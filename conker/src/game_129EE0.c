@@ -34,9 +34,9 @@ void func_150FCA30(void) {
     func_150FCBC0(2);
 
     // func_1000FA64(sound, x, y, z, volume, farDistance, nearDistance, callback, owner, key, flags, cents)
-    func_1000FA64(0x2B8, -2038, 1560, -2631, 28000, 9000, 7000, (s32)func_1000EC24, (void *)45, 0, 0, 0);
-    func_1000FA64(0x2B7, -319, -273, -3419, 28000, 9000, 7000, (s32)func_1000EC24, NULL, 0, 0, 0);
-    func_1000FA64(0x2B6, 1519, 947, -2633, 28000, 9000, 7000, (s32)func_1000EC24, (void *)90, 0, 0, 0);
+    func_1000FA64(0x2B8, -2038, 1560, -2631, 28000, 9000, 7000, (SoundRecordCallback)func_1000EC24, (void *)45, 0, 0, 0);
+    func_1000FA64(0x2B7, -319, -273, -3419, 28000, 9000, 7000, (SoundRecordCallback)func_1000EC24, NULL, 0, 0, 0);
+    func_1000FA64(0x2B6, 1519, 947, -2633, 28000, 9000, 7000, (SoundRecordCallback)func_1000EC24, (void *)90, 0, 0, 0);
 
     for (i = 0; i < D_80082FA0 + 1; i++) {
         func_15164F0C(4, i, 0, 0xFF, 1);

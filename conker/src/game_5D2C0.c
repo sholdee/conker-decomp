@@ -2700,7 +2700,7 @@ s32 func_150339C8(Attachment *att, Actor *owner) {
             att->unk3C = 0;
         } else if (att->unk3C == 0) {
             att->unk3C = func_1000FA64(0x448, owner->x_position, owner->y_position, owner->z_position, 32000, 1000,
-                                       500, (s32)func_15033BDC, att, (s32)owner, 0, 0) |
+                                       500, (SoundRecordCallback)func_15033BDC, att, (s32)owner, 0, 0) |
                          0x80000000;
         }
     }
@@ -2717,7 +2717,7 @@ s32 func_15033AD8(Attachment *att, Actor *owner) {
             att->unk3C += D_800BE9E4;
         } else {
             att->unk3C = func_1000FA64(0x513, owner->x_position, owner->y_position, owner->z_position, 32000, 1000,
-                                       500, (s32)func_15033BDC, att, (s32)owner, 0, 0);
+                                       500, (SoundRecordCallback)func_15033BDC, att, (s32)owner, 0, 0);
             att->unk38 = 0x513;
         }
     }
@@ -2774,7 +2774,7 @@ s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg
                         if (att->unk38 == 0x513) {
                             att->unk38 = 0x3A1;
                             att->unk3C = func_1000FA64(0x3A1, owner->x_position, owner->y_position,
-                                                       owner->z_position, 32000, 1000, 500, (s32)func_15033BDC, att,
+                                                       owner->z_position, 32000, 1000, 500, (SoundRecordCallback)func_15033BDC, att,
                                                        (s32)owner, 0, 0);
                             return 1;
                         }

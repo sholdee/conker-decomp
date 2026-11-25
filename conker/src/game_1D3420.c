@@ -156,7 +156,7 @@ void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, 
         }
     }
     if (playSound) {
-        func_1000FA64(0x1AA, emitter->x, emitter->y, emitter->z, 0x4000, 1000, 750, (s32)func_1000EF40, emitter,
+        func_1000FA64(0x1AA, emitter->x, emitter->y, emitter->z, 0x4000, 1000, 750, func_1000EF40, emitter,
                       0, 8, func_150ADA20() & 0x300);
     }
 }

@@ -161,7 +161,7 @@ s32 func_150E3414(s32 originX, s32 originY, s32 originZ, s32 x, s32 y, s32 z, Ac
 
     effect = func_150E3020(x, y, z, 0, 0, 0, arg7, speed, targetObj, originX, originY, originZ, NULL, -99);
     if (effect != NULL) {
-        effect->sound = func_1000FA64(0x2D0, originX, originY, originZ, 0x5DC0, 0x1770, 0x3E8, (s32)func_150E33CC,
+        effect->sound = func_1000FA64(0x2D0, originX, originY, originZ, 0x5DC0, 0x1770, 0x3E8, (SoundRecordCallback)func_150E33CC,
                                       0, 0, 0, 0);
         return effect->slot + 1;
     }

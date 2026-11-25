@@ -5,21 +5,15 @@
  * narrowing in callers) or the variable type; hide those declarations and declare them below.
  */
 #define func_1506160C func_1506160C_hdr
-#define func_1000F85C func_1000F85C_hdr
 #define func_1000F91C func_1000F91C_hdr
-#define func_10010BE8 func_10010BE8_hdr
 #define func_1505E874 func_1505E874_hdr
 #include "functions.h"
 #undef func_1506160C
-#undef func_1000F85C
 #undef func_1000F91C
-#undef func_10010BE8
 #undef func_1505E874
 void func_1505E874(s32, Actor *);
-void func_1000F85C(u16, s32, s32);
 void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
-u16 func_10010BE8(u16, s32, s32, s32, s32, s32, s32);
 #define D_800D1550 D_800D1550_hdr
 #define D_800CC298 D_800CC298_hdr
 #include "variables.h"
@@ -4349,7 +4343,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
                     if (actor->unk84.uh != 0xE9) {
                         func_100109D0(actor);
                         func_1000FA64(0x61E, (s16)(s32)actor->x_position, (s16)(s32)actor->y_position, (s16)(s32)actor->z_position,
-                                      0x7FFF, 0x1F4, 0xC8, (s32)func_1000EFB4, actor, (s32)D_80099428, 0, 0);
+                                      0x7FFF, 0x1F4, 0xC8, (SoundRecordCallback)func_1000EFB4, actor, (s32)D_80099428, 0, 0);
                         func_151C6EA0(actor, 0xFF, 1);
                     }
                 }

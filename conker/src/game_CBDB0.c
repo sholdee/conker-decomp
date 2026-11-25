@@ -1,14 +1,7 @@
 #include <ultra64.h>
 /* functions.h declares the sound starters func_10010F30/func_10010F88 void, but they return the
  * voice handle, which the wrappers below hand back to their callers. */
-#define func_10010F30 func_10010F30_void_decl_in_functions_h
-#define func_10010F88 func_10010F88_void_decl_in_functions_h
 #include "functions.h"
-#undef func_10010F30
-#undef func_10010F88
-s32 func_10010F30(s32 sound, u16 volume, u8 pan, s16 cents, u8 mix);
-s32 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16 y, s16 z, s16 nearDistance,
-                  s16 farDistance);
 /* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
 #define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"

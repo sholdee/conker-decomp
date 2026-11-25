@@ -1,12 +1,13 @@
 #include <ultra64.h>
 
-#define func_10010154 func_10010154_hdr
 #define func_10010630 func_10010630_hdr
+// matching: this file was built against a func_10010154 prototype with an unsigned volume
+#define func_10010154 func_10010154_functions_h
 #include "functions.h"
 #undef func_10010154
+s32 func_10010154(u16 sound, void *obj, u32 volume, s16 nearDistance, u16 farDistance);
 #undef func_10010630
 /* volume (arg2) is unsigned at the call sites. */
-u16 func_10010154(u16 arg0, void *arg1, u32 arg2, s16 arg3, u16 arg4);
 void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 #define D_80099A3C D_80099A3C_s16_hdr
 #define D_80099A3E D_80099A3E_s16_hdr

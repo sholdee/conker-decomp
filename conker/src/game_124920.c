@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// matching: functions.h declares func_10010F88 void; callers here use its s32 result
-#define func_10010F88 func_10010F88_void_decl_in_functions_h
 #include "functions.h"
-#undef func_10010F88
 #include "variables.h"
 #include "effects.h"
 
@@ -69,8 +66,6 @@ extern s32 func_151C4B0C(s32, ProjectileState *, struct17 *, struct17 *, f32 *, 
                          f32, Actor *, s32, u8, u8, s32, u8);
 extern void func_15145974(struct17 *, f32 *, f32 *);
 EffectObj *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
-s32 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16 y, s16 z, s16 nearDistance,
-                  s16 farDistance);
 
 /* Spawns a projectile at `pos`, aimed along `aim` (or at `target` when arg2 is set). */
 void func_150F7470(vertex *pos, struct17 *aim, s32 arg2, struct17 *target, u8 targetIsDir, s32 arg5, f32 speed,

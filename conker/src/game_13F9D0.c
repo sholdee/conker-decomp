@@ -876,7 +876,7 @@ void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 
         if (handle != 0) {
             func_1001123C(handle);
         }
-        obj->sound = func_1000FA64(sfx, obj->x, obj->y, obj->z, arg2, arg4, arg3, (s32)func_15114CC4, obj, 0, 0, 0);
+        obj->sound = func_1000FA64(sfx, obj->x, obj->y, obj->z, arg2, arg4, arg3, (SoundRecordCallback)func_15114CC4, obj, 0, 0, 0);
     }
 }
 

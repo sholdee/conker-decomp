@@ -160,7 +160,7 @@ void func_151D3480(vertex *pos, struct17 *dir, Surf151D3480 *surface, u8 kind, u
             sfx = (func_150ADA20() % 3U) + 0x459;
             if (D_80082FA0 == 0) {
                 func_1000FA64(sfx, pos->x, pos->y, pos->z, 0x4000, 1200, 800,
-                              (s32)func_1000EC24, (void *)40, 0, 0, 0);
+                              (SoundRecordCallback)func_1000EC24, (void *)40, 0, 0, 0);
                 sfx = 0x106;
             }
         } else {

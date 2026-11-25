@@ -1,10 +1,8 @@
 #include <ultra64.h>
 /* functions.h declares these with signatures that don't match their real ones; rename them out of the way. */
 #define func_15178E14 func_15178E14_header_mismatch
-#define func_10010F88 func_10010F88_hdr
 #include "functions.h"
 #undef func_15178E14
-#undef func_10010F88
 #include "variables.h"
 
 extern s32 func_15168118();
@@ -321,7 +319,6 @@ static void func_15178750_pad(void) {
 extern f32 D_800D9C10[][4][4];
 extern s32 func_150A6360(void *arg0, f32 arg1[4][4], f32 arg2, f32 arg3, f32 arg4,
                          f32 arg5, f32 arg6, f32 arg7);
-u16 func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
 
 /*
  * Swarm update: move up to 16 units towards the target, recompute viewMask, update the looping sound,

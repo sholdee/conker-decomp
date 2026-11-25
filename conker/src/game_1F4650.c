@@ -411,7 +411,7 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
             objState->endEffect1 = NULL;
         }
         if (objState->midEffect != NULL) {
-            func_1000FA64(0x4D0, pos[0], pos[1], pos[2], 0x1F40, 0xFA, 0x64, (s32)func_151C87AC, objState, 0, 8, (u8)func_150ADA20());
+            func_1000FA64(0x4D0, pos[0], pos[1], pos[2], 0x1F40, 0xFA, 0x64, (SoundRecordCallback)func_151C87AC, objState, 0, 8, (u8)func_150ADA20());
         }
     }
     return (s32)obj;
@@ -795,7 +795,7 @@ void func_151C899C(SightActor *actor, SightBeamObject *obj) {
         func_1505D024((s32)actor, D_800AAC30[state->unk94], 0, -1);
     }
     func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->spawn.pos.x, obj->spawn.pos.y, obj->spawn.pos.z, 2000, 2200);
-    func_1000FA64(0x2F6, obj->spawn.rot.x, obj->spawn.rot.y, obj->spawn.rot.z, 0x7FFF, 2200, 2000, (s32)&func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
+    func_1000FA64(0x2F6, obj->spawn.rot.x, obj->spawn.rot.y, obj->spawn.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
     func_1516972C((struct102 *)obj);
 }
 

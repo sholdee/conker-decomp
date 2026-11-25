@@ -539,7 +539,7 @@ void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
 /* Starts sound 0x4A7 at `obj`; func_151BB0E0 keeps it updated. */
 void func_151BB044(Actor *obj) {
     func_1000FA64(0x4A7, obj->x_position, obj->y_position, obj->z_position, 0x2000, 0x320, 0xC8,
-                  (s32)func_151BB0E0, obj, 0, 8, 0);
+                  (SoundRecordCallback)func_151BB0E0, obj, 0, 8, 0);
 }
 s32 func_1000F568(s32, s32);
 
@@ -617,7 +617,7 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
         }
         if (sound != 0) {
             func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, param, 0x320, 0xC8,
-                          (s32)func_151BB0E0, obj, state | 0x12CFF00, 8, 0);
+                          (SoundRecordCallback)func_151BB0E0, obj, state | 0x12CFF00, 8, 0);
             goto end; // matching: a plain return 1 here is scheduled differently
         }
         if (*soundId != 0x4A7) {
@@ -642,7 +642,7 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
                     timer = 0;
                     if (*soundId == 0x4A8) {
                         func_1000FA64(0x4A9, obj->x_position, obj->y_position, obj->z_position, 0x2EE0, 0x320,
-                                      0xC8, (s32)func_151BB0E0, obj, state | 0x880, 8, 0);
+                                      0xC8, (SoundRecordCallback)func_151BB0E0, obj, state | 0x880, 8, 0);
                         timer = (func_150ADA20() & 0x200) + 900;
                     }
                 }

@@ -1,39 +1,13 @@
 #include <ultra64.h>
-// The headers declare these with types that don't match how this file uses them;
-// rename the header copies out of the way and declare the real ones below.
-#define func_1000F85C func_1000F85C_hdr
-#define func_1000EDA0 func_1000EDA0_hdr
-#define func_1000EE70 func_1000EE70_hdr
-#define func_10010BE8 func_10010BE8_hdr
-#define func_10010F30 func_10010F30_hdr
-#define func_10010344 func_10010344_hdr
-#define func_10010154 func_10010154_hdr
-#define func_1000EF40 func_1000EF40_hdr
-#define func_1000EBC4 func_1000EBC4_hdr
-#define func_1000EB00 func_1000EB00_hdr
-#define func_1000FA64 func_1000FA64_hdr
-#define func_1000FF90 func_1000FF90_hdr
+// matching: func_10010F30 has an old-style definition (its u8 mix is reloaded from the s32 argument slot),
+// which is incompatible with the prototype its callers use, so the header's copy is renamed away here.
+#define func_10010F30 func_10010F30_functions_h
 #include "functions.h"
 #include "variables.h"
-#undef func_1000F85C
-#undef func_1000EDA0
-#undef func_1000EE70
-#undef func_10010BE8
 #undef func_10010F30
-#undef func_10010344
-#undef func_10010154
-#undef func_1000EF40
-#undef func_1000EBC4
-#undef func_1000EB00
-#undef func_1000FA64
-#undef func_1000FF90
 
-typedef struct SoundRecord SoundRecord;
-
-// Called each update for a record with flag 0x10, with the values func_10011624 is about to
-// apply; it may change them. Returning nonzero stops the record.
-typedef s32 (*SoundRecordCallback)(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
-                                   s32 *cents, s32 *mix, u16 *sound);
+// SoundRecordCallback (functions.h) is called each update for a record with flag 0x10, with the values
+// func_10011624 is about to apply.
 
 // A positional sound being tracked by func_10011624 (D_80041FE0, up to 32).
 struct SoundRecord {
@@ -97,14 +71,12 @@ extern SoundVariant D_8002C240[][5];
 extern f32 D_8002C400;
 extern f32 D_8002C404;
 
-s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farDistance);
-void func_10010F30(s32, s32, s32, s32, s32);
+u16 func_10010F30(s32, s32, s32, s32, s32); // promoted view of the old-style definition below
 u16 func_10010E78(u16 handle, s32 sound, u16 volume, s16 cents, s32 mix, s32 arg5,
                   s32 x, s32 y, s32 z, s32 nearDistance, s32 farDistance);
 void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end);
 s32 func_1510F8CC(s32 arg0);
 s32 func_1000F568(s32 base, s32 count);
-u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, u8 bus);
 void func_10017780(u8 arg0, u16 arg1);
 s32 *allocate_memory(s32, s32, s32, s32);
 struct31 *func_10017438(s32, s16, u16, u8, f32, u8, u8, struct31 **);
@@ -114,7 +86,7 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 field18, s32 dx0, s32 dy0, s32 dz0
 // The callbacks below reuse a record's owner/key words (0x18, 0x1C) for their own state.
 
 // func_1000EB00 and func_1000EBC4: the owner word is a countdown.
-typedef struct {
+struct TimedSoundRecord {
     /* 0x00 */ u16 sound;
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ s32 volume;
@@ -122,11 +94,11 @@ typedef struct {
     /* 0x18 */ s32 timer;
     /* 0x1C */ u8 pad1C[8];
     /* 0x24 */ u16 handle;
-} TimedSoundRecord;
+};
 
 // func_1000ECCC and func_1000EDA0: a sound for obj, started once the countdown in the
 // low half of the owner word runs out; the high half holds the sound id meanwhile.
-typedef struct {
+struct DelayedSoundRecord {
     /* 0x00 */ u16 sound;
     /* 0x02 */ u8 pad2[6];
     /* 0x08 */ u16 farDistance;
@@ -138,11 +110,9 @@ typedef struct {
         u16 h[2];
     } delay;
     /* 0x1C */ Actor *obj;
-} DelayedSoundRecord;
+};
 
 s32 func_1000ECCC(DelayedSoundRecord *record, s32 *active, u32 *volume, s32 *pan,
-                  s32 *cents, s32 *mix, u16 *sound);
-s32 func_1000EDA0(DelayedSoundRecord *record, s32 *active, u32 *volume, s32 *pan,
                   s32 *cents, s32 *mix, u16 *sound);
 s32 func_1000EE70(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound);
@@ -1049,19 +1019,19 @@ u16 func_10010E78(u16 handle, s32 sound, u16 volume, s16 cents, s32 mix, s32 arg
 }
 
 // Plays an unpositioned sound.
-void func_10010F30(sound, volume, pan, cents, mix)
+u16 func_10010F30(sound, volume, pan, cents, mix)
 s32 sound;
 u16 volume;
 u8 pan;
 s16 cents;
 s32 mix;
 {
-    func_10010BE8(0, sound, volume, pan, cents, ((u8 *)&mix)[3], D_80041FD9); // matching: lbu of mix's low byte
+    return func_10010BE8(0, sound, volume, pan, cents, ((u8 *)&mix)[3], D_80041FD9); // matching: lbu of mix's low byte
 }
 
-void func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4,
-                   s16 x, s16 y, s16 z, s16 nearDistance, s16 farDistance) {
-    func_10010E78(0, sound, volume, cents, mix, arg4, x, y, z, nearDistance, farDistance);
+u16 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4,
+                  s16 x, s16 y, s16 z, s16 nearDistance, s16 farDistance) {
+    return func_10010E78(0, sound, volume, cents, mix, arg4, x, y, z, nearDistance, farDistance);
 }
 
 // Plays a sound positioned on obj; a player-camera object (obj->camera set) plays it

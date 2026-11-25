@@ -324,7 +324,7 @@ Emitter *func_1518F5D0(Actor *owner, EmitterTemplate *tmpl, s16 duration, s8 upd
         }
         func_151D2AB0(dest->tmpl.anchorSet);
         func_1000FA64(0x4D, owner->x_position, owner->y_position, owner->z_position, 15000, 2000, 800,
-                      (s32)func_1518E298, emitter, (s32)owner, 0, 0);
+                      (SoundRecordCallback)func_1518E298, emitter, (s32)owner, 0, 0);
     }
     return emitter;
 }

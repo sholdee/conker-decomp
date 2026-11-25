@@ -8,6 +8,14 @@
 extern f32 fabsf(f32);
 #pragma intrinsic (fabsf)
 
+/* Positional sound records (init_EB00.c). A record callback runs each update with the values about to be
+ * applied and may change them; returning nonzero stops the record. */
+typedef struct SoundRecord SoundRecord;
+typedef struct TimedSoundRecord TimedSoundRecord;
+typedef struct DelayedSoundRecord DelayedSoundRecord;
+typedef s32 (*SoundRecordCallback)(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix,
+                                   u16 *sound);
+
 /* matching */
 void func_10001050(void);
 void func_100010F8(s32 arg0);
@@ -76,9 +84,9 @@ s32  func_1000E704(s32 arg0, s32 arg1, s32 arg2);
 void func_1000E75C(s32 arg0);
 s32  func_1000E770(s32 *arg0, s32 *arg1);
 u16  func_1000EA94(s32 arg0);
-s32  func_1000EB00(struct04 *arg0, s32 arg1, s32 *arg2, s32 *arg3, s32 arg6, s32 arg7, u16 *arg8);
-s32  func_1000EBC4(struct00 *arg0, s32 arg1, s32 arg2, s32 arg3);
-s32  func_1000EF40(struct57 *arg0, struct57 *arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6);
+s32 func_1000EB00(TimedSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
+s32 func_1000EBC4(TimedSoundRecord *record, s32 *active, u32 *volume, s32 *pan);
+s32 func_1000EF40(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 void func_1000F248(s32 arg0);
 s32  func_1000F3D0(u16 arg0);
 s32  func_1000F44C(u16 arg0);
@@ -90,7 +98,7 @@ s32  func_10010894(Actor *arg0);
 void func_100109D0(Actor *arg0);
 void func_10010A3C(Actor *arg0);
 void func_10010AA8(Actor *arg0);
-void func_10010F30(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4);
+u16 func_10010F30(s32 sound, u16 volume, u8 pan, s16 cents, u8 mix);
 void func_100111C8(u16 arg0);
 void func_1001123C(u16 arg0);
 s32  func_100112BC(s32 arg0, s32 arg1);
@@ -953,33 +961,33 @@ s32 func_1000E588(s32 arg0, s32 arg1, s32 arg2);
 //func_1000E934
 //func_1000EC24
 //func_1000ECCC
-void func_1000EDA0(void *arg0, s32 arg1, s32 arg2, s32 arg3, void *arg6);
-s32  func_1000EE70(void *arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4, void *arg5);
+s32 func_1000EDA0(DelayedSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
+s32 func_1000EE70(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
 //func_1000EFB4
 //func_1000F1A8
 //func_1000F44C
 //func_1000F4D8
 //func_1000F568
 //func_1000F6B8
-void func_1000F85C(u16 arg0, u16 arg1, s32 arg2);
+void func_1000F85C(u16 handle, s16 param, s32 value);
 void func_1000F91C(u16 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
-u16  func_1000FA64(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5, s16 arg6, s32 arg7, void *arg8, s32 arg9, s32 argA, s32 argB);
+u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance, s16 nearDistance, SoundRecordCallback callback, void *owner, s32 key, s32 flags, s32 cents);
 //func_1000FC18
 //func_1000FD38
 //func_1000FDF4
 //func_1000FE88
 //func_1000FEF0
-s32  func_1000FF90(s32 arg0, s32 arg1, s32 arg2);
+s32 func_1000FF90(SoundRecordCallback callback, void *owner, s32 key);
 //func_1001001C
 //func_100100E0
-u16 func_10010154(u16 arg0, void *arg1, s32 arg2, s16 arg3, u16 arg4);
-u16 func_10010344(u16 arg0, void *arg1, s32 arg2, s16 arg3, u16 arg4);
+s32 func_10010154(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance);
+s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farDistance);
 //func_10010558
 void func_10010630(u16 arg0, Actor *arg1, s32 arg2, s16 arg3, u16 arg4);
 //func_1001091C
-u16  func_10010BE8(s32 arg0, s32 arg1, u16 arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6);
+u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, u8 bus);
 //func_10010E78
-void func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
+u16 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16 y, s16 z, s16 nearDistance, s16 farDistance);
 //func_10010FFC
 //func_10011310
 s32  func_100114D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 *arg6, s32 *arg7, s32 *arg8);

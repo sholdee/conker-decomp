@@ -1,8 +1,6 @@
 #include <ultra64.h>
 // matching: functions.h declares these with other return types; the file needs the s32 forms
-#define func_10010F88 func_10010F88_void
 #include "functions.h"
-#undef func_10010F88
 #include "variables.h"
 #include "effects.h"
 
@@ -78,7 +76,6 @@ typedef struct {
 
 extern s32 func_151EF610(void);
 extern void func_1000D96C(s32, s32, s32);
-extern s32 func_10010F88(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern Trail *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15131828(void *, f32 *, void *, u8 *);
 extern void func_15131958(void *, f32, void *);

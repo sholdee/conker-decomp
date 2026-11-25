@@ -161,11 +161,11 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
     state = ((TrailActor *)state)->state;
     memcpy(state, &init, sizeof(TrailState));
     if (D_8008FD8C < 5) {
-        func_1000FA64(0x5B3, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5B3, 12, 0);
+        func_1000FA64(0x5B3, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B3, 12, 0);
     }
-    func_1000FA64(0x5B4, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5B4, 12, 0);
+    func_1000FA64(0x5B4, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5B4, 12, 0);
     if (D_8008FD8C < 7 || owner->camera != NULL) {
-        func_1000FA64(0x5BC, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5BC, 12, 0);
+        func_1000FA64(0x5BC, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (SoundRecordCallback)func_150D5124, state, 0x5BC, 12, 0);
     }
     {
         ParticleParams params;

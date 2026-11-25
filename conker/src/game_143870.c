@@ -1,11 +1,8 @@
 #include <ultra64.h>
 // functions.h declares these two as returning void; hide those prototypes and redeclare them below.
-#define func_10010F88 func_10010F88_void_decl_in_functions_h
 #include "functions.h"
-#undef func_10010F88
 #include "variables.h"
 
-s32 func_10010F88(s32 sound, u16 volume, s16 pitch, u8 arg3, s32 arg4, s16 x, s16 y, s16 z, s16 arg8, s16 arg9);
 s32 func_150490A8(struct17 *delta);
 
 /* The object fields used by the functions in this file. */

@@ -2,11 +2,9 @@
 
 /* Header declarations renamed out of the way and redeclared below: the level-object functions and
  * tables take this file's LevelObject (the header types them as struct134), and D_800D3098 is a pointer. */
-#define func_1000FA64 func_1000FA64_narrow_proto
 #define func_15144598 func_15144598_header
 #define func_15015300 func_15015300_header
 #include "functions.h"
-#undef func_1000FA64
 #undef func_15144598
 #undef func_15015300
 #define D_800D3098 D_800D3098_header
@@ -389,7 +387,6 @@ s32 func_1501374C(LevelObject *obj) {
 }
 
 /* func_1000FA64 passes its arguments as full words (callers do not truncate). */
-u16 func_1000FA64(s32, s32, s32, s32, s32, s32, s32, void *, void *, s32, s32, s32);
 void func_150A8050(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
 
 typedef struct Game40490BeamPacket {
@@ -436,7 +433,7 @@ s32 func_15013778(LevelObject *obj) {
         }
         height = obj->sizeY;
         func_1000FA64(0x67C, obj->x, (s16)(obj->y + height), obj->z,
-                      12000, height * 2, height / 2, (void *)func_1000EF40, 0, 0, 8, 0);
+                      12000, height * 2, height / 2, func_1000EF40, 0, 0, 8, 0);
     }
     return 1;
 }

@@ -921,7 +921,7 @@ void func_1516F548(
         (s16)velocityY, 0xC8, 1, 6, 0, 1, 0, 0,
         0, 0, 0, arg15, arg16);
     func_1000FA64(7, (s16)x, (s16)y, (s16)z, 0x36B0, 0x3E8, 0x64,
-        (s32)func_1000EBC4, (void *)arg3, 0, 0, 0);
+        (SoundRecordCallback)func_1000EBC4, (void *)arg3, 0, 0, 0);
 }
 
 /* x and z are 8.8 fixed point with their fractions in u.drift; the velocities are 8.8 too. */

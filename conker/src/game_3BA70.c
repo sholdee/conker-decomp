@@ -161,7 +161,7 @@ void func_1500E8C0(void) {
         descriptor.unk1C = 900.0f - descriptor.unk10;
         func_15189900(&descriptor, 1);
     }
-    func_1000FA64(1567, (D_800BE9F0 == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, (s32)func_1000EF40, 0, 0, 72, 0);
+    func_1000FA64(1567, (D_800BE9F0 == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, func_1000EF40, 0, 0, 72, 0);
 }
 
 void func_1500EAA0(void) {

@@ -1978,7 +1978,7 @@ void func_15138120(Actor *actor, s32 kind, u8 arg2) {
         desc.sound = func_1000FA64(0x4FE, (s16)(s32)actor->x_position,
                                    (s16)(s32)actor->y_position,
                                    (s16)(s32)actor->z_position, 0x5DC0,
-                                   600, 300, (s32)func_1000EBC4,
+                                   600, 300, (SoundRecordCallback)func_1000EBC4,
                                    (void *)120, 0, 0, 0);
         func_15134DAC(&desc, 0);
     }

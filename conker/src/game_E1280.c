@@ -156,7 +156,7 @@ Trail *func_150B3F5C(TrailState *params, Vec3f *pos, s16 capacity) {
 
     trail = func_15147A80(&spawn, sizeof(TrailState), sizeof(TrailPoint), 7, 7, 7, 0, 0, 0, 0xFF, 1);
     if (trail != NULL) {
-        func_1000FA64(0x221, pos->x, pos->y, pos->z, 25000, 4000, 600, (s32)func_1000EF40, 0, 0, 8,
+        func_1000FA64(0x221, pos->x, pos->y, pos->z, 25000, 4000, 600, func_1000EF40, 0, 0, 8,
                       func_150ADA20() & 0x40);
         memcpy(trail->state, &state, sizeof(TrailState));
     }

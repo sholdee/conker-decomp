@@ -219,7 +219,7 @@ void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
         // matching: the (s32) copy keeps IDO from sharing one register for region across the call
         func_1000FD38(func_1000EF40, (s32)state->region, 0);
         func_1000FA64(0x236, state->region->x, state->region->y, state->region->z, 0x4000, 1500, 1000,
-                      (s32)func_1000EF40, state->region, 0, 8, 0);
+                      func_1000EF40, state->region, 0, 8, 0);
     }
 }
 

@@ -1,12 +1,9 @@
 #include <ultra64.h>
 // matching: callers here use the full s32 return of these, unlike their functions.h prototypes
-#define func_10010F30 func_10010F30_void
 #include "functions.h"
-#undef func_10010F30
 #include "variables.h"
 #include "effects.h"
 
-extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_1000B060(f32, f32, u32);
 extern void func_1000E7A0(u32, s32);
 extern s32 func_1510F8CC(s32);

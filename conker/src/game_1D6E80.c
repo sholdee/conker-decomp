@@ -1,12 +1,9 @@
 #include <ultra64.h>
 /* functions.h declares these two with the wrong return types; use the ones this file needs. */
-#define func_10010F30 func_10010F30_void
 #include "functions.h"
-#undef func_10010F30
 #include "variables.h"
 #include "effects.h"
 
-extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_151EF610(void);
 extern s32 func_10010FFC(s32, s32, s32, s32, s32, Actor *);
 extern u8 func_151D8E20(void);

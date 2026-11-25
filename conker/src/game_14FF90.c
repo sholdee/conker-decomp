@@ -1528,13 +1528,13 @@ s32 func_15126378(Camera *camera) {
         func_150627D4(camera->player);
         D_800DBFF4[camera->playerIndex] = 2;
         if ((zone == 0x24) || (zone == 0x23)) {
-            func_1000FA64(0x605, 0, 0, 0, 0x6590, 300, 299, (s32)func_15127520, camera,
+            func_1000FA64(0x605, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)func_15127520, camera,
                           (u32)(-camera->unk1A4 * 10000.0f), 0, 0);
         } else if ((zone == 0x1B) || (zone == 0x1F) || (zone == 0x29)) {
             aimKey = ext->aimYawTarget * ext->aimPitchTarget;
-            func_1000FA64(0x622, 0, 0, 0, 0x6590, 300, 299, (s32)func_15127520, camera,
+            func_1000FA64(0x622, 0, 0, 0, 0x6590, 300, 299, (SoundRecordCallback)func_15127520, camera,
                           (u32)(-camera->unk1A4 * 10000.0f) | 0x80000000, 0x100, 0);
-            func_1000FA64(0x622, 0, 0, 0, 0x3E80, 300, 299, (s32)func_151277B0, camera, *(s32 *)&aimKey, 0x100, 0);
+            func_1000FA64(0x622, 0, 0, 0, 0x3E80, 300, 299, (SoundRecordCallback)func_151277B0, camera, *(s32 *)&aimKey, 0x100, 0);
         }
         viewer->unk2FC |= 1 << camera->playerIndex;
         viewer->unk74 |= 1 << camera->playerIndex;

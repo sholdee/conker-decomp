@@ -1,8 +1,6 @@
 #include <ultra64.h>
 /* functions.h declares these two void, but both return a value. */
-#define func_10010F30 func_10010F30_void
 #include "functions.h"
-#undef func_10010F30
 #include "variables.h"
 #include "effects.h"
 #include "libc/string.h"
@@ -113,7 +111,6 @@ typedef struct {
     u8 pad5[3];
 } ChildData;
 
-extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern u8 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 extern u8 *func_151407D0(GlowParams *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 extern struct225 *func_151602C0(Header *, Header2 *, s32, u8, u8, u8, u8, u8, s32, u8, s32);

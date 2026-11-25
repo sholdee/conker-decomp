@@ -601,7 +601,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             bulletState->trail = (TrailFx *)func_151602C0(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
             bulletState->follow = func_151B8908(obj);
             bulletState->sound = func_1000FA64(func_150ADA20() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
-                                               (s32)func_151C110C, obj, 0, 4, 0);
+                                               (SoundRecordCallback)func_151C110C, obj, 0, 4, 0);
             bulletState->unk88 = func_151B8400(obj);
             if (D_80082FA0 < 2 && D_8008FD8C < 4) {
                 bulletState->unk8C = func_151B8668(obj, fxOwner, fxList);

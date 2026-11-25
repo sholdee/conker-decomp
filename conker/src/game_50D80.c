@@ -2734,7 +2734,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 snd->volume = (vol * 0x7FFF) >> 8;
                 snd->stopAtEnd = event->type == 10;
                 func_1000FA64(event->value, (s16)pos[0], (s16)pos[1], (s16)pos[2], snd->volume, 0x7D00, 0x7918,
-                              (s32)func_150238D8, snd, 0, sflags, fade);
+                              (SoundRecordCallback)func_150238D8, snd, 0, sflags, fade);
             }
         }
     } else if (event->type == 8) {

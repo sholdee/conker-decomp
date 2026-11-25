@@ -2,11 +2,7 @@
 
 // matching: functions.h declares these with the wrong parameter types (u16 param, s32 callback);
 // hide those prototypes and declare the real ones below.
-#define func_1000F85C func_1000F85C_hdr
-#define func_1000FA64 func_1000FA64_hdr
 #include "functions.h"
-#undef func_1000F85C
-#undef func_1000FA64
 #include "variables.h"
 
 typedef struct ObjSoundRecord ObjSoundRecord;
@@ -34,10 +30,6 @@ struct ObjSoundRecord {
 };
 
 Actor *func_1505EEF4(s32 id);
-void func_1000F85C(u16 handle, s16 param, s32 value);
-u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance,
-                  s16 nearDistance, ObjSoundCallback callback, s32 delay, Actor *obj,
-                  s32 flags, s32 cents);
 
 // Clear the per-slot cooldowns of func_15103C14.
 void func_15103800(void) {
