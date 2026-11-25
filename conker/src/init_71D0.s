@@ -392,6 +392,7 @@ glabel func_100071D0
     /* 7754 10007754 00000000 */   nop
     /* 7758 10007758 08001E8E */  j          func_10007A38
     /* 775C 1000775C 00000000 */   nop
+  .globl .L10007760  /* another hand-written file branches here */
   .L10007760:
     /* 7760 10007760 3C098003 */  lui        $t1, %hi(__osRunQueue)
     /* 7764 10007764 2529BDF8 */  addiu      $t1, $t1, %lo(__osRunQueue)

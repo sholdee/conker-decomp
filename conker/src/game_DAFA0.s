@@ -407,6 +407,7 @@ glabel func_150ADAF0
     /* DB550 150AE0A0 02A9082A */  slt        $at, $s5, $t1
     /* DB554 150AE0A4 1420FEC7 */  bnez       $at, .L150ADBC4
     /* DB558 150AE0A8 AC600000 */   sw        $zero, 0x0($v1)
+  .globl .L150AE0AC  /* another hand-written file branches here */
   .L150AE0AC:
     /* DB55C 150AE0AC 8FBF0000 */  lw         $ra, 0x0($sp)
     /* DB560 150AE0B0 8FB00004 */  lw         $s0, 0x4($sp)
