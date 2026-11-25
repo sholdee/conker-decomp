@@ -135,7 +135,7 @@ StreamTask *func_151CD2C0(StreamSource *source, u8 arg1, s32 arg2) {
     spawner.emitter = NULL;
     spawner.textureIndex = source->textureIndex;
 
-    task = (StreamTask *)func_15149130(0x12C, -1, -1, -1, 0, 0x1E, (struct37 *)0x10, arg1, arg2);
+    task = (StreamTask *)func_15149130(0x12C, -1, -1, -1, 0, 0x1E, 0x10, arg1, arg2);
     if (task != NULL) {
         memcpy(&task->spawner, &spawner, sizeof(spawner));
     }

@@ -589,7 +589,7 @@ void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, struct17 *pos, s16 life
             drip.kind = kind;
             // the header types arg6 as a pointer; it is the size of the effect's data
             effect = func_15149130((lifetime == -1) ? 300 : lifetime, -1, 0x4A, -1, (lifetime == -1) ? 0 : 1, 0,
-                                   (struct37 *)sizeof(drip), arg9, argA);
+                                   sizeof(drip), arg9, argA);
             if (effect != NULL) {
                 memcpy(&((DripEffect *)effect)->drip, &drip, sizeof(drip));
             }

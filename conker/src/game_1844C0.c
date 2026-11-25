@@ -449,5 +449,5 @@ extern s32 D_800A6060[3]; /* { 0x36, 0x4C, 0x5B }: the model effect types */
 
 /* Sends an event to every model effect. */
 void func_15158078(s32 event, u8 eventType) {
-    func_15169260((s32)D_800A6060, 3, event, eventType);
+    func_15169260(D_800A6060, 3, event, eventType);
 }

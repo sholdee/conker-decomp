@@ -1,9 +1,6 @@
 #include <ultra64.h>
 
-// functions.h declares func_15169260's first parameter as s32; this file passes a pointer.
-#define func_15169260 func_15169260_s32
 #include "functions.h"
-#undef func_15169260
 #include "variables.h"
 
 typedef struct {
@@ -60,7 +57,6 @@ struct ActorFollowerGroup {
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
 void func_15143134(Vec3f *in, Vec3f *out, BoneMatrix *mtx);
 void func_1514EDF0(ActorFollowerGroup *, struct127 *);
-void func_15169260(s32 *, s32, s32, u8);
 
 void func_151D3308(BoneFollower *follower);
 void func_151D3354(BoneFollower *follower);

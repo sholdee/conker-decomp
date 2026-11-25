@@ -1,10 +1,8 @@
 #include <ultra64.h>
 
 #define func_1513D524 func_1513D524_void_proto
-#define func_15169260 func_15169260_s32
 #include "functions.h"
 #undef func_1513D524
-#undef func_15169260
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
@@ -532,7 +530,6 @@ struct Data_151417C4 {
     s32 unk0;
     s32 unk4;
 };
-void func_15169260(struct Data_151417C4 *, s32, u8 *, u8);
 
 /* Sends func_15169260 the one-byte payload arg0, addressed with the two words of D_8008A074. */
 void func_151417C4(u8 arg0, u8 arg1) {
@@ -541,7 +538,7 @@ void func_151417C4(u8 arg0, u8 arg1) {
 
     data = *(struct Data_151417C4 *)D_8008A074;
     payload[0] = arg0;
-    func_15169260(&data, 2, payload, arg1);
+    func_15169260(&data, 2, (s32)payload, arg1);
 }
 
 s32 func_15141818(s32 arg0, s32 arg1) {

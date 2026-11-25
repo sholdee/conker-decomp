@@ -236,7 +236,7 @@ void func_150B0C58(struct127 *owner, u8 arg1, s32 arg2) {
     data.ownerId = owner->unique_id;
     data.timer = 0.0f;
 
-    effect = (DDB60Effect *)func_15149130(300, -1, 0x58, -1, 0, 0x43, (struct37 *)sizeof(data), arg1, arg2);
+    effect = (DDB60Effect *)func_15149130(300, -1, 0x58, -1, 0, 0x43, sizeof(data), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

@@ -282,7 +282,7 @@ Beam *func_150EEF80(struct127 *actor, u8 slot, u8 arg2, s32 arg3) {
         }
         emitterLink.beam = beam;
         emitterLink.accum = 0.0f;
-        emitter = (BeamEmitter *)func_15149130(300, -1, 0x22, -1, 0, 0x20, (struct37 *)sizeof(EmitterLink), arg2, arg3);
+        emitter = (BeamEmitter *)func_15149130(300, -1, 0x22, -1, 0, 0x20, sizeof(EmitterLink), arg2, arg3);
         link->emitter = emitter;
         if (emitter != NULL) {
             memcpy(&emitter->link, &emitterLink, sizeof(emitterLink));
@@ -1279,7 +1279,7 @@ void func_150F10D4(struct127 *actor) {
     link.lastPos.y = actor->y_position;
     link.lastPos.z = actor->z_position;
 
-    emitter = (TrailEmitter *)func_15149130(300, -1, 0x4C, -1, 0, 0x3A, (struct37 *)sizeof(TrailLink),
+    emitter = (TrailEmitter *)func_15149130(300, -1, 0x4C, -1, 0, 0x3A, sizeof(TrailLink),
                                             0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->link, &link, sizeof(link));

@@ -1,10 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares the seventh argument of func_15149130 as a struct37 pointer; it is the size of the
- * effect data (as in game_113D60.c). */
-#define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
-#undef func_15149130
-void *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
 #include "variables.h"
 
 /* Particle spawn template for func_15132A4C: the same layout as Particle 0x10..0x8B (see game_15F680.c). */

@@ -129,7 +129,7 @@ DustEmitter *func_15191BE0(struct127 *owner, vertex *offset, u8 bone, f32 rateBa
 
     // the header's struct37 * parameter is really the size of the effect's data
     effect = (DustEmitter *)func_15149130((duration == -1) ? 300 : duration, -1, 0x1D, -1,
-                                          (duration == -1) ? 0 : 1, 0x1D, (struct37 *)sizeof(data), arg16,
+                                          (duration == -1) ? 0 : 1, 0x1D, sizeof(data), arg16,
                                           arg17);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));

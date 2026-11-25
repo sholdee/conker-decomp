@@ -1,14 +1,10 @@
 #include <ultra64.h>
-/* functions.h declares func_1509BFB0 void; it ends by tail-dispatching through D_800884D4
- * via jalr and leaves that result in v0. Declaring it s32 matches the caller's regalloc.
- * The seventh argument of func_15149130 is the size of the effect data, not a struct37 pointer. */
+/* matching: func_1509BFB0 is void, but it ends by tail-dispatching through D_800884D4 via jalr and
+ * leaves that result in v0; this file was built against an s32-returning prototype (caller regalloc). */
 #define func_1509BFB0 func_1509BFB0_hdr
-#define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
 #undef func_1509BFB0
-#undef func_15149130
 s32 func_1509BFB0(s32 num, s32, s32, ...);
-struct260 *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
 #include "variables.h"
 
 typedef struct {
@@ -35,7 +31,6 @@ typedef struct {
     /* 0x0C */ f32 accum; // particles owed; one is emitted per whole unit
 } Emitter;
 
-/* Effect object header from func_15149130; effect-specific data starts at 0x28. */
 typedef struct {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 kind;

@@ -1,9 +1,7 @@
 #include <ultra64.h>
 // functions.h declares these pointer parameters as s32; this file uses the real pointer types.
-#define func_15169260 func_15169260_hdr
 #define func_15169850 func_15169850_hdr
 #include "functions.h"
-#undef func_15169260
 #undef func_15169850
 #include "variables.h"
 
@@ -181,7 +179,6 @@ typedef struct {
     /* 0x34 */ s32 pad34;
 } ChildDesc;
 
-void func_15169260(Desc15169260 *, s32, s32, u8);
 void func_15169850(ContactKey *, u8, s32 *, u8 *, ContactObj *);
 void *memcpy(void *, const void *, u32);
 s32 func_1518E298();

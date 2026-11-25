@@ -234,7 +234,7 @@ void func_151CF898(struct127 *obj, f32 probeY, f32 arg2) {
                 data.unkC = 0.0f;
 
                 effect = (GroundEffect *)func_15149130((s16)((func_150ADA20() % 131U) + 51), -1, 0x20, -1, 1, 0,
-                                                       (struct37 *)sizeof(data), 0xFF, 1);
+                                                       sizeof(data), 0xFF, 1);
                 if (effect != NULL) {
                     memcpy(&effect->data, &data, sizeof(data));
                 }
@@ -552,7 +552,7 @@ void func_151D0058(struct127 *obj, u8 variant, u8 arg2, s32 arg3) {
     data.alpha = (func_150ADA20() % 56U) + 200;
     data.ownerUnk84 = obj->unk84.uh;
 
-    effect = (StripEffect *)func_15149130(300, -1, 0x61, 4, 0, 0x31, (struct37 *)sizeof(data), arg2, arg3);
+    effect = (StripEffect *)func_15149130(300, -1, 0x61, 4, 0, 0x31, sizeof(data), arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -1065,7 +1065,7 @@ void func_151D0F60(struct127 *obj, u8 pointFn, u8 arg2, s32 arg3) {
     data.dist = 0.0f;
     data.pointFn = pointFn;
 
-    effect = (TrackerEffect *)func_15149130(300, -1, 0x5F, -1, 0, 0x48, (struct37 *)sizeof(data), arg2, arg3);
+    effect = (TrackerEffect *)func_15149130(300, -1, 0x5F, -1, 0, 0x48, sizeof(data), arg2, arg3);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

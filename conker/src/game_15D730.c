@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_15169260 with s32 params; this file passes a ParticleTypeList *. */
-#define func_15169260 func_15169260_s32_decl
 #include "functions.h"
-#undef func_15169260
 #include "variables.h"
 #include "effects.h"
 #include "libc/string.h"
@@ -72,7 +69,6 @@ typedef struct ParticleTypeList {
 } ParticleTypeList;
 
 extern ParticleTypeList D_800A37F0;
-void func_15169260(ParticleTypeList *, s32, s32, u8);
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 

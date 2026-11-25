@@ -340,7 +340,7 @@ void func_151B2690(RopeTie *self) {
     lineData.endOffset = D_800AA374;
     lineData.halfWidth = 5.0f;
     lineData.owner = self;
-    tie->line = (RopeLine *)func_15149130(300, -1, -1, 0, 0, 0x13, (struct37 *)sizeof(RopeLineData), 0xFF, 1);
+    tie->line = (RopeLine *)func_15149130(300, -1, -1, 0, 0, 0x13, sizeof(RopeLineData), 0xFF, 1);
     if (tie->line != NULL) {
         memcpy(&tie->line->line, &lineData, sizeof(lineData));
     }

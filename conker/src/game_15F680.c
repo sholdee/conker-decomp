@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_15169260's first parameter as s32; it is a pointer to a list of object kinds. */
-#define func_15169260 func_15169260_s32_decl_in_functions_h
 #include "functions.h"
-#undef func_15169260
 /* variables.h declares the D_800DC460/D_800DC464 list head/tail as s32 and D_800DC468 as u16;
  * func_15132444 walks them as node pointers and reads D_800DC468 with lh, so the real types
  * are made file-local here (the shared header is left alone). */
@@ -937,7 +934,6 @@ void func_15133DE8(Particle *particle, ParticleEventRemove *data, u8 event) {
 }
 
 /* Call func_15169260 for both particle object kinds (0x19 and 0x48, see func_1513264C). */
-void func_15169260(const s32 *kinds, s32 count, s32 arg2, u8 arg3);
 
 void func_15133E3C(s32 arg0, u8 arg1) {
     const s32 kinds[2] = { 0x19, 0x48 };

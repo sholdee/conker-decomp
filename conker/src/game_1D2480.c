@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_15169260 with an s32 first argument; this file passes a typed pointer. */
-#define func_15169260 func_15169260_s32
 #include "functions.h"
-#undef func_15169260
 #include "variables.h"
 
 /* Full-screen tint effect: redraws a viewport's framebuffer modulated by a pulsing prim colour. */
@@ -169,7 +166,6 @@ struct Data151A561C {
 };
 
 extern struct Data151A561C D_800A8D70;
-void func_15169260(struct Data151A561C *, s32, s32, u8);
 
 /* Forwards a message to func_15169260 with a local copy of the D_800A8D70 descriptor. */
 void func_151A561C(s32 arg0, u8 arg1) {

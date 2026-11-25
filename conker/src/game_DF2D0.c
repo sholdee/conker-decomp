@@ -53,7 +53,7 @@ void func_150B1EE0(EffectHead *spawner, struct17 *pos, s32 arg2, s32 arg3) {
     data.accum = 0.0f;
 
     // the header's struct37 * parameter is really the size of the effect's data
-    effect = func_15149130(func_150ADA20() % 133U + 69, -1, 0x49, -1, 1, 0, (struct37 *)sizeof(data),
+    effect = func_15149130(func_150ADA20() % 133U + 69, -1, 0x49, -1, 1, 0, sizeof(data),
                            spawner->unkC, spawner->unk1);
     if (effect != NULL) {
         memcpy(&((EmitterEffect *)effect)->data, &data, sizeof(data));

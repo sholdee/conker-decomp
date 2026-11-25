@@ -65,7 +65,7 @@ void func_1500FFCC(void) {
 
         sp38.unk0 = 0.0f;
         sp38.unk4 = 0.0f;
-        fx2 = func_15149130(0x12C, -1, 0x17, -1, 0, 0x14, (struct37 *)8, 0xFF, 1);
+        fx2 = func_15149130(0x12C, -1, 0x17, -1, 0, 0x14, 8, 0xFF, 1);
         if ((D_80088870 = (u8 *)fx2) != NULL) {
             memcpy((u8 *)fx2 + 0x28, &sp38, 8);
         }

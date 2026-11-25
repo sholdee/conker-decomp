@@ -114,7 +114,7 @@ void func_150C4120(struct127 *owner, s16 duration, u8 arg2, s32 arg3) {
         data.flags = 1;
     }
     effect = (Effect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x53, -1, (duration == -1) ? 0 : 1,
-                                     0x40, (struct37 *)sizeof(EffectData), arg2, arg3); /* arg6 is the data size; its prototype is wrong */
+                                     0x40, sizeof(EffectData), arg2, arg3); /* arg6 is the data size; its prototype is wrong */
     if (effect != NULL) {
         state = &effect->data;
         memcpy(state, &data, sizeof(EffectData));

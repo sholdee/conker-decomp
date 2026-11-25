@@ -42,7 +42,7 @@ void func_151001B4(struct127 *owner) {
     data.timer = 0;
 
     // the header's struct37 * parameter is really the size of the effect's data
-    effect = func_15149130(300, -1, 0x4E, -1, 0, 0x3B, (struct37 *)sizeof(data), 0xFF, 1);
+    effect = func_15149130(300, -1, 0x4E, -1, 0, 0x3B, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
         memcpy(&((OwnerEffect *)effect)->data, &data, sizeof(data));
     }

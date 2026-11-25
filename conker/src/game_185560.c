@@ -1463,7 +1463,7 @@ void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
     emitter.ceiling = ceiling;
     emitter.settings = data->settings;
     obj = (RiseEmitterObject *)func_15149130(func_150ADA20() % (data->types.range + 1) + data->types.base,
-                                             -1, 0x3F, -1, 1, 0, (struct37 *)sizeof(RiseEmitter), spawner->unkC,
+                                             -1, 0x3F, -1, 1, 0, sizeof(RiseEmitter), spawner->unkC,
                                              spawner->unk1);
     if (obj != NULL) {
         memcpy(&obj->emitter, &emitter, sizeof(RiseEmitter));

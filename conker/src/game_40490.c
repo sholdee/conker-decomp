@@ -1,18 +1,14 @@
 #include <ultra64.h>
 
-/* Header declarations renamed out of the way and redeclared below: func_15149130's seventh argument is
- * the size of the effect data, not a struct37 pointer; the level-object functions and tables take
- * this file's LevelObject (the header types them as struct134), and D_800D3098 is a pointer. */
+/* Header declarations renamed out of the way and redeclared below: the level-object functions and
+ * tables take this file's LevelObject (the header types them as struct134), and D_800D3098 is a pointer. */
 #define func_1000FA64 func_1000FA64_narrow_proto
-#define func_15149130 func_15149130_struct37_decl_in_functions_h
 #define func_15144598 func_15144598_header
 #define func_15015300 func_15015300_header
 #include "functions.h"
 #undef func_1000FA64
-#undef func_15149130
 #undef func_15144598
 #undef func_15015300
-struct260 *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
 #define D_800D3098 D_800D3098_header
 #define D_800D9A20 D_800D9A20_header
 #define D_800D9A24 D_800D9A24_header

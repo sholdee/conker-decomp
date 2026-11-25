@@ -921,7 +921,7 @@ void func_151BD828(struct127 *actor, u8 arg1, s32 arg2) {
     burst.sparks[1] = NULL;
     burst.glows[0] = NULL;
     burst.glows[1] = NULL;
-    effect = (BurstEffect *)func_15149130(300, -1, 0x40, -1, 0, 0x33, (struct37 *)sizeof(BurstData), arg1, arg2);
+    effect = (BurstEffect *)func_15149130(300, -1, 0x40, -1, 0, 0x33, sizeof(BurstData), arg1, arg2);
     if (effect != NULL) {
         data = &effect->data;
         memcpy(data, &burst, sizeof(burst));

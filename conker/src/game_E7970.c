@@ -35,7 +35,7 @@ void func_150BA4C0(struct127 *owner, u8 arg1, s32 arg2) {
     data.ownerId = owner->unique_id;
     data.spawnAccum = 0.0f;
 
-    effect = func_15149130((func_150ADA20() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, (struct37 *)0xC, arg1, arg2);
+    effect = func_15149130((func_150ADA20() % 9U) + 15, -1, 0x52, -1, 1, 0x3F, 0xC, arg1, arg2);
     if (effect != NULL) {
         memcpy(&((EffectE7970 *)effect)->data, &data, sizeof(data));
     }

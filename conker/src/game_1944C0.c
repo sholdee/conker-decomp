@@ -1271,13 +1271,13 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
 }
 
 /* Sends an event to every object of the `count` types listed in `types`. */
-void func_15169260(s32 types, s32 count, s32 event, u8 eventType) {
+void func_15169260(void *types, s32 count, s32 event, u8 eventType) {
     s32 *type;
     s32 i;
     s32 list;
     struct102 *node;
 
-    for (i = 0, type = (s32 *)types; i < count; i++) {
+    for (i = 0, type = types; i < count; i++) {
         for (list = 0; list != 2; list++) {
             if (OBJ_TYPES[*type].handleEvent != NULL) {
                 node = D_800DCE50[list][*type];

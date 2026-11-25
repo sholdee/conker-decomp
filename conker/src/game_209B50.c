@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_15149130 with a struct37 * where this file passes the data size. */
-#define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
-#undef func_15149130
 #include "variables.h"
 
 /* Direction spread of a burst: func_15143794 takes a random angle from each range (see game_2062D0.c). */
@@ -100,7 +97,6 @@ typedef struct {
     /* 0x28 */ EmitterData data;
 } Emitter;
 
-void *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
 
 /* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by func_151DC97C
  * (D_8008A4E8[0x5B]), preceded by a func_151DC6A0 burst when `burst` is set. */

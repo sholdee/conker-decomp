@@ -1,9 +1,7 @@
 #include <ultra64.h>
-#define func_15169260 func_15169260_s32
 #define func_1513D524 func_1513D524_void_proto
 #define func_15169850 func_15169850_s32
 #include "functions.h"
-#undef func_15169260
 #undef func_1513D524
 #undef func_15169850
 #include "variables.h"
@@ -13,7 +11,6 @@ void *memcpy(void *, const void *, u32);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-void func_15169260(s32 *types, s32 count, struct ActorRef *ref, u8 msg);
 void func_15169850(struct ActorRef *ref, u8 msg, struct127 **actor, u8 *actorId, struct102 *self);
 void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
 void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize,
@@ -663,5 +660,5 @@ void func_15191B8C(ActorRef *ref, u8 msg) {
     s32 types[1] = { 0x20 };
 
     func_151494E0((s32)ref, msg);
-    func_15169260(types, 1, ref, msg);
+    func_15169260(types, 1, (s32)ref, msg);
 }

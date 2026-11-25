@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_15169260 with s32 parameters; this file declares its real pointer types
-#define func_15169260 func_15169260_s32
 #include "functions.h"
-#undef func_15169260
 #include "variables.h"
 
 /* Spawn descriptor for a DynModel; copied verbatim into DynModel.desc (same layout as in game_168A90.c). */
@@ -318,7 +315,6 @@ typedef struct {
 
 extern MsgTarget D_80088C50;
 extern MsgTarget D_80088C58;
-void func_15169260(MsgTarget *target, s32 arg1, void *data, u8 event);
 
 /* Sends message 0x1D: makes the lamps follow `track` for `duration`. */
 void func_15108FFC(s32 track, s32 duration, u8 sceneTag) {
@@ -329,7 +325,7 @@ void func_15108FFC(s32 track, s32 duration, u8 sceneTag) {
     msg.track = track;
     msg.duration = duration;
     msg.sceneTag = sceneTag;
-    func_15169260(&target, 2, &msg, 0x1D);
+    func_15169260(&target, 2, (s32)&msg, 0x1D);
 }
 
 /* Message handler: 0x1D sets the track to follow, 0x1E toggles the light. */
@@ -359,7 +355,7 @@ void func_151090DC(void) {
     MsgTarget target;
 
     target = D_80088C58;
-    func_15169260(&target, 2, NULL, 0x1E);
+    func_15169260(&target, 2, 0, 0x1E);
 }
 
 struct17 *func_15144B34(s32);

@@ -23,7 +23,7 @@ dummy_label_15010880:
     tmp.unk4 = base + 0xEA0;
     tmp.unk8 = base + 0xED4;
 
-    temp_v0 = func_15149130(0x12C, -1, 0x5E, -1, 0, 0, (struct37 *) 0xC, 0xFF, 1);
+    temp_v0 = func_15149130(0x12C, -1, 0x5E, -1, 0, 0,  0xC, 0xFF, 1);
     if (temp_v0 != NULL) {
         memcpy((u8 *) temp_v0 + 0x28, &tmp, 0xC);
     }

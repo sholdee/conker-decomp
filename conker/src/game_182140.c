@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_15169260(s32, ...); passing a struct pointer through an s32 cast changes codegen. */
-#define func_15169260 func_15169260_s32_decl
 #include "functions.h"
-#undef func_15169260
 #include "variables.h"
 
 typedef struct {
@@ -85,7 +82,6 @@ extern Pair1515572C D_800A6038;
 extern s32 D_800D2C9C;
 extern ScreenSprite *D_800DCE50[2][0x68];
 
-extern void func_15169260(Pair1515572C *, s32, s32, u8);
 extern s32 func_15181CC8(s32);
 extern s32 func_1517EF00(s32);
 extern ScreenSprite *func_15167A68(s32, s32, s32, s32, u8, s32);

@@ -224,7 +224,7 @@ struct260 *func_15109410(struct127 *object, s16 duration, s8 tickFunc, s8 emitFu
     data.objectId = object->unique_id;
 
     effect = (Effect1368C0 *)func_15149130(lifetime, -1, 0x1A, -1, timed, 0x1A,
-                                           (struct37 *)(extraSize + sizeof(data)), owner, kind);
+                                           (extraSize + sizeof(data)), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -486,7 +486,7 @@ struct260 *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f32
     data.unk0 = arg0;
 
     effect = (Effect1368C0 *)func_15149130(lifetime, -1, 0x1B, -1, timed, 0x1B,
-                                           (struct37 *)(extraSize + sizeof(data)), owner, kind);
+                                           (extraSize + sizeof(data)), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
@@ -565,7 +565,7 @@ struct260 *func_1510A344(struct127 *object, s32 duration, u8 owner, s32 kind) {
     data.spawnRate = 0.2040000111f;
     data.spawnRateRandom = 0.8220000267f;
 
-    effect = (Effect1368C0 *)func_15149130(duration, -1, 0x1C, -1, TRUE, 0x1C, (struct37 *)sizeof(data), owner, kind);
+    effect = (Effect1368C0 *)func_15149130(duration, -1, 0x1C, -1, TRUE, 0x1C, sizeof(data), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

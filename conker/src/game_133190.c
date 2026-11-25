@@ -565,7 +565,7 @@ BoltChainObj *func_15106F98(vertex *start, vertex *end, s32 depth, BoltChainConf
     chain.config = *config;
     chain.kind = kind;
 
-    obj = (BoltChainObj *)func_15149130(0, -1, 0x3E, -1, 0, 0x30, (struct37 *)(chain.count * sizeof(vertex) + 0x48), arg6, arg7);
+    obj = (BoltChainObj *)func_15149130(0, -1, 0x3E, -1, 0, 0x30, (chain.count * sizeof(vertex) + 0x48), arg6, arg7);
     if (obj != NULL) {
         data = &obj->chain;
         memcpy(data, &chain, sizeof(BoltChain));

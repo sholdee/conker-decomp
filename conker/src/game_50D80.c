@@ -1771,7 +1771,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         func_150AF738((s16)duration, sceneTag, 1);
                         data[0] = 0;
                         data[1] = 0;
-                        p = func_15149130((s16)duration, -1, 0x4B, -1, 1, 0, (struct37 *)4, sceneTag, 1);
+                        p = func_15149130((s16)duration, -1, 0x4B, -1, 1, 0, 4, sceneTag, 1);
                         if (p != NULL) {
                             memcpy((u8 *)p + 0x28, data, 4);
                         }

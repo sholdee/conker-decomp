@@ -188,7 +188,7 @@ void func_1506AA48(struct127 *obj, Pair1506AA48 *arg) {
     data.value = *arg;
 
     /* functions.h types the data-size parameter as struct37 * */
-    effect = func_15149130(10, 7, 35, -1, 1, 33, (struct37 *)sizeof(data), 0xFF, 1);
+    effect = func_15149130(10, 7, 35, -1, 1, 33, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }

@@ -215,7 +215,7 @@ extern s32 D_800AB300[]; /* object kinds to message: { 0x3F } (rumble objects) *
 
 /* Sends `message` with `data` to every rumble object. */
 void func_151D8DB4(s32 data, u8 message) {
-    func_15169260((s32)D_800AB300, 1, data, message);
+    func_15169260(D_800AB300, 1, data, message);
 }
 
 extern u8 D_800E0A00;

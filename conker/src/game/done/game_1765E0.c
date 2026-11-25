@@ -1,17 +1,10 @@
 #include <ultra64.h>
-/* include/functions.h types func_15149130's seventh parameter as a struct37 pointer, but every caller
- * passes the byte size of the effect's extra data; the header declaration is renamed out of the way
- * (same approach as game_113D60.c). */
-#define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
-#undef func_15149130
 #include "variables.h"
 
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
 void func_151D5E30(void *);
 
-struct260 *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags,
-                         u8 callbackSet, s32 dataSize, u8 arg7, s32 arg8);
 
 /* Allocates a timed callback object (0x28 header bytes plus dataSize) and initializes its header. */
 struct260 *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags,

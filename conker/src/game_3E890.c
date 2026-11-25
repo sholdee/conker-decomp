@@ -219,7 +219,7 @@ void func_1501175C(struct127 *owner, u8 arg1, s32 arg2) {
     data.id = owner->unique_id;
     data.effect = NULL;
     data.light = NULL;
-    object = (ControllerEffect *)func_15149130(300, -1, 0x54, -1, 0, 0x34, (struct37 *)sizeof(Controller), arg1, arg2);
+    object = (ControllerEffect *)func_15149130(300, -1, 0x54, -1, 0, 0x34, sizeof(Controller), arg1, arg2);
     if (object != NULL) {
         controller = &object->controller;
         memcpy(controller, &data, sizeof(data));
@@ -307,7 +307,7 @@ void func_15011A78(struct127 *owner, u8 arg1, s32 arg2) {
     data.unk4 = owner->unique_id;
     data.unk6 = 0;
 
-    effect = (OwnerEffect *)func_15149130(300, -1, 0x55, -1, 0, 0x42, (struct37 *)sizeof(struct182), arg1, arg2);
+    effect = (OwnerEffect *)func_15149130(300, -1, 0x55, -1, 0, 0x42, sizeof(struct182), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

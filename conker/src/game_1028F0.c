@@ -89,7 +89,7 @@ void func_150D5440(struct127 *obj, u8 arg1, s32 arg2) {
     data.ownerId = obj->unique_id;
     data.spawnAccum = 0.0f;
 
-    effect = (FollowEffect *)func_15149130(300, -1, 0x38, -1, 0, 0x28, (struct37 *)sizeof(data), arg1, arg2);
+    effect = (FollowEffect *)func_15149130(300, -1, 0x38, -1, 0, 0x28, sizeof(data), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

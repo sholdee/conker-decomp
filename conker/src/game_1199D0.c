@@ -73,7 +73,7 @@ void func_150EC520(Effect *effect) {
 
                 func_151432BC(emitter->shape, &point.x, &point.z, &upper, &point.y);
                 spawned = (Effect *)func_15149130(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
-                                                  (struct37 *)sizeof(point), effect->owner, effect->kind);
+                                                  sizeof(point), effect->owner, effect->kind);
                 if (spawned != NULL) {
                     memcpy(&spawned->data, &point, sizeof(point));
                 }
@@ -183,7 +183,7 @@ void func_150ECA68(struct127 *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration
     data.b = b;
 
     effect = (Effect *)func_15149130((duration == -1) ? 300 : duration, -1, 0x5D, -1, (duration == -1) ? FALSE : TRUE,
-                                     0x45, (struct37 *)sizeof(data), owner, kind);
+                                     0x45, sizeof(data), owner, kind);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }

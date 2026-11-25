@@ -161,7 +161,7 @@ void func_150DECC0(struct17 *pos, u8 owner, s32 kind) {
         struct17 effectPos;
 
         effectPos = *pos;
-        effect = func_15149130(15, 8, -1, -1, 1, 0, (struct37 *)sizeof(effectPos), *(u8 *)&owner, kind);
+        effect = func_15149130(15, 8, -1, -1, 1, 0, sizeof(effectPos), *(u8 *)&owner, kind);
         if (effect != NULL) {
             memcpy(&((PointEffect *)effect)->pos, &effectPos, sizeof(effectPos));
         }

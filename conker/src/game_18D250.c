@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_15169260 with s32 parameters; this file declares its real pointer types
-#define func_15169260 func_15169260_s32
 #include "functions.h"
-#undef func_15169260
 #include "variables.h"
 
 /* Object type 0x34: screen effects from ../Effects/ColourFrameBuffer/colourframebuffer.c */
@@ -41,7 +38,6 @@ typedef struct {
 } ColourFrameBufferEffect;
 
 extern void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, u8 owner, s32 arg5);
-void func_15169260(const s32 *kinds, s32 count, s32 data, u8 event);
 
 /* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
 extern ScreenEffect *D_800DCE50[2][104];

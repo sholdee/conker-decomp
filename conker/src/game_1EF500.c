@@ -1305,7 +1305,7 @@ void func_151C4644(Game1EF500TimedOwner *owner) {
 
         // the struct37 * parameter is really the size of the effect's data
         effect = func_15149130((s16)((func_150ADA20() % (u32)(emitter->lifeRange + 1)) + emitter->minimumLife),
-                               -1, 0x2B, -1, 1, 0, (struct37 *)sizeof(data), owner->unkC, owner->unk1);
+                               -1, 0x2B, -1, 1, 0, sizeof(data), owner->unkC, owner->unk1);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x28, &data, sizeof(data));
         }

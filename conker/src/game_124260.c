@@ -72,7 +72,7 @@ BeamObj *func_150F6DE4(struct127 *owner) {
     }
     state.flags = 0;
     // functions.h types the 7th argument (the size of the object data) as struct37 *
-    obj = (BeamObj *)func_15149130(300, -1, 0x43, -1, 0, 0x37, (struct37 *)sizeof(BeamState), 0xFF, 1);
+    obj = (BeamObj *)func_15149130(300, -1, 0x43, -1, 0, 0x37, sizeof(BeamState), 0xFF, 1);
     if (obj != NULL) {
         BeamState *beam;
 

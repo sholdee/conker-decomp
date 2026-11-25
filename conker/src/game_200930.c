@@ -585,7 +585,7 @@ void func_151D469C(obj, posFunc, arg2, arg3, arg4)
         }
     }
 
-    effect = func_15149130(arg2, -1, 0x41, -1, 1, 0x35, (struct37 *)0x20, arg3, arg4);
+    effect = func_15149130(arg2, -1, 0x41, -1, 1, 0x35, 0x20, arg3, arg4);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &emitter, sizeof(ObjEmitter));
     }

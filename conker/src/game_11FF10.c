@@ -117,7 +117,7 @@ void func_150F2C8C(struct127 *target) {
     state.timer = 0.0f;
     state.count = 0;
 
-    emitter = (Emitter *)func_15149130(300, -1, 0x5C, -1, 0, 0x44, (struct37 *)0x10, 0xFF, 1);
+    emitter = (Emitter *)func_15149130(300, -1, 0x5C, -1, 0, 0x44, 0x10, 0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->state, &state, sizeof(state));
     }

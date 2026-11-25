@@ -1657,7 +1657,7 @@ void func_1514F3CC(struct127 *obj) {
     payload.unk8 = 0.0f;
 
     // the seventh argument is the payload size
-    spawned = func_15149130(300, -1, 0x3A, -1, 0, 0x2B, (struct37 *)sizeof(payload), 0xFF, 1);
+    spawned = func_15149130(300, -1, 0x3A, -1, 0, 0x2B, sizeof(payload), 0xFF, 1);
     if (spawned != NULL) {
         memcpy((u8 *)spawned + 0x28, &payload, sizeof(payload));
     }

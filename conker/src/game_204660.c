@@ -70,7 +70,7 @@ struct260 *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 extr
     anchor.pos.z = 0.0f;
     anchor.maxStep = maxStep;
 
-    emitter = func_15149130(arg0, -1, 0x42, -1, arg1, 0x36, (struct37 *)(extraSize + sizeof(TrailAnchor)), arg5, arg6);
+    emitter = func_15149130(arg0, -1, 0x42, -1, arg1, 0x36, (extraSize + sizeof(TrailAnchor)), arg5, arg6);
     if (emitter != NULL) {
         memcpy(&((TrailEmitter *)emitter)->anchor, &anchor, sizeof(TrailAnchor));
     }

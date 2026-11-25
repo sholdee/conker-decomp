@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_15149130 func_15149130_hdr
 #include "functions.h"
-#undef func_15149130
 #define D_800DDDAC D_800DDDAC_hdr
 #define D_800DDDB0 D_800DDDB0_hdr
 #define D_800DDDC8 D_800DDDC8_hdr
@@ -984,7 +982,6 @@ typedef struct {
     /* 0x28 */ FlashData data;
 } FlashEffect;
 
-void *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
 void *memcpy(void *, const void *, u32);
 
 /* Spawns an effect that flashes `view` with colour r,g,b, fading out from `alpha` over

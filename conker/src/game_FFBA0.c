@@ -94,8 +94,7 @@ void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1) {
         emitter.color[1] = colors[i][1];
         emitter.color[2] = colors[i][2];
     }
-    // the header types func_15149130's data-size parameter as struct37 *
-    object = func_15149130(func_150ADA20() % 101U + 100, -1, 0x32, -1, 1, 0, (struct37 *)sizeof(emitter), unkC, unk1);
+    object = func_15149130(func_150ADA20() % 101U + 100, -1, 0x32, -1, 1, 0, sizeof(emitter), unkC, unk1);
     if (object != NULL) {
         memcpy(&((EffectObject *)object)->data, &emitter, sizeof(emitter));
     }
