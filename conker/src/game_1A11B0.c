@@ -61,99 +61,96 @@ typedef struct {
 
 extern Probe D_800DD348[3];
 
+/* z-buffer decompression table, indexed by the exponent (top 3 bits). */
 typedef struct {
     s32 shift;
     u32 base;
-} Tbl80089630;
+} ZDecode;
 
-typedef struct {
-    u8 pad0[0x24];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0x180 - 0x34];
-} View151742EC;
+extern ZDecode D_80089630[];
+extern void (*D_8008A080[])(Probe *, s32, s32, s32); // probe visible callbacks, given the sampled r, g, b
+extern s32 D_800DD300[]; // each probe's projected depth
+extern u16 D_800DD310[][4]; // each probe's z-buffer sample
+extern u16 D_800DD328[][4]; // each probe's frame buffer sample
+extern s32 D_800DD340; // the last visible probe's frame buffer sample
+void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *screenZ);
 
-extern Tbl80089630 D_80089630[];
-extern void (*D_8008A080[])(Probe *, s32, s32, s32);
-extern s32 D_800DD300[];
-extern u16 D_800DD310[][4];
-extern u16 D_800DD328[][4];
-extern s32 D_800DD340;
-void func_1501A764(s16 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6);
-
-Gfx *func_151742EC(Gfx *arg0, s32 arg1) {
-    f32 spB4;
-    f32 spB0;
-    f32 spAC;
-    Probe *rec;
+/* Runs the visibility probes (view 0 only): a probe sampled last frame calls its callback with the sampled
+ * pixel color when the z-buffer depth there is within 300 of its own depth; a newly queued probe is projected
+ * to the screen and, when inside the view, gets its z-buffer and frame buffer pixels copied for next frame. */
+Gfx *func_151742EC(Gfx *gfx, s32 view) {
+    f32 screenX;
+    f32 screenY;
+    f32 screenZ;
+    Probe *probe;
     s32 i;
-    u16 code;
-    s8 idx;
-    Tbl80089630 *tbl;
-    u32 pos;
-    s32 col;
-    s32 ad;
+    u16 zraw;
+    s8 callback;
+    ZDecode *fmt;
+    u32 depth;
+    s32 color;
+    s32 depthDiff;
     s32 r;
     s32 g;
     s32 b;
-    s32 n;
+    s32 never; // matching: see the dead guard at the end of the second loop
     s32 x;
     s32 y;
-    View151742EC *view;
 
-    rec = D_800DD348;
+    probe = D_800DD348;
     i = 0;
-    n = 0;
-    if (arg1 != 0) {
-        return arg0;
+    never = 0;
+    if (view != 0) {
+        return gfx;
     }
+    // matching: a do-while (no pretest edge) and the dead guard below set uopt's register priorities
     do {
-        if (rec->state == D_800BE9C0 + 1) {
-            code = *(u16 *)((u8 *)D_800DD310 + i * 8);
-            tbl = &D_80089630[code >> 13];
-            pos = (tbl->base + (((code >> 2) & 0x7FF) << tbl->shift)) >> 3;
+        if (probe->state == D_800BE9C0 + 1) {
+            zraw = D_800DD310[i][0];
+            fmt = &D_80089630[zraw >> 13];
+            depth = (fmt->base + (((zraw >> 2) & 0x7FF) << fmt->shift)) >> 3;
             {
             s32 d;
-            d = pos - D_800DD300[i];
-            ad = (d < 0) ? -d : d;
+            d = depth - D_800DD300[i];
+            depthDiff = (d < 0) ? -d : d;
             }
-            if (ad < 300) {
-                idx = rec->callback;
-                col = D_800DD328[i][0];
+            if (depthDiff < 300) {
+                callback = probe->callback;
+                color = D_800DD328[i][0];
                 r = (D_800DD328[i][0] >> 8) & 0xF8;
                 g = (D_800DD328[i][0] >> 3) & 0xF8;
                 b = (D_800DD328[i][0] << 2) & 0xF8;
-                D_800DD340 = col;
-                if (idx != 0xFFFFFFFF) {
-                    D_8008A080[idx](rec, r, g, b);
+                D_800DD340 = color;
+                if (callback != 0xFFFFFFFF) { // matching: != -1 compiles differently
+                    D_8008A080[callback](probe, r, g, b);
                 }
             }
-            rec->state = 0;
+            probe->state = 0;
         }
-        i++; rec++;
+        i++;
+        probe++;
     } while (i < 3);
     for (i = 0; i < 3; i++) {
         if (D_800DD348[i].state == 3) {
+            // matching: byte offsets here (not D_800DD310[i]) keep IDO's shared i * 8 address
             *(u16 *)((u8 *)D_800DD310 + i * 8) = 0xFFFF;
             D_800DD348[i].state = D_800BE9C0 + 1;
-            func_1501A764((s16)arg1, D_800DD348[i].x, D_800DD348[i].y, D_800DD348[i].z, &spB4, &spB0, &spAC);
-            x = spB4;
-            y = spB0;
-            D_800DD300[i] = spAC;
-            view = &((View151742EC *)D_800BE628)[arg1];
-            if (x >= (s32)view->unk2C && x < (s32)view->unk30 && y >= (s32)view->unk24 && y < (s32)view->unk28) {
-                arg0 = func_15173D00(arg0, x, y, 1, (s32)((u8 *)D_800DD310 + i * 8), (s32)((u8 *)D_800DD328 + i * 8), arg1);
+            func_1501A764(view, D_800DD348[i].x, D_800DD348[i].y, D_800DD348[i].z, &screenX, &screenY, &screenZ);
+            x = screenX;
+            y = screenY;
+            D_800DD300[i] = screenZ;
+            if (x >= (s32)VIEWS[view].left && x < (s32)VIEWS[view].right && y >= (s32)VIEWS[view].top &&
+                y < (s32)VIEWS[view].bottom) {
+                gfx = func_15173D00(gfx, x, y, 1, (s32)((u8 *)D_800DD310 + i * 8), (s32)((u8 *)D_800DD328 + i * 8), view);
             }
-            if (n != 0) {
+            // matching: dead guard; gives 0xFFFF a 2nd reference so it outranks view for a register
+            if (never != 0) {
                 *(u16 *)((u8 *)D_800DD310 + i * 8) = 0xFFFF;
             }
         }
     }
-    return arg0;
+    return gfx;
 }
-
 
 /* Queues a visibility probe at (x, y, z); returns 1 when all probe slots are in use. */
 s32 func_151745F0(f32 x, f32 y, f32 z, ProbeData *data, s8 callback, s32 arg5) {
