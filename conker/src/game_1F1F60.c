@@ -98,7 +98,7 @@ s32 func_151C4B0C(Game1F1F60Hit *knownHit, Game1F1F60Hit *hit, Vec3f *origin, Ve
         u8 found;
         s32 index;
 
-        index = -1;
+        index = -1; // matching: IDO emits this store although every path below overwrites it
         if (altOrigin != NULL && altDir != NULL) {
             hit->start = *altOrigin;
             hit->end = *altDir;
@@ -121,7 +121,7 @@ s32 func_151C4B0C(Game1F1F60Hit *knownHit, Game1F1F60Hit *hit, Vec3f *origin, Ve
             f32 dist;
             Game1F1F60Hit saved;
 
-            saved = *hit;
+            saved = *hit; // matching: unused copy, but the 0x64-byte stack slot and copy are in the target
             hit->start = *origin;
             hit->end.x = hit->hit.x - origin->x;
             hit->end.y = hit->hit.y - origin->y;
