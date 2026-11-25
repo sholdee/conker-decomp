@@ -283,7 +283,7 @@ void func_15009A38(s32 light, s32 id) {
 }
 
 void func_15009AA0(s32 light, s32 id) {
-    func_15162FAC(light, 1, 0, 2, 300, 0xD, 255, 1);
+    func_15162FAC(light, 1, 0, 2, 300, 13, 255, 1);
 }
 
 void func_15009AEC(s32 light, s32 id) {
@@ -571,7 +571,7 @@ typedef struct Game36680ParticleEffect {
 } Game36680ParticleEffect;
 
 /** Ambient action 2: spawns a particle effect with three random angles. */
-void func_1500A990(s32 arg0) {
+void func_1500A990(s32 unused) {
     f32 params[12];
     f32 fraction;
     Game36680ParticleEffect *effect;
@@ -1002,7 +1002,7 @@ void func_1500BC7C(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, s16 **t
     D_800DDBD0[slot] = 33;
 }
 
-void func_1500BE40(s32 arg0) {
+void func_1500BE40(s32 unused) {
     D_800DDD10[0] = 0;
     D_800DDD10[1] = 0;
     D_800DDD0C = 110;
