@@ -1982,64 +1982,58 @@ s32 func_1508A6FC(void) {
 }
 
 extern s8 D_8008FD90;
-extern s16 *D_8008FDD4;
+/* 12-byte per-player records at 0x70 of D_8008FDD4. */
+typedef struct ScoreRecord {
+    /* 0x0 */ s16 unk0;
+    /* 0x2 */ u8 pad2[0xA];
+} ScoreRecord;
 
-s32 func_1508B194(s32 arg0) {
-    if (arg0 >= D_8008FD90) {
+typedef struct ScoreTable {
+    /* 0x00 */ u8 pad0[0x70];
+    /* 0x70 */ ScoreRecord records[4];
+} ScoreTable;
+
+extern ScoreTable *D_8008FDD4;
+
+s32 func_1508B194(s32 player) {
+    if (player >= D_8008FD90) {
         return 0;
     }
 
-    return *(s16 *)((u8 *)D_8008FDD4 + arg0 * 12 + 0x70);
+    return D_8008FDD4->records[player].unk0;
 }
 
-void func_1508B1D4(s32 arg0) {
-    if (arg0 < D_8008FD90) {
-        *(s16 *)((u8 *)D_8008FDD4 + arg0 * 12 + 0x70) = 0;
+void func_1508B1D4(s32 player) {
+    if (player < D_8008FD90) {
+        D_8008FDD4->records[player].unk0 = 0;
     }
 }
 
-typedef struct {
-    f32 radiusSq;
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 pad;
-} Entry1508B20C;
-
-typedef struct {
-    u8 pad0[0x1745];
-    s8 count;
-    u8 pad1746[2];
-    Entry1508B20C entries[8];
-} Mgr1508B20C;
-
-#define MGR ((Mgr1508B20C *)D_800D23B0)
-
-void func_1508B20C(f32 arg0, f32 arg1, f32 arg2, f32 arg3) {
+/* Registers a zone of radius r around (x, y, z), up to 8. */
+void func_1508B20C(f32 x, f32 y, f32 z, f32 r) {
     s32 n;
 
-    if (MGR != NULL && MGR->count < 8) {
-        n = MGR->count++;
-        MGR->entries[n].x = arg0;
-        MGR->entries[n].y = arg1;
-        MGR->entries[n].z = arg2;
-        MGR->entries[n].radiusSq = arg3 * arg3;
+    if (D_800D23B0 != NULL && D_800D23B0->numZones < 8) {
+        n = D_800D23B0->numZones++;
+        D_800D23B0->zones[n].x = x;
+        D_800D23B0->zones[n].y = y;
+        D_800D23B0->zones[n].z = z;
+        D_800D23B0->zones[n].radiusSq = r * r;
     }
 }
 
-#undef MGR
+/* Flood fill over the path graph from a point, collecting the nodes just outside a radius. */
+typedef struct PathSearch {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 z;
+    /* 0x08 */ f32 radiusSq;
+    /* 0x0C */ f32 dist[8];
+    /* 0x2C */ s16 count;
+    /* 0x2E */ u8 ids[8];
+    /* 0x36 */ u8 visited[0x20]; /* bitset of visited node ids */
+} PathSearch;
 
-typedef struct {
-    f32 x;
-    f32 z;
-    f32 radiusSq;
-    f32 dist[8];
-    s16 count;
-    u8 ids[8];
-    u8 visited[1];
-} Search1508B2A8;
-
-void func_1508B2A8(u8 id, Search1508B2A8 *s) {
+void func_1508B2A8(u8 id, PathSearch *s) {
     PathNode *node;
     f32 dx;
     f32 dist;
@@ -2048,7 +2042,7 @@ void func_1508B2A8(u8 id, Search1508B2A8 *s) {
 
     /* BUG (original game): the bit index should be id & 7, so ids 8 apart share a visited bit */
     s->visited[id >> 3] |= 1 << (id & 3);
-    node = id + D_800D2350;
+    node = &D_800D2350[id];
     dx = node->x - s->x;
     dist = node->z - s->z;
     dist = (dx * dx) + (dist * dist);
@@ -2070,47 +2064,32 @@ void func_1508B2A8(u8 id, Search1508B2A8 *s) {
     }
 }
 
-
-typedef struct {
-    f32 radiusSq;
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 pad;
-} Entry1508B3F8;
-
-typedef struct {
-    f32 x;
-    f32 z;
-    f32 radiusSq;
-    f32 dist[8];
-    s16 count;
-    u8 ids[8];
-    u8 visited[0x20];
-} Search1508B3F8;
-
+/*
+ * For each registered zone, assigns every computer player standing in it the nearest
+ * path node reachable from the zone centre (unk55C), then clears the zones.
+ */
 void func_1508B3F8(void) {
     s32 i;
     s32 j;
     s32 found;
     s32 k;
     u8 best;
-    s32 r;
+    s32 startNode;
     s32 *zone;
     struct127 *obj;
     f32 x;
     f32 y;
     f32 z;
     f32 dx;
-    s32 t;
+    s32 layer;
     f32 d;
-    Entry1508B3F8 *e;
-    Search1508B3F8 s;
+    MpZone *zones;
+    PathSearch s;
     f32 bestDist;
     PathNode *node;
 
     zone = D_800D23B0->unk55C;
-    e = D_800D23B0->zones;
+    zones = D_800D23B0->zones;
     for (i = 0; i < D_8008FD8C; i++) {
         if (zone[i] != -1) {
             zone[i] = -2;
@@ -2118,10 +2097,10 @@ void func_1508B3F8(void) {
     }
     for (i = 0; i < D_800D23B0->numZones; i++) {
         found = 0;
-        s.radiusSq = e[i].radiusSq;
-        x = e[i].x;
-        y = e[i].y;
-        z = e[i].z;
+        s.radiusSq = zones[i].radiusSq;
+        x = zones[i].x;
+        y = zones[i].y;
+        z = zones[i].z;
         for (j = D_8008FD90; j < D_8008FD8C; j++) {
             obj = &D_800CC2D0[j];
             d = obj->y_position - y;
@@ -2133,15 +2112,15 @@ void func_1508B3F8(void) {
                     best = 0xFF;
                     if (!found) {
                         s.count = 0;
-                        t = func_15085DA8(y);
+                        layer = func_15085DA8(y);
                         found = 1;
-                        r = func_15085DF8(x, y, z, 0, t);
-                        if (r != -1) {
+                        startNode = func_15085DF8(x, y, z, 0, layer);
+                        if (startNode != -1) {
                             s.x = x;
                             s.z = z;
                             s.count = 0;
                             bzero(s.visited, 0x20);
-                            func_1508B2A8(r, (Search1508B2A8 *)&s);
+                            func_1508B2A8(startNode, &s);
                         }
                     }
                     for (k = 0; k < s.count; k++) {
@@ -2175,13 +2154,6 @@ void func_1508B3F8(void) {
 
 s32 func_1508C5B8(s32, s32);
 s32 func_1508A1BC(void);
-
-typedef struct B9BCActor {
-    u8 pad0[0x14];
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-} B9BCActor;
 
 s32 func_1508B9BC(void) {
     s32 mode;
@@ -2252,13 +2224,13 @@ s32 func_1508B9BC(void) {
     if (winner != -1) {
         f32 dx;
         f32 dz;
-        B9BCActor *actor;
-        B9BCActor *other;
+        struct127 *actor;
+        struct127 *other;
 
-        actor = (B9BCActor *)((u8 *)D_800CC2D0 + current * 0x32C);
-        other = (B9BCActor *)((u8 *)D_800CC2D0 + winner * 0x32C);
-        dx = actor->field14 - other->field14;
-        dz = actor->field1C - other->field1C;
+        actor = &D_800CC2D0[current];
+        other = &D_800CC2D0[winner];
+        dx = actor->x_position - other->x_position;
+        dz = actor->z_position - other->z_position;
         distance = sqrtf(dx * dx + dz * dz);
         D_800D23B0->unk45C[current] = (s32)distance;
     } else {
