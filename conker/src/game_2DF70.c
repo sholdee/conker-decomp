@@ -24,15 +24,16 @@ typedef struct MeshTri {
     Vtx *verts[3];
 } MeshTri;
 
-typedef struct Point32 {
+typedef struct Vec3f {
     f32 x;
     f32 y;
     f32 z;
-} Point32;
+} Vec3f;
 
-typedef struct Face32 {
-    Point32 pts[3];
-} Face32;
+// A triangle's vertex positions, passed by value to the box test func_15049260.
+typedef struct Tri3f {
+    Vec3f pts[3];
+} Tri3f;
 
 typedef struct YRange {
     s16 min;
@@ -42,8 +43,8 @@ typedef struct YRange {
 extern YRange *D_800DBE44;
 
 void func_15002560(QuadNode *node, QuadNode *parentNext);
-void func_15002008(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u16 *arg4);
-s32 func_15049260(Face32 arg0);
+void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList);
+s32 func_15049260(Tri3f tri);
 
 void func_15000AC0(void) {
     D_800D9E64 = 0;
@@ -543,8 +544,7 @@ void func_15001BC8(s32 map, s16 *nodeCount, s16 *leafCount) {
     func_15002560((QuadNode *)root, NULL);
     func_10004074(triList);
 
-    // regalloc fix:
-    if (1) { }
+    if (1) { } // matching: IDO's register allocation for the out-params needs this empty block
 
     if (nodeCount != NULL) {
         *nodeCount = D_800B0DCC;
@@ -649,115 +649,125 @@ u16 *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, s32 triList) {
     return (u16 *)node;
 }
 
-void func_15002008(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u16 *arg4) {
-    MeshTri *face;
+/**
+ * Appends to the quadtree buffer the triangles of `triList` that overlap the box
+ * [minX, maxX] x [minZ, maxZ], as a stream of index deltas: a byte for a delta below 0x80,
+ * otherwise a big-endian halfword index with bit 15 set. The stream ends with a 0 byte.
+ */
+void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList) {
+    MeshTri *tri;
     s32 count;
-    s32 idx;
-    s32 last;
-    s32 diff;
+    s32 index;
+    s32 prev;
+    s32 delta;
     s32 i;
     s32 j;
-    Face32 sp78;
+    Tri3f pos;
 
-    last = -1;
-    count = arg4[0];
+    prev = -1;
+    count = triList[0];
 
-    func_150492CC((f32)(arg1 - arg0), 32000.0f, (f32)(arg3 - arg2));
+    func_150492CC((f32)(maxX - minX), 32000.0f, (f32)(maxZ - minZ));
 
     for (i = 1; i <= count; i++) {
-        idx = arg4[i];
-        face = &((MeshTri *)D_800DBE3C)[idx];
+        index = triList[i];
+        tri = &((MeshTri *)D_800DBE3C)[index];
 
         for (j = 0; j < 3; j++) {
-            if ((u32)face->verts[j] > 0x80000000) {
-                sp78.pts[j].x = (f32)(face->verts[j]->v.ob[0] - (arg0 + arg1) / 2);
-                sp78.pts[j].y = (f32)face->verts[j]->v.ob[1];
-                sp78.pts[j].z = (f32)(face->verts[j]->v.ob[2] - (arg2 + arg3) / 2);
+            if ((u32)tri->verts[j] > 0x80000000) {
+                pos.pts[j].x = tri->verts[j]->v.ob[0] - (minX + maxX) / 2;
+                pos.pts[j].y = tri->verts[j]->v.ob[1];
+                pos.pts[j].z = tri->verts[j]->v.ob[2] - (minZ + maxZ) / 2;
             } else {
-                sp78.pts[j].x = 0.0f;
-                sp78.pts[j].y = 0.0f;
-                sp78.pts[j].z = 0.0f;
+                pos.pts[j].x = 0.0f;
+                pos.pts[j].y = 0.0f;
+                pos.pts[j].z = 0.0f;
             }
         }
 
-        if (func_15049260(sp78) == 0) {
-            diff = idx - last;
-            if (last == -1) {
-                func_15001B8C(idx | 0x8000);
-            } else if (diff < 0x80) {
-                func_15001B5C(diff);
+        if (func_15049260(pos) == 0) {
+            delta = index - prev;
+            if (prev == -1) {
+                func_15001B8C(index | 0x8000);
+            } else if (delta < 0x80) {
+                func_15001B5C(delta);
             } else {
-                func_15001B8C(idx | 0x8000);
+                func_15001B8C(index | 0x8000);
             }
-            last = idx;
+            prev = index;
         }
     }
 
     func_15001B5C(0);
 }
 
-int func_15002248(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 *arg4, s32 *arg5, u16 *arg6, u16 **arg7) {
+/**
+ * Collects into a new list (*subList: count, then indices) the triangles of `triList` that
+ * overlap the box [minX, maxX] x [minZ, maxZ], and returns their combined y range in
+ * *minY / *maxY, widened to a multiple of 2 << D_80082FA0. Returns the count.
+ */
+int func_15002248(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, u16 *triList, u16 **subList) {
     s32 i;
     s32 j;
     s32 count;
     s32 total;
-    s32 idx;
+    s32 index;
     u16 *out;
-    MeshTri *face;
-    s32 temp;
-    s32 flag;
-    s32 res;
-    s32 pad;
-    s32 mask;
-    Face32 sp74;
+    MeshTri *tri;
+    s32 bound;
+    s32 haveRange;
+    s32 result;
+    s32 lowBits;
+    s32 highBits;
+    Tri3f pos;
 
-    pad = (1 << (D_80082FA0 + 1)) - 1;
-    mask = -(1 << (D_80082FA0 + 1));
+    lowBits = (1 << (D_80082FA0 + 1)) - 1;
+    highBits = -(1 << (D_80082FA0 + 1));
 
-    func_150492CC((f32)(arg1 - arg0), 32000.0f, (f32)(arg3 - arg2));
+    func_150492CC((f32)(maxX - minX), 32000.0f, (f32)(maxZ - minZ));
 
-    total = arg6[0] + 1;
+    total = triList[0] + 1;
     count = 0;
     out = allocate_memory(total << 1, 1, 0, 0);
-    *arg7 = out;
-    *arg4 = 0;
-    *arg5 = 0;
-    flag = 0;
+    *subList = out;
+    *minY = 0;
+    *maxY = 0;
+    haveRange = FALSE;
 
     for (i = 1; i < total; i++) {
-        idx = arg6[i];
-        face = &((MeshTri *)D_800DBE3C)[idx];
+        index = triList[i];
+        tri = &((MeshTri *)D_800DBE3C)[index];
 
         for (j = 0; j < 3; j++) {
-            if ((u32)face->verts[j] > 0x80000000) {
-                sp74.pts[j].x = (f32)(face->verts[j]->v.ob[0] - ((arg0 + arg1) >> 1));
-                sp74.pts[j].y = (f32)face->verts[j]->v.ob[1];
-                sp74.pts[j].z = (f32)(face->verts[j]->v.ob[2] - ((arg2 + arg3) >> 1));
+            if ((u32)tri->verts[j] > 0x80000000) {
+                pos.pts[j].x = tri->verts[j]->v.ob[0] - ((minX + maxX) >> 1);
+                pos.pts[j].y = tri->verts[j]->v.ob[1];
+                pos.pts[j].z = tri->verts[j]->v.ob[2] - ((minZ + maxZ) >> 1);
             } else {
-                sp74.pts[j].x = 0.0f;
-                sp74.pts[j].y = 0.0f;
-                sp74.pts[j].z = 0.0f;
+                pos.pts[j].x = 0.0f;
+                pos.pts[j].y = 0.0f;
+                pos.pts[j].z = 0.0f;
             }
         }
 
-        res = func_15049260(sp74);
-        if (res == 0) {
+        result = func_15049260(pos);
+        if (result == 0) {
             count++;
-            out[count] = idx;
+            out[count] = index;
 
-            if (flag) {
-                temp = (D_800DBE44[idx].min - pad) & mask;
-                if (temp < *arg4) {
-                    *arg4 = temp;
+            if (haveRange) {
+                bound = (D_800DBE44[index].min - lowBits) & highBits;
+                if (bound < *minY) {
+                    *minY = bound;
                 }
-                temp = ((D_800DBE44[idx].max + pad) & mask) + pad;
-                if (*arg5 < temp) {
-                    *arg5 = temp;
+                bound = ((D_800DBE44[index].max + lowBits) & highBits) + lowBits;
+                if (*maxY < bound) {
+                    *maxY = bound;
                 }
             } else {
-                flag = 1;
-                *arg4 = (D_800DBE44[idx].min - pad) & mask;
-                *arg5 = ((D_800DBE44[idx].max + pad) & mask) + pad;
+                haveRange = TRUE;
+                *minY = (D_800DBE44[index].min - lowBits) & highBits;
+                *maxY = ((D_800DBE44[index].max + lowBits) & highBits) + lowBits;
             }
         }
     }
