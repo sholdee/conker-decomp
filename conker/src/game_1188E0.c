@@ -6,31 +6,46 @@
 #include "variables.h"
 #undef D_800D3098
 
-s32 func_150EB484(void *arg0, struct17 *arg1, void *arg2);
+/* An entry of the object table at D_800D3098 (struct178, a blob in structs.h): a collision
+   cylinder at (x, y, z); see CollisionCylinder in game_D0960.c. */
+typedef struct {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 radius;
+    /* 0x08 */ s16 height;
+    /* 0x0A */ u8 padA[0x18 - 0xA];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 pad1C[0x34 - 0x1C];
+} GateCylinder; /* size 0x34 */
 
-void func_150EB430(void *arg0, void *arg1, void *arg2) {
-    struct17 sp1C;
-
-    sp1C.unk0 = ((struct17 *) arg0)->unk0 + ((struct17 *) arg1)->unk0;
-    sp1C.unk4 = ((struct17 *) arg0)->unk4 + ((struct17 *) arg1)->unk4;
-    sp1C.unk8 = ((struct17 *) arg0)->unk8 + ((struct17 *) arg1)->unk8;
-    func_150EB484(arg0, &sp1C, arg2);
-}
-
-typedef struct Gate150EB484 {
-    u8 pad0[0x18];
-    s32 unk18;
-    u8 pad1C[0x34 - 0x1C];
-} Gate150EB484;
-
-extern Gate150EB484 *D_800D3098;
+/* variables.h declares D_800D3098 as an array; the code loads it as a pointer to the table. */
+extern GateCylinder *D_800D3098;
 extern s32 D_80088AA0[4];
 extern s32 D_80088AB0[8];
-extern s32 func_150A34B0(Gate150EB484 *, void *, struct17 *, void *);
+extern s32 func_150A34B0(GateCylinder *cyl, vertex *start, vertex *end, vertex *hit);
 extern void func_150A2864(s32, s32);
-void func_150EBC80(void *arg0, u8 arg1, s32 arg2);
+s32 func_150EB484(vertex *start, vertex *end, vertex *hit);
+void func_150EBC80(GateCylinder *gate, u8 arg1, s32 arg2);
 
-s32 func_150EB484(void *arg0, struct17 *arg1, void *arg2) {
+/* Tests the segment from start to start + delta against the gate cylinders. */
+void func_150EB430(vertex *start, vertex *delta, vertex *hit) {
+    vertex end;
+
+    end.x = start->x + delta->x;
+    end.y = start->y + delta->y;
+    end.z = start->z + delta->z;
+    func_150EB484(start, &end, hit);
+}
+
+/*
+ * Tests the segment from start to end against the D_800D3098 cylinders. While object 9 exists,
+ * a hit on one of the four D_80088AA0 cylinders disables it (func_150A2864(id, 1)), stores
+ * which one (1-4) in the object's unk2E8 and plays func_150EBC80's effect at it; the eight
+ * D_80088AB0 cylinders are only tested. Otherwise only cylinder 76 is tested, and a hit sets
+ * its unk18. Returns TRUE when object 9 exists and the segment hit one of the twelve.
+ */
+s32 func_150EB484(vertex *start, vertex *end, vertex *hit) {
     s32 i;
     s32 id;
     struct127 *obj;
@@ -39,25 +54,24 @@ s32 func_150EB484(void *arg0, struct17 *arg1, void *arg2) {
     if (obj != NULL) {
         for (i = 0; i < 4; i++) {
             id = D_80088AA0[i];
-            if (func_150A34B0(&D_800D3098[id], arg0, arg1, arg2)) {
+            if (func_150A34B0(&D_800D3098[id], start, end, hit)) {
                 func_150A2864(id, 1);
                 obj->unk2E8 = i + 1;
                 func_150EBC80(&D_800D3098[id], 0xFF, 1);
-                return 1;
+                return TRUE;
             }
         }
         for (i = 0; i < 8; i++) {
-            if (func_150A34B0(&D_800D3098[D_80088AB0[i]], arg0, arg1, arg2)) {
-                return 1;
+            if (func_150A34B0(&D_800D3098[D_80088AB0[i]], start, end, hit)) {
+                return TRUE;
             }
         }
-        return 0;
+        return FALSE;
     }
-    if (func_150A34B0(&D_800D3098[76], arg0, arg1, arg2)) {
+    if (func_150A34B0(&D_800D3098[76], start, end, hit)) {
         D_800D3098[76].unk18 = 1;
     }
-    return 0;
-
+    return FALSE;
 }
 
 typedef struct Obj150EB614 {
@@ -290,7 +304,7 @@ void func_151D3FF4(void *, u8, s32);
 void func_151D5514(void *, u8, s32);
 void *func_151541B8(void *, f32, f32, f32, f32, u8, s32);
 
-void func_150EBC80(void *arg0, u8 arg1, s32 arg2) {
+void func_150EBC80(GateCylinder *arg0, u8 arg1, s32 arg2) {
     Game1188E0Vec3f position;
     f32 random;
     f32 step;
