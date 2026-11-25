@@ -1976,178 +1976,151 @@ s32 func_1514563C(struct17 *start, struct17 *dir, struct17 *point, struct17 *out
     return 1;
 }
 
-void func_15145740(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4) {
-    s16 phi_t0;
-    s16 phi_v1;
+/*
+ * Aim of an actor (or of the vehicle it rides, model 150 with matrix physics): writes the point
+ * 2000 units along its yaw/pitch to target and, optionally, unit-1000 direction vectors for the
+ * pitch and for the pitch plus pitchOffset (radians).
+ */
+void func_15145740(struct127 *actor, struct17 *target, struct17 *dir, struct17 *offsetDir, f32 pitchOffset) {
+    s16 yaw;
+    s16 pitch;
     volatile f32 angle;
-    f32 spC;
-    f32 sp8[1];
-    f32 cpy;
+    f32 offsetPitchRad;
+    f32 horizontal[1];
+    f32 pitchDeg;
     f32 temp;
-    f32 sp4[1];
-    f32 sp0[1];
+    f32 yawRad[1];
+    f32 pitchRad[1];
 
-    if ((arg0->id == 0x96) && (arg0->unk31C->matrix_physics != 0)) {
-        phi_t0 = arg0->unk7A + arg0->unk31C->unk80;
-    } else if (arg0->unk31C != NULL) {
-        phi_t0 = arg0->unk7A - arg0->unk31C->unk12;
+    if ((actor->id == 150) && (actor->unk31C->matrix_physics != 0)) {
+        yaw = actor->unk7A + actor->unk31C->unk80;
+    } else if (actor->unk31C != NULL) {
+        yaw = actor->unk7A - actor->unk31C->unk12;
     } else {
-        phi_t0 = arg0->unk7A;
+        yaw = actor->unk7A;
     }
-    if ((arg0->id == 0x96) && (arg0->unk31C->matrix_physics != 0)) {
-        phi_v1 = arg0->unk31C->unk82 + 1024;
+    if ((actor->id == 150) && (actor->unk31C->matrix_physics != 0)) {
+        pitch = actor->unk31C->unk82 + 1024;
     } else {
-        phi_v1 = arg0->unk1D1 * 200;
+        pitch = actor->unk1D1 * 200;
     }
-    /* -g3 scope = uopt block boundary; the dead phi_v1 store keeps cpy from being copy-propagated */
+    // matching: this scope with its unused pad is a uopt block boundary, and the dead store to
+    // pitch keeps pitchDeg from being copy-propagated
     {
         s32 pad0;
 
-        cpy = phi_v1 * 0.005493164f;
-        phi_v1 = 0;
+        pitchDeg = pitch * (360.0f / 65536.0f);
+        pitch = 0;
     }
-    angle = cpy;
+    // matching: the volatile round trip and the pitchDeg/temp copies steer IDO's FP register colouring
+    angle = pitchDeg;
     temp = angle;
-    cpy = temp;
-    temp = temp * 0.01745329238f;
-    sp0[0] = temp;
-    func_1505A184(phi_t0, 2000.0f, cpy, &arg1->unk0, &arg1->unk8, &arg1->unk4);
-    if (arg2 != NULL) {
-        arg2->unk4 = cosf(sp0[0]) * 1000.0f;
-        sp8[0] = sinf(sp0[0]) * 1000.0f;
-        sp4[0] = phi_t0 * 9.587380191e-05f;
-        arg2->unk0 = sp8[0] * cosf(sp4[0]);
-        arg2->unk8 = -sp8[0] * sinf(sp4[0]);
-        if (arg3 != NULL) {
-            spC = sp0[0] + arg4;
-            arg3->unk4 = cosf(spC) * 1000.0f;
-            sp8[0] = sinf(spC) * 1000.0f;
-            arg3->unk0 = sp8[0] * cosf(sp4[0]);
-            arg3->unk8 = -sp8[0] * sinf(sp4[0]);
+    pitchDeg = temp;
+    temp = temp * 0.01745329238f; /* degrees to radians */
+    pitchRad[0] = temp;
+    func_1505A184(yaw, 2000.0f, pitchDeg, &target->unk0, &target->unk8, &target->unk4);
+    if (dir != NULL) {
+        dir->unk4 = cosf(pitchRad[0]) * 1000.0f;
+        horizontal[0] = sinf(pitchRad[0]) * 1000.0f;
+        yawRad[0] = yaw * 9.587380191e-05f; /* 2 pi / 65536 */
+        dir->unk0 = horizontal[0] * cosf(yawRad[0]);
+        dir->unk8 = -horizontal[0] * sinf(yawRad[0]);
+        if (offsetDir != NULL) {
+            offsetPitchRad = pitchRad[0] + pitchOffset;
+            offsetDir->unk4 = cosf(offsetPitchRad) * 1000.0f;
+            horizontal[0] = sinf(offsetPitchRad) * 1000.0f;
+            offsetDir->unk0 = horizontal[0] * cosf(yawRad[0]);
+            offsetDir->unk8 = -horizontal[0] * sinf(yawRad[0]);
         }
     }
 }
-// NON-MATCHING: 90% there
-// void func_15145740(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4) {
-//     struct194 tmp;
-//     f32 temp_f6;
-//     s16 phi_v1;
-//     s16 phi_t0;
-//
-//     if ((arg0->unk4 == 0x96) && ((arg0->unk31C->unk7D != 0))) {
-//         phi_t0 = arg0->unk7A + arg0->unk31C->unk80;
-//     } else {
-//         if (arg0->unk31C != 0) {
-//             phi_t0 = arg0->unk7A - arg0->unk31C->unk12;
-//         } else {
-//             phi_t0 = arg0->unk7A;
-//         }
-//     }
-//     if ((arg0->unk4 == 0x96) && (arg0->unk31C->unk7D != 0)) {
-//         phi_v1 = arg0->unk31C->unk82 + 1024;
-//     } else {
-//         phi_v1 = arg0->unk1D1 * 200;
-//     }
-//     tmp.unk14 = phi_t0;
-//     tmp.unk10 = phi_v1 * 0.005493164f;
-//     tmp.unk0 = tmp.unk10 * D_800A56B4;
-//     func_1505A184(phi_t0, 2000.0f, tmp.unk10, &arg1->unk0, &arg1->unk8, &arg1->unk4);
-//     if (arg2 != 0) {
-//         arg2->unk4 = cosf(tmp.unk0) * 1000.0f;
-//         temp_f6 = sinf(tmp.unk0) * 1000.0f;
-//         tmp.unk8 = temp_f6;
-//         tmp.unk4 = phi_t0 * D_800A56B8;
-//         arg2->unk0 = cosf(tmp.unk4) * tmp.unk8;
-//         arg2->unk8 = sinf(tmp.unk4) * -temp_f6;
-//         if (arg3 != 0) {
-//             tmp.unkC = tmp.unk0 + arg4;
-//             arg3->unk4 = cosf(tmp.unkC) * 1000.0f;
-//             tmp.unk8 = sinf(tmp.unkC) * 1000.0f;
-//             arg3->unk0 = cosf(tmp.unk4) * tmp.unk8;
-//             arg3->unk8 = sinf(tmp.unk4) * -tmp.unk8;
-//         }
-//     }
-// }
 
-void func_15145974(struct17 *arg0, f32 *arg1, f32 *arg2) {
-    *arg1 = func_150484A0(arg0->unk0, arg0->unk8) * D_800A56BC;
-    if (arg2 != NULL) {
-        *arg2 = (func_150484A0(sqrtf(arg0->unk0 * arg0->unk0 + arg0->unk8 * arg0->unk8), arg0->unk4) * D_800A56C0) - 90.0f;
+/* Heading (and optionally elevation, from -90) in degrees of a vector; func_150484A0 is atan2. */
+void func_15145974(struct17 *v, f32 *heading, f32 *elevation) {
+    *heading = func_150484A0(v->unk0, v->unk8) * 57.29577637f;
+    if (elevation != NULL) {
+        *elevation = (func_150484A0(sqrtf(v->unk0 * v->unk0 + v->unk8 * v->unk8), v->unk4) * 57.29577637f) - 90.0f;
     }
 }
 
-f32 func_15145A0C(f32 arg0, f32 arg1, f32 arg2) {
-    return D_800A548C[(s32)(arg0 * arg2 * 100.0f)] * arg1;
+f32 func_15145A0C(f32 arg0, f32 scale, f32 arg2) {
+    return D_800A548C[(s32)(arg0 * arg2 * 100.0f)] * scale;
 }
 
-
-void func_15145A50(struct127 *arg0) {
-    arg0->unk5 = 3;
+void func_15145A50(struct127 *actor) {
+    actor->unk5 = 3;
     if (D_800BE9F0 != 51) {
-        if ((D_800BE616 != 0) || (arg0->interaction_state == 5) || (arg0->interaction_state == 1) || (arg0->interaction_state == 21)) {
-            arg0->interaction_state = 5;
-            if (arg0->unk31C != NULL) {
-                arg0->unk31C->unk78 = 0;
+        if ((D_800BE616 != 0) || (actor->interaction_state == 5) || (actor->interaction_state == 1) ||
+            (actor->interaction_state == 21)) {
+            actor->interaction_state = 5;
+            if (actor->unk31C != NULL) {
+                actor->unk31C->unk78 = 0;
             }
         } else {
-            func_15053694(arg0);
+            func_15053694(actor);
         }
     }
 }
 
 void func_1515C1A0(void *, struct17 *, f32 *, f32 *);
 
-s32 func_15145AD8(struct17 *arg0, struct17 *arg1, struct127 *arg2, struct17 *arg3, struct17 *arg4, f32 *arg5, f32 *arg6, struct17 *arg7) {
-    struct17 sp7C;
-    f32 sp78;
-    f32 sp74;
-    struct17 sp68;
-    struct17 sp5C;
-    struct17 sp50;
+/*
+ * Ray (start, dir) against the actor's collision ellipsoid (centre/radius from func_1515C1A0, y squashed
+ * by unkDC); writes the near and far hits, unsquashed by unkE0. Returns 0 on a miss.
+ */
+s32 func_15145AD8(struct17 *start, struct17 *dir, struct127 *actor, struct17 *hitNear, struct17 *hitFar,
+                  f32 *radius, f32 *arg6, struct17 *center) {
+    struct17 centerBuf;
+    f32 radiusBuf;
+    f32 arg6Buf;
+    struct17 s;
+    struct17 d;
+    struct17 c;
 
-    if (arg5 != NULL) {
-        arg5 = &sp78;
+    /* sic: the fallbacks replace the caller's pointers when they are given */
+    if (radius != NULL) {
+        radius = &radiusBuf;
     }
     if (arg6 != NULL) {
-        arg6 = &sp74;
+        arg6 = &arg6Buf;
     }
-    if (arg7 != NULL) {
-        arg7 = &sp7C;
+    if (center != NULL) {
+        center = &centerBuf;
     }
-    func_1515C1A0(arg2, arg7, arg5, arg6);
+    func_1515C1A0(actor, center, radius, arg6);
     if (*arg6 == 0.0f) {
         return 0;
     }
-    if (*arg5 == 0.0f) {
+    if (*radius == 0.0f) {
         return 0;
     }
     {
-    f32 sp4C;
-    f32 sp48;
-    f32 sp44;
-    f32 sp40;
-    f32 sp3C;
-    sp40 = arg2->unkDC;
-    sp3C = arg2->unkE0;
-    sp68.unk0 = arg0->unk0;
-    sp68.unk4 = arg0->unk4 * sp40;
-    sp68.unk8 = arg0->unk8;
-    sp5C.unk0 = arg1->unk0;
-    sp5C.unk4 = arg1->unk4 * sp40;
-    sp5C.unk8 = arg1->unk8;
+    f32 length;
+    f32 tNear;
+    f32 tFar;
+    f32 squash;
+    f32 unsquash;
+    squash = actor->unkDC;
+    unsquash = actor->unkE0;
+    s.unk0 = start->unk0;
+    s.unk4 = start->unk4 * squash;
+    s.unk8 = start->unk8;
+    d.unk0 = dir->unk0;
+    d.unk4 = dir->unk4 * squash;
+    d.unk8 = dir->unk8;
     {
-    f32 sp38;
-    if (func_15145128(&sp5C, &sp5C, &sp4C, &sp38) == 0) {
+    f32 invLength;
+    if (func_15145128(&d, &d, &length, &invLength) == 0) {
         return 0;
     }
-    sp50.unk0 = arg7->unk0;
-    sp50.unk4 = arg7->unk4 * sp40;
-    sp50.unk8 = arg7->unk8;
-    if (func_151451F0(&sp68, &sp5C, &sp50, *arg5, sp4C, arg3, arg4, &sp48, &sp44) == 0) {
+    c.unk0 = center->unk0;
+    c.unk4 = center->unk4 * squash;
+    c.unk8 = center->unk8;
+    if (func_151451F0(&s, &d, &c, *radius, length, hitNear, hitFar, &tNear, &tFar) == 0) {
         return 0;
     }
-    arg3->unk4 *= sp3C;
-    arg4->unk4 *= sp3C;
+    hitNear->unk4 *= unsquash;
+    hitFar->unk4 *= unsquash;
     }
     }
     return 1;
