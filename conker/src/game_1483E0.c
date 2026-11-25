@@ -18,33 +18,26 @@ extern void func_15173C60(s32, s32);
 extern void func_15060A30(s32, void *);
 extern void func_1511A494(void *, s32 *, s32 *);
 
-struct F7Cw {
-    u8 p0[0x17];
-    u8 unk17;
-    u8 p18[0xF];
-    u8 unk27;
-    u8 p28[0x43];
-    u8 unk6B;
-    s16 unk6C;
-    s16 unk6E;
-    s16 unk70;
+/* Per-character trap state that func_1511BEBC drives while a character is caught. */
+struct CharacterTrap {
+    u8 pad0[0x6B];
+    u8 state;
+    s16 x;
+    s16 y;
+    s16 z;
 };
 
-struct F7Tg {
-    s32 p0;
-    u8 p4[0x10];
+/* The 0x32C-byte character object (struct127) as func_1511BEBC sees it. */
+struct TrapCharacter {
+    u8 pad0[0x14];
     f32 x;
     f32 y;
     f32 z;
-    u8 p20[0x45];
-    u8 unk65;
-    u8 p66[0x80];
-    s16 unkE6;
-    u8 pE8[0x1C];
-    u8 unk104;
-    u8 p105[0x216];
-    struct F7Cw *w;
-    u8 p320[0xC];
+    u8 pad20[0xC6];
+    s16 height;
+    u8 padE8[0x234];
+    struct CharacterTrap *trap;
+    u8 pad320[0xC];
 };
 
 extern f32 D_800A3210;
@@ -554,34 +547,36 @@ void func_1511BE5C(struct Obj1511BE5C *obj) {
 
 struct Obj1511BEBC {
     u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
+    s16 x;
+    s16 y;
+    s16 z;
     u8 pad16[0x1E];
-    f32 unk34;
+    f32 scale;
     u8 pad38[0x3B];
-    u8 unk73;
+    u8 flags;
     u8 pad74[0x8];
-    s32 unk7C;
-    s32 unk80;
-    f32 unk84;
+    s32 restAndTimer; /* low 16 bits: rest height, high 16 bits: timer */
+    s32 triggered;
+    f32 velocity;
 };
 
-struct Pl1511BEBC {
+/* The 0x9A0-byte player (struct108) as func_1511BEBC sees it. */
+struct TrapPlayer {
     u8 pad0[0x3D0];
-    struct F7Tg *unk3D0;
-    struct F7Cw *unk3D4;
+    struct TrapCharacter *character;
+    struct CharacterTrap *trap;
     u8 pad3D8[0x9A0 - 0x3D8];
 };
 
 extern void func_150DDED0(void *);
 
-void func_1511BEBC(struct Obj1511BEBC *o) {
+/* After a delay, lowers onto a player found beneath it and holds them at its position; rises back to rest otherwise. */
+void func_1511BEBC(struct Obj1511BEBC *obj) {
     f32 pos[3];
-    s16 limit;
-    struct F7Tg *target;
-    struct F7Tg *p;
-    struct Pl1511BEBC *e;
+    s16 restY;
+    struct TrapCharacter *target;
+    struct TrapCharacter *character;
+    struct TrapPlayer *player;
     s32 i;
     s32 mode;
     s32 flag8;
@@ -589,87 +584,86 @@ void func_1511BEBC(struct Obj1511BEBC *o) {
     f32 dy;
     f32 dz;
     s32 timer;
-    f32 thr;
+    f32 radiusSq;
     s32 flag4;
-    s32 t1;
-    f32 f84;
-    struct F7Cw *w;
+    s32 triggered;
+    f32 velocity;
+    struct CharacterTrap *trap;
     f32 dist;
-    void (*cb)(void *);
+    void (*onTrigger)(void *);
 
-    cb = func_150DDED0;
-    func_1511BE5C((struct Obj1511BE5C *)o);
-    mode = o->unk73 & 3;
-    flag4 = o->unk73 & 4;
-    flag8 = o->unk73 & 8;
-    t1 = o->unk80;
-    f84 = o->unk84;
+    onTrigger = func_150DDED0;
+    func_1511BE5C((struct Obj1511BE5C *)obj);
+    mode = obj->flags & 3;
+    flag4 = obj->flags & 4;
+    flag8 = obj->flags & 8;
+    triggered = obj->triggered;
+    velocity = obj->velocity;
     if (D_800BE9F0 == 10) {
-        thr = (o->unk34 * 100.0f) * (o->unk34 * 100.0f);
-        if (o->unk7C == 0) {
-            if (o->unk12 == 0) {
-                o->unk12 = 1;
+        radiusSq = (obj->scale * 100.0f) * (obj->scale * 100.0f);
+        if (obj->restAndTimer == 0) {
+            if (obj->y == 0) {
+                obj->y = 1;
             }
-            o->unk7C = (u16)o->unk12;
-            limit = o->unk12;
+            obj->restAndTimer = (u16)obj->y;
+            restY = obj->y;
             if (mode == 3) {
-                o->unk12 = limit;
+                obj->y = restY;
             }
         }
-        limit = (s16)(o->unk7C & 0xFFFF);
-        timer = o->unk7C >> 16;
-        target = 0;
-        pos[0] = o->unk10;
-        pos[1] = o->unk12 + -729.0f;
-        pos[2] = o->unk14;
+        restY = (s16)(obj->restAndTimer & 0xFFFF);
+        timer = obj->restAndTimer >> 16;
+        target = NULL;
+        pos[0] = obj->x;
+        pos[1] = obj->y + -729.0f;
+        pos[2] = obj->z;
         if (mode != 3 && mode != 1) {
             for (i = 0; i < D_8008FD8C; i++) {
-                e = &((struct Pl1511BEBC *)D_800DBFF0)[i];
-                if (e->unk3D4->unk6B >= 4) {
+                player = &((struct TrapPlayer *)D_800DBFF0)[i];
+                if (player->trap->state >= 4) {
                     continue;
                 }
-                p = e->unk3D0;
-                if (p->y + 40.0f < pos[1]) {
-                    dy = (p->y + (f32)p->unkE6) - pos[1];
-                    dz = p->z - pos[2];
-                    dx = p->x - pos[0];
+                character = player->character;
+                if (character->y + 40.0f < pos[1]) {
+                    dy = (character->y + (f32)character->height) - pos[1];
+                    dz = character->z - pos[2];
+                    dx = character->x - pos[0];
                     dist = dz * dz + (dx * dx + dy * dy);
-                    if (dist != dist) {
-                    }
-                    if (dist < thr) {
-                        target = p;
+                    if (dist != dist) {} // matching: no-op NaN self-test steers IDO's FP scheduling
+                    if (dist < radiusSq) {
+                        target = character;
                         break;
                     }
                 }
             }
         }
-        if (target == 0 && (mode == 2 || mode == 1)) {
+        if (target == NULL && (mode == 2 || mode == 1)) {
             for (i = 0; i < D_8008FD8C; i++) {
-                p = &((struct F7Tg *)D_800CC2D0)[i];
-                if (p->w->unk6B != 0) {
-                    target = p;
+                character = &((struct TrapCharacter *)D_800CC2D0)[i];
+                if (character->trap->state != 0) {
+                    target = character;
                     break;
                 }
             }
         }
-        if (target != 0 || mode == 2) {
-            if (target != 0 && t1 == 0) {
+        if (target != NULL || mode == 2) {
+            if (target != NULL && triggered == 0) {
                 func_15060A30(0x16B, target);
             }
             if (flag4 == 0) {
                 mode = 2;
-                if (t1 == 0) {
+                if (triggered == 0) {
                     timer = 0x32;
-                    t1++;
-                    if (cb != 0) {
-                        cb(o);
+                    triggered++;
+                    if (onTrigger != NULL) {
+                        onTrigger(obj);
                     }
                 }
-                if (target != 0) {
+                if (target != NULL) {
                     if (timer != 0) {
-                        target->w->unk6B = 1;
+                        target->trap->state = 1;
                     } else {
-                        target->w->unk6B = 2;
+                        target->trap->state = 2;
                     }
                 }
                 if (timer != 0) {
@@ -677,38 +671,38 @@ void func_1511BEBC(struct Obj1511BEBC *o) {
                         timer -= D_800BE9E4;
                     } else {
                         timer = 0;
-                        func_10010F88(0x1A4, 0x7FFF, 0, 0, 0, o->unk10, o->unk12, o->unk14, 0x5DC, 0xDAC);
+                        func_10010F88(0x1A4, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 0x5DC, 0xDAC);
                     }
                 } else {
-                    f84 += 1.0f;
-                    o->unk12 = o->unk12 - f84;
-                    if (o->unk12 <= limit - 300.0f) {
-                        o->unk12 = limit - 300.0f;
+                    velocity += 1.0f;
+                    obj->y = obj->y - velocity;
+                    if (obj->y <= restY - 300.0f) {
+                        obj->y = restY - 300.0f;
                         mode = 3;
-                        t1 = 0;
-                        f84 = 0.0f;
-                        if (target != 0) {
-                            target->w->unk6B = 0;
+                        triggered = 0;
+                        velocity = 0.0f;
+                        if (target != NULL) {
+                            target->trap->state = 0;
                         }
-                        func_10010F88(0x1A5, 0x7FFF, 0, 0, 0, o->unk10, o->unk12, o->unk14, 0x5DC, 0xDAC);
+                        func_10010F88(0x1A5, 0x7FFF, 0, 0, 0, obj->x, obj->y, obj->z, 0x5DC, 0xDAC);
                     }
                 }
-                if (target != 0) {
-                    target->w->unk6C = pos[0];
-                    target->w->unk6E = pos[1];
-                    target->w->unk70 = pos[2];
+                if (target != NULL) {
+                    target->trap->x = pos[0];
+                    target->trap->y = pos[1];
+                    target->trap->z = pos[2];
                 }
-            } else if (target != 0) {
-                if (t1 == 0 && target->w->unk6B == 0) {
+            } else if (target != NULL) {
+                if (triggered == 0 && target->trap->state == 0) {
                     timer = 0x32;
-                    t1++;
+                    triggered++;
                 }
-                w = target->w;
+                trap = target->trap;
                 if (timer != 0) {
-                    w->unk6B = 3;
-                } else if (w->unk6B == 3) {
-                    w->unk6B = 4;
-                    t1 = 0;
+                    trap->state = 3;
+                } else if (trap->state == 3) {
+                    trap->state = 4;
+                    triggered = 0;
                 }
                 if (timer != 0) {
                     if (D_800BE9E4 < timer) {
@@ -718,36 +712,36 @@ void func_1511BEBC(struct Obj1511BEBC *o) {
                     }
                 }
             }
-            if (target != 0) {
-                target->w->unk6C = pos[0];
-                target->w->unk6E = pos[1];
-                target->w->unk70 = pos[2];
+            if (target != NULL) {
+                target->trap->x = pos[0];
+                target->trap->y = pos[1];
+                target->trap->z = pos[2];
             }
         } else if (flag8 == 0 || mode == 1) {
-            if (o->unk12 < limit) {
-                if (t1 == 0) {
-                    t1++;
+            if (obj->y < restY) {
+                if (triggered == 0) {
+                    triggered++;
                 }
                 mode = 1;
-                f84 += 1.299999952f;
-                o->unk12 = o->unk12 + f84;
-                if (o->unk12 >= limit) {
-                    o->unk12 = limit;
-                    t1 = 0;
+                velocity += 1.299999952f;
+                obj->y = obj->y + velocity;
+                if (obj->y >= restY) {
+                    obj->y = restY;
+                    triggered = 0;
                     mode = 0;
-                    f84 = 0.0f;
+                    velocity = 0.0f;
                 }
             }
-            if (target != 0) {
-                target->w->unk6B = 0;
+            if (target != NULL) {
+                target->trap->state = 0;
             }
         }
-        o->unk80 = t1;
-        o->unk73 &= ~3;
-        o->unk73 |= mode;
-        o->unk7C &= 0xFFFF;
-        o->unk7C |= timer << 16;
-        o->unk84 = f84;
+        obj->triggered = triggered;
+        obj->flags &= ~3;
+        obj->flags |= mode;
+        obj->restAndTimer &= 0xFFFF;
+        obj->restAndTimer |= timer << 16;
+        obj->velocity = velocity;
     }
 }
 
