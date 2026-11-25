@@ -2230,7 +2230,11 @@ void func_15145EA4(f32 **offsets, f32 **results, Mtx *mtx, s32 count) {
         }
     }
 }
-s32 func_15146078(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
+/*
+ * Builds two unit vectors u, v perpendicular to n (axis-aligned when n lies along an axis).
+ * Returns 0 for a zero n.
+ */
+s32 func_15146078(struct17 *n, struct17 *u, struct17 *v) {
     u8 count;
     u8 axis;
     u8 zeroAxis;
@@ -2240,55 +2244,56 @@ s32 func_15146078(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
     f32 len;
     f32 invLen;
 
-    if ((arg0->unk0 == 0.0f) && (arg0->unk4 == 0.0f) && (arg0->unk8 == 0.0f)) {
+    if ((n->unk0 == 0.0f) && (n->unk4 == 0.0f) && (n->unk8 == 0.0f)) {
         return 0;
     }
 
     count = 0;
-    if (arg0->unk0 == 0.0f) {
+    if (n->unk0 == 0.0f) {
         count++;
         zeroAxis = 0;
     } else {
         axis = 0;
     }
-    if (arg0->unk4 == 0.0f) {
+    if (n->unk4 == 0.0f) {
         count++;
         zeroAxis = 1;
     } else {
         axis = 1;
     }
-    if (arg0->unk8 == 0.0f) {
+    if (n->unk8 == 0.0f) {
         count++;
         zeroAxis = 2;
     } else {
         axis = 2;
     }
 
+    // matching: double literals (0.0 / 1.0) here; f32 ones change IDO's FP register choice
     if (count == 2) {
         switch (axis) {
         case 0:
-            arg1->unk0 = 0.0;
-            arg1->unk4 = 1.0;
-            arg1->unk8 = 0.0;
-            arg2->unk0 = 0.0;
-            arg2->unk4 = 0.0;
-            arg2->unk8 = 1.0;
+            u->unk0 = 0.0;
+            u->unk4 = 1.0;
+            u->unk8 = 0.0;
+            v->unk0 = 0.0;
+            v->unk4 = 0.0;
+            v->unk8 = 1.0;
             break;
         case 1:
-            arg1->unk0 = 1.0;
-            arg1->unk4 = 0.0;
-            arg1->unk8 = 0.0;
-            arg2->unk0 = 0.0;
-            arg2->unk4 = 0.0;
-            arg2->unk8 = 1.0;
+            u->unk0 = 1.0;
+            u->unk4 = 0.0;
+            u->unk8 = 0.0;
+            v->unk0 = 0.0;
+            v->unk4 = 0.0;
+            v->unk8 = 1.0;
             break;
         case 2:
-            arg1->unk0 = 1.0;
-            arg1->unk4 = 0.0;
-            arg1->unk8 = 0.0;
-            arg2->unk0 = 0.0;
-            arg2->unk4 = 1.0;
-            arg2->unk8 = 0.0;
+            u->unk0 = 1.0;
+            u->unk4 = 0.0;
+            u->unk8 = 0.0;
+            v->unk0 = 0.0;
+            v->unk4 = 1.0;
+            v->unk8 = 0.0;
             break;
         }
         return 1;
@@ -2301,13 +2306,13 @@ s32 func_15146078(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
         j = 2;
         k = 1;
     }
-    ((f32 *)arg1)[i] = 1.0;
-    ((f32 *)arg1)[j] = 1.0;
-    ((f32 *)arg1)[k] = -((f32 *)arg0)[i] - (((f32 *)arg0)[j] / ((f32 *)arg0)[k]);
-    func_151450B4(arg1, arg0, arg2);
-    func_151450B4(arg2, arg0, arg1);
-    func_15145128(arg1, arg1, &len, &invLen);
-    func_15145128(arg2, arg2, &len, &invLen);
+    ((f32 *)u)[i] = 1.0;
+    ((f32 *)u)[j] = 1.0;
+    ((f32 *)u)[k] = -((f32 *)n)[i] - (((f32 *)n)[j] / ((f32 *)n)[k]);
+    func_151450B4(u, n, v);
+    func_151450B4(v, n, u);
+    func_15145128(u, u, &len, &invLen);
+    func_15145128(v, v, &len, &invLen);
     return 1;
 }
 extern u8 D_800BE9C0;
@@ -2340,10 +2345,10 @@ void *func_151462C8(void *arg0, s32 *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg
 
 extern s32 D_80082FA0;
 
-u8 func_151464B8(s16 *arg0) {
+/* Whether none of the players' bits (0 .. D_80082FA0) are set in flags[1]. */
+u8 func_151464B8(s16 *flags) {
     s32 i;
     s16 mask;
-    s16 field;
     s32 ret;
 
     i = 0;
@@ -2351,19 +2356,19 @@ u8 func_151464B8(s16 *arg0) {
     for (; i <= D_80082FA0; i++) {
         mask |= 1 << i;
     }
-    ret = (arg0[1] & mask) == 0;
-    field = arg0[1];
+    ret = (flags[1] & mask) == 0;
     return ret;
 }
 
-void func_15146508(struct127 *arg0, struct127 *arg1) {
-    struct193 tmp;
+/* Broadcasts message 45 (see func_151419D0) linking actors a and b. */
+void func_15146508(struct127 *a, struct127 *b) {
+    struct193 msg;
 
-    tmp.unk0 = arg0;
-    tmp.unk4 = arg1;
-    tmp.unk8 = arg0->unique_id;
-    tmp.unk9 = arg1->unique_id;
-    func_15169040(&tmp, 45, arg0, arg1);
+    msg.unk0 = a;
+    msg.unk4 = b;
+    msg.unk8 = a->unique_id;
+    msg.unk9 = b->unique_id;
+    func_15169040(&msg, 45, a, b);
 }
 
 typedef struct {
@@ -2435,35 +2440,31 @@ s32 func_1514654C(struct127 *arg0, Func1514654C_Arg1 *arg1, s32 arg2, f32 **arg3
     return 1;
 }
 
-s32 func_1514672C(struct17 *arg0) {
-    f32 temp_f2;
-    f32 temp_f0;
+/* Whether a position lies inside the world bounds (|x|, |z| <= 19500 and -9500 <= y <= 19500). */
+s32 func_1514672C(struct17 *pos) {
+    f32 limit;
+    f32 y;
 
-    temp_f2 = D_800A56C4;
-block_1514672C:
-    if ((temp_f2 < fabsf(arg0->unk0)) || (temp_f2 < fabsf(arg0->unk8)) || (temp_f0 = arg0->unk4, (temp_f2 < temp_f0)) || (temp_f0 < D_800A56C8)) {
+    limit = 19500.0f;
+    if ((limit < fabsf(pos->unk0)) || (limit < fabsf(pos->unk8)) || (y = pos->unk4, (limit < y)) || (y < -9500.0f)) {
         return 0;
     }
     return 1;
 }
-// NON-MATCHING: JUSTREG: first 3 statements are out of order
-// s32 func_1514672C(struct17 *arg0) {
-//     if ((D_800A56C4 < fabsf(arg0->unk0)) || (D_800A56C4 < fabsf(arg0->unk8)) || (D_800A56C4 < arg0->unk4) || (arg0->unk4 < D_800A56C8)) {
-//         return 0;
-//     } else {
-//         return 1;
-//     }
-// }
 
-void func_151467A4(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 *arg7) {
-    *arg0 = *arg0 - D_800BE9A4;
-    if (*arg0 < 0.0f) {
-        *arg0 = func_150ADA68() * arg1;
+/*
+ * Random drift: when the timer runs out it restarts at a random time below maxTime and picks a new
+ * target in [lo, mid) (3 in 4) or [mid, hi); value then eases towards the target by rate.
+ */
+void func_151467A4(f32 *timer, f32 maxTime, f32 *target, f32 lo, f32 mid, f32 hi, f32 rate, f32 *value) {
+    *timer = *timer - D_800BE9A4;
+    if (*timer < 0.0f) {
+        *timer = func_150ADA68() * maxTime;
         if ((func_150ADA20() & 3) != 0) {
-            *arg2 = (func_150ADA68() * (arg4 - arg3)) + arg3;
+            *target = (func_150ADA68() * (mid - lo)) + lo;
         } else {
-            *arg2 = (func_150ADA68() * (arg5 - arg4)) + arg4;
+            *target = (func_150ADA68() * (hi - mid)) + mid;
         }
     }
-    *arg7 = ((*arg2 - *arg7) * arg6) + *arg7;
+    *value = ((*target - *value) * rate) + *value;
 }
