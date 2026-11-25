@@ -84,6 +84,7 @@ void func_1507E2B0(ExpressionActor *actor) {
         if (actor->eyeClosed[1] >= 3) {
             actor->eyeClosed[1] = 0;
         }
+        // matching: the dead `== 1U` makes IDO load the constant 1 (later stored) in this block
         if ((actor->blinkTimer >= D_800BE9E4) | (0 * (actor->blinkTimer == 1U))) {
             actor->blinkTimer -= D_800BE9E4;
             return;
@@ -101,7 +102,7 @@ void func_1507E2B0(ExpressionActor *actor) {
     }
 }
 
-/* Lady Cog models (0xF, 0x46, 0x4C): shows one eye part per eye from the eye codes. */
+/* Models 0xF, 0x46 and 0x4C (Lady Cog per the other decomp): shows one eye part per eye. */
 void func_1507E3C0(ExpressionActor *actor) {
     s32 i;
     s32 eyePart[2];
@@ -239,10 +240,8 @@ void func_1507E73C(ExpressionActor *actor) {
         if (func_1507E6B8(actor)) {
             func_1507E2B0(actor);
         }
-        if (actor->expressionTimer == 0) {
-            if (actor->expression != actor->defaultExpression) {
-                func_1507EABC(actor);
-            }
+        if ((actor->expressionTimer == 0) && (actor->expression != actor->defaultExpression)) {
+            func_1507EABC(actor);
         }
     }
 }
@@ -256,25 +255,23 @@ void func_1507E7E4(ExpressionActor *actor, u8 index, u8 priority, u16 timer, s32
     ExpressionRecord *previous;
     u8 *actions;
 
-    if ((index != actor->expression) || (priority != actor->expressionPriority) ||
-        (timer != actor->expressionTimer)) {
-        if ((priority == 3) || (actor->expression == actor->defaultExpression) ||
-            (actor->expression == index) || (actor->expressionTimer == 0) ||
-            (actor->expressionPriority < priority)) {
-            if (index < func_1507E968(actor)) {
-                previous = func_1507E908(actor, actor->expression);
-                if (previous->action != 0) {
-                    actions = func_1507E9F8(actor, NULL);
-                    if (actions != NULL) {
-                        func_150302F0(actor, actions[previous->action - 1]);
-                    }
-                }
-                actor->expression = index;
-                actor->expressionTimer = timer;
-                actor->expressionPriority = priority;
-                func_1507E5C8(actor, morphDuration);
+    if (((index != actor->expression) || (priority != actor->expressionPriority) ||
+         (timer != actor->expressionTimer)) &&
+        ((priority == 3) || (actor->expression == actor->defaultExpression) ||
+         (actor->expression == index) || (actor->expressionTimer == 0) ||
+         (actor->expressionPriority < priority)) &&
+        (index < func_1507E968(actor))) {
+        previous = func_1507E908(actor, actor->expression);
+        if (previous->action != 0) {
+            actions = func_1507E9F8(actor, NULL);
+            if (actions != NULL) {
+                func_150302F0(actor, actions[previous->action - 1]);
             }
         }
+        actor->expression = index;
+        actor->expressionTimer = timer;
+        actor->expressionPriority = priority;
+        func_1507E5C8(actor, morphDuration);
     }
 }
 
@@ -313,7 +310,8 @@ s32 func_1507E968(ExpressionActor *actor) {
     return 0;
 }
 
-void func_1507E9E8(s32 arg0, s32 arg1) {
+/* Empty stub. */
+void func_1507E9E8(ExpressionActor *actor, s32 index) {
 }
 
 /* Returns the table of expression action ids (only model 0 has one) and its length. */
