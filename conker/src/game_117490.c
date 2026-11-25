@@ -220,73 +220,60 @@ void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA1
     }
 }
 
-typedef struct Game117940Phase {
-    u32 phase_80;
-    s32 phase_step_84;
-    f32 base_88;
-    f32 amplitude_8C;
-} Game117940Phase;
+/* Returns the oscillator's current value and advances its phase by this frame's step. */
+f32 func_150EA490(OscillatorObject *obj) {
+    Oscillator *oscillator = &obj->oscillator;
+    f32 value;
 
-typedef struct Game117940State {
-    u8 pad0[0x80];
-    Game117940Phase phase;
-} Game117940State;
-
-f32 func_150EA490(Game117940State *arg0) {
-    Game117940Phase *phase = &arg0->phase;
-    f32 result;
-
-    result = (func_151423D8((phase->phase_80 >> 16) - 0x40) * phase->amplitude_8C) + phase->base_88;
-    phase->phase_80 += (u32)phase->phase_step_84 * (u32)D_800BE9E4;
-    return result;
+    value = func_151423D8((oscillator->phase >> 16) - 0x40) * oscillator->amplitude + oscillator->base;
+    oscillator->phase += oscillator->phaseStep * D_800BE9E4;
+    return value;
 }
 
+/* Descriptor passed to func_1513418C (same layout as game_10CD70.c's BloodDripDesc). */
 typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u8  ownerActorId;
+    /* 0x00 */ s32 target[2];
+    /* 0x08 */ u8  ownerId;
     /* 0x09 */ u8  pad9[0x3];
-    /* 0x0C */ void *ownerActor;
-    /* 0x10 */ u8  ownerTransformIndex;
+    /* 0x0C */ struct127 *owner;
+    /* 0x10 */ u8  bone;
     /* 0x11 */ u8  pad11[0x3];
-    /* 0x14 */ f32 localOffsetX;
-    /* 0x18 */ f32 localOffsetY;
-    /* 0x1C */ f32 localOffsetZ;
-    /* 0x20 */ f32 spawnRadius;
-    /* 0x24 */ f32 spawnRate;
+    /* 0x14 */ Vec3f offset;
+    /* 0x20 */ f32 radius;
+    /* 0x24 */ f32 rate;
     /* 0x28 */ s16 lifetime;
     /* 0x2A */ u8  flags;
-    /* 0x2B */ u8  spawnCallbackIndex;
-    /* 0x2C */ s8  aliveCheckIndex;
-    /* 0x2D */ u8  behaviorIndex;
-} struct_EA500;
+    /* 0x2B */ u8  emitter;
+    /* 0x2C */ s8  callback;
+    /* 0x2D */ u8  unk2D;
+} EmitterDesc;
 
-extern f32 D_800A1438;
-void *func_1513418C(struct_EA500 *, s32, u8, s32);
+void *func_1513418C(EmitterDesc *, s32, u8, s32);
 
-void *func_150EA500(void *arg0, s16 arg1, s32 arg2, s32 arg3) {
-    struct_EA500 sp20;
+/* Attaches an emitter to bone 1 of `owner` for `lifetime` frames (-1: 300 frames). */
+void *func_150EA500(struct127 *owner, s16 lifetime, s32 arg2, s32 arg3) {
+    EmitterDesc desc;
 
-    sp20.unk0 = 0;
-    sp20.unk4 = 0;
-    sp20.ownerActorId = *((u8 *)arg0 + 0x3B);
-    sp20.ownerActor = arg0;
-    sp20.ownerTransformIndex = 1;
-    sp20.localOffsetX = 0.0f;
-    sp20.localOffsetY = 0.0f;
-    sp20.localOffsetZ = 0.0f;
-    sp20.spawnRadius = 25.0f;
-    sp20.spawnRate = D_800A1438;
-    if (arg1 == -1) {
-        sp20.lifetime = 0x12C;
+    desc.target[0] = 0;
+    desc.target[1] = 0;
+    desc.ownerId = owner->unique_id;
+    desc.owner = owner;
+    desc.bone = 1;
+    desc.offset.x = 0.0f;
+    desc.offset.y = 0.0f;
+    desc.offset.z = 0.0f;
+    desc.radius = 25.0f;
+    desc.rate = 0.26497f;
+    if (lifetime == -1) {
+        desc.lifetime = 300;
     } else {
-        sp20.lifetime = arg1;
+        desc.lifetime = lifetime;
     }
-    sp20.flags = ((arg1 == -1) ? 0 : 4) | 0xA;
-    sp20.spawnCallbackIndex = 7;
-    sp20.aliveCheckIndex = -1;
-    sp20.behaviorIndex = 6;
-    return func_1513418C(&sp20, 0, 0xFF, 0);
+    desc.flags = ((lifetime == -1) ? 0 : 4) | 0xA;
+    desc.emitter = 7;
+    desc.callback = -1;
+    desc.unk2D = 6;
+    return func_1513418C(&desc, 0, 0xFF, 0);
 }
 
 /* Spawns a particle at (x, y, z) drifting against the velocity (vx, vy, vz). */
@@ -365,86 +352,86 @@ void func_150EA8E0(s32 arg0) {
     func_150E5AE0();
 }
 
-void func_150EA904(s32 arg0, s32 arg1) {
-    u8 *p;
+/* A D_800DBEF4 entry (struct131) with the fields used here, which include/structs.h leaves unnamed. */
+typedef struct {
+    /* 0x00 */ Vec3f angle; /* degrees, kept in [0, 360) */
+    /* 0x0C */ u8  padC[0x4];
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ u8  pad16[0x26];
+    /* 0x3C */ s32 gravity;
+    /* 0x40 */ u8  pad40[0x1A];
+    /* 0x5A */ s16 velocityX;
+    /* 0x5C */ s16 velocityY;
+    /* 0x5E */ s16 velocityZ;
+    /* 0x60 */ Vec3f angularVelocity;
+    /* 0x6C */ u8  pad6C[0x2];
+    /* 0x6E */ u8  expired;
+    /* 0x6F */ u8  pad6F[0x3];
+    /* 0x72 */ u8  unk72;
+    /* 0x73 */ u8  flags;
+    /* 0x74 */ u8  pad74[0x8];
+    /* 0x7C */ s32 yFixed; /* y in 1/8 units */
+    /* 0x80 */ u8  pad80[0xA];
+    /* 0x8A */ u8  timer;
+    /* 0x8B */ u8  pad8B[0x15];
+} struct_EA944; // size 0xA0
 
-    p = (u8 *)D_800DBEF4 + arg1 * sizeof(struct131);
-    if (p[0x72] == 0xE0) {
-        p[0x73] = (p[0x73] & 0xFF) | 3;
+/* Sets flag bits 0 and 1 on D_800DBEF4 entry `index` if its unk72 is 0xE0. */
+void func_150EA904(s32 arg0, s32 index) {
+    struct_EA944 *entry = (struct_EA944 *)D_800DBEF4 + index;
+
+    if (entry->unk72 == 0xE0) {
+        entry->flags = (entry->flags & 0xFF) | 3; // matching: the no-op mask costs IDO one extra temp register
     }
 }
 
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ u8  padC[0x4];
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ u8  pad16[0x26];
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  pad40[0x1A];
-    /* 0x5A */ s16 unk5A;
-    /* 0x5C */ s16 unk5C;
-    /* 0x5E */ s16 unk5E;
-    /* 0x60 */ f32 unk60;
-    /* 0x64 */ f32 unk64;
-    /* 0x68 */ f32 unk68;
-    /* 0x6C */ u8  pad6C[0x2];
-    /* 0x6E */ u8  unk6E;
-    /* 0x6F */ u8  pad6F[0x4];
-    /* 0x73 */ u8  unk73;
-    /* 0x74 */ u8  pad74[0x8];
-    /* 0x7C */ s32 unk7C;
-    /* 0x80 */ u8  pad80[0xA];
-    /* 0x8A */ u8  unk8A;
-} struct_EA944;
+/* While both flag bits are set: spins and moves the entry, applies gravity, and counts its timer down. */
+void func_150EA944(struct_EA944 *entry) {
+    f32 frames;
+    f32 angle;
+    s32 timer;
 
-void func_150EA944(struct_EA944 *arg0) {
-    f32 temp_f0;
-    f32 temp_f2;
-    s32 temp_v0;
+    if ((entry->flags & 3) == 3) {
+        frames = D_800BE9E4;
 
-    if ((arg0->unk73 & 3) == 3) {
-        temp_f0 = (f32)D_800BE9E4;
-
-        arg0->unk0 += arg0->unk60 * temp_f0;
-        temp_f2 = arg0->unk0;
-        if (temp_f2 < 0.0f) {
-            arg0->unk0 = temp_f2 + 360.0f;
-        } else if (temp_f2 >= 360.0f) {
-            arg0->unk0 = temp_f2 - 360.0f;
+        entry->angle.x += entry->angularVelocity.x * frames;
+        angle = entry->angle.x;
+        if (angle < 0.0f) {
+            entry->angle.x = angle + 360.0f;
+        } else if (angle >= 360.0f) {
+            entry->angle.x = angle - 360.0f;
         }
 
-        arg0->unk4 += arg0->unk64 * temp_f0;
-        temp_f2 = arg0->unk4;
-        if (temp_f2 < 0.0f) {
-            arg0->unk4 = temp_f2 + 360.0f;
-        } else if (temp_f2 >= 360.0f) {
-            arg0->unk4 = temp_f2 - 360.0f;
+        entry->angle.y += entry->angularVelocity.y * frames;
+        angle = entry->angle.y;
+        if (angle < 0.0f) {
+            entry->angle.y = angle + 360.0f;
+        } else if (angle >= 360.0f) {
+            entry->angle.y = angle - 360.0f;
         }
 
-        arg0->unk8 += arg0->unk68 * temp_f0;
-        temp_f2 = arg0->unk8;
-        if (temp_f2 < 0.0f) {
-            arg0->unk8 = temp_f2 + 360.0f;
-        } else if (temp_f2 >= 360.0f) {
-            arg0->unk8 = temp_f2 - 360.0f;
+        entry->angle.z += entry->angularVelocity.z * frames;
+        angle = entry->angle.z;
+        if (angle < 0.0f) {
+            entry->angle.z = angle + 360.0f;
+        } else if (angle >= 360.0f) {
+            entry->angle.z = angle - 360.0f;
         }
 
-        temp_v0 = arg0->unk8A;
-        arg0->unk5C = arg0->unk5C - ((u32)arg0->unk3C * D_800BE9E4);
-        arg0->unk10 = arg0->unk10 + ((u32)arg0->unk5A * D_800BE9E4);
-        arg0->unk7C += (u32)arg0->unk5C * D_800BE9E4;
-        arg0->unk12 = arg0->unk7C >> 3;
-        arg0->unk14 = arg0->unk14 + ((u32)arg0->unk5E * D_800BE9E4);
+        timer = entry->timer;
+        entry->velocityY -= entry->gravity * D_800BE9E4;
+        entry->x += entry->velocityX * D_800BE9E4;
+        entry->yFixed += entry->velocityY * D_800BE9E4;
+        entry->y = entry->yFixed >> 3;
+        entry->z += entry->velocityZ * D_800BE9E4;
 
-        temp_v0 -= D_800BE9E4 << 2;
-        if (temp_v0 > 0) {
-            arg0->unk8A = temp_v0;
+        timer -= D_800BE9E4 * 4;
+        if (timer > 0) {
+            entry->timer = timer;
         } else {
-            arg0->unk6E = 1;
+            entry->expired = 1;
         }
     }
 }
