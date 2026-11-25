@@ -47,7 +47,7 @@ def symbol_table():
 
 
 def address_of(name, table):
-    m = re.fullmatch(r"(?:func|D)_([0-9A-Fa-f]{8})", name)
+    m = re.fullmatch(r"(?:func|D)_([0-9A-Fa-f]{1,8})", name)
     if m:
         return int(m.group(1), 16)
     return table.get(name)

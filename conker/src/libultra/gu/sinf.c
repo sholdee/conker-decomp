@@ -52,7 +52,7 @@ f32 sinf(f32 x)
         return -(((y * ysq) * result) + y);
     }
     if (x != x) {
-        return D_8002C920;
+        return __libm_qnan_f;
     }
     return D_80085EBC;
 }

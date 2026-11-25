@@ -130,7 +130,7 @@ s32 func_150034B4(void) {
 }
 
 extern void func_10004074(void *);
-extern u8 D_1A37E0[];
+extern u8 compressed_ROM_START[];
 
 /* Reads each texture's decompressed size from the 4-byte header of its compressed data in ROM. */
 void func_15003570(void) {
@@ -142,7 +142,7 @@ void func_15003570(void) {
     s32 size;
 
     buf = allocate_memory(16, 1, 2, 0);
-    romAddr = (u32)D_1A37E0;
+    romAddr = (u32)compressed_ROM_START;
     for (i = 0; i < NUM_TEXTURES; i++) {
         if (romAddr & 1) {
             romAddr--;

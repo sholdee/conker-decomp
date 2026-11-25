@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_1A37E0[];
+extern u8 compressed_ROM_START[];
 
 
 extern f32 func_150489B0(u8);
@@ -272,7 +272,7 @@ s32 func_1510D374(s32 index) {
     s32 romAddr;
     s32 i;
 
-    romAddr = (s32)D_1A37E0;
+    romAddr = (s32)compressed_ROM_START;
     for (i = 0; i < index; i++) {
         romAddr += D_80091D20[i];
     }

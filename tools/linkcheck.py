@@ -90,6 +90,20 @@ def main():
                 pinned.setdefault(sec, []).append(name)
             else:
                 fixed += 1
+    # 3. ROM layout: the code's fixed ROM offsets must equal where the outer link put the segments
+    #    (the game segment has a reserved size, so this holds unless a reservation overflows)
+    layout = {"game_us_rzip_ROM_START": "game_us_rzip_ROM_START", "debugger_us_ROM_START": "debugger_us_ROM_START",
+              "compressed_ROM_START": "compressed_ROM_START", "ucode_ROM_START": "_2D4B0_ROM_START",
+              "assets_offsets_table_ROM_START": "assets_offsets_table_ROM_START"}
+    outer_map = conker.parent / "build" / "conker.us.map"
+    if outer_map.exists():
+        outer = {m.group(2): int(m.group(1), 16) for m in
+                 re.finditer(r"^\s+0x([0-9a-f]+)\s+(\w+_ROM_START) = __romPos", outer_map.read_text(), re.M)}
+        inner = {n: v for n, v, _ in syms}
+        for code_name, link_name in layout.items():
+            if code_name in inner and link_name in outer and inner[code_name] != outer[link_name]:
+                wrong.append(f"{code_name} is 0x{inner[code_name]:X} but the ROM has {link_name} at 0x{outer[link_name]:X}")
+        print(f"ROM layout constants checked against the outer link: {sum(1 for c, l in layout.items() if c in inner and l in outer)}")
     for w in wrong[:50]:
         print("WRONG ADDRESS:", w)
     total = sum(len(v) for v in pinned.values())

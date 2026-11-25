@@ -17,8 +17,8 @@ typedef struct {
     u32 inst4;
 } __osExceptionVector;
 
-extern s32 func_10026700(u32, u32 *);
-extern s32 func_10026750(u32, u32);
+extern s32 __osSiRawReadIo(u32, u32 *);
+extern s32 __osSiRawWriteIo(u32, u32);
 extern s32 osPiRawReadIo(u32, u32 *);
 extern u32 __osGetSR(void);
 extern void __osSetSR(u32);
@@ -37,9 +37,9 @@ void __osInitialize_common(void) {
     D_800428E0 = 1;
     __osSetSR(__osGetSR() | 0x20000000);
     __osSetFpcCsr(0x01000800);
-    while (func_10026700(0x1FC007FC, &pifdata)) {
+    while (__osSiRawReadIo(0x1FC007FC, &pifdata)) {
     }
-    while (func_10026750(0x1FC007FC, pifdata | 8)) {
+    while (__osSiRawWriteIo(0x1FC007FC, pifdata | 8)) {
     }
     *(__osExceptionVector *)0x80000000 = *(__osExceptionVector *)func_100071D0;
     *(__osExceptionVector *)0x80000080 = *(__osExceptionVector *)func_100071D0;

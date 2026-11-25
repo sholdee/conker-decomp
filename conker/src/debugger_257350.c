@@ -31,10 +31,6 @@ extern u8 D_16003C70[]; // 32 spaces (pad source)
 extern u8 D_16003C94[]; // 32 '0' characters (pad source)
 extern u8 D_16003CB8[]; // "0123456789abcdef"
 extern u8 D_16003CCC[]; // "0123456789ABCDEF"
-extern u8 D_16004800[]; // "hlL": size qualifiers
-extern u8 D_16004804[]; // " +-#0": flag characters
-extern u32 D_1600480C[]; // flag bit for each flag character
-extern double D_16004828[]; // powers of ten: 1e1, 1e2, 1e4, ... 1e256
 
 s32 func_16001BB4(s32 (*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args);
 void func_160021FC(DebuggerPft *px, va_list *pap, u8 code, u8 *ac);
@@ -46,6 +42,12 @@ void func_160033A8(DebuggerPft *px, u8 code);
 #define FLAGS_MINUS 4
 #define FLAGS_HASH 8
 #define FLAGS_ZERO 16
+
+/* This unit's .rodata starts with these, in this order (then the literals of the functions). */
+const u8 D_16004800[] = "hlL";   // size qualifiers
+const u8 D_16004804[] = " +-#0"; // flag characters
+const u32 D_1600480C[] = { FLAGS_SPACE, FLAGS_PLUS, FLAGS_MINUS, FLAGS_HASH, FLAGS_ZERO, 0 }; // bit of each flag character
+const double D_16004828[] = { 1e1, 1e2, 1e4, 1e8, 1e16, 1e32, 1e64, 1e128, 1e256 }; // powers of ten for _Ldtob
 
 /* memcpy: copies count bytes from src to dst and returns dst. */
 u8 *func_16001AD0(u8 *dst, u8 *src, u32 count) {

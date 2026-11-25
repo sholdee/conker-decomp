@@ -27,7 +27,6 @@ typedef struct {
 } Particle;
 
 extern Particle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5);
-extern void D_1500310C(void);
 extern f32 sinf(f32);
 extern void func_15133894(Particle *);
 
@@ -76,7 +75,7 @@ Particle *func_151B5BF0(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rot
 
         sum = 0;
         p = (u32 *)func_15002FB4;
-        end = (u32 *)D_1500310C;
+        end = (u32 *)func_1500310C;
         for (; p < end; p++) {
             sum += *p;
             sum <<= 1;
