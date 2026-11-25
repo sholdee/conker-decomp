@@ -284,10 +284,6 @@ void func_150C2804(f32 *x, f32 *y, f32 *z, s16 delay, s32 arg4, s32 arg5) {
     params.callback = -1;
     func_15134908(&params, 0, arg4, arg5);
 }
-typedef struct {
-    TimedEffect base;
-    DiscEmitter unk28;
-} Struct150C29F0;
 
 void func_150C2898(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C29F0 *emitter) {
     f32 pos[3];

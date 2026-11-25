@@ -16,11 +16,6 @@ typedef struct QuadNode {
     /* 0xC */ s16 child;    // first of four children (0: leaf; its triangle stream follows the node)
 } QuadNode;
 
-// A triangle's vertex positions, passed by value to the box test func_15049260.
-typedef struct Tri3f {
-    Vec3f pts[3];
-} Tri3f;
-
 typedef struct YRange {
     s16 min;
     s16 max;

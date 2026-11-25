@@ -2694,4 +2694,11 @@ typedef struct DiscEmitter {
     /* 0x0C */ f32 y;
 } DiscEmitter; /* size 0x10 */
 
+/* Timed effect with a DiscEmitter as its data: the object of the expire callbacks func_150C29F0 and
+ * func_150C2C00 (game_EFEA0.c) and of func_150C2898 (game_EF410.c). */
+typedef struct Struct150C29F0 {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ DiscEmitter unk28;
+} Struct150C29F0; /* size 0x38 */
+
 #endif

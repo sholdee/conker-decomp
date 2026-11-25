@@ -46,6 +46,12 @@ typedef struct Vec3f {
     /* 0x8 */ f32 z;
 } Vec3f; // size 0xC
 
+/* A triangle's three vertex positions, passed by value to the triangle tests of game_76710.c
+ * (func_15049260, func_15049350). */
+typedef struct Tri3f {
+    /* 0x00 */ Vec3f pts[3];
+} Tri3f; // size 0x24
+
 /* 4x4 float matrix (row-major, the guMtxF2L layout) for bone and camera transforms. */
 typedef f32 MtxF[4][4];
 

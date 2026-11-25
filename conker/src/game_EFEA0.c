@@ -11,10 +11,6 @@ typedef struct {
     /* 0x154 */ u8 pad154[0xC];
     /* 0x160 */ f32 unk160;
 } Particle_EF410;
-typedef struct {
-    TimedEffect base;
-    DiscEmitter unk28;
-} Struct150C29F0;
 
 Particle_EF410 *func_15149550(ParticleEmitterDesc *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
 
