@@ -57,7 +57,7 @@ typedef struct {
 #define gRenderViews ((RenderView *)D_800BE628)
 extern f32 D_800D9D10[][4][4]; // per-view projection matrices
 
-f32 func_15048A40(u8 angle); // sine of a 256-step angle
+f32 func_15048A40(u8 angle); // -1..1 wave over a 256-step angle (used as a sine)
 
 /* Colour fade (func_1517EE40) */
 extern FadeColor D_800DDDA0[]; // colour
