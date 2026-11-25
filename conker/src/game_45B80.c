@@ -78,7 +78,6 @@ void func_150186D0(void) {
         cmd->words.w1 = (u32)(textStart);       \
     }
 
-void func_151E51EC(void);
 void func_1515D69C(void);
 void func_15189118(s32);
 void func_15125628(void);

@@ -66,8 +66,6 @@ s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
 extern void func_1518BA90(Actor *, s32, s32);
 extern void func_1518BBF4(Actor *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-extern s8 func_151E564C(void);
-extern s8 func_151E565C(void);
 
 /* Script "set" commands: applies command `opcode` with arguments `cmd->a` to object `objId`.
  * Returns 0 for an unknown command or missing object, 1 otherwise.

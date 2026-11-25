@@ -38,19 +38,6 @@ s8 D_800E0BE0[0x1C];
 WorldObject *func_151149AC(s32 id);
 #include "variables.h"
 
-void func_151DDC20(void);
-void func_151DE6D4(void);
-void func_151DE81C(void);
-void func_151DE8E8(void);
-void func_151DE8F0(void);
-void func_151E4264(void);
-void func_151E43DC(void);
-void func_151E4DD8(void);
-void func_151E4E64(void);
-void func_151E4EE8(void);
-void func_151E82B8(void);
-void func_151E83E8(void);
-
 /* .data, linked at 0x8008FD70..0x8008FFC0. IDO keeps the definition order, function statics included. */
 s8 D_8008FD70 = 0;
 u8 D_8008FD74 = 8;
@@ -139,8 +126,6 @@ s32 func_151DDB94(s32 value) {
 
 /* ---- formerly game_20B050.c ---- */
 
-void func_151E557C(void);
-
 /* Requests a switch to map 0x1D (func_1501C730 mode 6) and resets this mode's state flags. */
 void func_151DDBA0(void) {
     D_800D2E40 = 0;
@@ -174,12 +159,6 @@ extern char D_800AB7F0[];
 extern char D_800AB7F4[];
 extern char D_800AB7F8[];
 extern char D_800AB7FC[];
-
-s32 func_151DDB94(s32 arg0);
-void func_151DDBA0(void);
-void func_151DE85C(void);
-void func_151E2834(void);
-void func_151E530C(void);
 
 /*
  * Pause menu, run every frame: opens on START from an allowed controller, advances the play-time
@@ -475,24 +454,7 @@ void func_151DE8E8(void) {
 
 extern char D_800AB850[];
 extern s8 D_800E0A96; /* page to switch to once faded out; -1: none */
-void func_151E2404(void);
-void func_151E3344(s32, s32, s32, u8, s8);
 s32 func_151F2CDC(void);
-
-void func_151DD9E4(void);
-
-void func_15007778(void);
-void func_151E81EC(void);
-void func_151DF574(void);
-void func_151E7DC0(void);
-void func_151DF1BC(void);
-void func_151DFF38(void);
-void func_151E0424(void);
-void func_151E09DC(void);
-void func_151E2284(void);
-void func_151E0B70(void);
-void func_151E1744(void);
-void func_151E1214(void);
 
 s8 D_8008FEF8 = 0;
 
@@ -726,7 +688,6 @@ void func_151DE8F0(void) {
 }
 
 extern char D_800AB800[];
-void func_151E7E9C(void);
 
 /* Menu page for unk2C == 1: fades in and out, toggling D_8008FEF8 and object 9's animation (0xE/0xF) each fade-out. */
 void func_151DF1BC(void) {
@@ -822,7 +783,6 @@ void func_151DF1BC(void) {
 extern s8 D_800AB804[];
 extern char D_800AB810[];
 extern s8 D_800BE91B; /* == D_800BE918[0].stick_y; the field spelling mismatches */
-void func_151E30C4(void);
 
 s8 D_8008FF00 = 0;
 u8 D_8008FF04 = 0;
@@ -1122,7 +1082,6 @@ extern char D_800AB834[];
 extern char D_800AB838[];
 extern char D_800AB83C[];
 extern char D_800AB840[];
-void func_151E327C(void);
 
 /* Menu page for unk2C == 3..5: shows saved record slot unk2C - 3 (score, h:m:s time) with play/erase options. */
 void func_151DFF38(void) {
@@ -1243,7 +1202,6 @@ void func_151DFF38(void) {
 extern char D_800AB844[];
 extern char D_800AB848[];
 extern char D_800AB84C[];
-void func_151E22BC(void);
 
 /* Mode-select page: up/down picks a game mode of category unk2C; accept opens its setup (page 4). */
 void func_151E0424(void) {
@@ -1428,7 +1386,6 @@ void func_151E09DC(void) {
 }
 
 extern char D_800AB854[];
-void func_151E7F60(s32, s32);
 
 /*
  * Player-join page: controllers 2-4 press Start to join or leave (D_8008FE44 lists the players).
@@ -1599,7 +1556,6 @@ void func_151E0B70(void) {
     D_8008FDD4->input &= ~MENU_BACK;
 }
 
-void func_151E4314(void);
 extern s8 D_800AB74C[][4];
 extern char D_800AB858[];
 extern char D_800AB85C[];
@@ -1695,7 +1651,7 @@ void func_151E1214(void) {
 }
 
 /* Per-team x jitter for stacked names; a struct so the initial copy is one word */
-typedef struct { s8 v[4]; } Offs4;
+typedef struct Offs4 { s8 v[4]; } Offs4;
 Offs4 D_8008FF34 = { { -12, -12, -12, -12 } };
 s8 D_8008FF38[4] = { 0, 2, 3, 4 }; /* indexed from 1 through D_8008FF37 */
 /* Team layout of a mode (D_800AB710[ModeEntry.unk5]) */
@@ -1725,7 +1681,6 @@ extern char D_800AB88C[];
 extern char D_800AB890[];
 extern char D_800AB894[];
 extern char D_800AB898[];
-s32 func_151E24F0(s32 *);
 
 /*
  * Team page: left/right moves each player between the D_800E0BB0 teams, up/down sets the extra
@@ -2086,16 +2041,7 @@ struct Struct151E4314 {
 };
 
 extern struct Struct151E4314 D_800AB7A4[];
-void func_151E6964(s32);
-void func_151E55A8(void);
-void func_151E7EF8(void);
 void func_151F2D6C(s32, s32);
-
-void func_151DE7D4(void);
-
-void func_151E7F60(s32 arg0, s32 arg1);
-
-s32 func_151E24F0(s32 *arg0);
 
 /*
  * For modes whose entry has unk8 == 8: finds connected controllers (D_800BE740) that are not yet in the
@@ -2875,7 +2821,6 @@ extern char D_800AB8FC[];
 extern char D_800AB900[];
 extern char D_800AB904[];
 extern struct Struct151E4314 D_800AB7BC[];
-void func_151E4E00(void);
 
 /* State 6: results screen; plays the outcome cue, draws ranks and the continue/quit choice. */
 void func_151E43DC(void) {
@@ -3162,7 +3107,6 @@ void func_151E5034(void) {
     D_8008FDD4->unk8 = 0.0f;
 }
 
-void func_151E6BFC(void);
 extern u8 D_800AB570[];
 
 /* Menu init: default option values, text bank reset, D_8008FDD4 state, then state 11. */
@@ -4248,8 +4192,6 @@ void func_151E7E9C(void) {
         func_10017870(4);
     }
 }
-
-extern void func_151DDC20(void);
 
 /* Anti-tamper: checksums the code from func_151DDC20 to func_151DE7D4 and breaks osSpTaskLoad if it was modified. */
 void func_151E7EF8(void) {

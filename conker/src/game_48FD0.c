@@ -235,15 +235,6 @@ void func_1501C53C(void) {
 }
 
 extern u8 D_80084068;
-void func_151DCFD8(s32);
-void func_15007168(void);
-void func_15006590(s32 eepromSlot);
-void func_15006BEC(s32 saveSlot);
-void func_1500707C(s32 saveSlot);
-void func_1500727C(void);
-void func_15007360(void);
-void func_15007440(void);
-void func_15007558(void);
 
 
 /* Runs the pending EEPROM request. Without a 16K EEPROM (probe result D_80084068 != 2), load

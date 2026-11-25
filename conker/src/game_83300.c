@@ -4,10 +4,12 @@
 // (extra narrowing in callers) or the variable type; hide those declarations and declare them below.
 #define func_1000F91C func_1000F91C_hdr
 #define func_10010E78 func_10010E78_hdr
+#define func_151E5FF4 func_151E5FF4_hdr
 #define func_1506AD30 func_1506AD30_hdr
 #include "functions.h"
 #undef func_1000F91C
 #undef func_10010E78
+#undef func_151E5FF4
 #undef func_1506AD30
 void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
 f32 func_1506AD30(Actor *, f32, s32, s32); /* one call passes a fourth argument */
@@ -2233,6 +2235,7 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
     }
 }
 
+// matching: the cause is passed as a u8 (the definition takes an s32)
 void func_151E5FF4(void *, Actor *, u8);
 
 /*

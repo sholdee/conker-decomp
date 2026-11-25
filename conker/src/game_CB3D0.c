@@ -142,8 +142,6 @@ s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
 }
 
 
-extern s8 D_800E0BE0[];
-
 // Answers query `cmd` with up to four integer params and returns the result as an s32.
 s32 func_1509E3DC(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
     Actor *obj;

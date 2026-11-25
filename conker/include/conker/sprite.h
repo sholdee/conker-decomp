@@ -68,6 +68,8 @@ void func_150B768C(void);
 void func_150B76BC(s32 x, s32 slot);
 void func_150B77A8(void);
 void func_150B791C(void);
+extern u8 D_800D9890; // queued command for func_150B6BC0
+extern EffectHeader *D_800D9894;
 
 /* game_137DE0.c */
 void func_1510A930(s32 fadeIn, s32 hold, s32 fadeOut);

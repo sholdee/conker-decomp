@@ -830,7 +830,6 @@ extern u8 D_80E;
 extern u8 D_82F;
 extern u8 D_830;
 extern u8 D_891;
-s32 func_151E564C(void);
 
 extern s16 D_800E0C30;
 extern Mtx D_800E0C38;
@@ -1302,8 +1301,6 @@ Gfx *func_151EC3E8(Gfx *gfx) {
 extern u8 D_800E0C88[];
 extern u8 D_87B;
 extern u8 D_88C;
-s32 func_151E24F0(s32 *);
-void func_151E7F60(s32, s32);
 
 /* Draws the multi-page screen selected by D_8008FDD4: page images, a rotating list, or per-slot panels. */
 Gfx *func_151EC648(Gfx *gfx) {

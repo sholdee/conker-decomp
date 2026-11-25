@@ -88,15 +88,6 @@ void func_15005FB0(Camera *arg0);
 void func_15006010(Camera *arg0);
 void func_15006140(Camera *arg0);
 void func_15006170(Camera *arg0);
-void func_150064E0(void);
-void func_15007644(void);
-void func_1500764C(void);
-void func_15007668(void);
-void func_15007684(void);
-void func_150076A0(); /* defined with no parameters, but game_20BDA0.c passes one */
-void func_150076BC(s32 arg0);
-void func_15007718(s32 arg0);
-void func_15007750(s32 arg0);
 void func_150095D8(s32 arg0, s32 arg1);
 void func_15009600(s32 arg0, s32 arg1);
 void func_1500969C(s32 arg0, s32 arg1);

@@ -389,45 +389,8 @@ extern Vec3f * D_8008FC8C[];
 extern u8 * D_8008FC94[];
 extern u8 (*D_8008FCD0[])(void); // texture id pickers by effect kind (game_2062D0)
 extern u8 (*D_8008FD04[])(void); // a second picker table by effect kind (game_2062D0)
-extern s8 D_8008FD70;
-extern u8 D_8008FD74;
-extern s32 D_8008FD78;
-extern s8 D_8008FD7C;
-extern u8 D_8008FD80;
-extern s8 D_8008FD84[];
-extern s8   D_8008FD8C;
-extern s8   D_8008FD90;
-extern s8   D_8008FD94;
-extern s8 D_8008FD9C;
-extern u8 D_8008FDA4;
-extern s8   D_8008FDA8;
-extern u16  D_8008FDBC;
 
 /* 8009 */
-extern u16 D_8008FDC0;
-extern s8 D_8008FDC8;
-extern s16 D_8008FDCC;
-extern MenuState *D_8008FDD4; // multiplayer menu / match state
-extern s8 D_8008FDE0;
-extern s8 D_8008FDE4;
-extern f32 D_8008FDE8;
-extern f32 D_8008FE1C;
-extern f32 D_8008FE20;
-extern s8 D_8008FE28;
-extern s8 D_8008FE2C;
-extern s8 D_8008FE30;
-extern u8 D_8008FE34;
-extern f32 D_8008FE38;
-extern f32 D_8008FE3C;
-extern s8 D_8008FE40; /* number of players in D_8008FE44 */
-extern s8 D_8008FE44[]; /* controller of each player; -2: extra slot, -1: unused */
-extern s8 D_8008FE54[23];
-extern s8 D_8008FE6C[23];
-extern s8 D_8008FE84[23];
-extern s8 D_8008FEF0;
-extern s8 D_8008FEF8;
-extern s8 D_8008FF00;
-extern u8 D_8008FF04;
 extern s32 D_80090298[]; // texture ids
 extern s32 D_800902B8;
 extern s32 D_800902E4;
@@ -567,7 +530,6 @@ extern u16 D_800B87A0[]; // per texture: size
 
 extern s8  D_800BC448[]; // per texture: frames left before it is freed (0 = not loaded)
 
-extern u32 D_800BE3E4; // saved clock (seconds)
 extern u8 * D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
 extern ParticleResource D_800BE4A0[15];
 extern struct TexScroll **D_800BE4F0; /* four texture scrolls (func_15010FB0) */
@@ -607,10 +569,6 @@ extern u8   D_800BE358[0x80]; // EEPROM/mempak transfer buffer; [0..1] is a u16 
 extern s8   D_800BE3D9;
 extern s8   D_800BE3DA;
 extern s8   D_800BE3DB;
-extern s16  D_800BE3DC;
-extern u8   D_800BE3DE;
-extern s8   D_800BE3DF;
-extern u8   D_800BE3E0;
 extern s32  D_800BE3E8;
 extern s8   D_800BE3EC; // its save-slot argument
 extern SaveSlotInfo D_800BE3F8[3]; // the three save slots
@@ -1341,19 +1299,6 @@ extern u8 D_800E0B97;
 extern u8 D_800E0B98;
 extern u8 D_800E0B99;
 extern s16 D_800E0B9A;
-extern Actor * D_800E0BA0[];
-extern s8 D_800E0BB0;
-extern s8 D_800E0BB1;
-extern u8 D_800E0BB8[];
-extern s8 D_800E0BC8[];
-extern u16 D_800E0BCC;
-extern s8 D_800E0BCE[];
-extern s8 D_800E0BD0;
-extern u8 D_800E0BD1;
-extern s8 D_800E0BD3;
-extern u8 **D_800E0BD8; // text strings of the current language ([8 + n]: player names)
-extern u8 D_800E0BDC;
-extern s8 D_800E0BE0[]; /* multiplayer settings record (game_20AE20.c) */
 extern s8 D_800E0C00[]; /* team of each D_8008FE44 entry */
 extern s16 D_800E0C10[];
 extern s32 D_800E0C18[];

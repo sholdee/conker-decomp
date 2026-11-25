@@ -28,9 +28,6 @@ extern s32 D_800D3004;
 #define ID_FLAG_BIT(id) (1 << ((id) & 7))
 
 void func_150AE280(void);
-void func_151E53E8(s32 arg0);
-void func_151E8214(void);
-void func_151E4DC4(void);
 
 /*
  * Runs command `cmd` for record `id` with arguments `args`. Returns 1 for some record commands, else 0.
@@ -204,8 +201,6 @@ struct QueryArgs {
     /* 0x08 */ s32 unk8;     // query 34: number of weights
     /* 0x0C */ s32 unkC[1];  // query 34: the weights
 };
-
-s32 func_151E5F64(s32 arg0);
 
 /* Answers query `query` about record `id` with arguments `args`; unknown queries return 0. */
 s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {

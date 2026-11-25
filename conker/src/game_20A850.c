@@ -3,8 +3,6 @@
 #include "variables.h"
 
 
-s32 func_151DCFD8(s32);
-
 s32 func_151DD3A0(OSMesgQueue *arg0, u8 arg1, u8 *arg2, s32 arg3) {
     s32 ret = 0;
 

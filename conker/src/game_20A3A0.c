@@ -9,15 +9,13 @@ extern u8 D_800E0A24;
 extern u8 *D_800E0A28;
 extern s32 D_800E0A2C;
 
-s32 func_151DCFD8(s32 arg0);
-
-void func_151DCEF0(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
+void func_151DCEF0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size) {
     while (func_151DCFD8(1) != 0) {
     }
-    D_800E0A20 = arg0;
-    D_800E0A24 = arg1;
-    D_800E0A28 = arg2;
-    D_800E0A2C = arg3;
+    D_800E0A20 = mq;
+    D_800E0A24 = block;
+    D_800E0A28 = buffer;
+    D_800E0A2C = size;
     osSetTimer(&__osEepromTimer, 12000ULL * osClockRate / 1000000ULL, 0, &__osEepromTimerQ, &__osEepromTimerMsg);
 }
 

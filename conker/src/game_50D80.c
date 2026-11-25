@@ -339,7 +339,6 @@ void func_150242F8(s32 mode, s32 scene) {
 #define FF32(p, o) (*(f32 *) ((u8 *) (p) + (o)))
 #define FPTR(p, o) (*(void **) ((u8 *) (p) + (o)))
 
-extern u8 D_800D9890; // game_E4070.c
 extern s32 D_80090214[];
 
 extern void func_150C5C74(Actor *);
@@ -350,8 +349,6 @@ extern void light_sendEvent(u8, u8, s32);
 extern void func_151645C4(u8);
 extern s32 func_1519D030(void *, s32, s32, s32, s32, s32);
 extern void func_151A9390(s32, s32, s32, f32 *, f32, f32, s32, s32, s32);
-extern void func_151DE7D4(void);
-extern void func_151E53E8(s32);
 
 /*
  * First cutscene event handler: subtitles (types 7, 0xE-0x10, 0x12; shown only

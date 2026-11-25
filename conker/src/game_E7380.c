@@ -2,16 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Code range checksummed by func_150B9ED0 (anti-tamper: a mismatch breaks player 1's controller mapping). */
-extern s32 func_151E7EF8[];
-extern s32 func_151E7F60[];
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 
 /*
  * Called when the actor has moved from (prevX, prevZ): casts a ray from 80 units above it back towards
  * the previous position and, on a hit, spawns a burst of particles off the hit triangle (plus a
  * sprite when func_15145C90 accepts the hit object). First runs an anti-tamper checksum over the code
- * at func_151E7EF8. Nothing is spawned while func_150A3058(2 or 1, position) reports anything.
+ * from func_151E7EF8 to func_151E7F60 (a mismatch breaks player 1's controller mapping). Nothing is spawned while func_150A3058(2 or 1, position) reports anything.
  */
 void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
     s32 pad[3]; // matching: unused locals of the original; the frame is 16 bytes larger than the named ones need
