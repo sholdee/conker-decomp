@@ -4,125 +4,101 @@
 #undef func_15169260
 #include "variables.h"
 
-struct Local1515572CData {
-    s32 unk0;
-    s32 unk4;
-};
-
-extern struct Local1515572CData D_800A6038;
-extern void func_15169260(struct Local1515572CData *, s32, s32, u8);
-extern s32 (*D_8008ACC8[])(void *);
-
 typedef struct {
-    u8 pad0[0x22];
-    s16 unk22;
-    u16 unk24;
-    s16 unk26;
-    s16 unk28;
-    u8 pad2A[0x4];
-    u8 unk2E;
-    u8 pad2F[0x39];
-    u8 unk68;
-} Struct15154C90;
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+} SpriteColor;
 
-void func_15154C90(Struct15154C90 *arg0) {
-    s32 temp;
-    s8 failed;
+/* The 0x58-byte description a screen sprite is created from (copied to ScreenSprite.info). */
+typedef struct {
+    /* 0x00 */ f32 x;           /* centre, in viewport units */
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 halfSize[2];
+    /* 0x10 */ u8 texture;    /* index into D_80090B60, 0xFF = none */
+    /* 0x11 */ u8 pad11;
+    /* 0x12 */ s16 timer;     /* counts down by D_800BE9E4 when (flags & 1) */
+    /* 0x14 */ u16 flags;
+    /* 0x16 */ s16 fadeStart; /* (flags & 8): below this timer, alpha = timer * fadeRate */
+    /* 0x18 */ s16 fadeRate;
+    /* 0x1A */ u8 kind;       /* index into D_8008AD04 */
+    /* 0x1B */ SpriteColor color1;
+    /* 0x1F */ SpriteColor color2;
+    /* 0x23 */ u8 unk23;
+    /* 0x24 */ s32 otherModeL;
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ s32 unk2C;
+    /* 0x30 */ s32 combineMode; /* index into D_800A4AC8 */
+    /* 0x34 */ u8 pad34[3];
+    /* 0x37 */ u8 unk37;
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ s32 unk3C;
+    /* 0x40 */ s8 unk40;
+    /* 0x41 */ s8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ u8 viewport;   /* the only viewport drawn in when (flags & 0x10) */
+    /* 0x45 */ u8 pad45[3];
+    /* 0x48 */ f32 scaleX;    /* (flags & 0x80) */
+    /* 0x4C */ f32 scaleY;
+    /* 0x50 */ f32 offsetS;   /* (flags & 0x100) */
+    /* 0x54 */ f32 offsetT;
+} ScreenSpriteInfo;
 
-    failed = 0;
-    if (arg0->unk24 & 1) {
-        arg0->unk22 -= D_800BE9E4;
-        if (arg0->unk22 < 0) {
-            failed = 1;
-        }
-    }
-    temp = arg0->unk68 & 0xF;
-    if (temp != 0) {
-        if (failed == 0) {
-            s32 ret;
+typedef struct ScreenSprite {
+    /* 0x00 */ u8 pad0[8];
+    /* 0x08 */ struct ScreenSprite *next;
+    /* 0x0C */ u8 padC[4];
+    /* 0x10 */ ScreenSpriteInfo info;
+    /* 0x68 */ u8 unk68;      /* low nibble: index into D_8008ACC8 */
+} ScreenSprite;
 
-            ret = D_8008ACC8[temp](arg0);
-            if (ret == 0) {
-                failed = 1;
-            }
-        }
-    }
-    if (arg0->unk24 & 8) {
-        s16 temp_v1;
-
-        temp_v1 = arg0->unk22;
-        if (temp_v1 < arg0->unk26) {
-            temp = (s16)(temp_v1 * (u32)arg0->unk28);
-            if (temp < arg0->unk2E) {
-                arg0->unk2E = temp;
-            }
-        }
-    }
-    if (failed) {
-        func_1516972C((struct102 *) arg0);
-    }
-}
+/* Per-viewport record (0x180 bytes) of the table D_800BE628 points to. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x14];
+    /* 0x14 */ f32 scaleX;
+    /* 0x18 */ f32 scaleY;
+    /* 0x1C */ u8 pad1C[0x18];
+    /* 0x34 */ f32 centerX;
+    /* 0x38 */ f32 centerY;
+    /* 0x3C */ u8 pad3C[0x144];
+} Viewport;
 
 typedef struct {
     u8 pad0[0x6];
-    u16 unk6;
-    u16 unk8;
+    u16 width;
+    u16 height;
     u8 padA[0x2];
-} Tex15154D80;
+} SpriteTexture;
+
 typedef struct {
     s32 unk0;
     s32 unk4;
-} Mode15154D80;
+} CombineMode;
+
 typedef struct {
-    u8 pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    u8 pad1C[0x18];
-    f32 unk34;
-    f32 unk38;
-} Cam15154D80;
+    s32 unk0;
+    s32 unk4;
+} Pair1515572C;
+
+/* The two sprite lists func_151555AC searches. */
 typedef struct {
-    u8 pad0[0x10];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 unk20;
-    u8 pad21[3];
-    u16 unk24;
-    u8 pad26[5];
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 unk31;
-    u8 unk32;
-    u8 unk33;
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    s32 unk40;
-    u8 pad44[3];
-    u8 unk47;
-    s32 unk48;
-    s32 unk4C;
-    s8 unk50;
-    s8 unk51;
-    u8 pad52[2];
-    u8 unk54;
-    u8 pad55[3];
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-} Arg15154D80;
-extern Tex15154D80 D_80090B60[];
-extern Mode15154D80 D_800A4AC8[];
+    s32 id[2];
+} SpriteListIds;
+
+extern s32 (*D_8008ACC8[])(ScreenSprite *);
+extern void (*D_8008AD04[])(ScreenSprite *, s32, u8);
+extern SpriteTexture D_80090B60[];
+extern CombineMode D_800A4AC8[];
+extern SpriteListIds D_800A6030;
+extern Pair1515572C D_800A6038;
 extern s32 D_800D2C9C;
+extern ScreenSprite *D_800DCE50[2][0x68];
+
+extern void func_15169260(Pair1515572C *, s32, s32, u8);
 extern s32 func_15181CC8(s32);
 extern s32 func_1517EF00(s32);
+extern ScreenSprite *func_15167A68(s32, s32, s32, s32, u8, s32);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
@@ -131,193 +107,226 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
 void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
+s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount);
 
-Gfx *func_15154D80(Gfx *gfx, Arg15154D80 *arg1, s16 arg2) {
+/* Per-frame update of a sprite: runs its timer, its update callback and its fade-out; frees it when done. */
+void func_15154C90(ScreenSprite *sprite) {
+    s32 index;
+    s8 finished;
+
+    finished = 0;
+    if (sprite->info.flags & 1) {
+        sprite->info.timer -= D_800BE9E4;
+        if (sprite->info.timer < 0) {
+            finished = 1;
+        }
+    }
+    index = sprite->unk68 & 0xF;
+    if (index != 0) {
+        if (finished == 0) {
+            s32 ret;
+
+            ret = D_8008ACC8[index](sprite);
+            if (ret == 0) {
+                finished = 1;
+            }
+        }
+    }
+    if (sprite->info.flags & 8) {
+        s16 timer;
+
+        timer = sprite->info.timer;
+        if (timer < sprite->info.fadeStart) {
+            index = (s16)(timer * (u32)sprite->info.fadeRate);
+            if (index < sprite->info.color1.alpha) {
+                sprite->info.color1.alpha = index;
+            }
+        }
+    }
+    if (finished) {
+        func_1516972C((struct102 *)sprite);
+    }
+}
+
+/*
+ * Draws a sprite as a scissored texture rectangle in the given viewport, unless its flags hide it there.
+ */
+Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     s32 s;
     u8 update;
-    u16 texW;
+    u16 texWidth;
     s32 t;
     s32 dsdx;
     s32 dtdy;
-    u32 pad_texH;
+    u32 pad; // matching: unused stack slot
     f32 x;
     f32 y;
-    f32 hw;
-    f32 sw;
-    f32 sh;
+    f32 halfWidth;
+    f32 width;
+    f32 height;
     f32 xl;
     f32 yl;
-    f32 hh;
-    f32 texWf;
-    f32 texHf;
+    f32 halfHeight;
+    f32 texWidthF;
+    f32 texHeightF;
     f32 xh;
     f32 yh;
     s16 primR, primG, primB, primA;
     s16 envR, envG, envB, envA;
-    Cam15154D80 *cam;
+    Viewport *vp;
 
     update = 1;
-    cam = (Cam15154D80 *)(D_800BE628 + D_80082FA4 * 0x180);
-    if ((arg1->unk24 & 0x10) && (arg2 != arg1->unk54)) {
+    // matching: integer address arithmetic; indexing a Viewport array orders the addu differently
+    vp = (Viewport *)(D_800BE628 + D_80082FA4 * 0x180);
+    if ((sprite->info.flags & 0x10) && (viewport != sprite->info.viewport)) {
         return gfx;
     }
-    if ((arg1->unk24 & 0x40) && (D_800C35EA == 1)) {
+    if ((sprite->info.flags & 0x40) && (D_800C35EA == 1)) {
         return gfx;
     }
-    if ((arg1->unk24 & (1 << (arg2 + 11))) && ((func_15181CC8(arg2) == 0) || (func_1517EF00(arg2) > 200))) {
+    if ((sprite->info.flags & (1 << (viewport + 11))) &&
+        ((func_15181CC8(viewport) == 0) || (func_1517EF00(viewport) > 200))) {
         return gfx;
     }
-    if (arg1->unk20 != 0xFF) {
-        gfx = func_15142E24(gfx, (s32)&D_80090B60[arg1->unk20], 0, (arg1->unk24 & 0x200) ? 0 : 2, 0, 0, arg1->unk20, 0, 0, &update, (arg1->unk24 & 0x400) ? 0x3E : 3);
+    if (sprite->info.texture != 0xFF) {
+        gfx = func_15142E24(gfx, (s32)&D_80090B60[sprite->info.texture], 0, (sprite->info.flags & 0x200) ? 0 : 2,
+                            0, 0, sprite->info.texture, 0, 0, &update, (sprite->info.flags & 0x400) ? 0x3E : 3);
     }
-    gfx = func_15142B7C(gfx, arg1->unk38, arg1->unk3C);
-    func_151441A4(&primR, &primG, &primB, &primA, arg1->unk2F, arg1->unk30, arg1->unk31, arg1->unk32,
-                  arg1->unk2B, arg1->unk2C, arg1->unk2D, arg1->unk2E, arg1->unk33, arg1->unk50);
-    func_151442FC(&envR, &envG, &envB, &envA, arg1->unk2F, arg1->unk30, arg1->unk31, arg1->unk32,
-                  arg1->unk2B, arg1->unk2C, arg1->unk2D, arg1->unk2E, arg1->unk33, arg1->unk51);
+    gfx = func_15142B7C(gfx, sprite->info.unk28, sprite->info.unk2C);
+    func_151441A4(&primR, &primG, &primB, &primA,
+                  sprite->info.color2.red, sprite->info.color2.green, sprite->info.color2.blue, sprite->info.color2.alpha,
+                  sprite->info.color1.red, sprite->info.color1.green, sprite->info.color1.blue, sprite->info.color1.alpha,
+                  sprite->info.unk23, sprite->info.unk40);
+    func_151442FC(&envR, &envG, &envB, &envA,
+                  sprite->info.color2.red, sprite->info.color2.green, sprite->info.color2.blue, sprite->info.color2.alpha,
+                  sprite->info.color1.red, sprite->info.color1.green, sprite->info.color1.blue, sprite->info.color1.alpha,
+                  sprite->info.unk23, sprite->info.unk41);
     gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
     gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
-    gfx = func_1513F4E4(gfx, arg1->unk47, &update);
-    gfx = func_15142FBC(gfx, arg1->unk34 | D_800D2C9C | 0x2000 | 0xC00 | arg1->unk48 | arg1->unk4C,
-                        D_800A4AC8[arg1->unk40].unk0 | D_800A4AC8[arg1->unk40].unk4, &update);
-    x = cam->unk34 + arg1->unk10 * cam->unk14;
-    y = cam->unk38 + arg1->unk14 * cam->unk18;
-    while (0) {}
-    hw = arg1->unk18 * cam->unk14;
-    hh = arg1->unk1C * cam->unk18;
-    xl = (x - hw) * 4.0f;
-    yl = (y - hh) * 4.0f;
-    xh = (x + hw) * 4.0f;
-    yh = (y + hh) * 4.0f;
-    texW = D_80090B60[arg1->unk20].unk6;
-    texWf = (u32)D_80090B60[arg1->unk20].unk6;
-    while (0) {}
-    texHf = (u32)D_80090B60[arg1->unk20].unk8;
-    sw = (xh - xl) + 1.0f;
-    sh = (yh - yl) + 1.0f;
-    if (arg1->unk24 & 0x80) {
-        sw *= arg1->unk58;
-        sh *= arg1->unk5C;
+    gfx = func_1513F4E4(gfx, sprite->info.unk37, &update);
+    gfx = func_15142FBC(gfx, sprite->info.otherModeL | D_800D2C9C | G_TF_BILERP | G_TC_FILT |
+                            sprite->info.unk38 | sprite->info.unk3C,
+                        D_800A4AC8[sprite->info.combineMode].unk0 | D_800A4AC8[sprite->info.combineMode].unk4, &update);
+    x = vp->centerX + sprite->info.x * vp->scaleX;
+    y = vp->centerY + sprite->info.y * vp->scaleY;
+    while (0) {}  // matching: block boundary; without it IDO keeps vp in a different register
+    halfWidth = sprite->info.halfSize[0] * vp->scaleX;
+    halfHeight = sprite->info.halfSize[1] * vp->scaleY;
+    xl = (x - halfWidth) * 4.0f;
+    yl = (y - halfHeight) * 4.0f;
+    xh = (x + halfWidth) * 4.0f;
+    yh = (y + halfHeight) * 4.0f;
+    texWidth = D_80090B60[sprite->info.texture].width;
+    texWidthF = (u32)D_80090B60[sprite->info.texture].width;
+    while (0) {}  // matching: block boundary steers the scheduling of the texture size loads
+    texHeightF = (u32)D_80090B60[sprite->info.texture].height;
+    width = (xh - xl) + 1.0f;
+    height = (yh - yl) + 1.0f;
+    if (sprite->info.flags & 0x80) {
+        width *= sprite->info.scaleX;
+        height *= sprite->info.scaleY;
     }
-    if (sw != 0.0f) {
-        dsdx = (4096.0f * texWf) / sw;
+    if (width != 0.0f) {
+        dsdx = (4096.0f * texWidthF) / width;
     } else {
         dsdx = 0;
     }
-    if (sh != 0.0f) {
-        dtdy = (4096.0f * texHf) / sh;
+    if (height != 0.0f) {
+        dtdy = (4096.0f * texHeightF) / height;
     } else {
         dtdy = 0;
     }
     s = 0;
     t = 0;
-    if (arg1->unk24 & 2) {
-        s = (texW - 1) << 5;
+    if (sprite->info.flags & 2) {
+        s = (texWidth - 1) << 5;
         dsdx = -dsdx & 0xFFFF;
     }
-    if (arg1->unk24 & 4) {
-        t = (D_80090B60[arg1->unk20].unk8 - 1) << 5;
+    if (sprite->info.flags & 4) {
+        t = (D_80090B60[sprite->info.texture].height - 1) << 5;
         dtdy = -dtdy & 0xFFFF;
     }
-    if (arg1->unk24 & 0x100) {
-        s = s + arg1->unk60;
-        t = t + arg1->unk64;
+    if (sprite->info.flags & 0x100) {
+        s += sprite->info.offsetS;
+        t += sprite->info.offsetT;
     }
-    gSPScisTextureRectangle(gfx++, (s32)xl, (s32)yl, (s32)xh, (s32)yh, 0, s, t, dsdx, dtdy);
+    gSPScisTextureRectangle(gfx++, (s32)xl, (s32)yl, (s32)xh, (s32)yh, G_TX_RENDERTILE, s, t, dsdx, dtdy);
     return gfx;
 }
 
-struct Arg1515548C {
-    u8 pad0[8];
-    f32 unk8;
-    f32 unkC;
-    u8 pad10[4];
-    u16 unk14;
-    u8 pad16[0x42];
-};
+/*
+ * Creates a sprite from info, flagged with flags. With kinds given, it is not created (NULL) when its
+ * rectangle overlaps a live sprite of one of those kinds.
+ */
+ScreenSprite *func_1515548C(ScreenSpriteInfo *info, u8 flags, s32 *kinds, s32 kindCount, s32 arg4, u8 arg5, s32 arg6) {
+    ScreenSprite *sprite;
+    f32 halfSize[2];
 
-extern s32 func_151555AC();
-extern u8 *func_15167A68(s32, s32, s32, s32, u8, s32);
-
-u8 *func_1515548C(struct Arg1515548C *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
-    u8 *ret;
-    f32 pos[2];
-
-    if ((arg2 != 0) && (arg3 > 0)) {
-        pos[0] = arg0->unk8;
-        pos[1] = arg0->unkC;
-        if (func_151555AC(arg0, pos) != 0) {
-            return 0;
+    if ((kinds != NULL) && (kindCount > 0)) {
+        halfSize[0] = info->halfSize[0];
+        halfSize[1] = info->halfSize[1];
+        if (func_151555AC(&info->x, halfSize, kinds, kindCount) != 0) {
+            return NULL;
         }
     }
-    ret = func_15167A68((arg0->unk14 & 0x20) ? 0x57 : 0x5D, arg6, arg4 + 0x70, 1, arg5, 1);
-    if (ret == 0) {
-        return 0;
+    sprite = func_15167A68((info->flags & 0x20) ? 0x57 : 0x5D, arg6, arg4 + 0x70, 1, arg5, 1);
+    if (sprite == NULL) {
+        return NULL;
     }
-    memcpy(ret + 0x10, arg0, 0x58);
-    ret[0x68] = 0;
-    ret[0x68] |= arg1;
-    return ret;
+    memcpy(&sprite->info, info, sizeof(ScreenSpriteInfo));
+    sprite->unk68 = 0;
+    sprite->unk68 |= flags;
+    return sprite;
 }
 
-struct Local15155564 { u8 pad[0x2A]; u8 unk2A; };
-extern void (*D_8008AD04[])(struct Local15155564 *, s32, u8);
-
-void func_15155564(struct Local15155564 *arg0, s32 arg1, u8 arg2) {
-    if (D_8008AD04[arg0->unk2A] != NULL) {
-        D_8008AD04[arg0->unk2A](arg0, arg1, arg2);
+/* Calls the handler for the sprite's kind, if it has one. */
+void func_15155564(ScreenSprite *sprite, s32 arg1, u8 arg2) {
+    if (D_8008AD04[sprite->info.kind] != NULL) {
+        D_8008AD04[sprite->info.kind](sprite, arg1, arg2);
     }
 }
 
-struct Node151555AC {
-    u8 pad0[8];
-    struct Node151555AC *next;
-    u8 padC[4];
-    f32 pos[2];
-    f32 size[2];
-    u8 pad20[0xA];
-    u8 unk2A;
-};
-struct Ids151555AC { s32 id[2]; };
-extern struct Ids151555AC D_800A6030;
-extern u8 D_800DCE50[];
-
-s32 func_151555AC(f32 *arg0, f32 *arg1, s32 *arg2, s32 arg3) {
-    s32 j;
-    struct Ids151555AC ids;
+/*
+ * Returns 1 when a live sprite of one of the given kinds overlaps the rectangle center +- halfSize
+ * (its own half size added), searching both sprite lists D_800A6030 names in both tables.
+ */
+s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount) {
+    s32 table;
+    SpriteListIds lists;
     u8 i;
-    struct Node151555AC *node;
-    struct Node151555AC *next;
+    ScreenSprite *sprite;
+    ScreenSprite *next;
     s32 found;
     s32 k;
     f32 w;
     f32 h;
+
     i = 0;
-    for (j = 0; j < 2; j++) {
-        ids = D_800A6030;
+    for (table = 0; table < 2; table++) {
+        lists = D_800A6030;
         i &= 0;
         do {
-            node = ((struct Node151555AC *(*)[0x68])D_800DCE50)[j][ids.id[i]];
-            while (node != NULL) {
-                next = node->next;
-                k = arg3;
+            sprite = D_800DCE50[table][lists.id[i]];
+            while (sprite != NULL) {
+                next = sprite->next;
+                k = kindCount;
                 found = 0;
                 while (k > 0 && !found) {
-                    if (node->unk2A == arg2[k - 1]) {
+                    if (sprite->info.kind == kinds[k - 1]) {
                         found = 1;
                     } else {
                         k--;
                     }
                 }
                 if (found) {
-                    w = arg1[0] + node->size[0];
-                    h = arg1[1] + node->size[1];
-                    if (arg0[0] - w <= node->pos[0] && node->pos[0] <= arg0[0] + w &&
-                        arg0[1] - h <= node->pos[1] && node->pos[1] <= arg0[1] + h) {
+                    w = halfSize[0] + sprite->info.halfSize[0];
+                    h = halfSize[1] + sprite->info.halfSize[1];
+                    if (center[0] - w <= sprite->info.x && sprite->info.x <= center[0] + w &&
+                        center[1] - h <= sprite->info.y && sprite->info.y <= center[1] + h) {
                         return 1;
                     }
                 }
-                node = next;
+                sprite = next;
             }
 lbl:
             i++;
@@ -325,9 +334,10 @@ lbl:
         i = 0;
     }
 }
-void func_1515572C(s32 arg0, u8 arg1) {
-    struct Local1515572CData sp18;
 
-    sp18 = D_800A6038;
-    func_15169260(&sp18, 2, arg0, arg1);
+void func_1515572C(s32 arg0, u8 arg1) {
+    Pair1515572C pair;
+
+    pair = D_800A6038;
+    func_15169260(&pair, 2, arg0, arg1);
 }
