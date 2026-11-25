@@ -801,58 +801,66 @@ void func_150F6890(struct127 *owner, s16 arg1, s32 arg2, s32 arg3) {
     func_15134DAC(&desc, 0);
 }
 
-void func_15137F30(void *, void *, void *, void *, f32, void *, void *, void *,
-                   void *, f32 *, s16 *, s8 *, f32 *);
-void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
-                   s32, s32, s32, s32, s32, s32);
-void func_1504715C(f32 *, s32);
+/* Partial view of game_161520.c's BloodStrip. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xC - 0x2];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x1C - 0xD];
+    /* 0x1C */ struct127 *owner;
+} BloodStrip;
 
-void func_150F695C(void *arg0, void *arg1, void *arg2, void *arg3,
-                   f32 arg4, u8 *arg5) {
-    struct {
-        f32 value;
-        u8 pad60[0x14];
-        s32 field74;
-        s8 field78;
-        s8 field79;
-        u8 pad7A[2];
-        s32 field7C;
-        f32 scale;
-        u8 pad84;
-        s8 field85;
-        s16 field86;
-        f32 field88;
-        f32 vector8C[3];
-        u8 field98[0xC];
-        f32 vectorA4[3];
-    } local;
-    u8 selected;
-    s32 variant;
+/* Ground probe result filled by func_1504715C (game_105760.c's Ground_150D85AC). */
+typedef struct {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ u8 pad4[0x18 - 0x4];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s8 unk1C;
+    /* 0x1D */ s8 unk1D;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ s32 unk20;
+} Ground;
+
+void func_15137F30(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32 time, BloodStrip *strip,
+                   f32 *start, f32 *end, f32 *velocity, f32 *arg3, s16 *arg4, s8 *arg5, f32 *arg6);
+void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
+void func_1504715C(Ground *, struct127 *);
+
+/* BloodStrip emit callback: one func_151D9014 blood particle, larger than func_15137E60's. 60% of
+ * them get a ground probe under the strip's owner; the rest get none (height -10000). */
+void func_150F695C(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32 time, BloodStrip *strip) {
+    f32 start[3];
+    f32 end[3];
+    f32 velocity[3];
+    f32 arg3;
+    s16 arg4;
+    s8 arg5;
+    f32 arg6;
+    Ground ground;
+    u8 probeGround;
+    s32 flag;
     f32 random;
 
-    func_15137F30(arg0, arg1, arg2, arg3, arg4, arg5,
-                  local.vectorA4, local.field98, local.vector8C,
-                  &local.field88, &local.field86, &local.field85,
-                  &local.scale);
+    func_15137F30(pointA, pointB, velocityA, velocityB, time, strip, start, end, velocity, &arg3,
+                  &arg4, &arg5, &arg6);
     random = func_150ADA68();
-    local.scale *= 1.0f + (random + random);
-    selected = func_150ADA68() < 0.6f;
-    if (selected != 0) {
-        func_1504715C(&local.value, *(s32 *)(arg5 + 0x1C));
+    arg6 *= 1.0f + (random + random);
+    probeGround = func_150ADA68() < 0.6f;
+    if (probeGround) {
+        func_1504715C(&ground, strip->owner);
     } else {
-        local.field74 = 0;
-        local.field78 = 0;
-        local.field79 = 0;
-        local.field7C = 0;
-        local.value = -10000.0f;
+        ground.unk18 = 0;
+        ground.unk1C = 0;
+        ground.unk1D = 0;
+        ground.unk20 = 0;
+        ground.height = -10000.0f;
     }
-    if (selected) {
-        variant = func_150ADA68() < 0.5f;
+    if (probeGround) {
+        flag = func_150ADA68() < 0.5f;
     } else {
-        variant = 0;
+        flag = 0;
     }
-    func_151D9014(local.vectorA4, local.vector8C, 1, local.field88,
-                  local.field86, (u8)local.field85, local.scale, selected,
-                  1.8f, 1.8f, 1, (s32)&local.value, 1,
-                  variant, arg5[0xC], arg5[1]);
+    func_151D9014(start, velocity, 1, arg3, arg4, (u8)arg5, arg6, probeGround, 1.8f, 1.8f, 1,
+                  (s32)&ground, 1, flag, strip->unkC, strip->unk1);
 }
