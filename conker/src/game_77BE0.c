@@ -145,7 +145,7 @@ void func_1504A730(void) {
         if ((movement_obj)[j].interaction_state != 0 && (movement_obj)[j].unk31C != NULL) {
             if ((movement_obj)[j].unk137 != 0) {
                 if (D_800CBDA0[j] != 0) {
-                    db_Object_array[D_800CBDA0[j] - 1].flags |= 0x84;
+                    db_Object_array[D_800CBDA0[j] - 1].object_status |= 0x84;
                     D_800DBF94[D_800CBDA0[j] - 1] |= 1 << j;
                 }
                 (movement_obj)[j].unk31C->unk56 = 5;
@@ -227,8 +227,8 @@ void func_1504AF10(Actor *obj, s32 force, s32 release) {
                 db_Object_array[index].attach = 0;
                 return;
             }
-            db_Object_array[index].flags &= ~0x60;
-            db_Object_array[index].flags |= 0x20;
+            db_Object_array[index].object_status &= ~0x60;
+            db_Object_array[index].object_status |= 0x20;
             db_Object_array[index].x = obj->x_position;
             db_Object_array[index].y = obj->y_position + obj->unk90;
             db_Object_array[index].z = obj->z_position;

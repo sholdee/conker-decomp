@@ -12,7 +12,7 @@ void func_150104F0(void) {
 
     D_800D9950[0] = (D_800D9950[1] = (D_800D9950[2] = 0));
     temp_v0 = func_151149AC(0xF6);
-    temp_v0->work.floats[0] = 2.0f;
+    temp_v0->touch.f.a = 2.0f;
     D_80088980 = 0;
 }
 

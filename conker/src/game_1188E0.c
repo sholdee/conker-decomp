@@ -59,7 +59,7 @@ s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit) {
     return FALSE;
 }
 
-/* Behaviour scratch state (WorldObject.work): a damped swing or a bounce. */
+/* Behaviour scratch state (WorldObject.touch): a damped swing or a bounce. */
 typedef union MoverWork {
     struct {
         /* 0x7C */ f32 damping;
@@ -73,7 +73,7 @@ typedef union MoverWork {
     } bounce;
 } MoverWork;
 
-#define WORK(obj) ((MoverWork *)&(obj)->work)
+#define WORK(obj) ((MoverWork *)&(obj)->touch)
 
 void func_15117770(WorldObject *obj);
 
@@ -97,15 +97,15 @@ void func_150EB614(WorldObject *obj) {
     f32 delta;
     f32 magnitude;
 
-    if ((obj->behaviorState & 3) == 3) {
+    if ((obj->task_flag & 3) == 3) {
         return;
     }
-    if ((obj->behaviorState & 3) != 2) {
-        if (obj->flags & 4) {
+    if ((obj->task_flag & 3) != 2) {
+        if (obj->object_status & 4) {
             if (movement_obj->unk31C->unk57 != 0) {
-                obj->behaviorState &= ~3;
-                obj->behaviorState |= 2;
-                obj->param.word = 0;
+                obj->task_flag &= ~3;
+                obj->task_flag |= 2;
+                obj->moveData.word = 0;
                 WORK(obj)->bounce.rebound = 0.5f;
                 WORK(obj)->bounce.acceleration = 0.3000000119f;
                 WORK(obj)->bounce.velocity = 0.0f;
@@ -150,8 +150,8 @@ void func_150EB614(WorldObject *obj) {
         before = obj->t;
         func_15117770(obj);
         if (before == obj->t) {
-            obj->behaviorState &= ~3;
-            obj->behaviorState |= 3;
+            obj->task_flag &= ~3;
+            obj->task_flag |= 3;
             obj->t = 0.0f;
         }
     }

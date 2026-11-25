@@ -122,7 +122,7 @@ void func_1510DA84(Shadow *shadow) {
             tri = prop->shadow->floorTri;
             if (func_150A3FC4(prop->x, prop->z, 0, tri, &floorY) == 0) {
                 func_1510E7A4(0, tri, &floorY, 0, 0, 0, prop->x, prop->y, prop->z, prop->y,
-                              prop->index + 1, 0, -10000.0f, prop->y);
+                              prop->object_num + 1, 0, -10000.0f, prop->y);
             }
             triPtrs = NULL;
             x = prop->x;
@@ -247,7 +247,7 @@ Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
             case 1: {
                 WorldObject *prop = (WorldObject *)shadow->owner;
 
-                ownerAlpha = (prop->alpha * prop->viewAlpha[view] + 0xFF) >> 8;
+                ownerAlpha = (prop->alpha * prop->dst_fade_alpha[view] + 0xFF) >> 8;
                 break;
             }
         }

@@ -649,7 +649,7 @@ s32 func_15045880(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
             s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
-            hit->material = hit->surface->material;
+            hit->material = hit->surface->floorHitAttrib;
         }
         hit->flags |= 6;
         {
@@ -713,7 +713,7 @@ s32 func_15045AE4(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
             s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
-            hit->material = hit->surface->material;
+            hit->material = hit->surface->floorHitAttrib;
         }
         hit->flags |= 6;
         {
@@ -777,7 +777,7 @@ s32 func_15045D48(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
             s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
-            hit->material = hit->surface->material;
+            hit->material = hit->surface->floorHitAttrib;
         }
         hit->flags |= 6;
         if ((hit->surface->viewFlags & 0x80) == 0x80) {
@@ -836,7 +836,7 @@ s32 func_15045F8C(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
             s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
-            hit->material = hit->surface->material;
+            hit->material = hit->surface->floorHitAttrib;
         }
         hit->flags |= 6;
         if ((hit->surface->viewFlags & 0x80) == 0x80) {

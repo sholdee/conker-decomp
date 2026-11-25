@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Motion states in the low 2 bits of WorldObject.behaviorState (as in game_144C70.c). */
+/* Motion states in the low 2 bits of WorldObject.task_flag (as in game_144C70.c). */
 #define PROP_REST 0
 #define PROP_RETURNING 1
 #define PROP_MOVING 2
@@ -41,10 +41,10 @@ void func_1511F990(WorldObject *prop, s32 mode) {
     s32 group;
 
     // matching: the redundant & 0xFF costs one integer web, setting IDO's t6..t9 temp rotation
-    group = (s8)((prop->param.word >> 16) & 0xFF);
+    group = (s8)((prop->moveData.word >> 16) & 0xFF);
     added = FALSE;
-    motion = prop->behaviorState & 3;
-    flag = prop->behaviorState & 4;
+    motion = prop->task_flag & 3;
+    flag = prop->task_flag & 4;
     for (index = 0; index < D_800DBFC0; index++) {
         if (D_800DBFC8[index].prop == prop) {
             break;
@@ -66,7 +66,7 @@ void func_1511F990(WorldObject *prop, s32 mode) {
                     if (motion != PROP_REST && motion != PROP_RETURNING) {
                         motion = PROP_RETURNING;
                     }
-                    prop->u = (prop->param.word << 22) >> 22;
+                    prop->u = (prop->moveData.word << 22) >> 22;
                 } else if (mode == 1) {
                     motion = PROP_ARRIVED;
                 } else if (mode == 2) {
@@ -79,7 +79,7 @@ void func_1511F990(WorldObject *prop, s32 mode) {
                     } else if (!flag) {
                         motion = PROP_ARRIVED;
                     }
-                    prop->u = (prop->param.word << 22) >> 22;
+                    prop->u = (prop->moveData.word << 22) >> 22;
                 }
             } else if (mode == 0 || mode == 2 || mode == 3) {
                 if (mode != 3 || flag) {
@@ -94,20 +94,20 @@ void func_1511F990(WorldObject *prop, s32 mode) {
                 if (i == index || group != D_800DBFC8[i].group) {
                     continue;
                 }
-                if (!flag && (D_800DBFC8[i].prop->behaviorState & 4)) {
+                if (!flag && (D_800DBFC8[i].prop->task_flag & 4)) {
                     continue;
                 }
-                if ((D_800DBFC8[i].prop->behaviorState & 3) == PROP_ARRIVED && motion == PROP_MOVING) {
+                if ((D_800DBFC8[i].prop->task_flag & 3) == PROP_ARRIVED && motion == PROP_MOVING) {
                     continue;
                 }
-                if ((D_800DBFC8[i].prop->behaviorState & 3) == PROP_REST && motion == PROP_RETURNING) {
+                if ((D_800DBFC8[i].prop->task_flag & 3) == PROP_REST && motion == PROP_RETURNING) {
                     continue;
                 }
-                D_800DBFC8[i].prop->behaviorState &= ~3;
-                D_800DBFC8[i].prop->behaviorState |= motion;
+                D_800DBFC8[i].prop->task_flag &= ~3;
+                D_800DBFC8[i].prop->task_flag |= motion;
             }
         }
     }
-    prop->behaviorState &= ~3;
-    prop->behaviorState |= motion;
+    prop->task_flag &= ~3;
+    prop->task_flag |= motion;
 }

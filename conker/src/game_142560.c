@@ -2,21 +2,21 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Behaviour scratch state (WorldObject.work) of the objects driven by the callbacks in this file. */
+/* Behaviour scratch state (WorldObject.touch) of the objects driven by the callbacks in this file. */
 typedef struct {
     /* 0x7C */ s32 homeY;
     /* 0x80 */ s32 timer;
     /* 0x84 */ s32 returning;
 } Work142560;
 
-#define WORK(obj) ((Work142560 *)&(obj)->work)
+#define WORK(obj) ((Work142560 *)&(obj)->touch)
 
 void func_151150B0(s32 arg0) {
 }
 
 /* Spins the object about Z by (params >> 16) / 256 degrees per frame, wrapping to [0, 360). */
 void func_151150BC(WorldObject *obj) {
-    obj->spinZ = ((obj->param.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
+    obj->spinZ = ((obj->moveData.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
     obj->v += obj->spinZ;
     if (obj->v < 0.0f) {
         obj->v += 360.0f;
@@ -29,7 +29,7 @@ void func_151150BC(WorldObject *obj) {
 
 /* Spins the object about Y by (params >> 16) / 256 degrees per frame, wrapping to [0, 360). */
 void func_1511515C(WorldObject *obj) {
-    obj->spinY = ((obj->param.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
+    obj->spinY = ((obj->moveData.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
     obj->u += obj->spinY;
     if (obj->u < 0.0f) {
         obj->u += 360.0f;
@@ -42,7 +42,7 @@ void func_1511515C(WorldObject *obj) {
 
 /* Spins the object about X by (params >> 16) / 256 degrees per frame, wrapping to [0, 360). */
 void func_151151FC(WorldObject *obj) {
-    obj->spinX = ((obj->param.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
+    obj->spinX = ((obj->moveData.word >> 16) * D_800BE9E4) * (1.0f / 256.0f);
     obj->t += obj->spinX;
     if (obj->t < 0.0f) {
         obj->t += 360.0f;
@@ -64,9 +64,9 @@ void func_151152A8(WorldObject *obj) {
     if (WORK(obj)->homeY == 0) {
         WORK(obj)->homeY = obj->y;
     }
-    if (obj->flags & 4) {
-        if (WORK(obj)->homeY - obj->y < (s16)obj->param.word) {
-            obj->y -= (s16)(obj->param.word >> 16) * D_800BE9E4;
+    if (obj->object_status & 4) {
+        if (WORK(obj)->homeY - obj->y < (s16)obj->moveData.word) {
+            obj->y -= (s16)(obj->moveData.word >> 16) * D_800BE9E4;
         }
     } else {
         obj->y += (WORK(obj)->homeY - obj->y) * 0.05f * D_800BE9E4;
@@ -88,21 +88,21 @@ void func_15115368(WorldObject *obj) {
     f32 distSq;
     f32 s;
 
-    hold = (s8)(obj->param.word >> 8);
-    start = obj->param.word >> 24;
-    if (obj->flags & 4) {
+    hold = (s8)(obj->moveData.word >> 8);
+    start = obj->moveData.word >> 24;
+    if (obj->object_status & 4) {
         WORK(obj)->timer += D_800BE9E4;
     }
     if (WORK(obj)->timer <= start) {
-        if (!(obj->flags & 4) && WORK(obj)->timer != 0) {
+        if (!(obj->object_status & 4) && WORK(obj)->timer != 0) {
             WORK(obj)->timer = start;
         }
     } else if (WORK(obj)->timer <= start + hold) {
-        if (!(obj->flags & 4)) {
+        if (!(obj->object_status & 4)) {
             WORK(obj)->timer = start + hold;
         }
     } else {
-        if (!(obj->flags & 4)) {
+        if (!(obj->object_status & 4)) {
             WORK(obj)->timer += D_800BE9E4;
         }
         t = WORK(obj)->timer - start - hold;
@@ -115,11 +115,11 @@ void func_15115368(WorldObject *obj) {
                 if (WORK(obj)->homeY == 0) {
                     WORK(obj)->homeY = obj->y;
                 }
-                obj->y -= (s8)(obj->param.word >> 16) * D_800BE9E4;
-                if ((obj->param.word & 0xFF) * 16 < WORK(obj)->homeY - obj->y) {
+                obj->y -= (s8)(obj->moveData.word >> 16) * D_800BE9E4;
+                if ((obj->moveData.word & 0xFF) * 16 < WORK(obj)->homeY - obj->y) {
                     s32 pad; // matching: this block's -g3 scope (and slot) fixes the schedule and frame
-                    obj->flags &= ~0x61;
-                    obj->flags |= 0x20;
+                    obj->object_status &= ~0x61;
+                    obj->object_status |= 0x20;
                     WORK(obj)->returning = 1;
                 }
             }
@@ -135,8 +135,8 @@ void func_15115368(WorldObject *obj) {
                 distSq = dx + dz;
             }
             if (distSq > 500.0f * 500.0f) {
-                obj->flags &= ~0x61;
-                obj->flags |= 1;
+                obj->object_status &= ~0x61;
+                obj->object_status |= 1;
                 obj->y = WORK(obj)->homeY;
                 WORK(obj)->homeY = 0;
                 WORK(obj)->returning = 0;

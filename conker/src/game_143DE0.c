@@ -7,7 +7,7 @@
  * target. They are listed in the behaviour tables in 22D710.rodata.
  */
 
-/* Behaviour scratch state (WorldObject.work) of the movers below. */
+/* Behaviour scratch state (WorldObject.touch) of the movers below. */
 typedef union MoverWork {
     /* 0x7C */ s32 targetPos[3];
     /* 0x7C */ f32 targetSpin[3];
@@ -23,7 +23,7 @@ typedef union MoverWork {
     } swing;
 } MoverWork;
 
-#define WORK(obj) ((MoverWork *)&(obj)->work)
+#define WORK(obj) ((MoverWork *)&(obj)->touch)
 
 /* Animation entry of D_80089320: which ROM file holds the vertex frames, and how many there are. */
 typedef struct VertexAnim {
@@ -50,15 +50,15 @@ void func_15116BAC(WorldObject *obj);
  * enters the moving state 2 when the actor's unk31C->unk57 is 1.
  */
 void func_15116930(WorldObject *obj, Actor *actor) {
-    if ((obj->flags & 4) && !(obj->behaviorState & 3) && !(obj->behaviorState & 4) && actor->unk31C->unk57 == 1) {
-        obj->behaviorState &= ~3;
-        obj->behaviorState |= 2;
+    if ((obj->object_status & 4) && !(obj->task_flag & 3) && !(obj->task_flag & 4) && actor->unk31C->unk57 == 1) {
+        obj->task_flag &= ~3;
+        obj->task_flag |= 2;
     }
 }
 
 /* Moves the object toward its target while it is in the moving state. */
 void func_15116984(WorldObject *obj) {
-    if (obj->behaviorState & 2) {
+    if (obj->task_flag & 2) {
         func_151169B4(obj);
     }
 }
@@ -72,7 +72,7 @@ void func_151169B4(WorldObject *obj) {
     s32 *target;
     s32 i;
 
-    sound = obj->param.word >> 10;
+    sound = obj->moveData.word >> 10;
     // matching: x, y, z indexed through &obj->x; as plain fields IDO loads them before the targets
     if (WORK(obj)->targetPos[0] != (&obj->x)[0] || WORK(obj)->targetPos[1] != (&obj->x)[1] ||
         WORK(obj)->targetPos[2] != (&obj->x)[2]) {
@@ -80,8 +80,8 @@ void func_151169B4(WorldObject *obj) {
             func_15116BAC(obj);
             return;
         }
-        step = obj->param.word & ~0xFC00;
-        if (sound != 0 && obj->sound == 0 && D_80089260[sound].open != 0) {
+        step = obj->moveData.word & ~0xFC00;
+        if (sound != 0 && obj->sound_id == 0 && D_80089260[sound].open != 0) {
             func_15114D24(obj, D_80089260[sound].open, 24000, 2000, 4000, 0);
         }
         step = (step * D_800BE9E4) >> 1;
@@ -107,11 +107,11 @@ void func_151169B4(WorldObject *obj) {
         }
     } else {
         obj->moveX = obj->moveY = obj->moveZ = 0;
-        if (obj->sound != 0) {
+        if (obj->sound_id != 0) {
             if (sound != 0 && D_80089260[sound].opened != 0) {
                 func_15114D24(obj, D_80089260[sound].opened, 24000, 2000, 4000, 4);
             }
-            obj->sound = 0;
+            obj->sound_id = 0;
         }
     }
 }
@@ -129,11 +129,11 @@ void func_15116BAC(WorldObject *obj) {
     s32 i;
     s32 maxDist;
 
-    sound = obj->param.word >> 10;
+    sound = obj->moveData.word >> 10;
     started = FALSE;
     maxDist = 0;
-    rate = obj->param.word & ~0xFC00;
-    if (sound != 0 && obj->sound == 0 && D_80089260[sound].open != 0) {
+    rate = obj->moveData.word & ~0xFC00;
+    if (sound != 0 && obj->sound_id == 0 && D_80089260[sound].open != 0) {
         func_15114D24(obj, D_80089260[sound].open, 24000, 2000, 4000, 0);
         started = TRUE;
     }
@@ -180,7 +180,7 @@ void func_15116D7C(WorldObject *obj) {
     f32 *target;
     s32 i;
 
-    accel = obj->param.word * (1.0f / 256);
+    accel = obj->moveData.word * (1.0f / 256);
     dt = D_800BE9E4;
     rot = &obj->t;
     spin = &obj->spinX;
@@ -228,12 +228,12 @@ void func_15116EA4(WorldObject *obj) {
     s32 speed;
     s32 frame;
 
-    anim = obj->param.word & 0xFFFF;
+    anim = obj->moveData.word & 0xFFFF;
     file = D_80089320[anim].file;
     pos = WORK(obj)->anim.pos;
     frameCount = D_80089320[anim].frameCount;
     size = D_8002AAD0[file].end - D_8002AAD0[file].start;
-    speed = obj->param.word >> 16;
+    speed = obj->moveData.word >> 16;
     if (WORK(obj)->anim.frames == NULL) {
         WORK(obj)->anim.frames = allocate_memory(size, 1, 2, 0);
         func_10004514(D_8002AAD0[file].start, WORK(obj)->anim.frames, size, 1);
@@ -287,10 +287,10 @@ f32 func_151172D8(WorldObject *obj, f32 angle) {
     damping = WORK(obj)->swing.damping;
     acceleration = WORK(obj)->swing.acceleration;
     velocity = WORK(obj)->swing.velocity;
-    target = (obj->param.word << 22) >> 22;
+    target = (obj->moveData.word << 22) >> 22;
     if (angle != target || velocity != 0.0f) {
-        if (velocity == 0.0f && (obj->param.word >> 10) != 0 && D_80089260[obj->param.word >> 10].open != 0) {
-            func_15114D24(obj, D_80089260[obj->param.word >> 10].open, 24000, 200, 2500, 0);
+        if (velocity == 0.0f && (obj->moveData.word >> 10) != 0 && D_80089260[obj->moveData.word >> 10].open != 0) {
+            func_15114D24(obj, D_80089260[obj->moveData.word >> 10].open, 24000, 200, 2500, 0);
         }
         angle += velocity * D_800BE9E4;
         delta = func_15048A70(angle, target);

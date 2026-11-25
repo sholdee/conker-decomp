@@ -27,7 +27,7 @@ void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
         if (func_150A32B4(&D_800D3098[ids[i]], arg0, arg1, arg2) != 0) {
             if (propIds[i] != 0) {
                 prop = func_151149AC(propIds[i]);
-                prop->behaviorState = (prop->behaviorState & ~3) | 3;
+                prop->task_flag = (prop->task_flag & ~3) | 3;
             } else {
                 func_150A2864(ids[i], 1);
             }
@@ -37,7 +37,7 @@ void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
 
 /* Per-frame update: while moving, spins the rotation (wrapping each angle), applies gravity and
  * velocity (moveX..moveZ, gravity in param) to the position and counts alpha down as a lifetime
- * until inactive; kind 0xC props also get two assets of D_80090204 row work.words[0] passed to func_1510D874. */
+ * until inactive; kind 0xC props also get two assets of D_80090204 row touch.i.a passed to func_1510D874. */
 void func_150DE458(WorldObject *prop) {
     s32 pad[4]; // matching: unused frame space above size
     s32 size;
@@ -49,7 +49,7 @@ void func_150DE458(WorldObject *prop) {
     s32 slot;
     s32 nextSlot;
 
-    if ((prop->behaviorState & 3) == 3) {
+    if ((prop->task_flag & 3) == 3) {
         frames = D_800BE9E4;
 
         prop->t += prop->spinX * frames;
@@ -77,7 +77,7 @@ void func_150DE458(WorldObject *prop) {
         }
 
         timer = prop->alpha;
-        prop->moveY -= prop->param.word * D_800BE9E4;
+        prop->moveY -= prop->moveData.word * D_800BE9E4;
         prop->x += prop->moveX * D_800BE9E4;
         prop->y += prop->moveY * D_800BE9E4;
         prop->z += prop->moveZ * D_800BE9E4;
@@ -93,7 +93,7 @@ void func_150DE458(WorldObject *prop) {
     if ((prop->modelId & ~0x8000) == 0xC) {
         // matching: a for (i = 0; i < 2; i++) form (slots i * 2 + 4, i * 2 + 5) grows the frame by 8;
         // the original steps the asset pointer and both slot numbers separately
-        asset = D_80090204[prop->work.words[0]];
+        asset = D_80090204[prop->touch.i.a];
         slot = 4;
         nextSlot = 5;
         do {
@@ -107,14 +107,14 @@ void func_150DE458(WorldObject *prop) {
 }
 
 /* Sways the object: y bobs around 1130 and rotX / rotZ rock, each driven by func_15048A40 of its own
- * phase (work.words[0..2], in 1/8 steps of its angle); the phases advance 12, 16 and 24 per frame. */
+ * phase (touch.i.a/b/c, in 1/8 steps of its angle); the phases advance 12, 16 and 24 per frame. */
 void func_150DE6D8(WorldObject *prop) {
-    prop->y = func_15048A40(prop->work.words[0] >> 3) * 10.19999981f + 1130.0f;
-    prop->t = func_15048A40(prop->work.words[1] >> 3) * 1.100000024f;
-    prop->v = func_15048A40(prop->work.words[2] >> 3) * 1.100000024f;
-    prop->work.words[0] += D_800BE9E4 * 12;
-    prop->work.words[1] += D_800BE9E4 * 16;
-    prop->work.words[2] += D_800BE9E4 * 24;
+    prop->y = func_15048A40(prop->touch.i.a >> 3) * 10.19999981f + 1130.0f;
+    prop->t = func_15048A40(prop->touch.i.b >> 3) * 1.100000024f;
+    prop->v = func_15048A40(prop->touch.i.c >> 3) * 1.100000024f;
+    prop->touch.i.a += D_800BE9E4 * 12;
+    prop->touch.i.b += D_800BE9E4 * 16;
+    prop->touch.i.c += D_800BE9E4 * 24;
 }
 
 /* State func_150DE7C0 stores after each particle it spawns. */

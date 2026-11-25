@@ -11,8 +11,8 @@ typedef union {
     s32 i;
 } FloatOrWord;
 
-/* Script-set scratch words of an object (its WorldObject.work), each a float or a raw value. */
-#define WORK(obj) ((FloatOrWord *)(obj)->work.words)
+/* Script-set scratch words of an object (its WorldObject.touch), each a float or a raw value. */
+#define WORK(obj) ((FloatOrWord *)&(obj)->touch)
 
 extern WorldObject *func_151149AC(u8 id);
 extern s32 func_15086D48(s32);
@@ -36,7 +36,7 @@ s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
     switch (op) {
     case 0:
         obj->inactive = 0;
-        if (obj->update != NULL) {
+        if (obj->moveProc != NULL) {
             obj->viewFlags |= 0xF;
         }
         return 1;
@@ -88,37 +88,37 @@ s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
         }
         return 1;
     case 5:
-        obj->param.word = cmd[2];
+        obj->moveData.word = cmd[2];
         return 1;
     case 6:
-        obj->behaviorState &= ~3;
-        obj->behaviorState |= cmd[2] & 3;
+        obj->task_flag &= ~3;
+        obj->task_flag |= cmd[2] & 3;
         return 1;
     case 7:
         if (cmd[2] != 0) {
-            obj->behaviorState |= 4;
+            obj->task_flag |= 4;
         } else {
-            obj->behaviorState &= ~4;
+            obj->task_flag &= ~4;
         }
         return 1;
     case 8:
-        obj->param.word &= 0xFFFF;
-        obj->param.word |= cmd[2] << 16;
+        obj->moveData.word &= 0xFFFF;
+        obj->moveData.word |= cmd[2] << 16;
         WORK(obj)[0].i = cmd[3];
         return 1;
     case 9:
         func_150E4928(obj);
         break;
     case 10:
-        obj->update = D_80088C90[cmd[2]].update;
+        obj->moveProc = D_80088C90[cmd[2]].update;
         obj->onContact = D_80088C90[cmd[2]].onContact;
         obj->unk92 = D_80088C90[cmd[2]].unk8;
         break;
     case 11:
-        func_15173C90(cmd[2], cmd[3], obj->id);
+        func_15173C90(cmd[2], cmd[3], obj->unique_id);
         break;
     case 13:
-        obj->flags = (obj->flags & ~cmd[3]) | cmd[2];
+        obj->object_status = (obj->object_status & ~cmd[3]) | cmd[2];
         break;
     case 14:
         if (cmd[2] != ARG_KEEP) {
@@ -190,7 +190,7 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
         }
         return 0;
     case 22:
-        if ((obj->flags & 4) == 4) {
+        if ((obj->object_status & 4) == 4) {
             return 1;
         }
         return 0;
@@ -201,16 +201,16 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
         }
         return result | 0x2000;
     case 24:
-        return obj->flags;
+        return obj->object_status;
     case 25:
         if (WORK(obj)[2].i == WORK(obj)[0].i) {
             return 1;
         }
         return 0;
     case 26:
-        return obj->param.word;
+        return obj->moveData.word;
     case 27:
-        return obj->behaviorState & 3;
+        return obj->task_flag & 3;
     case 28:
         return obj->inactive == 0;
     case 29:
@@ -244,7 +244,7 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
         }
         break;
     case 35:
-        return (obj->behaviorState & 4) != 0;
+        return (obj->task_flag & 4) != 0;
     }
     return 0;
 }

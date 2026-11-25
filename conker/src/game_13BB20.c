@@ -335,7 +335,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                     if (db_Object_array[D_800DBE60 - 1].materials != NULL) {
                         *outFlags = db_Object_array[D_800DBE60 - 1].materials[triIndex - db_Object_array[D_800DBE60 - 1].firstTri];
                     } else {
-                        *outFlags = db_Object_array[D_800DBE60 - 1].material;
+                        *outFlags = db_Object_array[D_800DBE60 - 1].floorHitAttrib;
                     }
                 } else if (outFlags != NULL) {
                     *outFlags = 0;
@@ -371,7 +371,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                                 if (db_Object_array[propNum - 1].materials != NULL) {
                                     ceilingFlags = db_Object_array[propNum - 1].materials[triIndex - db_Object_array[propNum - 1].firstTri];
                                 } else {
-                                    ceilingFlags = db_Object_array[propNum - 1].material;
+                                    ceilingFlags = db_Object_array[propNum - 1].floorHitAttrib;
                                 }
                             } else {
                                 ceilingFlags = 0;
@@ -405,7 +405,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
     if (object != NULL) {
         object->propNum = D_800DBE60;
         if (D_800DBE60 != 0 && (y - *outFloorY) < 10.0f) {
-            db_Object_array[D_800DBE60 - 1].flags |= 0x84;
+            db_Object_array[D_800DBE60 - 1].object_status |= 0x84;
             D_800DBF94[D_800DBE60 - 1] |= 1 << (object - movement_obj);
         }
         if (objectNum != 0 && (y - *outFloorY) < 10.0f) {

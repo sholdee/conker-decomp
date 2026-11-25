@@ -1038,7 +1038,7 @@ s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *
         if (entry->inactive != 0) {
             continue;
         }
-        if (entry->flags & 0x60) {
+        if (entry->object_status & 0x60) {
             continue;
         }
         extent = (entry->unk52 < entry->unk50) ? entry->unk50 : entry->unk52;

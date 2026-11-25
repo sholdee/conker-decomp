@@ -26,14 +26,14 @@ s32 func_1511A410(Gfx *dl, s32 *second) {
     return found[0];
 }
 
-/* Behaviour scratch state (WorldObject.work) of an object whose display list textures func_1511A494 animates. */
+/* Behaviour scratch state (WorldObject.touch) of an object whose display list textures func_1511A494 animates. */
 typedef struct {
     /* 0x7C */ s32 unk7C;
     /* 0x80 */ s32 texIndices;
     /* 0x84 */ s32 animState;
 } TexAnimWork;
 
-#define WORK(obj) ((TexAnimWork *)&(obj)->work)
+#define WORK(obj) ((TexAnimWork *)&(obj)->touch)
 
 /* One texture animation: a sequence of texture assets, optionally restricted to one world. */
 typedef struct {
@@ -131,7 +131,7 @@ extern void func_15116110(WorldObject *);
 
 /* Runs func_15116110 while unk3C is set, then advances the texture animation. */
 void func_1511A6FC(WorldObject *obj) {
-    if (obj->param.word != 0) {
+    if (obj->moveData.word != 0) {
         func_15116110(obj);
     }
     func_1511A494(obj, &WORK(obj)->texIndices, &WORK(obj)->animState);

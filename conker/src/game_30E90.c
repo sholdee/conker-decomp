@@ -133,7 +133,7 @@ void func_150039E0(s32 level, s32 arg1) {
         obj->state = base[i].state & ~8;
         obj->fadeDistance = 0;
         obj->inactive = base[i].inactive;
-        obj->param.data = base[i].data;
+        obj->moveData.data = base[i].data;
         behavior = base[i].behavior.func;
         if (base[i].behavior.index < 0xFFFF) {
             // matching: the (s32) casts keep the compares on a copy of the loaded word
@@ -141,30 +141,30 @@ void func_150039E0(s32 level, s32 arg1) {
                 obj->state |= 4;
                 setStateBit2 = TRUE;
             }
-            obj->update = D_80088C90[base[i].behavior.index].update;
+            obj->moveProc = D_80088C90[base[i].behavior.index].update;
             obj->onContact = D_80088C90[base[i].behavior.index].onContact;
             obj->unk92 = D_80088C90[base[i].behavior.index].unk8;
             if (base[i].behavior.index == 22) {
                 isBehavior22 = TRUE;
             }
         } else {
-            obj->update = behavior;
+            obj->moveProc = behavior;
             obj->onContact = NULL;
         }
-        obj->material = base[i].material;
-        obj->work.floor.unk7C = 0;
-        obj->work.floor.tri = 0;
-        *(s32 *)&obj->work.floor.y = 0; // matching: an integer zero store, not 0.0f
-        obj->sound = 0;
+        obj->floorHitAttrib = base[i].material;
+        obj->touch.floor.unk7C = 0;
+        obj->touch.floor.tri = 0;
+        *(s32 *)&obj->touch.floor.y = 0; // matching: an integer zero store, not 0.0f
+        obj->sound_id = 0;
         obj->attach = 0;
         obj->effectFlags = 0;
-        obj->behaviorState = 4;
+        obj->task_flag = 4;
         obj->spinX = obj->spinY = obj->spinZ = 0.0f;
         obj->moveX = obj->moveY = obj->moveZ = obj->spinZ; // matching: 0 via spinZ, not a literal
         obj->yOffset = 0;
         obj->alpha = 0xFF;
-        obj->viewAlpha[0] = obj->viewAlpha[1] = obj->viewAlpha[2] = obj->viewAlpha[3] = 0xFF;
-        obj->index = i;
+        obj->dst_fade_alpha[0] = obj->dst_fade_alpha[1] = obj->dst_fade_alpha[2] = obj->dst_fade_alpha[3] = 0xFF;
+        obj->object_num = i;
         obj->shadow = NULL;
         obj->unk98 = 0;
         if (obj->displayList == NULL) {
@@ -198,31 +198,31 @@ void func_150039E0(s32 level, s32 arg1) {
                 obj->unk4D = D_800A26C0[id].unk4D;
                 obj->unk50 = D_800A26C0[id].unk50;
                 obj->unk52 = D_800A26C0[id].unk52;
-                obj->flags = D_800A26C0[id].flags;
+                obj->object_status = D_800A26C0[id].flags;
                 obj->state = D_800A26C0[id].state & ~8;
                 obj->effectFlags = D_800A26C0[id].effectFlags;
                 if (setStateBit2) {
                     obj->state |= 4;
                 }
                 obj->drawDistance = D_800A26C0[id].drawDistance;
-                obj->id = base[i].id;
+                obj->unique_id = base[i].id;
             } else {
                 obj->unk50 = base[i].unk50;
                 obj->unk52 = base[i].unk52;
-                obj->flags = base[i].flags;
+                obj->object_status = base[i].flags;
                 obj->unk4C = base[i].unk4C;
                 obj->unk4D = base[i].unk4D;
                 obj->drawDistance = base[i].drawDistance;
                 if (base[i].id != 0) {
-                    obj->id = base[i].id;
+                    obj->unique_id = base[i].id;
                 } else {
-                    obj->id = func_15004BF0(TRUE);
+                    obj->unique_id = func_15004BF0(TRUE);
                 }
             }
             if (id == 0x71) {
-                obj->material = 0xE;
+                obj->floorHitAttrib = 0xE;
             }
-            if (obj->update != NULL || isBehavior22) {
+            if (obj->moveProc != NULL || isBehavior22) {
                 if (obj->inactive == 0) {
                     obj->viewFlags = 0xF;
                 } else {
@@ -270,18 +270,18 @@ void func_150039E0(s32 level, s32 arg1) {
             }
             obj->unk50 = base[i].unk50;
             obj->unk52 = base[i].unk52;
-            obj->flags = base[i].flags;
+            obj->object_status = base[i].flags;
             obj->unk4C = base[i].unk4C;
             obj->unk4D = base[i].unk4D;
             obj->drawDistance = base[i].drawDistance;
             if (base[i].id != 0) {
-                obj->id = base[i].id;
+                obj->unique_id = base[i].id;
             } else {
-                obj->id = func_15004BF0(TRUE);
+                obj->unique_id = func_15004BF0(TRUE);
             }
         }
         func_15004AAC(obj, &base[i]);
-        if (obj->update == NULL && !isBehavior22) {
+        if (obj->moveProc == NULL && !isBehavior22) {
             obj->viewFlags |= 0x20;
         }
         if (!found) {
@@ -323,8 +323,8 @@ void func_150039E0(s32 level, s32 arg1) {
         D_800DBF94[i] = 0;
     }
     for (i = D_800DBF00; i < D_800DBEF0; i++) {
-        if (db_Object_array[i].id == 0) {
-            db_Object_array[i].id = func_15004BF0(FALSE);
+        if (db_Object_array[i].unique_id == 0) {
+            db_Object_array[i].unique_id = func_15004BF0(FALSE);
         }
     }
 }
@@ -375,7 +375,7 @@ void func_150045C4(s32 arg0) {
     guMtxIdentF(D_800DBF48);
     for (i = 0; i < D_800DBEF0; i++) {
         obj = &db_Object_array[i];
-        if (obj->update == NULL || obj->update == func_15116058 || obj->update == func_15116110) {
+        if (obj->moveProc == NULL || obj->moveProc == func_15116058 || obj->moveProc == func_15116110) {
             obj->attach = 3;
         }
         if (!(obj->state & 1)) {
@@ -383,8 +383,8 @@ void func_150045C4(s32 arg0) {
             guMtxF2L(mtx, &(*D_80089250[D_800BE9C0])[i]);
             bcopy(&(*D_80089250[D_800BE9C0])[i], &(*D_80089250[!D_800BE9C0])[i], sizeof(Mtx));
         }
-        if (obj->update == func_151150B0) {
-            obj->update = NULL;
+        if (obj->moveProc == func_151150B0) {
+            obj->moveProc = NULL;
         }
         if ((obj->state & 1) == 1) {
             func_1511490C(mtx, obj);
@@ -398,7 +398,7 @@ void func_150045C4(s32 arg0) {
             bcopy(obj->vertices[0], obj->vertices[1], obj->numVertices * sizeof(Vtx));
         }
         func_1510F800(2);
-        if ((obj->viewFlags & 0x80) == 0x80 && (obj->flags & 0x60) != 0x20) {
+        if ((obj->viewFlags & 0x80) == 0x80 && (obj->object_status & 0x60) != 0x20) {
             D_800D37E0[0] = i;
             func_150A44F0(1, D_800D37E0, 1);
         }
@@ -411,8 +411,8 @@ void func_150045C4(s32 arg0) {
         if ((obj->viewFlags & 0x20) == 0x20) {
             func_1510E7A4(&floorTri, NULL, &floorY, NULL, &floorFlags, NULL, obj->x, obj->y, obj->z, obj->y,
                           i + 1, NULL, -10000.0f, 20000.0f);
-            obj->work.floor.tri = floorTri;
-            obj->work.floor.y = floorY;
+            obj->touch.floor.tri = floorTri;
+            obj->touch.floor.y = floorY;
         }
     }
 }
@@ -531,7 +531,7 @@ s32 func_15004BF0(s32 fromTop) {
     if (fromTop == 0) {
         id = 1;
         for (i = fromTop = D_800DBF00; i < D_800DBEF0; i++) {
-            if (id == db_Object_array[i].id) {
+            if (id == db_Object_array[i].unique_id) {
                 id++;
                 i = fromTop - 1; // rescan with the next id
             }
@@ -544,7 +544,7 @@ s32 func_15004BF0(s32 fromTop) {
         fromTop = 0xFF - D_800DBF00;
         id = fromTop;
         for (i = 0; i < D_800DBEF0; i++) {
-            if (id == db_Object_array[i].id) {
+            if (id == db_Object_array[i].unique_id) {
                 id--;
                 i = -1; // rescan with the next id
             }

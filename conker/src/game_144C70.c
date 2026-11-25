@@ -22,7 +22,7 @@ typedef struct PropVtx {
     /* 0xC */ u8 cn[4];
 } PropVtx;
 
-/* Behaviour scratch state of the props in this file (WorldObject.work). */
+/* Behaviour scratch state of the props in this file (WorldObject.touch). */
 typedef union {
     struct {
         s32 homeY; /* y | 0x80000000 once saved */
@@ -54,16 +54,16 @@ typedef union {
     } sway;
 } PropWork;
 
-#define WORK(prop) ((PropWork *)&(prop)->work)
+#define WORK(prop) ((PropWork *)&(prop)->touch)
 
-/* Motion states kept in bits 0-1 of WorldObject.behaviorState. */
+/* Motion states kept in bits 0-1 of WorldObject.task_flag. */
 #define PROP_REST 0
 #define PROP_RETURNING 1
 #define PROP_MOVING 2
 #define PROP_ARRIVED 3
 
 #define PROP_SET_MOTION(prop, motion) \
-    ((prop)->behaviorState &= ~3, (prop)->behaviorState |= (motion))
+    ((prop)->task_flag &= ~3, (prop)->task_flag |= (motion))
 
 extern void func_15104A80(WorldObject *prop);
 
@@ -82,8 +82,8 @@ void func_151177C0(WorldObject *prop) {
     s16 lowered;
     s32 homeY;
 
-    motion = prop->behaviorState & 3;
-    flag4 = prop->behaviorState & 4;
+    motion = prop->task_flag & 3;
+    flag4 = prop->task_flag & 4;
     kind = prop->modelId;
     travel = 40;
     step = 3;
@@ -114,7 +114,7 @@ void func_151177C0(WorldObject *prop) {
         if (prop->y != lowered) {
             prop->y = lowered;
         }
-        if (autoReturn && !(prop->flags & 4) && !flag4) {
+        if (autoReturn && !(prop->object_status & 4) && !flag4) {
             motion = PROP_RETURNING;
         }
     } else if (motion == PROP_REST) {
@@ -166,9 +166,9 @@ void func_151179BC(WorldObject *prop) {
     f32 cz;
     f32 sz;
 
-    motion = prop->behaviorState & 3;
-    distance = (prop->param.word >> 16) & 0xFFFF;
-    delay = prop->param.word & 0xFFFF;
+    motion = prop->task_flag & 3;
+    distance = (prop->moveData.word >> 16) & 0xFFFF;
+    delay = prop->moveData.word & 0xFFFF;
     if (WORK(prop)->slide.homeZ == 0) {
         WORK(prop)->slide.homeXY = (prop->x & 0xFFFF) | (prop->y << 16);
         WORK(prop)->slide.homeZ = prop->z | 0x80000000;
@@ -189,7 +189,7 @@ void func_151179BC(WorldObject *prop) {
         } else {
             offset = distance;
         }
-        if (delay != 0 && !(prop->flags & 4) && !(prop->behaviorState & 4)) {
+        if (delay != 0 && !(prop->object_status & 4) && !(prop->task_flag & 4)) {
             if (D_800BE9E4 < WORK(prop)->slide.timer) {
                 WORK(prop)->slide.timer -= D_800BE9E4;
             } else {
@@ -238,9 +238,9 @@ void func_151179BC(WorldObject *prop) {
 
 /* Starts the prop moving when an object with interaction_state 1 triggers it while it is at rest. */
 void func_15117D3C(WorldObject *prop, Actor *obj) {
-    s32 delay = prop->param.word & 0xFFFF;
+    s32 delay = prop->moveData.word & 0xFFFF;
 
-    if (obj->interaction_state == 1 && (prop->flags & 4) && !(prop->behaviorState & 3) && !(prop->behaviorState & 4) &&
+    if (obj->interaction_state == 1 && (prop->object_status & 4) && !(prop->task_flag & 3) && !(prop->task_flag & 4) &&
         (delay == 0 || obj->unk31C->unk57 == 1)) {
         PROP_SET_MOTION(prop, PROP_MOVING);
     }
@@ -322,9 +322,9 @@ void func_15117F3C(WorldObject *prop) {
     maxAngle = 40.0; // matching: a double literal; 40.0f loads the constant differently
     rangeSq = 40000.0f;
     sound = 0x4B8;
-    motion = prop->behaviorState & 3;
-    flag4 = prop->behaviorState & 4;
-    stayOpen = prop->behaviorState & 8;
+    motion = prop->task_flag & 3;
+    flag4 = prop->task_flag & 4;
+    stayOpen = prop->task_flag & 8;
     switch (D_800BE9F0) {
     case 1:
     case 41:
@@ -484,7 +484,7 @@ void func_15117F3C(WorldObject *prop) {
                 }
                 accel += 0.02999999933f;
                 if (0.200000003f < accel) {
-                    if (prop->sound == 0) {
+                    if (prop->sound_id == 0) {
                         func_15114D24(prop, sound, 0x7D00, 0x5DC, 0xDAC, 0);
                     }
                 }
@@ -567,11 +567,11 @@ void func_15117F3C(WorldObject *prop) {
     WORK(prop)->hatch.counters |= started;
     WORK(prop)->hatch.accel = accel;
     WORK(prop)->hatch.speed = speed;
-    prop->flags &= ~0x60;
+    prop->object_status &= ~0x60;
     if (motion == PROP_MOVING || (motion == PROP_REST && timer != 0)) {
-        prop->flags |= 0x20;
+        prop->object_status |= 0x20;
     } else {
-        prop->flags |= 0; // matching: the no-op OR still emits a load/store pair
+        prop->object_status |= 0; // matching: the no-op OR still emits a load/store pair
     }
 }
 
@@ -615,15 +615,15 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
     sound = 0;
     slow = FALSE;
     func_1511F990(prop, arg1);
-    row = (prop->param.word & 0xFC00) >> 10;
-    openAngle = (prop->param.word << 22) >> 22;
-    motion = prop->behaviorState & 3;
+    row = (prop->moveData.word & 0xFC00) >> 10;
+    openAngle = (prop->moveData.word << 22) >> 22;
+    motion = prop->task_flag & 3;
     target = openAngle;
     angle = prop->u;
     speed = WORK(prop)->swing.speed;
     if (motion == PROP_REST || motion == PROP_RETURNING) {
         target = 0.0f;
-        if (motion == PROP_RETURNING && (prop->behaviorState & 4)) {
+        if (motion == PROP_RETURNING && (prop->task_flag & 4)) {
             slow = TRUE;
         }
     }
@@ -705,7 +705,7 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
         } else {
             prop->u = angle;
         }
-        index = (prop->param.word >> 24) & 0xFF;
+        index = (prop->moveData.word >> 24) & 0xFF;
         if (D_800BE9F0 == 2) {
             func_1000E75C(255.0f - fabsf(((angle - (f32)openAngle) * 255.0f) / (f32)openAngle));
             return;
@@ -740,8 +740,8 @@ void func_15118F24(WorldObject *prop) {
     f32 scale;
 
     func_1511F990(prop, 1);
-    motion = prop->behaviorState & 3;
-    openAngle = prop->param.half.lo;
+    motion = prop->task_flag & 3;
+    openAngle = prop->moveData.half.lo;
     target = openAngle;
     angle = prop->v;
     speed = WORK(prop)->swing.speed;
@@ -811,7 +811,7 @@ void func_15118F24(WorldObject *prop) {
     WORK(prop)->swing.speed = speed;
     if (D_800BE9B4 != 0 || angle != prop->v) {
         prop->v = angle;
-        index = (prop->param.word >> 24) & 0xFF;
+        index = (prop->moveData.word >> 24) & 0xFF;
         if (index != 0 && openAngle != 0) {
             scale = 1.0f - fabsf((angle - (f32)openAngle) / (f32)openAngle);
             func_1518804C(index - 1, scale);
@@ -822,7 +822,7 @@ void func_15118F24(WorldObject *prop) {
 
 /* Starts the prop moving when an object with interaction_state 1 (and unk65 clear) triggers it at rest. */
 void func_151193AC(WorldObject *prop, Actor *obj) {
-    if (obj->interaction_state == 1 && obj->unk65 == 0 && !(prop->behaviorState & 3) && !(prop->behaviorState & 4)) {
+    if (obj->interaction_state == 1 && obj->unk65 == 0 && !(prop->task_flag & 3) && !(prop->task_flag & 4)) {
         PROP_SET_MOTION(prop, PROP_MOVING);
     }
 }
@@ -846,9 +846,9 @@ void func_151193F4(WorldObject *prop) {
     if (speed != 0) {
         position = WORK(prop)->follow.position;
         homeY = (s16)(WORK(prop)->follow.homeY & 0xFFFF);
-        range = (u16)(prop->param.word >> 16);
+        range = (u16)(prop->moveData.word >> 16);
         targetY = (s32)(range * position) / 256 + homeY;
-        prop->behaviorState &= ~3;
+        prop->task_flag &= ~3;
         if (targetY != prop->y) {
             diff = prop->y - targetY;
             if (diff < 0) {
@@ -864,9 +864,9 @@ void func_151193F4(WorldObject *prop) {
                     prop->y -= speed;
                 }
             }
-            prop->behaviorState |= PROP_REST; // matching: the no-op OR still emits the original lbu/sb
+            prop->task_flag |= PROP_REST; // matching: the no-op OR still emits the original lbu/sb
         } else {
-            prop->behaviorState |= PROP_ARRIVED;
+            prop->task_flag |= PROP_ARRIVED;
         }
     }
 }

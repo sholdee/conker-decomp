@@ -1966,11 +1966,11 @@ void func_151E6C1C(s32 index) {
                 if (r != NULL) {
                     if (D_8008FDD4->unkC > 0.0f || D_8008FDD0 < 1.0f) {
                         if (D_8008FF78[D_8008FDD4->unk2C] < (s32)(scale * 100.0f)) {
-                            r->work.words[1] = 1;
+                            r->touch.i.b = 1;
                         }
                     } else if (D_8008FDD4->unkC < 0.0f) {
                         if (D_8008FF80[D_8008FDD4->unk2C] >= (s32)(scale * 100.0f)) {
-                            r->work.words[1] = 0;
+                            r->touch.i.b = 0;
                         }
                     }
                 }
@@ -2217,7 +2217,7 @@ void func_151E7DC0(void) {
         }
         r = func_151149AC(objId);
         if (r != NULL) {
-            r->work.words[1] = 2;
+            r->touch.i.b = 2;
         }
     }
 }

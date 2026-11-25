@@ -262,24 +262,24 @@ void func_150EA8E0(s32 arg0) {
     func_150E5AE0();
 }
 
-/* Sets behaviorState bits 0 and 1 on db_Object_array entry `index` if its id is 0xE0. */
+/* Sets task_flag bits 0 and 1 on db_Object_array entry `index` if its id is 0xE0. */
 void func_150EA904(s32 arg0, s32 index) {
     // matching: the no-op cast makes IDO load the array base before scaling index
     WorldObject *entry = (WorldObject *)db_Object_array + index;
 
-    if (entry->id == 0xE0) {
-        entry->behaviorState = (entry->behaviorState & 0xFF) | 3; // matching: the no-op mask costs IDO one extra temp register
+    if (entry->unique_id == 0xE0) {
+        entry->task_flag = (entry->task_flag & 0xFF) | 3; // matching: the no-op mask costs IDO one extra temp register
     }
 }
 
-/* While behaviorState bits 0-1 are set: spins and moves the entry, applies gravity (param, y kept in 1/8
- * units in work.words[0]) and fades its alpha out, then marks it inactive. */
+/* While task_flag bits 0-1 are set: spins and moves the entry, applies gravity (param, y kept in 1/8
+ * units in touch.i.a) and fades its alpha out, then marks it inactive. */
 void func_150EA944(WorldObject *entry) {
     f32 frames;
     f32 angle;
     s32 timer;
 
-    if ((entry->behaviorState & 3) == 3) {
+    if ((entry->task_flag & 3) == 3) {
         frames = D_800BE9E4;
 
         entry->t += entry->spinX * frames;
@@ -307,10 +307,10 @@ void func_150EA944(WorldObject *entry) {
         }
 
         timer = entry->alpha;
-        entry->moveY -= entry->param.word * D_800BE9E4;
+        entry->moveY -= entry->moveData.word * D_800BE9E4;
         entry->x += entry->moveX * D_800BE9E4;
-        entry->work.words[0] += entry->moveY * D_800BE9E4;
-        entry->y = entry->work.words[0] >> 3;
+        entry->touch.i.a += entry->moveY * D_800BE9E4;
+        entry->y = entry->touch.i.a >> 3;
         entry->z += entry->moveZ * D_800BE9E4;
 
         timer -= D_800BE9E4 * 4;

@@ -521,9 +521,9 @@ s32 func_1507D754(Actor *obj) {
             spawned->u = obj->unk40;
             spawned->v = obj->unkC4;
             spawned->alpha = 0xFF;
-            spawned->work.words[0] = 0;
-            spawned->work.words[1] = 0;
-            spawned->work.words[2] = 0;
+            spawned->touch.i.a = 0;
+            spawned->touch.i.b = 0;
+            spawned->touch.i.c = 0;
         }
         if (D_800BE616 != 0) {
             return 2;

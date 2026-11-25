@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Behaviour scratch state of the props in this file (WorldObject.work). */
+/* Behaviour scratch state of the props in this file (WorldObject.touch). */
 typedef union {
     struct {
         s32 started;   /* set after the first update */
@@ -16,9 +16,9 @@ typedef union {
     } wobble;
 } PropWork;
 
-#define WORK(prop) ((PropWork *)&(prop)->work)
+#define WORK(prop) ((PropWork *)&(prop)->touch)
 
-/* Motion states kept in bits 0-1 of WorldObject.behaviorState. */
+/* Motion states kept in bits 0-1 of WorldObject.task_flag. */
 #define PROP_REST 0
 #define PROP_RETURNING 1
 #define PROP_MOVING 2
@@ -43,7 +43,7 @@ void func_1511E780(WorldObject *prop) {
     f32 range;
     f32 rate;
 
-    motion = prop->behaviorState & 3;
+    motion = prop->task_flag & 3;
     soundSlot = -1;
     if (WORK(prop)->slide.triggered == 1) {
         if (motion == PROP_REST || motion == PROP_RETURNING) {
@@ -61,7 +61,7 @@ void func_1511E780(WorldObject *prop) {
         speed = 90.0f;
     }
     if (soundSlot != -1) {
-        sound = prop->param.word & 0xFFFF; // matching: the row index must share sound's register
+        sound = prop->moveData.word & 0xFFFF; // matching: the row index must share sound's register
         sound = (&D_80089260[sound].open)[soundSlot];
         if (sound > 0) {
             func_15114D24(prop, sound, 24000, 200, 2500, 0);
@@ -70,7 +70,7 @@ void func_1511E780(WorldObject *prop) {
     speed *= D_800BE9E4;
     range = 70.0f;
     rate = 6.0f;
-    switch (prop->param.word >> 16) {
+    switch (prop->moveData.word >> 16) {
     case 6:
         rate = 3.0f;
         range = 82.0f;
@@ -80,7 +80,7 @@ void func_1511E780(WorldObject *prop) {
         range = 80.0f;
         break;
     }
-    switch (prop->param.word >> 16) {
+    switch (prop->moveData.word >> 16) {
     case 0:
         if (WORK(prop)->slide.started == 0) {
             WORK(prop)->slide.home = prop->v;
@@ -162,8 +162,8 @@ void func_1511E780(WorldObject *prop) {
         break;
     }
     WORK(prop)->slide.started = TRUE;
-    prop->behaviorState &= ~3;
-    prop->behaviorState |= motion;
+    prop->task_flag &= ~3;
+    prop->task_flag |= motion;
 }
 
 /*
@@ -179,7 +179,7 @@ void func_1511EC50(WorldObject *prop) {
     }
 
     step = D_800BE9E4 * 4.0f;
-    if (prop->param.word != 0) {
+    if (prop->moveData.word != 0) {
         step *= 0.25f;
     }
 
@@ -213,7 +213,7 @@ void func_1511ED84(WorldObject *prop) {
     }
 
     step = D_800BE9E4 * 4.0f;
-    direction = 1 - (prop->id & 1);
+    direction = 1 - (prop->unique_id & 1);
 
     if (WORK(prop)->slide.triggered != 0) {
         if (direction & 1) {

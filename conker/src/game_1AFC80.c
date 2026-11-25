@@ -108,7 +108,7 @@ void func_15182C5C(WorldObject *prop) {
     f32 frac;
     s32 lift;
 
-    chain = prop->param.word;
+    chain = prop->moveData.word;
     out = prop->vertices[D_800BE9C0];
     func_150A8050(mtx, 0.0f, -D_8008D050[D_800DDE54[chain]].angle, 0.0f);
     for (i = 0; i < db_Object_array[D_8008D050[D_800DDE54[chain]].objIndex].numVertices; i++) {

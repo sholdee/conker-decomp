@@ -260,7 +260,7 @@ void func_15171200(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed, f32 m
 
 /* Spawns the scene-specific square ring of particles under the actor, chosen by its unk72. */
 void func_15171600(WorldObject *actor, u8 owner, s32 list) {
-    switch (actor->id) {
+    switch (actor->unique_id) {
     case 0xEB:
         func_151717FC(actor, 400.0f, 500.0f, 0.0f, -1270.0f, 0.0f, 2, 5, 20, 20, 1.0f, owner, list);
         break;

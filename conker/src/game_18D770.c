@@ -1099,27 +1099,27 @@ s32 func_15162B28(LightEffect *effect) {
     return 1;
 }
 
-/* Cycle callback: sets bit 0 of work.words[0] on the payload's object and sends event 36. */
+/* Cycle callback: sets bit 0 of touch.i.a on the payload's object and sends event 36. */
 void func_15162EF8(LightEffect *effect) {
     s8 message[9];
     WorldObject *object;
 
     object = func_151149AC(effect->data.objectCycle.objectId);
     if (object != NULL) {
-        object->work.words[0] |= 1;
+        object->touch.i.a |= 1;
     }
     message[0] = effect->lightType - 21;
     func_151403A8(&message, 36);
 }
 
-/* Cycle callback: clears bit 0 of work.words[0] on the payload's object and sends event 37. */
+/* Cycle callback: clears bit 0 of touch.i.a on the payload's object and sends event 37. */
 void func_15162F50(LightEffect *effect) {
     s8 message[9];
     WorldObject *object;
 
     object = func_151149AC(effect->data.objectCycle.objectId);
     if (object != NULL) {
-        object->work.words[0] &= ~1;
+        object->touch.i.a &= ~1;
     }
     message[0] = effect->lightType - 21;
     func_151403A8(&message, 37);

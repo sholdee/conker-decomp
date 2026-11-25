@@ -18,13 +18,13 @@ typedef struct {
     /* 0x13 */ s8 unk13;
 } LinkedObj;
 
-/* Behaviour scratch state of the objects in this file (WorldObject.work). */
+/* Behaviour scratch state of the objects in this file (WorldObject.touch). */
 typedef union {
     s32 count;        // func_150C7C90
     LinkedObj *link;  // func_150C7968
 } F4D20Work;
 
-#define WORK(obj) ((F4D20Work *)&(obj)->work)
+#define WORK(obj) ((F4D20Work *)&(obj)->touch)
 
 extern void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale);
 extern WorldObject *func_151149AC(u8);
@@ -35,7 +35,7 @@ extern s32 func_15116110(WorldObject *obj);
  * bit 3 of byte 0xA of the 27-byte flag record at D_800D2E4C is set. */
 void func_150C7870(WorldObject *obj) {
     if (!(D_800D2E4C[0xA] & 8)) {
-        if (!(db_Object_array[0].behaviorState & 4)) {
+        if (!(db_Object_array[0].task_flag & 4)) {
             func_1511650C(obj, 1, 0x353, 1000.0f);
         } else {
             func_1511650C(obj, 1, 0x43, 400.0f);
@@ -47,9 +47,9 @@ void func_150C7870(WorldObject *obj) {
 void func_150C78E0(WorldObject *obj) {
     WorldObject *obj3;
 
-    if (!(obj->behaviorState & 4)) {
+    if (!(obj->task_flag & 4)) {
         obj3 = &db_Object_array[3];
-        obj->param.word = -(obj3->param.word & 0xFFFF0000) & 0xFFFF0000;
+        obj->moveData.word = -(obj3->moveData.word & 0xFFFF0000) & 0xFFFF0000;
         func_151150BC(obj);
     }
 }
@@ -59,7 +59,7 @@ void func_150C7930(WorldObject *obj) {
     WorldObject *obj3;
 
     obj3 = &db_Object_array[3];
-    obj->param.word = obj3->param.word & 0xFFFF0000;
+    obj->moveData.word = obj3->moveData.word & 0xFFFF0000;
     func_151150BC(obj);
 }
 
@@ -70,10 +70,10 @@ void func_150C7968(WorldObject *obj) {
     s32 speed;
 
     func_15116110(obj);
-    if (!(obj->behaviorState & 4)) {
+    if (!(obj->task_flag & 4)) {
         obj3 = &db_Object_array[3];
         link = WORK(obj)->link;
-        speed = obj3->param.half.hi >> 4;
+        speed = obj3->moveData.half.hi >> 4;
         if (link != NULL) {
             link->unk13 = speed;
         }
@@ -144,8 +144,8 @@ void func_150C7C90(WorldObject *obj) {
         index = count;
     }
     last = &((F4D20Entry *)obj->displayList)[index];
-    angle = -669 - func_151149AC(obj->param.word & 0xFF)->y;
-    if (obj->param.word & 0x8000) {
+    angle = -669 - func_151149AC(obj->moveData.word & 0xFF)->y;
+    if (obj->moveData.word & 0x8000) {
         angle = 836 - angle;
     }
     while (angle < 0) {

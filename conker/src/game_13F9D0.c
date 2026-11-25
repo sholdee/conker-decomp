@@ -5,7 +5,7 @@
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
 void func_10004074();
 
-/* Turret settings (WorldObject.param.data); angles in degrees. */
+/* Turret settings (WorldObject.moveData.data); angles in degrees. */
 typedef struct Turret15112520Cfg {
     /* 0x00 */ f32 speedNear;
     /* 0x04 */ f32 speedFar;
@@ -39,7 +39,7 @@ void func_15112520(WorldObject *turret) {
     s32 pad; // matching: unused stack slot
     static s16 D_80089234; // sound timer: 0 idle, -1 start the sound, >0 cooldown frames
 
-    cfg = turret->param.data;
+    cfg = turret->moveData.data;
     dx = movement_obj[0].x_position - turret->x;
     dy = (movement_obj[0].y_position + 65.0f) - turret->y;
     dz = movement_obj[0].z_position - turret->z;
@@ -165,7 +165,7 @@ void func_15112A80(s32 player) {
                     obj = i + db_Object_array; // matching: &db_Object_array[i] swaps the addu operands
                     obj->viewFlags &= ~(1 << view);
                     // matching: empty then-branch orders uopt's live ranges (see func_15112A80 notes)
-                    if (!(obj->inactive != 1 && !(obj->state & 8) && (obj->flags & 1) && obj->alpha != 0 &&
+                    if (!(obj->inactive != 1 && !(obj->state & 8) && (obj->object_status & 1) && obj->alpha != 0 &&
                           (D_800C3658[player] != 0 || D_800C35EA[player] != 1 || func_15022B08(i, player) != 0) &&
                           ((D_800C35EA[player] == 1 && func_15022B08(i, player) != 0) ||
                            !(obj->effectFlags & 0x100) || func_1503F800(&obj->unk98, obj->x, obj->z, view, 0) == 0))) {
@@ -189,31 +189,31 @@ void func_15112A80(s32 player) {
                             *dp = -*dp;
                         }
                         if (*dp == 0) {
-                            obj->viewAlpha[view] = 0;
+                            obj->dst_fade_alpha[view] = 0;
                         } else if (drawDist < *dp) {
-                            obj->viewAlpha[view] = 0;
+                            obj->dst_fade_alpha[view] = 0;
                         } else {
                             if (*dp < drawDist - 200) {
                                 step = D_800BE9E4 * 10;
                                 if (obj->fadeDistance != 0) {
                                     if (*dp < obj->fadeDistance) {
-                                        if (step < obj->viewAlpha[view]) {
-                                            obj->viewAlpha[view] -= step;
+                                        if (step < obj->dst_fade_alpha[view]) {
+                                            obj->dst_fade_alpha[view] -= step;
                                         } else {
-                                            obj->viewAlpha[view] = 0;
+                                            obj->dst_fade_alpha[view] = 0;
                                         }
                                     } else {
-                                        if (obj->viewAlpha[view] < 255 - step) {
-                                            obj->viewAlpha[view] += step;
+                                        if (obj->dst_fade_alpha[view] < 255 - step) {
+                                            obj->dst_fade_alpha[view] += step;
                                         } else {
-                                            obj->viewAlpha[view] = 255;
+                                            obj->dst_fade_alpha[view] = 255;
                                         }
                                     }
-                                    if (obj->viewAlpha[view] == 0) {
+                                    if (obj->dst_fade_alpha[view] == 0) {
                                         continue;
                                     }
                                 } else {
-                                    obj->viewAlpha[view] = 255;
+                                    obj->dst_fade_alpha[view] = 255;
                                 // matching: this label splits the basic block, changing as1's scheduling
                                 fence:;
                                 }
@@ -222,7 +222,7 @@ void func_15112A80(s32 player) {
                                 if (alpha >= 256) {
                                     alpha = 255;
                                 }
-                                obj->viewAlpha[view] = alpha;
+                                obj->dst_fade_alpha[view] = alpha;
                             }
                             mask |= 1 << view;
                         }
@@ -247,7 +247,7 @@ void func_15113180(void) {
 
     for (i = 0; i < D_800DBEF0; i++) {
         db_Object_array[i].viewFlags &= ~0x40;
-        if (((db_Object_array[i].viewFlags & 0xF) != 0 || (db_Object_array[i].state & 4) == 4) && db_Object_array[i].update != NULL) {
+        if (((db_Object_array[i].viewFlags & 0xF) != 0 || (db_Object_array[i].state & 4) == 4) && db_Object_array[i].moveProc != NULL) {
             db_Object_array[i].viewFlags |= 0x40;
         }
     }
@@ -365,16 +365,16 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
     u16 effects;
 
     start = gfx;
-    if (obj->viewAlpha[view] == 255 && obj->alpha == 255) {
+    if (obj->dst_fade_alpha[view] == 255 && obj->alpha == 255) {
         alpha = 255;
     } else {
-        alpha = (obj->viewAlpha[view] * obj->alpha) / 255;
+        alpha = (obj->dst_fade_alpha[view] * obj->alpha) / 255;
         if (alpha == 0) {
             return gfx;
         }
     }
     if (alpha == 255) {
-        if (pass == (obj->flags & 0x10)) {
+        if (pass == (obj->object_status & 0x10)) {
             return gfx;
         }
     } else if (pass != 0) {
@@ -385,7 +385,7 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
         if (effects & 1) {
             gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->u, view);
         } else if (effects & 0x10) {
-            gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->work.floor.unk7C, view);
+            gfx = func_1511FC2C(gfx, obj->x, obj->y + obj->yOffset, obj->z, obj->touch.floor.unk7C, view);
         } else if (effects & 0x20) {
             gfx = func_1511FC44(gfx, obj->x, obj->y + obj->yOffset, obj->z, view);
         }
@@ -396,7 +396,7 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
     } else {
         gSPSegment(gfx++, 8, D_80083EC0);
     }
-    if ((obj->flags & 2) == 2) {
+    if ((obj->object_status & 2) == 2) {
         gSPSetGeometryMode(gfx++, 0x400000);
     } else {
         gSPClearGeometryMode(gfx++, 0x400000);
@@ -442,14 +442,14 @@ void func_15113C88(void) {
         hidden = FALSE;
         obj = i + db_Object_array; // matching: &db_Object_array[i] swaps the addu operands
         for (j = 0; j < D_80082FA0; j++) {
-            if (func_150859AC(j, 0) != 0 && obj->viewAlpha[j] == 0) {
+            if (func_150859AC(j, 0) != 0 && obj->dst_fade_alpha[j] == 0) {
                 hidden = TRUE;
                 break;
             }
         }
         do { // matching: without this wrapper uopt stops keeping &D_800C3658 in a saved register
-            if ((obj->state & 8) || obj->unk4C == 0 || (obj->flags & 0x10) == 0x10 || hidden ||
-                (D_800C3658[0] == 0 && D_800C35EA[0] == 1 && func_15022B08(i, 0) == 0) || !(obj->flags & 1)) {
+            if ((obj->state & 8) || obj->unk4C == 0 || (obj->object_status & 0x10) == 0x10 || hidden ||
+                (D_800C3658[0] == 0 && D_800C35EA[0] == 1 && func_15022B08(i, 0) == 0) || !(obj->object_status & 1)) {
                 show = FALSE;
             } else {
                 show = TRUE;
@@ -489,7 +489,7 @@ void func_15113E54(s32 arg0) {
     for (i = 0; i < count; i++) {
         obj = i + db_Object_array; // matching: operand order of the addu
         if ((obj->viewFlags & 0x40) == 0x40 && obj->inactive == 0) {
-            obj->update(obj);
+            obj->moveProc(obj);
         }
     }
 
@@ -504,15 +504,15 @@ void func_15113E54(s32 arg0) {
                             obj->moveX = moveX;
                             obj->moveY = moveY;
                             obj->moveZ = moveZ;
-                            obj->work.floor.tri = leaderFloorTri;
+                            obj->touch.floor.tri = leaderFloorTri;
                         }
-                        obj->update(obj);
+                        obj->moveProc(obj);
                     }
                     if (j == 0) {
                         moveX = obj->moveX;
                         moveY = obj->moveY;
                         moveZ = obj->moveZ;
-                        leaderFloorTri = obj->work.floor.tri;
+                        leaderFloorTri = obj->touch.floor.tri;
                     }
                 }
             }
@@ -522,7 +522,7 @@ void func_15113E54(s32 arg0) {
 
 /* Whether actor `actor` (any actor if -1) touches obj; only objects with flags bit 0x80 track contacts. */
 s32 func_15114050(WorldObject *obj, s32 actor) {
-    if (obj->flags & 0x80) {
+    if (obj->object_status & 0x80) {
         if (actor == -1) {
             return TRUE;
         }
@@ -538,7 +538,7 @@ s32 func_151140C4(WorldObject *obj) {
     s32 i;
 
     i = 0;
-    if (obj->flags & 0x80) {
+    if (obj->object_status & 0x80) {
         for (; i != 32; i++) {
             if (D_800DBF94[obj - db_Object_array] & (1 << i)) {
                 return i;
@@ -563,12 +563,12 @@ void func_15114188(void) {
                     if (db_Object_array[i].onContact != NULL && (db_Object_array[i].unk92 != 0 || movement_obj[j].unk127 != 0xFF)) {
                         db_Object_array[i].onContact(i + db_Object_array, &movement_obj[j]); // matching: addu operand order
                     }
-                    if ((db_Object_array[i].flags & 4) == 4 && !(db_Object_array[i].flags & 8)) {
+                    if ((db_Object_array[i].object_status & 4) == 4 && !(db_Object_array[i].object_status & 8)) {
                         func_1511473C(&movement_obj[j], i);
                     }
                 }
             }
-            db_Object_array[i].flags &= ~0x8C;
+            db_Object_array[i].object_status &= ~0x8C;
         }
     }
 }
@@ -676,7 +676,7 @@ WorldObject *func_151149AC(u8 id) {
         return NULL;
     }
     for (i = 0; i < D_800DBEF0; i++) {
-        if (db_Object_array[i].id == id) {
+        if (db_Object_array[i].unique_id == id) {
             return i + db_Object_array;
         }
     }
@@ -781,17 +781,17 @@ void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 
     u16 handle;
 
     if (flags & 1) {
-        if (obj->sound != 0) {
-            if (func_1001147C(obj->sound) == sfx) {
+        if (obj->sound_id != 0) {
+            if (func_1001147C(obj->sound_id) == sfx) {
                 return;
             }
         }
     }
 
     if (sfx == -1) {
-        if (obj->sound != 0) {
-            func_100111C8(obj->sound);
-            obj->sound = 0;
+        if (obj->sound_id != 0) {
+            func_100111C8(obj->sound_id);
+            obj->sound_id = 0;
         }
         return;
     }
@@ -799,25 +799,25 @@ void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 
     if (flags & 8) {
         handle = 0;
     } else {
-        handle = obj->sound;
+        handle = obj->sound_id;
     }
 
     if (flags & 4) {
         func_10010E78(handle, sfx, arg2, 0, 0, -1, obj->x, obj->y, obj->z, arg3, arg4);
         if ((flags & 8) == 0) {
-            obj->sound = 0;
+            obj->sound_id = 0;
         }
     } else if (flags & 2) {
         if (handle != 0) {
             func_1001123C(handle);
             handle = 0;
         }
-        obj->sound = func_10010E78(handle, sfx, arg2, 0, 0, -1, obj->x, obj->y, obj->z, arg3, arg4);
+        obj->sound_id = func_10010E78(handle, sfx, arg2, 0, 0, -1, obj->x, obj->y, obj->z, arg3, arg4);
     } else {
         if (handle != 0) {
             func_1001123C(handle);
         }
-        obj->sound = func_1000FA64(sfx, obj->x, obj->y, obj->z, arg2, arg4, arg3, (SoundRecordCallback)func_15114CC4, obj, 0, 0, 0);
+        obj->sound_id = func_1000FA64(sfx, obj->x, obj->y, obj->z, arg2, arg4, arg3, (SoundRecordCallback)func_15114CC4, obj, 0, 0, 0);
     }
 }
 

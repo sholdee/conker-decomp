@@ -131,46 +131,46 @@ s32 func_150BE1C4(EB340Rising *arg0) {
     return 1;
 }
 
-/* Behaviour scratch state (WorldObject.work) of func_150BE210. */
+/* Behaviour scratch state (WorldObject.touch) of func_150BE210. */
 typedef struct {
     /* 0x7C */ s32 unk7C;
     /* 0x80 */ s32 unk80;
     /* 0x84 */ f32 angle; // turns at spinY per frame until past 360
 } TurnerWork;
 
-#define TURNER_WORK(obj) ((TurnerWork *)&(obj)->work)
+#define TURNER_WORK(obj) ((TurnerWork *)&(obj)->touch)
 
 extern void func_1511650C(WorldObject *obj, s32, s32, f32);
 
-/* Until finished (behaviorState & 3 == 3): calls func_1511650C(1, 0x62C, 500), advances the work angle by
+/* Until finished (task_flag & 3 == 3): calls func_1511650C(1, 0x62C, 500), advances the work angle by
  * spinY while flags bit 2 is set (or clamps it to 270), and once it passes 360 marks itself finished and stops
  * its sound. */
 void func_150BE210(WorldObject *obj) {
-    if ((obj->behaviorState & 3) == 3) {
+    if ((obj->task_flag & 3) == 3) {
         return;
     }
     func_1511650C(obj, 1, 0x62C, 500.0f);
-    if (obj->flags & 4) {
+    if (obj->object_status & 4) {
         TURNER_WORK(obj)->angle += obj->spinY;
     } else if (TURNER_WORK(obj)->angle > 270.0f) {
         TURNER_WORK(obj)->angle = 270.0f;
     }
     if (TURNER_WORK(obj)->angle > 360.0f) {
-        obj->behaviorState &= ~3;
-        obj->behaviorState |= 3;
+        obj->task_flag &= ~3;
+        obj->task_flag |= 3;
         obj->spinY = 0.0f;
-        func_100111C8(obj->sound);
-        obj->sound = 0;
+        func_100111C8(obj->sound_id);
+        obj->sound_id = 0;
     }
 }
 
-/* Behaviour scratch state (WorldObject.work) of func_150BE2E8: the end points of its path. */
+/* Behaviour scratch state (WorldObject.touch) of func_150BE2E8: the end points of its path. */
 typedef struct {
     /* 0x7C */ s16 from[3];
     /* 0x82 */ s16 to[3];
 } MoverWork;
 
-#define MOVER_WORK(obj) ((MoverWork *)&(obj)->work)
+#define MOVER_WORK(obj) ((MoverWork *)&(obj)->touch)
 
 // matching: 0.128f read through its rodata symbol; the plain literal allocates FP registers differently
 extern f32 D_800A0068;
@@ -195,8 +195,8 @@ void func_150BE2E8(WorldObject *mover) {
     toX = MOVER_WORK(mover)->to[0];
     toY = MOVER_WORK(mover)->to[1];
     toZ = MOVER_WORK(mover)->to[2];
-    speed = mover->param.half.hi * (1.0f / 16384.0f);
-    progress = mover->param.half.lo * (1.0f / 16384.0f);
+    speed = mover->moveData.half.hi * (1.0f / 16384.0f);
+    progress = mover->moveData.half.lo * (1.0f / 16384.0f);
     speed -= speed * D_800A0068;
     progress += speed * D_800BE9E4;
 
@@ -207,8 +207,8 @@ void func_150BE2E8(WorldObject *mover) {
         progress = 1.0; // matching: a 1.0f literal here gets CSE'd with the compare's 1.0f
     }
 
-    mover->param.half.hi = speed * 16384.0f;
-    mover->param.half.lo = progress * 16384.0f;
+    mover->moveData.half.hi = speed * 16384.0f;
+    mover->moveData.half.lo = progress * 16384.0f;
 }
 
 /* Two-halfword command, as in game_61490.c's GameCommand. */

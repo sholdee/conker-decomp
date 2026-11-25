@@ -708,7 +708,7 @@ s32 func_15133894(Particle *particle) {
             skip = FALSE;
             if (particle->floor.surface != NULL) {
                 surface = particle->floor.surface;
-                if ((surface->flags & 0x60) == 0x40) {
+                if ((surface->object_status & 0x60) == 0x40) {
                     skip = TRUE;
                 }
             }

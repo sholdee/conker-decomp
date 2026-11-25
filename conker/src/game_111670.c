@@ -268,7 +268,7 @@ void func_150E4928(WorldObject *obj) {
                 i = ((s32)tri - (s32)D_800DBE3C) / 12;
                 material = obj->materials[i - obj->firstTri];
             } else {
-                material = obj->material;
+                material = obj->floorHitAttrib;
             }
             func_1511490C(mtx, obj);
             if (tri != NULL) {

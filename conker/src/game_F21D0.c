@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /*
- * Behaviour scratch state (WorldObject.work) of the two behaviours here: the pendulum's push phase
+ * Behaviour scratch state (WorldObject.touch) of the two behaviours here: the pendulum's push phase
  * (func_150C4D20) and the texture scroll state (func_150C4E9C).
  */
 typedef union {
@@ -15,7 +15,7 @@ typedef union {
     } scroll;
 } WorkF21D0;
 
-#define WORK(obj) ((WorkF21D0 *)&(obj)->work)
+#define WORK(obj) ((WorkF21D0 *)&(obj)->touch)
 
 /*
  * Swings the object like a pendulum on rotX (degrees, spinX its velocity): a spring pulls it back toward
@@ -43,7 +43,7 @@ void func_150C4D20(WorldObject *pendulum) {
     WORK(pendulum)->pendulum.phase = phase;
     push = func_15048A40(phase);
     velocity += push * 0.1f;
-    if ((pendulum->flags & 4) == 4) {
+    if ((pendulum->object_status & 4) == 4) {
         velocity += 0.1f;
     }
     velocity *= 0.8f;
@@ -74,7 +74,7 @@ typedef struct ScrollState {
 } ScrollState;
 
 /*
- * Scrolls the t texture coordinate of the object's vertices. Scroll mode (behaviorState & 3): 0 and 3 stand still,
+ * Scrolls the t texture coordinate of the object's vertices. Scroll mode (task_flag & 3): 0 and 3 stand still,
  * 2 speeds up to 300 per frame, 1 slows to 100 and then stops (switching to mode 3) once the scroll lines up
  * with the start position again. Binds texture 0x2C1 (modes 0, 2) or 0x1C0 (modes 1, 3) to segment 4 and,
  * when the dl has a second G_SETTIMG, the texture's last 0x200 bytes to segment 5.
@@ -88,7 +88,7 @@ void func_150C4E9C(WorldObject *obj) {
     s32 mode;
     s32 i;
 
-    mode = obj->behaviorState & 3;
+    mode = obj->task_flag & 3;
     if (WORK(obj)->scroll.state == NULL) {
         scroll = WORK(obj)->scroll.state = allocate_memory(sizeof(ScrollState), 1, 0, 0);
         func_1511A410(obj->displayList, &scroll->secondSetTImg);
@@ -131,8 +131,8 @@ void func_150C4E9C(WorldObject *obj) {
             }
             if (t >= startT && t - scroll->speed <= startT) {
                 scroll->speed = t - startT;
-                obj->behaviorState &= ~3;
-                obj->behaviorState |= 3; // mode 3: stopped
+                obj->task_flag &= ~3;
+                obj->task_flag |= 3; // mode 3: stopped
             }
         }
     }

@@ -4,7 +4,7 @@
 
 s32 func_150490A8(Vec3f *delta);
 
-/* Behaviour scratch state (WorldObject.work) of the two behaviours below. */
+/* Behaviour scratch state (WorldObject.touch) of the two behaviours below. */
 typedef union {
     struct {
         /* 0x7C */ s32 heightPhase;
@@ -16,7 +16,7 @@ typedef union {
     } push;
 } Work143870;
 
-#define WORK(obj) ((Work143870 *)&(obj)->work)
+#define WORK(obj) ((Work143870 *)&(obj)->touch)
 
 void func_1511515C(WorldObject *obj);
 s32 func_15116888(s32 x, s32 z, s32 *unused, Actor *other);
@@ -31,10 +31,10 @@ void func_151163C0(WorldObject *obj) {
     f32 previousSway;
     f32 sway;
 
-    heightRate = (obj->param.word >> 16) & 0xFF;
-    heightScale = (f32)(obj->param.word & 0xFF);
-    swayRate = (obj->param.word >> 24) & 0xFF;
-    swayScale = (f32)(u32)((obj->param.word >> 8) & 0xFF) * 1.40625f;
+    heightRate = (obj->moveData.word >> 16) & 0xFF;
+    heightScale = (f32)(obj->moveData.word & 0xFF);
+    swayRate = (obj->moveData.word >> 24) & 0xFF;
+    swayScale = (f32)(u32)((obj->moveData.word >> 8) & 0xFF) * 1.40625f;
     previousY = obj->y;
     previousSway = obj->t;
     obj->yOffset = cosf((f32)WORK(obj)->bob.heightPhase * 9.58738e-05f) * heightScale;
@@ -59,7 +59,7 @@ void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
     u32 volume;
     u16 handle;
 
-    if (!(obj->flags & 4)) {
+    if (!(obj->object_status & 4)) {
         push = 0;
     } else {
         push = func_15116888(obj->x, obj->z, &WORK(obj)->push.unk7C, movement_obj) >> 3;
@@ -67,7 +67,7 @@ void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
     if ((arg1 & 1) && push < 0) {
         push = 0;
     }
-    value = obj->param.half.hi;
+    value = obj->moveData.half.hi;
     value += push; // matching: a separate += keeps the lh in the beql delay slots
     if (push != 0) {
         WORK(obj)->push.timer = 0;
@@ -121,7 +121,7 @@ void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
         }
     }
     value <<= 16; // matching: shifting in place schedules the param reload before the sll
-    obj->param.word = (obj->param.word & 0xFFFF) | value;
+    obj->moveData.word = (obj->moveData.word & 0xFFFF) | value;
     func_1511515C(obj);
     if (soundId != 0) {
         f32 maxAmount = 1.0f; // matching: loads 1.0f before the sound test
@@ -131,17 +131,17 @@ void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
             amount = maxAmount;
         }
         volume = (12767.0f * amount) + 20000.0f;
-        handle = obj->sound;
+        handle = obj->sound_id;
         amount = (amount * pitchScale) - 500.0f;
         if (handle == 0) {
             if (speed > 0.01f) {
-                obj->sound = func_10010F88(soundId, volume, amount, 0, -1, obj->x, obj->y, obj->z, 1000, 6000);
+                obj->sound_id = func_10010F88(soundId, volume, amount, 0, -1, obj->x, obj->y, obj->z, 1000, 6000);
             }
         } else if (speed > 0.01f) {
             func_1000F91C(handle, volume, amount, 0, -1, obj->x, obj->y, obj->z, 200, 2000);
         } else {
             func_100111C8(handle);
-            obj->sound = 0;
+            obj->sound_id = 0;
         }
     }
 }

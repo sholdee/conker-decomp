@@ -255,10 +255,10 @@ void func_150F337C(Particle *particle, s16 viewport) {
 /* Sets bit 0 of obj->flags unless camera_global_Cameras->eye.z is below -2000. */
 void func_150F33B0(WorldObject *obj) {
     if (camera_global_Cameras->eye.z < -2000.0f) {
-        obj->flags &= ~1;
+        obj->object_status &= ~1;
         return;
     }
-    obj->flags = (obj->flags & ~1) | 1; // matching: a bitfield-style insert; a plain |= 1 allocates other temps
+    obj->object_status = (obj->object_status & ~1) | 1; // matching: a bitfield-style insert; a plain |= 1 allocates other temps
 }
 
 /* While camera_global_Cameras[player].eye.z is below -2100, mirrors (unk2FC > 840) into bit `player` of *D_800D9A40. */

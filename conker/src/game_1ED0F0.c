@@ -852,7 +852,7 @@ void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 ar
         if (ray->surface != NULL) {
             WorldObject *p = ray->surface;
 
-            if ((p->flags & 0x60) == 0x40) {
+            if ((p->object_status & 0x60) == 0x40) {
                 pos.x = ray->pos.x + ray->dir.x * 0.1f;
                 part = p;
                 pos.y = ray->pos.y + ray->dir.y * 0.1f;

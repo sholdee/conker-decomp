@@ -4,7 +4,7 @@
 
 /*
  * Per-type update routines for world objects (WorldObject, the db_Object_array array). The mode is in the low
- * two bits of behaviorState (0 closed, 1 closing, 2 opening, 3 open); per-type state lives in work
+ * two bits of task_flag (0 closed, 1 closing, 2 opening, 3 open); per-type state lives in work
  * (Work1483E0, one member per routine).
  */
 
@@ -24,7 +24,7 @@ struct Wave1511CB44;
 struct Swing1511DBC4;
 struct Pulse1511DF6C;
 
-/* Behaviour scratch state (WorldObject.work) of the objects in this file, one member per routine. */
+/* Behaviour scratch state (WorldObject.touch) of the objects in this file, one member per routine. */
 typedef union {
     struct {
         /* 0x7C */ f32 tilt;
@@ -81,7 +81,7 @@ typedef union {
     } w1511DF6C;
 } Work1483E0;
 
-#define WORK(obj) ((Work1483E0 *)&(obj)->work)
+#define WORK(obj) ((Work1483E0 *)&(obj)->touch)
 
 
 /* Eases the tilt toward 0.75 degrees per level, then wobbles randomly around it. */
@@ -91,7 +91,7 @@ void func_1511AF30(WorldObject *obj) {
     f32 diff;
     s32 roll;
 
-    level = obj->param.word;
+    level = obj->moveData.word;
     target = 75.0f * level * 0.009999999776f;
     if (target != WORK(obj)->w1511AF30.tilt) {
         diff = target - WORK(obj)->w1511AF30.tilt;
@@ -140,11 +140,11 @@ void func_1511B07C(WorldObject *obj) {
     }
     targetX = (s16)WORK(obj)->w1511B07C.homeX;
     targetZ = WORK(obj)->w1511B07C.homeZ;
-    state = obj->param.word & 0x3FF;
+    state = obj->moveData.word & 0x3FF;
     if (state >= 4 && state < 7) {
         func_1511F990(obj, 1);
     }
-    mode = obj->behaviorState & 3;
+    mode = obj->task_flag & 3;
     if (mode == 3 || mode == 2) {
         switch (state) {
         case 0:
@@ -251,10 +251,10 @@ void func_1511B07C(WorldObject *obj) {
         obj->z += step;
     } else if (mode == 2 || mode == 1) {
         // matching: the embedded &= makes IDO store the cleared flags before merging
-        obj->behaviorState = ((mode == 2) ? 3 : 0) | (obj->behaviorState &= ~3);
-        if (obj->sound != 0) {
-            func_100111C8(obj->sound);
-            obj->sound = 0;
+        obj->task_flag = ((mode == 2) ? 3 : 0) | (obj->task_flag &= ~3);
+        if (obj->sound_id != 0) {
+            func_100111C8(obj->sound_id);
+            obj->sound_id = 0;
             func_15114D24(obj, 0x4C8, 0x7D00, 100, 2500, 1);
         }
     }
@@ -275,8 +275,8 @@ void func_1511B51C(WorldObject *obj) {
     s32 openAngle;
     f32 ratio;
 
-    openAngle = obj->param.half.lo;
-    mode = obj->behaviorState & 3;
+    openAngle = obj->moveData.half.lo;
+    mode = obj->task_flag & 3;
     target = openAngle;
     angle = obj->v;
     velocity = WORK(obj)->w1511B51C.velocity;
@@ -320,13 +320,13 @@ void func_1511B51C(WorldObject *obj) {
         } else if (angle >= 360.0f) {
             angle -= 360.0f;
         }
-        obj->behaviorState &= ~3;
-        obj->behaviorState |= mode;
+        obj->task_flag &= ~3;
+        obj->task_flag |= mode;
     }
     WORK(obj)->w1511B51C.velocity = velocity;
     if (D_800BE9B4 != 0 || angle != obj->v) {
         obj->v = angle;
-        sound = (obj->param.word >> 24) & 0xFF;
+        sound = (obj->moveData.word >> 24) & 0xFF;
         if (sound != 0 && openAngle != 0) {
             ratio = fabsf((angle - openAngle) / openAngle);
             func_1518804C(sound - 1, ratio);
@@ -355,7 +355,7 @@ void func_1511B7D4(WorldObject *obj) {
     WorldObject *pivots[2];
 
     count = 0;
-    if (obj->param.word == 0) {
+    if (obj->moveData.word == 0) {
         pair = D_800A2F71;
         count = D_800A2F70;
         pivots[0] = obj - 1;
@@ -401,7 +401,7 @@ void func_1511BA24(WorldObject *obj) {
     f32 level;
 
     level = 0.0f;
-    func_15188010(obj->param.word, &level);
+    func_15188010(obj->moveData.word, &level);
     obj->alpha = level * 255.0f;
     if (obj->alpha == 0) {
         obj->alpha = 1;
@@ -532,9 +532,9 @@ void func_1511BEBC(WorldObject *obj) {
 
     onTrigger = func_150DDED0;
     func_1511BE5C(obj);
-    mode = obj->behaviorState & 3;
-    flag4 = obj->behaviorState & 4;
-    flag8 = obj->behaviorState & 8;
+    mode = obj->task_flag & 3;
+    flag4 = obj->task_flag & 4;
+    flag8 = obj->task_flag & 8;
     triggered = WORK(obj)->w1511BEBC.triggered;
     velocity = WORK(obj)->w1511BEBC.velocity;
     if (D_800BE9F0 == 10) {
@@ -675,8 +675,8 @@ void func_1511BEBC(WorldObject *obj) {
             }
         }
         WORK(obj)->w1511BEBC.triggered = triggered;
-        obj->behaviorState &= ~3;
-        obj->behaviorState |= mode;
+        obj->task_flag &= ~3;
+        obj->task_flag |= mode;
         WORK(obj)->w1511BEBC.restAndTimer &= 0xFFFF;
         WORK(obj)->w1511BEBC.restAndTimer |= timer << 16;
         WORK(obj)->w1511BEBC.velocity = velocity;
@@ -725,7 +725,7 @@ void func_1511C638(WorldObject *obj) {
     WorldObject *third;
 
     next = &obj[1];
-    mode = obj->behaviorState & 3;
+    mode = obj->task_flag & 3;
     if (D_800BE9F0 == 4) {
         third = &obj[2];
     } else {
@@ -738,8 +738,8 @@ void func_1511C638(WorldObject *obj) {
         if (third != NULL) {
             third->inactive = 0;
         }
-        if (obj->param.word != 0xFF) {
-            func_15173C60(0, obj->param.word);
+        if (obj->moveData.word != 0xFF) {
+            func_15173C60(0, obj->moveData.word);
         }
     }
     if (D_800BE9B4 != 0) {
@@ -762,7 +762,7 @@ void func_1511C638(WorldObject *obj) {
             WORK(obj)->w1511C638.delay += D_800BE9E4;
         } else {
             if (WORK(obj)->w1511C638.fade == 0) {
-                switch (next->param.word & 0xFF) {
+                switch (next->moveData.word & 0xFF) {
                 case 1:
                     func_15170F4C(next, 0xFF, 0);
                     func_10010F30(0x2BE, 0x7FFF, 64, 0, 0);
@@ -791,7 +791,7 @@ void func_1511C638(WorldObject *obj) {
                 case 2:
                     break;
                 case 3:
-                    func_150B2740(next->param.word >> 8, 0xFF);
+                    func_150B2740(next->moveData.word >> 8, 0xFF);
                     break;
                 }
             }
@@ -805,8 +805,8 @@ void func_1511C638(WorldObject *obj) {
                 WORK(obj)->w1511C638.fade = 0xFF;
                 mode = 3;
             }
-            if (obj->param.word != 0xFF) {
-                func_15173C60(WORK(obj)->w1511C638.fade, obj->param.word);
+            if (obj->moveData.word != 0xFF) {
+                func_15173C60(WORK(obj)->w1511C638.fade, obj->moveData.word);
             }
             if (mode == 3) {
                 WORK(obj)->w1511C638.delay = 0;
@@ -814,8 +814,8 @@ void func_1511C638(WorldObject *obj) {
             }
         }
     }
-    obj->behaviorState &= ~3;
-    obj->behaviorState |= mode;
+    obj->task_flag &= ~3;
+    obj->task_flag |= mode;
 }
 
 extern f32 D_800A31F4;
@@ -878,7 +878,7 @@ void func_1511CB44(WorldObject *obj) {
         mode = 0;
     } else if (D_800BE9F0 == 19) {
         mode = 1;
-        if (obj->id == 0xFE) {
+        if (obj->unique_id == 0xFE) {
             uvRate = 0.4530000091f;
             uvArg4 = 32;
             uvArg5 = 32;
@@ -931,8 +931,8 @@ void func_1511CB44(WorldObject *obj) {
         wave->pulseAlpha = 0;
         wave->alphaPhase = 0;
         if (D_800BE9F0 == 4) {
-            if (obj->id != 0xF2) {
-                if (obj->id == 0xF1) {
+            if (obj->unique_id != 0xF2) {
+                if (obj->unique_id == 0xF1) {
                     wave->alphaPhaseOffset = 0;
                 } else {
                     wave->alphaPhaseOffset = 0x80;
@@ -1036,7 +1036,7 @@ void func_1511D394(WorldObject *obj) {
     f32 accel;
     s32 wavePhase;
 
-    id = obj->param.word & 0xFF;
+    id = obj->moveData.word & 0xFF;
     owner = func_151149AC((u8)id);
     if (owner == NULL) {
         return;
@@ -1045,7 +1045,7 @@ void func_1511D394(WorldObject *obj) {
     if (ownerWave == NULL) {
         return;
     }
-    entry = &D_80089444[(obj->param.word >> 8) & 0xFF];
+    entry = &D_80089444[(obj->moveData.word >> 8) & 0xFF];
     rangeS = entry->rangeS;
     baseS = entry->baseS;
     phaseOffset = entry->phaseOffset;
@@ -1187,9 +1187,9 @@ void func_1511D9E4(WorldObject *obj) {
     } else {
         uv = WORK(obj)->w1511D9E4.uv;
     }
-    uvArg4 = obj->param.word >> 24;
-    uvArg5 = (obj->param.word >> 16) & 0xFF;
-    speed = (f32)(s16)(obj->param.word & 0xFFFF) * 0.01;
+    uvArg4 = obj->moveData.word >> 24;
+    uvArg5 = (obj->moveData.word >> 16) & 0xFF;
+    speed = (f32)(s16)(obj->moveData.word & 0xFFFF) * 0.01;
     WORK(obj)->w1511D9E4.uvAngle += speed * D_800BE9E4;
     func_15094AB8(obj->vertices[D_800BE9C0], uv, obj->numVertices, WORK(obj)->w1511D9E4.uvAngle, uvArg4, uvArg5);
 }
@@ -1221,7 +1221,7 @@ void func_1511DBC4(WorldObject *obj) {
         swing = WORK(obj)->w1511DBC4.swing;
     }
 
-    mode = obj->behaviorState & 3;
+    mode = obj->task_flag & 3;
     if (mode == 0) {
         obj->v = 0.0f;
     } else if (mode == 3) {
@@ -1251,8 +1251,8 @@ void func_1511DBC4(WorldObject *obj) {
         }
     }
 
-    obj->behaviorState &= ~3;
-    obj->behaviorState |= mode;
+    obj->task_flag &= ~3;
+    obj->task_flag |= mode;
 }
 
 struct Pulse1511DF6C {

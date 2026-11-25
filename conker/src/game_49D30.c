@@ -2111,7 +2111,7 @@ void func_150226BC(s32 track, s32 scene) {
             actor = func_151149AC(info->targetId);
             if (actor != NULL) {
                 if (actor->inactive == 1) {
-                    func_15022640(actor->id, scene);
+                    func_15022640(actor->unique_id, scene);
                     actor->inactive = 0;
                 }
             }
@@ -2230,7 +2230,7 @@ s32 func_15022B08(s32 actorIndex, s32 scene) {
 
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35C8[scene][i] != 0) {
-            if (D_800C35F0[scene][i].targetId == db_Object_array[actorIndex].id) {
+            if (D_800C35F0[scene][i].targetId == db_Object_array[actorIndex].unique_id) {
                 return 1;
             }
         }

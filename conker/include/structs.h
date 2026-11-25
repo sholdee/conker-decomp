@@ -1570,14 +1570,25 @@ struct Actor {
 /*
  * A world object: one 0xA0-byte entry of the level's object array db_Object_array (D_800DBEF0 entries),
  * built by func_150039E0 (game_30E90.c) from the level's placement lists. Owner type 1 for effects and trails.
+ * original: db_Object_struct (rom_debug_struct.c)
  */
 typedef struct Shadow Shadow; // blob shadow under an object, see game_13AE20.c
 
+/* WorldObject.task_flag (original state names from the debugger's db_Object viewer) */
+enum TaskFlag {
+    TASK_FLAG_OFF = 0,
+    TASK_FLAG_GOING_OFF = 1,
+    TASK_FLAG_GOING_ON = 2,
+    TASK_FLAG_ON = 3,
+    TASK_FLAG_STATE = 3,   // mask of the state bits
+    TASK_FLAG_LOCKED = 4   // the viewer shows "locked" / "unlocked"
+};
+
 typedef struct WorldObject WorldObject;
 struct WorldObject {
-    /* 0x00 */ f32 t; // x rotation, degrees
-    /* 0x04 */ f32 u; // y rotation
-    /* 0x08 */ f32 v; // z rotation
+    /* 0x00 */ f32 t;                // x rotation, degrees
+    /* 0x04 */ f32 u;                // y rotation
+    /* 0x08 */ f32 v;                // z rotation
     /* 0x0C */ void *model;          // loaded model asset, if any
     /* 0x10 */ s16 x;
     /* 0x12 */ s16 y;
@@ -1590,7 +1601,7 @@ struct WorldObject {
     /* 0x2C */ f32 xScale;
     /* 0x30 */ f32 yScale;
     /* 0x34 */ f32 zScale;
-    /* 0x38 */ void (*update)(WorldObject *obj);
+    /* 0x38 */ void (*moveProc)(WorldObject *obj); // per-frame behaviour
     /* 0x3C */ union {
         void *data;                  // per-kind data, e.g. a Turret15112520Cfg
         s32 word;
@@ -1603,14 +1614,14 @@ struct WorldObject {
             u16 lo;
         } uhalf;
         u8 bytes[4];
-    } param;                         // the placement's parameter word
-    /* 0x40 */ s32 material;         // collision material, used when materials is NULL
+    } moveData;                      // the placement's parameter word
+    /* 0x40 */ s32 floorHitAttrib;   // collision material, used when materials is NULL
     /* 0x44 */ s32 *materials;       // per-triangle materials, from firstTri on
     /* 0x48 */ u8 pad48[4];
     /* 0x4C */ u8 unk4C;
     /* 0x4D */ u8 unk4D;
     /* 0x4E */ u8 attach;            // < 3: own transform, 3: none, 101..124: rides actor movement_obj[attach - 100]
-    /* 0x4F */ u8 flags;
+    /* 0x4F */ u8 object_status;
     /* 0x50 */ u16 unk50;            // bounding radius, see func_15004AAC
     /* 0x52 */ u16 unk52;
     /* 0x54 */ u16 modelId;          // | 0x8000 for objects without a loaded model
@@ -1627,24 +1638,32 @@ struct WorldObject {
     /* 0x6F */ u8 viewFlags;         // bits 0-3: visible in view N, 0x40: update this frame, 0x80: hidden
     /* 0x70 */ u8 state;             // 1: vertices transformed into per-frame copies, 2: drawn by func_150A50C0,
                                      // 8: removed, high nibble: objects following in its group
-    /* 0x71 */ u8 index;             // own index in db_Object_array
-    /* 0x72 */ u8 id;                // found by func_151149AC
-    /* 0x73 */ u8 behaviorState;     // per-behaviour state bits
-    /* 0x74 */ u16 sound;            // handle from func_15114D24
+    /* 0x71 */ u8 object_num;        // own index in db_Object_array
+    /* 0x72 */ u8 unique_id;         // found by func_151149AC
+    /* 0x73 */ u8 task_flag;         // enum TaskFlag: bits 0-1 state, bit 2 locked
+    /* 0x74 */ u16 sound_id;         // handle from func_15114D24
     /* 0x76 */ u8 pad76[2];
     /* 0x78 */ void (*onContact)(WorldObject *obj, Actor *actor);
     /* 0x7C */ union {
-        s32 words[3];
-        f32 floats[3];
+        struct {
+            /* 0x7C */ s32 a;
+            /* 0x80 */ s32 b;
+            /* 0x84 */ s32 c;
+        } i;                         // original: touch.i.a/b/c
+        struct {
+            /* 0x7C */ f32 a;
+            /* 0x80 */ f32 b;
+            /* 0x84 */ f32 c;
+        } f;                         // float view (not named by the debugger)
         struct {
             /* 0x7C */ s32 unk7C;
             /* 0x80 */ s32 tri;      // floor probe results, see func_150045C4
             /* 0x84 */ f32 y;
         } floor;
-    } work;                          // per-behaviour scratch state
+    } touch;                         // per-behaviour scratch state
     /* 0x88 */ u16 fadeDistance;     // fades out when the camera is closer than this
     /* 0x8A */ u8 alpha;
-    /* 0x8B */ u8 viewAlpha[4];
+    /* 0x8B */ u8 dst_fade_alpha[4]; // per view (the debugger labels them [1]..[4])
     /* 0x8F */ u8 pad8F;
     /* 0x90 */ u16 drawDistance;     // 0: default (D_800D9B1C), 1: 40000
     /* 0x92 */ u8 unk92;
@@ -3201,7 +3220,7 @@ typedef struct {
     /* 0x4 */ u32 base;
 } ZDecode;
 
-/* A row of the prop sound table D_80089260 (row picked by bits of WorldObject.param). Doors play open/close
+/* A row of the prop sound table D_80089260 (row picked by bits of WorldObject.moveData). Doors play open/close
    when they start moving and opened/closed when they stop; movers play `open` on start and `opened` on stop. */
 typedef struct PropSounds {
     /* 0x0 */ s16 open;       /* starts moving forward (opening) */

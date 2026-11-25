@@ -3227,9 +3227,9 @@ void func_1508DC24(void) {
                 }
             }
         } else if (timers[i] == 0) {
-            j = pickup->work.words[1] - 1; // work word 1: player + 1 that touched the pickup, 0 = none
+            j = pickup->touch.i.b - 1; // work word 1: player + 1 that touched the pickup, 0 = none
             if (j != -1) {
-                pickup->work.words[1] = 0;
+                pickup->touch.i.b = 0;
                 if (items[i] == 0x8AE) {
                     movement_obj[j].unk31C->grenade_count += 3;
                     if (movement_obj[j].unk31C->grenade_count >= 7) {
