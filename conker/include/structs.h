@@ -2159,18 +2159,6 @@ typedef struct RopeSpawn {
 } RopeSpawn; /* size 0x24 */
 
 typedef struct {
-    u8 pad[0x170];
-    s32 unk170;
-} struct181;
-
-typedef struct {
-    Actor *unk0;
-    u8 unk4;
-    u8 pad5[0x1];
-    s16 unk6;
-} struct182;
-
-typedef struct {
     f32 unk0;
     f32 unk4;
     f32 unk8;
@@ -2606,7 +2594,6 @@ typedef struct IdRecordList {
     /* 0x04 */ IdRecord *head;
     /* 0x08 */ IdRecord *tail;
 } IdRecordList; // size 0xC
-
 
   // size 0x28
 

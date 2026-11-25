@@ -15,14 +15,21 @@ typedef struct {
     f32 unk18;
 } EmitterExtra; /* size 0x1C */
 
-struct181 *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
+/* The particle object func_151407D0 returns, as func_150113E0 uses it. */
+typedef struct {
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x60];
+    /* 0x170 */ EmitterExtra extra;
+} GlowEmitter;
+
+GlowEmitter *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 
 /* Spawns four emitters sharing one setup; only the packet position and rotation change. */
 void func_150113E0(void) {
     GlowShape params;
     ParticleDef packet;
     EmitterExtra extra;
-    struct181 *emitter;
+    GlowEmitter *emitter;
 
     extra.unk00 = 1.0420000553f;
     extra.unk04 = 0.9010000229f;
@@ -76,7 +83,7 @@ void func_150113E0(void) {
 
     emitter = func_151407D0(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
-        memcpy(&emitter->unk170, &extra, sizeof(extra));
+        memcpy(&emitter->extra, &extra, sizeof(extra));
     }
 
     packet.pos.x = -520.0f;
@@ -87,7 +94,7 @@ void func_150113E0(void) {
     packet.rot.z = 2220.0f;
     emitter = func_151407D0(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
-        memcpy(&emitter->unk170, &extra, sizeof(extra));
+        memcpy(&emitter->extra, &extra, sizeof(extra));
     }
 
     packet.pos.y = 70.0f;
@@ -98,7 +105,7 @@ void func_150113E0(void) {
     packet.rot.x = -584.0f;
     emitter = func_151407D0(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
-        memcpy(&emitter->unk170, &extra, sizeof(extra));
+        memcpy(&emitter->extra, &extra, sizeof(extra));
     }
 
     packet.pos.x = 506.0f;
@@ -109,7 +116,7 @@ void func_150113E0(void) {
     packet.rot.z = -208.0f;
     emitter = func_151407D0(&params, 0x7C, &packet, 0, 32, 0, 0, -1, 255, 1);
     if (emitter != NULL) {
-        memcpy(&emitter->unk170, &extra, sizeof(extra));
+        memcpy(&emitter->extra, &extra, sizeof(extra));
     }
 }
 
@@ -247,19 +254,19 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
 
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ struct182 data;
+    /* 0x28 */ FlashBurstData data;
 } OwnerEffect;
 
-/* Spawns an effect that remembers its owner and the owner's unique id. */
+/* Spawns timed effect 85 (func_150F64DC): light bursts on the owner while it lives. */
 void func_15011A78(Actor *owner, u8 arg1, s32 arg2) {
-    struct182 data;
+    FlashBurstData data;
     OwnerEffect *effect;
 
-    data.unk0 = owner;
-    data.unk4 = owner->unique_id;
-    data.unk6 = 0;
+    data.owner = owner;
+    data.ownerId = owner->unique_id;
+    data.timer = 0;
 
-    effect = (OwnerEffect *)func_15149130(300, -1, 0x55, -1, 0, 0x42, sizeof(struct182), arg1, arg2);
+    effect = (OwnerEffect *)func_15149130(300, -1, 0x55, -1, 0, 0x42, sizeof(FlashBurstData), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
