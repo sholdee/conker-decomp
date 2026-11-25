@@ -174,14 +174,9 @@ void func_151572D0(Effect *fx) {
     }
 }
 
-typedef struct {
-    s32 w0;
-    s32 w1;
-} OtherModeL;
-
 extern Gfx *(*D_8008ADBC[])(Gfx *, Effect *, s16, u8 *, u8 *);
 extern Gfx *(*D_8008ADCC[])(Gfx *, Effect *, s16, u8 *);
-extern OtherModeL D_800A4AC8[];
+extern RenderModePair D_800A4AC8[];
 
 Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
@@ -231,7 +226,7 @@ setup: // matching: a label here keeps as1 from filling the branch delay slots w
     gfx = func_15142FBC(gfx,
                         fx->params.render.unk0 | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | fx->params.render.unk14 |
                             fx->params.render.unk18,
-                        D_800A4AC8[fx->params.render.renderMode].w0 | D_800A4AC8[fx->params.render.renderMode].w1, &needSync);
+                        D_800A4AC8[fx->params.render.renderMode].cycle1 | D_800A4AC8[fx->params.render.renderMode].cycle2, &needSync);
     if (fx->params.flags & 2) {
         gfx = func_151462C8(gfx, &fx->attach, fx->params.unk41, fx->params.owner, fx->params.ownerId, view,
                             &fx->params.pos, (fx->params.flags & 4) ? 1 : 0, 0);

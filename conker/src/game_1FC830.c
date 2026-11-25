@@ -10,7 +10,7 @@ extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
 f32 func_15143E64(Vec3f *);
 TimedEffect *func_151CEAAC(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
 
-/* One point of a ribbon trail. */
+/* One point of a RibbonActor's ring buffer. */
 typedef struct {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ u8 pad0C[8];
@@ -18,7 +18,7 @@ typedef struct {
     /* 0x18 */ TrailVec2 offset; /* half-width vector across the ribbon */
     /* 0x20 */ f32 dirX;
     /* 0x24 */ f32 dirZ;
-} RibbonPoint;
+} RibbonActorPoint;
 
 typedef struct {
     Actor *owner;
@@ -29,7 +29,7 @@ typedef struct {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 vtxBuffer[0x10];
-    /* 0x94 */ RibbonPoint *points;
+    /* 0x94 */ RibbonActorPoint *points;
     /* 0x98 */ RibbonInfo *info;
 } RibbonActor;
 
@@ -47,7 +47,7 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     Vec3f curPos;
     s32 cur;
     s32 next;
-    RibbonPoint *points;
+    RibbonActorPoint *points;
     u8 update;
     f32 curWidth;
     f32 curX;

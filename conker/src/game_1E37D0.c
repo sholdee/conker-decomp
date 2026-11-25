@@ -515,12 +515,12 @@ typedef struct RibbonState {
 } RibbonState;
 
 /* One point of a ribbon effect. */
-typedef struct RibbonPoint {
+typedef struct RibbonEffectPoint {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 distance; /* distance to the previous point */
     /* 0x10 */ u8 alpha;
     /* 0x11 */ u8 pad11[3];
-} RibbonPoint;
+} RibbonEffectPoint;
 
 /* Returns 0 when the effect's source is gone, else stores the source position in pos. */
 extern s32 (*D_8008FB90[])(EffectObj *, Vec3f *);
@@ -544,7 +544,7 @@ EffectObj *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg
     spawn.flags = 20;
     spawn.kind = 16;
     spawn.unk14 = 2;
-    obj = func_15147A80(&spawn, argsSize + 0x10, sizeof(RibbonPoint), 0, 14, 14, 0, 0, 0, arg3, arg4);
+    obj = func_15147A80(&spawn, argsSize + 0x10, sizeof(RibbonEffectPoint), 0, 14, 14, 0, 0, 0, arg3, arg4);
     if (obj != NULL) {
         state = obj->userData;
         memcpy(state, &init, sizeof(init));
@@ -668,7 +668,7 @@ s32 func_151B76CC(EffectObj *obj, Vec3f *pos) {
 /* Moves the ribbon to its source position (D_8008FB90[selector]) and appends a point there. Returns 0 once the source is gone. */
 s32 func_151B77F4(EffectObj *obj) {
     RibbonState *state;
-    RibbonPoint *points;
+    RibbonEffectPoint *points;
     Vec3f previous;
     Vec3f delta;
     f32 distance;
@@ -688,7 +688,7 @@ s32 func_151B77F4(EffectObj *obj) {
         delta.z = obj->head.tmpl.pos.z - previous.z;
         distance = func_15143E64(&delta);
         {
-            RibbonPoint *point = &points[obj->head.end];
+            RibbonEffectPoint *point = &points[obj->head.end];
 
             point->pos = obj->head.tmpl.pos;
             point->distance = distance;
@@ -712,14 +712,14 @@ s32 func_151B77F4(EffectObj *obj) {
 
 /* Trims the ribbon to at most 1198 units of length, then fades its points from the head (opaque) to the tail. */
 s32 func_151B7998(EffectObj *obj) {
-    RibbonPoint *points;
+    RibbonEffectPoint *points;
     f32 total;
     f32 scale;
     s32 i;
     s32 prev;
     f32 t;
-    RibbonPoint *cur;
-    RibbonPoint *next;
+    RibbonEffectPoint *cur;
+    RibbonEffectPoint *next;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -800,7 +800,7 @@ Gfx *func_151B7C38(EffectObj *obj, Gfx *gfx, s16 view) {
     s32 index;
     s32 previous;
     Vec3f *camera;
-    RibbonPoint *points;
+    RibbonEffectPoint *points;
     Vec3f toCamera;
     Vec3f delta;
     Vec3f normal;

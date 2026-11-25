@@ -3,11 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-typedef struct OtherModeL {
-    s32 w0;
-    s32 w1;
-} OtherModeL;
-
 /* Animated, textured quad (update func_1515BAE0, draw func_1515BBF0). */
 typedef struct TexturedQuad {
     /* 0x00 */ EffectHeader header;
@@ -59,7 +54,7 @@ typedef struct ActorTracker {
 extern s32 (*D_8008B078[])(TexturedQuad *);
 extern s32 (*D_8008B07C[])(TexturedQuad *);
 extern EffectTexture D_80090B60[];
-extern OtherModeL D_800A4AC8[];
+extern RenderModePair D_800A4AC8[];
 
 s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags);
 Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
@@ -136,7 +131,7 @@ Gfx *func_1515BBF0(Gfx *gfx, TexturedQuad *quad, s32 view) {
                         G_PM_NPRIMITIVE | ((quad->flags & 2) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_PERSP |
                             G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE |
                             G_CD_NOISE | G_AD_NOISE,
-                        D_800A4AC8[quad->renderMode].w0 | D_800A4AC8[quad->renderMode].w1, &needSync);
+                        D_800A4AC8[quad->renderMode].cycle1 | D_800A4AC8[quad->renderMode].cycle2, &needSync);
     gSPVertex(gfx++, quad->vtx, 4, 0);
     gSP1Triangle(gfx++, 0, 1, 2, 0);
     gSP1Triangle(gfx++, 0, 2, 3, 0);
