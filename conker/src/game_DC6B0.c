@@ -5,9 +5,13 @@
 extern s32 *D_800DBF94;
 extern struct131 *func_151149AC(u8);
 extern s32 func_1505D024(struct127 *, s32, u16, s32);
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, u16, s32, s32, s16, s16, s32, u8, s16, s32, s32, u8, f32, f32, f32, f32, f32, f32);
-extern void func_150E2DB4(struct127 *, u8, s16, s32, f32, f32, f32, f32, f32, f32, s16, s16, u16, u8);
+extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+extern void func_150E1AB0(s32, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
+                          f32 halfWidth, f32 length, u16 lifetime, s32 texture, s32 mode, s16 onTime, s16 offTime,
+                          struct127 *owner, u8 ownerId, s16 bone, s32 ownerTag, s32 impactEffect, u8 unkFE,
+                          f32 startX, f32 startY, f32 startZ, f32 endX, f32 endY, f32 endZ);
+extern void func_150E2DB4(struct127 *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY,
+                          f32 startZ, f32 endX, f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8);
 extern void func_15179008(s32);
 
 /* If object idA (else idB) has bit 0 of its D_800DBF94 flag word set, calls func_1505D024 on
@@ -371,27 +375,28 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
     }
 }
 
-extern f32 sinf(f32);
+/* A sine oscillator: value = base + amplitude * sin(phase), with phase advancing by rate. */
+typedef struct {
+    /* 0x0 */ f32 base;
+    /* 0x4 */ f32 amplitude;
+    /* 0x8 */ f32 phase;
+    /* 0xC */ f32 rate; /* per unit of D_800BE9A4 */
+} Oscillator;
 
-struct Sub150AFBF4 {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-};
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ u8 pad14[0x5C];
+    /* 0x70 */ Oscillator osc;
+} Obj150AFBF4;
 
-struct Obj150AFBF4 {
-    char pad0[0x10];
-    f32 unk10;
-    char pad14[0x5C];
-    struct Sub150AFBF4 unk70;
-};
+/* Advances the oscillator at 0x70 (func_15144B68 wraps the phase) and writes its value to unk10. */
+s32 func_150AFBF4(Obj150AFBF4 *obj) {
+    Oscillator *osc = &obj->osc;
 
-s32 func_150AFBF4(struct Obj150AFBF4 *arg0) {
-    struct Sub150AFBF4 *p = &arg0->unk70;
-    p->unk8 = p->unk8 + p->unkC * D_800BE9A4;
-    p->unk8 = func_15144B68(p->unk8);
-    arg0->unk10 = sinf(p->unk8) * p->unk4 + p->unk0;
+    osc->phase = osc->phase + osc->rate * D_800BE9A4;
+    osc->phase = func_15144B68(osc->phase);
+    obj->unk10 = sinf(osc->phase) * osc->amplitude + osc->base;
     return 1;
 }
 
@@ -411,60 +416,64 @@ void func_150AFC68(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 arg4, s32 a
         0, 0, 0, bone, 0, arg4, arg5);          /* speed, startOffset, isAlt, bone, particleLink */
 }
 
-extern void *D_800DCE94;
+typedef struct Node150AFDB0 {
+    /* 0x00 */ u8 pad0[0x8];
+    /* 0x08 */ struct Node150AFDB0 *next;
+    /* 0x0C */ u8 padC[0x33];
+    /* 0x3F */ u8 unk3F;
+} Node150AFDB0;
 
-struct Node150AFDB0 {
-    char pad0[0x8];
-    struct Node150AFDB0 *unk8;
-    char pad0C[0x33];
-    u8 unk3F;
-};
+extern Node150AFDB0 *D_800DCE94;
 
+/* Releases (func_1516972C) every node of the D_800DCE94 list whose unk3F is D_800C3E78. Each
+ * node's successor is saved on the D_800DD198 iteration stack first, so releasing it is safe. */
 void func_150AFDB0(void) {
-    struct Node150AFDB0 *node;
+    Node150AFDB0 *node;
 
     D_800DD190++;
-    node = D_800DCE94;
-    while (node != 0) {
-        ((struct Node150AFDB0 **)D_800DD198)[(s8)D_800DD190] = node->unk8;
+    for (node = D_800DCE94; node != NULL; node = ((Node150AFDB0 **)D_800DD198)[D_800DD190]) {
+        ((Node150AFDB0 **)D_800DD198)[D_800DD190] = node->next;
         if (node->unk3F == D_800C3E78) {
             func_1516972C((struct102 *)node);
         }
-        node = ((struct Node150AFDB0 **)D_800DD198)[(s8)D_800DD190];
     }
     D_800DD190--;
 }
 
-void func_150AFE64(s32 arg0) {
-    f32 spA4;
-    f32 spA0;
-    f32 sp9C;
-    f32 sp98;
-    f32 sp94;
-    f32 sp90;
-    s32 idx;
-    f32 *mtx;
-    f32 zero;
+/* Fires a tracer along the -z axis of bone 3 (bone 2 if `altBone`) of D_800D154C, from 20 to
+ * 150 units out, plus a tracer (func_150E2DB4) attached to the same bone. */
+void func_150AFE64(s32 altBone) {
+    f32 startX;
+    f32 startY;
+    f32 startZ;
+    f32 endX;
+    f32 endY;
+    f32 endZ;
+    s32 bone;
+    f32 (*mtx)[4];
 
-    if (D_800D154C->unk1D4 != 0) {
-        if (arg0 == 0) {
-            idx = 3;
+    if (D_800D154C->unk1D4 != NULL) {
+        if (altBone == 0) {
+            bone = 3;
         } else {
-            idx = 2;
+            bone = 2;
         }
 
-        zero = 0.0f;
-        mtx = (f32 *)((u8 *)D_800D154C->unk1D4 + (idx << 6));
-        spA4 = zero;
-        spA0 = zero;
-        sp9C = -20.0f;
-        func_150A7960(mtx, spA4, spA0, sp9C, &spA4, &spA0, &sp9C);
-        sp98 = zero;
-        sp94 = zero;
-        sp90 = -150.0f;
-        func_150A7960(mtx, sp98, sp94, sp90, &sp98, &sp94, &sp90);
-        func_150E1AB0(0, spA4, spA0, sp9C, sp98, sp94, sp90, 40.0f, zero, 2.0f, 120.0f, 0x3C, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, zero, zero, zero, zero, zero, zero);
-        func_150E2DB4(D_800D154C, D_800D154C->unique_id, (s16)idx, -1, zero, zero, -39.0f, zero, zero, -150.0f, 3, 0xFF, 4, 0);
+        mtx = ((f32 (*)[4][4])D_800D154C->unk1D4)[bone];
+        startX = 0.0f;
+        startY = 0.0f;
+        startZ = -20.0f;
+        func_150A7960(mtx, startX, startY, startZ, &startX, &startY, &startZ);
+        endX = 0.0f;
+        endY = 0.0f;
+        endZ = -150.0f;
+        func_150A7960(mtx, endX, endY, endZ, &endX, &endY, &endZ);
+        /* speed 40, stopDist 0, halfWidth 2, length 120, lifetime 60, texture 35 */
+        func_150E1AB0(0, startX, startY, startZ, endX, endY, endZ, 40.0f, 0.0f, 2.0f, 120.0f, 60, 35,
+                      0, 0, 0, NULL, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+        /* from (0, 0, -39) to (0, 0, -150) in bone space; on 3 frames, off 255, lifetime 4 */
+        func_150E2DB4(D_800D154C, D_800D154C->unique_id, bone, -1, 0.0f, 0.0f, -39.0f, 0.0f, 0.0f, -150.0f,
+                      3, 0xFF, 4, 0);
     }
 }
 
