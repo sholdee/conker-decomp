@@ -1580,8 +1580,9 @@ struct Actor {
     /* 0x259 */ u8  unk259[3];
     s32 unk25C;
     /* 0x260 */ VtxMorphState *morph; // vertex morph (game_1A8060), NULL when the model has none
-    /* 0x264 */ s32 unk264;
-    u8  pad268[0x8];
+    /* 0x264 */ s32 unk264;      // allocations freed with the actor (func_15060F28)
+    /* 0x268 */ s32 unk268;
+    /* 0x26C */ s32 unk26C;
     /* 0x270 */ f32 unk270;
     /* 0x274 */ u8  objectNum; // D_800CC2D0 index + 1 of the object stood on, 0 = none
     /* 0x275 */ u8  unk275;  // D_800CC2D0 index + 1

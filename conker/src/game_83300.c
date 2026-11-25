@@ -1952,7 +1952,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
             
             landState = 0;
             if (actor->in_water == 0) {
-                *((u8 *)actor + 0x137) = 0;
+                actor->unk137 = 0;
                 actor->gravity = 5.0f;
             }
             if (actor->in_water == 0) {
@@ -2167,7 +2167,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
                         if (actor->xz_velocity > 20.0f) {
                             actor->xz_velocity = 20.0f;
                         }
-                    } else if (*((u8 *)actor + 0x110) == 0) {
+                    } else if (actor->unk110 == 0) {
                         actor->unk164 = 0.0f;
                         actor->unk168 = 0.0f;
                     }
@@ -2891,8 +2891,8 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
         }
         if (dist < maxDist) {
             if ((hit->unk24 & 0x2000) && i != attacker->unk13D) {
-                if (*(Vec3f **)((u8 *)attacker + 0x2F4) != NULL) {
-                    pos = **(Vec3f **)((u8 *)attacker + 0x2F4);
+                if (attacker->attachments != NULL) {
+                    pos = *(Vec3f *)attacker->attachments; // the first attachment's first 12 bytes
                 } else {
                     func_1507C3E0(attacker, &halfHeightRaw, 0, 0);
                     pos.x = attacker->x_position;
@@ -4648,39 +4648,40 @@ void func_15060F28(Actor *actor, s32 mode) {
             D_800D210C[actor->unk13F] = 0;
         }
     }
-    /* free the allocations held in the actor's padding (0x260..0x26C, 0x1D8, ...) */
-    if (*(void **)((u8 *)actor + 0x260) != NULL) {
-        func_10004074(*(void **)((u8 *)actor + 0x260));
+    /* free the actor's allocations */
+    if (actor->morph != NULL) {
+        func_10004074(actor->morph);
     }
-    if (*(s32 *)((u8 *)actor + 0x264) != 0) {
-        func_10004074((void *)*(s32 *)((u8 *)actor + 0x264));
+    if (actor->unk264 != 0) {
+        func_10004074((void *)actor->unk264);
     }
-    if (*(s32 *)((u8 *)actor + 0x268) != 0) {
-        func_10004074((void *)*(s32 *)((u8 *)actor + 0x268));
+    if (actor->unk268 != 0) {
+        func_10004074((void *)actor->unk268);
     }
-    if (*(s32 *)((u8 *)actor + 0x26C) != 0) {
-        func_10004074((void *)*(s32 *)((u8 *)actor + 0x26C));
+    if (actor->unk26C != 0) {
+        func_10004074((void *)actor->unk26C);
     }
-    if (*(void **)((u8 *)actor + 0x1D8) != NULL) {
-        func_10004074(*(void **)((u8 *)actor + 0x1D8));
+    if (actor->prevBones != NULL) {
+        func_10004074(actor->prevBones);
     }
-    if (*(struct102 **)((u8 *)actor + 0x2D4) != NULL) {
-        func_1516972C(*(struct102 **)((u8 *)actor + 0x2D4));
+    if (actor->unk2D4 != NULL) {
+        func_1516972C(actor->unk2D4);
     }
-    if (*(s32 **)((u8 *)actor + 0x304) != NULL) {
+    if (actor->unk304[0] != 0) {
         s32 i;
         for (i = 0; i <= D_80082FA0; i = (u8)(i + 1)) {
-            func_100043B4(*(s32 **)((u8 *)actor + (i * 4) + 0x304), 4);
+            func_100043B4((s32 *)actor->unk304[i], 4);
         }
     }
-    if (*(s32 *)((u8 *)actor + 0x314) != 0) {
-        func_100043B4((s32 *)*(s32 *)((u8 *)actor + 0x314), 4);
+    // matching: unk314 is read as an s32 (one load feeds both the test and the call)
+    if (*(s32 *)&actor->unk314 != 0) {
+        func_100043B4((s32 *)*(s32 *)&actor->unk314, 4);
     }
     if (actor->unk2D0 != NULL) {
         func_10004074(actor->unk2D0);
     }
-    if (*(void **)((u8 *)actor + 0x324) != NULL) {
-        func_10004074(*(void **)((u8 *)actor + 0x324));
+    if (actor->camData != NULL) {
+        func_10004074(actor->camData);
     }
     if ((actor->unk31C != NULL) && (actor->unk31C->boneChain != NULL)) {
         func_10004074(actor->unk31C->boneChain);
