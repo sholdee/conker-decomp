@@ -14,6 +14,7 @@ typedef struct Vec3f {
     f32 x, y, z;
 } Vec3f;
 
+// Parameters for func_151D8868.
 typedef struct {
     /* 0x0 */ u8 unk0;
     /* 0x1 */ u8 unk1;
@@ -24,19 +25,19 @@ typedef struct {
     /* 0x7 */ u8 unk7;
 } Struct15195738Small;
 
-extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-extern void func_151C0098(f32 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void func_1507CD64(struct127 *arg0, s32 arg1);
-extern s32 func_1518D1C0(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 *arg6);
+extern void func_151D8868(Struct15195738Small *params, s32 arg1, u8 arg2, s32 arg3);
+extern void func_151C0098(f32 *pos, struct127 *obj, s32 arg2, u8 arg3, s32 arg4);
+extern void func_1507CD64(struct127 *obj, s32 arg1);
+extern s32 func_1518D1C0(struct127 *obj, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 *arg6);
 extern u8 D_800A8244[];
 
-
-extern void func_151C329C(f32 *arg0, s32 arg1, s32 arg2);
+extern void func_151C329C(f32 *pos, u8 arg1, s32 arg2);
 extern void func_151DC260(f32 *pos, GroundInfo *ground, s32 type, u8 arg3, s32 arg4);
 extern void func_151DC484(f32 *pos, GroundInfo *ground, s32 type, u8 arg3, s32 arg4);
 extern s32 func_150A11C4;
 extern s32 func_150A1DA0;
 
+// Spawns one of several effects at the point D_800CC2C0, picked by obj's id.
 void func_15193CA0(struct127 *obj, u8 arg1, u8 arg2, s32 arg3) {
     f32 pos[3];
     GroundInfo ground;
@@ -158,11 +159,10 @@ typedef struct BurstParams {
 extern void func_15153F18(BurstParams *params, Vec3f *position, GroundInfo *ground, u8 arg3, s32 arg4);
 extern void *func_151AE7B0(struct127 *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);
 
+// Spawns a burst of particles from other when its id is 0-4.
 void func_15194408(struct127 *self, struct127 *other) {
-    struct {
-        GroundInfo ground;
-        BurstParams burst;
-    } locals;
+    BurstParams burst;
+    GroundInfo ground;
 
     switch (other->id) {
     case 0:
@@ -176,34 +176,34 @@ void func_15194408(struct127 *self, struct127 *other) {
     }
 
     func_151AE7B0(other, 0.6f, 90, 0xFF, 1);
-    func_1504715C(&locals.ground, other);
-    locals.burst.position.x = other->x_position;
-    locals.burst.position.y = other->y_position + 50.0f;
-    locals.burst.position.z = other->z_position;
-    locals.burst.unk14 = 6.0f;
-    locals.burst.countMin = 12;
-    locals.burst.countRange = 5;
-    locals.burst.yawRange = 0xFF;
-    locals.burst.pitchMin = -0x3F;
-    locals.burst.yawMin = 0;
-    locals.burst.pitchRange = 0x23;
-    locals.burst.unk30 = 3;
-    locals.burst.unk32 = 2;
-    locals.burst.unk34 = 30;
-    locals.burst.unk36 = 30;
-    locals.burst.unk38 = 100;
-    locals.burst.unk3A = 100;
-    locals.burst.unk44 = 16;
-    locals.burst.unk46 = 15;
-    locals.burst.unk48 = 0;
-    locals.burst.unk3C = 0;
-    locals.burst.unk18 = 3.0f;
-    locals.burst.unk1C = 0.21f;
-    locals.burst.unk20 = 0.406f;
-    locals.burst.speedMin = 13.0f;
-    locals.burst.speedRange = 8.0f;
-    locals.burst.unk40Chance = 0.3f;
-    func_15153F18(&locals.burst, &locals.burst.position, &locals.ground, 0xFF, 1);
+    func_1504715C(&ground, other);
+    burst.position.x = other->x_position;
+    burst.position.y = other->y_position + 50.0f;
+    burst.position.z = other->z_position;
+    burst.unk14 = 6.0f;
+    burst.countMin = 12;
+    burst.countRange = 5;
+    burst.yawRange = 0xFF;
+    burst.pitchMin = -0x3F;
+    burst.yawMin = 0;
+    burst.pitchRange = 0x23;
+    burst.unk30 = 3;
+    burst.unk32 = 2;
+    burst.unk34 = 30;
+    burst.unk36 = 30;
+    burst.unk38 = 100;
+    burst.unk3A = 100;
+    burst.unk44 = 16;
+    burst.unk46 = 15;
+    burst.unk48 = 0;
+    burst.unk3C = 0;
+    burst.unk18 = 3.0f;
+    burst.unk1C = 0.21f;
+    burst.unk20 = 0.406f;
+    burst.speedMin = 13.0f;
+    burst.speedRange = 8.0f;
+    burst.unk40Chance = 0.3f;
+    func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
 }
 
 extern void func_150C7020(struct127 *obj, s32 arg1, u8 arg2, s32 arg3);
@@ -217,13 +217,14 @@ extern u8 D_800A3FE6[];
 extern s32 func_15134070(struct127 *);
 extern void func_151B4CD0(struct127 *obj, u8 arg1, s32 arg2);
 
+// Spawns a burst of particles above other, aimed by self's facing angle, unless other's kind forbids it.
 void func_151945CC(struct127 *self, struct127 *other, u8 *arg2) {
     Vec3f pos;
-    s16 shade;
+    s16 facingYaw;
     BurstParams burst;
     GroundInfo ground;
 
-    shade = ((s32)self->unk7A >> 8) - 0x40;
+    facingYaw = (self->unk7A >> 8) - 0x40; // unk7A is a u16 angle; >> 8 makes it a byte angle
     pos.x = other->x_position;
     pos.y = other->y_position + 270.0;
     pos.z = other->z_position;
@@ -234,7 +235,7 @@ void func_151945CC(struct127 *self, struct127 *other, u8 *arg2) {
         func_1504715C(&ground, other);
         kind = func_15134070(other);
         if (kind != 0x63) {
-            profile = D_800A3FE6[kind << 4];
+            profile = D_800A3FE6[kind * 16]; // 16-byte records
             if (profile != 2) {
                 burst.position = pos;
                 burst.unk14 = 6.699999809f;
@@ -244,7 +245,7 @@ void func_151945CC(struct127 *self, struct127 *other, u8 *arg2) {
                 burst.speedMin = 4.400000095f;
                 burst.countMin = 15;
                 burst.countRange = 12;
-                burst.yawMin = shade - 0x40;
+                burst.yawMin = facingYaw - 0x40;
                 burst.yawRange = 0x80;
                 burst.pitchMin = -0xA0;
                 burst.pitchRange = 0x20;
@@ -289,6 +290,7 @@ void func_15194794(struct127 *self, struct127 *other, u8 *arg2) {
     }
 }
 
+// For ids 0-4 and 0x53, spawns a burst of particles above other and calls func_151D8868.
 void func_15194810(struct127 *self, struct127 *other, u8 *arg2) {
     Vec3f pos;
     BurstParams burst;
@@ -349,6 +351,7 @@ extern void func_15104170(s32 arg0, struct127 *self, struct127 *other);
 extern void func_1507DE4C(struct127 *obj);
 extern void func_15138BC0(struct127 *obj, u8 arg1, s32 arg2);
 
+// Calls func_15104170 when D_8008FD90 == 1 and self's unk31C->unk1A0 cooldown has run out, then restarts it.
 void func_151949F4(s32 arg0, struct127 *self, struct127 *other) {
     if (D_8008FD90 == 1 && self->unk127 == 0 && (D_800E9D00 & 8) && self->unk31C->unk1A0 == 0) {
         func_15104170(arg0, self, other);
@@ -362,6 +365,7 @@ void func_15194A68(struct127 *self, struct127 *other, u8 *arg2) {
     func_151949F4(0, self, other);
 }
 
+// Sets obj's unk9C flags and starts an id-specific animation for ids 0x75 and 0x80.
 void func_15194AB4(struct127 *obj) {
     s32 anim;
 
@@ -569,12 +573,14 @@ u8 arg2;
 }
 
 extern struct127 *func_1505ED34(void);
-extern s32 func_150838EC(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3);
-extern void func_150D10E4(void *arg0, u8 arg1);
+extern s32 func_150838EC(struct127 *obj, s32 anim, s32 arg2, f32 speed);
+extern void func_150D10E4(struct127 *obj, u8 arg1);
 
+// struct127 declares these offsets as padding, so they are reached by offset.
 #define U8AT(p, off) (*(u8 *)((u8 *)(p) + (off)))
 #define F32AT(p, off) (*(f32 *)((u8 *)(p) + (off)))
 
+// Kills obj and spawns a copy of it; the two are thrown apart with random velocities.
 void func_151951E0(struct127 *obj) {
     struct127 *copy;
 
@@ -622,6 +628,7 @@ void func_151951E0(struct127 *obj) {
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
 extern void func_15137610(struct127 *obj, f32 *from, f32 *to, f32 *dir, u8 arg4, s32 arg5);
 
+// Calls func_15137610 on a 40-unit segment through other, at right angles to self's (or other's, or a random) heading.
 void func_15195528(struct127 *self, struct127 *other, u8 *arg2) {
     f32 angle;
     f32 from[3];
@@ -656,12 +663,10 @@ void func_15195650(struct127 *self, struct127 *other, u8 *arg2) {
 }
 
 void func_15195698(struct127 *self, struct127 *other, u8 *arg2) {
-    if (other->health == 0) {
-        if (other->unk127 != 0xFF) {
-            func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
-            func_15145A50(other);
-            func_1507CD64(other, 6);
-        }
+    if (other->health == 0 && other->unk127 != 0xFF) {
+        func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
+        func_15145A50(other);
+        func_1507CD64(other, 6);
     }
     if (self->id == 0x47) {
         self->health = 0;
