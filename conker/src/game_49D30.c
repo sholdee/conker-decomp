@@ -2477,40 +2477,44 @@ s32 func_15022B08(s32 actorIndex, s32 scene) {
     return 0;
 }
 
-void func_15022BA4(s32 arg0) {
-    s32 i;
+/* Re-anchor the scene's paths. A type 6 track shifts every path key so that its own path starts at
+   its object (unk2 0) or actor (unk2 1). A type 7 track instead rotates the paths about its first
+   key to the anchor D_800C358C/D_800C3594 and adjusts the heading channel (7) to match. */
+void func_15022BA4(s32 scene) {
+    s32 track;
     s32 j;
     s32 k;
-    s32 flag;
+    s32 hasHeadingEvent;
     f32 y;
     f32 x;
     f32 z;
     f32 dx;
     f32 dy;
     f32 dz;
-    SeqPathKey *p;
+    SeqPathKey *key;
 
-    for (i = 0; i < D_800C363A[arg0]; i++) {
-        if (D_800C35C8[arg0][i] == 0) {
+    for (track = 0; track < D_800C363A[scene]; track++) {
+        if (D_800C35C8[scene][track] == 0) {
             continue;
         }
-        if (D_800C35F0[arg0][i].type == 6) {
+        if (D_800C35F0[scene][track].type == 6) {
             if (D_800C3663 == 0) {
-                p = D_800C3868[arg0][i];
-                func_15022190(p->x, p->y, p->z, 0.0f);
+                key = D_800C3868[scene][track];
+                func_15022190(key->x, key->y, key->z, 0.0f);
             }
-            if (D_800C35F0[arg0][i].unk2 == 0) {
+            if (D_800C35F0[scene][track].unk2 == 0) {
                 struct127 *obj;
-                obj = func_15083E90(D_800C35F0[arg0][i].unk3);
+                obj = func_15083E90(D_800C35F0[scene][track].unk3);
                 if (obj == NULL) {
                     return;
                 }
                 x = obj->x_position;
                 y = obj->y_position;
                 z = obj->z_position;
-            } else if (D_800C35F0[arg0][i].unk2 == 1) {
+            } else if (D_800C35F0[scene][track].unk2 == 1) {
                 struct131 *obj;
-                obj = (struct131 *)(s8)D_800C35F0[arg0][i].unk3;
+                // matching: the s8 id goes through the pointer variable before the call
+                obj = (struct131 *)(s8)D_800C35F0[scene][track].unk3;
                 obj = func_151149AC((s32)obj);
                 if (obj == NULL) {
                     return;
@@ -2521,69 +2525,69 @@ void func_15022BA4(s32 arg0) {
             } else {
                 return;
             }
-            p = D_800C3868[arg0][i];
-            dx = x - p->x;
-            dy = y - p->y;
-            dz = z - p->z;
-            for (j = 0; j < D_800C363A[arg0]; j++) {
-                for (k = 0; k < D_800C35C8[arg0][j]; k++) {
-                    D_800C3868[arg0][j][k].x = D_800C3868[arg0][j][k].x + dx;
-                    D_800C3868[arg0][j][k].y = D_800C3868[arg0][j][k].y + dy;
-                    D_800C3868[arg0][j][k].z = D_800C3868[arg0][j][k].z + dz;
+            key = D_800C3868[scene][track];
+            dx = x - key->x;
+            dy = y - key->y;
+            dz = z - key->z;
+            for (j = 0; j < D_800C363A[scene]; j++) {
+                for (k = 0; k < D_800C35C8[scene][j]; k++) {
+                    D_800C3868[scene][j][k].x = D_800C3868[scene][j][k].x + dx;
+                    D_800C3868[scene][j][k].y = D_800C3868[scene][j][k].y + dy;
+                    D_800C3868[scene][j][k].z = D_800C3868[scene][j][k].z + dz;
                 }
             }
             return;
-        } else if (D_800C35F0[arg0][i].type == 7) {
+        } else if (D_800C35F0[scene][track].type == 7) {
             f32 c;
             f32 s;
-            f32 t;
-            f32 ang;
+            f32 turn;
+            f32 radians;
             f32 rx;
             f32 rz;
             f32 nx;
-            f32 f;
-            SeqChannelKey *e;
+            f32 heading;
+            SeqChannelKey *chKey;
 
-            f = 0.0f;
-            for (j = 0; j < D_800C35D0[arg0][i]; j++) {
-                e = &D_800C3778[arg0][i][j];
-                if (e->channel == 7) {
-                    f = e->value;
+            heading = 0.0f;
+            for (j = 0; j < D_800C35D0[scene][track]; j++) {
+                chKey = &D_800C3778[scene][track][j];
+                if (chKey->channel == 7) {
+                    heading = chKey->value;
                     break;
                 }
             }
             if (D_800C3663 == 0) {
-                p = D_800C3868[arg0][i];
-                func_15022190(p->x, p->y, p->z, f);
+                key = D_800C3868[scene][track];
+                func_15022190(key->x, key->y, key->z, heading);
             }
-            t = D_800C3594 - f;
-            D_800C35A4 = t;
-            p = D_800C3868[arg0][i];
-            ang = t * 0.01745329238f;
-            x = p->x;
-            y = p->y;
-            z = p->z;
-            c = cosf(ang);
-            s = sinf(ang);
+            turn = D_800C3594 - heading;
+            D_800C35A4 = turn;
+            key = D_800C3868[scene][track];
+            radians = turn * 0.01745329238f;
+            x = key->x;
+            y = key->y;
+            z = key->z;
+            c = cosf(radians);
+            s = sinf(radians);
             dy = D_800C358C[1] - y;
-            for (j = 0; j < D_800C363A[arg0]; j++) {
-                for (k = 0, flag = 0; k < D_800C35C8[arg0][j]; k++) {
-                    rx = D_800C3868[arg0][j][k].x - x;
-                    rz = D_800C3868[arg0][j][k].z - z;
+            for (j = 0; j < D_800C363A[scene]; j++) {
+                for (k = 0, hasHeadingEvent = 0; k < D_800C35C8[scene][j]; k++) {
+                    rx = D_800C3868[scene][j][k].x - x;
+                    rz = D_800C3868[scene][j][k].z - z;
                     nx = rx * c + rz * s;
                     rz = -rx * s + rz * c;
-                    D_800C3868[arg0][j][k].x = D_800C358C[0] + nx;
-                    D_800C3868[arg0][j][k].y = D_800C3868[arg0][j][k].y + dy;
-                    D_800C3868[arg0][j][k].z = D_800C358C[2] + rz;
+                    D_800C3868[scene][j][k].x = D_800C358C[0] + nx;
+                    D_800C3868[scene][j][k].y = D_800C3868[scene][j][k].y + dy;
+                    D_800C3868[scene][j][k].z = D_800C358C[2] + rz;
                 }
-                if (D_800C35D8[arg0][j] != 0 && ((s8 *)D_800C3688[arg0][j])[0x20] == 7) {
-                    flag = 1;
+                if (D_800C35D8[scene][j] != 0 && D_800C3688[scene][j][4].type == 7) {
+                    hasHeadingEvent = 1;
                 }
-                if (flag == 0) {
-                    for (k = 0; k < D_800C35D0[arg0][j]; k++) {
-                        e = &D_800C3778[arg0][j][k];
-                        if (e->channel == 7) {
-                            e->value = e->value + t;
+                if (hasHeadingEvent == 0) {
+                    for (k = 0; k < D_800C35D0[scene][j]; k++) {
+                        chKey = &D_800C3778[scene][j][k];
+                        if (chKey->channel == 7) {
+                            chKey->value = chKey->value + turn;
                         }
                     }
                 }
