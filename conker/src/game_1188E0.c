@@ -9,7 +9,6 @@
 extern s32 D_80088AA0[4];
 extern s32 D_80088AB0[8];
 extern s32 func_150A34B0(TriggerZone *cyl, Vec3f *start, Vec3f *end, Vec3f *hit);
-extern void func_150A2864(s32, s32);
 s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit);
 void func_150EBC80(TriggerZone *gate, u8 owner, s32 kind);
 

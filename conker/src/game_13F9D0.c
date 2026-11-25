@@ -116,7 +116,6 @@ void func_15112520(WorldObject *turret) {
 
 
 extern s32 func_15022B08(s32, s32);
-extern s32 func_1503F800(void *, s16, s16, s32, s32);
 extern s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
 
 /* Builds each view's draw list: distance-culls and fades every object group, then appends visible groups. */

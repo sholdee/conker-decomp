@@ -7,8 +7,6 @@
 
 
 void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, s32 farDistance); /* stops a positional sound */
-s32 zone_isOutside(Actor *actor, TriggerZone *zone, s32 withMargin);
-void func_150A23E4(TriggerZone *zone);
 
 /* Per-frame update of the zone state that does not depend on an actor (ticks is unused). */
 void func_150A09D0(s32 ticks) {
@@ -199,9 +197,7 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
 s32 __osPiGetAccess(void);
 void __osPiRelAccess(void);
 s32 osPiRawReadIo(u32, u32 *);
-void func_150A24C0(TriggerZone *zone, s32 unk127);
 void func_15172E7C(Actor *actor, s32 arg1, s32 arg2);
-void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits);
 
 /* Finds the TriggerZones that contain the actor (narrowed through the zone bounding boxes) and applies them. */
 void func_150A11C4(Actor *actor) {

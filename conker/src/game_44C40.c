@@ -45,8 +45,6 @@ void func_15017868(void) {
     func_1509B4A0((s16)level, 1);
 }
 
-void func_15017B20(TriggerZone *objects, s32 count);
-
 /* Loads the level's object table and builds the list D_800D3270 of the ZONE_TYPE_CHAR_FLAGS TriggerZones with subTypeData 0, 2 or 6. */
 void func_15017930(s32 arg0) {
     u32 i;
@@ -85,9 +83,6 @@ void func_15017930(s32 arg0) {
     bzero(D_800D30F0, sizeof(D_800D30F0));
     bzero(D_800D30D0, sizeof(D_800D30D0));
 }
-
-extern void zone_cacheAngles(TriggerZone *obj);
-void func_15017FA4(TriggerZone *obj, ZoneBounds *bounds);
 
 /* Whether the ranges [a0, a1) and [b0, b1) overlap. */
 #define OVERLAP(a0, a1, b0, b1) (((a0 <= b0) && (b0 < a1)) || ((b0 < a0) && (a0 < b1)) || ((a0 < b1) && (b1 < a1)))

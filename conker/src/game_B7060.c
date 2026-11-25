@@ -11,7 +11,6 @@ extern f32 sqrtf(f32);
 
 #pragma intrinsic(sqrtf)
 
-extern void zone_findAt(s32, s32, s32, s32, s32);
 s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z);
 s32 func_15086D48(s32 id);
 f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz);

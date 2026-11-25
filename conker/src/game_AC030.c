@@ -721,7 +721,6 @@ typedef struct {
     s32 type[3];
 } ObjTypeList;
 
-extern s32 zone_findAt(s32 type, s32 subtype, s32 x, s32 y, s32 z);
 extern ObjTypeList D_80086C50;
 
 /*

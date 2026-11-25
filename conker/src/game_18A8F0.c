@@ -488,8 +488,6 @@ void func_1515E888(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg
     color[2] = v;
 }
 
-s32 zone_isOutside(Actor *obj, TriggerZone *zone, s32);
-
 /* First zone in the list whose type matches `mask` (0 = any) and that contains (x, y, z). */
 TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node) {
     Actor probe;

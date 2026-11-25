@@ -91,8 +91,6 @@ Gfx *func_150368C4(Gfx *gdl, s32 index, s32 player);
 s32 func_1503CF20(s32, s32, void *, s32, s32);
 s32 func_1503DA9C(Actor *, s32, s32, s32);
 void func_1503DF48(s32);
-s32 func_1503F904(Actor *, s32, s32);
-void func_1503F964(void);
 void func_1505DFDC(Actor *);
 // matching: the command goes in as s32 (functions.h has u8)
 void func_1506160C(Actor *obj, s32 arg1, u8 arg2, u8 arg3, s32 player);

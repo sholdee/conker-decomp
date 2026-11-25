@@ -1,5 +1,9 @@
 #include <ultra64.h>
+// matching: this file calls func_150A2AEC with a fourth argument (the actor); hide the header's prototype
+#define func_150A2AEC func_150A2AEC_hdr
 #include "functions.h"
+#undef func_150A2AEC
+s32 func_150A2AEC(s32 index, s32 count, const s32 *list, Actor *actor);
 #include "variables.h"
 #include "effects.h"
 
@@ -44,7 +48,6 @@ s32 func_15146890(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
 }
 
 s32 func_151420F8(Actor *actor);
-s32 func_150A2AEC(s32 index, s32 count, const s32 *list, Actor *actor);
 
 /* Map an actor's damage/effect kind onto the particle-effect id used for it.  Most kinds are a
    fixed id; kind 1 depends on the current world (level) and, in world 4, on whether

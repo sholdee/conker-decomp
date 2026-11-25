@@ -21,7 +21,6 @@ void func_1500C2A0(void) {
     D_800DC63C = 0;
 }
 
-void func_15008340(s32 region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 void func_1510F800(s32);
 void *memcpy(void *, const void *, u32);
 
@@ -71,7 +70,7 @@ void func_1500C2F0(s32 region, f32 density) {
             f32 y;
             f32 below;
 
-            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
+            func_15008340((TriggerZone *)region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;
@@ -197,7 +196,7 @@ void func_1500C8D0(s32 region, f32 density) {
             // matching: a separate statement makes IDO call func_150ADA20 for 0x40 first
             flag40 = (func_150ADA20() & 1) ? 0x40 : 0;
             part.flags = flag40 | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x4000 | 0x8000 | 0x10000 | 0x20000;
-            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
+            func_15008340((TriggerZone *)region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;
@@ -278,7 +277,7 @@ void func_1500CE4C(s32 region, f32 density) {
             temp = RANDOM_U16() * inv65535 * 12.0f + 10.0f;
             part.width = temp;
             part.height = temp;
-            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
+            func_15008340((TriggerZone *)region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             extra.centerY = y;
@@ -351,7 +350,7 @@ void func_1500D3AC(s32 region, f32 density) {
         inv65535 = 1.525902189e-05f;
         part.rotVel.y = 0.0f;
         do {
-            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
+            func_15008340((TriggerZone *)region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;
@@ -423,7 +422,7 @@ void func_1500D8C8(s32 region, f32 density) {
             f32 y;
             f32 below;
 
-            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
+            func_15008340((TriggerZone *)region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;
@@ -522,7 +521,7 @@ void func_1500DE88(s32 region, f32 density) {
                          0x8000 | 0x20000 | 0x800000;
             part.r2 = RANDOM() % 56 + 80;
             part.r = RANDOM() % 46 + 180;
-            func_15008340(region, &part.pos.x, &part.pos.z, &top, &bottom);
+            func_15008340((TriggerZone *)region, &part.pos.x, &part.pos.z, &top, &bottom);
             range = top - bottom;
             y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
             part.vel.y = y;

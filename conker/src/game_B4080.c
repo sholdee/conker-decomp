@@ -34,8 +34,6 @@ f32 func_15086BD0(s32 a, s32 b) {
 void func_15086C68(void) {
 }
 
-extern void zone_findAt(s32, s32, s32, s32, s32);
-
 /* Calls zone_findAt(3, 11, ...) at path node `index`. */
 void func_15086C70(s32 index) {
     s16 z = D_800D2350[index].z;

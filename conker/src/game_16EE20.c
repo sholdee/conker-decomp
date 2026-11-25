@@ -1,6 +1,9 @@
 #include <ultra64.h>
 
+// matching: this file calls func_150A2AEC with a fourth argument (the actor); hide the header's prototype
+#define func_150A2AEC func_150A2AEC_hdr
 #include "functions.h"
+#undef func_150A2AEC
 #include "variables.h"
 #include "effects.h"
 

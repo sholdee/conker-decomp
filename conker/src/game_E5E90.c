@@ -146,7 +146,6 @@ s32 func_150B89E0(ModelParticle *particle, f32 x, f32 y, f32 z, f32 floorHeight,
     return 1;
 }
 
-s32 func_150A3058(s32, s16, s16, s16);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *,
                   s32 *, void *, f32);
 s32 func_15145C90(s32);

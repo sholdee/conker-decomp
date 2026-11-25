@@ -144,7 +144,6 @@ s32 func_15085DF8(f32 x, f32 y, f32 z, s8 type, s8 layer) {
 }
 
 TriggerZone *func_15086C70(s32 index);
-s32 func_150A32B4(TriggerZone *zone, s32 x, s32 y, s32 z);
 
 /*
  * Returns the path node to head for from (x, y, z): the nearest node, or the next node of the

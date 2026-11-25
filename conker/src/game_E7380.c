@@ -5,7 +5,6 @@
 /* Code range checksummed by func_150B9ED0 (anti-tamper: a mismatch breaks player 1's controller mapping). */
 extern s32 func_151E7EF8[];
 extern s32 func_151E7F60[];
-extern s32 func_150A3058(s32, s16, s16, s16);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 extern s32 func_15145C90(s32);
 extern void func_151511FC(SurfaceBurst *, u8, s32);

@@ -5,8 +5,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern s32 func_150A32B4(TriggerZone *, s32, s32, s32);
-extern void func_150A2864(s32, s32);
 extern s32 D_80090204[][2];
 
 void func_150DE320(s32 arg0) {

@@ -98,8 +98,6 @@ extern f32 sinf(f32);
 extern f32 cosf(f32);
 extern u8 func_15085420(Actor *);
 extern f32 func_15086D94(f32, f32, f32, f32, f32);
-extern s32 func_150A2AEC(u32, s32, s32 *);
-extern TriggerZone *zone_findAt(s32, s32, s32, s32, s32);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 extern f32 func_15144BC8(f32);
 extern s8 func_151E564C(void);

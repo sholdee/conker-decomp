@@ -36,8 +36,6 @@ const u16 D_8009919C[6] = { 0x2B1, 0x2B5, 0x2B6, 0x2B7, 0x2BD, 0x2BE };
 void func_1508295C(s32, s32, s32);
 void func_1507D4F8(s32);
 s32 func_1504C8BC(Actor *);
-void func_150A11C4(void *);
-void func_150A278C(void *);
 void func_1504AF10(Actor *, s32, s32);
 void func_15061B4C(void);
 void func_15080C64(void);

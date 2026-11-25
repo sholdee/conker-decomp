@@ -36,8 +36,6 @@ Msg15128CB0 *func_1512D604(Camera *);
 s32 func_1512D6B0(Camera *);
 void func_1512D6F0(Camera *);
 void func_1512E8E0(Camera *);
-void func_150A09D0(s32);
-void func_150A11C4(Actor *);
 void func_151287E0(Camera *, s32, s32);
 void func_151283B8(Camera *);
 void func_1510B128(s32, f32, f32, f32, f32);
