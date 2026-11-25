@@ -2,6 +2,30 @@
 #include "functions.h"
 #include "variables.h"
 
+/* struct126 (struct127::unk31C) fields read by func_1507C3E0 that the shared header leaves as padding. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x4];
+    /* 0x004 */ s32 unk4;
+    /* 0x008 */ u8 pad8[0xF];
+    /* 0x017 */ u8 unk17;
+    /* 0x018 */ u8 pad18[0x36];
+    /* 0x04E */ u8 unk4E;
+    /* 0x04F */ u8 unk4F;
+    /* 0x050 */ u8 pad50[0x147];
+    /* 0x197 */ u8 unk197;
+    /* 0x198 */ u8 pad198[0xE];
+    /* 0x1A6 */ u16 unk1A6;
+    /* 0x1A8 */ u8 pad1A8[0xB];
+    /* 0x1B3 */ u8 unk1B3;
+} ObjExtView;
+
+/* Camera (struct108) fields past the shared header's declared range. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x95C];
+    /* 0x95C */ f32 unk95C;
+    /* 0x960 */ f32 unk960;
+} CameraSizeView;
+
 void func_1507C3E0(struct127 *obj, s16 *height, s16 *width, s16 *depth);
 
 /* Refreshes the cached height/width/depth (struct126 unk114-unk118) of every object that has one. */
@@ -20,15 +44,21 @@ void func_1507C370(void) {
 /* func_1507C3E0: the original has compiled-out debug code after the size selection (ra and
  * $f20 are saved and a1-a3 homed although no call survives). The dbg* names below are
  * stand-ins that are never referenced by the emitted code; the dead blocks only steer
- * uopt's live-range splitting (a: split, in $f18 across the selection; b: $f20; c: stack). */
-void dbg_func0(void); void dbgf(f32); void dbgp(f32 *); void dbgi(s32); void dbgu(); s32 dbgr(void); f32 dbgrf(void); f32 dbgff(f32); void dbg3(f32,f32,f32); void dbgv(); extern f32 dbgx[];
-void func_1507C3E0(struct127 *arg0, s16 *arg1, s16 *arg2, s16 *arg3) {
-    f32 a;
-    f32 c;
-    f32 b;
-    u8 *p;
-    s32 flag;
-    s32 pb[9];
+ * uopt's live-range splitting (height: split, in $f18 across the selection; depth: $f20;
+ * width: stack). See ~/conker-ws/func_1507C3E0/notes.md for the full ledger. */
+void dbg3(f32, f32, f32);
+void dbgp(f32 *);
+void dbgu();
+extern f32 dbgx[];
+/* Computes an object's height, width and depth (each output may be NULL): fixed sizes for
+ * special states and object ids, otherwise its unkE6/unkE4, scaled by y_scale/xz_scale. */
+void func_1507C3E0(struct127 *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
+    f32 height;
+    f32 width;
+    f32 depth;
+    ObjExtView *ext;
+    s32 applyScale;
+    s32 pad[9]; // matching: stack frame size and slot of zero
     f32 zero;
     f32 x1;
     f32 x2;
@@ -36,126 +66,126 @@ void func_1507C3E0(struct127 *arg0, s16 *arg1, s16 *arg2, s16 *arg3) {
     f32 x4;
     f32 x5;
     s32 dbg;
-    s32 pa[8];
+    s32 pad2[8]; // matching: stack frame size
 
-    dbg = 0;
-    flag = 1;
+    dbg = 0; // matching: guards the dead debug blocks below
+    applyScale = 1;
     zero = 0.0f;
-    if (arg0->interaction_state == 0) {
-        c = b = 60.0f;
-        a = 180.0f;
-    } else if (arg0->interaction_state == 0x2D) {
-        a = *(f32 *)((u8 *)arg0->camera + 0x960);
-        c = b = *(f32 *)((u8 *)arg0->camera + 0x95C);
-    } else if (arg0->interaction_state == 4) {
-        a = arg0->unkE6 * 6.0f;
-        c = b = arg0->unkE4 * 3.0f;
-    } else if (arg0->interaction_state == 0x2C) {
-        c = b = 80.0f;
-        a = 160.0f;
-    } else if (arg0->unk5 == 5) {
-        a = arg0->unkE6 * 2.0f;
-        c = b = arg0->unkE4;
+    if (obj->interaction_state == 0) {
+        width = depth = 60.0f;
+        height = 180.0f;
+    } else if (obj->interaction_state == 45) {
+        height = ((CameraSizeView *)obj->camera)->unk960;
+        width = depth = ((CameraSizeView *)obj->camera)->unk95C;
+    } else if (obj->interaction_state == 4) {
+        height = obj->unkE6 * 6.0f;
+        width = depth = obj->unkE4 * 3.0f;
+    } else if (obj->interaction_state == 44) {
+        width = depth = 80.0f;
+        height = 160.0f;
+    } else if (obj->unk5 == 5) {
+        height = obj->unkE6 * 2.0f;
+        width = depth = obj->unkE4;
     } else {
-        switch (arg0->id) {
+        switch (obj->id) {
         case 0: case 1: case 2: case 3: case 4:
         case 59:
         case 117: case 128: case 130: case 136: case 144: case 150: case 152:
         case 156: case 157: case 159: case 160: case 176: case 177: case 178: case 180:
-            p = (u8 *)arg0->unk31C;
-            if (p != NULL && *(s32 *)(p + 4) != 0) {
-                c = b = 60.0f;
-                a = 80.0f;
-            } else if (p != NULL && *(u8 *)(p + 0x17) != 0) {
-                c = b = 70.0f;
-                a = 300.0f;
-            } else if (arg0->in_water) {
-                a = 180.0f;
-                c = 90.0; b = 90.0f;
+            ext = (ObjExtView *)obj->unk31C;
+            if (ext != NULL && ext->unk4 != 0) {
+                width = depth = 60.0f;
+                height = 80.0f;
+            } else if (ext != NULL && ext->unk17 != 0) {
+                width = depth = 70.0f;
+                height = 300.0f;
+            } else if (obj->in_water) {
+                height = 180.0f;
+                width = 90.0; depth = 90.0f; // matching: double literal un-CSEs the constant
             } else {
-                c = 60.0f;
-                b = 60.0f;
-                a = 180.0f;
-                if (p != NULL) {
-                    if ((arg0->camera != NULL && *(s16 *)((u8 *)arg0->camera + 0x73C) != 0) ||
-                        *(u8 *)(p + 0x197) != 0 || *(u8 *)(p + 0x1B3) != 0) {
-                        c *= 2.0f; b *= 2.0f;
+                width = 60.0f;
+                depth = 60.0f;
+                height = 180.0f;
+                if (ext != NULL) {
+                    if ((obj->camera != NULL && obj->camera->unk73C != 0) ||
+                        ext->unk197 != 0 || ext->unk1B3 != 0) {
+                        width *= 2.0f; depth *= 2.0f;
                     }
-                    a += (u32)*(u16 *)(p + 0x1A6);
+                    height += ext->unk1A6;
                 }
             }
-            if (p != NULL && (*(u8 *)(p + 0x4E) & 0xF) == 1 && *(u8 *)(p + 0x4F) == 0 &&
-                arg0->xz_velocity < 40.0f) {
-                c = b = 110.0f;
-                a = 500.0f;
+            if (ext != NULL && (ext->unk4E & 0xF) == 1 && ext->unk4F == 0 &&
+                obj->xz_velocity < 40.0f) {
+                width = depth = 110.0f;
+                height = 500.0f;
             }
             break;
         case 37: case 46:
-            a = 70.0f;
-            c = 90.0; b = 90.0f;
+            height = 70.0f;
+            width = 90.0; depth = 90.0f; // matching: double literal un-CSEs the constant
             break;
         case 54:
-            a = 257.0f;
-            c = 90.0; b = 90.0f;
+            height = 257.0f;
+            width = 90.0; depth = 90.0f; // matching: double literal un-CSEs the constant
             break;
         case 154:
-            a = 60.0f;
-            c = b = 45.0f;
-            flag = 0;
+            height = 60.0f;
+            width = depth = 45.0f;
+            applyScale = 0;
             break;
         case 172:
-            c = b = 30.0f;
-            a = 90.0f;
-            flag = 0;
+            width = depth = 30.0f;
+            height = 90.0f;
+            applyScale = 0;
             break;
         case 137: case 186:
-            a = 60.0f;
-            c = b = 30.0f;
-            flag = 0;
+            height = 60.0f;
+            width = depth = 30.0f;
+            applyScale = 0;
             break;
         case 83:
             if (D_800BE616 != 0) {
-                c = b = 150.0f;
-                a = 300.0f;
+                width = depth = 150.0f;
+                height = 300.0f;
             } else {
-                a = 250.0f;
-                c = 90.0; b = 90.0f;
+                height = 250.0f;
+                width = 90.0; depth = 90.0f; // matching: double literal un-CSEs the constant
             }
             break;
         default:
-            flag = 0;
-            a = arg0->unkE6 * 2.0f;
-            c = b = arg0->unkE4;
+            applyScale = 0;
+            height = obj->unkE6 * 2.0f;
+            width = depth = obj->unkE4;
             break;
         }
-        if (arg0->unk13C > 100 && D_800CC2D0[arg0->unk13C - 100].id == 0x13) {
-            b += 120.0f * arg0->xz_scale;
-            a += 100.0f * arg0->y_scale;
+        if (obj->unk13C > 100 && D_800CC2D0[obj->unk13C - 100].id == 19) {
+            depth += 120.0f * obj->xz_scale;
+            height += 100.0f * obj->y_scale;
         }
-        if (flag) {
-            f32 sx;
-            sx = arg0->xz_scale;
-            a *= arg0->y_scale;
-            c *= sx;
-            b *= sx;
-            goto end;
+        if (applyScale) {
+            f32 xzScale;
+            xzScale = obj->xz_scale;
+            height *= obj->y_scale;
+            width *= xzScale;
+            depth *= xzScale;
+            goto end; // matching: falling out of the if/else schedules the tail differently
         }
     }
 end:
-    if (!dbg) { } else {
-        dbg3(a, b, b);
+    if (!dbg) { } else { // matching: a plain if (dbg) hoists the height/width loads
+        dbg3(height, depth, depth);
         x1 = dbgx[0x10]; x2 = dbgx[0x11]; x3 = dbgx[0x12]; x4 = dbgx[0x13]; x5 = dbgx[0x14];
         dbgx[0x15] = x1 * x2 * x3 * x4 * x5; dbgx[0x16] = x1 + x2 + x3 + x4 + x5;
-        dbgp(&zero); dbgp(&c); dbgu(); dbgu(); 
+        dbgp(&zero); dbgp(&width); dbgu(); dbgu();
     }
-    if (arg1 != NULL) {
-        *arg1 = a;
+    if (outHeight != NULL) {
+        *outHeight = height;
     }
-    if (arg2 != NULL) {
-        *arg2 = c;
+    if (outWidth != NULL) {
+        *outWidth = width;
     }
-    if (arg3 != NULL) {
-        *arg3 = b;
+    if (outDepth != NULL) {
+        *outDepth = depth;
     }
-    if (dbg) { dbgu(); dbgu(); dbgu(); dbgu(); dbgu(); dbgu(); dbgu(); dbgu();  }
+    if (dbg) { dbgu(); dbgu(); dbgu(); dbgu(); dbgu(); dbgu(); dbgu(); dbgu(); } // matching: block count drives uopt cost-splitting
 }
