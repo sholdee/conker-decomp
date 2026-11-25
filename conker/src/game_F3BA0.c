@@ -290,7 +290,7 @@ Emitter *func_150C68C4(struct127 *character, Watcher *watcher) {
     desc.radius = 80.0f;
     desc.rate = 0.6049699783f;
     desc.lifetime = 300;
-    desc.flags = 10;
+    desc.flags = 10;        /* on a bone (2), no previous position yet (8) */
     desc.emitter = 5;
     desc.callback = 2;
     desc.unk2D = 3;
@@ -306,19 +306,13 @@ void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Emitter *emitter
     ParticleDesc desc;
     RiseParticle *particle;
     RiseMotion motion;
+
     desc.texture = 0x2F;
     desc.renderMode = 0xC01;
     desc.unk0 = 0x200005;
     desc.unk4 = 0;
-    desc.b2 = 0;
-    desc.g2 = 0;
-    desc.r2 = 0;
-    desc.a = 0;
-    desc.b = 0;
-    desc.g = 0;
-    desc.r = 0;
-    desc.frameRate = 0;
-    desc.frame = 0;
+    desc.r = desc.g = desc.b = desc.a = desc.r2 = desc.g2 = desc.b2 = 0;
+    desc.frame = desc.frameRate = 0;
     desc.brightness = 0xFF;
     desc.scaleStart = 0;
     desc.scaleRate = 0.0f;
@@ -329,12 +323,12 @@ void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Emitter *emitter
     desc.deathFunc = -1;
     desc.pos.x = x;
     desc.pos.y = y;
+    desc.pos.z = z;
     desc.offset.x = 0.0f;
     desc.offset.y = 0.0f;
     desc.offset.z = 0.0f;
     desc.fadeStart = 30;
     desc.fadeRate = 8;
-    desc.pos.z = z;
     motion.ceiling = emitter->link.ceiling;
     motion.maxRiseSpeed = 4.0f;
     motion.swayPerSpeed = 0.25f;
@@ -345,8 +339,12 @@ void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Emitter *emitter
     desc.vel.x = -dx * 0.2f;
     desc.vel.y = 0.0f;
     desc.vel.z = -dz * 0.2f;
-    if (func_150ADA20() & 1) desc.flags |= 0x40;
-    if (func_150ADA20() & 1) desc.flags |= 0x80;
+    if (func_150ADA20() & 1) {
+        desc.flags |= 0x40;
+    }
+    if (func_150ADA20() & 1) {
+        desc.flags |= 0x80;
+    }
     desc.timer = func_150ADA20() % 51U + 106;
     desc.alpha = func_150ADA20() % 101U + 100;
     motion.baseSize = desc.width = desc.height = func_150ADA68() * 62.0f + 41.0f;
@@ -360,12 +358,15 @@ void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Emitter *emitter
     motion.swayZ = (func_150ADA68() * D_800A0470 + D_800A0474) * motion.baseSize;
     desc.gravity = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
     particle = func_151303BC(&desc, 2, sizeof(RiseMotion));
-    if (particle != NULL) memcpy(&particle->motion, &motion, sizeof(RiseMotion));
+    if (particle != NULL) {
+        memcpy(&particle->motion, &motion, sizeof(RiseMotion));
+    }
 }
 
 /* Emitter callback 2: returns whether the watcher refreshed keepAlive since the last call. */
 s32 func_150C6D1C(Emitter *emitter) {
     s32 alive = 1;
+
     if (!emitter->link.keepAlive) {
         alive = 0;
     }
@@ -376,6 +377,7 @@ s32 func_150C6D1C(Emitter *emitter) {
 /* Emitter teardown (D_80089AAC[3]): detaches the emitter from its watcher. */
 void func_150C6D40(Emitter *emitter) {
     WatcherEffects *effects = &emitter->link.owner->effects;
+
     effects->emitter = NULL;
     func_151346EC((struct102 *)emitter);
 }
@@ -383,6 +385,7 @@ void func_150C6D40(Emitter *emitter) {
 /* Emitter teardown (D_80089AD4[3]): detaches the emitter from its watcher. */
 void func_150C6D68(Emitter *emitter) {
     WatcherEffects *effects = &emitter->link.owner->effects;
+
     effects->emitter = NULL;
     func_1513470C((struct102 *)emitter);
 }
@@ -399,8 +402,8 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
     sprite = NULL;
     character = watcher->character;
     if (character->unk1D4) {
-        Vec3f origin;
-        origin = D_800887E0;
+        Vec3f origin = D_800887E0;
+
         func_15143134(&origin, &pos, character->unk1D4);
     } else {
         pos.x = character->x_position;
@@ -408,54 +411,58 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
         pos.z = character->z_position;
     }
     {
-    Vec3f probe;
-    probe.x = pos.x;
-    probe.y = pos.y + 200.0f;
-    probe.z = pos.z;
-    if (func_15045800(&probe.x, 0, pos.y - 200.0f, &watcher->floor) != 0) {
-    SpriteDef def;
-    FlickerState flicker;
-    f32 size;
-    u8 color;
-    s32 rand2;
-    s32 rand1;
-    s32 rand0;
-        color = func_151D8E20();
-        probe.y = watcher->floor.height;
-        size = func_150ADA68() * 100.0f + 200.0f;
-        flicker.owner = watcher;
-        flicker.keepAlive = 1;
-        flicker.targetMin = 26214.4f;
-        flicker.targetRange = 32768.0f;
-        flicker.target = 0.0f;
-        flicker.timer = 0;
-        flicker.periodMin = 10;
-        flicker.periodRange = 10;
-        flicker.rate = 0.231f;
-        def.frameSpeed = flicker.targetRange * 0.5f + flicker.targetMin;
-        def.texture = 0x38;
-        def.flags = 0x20300;
-        def.lifetime = 300;
-        def.unk10 = 150;
-        def.frame = 0;
-        def.unk11 = 0xFF;
-        def.rgba[0] = D_800AB414[color][0];
-        def.rgba[1] = D_800AB414[color][1];
-        def.rgba[2] = D_800AB414[color][2];
-        def.rgba[3] = 0xFF;
-        def.renderModes = 0x440001;
-        def.unk16 = 0;
-        def.unk17 = 6;
-        rand0 = func_150ADA20();
-        rand1 = func_150ADA20();
-        rand2 = func_150ADA20();
-        sprite = (FlickerSprite *)func_1513C73C((s32)&def, 9, 3, (s32)watcher->floor.unk4, probe.x, probe.y, probe.z, size, size,
-                            rand0 & 0xFF, ((rand2 & 1) * 2) + (rand1 & 1), 0x20,
-                            watcher->unkC, watcher->unk1);
-        if (sprite != NULL) {
-            memcpy(&sprite->flicker, &flicker, sizeof(FlickerState));
+        Vec3f probe;
+
+        probe.x = pos.x;
+        probe.y = pos.y + 200.0f;
+        probe.z = pos.z;
+        if (func_15045800(&probe.x, 0, pos.y - 200.0f, &watcher->floor) != 0) {
+            SpriteDef def;
+            FlickerState flicker;
+            f32 size;
+            u8 color;
+            s32 rand2;
+            s32 rand1;
+            s32 rand0;
+
+            color = func_151D8E20();
+            probe.y = watcher->floor.height;
+            size = func_150ADA68() * 100.0f + 200.0f;
+            flicker.owner = watcher;
+            flicker.keepAlive = 1;
+            flicker.targetMin = 26214.4f;
+            flicker.targetRange = 32768.0f;
+            flicker.target = 0.0f;
+            flicker.timer = 0;
+            flicker.periodMin = 10;
+            flicker.periodRange = 10;
+            flicker.rate = 0.231f;
+            def.frameSpeed = flicker.targetRange * 0.5f + flicker.targetMin;
+            def.texture = 0x38;
+            def.flags = 0x20300;
+            def.lifetime = 300;
+            def.unk10 = 150;
+            def.frame = 0;
+            def.unk11 = 0xFF;
+            def.rgba[0] = D_800AB414[color][0];
+            def.rgba[1] = D_800AB414[color][1];
+            def.rgba[2] = D_800AB414[color][2];
+            def.rgba[3] = 0xFF;
+            def.renderModes = 0x440001;
+            def.unk16 = 0;
+            def.unk17 = 6;
+            rand0 = func_150ADA20();
+            rand1 = func_150ADA20();
+            rand2 = func_150ADA20();
+            // matching: IDO needs the redundant `& 0xFF` on the u8 argument (the bytes change without it)
+            sprite = (FlickerSprite *)func_1513C73C((s32)&def, 9, 3, (s32)watcher->floor.unk4,
+                                                    probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
+                                                    (rand2 & 1) * 2 + (rand1 & 1), 0x20, watcher->unkC,
+                                                    watcher->unk1);
+            if (sprite != NULL) {
+                memcpy(&sprite->flicker, &flicker, sizeof(FlickerState));
+            }
         }
-    }
     }
     return sprite;
 }
