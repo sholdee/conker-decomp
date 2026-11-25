@@ -199,7 +199,7 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoi
         } else {
             node = &D_800D2350[nearest];
             size = node->unk8 * 2.0f;
-            if (100000000.0f < size * size) {
+            if (size * size > 100000000.0f) {
                 result = func_15086364(nearest, nGoals, nAvoid, goals, avoid);
             } else {
                 /* Find the link whose line (in xz) passes closest to the point, ahead of the node. */
@@ -246,9 +246,15 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoi
     return nearest;
 }
 
-extern u8 D_80087298;
-f32 func_15086BD0(s32 arg0, s32 arg1);
+extern u8 D_80087298; /* goal node reached by the last search, 0xFF if none */
+f32 func_15086BD0(s32 a, s32 b);
 
+/*
+ * Shortest-path search over the path graph from `start` to the nearest of the `nGoals` nodes in
+ * `goals`; entering one of the `nAvoid` nodes in `avoid` costs an extra 5000. Returns the next node
+ * to move to (skipping ahead over a run of nodes that have a zone, see func_15086C70), `start`
+ * itself if it is a goal, or 0xFF. Stores the route length in D_800D2354.
+ */
 s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
     s32 i;
     s32 j;
@@ -265,7 +271,7 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
     s32 curDist;
     s32 doneFirst;
     s32 cur;
-    u8 nb2;
+    u8 link;
     u8 result;
     f32 dx;
     f32 dy;
@@ -273,12 +279,12 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
     PathNode *node;
     PathNode *other;
     s32 dist[200];
-    u8 open[200];
+    u8 openList[200]; /* nodes still to visit, 0xFF = free slot */
     u8 prev[200];
-    u8 path[64];
-    u8 flags[64];
+    u8 path[64]; /* route, goal first */
+    u8 hasZone[64];
 
-    D_80087298 = -1;
+    D_80087298 = 0xFF;
     D_800D2354 = 0;
     if (nGoals <= 0) {
         return 0xFF;
@@ -286,10 +292,11 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
     if (start < 0 || start >= D_80087290) {
         return 0xFF;
     }
-    found = 1;
+    /* `found` is first "start is not a goal". */
+    found = TRUE;
     for (j = 0; j < nGoals; j++) {
         if (start == goals[j]) {
-            found = 0;
+            found = FALSE;
         }
     }
     count = 0;
@@ -300,34 +307,38 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
     for (i = 0; i < D_80087290; i++) {
         dist[i] = 1000000;
     }
+
+    /* Seed the open list with the neighbours of start. */
     node = &D_800D2350[start];
     for (i = 0; i < 5; i++) {
-        nb2 = node->links[i];
-        if (nb2 != 0xFF) {
+        link = node->links[i];
+        if (link != 0xFF) {
             penalty = 0;
             for (j = 0; j < nAvoid; j++) {
-                if (nb2 == avoid[j]) {
+                if (link == avoid[j]) {
                     penalty = 5000;
                 }
             }
-            other = &D_800D2350[nb2];
-            open[count] = nb2;
+            other = &D_800D2350[link];
+            openList[count] = link;
             prev[node->links[i]] = start;
             dx = node->x - other->x;
             dy = node->y - other->y;
             dz = node->z - other->z;
-            dist[node->links[i]] = (s16)(s32)sqrtf(dx * dx + dy * dy + dz * dz) + penalty;
+            dist[node->links[i]] = (s16)sqrtf(dx * dx + dy * dy + dz * dz) + penalty;
             count++;
         }
     }
+
     pathLen = 0;
     do {
+        /* Take the open node with the smallest distance. */
         best = 1000000;
         k = 0xFF;
         for (n = 0; n < count; n++) {
-            if (open[n] != 0xFF) {
-                if (dist[open[n]] < best) {
-                    best = dist[open[n]];
+            if (openList[n] != 0xFF) {
+                if (dist[openList[n]] < best) {
+                    best = dist[openList[n]];
                     k = n;
                 }
             }
@@ -336,18 +347,19 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
             if (k == count - 1) {
                 count--;
             }
-            i = open[k];
-            open[k] = 0xFF;
-            found = 0;
+            i = openList[k];
+            openList[k] = 0xFF;
+            found = FALSE;
             for (j = 0; j < nGoals; j++) {
                 if (i == goals[j]) {
-                    found = 1;
+                    found = TRUE;
                 }
             }
             if (found) {
+                /* Walk back from the goal to start. */
                 D_80087298 = i;
                 n = i;
-                if (&path[pathLen] == 0) {} /* no code; gives uopt a real &path use in this loop (register order in the tail) */
+                if (&path[pathLen] == NULL) {} // matching: code-less &path use in this loop sets uopt's register order for path in the tail
                 while (n != start) {
                     path[pathLen++] = n;
                     n = prev[n];
@@ -355,6 +367,7 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
                 path[pathLen++] = n;
                 k = 0xFF;
             } else {
+                /* Relax the neighbours of the visited node. */
                 curDist = dist[i];
                 node = &D_800D2350[i];
                 cur = i;
@@ -373,12 +386,13 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
                         dz = node->z - other->z;
                         d = (s32)sqrtf(dx * dx + dy * dy + dz * dz) + curDist + penalty;
                         if (d < dist[n]) {
+                            /* Update n in the open list, or add it in the first free slot. */
                             slot = 0xFF;
                             for (k = 0; k < count; k++) {
-                                if (slot == 0xFF && open[k] == 0xFF) {
+                                if (slot == 0xFF && openList[k] == 0xFF) {
                                     slot = k;
                                 }
-                                if (n == open[k]) {
+                                if (n == openList[k]) {
                                     dist[n] = d;
                                     prev[n] = cur;
                                     k = count + 10;
@@ -391,7 +405,7 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
                                     slot = count;
                                     count++;
                                 }
-                                open[slot] = n;
+                                openList[slot] = n;
                             }
                         }
                     }
@@ -400,38 +414,41 @@ s32 func_15086364(s32 start, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoid) {
             }
         }
     } while (k != 0xFF);
+
     if (pathLen < 2) {
         return 0xFF;
     }
+    /* path[pathLen + 1] is start, path[pathLen] the node after it. */
     pathLen -= 2;
     result = path[pathLen];
     for (i = 0; i <= pathLen + 1; ) {
-        flags[i] = func_15086C70(path[i]) != 0;
-        i++;
+        hasZone[i] = func_15086C70(path[i]) != NULL;
+        i++; // matching: increment on its own line (-g3 line numbers steer as1)
     }
+    /* Sum the route length, treating each run of zone nodes as one straight hop. */
     total = 0.0f;
-    doneFirst = 0;
-    if (flags[pathLen] && (!flags[pathLen + 1] || (pathLen > 0 && !flags[pathLen - 1]))) {
-        doneFirst = 1;
+    doneFirst = FALSE;
+    if (hasZone[pathLen] && (!hasZone[pathLen + 1] || (pathLen > 0 && !hasZone[pathLen - 1]))) {
+        doneFirst = TRUE;
     }
     while (pathLen > 0) {
         i = pathLen - 1;
         d = path[pathLen];
-        if (flags[pathLen - 1]) {
-            while (i >= 0 && flags[i]) {
+        if (hasZone[pathLen - 1]) {
+            while (i >= 0 && hasZone[i]) {
                 i--;
             }
             i++;
         }
         total += func_15086BD0(d, path[i]);
         if (!doneFirst) {
-            doneFirst = 1;
-            if (flags[pathLen]) {
+            doneFirst = TRUE;
+            if (hasZone[pathLen]) {
                 result = path[i];
             }
         }
         pathLen = i;
     }
-    D_800D2354 = (s32)total;
+    D_800D2354 = total;
     return result;
 }
