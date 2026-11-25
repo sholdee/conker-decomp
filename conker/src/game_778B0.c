@@ -2,37 +2,41 @@
 #include "functions.h"
 #include "variables.h"
 
-f32 func_1504A2B0(f32 arg0);
-f32 func_1504A620(f32 arg0);
+f32 func_1504A2B0(f32 x); // e^x
+f32 func_1504A620(f32 x); // ln(x)
 
-f32 func_1504A400(f32 arg0, f32 arg1) {
-    f32 base;
+/**
+ * x raised to the power y. Integral exponents use repeated multiplication (or division for negative y);
+ * other exponents go through e^(y * ln x). Returns 0 for 0^y and for a negative x with a fractional y.
+ */
+f32 func_1504A400(f32 x, f32 y) {
+    f32 acc;
 
-    if ((arg0 != 0.0f) && (arg1 == 0.0f)) {
+    if (x != 0.0f && y == 0.0f) {
         return 1.0f;
     }
-    if (arg0 == 0.0f) {
+    if (x == 0.0f) {
         return 0.0f;
     }
-    if (((arg0 == 0.0f) && (arg1 == 0.0f)) ||
-        ((arg0 < 0.0f) && (arg1 != (f32) (s32) arg1))) {
+    // matching: the redundant 0^0 test is in the original and its compares are emitted
+    if ((x == 0.0f && y == 0.0f) || (x < 0.0f && y != (s32) y)) {
         return 0.0f;
     }
 
-    if (arg1 != (f32) (s32) arg1) {
-        arg0 = func_1504A2B0(func_1504A620(arg0) * arg1);
-    } else if (0.0f < arg1) {
-        base = arg0;
-        arg1--;
-        while (arg1--) {
-            arg0 *= base;
+    if (y != (s32) y) {
+        x = func_1504A2B0(func_1504A620(x) * y);
+    } else if (y > 0.0f) {
+        acc = x;
+        y--;
+        while (y--) {
+            x *= acc;
         }
     } else {
-        base = 1.0f;
-        while (arg1++) {
-            base /= arg0;
+        acc = 1.0f;
+        while (y++) {
+            acc /= x;
         }
-        arg0 = base;
+        x = acc;
     }
-    return arg0;
+    return x;
 }
