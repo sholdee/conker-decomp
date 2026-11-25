@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A2F8C;
-
 /* Object driven by the behaviour callbacks in this file. */
 typedef struct Game142560Object {
     /* 0x00 */ f32 angleX;
@@ -72,91 +70,91 @@ void func_151151FC(Game142560Object *obj) {
 void func_1511529C(s32 arg0) {
 }
 
-void func_151152A8(Game142560Object *arg0) {
-    s32 target;
-    s32 current;
-    s32 step;
-    s32 *targetPtr;
-
-    targetPtr = &arg0->homeY;
-    target = *targetPtr;
-    if (target == 0) {
-        target = arg0->y;
-        *targetPtr = target;
+/*
+ * Sinks the object (y) at (params >> 16) units per frame while flag 4 is set, until it is
+ * (s16)params below its home height; otherwise eases it back toward home.
+ */
+void func_151152A8(Game142560Object *obj) {
+    if (obj->homeY == 0) {
+        obj->homeY = obj->y;
     }
-    current = arg0->y;
-    if ((arg0->flags & 0xFF) & 4) {
-        step = arg0->params;
-        if ((target - current) < (s16)step) {
-            arg0->y = current - ((s16)(step >> 16) * D_800BE9E4);
-            return;
+    if (obj->flags & 4) {
+        if (obj->homeY - obj->y < (s16)obj->params) {
+            obj->y -= (s16)(obj->params >> 16) * D_800BE9E4;
         }
     } else {
-        arg0->y = (s32)((f32)current + ((f32)(target - current) * D_800A2F8C * (f32)D_800BE9E4));
+        obj->y += (obj->homeY - obj->y) * 0.05f * D_800BE9E4;
     }
 }
 
-
-
-void func_15115368(Game142560Object *arg0) {
-    s32 lo;
-    s32 range;
+/*
+ * Shake-and-sink behaviour. params: start delay (bits 24-31), hold time (bits 8-15),
+ * sink speed (bits 16-23) and sink depth / 16 (bits 0-7). The timer runs every frame
+ * while flag 4 is set, and otherwise jumps to the end of the current phase. After the
+ * delay and hold the object wobbles about X and Z, and after 10 more frames it sinks.
+ * Once sunk deep enough it is marked as returning, and it resets to its home height
+ * when D_800CC2D0[0] is more than 500 units away in XZ.
+ */
+void func_15115368(Game142560Object *obj) {
+    s32 start;
+    s32 hold;
     f32 t;
-    f32 d;
+    f32 distSq;
     f32 s;
 
-    range = (s8)(arg0->params >> 8);
-    lo = arg0->params >> 24;
-    if (arg0->flags & 4) {
-        arg0->timer += D_800BE9E4;
+    hold = (s8)(obj->params >> 8);
+    start = obj->params >> 24;
+    if (obj->flags & 4) {
+        obj->timer += D_800BE9E4;
     }
-    if (arg0->timer <= lo) {
-        if (!(arg0->flags & 4) && arg0->timer != 0) {
-            arg0->timer = lo;
+    if (obj->timer <= start) {
+        if (!(obj->flags & 4) && obj->timer != 0) {
+            obj->timer = start;
         }
-    } else if (arg0->timer <= lo + range) {
-        if (!(arg0->flags & 4)) {
-            arg0->timer = lo + range;
+    } else if (obj->timer <= start + hold) {
+        if (!(obj->flags & 4)) {
+            obj->timer = start + hold;
         }
     } else {
-        if (!(arg0->flags & 4)) {
-            arg0->timer += D_800BE9E4;
+        if (!(obj->flags & 4)) {
+            obj->timer += D_800BE9E4;
         }
-        t = arg0->timer - lo - range;
-        if (arg0->returning == 0) {
-            s = sinf(t * 0.628000021f * 2);
-            arg0->angleX = -3 * s;
-            s = sinf(t * 0.628000021f * 3);
-            arg0->angleZ = 2 * s;
+        t = obj->timer - start - hold;
+        if (obj->returning == 0) {
+            s = sinf(t * 0.628f * 2);
+            obj->angleX = -3 * s;
+            s = sinf(t * 0.628f * 3);
+            obj->angleZ = 2 * s;
             if (t > 10.0f) {
-                if (arg0->homeY == 0) {
-                    arg0->homeY = arg0->y;
+                if (obj->homeY == 0) {
+                    obj->homeY = obj->y;
                 }
-                arg0->y -= (s8)(arg0->params >> 16) * D_800BE9E4;
-                if ((arg0->params & 0xFF) * 16 < arg0->homeY - arg0->y) {
-                    s32 pad;
-                    arg0->flags &= ~0x61;
-                    arg0->flags |= 0x20;
-                    arg0->returning = 1;
+                obj->y -= (s8)(obj->params >> 16) * D_800BE9E4;
+                if ((obj->params & 0xFF) * 16 < obj->homeY - obj->y) {
+                    s32 pad; // matching: this block's -g3 scope (and slot) fixes the schedule and frame
+                    obj->flags &= ~0x61;
+                    obj->flags |= 0x20;
+                    obj->returning = 1;
                 }
             }
         } else {
             {
                 f32 dx;
                 f32 dz;
-                dx = D_800CC2D0[0].x_position - arg0->x;
-                dz = D_800CC2D0[0].z_position - arg0->z;
+
+                dx = D_800CC2D0[0].x_position - obj->x;
+                dz = D_800CC2D0[0].z_position - obj->z;
                 dx = dx * dx;
                 dz = dz * dz;
-                d = dx + dz;
+                distSq = dx + dz;
             }
-            if (d > 250000.0f) {
-                arg0->flags &= ~0x61;
-                arg0->flags |= 1;
-                arg0->y = arg0->homeY;
-                arg0->homeY = 0;
-                arg0->returning = 0;
-                arg0->timer = 0;
+            if (distSq > 500.0f * 500.0f) {
+                obj->flags &= ~0x61;
+                obj->flags |= 1;
+                obj->y = obj->homeY;
+                obj->homeY = 0;
+                obj->returning = 0;
+                obj->timer = 0;
             }
         }
     }
