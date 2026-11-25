@@ -693,8 +693,14 @@ void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, Collisio
 }
 
 void func_15143134(Vec3f *, Vec3f *, MtxF *);
-extern u8 D_800AA954[];      /* bone index per muzzle */
-extern Vec3f D_800AA958[];  /* muzzle offset in bone space */
+/* Bone index per muzzle. */
+const u8 D_800AA954[3] = { 9, 4, 4 };
+/* Muzzle offset in bone space. */
+const Vec3f D_800AA958[3] = {
+    { 5.0f, 29.0f, 37.0f },
+    { 0.0f, 0.0f, 70.0f },
+    { 0.0f, 0.0f, 70.0f },
+};
 
 /* World position of obj's gun muzzle, from its bone matrices. */
 void func_151C1798(Actor *obj, Vec3f *pos) {
