@@ -90,28 +90,28 @@ typedef struct MpGame {
     /* 0x005C */ s32 unk5C[16];
     /* 0x009C */ s32 layer[16]; /* height band, func_15085DA8 */
     /* 0x00DC */ s32 unkDC[16];
-    /* 0x011C */ s32 unk11C[16];
+    /* 0x011C */ s32 target[16];              /* player each one is after, -1 = none */
     /* 0x015C */ s32 unk15C[16];
     /* 0x019C */ s32 unk19C[16];
     /* 0x01DC */ s32 unk1DC[16];
-    /* 0x021C */ s32 unk21C[16];
+    /* 0x021C */ s32 aimTime[16];             /* frames spent on the current aim */
     /* 0x025C */ s32 unk25C[16];
-    /* 0x029C */ s32 unk29C[16];
+    /* 0x029C */ s32 attackTimer[16];         /* fires when it turns non-negative */
     /* 0x02DC */ s32 unk2DC[16];
     /* 0x031C */ s32 unk31C[16];
     /* 0x035C */ s32 unk35C[16];
     /* 0x039C */ s32 unk39C[16];
-    /* 0x03DC */ s32 unk3DC[16];
+    /* 0x03DC */ s32 attacker[16];            /* last hit by (| 0x80 when fresh), from D_800E0BB8 */
     /* 0x041C */ s32 unk41C[16];
-    /* 0x045C */ s32 unk45C[16];
-    /* 0x049C */ s32 unk49C[16];
+    /* 0x045C */ s32 opponentDist[16];
+    /* 0x049C */ s32 opponent[16];            /* chosen by func_1508B9BC */
     /* 0x04DC */ s32 grenades[16];
     /* 0x051C */ s32 nearestEnemyDist[16];
     /* 0x055C */ s32 unk55C[16];
     /* 0x059C */ s32 unk59C[16];
     /* 0x05DC */ s32 targets[16][16];     /* per player: other players sorted by targetDists, -1 ends */
     /* 0x09DC */ s32 targetDists[16][16];
-    /* 0x0DDC */ s32 unkDDC[16];
+    /* 0x0DDC */ s32 teamScore[16];
     /* 0x0E1C */ u8 padE1C[0x48];
     /* 0x0E64 */ s32 team[16];
     /* 0x0EA4 */ s32 numSlots;
@@ -132,7 +132,7 @@ typedef struct MpGame {
     /* 0x13F4 */ s32 slotDropY[32];
     /* 0x1474 */ s32 slotDropZ[32];
     /* 0x14F4 */ s32 spawnNodes[32];          /* path node ids (func_15086D48) */
-    /* 0x1574 */ s32 unk1574[16];
+    /* 0x1574 */ s32 countdown[16];           /* frames, drawn in seconds in game type 0xB9 */
     /* 0x15B4 */ u8 weights[16][16];
     /* 0x16B4 */ f32 ticks;
     /* 0x16B8 */ f32 unk16B8;
@@ -144,16 +144,16 @@ typedef struct MpGame {
     /* 0x1702 */ s8 unk1702;
     /* 0x1703 */ s8 unk1703;
     /* 0x1704 */ s8 unk1704;
-    /* 0x1705 */ s8 unk1705[16];
-    /* 0x1715 */ s8 unk1715[16];
-    /* 0x1725 */ s8 unk1725[16];
-    /* 0x1735 */ s8 unk1735[16];
+    /* 0x1705 */ s8 sideGoal[16];             /* aim offset goals (func_1508CAD8 sideOffset/dropOffset) */
+    /* 0x1715 */ s8 dropGoal[16];
+    /* 0x1725 */ s8 side[16];                 /* eased toward the goals */
+    /* 0x1735 */ s8 drop[16];
     /* 0x1745 */ s8 numZones;
     /* 0x1748 */ MpZone zones[8];
-    /* 0x17A8 */ f32 unk17A8[16];
-    /* 0x17E8 */ f32 unk17E8[16];
-    /* 0x1828 */ f32 unk1828[16];
-    /* 0x1868 */ f32 unk1868[16];
+    /* 0x17A8 */ f32 aimX[16];                /* smoothed aim point */
+    /* 0x17E8 */ f32 aimY[16];
+    /* 0x1828 */ f32 aimZ[16];
+    /* 0x1868 */ f32 aimRate[16];             /* aim easing per frame */
 } MpGame;
 
 /*
@@ -1594,10 +1594,10 @@ s32 func_15089BC0(void) {
     scales = D_800872F8;
     for (i = 0; i < 16; i++) {
         D_800D23B0->unk16C0[i] = 0;
-        D_800D23B0->unk1868[i] = scales[D_800E0BD0];
-        D_800D23B0->unk17A8[i] = 0.0f;
-        D_800D23B0->unk17E8[i] = 0.0f;
-        D_800D23B0->unk1828[i] = 0.0f;
+        D_800D23B0->aimRate[i] = scales[D_800E0BD0];
+        D_800D23B0->aimX[i] = 0.0f;
+        D_800D23B0->aimY[i] = 0.0f;
+        D_800D23B0->aimZ[i] = 0.0f;
     }
     D_800D23B0->unkC = D_800872F0[D_800E0BD0];
     return 0;
@@ -1834,14 +1834,14 @@ s32 func_1508A6FC(void) {
     s32 *arr31C;
     s32 *arr39C;
     s32 *arr19C;
-    s32 *arr21C;
-    s32 *arr29C;
+    s32 *aimTimes;
+    s32 *attackTimers;
     s32 *arr25C;
     s32 *arr41C;
-    s32 *arr3DC;
+    s32 *attackers;
     s32 *layers;
-    s32 *arrDDC;
-    s32 *arr1574;
+    s32 *teamScores;
+    s32 *countdowns;
     u8 flag;
     s32 half;
     s32 j;
@@ -1858,13 +1858,13 @@ s32 func_1508A6FC(void) {
     arr35C = D_800D23B0->unk35C;
     arr31C = D_800D23B0->unk31C;
     arr19C = D_800D23B0->unk19C;
-    arr21C = D_800D23B0->unk21C;
-    arr29C = D_800D23B0->unk29C;
+    aimTimes = D_800D23B0->aimTime;
+    attackTimers = D_800D23B0->attackTimer;
     arr25C = D_800D23B0->unk25C;
     arr41C = D_800D23B0->unk41C;
-    arr3DC = D_800D23B0->unk3DC;
-    arrDDC = D_800D23B0->unkDDC;
-    arr1574 = D_800D23B0->unk1574;
+    attackers = D_800D23B0->attacker;
+    teamScores = D_800D23B0->teamScore;
+    countdowns = D_800D23B0->countdown;
     arr1C = D_800D23B0->unk1C;
     arr39C = D_800D23B0->unk39C;
     layers = D_800D23B0->layer;
@@ -1884,9 +1884,9 @@ s32 func_1508A6FC(void) {
             if ((team != 0) && (D_800D23B0->gameType == 0xB9)) {
                 obj->unk1E4 = 1;
             }
-            old = arr29C[i];
-            arr21C[i] += D_800BE9E4;
-            arr29C[i] += D_800BE9E4;
+            old = attackTimers[i];
+            aimTimes[i] += D_800BE9E4;
+            attackTimers[i] += D_800BE9E4;
             arr25C[i] -= D_800BE9E4;
             if (arr25C[i] <= 0) {
                 arr25C[i] = 0;
@@ -1895,14 +1895,14 @@ s32 func_1508A6FC(void) {
             if (arr41C[i] <= 0) {
                 arr41C[i] = 0;
             }
-            arr1574[i] -= D_800BE9E4;
-            if (arr1574[i] < 0) {
-                arr1574[i] = 0;
+            countdowns[i] -= D_800BE9E4;
+            if (countdowns[i] < 0) {
+                countdowns[i] = 0;
             }
             if ((arr19C[i] == 3) && ((arr25C[i] & 0x1F) >= 0x1D)) {
                 func_1508EC5C(i, 0x8000);
             }
-            arr3DC[i] = D_800E0BB8[i];
+            attackers[i] = D_800E0BB8[i];
             D_800E0BB8[i] &= 0x7F;
             if ((D_800D23B0->grenades) != 0) {
                 D_800D23B0->grenades[i] = obj->unk31C->grenade_count;
@@ -1915,19 +1915,19 @@ s32 func_1508A6FC(void) {
                         D_800D23B0->unk59C[i] = obj->unk20F;
                     } else {
                         D_800D23B0->unk59C[i] = -1;
-                        if (!arr3DC) { // matching: an extra use of arr3DC steers IDO's register allocation
+                        if (!attackers) { // matching: an extra use of attackers steers IDO's register allocation
                         }
                     }
                     arr35C[i] = 1;
                     arr25C[i] = 0;
                     arr19C[i] = 0;
                     D_800D23B0->unk5C[i] = 1;
-                    D_800D23B0->unk11C[i] = -1;
-                    arrDDC[team]--;
-                    if ((arr3DC[i] & 0x7F) < count) {
-                        other = teams[arr3DC[i] & 0x7F];
+                    D_800D23B0->target[i] = -1;
+                    teamScores[team]--;
+                    if ((attackers[i] & 0x7F) < count) {
+                        other = teams[attackers[i] & 0x7F];
                         if (team != other) {
-                            arrDDC[other]++;
+                            teamScores[other]++;
                         }
                     }
                     if (D_800D23B0->gameType != 0xB9) {
@@ -1942,68 +1942,68 @@ s32 func_1508A6FC(void) {
             flag = 1;
             if ((arr31C[i] != 0) && (D_800D23B0->gameType != 0xB8)) {
                 reset = 0;
-                if ((arr19C[i] != 1) && (arr21C[i] < 30)) {
+                if ((arr19C[i] != 1) && (aimTimes[i] < 30)) {
                     type = obj->unk232;
                     obj->unk222 = arr31C[i] - 2;
                     if ((type != 4) && (type != 5)) {
                         func_1508EBF8(i, 4);
                     }
                     if (type == 4) {
-                        arr21C[i] = 0;
+                        aimTimes[i] = 0;
                     }
                     if (type == 5) {
-                        arr21C[i] = 30;
-                        D_800D23B0->unk1868[i] = D_800872F8[D_800E0BD0];
-                        D_800D23B0->unk17A8[i] = (func_150ADA68() * 50.0f) + obj->x_position;
-                        D_800D23B0->unk17E8[i] = obj->y_position + 40.0f;
-                        D_800D23B0->unk1828[i] = (func_150ADA68() * 50.0f) + obj->z_position;
+                        aimTimes[i] = 30;
+                        D_800D23B0->aimRate[i] = D_800872F8[D_800E0BD0];
+                        D_800D23B0->aimX[i] = (func_150ADA68() * 50.0f) + obj->x_position;
+                        D_800D23B0->aimY[i] = obj->y_position + 40.0f;
+                        D_800D23B0->aimZ[i] = (func_150ADA68() * 50.0f) + obj->z_position;
                         if ((arr31C[i] - 2) >= 2) {
                             tgt = &D_800CC2D0[arr31C[i] - 2];
-                            D_800D23B0->unk17A8[i] += (tgt->x_position - obj->x_position) * 0.5f;
-                            D_800D23B0->unk1828[i] += (tgt->z_position - obj->z_position) * 0.5f;
+                            D_800D23B0->aimX[i] += (tgt->x_position - obj->x_position) * 0.5f;
+                            D_800D23B0->aimZ[i] += (tgt->z_position - obj->z_position) * 0.5f;
                         }
                     }
                 }
                 flag = 0;
                 bit = 0;
-                if (D_800872D0[D_800E0BD0] < arr29C[i]) {
-                    arr29C[i] = 0;
+                if (D_800872D0[D_800E0BD0] < attackTimers[i]) {
+                    attackTimers[i] = 0;
                     old = -1;
                 }
-                if ((arr29C[i] >= 0) && (old < 0)) {
+                if ((attackTimers[i] >= 0) && (old < 0)) {
                     bit = 1;
                 }
-                if ((D_800872C4[D_800E0BD0] != (-1)) && (arr21C[i] >= D_800872C4[D_800E0BD0])) {
+                if ((D_800872C4[D_800E0BD0] != (-1)) && (aimTimes[i] >= D_800872C4[D_800E0BD0])) {
                     reset = 1;
                 }
-                D_800D23B0->unk1725[i] += (D_800D23B0->unk1705[i] - D_800D23B0->unk1725[i]) >> 2;
-                D_800D23B0->unk1735[i] += (D_800D23B0->unk1715[i] - D_800D23B0->unk1735[i]) >> 2;
-                if (func_1508CAD8(i, arr31C[i] - 2, bit, reset, D_800D23B0->unk1725[i], D_800D23B0->unk1735[i]) && (arr19C[i] != 1)) {
-                    arr21C[i] = 0;
+                D_800D23B0->side[i] += (D_800D23B0->sideGoal[i] - D_800D23B0->side[i]) >> 2;
+                D_800D23B0->drop[i] += (D_800D23B0->dropGoal[i] - D_800D23B0->drop[i]) >> 2;
+                if (func_1508CAD8(i, arr31C[i] - 2, bit, reset, D_800D23B0->side[i], D_800D23B0->drop[i]) && (arr19C[i] != 1)) {
+                    aimTimes[i] = 0;
                 }
-                if (arr29C[i] == 0) {
-                    D_800D23B0->unk1705[i] = 0;
-                    D_800D23B0->unk1715[i] = 0;
+                if (attackTimers[i] == 0) {
+                    D_800D23B0->sideGoal[i] = 0;
+                    D_800D23B0->dropGoal[i] = 0;
                     if (D_800872E8[D_800E0BD0] < ((s32) (func_150ADA68() * 100.0f))) {
                         if (func_150ADA68() > 0.5f) {
-                            D_800D23B0->unk1705[i] = -50;
+                            D_800D23B0->sideGoal[i] = -50;
                         } else {
-                            D_800D23B0->unk1705[i] = 50;
+                            D_800D23B0->sideGoal[i] = 50;
                         }
                         if (func_150ADA68() > 0.5f) {
-                            D_800D23B0->unk1715[i] = 50;
+                            D_800D23B0->dropGoal[i] = 50;
                         } else {
-                            D_800D23B0->unk1715[i] = 0;
+                            D_800D23B0->dropGoal[i] = 0;
                         }
                     }
                 }
             }
             if (flag && (D_800D23B0->gameType != 0xB8)) {
-                arr29C[i] = -D_800872E0[D_800E0BD0];
+                attackTimers[i] = -D_800872E0[D_800E0BD0];
             }
             flags = obj->unk22C & 0x200;
             obj->unk22C &= ~0x200;
-            if (flags || (arr3DC[i] & 0x80)) {
+            if (flags || (attackers[i] & 0x80)) {
                 arr19C[i] = 0;
                 arr1C[i] = 1;
             }
@@ -2031,7 +2031,7 @@ s32 func_1508A6FC(void) {
         for (j = 0; j <= D_80082FA0; j++) {
             if (OBJ_TEAM(&D_800CC2D0[j]) == 0) {
                 vp = &HUD_VIEWS[j];
-                func_15042D94(vp->left + half, vp->top + 6.0f, 1, "%d", arr1574[j] / 60);
+                func_15042D94(vp->left + half, vp->top + 6.0f, 1, "%d", countdowns[j] / 60);
             }
         }
 
@@ -2220,8 +2220,8 @@ s32 func_1508A1BC(void);
 
 /*
  * Picks the best opponent for player unk4: the active player with the lowest path cost to it,
- * scaled by weights[unk4][] / 255 (and 0.8 for its current target). Stores it in unk49C and
- * the distance in unk45C. Returns 0.
+ * scaled by weights[unk4][] / 255 (and 0.8 for its current target). Stores it in opponent and
+ * the distance in opponentDist. Returns 0.
  */
 s32 func_1508B9BC(void) {
     s32 mode;
@@ -2247,7 +2247,7 @@ s32 func_1508B9BC(void) {
     active = D_800D23B0->unk39C;
     neighbors = D_800D23B0->targets[0];
     costs = D_800D23B0->targetDists[0];
-    targets = D_800D23B0->unk11C;
+    targets = D_800D23B0->target;
     if (count >= 9) {
         mode = 4;
     }
@@ -2284,7 +2284,7 @@ s32 func_1508B9BC(void) {
             }
         }
     }
-    D_800D23B0->unk49C[current] = winner;
+    D_800D23B0->opponent[current] = winner;
     if (winner != -1) {
         f32 dx;
         f32 dz;
@@ -2296,9 +2296,9 @@ s32 func_1508B9BC(void) {
         dx = actor->x_position - other->x_position;
         dz = actor->z_position - other->z_position;
         distance = sqrtf(dx * dx + dz * dz);
-        D_800D23B0->unk45C[current] = (s32)distance;
+        D_800D23B0->opponentDist[current] = (s32)distance;
     } else {
-        D_800D23B0->unk45C[current] = minimum;
+        D_800D23B0->opponentDist[current] = minimum;
     }
     return 0;
 }
@@ -2396,8 +2396,8 @@ s32 func_1508BF14(void) {
     kinds = D_800D23B0->unk15C;
     active = D_800D23B0->unk39C;
     teams = D_800D23B0->team;
-    bestCosts = D_800D23B0->unk45C;
-    bestSlots = D_800D23B0->unk49C;
+    bestCosts = D_800D23B0->opponentDist;
+    bestSlots = D_800D23B0->opponent;
     links = D_800D23B0->targets[0];
     costs = D_800D23B0->targetDists[0];
     myTeam = teams[myIdx];
@@ -2581,7 +2581,7 @@ s32 func_1508C5B8(s32 player, s32 checks) {
                     /* BUG (original game): measures player i against itself, not k */
                     dx = x0 - D_800CC2D0[i].x_position;
                     dz = x1 - D_800CC2D0[i].z_position;
-                    if (i == D_800D23B0->unk11C[k]) {
+                    if (i == D_800D23B0->target[k]) {
                         dx *= 0.5f;
                         dz *= 0.5f;
                     }
@@ -2693,7 +2693,7 @@ void func_150DA5EC(struct127 *, f32);
 
 
 /*
- * Steers bot `player` toward player `target`: eases the smoothed aim point (unk17A8/17E8/1828)
+ * Steers bot `player` toward player `target`: eases the smoothed aim point (aimX/aimY/aimZ)
  * toward the target (its position, or its 0x1A4 point if aimAtPoint), offset sideways by
  * sideOffset and down by dropOffset, turns the actor's yaw/pitch (or the camera pad's stick)
  * to it and presses Z_TRIG/R_TRIG when it should fire. Returns 1 while the yaw error exceeds 45 degrees.
@@ -2802,13 +2802,13 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             }
         }
         if (aimAtPoint == 0) {
-            dx = (victim->x_position + dx) - D_800D23B0->unk17A8[player];
-            dz = (victim->z_position + dz) - D_800D23B0->unk1828[player];
+            dx = (victim->x_position + dx) - D_800D23B0->aimX[player];
+            dz = (victim->z_position + dz) - D_800D23B0->aimZ[player];
         } else {
-            dx = ((f32)(s16)victim->pad1A4 + dx) - D_800D23B0->unk17A8[player];
-            dz = ((f32)*(s16 *)&victim->pad1A8 + dz) - D_800D23B0->unk1828[player];
+            dx = ((f32)(s16)victim->pad1A4 + dx) - D_800D23B0->aimX[player];
+            dz = ((f32)*(s16 *)&victim->pad1A8 + dz) - D_800D23B0->aimZ[player];
         }
-        scale = D_800D23B0->unk1868[player] * D_800BE9E4;
+        scale = D_800D23B0->aimRate[player] * D_800BE9E4;
         if (type == 3) {
             scale = 1.0f;
             dropOffset = 0;
@@ -2817,10 +2817,10 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         if (scale > 1.0f) {
             scale = 1.0f;
         }
-        D_800D23B0->unk17A8[player] += dx * scale;
-        D_800D23B0->unk1828[player] += dz * scale;
-        dx = D_800D23B0->unk17A8[player] - obj->x_position;
-        dz = D_800D23B0->unk1828[player] - obj->z_position;
+        D_800D23B0->aimX[player] += dx * scale;
+        D_800D23B0->aimZ[player] += dz * scale;
+        dx = D_800D23B0->aimX[player] - obj->x_position;
+        dz = D_800D23B0->aimZ[player] - obj->z_position;
         dist = sqrtf((dx * dx) + (dz * dz));
         if (dist < 1.0f) {
             dist = 1.0f;
@@ -2858,12 +2858,12 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             result = 1;
         }
         if (aimAtPoint == 0) {
-            cur = ((victim->y_position + height) - dropOffset) - D_800D23B0->unk17E8[player];
+            cur = ((victim->y_position + height) - dropOffset) - D_800D23B0->aimY[player];
         } else {
-            cur = ((f32)victim->unk1A6 - (f32)dropOffset) - D_800D23B0->unk17E8[player];
+            cur = ((f32)victim->unk1A6 - (f32)dropOffset) - D_800D23B0->aimY[player];
         }
-        D_800D23B0->unk17E8[player] += cur * scale;
-        cur = OBJ_STATE(obj)->unk140 - D_800D23B0->unk17E8[player];
+        D_800D23B0->aimY[player] += cur * scale;
+        cur = OBJ_STATE(obj)->unk140 - D_800D23B0->aimY[player];
         ang = func_1505A630(dist, cur, 0) * 0.005493164f;
         curYaw = OBJ_STATE(obj)->pitch;
         while (ang > 180.0f) {
@@ -2942,11 +2942,11 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
                 obj->unk7A = obj->unk76;
                 obj->unk40 = (f32)(s16)(obj->unk7A + 0x4000) * 0.005493164f;
                 func_150DA5EC(obj, f);
-            } else if (D_800D23B0->unk29C[player] >= 0) {
+            } else if (D_800D23B0->attackTimer[player] >= 0) {
                 OBJ_STATE(obj)->buttons = Z_TRIG;
                 if (mode == 1) {
                     OBJ_STATE(obj)->unk8E = 2;
-                    if (D_800872D8[D_800E0BD0] < D_800D23B0->unk29C[player]) {
+                    if (D_800872D8[D_800E0BD0] < D_800D23B0->attackTimer[player]) {
                         OBJ_STATE(obj)->buttons &= ~Z_TRIG;
                         OBJ_STATE(obj)->unk8E = 0;
                     }
@@ -2993,9 +2993,9 @@ void func_1508EB90(s32 arg0, s32 arg1, s32 arg2);
 extern f32 D_8009DA8C;
 
 /*
- * Copies player's target to its state (unk129). Once its timer passes the distance-dependent
- * limit for this level it is reset (with func_1508EC5C-style 0x61 if the target is seen), and
- * while the timer is 0, unk12A is set at random.
+ * Copies player's target to its state (unk129). Once its attackTimer passes the limit for
+ * this level and distance it is reset, with func_1508EB90(player, 0x61, 0x2000) if the target
+ * is in sight; while the timer is 0, unk12A is set at random.
  */
 s32 func_1508D850(s32 player) {
     s8 *timers;
@@ -3010,8 +3010,8 @@ s32 func_1508D850(s32 player) {
     s32 off;
 
     // matching: byte pointers plus a shared byte offset, as IDO keeps player * 4 in one register
-    targets = (s8 *)D_800D23B0->unk11C;
-    timers = (s8 *)D_800D23B0->unk29C;
+    targets = (s8 *)D_800D23B0->target;
+    timers = (s8 *)D_800D23B0->attackTimer;
     obj = &D_800CC2D0[player];
     off = player * 4;
     target = (s32 *)(targets + off);
@@ -3556,8 +3556,8 @@ s32 func_1508E89C(s32 player, s32 source) {
             if (D_800D23B0->unk39C) {
                 D_800D23B0->unk39C[player] = D_800D23B0->unk39C[source];
             }
-            if (D_800D23B0->unk3DC) {
-                D_800D23B0->unk3DC[player] = D_800D23B0->unk3DC[source];
+            if (D_800D23B0->attacker) {
+                D_800D23B0->attacker[player] = D_800D23B0->attacker[source];
             }
             if (D_800D23B0->slot) {
                 D_800D23B0->slot[player] = D_800D23B0->slot[source];
