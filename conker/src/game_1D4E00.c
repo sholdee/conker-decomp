@@ -75,7 +75,7 @@ typedef struct {
     /* 0x80 */ BoltPoint pointData[1];
 } Bolt;
 
-void *func_151A7950(BoltDef *, s32, u8, s32);
+Bolt *func_151A7950(BoltDef *, s32, u8, s32);
 s32 func_151A8B20(void *, s16, s32, u8, s32);
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
@@ -84,7 +84,7 @@ extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
  * Allocates a bolt for def with extraSize bytes of user data after its points. The local points run
  * from (0, 0, 0) to (0, 0, 1); func_151A8340 fills in the ones between.
  */
-void *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
+Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     Bolt *bolt;
 
     bolt = func_15167A68(0x2D, arg3, def->numPoints * sizeof(BoltPoint) + extraSize + sizeof(Bolt) - sizeof(BoltPoint), 1, arg2, 1);
@@ -388,277 +388,201 @@ void func_151A85D4(Bolt *bolt) {
     func_15169824((struct102 *)bolt);
 }
 
-typedef struct {
-    u8 bytes[4];
-} Unaligned4_151A8624;
+/*
+ * Spawns a bolt from bone `bone` of owner (at boneOffset in bone space) to targetOffset from the
+ * owner's position; func_151A87F8 (update1) keeps both ends attached. lifetime -1 means untimed.
+ */
+void *func_151A8624(struct127 *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
+                    f32 jitterDelay, f32 jitterDelayRange, BoltColor *color,
+                    f32 width, Vec3f *targetOffset, u8 arg9, u8 argA,
+                    s8 update2, s32 extraSize, u8 argD, s32 argE) {
+    Bolt *bolt;
+    BoltDef def;
+    BoltLink link;
+    u8 timed;
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-} Vec3f_151A8624;
-
-typedef struct {
-    void *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    Header2 unk8;
-    u8 unk14;
-    u8 pad15[3];
-    Header2 unk18;
-    u8 unk24;
-    u8 unk25;
-    u8 pad26[2];
-} Payload_151A8624;
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    f32 unk4;
-    f32 unk8;
-    u8 unkC;
-    u8 padD[3];
-    f32 unk10;
-    Unaligned4_151A8624 unk14;
-    f32 unk18;
-    u8 unk1C;
-    s8 unk1D;
-    u8 pad1E[2];
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    u8 unk4C;
-    u8 pad4D[3];
-} Header_151A8624;
-
-void *func_151A8624(u8 *arg0, Header2 *arg1, u8 arg2, s16 arg3,
-                    f32 arg4, f32 arg5, Unaligned4_151A8624 *arg6,
-                    f32 arg7, Vec3f_151A8624 *arg8, u8 arg9, u8 argA,
-                    s8 argB, s32 argC, u8 argD, s32 argE) {
-    void *temp_v0;
-    Header_151A8624 header;
-    Payload_151A8624 payload;
-    u8 flag;
-
-    if (arg0 == NULL) {
+    if (owner == NULL) {
         return NULL;
     }
     if (arg9 >= 2) {
         arg9 = 0;
     }
 
-    payload.unk8 = *arg1;
-    payload.unk14 = arg2;
-    payload.unk25 = 0;
-    payload.unk0 = arg0;
-    payload.unk4 = arg0[0x3B];
-    payload.unk24 = argA;
-    temp_v0 = &header;
+    link.boneOffset = *boneOffset;
+    link.bone = bone;
+    link.linkFlags = 0;
+    link.owner = owner;
+    link.ownerId = owner->unique_id;
+    link.unk24 = argA;
 
-    if (arg8 != NULL) {
-        *(Vec3f_151A8624 *)&payload.unk18 = *arg8;
+    if (targetOffset != NULL) {
+        link.targetOffset = *targetOffset;
     } else {
-        ((Vec3f_151A8624 *)&payload.unk18)->unk0 = 0.0f;
-        ((Vec3f_151A8624 *)&payload.unk18)->unk4 = 0.0f;
-        ((Vec3f_151A8624 *)&payload.unk18)->unk8 = 0.0f;
+        link.targetOffset.x = 0.0f;
+        link.targetOffset.y = 0.0f;
+        link.targetOffset.z = 0.0f;
     }
 
-    if (arg3 == -1) {
-        header.unk0 = 0x12C;
+    if (lifetime == -1) {
+        def.lifetime = 300;
     } else {
-        header.unk0 = arg3;
+        def.lifetime = lifetime;
     }
-    header.unk2 = 9;
-    header.unk4 = arg4;
-    header.unk8 = arg5;
-    if (arg3 == -1) {
-        flag = 0;
+    def.numPoints = 9;
+    def.jitterDelay = jitterDelay;
+    def.jitterDelayRange = jitterDelayRange;
+    if (lifetime == -1) {
+        timed = 0;
     } else {
-        flag = 1;
+        timed = BOLT_TIMED;
     }
-    header.unkC = flag;
-    header.unk10 = D_800A8DE0;
-    header.unk14 = *arg6;
-    header.unk18 = arg7;
+    def.flags = timed;
+    def.jitter = D_800A8DE0;
+    def.color = *color;
+    def.width = width;
+    // matching: both arms pick update1 1 (func_151A87F8), but IDO must see the arg9 test
     if ((arg9 != 0) && (arg9 == 1)) {
-        header.unk1C = 1;
+        def.update1 = 1;
     } else {
-        header.unk1C = 1;
+        def.update1 = 1;
     }
-    header.unk20 = 0.0f;
-    header.unk24 = 0.0f;
-    header.unk28 = 0.0f;
-    header.unk2C = 0.0f;
-    header.unk30 = 0.0f;
-    header.unk34 = 0.0f;
-    header.unk38 = 0.0f;
-    header.unk3C = 0.0f;
-    header.unk40 = 0.0f;
-    header.unk44 = 0.0f;
-    header.unk1D = argB;
-    header.unk4C = 2;
-    header.unk48 = 1.0f;
+    def.start.x = 0.0f;
+    def.start.y = 0.0f;
+    def.start.z = 0.0f;
+    def.end.x = 0.0f;
+    def.end.y = 0.0f;
+    def.end.z = 0.0f;
+    def.up.x = 0.0f;
+    def.up.y = 0.0f;
+    def.up.z = 0.0f;
+    def.length = 0.0f;
+    def.update2 = update2;
+    def.type = 2;
+    def.invLength = 1.0f;
 
-    temp_v0 = func_151A7950(temp_v0, argC + 0x28, argD, argE);
-    if (temp_v0 != NULL) {
-        memcpy(*(void **)((u8 *)temp_v0 + 0x60), &payload, sizeof(payload));
+    bolt = func_151A7950(&def, extraSize + sizeof(BoltLink), argD, argE);
+    if (bolt != NULL) {
+        memcpy(bolt->link, &link, sizeof(link));
     }
-    return temp_v0;
+    return bolt;
 }
-
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-    u8 pad5[0x14 - 0x5];
-    struct17 unk14;
-    u8 pad20[0x3B - 0x20];
-    u8 unk3B;
-    u8 pad3C[0x1D4 - 0x3C];
-    s32 unk1D4;
-} Owner151A87F8;
-
-typedef struct {
-    Owner151A87F8 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    struct17 unk8;
-    u8 unk14;
-    u8 pad15[3];
-    struct17 unk18;
-    u8 pad24;
-    u8 unk25;
-} Link151A87F8;
-
-typedef struct {
-    u8 pad0[0x1C];
-    u8 unk1C;
-    u8 pad1D[0x30 - 0x1D];
-    struct17 unk30;
-    struct17 unk3C;
-    struct17 unk48;
-    f32 unk54;
-    f32 unk58;
-    u8 pad5C[4];
-    Link151A87F8 *unk60;
-} Obj151A87F8;
 
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
 extern s32 func_15145C90(s32);
-extern void func_15143134(void *, void *, s32);
-extern f32 func_15143E64(struct17 *);
-extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
+extern void func_15143134(Vec3f *, Vec3f *, s32);
+extern f32 func_15143E64(Vec3f *);
+extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 
-s32 func_151A87F8(Obj151A87F8 *arg0) {
-    Link151A87F8 *link;
-    Owner151A87F8 *owner;
-    struct17 diff;
+/*
+ * Update hook 1 of a bolt spawned by func_151A8624: puts the start on the owner's bone and, until
+ * a ray cast succeeds, casts from there towards the target point to place the end. Deactivates
+ * the bolt when it has no length or the cast fails; returns 0 (destroy) once the owner is gone.
+ */
+s32 func_151A87F8(Bolt *bolt) {
+    BoltLink *link;
+    struct127 *owner;
+    Vec3f dir;
     s32 hit;
-    f32 x;
-    f32 y;
-    f32 z;
-    struct17 tmp;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    Vec3f unused;
 
-    link = arg0->unk60;
-    owner = link->unk0;
-    if ((owner->unk0 == 0) || (owner->unk3B != link->unk4) || (owner->unk4 == 0xFF)) {
+    link = bolt->link;
+    owner = link->owner;
+    if ((owner->interaction_state == 0) || (owner->unique_id != link->ownerId) || (owner->id == 0xFF)) {
         return 0;
     }
-    if (owner->unk1D4 != 0) {
-        func_15143134(&link->unk8, &arg0->unk30, owner->unk1D4 + (link->unk14 << 6));
-        if (!(link->unk25 & 1)) {
-            x = arg0->unk30.unk0 - (owner->unk14.unk0 + link->unk18.unk0);
-            y = arg0->unk30.unk4 - (owner->unk14.unk4 + link->unk18.unk4);
-            z = arg0->unk30.unk8 - (owner->unk14.unk8 + link->unk18.unk8);
-            if (func_150AC9C0(arg0->unk30.unk0, arg0->unk30.unk4, arg0->unk30.unk8, x, y, z, 0, 0,
-                              &arg0->unk3C.unk0, &arg0->unk3C.unk4, &arg0->unk3C.unk8, 0, &hit, 0, 0.0f)) {
+    if (owner->unk1D4 != NULL) {
+        func_15143134(&link->boneOffset, &bolt->def.start, (s32)owner->unk1D4 + (link->bone << 6)); /* 0x40-byte bone matrices */
+        if (!(link->linkFlags & 1)) {
+            dx = bolt->def.start.x - (owner->x_position + link->targetOffset.x);
+            dy = bolt->def.start.y - (owner->y_position + link->targetOffset.y);
+            dz = bolt->def.start.z - (owner->z_position + link->targetOffset.z);
+            if (func_150AC9C0(bolt->def.start.x, bolt->def.start.y, bolt->def.start.z, dx, dy, dz, 0, 0,
+                              &bolt->def.end.x, &bolt->def.end.y, &bolt->def.end.z, 0, &hit, 0, 0.0f)) {
                 if (func_15145C90(hit)) {
-                    link->unk25 |= 1;
+                    link->linkFlags |= 1;
                 } else {
-                    arg0->unk1C &= ~2;
+                    bolt->def.flags &= ~BOLT_ACTIVE;
                     return 1;
                 }
             } else {
-                arg0->unk1C &= ~2;
+                bolt->def.flags &= ~BOLT_ACTIVE;
                 return 1;
             }
         }
-        diff.unk0 = arg0->unk3C.unk0 - arg0->unk30.unk0;
-        diff.unk4 = arg0->unk3C.unk4 - arg0->unk30.unk4;
-        diff.unk8 = arg0->unk3C.unk8 - arg0->unk30.unk8;
-        arg0->unk54 = func_15143E64(&diff);
-        if (arg0->unk54 != 0.0f) {
+        dir.x = bolt->def.end.x - bolt->def.start.x;
+        dir.y = bolt->def.end.y - bolt->def.start.y;
+        dir.z = bolt->def.end.z - bolt->def.start.z;
+        bolt->def.length = func_15143E64(&dir);
+        // matching: the unused labels split IDO's basic blocks (length is reloaded; removing any one mismatches)
+        if (bolt->def.length != 0.0f) {
         lbl0:
-            arg0->unk58 = 1.0f / arg0->unk54;
-            func_15146078(&diff, &tmp, &arg0->unk48);
-            arg0->unk1C |= 2;
+            bolt->def.invLength = 1.0f / bolt->def.length;
+            func_15146078(&dir, &unused, &bolt->def.up);
+            bolt->def.flags |= BOLT_ACTIVE;
         lbl1:
             return 1;
         } else {
-            arg0->unk1C &= ~2;
+            bolt->def.flags &= ~BOLT_ACTIVE;
         lbl2:
             return 1;
         }
     } else {
-        arg0->unk1C &= ~2;
+        bolt->def.flags &= ~BOLT_ACTIVE;
     }
 lbl3:
     return 1;
 }
 
-extern void (*D_8008F964[])(u8 *, s32, u8);
+extern void (*D_8008F964[])(Bolt *, void *, u8);
 
-void func_151A8A20(u8 *arg0, s32 arg1, u8 arg2) {
-    s32 idx;
+/* Message handler: forwards to the type's handler in D_8008F964 (types 3 and up use type 0). */
+void func_151A8A20(Bolt *bolt, void *msg, u8 msgType) {
+    s32 type;
 
-    idx = arg0[0x5C];
-    if (idx >= 3) {
-        idx = 0;
+    type = bolt->def.type;
+    if (type >= 3) {
+        type = 0;
     }
-    if (D_8008F964[idx] != NULL) {
-        D_8008F964[idx](arg0, arg1, arg2);
+    if (D_8008F964[type] != NULL) {
+        D_8008F964[type](bolt, msg, msgType);
     }
 }
 
+/* Message 0x2D: two actors traded places (each with its unique_id). */
 typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA_151A8A78;
-
-typedef struct {
-    s32 unk0;
+    struct127 *actorA;
     union {
-        s32 w4;
-        u8  b4;
+        struct127 *actorB;
+        u8 id;              /* message 0: the unique_id of the dying actor */
     } u4;
-    u8  unk8;
-    u8  unk9;
-} ArgB_151A8A78;
+    u8 idA;
+    u8 idB;
+} BoltOwnerMsg;
 
-void func_151A8A78(void *arg0, s32 arg1, u8 arg2) {
-    SubA_151A8A78 *temp_v0 = *(SubA_151A8A78 **)((u8 *)arg0 + 0x60);
-    ArgB_151A8A78 *b = (ArgB_151A8A78 *)arg1;
-    s32 b0;
+/*
+ * Type 2 message handler (bolts from func_151A8624): message 0 destroys the bolt when its owner goes
+ * away; message 0x2D re-attaches it when its owner is swapped for another actor.
+ */
+void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
+    BoltLink *link = bolt->link;
+    BoltOwnerMsg *msg = arg;
+    struct127 *actor;
 
-    if (arg2 == 0) {
-        b0 = b->unk0;
-        if ((b0 == temp_v0->unk0) || (temp_v0->unk4 == b->u4.b4)) {
-            func_1516972C((struct102 *)arg0);
+    if (msgType == 0) {
+        actor = msg->actorA;
+        if ((actor == link->owner) || (link->ownerId == msg->u4.id)) {
+            func_1516972C((struct102 *)bolt);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (msgType == 0x2D) {
+        if (link->owner == msg->actorA) {
+            link->owner = msg->u4.actorB;
+            link->ownerId = msg->idB;
+        } else if (link->owner == msg->u4.actorB) {
+            link->owner = msg->actorA;
+            link->ownerId = msg->idA;
         }
     }
 }
