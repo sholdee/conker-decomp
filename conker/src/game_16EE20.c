@@ -704,12 +704,7 @@ s16 func_15143044(u8 arg0, s32 arg1) {
     return 0x7FFF - arg0;
 }
 
-typedef struct {
-    s32 *unk0;
-    s32 unk4;
-    s32 unk8;
-} Entry1514306C;
-extern Entry1514306C D_80090B60[];
+extern EffectTexture D_80090B60[];
 extern s32 D_80091514;
 extern s32 D_800915B0;
 
@@ -743,7 +738,7 @@ s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode) {
             }
             break;
         default:
-            ret = D_80090B60[arg1].unk0[arg2];
+            ret = D_80090B60[arg1].frames[arg2];
             break;
     }
     return ret;

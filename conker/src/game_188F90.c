@@ -1,16 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Texture table entry (D_80090B60). */
-typedef struct TextureInfo {
-    /* 0x0 */ s32 unk0;
-    /* 0x4 */ u8 frameCount;
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ u16 width;
-    /* 0x8 */ u16 height;
-    /* 0xA */ u16 unkA;
-} TextureInfo;
+#include "effects.h"
 
 typedef struct OtherModeL {
     s32 w0;
@@ -67,14 +58,14 @@ typedef struct ActorTracker {
 
 extern s32 (*D_8008B078[])(TexturedQuad *);
 extern s32 (*D_8008B07C[])(TexturedQuad *);
-extern TextureInfo D_80090B60[];
+extern EffectTexture D_80090B60[];
 extern OtherModeL D_800A4AC8[];
 
 s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags);
 Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142E24(Gfx *gfx, TextureInfo *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 texture, u8 arg7, s32 arg8,
+Gfx *func_15142E24(Gfx *gfx, EffectTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 texture, u8 arg7, s32 arg8,
                    u8 *needSync, s32 argA);
 Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync);

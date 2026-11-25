@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * Swinging ropes. A rope is a chain of up to 20 nodes hanging from a fixed top node; an
@@ -56,23 +57,13 @@ typedef struct {
     /* 0x28 */ f32 radius;             // horizontal offset of the owner from the rope
 } RopeRider;
 
-/* D_80090B60[]: one entry per texture. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ u8 numFrames;
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ u16 width;
-    /* 0x08 */ u16 height;
-    /* 0x0A */ u16 unkA;
-} TextureInfo;
-
-extern TextureInfo D_80090B60[];
+extern EffectTexture D_80090B60[];
 extern s32 D_800A9270[];           // the two object lists ropes are allocated in
 
 extern void *allocate_memory(s32, s32, s32, s32);
 f32 func_150489B0(u8);
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
-Gfx *func_15094FE8(Gfx *, TextureInfo *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+Gfx *func_15094FE8(Gfx *, EffectTexture *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 s32 func_151ACB38(Actor *obj, u8 *out);
 s32 func_151AE3A8(RopeRider *rider);
@@ -135,7 +126,7 @@ void func_151ACB94(RopeRider *rider, s32 arg1, u8 arg2) {
 /** Creates a rope from 0x24 bytes of spawn data: 20 nodes hanging from topY down to bottomY. */
 Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     Rope *rope;
-    TextureInfo *tex;
+    EffectTexture *tex;
     s32 i;
     s32 segments;
     s32 buf;

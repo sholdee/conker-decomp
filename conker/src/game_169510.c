@@ -4,16 +4,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* D_80090B60[]: one entry per texture. */
-typedef struct {
-    s32 unk0;
-    u8 numFrames;
-    u8 unk5;
-    u16 width;
-    u16 height;
-    u16 unkA;
-} TextureInfo;
-
 /* Per-behaviour state that follows a particle. */
 typedef union {
     struct {
@@ -75,7 +65,7 @@ typedef struct {
     u16 flag;
 } VtxColor;
 
-extern TextureInfo D_80090B60[];
+extern EffectTexture D_80090B60[];
 void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip);
 void func_151400D0(Vtx *vtx, VtxColor *colors);
 
@@ -129,7 +119,7 @@ void func_1513C060(QuadSprite *sprite) {
     if (!expired) {
         speed = sprite->def.frameSpeed;
         if (speed != 0) {
-            numFrames = D_80090B60[sprite->def.texture].numFrames;
+            numFrames = D_80090B60[sprite->def.texture].frameCount;
             lastFrame = (numFrames << 16) - 1;
             sprite->def.frame += speed * D_800BE9E4;
             if (lastFrame < sprite->def.frame) {
@@ -410,7 +400,7 @@ extern RenderModePair D_800A4AC8[];
 Gfx *func_15142B7C(Gfx *gfx, s32 setModes, s32 clearModes);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142E24(Gfx *gfx, TextureInfo *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 texture, u8 arg7, s32 arg8,
+Gfx *func_15142E24(Gfx *gfx, EffectTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 texture, u8 arg7, s32 arg8,
                    u8 *needSync, s32 argA);
 Gfx *func_15142FBC(Gfx *gfx, s32 modeHi, s32 modeLo, u8 *needSync);
 void func_151441A4(s16 *r, s16 *g, s16 *b, s16 *a, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 mode);
@@ -542,7 +532,7 @@ void func_1513CFE4(Particle *particle) {
     if (!expired) {
         speed = particle->def.frameSpeed;
         if (speed != 0) {
-            numFrames = D_80090B60[particle->def.texture].numFrames;
+            numFrames = D_80090B60[particle->def.texture].frameCount;
             lastFrame = (numFrames << 16) - 1;
             particle->def.frame += speed * D_800BE9E4;
             if (lastFrame < particle->def.frame) {
@@ -1663,7 +1653,7 @@ Vtx *func_1513FAB4(Particle *particle, u8 reversed, BeamScale *scale, s16 viewpo
 
 /* Sets the texture coordinates of a quad to cover the whole texture, mirrored per the flip bits. */
 void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip) {
-    TextureInfo *tex;
+    EffectTexture *tex;
     u16 maxS;
     u16 maxT;
     s32 coord;

@@ -10,13 +10,6 @@ typedef struct ScreenSprite {
 } ScreenSprite;
 
 typedef struct {
-    u8 pad0[0x6];
-    u16 width;
-    u16 height;
-    u8 padA[0x2];
-} SpriteTexture;
-
-typedef struct {
     s32 unk0;
     s32 unk4;
 } CombineMode;
@@ -29,7 +22,7 @@ typedef struct {
 
 extern s32 (*D_8008ACC8[])(ScreenSprite *);
 extern void (*D_8008AD04[])(ScreenSprite *, s32, u8);
-extern SpriteTexture D_80090B60[];
+extern EffectTexture D_80090B60[];
 extern CombineMode D_800A4AC8[];
 extern SpriteListIds D_800A6030;
 extern IdList2 D_800A6038;

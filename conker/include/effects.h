@@ -2258,4 +2258,14 @@ typedef struct RiseMotion {
     /* 0x24 */ f32 ceiling;
 } RiseMotion; /* size 0x28 */
 
+/* Entry of the effect texture table D_80090B60 (the `texture` index of the particle / sprite descriptors). */
+typedef struct EffectTexture {
+    /* 0x0 */ s32 *frames;    /* per-frame image data, frames[frame] */
+    /* 0x4 */ u8 frameCount;
+    /* 0x5 */ u8 unk5;
+    /* 0x6 */ u16 width;
+    /* 0x8 */ u16 height;
+    /* 0xA */ u16 unkA;
+} EffectTexture; /* size 0xC */
+
 #endif
