@@ -1,12 +1,8 @@
 #include <ultra64.h>
 
 #include "functions.h"
-#define D_800BE4A0 D_800BE4A0_header
-#define D_800DDA90 D_800DDA90_header
 #define D_800B0DF0 D_800B0DF0_header
 #include "variables.h"
-#undef D_800BE4A0
-#undef D_800DDA90
 #undef D_800B0DF0
 
 
@@ -582,23 +578,6 @@ typedef struct Game36680ResourceInfo {
     u8 pad9;
 } Game36680ResourceInfo; // size 0xA
 
-/** Resource picked for one of the 15 particle slots. */
-typedef struct Game36680ResourceChoice {
-    u16 id; // 0xFF: none
-    u16 flags;
-} Game36680ResourceChoice;
-
-/** Texture file of one particle slot (loaded later by game_1A89B0). */
-typedef struct Game36680ResourceFile {
-    s32 devAddr;
-    s32 size;
-    s32 buf;
-    u8 loaded;
-    u8 padD[3];
-} Game36680ResourceFile; // size 0x10
-
-extern Game36680ResourceChoice D_800BE4A0[15];
-extern Game36680ResourceFile D_800DDA90[15];
 extern Game36680ResourceInfo D_80095CE0[];
 extern u16 D_800BE478[15];
 extern s16 D_800DDB80[15][2];
@@ -623,7 +602,7 @@ void func_1500AC14(void) {
         D_800DDA90[i].devAddr = 0;
         D_800DDA90[i].buf = 0;
         D_800DDA90[i].size = 0;
-        D_800DDA90[i].loaded = 0;
+        D_800DDA90[i].used = 0;
         id = D_800BE4A0[i].id;
         if (id != 0xFF && (D_800BE478[i] != 0 || D_800BE4A0[i].id == 0x3B)) {
             D_800DDA90[i].devAddr = func_1502B020(&size, 2, 0, id);

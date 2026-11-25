@@ -2435,6 +2435,21 @@ typedef struct TexCoord {
     /* 0x2 */ s16 t;
 } TexCoord;
 
+/* The resource picked for one of the 15 particle sprite types (D_800BE4A0[15], game_36680.c). */
+typedef struct ParticleResource {
+    /* 0x0 */ u16 id; // 0xFF: none
+    /* 0x2 */ u16 flags;
+} ParticleResource;
+
+/* The texture file of one particle sprite type (D_800DDA90[15]; loaded by game_1A89B0.c). */
+typedef struct ParticleTexFile {
+    /* 0x0 */ s32 devAddr;
+    /* 0x4 */ s32 size;
+    /* 0x8 */ s32 buf;
+    /* 0xC */ u8  used; // set when a sprite of this type was built this frame
+    /* 0xD */ u8  padD[3];
+} ParticleTexFile; // size 0x10
+
 typedef struct {
     f32 unk0;   // used
     f32 unk4;   // used

@@ -192,14 +192,6 @@ typedef struct {
     s16 unk2;
 } Game1A89B0AnimRef;
 
-typedef struct {
-    s32 devAddr;
-    s32 size;
-    s32 buf;
-    u8 used; /* set when a sprite of this type was built this frame */
-    u8 padD[3];
-} Game1A89B0TexFile;
-
 /* Texture coordinate extents of a sprite type's frame. */
 typedef struct {
     s16 s;
@@ -226,7 +218,6 @@ extern struct { s16 x; s16 y; s16 z; } D_800DD470; /* set by func_1517E05C; x ==
 extern void func_10004074(s32);
 
 /* Per sprite type: the texture file (D_800DDA90) and the 26 frame pointers into its decoded buffer. */
-#define sTexFiles ((Game1A89B0TexFile *)&D_800DDA90)
 #define FRAMES_PER_TYPE 26
 #define sFrames ((s32 *)&D_800DD478) /* [15][FRAMES_PER_TYPE], indexed by a vertex's texture id */
 
@@ -365,27 +356,27 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                     dist = radius - ((radius - dist) * (fadeDist - 140)) / 100;
                 }
                 if (sFrames[type * FRAMES_PER_TYPE] == 0) {
-                    if (sTexFiles[type].devAddr != 0) {
+                    if (D_800DDA90[type].devAddr != 0) {
                         hi = D_80095CE0[D_800DDBC0[type]].frameSize * D_80095CE0[D_800DDBC0[type]].frameCount;
-                        sTexFiles[type].buf = func_10003C6C(sTexFiles[type].size, 1, 2, 1, 0);
-                        if (sTexFiles[type].buf != 0) {
+                        D_800DDA90[type].buf = func_10003C6C(D_800DDA90[type].size, 1, 2, 1, 0);
+                        if (D_800DDA90[type].buf != 0) {
                             sFrames[type * FRAMES_PER_TYPE] = func_10003C6C(hi, 4, 1, 0, 0);
                             if (sFrames[type * FRAMES_PER_TYPE] != 0) {
-                                func_10004514(sTexFiles[type].devAddr, (void *) sTexFiles[type].buf, sTexFiles[type].size, 1);
-                                sTexFiles[type].used = 1;
+                                func_10004514(D_800DDA90[type].devAddr, (void *) D_800DDA90[type].buf, D_800DDA90[type].size, 1);
+                                D_800DDA90[type].used = 1;
                                 hi = D_80095CE0[D_800DDBC0[type]].frameSize;
                                 for (frame = 1; frame < FRAMES_PER_TYPE; frame++) {
                                     sFrames[type * FRAMES_PER_TYPE + frame] = sFrames[type * FRAMES_PER_TYPE + frame - 1] + hi;
                                 }
                             } else {
-                                func_10004074(sTexFiles[type].buf);
+                                func_10004074(D_800DDA90[type].buf);
                             }
                         }
                     }
                 texdone:; // matching: IDO needs this empty labelled statement (a block join) here
                 } else {
-                    if (sTexFiles[type].used == 0) {
-                        sTexFiles[type].used = 1;
+                    if (D_800DDA90[type].used == 0) {
+                        D_800DDA90[type].used = 1;
                         func_100043B4((s32 *) sFrames[type * FRAMES_PER_TYPE], 4);
                     }
                 }
@@ -544,12 +535,12 @@ void func_1517CFC4(void) {
     s32 i;
 
     for (i = 0; i < 15; i++) {
-        if (sTexFiles[i].buf != 0) {
+        if (D_800DDA90[i].buf != 0) {
             if (sFrames[i * FRAMES_PER_TYPE] != 0) {
-                func_10006240(sTexFiles[i].buf, sFrames[i * FRAMES_PER_TYPE], D_8003809C);
-                func_10004074(sTexFiles[i].buf);
+                func_10006240(D_800DDA90[i].buf, sFrames[i * FRAMES_PER_TYPE], D_8003809C);
+                func_10004074(D_800DDA90[i].buf);
             }
-            sTexFiles[i].buf = 0;
+            D_800DDA90[i].buf = 0;
         }
     }
 }
@@ -754,14 +745,14 @@ void func_1517DE5C(void) {
 
     if (D_800DDD20 != 0) {
         for (i = 0; i < 15; i++) {
-            sTexFiles[i].used = 0;
+            D_800DDA90[i].used = 0;
         }
         func_1517BBAC(D_800CC2D0->x_position, D_800CC2D0->y_position, D_800CC2D0->z_position, 1500,
                       D_800DBFF0->unk380, D_800DBFF0->eye.x, D_800DBFF0->eye.y, D_800DBFF0->eye.z);
         for (i = 0; i < 15; i++) {
-            if (sFrames[i * FRAMES_PER_TYPE] != 0 && sTexFiles[i].used == 0) {
+            if (sFrames[i * FRAMES_PER_TYPE] != 0 && D_800DDA90[i].used == 0) {
                 sFrames[i * FRAMES_PER_TYPE] = 0;
-                sTexFiles[i].buf = 0;
+                D_800DDA90[i].buf = 0;
             }
         }
     }
