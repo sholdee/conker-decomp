@@ -38,32 +38,6 @@ typedef struct {
     u8 unk0[0x24];
 } struct_func_151C9AC0_sp20;
 typedef struct {
-    u8 pad_0x00[0x28];
-    s32 field_0x28;
-    struct102 *field_0x2C;
-    u8 pad_0x30[0x4];
-    s32 field_0x34;
-    s32 field_0x38;
-    s32 field_0x3C;
-    s32 field_0x40;
-    s32 field_0x44;
-    s32 field_0x48;
-    s32 field_0x4C;
-    s32 field_0x50;
-    u8 pad_0x54[0x32];
-    u8 field_0x86;
-} Game1F4650LinkBlock;
-typedef struct {
-    u8 pad_0x00[0x13C];
-    s32 field_0x13C;
-    u8 pad_0x140[0x4];
-    s32 field_0x144;
-} Game1F4650LinkedObject;
-typedef struct {
-    u8 pad_0x00[0x170];
-    s32 field_0x170;
-} Game1F4650LinkOwner;
-typedef struct {
     s32 field_0x0;
     u8 pad_0x4[0x8];
     u8 field_0xC;
@@ -929,6 +903,12 @@ typedef struct {
 
 void *func_151407D0(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32);
 
+/* Effect spawned by func_151C8FCC; +0x170 holds the beam object that owns it. */
+typedef struct {
+    u8 pad0[0x170];
+    SightBeamObject *owner;
+} SightExtension;
+
 /* Spawns a beam extension effect from `start` to `end`, owned by beam object `owner`. */
 s32 func_151C8FCC(s32 owner, vertex *start, vertex *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
     void *effect;
@@ -1112,134 +1092,122 @@ void func_151C9198(SightEmitter **emitters, vertex *pos, SightTriangle *triangle
     }
 }
 
-void func_151C94D4(Game1F4650LinkedObject *arg0) {
-    register Game1F4650LinkBlock *temp_s0;
-    s32 temp_a0;
+/* Frees the beam's effects and emitters, then removes the beam object with func_1513CA6C. */
+void func_151C94D4(SightBeamObject *obj) {
+    // matching: one register first holds the object, then its state (as IDO allocated it)
+    register SightBeamState *state;
+    void *part;
 
-    temp_s0 = (Game1F4650LinkBlock *)((s32)arg0 + 0x110);
-    if (arg0->field_0x13C != 0) {
-        func_1516972C(temp_s0->field_0x2C);
-        func_1000FD38(func_151C87AC, (void *)temp_s0, 0);
+    state = &obj->state;
+    if (obj->state.midEffect != NULL) {
+        func_1516972C((struct102 *)state->midEffect);
+        func_1000FD38(func_151C87AC, state, 0);
     }
-
-    temp_s0 = (Game1F4650LinkBlock *)*(s32 *)&arg0;
-    temp_a0 = ((Game1F4650LinkedObject *)temp_s0)->field_0x144;
-    temp_s0 = (Game1F4650LinkBlock *)((s32)temp_s0 + 0x110);
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
+    part = (void *)((SightBeamObject *)state)->state.endEffect0;
+    state = &((SightBeamObject *)state)->state;
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x38;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = (void *)state->endEffect1;
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x3C;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = state->emitter0[0];
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x40;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = state->emitter0[1];
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x44;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = state->emitter0[2];
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x48;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = state->emitter1[0];
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x4C;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = state->emitter1[1];
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x50;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = state->emitter1[2];
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    func_1513CA6C(arg0);
+    func_1513CA6C(obj);
 }
 
-void func_151C95D8(Game1F4650LinkedObject *arg0) {
-    register Game1F4650LinkBlock *temp_s0;
-    s32 temp_a0;
+/* Same as func_151C94D4, but finishes with func_1513CAA0. */
+void func_151C95D8(SightBeamObject *obj) {
+    // matching: one register first holds the object, then its state (as IDO allocated it)
+    register SightBeamState *state;
+    void *part;
 
-    temp_s0 = (Game1F4650LinkBlock *)((s32)arg0 + 0x110);
-    if (arg0->field_0x13C != 0) {
-        func_1516972C(temp_s0->field_0x2C);
-        func_1000FD38(func_151C87AC, (void *)temp_s0, 0);
+    state = &obj->state;
+    if (obj->state.midEffect != NULL) {
+        func_1516972C((struct102 *)state->midEffect);
+        func_1000FD38(func_151C87AC, state, 0);
     }
-
-    temp_s0 = (Game1F4650LinkBlock *)*(s32 *)&arg0;
-    temp_a0 = ((Game1F4650LinkedObject *)temp_s0)->field_0x144;
-    temp_s0 = (Game1F4650LinkBlock *)((s32)temp_s0 + 0x110);
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
+    part = (void *)((SightBeamObject *)state)->state.endEffect0;
+    state = &((SightBeamObject *)state)->state;
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x38;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = (void *)state->endEffect1;
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x3C;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = state->emitter0[0];
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x40;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = state->emitter0[1];
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x44;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = state->emitter0[2];
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x48;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = state->emitter1[0];
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x4C;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = state->emitter1[1];
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    temp_a0 = temp_s0->field_0x50;
-    if (temp_a0 != 0) {
-        func_1516972C((struct102 *)temp_a0);
+    part = state->emitter1[2];
+    if (part != NULL) {
+        func_1516972C(part);
     }
-
-    func_1513CAA0(arg0);
+    func_1513CAA0(obj);
 }
 
-s32 func_151C96DC(Game1F4650LinkOwner *arg0, s32 arg1) {
-    Game1F4650LinkBlock *temp;
+/* Returns whether the beam that owns this extension effect is switched on. */
+s32 func_151C96DC(SightExtension *effect, s32 arg1) {
+    SightBeamState *state;
 
-    temp = (Game1F4650LinkBlock *)(arg0->field_0x170 + 0x110);
-    if (temp->field_0x86 & 0x2) {
+    state = &effect->owner->state;
+    if (state->flags & 2) {
         return 1;
     }
     return 0;
 }
 
-void func_151C970C(s32 arg0, s32 arg1) {
+/* Sends `command` (see SightCommandMsg) to the sight beams keyed to `source`. */
+void func_151C970C(s32 command, s32 source) {
     struct {
-        s32 unk0;
-        u8 unk4;
-    } sp18;
-    sp18.unk0 = arg1;
-    sp18.unk4 = arg0;
-    func_151403A8((s32)&sp18, 0x3A);
+        s32 source;
+        u8 command;
+    } msg;
+    msg.source = source;
+    msg.command = command;
+    func_151403A8((s32)&msg, 0x3A);
 }
 
 extern s32 func_15046C80(f32 *, u16, f32, void *);
