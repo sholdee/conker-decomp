@@ -3,30 +3,7 @@
 #include "variables.h"
 #include "effects.h"
 
-/* The 8-byte payload func_150BDE90 copies to +0x28 of the object it creates. */
-typedef struct {
-    /* 0x00 */ Camera *owner;
-    /* 0x04 */ s16 timer; // countdown to the next emitter spawn
-    /* 0x06 */ s16 unk6;
-} EB340Spawn;
-
-/* The object func_150BDE90 creates; func_150BDF0C is its per-frame update. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EB340Spawn spawn;
-} EB340Obj;
 void func_150BDE90(Camera *owner, u8 arg1, s32 arg2);
-
-/* Copied to +0x70 of the emitter object func_1515548C returns. */
-typedef struct {
-    /* 0x00 */ Camera *owner;
-    /* 0x04 */ u8   pad4[0x8];
-    /* 0x0C */ u8   unkC;
-    /* 0x0D */ u8   unkD;
-    /* 0x0E */ u8   padE[0x2];
-    /* 0x10 */ f32  unk10;
-    /* 0x14 */ u8   pad14[0x44];
-} EB340Payload;
 
 extern void *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 void func_150BDF0C(EB340Obj *obj);
@@ -47,13 +24,6 @@ void func_150BE150(EB340Obj *obj, void **msg, u8 event) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ u8  pad0[0x14];
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8  pad18[0x68];
-    /* 0x80 */ f32 unk80;
-} EB340Rising;
-
 /* Advances unk14 by unk80 per frame; returns 0 once it passes 120. */
 s32 func_150BE1C4(EB340Rising *arg0) {
     arg0->unk14 += arg0->unk80 * D_800BE9A4;
@@ -62,15 +32,6 @@ s32 func_150BE1C4(EB340Rising *arg0) {
     }
     return 1;
 }
-
-/* Behaviour scratch state (WorldObject.touch) of func_150BE210. */
-typedef struct {
-    /* 0x7C */ s32 unk7C;
-    /* 0x80 */ s32 unk80;
-    /* 0x84 */ f32 angle; // turns at spinY per frame until past 360
-} TurnerWork;
-
-#define TURNER_WORK(obj) ((TurnerWork *)&(obj)->touch)
 
 extern void func_1511650C(WorldObject *obj, s32, s32, f32);
 
@@ -148,12 +109,6 @@ void func_150BE2E8(WorldObject *mover) {
     mover->moveData.half.hi = speed * 16384.0f;
     mover->moveData.half.lo = progress * 16384.0f;
 }
-
-/* Two-halfword command, as in game_61490.c's GameCommand. */
-typedef struct {
-    /* 0x00 */ s16 opcode;
-    /* 0x02 */ s16 value;
-} EB340Command;
 
 /* Writes object `id`'s two commands (0x68 = taskint[1], 0xE = taskint[0]) and returns the next slot. */
 EB340Command *func_150BE438(EB340Command *cmd, s32 id) {

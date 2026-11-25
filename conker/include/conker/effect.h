@@ -115,4 +115,51 @@
  *   game_1FFF60.c
  */
 
+/* Level effect spawners (game_EB340.c, game_EB600.c). */
+/* The 8-byte payload func_150BDE90 copies to +0x28 of the object it creates. */
+typedef struct {
+    /* 0x00 */ Camera *owner;
+    /* 0x04 */ s16 timer; // countdown to the next emitter spawn
+    /* 0x06 */ s16 unk6;
+} EB340Spawn;
+
+/* The object func_150BDE90 creates; func_150BDF0C is its per-frame update. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ EB340Spawn spawn;
+} EB340Obj;
+
+/* Copied to +0x70 of the emitter object func_1515548C returns. */
+typedef struct {
+    /* 0x00 */ Camera *owner;
+    /* 0x04 */ u8   pad4[0x8];
+    /* 0x0C */ u8   unkC;
+    /* 0x0D */ u8   unkD;
+    /* 0x0E */ u8   padE[0x2];
+    /* 0x10 */ f32  unk10;
+    /* 0x14 */ u8   pad14[0x44];
+} EB340Payload;
+
+typedef struct {
+    /* 0x00 */ u8  pad0[0x14];
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ u8  pad18[0x68];
+    /* 0x80 */ f32 unk80;
+} EB340Rising;
+
+/* Behaviour scratch state (WorldObject.touch) of func_150BE210. */
+typedef struct {
+    /* 0x7C */ s32 unk7C;
+    /* 0x80 */ s32 unk80;
+    /* 0x84 */ f32 angle; // turns at spinY per frame until past 360
+} TurnerWork;
+
+#define TURNER_WORK(obj) ((TurnerWork *)&(obj)->touch)
+
+/* Two-halfword command, as in game_61490.c's GameCommand. */
+typedef struct {
+    /* 0x00 */ s16 opcode;
+    /* 0x02 */ s16 value;
+} EB340Command;
+
 #endif
