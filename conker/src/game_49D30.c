@@ -759,14 +759,13 @@ void func_1501DF04(s32 scene) {
             } while ((chained != 0) && (D_800C35C4 == 0));
         }
     }
-    // matching: the fade call and the loop setup share a source line (-g3 line numbers steer scheduling),
-    // and the loop walks D_800CC2D0 by bytes (0xA4 is padding in Actor)
-    if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) { func_1517EE40(0, 0, 0, 0x1E, 0, 0); } { u8 *ptr = (u8 *)D_800CC2D0; u8 *end = (u8 *)&D_800D121C; do {
-        if (*(s32 *)ptr != 0) {
-            ptr[0xA4] = 0;
+    // matching: the fade call and the loop setup share a source line (-g3 line numbers steer scheduling)
+    if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) { func_1517EE40(0, 0, 0, 0x1E, 0, 0); } { Actor *obj = D_800CC2D0; Actor *end = (Actor *)&D_800D121C; do {
+        if (obj->interaction_state != 0) {
+            obj->fogMode = 0;
         }
-        ptr += sizeof(Actor);
-    } while (ptr != end); }
+        obj++;
+    } while (obj != end); }
     D_800C3663 = 0;
     func_1000E17C();
     D_800DBFF4[0] = 4;
@@ -944,35 +943,26 @@ void func_1501E540(s32 scene) {
     }
 }
 
-/* Actor bytes 0x6A..0x6D, which include/structs.h still declares as padding. */
-typedef struct {
-    u8 pad0[0x6A];
-    u8 unk6A;
-    u8 unk6B;
-    u8 unk6C;
-    u8 unk6D;
-} ObjAnimBytes;
-
 void func_1507EABC(void *);
 
-/* For each object bound to a track: wrap its 0x6C/0x6D counters at 10 and call func_1507EABC. */
+/* For each object bound to a track: wrap its eyeCode counters at 10 and call func_1507EABC. */
 void func_1501E73C(s32 scene) {
     s32 i;
-    ObjAnimBytes *obj;
+    Actor *obj;
 
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35F0[scene][i].type == 2) {
-            obj = (ObjAnimBytes *)func_15083E90(D_800C35F0[scene][i].unk2);
+            obj = func_15083E90(D_800C35F0[scene][i].unk2);
             if (obj == NULL) {
                 continue;
             }
-            if (obj->unk6C >= 10) {
-                obj->unk6C = 0;
-                obj->unk6A = 0;
+            if (obj->eyeCode[0] >= 10) {
+                obj->eyeCode[0] = 0;
+                obj->eyeClosed[0] = 0;
             }
-            if (obj->unk6D >= 10) {
-                obj->unk6D = 0;
-                obj->unk6B = 0;
+            if (obj->eyeCode[1] >= 10) {
+                obj->eyeCode[1] = 0;
+                obj->eyeClosed[1] = 0;
             }
             func_1507EABC(obj);
         }
@@ -2136,17 +2126,17 @@ void func_150222E0(s32 track, s32 scene) {
         if (info->type == 2) {
             obj = func_15083E90(info->unk2);
             if (obj != NULL) {
-                ((ObjAnimBytes *)obj)->unk6C = 0;
-                ((ObjAnimBytes *)obj)->unk6D = 0;
-                ((ObjAnimBytes *)obj)->unk6A = 0;
-                ((ObjAnimBytes *)obj)->unk6B = 0;
+                obj->eyeCode[0] = 0;
+                obj->eyeCode[1] = 0;
+                obj->eyeClosed[0] = 0;
+                obj->eyeClosed[1] = 0;
                 obj->unk282 = 0;
                 obj->unk27A[0] = 0;
                 obj->unk27A[1] = 0;
                 obj->unk27E[0] = 0;
                 obj->unk27E[1] = 0;
                 func_1507E7E4(obj, 0, 3, 0xFFFF, 0xA);
-                *(u8 *)((u8 *)obj + 0x71) = 0;
+                obj->expressionPriority = 0;
             }
         }
     }
