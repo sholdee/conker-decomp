@@ -43,6 +43,7 @@ extern s32 (*D_8008AB64[])(s32, s32, s32);
 extern AttachmentType *D_8008ABE8[];
 
 Attachment *func_1514EC1C(s32 handle, struct127 *owner, s16 type);
+s32 func_1514D4B8(s16 root, s16 type);
 
 typedef struct Vec3w1514F308 {
     s32 unk0;
@@ -73,18 +74,6 @@ typedef struct HudSpriteHandle {
 } HudSpriteHandle;
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern f32 D_800A5E08;
-extern f32 D_800A5E0C;
-extern f32 D_800A5E10;
-extern f32 D_800A5E14;
-extern f32 D_800A5E18;
-extern f32 D_800A5E1C;
-extern f32 D_800A5E58;
-extern f32 D_800A5E5C;
-extern f32 D_800A5DE4;
-extern f32 D_800A5DE8;
-extern f32 D_800A5DEC;
-extern f32 D_800A5DF0;
 extern Vec3w1514F308 D_800A5970;
 extern Vec3w1514F308 D_800A597C;
 extern u8 D_800A58A0;
@@ -96,14 +85,14 @@ extern s32 D_800A58F8;
 extern s32 D_800A590C;
 extern s32 D_800A5920;
 s32 func_15189FF0(void *, void *, void *, s32, s32, s32, s32);
-extern void func_151D74B0(s32, s32, s32, s32, s32);
+extern void func_151D74B0(struct127 *, s32, s32, s32, s32);
 void func_151BB044(s32);
 void func_151BC074(s32);
 void func_151BD2F8(void *, s32, s32);
 void func_151B9F00(void *, s32, s32);
 void func_150C0AC0(Struct1514F5CCArg *, s32, s32);
 s32 func_150C5370(void *, s32);
-extern void *func_15155FD4(s32);
+extern struct102 *func_15155FD4(s32);
 extern void *func_15155780(s32, s32);
 s32 func_1514CA80(struct127 *, s32 *, s32 *, s32 *);
 extern void (*D_8008AA70[])(struct127 *);
@@ -111,24 +100,26 @@ extern void (*D_8008AACC[])(struct127 *);
 extern u8 *D_8008AB90[];
 extern u8 D_800A5EC0[];
 extern u8 D_800A5ED8[];
-s32 func_15160A58(s32, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_15160A58(struct127 *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_1518D1C0(s32, s32, s32, s32, s32, s32, s32 *);
 s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150C4120(s32, s32, s32, s32);
 
-typedef struct Struct1514E00C_2C {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s8 unk1E;
+/* Tells a spawned emitter how to follow its owner: two points given in the space of bone `bone`
+ * of `target`, which func_1518A094 transforms every frame. */
+typedef struct EmitterAttach {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 x2;
+    /* 0x10 */ f32 y2;
+    /* 0x14 */ f32 z2;
+    /* 0x18 */ struct127 *target;
+    /* 0x1C */ u8 bone;
+    /* 0x1D */ u8 targetId;             // the target's unique_id
+    /* 0x1E */ s8 handler;              // index into D_8008D5A0, or -1
     /* 0x1F */ u8 pad1F;
-} Struct1514E00C_2C;
+} EmitterAttach;
 
 typedef struct Struct1514E00C_4C {
     /* 0x00 */ u8 unk00;
@@ -536,65 +527,68 @@ s32 func_1514CA80(struct127 *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot)
 }
 
 
-s32 func_1514D15C(struct127 *arg0) {
-    s32 sp44;
-    s32 sp40;
-    s32 sp3C;
+/**
+ * Runs the spawn callbacks for `obj` (see func_1514CA80), after freeing whatever is still
+ * queued for its slot. Does nothing if the object already has attachments.
+ */
+s32 func_1514D15C(struct127 *obj) {
+    s32 uniqueSlot;
+    s32 globalSlot;
+    s32 idSlot;
     u8 flags;
-    s32 temp_s0;
-    s32 index;
-    void *temp_v0;
+    s32 found;
+    s32 slot;
+    s32 handler;
+    struct102 *queued;
 
-    sp44 = -1;
-    sp40 = -1;
-    sp3C = -1;
-    index = arg0 - D_800CC2D0;
-    if (*(s32 *)((u8 *)arg0 + 0x2F4) != 0) {
+    uniqueSlot = -1;
+    globalSlot = -1;
+    idSlot = -1;
+    slot = obj - D_800CC2D0;
+    if (ATTACHMENTS(obj) != NULL) {
         return 0;
     }
 
     do {
-        temp_v0 = func_15155FD4(index);
-        if (temp_v0 != 0) {
-            func_1516972C((struct102 *)temp_v0);
+        queued = func_15155FD4(slot);
+        if (queued != NULL) {
+            func_1516972C(queued);
         }
-    } while (temp_v0 != 0);
+    } while (queued != NULL);
 
-    if ((index == 0) && (D_800BE616 == 0)) {
-        func_15155780(index, 0xFF);
+    if (slot == 0 && D_800BE616 == 0) {
+        func_15155780(slot, 0xFF);
     }
 
-    D_8008AACC[0](arg0);
-    temp_s0 = func_1514CA80(arg0, &sp44, &sp40, &sp3C);
-    flags = temp_s0;
-    if (temp_s0 == 0) {
+    D_8008AACC[0](obj);
+    // matching: the zero test must be on the s32 result, not on the u8 copy
+    found = func_1514CA80(obj, &uniqueSlot, &globalSlot, &idSlot);
+    flags = found;
+    if (found == 0) {
         return 0;
     }
 
     if (flags & 4) {
-        temp_s0 = D_800A5ED8[sp3C];
-        if (temp_s0 != 0) {
-            D_8008AA70[temp_s0](arg0);
+        handler = D_800A5ED8[idSlot];
+        if (handler != 0) {
+            D_8008AA70[handler](obj);
         }
     }
 
-    temp_s0 = flags & 2;
-    if (temp_s0 != 0) {
-        index = D_800A5EC0[sp40];
-        if (index != 0) {
-            D_8008AA70[index](arg0);
+    if (flags & 2) {
+        handler = D_800A5EC0[globalSlot];
+        if (handler != 0) {
+            D_8008AA70[handler](obj);
         }
     }
 
-    if ((temp_s0 != 0) && (flags & 1)) {
-        if (D_8008AA70[D_8008AB90[sp40][sp44]] != NULL) {
-            D_8008AA70[D_8008AB90[sp40][sp44]](arg0);
+    if ((flags & 2) && (flags & 1)) {
+        if (D_8008AA70[D_8008AB90[globalSlot][uniqueSlot]] != NULL) {
+            D_8008AA70[D_8008AB90[globalSlot][uniqueSlot]](obj);
         }
     }
     return 1;
 }
-
-s32 func_1514D4B8(s16, s16);
 
 /** Frees every attachment of `owner`, letting each attachment type release its handle first. */
 s32 func_1514D310(struct127 *owner) {
@@ -654,8 +648,8 @@ s32 func_1514D4B8(s16 root, s16 type) {
 }
 
 typedef struct Struct1514D564Payload {
-    struct127 *unk0;
-    u8 unk4;
+    struct127 *obj;
+    u8 uniqueId;
     s8 unk5;
     u8 pad6[2];
     f32 unk8;
@@ -677,135 +671,133 @@ typedef struct Struct1514D564Desc {
     u8 pad21[3];
 } Struct1514D564Desc;
 
-void func_1514D564(struct127 *arg0) {
-    Struct1514D564Desc sp34;
-    s32 temp_v0;
-    Struct1514D564Payload sp1C;
-    register f32 neg;
+void func_1514D564(struct127 *obj) {
+    Struct1514D564Desc desc;
+    s32 spawned;
+    Struct1514D564Payload payload;
 
-    neg = -180.0f;
-    sp1C.unk0 = arg0;
-    sp1C.unk4 = arg0->unique_id;
-    sp1C.unk8 = 0.0f;
-    sp1C.unkC = neg;
-    sp1C.unk10 = 77.0f;
-    sp34.unk0 = D_800A5DE4;
-    sp34.unk4 = D_800A5DE8;
-    sp34.unk8 = D_800A5DEC;
-    sp1C.unk5 = 6;
-    sp34.unk18 = 1;
-    sp34.unkC = arg0->x_position;
-    sp34.unk10 = arg0->y_position;
-    sp34.unk14 = arg0->z_position;
-    sp34.unk20 = 1;
-    sp34.unk1C = D_800A5DF0;
-    temp_v0 = func_150C5370(&sp34, 0x14);
-    if (temp_v0 != 0) {
-        memcpy((void *)(temp_v0 + 0xC8), &sp1C, 0x14);
-        func_1514EC1C(temp_v0, (s32) arg0, 0x15);
+    payload.obj = obj;
+    payload.uniqueId = obj->unique_id;
+    payload.unk8 = 0.0f;
+    payload.unkC = -180.0f;
+    payload.unk10 = 77.0f;
+    desc.unk0 = -477.0f;
+    desc.unk4 = -2015.0f;
+    desc.unk8 = 2244.0f;
+    payload.unk5 = 6;
+    desc.unk18 = 1;
+    desc.unkC = obj->x_position;
+    desc.unk10 = obj->y_position;
+    desc.unk14 = obj->z_position;
+    desc.unk20 = 1;
+    desc.unk1C = 0.3199999928f;
+    spawned = func_150C5370(&desc, sizeof(payload));
+    if (spawned != 0) {
+        memcpy((void *)(spawned + 0xC8), &payload, sizeof(payload));
+        func_1514EC1C(spawned, obj, 0x15);
     }
 }
 
-void func_1514D64C(s32 arg0) {
-    Struct1514E00C_A4 spA4;
-    Struct1514E00C_4C sp4C;
-    Struct1514E00C_2C sp2C;
+void func_1514D64C(struct127 *obj) {
+    Struct1514E00C_A4 emitter;
+    Struct1514E00C_4C spawn;
+    EmitterAttach attach;
 
-    sp4C.unk00 = 3;
-    sp4C.unk08 = 0;
-    sp4C.unk0C = 0;
-    sp4C.unk40 = 0x12012;
-    sp4C.unk04 = 0;
-    sp4C.unk45 = 0xFF;
-    sp4C.unk10 = 0xFF;
-    sp4C.unk11 = 0;
-    sp4C.unk12 = 0;
-    sp4C.unk13 = 0xFF;
-    sp4C.unk02 = 0x401;
-    sp4C.unk1C = 0.0f;
-    sp4C.unk20 = 0.0f;
-    sp4C.unk24 = 0.0f;
-    sp4C.unk28 = 0.0f;
-    sp4C.unk2C = 0.0f;
-    sp4C.unk30 = 0.0f;
+    spawn.unk00 = 3;
+    spawn.unk08 = 0;
+    spawn.unk0C = 0;
+    spawn.unk40 = 0x12012;
+    spawn.unk04 = 0;
+    spawn.unk45 = 0xFF;
+    spawn.unk10 = 0xFF;
+    spawn.unk11 = 0;
+    spawn.unk12 = 0;
+    spawn.unk13 = 0xFF;
+    spawn.unk02 = 0x401;
+    spawn.unk1C = 0.0f;
+    spawn.unk20 = 0.0f;
+    spawn.unk24 = 0.0f;
+    spawn.unk28 = 0.0f;
+    spawn.unk2C = 0.0f;
+    spawn.unk30 = 0.0f;
 
-    spA4.unk00 = 28.0f;
-    spA4.unk04 = 28.0f;
-    spA4.unk10 = 0.5f;
-    spA4.unk14 = 0.5f;
-    spA4.unk08 = 4.0f;
-    spA4.unk0C = 17.0f;
-    spA4.unk18 = 0.75f;
-    spA4.unk1C = 0.25f;
-    spA4.unk20 = 9.999999975e-07f;
+    emitter.unk00 = 28.0f;
+    emitter.unk04 = 28.0f;
+    emitter.unk10 = 0.5f;
+    emitter.unk14 = 0.5f;
+    emitter.unk08 = 4.0f;
+    emitter.unk0C = 17.0f;
+    emitter.unk18 = 0.75f;
+    emitter.unk1C = 0.25f;
+    emitter.unk20 = 9.999999975e-07f;
 
-    sp2C.unk1D = ((u8 *)arg0)[0x3B];
-    sp2C.unk18 = arg0;
-    sp2C.unk00 = 0.0f;
-    sp2C.unk04 = 0.0f;
-    sp2C.unk0C = 0.0f;
-    sp2C.unk10 = 0.0f;
-    sp2C.unk1C = 0x2B;
-    spA4.unk54 = 0;
-    spA4.unk55 = 0;
-    spA4.unk56 = 0;
-    spA4.unk57 = 0;
-    sp2C.unk1E = 1;
+    attach.targetId = obj->unique_id;
+    attach.target = obj;
+    attach.x = 0.0f;
+    attach.y = 0.0f;
+    attach.x2 = 0.0f;
+    attach.y2 = 0.0f;
+    attach.bone = 0x2B;
+    emitter.unk54 = 0;
+    emitter.unk55 = 0;
+    emitter.unk56 = 0;
+    emitter.unk57 = 0;
+    attach.handler = 1;
 
-    sp2C.unk08 = 25.0f;
-    sp2C.unk14 = 75.0f;
-    spA4.unk48 = 1.0f;
+    attach.z = 25.0f;
+    attach.z2 = 75.0f;
+    emitter.unk48 = 1.0f;
 
-    func_1514EC1C(func_15189FF0(&sp4C, &spA4, &sp2C, 2, 0, 0, 0), arg0, 9);
+    func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 9);
 
-    sp4C.unk00 = 3;
-    sp4C.unk08 = 0;
-    sp4C.unk0C = 0;
-    sp4C.unk40 = 0x12012;
-    sp4C.unk04 = 0;
-    sp4C.unk45 = 0xFF;
-    sp4C.unk10 = 0xFF;
-    sp4C.unk11 = 0;
-    sp4C.unk12 = 0;
-    sp4C.unk13 = 0xFF;
-    sp4C.unk02 = 0x401;
+    spawn.unk00 = 3;
+    spawn.unk08 = 0;
+    spawn.unk0C = 0;
+    spawn.unk40 = 0x12012;
+    spawn.unk04 = 0;
+    spawn.unk45 = 0xFF;
+    spawn.unk10 = 0xFF;
+    spawn.unk11 = 0;
+    spawn.unk12 = 0;
+    spawn.unk13 = 0xFF;
+    spawn.unk02 = 0x401;
 
-    spA4.unk00 = 30.0f;
-    spA4.unk04 = 30.0f;
-    spA4.unk08 = 10.0f;
-    spA4.unk10 = 0.8000000119f;
-    spA4.unk14 = 0.8000000119f;
+    emitter.unk00 = 30.0f;
+    emitter.unk04 = 30.0f;
+    emitter.unk08 = 10.0f;
+    emitter.unk10 = 0.8000000119f;
+    emitter.unk14 = 0.8000000119f;
 
-    sp4C.unk1C = 0.0f;
-    sp4C.unk20 = 0.0f;
-    sp4C.unk24 = 0.0f;
-    sp4C.unk28 = 0.0f;
-    sp4C.unk2C = 0.0f;
-    sp4C.unk30 = 0.0f;
+    spawn.unk1C = 0.0f;
+    spawn.unk20 = 0.0f;
+    spawn.unk24 = 0.0f;
+    spawn.unk28 = 0.0f;
+    spawn.unk2C = 0.0f;
+    spawn.unk30 = 0.0f;
 
-    spA4.unk18 = 0.6000000238f;
-    spA4.unk1C = 0.6000000238f;
-    spA4.unk0C = 16.0f;
-    spA4.unk20 = 9.999999975e-07f;
+    emitter.unk18 = 0.6000000238f;
+    emitter.unk1C = 0.6000000238f;
+    emitter.unk0C = 16.0f;
+    emitter.unk20 = 9.999999975e-07f;
 
-    sp2C.unk1D = ((u8 *)arg0)[0x3B];
-    sp2C.unk18 = arg0;
-    sp2C.unk1C = 5;
-    spA4.unk54 = 0;
-    spA4.unk55 = 0;
-    spA4.unk56 = 0;
-    spA4.unk57 = 0;
-    sp2C.unk1E = 0;
-    sp2C.unk04 = 10.0f;
-    sp2C.unk00 = 0.0f;
-    sp2C.unk0C = 0.0f;
-    sp2C.unk08 = -70.0f;
-    sp2C.unk10 = 20.0f;
-    sp2C.unk14 = -140.0f;
-    spA4.unk48 = 1.0f;
+    attach.targetId = obj->unique_id;
+    attach.target = obj;
+    attach.bone = 5;
+    emitter.unk54 = 0;
+    emitter.unk55 = 0;
+    emitter.unk56 = 0;
+    emitter.unk57 = 0;
+    attach.handler = 0;
+    attach.y = 10.0f;
+    attach.x = 0.0f;
+    attach.x2 = 0.0f;
+    attach.z = -70.0f;
+    attach.y2 = 20.0f;
+    attach.z2 = -140.0f;
+    emitter.unk48 = 1.0f;
 
-    func_1514EC1C(func_15189FF0(&sp4C, &spA4, &sp2C, 2, 0, 0, 0), arg0, 0xA);
-    func_15160A58(arg0, 5, &sp2C, 2, 0x12C, 0x28, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
+    func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 0xA);
+    func_15160A58(obj, 5, &attach, 2, 0x12C, 0x28, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
 }
 
 void func_1514D96C(s32 arg0) {
@@ -1023,8 +1015,7 @@ void func_1514DE88(s32 arg0) {
 }
 
 void func_15160CDC(s32, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_15160A58(s32, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern f32 D_800A5E04;
+s32 func_15160A58(struct127 *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern u8 D_800A58AC;
 extern u8 D_800A58B8;
 extern u8 D_800A58C4;
@@ -1033,7 +1024,7 @@ extern u8 D_800BE9B4;
 void func_1514DE94(s32 arg0) {
     struct St1514DE94 *temp;
 
-    func_15160CDC(arg0, 0xC, &D_800A58AC, &D_800A58B8, D_800A5E04, 2, 0x12C,
+    func_15160CDC(arg0, 0xC, &D_800A58AC, &D_800A58B8, 0.008333000354f, 2, 0x12C,
                   0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
     temp = func_15083568((struct127 *)arg0, 0x3C, 1.0f, 0);
     if (D_800BE9B4 == 0) {
@@ -1049,165 +1040,165 @@ void func_1514DFD0(u8 *arg0) {
     arg0[0x101] |= 0x34;
 }
 
-void func_1514E00C(s32 arg0) {
-    Struct1514E00C_A4 spA4;
-    Struct1514E00C_4C sp4C;
-    Struct1514E00C_2C sp2C;
+void func_1514E00C(struct127 *obj) {
+    Struct1514E00C_A4 emitter;
+    Struct1514E00C_4C spawn;
+    EmitterAttach attach;
 
-    sp4C.unk00 = 3;
-    sp4C.unk08 = 0;
-    sp4C.unk0C = 0;
-    sp4C.unk40 = 0x12002;
-    sp4C.unk04 = 0;
-    sp4C.unk45 = 0xFF;
-    sp4C.unk10 = 0xFF;
-    sp4C.unk11 = 0x8E;
-    sp4C.unk12 = 0x19;
-    sp4C.unk13 = 0xFF;
-    sp4C.unk02 = 0x401;
-    sp4C.unk1C = 0.0f;
-    sp4C.unk20 = 0.0f;
-    sp4C.unk24 = 0.0f;
-    sp4C.unk28 = 0.0f;
-    sp4C.unk2C = 0.0f;
-    sp4C.unk30 = 0.0f;
+    spawn.unk00 = 3;
+    spawn.unk08 = 0;
+    spawn.unk0C = 0;
+    spawn.unk40 = 0x12002;
+    spawn.unk04 = 0;
+    spawn.unk45 = 0xFF;
+    spawn.unk10 = 0xFF;
+    spawn.unk11 = 0x8E;
+    spawn.unk12 = 0x19;
+    spawn.unk13 = 0xFF;
+    spawn.unk02 = 0x401;
+    spawn.unk1C = 0.0f;
+    spawn.unk20 = 0.0f;
+    spawn.unk24 = 0.0f;
+    spawn.unk28 = 0.0f;
+    spawn.unk2C = 0.0f;
+    spawn.unk30 = 0.0f;
 
-    spA4.unk00 = 20.0f;
-    spA4.unk04 = 20.0f;
-    spA4.unk08 = 20.0f;
-    spA4.unk0C = 20.0f;
-    spA4.unk10 = 0.0f;
-    spA4.unk14 = 0.0f;
-    spA4.unk18 = 0.5f;
-    spA4.unk1C = 0.5f;
-    spA4.unk20 = D_800A5E08;
+    emitter.unk00 = 20.0f;
+    emitter.unk04 = 20.0f;
+    emitter.unk08 = 20.0f;
+    emitter.unk0C = 20.0f;
+    emitter.unk10 = 0.0f;
+    emitter.unk14 = 0.0f;
+    emitter.unk18 = 0.5f;
+    emitter.unk1C = 0.5f;
+    emitter.unk20 = 9.999999975e-07f;
 
-    sp2C.unk1D = ((u8 *)arg0)[0x3B];
-    sp2C.unk00 = 35.0f;
-    sp2C.unk04 = 27.0f;
-    sp2C.unk0C = 35.0f;
-    sp2C.unk10 = 27.0f;
-    sp2C.unk18 = arg0;
-    sp2C.unk1C = 6;
-    spA4.unk54 = 0;
-    spA4.unk55 = 0;
-    spA4.unk56 = 0;
-    spA4.unk57 = 0;
-    sp2C.unk1E = -1;
+    attach.targetId = obj->unique_id;
+    attach.x = 35.0f;
+    attach.y = 27.0f;
+    attach.x2 = 35.0f;
+    attach.y2 = 27.0f;
+    attach.target = obj;
+    attach.bone = 6;
+    emitter.unk54 = 0;
+    emitter.unk55 = 0;
+    emitter.unk56 = 0;
+    emitter.unk57 = 0;
+    attach.handler = -1;
 
-    sp2C.unk08 = 59.0f;
-    sp2C.unk14 = D_800A5E0C;
-    spA4.unk48 = 1.0f;
+    attach.z = 59.0f;
+    attach.z2 = 559.0f;
+    emitter.unk48 = 1.0f;
 
-    func_1514EC1C(func_15189FF0(&sp4C, &spA4, &sp2C, 2, 0, 0, 0), arg0, 6);
-    func_151D74B0(arg0, 5, -1, 0xFF, 1);
+    func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
+    func_151D74B0(obj, 5, -1, 0xFF, 1);
 }
 
-void func_1514E194(s32 arg0) {
-    Struct1514E00C_A4 spA4;
-    Struct1514E00C_4C sp4C;
-    Struct1514E00C_2C sp2C;
+void func_1514E194(struct127 *obj) {
+    Struct1514E00C_A4 emitter;
+    Struct1514E00C_4C spawn;
+    EmitterAttach attach;
 
-    sp4C.unk00 = 3;
-    sp4C.unk08 = 0;
-    sp4C.unk0C = 0;
-    sp4C.unk40 = 0x12002;
-    sp4C.unk04 = 0;
-    sp4C.unk45 = 0xFF;
-    sp4C.unk10 = 0xFF;
-    sp4C.unk11 = 0x8E;
-    sp4C.unk12 = 0x19;
-    sp4C.unk13 = 0xFF;
-    sp4C.unk02 = 0x401;
-    sp4C.unk1C = 0.0f;
-    sp4C.unk20 = 0.0f;
-    sp4C.unk24 = 0.0f;
-    sp4C.unk28 = 0.0f;
-    sp4C.unk2C = 0.0f;
-    sp4C.unk30 = 0.0f;
+    spawn.unk00 = 3;
+    spawn.unk08 = 0;
+    spawn.unk0C = 0;
+    spawn.unk40 = 0x12002;
+    spawn.unk04 = 0;
+    spawn.unk45 = 0xFF;
+    spawn.unk10 = 0xFF;
+    spawn.unk11 = 0x8E;
+    spawn.unk12 = 0x19;
+    spawn.unk13 = 0xFF;
+    spawn.unk02 = 0x401;
+    spawn.unk1C = 0.0f;
+    spawn.unk20 = 0.0f;
+    spawn.unk24 = 0.0f;
+    spawn.unk28 = 0.0f;
+    spawn.unk2C = 0.0f;
+    spawn.unk30 = 0.0f;
 
-    spA4.unk00 = 16.0f;
-    spA4.unk04 = 16.0f;
-    spA4.unk08 = 16.0f;
-    spA4.unk0C = 16.0f;
-    spA4.unk10 = 0.0f;
-    spA4.unk14 = 0.0f;
-    spA4.unk18 = 0.5f;
-    spA4.unk1C = 0.5f;
-    spA4.unk20 = D_800A5E10;
+    emitter.unk00 = 16.0f;
+    emitter.unk04 = 16.0f;
+    emitter.unk08 = 16.0f;
+    emitter.unk0C = 16.0f;
+    emitter.unk10 = 0.0f;
+    emitter.unk14 = 0.0f;
+    emitter.unk18 = 0.5f;
+    emitter.unk1C = 0.5f;
+    emitter.unk20 = 9.999999975e-07f;
 
-    sp2C.unk1D = ((u8 *)arg0)[0x3B];
-    sp2C.unk00 = 35.0f;
-    sp2C.unk04 = 27.0f;
-    sp2C.unk0C = 35.0f;
-    sp2C.unk10 = 27.0f;
-    sp2C.unk18 = arg0;
-    sp2C.unk1C = 6;
-    spA4.unk54 = 0;
-    spA4.unk55 = 0;
-    spA4.unk56 = 0;
-    spA4.unk57 = 0;
-    sp2C.unk1E = -1;
+    attach.targetId = obj->unique_id;
+    attach.x = 35.0f;
+    attach.y = 27.0f;
+    attach.x2 = 35.0f;
+    attach.y2 = 27.0f;
+    attach.target = obj;
+    attach.bone = 6;
+    emitter.unk54 = 0;
+    emitter.unk55 = 0;
+    emitter.unk56 = 0;
+    emitter.unk57 = 0;
+    attach.handler = -1;
 
-    sp2C.unk08 = 59.0f;
-    sp2C.unk14 = D_800A5E14;
-    spA4.unk48 = 1.0f;
+    attach.z = 59.0f;
+    attach.z2 = 559.0f;
+    emitter.unk48 = 1.0f;
 
-    func_1514EC1C(func_15189FF0(&sp4C, &spA4, &sp2C, 2, 0, 0, 0), arg0, 6);
-    func_151D74B0(arg0, 5, -1, 0xFF, 1);
+    func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 6);
+    func_151D74B0(obj, 5, -1, 0xFF, 1);
 }
 
-void func_1514E31C(s32 arg0) {
-    Struct1514E00C_A4 spA4;
-    Struct1514E00C_4C sp4C;
-    Struct1514E00C_2C sp2C;
+void func_1514E31C(struct127 *obj) {
+    Struct1514E00C_A4 emitter;
+    Struct1514E00C_4C spawn;
+    EmitterAttach attach;
 
-    sp4C.unk00 = 3;
-    sp4C.unk08 = 0;
-    sp4C.unk0C = 0;
-    sp4C.unk40 = 0x2012;
-    sp4C.unk04 = 0;
-    sp4C.unk45 = 0xFF;
-    sp4C.unk10 = 0xFF;
-    sp4C.unk11 = 0xE6;
-    sp4C.unk12 = 0;
-    sp4C.unk13 = 0xFF;
-    sp4C.unk02 = 0x401;
-    sp4C.unk1C = 0.0f;
-    sp4C.unk20 = 0.0f;
-    sp4C.unk24 = 0.0f;
-    sp4C.unk28 = 0.0f;
-    sp4C.unk2C = 0.0f;
-    sp4C.unk30 = 0.0f;
+    spawn.unk00 = 3;
+    spawn.unk08 = 0;
+    spawn.unk0C = 0;
+    spawn.unk40 = 0x2012;
+    spawn.unk04 = 0;
+    spawn.unk45 = 0xFF;
+    spawn.unk10 = 0xFF;
+    spawn.unk11 = 0xE6;
+    spawn.unk12 = 0;
+    spawn.unk13 = 0xFF;
+    spawn.unk02 = 0x401;
+    spawn.unk1C = 0.0f;
+    spawn.unk20 = 0.0f;
+    spawn.unk24 = 0.0f;
+    spawn.unk28 = 0.0f;
+    spawn.unk2C = 0.0f;
+    spawn.unk30 = 0.0f;
 
-    spA4.unk00 = 45.0f;
-    spA4.unk0C = 45.0f;
-    spA4.unk10 = 0.5f;
-    spA4.unk14 = 0.5f;
-    spA4.unk1C = 0.0f;
-    spA4.unk04 = 55.0f;
-    spA4.unk08 = 25.0f;
-    spA4.unk18 = D_800A5E18;
-    spA4.unk20 = D_800A5E1C;
+    emitter.unk00 = 45.0f;
+    emitter.unk0C = 45.0f;
+    emitter.unk10 = 0.5f;
+    emitter.unk14 = 0.5f;
+    emitter.unk1C = 0.0f;
+    emitter.unk04 = 55.0f;
+    emitter.unk08 = 25.0f;
+    emitter.unk18 = 0.8999999762f;
+    emitter.unk20 = 9.999999975e-07f;
 
-    sp2C.unk1D = ((u8 *)arg0)[0x3B];
-    sp2C.unk00 = 0.0f;
-    sp2C.unk04 = 0.0f;
-    sp2C.unk0C = 0.0f;
-    sp2C.unk10 = 0.0f;
-    sp2C.unk18 = arg0;
-    sp2C.unk1C = 0xC;
-    spA4.unk54 = 0;
-    spA4.unk55 = 0;
-    spA4.unk56 = 0;
-    spA4.unk57 = 0;
-    sp2C.unk1E = 2;
+    attach.targetId = obj->unique_id;
+    attach.x = 0.0f;
+    attach.y = 0.0f;
+    attach.x2 = 0.0f;
+    attach.y2 = 0.0f;
+    attach.target = obj;
+    attach.bone = 0xC;
+    emitter.unk54 = 0;
+    emitter.unk55 = 0;
+    emitter.unk56 = 0;
+    emitter.unk57 = 0;
+    attach.handler = 2;
 
-    sp2C.unk08 = 100.0f;
-    sp2C.unk14 = 600.0f;
-    spA4.unk48 = 1.0f;
+    attach.z = 100.0f;
+    attach.z2 = 600.0f;
+    emitter.unk48 = 1.0f;
 
-    func_1514EC1C(func_15189FF0(&sp4C, &spA4, &sp2C, 2, 3, 0, 0), arg0, 7);
+    func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 3, 0, 0), obj, 7);
 
     {
         struct {
@@ -1219,7 +1210,7 @@ void func_1514E31C(s32 arg0) {
         sp50.unk0 = 0.0f;
         sp50.unk4 = 0.0f;
         sp50.unk8 = 150.0f;
-        func_15160A58(arg0, 0xC, &sp50, 2, 0x12C, 0x28, 0xFF, 0xB5, 0, 0xFF, 0, 2, 0, 0, 0xFF, 1);
+        func_15160A58(obj, 0xC, &sp50, 2, 0x12C, 0x28, 0xFF, 0xB5, 0, 0xFF, 0, 2, 0, 0, 0xFF, 1);
     }
 }
 
@@ -1741,7 +1732,7 @@ void func_1514F308(s32 arg0) {
 
     sp54 = D_800A5970;
     sp48 = D_800A597C;
-    func_15160CDC(arg0, 5, &sp54, &sp48, D_800A5E58, 2, 0x12C,
+    func_15160CDC(arg0, 5, &sp54, &sp48, 0.02350199968f, 2, 0x12C,
                   0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
 }
 
@@ -1773,7 +1764,7 @@ void func_1514F44C(s32 arg0) {
     func_1514EC1C(v0, arg0, 0xD);
 }
 
-extern void func_151D74B0(s32, s32, s32, s32, s32);
+extern void func_151D74B0(struct127 *, s32, s32, s32, s32);
 
 void func_1514F4A8(s32 arg0) {
     func_151D74B0(arg0, 1, -1, 0xFF, 1);
@@ -1809,7 +1800,7 @@ void func_1514F5CC(struct127 *arg0) {
     sp1C.unk08 = arg0;
     sp1C.unk04 = 0.0f;
     sp1C.unk0C = arg0->unique_id;
-    sp1C.unk10 = D_800A5E5C;
+    sp1C.unk10 = 0.349999994f;
     sp1C.unk14 = 0x14;
     sp1C.unk16 = 0x12C;
     sp1C.unk18 = 4;
