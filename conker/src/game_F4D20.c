@@ -7,86 +7,93 @@
 #include "variables.h"
 
 
-extern void func_1511650C(struct131 *arg0, s32, s32, f32);
-extern struct131 *func_151149AC(u8);
+/* Whatever an object's unk7C points to in func_150C7968. */
+typedef struct {
+    /* 0x00 */ u8 pad00[0x13];
+    /* 0x13 */ s8 unk13;
+} LinkedObj;
 
-void func_150C7870(struct131 *arg0) {
-    if (!(((u8 *)D_800D2E4C)[0xA] & 8)) {
-        if (!(((u8 *)D_800DBEF4)[0x73] & 4)) {
-            func_1511650C(arg0, 1, 0x353, 1000.0f);
+/* The 0xA0-byte level objects (D_800DBEF4 entries) driven by the callbacks in this file. */
+typedef struct {
+    /* 0x00 */ f32 angleX;
+    /* 0x04 */ f32 angleY;
+    /* 0x08 */ f32 angleZ;
+    /* 0x0C */ u8  pad0C[0x4];
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ u8  pad16[0x6];
+    /* 0x1C */ s32 *unk1C; // func_150C7C90: list of words, ended by one whose top byte is -14
+    /* 0x20 */ u8  pad20[0x1C];
+    /* 0x3C */ union {
+        s32 word;
+        struct {
+            s16 hi; // spin speed for func_151150BC
+            u16 lo;
+        } half;
+    } params;
+    /* 0x40 */ u8  pad40[0x33];
+    /* 0x73 */ u8  flags;
+    /* 0x74 */ u8  pad74[0x8];
+    /* 0x7C */ union {
+        s32 count;        // func_150C7C90
+        LinkedObj *link;  // func_150C7968
+    } unk7C;
+    /* 0x80 */ u8  pad80[0x20];
+} F4D20Obj; // size 0xA0
+
+#define sObjs ((F4D20Obj *)D_800DBEF4)
+
+extern void func_1511650C(F4D20Obj *obj, s32 arg1, s32 soundId, f32 pitchScale);
+extern struct131 *func_151149AC(u8);
+extern void func_151150BC(F4D20Obj *obj);
+extern s32 func_15116110(F4D20Obj *obj);
+
+/* Runs func_1511650C with sound 0x353 (or 0x43 at a lower pitch once object 0's flag bit 2 is set), unless
+ * bit 3 of byte 0xA of the 27-byte flag record at D_800D2E4C is set. */
+void func_150C7870(F4D20Obj *obj) {
+    if (!(((u8 *)D_800D2E4C)[0xA] & 8)) { // struct102 has no field at byte 0xA (inside unk8)
+        if (!(sObjs[0].flags & 4)) {
+            func_1511650C(obj, 1, 0x353, 1000.0f);
         } else {
-            func_1511650C(arg0, 1, 0x43, 400.0f);
+            func_1511650C(obj, 1, 0x43, 400.0f);
         }
     }
 }
 
-typedef struct {
-    u8  pad00[0x3C];
-    s32 unk3C;
-    u8  pad40[0x33];
-    u8  unk73;
-    u8  pad74[0x16C];
-    s32 unk1E0;
-    u8  pad1E4[0x38];
-    s32 unk21C;
-} GameObj150C78E0;
+/* Spins the object at the opposite of object 3's spin speed. */
+void func_150C78E0(F4D20Obj *obj) {
+    F4D20Obj *obj3;
 
-typedef struct {
-    u8  pad00[0x3C];
-    s32 unk3C;
-} SubObj150C78E0;
-
-extern void func_151150BC(GameObj150C78E0 *);
-
-void func_150C78E0(GameObj150C78E0 *arg0) {
-    SubObj150C78E0 *temp;
-
-    if (!(arg0->unk73 & 4)) {
-        temp = (SubObj150C78E0 *)((u8 *)D_800DBEF4 + 0x1E0);
-        arg0->unk3C = -(temp->unk3C & 0xFFFF0000) & 0xFFFF0000;
-        func_151150BC(arg0);
+    if (!(obj->flags & 4)) {
+        obj3 = &sObjs[3];
+        obj->params.word = -(obj3->params.word & 0xFFFF0000) & 0xFFFF0000;
+        func_151150BC(obj);
     }
 }
 
-void func_150C7930(GameObj150C78E0 *arg0) {
-    SubObj150C78E0 *temp;
+/* Spins the object at object 3's spin speed. */
+void func_150C7930(F4D20Obj *obj) {
+    F4D20Obj *obj3;
 
-    temp = (SubObj150C78E0 *)((u8 *)D_800DBEF4 + 0x1E0);
-    arg0->unk3C = temp->unk3C & 0xFFFF0000;
-    func_151150BC(arg0);
+    obj3 = &sObjs[3];
+    obj->params.word = obj3->params.word & 0xFFFF0000;
+    func_151150BC(obj);
 }
 
-extern s32 func_15116110(GameObj150C78E0 *);
+/* After func_15116110, copies object 3's spin speed / 16 into the linked object's unk13. */
+void func_150C7968(F4D20Obj *obj) {
+    F4D20Obj *obj3;
+    LinkedObj *link;
+    s32 speed;
 
-typedef struct {
-    u8  pad00[0x13];
-    s8  unk13;
-} Obj7C;
-
-typedef struct {
-    u8  pad00[0x3C];
-    s16 unk3C;
-} SubObj7968;
-
-typedef struct {
-    u8  pad00[0x73];
-    u8  unk73;
-    u8  pad74[0x8];
-    Obj7C *unk7C;
-} GameObj150C7968;
-
-void func_150C7968(GameObj150C7968 *arg0) {
-    SubObj7968 *temp;
-    Obj7C *obj;
-    s32 t;
-
-    func_15116110((GameObj150C78E0 *)arg0);
-    if (!(arg0->unk73 & 4)) {
-        temp = (SubObj7968 *)((u8 *)D_800DBEF4 + 0x1E0);
-        obj = arg0->unk7C;
-        t = temp->unk3C >> 4;
-        if (obj != 0) {
-            obj->unk13 = t;
+    func_15116110(obj);
+    if (!(obj->flags & 4)) {
+        obj3 = &sObjs[3];
+        link = obj->unk7C.link;
+        speed = obj3->params.half.hi >> 4;
+        if (link != NULL) {
+            link->unk13 = speed;
         }
     }
 }
