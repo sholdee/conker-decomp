@@ -425,11 +425,11 @@ void func_151DF1BC(void) {
     }
     if (obj != NULL) {
         if (func_151F2CDC() == 1) {
-            if (obj->unk1FF == 0) {
-                obj->unk1FF = 1;
+            if (obj->levelMode == 0) {
+                obj->levelMode = 1;
             }
         } else {
-            obj->unk1FF = 0;
+            obj->levelMode = 0;
         }
     }
     if (D_8008FEF8 != 0) {

@@ -1372,14 +1372,19 @@ struct Actor {
     /* 0x1F8 */ f32 unk1F8;
     u8  unk1FC;
     u8  unk1FD;
-    /* 0x1FE */ u8  unk1FE;
-    u8  unk1FF;
-    s8  unk200;
+    /* 0x1FE */ u8  level;       // 0..255, moved by levelStep each update (func_15034860)
+    /* 0x1FF */ u8  levelMode;   // 0: fall, 2: rise, else random walk (3: until levelTimer runs out)
+    /* 0x200 */ u8  levelTimer;
     /* 0x201 */ u8  unk201;
     /* 0x202 */ s8  unk202;
-    /* 0x203 */ s8  unk203;
-    s32 unk204;
-    u32 pad208;
+    /* 0x203 */ s8  levelStep;
+    /* 0x204 */ s16 level2;      // -255..255 (direction set by the sign of unk208)
+    /* 0x206 */ u8  level2Mode;  // same encoding as levelMode
+    /* 0x207 */ u8  level2Timer;
+    /* 0x208 */ s8  unk208;
+    /* 0x209 */ s8  level2Step;
+    /* 0x20A */ u8  unk20A;
+    u8  pad20B;
     u8  pad20C[0x3];
     u8  unk20F;
     /* 0x210 */ u8  unk210;

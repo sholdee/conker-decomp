@@ -725,9 +725,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (obj == NULL) {
                 return 1;
             }
-            obj->unk1FF = !event->unk4;
-            if (obj->unk1FF != 0) {
-                obj->unk1FF += event->unk5;
+            obj->levelMode = !event->unk4;
+            if (obj->levelMode != 0) {
+                obj->levelMode += event->unk5;
             }
             if (event->unk4 == 0) {
                 FU8(obj, 0x201) = event->unk6;

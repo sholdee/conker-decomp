@@ -3487,8 +3487,8 @@ void func_15073078(void) {
 }
 
 void func_150730A4(void) {
-    D_800D154C->unk1FF = 3;
-    D_800D154C->unk200 = D_800D1580;
+    D_800D154C->levelMode = 3;
+    D_800D154C->levelTimer = D_800D1580;
 }
 
 void func_150730D0(void) {

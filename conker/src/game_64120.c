@@ -1673,7 +1673,7 @@ void func_1503A678(void) {
 
     obj = &D_800CC2D0[D_800C3E78];
     if (obj->id == 0x22) {
-        factor = ((u8 *)&D_800CC2D0[D_800C3E78].pad208)[2]; /* +0x20A */
+        factor = D_800CC2D0[D_800C3E78].unk20A;
         factor /= 64.0f;
         factor += 1.0f;
         if (D_800C3FFA == 0) {

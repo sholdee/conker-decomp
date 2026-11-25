@@ -61,9 +61,9 @@ void func_15080348(Actor *actor) {
     if (D_800D1928 != 0 && actor != NULL) {
         if (D_800D1928 == 1) {
             if (D_800427F0 < 1000) {
-                actor->unk1FF = 0;
+                actor->levelMode = 0;
             } else {
-                actor->unk1FF = 1;
+                actor->levelMode = 1;
             }
         } else {
             index = D_800D192C;
@@ -120,7 +120,7 @@ void func_15080430(Actor *actor, s32 expression, s32 morphDuration) {
             enabled = (expression != 0);
             D_800D1928 = enabled;
             if (!enabled) {
-                actor->unk1FF = 0;
+                actor->levelMode = 0;
             }
         }
     }
