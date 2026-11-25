@@ -10,18 +10,6 @@ typedef struct {
     s16 altThreshold;
 } ZScanParams;
 
-/* Per-player screen record, 0x180 bytes each, in the array that D_800BE628 points to. */
-typedef struct {
-    /* 0x00 */ u8 pad0[4];
-    /* 0x04 */ f32 width; // entries in the z-buffer row scanned by func_1512B1B8
-    /* 0x08 */ u8 pad8[0x1C];
-    /* 0x24 */ f32 yMin;
-    /* 0x28 */ f32 yMax;
-    /* 0x2C */ f32 xMin;
-    /* 0x30 */ f32 xMax;
-    /* 0x34 */ u8 pad34[0x14C];
-} ViewRec;
-
 /* State of one z-buffer occlusion scan (see func_1512B630). */
 typedef struct {
     u8 unk0;
@@ -394,9 +382,6 @@ s32 func_1512B730(CamView *arg0, f32 *offset, f32 *unused);
 void func_1512C150(CamView *arg0);
 s32 func_1512B53C(CamView *arg0);
 
-// matching: re-indexed at every use; a local pointer to the record changes regalloc
-#define VIEW (&((ViewRec *)D_800BE628)[arg0->unk23D])
-
 /* Projects the camera target to the screen, scans the z-buffer row through it for occluders and, when blocked,
  * swings the camera around the target (func_1512B730's correction, smoothed). */
 void func_1512AD54(CamView *arg0) {
@@ -419,9 +404,9 @@ void func_1512AD54(CamView *arg0) {
     }
     func_1501A764(arg0->unk23D, arg0->unk2BC.unk0, targetY, arg0->unk2BC.unk8, &D_800DC1F0, &D_800DC1F4, &D_800DC1F8);
     q = (f32 *)(s32)D_800DC1F8;
-    screenX = ((s32)D_800DC1F0 < (s32)VIEW->xMin) ? (s32)VIEW->xMin : (((s32)VIEW->xMax < (s32)D_800DC1F0) ? (s32)VIEW->xMax : (s32)D_800DC1F0);
-    screenY = ((s32)D_800DC1F4 < (s32)VIEW->yMin) ? (s32)VIEW->yMin : (((s32)VIEW->yMax < (s32)D_800DC1F4) ? (s32)VIEW->yMax : (s32)D_800DC1F4);
-    if ((screenX < VIEW->xMin) || (VIEW->xMax <= screenX) || (screenY < VIEW->yMin) || (VIEW->yMax <= screenY)) {
+    screenX = ((s32)D_800DC1F0 < (s32)D_800BE628[arg0->unk23D].left) ? (s32)D_800BE628[arg0->unk23D].left : (((s32)D_800BE628[arg0->unk23D].right < (s32)D_800DC1F0) ? (s32)D_800BE628[arg0->unk23D].right : (s32)D_800DC1F0);
+    screenY = ((s32)D_800DC1F4 < (s32)D_800BE628[arg0->unk23D].top) ? (s32)D_800BE628[arg0->unk23D].top : (((s32)D_800BE628[arg0->unk23D].bottom < (s32)D_800DC1F4) ? (s32)D_800BE628[arg0->unk23D].bottom : (s32)D_800DC1F4);
+    if ((screenX < D_800BE628[arg0->unk23D].left) || (D_800BE628[arg0->unk23D].right <= screenX) || (screenY < D_800BE628[arg0->unk23D].top) || (D_800BE628[arg0->unk23D].bottom <= screenY)) {
         arg0->unk5F8 = 1;
         arg0->unk8B8 = 0;
         return;
@@ -512,7 +497,7 @@ void func_1512B1B8(CamView *arg0, s32 screenX, s32 screenY, s32 depth) {
     mid = (halfWidth * 3) / 4;
 
     for (i = start; i < halfWidth; i++) {
-        if (((ViewRec *)D_800BE628)[arg0->unk23D].xMin < (f32)(screenX - i)) {
+        if (D_800BE628[arg0->unk23D].left < (f32)(screenX - i)) {
             {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
             zcode = arg0->unk8BC[screenX - i];
@@ -526,7 +511,7 @@ void func_1512B1B8(CamView *arg0, s32 screenX, s32 screenY, s32 depth) {
         }
     }
     for (i = start; i < halfWidth; i++) {
-        if ((f32)(screenX + i) < ((ViewRec *)D_800BE628)[arg0->unk23D].xMax) {
+        if ((f32)(screenX + i) < D_800BE628[arg0->unk23D].right) {
             {
             s16 pad; // matching: block-scoped pad that IDO gives a stack slot
             zcode = arg0->unk8BC[screenX + i];
@@ -548,7 +533,7 @@ s32 func_1512B53C(CamView *arg0) {
         s32 i;
 
         arg0->unk5F8 = 1;
-        for (i = 0; i < ((ViewRec *)D_800BE628)[arg0->unk23D].width; i++) {
+        for (i = 0; i < D_800BE628[arg0->unk23D].width; i++) {
             arg0->unk8BC[i] = 0xFFFC;
         }
         arg0->unk60C = 0.0f;

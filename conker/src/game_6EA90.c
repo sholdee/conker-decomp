@@ -82,19 +82,6 @@ void func_150415E0(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noComb
     }
 }
 
-/* Per-player screen record, 0x180 bytes each, in the array that D_800BE628 points to. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ f32 scaleX;
-    /* 0x18 */ f32 scaleY;
-    /* 0x1C */ u8 pad1C[0x8];
-    /* 0x24 */ f32 yMin;
-    /* 0x28 */ f32 yMax;
-    /* 0x2C */ f32 xMin;
-    /* 0x30 */ f32 xMax;
-    /* 0x34 */ u8 pad34[0x14C];
-} ViewRec;
-
 /* Sprite parameters passed to func_15094F70 / func_15095A48. */
 typedef struct {
     /* 0x00 */ s32 unk0;
@@ -159,8 +146,6 @@ f32 cosf(f32);
 Gfx *func_15094F70(Gfx *, u8 *, s32, GlyphSprite *, s32, s32, s32, s32, s32);
 Gfx *func_15095A48(Gfx *, GlyphSprite *, f32, f32);
 
-#define VIEW (&((ViewRec *)D_800BE628)[D_80082FA4])
-
 /*
  * Draws len characters of str at (x, y) in the current view, scaled by scaleX/scaleY (4096 = 1.0).
  * Codes 0xA1-0xA7 change colour or enable flashing (0xA6) and waving (0xA7) text; codes 0xA8 and up
@@ -210,8 +195,8 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
     if (str == NULL) {
         return gfx;
     }
-    scaleX *= VIEW->scaleX;
-    scaleY *= VIEW->scaleY;
+    scaleX *= D_800BE628[D_80082FA4].scaleX;
+    scaleY *= D_800BE628[D_80082FA4].scaleY;
     scaleX *= D_800380A0;
     scaleY *= D_800380A4;
     prevW = prevH = -1;
@@ -407,9 +392,9 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 if (D_800CBD5D != 0) {
                     yOff += wave;
                 }
-                dx = VIEW->scaleX * ((w >> 1) * scale) * D_800380A0;
+                dx = D_800BE628[D_80082FA4].scaleX * ((w >> 1) * scale) * D_800380A0;
                 x += dx;
-                dy = VIEW->scaleY * ((h >> 1) * scale) * D_800380A4;
+                dy = D_800BE628[D_80082FA4].scaleY * ((h >> 1) * scale) * D_800380A4;
                 sprite.flags = 0;
                 sprite.alpha = a;
                 y += dy;
@@ -457,8 +442,8 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 y += ((f32)D_80085994[font][c].y - gy) * D_800380A4 * sy;
                 ix = scaleX;
                 iy = scaleY;
-                if (VIEW->xMin <= x + w * D_800380A0 && x < VIEW->xMax &&
-                    VIEW->yMin <= y + h * D_800380A4 && y < VIEW->yMax) {
+                if (D_800BE628[D_80082FA4].left <= x + w * D_800380A0 && x < D_800BE628[D_80082FA4].right &&
+                    D_800BE628[D_80082FA4].top <= y + h * D_800380A4 && y < D_800BE628[D_80082FA4].bottom) {
                     dsdx = 0x400000 / ix;
                     dtdy = 0x400000 / iy;
                     if (w != prevW || h != prevH) {

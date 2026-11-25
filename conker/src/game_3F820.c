@@ -3,13 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    u8 padC[0x174];
-} D_800BE628View15012370;
-
 void func_15012370(void) {
     f32 temp_f0;
     f32 temp_f2;
@@ -26,9 +19,9 @@ void func_15012370(void) {
         do {
             func_151EF954(
                 ((f32 (*)[4][4])D_800DCC10)[i],
-                -(temp_f0 = (*(D_800BE628View15012370 **)&D_800BE628)[i].unk4 * half),
+                -(temp_f0 = D_800BE628[i].width * half),
                 temp_f0,
-                -(temp_f2 = (*(D_800BE628View15012370 **)&D_800BE628)[i].unk8 * half),
+                -(temp_f2 = D_800BE628[i].height * half),
                 temp_f2,
                 one,
                 temp_f24,

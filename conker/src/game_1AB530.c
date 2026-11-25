@@ -285,7 +285,7 @@ Gfx *func_1517EA4C(Gfx *gfx) {
     return gfx;
 }
 
-/* Vp_t with scalar fields (indexing Vp_t.vscale[2] changes IDO's FP register order). */
+/* matching: RenderView.viewports as Vp_t with scalar fields (indexing Vp_t.vscale[2] changes IDO's FP register order). */
 typedef struct {
     /* 0x00 */ s16 scaleX;
     /* 0x02 */ s16 scaleY;
@@ -297,17 +297,7 @@ typedef struct {
     /* 0x0E */ s16 transW;
 } FlareViewport;
 
-/* Per-player camera, size 0x180 (D_800BE628 is declared s32 in variables.h). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0xC];
-    /* 0x0C */ f32 centerX;
-    /* 0x10 */ f32 centerY;
-    /* 0x14 */ u8 pad14[0x2C];
-    /* 0x40 */ FlareViewport viewport[2]; /* indexed by D_800BE9C0 */
-    /* 0x60 */ u8 pad60[0x120];
-} FlareCamera;
-
-#define CAMERAS ((FlareCamera *)D_800BE628)
+#define VIEWPORTS ((FlareViewport *)D_800BE628->viewports)
 
 void func_15110360(s32 player, f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll);
 void func_150A7A00(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
@@ -336,8 +326,8 @@ s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     yaw = -player->unk380;
     roll = player->swayAmount;
     func_15110360(D_80082FA4, mtx, pitch, yaw, roll);
-    cx = CAMERAS[D_80082FA4].centerX;
-    cy = CAMERAS[D_80082FA4].centerY;
+    cx = D_800BE628[D_80082FA4].halfWidth;
+    cy = D_800BE628[D_80082FA4].halfHeight;
     func_150A7A00(mtx, x, y, z, &sx, &sy, &sz, &sw);
     if (sw > 10.0f) {
         scale = 1.0f / sw;
@@ -405,8 +395,8 @@ s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth) {
         exponent = sample >> 13;
         *outZbufDepth = ((((sample >> 2) & 0x7FF) << D_80089630[exponent].shift) + D_80089630[exponent].base) >> 3;
         // matching: `viewport + i`, not `viewport[i]` (that changes IDO's FP register order)
-        flare->depth = (u32)(((f32)(CAMERAS->viewport + D_800BE9C0)->transZ +
-                              (clip.f.z / clip.f.w) * (f32)(CAMERAS->viewport + D_800BE9C0)->scaleZ) * 32.0f);
+        flare->depth = (u32)(((f32)(VIEWPORTS + D_800BE9C0)->transZ +
+                              (clip.f.z / clip.f.w) * (f32)(VIEWPORTS + D_800BE9C0)->scaleZ) * 32.0f);
         return 1;
     }
     return 0;
