@@ -115,7 +115,8 @@ extern f32 D_800B0C48;
 extern s32 *D_800E0E20;          /* Huffman table pointers, relocated by D_800E0E28 */
 extern s32 D_800E0E28;
 extern f32 *D_800E0E30;          /* storage for the pow43 table */
-extern f32 D_800E0E38[4][36];    /* IMDCT window per block type (0 normal, 1 start, 2 short, 3 stop) */
+/* IMDCT window per block type (0 normal, 1 start, 2 short, 3 stop) */
+extern f32 D_800E0E38[4][36];
 extern f32 *D_800E1078;          /* pow43: i^(4/3) */
 extern f32 D_800E1080[256];      /* scalefactor gain powers */
 extern f32 D_800E1480[256];      /* 0.25^i: subblock gain powers */
@@ -156,8 +157,9 @@ extern s32 D_800B0734[2][4];     /* sample-rate table, indexed [id][sampleRateIn
 f32 func_1504A400(f32, f32);
 s32 func_151F8960(void *, s32 *, s32);
 
-/* func_151F8960(buf, &bitPos, n) reads n bits from buf at bitPos. This reads n
- * bits from the main data, with a zero width reading as 0. */
+/* func_151F8960(buf, &bitPos, n) reads n bits from buf at bitPos. */
+#define GET_HEADER_BITS(dec, n) func_151F8960((dec)->headerBuf, &(dec)->headerBit, (n))
+/* n bits of main data, a zero width reading as 0 */
 #define GET_MAIN_BITS(dec, n) \
     (((n) != 0) ? func_151F8960((dec)->mainData, &(dec)->mainDataBit, (n)) : 0)
 s32 func_151F8994(void *, s32 *, s32, s32, s32, s32, s16 **, u8 **);
@@ -626,7 +628,8 @@ s32 func_151F63C4(Mp3Decoder *dec, s32 gr, s32 ch) {
             sign += count;
             line = end;
         } else {
-            line = func_151F8994(dec->mainData, &dec->mainDataBit, table, line, linbits, end, &val, &sign);
+            line = func_151F8994(dec->mainData, &dec->mainDataBit, table, line, linbits, end, &val,
+                                 &sign);
         }
     }
     table = dec->count1TableSelect[gr][ch] + 32; /* count1 tables A/B are 32, 33 */
@@ -761,20 +764,18 @@ s32 func_151F6FD0(Mp3Decoder *dec) {
     dec->nch = (dec->mode == 3) ? 1 : 2;
     dec->ngr = (dec->id != 0) ? 2 : 1;
     if (dec->id != 0) {
-        dec->mainDataBegin = func_151F8960(dec->headerBuf, &dec->headerBit, 9);
+        dec->mainDataBegin = GET_HEADER_BITS(dec, 9);
         // matching: skips the private bits as a ternary statement; an if/else differs
-        (dec->nch == 1) ? func_151F8960(dec->headerBuf, &dec->headerBit, 5)
-                        : func_151F8960(dec->headerBuf, &dec->headerBit, 3);
+        (dec->nch == 1) ? GET_HEADER_BITS(dec, 5) : GET_HEADER_BITS(dec, 3);
     } else {
-        dec->mainDataBegin = func_151F8960(dec->headerBuf, &dec->headerBit, 8);
+        dec->mainDataBegin = GET_HEADER_BITS(dec, 8);
         // matching: skips the private bits as a ternary statement; an if/else differs
-        (dec->nch == 1) ? func_151F8960(dec->headerBuf, &dec->headerBit, 1)
-                        : func_151F8960(dec->headerBuf, &dec->headerBit, 2);
+        (dec->nch == 1) ? GET_HEADER_BITS(dec, 1) : GET_HEADER_BITS(dec, 2);
     }
     if (dec->id != 0) {
         for (ch = 0; ch < dec->nch; ch++) {
             for (band = 0; band < 4; band++) {
-                dec->scfsi[ch][band] = func_151F8960(dec->headerBuf, &dec->headerBit, 1);
+                dec->scfsi[ch][band] = GET_HEADER_BITS(dec, 1);
             }
         }
     }
@@ -785,36 +786,36 @@ s32 func_151F6FD0(Mp3Decoder *dec) {
     }
     for (gr = 0; gr < dec->ngr; gr++) {
         for (ch = 0; ch < dec->nch; ch++) {
-            dec->part23Length[gr][ch] = func_151F8960(dec->headerBuf, &dec->headerBit, 12);
-            dec->bigValues[gr][ch] = func_151F8960(dec->headerBuf, &dec->headerBit, 9);
-            dec->globalGain[gr][ch] = func_151F8960(dec->headerBuf, &dec->headerBit, 8);
+            dec->part23Length[gr][ch] = GET_HEADER_BITS(dec, 12);
+            dec->bigValues[gr][ch] = GET_HEADER_BITS(dec, 9);
+            dec->globalGain[gr][ch] = GET_HEADER_BITS(dec, 8);
             dec->scalefacCompress[gr][ch] =
-                (scalefacBits != 0) ? func_151F8960(dec->headerBuf, &dec->headerBit, scalefacBits) : 0;
-            dec->windowSwitching[gr][ch] = func_151F8960(dec->headerBuf, &dec->headerBit, 1);
+                (scalefacBits != 0) ? GET_HEADER_BITS(dec, scalefacBits) : 0;
+            dec->windowSwitching[gr][ch] = GET_HEADER_BITS(dec, 1);
             if (dec->windowSwitching[gr][ch] != 0) {
-                dec->blockType[gr][ch] = func_151F8960(dec->headerBuf, &dec->headerBit, 2);
-                dec->mixedBlock[gr][ch] = func_151F8960(dec->headerBuf, &dec->headerBit, 1);
+                dec->blockType[gr][ch] = GET_HEADER_BITS(dec, 2);
+                dec->mixedBlock[gr][ch] = GET_HEADER_BITS(dec, 1);
                 for (region = 0; region < 2; region++) {
-                    dec->tableSelect[gr][ch][region] = func_151F8960(dec->headerBuf, &dec->headerBit, 5);
+                    dec->tableSelect[gr][ch][region] = GET_HEADER_BITS(dec, 5);
                 }
                 dec->tableSelect[gr][ch][2] = 0;
                 for (window = 0; window < 3; window++) {
-                    dec->subblockGain[gr][ch][window] = func_151F8960(dec->headerBuf, &dec->headerBit, 3);
+                    dec->subblockGain[gr][ch][window] = GET_HEADER_BITS(dec, 3);
                 }
             } else {
                 dec->blockType[gr][ch] = 0;
                 dec->mixedBlock[gr][ch] = 0;
                 for (region = 0; region < 3; region++) {
-                    dec->tableSelect[gr][ch][region] = func_151F8960(dec->headerBuf, &dec->headerBit, 5);
+                    dec->tableSelect[gr][ch][region] = GET_HEADER_BITS(dec, 5);
                 }
-                dec->region0Count[gr][ch] = func_151F8960(dec->headerBuf, &dec->headerBit, 4);
-                dec->region1Count[gr][ch] = func_151F8960(dec->headerBuf, &dec->headerBit, 3);
+                dec->region0Count[gr][ch] = GET_HEADER_BITS(dec, 4);
+                dec->region1Count[gr][ch] = GET_HEADER_BITS(dec, 3);
             }
             if (dec->id != 0) {
-                dec->preflag[gr][ch] = func_151F8960(dec->headerBuf, &dec->headerBit, 1);
+                dec->preflag[gr][ch] = GET_HEADER_BITS(dec, 1);
             }
-            dec->scalefacScale[gr][ch] = func_151F8960(dec->headerBuf, &dec->headerBit, 1);
-            dec->count1TableSelect[gr][ch] = func_151F8960(dec->headerBuf, &dec->headerBit, 1);
+            dec->scalefacScale[gr][ch] = GET_HEADER_BITS(dec, 1);
+            dec->count1TableSelect[gr][ch] = GET_HEADER_BITS(dec, 1);
         }
     }
     dec->bitrate = D_800B06BC[dec->id][dec->bitrateIndex];
@@ -993,18 +994,18 @@ s32 func_151F8088(Mp3Decoder *dec, s32 seekPos) {
     }
     dec->streamPos += 2;
     dec->headerBit = 12; /* past the sync word */
-    dec->id = func_151F8960(dec->headerBuf, &dec->headerBit, 1);
-    dec->layer = func_151F8960(dec->headerBuf, &dec->headerBit, 2);
-    dec->protectionBit = func_151F8960(dec->headerBuf, &dec->headerBit, 1);
-    dec->bitrateIndex = func_151F8960(dec->headerBuf, &dec->headerBit, 4);
-    dec->sampleRateIndex = func_151F8960(dec->headerBuf, &dec->headerBit, 2);
-    dec->paddingBit = func_151F8960(dec->headerBuf, &dec->headerBit, 1);
-    dec->privateBit = func_151F8960(dec->headerBuf, &dec->headerBit, 1);
-    dec->mode = func_151F8960(dec->headerBuf, &dec->headerBit, 2);
-    dec->modeExtension = func_151F8960(dec->headerBuf, &dec->headerBit, 2);
-    dec->copyright = func_151F8960(dec->headerBuf, &dec->headerBit, 1);
-    dec->original = func_151F8960(dec->headerBuf, &dec->headerBit, 1);
-    dec->emphasis = func_151F8960(dec->headerBuf, &dec->headerBit, 2);
+    dec->id = GET_HEADER_BITS(dec, 1);
+    dec->layer = GET_HEADER_BITS(dec, 2);
+    dec->protectionBit = GET_HEADER_BITS(dec, 1);
+    dec->bitrateIndex = GET_HEADER_BITS(dec, 4);
+    dec->sampleRateIndex = GET_HEADER_BITS(dec, 2);
+    dec->paddingBit = GET_HEADER_BITS(dec, 1);
+    dec->privateBit = GET_HEADER_BITS(dec, 1);
+    dec->mode = GET_HEADER_BITS(dec, 2);
+    dec->modeExtension = GET_HEADER_BITS(dec, 2);
+    dec->copyright = GET_HEADER_BITS(dec, 1);
+    dec->original = GET_HEADER_BITS(dec, 1);
+    dec->emphasis = GET_HEADER_BITS(dec, 2);
     if ((dec->bitrateIndex == 15) || (dec->sampleRateIndex == 3)) {
         return func_151F8088(dec, -1);
     }
@@ -1018,7 +1019,8 @@ s32 func_151F8088(Mp3Decoder *dec, s32 seekPos) {
         dec->firstCopyright = dec->copyright;
         dec->firstOriginal = dec->original;
     } else if ((dec->id != dec->firstId) || (dec->layer != dec->firstLayer) ||
-               (dec->protectionBit != dec->firstProtectionBit) || (dec->sampleRateIndex != dec->firstSampleRateIndex) ||
+               (dec->protectionBit != dec->firstProtectionBit) ||
+               (dec->sampleRateIndex != dec->firstSampleRateIndex) ||
                (dec->mode != dec->firstMode) || (dec->original != dec->firstOriginal)) {
         return func_151F8088(dec, -1);
     }
