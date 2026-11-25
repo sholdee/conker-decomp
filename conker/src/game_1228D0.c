@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Sprite descriptor passed to func_15169968; the sprite it creates keeps these fields from +0x10. */
 typedef struct {
@@ -332,49 +333,6 @@ void func_150F5C08(struct127 *owner, s16 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-/* Particle descriptor passed to func_15130280 (0x70 bytes). */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 lifetime;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 pos;
-    struct17 unk3C;
-    struct17 vel;
-    f32 unk54;
-    u32 flags;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67;
-    s16 unk68;
-    u8 pad6A[2];
-    f32 unk6C;
-} ParticleDesc; /* 0x70 */
-
 /* Partial view of the particle func_15130280 creates. */
 typedef struct {
     u8 pad0[0xA8];
@@ -410,65 +368,65 @@ void func_150F5C98(SparkEffect *effect) {
     if (owner->unk1D4 != NULL) {
         data->accum += (0.2600000203f + func_150ADA68() * 0.1950000077f) * D_800BE9A4;
         if (data->accum > 1.0f) {
-            spawn.unk14 = 0xFF;
-            spawn.unk15 = 0xFF;
-            spawn.unk16 = 0xFF;
-            spawn.unk18 = 0xB4;
-            spawn.unk19 = 0xB4;
-            spawn.unk1A = 0xB4;
+            spawn.r = 0xFF;
+            spawn.g = 0xFF;
+            spawn.b = 0xFF;
+            spawn.r2 = 0xB4;
+            spawn.g2 = 0xB4;
+            spawn.b2 = 0xB4;
             srcs[0] = D_800A1B00;
             srcs[1] = D_800A1B0C;
             dsts[0] = &start.unk0;
             dsts[1] = &end.unk0;
             func_15145EA4(srcs, dsts, (Mtx *)owner->unk1D4 + 5, 2);
-            spawn.unk1D = 0x6C;
-            spawn.unk8 = 0x5103;
+            spawn.texture = 0x6C;
+            spawn.renderMode = 0x5103;
             spawn.unk0 = 0x200005;
             spawn.unk4 = 0x9F0600;
-            spawn.unkC = 0;
-            spawn.unk10 = 0;
-            spawn.unk17 = 0xFF;
-            spawn.unk1C = 0xFF;
+            spawn.frame = 0;
+            spawn.frameRate = 0;
+            spawn.a = 0xFF;
+            spawn.brightness = 0xFF;
             dx = end.unk0 - start.unk0;
             dy = end.unk4 - start.unk4;
             dz = end.unk8 - start.unk8;
-            spawn.unk3C = *(struct17 *)&D_800A5480;
+            spawn.offset = *(vertex *)&D_800A5480;
             spawn.flags = 0x84CE07;
-            spawn.unk60 = 8;
-            spawn.unk61 = 6;
-            spawn.unk62 = 0x10;
-            spawn.unk63 = -1;
-            spawn.unk64 = -1;
-            spawn.unk65 = 0;
-            spawn.unk5C = 0;
-            spawn.unk66 = 0xFF;
-            spawn.unk68 = 1000;
-            spawn.unk6C = 1000.0f;
+            spawn.primColorMode = 8;
+            spawn.envColorMode = 6;
+            spawn.updateFunc = 0x10;
+            spawn.deathFunc = -1;
+            spawn.drawFunc = -1;
+            spawn.handlerSet = 0;
+            spawn.viewMask = 0;
+            spawn.views = 0xFF;
+            spawn.minSize = 1000;
+            spawn.maxSize = 1000.0f;
             scale = 0.9730340242f;
-            spawn.unk24 = 1.022472024f;
+            spawn.scaleRate = 1.022472024f;
             do {
                 f32 speed;
                 f32 t;
                 s32 flipX;
                 Particle *spark;
 
-                spawn.lifetime = func_150ADA20() % 21U + 20;
-                spawn.unk22 = spawn.lifetime;
-                spawn.unk1E = spawn.lifetime;
-                spawn.unk20 = 0xFF / spawn.lifetime;
-                spawn.unk1B = func_150ADA20() % 26U + 8;
-                spawn.unk28 = spawn.unk2C = func_150ADA68() * 70.0f + 148.0f;
-                spawn.unk54 = func_150ADA68() * 0.2190000117f + 0.08600000292f;
+                spawn.timer = func_150ADA20() % 21U + 20;
+                spawn.scaleStart = spawn.timer;
+                spawn.fadeStart = spawn.timer;
+                spawn.fadeRate = 0xFF / spawn.timer;
+                spawn.alpha = func_150ADA20() % 26U + 8;
+                spawn.width = spawn.height = func_150ADA68() * 70.0f + 148.0f;
+                spawn.gravity = func_150ADA68() * 0.2190000117f + 0.08600000292f;
                 speed = func_150ADA68() * 0.04100000113f + 0.07800000161f;
-                spawn.vel.unk0 = dx * speed;
-                spawn.vel.unk4 = dy * speed;
-                spawn.vel.unk8 = dz * speed;
+                spawn.vel.x = dx * speed;
+                spawn.vel.y = dy * speed;
+                spawn.vel.z = dz * speed;
                 /* Start a random part of a frame along the path. */
                 t = func_150ADA68() * D_800BE9A4;
                 spawn.flags &= ~0xC0;
-                spawn.pos.unk0 = spawn.vel.unk0 * t + start.unk0;
-                spawn.pos.unk4 = spawn.vel.unk4 * t + start.unk4;
-                spawn.pos.unk8 = spawn.vel.unk8 * t + start.unk8;
+                spawn.pos.x = spawn.vel.x * t + start.unk0;
+                spawn.pos.y = spawn.vel.y * t + start.unk4;
+                spawn.pos.z = spawn.vel.z * t + start.unk8;
                 flipX = (func_150ADA20() & 1) ? 0x80 : 0;
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipX;
                 spark = func_15130280(&spawn, 1, 0, 4, effect->head.unkC, effect->head.unk1);

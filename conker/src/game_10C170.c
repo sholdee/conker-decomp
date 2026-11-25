@@ -1,47 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 
-
-/* Spawn descriptor for func_1513264C (0x7C bytes). */
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ struct17 unk10;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ struct17 pos;
-    /* 0x34 */ struct17 vel;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ u16 unk56;
-    /* 0x58 */ s8 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ s8 unk68;
-    /* 0x69 */ u8 unk69;
-    /* 0x6A */ s8 unk6A;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x78 */ s32 sound;
-} EffectSpawn;
 
 /* Debris emitter settings read by func_151A6F00. Angles are 0..255 binary angles. */
 typedef struct {
@@ -88,7 +50,7 @@ extern f32 D_80088960[3];
 extern f32 D_8008896C[3];
 
 void *memcpy(void *, const void *, u32);
-s32 func_1513264C(EffectSpawn *, s32, s32, s32, s32, u8, s32);
+s32 func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
 void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_151D5334(struct17 *, f32, f32, f32, s32, u8, s32);
 void func_151D5514(struct17 *, u8, s32);
@@ -104,7 +66,7 @@ void func_151A6F00(DebrisEmitter *, u8, u8, s32);
 void func_150DECC0(struct17 *pos, u8 owner, s32 kind) {
     s32 yaw;
     s32 i;
-    EffectSpawn spawn;
+    ParticleSpawn spawn;
     u8 idx;
     DebrisEmitter debris;
 
@@ -113,49 +75,49 @@ void func_150DECC0(struct17 *pos, u8 owner, s32 kind) {
     {
         extern f32 D_800A0EC8[15]; // matching: a block with a decl is a -g3 scheduling barrier; an extern takes no stack slot
 
-        spawn.unk00 = 15.0f;
-        spawn.unk0C = 1.0f;
-        spawn.unk08 = 1.0f;
-        spawn.unk04 = 0.200000003f;
-        spawn.unk10 = *(struct17 *)&D_800A5480;
-        spawn.unk1C = 1.0f;
-        spawn.unk20 = 1.0f;
-        spawn.unk24 = 1.0f;
-        spawn.unk44 = 0.0f;
-        spawn.unk50 = 0x29E9;
-        spawn.unk58 = 0;
+        spawn.radius = 15.0f;
+        spawn.sizeY = 1.0f;
+        spawn.sizeXZ = 1.0f;
+        spawn.elasticity = 0.200000003f;
+        spawn.rot = *(vertex *)&D_800A5480;
+        spawn.scale.x = 1.0f;
+        spawn.scale.y = 1.0f;
+        spawn.scale.z = 1.0f;
+        spawn.rotVel.y = 0.0f;
+        spawn.flags = 0x29E9;
+        spawn.variant = 0;
         spawn.unk5C = 0;
-        spawn.unk60 = 255;
-        spawn.unk61 = 13;
-        spawn.unk62 = 0;
-        spawn.unk63 = 10;
-        spawn.unk64 = 0;
-        spawn.unk65 = 0;
-        spawn.unk66 = 0;
-        spawn.unk67 = 0;
-        spawn.unk68 = 2;
+        spawn.alpha = 255;
+        spawn.updateFn = 13;
+        spawn.update2Fn = 0;
+        spawn.floorHitFn = 10;
+        spawn.floorType3Fn = 0;
+        spawn.wallHitFn = 0;
+        spawn.destroyFn = 0;
+        spawn.squashFn = 0;
+        spawn.matrixFn = 2;
         spawn.unk6A = 2;
         spawn.owner = NULL;
         spawn.ownerId = 0;
-        spawn.unk72 = 35;
-        spawn.unk74 = 7;
+        spawn.fadeStart = 35;
+        spawn.fadeRate = 7;
         spawn.sound = 0;
-        spawn.vel.unk0 = 0.0f;
-        spawn.vel.unk8 = 0.0f;
+        spawn.vel.x = 0.0f;
+        spawn.vel.z = 0.0f;
         for (i = 0; i < 15; i++) {
             idx = D_800A0EC8[i];
-            spawn.pos.unk0 = D_800A0D60[i].unk0 + pos->unk0;
-            spawn.pos.unk4 = D_800A0D60[i].unk4 + pos->unk4;
-            spawn.pos.unk8 = D_800A0D60[i].unk8 + pos->unk8;
-            spawn.vel.unk4 = D_80088960[idx] + func_150ADA68() * D_8008896C[idx];
-            spawn.unk40 = D_800A0E8C[i] * D_800A0E50[i] * 0.01900000125f;
-            spawn.unk48 = D_800A0E8C[i] * D_800A0E14[i] * 0.01900000125f;
-            spawn.unk4C = func_150ADA68() * 0.2080000043f + -1.032000065f;
-            spawn.unk54 = func_150ADA20() % 111U + 130;
+            spawn.pos.x = D_800A0D60[i].unk0 + pos->unk0;
+            spawn.pos.y = D_800A0D60[i].unk4 + pos->unk4;
+            spawn.pos.z = D_800A0D60[i].unk8 + pos->unk8;
+            spawn.vel.y = D_80088960[idx] + func_150ADA68() * D_8008896C[idx];
+            spawn.rotVel.x = D_800A0E8C[i] * D_800A0E50[i] * 0.01900000125f;
+            spawn.rotVel.z = D_800A0E8C[i] * D_800A0E14[i] * 0.01900000125f;
+            spawn.gravity = func_150ADA68() * 0.2080000043f + -1.032000065f;
+            spawn.lifetime = func_150ADA20() % 111U + 130;
             if (func_150ADA20() & 1) {
-                spawn.unk56 = 0xC4;
+                spawn.model = 0xC4;
             } else {
-                spawn.unk56 = 0xC5;
+                spawn.model = 0xC5;
             }
             // matching: *(u8 *)&owner re-reads owner from its stack slot at every use (a K&R u8 gets CSE'd)
             func_1513264C(&spawn, 3, 0xFF, 0, 0, *(u8 *)&owner, kind);

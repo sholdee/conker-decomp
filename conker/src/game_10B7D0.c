@@ -10,16 +10,13 @@
 #define D_800D3098 D_800D3098_array_decl_in_variables_h
 #define D_800A5480 D_800A5480_f32_decl_in_variables_h
 #include "variables.h"
+#include "effects.h"
 #undef D_800D3098
 #undef D_800A5480
 extern struct178 *D_800D3098;
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* variables.h declares D_800A5480 as one f32; it is a vector (copied whole into ParticleDef.rot). */
-extern Vec3f D_800A5480;
+extern vertex D_800A5480;
 
 extern f32 func_15048A40(u8 angle);
 extern s32 func_150A32B4(struct178 *, s32, s32, s32);
@@ -134,40 +131,12 @@ void func_150DE6D8(WorldObject *prop) {
     prop->work.words[2] += D_800BE9E4 * 24;
 }
 
-/* Spawn template of a particle, copied to Particle.def (same layout as ParticleDef in game_169510.c). */
-typedef struct {
-    /* 0x00 */ u8 texture;
-    /* 0x01 */ u8 type;
-    /* 0x02 */ u16 renderModes;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 frame;
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 rgba[4];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ Vec3f pos;
-    /* 0x28 */ Vec3f rot;
-    /* 0x34 */ Vec3f scale;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
-    /* 0x4C */ u8 viewportMask;
-    /* 0x4D */ u8 pad4D[3];
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 fadeStart;
-    /* 0x56 */ s16 fadeRate;
-} ParticleDef;
-
 /* State func_150DE7C0 stores after each particle it spawns. */
 typedef struct {
-    /* 0x00 */ Vec3f velocity;
+    /* 0x00 */ vertex velocity;
     /* 0x0C */ f32 timeLeft; // until the particle reaches the target
-    /* 0x10 */ Vec3f side;    // horizontal, perpendicular to forward
-    /* 0x1C */ Vec3f forward; // unit vector from source to target, flattened onto the XZ plane
+    /* 0x10 */ vertex side;    // horizontal, perpendicular to forward
+    /* 0x1C */ vertex forward; // unit vector from source to target, flattened onto the XZ plane
 } ParticleTravel;
 
 /* A particle spawned by func_1513D2F0, with func_150DE7C0's state at 0x110. */
@@ -200,17 +169,17 @@ typedef struct {
 } Emitter;
 
 void *memcpy(void *, const void *, u32);
-void func_1514470C(s32, Vec3f *);
-s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-s32 func_15140410(Particle *, Vec3f *, Vec3f *, s16);
+void func_1514470C(s32, vertex *);
+s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
+s32 func_15140410(Particle *, vertex *, vertex *, s16);
 extern TexturePair D_800A0D00;
 
 /* Every 200-400 frames, spawns a particle (texture 0xBE or 0xBF) at the link's source position that
  * travels to its target position at a random speed of 25-55 (0xBF ones at 0.18 of that). */
 void func_150DE7C0(Emitter *emitter) {
     EmitterLink *link;
-    Vec3f target;
-    Vec3f delta;
+    vertex target;
+    vertex delta;
     f32 length;
     f32 unused;
     f32 base;

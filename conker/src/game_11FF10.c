@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern f32 D_800A1950[];
 
@@ -27,32 +28,6 @@ typedef struct {
     /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ EmitterState state;
 } Emitter;
-
-/* Spawn template of a particle, copied to Particle.def (same layout as ParticleDef in game_169510.c). */
-typedef struct {
-    /* 0x00 */ u8 texture;
-    /* 0x01 */ u8 type;
-    /* 0x02 */ u16 renderModes;
-    /* 0x04 */ s16 lifetime;
-    /* 0x08 */ s32 frame;
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 rgba[4];
-    /* 0x14 */ f32 width;
-    /* 0x18 */ f32 height;
-    /* 0x1C */ struct17 pos;
-    /* 0x28 */ struct17 rot;
-    /* 0x34 */ struct17 scale;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
-    /* 0x4C */ u8 viewportMask;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 fadeStart;
-    /* 0x56 */ s16 fadeRate;
-} ParticleDef;
 
 /* State each emitted particle keeps after its Particle (copied in by func_150F2D14, updated by func_150F3214). */
 typedef struct {
@@ -197,12 +172,12 @@ void func_150F2D14(Emitter *emitter) {
 
                     src[0] = D_800A1950;
                     src[1] = D_800A195C;
-                    dst[0] = &def.pos.unk0;
+                    dst[0] = &def.pos.x;
                     dst[1] = &dir.unk0;
                     func_15145EA4(src, dst, (Mtx *)target->unk1D4 + 15, 2);
-                    dir.unk0 -= def.pos.unk0;
-                    dir.unk4 -= def.pos.unk4;
-                    dir.unk8 -= def.pos.unk8;
+                    dir.unk0 -= def.pos.x;
+                    dir.unk4 -= def.pos.y;
+                    dir.unk8 -= def.pos.z;
                     if (!func_15146078(&dir, &particle.axisU, &particle.axisV)) {
                         return;
                     }
@@ -219,10 +194,10 @@ void func_150F2D14(Emitter *emitter) {
                     def.rgba[3] = 0xFF;
                     def.height = 0.0f;
                     def.width = 0.0f;
-                    def.rot = *(struct17 *)&D_800A5480;
-                    def.scale.unk0 = 1.0f;
-                    def.scale.unk4 = 1.0f;
-                    def.scale.unk8 = 1.0f;
+                    def.rot = *(vertex *)&D_800A5480;
+                    def.scale.x = 1.0f;
+                    def.scale.y = 1.0f;
+                    def.scale.z = 1.0f;
                     def.flags = 0x04EC0000;
                     def.unk45 = 0xFF;
                     def.unk46 = 0;
@@ -267,7 +242,7 @@ s32 func_150F3214(Particle *particle) {
         return 0;
     }
 
-    func_15143134(D_800A1950, &particle->def.pos.unk0, (Mtx *)target->unk1D4 + 15);
+    func_15143134(D_800A1950, &particle->def.pos.x, (Mtx *)target->unk1D4 + 15);
 
     size = sqrtf(state->age) * state->growth;
     particle->def.height = size;

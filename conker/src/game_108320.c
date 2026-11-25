@@ -3,30 +3,11 @@
 #include "functions.h"
 #undef func_1513D524
 #include "variables.h"
+#include "effects.h"
 
 typedef struct {
     f32 x, y, z;
 } Vec3f;
-
-/* Spawn packet passed to func_1513D524; it lands in the new Effect at +0x18. */
-typedef struct {
-    u8  unk0;
-    u8  pad1;
-    s16 unk2;
-    s16 unk4;
-    u8  pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8  color[4];
-    u8  pad14[8];
-    Vec3f pos;      /* -> Effect.pos */
-    Vec3f dir;      /* -> Effect.dir */
-    Vec3f scale;
-    s32 unk40;
-    u8  alpha;      /* -> Effect.alpha */
-    u8  unk45;
-    u8  pad46[0x12];
-} EffectSpawn; /* size 0x58 */
 
 /* Self-propelled beam quad (func_150DAE70 / func_150DB114). */
 typedef struct {
@@ -74,7 +55,7 @@ typedef struct {
     BoneMtx *bones;
 } BeamOwner;
 
-extern Effect *func_1513D524(EffectSpawn *spawn, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
+extern Effect *func_1513D524(ParticleDef *spawn, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
 extern void func_15143134(Vec3f *in, Vec3f *out, BoneMtx *mtx);
 extern void func_151D5D60(Vtx_t **buffers, s16 index, s32 size, Vtx_t **vertices, u8 *fresh);
 
@@ -93,10 +74,10 @@ extern f32 D_80088948[];
 /* Spawns a beam effect between two bone-relative points of the owner's skeleton. */
 void func_150DAE70(BeamOwner *owner, s32 type, u8 arg2, s32 arg3) {
     BoneMtx *mtx;
-    Vec3f from;
+    vertex from;
     Vec3f to;
     Vec3f vel;
-    EffectSpawn spawn;
+    ParticleDef spawn;
     f32 distSq;
     f32 invDist;
     Effect *effect;
@@ -110,25 +91,25 @@ void func_150DAE70(BeamOwner *owner, s32 type, u8 arg2, s32 arg3) {
         vel.z = D_8008892C[type] * (to.z - from.z);
         distSq = (vel.x * vel.x) + (vel.z * vel.z);
         if (!(fabsf(distSq) < 9.999999747e-05f)) {
-            spawn.unk0 = 0x17;
-            spawn.unkC = 0x243A;
-            spawn.unk8 = 0;
-            spawn.unk40 = 0x401;
-            spawn.unk4 = D_80088930[type];
-            spawn.alpha = 255;
+            spawn.texture = 0x17;
+            spawn.frameSpeed = 0x243A;
+            spawn.frame = 0;
+            spawn.flags = 0x401;
+            spawn.lifetime = D_80088930[type];
+            spawn.unk44 = 255;
             spawn.unk45 = 255;
             // matching: the three stores share one line so as1 keeps IDO's t6-t9 constant order
-            spawn.color[2] = 200; spawn.color[1] = 200; spawn.color[0] = 200;
-            spawn.color[3] = 200;
-            spawn.unk2 = 0x401;
+            spawn.rgba[2] = 200; spawn.rgba[1] = 200; spawn.rgba[0] = 200;
+            spawn.rgba[3] = 200;
+            spawn.renderModes = 0x401;
             spawn.pos = from;
             spawn.scale.x = 1.0f;
             spawn.scale.y = 1.0f;
             invDist = 1.0f / sqrtf(distSq);
             spawn.scale.z = 1.0f;
-            spawn.dir.x = vel.z * invDist;
-            spawn.dir.y = 0.0f;
-            spawn.dir.z = vel.x * invDist;
+            spawn.rot.x = vel.z * invDist;
+            spawn.rot.y = 0.0f;
+            spawn.rot.z = vel.x * invDist;
             effect = func_1513D524(&spawn, 9, 0, 0, 7, 0, 0x2C, arg2, arg3);
             if (effect != NULL) {
                 effect->u.beam.vel = vel;
@@ -230,21 +211,21 @@ Vtx_t *func_150DB2D8(Effect *effect, s16 bufferIndex) {
 
 /* Spawns a quad whose position, angle, size and alpha follow the given values. */
 void func_150DB518(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHeight, s16 arg5, u8 arg6, s32 arg7) {
-    EffectSpawn spawn;
+    ParticleDef spawn;
     Effect *effect;
 
     if (pos != NULL && angle != NULL && halfWidth != NULL && alpha != NULL && halfHeight != NULL && arg5 != 0) {
-        spawn.unk0 = 0x17;
-        spawn.unkC = 0x243A;
-        spawn.unk40 = 0x401;
-        spawn.alpha = 255;
-        spawn.unk8 = 0;
-        spawn.unk4 = arg5;
+        spawn.texture = 0x17;
+        spawn.frameSpeed = 0x243A;
+        spawn.flags = 0x401;
+        spawn.unk44 = 255;
+        spawn.frame = 0;
+        spawn.lifetime = arg5;
         spawn.unk45 = 255;
         // matching: the three stores share one line so as1 keeps IDO's t6-t9 constant order
-        spawn.color[2] = 200; spawn.color[1] = 200; spawn.color[0] = 200;
-        spawn.color[3] = 200;
-        spawn.unk2 = 0x401;
+        spawn.rgba[2] = 200; spawn.rgba[1] = 200; spawn.rgba[0] = 200;
+        spawn.rgba[3] = 200;
+        spawn.renderModes = 0x401;
 
         effect = func_1513D524(&spawn, 0, 0xA, 0, 8, 0, 0x14, arg6, arg7);
         if (effect != NULL) {

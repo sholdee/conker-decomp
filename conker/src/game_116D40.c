@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 
 /* Spawn parameters for func_15130374 (same layout as ParticleSpawnArgs in game_10E240.c). */
@@ -40,45 +41,8 @@ typedef struct {
     /* 0x64 */ u8 pad64[8];
 } BurstParticleSpawn;
 
-/* Piece spawn template for func_15132A4C (same layout as PieceSpawn in game_1028F0.c). */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 scaleXZ;
-    /* 0x0C */ f32 scaleY;
-    /* 0x10 */ f32 rot[3];
-    /* 0x1C */ f32 unk1C[3];
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 unk69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6C */ void *unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x78 */ s32 unk78;
-} BurstPiece;
-
 extern void *func_15130374(BurstParticleSpawn *, u8, s32, u8, s32);
-extern s32 func_15132A4C(BurstPiece *, s32, s32, s32, u8, s32);
+extern s32 func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 extern void *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_15143794(s16 yaw, s16 pitch, f32 length, vertex *out);
 
@@ -88,7 +52,7 @@ void func_150E9890(vertex *pos, vertex *vel, f32 scale, u8 arg3, s32 arg4) {
     s32 count;
     BurstParticleSpawn spawn;
     s32 yaw;
-    BurstPiece piece;
+    ParticleSpawn piece;
     Header flash;
     Header2 origin;
     s32 pitch;
@@ -132,44 +96,44 @@ void func_150E9890(vertex *pos, vertex *vel, f32 scale, u8 arg3, s32 arg4) {
     func_15130374(&spawn, 0, 0, arg3, arg4);
 
     count = (func_150ADA20() & 7) + 5;
-    piece.unk50 = 0x21E8;
-    piece.unk56 = 27;
-    piece.unk0 = 0.0f;
-    piece.rot[0] = 0.0f;
-    piece.rot[1] = 0.0f;
-    piece.rot[2] = 0.0f;
-    piece.unk44 = 0.0f;
-    piece.unk58 = 0;
+    piece.flags = 0x21E8;
+    piece.model = 27;
+    piece.radius = 0.0f;
+    piece.rot.x = 0.0f;
+    piece.rot.y = 0.0f;
+    piece.rot.z = 0.0f;
+    piece.rotVel.y = 0.0f;
+    piece.variant = 0;
     piece.unk5C = 0;
-    piece.unk61 = 1;
-    piece.unk62 = 0;
-    piece.unk63 = 0;
-    piece.unk64 = 0;
-    piece.unk65 = 0;
-    piece.unk66 = 0;
-    piece.unk67 = 0;
-    piece.unk68 = 0;
+    piece.updateFn = 1;
+    piece.update2Fn = 0;
+    piece.floorHitFn = 0;
+    piece.floorType3Fn = 0;
+    piece.wallHitFn = 0;
+    piece.destroyFn = 0;
+    piece.squashFn = 0;
+    piece.matrixFn = 0;
     piece.unk6A = 2;
-    piece.unk6C = NULL;
-    piece.unk70 = 0;
-    piece.unk72 = 20;
-    piece.unk74 = 12;
-    piece.unk1C[0] = 1.0f;
-    piece.unk1C[1] = 1.0f;
-    piece.unk1C[2] = 1.0f;
-    piece.unk4 = 0.2f;
+    piece.owner = NULL;
+    piece.ownerId = 0;
+    piece.fadeStart = 20;
+    piece.fadeRate = 12;
+    piece.scale.x = 1.0f;
+    piece.scale.y = 1.0f;
+    piece.scale.z = 1.0f;
+    piece.elasticity = 0.2f;
     while (count > 0) {
         piece.pos = *pos;
-        piece.unk54 = (func_150ADA20() % 41U) + 29;
-        piece.unk60 = (func_150ADA20() % 76U) + 180;
+        piece.lifetime = (func_150ADA20() % 41U) + 29;
+        piece.alpha = (func_150ADA20() % 76U) + 180;
         yaw = func_150ADA20();
         pitch = func_150ADA20();
         func_15143794(yaw & 0xFF, -(pitch % 65U), ((func_150ADA68() * 2031.0f) + 1641.0f) * 0.01f, &piece.vel);
-        piece.scaleXZ = piece.scaleY = ((func_150ADA68() * 3047.0f) + 1016.0f) * 0.0001f * scale;
+        piece.sizeXZ = piece.sizeY = ((func_150ADA68() * 3047.0f) + 1016.0f) * 0.0001f * scale;
         // matching: `+ -206.0f` (add.s of a negative constant); `- 206.0f` emits sub.s
-        piece.unk4C = ((func_150ADA68() * 99.0f) + -206.0f) * 0.01f;
-        piece.unk40 = (func_150ADA68() * 101.0f) + -49.0f;
-        piece.unk48 = (func_150ADA68() * 101.0f) + -49.0f;
+        piece.gravity = ((func_150ADA68() * 99.0f) + -206.0f) * 0.01f;
+        piece.rotVel.x = (func_150ADA68() * 101.0f) + -49.0f;
+        piece.rotVel.z = (func_150ADA68() * 101.0f) + -49.0f;
         func_15132A4C(&piece, 3, 0xFF, 0, arg3, arg4);
         count--;
     }

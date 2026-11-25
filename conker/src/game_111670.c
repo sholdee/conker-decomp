@@ -5,48 +5,11 @@
 #undef func_15048A40
 extern f32 func_15048A40(u8 arg0);
 #include "variables.h"
+#include "effects.h"
 
 extern s32 func_151EF610(void);
 
 extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
-
-/* Chunk spawn request for func_15132A4C. */
-typedef struct Struct150E5558 {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 rot[3];    // degrees
-    /* 0x1C */ f32 scale[3];
-    /* 0x28 */ f32 pos[3];
-    /* 0x34 */ f32 vel[3];
-    /* 0x40 */ f32 unk40[3];  // random in [-3, 3)
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 flags;
-    /* 0x54 */ s16 lifetime;
-    /* 0x56 */ s16 kind;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 pad69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8 pad76[6];
-} Struct150E5558;
 
 
 /* Integer world position chosen by func_150E41C0 as the centre of func_150E42F8's scatter. */
@@ -612,7 +575,7 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
 
 /* Launches a chunk of debris `kind` from (x, y, z), flying along (dirX, -dirY, dirZ) and oriented to match. */
 void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, s32 size) {
-    Struct150E5558 chunk;
+    ParticleSpawn chunk;
     f32 pitch;
     f32 yaw;
     f32 speed;
@@ -632,60 +595,60 @@ void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, 
         yaw = 90.0f;
     }
 
-    chunk.rot[1] = yaw;
-    chunk.rot[2] = pitch;
-    chunk.scale[0] = 1.0f;
-    chunk.scale[1] = 1.0f;
-    chunk.scale[2] = 1.0f;
-    chunk.unk00 = 1.0f;
-    chunk.unk08 = 0.1700000018f;
-    chunk.unk0C = 0.1700000018f;
-    chunk.pos[0] = x;
-    chunk.pos[1] = y;
-    chunk.pos[2] = z;
-    chunk.rot[0] = 0.0f;
+    chunk.rot.y = yaw;
+    chunk.rot.z = pitch;
+    chunk.scale.x = 1.0f;
+    chunk.scale.y = 1.0f;
+    chunk.scale.z = 1.0f;
+    chunk.radius = 1.0f;
+    chunk.sizeXZ = 0.1700000018f;
+    chunk.sizeY = 0.1700000018f;
+    chunk.pos.x = x;
+    chunk.pos.y = y;
+    chunk.pos.z = z;
+    chunk.rot.x = 0.0f;
 
     if (kind == 4) {
-        chunk.kind = 6;
-        chunk.unk04 = 0.6000000238f;
+        chunk.model = 6;
+        chunk.elasticity = 0.6000000238f;
     } else if (kind == 9) {
-        chunk.kind = 8;
-        chunk.unk04 = 0.3000000119f;
+        chunk.model = 8;
+        chunk.elasticity = 0.3000000119f;
     } else {
-        chunk.kind = 7;
-        chunk.unk04 = 0.3000000119f;
+        chunk.model = 7;
+        chunk.elasticity = 0.3000000119f;
     }
 
     chunk.lifetime = func_151EF610() % 60 + 60;
     chunk.flags = 0x29E9;
 
     rand = func_150ADA68();
-    chunk.unk4C = -0.7799999714f;
+    chunk.gravity = -0.7799999714f;
     speed = rand * 4.599999905f + 1.5f;
-    chunk.vel[0] = speed * dirX;
-    chunk.vel[1] = -speed * dirY;
-    chunk.vel[2] = speed * dirZ;
+    chunk.vel.x = speed * dirX;
+    chunk.vel.y = -speed * dirY;
+    chunk.vel.z = speed * dirZ;
 
-    chunk.unk40[0] = func_150ADA68() * 6.0f + -3.0f;
-    chunk.unk40[2] = func_150ADA68() * 6.0f + -3.0f;
+    chunk.rotVel.x = func_150ADA68() * 6.0f + -3.0f;
+    chunk.rotVel.z = func_150ADA68() * 6.0f + -3.0f;
     rand = func_150ADA68() * 6.0f + -3.0f;
-    chunk.unk58 = 0;
+    chunk.variant = 0;
     chunk.unk5C = 0;
-    chunk.unk40[1] = rand;
-    chunk.unk60 = 0xFF;
-    chunk.unk61 = 1;
-    chunk.unk62 = 0;
-    chunk.unk63 = 3;
-    chunk.unk64 = 0;
-    chunk.unk65 = 0;
-    chunk.unk66 = 0;
-    chunk.unk67 = 0;
-    chunk.unk68 = 0;
+    chunk.rotVel.y = rand;
+    chunk.alpha = 0xFF;
+    chunk.updateFn = 1;
+    chunk.update2Fn = 0;
+    chunk.floorHitFn = 3;
+    chunk.floorType3Fn = 0;
+    chunk.wallHitFn = 0;
+    chunk.destroyFn = 0;
+    chunk.squashFn = 0;
+    chunk.matrixFn = 0;
     chunk.unk6A = 2;
-    chunk.unk6C = 0;
-    chunk.unk70 = 0;
-    chunk.unk72 = 0x20;
-    chunk.unk74 = 7;
+    chunk.owner = 0;
+    chunk.ownerId = 0;
+    chunk.fadeStart = 0x20;
+    chunk.fadeRate = 7;
 
     func_15132A4C(&chunk, 3, 0xFF, 0, 0xFF, 0);
 }

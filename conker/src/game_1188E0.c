@@ -7,6 +7,7 @@
 #define D_800D3098 D_800D3098_header
 #define D_800A5480 D_800A5480_header
 #include "variables.h"
+#include "effects.h"
 #undef D_800D3098
 #undef D_800A5480
 
@@ -186,47 +187,6 @@ void func_150EB614(MoverObj *obj) {
     }
 }
 
-/* Spawn descriptor for func_1513264C (0x7C bytes; EffectSpawn in game_124920.c). */
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ vertex unk10;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex unk40;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ s8 unk69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8 ownerId;
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8 pad76[2];
-    /* 0x78 */ s32 sound;
-} EffectSpawn;
-
 extern u8 D_800BE9EB;
 extern vertex D_800A1490;
 extern vertex D_800A149C;
@@ -239,7 +199,7 @@ void func_151D3FF4(vertex *pos, u8 owner, s32 kind);
 void func_151D5514(vertex *pos, u8 owner, s32 kind);
 void *func_151541B8(vertex *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 owner, s32 kind);
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, vertex *out);
-extern s32 func_1513264C(EffectSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 owner, s32 kind);
+extern s32 func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 owner, s32 kind);
 
 /*
  * Plays a fixed burst of effects: func_15164F0C, a func_150E83AC effect at D_800A149C lasting
@@ -247,7 +207,7 @@ extern s32 func_1513264C(EffectSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 a
  * func_1513264C debris pieces thrown from the D_800A14A8 points at random yaw/pitch/speed.
  */
 void func_150EB8C4(void) {
-    EffectSpawn spawn;
+    ParticleSpawn spawn;
 
     func_15164F0C(2, D_800BE9EB, NULL, 0xFF, 1);
     func_150E83AC(&D_800A149C, func_150ADA20() % 62U + 120, 0xFF, 1);
@@ -260,32 +220,32 @@ void func_150EB8C4(void) {
         s32 yaw;
         s32 pitch;
 
-        spawn.unk0C = 1.0f;
-        spawn.unk08 = 1.0f;
-        spawn.unk00 = 9.0f;
-        spawn.unk04 = 0.4350000322f;
-        spawn.unk10 = D_800A5480;
-        spawn.unk40.y = 0.0f;
-        spawn.unk1C = 1.0f;
-        spawn.unk20 = 1.0f;
-        spawn.unk24 = 1.0f;
-        spawn.unk50 = 0x29E9;
-        spawn.unk58 = 0;
+        spawn.sizeY = 1.0f;
+        spawn.sizeXZ = 1.0f;
+        spawn.radius = 9.0f;
+        spawn.elasticity = 0.4350000322f;
+        spawn.rot = D_800A5480;
+        spawn.rotVel.y = 0.0f;
+        spawn.scale.x = 1.0f;
+        spawn.scale.y = 1.0f;
+        spawn.scale.z = 1.0f;
+        spawn.flags = 0x29E9;
+        spawn.variant = 0;
         spawn.unk5C = 0;
-        spawn.unk60 = 0xFF;
-        spawn.unk61 = 13;
-        spawn.unk62 = 0;
-        spawn.unk63 = 12;
-        spawn.unk64 = 0;
-        spawn.unk65 = 0;
-        spawn.unk66 = 0;
-        spawn.unk67 = 0;
-        spawn.unk68 = 2;
+        spawn.alpha = 0xFF;
+        spawn.updateFn = 13;
+        spawn.update2Fn = 0;
+        spawn.floorHitFn = 12;
+        spawn.floorType3Fn = 0;
+        spawn.wallHitFn = 0;
+        spawn.destroyFn = 0;
+        spawn.squashFn = 0;
+        spawn.matrixFn = 2;
         spawn.unk6A = 2;
         spawn.owner = NULL;
         spawn.ownerId = 0;
-        spawn.unk72 = 25;
-        spawn.unk74 = 10;
+        spawn.fadeStart = 25;
+        spawn.fadeRate = 10;
         spawn.sound = 0;
         // matching: an early use of pitch makes IDO give it $s1 and yaw $s2
         if (pitch) {
@@ -295,11 +255,11 @@ void func_150EB8C4(void) {
             yaw = func_150ADA20();
             pitch = func_150ADA20();
             func_15143794(yaw % 26U + 45, (pitch & 0xF) - 25, func_150ADA68() * 30.0f + 15.0f, &spawn.vel);
-            spawn.unk40.x = func_150ADA68() * 15.10800076f + -7.554000378f;
-            spawn.unk40.z = func_150ADA68() * 15.10800076f + -7.554000378f;
-            spawn.unk4C = func_150ADA68() * 0.6170000434f + -1.621000051f;
-            spawn.unk54 = func_150ADA20() % 51U + 50;
-            spawn.unk56 = D_800A14D8[i];
+            spawn.rotVel.x = func_150ADA68() * 15.10800076f + -7.554000378f;
+            spawn.rotVel.z = func_150ADA68() * 15.10800076f + -7.554000378f;
+            spawn.gravity = func_150ADA68() * 0.6170000434f + -1.621000051f;
+            spawn.lifetime = func_150ADA20() % 51U + 50;
+            spawn.model = D_800A14D8[i];
             func_1513264C(&spawn, 3, 0xFF, 0, 0, 0xFF, 1);
         }
     }

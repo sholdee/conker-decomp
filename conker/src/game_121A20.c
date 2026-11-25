@@ -11,6 +11,7 @@ u32 func_150ADA20(void);
 s32 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16 y, s16 z, s16 nearDistance,
                   s16 farDistance);
 #include "variables.h"
+#include "effects.h"
 
 
 /* Flags of SpiralState. */
@@ -32,45 +33,6 @@ typedef struct {
     /* 0x25 */ u8 pad25[3];
 } SpiralState;
 
-/* Spawn descriptor for func_1513264C (0x7C bytes). */
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ struct17 rot; /* degrees */
-    /* 0x1C */ struct17 unk1C;
-    /* 0x28 */ struct17 pos;
-    /* 0x34 */ struct17 vel;
-    /* 0x40 */ struct17 spin; /* added to rot each frame */
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 id;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ s8 unk69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8 pad76[2];
-    /* 0x78 */ s32 sound;
-} EffectSpawn;
-
 /* An object spawned by func_1513264C with a SpiralState. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x20];
@@ -89,13 +51,13 @@ typedef struct {
 } EffectObj;
 
 extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
-extern EffectObj *func_1513264C(EffectSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 extraSize, u8 owner, s32 kind);
+extern EffectObj *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 extraSize, u8 owner, s32 kind);
 
 /* Spawns an effect that spirals from `from` to `to` at `speed` (invSpeed = 1 / speed), playing
  * `sound` near the camera when it is non-zero. */
-void func_150F4570(struct17 *from, struct17 *to, u8 id, f32 speed, f32 invSpeed, f32 scale, u8 fadeNear, s32 sound,
+void func_150F4570(vertex *from, struct17 *to, u8 id, f32 speed, f32 invSpeed, f32 scale, u8 fadeNear, s32 sound,
                    u8 owner, s32 kind) {
-    EffectSpawn spawn;
+    ParticleSpawn spawn;
     struct17 dir;
     struct17 delta;
     f32 length;
@@ -103,13 +65,13 @@ void func_150F4570(struct17 *from, struct17 *to, u8 id, f32 speed, f32 invSpeed,
     SpiralState spiral;
     EffectObj *obj;
 
-    delta.unk0 = to->unk0 - from->unk0;
-    delta.unk4 = to->unk4 - from->unk4;
-    delta.unk8 = to->unk8 - from->unk8;
+    delta.unk0 = to->unk0 - from->x;
+    delta.unk4 = to->unk4 - from->y;
+    delta.unk8 = to->unk8 - from->z;
     if (func_15145128(&delta, &dir, &length, &invLength) != 0) {
         spiral.flags = (fadeNear ? SPIRAL_FADE_NEAR : 0) | (sound ? SPIRAL_SOUND : 0);
         spiral.timeLeft = length * invSpeed;
-        spiral.center = *from;
+        spiral.center = *(struct17 *)from; // TODO(vectors): struct17/vertex mix
         spiral.phase = func_150ADA68() * 6.2831855f;
         spiral.phaseRate = func_150ADA68() * 0.2f + 0.08000000566f;
         if (func_150ADA20() & 1) {
@@ -121,43 +83,43 @@ void func_150F4570(struct17 *from, struct17 *to, u8 id, f32 speed, f32 invSpeed,
             spiral.cosDir = cosf(angle);
             spiral.sinDir = sinf(angle);
         }
-        spawn.unk00 = 1.0f;
-        spawn.unk04 = 1.0f;
-        spawn.unk08 = spawn.unk0C = scale;
-        spawn.rot.unk0 = func_150ADA68() * 360.0f;
-        spawn.rot.unk4 = func_150ADA68() * 360.0f;
-        spawn.rot.unk8 = func_150ADA68() * 360.0f;
-        spawn.unk1C.unk0 = 1.0f;
-        spawn.unk1C.unk4 = 1.0f;
-        spawn.unk1C.unk8 = 1.0f;
+        spawn.radius = 1.0f;
+        spawn.elasticity = 1.0f;
+        spawn.sizeXZ = spawn.sizeY = scale;
+        spawn.rot.x = func_150ADA68() * 360.0f;
+        spawn.rot.y = func_150ADA68() * 360.0f;
+        spawn.rot.z = func_150ADA68() * 360.0f;
+        spawn.scale.x = 1.0f;
+        spawn.scale.y = 1.0f;
+        spawn.scale.z = 1.0f;
         spawn.pos = *from;
-        spawn.vel.unk0 = dir.unk0 * speed;
-        spawn.vel.unk4 = dir.unk4 * speed;
-        spawn.vel.unk8 = dir.unk8 * speed;
-        spawn.spin.unk0 = func_150ADA68() * 21.90300179f + -10.95150089f;
-        spawn.spin.unk4 = 0.0f;
-        spawn.spin.unk8 = func_150ADA68() * 21.90300179f + -10.95150089f;
-        spawn.unk4C = 0.0f;
-        spawn.unk50 = 0x14900;
-        spawn.unk54 = 300;
-        spawn.id = id;
-        spawn.unk58 = 8;
+        spawn.vel.x = dir.unk0 * speed;
+        spawn.vel.y = dir.unk4 * speed;
+        spawn.vel.z = dir.unk8 * speed;
+        spawn.rotVel.x = func_150ADA68() * 21.90300179f + -10.95150089f;
+        spawn.rotVel.y = 0.0f;
+        spawn.rotVel.z = func_150ADA68() * 21.90300179f + -10.95150089f;
+        spawn.gravity = 0.0f;
+        spawn.flags = 0x14900;
+        spawn.lifetime = 300;
+        spawn.model = id;
+        spawn.variant = 8;
         spawn.unk5C = 0;
-        spawn.unk60 = 255;
-        spawn.unk61 = 22;
-        spawn.unk62 = 7;
-        spawn.unk63 = 0;
-        spawn.unk64 = 0;
-        spawn.unk65 = 0;
-        spawn.unk66 = 0;
-        spawn.unk67 = 0;
-        spawn.unk68 = 2;
-        spawn.unk69 = -1;
+        spawn.alpha = 255;
+        spawn.updateFn = 22;
+        spawn.update2Fn = 7;
+        spawn.floorHitFn = 0;
+        spawn.floorType3Fn = 0;
+        spawn.wallHitFn = 0;
+        spawn.destroyFn = 0;
+        spawn.squashFn = 0;
+        spawn.matrixFn = 2;
+        spawn.drawFn = -1;
         spawn.unk6A = 2;
-        spawn.unk6C = 0;
-        spawn.unk70 = 0;
-        spawn.unk72 = 1;
-        spawn.unk74 = 255;
+        spawn.owner = 0;
+        spawn.ownerId = 0;
+        spawn.fadeStart = 1;
+        spawn.fadeRate = 255;
         spawn.sound = sound;
         obj = func_1513264C(&spawn, 3, 0xFF, 0, sizeof(spiral), owner, kind);
         if (obj != NULL) {
