@@ -8,6 +8,7 @@ void func_15123070(struct108 *);
 void func_151254F4(struct108 *, s32);
 extern s32 D_80088800;
 
+/* Updates camera flags and range fields (unk190/unk348/unk34C/unk374) from func_1509BE40 state queries 0x5071/0x5072. */
 void func_150C7E00(struct108 *camera)
 {
   s32 queryBC;
@@ -33,7 +34,7 @@ void func_150C7E00(struct108 *camera)
     }
     else
     {
-      if (globalBB)
+      if (globalBB) // matching: an extra use of globalBB makes IDO load it into v0 and -1 into v1
       {
       }
       if ((globalBB != -1) && (queryBC != 0))
@@ -42,7 +43,6 @@ void func_150C7E00(struct108 *camera)
         if (func_15123934(camera, 8, 0, camera->unk134, 3) != 0)
         {
           func_151254F4(camera, D_800CC335 - 1);
- if (0) { }
           camera->unk84 &= ~4;
           camera->unk674 = 0.0f;
           func_15123070(camera);
@@ -73,7 +73,7 @@ void func_150C7E00(struct108 *camera)
   {
     if (func_1509BE40(0, 0x5072, 0x1A) == 0)
     {
-      if ((*camera->unk36C) & 4)
+      if (*camera->unk36C & 4)
       {
         camera->unk190 = 20.0f;
       }
@@ -83,8 +83,8 @@ void func_150C7E00(struct108 *camera)
         return;
       }
       func_1509BFB0(1, 0x9000, 0x17, func_1509BE40(1, func_1509BE40(0, 0x2011, 0xB7) | 0x2000, 0x9C, 0x2000));
-      t = (((f32) func_1509BE40(1, func_1509BE40(0, 0x2011, 0xB7) | 0x2000, 0x9A, 0x2000)) - 300.0f) / 900.0f;
-      blend = (t < 0.0f) ? (0.0f) : ((t > 1.0f) ? (1.0f) : (t));
+      t = ((f32)func_1509BE40(1, func_1509BE40(0, 0x2011, 0xB7) | 0x2000, 0x9A, 0x2000) - 300.0f) / 900.0f;
+      blend = (t < 0.0f) ? 0.0f : (t > 1.0f) ? 1.0f : t;
       if (queryBC == 0)
       {
         camera->unk348 = camera->unk34C = 200.0f;
@@ -126,13 +126,12 @@ void func_150C7E00(struct108 *camera)
         camera->unk73C = 0;
         if (camera->unk6C8 == 0)
         {
-          s32 pad;
+          s32 pad; // matching: block-scope decl keeps as1 from moving this store into the branch delay slot
           camera->unk674 = 0.0f;
         }
       }
     }
-    else
-      if ((func_151239CC(camera, 3) != 0) || (D_80088800 == 0))
+    else if ((func_151239CC(camera, 3) != 0) || (D_80088800 == 0))
     {
       camera->unk84 |= 4;
       D_80088800 = 1;
@@ -147,7 +146,7 @@ void func_150C7E00(struct108 *camera)
         camera->unk674 = 0.0f;
       }
     }
-    if ((*camera->unk36C) & 4)
+    if (*camera->unk36C & 4)
     {
       camera->unk190 = 0.0f;
     }
