@@ -3044,7 +3044,7 @@ typedef struct {
     struct226 *unk14;
     struct227 *unk18; // struct227 pointer?
     f32 unk1C;
-    s32 unk20; // struct17 pointer?
+    s32 unk20; // Vec3f pointer?
     s8  unk24;
     u8  unk25;
     u8  pad26[0x2];
@@ -3187,7 +3187,7 @@ typedef struct {
     s32 *unk18; // struct ptr?
     f32 unk1C;
     s32 unk20;
-    s32 *unk24; // struct17 struct ptr?
+    s32 *unk24; // Vec3f pointer?
 } struct242;
 
 typedef struct {

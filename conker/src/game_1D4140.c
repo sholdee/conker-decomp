@@ -52,6 +52,6 @@ void func_151A6C90(Actor *obj, u8 arg1, s32 arg2) {
         func_151D5514(&pos, arg1, arg2);
         func_151541B8(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
                       func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
-        func_151D5404((Vec3f *)&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 255, 0);
+        func_151D5404(&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 255, 0);
     }
 }

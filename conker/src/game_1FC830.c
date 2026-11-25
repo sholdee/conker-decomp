@@ -859,7 +859,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
         {
             Spawn1514FF44 emitA;
 
-            emitA.unk0 = *(Vec3f *)&pos; // TODO(vectors): struct17/vertex mix
+            emitA.unk0 = pos;
             emitA.unkC = 6;
             emitA.unkE = 8;
             emitA.unk10 = 0.03999999911f;
@@ -883,7 +883,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
         {
             Spawn15153CCC emitB;
 
-            emitB.unk0 = *(Vec3f *)&pos; // TODO(vectors): struct17/vertex mix
+            emitB.unk0 = pos;
             emitB.unkC = 10.0f;
             emitB.unk10 = 25.0f;
             emitB.unk14 = 1.253000021f;

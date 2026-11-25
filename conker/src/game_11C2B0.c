@@ -571,7 +571,7 @@ void func_150EFB80(BeamEmitter *emitter) {
     if (link->accum > 1.0f) {
         beam = link->beam;
         if (beam->link.flags & 1) {
-            spawn.pos = *(Vec3f *)&beam->end;
+            spawn.pos = beam->end;
             spawn.unkE = 5;
             spawn.unk10 = 10;
             part.unk14 = 4;

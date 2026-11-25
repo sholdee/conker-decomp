@@ -777,7 +777,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
         pos2.x = anchors[0]->unk0;
         pos2.y = anchors[0]->pad2;
         pos2.z = anchors[0]->unk4;
-        func_151D5404((Vec3f *)&pos2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, arg1);
+        func_151D5404(&pos2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, arg1);
     }
 }
 

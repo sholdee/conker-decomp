@@ -147,7 +147,7 @@ void func_15010A60(void) {
 
     for (i = 0; i < 6; i++) {
         pos = D_80096450[i];
-        part.pos = *(Vec3f *)&pos; // TODO(vectors): struct17/vertex mix
+        part.pos = pos;
         tail.unk18 = pos;
 
         func_1510F800(0);

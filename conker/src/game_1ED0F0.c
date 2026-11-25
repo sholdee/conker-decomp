@@ -325,7 +325,7 @@ void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList) {
 }
 
 void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList) {
-    func_151D5404((Vec3f *)pos, 800.0f, 2000.0f, 0.0005f, 15, 20, fxOwner, fxList);
+    func_151D5404(pos, 800.0f, 2000.0f, 0.0005f, 15, 20, fxOwner, fxList);
 }
 
 void func_150E83AC(Vec3f *, s16, u8, s32);

@@ -133,7 +133,7 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
         struct260 *effect;
         Vec3f effectPos;
 
-        effectPos = *(Vec3f *)pos; // TODO(vectors): struct17/vertex mix
+        effectPos = *pos;
         effect = func_15149130(15, 8, -1, -1, 1, 0, sizeof(effectPos), *(u8 *)&owner, kind);
         if (effect != NULL) {
             memcpy(&((PointEffect *)effect)->pos, &effectPos, sizeof(effectPos));

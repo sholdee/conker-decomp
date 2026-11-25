@@ -912,7 +912,7 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
                 spawn.offset.y = 0.0f;
                 spawn.offset.z = 0.0f;
                 spawn.scaleRate = 1.038234949f;
-                spawn.pos = *(Vec3f *)&hit->pos; // TODO(vectors): struct17/vertex mix
+                spawn.pos = hit->pos;
                 spawn.vel = D_800A5480;
                 do {
                     sub.unk0 = func_150ADA20();

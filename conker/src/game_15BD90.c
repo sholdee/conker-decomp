@@ -101,7 +101,7 @@ void func_1512E8E0(Camera *camera) {
             nodePos.x = node->x;
             nodePos.y = node->y;
             nodePos.z = node->z;
-            func_15048F90(&nodePos, (Vec3f *)&camera->eye, &toCamera);
+            func_15048F90(&nodePos, &camera->eye, &toCamera);
             for (i = 0; i < 5; i++) {
                 // matching: s32 link read back through (u8) adds a live range uopt needs for the frame layout
                 s32 link;

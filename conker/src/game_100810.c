@@ -197,7 +197,7 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
         desc.rgba[3] = 0xFF;
         desc.width = 100.0f;
         desc.height = 100.0f;
-        desc.pos = *(Vec3f *)&spawn.pos; // TODO(vectors): struct17/vertex mix
+        desc.pos = spawn.pos;
         desc.rot = end;
         desc.scale.x = 1.0f;
         desc.scale.y = 1.0f;
@@ -257,7 +257,7 @@ void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
         desc.rgba[3] = 0xFF;
         desc.width = 100.0f;
         desc.height = 100.0f;
-        desc.pos = *(Vec3f *)&spawn.pos; // TODO(vectors): struct17/vertex mix
+        desc.pos = spawn.pos;
         desc.rot = end;
         desc.flags = 0xCD2006;
         desc.unk44 = 0xFF;

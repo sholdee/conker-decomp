@@ -145,7 +145,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, Surf151D3480 *surface, u8 kind, u8 ar
         }
     } else {
         surfaceId = -1;
-        hitPos = *(Vec3f *)pos; // TODO(vectors): struct17/vertex mix
+        hitPos = *pos;
         hitSurface = *surface;
         hit = 1;
     }
@@ -173,7 +173,7 @@ void func_151D3480(Vec3f *pos, Vec3f *dir, Surf151D3480 *surface, u8 kind, u8 ar
 
         sparks.unk00 = 5 >> D_800DCA20;
         sparks.unk04 = 4 >> D_800DCA20;
-        sparks.unk08 = *(Vec3f *)pos; // TODO(vectors): struct17/vertex mix
+        sparks.unk08 = *pos;
         sparks.unk14 = 8.25f;
         sparks.unk18 = 5.859999657f;
         sparks.unk1C = 0.0f;

@@ -335,12 +335,12 @@ void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
     spawn.elasticity = 1.0f;
     spawn.sizeY = 1.0f;
     spawn.sizeXZ = 1.0f;
-    spawn.rot = *(Vec3f *)origin; // TODO(vectors): struct17/vertex mix
+    spawn.rot = *origin;
     spawn.scale.x = 1.0f;
     spawn.scale.y = 1.0f;
     spawn.scale.z = 1.0f;
-    spawn.pos = *(Vec3f *)origin; // TODO(vectors): struct17/vertex mix
-    spawn.vel = *(Vec3f *)origin; // TODO(vectors): struct17/vertex mix
+    spawn.pos = *origin;
+    spawn.vel = *origin;
     spawn.rotVel = *origin;
     spawn.flags = 0x11900;
     spawn.lifetime = 300;

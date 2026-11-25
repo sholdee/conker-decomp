@@ -122,7 +122,7 @@ void func_1512C490(Camera *camera) {
         func_1512523C(camera);
         func_15125594(camera);
     }
-    func_150491EC((Vec3f *)&eye, (Vec3f *)&at, (Vec3f *)&dir);
+    func_150491EC(&eye, &at, &dir);
     camera->playerExt->aimTarget = at;
     camera->playerExt->aimEye = eye;
     camera->playerExt->aimDir = dir;
@@ -175,7 +175,7 @@ void func_1512C490(Camera *camera) {
         func_150A7DF0(&rotMtx, -camera->shakeRot.y * shakeScale, camera->shakeRot.z * shakeScale, camera->shakeRot.x * shakeScale);
         guMtxCatL(VIEW_MTX(camera->playerIndex), &rotMtx, VIEW_MTX(camera->playerIndex));
         if (camera->playerExt != NULL) {
-            yaw = func_15048FC8((Vec3f *)&camera->playerExt->aimDir) - 180.0f;
+            yaw = func_15048FC8(&camera->playerExt->aimDir) - 180.0f;
             func_150A8050(dirMtx,
                           -func_150484A0(camera->playerExt->aimDir.y,
                                          sqrtf(camera->playerExt->aimDir.x * camera->playerExt->aimDir.x +

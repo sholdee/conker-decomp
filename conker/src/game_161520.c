@@ -1226,7 +1226,7 @@ void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
                 pos.x = probe.x;
                 pos.y = hit.height;
                 pos.z = probe.z;
-                func_151D9B8C(0, func_150ADA68() * 20.0f + 10.0f, func_150ADA20() % 101U + 100, hit.unk4, (Vec3f *)&pos,
+                func_151D9B8C(0, func_150ADA68() * 20.0f + 10.0f, func_150ADA20() % 101U + 100, hit.unk4, &pos,
                               func_150ADA20() % 201U + 400, 1, 1, 0, arg2, arg3);
             }
             count -= 1.0f;

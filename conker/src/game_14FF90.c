@@ -241,7 +241,7 @@ void func_15123070(Camera *camera) {
     if ((camera->cmdRunning != 0) && ((camera->cmd.type == 10) || (camera->cmd.type == 14))) {
         Vec3f delta;
 
-        func_15048F90((Vec3f *)&camera->unk618, (Vec3f *)&camera->focus, &delta);
+        func_15048F90(&camera->unk618, &camera->focus, &delta);
         camera->unk390 = camera->yaw - func_15048FC8(&delta);
     } else {
         angle = camera->player->unk40 - camera->yaw - 180.0f;
@@ -1133,15 +1133,15 @@ void func_151256BC(Camera *camera) {
             eyeScale = 1.0f;
             targetScale = 20.0f;
         }
-        func_1508EF80((Vec3f *)&camera->eye, (Vec3f *)&camera->target, amount * eyeScale, (Vec3f *)&camera->eye);
-        func_1508EF80((Vec3f *)&camera->target, (Vec3f *)&camera->eye, amount * targetScale,
-                      (Vec3f *)&camera->target);
+        func_1508EF80(&camera->eye, &camera->target, amount * eyeScale, &camera->eye);
+        func_1508EF80(&camera->target, &camera->eye, amount * targetScale,
+                      &camera->target);
     } else if (camera->swayPhase != 0.0f) {
         camera->swayPhase -= camera->swayPhase * 0.08f;
         camera->swayAmount += ((sinf(camera->swayPhase) * 4.0f) - camera->swayAmount) * 0.04f;
         amount = camera->swayAmount * 0.05f;
-        func_1508EF80((Vec3f *)&camera->eye, (Vec3f *)&camera->target, amount, (Vec3f *)&camera->eye);
-        func_1508EF80((Vec3f *)&camera->target, (Vec3f *)&camera->eye, amount * 20.0f, (Vec3f *)&camera->target);
+        func_1508EF80(&camera->eye, &camera->target, amount, &camera->eye);
+        func_1508EF80(&camera->target, &camera->eye, amount * 20.0f, &camera->target);
     }
 }
 
@@ -1640,7 +1640,7 @@ s32 func_15126378(Camera *camera) {
         ext->aimTarget = camera->target;
         ext->aimEye = camera->eye;
         ext->aimDir = dir;
-        func_15048F90((Vec3f *)&ext->aimEye, (Vec3f *)&ext->aimTarget, (Vec3f *)&ext->aimDir);
+        func_15048F90(&ext->aimEye, &ext->aimTarget, &ext->aimDir);
         D_800BE628[camera->playerIndex].perspScale = (-0.94f * zoomRatio) + 1.0f;
         func_1510B128(camera->playerIndex, camera->unk19C, camera->unk1A0, D_800BE628[camera->playerIndex].perspScale,
                       (71.0f * zoomRatio) + 54.0f);

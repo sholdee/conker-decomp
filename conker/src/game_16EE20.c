@@ -1633,7 +1633,7 @@ f32 func_15144AA8(s32 index) {
 
 /* Position (unk2F8) of D_800DBFF0[index]. */
 Vec3f *func_15144B34(s32 index) {
-    return (Vec3f *)&D_800DBFF0[index].eye;
+    return &D_800DBFF0[index].eye;
 }
 
 /* Wraps an angle into [0, 2 pi] radians. */

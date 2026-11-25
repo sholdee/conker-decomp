@@ -112,7 +112,7 @@ void func_1511EF40(WorldObject *prop) {
             actor->target.x = prop->x;
             actor->target.y = prop->y;
             actor->target.z = prop->z;
-            *(Vec3f *)&actor->focus = *(Vec3f *)&actor->target;
+            actor->focus = actor->target;
             actor->eye.x = 0.0f;
             actor->eye.z = 0.0f;
             actor->eye.y = 300.0f;

@@ -102,7 +102,7 @@ Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 kind, u8 
     s32 flip;
 
     spawn.flags = emitter->flags | 0x40000000;
-    spawn.pos = *(Vec3f *)&emitter->pos; // TODO(vectors): struct17/vertex mix
+    spawn.pos = emitter->pos;
     if (arg2) {
         spawn.flags |= 0x01000000;
         func_1510F800(0);

@@ -138,7 +138,7 @@ void func_151A7A90(Bolt *bolt) {
             dir.y = bolt->def.end.y - bolt->def.start.y;
             dir.z = bolt->def.end.z - bolt->def.start.z;
             up = bolt->def.up;
-            func_151450B4((Vec3f *)&dir, (Vec3f *)&up, (Vec3f *)&side);
+            func_151450B4(&dir, &up, &side);
             {
                 s32 i;
 

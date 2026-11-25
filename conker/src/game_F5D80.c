@@ -584,7 +584,7 @@ void func_150CA150(Actor *actor) {
         red = r;
         green = g;
         blue = b;
-        func_151D5404((Vec3f *)&pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
+        func_151D5404(&pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
         {
             RadialEffectDef def;
             u8 padB[0x14]; // matching: frame padding

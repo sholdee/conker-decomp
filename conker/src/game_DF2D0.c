@@ -114,7 +114,7 @@ void func_150B1F90(EmitterEffect *effect) {
         spawn.b2 = 0;
         spawn.brightness = 0xFF;
         spawn.scaleRate = 1.016479015f;
-        spawn.pos = *(Vec3f *)&data->pos; // TODO(vectors): struct17/vertex mix
+        spawn.pos = data->pos;
         spawn.offset.x = 0.0f;
         spawn.offset.y = 0.0f;
         spawn.offset.z = 0.0f;

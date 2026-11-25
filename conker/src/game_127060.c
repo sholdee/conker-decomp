@@ -480,7 +480,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
         {
             Spawn15153F18 first;
 
-            first.pos = *(Vec3f *)&pos; // TODO(vectors): struct17/vertex mix
+            first.pos = pos;
             first.unk14 = 4.0f;
             first.unk2C = 9;
             first.unk2E = 6;
@@ -509,7 +509,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
         {
             Spawn15150178 second;
 
-            second.pos = *(Vec3f *)&pos; // TODO(vectors): struct17/vertex mix
+            second.pos = pos;
             second.unk14 = 7;
             second.unk16 = 6;
             second.unk00 = 0;

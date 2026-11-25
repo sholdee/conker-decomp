@@ -284,7 +284,7 @@ void func_151D6BFC(Actor *owner, u8 arg1, s32 arg2) {
     params.owner = owner;
     params.ownerId = owner->unique_id;
     params.unk41 = 1;
-    params.pos = D_800A5480; // variables.h declares D_800A5480 as f32; it is a struct17
+    params.pos = D_800A5480;
     params.fadeStart = 8;
     params.fadeRate = 0x1F;
     func_15157010(&params, 0, 1.0f, 0, 0, 0, arg1, arg2);

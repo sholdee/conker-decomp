@@ -1014,7 +1014,7 @@ void func_151A2F0C(DescParticle *particle) {
 
     config.countBase = 8;
     config.countRange = 6;
-    config.position = *(Vec3f *)&particle->desc.pos; // TODO(vectors): struct17/vertex mix
+    config.position = particle->desc.pos;
     if (particle->desc.flags & 0x1000) {
         config.position.x += particle->desc.offset.x;
         config.position.y += particle->desc.offset.y;

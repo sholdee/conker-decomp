@@ -61,7 +61,7 @@ void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 s
     if (func_15145128(&delta, &dir, &length, &invLength) != 0) {
         spiral.flags = (fadeNear ? SPIRAL_FADE_NEAR : 0) | (sound ? SPIRAL_SOUND : 0);
         spiral.timeLeft = length * invSpeed;
-        spiral.center = *(Vec3f *)from; // TODO(vectors): struct17/vertex mix
+        spiral.center = *from;
         spiral.phase = func_150ADA68() * 6.2831855f;
         spiral.phaseRate = func_150ADA68() * 0.2f + 0.08000000566f;
         if (func_150ADA20() & 1) {

@@ -13,7 +13,7 @@ void func_151220D0(Camera *arg0) {
     f32 heading;
 
     if (!(arg0->contPad->button & 4)) {
-        func_15048F90((Vec3f *)&arg0->eye, (Vec3f *)&arg0->target, &vector);
+        func_15048F90(&arg0->eye, &arg0->target, &vector);
         vector.x += arg0->prevTarget.x - arg0->target.x;
         vector.z += arg0->prevTarget.z - arg0->target.z;
         heading = func_15048FC8(&vector);
@@ -41,7 +41,7 @@ void func_15122170(Camera *arg0) {
     arg0->unk5DC -= arg0->unk5DC * 0.07999999821f;
     arg0->orbitSpeed = 0.0f;
     func_15125330(arg0);
-    target = (Vec3f *)arg0->unk614;
+    target = arg0->unk614;
     if (target == NULL) {
         func_15122980(arg0);
         return;

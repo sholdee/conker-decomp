@@ -454,8 +454,8 @@ void func_15120158(Camera *camera) {
     camera->playerExt->aimTarget.z += aim->offset.z;
     camera->playerExt->aimEye.x += aim->offset.x;
     camera->playerExt->aimEye.z += aim->offset.z;
-    func_150491EC((Vec3f *)&camera->playerExt->aimEye, (Vec3f *)&camera->playerExt->aimTarget,
-                  (Vec3f *)&camera->playerExt->aimDir);
+    func_150491EC(&camera->playerExt->aimEye, &camera->playerExt->aimTarget,
+                  &camera->playerExt->aimDir);
     func_15123A54(camera);
     func_1512E140(camera);
     func_15125594(camera);

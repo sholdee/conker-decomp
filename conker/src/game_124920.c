@@ -111,7 +111,7 @@ void func_150F7470(Vec3f *pos, Vec3f *aim, s32 arg2, Vec3f *target, u8 targetIsD
     state.trailAge = 0.0f;
     state.trailDist = 0.0f;
     state.trailAgeStep = 70.0f * arg7;
-    state.trailPos = *(Vec3f *)pos; // TODO(vectors): struct17/vertex mix
+    state.trailPos = *pos;
     state.speed = speed;
     state.trailStep.x = state.dir.x * 70.0f;
     state.trailStep.y = state.dir.y * 70.0f;
@@ -323,7 +323,7 @@ s8 func_150F78B4(EffectObj *obj) {
 
                 puffState.phase = 4.712388992f;
                 puffState.timeLeft = 27.0f - state->trailAge;
-                spawn.pos = *(Vec3f *)&state->trailPos; // TODO(vectors): struct17/vertex mix
+                spawn.pos = state->trailPos;
                 spawn.unk44 = puffState.timeLeft * 6.481481552f;
                 puff = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1); // matching: the int cast orders the arg setup
                 if (puff != NULL) {
@@ -508,7 +508,7 @@ s32 func_150F81BC(EffectObj *obj) {
 
                     puffState.phase = 4.712388992f;
                     puffState.timeLeft = 27.0f - follow->trailAge;
-                    spawn.pos = *(Vec3f *)&follow->trailPos; // TODO(vectors): struct17/vertex mix
+                    spawn.pos = follow->trailPos;
                     spawn.unk44 = puffState.timeLeft * 6.481481552f;
                     puff = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC,
                                          obj->unk1); // matching: the int cast orders the arg setup

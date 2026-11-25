@@ -176,7 +176,7 @@ void func_151DC97C(Emitter *emitter) {
         desc.scaleStart = 120;
         desc.brightness = 0xFF;
         desc.scaleRate = 1.006579f;
-        desc.pos = *(Vec3f *)&data->pos; // TODO(vectors): struct17/vertex mix
+        desc.pos = data->pos;
         desc.offset.x = 0.0f;
         desc.offset.y = 0.0f;
         desc.offset.z = 0.0f;
