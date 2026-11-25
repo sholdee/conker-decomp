@@ -4,6 +4,7 @@
    declarations follow below. */
 #define func_1000B1B0 func_1000B1B0_hdr
 #define func_1000B1FC func_1000B1FC_hdr
+#define func_1000D758 func_1000D758_hdr
 #define func_1000DF68 func_1000DF68_hdr
 #define D_8002B074 D_8002B074_hdr
 #define D_8002B9D4 D_8002B9D4_hdr
@@ -16,6 +17,7 @@
 #include "variables.h"
 #undef func_1000B1B0
 #undef func_1000B1FC
+#undef func_1000D758
 #undef func_1000DF68
 #undef D_8002B074
 #undef D_8002B9D4
@@ -963,6 +965,8 @@ void func_1000D2F8(s32 index, f32 x, f32 y, f32 z) {
     MusicCallback callback;
     s32 i;
 
+    // matching: index and channel are read back from their stack slots on every use, which IDO
+    // only does through these pointer views; offset is the byte offset of index in the tables
     channel = (u8)((u32 *)&index)[0];
     status = func_1000853C((u8)((u32 *)&index)[0]);
     offset = (s32)((u32 *)&index)[0] * sizeof(*slot);
@@ -972,9 +976,10 @@ void func_1000D2F8(s32 index, f32 x, f32 y, f32 z) {
         if (track->pendingJump != 0 && func_1000CDA0(track->jumpWait, track->syncTo)) {
             func_10008C6C(((u8 *)&channel)[3], (*slot)->pendingJump - 1);
             track = *slot;
-            if (((u32)track->pendingVolume) != 0) {
-                track->volume = ((u32)track->pendingVolume);
-                (*slot)->baseVolume = ((u32)track->pendingVolume);
+            // matching: the u32 casts steer IDO's register choice for the pending volume
+            if (track->pendingVolume != 0) {
+                track->volume = (u32)track->pendingVolume;
+                (*slot)->baseVolume = (u32)track->pendingVolume;
                 track = *slot;
             }
             track->fade.current = 0x7FFF;
@@ -1025,14 +1030,12 @@ void func_1000D2F8(s32 index, f32 x, f32 y, f32 z) {
                             if ((*slot)->mutedChannels != 0) {
                                 func_100088F0(channel, (*slot)->mutedChannels, 0);
                             }
-                            i = 0;
-                            do {
+                            for (i = 0; i < 16; i++) {
                                 if ((*slot)->channelVolumes[i] != 0) {
                                     func_10008660(channel, i, (*slot)->channelVolumes[i], 1);
                                     (*slot)->channelVolumes[i] = 0;
                                 }
-                                i++;
-                            } while (i != 16);
+                            }
                         }
                     } else {
                         next->id = -1;
@@ -1087,7 +1090,7 @@ void func_1000D2F8(s32 index, f32 x, f32 y, f32 z) {
 
 /* Per-frame music update: ducks the channels by the kinds of sequence playing, then runs
    func_1000CEAC and func_1000D2F8 on every channel. */
-void func_1000D758(f32 x, f32 y, s32 z) {
+void func_1000D758(f32 x, f32 y, f32 z) {
     MusicInfo *infos;
     s32 kind5Mask;
     s32 noDuckMask;
@@ -1143,7 +1146,7 @@ void func_1000D758(f32 x, f32 y, s32 z) {
             func_1000CEAC(i);
         }
         for (i = 0; i < 3; i++) {
-            func_1000D2F8(i, x, y, *(f32 *)&z);
+            func_1000D2F8(i, x, y, z);
         }
     }
 }
