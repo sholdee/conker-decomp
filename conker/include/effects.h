@@ -1407,7 +1407,7 @@ typedef union EffectExtra {
 } EffectExtra; /* size 0x38 */
 
 /* func_15134DAC (game_161520.c): spawn parameters of a blood strip (object type 0x29), copied to the strip
- * at +0x10. Every duration frames (after pause) offsetA/offsetB are sampled in bone space. */
+ * at +0x18. Every duration frames (after pause) offsetA/offsetB are sampled in bone space. */
 typedef struct BloodStripDesc {
     /* 0x00 */ u8 ownerId;
     /* 0x01 */ u8 pad1[3];
@@ -1431,6 +1431,45 @@ typedef struct BloodStripDesc {
     /* 0x39 */ s8 updateCallback;   /* index into D_80089B6C, -1 = none */
     /* 0x3A */ u8 pad3A[2];
 } BloodStripDesc; /* size 0x3C */
+
+/*
+ * Blood swept between two points (offsetA, offsetB) on an actor's bone (object type 0x29, spawned by
+ * func_15134DAC in game_161520.c): every frame the points are transformed and the emit callback runs at
+ * steps between the old and new spots. Its fields ownerId..updateCallback are a copy of BloodStripDesc.
+ */
+typedef struct BloodStrip {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ s32 active;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ u8 ownerId;
+    /* 0x19 */ u8 pad19[3];
+    /* 0x1C */ struct Actor *owner;
+    /* 0x20 */ u8 bone;
+    /* 0x21 */ u8 pad21[3];
+    /* 0x24 */ Vec3f offsetA;
+    /* 0x30 */ Vec3f offsetB;
+    /* 0x3C */ u8 flags;
+    /* 0x3D */ u8 pad3D;
+    /* 0x3E */ s16 duration;   // frames of emission after each sample
+    /* 0x40 */ s16 pause;      // frames to wait (below 0) before the next sample
+    /* 0x42 */ s16 lifetime;
+    /* 0x44 */ u16 sound;      // playing sound, stopped when the strip is freed
+    /* 0x46 */ s8 sampleCallback;
+    /* 0x47 */ s8 emitCallback;
+    /* 0x48 */ s8 rateCallback;
+    /* 0x49 */ u8 pad49[3];
+    /* 0x4C */ f32 rate;
+    /* 0x50 */ u8 mode;        // selects the message handler
+    /* 0x51 */ s8 updateCallback;
+    /* 0x52 */ u8 pad52[2];
+    /* 0x54 */ s16 timer;
+    /* 0x56 */ u8 pad56[2];
+    /* 0x58 */ Vec3f posA;
+    /* 0x64 */ Vec3f posB;
+    /* 0x70 */ f32 accumulator;
+    /* 0x74 */ f32 power;      // set by the rate or sample callback
+    /* 0x78 */ f32 time;
+} BloodStrip; /* size 0x7C; extra data may follow */
 
 /* func_15154684 (game_17CAF0.c): countBase + rand % (countRange + 1) func_151C5F44 particles (game_1F2730.c)
  * from pos, each at a random yaw (the yaw fields are unused) and a pitch/speed from the ranges below. */
@@ -1822,6 +1861,26 @@ typedef struct BloodTrailDesc {
     /* 0x19 */ s8 callback;
     /* 0x1A */ u8 pad1A[2];
 } BloodTrailDesc; /* size 0x1C */
+
+/* Blood trailing behind a moving point given by three coordinate pointers (object type 0x2A, spawned by
+ * func_15134908 in game_161520.c); x..callback are a copy of BloodTrailDesc. Extra data may follow. */
+typedef struct BloodTrail {
+    /* 0x00 */ EffectHeader header; // header.kind and header.owner are passed on to the drops it emits
+    /* 0x10 */ f32 *x;
+    /* 0x14 */ f32 *y;
+    /* 0x18 */ f32 *z;
+    /* 0x1C */ f32 radius;
+    /* 0x20 */ f32 rate;
+    /* 0x24 */ s16 lifetime;
+    /* 0x26 */ u8 flags;
+    /* 0x27 */ u8 emitter;
+    /* 0x28 */ u8 unk28;
+    /* 0x29 */ s8 callback;
+    /* 0x2A */ u8 pad2A[2];
+    /* 0x2C */ Vec3f previous;
+    /* 0x38 */ f32 inverseDiameter;
+    /* 0x3C */ f32 accumulator;
+} BloodTrail; /* size 0x40 */
 
 /* matching: the first 0x18 bytes of BloodTrailDesc; a full BloodTrailDesc on the stack changes the frame. */
 typedef struct BloodTrailDesc18 {

@@ -410,25 +410,6 @@ void func_151347CC(void *arg0, ActorMsg *msg, u8 message) {
 void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 }
 
-/* Blood trailing behind a moving point given by three coordinate pointers. */
-typedef struct {
-    EffectHeader header;
-    f32 *x;
-    f32 *y;
-    f32 *z;
-    f32 radius;
-    f32 rate;
-    s16 lifetime;
-    u8 flags;
-    u8 emitter;
-    u8 field28;
-    s8 callback;
-    u8 pad2A[2];
-    Vec3f previous;
-    f32 inverseDiameter;
-    f32 accumulator;
-} BloodTrail;
-
 #define BLOOD_TRAIL_LIFETIME   0x01
 #define BLOOD_TRAIL_SKIP_FRAME 0x02 /* don't emit on the next update */
 #define BLOOD_TRAIL_CALLBACK   0x04
@@ -565,44 +546,6 @@ s32 func_15134CEC(Struct15134CEC *particle) {
     return 1;
 }
 
-
-/*
- * Blood swept between two points (offsetA, offsetB) on an actor's bone: every frame the
- * points are transformed and the emit callback runs at steps between the old and new spots.
- */
-typedef struct {
-    EffectHeader header;
-    s32 active;
-    s32 unk14;
-    u8 ownerId;
-    u8 pad19[3];
-    Actor *owner;
-    u8 bone;
-    u8 pad21[3];
-    Vec3f offsetA;
-    Vec3f offsetB;
-    u8 flags;
-    u8 pad3D;
-    s16 duration;           /* frames of emission after each sample */
-    s16 pause;              /* frames to wait (below 0) before the next sample */
-    s16 lifetime;
-    u16 sound;              /* playing sound, stopped when the strip is freed */
-    s8 sampleCallback;
-    s8 emitCallback;
-    s8 rateCallback;
-    u8 pad49[3];
-    f32 rate;
-    u8 mode;                /* selects the message handler */
-    s8 updateCallback;
-    u8 pad52[2];
-    s16 timer;
-    u8 pad56[2];
-    Vec3f posA;
-    Vec3f posB;
-    f32 accumulator;
-    f32 power;              /* set by the rate callback */
-    f32 time;
-} BloodStrip;
 
 #define BLOOD_STRIP_LIFETIME 0x02
 

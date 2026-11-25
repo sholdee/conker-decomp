@@ -98,17 +98,6 @@ void func_150D0E90(s32 arg0) {
     }
 }
 
-/* A live blood strip (see game_161520.c); only the fields used here are named. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x74 - 0xD];
-    /* 0x74 */ f32 power; /* set by the sample callback */
-    /* 0x78 */ f32 time;
-} BloodStrip;
-
 BloodStrip *func_15134DAC(BloodStripDesc *desc, s32 arg1);
 
 /* Spawns a blood strip on obj that uses sample callback 6 and emit callback 7 (below);
@@ -182,5 +171,5 @@ void func_150D1204(Vec3f *pointA, Vec3f *pointB, Vec3f *velocityA, Vec3f *veloci
 
     func_151DB5D0(0, &start, &velocity, random0 * 61.0f + 60.0f, 1.03571403f, 0.9704080224f,
                   random1 * 0.1570000052f + -0.08000000566f, (randomInt & 0xF) + 35,
-                  func_150ADA20() % 156U + 100, 30, 8, 0, strip->unkC, strip->unk1);
+                  func_150ADA20() % 156U + 100, 30, 8, 0, strip->header.owner, strip->header.kind);
 }

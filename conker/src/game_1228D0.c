@@ -653,16 +653,6 @@ void func_150F6890(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
     func_15134DAC(&desc, 0);
 }
 
-/* Partial view of game_161520.c's BloodStrip. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1C - 0xD];
-    /* 0x1C */ Actor *owner;
-} BloodStrip;
-
 void func_15137F30(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32 time, BloodStrip *strip,
                    f32 *start, f32 *end, f32 *velocity, f32 *arg3, s16 *arg4, s8 *arg5, f32 *arg6);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
@@ -703,5 +693,5 @@ void func_150F695C(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32
         flag = 0;
     }
     func_151D9014(start, velocity, 1, arg3, arg4, (u8)arg5, arg6, probeGround, 1.8f, 1.8f, 1,
-                  (s32)&ground, 1, flag, strip->unkC, strip->unk1);
+                  (s32)&ground, 1, flag, strip->header.owner, strip->header.kind);
 }

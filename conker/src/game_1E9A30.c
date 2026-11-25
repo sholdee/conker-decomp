@@ -423,45 +423,6 @@ s32 func_151BD2BC(OwnedEffect28 *effect) {
     return 1;
 }
 
-/* Blood swept between two points on an actor's bone (game_161520.c's BloodStrip). */
-typedef struct {
-    u8 pad0;
-    u8 kind;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
-    s32 active;
-    s32 unk14;
-    u8 ownerId;
-    u8 pad19[3];
-    Actor *owner;
-    u8 bone;
-    u8 pad21[3];
-    Vec3f offsetA;
-    Vec3f offsetB;
-    u8 flags;
-    u8 pad3D;
-    s16 duration;
-    s16 pause;
-    s16 lifetime;
-    u16 sound;
-    s8 sampleCallback;
-    s8 emitCallback;
-    s8 rateCallback;
-    u8 pad49[3];
-    f32 rate;
-    u8 mode;
-    s8 updateCallback;
-    u8 pad52[2];
-    s16 timer;
-    u8 pad56[2];
-    Vec3f posA;
-    Vec3f posB;
-    f32 accumulator;
-    f32 power;
-    f32 time;
-} BloodStrip;
-
 /* BloodStrip spawned by func_151BD2F8, with two bytes of extra data. */
 typedef struct {
     BloodStrip strip;
@@ -600,7 +561,7 @@ void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 t
         desc.offset.x = strip->owner->xpos;
         desc.offset.y = strip->owner->ypos;
         desc.offset.z = strip->owner->zpos;
-        particle = func_15130374(&desc, 1, 0x10, strip->unkC, strip->kind);
+        particle = func_15130374(&desc, 1, 0x10, strip->header.owner, strip->header.kind);
         if (particle != NULL) {
             memcpy(&particle->drag, &drag, sizeof(drag));
             memcpy(&particle->owner, &ownerRef, sizeof(ownerRef));
