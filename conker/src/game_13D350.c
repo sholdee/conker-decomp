@@ -382,10 +382,11 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
     return ret;
 }
 
-typedef struct {
-    s32 tex;
-    s32 idx;
-} TexEntry15110CFC;
+/* A queued sky tile: its loaded texture and its format (the index into the per-format load tables). */
+typedef struct SkyTile {
+    s32 texture;
+    s32 format;
+} SkyTile;
 
 s32 func_150A6210(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
 extern s32 func_1510D0EC(s32, s32, s32, s32);
@@ -394,9 +395,13 @@ extern u8 D_800DBEAB;
 extern u8 D_800DBEAC;
 extern s32 *D_800DBE80;
 
+/* Draws sky face `mode`: a width x height grid of tileW x tileH textured quads in the plane `axis` ('x', 'y' or
+ * 'z') through (x, y, z). Quads outside the view (func_150A6210) and rows past the sky extent `limit` are
+ * skipped; visible ones are queued in *vtxBufPtr and drawn four at a time. The vertex/queue cursors are carried
+ * between faces through the pointer arguments. quad is scratch (callers pass NULL). */
 Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, u32 width, u32 height,
                    u32 tileW, u32 tileH, f32 x, f32 y, f32 z, u8 axis, f32 mtx[4][4], s32 limit,
-                   s32 *vtxCountPtr, s32 *vtxIdxPtr, TexEntry15110CFC *entries, s32 *lastIdxPtr,
+                   s32 *vtxCountPtr, s32 *vtxIdxPtr, SkyTile *queue, s32 *lastIdxPtr,
                    u8 *sizes, u8 *shifts, s16 *palOffs, u8 *tlutCounts, u8 *tiles, s32 mode) {
     Vtx *vtxBuf;
     s32 row;
@@ -423,7 +428,7 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
     s32 tcS;
     s32 tcT;
     s32 i;
-    s32 padE;
+    s32 padE; // matching: padE, padM, padR, padB and the unused v size IDO's -g3 frame
     s32 padM[1];
     s32 nCols;
     s32 nRows;
@@ -431,7 +436,7 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
     s32 h8;
     s32 colIdx;
     s32 rowIdx;
-    s32 idx;
+    s32 format;
     s32 lastIdx;
     s32 padR;
     s32 vtxCount;
@@ -558,8 +563,8 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
                     quad[3].v.tc[0] = 16;
                     quad[3].v.flag = 0;
                     nCols = width / tileW;
-                    entries[vtxCount >> 2].tex = texAddr;
-                    entries[vtxCount >> 2].idx =
+                    queue[vtxCount >> 2].texture = texAddr;
+                    queue[vtxCount >> 2].format =
                         // matching: index + base (not D_800DBE80[...]) sets IDO's addu operand order
                         *((colIdx * nRows + rowIdx + mode * nCols * nRows) + (u8 *)D_800DBE80);
                     vtxCount += 4;
@@ -567,16 +572,16 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
                         s32 padB[2];
                         gSPVertex(gfx++, &vtxBuf[vtxIdx], 16, 0);
                         for (i = 0; i < 16; i += 4) {
-                            idx = entries[i >> 2].idx;
+                            format = queue[i >> 2].format;
                             gDPPipeSync(gfx++);
-                            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, entries[i >> 2].tex);
-                            gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, ((sizes[idx] + 0x800) >> shifts[idx]) - 1, 0);
-                            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, entries[i >> 2].tex + palOffs[idx]);
+                            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, queue[i >> 2].texture);
+                            gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, ((sizes[format] + 0x800) >> shifts[format]) - 1, 0);
+                            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, queue[i >> 2].texture + palOffs[format]);
                             gDPLoadSync(gfx++);
-                            gDPLoadTLUTCmd(gfx++, G_TX_LOADTILE - 1, tlutCounts[idx]);
-                            if (idx != lastIdx) {
-                                lastIdx = idx;
-                                gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, tiles[idx], G_ON);
+                            gDPLoadTLUTCmd(gfx++, G_TX_LOADTILE - 1, tlutCounts[format]);
+                            if (format != lastIdx) {
+                                lastIdx = format;
+                                gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, tiles[format], G_ON);
                             }
                             gSP1Triangle(gfx++, i + 2, i, i + 1, 0);
                             gSP1Triangle(gfx++, i + 3, i, i + 2, 0);
@@ -584,7 +589,7 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 texBase, Vtx *quad, s32 arg4, 
                         vtxCount = 0;
                         vtxIdx += 16;
                     }
-                } else {
+                } else { // matching: the empty else arms steer IDO's register allocation
                 }
             } else {
             }
@@ -699,10 +704,6 @@ typedef struct Game13D350Face {
     s16 unkE;
 } Game13D350Face;
 
-typedef struct Game13D350Tex {
-    s32 addr;
-    s32 idx;
-} Game13D350Tex;
 
 typedef struct Game13D350Color {
     u8 r;
@@ -745,7 +746,7 @@ Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f
     s32 vtx;
     s32 count;
     s32 vtxBase;
-    Game13D350Tex texs[4];
+    SkyTile queue[4];
     Gfx *t;
     s32 lastIdx;
     f32 fov;
@@ -853,16 +854,16 @@ Gfx *func_15111AF4(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 pitch, f32 yaw, f
         idx = (i == 5) ? 0 : i;
         gfx = func_15110CFC(gfx, (Vtx **)&vtx, texList[idx], 0, 2, D_800A2DA0[i].unk0, D_800A2DA0[i].unk2, 0x3C, 0x1E,
                             D_800A2DA0[i].unk4, D_800A2DA0[i].unk6, D_800A2DA0[i].unk8, fmt, mtx, dist, &count, &vtxBase,
-                            (TexEntry15110CFC *)texs, &lastIdx, sp104.v, sp100.v, spFC.v, spF8.v, spF4.v, idx);
+                            queue, &lastIdx, sp104.v, sp100.v, spFC.v, spF8.v, spF4.v, idx);
     }
     if (count != 0) {
         gSPVertex(gfx++, vtxBase * 16 + vtx, count, 0);
         for (j = 0; j < count; j += 4) {
-            idx = texs[j >> 2].idx;
+            idx = queue[j >> 2].format;
             gDPPipeSync(gfx++);
-            { Gfx *command = gfx++; command->words.w0 = 0xFD100000; command->words.w1 = texs[j >> 2].addr; }
+            { Gfx *command = gfx++; command->words.w0 = 0xFD100000; command->words.w1 = queue[j >> 2].texture; }
             { Gfx *command = gfx++; command->words.w0 = 0xF3000000; command->words.w1 = 0x077FF000; }
-            { Gfx *command = gfx++; command->words.w0 = 0xFD100000; command->words.w1 = texs[j >> 2].addr + spFC.v[idx]; }
+            { Gfx *command = gfx++; command->words.w0 = 0xFD100000; command->words.w1 = queue[j >> 2].texture + spFC.v[idx]; }
             gDPLoadSync(gfx++);
             gDPLoadTLUTCmd(gfx++, 6, spF8.v[idx]);
             if (idx != lastIdx) {
