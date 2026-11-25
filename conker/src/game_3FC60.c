@@ -9,21 +9,12 @@ extern u8 D_800DF9B3[];
 extern u8 *D_800BE510;
 extern u16 D_800BE528;
 
-typedef struct {
-    u8 pad0[0xC];
-    u8 unkC;
-    u8 unkD;
-    u8 unkE;
-    u8 padF;
-} struct_func_15012C84;
-
 
 extern void *allocate_memory(s32, s32, s32, s32);
 extern void func_15012ED8(u32 *);
 extern u8 D_800BE530[];
 extern s16 D_800BE550[];
-void func_15012C84(struct_func_15012C84 *arg0, u32 arg1);
-extern struct_func_15012C84 *D_800B0E10[];
+void func_15012C84(Vtx *arg0, u32 arg1);
 extern s32 D_800B0E44;
 extern s32 D_800B0E48;
 extern s32 D_800B0E4C;
@@ -37,7 +28,7 @@ void func_150127B0(void) {
     s32 j;
     s32 k;
     VtxColorGroup *b;
-    struct_func_15012C84 *src;
+    Vtx *src;
 
     D_800BE520 = NULL;
     if (D_800B0DF0->vtxColorFlags != 0) {
@@ -73,7 +64,7 @@ void func_150127B0(void) {
             for (i = 0; i < D_800DBEF0; i++) {
                 if (D_800DBEF4[i].numVertices != 0) {
                     D_800BE524[i] = D_800BE528;
-                    func_15012C84((struct_func_15012C84 *)D_800DBEF4[i].srcVertices, D_800DBEF4[i].numVertices);
+                    func_15012C84(D_800DBEF4[i].srcVertices, D_800DBEF4[i].numVertices);
                 } else {
                     D_800BE524[i] = 0xFFFF;
                 }
@@ -91,12 +82,12 @@ void func_150127B0(void) {
                         if (i < 4) {
                             src = D_800B0E10[i];
                         } else {
-                            src = (struct_func_15012C84 *)D_800DBEF4[i - 4].srcVertices;
+                            src = D_800DBEF4[i - 4].srcVertices;
                         }
                         for (k = 0; k < b[j].count; k++) {
-                            D_800BE520[i][j][k * 3 + 0] = src[b[j].vertexIndices[k]].unkC;
-                            D_800BE520[i][j][k * 3 + 1] = src[b[j].vertexIndices[k]].unkD;
-                            D_800BE520[i][j][k * 3 + 2] = src[b[j].vertexIndices[k]].unkE;
+                            D_800BE520[i][j][k * 3 + 0] = src[b[j].vertexIndices[k]].v.cn[0];
+                            D_800BE520[i][j][k * 3 + 1] = src[b[j].vertexIndices[k]].v.cn[1];
+                            D_800BE520[i][j][k * 3 + 2] = src[b[j].vertexIndices[k]].v.cn[2];
                         }
                     }
                 } else {
@@ -107,13 +98,13 @@ void func_150127B0(void) {
     }
 }
 
-void func_15012C84(struct_func_15012C84 *arg0, u32 arg1) {
+void func_15012C84(Vtx *arg0, u32 arg1) {
     u32 i;
 
     for (i = 0; i < arg1; i++) {
-        D_800BE510[D_800BE528 * 3] = arg0[i].unkC;
-        D_800BE510[(D_800BE528 * 3) + 1] = arg0[i].unkD;
-        D_800BE510[(D_800BE528 * 3) + 2] = arg0[i].unkE;
+        D_800BE510[D_800BE528 * 3] = arg0[i].v.cn[0];
+        D_800BE510[(D_800BE528 * 3) + 1] = arg0[i].v.cn[1];
+        D_800BE510[(D_800BE528 * 3) + 2] = arg0[i].v.cn[2];
         D_800BE528++;
     }
 }

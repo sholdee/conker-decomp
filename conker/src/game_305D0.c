@@ -52,7 +52,6 @@ typedef struct {
     s32 loaded;
 } LevelModelEntry;
 
-extern s32 D_800B0E10[];
 extern s32 D_800B0E20[];
 extern LevelModelEntry *D_800B0E50;
 
@@ -81,7 +80,7 @@ void func_150031EC(s32 level) {
     D_800B0E50 = models;
     for (k = 1; k < 4; k++) {
         D_800B0E00[k] = 0;
-        D_800B0E10[k] = 0;
+        D_800B0E10[k] = NULL;
         D_800B0E40[k] = 0;
     }
     func_150034B4();
@@ -106,13 +105,13 @@ void func_150031EC(s32 level) {
                 func_15003120(i, (s32)model, model->rangeList);
                 if (i < 4) {
                     D_800B0E00[i] = model->displayList;
-                    D_800B0E10[i] = (s32)model->vertices;
-                    D_800B0E40[i] = (u32)((s32)D_800B0E00[i] - D_800B0E10[i]) / sizeof(Vtx); // the display list follows the vertices
+                    D_800B0E10[i] = model->vertices;
+                    D_800B0E40[i] = (u32)((s32)D_800B0E00[i] - (s32)D_800B0E10[i]) / sizeof(Vtx); // the display list follows the vertices
                     D_800B0E20[i] = model->unk8;
                     if (i == 0) {
                         func_150039BC(model->unk10);
                     }
-                    func_150049A4(D_800B0E00[i], D_800B0E10[i] + 0xFF000000, (s32)model);
+                    func_150049A4(D_800B0E00[i], (s32)D_800B0E10[i] + 0xFF000000, (s32)model);
                     func_1510CE60(D_800B0E00[i], 0, 1, 63, NULL);
                 } else {
                     func_150049A4(model->displayList, 0, (s32)model);

@@ -885,6 +885,7 @@ extern LevelHeader *D_800B0DF0;
 extern Gfx *D_800B0E00[4]; // level display lists (D_800B0E04 is [1])
 extern Gfx *D_800B0E04;
 
+extern Vtx *D_800B0E10[4]; // level mesh vertices of the four level models (each display list follows its vertices)
 extern VtxColorGroup **D_800B0E30; // groups of each vertex color set
 extern u8 *D_800B0E34; // group count of each vertex color set
 

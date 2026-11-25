@@ -165,7 +165,6 @@ typedef struct {
 } UvWobble;
 
 extern UvWobble *D_800D9E60[];
-extern Vtx *D_800B0E10[];
 extern void *allocate_memory(s32, s32, s32, s32);
 
 /* Registers a UV wobble for mesh 0 vertices drawn with texture `tex` and mesh 1 ones drawn with D_800917B8. */
