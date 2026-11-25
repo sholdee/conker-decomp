@@ -17,8 +17,6 @@ extern s32 func_1000B060(f32, f32, u32);
 extern void func_1000E7A0(u32, s32);
 extern s32 func_1510F8CC(s32);
 extern f32 D_800AAA30; /* 0.1f */
-extern f32 D_800AAA80;
-extern f32 D_800AAA84;
 
 /* The view of D_800B0DF0 used here; struct104 has no field at 0x2C. */
 typedef struct {
@@ -141,30 +139,33 @@ typedef struct {
     u16 range;
 } GameStruct151C2734Sfx;
 
+/* Spawn template for func_1513D2F0 (0x58 bytes). */
 typedef struct Game1EF500TrailSpawn {
-    u8 field00;
-    u8 field01;
-    s16 field02;
-    s16 field04;
-    u8 pad06[2];
-    s32 field08;
-    s32 field0C;
-    u8 field10;
-    u8 field11;
-    u8 field12;
-    u8 field13;
-    f32 field14;
-    f32 field18;
-    Vec3f position;
-    f32 field28[6];
-    s32 flags;
-    u8 field44;
-    u8 field45;
-    u8 field46;
-    u8 field47;
-    u8 pad48[4];
-    u8 field4C;
-    u8 pad4D[0xB];
+    /* 0x00 */ u8 field00;
+    /* 0x01 */ u8 field01;
+    /* 0x02 */ s16 field02;
+    /* 0x04 */ s16 field04;
+    /* 0x06 */ u8 pad06[2];
+    /* 0x08 */ s32 field08;
+    /* 0x0C */ s32 field0C;
+    /* 0x10 */ u8 field10;
+    /* 0x11 */ u8 field11;
+    /* 0x12 */ u8 field12;
+    /* 0x13 */ u8 field13;
+    /* 0x14 */ f32 field14;
+    /* 0x18 */ f32 field18;
+    /* 0x1C */ Vec3f position;
+    /* 0x28 */ f32 field28[6];
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 field44;
+    /* 0x45 */ u8 field45;
+    /* 0x46 */ u8 field46;
+    /* 0x47 */ u8 field47;
+    /* 0x48 */ s32 field48;
+    /* 0x4C */ u8 field4C;
+    /* 0x4D */ u8 pad4D[7];
+    /* 0x54 */ s16 field54;
+    /* 0x56 */ s16 field56;
 } Game1EF500TrailSpawn;
 
 extern GameStruct151C2734Sfx D_8008FBE8[];
@@ -907,24 +908,6 @@ void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
 }
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x30];
-    /* 0x30 */ struct17 pos;
-    /* 0x3C */ u8 pad3C[0x60 - 0x3C];
-    /* 0x60 */ struct17 prev;
-    /* 0x6C */ u8 unk6C[0x88 - 0x6C];
-} GameSub151C3B0C;
-
-typedef struct {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0x110 - 0xD];
-    /* 0x110 */ GameSub151C3B0C unk110;
-    /* 0x198 */ s32 unk198;
-} GameObj151C3B0C;
-
-typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s16 unk4;
     /* 0x06 */ u8 unk6;
@@ -945,44 +928,11 @@ typedef struct {
     /* 0x21 */ u8 pad21;
     /* 0x22 */ s16 unk22;
     /* 0x24 */ s16 unk24;
-} GameDebris151C3B0C; /* 0x28 */
+} GameDebris151C3B0C; /* 0x28, func_1513C650 packet (as Packet15141F78 in game_16EE20.c) */
 
 typedef struct {
-    /* 0x00 */ u8 unk00;
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ s16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ u8 pad06[2];
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ struct17 pos;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ u8 unk4C;
-    /* 0x4D */ u8 pad4D[7];
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} GameSpark151C3B0C; /* 0x58 */
-
-typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
+    /* 0x00 */ s16 countBase;
+    /* 0x02 */ s16 countRange;
     /* 0x04 */ u8 unk4;
     /* 0x05 */ u8 pad5;
     /* 0x06 */ u16 unk6;
@@ -1008,13 +958,13 @@ typedef struct {
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;
-    /* 0x38 */ struct17 unk38;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s16 unk48;
-    /* 0x4A */ s16 unk4A;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
+    /* 0x38 */ Vec3f position;
+    /* 0x44 */ s16 yawBase;
+    /* 0x46 */ s16 pitchBase;
+    /* 0x48 */ s16 yawRange;
+    /* 0x4A */ s16 pitchRange;
+    /* 0x4C */ f32 speedBase;
+    /* 0x50 */ f32 speedRange;
     /* 0x54 */ f32 unk54;
     /* 0x58 */ f32 unk58;
     /* 0x5C */ s32 unk5C;
@@ -1024,19 +974,24 @@ typedef struct {
     /* 0x63 */ u8 unk63;
     /* 0x64 */ u8 unk64;
     /* 0x65 */ u8 pad65[3];
-    /* 0x68 */ f32 unk68;
-} GameSmoke151C3B0C; /* 0x6C */
+    /* 0x68 */ f32 extra;
+} GameSmoke151C3B0C; /* 0x6C, func_15153634 config (as Config15153634 in game_1EC390.c) */
 
-void func_15153634(void *, u8, u8, s32);
+void func_15153634(GameSmoke151C3B0C *, u8, u8, s32);
 
-void func_151C3B0C(GameObj151C3B0C *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, u8 arg6, u8 arg7) {
-    s32 kind;
-    GameSub151C3B0C *sub;
+/*
+ * Impact effects where the projectile hit: with the given chances, debris, a spark, a smoke burst
+ * and a flash. Their look depends on the hit surface's material and on the level (D_800BE9F0).
+ */
+void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f32 smokeChance, f32 flashChance,
+                   u8 debrisArg, u8 smokeArg, u8 sparkArg) {
+    s32 material;
+    Game1EF500TrailExt *ext;
     s32 type;
 
-    kind = arg0->unk198 & 0x1F;
+    material = trail->trail.path.field_60 & 0x1F;
     if ((D_800BE9F0 == 0x2B) || (D_800BE9F0 == 0x30)) {
-        switch (kind) {
+        switch (material) {
         case 1:
             type = 3;
             break;
@@ -1046,9 +1001,9 @@ void func_151C3B0C(GameObj151C3B0C *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4
             type = 4;
             break;
         }
-    } else if ((kind == 0xB) && (D_800BE9F0 == 4)) {
+    } else if ((material == 0xB) && (D_800BE9F0 == 4)) {
         type = 1;
-    } else if (((kind == 1) || (kind == 0xA)) && (D_800BE9F0 == 0xE)) {
+    } else if ((material == 1 || material == 0xA) && (D_800BE9F0 == 0xE)) {
         type = 2;
     } else if (D_800BE9F0 == 0x34) {
         type = 3;
@@ -1056,9 +1011,9 @@ void func_151C3B0C(GameObj151C3B0C *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4
         type = 5;
     } else {
         type = 0;
-        arg3 = arg2 = arg1 = 0.0f;
+        smokeChance = sparkChance = debrisChance = 0.0f;
     }
-    if (func_150ADA68() < arg1) {
+    if (func_150ADA68() < debrisChance) {
         GameDebris151C3B0C debris;
         f32 scale;
         const s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
@@ -1081,57 +1036,57 @@ void func_151C3B0C(GameObj151C3B0C *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4
         debris.unk18 = ((big ? 0x48 : 0x3B) << 16) + 2;
         debris.unk16 = 0;
         debris.unk17 = big ? 6 : 7;
-        debris.unk20 = arg5;
+        debris.unk20 = debrisArg;
         debris.unk22 = 0x20;
         debris.unk24 = 7;
-        sub = &arg0->unk110;
-        func_1513C650((s32)&debris, 0, 0, (s32)sub->unk6C, sub->pos.unk0, sub->pos.unk4, sub->pos.unk8,
-                      scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, arg0->unkC, arg0->unk1);
+        ext = &trail->trail;
+        func_1513C650((s32)&debris, 0, 0, (s32)ext->path.surface, ext->path.hit.x, ext->path.hit.y, ext->path.hit.z,
+                      scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, trail->unkC, trail->unk1);
     }
-    if (func_150ADA68() < arg2) {
-        GameSpark151C3B0C spark;
+    if (func_150ADA68() < sparkChance) {
+        Game1EF500TrailSpawn spark;
         const s32 shade[6] = { 0x6D, 0x6D, 0x6E, 0x6E, 0x6D, 0x6D };
 
-        sub = &arg0->unk110;
-        spark.unk00 = shade[type];
-        spark.unk01 = 0;
-        spark.unk02 = 0x3B03;
-        spark.unk04 = (func_150ADA20() % 6U) + 0xD;
-        spark.unk08 = 0;
-        spark.unk0C = 0;
-        spark.unk10 = 0xFF;
-        spark.unk11 = 0xFF;
-        spark.unk12 = 0xFF;
-        spark.unk13 = 0xFF;
-        spark.unk14 = (func_150ADA68() * 5.0f) + 7.0f;
-        spark.unk18 = (func_150ADA68() * 40.0f) + 10.0f;
-        spark.pos = sub->pos;
-        spark.unk28 = sub->pos.unk0 - sub->prev.unk0;
-        spark.unk2C = sub->pos.unk4 - sub->prev.unk4;
-        spark.unk30 = sub->pos.unk8 - sub->prev.unk8;
-        spark.unk34 = 1.269999981f;
-        spark.unk38 = 1.0f;
-        spark.unk3C = 56.81999969f;
+        ext = &trail->trail;
+        spark.field00 = shade[type];
+        spark.field01 = 0;
+        spark.field02 = 0x3B03;
+        spark.field04 = (func_150ADA20() % 6U) + 0xD;
+        spark.field08 = 0;
+        spark.field0C = 0;
+        spark.field10 = 0xFF;
+        spark.field11 = 0xFF;
+        spark.field12 = 0xFF;
+        spark.field13 = 0xFF;
+        spark.field14 = (func_150ADA68() * 5.0f) + 7.0f;
+        spark.field18 = (func_150ADA68() * 40.0f) + 10.0f;
+        spark.position = ext->path.hit;
+        spark.field28[0] = ext->path.hit.x - ext->path.end.x;
+        spark.field28[1] = ext->path.hit.y - ext->path.end.y;
+        spark.field28[2] = ext->path.hit.z - ext->path.end.z;
+        spark.field28[3] = 1.269999981f;
+        spark.field28[4] = 1.0f;
+        spark.field28[5] = 56.81999969f;
         spark.flags = (D_800BE616 ? 0x40000000 : 0) | 0x08DC0009;
-        spark.unk44 = (func_150ADA20() % 76U) + 0xB4;
-        spark.unk45 = 0xFF;
-        spark.unk46 = 0;
-        spark.unk47 = 7;
-        spark.unk48 = 0;
-        spark.unk4C = arg7;
-        spark.unk54 = 8;
-        spark.unk56 = 0x1F;
-        func_1513D2F0(&spark, (s32)&D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, arg0->unkC, arg0->unk1);
+        spark.field44 = (func_150ADA20() % 76U) + 0xB4;
+        spark.field45 = 0xFF;
+        spark.field46 = 0;
+        spark.field47 = 7;
+        spark.field48 = 0;
+        spark.field4C = sparkArg;
+        spark.field54 = 8;
+        spark.field56 = 0x1F;
+        func_1513D2F0(&spark, (s32)&D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, trail->unkC, trail->unk1);
     }
-    if (func_150ADA68() < arg3) {
+    if (func_150ADA68() < smokeChance) {
         GameSmoke151C3B0C smoke;
         const u8 colorA[6][3] = { { 0xB7, 0x77, 0x34 }, { 0xB7, 0x77, 0x34 }, { 0xAA, 0x52, 0x1E },
                             { 0xAA, 0x52, 0x1E }, { 0x98, 0x92, 0x79 }, { 0xFF, 0xC0, 0x00 } };
         const u8 colorB[6][3] = { { 0x5C, 0x30, 0x00 }, { 0x5C, 0x30, 0x00 }, { 0x00, 0x00, 0x00 },
                             { 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x8D }, { 0x8D, 0x00, 0x00 } };
 
-        smoke.unk0 = 5;
-        smoke.unk2 = 0xF;
+        smoke.countBase = 5;
+        smoke.countRange = 15;
         smoke.unk4 = 0x6C;
         smoke.unk6 = 0x5103;
         smoke.unk8 = 0x200005;
@@ -1156,13 +1111,13 @@ void func_151C3B0C(GameObj151C3B0C *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4
         smoke.unk2C = 1.049999952f;
         smoke.unk30 = 60.0f;
         smoke.unk34 = 65.0f;
-        smoke.unk38 = arg0->unk110.pos;
-        smoke.unk44 = 0;
-        smoke.unk46 = -0x28;
-        smoke.unk48 = 0xFF;
-        smoke.unk4A = 0x28;
-        smoke.unk4C = 9.0f;
-        smoke.unk50 = 17.0f;
+        smoke.position = trail->trail.path.hit;
+        smoke.yawBase = 0;
+        smoke.pitchBase = -40;
+        smoke.yawRange = 0xFF;
+        smoke.pitchRange = 40;
+        smoke.speedBase = 9.0f;
+        smoke.speedRange = 17.0f;
         smoke.unk54 = 0.00800000038f;
         smoke.unk58 = 0.2610000074f;
         smoke.unk5C = (D_800BE616 ? 0x800000 : 0) | 0x40E07;
@@ -1171,10 +1126,10 @@ void func_151C3B0C(GameObj151C3B0C *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4
         smoke.unk62 = 8;
         smoke.unk63 = 6;
         smoke.unk64 = 1;
-        smoke.unk68 = 0.8702070117f;
-        func_15153634(&smoke, arg6, arg0->unkC, arg0->unk1);
+        smoke.extra = 0.8702070117f;
+        func_15153634(&smoke, smokeArg, trail->unkC, trail->unk1);
     }
-    if (func_150ADA68() < arg4) {
+    if (func_150ADA68() < flashChance) {
         Header header;
         Header2 header2;
         const u8 color[2][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xA7, 0xA7 } };
@@ -1182,14 +1137,14 @@ void func_151C3B0C(GameObj151C3B0C *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4
 
         header.unk0 = 3;
         header.unk1 = -1;
-        sub = &arg0->unk110;
+        ext = &trail->trail;
         header.unk2 = (func_150ADA20() % 6U) + 3;
         header.unk4 = 0;
-        header2.unk0 = (s32)sub->pos.unk0;
-        header2.unk4 = (s32)sub->pos.unk4;
-        header2.unk8 = (s32)sub->pos.unk8;
+        header2.unk0 = (s32)ext->path.hit.x;
+        header2.unk4 = (s32)ext->path.hit.y;
+        header2.unk8 = (s32)ext->path.hit.z;
         sel = func_150ADA20() & 1;
-        func_151602C0(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, arg0->unkC, arg0->unk1);
+        func_151602C0(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, trail->unkC, trail->unk1);
     }
 }
 
@@ -1275,91 +1230,87 @@ s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     return alive;
 }
 
+/* Data of a timed particle emitter effect, after its 0x28-byte effect head. */
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-} GameStruct151C4644Vec;
-
-typedef struct {
-    GameStruct151C4644Vec *unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s16 unk10;
-    s16 unk12;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-} GameStruct151C4644Sub;
+    /* 0x00 */ s16 *position; /* x, y, z */
+    /* 0x04 */ s32 timer;
+    /* 0x08 */ s32 minimumDelay;
+    /* 0x0C */ s32 delayRange;
+    /* 0x10 */ s16 minimumLife;
+    /* 0x12 */ s16 lifeRange;
+    /* 0x14 */ f32 base;
+    /* 0x18 */ f32 jitter;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 spread;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+} Game1EF500TimedEmitter;
 
 typedef struct {
-    u8 pad0[1];
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    GameStruct151C4644Sub unk28;
-} GameStruct151C4644;
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x1B];
+    /* 0x28 */ Game1EF500TimedEmitter emitter;
+} Game1EF500TimedOwner;
 
+/* Data of each particle the timed emitter spawns (copied to the particle's +0x28). */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-} GameStruct151C4644Payload;
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 angle10;
+    /* 0x14 */ f32 angle14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ Vec3f position;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+} Game1EF500TimedParticle; /* 0x44 */
 
-void func_151C4644(GameStruct151C4644 *arg0) {
-    GameStruct151C4644Sub *sub;
-    GameStruct151C4644Payload sp48;
-    struct260 *temp_v0;
+/* Timed emitter update: when its timer runs out, spawns one particle and picks a new random delay. */
+void func_151C4644(Game1EF500TimedOwner *owner) {
+    Game1EF500TimedEmitter *emitter;
+    Game1EF500TimedParticle data;
+    struct260 *effect;
 
-    sub = &arg0->unk28;
-    sub->unk4 -= D_800BE9E4;
-    if (sub->unk4 < 0) {
-        sp48.unk0 = sub->unk1C;
-        sp48.unk4 = sub->unk20;
-        sp48.unk8 = func_150ADA68() * sub->unk24;
-        sp48.unkC = func_150ADA68() * sub->unk24;
-        sp48.unk10 = func_150ADA68() * D_800AAA80;
-        sp48.unk14 = func_150ADA68() * D_800AAA84;
-        sp48.unk18 = sub->unk28;
-        sp48.unk1C = sub->unk28;
-        sp48.unk20 = 0.0f;
-        sp48.unk24 = (func_150ADA68() * sub->unk18) + sub->unk14;
-        sp48.unk28 = 0.0f;
-        sp48.unk2C = sub->unk0->unk0;
-        sp48.unk30 = sub->unk0->unk2;
-        sp48.unk34 = sub->unk0->unk4;
-        sp48.unk38 = sub->unk2C;
-        sp48.unk3C = sub->unk30;
-        sp48.unk40 = sub->unk34;
+    emitter = &owner->emitter;
+    emitter->timer -= D_800BE9E4;
+    if (emitter->timer < 0) {
+        data.unk0 = emitter->unk1C;
+        data.unk4 = emitter->unk20;
+        data.unk8 = func_150ADA68() * emitter->spread;
+        data.unkC = func_150ADA68() * emitter->spread;
+        data.angle10 = func_150ADA68() * 6.283185482f; /* 2pi */
+        data.angle14 = func_150ADA68() * 6.283185482f;
+        data.unk18 = emitter->unk28;
+        data.unk1C = emitter->unk28;
+        data.unk20 = 0.0f;
+        data.unk24 = (func_150ADA68() * emitter->jitter) + emitter->base;
+        data.unk28 = 0.0f;
+        data.position.x = emitter->position[0];
+        data.position.y = emitter->position[1];
+        data.position.z = emitter->position[2];
+        data.unk38 = emitter->unk2C;
+        data.unk3C = emitter->unk30;
+        data.unk40 = emitter->unk34;
 
-        temp_v0 = func_15149130((s16)((func_150ADA20() % (u32)(sub->unk12 + 1)) + sub->unk10),
-                                -1, 0x2B, -1, 1, 0, (struct37 *)0x44, arg0->unkC, arg0->unk1);
-        if (temp_v0 != NULL) {
-            memcpy((u8 *)temp_v0 + 0x28, &sp48, 0x44);
+        // the struct37 * parameter is really the size of the effect's data
+        effect = func_15149130((s16)((func_150ADA20() % (u32)(emitter->lifeRange + 1)) + emitter->minimumLife),
+                               -1, 0x2B, -1, 1, 0, (struct37 *)sizeof(data), owner->unkC, owner->unk1);
+        if (effect != NULL) {
+            memcpy((u8 *)effect + 0x28, &data, sizeof(data));
         }
 
-        sub->unk4 = (func_150ADA20() % (u32)(sub->unkC + 1)) + sub->unk8;
+        emitter->timer = (func_150ADA20() % (u32)(emitter->delayRange + 1)) + emitter->minimumDelay;
     }
 }
