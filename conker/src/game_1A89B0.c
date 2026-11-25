@@ -203,7 +203,7 @@ extern Game1A89B0AnimRef D_8008CF00[][8];
 extern u32 D_800DDC40[15]; /* distance to the nearest sprite this frame */
 extern Game1A89B0TexSize D_800DDB80[];
 extern void *allocate_memory(s32, s32, s32, s32);
-extern s32 func_150AD9A0(s32, s32, s32);
+extern s32 math_distance3D(s32, s32, s32);
 extern void func_15170500(s32, s32, s32, s32, s32, s32, s32);
 
 extern struct { s16 x; s16 y; s16 z; } D_800DD470; /* set by func_1517E05C; x == 0 means unset */
@@ -335,13 +335,13 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
         return;
     }
     for (j = 0; (u32) j < (u32) D_800DDD0C && IN_WINDOW(i); i += dir) {
-        dist = func_150AD9A0(D_800DDD18[i].x - x, D_800DDD18[i].y - y, D_800DDD18[i].z - z);
+        dist = math_distance3D(D_800DDD18[i].x - x, D_800DDD18[i].y - y, D_800DDD18[i].z - z);
         if (dist < radius) {
             type = D_800DDD18[i].unk6 & 0xF;
             if ((u32) dist < D_800DDC40[type]) {
                 D_800DDC40[type] = dist;
             }
-            fadeDist = func_150AD9A0(D_800DDD18[i].x - fadeX, D_800DDD18[i].y - fadeY, D_800DDD18[i].z - fadeZ);
+            fadeDist = math_distance3D(D_800DDD18[i].x - fadeX, D_800DDD18[i].y - fadeY, D_800DDD18[i].z - fadeZ);
             if (fadeDist > 140) {
                 if (fadeDist < 240) {
                     dist = radius - ((radius - dist) * (fadeDist - 140)) / 100;
@@ -377,7 +377,7 @@ void func_1517BBAC(s32 x, s32 y, s32 z, s32 radius, f32 angle, s32 fadeX, s32 fa
                     phase = 0;
                 }
                 if (D_800DD470.x != 0) {
-                    if (func_150AD9A0(D_800DDD18[i].x - D_800DD470.x, D_800DDD18[i].y - D_800DD470.y,
+                    if (math_distance3D(D_800DDD18[i].x - D_800DD470.x, D_800DDD18[i].y - D_800DD470.y,
                                       D_800DDD18[i].z - D_800DD470.z) < 80 &&
                         D_800DDBC0[type] == 0) {
                         if (D_800DDD18[i].unkB != 0x21) {

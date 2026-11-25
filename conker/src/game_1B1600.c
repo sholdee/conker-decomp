@@ -102,7 +102,7 @@ extern f32 D_800D3680;
 extern f32 D_800D3684;
 extern f32 D_800D368C;
 extern s8 D_8008D3F8[8][3];
-extern s32 func_150AD9A0(s32, s32, s32);
+extern s32 math_distance3D(s32, s32, s32);
 extern void func_15047390(MtxF mf, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern void func_150A7A48(MtxF a, MtxF b, MtxF c);
@@ -153,7 +153,7 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
                 nodePos[0] = node->x;
                 nodePos[1] = node->y;
                 nodePos[2] = node->z;
-                v = func_150AD9A0(nodePos[0] - objPos.x, nodePos[1] - objPos.y, nodePos[2] - objPos.z);
+                v = math_distance3D(nodePos[0] - objPos.x, nodePos[1] - objPos.y, nodePos[2] - objPos.z);
                 if (v < dist && minDist < v) {
                     dist = v;
                     found++;
@@ -217,7 +217,7 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     if (delta.y < minY) {
         D_800DDFB0[slot].y += minY - delta.y;
         delta.y = minY;
-        v = func_150AD9A0(delta.x, delta.y, delta.z);
+        v = math_distance3D(delta.x, delta.y, delta.z);
         scale = D_800DF6F8 / v;
         D_800DF6F8 = v;
         D_800DDFB0[slot].x += delta.x * scale - delta.x;
@@ -334,7 +334,7 @@ s32 func_15184DF0(s32 objIndex, s32 view, f32 *halfX, f32 *halfY, f32 *halfZ) {
     x = D_800CC2D0[objIndex].x_position;
     y = D_800CC2D0[objIndex].y_position;
     z = D_800CC2D0[objIndex].z_position;
-    dist = func_150AD9A0(x - D_800DBFF0[view].eye.x,
+    dist = math_distance3D(x - D_800DBFF0[view].eye.x,
                          y - D_800DBFF0[view].eye.y,
                          z - D_800DBFF0[view].eye.z);
     if (dist > 2000) {

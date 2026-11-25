@@ -268,3 +268,4 @@ D_80091AB8 = 0x80091AB8; // type:label
 func_16000B14 = 0x16000B14; // type:func
 D_1600487C = 0x1600487C; // type:label
 func_150A9C40                   = 0x150A9C40; // type:func
+math_distance3D = 0x150AD9A0; // type:func

@@ -142,7 +142,7 @@ void func_151177C0(WorldObject *prop) {
     PROP_SET_MOTION(prop, motion);
 }
 
-s32 func_150AD9A0(s32 dx, s32 dy, s32 dz);
+s32 math_distance3D(s32 dx, s32 dy, s32 dz);
 
 /*
  * Slides the prop out from its saved home position along its rotated Z axis by the signed
@@ -182,7 +182,7 @@ void func_151179BC(WorldObject *prop) {
         prop->z = homeZ;
         return;
     }
-    current = func_150AD9A0(homeX - prop->x, homeY - prop->y, homeZ - prop->z);
+    current = math_distance3D(homeX - prop->x, homeY - prop->y, homeZ - prop->z);
     if (motion == PROP_ARRIVED) {
         if (distance < 0) {
             offset = -distance;

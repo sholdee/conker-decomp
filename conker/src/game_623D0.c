@@ -191,7 +191,7 @@ extern void *allocate_memory(s32, s32, s32, s32);
 void func_1502D54C(s32, s32 *);
 s32 func_1502DB20(u8);
 s32 func_15031070(ModelAttachment *, Actor *, MtxF **, s32 *);
-s32 func_150AD9A0(s32, s32, s32);
+s32 math_distance3D(s32, s32, s32);
 
 /*
  * Queues reflections of object `objIndex` and of its attachments, mirrored as described at
@@ -241,7 +241,7 @@ visible:;
     if (D_800C35EA[0] == 1) {
         range = 10000;
     }
-    dist = func_150AD9A0(D_800DBFF0->eye.x - D_800CC2D0[objIndex].x_position,
+    dist = math_distance3D(D_800DBFF0->eye.x - D_800CC2D0[objIndex].x_position,
                          D_800DBFF0->eye.y - D_800CC2D0[objIndex].y_position,
                          D_800DBFF0->eye.z - D_800CC2D0[objIndex].z_position);
     if ((f32)range < dist) {

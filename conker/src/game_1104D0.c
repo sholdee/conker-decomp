@@ -4,7 +4,7 @@
 
 extern void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
 void func_151C3B0C(s32, f32, f32, f32, f32, s32, s32, s32);
-extern s32 func_150AD9A0(s32, s32, s32);
+extern s32 math_distance3D(s32, s32, s32);
 
 /* 18 bytes copied verbatim from an effect into each particle it spawns. */
 typedef struct {
@@ -93,7 +93,7 @@ s32 func_150E3208(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s3
     HomingEffect *effect;
 
     effect = func_150E3020(x, y, z, targetX, targetY, targetZ, arg6,
-                           (f32)func_150AD9A0(x - targetX, y - targetY, z - targetZ) / (f32)frames,
+                           (f32)math_distance3D(x - targetX, y - targetY, z - targetZ) / (f32)frames,
                            NULL, 0.0f, 0.0f, 0.0f, NULL, -99);
     if (effect != NULL) {
         return effect->slot + 1;

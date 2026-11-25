@@ -104,7 +104,7 @@ void func_150A0D14(TriggerZone *zone) {
 }
 
 void func_15035808(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
-s32 func_150AD9A0(s16, s16, s16);
+s32 math_distance3D(s16, s16, s16);
 
 /* Starts the type-6 zone effect (func_15035808) for every active actor inside such a zone. */
 void func_150A0D8C(void) {
@@ -124,7 +124,7 @@ void func_150A0D8C(void) {
 
                 dy = obj->y_position - D_800D3098[i].y;
                 if (D_800D3098[i].subtype == 0) {
-                    if (func_150AD9A0((s16)(obj->x_position - D_800D3098[i].x), dy,
+                    if (math_distance3D((s16)(obj->x_position - D_800D3098[i].x), dy,
                                       (s16)(obj->z_position - D_800D3098[i].z)) < D_800D3098[i].radius) {
                         fade = D_800D3098[i].radius * 0.2f;
                         if (fade > 100.0f) {
@@ -521,7 +521,7 @@ s32 func_150A1DA0(Actor *actor, TriggerZone *zone, s32 withMargin) {
             }
             break;
         case 1:
-            if (func_150AD9A0(dx, dy, dz) < zone->radius + margin) {
+            if (math_distance3D(dx, dy, dz) < zone->radius + margin) {
                 return 0;
             }
             break;
