@@ -232,7 +232,6 @@ typedef struct {
 
 extern s8 D_800E0BB1;
 extern u16 D_800BE930[];
-extern u16 D_800BE918[][3];
 extern u8 D_800D2E40;
 s32 func_151E5F64(s32 arg0);
 
@@ -299,7 +298,7 @@ s32 func_1509FE0C(s32 id, s32 query, QueryArgs *args) {
     case 39:
         return D_800BE930[args->unk8];
     case 40:
-        return D_800BE918[args->unk8][0];
+        return D_800BE918[args->unk8].button;
     case 41:
         return D_800E0B94 == 2;
     case 42:

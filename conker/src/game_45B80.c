@@ -133,8 +133,8 @@ s32 func_1501878C(void) {
         if (D_800DC9F0 != 0) {
             func_151412BC();
         }
-        (*(s16 *)&D_800BEAA8)--; // matching: read signed (lh); variables.h declares it u16
-        if (D_800BE615 != 0 && *(s16 *)&D_800BEAA8 == 0) {
+        D_800BEAA8--;
+        if (D_800BE615 != 0 && D_800BEAA8 == 0) {
             func_10004074(D_800BE9C8[0]);
             func_10004074(D_800BE9C8[1]);
             D_800BE9C8[0] = NULL;
@@ -405,7 +405,7 @@ s32 func_15019130(void) {
     func_150242F8(0, 0);
     func_15020EC4(0);
     func_1501E2F8(0);
-    if (*(s8 *)&D_800D23A9 != 0) { // matching: read signed (lb); variables.h declares it u8
+    if (D_800D23A9 != 0) {
         func_15087CC0();
     }
     func_15122AE0();

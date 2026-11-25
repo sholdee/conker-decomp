@@ -430,8 +430,8 @@ extern u8   (*D_8008B1F8[])(struct225*);
 extern void (*D_8008B208[])(struct225*);
 extern void (*D_8008B2B0[])(struct225*);
 extern s32 (*D_8008B36C[])(void);
-extern s32 (*D_8008B370[])(s32);
-extern void (*D_8008B374[])(s32);
+extern void (*D_8008B370[])(struct225 *effect, s32 arg1, u8 eventId); // light event handlers
+extern void (*D_8008B374[])(struct225 *effect);
 
 extern struct115 D_8008B4A8[];
 extern struct115 D_8008B4D0[];
@@ -845,6 +845,7 @@ extern s32  D_800BE654[];
 extern f32  D_800BE6B8;
 extern struct156 D_800BE760[];
 extern OSMesgQueue D_800BE900;
+extern OSContPad D_800BE918[4]; // controller pads (read in game_48FD0.c)
 extern u8   D_800BE938;
 extern Gfx *D_800BE9C8[2]; // display-list buffer per framebuffer (D_800BE9C0)
 extern Gfx *D_800BE9D0;    // display-list write head
@@ -887,7 +888,7 @@ extern s32 D_800BEA08;
 extern OSMesgQueue D_800BEA10;
 extern OSMesg      D_800BEA28;
 extern struct195  *D_800BEA68;
-extern u16 D_800BEAA8;
+extern s16 D_800BEAA8;
 extern u8  D_800BEAAA;
 extern u8  D_800BEAAB;
 extern u8  D_800BEAC0;
@@ -1071,7 +1072,7 @@ extern u16 D_800D2132;
 extern s32 D_800D2138;
 
 extern s16 D_800D2340;
-extern u8  D_800D23A9;
+extern s8  D_800D23A9;
 extern s32 D_800D23C0;
 extern s32 D_800D23D0;
 

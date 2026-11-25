@@ -103,7 +103,6 @@ extern s8 D_8008FE2C;
 extern u8 D_8008FE34;
 extern f32 D_8008FDE8;
 
-extern OSContPad D_800BE918[4];
 extern s32 D_8008FE24;
 extern s8 D_8008FD84;
 extern u8 D_8008FF08[];

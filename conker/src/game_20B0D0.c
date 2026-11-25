@@ -37,7 +37,6 @@ struct Struct151E5034 {
     } unk66[4];
 };
 
-extern OSContPad D_800BE918[];
 extern u16 D_800BE930[]; /* button bits per controller, read by the menus */
 extern OSIoMesg D_800388E0;
 extern struct Struct151E5034 *D_8008FDD4;

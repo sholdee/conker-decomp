@@ -31,7 +31,6 @@ extern u16 D_800BE700[];
 extern u16 D_800BE708[];
 extern u16 D_800BE718[];
 extern u8 D_800BE740;
-extern OSContPad D_800BE918[];
 extern u16 D_800BE930[];
 extern u8 D_800E0B95;
 extern OSMesg D_800BE990;

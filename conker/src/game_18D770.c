@@ -1377,7 +1377,7 @@ void func_151635A8(struct225 *effect, s32 arg1, u8 eventId) {
     LightTrack *track = (LightTrack *)&effect->unk18;
 
     if (D_8008B370[track->handler] != NULL) {
-        ((void (*)(struct225 *, s32, u8))D_8008B370[track->handler])(effect, arg1, eventId);
+        D_8008B370[track->handler](effect, arg1, eventId);
     }
 }
 
@@ -1632,7 +1632,7 @@ void func_15163FEC(struct225 *effect, ActorEvent *event, u8 eventId) {
             dst->actorId = event->actorId;
         }
     } else if (D_8008B374[attach->unk15] != NULL) {
-        D_8008B374[attach->unk15]((s32)effect);
+        D_8008B374[attach->unk15](effect);
     }
 }
 

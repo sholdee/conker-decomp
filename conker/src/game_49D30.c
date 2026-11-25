@@ -4,14 +4,12 @@
 #define D_800C3958 D_800C3958_hdr
 #define D_800C35EA D_800C35EA_hdr
 #define D_800C3654 D_800C3654_hdr
-#define D_800BEAA8 D_800BEAA8_hdr
 #define D_800C3CA0 D_800C3CA0_hdr
 #define D_800C3600 D_800C3600_hdr
 #include "variables.h"
 #undef D_800C3958
 #undef D_800C35EA
 #undef D_800C3654
-#undef D_800BEAA8
 #undef D_800C3CA0
 #undef D_800C3600
 
@@ -91,7 +89,6 @@ typedef struct {
 extern SeqTrackState *D_800C3958[];
 extern u8 D_800C35EA[];
 extern u8 D_800C3654[];
-extern s16 D_800BEAA8;
 
 extern u16 *D_800C35C8[];
 extern u16 *D_800C35D8[];
