@@ -113,14 +113,7 @@ typedef struct {
 } BeamLink; /* 0x44 */
 
 typedef struct Beam {
-    /* 0x000 */ u8 pad0[0x2C];
-    /* 0x02C */ f32 width;
-    /* 0x030 */ u8 pad30[4];
-    /* 0x034 */ Vec3f start;
-    /* 0x040 */ Vec3f end;
-    /* 0x04C */ u8 pad4C[0x10];
-    /* 0x05C */ u8 alpha;
-    /* 0x05D */ u8 pad5D[0xB3];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ BeamLink link;
 } Beam;
 
@@ -329,13 +322,13 @@ s32 func_150EF38C(Beam *beam) {
     }
     link->flags &= ~1;
     if (actor->unk1D4 != NULL) {
-        func_15143134(D_800A15F0[link->slot], &beam->start.x, (Mtx *)actor->unk1D4 + D_800A1638[link->slot]);
-        beam->end.x = target->x_position;
-        beam->end.y = target->y_position;
-        beam->end.z = target->z_position;
-        link->direction.x = beam->end.x - beam->start.x;
-        link->direction.y = beam->end.y - beam->start.y;
-        link->direction.z = beam->end.z - beam->start.z;
+        func_15143134(D_800A15F0[link->slot], &beam->head.def.pos.x, (Mtx *)actor->unk1D4 + D_800A1638[link->slot]);
+        beam->head.def.rot.x = target->x_position;
+        beam->head.def.rot.y = target->y_position;
+        beam->head.def.rot.z = target->z_position;
+        link->direction.x = beam->head.def.rot.x - beam->head.def.pos.x;
+        link->direction.y = beam->head.def.rot.y - beam->head.def.pos.y;
+        link->direction.z = beam->head.def.rot.z - beam->head.def.pos.z;
         if (func_15145128(&link->direction.x, &link->direction.x, &link->distance, &link->inverse) != 0) {
             link->flags |= 1;
         }
@@ -343,20 +336,20 @@ s32 func_150EF38C(Beam *beam) {
     link->widthPhase += 0.1600000113f * D_800BE9A4;
     angle = func_15144B68(link->widthPhase);
     link->widthPhase = angle;
-    beam->width = sinf(angle) * 5.0f + 16.0f;
+    beam->head.def.width = sinf(angle) * 5.0f + 16.0f;
     link->alphaPhase += 0.1600000113f * D_800BE9A4;
     angle = func_15144B68(link->alphaPhase);
     link->alphaPhase = angle;
-    beam->alpha = sinf(angle) * 25.0f + 230.0f;
+    beam->head.def.unk44 = sinf(angle) * 25.0f + 230.0f;
     if (link->flags & 1) {
         if (link->flash != NULL) {
             link->flash->sprite->hidden = FALSE;
             position = link->flash->sprite->position;
-            position[0] = beam->start.x;
-            position[1] = beam->start.y;
-            position[2] = beam->start.z;
+            position[0] = beam->head.def.pos.x;
+            position[1] = beam->head.def.pos.y;
+            position[2] = beam->head.def.pos.z;
         }
-        func_15081690(actor, beam->start.x, beam->start.y, beam->start.z,
+        func_15081690(actor, beam->head.def.pos.x, beam->head.def.pos.y, beam->head.def.pos.z,
                       link->direction.x, link->direction.y, link->direction.z,
                       &hit, link->distance, 1, 0, 1, 4, 0, 0);
         if (hit.count >= 2) {
@@ -497,8 +490,8 @@ s32 func_150EFA4C(Spark *spark) {
             u8 slot;
 
             slot = link->slot;
-            spark->start = beam->start;
-            spark->end = beam->end;
+            spark->start = beam->head.def.pos;
+            spark->end = beam->head.def.rot;
             spark->distance = link->distance;
             spark->inverse = link->inverse;
             func_15143134(D_800A1620[slot], &spark->offset.x, (Mtx *)actor->unk1D4 + D_800A1638[slot]);
@@ -533,7 +526,7 @@ void func_150EFB80(BeamEmitter *emitter) {
     if (link->accum > 1.0f) {
         beam = link->beam;
         if (beam->link.flags & 1) {
-            spawn.pos = beam->end;
+            spawn.pos = beam->head.def.rot;
             spawn.flags = 5;
             spawn.kind = 10;
             part.flags = 4;
@@ -587,12 +580,9 @@ typedef struct {
 } GlowLink;
 
 typedef struct Glow {
-    /* 0x000 */ u8 pad0[0x34];
-    /* 0x034 */ Vec3f start;
-    /* 0x040 */ Vec3f end;
-    /* 0x04C */ u8 pad4C[0xC];
-    /* 0x058 */ s32 flags;             /* bits 1-2: drawn */
-    /* 0x05C */ u8 pad5C[0x114];
+    /* 0x000 */ DefParticleHead head;   /* head.def.flags bits 1-2: drawn */
+    /* 0x110 */ GlowShape shape;
+    /* 0x16C */ u8 pad16C[4];
     /* 0x170 */ GlowLink link;
 } Glow;
 
@@ -681,14 +671,14 @@ s32 func_150F00EC(Glow *glow) {
     beam = glow->link.beam;
     link = &beam->link;
     if (beam->link.flags & 1) {
-        glow->start = beam->start;
-        glow->end.x = beam->start.x + (link->direction.x * 500.0f);
-        glow->end.y = beam->start.y + (link->direction.y * 500.0f);
-        glow->end.z = beam->start.z + (link->direction.z * 500.0f);
-        glow->flags |= 6;
+        glow->head.def.pos = beam->head.def.pos;
+        glow->head.def.rot.x = beam->head.def.pos.x + (link->direction.x * 500.0f);
+        glow->head.def.rot.y = beam->head.def.pos.y + (link->direction.y * 500.0f);
+        glow->head.def.rot.z = beam->head.def.pos.z + (link->direction.z * 500.0f);
+        glow->head.def.flags |= 6;
     } else {
-        glow->flags &= ~4;
-        glow->flags &= ~2;
+        glow->head.def.flags &= ~4;
+        glow->head.def.flags &= ~2;
     }
     return 1;
 }

@@ -5,9 +5,11 @@
 
 /* Common head of the effect / particle objects (the first 0x10 bytes of each). */
 typedef struct EffectHeader {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xA];
+    /* 0x00 */ u8 type;
+    /* 0x01 */ u8 kind;    /* also the object list it is linked into */
+    /* 0x02 */ u8 pad2[2];
+    /* 0x04 */ struct EffectHeader *prev;
+    /* 0x08 */ struct EffectHeader *next;
     /* 0x0C */ u8 owner;
     /* 0x0D */ u8 unkD;
     /* 0x0E */ s16 state;   /* -1 frees the object */
