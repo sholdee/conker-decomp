@@ -6,11 +6,11 @@
 #include "variables.h"
 
 extern void func_1510F800(s32);
-extern void *func_1513D524(void *, u8, u8, u8, u8, u8, s32, u8, s32);
-extern void func_1513F680();
-extern void func_151429E0(u8, u8 *, u8 *, u8 *);
-extern void func_1518CA80(void *, u8);
-extern void func_151D5D60();
+extern void *func_1513D524(void *spawn, u8, u8, u8, u8, u8, s32 extraSize, u8, s32);
+extern void func_1513F680(void *obj, u8, u8 effect, u8, u8);
+extern void func_151429E0(u8, u8 *r, u8 *g, u8 *b);
+extern void func_1518CA80(void *effect, u8 mode);
+extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **vtx, u8 *fresh);
 
 /* Emitter description that func_15149550 turns into a spawned particle. */
 typedef struct {
@@ -57,7 +57,7 @@ typedef struct {
     /* 0x44 */ u8 unk44;
     /* 0x45 */ u8 unk45;
     /* 0x46 */ u8 pad46[2];
-    /* 0x48 */ s32 region;
+    /* 0x48 */ s32 unk48;              // func_1510FD20(x, z) when flag 0x01000000 is set
     /* 0x4C */ s32 pad4C[3];
 } ParticleSpawn;
 
@@ -115,13 +115,13 @@ typedef struct {
     /* 0x073 */ u8 unk73;
     /* 0x074 */ u8 growFlags;
     /* 0x075 */ u8 pad75[0x4B];
-    /* 0x0C0 */ s16 vtxTemplate[0x20];
-    /* 0x100 */ s16 *vtxBuffers[4];
+    /* 0x0C0 */ Vtx quadTemplate[4];
+    /* 0x100 */ Vtx *quadBuffers[4];    // each holds two copies of the quad (double-buffered)
     /* 0x110 */ ParticleMotion motion;
 } Particle;
 
 /* Spawns a particle described by `emitter`, with randomly flickering size and channel C. */
-Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 useRegion, u8 kind, u8 arg4, s32 arg5) {
+Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 kind, u8 arg4, s32 arg5) {
     Particle *particle;
     ParticleSpawn spawn;
     ParticleMotion motion;
@@ -129,13 +129,13 @@ Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 useRegion, u8 kind
 
     spawn.flags = emitter->flags | 0x40000000;
     spawn.pos = emitter->pos;
-    if (useRegion) {
+    if (arg2) {
         spawn.flags |= 0x01000000;
         func_1510F800(0);
-        spawn.region = func_1510FD20(spawn.pos.unk0, spawn.pos.unk8);
+        spawn.unk48 = func_1510FD20(spawn.pos.unk0, spawn.pos.unk8);
     } else {
         spawn.flags &= ~0x01000000;
-        spawn.region = 0;
+        spawn.unk48 = 0;
     }
 
     switch (kind) {
@@ -249,200 +249,141 @@ s32 func_15149838(Particle *particle) {
     return 1;
 }
 
-typedef struct {
-    char pad_0x0[0x8];
-    f32 field_0x8;
-    char pad_0xC[0x14];
-    f32 field_0x20;
-    char pad_0x24[0x20];
-    f32 field_0x44;
-} Struct15149550ObjExtra;
+/* Grows width and height towards their targets; once both are within 95%, switches the
+ * particle to effect 0xD. Returns 1 (keep alive). */
+s32 func_15149A94(Particle *particle) {
+    ParticleMotion *motion = &particle->motion;
+    s32 flags = particle->growFlags;
+    s32 grown = TRUE;
 
-typedef struct {
-    char pad_0x0[0x1C];
-    s16 field_0x1C;
-    char pad_0x1E[0xE];
-    f32 field_0x2C;
-    f32 field_0x30;
-    char pad_0x34[0x24];
-    s32 field_0x58;
-    char pad_0x5C[0x14];
-    u8 field_0x70;
-    char pad_0x71[0x1];
-    u8 field_0x72;
-    u8 field_0x73;
-    u8 field_0x74;
-    char pad_0x75[0x9B];
-    Struct15149550ObjExtra field_0x110;
-    u8 field_0x158;
-} Struct15149550Obj;
-
-s32 func_15149A94(Struct15149550Obj *arg0) {
-    Struct15149550ObjExtra *temp_v0;
-    s32 var_v1;
-    s32 flags;
-
-    flags = arg0->field_0x74;
-    var_v1 = 1;
-    temp_v0 = &arg0->field_0x110;
     if (!(flags & 2)) {
-        arg0->field_0x2C += (temp_v0->field_0x8 - arg0->field_0x2C) * temp_v0->field_0x44;
-        if ((temp_v0->field_0x8 * 0.95f) < arg0->field_0x2C) {
-            arg0->field_0x74 |= 2;
-            flags = arg0->field_0x74;
+        particle->width += (motion->targetA - particle->width) * motion->growRate;
+        if (motion->targetA * 0.95f < particle->width) {
+            flags = particle->growFlags |= 2;
         } else {
-            var_v1 = 0;
-            flags = arg0->field_0x74;
+            grown = FALSE;
+            flags = particle->growFlags;
         }
     }
     if (!(flags & 8)) {
-        arg0->field_0x30 += (temp_v0->field_0x20 - arg0->field_0x30) * temp_v0->field_0x44;
-        if ((temp_v0->field_0x20 * 0.95f) < arg0->field_0x30) {
-            arg0->field_0x74 |= 8;
+        particle->height += (motion->targetB - particle->height) * motion->growRate;
+        if (motion->targetB * 0.95f < particle->height) {
+            particle->growFlags |= 8;
         } else {
-            var_v1 = 0;
+            grown = FALSE;
         }
     }
-    if (var_v1) {
-        func_1513F680(arg0, arg0->field_0x70, 0xD, arg0->field_0x72, arg0->field_0x73);
+    if (grown) {
+        func_1513F680(particle, particle->unk70, 0xD, particle->unk72, particle->unk73);
     }
-    if (arg0->field_0x1C < 5) {
-        func_1513F680(arg0, arg0->field_0x70, arg0->field_0x158, arg0->field_0x72, arg0->field_0x73);
-        arg0->field_0x1C = 0x64;
-        arg0->field_0x58 &= -2;
+    if (particle->timer < 5) {
+        func_1513F680(particle, particle->unk70, motion->effect, particle->unk72, particle->unk73);
+        particle->timer = 100;
+        particle->unk58 &= ~1;
     }
     return 1;
 }
 
-struct Foo15149BF4 {
-    char pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    char pad34[0x11C];
-    f32 unk150;
-};
-
-s32 func_15149BF4(struct Foo15149BF4 *arg0) {
-    s32 ret;
-
-    arg0->unk2C = arg0->unk2C - (arg0->unk2C * arg0->unk150);
-    arg0->unk30 = arg0->unk30 - (arg0->unk30 * arg0->unk150);
-    if (arg0->unk2C < 2.0f) {
-        goto ret0;
-    }
-    ret = 1;
-    if (arg0->unk30 < 2.0f) {
-        ret0:
-        return 0;
-    }
-    return ret;
-}
-
-extern f32 D_800BE9A4;
-s32 func_15149C58(f32 *arg0) {
-    arg0[11] -= arg0[11] * arg0[84];
-    arg0[12] -= arg0[12] * arg0[84];
-    arg0[20] += arg0[19] * D_800BE9A4;
-    arg0[14] += arg0[20] * D_800BE9A4;
-    if (arg0[87] < arg0[14]) {
-        return 0;
-    }
-    if ((arg0[11] < 4.0f) || (arg0[12] < 4.0f)) {
+/* Shrinks the particle; returns 0 (kill) once either side is below 2 units. */
+s32 func_15149BF4(Particle *particle) {
+    particle->width -= particle->width * particle->motion.shrinkRate;
+    particle->height -= particle->height * particle->motion.shrinkRate;
+    if (particle->width < 2.0f || particle->height < 2.0f) {
         return 0;
     }
     return 1;
 }
 
-struct Foo15149D18 {
-    char pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    char pad40[0x80];
-    char unkC0[0x40];
-    s16 *unk100[1];
-};
+/* Shrinks the particle while it accelerates upwards; returns 0 (kill) once it rises past
+ * maxHeight or either side drops below 4 units. */
+s32 func_15149C58(Particle *particle) {
+    particle->width -= particle->width * particle->motion.shrinkRate;
+    particle->height -= particle->height * particle->motion.shrinkRate;
+    particle->velY += particle->accelY * D_800BE9A4;
+    particle->pos.unk4 += particle->velY * D_800BE9A4;
+    if (particle->motion.maxHeight < particle->pos.unk4) {
+        return 0;
+    }
+    if (particle->width < 4.0f || particle->height < 4.0f) {
+        return 0;
+    }
+    return 1;
+}
 
-s16 *func_15149D18(struct Foo15149D18 *arg0, s16 arg1) {
-    s16 *var_v0;
-    s16 *ret;
-    f32 temp_f2;
-    f32 temp_f12;
-    u8 sp37;
+/* Fetches this frame's vertex buffer for billboard quad `index` (initialising both halves from
+ * quadTemplate when newly allocated) and positions its four corners around the particle,
+ * rotated by the angle tables D_800DD1D8/D_800DD1E8. Returns NULL if no buffer is available. */
+Vtx *func_15149D18(Particle *particle, s16 index) {
+    Vtx *vtx;
+    Vtx *result; // matching: IDO keeps a spilled copy of vtx for the return
+    f32 dz;
+    f32 dx;
+    u8 fresh;
 
-    func_151D5D60(arg0->unk100, arg1, 0x40, &var_v0, &sp37);
-    ret = var_v0;
-    if (var_v0) {
-        if (sp37) {
-            memcpy(arg0->unk100[arg1], arg0->unkC0, 0x40);
-            memcpy(arg0->unk100[arg1] + 0x20, arg0->unkC0, 0x40);
+    func_151D5D60(particle->quadBuffers, index, sizeof(particle->quadTemplate), &vtx, &fresh);
+    result = vtx;
+    if (vtx != NULL) {
+        if (fresh) {
+            memcpy(particle->quadBuffers[index], particle->quadTemplate, sizeof(particle->quadTemplate));
+            memcpy(particle->quadBuffers[index] + 4, particle->quadTemplate, sizeof(particle->quadTemplate));
         }
     } else {
-        return 0;
+        return NULL;
     }
 
-    temp_f2 = D_800DD1D8[arg1] * arg0->unk2C;
-    temp_f12 = D_800DD1E8[arg1] * arg0->unk2C;
+    dz = D_800DD1D8[index] * particle->width;
+    dx = D_800DD1E8[index] * particle->width;
 
-    var_v0[0] = var_v0[0x18] = arg0->unk34 + temp_f12;
-    var_v0[1] = var_v0[9] = arg0->unk38;
-    var_v0[2] = var_v0[0x1A] = arg0->unk3C - temp_f2;
-    var_v0[8] = var_v0[0x10] = arg0->unk34 - temp_f12;
-    var_v0[0x11] = var_v0[0x19] = arg0->unk38 + arg0->unk30;
-    var_v0[0xA] = var_v0[0x12] = arg0->unk3C + temp_f2;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = particle->pos.unk0 + dx;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = particle->pos.unk4;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = particle->pos.unk8 - dz;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = particle->pos.unk0 - dx;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = particle->pos.unk4 + particle->height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = particle->pos.unk8 + dz;
 
-    return ret;
+    return result;
 }
 
+/* Effect description passed to func_1518CA80 (mode 1: the position is given in floats). */
 typedef struct {
-    char pad0[0x34];
-    struct17 unk34;
-} Struct15149EC4Arg;
+    /* 0x00 */ struct17 pos;
+    /* 0x0C */ u8 padC[0xA];
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ s16 unk26;
+    /* 0x28 */ u8 color1[3];
+    /* 0x2B */ u8 color2[3];
+    /* 0x2E */ u8 intensity;          // func_1518CA80 scales both colours by intensity / 256
+    /* 0x2F */ u8 unk2F;
+    /* 0x30 */ u8 unk30;
+    /* 0x31 */ u8 unk31;
+} ParticleEffect;
 
-typedef struct {
-    struct17 unk0;
-    char padC[0xA];
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    s16 unk26;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 unk31;
-} Struct15149EC4Stack;
+/* Spawns a randomised func_1518CA80 effect at the particle's position. Returns 0. */
+s32 func_15149EC4(Particle *particle) {
+    ParticleEffect effect;
 
-s32 func_15149EC4(Struct15149EC4Arg *arg0) {
-    Struct15149EC4Stack sp1C;
-
-    sp1C.unk0 = arg0->unk34;
-    sp1C.unk16 = 0;
-    sp1C.unk18 = 0;
-    sp1C.unk1A = sp1C.unk1C = (func_150ADA20() % 6U) + 8;
-    sp1C.unk1E = 0;
-    sp1C.unk20 = 0;
-    sp1C.unk22 = (func_150ADA20() % 201U) + 0x64;
-    sp1C.unk24 = (func_150ADA20() % 5U) + 3;
-    sp1C.unk26 = 0x258;
-    func_151429E0(3, &sp1C.unk28, &sp1C.unk29, &sp1C.unk2A);
-    func_151429E0(4, &sp1C.unk2B, &sp1C.unk2C, &sp1C.unk2D);
-    sp1C.unk2E = 0xFF;
-    sp1C.unk2F = (func_150ADA20() % 65U) + 0x5C;
-    sp1C.unk30 = (func_150ADA20() % 3U) + 1;
-    sp1C.unk31 = 0;
-    func_1518CA80(&sp1C, 1);
+    effect.pos = particle->pos;
+    effect.unk16 = 0;
+    effect.unk18 = 0;
+    effect.unk1A = effect.unk1C = (func_150ADA20() % 6U) + 8;
+    effect.unk1E = 0;
+    effect.unk20 = 0;
+    effect.unk22 = (func_150ADA20() % 201U) + 100;
+    effect.unk24 = (func_150ADA20() % 5U) + 3;
+    effect.unk26 = 600;
+    func_151429E0(3, &effect.color1[0], &effect.color1[1], &effect.color1[2]);
+    func_151429E0(4, &effect.color2[0], &effect.color2[1], &effect.color2[2]);
+    effect.intensity = 0xFF;
+    effect.unk2F = (func_150ADA20() % 65U) + 92;
+    effect.unk30 = (func_150ADA20() % 3U) + 1;
+    effect.unk31 = 0;
+    func_1518CA80(&effect, 1);
     return 0;
 }
