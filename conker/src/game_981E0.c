@@ -4019,24 +4019,25 @@ void func_15073FA0(void) {
 
 
 void func_15074644(void) {
-    D_800D154C->unk31C->unk11A = (s8) D_800D1580;
+    D_800D154C->unk31C->unk11A = D_800D1580;
 }
 
 void func_15074664(void) {
     if (D_800D154C->unk31C != NULL) {
         if (D_800D1580 == 1) {
             func_10011FDC(5);
-        } else if ((u8) D_800D154C->unk31C->unk94 == 1) {
+        } else if ((u8)D_800D154C->unk31C->unk94 == 1) {
             func_10011FDC(0);
         }
         D_800D154C->unk31C->unk94 = D_800D1580;
     }
 }
 
+/* Deals D_800D1580 damage to the current object (or, while it holds one, to the player). */
 void func_150746F0(void) {
     struct127 *target;
     s32 damage;
-    struct126 *player;
+    struct126 *ext;
     struct108 *camera;
 
     target = NULL;
@@ -4055,95 +4056,95 @@ void func_150746F0(void) {
                 func_1507CD64(target, 6);
             }
         } else {
-            player = target->unk31C;
+            ext = target->unk31C;
             target->health = target->health - damage;
-            if (player != NULL) {
+            if (ext != NULL) {
                 camera = target->camera;
                 if (camera != NULL) {
-                    if (((u8 *)player)[0x197] != 0) {
-                        func_1517F488(0xFF, 0, 0, 0xB4, 0x14, ((u8 *)camera)[0x23D]);
+                    if (HIDDEN126(ext)->unk197 != 0) {
+                        func_1517F488(0xFF, 0, 0, 180, 20, camera->unk23D);
                     }
                 }
             }
         }
     }
 }
-// ?
+/* Sets the state (unk232) of the current object's owner (unk65 = index + 1). */
 void func_150747E4(void) {
     s32 i;
-    s32 t;
+    s32 owner;
 
-    t = D_800D154C->unk65;
-    i = t;
+    owner = D_800D154C->unk65;
+    i = owner;
     if (i != 0) {
         i = i - 1;
         D_800CC2D0[i].unk232 = D_800D1580;
-        D_800CC2D0[i].unk218 = 0;
+        D_800CC2D0[i].unk218 = NULL;
     }
 }
 
 void func_15074840(void) {
-    if (D_800D154C->unk31C != 0) {
+    if (D_800D154C->unk31C != NULL) {
         D_800D154C->unk31C->unk1AA += D_800D1580;
     }
 }
 
 void func_15074870(void) {
-    D_800D154C->unk24F = (s8) D_800D1580;
+    D_800D154C->unk24F = D_800D1580;
 }
 
+/* Adds the top byte to unk138 when bit `mask` of word unk2E4[index] matches the low bit's sense. */
 void func_1507488C(void) {
     u8 index;
     u8 mask;
     u8 enabled;
 
-    index = D_800D1580 >> 0x10;
+    index = D_800D1580 >> 16;
     mask = D_800D1580 >> 8;
     enabled = D_800D1580 & 1;
-    if (((s32 *)((u8 *)D_800D154C + 0x2E4))[index] & mask) {
+    if ((&D_800D154C->unk2E4)[index] & mask) {
         enabled ^= 1;
     }
     if (enabled != 0) {
-        *(u8 *)((u8 *)D_800D154C + 0x138) += (u8)(D_800D1580 >> 0x18);
+        D_800D154C->unk138 += (u8)(D_800D1580 >> 24);
     }
 }
 
 void func_150748F4(void) {
-    D_800CC3D7 = (s8) D_800D1580;
+    D_800CC3D7 = D_800D1580;
 }
 
 void func_1507490C(void) {
-    struct127 *tmp;
-    u8 temp_v0 = (u8)(D_800D154C->unk13C - 100);
+    u8 index = D_800D154C->unk13C - 100;
 
     if (D_800D154C->unk13C != 0) {
-        tmp = &D_800CC2D0[temp_v0 & 0xFF];
-        if (D_800CC2D0[temp_v0].unk13D >= 0x64) {
-            D_800CC2D0[temp_v0].unk232 = D_800D1580;
-            D_800CC2D0[temp_v0].unk218 = 0;
-            D_800CC2D0[temp_v0].stunned = 0;
+        if (D_800CC2D0[index].unk13D >= 100) {
+            D_800CC2D0[index].unk232 = D_800D1580;
+            D_800CC2D0[index].unk218 = NULL;
+            D_800CC2D0[index].stunned = 0;
         }
     }
 }
 
+/* Makes every object within D_800D1580 * 8 units start chasing (unk31C->chasing = 20). */
 void func_15074980(void) {
     s32 i;
-    struct126 *temp;
-    f32 dist = (f32)(D_800D1580 * 8);
+    struct126 *ext;
+    f32 dist = D_800D1580 * 8;
 
     for (i = 0; i < D_8008FD8C; i++) {
         if (func_1505A72C(D_800D154C, &D_800CC2D0[i]) < dist) {
-            temp = D_800CC2D0[i].unk31C;
-            if (temp != 0) {
-                temp->chasing = 0x14;
+            ext = D_800CC2D0[i].unk31C;
+            if (ext != NULL) {
+                ext->chasing = 20;
             }
         }
     }
 }
 
 void func_15074A44(void) {
-    if (D_800D154C->unk31C != 0) {
-        D_800D154C->unk31C->unk26 = (s8) D_800D1580;
+    if (D_800D154C->unk31C != NULL) {
+        D_800D154C->unk31C->unk26 = D_800D1580;
     }
 }
 
@@ -4153,31 +4154,33 @@ void func_15074A6C(void) {
     }
 }
 
+/* Scales the object by distance to the player: 0.3 within 200, unk148 beyond 1500, lerped between. */
 void func_15074A94(void) {
-    f32 temp_f0;
-    f32 temp_f14;
-    f32 var_f2;
-    f32 *new_var = &D_8009A0F4;
+    f32 dist;
+    f32 maxScale;
+    f32 scale;
+    f32 *minScale = &D_8009A0F4; // matching: the 0.3f rodata constant read through a pointer
 
-    temp_f0 = func_1505A72C(D_800CC2D0, D_800D154C);
+    dist = func_1505A72C(D_800CC2D0, D_800D154C);
     if (D_800D154C->unk148 < 0.2f) {
         D_800D154C->unk148 = D_800D154C->unk154;
     }
-    if (temp_f0 < 200.0f) {
-        var_f2 = 0.3f;
+    if (dist < 200.0f) {
+        scale = 0.3f;
     } else {
-        temp_f14 = D_800D154C->unk148;
-        if (1500.0f < temp_f0) {
-            var_f2 = temp_f14;
+        maxScale = D_800D154C->unk148;
+        if (1500.0f < dist) {
+            scale = maxScale;
         } else {
-            f32 temp_f12;
-            temp_f12 = temp_f14 - *new_var;
-            var_f2 = *new_var;
-            var_f2 = var_f2 + (((temp_f0 - 200.0f) / 1300.0f) * temp_f12);
-            temp_f14 = D_800D154C->unk148;
+            f32 range;
+
+            range = maxScale - *minScale;
+            scale = *minScale;
+            scale = scale + (((dist - 200.0f) / 1300.0f) * range);
+            maxScale = D_800D154C->unk148;
         }
     }
-    D_800D154C->unk158 = var_f2;
+    D_800D154C->unk158 = scale;
     D_800D154C->unk154 = D_800D154C->unk158;
     D_800D154C->unk15C = 0.02f;
 }
@@ -4199,150 +4202,153 @@ void func_15074BD8(s32 arg0, s32 arg1, s32 arg2) {
 void func_15074BEC(s32 arg0, s32 arg1, s32 arg2) {
 }
 
-void func_15074C00(s32 arg0, struct127 *arg1, s32 arg2) {
-    struct199 tmp; // is this actually 2 structs?
+/* Collision handlers (self, other, result): */
 
-    if (((u8)arg1->unk239 & 0x7F) == 5) {
-        func_1504715C(&tmp);
-        tmp.unk24 = D_800CC2C0;
-        tmp.unk28 = D_800CC2C4;
-        tmp.unk2C = D_800CC2C8;
-        func_150C04C0(&tmp.unk24, &tmp, 0x16, 1, 0xFF, 0);
+void func_15074C00(s32 self, struct127 *other, s32 result) {
+    struct199 hit;
+
+    if (((u8)other->unk239 & 0x7F) == 5) {
+        func_1504715C(&hit);
+        hit.unk24 = D_800CC2C0;
+        hit.unk28 = D_800CC2C4;
+        hit.unk2C = D_800CC2C8;
+        func_150C04C0(&hit.unk24, &hit, 22, 1, 0xFF, 0);
     }
 }
 
-void func_15074C80(struct127 *arg0, struct127 *arg1) {
-    s32 temp_a2;
+void func_15074C80(struct127 *self, struct127 *other) {
+    s32 anim;
 
-    if ((u16)arg0->unk278 == 0x11) {
-        func_151942E8(arg0, arg1);
+    if ((u16)self->unk278 == 17) {
+        func_151942E8(self, other);
     }
 
-    if (((u16)arg0->unk278 == 2) || ((u16)arg0->unk278 == 0x12) || ((u16)arg0->unk278 == 3) || ((u16)arg0->unk278 == 6)) {
-        if (arg1->health == 0) {
-            if ((u16)arg0->unk278 == 2) {
-                temp_a2 = 0x2A;
-            } else if ((u16)arg0->unk278 == 0x12) {
-                temp_a2 = 0x2F;
+    if ((u16)self->unk278 == 2 || (u16)self->unk278 == 18 || (u16)self->unk278 == 3 || (u16)self->unk278 == 6) {
+        if (other->health == 0) {
+            if ((u16)self->unk278 == 2) {
+                anim = 0x2A;
+            } else if ((u16)self->unk278 == 18) {
+                anim = 0x2F;
             } else {
-                if ((u16)arg0->unk278 == 3) {
-                    temp_a2 = 0x39;
+                if ((u16)self->unk278 == 3) {
+                    anim = 0x39;
                 } else {
-                    temp_a2 = 0x51;
+                    anim = 0x51;
                 }
             }
-            func_150335C8(arg0, arg1, temp_a2, 0xC, 1, 0);
+            func_150335C8(self, other, anim, 12, 1, 0);
         }
-        arg0->health = 0;
+        self->health = 0;
     }
 
-    if (arg1->interaction_state == 0x19) {
-        func_15166118((s32)(256.0f - (func_150484A0(arg0->y_velocity, arg0->xz_velocity) * 40.743664f)),
-                      0xC0 - ((s32)arg0->unk76 >> 8),
-                      (s32)arg0->x_position,
-                      (s32)arg0->y_position,
-                      (s32)arg0->z_position,
-                      0x10,
-                      0x14,
+    if (other->interaction_state == 0x19) {
+        func_15166118((s32)(256.0f - (func_150484A0(self->y_velocity, self->xz_velocity) * 40.743664f)),
+                      0xC0 - ((s32)self->unk76 >> 8),
+                      (s32)self->x_position,
+                      (s32)self->y_position,
+                      (s32)self->z_position,
+                      16,
+                      20,
                       0,
                       0xFF,
                       0);
     }
 }
 
-void func_15074DEC(struct127 *arg0, s32 arg1, s32 arg2) {
-    arg0->unk2E8 = 1;
+void func_15074DEC(struct127 *self, s32 other, s32 result) {
+    self->unk2E8 = 1;
 }
 
-void func_15074E04(s32 arg0, s32 arg1, s32 arg2) {
-    func_1516FE1C((s32) (arg1 - (s32)&D_800CC2D0) / (s32) sizeof(struct127), 0xB4, 0xFF, 0);
-    func_1518D1C0(arg1, 0xB, 0, 1, 0xFF, 0, &D_80099C1C);
+void func_15074E04(s32 self, s32 other, s32 result) {
+    func_1516FE1C((struct127 *)other - D_800CC2D0, 180, 0xFF, 0);
+    func_1518D1C0(other, 11, 0, 1, 0xFF, 0, &D_80099C1C);
 }
 
-void func_15074E80(struct127 *arg0, struct127 *arg1, s32 arg2) {
-    s8 sp1F = 0;
-    func_15194794(arg0, arg1, &sp1F);
-    if (arg1->interaction_state == 1) {
-        arg0->immune = (u8)0xFF;
-        arg1->immune = (u8)0xC8;
-        D_800D1580 = 0x60000; // 393216
+void func_15074E80(struct127 *self, struct127 *other, s32 result) {
+    s8 hitResult = 0;
+
+    func_15194794(self, other, &hitResult);
+    if (other->interaction_state == 1) {
+        self->immune = 0xFF;
+        other->immune = 200;
+        D_800D1580 = 0x60000;
         func_15072740();
     }
 }
 
-void func_15074EE8(struct127 *arg0, struct127 *arg1, s32 arg2) {
-    if (arg1->interaction_state == 1) {
-        arg0->immune = (u8)0xFF;
-        arg1->immune = (u8)0xC8;
+void func_15074EE8(struct127 *self, struct127 *other, s32 result) {
+    if (other->interaction_state == 1) {
+        self->immune = 0xFF;
+        other->immune = 200;
         D_800D1580 = 0x70000;
         func_15072740();
     }
 }
 
-void func_15074F30(struct127 *arg0, struct127 *arg1, s32 arg2) {
-    arg0->unk232 = arg1->unk109;
-    arg0->unk218 = 0;
+void func_15074F30(struct127 *self, struct127 *other, s32 result) {
+    self->unk232 = other->unk109;
+    self->unk218 = NULL;
 }
 
 void func_15194408(struct127 *arg0, struct127 *arg1);
 
-void func_15074F48(struct127 *arg0, struct127 *arg1, s32 arg2) {
-    f32 dx = -2641.0f - arg0->x_position;
-    f32 dz = arg0->z_position - 3039.0f;
+/* Sends `other` towards (-2641, 3039). */
+void func_15074F48(struct127 *self, struct127 *other, s32 result) {
+    f32 dx = -2641.0f - self->x_position;
+    f32 dz = self->z_position - 3039.0f;
 
-    arg1->unk76 = func_1505A630(dx, dz, 0);
-    arg1->xz_velocity = sqrtf(dx * dx + dz * dz) * 0.03f;
-    func_15194408(arg0, arg1);
+    other->unk76 = func_1505A630(dx, dz, 0);
+    other->xz_velocity = sqrtf(dx * dx + dz * dz) * 0.03f;
+    func_15194408(self, other);
 }
 
-void func_15074FD4(struct127 *arg0, struct127 *arg1, s32 arg2) {
-    if (arg1->interaction_state == 1) {
-        arg0->immune = (u8)0xFF;
-        arg1->immune = (u8)0xC8;
+void func_15074FD4(struct127 *self, struct127 *other, s32 result) {
+    if (other->interaction_state == 1) {
+        self->immune = 0xFF;
+        other->immune = 200;
         D_800D1580 = 0x60000;
-        if (arg0->id == 0x8E) {
+        if (self->id == 0x8E) {
             D_800D1580 = 0x140000;
         }
         func_15072740();
     }
-    func_151942B0(arg0, arg1, arg2);
+    func_151942B0(self, other, result);
 }
 
-void func_15075050(struct127 *arg0, s32 arg1, s32 arg2) {
-    arg0->unkB8 = 5.0f;
-    if (arg0->xz_velocity > 0.0f) {
-        arg0->unkB8 = -5.0f;
+void func_15075050(struct127 *self, s32 other, s32 result) {
+    self->unkB8 = 5.0f;
+    if (self->xz_velocity > 0.0f) {
+        self->unkB8 = -5.0f;
     }
-    arg0->gravity = 5.0f;
-    arg0->y_velocity = 12.0f;
+    self->gravity = 5.0f;
+    self->y_velocity = 12.0f;
 }
 
-void func_150750A4(struct127 *arg0, s32 arg1, s32 arg2) {
-    arg0->gravity = 5.0f;
+void func_150750A4(struct127 *self, s32 other, s32 result) {
+    self->gravity = 5.0f;
 }
 
-void func_150750C4(struct127 *arg0, struct127 *arg1, u8 *arg2) {
-
-    if ((arg1->id  == 0x88) && ((s32) arg0->unk107 < 0x37)) {
-        arg0->unk138 += 3;
+void func_150750C4(struct127 *self, struct127 *other, u8 *result) {
+    if (other->id == 0x88 && self->unk107 < 55) {
+        self->unk138 += 3;
     }
-    func_15194794(arg0, arg1, arg2);
-    if (arg1->id != 0x53) {
-        func_15145A50(arg1);
-        arg1->health = (u8)0;
-        func_1507CD64(arg1, 8);
-        *arg2 = (u8)39;
+    func_15194794(self, other, result);
+    if (other->id != 0x53) {
+        func_15145A50(other);
+        other->health = 0;
+        func_1507CD64(other, 8);
+        *result = 39;
     }
 }
 
-struct127 *func_1507515C(struct127 *arg0) {
+/* Returns the first live object owned by `owner` (unk65 = owner index + 1), or NULL. */
+struct127 *func_1507515C(struct127 *owner) {
     struct127 *obj;
     s32 i;
 
     obj = D_800CC2D0;
     for (i = 0; i < 26; i++) {
-        if ((obj->interaction_state != 0) && (obj->id != 0xFF) &&
-            (obj->unk65 == ((arg0 - D_800CC2D0) + 1))) {
+        if (obj->interaction_state != 0 && obj->id != 0xFF && obj->unk65 == (owner - D_800CC2D0) + 1) {
             return obj;
         }
         obj++;
