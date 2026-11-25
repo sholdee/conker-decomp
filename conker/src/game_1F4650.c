@@ -20,8 +20,6 @@ extern f32 sinf(f32);
 extern void func_1514373C(f32, f32, f32 *, f32 *);
 extern void func_15145974(struct17 *, f32 *, f32 *);
 extern void func_1000FD38(void *, void *, s32);
-extern s32 func_151C87E0(s32, s32);
-extern void func_151C899C();
 extern void *func_1515548C(void *, u8, s32, s32, s32, u8, s32);
 extern void *func_1515FF74(void *, s32, u8, s32);
 extern void func_15160274(s32, s32, s32);
@@ -65,14 +63,6 @@ typedef struct {
     u8 pad_0x00[0x170];
     s32 field_0x170;
 } Game1F4650LinkOwner;
-typedef struct {
-    s32 field_0x0;
-    s32 field_0x4;
-} Game1F4650LinkMatchEvent;
-typedef struct {
-    s32 field_0x0;
-    u8 field_0x4;
-} Game1F4650LinkStateEvent;
 typedef struct {
     s32 field_0x0;
     u8 pad_0x4[0x8];
@@ -230,6 +220,30 @@ typedef struct {
     u32 flags;
 } SightEmitter;
 
+/* Generic actor fields used here; kind indexes D_800D1C90. */
+typedef struct SightActor {
+    u8 pad0[4];
+    u8 kind;
+    u8 pad5[0xF];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad20[0x12C];
+    f32 scale;
+} SightActor;
+
+/* Message 0x20 (see func_151C8674). */
+typedef struct {
+    SightActor *actor;
+    Game1F4650Beam *source;
+} SightTouchMsg;
+
+/* Message 0x3A: 0 = switch on, 1 = switch off, 2 = trigger. */
+typedef struct {
+    Game1F4650Beam *source;
+    u8 command;
+} SightCommandMsg;
+
 /* Visibility record returned by func_1510FD20 for a map position. */
 typedef struct {
     u8 pad0[2];
@@ -248,7 +262,7 @@ typedef struct {
     f32 angleT;
     f32 speedS;
     f32 speedT;
-    Game1F4650Beam *unk28;
+    Game1F4650Beam *source;
     SightModelOwner *midEffect;
     s32 unk30;
     s32 endEffect0;
@@ -271,6 +285,12 @@ typedef struct {
     f32 pulseAngle;
     f32 pulseSpeed;
 } SightBeamState;
+
+/* Sound handle from func_1000FA64; `state` is the user pointer passed to it. */
+typedef struct {
+    u8 pad0[0x18];
+    SightBeamState *state;
+} SightSoundHandle;
 
 /* Spawn descriptor for func_1513D4B8 / func_151407D0; the spawned object holds a copy at +0x18. */
 typedef struct {
@@ -305,7 +325,7 @@ extern void func_1510F800(s32);
 extern s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
 extern SightModelOwner *func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 s32 func_151C8FCC(s32 arg0, vertex *arg1, vertex *arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, u8 arg8, s32 arg9);
-s32 func_151C87AC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
+s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
 
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
 s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTriangle *endTri, Game1F4650Beam *beam, Game1F4650Beam *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
@@ -380,7 +400,7 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
     }
     state.alternate = 0;
     state.phase = 0.0f;
-    state.unk28 = source;
+    state.source = source;
     if (hasMidEffect) {
         Header hdr;
 
@@ -634,47 +654,49 @@ s32 func_151C82D0(SightBeamObject *obj) {
     return 1;
 }
 
-void func_151C8674(s32 arg0, s32 arg1) {
+/* Tells sight beams that `actor` moved, so beams keyed to `source` can test it (message 0x20). */
+void func_151C8674(s32 actor, s32 source) {
     struct {
-        s32 unk0;
-        s32 unk4;
-    } sp18;
-    if (arg0 != 0) {
-        sp18.unk0 = arg0;
-        sp18.unk4 = arg1;
-        func_151403A8((s32)&sp18, 0x20);
+        s32 actor;
+        s32 source;
+    } msg;
+    if (actor != 0) {
+        msg.actor = actor;
+        msg.source = source;
+        func_151403A8((s32)&msg, 0x20);
     }
 }
 
-void func_151C86AC(s32 arg0, s32 arg1, u8 arg2) {
-    s32 *arg0p;
-    Game1F4650LinkBlock *temp_v0;
-    s32 temp_v1;
+s32 func_151C87E0(SightActor *actor, SightBeamObject *obj);
+void func_151C899C();
 
-    arg0p = &arg0;
-    switch (arg2) {
+/* Message handler of a sight beam object. */
+void func_151C86AC(SightBeamObject *obj, void *msg, u8 msgId) {
+    // matching: taking obj's address keeps it in its stack slot, reloaded at each use
+    SightBeamObject **objp = &obj;
+    SightBeamState *state;
+
+    switch (msgId) {
     case 0x20:
-        temp_v0 = (Game1F4650LinkBlock *)(*arg0p + 0x110);
-        if ((temp_v0->field_0x86 & 0x10) && (((Game1F4650LinkMatchEvent *)arg1)->field_0x4 == temp_v0->field_0x28)) {
-            if (func_151C87E0(((Game1F4650LinkMatchEvent *)arg1)->field_0x0, *arg0p) != 0) {
-                func_151C899C(((Game1F4650LinkMatchEvent *)arg1)->field_0x0, *arg0p);
+        state = &(*objp)->state;
+        if ((state->flags & 0x10) && ((SightTouchMsg *)msg)->source == state->source) {
+            if (func_151C87E0(((SightTouchMsg *)msg)->actor, *objp) != 0) {
+                func_151C899C(((SightTouchMsg *)msg)->actor, *objp);
             }
         }
         break;
     case 0x3A:
-        temp_v0 = (Game1F4650LinkBlock *)*arg0p;
-        temp_v0 = (Game1F4650LinkBlock *)((s32)temp_v0 + 0x110);
-        if (((Game1F4650LinkStateEvent *)arg1)->field_0x0 == temp_v0->field_0x28) {
-            temp_v1 = ((Game1F4650LinkStateEvent *)arg1)->field_0x4;
-            switch (temp_v1) {
+        state = &(*objp)->state;
+        if (((SightCommandMsg *)msg)->source == state->source) {
+            switch (((SightCommandMsg *)msg)->command) {
             case 0:
-                temp_v0->field_0x86 |= 2;
+                state->flags |= 2;
                 break;
             case 1:
-                temp_v0->field_0x86 &= ~2;
+                state->flags &= ~2;
                 break;
             case 2:
-                func_151C899C(0, *arg0p);
+                func_151C899C(NULL, *objp);
                 break;
             }
         }
@@ -682,10 +704,11 @@ void func_151C86AC(s32 arg0, s32 arg1, u8 arg2) {
     }
 }
 
-s32 func_151C87AC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
-    void *temp = *(void **)((s32)arg0 + 0x18);
-    if (!(*(u8 *)((s32)temp + 0x86) & 0x2)) {
-        *arg6 = 0;
+/* Sound callback (registered by func_151C756C): mutes the hum while the beam is off. */
+s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume) {
+    SightBeamState *state = sound->state;
+    if (!(state->flags & 2)) {
+        *volume = 0;
     }
     return 0;
 }
@@ -693,56 +716,57 @@ s32 func_151C87AC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
 extern void func_1507C3E0(void *, s16 *, s16 *, s16 *);
 extern s32 func_151451F0(vertex *, vertex *, vertex *, f32, f32, vertex *, vertex *, f32 *, f32 *);
 
-s32 func_151C87E0(s32 arg0, s32 arg1) {
-    s32 idx;
+/* Returns whether the beam segment passes through the actor's bounding sphere. */
+s32 func_151C87E0(SightActor *actor, SightBeamObject *obj) {
+    s32 kind;
     f32 radius;
     f32 scale;
-    vertex pos;
-    f32 half;
-    vertex a;
-    f32 ex;
-    f32 ey;
-    f32 ez;
+    vertex center;
+    f32 halfHeight;
+    vertex start;
+    f32 endX;
+    f32 endY;
+    f32 endZ;
     vertex dir;
-    f32 len;
-    vertex outA;
-    vertex outB;
-    f32 outC;
-    f32 outD;
-    s16 h;
-    s16 p;
-    s16 r;
+    f32 length;
+    vertex nearHit;
+    vertex farHit;
+    f32 nearT;
+    f32 farT;
+    s16 height;
+    s16 width;
+    s16 depth;
 
-    idx = *(u8 *)(arg0 + 4);
-    if (idx < 0xBB && idx != 0xFF) {
-        radius = *(f32 *)(arg0 + 0x14C) * (*(s16 *)((u8 *)D_800D1C90[idx] + 0x1A));
+    kind = actor->kind;
+    if (kind < 187 && kind != 0xFF) {
+        radius = actor->scale * D_800D1C90[kind]->unk1A;
     } else {
         radius = 50.0f;
     }
-    func_1507C3E0((void *)arg0, &h, &p, &r);
-    if ((f32)h == 0.0f) {
+    func_1507C3E0(actor, &height, &width, &depth);
+    if ((f32)height == 0.0f) {
         return 0;
     }
-    half = (f32)h * 0.5f;
-    pos.x = *(f32 *)(arg0 + 0x14);
-    pos.y = *(f32 *)(arg0 + 0x18) + half;
-    pos.z = *(f32 *)(arg0 + 0x1C);
-    scale = radius / half;
-    a.x = *(f32 *)(arg1 + 0x34);
-    a.y = (*(f32 *)(arg1 + 0x38) - pos.y) * scale + pos.y;
-    a.z = *(f32 *)(arg1 + 0x3C);
-    ex = *(f32 *)(arg1 + 0x40);
-    ey = (*(f32 *)(arg1 + 0x44) - pos.y) * scale + pos.y;
-    ez = *(f32 *)(arg1 + 0x48);
-    dir.x = ex - a.x;
-    dir.y = ey - a.y;
-    dir.z = ez - a.z;
+    halfHeight = (f32)height * 0.5f;
+    center.x = actor->x;
+    center.y = actor->y + halfHeight;
+    center.z = actor->z;
+    scale = radius / halfHeight;
+    start.x = obj->spawn.start.x;
+    start.y = (obj->spawn.start.y - center.y) * scale + center.y;
+    start.z = obj->spawn.start.z;
+    endX = obj->spawn.end.x;
+    endY = (obj->spawn.end.y - center.y) * scale + center.y;
+    endZ = obj->spawn.end.z;
+    dir.x = endX - start.x;
+    dir.y = endY - start.y;
+    dir.z = endZ - start.z;
     {
-        f32 unused;
-        if (func_15145128(&dir, &dir, &len, &unused) == 0) {
+        f32 invLength;
+        if (func_15145128(&dir, &dir, &length, &invLength) == 0) {
             return 0;
         }
-        if (func_151451F0(&a, &dir, &pos, radius, len, &outA, &outB, &outC, &outD) != 0) {
+        if (func_151451F0(&start, &dir, &center, radius, length, &nearHit, &farHit, &nearT, &farT) != 0) {
             return 1;
         }
     }
