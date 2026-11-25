@@ -174,9 +174,24 @@ def build(ws):
     ensure_build(wc)
     (wc / BIN).unlink(missing_ok=True)
     stamp = ws / ".splat_yaml"
+    if not yaml_changed(ws) and not stamp.exists() and (wc / "asm").is_symlink():
+        # this workspace does not change splat's inputs, but main may have (another land): its asm/ is
+        # main's through the symlink, so take main's matching splat outputs too, then rebuild fully
+        stale = [n for n in SPLAT_INPUTS + ("conker.ld", "undefined_syms_auto.txt", "undefined_funcs_auto.txt", "jtbl_labels.us.txt")
+                 if (MAIN / n).exists() and (not (wc / n).exists() or not filecmp.cmp(MAIN / n, wc / n, shallow=False))]
+        if stale:
+            for n in stale:
+                shutil.copy(MAIN / n, wc / n)
+                if n in SPLAT_INPUTS:
+                    shutil.copy(MAIN / n, ws / "base" / n)
+            return wc, run("make -B -j8 2>&1", wc, timeout=1800)
     if yaml_changed(ws) or stamp.exists():
         cur = b"".join((wc / n).read_bytes() for n in SPLAT_INPUTS)
         if not stamp.exists() or stamp.read_bytes() != cur:
+            # asm/ is a symlink to main's in a lean workspace: splat must never write through it
+            if (wc / "asm").is_symlink():
+                (wc / "asm").unlink()
+                subprocess.run(["cp", "-a", "--reflink=auto", str(MAIN / "asm"), str(wc / "asm")], check=True)
             run(SPLAT, wc, timeout=1800)  # the yaml changed: regenerate asm/ and the linker script
             stamp.write_bytes(cur)
             return wc, run("make -B -j8 2>&1", wc, timeout=1800)

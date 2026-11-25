@@ -32,9 +32,17 @@ python3 ~/conker/tools/cw.py land  clean.game_X -m "own .rodata"
   `extern ... D_XXXXXXXX`. Define them in the C file as `const` or `static const` data, with the
   correct type and initializer, in the ROM order. Then remove the extern. If other files use the
   symbol, keep the same `D_` name for the definition. Wave 3 renames it later.
-- **IDO order.** IDO writes the `.rodata` of a file in source order. A literal goes where a function
-  first uses it. Const data goes where you define it. Thus the position of each definition relative to
-  the functions sets its position in the ROM.
+- **IDO order (checked by the first fleet).** In one compilation unit, IDO writes all front-end data
+  first: const globals, string literals and const local initializers, in source order. After that come
+  all float literals and jump tables, in function order. A definition placed between two functions
+  still goes before every literal of the unit.
+- **IDO placement rules.** A const scalar at file scope (static or not) goes to `.data`, not to
+  `.rodata`. Use a const aggregate (array or struct) for `.rodata`. A static const local also goes to
+  `.data`. A one-element const array can change the float register allocation where a const struct
+  does not.
+- **16-byte zero padding inside the window marks a unit boundary.** IDO pads the `.rodata` of each
+  unit to 16 bytes. If the window has such padding between your words, the file was two (or more)
+  original compilation units. See "Splitting a file" below.
 - **A literal has a different value** (often by one unit in the last place). Write the float at full
   precision. Get the decimal value from the ROM word: `0.1290000081f`, not `0.129f`.
 - **The order is different.** Usually a literal is hoisted or used twice. IDO merges identical
@@ -44,6 +52,30 @@ python3 ~/conker/tools/cw.py land  clean.game_X -m "own .rodata"
   anonymous rodata.
 - **Data that is not yours** (constants of a hand-written asm file, a table of another file): do not
   change it.
+
+## Splitting a file
+Do this only when the ROM shows a unit boundary inside the file: end-of-unit zero padding, or front-end
+data (strings, const tables) after literals of earlier functions. The first function of the new unit
+must start on a 16-byte boundary in the text.
+```
+python3 ~/conker/tools/cw.py new --tree split.game_X          # a tree workspace: several files change
+#   in ~/conker-ws/split.game_X/conker/conker.us.yaml, add `- [0xOFF, c, game_OFF]` after the file's entry
+SPLIT_ROOT=~/conker-ws/split.game_X/conker python3 ~/conker/tools/split_tu.py plan  game_X 0xOFF
+SPLIT_ROOT=~/conker-ws/split.game_X/conker python3 ~/conker/tools/split_tu.py apply game_X 0xOFF
+python3 ~/conker/tools/cw.py check split.game_X                 # runs splat for the new entry
+#   carve one slice per unit (ro_migrate.py carve ... --root), check again, then land
+```
+- Each new file keeps all top-level declarations. Delete the ones it does not use, if `check` still
+  matches.
+- If `conker/Makefile` gives the old file special flags (search it for the file name), stop and report.
+  The new files need the same flags, and agents do not edit the Makefile.
+- `cw.py land` lands the yaml, the changed file and the new files together.
+
+## Pinned words
+After a file links its own `.rodata`, every word of the slice must be reached through the object, not
+through an absolute `D_` name. Run `python3 ~/conker/tools/linkcheck.py ~/conker-ws/<workspace>/conker --list`.
+If a pinned `D_` name is in your file (an `extern` read of one of your own words), replace the read with
+the literal, or define the data under that name.
 
 ## Rules
 - The bytes of the code must not change. `cw.py check` shows each function whose bytes moved.
