@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Object type 0xD: a three-quad puff (each quad on its own randomly rotated matrix). */
+/* Object type 0xD: a puff of three quads, each on its own matrix with a different yaw. */
 typedef struct {
     u8 pad0;
     u8 unk1;
@@ -20,13 +20,8 @@ typedef struct {
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_1517E05C(s32, s32, s32);
-extern s32 D_8009054C;
-extern s32 D_800DD220;
-extern s32 D_800DD224;
-extern s32 D_800DD228[];
-extern s32 D_800DD230;
 
-/* Spawns a puff object at (x, y, z) with the given scale. */
+/* Spawns a puff at (x, y, z); its quads are yawed 90-153 degrees apart from a random start. */
 void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
     PuffObj *obj;
     s32 angle;
@@ -53,8 +48,7 @@ void func_151669A0(s32 x, s32 y, s32 z, f32 scale, u8 arg4, s32 arg5) {
             } else {
                 func_15043E68(&obj->mtx[i], 0.0f, angle, 0.0f, fx, fy, fz);
             }
-            angle += func_150ADA20() & 0x3F;
-            angle += 90;
+            angle += (func_150ADA20() & 0x3F) + 90;
         }
         func_1517E05C(x, y, z);
     }
@@ -147,39 +141,47 @@ void func_15166B50(void *self) {
 
 extern Vtx D_8008B3E0[];
 
-Gfx *func_15166D68(Gfx *pkt, PuffObj *obj, s32 arg2) {
-    Mtx *mtx;
-    s32 r;
-    s32 s;
+/* Draws the three quads; their texture scrolls in S as the timer runs down. */
+Gfx *func_15166D68(Gfx *gfx, PuffObj *obj, s32 arg2) {
+    s32 texS;
     s32 i;
 
-    for (i = 0, mtx = obj->mtx; i != 0xC0; i += 0x40) {
-        gSPMatrix(pkt++, mtx, G_MTX_LOAD);
-        gSPVertex(pkt++, D_8008B3E0, 6, 0);
-        s = 0x2800 - ((obj->timer << 12) / 10);
-        gSPModifyVertex(pkt++, 0, G_MWO_POINT_ST, (s << 16) + 0x2000);
-        gSPModifyVertex(pkt++, 1, G_MWO_POINT_ST, (s << 16) + 0x2000);
-        gSPModifyVertex(pkt++, 2, G_MWO_POINT_ST, (s << 16) + 0x2400);
-        gSPModifyVertex(pkt++, 3, G_MWO_POINT_ST, ((s + 0x800) << 16) + 0x2000);
-        gSPModifyVertex(pkt++, 4, G_MWO_POINT_ST, ((s + 0x800) << 16) + 0x2000);
-        gSPModifyVertex(pkt++, 5, G_MWO_POINT_ST, ((s + 0x800) << 16) + 0x2400);
-        gSP1Triangle(pkt++, 5, 3, 0, 0);
-        gSP1Triangle(pkt++, 2, 5, 0, 0);
-        gSP1Triangle(pkt++, 1, 4, 5, 0);
-        gSP1Triangle(pkt++, 1, 5, 2, 0);
-        mtx++;
+    for (i = 0; i < 3; i++) {
+        gSPMatrix(gfx++, &obj->mtx[i], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPVertex(gfx++, D_8008B3E0, 6, 0);
+        texS = 0x2800 - ((obj->timer << 12) / 10);
+        gSPModifyVertex(gfx++, 0, G_MWO_POINT_ST, (texS << 16) + 0x2000);
+        gSPModifyVertex(gfx++, 1, G_MWO_POINT_ST, (texS << 16) + 0x2000);
+        gSPModifyVertex(gfx++, 2, G_MWO_POINT_ST, (texS << 16) + 0x2400);
+        gSPModifyVertex(gfx++, 3, G_MWO_POINT_ST, ((texS + 0x800) << 16) + 0x2000);
+        gSPModifyVertex(gfx++, 4, G_MWO_POINT_ST, ((texS + 0x800) << 16) + 0x2000);
+        gSPModifyVertex(gfx++, 5, G_MWO_POINT_ST, ((texS + 0x800) << 16) + 0x2400);
+        gSP1Triangle(gfx++, 5, 3, 0, 0);
+        gSP1Triangle(gfx++, 2, 5, 0, 0);
+        gSP1Triangle(gfx++, 1, 4, 5, 0);
+        gSP1Triangle(gfx++, 1, 5, 2, 0);
     }
-    return pkt;
+    return gfx;
 }
 
-void func_15166F6C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    D_800DD228[0] = (s32)&D_8009054C;
-    func_15094F70(arg0, D_800DD228[0], D_800DD220, (s32)&D_800DD230, 0, 0, 0, D_800DD224, 3);
+Gfx *func_15094F70(Gfx *gdl, void *texture, s32 frame, void *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm,
+                  s32 assetArg);
+extern s32 D_8009054C;
+extern s32 D_800DD220;
+extern s32 D_800DD224;
+extern void *D_800DD228;
+extern s32 D_800DD230;
+
+/* Loads texture D_8009054C, using the frame and mode already in D_800DD220/D_800DD224. */
+Gfx *func_15166F6C(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
+    D_800DD228 = &D_8009054C;
+    return func_15094F70(gfx, D_800DD228, D_800DD220, &D_800DD230, 0, 0, 0, D_800DD224, 3);
 }
 
 extern Mtx D_80089470;
 
-Gfx *func_15166FD8(Gfx *pkt, s32 arg1, s32 arg2) {
-    gSPMatrix(pkt++, &D_80089470, G_MTX_LOAD);
-    return pkt;
+/* Loads D_80089470 as the modelview matrix. */
+Gfx *func_15166FD8(Gfx *gfx, s32 arg1, s32 arg2) {
+    gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    return gfx;
 }
