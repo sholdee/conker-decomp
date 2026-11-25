@@ -84,10 +84,6 @@ void func_150C851C(s32 scale) {
     }
 }
 
-/* Two texture-id tables of five animation frames each. */
-typedef struct {
-    s32 *frames[2];
-} TextureFrameTables;
 extern TextureFrameTables D_80088810; /* = { D_80090230, D_80090244 } */
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 

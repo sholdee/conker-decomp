@@ -162,14 +162,6 @@ void func_15194588(Actor *self, Actor *other, u8 *arg2) {
     func_15194408(self, other);
 }
 
-/* Per-model blood settings (game_161520.c's BloodProfile), indexed by func_15134070's profile. */
-typedef struct {
-    /* 0x0 */ f32 offset[3];
-    /* 0xC */ u16 unkC;
-    /* 0xE */ u8 unkE;
-    /* 0xF */ u8 padF;
-} BloodProfile;
-
 extern BloodProfile D_800A3FD8[];
 extern s32 func_15134070(Actor *);
 extern void func_151B4CD0(Actor *obj, u8 arg1, s32 arg2);

@@ -115,6 +115,11 @@
  *   game_1FFF60.c
  */
 
+/* Two texture-id tables of five animation frames each (D_80088810 in game_F5800.c, D_80088900 in game_1048D0.c). */
+typedef struct TextureFrameTables {
+    /* 0x0 */ s32 *frames[2];
+} TextureFrameTables; /* size 0x8 */
+
 /* Level effect spawners (game_EB340.c, game_EB600.c). */
 /* The 8-byte payload func_150BDE90 copies to +0x28 of the object it creates. */
 typedef struct {

@@ -103,10 +103,6 @@ void func_150D7630(s32 arg0) {
     }
 }
 
-/* Two texture-id tables of five animation frames each. */
-typedef struct {
-    s32 *frames[2];
-} TextureFrameTables;
 extern TextureFrameTables D_80088900; /* = { D_80090230, D_80090244 } */
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 

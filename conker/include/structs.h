@@ -1950,6 +1950,14 @@ typedef struct ParticleTexFile {
     /* 0xD */ u8  padD[3];
 } ParticleTexFile; // size 0x10
 
+/* Per-model blood settings, indexed by func_15134070's profile index (the table D_800A3FD8, game_161520.c). */
+typedef struct BloodProfile {
+    /* 0x0 */ Vec3f offset; // where blood comes from, relative to the actor's bone 12
+    /* 0xC */ u16 chunkModel; // model of the gore chunk thrown off the actor (func_1513264C)
+    /* 0xE */ u8 unkE; // 2: no blood (sprays and drips are skipped)
+    /* 0xF */ u8 padF;
+} BloodProfile; /* size 0x10 */
+
 /* A camera message payload (func_1512D560 types 7, 8 and 10, applied by func_15128CB0 in game_156160.c);
  * gCamShot is the shared one that cutscenes and TriggerZones fill in. */
 typedef struct CamShot {

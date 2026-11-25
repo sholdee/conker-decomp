@@ -18,14 +18,6 @@ extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 extern void func_151BC5A4(TimedEffect *, s32, u8);
 
-/* Per-model blood settings, indexed by func_15134070's profile index. */
-typedef struct {
-    Vec3f offset;           /* where blood comes from, relative to the actor's bone 12 */
-    u16 unkC;
-    u8 unkE;
-    u8 padF;
-} BloodProfile;
-
 /* Scale factors passed to func_1513A24C (all 1.0f). */
 const f32 D_800A3C30[15] = {
     1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
@@ -1975,7 +1967,7 @@ extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
 
 /*
- * Throws a func_1513264C chunk (model D_800A3FD8[kind].unkC) off the actor from position, and for
+ * Throws a func_1513264C chunk (model D_800A3FD8[kind].chunkModel) off the actor from position, and for
  * profiles 4-6 also the accessories it still wears (bits of unk94).
  */
 void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4, s32 arg5) {
@@ -2000,7 +1992,7 @@ void func_15138424(Actor *actor, Vec3f *position, s32 kind, void *arg3, u8 arg4,
     spawn.flags = 0x39E9;
     spawn.rotVel.y = 0.0f;
     spawn.lifetime = func_150ADA20() % 51U + 250;
-    spawn.model = D_800A3FD8[kind].unkC;
+    spawn.model = D_800A3FD8[kind].chunkModel;
     spawn.sizeY = ((D_800A40C8 == &D_800A3FD8[kind]) ? 0.6000000238f : 1.0f) * ((actor->scale_xz + actor->scale_y) * 0.5f);
     spawn.sizeXZ = spawn.sizeY;
     spawn.gravity = (func_150ADA68() * 292.0f + -1099.0f) * 0.001000000047f;

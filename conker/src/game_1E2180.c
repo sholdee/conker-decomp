@@ -3,14 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Per-model blood settings (game_161520.c's BloodProfile), indexed by func_15134070's profile. */
-typedef struct {
-    /* 0x0 */ f32 offset[3];
-    /* 0xC */ u16 unkC;
-    /* 0xE */ u8 unkE;
-    /* 0xF */ u8 padF;
-} BloodProfile;
-
 extern BloodProfile D_800A3FD8[];
 
 #define BLOOD_PROFILE_NONE 99
