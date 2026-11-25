@@ -1495,7 +1495,7 @@ void func_1513A24C(Vec3f *, s32 *, f32 *, s32, f32, u8, u8, u8 *, void *,
 void func_15150D1C(Blood36C3CSpray *, u8, s32);
 void func_151A9834(Vec3f *, f32, f32, GroundHit *, s32, u8, s8 *, u8, s32);
 void func_151C61A0(s32, s32, u8, s32);
-void func_1513A48C(void *, u8, s32);
+void func_1513A48C(Vec3f *, u8, s32);
 extern s32 *D_80089A20[];
 extern f32 D_800A3C30;
 extern s32 D_800A3F14[];
@@ -2315,7 +2315,7 @@ void func_15139D74(struct127 *, f32 *, void *, u8, s32);
 void func_1513A6E0(struct127 *, f32 *, void *, u8, s32);
 void func_1513ABB8(struct127 *, f32 *, u8, void *, u8, s32);
 void func_1513B0F8(struct127 *, f32 *, void *, u8, s32);
-void func_1513A594(void *, s32, s32, u8, s32);
+void func_1513A594(struct127 *, Vec3f *, GroundHit *, u8, s32);
 void func_151036B4(void *, u8, s32);
 
 /* Blood for a fatal hit: strip and burst, then the per-profile gore effect. */
@@ -2357,7 +2357,7 @@ void func_15138C80(struct127 *actor, u8 arg1, s32 arg2) {
                 func_15139768(actor, &position.x, 1.0f, &hit, arg1, arg2);
                 return;
             case 4:
-                func_1513A594(actor, (s32)&position.x, (s32)&hit, arg1, arg2);
+                func_1513A594(actor, &position, &hit, arg1, arg2);
                 return;
             case 8:
             case 9:
@@ -2385,7 +2385,7 @@ extern s32 D_800A4168[];
 extern s32 D_800A4178[];
 extern Vec3f D_800A4188[];
 extern Vec3f D_800A41B8;
-void func_1513A5E0(s32 arg0, s32 arg1, s32 arg2);
+void func_1513A5E0(Vec3f *position, s32 arg1, s32 arg2);
 
 /* Gore for profile 3, 5 and 6 actors: a random chunk set from D_800A4160 and, with extraSpray, chunk model 0x48. */
 void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4, s32 arg5) {
@@ -2455,7 +2455,7 @@ void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 a
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1513A5E0((s32)origin, arg4 & 0xFF, arg5);
+    func_1513A5E0((Vec3f *)origin, arg4 & 0xFF, arg5);
     {
         f32 first[3];
         f32 second[3];
@@ -2792,7 +2792,7 @@ void func_15139D74(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1513A5E0((s32)origin, arg3 & 0xFF, arg4);
+    func_1513A5E0((Vec3f *)origin, arg3 & 0xFF, arg4);
     {
         f32 first[3];
         f32 second[3];
@@ -2879,172 +2879,145 @@ typedef struct {
 void func_1515080C(Cfg080C_1513A24C *, s32 *, f32 *, s32, Extra080C_1513A24C *, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
 void func_15133E3C(s32, u8);
 
-void func_1513A24C(Vec3f *arg0, s32 *arg1, f32 *arg2, s32 arg3, f32 arg4, u8 arg5, u8 arg6, u8 *arg7, void *arg8, u8 arg9, s32 argA) {
-    Cfg080C_1513A24C a;
-    Extra080C_1513A24C b;
+/* Blood burst (func_1515080C) for an actor of blood profile `kind`; actor is a struct127. */
+void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor, void *hit, u8 arg9, s32 argA) {
+    Cfg080C_1513A24C config;
+    Extra080C_1513A24C extra;
     s32 flag;
 
-    a.unk0 = 0x28;
-    a.unk4 = 0;
-    a.pos = *arg0;
-    a.unk14 = 0;
-    a.unk16 = 0xFF;
-    a.unk2C = 0x1E0;
-    a.unk2E = 0xF0;
-    a.unk30 = 1 * arg4;
-    a.unk34 = 0 * arg4;
-    a.unk40 = arg6;
-    b.unk0 = 4;
+    config.unk0 = 40;
+    config.unk4 = 0;
+    config.pos = *position;
+    config.unk14 = 0;
+    config.unk16 = 255;
+    config.unk2C = 480;
+    config.unk2E = 240;
+    config.unk30 = 1 * scale;
+    config.unk34 = 0 * scale;
+    config.unk40 = arg6;
+    extra.unk0 = 4;
     flag = -1;
-    a.unk18 = -0x40;
-    a.unk1A = 0xC;
-    a.unk20 = 5.0f;
-    a.unk3C = 1.0f;
-    a.unk1C = 13.0f;
-    a.unk24 = -1.007000089f;
-    a.unk28 = 0.2520000041f;
-    a.unk38 = 16.10200119f;
-    switch (arg5) {
-    case 0x13:
-        if (D_800BE9F0 == 0x3C) {
-            a.unk3C = 0.0f;
+    config.unk18 = -64;
+    config.unk1A = 12;
+    config.unk20 = 5.0f;
+    config.unk3C = 1.0f;
+    config.unk1C = 13.0f;
+    config.unk24 = -1.007000089f;
+    config.unk28 = 0.2520000041f;
+    config.unk38 = 16.10200119f;
+    switch (kind) {
+    case 19:
+        if (D_800BE9F0 == 60) {
+            config.unk3C = 0.0f;
         }
         break;
-    case 0xD:
-        a.unk18 = -0x2E;
-        a.unk1A = 0x14;
-        a.unk1C = 15.0f;
-        a.unk20 = 8.0f;
-        a.unk24 = -1.262000084f;
-        a.unk28 = 0.4900000095f;
-        a.unk38 = 12.91100025f;
+    case 13:
+        config.unk18 = -46;
+        config.unk1A = 20;
+        config.unk1C = 15.0f;
+        config.unk20 = 8.0f;
+        config.unk24 = -1.262000084f;
+        config.unk28 = 0.4900000095f;
+        config.unk38 = 12.91100025f;
         break;
     case 1: {
-        const u16 tbl[4] = { 0x83, 0x81, 0x82, 0x84 };
-        s32 idx;
-        idx = arg7[0x128];
-        if (idx >= 4) {
-            idx = 3;
+        const u16 models[4] = { 0x83, 0x81, 0x82, 0x84 };
+        s32 index;
+        index = actor[0x128]; /* struct127 byte 0x128, not in the shared struct yet */
+        if (index >= 4) {
+            index = 3;
         }
-        b.unk4 = tbl[idx];
-        b.unk6 = 6;
-        b.unk8 = 3;
+        extra.unk4 = models[index];
+        extra.unk6 = 6;
+        extra.unk8 = 3;
         flag = 1;
         break;
     }
     }
-    func_1515080C(&a, arg1, arg2, arg3, &b, 0xC, 6, 1, flag, arg8, 5.0f, 1, D_800BE616 ? 1 : 0, arg9, argA);
+    func_1515080C(&config, table, arg2, count, &extra, 0xC, 6, 1, flag, hit, 5.0f, 1, D_800BE616 ? 1 : 0, arg9, argA);
     func_15133E3C(0, 0x45);
 }
 
+/* Parameters of a func_15152190 blood splash. */
 typedef struct {
-    s32 x;
-    s32 y;
-    s32 z;
-} Vec3i_A48C;
+    s32 unk0;
+    s32 unk4;
+    Vec3f position;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    s16 unk2C;
+    s16 unk2E;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+} BloodSplashConfig;
 
-typedef struct {
-    s32 field_0;
-    s32 field_4;
-    Vec3i_A48C position;
-    s16 field_14;
-    s16 field_16;
-    s16 field_18;
-    s16 field_1A;
-    f32 field_1C;
-    f32 field_20;
-    f32 field_24;
-    f32 field_28;
-    s16 field_2C;
-    s16 field_2E;
-    f32 field_30;
-    f32 field_34;
-    f32 field_38;
-} BloodA48CConfig;
-
-void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
+void func_15152190(BloodSplashConfig *, void *, void *, s32, f32, s32, s32, s32);
 extern u8 D_800A4260[];
 extern u8 D_800A4264[];
 
-void func_1513A48C(void *arg0, u8 arg1, s32 arg2) {
-    BloodA48CConfig config;
+/* Small blood splash at position (func_15152190 with D_800A4260). */
+void func_1513A48C(Vec3f *position, u8 arg1, s32 arg2) {
+    BloodSplashConfig config;
 
-    config.field_0 = 8;
-    config.field_4 = 4;
-    config.position = *(Vec3i_A48C *)arg0;
-    config.field_14 = 0;
-    config.field_16 = 0xFF;
-    config.field_18 = -0x37;
-    config.field_1A = 0x20;
-    config.field_2C = 0x28;
-    config.field_2E = 0x14;
-    config.field_30 = 0.07f;
-    config.field_34 = 0.07f;
-    config.field_1C = 10.0f;
-    config.field_20 = 9.0f;
-    config.field_24 = -1.0040001f;
-    config.field_28 = 0.254f;
-    config.field_38 = 23.446001f;
+    config.unk0 = 8;
+    config.unk4 = 4;
+    config.position = *position;
+    config.unk14 = 0;
+    config.unk16 = 255;
+    config.unk18 = -55;
+    config.unk1A = 32;
+    config.unk2C = 40;
+    config.unk2E = 20;
+    config.unk30 = 0.07f;
+    config.unk34 = 0.07f;
+    config.unk1C = 10.0f;
+    config.unk20 = 9.0f;
+    config.unk24 = -1.0040001f;
+    config.unk28 = 0.254f;
+    config.unk38 = 23.446001f;
     func_15152190(&config, D_800A4260, D_800A4264, 1, 0.0f, 1,
                   (s32)arg1, arg2);
 }
 
-void func_1513A594(void *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
-    func_1513A5E0(arg1, arg3 & 0xFF, arg4);
-    if (*(s32 *)((u8 *)arg0 + 0x1D4) != 0) {
-        if (arg0) {
+/* Gore for profile 4 actors: just a splash. */
+void func_1513A594(struct127 *actor, Vec3f *origin, GroundHit *hit, u8 arg3, s32 arg4) {
+    func_1513A5E0(origin, arg3 & 0xFF, arg4);
+    if (actor->unk1D4 != 0) { // matching: dead test, IDO still emits the unk1D4 load
+        if (actor) {
         }
     }
 }
 
-typedef struct {
-    s32 x;
-    s32 y;
-    s32 z;
-} Vec3i_1513A5E0;
-
-typedef struct {
-    s32 field_0;
-    s32 field_4;
-    Vec3i_1513A5E0 position;
-    s16 field_14;
-    s16 field_16;
-    s16 field_18;
-    s16 field_1A;
-    f32 field_1C;
-    f32 field_20;
-    f32 field_24;
-    f32 field_28;
-    s16 field_2C;
-    s16 field_2E;
-    f32 field_30;
-    f32 field_34;
-    f32 field_38;
-} BloodA5E0Config;
-
-void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
 extern u8 D_800A4268[];
 extern u8 D_800A4270[];
 
-void func_1513A5E0(s32 arg0, s32 arg1, s32 arg2) {
-    BloodA5E0Config config;
+/* Blood splash at position (func_15152190 with D_800A4268). */
+void func_1513A5E0(Vec3f *position, s32 arg1, s32 arg2) {
+    BloodSplashConfig config;
 
-    config.field_0 = 7;
-    config.field_4 = 7;
-    config.position = *(Vec3i_1513A5E0 *)arg0;
-    config.field_14 = 0;
-    config.field_16 = 0xFF;
-    config.field_18 = -0x32;
-    config.field_1A = 0x1B;
-    config.field_1C = 4.0f;
-    config.field_20 = 4.0f;
-    config.field_2C = 0x19;
-    config.field_2E = 0x28;
-    config.field_30 = 0.0201f;
-    config.field_34 = 0.0201f;
-    config.field_24 = -0.43f;
-    config.field_28 = 0.272f;
-    config.field_38 = 20.187f;
+    config.unk0 = 7;
+    config.unk4 = 7;
+    config.position = *position;
+    config.unk14 = 0;
+    config.unk16 = 255;
+    config.unk18 = -50;
+    config.unk1A = 27;
+    config.unk1C = 4.0f;
+    config.unk20 = 4.0f;
+    config.unk2C = 25;
+    config.unk2E = 40;
+    config.unk30 = 0.0201f;
+    config.unk34 = 0.0201f;
+    config.unk24 = -0.43f;
+    config.unk28 = 0.272f;
+    config.unk38 = 20.187f;
     func_15152190(&config, D_800A4268, D_800A4270, 2, 0.0f, 1,
                   (u8)arg1, arg2);
 }
@@ -3127,7 +3100,7 @@ void func_1513A6E0(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
         u8 mask2;
         u32 r1;
         u32 r2;
-        func_1513A5E0((s32)origin, arg3 & 0xFF, arg4);
+        func_1513A5E0((Vec3f *)origin, arg3 & 0xFF, arg4);
         {
         s32 q;
         func_1503F404((s32)BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
@@ -3247,7 +3220,7 @@ void func_1513ABB8(struct127 *actor, f32 *origin, u8 variant, void *hit, u8 arg4
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1513A5E0((s32)origin, arg4 & 0xFF, arg5);
+    func_1513A5E0((Vec3f *)origin, arg4 & 0xFF, arg5);
     {
         f32 first[3];
         f32 second[3];
