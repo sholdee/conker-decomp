@@ -3,17 +3,25 @@
 #include "variables.h"
 
 extern s16 D_80082FA6;
-Gfx *func_1501A680(Gfx *arg0);
+Gfx *func_1501A680(Gfx *gfx);
 
+/* Per-player view record (0x180 bytes) in the array D_800BE628 points to; see game_126F60.c. */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    u8  unk8[0x178];
-} View15173D00; // size 0x180, layout of D_800BE628 records
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 width;
+    /* 0x08 */ u8 pad8[0x1C];
+    /* 0x24 */ f32 top;
+    /* 0x28 */ f32 bottom;
+    /* 0x2C */ f32 left;
+    /* 0x30 */ f32 right;
+    /* 0x34 */ u8 pad34[0x14C];
+} ProbeView; // size 0x180
 
-Gfx *func_15173D00(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 arg6) {
-    Gfx *ret;
+#define VIEWS ((ProbeView *)D_800BE628)
 
+/* Copies 4 pixels starting at (x, y) of the z-buffer into zDest and of the current frame buffer into
+ * colorDest, using copy-mode texture rectangles that load one screen row of view's width. */
+Gfx *func_15173D00(Gfx *gfx, s32 x, s32 y, s32 unused, s32 zDest, s32 colorDest, s16 view) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, 0, 0);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
@@ -22,36 +30,36 @@ Gfx *func_15173D00(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPSetColorDither(gfx++, G_CD_DISABLE);
     gDPSetAlphaDither(gfx++, G_AD_DISABLE);
-    gDPLoadTextureBlock(gfx++, (arg2 * D_800BE620 * 2) + D_800BE9C4, G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)((View15173D00 *)D_800BE628)[arg6].unk4, 1, 0, 0, 0, 0, 0, 0, 0);
-    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, arg4);
-    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, (s32)((View15173D00 *)D_800BE628)[arg6].unk4, 1);
-    gSPTextureRectangle(gfx++, 0, 0, 12, 4, G_TX_RENDERTILE, arg1 << 5, 0, 0x1000, 0x400);
-    gDPLoadTextureBlock(gfx++, D_8002AAE8[D_800BE9C0] + (arg2 * D_800BE620 * 2), G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)((View15173D00 *)D_800BE628)[arg6].unk4, 1, 0, 0, 0, 0, 0, 0, 0);
-    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, arg5);
-    gSPTextureRectangle(gfx++, 0, 0, 12, 4, G_TX_RENDERTILE, arg1 << 5, 0, 0x1000, 0x400);
+    gDPLoadTextureBlock(gfx++, (y * D_800BE620 * 2) + D_800BE9C4, G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)VIEWS[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, zDest);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, (s32)VIEWS[view].width, 1);
+    gSPTextureRectangle(gfx++, 0, 0, 3 << 2, 1 << 2, G_TX_RENDERTILE, x << 5, 0, 4 << 10, 1 << 10);
+    gDPLoadTextureBlock(gfx++, D_8002AAE8[D_800BE9C0] + (y * D_800BE620 * 2), G_IM_FMT_RGBA, G_IM_SIZ_16b, (s32)VIEWS[view].width, 1, 0, 0, 0, 0, 0, 0, 0);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, colorDest);
+    gSPTextureRectangle(gfx++, 0, 0, 3 << 2, 1 << 2, G_TX_RENDERTILE, x << 5, 0, 4 << 10, 1 << 10);
 
-    ret = (Gfx *)func_1501A490((s32)func_1501A680(gfx), D_80082FA6, 0, 0, 0, 0);
-    gDPSetTexturePersp(ret, G_TP_PERSP);
-    return ret + 1;
+    gfx = (Gfx *)func_1501A490((s32)func_1501A680(gfx), D_80082FA6, 0, 0, 0, 0);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    return gfx;
 }
 
-typedef struct Blk151745F0 {
+/* Caller data copied into a probe and handed back to its callback. */
+typedef struct {
     s32 unk0[9];
-} Blk151745F0;
+} ProbeData;
 
-typedef struct Rec151745F0 {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ char padD[3];
-    /* 0x10 */ Blk151745F0 unk10;
-    /* 0x34 */ s8 unk34;
-    /* 0x35 */ char pad35[3];
+/* A world point whose visibility is tested by sampling the z-buffer (up to 3 at once). */
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ u8 state; // 0 free, 3 queued, else frame buffer index + 1 it was sampled in
+    /* 0x10 */ ProbeData data;
+    /* 0x34 */ s8 callback; // index into D_8008A080, -1 for none
     /* 0x38 */ s32 unk38;
-} Rec151745F0;
+} Probe;
 
-extern Rec151745F0 D_800DD348[3];
+extern Probe D_800DD348[3];
 
 typedef struct {
     s32 shift;
@@ -68,7 +76,7 @@ typedef struct {
 } View151742EC;
 
 extern Tbl80089630 D_80089630[];
-extern void (*D_8008A080[])(Rec151745F0 *, s32, s32, s32);
+extern void (*D_8008A080[])(Probe *, s32, s32, s32);
 extern s32 D_800DD300[];
 extern u16 D_800DD310[][4];
 extern u16 D_800DD328[][4];
@@ -79,7 +87,7 @@ Gfx *func_151742EC(Gfx *arg0, s32 arg1) {
     f32 spB4;
     f32 spB0;
     f32 spAC;
-    Rec151745F0 *rec;
+    Probe *rec;
     s32 i;
     u16 code;
     s8 idx;
@@ -102,7 +110,7 @@ Gfx *func_151742EC(Gfx *arg0, s32 arg1) {
         return arg0;
     }
     do {
-        if (rec->unkC == D_800BE9C0 + 1) {
+        if (rec->state == D_800BE9C0 + 1) {
             code = *(u16 *)((u8 *)D_800DD310 + i * 8);
             tbl = &D_80089630[code >> 13];
             pos = (tbl->base + (((code >> 2) & 0x7FF) << tbl->shift)) >> 3;
@@ -112,7 +120,7 @@ Gfx *func_151742EC(Gfx *arg0, s32 arg1) {
             ad = (d < 0) ? -d : d;
             }
             if (ad < 300) {
-                idx = rec->unk34;
+                idx = rec->callback;
                 col = D_800DD328[i][0];
                 r = (D_800DD328[i][0] >> 8) & 0xF8;
                 g = (D_800DD328[i][0] >> 3) & 0xF8;
@@ -122,15 +130,15 @@ Gfx *func_151742EC(Gfx *arg0, s32 arg1) {
                     D_8008A080[idx](rec, r, g, b);
                 }
             }
-            rec->unkC = 0;
+            rec->state = 0;
         }
         i++; rec++;
     } while (i < 3);
     for (i = 0; i < 3; i++) {
-        if (D_800DD348[i].unkC == 3) {
+        if (D_800DD348[i].state == 3) {
             *(u16 *)((u8 *)D_800DD310 + i * 8) = 0xFFFF;
-            D_800DD348[i].unkC = D_800BE9C0 + 1;
-            func_1501A764((s16)arg1, D_800DD348[i].unk0, D_800DD348[i].unk4, D_800DD348[i].unk8, &spB4, &spB0, &spAC);
+            D_800DD348[i].state = D_800BE9C0 + 1;
+            func_1501A764((s16)arg1, D_800DD348[i].x, D_800DD348[i].y, D_800DD348[i].z, &spB4, &spB0, &spAC);
             x = spB4;
             y = spB0;
             D_800DD300[i] = spAC;
@@ -147,23 +155,23 @@ Gfx *func_151742EC(Gfx *arg0, s32 arg1) {
 }
 
 
-s32 func_151745F0(f32 arg0, f32 arg1, f32 arg2, Blk151745F0 *arg3, s8 arg4, s32 arg5) {
+/* Queues a visibility probe at (x, y, z); returns 1 when all probe slots are in use. */
+s32 func_151745F0(f32 x, f32 y, f32 z, ProbeData *data, s8 callback, s32 arg5) {
     s32 i;
 
     for (i = 0; i < 3; i++) {
-        if (D_800DD348[i].unkC == 0) {
-            D_800DD348[i].unk0 = arg0;
-            D_800DD348[i].unk4 = arg1;
-            D_800DD348[i].unkC = 3;
-            D_800DD348[i].unk8 = arg2;
-            D_800DD348[i].unk34 = arg4;
+        if (D_800DD348[i].state == 0) {
+            D_800DD348[i].x = x;
+            D_800DD348[i].y = y;
+            D_800DD348[i].state = 3;
+            D_800DD348[i].z = z;
+            D_800DD348[i].callback = callback;
             D_800DD348[i].unk38 = arg5;
-            if (arg3 != NULL) {
-                D_800DD348[i].unk10 = *arg3;
+            if (data != NULL) {
+                D_800DD348[i].data = *data;
             }
             return 0;
         }
     }
     return 1;
 }
-
