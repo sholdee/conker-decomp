@@ -1304,7 +1304,7 @@ extern u16  D_800D2454; // perspNorm for D_800D23D0
 extern u8  D_800D2456;
 extern u8  D_800D2457;
 extern u8  D_800D2458;
-extern struct256 *D_800D245C;
+extern BlockDebris *D_800D245C;
 extern Bubble D_800D2460[6];
 extern u8  D_800D246D;
 extern u8  D_800D247D;

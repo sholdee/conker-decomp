@@ -36,8 +36,8 @@ void func_1508F0D4(void) {
     s32 j;
     s32 pad1; // matching: unused stack slot in the original frame
     s32 count;
-    struct256 *node;
-    struct256 **link;
+    BlockDebris *node;
+    BlockDebris **link;
     f32 target;
     f32 base;
     f32 cur;
@@ -46,23 +46,23 @@ void func_1508F0D4(void) {
     link = &D_800D245C;
     node = D_800D245C;
     while (node != NULL) {
-        node->unk94 -= 5.0f;
-        node->unk84 += node->unk90;
-        node->unk88 += node->unk94;
-        node->unk8C += node->unk98;
-        node->unk9C += node->unkA8;
-        node->unkA0 += node->unkAC;
-        node->unkA4 += node->unkB0;
-        timer = node->unkB4;
+        node->vel.y -= 5.0f;
+        node->pos.x += node->vel.x;
+        node->pos.y += node->vel.y;
+        node->pos.z += node->vel.z;
+        node->rot.x += node->rotVel.x;
+        node->rot.y += node->rotVel.y;
+        node->rot.z += node->rotVel.z;
+        timer = node->timer;
         timer -= D_800BE9E4;
         if (timer <= 0) {
-            *link = node->unk80;
+            *link = node->next;
             func_100043B4((s32 *)node, 3);
         } else {
-            node->unkB4 = timer;
-            link = &node->unk80;
+            node->timer = timer;
+            link = &node->next;
         }
-        node = node->unk80;
+        node = node->next;
     }
 
     if (D_800CC49A < D_800D2457) {
@@ -150,24 +150,24 @@ void func_1508F0D4(void) {
 void func_1508F7BC(void) {
     MtxF mtx;
     f32 unused;
-    struct256 *node;
+    BlockDebris *node;
 
     D_800D2456 -= 1;
     D_800D2890[0] = func_150ADA20() % 5U;
     D_800D2890[2] = sqrtf(25.0f - D_800D2890[0] * D_800D2890[0]);
     node = allocate_memory(sizeof(*node), 1, 1, 0);
-    node->unk80 = D_800D245C;
+    node->next = D_800D245C;
     D_800D245C = node;
     guMtxL2F(mtx, &D_800D2590[D_800D2456][D_800BE9C0 ^ 1]);
-    func_1503E5F8(mtx, &node->unk84, &node->unk88, &node->unk8C, &node->unk9C, &node->unkA0, &node->unkA4,
+    func_1503E5F8(mtx, &node->pos.x, &node->pos.y, &node->pos.z, &node->rot.x, &node->rot.y, &node->rot.z,
                   &unused, &unused, &unused);
-    node->unk90 = (func_150ADA20() & 0xFU) + 10;
-    node->unk94 = (func_150ADA20() & 0x1FU) + 20;
-    node->unk98 = 0.0f;
-    node->unkA8 = func_150ADA20() & 0xFU;
-    node->unkAC = func_150ADA20() & 0xFU;
-    node->unkB0 = func_150ADA20() & 0xFU;
-    node->unkB4 = 120;
+    node->vel.x = (func_150ADA20() & 0xFU) + 10;
+    node->vel.y = (func_150ADA20() & 0x1FU) + 20;
+    node->vel.z = 0.0f;
+    node->rotVel.x = func_150ADA20() & 0xFU;
+    node->rotVel.y = func_150ADA20() & 0xFU;
+    node->rotVel.z = func_150ADA20() & 0xFU;
+    node->timer = 120;
 }
 
 /* Adds a block on top; it grows in from zero scale. */
@@ -375,7 +375,7 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
     f32 scale;
     MtxF mtx;
     MtxF base;
-    struct256 *node;
+    BlockDebris *node;
     Gfx *dl;
 
     if (D_800D2588 == NULL) {
@@ -443,11 +443,10 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
         gSPDisplayList(gfx++, dl);
     }
     if (fixed == 0) {
-        /* struct256 starts with the particle's two (double-buffered) matrices */
-        for (node = D_800D245C; node != NULL; node = node->unk80) {
-            func_15043E68((Mtx *)node->pad0 + D_800BE9C0, node->unk9C, node->unkA0, node->unkA4, node->unk84,
-                          node->unk88, node->unk8C);
-            gSPMatrix(gfx++, (Mtx *)node->pad0 + D_800BE9C0, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        for (node = D_800D245C; node != NULL; node = node->next) {
+            func_15043E68(&node->mtx[D_800BE9C0], node->rot.x, node->rot.y, node->rot.z, node->pos.x,
+                          node->pos.y, node->pos.z);
+            gSPMatrix(gfx++, &node->mtx[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
             gSPDisplayList(gfx++, dl);
         }
     }

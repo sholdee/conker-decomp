@@ -14,7 +14,7 @@ typedef struct Camera Camera;
 struct Rope;
 struct BoneChain;
 typedef struct ObjScriptCmd ObjScriptCmd;
-typedef struct struct256 struct256;
+typedef struct BlockDebris BlockDebris;
 /* Effect objects (include/effects.h), named here for the prototypes in functions.h. */
 struct DefParticleHead;
 struct ParticleDesc;
@@ -3765,24 +3765,18 @@ typedef struct {
     u8  pad20[0x8];
 } struct253; // size 0x28
 
-struct struct256 {
-    u8 pad0[0x80];
-    struct256 *unk80;
-    f32 unk84;
-    f32 unk88;
-    f32 unk8C;
-    f32 unk90;
-    f32 unk94;
-    f32 unk98;
-    f32 unk9C;
-    f32 unkA0;
-    f32 unkA4;
-    f32 unkA8;
-    f32 unkAC;
-    f32 unkB0;
-    u8  unkB4;
-    u8  padB5[0x3];
-}; // size 0xB8
+/* A debris particle of game_BC510.c's block stack (a block knocked off the top, func_1508F7BC), in the list
+ * D_800D245C; func_1508F0D4 moves it and frees it when its timer runs out. */
+struct BlockDebris {
+    /* 0x00 */ Mtx mtx[2];                 /* double-buffered by D_800BE9C0 */
+    /* 0x80 */ struct BlockDebris *next;
+    /* 0x84 */ Vec3f pos;
+    /* 0x90 */ Vec3f vel;
+    /* 0x9C */ Vec3f rot;
+    /* 0xA8 */ Vec3f rotVel;
+    /* 0xB4 */ u8 timer;
+    /* 0xB5 */ u8 padB5[0x3];
+}; /* size 0xB8 */
 
 typedef struct {
     u8 pad0[0xD16];
