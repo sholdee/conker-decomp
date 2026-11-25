@@ -1,3 +1,4 @@
+/* functions.h declares func_150ADA20 as returning u8; it returns a full u32 random number. */
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include <ultra64.h>
 #include "functions.h"
@@ -5,28 +6,13 @@
 #undef func_150ADA20
 u32 func_150ADA20(void);
 
-extern f32 D_800AA97C;
-extern f32 D_800AA980;
-extern f32 D_800AA984;
-extern f32 D_800AA988;
-extern f32 D_800AA98C;
-extern f32 D_800AA990;
-extern f32 D_800AA994;
-extern f32 D_800AA998;
-
 void func_151541B8(void *, f32, s32, f32, f32, u8, s32);
 
-typedef struct {
-    char pad_0[0x4];
-    u8 field_0x04;
-    char pad_1[0x1CF];
-    s32 field_0x1D4;
-} GameObjectMatrixSource;
-
+/* Particle parameters for a bullet impact, filled in by func_151BFC40. */
 typedef struct {
     /* 0x00 */ s32 unk00;
     /* 0x04 */ s32 unk04;
-    /* 0x08 */ u8  pad08[0xC];
+    /* 0x08 */ vertex pos;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -46,47 +32,29 @@ typedef struct {
     /* 0x4C */ s16 unk4C;
     /* 0x4E */ s16 unk4E;
     /* 0x50 */ s8  unk50;
-} Struct151BFC40;
+} ImpactFxConfig; /* size 0x54 */
 
-void func_151BFC40(void *arg0, f32 *arg1) {
-    Struct151BFC40 *temp = arg0;
+/* Collision surface (0x12 bytes, 2-byte aligned) as stored in a ray-cast result. */
+typedef struct {
+    /* 0x00 */ s16 unk00[9];
+} HitSurface;
 
-    temp->unk00 = 3;
-    temp->unk04 = 4 >> ((D_80082FA0 >= 2) ? 1 : 0);
-    arg1[0] = 494.0f;
-    temp->unk14 = D_800AA97C;
-    temp->unk18 = D_800AA980;
-    temp->unk1C = 45.0f;
-    temp->unk20 = 53.0f;
-    temp->unk24 = 203.0f;
-    temp->unk28 = 414.0f;
-    temp->unk2C = 7;
-    temp->unk30 = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
-    temp->unk34 = 15.0f;
-    temp->unk38 = D_800AA984;
-    temp->unk3C = D_800AA988;
-    temp->unk40 = D_800AA98C;
-    temp->unk44 = 25;
-    temp->unk46 = 15;
-    temp->unk48 = 100;
-    temp->unk4A = 100;
-    temp->unk4C = 12;
-    temp->unk4E = 20;
+/* Argument block for func_1514FB98: an impact with no surface. */
+typedef struct {
+    /* 0x00 */ vertex vel;
+    /* 0x0C */ f32 scale;
+    /* 0x10 */ ImpactFxConfig config;
+} ImpactFx; /* size 0x64 */
 
-    if (D_80082FA0 < 2) {
-        if (D_8008FD8C < 8) {
-            goto zero;
-        }
-    }
+/* Argument block for func_1514FBFC: an impact against a collision surface. */
+typedef struct {
+    /* 0x00 */ vertex vel;
+    /* 0x0C */ HitSurface surface;
+    /* 0x20 */ f32 scale;
+    /* 0x24 */ ImpactFxConfig config;
+} SurfaceImpactFx; /* size 0x78 */
 
-    temp->unk50 = -1;
-    return;
-
-zero:
-    temp->unk50 = 0;
-}
-
-struct Vec3F151BFDA0 { f32 x; f32 y; f32 z; };
+/* Argument block for func_1514FCE8. */
 typedef struct {
     /* 0x00 */ s16 unk00;
     /* 0x02 */ s16 unk02;
@@ -94,7 +62,7 @@ typedef struct {
     /* 0x06 */ s16 unk06;
     /* 0x08 */ s32 unk08;
     /* 0x0C */ s32 unk0C;
-    /* 0x10 */ struct Vec3F151BFDA0 unk10;
+    /* 0x10 */ vertex pos;
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24;
@@ -113,248 +81,247 @@ typedef struct {
     /* 0x52 */ s16 unk52;
     /* 0x54 */ s16 unk54;
     /* 0x56 */ s16 unk56;
-    /* 0x58 */ s8 unk58;
-} Struct151C0098;
-struct Local151BFDA0 {
-    struct Vec3F151BFDA0 unk0;  /* 0x00 (sp 0x24) */
-    f32 unkC;                   /* 0x0C (sp 0x30) */
-    u8 unk10[0x8];              /* 0x10 (sp 0x34) */
-    struct Vec3F151BFDA0 unk18; /* 0x18 (sp 0x3C) */
-    u8 unk24[0x40];             /* 0x24 (sp 0x48) */
-};
-void func_151C0418(f32 *, u8, s32);
-void func_151C04F8(f32 *, u8, s32);
-void func_151C05A4(void *, u8, s32);
-void func_151C05F0(void *, u8, s32);
-void func_151BFC40(void *, f32 *);
-void func_1514FB98(void *, u8, s32);
-void func_1514FCE8(Struct151C0098 *, u8, s32);
-void func_1504715C(void *, s32);
-s32 func_15046C80(f32 *, s32, f32, void *);
-void func_151C0360(void *, void *, s32, s32);
-void func_151C0644(void *, u8, s32);
+    /* 0x58 */ s8  unk58;
+} DebrisFx;
 
-void func_151BFDA0(struct Vec3F151BFDA0 *arg0, struct Vec3F151BFDA0 *arg1, u8 arg2, u8 arg3, s32 arg4) {
-    struct Local151BFDA0 sp24;
+/* Fills in the impact particle parameters; fewer particles on busy frames. */
+void func_151BFC40(ImpactFxConfig *config, f32 *scale) {
+    config->unk00 = 3;
+    config->unk04 = 4 >> ((D_80082FA0 >= 2) ? 1 : 0);
+    *scale = 494.0f;
+    config->unk14 = 0.06089999899f;
+    config->unk18 = 0.02520000003f;
+    config->unk1C = 45.0f;
+    config->unk20 = 53.0f;
+    config->unk24 = 203.0f;
+    config->unk28 = 414.0f;
+    config->unk2C = 7;
+    config->unk30 = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
+    config->unk34 = 15.0f;
+    config->unk38 = 0.8800000548f;
+    config->unk3C = -0.3980000317f;
+    config->unk40 = 0.3910000324f;
+    config->unk44 = 25;
+    config->unk46 = 15;
+    config->unk48 = 100;
+    config->unk4A = 100;
+    config->unk4C = 12;
+    config->unk4E = 20;
+    config->unk50 = (D_80082FA0 >= 2 || D_8008FD8C >= 8) ? -1 : 0;
+}
 
-    func_151C0418((f32 *)arg0, arg3, arg4);
-    func_151C04F8((f32 *)arg0, arg3, arg4);
-    func_151C05A4(arg0, arg3, arg4);
-    func_151C05F0(arg0, arg3, arg4);
-    if (arg2 != 0) {
-        sp24.unk0.x = -arg1->x;
-        sp24.unk0.y = -arg1->y;
-        sp24.unk0.z = -arg1->z;
-        func_151BFC40(&sp24.unk10, &sp24.unkC);
-        sp24.unk18 = *arg0;
-        func_1514FB98(&sp24, arg3, arg4);
+void func_151C0418(vertex *pos, u8 arg1, s32 arg2);
+void func_151C04F8(vertex *pos, u8 arg1, s32 arg2);
+void func_151C05A4(vertex *pos, u8 arg1, s32 arg2);
+void func_151C05F0(vertex *pos, u8 arg1, s32 arg2);
+void func_1514FB98(ImpactFx *, u8, s32);
+void func_1514FBFC(SurfaceImpactFx *, u8, s32);
+void func_1514FCE8(DebrisFx *, u8, s32);
+void func_1504715C(f32 *, s32);
+s32 func_15046C80(vertex *, s32, f32, f32 *);
+void func_151C0360(void *surface, vertex *pos, u8 arg2, s32 arg3);
+void func_151C0644(vertex *pos, u8 arg1, s32 arg2);
+s32 func_15144E80(HitSurface *, vertex *, vertex *, vertex *);
+
+/* Bullet hit with no surface: sparks and smoke at pos, plus impact particles thrown back along -dir. */
+void func_151BFDA0(vertex *pos, vertex *dir, u8 withParticles, u8 arg3, s32 arg4) {
+    ImpactFx fx;
+
+    func_151C0418(pos, arg3, arg4);
+    func_151C04F8(pos, arg3, arg4);
+    func_151C05A4(pos, arg3, arg4);
+    func_151C05F0(pos, arg3, arg4);
+    if (withParticles) {
+        fx.vel.x = -dir->x;
+        fx.vel.y = -dir->y;
+        fx.vel.z = -dir->z;
+        func_151BFC40(&fx.config, &fx.scale);
+        fx.config.pos = *pos;
+        func_1514FB98(&fx, arg3, arg4);
     }
 }
 
-struct Copy18_151BFE84 {
-    u8 bytes[0x10];
-    u16 unk10;
-};
+/* Bullet hit against a collision surface (or none). */
+void func_151BFE84(HitSurface *surface, vertex *pos, vertex *dir, u8 withParticles, u8 arg4, s32 arg5) {
+    vertex v0;
+    vertex v1;
+    vertex v2;
 
-struct Local151BFE84_FBFC {
-    struct Vec3F151BFDA0 unk0;
-    struct Copy18_151BFE84 unkC;
-    u8 pad1E[2];
-    f32 unk20;
-    u8 unk24[0x8];
-    struct Vec3F151BFDA0 unk2C;
-    u8 unk38[0x40];
-};
-
-s32 func_15144E80(void *, struct Vec3F151BFDA0 *, struct Vec3F151BFDA0 *, struct Vec3F151BFDA0 *);
-void func_1514FBFC(void *, u8, s32);
-
-void func_151BFE84(struct Copy18_151BFE84 *arg0, struct Vec3F151BFDA0 *arg1, struct Vec3F151BFDA0 *arg2, u8 arg3, u8 arg4, s32 arg5) {
-    struct Vec3F151BFDA0 sp114;
-    struct Vec3F151BFDA0 sp108;
-    struct Vec3F151BFDA0 spFC;
-
-    func_151C0418((f32 *)arg1, (*(u8*)&arg4), (*(s32*)&arg5));
-    func_151C04F8((f32 *)arg1, (*(u8*)&arg4), (*(s32*)&arg5));
-    func_151C05A4(arg1, (*(u8*)&arg4), (*(s32*)&arg5));
-    func_151C05F0(arg1, (*(u8*)&arg4), (*(s32*)&arg5));
-    if (arg0 != NULL && (*(u8*)&arg3) != 0) {
-        if (func_15144E80(arg0, &sp114, &sp108, &spFC) != 0 && spFC.y < 0.0f) {
-            func_151C0644(arg1, (*(u8*)&arg4), (*(s32*)&arg5));
+    // matching: taking the addresses keeps arg4/arg5 in their stack slots (reloaded at each use)
+    func_151C0418(pos, *(u8 *)&arg4, *(s32 *)&arg5);
+    func_151C04F8(pos, arg4, arg5);
+    func_151C05A4(pos, arg4, arg5);
+    func_151C05F0(pos, arg4, arg5);
+    if (surface != NULL && withParticles) {
+        if (func_15144E80(surface, &v0, &v1, &v2) != 0 && v2.y < 0.0f) {
+            func_151C0644(pos, arg4, arg5);
         }
     }
-    if (arg0 != NULL && (*(u8*)&arg3) != 0) {
-        func_151C0360(arg0, arg1, (*(u8*)&arg4), (*(s32*)&arg5));
+    if (surface != NULL && withParticles) {
+        func_151C0360(surface, pos, arg4, arg5);
     }
-    if (arg3) {
-        if (arg0 != NULL) {
-            struct Local151BFE84_FBFC sp84;
+    if (withParticles) {
+        if (surface != NULL) {
+            SurfaceImpactFx fx;
 
-            sp84.unk0.x = -arg2->x;
-            sp84.unk0.y = -arg2->y;
-            sp84.unk0.z = -arg2->z;
-            sp84.unkC = *arg0;
-            sp84.unk2C = *arg1;
-            func_151BFC40(&sp84.unk24, &sp84.unk20);
-            func_1514FBFC(&sp84, (*(u8*)&arg4), (*(s32*)&arg5));
+            fx.vel.x = -dir->x;
+            fx.vel.y = -dir->y;
+            fx.vel.z = -dir->z;
+            fx.surface = *surface;
+            fx.config.pos = *pos;
+            func_151BFC40(&fx.config, &fx.scale);
+            func_1514FBFC(&fx, arg4, arg5);
         } else {
-            struct Local151BFDA0 sp20;
+            ImpactFx fx;
 
-            sp20.unk0.x = -arg2->x;
-            sp20.unk0.y = -arg2->y;
-            sp20.unk0.z = -arg2->z;
-            func_151BFC40(&sp20.unk10, &sp20.unkC);
-            sp20.unk18 = *arg1;
-            func_1514FB98(&sp20, (*(u8*)&arg4), (*(s32*)&arg5));
+            fx.vel.x = -dir->x;
+            fx.vel.y = -dir->y;
+            fx.vel.z = -dir->z;
+            func_151BFC40(&fx.config, &fx.scale);
+            fx.config.pos = *pos;
+            func_1514FB98(&fx, arg4, arg5);
         }
     }
 }
 
-void func_151C0098(struct Vec3F151BFDA0 *arg0, s32 arg1, volatile u8 arg2, u8 arg3, s32 arg4) {
-    Struct151C0098 sp64;
-    f32 sp58[3];
-    f32 sp34[9];
-    f32 sp28[3];
+/* Bullet hit on an object: sparks and debris at pos, plus a ground mark below it if hitObj is set. */
+void func_151C0098(vertex *pos, s32 hitObj, u8 withParticles, u8 arg3, s32 arg4) {
+    DebrisFx fx;
+    vertex probe;
+    f32 floor[9];
+    vertex markPos;
 
-    func_151C0418((f32 *)arg0, arg3, arg4);
-    func_151C04F8((f32 *)arg0, arg3, arg4);
-    func_151C05A4(arg0, arg3, arg4);
-    func_151C05F0(arg0, arg3, arg4);
+    func_151C0418(pos, arg3, arg4);
+    func_151C04F8(pos, arg3, arg4);
+    func_151C05A4(pos, arg3, arg4);
+    func_151C05F0(pos, arg3, arg4);
 
-    if (arg2 != 0) {
-        sp64.unk00 = 0;
-        sp64.unk02 = 0xFF;
-        sp64.unk04 = -0x40;
-        sp64.unk06 = 0x47;
-        sp64.unk08 = 6;
-        sp64.unk0C = 4;
-        sp64.unk10 = *arg0;
-        sp64.unk1C = 23.0f;
-        sp64.unk20 = 30.0f;
-        sp64.unk24 = 45.0f;
-        sp64.unk28 = 53.0f;
-        sp64.unk2C = 203.0f;
-        sp64.unk30 = 414.0f;
-        sp64.unk34 = 7;
-        sp64.unk38 = 3;
-        sp64.unk3C = 15.0f;
-        sp64.unk40 = D_800AA990;
-        sp64.unk44 = D_800AA994;
-        sp64.unk48 = D_800AA998;
-        sp64.unk4C = 25;
-        sp64.unk4E = 15;
-        sp64.unk50 = 100;
-        sp64.unk52 = 100;
-        sp64.unk54 = 12;
-        sp64.unk56 = 20;
-        sp64.unk58 = 0;
-        func_1514FCE8(&sp64, arg3, arg4);
+    // matching: taking the address keeps withParticles in its stack slot (reloaded at each use)
+    if (*(u8 *)&withParticles) {
+        fx.unk00 = 0;
+        fx.unk02 = 255;
+        fx.unk04 = -64;
+        fx.unk06 = 71;
+        fx.unk08 = 6;
+        fx.unk0C = 4;
+        fx.pos = *pos;
+        fx.unk1C = 23.0f;
+        fx.unk20 = 30.0f;
+        fx.unk24 = 45.0f;
+        fx.unk28 = 53.0f;
+        fx.unk2C = 203.0f;
+        fx.unk30 = 414.0f;
+        fx.unk34 = 7;
+        fx.unk38 = 3;
+        fx.unk3C = 15.0f;
+        fx.unk40 = 0.8720000386f;
+        fx.unk44 = -0.3980000317f;
+        fx.unk48 = 0.3640000224f;
+        fx.unk4C = 25;
+        fx.unk4E = 15;
+        fx.unk50 = 100;
+        fx.unk52 = 100;
+        fx.unk54 = 12;
+        fx.unk56 = 20;
+        fx.unk58 = 0;
+        func_1514FCE8(&fx, arg3, arg4);
     }
 
-    if (arg2 != 0 && arg1 != 0) {
-        sp58[0] = arg0->x;
-        sp58[1] = arg0->y + 100.0f;
-        sp58[2] = arg0->z;
-        func_1504715C(sp34, arg1);
-        if (func_15046C80(sp58, 0, arg0->y - 1000.0f, sp34) != 0) {
-            sp28[0] = sp58[0];
-            sp28[1] = sp34[0];
-            sp28[2] = sp58[2];
-            func_151C0360(&sp34[1], sp28, arg3 & 0xFF, arg4);
-            func_151C0644(arg0, arg3, arg4);
+    if (withParticles && hitObj != 0) {
+        probe.x = pos->x;
+        probe.y = pos->y + 100.0f;
+        probe.z = pos->z;
+        func_1504715C(floor, hitObj);
+        if (func_15046C80(&probe, 0, pos->y - 1000.0f, floor) != 0) {
+            markPos.x = probe.x;
+            markPos.y = floor[0];
+            markPos.z = probe.z;
+            func_151C0360(&floor[1], &markPos, arg3, arg4);
+            func_151C0644(pos, arg3, arg4);
         }
     }
 }
 
-s32 func_151C02E4(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
+/* Whether obj is a valid target: not in the ignore list, not self, active, and with a valid id. */
+s32 func_151C02E4(struct127 *obj, struct127 *self, s32 ignoreCount, struct127 **ignore) {
     u8 i;
 
-    for (i = 0; i < arg2; i++) {
-        if (arg0 == arg3[i]) {
-            return 0;
+    for (i = 0; i < ignoreCount; i++) {
+        if (obj == ignore[i]) {
+            return FALSE;
         }
     }
-    if (arg0 == arg1) {
-        return 0;
+    if (obj == self) {
+        return FALSE;
     }
-    if (*(s32 *)arg0 == 0) {
-        return 0;
+    if (obj->interaction_state == 0) {
+        return FALSE;
     }
-    if (*(u8 *)(arg0 + 4) == 0xFF) {
-        return 0;
+    if (obj->id == 0xFF) {
+        return FALSE;
     }
-    return 1;
+    return TRUE;
 }
 
-void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_150E7FEC(f32, s32, void *, vertex *, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_151C0360(void *arg0, void *arg1, s32 arg2, s32 arg3) {
-    union { u32 w; f64 _a; } r1;
-    f32 sp3C;
-    u32 r2;
+void func_151C0360(void *surface, vertex *pos, u8 arg2, s32 arg3) {
+    // matching: the f64 member gives the random value an 8-byte aligned stack slot
+    union { u32 w; f64 align; } shade;
+    f32 rand;
+    u32 duration;
 
-    sp3C = func_150ADA68();
-    r1.w = func_150ADA20();
-    r2 = func_150ADA20();
-    func_150E7FEC(sp3C * 75.0f + 75.0f, (u8)((r1.w % 56U) + 200), arg0, arg1,
-                  ((u32)r2 % 205U) + 299, 1, 1, 0, 0, 0, (u8)arg2, 0);
+    rand = func_150ADA68();
+    shade.w = func_150ADA20();
+    duration = func_150ADA20();
+    func_150E7FEC(rand * 75.0f + 75.0f, (u8)(shade.w % 56 + 200), surface, pos,
+                  duration % 205 + 299, 1, 1, 0, 0, 0, arg2, 0);
 }
 
 s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
-void func_151C0418(f32 *arg0, u8 arg1, s32 arg2) {
+void func_151C0418(vertex *pos, u8 arg1, s32 arg2) {
     Header header;
     Header2 header2;
 
     header.unk0 = 3;
     header.unk1 = -1;
-    header.unk2 = (func_150ADA20() % 0xBU) + 0x14;
+    header.unk2 = func_150ADA20() % 11 + 20;
     header.unk4 = 0;
 
-    header2.unk0 = (s32) arg0[0];
-    header2.unk4 = (s32) arg0[1];
-    header2.unk8 = (s32) arg0[2];
+    header2.unk0 = pos->x;
+    header2.unk4 = pos->y;
+    header2.unk8 = pos->z;
 
-    func_151602C0(&header, &header2, (func_150ADA20() % 0x79U) + 0x3C, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
+    func_151602C0(&header, &header2, func_150ADA20() % 121 + 60, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
 
-void func_151C04F8(f32 *arg0, u8 arg1, s32 arg2) {
-    union { f32 f; f64 _a; } temp_f0;
-    u32 temp_a;
+void func_151C04F8(vertex *pos, u8 arg1, s32 arg2) {
+    // matching: the f64 member gives the random value an 8-byte aligned stack slot
+    union { f32 f; f64 align; } rand;
+    u32 shade;
 
-    temp_f0.f = func_150ADA68();
-    temp_a = func_150ADA20();
-    func_151541B8(arg0, temp_f0.f * 4.0f + 14.0f, 0x3F974EB9,
-                  (f32)(u32)((temp_a % 0x38U) + 0xC8), 0.0f, arg1, arg2);
+    rand.f = func_150ADA68();
+    shade = func_150ADA20();
+    // 0x3F974EB9 is 1.18209f, passed in a GPR as its bit pattern
+    func_151541B8(pos, rand.f * 4.0f + 14.0f, 0x3F974EB9, (f32)(shade % 56 + 200), 0.0f, arg1, arg2);
 }
 
-void func_151D5334(void *, f32, f32, f32, s32, u8, s32);
+void func_151D5334(vertex *, f32, f32, f32, s32, u8, s32);
 
-void func_151C05A4(void *arg0, u8 arg1, s32 arg2) {
-    func_151D5334(arg0, 800.0f, 2000.0f, 0.0005f, 5, arg1, arg2);
+void func_151C05A4(vertex *pos, u8 arg1, s32 arg2) {
+    func_151D5334(pos, 800.0f, 2000.0f, 0.0005f, 5, arg1, arg2);
 }
 
-void func_151C05F0(void *arg0, u8 arg1, s32 arg2) {
-    func_151D5404(arg0, 800.0f, 2000.0f, 0.0005f, 0xF, 0x14, arg1, arg2);
+void func_151C05F0(vertex *pos, u8 arg1, s32 arg2) {
+    func_151D5404((struct17 *)pos, 800.0f, 2000.0f, 0.0005f, 15, 20, arg1, arg2);
 }
 
-void func_150E83AC(void *, s16, u8, s32);
+void func_150E83AC(vertex *, s16, u8, s32);
 
-void func_151C0644(void *arg0, u8 arg1, s32 arg2) {
-    func_150E83AC(arg0, (s16)((u32)func_150ADA20() % 0x3E + 0x78), arg1, arg2);
+void func_151C0644(vertex *pos, u8 arg1, s32 arg2) {
+    func_150E83AC(pos, func_150ADA20() % 62 + 120, arg1, arg2);
 }
-
-typedef struct {
-    /* 0x0 */ f32 x;
-    /* 0x4 */ f32 y;
-    /* 0x8 */ f32 z;
-} Vec151C196C;
-
-/* 0x12 bytes, 2-byte aligned: copied whole with lwl/lwr + lhu. */
-typedef struct {
-    /* 0x00 */ u8  unk00[0x10];
-    /* 0x10 */ s16 unk10;
-} Blob151C1D5C;
 
 typedef struct {
     /* 0x00 */ u8 pad00[0x4F];
@@ -363,7 +330,7 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ f32 unk00;
-    /* 0x04 */ Blob151C1D5C unk04;
+    /* 0x04 */ HitSurface unk04;
     /* 0x18 */ s32 unk18;
     /* 0x1C */ s8  unk1C;
     /* 0x1D */ s8  unk1D;
@@ -373,12 +340,12 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 unk00;
     /* 0x04 */ f32 unk04;
-    /* 0x08 */ Vec151C196C unk08;
-    /* 0x14 */ Vec151C196C unk14;
-    /* 0x20 */ Vec151C196C unk20;
-    /* 0x2C */ Vec151C196C unk2C;
-    /* 0x38 */ Vec151C196C unk38;
-    /* 0x44 */ Blob151C1D5C unk44;
+    /* 0x08 */ vertex unk08;
+    /* 0x14 */ vertex unk14;
+    /* 0x20 */ vertex unk20;
+    /* 0x2C */ vertex unk2C;
+    /* 0x38 */ vertex unk38;
+    /* 0x44 */ HitSurface unk44;
     /* 0x56 */ s16 unk56;
     /* 0x58 */ u8  unk58;
     /* 0x59 */ u8  unk59;
@@ -390,8 +357,8 @@ typedef struct {
 
 typedef struct {
     /* 0x000 */ u8 pad0[0x130];
-    /* 0x130 */ Vec151C196C unk130;
-    /* 0x13C */ Vec151C196C unk13C;
+    /* 0x130 */ vertex unk130;
+    /* 0x13C */ vertex unk13C;
     /* 0x148 */ u8 pad148[0x4F];
     /* 0x197 */ u8 unk197;
 } Cam151C0698;
@@ -437,7 +404,7 @@ typedef struct {
     /* 0x092 */ u8 unk92;
     /* 0x093 */ u8 pad93;
     /* 0x094 */ f32 unk94;
-    /* 0x098 */ Vec151C196C unk98;
+    /* 0x098 */ vertex unk98;
     /* 0x0A4 */ Res151C1D5C unkA4;
     /* 0x0C8 */ u8 unkC8;
     /* 0x0C9 */ u8 padC9[3];
@@ -455,9 +422,9 @@ typedef struct {
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24;
-    /* 0x28 */ Vec151C196C pos;
-    /* 0x34 */ Vec151C196C vel;
-    /* 0x40 */ Vec151C196C unk40;
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ vertex unk40;
     /* 0x4C */ f32 unk4C;
     /* 0x50 */ s32 unk50;
     /* 0x54 */ s16 unk54;
@@ -483,21 +450,21 @@ typedef struct {
 } Desc151C0698;
 
 f32 func_15144AA8(u8, void *);
-void func_15145740(Actor151C0698 *, Vec151C196C *, void *, s32, f32);
-s32 func_151D5B6C(Vec151C196C *, Vec151C196C *, Actor151C0698 *, s32, Blk151C0698 *);
+void func_15145740(Actor151C0698 *, vertex *, void *, s32, f32);
+s32 func_151D5B6C(vertex *, vertex *, Actor151C0698 *, s32, Blk151C0698 *);
 void *func_15132A4C(Desc151C0698 *, s32, s32, s32, u8, s32);
-void func_15145974(Vec151C196C *, f32 *, f32 *);
+void func_15145974(vertex *, f32 *, f32 *);
 s32 func_151B8908(void *);
 s32 func_151B8400(void *);
 s32 func_151B8668(void *, u8, s32);
-void func_15145EA4(Vec151C196C **, Vec151C196C **, s32, s32);
-void func_15102B38(Actor151C0698 *, s32, Vec151C196C *, Vec151C196C *, f32 *, s32, s32, f32,
-                   Vec151C196C *, s32, s32, s32, u8, s32);
-void func_15103254(s16, u8, f32, Vec151C196C *, s32, u8, s32);
-void func_151C1798(GameObjectMatrixSource *arg0, s32 arg1);
+void func_15145EA4(vertex **, vertex **, s32, s32);
+void func_15102B38(Actor151C0698 *, s32, vertex *, vertex *, f32 *, s32, s32, f32,
+                   vertex *, s32, s32, s32, u8, s32);
+void func_15103254(s16, u8, f32, vertex *, s32, u8, s32);
+void func_151C1798(struct127 *arg0, s32 arg1);
 void func_151C1860(f32 *arg0, u8 arg1, s32 arg2);
-s32 func_151C196C(Ray151C196C *arg0, Vec151C196C *arg1, Vec151C196C *arg2, Vec151C196C *arg3,
-                  Vec151C196C *arg4, s32 arg5, s32 arg6, Vec151C196C *arg7, f32 *arg8,
+s32 func_151C196C(Ray151C196C *arg0, vertex *arg1, vertex *arg2, vertex *arg3,
+                  vertex *arg4, s32 arg5, s32 arg6, vertex *arg7, f32 *arg8,
                   Res151C1D5C *arg9, s32 arg10);
 s32 func_151C110C();
 #define RAND() func_150ADA20()
@@ -505,15 +472,15 @@ s32 func_151C110C();
 void func_151C0698(Actor151C0698 *arg0, Actor151C0698 *arg1, Blk151C0698 *arg2, u8 arg3, u8 arg4, s32 arg5) {
     Ray151C196C ray;
     f32 depth;
-    Vec151C196C hitPos;
+    vertex hitPos;
     Res151C1D5C res;
     u8 useCam;
-    Vec151C196C pos;
-    Vec151C196C dir;
-    Vec151C196C camPos;
-    Vec151C196C camDir;
+    vertex pos;
+    vertex dir;
+    vertex camPos;
+    vertex camDir;
     s32 mode;
-    Vec151C196C *src;
+    vertex *src;
     Actor151C0698 *who;
     f32 angle;
     u8 sp218[0x14];
@@ -527,7 +494,7 @@ void func_151C0698(Actor151C0698 *arg0, Actor151C0698 *arg1, Blk151C0698 *arg2, 
     depth = 0.0f;
     if (D_800BE616 != 0) {
         if (arg0->unk1D4 != 0) {
-            func_151C1798((GameObjectMatrixSource *) arg0, (s32) &pos);
+            func_151C1798((struct127 *) arg0, (s32) &pos);
         } else {
             pos.x = arg0->unk14;
             pos.y = arg0->unk18 + 65.0f;
@@ -550,14 +517,14 @@ lbl1:
                 pos.y = src->y;
                 pos.z = src->z - sinf(angle) * 25.0f;
             } else if (arg0->unk1D4 != 0) {
-                func_151C1798((GameObjectMatrixSource *) arg0, (s32) &pos);
+                func_151C1798((struct127 *) arg0, (s32) &pos);
             } else {
                 pos.x = arg0->unk14;
                 pos.y = arg0->unk18 + 65.0f;
                 pos.z = arg0->unk1C;
             }
         } else if (arg0->unk1D4 != 0) {
-            func_151C1798((GameObjectMatrixSource *) arg0, (s32) &pos);
+            func_151C1798((struct127 *) arg0, (s32) &pos);
         } else {
             pos.x = arg0->unk14;
             pos.y = arg0->unk18 + 65.0f;
@@ -679,14 +646,14 @@ lbl1:
         }
         if (arg0->unk1D4 != 0 && (arg0->unk74 & 0xF) != 0xF) {
             if (arg0->unk04 != 0x77 && arg0->unk04 != 0x28) {
-                const Vec151C196C a = { 3.0f, 125.0f, 35.0f };
-                const Vec151C196C b = { 6.0f, -50.0f, 35.0f };
-                const Vec151C196C c = { 3.0f, 200.0f, 35.0f };
+                const vertex a = { 3.0f, 125.0f, 35.0f };
+                const vertex b = { 6.0f, -50.0f, 35.0f };
+                const vertex c = { 3.0f, 200.0f, 35.0f };
                 f32 scl[2];
-                Vec151C196C outA;
-                Vec151C196C outB;
-                Vec151C196C *in[2];
-                Vec151C196C *out[2];
+                vertex outA;
+                vertex outB;
+                vertex *in[2];
+                vertex *out[2];
 
                 scl[0] = func_150ADA68() * 10.0f + 25.0f;
                 scl[1] = func_150ADA68() * 1.009000063f + 2.013000011f;
@@ -748,7 +715,7 @@ typedef struct Model151C1180 {
 
 typedef struct Fx151C1180 {
     u8 pad0[0x40];
-    Vec151C196C unk40;
+    vertex unk40;
 } Fx151C1180;
 
 typedef struct {
@@ -776,15 +743,15 @@ typedef struct {
     /* 0x002 */ u8 pad2[0xA];
     /* 0x00C */ u8 unkC;
     /* 0x00D */ u8 padD[0x2B];
-    /* 0x038 */ Vec151C196C pos;
-    /* 0x044 */ Vec151C196C vel;
+    /* 0x038 */ vertex pos;
+    /* 0x044 */ vertex vel;
     /* 0x050 */ u8 pad50[0x120];
     /* 0x170 */ Ray151C196C ray;
 } Obj151C1180;
 
 
 void func_15055A2C(s32, f32, f32, f32, s32);
-void func_151C1654(struct Vec3F151BFDA0 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void func_151C1654(vertex *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_15081690(s32, f32, f32, f32, f32, f32, f32, Ray151C196C *, f32, s32, s32, s32, s32,
                    s32, s32);
 s32 func_151ABE40(void *, void *, s32, s32, s32);
@@ -793,8 +760,8 @@ s32 func_151C1180(Obj151C1180 *arg0)
 {
   Sub151C1180 *sub;
   f32 scale;
-  Vec151C196C spD4;
-  Vec151C196C spC8;
+  vertex spD4;
+  vertex spC8;
   Ray151C196C sp64;
   Model151C1180 *model;
   sub = (Sub151C1180 *) (&arg0->ray);
@@ -811,11 +778,11 @@ s32 func_151C1180(Obj151C1180 *arg0)
   spD4.z = sub->ray.unk38.z * scale;
   if (D_800E0930 != 0)
   {
-    if (((s32 (*)(Vec151C196C *, Vec151C196C *, Vec151C196C *)) D_800E0930)(&arg0->pos, &spD4, &spC8) != 0)
+    if (((s32 (*)(vertex *, vertex *, vertex *)) D_800E0930)(&arg0->pos, &spD4, &spC8) != 0)
     {
       func_15055A2C(0, spC8.x, spC8.y, spC8.z, 0);
-      func_151C1654((struct Vec3F151BFDA0 *) (&spC8), (s32) (&sub->ray.unk38), sub->unk6C, sub->unk92, 0);
-      func_151BFDA0((struct Vec3F151BFDA0 *) (&spC8), (struct Vec3F151BFDA0 *) (&sub->ray.unk38), !(sub->unkC8 & 1), arg0->unkC, arg0->unk1);
+      func_151C1654((vertex *) (&spC8), (s32) (&sub->ray.unk38), sub->unk6C, sub->unk92, 0);
+      func_151BFDA0((vertex *) (&spC8), (vertex *) (&sub->ray.unk38), !(sub->unkC8 & 1), arg0->unkC, arg0->unk1);
       return 0;
     }
   }
@@ -827,8 +794,8 @@ s32 func_151C1180(Obj151C1180 *arg0)
     if (sp64.unk59 >= 2)
     {
       func_15055A2C(1, sp64.unk08.x, sp64.unk08.y, sp64.unk08.z, 0);
-      func_151C1654((struct Vec3F151BFDA0 *) (&sp64.unk08), (s32) (&sub->ray.unk38), sub->unk6C, sub->unk92, 0);
-      func_151C0098((struct Vec3F151BFDA0 *) (&sp64.unk08), sp64.unk00, !(sub->unkC8 & 1), arg0->unkC, arg0->unk1);
+      func_151C1654((vertex *) (&sp64.unk08), (s32) (&sub->ray.unk38), sub->unk6C, sub->unk92, 0);
+      func_151C0098((vertex *) (&sp64.unk08), sp64.unk00, !(sub->unkC8 & 1), arg0->unkC, arg0->unk1);
       return 0;
     }
   }
@@ -852,8 +819,8 @@ s32 func_151C1180(Obj151C1180 *arg0)
     if (sub->ray.unk59 == 1)
     {
       func_15055A2C(0, sub->ray.unk08.x, sub->ray.unk08.y, sub->ray.unk08.z, 0);
-      func_151C1654((struct Vec3F151BFDA0 *) (&sub->ray.unk08), (s32) (&sub->ray.unk38), sub->unk6C, sub->unk92, (s32) (&sub->ray.unk44));
-      func_151BFE84((struct Copy18_151BFE84 *) (&sub->ray.unk44), (struct Vec3F151BFDA0 *) (&sub->ray.unk08), (struct Vec3F151BFDA0 *) (&arg0->vel), !(sub->unkC8 & 1), arg0->unkC, arg0->unk1);
+      func_151C1654((vertex *) (&sub->ray.unk08), (s32) (&sub->ray.unk38), sub->unk6C, sub->unk92, (s32) (&sub->ray.unk44));
+      func_151BFE84((HitSurface *) (&sub->ray.unk44), (vertex *) (&sub->ray.unk08), (vertex *) (&arg0->vel), !(sub->unkC8 & 1), arg0->unkC, arg0->unk1);
     }
     return 0;
   }
@@ -919,10 +886,10 @@ void func_151C1628(void *arg0) {
     func_1513259C(arg0);
 }
 
-void func_151D40D4(struct Vec3F151BFDA0 *, s32, s32, s32, s32, s32, s32, s32);
-void func_151D42E8(struct Vec3F151BFDA0 *, s32, s32, s32, s32);
+void func_151D40D4(vertex *, s32, s32, s32, s32, s32, s32, s32);
+void func_151D42E8(vertex *, s32, s32, s32, s32);
 
-void func_151C1654(struct Vec3F151BFDA0 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void func_151C1654(vertex *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     void (*callback)(s32, s32, s32);
     u8 temp;
 
@@ -954,10 +921,10 @@ struct S800AA958 { s32 unk0; s32 unk4; s32 unk8; };
 extern u8 D_800AA954[];
 extern struct S800AA958 D_800AA958[];
 
-void func_151C1798(GameObjectMatrixSource *arg0, s32 arg1) {
+void func_151C1798(struct127 *arg0, s32 arg1) {
     s32 index;
 
-    switch (arg0->field_0x04) {
+    switch (arg0->id) {
     case 0x77:
         index = 1;
         break;
@@ -969,7 +936,7 @@ void func_151C1798(GameObjectMatrixSource *arg0, s32 arg1) {
         break;
     }
     func_15143134(&D_800AA958[index], arg1,
-                  arg0->field_0x1D4 + (D_800AA954[index] << 6));
+                  (s32)arg0->unk1D4 + (D_800AA954[index] << 6));
 }
 
 void func_151C1814(s32 *arg0, s32 *arg1, u8 arg2) {
@@ -999,28 +966,27 @@ void func_151C1860(f32 *arg0, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() % 0xBU) + 5, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg1, arg2);
 }
 
-s32 func_151C02E4(s32, s32, s32, s32 *);
-
 typedef struct {
-    s32 unk0;
-    s32 unk4[1];
-} Struct151C1940;
+    /* 0x00 */ s32 count;
+    /* 0x04 */ struct127 *objs[1];
+} IgnoreList;
 
-s32 func_151C1940(s32 arg0, s32 arg1, Struct151C1940 *arg2) {
-    return func_151C02E4(arg0, arg1, arg2->unk0, arg2->unk4);
+/* Target filter callback: func_151C02E4 with the ignore list packed in a struct. */
+s32 func_151C1940(struct127 *obj, struct127 *self, IgnoreList *ignore) {
+    return func_151C02E4(obj, self, ignore->count, ignore->objs);
 }
 
 
-void func_151C1D5C(s32, Vec151C196C *, Vec151C196C *, Ray151C196C *, f32, s32, s32, s32, s8,
-                   s32, Vec151C196C *, f32 *, Res151C1D5C *, s32);
-s32 func_15145128(Vec151C196C *, Vec151C196C *, f32 *, f32 *);
+void func_151C1D5C(s32, vertex *, vertex *, Ray151C196C *, f32, s32, s32, s32, s8,
+                   s32, vertex *, f32 *, Res151C1D5C *, s32);
+s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
 
-s32 func_151C196C(Ray151C196C *arg0, Vec151C196C *arg1, Vec151C196C *arg2, Vec151C196C *arg3,
-                  Vec151C196C *arg4, s32 arg5, s32 arg6, Vec151C196C *arg7, f32 *arg8,
+s32 func_151C196C(Ray151C196C *arg0, vertex *arg1, vertex *arg2, vertex *arg3,
+                  vertex *arg4, s32 arg5, s32 arg6, vertex *arg7, f32 *arg8,
                   Res151C1D5C *arg9, s32 arg10) {
     u8 trace;
     u8 hit;
-    Vec151C196C *src;
+    vertex *src;
 
     trace = 1;
     hit = 0;
@@ -1092,11 +1058,11 @@ s32 func_151C196C(Ray151C196C *arg0, Vec151C196C *arg1, Vec151C196C *arg2, Vec15
 void func_15081690(s32, f32, f32, f32, f32, f32, f32, Ray151C196C *, f32, s32, s32, s32, s32,
                    s32, s32);
 
-void func_151C1D5C(s32 arg0, Vec151C196C *arg1, Vec151C196C *arg2, Ray151C196C *arg3, f32 arg4,
-                   s32 arg5, s32 arg6, s32 arg7, s8 arg8, s32 arg9, Vec151C196C *arg10,
+void func_151C1D5C(s32 arg0, vertex *arg1, vertex *arg2, Ray151C196C *arg3, f32 arg4,
+                   s32 arg5, s32 arg6, s32 arg7, s8 arg8, s32 arg9, vertex *arg10,
                    f32 *arg11, Res151C1D5C *arg12, s32 arg13) {
     Obj151C1D5C *obj;
-    Vec151C196C pos;
+    vertex pos;
     f32 dist;
     s32 more;
 
