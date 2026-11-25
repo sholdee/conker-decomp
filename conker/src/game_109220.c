@@ -225,47 +225,43 @@ s32 func_150DBD70(u8 kind) {
     StreamState state;
     StreamActor *actor;
 
-    {
     state.count = 0.0f;
     state.texCoord = 0;
     spawn.flags = 0;
     state.widthAngle = 0;
-    }
     switch (kind) {
     case 0:
-    case 5: {
+    case 5:
         switch (kind) {
-        case 0: {
+        case 0:
             spawn.pos.x = 5.0f;
             spawn.pos.y = 115.0f;
             spawn.pos.z = -1938.0f;
-            state.floor = 40.4000015f;
-            }
+            state.floor = 40.4f;
             break;
-        case 5: {
-            spawn.pos.x = -693.793457f;
-            spawn.pos.y = 205.640015f;
-            spawn.pos.z = -1944.81384f;
+        case 5:
+            spawn.pos.x = -693.79346f;
+            spawn.pos.y = 205.64001f;
+            spawn.pos.z = -1944.8138f;
             state.floor = 90.0f;
-            }
             break;
         }
         state.x = spawn.pos.x;
         state.z = spawn.pos.z;
-        state.gravity = -1.60000002f;
-        state.rate = 1.66999996f;
+        state.gravity = -1.6f;
+        state.rate = 1.67f;
         state.widthBase = 14.0f;
         state.widthRange = 4.0f;
-        state.swayZ = 3.5999999f;
-        state.radius = 45.1899986f;
+        state.swayZ = 3.6f;
+        state.radius = 45.19f;
         state.speedBase = 40.0f;
         state.accelRange = -185.0f;
         state.sizeRange = 385.0f;
-        state.splashRate = 0.224999994f;
-        state.splashSpeedBase = 5.94999981f;
-        state.splashSpeedRange = 5.63000011f;
+        state.splashRate = 0.225f;
+        state.splashSpeedBase = 5.95f;
+        state.splashSpeedRange = 5.63f;
         state.splashScaleBase = 5.0f;
-        state.splashSizeBase = 1.10000002f;
+        state.splashSizeBase = 1.1f;
         spawn.capacity = 25;
         spawn.unk0C = 133;
         state.timer = 120;
@@ -274,7 +270,7 @@ s32 func_150DBD70(u8 kind) {
         state.widthAngleRange = 12;
         state.texCoordStep = 2;
         state.texCoordStepRange = 2;
-        state.splashSizeRange = 0.419999987f;
+        state.splashSizeRange = 0.42f;
         state.angleXRange = 10;
         state.angleZRange = 5;
         spawn.flags |= 1;
@@ -285,7 +281,7 @@ s32 func_150DBD70(u8 kind) {
         state.unk60 = 1;
         state.pitchBase = 63;
         state.lifetime = 56;
-        state.dropRate = 1.48000002f;
+        state.dropRate = 1.48f;
         state.accelBase = -128;
         state.fadeBase = 8;
         state.fadeRange = 10;
@@ -331,40 +327,35 @@ s32 func_150DBD70(u8 kind) {
         state.ringScaleRange = 100.0f;
         state.speedRange = 25.0f;
         state.splashRadius = 25.0f;
-        state.dropRadius = 17.1900005f;
+        state.dropRadius = 17.19f;
         state.dropSpeedBase = 270.0f;
         state.dropSpeedRange = 154.0f;
         state.dropSizeRange = 173.0f;
         state.ringY = 60.0f;
-        }
         break;
     case 1:
     case 2:
     case 3:
     case 4: {
-        struct127 *arena;
-        arena = func_15083E90(6);
+        struct127 *arena = func_15083E90(6);
+
         if (arena == NULL) {
             return 0;
         }
         if (arena->unk84.uh == 6) {
-            {
             state.floor = 498.0f;
-            }
         } else {
             state.floor = -37.0f;
         }
         spawn.pos.y = 736.0f;
         switch (kind) {
-        case 1: {
+        case 1:
             spawn.pos.x = 650.0f;
             spawn.pos.z = -650.0f;
-            }
             break;
-        case 2: {
+        case 2:
             spawn.pos.x = -650.0f;
             spawn.pos.z = -650.0f;
-            }
             break;
         case 3:
             spawn.pos.z = 650.0f;
@@ -378,18 +369,18 @@ s32 func_150DBD70(u8 kind) {
         state.x = spawn.pos.x;
         state.z = spawn.pos.z;
         state.gravity = -2.0f;
-        state.rate = 1.25999999f;
+        state.rate = 1.26f;
         state.widthBase = 132.0f;
-        state.widthRange = 17.6000004f;
-        state.velocityY = -9.10000038f;
-        state.spawnRate = 0.319999993f;
-        state.radius = 114.900002f;
+        state.widthRange = 17.6f;
+        state.velocityY = -9.1f;
+        state.spawnRate = 0.32f;
+        state.radius = 114.9f;
         state.speedBase = 1039.0f;
         state.speedRange = 769.0f;
         state.accelRange = -51.0f;
-        state.splashRate = 0.310000002f;
-        state.splashRadius = 139.529999f;
-        state.splashSpeedBase = 18.7999992f;
+        state.splashRate = 0.31f;
+        state.splashRadius = 139.53f;
+        state.splashSpeedBase = 18.8f;
         spawn.capacity = 30;
         state.splashScaleBase = 15.0f;
         state.splashScaleRange = 12.0f;
@@ -403,7 +394,7 @@ s32 func_150DBD70(u8 kind) {
         state.texCoordStepRange = 3;
         state.angleXRange = 6;
         state.angleZRange = 6;
-        state.splashSizeRange = 1.19000006f;
+        state.splashSizeRange = 1.19f;
         spawn.flags |= 1;
         state.trailTexture = 25;
         state.unk42 = 81;
@@ -415,7 +406,7 @@ s32 func_150DBD70(u8 kind) {
         state.lifetime = 600;
         state.accelBase = -72;
         state.fadeBase = 6;
-        state.dropRate = 0.720000029f;
+        state.dropRate = 0.72f;
         state.fadeRange = 3;
         state.sizeBase = 1300;
         state.frameRate = 171;
@@ -460,7 +451,7 @@ s32 func_150DBD70(u8 kind) {
         state.dropSpeedBase = 2366.0f;
         state.dropSpeedRange = 1231.0f;
         state.ringY = 3.0f;
-        state.ringRate = 0.0780000016f;
+        state.ringRate = 0.078f;
         }
         break;
     default:
@@ -526,7 +517,7 @@ s32 func_150DC558(StreamActor *actor) {
                                   state->splashLifetime, (state->trailTexture == 0x18) ? 0x7D : 0xFF,
                                   func_150ADA68() * state->splashScaleRange + state->splashScaleBase,
                                   func_150ADA20() % (u32)(state->splashCountRange + 1) + state->splashCountBase, 1,
-                                  1.70000005f, 1.70000005f, 1, (state->trailTexture == 0x18) ? 7 : 2, 0, 0x10, 0xF, 0,
+                                  1.7f, 1.7f, 1, (state->trailTexture == 0x18) ? 7 : 2, 0, 0x10, 0xF, 0,
                                   actor->unk0C, actor->unk01);
                     state->splashCount -= 1.0f;
                 }
