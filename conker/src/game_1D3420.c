@@ -54,25 +54,24 @@ void func_151A5F70(Game1D3420Listener *listener, void *data, u8 type) {
     s32 found;
     Game1D3420Target *target;
 
-    if (type == 0x35) {
-        target = &listener->target;
-        i = 0;
-        found = FALSE;
-        while (i < msg->count && !found) {
-            if (target->id == msg->ids[i]) {
-                found = TRUE;
-            } else {
-                i++;
-            }
+    if (type != 0x35) {
+        return;
+    }
+    target = &listener->target;
+    i = 0;
+    found = FALSE;
+    while (i < msg->count && !found) {
+        if (target->id == msg->ids[i]) {
+            found = TRUE;
+        } else {
+            i++;
         }
-        if (found) {
-            if (target->emitter->ready == 1) {
-                func_151A6068(target->emitter, target->argument, target->flags & 1, target->flags & 2,
-                              listener->unkC, listener->unk1);
-                target->emitter->ready = 0;
-                target->value = msg->value;
-            }
-        }
+    }
+    if (found && target->emitter->ready == 1) {
+        func_151A6068(target->emitter, target->argument, target->flags & 1, target->flags & 2,
+                      listener->unkC, listener->unk1);
+        target->emitter->ready = 0;
+        target->value = msg->value;
     }
 }
 
@@ -133,7 +132,7 @@ void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, 
 
     init.emitter = emitter;
     init.unk4 = 0.0f;
-    init.unk8 = (func_150ADA68() * 80.0f) + -380.0f;
+    init.unk8 = (func_150ADA68() * 80.0f) + -380.0f; // matching: add of a negative literal, not sub.s
     init.unkC = (func_150ADA68() * 1300.0f) + 2700.0f;
     init.unk10 = 0;
     init.unk14 = func_150ADA20();
@@ -191,14 +190,20 @@ void func_151A6068(Game1D3420Emitter *emitter, s32 arg1, u8 playSound, u8 arg3, 
 }
 
 /* --- func_151A6350 (ROM 0x1D3800): kept in this file, see the note in game_1D3800.c --- */
+typedef struct Game1D2B10QuadVertex {
+    s16 x, y, z, flag;
+    s16 s, t;
+    u8 r, g, b, a;
+} Game1D2B10QuadVertex;
+
 typedef struct Game1D2B10QuadOwner {
     u8 unknown0[0x2C];
     f32 width;
     f32 height;
     f32 x, y, z;
     u8 unknown40[0x80];
-    u8 vertexTemplate[0x40];
-    u8 *buffers[5];
+    Game1D2B10QuadVertex vertexTemplate[4];
+    u8 *buffers[5]; /* each holds two copies of vertexTemplate */
     f32 unk114; /* texture s of the quad's first edge */
     f32 unk118;
     f32 unk11C; /* texture s span */
@@ -206,19 +211,13 @@ typedef struct Game1D2B10QuadOwner {
     u8 alpha;
 } Game1D2B10QuadOwner;
 
-typedef struct Game1D2B10QuadVertex {
-    s16 x, y, z, flag;
-    s16 s, t;
-    u8 r, g, b, a;
-} Game1D2B10QuadVertex;
-
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 
 /* Writes the 4 vertices of a vertical quad rotated by table angle `index` into the owner's vertex
  * buffer `index` (initialised from the template the first time) and returns them, or NULL. */
-void *func_151A6350(Game1D2B10QuadOwner *owner, s16 index) {
+Game1D2B10QuadVertex *func_151A6350(Game1D2B10QuadOwner *owner, s16 index) {
     Game1D2B10QuadVertex *vertices;
-    void *result;
+    Game1D2B10QuadVertex *result;
     f32 dz;
     f32 dx;
     s16 sStart;
@@ -230,8 +229,9 @@ void *func_151A6350(Game1D2B10QuadOwner *owner, s16 index) {
     result = vertices;
     if (vertices != NULL) {
         if (isNew) {
-            memcpy(owner->buffers[index], owner->vertexTemplate, 0x40);
-            memcpy(owner->buffers[index] + 0x40, owner->vertexTemplate, 0x40);
+            memcpy(owner->buffers[index], owner->vertexTemplate, sizeof(owner->vertexTemplate));
+            memcpy(owner->buffers[index] + sizeof(owner->vertexTemplate), owner->vertexTemplate,
+                   sizeof(owner->vertexTemplate));
         }
     } else {
         return NULL;
