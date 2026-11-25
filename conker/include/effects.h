@@ -2684,6 +2684,31 @@ typedef struct ShapeEmitter {
     /* 0x0C */ f32 accumulator;
 } ShapeEmitter;
 
+/* Text box data (at 0x28 in its object): shows a string one line at a time. */
+typedef struct TextLines {
+    /* 0x00 */ u8 id; // matched against message 0x51's payload
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ u8 *str;
+    /* 0x08 */ u8 flags; // bit 0: a new line is being shown this frame
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ u8 *line;
+    /* 0x10 */ u8 *lineEnd;
+    /* 0x14 */ u8 lineLen;
+    /* 0x15 */ u8 page; // which of lines[] holds the current line; the other holds the previous one
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ u8 *lines[2]; // NUL-terminated copies of lines, each as long as the longest line
+    /* 0x20 */ void *style; // the display style's own state, which follows this struct
+    /* 0x24 */ s8 updateFn; // index into D_800888A0, or -1
+    /* 0x25 */ u8 msgFn; // index into D_800888B0
+    /* 0x26 */ u8 pad26[2];
+} TextLines; /* size 0x28 */
+
+/* Text box object created by func_150CFF10 (game_FD1D0.c); its display style's state follows. */
+typedef struct TextObj {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ TextLines text;
+} TextObj;
+
 /* Emitter state at +0x28 of func_150DE7C0's object. */
 typedef struct ZonePairEmitter {
     /* 0x00 */ s16 timer; // frames until the next particle

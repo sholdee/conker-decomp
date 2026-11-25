@@ -7,31 +7,6 @@ extern void func_150D6730(Actor *obj, u8 arg1, s32 arg2);
 extern s32 func_15042E3C(char *format, ...);
 extern Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 
-/* Text box data (same layout as TextLines in game_FC5F0.c). */
-typedef struct {
-    /* 0x00 */ u8 id;
-    /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ u8 *str;
-    /* 0x08 */ u8 flags;
-    /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ u8 *line;
-    /* 0x10 */ u8 *lineEnd;
-    /* 0x14 */ u8 lineLen;
-    /* 0x15 */ u8 page;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ u8 *lines[2];
-    /* 0x20 */ void *style; // the display style's own state
-    /* 0x24 */ s8 updateFn; // index into D_800888A0, or -1
-    /* 0x25 */ u8 msgFn; // index into D_800888B0
-    /* 0x26 */ u8 pad26[2];
-} TextLines;
-
-/* Text box object created by func_150CFF10 (same layout as TextObj in game_FC5F0.c). */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ TextLines text;
-} TextObj;
-
 /* Style 3 text box state: an amount shown as "$ %d" that fades out with its owner. */
 typedef struct {
     /* 0x00 */ Actor *owner;
