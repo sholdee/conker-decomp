@@ -5,48 +5,6 @@
 s32 func_150ADA20(void);
 #include "variables.h"
 
-extern f32 D_8009FDD4;
-extern f32 D_8009FDD8;
-extern f32 D_8009FDDC;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
-    f32 unk10;
-    f32 unk14;
-    u8 pad18[8];
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    u8 pad2C[0xC];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    u8 pad5C[4];
-    s32 unk60;
-    u8 pad64[0xE];
-    u8 unk72;
-    u8 pad73[5];
-    u8 unk78;
-    u8 pad79[0xAF];
-    s32 unk128;
-    u8 pad12C[0x14];
-    f32 unk140;
-    u8 pad144[8];
-    s32 unk14C;
-    u8 pad150[0x18];
-    s32 unk168;
-} Obj150B89E0;
-
 typedef struct {
     u8 unk0;
     u8 unk1;
@@ -130,49 +88,63 @@ typedef struct {
     s32 unk84;
 } Burst150B89E0;
 
-extern s32 D_80088734[];
-extern s32 D_8008873C;
 void *memcpy(void *, const void *, u32);
-void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 void func_15151A38(Burst150B89E0 *, u8, s32);
-s32 func_150B89E0(Obj150B89E0 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
 
-s32 func_150B9560(void *arg0) {
-    f32 *temp_v0;
-    f32 temp_f0;
-    s16 v1;
+/* Particle state shared by the update callbacks below. */
+typedef struct {
+    u8 pad0[0x1C];
+    s16 unk1C;
+    u8 pad1E[0xA];
+    u8 unk28;
+    u8 pad29[3];
+    f32 unk2C;
+    f32 unk30;
+    u8 pad34[4];
+    f32 unk38;
+    u8 pad3C[0x20];
+    u8 unk5C;
+    u8 pad5D[0xB3];
+    f32 unk110;
+} Particle150B9560;
 
-    temp_v0 = (f32 *)((u8 *)arg0 + 0x110);
-    v1 = *(volatile s16 *)((u8 *)arg0 + 0x1C);
-    if (v1 < 0x50) {
-        *temp_v0 += D_8009FDD4 * D_800BE9A4;
-        *(f32 *)((u8 *)arg0 + 0x38) = *(volatile f32 *)((u8 *)arg0 + 0x38) - *temp_v0;
-        v1 = *(volatile s16 *)((u8 *)arg0 + 0x1C);
+/* Before t=80: integrates unk110 as a speed and moves unk38 by it. From t=115 scales unk2C/unk30 by 1.35; before t=65 grows unk30. */
+s32 func_150B9560(Particle150B9560 *particle) {
+    f32 *speed = &particle->unk110;
+    f32 scale;
+
+    if (particle->unk1C < 80) {
+        *speed += 0.3f * D_800BE9A4;
+        particle->unk38 -= *speed;
     }
 
-    if (v1 >= 0x73) {
-        temp_f0 = D_8009FDD8;
-        *(f32 *)((u8 *)arg0 + 0x2C) *= temp_f0;
-        *(f32 *)((u8 *)arg0 + 0x30) *= temp_f0;
-    } else if (v1 < 0x41) {
-        *(f32 *)((u8 *)arg0 + 0x30) += D_8009FDDC;
+    if (particle->unk1C >= 115) {
+        scale = 1.35f;
+        particle->unk2C *= scale;
+        particle->unk30 *= scale;
+    } else if (particle->unk1C < 65) {
+        particle->unk30 += 1.2f;
     }
 
     return 1;
 }
 
-s32 func_150B95FC(void *arg0) {
-    s16 v0 = *(s16*)((u8*)arg0 + 0x1C);
-    if (v0 < 0x20) {
-        *(u8*)((u8*)arg0 + 0x5C) = v0 << 3;
+/* Ramps unk5C up by 8 per step of unk1C while unk1C < 32. */
+s32 func_150B95FC(Particle150B9560 *particle) {
+    s16 t = particle->unk1C;
+
+    if (t < 32) {
+        particle->unk5C = t * 8;
     }
     return 1;
 }
 
-s32 func_150B961C(void *arg0) {
-    s16 v0 = *(s16*)((u8*)arg0 + 0x1C);
-    if (v0 < 0x40) {
-        *(u8*)((u8*)arg0 + 0x28) = v0 << 2;
+/* Ramps unk28 up by 4 per step of unk1C while unk1C < 64. */
+s32 func_150B961C(Particle150B9560 *particle) {
+    s16 t = particle->unk1C;
+
+    if (t < 64) {
+        particle->unk28 = t * 4;
     }
     return 1;
 }
