@@ -42,9 +42,8 @@ void func_1500EF20(void) {
         memcpy(&temp_v0->unk28, &tmp, 16);
     }
 
-    temp_v0 = (struct102 *)&D_800DCD20;
-    D_800DCD94 = temp_v0->unk0;
-    D_800DCD98 = temp_v0->unk1;
-    D_800DCD9C = temp_v0->unk2;
+    D_800DCD94 = D_800DCD20[0];
+    D_800DCD98 = D_800DCD20[1];
+    D_800DCD9C = D_800DCD20[2];
     D_800DCDA0 = 0.0f;
 }

@@ -5,7 +5,6 @@
 #undef func_1515D4D4
 void func_1515D4D4();
 #define D_800D3098 D_800D3098_header
-#define D_800DCD30 D_800DCD30_header
 #define D_800DCD80 D_800DCD80_header
 #define D_800DCD84 D_800DCD84_header
 #define D_800BE4A0 D_800BE4A0_header
@@ -14,7 +13,6 @@ void func_1515D4D4();
 #define D_800DBE5C D_800DBE5C_header
 #include "variables.h"
 #undef D_800D3098
-#undef D_800DCD30
 #undef D_800DCD80
 #undef D_800DCD84
 #undef D_800BE4A0
@@ -22,7 +20,6 @@ void func_1515D4D4();
 #undef D_800B0DF0
 #undef D_800DBE5C
 
-extern u8 D_800DCD30[4][3];
 
 typedef struct Game36680Point {
     s16 position[3];

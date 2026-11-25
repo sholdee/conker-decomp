@@ -2,17 +2,11 @@
 #define func_1515D4D4 func_1515D4D4_prototype
 #include "functions.h"
 #undef func_1515D4D4
-#define D_800DCD20 D_800DCD20_hdr
-#define D_800DCD24 D_800DCD24_hdr
-#define D_800DCD30 D_800DCD30_hdr
 #define D_800DCD40 D_800DCD40_hdr
 #define D_800DCD78 D_800DCD78_hdr
 #define D_800DCD80 D_800DCD80_hdr
 #define D_800DCD84 D_800DCD84_hdr
 #include "variables.h"
-#undef D_800DCD20
-#undef D_800DCD24
-#undef D_800DCD30
 #undef D_800DCD40
 #undef D_800DCD78
 #undef D_800DCD80
@@ -57,10 +51,7 @@ typedef struct {
     /* 0x28 */ s16 pos2[4];
 } PointLightGfx;
 
-extern u8 D_800DCD20[3];            // ambient colour
-extern u8 D_800DCD24[3];
 extern u8 D_800DCD27;               // priority of the current ambient colour
-extern s8 D_800DCD30[4][3];         // per-player directional light direction
 extern PointLightGfx D_800DCD40;    // padding light for odd light counts
 extern PointLight *D_800DCD78;      // list of all point lights
 extern struct ZoneNode *D_800DCD80; // ambient colour zones

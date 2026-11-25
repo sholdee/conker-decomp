@@ -1228,7 +1228,7 @@ extern s32 D_800DC460;
 extern s32 D_800DC464;
 extern u16 D_800DC468[];
 extern s32 D_800DC63C;
-extern u8  D_800DCD30;
+extern s8 D_800DCD30[4][3]; // per-player directional light direction
 extern u8  D_800DCD31;
 extern u8  D_800DCD32;
 extern u8  D_800DCD33;
@@ -1253,11 +1253,11 @@ extern f32 D_800DCD98;
 extern f32 D_800DCD9C;
 extern f32 D_800DCDA0;
 
-extern struct100 *D_800DCD20;
+extern u8 D_800DCD20[3]; // ambient light colour
 // extern struct100 *D_800DCD24;
 // extern struct100 *D_800DCD28;
 
-extern s8 D_800DCD24[3];
+extern u8 D_800DCD24[3]; // tint colour
 extern u8 D_800DCD28[3];
 
 extern s32  D_800DCDC4; // probably wrong type

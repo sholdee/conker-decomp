@@ -1816,8 +1816,7 @@ void func_151644F4(struct225 *effect, Vec3f *pivot, f32 offset, f32 angleX, f32 
     effect->unk14->unk12 = z;
 }
 
-/* Turns the special lighting for the current D_800BE9F0 setting on or off, setting the colours in D_800DCD20 and D_800B0DF0.
- * D_800DCD20 is declared as a pointer in variables.h but holds an RGB triple here. */
+/* Turns the special lighting for the current D_800BE9F0 setting on or off, setting the colours in D_800DCD20 and D_800B0DF0. */
 void func_151645C4(u8 enable) {
     D_800DCDD0 = enable;
     if (enable) {
@@ -1830,9 +1829,9 @@ void func_151645C4(u8 enable) {
             func_1511172C(4);
             // fallthrough
         case 57:
-            ((u8 *)&D_800DCD20)[0] = D_800886F0[0];
-            ((u8 *)&D_800DCD20)[1] = D_800886F0[1];
-            ((u8 *)&D_800DCD20)[2] = D_800886F0[2];
+            D_800DCD20[0] = D_800886F0[0];
+            D_800DCD20[1] = D_800886F0[1];
+            D_800DCD20[2] = D_800886F0[2];
             D_800B0DF0->unk5 = D_800886F4[0];
             D_800B0DF0->unk6 = D_800886F4[1];
             D_800B0DF0->unk7 = D_800886F4[2];
@@ -1850,9 +1849,9 @@ void func_151645C4(u8 enable) {
         case 12:
         case 57:
             func_1511172C(6);
-            ((u8 *)&D_800DCD20)[0] = D_800886F8[0];
-            ((u8 *)&D_800DCD20)[1] = D_800886F8[1];
-            ((u8 *)&D_800DCD20)[2] = D_800886F8[2];
+            D_800DCD20[0] = D_800886F8[0];
+            D_800DCD20[1] = D_800886F8[1];
+            D_800DCD20[2] = D_800886F8[2];
             D_800B0DF0->unk5 = 0xFF;
             D_800B0DF0->unk6 = 0xFF;
             D_800B0DF0->unk7 = 0xFF;
