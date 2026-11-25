@@ -11,7 +11,6 @@ f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
 void func_15169260(void *, s32, s32, u8);
-extern f32 D_800A8018;
 extern void func_151D5D60();
 extern void func_1513F680();
 extern void func_15143134(void *, void *, void *);
@@ -133,6 +132,23 @@ typedef struct DripSlot {
 } DripSlot;
 
 #define DRIP_SLOT_COUNT 60
+
+/* Leading fields of a func_151491F4 task. */
+typedef struct {
+    /* 0x00 */ u8 type;
+    /* 0x01 */ u8 list;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 flags;            /* bit 0: the timer counts down */
+    /* 0x0E */ s16 timer;
+} TaskHeader;
+
+/* A func_151491F4 task that keeps the link of an emitter that could not be created yet. */
+typedef struct {
+    /* 0x00 */ TaskHeader header;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ ActorLink link;
+} DripRetryTask;
 
 /* Object type 0x20: hangs drops on the bones of an actor. */
 typedef struct {
@@ -497,91 +513,79 @@ s32 func_15190F9C(Particle *drop) {
     return 1;
 }
 
-struct Struct1519108C {
-    char pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    char pad44[0x4];
-    f32 unk48;
-    char pad4C[0x74];
-    char unkC0[0x40];
-    s16 *unk100[0xB];
-    f32 unk12C;
-};
+/*
+ * Vertex function: builds the drop's quad in its vertex buffer for viewport vp, tilted by how fast it
+ * moves sideways on screen (D_800DD1E8 / D_800DD1D8 are the viewport's view direction).
+ */
+Vtx *func_1519108C(Particle *drop, s16 vp) {
+    Vtx *vtx;
+    Vtx *ret;
+    f32 halfWidthCos;
+    f32 sinAngle;
+    f32 halfWidthSin;
+    f32 heightCos;
+    f32 heightSin;
+    f32 speed;
+    f32 sign;
+    f32 *viewX;
+    f32 *viewZ;
+    f32 angle;
+    u8 fresh;
 
-s16 *func_1519108C(struct Struct1519108C *arg0, s16 arg1) {
-    s16 *var_v0;
-    s16 *ret;
-    f32 temp_f2;
-    f32 sinval;
-    f32 temp_f18;
-    f32 temp_y_cos;
-    f32 temp_y_sin;
-    f32 var_f2;
-    f32 var_f14;
-    f32 *temp_v1;
-    f32 *temp_a0;
-    f32 temp_f0;
-    u8 sp37;
-
-    func_151D5D60(arg0->unk100, arg1, 0x40, &var_v0, &sp37);
-    ret = var_v0;
-    if (var_v0) {
-        if (sp37) {
-            memcpy(arg0->unk100[arg1], arg0->unkC0, 0x40);
-            memcpy(arg0->unk100[arg1] + 0x20, arg0->unkC0, 0x40);
+    func_151D5D60(drop->vtxBuffers, vp, 0x40, &vtx, &fresh);
+    ret = vtx;
+    if (vtx) {
+        if (fresh) {
+            memcpy(drop->vtxBuffers[vp], drop->vtxTemplate, sizeof(drop->vtxTemplate));
+            memcpy(drop->vtxBuffers[vp] + 4, drop->vtxTemplate, sizeof(drop->vtxTemplate));
         }
     } else {
-        return 0;
+        return NULL;
     }
 
-    temp_v1 = &D_800DD1E8[arg1];
-    temp_a0 = &D_800DD1D8[arg1];
-    var_f14 = -1.0f;
-    var_f2 = ((*temp_v1 * (arg0->unk40 - arg0->unk34)) - (*temp_a0 * (arg0->unk48 - arg0->unk3C))) * D_800BE9A8;
-    if (var_f2 < 0.0f) {
-        var_f14 = 1.0f;
-        var_f2 = -var_f2;
+    viewX = &D_800DD1E8[vp];
+    viewZ = &D_800DD1D8[vp];
+    sign = -1.0f;
+    speed = ((*viewX * (drop->def.rot.x - drop->def.pos.x)) - (*viewZ * (drop->def.rot.z - drop->def.pos.z))) * D_800BE9A8;
+    if (speed < 0.0f) {
+        sign = 1.0f;
+        speed = -speed;
     }
 
-    temp_f0 = sqrtf(var_f2) * arg0->unk12C;
-    if (D_800A8018 < temp_f0) {
-        temp_f0 = D_800A8018;
+    angle = sqrtf(speed) * drop->motion.stretch;
+    if (angle > 1.570796371f) {
+        angle = 1.570796371f;
     }
 
-    temp_f0 = temp_f0 * var_f14;
-    sinval = sinf(temp_f0);
-    temp_f0 = cosf(temp_f0);
-    temp_f2 = arg0->unk2C * temp_f0;
-    temp_f18 = arg0->unk2C * sinval;
-    temp_y_cos = arg0->unk30 * temp_f0;
-    temp_y_sin = arg0->unk30 * sinval;
+    angle = angle * sign;
+    sinAngle = sinf(angle);
+    angle = cosf(angle);
+    halfWidthCos = drop->def.width * angle;
+    halfWidthSin = drop->def.width * sinAngle;
+    heightCos = drop->def.height * angle;
+    heightSin = drop->def.height * sinAngle;
 
-    var_v0[0] = (*temp_v1 * -temp_f2) + arg0->unk34;
-    var_v0[1] = arg0->unk38 + temp_f18;
-    var_v0[2] = arg0->unk3C - (*temp_a0 * -temp_f2);
-    var_v0[3] = 0;
+    vtx[0].v.ob[0] = (*viewX * -halfWidthCos) + drop->def.pos.x;
+    vtx[0].v.ob[1] = drop->def.pos.y + halfWidthSin;
+    vtx[0].v.ob[2] = drop->def.pos.z - (*viewZ * -halfWidthCos);
+    vtx[0].v.flag = 0;
 
-    var_v0[8] = (*temp_v1 * temp_f2) + arg0->unk34;
-    var_v0[9] = arg0->unk38 - temp_f18;
-    var_v0[10] = arg0->unk3C - (*temp_a0 * temp_f2);
-    var_v0[11] = 0;
+    vtx[1].v.ob[0] = (*viewX * halfWidthCos) + drop->def.pos.x;
+    vtx[1].v.ob[1] = drop->def.pos.y - halfWidthSin;
+    vtx[1].v.ob[2] = drop->def.pos.z - (*viewZ * halfWidthCos);
+    vtx[1].v.flag = 0;
 
-    temp_f0 = temp_f2 - temp_y_sin;
-    var_v0[16] = (*temp_v1 * temp_f0) + arg0->unk34;
-    var_v0[17] = (arg0->unk38 - temp_f18) - temp_y_cos;
-    var_v0[18] = arg0->unk3C - (*temp_a0 * temp_f0);
-    var_v0[19] = 0;
+    angle = halfWidthCos - heightSin;
+    vtx[2].v.ob[0] = (*viewX * angle) + drop->def.pos.x;
+    vtx[2].v.ob[1] = (drop->def.pos.y - halfWidthSin) - heightCos;
+    vtx[2].v.ob[2] = drop->def.pos.z - (*viewZ * angle);
+    vtx[2].v.flag = 0;
 
-    temp_f0 = -(temp_f2 + temp_y_sin);
-    var_v0[24] = (*temp_v1 * temp_f0) + arg0->unk34;
-    var_v0[25] = (arg0->unk38 + temp_f18) - temp_y_cos;
-    var_v0[26] = arg0->unk3C - (*temp_a0 * temp_f0);
-    var_v0[27] = 0;
+    angle = -(halfWidthCos + heightSin);
+    vtx[3].v.ob[0] = (*viewX * angle) + drop->def.pos.x;
+    vtx[3].v.ob[1] = (drop->def.pos.y + halfWidthSin) - heightCos;
+    vtx[3].v.ob[2] = drop->def.pos.z - (*viewZ * angle);
+    vtx[3].v.flag = 0;
 
     return ret;
 }
@@ -613,143 +617,110 @@ void func_15191400(DripEmitter *emitter) {
     bzero(emitter->slots, DRIP_SLOT_COUNT * sizeof(DripSlot));
 }
 
-struct Sub15191520 {
-    f32 vx;
-    f32 vy;
-    f32 vz;
-    f32 grav;
-    f32 drag;
-    u8 pad_14[4];
-    f32 damp;
-    u8 pad_1C[0x1C];
-    f32 floor;
-    u8 unk3C[0x19];
-    u8 type;
-    u8 pad_56[6];
-    u8 color;
-};
+s32 func_1514672C(Vec3f *pos);
+s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, Ground *ground);
+void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
 
-struct Obj15191520 {
-    u8 pad_0;
-    u8 unk1;
-    u8 pad_2[0xA];
-    u8 unkC;
-    u8 pad_D[0x1F];
-    f32 unk2C;
-    f32 unk30;
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 x2;
-    f32 y2;
-    f32 z2;
-    u8 pad_4C[0x10];
-    u8 unk5C;
-    u8 pad_5D[0xB3];
-    struct Sub15191520 sub;
-};
-
-s32 func_1514672C(struct17 *arg0);
-s32 func_15046C80(f32 *arg0, s32 arg1, f32 arg2, void *arg3);
-void func_151DAB58(u8, f32, u8, struct17 *, s32, u8, u8);
-
-s8 func_15191520(struct Obj15191520 *arg0) {
+/* Update of a falling drop: moves it under drag and gravity; on reaching the ground it splashes and dies. */
+s8 func_15191520(Particle *drop) {
     f32 dx;
     f32 dz;
     f32 dy;
-    struct Sub15191520 *sub;
-    s8 ret;
+    DripMotion *motion;
+    s8 alive;
     f32 oldY;
     f32 oldVz;
     f32 oldVx;
 
-    oldY = arg0->y;
-    sub = &arg0->sub;
-    ret = 1;
-    oldVx = sub->vx;
-    oldVz = sub->vz;
-    sub->vx *= sub->drag * D_800BE9A4;
-    sub->vz *= sub->drag * D_800BE9A4;
-    dx = (sub->vx + oldVx) * 0.5f * D_800BE9A4;
-    dy = sub->vy * D_800BE9A4 + sub->grav * D_800BE9A4 * D_800BE9A4 * 0.5f;
-    dz = (sub->vz + oldVz) * 0.5f * D_800BE9A4;
-    sub->vy += sub->grav * D_800BE9A4;
-    arg0->x += dx;
-    arg0->y += dy;
-    arg0->z += dz;
-    arg0->x2 += dx;
-    arg0->y2 += dy;
-    arg0->z2 += dz;
-    arg0->x2 = arg0->x + (arg0->x2 - arg0->x) * sub->damp;
-    arg0->y2 = arg0->y + (arg0->y2 - arg0->y) * sub->damp;
-    arg0->z2 = arg0->z + (arg0->z2 - arg0->z) * sub->damp;
+    oldY = drop->def.pos.y;
+    motion = &drop->motion;
+    alive = 1;
+    oldVx = motion->vel.x;
+    oldVz = motion->vel.z;
+    motion->vel.x *= motion->drag * D_800BE9A4;
+    motion->vel.z *= motion->drag * D_800BE9A4;
+    dx = (motion->vel.x + oldVx) * 0.5f * D_800BE9A4;
+    dy = motion->vel.y * D_800BE9A4 + motion->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f;
+    dz = (motion->vel.z + oldVz) * 0.5f * D_800BE9A4;
+    motion->vel.y += motion->gravity * D_800BE9A4;
+    drop->def.pos.x += dx;
+    drop->def.pos.y += dy;
+    drop->def.pos.z += dz;
+    drop->def.rot.x += dx;
+    drop->def.rot.y += dy;
+    drop->def.rot.z += dz;
+    drop->def.rot.x = drop->def.pos.x + (drop->def.rot.x - drop->def.pos.x) * motion->trail;
+    drop->def.rot.y = drop->def.pos.y + (drop->def.rot.y - drop->def.pos.y) * motion->trail;
+    drop->def.rot.z = drop->def.pos.z + (drop->def.rot.z - drop->def.pos.z) * motion->trail;
     {
-    struct17 pos;
-    pos.unk0 = arg0->x;
-    pos.unk4 = oldY - arg0->unk30;
-    pos.unk8 = arg0->z;
+        Vec3f probe;
 
-    if (func_1514672C(&pos) == 0) {
-        return 0;
-    }
-    if (func_15046C80((f32 *)&pos, 0, arg0->y - arg0->unk30, &sub->floor) != 0) {
-        pos.unk4 = sub->floor;
-        if (sub->type == 3) {
-            func_151DBCBC(sub->color, arg0->unk2C * arg0->unk30 * 0.25f, arg0->unk5C, (s32)&sub->unk3C, &pos, arg0->unkC, arg0->unk1);
-        } else if (func_150ADA20() & 1) {
-            func_151D9B8C(sub->color, arg0->unk2C * arg0->unk30 * 0.150000006f, arg0->unk5C, (s32)&sub->unk3C, &pos, (func_150ADA20() % 41U) + 0x50, 1, 1, 0, arg0->unkC, arg0->unk1);
-        } else {
-            func_151DAB58(sub->color, arg0->unk2C * arg0->unk30 * 0.05000000075f, arg0->unk5C, &pos, 1, arg0->unkC, arg0->unk1);
+        probe.x = drop->def.pos.x;
+        probe.y = oldY - drop->def.height;
+        probe.z = drop->def.pos.z;
+        if (func_1514672C(&probe) == 0) {
+            return 0;
         }
-        ret = 0;
+        if (func_15046C80(&probe, 0, drop->def.pos.y - drop->def.height, &motion->ground) != 0) {
+            probe.y = motion->ground.y;
+            if (motion->ground.unk1D == 3) {
+                func_151DBCBC(motion->kind, drop->def.width * drop->def.height * 0.25f, drop->def.unk44,
+                              (s32)motion->ground.unk4, &probe, drop->owner, drop->list);
+            } else if (func_150ADA20() & 1) {
+                func_151D9B8C(motion->kind, drop->def.width * drop->def.height * 0.150000006f, drop->def.unk44,
+                              (s32)motion->ground.unk4, (struct17 *)&probe, func_150ADA20() % 41U + 80, 1, 1, 0,
+                              drop->owner, drop->list);
+            } else {
+                func_151DAB58(motion->kind, drop->def.width * drop->def.height * 0.05000000075f, drop->def.unk44,
+                              &probe, 1, drop->owner, drop->list);
+            }
+            alive = 0;
+        }
     }
-    }
-    return ret;
+    return alive;
 }
 
-s32 func_1519187C(void *arg0)
-{
-  s16 v0;
-  s32 v1;
-  v0 = *((s16 *) (((u8 *) arg0) + 0x1C));
-  if (v0 < (*((s16 *) (((0, (u8 *) arg0)) + 0x124))))
-  {
-    v1 = v0;
-    v1 *= *((s16 *) (((u8 *) arg0) + 0x126));
-    if (v1 < (*((u8 *) (((u8 *) arg0) + 0x5C))))
-    {
-      *((u8 *) (((u8 *) arg0) + 0x5C)) = v1;
+/* Fades a drop's alpha out over the last fadeStart frames of its lifetime. */
+s32 func_1519187C(Particle *drop) {
+    s16 lifetime;
+    s32 alpha;
+
+    lifetime = drop->def.lifetime;
+    if (lifetime < drop->motion.fadeStart) {
+        alpha = lifetime * drop->motion.fadeRate;
+        if (alpha < drop->def.unk44) {
+            drop->def.unk44 = alpha;
+        }
     }
-  }
-  return 1;
+    return 1;
 }
 
+/* Retries creating the emitter until its actor has bone matrices; gives up when the actor is gone. */
+void func_151918BC(DripRetryTask *task) {
+    struct127 *actor;
+    ActorLink *link;
+    u8 done;
 
-void func_151918BC(void *arg0) {
-    u8 *temp_v1;
-    u8 *temp_a0;
-    u8 var_v0;
-
-    temp_a0 = (u8 *)arg0 + 0x28;
-    temp_v1 = *(u8 **)temp_a0;
-    var_v0 = 0;
-    if (*(s32 *)temp_v1 == 0) {
-        var_v0 = 1;
-    } else if (temp_a0[4] != temp_v1[0x3B]) {
-        var_v0 = 1;
+    link = &task->link;
+    actor = link->actor;
+    done = 0;
+    if (actor->interaction_state == 0) {
+        done = 1;
+    } else if (actor->unique_id != link->actorId) {
+        done = 1;
     }
-    if (!var_v0 && (*(s32 *)(temp_v1 + 0x1D4) != 0)) {
-        if ((*(u8 *)((u8 *)arg0 + 0xD) & 1) != 0) {
-            *(s16 *)(temp_a0 + 6) = *(s16 *)((u8 *)arg0 + 0xE);
-            temp_a0[8] |= 1;
+    if (!done && actor->unk1D4 != NULL) {
+        if (task->header.flags & 1) {
+            link->timer = task->header.timer;
+            link->flags |= 1;
         } else {
-            *(s16 *)(temp_a0 + 6) = 0x12C;
+            link->timer = 300;
         }
-        var_v0 = 1;
-        func_15190770(temp_a0, 0, *(u8 *)((u8 *)arg0 + 0xC), *(u8 *)((u8 *)arg0 + 1));
+        done = 1;
+        func_15190770(link, 0, task->header.owner, task->header.list);
     }
-    if (var_v0) {
-        func_1516972C(arg0);
+    if (done) {
+        func_1516972C((struct102 *)task);
     }
 }
 
