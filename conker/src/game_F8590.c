@@ -261,20 +261,22 @@ void func_150CB1F4(struct127 *actor, s32 side, s32 arg2) {
     }
 }
 
-struct Func150CB7CC {
-    char pad0[0x1C];
-    s16 unk1C;
-    char pad1E[0x28 - 0x1E];
-    u8 unk28;
-};
+/* Particle updated by func_150CB7CC. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x1C];
+    /* 0x1C */ s16 timer;
+    /* 0x1E */ u8 pad1E[0xA];
+    /* 0x28 */ u8 alpha;
+} FadeParticle;
 
-s32 func_150CB7CC(struct Func150CB7CC *arg0) {
-    s32 v1;
+/* Fades the particle out over the last 32 frames of its timer. */
+s32 func_150CB7CC(FadeParticle *particle) {
+    s32 fade;
 
-    if (arg0->unk1C < 0x20) {
-        v1 = arg0->unk1C << 3;
-        if (v1 < arg0->unk28) {
-            arg0->unk28 = v1;
+    if (particle->timer < 32) {
+        fade = particle->timer * 8;
+        if (fade < particle->alpha) {
+            particle->alpha = fade;
         }
     }
     return 1;
@@ -374,33 +376,22 @@ s32 func_150CB800(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
     return 1;
 }
 
-typedef struct {
-    char pad0[0x1C];
-    s16 unk1C;
-    char pad1E[0x2C - 0x1E];
-    f32 unk2C;
-    f32 unk30;
-    char pad34[0x58 - 0x34];
-    s32 unk58;
-    u8 unk5C;
-    char pad5D[0x128 - 0x5D];
-    s16 unk128;
-    char pad12A[0x12C - 0x12A];
-    f32 unk12C;
-} CBA30Struct;
+/*
+ * Update for the func_150CB1F4 dust: grows it while growTime lasts, and once flag 1 is set
+ * fades it out over the last 32 frames of its timer.
+ */
+s32 func_150CBA30(DustParticle *dust) {
+    dust->growth.growTime -= D_800BE9E4;
+    if (dust->growth.growTime > 0) {
+        f32 grow = dust->growth.growRate * D_800BE9A4;
 
-
-s32 func_150CBA30(CBA30Struct *arg0) {
-    arg0->unk128 -= D_800BE9E4;
-    if (arg0->unk128 > 0) {
-        f32 v = arg0->unk12C * D_800BE9A4;
-        arg0->unk2C = arg0->unk2C + v;
-        arg0->unk30 = arg0->unk30 + v;
+        dust->size0 = dust->size0 + grow;
+        dust->size1 = dust->size1 + grow;
     }
-    if (arg0->unk58 & 1) {
-        if (arg0->unk1C < 0x20) {
-            if ((arg0->unk1C << 3) < arg0->unk5C) {
-                arg0->unk5C = arg0->unk1C << 3;
+    if (dust->flags & 1) {
+        if (dust->timer < 32) {
+            if (dust->timer * 8 < dust->alpha) {
+                dust->alpha = dust->timer * 8;
             }
         }
     }
@@ -506,44 +497,62 @@ s32 func_150CBABC(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     return 1;
 }
 
+/* Particle spawned by func_150CBABC; updated by func_150CBCE0. */
 typedef struct {
-    char pad0[0x58];
-    f32 unk58;
-    char pad5C[0x60 - 0x5C];
-    f32 unk60;
-} Func150CBCE0;
+    /* 0x00 */ u8 pad0[0x58];
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ u8 pad5C[4];
+    /* 0x60 */ f32 unk60;
+    /* 0x64 */ u8 pad64[0x44];
+    /* 0xA8 */ f32 damping; // per-frame-step factor applied to unk58 and unk60
+} SparkParticle;
 
-s32 func_150CBCE0(Func150CBCE0 *arg0, s32 arg1) {
+/* Multiplies unk58 and unk60 by the particle's damping once per frame step. */
+s32 func_150CBCE0(SparkParticle *particle, s32 arg1) {
     s32 i;
-    volatile f32 *scale;
+    f32 *damping;
 
-    scale = (volatile f32 *)((u8 *)arg0 + 0xA8);
+    damping = &particle->damping; // matching: read through a pointer, IDO reloads it after every store
     for (i = D_800BE9E4; i != 0; i--) {
-        arg0->unk58 *= *scale;
-        arg0->unk60 *= *scale;
+        particle->unk58 *= *damping;
+        particle->unk60 *= *damping;
     }
     return 1;
 }
 
-s32 func_150CBE88(f32 *arg0) {
-    arg0[14] += arg0[17] * D_800BE9A4;
-    arg0[15] += (arg0[18] * D_800BE9A4) + (((arg0[23] * D_800BE9A4) * D_800BE9A4) * 0.5f);
-    arg0[16] += arg0[19] * D_800BE9A4;
-    arg0[18] += arg0[23] * D_800BE9A4;
-    arg0[8] += arg0[20] * D_800BE9A4;
-    arg0[9] += arg0[21] * D_800BE9A4;
-    arg0[10] += arg0[22] * D_800BE9A4;
+/* Particle moved by func_150CBE88. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x20];
+    /* 0x20 */ f32 unk20[3]; // integrated from unk50
+    /* 0x2C */ u8 pad2C[0xC];
+    /* 0x38 */ f32 pos[3];
+    /* 0x44 */ f32 vel[3];
+    /* 0x50 */ f32 unk50[3];
+    /* 0x5C */ f32 gravity;  // added to vel[1]
+} BallisticParticle;
+
+/* Advances the particle one frame step under constant vertical acceleration. */
+s32 func_150CBE88(BallisticParticle *particle) {
+    particle->pos[0] += particle->vel[0] * D_800BE9A4;
+    particle->pos[1] += (particle->vel[1] * D_800BE9A4) + (((particle->gravity * D_800BE9A4) * D_800BE9A4) * 0.5f);
+    particle->pos[2] += particle->vel[2] * D_800BE9A4;
+    particle->vel[1] += particle->gravity * D_800BE9A4;
+    particle->unk20[0] += particle->unk50[0] * D_800BE9A4;
+    particle->unk20[1] += particle->unk50[1] * D_800BE9A4;
+    particle->unk20[2] += particle->unk50[2] * D_800BE9A4;
     return 1;
 }
 
-struct Func150CBF5C {
-    char pad0[0x1C];
-    s16 unk1C;
-    char pad1E[0x58 - 0x1E];
-    s32 unk58;
-};
+/* Particle handled by func_150CBF5C. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x1C];
+    /* 0x1C */ s16 timer;
+    /* 0x1E */ u8 pad1E[0x3A];
+    /* 0x58 */ s32 flags;
+} FadeoutParticle;
 
-void func_150CBF5C(struct Func150CBF5C *arg0) {
-    arg0->unk58 |= 1;
-    arg0->unk1C = 0x20;
+/* Sets flag 1 and a 32-frame timer (the fade-out func_150CBA30 runs on its dust). */
+void func_150CBF5C(FadeoutParticle *particle) {
+    particle->flags |= 1;
+    particle->timer = 32;
 }
