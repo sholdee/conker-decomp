@@ -313,26 +313,8 @@ void func_15150400(struct Arg15150400 *config, AngleRange *angles, u8 arg2, s32 
     }
 }
 
-struct Arg1515080C {
-    s32 countBase;
-    s32 countRange;
-    Vec3f origin;
-    AngleRange angles;
-    f32 speedBase;
-    f32 speedRange;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    f32 scaleBase;
-    f32 scaleRange;
-    f32 spin;
-    f32 unk3C; /* probability */
-    u8 unk40;
-};
-
 /* Like func_15150400, but the variant tables are passed in and each variant is used at most once. */
-void func_1515080C(struct Arg1515080C *config, s32 *variantIds, f32 *variantScales, s32 variantCount, void *extraData, s32 extraSize, u8 arg6, u8 arg7, s8 arg8, s32 arg9, f32 radius, u8 argB, u8 argC, u8 argD, s32 argE) {
+void func_1515080C(DebrisSpray *config, s32 *variantIds, f32 *variantScales, s32 variantCount, void *extraData, s32 extraSize, u8 arg6, u8 arg7, s8 arg8, s32 arg9, f32 radius, u8 argB, u8 argC, u8 argD, s32 argE) {
     u8 *used;
     ParticleSpawn spawn;
     s32 remaining;
@@ -382,16 +364,16 @@ void func_1515080C(struct Arg1515080C *config, s32 *variantIds, f32 *variantScal
             pitch = (func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase;
             func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.vel.x);
             func_15143794(yaw, pitch, radius, &spawn.pos.x);
-            spawn.pos.x += config->origin.x;
-            spawn.pos.y += config->origin.y;
-            spawn.pos.z += config->origin.z;
+            spawn.pos.x += config->pos.x;
+            spawn.pos.y += config->pos.y;
+            spawn.pos.z += config->pos.z;
             spawn.rot.x = func_150ADA68() * 360.0f;
             spawn.rot.y = func_150ADA68() * 360.0f;
             spawn.rot.z = func_150ADA68() * 360.0f;
             spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
             spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
-            spawn.gravity = (func_150ADA68() * config->unk28) + config->unk24;
-            spawn.lifetime = (func_150ADA20() % (u32)(config->unk2E + 1)) + config->unk2C;
+            spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
+            spawn.lifetime = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
             {
             /* pick the skip-th unused variant, wrapping around */
             u32 skip;
@@ -420,9 +402,9 @@ void func_1515080C(struct Arg1515080C *config, s32 *variantIds, f32 *variantScal
             used[slot] = TRUE;
             {
             void *piece;
-            if (func_150ADA68() < config->unk3C) {
+            if (func_150ADA68() < config->floorHitChance) {
                 spawn.flags |= 1;
-                spawn.floorHitFn = config->unk40;
+                spawn.floorHitFn = config->floorHitFn;
                 spawn.updateFn = 13;
             } else {
                 spawn.flags &= ~1;
@@ -1238,38 +1220,6 @@ void func_15152B38(TrailBurst *config, u8 arg1, s32 arg2) {
     }
 }
 
-struct Local15152F70Arg {
-    Vec3f position;
-    f32 sizeBase;
-    f32 sizeRange;
-    f32 growthBase;
-    f32 growthRange;
-    f32 speedBase;
-    f32 speedRange;
-    s16 countBase;
-    s16 countRange;
-    s16 yawBase;
-    s16 yawRange;
-    s16 pitchBase;
-    s16 pitchRange;
-    s16 fadeBase;
-    s16 fadeRange;
-    s16 lifeBase;
-    s16 lifeRange;
-    u8 green;
-    u8 red;
-    u8 pad3A[2];
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    s32 unk48;
-    s32 unk4C;
-    s32 unk50;
-    u8 blue;
-    u8 alpha;
-    u8 pad56[2];
-};
-
 /* Motion15147DA0 without the trailing unk1C/unk1E, which this caller never sets. */
 typedef struct {
     f32 size;
@@ -1283,7 +1233,7 @@ typedef struct {
 } MotionShort15147DA0;
 
 /* Like func_15151A38, with a fixed color and fixed func_15147DA0 parameters. */
-void func_15152F70(struct Local15152F70Arg *config, u8 arg1) {
+void func_15152F70(SimplePuffSpray *config, u8 arg1) {
     EffectTemplate spawn;
     s32 count;
     MotionShort15147DA0 motion;
@@ -1302,7 +1252,7 @@ void func_15152F70(struct Local15152F70Arg *config, u8 arg1) {
     motion.blue = config->blue;
     motion.red = config->red;
     motion.alpha = config->alpha;
-    spawn.pos = config->position;
+    spawn.pos = config->pos;
     params.unk0 = 0;
     params.setGeometryMode = 1;
     params.clearGeometryMode = 0x160600;
@@ -1314,22 +1264,22 @@ void func_15152F70(struct Local15152F70Arg *config, u8 arg1) {
     params.primMode = 9;
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
     while (count != 0) {
-        yaw = (func_150ADA20() % (u32)(config->yawRange + 1)) + config->yawBase;
-        pitch = (func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitchBase;
+        yaw = (func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase;
+        pitch = (func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase;
         cosPitch = func_151423D8((u8)pitch);
         sinPitch = func_151423D8((u8)(pitch - 0x40));
         cosYaw = func_151423D8((u8)yaw);
         sinYaw = func_151423D8((u8)(yaw - 0x40));
         speed = (func_150ADA68() * config->speedRange) + config->speedBase;
-        spawn.itemCount = (func_150ADA20() % (u32)(config->fadeRange + 1)) + config->fadeBase;
+        spawn.itemCount = (func_150ADA20() % (u32)(config->itemCountRange + 1)) + config->itemCountBase;
         spawn.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
         motion.size = (func_150ADA68() * config->sizeRange) + config->sizeBase;
         motion.growth = (func_150ADA68() * config->growthRange) + config->growthBase;
         motion.velocity.x = (speed * cosPitch) * sinYaw;
         motion.velocity.y = -speed * sinPitch;
         motion.velocity.z = (speed * cosPitch) * cosYaw;
-        func_15147DA0(&spawn, &motion, 0, config->unk3C, config->unk40, config->unk44, config->unk48,
-                      config->unk4C, config->unk50, 0, 0, &params, 0, arg1, 1);
+        func_15147DA0(&spawn, &motion, 0, config->handlers[0], config->handlers[1], config->handlers[2], config->handlers[3],
+                      config->handlers[4], config->handlers[5], 0, 0, &params, 0, arg1, 1);
         count--;
     }
 }

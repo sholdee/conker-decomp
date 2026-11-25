@@ -331,38 +331,6 @@ void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
 }
 
 typedef struct {
-    Vec3f unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    u8 unk38;
-    u8 unk39;
-    u8 pad3A[2];
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    s32 unk48;
-    s32 unk4C;
-    s32 unk50;
-    u8 unk54;
-    u8 unk55;
-    u8 pad56[2];
-} Struct1514B364Emit;
-
-typedef struct {
     f32 unk00;
     f32 unk04;
     f32 unk08;
@@ -376,7 +344,7 @@ typedef struct {
 
 extern s32 func_15046C80(Vec3f *, s32, f32, Struct1514B364Hit *);
 extern void func_15152B38(TrailBurst *, u8, s32);
-extern void func_15152F70(Struct1514B364Emit *, u8);
+extern void func_15152F70(SimplePuffSpray *, u8);
 
 /* If func_15046C80 finds ground within 200 units of `position`, spawns a cluster of effects there. */
 void func_1514B364(Vec3f *position, Struct1514B364Hit *ground, u8 arg2, s32 arg3) {
@@ -451,35 +419,35 @@ void func_1514B364(Vec3f *position, Struct1514B364Hit *ground, u8 arg2, s32 arg3
         func_15152B38(&spawn, arg2, arg3);
     }
     {
-        Struct1514B364Emit emit;
+        SimplePuffSpray emit;
 
-        emit.unk0 = pos;
-        emit.unkC = 3.99f;
-        emit.unk10 = 8.11f;
-        emit.unk14 = 0.60200006f;
-        emit.unk18 = 0.407f;
-        emit.unk1C = 10.139999f;
-        emit.unk20 = 10.2699995f;
-        emit.unk24 = 8;
-        emit.unk26 = 8;
-        emit.unk28 = 0;
-        emit.unk2A = 0xFF;
-        emit.unk2C = -64;
-        emit.unk2E = 44;
-        emit.unk30 = 5;
-        emit.unk32 = 4;
-        emit.unk34 = 66;
-        emit.unk36 = 30;
-        emit.unk38 = 10;
-        emit.unk39 = 33;
-        emit.unk3C = 1;
-        emit.unk40 = 12;
-        emit.unk44 = 0;
-        emit.unk48 = 0;
-        emit.unk4C = 0;
-        emit.unk50 = 0;
-        emit.unk54 = 0xFF;
-        emit.unk55 = func_150ADA20() % 101U + 155;
+        emit.pos = pos;
+        emit.sizeBase = 3.99f;
+        emit.sizeRange = 8.11f;
+        emit.growthBase = 0.60200006f;
+        emit.growthRange = 0.407f;
+        emit.speedBase = 10.139999f;
+        emit.speedRange = 10.2699995f;
+        emit.countBase = 8;
+        emit.countRange = 8;
+        emit.angles.yawBase = 0;
+        emit.angles.yawRange = 0xFF;
+        emit.angles.pitchBase = -64;
+        emit.angles.pitchRange = 44;
+        emit.itemCountBase = 5;
+        emit.itemCountRange = 4;
+        emit.lifeBase = 66;
+        emit.lifeRange = 30;
+        emit.green = 10;
+        emit.red = 33;
+        emit.handlers[0] = 1;
+        emit.handlers[1] = 12;
+        emit.handlers[2] = 0;
+        emit.handlers[3] = 0;
+        emit.handlers[4] = 0;
+        emit.handlers[5] = 0;
+        emit.blue = 0xFF;
+        emit.alpha = func_150ADA20() % 101U + 155;
         func_15152F70(&emit, 0xFF);
     }
     func_1514B034(&pos, arg2, arg3);

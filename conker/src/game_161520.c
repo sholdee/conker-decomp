@@ -2720,75 +2720,54 @@ void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
 
 typedef struct {
     /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ u8 unk40;
-} Cfg080C_1513A24C;
-
-typedef struct {
-    /* 0x00 */ s32 unk0;
     /* 0x04 */ u16 unk4;
     /* 0x06 */ s8 unk6;
     /* 0x08 */ s32 unk8;
 } Extra080C_1513A24C;
 
-void func_1515080C(Cfg080C_1513A24C *, s32 *, f32 *, s32, Extra080C_1513A24C *, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
+void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, Extra080C_1513A24C *, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
 void func_15133E3C(s32, u8);
 
 /* Blood burst (func_1515080C) for an actor of blood profile `kind`; actor is a Actor. */
 void func_1513A24C(Vec3f *position, s32 *table, f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor, void *hit, u8 arg9, s32 argA) {
-    Cfg080C_1513A24C config;
+    DebrisSpray config;
     Extra080C_1513A24C extra;
     s32 flag;
 
-    config.unk0 = 40;
-    config.unk4 = 0;
+    config.countBase = 40;
+    config.countRange = 0;
     config.pos = *position;
-    config.unk14 = 0;
-    config.unk16 = 255;
-    config.unk2C = 480;
-    config.unk2E = 240;
-    config.unk30 = 1 * scale;
-    config.unk34 = 0 * scale;
-    config.unk40 = arg6;
+    config.angles.yawBase = 0;
+    config.angles.yawRange = 255;
+    config.lifeBase = 480;
+    config.lifeRange = 240;
+    config.scaleBase = 1 * scale;
+    config.scaleRange = 0 * scale;
+    config.floorHitFn = arg6;
     extra.unk0 = 4;
     flag = -1;
-    config.unk18 = -64;
-    config.unk1A = 12;
-    config.unk20 = 5.0f;
-    config.unk3C = 1.0f;
-    config.unk1C = 13.0f;
-    config.unk24 = -1.007000089f;
-    config.unk28 = 0.2520000041f;
-    config.unk38 = 16.10200119f;
+    config.angles.pitchBase = -64;
+    config.angles.pitchRange = 12;
+    config.speedRange = 5.0f;
+    config.floorHitChance = 1.0f;
+    config.speedBase = 13.0f;
+    config.gravityBase = -1.007000089f;
+    config.gravityRange = 0.2520000041f;
+    config.spin = 16.10200119f;
     switch (kind) {
     case 19:
         if (D_800BE9F0 == 60) {
-            config.unk3C = 0.0f;
+            config.floorHitChance = 0.0f;
         }
         break;
     case 13:
-        config.unk18 = -46;
-        config.unk1A = 20;
-        config.unk1C = 15.0f;
-        config.unk20 = 8.0f;
-        config.unk24 = -1.262000084f;
-        config.unk28 = 0.4900000095f;
-        config.unk38 = 12.91100025f;
+        config.angles.pitchBase = -46;
+        config.angles.pitchRange = 20;
+        config.speedBase = 15.0f;
+        config.speedRange = 8.0f;
+        config.gravityBase = -1.262000084f;
+        config.gravityRange = 0.4900000095f;
+        config.spin = 12.91100025f;
         break;
     case 1: {
         const u16 models[4] = { 0x83, 0x81, 0x82, 0x84 };

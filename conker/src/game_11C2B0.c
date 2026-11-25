@@ -1513,27 +1513,6 @@ void func_150F1CB0(Actor *actor) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ u8 unk40;
-} Cfg150F1D10A;
-
 extern s32 D_800A18C0[];
 extern f32 D_800A18CC[];
 extern s32 D_800A18D8[];
@@ -1543,7 +1522,7 @@ void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 void func_151D5514(Vec3f *, u8, s32);
 void func_151D3FF4(Vec3f *, u8, s32);
 void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
-void func_1515080C(Cfg150F1D10A *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, u8, s32);
+void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, u8, s32);
 void func_15152190(DebrisBurst *, s32 *, f32 *, s32, f32, s32, u8, s32);
 
 /* Burst of effects at `actor` (func_151D5404 and friends, sound 0x2B6/0x2BE, two particle
@@ -1567,27 +1546,27 @@ void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
     func_151541B8(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
                   (f32)(u32)(func_150ADA20() % 56U + 200), 0.0f, arg1, arg2);
     {
-        Cfg150F1D10A a;
+        DebrisSpray a;
         DebrisBurst b;
 
-        a.unk0 = 3;
-        a.unk4 = 0;
+        a.countBase = 3;
+        a.countRange = 0;
         a.pos = pos;
-        a.unk1C = 30.0f;
-        a.unk20 = 20.0f;
-        a.unk24 = -1.855000138f;
-        a.unk28 = 0.6980000138f;
-        a.unk14 = 0;
-        a.unk16 = 0xFF;
-        a.unk18 = -64;
-        a.unk1A = 44;
-        a.unk2C = 60;
-        a.unk2E = 20;
-        a.unk30 = 1 * scale; // matching: IDO emits both multiplies; plain scale / 0.0f differ
-        a.unk34 = 0 * scale;
-        a.unk38 = 8.990000725f;
-        a.unk3C = 0.0f;
-        a.unk40 = 12;
+        a.speedBase = 30.0f;
+        a.speedRange = 20.0f;
+        a.gravityBase = -1.855000138f;
+        a.gravityRange = 0.6980000138f;
+        a.angles.yawBase = 0;
+        a.angles.yawRange = 0xFF;
+        a.angles.pitchBase = -64;
+        a.angles.pitchRange = 44;
+        a.lifeBase = 60;
+        a.lifeRange = 20;
+        a.scaleBase = 1 * scale; // matching: IDO emits both multiplies; plain scale / 0.0f differ
+        a.scaleRange = 0 * scale;
+        a.spin = 8.990000725f;
+        a.floorHitChance = 0.0f;
+        a.floorHitFn = 12;
         func_1515080C(&a, D_800A18C0, D_800A18CC, 3, 0, 0, 0, 1, -1, 0, 0.0f, 0, 0, arg1, arg2);
         b.countBase = 5;
         b.countRange = 3;

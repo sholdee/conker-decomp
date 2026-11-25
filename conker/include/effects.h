@@ -1111,4 +1111,51 @@ typedef struct SpriteBurst {
     /* 0x68 */ f32 extra;           /* copied into each particle at +0xA8 */
 } SpriteBurst; /* size 0x6C */
 
+/* func_15152F70 (game_17CAF0.c): PuffSpray with a fixed alpha, no per-puff alpha range and fixed render
+ * settings. */
+typedef struct SimplePuffSpray {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 sizeBase;
+    /* 0x10 */ f32 sizeRange;
+    /* 0x14 */ f32 growthBase;
+    /* 0x18 */ f32 growthRange;
+    /* 0x1C */ f32 speedBase;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ s16 countBase;
+    /* 0x26 */ s16 countRange;
+    /* 0x28 */ AngleRange angles;
+    /* 0x30 */ s16 itemCountBase;   /* EffectTemplate.itemCount */
+    /* 0x32 */ s16 itemCountRange;
+    /* 0x34 */ s16 lifeBase;
+    /* 0x36 */ s16 lifeRange;
+    /* 0x38 */ u8 green;
+    /* 0x39 */ u8 red;
+    /* 0x3A */ u8 pad3A[2];
+    /* 0x3C */ s32 handlers[6];     /* func_15147DA0's arguments 3..8 (state and handler indices) */
+    /* 0x54 */ u8 blue;
+    /* 0x55 */ u8 alpha;
+    /* 0x56 */ u8 pad56[2];
+} SimplePuffSpray; /* size 0x58 */
+
+/* func_1515080C (game_17CAF0.c): DebrisBurst whose pieces each use a different entry of the variant tables,
+ * and bounce (floor-hit handler floorHitFn) with probability floorHitChance. */
+typedef struct DebrisSpray {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ AngleRange angles;
+    /* 0x1C */ f32 speedBase;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ f32 gravityBase;
+    /* 0x28 */ f32 gravityRange;
+    /* 0x2C */ s16 lifeBase;
+    /* 0x2E */ s16 lifeRange;
+    /* 0x30 */ f32 scaleBase;       /* times the variant's scale */
+    /* 0x34 */ f32 scaleRange;
+    /* 0x38 */ f32 spin;            /* rotVel.x / rotVel.z are random in [-spin, spin] */
+    /* 0x3C */ f32 floorHitChance;
+    /* 0x40 */ u8 floorHitFn;       /* ParticleSpawn.floorHitFn of the pieces that bounce */
+    /* 0x41 */ u8 pad41[3];
+} DebrisSpray; /* size 0x44 */
+
 #endif

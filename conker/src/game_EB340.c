@@ -228,28 +228,6 @@ EB340Command *func_150BE438(EB340Command *cmd, s32 id) {
     return cmd + 2;
 }
 
-/* func_1515080C parameter block (same layout as game_11C2B0.c's Cfg150F1D10A). */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s8 unk40;
-} EB340Cfg80C;
-
 extern s32 D_800A0010[];
 extern f32 D_800A0038[];
 extern s32 D_800A0060[];
@@ -257,7 +235,7 @@ extern f32 D_800A0064[];
 
 void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
 void func_1504715C(void *, Actor *);
-void func_1515080C(EB340Cfg80C *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
+void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
 void func_15152190(DebrisBurst *, s32 *, f32 *, s32, f32, s32, u8, s32);
 void func_15153F18(AngleRange *, SplashSpray *, void *, u8, s32);
 
@@ -269,31 +247,31 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
     f32 unk2;
     f32 halfSize;
     u8 ground[0x24]; // filled by func_1504715C (a ground probe in other files)
-    EB340Cfg80C primary;
+    DebrisSpray primary;
     DebrisBurst secondary;
 
     if (obj != NULL) {
         halfSize = (obj->xz_scale + obj->y_scale) * 0.5f;
         func_1515C244(obj, &pos, &radius, &unk2);
         func_1504715C(ground, obj);
-        primary.unk0 = 10;
-        primary.unk4 = 0;
+        primary.countBase = 10;
+        primary.countRange = 0;
         primary.pos = pos;
-        primary.unk14 = 0;
-        primary.unk16 = 0xFF;
-        primary.unk18 = -0x40;
-        primary.unk1A = 0x32;
-        primary.unk1C = 13.0f;
-        primary.unk20 = 9.0f;
-        primary.unk24 = -1.326000094f;
-        primary.unk28 = 0.4410000145f;
-        primary.unk2C = 0x4B;
-        primary.unk2E = 0x28;
-        primary.unk30 = halfSize;
-        primary.unk34 = 0.0f;
-        primary.unk38 = 14.09800053f;
-        primary.unk3C = 1.0f;
-        primary.unk40 = 0xB;
+        primary.angles.yawBase = 0;
+        primary.angles.yawRange = 0xFF;
+        primary.angles.pitchBase = -0x40;
+        primary.angles.pitchRange = 0x32;
+        primary.speedBase = 13.0f;
+        primary.speedRange = 9.0f;
+        primary.gravityBase = -1.326000094f;
+        primary.gravityRange = 0.4410000145f;
+        primary.lifeBase = 0x4B;
+        primary.lifeRange = 0x28;
+        primary.scaleBase = halfSize;
+        primary.scaleRange = 0.0f;
+        primary.spin = 14.09800053f;
+        primary.floorHitChance = 1.0f;
+        primary.floorHitFn = 0xB;
         func_1515080C(&primary, D_800A0010, D_800A0038, 10, 0, 0, 0, 1, -1, ground, 55.0f, 0, 0, arg1, arg2);
         secondary.countBase = 0x11;
         secondary.countRange = 9;

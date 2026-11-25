@@ -45,19 +45,6 @@ typedef struct Fx151539B4Args {
     s32 unk48;
 } Fx151539B4Args;
 
-/* Parameter block for func_15152F70. */
-typedef struct Fx15152F70Args {
-    Vec3f pos;
-    f32 unk0C, unk10, unk14, unk18, unk1C, unk20;
-    s16 unk24, unk26;
-    s16 angle;
-    s16 unk2A, unk2C, unk2E, unk30, unk32, unk34, unk36;
-    u8 unk38, unk39;
-    s16 pad3A;
-    s32 unk3C, unk40, unk44, unk48, unk4C, unk50;
-    u8 unk54, unk55;
-} Fx15152F70Args;
-
 /* Parameter block for func_150B3F5C. */
 typedef struct Fx150B3F5CArgs {
     Vec3f vel;
@@ -81,7 +68,7 @@ extern PipeIds D_8009F95C;
 extern void func_151A6F00(Fx151A6F00Args *, s32, u8, s32);
 extern void func_1514C858(f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, f32, s32, u8);
 extern void func_151539B4(Fx151539B4Args *, u8);
-extern void func_15152F70(Fx15152F70Args *, u8);
+extern void func_15152F70(SimplePuffSpray *, u8);
 extern void func_150B3F5C(Fx150B3F5CArgs *, Vec3f *, s32);
 
 /* Explodes pipe `pipe`: fires the four effect spawners at its spot and plays two sounds there. */
@@ -89,7 +76,7 @@ void func_150B2740(u8 pipe, u8 arg1) {
     Fx151A6F00Args argsA;
     s16 i;
     Fx151539B4Args argsB;
-    Fx15152F70Args argsC;
+    SimplePuffSpray argsC;
     f32 yawSin; // matching: also holds the debris size; a separate local mismatches
     f32 yawCos;
     Vec3f origin;
@@ -160,43 +147,43 @@ void func_150B2740(u8 pipe, u8 arg1) {
     func_151539B4(&argsB, arg1);
     {
     // matching: a declaration here opens a -g3 lexical block, which steers as1's scheduling
-    extern void func_15152F70(Fx15152F70Args *, u8);
+    extern void func_15152F70(SimplePuffSpray *, u8);
 
     argsC.pos = D_8009F920[pipe].pos;
-    argsC.unk24 = 15;
-    argsC.unk26 = 8;
-    argsC.angle = D_8009F920[pipe].yaw - 25;
-    argsC.unk2A = 50;
-    argsC.unk2C = -50;
-    argsC.unk2E = 60;
-    argsC.unk30 = 3;
-    argsC.unk32 = 2;
-    argsC.unk34 = 60;
-    argsC.unk36 = 20;
-    argsC.unk38 = 6;
-    argsC.unk39 = 8;
-    argsC.unk3C = 1;
-    argsC.unk40 = 7;
-    argsC.unk44 = 0;
-    argsC.unk48 = 0;
-    argsC.unk4C = 0;
-    argsC.unk50 = 0;
-    argsC.unk54 = 0xFF;
-    argsC.unk55 = 0xA0;
-    argsC.unk1C = 20.0f;
-    argsC.unk20 = 40.0f;
-    argsC.unk0C = 10.0f;
-    argsC.unk10 = 30.0f;
-    argsC.unk14 = 1.5f;
-    argsC.unk18 = 1.0f;
+    argsC.countBase = 15;
+    argsC.countRange = 8;
+    argsC.angles.yawBase = D_8009F920[pipe].yaw - 25;
+    argsC.angles.yawRange = 50;
+    argsC.angles.pitchBase = -50;
+    argsC.angles.pitchRange = 60;
+    argsC.itemCountBase = 3;
+    argsC.itemCountRange = 2;
+    argsC.lifeBase = 60;
+    argsC.lifeRange = 20;
+    argsC.green = 6;
+    argsC.red = 8;
+    argsC.handlers[0] = 1;
+    argsC.handlers[1] = 7;
+    argsC.handlers[2] = 0;
+    argsC.handlers[3] = 0;
+    argsC.handlers[4] = 0;
+    argsC.handlers[5] = 0;
+    argsC.blue = 0xFF;
+    argsC.alpha = 0xA0;
+    argsC.speedBase = 20.0f;
+    argsC.speedRange = 40.0f;
+    argsC.sizeBase = 10.0f;
+    argsC.sizeRange = 30.0f;
+    argsC.growthBase = 1.5f;
+    argsC.growthRange = 1.0f;
     func_15152F70(&argsC, arg1);
     }
-    argsC.unk24 = 10;
-    argsC.unk26 = 6;
-    argsC.unk34 = 100;
-    argsC.unk36 = 0;
-    argsC.unk39 = 9;
-    argsC.unk48 = 5;
+    argsC.countBase = 10;
+    argsC.countRange = 6;
+    argsC.lifeBase = 100;
+    argsC.lifeRange = 0;
+    argsC.red = 9;
+    argsC.handlers[3] = 5;
     func_15152F70(&argsC, arg1);
     yawSin = func_151423D8(D_8009F920[pipe].yaw);
     yawCos = func_151423D8(D_8009F920[pipe].yaw - 0x40);
