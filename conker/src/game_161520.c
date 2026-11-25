@@ -26,6 +26,10 @@ extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
 extern void func_151BC5A4(struct260 *, s32, u8);
 
 typedef struct {
+    f32 x, y, z;
+} Vec3f;
+
+typedef struct {
     s32 unk0[4];
 } Struct15136698Table;
 
@@ -151,10 +155,6 @@ s32 func_1513416C(struct102 *effect) {
 }
 
 
-typedef struct {
-    f32 x, y, z;
-} BloodDripVec3f;
-
 /* Blood dripping from a point, optionally attached to an actor or one of its bones. */
 typedef struct {
     u8 pad0[0x10];
@@ -172,7 +172,7 @@ typedef struct {
     u8 emitter;
     s8 callback;
     u8 pad3D[3];
-    BloodDripVec3f previous;
+    Vec3f previous;
     f32 inverseDiameter;
     f32 accumulator;
 } BloodDrip;
@@ -301,7 +301,7 @@ void func_151342BC(BloodDrip *drip) {
             drip->accumulator -= 1.0f;
         }
     }
-    drip->previous = *(BloodDripVec3f *)position;
+    drip->previous = *(Vec3f *)position;
     drip->flags &= ~BLOOD_DRIP_NO_PREVIOUS;
     if (!dead) {
         if ((drip->callback != -1) && (D_80089AA0[drip->callback](drip) == 0)) {
@@ -406,41 +406,22 @@ void func_151347CC(void *arg0, ArgB_151347CC *msg, u8 message) {
 void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 }
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+/* Spawn parameters of a BloodTrail; copied verbatim into the effect. */
+typedef struct {
+    f32 *x;
+    f32 *y;
+    f32 *z;
+    f32 radius;
+    f32 rate;
+    s16 lifetime;
+    u8 flags;
+    u8 emitter;
+    u8 field28;
+    s8 callback;
+    u8 pad2A[2];
+} BloodTrailDesc;
 
-struct Struct15134908 {
-    u8 pad0[0x10];
-    f32 *unk10;
-    f32 *unk14;
-    f32 *unk18;
-    f32 unk1C;
-    u8 pad20[0xC];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-};
-
-void *func_15134908(void *arg0, s32 arg1, u8 arg2, s32 arg3) {
-    struct Struct15134908 *temp_v0;
-    struct Struct15134908 *sp24;
-
-    temp_v0 = (struct Struct15134908 *)func_15167A68(0x2A, arg3, arg1 + 0x40, 1, arg2, 1);
-    if (temp_v0 == 0) {
-        return NULL;
-    }
-    *(u8 *)((s32)arg0 + 0x16) |= 2;
-    sp24 = temp_v0;
-    memcpy((s32)temp_v0 + 0x10, arg0, 0x1C);
-    sp24->unk2C = *sp24->unk10;
-    sp24->unk30 = *sp24->unk14;
-    sp24->unk34 = *sp24->unk18;
-    sp24->unk38 = (f32)(1.0f / (sp24->unk1C + sp24->unk1C));
-    sp24->unk3C = 0.0f;
-    return sp24;
-}
-
+/* Blood trailing behind a moving point given by three coordinate pointers. */
 typedef struct {
     u8 pad0[0x10];
     f32 *x;
@@ -454,14 +435,37 @@ typedef struct {
     u8 field28;
     s8 callback;
     u8 pad2A[2];
-    BloodDripVec3f previous;
+    Vec3f previous;
     f32 inverseDiameter;
     f32 accumulator;
 } BloodTrail;
 
+#define BLOOD_TRAIL_LIFETIME   0x01
+#define BLOOD_TRAIL_SKIP_FRAME 0x02 /* don't emit on the next update */
+#define BLOOD_TRAIL_CALLBACK   0x04
+
+/* Spawns a BloodTrail effect from desc, starting at the current position. */
+BloodTrail *func_15134908(BloodTrailDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
+    BloodTrail *trail;
+
+    trail = func_15167A68(0x2A, arg3, arg1 + 0x40, 1, arg2, 1);
+    if (trail == NULL) {
+        return NULL;
+    }
+    desc->flags |= BLOOD_TRAIL_SKIP_FRAME;
+    memcpy(&trail->x, desc, sizeof(BloodTrailDesc));
+    trail->previous.x = *trail->x;
+    trail->previous.y = *trail->y;
+    trail->previous.z = *trail->z;
+    trail->inverseDiameter = 1.0f / (trail->radius + trail->radius);
+    trail->accumulator = 0.0f;
+    return trail;
+}
+
 extern s32 (*D_80089B18[])(void *);
 extern void (*D_80089AFC[])(f32, f32, f32, f32, f32, f32, void *);
 
+/* Per-frame update: emits drops along the path the trail point moved since last frame. */
 void func_151349D0(BloodTrail *trail) {
     u8 flags;
     f32 position[3];
@@ -474,15 +478,15 @@ void func_151349D0(BloodTrail *trail) {
     position[0] = *trail->x;
     position[1] = *trail->y;
     position[2] = *trail->z;
-    if (trail->flags & 4) {
+    if (trail->flags & BLOOD_TRAIL_CALLBACK) {
         if ((trail->callback != -1) && (D_80089B18[trail->callback](trail) == 0)) {
             func_1516972C((struct102 *)trail);
             return;
         }
     }
     flags = trail->flags;
-    if (flags & 2) {
-        trail->flags = flags & ~2;
+    if (flags & BLOOD_TRAIL_SKIP_FRAME) {
+        trail->flags = flags & ~BLOOD_TRAIL_SKIP_FRAME;
     } else {
         f32 scale;
         f32 distance;
@@ -514,8 +518,8 @@ void func_151349D0(BloodTrail *trail) {
             trail->accumulator -= 1.0f;
         }
     }
-    trail->previous = *(BloodDripVec3f *)position;
-    if (trail->flags & 1) {
+    trail->previous = *(Vec3f *)position;
+    if (trail->flags & BLOOD_TRAIL_LIFETIME) {
         trail->lifetime -= D_800BE9E4;
         if (trail->lifetime < 0) {
             func_1516972C((struct102 *)trail);
@@ -544,201 +548,217 @@ typedef struct {
     f32 unk74;
 } Struct15134CEC;
 
-s32 func_15134CEC(Struct15134CEC *arg0) {
-    s32 temp_v1;
+/* Particle callback: accelerates and moves the particle and fades unk2E; returns 0 to kill it. */
+s32 func_15134CEC(Struct15134CEC *particle) {
+    s32 fade;
 
-    arg0->unk70 += 0.125f * D_800BE9A4;
-    temp_v1 = arg0->unk2E;
-    arg0->unk74 += D_800A45B0 * D_800BE9A4;
-    arg0->unk14 += arg0->unk70 * D_800BE9A4;
-    arg0->unk1C += arg0->unk74 * D_800BE9A4;
-    if (arg0->unk14 > 130.0f) {
+    particle->unk70 += 0.125f * D_800BE9A4;
+    fade = particle->unk2E;
+    particle->unk74 += 0.07999999821f * D_800BE9A4;
+    particle->unk14 += particle->unk70 * D_800BE9A4;
+    particle->unk1C += particle->unk74 * D_800BE9A4;
+    if (particle->unk14 > 130.0f) {
         return 0;
     }
-    temp_v1 -= D_800BE9E4 * 2;
-    if (temp_v1 < 0) {
+    fade -= D_800BE9E4 * 2;
+    if (fade < 0) {
         return 0;
     }
-    arg0->unk2E = temp_v1;
+    particle->unk2E = fade;
     return 1;
 }
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
-
-void *func_15134DAC(void *arg0, s32 arg1) {
-    void *temp_v1;
-
-    temp_v1 = func_15167A68(0x29, 0, arg1 + 0x80, 1, 0xFF, 1);
-    if (temp_v1 == 0) {
-        return NULL;
-    }
-    memcpy((s32)temp_v1 + 0x18, arg0, 0x3C);
-    *(s16 *)((s32)temp_v1 + 0x54) = -(*(s16 *)((s32)arg0 + 0x28));
-    *(s32 *)((s32)temp_v1 + 0x10) = 1;
-    *(s32 *)((s32)temp_v1 + 0x14) = 0;
-    *(f32 *)((s32)temp_v1 + 0x70) = 0.0f;
-    *(f32 *)((s32)temp_v1 + 0x74) = 0.0f;
-    *(f32 *)((s32)temp_v1 + 0x78) = 0.0f;
-    return temp_v1;
-}
-
+/* Spawn parameters of a BloodStrip (copied to BloodStrip::ownerId). */
 typedef struct {
-    f32 x, y, z;
-} Vec3_15134E48;
+    u8 ownerId;
+    u8 pad1[3];
+    struct127 *owner;
+    u8 bone;
+    u8 pad9[3];
+    Vec3f offsetA;
+    Vec3f offsetB;
+    u8 flags;
+    u8 pad25;
+    s16 duration;
+    s16 pause;
+    s16 lifetime;
+    u8 pad2C[2];
+    s8 sampleCallback;
+    s8 emitCallback;
+    s8 rateCallback;
+    u8 pad31[3];
+    f32 rate;
+    u8 pad38;
+    s8 updateCallback;
+    u8 pad3A[2];
+} BloodStripDesc;
 
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x38];
-    u8 unk74;
-    u8 pad75[0x15F];
-    s32 unk1D4;
-} Owner_15134E48;
-
+/*
+ * Blood swept between two points (offsetA, offsetB) on an actor's bone: every frame the
+ * points are transformed and the emit callback runs at steps between the old and new spots.
+ */
 typedef struct {
     u8 pad0[0x10];
-    s32 unk10;
-    u8 pad14[4];
-    u8 unk18;
+    s32 active;
+    s32 unk14;
+    u8 ownerId;
     u8 pad19[3];
-    Owner_15134E48 *unk1C;
-    u8 unk20;
+    struct127 *owner;
+    u8 bone;
     u8 pad21[3];
-    Vec3_15134E48 unk24;
-    Vec3_15134E48 unk30;
-    u8 unk3C;
+    Vec3f offsetA;
+    Vec3f offsetB;
+    u8 flags;
     u8 pad3D;
-    s16 unk3E;
-    s16 unk40;
-    s16 unk42;
+    s16 duration;           /* frames of emission after each sample */
+    s16 pause;              /* frames to wait (below 0) before the next sample */
+    s16 lifetime;
     u8 pad44[2];
-    s8 unk46;
-    s8 unk47;
-    s8 unk48;
+    s8 sampleCallback;
+    s8 emitCallback;
+    s8 rateCallback;
     u8 pad49[3];
-    f32 unk4C;
+    f32 rate;
     u8 pad50;
-    s8 unk51;
+    s8 updateCallback;
     u8 pad52[2];
-    s16 unk54;
+    s16 timer;
     u8 pad56[2];
-    Vec3_15134E48 unk58;
-    Vec3_15134E48 unk64;
-    f32 unk70;
+    Vec3f posA;
+    Vec3f posB;
+    f32 accumulator;
     f32 unk74;
-    f32 unk78;
-} Obj_15134E48;
+    f32 time;
+} BloodStrip;
 
+#define BLOOD_STRIP_LIFETIME 0x02
 
-extern s32 (*D_80089B1C[])(Obj_15134E48 *);
-extern void (*D_80089B38[])(Vec3_15134E48 *, Vec3_15134E48 *, Vec3_15134E48 *, Vec3_15134E48 *, f32, Obj_15134E48 *);
-extern f32 (*D_80089B5C[])(Obj_15134E48 *);
-extern s32 (*D_80089B6C[])(Obj_15134E48 *);
-void func_15135424(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+/* Spawns a BloodStrip effect from desc. */
+BloodStrip *func_15134DAC(BloodStripDesc *desc, s32 arg1) {
+    BloodStrip *strip;
 
-void func_15134E48(Obj_15134E48 *arg0) {
-    Obj_15134E48 *p = arg0;
+    strip = func_15167A68(0x29, 0, arg1 + 0x80, 1, 0xFF, 1);
+    if (strip == NULL) {
+        return NULL;
+    }
+    memcpy(&strip->ownerId, desc, sizeof(BloodStripDesc));
+    strip->timer = -desc->pause;
+    strip->active = 1;
+    strip->unk14 = 0;
+    strip->accumulator = 0.0f;
+    strip->unk74 = 0.0f;
+    strip->time = 0.0f;
+    return strip;
+}
+
+extern s32 (*D_80089B1C[])(BloodStrip *);
+extern void (*D_80089B38[])(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32, BloodStrip *);
+extern f32 (*D_80089B5C[])(BloodStrip *);
+extern s32 (*D_80089B6C[])(BloodStrip *);
+void func_15135424(void *matrix, Vec3f *inA, Vec3f *inB, Vec3f *outA, Vec3f *outB);
+
+/* Per-frame update of a BloodStrip. */
+void func_15134E48(BloodStrip *arg0) {
+    BloodStrip *strip = arg0; // matching: the parameter copy reserves the stack slot IDO kept
     u8 kill;
-    s32 base;
+    u8 *boneMatrix;
 
     kill = 0;
-    if (p->unk1C->unk0 == 0 || p->unk1C->unk3B != p->unk18) {
+    if (strip->owner->interaction_state == 0 || strip->owner->unique_id != strip->ownerId) {
         kill = 1;
     }
-    if (p->unk10 & 1) {
-        if (!kill && p->unk1C->unk1D4 != 0 && (p->unk1C->unk74 & 0xF) != 0xF) {
-            base = p->unk1C->unk1D4;
-            base += p->unk20 << 6;
-            p->unk54 -= D_800BE9E4;
-            if (p->unk54 < -p->unk40) {
-                p->unk54 = p->unk3E;
-                func_15135424(base, (s32)&p->unk24, (s32)&p->unk30, (s32)&p->unk58, (s32)&p->unk64);
-                if (p->unk46 != -1 && D_80089B1C[p->unk46](p) == 0) {
+    if (strip->active & 1) {
+        if (!kill && strip->owner->unk1D4 != 0 && (strip->owner->unk74 & 0xF) != 0xF) {
+            boneMatrix = ((u8 (*)[0x40])strip->owner->unk1D4)[strip->bone];
+            strip->timer -= D_800BE9E4;
+            if (strip->timer < -strip->pause) {
+                strip->timer = strip->duration;
+                func_15135424(boneMatrix, &strip->offsetA, &strip->offsetB, &strip->posA, &strip->posB);
+                if (strip->sampleCallback != -1 && D_80089B1C[strip->sampleCallback](strip) == 0) {
                     kill = 1;
-                    p->unk54 = -1;
+                    strip->timer = -1;
                 }
             }
-            if (p->unk54 > 0) {
-                if (p->unk48 != -1) {
-                    p->unk74 = D_80089B5C[p->unk48](p);
+            if (strip->timer > 0) {
+                if (strip->rateCallback != -1) {
+                    strip->unk74 = D_80089B5C[strip->rateCallback](strip);
                 }
-                p->unk70 += p->unk4C * D_800BE9A4;
-                if (p->unk70 > 1.0f) {
-                    Vec3_15134E48 end1;
-                    Vec3_15134E48 end2;
-                    Vec3_15134E48 vel1;
-                    Vec3_15134E48 vel2;
-                    f32 inv;
-                    f32 t;
-                    f32 step;
-                    Vec3_15134E48 cur1;
-                    Vec3_15134E48 cur2;
-                    f32 dz;
-                    f32 dy;
-                    f32 dx;
-                    Vec3_15134E48 d2;
-                    f32 ix;
-                    f32 iy;
-                    f32 iz;
-                    f32 jx;
-                    f32 jy;
-                    f32 jz;
-                    inv = 1.0f / p->unk70;
-                    t = p->unk78 + D_800BE9A4;
-                    step = t * inv;
-                    cur1 = p->unk58;
-                    cur2 = p->unk64;
-                    func_15135424(base, (s32)&p->unk24, (s32)&p->unk30, (s32)&end1, (s32)&end2);
-                    dx = end1.x - p->unk58.x;
-                    dy = end1.y - p->unk58.y;
-                    dz = end1.z - p->unk58.z;
-                    d2.x = end2.x - p->unk64.x;
-                    d2.y = end2.y - p->unk64.y;
-                    d2.z = end2.z - p->unk64.z;
-                    ix = dx * inv;
-                    iy = dy * inv;
-                    iz = dz * inv;
-                    jx = d2.x * inv;
-                    jy = d2.y * inv;
-                    jz = d2.z * inv;
-                    vel1.x = dx * D_800BE9A8;
-                    vel1.y = dy * D_800BE9A8;
-                    vel1.z = dz * D_800BE9A8;
-                    vel2.x = d2.x * D_800BE9A8;
-                    vel2.y = d2.y * D_800BE9A8;
-                    vel2.z = d2.z * D_800BE9A8;
+                strip->accumulator += strip->rate * D_800BE9A4;
+                if (strip->accumulator > 1.0f) {
+                    Vec3f newA;
+                    Vec3f newB;
+                    Vec3f velocityA;
+                    Vec3f velocityB;
+                    f32 invCount;
+                    f32 time;
+                    f32 timeStep;
+                    Vec3f pointA;
+                    Vec3f pointB;
+                    f32 deltaAZ;
+                    f32 deltaAY;
+                    f32 deltaAX;
+                    Vec3f deltaB;
+                    f32 stepAX;
+                    f32 stepAY;
+                    f32 stepAZ;
+                    f32 stepBX;
+                    f32 stepBY;
+                    f32 stepBZ;
+                    invCount = 1.0f / strip->accumulator;
+                    time = strip->time + D_800BE9A4;
+                    timeStep = time * invCount;
+                    pointA = strip->posA;
+                    pointB = strip->posB;
+                    func_15135424(boneMatrix, &strip->offsetA, &strip->offsetB, &newA, &newB);
+                    deltaAX = newA.x - strip->posA.x;
+                    deltaAY = newA.y - strip->posA.y;
+                    deltaAZ = newA.z - strip->posA.z;
+                    deltaB.x = newB.x - strip->posB.x;
+                    deltaB.y = newB.y - strip->posB.y;
+                    deltaB.z = newB.z - strip->posB.z;
+                    stepAX = deltaAX * invCount;
+                    stepAY = deltaAY * invCount;
+                    stepAZ = deltaAZ * invCount;
+                    stepBX = deltaB.x * invCount;
+                    stepBY = deltaB.y * invCount;
+                    stepBZ = deltaB.z * invCount;
+                    velocityA.x = deltaAX * D_800BE9A8;
+                    velocityA.y = deltaAY * D_800BE9A8;
+                    velocityA.z = deltaAZ * D_800BE9A8;
+                    velocityB.x = deltaB.x * D_800BE9A8;
+                    velocityB.y = deltaB.y * D_800BE9A8;
+                    velocityB.z = deltaB.z * D_800BE9A8;
                     do {
-                        if (p->unk47 != -1) {
-                            D_80089B38[p->unk47](&cur1, &cur2, &vel1, &vel2, t, p);
+                        if (strip->emitCallback != -1) {
+                            D_80089B38[strip->emitCallback](&pointA, &pointB, &velocityA, &velocityB, time, strip);
                         }
-                        cur1.x += ix;
-                        cur1.y += iy;
-                        cur1.z += iz;
-                        cur2.x += jx;
-                        cur2.y += jy;
-                        cur2.z += jz;
-                        t -= step;
-                        p->unk70 -= 1.0f;
-                    } while (p->unk70 > 1.0f);
-                    p->unk58 = cur1;
-                    p->unk64 = cur2;
-                    p->unk78 = t;
+                        pointA.x += stepAX;
+                        pointA.y += stepAY;
+                        pointA.z += stepAZ;
+                        pointB.x += stepBX;
+                        pointB.y += stepBY;
+                        pointB.z += stepBZ;
+                        time -= timeStep;
+                        strip->accumulator -= 1.0f;
+                    } while (strip->accumulator > 1.0f);
+                    strip->posA = pointA;
+                    strip->posB = pointB;
+                    strip->time = time;
                 }
             }
         }
-        if (p->unk51 != -1 && D_80089B6C[p->unk51](p) == 0) {
+        if (strip->updateCallback != -1 && D_80089B6C[strip->updateCallback](strip) == 0) {
             kill = 1;
         }
-        if (p->unk3C & 2) {
-            p->unk42 -= D_800BE9E4;
-            if (p->unk42 < 0) {
+        if (strip->flags & BLOOD_STRIP_LIFETIME) {
+            strip->lifetime -= D_800BE9E4;
+            if (strip->lifetime < 0) {
                 kill = 1;
             }
         }
     }
     if (kill) {
-        func_1516972C((struct102 *)p);
+        func_1516972C((struct102 *)strip);
     }
 }
 
@@ -795,17 +815,18 @@ void func_151353A8(struct1513532C *arg0) {
     D_80089B88[idx](p);
 }
 
-extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
+extern s32 func_15145EA4(Vec3f **in, Vec3f **out, void *matrix, s32 count);
 
-void func_15135424(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    s32 sp20[2];
-    s32 sp18[2];
+/* Transforms inA and inB by matrix into outA and outB. */
+void func_15135424(void *matrix, Vec3f *inA, Vec3f *inB, Vec3f *outA, Vec3f *outB) {
+    Vec3f *in[2];
+    Vec3f *out[2];
 
-    sp20[0] = arg1;
-    sp20[1] = arg2;
-    sp18[0] = arg3;
-    sp18[1] = arg4;
-    func_15145EA4(sp20, sp18, arg0, 2);
+    in[0] = inA;
+    in[1] = inB;
+    out[0] = outA;
+    out[1] = outB;
+    func_15145EA4(in, out, matrix, 2);
 }
 
 typedef struct {
@@ -1182,12 +1203,6 @@ void func_15135DD0(V15135DD0 *arg0, V15135DD0 *arg1, s32 arg2, u8 arg3, s32 arg4
 }
 
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_36404;
-
-typedef struct {
     f32 height;
     u8 geometry[0x19];
     u8 type;
@@ -1202,8 +1217,8 @@ void func_15136404(void *arg0, f32 arg1, u8 arg2, s32 arg3) {
     f32 scale;
     f32 count;
     Hit36404 hit;
-    Vec3f_36404 probe;
-    Vec3f_36404 pos;
+    Vec3f probe;
+    Vec3f pos;
 
     if (arg0 != NULL) {
         scale = 3.141592741f * arg1 * arg1;
@@ -1399,37 +1414,21 @@ s32 func_15136A1C(struct102 *arg0) {
     return 1;
 }
 
-extern f32 D_800A461C;
-extern f32 D_800A4620;
-extern void *func_15134908(void *, s32, u8, s32);
+/* Starts a short blood trail behind the point (*x, *y, *z). */
+void func_15136A50(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 arg4, s32 arg5) {
+    BloodTrailDesc desc;
 
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ s8 unk19;
-} Struct15136A50;
-
-void func_15136A50(s32 arg0, s32 arg1, s32 arg2, s16 arg3, s32 arg4, s32 arg5) {
-    Struct15136A50 sp1C;
-
-    sp1C.unk0C = D_800A461C;
-    sp1C.unk00 = arg0;
-    sp1C.unk04 = arg1;
-    sp1C.unk08 = arg2;
-    sp1C.unk10 = D_800A4620;
-    sp1C.unk14 = arg3;
-    sp1C.unk16 = 5;
-    sp1C.unk17 = 5;
-    sp1C.unk18 = 2;
-    sp1C.unk19 = -1;
-    func_15134908(&sp1C, 0, arg4, arg5);
+    desc.radius = 10.30000019f;
+    desc.x = x;
+    desc.y = y;
+    desc.z = z;
+    desc.rate = 0.5008999705f;
+    desc.lifetime = lifetime;
+    desc.flags = BLOOD_TRAIL_LIFETIME | BLOOD_TRAIL_CALLBACK;
+    desc.emitter = 5;
+    desc.field28 = 2;
+    desc.callback = -1;
+    func_15134908(&desc, 0, arg4, arg5);
 }
 
 extern f32 D_800A4624;
@@ -1461,12 +1460,6 @@ void func_15136AE4(f32 a0, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, u8 *a6) {
                     a6[0xC], a6[1]);
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_36C3C;
-
 typedef struct Blood36C3CActor {
     u8 pad0[4];
     u8 unk4;
@@ -1487,7 +1480,7 @@ typedef struct Blood36C3CHit {
 typedef struct Blood36C3CSpray {
     s32 countBase;
     s32 countRange;
-    Vec3f_36C3C origin;
+    Vec3f origin;
     s16 angleBase;
     s16 angleRange;
     s16 pitchBase;
@@ -1503,10 +1496,10 @@ typedef struct Blood36C3CSpray {
 s32 func_15134070();
 void func_1504715C();
 void func_1515C244(void *, void *, f32 *, f32 *);
-void func_1513A24C(Vec3f_36C3C *, s32 *, f32 *, s32, f32, u8, u8, u8 *, void *,
+void func_1513A24C(Vec3f *, s32 *, f32 *, s32, f32, u8, u8, u8 *, void *,
                    u8, s32);
 void func_15150D1C(Blood36C3CSpray *, u8, s32);
-void func_151A9834(Vec3f_36C3C *, f32, f32, void *, s32, u8, s8 *, u8, s32);
+void func_151A9834(Vec3f *, f32, f32, void *, s32, u8, s8 *, u8, s32);
 void func_151C61A0(s32, s32, u8, s32);
 void func_1513A48C(void *, u8, s32);
 extern s32 *D_80089A20[];
@@ -1523,7 +1516,7 @@ extern f32 D_800A4630;
 
 void func_15136C3C(Blood36C3CActor *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
                    u8 arg5, u8 arg6, s32 arg7) {
-    Vec3f_36C3C position;
+    Vec3f position;
     f32 unused0;
     f32 unused1;
     f32 halfHeight;
@@ -1815,32 +1808,32 @@ typedef struct Blood3783CHit {
     u8 pad1D[7];
 } Blood3783CHit;
 
-typedef void *(*Blood3783CSpawn)(Vec3f_36C3C *, Vec3f_36C3C *, f32, Vec3f_36C3C *, Vec3f_36C3C *, f32,
+typedef void *(*Blood3783CSpawn)(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32,
                                  s32, s32, s32, f32, s32, s32, s32, s32);
 
 s32 func_15046C80(f32 *, u16, f32, void *);
 s32 func_1514672C(f32 *);
-void *func_151B5BF0(Vec3f_36C3C *, Vec3f_36C3C *, f32, Vec3f_36C3C *, Vec3f_36C3C *, f32, s32, s32,
+void *func_151B5BF0(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s32, s32,
                     s32, f32, s32, s32, s32, s32);
-void *func_151B6010(Vec3f_36C3C *, Vec3f_36C3C *, f32, Vec3f_36C3C *, Vec3f_36C3C *, f32, s32, s32,
+void *func_151B6010(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, s32, s32,
                     s32, f32, s32, s32, s32, s32);
 extern f32 D_800A481C;
 extern f32 D_800A4820;
 extern f32 D_800A4824;
 
 void func_1513783C(Blood36C3CActor *arg0, u8 arg1, s32 arg2) {
-    Vec3f_36C3C position;
+    Vec3f position;
     f32 unused0;
     f32 unused1;
     f32 halfHeight;
-    Vec3f_36C3C probe;
+    Vec3f probe;
     Blood3783CHit hit;
     s32 kind;
     u8 heavy;
-    Vec3f_36C3C origin;
-    Vec3f_36C3C velocity;
-    Vec3f_36C3C rotation;
-    Vec3f_36C3C spin;
+    Vec3f origin;
+    Vec3f velocity;
+    Vec3f rotation;
+    Vec3f spin;
     Blood3783CSpawn spawn;
 
     if (arg0 == NULL) {
@@ -2428,7 +2421,7 @@ void func_151036B4(void *, u8, s32);
 
 void func_15138C80(Blood1380B4State *arg0, u8 arg1, s32 arg2) {
     s32 kind;
-    Vec3f_36C3C position;
+    Vec3f position;
     u8 valid;
     BloodHitRecord hit;
 
@@ -2489,7 +2482,7 @@ void func_15138C80(Blood1380B4State *arg0, u8 arg1, s32 arg2) {
 
 typedef struct BloodParticlePacket {
     f32 field0, field4, field8, fieldC;
-    Vec3f_36C3C angles, scale, position, velocity, field40;
+    Vec3f angles, scale, position, velocity, field40;
     f32 field4C;
     s32 field50;
     s16 field54, field56;
@@ -2508,13 +2501,13 @@ typedef struct BloodParticlePacket {
 extern u8 D_800A4160[];
 extern s32 D_800A4168[];
 extern s32 D_800A4178[];
-extern Vec3f_36C3C D_800A4188[];
-extern Vec3f_36C3C D_800A41B8;
+extern Vec3f D_800A4188[];
+extern Vec3f D_800A41B8;
 void func_1513A5E0(s32 arg0, s32 arg1, s32 arg2);
 
 void func_15138E98(Blood1380B4State *arg0, f32 *arg1, u8 arg2, void *arg3, u8 arg4, s32 arg5) {
     u8 index;
-    Vec3f_36C3C position;
+    Vec3f position;
 
     index = func_150ADA20() % 6U;
     {
@@ -2882,11 +2875,11 @@ void func_15139768(Obj15139768 *arg0, f32 *arg1, f32 arg2, void *arg3, u8 arg4, 
 extern u8 D_800A4218[];
 extern s32 D_800A421C[];
 extern s32 D_800A4228[];
-extern Vec3f_36C3C D_800A4234[];
+extern Vec3f D_800A4234[];
 
 void func_15139D74(Blood1380B4State *arg0, f32 *arg1, void *arg2, u8 arg3, s32 arg4) {
     u8 index;
-    Vec3f_36C3C position;
+    Vec3f position;
 
     index = func_150ADA20() % 3U;
     {
@@ -3010,7 +3003,7 @@ void func_15139D74(Blood1380B4State *arg0, f32 *arg1, void *arg2, u8 arg3, s32 a
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3f_36C3C pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -3038,7 +3031,7 @@ typedef struct {
 void func_1515080C(Cfg080C_1513A24C *, s32 *, f32 *, s32, Extra080C_1513A24C *, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
 void func_15133E3C(s32, u8);
 
-void func_1513A24C(Vec3f_36C3C *arg0, s32 *arg1, f32 *arg2, s32 arg3, f32 arg4, u8 arg5, u8 arg6, u8 *arg7, void *arg8, u8 arg9, s32 argA) {
+void func_1513A24C(Vec3f *arg0, s32 *arg1, f32 *arg2, s32 arg3, f32 arg4, u8 arg5, u8 arg6, u8 *arg7, void *arg8, u8 arg9, s32 argA) {
     Cfg080C_1513A24C a;
     Extra080C_1513A24C b;
     s32 flag;
@@ -3385,11 +3378,11 @@ void func_1513A6E0(ObjA6E0 *arg0, f32 *arg1, void *arg2, u8 arg3, s32 arg4) {
 extern u8 D_800A42D0[];
 extern s32 D_800A42D4[][2];
 extern s32 D_800A42E4[][2];
-extern Vec3f_36C3C D_800A42F4[][2];
+extern Vec3f D_800A42F4[][2];
 
 void func_1513ABB8(Blood1380B4State *arg0, f32 *arg1, u8 arg2, void *arg3, u8 arg4, s32 arg5) {
     u8 index;
-    Vec3f_36C3C position;
+    Vec3f position;
 
     index = func_150ADA20() % 3U;
     {
@@ -3527,7 +3520,7 @@ extern s32 D_800A4330[];
 extern f32 D_800A4338[][3];
 void func_1513B0F8(Blood1380B4State *arg0, f32 *arg1, void *arg2, u8 arg3, s32 arg4) {
     u8 index;
-    Vec3f_36C3C rotation;
+    Vec3f rotation;
     BloodParticlePacket spawn;
     u8 i;
     u8 mask;
