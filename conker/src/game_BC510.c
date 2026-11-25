@@ -874,11 +874,6 @@ typedef struct HudBars {
     u8 b[4];
 } HudBars;
 
-typedef struct HudScore {
-    u8 pad0[0x46];
-    s16 score[4];
-} HudScore;
-
 typedef struct HudNames {
     u8 pad0[0x20];
     char *name[1];
@@ -899,7 +894,6 @@ extern u8 D_800873B4[];
 extern u8 D_800873BC[];
 extern u8 D_800873C4[];
 extern u8 D_800873C8[];
-extern HudScore *D_8008FDD4;
 extern HudNames *D_800E0BD8;
 extern HudTime *D_800872A0;
 extern u8 D_CF1[];

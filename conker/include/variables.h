@@ -494,6 +494,7 @@ extern u16  D_8008FDBC;
 extern u16 D_8008FDC0;
 extern s8 D_8008FDC8;
 extern s16 D_8008FDCC;
+extern MenuState *D_8008FDD4; // multiplayer menu / match state
 extern s8 D_8008FDE0;
 extern s8 D_8008FDE4;
 extern f32 D_8008FDE8;
@@ -1672,6 +1673,7 @@ extern u8 D_800E0A97;
 extern s16 D_800E0AA0[];
 extern s8 D_800E0AC0[];
 extern s16 D_800E0AD0[16];
+extern MenuState D_800E0AF0; // the instance D_8008FDD4 points at
 extern u8 **D_800E0B88; // bank 2 text strings (80)
 extern u8 D_800E0B8C;
 extern s8 D_800E0B90[];

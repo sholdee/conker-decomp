@@ -3,35 +3,7 @@
 #include "variables.h"
 
 extern s8 D_800E0BE0[];
-struct Struct151E5034 {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    /* 0x20 */ u16 input;       /* MENU_* bits pressed this frame on controller 1 */
-    /* 0x22 */ u16 padInput[4]; /* MENU_* bits pressed this frame, per controller */
-    /* 0x2A */ s8 unk2A;
-    /* 0x2B */ s8 unk2B;
-    /* 0x2C */ s8 unk2C;
-    /* 0x2D */ char pad2D;
-    /* 0x2E */ s8 stickX[4];    /* last stick position, per controller */
-    /* 0x32 */ s8 stickY[4];
-    /* 0x36 */ s8 repeatX[4];   /* stick auto-repeat timers */
-    /* 0x3A */ s8 repeatY[4];
-    /* 0x3E */ s8 menu;
-    /* 0x3F */ s8 page;
-    /* 0x40 */ s8 prevPage;
-    /* 0x41 */ s8 cursor;
-    /* 0x42 */ s8 selection;
-    s8 unk43;
-    s8 unk44;
-};
-
-/* Menu input bits (Struct151E5034.input / padInput), built from the pads in func_151DE8F0 */
+/* Menu input bits (MenuState.input / padInput), built from the pads in func_151DE8F0 */
 #define MENU_UP     0x01 /* stick up */
 #define MENU_DOWN   0x02 /* stick down */
 #define MENU_LEFT   0x04 /* stick left */
@@ -74,7 +46,6 @@ void func_151DD9E4(void);
 
 
 
-extern struct Struct151E5034 *D_8008FDD4;
 
 
 

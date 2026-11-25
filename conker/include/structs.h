@@ -4111,4 +4111,46 @@ typedef struct {
     /* 0x24 */ s16 maxZ;
 } ZoneBounds; /* size 0x28 */
 
+/* Per-player match statistics (MenuState.stats). */
+typedef struct {
+    /* 0x0 */ s16 unk0; /* hits on opponents */
+    /* 0x2 */ s16 unk2;
+    /* 0x4 */ s16 unk4; /* hits on opponents with cause 0x2E */
+    /* 0x6 */ s16 unk6; /* the player's unk1AA at the end of the match */
+    /* 0x8 */ s16 unk8; /* hits taken */
+    /* 0xA */ s16 unkA; /* kills of teammates */
+} PlayerMatchStats; /* size 0xC */
+
+/* Multiplayer menu / match state (D_8008FDD4, which points at the static instance D_800E0AF0). */
+typedef struct {
+    /* 0x00 */ f32 unk0;         /* progress of a step between path stops (func_151E6C1C) */
+    /* 0x04 */ f32 unk4;         /* its speed */
+    /* 0x08 */ f32 unk8;         /* progress along the current stop's path */
+    /* 0x0C */ f32 unkC;         /* its speed */
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ u16 input;        /* MENU_* bits pressed this frame on controller 1 */
+    /* 0x22 */ u16 padInput[4];  /* MENU_* bits pressed this frame, per controller */
+    /* 0x2A */ s8 unk2A;
+    /* 0x2B */ s8 unk2B;         /* current path stop */
+    /* 0x2C */ s8 unk2C;         /* displayed stop */
+    /* 0x2D */ s8 unk2D;
+    /* 0x2E */ s8 stickX[4];     /* last stick position, per controller */
+    /* 0x32 */ s8 stickY[4];
+    /* 0x36 */ s8 repeatX[4];    /* stick auto-repeat timers */
+    /* 0x3A */ s8 repeatY[4];
+    /* 0x3E */ s8 menu;          /* which of the two menu paths is in use */
+    /* 0x3F */ s8 page;
+    /* 0x40 */ s8 prevPage;
+    /* 0x41 */ s8 cursor;
+    /* 0x42 */ s8 selection;     /* e.g. row of the mode table D_800AB68C */
+    /* 0x43 */ s8 unk43;
+    /* 0x44 */ s8 unk44;
+    /* 0x45 */ char pad45;
+    /* 0x46 */ s16 score[16];    /* per-player score (checked against the limit D_800E0BE0[6], capped at 9999) */
+    /* 0x66 */ PlayerMatchStats stats[4];
+} MenuState; /* size 0x98 */
+
 #endif

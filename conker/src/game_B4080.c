@@ -1983,18 +1983,6 @@ s32 func_1508A6FC(void) {
     return result;
 }
 
-/* 12-byte per-player records at 0x70 of D_8008FDD4. */
-typedef struct ScoreRecord {
-    /* 0x0 */ s16 unk0;
-    /* 0x2 */ u8 pad2[0xA];
-} ScoreRecord;
-
-typedef struct ScoreTable {
-    /* 0x00 */ u8 pad0[0x70];
-    /* 0x70 */ ScoreRecord records[4];
-} ScoreTable;
-
-extern ScoreTable *D_8008FDD4;
 
 /* Returns player's score record value (0 for a non-human player). */
 s32 func_1508B194(s32 player) {
@@ -2002,13 +1990,13 @@ s32 func_1508B194(s32 player) {
         return 0;
     }
 
-    return D_8008FDD4->records[player].unk0;
+    return D_8008FDD4->stats[player].unkA;
 }
 
 /* Clears player's score record value. */
 void func_1508B1D4(s32 player) {
     if (player < D_8008FD90) {
-        D_8008FDD4->records[player].unk0 = 0;
+        D_8008FDD4->stats[player].unkA = 0;
     }
 }
 

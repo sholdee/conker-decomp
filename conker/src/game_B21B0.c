@@ -24,13 +24,6 @@ s32 func_15084D00(Actor *obj) {
     return id;
 }
 
-/* Multiplayer score state (ScoreState in game_215960); only the field used here. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x42];
-    /* 0x42 */ s8 unk42;
-} ScoreState;
-
-extern ScoreState *D_8008FDD4;
 
 /* Copies spawn point `spawnIndex` (or, when it is -1, the player's stored one) into the out
  * parameters. In multiplayer (D_800BE616) with D_800D18A8 set, it instead picks the team's spawn
@@ -58,7 +51,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
         remember = FALSE;
         D_800D18A8 = 0;
     }
-    if (D_800BE616 && D_8008FDD4->unk42 == 0 && D_800E0BE3 != 0) {
+    if (D_800BE616 && D_8008FDD4->selection == 0 && D_800E0BE3 != 0) {
         remember = FALSE;
     }
     if (playerIndex != 0xFF) {
@@ -115,7 +108,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
                     }
                 }
             }
-            if (D_8008FDD4->unk42 != 0 || D_800E0BE3 == 0) {
+            if (D_8008FDD4->selection != 0 || D_800E0BE3 == 0) {
                 spawnIndex = candidates[best];
             }
             state = D_800CC2D0[playerIndex].unk31C;
