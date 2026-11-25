@@ -3,18 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Common head of an effect object (struct260 is a shorter view). Each effect keeps its own data
- * from +0x28. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state; /* set to -1 to free the effect */
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
-} EffectHead;
-
 /* Data of the effect spawned by func_150B1EE0 and run by func_150B1F90. */
 typedef struct {
     Vec3f pos;
@@ -22,7 +10,8 @@ typedef struct {
 } EmitterData;
 
 typedef struct {
-    EffectHead head;
+    EffectHeader head;
+    u8 pad10[0x18];
     EmitterData data;
 } EmitterEffect;
 
@@ -46,7 +35,7 @@ void func_150B1E20(Camera *camera) {
 }
 
 /* Spawns an emitter effect (func_150B1F90) at `pos` with a random duration of 69-201. */
-void func_150B1EE0(EffectHead *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
+void func_150B1EE0(EffectHeader *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
     EmitterData data;
     struct260 *effect;
 
@@ -55,7 +44,7 @@ void func_150B1EE0(EffectHead *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
 
     // the header's struct37 * parameter is really the size of the effect's data
     effect = func_15149130(func_150ADA20() % 133U + 69, -1, 0x49, -1, 1, 0, sizeof(data),
-                           spawner->unkC, spawner->unk1);
+                           spawner->owner, spawner->kind);
     if (effect != NULL) {
         memcpy(&((EmitterEffect *)effect)->data, &data, sizeof(data));
     }
@@ -132,7 +121,7 @@ void func_150B1F90(EmitterEffect *effect) {
             spawn.alpha = func_150ADA20() % 101U + 100;
             spawn.timer = func_150ADA20() % 78U + 126;
             spawn.width = spawn.height = func_150ADA68() * 503.0f + 405.0f;
-            particle = func_15130280(&spawn, 1, 0, 0x10, effect->head.unkC, effect->head.unk1);
+            particle = func_15130280(&spawn, 1, 0, 0x10, effect->head.owner, effect->head.kind);
             if (particle != NULL) {
                 memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
             }

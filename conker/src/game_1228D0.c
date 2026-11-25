@@ -292,18 +292,6 @@ s32 func_150F5A54(DrawHook *hook, Actor *actor) {
     return 0;
 }
 
-/* Common head of an effect object (struct260 is a shorter view). Each effect keeps its own data
- * from +0x28. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state; /* set to -1 to free the effect */
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
-} EffectHead;
-
 /* Data of the spark effect spawned by func_150F5C08 and run by func_150F5C98. */
 typedef struct {
     Actor *owner;
@@ -313,7 +301,8 @@ typedef struct {
 } SparkData;
 
 typedef struct {
-    EffectHead head;
+    EffectHeader head;
+    u8 pad10[0x18];
     SparkData data;
 } SparkEffect;
 
@@ -429,7 +418,7 @@ void func_150F5C98(SparkEffect *effect) {
                 spawn.pos.z = spawn.vel.z * t + start.z;
                 flipX = (func_150ADA20() & 1) ? 0x80 : 0;
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipX;
-                spark = func_15130280(&spawn, 1, 0, 4, effect->head.unkC, effect->head.unk1);
+                spark = func_15130280(&spawn, 1, 0, 4, effect->head.owner, effect->head.kind);
                 if (spark != NULL) {
                     memcpy(&spark->unkA8, &scale, sizeof(scale));
                 }
@@ -487,7 +476,8 @@ typedef struct {
 } BeamData;
 
 struct BeamEffect {
-    EffectHead head;
+    EffectHeader head;
+    u8 pad10[0x18];
     BeamData data;
 };
 
@@ -630,7 +620,8 @@ typedef struct {
 } BurstData;
 
 typedef struct {
-    EffectHead head;
+    EffectHeader head;
+    u8 pad10[0x18];
     BurstData data;
 } BurstEffect;
 
@@ -677,8 +668,8 @@ void func_150F64DC(BurstEffect *effect) {
                 origin.unk4 = pos[1];
                 origin.unk8 = pos[2];
                 rand3 = (func_150ADA20() % 61U) + 60;
-                func_151602C0(&header, &origin, rand3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, effect->head.unkC,
-                              effect->head.unk1);
+                func_151602C0(&header, &origin, rand3, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, effect->head.owner,
+                              effect->head.kind);
                 do {
                     color[0] = 0xA0;
                     color[1] = 0xA0;
@@ -688,8 +679,8 @@ void func_150F64DC(BurstEffect *effect) {
                     rand2 = func_150ADA20();
                     rand3 = func_150ADA20();
                     func_15107C1C(owner, 0, D_800A1B30, (u8)rand1, (rand2 % 43U) - 50, (rand3 % 18U) + 5, 4,
-                                  27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, effect->head.unkC,
-                                  effect->head.unk1);
+                                  27.0f, (func_150ADA68() * 16.0f) + 20.0f, 0, 2, color, effect->head.owner,
+                                  effect->head.kind);
                     count--;
                 } while (count > 0);
                 data->timer = (func_150ADA20() % 91U) + 90;

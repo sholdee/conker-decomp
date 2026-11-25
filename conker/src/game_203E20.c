@@ -1,23 +1,13 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern void func_150D6730(Actor *obj, u8 arg1, s32 arg2);
 extern s32 func_15042E3C(char *format, ...);
 extern Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 extern u32 D_80083740[];
 extern u32 D_800838C0[];
-
-/* Header shared by the objects func_15149130 creates (same layout as in game_FC5F0.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE; // set to -1 to remove the object
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
-} ObjHeader;
 
 /* Text box data (same layout as TextBox in game_FC5F0.c). */
 typedef struct {
@@ -40,7 +30,8 @@ typedef struct {
 
 /* Text box object created by func_150CFF10 (same layout as TextObj in game_FC5F0.c). */
 typedef struct {
-    /* 0x00 */ ObjHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ TextBox text;
 } TextObj;
 
@@ -367,7 +358,7 @@ s32 func_151D7000(TextObj *obj) {
         return 0;
     }
 
-    timeLeft = obj->header.unkE;
+    timeLeft = obj->header.state;
     if (timeLeft < style->fadeStart) {
         alpha = timeLeft * style->fadeRate;
         if (alpha < 0) {

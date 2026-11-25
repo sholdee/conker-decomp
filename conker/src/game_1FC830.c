@@ -181,18 +181,6 @@ void func_151CF844(FollowerActor *actor, s32 arg1, u8 arg2) {
     }
 }
 
-/* Common head of an effect object (struct260 is a shorter view); each effect keeps its own data
- * from +0x28. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state; /* set to -1 to free the effect */
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
-} EffectHead;
-
 /* Data of the ground effect spawned by func_151CF898. */
 typedef struct {
     Vec3f pos;
@@ -200,7 +188,8 @@ typedef struct {
 } GroundEffectData;
 
 typedef struct {
-    EffectHead head;
+    EffectHeader head;
+    u8 pad10[0x18];
     GroundEffectData data;
 } GroundEffect;
 
@@ -728,7 +717,8 @@ typedef struct {
 } OwnerRef;
 
 typedef struct {
-    EffectHead head;
+    EffectHeader head;
+    u8 pad10[0x18];
     OwnerRef ref;
 } OwnedEffect;
 
@@ -1002,7 +992,8 @@ typedef struct {
 } TrackerData;
 
 typedef struct {
-    EffectHead head;
+    EffectHeader head;
+    u8 pad10[0x18];
     TrackerData data;
 } TrackerEffect;
 
@@ -1185,7 +1176,7 @@ void func_151D1448(TrackerEffect *effect) {
     req.spawn.kind = 19;
     req.spawn.unk14 = 6;
     req.spawn.unk18 = 0;
-    trail = func_15147A80(&req.spawn, sizeof(FollowerData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->head.unkC, effect->head.unk1);
+    trail = func_15147A80(&req.spawn, sizeof(FollowerData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->head.owner, effect->head.kind);
     if (trail != NULL) {
         memcpy(trail->data, &req.data, sizeof(FollowerData));
         data->trail = trail;

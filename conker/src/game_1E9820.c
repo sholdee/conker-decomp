@@ -1,17 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void func_15143794(s16, s16, f32, void *);
 void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
-/* The leading bytes of an effect (cf. struct102); only unk1 and unkC are read here. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-} EffectHeader;
 
 /* Drip emitter callback (D_80089A70[39]): spawns one particle at (x, y, z), flung in a random
  * direction and pushed against the drip's movement (dx, dy, dz). The func_151A26EC arguments
@@ -46,5 +39,5 @@ void func_151BC370(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     random_b = func_150ADA20();
     func_151A26EC(position, offset, velocity, 1.0f, (fraction_a * 1049.0f + -1022.0f) * 0.001f,
                   fraction_b * 124.0f + 202.0f, (random_a & 0xF) + 20, random_b % 201U + 55, 15, 15, 0, -1,
-                  203, 0, 0, effect->unkC, effect->unk1);
+                  203, 0, 0, effect->owner, effect->kind);
 }

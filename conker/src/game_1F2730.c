@@ -265,19 +265,11 @@ void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRin
     }
 }
 
-/* Effect record passed to func_151C5E74; unkC and unk1 are the owner arguments of spawned particles. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-} Effect151C5E74;
-
-void func_15137F30(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, Effect151C5E74 *effect, Vec3f *pos, Vec3f *unk60,
+void func_15137F30(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *effect, Vec3f *pos, Vec3f *unk60,
                    Vec3f *vel, f32 *out50, s16 *out4E, u8 *out4D, f32 *out48);
 
 /* Spawns one func_151D9014 particle whose position, velocity and parameters func_15137F30 computes. */
-void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, Effect151C5E74 *effect) {
+void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, EffectHeader *effect) {
     Vec3f pos;
     Vec3f unk60;
     Vec3f vel;
@@ -288,8 +280,8 @@ void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, Effect151C5E74 
     f32 param6;
 
     func_15137F30(a0, a1, a2, a3, arg4, effect, &pos, &unk60, &vel, &param3, &param4, &param5, &param6);
-    func_151D9014(&pos, &vel, 1, param3, param4, param5, param6, 0, 1.0f, 1.0f, 1, 0, 1, 0, effect->unkC,
-                  effect->unk1);
+    func_151D9014(&pos, &vel, 1, param3, param4, param5, param6, 0, 1.0f, 1.0f, 1, 0, 1, 0, effect->owner,
+                  effect->kind);
 }
 
 /* Spawns a func_15130280 particle at `pos` moving at `vel`. A `unk0A` of -1 means 300 and leaves flag

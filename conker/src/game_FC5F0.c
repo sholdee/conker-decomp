@@ -1,17 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Header shared by the objects func_15149130 creates; each object type's own data starts at 0x28. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE; // set to -1 to remove the object
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
-} ObjHeader;
+#include "effects.h"
 
 /* Ground probe result filled by func_1504715C. */
 typedef struct {
@@ -28,7 +18,8 @@ typedef struct {
 } ActorEmitterState;
 
 typedef struct {
-    /* 0x00 */ ObjHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ ActorEmitterState state;
 } ActorEmitter;
 
@@ -55,7 +46,7 @@ void func_150CF140(ActorEmitter *emitter) {
     actor = emitter->state.actor;
     state = &emitter->state;
     if ((actor->interaction_state == 0) || (actor->unique_id != state->actorId)) {
-        emitter->header.unkE = -1;
+        emitter->header.state = -1;
         return;
     }
     if (actor->unk1D4 != NULL) {
@@ -72,7 +63,7 @@ void func_150CF140(ActorEmitter *emitter) {
             func_15143794(yaw, (s16)((func_150ADA20() % 54U) - 56), (func_150ADA68() * 1.4430001f) + 2.2680001f, vel);
             func_151D9014(pos, vel, 5, (func_150ADA68() * 0.286f) + -0.78700006f, (func_150ADA20() % 21U) + 30,
                           (func_150ADA20() % 156U) + 100, (func_150ADA68() * 50.0f) + 48.0f, 1, 1.0f, 1.0f, 0,
-                          &ground, 1, 0, emitter->header.unkC, emitter->header.unk1);
+                          &ground, 1, 0, emitter->header.owner, emitter->header.kind);
             state->spawnCredit -= 1.0f;
         }
     }
@@ -179,7 +170,7 @@ typedef struct {
     /* 0x4C */ f32 unk4C;
     /* 0x50 */ f32 unk50;
     /* 0x54 */ f32 unk54;
-} ParticleSpawn;
+} ScreenParticleSpawn;
 
 /* Particle motion: while flags & 1, hop from startX to startX + distance along an arc. */
 typedef struct {
@@ -211,11 +202,11 @@ typedef struct {
     } motion;
 } Particle;
 
-Particle *func_1515548C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
+Particle *func_1515548C(ScreenParticleSpawn *, s32, s32, s32, s32, u8, s32);
 
 /* Spawns the hopping particle, waiting off screen at (-300, 72). */
 void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
-    ParticleSpawn spawn;
+    ScreenParticleSpawn spawn;
     HopMotion hop;
     Particle *particle;
 
@@ -271,7 +262,7 @@ void func_15143874(s16 angle, f32 distance, f32 *x, f32 *y);
    dust particles. */
 s32 func_150CF800(Particle *hopper) {
     f32 phase;
-    ParticleSpawn spawn;
+    ScreenParticleSpawn spawn;
     BounceMotion dust;
     s8 count;
     s32 rand;
@@ -446,7 +437,8 @@ typedef struct {
 } TextBox;
 
 typedef struct {
-    /* 0x00 */ ObjHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ TextBox text;
 } TextObj;
 
@@ -513,7 +505,7 @@ s32 func_150D0034(s32 arg0, TextObj *obj, s32 arg2) {
     TextBox *text = &obj->text;
 
     if ((text->updateFn != -1) && (D_800888A0[text->updateFn](obj) == 0)) {
-        obj->header.unkE = -1;
+        obj->header.state = -1;
         return arg0;
     }
     text->flags &= ~1;

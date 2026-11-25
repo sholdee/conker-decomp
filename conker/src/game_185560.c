@@ -1011,16 +1011,8 @@ Particle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
     return particle;
 }
 
-/* Common object header bytes that spawn functions pass along. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-} ObjectHeader;
-
 /* Spawns one stationary rising particle at (x, y, z). */
-void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, ObjectHeader *obj) {
+void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, EffectHeader *obj) {
     Vec3f pos;
     Vec3f velocity;
 
@@ -1030,7 +1022,7 @@ void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, ObjectHead
     velocity.y = 0.0f;
     velocity.z = 0.0f;
     pos.z = z;
-    func_15159890(&pos, &velocity, obj->unkC, obj->unk1);
+    func_15159890(&pos, &velocity, obj->owner, obj->kind);
 }
 
 /* Emitter data at 0x28 of the func_15159C08 emitter. */

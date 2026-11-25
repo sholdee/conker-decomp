@@ -39,24 +39,15 @@ typedef struct Game113D60Emission {
     /* 0x40 */ u8 color;
 } Game113D60Emission; // size 0x44
 
-/* Common head of the effect objects this file updates; each effect's own data starts at 0x28. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x18];
-} Game113D60EffectHeader; // size 0x28
-
-typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
     /* 0x28 */ u8 data[1]; // effect-specific data
 } Game113D60AnyEffect;
 
 typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ Game113D60Emission emission;
 } Game113D60Effect;
 
@@ -559,7 +550,8 @@ typedef struct {
 } Game113D60Burst;
 
 typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ Game113D60Burst burst;
 } Game113D60BurstEffect;
 
@@ -651,7 +643,7 @@ void func_150E7C9C(Game113D60BurstEffect *effect) {
         burst->head.accum -= 1.0f;
     }
     if (burst->head.next >= burst->head.count) {
-        effect->header.unkE = -1;
+        effect->header.state = -1;
     }
 }
 
@@ -842,7 +834,8 @@ typedef struct {
 } Game113D60Emitter;
 
 typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ Game113D60Emitter emitter;
 } Game113D60EmitterEffect;
 
@@ -935,7 +928,8 @@ void func_150E8854(void) {
 }
 
 typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ f32 timer;
 } Game113D60TimerEffect;
 
@@ -1018,7 +1012,8 @@ typedef struct {
 } Game113D60Spawner;
 
 typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ Game113D60Spawner spawner;
 } Game113D60RegionSpawnerEffect;
 
@@ -1122,7 +1117,8 @@ typedef struct {
 } Game113D60PointSpawner;
 
 typedef struct {
-    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ Game113D60PointSpawner spawner;
 } Game113D60PointSpawnerEffect;
 
@@ -1298,7 +1294,8 @@ typedef struct {
 } Game113D60DebrisExtra;
 
 typedef struct {
-    /* 0x000 */ Game113D60EffectHeader header;
+    /* 0x000 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x028 */ u8 pad28[0x10];
     /* 0x038 */ Vec3f position;
     /* 0x044 */ u8 pad44[0x12C];

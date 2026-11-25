@@ -51,17 +51,6 @@ typedef struct DustParticle {
     /* 0xA8 */ DustData dust;
 } DustParticle;
 
-/* Common head of an effect object (as EffectHead in game_1228D0.c); data follows at +0x28. */
-typedef struct EffectHead {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state; /* set to -1 to free the effect */
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
-} EffectHead;
-
 /* Data of the dust emitter effect (func_15191BE0, run by func_15191D54). */
 typedef struct DustEmitterData {
     /* 0x00 */ Actor *owner;
@@ -88,7 +77,8 @@ typedef struct DustEmitterData {
 } DustEmitterData; /* 0x68 */
 
 typedef struct DustEmitter {
-    EffectHead head;
+    EffectHeader head;
+    u8 pad10[0x18];
     DustEmitterData data;
 } DustEmitter;
 
@@ -189,7 +179,7 @@ void func_15191D54(DustEmitter *effect) {
                               func_150ADA20() % (data->lifetimeRandom + 1) + data->lifetimeBase,
                               func_150ADA20() % (data->alphaRandom + 1) + data->alphaBase, 0xFF,
                               func_150ADA68() * data->sizeRandom + data->sizeBase, hit, floorY,
-                              &data->floor.data, data->kind, effect->head.unkC, effect->head.unk1);
+                              &data->floor.data, data->kind, effect->head.owner, effect->head.kind);
                 data->accum -= 1.0f;
             } while (data->accum > 1.0f);
         } else {

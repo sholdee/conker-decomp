@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Descriptor passed to func_15134DAC (same layout as game_1228D0.c's struct_150F6890). */
 typedef struct {
@@ -87,18 +88,10 @@ void func_150C7020(Actor *owner, s16 duration, s32 arg2, s32 arg3) {
     func_15134DAC(&desc, 0);
 }
 
-/* Partial view of the task passed to func_150C71C0 (cf. game_1D6E80.c's Task151AA30C). */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-} Task150C71C0;
-
 void func_151DB5D0(s32, f32 *pos, f32 *vel, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns one func_151DB5D0 particle at `from`, moving towards `to` with randomized size and lifetime. */
-void func_150C71C0(f32 *from, f32 *to, s32 arg2, s32 arg3, s32 arg4, Task150C71C0 *task) {
+void func_150C71C0(f32 *from, f32 *to, s32 arg2, s32 arg3, s32 arg4, EffectHeader *task) {
     f32 vel[3];
     s16 fadeTime;
     s32 lifetime;
@@ -115,6 +108,6 @@ void func_150C71C0(f32 *from, f32 *to, s32 arg2, s32 arg3, s32 arg4, Task150C71C
     rand2 = func_150ADA68();
     lifetime = func_150ADA20() % 101U + 155;
     func_151DB5D0(0, from, vel, rand0 * 70.0f + 30.0f, rand1 * 0.020000001f + 1.0400001f, 1.0f,
-                  rand2 * 0.194f + -0.35000002f, fadeTime, lifetime, fadeTime, 255 / fadeTime, 1, task->unkC,
-                  task->unk1);
+                  rand2 * 0.194f + -0.35000002f, fadeTime, lifetime, fadeTime, 255 / fadeTime, 1, task->owner,
+                  task->kind);
 }

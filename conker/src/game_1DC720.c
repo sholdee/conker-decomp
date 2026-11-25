@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Descriptor copied into a new emitter effect by func_1513418C (same layout as game_10CD70.c's
  * BloodDripDesc and game_117490.c's EmitterDesc). */
@@ -20,12 +21,6 @@ typedef struct {
     /* 0x2C */ s8 callback;
     /* 0x2D */ u8 unk2D;
 } EmitterDesc;
-
-/* The leading bytes of an emitter effect (cf. game_10CD70.c's EffectHeader). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0xC];
-    /* 0x0C */ u8 unkC;
-} EffectHeader;
 
 void func_1516962C(s32 type, Actor *actor, u8 eventType);
 void *func_1513418C(EmitterDesc *desc, s32 arg1, u8 arg2, s32 arg3);
@@ -68,7 +63,7 @@ void func_151AF338(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     position[0] = x;
     position[1] = y;
     position[2] = z;
-    func_151AF388(position, dx, dy, dz, effect->unkC);
+    func_151AF388(position, dx, dy, dz, effect->owner);
 }
 
 /* Spawns one randomised func_151D9014 particle at `position`, moving at -0.13 * (dx, dy, dz). */

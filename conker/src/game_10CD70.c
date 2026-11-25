@@ -4,6 +4,7 @@
  * table (func_150DF8C0 dereferences the symbol's first word), so it gets a local declaration. */
 #define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
+#include "effects.h"
 #undef D_800D3098
 extern struct178 *D_800D3098;
 
@@ -407,14 +408,6 @@ void func_150E0348(Actor *actor, u8 arg1, s32 arg2) {
 void func_15143794(s16, s16, f32, void *);
 void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-/* The leading bytes of an effect (cf. struct102); only unk1 and unkC are read here. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-} EffectHeader;
-
 /* Blood-drip emitter callback (D_80089A70): spawns one drop at (x, y, z), flung in a random
  * direction and pushed against the drip's movement (dx, dy, dz). */
 void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
@@ -447,7 +440,7 @@ void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     random_b = func_150ADA20();
     func_151A26EC(position, acceleration, velocity, 0.986891f, alpha_random * 0.23f + -0.337f,
                   size_random * 200.0f + 150.0f, random_a % 26U + 40, random_b % 201U + 55, 30, 20, 0, -1,
-                  52, 53, 52, effect->unkC, effect->unk1);
+                  52, 53, 52, effect->owner, effect->kind);
 }
 
 f32 sqrtf(f32);
