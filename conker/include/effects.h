@@ -2940,6 +2940,26 @@ typedef struct FlashBurstData {
     /* 0x06 */ s16 timer; /* frames until the next burst */
 } FlashBurstData;
 
+/* Timed effect 0x55 (func_15149130, spawned by func_15011A78), updated by func_150F64DC. */
+typedef struct FlashBurstEffect {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ FlashBurstData data;
+} FlashBurstEffect; /* size 0x30 */
+
+/* Data of the effect spawned by func_151001B4 for an actor. */
+typedef struct OwnerEffectData {
+    /* 0x00 */ struct Actor *owner;
+    /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ s16 timer;  /* counts down by D_800BE9E4 while the owner has a camera */
+} OwnerEffectData; /* size 0x8 */
+
+/* Timed effect 0x4E (func_15149130), spawned by func_151001B4 (game_12D630.c) and updated by func_151002BC. */
+typedef struct OwnerEffect {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ OwnerEffectData data;
+} OwnerEffect; /* size 0x30 */
+
 /* Data of the emitter effect (func_150EC520): spawns points on a shape at a random rate. */
 typedef struct ShapeEmitter {
     /* 0x00 */ void *shape;

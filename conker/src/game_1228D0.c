@@ -538,11 +538,6 @@ void func_150F64B0(DefParticleHead *obj) {
 }
 
 
-typedef struct {
-    TimedEffect base;
-    FlashBurstData data;
-} FlashBurstEffect;
-
 extern f32 D_800A1B30[3];
 void func_15143134(void *, f32 *, Mtx *);
 extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);

@@ -252,21 +252,16 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ FlashBurstData data;
-} OwnerEffect;
-
 /* Spawns timed effect 85 (func_150F64DC): light bursts on the owner while it lives. */
 void func_15011A78(Actor *owner, u8 arg1, s32 arg2) {
     FlashBurstData data;
-    OwnerEffect *effect;
+    FlashBurstEffect *effect;
 
     data.owner = owner;
     data.ownerId = owner->unique_id;
     data.timer = 0;
 
-    effect = (OwnerEffect *)func_15149130(300, -1, 0x55, -1, 0, 0x42, sizeof(FlashBurstData), arg1, arg2);
+    effect = (FlashBurstEffect *)func_15149130(300, -1, 0x55, -1, 0, 0x42, sizeof(FlashBurstData), arg1, arg2);
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
