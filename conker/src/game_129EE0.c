@@ -57,7 +57,7 @@ typedef struct {
     /* 0x06 */ s16 pitchSpread;
     /* 0x08 */ s32 count;
     /* 0x0C */ s32 countSpread;
-    /* 0x10 */ struct17 position;
+    /* 0x10 */ Vec3f position;
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24;
@@ -81,14 +81,14 @@ typedef struct {
 
 
 extern const s16 D_800A1EE0[3][2];
-void *func_151541B8(struct17 *, f32, f32, f32, f32, u8, s32);
+void *func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 extern void func_15143874(s32, f32, f32 *, f32 *);
 extern void func_1514FCE8(ParticleBurstDesc *, u8, s32);
 
 /* Spawns an effect in the middle of area D_800D9AA0[index] and 3-4 particle bursts at random angles around it. */
 void func_150FCBC0(u8 index) {
     struct134 *area;
-    struct17 pos;
+    Vec3f pos;
     const s16 *range;
     ParticleBurstDesc desc;
     s16 count;
@@ -103,9 +103,9 @@ void func_150FCBC0(u8 index) {
     if (area == NULL) {
         return;
     }
-    pos.unk0 = area->unk0;
-    pos.unk4 = (s16)area->unk2 + (s16)area->unk8 * 0.5f;
-    pos.unk8 = area->unk4;
+    pos.x = area->unk0;
+    pos.y = (s16)area->unk2 + (s16)area->unk8 * 0.5f;
+    pos.z = area->unk4;
     randFrac = func_150ADA68();
     func_151541B8(&pos, randFrac * 4.0f + 12.0f, 6.6943097f, (f32)(func_150ADA20() % 56U + 200), 2.6090002f, 0xFF, 1);
     count = (func_150ADA20() & 1) + 3;
@@ -139,30 +139,30 @@ void func_150FCBC0(u8 index) {
             randInt = func_150ADA20();
             angle = range[0] + randInt % (range[1] + 1);
             desc.angle = angle - 40;
-            func_15143874((s16)angle, (s16)area->unk6, &desc.position.unk0, &desc.position.unk8);
-            desc.position.unk0 += area->unk0;
-            desc.position.unk8 += area->unk4;
-            desc.position.unk4 = func_150ADA68() * (s16)area->unk8 + (s16)area->unk2;
+            func_15143874((s16)angle, (s16)area->unk6, &desc.position.x, &desc.position.z);
+            desc.position.x += area->unk0;
+            desc.position.z += area->unk4;
+            desc.position.y = func_150ADA68() * (s16)area->unk8 + (s16)area->unk2;
             func_1514FCE8(&desc, 0xFF, 1);
             count--;
         } while (count > 0);
     }
 }
 
-extern f32 func_15165BB0(void *arg0, struct17 *pos, f32 arg2, f32 arg3, f32 arg4);
+extern f32 func_15165BB0(void *arg0, Vec3f *pos, f32 arg2, f32 arg3, f32 arg4);
 
 /* func_15165BB0 of arg0 against the centre of area 0 (1.0f when there is no area 0). */
 f32 func_150FCF1C(void *arg0) {
     struct134 *area;
-    struct17 pos;
+    Vec3f pos;
 
     area = D_800D9AA0[0];
     if (area == NULL) {
         return 1.0f;
     }
-    pos.unk0 = area->unk0;
-    pos.unk4 = (s16)area->unk2;
-    pos.unk8 = area->unk4;
+    pos.x = area->unk0;
+    pos.y = (s16)area->unk2;
+    pos.z = area->unk4;
     return func_15165BB0(arg0, &pos, 2007.0f, 9005.0f, 0.00011104942f);
 }
 
@@ -221,7 +221,7 @@ struct Actor150FD514 {
 extern Vtx *func_1513EDE4(Actor150FD514 *particle, s16 viewport);
 extern s32 D_800A1EEC[];
 extern void func_1504715C(GroundHit *, Actor *);
-extern s32 func_15046C80(struct17 *, s32, f32, GroundHit *);
+extern s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
 extern void func_1505D024(Actor *, s32, u16, s32);
 extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
@@ -231,9 +231,9 @@ extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s3
  */
 void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     GroundHit ground;
-    vertex pos;
+    Vec3f pos;
     u8 onGround;
-    struct17 probe;
+    Vec3f probe;
     ParticleDef def;
     Ext150FCFD4 ext;
     Actor150FD514 *particle;
@@ -247,10 +247,10 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
         return;
     }
     pos.x = obj->x_position;
-    probe.unk0 = pos.x;
-    probe.unk4 = obj->y_position + 100.0f;
+    probe.x = pos.x;
+    probe.y = obj->y_position + 100.0f;
     pos.z = obj->z_position;
-    probe.unk8 = pos.z;
+    probe.z = pos.z;
     func_1504715C(&ground, obj);
     if (func_15046C80(&probe, 0, -10000.0f, &ground)) {
         pos.y = ground.height;
@@ -291,7 +291,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     def.width = 0.0f;
     def.height = 1500.0f;
     def.pos = pos;
-    def.rot = *(vertex *)&D_800A5480;
+    def.rot = D_800A5480;
     def.scale.x = 1.0f;
     def.scale.y = 0.0f;
     def.scale.z = 1.0f;
@@ -322,7 +322,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
             extern s32 D_800A4AA0;
 
             if (onGround) {
-                extern f32 D_800A5480;
+                extern Vec3f D_800A5480;
 
                 groundDef.texture = 3;
                 groundDef.type = 0;
@@ -340,7 +340,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
                 groundDef.pos.x = pos.x;
                 groundDef.pos.y = pos.y + 5.0f;
                 groundDef.pos.z = pos.z;
-                groundDef.rot = *(vertex *)&D_800A5480;
+                groundDef.rot = D_800A5480;
                 groundDef.scale.x = 1.0f;
                 groundDef.scale.y = 1.0f;
                 groundDef.scale.z = 1.0f;
@@ -361,9 +361,9 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
 
 extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);
 extern void func_15107B78(Actor *, s32, s32, s32, s32);
-extern void func_151D5334(struct17 *, f32, f32, f32, s32, u8, s32);
+extern void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150E83AC(struct17 *, s16, u8, s32);
+extern void func_150E83AC(Vec3f *, s16, u8, s32);
 extern f32 sinf(f32);
 
 /*
@@ -376,7 +376,7 @@ s32 func_150FD514(Actor150FD514 *particle) {
     Ext150FCFD4 *ext;
     f32 z;
     f32 x;
-    struct17 groundPos;
+    Vec3f groundPos;
 
     ext = &particle->ext;
     owner = ext->owner;
@@ -415,9 +415,9 @@ s32 func_150FD514(Actor150FD514 *particle) {
             func_151D5404(&particle->def.pos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, particle->unkC, particle->unk1);
             func_151D5334(&particle->def.pos, 506.0f, 1013.0f, 0.0009871669f, 5, particle->unkC, particle->unk1);
             if (ext->onGround & 1) {
-                groundPos.unk0 = particle->def.pos.x;
-                groundPos.unk4 = ext->ground.height;
-                groundPos.unk8 = particle->def.pos.z;
+                groundPos.x = particle->def.pos.x;
+                groundPos.y = ext->ground.height;
+                groundPos.z = particle->def.pos.z;
                 func_150E7FEC(func_150ADA68() * 78.0f + 125.0f, (u8)((func_150ADA20() % 76) + 180), &ext->ground.unk04, &groundPos,
                               (func_150ADA20() % 207) + 302, 0, 1, 0, 0, 0, particle->unkC, 0);
                 func_150E83AC(&groundPos, (func_150ADA20() % 80) + 243, particle->unkC, particle->unk1);

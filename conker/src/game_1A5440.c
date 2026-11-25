@@ -316,8 +316,8 @@ s32 func_15178750(s32 arg0, SwarmMember *member, s16 view) {
 static void func_15178750_pad(void) {
 }
 
-extern f32 D_800D9C10[][4][4];
-extern s32 func_150A6360(void *arg0, f32 arg1[4][4], f32 arg2, f32 arg3, f32 arg4,
+extern MtxF D_800D9C10[];
+extern s32 func_150A6360(void *arg0, MtxF arg1, f32 arg2, f32 arg3, f32 arg4,
                          f32 arg5, f32 arg6, f32 arg7);
 
 /*

@@ -223,7 +223,7 @@ typedef struct {
     /* 0x40 */ u8 ownerId;
     /* 0x41 */ u8 unk41;
     /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ struct17 pos;
+    /* 0x44 */ Vec3f pos;
     /* 0x50 */ s32 unk50;
     /* 0x54 */ s16 fadeStart; // alpha fades once lifetime drops below this
     /* 0x56 */ s16 fadeRate;
@@ -234,7 +234,7 @@ typedef struct {
     /* 0x00 */ u8 header[0x10];
     /* 0x10 */ EffectParams params;
     /* 0x68 */ u8 pad68[0x7C - 0x68];
-    /* 0x7C */ f32 mtx[2][4][4]; // per frame
+    /* 0x7C */ MtxF mtx[2]; // per frame
 } ModelEffect;
 
 typedef struct {
@@ -284,7 +284,7 @@ void func_151D6BFC(Actor *owner, u8 arg1, s32 arg2) {
     params.owner = owner;
     params.ownerId = owner->unique_id;
     params.unk41 = 1;
-    params.pos = *(struct17 *)&D_800A5480; // variables.h declares D_800A5480 as f32; it is a struct17
+    params.pos = D_800A5480; // variables.h declares D_800A5480 as f32; it is a struct17
     params.fadeStart = 8;
     params.fadeRate = 0x1F;
     func_15157010(&params, 0, 1.0f, 0, 0, 0, arg1, arg2);

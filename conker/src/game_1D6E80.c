@@ -547,7 +547,7 @@ typedef struct {
 void *func_151303BC(ParticleDesc *desc, u8 arg1, s32 payloadSize);
 
 /* Spawns a particle burst moving from `from` toward `to`, advanced by `t` frames. */
-void func_151AA6D8(vertex *from, vertex *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
+void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
     ParticleDesc burst;
     void *spawned;
     BurstPayload payload;
@@ -695,7 +695,7 @@ typedef struct {
     /* 0x02 */ s16 unk02;
     /* 0x04 */ s16 unk04;
     /* 0x06 */ s16 unk06;
-    /* 0x08 */ vertex unk08;
+    /* 0x08 */ Vec3f unk08;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -718,19 +718,19 @@ typedef struct {
 } Cfg_151AABC4;
 
 extern u8 D_800A8F70[];
-extern void func_15142314(struct255 *, u8, vertex *, Actor *);
+extern void func_15142314(struct255 *, u8, Vec3f *, Actor *);
 extern void func_1504715C(GroundHit *hit, Actor *actor);
-extern s32 func_1504697C(vertex *pos, s32 arg1, f32 minY, GroundHit *hit);
-extern void func_15153F18(Cfg_151AABC4 *, vertex *, GroundHit *, u8, s32);
+extern s32 func_1504697C(Vec3f *pos, s32 arg1, f32 minY, GroundHit *hit);
+extern void func_15153F18(Cfg_151AABC4 *, Vec3f *, GroundHit *, u8, s32);
 
 /* Finds point D_800A8F70[index] of the actor's unk1D4 (func_15142314) and spawns two effects on the ground below it. */
 void func_151AABC4(Actor *actor, u8 index) {
-    vertex pos;
+    Vec3f pos;
     GroundHit floor;
     f32 y;
-    vertex probe;
+    Vec3f probe;
     u8 color;
-    vertex hit;
+    Vec3f hit;
 
     if ((actor != NULL) && (actor->unk1D4 != NULL)) {
         color = func_151D8E20();

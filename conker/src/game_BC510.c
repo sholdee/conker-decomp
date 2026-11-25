@@ -6,7 +6,7 @@
 #undef func_150A7CB0
 #undef func_1502B7F0
 void func_1509093C(void);
-void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
+void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
 #define D_800D24C8 D_800D24C8_hdr
 #define D_800D2460 D_800D2460_hdr
 #define D_800D2890 D_800D2890_hdr
@@ -189,7 +189,7 @@ void func_1508F0D4(void) {
 
 /* Removes the top block and spawns a debris particle at its position. */
 void func_1508F7BC(void) {
-    f32 mtx[4][4];
+    MtxF mtx;
     f32 unused;
     struct256 *node;
 
@@ -405,7 +405,7 @@ Gfx *func_1508FD38(register Gfx *gfx) {
 }
 extern s16 D_8008FDCC;
 extern s16 D_8009DC90[][3];
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
 /* Draws the stacked blocks and the debris particles. With `fixed` set, instead draws D_800CC49A
  * blocks at full scale at a fixed spot near D_8009DCB4[3..5], after patching the block display
@@ -417,8 +417,8 @@ Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
     f32 y;
     f32 z;
     f32 scale;
-    f32 mtx[4][4];
-    f32 base[4][4];
+    MtxF mtx;
+    MtxF base;
     struct256 *node;
     Gfx *dl;
 

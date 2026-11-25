@@ -18,10 +18,10 @@ typedef struct {
  */
 typedef struct {
     /* 0x00 */ u8 header[0x10];
-    /* 0x10 */ vertex headPos;
-    /* 0x1C */ vertex headVel;
-    /* 0x28 */ vertex tailPos;
-    /* 0x34 */ vertex tailVel;
+    /* 0x10 */ Vec3f headPos;
+    /* 0x1C */ Vec3f headVel;
+    /* 0x28 */ Vec3f tailPos;
+    /* 0x34 */ Vec3f tailVel;
     /* 0x40 */ u8 flags;            // 1: lifetime counts down, 2: cull front, 4: cull back, 8: fades out
     /* 0x42 */ s16 lifetime;
     /* 0x44 */ u16 renderMode;      // low byte: D_800A4AC8 render mode, high byte: func_1513F4E4 combiner
@@ -36,8 +36,8 @@ typedef struct {
 
 /* Spawn parameters for a streak particle. */
 typedef struct {
-    /* 0x00 */ vertex pos;
-    /* 0x0C */ vertex dir;
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ Vec3f dir;
     /* 0x18 */ f32 headSpeed;
     /* 0x1C */ f32 tailSpeed;
     /* 0x20 */ Color8 headColor;
@@ -56,7 +56,7 @@ StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, 
     StreakParticle *newParticle;
     StreakParticle *particle;
     s32 id;
-    vertex pos;
+    Vec3f pos;
 
     switch (kind) {
         case 0:
@@ -172,10 +172,10 @@ f32 sqrtf(f32);
 /* Draws a streak particle for one view as a single triangle facing that view's eye. */
 Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
     StreakParticle *p;
-    vertex axis;
-    vertex toEye;
-    vertex side;
-    vertex *eye;
+    Vec3f axis;
+    Vec3f toEye;
+    Vec3f side;
+    Vec3f *eye;
     f32 lengthSquared;
     u8 needSync;
     s16 cullFlags;
@@ -249,7 +249,7 @@ Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
 typedef struct {
     /* 0x00 */ s16 countBase;
     /* 0x02 */ s16 countRange;
-    /* 0x04 */ vertex pos;
+    /* 0x04 */ Vec3f pos;
     /* 0x10 */ s16 yawBase;
     /* 0x12 */ s16 pitchBase;
     /* 0x14 */ s16 yawRange;
@@ -276,7 +276,7 @@ typedef struct {
 
 /* A streak burst plus one particle at the same point (func_151568F8). */
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 countBase;
     /* 0x0E */ s16 countRange;
     /* 0x10 */ s16 yawBase;

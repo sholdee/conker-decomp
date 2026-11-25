@@ -120,7 +120,7 @@ typedef struct {
 } Obj151BA084;
 
 extern u8 D_800C3E90;
-void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
+void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 
 /*
  * Per-frame update of an effect that follows its owner's model: builds the effect's matrix from the
@@ -131,9 +131,9 @@ s32 func_151BA084(Obj151BA084 *effect, s16 viewport) {
     EffectOwnerRef *ref;
     Actor *owner;
     u8 *model;
-    f32 modelMtx[4][4];
+    MtxF modelMtx;
     Actor *player;
-    f32 viewMtx[4][4];
+    MtxF viewMtx;
     s32 i;
     f32 originS;
     f32 origin[3];
@@ -257,7 +257,7 @@ typedef struct {
     /* 0x06 */ s16 unk6;
     /* 0x08 */ s32 unk8;
     /* 0x0C */ s32 unkC;
-    /* 0x10 */ vertex pos;
+    /* 0x10 */ Vec3f pos;
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24;
@@ -280,11 +280,11 @@ typedef struct ParticleSpawn80 {
     /* 0x04 */ f32 elasticity;
     /* 0x08 */ f32 sizeXZ;
     /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
+    /* 0x10 */ Vec3f rot;
+    /* 0x1C */ Vec3f scale;
+    /* 0x28 */ Vec3f pos;
+    /* 0x34 */ Vec3f vel;
+    /* 0x40 */ Vec3f rotVel;
     /* 0x4C */ f32 gravity;
     /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;
@@ -314,14 +314,14 @@ typedef struct ParticleSpawn80 {
     /* 0x7C */ u8 pad7C[0x4];
 } ParticleSpawn80;
 
-extern vertex D_800AA590, D_800AA59C, D_800AA5A8, D_800AA5B4[], D_800AA5CC[], D_800AA5FC[];
+extern Vec3f D_800AA590, D_800AA59C, D_800AA5A8, D_800AA5B4[], D_800AA5CC[], D_800AA5FC[];
 extern f32 D_800AA62C[];
-extern vertex D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[], D_800AA6D8[];
+extern Vec3f D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[], D_800AA6D8[];
 extern f32 D_800AA708[];
 void func_1514FCE8(Desc1514FCE8 *, u8, s32);
 extern void func_1503F404(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 extern void func_1513264C(ParticleSpawn80 *, s32, s32, FloorInfo *, s32, u8, s32);
-extern void func_15143134(vertex *in, vertex *out, Mtx *mtx);
+extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 
 /*
  * Spawns a burst effect at `obj` plus up to twelve particles launched along fixed paths in the space of
@@ -330,7 +330,7 @@ extern void func_15143134(vertex *in, vertex *out, Mtx *mtx);
 void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     Desc1514FCE8 burst;
     FloorInfo floor;
-    vertex objPos;
+    Vec3f objPos;
     ParticleSpawn80 part;
     f32 outA2, outA1, outA0, outB2, outB1, outB0;
     Mtx *mtx;
@@ -667,13 +667,13 @@ end:
 
 /* Effect descriptor read by func_1514FBFC. */
 typedef struct {
-    vertex dir;      /* 0x00 */
+    Vec3f dir;      /* 0x00 */
     Surface surf;     /* 0x0C */
     u8 pad1E[2];
     f32 unk20;
     s32 unk24;
     s32 unk28;
-    vertex pos;      /* 0x2C */
+    Vec3f pos;      /* 0x2C */
     f32 unk38;
     f32 unk3C;
     f32 unk40;
@@ -699,8 +699,8 @@ typedef struct {
 typedef struct {
     s32 unk0;
     s32 unk4;
-    vertex pos;      /* 0x08 */
-    vertex vel;      /* 0x14 */
+    Vec3f pos;      /* 0x08 */
+    Vec3f vel;      /* 0x14 */
     Surface surf;     /* 0x20 */
     u8 pad32[2];
     f32 unk34;
@@ -723,28 +723,28 @@ extern F32x9 D_800AA73C;
 void func_15055A2C(s32, f32, f32, f32, s32);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, Surface *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 s32 func_15145C90(s32 hitInfo);
-s32 func_15144E80(Surface *, vertex *, vertex *, vertex *);
+s32 func_15144E80(Surface *, Vec3f *, Vec3f *, Vec3f *);
 void func_1514FBFC(Desc1514FBFC *, u8, s32);
 void func_15151D6C(Desc15151D6C *, s32 *, f32 *, s32, u8, s32);
-void func_151C04F8(vertex *, u8, s32);
-void func_151C05A4(vertex *, u8, s32);
-void func_151C05F0(vertex *, u8, s32);
-void func_151C0644(vertex *, u8, s32);
-void func_151BBEE4(vertex *pos, u8 arg1, s32 arg2);
-void func_151BBFBC(Surface *surf, vertex *pos, s32 arg2, s32 arg3);
+void func_151C04F8(Vec3f *, u8, s32);
+void func_151C05A4(Vec3f *, u8, s32);
+void func_151C05F0(Vec3f *, u8, s32);
+void func_151C0644(Vec3f *, u8, s32);
+void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2);
+void func_151BBFBC(Surface *surf, Vec3f *pos, s32 arg2, s32 arg3);
 
 /*
  * Impact effect for a shot from `from` towards `to`: effects at the origin, then a ray cast along the
  * shot and, where it hits a surface, impact effects there.
  */
-void func_151BB61C(Actor *obj, vertex *from, vertex *to, u8 arg3, s32 arg4) {
+void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
     Surface surf;
-    vertex hit;
-    vertex delta;
+    Vec3f hit;
+    Vec3f delta;
     s32 hitInfo;
-    vertex edgeA;
-    vertex edgeB;
-    vertex normal;
+    Vec3f edgeA;
+    Vec3f edgeB;
+    Vec3f normal;
     Desc1514FBFC fx;
 
     if (obj != NULL) {
@@ -825,7 +825,7 @@ void func_151BB61C(Actor *obj, vertex *from, vertex *to, u8 arg3, s32 arg4) {
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ vertex pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -841,24 +841,24 @@ typedef struct {
     /* 0x38 */ f32 unk38;
 } Desc15152190;
 
-void func_15152190(Desc15152190 *, vertex *, vertex *, s32, f32, s32, s32, s32);
-s32 func_15046C80(vertex *, u16, f32, FloorInfo *);
-extern vertex D_8008FBA0;
-extern vertex D_8008FBAC;
+void func_15152190(Desc15152190 *, Vec3f *, Vec3f *, s32, f32, s32, s32, s32);
+s32 func_15046C80(Vec3f *, u16, f32, FloorInfo *);
+extern Vec3f D_8008FBA0;
+extern Vec3f D_8008FBAC;
 
 /*
  * Impact effect halfway between `a` and `b`: a burst there, a ground impact on the floor below it,
  * and a shower of debris.
  */
 void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
-    vertex center;
+    Vec3f center;
     Desc1514FCE8 burst;
     FloorInfo floor;
-    vertex probe;
-    vertex hit;
-    vertex edgeA;
-    vertex edgeB;
-    vertex normal;
+    Vec3f probe;
+    Vec3f hit;
+    Vec3f edgeA;
+    Vec3f edgeB;
+    Vec3f normal;
 
     if (obj != NULL) {
         center.x = (b[0] + a[0]) * 0.5f;
@@ -915,8 +915,8 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         }
         {
             Desc15152190 debris;
-            vertex first = D_8008FBA0;
-            vertex second = D_8008FBAC;
+            Vec3f first = D_8008FBA0;
+            Vec3f second = D_8008FBAC;
 
             debris.unk0 = 4;
             debris.unk4 = 8;
@@ -940,7 +940,7 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
 }
 
 /* Spawns a short-lived effect at `pos` with a random size and lifetime. */
-void func_151BBEE4(vertex *pos, u8 arg1, s32 arg2) {
+void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
     Header header;
     Header2 header2;
 
@@ -956,10 +956,10 @@ void func_151BBEE4(vertex *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
-void func_150E7FEC(f32, s32, Surface *, vertex *, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_150E7FEC(f32, s32, Surface *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a randomised func_150E7FEC effect on surface `surf` at `pos`. */
-void func_151BBFBC(Surface *surf, vertex *pos, s32 arg2, s32 arg3) {
+void func_151BBFBC(Surface *surf, Vec3f *pos, s32 arg2, s32 arg3) {
     s32 pad; // matching: unused stack slot
     u32 rnd1;
     f32 rnd0;
@@ -1012,7 +1012,7 @@ typedef struct {
 } Fx15163414;
 
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 unkC;
     /* 0x0E */ s16 unkE;
     /* 0x10 */ s32 unk10;
@@ -1026,7 +1026,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
-    /* 0x08 */ vertex pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;

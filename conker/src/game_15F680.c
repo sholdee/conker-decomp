@@ -60,11 +60,11 @@ typedef struct Particle {
     /* 0x014 */ f32 elasticity;
     /* 0x018 */ f32 sizeXZ;
     /* 0x01C */ f32 sizeY;
-    /* 0x020 */ vertex rot;
-    /* 0x02C */ vertex scale;
-    /* 0x038 */ vertex pos;
-    /* 0x044 */ vertex vel;
-    /* 0x050 */ vertex rotVel;
+    /* 0x020 */ Vec3f rot;
+    /* 0x02C */ Vec3f scale;
+    /* 0x038 */ Vec3f pos;
+    /* 0x044 */ Vec3f vel;
+    /* 0x050 */ Vec3f rotVel;
     /* 0x05C */ f32 gravity;
     /* 0x060 */ u32 flags;
     /* 0x064 */ s16 lifetime;
@@ -93,7 +93,7 @@ typedef struct Particle {
     /* 0x08C */ struct ParticleNode *node;
     /* 0x090 */ Mtx mtx[2];
     /* 0x110 */ ParticleFloor floor;
-    /* 0x134 */ vertex squashOrigin;
+    /* 0x134 */ Vec3f squashOrigin;
     /* 0x140 */ f32 speed;
     /* 0x144 */ f32 invSpeed;
     /* 0x148 */ u8 hitFlags;
@@ -114,7 +114,7 @@ typedef struct Particle {
 typedef struct {
     /* 0x000 */ s32 type;
     /* 0x004 */ u8 pad4[0x10];
-    /* 0x014 */ vertex pos;
+    /* 0x014 */ Vec3f pos;
     /* 0x020 */ u8 pad20[0x8];
     /* 0x028 */ f32 unk28;
     /* 0x02C */ u8 pad2C[0xB8];
@@ -504,13 +504,13 @@ Gfx *func_15132B80(Gfx *gfx, Particle *arg1, s16 arg2) {
 /* Move a physics particle (gravity, velocity, spin) and collide it with the floor and walls, recording
  * hits in hitFlags and calling the hit handlers. Returns 0 if a handler ended the update. */
 s32 func_15132DDC(Particle *particle) {
-    vertex prev;
-    vertex test;
+    Vec3f prev;
+    Vec3f test;
     CollisionProbe probe;
     f32 speed;
 
     if (particle->flags & 7) {
-        memcpy(&prev, &particle->pos, sizeof(vertex));
+        memcpy(&prev, &particle->pos, sizeof(Vec3f));
     }
 
     if (particle->flags & 8) {
@@ -555,7 +555,7 @@ s32 func_15132DDC(Particle *particle) {
                 }
 
                 if (particle->flags & 0x10) {
-                    memcpy(&particle->squashOrigin, &particle->pos, sizeof(vertex));
+                    memcpy(&particle->squashOrigin, &particle->pos, sizeof(Vec3f));
                 }
             }
 
@@ -611,7 +611,7 @@ s32 func_15132DDC(Particle *particle) {
                 }
 
                 if (particle->flags & 0x10) {
-                    memcpy(&particle->squashOrigin, &particle->pos, sizeof(vertex));
+                    memcpy(&particle->squashOrigin, &particle->pos, sizeof(Vec3f));
                 }
             }
         }
@@ -659,7 +659,7 @@ s32 func_151332DC(Particle *particle) {
             return 1;
         }
     } else {
-        memcpy(&particle->pos, &particle->squashOrigin, sizeof(vertex));
+        memcpy(&particle->pos, &particle->squashOrigin, sizeof(Vec3f));
         particle->squashPhase = 0;
         particle->hitFlags &= ~0x18;
     }
@@ -771,8 +771,8 @@ s32 func_151337C0(Particle *particle) {
  * unk20 record is flagged (bits 0x60 of byte 0x4F == 0x40). */
 s32 func_15133894(Particle *particle) {
     s8 result;
-    vertex prev;
-    vertex test;
+    Vec3f prev;
+    Vec3f test;
     u8 *unk20;
     s32 skip;
 
@@ -832,7 +832,7 @@ s32 func_15133A50(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight) {
 s32 func_15133A94(Mtx *mtx, Particle *particle) {
     Actor *owner;
     f32 (*ownerMtxs)[4][4];
-    f32 mf[4][4];
+    MtxF mf;
     s32 pad; // matching: unused stack slot
 
     owner = particle->owner;

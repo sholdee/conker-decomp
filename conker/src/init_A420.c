@@ -115,8 +115,8 @@ s32 func_1000A750(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle, s32 x, s32 
     s16 soundX;
     s16 soundY;
     s16 soundZ;
-    struct17 segment;
-    struct17 offset;
+    Vec3f segment;
+    Vec3f offset;
     f32 lengthSq;
     f32 dot;
 
@@ -150,17 +150,17 @@ s32 func_1000A750(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle, s32 x, s32 
         if (best >= count - 1 || beforeBestDist < afterBestDist) {
             best--;
         }
-        segment.unk0 = PATH_POINTS(path)[best + 1].x - PATH_POINTS(path)[best].x;
-        segment.unk4 = PATH_POINTS(path)[best + 1].y - PATH_POINTS(path)[best].y;
-        segment.unk8 = PATH_POINTS(path)[best + 1].z - PATH_POINTS(path)[best].z;
-        offset.unk0 = x - PATH_POINTS(path)[best].x;
-        offset.unk4 = y - PATH_POINTS(path)[best].y;
-        offset.unk8 = z - PATH_POINTS(path)[best].z;
-        dot = func_150AD900(&segment.unk0, &offset.unk0);
+        segment.x = PATH_POINTS(path)[best + 1].x - PATH_POINTS(path)[best].x;
+        segment.y = PATH_POINTS(path)[best + 1].y - PATH_POINTS(path)[best].y;
+        segment.z = PATH_POINTS(path)[best + 1].z - PATH_POINTS(path)[best].z;
+        offset.x = x - PATH_POINTS(path)[best].x;
+        offset.y = y - PATH_POINTS(path)[best].y;
+        offset.z = z - PATH_POINTS(path)[best].z;
+        dot = func_150AD900(&segment.x, &offset.x);
         if (dot < 0.0f) {
             outside = TRUE;
         } else {
-            lengthSq = func_150AD930(&segment.unk0);
+            lengthSq = func_150AD930(&segment.x);
             lengthSq = lengthSq * lengthSq;
             if (lengthSq < dot) {
                 outside = TRUE;
@@ -168,29 +168,29 @@ s32 func_1000A750(s32 path, s32 panX, s32 panY, s32 panZ, f32 angle, s32 x, s32 
         }
         if (outside) {
             // the listener projects outside that segment: try the one on the other side
-            func_150AD900(&segment.unk0, &offset.unk0);
+            func_150AD900(&segment.x, &offset.x);
             if (beforeBestDist < afterBestDist) {
                 best++;
             } else {
                 best--;
             }
-            segment.unk0 = PATH_POINTS(path)[best + 1].x - PATH_POINTS(path)[best].x;
-            segment.unk4 = PATH_POINTS(path)[best + 1].y - PATH_POINTS(path)[best].y;
-            segment.unk8 = PATH_POINTS(path)[best + 1].z - PATH_POINTS(path)[best].z;
-            offset.unk0 = x - PATH_POINTS(path)[best].x;
-            offset.unk4 = y - PATH_POINTS(path)[best].y;
-            offset.unk8 = z - PATH_POINTS(path)[best].z;
-            dot = func_150AD900(&segment.unk0, &offset.unk0);
-            lengthSq = func_150AD930(&segment.unk0);
+            segment.x = PATH_POINTS(path)[best + 1].x - PATH_POINTS(path)[best].x;
+            segment.y = PATH_POINTS(path)[best + 1].y - PATH_POINTS(path)[best].y;
+            segment.z = PATH_POINTS(path)[best + 1].z - PATH_POINTS(path)[best].z;
+            offset.x = x - PATH_POINTS(path)[best].x;
+            offset.y = y - PATH_POINTS(path)[best].y;
+            offset.z = z - PATH_POINTS(path)[best].z;
+            dot = func_150AD900(&segment.x, &offset.x);
+            lengthSq = func_150AD930(&segment.x);
             lengthSq = lengthSq * lengthSq;
         }
         if (lengthSq != 0.0f) {
             if (dot < lengthSq) {
                 func_15049148(&segment, dot / lengthSq, &segment);
             }
-            soundX = PATH_POINTS(path)[best].x + segment.unk0;
-            soundY = PATH_POINTS(path)[best].y + segment.unk4;
-            soundZ = PATH_POINTS(path)[best].z + segment.unk8;
+            soundX = PATH_POINTS(path)[best].x + segment.x;
+            soundY = PATH_POINTS(path)[best].y + segment.y;
+            soundZ = PATH_POINTS(path)[best].z + segment.z;
         }
     }
     return func_1000A420(soundX - panX, soundY - panY, soundZ - panZ, angle, soundX - x, soundY - y, soundZ - z,

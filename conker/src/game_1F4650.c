@@ -6,7 +6,7 @@
 
 extern f32 sinf(f32);
 extern void func_1514373C(f32, f32, f32 *, f32 *);
-extern void func_15145974(vertex *, f32 *, f32 *);
+extern void func_15145974(Vec3f *, f32 *, f32 *);
 extern void func_1000FD38(void *, void *, s32);
 extern void *func_1515548C(void *, u8, s32, s32, s32, u8, s32);
 extern void *func_1515FF74(void *, s32, u8, s32);
@@ -66,7 +66,7 @@ typedef struct {
 } SightBeamParams;
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, void *, s32, f32);
-extern s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTriangle *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
+extern s32 func_151C756C(Vec3f *start, SightTriangle *startTri, Vec3f *end, SightTriangle *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
 
 /* Casts rays both ways from the beam's midpoint and spawns a sight beam between the two surfaces hit. */
 s32 func_151C71A0(SightBeamParams *beam) {
@@ -85,7 +85,7 @@ s32 func_151C71A0(SightBeamParams *beam) {
     f32 midZ;
     f32 midY;
     f32 midX;
-    f32 matrix[4][4];
+    MtxF matrix;
     s32 hit1;
     s32 hit2;
     SightTriangle triangle1;
@@ -259,18 +259,18 @@ typedef struct {
 } SightBeamObject;
 
 extern void func_1510F800(s32);
-extern s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
+extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 extern SightModelOwner *func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
-struct SightExtension *func_151C8FCC(SightBeamObject *owner, vertex *start, vertex *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
+struct SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
 s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
 
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
-s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTriangle *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
+s32 func_151C756C(Vec3f *start, SightTriangle *startTri, Vec3f *end, SightTriangle *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
     SightBeamObject *obj;
     ParticleDef spawn;
     SightBeamState state;
     s32 pos[3];
-    vertex ndir;
+    Vec3f ndir;
 
     func_1510F800(0);
     state.zone0 = (SightZone *)func_1510FD20(start->x, start->z);
@@ -303,7 +303,7 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
     state.speedT = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
     {
         // matching: a block-scope declaration gives IDO a scope boundary here
-        extern void func_151C9198(SightEmitter **, vertex *, SightTriangle *, vertex *, SightZone *, u8, u8, u8, s32);
+        extern void func_151C9198(SightEmitter **, Vec3f *, SightTriangle *, Vec3f *, SightZone *, u8, u8, u8, s32);
 
         spawn.scale.x = end->x - start->x;
         spawn.scale.y = end->y - start->y;
@@ -375,13 +375,13 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
     obj = func_1513D4B8(&spawn, &D_800A4AA0, 0x1A, 0, 0, 0x18, 0, 0xA0, arg16, arg17);
     if (obj != NULL) {
         SightBeamState *objState;
-        vertex dir;
+        Vec3f dir;
         f32 len;
         f32 inv;
-        vertex p0;
-        vertex p1;
-        vertex q0;
-        vertex q1;
+        Vec3f p0;
+        Vec3f p1;
+        Vec3f q0;
+        Vec3f q1;
 
         {
             // matching: a block-scope declaration gives IDO a scope boundary here
@@ -417,17 +417,17 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
     return (s32)obj;
 }
 
-extern vertex *func_15144B34(s32);
+extern Vec3f *func_15144B34(s32);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-void func_15145548(vertex *arg0, vertex *arg1, vertex *arg2, vertex *arg3, f32 *arg4);
+void func_15145548(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4);
 
 /* Builds the beam's quad for one view: a strip of the beam's width facing the camera. */
 void *func_151C7E98(SightBeamObject *obj, s16 view) {
     Vtx *vertices;
     void *result;
-    vertex *camera;
-    vertex dir;
-    vertex closest;
+    Vec3f *camera;
+    Vec3f dir;
+    Vec3f closest;
     f32 dx, dy, dz;
     f32 nx, ny, nz;
     f32 lengthSquared;
@@ -643,23 +643,23 @@ s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg
 }
 
 extern void func_1507C3E0(void *, s16 *, s16 *, s16 *);
-extern s32 func_151451F0(vertex *, vertex *, vertex *, f32, f32, vertex *, vertex *, f32 *, f32 *);
+extern s32 func_151451F0(Vec3f *, Vec3f *, Vec3f *, f32, f32, Vec3f *, Vec3f *, f32 *, f32 *);
 
 /* Returns whether the beam segment passes through the actor's bounding sphere. */
 s32 func_151C87E0(SightActor *actor, SightBeamObject *obj) {
     s32 kind;
     f32 radius;
     f32 scale;
-    vertex center;
+    Vec3f center;
     f32 halfHeight;
-    vertex start;
+    Vec3f start;
     f32 endX;
     f32 endY;
     f32 endZ;
-    vertex dir;
+    Vec3f dir;
     f32 length;
-    vertex nearHit;
-    vertex farHit;
+    Vec3f nearHit;
+    Vec3f farHit;
     f32 nearT;
     f32 farT;
     s16 height;
@@ -704,12 +704,12 @@ s32 func_151C87E0(SightActor *actor, SightBeamObject *obj) {
 
 /* Parameters for func_1514FBFC (a burst of debris off a surface triangle). */
 typedef struct {
-    vertex dir;
+    Vec3f dir;
     SightTriangle triangle;
     f32 unk20;
     s32 unk24;
     s32 unk28;
-    vertex pos;
+    Vec3f pos;
     f32 unk38, unk3C, unk40, unk44, unk48, unk4C;
     s32 unk50, unk54;
     f32 unk58, unk5C, unk60, unk64;
@@ -843,7 +843,7 @@ typedef struct SightExtension {
 } SightExtension;
 
 /* Spawns a beam extension effect from `start` to `end`, owned by beam object `owner`. */
-SightExtension *func_151C8FCC(SightBeamObject *owner, vertex *start, vertex *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
+SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
     SightExtension *effect;
     SightExtensionParams params;
     ParticleDef desc;
@@ -899,11 +899,11 @@ typedef struct ParticleSpawn78 {
     /* 0x04 */ f32 elasticity;
     /* 0x08 */ f32 sizeXZ;
     /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
+    /* 0x10 */ Vec3f rot;
+    /* 0x1C */ Vec3f scale;
+    /* 0x28 */ Vec3f pos;
+    /* 0x34 */ Vec3f vel;
+    /* 0x40 */ Vec3f rotVel;
     /* 0x4C */ f32 gravity;
     /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;
@@ -931,15 +931,15 @@ typedef struct ParticleSpawn78 {
     /* 0x76 */ u8 pad76[2];
 } ParticleSpawn78;
 
-extern s32 func_15144E80(SightTriangle *, vertex *, vertex *, vertex *);
+extern s32 func_15144E80(SightTriangle *, Vec3f *, Vec3f *, Vec3f *);
 extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern void func_15133760(void *, void *);
 
 /* Spawns the three parts of a beam emitter on the surface triangle at `pos`. */
-void func_151C9198(SightEmitter **emitters, vertex *pos, SightTriangle *triangle, vertex *dir, SightZone *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8) {
-    vertex edge0;
-    vertex edge1;
-    vertex normal;
+void func_151C9198(SightEmitter **emitters, Vec3f *pos, SightTriangle *triangle, Vec3f *dir, SightZone *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8) {
+    Vec3f edge0;
+    Vec3f edge1;
+    Vec3f normal;
     s32 i;
     ParticleSpawn78 desc;
     void *unused; // matching: reserves a stack slot
@@ -1159,11 +1159,11 @@ void func_151C9AC0(SightActor *actor, u8 arg1, s32 arg2);
 
 /* Explosion at an actor's position: ground scorch, smoke, debris and sound. */
 void func_151C9740(SightActor *actor, u8 arg1, s32 arg2) {
-    vertex origin;
-    vertex impact;
+    Vec3f origin;
+    Vec3f impact;
     u8 hit;
     u8 airborne;
-    vertex query;
+    Vec3f query;
     SightCollision collision;
 
     if (actor == NULL) {

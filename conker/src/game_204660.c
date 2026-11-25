@@ -16,7 +16,7 @@ typedef struct {
     /* 0x04 */ u8 anchorType;       /* index into D_8008FCA0 (update) and D_8008FCA4 (message handler) */
     /* 0x05 */ u8 flags;            /* bit 0: pos is valid this frame */
     /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ vertex pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ f32 maxStep; /* moving further than this in one frame detaches the trail */
 } TrailAnchor;
 
@@ -43,11 +43,11 @@ typedef struct {
 extern s32 (*D_8008FCA0[])(TrailEmitter *);
 extern void (*D_8008FCA4[])(TrailEmitter *, TrailBoneLink *, u8);
 extern s32 (*D_8008FCA8[])(TrailEmitter *);
-extern struct17 D_800AB280[];
+extern Vec3f D_800AB280[];
 extern u8 D_800AB2D4[];
 
-extern f32 func_15143E64(struct17 *);
-void func_15143134(struct17 *offset, f32 *out, Mtx *mtx);
+extern f32 func_15143E64(Vec3f *);
+void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx);
 void func_151D77C8(TrailEmitter *emitter);
 void func_151D7830(TrailEmitter *emitter);
 
@@ -77,9 +77,9 @@ struct260 *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 extr
  */
 void func_151D7264(TrailEmitter *emitter) {
     TrailAnchor *anchor;
-    vertex prevPos;
+    Vec3f prevPos;
     u8 wasValid;
-    struct17 step;
+    Vec3f step;
 
     anchor = &emitter->anchor;
     prevPos = anchor->pos;
@@ -91,9 +91,9 @@ void func_151D7264(TrailEmitter *emitter) {
     }
     if (anchor->flags & 1) {
         if (wasValid) {
-            step.unk0 = anchor->pos.x - prevPos.x;
-            step.unk4 = anchor->pos.y - prevPos.y;
-            step.unk8 = anchor->pos.z - prevPos.z;
+            step.x = anchor->pos.x - prevPos.x;
+            step.y = anchor->pos.y - prevPos.y;
+            step.z = anchor->pos.z - prevPos.z;
             if (func_15143E64(&step) < anchor->maxStep) {
                 if (anchor->trail == NULL) {
                     func_151D7830(emitter);
@@ -247,7 +247,7 @@ s32 func_151D779C(TrailEmitter *emitter) {
 
 /* A trail point. */
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 velY;
     /* 0x10 */ f32 length; /* distance to the next newer point */
     /* 0x14 */ u8 alpha;
@@ -257,7 +257,7 @@ typedef struct {
 /* Trail data at 0x98. */
 typedef struct {
     /* 0x00 */ TrailEmitter *emitter; /* NULL once detached */
-    /* 0x04 */ vertex lastPos;        /* where the last point was emitted */
+    /* 0x04 */ Vec3f lastPos;        /* where the last point was emitted */
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 spawnAccum;
     /* 0x18 */ f32 texPhase;
@@ -265,7 +265,7 @@ typedef struct {
 
 /* The header func_15147A80 copies to 0x10 of the new trail. */
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 timer;
     /* 0x0E */ u16 flags;
     /* 0x10 */ s32 unk10;
@@ -277,7 +277,7 @@ typedef struct {
 
 typedef struct Trail {
     /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ vertex pos; /* head of the trail */
+    /* 0x10 */ Vec3f pos; /* head of the trail */
     /* 0x1C */ s16 timer;  /* while fading: alpha is timer * 12 */
     /* 0x1E */ u16 flags;  /* bit 1: the head follows the emitter; bit 3: fading */
     /* 0x20 */ u8 pad20[5];
@@ -289,7 +289,7 @@ typedef struct Trail {
     /* 0x2F */ u8 pad2F;
     /* 0x30 */ u8 unk30;
     /* 0x31 */ u8 pad31[0x23];
-    /* 0x54 */ vertex tailPos;
+    /* 0x54 */ Vec3f tailPos;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ TrailPoint *points;
@@ -346,7 +346,7 @@ void func_151D7830(TrailEmitter *emitter) {
 
 extern f32 D_800BE9A4;
 
-void func_151D8718(vertex *pos, f32 *velY, f32 dt);
+void func_151D8718(Vec3f *pos, f32 *velY, f32 dt);
 
 /* Detached trail update: the points keep falling and the tail position follows the oldest point. */
 s32 func_151D792C(Trail *trail) {
@@ -384,7 +384,7 @@ tail:
 s32 func_151D7A38(Trail *trail) {
     TrailData *data;
     TrailPoint *points;
-    vertex anchorPos;
+    Vec3f anchorPos;
     TrailEmitter *emitter;
     TrailPoint *point;
     f32 invCount;
@@ -393,7 +393,7 @@ s32 func_151D7A38(Trail *trail) {
     f32 diffX;
     f32 diffY;
     f32 diffZ;
-    vertex pos;
+    Vec3f pos;
     f32 stepX;
     f32 stepY;
     f32 stepZ;
@@ -465,8 +465,8 @@ s32 func_151D7CD0(Trail *trail) {
     TrailPoint *points;
     f32 totalLength;
     TrailPoint *point;
-    vertex *newerPos;
-    struct17 delta;
+    Vec3f *newerPos;
+    Vec3f delta;
     s32 i;
     f32 cut;
     f32 pad; // matching: an unused local IDO still gives a stack slot
@@ -503,9 +503,9 @@ s32 func_151D7CD0(Trail *trail) {
                 i = trail->capacity - 1;
             }
             point = &points[i];
-            delta.unk0 = point->pos.x - newerPos->x;
-            delta.unk4 = point->pos.y - newerPos->y;
-            delta.unk8 = point->pos.z - newerPos->z;
+            delta.x = point->pos.x - newerPos->x;
+            delta.y = point->pos.y - newerPos->y;
+            delta.z = point->pos.z - newerPos->z;
             length = func_15143E64(&delta);
             totalLength += length;
             point->length = length;
@@ -513,9 +513,9 @@ s32 func_151D7CD0(Trail *trail) {
                 if (point->length != 0.0f) {
                     invLength = 1.0f / point->length;
                     cut = (totalLength - 80.0f) * invLength;
-                    point->pos.x -= delta.unk0 * cut;
-                    point->pos.y -= delta.unk4 * cut;
-                    point->pos.z -= delta.unk8 * cut;
+                    point->pos.x -= delta.x * cut;
+                    point->pos.y -= delta.y * cut;
+                    point->pos.z -= delta.z * cut;
                     point->length = point->length * (1.0f - cut);
                 }
                 totalLength = 80.0f;
@@ -596,8 +596,8 @@ extern u8 D_80090CD4[];
  */
 Gfx *func_151D80C4(Trail *trail, Gfx *gfx, s16 view) {
     TrailData *data;
-    vertex pos;
-    vertex newerPos;
+    Vec3f pos;
+    Vec3f newerPos;
     s32 i;
     s32 newest;
     TrailPoint *points;
@@ -732,7 +732,7 @@ Gfx *func_151D80C4(Trail *trail, Gfx *gfx, s16 view) {
 }
 
 /* Lets a point fall for dt: integrates velY under gravity and moves pos->y. */
-void func_151D8718(vertex *pos, f32 *velY, f32 dt) {
+void func_151D8718(Vec3f *pos, f32 *velY, f32 dt) {
     f32 v = *velY;
 
     *velY += 0.2340000123f * dt;

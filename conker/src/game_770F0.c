@@ -22,7 +22,7 @@ extern f32 sqrtf(f32);
 typedef struct { s32 v[3]; } Nxt3;
 extern Nxt3 D_80085FF0;
 
-void func_15049CB8(f32 m[4][4], f32 *q) {
+void func_15049CB8(MtxF m, f32 *q) {
     f32 tr;
     f32 s;
     s32 i;

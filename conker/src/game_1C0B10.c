@@ -4,12 +4,6 @@
 #include "libc/math.h"
 
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
-typedef struct {
     u8 red;
     u8 green;
     u8 blue;

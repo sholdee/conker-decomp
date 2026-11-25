@@ -11,7 +11,7 @@ void func_15103690(s32 arg0) {
 typedef struct {
     /* 0x00 */ s32 count;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ vertex origin;
+    /* 0x08 */ Vec3f origin;
     /* 0x14 */ s16 yaw;
     /* 0x16 */ s16 yawRange;
     /* 0x18 */ s16 pitch;
@@ -31,7 +31,7 @@ void func_15152190(DebrisBurst *, s32 *variantIds, f32 *variantScales, s32 varia
                    s32);
 
 /* Throws a burst of debris (one variant, id 226) from origin. */
-void func_151036B4(vertex *origin, u8 arg1, s32 arg2) {
+void func_151036B4(Vec3f *origin, u8 arg1, s32 arg2) {
     DebrisBurst debris;
     s32 variantIds[] = { 226 };
     f32 variantScales[] = { 1.0f };

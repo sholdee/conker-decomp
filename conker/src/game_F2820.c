@@ -2,12 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct Vec3f {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
 /* Spawn parameters; func_150C5370 copies them into the object at +0x18. */
 typedef struct StripDesc {
     /* 0x00 */ Vec3f p0;

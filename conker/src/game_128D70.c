@@ -139,12 +139,12 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
     f32 *dstPoints[3];
     s32 matrix;
     f32 localPoint[3];
-    struct17 normal;
+    Vec3f normal;
     f32 t;
     f32 dx;
     f32 dy;
     f32 dz;
-    vertex *linePoint;
+    Vec3f *linePoint;
     u8 cameraMask;
     s8 variant;
     SparkArg_150FB8C0 spark;
@@ -206,7 +206,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
     func_15145EA4(srcPoints, dstPoints, matrix, useTarget ? 3 : 2);
     if (useTarget) {
         // matching: this block-scope redeclaration of the callee is needed; removing it mismatches
-        extern void func_151450B4(struct17 *, struct17 *, struct17 *);
+        extern void func_151450B4(Vec3f *, Vec3f *, Vec3f *);
 
         linePoint = &target->unk31C->aimEye;
         edgeA[0] -= origin[0];
@@ -215,12 +215,12 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
         edgeB[0] -= origin[0];
         edgeB[1] -= origin[1];
         edgeB[2] -= origin[2];
-        func_151450B4((struct17 *)edgeA, (struct17 *)edgeB, &normal);
+        func_151450B4((Vec3f *)edgeA, (Vec3f *)edgeB, &normal);
         dx = origin[0] - linePoint->x;
         dy = origin[1] - linePoint->y;
         dz = origin[2] - linePoint->z;
-        t = ((normal.unk0 * dx) + (normal.unk4 * dy) + (normal.unk8 * dz)) /
-            ((normal.unk0 * target->unk31C->aimDir.x) + (normal.unk4 * target->unk31C->aimDir.y) + (normal.unk8 * target->unk31C->aimDir.z));
+        t = ((normal.x * dx) + (normal.y * dy) + (normal.z * dz)) /
+            ((normal.x * target->unk31C->aimDir.x) + (normal.y * target->unk31C->aimDir.y) + (normal.z * target->unk31C->aimDir.z));
         hitPoint[0] = linePoint->x + (t * target->unk31C->aimDir.x);
         hitPoint[1] = linePoint->y + (t * target->unk31C->aimDir.y);
         hitPoint[2] = linePoint->z + (t * target->unk31C->aimDir.z);

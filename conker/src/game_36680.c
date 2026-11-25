@@ -835,13 +835,7 @@ s32 func_1500B1F4(s16 count, u8 kind, s32 slot, s32 subtype, s32 index, s16 **tr
 }
 
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Game36680Vec3f;
-
-typedef struct {
-    Game36680Vec3f points[3];
+    Vec3f points[3];
 } Game36680Triangle;
 
 extern void func_15049350(Game36680Triangle);

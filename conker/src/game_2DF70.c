@@ -24,12 +24,6 @@ typedef struct MeshTri {
     Vtx *verts[3];
 } MeshTri;
 
-typedef struct Vec3f {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
 // A triangle's vertex positions, passed by value to the box test func_15049260.
 typedef struct Tri3f {
     Vec3f pts[3];

@@ -2,12 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
 /* Orientation, scale and simple ballistic motion of a tumbling piece. */
 typedef struct {
     /* 0x00 */ Vec3f angle;
@@ -173,7 +167,7 @@ s32 func_1518A5F4(EffectActor *actor) {
 /* Draw callback: builds the actor's model matrix from its angle, scale and position. */
 s32 func_1518A914(Mtx *mtx, EffectActor *actor) {
     EffectMotion *motion = &actor->motion;
-    f32 mf[4][4];
+    MtxF mf;
 
     func_150A8050(mf, motion->angle.x, motion->angle.y, motion->angle.z);
     mf[3][0] = actor->position.x;

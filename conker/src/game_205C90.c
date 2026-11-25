@@ -17,7 +17,7 @@ typedef struct {
 
 /* Distance falloff data of a RumbleFalloffObj. */
 typedef struct {
-    /* 0x00 */ struct17 pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 innerRadius;  /* full strength inside this distance */
     /* 0x10 */ f32 falloffRange; /* zero strength beyond innerRadius + falloffRange */
     /* 0x14 */ f32 falloffScale; /* strength lost per unit beyond innerRadius */
@@ -38,8 +38,8 @@ typedef struct {
 } RumbleFalloffObj;
 
 extern u8 D_80084060[]; /* controller port of each player, >= 4: none */
-extern struct17 *func_15144B34(s32 view);
-extern f32 func_15143E64(struct17 *);
+extern Vec3f *func_15144B34(s32 view);
+extern f32 func_15143E64(Vec3f *);
 extern void (*D_8008FCC0[])(RumbleObj *);
 void func_1501C010(u8 player, u8 strength);
 void func_1501C17C(u8 player);
@@ -181,14 +181,14 @@ void func_151D8BE0(RumbleFalloffObj *obj) {
 /* Sets the rumble strength from the distance between `falloff->pos` and the view's camera. */
 void func_151D8C00(RumbleObj *obj, RumbleFalloff *falloff) {
     f32 scale;
-    struct17 delta;
-    struct17 *camera;
+    Vec3f delta;
+    Vec3f *camera;
     f32 dist;
 
     camera = func_15144B34(falloff->view);
-    delta.unk0 = falloff->pos.unk0 - camera->unk0;
-    delta.unk4 = falloff->pos.unk4 - camera->unk4;
-    delta.unk8 = falloff->pos.unk8 - camera->unk8;
+    delta.x = falloff->pos.x - camera->x;
+    delta.y = falloff->pos.y - camera->y;
+    delta.z = falloff->pos.z - camera->z;
 
     dist = func_15143E64(&delta);
     if (dist < falloff->innerRadius) {

@@ -3,10 +3,10 @@
 #include "variables.h"
 #include "effects.h"
 
-void func_150B5A3C(vertex *pos, u8 owner, s32 kind);
-void func_150B5E34(vertex *pos, u8 owner, s32 kind);
-void func_150B6000(vertex *pos, u8 owner, s32 kind);
-void func_150B60E0(Actor *obj, vertex *out);
+void func_150B5A3C(Vec3f *pos, u8 owner, s32 kind);
+void func_150B5E34(Vec3f *pos, u8 owner, s32 kind);
+void func_150B6000(Vec3f *pos, u8 owner, s32 kind);
+void func_150B60E0(Actor *obj, Vec3f *out);
 
 /* Effect instance whose per-type data (from 0x28) tracks a game object. */
 typedef struct ObjBurstEffect {
@@ -25,7 +25,7 @@ typedef struct ObjBurstEffect {
 typedef struct {
     /* 0x00 */ s32 unk00;
     /* 0x04 */ s32 unk04;
-    /* 0x08 */ vertex pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -99,8 +99,8 @@ GameCommand *func_150B58F0(GameCommand *cmd, s32 objIndex) {
 
 /** Randomly spawns particle bursts at the tracked object; ends the effect once that object is gone. */
 void func_150B5950(ObjBurstEffect *effect) {
-    vertex *posp;
-    vertex pos;
+    Vec3f *posp;
+    Vec3f pos;
     Actor *obj;
 
     obj = effect->obj;
@@ -126,7 +126,7 @@ void func_150B5950(ObjBurstEffect *effect) {
 }
 
 /** Spawns a func_15152B38 effect at pos, plus the func_150B5E34 and func_150B6000 particles. */
-void func_150B5A3C(vertex *pos, u8 owner, s32 kind) {
+void func_150B5A3C(Vec3f *pos, u8 owner, s32 kind) {
     EffectSpawn spawn;
 
     spawn.unk00 = 5;
@@ -188,7 +188,7 @@ void func_150B5A3C(vertex *pos, u8 owner, s32 kind) {
 }
 
 /** Larger variant of func_150B5A3C (different template values). */
-void func_150B5C38(vertex *pos, u8 owner, s32 kind) {
+void func_150B5C38(Vec3f *pos, u8 owner, s32 kind) {
     EffectSpawn spawn;
 
     spawn.unk00 = 13;
@@ -252,7 +252,7 @@ void func_150B5C38(vertex *pos, u8 owner, s32 kind) {
 extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /** Spawns one func_15130280 particle at pos with some randomized fields and flags. */
-void func_150B5E34(vertex *pos, u8 owner, s32 kind) {
+void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
     ParticleDesc spawn;
     s32 flag80;
     s32 flag40;
@@ -301,7 +301,7 @@ void func_150B5E34(vertex *pos, u8 owner, s32 kind) {
 extern s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /** Spawns a func_151602C0 effect at pos (as integer coordinates) with randomized parameters. */
-void func_150B6000(vertex *pos, u8 owner, s32 kind) {
+void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
     Header header;
     Header2 ipos;
 
@@ -317,11 +317,11 @@ void func_150B6000(vertex *pos, u8 owner, s32 kind) {
     func_151602C0(&header, &ipos, func_150ADA20() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
 }
 
-extern void func_15143134(vertex *in, vertex *out, void *mtx);
-extern vertex D_8009FC30;
+extern void func_15143134(Vec3f *in, Vec3f *out, void *mtx);
+extern Vec3f D_8009FC30;
 
 /** Transforms the fixed point D_8009FC30 by the matrix at obj->unk1D4 + 0x140 into out. */
-void func_150B60E0(Actor *obj, vertex *out) {
+void func_150B60E0(Actor *obj, Vec3f *out) {
     func_15143134(&D_8009FC30, out, (u8 *)obj->unk1D4 + 0x140);
 }
 
@@ -375,7 +375,7 @@ typedef struct BoltChainConfig {
 } BoltChainConfig; /* size 0x30 */
 
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-extern void func_15106F98(vertex *start, vertex *end, s32 depth, BoltChainConfig *config, f32 spread, s32 type, s32 owner, s32 kind);
+extern void func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, s32 type, s32 owner, s32 kind);
 
 /**
  * While the emitter is not in state 1, spawns bolts between random points on the rim of its
@@ -400,8 +400,8 @@ void func_150B6110(BoltRingEffect *effect) {
     data->spawnAccum += (0.15f + func_150ADA68() * 0.155f) * D_800BE9A4;
     if (data->spawnAccum > 1.0f) {
         BoltChainConfig config;
-        vertex start;
-        vertex end;
+        Vec3f start;
+        Vec3f end;
         f32 spread;
 
         config.widthBase = 35.0f;
@@ -451,7 +451,7 @@ void func_150B6450(struct102 *effect, s32 arg1, u8 msg) {
  * whose remaining fields are emitter state that the spawner fills in.
  */
 typedef struct {
-    /* 0x00 */ vertex baseVel;
+    /* 0x00 */ Vec3f baseVel;
     /* 0x0C */ f32 gravity;
     /* 0x10 */ u8 phaseJitter;
     /* 0x11 */ u8 pad11[3];
@@ -477,11 +477,11 @@ typedef struct {
     /* 0x3C */ f32 burstRate;
 } TrailParams; /* size 0x40 */
 
-extern void *func_150B3F5C(TrailParams *params, vertex *pos, s16 capacity);
-extern void func_15143794(s16 yaw, s16 pitch, f32 length, vertex *out);
+extern void *func_150B3F5C(TrailParams *params, Vec3f *pos, s16 capacity);
+extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 
 /* Per-variant trail settings used by func_150B648C. */
-extern vertex D_8009FC3C[];   /* emitter position (variants 1 and 2) */
+extern Vec3f D_8009FC3C[];   /* emitter position (variants 1 and 2) */
 extern f32 D_8009FC60[];      /* gravity */
 extern f32 D_8009FC6C[];      /* widthGrowth */
 extern f32 D_8009FC78[];      /* width */
@@ -491,7 +491,7 @@ extern s16 D_8009FC8E[][2];   /* capacity */
 /** Spawns trail variant 0, 1 or 2 (variant 0 at a position from func_151423D8). */
 void func_150B648C(u8 variant) {
     TrailParams params;
-    vertex pos;
+    Vec3f pos;
 
     if (variant == 0) {
         params.baseVel.x = func_151423D8(0xAA) * 10.0f;

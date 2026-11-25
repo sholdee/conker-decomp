@@ -4,9 +4,9 @@
 
 struct S151BEB20 {
     u8 pad0[0x54];
-    struct17 pos;
+    Vec3f pos;
     u8 pad60[0x7C - 0x60];
-    f32 mtx[2][4][4]; /* double-buffered, indexed by D_800BE9C0 */
+    MtxF mtx[2]; /* double-buffered, indexed by D_800BE9C0 */
     u8 padFC[0x120 - 0xFC];
     f32 rotY;
 };
@@ -18,9 +18,9 @@ s32 func_151BEB20(struct S151BEB20 *arg0) {
     func_150A8050(arg0->mtx[D_800BE9C0], 0.0f, arg0->rotY, 0.0f);
 
     scale = 0.9230000377f;
-    arg0->mtx[D_800BE9C0][3][0] = arg0->pos.unk0;
-    arg0->mtx[D_800BE9C0][3][1] = arg0->pos.unk4;
-    arg0->mtx[D_800BE9C0][3][2] = arg0->pos.unk8;
+    arg0->mtx[D_800BE9C0][3][0] = arg0->pos.x;
+    arg0->mtx[D_800BE9C0][3][1] = arg0->pos.y;
+    arg0->mtx[D_800BE9C0][3][2] = arg0->pos.z;
 
     arg0->mtx[D_800BE9C0][0][0] *= scale;
     arg0->mtx[D_800BE9C0][0][1] *= scale;
@@ -42,7 +42,7 @@ s32 func_151BEC94(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4) {
 
 typedef struct {
     /* 0x00 */ f32 unk0;
-    /* 0x04 */ struct17 pos;
+    /* 0x04 */ Vec3f pos;
     /* 0x10 */ u8 unk10;
 } S151BECB8Params;
 
@@ -56,7 +56,7 @@ typedef struct {
     /* 0x011 */ u8 pad11[0x37];
     /* 0x048 */ u8 unk48;
     /* 0x049 */ u8 pad49[0xB];
-    /* 0x054 */ struct17 unk54;
+    /* 0x054 */ Vec3f unk54;
     /* 0x060 */ s32 unk60;
     /* 0x064 */ u8 pad64[0x98];
     /* 0x0FC */ s32 unkFC;
@@ -67,10 +67,10 @@ typedef struct {
 } S151BECB8;
 
 extern void func_1515C1A0(Actor *, f32 *, f32 *, f32 *);
-extern f32 func_15143E64(struct17 *);
+extern f32 func_15143E64(Vec3f *);
 void func_151BF340(u8 arg0, s32 arg1);
-void func_151BF0C8(struct17 *arg0);
-void *func_151BEEE0(f32 arg0, struct17 *arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
+void func_151BF0C8(Vec3f *arg0);
+void *func_151BEEE0(f32 arg0, Vec3f *arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
 s32 func_151BEE94(Actor *arg0);
 
 /*
@@ -88,7 +88,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
         f32 radius;
         f32 height;
         f32 objPos[3];
-        struct17 diff;
+        Vec3f diff;
 
         obj = D_800CC2D0;
         do {
@@ -97,9 +97,9 @@ s32 func_151BECB8(S151BECB8 *arg0) {
 
                 params = &arg0->params;
                 func_1515C1A0(obj, objPos, &radius, &height);
-                diff.unk0 = objPos[0] - params->pos.unk0;
-                diff.unk4 = objPos[1] - params->pos.unk4;
-                diff.unk8 = objPos[2] - params->pos.unk8;
+                diff.x = objPos[0] - params->pos.x;
+                diff.y = objPos[1] - params->pos.y;
+                diff.z = objPos[2] - params->pos.z;
                 dist = func_15143E64(&diff);
                 if (dist - radius < range) {
                     s32 mode;

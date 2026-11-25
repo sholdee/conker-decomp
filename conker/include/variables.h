@@ -396,7 +396,7 @@ extern u64 D_800885B0;
 extern Actor *D_80088720;
 extern Actor *D_80088730;
 extern s32 D_80088750;
-extern vertex D_80088724;
+extern Vec3f D_80088724;
 extern u8  D_80088980;
 extern u8  D_80088B40;
 extern u8  D_80088B60;
@@ -654,8 +654,8 @@ extern f32 D_800A0288;
 extern f32 D_800A0290;
 extern f32 D_800A0310;
 extern f32 D_800A0314;
-extern f32 D_800A1B80;
-extern f32 D_800A1B8C;
+extern Vec3f D_800A1B80;
+extern Vec3f D_800A1B8C;
 extern f32 D_800A1B98;
 extern f32 D_800A1B9C;
 extern f32 D_800A1BA0;
@@ -768,7 +768,7 @@ extern f32 D_800AB4EC;
 extern f32 D_800AB4F0;
 extern f32 D_800AB4F4;
 
-extern f32 D_800A5480;
+extern Vec3f D_800A5480; // zero vector
 extern f32 D_800A548C[];
 
 // end of data D_800B0DBC
@@ -1093,7 +1093,7 @@ extern u8  D_800D2590;
 extern s32 D_800D24C0;
 extern s32 D_800D24C8;
 
-extern struct17 D_800D2890;
+extern Vec3f D_800D2890;
 
 extern u8  D_800D2C68;
 extern s32 D_800D2C28;
@@ -1144,10 +1144,10 @@ extern s32 D_800D99D0[8];
 extern struct134 *D_800D9A20;
 extern struct134 *D_800D9A24;
 extern s32 D_800D9A40;
-extern s32 D_800D9A50;
+extern Vec3f D_800D9A50;
 extern struct134 *D_800D9AA0[]; // length 3?
 extern u16 D_800D9AB0[4];
-extern struct17 D_800D9AC0[];
+extern Vec3f D_800D9AC0[];
 extern u8 D_800D9AF0;
 extern struct200 D_800D9AF8[];
 

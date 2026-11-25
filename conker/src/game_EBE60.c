@@ -13,17 +13,17 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } GroundHit; // size 0x24
 
-void func_15142314(struct255 *bones, s32 bone, vertex *out);
+void func_15142314(struct255 *bones, s32 bone, Vec3f *out);
 void func_1504715C(GroundHit *hit, Actor *actor);
-s32 func_15046C80(vertex *probe, s32 arg1, f32 bottom, GroundHit *hit);
-void func_15141F78(u8, GroundHit *, f32, u8, vertex *, u8);
-void func_15142180(u8, vertex *, s32, f32, f32);
+s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, GroundHit *hit);
+void func_15141F78(u8, GroundHit *, f32, u8, Vec3f *, u8);
+void func_15142180(u8, Vec3f *, s32, f32, f32);
 s32 func_1509BE40(s32, s32, s32, s32);
 
 /* Get the position of one of the actor's bones (picked by `side`, 0x10 by default).  With a `hit`
    buffer, also look for the ground below that point and return func_15046C80's result. */
-s32 func_150BE9B0(vertex *pos, Actor *actor, GroundHit *hit, u8 side) {
-    vertex probe;
+s32 func_150BE9B0(Vec3f *pos, Actor *actor, GroundHit *hit, u8 side) {
+    Vec3f probe;
     s32 bone;
 
     switch (side) {
@@ -65,7 +65,7 @@ s32 func_150BEAA8(s32 arg0, s32 arg1) {
    at least 76. */
 // matching: s32 actor (cast at each use) makes IDO reload it from the arg slot for each cast
 void func_150BEACC(s32 actor, s32 side, s32 strength) {
-    vertex pos;
+    Vec3f pos;
     GroundHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
@@ -80,8 +80,8 @@ void func_150BEACC(s32 actor, s32 side, s32 strength) {
 }
 
 /* Same as func_150BE9B0 with bones 0x19 and 0x16 for sides 4 and 5. */
-s32 func_150BEC30(vertex *pos, Actor *actor, GroundHit *hit, u8 side) {
-    vertex probe;
+s32 func_150BEC30(Vec3f *pos, Actor *actor, GroundHit *hit, u8 side) {
+    Vec3f probe;
     s32 bone;
 
     switch (side) {
@@ -122,7 +122,7 @@ s32 func_150BED28(s32 arg0, s32 arg1) {
 /* Same as func_150BEACC with the func_150BEC30 bones and a scale factor of 2 instead of 3.177. */
 // matching: s32 actor (cast at each use) makes IDO reload it from the arg slot for each cast
 void func_150BED4C(s32 actor, s32 side, s32 strength) {
-    vertex pos;
+    Vec3f pos;
     GroundHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {

@@ -56,7 +56,7 @@ extern u8 D_800A7210[7]; /* vertex indices; a static const here would land in di
 extern f32 D_800A7220;
 
 extern Particle *func_15167A68(s32, s32, s32, s32, s32, s32);
-s32 func_1510AEE0(f32 mtx[4][4], f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
+s32 func_1510AEE0(MtxF mtx, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
 void func_1510E82C(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
 Gfx *func_1510B7B4(Gfx *gfx, s32 player);
 Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
@@ -184,7 +184,7 @@ Gfx *func_1517A394(Gfx *gfx) {
 extern f32 D_800D35E0;
 extern f32 D_800D35E8; /* 0x800D35E4 has no symbol of its own */
 #define D_800D35E4 ((&D_800D35E8)[-1])
-extern f32 D_800D9C10[][4][4]; /* one view matrix per camera */
+extern MtxF D_800D9C10[]; /* one view matrix per camera */
 extern s32 D_800D2C9C;
 extern s16 D_800DD450; /* primitive alpha last set in the display list; -1 = unknown */
 extern u8 D_8008CDF0[];

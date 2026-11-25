@@ -17,8 +17,6 @@ extern void func_1501C730(s32, s32, s32, s32, s32);
 void func_1507D1D8(Actor *obj);
 extern void func_1509C3A0(void);
 
-
-
 void func_1507CD0C(Actor *obj);
 void func_1506160C(Actor *, u8, u8, u8, u8);
 void func_1507D4F8(s32);
@@ -762,22 +760,20 @@ s32 func_1507E114(s32 arg0) {
     func_15084D70(0, D_800BE3E0, 1, pos, vec, &unk43, &unk42, &unk44, &unk3C, 1, &type);
     return type + 1;
 }
-/* unk1D4 points at an array of 4x4 f32 bone matrices (0x40 bytes each). */
-typedef f32 BoneMtx[4][4];
 
-void func_15143134(f32 *in, f32 *out, BoneMtx *mtx);
+void func_15143134(f32 *in, f32 *out, MtxF *mtx);
 
 /* Gets obj's tracking point: 30 * y_scale up through bone 0 (12 or 3 in some states), or its position. */
 void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z) {
     if (obj->unk1D4 != NULL) {
-        BoneMtx *bone;
+        MtxF *bone;
         f32 in[3];
         f32 out[3];
 
         in[0] = 0.0f;
         in[1] = obj->y_scale * 30.0f;
         in[2] = 0.0f;
-        bone = (BoneMtx *)obj->unk1D4;
+        bone = (MtxF *)obj->unk1D4;
         if (obj->interaction_state == 1) {
             bone += 12;
         } else if (obj->interaction_state == 0x1E) {

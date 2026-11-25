@@ -6,14 +6,14 @@
 struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
 
 void func_15145740(Actor *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4);
-s32 func_1514654C(Actor *, ActorCtl *, s32, vertex **, f32 **, s32);
+s32 func_1514654C(Actor *, ActorCtl *, s32, Vec3f **, f32 **, s32);
 s32 func_151C229C(f32 *arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
 void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4);
 void func_151C56A4(f32 *pos, u8 arg1, s32 arg2);
 
 /* Model-space points that func_1514654C transforms through model part 0x46 into world space. */
-extern vertex D_800AAA90;
-extern vertex D_800AAAA8;
+extern Vec3f D_800AAA90;
+extern Vec3f D_800AAAA8;
 
 /* Spawns a func_151C229C effect along a segment at `obj`: offset along func_15145740's `dir` from its
  * position, or, when it has unk1D4, between two points of model part 0x46, plus func_151C56A4 and
@@ -24,7 +24,7 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
     f32 dir[3];
     f32 unkB0[3];
     ActorCtl *part;
-    vertex *modelPoints[2];
+    Vec3f *modelPoints[2];
     f32 *worldPoints[2];
     s32 arg16;
     s32 arg23;
@@ -83,8 +83,8 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_15102B38(Actor *, u8, vertex *, vertex *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
-extern vertex D_800AAA9C;
+extern void func_15102B38(Actor *, u8, Vec3f *, Vec3f *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
+extern Vec3f D_800AAA9C;
 
 /* Spawns a func_15102B38 effect at `pos` on `obj` with randomized scale and parameters. */
 void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4) {
@@ -138,31 +138,31 @@ typedef struct {
     /* 0xA8 */ ParticleData data;
 } Particle;
 
-extern s32 func_15137C64(vertex *, vertex *, f32 *, f32 *, f32 *, vertex *, vertex *, vertex *);
-extern void func_151DC034(vertex *, f32, u8, s16, s32, u8, s32);
-extern void func_151DA6F8(vertex *, vertex *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_15143794(s16, s16, f32, vertex *);
+extern s32 func_15137C64(Vec3f *, Vec3f *, f32 *, f32 *, f32 *, Vec3f *, Vec3f *, Vec3f *);
+extern void func_151DC034(Vec3f *, f32, u8, s16, s32, u8, s32);
+extern void func_151DA6F8(Vec3f *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
+extern void func_15143794(s16, s16, f32, Vec3f *);
 extern void func_15143874(s16, f32, f32 *, f32 *);
 extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-void func_151D9014(vertex *a0, vertex *a1, s32 a2, f32 a3, s32 sp10, s32 sp14, f32 sp18, s32 sp1C, f32 sp20, f32 sp24, s32 sp28, s32 sp2C, s32 sp30, s32 sp34, u8 sp38, s32 sp3C);
+void func_151D9014(Vec3f *a0, Vec3f *a1, s32 a2, f32 a3, s32 sp10, s32 sp14, f32 sp18, s32 sp1C, f32 sp20, f32 sp24, s32 sp28, s32 sp2C, s32 sp30, s32 sp34, u8 sp38, s32 sp3C);
 
 /* Spawns a burst of effects from the frame func_15137C64 derives from arg0..arg2: always a
  * func_151DC034 effect, then (each when its flag is set) a ring of func_151DA6F8 particles,
  * func_151D9014 particles along `dir`, and func_15130280 particles thrown at random angles. */
-void func_151C577C(vertex *arg0, vertex *arg1, vertex *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
+void func_151C577C(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
                    s32 arg7) {
-    vertex unkPos;
-    vertex origin;
+    Vec3f unkPos;
+    Vec3f origin;
     f32 dir[3];
     f32 basisA[3];
     f32 basisB[3];
     s16 ringCount;
     f32 sinv;
     f32 cosv;
-    vertex vel;
+    Vec3f vel;
     s32 randB;
     s32 bit80;
-    vertex vel2;
+    Vec3f vel2;
     s32 count;
     ParticleDesc spawn;
     f32 unkA8;
@@ -273,14 +273,14 @@ typedef struct {
     /* 0x0C */ u8 unkC;
 } Effect151C5E74;
 
-void func_15137F30(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, Effect151C5E74 *effect, vertex *pos, vertex *unk60,
-                   vertex *vel, f32 *out50, s16 *out4E, u8 *out4D, f32 *out48);
+void func_15137F30(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, Effect151C5E74 *effect, Vec3f *pos, Vec3f *unk60,
+                   Vec3f *vel, f32 *out50, s16 *out4E, u8 *out4D, f32 *out48);
 
 /* Spawns one func_151D9014 particle whose position, velocity and parameters func_15137F30 computes. */
 void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, Effect151C5E74 *effect) {
-    vertex pos;
-    vertex unk60;
-    vertex vel;
+    Vec3f pos;
+    Vec3f unk60;
+    Vec3f vel;
     /* func_151D9014 arguments 3..6 */
     f32 param3;
     s16 param4;
@@ -294,7 +294,7 @@ void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, Effect151C5E74 
 
 /* Spawns a func_15130280 particle at `pos` moving at `vel`. A `unk0A` of -1 means 300 and leaves flag
  * bit 0 clear. Returns the particle, or NULL. */
-Particle *func_151C5F44(vertex *pos, vertex *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
+Particle *func_151C5F44(Vec3f *pos, Vec3f *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
                         u8 altUnk62, s32 arg8, u8 arg9, s32 argA) {
     ParticleDesc spawn;
     f32 unkA8;
@@ -366,7 +366,7 @@ Particle *func_151C5F44(vertex *pos, vertex *vel, f32 unk54, f32 unkA8Value, u8 
 typedef struct {
     /* 0x00 */ s16 unk00;
     /* 0x02 */ s16 unk02;
-    /* 0x04 */ vertex *unk04;
+    /* 0x04 */ Vec3f *unk04;
     /* 0x08 */ s16 unk08;
     /* 0x0A */ s16 unk0A;
     /* 0x0C */ s16 unk0C;
@@ -383,13 +383,13 @@ typedef struct {
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;
-    /* 0x38 */ vertex *unk38;
+    /* 0x38 */ Vec3f *unk38;
 } Effect15154684;
 
 void func_15154684(Effect15154684 *desc, u8 arg1, s32 arg2);
 
 /* Spawns a fixed func_15154684 effect between the points `arg0` and `arg1`. */
-void func_151C61A0(vertex *arg0, vertex *arg1, u8 arg2, s32 arg3) {
+void func_151C61A0(Vec3f *arg0, Vec3f *arg1, u8 arg2, s32 arg3) {
     Effect15154684 desc;
 
     desc.unk00 = 10;

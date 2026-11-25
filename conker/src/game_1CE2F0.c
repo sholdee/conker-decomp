@@ -767,13 +767,13 @@ typedef struct {
     /* 0x4 */ FadeEvent fade;
 } ParticleData151A26EC;
 
-s32 func_1513170C(DescParticle *, struct17 *);
+s32 func_1513170C(DescParticle *, Vec3f *);
 extern void (*D_8008F8E0[])(DescParticle *, s32);
 
 extern DescParticle *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns one func_15130374 particle (texture 39, update func 0x11) at pos/offset with velocity vel. */
-s32 func_151A26EC(vertex *pos, vertex *offset, vertex *vel, f32 drag, f32 gravity, f32 size,
+s32 func_151A26EC(Vec3f *pos, Vec3f *offset, Vec3f *vel, f32 drag, f32 gravity, f32 size,
                   s16 timer, u8 alpha, s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc,
                   u8 r, u8 g, u8 b, u8 argF, s32 arg10) {
     ParticleData151A26EC data;
@@ -836,7 +836,7 @@ s32 func_151A26EC(vertex *pos, vertex *offset, vertex *vel, f32 drag, f32 gravit
 }
 
 /* Update func 0x11 (func_151A26EC's particles): dim out, run the one-shot event, then apply drag. */
-s32 func_151A2960(DescParticle *particle, struct17 *prevPos) {
+s32 func_151A2960(DescParticle *particle, Vec3f *prevPos) {
     FadeEvent *fade;
 
     fade = &particle->fade;
@@ -851,13 +851,13 @@ s32 func_151A2960(DescParticle *particle, struct17 *prevPos) {
     return func_1513170C(particle, prevPos);
 }
 
-void func_151A2C24(struct17 *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
+void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
                    s32 count, f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase,
                    s16 delayRange, s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart,
                    s8 eventFunc, u8 arg13, s32 arg14, u8 useAngles);
 
 /* Bursts `count` particles from pos moving at yaw/pitch with a speed that falls off over the burst. */
-void func_151A2A14(struct17 *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope, s32 count,
+void func_151A2A14(Vec3f *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope, s32 count,
                    f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase, s16 delayRange,
                    s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg18,
                    s32 arg19) {
@@ -867,7 +867,7 @@ void func_151A2A14(struct17 *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f
 }
 
 /* Bursts `count` particles from pos moving along dir, scaled down over the burst. */
-void func_151A2AD4(struct17 *pos, f32 *dir, f32 sizeBase, f32 sizeSlope, s32 count, f32 spread, f32 drag,
+void func_151A2AD4(Vec3f *pos, f32 *dir, f32 sizeBase, f32 sizeSlope, s32 count, f32 spread, f32 drag,
                    f32 gravityBase, f32 gravityRange, s16 delayBase, s16 delayRange, s16 alphaBase,
                    s16 alphaRange, s16 fadeStart, s16 fadeOutStart, s8 eventFunc, u8 arg16, s32 arg17) {
     func_151A2C24(pos, dir, 0, 0, 0.0f, sizeBase, sizeSlope, count, spread, drag, gravityBase, gravityRange,
@@ -899,7 +899,7 @@ typedef struct {
 extern BurstColors D_8008F8E8;
 
 /* Spawns `count` func_151A26EC particles around pos; size and speed change linearly over the burst. */
-void func_151A2C24(struct17 *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
+void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
                    s32 count, f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase,
                    s16 delayRange, s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart,
                    s8 eventFunc, u8 arg13, s32 arg14, u8 useAngles) {
@@ -944,7 +944,7 @@ void func_151A2C24(struct17 *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 s
         } else {
             b = -1;
         }
-        func_151A26EC(pos, (struct17 *)offset, (struct17 *)vel, drag, rand * gravityRange + gravityBase,
+        func_151A26EC(pos, (Vec3f *)offset, (Vec3f *)vel, drag, rand * gravityRange + gravityBase,
                       sizeSlope * t + sizeBase, delay + minFade, a % (u32)(alphaRange + 1) + alphaBase,
                       fadeStart, fadeOutStart, b, eventFunc, colors.rgb[color][0], colors.rgb[color][1],
                       colors.rgb[color][2], arg13, arg14);
@@ -964,7 +964,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 countBase;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ struct17 position;
+    /* 0x08 */ Vec3f position;
     /* 0x14 */ f32 sizeBase;
     /* 0x18 */ f32 sizeRange;
     /* 0x1C */ f32 unk1C;
@@ -1014,11 +1014,11 @@ void func_151A2F0C(DescParticle *particle) {
 
     config.countBase = 8;
     config.countRange = 6;
-    config.position = *(struct17 *)&particle->desc.pos; // TODO(vectors): struct17/vertex mix
+    config.position = *(Vec3f *)&particle->desc.pos; // TODO(vectors): struct17/vertex mix
     if (particle->desc.flags & 0x1000) {
-        config.position.unk0 += particle->desc.offset.x;
-        config.position.unk4 += particle->desc.offset.y;
-        config.position.unk8 += particle->desc.offset.z;
+        config.position.x += particle->desc.offset.x;
+        config.position.y += particle->desc.offset.y;
+        config.position.z += particle->desc.offset.z;
     }
     config.sizeBase = (particle->desc.width + particle->desc.height) * 0.5f * 0.01999999955f;
     config.sizeRange = (particle->desc.width + particle->desc.height) * 0.5f * 0.03529999778f;

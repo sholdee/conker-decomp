@@ -5,10 +5,10 @@
 
 /* Orientation, scale and simple ballistic motion stored after an effect actor's header. */
 typedef struct {
-    /* 0x00 */ vertex angle;
+    /* 0x00 */ Vec3f angle;
     /* 0x0C */ f32 scale;
-    /* 0x10 */ vertex velocity;
-    /* 0x1C */ vertex angularVelocity;
+    /* 0x10 */ Vec3f velocity;
+    /* 0x1C */ Vec3f angularVelocity;
     /* 0x28 */ f32 gravity;
     /* 0x2C */ f32 damping;
 } EffectMotion;
@@ -43,7 +43,7 @@ typedef struct {
     /* 0x44 */ u8 ownerId;
     /* 0x45 */ u8 attachMode;
     /* 0x46 */ u8 pad46[2];
-    /* 0x48 */ vertex position;
+    /* 0x48 */ Vec3f position;
     /* 0x54 */ u8 pad54[4];
     /* 0x58 */ Mtx mtx[2]; /* double-buffered by D_800BE9C0 */
     /* 0xD8 */ s32 attachment; /* start of the block func_151462C8 reads */
@@ -143,7 +143,7 @@ void func_151441A4(s16 *r, s16 *g, s16 *b, s16 *a, u8 arg4, u8 arg5, u8 arg6, s3
                    u8 arg10, u8 arg11, u8 arg12, u8 arg13);
 void func_151442FC(s16 *r, s16 *g, s16 *b, s16 *a, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9,
                    u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-Gfx *func_151462C8(Gfx *gfx, void *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, vertex *arg6, u8 arg7, s32 arg8);
+Gfx *func_151462C8(Gfx *gfx, void *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, Vec3f *arg6, u8 arg7, s32 arg8);
 
 /* Draws an effect actor: sets its render state and colors, then its matrix and display list. */
 Gfx *func_151582C8(Gfx *gfx, EffectActor *actor, s16 arg2) {
@@ -180,7 +180,7 @@ Gfx *func_151582C8(Gfx *gfx, EffectActor *actor, s16 arg2) {
 /* Draw callback: rotates by data.motion.angle, scales uniformly and translates to the actor's position. */
 s32 func_1515858C(Mtx *mtx, EffectActor *actor) {
     EffectMotion *motion = &actor->data.motion;
-    f32 mf[4][4];
+    MtxF mf;
 
     func_150A8050(mf, motion->angle.x, motion->angle.y, motion->angle.z);
     mf[3][0] = actor->position.x;
@@ -202,7 +202,7 @@ s32 func_1515858C(Mtx *mtx, EffectActor *actor) {
 /* Update callback: damps horizontal velocity, applies gravity and integrates position and angle. */
 s32 func_15158684(EffectActor *actor) {
     EffectMotion *motion;
-    vertex prevVelocity;
+    Vec3f prevVelocity;
     s32 i;
 
     motion = &actor->data.motion;
@@ -230,17 +230,18 @@ s32 func_15158684(EffectActor *actor) {
     return 1;
 }
 
+/* A matrix wrapped in a struct so that it can be copied by assignment. */
 typedef struct {
-    f32 m[4][4];
-} MtxF;
+    MtxF m;
+} MtxFBox;
 
-extern MtxF D_8008AE18;
+extern MtxFBox D_8008AE18;
 
 /* Draw callback: scales the fixed matrix D_8008AE18 by data.size and translates to the actor's position. */
 s32 func_15158920(Mtx *mtx, EffectActor *actor) {
     f32 scale;
     s32 pad; // matching: IDO's frame has an unused slot here
-    MtxF mf;
+    MtxFBox mf;
 
     mf = D_8008AE18;
     scale = actor->data.size * 0.003921568859f;
@@ -352,7 +353,7 @@ typedef struct {
     /* 0x1C */ u8 characterId;
     /* 0x1D */ u8 mode; /* from func_15159370 */
     /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ vertex lastPosition;
+    /* 0x20 */ Vec3f lastPosition;
     /* 0x2C */ u8 state0; /* func_15159084 */
     /* 0x2D */ u8 state1; /* func_15159120 */
     /* 0x2E */ u8 state2; /* func_15159184 */
@@ -415,7 +416,7 @@ void func_15158D00(CharacterWatcher *watcher) {
 s32 func_15159084(Actor *chr, u8 mode);
 s32 func_15159120(Actor *chr, u8 mode);
 s32 func_15159184(Actor *chr, u8 mode);
-s32 func_15159230(Actor *chr, vertex *lastPosition, u8 prevState);
+s32 func_15159230(Actor *chr, Vec3f *lastPosition, u8 prevState);
 s32 func_151592B8(Actor *chr, u8 mode);
 
 /* A state-change rule: both masks are unions of STATE_BITS values. */
@@ -573,7 +574,7 @@ s32 func_15159184(Actor *chr, u8 mode) {
 }
 
 /* Returns 0 if chr has not moved since lastPosition, 1 if it started moving, 2 if it kept moving. */
-s32 func_15159230(Actor *chr, vertex *lastPosition, u8 prevState) {
+s32 func_15159230(Actor *chr, Vec3f *lastPosition, u8 prevState) {
     s32 ret;
 
     if ((chr->x_position != lastPosition->x) || (chr->y_position != lastPosition->y) ||
@@ -760,7 +761,7 @@ typedef struct {
     /* 0x07 */ s8 heightPhaseStep;
     /* 0x08 */ f32 widthWobble;
     /* 0x0C */ f32 heightWobble;
-    /* 0x10 */ vertex direction;
+    /* 0x10 */ Vec3f direction;
     /* 0x1C */ f32 angle;
     /* 0x20 */ f32 angleSpeed;
 } OscillateMotion;
@@ -797,9 +798,9 @@ typedef struct {
     /* 0x2C */ u8 pad2C[0xC];
     /* 0x38 */ f32 width;
     /* 0x3C */ f32 height;
-    /* 0x40 */ vertex position;
-    /* 0x4C */ vertex offset;
-    /* 0x58 */ vertex velocity;
+    /* 0x40 */ Vec3f position;
+    /* 0x4C */ Vec3f offset;
+    /* 0x58 */ Vec3f velocity;
     /* 0x64 */ u8 pad64[4];
     /* 0x68 */ u32 flags; /* 0x2000: dies above RiseMotion.ceiling */
     /* 0x6C */ u8 pad6C[0x14];
@@ -820,8 +821,8 @@ typedef struct {
 
 s32 func_151596BC(Particle *particle, ParticleUpdateArg *arg1);
 u8 func_151D8E20(void);
-s32 func_15046C00(vertex *pos, u16 arg1, f32 maxHeight, GroundHit *hit);
-s32 func_1514672C(vertex *pos);
+s32 func_15046C00(Vec3f *pos, u16 arg1, f32 maxHeight, GroundHit *hit);
+s32 func_1514672C(Vec3f *pos);
 
 /* Update callback: rises and sways; dies on reaching the ground hit above it (splashing on surface 3). */
 u8 func_15159594(Particle *particle, ParticleUpdateArg *arg1) {
@@ -831,7 +832,7 @@ u8 func_15159594(Particle *particle, ParticleUpdateArg *arg1) {
     alive = 1;
     if (func_151596BC(particle, arg1) != 0) {
         if (particle->velocity.y > 0.0f) {
-            vertex pos;
+            Vec3f pos;
 
             pos.x = particle->position.x + particle->offset.x;
             pos.y = arg1->unk4;
@@ -917,9 +918,9 @@ typedef struct ParticleDesc6C {
     /* 0x24 */ f32 scaleRate;
     /* 0x28 */ f32 width;
     /* 0x2C */ f32 height;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
     /* 0x5C */ struct ParticleViewMask *viewMask;
@@ -938,7 +939,7 @@ typedef struct ParticleDesc6C {
 Particle *func_151303BC(ParticleDesc6C *spawn, s32 arg1, s32 motionSize);
 
 /* Spawns one rising particle (func_151596BC family) at pos with the given velocity. */
-Particle *func_15159890(vertex *pos, vertex *velocity, s32 arg2, s32 arg3) {
+Particle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
     f32 size;
     ParticleDesc6C spawn;
     Particle *particle;
@@ -1020,8 +1021,8 @@ typedef struct {
 
 /* Spawns one stationary rising particle at (x, y, z). */
 void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, ObjectHeader *obj) {
-    vertex pos;
-    vertex velocity;
+    Vec3f pos;
+    Vec3f velocity;
 
     pos.x = x;
     pos.y = y;
@@ -1034,8 +1035,8 @@ void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, ObjectHead
 
 /* Emitter data at 0x28 of the func_15159C08 emitter. */
 typedef struct {
-    /* 0x00 */ vertex position;
-    /* 0x0C */ vertex velocity;
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ Vec3f velocity;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 radius;
     /* 0x20 */ f32 angleX;
@@ -1053,7 +1054,7 @@ typedef struct {
 extern u8 D_800BE9EB;
 extern float sinf(float);
 extern float cosf(float);
-void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* Emitter update: spawns oscillating particles at random points of a rotated disk. */
 void func_15159C08(DiskEmitterObject *obj) {
@@ -1061,7 +1062,7 @@ void func_15159C08(DiskEmitterObject *obj) {
     Particle *particle;
 
     emitter = &obj->emitter;
-    if (func_151454BC(D_800BE9EB, 3000.0f, (struct17 *)emitter)) {
+    if (func_151454BC(D_800BE9EB, 3000.0f, (Vec3f *)emitter)) {
         emitter->pending += (emitter->rate + (func_150ADA68() * emitter->rateRandom)) * D_800BE9A4;
         if (emitter->pending > 1.0f) {
             ParticleDesc6C spawn;
@@ -1072,7 +1073,7 @@ void func_15159C08(DiskEmitterObject *obj) {
             f32 z;
             f32 scale;
             f32 invScale;
-            f32 mtx[4][4];
+            MtxF mtx;
             f32 dist;
             f32 fadeTime;
             f32 size;
@@ -1188,7 +1189,7 @@ s32 func_1515A11C(Particle *particle, ParticleUpdateArg *arg1) {
 void *func_15130280(ParticleDesc6C *spawn, u8 arg1, GroundHit *ground, s32 motionSize, u8 arg4, s32 arg5);
 
 /* Spawns one drifting particle; with no horizontal velocity it lands on the ground below pos. */
-Particle *func_1515A238(vertex *pos, vertex *velocity, f32 arg2, f32 damping, GroundHit *ground, f32 size,
+Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, GroundHit *ground, f32 size,
                         s16 lifetime, u8 alpha, u8 arg8, u8 arg9, s32 argA) {
     Particle *particle;
     s32 pad; // matching: 4 unused frame bytes sit above spawn
@@ -1307,7 +1308,7 @@ s32 func_1515A60C(Particle *particle, ParticleUpdateArg *arg1) {
 u8 func_1515A78C(Particle *particle, ParticleUpdateArg *arg1) {
     DriftMotion *drift;
     u8 alive;
-    vertex pos;
+    Vec3f pos;
 
     alive = 1;
     drift = &particle->motion.drift;
@@ -1441,7 +1442,7 @@ void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
 /* Emitter data at 0x28 of the func_1515AB88 emitter. */
 typedef struct {
     /* 0x00 */ f32 pending; /* particles owed; one is spawned per whole unit */
-    /* 0x04 */ vertex position;
+    /* 0x04 */ Vec3f position;
     /* 0x10 */ f32 ceiling;
     /* 0x14 */ EmitterSettings settings;
 } RiseEmitter;
@@ -1456,7 +1457,7 @@ typedef struct {
 } RiseEmitterObject;
 
 /* Spawner callback: creates an emitter of a random type at pos that spawns particles up to ceiling. */
-void func_1515AA84(Spawner *spawner, vertex *pos, f32 ceiling, s32 arg3) {
+void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
     RiseEmitter emitter;
     SpawnerData *data;
     RiseEmitterObject *obj;

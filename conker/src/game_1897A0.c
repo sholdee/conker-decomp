@@ -5,7 +5,7 @@
 
 /* Spawn header that func_15147A80 copies to 0x10 of a new trail. */
 typedef struct TrailHeader {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 life;
     /* 0x0E */ u16 flags;
     /* 0x10 */ s32 kind;
@@ -17,14 +17,14 @@ typedef struct TrailHeader {
 
 /* One point of a trail. */
 typedef struct TrailPoint {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 velY;
 } TrailPoint; /* size 0x10 */
 
 /* Per-trail settings, copied from the spawner by func_1515C2F0. */
 typedef struct TrailData {
     /* 0x00 */ f32 width;     /* half-width of the ribbon */
-    /* 0x04 */ vertex vel;    /* initial point velocity; only vel.y is kept per point */
+    /* 0x04 */ Vec3f vel;    /* initial point velocity; only vel.y is kept per point */
     /* 0x10 */ f32 gravity;
     /* 0x14 */ u8 flags;      /* 1: two-cycle mode; 4: fade out; 8: shrink */
     /* 0x15 */ u8 primMode;
@@ -56,7 +56,7 @@ typedef struct Trail {
     /* 0x2D */ s8 tail; /* oldest point */
     /* 0x2E */ s8 head; /* next point to write */
     /* 0x2F */ u8 pad2F[0x25];
-    /* 0x54 */ vertex tailPos;
+    /* 0x54 */ Vec3f tailPos;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ TrailPoint *points;
@@ -87,7 +87,7 @@ s32 func_1515C388(Trail *trail) {
     TrailData *data;
     u8 failed;
     TrailPoint *points;
-    vertex oldest; // matching: copied but never read (the target keeps the copy)
+    Vec3f oldest; // matching: copied but never read (the target keeps the copy)
     s32 i;
     TrailHandler unused; // matching: unused local; without it IDO allocates registers differently
 
@@ -183,8 +183,8 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
     Vtx *vtx;
     s32 i;
     u8 update;
-    vertex next;
-    vertex cur;
+    Vec3f next;
+    Vec3f cur;
     TrailData *data;
     TrailPoint *points;
     f32 *camPos;
@@ -490,7 +490,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 countBase;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ vertex pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ f32 sizeBase;
     /* 0x18 */ f32 sizeRange;
     /* 0x1C */ f32 gravityBase;
@@ -531,7 +531,7 @@ typedef struct {
 } TrailBurst;
 
 extern EmitterPreset D_800A64A0[];
-extern void func_15143794(s16 yaw, s16 pitch, f32 length, vertex *out);
+extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 extern void func_15152B38(TrailBurst *, u8, s32);
 
 /* Emits trail bursts at random points on a sphere around the origin, at the preset's random rate. */

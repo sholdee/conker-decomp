@@ -38,8 +38,8 @@ typedef struct {
     /* 0x10 */ f32 growth;    // width = height = growth * sqrtf(age)
     /* 0x14 */ f32 fadeFrom;  // def.unk44 = fadeFrom - fadeRate * age * age
     /* 0x18 */ f32 fadeRate;  // fadeFrom / (lifetime * lifetime): def.unk44 reaches 0 at lifetime
-    /* 0x1C */ struct17 axisU; // quad axes for func_15140410
-    /* 0x28 */ struct17 axisV;
+    /* 0x1C */ Vec3f axisU; // quad axes for func_15140410
+    /* 0x28 */ Vec3f axisV;
 } ParticleState;
 
 /* A particle spawned by func_1513D2F0. */
@@ -126,7 +126,7 @@ void func_150F2C8C(Actor *target) {
 extern f32 D_800A195C[];
 void func_1502EA98(Actor *, s32, s32, s32, s32, s32, s32);
 void func_15145EA4(f32 **, f32 **, Mtx *, s32);
-extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
+extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 
 /* Emitter update: while the target lives, emits a burst of 3 particles from its bone 15 each time its unk222
  * changes to a nonzero value. */
@@ -168,16 +168,16 @@ void func_150F2D14(Emitter *emitter) {
                 {
                     f32 *src[2];
                     f32 *dst[2];
-                    struct17 dir;
+                    Vec3f dir;
 
                     src[0] = D_800A1950;
                     src[1] = D_800A195C;
                     dst[0] = &def.pos.x;
-                    dst[1] = &dir.unk0;
+                    dst[1] = &dir.x;
                     func_15145EA4(src, dst, (Mtx *)target->unk1D4 + 15, 2);
-                    dir.unk0 -= def.pos.x;
-                    dir.unk4 -= def.pos.y;
-                    dir.unk8 -= def.pos.z;
+                    dir.x -= def.pos.x;
+                    dir.y -= def.pos.y;
+                    dir.z -= def.pos.z;
                     if (!func_15146078(&dir, &particle.axisU, &particle.axisV)) {
                         return;
                     }
@@ -194,7 +194,7 @@ void func_150F2D14(Emitter *emitter) {
                     def.rgba[3] = 0xFF;
                     def.height = 0.0f;
                     def.width = 0.0f;
-                    def.rot = *(vertex *)&D_800A5480;
+                    def.rot = D_800A5480;
                     def.scale.x = 1.0f;
                     def.scale.y = 1.0f;
                     def.scale.z = 1.0f;

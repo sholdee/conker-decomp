@@ -233,7 +233,7 @@ extern f32 D_800DC1F4;
 extern f32 D_800DC1F8;
 extern f32 D_800DC1FC;
 void func_1501A764(s32, f32, f32, f32, f32 *, f32 *, f32 *);
-void func_1508EF80(struct17 *arg0, struct17 *arg1, f32 arg2, struct17 *arg3);
+void func_1508EF80(Vec3f *arg0, Vec3f *arg1, f32 arg2, Vec3f *arg3);
 void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth);
 s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused);
 void func_1512C150(Camera *arg0);
@@ -246,7 +246,7 @@ void func_1512AD54(Camera *arg0) {
     s32 screenY;
     f32 *q; // matching: one local carries the projected depth (as s32) and later &D_800DC1FC
     f32 targetY;
-    vertex pos;
+    Vec3f pos;
 
     targetY = arg0->target.y;
     if (func_1512B53C(arg0) != 0) {
@@ -730,9 +730,9 @@ extern f32 D_800895B0;
 /* Keeps the camera outside the circle of radius unk938 around unk93C (horizontally), pushing it out to the edge. */
 void func_1512C20C(Camera *arg0) {
     f32 dz; // matching: also holds the target distance later (a separate local grows the frame)
-    vertex pos;
-    vertex offset;
-    vertex toPos;
+    Vec3f pos;
+    Vec3f offset;
+    Vec3f toPos;
 
     if (arg0->unk948) {
         f32 dx; // matching: also holds the yaw difference later
@@ -741,7 +741,7 @@ void func_1512C20C(Camera *arg0) {
         dz = arg0->eye.z - arg0->unk93C.z;
         pos = arg0->eye;
         if (sqrtf(SQ(dx) + SQ(dz)) < arg0->unk938) {
-            vertex target;
+            Vec3f target;
             f32 outwardYaw;
             f32 yaw;
 

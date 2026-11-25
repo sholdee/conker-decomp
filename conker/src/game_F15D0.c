@@ -97,9 +97,9 @@ void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
             spawn.b2 = 0;
             spawn.alpha = 0xFF;
             spawn.brightness = 0xFF;
-            spawn.pos = *(vertex *)&D_800A5480;
-            spawn.offset = *(vertex *)&D_800A5480;
-            spawn.vel = *(vertex *)&D_800A5480;
+            spawn.pos = D_800A5480;
+            spawn.offset = D_800A5480;
+            spawn.vel = D_800A5480;
             spawn.scaleStart = 1;
             spawn.gravity = 0.0f;
             spawn.scaleRate = 1.0f;
@@ -136,15 +136,15 @@ typedef struct {
 } GroundHit; /* size 0x24 */
 
 extern void func_1504715C(GroundHit *, Actor *);
-extern s32 func_1514654C(Actor *, ActorCtl *, s32, vertex **, vertex **, s32);
-extern void func_15143134(vertex *, vertex *, Mtx *);
-extern void func_15143794(s16 yaw, s16 pitch, f32 length, vertex *out);
-extern s32 func_1515C0F8(Actor *, vertex **);
-extern void func_151C36D8(vertex *, s32, s32);
-extern void func_151D9014(vertex *, vertex *, s32, f32, s32, s32, f32, s32, f32, f32, s32, void *, s32, s32, s32, s32);
-extern vertex D_800A0350[];
+extern s32 func_1514654C(Actor *, ActorCtl *, s32, Vec3f **, Vec3f **, s32);
+extern void func_15143134(Vec3f *, Vec3f *, Mtx *);
+extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
+extern s32 func_1515C0F8(Actor *, Vec3f **);
+extern void func_151C36D8(Vec3f *, s32, s32);
+extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, void *, s32, s32, s32, s32);
+extern Vec3f D_800A0350[];
 extern u8 D_800A0374[];
-extern vertex D_800A0378[];
+extern Vec3f D_800A0378[];
 extern u8 D_800A03A8[];
 
 /* Per-frame update of the func_150C4120 effect: keeps its particle at a point on the owner and emits
@@ -152,18 +152,18 @@ extern u8 D_800A03A8[];
 void func_150C44A4(Effect *effect) {
     Actor *owner;
     EffectData *data;
-    vertex pos;
-    vertex offset;
+    Vec3f pos;
+    Vec3f offset;
     f32 progress;
     s32 i;
     f32 t;
     GroundHit ground;
-    vertex *offsetPtr;
-    vertex *posPtr;
+    Vec3f *offsetPtr;
+    Vec3f *posPtr;
     ActorCtl *bone;
     s32 emit;
-    vertex *wind;
-    vertex vel;
+    Vec3f *wind;
+    Vec3f vel;
     s32 rand1;
     s32 rand0;
     f32 randF0;
@@ -245,7 +245,7 @@ void func_150C44A4(Effect *effect) {
     data->unk10 += (0.1300000101f + func_150ADA68() * 0.2f) * D_800BE9A4;
     if (data->unk10 > 1.0f) {
         if (func_1515C0F8(owner, &wind) == 0) {
-            wind = (vertex *)&D_800A5480;
+            wind = &D_800A5480;
         }
         do {
             rand1 = func_150ADA20();

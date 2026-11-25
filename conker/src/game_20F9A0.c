@@ -1953,10 +1953,6 @@ typedef struct {
     u16 unk2;
 } Snd151E6C1C;
 
-typedef struct {
-    f32 x, y, z;
-} Vec151E6C1C;
-
 extern u8 D_8008FF40[];
 extern f32 D_8008FF48[];
 extern f32 D_8008FF60[];
@@ -2316,7 +2312,7 @@ void func_151E6C1C(s32 index) {
     obj->target.x = obj->focus.x;
     obj->target.y = obj->focus.y;
     obj->target.z = UNK2AC_F32;
-    *(Vec151E6C1C *)&obj->focus.x = *(Vec151E6C1C *)&obj->target.x;
+    *(Vec3f *)&obj->focus.x = *(Vec3f *)&obj->target.x;
     obj->unk390 = 0.0f;
     obj->unk1A4 = 20.0f;
     obj->unk19C = 20.0f;

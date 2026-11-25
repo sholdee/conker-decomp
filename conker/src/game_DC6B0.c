@@ -6,7 +6,7 @@
 extern s32 *D_800DBF94;
 extern WorldObject *func_151149AC(u8);
 extern s32 func_1505D024(Actor *, s32, u16, s32);
-extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_150E1AB0(s32, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
                           f32 halfWidth, f32 length, u16 lifetime, s32 texture, s32 mode, s16 onTime, s16 offTime,
                           Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, s32 impactEffect, u8 unkFE,
@@ -64,14 +64,14 @@ typedef struct {
 /* A particle created by func_15130280. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ vertex vel;
+    /* 0x58 */ Vec3f vel;
     /* 0x64 */ u8 pad64[0xA8 - 0x64];
     /* 0xA8 */ WobbleData wobble;
 } Particle;
 
 /* Per-effect data of the func_150AF328 emitter. */
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 spawnAccum;
 } EmitterData;
 
@@ -86,7 +86,7 @@ typedef struct {
 
 extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_15131828(Particle *, f32 *amplitude, u8 *phase, u8 *phaseStep);
-extern void func_15131958(vertex *vel, f32 drag);
+extern void func_15131958(Vec3f *vel, f32 drag);
 
 /* Emitter update: accumulates 0.1352..0.305 particles per unit of D_800BE9A4 and spawns one
  * randomly sized particle at the emitter's position for each whole one. */
@@ -459,15 +459,15 @@ typedef struct GameDC6B0TrailArgs {
 } GameDC6B0TrailArgs;
 
 GameDC6B0Projectile *func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
-void func_15145974(vertex *v, f32 *heading, f32 *elevation);
+void func_15145974(Vec3f *v, f32 *heading, f32 *elevation);
 struct102 *func_151B7328(void *args, s32 selector, s32 argsSize, s32, s32);
-s32 func_15145128(vertex *v, vertex *out, f32 *length, f32 *invLength);
+s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength);
 
 /* Fires a projectile from `from` towards `to` at speed 80, with a ribbon trail. Does nothing if
  * the two points coincide. */
-void func_150B0094(vertex *from, vertex *to, u8 arg2, s32 arg3) {
+void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
     ParticleSpawn packet;
-    vertex dir;
+    Vec3f dir;
     f32 length;
     f32 invLength;
     GameDC6B0Projectile *projectile;
@@ -488,7 +488,7 @@ void func_150B0094(vertex *from, vertex *to, u8 arg2, s32 arg3) {
         func_15145974(&packet.vel, &packet.rot.y, &packet.rot.x);
         packet.scale.z = packet.scale.y = packet.scale.x = 1.0f;
         packet.rot.z = 0.0f;
-        packet.rotVel = *(vertex *)&D_800A5480; /* D_800A5480 holds a zero vertex; variables.h declares it as f32 */
+        packet.rotVel = D_800A5480; /* D_800A5480 holds a zero vertex; variables.h declares it as f32 */
         packet.flags = 0x19A0;
         packet.lifetime = 300;
         packet.model = 210;
@@ -574,7 +574,7 @@ typedef struct {
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;
-    /* 0x38 */ vertex position;
+    /* 0x38 */ Vec3f position;
     /* 0x44 */ s16 yaw;
     /* 0x46 */ s16 pitch;
     /* 0x48 */ s16 yawRange;
@@ -598,7 +598,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 count;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ vertex origin;
+    /* 0x08 */ Vec3f origin;
     /* 0x14 */ s16 yaw;
     /* 0x16 */ s16 yawRange;
     /* 0x18 */ s16 pitch;
@@ -623,7 +623,7 @@ extern const f32 D_8009F7A4[5];
 
 /* Spawns a particle burst and a burst of debris (5 variants) 30 units above obj. */
 void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {
-    vertex pos;
+    Vec3f pos;
 
     pos.x = obj->x_position;
     pos.y = obj->y_position + 30.0f;

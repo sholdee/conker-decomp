@@ -6,7 +6,6 @@
 #undef func_15105848
 #include "variables.h"
 
-typedef struct { f32 x, y, z; } Vec3f;
 typedef struct { u8 r, g, b, a; } ColorRGBA;
 
 /* Same layout as SpawnRegion in game_16EE20.c. */

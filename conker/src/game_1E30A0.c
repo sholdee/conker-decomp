@@ -21,7 +21,7 @@ typedef struct {
     /* 0x018 */ f32 sizeXZ;
     /* 0x01C */ f32 sizeY;
     /* 0x020 */ u8 pad20[0x18];
-    /* 0x038 */ vertex pos;
+    /* 0x038 */ Vec3f pos;
     /* 0x044 */ u8 pad44[0x170 - 0x44];
     /* 0x170 */ Pulse pulse;
 } Particle;
@@ -33,7 +33,7 @@ extern void func_15133894(Particle *);
 
 /* Spawns a pulsing particle of the given size at pos (fading out over 0x100 >> fadeShift frames at the end
  * of its lifetime). Also checksums func_15002FB4's code as an anti-tamper check. */
-Particle *func_151B5BF0(vertex *pos, vertex *vel, f32 size, vertex *rot, vertex *rotVel, f32 gravity,
+Particle *func_151B5BF0(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rotVel, f32 gravity,
                         s16 lifetime, u8 alpha, s32 unused, f32 elasticity, u8 fadeShift, u8 arg11, u8 arg12,
                         s32 arg13) {
     Particle *particle;

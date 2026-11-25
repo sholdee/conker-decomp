@@ -39,7 +39,7 @@ typedef struct {
 } Struct150C3D5CLocals;
 
 typedef struct {
-    /* 0x00 */ struct17 unk0;
+    /* 0x00 */ Vec3f unk0;
     /* 0x0C */ f32 unk0C;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
@@ -91,7 +91,7 @@ typedef struct {
     /* 0x02 */ s16 unk2;
     /* 0x04 */ s16 unk4;
     /* 0x06 */ s16 unk6;
-    /* 0x08 */ struct17 unk8;
+    /* 0x08 */ Vec3f unk8;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ f32 unk18;
@@ -113,14 +113,14 @@ typedef struct {
     /* 0x41 */ u8 pad41[3];
     /* 0x44 */ f32 unk44;
 } Struct150C2700;
-void func_15150178(Struct150C2700 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
+void func_15150178(Struct150C2700 *arg0, Vec3f *arg1, s32 arg2, u8 arg3, s32 arg4);
 
 void func_150C1F60(u8 arg0) {
     Struct150C2558 params;
 
-    params.unk0.unk0 = 8152.0f;
-    params.unk0.unk4 = 40.0f;
-    params.unk0.unk8 = -309.0f;
+    params.unk0.x = 8152.0f;
+    params.unk0.y = 40.0f;
+    params.unk0.z = -309.0f;
     params.unk1C = 40.92f;
     params.unk20 = 20.45f;
     params.unk0C = 9.0f;
@@ -211,9 +211,9 @@ void func_150C1F60(u8 arg0) {
 void func_150C2290(u8 arg0) {
     Struct150C2558 params;
 
-    params.unk0.unk0 = 8152.0f;
-    params.unk0.unk4 = 40.0f;
-    params.unk0.unk8 = 309.0f;
+    params.unk0.x = 8152.0f;
+    params.unk0.y = 40.0f;
+    params.unk0.z = 309.0f;
     params.unk1C = 100.0f;
     params.unk20 = 57.5f;
     params.unk0C = 55.6f;
@@ -304,12 +304,12 @@ s32 func_150C251C(Particle_EF410 *particle) {
 s32 func_150C2558(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     Struct150C2558 params;
 
-    params.unk0.unk0 = x;
-    params.unk0.unk4 = y;
-    params.unk0.unk8 = (z + 15.0f) - (func_150ADA68() * 30.0f);
+    params.unk0.x = x;
+    params.unk0.y = y;
+    params.unk0.z = (z + 15.0f) - (func_150ADA68() * 30.0f);
     params.unk24 = 1;
     params.unk26 = 0;
-    params.unk28 = (s32)(params.unk0.unk8 * 0.07012195f) - 0x40;
+    params.unk28 = (s32)(params.unk0.z * 0.07012195f) - 0x40;
     params.unk2A = 9;
     params.unk2C = 0;
     params.unk2E = 0;
@@ -356,8 +356,8 @@ s32 func_150C2558(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 s32 func_150C2700(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     Struct150C2700 params;
 
-    params.unk8.unk0 = x;
-    params.unk8.unk4 = y;
+    params.unk8.x = x;
+    params.unk8.y = y;
     params.unk14 = 6;
     params.unk16 = 5;
     params.unk0 = 0x6B;
@@ -374,7 +374,7 @@ s32 func_150C2700(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     params.unk3C = 0.0f;
     params.unk40 = 1;
     params.unk44 = 0.0f;
-    params.unk8.unk8 = z;
+    params.unk8.z = z;
     params.unk18 = 30.0f;
     params.unk1C = 35.0f;
     params.unk24 = -2.328f;
@@ -458,7 +458,7 @@ void func_150C2898(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C
                     emitter->unkC, emitter->unk1);
 }
 typedef struct {
-    struct17 unk0;
+    Vec3f unk0;
     f32 unkC;
     f32 unk10;
     f32 unk14;
@@ -518,9 +518,9 @@ void func_150C29F0(Struct150C29F0 *emitter) {
     particle.unk38 = 0.0f;
     particle.unk40 = 0.045f;
     particle.unk44 = 0.7f;
-    particle.unk0.unk0 = pos->x + radius * cosine;
-    particle.unk0.unk4 = pos->y;
-    particle.unk0.unk8 = pos->z + radius * sine;
+    particle.unk0.x = pos->x + radius * cosine;
+    particle.unk0.y = pos->y;
+    particle.unk0.z = pos->z + radius * sine;
     particle.unk3C = 10000.0f;
     scaleA = (func_150ADA68() * 0.5f) + 1.0f;
     scaleB = (func_150ADA68() * 0.5f) + 1.0f;
@@ -533,7 +533,7 @@ void func_150C29F0(Struct150C29F0 *emitter) {
     emitter->unkE = (func_150ADA20() % 51U) + 25;
 }
 void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
-struct17 *func_15144B34(s32);
+Vec3f *func_15144B34(s32);
 void *memcpy(void *, const void *, u32);
 
 void func_150C2C00(Struct150C29F0 *emitter) {
@@ -555,7 +555,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
             if (2500000.0f < distSq) {
                 particle.unk20 = 0x6231;
                 particle.unk22 = 0x1A4D;
-                particle.unk0.unk4 = -390.0f;
+                particle.unk0.y = -390.0f;
                 particle.unk26 = 0;
                 particle.unk27 = 0;
                 particle.unk28 = 0;
@@ -572,7 +572,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
                 do {
                     angle = (func_150ADA68() * 5.8659425f) + 0.957204f;
                     if (func_15144C8C(func_150484A0(pos[0], pos[2]), angle) < 0.4f) {
-                        func_1514373C(angle, (func_150ADA68() * 1278.0f) + 3900.0f, &particle.unk0.unk0, &particle.unk0.unk8);
+                        func_1514373C(angle, (func_150ADA68() * 1278.0f) + 3900.0f, &particle.unk0.x, &particle.unk0.z);
                         scaleA = ((func_150ADA68() * 1991.0f) + 1985.0f) * 0.001f;
                         scaleB = ((func_150ADA68() * 1493.0f) + 3000.0f) * 0.001f;
                         particle.unkC = 22.6f * scaleA;
@@ -611,16 +611,16 @@ s32 func_150C2FCC(Particle_EF410 *particle) {
 s32 func_150C308C(Particle_EF410 *particle) {
     u8 triggered;
     f32 value; // matching: one local for the squared distance and then the angle (IDO puts both in $f12)
-    struct17 *pos;
+    Vec3f *pos;
 
     triggered = FALSE;
     if (particle->unk1C >= 6) {
         pos = func_15144B34(D_80082FA4);
-        value = pos->unk0 * pos->unk0 + pos->unk8 * pos->unk8;
+        value = pos->x * pos->x + pos->z * pos->z;
         if (value < 2500000.0f) {
             triggered = TRUE;
         } else {
-            value = func_150484A0(pos->unk0, pos->unk8);
+            value = func_150484A0(pos->x, pos->z);
             if (0.4f < func_15144C8C(value, particle->unk160)) {
                 triggered = TRUE;
             }

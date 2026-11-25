@@ -80,7 +80,7 @@ void func_151617C4(struct225 *effect);
 void func_151617E4(struct225 *effect);
 void func_15161804(struct225 *effect);
 void func_15161860(struct225 *effect);
-void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, struct17 *position, s16 arg5, s16 arg6);
+void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, Vec3f *position, s16 arg5, s16 arg6);
 struct225 *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3);
 s32 func_15161A68(struct225 *effect);
 struct225 *func_15161E24(Actor *actor, u8 unk5, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
@@ -110,7 +110,7 @@ struct225 *func_15164208(struct226 *light, u8 id, u8 arg2, s32 arg3);
 s32 func_1516429C(struct225 *effect);
 void func_151643A8(struct225 *effect, s32 arg1, u8 eventId);
 s32 func_151643F8(struct225 *effect);
-void func_151644F4(struct225 *effect, struct17 *pivot, f32 offset, f32 angleX, f32 angleZ);
+void func_151644F4(struct225 *effect, Vec3f *pivot, f32 offset, f32 angleX, f32 angleZ);
 s32 func_151644A8(struct225 *effect);
 
 /* Creates a light at `position` and an effect instance (with `size` bytes of payload) that owns it. */
@@ -168,7 +168,7 @@ extern void (*D_8008B150[])(void *);
 void func_151604A0(void *arg0, u8 *message, u8 event) {
     struct225 *effect = arg0;
     void (*handler)(void *);
-    struct17 position;
+    Vec3f position;
 
     switch (event) {
     case 0x17:
@@ -190,9 +190,9 @@ void func_151604A0(void *arg0, u8 *message, u8 event) {
             effect->unk14->unk9 = 1;
             break;
         case 0x1C:
-            position.unk0 = effect->unk14->unkE;
-            position.unk4 = effect->unk14->unk10;
-            position.unk8 = effect->unk14->unk12;
+            position.x = effect->unk14->unkE;
+            position.y = effect->unk14->unk10;
+            position.z = effect->unk14->unk12;
             func_151618BC(16000, 0, 0, 0, &position, 500, 1000);
             return;
         case 0x1F:
@@ -246,7 +246,7 @@ typedef struct {
 s32 func_151606A8(struct225 *effect) {
     LightMount **mount;
     union {
-        f32 mf[4][4];
+        MtxF mf;
         s64 align;
     } mtx;
     f32 z;
@@ -302,16 +302,16 @@ s32 func_151607A4(struct225 *effect) {
 /* Starts one flicker: drops to dark, picks a ramp rate and delay, and optionally plays a sound at the light. */
 void func_15160954(f32 *level, f32 *peak, f32 *rate, f32 *delay, struct225 *effect) {
     s32 pad0; // matching: unused stack slot
-    struct17 position;
+    Vec3f position;
     s32 pad1; // matching: unused stack slot
 
     *level = 0.0f;
     *rate = *peak / ((func_150ADA68() * 12.0f) + 8.0f);
     *delay = (func_150ADA68() * 28.0f) + 1.0f;
 
-    position.unk0 = effect->unk14->unkE;
-    position.unk4 = effect->unk14->unk10;
-    position.unk8 = effect->unk14->unk12;
+    position.x = effect->unk14->unkE;
+    position.y = effect->unk14->unk10;
+    position.z = effect->unk14->unk12;
 
     if (((LightFlicker *)&effect->unk18)->sound) {
         func_151618BC(25000, 0, 0, 0, &position, 500, 1500);
@@ -324,13 +324,13 @@ typedef struct {
     u8 actorId;      // actor->unique_id when attached; a change means the actor slot was reused
     u8 bone;         // index of the bone matrix in actor->unk1D4
     u8 pad6[0x2];
-    struct17 offset; // position in the bone's frame
+    Vec3f offset; // position in the bone's frame
     s8 callback;     // index into D_8008B1F8, or -1
     u8 unk15;
 } LightAttach;
 
 /* Creates a light that follows `actor` (see func_15160B74). */
-struct225 *func_15160A58(Actor *actor, u8 bone, struct17 *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 unk15, u8 argE, s32 argF) {
+struct225 *func_15160A58(Actor *actor, u8 bone, Vec3f *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 unk15, u8 argE, s32 argF) {
     struct225 *effect;
     Header header;
     LightAttach attach;
@@ -364,7 +364,7 @@ struct225 *func_15160A58(Actor *actor, u8 bone, struct17 *offset, u8 arg3, s16 l
     return effect;
 }
 
-void func_15143134(f32 *in, f32 *out, f32 mtx[4][4]);
+void func_15143134(f32 *in, f32 *out, MtxF mtx);
 
 /* Moves the light to its actor (or the bone point); returns 0 once the actor is gone. */
 u8 func_15160B74(struct225 *effect) {
@@ -385,7 +385,7 @@ u8 func_15160B74(struct225 *effect) {
     if (actor->unk1D4 != NULL && (actor->unk74 & 0xF) != 0xF) {
         f32 position[3];
 
-        func_15143134(&attach->offset.unk0, position, ((f32 (*)[4][4])actor->unk1D4)[attach->bone]);
+        func_15143134(&attach->offset.x, position, ((f32 (*)[4][4])actor->unk1D4)[attach->bone]);
         effect->unk14->unkE = position[0];
         effect->unk14->unk10 = position[1];
         effect->unk14->unk12 = position[2];
@@ -407,15 +407,15 @@ typedef struct {
     u8 actorId;      // actor->unique_id when attached
     u8 bone;         // index of the bone matrix in actor->unk1D4
     u8 pad6[0x2];
-    struct17 start;  // beam start in the bone's frame
-    struct17 end;    // beam end in the bone's frame
+    Vec3f start;  // beam start in the bone's frame
+    Vec3f end;    // beam end in the bone's frame
     f32 scale;       // hit distance to intensity
     u8 flags;        // 1: cast from the bone, 2: flag the hit actor
     u8 unk25;
 } LightBeam;
 
 /* Creates a beam light on `actor` (see func_15160E30). */
-struct225 *func_15160CDC(Actor *actor, u8 bone, struct17 *start, struct17 *end, f32 scale, u8 arg5, s16 lifetime, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 unk25, u8 flagHit, u8 argE, s32 argF) {
+struct225 *func_15160CDC(Actor *actor, u8 bone, Vec3f *start, Vec3f *end, f32 scale, u8 arg5, s16 lifetime, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 unk25, u8 flagHit, u8 argE, s32 argF) {
     struct225 *effect;
     Header header;
     LightBeam beam;
@@ -467,7 +467,7 @@ typedef struct {
 
 void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-s32 func_15145EA4(f32 **in, f32 **out, f32 mtx[4][4], s32 count);
+s32 func_15145EA4(f32 **in, f32 **out, MtxF mtx, s32 count);
 
 /* Casts the beam and puts the light where it hits; the light is off and at the actor when nothing is hit. */
 s32 func_15160E30(struct225 *effect) {
@@ -490,8 +490,8 @@ s32 func_15160E30(struct225 *effect) {
         f32 *in[2];
         f32 *out[2];
 
-        in[0] = &beam->start.unk0;
-        in[1] = &beam->end.unk0;
+        in[0] = &beam->start.x;
+        in[1] = &beam->end.x;
         out[0] = start;
         out[1] = dir;
         func_15145EA4(in, out, ((f32 (*)[4][4])actor->unk1D4)[beam->bone], 2);
@@ -774,10 +774,10 @@ void func_15161860(struct225 *effect) {
 }
 
 /* Plays one of ten random sounds at `position`. */
-void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, struct17 *position, s16 arg5, s16 arg6) {
+void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, Vec3f *position, s16 arg5, s16 arg6) {
     s32 sounds[10] = { 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108 };
 
-    func_10010F88(sounds[func_150ADA20() % 10U], arg0, arg1, arg2, arg3, position->unk0, position->unk4, position->unk8, arg5, arg6);
+    func_10010F88(sounds[func_150ADA20() % 10U], arg0, arg1, arg2, arg3, position->x, position->y, position->z, arg5, arg6);
 }
 
 /* Creates a light driven by entry `index` of D_800C3958 (see func_15161A68). */
@@ -929,8 +929,8 @@ struct225 *func_15162034(struct226 *light, u8 arg1, s32 arg2) {
 
 /* Colour cycle: colour = base + amplitude * sin(phase). */
 typedef struct {
-    struct17 base;
-    struct17 amplitude;
+    Vec3f base;
+    Vec3f amplitude;
     f32 phase;
     f32 speed; // phase advance per frame
 } LightColourPulse;
@@ -940,13 +940,13 @@ void func_15162110(s32 arg0) {
     struct236 *object;
     LightColourPulse pulse;
 
-    pulse.base.unk4 = 15.0f;
-    pulse.base.unk8 = 0.0f;
-    pulse.amplitude.unk4 = 15.0f;
-    pulse.amplitude.unk8 = 0.0f;
+    pulse.base.y = 15.0f;
+    pulse.base.z = 0.0f;
+    pulse.amplitude.y = 15.0f;
+    pulse.amplitude.z = 0.0f;
     pulse.phase = 0.0f;
-    pulse.base.unk0 = 42.5f;
-    pulse.amplitude.unk0 = 37.5f;
+    pulse.base.x = 42.5f;
+    pulse.amplitude.x = 37.5f;
     pulse.speed = 0.07609999925f;
 
     object = func_15149130(300, -1, 30, -1, 0, 0, sizeof(pulse), 0xFF, 1);
@@ -964,9 +964,9 @@ void func_151621B8(struct236 *object) {
     sine = sinf(pulse->phase);
 
     func_1515D4D4(
-        (u8)(pulse->base.unk0 + (sine * pulse->amplitude.unk0)),
-        (u8)(pulse->base.unk4 + (sine * pulse->amplitude.unk4)),
-        (u8)(pulse->base.unk8 + (sine * pulse->amplitude.unk8)),
+        (u8)(pulse->base.x + (sine * pulse->amplitude.x)),
+        (u8)(pulse->base.y + (sine * pulse->amplitude.y)),
+        (u8)(pulse->base.z + (sine * pulse->amplitude.z)),
         0);
     pulse->phase += pulse->speed * D_800BE9A4;
     pulse->phase = func_15144B68(pulse->phase);
@@ -982,8 +982,8 @@ struct225 *func_151623F4(struct226 *light, u8 kind, u8 type, u8 arg3, s8 update,
         return NULL;
     }
 
-    pulse.base = *(struct17 *)D_800A670C[kind];
-    pulse.amplitude = *(struct17 *)D_800A6730[kind];
+    pulse.base = *(Vec3f *)D_800A670C[kind];
+    pulse.amplitude = *(Vec3f *)D_800A6730[kind];
 
     pulse.phase = 0.0f;
     pulse.speed = D_800A6754[kind];
@@ -1007,9 +1007,9 @@ s32 func_15162510(struct225 *effect) {
     pulse = (LightColourPulse *)&effect->unk18;
     sine = sinf(pulse->phase);
 
-    effect->unk14->unk5 = pulse->base.unk0 + (sine * pulse->amplitude.unk0);
-    effect->unk14->unk6 = pulse->base.unk4 + (sine * pulse->amplitude.unk4);
-    effect->unk14->unk7 = pulse->base.unk8 + (sine * pulse->amplitude.unk8);
+    effect->unk14->unk5 = pulse->base.x + (sine * pulse->amplitude.x);
+    effect->unk14->unk6 = pulse->base.y + (sine * pulse->amplitude.y);
+    effect->unk14->unk7 = pulse->base.z + (sine * pulse->amplitude.z);
 
     pulse->phase += pulse->speed * D_800BE9A4;
     pulse->phase = func_15144B68(pulse->phase);
@@ -1556,7 +1556,7 @@ struct225 *func_15163BE8(Actor *actor, u8 arg1, s32 arg2) {
     pulse.phase = func_150ADA68() * 6.283185482f;
     pulse.speed = D_800A69D4[6];
 
-    effect = func_15160A58(actor, 1, (struct17 *)&D_800A6A0C, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(pulse), 1, arg1, arg2);
+    effect = func_15160A58(actor, 1, (Vec3f *)&D_800A6A0C, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(pulse), 1, arg1, arg2);
     if (effect != NULL) {
         memcpy(&((LightAttachPulse *)&effect->unk18)->pulse, &pulse, sizeof(pulse));
     }
@@ -1753,7 +1753,7 @@ void func_151643A8(struct225 *effect, s32 arg1, u8 eventId) {
 
 /* Payload of func_151643F8: a fixed point in some transform's frame. */
 typedef struct {
-    struct17 position;
+    Vec3f position;
     s32 mtx; // passed to func_15145CD0
 } LightTransformed;
 
@@ -1784,32 +1784,32 @@ void func_1516441C(struct225 *effect, LightTransformed *point) {
 typedef struct {
     f32 offset;       // passed as y to func_150A7960
     f32 scale;        // applied to the swing angles
-    struct17 *angles; // swing angles (x and z are used)
-    struct17 pivot;
+    Vec3f *angles; // swing angles (x and z are used)
+    Vec3f pivot;
 } LightSwing;
 
 s32 func_151644A8(struct225 *effect) {
     LightSwing *swing = (LightSwing *)&effect->unk18;
     f32 scale;
-    struct17 *angles;
+    Vec3f *angles;
 
     angles = swing->angles;
     scale = swing->scale;
-    func_151644F4(effect, &swing->pivot, swing->offset, angles->unk0 * scale, angles->unk8 * scale);
+    func_151644F4(effect, &swing->pivot, swing->offset, angles->x * scale, angles->z * scale);
     return 1;
 }
 
 /* Moves the light to `offset` in the frame rotated by (angleX, 0, angleZ) about `pivot`. */
-void func_151644F4(struct225 *effect, struct17 *pivot, f32 offset, f32 angleX, f32 angleZ) {
+void func_151644F4(struct225 *effect, Vec3f *pivot, f32 offset, f32 angleX, f32 angleZ) {
     f32 z;
     f32 y;
     f32 x;
-    f32 mtx[4][4];
+    MtxF mtx;
 
     func_150A8050(mtx, angleX, 0.0f, angleZ);
-    mtx[3][0] = pivot->unk0;
-    mtx[3][1] = pivot->unk4;
-    mtx[3][2] = pivot->unk8;
+    mtx[3][0] = pivot->x;
+    mtx[3][1] = pivot->y;
+    mtx[3][2] = pivot->z;
     func_150A7960(mtx[0], 0.0f, offset, 0.0f, &x, &y, &z);
     effect->unk14->unkE = x;
     effect->unk14->unk10 = y;

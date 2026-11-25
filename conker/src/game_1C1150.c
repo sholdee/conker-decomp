@@ -10,10 +10,6 @@ typedef struct GroundInfo {
 
 extern void func_1504715C(GroundInfo *ground, Actor *obj);
 
-typedef struct Vec3f {
-    f32 x, y, z;
-} Vec3f;
-
 // Parameters for func_151D8868.
 typedef struct {
     /* 0x0 */ u8 unk0;
@@ -89,7 +85,6 @@ void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
     func_151DC260(pos, &ground, type, arg2, arg3);
 }
 
-
 void func_151942B0(Actor *self, Actor *other, u8 *arg2) {
     func_15193CA0(other, FALSE, 0xFF, 1);
 }
@@ -154,7 +149,6 @@ typedef struct BurstParams {
     /* 0x46 */ s16 unk46;
     /* 0x48 */ s32 unk48;
 } BurstParams;
-
 
 extern void func_15153F18(BurstParams *params, Vec3f *position, GroundInfo *ground, u8 arg3, s32 arg4);
 extern void *func_151AE7B0(Actor *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);

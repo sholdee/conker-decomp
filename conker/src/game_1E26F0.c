@@ -2,12 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef f32 BoneMtx[4][4];
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* Effect data of the wavy beam drawn between two actors' bones (func_151B5328). */
 typedef struct {
     /* 0x000 */ Vtx vertices[2][44];  // double-buffered, indexed by D_800BE9C0
@@ -68,7 +62,7 @@ BeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
     return effect;
 }
 
-void func_15143134(const f32 *in, Vec3f *out, BoneMtx *mtx);
+void func_15143134(const f32 *in, Vec3f *out, MtxF *mtx);
 Gfx *func_15142E24(Gfx *, u8 *, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
 Gfx *func_15142B7C(Gfx *, s32, s32);
 Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
@@ -125,8 +119,8 @@ Gfx *func_151B5328(Gfx *gdl, BeamEffect *effect, s16 viewIdx) {
         failed = 1;
     }
     if (!failed && data->first->unk1D4 != NULL && data->second->unk1D4 != NULL) {
-        func_15143134(D_800AA400, &start, &((BoneMtx *)data->first->unk1D4)[D_8008FB80]);
-        func_15143134(D_800AA40C, &end, &((BoneMtx *)data->second->unk1D4)[D_8008FB84]);
+        func_15143134(D_800AA400, &start, &((MtxF *)data->first->unk1D4)[D_8008FB80]);
+        func_15143134(D_800AA40C, &end, &((MtxF *)data->second->unk1D4)[D_8008FB84]);
         flag = 1;
         vtx = data->vertices[D_800BE9C0];
         eye = (Vec3f *)&D_800DBFF0[viewIdx].eye;

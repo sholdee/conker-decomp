@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* Settings an emitter is created with (see game_1BA670.c). */
 typedef struct EmitterParams {
     /* 0x0 */ Actor *owner;

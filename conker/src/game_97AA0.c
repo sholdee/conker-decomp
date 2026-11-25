@@ -68,7 +68,7 @@ struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32,
 void func_151B7144(Actor *, s32, s32);
 void func_151B6320(Actor *, s32, s32);
 void func_15137610(Actor *, f32 *, f32 *, s32, s32, s32);
-void func_15103E40(Actor *, Actor *, struct17 *, u8, u8, u8, u8);
+void func_15103E40(Actor *, Actor *, Vec3f *, u8, u8, u8, u8);
 void func_151B7328(ObjectRef *, s32, s32, s32, s32);
 void func_151CEAAC(Actor *, s32, s32, s32, s32);
 
@@ -182,7 +182,7 @@ void func_1506AAE0(Actor *obj, s32 arg1) {
 
 typedef struct {
     /* 0x00 */ Actor *unk0;
-    /* 0x04 */ struct17 unk4;
+    /* 0x04 */ Vec3f unk4;
     /* 0x10 */ s32 unk10;
 } Arg1506AB7C;
 

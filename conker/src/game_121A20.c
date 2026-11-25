@@ -16,7 +16,7 @@
  * from one point towards another (updated by func_150F48D0). */
 typedef struct {
     /* 0x00 */ f32 timeLeft;
-    /* 0x04 */ struct17 center;
+    /* 0x04 */ Vec3f center;
     /* 0x10 */ f32 phase; /* radians */
     /* 0x14 */ f32 phaseRate;
     /* 0x18 */ f32 cosDir;
@@ -29,11 +29,11 @@ typedef struct {
 /* An object spawned by func_1513264C with a SpiralState. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x20];
-    /* 0x020 */ struct17 rot; /* degrees */
+    /* 0x020 */ Vec3f rot; /* degrees */
     /* 0x02C */ u8 pad2C[0xC];
-    /* 0x038 */ struct17 pos;
-    /* 0x044 */ struct17 vel;
-    /* 0x050 */ struct17 spin;
+    /* 0x038 */ Vec3f pos;
+    /* 0x044 */ Vec3f vel;
+    /* 0x050 */ Vec3f spin;
     /* 0x05C */ u8 pad5C[0x14];
     /* 0x070 */ u8 alpha;
     /* 0x071 */ u8 unk71;
@@ -43,28 +43,28 @@ typedef struct {
     /* 0x170 */ SpiralState spiral;
 } EffectObj;
 
-extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
+extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 extern EffectObj *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 extraSize, u8 owner, s32 kind);
 
 /* Spawns an effect that spirals from `from` to `to` at `speed` (invSpeed = 1 / speed), playing
  * `sound` near the camera when it is non-zero. */
-void func_150F4570(vertex *from, struct17 *to, u8 id, f32 speed, f32 invSpeed, f32 scale, u8 fadeNear, s32 sound,
+void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 speed, f32 invSpeed, f32 scale, u8 fadeNear, s32 sound,
                    u8 owner, s32 kind) {
     ParticleSpawn spawn;
-    struct17 dir;
-    struct17 delta;
+    Vec3f dir;
+    Vec3f delta;
     f32 length;
     f32 invLength;
     SpiralState spiral;
     EffectObj *obj;
 
-    delta.unk0 = to->unk0 - from->x;
-    delta.unk4 = to->unk4 - from->y;
-    delta.unk8 = to->unk8 - from->z;
+    delta.x = to->x - from->x;
+    delta.y = to->y - from->y;
+    delta.z = to->z - from->z;
     if (func_15145128(&delta, &dir, &length, &invLength) != 0) {
         spiral.flags = (fadeNear ? SPIRAL_FADE_NEAR : 0) | (sound ? SPIRAL_SOUND : 0);
         spiral.timeLeft = length * invSpeed;
-        spiral.center = *(struct17 *)from; // TODO(vectors): struct17/vertex mix
+        spiral.center = *(Vec3f *)from; // TODO(vectors): struct17/vertex mix
         spiral.phase = func_150ADA68() * 6.2831855f;
         spiral.phaseRate = func_150ADA68() * 0.2f + 0.08000000566f;
         if (func_150ADA20() & 1) {
@@ -86,9 +86,9 @@ void func_150F4570(vertex *from, struct17 *to, u8 id, f32 speed, f32 invSpeed, f
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
         spawn.pos = *from;
-        spawn.vel.x = dir.unk0 * speed;
-        spawn.vel.y = dir.unk4 * speed;
-        spawn.vel.z = dir.unk8 * speed;
+        spawn.vel.x = dir.x * speed;
+        spawn.vel.y = dir.y * speed;
+        spawn.vel.z = dir.z * speed;
         spawn.rotVel.x = func_150ADA68() * 21.90300179f + -10.95150089f;
         spawn.rotVel.y = 0.0f;
         spawn.rotVel.z = func_150ADA68() * 21.90300179f + -10.95150089f;
@@ -138,21 +138,21 @@ s32 func_150F48D0(EffectObj *obj) {
         f32 side;
         func_1514373C(spiral->phase, spiral->radius, &side, &up);
         spiral->phase += spiral->phaseRate * D_800BE9A4;
-        spiral->center.unk0 += obj->vel.unk0 * D_800BE9A4;
-        spiral->center.unk4 += obj->vel.unk4 * D_800BE9A4;
-        spiral->center.unk8 += obj->vel.unk8 * D_800BE9A4;
-        obj->pos.unk0 = spiral->center.unk0 + side * spiral->cosDir;
-        obj->pos.unk4 = spiral->center.unk4 + up;
-        obj->pos.unk8 = spiral->center.unk8 - side * spiral->sinDir;
+        spiral->center.x += obj->vel.x * D_800BE9A4;
+        spiral->center.y += obj->vel.y * D_800BE9A4;
+        spiral->center.z += obj->vel.z * D_800BE9A4;
+        obj->pos.x = spiral->center.x + side * spiral->cosDir;
+        obj->pos.y = spiral->center.y + up;
+        obj->pos.z = spiral->center.z - side * spiral->sinDir;
     }
-    obj->rot.unk0 += obj->spin.unk0 * D_800BE9A4;
-    obj->rot.unk4 += obj->spin.unk4 * D_800BE9A4;
-    obj->rot.unk8 += obj->spin.unk8 * D_800BE9A4;
+    obj->rot.x += obj->spin.x * D_800BE9A4;
+    obj->rot.y += obj->spin.y * D_800BE9A4;
+    obj->rot.z += obj->spin.z * D_800BE9A4;
     // matching: the original falls off the end here without setting a return value
 }
 
-extern struct17 *func_15144B34(s32);
-extern f32 func_15143E64(struct17 *);
+extern Vec3f *func_15144B34(s32);
+extern f32 func_15143E64(Vec3f *);
 
 /* Fades the object out near the camera and keeps its positional sound playing (started
  * within 200 units of the camera), as its SPIRAL_* flags ask; always returns 1. */
@@ -162,13 +162,13 @@ s32 func_150F4A38(EffectObj *obj) {
 
     spiral = &obj->spiral;
     if ((spiral->flags & SPIRAL_FADE_NEAR) || (spiral->flags & SPIRAL_SOUND)) {
-        struct17 *camera;
-        struct17 delta;
+        Vec3f *camera;
+        Vec3f delta;
 
         camera = func_15144B34(0);
-        delta.unk0 = obj->pos.unk0 - camera->unk0;
-        delta.unk4 = obj->pos.unk4 - camera->unk4;
-        delta.unk8 = obj->pos.unk8 - camera->unk8;
+        delta.x = obj->pos.x - camera->x;
+        delta.y = obj->pos.y - camera->y;
+        delta.z = obj->pos.z - camera->z;
         dist = func_15143E64(&delta);
     }
     if (spiral->flags & SPIRAL_FADE_NEAR) {
@@ -182,10 +182,10 @@ s32 func_150F4A38(EffectObj *obj) {
     }
     if ((spiral->flags & SPIRAL_SOUND) && !(spiral->flags & SPIRAL_MUTED)) {
         if (obj->sound >> 16) {
-            func_1000F9D4(obj->sound >> 16, obj->pos.unk0, obj->pos.unk4, obj->pos.unk8);
+            func_1000F9D4(obj->sound >> 16, obj->pos.x, obj->pos.y, obj->pos.z);
         } else if (dist < 200.0f) {
             obj->sound |= func_10010F88(obj->sound & 0xFFFF, (func_150ADA20() & 0x3FFF) + 0x4000, 0, 0, -1,
-                                        obj->pos.unk0, obj->pos.unk4, obj->pos.unk8, 10000, 20000) << 16;
+                                        obj->pos.x, obj->pos.y, obj->pos.z, 10000, 20000) << 16;
         }
     }
     return 1;
@@ -255,10 +255,10 @@ extern void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
  * its view direction. */
 void func_150F4DEC(CameraEmitter *emitter) {
     CameraEmitterData *data;
-    struct17 *eye;
+    Vec3f *eye;
     s32 yaw;
-    struct17 from;
-    struct17 to;
+    Vec3f from;
+    Vec3f to;
     VariantList *variants;
     u8 i;
     f32 speed;
@@ -273,18 +273,18 @@ void func_150F4DEC(CameraEmitter *emitter) {
         /* degrees to 256-step binary angle */
         yaw = (data->camera->unk380 + 180.0f) * 0.7111111283f;
         do {
-            func_15143874(yaw + 21, func_150ADA68() * 381.0f + 254.0f, &from.unk0, &from.unk8);
-            from.unk4 = func_150ADA68() * 212.0f + -133.0f;
-            from.unk0 += eye->unk0;
-            from.unk4 += eye->unk4;
-            from.unk8 += eye->unk8;
-            func_15143874(yaw - 21, func_150ADA68() * 381.0f + 254.0f, &to.unk0, &to.unk8);
-            to.unk4 = func_150ADA68() * 212.0f + -133.0f;
-            to.unk0 += eye->unk0;
-            to.unk4 += eye->unk4;
-            to.unk8 += eye->unk8;
+            func_15143874(yaw + 21, func_150ADA68() * 381.0f + 254.0f, &from.x, &from.z);
+            from.y = func_150ADA68() * 212.0f + -133.0f;
+            from.x += eye->x;
+            from.y += eye->y;
+            from.z += eye->z;
+            func_15143874(yaw - 21, func_150ADA68() * 381.0f + 254.0f, &to.x, &to.z);
+            to.y = func_150ADA68() * 212.0f + -133.0f;
+            to.x += eye->x;
+            to.y += eye->y;
+            to.z += eye->z;
             if (func_150ADA20() & 1) {
-                struct17 tmp;
+                Vec3f tmp;
 
                 tmp = from;
                 from = to;

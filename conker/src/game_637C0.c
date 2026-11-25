@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_150440A0(f32 mtx[4][4], f32 eyeX, f32 eyeY, f32 eyeZ, f32 atX, f32 atY, f32 atZ, f32 upX, f32 upY, f32 upZ);
+void func_150440A0(MtxF mtx, f32 eyeX, f32 eyeY, f32 eyeZ, f32 atX, f32 atY, f32 atZ, f32 upX, f32 upY, f32 upZ);
 
 /*
  * Rebuilds bone matrix `bone` of actor `actorIndex` as a look-at (func_150440A0) along the line

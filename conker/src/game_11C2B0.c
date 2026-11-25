@@ -79,8 +79,6 @@ void func_150EEF40(Actor *actor, u8 slot) {
     func_151403A8((s32)&msg, 0x43);
 }
 
-typedef struct { f32 x, y, z; } Vec3f;
-
 typedef struct {
     u8 pad0[9];
     u8 hidden;
@@ -206,7 +204,7 @@ Beam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     init.target = func_15083E90(0x12);
     init.targetId = 0x12;
     init.slot = slot;
-    init.direction = *(Vec3f *)&D_800A5480;
+    init.direction = D_800A5480;
     init.flags = 0;
     spawn.texture = 0x94;
     spawn.type = 7;
@@ -225,8 +223,8 @@ Beam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     spawn.scale.y = 0.0f;
     spawn.scale.z = 0.0f;
     spawn.width = 100.0f;
-    spawn.pos = *(vertex *)&D_800A5480;
-    spawn.rot = *(vertex *)&D_800A5480;
+    spawn.pos = D_800A5480;
+    spawn.rot = D_800A5480;
     spawn.flags = 0x046C0008;
     spawn.unk44 = 0xFF;
     spawn.unk45 = 0xFF;
@@ -518,7 +516,7 @@ s32 func_150EFA4C(Spark *spark) {
 }
 
 typedef struct {
-    struct17 pos;
+    Vec3f pos;
     s16 unkC;
     s16 unkE;
     s32 unk10;
@@ -573,7 +571,7 @@ void func_150EFB80(BeamEmitter *emitter) {
     if (link->accum > 1.0f) {
         beam = link->beam;
         if (beam->link.flags & 1) {
-            spawn.pos = *(struct17 *)&beam->end;
+            spawn.pos = *(Vec3f *)&beam->end;
             spawn.unkE = 5;
             spawn.unk10 = 10;
             part.unk14 = 4;
@@ -873,9 +871,9 @@ extern f32 D_800A1640[][3];
 extern f32 D_800A1658[][3];
 extern u8 D_800A1670[];
 extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
-extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8,
+extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, Vec3f *, s32, s32, s32, u8,
                           s32);
-s32 func_151C229C(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, Actor *,
+s32 func_151C229C(Vec3f *, Vec3f *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, Actor *,
                   s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 
 /* Fires a projectile (func_151C229C) from slot `slot` of `actor` once actor->unk2EC
@@ -887,8 +885,8 @@ s32 func_150F03F8(actor, slot, arg2, arg3)
     s32 arg3;
 {
     s32 ret;
-    struct17 muzzle;
-    struct17 dir;
+    Vec3f muzzle;
+    Vec3f dir;
     f32 *src[2];
     f32 *dst[2];
     Header hdr;
@@ -913,12 +911,12 @@ s32 func_150F03F8(actor, slot, arg2, arg3)
     }
     src[0] = D_800A1640[slot];
     src[1] = D_800A1658[slot];
-    dst[0] = &muzzle.unk0;
-    dst[1] = &dir.unk0;
+    dst[0] = &muzzle.x;
+    dst[1] = &dir.x;
     func_15145EA4(src, dst, (Mtx *)actor->unk1D4 + D_800A1670[slot], 2);
-    dir.unk0 -= muzzle.unk0;
-    dir.unk4 -= muzzle.unk4;
-    dir.unk8 -= muzzle.unk8;
+    dir.x -= muzzle.x;
+    dir.y -= muzzle.y;
+    dir.z -= muzzle.z;
     {
         f32 func_150ADA68(void); // matching: this block's extra line steers as1 scheduling
 
@@ -933,9 +931,9 @@ s32 func_150F03F8(actor, slot, arg2, arg3)
     hdr.unk1 = -1;
     hdr.unk2 = (func_150ADA20() % 5U) + 4;
     hdr.unk4 = 0;
-    origin.unk0 = muzzle.unk0;
-    origin.unk4 = muzzle.unk4;
-    origin.unk8 = muzzle.unk8;
+    origin.unk0 = muzzle.x;
+    origin.unk4 = muzzle.y;
+    origin.unk8 = muzzle.z;
     randA = (func_150ADA20() % 51U) + 80;
     func_151602C0(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg2, arg3);
     params[1] = (func_150ADA68() * 1906.0f + 969.0f) * 0.001000000047f;
@@ -1156,8 +1154,8 @@ void func_150F0BEC(Actor *actor) {
     spawn.pos.x = actor->x_position;
     spawn.pos.y = actor->y_position;
     spawn.pos.z = actor->z_position;
-    spawn.offset = *(vertex *)&D_800A5480;
-    spawn.vel = *(vertex *)&D_800A5480;
+    spawn.offset = D_800A5480;
+    spawn.vel = D_800A5480;
     spawn.fadeStart = 1;
     spawn.fadeRate = 0xFF;
     spawn.scaleStart = 1;
@@ -1435,7 +1433,7 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
     u8 arg3;
     s32 arg4;
 {
-    struct17 muzzle;
+    Vec3f muzzle;
     u8 kind;
 
     if (actor == NULL) {
@@ -1470,15 +1468,15 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
             return;
         }
         src[0] = D_800A168C[kind][variant][slot];
-        dst[0] = &muzzle.unk0;
+        dst[0] = &muzzle.x;
         func_15145EA4(src, dst, (Mtx *)actor->unk1D4 + D_800A180C[kind][slot], 1);
         hdr.unk0 = 3;
         hdr.unk1 = -1;
         hdr.unk2 = (func_150ADA20() % 5U) + 4;
         hdr.unk4 = 0;
-        origin.unk0 = muzzle.unk0;
-        origin.unk4 = muzzle.unk4;
-        origin.unk8 = muzzle.unk8;
+        origin.unk0 = muzzle.x;
+        origin.unk4 = muzzle.y;
+        origin.unk8 = muzzle.z;
         randA = (func_150ADA20() % 51U) + 80;
         func_151602C0(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
         params[1] = (func_150ADA68() * 701.0f + 1925.0f) * 0.001000000047f;
@@ -1504,8 +1502,6 @@ typedef struct {
 } Struct800CC298;
 
 #define D_800CC298_REC ((Struct800CC298 *)&D_800CC298)
-
-typedef f32 MtxF[4][4];
 
 extern Rates150F1A00 D_80088B00;
 f32 cosf(f32);
@@ -1609,7 +1605,7 @@ void func_150F1CB0(Actor150F1CB0 *actor) {
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ struct17 pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -1630,7 +1626,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ struct17 pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -1651,30 +1647,30 @@ extern f32 D_800A18CC[];
 extern s32 D_800A18D8[];
 extern f32 D_800A18E0[];
 
-void func_151D5334(struct17 *, f32, f32, f32, s32, u8, s32);
-void func_151D5514(struct17 *, u8, s32);
-void func_151D3FF4(struct17 *, u8, s32);
-void func_151541B8(struct17 *, f32, f32, f32, f32, u8, s32);
+void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
+void func_151D5514(Vec3f *, u8, s32);
+void func_151D3FF4(Vec3f *, u8, s32);
+void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 void func_1515080C(Cfg150F1D10A *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, u8, s32);
 void func_15152190(Cfg150F1D10B *, s32 *, f32 *, s32, f32, s32, u8, s32);
 
 /* Burst of effects at `actor` (func_151D5404 and friends, sound 0x2B6/0x2BE, two particle
  * sprays scaled by the actor's size). */
 void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
-    struct17 pos;
+    Vec3f pos;
     f32 scale;
 
     if (actor == NULL) {
         return;
     }
-    pos.unk0 = actor->x_position;
-    pos.unk4 = actor->y_position + 20.0f;
-    pos.unk8 = actor->z_position;
+    pos.x = actor->x_position;
+    pos.y = actor->y_position + 20.0f;
+    pos.z = actor->z_position;
     scale = (actor->xz_scale + actor->y_scale) * 0.5f;
     func_151D5404(&pos, 506.0f, 1013.0f, 0.0009871669f, 15, 20, arg1, arg2);
     func_151D5334(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
     func_151D5514(&pos, arg1, arg2);
-    func_10010F88((func_150ADA20() & 8) + 0x2B6, 0x7FFF, 0, 0, 0, pos.unk0, pos.unk4, pos.unk8, 4000, 6000);
+    func_10010F88((func_150ADA20() & 8) + 0x2B6, 0x7FFF, 0, 0, 0, pos.x, pos.y, pos.z, 4000, 6000);
     func_151D3FF4(&pos, arg1, arg2);
     func_151541B8(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
                   (f32)(u32)(func_150ADA20() % 56U + 200), 0.0f, arg1, arg2);

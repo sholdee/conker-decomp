@@ -16,13 +16,13 @@ s32 func_1502B5C8(s32 *size, s32 arg1, s32 arg2, s32 arg3);
 
 /* A translation plus a rotation (degrees) applied on top of a camera's view matrix. */
 typedef struct {
-    /* 0x00 */ vertex pos;
-    /* 0x0C */ vertex rot;
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ Vec3f rot;
 } CamOffset;
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x54];
-    /* 0x54 */ vertex unk54;
+    /* 0x54 */ Vec3f unk54;
     /* 0x60 */ f32 unk60;
     /* 0x64 */ u8 pad64[0x4];
 } Entry800DC2C0;
@@ -57,18 +57,18 @@ void func_1512C490(Camera *camera) {
     s32 pad100; // matching: unused stack slot in the original frame
     f32 sideZ;
     f32 sideX;
-    vertex eye;
-    vertex at;
-    vertex prevEye;
-    vertex prevTarget;
+    Vec3f eye;
+    Vec3f at;
+    Vec3f prevEye;
+    Vec3f prevTarget;
     f32 shakeScale;
-    vertex dir;
+    Vec3f dir;
     f32 stiffness;
     f32 damping;
     f32 dirZ;
     f32 dirY;
     f32 dirX;
-    f32 dirMtx[4][4];
+    MtxF dirMtx;
     f32 yaw;
 
     shakeScale = D_800BE628[camera->playerIndex].perspScale;
@@ -122,7 +122,7 @@ void func_1512C490(Camera *camera) {
         func_1512523C(camera);
         func_15125594(camera);
     }
-    func_150491EC((struct17 *)&eye, (struct17 *)&at, (struct17 *)&dir);
+    func_150491EC((Vec3f *)&eye, (Vec3f *)&at, (Vec3f *)&dir);
     camera->playerExt->aimTarget = at;
     camera->playerExt->aimEye = eye;
     camera->playerExt->aimDir = dir;
@@ -175,7 +175,7 @@ void func_1512C490(Camera *camera) {
         func_150A7DF0(&rotMtx, -camera->shakeRot.y * shakeScale, camera->shakeRot.z * shakeScale, camera->shakeRot.x * shakeScale);
         guMtxCatL(VIEW_MTX(camera->playerIndex), &rotMtx, VIEW_MTX(camera->playerIndex));
         if (camera->playerExt != NULL) {
-            yaw = func_15048FC8((struct17 *)&camera->playerExt->aimDir) - 180.0f;
+            yaw = func_15048FC8((Vec3f *)&camera->playerExt->aimDir) - 180.0f;
             func_150A8050(dirMtx,
                           -func_150484A0(camera->playerExt->aimDir.y,
                                          sqrtf(camera->playerExt->aimDir.x * camera->playerExt->aimDir.x +
@@ -243,7 +243,7 @@ void func_1512C490(Camera *camera) {
 /* Applies the camera's breathing wobble: a scale on x and y that oscillates with wobblePhase. */
 void func_1512D070(Camera *camera) {
     Mtx mtx;
-    f32 mf[4][4];
+    MtxF mf;
     f32 amount;
 
     if (camera->mode & 0x80000) {

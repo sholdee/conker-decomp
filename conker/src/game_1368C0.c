@@ -70,7 +70,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ vertex pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -128,11 +128,11 @@ typedef struct ParticleSpawn78 {
     /* 0x04 */ f32 elasticity;
     /* 0x08 */ f32 sizeXZ;
     /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
+    /* 0x10 */ Vec3f rot;
+    /* 0x1C */ Vec3f scale;
+    /* 0x28 */ Vec3f pos;
+    /* 0x34 */ Vec3f vel;
+    /* 0x40 */ Vec3f rotVel;
     /* 0x4C */ f32 gravity;
     /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;
@@ -170,30 +170,30 @@ typedef struct {
 
 /* Emission segments of effect 0x1A: particles start on segment i (D_800A24B0[i] to
  * D_800A24B0[i + 1]), picked with weight D_800A2504[i]; D_800A2504[6] is the weight total. */
-extern const vertex D_800A24B0[7];
+extern const Vec3f D_800A24B0[7];
 extern const f32 D_800A2504[7];
-extern const vertex D_800A2520[6];
+extern const Vec3f D_800A2520[6];
 /* The same for effect 0x1B. */
-extern const vertex D_800A2568[7];
-extern const vertex D_800A25BC[6];
+extern const Vec3f D_800A2568[7];
+extern const Vec3f D_800A25BC[6];
 /* Effect 0x1C's two emission points and the points their particles head for. */
-extern vertex D_800A2604;
-extern vertex D_800A2610;
-extern vertex D_800A261C;
-extern vertex D_800A2628;
+extern Vec3f D_800A2604;
+extern Vec3f D_800A2610;
+extern Vec3f D_800A261C;
+extern Vec3f D_800A2628;
 
 /* Per-frame effect callbacks, and particle emitters called with
  * (effect, point, segment start, segment end, segment tip, direction). */
 extern void (*D_80088C60[])(void *);
-extern void (*D_80088C64[])(void *, vertex *, vertex *, vertex *, vertex *, vertex *);
+extern void (*D_80088C64[])(void *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *);
 
-extern void func_15143134(const vertex *, vertex *, void *);
-extern s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
+extern void func_15143134(const Vec3f *, Vec3f *, void *);
+extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 extern Particle1368C0 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 extern void func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 extern void func_15152B38(EmitterSpawn *, u8, s32);
-extern void func_1511490C(f32 mtx[4][4], void *arg1);
-extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+extern void func_1511490C(MtxF mtx, void *arg1);
+extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /*
  * Creates effect 0x1A on `object`, lasting `duration` frames (negative: 300), emitting
@@ -240,13 +240,13 @@ struct260 *func_15109410(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, 
 void func_151094FC(Effect1368C0 *effect) {
     ObjectEmitterData *data;
     Actor *object;
-    vertex point;
-    vertex start;
-    vertex end;
-    vertex tip;
-    vertex dir;
-    vertex local;
-    const vertex *segment;
+    Vec3f point;
+    Vec3f start;
+    Vec3f end;
+    Vec3f tip;
+    Vec3f dir;
+    Vec3f local;
+    const Vec3f *segment;
     void *matrix;
     s32 i;
     f32 r;
@@ -294,7 +294,7 @@ void func_151094FC(Effect1368C0 *effect) {
 }
 
 /* Particle emitter: a particle flying along `dir` from `point`, plus a func_15152B38 emitter there. */
-void func_15109848(Effect1368C0 *effect, vertex *point, vertex *start, vertex *end, vertex *tip, vertex *dir) {
+void func_15109848(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) {
     ParticleDesc spawn;
     f32 speed;
     EmitterSpawn emitter;
@@ -399,7 +399,7 @@ void func_15109848(Effect1368C0 *effect, vertex *point, vertex *start, vertex *e
 }
 
 /* Particle emitter: a randomly sized and spun piece of debris thrown along `dir` from `point`. */
-void func_15109C20(Effect1368C0 *effect, vertex *point, vertex *start, vertex *end, vertex *tip, vertex *dir) {
+void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end, Vec3f *tip, Vec3f *dir) {
     s32 padA4; // matching: unused stack slots in the original frame
     Actor *object;
     f32 speed;
@@ -506,13 +506,13 @@ void func_15109FB8(Effect1368C0 *effect) {
     data->spawnAccum += data->spawnRate * D_800A2504[6] * D_800BE9A4;
     if (data->emitFunc != -1) {
         while (data->spawnAccum > 1.0f) {
-            f32 mtx[4][4];
-            vertex point;
-            vertex start;
-            vertex end;
-            vertex tip;
-            vertex dir;
-            const vertex *segment;
+            MtxF mtx;
+            Vec3f point;
+            Vec3f start;
+            Vec3f end;
+            Vec3f tip;
+            Vec3f dir;
+            const Vec3f *segment;
             s32 i;
             f32 r;
             f32 t;
@@ -581,8 +581,8 @@ struct260 *func_1510A344(Actor *object, s32 duration, u8 owner, s32 kind) {
 void func_1510A40C(Effect1368C0 *effect) {
     PairEmitterData *data;
     Actor *object;
-    vertex points[2];
-    vertex dirs[2];
+    Vec3f points[2];
+    Vec3f dirs[2];
     void *matrix;
     ParticleDesc spawn;
     f32 extra;

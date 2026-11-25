@@ -10,10 +10,6 @@
 
 #define TRAIL_ATTACHED  2 /* trail->flags: the ribbon starts at the emitter position */
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* One point of a trail's ring buffer. */
 typedef struct {
     /* 0x00 */ Vec3f pos;

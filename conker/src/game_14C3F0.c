@@ -40,8 +40,8 @@ typedef union {
 
 extern void *allocate_memory(s32, s32, s32, s32);
 extern WorldObject *func_151149AC(u8 id); /* the prop whose id is `id`, or NULL */
-extern void func_1511490C(f32 mtx[4][4], WorldObject *prop);
-extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+extern void func_1511490C(MtxF mtx, WorldObject *prop);
+extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* State of func_1511EF40's swing, allocated on its first update. */
 struct SwingMotion {
@@ -55,10 +55,6 @@ struct SwingMotion {
     /* 0x1C */ s16 timer;
     /* 0x1E */ u8 pad1E[6];
 }; /* size 0x24 */
-
-typedef struct {
-    f32 x, y, z;
-} FVec3;
 
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
 extern s32 func_15086D48(s32);
@@ -116,7 +112,7 @@ void func_1511EF40(WorldObject *prop) {
             actor->target.x = prop->x;
             actor->target.y = prop->y;
             actor->target.z = prop->z;
-            *(FVec3 *)&actor->focus = *(FVec3 *)&actor->target;
+            *(Vec3f *)&actor->focus = *(Vec3f *)&actor->target;
             actor->eye.x = 0.0f;
             actor->eye.z = 0.0f;
             actor->eye.y = 300.0f;
@@ -142,7 +138,7 @@ void func_1511EF40(WorldObject *prop) {
 /* On level 0x35, places a kind-0x8005 prop at a fixed point in the frame of the prop it is linked to. */
 void func_1511F31C(WorldObject *prop) {
     s32 pad[2]; // matching: unused stack slots of the original frame
-    f32 mtx[4][4];
+    MtxF mtx;
     f32 x;
     f32 y;
     f32 z;

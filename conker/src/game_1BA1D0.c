@@ -17,34 +17,34 @@ typedef struct Particle {
 
 extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-extern void func_15145DB4(void *placement, struct17 *in, struct17 *out, s32 count);
+extern void func_15145DB4(void *placement, Vec3f *in, Vec3f *out, s32 count);
 
 /* Spawns 25-35 particles on a ring around (111, -90, 0) in placement space, flying outward from its center. */
 void func_1518CD20(void *placement, u8 arg1, s32 arg2) {
     s16 count;
     ParticleDesc spawn;
     s16 remaining;
-    vertex *points;
+    Vec3f *points;
     s16 i;
     f32 drag;
-    struct17 *ring;
+    Vec3f *ring;
 
     count = remaining = func_150ADA20() % 11U + 25;
     if (count > 0) {
-        ring = (struct17 *)func_10003C6C((count + 1) * sizeof(struct17), 3, 1, 0, 1);
-        points = (vertex *)func_10003C6C((count + 1) * sizeof(vertex), 3, 1, 0, 1);
+        ring = (Vec3f *)func_10003C6C((count + 1) * sizeof(Vec3f), 3, 1, 0, 1);
+        points = (Vec3f *)func_10003C6C((count + 1) * sizeof(Vec3f), 3, 1, 0, 1);
         if (ring == NULL || points == NULL) {
             return;
         }
         for (i = 0; i < count; i++) {
-            func_1514373C(func_150ADA68() * 3.141592741f + 3.141592741f, 114.0f, &ring[i].unk0, &ring[i].unk8);
-            ring[i].unk0 += 111.0f;
-            ring[i].unk4 = -90.0f;
+            func_1514373C(func_150ADA68() * 3.141592741f + 3.141592741f, 114.0f, &ring[i].x, &ring[i].z);
+            ring[i].x += 111.0f;
+            ring[i].y = -90.0f;
         }
         i = 0;
-        ring[count].unk0 = 111.0f;
-        ring[count].unk4 = -90.0f;
-        ring[count].unk8 = 0.0f;
+        ring[count].x = 111.0f;
+        ring[count].y = -90.0f;
+        ring[count].z = 0.0f;
         func_15145DB4(placement, ring, points, count + 1);
         spawn.texture = 0x6C;
         spawn.renderMode = 0x5103;

@@ -10,7 +10,7 @@ typedef struct BoltDesc {
     /* 0x00 */ s16 life;
     /* 0x02 */ u8 flags;          /* bit 0: life counts down */
     /* 0x03 */ u8 pad3;
-    /* 0x04 */ vertex ctrl[4];     /* Bezier control points; ctrl[0] and ctrl[3] are the end points */
+    /* 0x04 */ Vec3f ctrl[4];     /* Bezier control points; ctrl[0] and ctrl[3] are the end points */
     /* 0x34 */ s8 updateKind;     /* index into D_80088C10, -1: none */
     /* 0x35 */ u8 pad35[3];
     /* 0x38 */ s32 segments;
@@ -26,15 +26,15 @@ typedef struct BoltDesc {
 /* One point of the Bezier sampled at parameter t, with a frame for the sideways jitter. */
 typedef struct BoltSample {
     /* 0x00 */ f32 t;
-    /* 0x04 */ vertex pos;
-    /* 0x10 */ vertex tangent;
-    /* 0x1C */ vertex normal;
-    /* 0x28 */ vertex binormal;
+    /* 0x04 */ Vec3f pos;
+    /* 0x10 */ Vec3f tangent;
+    /* 0x1C */ Vec3f normal;
+    /* 0x28 */ Vec3f binormal;
 } BoltSample; /* size 0x34 */
 
 typedef struct BoltFlare {
     /* 0x00 */ u8 pad0[0x40];
-    /* 0x40 */ vertex pos;
+    /* 0x40 */ Vec3f pos;
 } BoltFlare;
 
 /*
@@ -80,7 +80,7 @@ typedef struct BoltChain {
     /* 0x00 */ s32 count;          /* number of points */
     /* 0x04 */ s32 index;          /* point where the next link starts */
     /* 0x08 */ BoltObj *link;      /* the live link, NULL once it is gone */
-    /* 0x0C */ vertex *points;
+    /* 0x0C */ Vec3f *points;
     /* 0x10 */ BoltChainConfig config;
     /* 0x40 */ u8 kind;            /* index into D_80088C38 */
     /* 0x41 */ u8 pad41[3];
@@ -91,29 +91,29 @@ typedef struct BoltChainObj {
     /* 0x24 */ u8 pad24[4];
     /* 0x28 */ BoltChain chain;
     /* 0x6C */ u8 pad6C[4];
-    /* 0x70 */ vertex points[1];    /* chain.count points */
+    /* 0x70 */ Vec3f points[1];    /* chain.count points */
 } BoltChainObj;
 
 /* Result of the func_15081690 ray cast. */
 typedef struct RayHit {
     /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ vertex pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ u8 pad14[0x59 - 0x14];
     /* 0x59 */ u8 hit;
     /* 0x5A */ u8 pad5A[0x64 - 0x5A];
 } RayHit;
 
 void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread);
-void func_15107A20(Actor *actor, s32 yaw, s32 pitch, vertex *out, vertex *centerOut);
-void func_15107AE0(vertex *start, vertex *end, vertex *ctrl1, vertex *ctrl2);
-void func_15107F54(Actor *actor, u8 bone, vertex *localPos, vertex *out);
-void func_15143794(s32 yaw, s32 pitch, f32 length, vertex *out);
+void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
+void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2);
+void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out);
+void func_15143794(s32 yaw, s32 pitch, f32 length, Vec3f *out);
 void func_15081690(Actor *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32, s32, s32, s32, s32, s32);
 BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
 void func_15106214(BoltObj *bolt);
 void func_15106610(BoltObj *bolt);
 BoltSample *func_151061E0(BoltObj *bolt);
-vertex *func_151061EC(BoltObj *bolt);
+Vec3f *func_151061EC(BoltObj *bolt);
 
 extern s32 (*D_80088C10[])(BoltObj *bolt, u8 *moved);
 
@@ -132,12 +132,12 @@ BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
 
     segments = desc->segments;
     points = desc->segments + 2;
-    bolt = func_15167A68(0x40, arg3, segments * sizeof(BoltSample) + points * sizeof(vertex) + extraSize + sizeof(BoltObj), 1, arg2, 1);
+    bolt = func_15167A68(0x40, arg3, segments * sizeof(BoltSample) + points * sizeof(Vec3f) + extraSize + sizeof(BoltObj), 1, arg2, 1);
     if (bolt == NULL) {
         return NULL;
     }
     memcpy(&bolt->desc, desc, sizeof(BoltDesc));
-    bolt->userData = (u8 *)bolt + segments * sizeof(BoltSample) + points * sizeof(vertex) + sizeof(BoltObj);
+    bolt->userData = (u8 *)bolt + segments * sizeof(BoltSample) + points * sizeof(Vec3f) + sizeof(BoltObj);
     bolt->step = 1.0f / (desc->segments + 1);
     bolt->rejitterTimer = func_150ADA20() % (desc->rejitterRange + 1) + desc->rejitterBase;
     func_15106214(bolt);
@@ -166,8 +166,8 @@ BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
         spawn.b2 = desc->color.b;
         spawn.alpha = desc->color.a;
         spawn.brightness = 0xFF;
-        spawn.offset = *(vertex *)&D_800A5480;
-        spawn.vel = *(vertex *)&D_800A5480;
+        spawn.offset = D_800A5480;
+        spawn.vel = D_800A5480;
         spawn.fadeStart = 1;
         spawn.fadeRate = 0xFF;
         spawn.scaleStart = 1;
@@ -242,9 +242,9 @@ BoltSample *func_151061E0(BoltObj *bolt) {
 }
 
 /* The jittered joint points that follow the samples. */
-vertex *func_151061EC(BoltObj *bolt) {
+Vec3f *func_151061EC(BoltObj *bolt) {
     s32 segments = bolt->desc.segments;
-    return (vertex *)((BoltSample *)(bolt + 1) + segments);
+    return (Vec3f *)((BoltSample *)(bolt + 1) + segments);
 }
 
 f32 func_151064B4(f32 t);
@@ -255,7 +255,7 @@ f32 func_15106558(f32 t);
 f32 func_15106584(f32 t);
 f32 func_151065BC(f32 t);
 f32 func_151065EC(f32 t);
-s32 func_15146078(vertex *dir, vertex *perp0, vertex *perp1);
+s32 func_15146078(Vec3f *dir, Vec3f *perp0, Vec3f *perp1);
 
 /* Samples the Bezier at t = step, 2 * step, ...: position, tangent and a frame around the tangent. */
 void func_15106214(BoltObj *bolt) {
@@ -353,7 +353,7 @@ void func_15143874(s16 angle, f32 radius, f32 *x, f32 *y);
 /* Rebuilds the joint points: the fixed end points plus each sample pushed a random distance sideways. */
 void func_15106610(BoltObj *bolt) {
     BoltSample *samples;
-    vertex *points;
+    Vec3f *points;
     s32 i;
     s32 j;
 
@@ -362,7 +362,7 @@ void func_15106610(BoltObj *bolt) {
     points[0] = bolt->desc.ctrl[0];
     points[bolt->desc.segments + 1] = bolt->desc.ctrl[3];
     for (i = 1, j = 0; i < bolt->desc.segments + 1; i++, j++) {
-        vertex *point = &points[i];
+        Vec3f *point = &points[i];
         BoltSample *sample = &samples[j];
         f32 offset1;
         f32 offset0;
@@ -376,7 +376,7 @@ void func_15106610(BoltObj *bolt) {
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-vertex *func_15144B34(s32 view);
+Vec3f *func_15144B34(s32 view);
 Gfx *func_15142E24(Gfx *, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
 Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
 Gfx *func_15142B7C(Gfx *, s32, s32);
@@ -388,17 +388,17 @@ extern s32 D_800D2C9C;
 
 /* Draws the bolt as a camera-facing strip: three vertices (one side, centre, other side) per joint point. */
 Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
-    vertex *camera;
+    Vec3f *camera;
     BoltObj *curve = bolt; // matching: a second copy of the bolt pointer steers IDO's register choice
     Vtx_t *vtx;
-    vertex delta;
-    vertex toCamera;
-    vertex normal;
+    Vec3f delta;
+    Vec3f toCamera;
+    Vec3f normal;
     f32 lengthSquared;
     u8 flag;
-    vertex *points;
+    Vec3f *points;
     s32 i;
-    vertex previous;
+    Vec3f previous;
 
     if (0) { gdl = gdl; } // matching: dead IR resets uopt alias state so the first strip reloads vtx
     func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, (void **)&vtx, NULL);
@@ -454,7 +454,7 @@ Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
     vtx++;
     previous = points[0];
     for (i = 1; i < curve->desc.segments + 2; i++) {
-        vertex *point = &points[i];
+        Vec3f *point = &points[i];
 
         delta.x = previous.x - point->x;
         delta.y = previous.y - point->y;
@@ -554,7 +554,7 @@ void func_15106F50(BoltObj *bolt, s32 arg1, u8 arg2) {
 }
 
 /* Creates a bolt chain from start to end with (1 << depth) + 1 randomly spaced points. */
-BoltChainObj *func_15106F98(vertex *start, vertex *end, s32 depth, BoltChainConfig *config, f32 spread, u8 kind, u8 arg6, s32 arg7) {
+BoltChainObj *func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, u8 kind, u8 arg6, s32 arg7) {
     BoltChainObj *obj;
     BoltChain chain;
     BoltChain *data;
@@ -565,11 +565,11 @@ BoltChainObj *func_15106F98(vertex *start, vertex *end, s32 depth, BoltChainConf
     chain.config = *config;
     chain.kind = kind;
 
-    obj = (BoltChainObj *)func_15149130(0, -1, 0x3E, -1, 0, 0x30, (chain.count * sizeof(vertex) + 0x48), arg6, arg7);
+    obj = (BoltChainObj *)func_15149130(0, -1, 0x3E, -1, 0, 0x30, (chain.count * sizeof(Vec3f) + 0x48), arg6, arg7);
     if (obj != NULL) {
         data = &obj->chain;
         memcpy(data, &chain, sizeof(BoltChain));
-        data->points = (vertex *)((u8 *)data + 0x48); // matching: = obj->points, but computed from data
+        data->points = (Vec3f *)((u8 *)data + 0x48); // matching: = obj->points, but computed from data
         data->points[0] = *start;
         data->points[chain.count - 1] = *end;
         func_151070F8(obj, 0, chain.count - 1, spread);
@@ -580,7 +580,7 @@ BoltChainObj *func_15106F98(vertex *start, vertex *end, s32 depth, BoltChainConf
 /* Recursively places the points between lo and hi on the line, each midpoint randomly within +-spread of halfway. */
 void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread) {
     BoltChain *chain = &obj->chain;
-    vertex *a;
+    Vec3f *a;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -608,7 +608,7 @@ void func_151072BC(BoltChainObj *obj) {
     BoltChain *chain;
     BoltDesc desc;
     BoltChainObj *owner;
-    vertex offset;
+    Vec3f offset;
     BoltChainConfig *config;
 
     chain = &obj->chain;
@@ -704,7 +704,7 @@ typedef struct BoltBoneAnchor {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;         /* owner's unique_id when spawned */
     /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ vertex localPos;
+    /* 0x08 */ Vec3f localPos;
     /* 0x14 */ u8 bone;
     /* 0x15 */ u8 pad15[3];
 } BoltBoneAnchor;
@@ -718,7 +718,7 @@ BoltObj *func_15107700(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments,
     BoltObj *bolt;
     BoltDesc desc;
     RayHit hit;
-    vertex center;
+    Vec3f center;
     s32 countsDown;
     if (actor->unk1D4 == NULL) {
         return NULL;
@@ -751,7 +751,7 @@ BoltObj *func_15107700(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments,
 
     // matching: a block holding a declaration emits a scope marker that keeps IDO from hoisting &desc.color
     {
-        void func_15107A20(Actor *actor, s32 yaw, s32 pitch, vertex *out, vertex *centerOut);
+        void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
 
         func_15107A20(actor, yaw, pitch, &desc.ctrl[0], &center);
         func_15081690(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, desc.ctrl[0].x - center.x, desc.ctrl[0].y - center.y, desc.ctrl[0].z - center.z, &hit, 0.0f, 0, 1, 1, -1, 0, 0);
@@ -779,7 +779,7 @@ void func_151078E4(BoltObj *bolt, s32 arg1, u8 arg2) {
 s32 func_15107924(BoltObj *bolt, u8 *moved) {
     BoltAnchor *anchor;
     Actor *owner;
-    vertex oldStart;
+    Vec3f oldStart;
 
     anchor = bolt->userData;
     owner = anchor->owner;
@@ -796,11 +796,11 @@ s32 func_15107924(BoltObj *bolt, u8 *moved) {
     return 1;
 }
 
-void func_1515C244(Actor *actor, vertex *center, f32 *radius, f32 *arg3);
+void func_1515C244(Actor *actor, Vec3f *center, f32 *radius, f32 *arg3);
 
 /* The point on the actor's bounds in direction yaw/pitch (vertically scaled by unkF0); optionally the bounds centre. */
-void func_15107A20(Actor *actor, s32 yaw, s32 pitch, vertex *out, vertex *centerOut) {
-    vertex center;
+void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut) {
+    Vec3f center;
     f32 radius;
     f32 unused;
 
@@ -816,7 +816,7 @@ void func_15107A20(Actor *actor, s32 yaw, s32 pitch, vertex *out, vertex *center
 }
 
 /* Inner control points of a straight bolt: one third and two thirds of the way from start to end. */
-void func_15107AE0(vertex *start, vertex *end, vertex *ctrl1, vertex *ctrl2) {
+void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -836,8 +836,8 @@ extern void func_151C329C(void *, s32, s32);
 
 /* Calls func_151C329C at the point on the actor's bounds in direction yaw/pitch. */
 void func_15107B78(Actor *actor, s32 yaw, s32 pitch, s32 arg3, s32 arg4) {
-    vertex pos;
-    vertex center;
+    Vec3f pos;
+    Vec3f center;
     f32 radius;
     f32 unused;
 
@@ -856,12 +856,12 @@ void func_15107B78(Actor *actor, s32 yaw, s32 pitch, s32 arg3, s32 arg4) {
  * Spawns a kind-3 bolt from localPos in the actor's bone matrix along direction yaw/pitch, up to 300
  * units or to what the ray hits. life -1 means it never runs out.
  */
-BoltObj *func_15107C1C(Actor *actor, u8 bone, vertex *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
+BoltObj *func_15107C1C(Actor *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
     BoltBoneAnchor anchor;
     BoltObj *bolt;
     BoltDesc desc;
     RayHit hit;
-    vertex dir;
+    Vec3f dir;
     s32 countsDown;
     if (actor->unk1D4 == NULL) {
         return NULL;
@@ -916,7 +916,7 @@ BoltObj *func_15107C1C(Actor *actor, u8 bone, vertex *localPos, s16 yaw, s16 pit
 s32 func_15107E48(BoltObj *bolt, u8 *moved) {
     BoltBoneAnchor *anchor;
     Actor *owner;
-    vertex oldStart;
+    Vec3f oldStart;
 
     anchor = bolt->userData;
     owner = anchor->owner;
@@ -936,10 +936,10 @@ s32 func_15107E48(BoltObj *bolt, u8 *moved) {
     return 1;
 }
 
-void func_15143134(vertex *in, vertex *out, s32 mtx);
+void func_15143134(Vec3f *in, Vec3f *out, s32 mtx);
 
 /* Transforms localPos by the actor's bone matrix (64 bytes each, at unk1D4). */
-void func_15107F54(Actor *actor, u8 bone, vertex *localPos, vertex *out) {
+void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out) {
     func_15143134(localPos, out, (s32)actor->unk1D4 + (bone << 6));
 }
 

@@ -17,10 +17,6 @@ u8 func_150ADA20(void);
  * D_800BE9E4 the number of frames elapsed.
  */
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* Trail parameters, one entry per trail kind (D_800A8B80). */
 typedef struct TrailSpec {
     /* 0x00 */ f32 gravity;

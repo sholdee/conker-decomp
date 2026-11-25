@@ -6,7 +6,7 @@
 /* Parameter block for func_15152F70 (struct Local15152F70Arg in game_17CAF0.c). Integer fields are
  * base/range pairs, (random % (range + 1)) + base; float pairs are random01 * range + base. */
 typedef struct {
-    vertex position;
+    Vec3f position;
     f32 sizeBase;
     f32 sizeRange;
     f32 growthBase;
@@ -39,7 +39,7 @@ typedef struct {
 
 /* Parameter block for func_15153298 (Game153298Config in game_17CAF0.c). */
 typedef struct {
-    vertex position;
+    Vec3f position;
     s16 countBase;
     s16 countRange;
     s16 yawBase;

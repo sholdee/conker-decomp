@@ -3,12 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-typedef f32 BoneMatrix[4][4];
-
 typedef struct BoneFollower BoneFollower;
 typedef struct ActorFollowerGroup ActorFollowerGroup;
 
@@ -55,7 +49,7 @@ struct ActorFollowerGroup {
 }; // size 0x30
 
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
-void func_15143134(Vec3f *in, Vec3f *out, BoneMatrix *mtx);
+void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
 void func_1514EDF0(ActorFollowerGroup *, Actor *);
 
 void func_151D3308(BoneFollower *follower);
@@ -119,7 +113,7 @@ void func_151D2C40(BoneFollower *follower) {
         return;
     }
 
-    func_15143134(&follower->offset, &position, &((BoneMatrix *)actor->unk1D4)[follower->bone]);
+    func_15143134(&follower->offset, &position, &((MtxF *)actor->unk1D4)[follower->bone]);
 
     if (follower->flags & 1) {
         follower->timer -= D_800BE9E4;

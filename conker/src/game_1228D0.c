@@ -351,8 +351,8 @@ void func_150F5C98(SparkEffect *effect) {
     SparkData *data;
     ParticleDesc spawn;
     f32 scale;
-    struct17 start;
-    struct17 end;
+    Vec3f start;
+    Vec3f end;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -376,8 +376,8 @@ void func_150F5C98(SparkEffect *effect) {
             spawn.b2 = 0xB4;
             srcs[0] = D_800A1B00;
             srcs[1] = D_800A1B0C;
-            dsts[0] = &start.unk0;
-            dsts[1] = &end.unk0;
+            dsts[0] = &start.x;
+            dsts[1] = &end.x;
             func_15145EA4(srcs, dsts, (Mtx *)owner->unk1D4 + 5, 2);
             spawn.texture = 0x6C;
             spawn.renderMode = 0x5103;
@@ -387,10 +387,10 @@ void func_150F5C98(SparkEffect *effect) {
             spawn.frameRate = 0;
             spawn.a = 0xFF;
             spawn.brightness = 0xFF;
-            dx = end.unk0 - start.unk0;
-            dy = end.unk4 - start.unk4;
-            dz = end.unk8 - start.unk8;
-            spawn.offset = *(vertex *)&D_800A5480;
+            dx = end.x - start.x;
+            dy = end.y - start.y;
+            dz = end.z - start.z;
+            spawn.offset = D_800A5480;
             spawn.flags = 0x84CE07;
             spawn.primColorMode = 8;
             spawn.envColorMode = 6;
@@ -424,9 +424,9 @@ void func_150F5C98(SparkEffect *effect) {
                 /* Start a random part of a frame along the path. */
                 t = func_150ADA68() * D_800BE9A4;
                 spawn.flags &= ~0xC0;
-                spawn.pos.x = spawn.vel.x * t + start.unk0;
-                spawn.pos.y = spawn.vel.y * t + start.unk4;
-                spawn.pos.z = spawn.vel.z * t + start.unk8;
+                spawn.pos.x = spawn.vel.x * t + start.x;
+                spawn.pos.y = spawn.vel.y * t + start.y;
+                spawn.pos.z = spawn.vel.z * t + start.z;
                 flipX = (func_150ADA20() & 1) ? 0x80 : 0;
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipX;
                 spark = func_15130280(&spawn, 1, 0, 4, effect->head.unkC, effect->head.unk1);
@@ -459,8 +459,8 @@ typedef struct {
 /* Something drawn between two points (a beam or streak). */
 typedef struct {
     u8 pad0[0x34];
-    struct17 start;
-    struct17 end;
+    Vec3f start;
+    Vec3f end;
     u8 pad4C[0x110 - 0x4C];
     BeamPart part;
 } Beam;
@@ -499,8 +499,8 @@ extern f32 D_800A1B24[3];
 void func_150F6178(BeamEffect *effect) {
     BeamData *data;
     Actor *owner;
-    struct17 start;
-    struct17 end;
+    Vec3f start;
+    Vec3f end;
     f32 *srcs[2];
     f32 *dsts[2];
 
@@ -517,8 +517,8 @@ void func_150F6178(BeamEffect *effect) {
 
         srcs[0] = D_800A1B18;
         srcs[1] = D_800A1B24;
-        dsts[0] = &start.unk0;
-        dsts[1] = &end.unk0;
+        dsts[0] = &start.x;
+        dsts[1] = &end.x;
         func_15145EA4(srcs, dsts, (Mtx *)owner->unk1D4, 2);
         if (data->beam != NULL) {
             beam = data->beam;
@@ -530,9 +530,9 @@ void func_150F6178(BeamEffect *effect) {
         if (flash != NULL) {
             sprite = flash->sprite;
             sprite->hidden = FALSE;
-            sprite->position[0] = start.unk0;
-            sprite->position[1] = start.unk4;
-            sprite->position[2] = start.unk8;
+            sprite->position[0] = start.x;
+            sprite->position[1] = start.y;
+            sprite->position[2] = start.z;
         }
     } else {
         if (data->beam != NULL) {

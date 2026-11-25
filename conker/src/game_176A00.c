@@ -11,7 +11,7 @@ extern void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **vtx, u8 *fre
 
 /* Emitter description that func_15149550 turns into a spawned particle. */
 typedef struct {
-    /* 0x00 */ struct17 pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 maxA;
     /* 0x10 */ f32 maxB;
     /* 0x14 */ f32 minA;
@@ -76,7 +76,7 @@ typedef struct {
     /* 0x028 */ u8 pad28[4];
     /* 0x02C */ f32 width;            // eased by motion channel A
     /* 0x030 */ f32 height;           // eased by motion channel B
-    /* 0x034 */ struct17 pos;
+    /* 0x034 */ Vec3f pos;
     /* 0x040 */ u8 pad40[0xC];
     /* 0x04C */ f32 accelY;
     /* 0x050 */ f32 velY;
@@ -102,7 +102,7 @@ Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 kind, u8 
     s32 flip;
 
     spawn.flags = emitter->flags | 0x40000000;
-    spawn.pos = *(vertex *)&emitter->pos; // TODO(vectors): struct17/vertex mix
+    spawn.pos = *(Vec3f *)&emitter->pos; // TODO(vectors): struct17/vertex mix
     if (arg2) {
         spawn.flags |= 0x01000000;
         func_1510F800(0);
@@ -274,8 +274,8 @@ s32 func_15149C58(Particle *particle) {
     particle->width -= particle->width * particle->motion.shrinkRate;
     particle->height -= particle->height * particle->motion.shrinkRate;
     particle->velY += particle->accelY * D_800BE9A4;
-    particle->pos.unk4 += particle->velY * D_800BE9A4;
-    if (particle->motion.maxHeight < particle->pos.unk4) {
+    particle->pos.y += particle->velY * D_800BE9A4;
+    if (particle->motion.maxHeight < particle->pos.y) {
         return 0;
     }
     if (particle->width < 4.0f || particle->height < 4.0f) {
@@ -308,19 +308,19 @@ Vtx *func_15149D18(Particle *particle, s16 index) {
     dz = D_800DD1D8[index] * particle->width;
     dx = D_800DD1E8[index] * particle->width;
 
-    vtx[0].v.ob[0] = vtx[3].v.ob[0] = particle->pos.unk0 + dx;
-    vtx[0].v.ob[1] = vtx[1].v.ob[1] = particle->pos.unk4;
-    vtx[0].v.ob[2] = vtx[3].v.ob[2] = particle->pos.unk8 - dz;
-    vtx[1].v.ob[0] = vtx[2].v.ob[0] = particle->pos.unk0 - dx;
-    vtx[2].v.ob[1] = vtx[3].v.ob[1] = particle->pos.unk4 + particle->height;
-    vtx[1].v.ob[2] = vtx[2].v.ob[2] = particle->pos.unk8 + dz;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = particle->pos.x + dx;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = particle->pos.y;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = particle->pos.z - dz;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = particle->pos.x - dx;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = particle->pos.y + particle->height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = particle->pos.z + dz;
 
     return result;
 }
 
 /* Effect description passed to func_1518CA80 (mode 1: the position is given in floats). */
 typedef struct {
-    /* 0x00 */ struct17 pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ u8 padC[0xA];
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;

@@ -4,7 +4,7 @@
 #include "macros.h"
 
 extern f32 D_800894C0;
-extern vertex D_800894C8;
+extern Vec3f D_800894C8;
 
 void func_150495B0(f32 *value, f32 target, f32 *vel, f32 accel, f32 maxSpeed, f32 dt);
 void func_15123070(Camera *camera);
@@ -18,7 +18,7 @@ void func_1512A390(Camera *camera);
 /* Places the eye on an orbit around the target: yaw from the player's facing (or the camera yaw),
    pitch from the player or pitchOverride, then eases it there and keeps it out of the target. */
 void func_15122440(Camera *camera) {
-    vertex offset = D_800894C8;
+    Vec3f offset = D_800894C8;
     f32 horiz;
     f32 yaw;
     f32 pitch;
@@ -105,8 +105,8 @@ lbl: // matching: the unused label starts a new basic block before the orbit rot
     }
     if ((camera->player->unk102 == 0) && !(camera->buttonsPressed & R_TRIG)) {
         if (sqrtf(SQ(camera->eye.x - camera->target.x) + SQ(camera->eye.y - camera->target.y) + SQ(camera->eye.z - camera->target.z)) < 120.0f) {
-            vertex dir;
-            func_150491EC((struct17 *)&camera->target, (struct17 *)&camera->eye, (struct17 *)&dir);
+            Vec3f dir;
+            func_150491EC((Vec3f *)&camera->target, (Vec3f *)&camera->eye, (Vec3f *)&dir);
             camera->eye.x = camera->target.x + 120.0f * dir.x;
             camera->eye.y = camera->target.y + 120.0f * dir.y;
             camera->eye.z = camera->target.z + 120.0f * dir.z;
@@ -123,16 +123,16 @@ lbl: // matching: the unused label starts a new basic block before the orbit rot
 /* Eases yawFollow toward a gain picked from the camera state and turns yaw by it toward the target's
    motion, then runs the per-frame camera updates. */
 void func_15122980(Camera *camera) {
-    vertex toPrevTarget;
-    vertex toTarget;
+    Vec3f toPrevTarget;
+    Vec3f toTarget;
     f32 prevAngle;
     f32 angle;
 
     if (camera->unkDC != 4) {
-        func_15048F90((struct17 *)&camera->eye, (struct17 *)&camera->prevTarget, (struct17 *)&toPrevTarget);
-        func_15048F90((struct17 *)&camera->eye, (struct17 *)&camera->target, (struct17 *)&toTarget);
-        prevAngle = func_15048FC8((struct17 *)&toPrevTarget);
-        angle = func_15048FC8((struct17 *)&toTarget);
+        func_15048F90((Vec3f *)&camera->eye, (Vec3f *)&camera->prevTarget, (Vec3f *)&toPrevTarget);
+        func_15048F90((Vec3f *)&camera->eye, (Vec3f *)&camera->target, (Vec3f *)&toTarget);
+        prevAngle = func_15048FC8((Vec3f *)&toPrevTarget);
+        angle = func_15048FC8((Vec3f *)&toTarget);
         if (camera->playerMoved == 0) {
             camera->yawFollowTarget = 0.0f;
         } else if ((camera->flags & 0x100000) || ((camera->unk390 > 180.0f) && (camera->unk390 < 270.0f))) {

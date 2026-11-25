@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15047390(f32 mf[4][4], f32 eyeX, f32 eyeY, f32 eyeZ, f32 atX, f32 atY, f32 atZ, f32 upX, f32 upY, f32 upZ);
+void func_15047390(MtxF mf, f32 eyeX, f32 eyeY, f32 eyeZ, f32 atX, f32 atY, f32 atZ, f32 upX, f32 upY, f32 upZ);
 s32 func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32);
 
 /*
@@ -12,7 +12,7 @@ s32 func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32);
  */
 s32 func_150E1570(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 toY, f32 toZ, s32 skipIndex,
                   s32 effect) {
-    f32 view[4][4];
+    MtxF view;
     f32 dx;
     f32 dy;
     f32 dz;

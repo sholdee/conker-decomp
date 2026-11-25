@@ -46,13 +46,9 @@ typedef struct {
     u8 b;
 } Rgb8;
 
-typedef struct {
-    f32 x, y, z;
-} Vec3;
-
 /* Effect template for func_150C88D0. */
 typedef struct {
-    /* 0x00 */ Vec3 position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ u8 unkC;
     /* 0x0D */ s8 unkD;
     /* 0x10 */ f32 unk10;
@@ -86,13 +82,10 @@ typedef struct {
     /* 0x128 */ GrowParticleExtra extra;
 } GrowParticle;
 
-typedef f32 BoneMtx[4][4];
-
-
 extern GroundBurstDef D_800A0640[];
 void func_1504715C(GroundHit *, Actor *);
 s32 func_15046C80(f32 *, s32, f32, GroundHit *);
-void func_15143134(f32 *in, f32 *out, BoneMtx *mtx);
+void func_15143134(f32 *in, f32 *out, MtxF *mtx);
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, void *, u8);
 void func_150C88D0(Effect88D0Spawn *, s32, s32, s32);
@@ -117,7 +110,7 @@ void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
     func_1504715C(&ground, owner);
     def = &D_800A0640[index];
     /* Actor.unk1D4 (typed struct255 * in structs.h) is the owner's bone matrix array */
-    func_15143134(def->offset, pos, &((BoneMtx *)owner->unk1D4)[def->bone]);
+    func_15143134(def->offset, pos, &((MtxF *)owner->unk1D4)[def->bone]);
     {
         f32 ray[3];
 
@@ -204,7 +197,7 @@ lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above 
             {
                 s16 n1; // matching: a variable, not a literal, so IDO emits the runtime int-to-float convert
 
-                fx.position = *(Vec3 *)pos;
+                fx.position = *(Vec3f *)pos;
                 fx.unk10 = 70.59999847f;
                 fx.unkC = 1;
                 fx.unkD = -1;
@@ -231,7 +224,7 @@ lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above 
             func_1514C678(pos[0], pos[1], pos[2], (func_150ADA68() * 70.0f) + 70.0f,
                           0, 0xFF, rnd, 0x12, 0, 0.0f, &rgb, arg3);
         }
-        func_151D5404((struct17 *)pos, 500.0f, 5000.0f, 0.0002f, 12, 15, 0xFF, 0);
+        func_151D5404((Vec3f *)pos, 500.0f, 5000.0f, 0.0002f, 12, 15, 0xFF, 0);
     }
 }
 
@@ -355,11 +348,11 @@ typedef struct ParticleSpawn80 {
     /* 0x04 */ f32 elasticity;
     /* 0x08 */ f32 sizeXZ;
     /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
+    /* 0x10 */ Vec3f rot;
+    /* 0x1C */ Vec3f scale;
+    /* 0x28 */ Vec3f pos;
+    /* 0x34 */ Vec3f vel;
+    /* 0x40 */ Vec3f rotVel;
     /* 0x4C */ f32 gravity;
     /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;

@@ -5,14 +5,14 @@
 
 
 extern void func_151A6F00(DebrisEmitter *, s32, u8, s32);
-extern void func_151D5334(vertex *, f32, f32, f32, s32, u8, s32);
-extern void func_151D3FF4(vertex *, u8, s32);
-extern void func_151D5514(vertex *, u8, s32);
-extern void func_151541B8(vertex *, f32, f32, f32, f32, u8, s32);
+extern void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
+extern void func_151D3FF4(Vec3f *, u8, s32);
+extern void func_151D5514(Vec3f *, u8, s32);
+extern void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 
 /* Spawns a debris burst plus the follow-up effects at the object's position. */
 void func_151A6C90(Actor *obj, u8 arg1, s32 arg2) {
-    vertex pos;
+    Vec3f pos;
     DebrisEmitter emitter;
 
     pos.x = obj->x_position;
@@ -52,6 +52,6 @@ void func_151A6C90(Actor *obj, u8 arg1, s32 arg2) {
         func_151D5514(&pos, arg1, arg2);
         func_151541B8(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
                       func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
-        func_151D5404((struct17 *)&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 255, 0);
+        func_151D5404((Vec3f *)&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 255, 0);
     }
 }

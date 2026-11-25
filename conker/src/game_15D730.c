@@ -126,13 +126,13 @@ typedef struct ParticleTexture {
 } ParticleTexture;
 
 extern ParticleTexture D_80090B60[];
-extern s32 (*D_80089760[])(Particle *, vertex *);
+extern s32 (*D_80089760[])(Particle *, Vec3f *);
 extern void (*D_80089800[])(Particle *);
 
 /* Per-frame particle update: lifetime, motion, fade, scaling, animation and the update/death callbacks. */
 void func_151303EC(Particle *p) {
     s32 pad; // matching: unused stack slot
-    vertex prevPos;
+    Vec3f prevPos;
     u8 dead;
     s32 i;
     s32 maxFrame;
@@ -241,7 +241,7 @@ typedef struct ParticleRenderMode {
 extern s32 (*D_80089804[])(Particle *, s16);
 extern ParticleRenderMode D_800A4AC8[];
 extern s32 D_800D2C9C;
-s32 func_15144CEC(vertex *, f32 *, f32 *, f32 *, f32 *, s32);
+s32 func_15144CEC(Vec3f *, f32 *, f32 *, f32 *, f32 *, s32);
 void func_1513137C(s16 *r, s16 *g, s16 *b, s16 *a, Particle *p);
 void func_1513164C(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s16 *envG, s16 *envB, s16 *envA, Particle *p);
 void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7);
@@ -255,7 +255,7 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *needSync);
 /* Draws a particle as a screen-space textured rectangle in the given view. */
 Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
     s32 pad; // matching: unused stack slot
-    vertex pos;
+    Vec3f pos;
     u8 needSync;
     u8 mode;
     u8 shade;
@@ -507,26 +507,26 @@ void func_1513164C(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s1
     func_1513137C(primR, primG, primB, primA, p);
 }
 
-void func_151318E8(vertex *vel, f32 drag);
+void func_151318E8(Vec3f *vel, f32 drag);
 
 /* Particle update func: applies p->data.drag to the vertical velocity. */
-s32 func_151316AC(Particle *p, vertex *prevPos) {
+s32 func_151316AC(Particle *p, Vec3f *prevPos) {
     func_151318E8(&p->desc.vel, p->data.drag);
     return TRUE;
 }
 
-void func_15131918(vertex *vel, f32 drag);
+void func_15131918(Vec3f *vel, f32 drag);
 
 /* Particle update func: applies p->data.drag to the horizontal velocity. */
-s32 func_151316DC(Particle *p, vertex *prevPos) {
+s32 func_151316DC(Particle *p, Vec3f *prevPos) {
     func_15131918(&p->desc.vel, p->data.drag);
     return TRUE;
 }
 
-void func_15131958(vertex *vel, f32 drag);
+void func_15131958(Vec3f *vel, f32 drag);
 
 /* Particle update func: applies p->data.drag to the whole velocity. */
-s32 func_1513170C(Particle *p, vertex *prevPos) {
+s32 func_1513170C(Particle *p, Vec3f *prevPos) {
     func_15131958(&p->desc.vel, p->data.drag);
     return TRUE;
 }
@@ -580,7 +580,7 @@ void func_15131828(Particle *p, f32 *amplitude, u8 *phase, u8 *phaseStep) {
 }
 
 /* Scales vel->y by drag once per elapsed tick. */
-void func_151318E8(vertex *vel, f32 drag) {
+void func_151318E8(Vec3f *vel, f32 drag) {
     s32 i;
 
     for (i = D_800BE9E4; i > 0; i--) {
@@ -589,7 +589,7 @@ void func_151318E8(vertex *vel, f32 drag) {
 }
 
 /* Scales vel->x and vel->z by drag once per elapsed tick. */
-void func_15131918(vertex *vel, f32 drag) {
+void func_15131918(Vec3f *vel, f32 drag) {
     s32 i;
 
     for (i = D_800BE9E4; i > 0; i--) {
@@ -599,7 +599,7 @@ void func_15131918(vertex *vel, f32 drag) {
 }
 
 /* Scales all of vel by drag once per elapsed tick. */
-void func_15131958(vertex *vel, f32 drag) {
+void func_15131958(Vec3f *vel, f32 drag) {
     s32 i;
 
     for (i = D_800BE9E4; i > 0; i--) {
@@ -609,24 +609,24 @@ void func_15131958(vertex *vel, f32 drag) {
     }
 }
 
-s32 func_151319C4(Particle *p, vertex *prevPos, ParticleBounce *bounce);
+s32 func_151319C4(Particle *p, Vec3f *prevPos, ParticleBounce *bounce);
 
 /* Particle update func: floor collision using p->data.bounce. */
-s32 func_151319A4(Particle *p, vertex *prevPos) {
+s32 func_151319A4(Particle *p, Vec3f *prevPos) {
     return func_151319C4(p, prevPos, &p->data.bounce);
 }
 
-extern s32 func_1514672C(vertex *);
-extern s32 func_15046C80(vertex *, s32, f32, f32 *);
-extern s32 (*D_80089874[])(Particle *, vertex *, f32 *, ParticleBounce *);
+extern s32 func_1514672C(Vec3f *);
+extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
+extern s32 (*D_80089874[])(Particle *, Vec3f *, f32 *, ParticleBounce *);
 
 /*
  * When a falling particle reaches the floor below it, calls its hit func with the floor point.
  * Returns FALSE if the particle should die.
  */
-s32 func_151319C4(Particle *p, vertex *prevPos, ParticleBounce *bounce) {
+s32 func_151319C4(Particle *p, Vec3f *prevPos, ParticleBounce *bounce) {
     u8 alive;
-    vertex probe;
+    Vec3f probe;
 
     alive = TRUE;
     if ((bounce->flags & 1) && bounce->hitFunc != -1 && D_80089874[bounce->hitFunc] != NULL && p->desc.pos.y < prevPos->y) {
@@ -649,13 +649,13 @@ s32 func_151319C4(Particle *p, vertex *prevPos, ParticleBounce *bounce) {
 }
 
 /* Particle update func: drag on the whole velocity, then floor collision. */
-s32 func_15131AFC(Particle *p, vertex *prevPos) {
+s32 func_15131AFC(Particle *p, Vec3f *prevPos) {
     func_15131958(&p->desc.vel, p->data.dragBounce.drag);
     return func_151319C4(p, prevPos, &p->data.dragBounce.bounce);
 }
 
 /* Particle update func: drag on the horizontal velocity, then floor collision. */
-s32 func_15131B3C(Particle *p, vertex *prevPos) {
+s32 func_15131B3C(Particle *p, Vec3f *prevPos) {
     func_15131918(&p->desc.vel, p->data.dragBounce.drag);
     return func_151319C4(p, prevPos, &p->data.dragBounce.bounce);
 }
@@ -663,7 +663,7 @@ s32 func_15131B3C(Particle *p, vertex *prevPos) {
 
 /* Floor hit func: bounces the particle off the floor, and stops it once the bounce is small. */
 // matching: hit is indexed as f32[3]; vertex access swaps IDO's add.s operands
-s32 func_15131B7C(Particle *p, vertex *prevPos, f32 *hit, ParticleBounce *bounce) {
+s32 func_15131B7C(Particle *p, Vec3f *prevPos, f32 *hit, ParticleBounce *bounce) {
     p->desc.pos.y = p->desc.height * 0.06000000238f + hit[1];
     p->desc.vel.x *= bounce->restitution;
     p->desc.vel.y *= -bounce->restitution;
@@ -710,13 +710,13 @@ void func_15131D4C(s32 arg0, u8 arg1) {
 }
 
 /* Particle update func: pulses the particle's width and height (p->data.pulse). */
-s32 func_15131D9C(Particle *p, vertex *prevPos) {
+s32 func_15131D9C(Particle *p, Vec3f *prevPos) {
     func_15131C84(p->data.pulse.phase, p->data.pulse.phaseStep, p->data.pulse.baseSize, p->data.pulse.amplitude, &p->desc.width, &p->desc.height);
     return TRUE;
 }
 
 /* Particle update func: grows the particle with sqrt(time) and fades it quadratically; dies after duration. */
-s32 func_15131DEC(Particle *p, vertex *prevPos) {
+s32 func_15131DEC(Particle *p, Vec3f *prevPos) {
     f32 elapsed;
     f32 size;
 
@@ -735,7 +735,7 @@ s32 func_15131DEC(Particle *p, vertex *prevPos) {
 }
 
 /* Spawns a flash particle (see func_15131DEC) at pos. */
-Particle *func_15131EE4(vertex *pos, f32 size, u8 arg2, s32 arg3) {
+Particle *func_15131EE4(Vec3f *pos, f32 size, u8 arg2, s32 arg3) {
     ParticleDesc desc;
     ParticleFlash flash;
     Particle *particle;
@@ -764,7 +764,7 @@ Particle *func_15131EE4(vertex *pos, f32 size, u8 arg2, s32 arg3) {
     desc.b = 0xFF;
     desc.brightness = 0xFF;
     desc.pos = *pos;
-    desc.offset = *(vertex *)&D_800A5480;
+    desc.offset = D_800A5480;
     desc.fadeStart = 1;
     desc.fadeRate = 0xFF;
     desc.scaleStart = 1;
@@ -781,7 +781,7 @@ Particle *func_15131EE4(vertex *pos, f32 size, u8 arg2, s32 arg3) {
     desc.handlerSet = 0;
     desc.viewMask = NULL;
     desc.views = 0xFF;
-    desc.vel = *(vertex *)&D_800A5480;
+    desc.vel = D_800A5480;
     desc.timer = 300;
     desc.width = 0.0f;
     desc.height = 0.0f;

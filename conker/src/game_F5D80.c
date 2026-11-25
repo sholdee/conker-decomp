@@ -9,7 +9,7 @@ extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
 /* Spawn parameters for an expanding ring effect (copied into RadialEffect.def). */
 typedef struct {
-    vertex pos;
+    Vec3f pos;
     u8 flags;          /* 0x0C: bit 0 = expires when remaining runs out */
     s8 checkCallback;  /* 0x0D: index into D_80088860, -1 = none */
     f32 speed;         /* 0x10: radius growth per tick */
@@ -361,7 +361,7 @@ typedef struct {
 ParticleObject *func_15130374(ParticleDesc *packet, u8, s32, u8, s32);
 
 /* Ring emit callback 0: spawns a dark particle at pos, moving along heading. */
-void func_150C99B4(RadialEffect *effect, vertex *pos, u8 heading, f32 cosine, f32 sine) {
+void func_150C99B4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
     ParticleDesc packet;
     s32 pad; // matching: unused stack slot
     s16 pitch;
@@ -457,7 +457,7 @@ typedef struct {
 BurstParticle *func_15132A4C(ParticleSpawn *packet, s32, s32, s32, u8, s32);
 
 /* Ring emit callback 1: spawns a tumbling burst object at pos (the colour from func_150CCD90 goes unused). */
-void func_150C9DC4(RadialEffect *effect, vertex *pos, u8 heading, f32 cosine, f32 sine) {
+void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
     ParticleSpawn packet;
     f32 r;
     f32 g;
@@ -529,7 +529,7 @@ extern s32 func_151942B0[];
 void func_1504715C(void *, void *);
 s32 func_15046C80(void *, s32, f32, void *);
 
-void func_150CA930(vertex *pos);
+void func_150CA930(Vec3f *pos);
 
 typedef struct {
     s32 unk0;
@@ -548,7 +548,7 @@ typedef struct {
  * when the floor was found, four func_1513C5B0 quads around the impact point plus particles.
  */
 void func_150CA150(Actor *actor) {
-    vertex pos;
+    Vec3f pos;
     f32 r, g, b;
     u8 red, green, blue;
     f32 floorInfo[9];
@@ -584,7 +584,7 @@ void func_150CA150(Actor *actor) {
         red = r;
         green = g;
         blue = b;
-        func_151D5404((struct17 *)&pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
+        func_151D5404((Vec3f *)&pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
         {
             RadialEffectDef def;
             u8 padB[0x14]; // matching: frame padding
@@ -674,7 +674,7 @@ void func_150CA150(Actor *actor) {
 }
 
 
-void func_150CA930(vertex *pos) {
+void func_150CA930(Vec3f *pos) {
     s16 randomArg;
 
     randomArg = (func_150ADA20() % 21U) + 10;

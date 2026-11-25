@@ -93,7 +93,7 @@ extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /* Per-frame update: halfway through, spawns a particle from each quad; frees the object when done. */
 void func_15166B50(void *self) {
-    f32 mf[4][4];
+    MtxF mf;
     f32 x;
     f32 y;
     f32 z;

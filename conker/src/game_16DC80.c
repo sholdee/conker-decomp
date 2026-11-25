@@ -136,7 +136,7 @@ extern void (*D_80089FE4[])(GlowObj *);
 typedef void (*GlowMsgFn)(GlowObj *, u8 *, u8);
 extern GlowMsgFn D_8008A02C[];
 extern GlowObj *D_800DCE50[2][104];
-extern struct17 *func_15144B34(s32);
+extern Vec3f *func_15144B34(s32);
 extern s32 func_15144CEC(f32 *, f32 *, f32 *, f32 *, f32 *, s32);
 void func_151D5D60(void **, s16, s32, void **, u8 *);
 void func_1517E134(void *);
@@ -178,10 +178,10 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
     Vtx *vtx;
     Vtx *quad;
     GlowParams *params;
-    struct17 toCam;
+    Vec3f toCam;
     f32 dirZ, dirY, dirX;
     f32 cx, cy, cz;
-    struct17 *camPos;
+    Vec3f *camPos;
     f32 intensity;
     f32 dist;
     f32 w;
@@ -256,21 +256,21 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
             }
             obj->flags |= 4;
         }
-        toCam.unk0 = camPos->unk0 - obj->pos[0];
-        toCam.unk4 = camPos->unk4 - obj->pos[1];
-        toCam.unk8 = camPos->unk8 - obj->pos[2];
+        toCam.x = camPos->x - obj->pos[0];
+        toCam.y = camPos->y - obj->pos[1];
+        toCam.z = camPos->z - obj->pos[2];
         dirX = obj->aim[0] - obj->pos[0];
         dirY = obj->aim[1] - obj->pos[1];
         dirZ = obj->aim[2] - obj->pos[2];
-        intensity = dirX * toCam.unk0 + dirY * toCam.unk4 + dirZ * toCam.unk8;
+        intensity = dirX * toCam.x + dirY * toCam.y + dirZ * toCam.z;
         if (intensity < 0.0f) {
             intensity = 0.0f;
         }
         if (intensity == 0.0f && !(obj->flags & 0x10000)) {
             return NULL;
         }
-        if (fabsf(toCam.unk0) > 0.0001f || fabsf(toCam.unk8) > 0.0001f) {
-            dist = sqrtf(toCam.unk0 * toCam.unk0 + toCam.unk4 * toCam.unk4 + toCam.unk8 * toCam.unk8);
+        if (fabsf(toCam.x) > 0.0001f || fabsf(toCam.z) > 0.0001f) {
+            dist = sqrtf(toCam.x * toCam.x + toCam.y * toCam.y + toCam.z * toCam.z);
             fade = 1.0f - params->fadeRate * dist;
             if (fade > 0.0f) {
                 zraw = params->zbufSample[view];
@@ -300,27 +300,27 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
                 } else {
                     params->visibility[view] = 0xFF;
                 }
-                horiz = sqrtf(toCam.unk0 * toCam.unk0 + toCam.unk8 * toCam.unk8);
+                horiz = sqrtf(toCam.x * toCam.x + toCam.z * toCam.z);
                 invHoriz = 1.0f / horiz;
                 invDist2 = 1.0f / dist;
                 invDist = invDist2;
                 /* aim is 500 units out, so this is cos(angle to the viewer) * fade */
                 intensity *= fade * invDist * 0.002f;
                 offset = params->offset0 + (params->offset1 - params->offset0) * intensity;
-                cx = obj->pos[0] + offset * toCam.unk0;
-                cy = obj->pos[1] + offset * toCam.unk4;
-                cz = obj->pos[2] + offset * toCam.unk8;
+                cx = obj->pos[0] + offset * toCam.x;
+                cy = obj->pos[1] + offset * toCam.y;
+                cz = obj->pos[2] + offset * toCam.z;
                 w = (params->width0 + (params->width1 - params->width0) * intensity) * params->scale;
                 h = (params->height0 + (params->height1 - params->height0) * intensity) * params->scale;
                 /* up = h * (-x * y, horiz^2, -z * y) / (horiz * dist), right = w * (-z, 0, x) / horiz */
                 dz = invHoriz * invDist2; // matching: dz reused as the up-vector factor
                 dz = h * dz;
-                upX = -toCam.unk0 * toCam.unk4 * dz;
+                upX = -toCam.x * toCam.y * dz;
                 rightScale = w * invHoriz;
-                upZ = -toCam.unk8 * toCam.unk4 * dz;
+                upZ = -toCam.z * toCam.y * dz;
                 upY = h * horiz * invDist;
-                rightX = -toCam.unk8 * rightScale;
-                leftZ = -toCam.unk0 * rightScale;
+                rightX = -toCam.z * rightScale;
+                leftZ = -toCam.x * rightScale;
                 vtx->v.ob[0] = upX + rightX + cx;
                 vtx->v.ob[1] = upY + cy;
                 vtx->v.ob[2] = upZ - leftZ + cz;
@@ -548,7 +548,7 @@ s32 func_15141818(s32 arg0, s32 arg1) {
  */
 void func_1514182C(GlowObj *obj, f32 *pivot, f32 distance, f32 spread, f32 angleX, f32 angleZ) {
     f32 dx, dy, dz;
-    f32 mtx[4][4];
+    MtxF mtx;
 
     func_150A8050(mtx, angleX, 0.0f, angleZ);
     mtx[3][0] = pivot[0];

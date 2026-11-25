@@ -3,7 +3,7 @@
 #include "variables.h"
 
 extern void func_151D5D60();
-extern void func_15142914(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8);
+extern void func_15142914(MtxF mtx, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8);
 extern void func_150A7960(f32 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6);
 extern f32 D_8009F750;
 extern f32 D_8009F754;
@@ -91,7 +91,7 @@ s16 *func_150AE36C(struct Foo150AE36C *arg0, s16 arg1) {
     f32 sp90;
     f32 sp8C;
     f32 pad84[2];
-    f32 mtx[4][4];
+    MtxF mtx;
     u8 sp43;
 
     func_151D5D60(arg0->unk100, arg1, 0x40, &var_v0, &sp43);

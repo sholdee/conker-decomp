@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
+extern void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                           f32 *scaleX, f32 *scaleY, f32 *scaleZ);
 extern Actor *func_15073118(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ,
                                 f32 yawOffset, f32 speed, f32 yVelocity, f32 gravity, s32 unk83);
@@ -24,7 +24,7 @@ s32 func_150C8730(Hook150C8730 *hook, Actor *actor) {
     u8 frame;
     Mtx *mtx;
     s32 pad[2]; // matching: unused stack space
-    f32 mf[4][4];
+    MtxF mf;
     f32 x;
     f32 y;
     f32 z;

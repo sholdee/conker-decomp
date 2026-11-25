@@ -2,17 +2,13 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f_1DF510;
-
 /* Template copied into a new rope (HoltenRopeEffect 0x10-0x47, see game_1E0560.c). */
 typedef struct {
     /* 0x00 */ u8 flags;
     /* 0x01 */ u8 pad1;
     /* 0x02 */ s16 timer;
-    /* 0x04 */ Vec3f_1DF510 start;
-    /* 0x10 */ Vec3f_1DF510 end;
+    /* 0x04 */ Vec3f start;
+    /* 0x10 */ Vec3f end;
     /* 0x1C */ s8 startCallback;
     /* 0x1D */ s8 endCallback;
     /* 0x1E */ u8 drawStyle;
@@ -31,7 +27,7 @@ typedef struct {
     /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId; // target->unique_id when attached
     /* 0x05 */ u8 bone;     // index into the Mtx array at target->unk1D4
-    /* 0x08 */ Vec3f_1DF510 offset;
+    /* 0x08 */ Vec3f offset;
 } RopeAnchor;
 
 typedef struct TiedRope TiedRope;
@@ -70,7 +66,7 @@ struct TiedRope {
 /* Data at 0x28 of the straight line effect a RopeTie owns. */
 typedef struct {
     /* 0x00 */ RopeAnchor anchor; // anchor.offset is the start point
-    /* 0x14 */ Vec3f_1DF510 endOffset;
+    /* 0x14 */ Vec3f endOffset;
     /* 0x20 */ f32 halfWidth;
     /* 0x24 */ RopeTie *owner;
 } RopeLineData;
@@ -82,14 +78,14 @@ struct RopeLine {
 };
 
 TiedRope *func_151B30B0(HoltenRopeDesc *desc, f32 texScale, s32 extraSize, u8 arg3, s32 arg4);
-extern Vec3f_1DF510 D_800AA320;
-extern Vec3f_1DF510 D_800AA32C;
-extern Vec3f_1DF510 D_800AA338;
-extern Vec3f_1DF510 D_800AA344;
-extern Vec3f_1DF510 D_800AA350;
-extern Vec3f_1DF510 D_800AA35C;
-extern Vec3f_1DF510 D_800AA368;
-extern Vec3f_1DF510 D_800AA374;
+extern Vec3f D_800AA320;
+extern Vec3f D_800AA32C;
+extern Vec3f D_800AA338;
+extern Vec3f D_800AA344;
+extern Vec3f D_800AA350;
+extern Vec3f D_800AA35C;
+extern Vec3f D_800AA368;
+extern Vec3f D_800AA374;
 
 s32 func_151B22F4(RopeTie *self);
 void func_151B222C(RopeTie *self);
@@ -362,7 +358,7 @@ Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern void func_15143134(Vec3f_1DF510 *in, Vec3f_1DF510 *out, Mtx *mtx);
+extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 extern void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern u8 D_80090DE8[];
 extern s32 D_800D2C9C;
@@ -385,8 +381,8 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
     f32 dy;
     f32 dz;
     f32 lenSq;
-    Vec3f_1DF510 start;
-    Vec3f_1DF510 end;
+    Vec3f start;
+    Vec3f end;
     f32 toCamX;
     f32 toCamY;
     f32 toCamZ;

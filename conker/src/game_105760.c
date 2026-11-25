@@ -2,9 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* An actor's bone matrix: Actor.unk1D4 points at an array of these. */
-typedef f32 MtxF[4][4];
-
 void func_150A7960(MtxF, f32, f32, f32, f32 *, f32 *, f32 *);
 
 void func_150D82B0(s32 arg0) {
@@ -110,12 +107,6 @@ s16 *func_150D8590(s16 *cmd, s32 arg1) {
     cmd[1] = 0;
     return cmd + 2;
 }
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
 
 /* Ground probe result filled by func_15046C80 (size 0x24). */
 typedef struct {

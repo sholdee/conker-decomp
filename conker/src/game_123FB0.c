@@ -14,9 +14,9 @@ s32 func_1509BE40();
  */
 void func_150F6B00(Camera *actor) {
     f32 vertical;
-    struct17 normalized;
-    struct17 offset;
-    struct17 direction;
+    Vec3f normalized;
+    Vec3f offset;
+    Vec3f direction;
     f32 blend;
     f32 inverseLength;
     f32 lateral;
@@ -25,11 +25,11 @@ void func_150F6B00(Camera *actor) {
 
     if (func_1509BE40(1, 0x4003, 6, 0x2000) && actor->player->health) {
         actor->flags |= 0xC0001000;
-        func_15048F90((struct17 *)&D_800A1B80, (struct17 *)&actor->focus, &offset);
-        func_15048F90((struct17 *)&D_800A1B80, (struct17 *)&D_800A1B8C, &direction);
-        inverseLength = 1.0f / func_150AD930(&direction.unk0);
+        func_15048F90(&D_800A1B80, (Vec3f *)&actor->focus, &offset);
+        func_15048F90(&D_800A1B80, &D_800A1B8C, &direction);
+        inverseLength = 1.0f / func_150AD930(&direction.x);
         func_1504917C(&direction, &normalized);
-        projection = func_150AD900(&normalized.unk0, &offset.unk0) * inverseLength * 0.75f;
+        projection = func_150AD900(&normalized.x, &offset.x) * inverseLength * 0.75f;
         if (projection < 0.0f) {
             blend = 0.0f;
         } else {
@@ -49,7 +49,7 @@ void func_150F6B00(Camera *actor) {
         }
         vertical = -20.0f;
         func_1509BFB0(3, 0x4003, 3, (s32)lateral, (s32)vertical, (s32)LERP(-5530.0f, 1198.0f, blend)); // z of the segment ends
-        func_15049688(&actor->yaw, func_15048FC8((struct17 *)&D_800D9A50) - 180.0f, &actor->yawEaseVel, 8.0f, 10.0f, actor->dt);
+        func_15049688(&actor->yaw, func_15048FC8(&D_800D9A50) - 180.0f, &actor->yawEaseVel, 8.0f, 10.0f, actor->dt);
         actor->yawRad = actor->yaw * 0.01745329238f; // degrees to radians
     } else {
         actor->flags &= 0x3FFFEFFF;

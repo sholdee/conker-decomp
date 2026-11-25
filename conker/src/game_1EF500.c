@@ -16,7 +16,7 @@ typedef struct {
 } GameStruct151C2050State;
 
 /* Queues a positional sound event (func_1000E7A0 kind 8) for soundId, only in a few specific levels. */
-void func_151C2050(Actor *obj, vertex *pos, vertex *dir, s32 soundId, f32 distance) {
+void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance) {
     s32 pan;
     s32 volume;
     Camera *camera;
@@ -56,11 +56,11 @@ void func_151C2050(Actor *obj, vertex *pos, vertex *dir, s32 soundId, f32 distan
 typedef struct Game1F1F60Hit {
     /* 0x00 */ void *actor;
     /* 0x04 */ f32 dist;
-    /* 0x08 */ vertex hit;
-    /* 0x14 */ vertex normal;
-    /* 0x20 */ vertex point;
-    /* 0x2C */ vertex start;
-    /* 0x38 */ vertex end; /* the ray direction */
+    /* 0x08 */ Vec3f hit;
+    /* 0x14 */ Vec3f normal;
+    /* 0x20 */ Vec3f point;
+    /* 0x2C */ Vec3f start;
+    /* 0x38 */ Vec3f end; /* the ray direction */
     /* 0x44 */ s16 surface[9];
     /* 0x56 */ s16 field_56;
     /* 0x58 */ s8 field_58;
@@ -75,9 +75,9 @@ typedef struct Game1F1F60Hit {
 typedef struct Game1EF500TrailExt {
     /* 0x00 */ u8 flags;
     /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ vertex velocity;
-    /* 0x10 */ vertex accel; /* eases toward drift each frame; also the length of the drawn tail */
-    /* 0x1C */ vertex drift;
+    /* 0x04 */ Vec3f velocity;
+    /* 0x10 */ Vec3f accel; /* eases toward drift each frame; also the length of the drawn tail */
+    /* 0x1C */ Vec3f drift;
     /* 0x28 */ Game1F1F60Hit path;
     /* 0x8C */ f32 remaining; /* distance left before the projectile expires */
     /* 0x90 */ Actor *owner;
@@ -111,7 +111,7 @@ typedef struct {
     /* 0x00D */ u8 padD[0x1F];
     /* 0x02C */ f32 width;
     /* 0x030 */ u8 pad30[4];
-    /* 0x034 */ vertex position;
+    /* 0x034 */ Vec3f position;
     /* 0x040 */ u8 pad40[0x1C];
     /* 0x05C */ u8 alpha;
     /* 0x05D */ u8 pad5D[0x63];
@@ -123,7 +123,7 @@ typedef struct {
 /* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler (entry 0 is func_151C2F48). */
 typedef void (*TrailExpireHandler)(Game1EF500Trail *);
 /* Signature of the hook in D_800E0940: (hit position, index of the WorldObject that was hit). */
-typedef void (*TrailHitCallback)(vertex *, s32);
+typedef void (*TrailHitCallback)(Vec3f *, s32);
 
 extern TrailExpireHandler D_8008FBD0[];
 
@@ -147,7 +147,7 @@ typedef struct Game1EF500TrailSpawn {
     /* 0x13 */ u8 field13;
     /* 0x14 */ f32 field14;
     /* 0x18 */ f32 field18;
-    /* 0x1C */ vertex position;
+    /* 0x1C */ Vec3f position;
     /* 0x28 */ f32 field28[6];
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 field44;
@@ -169,9 +169,9 @@ void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 void *memcpy(void *, const void *, u32);
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-s32 func_151D5B6C(vertex *, vertex *, Actor *, s8, s32);
-s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, vertex *arg2, vertex *arg3, f32 *arg4, f32 arg5,
-                  u8 arg6, vertex *arg7, vertex *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13,
+s32 func_151D5B6C(Vec3f *, Vec3f *, Actor *, s8, s32);
+s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4, f32 arg5,
+                  u8 arg6, Vec3f *arg7, Vec3f *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13,
                   u8 arg14, u8 arg15, s32 arg16, u8 arg17);
 
 /*
@@ -179,7 +179,7 @@ s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, vertex *arg2, vertex
  * sets up its path and runs its first update of dt. Returns NULL if it could not be placed or
  * if that first update already ended it.
  */
-Game1EF500Trail *func_151C229C(vertex *origin, vertex *direction, vertex *altOrigin, vertex *altDirection,
+Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
                                u8 altNormalized, Game1F1F60Hit *knownHit, f32 speed, f32 arg7, f32 arg8,
                                f32 driftSpeed, f32 arg10, u8 arg11, Actor *owner, u8 arg13, u8 collide, u8 arg15,
                                u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 arg20,
@@ -187,13 +187,13 @@ Game1EF500Trail *func_151C229C(vertex *origin, vertex *direction, vertex *altOri
     Game1EF500Trail *result;
     Game1EF500TrailSpawn spawn;
     Game1EF500TrailExt ext;
-    vertex sourceDir;
+    Vec3f sourceDir;
     u8 useSource;
-    vertex targetDir;
+    Vec3f targetDir;
     u8 useTarget;
     s32 unused; // matching: unused stack slot in the original frame
-    vertex *from;
-    vertex *dir;
+    Vec3f *from;
+    Vec3f *dir;
 
     useSource = FALSE;
     useTarget = altNormalized && altDirection != NULL;
@@ -373,7 +373,7 @@ s8 func_151C2734(Game1EF500Trail *trail) {
 }
 
 void func_151D5D60(u8 **, s16, s32, void **, u8 *);
-vertex *func_15144B34(s32);
+Vec3f *func_15144B34(s32);
 
 /*
  * Builds the projectile's tail for view index: a quad from its position back along accel, widened
@@ -381,18 +381,18 @@ vertex *func_15144B34(s32);
  * vertices, or NULL if no vertex buffer was available.
  */
 Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
-    vertex start;
-    vertex end;
+    Vec3f start;
+    Vec3f end;
     f32 dx, dy, dz;
     f32 nx, ny, nz;
-    vertex mid;
+    Vec3f mid;
     f32 unusedX, unusedY; // matching: unused locals that still take stack slots
     Game1EF500TrailExt *ext;
     f32 lengthSq;
     f32 scale;
     Vtx *vertices;
     Vtx *result;
-    vertex *eye;
+    Vec3f *eye;
     u8 fresh;
     Vtx *unusedVtx; // matching: as above
 
@@ -489,10 +489,10 @@ s32 func_151C2E94(Actor *obj, Actor *self) {
     return TRUE;
 }
 
-s32 func_151D4DAC(void *, Actor *, vertex *, vertex *, Game1F1F60Hit *, s32, vertex *, u8, u8);
+s32 func_151D4DAC(void *, Actor *, Vec3f *, Vec3f *, Game1F1F60Hit *, s32, Vec3f *, u8, u8);
 
 /* Impact handler: the projectile hit actor (at hitPos) during its ray cast. */
-s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, vertex *hitPos, vertex *hitPoint,
+s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
                   Game1F1F60Hit *hit) {
     return func_151D4DAC(actor, owner, hitPos, hitPoint, hit, trail->trail.fieldA4, &trail->trail.path.end,
                          trail->unkC, trail->unk1);
@@ -500,7 +500,7 @@ s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, vertex *hit
 
 extern u8 D_800DCA20;
 extern f32 D_800DCA24;
-void func_15102920(f32, s32, s16 *, vertex *, s32, s32, s32, s32, u8, u8);
+void func_15102920(f32, s32, s16 *, Vec3f *, s32, s32, s32, s32, u8, u8);
 void func_15152B38(void *, u8, s32);
 s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
@@ -515,7 +515,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 countBase;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ vertex position;
+    /* 0x08 */ Vec3f position;
     /* 0x14 */ f32 sizeBase;
     /* 0x18 */ f32 sizeRange;
     /* 0x1C */ f32 unk1C;
@@ -640,7 +640,7 @@ void func_151C2F48(Game1EF500Trail *trail) {
 extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Impact effect at pos: a burst, a randomly flipped particle and a flash. */
-void func_151C329C(vertex *pos, u8 arg1, s32 arg2) {
+void func_151C329C(Vec3f *pos, u8 arg1, s32 arg2) {
     BurstConfig burst;
     ParticleDesc particle;
     Header header;
@@ -748,7 +748,7 @@ void func_151C329C(vertex *pos, u8 arg1, s32 arg2) {
 }
 
 /* Smaller variant of func_151C329C. */
-void func_151C36D8(vertex *pos, u8 arg1, s32 arg2) {
+void func_151C36D8(Vec3f *pos, u8 arg1, s32 arg2) {
     BurstConfig burst;
     ParticleDesc particle;
     Header header;
@@ -908,7 +908,7 @@ typedef struct {
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;
-    /* 0x38 */ vertex position;
+    /* 0x38 */ Vec3f position;
     /* 0x44 */ s16 yawBase;
     /* 0x46 */ s16 pitchBase;
     /* 0x48 */ s16 yawRange;
@@ -1131,7 +1131,7 @@ u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
             length = ext->scale * dt;
         }
         if (length != 0.0f) {
-            vertex *from = &trail->position;
+            Vec3f *from = &trail->position;
 
             solid = !(ext->flags & TRAIL_FLAG_8);
             func_15081690(owner, from->x, from->y, from->z, ext->path.end.x, ext->path.end.y, ext->path.end.z,
@@ -1221,7 +1221,7 @@ typedef struct {
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24;
     /* 0x28 */ f32 unk28;
-    /* 0x2C */ vertex position;
+    /* 0x2C */ Vec3f position;
     /* 0x38 */ f32 unk38;
     /* 0x3C */ f32 unk3C;
     /* 0x40 */ f32 unk40;

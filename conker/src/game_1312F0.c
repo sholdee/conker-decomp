@@ -13,22 +13,22 @@ typedef struct {
 
 f32 func_150ADA68(void);
 void func_1504715C(GroundHit *, Actor *);
-s32 func_15046C80(struct17 *, s32, f32, GroundHit *);
-void func_151D3FF4(struct17 *, u8, s32);
-void func_150E7FEC(f32, u8, s16 *, struct17 *, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_150E83AC(struct17 *, s16, u8, s32);
-void func_151D5404(struct17 *, f32, f32, f32, s32, s32, u8, s32);
-void func_151D5334(struct17 *, f32, f32, f32, s32, u8, s32);
-void func_151D5514(struct17 *, u8, s32);
-void func_151D40D4(struct17 *, s32, Actor *, Actor *, s32, s32, s32, s32);
+s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
+void func_151D3FF4(Vec3f *, u8, s32);
+void func_150E7FEC(f32, u8, s16 *, Vec3f *, s32, s32, s32, s32, s32, s32, u8, s32);
+void func_150E83AC(Vec3f *, s16, u8, s32);
+void func_151D5404(Vec3f *, f32, f32, f32, s32, s32, u8, s32);
+void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
+void func_151D5514(Vec3f *, u8, s32);
+void func_151D40D4(Vec3f *, s32, Actor *, Actor *, s32, s32, s32, s32);
 void func_15055A2C(s32, f32, f32, f32, s32);
-void func_151541B8(struct17 *, f32, f32, f32, f32, u8, s32);
+void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 
 /* Spawns an impact burst at pos: a ground splash when there is floor just below, effects, an optional variant-specific effect pair and particles. */
-void func_15103E40(Actor *owner, Actor *obj, struct17 *pos, u8 variant, s32 arg4, u8 arg5, s32 arg6) {
-    struct17 impact;
+void func_15103E40(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s32 arg4, u8 arg5, s32 arg6) {
+    Vec3f impact;
     u8 hitGround;
-    struct17 top;
+    Vec3f top;
     GroundHit hit;
     s32 effectA;
     s32 effectB;
@@ -40,16 +40,16 @@ void func_15103E40(Actor *owner, Actor *obj, struct17 *pos, u8 variant, s32 arg4
     hitGround = FALSE;
     func_151D3FF4(pos, arg5, arg6);
 
-    top.unk0 = pos->unk0;
-    top.unk4 = pos->unk4 + 100.0f;
-    top.unk8 = pos->unk8;
+    top.x = pos->x;
+    top.y = pos->y + 100.0f;
+    top.z = pos->z;
     func_1504715C(&hit, obj);
 
-    if (func_15046C80(&top, 0, pos->unk4 - 100.0f, &hit) && (hit.flags & 1)) {
-        impact.unk0 = top.unk0;
+    if (func_15046C80(&top, 0, pos->y - 100.0f, &hit) && (hit.flags & 1)) {
+        impact.x = top.x;
         hitGround = TRUE;
-        impact.unk4 = hit.height;
-        impact.unk8 = top.unk8;
+        impact.y = hit.height;
+        impact.z = top.z;
         func_150E7FEC(func_150ADA68() * 125.0f + 204.0f, func_150ADA20() % 101U + 155, hit.points, &impact,
                       func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg5, 0);
     }
@@ -70,6 +70,6 @@ void func_15103E40(Actor *owner, Actor *obj, struct17 *pos, u8 variant, s32 arg4
         func_151D40D4(pos, 0, owner, obj, 0, effectA, effectB, arg4);
     }
 
-    func_15055A2C(0, pos->unk0, pos->unk4, pos->unk8, 1);
+    func_15055A2C(0, pos->x, pos->y, pos->z, 1);
     func_151541B8(pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f, func_150ADA20() % 56U + 200, 0.0f, arg5, arg6);
 }

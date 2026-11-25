@@ -5,7 +5,7 @@
 
 /* One of the three exploding pipes: where it is and which way it faces. */
 typedef struct PipeSpot {
-    vertex pos;
+    Vec3f pos;
     u8 yaw;
 } PipeSpot;
 
@@ -17,7 +17,7 @@ typedef struct PipeIds {
 typedef struct Fx151A6F00Args {
     s16 unk00;
     s16 pad02;
-    vertex pos;
+    Vec3f pos;
     s16 unk10;
     s16 pad12;
     f32 unk14;
@@ -31,7 +31,7 @@ typedef struct Fx151A6F00Args {
 /* Parameter block for func_151539B4. */
 typedef struct Fx151539B4Args {
     s16 unk00, unk02;
-    vertex pos;
+    Vec3f pos;
     s16 angle;
     s16 unk12, unk14, unk16;
     f32 unk18, unk1C, unk20, unk24;
@@ -47,7 +47,7 @@ typedef struct Fx151539B4Args {
 
 /* Parameter block for func_15152F70. */
 typedef struct Fx15152F70Args {
-    vertex pos;
+    Vec3f pos;
     f32 unk0C, unk10, unk14, unk18, unk1C, unk20;
     s16 unk24, unk26;
     s16 angle;
@@ -60,7 +60,7 @@ typedef struct Fx15152F70Args {
 
 /* Parameter block for func_150B3F5C. */
 typedef struct Fx150B3F5CArgs {
-    vertex vel;
+    Vec3f vel;
     f32 unk0C;
     u8 unk10;
     f32 unk14, unk18;
@@ -82,7 +82,7 @@ extern void func_151A6F00(Fx151A6F00Args *, s32, u8, s32);
 extern void func_1514C858(f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, f32, s32, u8);
 extern void func_151539B4(Fx151539B4Args *, u8);
 extern void func_15152F70(Fx15152F70Args *, u8);
-extern void func_150B3F5C(Fx150B3F5CArgs *, vertex *, s32);
+extern void func_150B3F5C(Fx150B3F5CArgs *, Vec3f *, s32);
 
 /* Explodes pipe `pipe`: fires the four effect spawners at its spot and plays two sounds there. */
 void func_150B2740(u8 pipe, u8 arg1) {
@@ -92,7 +92,7 @@ void func_150B2740(u8 pipe, u8 arg1) {
     Fx15152F70Args argsC;
     f32 yawSin; // matching: also holds the debris size; a separate local mismatches
     f32 yawCos;
-    vertex origin;
+    Vec3f origin;
     Fx150B3F5CArgs argsD;
 
     func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
@@ -250,8 +250,8 @@ typedef struct PipeChunk {
     /* 0x018 */ u8 pad18[0x3C - 0x18];
     /* 0x03C */ f32 unk3C;
     /* 0x040 */ u8 pad40[0x44 - 0x40];
-    /* 0x044 */ vertex vel;
-    /* 0x050 */ vertex unk50;
+    /* 0x044 */ Vec3f vel;
+    /* 0x050 */ Vec3f unk50;
     /* 0x05C */ u8 pad5C[0x60 - 0x5C];
     /* 0x060 */ s32 flags;
     /* 0x064 */ s16 lifetime;

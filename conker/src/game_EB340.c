@@ -274,7 +274,7 @@ EB340Command *func_150BE438(EB340Command *cmd, s32 id) {
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ struct17 pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -296,7 +296,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ struct17 pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -318,7 +318,7 @@ typedef struct {
     /* 0x02 */ s16 unk02;
     /* 0x04 */ s16 unk04;
     /* 0x06 */ s16 unk06;
-    /* 0x08 */ struct17 pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -345,16 +345,16 @@ extern f32 D_800A0038[];
 extern s32 D_800A0060[];
 extern f32 D_800A0064[];
 
-void func_1515C244(Actor *, struct17 *, f32 *, f32 *);
+void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
 void func_1504715C(void *, Actor *);
 void func_1515080C(EB340Cfg80C *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
 void func_15152190(EB340Cfg2190 *, s32 *, f32 *, s32, f32, s32, u8, s32);
-void func_15153F18(EB340Cfg3F18 *, struct17 *, void *, u8, s32);
+void func_15153F18(EB340Cfg3F18 *, Vec3f *, void *, u8, s32);
 
 /* Spawns the burst of effects at `obj`'s centre: one func_1515080C, one func_15152190
  * and three func_15153F18 particle sets (kinds 0, 2 and 10). */
 void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
-    struct17 pos;
+    Vec3f pos;
     f32 radius;
     f32 unk2;
     f32 halfSize;

@@ -2,12 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct Vec3f {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
 /* Texture table entry (D_80090B60). */
 typedef struct TextureInfo {
     /* 0x0 */ s32 unk0;

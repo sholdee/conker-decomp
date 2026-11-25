@@ -17,7 +17,7 @@ typedef struct {
 
 /* Data of the effect spawned by func_150B1EE0 and run by func_150B1F90. */
 typedef struct {
-    struct17 pos;
+    Vec3f pos;
     f32 accum; /* particles owed; one is spawned per whole unit */
 } EmitterData;
 
@@ -46,7 +46,7 @@ void func_150B1E20(Camera *camera) {
 }
 
 /* Spawns an emitter effect (func_150B1F90) at `pos` with a random duration of 69-201. */
-void func_150B1EE0(EffectHead *spawner, struct17 *pos, s32 arg2, s32 arg3) {
+void func_150B1EE0(EffectHead *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
     EmitterData data;
     struct260 *effect;
 
@@ -114,7 +114,7 @@ void func_150B1F90(EmitterEffect *effect) {
         spawn.b2 = 0;
         spawn.brightness = 0xFF;
         spawn.scaleRate = 1.016479015f;
-        spawn.pos = *(vertex *)&data->pos; // TODO(vectors): struct17/vertex mix
+        spawn.pos = *(Vec3f *)&data->pos; // TODO(vectors): struct17/vertex mix
         spawn.offset.x = 0.0f;
         spawn.offset.y = 0.0f;
         spawn.offset.z = 0.0f;

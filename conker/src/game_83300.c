@@ -34,7 +34,6 @@ typedef struct Game83300Anim298 {
 } Game83300Anim298;
 extern Game83300Anim298 D_800CC298;
 
-
 void func_15058F24(Actor *arg0, f32, f32);
 void func_1505D6F0(Actor *arg0, s32 arg1);
 u8   func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
@@ -494,7 +493,7 @@ typedef struct ActorInfo15056B08 {
 struct216 *func_1507BB28(s32, s32);
 void func_1507BC14(Actor *);
 s32 func_150229E4(Actor *);
-void func_15047390(f32 mf[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
+void func_15047390(MtxF mf, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 void func_1504C9E4(Actor *arg0, s8 arg1, u8 arg2);
 u8 func_15059B54(Actor *arg0, u16 arg1);
 extern f32 D_800CC2E4;
@@ -756,7 +755,7 @@ void func_15056B08(Actor *actor) {
                             if ((D_800C3E78 != 0) &&
                                 (!actor->unk229 || (fabsf(actor->y_position - D_800CC2E8[0]) < dsq))) {
                                 if (actor->id == 0x9E) {
-                                    f32 mtx[4][4];
+                                    MtxF mtx;
                                     f32 lookX;
                                     f32 lookZ;
                                     f32 lookY;
@@ -1783,7 +1782,6 @@ void func_1505A250(f32 targetX, f32 targetZ, f32 rate, f32 *x, f32 *z) {
     }
 }
 
-
 /* Accelerates/decelerates the actor's xz_velocity toward targetSpeed; player rates are scaled in water and other states. */
 void func_1505A3A8(f32 targetSpeed, Actor *actor, f32 accel, f32 decel, u8 turnDiff) {
     accel *= D_800D1550;
@@ -2593,7 +2591,6 @@ typedef struct {
     u8 unk3;
 } Rule1505C1E4;
 
-
 extern u8 D_8009A6A0[];
 extern Rule1505C1E4 *D_80086AA0[];
 s32 func_1506E46C(Actor *arg0, s32 *arg1, s32 arg2);
@@ -2768,12 +2765,6 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, Entry1505C1E4 *table, s32 inde
 }
 s32 func_1505C7D8(Actor *arg0, s32 arg1);
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec1505C7D8;
-
 extern s32 D_800B2CD0;
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
 void func_1507C3E0(Actor *, s16 *, s32, s32);
@@ -2816,7 +2807,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
     f32 offZ2;
     f32 pad4;
     f32 pad5;
-    Vec1505C7D8 pos;
+    Vec3f pos;
     f32 hitZ;
     f32 hitY;
     f32 hitX;
@@ -2931,8 +2922,8 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
         }
         if (dist < maxDist) {
             if ((hit->unk24 & 0x2000) && i != attacker->unk13D) {
-                if (*(Vec1505C7D8 **)((u8 *)attacker + 0x2F4) != NULL) {
-                    pos = **(Vec1505C7D8 **)((u8 *)attacker + 0x2F4);
+                if (*(Vec3f **)((u8 *)attacker + 0x2F4) != NULL) {
+                    pos = **(Vec3f **)((u8 *)attacker + 0x2F4);
                 } else {
                     func_1507C3E0(attacker, &halfHeightRaw, 0, 0);
                     pos.x = attacker->x_position;
@@ -5066,7 +5057,6 @@ void func_15061B4C(void) {
             f32 weights[4];
             s32 j;
             Game83300Step4 step = D_800860F0;
-
 
             if (D_800CC2D0[i].unk1D4 != NULL) {
                 for (j = 0; j < 4; j++) {

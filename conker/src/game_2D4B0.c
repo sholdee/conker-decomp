@@ -248,7 +248,7 @@ void func_150006E0(void) {
     }
 
     for (i = 0; i <= D_80082FA0; i++) {
-        D_800D9AC0[i].unk0 = -1.0f;
+        D_800D9AC0[i].x = -1.0f;
     }
 
     D_800D9AF0 = 0;

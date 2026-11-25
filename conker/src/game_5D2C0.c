@@ -9,7 +9,7 @@ extern u8 D_800BEA0C;
 extern s32 D_800902BC[];
 void func_1000FD38(void *, void *, s32);
 s32 func_15033BDC();
-extern void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 out[4][4]);
+extern void func_150A7A48(MtxF a, MtxF b, MtxF out);
 extern void func_1503E5F8();
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 extern void func_10004074(void *ptr);
@@ -329,22 +329,22 @@ void func_15030468(void) {
     s32 ret;
     s32 i;
     s32 j;
-    f32 normMtx[4][4];
-    f32 offsetMtx[4][4];
-    f32 resultMtx[4][4];
+    MtxF normMtx;
+    MtxF offsetMtx;
+    MtxF resultMtx;
     f32 (*boneMtx)[4];
     Mtx *mtx;
     s32 remove;
-    f32 boneBuf[4][4];
+    MtxF boneBuf;
     s32 pass;
     s32 hasFollowers;
     f32 inv;
     Mtx *parentMtx;
     Mtx *parentBoneMtx;
-    f32 rotMtx[4][4];
-    f32 rotResultMtx[4][4];
-    f32 rotMtx2[4][4];
-    f32 rotResultMtx2[4][4];
+    MtxF rotMtx;
+    MtxF rotResultMtx;
+    MtxF rotMtx2;
+    MtxF rotResultMtx2;
 
     hasFollowers = FALSE;
     for (pass = 0; pass < 2; pass++) {
@@ -2550,10 +2550,10 @@ s32 func_150334B8(Attachment *att, Actor *owner) {
  * (only rotation when `noTranslation`). */
 Attachment *func_150335C8(Actor *obj, Actor *target, s32 setId, s32 bone, s32 arg4, s32 noTranslation) {
     Attachment *att;
-    f32 boneMtx[4][4];
-    f32 invBoneMtx[4][4];
-    f32 objMtx[4][4];
-    f32 relMtx[4][4];
+    MtxF boneMtx;
+    MtxF invBoneMtx;
+    MtxF objMtx;
+    MtxF relMtx;
     f32 x;
     f32 y;
     f32 z;

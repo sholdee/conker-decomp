@@ -3,10 +3,6 @@
 #include "variables.h"
 
 typedef struct {
-    f32 x, y, z;
-} TrailVec3;
-
-typedef struct {
     f32 x, z;
 } TrailVec2;
 
@@ -15,8 +11,8 @@ typedef struct {
     /* 0x04 */ u8 pad4[4];
     /* 0x08 */ s32 unk8;
     /* 0x0C */ u8 padC[0xC];
-    /* 0x18 */ TrailVec3 position;
-    /* 0x24 */ TrailVec3 velocity;
+    /* 0x18 */ Vec3f position;
+    /* 0x24 */ Vec3f velocity;
     /* 0x30 */ f32 speed;
 } TrailOwnerMotion;
 
@@ -39,7 +35,7 @@ typedef struct {
 
 /* One sample in the trail's ring buffer. */
 typedef struct {
-    /* 0x00 */ TrailVec3 position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 length;   /* distance from the previous (older) sample */
     /* 0x10 */ f32 invSpeed; /* 1 / the owner's horizontal speed when sampled */
     /* 0x14 */ u8 alpha;
@@ -50,7 +46,7 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ TrailVec3 position;
+    /* 0x10 */ Vec3f position;
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ u16 flags;
     /* 0x20 */ u8 pad20[5];
@@ -290,8 +286,8 @@ s32 func_151D197C(TrailActor *actor) {
 /* Draws the trail as a textured ribbon: one quad per pair of samples, head to tail. */
 Gfx *func_151D1C98(TrailActor *actor, Gfx *gfx, s16 arg2) {
     TrailState *state;
-    TrailVec3 next;
-    TrailVec3 first;
+    Vec3f next;
+    Vec3f first;
     TrailPoint *points;
     s32 index;
     s32 previous;

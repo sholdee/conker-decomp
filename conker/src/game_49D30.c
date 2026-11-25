@@ -276,7 +276,6 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
     D_800BEAA8++;
 }
 
-
 /* ROM offsets (relative to D_2D4B0) of one RSP microcode's text and data. */
 typedef struct {
     s32 textStart;
@@ -823,8 +822,6 @@ void func_1501DF04(s32 scene) {
     D_800DBFF4[0] = 4;
     D_800C3672 = 1;
 }
-
-
 
 /* Whether the running cutscene may be skipped now (button 0x20, or map-specific rules for maps
    0x1D and 0x21). */
@@ -1403,11 +1400,6 @@ void func_1501EC38(s32 scene) {
     }
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} SeqVec3f;
 void func_15020878(s32 track, s32 segment, s32 scene);
 
 /* Find the path segment containing distance `dist` along track `track` and write two points to
@@ -1418,7 +1410,7 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
     s32 lo;
     s32 hi;
     s32 sample;
-    SeqVec3f points[4];
+    Vec3f points[4];
     f32 *distances;
     s32 i;
     u8 j;
@@ -1465,9 +1457,9 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
         j = 0;
         for (i = 0; i < 2; i++) {
             t = (f32)(sample + i) * 0.01f;
-            ((SeqVec3f *)out)[j].x = ((D_800C3A50[scene][track].coef3[0] * t + D_800C3A50[scene][track].coef2[0]) * t + D_800C3A50[scene][track].coef1[0]) * t + D_800C3A50[scene][track].coef0[0];
-            ((SeqVec3f *)out)[j].y = ((D_800C3A50[scene][track].coef3[1] * t + D_800C3A50[scene][track].coef2[1]) * t + D_800C3A50[scene][track].coef1[1]) * t + D_800C3A50[scene][track].coef0[1];
-            ((SeqVec3f *)out)[j].z = ((D_800C3A50[scene][track].coef3[2] * t + D_800C3A50[scene][track].coef2[2]) * t + D_800C3A50[scene][track].coef1[2]) * t + D_800C3A50[scene][track].coef0[2];
+            ((Vec3f *)out)[j].x = ((D_800C3A50[scene][track].coef3[0] * t + D_800C3A50[scene][track].coef2[0]) * t + D_800C3A50[scene][track].coef1[0]) * t + D_800C3A50[scene][track].coef0[0];
+            ((Vec3f *)out)[j].y = ((D_800C3A50[scene][track].coef3[1] * t + D_800C3A50[scene][track].coef2[1]) * t + D_800C3A50[scene][track].coef1[1]) * t + D_800C3A50[scene][track].coef0[1];
+            ((Vec3f *)out)[j].z = ((D_800C3A50[scene][track].coef3[2] * t + D_800C3A50[scene][track].coef2[2]) * t + D_800C3A50[scene][track].coef1[2]) * t + D_800C3A50[scene][track].coef0[2];
             j ^= 1;
         }
     } else {
@@ -1480,15 +1472,14 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
         }
         j = 0;
         for (i = 0; i < 2; i++) {
-            ((SeqVec3f *)out)[j].x = (points[2].x - points[1].x) * dist + points[1].x;
-            ((SeqVec3f *)out)[j].y = (points[2].y - points[1].y) * dist + points[1].y;
-            ((SeqVec3f *)out)[j].z = (points[2].z - points[1].z) * dist + points[1].z;
+            ((Vec3f *)out)[j].x = (points[2].x - points[1].x) * dist + points[1].x;
+            ((Vec3f *)out)[j].y = (points[2].y - points[1].y) * dist + points[1].y;
+            ((Vec3f *)out)[j].z = (points[2].z - points[1].z) * dist + points[1].z;
             j ^= 1;
         }
     }
     return sample;
 }
-
 
 /* Position of track `track` at `percent` (0-100) of its path length. */
 void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 scene) {
@@ -1592,9 +1583,9 @@ void func_1501FFE8(f32 *out, SeqPathKey *keys, s32 key, s32 numKeys) {
     }
 
     for (i = start; i < start + count; outIdx++, i++) {
-        ((SeqVec3f *)out)[outIdx].x = keys[i].x;
-        ((SeqVec3f *)out)[outIdx].y = keys[i].y;
-        ((SeqVec3f *)out)[outIdx].z = keys[i].z;
+        ((Vec3f *)out)[outIdx].x = keys[i].x;
+        ((Vec3f *)out)[outIdx].y = keys[i].y;
+        ((Vec3f *)out)[outIdx].z = keys[i].z;
     }
 
     if (!(flags & 1)) {
@@ -1677,7 +1668,6 @@ void func_15020388(s32 track, s32 scene) {
     }
 }
 
-
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
@@ -1751,8 +1741,7 @@ void func_15020878(s32 track, s32 segment, s32 scene) {
     D_800C3A50[scene][track].segment = segment;
 }
 
-
-SeqVec3f D_800C3620;
+Vec3f D_800C3620;
 extern void func_15128CB0(Camera *);
 extern void func_1517D5FC(s16, s16, s16, s32, s32, s32);
 s32 func_15023264(s32 scene, s32 time);
@@ -2045,7 +2034,6 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
     }
 }
 
-
 /* If object `objIndex` is bound to a track of `scene`, report where it should look: through the
    track's active events in D_800C3960 (slot 2: another track's position, slot 1: this track's
    unk24..unk2C or the player). Returns 1 when the out-angles were written, else 0. */
@@ -2103,7 +2091,6 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
     return 0;
 }
 
-
 /* If object `objIndex` is bound to a track of the scene, return 1 and its unk40 (outA) and unk3C
    (outB) values, each written twice (0 where unset). */
 s32 func_15022024(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
@@ -2133,7 +2120,6 @@ s32 func_15022024(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
     }
     return 0;
 }
-
 
 /* Set D_800C358C/D_800C3594 and raise D_800C3663. */
 void func_15022190(s16 x, s16 y, s16 z, f32 value) {
@@ -2641,7 +2627,6 @@ void func_15023440(SeqSubtitle *sub, s32 force) {
     }
     entry->active = 0;
 }
-
 
 /* Find the subtitle slot of `track`, or claim a free one (stealing slot 0 when all are busy). */
 SeqSubtitle *func_150234A4(s32 track, s32 replaceOpen) {

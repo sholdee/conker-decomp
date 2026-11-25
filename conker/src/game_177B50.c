@@ -7,7 +7,7 @@ extern void func_151D5D60(u8 **buffers, s16 index, s32 size, void **out, u8 *isN
 
 /* Particle spawn descriptor passed to func_15149550. */
 typedef struct {
-    struct17 pos;
+    Vec3f pos;
     f32 unkC;
     f32 unk10;
     f32 unk14;
@@ -36,12 +36,6 @@ typedef struct {
 
 s32 func_15149550(Struct15149550Arg *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
 
-typedef struct Vec3f1514A6A0 {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f1514A6A0;
-
 typedef struct Vtx1514A6A0 {
     s16 x, y, z, flag;
     u8 other[8];
@@ -51,8 +45,8 @@ typedef struct Beam1514A6A0 {
     u8 unknown0[0x2C];
     f32 width;
     f32 progress;
-    Vec3f1514A6A0 start;
-    Vec3f1514A6A0 end;
+    Vec3f start;
+    Vec3f end;
     f32 radius;
     u8 unknown50[0x70];
     u8 vertexTemplate[0x40];
@@ -64,12 +58,12 @@ void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam) {
     Vtx1514A6A0 *vertices;
     void *result;
     f32 distanceSquared;
-    Vec3f1514A6A0 tip;
+    Vec3f tip;
     f32 dx, dy, dz;
     f32 vx, vy, vz;
     f32 nx, ny, nz;
     f32 lengthSquared;
-    Vec3f1514A6A0 *eye;
+    Vec3f *eye;
     f32 radiusSquared;
     u8 fresh;
 
@@ -89,7 +83,7 @@ void *func_1514A6A0(Beam1514A6A0 *beam, s16 cam) {
     tip.x = beam->start.x + dx * beam->progress;
     tip.y = beam->start.y + dy * beam->progress;
     tip.z = beam->start.z + dz * beam->progress;
-    eye = (Vec3f1514A6A0 *)&D_800DBFF0[cam].eye.x;
+    eye = (Vec3f *)&D_800DBFF0[cam].eye.x;
     dx = tip.x - beam->start.x;
     dy = tip.y - beam->start.y;
     dz = tip.z - beam->start.z;
@@ -191,7 +185,7 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
         particle.unk30 = 0;
         particle.unk2E = 0;
         particle.unk34 = 15;
-        particle.pos.unk4 = y;
+        particle.pos.y = y;
 
         do {
             // matching: explicit mask; func_150ADA20 really returns a full word
@@ -201,8 +195,8 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
             dist = func_150ADA68() * radius;
             size = func_150ADA68() * sizeRange + sizeBase;
             height = func_150ADA68() * heightRange + heightBase;
-            particle.pos.unk0 = dist * sin + x;
-            particle.pos.unk8 = dist * cos + z;
+            particle.pos.x = dist * sin + x;
+            particle.pos.z = dist * cos + z;
             particle.unkC = 22.6f * size;
             particle.unk14 = 13.786f * size;
             particle.unk10 = 57.969f * height;
@@ -216,7 +210,7 @@ void func_1514AB5C(f32 x, f32 y, f32 z, f32 radius, s16 count, f32 sizeBase, f32
 }
 
 /* Spawns one particle at `pos` with randomized size, lifetime and fade. */
-void func_1514AD9C(struct17 *pos, u8 arg1, s32 arg2) {
+void func_1514AD9C(Vec3f *pos, u8 arg1, s32 arg2) {
     Struct15149550Arg particle;
     f32 size;
     f32 height;
@@ -290,7 +284,7 @@ s32 func_1514AF74(Particle177B50 *p) {
 extern void func_15143874(s16, f32, f32 *, f32 *);
 
 /* Spawns a random number of particles scattered within 42 units of `pos` in the XZ plane. */
-void func_1514B034(struct17 *pos, u8 arg1, s32 arg2) {
+void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 count;
     Struct15149550Arg particle;
     s32 angle;
@@ -301,7 +295,7 @@ void func_1514B034(struct17 *pos, u8 arg1, s32 arg2) {
     if (count > 1.0f) {
         particle.unk20 = 0x6231;
         particle.unk22 = 0x1A4D;
-        particle.pos.unk4 = pos->unk4;
+        particle.pos.y = pos->y;
         particle.unk26 = 0;
         particle.unk27 = 0;
         particle.unk28 = 0;
@@ -315,9 +309,9 @@ void func_1514B034(struct17 *pos, u8 arg1, s32 arg2) {
         particle.unk3C = 0.0f;
         do {
             angle = func_150ADA20();
-            func_15143874(angle & 0xFF, func_150ADA68() * 42.0f, &particle.pos.unk0, &particle.pos.unk8);
-            particle.pos.unk0 += pos->unk0;
-            particle.pos.unk8 += pos->unk8;
+            func_15143874(angle & 0xFF, func_150ADA68() * 42.0f, &particle.pos.x, &particle.pos.z);
+            particle.pos.x += pos->x;
+            particle.pos.z += pos->z;
             particle.unk40 = (func_150ADA68() * 16.0f + 29.0f) * 0.001f;
             particle.unk44 = (func_150ADA68() * 600.0f + 400.0f) * 0.001f;
             size = (func_150ADA68() * 1205.0f + 304.0f) * 0.001f;
@@ -339,7 +333,7 @@ void func_1514B034(struct17 *pos, u8 arg1, s32 arg2) {
 typedef struct {
     s32 unk0;
     s32 unk4;
-    struct17 unk8;
+    Vec3f unk8;
     f32 unk14;
     f32 unk18;
     f32 unk1C;
@@ -394,7 +388,7 @@ typedef struct {
 } Struct1514B364Spawn;
 
 typedef struct {
-    struct17 unk0;
+    Vec3f unk0;
     f32 unkC;
     f32 unk10;
     f32 unk14;
@@ -437,22 +431,22 @@ typedef struct {
     u8 pad1D[0x7];
 } Struct1514B364Hit;
 
-extern s32 func_15046C80(struct17 *, s32, f32, Struct1514B364Hit *);
+extern s32 func_15046C80(Vec3f *, s32, f32, Struct1514B364Hit *);
 extern void func_15152B38(Struct1514B364Spawn *, u8, s32);
 extern void func_15152F70(Struct1514B364Emit *, u8);
 
 /* If func_15046C80 finds ground within 200 units of `position`, spawns a cluster of effects there. */
-void func_1514B364(struct17 *position, Struct1514B364Hit *ground, u8 arg2, s32 arg3) {
-    struct17 pos;
+void func_1514B364(Vec3f *position, Struct1514B364Hit *ground, u8 arg2, s32 arg3) {
+    Vec3f pos;
 
     pos = *position;
     {
-        struct17 probe;
+        Vec3f probe;
 
-        probe.unk0 = position->unk0;
-        probe.unk4 = position->unk4 + 200.0f;
-        probe.unk8 = position->unk8;
-        if (func_15046C80(&probe, 0, position->unk4 - 200.0f, ground) == 0) {
+        probe.x = position->x;
+        probe.y = position->y + 200.0f;
+        probe.z = position->z;
+        if (func_15046C80(&probe, 0, position->y - 200.0f, ground) == 0) {
             return;
         }
     }
@@ -562,9 +556,9 @@ void func_1514B364(struct17 *position, Struct1514B364Hit *ground, u8 arg2, s32 a
         desc.rgba[3] = 0xFF;
         desc.width = 1.0f;
         desc.height = 1.0f;
-        desc.pos.x = pos.unk0;
-        desc.pos.y = pos.unk4 + 10.0f;
-        desc.pos.z = pos.unk8;
+        desc.pos.x = pos.x;
+        desc.pos.y = pos.y + 10.0f;
+        desc.pos.z = pos.z;
         desc.rot.x = 0.0f;
         desc.rot.y = 0.0f;
         desc.rot.z = 0.0f;
@@ -620,8 +614,6 @@ typedef struct {
     f32 unk4;
 } Struct1514B8E4Size;
 
-
-
 /* Particle state at offset 0x110 written by func_1514B8E4 and animated by func_1514BC08. */
 typedef struct {
     /* 0x00 */ f32 base2C;
@@ -638,7 +630,7 @@ typedef struct {
     /* 0x2C */ f32 target24;
     /* 0x30 */ f32 timer24;
     /* 0x34 */ f32 value24;
-    /* 0x38 */ struct17 unk38;
+    /* 0x38 */ Vec3f unk38;
     /* 0x44 */ f32 unk44;
     /* 0x48 */ f32 unk48;
     /* 0x4C */ f32 unk4C;
@@ -648,7 +640,7 @@ typedef struct {
  * Spawns a particle at `pos` through func_1513D2F0 and stores its initial func_1514BC08 state.
  * A `life` of -1 means 300 frames without the timed-life flag.
  */
-void *func_1514B8E4(vertex *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, struct17 *arg4,
+void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Vec3f *arg4,
                     f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags,
                     s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11) {
     void *particle;
@@ -659,9 +651,9 @@ void *func_1514B8E4(vertex *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, s
     if (arg4 != NULL) {
         state.unk38 = *arg4;
     } else {
-        state.unk38.unk0 = 0.0f;
-        state.unk38.unk4 = 0.0f;
-        state.unk38.unk8 = 0.0f;
+        state.unk38.x = 0.0f;
+        state.unk38.y = 0.0f;
+        state.unk38.z = 0.0f;
     }
     state.unk44 = arg5;
     state.timer2C = 0.0f;

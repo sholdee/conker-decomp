@@ -2,12 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3F;
-
 /* Directions a func_15150400/func_15152190 burst scatters in (256-step binary angles). */
 typedef struct {
     /* 0x0 */ s16 yawBase;
@@ -21,7 +15,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 countBase;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3F origin;
+    /* 0x08 */ Vec3f origin;
     /* 0x14 */ f32 speedBase;
     /* 0x18 */ f32 speedRange;
     /* 0x1C */ f32 unk1C;
@@ -51,7 +45,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 countBase;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3F origin;
+    /* 0x08 */ Vec3f origin;
     /* 0x14 */ AngleRange angles;
     /* 0x1C */ f32 speedBase;
     /* 0x20 */ f32 speedRange;
@@ -93,7 +87,7 @@ typedef struct {
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;
-    /* 0x38 */ Vec3F position;
+    /* 0x38 */ Vec3f position;
     /* 0x44 */ s16 yawBase;
     /* 0x46 */ s16 pitchBase;
     /* 0x48 */ s16 yawRange;
@@ -121,7 +115,7 @@ typedef struct {
     /* 0x00D */ u8 padD[0xB];
     /* 0x018 */ f32 unk18;
     /* 0x01C */ u8 pad1C[0x1C];
-    /* 0x038 */ Vec3F position;
+    /* 0x038 */ Vec3f position;
     /* 0x044 */ u8 pad44[0x1C];
     /* 0x060 */ s32 unk60;
     /* 0x064 */ u8 pad64[0x2];
@@ -130,7 +124,6 @@ typedef struct {
     /* 0x110 */ u8 unk110[0x60];
     /* 0x170 */ f32 burstChance; /* func_150C04C0's extraData */
 } Piece;
-
 
 extern void func_15150400(Arg15150400 *, AngleRange *, u8, s32);
 extern void func_15152190(Arg15152190 *, const s32 *, const f32 *, u32, f32, s32, u8, s32);
@@ -293,8 +286,8 @@ void func_150BF21C(Struct150BF21C *obj) {
     f32 speed;
     s32 paused;
     f32 bob;
-    f32 translate[4][4];
-    f32 model[4][4];
+    MtxF translate;
+    MtxF model;
     f32 rate;
     s32 i;
     f32 bobXZ;
@@ -626,7 +619,7 @@ void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 
 /* func_15136C3C on the object, then a burst of particles at its x/z, unk180 + 105 high. */
 void func_150BFFE0(Actor *obj) {
-    Vec3F pos;
+    Vec3f pos;
     Arg15153634 spawn;
 
     pos.x = obj->x_position;
@@ -682,7 +675,7 @@ void func_150BFFE0(Actor *obj) {
 
 /* Piece handler: two particle bursts 20 units above `y` at the piece's position. */
 s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
-    Vec3F pos;
+    Vec3f pos;
     Arg15152190 burst;
 
     pos.x = piece->position.x;
@@ -761,7 +754,7 @@ s32 func_150C01DC(Piece *piece, s32 arg1, s32 arg2, s32 arg3, f32 y) {
 }
 
 /* Scatters 9-13 pieces of variant `id` from origin; each piece carries a 0.65 burst chance. */
-void func_150C04C0(Vec3F *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5) {
+void func_150C04C0(Vec3f *origin, void *arg1, s32 id, u8 arg3, u8 arg4, s32 arg5) {
     Arg15150400 config;
     AngleRange angles;
     s32 ids[1];

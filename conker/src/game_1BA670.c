@@ -57,7 +57,7 @@ typedef struct {
     /* 0x28 */ u8 pad28[4];
     /* 0x2C */ s16 unk2C;
     /* 0x2E */ u8 pad2E[2];
-    /* 0x30 */ vertex vel;
+    /* 0x30 */ Vec3f vel;
     /* 0x3C */ f32 unk3C;
     /* 0x40 */ f32 unk40;
     /* 0x44 */ f32 unk44;
@@ -72,8 +72,8 @@ typedef struct {
     /* 0x000 */ u8 pad0[0x1C];
     /* 0x01C */ s16 lifetime;
     /* 0x01E */ u8 pad1E[0x16];
-    /* 0x034 */ vertex pos;
-    /* 0x040 */ vertex prevPos;
+    /* 0x034 */ Vec3f pos;
+    /* 0x040 */ Vec3f prevPos;
     /* 0x04C */ u8 pad4C[0xC];
     /* 0x058 */ s32 flags;
     /* 0x05C */ u8 pad5C[0xB4];
@@ -82,7 +82,7 @@ typedef struct {
 
 /* An emission point attached to one of the owner's bones. */
 typedef struct {
-    /* 0x0 */ vertex pos;
+    /* 0x0 */ Vec3f pos;
     /* 0xC */ s16 bone;
 } EmitterPoint; /* 0x10 */
 
@@ -130,7 +130,7 @@ typedef struct {
 typedef struct EmitterSlot {
     /* 0x00 */ Particle *particle;
     /* 0x04 */ s32 timer;
-    /* 0x08 */ vertex offset;
+    /* 0x08 */ Vec3f offset;
     /* 0x14 */ struct EmitterSlot *next; // ring of free slots while emitting
 } EmitterSlot; /* 0x18 */
 
@@ -149,7 +149,7 @@ typedef struct Emitter {
     /* 0x2E */ u8 pad2E[2];
     /* 0x30 */ EmitterScaleSource *scaleSrc;
     /* 0x34 */ f32 scale;
-    /* 0x38 */ vertex pos;
+    /* 0x38 */ Vec3f pos;
     /* 0x44 */ u8 pad44[4];
     /* 0x48 */ EmitterSlot slots[100];
 } Emitter;

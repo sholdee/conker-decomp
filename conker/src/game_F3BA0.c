@@ -101,7 +101,7 @@ typedef struct {
     /* 0x0C */ Actor *owner;
     /* 0x10 */ u8 bone;
     /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ vertex offset;
+    /* 0x14 */ Vec3f offset;
     /* 0x20 */ f32 radius;
     /* 0x24 */ f32 rate;
     /* 0x28 */ s16 lifetime;
@@ -138,7 +138,7 @@ typedef struct {
 
 void *memcpy(void *, const void *, u32);
 s32 func_15045800(f32 *pos, s32 mask, f32 bottom, FloorHit *hit);
-void func_15143134(vertex *in, vertex *out, struct255 *matrix);
+void func_15143134(Vec3f *in, Vec3f *out, struct255 *matrix);
 u8 func_151D8E20(void);
 Emitter *func_1513418C(EmitterDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
 RiseParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize);
@@ -149,7 +149,7 @@ void func_1513470C(struct102 *effect);
 FlickerSprite *func_150C6D90(Watcher *watcher);
 Emitter *func_150C68C4(Actor *character, Watcher *watcher);
 
-extern vertex D_800887E0;
+extern Vec3f D_800887E0;
 /* matching: rodata holds second copies of these constants, which repeated literals would fold into the first */
 extern f32 D_800A0450, D_800A0454; /* 5000.0f */
 extern f32 D_800A0464;             /* 0.15f */
@@ -354,13 +354,13 @@ void func_150C6D68(Emitter *emitter) {
  */
 FlickerSprite *func_150C6D90(Watcher *watcher) {
     FlickerSprite *sprite;
-    vertex pos;
+    Vec3f pos;
     Actor *character;
 
     sprite = NULL;
     character = watcher->character;
     if (character->unk1D4) {
-        vertex origin = D_800887E0;
+        Vec3f origin = D_800887E0;
 
         func_15143134(&origin, &pos, character->unk1D4);
     } else {
@@ -369,7 +369,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
         pos.z = character->z_position;
     }
     {
-        vertex probe;
+        Vec3f probe;
 
         probe.x = pos.x;
         probe.y = pos.y + 200.0f;

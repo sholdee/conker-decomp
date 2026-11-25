@@ -26,9 +26,9 @@ typedef struct CamPlayerExt {
     /* 0x079 */ u8 pad79[0x114 - 0x79];
     /* 0x114 */ s16 unk114;
     /* 0x116 */ u8 pad116[0x130 - 0x116];
-    /* 0x130 */ vertex aimDir;
-    /* 0x13C */ vertex aimEye;
-    /* 0x148 */ vertex aimTarget;
+    /* 0x130 */ Vec3f aimDir;
+    /* 0x13C */ Vec3f aimEye;
+    /* 0x148 */ Vec3f aimTarget;
     /* 0x154 */ u8 pad154[0x16C - 0x154];
     /* 0x16C */ f32 aimYaw;
     /* 0x170 */ f32 aimPitch;
@@ -454,8 +454,8 @@ void func_15120158(Camera *camera) {
     camera->playerExt->aimTarget.z += aim->offset.z;
     camera->playerExt->aimEye.x += aim->offset.x;
     camera->playerExt->aimEye.z += aim->offset.z;
-    func_150491EC((struct17 *)&camera->playerExt->aimEye, (struct17 *)&camera->playerExt->aimTarget,
-                  (struct17 *)&camera->playerExt->aimDir);
+    func_150491EC((Vec3f *)&camera->playerExt->aimEye, (Vec3f *)&camera->playerExt->aimTarget,
+                  (Vec3f *)&camera->playerExt->aimDir);
     func_15123A54(camera);
     func_1512E140(camera);
     func_15125594(camera);
@@ -466,10 +466,10 @@ void func_15120158(Camera *camera) {
 void func_15121490(Actor *player, OSContPad *pad) {
     CamPlayerExt *ext;
     s32 zone;
-    vertex target;
-    vertex eye;
+    Vec3f target;
+    Vec3f eye;
     f32 angle;
-    vertex dir;
+    Vec3f dir;
     f32 temp;
 
     player->unk31C->unk198 = 0;

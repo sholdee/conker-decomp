@@ -5,7 +5,7 @@
 
 /* Data copied into a func_151491F4 particle at offset 0x28 by func_1515AF90. */
 typedef struct {
-    /* 0x00 */ vertex position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 upperFloorY; // highest floor between the camera's eye and y = 19500
@@ -23,7 +23,7 @@ typedef struct {
     /* 0x20 */ void *surface;
 } GroundHit;
 
-s32 func_1504697C(vertex *pos, u16 mask, f32 bottom, GroundHit *hit);
+s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, GroundHit *hit);
 
 /*
  * With a 1-in-16 chance, spawns a particle (func_151491F4) 107-2010 units from the player's camera,
@@ -34,7 +34,7 @@ void func_1515AF90(s16 player) {
     if (!(func_150ADA20() & 0xF)) {
         void *particle;
         GroundParticle effect;
-        vertex *eye;
+        Vec3f *eye;
         s32 yaw;
         u8 valid;
         s16 angle;
@@ -42,9 +42,9 @@ void func_1515AF90(s16 player) {
         f32 cosine;
         f32 sine;
         GroundHit hit;
-        vertex probe;
+        Vec3f probe;
         GroundHit lowerHit;
-        vertex lowerProbe;
+        Vec3f lowerProbe;
         f32 bottom;
 
         valid = TRUE;
@@ -124,9 +124,9 @@ typedef struct ParticleDesc6C {
     /* 0x24 */ f32 scaleRate;
     /* 0x28 */ f32 width;
     /* 0x2C */ f32 height;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
     /* 0x5C */ struct ParticleViewMask *viewMask;
@@ -156,7 +156,7 @@ typedef struct {
 
 /* Emitter state stored in an effect object at +0x28. */
 typedef struct {
-    /* 0x00 */ vertex position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 rate;        // particles per unit of D_800BE9A4
     /* 0x10 */ f32 accumulator; // pending particles; one is spawned per whole unit
     /* 0x14 */ f32 unk14;

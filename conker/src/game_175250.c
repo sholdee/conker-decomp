@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* Spawn description passed to func_15147DA0 (first argument). */
 typedef struct {
     Vec3f pos;
@@ -118,7 +114,6 @@ Trail *func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 extraSize, s32 
     params->render = *render;
     return trail;
 }
-
 
 typedef s32 (*TrailFunc)();
 extern TrailFunc D_8008A3E0[];

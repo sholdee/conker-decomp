@@ -12,8 +12,8 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s16 countBase;
     /* 0x02 */ s16 countRange;
-    /* 0x04 */ vertex position;
-    /* 0x10 */ vertex normal;
+    /* 0x04 */ Vec3f position;
+    /* 0x10 */ Vec3f normal;
     /* 0x1C */ SurfaceTriangle triangle;
     /* 0x30 */ f32 spread;
     /* 0x34 */ u8 unk34;
@@ -69,7 +69,7 @@ typedef struct {
 
 /* Per-behaviour motion block stored right after a particle. */
 typedef struct {
-    /* 0x00 */ vertex vel;
+    /* 0x00 */ Vec3f vel;
     /* 0x0C */ f32 rotVelX;
     /* 0x10 */ f32 rotVelY;
     /* 0x14 */ f32 minY;           /* the particle expires below this height */
@@ -121,7 +121,7 @@ void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
         f32 dz;
         f32 dy;
         f32 dx;
-        vertex hit;
+        Vec3f hit;
         SurfaceTriangle triangle;
         s32 hitObject;
         SpriteDef sprite;

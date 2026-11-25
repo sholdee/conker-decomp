@@ -146,10 +146,10 @@ void func_15164EE4(void) {
 
 /* The amplitudes and speeds of CamWobbleDef seen as four vectors. */
 typedef struct {
-    /* 0x00 */ vertex ampPos;
-    /* 0x0C */ vertex ampRot;
-    /* 0x18 */ vertex speedPos;
-    /* 0x24 */ vertex speedRot;
+    /* 0x00 */ Vec3f ampPos;
+    /* 0x0C */ Vec3f ampRot;
+    /* 0x18 */ Vec3f speedPos;
+    /* 0x24 */ Vec3f speedRot;
 } CamWobbleShape;
 
 /* A wobble that ramps up to peak over riseTime, holds it for holdTime and ramps down over fallTime. */
@@ -172,7 +172,7 @@ typedef struct {
 
 /* Distance falloff used by scaleFn 1 (func_15165B80). */
 typedef struct {
-    /* 0x00 */ vertex origin;
+    /* 0x00 */ Vec3f origin;
     /* 0x0C */ f32 radius;       // full strength within this distance of origin
     /* 0x10 */ f32 fadeRange;    // then fades to nothing over this distance
     /* 0x14 */ f32 invFadeRange; // 1 / fadeRange
@@ -490,7 +490,7 @@ s32 func_151658DC(CamWobbleEnv *wobble) {
     return active;
 }
 
-f32 func_15165BB0(CamWobble *wobble, vertex *origin, f32 radius, f32 fadeRange, f32 invFadeRange);
+f32 func_15165BB0(CamWobble *wobble, Vec3f *origin, f32 radius, f32 fadeRange, f32 invFadeRange);
 
 /* Scale callback 1: fades the wobble with the player's distance from its falloff origin. */
 f32 func_15165B80(CamWobbleEnv *wobble) {
@@ -498,14 +498,14 @@ f32 func_15165B80(CamWobbleEnv *wobble) {
                          wobble->falloff.invFadeRange);
 }
 
-extern vertex *func_15144B34(s32);
-extern f32 func_15143E64(vertex *);
+extern Vec3f *func_15144B34(s32);
+extern f32 func_15143E64(Vec3f *);
 
 /* 1 within radius of origin, 0 beyond radius + fadeRange, linear in between. */
-f32 func_15165BB0(CamWobble *wobble, vertex *origin, f32 radius, f32 fadeRange, f32 invFadeRange) {
+f32 func_15165BB0(CamWobble *wobble, Vec3f *origin, f32 radius, f32 fadeRange, f32 invFadeRange) {
     f32 scale;
-    vertex delta;
-    vertex *playerPos;
+    Vec3f delta;
+    Vec3f *playerPos;
     f32 dist;
 
     playerPos = func_15144B34(wobble->def.playerIndex);

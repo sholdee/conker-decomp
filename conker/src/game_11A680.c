@@ -59,7 +59,7 @@ f32 func_150ED298(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, 
     f32 time;
     f32 result;
     f32 root;
-    f32 mf[4][4];
+    MtxF mf;
     f32 firstTime;
 
     if (obj->unk1D4 != NULL) {

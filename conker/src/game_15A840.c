@@ -10,7 +10,7 @@ typedef struct {
     /* 0x28 */ f32 orbitSpeed; /* degrees per frame, clamped to +-10 */
 } CamOrbitState;
 
-void func_1508EF80(struct17 *point, struct17 *pivot, f32 degrees, struct17 *out);
+void func_1508EF80(Vec3f *point, Vec3f *pivot, f32 degrees, Vec3f *out);
 
 /* Manual camera orbit. While input bit 0 or 1 is held (and bit 21 of flags is clear), orbitSpeed
    accelerates by 0.5 per frame in that direction, clamped to +-10, and the eye orbits around
@@ -49,11 +49,11 @@ void func_1512D390(Camera *camera) {
             orbit->counter = 20;
             return;
         }
-        func_1508EF80((struct17 *)&camera->eye, (struct17 *)&camera->focus,
-                      (orbit->orbitSpeed * D_800BE9A4) / 2.5f, (struct17 *)&camera->eye);
+        func_1508EF80((Vec3f *)&camera->eye, (Vec3f *)&camera->focus,
+                      (orbit->orbitSpeed * D_800BE9A4) / 2.5f, (Vec3f *)&camera->eye);
     } else if (orbit->orbitSpeed != 0.0f) {
         orbit->orbitSpeed -= orbit->orbitSpeed * 0.2f * D_800BE9A4;
-        func_1508EF80((struct17 *)&camera->eye, (struct17 *)&camera->focus,
-                      (orbit->orbitSpeed * D_800BE9A4) / 2.5f, (struct17 *)&camera->eye);
+        func_1508EF80((Vec3f *)&camera->eye, (Vec3f *)&camera->focus,
+                      (orbit->orbitSpeed * D_800BE9A4) / 2.5f, (Vec3f *)&camera->eye);
     }
 }

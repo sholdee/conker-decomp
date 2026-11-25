@@ -2,14 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef f32 MtxF[4][4];
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
 /* Object spawn parameters (see game_179F30.c); only passed through here. */
 typedef struct SpawnParams SpawnParams;
 

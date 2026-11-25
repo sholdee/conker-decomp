@@ -202,9 +202,6 @@ void func_150DFCA8(SwingObject *obj) {
     }
 }
 
-/* An actor's bone matrices: Actor.unk1D4 points at an array of these, 0x40 bytes each. */
-typedef f32 MtxF[4][4];
-
 /* Moves bone 1 of the actor to its x/z position at a fixed height of 2706. */
 void func_150DFDA4(Actor *actor) {
     f32 (*bone)[4] = ((MtxF *)actor->unk1D4)[1];
@@ -375,7 +372,7 @@ typedef struct {
     /* 0x0C */ Actor *owner;
     /* 0x10 */ u8 bone;
     /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ struct17 offset;
+    /* 0x14 */ Vec3f offset;
     /* 0x20 */ f32 radius;
     /* 0x24 */ f32 rate;
     /* 0x28 */ s16 lifetime;
@@ -396,7 +393,7 @@ void func_150E0348(Actor *actor, u8 arg1, s32 arg2) {
     desc.ownerId = actor->unique_id;
     desc.bone = 0;
     desc.owner = actor;
-    desc.offset = *(struct17 *)&D_800A5480; /* a Vec3; variables.h declares it as one f32 */
+    desc.offset = D_800A5480; /* a Vec3; variables.h declares it as one f32 */
     desc.lifetime = 300;
     desc.flags = 0x1B; /* FOLLOW_OWNER | ON_BONE | NO_PREVIOUS | STATIC */
     desc.emitter = 11; /* D_80089A70[11] = func_150E03F8 */
@@ -486,13 +483,13 @@ extern u8 D_80088988;
 extern f32 D_800A0F70[][3];
 extern f32 D_800A0F88[][3];
 extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
-extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8,
+extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, Vec3f *, s32, s32, s32, u8,
                           s32);
 
 /* Spawns a func_15102B38 effect between points D_800A0F70[slot] and D_800A0F88[slot] of the
  * actor's bone D_80088988, starting at the first point in world space. */
 void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
-    struct17 start;
+    Vec3f start;
     f32 scale;
     f32 params[2];
     f32 *src[1];
@@ -505,7 +502,7 @@ void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
         return;
     }
     src[0] = D_800A0F70[slot];
-    dst[0] = &start.unk0;
+    dst[0] = &start.x;
     func_15145EA4(src, dst, (Mtx *)actor->unk1D4 + D_80088988, 1);
     scale = 1.0f; // matching: IDO keeps the multiply by 1.0 only through a variable
     params[1] = func_150ADA68() * scale + 2.0f;

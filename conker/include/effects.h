@@ -54,9 +54,9 @@ typedef struct ParticleDesc {
     /* 0x24 */ f32 scaleRate;
     /* 0x28 */ f32 width;
     /* 0x2C */ f32 height;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
     /* 0x5C */ struct ParticleViewMask *viewMask;
@@ -80,11 +80,11 @@ typedef struct ParticleSpawn {
     /* 0x04 */ f32 elasticity;
     /* 0x08 */ f32 sizeXZ;
     /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
+    /* 0x10 */ Vec3f rot;
+    /* 0x1C */ Vec3f scale;
+    /* 0x28 */ Vec3f pos;
+    /* 0x34 */ Vec3f vel;
+    /* 0x40 */ Vec3f rotVel;
     /* 0x4C */ f32 gravity;
     /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;
@@ -132,9 +132,9 @@ typedef struct ParticleDef {
     /* 0x10 */ u8 rgba[4];
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
-    /* 0x1C */ vertex pos;
-    /* 0x28 */ vertex rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
-    /* 0x34 */ vertex scale;
+    /* 0x1C */ Vec3f pos;
+    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
     /* 0x45 */ u8 unk45;
@@ -152,7 +152,7 @@ typedef struct ParticleDef {
 typedef struct DebrisEmitter {
     /* 0x00 */ s16 count;
     /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ vertex pos;
+    /* 0x04 */ Vec3f pos;
     /* 0x10 */ s16 lifetime;
     /* 0x12 */ u8 pad12[2];
     /* 0x14 */ f32 radius;     /* spawn points lie within this distance of pos */
@@ -164,7 +164,7 @@ typedef struct DebrisEmitter {
     /* 0x24 */ f32 speedRange;
     /* 0x28 */ f32 velYBase;   /* mode 0 only */
     /* 0x2C */ f32 velYRange;
-    /* 0x30 */ vertex dir;     /* modes 2 and 3 */
+    /* 0x30 */ Vec3f dir;     /* modes 2 and 3 */
     /* 0x3C */ f32 sizeBase;
     /* 0x40 */ f32 sizeRange;
     /* 0x44 */ f32 gravityBase;

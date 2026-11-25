@@ -20,9 +20,9 @@ typedef struct {
 
 /* Per-object state stored at offset 0x28 of the object. */
 typedef struct {
-    vertex position;
-    vertex rotation;
-    vertex angularVelocity;
+    Vec3f position;
+    Vec3f rotation;
+    Vec3f angularVelocity;
     FF0E0Child *children[6];
     f32 intensity;
     s32 unk40;
@@ -37,12 +37,12 @@ typedef struct {
 
 /* Payload of message 0x32 (passed as the s32 argument). */
 typedef struct {
-    vertex angularVelocity;
+    Vec3f angularVelocity;
     f32 intensity;
 } FF0E0SpinMsg;
 
-extern vertex D_800A08F0[6];
-extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+extern Vec3f D_800A08F0[6];
+extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
 
 /* Spins the object and casts a ray from its position along each of the six rotated directions,
@@ -50,7 +50,7 @@ extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f3
 void func_150D1C30(FF0E0Object *obj) {
     FF0E0State *state;
     FF0E0Child *child;
-    f32 mtx[4][4];
+    MtxF mtx;
     s32 i;
 
     state = &obj->state;
@@ -115,7 +115,7 @@ void func_150D1F6C(FF0E0Object *obj, s32 arg, u8 msg) {
             }
         }
     } else if (msg == 0x4E) {
-        obj->state.angularVelocity = *(vertex *)&D_800A5480;
+        obj->state.angularVelocity = D_800A5480;
     } else if (msg == 0x4F) {
         func_1516972C((struct102 *)obj);
     }

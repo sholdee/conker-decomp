@@ -36,13 +36,13 @@ void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, f32 (*srcMtx)[4
                    f32 (*dstMtx)[4][4], s32 count, f32 planeX, f32 planeY, f32 planeZ, f32 unused,
                    f32 angle, f32 objX, f32 objY, f32 objZ, f32 fadeStart, f32 fadeEnd, f32 maxAlpha,
                    s32 srcIsFixed, s32 dstToFixed) {
-    f32 flip[4][4];
-    f32 rotA[4][4];
-    f32 rotB[4][4];
+    MtxF flip;
+    MtxF rotA;
+    MtxF rotB;
     s32 i;
     f32 (*src)[4];
     f32 dist;
-    f32 temp[4][4];
+    MtxF temp;
     struct255 *savedMtx;
 
     guMtxIdentF(flip);

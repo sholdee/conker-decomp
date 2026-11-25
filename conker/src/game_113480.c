@@ -3,12 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
 /* Hit record copied to Streak.impact (+0x110) when a streak is spawned. */
 typedef struct {
     /* 0x00 */ u8 flags; /* bit 0: the streak's path hits a surface */
@@ -49,7 +43,7 @@ extern f32 func_15144A74(Vec3f *, Vec3f *);
 extern s32 func_15145C90(s32);
 
 /* Spawns a streak particle from start along dir; when checkHit is set, records where its path hits a surface. */
-void *func_150E5FD0(vertex *start, vertex *dir, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6, u8 checkHit, u8 arg8,
+void *func_150E5FD0(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6, u8 checkHit, u8 arg8,
                     s16 life, s8 callback) {
     void *streak;
     ParticleDef info;

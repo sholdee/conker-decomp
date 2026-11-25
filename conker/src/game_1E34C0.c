@@ -24,7 +24,7 @@ extern void func_15133894(Particle *);
 
 /* Spawns a pulsing particle of the given size at pos (fading out over 0x100 >> fadeShift frames at the end
  * of its lifetime). */
-Particle *func_151B6010(vertex *pos, vertex *vel, f32 size, vertex *rot, vertex *rotVel, f32 gravity,
+Particle *func_151B6010(Vec3f *pos, Vec3f *vel, f32 size, Vec3f *rot, Vec3f *rotVel, f32 gravity,
                         s16 lifetime, u8 alpha, s32 unused, f32 elasticity, u8 fadeShift, u8 arg11, u8 arg12,
                         s32 arg13) {
     Particle *particle;

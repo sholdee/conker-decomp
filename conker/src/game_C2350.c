@@ -41,15 +41,15 @@ typedef struct {
     /* 0x10 */ Texture *tex;
 } SpriteParams;
 
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+void func_150A7A48(MtxF a, MtxF b, MtxF c);
 void func_150A7A00(void *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 
-extern f32 D_800D2CA8[][4][4];
+extern MtxF D_800D2CA8[];
 
 /* Combines view `view`'s current projection and view matrices into D_800D2CA8[view]. */
 void func_15094EA0(s32 view) {
-    f32 projection[4][4];
-    f32 viewMtx[4][4];
+    MtxF projection;
+    MtxF viewMtx;
 
     guMtxL2F(projection, &((Mtx **)&D_800DC2A0)[D_800BE9C0][view]);
     guMtxL2F(viewMtx, &VIEWS[view].projectionMtx[D_800BE9C0]);

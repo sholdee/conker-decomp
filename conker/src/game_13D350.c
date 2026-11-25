@@ -140,12 +140,12 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     return gfx;
 }
 
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
 /* Builds the camera rotation matrix in mtx: yaw, then pitch, then roll (func_150A8050 makes a rotation from
  * three angles, func_150A7A48 multiplies). */
-void func_151102CC(f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll) {
-    f32 rotation[4][4];
+void func_151102CC(MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
+    MtxF rotation;
 
     func_150A8050(mtx, 0.0f, yaw, 0.0f);
     func_150A8050(rotation, pitch, 0.0f, 0.0f);
@@ -155,7 +155,7 @@ void func_151102CC(f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll) {
 }
 
 /* Builds view viewIndex's view-projection matrix in mtx from the camera angles. */
-void func_15110360(s32 viewIndex, f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll) {
+void func_15110360(s32 viewIndex, MtxF mtx, f32 pitch, f32 yaw, f32 roll) {
     func_151102CC(mtx, pitch, yaw, roll);
     func_150A7A48(mtx, RENDER_VIEWS[viewIndex].projection, mtx);
 }
@@ -348,7 +348,7 @@ typedef struct SkyTile {
     s32 format;
 } SkyTile;
 
-s32 func_150A6210(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
+s32 func_150A6210(MtxF mtx, f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 extern u8 D_1673[];
 extern u8 D_800DBEAB;
@@ -360,7 +360,7 @@ extern u8 D_800DBEAC;
  * in *vtxBufPtr and drawn four at a time. The vertex/queue cursors are carried between faces through the
  * pointer arguments. quad is scratch (callers pass NULL). */
 Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4, u32 width, u32 height,
-                   u32 tileW, u32 tileH, f32 x, f32 y, f32 z, u8 axis, f32 mtx[4][4], s32 limit,
+                   u32 tileW, u32 tileH, f32 x, f32 y, f32 z, u8 axis, MtxF mtx, s32 limit,
                    s32 *vtxCountPtr, s32 *vtxIdxPtr, SkyTile *queue, s32 *lastFormatPtr,
                    u8 *sizes, u8 *shifts, s16 *palOffsets, u8 *tlutCounts, u8 *tiles, s32 texSet) {
     Vtx *vtxBuf;
@@ -691,8 +691,8 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     s32 axis;
     s32 texSet;
     s32 *texList;
-    f32 rotation[4][4];
-    f32 viewProj[4][4];
+    MtxF rotation;
+    MtxF viewProj;
     Vtx *vtx;
     s32 vtxCount;
     s32 vtxIdx;

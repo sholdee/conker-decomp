@@ -15,7 +15,7 @@ extern SpawnedParticle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, 
 extern void func_15133760(Mtx *mtx, SpawnedParticle *particle);
 
 /* Spawns one of three particle variants at pos, turned rotY degrees about the vertical axis. */
-void *func_151BEEE0(f32 rotY, vertex *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
+void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
     SpawnedParticle *particle;
     ParticleVariants variants = D_8008FBC0;
 
@@ -81,7 +81,7 @@ void *func_151BEEE0(f32 rotY, vertex *pos, s32 arg2, u8 arg3, u8 variant, u8 arg
 typedef struct {
     /* 0x00 */ s32 countBase;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ vertex position;
+    /* 0x08 */ Vec3f position;
     /* 0x14 */ f32 speedBase;
     /* 0x18 */ f32 speedRange;
     /* 0x1C */ s16 yawBase;
@@ -129,7 +129,7 @@ typedef struct {
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;
-    /* 0x38 */ vertex position;
+    /* 0x38 */ Vec3f position;
     /* 0x44 */ s16 yawBase;
     /* 0x46 */ s16 pitchBase;
     /* 0x48 */ s16 yawRange;
@@ -152,7 +152,7 @@ void func_15150F90(Game150F90Config *config, u8 arg1, u8 arg2, s32 arg3);
 void func_15153634(Config15153634 *config, u8 arg1, u8 arg2, s32 arg3);
 
 /* Spawns two particle bursts at pos: one through func_15150F90, one through func_15153634. */
-void func_151BF0C8(vertex *pos) {
+void func_151BF0C8(Vec3f *pos) {
     Game150F90Config first;
     Config15153634 second;
 
@@ -256,7 +256,7 @@ typedef struct {
     /* 0x40 */ u8  unk40;
     /* 0x41 */ u8  unk41;
     /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ vertex position;
+    /* 0x44 */ Vec3f position;
     /* 0x50 */ s32 unk50;
     /* 0x54 */ s16 unk54;
     /* 0x56 */ s16 unk56;
@@ -264,7 +264,7 @@ typedef struct {
 
 /* The block copied to the panel's +0x120. */
 typedef struct {
-    /* 0x00 */ vertex unk0;
+    /* 0x00 */ Vec3f unk0;
     /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
 } PanelExtra;
@@ -416,7 +416,7 @@ void func_151BF340(u8 owner, s32 kind) {
                 panelConfig.position.y = 79.0f;
             }
             panelConfig.position.z = 0.0f;
-            panelExtra.unk0 = *(vertex *)&D_800A5480; /* variables.h declares D_800A5480 as a single f32 */
+            panelExtra.unk0 = D_800A5480; /* variables.h declares D_800A5480 as a single f32 */
             panelExtra.unkC = 0.3010000288f;
             panelExtra.unk10 = 0.3010000288f;
             display->panel = func_15157010(&panelConfig, 0, 1.0f, 0, 0, 0x14, owner, kind);

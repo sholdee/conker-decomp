@@ -60,7 +60,7 @@ void func_151BC5A4(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
 
 /* One point of a ribbon trail. */
 typedef struct {
-    struct17 pos;
+    Vec3f pos;
     s16 lifetime;
     u8 alpha;
     u8 padF;
@@ -70,7 +70,7 @@ typedef struct {
 /* Trail state that follows the owner actor. */
 typedef struct {
     ActorRef owner;
-    struct17 lastPos;      /* 0x08: position of the newest point */
+    Vec3f lastPos;      /* 0x08: position of the newest point */
     f32 pending;           /* 0x14: points owed, emitted once it exceeds 1 */
     f32 unk18;
     f32 texU;              /* 0x1C: texture coordinate reached by the owner */
@@ -80,7 +80,7 @@ typedef struct {
 /* Ribbon trail effect: a ring buffer of points from head (oldest) to tail (next write). */
 typedef struct {
     u8 pad0[0x10];
-    struct17 pos;          /* 0x10 */
+    Vec3f pos;          /* 0x10 */
     u8 pad1C[2];
     u16 flags;             /* 0x1E */
     u8 pad20[5];
@@ -92,7 +92,7 @@ typedef struct {
     u8 pad2F;
     s8 unk30;
     u8 pad31[0x23];
-    struct17 headPos;      /* 0x54 */
+    Vec3f headPos;      /* 0x54 */
     u8 pad60[0x24];
     u8 buffers[0x10];      /* 0x84 */
     TrailPoint *points;    /* 0x94 */
@@ -139,21 +139,21 @@ s32 func_151BC64C(TrailEffect *trail) {
     if (trail->count > 0) {
         trail->headPos = points[trail->head].pos;
     } else {
-        trail->headPos.unk0 = 0.0f;
-        trail->headPos.unk4 = 0.0f;
-        trail->headPos.unk8 = 0.0f;
+        trail->headPos.x = 0.0f;
+        trail->headPos.y = 0.0f;
+        trail->headPos.z = 0.0f;
     }
     return 1;
 }
 
-extern f32 func_15143E64(struct17 *);
+extern f32 func_15143E64(Vec3f *);
 
 /* Follows the owner and emits trail points evenly along the distance it moved. */
 s32 func_151BC794(TrailEffect *trail) {
     TrailData *data;
     TrailPoint *points;
     Actor *owner;
-    struct17 delta;
+    Vec3f delta;
     TrailPoint *point;
     f32 dist;
     f32 inv;
@@ -166,17 +166,17 @@ s32 func_151BC794(TrailEffect *trail) {
         trail->flags |= 8;
         return 1;
     }
-    trail->pos.unk0 = owner->x_position;
-    trail->pos.unk4 = owner->y_position;
-    trail->pos.unk8 = owner->z_position;
-    delta.unk0 = trail->pos.unk0 - data->lastPos.unk0;
-    delta.unk4 = trail->pos.unk4 - data->lastPos.unk4;
-    delta.unk8 = trail->pos.unk8 - data->lastPos.unk8;
+    trail->pos.x = owner->x_position;
+    trail->pos.y = owner->y_position;
+    trail->pos.z = owner->z_position;
+    delta.x = trail->pos.x - data->lastPos.x;
+    delta.y = trail->pos.y - data->lastPos.y;
+    delta.z = trail->pos.z - data->lastPos.z;
     dist = func_15143E64(&delta);
     data->pending += dist * 0.04870799929f * D_800BE9A4;
     data->texU += dist * 9.708835602f;
     if (data->pending > 1.0f) {
-        struct17 pos;
+        Vec3f pos;
         f32 u;
         f32 y;
         f32 yStep;
@@ -191,9 +191,9 @@ s32 func_151BC794(TrailEffect *trail) {
         startU = data->lastTexU;
         u = startU;
         yStep = -(y * inv);
-        dx = delta.unk0 * inv;
-        dy = delta.unk4 * inv;
-        dz = delta.unk8 * inv;
+        dx = delta.x * inv;
+        dy = delta.y * inv;
+        dz = delta.z * inv;
         uSpan = data->texU - startU;
         do {
             point = &points[trail->tail];
@@ -218,9 +218,9 @@ s32 func_151BC794(TrailEffect *trail) {
                 trail->count--;
             }
             u += uSpan * inv;
-            pos.unk0 += dx;
-            pos.unk4 += dy;
-            pos.unk8 += dz;
+            pos.x += dx;
+            pos.y += dy;
+            pos.z += dz;
             y += yStep;
             data->pending -= 1.0f;
         } while (data->pending > 1.0f);
@@ -236,7 +236,7 @@ Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern struct17 *func_15144B34(s32);
+extern Vec3f *func_15144B34(s32);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern u8 D_80090CD4[];
 extern s32 D_800D2C9C;
@@ -249,10 +249,10 @@ extern struct {
 Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
     Vtx *vtx;
     TrailPoint *points;
-    struct17 *camPos;
+    Vec3f *camPos;
     u8 dirty;
-    struct17 prev;
-    struct17 cur;
+    Vec3f prev;
+    Vec3f cur;
     f32 viewX;
     f32 viewY;
     f32 viewZ;
@@ -308,12 +308,12 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
             prevAlpha = points[i].alpha;
             prevTexU = points[i].texU;
 
-            edgeX = cur.unk0 - prev.unk0;
-            edgeY = cur.unk4 - prev.unk4;
-            edgeZ = cur.unk8 - prev.unk8;
-            viewX = cur.unk0 - camPos->unk0;
-            viewY = cur.unk4 - camPos->unk4;
-            viewZ = cur.unk8 - camPos->unk8;
+            edgeX = cur.x - prev.x;
+            edgeY = cur.y - prev.y;
+            edgeZ = cur.z - prev.z;
+            viewX = cur.x - camPos->x;
+            viewY = cur.y - camPos->y;
+            viewZ = cur.z - camPos->z;
             sideX = (edgeY * viewZ) - (viewY * edgeZ);
             sideY = (edgeZ * viewX) - (viewZ * edgeX);
             sideZ = (edgeX * viewY) - (viewX * edgeY);
@@ -326,9 +326,9 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
                 sideY = sideY * scale;
                 sideZ = sideZ * scale;
             }
-            vtx->v.ob[0] = cur.unk0 + sideX;
-            vtx->v.ob[1] = cur.unk4 + sideY;
-            vtx->v.ob[2] = cur.unk8 + sideZ;
+            vtx->v.ob[0] = cur.x + sideX;
+            vtx->v.ob[1] = cur.y + sideY;
+            vtx->v.ob[2] = cur.z + sideZ;
             vtx->v.tc[0] = curTexU;
             vtx->v.tc[1] = 0;
             vtx->v.cn[0] = 0xFF;
@@ -337,9 +337,9 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
             vtx->v.cn[3] = curAlpha;
             vtx->v.flag = 0;
             vtx++;
-            vtx->v.ob[0] = cur.unk0 - sideX;
-            vtx->v.ob[1] = cur.unk4 - sideY;
-            vtx->v.ob[2] = cur.unk8 - sideZ;
+            vtx->v.ob[0] = cur.x - sideX;
+            vtx->v.ob[1] = cur.y - sideY;
+            vtx->v.ob[2] = cur.z - sideZ;
             vtx->v.tc[0] = curTexU;
             vtx->v.tc[1] = 0x7FF;
             vtx->v.cn[0] = 0xFF;
@@ -350,12 +350,12 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
             vtx++;
             do {
                 j = i;
-                edgeX = cur.unk0 - prev.unk0;
-                edgeY = cur.unk4 - prev.unk4;
-                edgeZ = cur.unk8 - prev.unk8;
-                viewX = prev.unk0 - camPos->unk0;
-                viewY = prev.unk4 - camPos->unk4;
-                viewZ = prev.unk8 - camPos->unk8;
+                edgeX = cur.x - prev.x;
+                edgeY = cur.y - prev.y;
+                edgeZ = cur.z - prev.z;
+                viewX = prev.x - camPos->x;
+                viewY = prev.y - camPos->y;
+                viewZ = prev.z - camPos->z;
                 sideX = (edgeY * viewZ) - (viewY * edgeZ);
                 sideY = (edgeZ * viewX) - (viewZ * edgeX);
                 sideZ = (edgeX * viewY) - (viewX * edgeY);
@@ -368,9 +368,9 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
                     sideY = sideY * scale;
                     sideZ = sideZ * scale;
                 }
-                vtx->v.ob[0] = prev.unk0 + sideX;
-                vtx->v.ob[1] = prev.unk4 + sideY;
-                vtx->v.ob[2] = prev.unk8 + sideZ;
+                vtx->v.ob[0] = prev.x + sideX;
+                vtx->v.ob[1] = prev.y + sideY;
+                vtx->v.ob[2] = prev.z + sideZ;
                 vtx->v.tc[0] = prevTexU;
                 vtx->v.tc[1] = 0;
                 vtx->v.cn[0] = 0xFF;
@@ -379,9 +379,9 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
                 vtx->v.cn[3] = prevAlpha;
                 vtx->v.flag = 0;
                 vtx++;
-                vtx->v.ob[0] = prev.unk0 - sideX;
-                vtx->v.ob[1] = prev.unk4 - sideY;
-                vtx->v.ob[2] = prev.unk8 - sideZ;
+                vtx->v.ob[0] = prev.x - sideX;
+                vtx->v.ob[1] = prev.y - sideY;
+                vtx->v.ob[2] = prev.z - sideZ;
                 vtx->v.tc[0] = prevTexU;
                 vtx->v.tc[1] = 0x7FF;
                 vtx->v.cn[0] = 0xFF;
@@ -475,8 +475,8 @@ typedef struct {
     Actor *owner;
     u8 bone;
     u8 pad9[3];
-    struct17 offsetA;
-    struct17 offsetB;
+    Vec3f offsetA;
+    Vec3f offsetB;
     u8 flags;
     u8 pad25;
     s16 duration;
@@ -507,8 +507,8 @@ typedef struct {
     Actor *owner;
     u8 bone;
     u8 pad21[3];
-    struct17 offsetA;
-    struct17 offsetB;
+    Vec3f offsetA;
+    Vec3f offsetB;
     u8 flags;
     u8 pad3D;
     s16 duration;
@@ -525,8 +525,8 @@ typedef struct {
     u8 pad52[2];
     s16 timer;
     u8 pad56[2];
-    struct17 posA;
-    struct17 posB;
+    Vec3f posA;
+    Vec3f posB;
     f32 accumulator;
     f32 power;
     f32 time;
@@ -557,12 +557,12 @@ void func_151BD2F8(Actor *actor, s32 arg1, s32 arg2) {
     desc.ownerId = actor->unique_id;
     desc.owner = actor;
     desc.bone = 1;
-    desc.offsetA.unk0 = 31.0f;
-    desc.offsetA.unk4 = -34.0f;
-    desc.offsetA.unk8 = -117.0f;
-    desc.offsetB.unk0 = 35.0f;
-    desc.offsetB.unk4 = -24.0f;
-    desc.offsetB.unk8 = -182.0f;
+    desc.offsetA.x = 31.0f;
+    desc.offsetA.y = -34.0f;
+    desc.offsetA.z = -117.0f;
+    desc.offsetB.x = 35.0f;
+    desc.offsetB.y = -24.0f;
+    desc.offsetB.z = -182.0f;
     desc.flags = 0;
     desc.duration = 50;
     desc.pause = 100;
@@ -581,8 +581,8 @@ void func_151BD2F8(Actor *actor, s32 arg1, s32 arg2) {
         memcpy(&strip->sampleAge, &sampleAge.value, sizeof(sampleAge.value));
     }
 
-    desc.offsetA.unk0 = -desc.offsetA.unk0;
-    desc.offsetB.unk0 = -desc.offsetB.unk0;
+    desc.offsetA.x = -desc.offsetA.x;
+    desc.offsetB.x = -desc.offsetB.x;
 
     strip = func_15134DAC(&desc, sizeof(sampleAge.value));
     if (strip != NULL) {
@@ -633,9 +633,9 @@ typedef struct ParticleDesc68 {
     /* 0x24 */ f32 scaleRate;
     /* 0x28 */ f32 width;
     /* 0x2C */ f32 height;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
     /* 0x5C */ struct ParticleViewMask *viewMask;
@@ -652,19 +652,19 @@ typedef struct ParticleDesc68 {
 /* Particle spawned by func_151BD43C, with its 0x10 bytes of per-particle data. */
 typedef struct {
     u8 pad0[0x4C];
-    struct17 offset;   /* 0x4C: ParticleDesc68.offset, the point the particle moves with */
+    Vec3f offset;   /* 0x4C: ParticleDesc68.offset, the point the particle moves with */
     u8 pad58[0x50];
     f32 drag;          /* 0xA8: read by func_1513170C */
     u8 padAC[4];
     ActorRef owner;    /* 0xB0 */
 } BloodDroplet;
 
-s32 func_1513170C(BloodDroplet *particle, struct17 *prevPos);
+s32 func_1513170C(BloodDroplet *particle, Vec3f *prevPos);
 
 BloodDroplet *func_15130374(ParticleDesc68 *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
 
 /* BloodStrip emit callback: spawns one blood droplet at pointA moving towards pointB. */
-void func_151BD43C(struct17 *pointA, struct17 *pointB, struct17 *velA, struct17 *velB, f32 time,
+void func_151BD43C(Vec3f *pointA, Vec3f *pointB, Vec3f *velA, Vec3f *velB, f32 time,
                    BloodStrip *strip) {
     BloodDroplet *particle;
     Actor *owner;
@@ -708,12 +708,12 @@ void func_151BD43C(struct17 *pointA, struct17 *pointB, struct17 *velA, struct17 
         desc.brightness = 255;
         desc.timer = (func_150ADA20() % 18U) + 25;
         desc.width = desc.height = (func_150ADA68() * 53.0f) + 49.0f;
-        desc.vel.x = (pointB->unk0 - pointA->unk0) * strip->power;
-        desc.vel.y = (pointB->unk4 - pointA->unk4) * strip->power;
-        desc.vel.z = (pointB->unk8 - pointA->unk8) * strip->power;
-        desc.pos.x = pointA->unk0 - strip->owner->x_position;
-        desc.pos.y = pointA->unk4 - strip->owner->y_position;
-        desc.pos.z = pointA->unk8 - strip->owner->z_position;
+        desc.vel.x = (pointB->x - pointA->x) * strip->power;
+        desc.vel.y = (pointB->y - pointA->y) * strip->power;
+        desc.vel.z = (pointB->z - pointA->z) * strip->power;
+        desc.pos.x = pointA->x - strip->owner->x_position;
+        desc.pos.y = pointA->y - strip->owner->y_position;
+        desc.pos.z = pointA->z - strip->owner->z_position;
         desc.pos.x += desc.vel.x * time;
         desc.pos.y += desc.vel.y * time;
         desc.pos.z += desc.vel.z * time;
@@ -746,13 +746,13 @@ f32 func_151BD750(AgedBloodStrip *strip) {
 }
 
 /* Particle update: keeps the droplet moving with its owner, then runs the standard update. */
-void func_151BD79C(BloodDroplet *particle, struct17 *prevPos) {
+void func_151BD79C(BloodDroplet *particle, Vec3f *prevPos) {
     Actor *owner = particle->owner.actor;
 
     if (owner->interaction_state != 0 && owner->id != 0xFF) {
-        particle->offset.unk0 = owner->x_position;
-        particle->offset.unk4 = owner->y_position;
-        particle->offset.unk8 = owner->z_position;
+        particle->offset.x = owner->x_position;
+        particle->offset.y = owner->y_position;
+        particle->offset.z = owner->z_position;
     }
     func_1513170C(particle, prevPos);
 }
@@ -860,16 +860,16 @@ typedef struct {
 
 struct BurstSpark {
     u8 pad0[0x34];
-    struct17 start;        /* 0x34 */
-    struct17 end;          /* 0x40 */
+    Vec3f start;        /* 0x34 */
+    Vec3f end;          /* 0x40 */
     u8 pad4C[0x110 - 0x4C];
     BurstSparkData data;   /* 0x110 */
 };
 
 struct BurstGlow {
     u8 pad0[0x34];
-    struct17 start;        /* 0x34 */
-    struct17 end;          /* 0x40 */
+    Vec3f start;        /* 0x34 */
+    Vec3f end;          /* 0x40 */
     u8 pad4C[0xC];
     s32 flags;             /* 0x58: bit 1 visible */
     u8 pad5C[0x170 - 0x5C];
@@ -933,8 +933,8 @@ void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
             spark.field2C = 160.0f;
             spark.field30 = 95.0f;
             spark.field34 = 207.5f;
-            sparkEffect.pos = *(vertex *)&D_800A5480;
-            sparkEffect.rot = *(vertex *)&D_800A5480;
+            sparkEffect.pos = D_800A5480;
+            sparkEffect.rot = D_800A5480;
             sparkEffect.scale.x = 1.0f;
             sparkEffect.scale.y = 1.0f;
             sparkEffect.scale.z = 1.0f;
@@ -1003,8 +1003,8 @@ void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
             glowEffect.rgba[3] = 0xFF;
             glowEffect.width = 100.0f;
             glowEffect.height = 100.0f;
-            glowEffect.pos = *(vertex *)&D_800A5480;
-            glowEffect.rot = *(vertex *)&D_800A5480;
+            glowEffect.pos = D_800A5480;
+            glowEffect.rot = D_800A5480;
             glowEffect.scale.x = 1.0f;
             glowEffect.scale.y = 1.0f;
             glowEffect.scale.z = 1.0f;
@@ -1025,23 +1025,23 @@ void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
     }
 }
 
-extern struct17 D_800AA778;
-extern struct17 D_800AA784;
-extern struct17 D_800AA790;
-extern struct17 D_800AA79C;
-extern s32 func_15145EA4(struct17 **src, struct17 **dst, Mtx *matrix, s32 count);
+extern Vec3f D_800AA778;
+extern Vec3f D_800AA784;
+extern Vec3f D_800AA790;
+extern Vec3f D_800AA79C;
+extern s32 func_15145EA4(Vec3f **src, Vec3f **dst, Mtx *matrix, s32 count);
 
 /* Per-frame update of the burst: keeps the sparks and glows on bone 1 of the owner. */
 void func_151BDD8C(BurstEffect *effect) {
     BurstData *data;
     Actor *owner;
-    struct17 starts[2];
-    struct17 ends[2];
+    Vec3f starts[2];
+    Vec3f ends[2];
     u8 i;
     u8 j;
     u8 k;
-    struct17 *srcs[4];
-    struct17 *dsts[4];
+    Vec3f *srcs[4];
+    Vec3f *dsts[4];
     s32 player;
 
     data = &effect->data;

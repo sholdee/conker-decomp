@@ -11,12 +11,6 @@
 #define TRAIL_SIDE_6 6
 #define TRAIL_SIDE_7 7
 
-typedef struct TrailVec3 {
-    f32 x;
-    f32 y;
-    f32 z;
-} TrailVec3;
-
 typedef struct TrailVec2 {
     f32 x;
     f32 z;
@@ -51,7 +45,7 @@ typedef struct TrailConfig {
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ f32 pointsPerUnit;   /* new points emitted per unit of distance moved */
     /* 0x0C */ f32 pendingPoints;
-    /* 0x10 */ TrailVec3 emitPos;   /* where the last point was emitted */
+    /* 0x10 */ Vec3f emitPos;   /* where the last point was emitted */
     /* 0x1C */ f32 emitTime;
     /* 0x20 */ f32 actorX;
     /* 0x24 */ f32 actorZ;
@@ -93,7 +87,7 @@ typedef struct TrailPoint {
 
 typedef struct Trail {
     /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ TrailVec3 pos;
+    /* 0x10 */ Vec3f pos;
     /* 0x1C */ u8 pad1C[2];
     /* 0x1E */ u16 flags; /* 2: attached (strip starts at pos), 4: pos has been found */
     /* 0x20 */ s32 side;
@@ -106,7 +100,7 @@ typedef struct Trail {
     /* 0x2F */ u8 pad2F;
     /* 0x30 */ u8 unk30;
     /* 0x31 */ u8 pad31[0x23];
-    /* 0x54 */ TrailVec3 tailPos;
+    /* 0x54 */ Vec3f tailPos;
     /* 0x60 */ f32 groundY;
     /* 0x64 */ u8 pad64[0x20];
     /* 0x84 */ u8 unk84[0x10];
@@ -137,7 +131,7 @@ f32 fabsf(f32);
 s32 func_1519EF90(config, side, out)
     TrailConfig *config;
     u8 side;
-    TrailVec3 *out;
+    Vec3f *out;
 {
     Actor *actor;
     TrailSet *trails;
@@ -222,7 +216,7 @@ void func_1519F168(Trail *trail) {
 
 /* Spawn descriptor for func_15147A80; it becomes the new trail's fields from 0x10 on. */
 typedef struct TrailHeader {
-    /* 0x00 */ TrailVec3 pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 unkC;
     /* 0x0E */ u16 flags;
     /* 0x10 */ s32 side;
@@ -346,7 +340,7 @@ void func_1519F48C(Trail *trail) {
     config->flags |= 1;
 }
 
-s32 func_15045800(TrailVec3 *, u16, f32, f32 *);
+s32 func_15045800(Vec3f *, u16, f32, f32 *);
 /* D_800BE9A4: frame time, D_800BE9E4: frames elapsed (both used as per-update scale factors). */
 
 /* Ages, drifts and re-grounds every point; returns 0 once a detached trail is used up. */
@@ -383,7 +377,7 @@ s32 func_1519F4F0(Trail *trail) {
         point->x += point->vel.x * D_800BE9A4;
         point->z += point->vel.z * D_800BE9A4;
         {
-            TrailVec3 probe;
+            Vec3f probe;
 
             probe.x = point->x;
             probe.y = point->y + 30.0f;
@@ -445,7 +439,7 @@ s32 func_1519F7F0(Trail *trail) {
     f32 dist;
     f32 ageStep;
     f32 inv;
-    TrailVec3 cur;
+    Vec3f cur;
     f32 age;
     f32 width;
     f32 widthDelta;
@@ -556,7 +550,7 @@ s32 func_1519F7F0(Trail *trail) {
             point->x += point->vel.x * age;
             point->z += point->vel.z * age;
             {
-                TrailVec3 probe;
+                Vec3f probe;
 
                 probe.x = point->x;
                 if (actor->unk118 < -9500.0f) {
@@ -619,8 +613,8 @@ Gfx *func_1519FE6C(Trail *trail, Gfx *gfx, s16 arg2) {
     Vtx *vtx;
     TrailConfig *config;
     TrailPoint *points;
-    TrailVec3 cur;
-    TrailVec3 prev;
+    Vec3f cur;
+    Vec3f prev;
     s32 i;
     s32 j;
     f32 nx;

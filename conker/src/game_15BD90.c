@@ -81,13 +81,13 @@ void func_1512E8E0(Camera *camera) {
             f32 dx;
             s32 i;
             f32 minDist;
-            struct17 toCamera;
-            struct17 dir;
-            struct17 offset;
-            struct17 nodePos;
-            struct17 linkPos;
-            struct17 best;
-            struct17 closest;
+            Vec3f toCamera;
+            Vec3f dir;
+            Vec3f offset;
+            Vec3f nodePos;
+            Vec3f linkPos;
+            Vec3f best;
+            Vec3f closest;
             f32 dy;
             CamPathNode *node;
             f32 dz;
@@ -98,28 +98,28 @@ void func_1512E8E0(Camera *camera) {
             if (camera->mode & 0x100) {
                 return;
             }
-            nodePos.unk0 = node->x;
-            nodePos.unk4 = node->y;
-            nodePos.unk8 = node->z;
-            func_15048F90(&nodePos, (struct17 *)&camera->eye, &toCamera);
+            nodePos.x = node->x;
+            nodePos.y = node->y;
+            nodePos.z = node->z;
+            func_15048F90(&nodePos, (Vec3f *)&camera->eye, &toCamera);
             for (i = 0; i < 5; i++) {
                 // matching: s32 link read back through (u8) adds a live range uopt needs for the frame layout
                 s32 link;
 
                 link = node->links[i];
                 if ((u8)link != 0xFF) {
-                    linkPos.unk0 = D_800D2350[(u8)link].x;
-                    linkPos.unk4 = D_800D2350[(u8)link].y;
-                    linkPos.unk8 = D_800D2350[(u8)link].z;
+                    linkPos.x = D_800D2350[(u8)link].x;
+                    linkPos.y = D_800D2350[(u8)link].y;
+                    linkPos.z = D_800D2350[(u8)link].z;
                     func_150491EC(&nodePos, &linkPos, &dir);
-                    func_15049148(&dir, func_150AD900(&dir.unk0, &toCamera.unk0), &offset);
+                    func_15049148(&dir, func_150AD900(&dir.x, &toCamera.x), &offset);
                     func_15048F20(&nodePos, &offset, &closest);
-                    dx = camera->eye.x - closest.unk0;
-                    dy = camera->eye.y - closest.unk4;
-                    dz = camera->eye.z - closest.unk8;
+                    dx = camera->eye.x - closest.x;
+                    dy = camera->eye.y - closest.y;
+                    dz = camera->eye.z - closest.z;
                     // matching: dy/dz stay dead and the y/z terms are spelled out; the extra CSE temps size the frame
-                    if (((dx * dx) + ((camera->eye.y - closest.unk4) * (camera->eye.y - closest.unk4)) + ((camera->eye.z - closest.unk8) * (camera->eye.z - closest.unk8))) < minDist) {
-                        minDist = (dx * dx) + ((camera->eye.y - closest.unk4) * (camera->eye.y - closest.unk4)) + ((camera->eye.z - closest.unk8) * (camera->eye.z - closest.unk8));
+                    if (((dx * dx) + ((camera->eye.y - closest.y) * (camera->eye.y - closest.y)) + ((camera->eye.z - closest.z) * (camera->eye.z - closest.z))) < minDist) {
+                        minDist = (dx * dx) + ((camera->eye.y - closest.y) * (camera->eye.y - closest.y)) + ((camera->eye.z - closest.z) * (camera->eye.z - closest.z));
                         best = closest;
                     }
                 }
@@ -175,19 +175,19 @@ void func_1512E8E0(Camera *camera) {
                 if (camera->snap != 0) {
                     camera->unk8F4 = 0.0f;
                     camera->unk904 = 0.0f;
-                    camera->eye.x = best.unk0;
-                    camera->eye.z = best.unk8;
+                    camera->eye.x = best.x;
+                    camera->eye.z = best.z;
                 } else {
-                    func_150495B0(&camera->eye.x, best.unk0, &camera->unk8F4, camera->unk908, camera->unk90C, camera->dt);
-                    func_150495B0(&camera->eye.z, best.unk8, &camera->unk904, camera->unk908, camera->unk90C, camera->dt);
+                    func_150495B0(&camera->eye.x, best.x, &camera->unk8F4, camera->unk908, camera->unk90C, camera->dt);
+                    func_150495B0(&camera->eye.z, best.z, &camera->unk904, camera->unk908, camera->unk90C, camera->dt);
                 }
             }
             if (!(camera->pathFlags & 8)) {
                 if (camera->snap != 0) {
-                    camera->eye.y = best.unk4;
+                    camera->eye.y = best.y;
                     camera->unk8FC = 0.0f;
                 } else {
-                    func_150495B0(&camera->eye.y, best.unk4, &camera->unk8FC, camera->unk908, camera->unk90C, camera->dt);
+                    func_150495B0(&camera->eye.y, best.y, &camera->unk8FC, camera->unk908, camera->unk90C, camera->dt);
                 }
             }
             func_15125594(camera);

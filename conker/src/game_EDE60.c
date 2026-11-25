@@ -17,7 +17,7 @@ typedef struct {
 
 /* Describes an emitter; func_150C0AC0 copies it into the emitter. */
 typedef struct {
-    /* 0x00 */ vertex *source;     /* followed when flags & 2 */
+    /* 0x00 */ Vec3f *source;     /* followed when flags & 2 */
     /* 0x04 */ s32 unk4;
     /* 0x08 */ Actor *target;  /* followed otherwise */
     /* 0x0C */ u8 targetId;        /* target->unique_id; a mismatch means the object was reused */
@@ -49,7 +49,7 @@ typedef struct {
 
 struct Particle {
     /* 0x00 */ u8 pad0[0x40];
-    /* 0x40 */ vertex anchor;
+    /* 0x40 */ Vec3f anchor;
     /* 0x4C */ u8 pad4C[0xA8 - 0x4C];
     /* 0xA8 */ Emitter *owner;
 };
@@ -149,9 +149,9 @@ typedef struct ParticleDesc68 {
     /* 0x24 */ f32 scaleRate;
     /* 0x28 */ f32 width;
     /* 0x2C */ f32 height;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
     /* 0x5C */ struct ParticleViewMask *viewMask;
@@ -171,7 +171,7 @@ extern Particle *func_15130280(ParticleDesc68 *, u8, s32, s32, u8, s32);
 void func_150C0C38(Emitter *emitter) {
     Emitter *self; // matching: IDO's register/stack allocation needs this copy of the parameter
     u8 kill;
-    vertex pos;
+    Vec3f pos;
     Actor *target;
     s16 i;
     s32 bit;
@@ -192,7 +192,7 @@ void func_150C0C38(Emitter *emitter) {
         pos.y = emitter->desc.target->unk180;
         pos.z = emitter->desc.target->z_position;
     } else {
-        memcpy(&pos, emitter->desc.source, sizeof(vertex));
+        memcpy(&pos, emitter->desc.source, sizeof(Vec3f));
         pos.y -= 65.0f;
     }
     if (!kill) {

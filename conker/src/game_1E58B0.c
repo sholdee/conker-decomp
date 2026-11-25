@@ -7,7 +7,7 @@ extern u8 D_800AA490;
 extern f32 D_800DCA24;
 extern f32 D_800BE9A4;
 extern f32 D_800BE9A8;
-extern vertex D_800A5480;
+extern Vec3f D_800A5480;
 
 /* The leading fields of a bullet object (see func_151C0698 in game_1ED0F0.c). */
 typedef struct {
@@ -16,8 +16,8 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 fxOwner;
     /* 0x0D */ u8 padD[0x2B];
-    /* 0x38 */ vertex pos;
-    /* 0x44 */ vertex vel;
+    /* 0x38 */ Vec3f pos;
+    /* 0x44 */ Vec3f vel;
 } Bullet;
 
 /* A particle spawned by func_151B8400, which keeps its bullet at 0x110. */

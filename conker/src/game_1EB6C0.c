@@ -34,8 +34,8 @@ typedef struct {
     u8 pad19[0x13];
     f32 width;             /* 0x2C: def.width */
     f32 height;            /* 0x30: def.height */
-    struct17 start;        /* 0x34: def.pos */
-    struct17 end;          /* 0x40: def.rot, the far end of a beam */
+    Vec3f start;        /* 0x34: def.pos */
+    Vec3f end;          /* 0x40: def.rot, the far end of a beam */
     u8 pad4C[0x10];
     u8 alpha;              /* 0x5C */
     u8 pad5D[0x110 - 0x5D];

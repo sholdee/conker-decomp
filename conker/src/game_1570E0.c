@@ -24,7 +24,7 @@ void func_15129C30(Camera *cam) {
     f32 strafe;
     f32 stickX;
     f32 stickY;
-    struct17 floor; // matching: frame size needs 12 bytes here although only .unk0 is written
+    Vec3f floor; // matching: frame size needs 12 bytes here although only .unk0 is written
     u8 index;
     u16 buttons;
     f32 f;
@@ -156,7 +156,7 @@ void func_15129C30(Camera *cam) {
     }
     cam->unk380 = cam->yaw;
     cam->unk3A0 = cam->yawRad = cam->yaw * 0.01745329238f;
-    func_1510E7A4(&cam->unk644, &cam->unk648, &floor.unk0, &cam->unk360, &cam->unk640, 0, cam->eye.x, cam->eye.y,
+    func_1510E7A4(&cam->unk644, &cam->unk648, &floor.x, &cam->unk360, &cam->unk640, 0, cam->eye.x, cam->eye.y,
                   cam->eye.z, cam->eye.y, 0, 0, -10000.0f, cam->eye.y);
 }
 

@@ -4,7 +4,7 @@
 #include "effects.h"
 
 void *memcpy(void *, const void *, u32);
-void func_15143134(vertex *in, vertex *out, s32 angle);
+void func_15143134(Vec3f *in, Vec3f *out, s32 angle);
 void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 
 typedef struct {
@@ -70,9 +70,9 @@ typedef struct ParticleDesc64 {
     /* 0x24 */ f32 scaleRate;
     /* 0x28 */ f32 width;
     /* 0x2C */ f32 height;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
     /* 0x5C */ struct ParticleViewMask *viewMask;
@@ -113,24 +113,24 @@ void func_151B1AB0(Owner151B1AB0 *owner) {
 void func_151B1B34(Task151B1AB0 *task) {
     Data151B1AB0 *data;
     Particle1DEF60 *particle;
-    vertex *origin;
+    Vec3f *origin;
     f32 size;
     ParticleDesc64 spawn;
     f32 zero; // matching: 0.0f held in one FP register for every store
     f32 extra;
-    vertex emitPointA;
-    vertex emitPointB;
+    Vec3f emitPointA;
+    Vec3f emitPointB;
 
     data = &task->data;
     data->timer += (697.0f + (func_150ADA68() * 342.0f)) * 0.001000000047f * D_800BE9A4;
     if (data->timer > 1.0f) {
         if (data->owner->unk1D4 != 0) {
             {
-                vertex offset = {19.0f, 0.0f, 25.0f};
+                Vec3f offset = {19.0f, 0.0f, 25.0f};
                 func_15143134(&offset, &emitPointA, data->owner->unk1D4 + 0x800);
             }
             {
-                vertex offset = {19.0f, 0.0f, 25.0f};
+                Vec3f offset = {19.0f, 0.0f, 25.0f};
                 func_15143134(&offset, &emitPointB, data->owner->unk1D4 + 0x640);
             }
             zero = 0.0f;

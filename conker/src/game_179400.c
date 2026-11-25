@@ -5,7 +5,7 @@
 /* Per-type particle state at particle + 0x110, ballistic layout (func_1514BC08 reuses the area for its wobble state). */
 typedef struct {
     /* 0x00 */ u8 pad0[0x38];
-    /* 0x38 */ struct17 velocity;
+    /* 0x38 */ Vec3f velocity;
     /* 0x44 */ f32 gravity;
     /* 0x48 */ f32 drag;
     /* 0x4C */ f32 unk4C;
@@ -18,8 +18,8 @@ typedef struct {
     /* 0x000 */ u8 pad0[0x1C];
     /* 0x01C */ s16 life;
     /* 0x01E */ u8 pad1E[0x16];
-    /* 0x034 */ struct17 pos;
-    /* 0x040 */ struct17 unk40;
+    /* 0x034 */ Vec3f pos;
+    /* 0x040 */ Vec3f unk40;
     /* 0x04C */ u8 pad4C[0xC];
     /* 0x058 */ s32 flags;
     /* 0x05C */ u8 pad5C[0x15];
@@ -34,9 +34,9 @@ void func_1514BE20(void *);
 
 /* Sets unk40 to the point 100 units above the particle's position. */
 void func_1514BF50(Particle *p) {
-    p->unk40.unk0 = p->pos.unk0;
-    p->unk40.unk4 = p->pos.unk4 + 100.0f;
-    p->unk40.unk8 = p->pos.unk8;
+    p->unk40.x = p->pos.x;
+    p->unk40.y = p->pos.y + 100.0f;
+    p->unk40.z = p->pos.z;
 }
 
 /* Eases the particle toward random wobble targets kept in its state at + 0x110. */
@@ -50,28 +50,28 @@ void func_1514BF7C(Particle *p) {
  */
 void func_1514BF9C(Particle *p) {
     ParticleMotion *motion;
-    struct17 oldVel;
+    Vec3f oldVel;
     s32 ticks;
 
     motion = &p->motion;
     oldVel = motion->velocity;
     for (ticks = D_800BE9E4; ticks != 0; ticks--) {
-        motion->velocity.unk0 *= motion->drag;
-        motion->velocity.unk4 *= motion->drag;
-        motion->velocity.unk8 *= motion->drag;
+        motion->velocity.x *= motion->drag;
+        motion->velocity.y *= motion->drag;
+        motion->velocity.z *= motion->drag;
     }
     {
         f32 accelX;
         f32 accelY;
         f32 accelZ;
 
-        motion->velocity.unk4 += motion->gravity * D_800BE9A4;
-        accelX = (motion->velocity.unk0 - oldVel.unk0) * D_800BE9A8;
-        accelY = (motion->velocity.unk4 - oldVel.unk4) * D_800BE9A8;
-        accelZ = (motion->velocity.unk8 - oldVel.unk8) * D_800BE9A8;
-        p->pos.unk0 += (oldVel.unk0 + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
-        p->pos.unk4 += (oldVel.unk4 + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
-        p->pos.unk8 += (oldVel.unk8 + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
+        motion->velocity.y += motion->gravity * D_800BE9A4;
+        accelX = (motion->velocity.x - oldVel.x) * D_800BE9A8;
+        accelY = (motion->velocity.y - oldVel.y) * D_800BE9A8;
+        accelZ = (motion->velocity.z - oldVel.z) * D_800BE9A8;
+        p->pos.x += (oldVel.x + 0.5f * accelX * D_800BE9A4) * D_800BE9A4;
+        p->pos.y += (oldVel.y + 0.5f * accelY * D_800BE9A4) * D_800BE9A4;
+        p->pos.z += (oldVel.z + 0.5f * accelZ * D_800BE9A4) * D_800BE9A4;
     }
 }
 

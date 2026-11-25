@@ -12,7 +12,6 @@ extern s32 func_151EF610(void);
 
 extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 
-
 /* Integer world position chosen by func_150E41C0 as the centre of func_150E42F8's scatter. */
 typedef struct Struct150E42F8D99F0 {
     s16 x;
@@ -222,8 +221,8 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
 
 extern void func_150A44F0(s32, s16 *, s32);
 extern s32 func_150A43E0(s32, s32, s32, s16 *);
-extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
-extern void func_1511490C(f32 arg0[4][4], void *arg1);
+extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+extern void func_1511490C(MtxF arg0, void *arg1);
 extern void func_1510F800(s32);
 
 /*
@@ -246,7 +245,7 @@ void func_150E4928(WorldObject *obj) {
     f32 outx;
     f32 outy;
     f32 outz;
-    f32 mtx[4][4];
+    MtxF mtx;
 
     height = -10000.0f;
     i = obj - D_800DBEF4;
@@ -312,7 +311,6 @@ void func_150E4928(WorldObject *obj) {
     }
 }
 
-
 typedef struct Struct150E4CBC {
     /* 0x00 */ u8 pad0[0x90];
     /* 0x90 */ s32 timer;
@@ -349,13 +347,7 @@ void func_150E4CBC(Struct150E4CBC *fx) {
 }
 
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vtx150E5810;
-
-typedef struct {
-    Vtx150E5810 v[3];
+    Vec3f v[3];
 } Tri150E5810;
 
 /* Computes the plane of a triangle; the (unnormalised) normal lands in D_800CC210..D_800CC218. */
@@ -398,7 +390,7 @@ extern u8 D_8009187C[];
 extern u8 D_800918A0[];
 extern u8 D_800918AC[];
 extern u8 D_80090520[];
-extern void func_150440A0(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
+extern void func_150440A0(MtxF arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 extern f32 func_150489B0(u8);
 extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, s32 size);
@@ -423,7 +415,7 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
     f32 dirZ;
     f32 len;
     f32 baseSpeed;
-    f32 mtx[4][4];
+    MtxF mtx;
     Spawn150E4E04 spawn;
     f32 speed;
     u8 angle;
@@ -626,7 +618,6 @@ void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, 
     func_15132A4C(&chunk, 3, 0xFF, 0, 0xFF, 0);
 }
 
-
 typedef struct Struct150E5810 {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ f32 unk10;
@@ -654,9 +645,9 @@ s32 func_150E5810(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, f32 groundY
     f32 len;
     f32 pad; // matching: unused stack slot
     f32 dot;
-    struct17 vel;
-    struct17 normal;
-    struct17 unit;
+    Vec3f vel;
+    Vec3f normal;
+    Vec3f unit;
 
     obj->unk3C = obj->unk10 * 1.100000024f + groundY;
     if (obj->velY > -2.0f) {
@@ -673,21 +664,21 @@ s32 func_150E5810(Struct150E5810 *obj, s32 arg1, s32 arg2, s32 arg3, f32 groundY
                 tri.v[i].z = verts[i][2];
             }
             func_15049350(tri);
-            normal.unk0 = -D_800CC210;
-            normal.unk4 = -D_800CC214;
-            normal.unk8 = -D_800CC218;
-            len = func_150AD930(&normal.unk0);
+            normal.x = -D_800CC210;
+            normal.y = -D_800CC214;
+            normal.z = -D_800CC218;
+            len = func_150AD930(&normal.x);
             if (len > 9.999999747e-06f) {
                 func_15049148(&normal, 1.0f / len, &unit);
-                vel.unk0 = obj->velX;
-                vel.unk4 = obj->velY;
-                vel.unk8 = obj->velZ;
-                dot = func_150AD900(&unit.unk0, &vel.unk0);
+                vel.x = obj->velX;
+                vel.y = obj->velY;
+                vel.z = obj->velZ;
+                dot = func_150AD900(&unit.x, &vel.x);
                 func_15049148(&unit, 2.0f * dot, &normal);
                 func_15048F58(&vel, &normal, &normal);
-                obj->velX = obj->bounce * normal.unk0 * 0.8000000119f;
-                obj->velY = obj->bounce * normal.unk4;
-                obj->velZ = obj->bounce * normal.unk8 * 0.8000000119f;
+                obj->velX = obj->bounce * normal.x * 0.8000000119f;
+                obj->velY = obj->bounce * normal.y;
+                obj->velZ = obj->bounce * normal.z * 0.8000000119f;
             }
         } else {
             obj->velX *= obj->bounce;

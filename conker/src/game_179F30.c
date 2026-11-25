@@ -30,8 +30,8 @@ typedef struct AttachmentType {
 /* Tells a spawned emitter how to follow its owner: two points (p0, p1) given in the space of
  * bone `bone` of `target`, which func_1518A094 transforms every frame. */
 typedef struct EmitterAttach {
-    /* 0x00 */ vertex p0;
-    /* 0x0C */ vertex p1;
+    /* 0x00 */ Vec3f p0;
+    /* 0x0C */ Vec3f p1;
     /* 0x18 */ Actor *target;
     /* 0x1C */ u8 bone;
     /* 0x1D */ u8 targetId;             // the target's unique_id
@@ -102,15 +102,15 @@ extern s32 (*D_8008AB64[])(s32, s32, s32);
 extern AttachmentType *D_8008ABE8[];
 
 /* Emitter offsets. */
-extern vertex D_800A58A0;
-extern vertex D_800A58AC;
-extern vertex D_800A58B8;
-extern vertex D_800A58C4;
-extern vertex D_800A5934;
-extern vertex D_800A5940;
-extern vertex D_800A594C;
-extern vertex D_800A5958;
-extern vertex D_800A5964;
+extern Vec3f D_800A58A0;
+extern Vec3f D_800A58AC;
+extern Vec3f D_800A58B8;
+extern Vec3f D_800A58C4;
+extern Vec3f D_800A5934;
+extern Vec3f D_800A5940;
+extern Vec3f D_800A594C;
+extern Vec3f D_800A5958;
+extern Vec3f D_800A5964;
 
 /* This file. */
 s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
@@ -638,8 +638,8 @@ typedef struct Struct1514D564Payload {
 
 /* func_150C5370 copies the first 0x24 bytes and caches the distance between p0 and p1. */
 typedef struct Struct1514D564Desc {
-    /* 0x00 */ vertex p0;
-    /* 0x0C */ vertex p1;
+    /* 0x00 */ Vec3f p0;
+    /* 0x0C */ Vec3f p1;
     /* 0x18 */ s8 unk18;
     u8 pad19[3];
     f32 unk1C;
@@ -1149,7 +1149,7 @@ void func_1514E31C(Actor *obj) {
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 3, 0, 0), obj, 7);
 
     {
-        vertex offset;
+        Vec3f offset;
 
         offset.x = 0.0f;
         offset.y = 0.0f;
@@ -1630,8 +1630,8 @@ void func_1514F194(Actor *obj) {
 }
 
 void func_1514F308(Actor *obj) {
-    vertex pointA = { 52.0f, 0.0f, 80.0f };
-    vertex pointB = { 52.0f, 0.0f, 353.0f };
+    Vec3f pointA = { 52.0f, 0.0f, 80.0f };
+    Vec3f pointB = { 52.0f, 0.0f, 353.0f };
 
     func_15160CDC(obj, 5, &pointA, &pointB, 0.02350199968f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);

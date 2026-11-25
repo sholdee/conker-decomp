@@ -33,7 +33,7 @@ typedef struct Game113D60Emission {
     /* 0x00 */ f32 x, y, amplitudeX, amplitudeY;
     /* 0x10 */ f32 phaseX, phaseY, speedX, speedY;
     /* 0x20 */ f32 time, rate, remaining;
-    /* 0x2C */ vertex position;
+    /* 0x2C */ Vec3f position;
     /* 0x38 */ f32 scale;
     /* 0x3C */ s16 duration, durationRange;
     /* 0x40 */ u8 color;
@@ -72,9 +72,9 @@ typedef struct Game113D60Source {
     u8 padD[3];
 } Game113D60Source;
 
-typedef void (*Game113D60EndCallback)(vertex *, s32);
-typedef void (*Game113D60StartCallback)(vertex *);
-typedef void (*Game113D60MotionCallback)(vertex *, vertex *, vertex *, Game113D60Emission *);
+typedef void (*Game113D60EndCallback)(Vec3f *, s32);
+typedef void (*Game113D60StartCallback)(Vec3f *);
+typedef void (*Game113D60MotionCallback)(Vec3f *, Vec3f *, Vec3f *, Game113D60Emission *);
 
 void *memcpy(void *, const void *, u32);
 extern Game113D60StartCallback D_80088A20[];
@@ -87,9 +87,9 @@ extern u8 D_800C35E8;
  * points towards `actor`. */
 void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
     Game113D60Source *source;
-    vertex end;
-    vertex start;
-    vertex delta;
+    Vec3f end;
+    Vec3f start;
+    Vec3f delta;
     Game113D60Emission emission;
     Game113D60Effect *effect;
 
@@ -143,8 +143,8 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
 }
 
 extern f32 sinf(f32);
-extern void func_151436B4(f32, f32, f32, vertex *);
-extern s32 func_150E5FD0(vertex *, vertex *, f32, f32, f32, u8, s32, u8, u8, s16, s8);
+extern void func_151436B4(f32, f32, f32, Vec3f *);
+extern s32 func_150E5FD0(Vec3f *, Vec3f *, f32, f32, f32, u8, s32, u8, u8, s16, s8);
 extern f32 func_15144528(f32, f32, f32);
 
 /* Emits this frame's particles along a sine-wobbled direction and advances the wobble phases. */
@@ -159,7 +159,7 @@ void func_150E6B84(Game113D60Effect *effect) {
     f32 speedY;
     f32 factor;
     f32 period;
-    vertex direction;
+    Vec3f direction;
     f32 phaseX;
     f32 phaseY;
     f32 sineX;
@@ -208,15 +208,15 @@ void func_150E6B84(Game113D60Effect *effect) {
 }
 
 typedef struct {
-    /* 0x00 */ vertex start;
-    /* 0x0C */ vertex end;
+    /* 0x00 */ Vec3f start;
+    /* 0x0C */ Vec3f end;
 } Game113D60Segment;
 
 extern Game113D60Segment *D_80088A3C;
 extern Game113D60Segment *D_80088A40;
 
 /* Start callback: a random point on one of two segments. */
-void func_150E6E34(vertex *out) {
+void func_150E6E34(Vec3f *out) {
     Game113D60Segment *segment;
     f32 t;
 
@@ -234,7 +234,7 @@ void func_150E6E34(vertex *out) {
 extern void func_1514470C(struct134 *, void *);
 
 /* End callback: the position of one of the two entries of the D_800D9A20 table. */
-void func_150E6ED8(vertex *out) {
+void func_150E6ED8(Vec3f *out) {
     // D_800D9A20 is declared as a single pointer in variables.h but is a two-entry table here.
     func_1514470C((&D_800D9A20)[func_150ADA20() & 1], out);
 }
@@ -242,7 +242,7 @@ void func_150E6ED8(vertex *out) {
 extern Game113D60Segment *D_80088A44[];
 
 /* Start callback: a random point on one of six segments. */
-void func_150E6F18(vertex *out) {
+void func_150E6F18(Vec3f *out) {
     Game113D60Segment *segment;
     f32 t;
 
@@ -255,7 +255,7 @@ void func_150E6F18(vertex *out) {
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x38];
-    /* 0x38 */ vertex unk38;
+    /* 0x38 */ Vec3f unk38;
 } Bone150E6FAC;
 
 typedef struct {
@@ -265,7 +265,7 @@ typedef struct {
 
 typedef struct {
     /* 0x000 */ u8 pad0[0x14];
-    /* 0x014 */ vertex position;
+    /* 0x014 */ Vec3f position;
     /* 0x020 */ u8 pad20[0x2D4];
     /* 0x2F4 */ void *unk2F4;
 } Actor150E6FAC;
@@ -274,7 +274,7 @@ s32 func_1514ECE0(void *, s16, void *);
 
 /* End callback: a random point on a ring around node 0x16 of the actor's model, or the actor's
  * position when the model has no such node. */
-void func_150E6FAC(vertex *out, Actor150E6FAC *actor) {
+void func_150E6FAC(Vec3f *out, Actor150E6FAC *actor) {
     Node150E6FAC *node;
     f32 sine;
     f32 radius;
@@ -300,14 +300,14 @@ void func_150E6FAC(vertex *out, Actor150E6FAC *actor) {
 }
 
 /* End callback: the actor's position. */
-void func_150E70CC(vertex *out, Actor150E6FAC *actor) {
+void func_150E70CC(Vec3f *out, Actor150E6FAC *actor) {
     out->x = actor->position.x;
     out->y = actor->position.y;
     out->z = actor->position.z;
 }
 
 /* Motion callback: aims the emission along `delta` with a random wobble. */
-void func_150E70EC(vertex *start, vertex *end, vertex *delta, Game113D60Emission *emission) {
+void func_150E70EC(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission) {
     f32 dx;
     f32 dz;
 
@@ -324,7 +324,7 @@ void func_150E70EC(vertex *start, vertex *end, vertex *delta, Game113D60Emission
 }
 
 /* Motion callback: aims the emission along `delta` with a fixed tilt and a random wobble. */
-void func_150E71E4(vertex *start, vertex *end, vertex *delta, Game113D60Emission *emission) {
+void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission) {
     emission->x = func_150484A0(delta->x, delta->z);
     emission->amplitudeX = 0.471238941f;
     emission->phaseX = func_150ADA68() * 6.283185482f;
@@ -679,7 +679,7 @@ typedef struct {
 
 /* Spawns a func_1513C650 effect of the given size at `position`, lasting `duration` frames
  * (-1: a fixed 300 frames without the timed flag). */
-void func_150E7FEC(f32 size, u8 arg1, s32 arg2, vertex *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, u8 owner, s32 kind) {
     s32 pad; // matching: unused stack slot
     Struct1513C650Arg arg;
@@ -721,7 +721,7 @@ typedef struct {
     /* 0x06 */ s16 unk06;
     /* 0x08 */ s32 unk08;
     /* 0x0C */ s32 unk0C;
-    /* 0x10 */ vertex position;
+    /* 0x10 */ Vec3f position;
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24;
@@ -743,8 +743,8 @@ typedef struct {
     /* 0x58 */ s8 unk58;
 } Struct1514FCE8Arg; // first argument of func_1514FCE8
 
-extern vertex D_800A1290[];
-extern void func_151D3FF4(vertex *position, u8 owner, s32 kind);
+extern Vec3f D_800A1290[];
+extern void func_151D3FF4(Vec3f *position, u8 owner, s32 kind);
 extern void func_1514FCE8(Struct1514FCE8Arg *arg0, u8 owner, s32 kind);
 
 /* For points 4-7 of the D_800A1290 table: spawns the func_151D3FF4 and func_1514FCE8 effects
@@ -754,7 +754,7 @@ void func_150E81A8(index, owner, kind)
     u8 owner;
     s32 kind;
 {
-    vertex position;
+    Vec3f position;
     Struct1514FCE8Arg arg;
     Game113D60Event event;
 
@@ -802,12 +802,12 @@ void func_150E81A8(index, owner, kind)
 }
 
 typedef struct {
-    /* 0x00 */ vertex position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 unkC;
 } Game113D60PointData;
 
 /* Creates effect 0x28 at `position`, lasting `duration` frames (-1: 300). */
-void func_150E83AC(vertex *position, s16 duration, u8 owner, s32 kind) {
+void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind) {
     Game113D60PointData data;
     struct260 *effect;
 
@@ -837,7 +837,7 @@ typedef struct {
 } Game113D60Particle;
 
 typedef struct {
-    /* 0x0 */ vertex position;
+    /* 0x0 */ Vec3f position;
     /* 0xC */ f32 accum;
 } Game113D60Emitter;
 
@@ -1023,18 +1023,18 @@ typedef struct {
 } Game113D60RegionSpawnerEffect;
 
 typedef struct {
-    /* 0x00 */ vertex position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 unk0C;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
 } Game113D60Data8B1C;
 
-extern vertex *func_15144B34(s32);
+extern Vec3f *func_15144B34(s32);
 
 /* Spawns effect 0x34 at random points of the weighted regions within 1800 units of the
  * position func_15144B34 returns. */
 void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
-    vertex *center;
+    Vec3f *center;
     Game113D60Spawner *spawner;
     Game113D60WeightedNode *node;
     f32 pick;
@@ -1101,9 +1101,9 @@ typedef struct ParticleDesc64 {
     /* 0x24 */ f32 scaleRate;
     /* 0x28 */ f32 width;
     /* 0x2C */ f32 height;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
     /* 0x5C */ struct ParticleViewMask *viewMask;
@@ -1115,7 +1115,7 @@ typedef struct ParticleDesc64 {
 
 /* A spawner at a fixed point: `position`, then the spawn rate as in Game113D60Spawner. */
 typedef struct {
-    /* 0x00 */ vertex position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 rate;
     /* 0x10 */ f32 rateRange;
     /* 0x14 */ f32 accum;
@@ -1230,7 +1230,7 @@ void func_150E90DC(void) {
 }
 
 typedef struct {
-    /* 0x00 */ vertex position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 unk0C;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
@@ -1244,7 +1244,7 @@ typedef struct {
 
 /* Like func_150E8B1C, but spawns effect 0x37 within 1400 units. */
 void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
-    vertex *center;
+    Vec3f *center;
     Game113D60Spawner *spawner;
     Game113D60WeightedNode *node;
     f32 pick;
@@ -1300,7 +1300,7 @@ typedef struct {
 typedef struct {
     /* 0x000 */ Game113D60EffectHeader header;
     /* 0x028 */ u8 pad28[0x10];
-    /* 0x038 */ vertex position;
+    /* 0x038 */ Vec3f position;
     /* 0x044 */ u8 pad44[0x12C];
     /* 0x170 */ Game113D60DebrisExtra extra;
 } Game113D60Debris;
@@ -1311,11 +1311,11 @@ typedef struct ParticleSpawn78 {
     /* 0x04 */ f32 elasticity;
     /* 0x08 */ f32 sizeXZ;
     /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
+    /* 0x10 */ Vec3f rot;
+    /* 0x1C */ Vec3f scale;
+    /* 0x28 */ Vec3f pos;
+    /* 0x34 */ Vec3f vel;
+    /* 0x40 */ Vec3f rotVel;
     /* 0x4C */ f32 gravity;
     /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;

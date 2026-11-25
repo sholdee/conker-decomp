@@ -224,10 +224,10 @@ void func_15017B20(LevelObject *objects, s32 count) {
     }
 }
 
-void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
-void func_150A7DA0(f32 mtx[4][4], f32, f32, f32);
-void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
+void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
+void func_150A7A48(MtxF a, MtxF b, MtxF c);
+void func_150A7DA0(MtxF mtx, f32, f32, f32);
+void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
 
 /*
  * Computes obj's axis-aligned bounds: the extremes (and the origin) of the unit cube's corners transformed by the
@@ -239,8 +239,8 @@ void func_15017FA4(LevelObject *obj, ObjectBounds *bounds) {
     s32 shape;
     s32 invalid;
     s32 minX, maxX, minY, maxY, minZ, maxZ;
-    f32 transform[4][4];
-    f32 rotation[4][4];
+    MtxF transform;
+    MtxF rotation;
     f32 signX, signY, signZ;
     f32 x, y, z;
 

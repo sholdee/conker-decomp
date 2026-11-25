@@ -65,14 +65,14 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
     s32 onGround;
     s32 model;
     s32 surfaceIndex;
-    struct17 diff;
+    Vec3f diff;
     u32 surfaceFlags;
     s32 surface;
 
     height = (f32)y;
-    diff.unk0 = x - D_800DBFF0[player].eye.x;
-    diff.unk4 = height - D_800DBFF0[player].eye.y;
-    diff.unk8 = z - D_800DBFF0[player].eye.z;
+    diff.x = x - D_800DBFF0[player].eye.x;
+    diff.y = height - D_800DBFF0[player].eye.y;
+    diff.z = z - D_800DBFF0[player].eye.z;
     angle = func_15048FC8(&diff);
     for (i = 0; i < count; i++) {
         actor = func_15167A68(10, 0, 0xF8, 1, 0xFF, 1);
@@ -224,7 +224,7 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
     s32 angle;
     s32 ringWidth;
     s32 onGround;
-    struct17 diff;
+    Vec3f diff;
     u32 variant;
     s32 surface;
 
@@ -232,9 +232,9 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
         return;
     }
     if (flags & 0x10000) {
-        diff.unk0 = x - D_800DBFF0[player].eye.x;
-        diff.unk4 = y - D_800DBFF0[player].eye.y;
-        diff.unk8 = z - D_800DBFF0[player].eye.z;
+        diff.x = x - D_800DBFF0[player].eye.x;
+        diff.y = y - D_800DBFF0[player].eye.y;
+        diff.z = z - D_800DBFF0[player].eye.z;
         angle = func_15048FC8(&diff);
     }
     for (i = 0; i < count; i++) {
@@ -362,13 +362,13 @@ typedef struct SwarmFlight {
 extern SwarmFlight D_8008D0B0[];
 extern s32 D_800C35B0;
 extern u8 D_800C35E8;
-extern f32 D_800D9C10[][4][4]; /* one view matrix per camera */
+extern MtxF D_800D9C10[]; /* one view matrix per camera */
 extern f32 D_800D35E0;
 extern f32 D_800D35E8; /* 0x800D35E4 == (&D_800D35E8)[-1]; it has no symbol of its own */
 #define D_800D35E4 ((&D_800D35E8)[-1])
-s32 func_150490A8(struct17 *arg0);
+s32 func_150490A8(Vec3f *arg0);
 s32 func_150AD960(s32, s32, s32, s32);
-s32 func_1510AEE0(f32 mtx[4][4], f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
+s32 func_1510AEE0(MtxF mtx, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
 
 /* Common per-frame flight update for a swarm actor: fading, wandering inside its home ring,
  * pitch/yaw/roll easing, wing-frame swapping and movement. Frees the actor when its model
@@ -387,7 +387,7 @@ void func_15175958(SwarmActor *actor) {
     s32 surfaceFlags;
     s32 angle;
     s32 dist;
-    struct17 vec;
+    Vec3f vec;
     s32 surface;
     SwarmFlight *flight;
     SwarmModel *model;
@@ -457,8 +457,8 @@ void func_15175958(SwarmActor *actor) {
         dist = func_150AD960((s32)actor->x, (s32)actor->z, actor->originX, actor->originZ);
         tooClose = ((actor->flags & 0x10) && dist < actor->minRadius) ? TRUE : FALSE;
         if (actor->maxRadius < dist || tooClose) {
-            vec.unk0 = actor->originX - actor->x;
-            vec.unk8 = actor->z - actor->originZ;
+            vec.x = actor->originX - actor->x;
+            vec.z = actor->z - actor->originZ;
             angle = func_150490A8(&vec);
             if (tooClose) {
                 angle += 0x80;
@@ -777,15 +777,15 @@ void func_15176B84(SwarmActor *actor) {
     func_15175958(actor);
 }
 
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+void func_150A7A48(MtxF a, MtxF b, MtxF c);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 /* Draws a flying swarm actor: builds its scaled model matrix, eases its brightness towards
  * the lighting of the surface below it, and draws its model with that colour and its alpha. */
 Gfx *func_15176DF0(Gfx *gdl, SwarmActor *actor, s16 camera) {
     s32 pad; // matching: unused stack slot
-    f32 rot[4][4];
-    f32 mtx[4][4];
+    MtxF rot;
+    MtxF mtx;
     s32 col[3];
     s32 brightness;
     s32 target;
@@ -843,7 +843,7 @@ Gfx *func_15176DF0(Gfx *gdl, SwarmActor *actor, s16 camera) {
 /* Draws a swarm actor for camera `camera`, unless it is outside that camera's view.
  * Perched actors (state 0) use model 10's resting pose; the rest go through func_15176DF0. */
 Gfx *func_151770C8(Gfx *gdl, SwarmActor *actor, s16 camera) {
-    f32 mtx[4][4];
+    MtxF mtx;
     s32 culled;
 
     culled = func_1510AEE0(D_800D9C10[camera], actor->x, actor->y, actor->z,

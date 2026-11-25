@@ -37,7 +37,7 @@ typedef struct Game10A350Emission {
 
 /* One point of the trail ring buffer. */
 typedef struct Game10A350Record {
-    /* 0x00 */ struct17 pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 velocityY;
     /* 0x10 */ f32 width;
     /* 0x14 */ s16 alpha;
@@ -106,7 +106,7 @@ typedef struct Game10A350Actor {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unk0C;
     /* 0x0D */ u8 padD[3];
-    /* 0x10 */ struct17 pos;
+    /* 0x10 */ Vec3f pos;
     /* 0x1C */ u8 pad1C[2];
     /* 0x1E */ u16 flags;
     /* 0x20 */ u8 pad20[5];
@@ -164,8 +164,8 @@ s32 func_150DCEA0(Game10A350Actor *actor) {
             stepScale = D_800BE9A4 * inverse;
             x = state->x;
             z = state->z;
-            dx = func_151423D8((u8)(state->angleX - 0x40)) * state->swayX + actor->pos.unk0 - state->x;
-            dz = func_151423D8((u8)(state->angleZ - 0x40)) * state->swayZ + actor->pos.unk8 - state->z;
+            dx = func_151423D8((u8)(state->angleX - 0x40)) * state->swayX + actor->pos.x - state->x;
+            dz = func_151423D8((u8)(state->angleZ - 0x40)) * state->swayZ + actor->pos.z - state->z;
             if (state->count > 1.0f) {
                 stepX = dx * inverse;
                 stepZ = dz * inverse;
@@ -188,7 +188,7 @@ s32 func_150DCEA0(Game10A350Actor *actor) {
                         spawned = TRUE;
                         packet.frame_rate = state->frameRate;
                         packet.texture = state->texture;
-                        packet.position[1] = actor->pos.unk4;
+                        packet.position[1] = actor->pos.y;
                         packet.lifetime = state->lifetime;
                         do {
                             speed = func_150ADA68() * state->speedRange + state->speedBase;
@@ -198,8 +198,8 @@ s32 func_150DCEA0(Game10A350Actor *actor) {
                             pitch = (func_150ADA20() % (u32)(state->pitchRange + 1)) + state->pitchBase;
                             sinPitch = func_151423D8(pitch);
                             cosPitch = func_151423D8((u8)(pitch - 0x40));
-                            packet.position[0] = actor->pos.unk0 + state->radius * cosYaw;
-                            packet.position[2] = actor->pos.unk8 + state->radius * sinYaw;
+                            packet.position[0] = actor->pos.x + state->radius * cosYaw;
+                            packet.position[2] = actor->pos.z + state->radius * sinYaw;
                             packet.velocity_x = speed * sinPitch * cosYaw;
                             packet.velocity_y = -speed * cosPitch;
                             packet.velocity_z = speed * sinPitch * sinYaw;
@@ -215,9 +215,9 @@ s32 func_150DCEA0(Game10A350Actor *actor) {
                             state->spawnCount -= 1.0f;
                         }
                     }
-                    records[actor->tail].pos.unk0 = x;
-                    records[actor->tail].pos.unk4 = actor->pos.unk4;
-                    records[actor->tail].pos.unk8 = z;
+                    records[actor->tail].pos.x = x;
+                    records[actor->tail].pos.y = actor->pos.y;
+                    records[actor->tail].pos.z = z;
                     records[actor->tail].velocityY = state->velocityY;
                     state->widthAngle += func_150ADA20() % (u32)(state->widthAngleRange + 1);
                     records[actor->tail].width = func_151423D8((u8)(state->widthAngle - 0x40)) * state->widthRange + state->widthBase;
@@ -225,7 +225,7 @@ s32 func_150DCEA0(Game10A350Actor *actor) {
                     records[actor->tail].texCoord = state->texCoord;
                     state->texCoord += state->texCoordStep + (func_150ADA20() % (u32)(state->texCoordStepRange + 1));
                     records[actor->tail].velocityY += state->gravity * scale;
-                    records[actor->tail].pos.unk4 += records[actor->tail].velocityY * scale;
+                    records[actor->tail].pos.y += records[actor->tail].velocityY * scale;
                     actor->tail++;
                     if (actor->tail == actor->capacity) {
                         actor->tail = 0;
@@ -319,8 +319,8 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_150DD640(Game10A350Actor *actor, Gfx *gfx, s16 view) {
     Vtx *vtx;
     f32 cosYaw;
-    struct17 older;
-    struct17 newer;
+    Vec3f older;
+    Vec3f newer;
     s32 j;
     s32 i;
     f32 sinYaw;
@@ -379,9 +379,9 @@ Gfx *func_150DD640(Game10A350Actor *actor, Gfx *gfx, s16 view) {
                 prevTexCoord = records[i].texCoord;
                 texCoord = records[j].texCoord;
             }
-            vtx->v.ob[0] = records[j].width * cosYaw + newer.unk0;
-            vtx->v.ob[1] = newer.unk4;
-            vtx->v.ob[2] = newer.unk8 - records[j].width * sinYaw;
+            vtx->v.ob[0] = records[j].width * cosYaw + newer.x;
+            vtx->v.ob[1] = newer.y;
+            vtx->v.ob[2] = newer.z - records[j].width * sinYaw;
             SET_TEXCOORD(vtx, tcAxis[0], prevTexCoord << 6);
             vtx->v.tc[tcAxis[1]] = 0;
             vtx->v.cn[0] = 0xFF;
@@ -390,9 +390,9 @@ Gfx *func_150DD640(Game10A350Actor *actor, Gfx *gfx, s16 view) {
             vtx->v.cn[3] = records[i].alpha;
             vtx->v.flag = 0;
             vtx++;
-            vtx->v.ob[0] = newer.unk0 - records[j].width * cosYaw;
-            vtx->v.ob[1] = newer.unk4;
-            vtx->v.ob[2] = records[j].width * sinYaw + newer.unk8;
+            vtx->v.ob[0] = newer.x - records[j].width * cosYaw;
+            vtx->v.ob[1] = newer.y;
+            vtx->v.ob[2] = records[j].width * sinYaw + newer.z;
             SET_TEXCOORD(vtx, tcAxis[0], prevTexCoord << 6);
             SET_TEXCOORD(vtx, tcAxis[1], (D_80090B60[state->trailTexture].width - 1) << 6);
             vtx->v.cn[0] = 0xFF;
@@ -402,9 +402,9 @@ Gfx *func_150DD640(Game10A350Actor *actor, Gfx *gfx, s16 view) {
             vtx->v.flag = 0;
             vtx++;
             do {
-                vtx->v.ob[0] = records[j].width * cosYaw + older.unk0;
-                vtx->v.ob[1] = older.unk4;
-                vtx->v.ob[2] = older.unk8 - records[j].width * sinYaw;
+                vtx->v.ob[0] = records[j].width * cosYaw + older.x;
+                vtx->v.ob[1] = older.y;
+                vtx->v.ob[2] = older.z - records[j].width * sinYaw;
                 SET_TEXCOORD(vtx, tcAxis[0], texCoord << 6);
                 vtx->v.tc[tcAxis[1]] = 0;
                 vtx->v.cn[0] = 0xFF;
@@ -413,9 +413,9 @@ Gfx *func_150DD640(Game10A350Actor *actor, Gfx *gfx, s16 view) {
                 vtx->v.cn[3] = records[j].alpha;
                 vtx->v.flag = 0;
                 vtx++;
-                vtx->v.ob[0] = older.unk0 - records[j].width * cosYaw;
-                vtx->v.ob[1] = older.unk4;
-                vtx->v.ob[2] = records[j].width * sinYaw + older.unk8;
+                vtx->v.ob[0] = older.x - records[j].width * cosYaw;
+                vtx->v.ob[1] = older.y;
+                vtx->v.ob[2] = records[j].width * sinYaw + older.z;
                 SET_TEXCOORD(vtx, tcAxis[0], texCoord << 6);
                 SET_TEXCOORD(vtx, tcAxis[1], (D_80090B60[state->trailTexture].width - 1) << 6);
                 vtx->v.cn[0] = 0xFF;

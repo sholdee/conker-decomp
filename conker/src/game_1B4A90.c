@@ -35,12 +35,12 @@ typedef struct {
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_10004074(void *);
-extern void func_150A7DA0(f32 mtx[4][4], f32 x, f32 y, f32 z);
-extern void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
-extern void guMtxF2L2(f32 mf[4][4], Mtx *m);
-extern void func_151EFE00(f32 mtx[4][4]); /* identity matrix */
+extern void func_150A7DA0(MtxF mtx, f32 x, f32 y, f32 z);
+extern void func_150A7A48(MtxF a, MtxF b, MtxF c);
+extern void guMtxF2L2(MtxF mf, Mtx *m);
+extern void func_151EFE00(MtxF mtx); /* identity matrix */
 extern Vtx D_8008D538[];
-void func_15187D6C(f32 mtx[4][4], f32 rx, f32 ry, f32 rz);
+void func_15187D6C(MtxF mtx, f32 rx, f32 ry, f32 rz);
 
 /* Spawns a burst effect at (x, y, z) with 12 pieces in three rings of four. */
 void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJitter, f32 scaleYZ, f32 scaleX) {
@@ -120,8 +120,8 @@ void func_15187978(BurstEffect *burst) {
 Gfx *func_15187A98(Gfx *gdl, BurstEffect *burst, s32 arg2) {
     s32 i;
     s32 alpha;
-    f32 mtx[4][4];
-    f32 rot[4][4];
+    MtxF mtx;
+    MtxF rot;
     Gfx *primCmd;
     Gfx *mtxCmd;
 
@@ -167,7 +167,7 @@ Gfx *func_15187A98(Gfx *gdl, BurstEffect *burst, s32 arg2) {
 }
 
 /* Builds a rotation matrix from angles in degrees (the alternative axis order to func_150A8050). */
-void func_15187D6C(f32 mtx[4][4], f32 rx, f32 ry, f32 rz) {
+void func_15187D6C(MtxF mtx, f32 rx, f32 ry, f32 rz) {
     f32 sx;
     f32 cx;
     f32 sz;

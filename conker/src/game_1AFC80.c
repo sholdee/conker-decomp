@@ -111,7 +111,7 @@ void func_151827D0(void) {
 
 
 f32 func_15182F58(s32 dist, s32 chain);
-void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /*
  * Bends a wave-chain prop's mesh: each rest vertex is lifted by the chain height interpolated
@@ -125,7 +125,7 @@ void func_15182C5C(WorldObject *prop) {
     f32 weighted[2]; // matching: two scalars give a different stack frame
     s32 sample;
     s32 next;
-    f32 mtx[4][4];
+    MtxF mtx;
     f32 x;
     f32 y;
     f32 z;
@@ -185,7 +185,7 @@ s32 func_15182FDC(Actor *actor, s32 sample, s32 chain) {
     f32 originX;
     f32 originY;
     f32 originZ;
-    f32 mtx[4][4];
+    MtxF mtx;
     s32 objIndex;
     s32 under;
     s8 push;

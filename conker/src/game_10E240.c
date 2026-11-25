@@ -159,9 +159,9 @@ typedef struct ParticleDesc68 {
     /* 0x24 */ f32 scaleRate;
     /* 0x28 */ f32 width;
     /* 0x2C */ f32 height;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
     /* 0x5C */ struct ParticleViewMask *viewMask;
@@ -176,10 +176,10 @@ typedef struct ParticleDesc68 {
 } ParticleDesc68;
 
 /* Two points per emitter index, in the prop's space (start and end of the emission direction). */
-extern vertex D_800A0FE4[];
-extern vertex D_800A0FFC[];
+extern Vec3f D_800A0FE4[];
+extern Vec3f D_800A0FFC[];
 extern struct260 *func_15130374(ParticleDesc68 *, u8, s32, u8, s32);
-extern void func_15145CD0(Prop *, vertex **, f32 **, s32);
+extern void func_15145CD0(Prop *, Vec3f **, f32 **, s32);
 
 /* Emitter effect update: accumulates a random rate and, while the emitter's lookup has one of the
  * low D_80082FA0 + 1 bits set, emits one particle per whole unit along D_800A0FE4 -> D_800A0FFC. */
@@ -191,7 +191,7 @@ void func_150E114C(EmitterEffect *effect) {
     ParticleDesc68 args;
     f32 extra;
     f32 dir[3];
-    vertex *points[2];
+    Vec3f *points[2];
     f32 *results[2];
     s32 flip80;
     s32 flip40;

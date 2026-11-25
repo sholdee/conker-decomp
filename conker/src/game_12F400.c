@@ -3,15 +3,15 @@
 #include "variables.h"
 
 extern void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *isNew);
-extern s32 func_15144E80(void *, struct17 *, struct17 *, struct17 *);
-extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
+extern s32 func_15144E80(void *, Vec3f *, Vec3f *, Vec3f *);
+extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 
 /* A quad particle (same layout as Particle in game_169510.c), followed by its motion state at 0x110. */
 typedef struct {
     char pad0[0x2C];
     f32 width;
     f32 height;
-    struct17 pos;
+    Vec3f pos;
     char pad40[0x80];
     Vtx vtxTemplate[4];
     Vtx *vtxBuffers[4]; /* per viewport, refreshed from vtxTemplate */
@@ -25,8 +25,8 @@ Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
     s32 pad; // matching: unused stack slot in the original frame
     Vtx *vtx;
     Vtx *ret;
-    struct17 axisU;
-    struct17 axisV;
+    Vec3f axisU;
+    Vec3f axisV;
     u8 isNew;
 
     func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vtx, &isNew);
@@ -52,28 +52,28 @@ Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
     func_15145128(&axisU, &axisU, NULL, NULL);
     func_15145128(&axisV, &axisV, NULL, NULL);
 
-    axisU.unk0 *= particle->width;
-    axisU.unk4 *= particle->width;
-    axisU.unk8 *= particle->width;
-    axisV.unk0 *= particle->height;
-    axisV.unk4 *= particle->height;
-    axisV.unk8 *= particle->height;
+    axisU.x *= particle->width;
+    axisU.y *= particle->width;
+    axisU.z *= particle->width;
+    axisV.x *= particle->height;
+    axisV.y *= particle->height;
+    axisV.z *= particle->height;
 
-    vtx[0].v.ob[0] = (particle->pos.unk0 - axisU.unk0) + axisV.unk0;
-    vtx[0].v.ob[1] = (particle->pos.unk4 - axisU.unk4) + axisV.unk4;
-    vtx[0].v.ob[2] = (particle->pos.unk8 - axisU.unk8) + axisV.unk8;
+    vtx[0].v.ob[0] = (particle->pos.x - axisU.x) + axisV.x;
+    vtx[0].v.ob[1] = (particle->pos.y - axisU.y) + axisV.y;
+    vtx[0].v.ob[2] = (particle->pos.z - axisU.z) + axisV.z;
     vtx[0].v.flag = 0;
-    vtx[1].v.ob[0] = (particle->pos.unk0 + axisU.unk0) + axisV.unk0;
-    vtx[1].v.ob[1] = (particle->pos.unk4 + axisU.unk4) + axisV.unk4;
-    vtx[1].v.ob[2] = (particle->pos.unk8 + axisU.unk8) + axisV.unk8;
+    vtx[1].v.ob[0] = (particle->pos.x + axisU.x) + axisV.x;
+    vtx[1].v.ob[1] = (particle->pos.y + axisU.y) + axisV.y;
+    vtx[1].v.ob[2] = (particle->pos.z + axisU.z) + axisV.z;
     vtx[1].v.flag = 0;
-    vtx[2].v.ob[0] = (particle->pos.unk0 + axisU.unk0) - axisV.unk0;
-    vtx[2].v.ob[1] = (particle->pos.unk4 + axisU.unk4) - axisV.unk4;
-    vtx[2].v.ob[2] = (particle->pos.unk8 + axisU.unk8) - axisV.unk8;
+    vtx[2].v.ob[0] = (particle->pos.x + axisU.x) - axisV.x;
+    vtx[2].v.ob[1] = (particle->pos.y + axisU.y) - axisV.y;
+    vtx[2].v.ob[2] = (particle->pos.z + axisU.z) - axisV.z;
     vtx[2].v.flag = 0;
-    vtx[3].v.ob[0] = (particle->pos.unk0 - axisU.unk0) - axisV.unk0;
-    vtx[3].v.ob[1] = (particle->pos.unk4 - axisU.unk4) - axisV.unk4;
-    vtx[3].v.ob[2] = (particle->pos.unk8 - axisU.unk8) - axisV.unk8;
+    vtx[3].v.ob[0] = (particle->pos.x - axisU.x) - axisV.x;
+    vtx[3].v.ob[1] = (particle->pos.y - axisU.y) - axisV.y;
+    vtx[3].v.ob[2] = (particle->pos.z - axisU.z) - axisV.z;
     vtx[3].v.flag = 0;
 
     return ret;

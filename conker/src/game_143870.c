@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_150490A8(struct17 *delta);
+s32 func_150490A8(Vec3f *delta);
 
 /* The object fields used by the functions in this file. */
 typedef struct {
@@ -172,12 +172,12 @@ s32 func_15116888(s32 x, s32 z, s32 *unused, Actor *other) {
     s32 angle;
     f32 result;
     f32 cosine;
-    struct17 delta;
+    Vec3f delta;
 
     otherX = (s32)other->x_position;
     otherZ = (s32)other->z_position;
-    delta.unk0 = otherX - x;
-    delta.unk8 = otherZ - z;
+    delta.x = otherX - x;
+    delta.z = otherZ - z;
 
     bearing = func_150490A8(&delta);
     angle = other->unk76;

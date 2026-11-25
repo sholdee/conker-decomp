@@ -235,8 +235,8 @@ void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
             motion.unk2C = 160.0f;
             motion.unk30 = 95.0f;
             motion.unk34 = 207.5f;
-            packet.pos = *(vertex *)&D_800A5480;
-            packet.rot = *(vertex *)&D_800A5480;
+            packet.pos = D_800A5480;
+            packet.rot = D_800A5480;
             packet.scale.x = 1.0f;
             packet.scale.y = 1.0f;
             packet.scale.z = 1.0f;

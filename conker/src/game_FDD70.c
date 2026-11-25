@@ -103,10 +103,6 @@ void func_150D0E90(s32 arg0) {
     }
 }
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* Spawn parameters of a blood strip (see func_15134DAC in game_161520.c). */
 typedef struct {
     /* 0x00 */ u8 ownerId;

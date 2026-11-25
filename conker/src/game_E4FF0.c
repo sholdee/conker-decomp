@@ -9,11 +9,11 @@ typedef struct ParticleSpawn78 {
     /* 0x04 */ f32 elasticity;
     /* 0x08 */ f32 sizeXZ;
     /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
+    /* 0x10 */ Vec3f rot;
+    /* 0x1C */ Vec3f scale;
+    /* 0x28 */ Vec3f pos;
+    /* 0x34 */ Vec3f vel;
+    /* 0x40 */ Vec3f rotVel;
     /* 0x4C */ f32 gravity;
     /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;
@@ -43,7 +43,7 @@ typedef struct ParticleSpawn78 {
 
 /* Burst config read by func_15151A38 (game_17CAF0.c's struct Local15151A38Arg). */
 typedef struct {
-    /* 0x00 */ vertex position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 sizeBase;
     /* 0x10 */ f32 sizeRange;
     /* 0x14 */ f32 growthBase;
@@ -103,10 +103,10 @@ extern f32 D_8009FD48[3];
 void func_15142314(s32 model, s32 joint, f32 *out);
 void func_15143134(f32 *in, f32 *out, void *mtx);
 void func_1515C244(Actor *, f32 *, f32 *, f32 *);
-void func_150B82D0(vertex *, f32 *, f32 *, f32 *, u8, s32);
-void func_150B85C0(vertex *, f32 *, f32 *, u8, s32);
+void func_150B82D0(Vec3f *, f32 *, f32 *, f32 *, u8, s32);
+void func_150B85C0(Vec3f *, f32 *, f32 *, u8, s32);
 void func_1504715C(Ground *, Actor *);
-s32 func_15046C80(vertex *, s32, f32, Ground *);
+s32 func_15046C80(Vec3f *, s32, f32, Ground *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
 s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 void func_15151A38(BurstConfig *, u8, s32);
@@ -117,8 +117,8 @@ void func_15151A38(BurstConfig *, u8, s32);
  * from joints 4 and 5 of its model (or from fixed points above it when it has no model).
  */
 void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
-    vertex joints[2];
-    vertex root;
+    Vec3f joints[2];
+    Vec3f root;
     f32 scaleXZ;
     f32 scaleY;
     f32 scale;
@@ -130,7 +130,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
     s8 i;
     f32 velX;
     f32 velZ;
-    vertex center;
+    Vec3f center;
     f32 height;
     f32 radius;
     f32 aspect;
@@ -185,7 +185,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
         func_150B85C0(&center, &height, &radius, arg1, arg2);
         {
             Ground ground;
-            vertex probe;
+            Vec3f probe;
 
             probe.x = center.x;
             probe.y = center.y + 100.0f;
@@ -324,7 +324,7 @@ void *func_1518A3C0(f32 *, f32 *, f32, f32 *, f32 *, f32, f32, u8, s16, u8, s32,
  * Spawns 35-60 tumbling pieces at random directions around `center`, at distance `radius`
  * with the vertical offset scaled by `yScale`, each flying outwards.
  */
-void func_150B82D0(vertex *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4, s32 arg5) {
+void func_150B82D0(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4, s32 arg5) {
     s32 count;
     f32 pos[3];
     f32 rot[3];
@@ -364,7 +364,7 @@ typedef struct {
 extern SpawnedParticle *func_15130374(ParticleDesc *spawn, u8 arg1, s32 dataSize, u8 arg3, s32 arg4);
 
 /* Spawns one particle at `center`, sized from `radius` and `height`. */
-void func_150B85C0(vertex *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
+void func_150B85C0(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
     ParticleDesc spawn;
 
     spawn.texture = 0x29;

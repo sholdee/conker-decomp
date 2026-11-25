@@ -24,7 +24,7 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x38];
-    /* 0x38 */ struct17 velocity;
+    /* 0x38 */ Vec3f velocity;
     /* 0x44 */ f32 unk44;
     /* 0x48 */ f32 unk48;
 } SpriteMotion;
@@ -37,7 +37,7 @@ typedef struct {
     /* 0x028 */ u8 pad28[4];
     /* 0x02C */ f32 unk2C;
     /* 0x030 */ f32 unk30;
-    /* 0x034 */ struct17 target;
+    /* 0x034 */ Vec3f target;
     /* 0x040 */ u8 pad40[0x18];
     /* 0x058 */ s32 flags;
     /* 0x05C */ u8 pad5C[0x10];
@@ -123,13 +123,13 @@ typedef struct {
 /* One entry of a bone anchor set (D_800E0990). */
 typedef struct {
     /* 0x00 */ u8 bone;
-    /* 0x04 */ struct17 offset;
+    /* 0x04 */ Vec3f offset;
 } BoneAnchor; /* 0x10 */
 
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
-    /* 0x08 */ struct17 offset;
+    /* 0x08 */ Vec3f offset;
     /* 0x14 */ u8 bone;
     /* 0x16 */ s16 duration;
     /* 0x18 */ u8 unk18;
@@ -144,7 +144,7 @@ typedef struct {
     /* 0x00 */ u8 pad0[0x2C];
     /* 0x2C */ EffectSprite *sprite;
     /* 0x30 */ Emitter *parent;
-    /* 0x34 */ struct17 pos;
+    /* 0x34 */ Vec3f pos;
 } EmitterParticle;
 
 typedef struct {
@@ -182,14 +182,14 @@ typedef struct {
 void func_15169850(ContactKey *, u8, s32 *, u8 *, ContactObj *);
 void *memcpy(void *, const void *, u32);
 s32 func_1518E298();
-void func_15143134(struct17 *offset, struct17 *out, Mtx *mtx);
-void *func_1514B8E4(struct17 *, SpriteSize *, s16, u8, struct17 *, f32, f32, f32, u8, u8, u8, s32, u8, s16,
+void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
+void *func_1514B8E4(Vec3f *, SpriteSize *, s16, u8, Vec3f *, f32, f32, f32, u8, u8, u8, s32, u8, s16,
                     s16, s32, u8, s32);
 void func_1514BE20(EffectSprite *);
 void func_1514BF50(EffectSprite *);
 struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 void func_151D2AB0(s32);
-void func_151D2BA4(EmitterParticleDesc *, struct17 *, s32, u8, s32);
+void func_151D2BA4(EmitterParticleDesc *, Vec3f *, s32, u8, s32);
 Emitter *func_151D2F00(EmitterDesc *, s32, u8, s32);
 
 s32 func_1518FDC4(Actor *obj, u8 *kind, u8 variant);
@@ -364,7 +364,7 @@ void func_1518F8E0(Emitter *emitter) {
     EmitterParams *params;
     Actor *owner;
     SpriteSize size;
-    struct17 pos;
+    Vec3f pos;
     BoneAnchor *anchor;
     s32 set;
     s32 kind;
@@ -391,7 +391,7 @@ void func_1518F8E0(Emitter *emitter) {
                     }
                     sprite = func_1514B8E4(&pos, &size, -1,
                                            (u32)frameRand % (params->tmpl.unk21Range + 1) + params->tmpl.unk20,
-                                           (struct17 *)&D_800A5480, 0.0f, 1.0f, params->tmpl.unk4C, 0, 0x23,
+                                           &D_800A5480, 0.0f, 1.0f, params->tmpl.unk4C, 0, 0x23,
                                            0, kind, 1, 1, 0xFF, 0, emitter->unkC, emitter->unk1);
                     if (sprite != NULL) {
                         desc.owner = owner;
@@ -421,7 +421,7 @@ void func_1518F8E0(Emitter *emitter) {
     }
 }
 
-s32 func_1518FC04(EmitterParticle *particle, struct17 *target) {
+s32 func_1518FC04(EmitterParticle *particle, Vec3f *target) {
     EffectSprite *sprite;
 
     sprite = particle->sprite;
@@ -430,7 +430,7 @@ s32 func_1518FC04(EmitterParticle *particle, struct17 *target) {
     return 1;
 }
 
-s32 func_1518FC44(EmitterParticle *particle, struct17 *target) {
+s32 func_1518FC44(EmitterParticle *particle, Vec3f *target) {
     EffectSprite *sprite;
 
     sprite = particle->sprite;
@@ -440,7 +440,7 @@ s32 func_1518FC44(EmitterParticle *particle, struct17 *target) {
 }
 
 /* Launches the particle's sprite from its position toward `dest`, or frees it if it has no emitter. */
-void func_1518FC84(EmitterParticle *particle, struct17 *dest) {
+void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
     EffectSprite *sprite;
     SpriteMotion *motion;
     EmitterParams *params;
@@ -452,9 +452,9 @@ void func_1518FC84(EmitterParticle *particle, struct17 *dest) {
         return;
     }
     parent = particle->parent;
-    sprite->data.motion.velocity.unk0 = (dest->unk0 - particle->pos.unk0) * parent->params.tmpl.velocityScale;
-    sprite->data.motion.velocity.unk4 = (dest->unk4 - particle->pos.unk4) * parent->params.tmpl.velocityScale;
-    sprite->data.motion.velocity.unk8 = (dest->unk8 - particle->pos.unk8) * parent->params.tmpl.velocityScale;
+    sprite->data.motion.velocity.x = (dest->x - particle->pos.x) * parent->params.tmpl.velocityScale;
+    sprite->data.motion.velocity.y = (dest->y - particle->pos.y) * parent->params.tmpl.velocityScale;
+    sprite->data.motion.velocity.z = (dest->z - particle->pos.z) * parent->params.tmpl.velocityScale;
     params = &parent->params;
     motion = &sprite->data.motion;
     motion->unk44 = func_150ADA68() * params->tmpl.unk34Range + params->tmpl.unk30;

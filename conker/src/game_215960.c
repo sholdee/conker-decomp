@@ -29,7 +29,7 @@ typedef struct {
     /* 0x1C */ s32 unk1C; /* segment 1 base */
     /* 0x20 */ s32 unk20;
     /* 0x24 */ HudModelAnim *anim;
-    /* 0x28 */ f32 matrices[2][4][4];
+    /* 0x28 */ MtxF matrices[2];
 } HudModel;
 
 /* A HUD image drawn by func_151ED430: a texture id (split into 4KB chunks of consecutive ids) and its format. */

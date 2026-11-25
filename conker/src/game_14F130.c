@@ -21,7 +21,7 @@ void func_15121C80(Camera *camera, f32 yawOffset) {
     f32 limit;
     s32 mode;
     s32 active;
-    vertex position;
+    Vec3f position;
 
     active = (camera->status & 0x10) != 0;
     if (active) {

@@ -140,9 +140,6 @@ typedef struct {
 
 extern Game10EF60Impact D_800D9960[];
 
-/* An actor's bone matrices: Actor.unk1D4 points at an array of these. */
-typedef f32 MtxF[4][4];
-
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, u32 *, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
 s32 func_150E1570(Actor *, f32, f32, f32, f32, f32, f32, s32, s32);
@@ -170,7 +167,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
     s32 impact;
     s16 angle;
     f32 incoming[3];
-    struct17 reflected;
+    Vec3f reflected;
     f32 fwdY;
     f32 fwdZ;
     f32 rayX;
@@ -235,12 +232,12 @@ void func_150E1D14(Game10EF60Effect *effect) {
                                 incoming[0] = effect->target_x - effect->x;
                                 incoming[1] = effect->target_y - effect->y;
                                 incoming[2] = effect->target_z - effect->z;
-                                func_15049148((struct17 *)D_800D9960[aim].normal, 2.0f * func_150AD900(D_800D9960[aim].normal, incoming), &reflected);
-                                func_15048F58((struct17 *)incoming, &reflected, &reflected);
-                                reflected.unk0 += effect->target_x;
-                                reflected.unk4 += effect->target_y;
-                                reflected.unk8 += effect->target_z;
-                                func_150E1AB0(0, effect->target_x, effect->target_y, effect->target_z, reflected.unk0, reflected.unk4, reflected.unk8, (f32)(func_151EF610() % 35) + 20.0f, 0.0f, 8.0f, 320.0f, 30, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                                func_15049148((Vec3f *)D_800D9960[aim].normal, 2.0f * func_150AD900(D_800D9960[aim].normal, incoming), &reflected);
+                                func_15048F58((Vec3f *)incoming, &reflected, &reflected);
+                                reflected.x += effect->target_x;
+                                reflected.y += effect->target_y;
+                                reflected.z += effect->target_z;
+                                func_150E1AB0(0, effect->target_x, effect->target_y, effect->target_z, reflected.x, reflected.y, reflected.z, (f32)(func_151EF610() % 35) + 20.0f, 0.0f, 8.0f, 320.0f, 30, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                                 func_10010F88(func_151EF610() % 6 + 0x2B, 10000, 0, 0, aim, effect->target_x, effect->target_y, effect->target_z, 500, 2000);
                             }
                         }
@@ -345,11 +342,6 @@ void func_150E1D14(Game10EF60Effect *effect) {
     }
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
 typedef struct {
     u8 pad0[0x10];
     void *unk10;

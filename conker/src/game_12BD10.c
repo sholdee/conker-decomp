@@ -2,29 +2,29 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 func_15145EA4(struct17 **src, struct17 **dst, void *mtx, s32 count);
+extern s32 func_15145EA4(Vec3f **src, Vec3f **dst, void *mtx, s32 count);
 extern u8 D_80088BA0;
-extern struct17 D_800A2000;
-extern struct17 D_800A200C;
-extern struct17 D_800A2018;
-extern struct17 D_800A2024;
+extern Vec3f D_800A2000;
+extern Vec3f D_800A200C;
+extern Vec3f D_800A2018;
+extern Vec3f D_800A2024;
 void func_151D5148(Actor *obj);
-void func_151D3F14(struct17 *pos, u8 arg1, s32 arg2);
-void func_15145740(Actor *obj, struct17 *direction, struct17 *axis0, struct17 *axis1, f32 arg4);
-s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, u8 arg25, s32 arg26);
-void func_151D4408(struct17 *pos, struct17 *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
-void func_150FEC28(Actor *actor, u8 bone, struct17 *arg2, struct17 *arg3, struct17 *position, u8 arg5, s32 arg6);
+void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2);
+void func_15145740(Actor *obj, Vec3f *direction, Vec3f *axis0, Vec3f *axis1, f32 arg4);
+s32 func_151C229C(Vec3f *arg0, Vec3f *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, u8 arg25, s32 arg26);
+void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
+void func_150FEC28(Actor *actor, u8 bone, Vec3f *arg2, Vec3f *arg3, Vec3f *position, u8 arg5, s32 arg6);
 
 /* Spawns a projectile (func_151C229C) along `actor`'s direction. With bone matrices it starts at
  * bone D_80088BA0 and is followed by the func_151D3F14 / func_151D4408 / func_150FEC28 effects;
  * without them it starts 34 units to the side of and 49 units above the actor. */
 void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
-    struct17 position;
-    struct17 direction;
-    struct17 axis0;
-    struct17 axis1;
-    struct17 origin;
-    struct17 delta;
+    Vec3f position;
+    Vec3f direction;
+    Vec3f axis0;
+    Vec3f axis1;
+    Vec3f origin;
+    Vec3f delta;
     f32 sideZ;
     f32 sideX;
     void *mtx;
@@ -32,8 +32,8 @@ void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
     func_151D5148(actor);
     func_15145740(actor, &direction, &axis0, &axis1, 0.8110000491f);
     if (actor->unk1D4 != NULL) {
-        struct17 *sources[3];
-        struct17 *destinations[3];
+        Vec3f *sources[3];
+        Vec3f *destinations[3];
 
         mtx = ((f32 (*)[4][4])actor->unk1D4)[D_80088BA0];
         sources[0] = &D_800A2000;
@@ -43,12 +43,12 @@ void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
         destinations[1] = &origin;
         destinations[2] = &delta;
         func_15145EA4(sources, destinations, mtx, 3);
-        delta.unk0 -= origin.unk0;
-        delta.unk4 -= origin.unk4;
-        delta.unk8 -= origin.unk8;
+        delta.x -= origin.x;
+        delta.y -= origin.y;
+        delta.z -= origin.z;
     } else {
-        f32 x = direction.unk0;
-        f32 z = direction.unk8;
+        f32 x = direction.x;
+        f32 z = direction.z;
 
         mtx = NULL;
         if (0.0001f < fabsf(x) || 0.0001f < fabsf(z)) {
@@ -61,9 +61,9 @@ void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
             sideZ = 1.0f;
             sideX = 0.0f;
         }
-        position.unk0 = actor->x_position + 34.0f * sideX;
-        position.unk4 = actor->y_position + 49.0f;
-        position.unk8 = actor->z_position + 34.0f * sideZ;
+        position.x = actor->x_position + 34.0f * sideX;
+        position.y = actor->y_position + 49.0f;
+        position.z = actor->z_position + 34.0f * sideZ;
     }
     func_151C229C(&position, &direction, 0, 0, 0, 0, 300.0f, 0.003333333414f,
                   func_150ADA68() * 10.0f + 25.0f, func_150ADA68() * 200.0f + 400.0f, 50.0f,
@@ -79,10 +79,10 @@ void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
 }
 
 /* Transforms the point D_800A2000 by bone D_80088BA0 of `actor` into `*out`. */
-void func_150FEBC8(Actor *actor, s32 arg1, struct17 *out) {
+void func_150FEBC8(Actor *actor, s32 arg1, Vec3f *out) {
     void *mtx;
-    struct17 *src;
-    struct17 *dst;
+    Vec3f *src;
+    Vec3f *dst;
 
     mtx = ((f32 (*)[4][4])actor->unk1D4)[D_80088BA0];
     src = &D_800A2000;
@@ -90,11 +90,11 @@ void func_150FEBC8(Actor *actor, s32 arg1, struct17 *out) {
     func_15145EA4(&src, &dst, mtx, 1);
 }
 
-extern void func_15102B38(Actor *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6,
-                          f32 arg7, struct17 *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
+extern void func_15102B38(Actor *obj, u8 bone, Vec3f *arg2, Vec3f *arg3, f32 *arg4, s32 arg5, s32 arg6,
+                          f32 arg7, Vec3f *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
 
 /* Spawns a randomized effect (func_15102B38) on bone `bone` of `actor` at `position`. */
-void func_150FEC28(Actor *actor, u8 bone, struct17 *arg2, struct17 *arg3, struct17 *position, u8 arg5, s32 arg6) {
+void func_150FEC28(Actor *actor, u8 bone, Vec3f *arg2, Vec3f *arg3, Vec3f *position, u8 arg5, s32 arg6) {
     f32 motion[2];
     s32 pad; // matching: unused stack slot between motion and random
     s32 random[2];

@@ -60,10 +60,6 @@ typedef struct Game3F820Spread {
     u8 padD[3];
 } Game3F820Spread;
 
-typedef struct Game3F820Vec3f {
-    f32 x, y, z;
-} Game3F820Vec3f;
-
 void *memcpy(void *, const void *, u32);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
 extern Game3F820Spread D_8009F920[3];
@@ -76,7 +72,7 @@ void func_150124A0(void) {
     f32 yawCos;
     f32 yawSin;
     void *result;
-    Game3F820Vec3f hit;
+    Vec3f hit;
     f32 pitchCos;
     f32 radius;
     f32 dirX;

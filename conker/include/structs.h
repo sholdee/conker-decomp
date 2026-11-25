@@ -243,11 +243,15 @@ typedef struct {
     u32 pad38;
 } struct16; // 0x3C
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-} struct17; // TODO: replace with vertex
+/* Three-float vector: positions, directions, velocities, scales. */
+typedef struct Vec3f {
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
+    /* 0x8 */ f32 z;
+} Vec3f; // size 0xC
+
+/* 4x4 float matrix (row-major, the guMtxF2L layout) for bone and camera transforms. */
+typedef f32 MtxF[4][4];
 
 typedef struct {
     s32 unk0;
@@ -628,12 +632,6 @@ typedef struct {
     s32 unk20;
     u16 unk24;  // used
 } struct57;
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} vertex;
 
 typedef struct {
     u8 unk0;
@@ -1032,8 +1030,8 @@ typedef struct {
     /* 0x0BC */ f32 unkBC;
     /* 0x0C0 */ f32 unkC0;
     /* 0x0C4 */ u8  padC4[0x18];
-    /* 0x0DC */ vertex unkDC;
-    /* 0x0E8 */ vertex unkE8;      // a direction (func_15145974 turns it into heading/elevation)
+    /* 0x0DC */ Vec3f unkDC;
+    /* 0x0E8 */ Vec3f unkE8;      // a direction (func_15145974 turns it into heading/elevation)
     /* 0x0F4 */ u8  padF4[0x14];
     /* 0x108 */ u8  unk108;
     /* 0x109 */ u8  unk109;
@@ -1056,11 +1054,11 @@ typedef struct {
     /* 0x12B */ u8  pad12B;
     /* 0x12C */ u16 unk12C;
     /* 0x12E */ u8  pad12E[2];
-    /* 0x130 */ vertex aimDir;
-    /* 0x13C */ vertex aimEye;
-    /* 0x148 */ vertex aimTarget;
+    /* 0x130 */ Vec3f aimDir;
+    /* 0x13C */ Vec3f aimEye;
+    /* 0x148 */ Vec3f aimTarget;
     /* 0x154 */ u8  pad154[0xC];
-    /* 0x160 */ vertex unk160;
+    /* 0x160 */ Vec3f unk160;
     /* 0x16C */ f32 aimYaw;
     /* 0x170 */ f32 aimPitch;
     /* 0x174 */ f32 aimYawTarget;
@@ -1889,8 +1887,8 @@ typedef struct CamCmd {
 
 /* Aim (first-person swing) state (Camera.aim, at 0x740). */
 typedef struct CamAim {
-    /* 0x00 */ vertex orbitPos;                      /* eye position on the orbit around the target */
-    /* 0x0C */ vertex offset;                        /* sideways shift of the aim ray (x and z only) */
+    /* 0x00 */ Vec3f orbitPos;                      /* eye position on the orbit around the target */
+    /* 0x0C */ Vec3f offset;                        /* sideways shift of the aim ray (x and z only) */
     /* 0x18 */ f32 yawVel;
     /* 0x1C */ f32 pitchVel;
     /* 0x20 */ f32 savedYaw;                         /* view to return to on exit */
@@ -1920,8 +1918,8 @@ typedef struct CamAim {
 typedef struct CamTransition {
     /* 0x00 */ u16 state;
     /* 0x02 */ u8 pad2[0x2];
-    /* 0x04 */ vertex startTarget;
-    /* 0x10 */ vertex endTarget;
+    /* 0x04 */ Vec3f startTarget;
+    /* 0x10 */ Vec3f endTarget;
     /* 0x1C */ f32 startDistance;
     /* 0x20 */ f32 startYaw;
     /* 0x24 */ f32 unk24;
@@ -1943,8 +1941,8 @@ typedef struct CamTransition {
 typedef struct CamRail {
     /* 0x00 */ u8 offsetMode;                        /* which side of the rail the eye sits on (0..3) */
     /* 0x01 */ u8 pad1[0x3];
-    /* 0x04 */ vertex start;
-    /* 0x10 */ vertex dir;                           /* unit direction from start to end */
+    /* 0x04 */ Vec3f start;
+    /* 0x10 */ Vec3f dir;                           /* unit direction from start to end */
     /* 0x1C */ f32 invLength;
     /* 0x20 */ f32 offset;                           /* horizontal distance of the eye from the rail */
     /* 0x24 */ f32 heightOffset;
@@ -1952,7 +1950,7 @@ typedef struct CamRail {
     /* 0x2C */ f32 eyeEaseB;
     /* 0x30 */ f32 eyeEaseAVel;
     /* 0x34 */ f32 eyeEaseBVel;
-    /* 0x38 */ vertex eyeGoal;
+    /* 0x38 */ Vec3f eyeGoal;
 } CamRail; // size 0x44
 
 /* One player camera (Actor.camera; array at D_800DBFF0). Mode state 0x000..0x236 is a stack of 21 save slots (func_15123934 / func_151239CC). */
@@ -2005,22 +2003,22 @@ struct Camera {
     /* 0x274 */ s16 unk274;
     /* 0x276 */ u8 pad276[0x2];
     /* 0x278 */ f32 unk278;
-    /* 0x27C */ vertex unk27C;
-    /* 0x288 */ vertex unk288;
+    /* 0x27C */ Vec3f unk27C;
+    /* 0x288 */ Vec3f unk288;
     /* 0x294 */ u8 pad294[0x4];
     /* 0x298 */ s16 playerMoved;
     /* 0x29A */ u8 pad29A[0x2];
     /* 0x29C */ f32 swayPhase;
     /* 0x2A0 */ f32 targetYVel;
-    /* 0x2A4 */ vertex focus;                        /* point followed on the player */
-    /* 0x2B0 */ vertex lastPlayerPos;
-    /* 0x2BC */ vertex target;                       /* look-at point */
-    /* 0x2C8 */ vertex prevTarget;
+    /* 0x2A4 */ Vec3f focus;                        /* point followed on the player */
+    /* 0x2B0 */ Vec3f lastPlayerPos;
+    /* 0x2BC */ Vec3f target;                       /* look-at point */
+    /* 0x2C8 */ Vec3f prevTarget;
     /* 0x2D4 */ u8 pad2D4[0xC];
-    /* 0x2E0 */ vertex savedTarget;
-    /* 0x2EC */ vertex savedEye;
-    /* 0x2F8 */ vertex eye;                          /* camera position */
-    /* 0x304 */ vertex prevEye;
+    /* 0x2E0 */ Vec3f savedTarget;
+    /* 0x2EC */ Vec3f savedEye;
+    /* 0x2F8 */ Vec3f eye;                          /* camera position */
+    /* 0x304 */ Vec3f prevEye;
     /* 0x310 */ u8 pad310[0x34];
     /* 0x344 */ f32 unk344;
     /* 0x348 */ f32 height;
@@ -2053,7 +2051,7 @@ struct Camera {
     /* 0x3B4 */ f32 distanceAccel;
     /* 0x3B8 */ f32 distanceMaxSpeed;
     /* 0x3BC */ u8 pad3BC[0x4];
-    /* 0x3C0 */ vertex eyeVel;                       /* easing velocity of eye */
+    /* 0x3C0 */ Vec3f eyeVel;                       /* easing velocity of eye */
     /* 0x3CC */ s16 unk3CC;
     /* 0x3CE */ u8 pad3CE[0x2];
     /* 0x3D0 */ Actor *player;                   /* the object the camera follows */
@@ -2069,7 +2067,7 @@ struct Camera {
     /* 0x3F2 */ u8 pad3F2[0x2];
     /* 0x3F4 */ f32 unk3F4;
     /* 0x3F8 */ f32 unk3F8;
-    /* 0x3FC */ vertex unk3FC;
+    /* 0x3FC */ Vec3f unk3FC;
     /* 0x408 */ u8 pad408[0x1C4];
     /* 0x5CC */ f32 unk5CC;
     /* 0x5D0 */ f32 unk5D0;
@@ -2091,8 +2089,8 @@ struct Camera {
     /* 0x608 */ u8 pad608[0x4];
     /* 0x60C */ f32 unk60C;
     /* 0x610 */ f32 unk610;
-    /* 0x614 */ vertex *unk614;
-    /* 0x618 */ vertex unk618;
+    /* 0x614 */ Vec3f *unk614;
+    /* 0x618 */ Vec3f unk618;
     /* 0x624 */ u8 pad624[0x4];
     /* 0x628 */ s32 unk628;
     /* 0x62C */ f32 unk62C;
@@ -2104,7 +2102,7 @@ struct Camera {
     /* 0x64C */ u8 pad64C[0x10];
     /* 0x65C */ f32 unk65C;
     /* 0x660 */ f32 unk660;
-    /* 0x664 */ vertex forward;
+    /* 0x664 */ Vec3f forward;
     /* 0x670 */ f32 followRate;
     /* 0x674 */ f32 followRateTarget;
     /* 0x678 */ f32 followRateVel;
@@ -2153,8 +2151,8 @@ struct Camera {
     /* 0x84E */ u8 shakeFrame;
     /* 0x84F */ u8 pad84F[0x1];
     /* 0x850 */ s32 shakeIndex;                      /* which D_800DC280 table */
-    /* 0x854 */ vertex shakeRot;
-    /* 0x860 */ vertex shakePos;
+    /* 0x854 */ Vec3f shakeRot;
+    /* 0x860 */ Vec3f shakePos;
     /* 0x86C */ f32 pitchOverride;                   /* degrees, 999.0f = none */
     /* 0x870 */ CamRail rail;
     /* 0x8B4 */ f32 unk8B4;
@@ -2198,7 +2196,7 @@ struct Camera {
     /* 0x930 */ f32 unk930;
     /* 0x934 */ f32 unk934;
     /* 0x938 */ f32 unk938;
-    /* 0x93C */ vertex unk93C;
+    /* 0x93C */ Vec3f unk93C;
     /* 0x948 */ u8 unk948;
     /* 0x949 */ u8 unk949;
     /* 0x94A */ u8 pad94A[0x2];
@@ -3378,7 +3376,7 @@ typedef struct RenderView {
     /* 0x088 */ f32 frustumPlanes[4][3]; // side-plane normals: [0..1] from frustumFovX, [2..3] from frustumFovY
     /* 0x0B8 */ u16 perspNorm;
     /* 0x0BA */ u8  padBA[2];
-    /* 0x0BC */ f32 projection[4][4];
+    /* 0x0BC */ MtxF projection;
     /* 0x0FC */ u8  padFC[4];
     /* 0x100 */ Mtx projectionMtx[2]; // indexed by the framebuffer index D_800BE9C0
 } RenderView; // size 0x180

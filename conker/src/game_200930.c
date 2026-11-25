@@ -7,7 +7,7 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void (*D_8008FC70[])(Actor *, s16, struct17 *);
+extern void (*D_8008FC70[])(Actor *, s16, Vec3f *);
 extern void *func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 allocate_memory(s32, s32, s32, s32);
 
@@ -15,7 +15,7 @@ void func_1503F404(void *, void *, void *, void *, void *, void *, void *, void 
 void *func_15132A4C(void *, s32, s32, s32, u8, s32);
 void func_15131828(void *, void *, void *, void *);
 void func_15131958(void *, f32, void *);
-void func_151541B8(struct17 *, f32, f32, f32, f32, u8, s32);
+void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 
 typedef struct {
     s16 v[9];
@@ -24,7 +24,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 unk00;
     /* 0x04 */ s32 unk04;
-    /* 0x08 */ struct17 unk08;
+    /* 0x08 */ Vec3f unk08;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -85,7 +85,7 @@ s32 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5,
                   s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
 void func_15152B38(void *, u8, s32);
 void func_15145974(void *, f32 *, f32 *);
-s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
+s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 void func_15102920(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32);
 void *memcpy(void *, const void *, u32);
 
@@ -98,8 +98,8 @@ typedef struct {
 } ParticleWobble;
 
 /* Spawns the impact effects (sound, sparks, debris, decal) of a hit at pos travelling along dir. */
-void func_151D3480(vertex *pos, struct17 *dir, Surf151D3480 *surface, u8 kind, u8 arg4, s32 arg5) {
-    struct17 hitPos;
+void func_151D3480(Vec3f *pos, Vec3f *dir, Surf151D3480 *surface, u8 kind, u8 arg4, s32 arg5) {
+    Vec3f hitPos;
     Surf151D3480 hitSurface;
     u8 hit;
     s32 surfaceId;
@@ -135,8 +135,8 @@ void func_151D3480(vertex *pos, struct17 *dir, Surf151D3480 *surface, u8 kind, u
             break;
     }
     if (surface == NULL) {
-        if (func_150AC9C0(pos->x - dir->unk0, pos->y - dir->unk4, pos->z - dir->unk8, dir->unk0, dir->unk4, dir->unk8,
-                          &hitDist, &hitSurface, &hitPos.unk0, &hitPos.unk4, &hitPos.unk8, &hitUnk, &surfaceId, 0, 0.0f)) {
+        if (func_150AC9C0(pos->x - dir->x, pos->y - dir->y, pos->z - dir->z, dir->x, dir->y, dir->z,
+                          &hitDist, &hitSurface, &hitPos.x, &hitPos.y, &hitPos.z, &hitUnk, &surfaceId, 0, 0.0f)) {
             hit = 1;
         } else {
             typedef s32 BlockScope; // matching: a declaration in this block changes IDO's branch layout
@@ -145,7 +145,7 @@ void func_151D3480(vertex *pos, struct17 *dir, Surf151D3480 *surface, u8 kind, u
         }
     } else {
         surfaceId = -1;
-        hitPos = *(struct17 *)pos; // TODO(vectors): struct17/vertex mix
+        hitPos = *(Vec3f *)pos; // TODO(vectors): struct17/vertex mix
         hitSurface = *surface;
         hit = 1;
     }
@@ -173,7 +173,7 @@ void func_151D3480(vertex *pos, struct17 *dir, Surf151D3480 *surface, u8 kind, u
 
         sparks.unk00 = 5 >> D_800DCA20;
         sparks.unk04 = 4 >> D_800DCA20;
-        sparks.unk08 = *(struct17 *)pos; // TODO(vectors): struct17/vertex mix
+        sparks.unk08 = *(Vec3f *)pos; // TODO(vectors): struct17/vertex mix
         sparks.unk14 = 8.25f;
         sparks.unk18 = 5.859999657f;
         sparks.unk1C = 0.0f;
@@ -255,7 +255,7 @@ void func_151D3480(vertex *pos, struct17 *dir, Surf151D3480 *surface, u8 kind, u
         p.fadeStart = 12;
         p.fadeRate = 21;
         if (big) {
-            struct17 unitDir;
+            Vec3f unitDir;
             f32 unkOut1;
             f32 unkOut2;
             f32 speed;
@@ -263,9 +263,9 @@ void func_151D3480(vertex *pos, struct17 *dir, Surf151D3480 *surface, u8 kind, u
             if (func_15145128(dir, &unitDir, &unkOut1, &unkOut2)) {
                 speed = func_150ADA68() * 12.0f + 3.0f;
                 p.lifetime = (func_150ADA20() % 11U) + 30;
-                p.vel.x = -unitDir.unk0 * speed;
-                p.vel.y = -unitDir.unk4 * speed;
-                p.vel.z = -unitDir.unk8 * speed;
+                p.vel.x = -unitDir.x * speed;
+                p.vel.y = -unitDir.y * speed;
+                p.vel.z = -unitDir.z * speed;
                 p.rotVel.x = (func_150ADA68() * 203280.0f + -101640.0f) * 9.999999747e-05f;
                 p.rotVel.y = (func_150ADA68() * 203280.0f + -101640.0f) * 9.999999747e-05f;
                 p.rotVel.z = (func_150ADA68() * 203280.0f + -101640.0f) * 9.999999747e-05f;
@@ -305,9 +305,9 @@ void func_151D3480(vertex *pos, struct17 *dir, Surf151D3480 *surface, u8 kind, u
 /* A debris particle as seen by its update callback. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x20];
-    /* 0x020 */ struct17 unk20;
+    /* 0x020 */ Vec3f unk20;
     /* 0x02C */ u8 pad2C[0x50 - 0x2C];
-    /* 0x050 */ struct17 unk50;
+    /* 0x050 */ Vec3f unk50;
     /* 0x05C */ u8 pad5C[0x170 - 0x5C];
     /* 0x170 */ ParticleWobble wobble;
 } WobbleParticle;
@@ -319,7 +319,7 @@ s32 func_151D3D50(WobbleParticle *particle) {
     if (wobble->timer > 0) {
         wobble->phase += wobble->phaseSpeed * D_800BE9A4;
         wobble->phase = func_15144B68(wobble->phase);
-        particle->unk20.unk4 = particle->unk50.unk4 + sinf(wobble->phase) * wobble->amplitude;
+        particle->unk20.y = particle->unk50.y + sinf(wobble->phase) * wobble->amplitude;
         wobble->timer -= D_800BE9E4;
     } else {
         particle->unk20 = particle->unk50;
@@ -361,7 +361,7 @@ void func_151D3E6C(Actor *obj, f32 *a, f32 *b, s32 arg3) {
     }
 }
 
-void func_151D3F14(struct17 *pos, u8 arg1, s32 arg2) {
+void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2) {
     Header header;
     Header2 header2;
 
@@ -370,14 +370,14 @@ void func_151D3F14(struct17 *pos, u8 arg1, s32 arg2) {
     header.unk2 = (func_150ADA20() % 3U) + 4;
     header.unk4 = 0;
 
-    header2.unk0 = pos->unk0;
-    header2.unk4 = pos->unk4;
-    header2.unk8 = pos->unk8;
+    header2.unk0 = pos->x;
+    header2.unk4 = pos->y;
+    header2.unk8 = pos->z;
 
     func_151602C0(&header, &header2, (func_150ADA20() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
 }
 
-void func_151D3FF4(struct17 *pos, u8 arg1, s32 arg2) {
+void func_151D3FF4(Vec3f *pos, u8 arg1, s32 arg2) {
     Header header;
     Header2 header2;
 
@@ -386,9 +386,9 @@ void func_151D3FF4(struct17 *pos, u8 arg1, s32 arg2) {
     header.unk2 = (func_150ADA20() % 11U) + 20;
     header.unk4 = 0;
 
-    header2.unk0 = pos->unk0;
-    header2.unk4 = pos->unk4;
-    header2.unk8 = pos->unk8;
+    header2.unk0 = pos->x;
+    header2.unk4 = pos->y;
+    header2.unk8 = pos->z;
 
     func_151602C0(&header, &header2, (func_150ADA20() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
 }
@@ -397,40 +397,40 @@ void func_1507C3E0(Actor *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
 
 /* Calls func_1505D1C4 twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
    or pos raised by half of target's height when there is no dir. */
-void func_151D40D4(struct17 *pos, struct17 *dir, Actor *obj, Actor *target, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
     u16 angle;
-    struct17 point;
+    Vec3f point;
     s16 height;
 
     if (dir != NULL) {
-        angle = (u16)(func_150484A0(dir->unk0, dir->unk8) * 10430.37793f);
+        angle = (u16)(func_150484A0(dir->x, dir->z) * 10430.37793f);
         angle = (angle - 0x4000) | 1;
-        point.unk0 = pos->unk0 + (dir->unk0 * -90.0f);
-        point.unk4 = pos->unk4 + (dir->unk4 * -90.0f);
-        point.unk8 = pos->unk8 + (dir->unk8 * -90.0f);
+        point.x = pos->x + (dir->x * -90.0f);
+        point.y = pos->y + (dir->y * -90.0f);
+        point.z = pos->z + (dir->z * -90.0f);
     } else {
         point = *pos;
         if (target != NULL) {
             func_1507C3E0(target, &height, NULL, NULL);
-            point.unk4 += height >> 1;
+            point.y += height >> 1;
         }
         angle = 0;
     }
-    func_1505D1C4(pos->unk0, pos->unk4, pos->unk8, arg5, obj - D_800CC2D0, angle, arg7, (s32)&point);
-    func_1505D1C4(pos->unk0, pos->unk4, pos->unk8, arg6, obj - D_800CC2D0, angle, arg7, (s32)&point);
+    func_1505D1C4(pos->x, pos->y, pos->z, arg5, obj - D_800CC2D0, angle, arg7, (s32)&point);
+    func_1505D1C4(pos->x, pos->y, pos->z, arg6, obj - D_800CC2D0, angle, arg7, (s32)&point);
 }
 
-void func_151D42E8(struct17 *pos, struct17 *dir, Actor *obj, s32 arg3, s32 arg4) {
+void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, s32 arg3, s32 arg4) {
     f32 yaw;
     u16 angle;
 
     if (dir != NULL) {
-        yaw = func_150484A0(dir->unk0, dir->unk8);
+        yaw = func_150484A0(dir->x, dir->z);
         angle = ((u16)(yaw * 10430.37793f) - 0x4000) | 1;
     } else {
         angle = 0;
     }
-    func_1505D1C4(pos->unk0, pos->unk4, pos->unk8, arg4, obj - D_800CC2D0, angle, 0, 0);
+    func_1505D1C4(pos->x, pos->y, pos->z, arg4, obj - D_800CC2D0, angle, 0, 0);
 }
 
 /* Unused outputs of func_1503F404's matrix decomposition. */
@@ -445,7 +445,7 @@ struct S151D4408Temps {
 };
 
 /* Spawns one particle at pos flying along dir, oriented by matrix mtx and attached to owner. */
-void func_151D4408(vertex *pos, struct17 *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6) {
+void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6) {
     ParticleSpawn p;
     struct S151D4408Temps unused;
     f32 speed;
@@ -466,9 +466,9 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     p.pos = *pos;
 
     speed = (speed * 105.0f + 199.0f) * 0.001000000047f;
-    p.vel.x = dir->unk0 * speed;
-    p.vel.y = dir->unk4 * speed;
-    p.vel.z = dir->unk8 * speed;
+    p.vel.x = dir->x * speed;
+    p.vel.y = dir->y * speed;
+    p.vel.z = dir->z * speed;
 
     p.rotVel.x = (func_150ADA68() * 6378.0f + -3189.0f) * 0.001000000047f;
     p.rotVel.y = 0.0f;
@@ -510,7 +510,7 @@ typedef struct {
     /* 0x08 */ u8 posFunc;
     /* 0x0C */ f32 spawnTimer;
     /* 0x10 */ u8 flags; /* bit 0: pos is valid */
-    /* 0x14 */ struct17 pos;
+    /* 0x14 */ Vec3f pos;
 } ObjEmitter;
 
 /* Sends message 0x3C (handled by func_151D4C38) for obj's attached effects. */
@@ -580,15 +580,15 @@ typedef struct {
 } EmitterEffect;
 
 extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-extern f32 func_15143E64(struct17 *);
+extern f32 func_15143E64(Vec3f *);
 
 /* Effect update: tracks the emitter's point on its object and spawns smoke puffs along the path it moved. */
 void func_151D4794(EmitterEffect *effect) {
     ObjEmitter *emitter;
     u8 wasValid;
-    struct17 prev;
+    Vec3f prev;
     Actor *obj;
-    struct17 diff;
+    Vec3f diff;
 
     obj = effect->emitter.obj;
     prev = effect->emitter.pos;
@@ -603,9 +603,9 @@ void func_151D4794(EmitterEffect *effect) {
         emitter->flags |= 1;
     }
     if (wasValid) {
-        diff.unk0 = emitter->pos.unk0 - prev.unk0;
-        diff.unk4 = emitter->pos.unk4 - prev.unk4;
-        diff.unk8 = emitter->pos.unk8 - prev.unk8;
+        diff.x = emitter->pos.x - prev.x;
+        diff.y = emitter->pos.y - prev.y;
+        diff.z = emitter->pos.z - prev.z;
         if (func_15143E64(&diff) > 5.0f) {
             return;
         }
@@ -648,13 +648,13 @@ void func_151D4794(EmitterEffect *effect) {
                 {
                     f32 t = func_150ADA68();
 
-                    spawn.pos.x = diff.unk0 * t + prev.unk0;
-                    spawn.pos.y = diff.unk4 * t + prev.unk4;
-                    spawn.pos.z = diff.unk8 * t + prev.unk8;
+                    spawn.pos.x = diff.x * t + prev.x;
+                    spawn.pos.y = diff.y * t + prev.y;
+                    spawn.pos.z = diff.z * t + prev.z;
                 }
-                spawn.vel.x = diff.unk0 * D_800BE9A8 * 0.2980000079f;
-                spawn.vel.y = diff.unk4 * D_800BE9A8 * 0.2980000079f;
-                spawn.vel.z = diff.unk8 * D_800BE9A8 * 0.2980000079f;
+                spawn.vel.x = diff.x * D_800BE9A8 * 0.2980000079f;
+                spawn.vel.y = diff.y * D_800BE9A8 * 0.2980000079f;
+                spawn.vel.z = diff.z * D_800BE9A8 * 0.2980000079f;
                 extra.unk0 = func_150ADA20() & 0xFF;
                 extra.unk1 = func_150ADA20() & 0xFF;
                 extra.unk2 = func_150ADA20() % 5U + 4;
@@ -803,10 +803,10 @@ void func_151D5148(Actor *obj) {
    unk31C->unk130 with the plane through ref (arg9, or arg1 without it) whose normal func_151450B4 derives
    from arg2..arg4. The point and the line direction go to pointBuf/dirBuf and *outPoint/*outDir point at
    them; otherwise both are NULL. */
-void func_151D5174(Actor *obj, struct17 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, struct17 *pointBuf, struct17 *dirBuf, struct17 **outPoint, struct17 **outDir, struct17 *arg9) {
-    vertex *origin;
-    struct17 temp;
-    struct17 normal;
+void func_151D5174(Actor *obj, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, Vec3f *arg4, Vec3f *pointBuf, Vec3f *dirBuf, Vec3f **outPoint, Vec3f **outDir, Vec3f *arg9) {
+    Vec3f *origin;
+    Vec3f temp;
+    Vec3f normal;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -818,23 +818,23 @@ void func_151D5174(Actor *obj, struct17 *arg1, struct17 *arg2, struct17 *arg3, s
             func_151450B4(arg2, arg3, &temp);
             func_151450B4(&temp, arg4, &normal);
             if (arg9 != NULL) {
-                dx = arg9->unk0 - origin->x;
-                dy = arg9->unk4 - origin->y;
-                dz = arg9->unk8 - origin->z;
+                dx = arg9->x - origin->x;
+                dy = arg9->y - origin->y;
+                dz = arg9->z - origin->z;
             } else {
-                dx = arg1->unk0 - origin->x;
-                dy = arg1->unk4 - origin->y;
-                dz = arg1->unk8 - origin->z;
+                dx = arg1->x - origin->x;
+                dy = arg1->y - origin->y;
+                dz = arg1->z - origin->z;
             }
-            t = normal.unk0 * dx + normal.unk4 * dy + normal.unk8 * dz;
-            t /= normal.unk0 * obj->unk31C->aimDir.x + normal.unk4 * obj->unk31C->aimDir.y +
-                 normal.unk8 * obj->unk31C->aimDir.z;
-            pointBuf->unk0 = origin->x + t * obj->unk31C->aimDir.x;
-            pointBuf->unk4 = origin->y + t * obj->unk31C->aimDir.y;
-            pointBuf->unk8 = origin->z + t * obj->unk31C->aimDir.z;
-            dirBuf->unk0 = obj->unk31C->aimDir.x;
-            dirBuf->unk4 = obj->unk31C->aimDir.y;
-            dirBuf->unk8 = obj->unk31C->aimDir.z;
+            t = normal.x * dx + normal.y * dy + normal.z * dz;
+            t /= normal.x * obj->unk31C->aimDir.x + normal.y * obj->unk31C->aimDir.y +
+                 normal.z * obj->unk31C->aimDir.z;
+            pointBuf->x = origin->x + t * obj->unk31C->aimDir.x;
+            pointBuf->y = origin->y + t * obj->unk31C->aimDir.y;
+            pointBuf->z = origin->z + t * obj->unk31C->aimDir.z;
+            dirBuf->x = obj->unk31C->aimDir.x;
+            dirBuf->y = obj->unk31C->aimDir.y;
+            dirBuf->z = obj->unk31C->aimDir.z;
             *outPoint = pointBuf;
             *outDir = dirBuf;
         end: // matching: the unused label changes IDO's block layout and register allocation
@@ -846,7 +846,7 @@ void func_151D5174(Actor *obj, struct17 *arg1, struct17 *arg2, struct17 *arg3, s
 }
 
 typedef struct {
-    /* 0x00 */ struct17 pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
@@ -855,7 +855,7 @@ typedef struct {
 extern void func_15164F0C(u8, u8, s32, u8, s32);
 
 /* Calls func_15164F0C once for each i in 0..D_80082FA0 with the same parameters. */
-void func_151D5334(struct17 *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
+void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
     s32 i;
     Params151D5334 params;
 
@@ -879,7 +879,7 @@ typedef struct {
 
 /* User data of the effects func_151D5404 creates. */
 typedef struct {
-    /* 0x00 */ struct17 pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
@@ -888,7 +888,7 @@ typedef struct {
 } Params151D5404;
 
 /* Creates one func_151D8868 effect for each i in 0..D_80082FA0, with unk2 random in [base, base + range]. */
-void func_151D5404(struct17 *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range, s32 arg6, s32 arg7) {
+void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range, s32 arg6, s32 arg7) {
     Params151D5404 params;
     Header151D5404 header;
     void *effect;
@@ -920,7 +920,7 @@ typedef struct {
     /* 0x06 */ s16 unk06;
     /* 0x08 */ s32 unk08;
     /* 0x0C */ s32 unk0C;
-    /* 0x10 */ struct17 pos;
+    /* 0x10 */ Vec3f pos;
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24;
@@ -944,7 +944,7 @@ typedef struct {
 
 void func_1514FCE8(Spawn151D5514 *, u8, s32);
 
-void func_151D5514(struct17 *pos, u8 arg1, s32 arg2) {
+void func_151D5514(Vec3f *pos, u8 arg1, s32 arg2) {
     Spawn151D5514 spawn;
 
     spawn.unk00 = 0;
@@ -977,7 +977,7 @@ void func_151D5514(struct17 *pos, u8 arg1, s32 arg2) {
 }
 
 /* Combined effect at pos: func_151D5514, func_151D3FF4 and func_151541B8. */
-void func_151D5648(struct17 *pos, u8 arg1, s32 arg2) {
+void func_151D5648(Vec3f *pos, u8 arg1, s32 arg2) {
     u32 randU;
     f32 randF;
 
@@ -989,15 +989,15 @@ void func_151D5648(struct17 *pos, u8 arg1, s32 arg2) {
                   (randU % 56U) + 200, 0.0f, arg1, arg2);
 }
 
-extern s32 func_15145EA4(struct17 **src, struct17 **dst, s32 mtx, s32 count);
+extern s32 func_15145EA4(Vec3f **src, Vec3f **dst, s32 mtx, s32 count);
 
 /* Spawns a func_151D4408 particle on bone `bone` of obj, from local point from towards local point to. */
-void func_151D5714(Actor *obj, struct17 *from, struct17 *to, u8 bone, f32 scale, u8 arg5, s32 arg6) {
-    struct17 start;
-    struct17 dir;
+void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6) {
+    Vec3f start;
+    Vec3f dir;
     s32 mtx;
-    struct17 *srcs[2];
-    struct17 *dsts[2];
+    Vec3f *srcs[2];
+    Vec3f *dsts[2];
 
     if (obj->unk1D4 != NULL) {
         if ((obj->unk74 & 0xF) != 0xF) {
@@ -1007,34 +1007,34 @@ void func_151D5714(Actor *obj, struct17 *from, struct17 *to, u8 bone, f32 scale,
             dsts[0] = &start;
             dsts[1] = &dir;
             func_15145EA4(srcs, dsts, mtx, 2);
-            dir.unk0 -= start.unk0;
-            dir.unk4 -= start.unk4;
-            dir.unk8 -= start.unk8;
+            dir.x -= start.x;
+            dir.y -= start.y;
+            dir.z -= start.z;
             { // matching: a block holding a declaration changes how as1 schedules the call setup
-void func_151D4408(vertex *pos, struct17 *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
+void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
                 func_151D4408(&start, &dir, (void *)mtx, obj, scale, arg5, arg6);
             }
         }
     }
 }
 
-extern struct17 *D_8008FC8C[];
+extern Vec3f *D_8008FC8C[];
 extern u8 *D_8008FC94[];
-void func_151D5A18(Actor *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, u8);
+void func_151D5A18(Actor *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, u8);
 void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
 void func_150636A4(Actor *);
 
 /* Computes obj's emission point and direction for slot `slot`, stores a far target point along it in
    unk31C->unkB8..unkC0, and calls func_15081690 from the point towards that target. */
 void func_151D57F8(Actor *obj, u8 slot) {
-    struct17 pos;
-    struct17 forward;
-    struct17 axis1;
-    struct17 axis2;
-    struct17 pointBuf;
-    struct17 dirBuf;
-    struct17 *origin;
-    struct17 *dir;
+    Vec3f pos;
+    Vec3f forward;
+    Vec3f axis1;
+    Vec3f axis2;
+    Vec3f pointBuf;
+    Vec3f dirBuf;
+    Vec3f *origin;
+    Vec3f *dir;
 
     func_151D5A18(obj, &pos, &forward, &axis1, &axis2, D_8008FC8C[slot], *D_8008FC94[slot]);
     func_151D5174(obj, &pos, &forward, &axis1, &axis2, &pointBuf, &dirBuf, &origin, &dir, NULL);
@@ -1045,31 +1045,31 @@ void func_151D57F8(Actor *obj, u8 slot) {
     if (dir == NULL) {
         dir = &forward;
     }
-    obj->unk31C->unkB8 = origin->unk0 + dir->unk0 * 9999.0f;
-    obj->unk31C->unkBC = origin->unk4 + dir->unk4 * 9999.0f;
-    obj->unk31C->unkC0 = origin->unk8 + dir->unk8 * 9999.0f;
+    obj->unk31C->unkB8 = origin->x + dir->x * 9999.0f;
+    obj->unk31C->unkBC = origin->y + dir->y * 9999.0f;
+    obj->unk31C->unkC0 = origin->z + dir->z * 9999.0f;
     if (obj->unk31C->unk109) {
-        struct17 delta;
+        Vec3f delta;
         f32 len;
 
-        delta.unk0 = obj->unk31C->unkB8 - pos.unk0;
-        delta.unk4 = obj->unk31C->unkBC - pos.unk4;
-        delta.unk8 = obj->unk31C->unkC0 - pos.unk8;
+        delta.x = obj->unk31C->unkB8 - pos.x;
+        delta.y = obj->unk31C->unkBC - pos.y;
+        delta.z = obj->unk31C->unkC0 - pos.z;
         if (func_15145128(&delta, &delta, &len, NULL) != 0) {
-            func_15081690(obj, pos.unk0, pos.unk4, pos.unk8, delta.unk0, delta.unk4, delta.unk8,
+            func_15081690(obj, pos.x, pos.y, pos.z, delta.x, delta.y, delta.z,
                           &obj->unk31C->unkB0, len * 1.00999999f, 0, 0, 0, -1, 0, 0);
         }
     }
     func_150636A4(obj);
 }
 
-void func_15145740(Actor *, struct17 *, struct17 *, struct17 *, f32);
+void func_15145740(Actor *, Vec3f *, Vec3f *, Vec3f *, f32);
 
 /* Computes obj's axes (forward, axis1, axis2) and the world position of localPos on bone `bone`;
    objects without bone matrices use a point 34 units out and 49 up from their origin. */
-void func_151D5A18(Actor *obj, struct17 *out, struct17 *forward, struct17 *axis1, struct17 *axis2, struct17 *localPos, u8 bone) {
-    struct17 *src;
-    struct17 *dst;
+void func_151D5A18(Actor *obj, Vec3f *out, Vec3f *forward, Vec3f *axis1, Vec3f *axis2, Vec3f *localPos, u8 bone) {
+    Vec3f *src;
+    Vec3f *dst;
 
     func_15145740(obj, forward, axis1, axis2, 0.8110000491f);
     if (obj->unk1D4 != NULL) {
@@ -1080,37 +1080,37 @@ void func_151D5A18(Actor *obj, struct17 *out, struct17 *forward, struct17 *axis1
         f32 dz;
         f32 dx;
 
-        if ((9.999999747e-05f < fabsf(forward->unk0)) || (9.999999747e-05f < fabsf(forward->unk8))) {
+        if ((9.999999747e-05f < fabsf(forward->x)) || (9.999999747e-05f < fabsf(forward->z))) {
             f32 inv;
             f32 z;
 
-            z = forward->unk8;
-            inv = 1.0f / sqrtf((forward->unk0 * forward->unk0) + (z * z));
+            z = forward->z;
+            inv = 1.0f / sqrtf((forward->x * forward->x) + (z * z));
             dz = z * inv;
-            dx = -forward->unk0 * inv;
+            dx = -forward->x * inv;
         } else {
             dz = 1.0f;
             dx = 0.0f;
         }
-        out->unk0 = obj->x_position + (34.0f * dx);
-        out->unk4 = obj->y_position + 49.0f;
-        out->unk8 = obj->z_position + (34.0f * dz);
+        out->x = obj->x_position + (34.0f * dx);
+        out->y = obj->y_position + 49.0f;
+        out->z = obj->z_position + (34.0f * dz);
     }
 }
 
-s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
+s32 func_151452C4(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, f32 arg3, Vec3f *arg4, Vec3f *arg5, f32 *arg6, f32 *arg7);
 extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
 
 /* Runs func_151452C4(p0, p1, center, 2 * radius) for every active object except `self` (and, when filter
    is not -1, only for those D_80086C90[filter] accepts). Returns a mask with bit i cleared for each
    object i it reports. */
-s32 func_151D5B6C(struct17 *p0, struct17 *p1, Actor *self, s8 filter, s32 filterArg) {
+s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, s32 filterArg) {
     f32 radius;
     Actor *obj;
     s32 mask;
-    struct17 center;
-    struct17 out0;
-    struct17 out1;
+    Vec3f center;
+    Vec3f out0;
+    Vec3f out1;
     f32 outF0;
     f32 outF1;
     u8 i;
@@ -1129,9 +1129,9 @@ s32 func_151D5B6C(struct17 *p0, struct17 *p1, Actor *self, s8 filter, s32 filter
         } else {
             radius = obj->unkD2;
         }
-        center.unk0 = obj->x_position;
-        center.unk4 = obj->y_position + obj->unkD6;
-        center.unk8 = obj->z_position;
+        center.x = obj->x_position;
+        center.y = obj->y_position + obj->unkD6;
+        center.z = obj->z_position;
         if (func_151452C4(p0, p1, &center, radius + radius, &out0, &out1, &outF0, &outF1)) {
             mask &= ~(1 << i);
         }

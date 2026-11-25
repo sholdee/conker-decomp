@@ -209,10 +209,10 @@ extern Vec3w D_80099B7C;
 extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
 extern Actor *func_1507515C(Actor *);
 extern void func_151C1860(void *, s32, s32);
-void func_15103E40(Actor *, Actor *, struct17 *, u8, u8, u8, u8);
+void func_15103E40(Actor *, Actor *, Vec3f *, u8, u8, u8, u8);
 extern Vec3w D_80099BA0;
 extern Vec3w D_80099BAC;
-extern void func_151D5334(struct17*, f32, f32, f32, s32, s32, s32);
+extern void func_151D5334(Vec3f*, f32, f32, f32, s32, s32, s32);
 extern void func_150FE860(Actor *arg0, s32 arg1, s32 arg2);
 extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern void func_150FF084(Actor *arg0, s32 arg1, s32 arg2);
@@ -852,7 +852,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     f32 x;
     f32 y;
     f32 z;
-    f32 mf[4][4];
+    MtxF mf;
 
     count = 0;
     for (i = 0; i < 25; i++) {
@@ -2598,14 +2598,14 @@ void func_15070C18(s32 cmd) {
 }
 
 void func_15070C40(u8 variant) {
-    struct17 pos;
+    Vec3f pos;
     Actor *obj;
     Actor *owner;
 
     obj = D_800D154C;
-    pos.unk0 = obj->x_position;
-    pos.unk4 = obj->y_position;
-    pos.unk8 = obj->z_position;
+    pos.x = obj->x_position;
+    pos.y = obj->y_position;
+    pos.z = obj->z_position;
 
     owner = obj->unk124 ? &D_800CC2D0[obj->unk124 - 1] : obj;
     func_15103E40(owner, obj, &pos, variant, 0, 0xFF, 0);
@@ -2690,8 +2690,8 @@ void func_15070F60(cmd)
     fx.header2.unk8 = fx.worldPos[2];
 
     func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
-    func_151D5404((struct17 *)fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
-    func_151D5334((struct17 *)fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
+    func_151D5404((Vec3f *)fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
+    func_151D5334((Vec3f *)fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
 }
 void func_15071230(s32 cmd) {
     func_15070F60(0);
@@ -2804,13 +2804,13 @@ void func_15071690(s32 cmd) {
 }
 
 void func_150716EC(s32 cmd) {
-    struct17 pos;
+    Vec3f pos;
     Actor *obj;
 
     obj = D_800D154C;
-    pos.unk0 = obj->x_position;
-    pos.unk4 = obj->y_position;
-    pos.unk8 = obj->z_position;
+    pos.x = obj->x_position;
+    pos.y = obj->y_position;
+    pos.z = obj->z_position;
     func_151D5404(&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 0xFF, 0);
 }
 
@@ -3506,7 +3506,7 @@ void func_150730D0(void) {
 u8 *func_15073118(u8 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, f32 yawOffset, f32 speed,
                   f32 yVelocity, f32 gravity, s32 unk83) {
     Mtx *mtx;
-    f32 mf[4][4];
+    MtxF mf;
     Actor *obj;
     f32 x;
     f32 y;

@@ -51,7 +51,7 @@ void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, u8
     f32 px;
     f32 py;
     f32 pz;
-    vertex step;
+    Vec3f step;
     s16 i;
     f32 inverse;
 

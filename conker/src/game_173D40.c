@@ -18,7 +18,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 countBase;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ vertex position;
+    /* 0x08 */ Vec3f position;
     /* 0x14 */ f32 speedBase;
     /* 0x18 */ f32 speedRange;
     /* 0x1C */ s16 yawBase;
@@ -37,13 +37,13 @@ typedef struct {
     /* 0x40 */ s16 lifeRange;
 } Game150F90Config;
 
-void func_15142314(struct255 *bones, s32 bone, vertex *out);
+void func_15142314(struct255 *bones, s32 bone, Vec3f *out);
 void func_1504715C(GroundHit *hit, Actor *actor);
-s32 func_15046C80(vertex *probe, s32 arg1, f32 bottom, GroundHit *hit);
-void func_15141F78(u8, GroundHit *, f32, u8, vertex *, u8);
-void func_15142180(u8, vertex *, s32, f32, f32);
+s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, GroundHit *hit);
+void func_15141F78(u8, GroundHit *, f32, u8, Vec3f *, u8);
+void func_15142180(u8, Vec3f *, s32, f32, f32);
 u8 func_151D8E20(void);
-void func_151DAB58(u8, f32, u8, vertex *, s32, u8, u8);
+void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
 extern u8 (*D_8008FD04)(void);
 extern u8 (*D_8008FD1C)(void);
 extern u8 (*D_8008FD30)(void);
@@ -54,8 +54,8 @@ struct260 *func_15130374(void *, u8, s32, u8, s32);
 /* Get the position of one of the actor's bones (0x13 for side 1, 0x17 for side 2; any other side
    fails with 0).  With a `hit` buffer, also look for the ground below that point and return
    func_15046C80's result. */
-s32 func_15146890(vertex *pos, Actor *actor, GroundHit *hit, u8 side) {
-    vertex probe;
+s32 func_15146890(Vec3f *pos, Actor *actor, GroundHit *hit, u8 side) {
+    Vec3f probe;
     s32 bone;
 
     if ((side != 1) && (side != 2)) {
@@ -125,7 +125,7 @@ s32 func_15146970(s32 kind, Actor *actor) {
 
 /* Burst of func_15150F90 pieces from the actor's bone on `side`. */
 void func_15146A98(s32 actor, s32 side, s32 strength) {
-    vertex pos;
+    Vec3f pos;
     Game150F90Config burst;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
@@ -165,7 +165,7 @@ void func_15146BD8(s32 actor, s32 side, s32 strength) {
 /* Effect 0xB (or 0xC when `alt`) at the ground below the actor's bone on `side`, plus effect 2
    there when strength is at least 115. */
 void func_15146BF8(s32 actor, s32 side, s32 strength, s32 alt) {
-    vertex pos;
+    Vec3f pos;
     GroundHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
@@ -181,7 +181,7 @@ void func_15146BF8(s32 actor, s32 side, s32 strength, s32 alt) {
 
 /* Effect 0xA at the ground below the actor's bone on `side`. */
 void func_15146D60(s32 actor, s32 side, s32 strength) {
-    vertex pos;
+    Vec3f pos;
     GroundHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
@@ -195,10 +195,10 @@ void func_15146D60(s32 actor, s32 side, s32 strength) {
 /* Effect func_151D8E20() at the ground below the actor's bone on `side` (only when strength is at
    least 71), and a randomly sized func_151D9B8C or func_151DAB58 particle at ground height. */
 void func_15146E84(s32 actor, s32 side, s32 strength) {
-    vertex pos;
+    Vec3f pos;
     GroundHit hit;
     u8 kind;
-    vertex spot;
+    Vec3f spot;
     s32 pad; // matching: an unused stack slot sits between spot and random
     s32 random;
     f32 size;
@@ -233,7 +233,7 @@ void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6
 
 /* func_1514C678 at the actor's bone on `side`, with a random radius below 11. */
 void func_15147040(s32 actor, s32 side, s32 strength) {
-    vertex pos;
+    Vec3f pos;
     s16 roll;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
@@ -308,7 +308,7 @@ s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 /* Effect 0 at the ground below the actor's bone on `side` when strength is at least 115, then
    effect D_8008FD04() there. */
 void func_15147318(s32 actor, s32 side, s32 strength) {
-    vertex pos;
+    Vec3f pos;
     GroundHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
@@ -325,7 +325,7 @@ void func_15147318(s32 actor, s32 side, s32 strength) {
 /* Effect D_8008FD1C() at the ground below the actor's bone on `side`, plus effect 6 there when
    strength is at least 115. */
 void func_15147478(s32 actor, s32 side, s32 strength) {
-    vertex pos;
+    Vec3f pos;
     GroundHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
@@ -342,7 +342,7 @@ void func_15147478(s32 actor, s32 side, s32 strength) {
 /* Effect D_8008FD30() at the ground below the actor's bone on `side`, plus effect 0xB there when
    strength is at least 115. */
 void func_151475D8(s32 actor, s32 side, s32 strength) {
-    vertex pos;
+    Vec3f pos;
     GroundHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {

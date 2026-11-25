@@ -3,13 +3,11 @@
 #define func_150EB430 func_150EB430_header
 #include "functions.h"
 #undef func_150EB430
-/* variables.h types these as struct178[73] and f32; see the declarations below. */
+/* variables.h types this as struct178[73]; see the declaration below. */
 #define D_800D3098 D_800D3098_header
-#define D_800A5480 D_800A5480_header
 #include "variables.h"
 #include "effects.h"
 #undef D_800D3098
-#undef D_800A5480
 
 /* An entry of the object table at D_800D3098 (struct178, a blob in structs.h): a collision
    cylinder at (x, y, z); see CollisionCylinder in game_D0960.c. */
@@ -28,14 +26,14 @@ typedef struct {
 extern GateCylinder *D_800D3098;
 extern s32 D_80088AA0[4];
 extern s32 D_80088AB0[8];
-extern s32 func_150A34B0(GateCylinder *cyl, vertex *start, vertex *end, vertex *hit);
+extern s32 func_150A34B0(GateCylinder *cyl, Vec3f *start, Vec3f *end, Vec3f *hit);
 extern void func_150A2864(s32, s32);
-s32 func_150EB484(vertex *start, vertex *end, vertex *hit);
+s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit);
 void func_150EBC80(GateCylinder *gate, u8 owner, s32 kind);
 
 /* Tests the segment from start to start + delta against the gate cylinders. */
-void func_150EB430(vertex *start, vertex *delta, vertex *hit) {
-    vertex end;
+void func_150EB430(Vec3f *start, Vec3f *delta, Vec3f *hit) {
+    Vec3f end;
 
     end.x = start->x + delta->x;
     end.y = start->y + delta->y;
@@ -50,7 +48,7 @@ void func_150EB430(vertex *start, vertex *delta, vertex *hit) {
  * D_80088AB0 cylinders are only tested. Otherwise only cylinder 76 is tested, and a hit sets
  * its unk18. Returns TRUE when object 9 exists and the segment hit one of the twelve.
  */
-s32 func_150EB484(vertex *start, vertex *end, vertex *hit) {
+s32 func_150EB484(Vec3f *start, Vec3f *end, Vec3f *hit) {
     s32 i;
     s32 id;
     Actor *obj;
@@ -188,17 +186,16 @@ void func_150EB614(MoverObj *obj) {
 }
 
 extern u8 D_800BE9EB;
-extern vertex D_800A1490;
-extern vertex D_800A149C;
-extern vertex D_800A14A8[4];
+extern Vec3f D_800A1490;
+extern Vec3f D_800A149C;
+extern Vec3f D_800A14A8[4];
 extern u8 D_800A14D8[4];
-extern vertex D_800A5480;
-void func_150E83AC(vertex *position, s16 duration, u8 owner, s32 kind);
+void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind);
 void *func_15164F0C(u8, u8, void *, u8 owner, s32 kind);
-void func_151D3FF4(vertex *pos, u8 owner, s32 kind);
-void func_151D5514(vertex *pos, u8 owner, s32 kind);
-void *func_151541B8(vertex *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 owner, s32 kind);
-extern void func_15143794(s16 yaw, s16 pitch, f32 length, vertex *out);
+void func_151D3FF4(Vec3f *pos, u8 owner, s32 kind);
+void func_151D5514(Vec3f *pos, u8 owner, s32 kind);
+void *func_151541B8(Vec3f *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 owner, s32 kind);
+extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 extern s32 func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 owner, s32 kind);
 
 /*
@@ -284,7 +281,7 @@ void *func_151D8868(CameraEvent *event, s32 arg1, u8 owner, s32 kind);
  * the cylinder's base and again half its height up.
  */
 void func_150EBC80(GateCylinder *gate, u8 owner, s32 kind) {
-    vertex position;
+    Vec3f position;
     f32 random;
     f32 step;
     CameraEvent event;

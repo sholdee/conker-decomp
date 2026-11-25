@@ -317,7 +317,7 @@ typedef struct {
 } Source15141F78;
 
 /* Spawns a burst of particles of the given kind, sized by `scale`. */
-void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, struct17 *pos, u8 arg5) {
+void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, Vec3f *pos, u8 arg5) {
     Packet15141F78 packet;
     f32 size;
     s32 flag;
@@ -349,7 +349,7 @@ void func_15141F78(u8 kind, Source15141F78 *src, f32 scale, u8 arg3, struct17 *p
         flag = 0;
     }
 
-    func_1513C650((s32)&packet, 0, 0, (s32)src->unk4, pos->unk0, src->unk0, pos->unk8, size, size, arg3, flag, 3, 1, 0, 0xFF, 1);
+    func_1513C650((s32)&packet, 0, 0, (s32)src->unk4, pos->x, src->unk0, pos->z, size, size, arg3, flag, 3, 1, 0, 0xFF, 1);
 }
 
 /* Template copied onto the stack for func_150A2AEC. */
@@ -380,7 +380,7 @@ typedef struct {
     /* 0x02 */ s16 unk2;
     /* 0x04 */ s16 unk4;
     /* 0x06 */ s16 unk6;
-    /* 0x08 */ struct17 pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -403,10 +403,10 @@ typedef struct {
 } Params15153F18;
 
 
-void func_15153F18(Params15153F18 *params, struct17 *pos, s32, s32, s32);
+void func_15153F18(Params15153F18 *params, Vec3f *pos, s32, s32, s32);
 
 /* Spawns the func_15153F18 effect of the given kind at `pos`. */
-void func_15142180(u8 kind, struct17 *pos, s32 arg2, f32 scaleA, f32 scaleB) {
+void func_15142180(u8 kind, Vec3f *pos, s32 arg2, f32 scaleA, f32 scaleB) {
     Params15153F18 params;
 
     params.pos = *pos;
@@ -458,7 +458,7 @@ typedef struct {
 /* Matrix storage, read as fixed point or as floats depending on D_800C3E90. */
 typedef union {
     MtxFixed fx;
-    f32 mf[4][4];
+    MtxF mf;
 } MtxView;
 
 /* Copies the translation of mtx[index] to out (fixed-point when D_800C3E90 is set). */
@@ -535,7 +535,7 @@ void func_150A8050(f32 (*)[4], f32, f32, f32);
  */
 void func_151424F4(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 sx, f32 sy, f32 sz,
                    f32 x, f32 y, f32 z) {
-    f32 mf[4][4];
+    MtxF mf;
 
     func_150A8050(&mf, rotX, rotY, rotZ);
     mf[3][0] = x;
@@ -556,7 +556,7 @@ void func_151424F4(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 ro
 /* Builds a matrix at (x, y, z) whose forward axis points at (atX, atY, atZ), scaled per axis. */
 void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z,
                    f32 atX, f32 atY, f32 atZ) {
-    f32 mf[4][4];
+    MtxF mf;
     f32 inv;
     f32 fx, fy, fz;
     f32 ux, uy, uz;
@@ -599,7 +599,7 @@ void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f3
 
 /* Builds a rotation matrix at (x, y, z), rows 0/2 scaled by scaleXZ and row 1 by scaleY. */
 void func_15142838(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
-    f32 mf[4][4];
+    MtxF mf;
 
     func_150A8050(mf, rotX, rotY, rotZ);
     mf[3][0] = x;
@@ -618,7 +618,7 @@ void func_15142838(Mtx *out, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 ro
 }
 
 /* Float version of func_15142838. */
-void func_15142914(f32 mf[4][4], f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
+void func_15142914(MtxF mf, f32 scaleXZ, f32 scaleY, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
     func_150A8050(mf, rotX, rotY, rotZ);
     mf[3][0] = x;
     mf[3][1] = y;
@@ -823,27 +823,27 @@ s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode) {
  * Transforms `offset` by mtx into out (just mtx's translation when offset is NULL or zero).
  * D_800DCA00 records the progress through the function (a debug breadcrumb).
  */
-void func_15143134(struct17 *offset, f32 *out, Mtx *mtx) {
-    f32 mf[4][4];
+void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx) {
+    MtxF mf;
 
     D_800DCA00 = 1;
-    if ((offset != NULL) && ((offset->unk0 != 0.0f) || (offset->unk4 != 0.0f) || (offset->unk8 != 0.0f))) {
+    if ((offset != NULL) && ((offset->x != 0.0f) || (offset->y != 0.0f) || (offset->z != 0.0f))) {
         D_800DCA00 = 2;
-        D_800DCA08 = offset->unk0;
-        D_800DCA0C = offset->unk4;
-        D_800DCA10 = offset->unk8;
+        D_800DCA08 = offset->x;
+        D_800DCA0C = offset->y;
+        D_800DCA10 = offset->z;
         if (D_800C3E90) {
             D_800DCA00 = 3;
             D_800DCA04 = mtx;
             guMtxL2F(mf, mtx);
-            func_150A7960(mf[0], offset->unk0, offset->unk4, offset->unk8, out, out + 1, out + 2);
+            func_150A7960(mf[0], offset->x, offset->y, offset->z, out, out + 1, out + 2);
             D_800DCA00 = 4;
         // matching: an (unused) label here changes how IDO lays out the branch to the final store
         state4_done:;
         } else {
             D_800DCA00 = 5;
             D_800DCA04 = mtx;
-            func_150A7960((f32 *)mtx, offset->unk0, offset->unk4, offset->unk8, out, out + 1, out + 2);
+            func_150A7960((f32 *)mtx, offset->x, offset->y, offset->z, out, out + 1, out + 2);
             D_800DCA00 = 6;
         }
     } else {
@@ -1215,10 +1215,10 @@ s32 func_15143E24(Actor *actor) {
     return (s16)(actor->unk7A >> 8);
 }
 /* Length of a vector. */
-f32 func_15143E64(struct17 *v) {
-    f32 x = v->unk0;
-    f32 y = v->unk4;
-    f32 z = v->unk8;
+f32 func_15143E64(Vec3f *v) {
+    f32 x = v->x;
+    f32 y = v->y;
+    f32 z = v->z;
 
     return sqrtf(x * x + y * y + z * z);
 }
@@ -1599,20 +1599,20 @@ void func_1514470C(SpawnRegion *region, f32 *out) {
         return;
     case 1:
         {
-            struct17 offset;
+            Vec3f offset;
 
             func_151436B4(func_150ADA68() * 6.2831855f, func_150ADA68() * 6.2831855f,
-                          func_150ADA68() * radiusX, &offset.unk0);
-            out[0] = region->x + offset.unk0;
-            out[1] = region->y + offset.unk4;
-            out[2] = region->z + offset.unk8;
+                          func_150ADA68() * radiusX, &offset.x);
+            out[0] = region->x + offset.x;
+            out[1] = region->y + offset.y;
+            out[2] = region->z + offset.z;
         }
         return;
     }
 }
 /* Dot product. */
-f32 func_15144A74(struct17 *a, struct17 *b) {
-    return a->unk0 * b->unk0 + a->unk4 * b->unk4 + a->unk8 * b->unk8;
+f32 func_15144A74(Vec3f *a, Vec3f *b) {
+    return a->x * b->x + a->y * b->y + a->z * b->z;
 }
 
 /* D_800DBFF0[index].unk380 wrapped into [0, 360] degrees. */
@@ -1632,8 +1632,8 @@ f32 func_15144AA8(s32 index) {
 }
 
 /* Position (unk2F8) of D_800DBFF0[index]. */
-struct17 *func_15144B34(s32 index) {
-    return (struct17 *)&D_800DBFF0[index].eye;
+Vec3f *func_15144B34(s32 index) {
+    return (Vec3f *)&D_800DBFF0[index].eye;
 }
 
 /* Wraps an angle into [0, 2 pi] radians. */
@@ -1745,13 +1745,13 @@ typedef struct {
  * Edge vectors of a triangle: normal = (v0 - v1) x (v2 - v1), binormal = edge x normal, edge = v0 - v1.
  * Returns 0 for a degenerate triangle (two equal vertices). `normal` may be NULL.
  */
-s32 func_15144E80(Tri15144E80 *tri, struct17 *binormal, struct17 *edgeOut, struct17 *normal) {
+s32 func_15144E80(Tri15144E80 *tri, Vec3f *binormal, Vec3f *edgeOut, Vec3f *normal) {
     f32 c[3];
     f32 b[3];
     f32 a[3];
-    struct17 normalBuf;
-    struct17 edge0;
-    struct17 edge1;
+    Vec3f normalBuf;
+    Vec3f edge0;
+    Vec3f edge1;
 
     if (normal == NULL) {
         normal = &normalBuf;
@@ -1777,12 +1777,12 @@ s32 func_15144E80(Tri15144E80 *tri, struct17 *binormal, struct17 *edgeOut, struc
         return 0;
     }
 
-    edge0.unk0 = a[0] - b[0];
-    edge0.unk4 = a[1] - b[1];
-    edge0.unk8 = a[2] - b[2];
-    edge1.unk0 = c[0] - b[0];
-    edge1.unk4 = c[1] - b[1];
-    edge1.unk8 = c[2] - b[2];
+    edge0.x = a[0] - b[0];
+    edge0.y = a[1] - b[1];
+    edge0.z = a[2] - b[2];
+    edge1.x = c[0] - b[0];
+    edge1.y = c[1] - b[1];
+    edge1.z = c[2] - b[2];
 
     func_151450B4(&edge0, &edge1, normal);
     func_151450B4(&edge0, normal, binormal);
@@ -1791,21 +1791,21 @@ s32 func_15144E80(Tri15144E80 *tri, struct17 *binormal, struct17 *edgeOut, struc
 }
 
 /* Cross product out = a x b. */
-void func_151450B4(struct17 *a, struct17 *b, struct17 *out) {
-    out->unk0 = a->unk4 * b->unk8 - a->unk8 * b->unk4;
-    out->unk4 = a->unk8 * b->unk0 - a->unk0 * b->unk8;
-    out->unk8 = a->unk0 * b->unk4 - a->unk4 * b->unk0;
+void func_151450B4(Vec3f *a, Vec3f *b, Vec3f *out) {
+    out->x = a->y * b->z - a->z * b->y;
+    out->y = a->z * b->x - a->x * b->z;
+    out->z = a->x * b->y - a->y * b->x;
 }
 
 /* Normalizes v into out; returns 0 for a zero vector. length and invLength are optional outputs. */
-s32 func_15145128(struct17 *v, struct17 *out, f32 *length, f32 *invLength) {
+s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength) {
     f32 sq;
     f32 invBuf;
 
     if (invLength == NULL) {
         invLength = &invBuf;
     }
-    sq = v->unk0 * v->unk0 + v->unk4 * v->unk4 + v->unk8 * v->unk8;
+    sq = v->x * v->x + v->y * v->y + v->z * v->z;
     if (sq == 0.0f) {
         return 0;
     }
@@ -1815,18 +1815,18 @@ s32 func_15145128(struct17 *v, struct17 *out, f32 *length, f32 *invLength) {
     } else {
         *invLength = 1.0f / sqrtf(sq);
     }
-    out->unk0 = *invLength * v->unk0;
-    out->unk4 = *invLength * v->unk4;
-    out->unk8 = *invLength * v->unk8;
+    out->x = *invLength * v->x;
+    out->y = *invLength * v->y;
+    out->z = *invLength * v->z;
     return 1;
 }
 
-s32 func_151452C4(struct17 *origin, struct17 *dir, struct17 *center, f32 radius, struct17 *hitNear,
-                  struct17 *hitFar, f32 *tNear, f32 *tFar);
+s32 func_151452C4(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, Vec3f *hitNear,
+                  Vec3f *hitFar, f32 *tNear, f32 *tFar);
 
 /* Ray/sphere test (see func_151452C4) that also requires the hit to be closer than maxDist. */
-s32 func_151451F0(struct17 *origin, struct17 *dir, struct17 *center, f32 radius, f32 maxDist, struct17 *hitNear,
-                  struct17 *hitFar, f32 *tNear, f32 *tFar) {
+s32 func_151451F0(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, f32 maxDist, Vec3f *hitNear,
+                  Vec3f *hitFar, f32 *tNear, f32 *tFar) {
     f32 t;
 
     if (func_151452C4(origin, dir, center, radius, hitNear, hitFar, tNear, tFar) != 0) {
@@ -1853,13 +1853,13 @@ s32 func_151451F0(struct17 *origin, struct17 *dir, struct17 *center, f32 radius,
  * Intersects the ray origin + t * dir (dir normalized) with a sphere. Writes both intersection points
  * and their t; returns 0 on a miss or when the near point is behind the origin.
  */
-s32 func_151452C4(struct17 *origin, struct17 *dir, struct17 *center, f32 radius, struct17 *hitNear,
-                  struct17 *hitFar, f32 *tNear, f32 *tFar) {
+s32 func_151452C4(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, Vec3f *hitNear,
+                  Vec3f *hitFar, f32 *tNear, f32 *tFar) {
     f32 dx;
     f32 dy;
     f32 dz;
-    struct17 d;
-    struct17 o;
+    Vec3f d;
+    Vec3f o;
     f32 proj;
     f32 rr;
     f32 root;
@@ -1867,13 +1867,13 @@ s32 func_151452C4(struct17 *origin, struct17 *dir, struct17 *center, f32 radius,
     f32 t1;
     f32 dd;
 
-    dx = center->unk0 - origin->unk0;
-    dy = center->unk4 - origin->unk4;
-    dz = center->unk8 - origin->unk8;
+    dx = center->x - origin->x;
+    dy = center->y - origin->y;
+    dz = center->z - origin->z;
     d = *dir;
     o = *origin;
     dd = (dx * dx) + (dy * dy) + (dz * dz);
-    proj = (dx * d.unk0) + (dy * d.unk4) + (dz * d.unk8);
+    proj = (dx * d.x) + (dy * d.y) + (dz * d.z);
     rr = radius * radius;
     if (rr < dd - (proj * proj)) {
         return 0;
@@ -1884,20 +1884,20 @@ s32 func_151452C4(struct17 *origin, struct17 *dir, struct17 *center, f32 radius,
     }
     t0 = proj - root;
     t1 = proj + root;
-    hitNear->unk0 = (t0 * d.unk0) + o.unk0;
-    hitNear->unk4 = (t0 * d.unk4) + o.unk4;
-    hitNear->unk8 = (t0 * d.unk8) + o.unk8;
+    hitNear->x = (t0 * d.x) + o.x;
+    hitNear->y = (t0 * d.y) + o.y;
+    hitNear->z = (t0 * d.z) + o.z;
     *tNear = t0;
-    hitFar->unk0 = (t1 * d.unk0) + o.unk0;
-    hitFar->unk4 = (t1 * d.unk4) + o.unk4;
-    hitFar->unk8 = (t1 * d.unk8) + o.unk8;
+    hitFar->x = (t1 * d.x) + o.x;
+    hitFar->y = (t1 * d.y) + o.y;
+    hitFar->z = (t1 * d.z) + o.z;
     *tFar = t1;
     {
-        struct17 diff;
+        Vec3f diff;
 
-        diff.unk0 = hitNear->unk0 - origin->unk0;
-        diff.unk4 = hitNear->unk4 - origin->unk4;
-        diff.unk8 = hitNear->unk8 - origin->unk8;
+        diff.x = hitNear->x - origin->x;
+        diff.y = hitNear->y - origin->y;
+        diff.z = hitNear->z - origin->z;
         if (func_15144A74(&diff, dir) < 0.0f) {
             return 0;
         }
@@ -1906,16 +1906,16 @@ s32 func_151452C4(struct17 *origin, struct17 *dir, struct17 *center, f32 radius,
 }
 
 /* Whether point lies within radius of D_800DBFF0[index]'s position (unk2F8). */
-s32 func_151454BC(u8 index, f32 radius, struct17 *point) {
+s32 func_151454BC(u8 index, f32 radius, Vec3f *point) {
     f32 dx;
     f32 dy;
     f32 dz;
-    struct17 *pos;
+    Vec3f *pos;
 
     pos = func_15144B34(index);
-    dx = point->unk0 - pos->unk0;
-    dy = point->unk4 - pos->unk4;
-    dz = point->unk8 - pos->unk8;
+    dx = point->x - pos->x;
+    dy = point->y - pos->y;
+    dz = point->z - pos->z;
 
     if ((radius * radius) < ((dx * dx) + (dy * dy) + (dz * dz))) {
         return 0;
@@ -1923,10 +1923,10 @@ s32 func_151454BC(u8 index, f32 radius, struct17 *point) {
     return 1;
 }
 
-s32 func_1514563C(struct17 *start, struct17 *dir, struct17 *point, struct17 *out, f32 *t);
+s32 func_1514563C(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t);
 
 /* Closest point to `point` on the segment start .. start + dir, into out (t optional). */
-void func_15145548(struct17 *start, struct17 *dir, struct17 *point, struct17 *out, f32 *t) {
+void func_15145548(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t) {
     f32 tBuf;
 
     if (t == NULL) {
@@ -1936,9 +1936,9 @@ void func_15145548(struct17 *start, struct17 *dir, struct17 *point, struct17 *ou
         if (*t < 0.0f) {
             *out = *start;
         } else if (1.0f < *t) {
-            out->unk0 = start->unk0 + dir->unk0;
-            out->unk4 = start->unk4 + dir->unk4;
-            out->unk8 = start->unk8 + dir->unk8;
+            out->x = start->x + dir->x;
+            out->y = start->y + dir->y;
+            out->z = start->z + dir->z;
         }
     } else {
         *out = *start;
@@ -1946,7 +1946,7 @@ void func_15145548(struct17 *start, struct17 *dir, struct17 *point, struct17 *ou
 }
 
 /* Closest point to `point` on the line start + t * dir, into out; returns 0 when dir is zero. */
-s32 func_1514563C(struct17 *start, struct17 *dir, struct17 *point, struct17 *out, f32 *t) {
+s32 func_1514563C(Vec3f *start, Vec3f *dir, Vec3f *point, Vec3f *out, f32 *t) {
     f32 tBuf[1];
     f32 denom;
     f32 dot0;
@@ -1956,16 +1956,16 @@ s32 func_1514563C(struct17 *start, struct17 *dir, struct17 *point, struct17 *out
         // matching: the fallback slot is 3 words below the buffer (sp+0x10); no declaration places it there
         t = &tBuf[-3];
     }
-    denom = (dir->unk0 * dir->unk0) + (dir->unk4 * dir->unk4) + (dir->unk8 * dir->unk8);
+    denom = (dir->x * dir->x) + (dir->y * dir->y) + (dir->z * dir->z);
     if (denom == 0.0f) {
         return 0;
     }
-    dot0 = (dir->unk0 * start->unk0) + (dir->unk4 * start->unk4) + (dir->unk8 * start->unk8);
-    dot1 = (dir->unk0 * point->unk0) + (dir->unk4 * point->unk4) + (dir->unk8 * point->unk8);
+    dot0 = (dir->x * start->x) + (dir->y * start->y) + (dir->z * start->z);
+    dot1 = (dir->x * point->x) + (dir->y * point->y) + (dir->z * point->z);
     *t = (dot1 - dot0) / denom;
-    out->unk0 = start->unk0 + (*t * dir->unk0);
-    out->unk4 = start->unk4 + (*t * dir->unk4);
-    out->unk8 = start->unk8 + (*t * dir->unk8);
+    out->x = start->x + (*t * dir->x);
+    out->y = start->y + (*t * dir->y);
+    out->z = start->z + (*t * dir->z);
     return 1;
 }
 
@@ -1974,7 +1974,7 @@ s32 func_1514563C(struct17 *start, struct17 *dir, struct17 *point, struct17 *out
  * 2000 units along its yaw/pitch to target and, optionally, unit-1000 direction vectors for the
  * pitch and for the pitch plus pitchOffset (radians).
  */
-void func_15145740(Actor *actor, struct17 *target, struct17 *dir, struct17 *offsetDir, f32 pitchOffset) {
+void func_15145740(Actor *actor, Vec3f *target, Vec3f *dir, Vec3f *offsetDir, f32 pitchOffset) {
     s16 yaw;
     s16 pitch;
     volatile f32 angle;
@@ -2011,28 +2011,28 @@ void func_15145740(Actor *actor, struct17 *target, struct17 *dir, struct17 *offs
     pitchDeg = temp;
     temp = temp * 0.01745329238f; /* degrees to radians */
     pitchRad[0] = temp;
-    func_1505A184(yaw, 2000.0f, pitchDeg, &target->unk0, &target->unk8, &target->unk4);
+    func_1505A184(yaw, 2000.0f, pitchDeg, &target->x, &target->z, &target->y);
     if (dir != NULL) {
-        dir->unk4 = cosf(pitchRad[0]) * 1000.0f;
+        dir->y = cosf(pitchRad[0]) * 1000.0f;
         horizontal[0] = sinf(pitchRad[0]) * 1000.0f;
         yawRad[0] = yaw * 9.587380191e-05f; /* 2 pi / 65536 */
-        dir->unk0 = horizontal[0] * cosf(yawRad[0]);
-        dir->unk8 = -horizontal[0] * sinf(yawRad[0]);
+        dir->x = horizontal[0] * cosf(yawRad[0]);
+        dir->z = -horizontal[0] * sinf(yawRad[0]);
         if (offsetDir != NULL) {
             offsetPitchRad = pitchRad[0] + pitchOffset;
-            offsetDir->unk4 = cosf(offsetPitchRad) * 1000.0f;
+            offsetDir->y = cosf(offsetPitchRad) * 1000.0f;
             horizontal[0] = sinf(offsetPitchRad) * 1000.0f;
-            offsetDir->unk0 = horizontal[0] * cosf(yawRad[0]);
-            offsetDir->unk8 = -horizontal[0] * sinf(yawRad[0]);
+            offsetDir->x = horizontal[0] * cosf(yawRad[0]);
+            offsetDir->z = -horizontal[0] * sinf(yawRad[0]);
         }
     }
 }
 
 /* Heading (and optionally elevation, from -90) in degrees of a vector; func_150484A0 is atan2. */
-void func_15145974(struct17 *v, f32 *heading, f32 *elevation) {
-    *heading = func_150484A0(v->unk0, v->unk8) * 57.29577637f;
+void func_15145974(Vec3f *v, f32 *heading, f32 *elevation) {
+    *heading = func_150484A0(v->x, v->z) * 57.29577637f;
     if (elevation != NULL) {
-        *elevation = (func_150484A0(sqrtf(v->unk0 * v->unk0 + v->unk8 * v->unk8), v->unk4) * 57.29577637f) - 90.0f;
+        *elevation = (func_150484A0(sqrtf(v->x * v->x + v->z * v->z), v->y) * 57.29577637f) - 90.0f;
     }
 }
 
@@ -2055,20 +2055,20 @@ void func_15145A50(Actor *actor) {
     }
 }
 
-void func_1515C1A0(void *, struct17 *, f32 *, f32 *);
+void func_1515C1A0(void *, Vec3f *, f32 *, f32 *);
 
 /*
  * Ray (start, dir) against the actor's collision ellipsoid (centre/radius from func_1515C1A0, y squashed
  * by unkDC); writes the near and far hits, unsquashed by unkE0. Returns 0 on a miss.
  */
-s32 func_15145AD8(struct17 *start, struct17 *dir, Actor *actor, struct17 *hitNear, struct17 *hitFar,
-                  f32 *radius, f32 *arg6, struct17 *center) {
-    struct17 centerBuf;
+s32 func_15145AD8(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f *hitFar,
+                  f32 *radius, f32 *arg6, Vec3f *center) {
+    Vec3f centerBuf;
     f32 radiusBuf;
     f32 arg6Buf;
-    struct17 s;
-    struct17 d;
-    struct17 c;
+    Vec3f s;
+    Vec3f d;
+    Vec3f c;
 
     /* sic: the fallbacks replace the caller's pointers when they are given */
     if (radius != NULL) {
@@ -2095,25 +2095,25 @@ s32 func_15145AD8(struct17 *start, struct17 *dir, Actor *actor, struct17 *hitNea
     f32 unsquash;
     squash = actor->unkDC;
     unsquash = actor->unkE0;
-    s.unk0 = start->unk0;
-    s.unk4 = start->unk4 * squash;
-    s.unk8 = start->unk8;
-    d.unk0 = dir->unk0;
-    d.unk4 = dir->unk4 * squash;
-    d.unk8 = dir->unk8;
+    s.x = start->x;
+    s.y = start->y * squash;
+    s.z = start->z;
+    d.x = dir->x;
+    d.y = dir->y * squash;
+    d.z = dir->z;
     {
     f32 invLength;
     if (func_15145128(&d, &d, &length, &invLength) == 0) {
         return 0;
     }
-    c.unk0 = center->unk0;
-    c.unk4 = center->unk4 * squash;
-    c.unk8 = center->unk8;
+    c.x = center->x;
+    c.y = center->y * squash;
+    c.z = center->z;
     if (func_151451F0(&s, &d, &c, *radius, length, hitNear, hitFar, &tNear, &tFar) == 0) {
         return 0;
     }
-    hitNear->unk4 *= unsquash;
-    hitFar->unk4 *= unsquash;
+    hitNear->y *= unsquash;
+    hitFar->y *= unsquash;
     }
     }
     return 1;
@@ -2137,7 +2137,7 @@ typedef struct {
 
 /* Transforms `count` points (given by pointer) by the placement. */
 void func_15145CD0(Placement *placement, f32 **in, f32 **out, s32 count) {
-    f32 mf[4][4];
+    MtxF mf;
     f32 **src;
     f32 **dst;
     f32 *p;
@@ -2163,8 +2163,8 @@ void func_15145CD0(Placement *placement, f32 **in, f32 **out, s32 count) {
 }
 
 /* Transforms the `count` points in[] by the placement into out[]. */
-void func_15145DB4(Placement *placement, struct17 *in, struct17 *out, s32 count) {
-    f32 mf[4][4];
+void func_15145DB4(Placement *placement, Vec3f *in, Vec3f *out, s32 count) {
+    MtxF mf;
     s32 i;
 
     func_150A8050(mf, placement->rot[0], placement->rot[1], placement->rot[2]);
@@ -2172,7 +2172,7 @@ void func_15145DB4(Placement *placement, struct17 *in, struct17 *out, s32 count)
     mf[3][1] = placement->pos[1];
     mf[3][2] = placement->pos[2];
     for (i = 0; count > 0; i++) {
-        func_150A7960(mf[0], in[i].unk0, in[i].unk4, in[i].unk8, &out[i].unk0, &out[i].unk4, &out[i].unk8);
+        func_150A7960(mf[0], in[i].x, in[i].y, in[i].z, &out[i].x, &out[i].y, &out[i].z);
         count--;
     }
 }
@@ -2180,7 +2180,7 @@ void func_15145DB4(Placement *placement, struct17 *in, struct17 *out, s32 count)
 /* Array version of func_15143134: mfs each offsets[i] by mtx into results[i]. */
 void func_15145EA4(f32 **offsets, f32 **results, Mtx *mtx, s32 count) {
     f32 *input;
-    f32 mf[4][4];
+    MtxF mf;
     f32 *output;
     f32 **outputs;
 
@@ -2227,7 +2227,7 @@ void func_15145EA4(f32 **offsets, f32 **results, Mtx *mtx, s32 count) {
  * Builds two unit vectors u, v perpendicular to n (axis-aligned when n lies along an axis).
  * Returns 0 for a zero n.
  */
-s32 func_15146078(struct17 *n, struct17 *u, struct17 *v) {
+s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v) {
     u8 count;
     u8 axis;
     u8 zeroAxis;
@@ -2237,24 +2237,24 @@ s32 func_15146078(struct17 *n, struct17 *u, struct17 *v) {
     f32 len;
     f32 invLen;
 
-    if ((n->unk0 == 0.0f) && (n->unk4 == 0.0f) && (n->unk8 == 0.0f)) {
+    if ((n->x == 0.0f) && (n->y == 0.0f) && (n->z == 0.0f)) {
         return 0;
     }
 
     count = 0;
-    if (n->unk0 == 0.0f) {
+    if (n->x == 0.0f) {
         count++;
         zeroAxis = 0;
     } else {
         axis = 0;
     }
-    if (n->unk4 == 0.0f) {
+    if (n->y == 0.0f) {
         count++;
         zeroAxis = 1;
     } else {
         axis = 1;
     }
-    if (n->unk8 == 0.0f) {
+    if (n->z == 0.0f) {
         count++;
         zeroAxis = 2;
     } else {
@@ -2265,28 +2265,28 @@ s32 func_15146078(struct17 *n, struct17 *u, struct17 *v) {
     if (count == 2) {
         switch (axis) {
         case 0:
-            u->unk0 = 0.0;
-            u->unk4 = 1.0;
-            u->unk8 = 0.0;
-            v->unk0 = 0.0;
-            v->unk4 = 0.0;
-            v->unk8 = 1.0;
+            u->x = 0.0;
+            u->y = 1.0;
+            u->z = 0.0;
+            v->x = 0.0;
+            v->y = 0.0;
+            v->z = 1.0;
             break;
         case 1:
-            u->unk0 = 1.0;
-            u->unk4 = 0.0;
-            u->unk8 = 0.0;
-            v->unk0 = 0.0;
-            v->unk4 = 0.0;
-            v->unk8 = 1.0;
+            u->x = 1.0;
+            u->y = 0.0;
+            u->z = 0.0;
+            v->x = 0.0;
+            v->y = 0.0;
+            v->z = 1.0;
             break;
         case 2:
-            u->unk0 = 1.0;
-            u->unk4 = 0.0;
-            u->unk8 = 0.0;
-            v->unk0 = 0.0;
-            v->unk4 = 1.0;
-            v->unk8 = 0.0;
+            u->x = 1.0;
+            u->y = 0.0;
+            u->z = 0.0;
+            v->x = 0.0;
+            v->y = 1.0;
+            v->z = 0.0;
             break;
         }
         return 1;
@@ -2319,7 +2319,7 @@ void *func_1515E544(void *, s32, u8, u8, void *);
  * Draws `slot` of a model: with the owning actor's own textures (mode 1, falling back to the shared
  * ones in mode 2 when the actor is gone or has none), or plainly through func_1515D914.
  */
-void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s16 slot, struct17 *pos,
+void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s16 slot, Vec3f *pos,
                     u8 flags, s32 arg8) {
     s32 tex;
     s32 unk18;
@@ -2349,7 +2349,7 @@ void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s
                 break;
             case 0:
             default:
-                gfx = func_1515D914(gfx, slot, (s32)pos->unk0, (s32)pos->unk4, (s32)pos->unk8, arg8, tex, model[0],
+                gfx = func_1515D914(gfx, slot, (s32)pos->x, (s32)pos->y, (s32)pos->z, arg8, tex, model[0],
                                     unk18, model + 1, model[7], 0,
                                     ((flags & 1) ? 2 : 0) | (((flags & 2) ? 0x10 : 0) | 8), 0);
                 break;
@@ -2420,7 +2420,7 @@ s32 func_1514654C(Actor *actor, AttachPoint *point, s32 index, f32 **offsets, f3
     ActorCtl *part;
     Mtx *partMtx;
     s32 partCount;
-    f32 mf[4][4];
+    MtxF mf;
 
     if ((actor == NULL) || (point == NULL) || (actor->unk1D4 == NULL)) {
         return 0;
@@ -2465,12 +2465,12 @@ s32 func_1514654C(Actor *actor, AttachPoint *point, s32 index, f32 **offsets, f3
 }
 
 /* Whether a position lies inside the world bounds (|x|, |z| <= 19500 and -9500 <= y <= 19500). */
-s32 func_1514672C(struct17 *pos) {
+s32 func_1514672C(Vec3f *pos) {
     f32 limit;
     f32 y;
 
     limit = 19500.0f;
-    if ((limit < fabsf(pos->unk0)) || (limit < fabsf(pos->unk8)) || (y = pos->unk4, (limit < y)) || (y < -9500.0f)) {
+    if ((limit < fabsf(pos->x)) || (limit < fabsf(pos->z)) || (y = pos->y, (limit < y)) || (y < -9500.0f)) {
         return 0;
     }
     return 1;

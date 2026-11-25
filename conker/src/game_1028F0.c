@@ -49,9 +49,9 @@ typedef struct {
     /* 0x2C */ u8 pad2C[0x38 - 0x2C];
     /* 0x38 */ f32 unk38;
     /* 0x3C */ f32 unk3C;
-    /* 0x40 */ vertex anchor;
-    /* 0x4C */ vertex offset;
-    /* 0x58 */ vertex vel;
+    /* 0x40 */ Vec3f anchor;
+    /* 0x4C */ Vec3f offset;
+    /* 0x58 */ Vec3f vel;
     /* 0x64 */ f32 accelY;
     /* 0x68 */ u8 pad68[0xA8 - 0x68];
     /* 0xA8 */ union {
@@ -78,7 +78,7 @@ extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 extern s32 func_1515C0F8(Actor *arg0, f32 **arg1);
 extern void func_15182670(u8, u8, u8, u8, s32, u8, u8, s32);
-extern void *func_15154884(vertex *, f32, f32, f32, u8, s32);
+extern void *func_15154884(Vec3f *, f32, f32, f32, u8, s32);
 
 /* Attaches a FollowEffect (func_150D54C8) to obj. */
 void func_150D5440(Actor *obj, u8 arg1, s32 arg2) {
@@ -107,7 +107,7 @@ void func_150D54C8(FollowEffect *effect) {
     f32 sinYaw;
     f32 rightX;
     f32 rightZ;
-    f32 *refVel;
+    Vec3f *refVel;
     u8 right;
     f32 along;
     f32 speed;
@@ -174,9 +174,9 @@ void func_150D54C8(FollowEffect *effect) {
                 spawn.pos.z = owner->z_position + rightZ * sideOffset - cosYaw * 180.0f * 0.5f + cosYaw * 180.0f * along;
                 // matching: the two spellings of 6.0f / 0.564f keep IDO from sharing one rodata load
                 spawn.vel.x = (right ? (speed = speed * 2.907000065f + 6.000000477f)
-                                     : -(speed = speed * 2.907000065f + 6.0000005f)) * rightX - refVel[0] * 0.5640000105f;
+                                     : -(speed = speed * 2.907000065f + 6.0000005f)) * rightX - refVel->x * 0.5640000105f;
                 spawn.vel.y = 3.156000137f * speed;
-                spawn.vel.z = (right ? speed : -speed) * rightZ - refVel[2] * 0.564f;
+                spawn.vel.z = (right ? speed : -speed) * rightZ - refVel->z * 0.564f;
                 spawn.timer = func_150ADA20() % 10U + 31;
                 spawn.alpha = func_150ADA20() % 76U + 180;
                 spawn.width = spawn.height = func_150ADA68() * 364.0f + 111.0f;
@@ -226,18 +226,18 @@ extern s32 *D_80089A20[];
 extern s32 D_800A3F14[];
 
 s32 func_15134070(Actor *);
-s32 func_15145128(vertex *, vertex *, s32 *, s32 *);
+s32 func_15145128(Vec3f *, Vec3f *, s32 *, s32 *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, s32 *, s32 *, s32 *, f32 *, s32, s32 *, f32);
-s32 func_15144E80(f32 *, vertex *, vertex *, vertex *);
-f32 func_15144A74(vertex *, vertex *);
-void func_15146078(vertex *, vertex *, vertex *);
+s32 func_15144E80(f32 *, Vec3f *, Vec3f *, Vec3f *);
+f32 func_15144A74(Vec3f *, Vec3f *);
+void func_15146078(Vec3f *, Vec3f *, Vec3f *);
 void func_15143874(s16, f32, f32 *, f32 *);
 s32 func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
-void func_151C05A4(vertex *, u8, s32);
-void func_151C05F0(vertex *, u8, s32);
+void func_151C05A4(Vec3f *, u8, s32);
+void func_151C05F0(Vec3f *, u8, s32);
 void func_151C0360(f32 *, s32 *, u8, s32);
-void func_150D6388(vertex *pos, u8 arg1, s32 arg2);
-void func_150D6434(vertex *pos, u8 arg1, s32 arg2);
+void func_150D6388(Vec3f *pos, u8 arg1, s32 arg2);
+void func_150D6434(Vec3f *pos, u8 arg1, s32 arg2);
 void func_150D65F0(f32 *pos, s32 *arg1, u8 arg2, s32 arg3);
 void func_150D66A4(u8 arg0, u8 arg1, s32 arg2);
 
@@ -247,8 +247,8 @@ void func_150D66A4(u8 arg0, u8 arg1, s32 arg2);
  * plus impact and dust effects.
  */
 void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
-    vertex pos;
-    vertex vel;
+    Vec3f pos;
+    Vec3f vel;
     s32 hitOut[3];
     u8 hit;
     s32 useDefaultBasis;
@@ -258,9 +258,9 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
     s32 hitSurface;
     s32 type;
     f32 dist;
-    vertex normal;
-    vertex tangentU;
-    vertex tangentV;
+    Vec3f normal;
+    Vec3f tangentU;
+    Vec3f tangentV;
     s32 moving;
     ParticleSpawn piece;
 
@@ -438,10 +438,10 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-void func_151541B8(vertex *, f32, f32, f32, f32, u8, s32);
+void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 
 /* Spawns a func_151541B8 effect at pos with a random size and a 200-255 fourth argument. */
-void func_150D6388(vertex *pos, u8 arg1, s32 arg2) {
+void func_150D6388(Vec3f *pos, u8 arg1, s32 arg2) {
     u32 randInt;
     f32 randFrac;
 
@@ -451,7 +451,7 @@ void func_150D6388(vertex *pos, u8 arg1, s32 arg2) {
 }
 
 /* Spawns a func_15154884 effect at pos with randomized parameters. */
-void func_150D6434(vertex *pos, u8 arg1, s32 arg2) {
+void func_150D6434(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 rand3;
     f32 rand2;
     f32 rand1;
@@ -542,8 +542,8 @@ void func_150D66A4(u8 arg0, u8 arg1, s32 arg2) {
     func_15182670(0xFF, 0xFF, 0xFF, rand1 % 56 + 200, rand2 % 6 + 25, arg0, arg1, arg2);
 }
 
-void func_150D6C98(Actor *obj, vertex *out);
-extern void func_15143794(s16, s16, f32, vertex *);
+void func_150D6C98(Actor *obj, Vec3f *out);
+extern void func_15143794(s16, s16, f32, Vec3f *);
 
 /* Spawns 15-25 drift particles and one grow particle that follow obj. */
 void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {
@@ -635,7 +635,7 @@ void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {
         growSpawn.b = 0xFF;
         growSpawn.brightness = 0xFF;
         func_150D6C98(obj, &growSpawn.pos);
-        growSpawn.offset = *(vertex *)&D_800A5480;
+        growSpawn.offset = D_800A5480;
         growSpawn.fadeStart = 1;
         growSpawn.fadeRate = 0xFF;
         growSpawn.scaleStart = 1;
@@ -651,7 +651,7 @@ void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {
         growSpawn.handlerSet = 9;
         growSpawn.viewMask = 0;
         growSpawn.views = 0xFF;
-        growSpawn.vel = *(vertex *)&D_800A5480;
+        growSpawn.vel = D_800A5480;
         growSpawn.timer = 300;
         growSpawn.height = 0.0f;
         growSpawn.width = 0.0f;
@@ -664,13 +664,13 @@ void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 /* Writes the point 60 units above obj's position to out. */
-void func_150D6C98(Actor *obj, vertex *out) {
+void func_150D6C98(Actor *obj, Vec3f *out) {
     out->x = obj->x_position;
     out->y = obj->y_position + 60.0f;
     out->z = obj->z_position;
 }
 
-void func_15131958(vertex *, f32);
+void func_15131958(Vec3f *, f32);
 
 /* Drift particle update: follows the owner and integrates offset/velocity; returns 0 to kill. */
 s32 func_150D6CC4(Particle *particle, s32 arg1) {
@@ -684,7 +684,7 @@ s32 func_150D6CC4(Particle *particle, s32 arg1) {
     }
     func_150D6C98(owner, &particle->anchor);
     {
-        vertex prevVel = particle->vel;
+        Vec3f prevVel = particle->vel;
         f32 accelX;
         f32 accelY;
         f32 accelZ;

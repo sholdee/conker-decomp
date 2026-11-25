@@ -342,8 +342,8 @@ Actor *func_1505EEF4(s32);
 s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
     Camera *actor;
     s32 side;
-    struct17 facing;
-    struct17 toTarget;
+    Vec3f facing;
+    Vec3f toTarget;
     f32 angle;
     Actor *target;
     C3E20Pose *pose;
@@ -375,11 +375,11 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
             return -1;
         }
         angle = actor->yawRad + 1.570796371f;
-        facing.unk0 = sinf(angle);
-        facing.unk4 = 0.0f;
-        facing.unk8 = cosf(angle);
-        func_15048F90((struct17 *)&actor->eye, (struct17 *)&target->x_position, &toTarget);
-        toTarget.unk4 = 0.0f;
+        facing.x = sinf(angle);
+        facing.y = 0.0f;
+        facing.z = cosf(angle);
+        func_15048F90((Vec3f *)&actor->eye, (Vec3f *)&target->x_position, &toTarget);
+        toTarget.y = 0.0f;
         if (func_150AD900((f32 *)&facing, (f32 *)&toTarget) >= 0.0f) {
             side = -1;
         } else {
@@ -397,18 +397,18 @@ unknown_query:
 /* While a command runs, moves both actor points (unk2A4, unk2F8) along the unit vector between them, scaled by D_800D2E30. */
 void func_15097798(s32 actorIndex) {
     Camera *actor;
-    struct17 dir;
+    Vec3f dir;
 
     actor = &D_800DBFF0[actorIndex];
     if (D_800D2DB4 != 0) {
-        func_15048F90((struct17 *)&actor->focus, (struct17 *)&actor->eye, &dir);
+        func_15048F90((Vec3f *)&actor->focus, (Vec3f *)&actor->eye, &dir);
         func_1504917C(&dir, &dir);
 
-        actor->focus.x += dir.unk0 * -2.5f * D_800D2E30[actorIndex];
-        actor->focus.y += dir.unk4 * -2.0f * D_800D2E30[actorIndex];
-        *(f32 *)&actor->focus.z += dir.unk8 * -2.5f * D_800D2E30[actorIndex];
-        actor->eye.x += dir.unk0 * -2.5f * D_800D2E30[actorIndex];
-        actor->eye.y += dir.unk4 * -2.0f * D_800D2E30[actorIndex];
-        actor->eye.z += dir.unk8 * -2.5f * D_800D2E30[actorIndex];
+        actor->focus.x += dir.x * -2.5f * D_800D2E30[actorIndex];
+        actor->focus.y += dir.y * -2.0f * D_800D2E30[actorIndex];
+        *(f32 *)&actor->focus.z += dir.z * -2.5f * D_800D2E30[actorIndex];
+        actor->eye.x += dir.x * -2.5f * D_800D2E30[actorIndex];
+        actor->eye.y += dir.y * -2.0f * D_800D2E30[actorIndex];
+        actor->eye.z += dir.z * -2.5f * D_800D2E30[actorIndex];
     }
 }

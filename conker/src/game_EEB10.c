@@ -5,10 +5,6 @@
 void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count,
                    u8 kind, s32 arg8, f32 arg9, s32 arg10, u8 arg11);
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* Spawn description passed to func_15147DA0 (first argument). */
 typedef struct {
     /* 0x00 */ Vec3f pos;

@@ -51,8 +51,8 @@ typedef struct {
 
 extern WaveObject *func_151149AC(u8);
 void *allocate_memory(s32, s32, s32, s32);
-extern void func_1511490C(f32 mtx[4][4], WaveObject *obj);
-extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+extern void func_1511490C(MtxF mtx, WaveObject *obj);
+extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_150A6FA0(Vtx *dst, u16 count, WaveParams *params, s8 *phase, f32 *weight, Vtx *src);
 extern void func_150A70C0(Vtx *dst, u16 count, WaveParams *params, s8 *phase, Vtx *src);
 extern void func_150A71C8(Vtx *dst, u16 count, WaveParams *params, u8 *unk, s8 *phase, Vtx *src);
@@ -192,7 +192,7 @@ void func_15177A94(void) {
     WaveDeformer *deformer;
     WaveObject *obj;
     Vtx *src;
-    f32 mtx[4][4];
+    MtxF mtx;
     f32 x;
     f32 y;
     f32 z;

@@ -7,12 +7,6 @@ void func_151C3B0C(s32, f32, f32, f32, f32, s32, s32, s32);
 extern s32 func_150AD9A0(s32, s32, s32);
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
 /* 18 bytes copied verbatim from an effect into each particle it spawns. */
 typedef struct {
     s16 unk0[9];

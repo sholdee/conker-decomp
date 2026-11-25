@@ -6,7 +6,7 @@
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ vertex pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -28,7 +28,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ vertex pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -46,7 +46,7 @@ typedef struct {
 
 /* Parameter block for the particle emitter func_15151A38. */
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 unk0C;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
@@ -97,7 +97,7 @@ extern f32 D_800AB0E0[];
 extern s32 D_800AB110[];
 extern f32 D_800AB114[];
 
-void func_1515C244(Actor *, vertex *, f32 *, f32 *);
+void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
 void func_1504715C(void *, Actor *);
 void func_1515080C(Emitter080CParams *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
 void func_15152190(Emitter2190Params *, s32 *, f32 *, s32, f32, s32, u8, s32);
@@ -106,7 +106,7 @@ void func_15151A38(Emitter1A38Params *, u8, s32);
 /* Plays sound 0xAA at the actor and spawns three particle effects (via func_1515080C, func_15152190
  * and func_15151A38) at its origin. */
 void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
-    vertex origin;
+    Vec3f origin;
     f32 extent1;
     f32 extent2;
     f32 scale;

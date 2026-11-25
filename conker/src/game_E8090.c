@@ -36,12 +36,12 @@ typedef struct {
 } DecalDesc_150BABE0;
 
 /* matching: the joint owner is passed as s32; a pointer parameter changes register allocation */
-void func_15142314(s32, s32, vertex *);
+void func_15142314(s32, s32, Vec3f *);
 void func_15143E94(s32 arg0, s32 arg1);
 void func_15165F80(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s32 arg6, s32 arg7, s32 arg8, f32 arg9, s32 argA, s32 argB);
 void func_1504715C(Ground_150BABE0 *, Actor *);
-s32 func_15046C80(vertex *, s32, f32, Ground_150BABE0 *);
+s32 func_15046C80(Vec3f *, s32, f32, Ground_150BABE0 *);
 s32 func_1518ABD0(s32, struct210 *, u8);
 
 /*
@@ -50,11 +50,11 @@ s32 func_1518ABD0(s32, struct210 *, u8);
  */
 // matching: each `*(u8 *)&arg2` reloads arg2 from its stack slot; plain or K&R arg2 is kept in a register
 void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
-    vertex pos;
+    Vec3f pos;
     s32 joint;
     s32 yaw;
     Ground_150BABE0 ground;
-    vertex probe;
+    Vec3f probe;
     DecalDesc_150BABE0 desc;
     struct210 *decal;
     f32 size;
@@ -141,9 +141,9 @@ typedef struct ParticleDesc68 {
     /* 0x24 */ f32 scaleRate;
     /* 0x28 */ f32 width;
     /* 0x2C */ f32 height;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ u32 flags;      /* PARTICLE_* */
     /* 0x5C */ struct ParticleViewMask *viewMask;
@@ -165,7 +165,7 @@ typedef struct {
     /* 0x1E */ u8 pad1E[0xA];
     /* 0x28 */ u8 alpha;
     /* 0x29 */ u8 pad29[0x2F];
-    /* 0x58 */ vertex velocity;
+    /* 0x58 */ Vec3f velocity;
     /* 0x64 */ u8 pad64[0x1D];
     /* 0x81 */ u8 unk81;
     /* 0x82 */ u8 pad82[0x26];

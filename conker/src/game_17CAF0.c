@@ -619,7 +619,7 @@ void func_15150D1C(struct Local15150D1CArg *config, u8 arg1, s32 arg2) {
     s16 *hitTriangle;
     struct Vec3F direction;
     s16 triangle[9];
-    struct17 hit;
+    Vec3f hit;
     f32 distance;
     s32 surface;
     s32 count;
@@ -632,7 +632,7 @@ void func_15150D1C(struct Local15150D1CArg *config, u8 arg1, s32 arg2) {
                       100.0f, &direction.x);
         if (func_150AC9C0(config->origin.x, config->origin.y, config->origin.z,
                           direction.x, direction.y, direction.z, NULL, hitTriangle,
-                          &hit.unk0, &hit.unk4, &hit.unk8, &distance, &surface, 0, 0.0f) != 0
+                          &hit.x, &hit.y, &hit.z, &distance, &surface, 0, 0.0f) != 0
             && func_15145C90(surface) != 0 && distance < config->maxDistance) {
             func_151D9B8C(config->unk2C, (func_150ADA68() * config->unk24) + config->unk20,
                           (func_150ADA20() % 156U) + 100, (s32)hitTriangle, &hit,

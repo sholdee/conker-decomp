@@ -114,27 +114,27 @@ typedef struct {
 } GroundHit; // size 0x24
 
 void func_1504715C(GroundHit *hit, Actor *obj);
-s32 func_15046C80(struct17 *pos, s32 arg1, f32 minY, GroundHit *hit);
+s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, GroundHit *hit);
 
 /* Copies obj's position into pos (using unk180 as the height when set); with a hit buffer, also probes the ground below. */
-s32 func_150BA930(struct17 *pos, Actor *obj, GroundHit *hit, s32 arg3) {
-    struct17 probe;
+s32 func_150BA930(Vec3f *pos, Actor *obj, GroundHit *hit, s32 arg3) {
+    Vec3f probe;
 
-    pos->unk0 = obj->x_position;
+    pos->x = obj->x_position;
     if (-9500.0f < obj->unk180) {
-        pos->unk4 = obj->unk180;
+        pos->y = obj->unk180;
     } else {
-        pos->unk4 = obj->y_position;
+        pos->y = obj->y_position;
     }
-    pos->unk8 = obj->z_position;
+    pos->z = obj->z_position;
     if (hit == NULL) {
         return 1;
     }
-    probe.unk0 = pos->unk0;
-    probe.unk4 = pos->unk4 + 100.0f;
-    probe.unk8 = pos->unk8;
+    probe.x = pos->x;
+    probe.y = pos->y + 100.0f;
+    probe.z = pos->z;
     func_1504715C(hit, obj);
-    return func_15046C80(&probe, 0, pos->unk4 - 100.0f, hit);
+    return func_15046C80(&probe, 0, pos->y - 100.0f, hit);
 }
 
 /* Constant handler; always returns 9. */
@@ -144,7 +144,7 @@ s32 func_150BAA00(s32 arg0, s32 arg1) {
 
 /* Spawns effects at obj; when the ground probe hits, also a burst aimed by D_800DBFF0[D_80082FA4].unk380 (degrees). */
 void func_150BAA14(Actor *obj, s32 arg1, s32 arg2) {
-    struct17 pos;
+    Vec3f pos;
     GroundHit hit;
     s32 angle;
     u8 onGround;
@@ -160,9 +160,9 @@ void func_150BAA14(Actor *obj, s32 arg1, s32 arg2) {
 
     if (onGround) {
         angle = (s32)(D_800DBFF0[D_80082FA4].unk380 * D_8009FE64);
-        func_15165F80(-1, (s32)pos.unk0, (s32)(pos.unk4 + 6.0f), (s32)pos.unk8,
+        func_15165F80(-1, (s32)pos.x, (s32)(pos.y + 6.0f), (s32)pos.z,
                       0x19, 0x12, 0, 0xFF, 1);
-        func_1514C678(pos.unk0, pos.unk4, pos.unk8,
+        func_1514C678(pos.x, pos.y, pos.z,
                       (func_150ADA68() * 50.0f) + 40.0f, angle + 60, angle - 60,
                       (func_150ADA20() % 11U) + 30, 5, 0, 0.0f, 0, 0xFF);
     }

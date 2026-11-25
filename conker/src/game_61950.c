@@ -14,9 +14,6 @@ typedef struct GameCommand {
     s16 value;
 } GameCommand;
 
-/* An actor's bone matrix: Actor.unk1D4 points at an array of these. */
-typedef f32 MtxF[4][4];
-
 /*
  * Appends two commands built from the object's unk2E4 angle pair (two s16s):
  * opcode 0x12 with the second angle, opcode 0xE with the negated first one,

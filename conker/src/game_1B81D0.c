@@ -16,11 +16,11 @@ typedef struct {
     /* 0x014 */ f32 elasticity;
     /* 0x018 */ f32 sizeXZ;
     /* 0x01C */ f32 sizeY;
-    /* 0x020 */ vertex rot;
-    /* 0x02C */ vertex scale;
-    /* 0x038 */ vertex pos;
-    /* 0x044 */ vertex vel;
-    /* 0x050 */ vertex rotVel;
+    /* 0x020 */ Vec3f rot;
+    /* 0x02C */ Vec3f scale;
+    /* 0x038 */ Vec3f pos;
+    /* 0x044 */ Vec3f vel;
+    /* 0x050 */ Vec3f rotVel;
     /* 0x05C */ f32 gravity;
     /* 0x060 */ u32 flags;
     /* 0x064 */ s16 lifetime;
@@ -44,7 +44,7 @@ typedef struct {
 
 /* Effect description passed to func_1518CA80 (mode 1: the position is given in floats). */
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ u8 padC[0xA];
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -66,7 +66,7 @@ typedef struct {
 extern Particle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 extern void func_1518CA80(ParticleEffect *, u8);
 extern void func_151429E0(u8, u8 *, u8 *, u8 *);
-extern s32 func_15046C80(vertex *, s32, f32, ParticleFloor *);
+extern s32 func_15046C80(Vec3f *, s32, f32, ParticleFloor *);
 
 /*
  * Particle callback: once the particle is below its floor height, spawns 4-7 splash droplets and
@@ -231,10 +231,10 @@ s32 func_1518B1D8(Particle *particle) {
     return 1;
 }
 
-void func_1518B2A8(vertex *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6);
+void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6);
 
 /* func_1518B2A8 with model 4. */
-void func_1518B264(vertex *pos, f32 radius, f32 size, s32 count, u8 arg4) {
+void func_1518B264(Vec3f *pos, f32 radius, f32 size, s32 count, u8 arg4) {
     func_1518B2A8(pos, radius, size, count, 4, 0xFF, arg4);
 }
 
@@ -243,7 +243,7 @@ void func_1518B264(vertex *pos, f32 radius, f32 size, s32 count, u8 arg4) {
  * is spawned only where func_15046C80 finds a floor below the point, together with 1-4 smaller ones
  * above it; every droplet remembers that floor height (see func_1518AD20). arg5 is unused.
  */
-void func_1518B2A8(vertex *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
+void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
     ParticleSpawn spawn;
     ParticleFloor floor;
     u8 angle;

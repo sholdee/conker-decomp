@@ -25,7 +25,7 @@ typedef struct {
 
 /* Data of the particle source effect (func_150EC6B0). */
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 accumulator;
 } ParticleSourceData;
 

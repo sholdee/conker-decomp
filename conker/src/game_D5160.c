@@ -3,7 +3,7 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_D5160/func_150A7CB0.s")
 // NON-MATCHING: sw/jr in wrong order
-// void func_150A7CB0(f32 mtx[4][4], s32 x, s32 y, s32 z) {
+// void func_150A7CB0(MtxF mtx, s32 x, s32 y, s32 z) {
 //     ((s32)mtx[0][0]) = x;
 //     ((s32)mtx[0][1]) = 0;
 //     ((s32)mtx[0][2]) = 0;

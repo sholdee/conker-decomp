@@ -10,7 +10,7 @@ typedef struct {
     /* 0x0C */ Actor *owner;
     /* 0x10 */ u8 bone;
     /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ struct17 offset;
+    /* 0x14 */ Vec3f offset;
     /* 0x20 */ f32 radius;
     /* 0x24 */ f32 rate;
     /* 0x28 */ s16 lifetime;
@@ -42,9 +42,9 @@ void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 arg3, s32 arg4) {
     desc.ownerId = actor->unique_id;
     desc.owner = actor;
     desc.bone = 1;
-    desc.offset.unk0 = 0.0f;
-    desc.offset.unk4 = 0.0f;
-    desc.offset.unk8 = 0.0f;
+    desc.offset.x = 0.0f;
+    desc.offset.y = 0.0f;
+    desc.offset.z = 0.0f;
     desc.radius = 15.40000057f;
     desc.rate = rate;
     desc.flags = EFFECT_ON_BONE;

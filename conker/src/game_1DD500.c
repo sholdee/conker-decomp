@@ -30,7 +30,7 @@ typedef struct Game1DD500Impact {
     /* 0x02 */ s16 unk02;
     /* 0x04 */ s16 unk04;
     /* 0x06 */ s16 unk06;
-    /* 0x08 */ vertex position;
+    /* 0x08 */ Vec3f position;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -57,10 +57,10 @@ void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                    s32, s32, s32, s32, s32, s32, s32, s32);
 void func_1504715C(Game1DD500Ground *, Actor *);
 s32 func_15134070(Actor *);
-void func_15143134(vertex *, vertex *, Mtx *);
-void func_15153F18(Game1DD500Impact *, vertex *, Game1DD500Ground *, s32, s32);
+void func_15143134(Vec3f *, Vec3f *, Mtx *);
+void func_15153F18(Game1DD500Impact *, Vec3f *, Game1DD500Ground *, s32, s32);
 extern Game1DD500Profile D_800A3FD8[];
-extern vertex D_800AA120;
+extern Vec3f D_800AA120;
 
 /* Joint matrix of an actor; include/ types the array as struct255 *. */
 #define JOINT_MTX(actor, joint) (&((Mtx *)(actor)->unk1D4)[joint])
@@ -244,7 +244,7 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
 
 /* Per-particle motion block at 0x110 of a particle object. */
 typedef struct Game1DD500Motion {
-    /* 0x00 */ vertex velocity;
+    /* 0x00 */ Vec3f velocity;
     /* 0x0C */ f32 gravity;
     /* 0x10 */ u8 phaseWidth;     /* oscillator angles */
     /* 0x11 */ u8 phaseHeight;
@@ -270,8 +270,8 @@ typedef struct Game1DD500Particle {
     /* 0x01E */ u8 pad1E[0xE];
     /* 0x02C */ f32 width;
     /* 0x030 */ f32 height;
-    /* 0x034 */ vertex position;
-    /* 0x040 */ vertex previous;
+    /* 0x034 */ Vec3f position;
+    /* 0x040 */ Vec3f previous;
     /* 0x04C */ u8 pad4C[0xC];
     /* 0x058 */ s32 flags;
     /* 0x05C */ u8 alpha;
@@ -388,7 +388,7 @@ Game1DD500Task *func_151B09BC(Actor *actor, Actor *other, s16 lifetime, u8 arg3,
 typedef struct Game1DD500Mount {
     /* 0x0 */ u8 joint;
     /* 0x1 */ u8 pad1[3];
-    /* 0x4 */ vertex offset;
+    /* 0x4 */ Vec3f offset;
 } Game1DD500Mount;
 
 void func_1513F680(Game1DD500Particle *, u8, u8, u8, u8);
@@ -427,7 +427,7 @@ void func_151B0B88(Game1DD500Task *task) {
                                                              : JOINT_MTX(emitter->owner, D_800AA12C[i].joint));
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
-                        vertex *velocity = &slot->particle->motion.velocity;
+                        Vec3f *velocity = &slot->particle->motion.velocity;
 
                         velocity->x = (slot->particle->position.x - slot->particle->previous.x) * D_800BE9A8;
                         velocity->y = 0.0f;

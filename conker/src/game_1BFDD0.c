@@ -58,7 +58,7 @@ void func_15192920(Actor *object) {
     }
 }
 
-extern s32 func_1515C0F8(Actor *, vertex **);
+extern s32 func_1515C0F8(Actor *, Vec3f **);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
 extern Particle1BFDD0 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
@@ -69,7 +69,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
     ParticleDesc desc;
     u8 side;
     f32 drag;
-    vertex *dir;
+    Vec3f *dir;
     f32 speed;
     Particle1BFDD0 *particle;
 
@@ -150,8 +150,8 @@ Effect1BFDD0 *func_15192D48(Actor *object, s16 type, u8 arg2, s32 arg3) {
     return effect;
 }
 
-extern void func_15143134(const vertex *, vertex *, Mtx *);
-extern void func_15143794(s16 yaw, s16 pitch, f32 speed, vertex *out);
+extern void func_15143134(const Vec3f *, Vec3f *, Mtx *);
+extern void func_15143794(s16 yaw, s16 pitch, f32 speed, Vec3f *out);
 
 /* Update of func_15192D48's effect: emits 0.79-1.99 particles per D_800BE9A4 tick from bone 1 of the
  * object, flung out to either side. */
@@ -162,7 +162,7 @@ void func_15192DF0(Effect1BFDD0 *effect) {
     s16 yaw;
     f32 drag;
     s32 rand;
-    vertex offset;
+    Vec3f offset;
     Particle1BFDD0 *particle;
 
     data = &effect->data;

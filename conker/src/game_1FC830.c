@@ -3,19 +3,18 @@
 #include "variables.h"
 #include "effects.h"
 
-typedef struct { f32 x, y, z; } TrailVec3;
 typedef struct { f32 x, z; } TrailVec2;
 
 extern f32 D_800D9860;
 extern f32 func_15144AA8(s32);
-extern struct17 *func_15144B34(s32);
-extern s32 func_15046C80(struct17 *, s32, f32, f32 *);
-f32 func_15143E64(struct17 *);
+extern Vec3f *func_15144B34(s32);
+extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
+f32 func_15143E64(Vec3f *);
 struct260 *func_151CEAAC(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
 
 /* One point of a ribbon trail. */
 typedef struct {
-    /* 0x00 */ TrailVec3 pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ u8 pad0C[8];
     /* 0x14 */ f32 width;
     /* 0x18 */ TrailVec2 offset; /* half-width vector across the ribbon */
@@ -58,8 +57,8 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 /* Draws the ribbon from its newest point back to its oldest, one quad per segment. */
 Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     RibbonInfo *info;
-    TrailVec3 nextPos;
-    TrailVec3 curPos;
+    Vec3f nextPos;
+    Vec3f curPos;
     s32 cur;
     s32 next;
     RibbonPoint *points;
@@ -196,7 +195,7 @@ typedef struct {
 
 /* Data of the ground effect spawned by func_151CF898. */
 typedef struct {
-    struct17 pos;
+    Vec3f pos;
     f32 unkC;
 } GroundEffectData;
 
@@ -209,8 +208,8 @@ typedef struct {
  * the camera of the object's player, within 40 degrees either side of the camera's yaw. */
 void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
     Camera *player;
-    struct17 spawnPos;
-    struct17 *camPos;
+    Vec3f spawnPos;
+    Vec3f *camPos;
     f32 yaw;
     f32 angle;
     f32 distance;
@@ -225,12 +224,12 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
             angle = ((func_150ADA68() * 80.0f) + (yaw - 40.0f)) * 0.01745329238f;
             distance = func_150ADA68() * 2000.0f;
 
-            spawnPos.unk0 = camPos->unk0 - (sinf(angle) * distance);
-            spawnPos.unk4 = probeY;
-            spawnPos.unk8 = camPos->unk8 - (cosf(angle) * distance);
+            spawnPos.x = camPos->x - (sinf(angle) * distance);
+            spawnPos.y = probeY;
+            spawnPos.z = camPos->z - (cosf(angle) * distance);
 
             if (func_15046C80(&spawnPos, 0, arg2, &D_800D9860) != 0) {
-                spawnPos.unk4 = D_800D9860;
+                spawnPos.y = D_800D9860;
                 data.pos = spawnPos;
                 data.unkC = 0.0f;
 
@@ -246,7 +245,7 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
 
 /* Spawn request for func_15151A38. */
 typedef struct {
-    /* 0x00 */ struct17 pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 unk0C;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
@@ -297,11 +296,11 @@ typedef struct ParticleSpawn78 {
     /* 0x04 */ f32 elasticity;
     /* 0x08 */ f32 sizeXZ;
     /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
+    /* 0x10 */ Vec3f rot;
+    /* 0x1C */ Vec3f scale;
+    /* 0x28 */ Vec3f pos;
+    /* 0x34 */ Vec3f vel;
+    /* 0x40 */ Vec3f rotVel;
     /* 0x4C */ f32 gravity;
     /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;
@@ -333,7 +332,7 @@ typedef struct ParticleSpawn78 {
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ struct17 pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -351,32 +350,32 @@ typedef struct {
     u8 unk0[0x24];
 } FloorInfo;
 
-extern struct17 D_800AAEEC[];
+extern Vec3f D_800AAEEC[];
 // matching: the model goes in as s32; a struct255 * argument changes the temp registers
 void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-void func_15143134(struct17 *, struct17 *, Mtx *);
-void func_15143794(s16, s16, f32, struct17 *);
+void func_15143134(Vec3f *, Vec3f *, Mtx *);
+void func_15143794(s16, s16, f32, Vec3f *);
 s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 void func_15150D1C(Spawn15150D1C *, u8, s32);
-void func_151A9834(struct17 *, f32, f32, FloorInfo *, s32, s32, s8 *, u8, s32);
+void func_151A9834(Vec3f *, f32, f32, FloorInfo *, s32, s32, s8 *, u8, s32);
 void func_15151A38(Spawn15151A38 *, u8, s32);
 void func_1504715C(FloorInfo *, Actor *);
 
 /* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
  * spin, plus three more effects at 200 units above it. */
 void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
-    vertex vecB;
-    struct17 pos;
-    struct17 vecA;
-    struct17 vecC;
+    Vec3f vecB;
+    Vec3f pos;
+    Vec3f vecA;
+    Vec3f vecC;
     u8 i;
 
-    pos.unk0 = obj->x_position;
-    pos.unk4 = obj->y_position + 200.0f;
-    pos.unk8 = obj->z_position;
+    pos.x = obj->x_position;
+    pos.y = obj->y_position + 200.0f;
+    pos.z = obj->z_position;
     if (obj->unk1D4) {
-        func_1503F404((s32)obj->unk1D4, &vecA.unk0, &vecA.unk4, &vecA.unk8, &vecB.x, &vecB.y, &vecB.z,
-                      &vecC.unk0, &vecC.unk4, &vecC.unk8);
+        func_1503F404((s32)obj->unk1D4, &vecA.x, &vecA.y, &vecA.z, &vecB.x, &vecB.y, &vecB.z,
+                      &vecC.x, &vecC.y, &vecC.z);
         {
             ParticleSpawn78 piece;
             const s32 models[7] = { 0x6F, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75 };
@@ -494,7 +493,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
 
             func_1504715C(&floor, obj);
             flag = 2;
-            func_151A9834(&pos, pos.unk4 - 2000.0f, 200.0f, &floor, (func_150ADA20() & 3) + 7, 0, &flag, arg1, arg2);
+            func_151A9834(&pos, pos.y - 2000.0f, 200.0f, &floor, (func_150ADA20() & 3) + 7, 0, &flag, arg1, arg2);
         }
     }
 }
@@ -569,8 +568,8 @@ void func_151D0128(StripEffect *effect) {
     }
 }
 
-extern struct17 D_800AAF5C[];
-extern struct17 D_800AAF74;
+extern Vec3f D_800AAF5C[];
+extern Vec3f D_800AAF74;
 extern u8 D_800AAF80[];
 extern u8 D_80091154[];
 Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
@@ -582,19 +581,19 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     Vtx *vtx;
     Actor *owner;
     u8 update;
-    struct17 *camPos;
+    Vec3f *camPos;
     f32 midX;
     f32 midY;
     f32 midZ;
     f32 side[3];
     f32 taper;
-    struct17 from;
-    struct17 to;
-    struct17 diff;
+    Vec3f from;
+    Vec3f to;
+    Vec3f diff;
     f32 stepX;
     f32 stepY;
     f32 stepZ;
-    struct17 pos;
+    Vec3f pos;
     f32 ang;
     f32 progress;
     f32 dist;
@@ -628,16 +627,16 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     gfx = func_1513F4E4(gfx, 0x3B, &update);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, data->alpha, &update);
     gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].cycle1 | D_800A4AC8[3].cycle2, &update);
-    diff.unk0 = to.unk0 - from.unk0;
-    diff.unk4 = to.unk4 - from.unk4;
-    diff.unk8 = to.unk8 - from.unk8;
+    diff.x = to.x - from.x;
+    diff.y = to.y - from.y;
+    diff.z = to.z - from.z;
     dist = func_15143E64(&diff);
-    midX = diff.unk0 * 0.5f + from.unk0 - camPos->unk0;
-    midY = diff.unk4 * 0.5f + from.unk4 - camPos->unk4;
-    midZ = diff.unk8 * 0.5f + from.unk8 - camPos->unk8;
-    offsetX = diff.unk4 * midZ - midY * diff.unk8;
-    offsetY = diff.unk8 * midX - midZ * diff.unk0;
-    offsetZ = diff.unk0 * midY - midX * diff.unk4;
+    midX = diff.x * 0.5f + from.x - camPos->x;
+    midY = diff.y * 0.5f + from.y - camPos->y;
+    midZ = diff.z * 0.5f + from.z - camPos->z;
+    offsetX = diff.y * midZ - midY * diff.z;
+    offsetY = diff.z * midX - midZ * diff.x;
+    offsetZ = diff.x * midY - midX * diff.y;
     if (offsetX * offsetX + offsetY * offsetY + offsetZ * offsetZ == 0.0f) {
         side[0] = 0.0f;
         side[1] = 0.0f;
@@ -648,9 +647,9 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
         side[1] = offsetY * amp;
         side[2] = offsetZ * amp;
     }
-    stepX = diff.unk0 * 0.1666666716f;
-    stepY = diff.unk4 * 0.1666666716f;
-    stepZ = diff.unk8 * 0.1666666716f;
+    stepX = diff.x * 0.1666666716f;
+    stepY = diff.y * 0.1666666716f;
+    stepZ = diff.z * 0.1666666716f;
     if (dist < 20.0f) {
         amp = 0.0f;
     } else if (dist < 70.0f) {
@@ -662,9 +661,9 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     pos = from; progress = 0.0f; ang = 0.0f; tex = 0.0f; i = 0; do {
         taper = 1.0f - sinf(ang) * amp;
         offsetX = side[0] * taper;
-        vtx->v.ob[0] = (s32)(offsetX + pos.unk0);
-        vtx->v.ob[1] = (s32)(side[1] * taper + pos.unk4);
-        vtx->v.ob[2] = (s32)(side[2] * taper + pos.unk8);
+        vtx->v.ob[0] = (s32)(offsetX + pos.x);
+        vtx->v.ob[1] = (s32)(side[1] * taper + pos.y);
+        vtx->v.ob[2] = (s32)(side[2] * taper + pos.z);
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
@@ -672,9 +671,9 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
         vtx->v.tc[0] = 0;
         vtx->v.tc[1] = (s32)tex;
         vtx++;
-        vtx->v.ob[0] = (s32)(pos.unk0 - offsetX);
-        vtx->v.ob[1] = (s32)(pos.unk4 - side[1] * taper);
-        vtx->v.ob[2] = (s32)(pos.unk8 - side[2] * taper);
+        vtx->v.ob[0] = (s32)(pos.x - offsetX);
+        vtx->v.ob[1] = (s32)(pos.y - side[1] * taper);
+        vtx->v.ob[2] = (s32)(pos.z - side[2] * taper);
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
@@ -684,11 +683,11 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
         vtx++;
         taper = 1.0f - sinf(ang + 0.5235987902f) * amp;
         offsetX = side[0] * taper;
-        vtx->v.ob[0] = (s32)(pos.unk0 + stepX - offsetX);
+        vtx->v.ob[0] = (s32)(pos.x + stepX - offsetX);
         offsetY = side[1] * taper;
-        vtx->v.ob[1] = (s32)(pos.unk4 + stepY - offsetY);
+        vtx->v.ob[1] = (s32)(pos.y + stepY - offsetY);
         offsetZ = side[2] * taper;
-        vtx->v.ob[2] = (s32)(pos.unk8 + stepZ - offsetZ);
+        vtx->v.ob[2] = (s32)(pos.z + stepZ - offsetZ);
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
@@ -698,9 +697,9 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
         vtx++;
         // matching: dead store; its two variable reads shift where uopt splits the basic block
         unused = offsetX + offsetY;
-        vtx->v.ob[0] = (s32)(pos.unk0 + stepX + offsetX);
-        vtx->v.ob[1] = (s32)(pos.unk4 + stepY + offsetY);
-        vtx->v.ob[2] = (s32)(pos.unk8 + stepZ + offsetZ);
+        vtx->v.ob[0] = (s32)(pos.x + stepX + offsetX);
+        vtx->v.ob[1] = (s32)(pos.y + stepY + offsetY);
+        vtx->v.ob[2] = (s32)(pos.z + stepZ + offsetZ);
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
@@ -712,9 +711,9 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
         gSPVertex(gfx++, vtx - 4, 4, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
         gSP1Triangle(gfx++, 0, 2, 3, 0);
-        pos.unk0 += stepX;
-        pos.unk4 += stepY;
-        pos.unk8 += stepZ;
+        pos.x += stepX;
+        pos.y += stepY;
+        pos.z += stepZ;
         progress += 0.1666666716f;
         ang += 0.5235987902f;
         tex += 341.3333435f;
@@ -761,14 +760,14 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
 /* Emission shape shared by func_1514FF44, func_15153CCC, func_1514F6E8 and func_1514F808. */
 typedef struct {
     /* 0x00 */ u8 unk0;
-    /* 0x04 */ struct17 dir;
-    /* 0x10 */ struct17 unk10;
-    /* 0x1C */ struct17 unk1C;
+    /* 0x04 */ Vec3f dir;
+    /* 0x10 */ Vec3f unk10;
+    /* 0x1C */ Vec3f unk1C;
     /* 0x28 */ f32 unk28;
 } EmitShape; /* 0x2C */
 
 typedef struct {
-    struct17 unk0;
+    Vec3f unk0;
     s16 unkC;
     s16 unkE;
     f32 unk10;
@@ -792,7 +791,7 @@ typedef struct {
 } Spawn1514FF44; /* 0x40 */
 
 typedef struct {
-    struct17 unk0;
+    Vec3f unk0;
     f32 unkC;
     f32 unk10;
     f32 unk14;
@@ -817,11 +816,11 @@ typedef struct {
 
 extern f32 D_800AAF84[3];
 extern f32 D_800AAF90[3];
-extern void func_15145EA4(f32 **, struct17 **, Mtx *, s32);
+extern void func_15145EA4(f32 **, Vec3f **, Mtx *, s32);
 extern void func_1514FF44(EmitShape *, Spawn1514FF44 *, FloorInfo *, u8, s32);
 extern void func_15153CCC(EmitShape *, Spawn15153CCC *, FloorInfo *, u8, s32);
 extern s32 func_1514F6E8(EmitShape *);
-extern void func_1514F808(EmitShape *, f32, struct17 *);
+extern void func_1514F808(EmitShape *, f32, Vec3f *);
 /* Partial view of the particle func_15130280 creates. */
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];
@@ -833,34 +832,34 @@ extern CarrierParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 /* Emits two particle bursts along the line between two of the object's model points, and sometimes
  * 5-10 more particles that each carry a func_151CEAAC effect. */
 void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
-    vertex pos;
-    struct17 dir;
+    Vec3f pos;
+    Vec3f dir;
     FloorInfo floor;
     EmitShape shape;
 
     if (obj->unk1D4 != NULL) {
         {
             f32 *srcs[2];
-            struct17 *dsts[2];
+            Vec3f *dsts[2];
 
             srcs[0] = D_800AAF84;
             srcs[1] = D_800AAF90;
             dsts[0] = &pos;
             dsts[1] = &dir;
             func_15145EA4(srcs, dsts, (Mtx *)obj->unk1D4 + 2, 2);
-            dir.unk0 -= pos.x;
-            dir.unk4 -= pos.y;
-            dir.unk8 -= pos.z;
+            dir.x -= pos.x;
+            dir.y -= pos.y;
+            dir.z -= pos.z;
         }
         func_1504715C(&floor, obj);
         shape.unk0 = 0;
         shape.dir = dir;
-        /* D_800A5480 (an f32 in variables.h) starts a zero vector. */
-        shape.unk10 = shape.unk1C = *(struct17 *)&D_800A5480;
+        /* Start from the zero vector D_800A5480. */
+        shape.unk10 = shape.unk1C = D_800A5480;
         {
             Spawn1514FF44 emitA;
 
-            emitA.unk0 = *(struct17 *)&pos; // TODO(vectors): struct17/vertex mix
+            emitA.unk0 = *(Vec3f *)&pos; // TODO(vectors): struct17/vertex mix
             emitA.unkC = 6;
             emitA.unkE = 8;
             emitA.unk10 = 0.03999999911f;
@@ -884,7 +883,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
         {
             Spawn15153CCC emitB;
 
-            emitB.unk0 = *(struct17 *)&pos; // TODO(vectors): struct17/vertex mix
+            emitB.unk0 = *(Vec3f *)&pos; // TODO(vectors): struct17/vertex mix
             emitB.unkC = 10.0f;
             emitB.unk10 = 25.0f;
             emitB.unk14 = 1.253000021f;
@@ -931,7 +930,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
             spawn.alpha = 0;
             spawn.brightness = 0xFF;
             spawn.pos = pos;
-            spawn.offset = *(vertex *)&D_800A5480;
+            spawn.offset = D_800A5480;
             spawn.scaleStart = 1;
             spawn.flags = 0xC007;
             spawn.scaleRate = 1.0f;
@@ -987,7 +986,7 @@ void func_151D0F34(CarrierParticle *particle) {
 }
 
 /* Point functions: each writes a point of the object to out and returns whether it has one. */
-extern s32 (*D_8008FC30[])(Actor *obj, struct17 *out);
+extern s32 (*D_8008FC30[])(Actor *obj, Vec3f *out);
 
 /* Data of the tracker effect: follows one point of its owner and leaves a trail behind it. */
 typedef struct {
@@ -995,9 +994,9 @@ typedef struct {
     /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ FollowerActor *trail; /* spawned by func_151D1448 */
-    /* 0x0C */ struct17 prevPos;
-    /* 0x18 */ struct17 pos;
-    /* 0x24 */ struct17 delta;
+    /* 0x0C */ Vec3f prevPos;
+    /* 0x18 */ Vec3f pos;
+    /* 0x24 */ Vec3f delta;
     /* 0x30 */ f32 dist; /* distance moved this frame */
     /* 0x34 */ u8 pointFn; /* index into D_8008FC30 */
 } TrackerData;
@@ -1017,11 +1016,11 @@ void func_151D0F60(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
     data.trail = NULL;
 
     if (D_8008FC30[pointFn](obj, &data.pos) == 0) {
-        data.pos = *(struct17 *)&D_800A5480;
+        data.pos = D_800A5480;
     }
 
     data.prevPos = data.pos;
-    data.delta = *(struct17 *)&D_800A5480;
+    data.delta = D_800A5480;
     data.dist = 0.0f;
     data.pointFn = pointFn;
 
@@ -1032,29 +1031,29 @@ void func_151D0F60(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
 }
 
 /* Point function: 8 units above the object's unk180 height, at its x/z. */
-s32 func_151D1074(Actor *obj, struct17 *out) {
-    out->unk0 = obj->x_position;
-    out->unk4 = obj->unk180 + 8.0f;
-    out->unk8 = obj->z_position;
+s32 func_151D1074(Actor *obj, Vec3f *out) {
+    out->x = obj->x_position;
+    out->y = obj->unk180 + 8.0f;
+    out->z = obj->z_position;
     return TRUE;
 }
 
-s32 func_151D10E4(Actor *obj, struct17 *out, u8 which);
+s32 func_151D10E4(Actor *obj, Vec3f *out, u8 which);
 
 /* Point function: the object's model point 0. */
-s32 func_151D10A4(Actor *obj, struct17 *out) {
+s32 func_151D10A4(Actor *obj, Vec3f *out) {
     return func_151D10E4(obj, out, 0);
 }
 
 /* Point function: the object's model point 1. */
-s32 func_151D10C4(Actor *obj, struct17 *out) {
+s32 func_151D10C4(Actor *obj, Vec3f *out) {
     return func_151D10E4(obj, out, 1);
 }
 
-extern struct17 D_800AAF9C[];
+extern Vec3f D_800AAF9C[];
 
 /* Writes model point D_800AAF9C[which] of the object, in world space, to out. */
-s32 func_151D10E4(Actor *obj, struct17 *out, u8 which) {
+s32 func_151D10E4(Actor *obj, Vec3f *out, u8 which) {
     s32 joints = (s32)obj->unk1D4;
 
     if (joints == 0) {
@@ -1091,9 +1090,9 @@ void func_151D1138(TrackerEffect *effect) {
         finished = TRUE;
     }
 
-    data->delta.unk0 = data->pos.unk0 - data->prevPos.unk0;
-    data->delta.unk4 = data->pos.unk4 - data->prevPos.unk4;
-    data->delta.unk8 = data->pos.unk8 - data->prevPos.unk8;
+    data->delta.x = data->pos.x - data->prevPos.x;
+    data->delta.y = data->pos.y - data->prevPos.y;
+    data->delta.z = data->pos.z - data->prevPos.z;
     data->dist = func_15143E64(&data->delta);
 
     state = func_1510F8CC(owner->unk184);
@@ -1148,7 +1147,7 @@ void func_151D13E0(TrackerEffect *effect) {
 
 /* Spawn description passed to func_15147A80 (see game_105FC0.c's TrailSpawn). */
 typedef struct {
-    /* 0x00 */ struct17 pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 unkC;
     /* 0x0E */ s16 unkE;
     /* 0x10 */ s32 unk10;

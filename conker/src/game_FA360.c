@@ -5,8 +5,8 @@
 
 /* Spawn description consumed by func_150CCEB0 (filled by func_15152874). */
 typedef struct {
-    /* 0x00 */ vertex pos;
-    /* 0x0C */ vertex vel;
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ Vec3f vel;
     /* 0x18 */ f32 drag;
     /* 0x1C */ f32 gravity;
     /* 0x20 */ u8 color[4];
@@ -17,10 +17,10 @@ typedef struct {
 
 /* Per-effect motion state of a drifting quad (lives at Effect + 0x110). */
 typedef struct {
-    /* 0x00 */ vertex vel;
+    /* 0x00 */ Vec3f vel;
     /* 0x0C */ f32 gravity;
     /* 0x10 */ f32 drag;
-    /* 0x14 */ vertex spin; /* added to Effect.dir every frame */
+    /* 0x14 */ Vec3f spin; /* added to Effect.dir every frame */
     /* 0x20 */ u8 pad20[4];
     /* 0x24 */ f32 swayLength;
     /* 0x28 */ f32 swayLengthRate;
@@ -36,9 +36,9 @@ typedef struct {
     /* 0x000 */ u8 pad0[0x2C];
     /* 0x02C */ f32 halfWidth;
     /* 0x030 */ f32 halfHeight;
-    /* 0x034 */ vertex pos;
-    /* 0x040 */ vertex dir;   /* rotation angles for func_150A8050 */
-    /* 0x04C */ vertex sway;  /* offset added to pos while falling */
+    /* 0x034 */ Vec3f pos;
+    /* 0x040 */ Vec3f dir;   /* rotation angles for func_150A8050 */
+    /* 0x04C */ Vec3f sway;  /* offset added to pos while falling */
     /* 0x058 */ u8 pad58[0x68];
     /* 0x0C0 */ Vtx_t template[4];
     /* 0x100 */ Vtx_t *buffers[4]; /* each holds two copies of the 4-vertex quad */
@@ -144,14 +144,14 @@ s32 func_150CD17C(Effect *effect) {
 }
 
 extern void func_151D5D60(Vtx_t **buffers, s16 index, s32 size, Vtx_t **vertices, u8 *fresh);
-void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* Draw: fills this frame's vertex buffer with the quad, rotated by dir and placed at pos (plus sway while falling). */
 Vtx_t *func_150CD59C(Effect *effect, s16 bufferIndex) {
     s32 pad; // matching: unused stack slot
     Vtx_t *vertices;
     Vtx_t *result;
-    f32 mtx[4][4];
+    MtxF mtx;
     f32 corners[4][3];
     u8 i;
     u8 fresh;
@@ -209,7 +209,7 @@ Vtx_t *func_150CD59C(Effect *effect, s16 bufferIndex) {
 typedef struct {
     /* 0x00 */ s32 countBase;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ vertex pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ s16 yawBase; /* binary angles (256 per turn) */
     /* 0x16 */ s16 yawRange;
     /* 0x18 */ s16 pitchBase;

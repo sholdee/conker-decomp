@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* Trail types (see game_175250.c). */
 
 /* Spawn description passed to func_15147DA0 (first argument). */

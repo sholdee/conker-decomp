@@ -157,12 +157,6 @@ void func_15108850(struct226 *light) {
     }
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
-
 f32 sinf(f32);
 void func_15108B80(DynModel *model);
 void func_15108BC0(DynModel *model);
@@ -233,7 +227,7 @@ s32 func_15108C38(DynModel *model) {
 
 /* Draw function 1: builds this frame's lamp matrix, swung, raised to its height and scaled by 0.157. */
 s32 func_15108D24(DynModel *model, s32 viewport) {
-    f32 mtx[4][4];
+    MtxF mtx;
     LampData *lamp;
 
     lamp = LAMP_DATA(model);
@@ -252,7 +246,7 @@ s32 func_15108D24(DynModel *model, s32 viewport) {
     return 1;
 }
 
-void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 
 /*
@@ -264,7 +258,7 @@ s32 func_15108E10(struct225 *effect) {
     DynModel *model;
     LampData *lamp;
     Vec3f end;
-    f32 mtx[4][4];
+    MtxF mtx;
     Vec3f pad2; // matching: unused stack slots
     Vec3f hit;
 
@@ -358,16 +352,16 @@ void func_151090DC(void) {
     func_15169260(&target, 2, 0, 0x1E);
 }
 
-struct17 *func_15144B34(s32);
+Vec3f *func_15144B34(s32);
 
 /*
  * Draw function 4: builds the lamp matrix and recomputes the texture coordinates of the 16 vertices of
  * `viewport`'s buffer, projected on the horizontal axis perpendicular to the camera.
  */
 s32 func_15109120(DynModel *model, s16 viewport) {
-    f32 mtx[4][4];
+    MtxF mtx;
     LampData *lamp;
-    struct17 *camera;
+    Vec3f *camera;
     f32 dirX;
     f32 dirZ;
     f32 x;
@@ -395,12 +389,12 @@ s32 func_15109120(DynModel *model, s16 viewport) {
     mtx[2][2] *= 0.157f;
     guMtxF2L(mtx, &model->mtx[D_800BE9C0]);
     camera = func_15144B34(viewport);
-    camX = camera->unk0;
-    if (0.0001f < fabsf(camX) || 0.0001f < fabsf(camera->unk4)) {
+    camX = camera->x;
+    if (0.0001f < fabsf(camX) || 0.0001f < fabsf(camera->y)) {
         f32 camZ;
         f32 invLen;
 
-        camZ = camera->unk8;
+        camZ = camera->z;
         invLen = 1.0f / sqrtf(camX * camX + camZ * camZ);
         dirX = camZ * invLen;
         dirZ = -camX * invLen;

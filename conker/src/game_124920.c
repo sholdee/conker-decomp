@@ -5,28 +5,28 @@
 
 extern f32 D_800A1BD8;
 extern f32 sinf(f32);
-extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
-extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
+extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
+extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 
 /* Per-object state of the projectile spawned by func_150F7470 (updated by func_150F78B4). */
 typedef struct {
     /* 0x00 */ u8 pad0[4];
     /* 0x04 */ f32 unk4;
     /* 0x08 */ u8 pad8[0x30];
-    /* 0x38 */ struct17 dir;
+    /* 0x38 */ Vec3f dir;
     /* 0x44 */ u8 pad44[0x20];
     /* 0x64 */ s32 unk64;
     /* 0x68 */ f32 timeLeft;
     /* 0x6C */ f32 speed;
     /* 0x70 */ u8 flags; /* 1: impact effect, 2: ray-test the path, 4: see func_150F78B4 */
     /* 0x71 */ u8 pad71[3];
-    /* 0x74 */ struct17 unk74;
-    /* 0x80 */ struct17 unk80;
+    /* 0x74 */ Vec3f unk74;
+    /* 0x80 */ Vec3f unk80;
     /* 0x8C */ f32 trailDist;
     /* 0x90 */ f32 trailAge;
     /* 0x94 */ f32 trailAgeStep;
-    /* 0x98 */ struct17 trailPos;
-    /* 0xA4 */ struct17 trailStep;
+    /* 0x98 */ Vec3f trailPos;
+    /* 0xA4 */ Vec3f trailStep;
     /* 0xB0 */ s8 unkB0;
     /* 0xB1 */ u8 padB1[3];
 } ProjectileState;
@@ -34,7 +34,7 @@ typedef struct {
 /* Per-object state of the effect spawned by func_150F802C (updated by func_150F81BC). */
 typedef struct {
     /* 0x00 */ f32 *target; /* position (3 floats), then 3 more floats copied to unk20 */
-    /* 0x04 */ struct17 trailPos;
+    /* 0x04 */ Vec3f trailPos;
     /* 0x10 */ f32 trailAge;
 } FollowState;
 
@@ -49,8 +49,8 @@ typedef struct {
     /* 0x024 */ f32 unk24;
     /* 0x028 */ f32 unk28;
     /* 0x02C */ u8 pad2C[0xC];
-    /* 0x038 */ struct17 pos;
-    /* 0x044 */ struct17 vel;
+    /* 0x038 */ Vec3f pos;
+    /* 0x044 */ Vec3f vel;
     /* 0x050 */ u8 pad50[0x2C];
     /* 0x07C */ Actor *owner;
     /* 0x080 */ u8 pad80[8];
@@ -62,21 +62,21 @@ typedef struct {
     } state;
 } EffectObj;
 
-extern s32 func_151C4B0C(s32, ProjectileState *, struct17 *, struct17 *, f32 *, f32, u8, s32, struct17 *, u8 *, s32,
+extern s32 func_151C4B0C(s32, ProjectileState *, Vec3f *, Vec3f *, f32 *, f32, u8, s32, Vec3f *, u8 *, s32,
                          f32, Actor *, s32, u8, u8, s32, u8);
-extern void func_15145974(struct17 *, f32 *, f32 *);
+extern void func_15145974(Vec3f *, f32 *, f32 *);
 EffectObj *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 
 /* Spawns a projectile at `pos`, aimed along `aim` (or at `target` when arg2 is set). */
-void func_150F7470(vertex *pos, struct17 *aim, s32 arg2, struct17 *target, u8 targetIsDir, s32 arg5, f32 speed,
+void func_150F7470(Vec3f *pos, Vec3f *aim, s32 arg2, Vec3f *target, u8 targetIsDir, s32 arg5, f32 speed,
                    f32 arg7, f32 arg8, Actor *owner, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14,
                    s8 arg15, s32 sound, u8 arg17, u8 arg18, s32 arg19) {
     ProjectileState state;
     ParticleSpawn spawn;
     EffectObj *obj;
-    struct17 aimDir;
+    Vec3f aimDir;
     u8 hasAimDir;
-    struct17 targetDir;
+    Vec3f targetDir;
     u8 hasTargetDir;
 
     hasAimDir = FALSE;
@@ -111,11 +111,11 @@ void func_150F7470(vertex *pos, struct17 *aim, s32 arg2, struct17 *target, u8 ta
     state.trailAge = 0.0f;
     state.trailDist = 0.0f;
     state.trailAgeStep = 70.0f * arg7;
-    state.trailPos = *(struct17 *)pos; // TODO(vectors): struct17/vertex mix
+    state.trailPos = *(Vec3f *)pos; // TODO(vectors): struct17/vertex mix
     state.speed = speed;
-    state.trailStep.unk0 = state.dir.unk0 * 70.0f;
-    state.trailStep.unk4 = state.dir.unk4 * 70.0f;
-    state.trailStep.unk8 = state.dir.unk8 * 70.0f;
+    state.trailStep.x = state.dir.x * 70.0f;
+    state.trailStep.y = state.dir.y * 70.0f;
+    state.trailStep.z = state.dir.z * 70.0f;
     state.flags |= (state.unk4 > 150.0f) ? 1 : 0;
     spawn.radius = 1.0f;
     spawn.elasticity = 1.0f;
@@ -127,10 +127,10 @@ void func_150F7470(vertex *pos, struct17 *aim, s32 arg2, struct17 *target, u8 ta
     spawn.scale.z = 1.0f;
     spawn.rot.z = 0.0f;
     spawn.pos = *pos;
-    spawn.vel.x = state.dir.unk0 * speed;
-    spawn.vel.y = state.dir.unk4 * speed;
-    spawn.vel.z = state.dir.unk8 * speed;
-    spawn.rotVel = *(vertex *)&D_800A5480;
+    spawn.vel.x = state.dir.x * speed;
+    spawn.vel.y = state.dir.y * speed;
+    spawn.vel.z = state.dir.z * speed;
+    spawn.rotVel = D_800A5480;
     spawn.gravity = 0.0f;
     spawn.flags = 0x120;
     spawn.lifetime = 300;
@@ -175,9 +175,9 @@ typedef struct ParticleDef54 {
     /* 0x10 */ u8 rgba[4];
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
-    /* 0x1C */ vertex pos;
-    /* 0x28 */ vertex rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
-    /* 0x34 */ vertex scale;
+    /* 0x1C */ Vec3f pos;
+    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
     /* 0x45 */ u8 unk45;
@@ -191,8 +191,8 @@ typedef struct ParticleDef54 {
 
 /* Per-object state of a puff spawned by func_1513D2F0 (updated by func_150F7E20). */
 typedef struct {
-    /* 0x00 */ struct17 unk0;
-    /* 0x0C */ struct17 unkC;
+    /* 0x00 */ Vec3f unk0;
+    /* 0x0C */ Vec3f unkC;
     /* 0x18 */ f32 timeLeft;
     /* 0x1C */ f32 phase;
     /* 0x20 */ f32 phaseSpeed;
@@ -215,11 +215,11 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 unk00;
     /* 0x04 */ f32 unk04;
-    /* 0x08 */ struct17 pos;
-    /* 0x14 */ struct17 unk14;
-    /* 0x20 */ struct17 unk20;
-    /* 0x2C */ struct17 unk2C;
-    /* 0x38 */ struct17 unk38;
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ Vec3f unk14;
+    /* 0x20 */ Vec3f unk20;
+    /* 0x2C */ Vec3f unk2C;
+    /* 0x38 */ Vec3f unk38;
     /* 0x44 */ u8 unk44[0x12];
     /* 0x56 */ s16 unk56;
     /* 0x58 */ u8 unk58;
@@ -233,8 +233,8 @@ typedef struct {
 
 void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
                    s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
-void func_151D4DAC(s32, Actor *, struct17 *, struct17 *, RayHit *, s32, struct17 *, u8, s32);
-void func_150F7F8C(struct17 *pos, u8 arg1, s32 arg2);
+void func_151D4DAC(s32, Actor *, Vec3f *, Vec3f *, RayHit *, s32, Vec3f *, u8, s32);
+void func_150F7F8C(Vec3f *pos, u8 arg1, s32 arg2);
 
 /*
  * Per-frame update of a projectile: ray-tests and moves it, runs out its lifetime, and leaves a
@@ -255,12 +255,12 @@ s8 func_150F78B4(EffectObj *obj) {
     owner = obj->owner;
     dt = (state->timeLeft < D_800BE9A4) ? state->timeLeft : D_800BE9A4;
     if (obj->sound != 0) {
-        func_1000F9D4(obj->sound, obj->pos.unk0, obj->pos.unk4, obj->pos.unk8);
+        func_1000F9D4(obj->sound, obj->pos.x, obj->pos.y, obj->pos.z);
     }
     dist = state->speed * dt;
     if (state->flags & 2) {
-        func_15081690(owner, obj->pos.unk0, obj->pos.unk4, obj->pos.unk8, state->dir.unk0, state->dir.unk4,
-                      state->dir.unk8, &hit, dist, 1, 0, !(state->flags & 4), state->unkB0, 0, 0);
+        func_15081690(owner, obj->pos.x, obj->pos.y, obj->pos.z, state->dir.x, state->dir.y,
+                      state->dir.z, &hit, dist, 1, 0, !(state->flags & 4), state->unkB0, 0, 0);
         if (hit.hit >= 2) {
             func_151D4DAC(hit.unk00, owner, &hit.pos, &hit.unk20, &hit, 0x1A, &state->dir, obj->unkC, obj->unk1);
             if (state->flags & 1) {
@@ -269,9 +269,9 @@ s8 func_150F78B4(EffectObj *obj) {
             alive = FALSE;
         }
     }
-    obj->pos.unk0 += obj->vel.unk0 * dt;
-    obj->pos.unk4 += obj->vel.unk4 * dt;
-    obj->pos.unk8 += obj->vel.unk8 * dt;
+    obj->pos.x += obj->vel.x * dt;
+    obj->pos.y += obj->vel.y * dt;
+    obj->pos.z += obj->vel.z * dt;
     if (alive == TRUE) {
         state->timeLeft -= D_800BE9A4;
         if (state->timeLeft <= 0.0f) {
@@ -307,7 +307,7 @@ s8 func_150F78B4(EffectObj *obj) {
             spawn.width = 0.0f;
             spawn.height = 0.0f;
             puffState.phaseSpeed = 0.4670000076f;
-            spawn.rot = *(vertex *)&D_800A5480;
+            spawn.rot = D_800A5480;
             spawn.scale.x = 1.0f;
             spawn.scale.y = 1.0f;
             spawn.scale.z = 1.0f;
@@ -323,7 +323,7 @@ s8 func_150F78B4(EffectObj *obj) {
 
                 puffState.phase = 4.712388992f;
                 puffState.timeLeft = 27.0f - state->trailAge;
-                spawn.pos = *(vertex *)&state->trailPos; // TODO(vectors): struct17/vertex mix
+                spawn.pos = *(Vec3f *)&state->trailPos; // TODO(vectors): struct17/vertex mix
                 spawn.unk44 = puffState.timeLeft * 6.481481552f;
                 puff = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1); // matching: the int cast orders the arg setup
                 if (puff != NULL) {
@@ -331,9 +331,9 @@ s8 func_150F78B4(EffectObj *obj) {
                 }
                 state->trailDist -= 70.0f;
                 state->trailAge -= state->trailAgeStep;
-                state->trailPos.unk0 += state->trailStep.unk0;
-                state->trailPos.unk4 += state->trailStep.unk4;
-                state->trailPos.unk8 += state->trailStep.unk8;
+                state->trailPos.x += state->trailStep.x;
+                state->trailPos.y += state->trailStep.y;
+                state->trailPos.z += state->trailStep.z;
                 puffs -= 1.0f;
             } while (puffs > 1.0f);
         }
@@ -365,15 +365,15 @@ void func_150F7F58(struct210 *obj, s16 arg1) {
 }
 
 extern f32 func_150ADA68(void);
-void func_151541B8(struct17 *pos, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6);
-void func_151D3F14(struct17 *pos, u8, s32);
+void func_151541B8(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6);
+void func_151D3F14(Vec3f *pos, u8, s32);
 ActorCtl *func_150FF288(Actor *);
-s32 func_150FF6E0(struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, Actor *, ActorCtl *);
-void func_150FF474(struct17 *position, struct17 *points, u8 arg2, s32 arg3);
-void func_151D4408(struct17 *, struct17 *, void *, Actor *, f32, s32, s32);
+s32 func_150FF6E0(Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Actor *, ActorCtl *);
+void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
+void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
 
 /* Impact effect at `pos`. */
-void func_150F7F8C(struct17 *pos, u8 arg1, s32 arg2) {
+void func_150F7F8C(Vec3f *pos, u8 arg1, s32 arg2) {
     f32 random1;
     f32 random0;
 
@@ -392,9 +392,9 @@ void func_150F802C(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
     EffectObj *obj;
 
     packet.follow.target = target;
-    packet.follow.trailPos.unk0 = target[0];
-    packet.follow.trailPos.unk4 = target[1];
-    packet.follow.trailPos.unk8 = target[2];
+    packet.follow.trailPos.x = target[0];
+    packet.follow.trailPos.y = target[1];
+    packet.follow.trailPos.z = target[2];
     packet.follow.trailAge = 0.0f;
     packet.spawn.radius = 1.0f;
     packet.spawn.elasticity = 1.0f;
@@ -412,7 +412,7 @@ void func_150F802C(f32 *target, s16 arg1, u8 arg2, s32 arg3) {
     packet.spawn.vel.x = 0.0f;
     packet.spawn.vel.y = 0.0f;
     packet.spawn.vel.z = 0.0f;
-    packet.spawn.rotVel = *(vertex *)&D_800A5480;
+    packet.spawn.rotVel = D_800A5480;
     packet.spawn.gravity = 0.0f;
     packet.spawn.flags = 0x980;
     packet.spawn.lifetime = arg1;
@@ -445,32 +445,32 @@ s32 func_150F81BC(EffectObj *obj) {
     FollowState *follow;
 
     follow = &obj->state.follow;
-    obj->pos.unk0 = follow->target[0];
-    obj->pos.unk4 = follow->target[1];
-    obj->pos.unk8 = follow->target[2];
+    obj->pos.x = follow->target[0];
+    obj->pos.y = follow->target[1];
+    obj->pos.z = follow->target[2];
     obj->unk20 = follow->target[3];
     obj->unk24 = follow->target[4];
     obj->unk28 = follow->target[5];
     {
-        struct17 delta;
+        Vec3f delta;
         f32 dist;
         f32 unused;
-        struct17 dir;
+        Vec3f dir;
         f32 puffs;
 
-        delta.unk0 = obj->pos.unk0 - follow->trailPos.unk0;
-        delta.unk4 = obj->pos.unk4 - follow->trailPos.unk4;
-        delta.unk8 = obj->pos.unk8 - follow->trailPos.unk8;
+        delta.x = obj->pos.x - follow->trailPos.x;
+        delta.y = obj->pos.y - follow->trailPos.y;
+        delta.z = obj->pos.z - follow->trailPos.z;
         follow->trailAge += D_800BE9A4;
         if (func_15145128(&delta, &dir, &dist, &unused) != 0) {
-            struct17 step;
+            Vec3f step;
             PuffObj *puff;
             ParticleDef54 spawn;
             PuffState puffState;
 
-            step.unk0 = dir.unk0 * 20.0f;
-            step.unk4 = dir.unk4 * 20.0f;
-            step.unk8 = dir.unk8 * 20.0f;
+            step.x = dir.x * 20.0f;
+            step.y = dir.y * 20.0f;
+            step.z = dir.z * 20.0f;
             puffs = dist * 0.05000000075f;
             if (puffs > 1.0f) {
                 f32 ageStep;
@@ -492,7 +492,7 @@ s32 func_150F81BC(EffectObj *obj) {
                 spawn.rgba[3] = 0xFF;
                 spawn.height = 0.0f;
                 spawn.width = 0.0f;
-                spawn.rot = *(vertex *)&D_800A5480;
+                spawn.rot = D_800A5480;
                 spawn.scale.x = 1.0f;
                 spawn.scale.y = 1.0f;
                 spawn.scale.z = 1.0f;
@@ -508,16 +508,16 @@ s32 func_150F81BC(EffectObj *obj) {
 
                     puffState.phase = 4.712388992f;
                     puffState.timeLeft = 27.0f - follow->trailAge;
-                    spawn.pos = *(vertex *)&follow->trailPos; // TODO(vectors): struct17/vertex mix
+                    spawn.pos = *(Vec3f *)&follow->trailPos; // TODO(vectors): struct17/vertex mix
                     spawn.unk44 = puffState.timeLeft * 6.481481552f;
                     puff = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC,
                                          obj->unk1); // matching: the int cast orders the arg setup
                     if (puff != NULL) {
                         memcpy(&puff->state, &puffState, sizeof(puffState));
                     }
-                    follow->trailPos.unk0 += step.unk0;
-                    follow->trailPos.unk4 += step.unk4;
-                    follow->trailPos.unk8 += step.unk8;
+                    follow->trailPos.x += step.x;
+                    follow->trailPos.y += step.y;
+                    follow->trailPos.z += step.z;
                     puffs -= 1.0f;
                     follow->trailAge -= ageStep;
                 } while (puffs > 1.0f);
@@ -531,7 +531,7 @@ s32 func_150F81BC(EffectObj *obj) {
 typedef struct {
     s32 unk0;
     s32 unk4;
-    struct17 pos;
+    Vec3f pos;
     f32 unk14;
     f32 unk18;
     f32 unk1C;
@@ -590,11 +590,11 @@ extern void func_15152B38(EmitterSpawn *, u8, s32);
 
 /* Effects 50 units above `obj`: a func_151602C0 burst and a func_15152B38 emitter. */
 void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
-    struct17 pos;
+    Vec3f pos;
 
-    pos.unk0 = obj->x_position;
-    pos.unk4 = obj->y_position + 50.0f;
-    pos.unk8 = obj->z_position;
+    pos.x = obj->x_position;
+    pos.y = obj->y_position + 50.0f;
+    pos.z = obj->z_position;
     {
         Header header;
         Header2 header2;
@@ -603,9 +603,9 @@ void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
         header.unk1 = -1;
         header.unk2 = (func_150ADA20() % 9U) + 5;
         header.unk4 = 0;
-        header2.unk0 = pos.unk0;
-        header2.unk4 = pos.unk4;
-        header2.unk8 = pos.unk8;
+        header2.unk0 = pos.x;
+        header2.unk4 = pos.y;
+        header2.unk8 = pos.z;
         func_151602C0(&header, &header2, (func_150ADA20() % 31U) + 90, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
     }
     {
@@ -757,10 +757,10 @@ void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
-extern void func_151C329C(struct17 *pos, s32, s32);
-extern void func_15143794(s16, s16, f32, struct17 *out);
+extern void func_151C329C(Vec3f *pos, s32, s32);
+extern void func_15143794(s16, s16, f32, Vec3f *out);
 extern void *func_15130280(ParticleDesc *spawn, u8, s32, s32, u8, s32);
-void func_151DB5D0(s32, struct17 *pos, struct17 *vel, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
+void func_151DB5D0(s32, Vec3f *pos, Vec3f *vel, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 /*
  * While any object 0x98 in state 0x1EB is active: steps through the parts on a timer (with a sound and a
@@ -822,13 +822,13 @@ void func_150F892C(StageObj *obj) {
     state->unk38 += (0.02000000142f + func_150ADA68() * 0.025f) * (D_800BE9A4 * count);
     if (state->unk38 > 1.0f) {
         s16 side;
-        struct17 pos;
+        Vec3f pos;
         side = (state->unk5 & 1) ? -1 : 1;
         do {
-            func_15143874((func_150ADA20() % 126U - 220) * side, state->unk48, &pos.unk0, &pos.unk8);
-            pos.unk4 = func_150ADA68() * 150.0f + 30.0f;
-            pos.unk0 += state->unk40;
-            pos.unk8 += state->unk44;
+            func_15143874((func_150ADA20() % 126U - 220) * side, state->unk48, &pos.x, &pos.z);
+            pos.y = func_150ADA68() * 150.0f + 30.0f;
+            pos.x += state->unk40;
+            pos.z += state->unk44;
             func_151C329C(&pos, obj->unkC, obj->unk1);
             state->unk38 -= 1.0f;
         } while (state->unk38 > 1.0f);
@@ -911,7 +911,7 @@ void func_150F892C(StageObj *obj) {
         flare.r2 = 0xFF;
         flare.g2 = 0xFF;
         flare.b2 = 0xFF;
-        flare.offset = *(vertex *)&D_800A5480;
+        flare.offset = D_800A5480;
         flare.fadeStart = 8;
         flare.fadeRate = 0x1F;
         flare.scaleStart = 1;
@@ -958,17 +958,17 @@ void func_150F892C(StageObj *obj) {
     state->unk2C += (0.3360000253f + func_150ADA68() * 0.126f) * (D_800BE9A4 * count);
     if (state->unk2C > 1.0f) {
         s16 side;
-        struct17 pos;
-        struct17 vel;
+        Vec3f pos;
+        Vec3f vel;
         side = (state->unk5 & 1) ? -1 : 1;
         do {
             s16 angle;
 
             angle = (func_150ADA20() % 126U - 220) * side;
-            func_15143874(angle, state->unk48, &pos.unk0, &pos.unk8);
-            pos.unk4 = func_150ADA68() * 150.0f + 30.0f;
-            pos.unk0 += state->unk40;
-            pos.unk8 += state->unk44;
+            func_15143874(angle, state->unk48, &pos.x, &pos.z);
+            pos.y = func_150ADA68() * 150.0f + 30.0f;
+            pos.x += state->unk40;
+            pos.z += state->unk44;
             func_15143794(func_150ADA20() % 9U + angle - 4, (func_150ADA20() & 7) - 16,
                           func_150ADA68() * 6.0f + 4.0f, &vel);
             func_151DB5D0(8, &pos, &vel, func_150ADA68() * 200.0f + 200.0f, 1.025439024f, 0.938816011f,
@@ -1008,11 +1008,11 @@ void func_150F97C0(struct260 *arg0) {
 }
 
 extern u8 D_80088B50;
-extern struct17 D_800A1C48;
-extern struct17 D_800A1C54;
-extern s32 func_15145EA4(struct17 **src, struct17 **dst, void *mtx, s32 count);
-extern void func_15102B38(Actor *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6,
-                          f32 arg7, struct17 *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
+extern Vec3f D_800A1C48;
+extern Vec3f D_800A1C54;
+extern s32 func_15145EA4(Vec3f **src, Vec3f **dst, void *mtx, s32 count);
+extern void func_15102B38(Actor *obj, u8 bone, Vec3f *arg2, Vec3f *arg3, f32 *arg4, s32 arg5, s32 arg6,
+                          f32 arg7, Vec3f *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
 
 /* Effect at the point D_800A1C48 on bone D_80088B50 of `obj`. */
 void func_150F97EC(obj, arg1, arg2)
@@ -1020,11 +1020,11 @@ Actor *obj;
 u8 arg1;
 s32 arg2;
 {
-    struct17 pos;
+    Vec3f pos;
     f32 one;
     f32 motion[2];
-    struct17 *src;
-    struct17 *dst;
+    Vec3f *src;
+    Vec3f *dst;
     void *mtx;
     s32 random1;
     s32 random0;
@@ -1051,11 +1051,11 @@ Actor *obj;
 u8 arg1;
 s32 arg2;
 {
-    struct17 points[6];
-    struct17 position;
-    struct17 hit;
-    struct17 normal;
-    struct17 unk30;
+    Vec3f points[6];
+    Vec3f position;
+    Vec3f hit;
+    Vec3f normal;
+    Vec3f unk30;
     ActorCtl *gun;
 
     gun = func_150FF288(obj);

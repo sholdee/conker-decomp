@@ -6,7 +6,7 @@
 /* The actor an emitter is attached to. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x14];
-    /* 0x014 */ vertex pos;
+    /* 0x014 */ Vec3f pos;
     /* 0x020 */ u8 pad20[0x1B];
     /* 0x03B */ u8 unk3B;
     /* 0x03C */ u8 pad3C[0x198];
@@ -150,7 +150,7 @@ typedef struct {
     /* 0x2D */ u8 unk2D;
 } GameF3270SpawnDesc;
 
-s32 func_15045800(vertex *from, s32 arg1, f32 minY, f32 *hitY);
+s32 func_15045800(Vec3f *from, s32 arg1, f32 minY, f32 *hitY);
 GameF3270LinkedObject *func_1513418C(GameF3270SpawnDesc *desc, s32 arg1, u8 arg2, s32 arg3);
 
 /* Spawns the emitter's linked object, recording the surface height above the actor. */
@@ -162,7 +162,7 @@ GameF3270LinkedObject *func_150C5F94(GameF3270Actor *actor, GameF3270Emitter *em
     link.owner = emitter;
     link.alive = TRUE;
     {
-        vertex from;
+        Vec3f from;
 
         from.x = actor->pos.x;
         from.y = actor->pos.y + 5000.0f;
@@ -344,21 +344,21 @@ typedef struct {
     /* 0x21 */ u8 pad21[7];
 } GameF3270ParticleDesc; // size 0x28
 
-extern vertex D_800887D0;
+extern Vec3f D_800887D0;
 extern u8 D_800AB414[][3]; // RGB colours
-void func_15143134(vertex *in, vertex *out, s32 mtx);
+void func_15143134(Vec3f *in, Vec3f *out, s32 mtx);
 u8 func_151D8E20(void);
 
 /* Spawns the emitter's particle on the surface below the actor, if there is one within 200 units. */
 GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
     GameF3270Particle *particle;
-    vertex pos;
+    Vec3f pos;
     GameF3270Actor *actor;
 
     particle = NULL;
     actor = emitter->actor;
     if (actor->unk1D4) {
-        vertex origin;
+        Vec3f origin;
 
         origin = D_800887D0;
         func_15143134(&origin, &pos, actor->unk1D4);
@@ -368,7 +368,7 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
         pos.z = actor->pos.z;
     }
     {
-        vertex probe;
+        Vec3f probe;
 
         probe.x = pos.x;
         probe.y = pos.y + 200.0f;

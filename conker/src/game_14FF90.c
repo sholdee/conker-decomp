@@ -58,7 +58,7 @@ void func_1512A360(Camera *camera);
 void func_1512E4B0(Camera *camera);
 void func_1512DEA4(Camera *camera);
 void func_15143134(f32 *in, f32 *out, Mtx *mtx);
-void func_1508EF80(struct17 *arg0, struct17 *arg1, f32 arg2, struct17 *arg3);
+void func_1508EF80(Vec3f *arg0, Vec3f *arg1, f32 arg2, Vec3f *arg3);
 void func_151CC290(s32 arg0);
 void func_1515BA10(s32 arg0);
 void func_1515BA1C(s16 arg0);
@@ -100,7 +100,7 @@ void func_1511FC60(Camera *camera);
 void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 s32 func_15125490(Camera *camera);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s16 *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-void func_150AD8B0(struct17 *, struct17 *, struct17 *);
+void func_150AD8B0(Vec3f *, Vec3f *, Vec3f *);
 void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
 void func_1507E1D0(Actor *, f32 *, f32 *, f32 *);
 void func_1512D560(void *, s32, s32);
@@ -136,8 +136,8 @@ void func_15122AE0(void) {
 /* Per-frame update of one player camera: input, zone state, then either a special mode or the
    follow camera (focus, distance, angles, collision). */
 void func_15122C5C(Camera *camera) {
-    vertex *target;
-    vertex *eye;
+    Vec3f *target;
+    Vec3f *eye;
     u8 index;
     f32 fov;
 
@@ -239,9 +239,9 @@ void func_15123070(Camera *camera) {
     f32 angle;
 
     if ((camera->cmdRunning != 0) && ((camera->cmd.type == 10) || (camera->cmd.type == 14))) {
-        struct17 delta;
+        Vec3f delta;
 
-        func_15048F90((struct17 *)&camera->unk618, (struct17 *)&camera->focus, &delta);
+        func_15048F90((Vec3f *)&camera->unk618, (Vec3f *)&camera->focus, &delta);
         camera->unk390 = camera->yaw - func_15048FC8(&delta);
     } else {
         angle = camera->player->unk40 - camera->yaw - 180.0f;
@@ -553,7 +553,7 @@ void func_15123A54(Camera *camera) {
                                   (camera->eye.z - camera->target.z) * (camera->eye.z - camera->target.z));
             if ((camera->aimState != 0) || (camera->snap != 0) || (camera->player->unk102 != 0) ||
                 (!(camera->flags & 0x1000) && (camera->unk92C == 0) && !(camera->flags & 0x40000) && !(camera->status & 0x80))) {
-                struct17 dir;
+                Vec3f dir;
                 s16 tri[10];
                 f32 hit[3];
                 f32 dist;
@@ -562,38 +562,38 @@ void func_15123A54(Camera *camera) {
                 f32 backZ;
                 f32 pad2;
                 f32 backX;
-                struct17 edge1;
-                struct17 edge2;
-                struct17 normal;
+                Vec3f edge1;
+                Vec3f edge2;
+                Vec3f normal;
                 f32 hit2[3];
                 f32 dist2;
                 f32 prevDistance;
-                struct17 v0;
-                struct17 v1;
-                struct17 v2;
+                Vec3f v0;
+                Vec3f v1;
+                Vec3f v2;
 
-                dir.unk0 = sinf(camera->yawRad);
-                dir.unk4 = 0.0f;
-                dir.unk8 = cosf(camera->yawRad);
-                if ((func_150AC9C0(camera->focus.x, camera->focus.y + 140.0f, camera->focus.z, dir.unk0, dir.unk4, dir.unk8, 0,
+                dir.x = sinf(camera->yawRad);
+                dir.y = 0.0f;
+                dir.z = cosf(camera->yawRad);
+                if ((func_150AC9C0(camera->focus.x, camera->focus.y + 140.0f, camera->focus.z, dir.x, dir.y, dir.z, 0,
                                    tri, &hit[0], &hit[1], &hit[2], &dist, 0, 0, camera->targetDistance + 30.0f) != 0) &&
                     (dist < camera->targetDistance)) {
                     backX = sinf(camera->yawRad + 3.1415927410125732f) * camera->targetDistance;
                     backZ = cosf(camera->yawRad + 3.1415927410125732f) * camera->targetDistance;
-                    v0.unk0 = tri[0];
-                    v0.unk4 = tri[1];
-                    v0.unk8 = tri[2];
-                    v1.unk0 = tri[3];
-                    v1.unk4 = tri[4];
-                    v1.unk8 = tri[5];
-                    v2.unk0 = tri[6];
-                    v2.unk4 = tri[7];
-                    v2.unk8 = tri[8];
+                    v0.x = tri[0];
+                    v0.y = tri[1];
+                    v0.z = tri[2];
+                    v1.x = tri[3];
+                    v1.y = tri[4];
+                    v1.z = tri[5];
+                    v2.x = tri[6];
+                    v2.y = tri[7];
+                    v2.z = tri[8];
                     func_15048F90(&v0, &v1, &edge1);
                     func_15048F90(&v0, &v2, &edge2);
                     func_150AD8B0(&edge2, &edge1, &normal);
                     func_1504917C(&normal, &normal);
-                    if (0.3253220021724701f < func_150AD900(&dir.unk0, &normal.unk0)) {
+                    if (0.3253220021724701f < func_150AD900(&dir.x, &normal.x)) {
                         if (func_150AC9C0(camera->focus.x - backX, camera->focus.y + 140.0f, camera->focus.z - backZ, backX,
                                           0.0f, backZ, 0, tri2, &hit2[0], &hit2[1], &hit2[2], &dist2, 0, 0,
                                           camera->targetDistance + 30.0f) != 0) {
@@ -979,11 +979,11 @@ void func_1512523C(Camera *camera) {
 
 /* Yaw (degrees and radians) of the eye->target line. */
 void func_15125330(Camera *camera) {
-    struct17 delta;
+    Vec3f delta;
 
-    delta.unk0 = camera->target.x - camera->eye.x;
-    delta.unk4 = 0.0f;
-    delta.unk8 = camera->target.z - camera->eye.z;
+    delta.x = camera->target.x - camera->eye.x;
+    delta.y = 0.0f;
+    delta.z = camera->target.z - camera->eye.z;
 
     camera->yaw = func_15048FC8(&delta);
     camera->yawRad = camera->yaw * DEG2RAD;
@@ -1133,15 +1133,15 @@ void func_151256BC(Camera *camera) {
             eyeScale = 1.0f;
             targetScale = 20.0f;
         }
-        func_1508EF80((struct17 *)&camera->eye, (struct17 *)&camera->target, amount * eyeScale, (struct17 *)&camera->eye);
-        func_1508EF80((struct17 *)&camera->target, (struct17 *)&camera->eye, amount * targetScale,
-                      (struct17 *)&camera->target);
+        func_1508EF80((Vec3f *)&camera->eye, (Vec3f *)&camera->target, amount * eyeScale, (Vec3f *)&camera->eye);
+        func_1508EF80((Vec3f *)&camera->target, (Vec3f *)&camera->eye, amount * targetScale,
+                      (Vec3f *)&camera->target);
     } else if (camera->swayPhase != 0.0f) {
         camera->swayPhase -= camera->swayPhase * 0.08f;
         camera->swayAmount += ((sinf(camera->swayPhase) * 4.0f) - camera->swayAmount) * 0.04f;
         amount = camera->swayAmount * 0.05f;
-        func_1508EF80((struct17 *)&camera->eye, (struct17 *)&camera->target, amount, (struct17 *)&camera->eye);
-        func_1508EF80((struct17 *)&camera->target, (struct17 *)&camera->eye, amount * 20.0f, (struct17 *)&camera->target);
+        func_1508EF80((Vec3f *)&camera->eye, (Vec3f *)&camera->target, amount, (Vec3f *)&camera->eye);
+        func_1508EF80((Vec3f *)&camera->target, (Vec3f *)&camera->eye, amount * 20.0f, (Vec3f *)&camera->target);
     }
 }
 
@@ -1440,7 +1440,7 @@ s32 func_15126378(Camera *camera) {
     f32 minRange;
     f32 aimKey;
     s32 buttons;
-    vertex dir;
+    Vec3f dir;
     f32 rotated;
     f32 maxRange;
     f32 yawDelta;
@@ -1640,7 +1640,7 @@ s32 func_15126378(Camera *camera) {
         ext->aimTarget = camera->target;
         ext->aimEye = camera->eye;
         ext->aimDir = dir;
-        func_15048F90((struct17 *)&ext->aimEye, (struct17 *)&ext->aimTarget, (struct17 *)&ext->aimDir);
+        func_15048F90((Vec3f *)&ext->aimEye, (Vec3f *)&ext->aimTarget, (Vec3f *)&ext->aimDir);
         D_800BE628[camera->playerIndex].perspScale = (-0.94f * zoomRatio) + 1.0f;
         func_1510B128(camera->playerIndex, camera->unk19C, camera->unk1A0, D_800BE628[camera->playerIndex].perspScale,
                       (71.0f * zoomRatio) + 54.0f);
@@ -1779,10 +1779,10 @@ s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
 s32 func_151279A0(Actor *obj, OSContPad *contPad) {
     ActorCtl *ext;
     s32 zone;
-    vertex pos;
-    vertex base;
+    Vec3f pos;
+    Vec3f base;
     f32 dt;
-    vertex dir;
+    Vec3f dir;
     f32 rotated;
     f32 pad; // matching: unused stack slot in the frame
     s32 buttons;

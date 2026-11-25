@@ -124,9 +124,9 @@ typedef struct ParticleDef54 {
     /* 0x10 */ u8 rgba[4];
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
-    /* 0x1C */ vertex pos;
-    /* 0x28 */ vertex rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
-    /* 0x34 */ vertex scale;
+    /* 0x1C */ Vec3f pos;
+    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
     /* 0x45 */ u8 unk45;
@@ -187,7 +187,7 @@ void func_150D2924(EffectObject *obj) {
         do {
             motion.life = 22.0f - emitter->elapsed;
             if (motion.life > 0.0f) {
-                vertex point;
+                Vec3f point;
 
                 func_1514373C(emitter->angle, record[3], &point.x, &point.z);
                 point.y = record[4];
@@ -214,15 +214,15 @@ void func_150D2924(EffectObject *obj) {
 }
 
 void func_150AD8B0(f32 *a, f32 *b, f32 *out);
-vertex *func_15144B34(s32 viewport);
+Vec3f *func_15144B34(s32 viewport);
 void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **out, u8 *fresh);
 
 typedef struct GameFFBA0Beam {
     u8 pad0[0x2C];
     f32 width;
     u8 pad30[4];
-    vertex start;
-    vertex end;
+    Vec3f start;
+    Vec3f end;
     u8 pad4C[0x74];
     Vtx vertexTemplate[4];
     Vtx *buffers[4];
@@ -236,12 +236,12 @@ typedef struct GameFFBA0Beam {
 Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index) {
     Vtx *vertices;
     Vtx *result;
-    vertex *camera;
-    vertex delta;
-    vertex end;
-    vertex middle;
-    vertex view;
-    vertex side;
+    Vec3f *camera;
+    Vec3f delta;
+    Vec3f end;
+    Vec3f middle;
+    Vec3f view;
+    Vec3f side;
     f32 lengthSquared;
     f32 *texture;
     u8 fresh;

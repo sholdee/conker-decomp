@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "libc/string.h"
 
-typedef struct { f32 x, y, z; } TrailVec3;
 typedef struct { f32 x, z; } TrailVec2;
 
 /* The object a trail follows (see func_151CEC10 / func_151CEC54 in game_1FC0C0.c). */
@@ -27,7 +26,7 @@ typedef struct {
 
 /* Spawn parameters passed to func_15147A80. */
 typedef struct {
-    /* 0x00 */ TrailVec3 pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 unkC;
     /* 0x0E */ s16 unkE;
     /* 0x10 */ s32 unk10;
@@ -53,7 +52,7 @@ typedef struct {
 } Motion;
 
 extern TrailObject *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-s32 func_151CEC10(TrailVec3 *pos, TrailOwner *owner, void *target);
+s32 func_151CEC10(Vec3f *pos, TrailOwner *owner, void *target);
 
 /* Integrates position/velocity under constant acceleration over one frame and ramps fade up to 1. */
 s32 func_151CEA20(Motion *motion) {

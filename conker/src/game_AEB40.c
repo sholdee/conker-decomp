@@ -284,11 +284,11 @@ typedef struct PartSet {
 typedef struct RayHit {
     /* 0x00 */ GameObj *obj;
     /* 0x04 */ f32 dist;
-    /* 0x08 */ struct17 hit;
-    /* 0x14 */ struct17 centre;
-    /* 0x20 */ struct17 far;
-    /* 0x2C */ struct17 origin;
-    /* 0x38 */ struct17 dir;
+    /* 0x08 */ Vec3f hit;
+    /* 0x14 */ Vec3f centre;
+    /* 0x20 */ Vec3f far;
+    /* 0x2C */ Vec3f origin;
+    /* 0x38 */ Vec3f dir;
     /* 0x44 */ u8 unk44[0x12];
     /* 0x56 */ u16 unk56;
     /* 0x58 */ u8 unk58;
@@ -335,7 +335,7 @@ extern u16 D_800BE598[];
 extern ModelReloc *D_800C5338[];
 extern u16 D_800C5628[];
 extern u16 D_800C57A0[];
-extern f32 D_800D9C10[][4][4];
+extern MtxF D_800D9C10[];
 
 extern void func_1505E650(GameObj *obj, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
 extern GameObj *func_1505F0AC(s32);
@@ -363,9 +363,9 @@ extern void func_15060A9C(s32, GameObj *);
 extern void func_1506AC8C(GameObj *, s32, s32);
 extern void func_1507DE4C(GameObj *);
 extern void func_1507DF10(GameObj *obj, s32 arg1);
-extern s32 func_1508114C(GameObj *obj, struct17 *rayOrigin, struct17 *rayDir, struct17 *outNear, struct17 *outFar, struct17 *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
+extern s32 func_1508114C(GameObj *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
 extern s32 func_15084D00(GameObj *);
-extern s32 func_150A6360(void *arg0, f32 arg1[4][4], f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
+extern s32 func_150A6360(void *arg0, MtxF arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
 extern void func_150B5C38(void *, u8, s32);
 extern void func_150B6754(u8, s32);
@@ -376,9 +376,9 @@ extern void func_15104608(f32, f32, f32, s32);
 extern void func_1510D720(s32 arg0);
 extern void func_15137610(GameObj *, void *, void *, void *, u8, s32);
 extern void func_15138C80(GameObj *, s32, s32);
-extern f32 func_15143E64(struct17 *);
-extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
-extern s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
+extern f32 func_15143E64(Vec3f *);
+extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
+extern s32 func_151452C4(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, f32 arg3, Vec3f *arg4, Vec3f *arg5, f32 *arg6, f32 *arg7);
 extern void func_15145974(void *, f32 *, f32 *);
 extern s32 func_1514D15C(GameObj *obj);
 extern s32 *func_1515D440(void);
@@ -386,7 +386,7 @@ extern s32 func_1515D480(s32);
 extern s32 func_151D3480(void *, void *, void *, u8, u8, s32);
 extern s32 func_151E5F64(s32 arg0);
 
-s32 func_15081C20(struct17 *origin, struct17 *dir, GameObj *obj, struct17 *outNear, struct17 *outFar, f32 *outNearDist, f32 *outFarDist);
+s32 func_15081C20(Vec3f *origin, Vec3f *dir, GameObj *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist);
 void func_15081E0C(GameObj *obj, u16 part, u8 skip);
 s32 func_150825C0(s32 spawnIdx, s32 arg1);
 s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot);
@@ -423,20 +423,20 @@ void func_15081690(GameObj *self, f32 originX, f32 originY, f32 originZ, f32 dir
     s32 skip;
     s32 ret;
     u8 childSlot[25];
-    struct17 near;
-    struct17 far;
-    struct17 centre;
-    struct17 origin;
-    struct17 dir;
+    Vec3f near;
+    Vec3f far;
+    Vec3f centre;
+    Vec3f origin;
+    Vec3f dir;
     s32 index;
     s32 surfIdx;
 
-    origin.unk0 = originX;
-    origin.unk4 = originY;
-    origin.unk8 = originZ;
-    dir.unk0 = dirX;
-    dir.unk4 = dirY;
-    dir.unk8 = dirZ;
+    origin.x = originX;
+    origin.y = originY;
+    origin.z = originZ;
+    dir.x = dirX;
+    dir.y = dirY;
+    dir.z = dirZ;
     out->dist = -1.0f;
     out->obj = NULL;
     out->hitType = 0;
@@ -468,9 +468,9 @@ void func_15081690(GameObj *self, f32 originX, f32 originY, f32 originZ, f32 dir
         dist < maxDist) {
         out->dist = dist;
         out->hitType = 1;
-        out->hit.unk0 = hitX;
-        out->hit.unk4 = hitY;
-        out->hit.unk8 = hitZ;
+        out->hit.x = hitX;
+        out->hit.y = hitY;
+        out->hit.z = hitZ;
         out->far = out->hit;
         if (surfIdx != -1) {
             out->surface = &D_800DBEF4[surfIdx];
@@ -535,48 +535,48 @@ void func_15081690(GameObj *self, f32 originX, f32 originY, f32 originZ, f32 dir
 
 /* Intersects a ray with obj's collision cylinder (radius unkD2, centre raised by unkD6, y squashed by
    unkDC). Returns 1 with the entry/exit points and their distances from origin on a hit. */
-s32 func_15081C20(struct17 *origin, struct17 *dir, GameObj *obj, struct17 *outNear, struct17 *outFar, f32 *outNearDist, f32 *outFarDist) {
-    struct17 pos;
+s32 func_15081C20(Vec3f *origin, Vec3f *dir, GameObj *obj, Vec3f *outNear, Vec3f *outFar, f32 *outNearDist, f32 *outFarDist) {
+    Vec3f pos;
 
-    pos.unk0 = obj->x_position;
-    pos.unk4 = obj->y_position + obj->unkD6;
-    pos.unk8 = obj->z_position;
+    pos.x = obj->x_position;
+    pos.y = obj->y_position + obj->unkD6;
+    pos.z = obj->z_position;
     {
-        struct17 start;
-        struct17 unitDir;
-        struct17 center;
+        Vec3f start;
+        Vec3f unitDir;
+        Vec3f center;
         f32 yScale;
         f32 yUnscale;
 
         yScale = obj->unkDC;
         yUnscale = obj->unkE0;
-        start.unk0 = origin->unk0;
-        start.unk4 = origin->unk4 * yScale;
-        start.unk8 = origin->unk8;
-        unitDir.unk0 = dir->unk0;
-        unitDir.unk4 = dir->unk4 * yScale;
-        unitDir.unk8 = dir->unk8;
+        start.x = origin->x;
+        start.y = origin->y * yScale;
+        start.z = origin->z;
+        unitDir.x = dir->x;
+        unitDir.y = dir->y * yScale;
+        unitDir.z = dir->z;
         if (func_15145128(&unitDir, &unitDir, NULL, NULL) == 0) {
             return 0;
         }
-        center.unk0 = pos.unk0;
-        center.unk4 = pos.unk4 * yScale;
-        center.unk8 = pos.unk8;
+        center.x = pos.x;
+        center.y = pos.y * yScale;
+        center.z = pos.z;
         if (func_151452C4(&start, &unitDir, &center, obj->unkD2, outNear, outFar, outNearDist, outFarDist) == 0) {
             return 0;
         }
-        outNear->unk4 *= yUnscale;
-        outFar->unk4 *= yUnscale;
+        outNear->y *= yUnscale;
+        outFar->y *= yUnscale;
         {
-            struct17 diff;
+            Vec3f diff;
 
-            diff.unk0 = outNear->unk0 - origin->unk0;
-            diff.unk4 = outNear->unk4 - origin->unk4;
-            diff.unk8 = outNear->unk8 - origin->unk8;
+            diff.x = outNear->x - origin->x;
+            diff.y = outNear->y - origin->y;
+            diff.z = outNear->z - origin->z;
             *outNearDist = func_15143E64(&diff);
-            diff.unk0 = outFar->unk0 - origin->unk0;
-            diff.unk4 = outFar->unk4 - origin->unk4;
-            diff.unk8 = outFar->unk8 - origin->unk8;
+            diff.x = outFar->x - origin->x;
+            diff.y = outFar->y - origin->y;
+            diff.z = outFar->z - origin->z;
             *outFarDist = func_15143E64(&diff);
         }
     }
@@ -649,19 +649,19 @@ s32 func_15081E78(GameObj *self, RayHit *hit, s32 kind) {
                 f32 front[3];
                 f32 back[3];
 
-                front[0] = hit->hit.unk0 + hit->dir.unk0 * 5.0f;
-                front[1] = hit->hit.unk4 + hit->dir.unk4 * 5.0f;
-                front[2] = hit->hit.unk8 + hit->dir.unk8 * 5.0f;
-                back[0] = hit->hit.unk0 - hit->dir.unk0 * 5.0f;
-                back[1] = hit->hit.unk4 - hit->dir.unk4 * 5.0f;
-                back[2] = hit->hit.unk8 - hit->dir.unk8 * 5.0f;
+                front[0] = hit->hit.x + hit->dir.x * 5.0f;
+                front[1] = hit->hit.y + hit->dir.y * 5.0f;
+                front[2] = hit->hit.z + hit->dir.z * 5.0f;
+                back[0] = hit->hit.x - hit->dir.x * 5.0f;
+                back[1] = hit->hit.y - hit->dir.y * 5.0f;
+                back[2] = hit->hit.z - hit->dir.z * 5.0f;
                 func_150EB484(front, back, &vc);
             }
             // fallthrough
         case 9:
         case 10:
             effect = -1;
-            func_15104608(hit->hit.unk0, hit->hit.unk4, hit->hit.unk8, self->unk124);
+            func_15104608(hit->hit.x, hit->hit.y, hit->hit.z, self->unk124);
             func_1506AC8C(self, 2, 0);
             break;
         default:
@@ -716,7 +716,7 @@ s32 func_15081E78(GameObj *self, RayHit *hit, s32 kind) {
                 if (obj->unk31C != NULL) {
                     obj->unk31C->unk1AD = 1;
                 }
-                if (obj->id == 0x80 && hit->unk5A == 0 && hit->hit.unk4 - 5.5f > hit->centre.unk4) {
+                if (obj->id == 0x80 && hit->unk5A == 0 && hit->hit.y - 5.5f > hit->centre.y) {
                     func_15060A9C((func_150ADA20() & 7) + 0x2E3, obj);
                 }
                 func_15138C80(obj, 0xFF, 1);
@@ -756,9 +756,9 @@ s32 func_15081E78(GameObj *self, RayHit *hit, s32 kind) {
         if (spawnEffect != 0 && obj->health < 2) {
             GameObj source;
 
-            source.x_position = hit->hit.unk0;
-            source.y_position = hit->hit.unk4;
-            source.z_position = hit->hit.unk8;
+            source.x_position = hit->hit.x;
+            source.y_position = hit->hit.y;
+            source.z_position = hit->hit.z;
             source.unkB8 = pitch;
             source.unk40 = yaw + 180.0f;
             source.unkC4 = 0.0f;

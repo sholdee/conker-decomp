@@ -8,8 +8,8 @@
 #undef func_150A7CB0
 #include "variables.h"
 
-void func_150A7CB0(f32 mtx[4][4], f32 scaleX, f32 scaleY, f32 scaleZ); // functions.h types the scales s32
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+void func_150A7CB0(MtxF mtx, f32 scaleX, f32 scaleY, f32 scaleZ); // functions.h types the scales s32
+void func_150A7A48(MtxF a, MtxF b, MtxF c);
 void func_10004074();
 
 /* Turret settings (WorldObject.param.data); angles in degrees. */
@@ -144,7 +144,7 @@ typedef struct DrawEntry {
 extern DrawEntry **D_80089240[]; // per view
 extern Mtx **D_80089250[];       // per frame buffer: one Mtx per object
 extern u16 D_800DBEE8[];         // per view: entries in D_80089240
-extern f32 D_800D9C10[][4][4];   // per view
+extern MtxF D_800D9C10[];   // per view
 extern u8 D_800C3658[];
 
 extern s32 func_15022B08(s32, s32);
@@ -284,22 +284,22 @@ typedef struct Game13F9D0Actor {
     /* 0x092 */ u8 pad92[0xA5];
     /* 0x137 */ u8 unk137;
     /* 0x138 */ u8 pad138[0x9C];
-    /* 0x1D4 */ struct { f32 mtx[4][4]; } *unk1D4; // world matrix
+    /* 0x1D4 */ struct { MtxF mtx; } *unk1D4; // world matrix
     /* 0x1D8 */ u8 pad1D8[0x154];
 } Game13F9D0Actor; // size 0x32C
 
 #define ACTORS ((Game13F9D0Actor *)D_800CC2D0)
 
-void func_1511490C(f32 mtx[4][4], WorldObject *obj);
+void func_1511490C(MtxF mtx, WorldObject *obj);
 void func_150A7B80(void *);
-extern f32 D_800DBF08[][4][4];
+extern MtxF D_800DBF08[];
 
 /* Writes this frame's model matrix for every object in each view's draw list. */
 void func_15113218(void) {
     WorldObject *obj;
     Game13F9D0Actor *actor;
     f32 (*parent)[4];
-    f32 mf[4][4];
+    MtxF mf;
     s32 j;
     s32 view;
     s32 pad1[2]; // matching: unused stack slots
@@ -392,7 +392,7 @@ Gfx *func_1511FC44(Gfx *gfx, f32 x, f32 y, f32 z, s32 view);
 Gfx *func_1510CDB8(Gfx *gfx, s32, s32 alpha, s32 view);
 Gfx *func_1510D8C0(Gfx *gfx, WorldObject *obj);
 Gfx *func_150CF5E8(Gfx *gfx);
-Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, f32 mtx[4][4], s32, s32, s32);
+Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, MtxF mtx, s32, s32, s32);
 extern u8 D_80083D40[];
 extern u8 D_80083EC0[];
 extern s32 D_800BEBA4;
@@ -628,7 +628,7 @@ void func_15114188(void) {
     }
 }
 
-void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /*
  * Moves the point (*x, *y, *z) along with object objIndex: rotates it about the object by this frame's spin
@@ -641,8 +641,8 @@ void func_15114348(s32 objIndex, f32 *x, f32 *y, f32 *z) {
     f32 rx;
     f32 ry;
     f32 rz;
-    f32 m[4][4];
-    f32 m2[4][4];
+    MtxF m;
+    MtxF m2;
     f32 zaxis[3];
     f32 yaxis[3];
     f32 xaxis[3];
@@ -704,8 +704,8 @@ void func_1511473C(Game13F9D0Actor *actor, s32 objIndex) {
 }
 
 /* Builds an object's rotation matrix: yaw first, then pitch/roll (func_150A8050 makes Euler rotations). */
-void func_151148A8(f32 mtx[4][4], WorldObject *obj) {
-    f32 pitchRoll[4][4];
+void func_151148A8(MtxF mtx, WorldObject *obj) {
+    MtxF pitchRoll;
 
     func_150A8050(mtx, 0.0f, obj->rotY, 0.0f);
     func_150A8050(pitchRoll, obj->rotX, 0.0f, obj->rotZ);
@@ -713,8 +713,8 @@ void func_151148A8(f32 mtx[4][4], WorldObject *obj) {
 }
 
 /* Builds an object's model matrix: scale, then rotation, then translation to (x, y + yOffset, z). */
-void func_1511490C(f32 mtx[4][4], WorldObject *obj) {
-    f32 scale[4][4];
+void func_1511490C(MtxF mtx, WorldObject *obj) {
+    MtxF scale;
 
     func_151148A8(mtx, obj);
     mtx[3][0] = obj->x;

@@ -44,10 +44,10 @@ extern FxImpactEntry D_800A925C[];
 
 u8 func_151D8E20(void);
 void func_1514C678(f32 x, f32 y, f32 z, f32, s32, s32, s32, s32, s32, f32, FxSpawnPayload *, s32);
-void func_151DBE80(u8, f32, f32, s16, vertex *, void *, s32, s32, s32, s32);
+void func_151DBE80(u8, f32, f32, s16, Vec3f *, void *, s32, s32, s32, s32);
 
 /* Spawns the effects listed for impact type `type` at `pos` on surface `hit`. */
-void func_151ABE40(vertex *pos, FxSurfaceHit *hit, s32 type, s32 arg3, s32 arg4) {
+void func_151ABE40(Vec3f *pos, FxSurfaceHit *hit, s32 type, s32 arg3, s32 arg4) {
     FxImpactSet *set;
     u8 kind;
 
@@ -277,20 +277,20 @@ s32 func_151AC3CC(FxEmitter *emitter) {
     return 1;
 }
 
-void func_151DAB58(u8, f32, u8, struct17 *, s32, u8, s32);
+void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, s32);
 
 /* Spawns a burst at the emitter's current point (with height `y`): randomly one of two
  * effects, scaled from the emitter's data. */
 s32 func_151AC408(FxEmitter *emitter, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
     FxEmitterData *data = emitter->data;
     FxEmitterPoint *points = emitter->points;
-    struct17 pos;
+    Vec3f pos;
     u8 kind;
     s32 life;
 
-    pos.unk0 = points[emitter->pointIndex].x;
-    pos.unk4 = y;
-    pos.unk8 = points[emitter->pointIndex].z;
+    pos.x = points[emitter->pointIndex].x;
+    pos.y = y;
+    pos.z = points[emitter->pointIndex].z;
     kind = func_151D8E20();
     if (func_150ADA20() & 1) {
         life = func_150ADA20() % 41 + 80;

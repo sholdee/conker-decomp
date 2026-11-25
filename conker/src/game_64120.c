@@ -10,7 +10,6 @@ u8 func_150ADA20(void);
 s32 func_150380C0(f32 *, s32, s32, s32, f32, s32, f32 *, s32, s32, s32, s32);
 extern f32 D_800C3FD0[];
 
-
 extern s16 D_800C3FF4[];
 extern u16 *D_80084380[];
 extern u8 D_80097E7C[];
@@ -31,7 +30,6 @@ typedef struct {
 extern AimLimits D_80098068[];
 void func_1503B708(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range,
                    s32 preferId, f32 *bestDist, s32 noCheck, s32 skipUnk127, s32 anyRange, s32 axisMode);
-
 
 /* Per-object aim easing state (Actor +0x324), one entry per aim slot (pass, D_800C3FFA). */
 typedef struct CamData {
@@ -591,10 +589,6 @@ s32 func_15037880(s32 objIndex, f32 *out) {
     return 0;
 }
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* The eight node types func_150379DC scans for aim targets. */
 typedef struct {
     s32 types[8];
@@ -699,7 +693,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
                 target.y = held->y_position;
                 target.z = held->z_position;
             } else {
-                func_15043FF0((vertex *)&target, model);
+                func_15043FF0((Vec3f *)&target, model);
             }
             if (func_15037698(objIndex, refBone, bone, target.x, target.y, target.z, out, range, 0, axisMode)) {
                 return;
@@ -976,7 +970,7 @@ typedef struct {
 
 void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPitch, f32 fallbackYaw,
                    f32 fallbackPitch, s32 objIndex, s32 slot);
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+void func_150A7A48(MtxF a, MtxF b, MtxF c);
 extern u8 D_800BEA0C;
 extern u8 D_800C3FDC;
 extern f32 D_800C3FE0;
@@ -984,9 +978,9 @@ extern f32 D_800C3FE4;
 extern f32 D_800981A0[][4]; /* per rate index: yaw rate, pitch rate, yaw max step, pitch max step */
 s32 func_15021DB8(f32 *, f32 *, f32 *, f32 *, s32, s32);
 void func_15049C40(f32 *arg0, f32 *arg1);
-void func_15049CB8(f32 m[4][4], f32 *q);
+void func_15049CB8(MtxF m, f32 *q);
 void func_15049EDC(f32 *a, f32 *b, f32 t, f32 *out);
-void func_1504A140(f32 *q, f32 m[4][4]);
+void func_1504A140(f32 *q, MtxF m);
 
 /*
  * Turns bone matrix `bone` of object objIndex (measured against refBone) toward target (-99999 for none),
@@ -997,7 +991,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
                    s32 axes, s32 noLimit, s32 relative, s32 yawDeadzone, s32 argB, s32 axisMode) {
     Actor *obj;
     f32 (*refMtx)[4];
-    f32 result[4][4];
+    MtxF result;
     f32 scale[3];
     f32 dir[3];
     f32 localX;
@@ -1006,9 +1000,9 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
     f32 yaw;
     f32 pitch;
     f32 roll;
-    f32 mtxC[4][4];
-    f32 mtxA[4][4];
-    f32 mtxB[4][4];
+    MtxF mtxC;
+    MtxF mtxA;
+    MtxF mtxB;
     f32 forward[3];
     f32 origYaw;
     f32 origPitch;
@@ -1381,7 +1375,6 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
     }
 }
 
-
 /* Returns aim limits slot limitIdx (the same for every object). */
 AimLimits *func_15039A54(s32 objIndex, s32 limitIdx) {
     return &D_80098068[limitIdx];
@@ -1522,7 +1515,6 @@ typedef struct {
 
 s32 func_1503D774(s32 arg0, s32 arg1);
 void func_1507C3E0(Actor *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
-
 
 /*
  * Recomputes an object's aim points (OBJ_AIM) from its type's aim bone: the bone origin pushed out by
@@ -1675,8 +1667,8 @@ void func_1503A678(void) {
     f32 scaleX;
     f32 factor;
     f32 unused; // matching: -g3 stack slot
-    f32 scaleMtx[4][4];
-    f32 tmp[4][4];
+    MtxF scaleMtx;
+    MtxF tmp;
     f32 pos[3];
 
     obj = &D_800CC2D0[D_800C3E78];
@@ -1928,7 +1920,7 @@ void func_1503A830(Actor *obj) {
                     model = (u8 *)holderData->unk3E8[D_800BE9C0];
                     if (model != NULL) {
                         model += 0x80;
-                        func_15043FF0((vertex *)D_800C3FE8, (struct113 *)model);
+                        func_15043FF0((Vec3f *)D_800C3FE8, (struct113 *)model);
                         noHolderTarget = 0;
                     }
                 }

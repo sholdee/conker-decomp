@@ -54,14 +54,14 @@ extern s32 (*D_80082E30[])(LevelObject *);
 extern void (*D_80082F28[])(struct LevelObject *, f32);
 extern u8 D_800C35E8;
 extern void func_1510F800(s32);
-s32 func_151BE850(struct17 *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6);
+s32 func_151BE850(Vec3f *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6);
 s32 func_15149550(void *, s32, s32, u8, u8, s32);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 typedef struct {
     s8 unk0;
     u8 pad1[3];
-    struct17 unk4;
-    struct17 unk10;
+    Vec3f unk4;
+    Vec3f unk10;
     f32 unk1C;
     s8 unk20;
     u8 pad21[3];
@@ -223,7 +223,7 @@ s32 func_150130B4(LevelObject *obj) {
     s32 kind;
     s32 index;
     u8 onGround;
-    f32 mtx[4][4];
+    MtxF mtx;
 
     obj->flags |= 4;
     onGround = (obj->unk20 >> 24) & 0xFF;
@@ -387,7 +387,7 @@ s32 func_1501374C(LevelObject *obj) {
 }
 
 /* func_1000FA64 passes its arguments as full words (callers do not truncate). */
-void func_150A8050(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
+void func_150A8050(MtxF mtx, f32 arg1, f32 arg2, f32 arg3);
 
 typedef struct Game40490BeamPacket {
     f32 position[3];
@@ -404,7 +404,7 @@ typedef struct Game40490BeamPacket {
 s32 func_15013778(LevelObject *obj) {
     struct260 *effect;
     Game40490BeamPacket packet;
-    f32 matrix[4][4];
+    MtxF matrix;
 
     if (obj->sizeY != 0) {
         f32 inverse;
@@ -556,13 +556,13 @@ s32 func_15013C38(LevelObject *obj) {
 
 /** Calls func_151BE850 at the object's position, with a count of unk18 (at least 1). */
 s32 func_15013D38(LevelObject *obj) {
-    struct17 pos;
+    Vec3f pos;
     s32 count;
 
     obj->flags |= 4;
-    pos.unk0 = obj->x;
-    pos.unk4 = obj->y;
-    pos.unk8 = obj->z;
+    pos.x = obj->x;
+    pos.y = obj->y;
+    pos.z = obj->z;
 
     count = obj->unk18;
     func_151BE850(&pos, obj->rotY, count ? count : 1, (u8)obj->unk1C, 1, 0xFF, 1);
@@ -808,7 +808,7 @@ s32 func_150144B8(LevelObject *obj) {
     u32 value; // matching: holds the random number, then the effect address; two locals grow the frame
     struct {
         f32 direction[3];
-        f32 matrix[4][4];
+        MtxF matrix;
     } scratch;
 
     obj->flags |= 4;
@@ -983,7 +983,7 @@ s32 func_15014F6C(LevelObject *obj) {
         s32 unk4;
         s32 unk8;
         s32 unkC;
-        f32 mtx[4][4];
+        MtxF mtx;
         u8 unk50;
         u8 unk51;
     } data;
@@ -1013,14 +1013,14 @@ s32 func_15014F6C(LevelObject *obj) {
 }
 
 s32 func_150150A4(void) {
-    struct17 *item = func_1515F1B0();
+    Vec3f *item = func_1515F1B0();
 
     if (item == NULL) {
         return 1;
     }
 
     func_1515F25C(&D_800DCDC4, item);
-    D_800DCD90 += item->unk8;
+    D_800DCD90 += item->z;
     return 1;
 }
 
@@ -1139,7 +1139,7 @@ void func_15015354(LevelObject *obj) {
     f32 y;
     f32 x;
     f32 corners[4][3];
-    f32 mtx[4][4];
+    MtxF mtx;
     u8 i;
 
     data.unk0 = obj;
@@ -1225,8 +1225,8 @@ s32 func_15015644(LevelObject *obj) {
 /** Passes the object's two end points (its position, and sizeY along its rotation from there) to
  * func_151ACBD4, higher end first. In levels 0xB, 0x2C and 0x26 only objects with a large enough unk18 do. */
 s32 func_150156F4(LevelObject *obj) {
-    struct17 points[2];
-    f32 mtx[4][4];
+    Vec3f points[2];
+    MtxF mtx;
     Struct150156F4Payload payload;
 
     if (D_800BE9F0 == 0xB) {
@@ -1248,19 +1248,19 @@ s32 func_150156F4(LevelObject *obj) {
     mtx[3][1] = obj->y;
     mtx[3][2] = obj->z;
 
-    func_150A7960(mtx[0], 0.0f, obj->sizeY, 0.0f, &points[1].unk0, &points[1].unk4, &points[1].unk8);
+    func_150A7960(mtx[0], 0.0f, obj->sizeY, 0.0f, &points[1].x, &points[1].y, &points[1].z);
 
-    points[0].unk0 = obj->x;
-    points[0].unk4 = obj->y;
-    points[0].unk8 = obj->z;
+    points[0].x = obj->x;
+    points[0].y = obj->y;
+    points[0].z = obj->z;
     payload.unk0 = obj->unk18;
 
     /* unk4 gets the higher end, unk10 the lower */
-    payload.unk4 = points[points[0].unk4 < points[1].unk4];
-    payload.unk10 = points[points[1].unk4 < points[0].unk4];
+    payload.unk4 = points[points[0].y < points[1].y];
+    payload.unk10 = points[points[1].y < points[0].y];
 
     payload.unk20 = 0;
-    payload.unk1C = fabsf(points[1].unk4 - points[0].unk4);
+    payload.unk1C = fabsf(points[1].y - points[0].y);
     func_151ACBD4(&payload, 0);
 
     return 1;

@@ -138,8 +138,8 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
 /**
  * Moves camera `view` to `eye`, aims it at `actor`'s position and resets its derived state.
  */
-void func_15005818(Camera *view, Actor *actor, vertex *eye) {
-    vertex *viewEye;
+void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
+    Vec3f *viewEye;
 
     view->snap = 1;
     view->eye.x = eye->x;

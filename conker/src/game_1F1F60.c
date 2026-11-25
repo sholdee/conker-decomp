@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct { f32 x, y, z; } Vec3f;
-
 /* A pair of linked ids, each with a byte that goes with it. */
 typedef struct {
     /* 0x0 */ s32 idA;

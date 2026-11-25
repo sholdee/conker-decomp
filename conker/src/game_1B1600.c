@@ -3,7 +3,7 @@
 #define func_150A7CB0 func_150A7CB0_hdr
 #include "functions.h"
 #undef func_150A7CB0
-void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
+void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
 #include "variables.h"
 
 /* A shadow-polygon vertex while it is clipped in light space. */
@@ -105,13 +105,13 @@ typedef struct Node15184368 {
     s16 z;
 } Node15184368;
 
-extern struct17 D_800DE010; /* default light offset from the object */
-extern struct17 D_800DDFB0[]; /* light position per shadow slot */
+extern Vec3f D_800DE010; /* default light offset from the object */
+extern Vec3f D_800DDFB0[]; /* light position per shadow slot */
 extern f32 D_800DF6F8; /* light-to-object distance */
 extern f32 D_800DE028;
 extern f32 D_800DE02C;
 extern u8 D_800DF0E1;
-extern f32 D_800DF0F8[][4][4];
+extern MtxF D_800DF0F8[];
 extern u16 D_800DF0D0[];
 extern Mtx D_800DF2F8[][2];
 extern s32 D_800DF088;
@@ -121,9 +121,9 @@ extern f32 D_800D3684;
 extern f32 D_800D368C;
 extern s8 D_8008D3F8[8][3];
 extern s32 func_150AD9A0(s32, s32, s32);
-extern void func_15047390(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
+extern void func_15047390(MtxF mf, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+extern void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
 /*
  * Sets up the shadow projection for object objIndex in shadow slot `slot`: picks the nearest light node
@@ -132,9 +132,9 @@ extern void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
  * shadow should be drawn.
  */
 f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 minDist) {
-    struct17 delta;
-    struct17 objPos;
-    struct17 lightPos;
+    Vec3f delta;
+    Vec3f objPos;
+    Vec3f lightPos;
     f32 sx;
     f32 sy;
     f32 sz;
@@ -144,8 +144,8 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     f32 dist;
     f32 scale;
     f32 minY;
-    f32 proj[4][4];
-    f32 bias[4][4];
+    MtxF proj;
+    MtxF bias;
     s32 i;
     s32 done;
     s32 found;
@@ -154,16 +154,16 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     f32 perspScale;
     f32 v;
     Actor *obj;
-    struct17 *eye;
+    Vec3f *eye;
 
     obj = &D_800CC2D0[objIndex];
     done = 0;
     dist = 5000.0f;
-    objPos.unk0 = obj->x_position;
+    objPos.x = obj->x_position;
     perspScale = 2.0f;
-    objPos.unk4 = obj->y_position;
+    objPos.y = obj->y_position;
     found = 0;
-    objPos.unk8 = obj->z_position;
+    objPos.z = obj->z_position;
     if (D_800DE034 == 0) {
         node = (Node15184368 *)D_800DCD78;
         while (node != NULL) {
@@ -171,13 +171,13 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
                 nodePos[0] = node->x;
                 nodePos[1] = node->y;
                 nodePos[2] = node->z;
-                v = func_150AD9A0(nodePos[0] - objPos.unk0, nodePos[1] - objPos.unk4, nodePos[2] - objPos.unk8);
+                v = func_150AD9A0(nodePos[0] - objPos.x, nodePos[1] - objPos.y, nodePos[2] - objPos.z);
                 if (v < dist && minDist < v) {
                     dist = v;
                     found++;
-                    lightPos.unk0 = nodePos[0];
-                    lightPos.unk4 = nodePos[1];
-                    lightPos.unk8 = nodePos[2];
+                    lightPos.x = nodePos[0];
+                    lightPos.y = nodePos[1];
+                    lightPos.z = nodePos[2];
                 }
             }
             node = node->next;
@@ -187,60 +187,60 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
         if (minDist != 0.0f) {
             return 0.0f;
         }
-        if (D_800DE010.unk4 <= 0.0f) {
-            D_800DE010.unk0 = 100.0f;
-            D_800DE010.unk4 = 600.0f;
-            D_800DE010.unk8 = -200.0f;
+        if (D_800DE010.y <= 0.0f) {
+            D_800DE010.x = 100.0f;
+            D_800DE010.y = 600.0f;
+            D_800DE010.z = -200.0f;
         }
         dist = 1.0f;
-        lightPos.unk0 = D_800DE010.unk0 * D_800DE03C + objPos.unk0;
-        lightPos.unk4 = D_800DE010.unk4 * D_800DE03C + objPos.unk4;
-        lightPos.unk8 = D_800DE010.unk8 * D_800DE03C + objPos.unk8;
+        lightPos.x = D_800DE010.x * D_800DE03C + objPos.x;
+        lightPos.y = D_800DE010.y * D_800DE03C + objPos.y;
+        lightPos.z = D_800DE010.z * D_800DE03C + objPos.z;
     }
     if (*(s32 *)D_800DBFF4 != 0 || D_800DE038 >= 2) {
         eye = &D_800DDFB0[slot];
-        eye->unk0 = lightPos.unk0;
-        eye->unk4 = lightPos.unk4;
-        eye->unk8 = lightPos.unk8;
+        eye->x = lightPos.x;
+        eye->y = lightPos.y;
+        eye->z = lightPos.z;
     } else {
         eye = &D_800DDFB0[slot];
-        eye->unk0 = eye->unk0 + (lightPos.unk0 - eye->unk0) * 0.3f;
-        eye->unk4 = eye->unk4 + (lightPos.unk4 - eye->unk4) * 0.3f;
-        eye->unk8 = eye->unk8 + (lightPos.unk8 - eye->unk8) * 0.3f;
+        eye->x = eye->x + (lightPos.x - eye->x) * 0.3f;
+        eye->y = eye->y + (lightPos.y - eye->y) * 0.3f;
+        eye->z = eye->z + (lightPos.z - eye->z) * 0.3f;
     }
     func_15048F90(&objPos, eye, &delta);
-    D_800DF6F8 = func_150AD930(&delta.unk0);
+    D_800DF6F8 = func_150AD930(&delta.x);
     if (D_800DF6F8 < 200.0f) {
         f32 ratio;
         ratio = 200.0f / D_800DF6F8;
         D_800DF6F8 = 200.0f;
-        v = delta.unk0 * ratio;
-        D_800DDFB0[slot].unk0 += v - delta.unk0;
-        delta.unk0 = v;
-        v = delta.unk4 * ratio;
-        D_800DDFB0[slot].unk4 += v - delta.unk4;
-        delta.unk4 = v;
-        v = delta.unk8 * ratio;
-        D_800DDFB0[slot].unk8 += v - delta.unk8;
-        delta.unk8 = v;
+        v = delta.x * ratio;
+        D_800DDFB0[slot].x += v - delta.x;
+        delta.x = v;
+        v = delta.y * ratio;
+        D_800DDFB0[slot].y += v - delta.y;
+        delta.y = v;
+        v = delta.z * ratio;
+        D_800DDFB0[slot].z += v - delta.z;
+        delta.z = v;
     }
     if (D_800DE040 != 0) {
-        minY = sqrtf(delta.unk0 * delta.unk0 + delta.unk8 * delta.unk8) * 0.57735f;
+        minY = sqrtf(delta.x * delta.x + delta.z * delta.z) * 0.57735f;
         if (minY < 10.0f) {
             minY = 10.0f;
         }
     } else {
         minY = 10.0f;
     }
-    if (delta.unk4 < minY) {
-        D_800DDFB0[slot].unk4 += minY - delta.unk4;
-        delta.unk4 = minY;
-        v = func_150AD9A0(delta.unk0, delta.unk4, delta.unk8);
+    if (delta.y < minY) {
+        D_800DDFB0[slot].y += minY - delta.y;
+        delta.y = minY;
+        v = func_150AD9A0(delta.x, delta.y, delta.z);
         scale = D_800DF6F8 / v;
         D_800DF6F8 = v;
-        D_800DDFB0[slot].unk0 += delta.unk0 * scale - delta.unk0;
-        D_800DDFB0[slot].unk4 += delta.unk4 * scale - delta.unk4;
-        D_800DDFB0[slot].unk8 += delta.unk8 * scale - delta.unk8;
+        D_800DDFB0[slot].x += delta.x * scale - delta.x;
+        D_800DDFB0[slot].y += delta.y * scale - delta.y;
+        D_800DDFB0[slot].z += delta.z * scale - delta.z;
     }
     if (5000.0f * D_800DE03C < D_800DF6F8) {
         D_800D3688 = 0.0f;
@@ -253,13 +253,13 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     } else {
         D_800D3688 = -D_800DE028 * D_800DE03C - D_800DF6F8;
     }
-    func_15047390(D_800DF0F8[slot], D_800DDFB0[slot].unk0, D_800DDFB0[slot].unk4, D_800DDFB0[slot].unk8, objPos.unk0, objPos.unk4, objPos.unk8, 0.0f, 1.0f, 0.0f);
+    func_15047390(D_800DF0F8[slot], D_800DDFB0[slot].x, D_800DDFB0[slot].y, D_800DDFB0[slot].z, objPos.x, objPos.y, objPos.z, 0.0f, 1.0f, 0.0f);
     maxY = 0.0f;
     maxX = 0.0f;
     maxZ = -1000000.0f;
     for (i = 0; i < 8; i++) {
-        func_150A7960((f32 *)D_800DF0F8[slot], D_8008D3F8[i][0] * halfX + objPos.unk0, D_8008D3F8[i][1] * halfY + objPos.unk4,
-                      D_8008D3F8[i][2] * halfZ + objPos.unk8, &sx, &sy, &sz);
+        func_150A7960((f32 *)D_800DF0F8[slot], D_8008D3F8[i][0] * halfX + objPos.x, D_8008D3F8[i][1] * halfY + objPos.y,
+                      D_8008D3F8[i][2] * halfZ + objPos.z, &sx, &sy, &sz);
         if (sz == 0.0f) {
             sz = 0.0001f;
         }

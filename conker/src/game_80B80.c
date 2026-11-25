@@ -15,7 +15,7 @@ void func_150836CC(Actor *, s32);
 void func_1507C324(void *, void *);
 void func_1514AD9C(f32 *, s32, s32);
 void func_1503192C(Actor *, s32, s32, s32);
-void func_151DCDE0(struct17 *, s32, s32);
+void func_151DCDE0(Vec3f *, s32, s32);
 
 s32 func_1505C7D8(Actor *, u8);
 void func_15059C84(Actor *);
@@ -802,11 +802,11 @@ void func_1505528C(Actor *obj) {
     if ((hitFlags != 0) && (kind == 0x35)) {
         func_10010630(0x360, obj, 0x4E20, 500, 2500);
         if (obj->unk118 < obj->y_position) {
-            struct17 pos;
+            Vec3f pos;
 
-            pos.unk0 = obj->x_position;
-            pos.unk4 = obj->y_position + 20.0f;
-            pos.unk8 = obj->z_position;
+            pos.x = obj->x_position;
+            pos.y = obj->y_position + 20.0f;
+            pos.z = obj->z_position;
             func_151DCDE0(&pos, 0xFF, 1);
         }
         func_15060F28(obj, 1);

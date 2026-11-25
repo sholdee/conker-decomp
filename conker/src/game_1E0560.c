@@ -3,12 +3,8 @@
 #include "variables.h"
 
 typedef struct {
-    f32 x, y, z;
-} Vec3f_1E0560;
-
-typedef struct {
-    /* 0x00 */ Vec3f_1E0560 pos;
-    /* 0x0C */ Vec3f_1E0560 vel;
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ Vec3f vel;
 } HoltenRopePoint;
 
 /* Rope effect: a 10-point chain hung between two endpoints and drawn as a textured strip. */
@@ -17,8 +13,8 @@ typedef struct {
     /* 0x010 */ u8 flags;           // ROPE_FLAG_*
     /* 0x011 */ u8 pad11;
     /* 0x012 */ s16 timer;
-    /* 0x014 */ Vec3f_1E0560 start; // written by startCallback
-    /* 0x020 */ Vec3f_1E0560 end;   // written by endCallback
+    /* 0x014 */ Vec3f start; // written by startCallback
+    /* 0x020 */ Vec3f end;   // written by endCallback
     /* 0x02C */ s8 startCallback;   // index into D_8008FAF0, -1 for none
     /* 0x02D */ s8 endCallback;     // index into D_8008FAF0, -1 for none
     /* 0x02E */ u8 drawStyle;       // index into D_8008FB10
@@ -52,7 +48,7 @@ typedef struct {
 typedef struct {
     /* 0x000 */ s32 unk0;
     /* 0x004 */ u8 pad4[0x10];
-    /* 0x014 */ Vec3f_1E0560 pos;
+    /* 0x014 */ Vec3f pos;
     /* 0x020 */ u8 pad20[0x1B];
     /* 0x03B */ u8 unk3B;
     /* 0x03C */ u8 pad3C[0x198];
@@ -70,7 +66,7 @@ typedef struct {
     HoltenRopeAnchor anchor;
 } HoltenRopeAttached;
 
-extern s32 (*D_8008FAF0[])(HoltenRopeEffect *, Vec3f_1E0560 *, s32);
+extern s32 (*D_8008FAF0[])(HoltenRopeEffect *, Vec3f *, s32);
 extern s32 (*D_8008FAF8[])(HoltenRopeEffect *);
 extern void (*D_8008FB70[])(HoltenRopeEffect *);
 extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
@@ -166,8 +162,8 @@ extern struct {
 Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
     s32 i;
     Vtx *vtx;
-    Vec3f_1E0560 a;
-    Vec3f_1E0560 b;
+    Vec3f a;
+    Vec3f b;
     s32 texT;
     f32 *eye;
     f32 toEyeX;
@@ -338,7 +334,7 @@ void func_151B3A34(HoltenRopeEffect *effect, s32 arg1, u8 arg2) {
 /* Update callback: lays the points out in a straight line from start to end, at rest. */
 s32 func_151B3A7C(HoltenRopeEffect *effect) {
     s32 pad[4]; // matching: stack slots
-    Vec3f_1E0560 pos;
+    Vec3f pos;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -367,10 +363,10 @@ s32 func_151B3A7C(HoltenRopeEffect *effect) {
  * in the vertical plane through both ends.
  */
 s32 func_151B3CF0(HoltenRopeEffect *effect) {
-    Vec3f_1E0560 delta;
-    Vec3f_1E0560 mid;
-    Vec3f_1E0560 relStart;
-    Vec3f_1E0560 relEnd;
+    Vec3f delta;
+    Vec3f mid;
+    Vec3f relStart;
+    Vec3f relEnd;
     f32 invDist;
     f32 dirZ;
     f32 dirX;
@@ -419,7 +415,7 @@ s32 func_151B3CF0(HoltenRopeEffect *effect) {
  * Endpoint callback for a rope hung from an actor: the start follows the actor
  * while it is still the one recorded at creation, the end hangs at a fixed point.
  */
-s32 func_151B3F28(HoltenRopeAttached *rope, Vec3f_1E0560 *pos, u8 isStart) {
+s32 func_151B3F28(HoltenRopeAttached *rope, Vec3f *pos, u8 isStart) {
     s32 ret;
 
     ret = TRUE;
@@ -452,9 +448,9 @@ s32 func_151B3FDC(HoltenRopeEffect *effect) {
     f32 dx;
     f32 dy;
     f32 dz;
-    Vec3f_1E0560 mid;
-    Vec3f_1E0560 relStart;
-    Vec3f_1E0560 relEnd;
+    Vec3f mid;
+    Vec3f relStart;
+    Vec3f relEnd;
     f32 horizDist;
     f32 inv;
     f32 dirZ;
@@ -538,9 +534,9 @@ u8 func_151B42A4(HoltenRopeEffect *effect) {
     f32 dx;
     f32 dy;
     f32 dz;
-    Vec3f_1E0560 mid;
-    Vec3f_1E0560 relStart;
-    Vec3f_1E0560 relEnd;
+    Vec3f mid;
+    Vec3f relStart;
+    Vec3f relEnd;
     f32 horizDist;
     f32 inv;
     f32 pad3[5];  // matching: stack slots
@@ -565,8 +561,8 @@ u8 func_151B42A4(HoltenRopeEffect *effect) {
     f32 ellipseY;
     f32 acrossOffset;
     f32 pad6;     // matching: stack slot
-    Vec3f_1E0560 prev;
-    Vec3f_1E0560 target;
+    Vec3f prev;
+    Vec3f target;
     f32 offsetX;
     f32 offsetY;
     f32 offsetZ;
@@ -631,7 +627,7 @@ u8 func_151B42A4(HoltenRopeEffect *effect) {
                     point->vel.z = 0.0f;
                 } else if (*(s32 *)D_800DBFF4 != 0) {
                     point->pos = target;
-                    point->vel = *(Vec3f_1E0560 *)&D_800A5480;
+                    point->vel = D_800A5480;
                 } else {
                     offsetX = (prev.x - target.x) * weight * effect->lagScale;
                     offsetY = (prev.y - target.y) * weight * effect->lagScale;
@@ -662,7 +658,7 @@ typedef struct {
     /* 0x04 */ u8 targetId; // target->unk3B when the rope was attached
     /* 0x05 */ u8 bone;
     /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ Vec3f_1E0560 offset; // in the bone's space
+    /* 0x08 */ Vec3f offset; // in the bone's space
 } HoltenRopeBoneAnchor;
 
 typedef struct {
@@ -670,13 +666,13 @@ typedef struct {
     HoltenRopeBoneAnchor end;
 } HoltenRopeBoneAnchors;
 
-void func_15143134(Vec3f_1E0560 *in, Vec3f_1E0560 *out, Mtx *mtx);
+void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 
 /*
  * Places one end of a rope tied between two bones (called through func_151B2FA0). Returns 0 once
  * either actor is gone; while either has no bone matrices yet, both ends are marked lost.
  */
-s32 func_151B47D8(HoltenRopeEffect *effect, HoltenRopeBoneAnchors *anchors, Vec3f_1E0560 *pos, u8 isStart) {
+s32 func_151B47D8(HoltenRopeEffect *effect, HoltenRopeBoneAnchors *anchors, Vec3f *pos, u8 isStart) {
     HoltenRopeTarget *startTarget = anchors->start.target;
     HoltenRopeTarget *endTarget = anchors->end.target;
 

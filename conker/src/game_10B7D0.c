@@ -6,15 +6,10 @@
 #undef func_150DE32C
 /* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
 #define D_800D3098 D_800D3098_array_decl_in_variables_h
-#define D_800A5480 D_800A5480_f32_decl_in_variables_h
 #include "variables.h"
 #include "effects.h"
 #undef D_800D3098
-#undef D_800A5480
 extern struct178 *D_800D3098;
-
-/* variables.h declares D_800A5480 as one f32; it is a vector (copied whole into ParticleDef.rot). */
-extern vertex D_800A5480;
 
 extern s32 func_150A32B4(struct178 *, s32, s32, s32);
 extern WorldObject *func_151149AC(u8);
@@ -130,10 +125,10 @@ void func_150DE6D8(WorldObject *prop) {
 
 /* State func_150DE7C0 stores after each particle it spawns. */
 typedef struct {
-    /* 0x00 */ vertex velocity;
+    /* 0x00 */ Vec3f velocity;
     /* 0x0C */ f32 timeLeft; // until the particle reaches the target
-    /* 0x10 */ vertex side;    // horizontal, perpendicular to forward
-    /* 0x1C */ vertex forward; // unit vector from source to target, flattened onto the XZ plane
+    /* 0x10 */ Vec3f side;    // horizontal, perpendicular to forward
+    /* 0x1C */ Vec3f forward; // unit vector from source to target, flattened onto the XZ plane
 } ParticleTravel;
 
 /* A particle spawned by func_1513D2F0, with func_150DE7C0's state at 0x110. */
@@ -166,17 +161,17 @@ typedef struct {
 } Emitter;
 
 void *memcpy(void *, const void *, u32);
-void func_1514470C(s32, vertex *);
-s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
-s32 func_15140410(Particle *, vertex *, vertex *, s16);
+void func_1514470C(s32, Vec3f *);
+s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
+s32 func_15140410(Particle *, Vec3f *, Vec3f *, s16);
 extern TexturePair D_800A0D00;
 
 /* Every 200-400 frames, spawns a particle (texture 0xBE or 0xBF) at the link's source position that
  * travels to its target position at a random speed of 25-55 (0xBF ones at 0.18 of that). */
 void func_150DE7C0(Emitter *emitter) {
     EmitterLink *link;
-    vertex target;
-    vertex delta;
+    Vec3f target;
+    Vec3f delta;
     f32 length;
     f32 unused;
     f32 base;

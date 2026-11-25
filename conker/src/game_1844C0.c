@@ -2,10 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* Model instance created by func_1503F62C (see game_6C960.c); only the fields used here. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x3E0];
@@ -88,7 +84,7 @@ typedef struct {
     /* 0x071 */ u8 pad71[3];
     /* 0x074 */ s32 segment1;
     /* 0x078 */ s32 unk78;
-    /* 0x07C */ f32 mtx[2][4][4]; /* per frame */
+    /* 0x07C */ MtxF mtx[2]; /* per frame */
     /* 0x0FC */ EffectAttach attach;
     /* 0x118 */ s32 unk118;
     /* 0x11C */ u8 pad11C[4];

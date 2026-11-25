@@ -15,7 +15,7 @@ typedef struct {
  * (same layout as DropBurstSpec in game_2062D0.c). */
 typedef struct {
     /* 0x00 */ BurstAngles angles;
-    /* 0x08 */ struct17 pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ s16 count;
     /* 0x16 */ s16 countRange;
     /* 0x18 */ f32 speed;
@@ -38,14 +38,14 @@ typedef struct {
     /* 0x44 */ f32 bounceChance;
 } DropBurstSpec; /* 0x48 */
 
-void func_15103254(s16 lifetime, u8 alpha, f32 size, struct17 *pos, u8 views, u8 arg5, s32 arg6);
-void func_15150178(DropBurstSpec *spec, struct17 *pos, s32 arg2, u8 owner, s32 kind);
-void func_151D3F14(struct17 *pos, u8 owner, s32 kind);
+void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 arg5, s32 arg6);
+void func_15150178(DropBurstSpec *spec, Vec3f *pos, s32 arg2, u8 owner, s32 kind);
+void func_151D3F14(Vec3f *pos, u8 owner, s32 kind);
 void func_15182670(u8 r, u8 g, u8 b, u8 alpha, s32 duration, s32 view, u8 owner, s32 kind);
 
 /* Spawns a flash particle, a burst of 12-18 drops, the func_151D3F14 effect and a white screen
  * flash at `pos`. */
-void func_151DC6A0(struct17 *pos, u8 owner, s32 kind) {
+void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind) {
     func_15103254(func_150ADA20() % 5U + 12, func_150ADA20() % 56U + 200, func_150ADA68() * 600.0f + 1700.0f,
                   pos, 0xFF, owner, kind);
     {
@@ -82,7 +82,7 @@ void func_151DC6A0(struct17 *pos, u8 owner, s32 kind) {
 
 /* Data of the effect spawned by func_151DC8BC and updated by func_151DC97C. */
 typedef struct {
-    /* 0x00 */ struct17 pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 accum;        /* particles still to emit; func_151DC97C emits one per whole unit */
     /* 0x10 */ u8 randomColors;  /* nonzero: each particle takes one of three random colour pairs */
     /* 0x11 */ u8 pad11[3];
@@ -101,7 +101,7 @@ typedef struct {
 
 /* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by func_151DC97C
  * (D_8008A4E8[0x5B]), preceded by a func_151DC6A0 burst when `burst` is set. */
-void func_151DC8BC(struct17 *pos, s32 duration, u8 burst, u8 randomColors, u8 owner, s32 kind) {
+void func_151DC8BC(Vec3f *pos, s32 duration, u8 burst, u8 randomColors, u8 owner, s32 kind) {
     EmitterData data;
     Emitter *emitter;
 
@@ -176,7 +176,7 @@ void func_151DC97C(Emitter *emitter) {
         desc.scaleStart = 120;
         desc.brightness = 0xFF;
         desc.scaleRate = 1.006579f;
-        desc.pos = *(vertex *)&data->pos; // TODO(vectors): struct17/vertex mix
+        desc.pos = *(Vec3f *)&data->pos; // TODO(vectors): struct17/vertex mix
         desc.offset.x = 0.0f;
         desc.offset.y = 0.0f;
         desc.offset.z = 0.0f;

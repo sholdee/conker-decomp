@@ -7,7 +7,7 @@
 typedef struct {
     s32 unk00;
     s32 unk04;
-    struct17 unk08; // position
+    Vec3f unk08; // position
     s16 unk14;
     s16 unk16;
     s16 unk18;
@@ -29,7 +29,7 @@ typedef struct {
     s16 unk02;
     s16 unk04;
     s16 unk06;
-    struct17 unk08; // position
+    Vec3f unk08; // position
     f32 unk14;
     f32 unk18;
     f32 unk1C;
@@ -60,7 +60,7 @@ extern s32 func_15143E24(Actor *);
 extern void func_1504715C(Floor150B06B0 *, Actor *);
 extern void func_151C329C(void *, u8, s32);
 extern void func_15152190(Arg150B06B0_2190 *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
-extern void func_15153F18(Arg150B06B0_3F18 *, struct17 *, Floor150B06B0 *, u8, s32);
+extern void func_15153F18(Arg150B06B0_3F18 *, Vec3f *, Floor150B06B0 *, u8, s32);
 
 extern const s32 D_8009F810[1];
 extern const f32 D_8009F814[1];
@@ -73,22 +73,22 @@ extern const f32 D_8009F81C[1];
  * func_15153F18 passes (unk3C = 0, then 1) using the func_1504715C info for actor.
  */
 void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
-    struct17 pos;
+    Vec3f pos;
     s8 angle;
     Floor150B06B0 floor;
 
-    pos.unk0 = actor->x_position;
-    pos.unk4 = actor->y_position;
-    pos.unk8 = actor->z_position;
+    pos.x = actor->x_position;
+    pos.y = actor->y_position;
+    pos.z = actor->z_position;
     angle = func_15143E24(other) + 0x40;
     func_1504715C(&floor, actor);
     if (actor->id == 0xA6) {
-        struct17 raisedPos;
+        Vec3f raisedPos;
         Arg150B06B0_2190 burst;
 
-        raisedPos.unk0 = pos.unk0;
-        raisedPos.unk4 = pos.unk4 + 50.0f;
-        raisedPos.unk8 = pos.unk8;
+        raisedPos.x = pos.x;
+        raisedPos.y = pos.y + 50.0f;
+        raisedPos.z = pos.z;
         func_151C329C(&raisedPos, arg2, arg3);
         burst.unk00 = 10;
         burst.unk04 = 10;
@@ -267,7 +267,7 @@ void func_150B0D20(DDB60Effect *effect) {
     s32 idx;
     f32 forward[2];
     f32 right[2];
-    f32 *refVel;
+    Vec3f *refVel;
     f32 pos[3];
     f32 vel[3];
     s16 angle;
@@ -304,8 +304,8 @@ void func_150B0D20(DDB60Effect *effect) {
             do {
                 func_150B0A60(owner, &D_800CC2D0[idx], forward, right, pos, &angle);
                 func_15143794(angle, (func_150ADA20() % 26) - 41, func_150ADA68() * 3.769999981f + 4.059999943f, vel);
-                vel[0] -= refVel[0] * 0.9250000715f;
-                vel[2] -= refVel[2] * 0.9250000715f;
+                vel[0] -= refVel->x * 0.9250000715f;
+                vel[2] -= refVel->z * 0.9250000715f;
                 func_151D9014(pos, vel, 5, func_150ADA68() * 0.1780000031f + -0.4420000315f,
                               (func_150ADA20() % 21) + 20, (func_150ADA20() % 101) + 155,
                               func_150ADA68() * 50.0f + 80.0f, func_150ADA68() < 0.04400000349f, 1.399999976f,

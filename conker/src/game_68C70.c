@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
 /* Simulation state of the 5-joint bone chain driven from bones 24-28 (0x50 bytes). */
 typedef struct BoneChain {
     /* 0x00 */ f32 pos[5][3];   /* joint world positions, root first */
@@ -13,9 +12,6 @@ typedef struct BoneChain {
     /* 0x4C */ s16 swayTimer;   /* frames until the next idle sway */
     /* 0x4E */ u8 blendTimer;   /* frames left blending back from the animated pose */
 } BoneChain;
-
-typedef f32 MtxF[4][4]; /* one bone matrix; Actor.unk1D4 points at an array of them */
-
 
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 
@@ -423,7 +419,7 @@ void func_1503B9BC(s32 objIndex) {
     func_1503CB98(objIndex, mode, blend, chain);
 }
 
-void func_150440A0(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
+void func_150440A0(MtxF arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 
 /*
  * Rebuilds bone matrices 24-27 so that each one looks from chain joint i to joint i+1, keeping the
@@ -439,7 +435,7 @@ void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain) {
     f32 inv;
     s32 i;
     s32 j;
-    f32 rootMtx[4][4];
+    MtxF rootMtx;
     f32 animPos[5][3];
     s32 boneOffset;
     s32 joint;
@@ -519,44 +515,4 @@ void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain) {
         chain->blendTimer = 30;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

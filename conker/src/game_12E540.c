@@ -19,9 +19,9 @@ typedef struct {
 typedef struct {
     u8 pad0[0xB4];
     f32 targetDist;
-    struct17 targetPos;
+    Vec3f targetPos;
     u8 padC4[0x24];
-    struct17 targetDir;
+    Vec3f targetDir;
     HitInfo targetHit;
     u8 pad106[3];
     u8 targetType; // 0 = no target
@@ -53,7 +53,7 @@ typedef struct {
     u8 pad0[0x38];
     f32 sizeX;
     f32 sizeY;
-    struct17 pos;
+    Vec3f pos;
     u8 pad4C[0x5C];
     f32 baseSizeX;
     f32 baseSizeY;
@@ -71,7 +71,7 @@ typedef struct {
 /* beam->data.hitFx: placed just short of the hit point on type 1 hits. */
 typedef struct {
     u8 pad0[0x34];
-    struct17 pos;
+    Vec3f pos;
     u8 pad40[0xD0];
     BeamHitFxData data;
 } BeamHitFx;
@@ -93,8 +93,8 @@ typedef struct {
 /* beam->data.line: spans the beam from start to end. */
 typedef struct {
     u8 pad0[0x34];
-    struct17 start;
-    struct17 end;
+    Vec3f start;
+    Vec3f end;
     u8 pad4C[0xC];
     s32 unk58;
     u8 pad5C[0x114];
@@ -104,7 +104,7 @@ typedef struct {
 /* beam->data.endFx: placed at the beam's end on type 2 and 3 hits. */
 typedef struct {
     u8 pad0[0x40];
-    struct17 pos;
+    Vec3f pos;
     u8 pad4C[0x5C];
     BeamLink link;
 } BeamEndFx;
@@ -113,8 +113,8 @@ typedef struct {
     BeamOwner *owner;
     u8 unk4; // must match owner->unk3B
     u8 pad5[3];
-    struct17 localStart;  // in bone space
-    struct17 localTarget; // in bone space
+    Vec3f localStart;  // in bone space
+    Vec3f localTarget; // in bone space
     u8 bone;
     u8 pad21;
     u8 unk22;
@@ -138,8 +138,8 @@ typedef struct {
 
 struct Beam {
     u8 pad0[0x34];
-    struct17 start;
-    struct17 end;
+    Vec3f start;
+    Vec3f end;
     u8 pad4C[0x74];
     Vtx vtxTemplate[4];
     Vtx *vtxBuf[4];
@@ -266,8 +266,8 @@ void func_15101350(BeamEndFx *fx) {
     func_1513175C((struct210 *)fx);
 }
 
-extern void func_15143134(struct17 *src, struct17 *dst, f32 (*mtx)[4]);
-extern f32 func_15143E64(struct17 *);
+extern void func_15143134(Vec3f *src, Vec3f *dst, f32 (*mtx)[4]);
+extern f32 func_15143E64(Vec3f *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32 *, HitInfo *, f32 *, f32 *, f32 *, s32, s32, s32, f32);
 
 /*
@@ -281,10 +281,10 @@ s8 func_15101378(Beam *beam) {
     BeamOwner *owner;
     u8 hit;
     HitInfo hitInfo;
-    struct17 dir;
+    Vec3f dir;
     u8 endIsHit; // matching: always tested as endIsHit != 0; a bare test changes the frame size
     f32 (*boneMtx)[4];
-    struct17 target;
+    Vec3f target;
     s32 unkOut;
     s32 hitType;
     s32 pad; // matching: stack slot needed for the frame size
@@ -309,31 +309,31 @@ s8 func_15101378(Beam *beam) {
                     beam->end = owner->aim->targetPos;
                     data->length = owner->aim->targetDist;
                     hitInfo = owner->aim->targetHit;
-                    dir.unk0 = beam->end.unk0 - beam->start.unk0;
-                    dir.unk4 = beam->end.unk4 - beam->start.unk4;
-                    dir.unk8 = beam->end.unk8 - beam->start.unk8;
+                    dir.x = beam->end.x - beam->start.x;
+                    dir.y = beam->end.y - beam->start.y;
+                    dir.z = beam->end.z - beam->start.z;
                 } else {
                     endIsHit = 0;
                     hitType = 2;
                     data->length = 2000.0f;
-                    dir.unk0 = owner->aim->targetDir.unk0 * 2000.0f;
-                    dir.unk4 = owner->aim->targetDir.unk4 * 2000.0f;
-                    dir.unk8 = owner->aim->targetDir.unk8 * 2000.0f;
-                    beam->end.unk0 = beam->start.unk0 + dir.unk0;
-                    beam->end.unk4 = beam->start.unk4 + dir.unk4;
-                    beam->end.unk8 = beam->start.unk8 + dir.unk8;
+                    dir.x = owner->aim->targetDir.x * 2000.0f;
+                    dir.y = owner->aim->targetDir.y * 2000.0f;
+                    dir.z = owner->aim->targetDir.z * 2000.0f;
+                    beam->end.x = beam->start.x + dir.x;
+                    beam->end.y = beam->start.y + dir.y;
+                    beam->end.z = beam->start.z + dir.z;
                 }
             } else {
                 func_15143134(&data->localTarget, &target, boneMtx);
-                target.unk0 = target.unk0 - beam->start.unk0;
-                target.unk4 = target.unk4 - beam->start.unk4;
-                target.unk8 = target.unk8 - beam->start.unk8;
-                if (func_150AC9C0(beam->start.unk0, beam->start.unk4, beam->start.unk8, target.unk0, target.unk4,
-                                  target.unk8, &unkOut, &hitInfo, &beam->end.unk0, &beam->end.unk4, &beam->end.unk8, 0,
+                target.x = target.x - beam->start.x;
+                target.y = target.y - beam->start.y;
+                target.z = target.z - beam->start.z;
+                if (func_150AC9C0(beam->start.x, beam->start.y, beam->start.z, target.x, target.y,
+                                  target.z, &unkOut, &hitInfo, &beam->end.x, &beam->end.y, &beam->end.z, 0,
                                   0, 0, 0.0f) != hit * 0) { // matching: reading hit here makes IDO keep it in v1
-                    dir.unk0 = beam->end.unk0 - beam->start.unk0;
-                    dir.unk4 = beam->end.unk4 - beam->start.unk4;
-                    dir.unk8 = beam->end.unk8 - beam->start.unk8;
+                    dir.x = beam->end.x - beam->start.x;
+                    dir.y = beam->end.y - beam->start.y;
+                    dir.z = beam->end.z - beam->start.z;
                     hit = 1;
                     data->length = func_15143E64(&dir);
                 } else {
@@ -362,9 +362,9 @@ s8 func_15101378(Beam *beam) {
                     if (data->length > 40.0f) {
                         f32 invLength = 1.0f / data->length;
 
-                        hitFx->pos.unk0 = beam->end.unk0 - dir.unk0 * invLength * 20.0f;
-                        hitFx->pos.unk4 = beam->end.unk4 - dir.unk4 * invLength * 20.0f;
-                        hitFx->pos.unk8 = beam->end.unk8 - dir.unk8 * invLength * 20.0f;
+                        hitFx->pos.x = beam->end.x - dir.x * invLength * 20.0f;
+                        hitFx->pos.y = beam->end.y - dir.y * invLength * 20.0f;
+                        hitFx->pos.z = beam->end.z - dir.z * invLength * 20.0f;
                     } else {
                         hitFx->pos = beam->end;
                     }
@@ -387,9 +387,9 @@ s8 func_15101378(Beam *beam) {
             if (data->endPoint != NULL) {
                 endPoint = data->endPoint;
                 do {} while (0); // matching: adds the uopt temp that puts the t0 spill at 0x5C
-                endPoint->data->pos[0] = beam->end.unk0;
-                endPoint->data->pos[1] = beam->end.unk4;
-                endPoint->data->pos[2] = beam->end.unk8;
+                endPoint->data->pos[0] = beam->end.x;
+                endPoint->data->pos[1] = beam->end.y;
+                endPoint->data->pos[2] = beam->end.z;
                 if (endIsHit != 0) {
                     endPoint->data->disabled = 0;
                 } else {
@@ -449,7 +449,7 @@ s8 func_15101378(Beam *beam) {
 
 
 extern f32 *func_15144B34(s32);
-extern void func_15145548(struct17 *, struct17 *, f32 *, struct17 *, s32);
+extern void func_15145548(Vec3f *, Vec3f *, f32 *, Vec3f *, s32);
 
 /*
  * Builds this frame's quad for the beam as seen from viewport `viewport`: four vertices from start to
@@ -461,15 +461,15 @@ Vtx *func_151019C4(Beam *beam, s16 viewport) {
     Vtx *vtx;
     Vtx *result;
     f32 *eye;
-    struct17 dir;
-    struct17 closest;
+    Vec3f dir;
+    Vec3f closest;
     f32 dx, dy, dz;
     f32 sideZ, sideY, sideX;
     f32 sideLenSq;
     f32 scale;
     f32 scrollSpeed;
-    struct17 start;
-    struct17 end;
+    Vec3f start;
+    Vec3f end;
     f32 drawLen;
     u8 isNew;
     s32 texStart, texEnd, texSpan;
@@ -496,27 +496,27 @@ Vtx *func_151019C4(Beam *beam, s16 viewport) {
         if (maxLen < scale) {
             f32 ratio = maxLen / scale;
 
-            dir.unk0 = (beam->end.unk0 - start.unk0) * ratio;
-            dir.unk4 = (beam->end.unk4 - start.unk4) * ratio;
-            dir.unk8 = (beam->end.unk8 - start.unk8) * ratio;
-            end.unk0 = start.unk0 + dir.unk0;
-            end.unk4 = start.unk4 + dir.unk4;
-            end.unk8 = start.unk8 + dir.unk8;
+            dir.x = (beam->end.x - start.x) * ratio;
+            dir.y = (beam->end.y - start.y) * ratio;
+            dir.z = (beam->end.z - start.z) * ratio;
+            end.x = start.x + dir.x;
+            end.y = start.y + dir.y;
+            end.z = start.z + dir.z;
             drawLen = maxLen;
         } else {
             end = beam->end;
-            dir.unk0 = end.unk0 - start.unk0;
-            dir.unk4 = end.unk4 - start.unk4;
-            dir.unk8 = end.unk8 - start.unk8;
+            dir.x = end.x - start.x;
+            dir.y = end.y - start.y;
+            dir.z = end.z - start.z;
             drawLen = data->length;
         }
         func_15145548(&start, &dir, eye, &closest, 0);
-        dx = closest.unk0 - eye[0];
-        dy = closest.unk4 - eye[1];
-        dz = closest.unk8 - eye[2];
-        sideX = dir.unk4 * dz - dy * dir.unk8;
-        sideY = dir.unk8 * dx - dz * dir.unk0;
-        sideZ = dir.unk0 * dy - dx * dir.unk4;
+        dx = closest.x - eye[0];
+        dy = closest.y - eye[1];
+        dz = closest.z - eye[2];
+        sideX = dir.y * dz - dy * dir.z;
+        sideY = dir.z * dx - dz * dir.x;
+        sideZ = dir.x * dy - dx * dir.y;
         sideLenSq = sideX * sideX + sideY * sideY + sideZ * sideZ;
         if (sideLenSq == 0.0f) {
             sideZ = sideY = sideX = 0.0f;
@@ -547,30 +547,30 @@ Vtx *func_151019C4(Beam *beam, s16 viewport) {
                 texEnd = texStart + texSpan;
             }
         }
-        vtx->v.ob[0] = end.unk0 + sideX;
-        vtx->v.ob[1] = end.unk4 + sideY;
-        vtx->v.ob[2] = end.unk8 + sideZ;
+        vtx->v.ob[0] = end.x + sideX;
+        vtx->v.ob[1] = end.y + sideY;
+        vtx->v.ob[2] = end.z + sideZ;
         vtx->v.tc[1] = 0;
         vtx->v.tc[0] = texEnd;
         vtx->v.flag = 0;
         vtx++;
-        vtx->v.ob[0] = end.unk0 - sideX;
-        vtx->v.ob[1] = end.unk4 - sideY;
-        vtx->v.ob[2] = end.unk8 - sideZ;
+        vtx->v.ob[0] = end.x - sideX;
+        vtx->v.ob[1] = end.y - sideY;
+        vtx->v.ob[2] = end.z - sideZ;
         vtx->v.tc[1] = 0x7C0;
         vtx->v.tc[0] = texEnd;
         vtx->v.flag = 0;
         vtx++;
-        vtx->v.ob[0] = start.unk0 - sideX;
-        vtx->v.ob[1] = start.unk4 - sideY;
-        vtx->v.ob[2] = start.unk8 - sideZ;
+        vtx->v.ob[0] = start.x - sideX;
+        vtx->v.ob[1] = start.y - sideY;
+        vtx->v.ob[2] = start.z - sideZ;
         vtx->v.tc[1] = 0x7C0;
         vtx->v.tc[0] = texStart;
         vtx->v.flag = 0;
         vtx++;
-        vtx->v.ob[0] = start.unk0 + sideX;
-        vtx->v.ob[1] = start.unk4 + sideY;
-        vtx->v.ob[2] = start.unk8 + sideZ;
+        vtx->v.ob[0] = start.x + sideX;
+        vtx->v.ob[1] = start.y + sideY;
+        vtx->v.ob[2] = start.z + sideZ;
         vtx->v.tc[1] = 0;
         vtx->v.tc[0] = texStart;
         vtx->v.flag = 0;

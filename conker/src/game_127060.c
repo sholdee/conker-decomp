@@ -39,8 +39,8 @@ typedef struct {
 /* A spark object (func_1513D2F0) of the burst. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x34];
-    /* 0x034 */ struct17 pos;
-    /* 0x040 */ struct17 dir;
+    /* 0x034 */ Vec3f pos;
+    /* 0x040 */ Vec3f dir;
     /* 0x04C */ u8 pad4C[0x110 - 0x4C];
     /* 0x110 */ BurstSparkData data;
 } BurstSpark;
@@ -58,8 +58,8 @@ typedef struct {
 /* A glow object (func_151407D0) of the burst. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x34];
-    /* 0x034 */ struct17 pos;
-    /* 0x040 */ struct17 dir;
+    /* 0x034 */ Vec3f pos;
+    /* 0x040 */ Vec3f dir;
     /* 0x04C */ u8 pad4C[0x58 - 0x4C];
     /* 0x058 */ s32 flags;
     /* 0x05C */ u8 pad5C[0x170 - 0x5C];
@@ -182,8 +182,8 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
             spawn.rgba[1] = 0xFF;
             spawn.rgba[2] = 0xFF;
             spawn.rgba[3] = 0xFF;
-            spawn.pos = *(vertex *)&D_800A5480;
-            spawn.rot = *(vertex *)&D_800A5480;
+            spawn.pos = D_800A5480;
+            spawn.rot = D_800A5480;
             spawn.scale.x = 1.0f;
             spawn.scale.y = 1.0f;
             spawn.scale.z = 1.0f;
@@ -251,8 +251,8 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
             spawn.rgba[3] = 0xFF;
             spawn.width = 100.0f;
             spawn.height = 100.0f;
-            spawn.pos = *(vertex *)&D_800A5480;
-            spawn.rot = *(vertex *)&D_800A5480;
+            spawn.pos = D_800A5480;
+            spawn.rot = D_800A5480;
             spawn.scale.x = 1.0f;
             spawn.scale.y = 1.0f;
             spawn.scale.z = 1.0f;
@@ -285,10 +285,10 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
 }
 
 extern s32 func_15145EA4(void *offsets, void *results, Mtx *mtx, s32 count);
-extern struct17 D_800A1CCC;
-extern struct17 D_800A1CD8;
-extern struct17 D_800A1CE4;
-extern struct17 D_800A1CF0;
+extern Vec3f D_800A1CCC;
+extern Vec3f D_800A1CD8;
+extern Vec3f D_800A1CE4;
+extern Vec3f D_800A1CF0;
 
 /*
  * Burst effect update: ends when the owner is gone, keeps the sparks and glows on the owner's
@@ -305,11 +305,11 @@ void func_150FA1B8(BurstEffect *effect) {
         return;
     }
     if (actor->unk1D4 != NULL) {
-        struct17 positions[2];
-        struct17 directions[2];
+        Vec3f positions[2];
+        Vec3f directions[2];
         s32 pad; // matching: unused stack slot
-        struct17 *offsets[4];
-        struct17 *results[4];
+        Vec3f *offsets[4];
+        Vec3f *results[4];
         BurstSpark *spark;
         BurstGlow *glow;
         u8 i;
@@ -401,7 +401,7 @@ typedef struct {
     s16 unk02;
     s16 unk04;
     s16 unk06;
-    struct17 pos;
+    Vec3f pos;
     f32 unk14;
     f32 unk18;
     f32 unk1C;
@@ -429,7 +429,7 @@ typedef struct {
     s16 unk02;
     s16 unk04;
     s16 unk06;
-    struct17 pos;
+    Vec3f pos;
     s16 unk14;
     s16 unk16;
     f32 unk18;
@@ -458,20 +458,20 @@ typedef struct {
     /* 0xA8 */ f32 data[5];
 } ImpactParticle;
 
-extern struct17 D_800A1CFC[];
-extern void func_15143134(struct17 *offset, struct17 *out, Mtx *mtx);
+extern Vec3f D_800A1CFC[];
+extern void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
 extern void func_1504715C(void *ground, Actor *actor);
 extern void func_15153F18(s16 *, void *, void *, u8, s32);
 extern void func_15150178(s16 *, void *, void *, u8, s32);
 extern ImpactParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-extern void func_151C329C(struct17 *, u8, s32);
+extern void func_151C329C(Vec3f *, u8, s32);
 
 /*
  * Spawns an impact at offset D_800A1CFC[point] in actor's sixth matrix: two func_15153F18 /
  * func_15150178 bursts, a particle with a random rise, and func_151C329C at the point.
  */
 void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
-    vertex pos;
+    Vec3f pos;
     u8 ground[0x24];
 
     if (actor->unk1D4) {
@@ -480,7 +480,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
         {
             Spawn15153F18 first;
 
-            first.pos = *(struct17 *)&pos; // TODO(vectors): struct17/vertex mix
+            first.pos = *(Vec3f *)&pos; // TODO(vectors): struct17/vertex mix
             first.unk14 = 4.0f;
             first.unk2C = 9;
             first.unk2E = 6;
@@ -509,7 +509,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
         {
             Spawn15150178 second;
 
-            second.pos = *(struct17 *)&pos; // TODO(vectors): struct17/vertex mix
+            second.pos = *(Vec3f *)&pos; // TODO(vectors): struct17/vertex mix
             second.unk14 = 7;
             second.unk16 = 6;
             second.unk00 = 0;
@@ -559,7 +559,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             spawn.b = 0xFF;
             spawn.brightness = 0xFF;
             spawn.pos = pos;
-            spawn.offset = *(vertex *)&D_800A5480;
+            spawn.offset = D_800A5480;
             spawn.fadeStart = 1;
             spawn.fadeRate = 0xFF;
             spawn.scaleStart = 1;
@@ -573,7 +573,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             spawn.handlerSet = 0;
             spawn.viewMask = 0;
             spawn.views = 0xFF;
-            spawn.vel = *(vertex *)&D_800A5480;
+            spawn.vel = D_800A5480;
             spawn.timer = 300;
             spawn.width = 0.0f;
             spawn.height = 0.0f;
@@ -631,15 +631,15 @@ typedef struct {
 } VariantList;
 
 extern VariantList D_80088B20[];
-void func_1514470C(s32, struct17 *);
-void func_150F4570(struct17 *from, struct17 *to, u8 id, f32 duration, f32 rate, f32 scale, u8 arg6, s32 arg7, u8 owner,
+void func_1514470C(s32, Vec3f *);
+void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 duration, f32 rate, f32 scale, u8 arg6, s32 arg7, u8 owner,
                    s32 kind);
 
 /* Emitter update: spawns func_150F4570 effects between the two endpoints, 0.08-0.26 per frame (times D_800BE9A4). */
 void func_150FAAEC(EmitterEffect *effect) {
     EmitterData *data;
-    struct17 from;
-    struct17 to;
+    Vec3f from;
+    Vec3f to;
     u8 i;
     f32 duration;
     VariantList *variants;
@@ -747,7 +747,7 @@ typedef struct {
     /* 0x40 */ u8 unk40;
     /* 0x41 */ u8 unk41;
     /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ struct17 unk44;
+    /* 0x44 */ Vec3f unk44;
     /* 0x50 */ s32 unk50;
     /* 0x54 */ s16 unk54;
     /* 0x56 */ s16 unk56;
@@ -834,7 +834,7 @@ void func_150FAE18(s16 duration, u8 owner, s32 kind) {
         model.unk3C = 0;
         model.unk40 = 0;
         model.unk41 = 1;
-        model.unk44 = *(struct17 *)&D_800A5480;
+        model.unk44 = D_800A5480;
         model.unk54 = 10;
         model.unk56 = 25;
         spawned = func_15157010(&model, 0, 1.0, 0, 0, 2, owner, kind);

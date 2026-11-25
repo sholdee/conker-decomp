@@ -48,12 +48,6 @@ typedef struct {
     /* 0x80 */ Oscillator oscillator;
 } OscillatorObject;
 
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-} Vec3f;
-
 /* Extra data func_151303BC's caller copies into the particle at +0xA8. */
 typedef struct {
     /* 0x00 */ f32 size;
@@ -121,7 +115,7 @@ s32 func_150EA10C(OscillatorObject *obj) {
 }
 
 /* Spawns a particle on the segment `from`->`to`, `t` of the way along, drifting that way. */
-void func_150EA11C(vertex *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA11C_arg5 *arg5) {
+void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA11C_arg5 *arg5) {
     ParticleDesc desc;
     u8 *particle;
     ParticleExtra extra;

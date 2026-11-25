@@ -5,10 +5,6 @@
 void func_1514373C(f32, f32, f32 *, f32 *);
 
 typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-typedef struct {
     u8 r, g, b, a;
 } BoltColor;
 
@@ -142,7 +138,7 @@ void func_151A7A90(Bolt *bolt) {
             dir.y = bolt->def.end.y - bolt->def.start.y;
             dir.z = bolt->def.end.z - bolt->def.start.z;
             up = bolt->def.up;
-            func_151450B4((struct17 *)&dir, (struct17 *)&up, (struct17 *)&side);
+            func_151450B4((Vec3f *)&dir, (Vec3f *)&up, (Vec3f *)&side);
             {
                 s32 i;
 

@@ -29,7 +29,7 @@ typedef struct {
 
 /* Motion state of a drop that hangs on an actor's bone, then falls and splashes. */
 typedef struct {
-    /* 0x00 */ vertex vel;
+    /* 0x00 */ Vec3f vel;
     /* 0x0C */ f32 gravity;
     /* 0x10 */ f32 drag;
     /* 0x14 */ s16 fadeStart;       /* lifetime below which the alpha fades */
@@ -167,7 +167,7 @@ void func_1519086C(DripEmitter *emitter) {
 
 /* A point on an actor's bone where a drop hangs. */
 typedef struct {
-    /* 0x0 */ vertex offset;
+    /* 0x0 */ Vec3f offset;
     /* 0xC */ u8 bone;
 } BoneMount; /* size 0x10 */
 
@@ -186,7 +186,7 @@ extern EmitterKind D_8008FA70[];
 extern u8 D_800AB310[];
 extern u8 D_800AB404[];
 void func_1504715C(Ground *ground, Actor *actor);
-void func_15143134(vertex *offset, vertex *out, Mtx *mtx);
+void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
 void func_1513F680(Particle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn);
 
 /*
@@ -481,9 +481,9 @@ void func_15191400(DripEmitter *emitter) {
     bzero(emitter->slots, DRIP_SLOT_COUNT * sizeof(DripSlot));
 }
 
-s32 func_1514672C(vertex *pos);
-s32 func_15046C80(vertex *pos, s32 arg1, f32 minY, Ground *ground);
-void func_151DAB58(u8, f32, u8, vertex *, s32, u8, u8);
+s32 func_1514672C(Vec3f *pos);
+s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, Ground *ground);
+void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
 
 /* Update of a falling drop: moves it under drag and gravity; on reaching the ground it splashes and dies. */
 s8 func_15191520(Particle *drop) {
@@ -517,7 +517,7 @@ s8 func_15191520(Particle *drop) {
     drop->def.rot.y = drop->def.pos.y + (drop->def.rot.y - drop->def.pos.y) * motion->trail;
     drop->def.rot.z = drop->def.pos.z + (drop->def.rot.z - drop->def.pos.z) * motion->trail;
     {
-        vertex probe;
+        Vec3f probe;
 
         probe.x = drop->def.pos.x;
         probe.y = oldY - drop->def.height;
@@ -532,7 +532,7 @@ s8 func_15191520(Particle *drop) {
                               (s32)motion->ground.unk4, &probe, drop->owner, drop->list);
             } else if (func_150ADA20() & 1) {
                 func_151D9B8C(motion->kind, drop->def.width * drop->def.height * 0.150000006f, drop->def.unk44,
-                              (s32)motion->ground.unk4, (struct17 *)&probe, func_150ADA20() % 41U + 80, 1, 1, 0,
+                              (s32)motion->ground.unk4, (Vec3f *)&probe, func_150ADA20() % 41U + 80, 1, 1, 0,
                               drop->owner, drop->list);
             } else {
                 func_151DAB58(motion->kind, drop->def.width * drop->def.height * 0.05000000075f, drop->def.unk44,

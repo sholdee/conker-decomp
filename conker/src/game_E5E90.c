@@ -39,11 +39,11 @@ typedef struct {
     /* 0x014 */ f32 elasticity;
     /* 0x018 */ f32 sizeXZ;
     /* 0x01C */ f32 sizeY;
-    /* 0x020 */ vertex rot;        /* the look-at point of the particle's matrix */
-    /* 0x02C */ vertex scale;
-    /* 0x038 */ vertex pos;
-    /* 0x044 */ vertex vel;
-    /* 0x050 */ vertex rotVel;
+    /* 0x020 */ Vec3f rot;        /* the look-at point of the particle's matrix */
+    /* 0x02C */ Vec3f scale;
+    /* 0x038 */ Vec3f pos;
+    /* 0x044 */ Vec3f vel;
+    /* 0x050 */ Vec3f rotVel;
     /* 0x05C */ f32 gravity;
     /* 0x060 */ u32 flags;
     /* 0x064 */ s16 lifetime;
@@ -58,7 +58,7 @@ typedef struct {
     /* 0x078 */ u8 matrixFn;
     /* 0x079 */ u8 pad79[0x97];
     /* 0x110 */ ParticleFloor floor;
-    /* 0x134 */ vertex squashOrigin;
+    /* 0x134 */ Vec3f squashOrigin;
     /* 0x140 */ f32 speed;
     /* 0x144 */ u8 pad144[8];
     /* 0x14C */ s32 unk14C;
@@ -68,7 +68,7 @@ typedef struct {
 
 /* func_15151A38's argument: spawns a random count of particles at position. */
 typedef struct {
-    /* 0x00 */ vertex position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 sizeBase;
     /* 0x10 */ f32 sizeRange;
     /* 0x14 */ f32 growthBase;
@@ -111,7 +111,7 @@ typedef struct {
 extern s32 D_80088734[];
 extern s32 D_8008873C;
 void *memcpy(void *, const void *, u32);
-void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
+void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 void func_15151A38(BurstConfig *config, u8 arg1, s32 arg2);
 
 /* Floor hit: above speed 30 the particle shatters into dust and is destroyed; above 15 it bounces;
@@ -223,7 +223,7 @@ s32 func_150B89E0(PhysicsParticle *particle, f32 x, f32 y, f32 z, f32 floorHeigh
         particle->rotVel.z *= particle->elasticity;
         func_10010F88(D_8008873C, 32000, 0, 0, 0, particle->pos.x, particle->pos.y, particle->pos.z, 1000, 4000);
     } else {
-        f32 mtx[4][4];
+        MtxF mtx;
 
         particle->update2Fn = 1;
         particle->matrixFn = 1;
@@ -245,8 +245,8 @@ typedef struct {
 /* func_15151670's argument: spawns a random count of particles off a surface triangle, moving inside
  * the cone around its normal. */
 typedef struct {
-    /* 0x00 */ vertex position;
-    /* 0x0C */ vertex normal;
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ Vec3f normal;
     /* 0x18 */ HitTriangle triangle;
     /* 0x2A */ u8 pad2A[2];
     /* 0x2C */ f32 spread;
@@ -266,7 +266,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 type;
     /* 0x04 */ u8 pad4[0x10];
-    /* 0x14 */ vertex pos;
+    /* 0x14 */ Vec3f pos;
 } CollisionProbe;
 
 s32 func_150A3058(s32, s16, s16, s16);
@@ -282,8 +282,8 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
 
     if (impactSpeed > 6.0f) {
         if (func_150A3058(1, probe->pos.x, probe->pos.y, probe->pos.z) == 0) {
-            vertex move;
-            vertex hit;
+            Vec3f move;
+            Vec3f hit;
             HitTriangle triangle;
             s32 hitObject;
             ParticleDef def;

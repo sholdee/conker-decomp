@@ -36,7 +36,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 countBase;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ struct17 position;
+    /* 0x08 */ Vec3f position;
     /* 0x14 */ f32 sizeBase;
     /* 0x18 */ f32 sizeRange;
     /* 0x1C */ f32 unk1C;
@@ -86,11 +86,11 @@ void func_151A3150(DescParticle *particle) {
 
     config.countBase = 10;
     config.countRange = 15;
-    config.position = *(struct17 *)&particle->desc.pos; // TODO(vectors): struct17/vertex mix
+    config.position = *(Vec3f *)&particle->desc.pos; // TODO(vectors): struct17/vertex mix
     if (particle->desc.flags & 0x1000) {
-        config.position.unk0 += particle->desc.offset.x;
-        config.position.unk4 += particle->desc.offset.y;
-        config.position.unk8 += particle->desc.offset.z;
+        config.position.x += particle->desc.offset.x;
+        config.position.y += particle->desc.offset.y;
+        config.position.z += particle->desc.offset.z;
     }
     config.sizeBase = (particle->desc.width + particle->desc.height) * 0.5f * 0.02119999938f;
     config.sizeRange = (particle->desc.width + particle->desc.height) * 0.5f * 0.05319999903f;

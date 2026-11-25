@@ -7,10 +7,6 @@
  * floor, splash (splash and drop particles plus flat ripple sprites) and play a sound.
  */
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* Spawn header passed to func_15147A80; the actor keeps a copy of it at 0x10. */
 typedef struct {
     /* 0x00 */ Vec3f pos;

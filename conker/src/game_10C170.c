@@ -12,10 +12,10 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 owner;
     /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ struct17 pos;
+    /* 0x28 */ Vec3f pos;
 } PointEffect;
 
-extern struct17 D_800A0D60[15];
+extern Vec3f D_800A0D60[15];
 extern f32 D_800A0E14[15];
 extern f32 D_800A0E50[15];
 extern f32 D_800A0E8C[15];
@@ -25,10 +25,10 @@ extern f32 D_8008896C[3];
 void *memcpy(void *, const void *, u32);
 s32 func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
 void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_151D5334(struct17 *, f32, f32, f32, s32, u8, s32);
-void func_151D5514(struct17 *, u8, s32);
-void func_151D3FF4(struct17 *, u8, s32);
-void func_151541B8(struct17 *, f32, f32, f32, f32, u8, s32);
+void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
+void func_151D5514(Vec3f *, u8, s32);
+void func_151D3FF4(Vec3f *, u8, s32);
+void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 void func_151A6F00(DebrisEmitter *, u8, u8, s32);
 
 /*
@@ -36,7 +36,7 @@ void func_151A6F00(DebrisEmitter *, u8, u8, s32);
  * func_151D5404/5334/5514/3FF4 and func_151541B8 effects, a burst of 3-6 debris aimed
  * around the camera yaw, and a short-lived PointEffect at pos.
  */
-void func_150DECC0(vertex *pos, u8 owner, s32 kind) {
+void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
     s32 yaw;
     s32 i;
     ParticleSpawn spawn;
@@ -52,7 +52,7 @@ void func_150DECC0(vertex *pos, u8 owner, s32 kind) {
         spawn.sizeY = 1.0f;
         spawn.sizeXZ = 1.0f;
         spawn.elasticity = 0.200000003f;
-        spawn.rot = *(vertex *)&D_800A5480;
+        spawn.rot = D_800A5480;
         spawn.scale.x = 1.0f;
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
@@ -79,9 +79,9 @@ void func_150DECC0(vertex *pos, u8 owner, s32 kind) {
         spawn.vel.z = 0.0f;
         for (i = 0; i < 15; i++) {
             idx = D_800A0EC8[i];
-            spawn.pos.x = D_800A0D60[i].unk0 + pos->x;
-            spawn.pos.y = D_800A0D60[i].unk4 + pos->y;
-            spawn.pos.z = D_800A0D60[i].unk8 + pos->z;
+            spawn.pos.x = D_800A0D60[i].x + pos->x;
+            spawn.pos.y = D_800A0D60[i].y + pos->y;
+            spawn.pos.z = D_800A0D60[i].z + pos->z;
             spawn.vel.y = D_80088960[idx] + func_150ADA68() * D_8008896C[idx];
             spawn.rotVel.x = D_800A0E8C[i] * D_800A0E50[i] * 0.01900000125f;
             spawn.rotVel.z = D_800A0E8C[i] * D_800A0E14[i] * 0.01900000125f;
@@ -131,9 +131,9 @@ void func_150DECC0(vertex *pos, u8 owner, s32 kind) {
     func_151A6F00(&debris, 0, *(u8 *)&owner, kind);
     {
         struct260 *effect;
-        struct17 effectPos;
+        Vec3f effectPos;
 
-        effectPos = *(struct17 *)pos; // TODO(vectors): struct17/vertex mix
+        effectPos = *(Vec3f *)pos; // TODO(vectors): struct17/vertex mix
         effect = func_15149130(15, 8, -1, -1, 1, 0, sizeof(effectPos), *(u8 *)&owner, kind);
         if (effect != NULL) {
             memcpy(&((PointEffect *)effect)->pos, &effectPos, sizeof(effectPos));
@@ -147,44 +147,44 @@ typedef struct {
     /* 0x04 */ u8 pad4[0x20];
 } GroundHit; /* size 0x24 */
 
-s32 func_1504697C(struct17 *, s32, f32, GroundHit *);
-void func_150E83AC(struct17 *, s16, u8, s32);
-void func_151A9834(struct17 *, f32, f32, GroundHit *, s32, u8, s32, u8, s32);
+s32 func_1504697C(Vec3f *, s32, f32, GroundHit *);
+void func_150E83AC(Vec3f *, s16, u8, s32);
+void func_151A9834(Vec3f *, f32, f32, GroundHit *, s32, u8, s32, u8, s32);
 
 /*
  * Effect update: drops the effect's position onto the ground below it (if any), spawns a
  * point effect (func_150E83AC) there and scatters 3-5 func_151A9834 spawns around it.
  */
 void func_150DF334(PointEffect *effect) {
-    struct17 *pos;
+    Vec3f *pos;
     GroundHit hit;
     u8 onGround;
-    struct17 groundPos;
-    struct17 probe;
-    struct17 center;
+    Vec3f groundPos;
+    Vec3f probe;
+    Vec3f center;
 
     pos = &effect->pos;
     onGround = 0;
-    probe.unk0 = effect->pos.unk0;
-    probe.unk4 = effect->pos.unk4 + 500.0f;
-    probe.unk8 = effect->pos.unk8;
-    if (func_1504697C(&probe, 0, probe.unk4 - 1000.0f, &hit) != 0) {
-        groundPos.unk0 = pos->unk0;
-        groundPos.unk4 = hit.height;
-        groundPos.unk8 = pos->unk8;
+    probe.x = effect->pos.x;
+    probe.y = effect->pos.y + 500.0f;
+    probe.z = effect->pos.z;
+    if (func_1504697C(&probe, 0, probe.y - 1000.0f, &hit) != 0) {
+        groundPos.x = pos->x;
+        groundPos.y = hit.height;
+        groundPos.z = pos->z;
         onGround = 1;
     }
     func_150E83AC(onGround ? &groundPos : pos, (s16)(func_150ADA20() % 62U + 120), effect->owner, effect->kind);
     pos = onGround ? &groundPos : &effect->pos;
     center = *pos;
-    center.unk4 += 500.0f;
-    func_151A9834(&center, center.unk4 - 1000.0f, 250.0f, &hit, func_150ADA20() % 3U + 3, 1, 0, effect->owner,
+    center.y += 500.0f;
+    func_151A9834(&center, center.y - 1000.0f, 250.0f, &hit, func_150ADA20() % 3U + 3, 1, 0, effect->owner,
                   effect->kind);
 }
 
 /* Particle emitter description passed to func_15149550. */
 typedef struct {
-    /* 0x00 */ struct17 pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 maxA;
     /* 0x10 */ f32 maxB;
     /* 0x14 */ f32 minA;
@@ -212,7 +212,7 @@ void *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 arg3, u8 owne
 void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 
 /* Spawns a particle at pos, then 1-3 more scattered within 30 units of it. */
-void func_150DF4B8(struct17 *pos, s32 arg1, s32 arg2, u8 owner, s32 kind) {
+void func_150DF4B8(Vec3f *pos, s32 arg1, s32 arg2, u8 owner, s32 kind) {
     ParticleEmitter emitter;
     f32 scaleA;
     f32 scaleB;
@@ -245,9 +245,9 @@ void func_150DF4B8(struct17 *pos, s32 arg1, s32 arg2, u8 owner, s32 kind) {
     emitter.growRate = 0.699999988f;
     func_15149550(&emitter, 10, 0, 0, owner, kind);
     for (count = func_150ADA20() % 3U + 1; count > 0; count--) {
-        func_15143874(func_150ADA20() & 0xFF, 30.0f, &emitter.pos.unk0, &emitter.pos.unk8);
-        emitter.pos.unk0 += pos->unk0;
-        emitter.pos.unk8 += pos->unk8;
+        func_15143874(func_150ADA20() & 0xFF, 30.0f, &emitter.pos.x, &emitter.pos.z);
+        emitter.pos.x += pos->x;
+        emitter.pos.z += pos->z;
         scaleA = func_150ADA68() * 0.5f + 0.75f;
         scaleB = func_150ADA68() * 0.5f + 0.75f;
         emitter.maxA = 22.6f * scaleA;

@@ -12,7 +12,7 @@ typedef struct {
     /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
     /* 0x05 */ u8 bone;
     /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ vertex offset;        /* attachment point in bone space */
+    /* 0x08 */ Vec3f offset;        /* attachment point in bone space */
     /* 0x14 */ f32 pointsPerUnit;   /* points emitted per unit travelled */
     /* 0x18 */ s16 intensity;       /* initial TrailPoint.intensity */
     /* 0x1A */ s16 holdTime;        /* initial TrailPoint.holdTime */
@@ -39,7 +39,7 @@ typedef struct {
     /* 0x00 */ TrailParams params;
     /* 0x30 */ u8 flags;
     /* 0x31 */ u8 pad31[3];
-    /* 0x34 */ vertex lastPos;       /* head position when points were last emitted */
+    /* 0x34 */ Vec3f lastPos;       /* head position when points were last emitted */
     /* 0x40 */ f32 pending;         /* fractional points not yet emitted */
     /* 0x44 */ u8 texCoord;
     /* 0x45 */ u8 pad45[3];
@@ -50,7 +50,7 @@ typedef struct {
 
 /* Leading fields of a new effect object, passed to func_15147A80 (they land at its 0x10). */
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 unkC;
     /* 0x0E */ u16 flags;
     /* 0x10 */ s32 unk10;
@@ -62,7 +62,7 @@ typedef struct {
 
 /* One point of a trail. */
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 width;
     /* 0x10 */ s16 intensity;       /* alpha scale; the point dies when it drops below 0 */
     /* 0x12 */ s16 holdTime;        /* ticks before intensity starts to fall */
@@ -79,7 +79,7 @@ typedef struct {
     /* 0x00 */ u8 pad0[0xC];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 pad0D[3];
-    /* 0x10 */ vertex headPos;
+    /* 0x10 */ Vec3f headPos;
     /* 0x1C */ u8 pad1C[2];
     /* 0x1E */ u16 flags;
     /* 0x20 */ u8 pad20[5];
@@ -91,7 +91,7 @@ typedef struct {
     /* 0x2F */ u8 pad2F;
     /* 0x30 */ u8 unk30;
     /* 0x31 */ u8 pad31[0x23];
-    /* 0x54 */ vertex tailPos;
+    /* 0x54 */ Vec3f tailPos;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ TrailPoint *points;
@@ -107,7 +107,7 @@ typedef struct {
     /* 0x0C */ Actor *owner;
     /* 0x10 */ u8 bone;
     /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ vertex offset;
+    /* 0x14 */ Vec3f offset;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24;
     /* 0x28 */ s16 unk28;
@@ -165,7 +165,7 @@ typedef struct {
     /* 0x0C */ f32 pending;         /* emissions accumulated, not yet spawned */
     /* 0x10 */ u8 bone;
     /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ vertex offset;        /* emission point in bone space */
+    /* 0x14 */ Vec3f offset;        /* emission point in bone space */
 } BoneEmitter;
 
 typedef struct {
@@ -203,7 +203,7 @@ typedef struct {
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;
-    /* 0x38 */ vertex pos;
+    /* 0x38 */ Vec3f pos;
     /* 0x44 */ s16 unk44;
     /* 0x46 */ s16 unk46;
     /* 0x48 */ s16 unk48;
@@ -250,7 +250,7 @@ void *func_1513418C(void *, s32, u8, s32);
 void *func_15130374(void *spawn, u8, s32, u8, s32);
 s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *func_15147A80(EffectSpawnInfo *info, s32 stateSize, s32 capacity, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_15143134(vertex *in, vertex *out, s32 matrix);
+void func_15143134(Vec3f *in, Vec3f *out, s32 matrix);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 Gfx *func_15142E24(Gfx *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
@@ -262,7 +262,7 @@ void func_15153634(ParticleSpawn151A4A38 *, s32, s32, s32);
 TrailEffect *func_151A3504(TrailParams *params, u8 arg1);
 void func_151A4590(Actor *owner, u8 arg1);
 void func_151A499C(Actor *owner, u8 arg1);
-s32 func_151A4E34(TrailParams *params, vertex *out);
+s32 func_151A4E34(TrailParams *params, Vec3f *out);
 void func_151A4E9C(TrailEffect *effect);
 
 /* Spawns the effects attached to an actor: a trail and two more effects. */
@@ -391,7 +391,7 @@ s32 func_151A37C0(TrailEffect *effect) {
     TrailState *state = effect->state;
     TrailPoint *points = effect->points;
     Actor *owner;
-    vertex delta;
+    Vec3f delta;
     s32 started;
     TrailParams retry;
 
@@ -434,7 +434,7 @@ s32 func_151A37C0(TrailEffect *effect) {
         f32 age;
         f32 ageStep;
         f32 width;
-        vertex pos;
+        Vec3f pos;
         f32 stepX;
         f32 stepY;
         f32 widthLeft;
@@ -510,8 +510,8 @@ Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
     f32 sideX, sideY, sideZ, lenSq, scale;
     u8 pad; // matching: unused local keeps the frame layout
     s32 idx;
-    vertex next;
-    vertex cur;
+    Vec3f next;
+    Vec3f cur;
     s32 nextIdx;
     s32 curIdx;
     u8 nextTex;
@@ -872,7 +872,7 @@ void func_151A499C(Actor *owner, u8 arg1) {
  */
 void func_151A4A38(BoneEmitterTask *task) {
     BoneEmitter *emitter;
-    vertex pos;
+    Vec3f pos;
     ParticleSpawn151A4A38 spawn;
     s16 angle;
 
@@ -992,7 +992,7 @@ void func_151A4D88(BoneEmitterTask *task, ActorMessage *msg, u8 type) {
  * Transforms the trail's attachment offset by its owner's bone matrix into out.
  * Returns 0 if the owner has no bone matrices or is not being drawn.
  */
-s32 func_151A4E34(TrailParams *params, vertex *out) {
+s32 func_151A4E34(TrailParams *params, Vec3f *out) {
     Actor *owner = params->owner;
     u8 *bones = (u8 *)owner->unk1D4;
 

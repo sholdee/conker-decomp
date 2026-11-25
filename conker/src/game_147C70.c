@@ -4,8 +4,8 @@
 
 extern f32 func_150489B0(u8 angle);
 extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_1511490C(f32 mtx[4][4], void *obj);
-extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+extern void func_1511490C(MtxF mtx, void *obj);
+extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_1511A494(void *obj, s32 *arg1, s32 *arg2);
 
 typedef struct {
@@ -66,7 +66,7 @@ f32 sqrtf(f32);
 void func_1511A838(Game147C70State *mesh) {
     s32 i;
     s32 j;
-    f32 matrix[4][4];
+    MtxF matrix;
     f32 outX;
     f32 outY;
     f32 outZ;

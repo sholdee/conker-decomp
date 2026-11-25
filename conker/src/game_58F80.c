@@ -268,7 +268,7 @@ extern s32 D_800BEBA4;
 extern u8 D_800D9900;
 extern u8 D_800D9C10[][0x40];
 extern u8 D_800D9E28[];
-extern f32 D_800D2CA8[][4][4]; // view matrix per player
+extern MtxF D_800D2CA8[]; // view matrix per player
 extern u8 D_800DD2E4[];
 extern u16 D_800DD2E8;
 extern u16 D_800DD2EC;
@@ -296,7 +296,7 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap);
 Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 *colour, s32 mode, s32 wrap);
 void func_1502D54C(s32 index, s32 *colour);
 void func_1502D630(GameObj *obj, s32 *colour, s32 player);
-void func_1502DB84(f32 mtx[4][4], s32 index);
+void func_1502DB84(MtxF mtx, s32 index);
 void func_1502DF38(s32 index, s32 rootOnly);
 void func_1502E4C4(s32 index);
 void func_1502E9FC(GameObj *obj, s32 dist);
@@ -346,9 +346,9 @@ Gfx *func_15094F70(Gfx *, u8 *, s32, SpriteParams *, s32, s32, s32, s32, s32);
 Gfx *func_15095760(Gfx *, SpriteParams *);
 void func_150A4B04(GameObj *);
 s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
-void func_150A7960(f32 mtx[4][4], f32, f32, f32, f32 *, f32 *, f32 *);
-void func_150A7A00(f32 mtx[4][4], f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
-void func_150A81D0(s32 *, f32 mtx[4][4], ObjAnim *, s32, s32, s16 *, u8 *, s32);
+void func_150A7960(MtxF mtx, f32, f32, f32, f32 *, f32 *, f32 *);
+void func_150A7A00(MtxF mtx, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
+void func_150A81D0(s32 *, MtxF mtx, ObjAnim *, s32, s32, s16 *, u8 *, s32);
 void func_150A9984(s32, s32);
 Gfx *func_150C3160(Gfx *, GameObj *);
 struct102 *func_1510D970(s32, GameObj *, s32, s32, s32);
@@ -1144,7 +1144,7 @@ s32 func_1502DB20(s32 id) {
 }
 
 /* Computes the object's bone matrices for this frame into the matrix pool (root transform mtx). */
-void func_1502DB84(f32 mtx[4][4], s32 index) {
+void func_1502DB84(MtxF mtx, s32 index) {
     s16 cmd[42];
     s32 id;
     u8 *remap;
@@ -1247,7 +1247,7 @@ load:
 /* Builds the object's root matrix (from its parent's bone or its own transform); with
    rootOnly it is stored as the object's only bone, otherwise the full skeleton is computed. */
 void func_1502DF38(s32 index, s32 rootOnly) {
-    f32 mtx[4][4];
+    MtxF mtx;
     GameObj *obj;
     GameObj *other;
     s32 canCull;

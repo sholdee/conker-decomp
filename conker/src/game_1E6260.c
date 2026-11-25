@@ -24,7 +24,7 @@ typedef struct {
     /* 0x018 */ f32 sizeXZ;
     /* 0x01C */ f32 sizeY;
     /* 0x020 */ u8 pad20[0x18];
-    /* 0x038 */ vertex pos;
+    /* 0x038 */ Vec3f pos;
     /* 0x044 */ u8 pad44[0x170 - 0x44];
     /* 0x170 */ LampSwing swing;
 } Particle;
@@ -32,8 +32,8 @@ typedef struct {
 /* Beam particle made by func_151407D0 (same layout as Particle in game_100810.c). */
 typedef struct {
     /* 0x00 */ u8 pad0[0x34];
-    /* 0x34 */ vertex pos;
-    /* 0x40 */ vertex end;
+    /* 0x34 */ Vec3f pos;
+    /* 0x40 */ Vec3f end;
 } Beam;
 
 /* Data of the swinging-light effect, stored at struct225.unk18 by func_151B8DB0. */
@@ -54,7 +54,7 @@ typedef struct {
     u8 pad5A[6];
 } ParticleParams; // size 0x60
 
-extern vertex D_800AA4E0[];     // lamp position, by kind
+extern Vec3f D_800AA4E0[];     // lamp position, by kind
 extern f32 D_800AA528[];        // lamp size, by kind
 Particle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize, u8 arg4, s32 arg5);
 void func_1510F800(s32 type);
@@ -219,7 +219,7 @@ s32 func_151B9214(Particle *particle) {
 /* Matrix callback (D_8008998C slot 4): the particle rolled by its swing angle, scaled by its size and
  * placed at its position. */
 s32 func_151B9310(Mtx *dest, Particle *particle) {
-    f32 mtx[4][4];
+    MtxF mtx;
     s32 pad[2]; // matching: unused stack space below the matrix
 
     func_150A8050(mtx, 0.0f, 0.0f, particle->swing.out);
@@ -244,15 +244,15 @@ s32 func_151B9310(Mtx *dest, Particle *particle) {
     return 1;
 }
 
-void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* Light effect update (D_8008B0F0 slot 7): moves the light to a point 150 units below the swinging lamp
  * and aims the beam from the lamp along the swing. */
 s32 func_151B9408(struct225 *effect) {
     f32 extend; // matching: the 500.0f literal needs its own local (inline changes the frame)
     Particle *lamp;
-    vertex point;
-    f32 mtx[4][4];
+    Vec3f point;
+    MtxF mtx;
     f32 reach;
     f32 rate;
     f32 dx, dy, dz; // unit direction from the lamp down to the light point

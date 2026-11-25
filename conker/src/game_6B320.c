@@ -61,9 +61,9 @@ extern s32 func_1503EF4C(s32 kind, s32 variant, s32 objIndex);
 extern void func_1503E260(s32 objIndex);
 extern void func_1503ECA0(s32 objIndex);
 extern f32 sqrtf(f32);
-extern void func_150499A0(f32 src[4][4], f32 out[4][4]);  /* inverse, as used here */
-extern void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 out[4][4]);  /* out = a * b */
-extern void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
+extern void func_150499A0(MtxF src, MtxF out);  /* inverse, as used here */
+extern void func_150A7A48(MtxF a, MtxF b, MtxF out);  /* out = a * b */
+extern void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                           f32 *scaleX, f32 *scaleY, f32 *scaleZ);
 extern void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi);
 
@@ -203,8 +203,8 @@ void func_1503E260(s32 objIndex) {
  */
 void func_1503E3C4(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s32 noParent) {
     s32 pad; // matching: unused stack slot above the matrices
-    f32 local[4][4];
-    f32 parentInv[4][4];
+    MtxF local;
+    MtxF parentInv;
     Actor *obj;
     s32 parent;
     f32 len;
@@ -256,9 +256,9 @@ void func_1503E3C4(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s
 void func_150AD8B0(f32 *a, f32 *b, f32 *out);
 
 /* Decompose a 4x4 transform into translation, rotation (degrees) and per-axis scale. */
-void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
+void func_1503E5F8(MtxF mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                    f32 *scaleX, f32 *scaleY, f32 *scaleZ) {
-    f32 m[4][4];
+    MtxF m;
     f32 cross[4];
     s32 i;
     f32 len;
@@ -283,7 +283,7 @@ void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, 
         } else {
             *scaleZ = len;
         }
-        func_15049148((struct17 *)m[i], 1.0f / len, (struct17 *)m[i]);
+        func_15049148((Vec3f *)m[i], 1.0f / len, (Vec3f *)m[i]);
     }
     /* A mirrored basis: flip the scale signs and axes back to a rotation. */
     func_150AD8B0(m[1], m[2], cross);
@@ -311,7 +311,7 @@ void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, 
     *rotZ = rz * 57.29577637f;
 }
 
-extern void func_150A7DA0(f32 mtx[4][4], f32 x, f32 y, f32 z);
+extern void func_150A7DA0(MtxF mtx, f32 x, f32 y, f32 z);
 
 /* Rebuild the object's bone matrices from its simulated parts. */
 void func_1503E82C(s32 objIndex) {
@@ -320,7 +320,7 @@ void func_1503E82C(s32 objIndex) {
     s32 i;
     s32 parent;
     f32 (*bone)[4];
-    f32 m[4][4];
+    MtxF m;
     ObjPart *part;
 
     if (D_800CC2D0[objIndex].unk1D4 != NULL) {
@@ -582,7 +582,7 @@ extern u8 D_800C3E90;
 /* func_1503E5F8 on an Mtx, which is fixed point when D_800C3E90 is set and plain floats otherwise. */
 void func_1503F404(Mtx *mtx, f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                    f32 *scaleX, f32 *scaleY, f32 *scaleZ) {
-    f32 m[4][4];
+    MtxF m;
 
     if (D_800C3E90) {
         guMtxL2F(m, mtx);

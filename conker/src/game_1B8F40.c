@@ -3,10 +3,6 @@
 #include "variables.h"
 
 typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-typedef struct {
     s16 x, y, z;
 } Vec3s;
 

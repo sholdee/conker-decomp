@@ -30,7 +30,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 unk00;
     /* 0x04 */ s32 unk04;
-    /* 0x08 */ struct17 pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -108,7 +108,7 @@ void func_1519EA04(EvTimer *timer) {
 }
 
 /* Spawns a func_15152190 effect at pos (cutscene event; the caller passes an id < 0xE9 and a scale). */
-void func_1519EA78(struct17 *pos, u16 id, f32 scale, u8 arg3, s32 arg4) {
+void func_1519EA78(Vec3f *pos, u16 id, f32 scale, u8 arg3, s32 arg4) {
     Arg15152190 def;
     s32 idArg;
     f32 scaleArg;
@@ -143,7 +143,7 @@ typedef struct {
     /* 0x024 */ f32 unk24;
     /* 0x028 */ f32 unk28;
     /* 0x02C */ u8 pad2C[0xC];
-    /* 0x038 */ struct17 pos;
+    /* 0x038 */ Vec3f pos;
     /* 0x044 */ u8 pad44[0x12C];
     /* 0x170 */ SeqTrackState *track;
 } EffectObj;
@@ -172,8 +172,8 @@ void func_1519EB8C(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4
     packet.spawn.pos.x = track->x;
     packet.spawn.pos.y = track->y;
     packet.spawn.pos.z = track->z;
-    packet.spawn.vel = *(vertex *)&D_800A5480;
-    packet.spawn.rotVel = *(vertex *)&D_800A5480;
+    packet.spawn.vel = D_800A5480;
+    packet.spawn.rotVel = D_800A5480;
     packet.spawn.gravity = 0.0f;
     packet.spawn.flags = 0x980;
     packet.spawn.lifetime = duration;
@@ -210,9 +210,9 @@ s32 func_1519ED24(EffectObj *obj) {
     obj->unk20 = track->unkC;
     obj->unk24 = track->unk10;
     obj->unk28 = track->unk14;
-    obj->pos.unk0 = track->x;
-    obj->pos.unk4 = track->y;
-    obj->pos.unk8 = track->z;
+    obj->pos.x = track->x;
+    obj->pos.y = track->y;
+    obj->pos.z = track->z;
     return 1;
 }
 

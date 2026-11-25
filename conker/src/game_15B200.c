@@ -14,7 +14,7 @@ void func_1512DD50(Camera *camera) {
     f32 y;
     f32 scale;
     f32 dy;
-    vertex span;
+    Vec3f span;
     f32 dx;
     f32 dz;
 

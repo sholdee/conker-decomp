@@ -9,9 +9,6 @@
 // matching: integer address math hides the base from IDO's alias analysis (s16 (*)[3] indexing reorders loads)
 #define QUAD_ANCHOR(index) ((s16 *)((s32)&D_800C3FC4 + (index) * 6))
 
-/* An actor's bone matrix: Actor.unk1D4 points at an array of these. */
-typedef f32 MtxF[4][4];
-
 void func_150A7960(MtxF, f32, f32, f32, f32 *, f32 *, f32 *);
 
 /*

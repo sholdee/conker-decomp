@@ -8,7 +8,7 @@
 typedef struct {
     /* 0x00 */ s32 count;
     /* 0x04 */ s32 countRange;
-    /* 0x08 */ vertex origin;
+    /* 0x08 */ Vec3f origin;
     /* 0x14 */ s16 yaw;
     /* 0x16 */ s16 yawRange;
     /* 0x18 */ s16 pitch;
@@ -26,7 +26,7 @@ typedef struct {
 
 extern s32 D_800A2430;
 extern f32 D_800A2434;
-void func_150E83AC(vertex *position, s16 duration, u8 owner, s32 kind);
+void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind);
 void func_15136C3C(Actor *, s32, s32, s32, s32, s32, u8, s32);
 void func_15152190(DebrisBurst *, s32 *variantIds, f32 *variantScales, s32 variantCount, f32 radius, s32, u8,
                    s32);
@@ -34,8 +34,8 @@ void func_15152190(DebrisBurst *, s32 *variantIds, f32 *variantScales, s32 varia
 /* Plays an effect at obj lasting 500-700 frames, throws debris from 30 units above it, then calls
  * func_15136C3C on obj. */
 void func_15108120(Actor *obj, u8 arg1, s32 arg2) {
-    vertex pos;
-    vertex debrisOrigin;
+    Vec3f pos;
+    Vec3f debrisOrigin;
 
     pos.x = obj->x_position;
     pos.y = obj->y_position;

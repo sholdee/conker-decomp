@@ -299,8 +299,8 @@ typedef struct {
 
 #define VIEWPORTS ((FlareViewport *)D_800BE628->viewports)
 
-void func_15110360(s32 player, f32 mtx[4][4], f32 pitch, f32 yaw, f32 roll);
-void func_150A7A00(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
+void func_15110360(s32 player, MtxF mtx, f32 pitch, f32 yaw, f32 roll);
+void func_150A7A00(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
 
 /*
  * Projects a world point to the current player's screen. Returns 1 and the screen position when the point
@@ -315,7 +315,7 @@ s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     f32 sy;
     f32 sz;
     f32 sw;
-    f32 mtx[4][4];
+    MtxF mtx;
     f32 cx;
     f32 cy;
     f32 scale;

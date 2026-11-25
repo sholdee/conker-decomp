@@ -619,7 +619,7 @@ struct Obj150BCFB8 {
     /* 0x18 */ u8 pad18[0x3C - 0x18];
     /* 0x3C */ f32 unk3C;
     /* 0x40 */ u8 pad40[0x44 - 0x40];
-    /* 0x44 */ vertex vel;
+    /* 0x44 */ Vec3f vel;
     /* 0x50 */ f32 unk50;
     /* 0x54 */ f32 unk54;
     /* 0x58 */ f32 unk58;
@@ -652,11 +652,11 @@ typedef struct {
     /* 0xA8 */ u8 data[4]; /* per-particle handler state */
 } Particle;
 
-void func_1514470C(struct178 *, vertex *);
-void func_15143794(s16, s16, f32, vertex *);
+void func_1514470C(struct178 *, Vec3f *);
+void func_15143794(s16, s16, f32, Vec3f *);
 s32 func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
 Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-void func_151D5334(vertex *, f32, f32, f32, s32, u8, s32);
+void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 
 /* Burst of particles and spawned particles from two random anchors (entries 0x4C/0x4D of D_800D3098). */
 void func_150BD070(u8 arg0, s32 arg1) {
@@ -719,8 +719,8 @@ void func_150BD070(u8 arg0, s32 arg1) {
         ParticleDesc spawn;
         f32 scale;
         s32 rnd;
-        vertex pos;
-        vertex pos2;
+        Vec3f pos;
+        Vec3f pos2;
 
         count = func_150ADA20() % 9U + 17;
         spawn.unk0 = 0x200005;
@@ -740,7 +740,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
         spawn.fadeStart = 0x23;
         spawn.fadeRate = 7;
         spawn.scaleRate = 1.012537f;
-        spawn.offset = *(vertex *)&D_800A5480;
+        spawn.offset = D_800A5480;
         rnd = (func_150ADA20() & 1) ? 0x40 : 0;
         spawn.flags = ((func_150ADA20() & 1) ? 0x80 : 0) | 7 | rnd | 0x8000 | 0x4000 | 0x800 | 0x400 | 0x200 | 0x20000 | 0x800000;
         spawn.viewMask = 0;
@@ -777,24 +777,24 @@ void func_150BD070(u8 arg0, s32 arg1) {
         pos2.x = anchors[0]->unk0;
         pos2.y = anchors[0]->pad2;
         pos2.z = anchors[0]->unk4;
-        func_151D5404((struct17 *)&pos2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, arg1);
+        func_151D5404((Vec3f *)&pos2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, arg1);
     }
 }
 
-extern vertex D_8009FF40[4];
-extern vertex D_8009FF70[4];
-extern vertex D_8009FFA0[4];
-void func_15143134(vertex *src, vertex *dst, struct255 *frame);
+extern Vec3f D_8009FF40[4];
+extern Vec3f D_8009FF70[4];
+extern Vec3f D_8009FFA0[4];
+void func_15143134(Vec3f *src, Vec3f *dst, struct255 *frame);
 void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 arg6, s32 arg7,
-                   s32 arg8, f32 arg9, vertex *dir, u8 arg11);
+                   s32 arg8, f32 arg9, Vec3f *dir, u8 arg11);
 
 /* Transforms three 4-point tables by the actor's unk1D4 and emits two segments (point 2->3 and 3->0). */
 void func_150BD740(Actor *actor, u8 arg1, s32 arg2) {
-    vertex points[4];
-    vertex dirFrom[4];
-    vertex dirTo[4];
+    Vec3f points[4];
+    Vec3f dirFrom[4];
+    Vec3f dirTo[4];
     s32 i;
-    vertex dir[4];
+    Vec3f dir[4];
 
     if (actor != NULL) {
         if (actor->unk1D4 != NULL) {
@@ -819,7 +819,7 @@ void func_150BD740(Actor *actor, u8 arg1, s32 arg2) {
 
 /* Trail spawn structs; same layout as the ones in game_175250.c. */
 typedef struct {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 unkC;
     /* 0x0E */ s16 unkE;
     /* 0x10 */ s32 unk10;
@@ -830,7 +830,7 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ f32 halfWidth;
-    /* 0x04 */ vertex velocity;
+    /* 0x04 */ Vec3f velocity;
     /* 0x10 */ f32 gravity;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ u8 flags;

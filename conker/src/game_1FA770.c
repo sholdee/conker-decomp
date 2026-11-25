@@ -4,7 +4,6 @@
 
 void *memcpy(void *dst, const void *src, u32 size);
 
-typedef struct { f32 x, y, z; } Vec3f;
 typedef struct { f32 x, z; } Vec2f;
 
 /* Events posted through func_151494E0 with a stream id as the payload. */

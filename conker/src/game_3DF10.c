@@ -16,23 +16,17 @@
 
 // fat struct to decipher
 
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-} Vec3f3DF10;
-
 /* matching: the first 0x78 bytes of ParticleSpawn; a full ParticleSpawn on the stack changes the frame. */
 typedef struct ParticleSpawn78 {
     /* 0x00 */ f32 radius;
     /* 0x04 */ f32 elasticity;
     /* 0x08 */ f32 sizeXZ;
     /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
+    /* 0x10 */ Vec3f rot;
+    /* 0x1C */ Vec3f scale;
+    /* 0x28 */ Vec3f pos;
+    /* 0x34 */ Vec3f vel;
+    /* 0x40 */ Vec3f rotVel;
     /* 0x4C */ f32 gravity;
     /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;
@@ -67,7 +61,7 @@ typedef struct {
     /* 0x0C */ f32 unk0C;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
-    /* 0x18 */ Vec3f3DF10 unk18;
+    /* 0x18 */ Vec3f unk18;
     /* 0x24 */ f32 unk24;
     /* 0x28 */ f32 unk28;
 } Struct3DF10Tail; /* size 0x2C */
@@ -84,7 +78,7 @@ extern Obj3DF10 *func_1513B5E0(void *, s32, s32, s32, s32);
 extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 extern u32 osGetCount(void);
 
-extern Vec3f3DF10 D_80096450[];
+extern Vec3f D_80096450[];
 extern u8 D_80096498[];
 
 void func_15010A60(void) {
@@ -100,7 +94,7 @@ void func_15010A60(void) {
     Header2 header2;
     void *payload;
     struct225 *snd;
-    Vec3f3DF10 pos;
+    Vec3f pos;
 
     func_150E8854();
 
@@ -153,7 +147,7 @@ void func_15010A60(void) {
 
     for (i = 0; i < 6; i++) {
         pos = D_80096450[i];
-        part.pos = *(vertex *)&pos; // TODO(vectors): struct17/vertex mix
+        part.pos = *(Vec3f *)&pos; // TODO(vectors): struct17/vertex mix
         tail.unk18 = pos;
 
         func_1510F800(0);

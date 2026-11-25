@@ -58,11 +58,11 @@ typedef struct {
     /* 0x014 */ f32 elasticity;
     /* 0x018 */ f32 sizeXZ;
     /* 0x01C */ f32 sizeY;
-    /* 0x020 */ vertex rot;        /* the look-at point of func_150B9D14's matrix */
-    /* 0x02C */ vertex scale;
-    /* 0x038 */ vertex pos;
-    /* 0x044 */ vertex vel;
-    /* 0x050 */ vertex rotVel;
+    /* 0x020 */ Vec3f rot;        /* the look-at point of func_150B9D14's matrix */
+    /* 0x02C */ Vec3f scale;
+    /* 0x038 */ Vec3f pos;
+    /* 0x044 */ Vec3f vel;
+    /* 0x050 */ Vec3f rotVel;
     /* 0x05C */ f32 gravity;
     /* 0x060 */ u32 flags;
     /* 0x064 */ s16 lifetime;
@@ -85,7 +85,7 @@ typedef struct {
 
 /* func_15151A38's argument: spawns a random count of particles at position. */
 typedef struct {
-    /* 0x00 */ vertex position;
+    /* 0x00 */ Vec3f position;
     /* 0x0C */ f32 sizeBase;
     /* 0x10 */ f32 sizeRange;
     /* 0x14 */ f32 growthBase;
@@ -127,7 +127,7 @@ typedef struct {
 
 void *memcpy(void *, const void *, u32);
 void func_15151A38(BurstConfig *config, u8 arg1, s32 arg2);
-s32 func_15046C80(vertex *pos, s32 arg1, f32 bottom, ParticleFloor *floor);
+s32 func_15046C80(Vec3f *pos, s32 arg1, f32 bottom, ParticleFloor *floor);
 extern s32 D_80088740;
 void func_15142600(Mtx *out, f32 scaleXZ, f32 scaleY, f32 sx, f32 sy, f32 sz, f32 x, f32 y, f32 z,
                    f32 atX, f32 atY, f32 atZ);
@@ -182,10 +182,10 @@ s32 func_150B961C(SpriteFx *sprite) {
  */
 s32 func_150B963C(PhysicsParticle *particle) {
     f32 distSq;
-    vertex playerPos;
+    Vec3f playerPos;
     f32 dirX;
     f32 dirZ;
-    vertex pos;
+    Vec3f pos;
 
     if ((D_80088730 == NULL) || (D_80088730->interaction_state == 0) || (D_80088730->unique_id != 1)) {
         D_80088730 = func_15083E90(1);

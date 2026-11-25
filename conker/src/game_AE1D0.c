@@ -33,10 +33,7 @@ typedef struct {
 extern HitSphere *D_80086C60[];
 extern u8 D_8009CBCC[];
 
-/* One 4x4 matrix per model bone (Actor.unk1D4 points at an array of them). */
-typedef f32 BoneMtx[4][4];
-
-void func_15143134(struct17 *in, struct17 *out, BoneMtx *mtx);
+void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
 void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
 
 /* Point vs. hit-sphere test: takes the point `dist` ahead of `self` (rotated by its pitch unkB8
@@ -57,9 +54,9 @@ s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 a
     f32 dz;
     ModelBounds *bounds;
     s32 count;
-    BoneMtx *bones;
-    struct17 local;
-    struct17 world;
+    MtxF *bones;
+    Vec3f local;
+    Vec3f world;
     HitSphere *p;
     s32 i;
     HitSphere *spheres;
@@ -97,19 +94,19 @@ s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 a
     spheres = D_80086C60[type];
     count = D_8009CBCC[type];
     i = 0;
-    bones = (BoneMtx *)obj->unk1D4;
+    bones = (MtxF *)obj->unk1D4;
     if (count > 0) {
         // matching: p = spheres in its own block; a plain assignment changes IDO's s-register allocation
         do { p = spheres; } while (0);
         do {
-            local.unk0 = p->x;
-            local.unk4 = p->y;
-            local.unk8 = p->z;
+            local.x = p->x;
+            local.y = p->y;
+            local.z = p->z;
             // matching: byte offset keeps IDO's base+offset addu order (&bones[i] emits offset+base)
-            func_15143134(&local, &world, (BoneMtx *)((u8 *)bones + p->bone * sizeof(BoneMtx)));
-            dx = pos[0] - world.unk0;
-            dy = pos[1] - world.unk4;
-            dz = pos[2] - world.unk8;
+            func_15143134(&local, &world, (MtxF *)((u8 *)bones + p->bone * sizeof(MtxF)));
+            dx = pos[0] - world.x;
+            dy = pos[1] - world.y;
+            dz = pos[2] - world.z;
             i++;
             r = p->radius * obj->xz_scale + radius;
             if (!(r * r < dx * dx + dy * dy + dz * dz)) {
@@ -136,9 +133,8 @@ s32 func_1508108C(Actor *obj) {
     return -1;
 }
 
-
 /* Ray vs. sphere: nonzero on a hit, with the entry/exit points and their ray parameters. */
-s32 func_151452C4(struct17 *origin, struct17 *dir, struct17 *centre, f32 radius, struct17 *outNear, struct17 *outFar, f32 *outTNear, f32 *outTFar);
+s32 func_151452C4(Vec3f *origin, Vec3f *dir, Vec3f *centre, f32 radius, Vec3f *outNear, Vec3f *outFar, f32 *outTNear, f32 *outTFar);
 
 /* Ray vs. per-bone hit-sphere test for one actor.  Broad phase: build the whole-object
  * bounding sphere from D_800D1C90[obj->id] and ray-test it; if that hits, walk the model's
@@ -149,7 +145,7 @@ s32 func_151452C4(struct17 *origin, struct17 *dir, struct17 *centre, f32 radius,
  * loop, overwriting the tracked best distance with the LAST call's near-t rather than the
  * best one.  Golden does exactly this (0x15081460..0x15081484); it is not to be "fixed".
  */
-s32 func_1508114C(Actor *obj, struct17 *rayOrigin, struct17 *rayDir, struct17 *outNear, struct17 *outFar, struct17 *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset) {
+s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset) {
     s32 idx;
     HitSphere *spheres;
     s32 count;
@@ -158,16 +154,16 @@ s32 func_1508114C(Actor *obj, struct17 *rayOrigin, struct17 *rayDir, struct17 *o
     f32 tNear;
     f32 tFar;
     s32 i;
-    struct17 centre;
-    struct17 bestCentre;
-    struct17 near;
-    struct17 far;
-    struct17 local;
-    struct17 bestNear;
-    struct17 bestFar;
+    Vec3f centre;
+    Vec3f bestCentre;
+    Vec3f near;
+    Vec3f far;
+    Vec3f local;
+    Vec3f bestNear;
+    Vec3f bestFar;
     s32 bestPart;
     HitSphere *p;
-    BoneMtx *bones;
+    MtxF *bones;
     f32 radius;
 
     if (obj->unk1D4 == NULL) {
@@ -181,9 +177,9 @@ s32 func_1508114C(Actor *obj, struct17 *rayOrigin, struct17 *rayDir, struct17 *o
     spheres = D_80086C60[type];
     count = D_8009CBCC[type];
     *outDist = -1.0f;
-    centre.unk0 = obj->x_position;
-    centre.unk4 = ((ModelBounds *)D_800D1C90[obj->id])->body_height * obj->y_scale + obj->y_position;
-    centre.unk8 = obj->z_position;
+    centre.x = obj->x_position;
+    centre.y = ((ModelBounds *)D_800D1C90[obj->id])->body_height * obj->y_scale + obj->y_position;
+    centre.z = obj->z_position;
     radius = ((ModelBounds *)D_800D1C90[obj->id])->body_radius * obj->y_scale;
     if (func_151452C4(rayOrigin, rayDir, &centre, radius, &near, &far, &tNear, &tFar) == 0) {
         return 0;
@@ -197,12 +193,12 @@ s32 func_1508114C(Actor *obj, struct17 *rayOrigin, struct17 *rayDir, struct17 *o
             if ((1 << p->bone) & obj->unk9C) {
                 /* bone masked off in obj->unk9C */
             } else {
-                bones = (BoneMtx *)obj->unk1D4;
-                local.unk0 = p->x;
-                local.unk4 = p->y;
-                local.unk8 = p->z;
+                bones = (MtxF *)obj->unk1D4;
+                local.x = p->x;
+                local.y = p->y;
+                local.z = p->z;
                 // matching: byte offset keeps IDO's base+offset addu order (&bones[i] emits offset+base)
-                func_15143134(&local, &centre, (BoneMtx *)((u8 *)bones + p->bone * sizeof(BoneMtx)));
+                func_15143134(&local, &centre, (MtxF *)((u8 *)bones + p->bone * sizeof(MtxF)));
                 if (func_151452C4(rayOrigin, rayDir, &centre, p->radius * obj->xz_scale, &near, &far, &tNear, &tFar) != 0) {
                     if (*outDist == -1.0f || (tNear < *outDist && p->part >= bestPart)) {
                         *outDist = tNear;
@@ -235,7 +231,6 @@ s32 func_1508114C(Actor *obj, struct17 *rayOrigin, struct17 *rayDir, struct17 *o
     }
     return 1;
 }
-
 
 s32 func_15080D20(Actor *, Actor *, s32, f32, f32, s32);
 

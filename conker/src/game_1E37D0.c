@@ -5,7 +5,7 @@
 
 /* Spawn header that func_15147A80 copies to EffectObject+0x10. */
 typedef struct EffectSpawn {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 lifetime;
     /* 0x0E */ u16 flags;
     /* 0x10 */ s32 unk10;
@@ -17,7 +17,7 @@ typedef struct EffectSpawn {
 /* Effect object created by func_15147A80: a ring buffer of points plus a kind-specific state block. */
 typedef struct EffectObject {
     /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ vertex pos;
+    /* 0x10 */ Vec3f pos;
     /* 0x1C */ s16 lifetime;
     /* 0x1E */ u16 flags;
     /* 0x20 */ s32 unk20;
@@ -30,7 +30,7 @@ typedef struct EffectObject {
     /* 0x2F */ u8 unk2F;
     /* 0x30 */ s8 unk30;
     /* 0x31 */ u8 pad31[0x23];
-    /* 0x54 */ vertex tailPos;
+    /* 0x54 */ Vec3f tailPos;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 buffers[0x10];
     /* 0x94 */ void *points;
@@ -41,7 +41,7 @@ typedef struct EffectObject {
 typedef struct TrailTarget {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ u8 pad4[0x10];
-    /* 0x14 */ vertex pos;
+    /* 0x14 */ Vec3f pos;
     /* 0x20 */ u8 pad20[0x1B];
     /* 0x3B */ u8 unk3B;
     /* 0x3C */ f32 unk3C;
@@ -58,7 +58,7 @@ typedef struct TrailState {
     /* 0x00 */ TrailTarget *target;
     /* 0x04 */ u8 targetUnk3B; /* target->unk3B when the trail was spawned */
     /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ vertex lastPos;
+    /* 0x08 */ Vec3f lastPos;
     /* 0x14 */ f32 pending; /* points still to emit */
     /* 0x18 */ f32 elapsed; /* time since the last point was emitted */
     /* 0x1C */ f32 targetTexS; /* texture s at the target's position */
@@ -69,7 +69,7 @@ typedef struct TrailState {
 
 /* One point of a trail effect. */
 typedef struct TrailPoint {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 life;
     /* 0x10 */ u8 alpha;
     /* 0x11 */ u8 pad11[3];
@@ -166,14 +166,14 @@ s32 func_151B6420(EffectObject *obj) {
     return 1;
 }
 
-f32 func_15143E64(vertex *);
+f32 func_15143E64(Vec3f *);
 
 /* Follows the trail's target and emits points along the path it moved. Stops the trail once the target is gone. */
 s32 func_151B65D4(EffectObject *obj) {
     TrailState *state;
     TrailPoint *points;
     TrailTarget *target;
-    vertex delta;
+    Vec3f delta;
     s32 pad0; // matching: stack pad
     s32 pad1; // matching: stack pad
     f32 dist;
@@ -197,7 +197,7 @@ s32 func_151B65D4(EffectObject *obj) {
     state->targetTexS += dist * 4.409547806f;
     if (state->pending > 1.0f) {
         TrailPoint *point;
-        vertex cur;
+        Vec3f cur;
         f32 inv;
         f32 elapsed;
         f32 elapsedStep;
@@ -263,7 +263,7 @@ Gfx *func_15142E24(Gfx *gfx, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern vertex *func_15144B34(s32);
+extern Vec3f *func_15144B34(s32);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 extern u8 D_80090CD4[];
 extern s32 D_800D2C9C;
@@ -277,10 +277,10 @@ extern struct {
 Gfx *func_151B6928(EffectObject *obj, Gfx *gfx, s16 view) {
     Vtx *vtx;
     TrailPoint *points;
-    vertex *camera;
+    Vec3f *camera;
     u8 flag;
-    vertex next;
-    vertex cur;
+    Vec3f next;
+    Vec3f cur;
     f32 toCamX;
     f32 toCamY;
     f32 toCamZ;
@@ -539,7 +539,7 @@ void func_151B7144(TrailTarget *target, u8 arg1, s32 arg2) {
 /* Particle a ribbon effect drags along (see func_151B77F4). */
 typedef struct LinkedParticle {
     /* 0x00 */ u8 pad0[0x40];
-    /* 0x40 */ vertex pos;
+    /* 0x40 */ Vec3f pos;
 } LinkedParticle;
 
 /* State block of a ribbon effect (func_151B7328). A copy of its arguments follows at +0x10. */
@@ -552,14 +552,14 @@ typedef struct RibbonState {
 
 /* One point of a ribbon effect. */
 typedef struct RibbonPoint {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 distance; /* distance to the previous point */
     /* 0x10 */ u8 alpha;
     /* 0x11 */ u8 pad11[3];
 } RibbonPoint;
 
 /* Returns 0 when the effect's source is gone, else stores the source position in pos. */
-extern s32 (*D_8008FB90[])(EffectObject *, vertex *);
+extern s32 (*D_8008FB90[])(EffectObject *, Vec3f *);
 
 /* Spawns a ribbon effect that follows the position given by D_8008FB90[selector], with a copy of args
  * (argsSize bytes) and a linked particle. Returns NULL if nothing was spawned. */
@@ -575,7 +575,7 @@ EffectObject *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 
     init.args = NULL;
     init.selector = selector;
     spawn.capacity = 20;
-    spawn.pos = *(vertex *)&D_800A5480; /* D_800A5480 holds a vertex; variables.h declares it as f32 */
+    spawn.pos = D_800A5480; /* D_800A5480 holds a vertex; variables.h declares it as f32 */
     spawn.lifetime = 300;
     spawn.flags = 20;
     spawn.unk10 = 16;
@@ -613,8 +613,8 @@ EffectObject *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 
         particle.brightness = 0xFF;
         particle.width = particle.height = func_150ADA68() * 800.0f + 1700.0f;
         particle.pos = spawn.pos;
-        particle.offset = *(vertex *)&D_800A5480;
-        particle.vel = *(vertex *)&D_800A5480;
+        particle.offset = D_800A5480;
+        particle.vel = D_800A5480;
         particle.fadeStart = 1;
         particle.fadeRate = 0xFF;
         particle.scaleStart = 1;
@@ -650,13 +650,13 @@ typedef struct RotatedTarget {
     /* 0x00 */ u8 pad0[0x18];
     /* 0x18 */ f32 scaleXZ;
     /* 0x1C */ f32 scaleY;
-    /* 0x20 */ vertex rot;
+    /* 0x20 */ Vec3f rot;
     /* 0x2C */ u8 pad2C[0xC];
-    /* 0x38 */ vertex pos;
+    /* 0x38 */ Vec3f pos;
 } RotatedTarget;
 
 /* D_8008FB90 callback: reads the followed TrailTarget's position; fails once the target is gone. */
-s32 func_151B7678(EffectObject *obj, vertex *pos) {
+s32 func_151B7678(EffectObject *obj, Vec3f *pos) {
     RibbonState *state;
     TrailTargetRef *ref;
     TrailTarget *target;
@@ -675,11 +675,11 @@ s32 func_151B7678(EffectObject *obj, vertex *pos) {
 }
 
 /* D_8008FB90 callback: places pos 250 units along the target's local -z axis. */
-s32 func_151B76CC(EffectObject *obj, vertex *pos) {
+s32 func_151B76CC(EffectObject *obj, Vec3f *pos) {
     RibbonState *state;
     RotatedTarget **ref;
     RotatedTarget *target;
-    f32 mtx[4][4];
+    MtxF mtx;
 
     state = obj->state;
     ref = state->args;
@@ -705,8 +705,8 @@ s32 func_151B76CC(EffectObject *obj, vertex *pos) {
 s32 func_151B77F4(EffectObject *obj) {
     RibbonState *state;
     RibbonPoint *points;
-    vertex previous;
-    vertex delta;
+    Vec3f previous;
+    Vec3f delta;
     f32 distance;
 
     state = obj->state;
@@ -832,15 +832,15 @@ extern u8 D_80091100[];
 
 /* Draws the ribbon as a camera-facing strip 58 units wide, from the newest point to the oldest. */
 Gfx *func_151B7C38(EffectObject *obj, Gfx *gfx, s16 view) {
-    vertex next;
-    vertex cur;
+    Vec3f next;
+    Vec3f cur;
     s32 index;
     s32 previous;
-    vertex *camera;
+    Vec3f *camera;
     RibbonPoint *points;
-    vertex toCamera;
-    vertex delta;
-    vertex normal;
+    Vec3f toCamera;
+    Vec3f delta;
+    Vec3f normal;
     f32 lengthSquared;
     u8 flag;
     u8 curAlpha;

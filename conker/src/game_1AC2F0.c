@@ -36,7 +36,7 @@ typedef struct {
     u8 b;
 } FadeColor;
 
-extern f32 D_800D9D10[][4][4]; // per-view projection matrices
+extern MtxF D_800D9D10[]; // per-view projection matrices
 
 
 /* Colour fade (func_1517EE40) */
@@ -274,7 +274,7 @@ void func_1517F7B4(void) {
     }
 }
 
-void func_150A7A00(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
+void func_150A7A00(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
 
 /* Moves the iris hole of `view` to the screen position x,y (`onScreen`) or to the projection
  * of the world point x,y,z, clamped to +-10000. */

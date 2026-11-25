@@ -460,8 +460,8 @@ void func_15196318(TexScroll *scroll, s32 speedS, s32 speedT) {
 
 /* One point of an effect's ring buffer (0x24 bytes). */
 typedef struct Particle {
-    /* 0x00 */ vertex pos;
-    /* 0x0C */ vertex vel;
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ Vec3f vel;
     /* 0x18 */ f32 size;
     /* 0x1C */ s16 life;
     /* 0x1E */ s8 holdTimer;
@@ -478,7 +478,7 @@ typedef struct CharacterFlamethrowerActor {
     /* 0x02 */ char pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ char padD[0x3];
-    /* 0x10 */ vertex pos;
+    /* 0x10 */ Vec3f pos;
     /* 0x1C */ char pad1C[0x2];
     /* 0x1E */ u16 flags1E;
     /* 0x20 */ char pad20[0x5];
@@ -492,7 +492,7 @@ typedef struct CharacterFlamethrowerActor {
     /* 0x31 */ char pad31[0xA];
     /* 0x3B */ u8 unk3B;
     /* 0x3C */ char pad3C[0x18];
-    /* 0x54 */ vertex tailPos;
+    /* 0x54 */ Vec3f tailPos;
     /* 0x60 */ char pad60[0x24];
     /* 0x84 */ u8 buffers[0x10];
     /* 0x94 */ void *points;
@@ -501,7 +501,7 @@ typedef struct CharacterFlamethrowerActor {
 
 /* Spawn header passed to func_15147A80. */
 typedef struct EffectSpawn {
-    /* 0x00 */ vertex pos;
+    /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 lifetime;
     /* 0x0E */ u16 kind;
     /* 0x10 */ s32 flags;
@@ -518,8 +518,8 @@ typedef struct CharacterFlamethrowerJetTemplate {
     /* 0x0C */ u8 shade;
     /* 0x10 */ s32 id;
     /* 0x14 */ u8 bone;
-    /* 0x18 */ vertex startOffset;
-    /* 0x24 */ vertex endOffset;
+    /* 0x18 */ Vec3f startOffset;
+    /* 0x24 */ Vec3f endOffset;
     /* 0x30 */ s8 speedFn;
     /* 0x31 */ u8 fadeRate;
     /* 0x32 */ u8 life;
@@ -554,10 +554,10 @@ typedef struct CharacterFlamethrowerJet {
     /* 0x05 */ u8 bone;
     /* 0x06 */ u8 flags;
     /* 0x07 */ s8 speedFn; /* D_8008F870 index, -1 = none */
-    /* 0x08 */ vertex startOffset;
-    /* 0x14 */ vertex endOffset;
-    /* 0x20 */ vertex start;
-    /* 0x2C */ vertex end;
+    /* 0x08 */ Vec3f startOffset;
+    /* 0x14 */ Vec3f endOffset;
+    /* 0x20 */ Vec3f start;
+    /* 0x2C */ Vec3f end;
     /* 0x38 */ f32 speed;
     /* 0x3C */ f32 timeCarry;
     /* 0x40 */ f32 gravity;
@@ -632,7 +632,7 @@ extern CharacterFlamethrowerJetTemplate D_800A87A0[];
 extern s16 (*D_8008F890[])(void);
 extern f32 (*D_8008F870[])(void *, s32);
 extern void (*D_8008F87C[])(void *);
-void func_15143134(vertex *in, vertex *out, s32 matrix);
+void func_15143134(Vec3f *in, Vec3f *out, s32 matrix);
 void *func_15147A80(void *spawn, s32 stateSize, s32 pointSize, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a jet effect from preset D_800A87A0[preset], attached to a bone of `owner`. */
@@ -825,8 +825,8 @@ s32 func_15196748(CharacterFlamethrowerActor *actor) {
 }
 
 
-void func_15198D88(CharacterFlamethrowerActor *actor, vertex *end);
-void func_151990AC(CharacterFlamethrowerActor *actor, vertex *end);
+void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end);
+void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end);
 
 /*
  * Emits a jet's particles for this frame: tracks its bone-relative start/end points, then spawns
@@ -835,7 +835,7 @@ void func_151990AC(CharacterFlamethrowerActor *actor, vertex *end);
 s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     CharacterFlamethrowerJet *jet;
     Particle *points;
-    vertex end;
+    Vec3f end;
     s32 unused; // matching: unused locals (also pad4-pad7) keep the original frame size
     s32 matrix;
     f32 inv;
@@ -848,8 +848,8 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     f32 dx2;
     f32 dsize;
     f32 dspeed;
-    vertex cur;
-    vertex cur2;
+    Vec3f cur;
+    Vec3f cur2;
     f32 t;
     f32 speed;
     f32 size;
@@ -985,16 +985,16 @@ Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 /* Draws a jet as a camera-facing ribbon through its points, oldest last. */
 Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     Vtx_t *vtx;
-    vertex *eye;
-    vertex next;
-    vertex cur;
+    Vec3f *eye;
+    Vec3f next;
+    Vec3f cur;
     Particle *points;
     CharacterFlamethrowerJet *jet;
     s32 i;
     s32 j;
-    vertex toCam;
-    vertex delta;
-    vertex n;
+    Vec3f toCam;
+    Vec3f delta;
+    Vec3f n;
     f32 len;
     u8 curTexS;
     u8 nextTexS;
@@ -1217,8 +1217,8 @@ typedef struct JetChildData {
     /* 0x24 */ f32 unk24;
     /* 0x28 */ s32 unk28;
     /* 0x2C */ s16 unk2C;
-    /* 0x30 */ vertex velA;
-    /* 0x3C */ vertex velB;
+    /* 0x30 */ Vec3f velA;
+    /* 0x3C */ Vec3f velB;
     /* 0x48 */ f32 gravity;
     /* 0x4C */ f32 dragA;
     /* 0x50 */ f32 dragB;
@@ -1229,8 +1229,8 @@ typedef struct JetChildData {
 
 /* User data of the line particles a flame sheds (func_1519A9A4), at SceneParticle 0x110. */
 typedef struct FlameLineData {
-    /* 0x00 */ vertex velA;
-    /* 0x0C */ vertex velB;
+    /* 0x00 */ Vec3f velA;
+    /* 0x0C */ Vec3f velB;
     /* 0x18 */ f32 gravity;
     /* 0x1C */ f32 dragA;
     /* 0x20 */ f32 dragB;
@@ -1249,8 +1249,8 @@ typedef struct SceneParticle {
     /* 0x01E */ char pad1E[0xE];
     /* 0x02C */ f32 width;
     /* 0x030 */ f32 progress; /* how far from start towards end the beam is drawn */
-    /* 0x034 */ vertex start;
-    /* 0x040 */ vertex end;
+    /* 0x034 */ Vec3f start;
+    /* 0x040 */ Vec3f end;
     /* 0x04C */ char pad4C[0x10];
     /* 0x05C */ u8 alpha;
     /* 0x05D */ char pad5D[0xC0 - 0x5D];
@@ -1299,13 +1299,13 @@ void *func_15197C10(SceneParticle *beam, s16 view) {
     Vtx_t *vertices;
     void *result;
     f32 progress;
-    vertex tip;
+    Vec3f tip;
     f32 dx, dy, dz;
     f32 vx, vy, vz;
     f32 nx, ny, nz;
     f32 lengthSquared;
     u8 fresh;
-    vertex *eye;
+    Vec3f *eye;
     f32 scale;
 
     func_151D5D60(beam->buffers, view, 0x40, (void **)&vertices, &fresh);
@@ -1440,9 +1440,9 @@ typedef struct ParticleDef48 {
     /* 0x10 */ u8 rgba[4];
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
-    /* 0x1C */ vertex pos;
-    /* 0x28 */ vertex rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
-    /* 0x34 */ vertex scale;
+    /* 0x1C */ Vec3f pos;
+    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
     /* 0x45 */ u8 unk45;
@@ -1574,7 +1574,7 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
     Particle *points;
     Actor *obj;
     s32 i;
-    vertex pos;
+    Vec3f pos;
     f32 r;
     f32 h;
     f32 d;
@@ -1622,7 +1622,7 @@ s32 func_151987CC(CharacterFlamethrowerActor *actor) {
     Actor *obj;
     s32 i;
     s32 j;
-    vertex pos;
+    Vec3f pos;
     f32 r;
     f32 h;
     f32 d;
@@ -1676,7 +1676,7 @@ typedef struct ListedObject {
     /* 0x91 */ u8 unk91;
     /* 0x92 */ s16 unk92;
     /* 0x94 */ s32 unk94;
-    /* 0x98 */ vertex pos;
+    /* 0x98 */ Vec3f pos;
     /* 0xA4 */ u8 padA4[0x4];
     /* 0xA8 */ f32 unkA8;
     /* 0xAC */ u8 padAC[0x8];
@@ -1715,7 +1715,7 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     f32 dz;
     f32 r;
     u8 lists[3] = { 0x15, 0x16, 0x17 };
-    vertex pos;
+    Vec3f pos;
 
     owner = jet->owner;
     sub = owner->unk31C;
@@ -1827,7 +1827,7 @@ typedef struct JetScatterPreset {
 
 /* Spawn description, motion and style for func_15147DA0. */
 typedef struct {
-    vertex pos;
+    Vec3f pos;
     s16 unkC;
     s16 unkE;
     s32 unk10;
@@ -1838,7 +1838,7 @@ typedef struct {
 
 typedef struct {
     f32 unk0;
-    vertex vel;
+    Vec3f vel;
     f32 unk10;
     f32 unk14;
     u8 unk18;
@@ -1866,7 +1866,7 @@ extern JetScatterPreset D_800A8728[];
 extern s32 func_15147DA0(ScatterSpawn *, ScatterMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, ScatterStyle *, s32, s32, s32);
 
 /* Spawns scatterAccum particles (func_15147DA0) flying from the actor towards random points around `end`. */
-void func_15198D88(CharacterFlamethrowerActor *actor, vertex *end) {
+void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     ScatterStyle style;
     CharacterFlamethrowerJet *jet;
     JetScatterPreset *preset;
@@ -1972,7 +1972,7 @@ extern u8 D_80090514[];
 extern JetSpritePreset D_800A8770[];
 
 /* Emits spriteAccum sprites (func_15167D84) flying from the actor towards random points around `end`. */
-void func_151990AC(CharacterFlamethrowerActor *actor, vertex *end) {
+void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
     f32 speed;
     SpriteEmission packet;
     f32 cosine1;
@@ -2104,8 +2104,8 @@ void func_1519944C(CharacterFlamethrowerActor *actor) {
 
 /* One point of a flame's ring buffer (0x28 bytes). */
 typedef struct FlamePoint {
-    /* 0x00 */ vertex pos;
-    /* 0x0C */ vertex vel;
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ Vec3f vel;
     /* 0x18 */ f32 size;
     /* 0x1C */ f32 length; /* distance to the next newer point */
     /* 0x20 */ u8 alpha;
@@ -2120,8 +2120,8 @@ typedef struct FlameSeed {
     /* 0x05 */ u8 bone;
     /* 0x06 */ u8 flags;
     /* 0x07 */ u8 pad07;
-    /* 0x08 */ vertex startOffset;
-    /* 0x14 */ vertex endOffset;
+    /* 0x08 */ Vec3f startOffset;
+    /* 0x14 */ Vec3f endOffset;
     /* 0x20 */ f32 gravity;
     /* 0x24 */ f32 emitRate;
     /* 0x28 */ f32 maxLength;
@@ -2169,7 +2169,7 @@ typedef struct FlameLineParams {
 
 /* Parameters of the particles (func_15147DA0) a flame scatters towards `target`; random values are min + range. */
 typedef struct FlameScatterParams {
-    /* 0x00 */ vertex target; /* bone-relative */
+    /* 0x00 */ Vec3f target; /* bone-relative */
     /* 0x0C */ f32 rate;
     /* 0x10 */ f32 rateRange;
     /* 0x14 */ s32 unk14;
@@ -2191,7 +2191,7 @@ typedef struct FlameScatterParams {
 
 /* Parameters of the particles (func_15130280) a flame emits towards `target`; random values are min + range. */
 typedef struct FlameEmitParams {
-    /* 0x00 */ vertex target; /* bone-relative */
+    /* 0x00 */ Vec3f target; /* bone-relative */
     /* 0x0C */ f32 rate;
     /* 0x10 */ f32 rateRange;
     /* 0x14 */ s16 unk14;
@@ -2215,8 +2215,8 @@ typedef struct CharacterFlamethrowerFlame {
     /* 0x04C */ FlameLineParams line;
     /* 0x090 */ FlameScatterParams scatter;
     /* 0x0D4 */ FlameEmitParams emit;
-    /* 0x110 */ vertex start;
-    /* 0x11C */ vertex end;
+    /* 0x110 */ Vec3f start;
+    /* 0x11C */ Vec3f end;
     /* 0x128 */ f32 timeCarry;
     /* 0x12C */ f32 emitAccum;
     /* 0x130 */ u16 sound;
@@ -2248,8 +2248,8 @@ typedef struct CharacterFlamethrowerSetup {
     /* 0xE0 */ FlameEmitParams emit;
 } CharacterFlamethrowerSetup;
 
-void func_15145EA4(vertex **in, vertex **out, s32 matrix, s32 count);
-struct225 *func_1519C09C(CharacterFlamethrowerActor *flame, vertex *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
+void func_15145EA4(Vec3f **in, Vec3f **out, s32 matrix, s32 count);
+struct225 *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
                          s32 arg7);
 extern void (*D_8008F8A4[])(void *);
 extern s16 (*D_8008F8B8[])(void);
@@ -2260,8 +2260,8 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
     EffectSpawn spawn;
     CharacterFlamethrowerFlame initial;
     Actor *owner;
-    vertex *inputs[2];
-    vertex *outputs[2];
+    Vec3f *inputs[2];
+    Vec3f *outputs[2];
     CharacterFlamethrowerFlame *state;
 
     owner = setup->seed.owner;
@@ -2399,7 +2399,7 @@ void func_15199980(CharacterFlamethrowerActor *actor) {
 extern s32 (*D_8008F8C4[])(void *);
 extern void (*D_8008F8BC[])(void *);
 
-void func_1519BE1C(vertex *pos, vertex *vel, f32 gravity, f32 dt);
+void func_1519BE1C(Vec3f *pos, Vec3f *vel, f32 gravity, f32 dt);
 
 /* Per-frame flame update: moves its points under gravity and keeps the light at the oldest point. */
 s32 func_15199A10(CharacterFlamethrowerActor *actor) {
@@ -2471,7 +2471,7 @@ typedef struct {
 } FlameSpark;
 
 void func_15145740(void *, void *, void *, void *, f32);
-s32 func_15146078(vertex *, vertex *, vertex *);
+s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 void func_15143874(s16, f32, f32 *, f32 *);
 void *func_15130280(void *, u8, s32, s32, u8, s32);
 void func_151D8868(void *, s32, s32, s32);
@@ -2484,10 +2484,10 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
     FlamePoint *points;
     Actor *obj;
-    vertex pos0;
-    vertex pos1;
-    vertex pos2;
-    vertex pos3;
+    Vec3f pos0;
+    Vec3f pos1;
+    Vec3f pos2;
+    Vec3f pos3;
 
     flame = actor->state;
     points = actor->points;
@@ -2501,8 +2501,8 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         flame->flags &= ~0x10;
     }
     if (obj->unk1D4 != NULL) {
-        vertex *inputs[4];
-        vertex *outputs[4];
+        Vec3f *inputs[4];
+        Vec3f *outputs[4];
 
         inputs[0] = &flame->seed.startOffset;
         inputs[1] = &flame->seed.endOffset;
@@ -2515,8 +2515,8 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         func_15145EA4(inputs, outputs, (s32)obj->unk1D4 + (flame->seed.bone << 6), 4);
         flame->flags &= ~1;
     } else {
-        vertex dir;
-        vertex up;
+        Vec3f dir;
+        Vec3f up;
 
         func_15145740(obj, &dir, &up, 0, 0.0f);
         pos0.x = obj->x_position;
@@ -2533,10 +2533,10 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         f32 inv;
         f32 t;
         f32 step;
-        vertex d0;
-        vertex d1;
-        vertex cur0;
-        vertex cur1;
+        Vec3f d0;
+        Vec3f d1;
+        Vec3f cur0;
+        Vec3f cur1;
         f32 ix0;
         f32 iy0;
         f32 iz0;
@@ -2607,9 +2607,9 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
             ScatterSpawn spawn;
             ScatterMotion motion;
             ScatterStyle style;
-            vertex delta;
-            vertex axisA;
-            vertex axisB;
+            Vec3f delta;
+            Vec3f axisA;
+            Vec3f axisB;
             f32 c;
             f32 s;
             f32 speed;
@@ -2663,9 +2663,9 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         flame->particleAccum += (flame->emit.rate + func_150ADA68() * flame->emit.rateRange) * D_800BE9A4;
         if (flame->particleAccum > 1.0f) {
             ParticleDesc part;
-            vertex delta;
-            vertex axisA;
-            vertex axisB;
+            Vec3f delta;
+            Vec3f axisA;
+            Vec3f axisB;
             f32 c;
             f32 s;
             f32 speed;
@@ -2760,9 +2760,9 @@ typedef struct ParticleDef4C {
     /* 0x10 */ u8 rgba[4];
     /* 0x14 */ f32 width;
     /* 0x18 */ f32 height;
-    /* 0x1C */ vertex pos;
-    /* 0x28 */ vertex rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
-    /* 0x34 */ vertex scale;
+    /* 0x1C */ Vec3f pos;
+    /* 0x28 */ Vec3f rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x34 */ Vec3f scale;
     /* 0x40 */ s32 flags;
     /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
     /* 0x45 */ u8 unk45;
@@ -2773,7 +2773,7 @@ typedef struct ParticleDef4C {
 
 extern void (*D_8008F8A8[])(void *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-f32 func_15143E64(vertex *);
+f32 func_15143E64(Vec3f *);
 f32 func_15144528(f32, f32, f32);
 void func_15143794(s16, s16, f32, f32 *);
 
@@ -2794,9 +2794,9 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
     maxLen = flame->seed.maxLength;
     if ((flame->flags & 4) && actor->count >= 2) {
         Actor *obj;
-        vertex *end;
+        Vec3f *end;
         s32 i;
-        vertex hitPos;
+        Vec3f hitPos;
         f32 x;
         f32 y;
         f32 z;
@@ -2829,9 +2829,9 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
         }
     }
     if (actor->count >= 2) {
-        vertex *prev;
+        Vec3f *prev;
         s32 i;
-        vertex diff;
+        Vec3f diff;
 
         i = actor->head;
         flame->length = 0.0f;
@@ -2940,9 +2940,9 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
             FlamePoint *last;
             FlamePoint *a;
             FlamePoint *b;
-            vertex pos;
+            Vec3f pos;
             f32 alpha;
-            vertex dir;
+            Vec3f dir;
             f32 sum;
             f32 target;
             SceneParticle *particle;
@@ -3018,7 +3018,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
                 f32 r2;
                 f32 r3;
                 s32 r;
-                vertex vel;
+                Vec3f vel;
 
                 r1 = func_150ADA68() * flame->line.unk14 + flame->line.unkC;
                 r2 = func_150ADA68() * flame->line.unk18 + flame->line.unk10;
@@ -3059,7 +3059,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
         D_8008F8A8[flame->seed.unk35](actor);
     }
     if ((flame->flags & 2) && actor->count >= 2) {
-        vertex *end;
+        Vec3f *end;
         FlamePoint *h;
         s32 i;
         s32 pad9;
@@ -3090,14 +3090,14 @@ extern s32 D_800A4AC8[][2];
 /* Draws a flame as a camera-facing ribbon through its points (culled when off screen). */
 Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     CharacterFlamethrowerFlame *state;
-    vertex next;
-    vertex cur;
+    Vec3f next;
+    Vec3f cur;
     s32 index;
     FlamePoint *points;
-    vertex *camera;
-    vertex toCamera;
-    vertex delta;
-    vertex normal;
+    Vec3f *camera;
+    Vec3f toCamera;
+    Vec3f delta;
+    Vec3f normal;
     s32 previous;
     f32 lengthSquared;
     u8 flag;
@@ -3148,7 +3148,7 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     if (vtx == NULL) {
         return gfx;
     }
-    camera = (vertex *)func_15144B34(view);
+    camera = (Vec3f *)func_15144B34(view);
     flag = 1;
     gfx = (Gfx *)func_15142E24((s32)gfx, (s32)D_80091064, 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
@@ -3297,8 +3297,8 @@ Gfx *func_1519B4B8(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
 }
 
 /* Integrates a point over `dt` under `gravity` (applied to vel.y). */
-void func_1519BE1C(vertex *pos, vertex *vel, f32 gravity, f32 dt) {
-    vertex v;
+void func_1519BE1C(Vec3f *pos, Vec3f *vel, f32 gravity, f32 dt) {
+    Vec3f v;
 
     v = *vel;
     vel->y += gravity * dt;
@@ -3406,7 +3406,7 @@ typedef struct FlameLight {
 } FlameLight;
 
 /* Creates the light that follows flame `flame` at `pos`, colored (red, green, blue, alpha). */
-struct225 *func_1519C09C(CharacterFlamethrowerActor *flame, vertex *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
+struct225 *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
                          s32 arg7) {
     struct225 *light;
     Header header;
@@ -3465,10 +3465,10 @@ void func_1519C258(FlameLight *light) {
 /* Flame line particle callback: gravity, per-frame drag, then moves both beam ends (constant acceleration). */
 s32 func_1519C26C(SceneParticle *beam) {
     f32 dtSq;
-    vertex velA;
-    vertex velB;
-    vertex accA;
-    vertex accB;
+    Vec3f velA;
+    Vec3f velB;
+    Vec3f accA;
+    Vec3f accB;
     FlameLineData *p = &beam->data.line;
 
     dtSq = D_800BE9A4 * D_800BE9A4;
@@ -3521,18 +3521,18 @@ s32 func_1519C4E4(SceneParticle *beam) {
     return 1;
 }
 
-void func_15145548(vertex *arg0, vertex *arg1, vertex *arg2, vertex *arg3, f32 *arg4);
+void func_15145548(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4);
 
 /* Builds a flame line beam's quad (4 vertices) from start towards end, `progress` of the way, facing the camera. */
 void *func_1519C56C(SceneParticle *beam, s16 view) {
     Vtx_t *vertices;
     void *result;
-    vertex *pos;
-    vertex dir;
-    vertex mid;
+    Vec3f *pos;
+    Vec3f dir;
+    Vec3f mid;
     f32 dx, dy, dz;
     f32 nx, ny, nz;
-    vertex closest;
+    Vec3f closest;
     f32 t;
     f32 lengthSquared;
     u8 fresh;
@@ -3548,7 +3548,7 @@ void *func_1519C56C(SceneParticle *beam, s16 view) {
     } else {
         return NULL;
     }
-    pos = (vertex *)func_15144B34(view);
+    pos = (Vec3f *)func_15144B34(view);
     dir.x = beam->end.x - beam->start.x;
     dir.y = beam->end.y - beam->start.y;
     dir.z = beam->end.z - beam->start.z;
@@ -3780,7 +3780,7 @@ void func_1519CDB0(CharacterFlamethrowerActor *actor, f32 fraction, s32 kind) {
     CharacterFlamethrowerFlame *state;
     FlamePoint *point;
     Actor *owner;
-    vertex *previous;
+    Vec3f *previous;
 
     state = actor->state;
     points = actor->points;

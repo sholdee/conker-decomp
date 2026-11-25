@@ -21,7 +21,7 @@ void func_150F6DB0(Actor *owner) {
 /* A sprite spawned by func_15130280 that marks one end of the beam. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x40];
-    /* 0x40 */ struct17 pos;
+    /* 0x40 */ Vec3f pos;
     /* 0x4C */ u8 pad4C[0x74 - 0x4C];
     /* 0x74 */ s8 mode; /* 3 or -1 (see func_150F706C) */
 } BeamEnd;
@@ -30,7 +30,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ u8 *hitObj;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ struct17 pos;
+    /* 0x08 */ Vec3f pos;
     /* 0x14 */ u8 pad14[0x59 - 0x14];
     /* 0x59 */ u8 hit; /* 0: no hit */
     /* 0x5A */ u8 pad5A[0x64 - 0x5A];
@@ -93,9 +93,9 @@ BeamObj *func_150F6DE4(Actor *owner) {
             spawn.a = 0xFF;
             spawn.brightness = 0xFF;
             spawn.width = spawn.height = 1511.0f;
-            spawn.pos = *(vertex *)&D_800A5480;
-            spawn.offset = *(vertex *)&D_800A5480;
-            spawn.vel = *(vertex *)&D_800A5480;
+            spawn.pos = D_800A5480;
+            spawn.offset = D_800A5480;
+            spawn.vel = D_800A5480;
             spawn.fadeStart = 1;
             spawn.fadeRate = 0xFF;
             spawn.scaleStart = 1;
@@ -128,7 +128,7 @@ BeamObj *func_150F6DE4(Actor *owner) {
     return obj;
 }
 
-void func_15145740(Actor *actor, struct17 *out, struct17 *arg2, struct17 *arg3, f32 arg4);
+void func_15145740(Actor *actor, Vec3f *out, Vec3f *arg2, Vec3f *arg3, f32 arg4);
 void func_15081690(Actor *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
                    s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
 s32 func_1506196C(u8 *obj, s32 arg1);
@@ -138,8 +138,8 @@ void func_1502EA98(u8 *obj, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
 void func_150F706C(BeamObj *obj) {
     BeamState *beam;
     Actor *owner;
-    struct17 origin;
-    struct17 hitPos;
+    Vec3f origin;
+    Vec3f hitPos;
 
     beam = &obj->beam;
     owner = beam->owner;
@@ -157,17 +157,17 @@ void func_150F706C(BeamObj *obj) {
         return;
     }
 
-    origin.unk0 = owner->x_position;
-    origin.unk4 = owner->y_position + 46.0f;
-    origin.unk8 = owner->z_position;
-    func_15145740(owner, (struct17 *)&D_800D9A50, NULL, NULL, 0.0f);
+    origin.x = owner->x_position;
+    origin.y = owner->y_position + 46.0f;
+    origin.z = owner->z_position;
+    func_15145740(owner, &D_800D9A50, NULL, NULL, 0.0f);
 
-    ((struct17 *)&D_800D9A50)->unk0 *= 0.001f;
-    ((struct17 *)&D_800D9A50)->unk4 *= 0.001f;
-    ((struct17 *)&D_800D9A50)->unk8 *= 0.001f;
+    D_800D9A50.x *= 0.001f;
+    D_800D9A50.y *= 0.001f;
+    D_800D9A50.z *= 0.001f;
 
-    func_15081690(owner, origin.unk0, origin.unk4, origin.unk8,
-                  ((struct17 *)&D_800D9A50)->unk0, ((struct17 *)&D_800D9A50)->unk4, ((struct17 *)&D_800D9A50)->unk8,
+    func_15081690(owner, origin.x, origin.y, origin.z,
+                  D_800D9A50.x, D_800D9A50.y, D_800D9A50.z,
                   &beam->ray, 5000.0f, 0, 0, 1, -1, 0, 0);
 
     beam->flags |= 1;

@@ -113,7 +113,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
  */
 void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex) {
     s32 pad[2]; // matching: frame keeps 8 unused bytes above pos
-    vertex pos;
+    Vec3f pos;
     Actor *obj;
 
     obj = &D_800CC2D0[arg0->unk124];

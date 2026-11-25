@@ -8,10 +8,10 @@ u8 func_150ADA20(void);
 #include "variables.h"
 #include "effects.h"
 
-void func_15142314(struct255 *bones, s32 bone, vertex *out);
+void func_15142314(struct255 *bones, s32 bone, Vec3f *out);
 
 /* Gets the position of the actor's bone 0x18 (side 1) or 0x15 (side 2). */
-s32 func_150C19C0(vertex *pos, Actor *actor, u8 side) {
+s32 func_150C19C0(Vec3f *pos, Actor *actor, u8 side) {
     s32 bone;
 
     switch (side) {
@@ -47,7 +47,7 @@ void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life,
  * flat quad at the actor's unk180 height, and 5 to 12 debris particles flying outwards from it.
  */
 void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
-    vertex pos;
+    Vec3f pos;
     f32 scale;
     ParticleSpawn spawn;
     f32 radius;

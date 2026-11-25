@@ -13,17 +13,17 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } GroundHit; // size 0x24
 
-void func_15142314(struct255 *bones, s32 bone, vertex *out);
+void func_15142314(struct255 *bones, s32 bone, Vec3f *out);
 void func_1504715C(GroundHit *hit, Actor *actor);
-s32 func_15046C80(vertex *probe, s32 arg1, f32 bottom, GroundHit *hit);
-void func_15141F78(u8, GroundHit *, f32, u8, vertex *, u8);
+s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, GroundHit *hit);
+void func_15141F78(u8, GroundHit *, f32, u8, Vec3f *, u8);
 s32 func_151420F8(Actor *actor);
 
 /* Get the position of one of the actor's bones (0x21 for side 1, 0x1D for side 2; any other side
    fails with 0).  With a `hit` buffer, also look for the ground below that point and return
    func_15046C80's result.  (Same as func_15146890 with different bones.) */
-s32 func_150EAF50(vertex *pos, Actor *actor, GroundHit *hit, u8 side) {
-    vertex probe;
+s32 func_150EAF50(Vec3f *pos, Actor *actor, GroundHit *hit, u8 side) {
+    Vec3f probe;
     s32 bone;
 
     if ((side != 1) && (side != 2)) {
@@ -67,7 +67,7 @@ s32 func_150EB030(s32 kind, Actor *actor) {
 // matching: `actor` is an int cast at each use; with a pointer parameter IDO merges the two
 // loads of it that the original makes (as func_15146D60 in game_173D40.c).
 void func_150EB090(s32 actor, s32 side, s32 strength) {
-    vertex pos;
+    Vec3f pos;
     GroundHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {

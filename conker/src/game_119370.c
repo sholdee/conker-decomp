@@ -10,9 +10,9 @@ extern u8 D_800A1548[];
 extern void func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 extern void func_15143874(s16, f32, f32 *, f32 *);
-extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
+extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, Vec3f *, s32, s32, s32, u8, s32);
 extern s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-s32 func_151C229C(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, Actor *, s32, s32, s32,
+s32 func_151C229C(Vec3f *, Vec3f *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, Actor *, s32, s32, s32,
                   s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 
 /* Fires a shot from muzzle `slot` (0 or 1) of `actor`: casts a ray along the aim given by bone 2, spawns a
@@ -20,16 +20,16 @@ s32 func_151C229C(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, f32
  * func_151602C0 flash at the muzzle and a func_15102B38 beam on the muzzle's bone. */
 s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     s32 tracer;
-    struct17 aimStart;
-    struct17 aimDir;
-    struct17 muzzle;
-    struct17 *tracerDir;
-    struct17 hitDir;
+    Vec3f aimStart;
+    Vec3f aimDir;
+    Vec3f muzzle;
+    Vec3f *tracerDir;
+    Vec3f hitDir;
     f32 *srcs[2];
     f32 *dsts[2];
     f32 *muzzleSrc[1];
     f32 *muzzleDst[1];
-    struct17 hit;
+    Vec3f hit;
     f32 jitter[2];
     Header flashHeader;
     Header2 flashPos;
@@ -50,22 +50,22 @@ s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     }
     srcs[0] = D_800A1500;
     srcs[1] = D_800A150C;
-    dsts[0] = &aimStart.unk0;
-    dsts[1] = &aimDir.unk0;
+    dsts[0] = &aimStart.x;
+    dsts[1] = &aimDir.x;
     func_15145EA4(srcs, dsts, (Mtx *)actor->unk1D4 + 2, 2);
-    aimDir.unk0 -= aimStart.unk0;
-    aimDir.unk4 -= aimStart.unk4;
-    aimDir.unk8 -= aimStart.unk8;
+    aimDir.x -= aimStart.x;
+    aimDir.y -= aimStart.y;
+    aimDir.z -= aimStart.z;
     {
         // matching: the block (needing a declaration, so a prototype) fences as1's scheduling
         void func_15145EA4(f32 **, f32 **, Mtx *, s32);
 
         muzzleSrc[0] = D_800A1518[slot];
-        muzzleDst[0] = &muzzle.unk0;
+        muzzleDst[0] = &muzzle.x;
         func_15145EA4(muzzleSrc, muzzleDst, (Mtx *)actor->unk1D4 + D_800A1548[slot], 1);
     }
-    if (func_150AC9C0(aimStart.unk0, aimStart.unk4, aimStart.unk8, aimDir.unk0, aimDir.unk4, aimDir.unk8, NULL,
-                      NULL, &hit.unk0, &hit.unk4, &hit.unk8, NULL, NULL, NULL, 0.0f)) {
+    if (func_150AC9C0(aimStart.x, aimStart.y, aimStart.z, aimDir.x, aimDir.y, aimDir.z, NULL,
+                      NULL, &hit.x, &hit.y, &hit.z, NULL, NULL, NULL, 0.0f)) {
         randInt = func_150ADA20();
         randA = func_150ADA68() * 80.0f;
         func_15143874((s16)(randInt & 0xFF), randA, &jitter[0], &jitter[1]);
@@ -73,12 +73,12 @@ s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
             // matching: the block (needing a declaration, so a prototype) fences as1's scheduling
             void func_15143874(s16, f32, f32 *, f32 *);
 
-            hit.unk0 += jitter[0];
-            hit.unk8 += jitter[1];
+            hit.x += jitter[0];
+            hit.z += jitter[1];
             tracerDir = &hitDir;
-            hitDir.unk0 = hit.unk0 - muzzle.unk0;
-            hitDir.unk4 = hit.unk4 - muzzle.unk4;
-            hitDir.unk8 = hit.unk8 - muzzle.unk8;
+            hitDir.x = hit.x - muzzle.x;
+            hitDir.y = hit.y - muzzle.y;
+            hitDir.z = hit.z - muzzle.z;
         }
     } else {
         tracerDir = &aimDir;
@@ -98,9 +98,9 @@ s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     flashHeader.unk1 = -1;
     flashHeader.unk2 = (func_150ADA20() % 3U) + 3;
     flashHeader.unk4 = 0;
-    flashPos.unk0 = muzzle.unk0;
-    flashPos.unk4 = muzzle.unk4;
-    flashPos.unk8 = muzzle.unk8;
+    flashPos.unk0 = muzzle.x;
+    flashPos.unk4 = muzzle.y;
+    flashPos.unk8 = muzzle.z;
     randInt = (func_150ADA20() % 13U) + 90;
     func_151602C0(&flashHeader, &flashPos, randInt, 255, 255, 255, 255, 0, 0, arg2, arg3);
     beamSize[1] = (func_150ADA68() * 2586.0f + 1758.0f) * 0.001000000047f;

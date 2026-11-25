@@ -95,7 +95,7 @@ void func_1512C150(Camera *);
 extern u8 D_800C3672;
 extern s32 D_800C367C;
 extern s32 D_800C3678;
-extern struct17 D_80089544;
+extern Vec3f D_80089544;
 extern f32 D_800C3648;
 
 /*
@@ -259,7 +259,7 @@ void func_15128CB0(Camera *cam) {
         {
             Data15128CB0 *data;
             f32 surface;
-            struct17 pos;
+            Vec3f pos;
             f32 angle;
             f32 x; // matching: stack-slot pads that place pos and angle in the frame
             f32 y;
@@ -294,8 +294,8 @@ void func_15128CB0(Camera *cam) {
                 }
                 cam->swayAmount = data->unk20;
                 angle = data->unk24 * 0.01745329238f;
-                pos.unk4 = sinf(angle) * -pos.unk8;
-                pos.unk8 = cosf(angle) * pos.unk8;
+                pos.y = sinf(angle) * -pos.z;
+                pos.z = cosf(angle) * pos.z;
                 if (D_800DBFF4[0]) {
                     cam->yaw = data->unk28;
                     cam->unk380 = data->unk28;
@@ -307,18 +307,18 @@ void func_15128CB0(Camera *cam) {
                 angle = cam->yaw;
                 angle += func_15048A70(cam->yaw, data->unk28) / 1.0f;
                 angle *= 0.01745329238f;
-                pos.unk0 = sinf(angle) * pos.unk8;
-                pos.unk8 = cosf(angle) * pos.unk8;
-                pos.unk0 += data->unk14;
-                pos.unk4 += data->unk18;
-                pos.unk8 += data->unk1C;
+                pos.x = sinf(angle) * pos.z;
+                pos.z = cosf(angle) * pos.z;
+                pos.x += data->unk14;
+                pos.y += data->unk18;
+                pos.z += data->unk1C;
                 cam->unk19C = data->unk2C;
                 cam->unk1A0 = data->unk30;
                 cam->unk1A4 = data->unk2C;
                 cam->unk1A8 = data->unk30;
-                cam->focus.x = pos.unk0;
-                cam->focus.y = pos.unk4;
-                cam->focus.z = pos.unk8;
+                cam->focus.x = pos.x;
+                cam->focus.y = pos.y;
+                cam->focus.z = pos.z;
                 cam->target = cam->focus;
                 cam->unk3A8 = 0.0f;
                 cam->unk5E8 = 0.0f;
@@ -375,7 +375,7 @@ void func_151298C0(Camera *cam, s32 arg1) {
  */
 void func_15129934(Camera *cam) {
     f32 x;
-    struct17 dir;
+    Vec3f dir;
     f32 z;
     f32 y;
     f32 dist;
@@ -398,13 +398,13 @@ void func_15129934(Camera *cam) {
             dist = 0.0f;
         }
         func_15049148(&dir, dist, &dir);
-        x = cam->unk27C.x + dir.unk0;
+        x = cam->unk27C.x + dir.x;
         if (cam->cmd.unk8 & 0xF) {
             y = cam->unk27C.y;
         } else {
-            y = cam->unk27C.y + dir.unk4 * 1.2f;
+            y = cam->unk27C.y + dir.y * 1.2f;
         }
-        z = cam->unk27C.z + dir.unk8;
+        z = cam->unk27C.z + dir.z;
         if (cam->snap) {
             cam->eye.x = x;
             cam->prevEye.x = x;

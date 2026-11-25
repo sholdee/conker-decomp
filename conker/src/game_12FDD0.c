@@ -12,8 +12,8 @@ typedef struct {
     /* 0x0C */ s16 node;       /* func_1503195C node, -1: use the bone matrix */
     /* 0x10 */ s32 bone;
     /* 0x14 */ u8 flags;       /* bit 0: start/end are valid this frame */
-    /* 0x18 */ struct17 start; /* def.pos and def.rot transformed to world space */
-    /* 0x24 */ struct17 end;
+    /* 0x18 */ Vec3f start; /* def.pos and def.rot transformed to world space */
+    /* 0x24 */ Vec3f end;
 } BeamData; /* size 0x30 */
 
 /* A particle spawned by func_1513D2F0 (as Particle in game_169510.c, followed by its data). */
@@ -58,11 +58,11 @@ typedef struct {
 #define PARTICLE_DRAW_FUNC 0x8000
 #define PARTICLE_VIEWS     0x40000
 
-void func_15103254(s16 lifetime, u8 alpha, f32 size, vertex *pos, u8 views, u8 arg5, s32 arg6);
+void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 arg5, s32 arg6);
 
 /* Spawns a func_1513C650 effect of the given size on a surface (none for some materials on maps 0x36 and 0x26);
  * a duration of -1 means a fixed 300 frames without the timed flag. */
-struct210 *func_15102920(f32 size, u8 arg1, s32 arg2, struct17 *position, s16 duration, u8 arg5, u8 arg6,
+struct210 *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
                          s32 surfaceFlags, u8 arg8, s32 arg9) {
     struct210 *result;
     Struct1513C650Arg arg;
@@ -113,7 +113,7 @@ struct210 *func_15102920(f32 size, u8 arg1, s32 arg2, struct17 *position, s16 du
         argB = 0;
         argC = 0;
     }
-    result = func_1513C650((s32)&arg, 0, 0, arg2, position->unk0, position->unk4, position->unk8, size, size,
+    result = func_1513C650((s32)&arg, 0, 0, arg2, position->x, position->y, position->z, size, size,
                            func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), argB, argC, 0,
                            arg8, arg9);
     return result;
@@ -121,8 +121,8 @@ struct210 *func_15102920(f32 size, u8 arg1, s32 arg2, struct17 *position, s16 du
 
 /* Spawns a beam particle from `start` to `end`, attached to bone `bone` of `target` (or to its model node `node`),
  * plus a flash at `flashPos`. */
-Particle *func_15102B38(Actor *target, u8 bone, vertex *start, vertex *end, ParticleSize *size, s16 lifetime,
-                  u8 alpha, f32 flashSize, struct17 *flashPos, u8 viewMask, s32 extraSize, s16 node, u8 arg12,
+Particle *func_15102B38(Actor *target, u8 bone, Vec3f *start, Vec3f *end, ParticleSize *size, s16 lifetime,
+                  u8 alpha, f32 flashSize, Vec3f *flashPos, u8 viewMask, s32 extraSize, s16 node, u8 arg12,
                   s32 arg13) {
     Particle *particle;
     ParticleDef def;
@@ -134,8 +134,8 @@ Particle *func_15102B38(Actor *target, u8 bone, vertex *start, vertex *end, Part
     }
 
     beam.flags = 0;
-    beam.start = *(struct17 *)&D_800A5480;
-    beam.end = *(struct17 *)&D_800A5480;
+    beam.start = D_800A5480;
+    beam.end = D_800A5480;
     beam.bone = bone;
     beam.target = target;
     beam.node = node;
@@ -186,15 +186,15 @@ void func_15102D50(Particle *particle, s32 arg1, u8 arg2) {
 }
 
 extern s32 func_1514654C(Actor *, ActorCtl *, s32, void *, void *, s32);
-extern void func_15145EA4(struct17 **src, struct17 **dst, Mtx *matrix, s32 count);
+extern void func_15145EA4(Vec3f **src, Vec3f **dst, Mtx *matrix, s32 count);
 
 /* Beam update: moves the beam's end points with its target's bone or model node.
  * Returns 0 when the beam should die (target gone or node missing). */
 s32 func_15102D90(Particle *particle) {
     Actor *target;
     BeamData *beam;
-    struct17 *src[2];
-    struct17 *dst[2];
+    Vec3f *src[2];
+    Vec3f *dst[2];
 
     beam = &particle->beam;
     beam->flags &= ~1;
@@ -226,18 +226,18 @@ s32 func_15102D90(Particle *particle) {
     return 1;
 }
 
-extern struct17 *func_15144B34(s32);
+extern Vec3f *func_15144B34(s32);
 void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **vtx, u8 *fresh);
-void func_15145548(struct17 *origin, struct17 *dir, struct17 *point, struct17 *closest, f32 *t);
+void func_15145548(Vec3f *origin, Vec3f *dir, Vec3f *point, Vec3f *closest, f32 *t);
 
 /* Vertex function: builds the beam's quad for `viewport`, from its start to def.height of the way to its end,
  * def.width wide and facing the viewport's camera. */
 Vtx *func_15102EB8(Particle *particle, s16 viewport) {
-    struct17 *camera;
-    struct17 mid;
-    struct17 dir;
+    Vec3f *camera;
+    Vec3f mid;
+    Vec3f dir;
     BeamData *beam;
-    struct17 closest;
+    Vec3f closest;
     f32 dx, dy, dz;
     f32 nx, ny, nz;
     Vtx *vtx;
@@ -263,19 +263,19 @@ Vtx *func_15102EB8(Particle *particle, s16 viewport) {
     } else {
         return NULL;
     }
-    mid.unk0 = beam->start.unk0 + (beam->end.unk0 - beam->start.unk0) * particle->def.height;
-    mid.unk4 = beam->start.unk4 + (beam->end.unk4 - beam->start.unk4) * particle->def.height;
-    mid.unk8 = beam->start.unk8 + (beam->end.unk8 - beam->start.unk8) * particle->def.height;
-    dir.unk0 = mid.unk0 - beam->start.unk0;
-    dir.unk4 = mid.unk4 - beam->start.unk4;
-    dir.unk8 = mid.unk8 - beam->start.unk8;
+    mid.x = beam->start.x + (beam->end.x - beam->start.x) * particle->def.height;
+    mid.y = beam->start.y + (beam->end.y - beam->start.y) * particle->def.height;
+    mid.z = beam->start.z + (beam->end.z - beam->start.z) * particle->def.height;
+    dir.x = mid.x - beam->start.x;
+    dir.y = mid.y - beam->start.y;
+    dir.z = mid.z - beam->start.z;
     func_15145548(&beam->start, &dir, camera, &closest, &t);
-    dx = closest.unk0 - camera->unk0;
-    dy = closest.unk4 - camera->unk4;
-    dz = closest.unk8 - camera->unk8;
-    nx = dir.unk4 * dz - dy * dir.unk8;
-    ny = dir.unk8 * dx - dz * dir.unk0;
-    nz = dir.unk0 * dy - dx * dir.unk4;
+    dx = closest.x - camera->x;
+    dy = closest.y - camera->y;
+    dz = closest.z - camera->z;
+    nx = dir.y * dz - dy * dir.z;
+    ny = dir.z * dx - dz * dir.x;
+    nz = dir.x * dy - dx * dir.y;
     lengthSquared = nx * nx + ny * ny + nz * nz;
     if (lengthSquared == 0.0f) {
         nx = 0.0f;
@@ -287,24 +287,24 @@ Vtx *func_15102EB8(Particle *particle, s16 viewport) {
         ny *= scale;
         nz *= scale;
     }
-    vtx->v.ob[0] = beam->start.unk0 + nx;
-    vtx->v.ob[1] = beam->start.unk4 + ny;
-    vtx->v.ob[2] = beam->start.unk8 + nz;
+    vtx->v.ob[0] = beam->start.x + nx;
+    vtx->v.ob[1] = beam->start.y + ny;
+    vtx->v.ob[2] = beam->start.z + nz;
     vtx->v.flag = 0;
     vtx++;
-    vtx->v.ob[0] = mid.unk0 + nx;
-    vtx->v.ob[1] = mid.unk4 + ny;
-    vtx->v.ob[2] = mid.unk8 + nz;
+    vtx->v.ob[0] = mid.x + nx;
+    vtx->v.ob[1] = mid.y + ny;
+    vtx->v.ob[2] = mid.z + nz;
     vtx->v.flag = 0;
     vtx++;
-    vtx->v.ob[0] = mid.unk0 - nx;
-    vtx->v.ob[1] = mid.unk4 - ny;
-    vtx->v.ob[2] = mid.unk8 - nz;
+    vtx->v.ob[0] = mid.x - nx;
+    vtx->v.ob[1] = mid.y - ny;
+    vtx->v.ob[2] = mid.z - nz;
     vtx->v.flag = 0;
     vtx++;
-    vtx->v.ob[0] = beam->start.unk0 - nx;
-    vtx->v.ob[1] = beam->start.unk4 - ny;
-    vtx->v.ob[2] = beam->start.unk8 - nz;
+    vtx->v.ob[0] = beam->start.x - nx;
+    vtx->v.ob[1] = beam->start.y - ny;
+    vtx->v.ob[2] = beam->start.z - nz;
     vtx->v.flag = 0;
     return result;
 }
@@ -313,7 +313,7 @@ extern s32 D_80088BD0[];
 extern void *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns a flash particle of the given size at `pos`, with one of four random textures and random flips. */
-void func_15103254(s16 lifetime, u8 alpha, f32 size, vertex *pos, u8 views, u8 arg5, s32 arg6) {
+void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 arg5, s32 arg6) {
     s32 index;
     ParticleDesc desc;
 

@@ -19,13 +19,13 @@ typedef struct {
 } GroundHit; // size 0x24
 
 void func_1504715C(GroundHit *hit, Actor *actor);
-s32 func_15046C80(vertex *probe, s32 arg1, f32 bottom, GroundHit *hit);
+s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, GroundHit *hit);
 void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
                    f32 arg9, s32 argA, u8 argB);
 
 /* Spawns two effects on the ground under the actor, probing from 1000 units above it to 3000 below. */
 void func_150CDBB0(Actor *actor, u8 owner, s32 arg2) {
-    vertex pos;
+    Vec3f pos;
 
     if (actor == NULL) {
         return;
@@ -124,11 +124,11 @@ typedef struct ParticleSpawn80 {
     /* 0x04 */ f32 elasticity;
     /* 0x08 */ f32 sizeXZ;
     /* 0x0C */ f32 sizeY;
-    /* 0x10 */ vertex rot;
-    /* 0x1C */ vertex scale;
-    /* 0x28 */ vertex pos;
-    /* 0x34 */ vertex vel;
-    /* 0x40 */ vertex rotVel;
+    /* 0x10 */ Vec3f rot;
+    /* 0x1C */ Vec3f scale;
+    /* 0x28 */ Vec3f pos;
+    /* 0x34 */ Vec3f vel;
+    /* 0x40 */ Vec3f rotVel;
     /* 0x4C */ f32 gravity;
     /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;
