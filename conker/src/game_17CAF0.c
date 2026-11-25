@@ -1834,32 +1834,26 @@ void func_15152B38(struct Local15152B38Arg *config, u8 arg1, s32 arg2) {
     }
 }
 
-struct Local15152F70Header {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
-
 struct Local15152F70Arg {
-    struct Local15152F70Header unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    u8 unk38;
-    u8 unk39;
+    struct Vec3F position;
+    f32 sizeBase;
+    f32 sizeRange;
+    f32 growthBase;
+    f32 growthRange;
+    f32 speedBase;
+    f32 speedRange;
+    s16 countBase;
+    s16 countRange;
+    s16 yawBase;
+    s16 yawRange;
+    s16 pitchBase;
+    s16 pitchRange;
+    s16 fadeBase;
+    s16 fadeRange;
+    s16 lifeBase;
+    s16 lifeRange;
+    u8 green;
+    u8 red;
     u8 pad3A[2];
     s32 unk3C;
     s32 unk40;
@@ -1867,98 +1861,72 @@ struct Local15152F70Arg {
     s32 unk48;
     s32 unk4C;
     s32 unk50;
-    u8 unk54;
-    u8 unk55;
+    u8 blue;
+    u8 alpha;
     u8 pad56[2];
 };
 
-struct Local15152F70Pos {
-    struct Local15152F70Header unk0;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    u8 pad14;
-    u8 unk15;
-    u8 pad16[2];
-    s32 unk18;
-};
-
-struct Local15152F70Spawn {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
+/* Motion15147DA0 without the trailing unk1C/unk1E, which this caller never sets. */
+typedef struct {
+    f32 size;
+    struct Vec3F velocity;
+    f32 growth;
     u8 pad14[4];
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-};
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+} MotionShort15147DA0;
 
-struct Local15152F70Style {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-};
-
-void func_15152F70(struct Local15152F70Arg *arg0, u8 arg1) {
-    struct Local15152F70Pos pos;
+/* Like func_15151A38, with a fixed color and fixed func_15147DA0 parameters. */
+void func_15152F70(struct Local15152F70Arg *config, u8 arg1) {
+    Spawn15147DA0 spawn;
     s32 count;
-    struct Local15152F70Spawn spawn;
-    s16 randS1;
-    struct Local15152F70Style style;
-    s16 randS2;
-    f32 temp_f20;
-    f32 temp_f22;
-    f32 temp_f24;
-    f32 temp_f26;
-    f32 temp_f28;
+    MotionShort15147DA0 motion;
+    s16 yaw;
+    Params15147DA0 params;
+    s16 pitch;
+    f32 speed;
+    f32 cosPitch;
+    f32 sinPitch;
+    f32 cosYaw;
+    f32 sinYaw;
 
-    pos.unk10 = 1;
-    pos.unkE = 1;
-    spawn.unk19 = arg0->unk38;
-    spawn.unk1A = arg0->unk54;
-    spawn.unk18 = arg0->unk39;
-    spawn.unk1B = arg0->unk55;
-    pos.unk0 = arg0->unk0;
-    style.unk0 = 0;
-    style.unk4 = 1;
-    style.unk8 = 0x160600;
-    style.unkC = 3;
-    style.unk10 = 0x10;
-    style.unk14 = 0x80;
-    style.unk18 = 0x20;
-    style.unk1C = 0;
-    style.unk1D = 9;
-    count = (func_150ADA20() % (u32)(arg0->unk26 + 1)) + arg0->unk24;
-
-    if (count != 0) {
-        do {
-            randS1 = (func_150ADA20() % (u32)(arg0->unk2A + 1)) + arg0->unk28;
-            randS2 = (func_150ADA20() % (u32)(arg0->unk2E + 1)) + arg0->unk2C;
-            temp_f22 = func_151423D8((u8)randS2);
-            temp_f24 = func_151423D8((u8)(randS2 - 0x40));
-            temp_f26 = func_151423D8((u8)randS1);
-            temp_f28 = func_151423D8((u8)(randS1 - 0x40));
-            temp_f20 = (func_150ADA68() * arg0->unk20) + arg0->unk1C;
-            pos.unk15 = (func_150ADA20() % (u32)(arg0->unk32 + 1)) + arg0->unk30;
-            pos.unkC = (func_150ADA20() % (u32)(arg0->unk36 + 1)) + arg0->unk34;
-            spawn.unk0 = (func_150ADA68() * arg0->unk10) + arg0->unkC;
-            spawn.unk10 = (func_150ADA68() * arg0->unk18) + arg0->unk14;
-            spawn.unk4 = (temp_f20 * temp_f22) * temp_f28;
-            spawn.unk8 = -temp_f20 * temp_f24;
-            spawn.unkC = (temp_f20 * temp_f22) * temp_f26;
-            func_15147DA0(&pos, &spawn, 0, arg0->unk3C, arg0->unk40, arg0->unk44, arg0->unk48,
-                          arg0->unk4C, arg0->unk50, 0, 0, (s32 *)&style, 0, arg1, 1);
-            count--;
-        } while (count != 0);
+    spawn.active = 1;
+    spawn.enabled = 1;
+    motion.green = config->green;
+    motion.blue = config->blue;
+    motion.red = config->red;
+    motion.alpha = config->alpha;
+    spawn.position = config->position;
+    params.unk0 = 0;
+    params.unk4 = 1;
+    params.unk8 = 0x160600;
+    params.unkC = 3;
+    params.unk10 = 0x10;
+    params.unk14 = 0x80;
+    params.unk18 = 0x20;
+    params.unk1C = 0;
+    params.unk1D = 9;
+    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    while (count != 0) {
+        yaw = (func_150ADA20() % (u32)(config->yawRange + 1)) + config->yawBase;
+        pitch = (func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitchBase;
+        cosPitch = func_151423D8((u8)pitch);
+        sinPitch = func_151423D8((u8)(pitch - 0x40));
+        cosYaw = func_151423D8((u8)yaw);
+        sinYaw = func_151423D8((u8)(yaw - 0x40));
+        speed = (func_150ADA68() * config->speedRange) + config->speedBase;
+        spawn.fade = (func_150ADA20() % (u32)(config->fadeRange + 1)) + config->fadeBase;
+        spawn.life = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
+        motion.size = (func_150ADA68() * config->sizeRange) + config->sizeBase;
+        motion.growth = (func_150ADA68() * config->growthRange) + config->growthBase;
+        motion.velocity.x = (speed * cosPitch) * sinYaw;
+        motion.velocity.y = -speed * sinPitch;
+        motion.velocity.z = (speed * cosPitch) * cosYaw;
+        func_15147DA0(&spawn, &motion, 0, config->unk3C, config->unk40, config->unk44, config->unk48,
+                      config->unk4C, config->unk50, 0, 0, (s32 *)&params, 0, arg1, 1);
+        count--;
     }
 }
 
