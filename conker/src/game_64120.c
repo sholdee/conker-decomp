@@ -614,7 +614,6 @@ typedef struct AimNode {
 } AimNode;
 
 static AimNodeTypes D_800843E0 = { { 0x0A, 0x15, 0x16, 0x17, 0x13, 0x14, 0x19, 0x48 } };
-ModelAttachment *func_150319CC(s32, Actor *);
 
 /*
  * Picks the point object objIndex should aim bone `bone` at, writing it to out (or -99999 when there is none):

@@ -621,7 +621,6 @@ u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_1501748C(s16 arg0);
 
 Gfx *func_1501A490(Gfx *dl, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode);
-ModelAttachment *func_1503195C(Actor *, s32, s32);
 s32 func_15043BB8(MsgRing *ring, u8 *message, s32 size);
 f32  func_15047C00(f32 arg0);
 f32  func_15047D60(f32 arg0);

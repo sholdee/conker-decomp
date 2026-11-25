@@ -186,7 +186,6 @@ void func_150D7790(Actor *obj, s32 action) {
 }
 
 extern s8 D_800CC4B4;
-extern u8 *func_15033E84(Actor *arg0);
 extern s32 func_15052F9C(Actor *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 extern void func_1505327C(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 extern void func_1505A3A8(f32 arg0, Actor *arg1, f32 arg2, f32 arg3, u8 arg4);

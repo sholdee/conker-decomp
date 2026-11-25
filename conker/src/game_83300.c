@@ -4544,7 +4544,6 @@ extern void func_151695F0(Actor *, s32);
 extern void func_15084558(Actor *);
 extern void func_1504AF10(Actor *, s32, s32);
 extern void func_1503E260(s32);
-extern s32 func_150303E4(Actor *);
 extern void func_15188AD0(Actor *);
 void func_150626EC(Actor *arg0, s32 arg1);
 
@@ -5168,7 +5167,6 @@ void func_150627D4(Actor *actor) {
     func_15039CC8(actor);
 }
 
-void func_15033EC4(s32 arg0, s32 arg1);
 
 #define OBJ_INDEX(obj) ((u32)((obj) - movement_obj))
 

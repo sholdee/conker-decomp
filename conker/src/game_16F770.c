@@ -1919,7 +1919,6 @@ void func_15146508(Actor *a, Actor *b) {
     func_15169040(&msg, 45, a, b);
 }
 
-s32 func_15031070(ModelAttachment *, Actor *, Mtx **, Mtx **);
 void func_15145EA4(f32 **, f32 **, Mtx *, s32);
 
 /*

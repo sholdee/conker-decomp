@@ -60,7 +60,6 @@ const ModelBurstPiece D_800A6ED8[6] = {
 };
 
 f32 func_150489B0(u8);
-void *func_1518C900(s32);
 void func_15168BE4(ModelFxTemplate *, u8, s32);
 void func_15170B90(WorldObject *, s32, s32, s32, u8, s32);
 void func_151717FC(WorldObject *, f32, f32, f32, f32, f32, s32, s32, s32, s32, f32, u8, s32);

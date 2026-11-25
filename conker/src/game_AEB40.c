@@ -5,8 +5,6 @@
 
 extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
 
-extern ModelAttachment *func_15030AF4(Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
-extern void func_150335C8(Actor *, Actor *, s32, s32, s32, s32);
 extern s32 func_1505D024(Actor *, s32, u16, s32);
 extern void func_15060A30(s32, Actor *);
 extern void func_15060A9C(s32, Actor *);

@@ -288,7 +288,6 @@ void func_1508F9F4(void) {
 }
 Gfx *func_15094F40(Gfx *);
 Gfx *func_15096934(Gfx *);
-void func_1518CA04(s32);
 
 /* Builds this level's overlay display list: blocks, water, bubbles and HUD. Returns the
  * original pointer (drops everything) if the frame's display list buffer would overflow. */
@@ -534,7 +533,6 @@ Gfx *func_15090630(Gfx *gfx) {
     return gfx;
 }
 extern s32 D_800D2558[];
-extern s32 func_1502FE10(s32 id, s32 **end, u8 *arg2, WaterVtx **start, s32 *arg4, s32 *arg5, s32 *arg6);
 extern u16 D_8009025A;
 extern u16 D_80090262;
 extern u16 D_80090266;

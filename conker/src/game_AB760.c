@@ -15,7 +15,6 @@ typedef struct {
     /* 0x4 */ u32 size; // in bytes
 } ExpressionTableHeader;
 
-s32 func_150302F0(Actor *, s32);
 s32 func_150849A0(Actor *);
 
 extern u8 D_8009D910[];

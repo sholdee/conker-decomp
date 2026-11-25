@@ -20,7 +20,6 @@ typedef struct PlayerMarker {
 
 #define OBJ_TYPE_PLAYER_MARKER 0x50
 
-void func_1518C900(s32);
 PlayerMarker *func_15155FD4(s32 playerId);
 
 /* Allocates a marker object (object list 0) for player `playerId`. */
@@ -182,7 +181,6 @@ Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
     return gfx;
 }
 
-void func_1518CA04(s32 arg0);
 
 /* Destroy handler: frees the light, then the object. */
 void func_15155EF8(PlayerMarker *arg0) {

@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void func_150A7960(MtxF, f32, f32, f32, f32 *, f32 *, f32 *);
 

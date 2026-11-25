@@ -188,7 +188,6 @@ s32 func_15035714(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
 extern void *allocate_memory(s32, s32, s32, s32);
 void func_1502D54C(s32, s32 *);
 s32 func_1502DB20(u8);
-s32 func_15031070(ModelAttachment *, Actor *, MtxF **, s32 *);
 s32 math_distance3D(s32, s32, s32);
 
 /*

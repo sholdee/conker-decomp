@@ -1592,8 +1592,6 @@ void func_1502EA0C(Actor *, s32, s32, s32, s32, s32);
 s32 func_1508E780(s32 arg0);
 void func_1502EA50(Actor *);
 void func_15080620(s32, s32, s32, s32);
-void func_15030158(ModelAttachment *, s32);
-s32 func_15033E28(Actor *, ModelAttachment **);
 
 
 /*

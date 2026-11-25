@@ -1,6 +1,10 @@
 #include <ultra64.h>
 
+// matching: func_150302F0 returns an s32 (game_5D2C0.c); func_150836CC matches only when it sees a void return
+#define func_150302F0 func_150302F0_functions_h
 #include "functions.h"
+#undef func_150302F0
+void func_150302F0(Actor *obj, s32 setId);
 #include "variables.h"
 
 // One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
@@ -26,8 +30,6 @@ typedef struct PartSet {
 extern PartSet D_80086CC4[];
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
-extern void func_150302F0(Actor *obj, s32 setId);
-extern ModelAttachment *func_15030AF4(Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
 extern s32 func_1503D660(s32 modelId, s32 arg1);
 extern s32 func_1503D774(s32 modelId, s32 arg1);
 extern s32 func_1503DA9C(Actor *, s32, s32, s32);

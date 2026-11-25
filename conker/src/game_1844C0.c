@@ -66,7 +66,6 @@ void func_151571C4(ModelEffect *fx) {
     }
 }
 
-extern void func_1518CA04(s32);
 
 /* Destroy handler: frees the attachments and model instance, then the object (func_15169804). */
 void func_15157248(ModelEffect *fx) {

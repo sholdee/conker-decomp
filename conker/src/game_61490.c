@@ -3,7 +3,6 @@
 #include "variables.h"
 
 GameCommand *func_150F1B48(GameCommand *, s32);
-GameCommand *func_150D8590(GameCommand *, s32);
 s32 func_1503DA3C(s32, s32);
 
 /* Builds the command list for actor `index`, dispatching on its id, and terminates it with 0x1000. */

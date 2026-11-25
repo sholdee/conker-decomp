@@ -1,15 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern s32 D_800902BC[];
 void func_1000FD38(void *, void *, s32);
-s32 func_15033BDC();
 extern void func_150A7A48(MtxF a, MtxF b, MtxF out);
 extern void func_1503E5F8();
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-void func_1518CA04(s32 model);
 
 
 void func_15168E54(Gfx *, AttachModelHeader *);
@@ -54,7 +51,6 @@ s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4,
 
 
 
-void func_15031C14(ModelAttachment *att);
 
 /* Loads the attachment's model, making private per-frame vertex copies when the owner needs them. */
 s32 func_1502FFD8(ModelAttachment *att, Actor *owner) {
@@ -159,7 +155,6 @@ void func_15030158(ModelAttachment *att, s32 immediate) {
     func_10004074(att);
 }
 
-s32 func_15030310(Actor *owner, s32 setId, s32 index);
 
 /* Removes every attachment of set `setId` from `owner`. */
 s32 func_150302F0(Actor *owner, s32 setId) {
@@ -223,7 +218,6 @@ s32 func_150303E4(Actor *owner) {
 /* Per-model hooks, indexed by ModelAttachment.handler; a nonzero return removes the attachment. */
 typedef s32 (*AttachmentHook)(ModelAttachment *att, Actor *owner);
 extern AttachmentHook D_800841C0[];
-s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx);
 
 /* Per-frame update of every attachment: runs its hook, builds its matrix for this frame and removes
  * it when its owner is gone or it has expired. Attachments that follow another attachment's
@@ -420,7 +414,6 @@ void func_15030468(void) {
     }
 }
 
-void func_15031A50(ModelAttachment *att, Actor *owner);
 
 /* Attaches `model` to bone `bone` of `owner` as part of set `setId`. Returns NULL on failure, or
  * (unless flags & 8) when that model of that set is already attached. */
@@ -530,7 +523,6 @@ void func_15030D54(ModelAttachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY
 }
 
 s32 func_1506196C(Actor *obj, s32 view);
-Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 arg4);
 
 /* Draws the attachments of every object visible in viewport `view`. `pass` 0 draws the opaque
  * ones, 1 the translucent ones, 2 those of objects whose unk5 is 7. */
@@ -2610,7 +2602,7 @@ s32 func_15033AD8(ModelAttachment *att, Actor *owner) {
 }
 
 /* Sound started by the attachment hooks (func_1000FA64); only the fields used here. */
-typedef struct AttachmentSound {
+struct AttachmentSound {
     /* 0x00 */ u16 unk0;
     /* 0x02 */ s16 x;
     /* 0x04 */ s16 y;
@@ -2620,7 +2612,7 @@ typedef struct AttachmentSound {
     /* 0x1C */ Actor *owner;
     /* 0x20 */ u8 pad20[0x4];
     /* 0x24 */ u16 unk24;
-} AttachmentSound;
+};
 
 void func_10010FFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, Actor *arg5);
 
