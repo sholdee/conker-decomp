@@ -6,10 +6,8 @@
 #include "functions.h"
 #undef func_150ADA20
 u8 func_150ADA20(void);
-#define D_800DD444 D_800DD444_hdr
 #define D_800C35EA D_800C35EA_hdr
 #include "variables.h"
-#undef D_800DD444
 #undef D_800C35EA
 
 #define RAIN_MAX_DROPS 300
@@ -65,7 +63,6 @@ extern Vec3s D_800DD438;    /* centre of the rain volume */
  * matching: int-typed; a pointer-typed global changes func_15178EFC's register allocation. */
 extern s32 D_800DD440;
 #define RAIN_DROP(i) (*(QuadFx **)(D_800DD440 + (i) * sizeof(QuadFx *)))
-extern s16 D_800DD444;      /* state timer */
 extern s8 D_800DD446;       /* rain state */
 extern u8 D_800C35EA[];
 

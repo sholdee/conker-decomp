@@ -4,12 +4,10 @@
    with their real element types. */
 #define D_800D19A0 D_800D19A0_hdr
 #define D_800D1588 D_800D1588_hdr
-#define D_800C5A90 D_800C5A90_hdr
 #define D_800C6360 D_800C6360_hdr
 #include "variables.h"
 #undef D_800D19A0
 #undef D_800D1588
-#undef D_800C5A90
 #undef D_800C6360
 
 /* Entries of the D_800C5338[id] texture tables. */
@@ -70,7 +68,6 @@ extern u16 D_800C5628[];      // textures count
 extern u16 D_800C4ED0[];      // bone count
 extern s16 D_800C5918[];      // triangle weight, see func_1503D984
 extern s32 D_800D1588[];      // animation table (ActorAnim *), see func_1503D660
-extern u16 D_800C5A90[];      // animation count, see func_1503D484
 extern TexCoord *D_800C6360[]; // saved texture coordinates, see func_1503D804
 extern struct124 *D_800D1C90[]; // see func_1503D774
 // D_800C5C08 / D_800C6070 (vertex runs / triangle list, built by func_150028BC) keep variables.h's s32.

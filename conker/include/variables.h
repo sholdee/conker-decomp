@@ -911,7 +911,7 @@ extern s32 D_800C3C94;
 extern struct163 D_800C3CA0[3];
 extern u8  D_800C3E78;
 extern u16 D_800C3E7C;
-extern s32 D_800C3E80;
+extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
 extern s32 D_800C3E84;
 extern s32 D_800C3EE0;
 extern struct222* D_800C3FC0;
@@ -919,7 +919,7 @@ extern s32 D_800C3FC4;
 extern s64 D_800C3A60[];
 extern u8  D_800C4000;
 
-extern s16 D_800C5A90[187]; // 374 bytes, 187 shorts
+extern u16 D_800C5A90[187]; // per model: animation count
 extern s32 D_800C5C08[187];
 extern s32 D_800C6070[187];
 extern s32 D_800C6360[187];
@@ -1277,7 +1277,7 @@ extern u8   D_800DD405;
 extern u8   D_800DD406;
 extern s32  D_800DD410[2];
 extern u8   D_800DD418;
-extern u16  D_800DD444;
+extern s16  D_800DD444; // state timer
 extern s32  D_800DD460[2];
 extern s32  D_800DD478; // struct/array of size 0x618 (1560)
 

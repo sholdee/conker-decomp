@@ -3558,15 +3558,15 @@ void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 a
     if (actor->id == 0xFF) {
         return;
     }
-    if ((u16)D_800C5A90[actor->id] == 0) {
+    if (D_800C5A90[actor->id] == 0) {
         return;
     }
     data = (u8 *)actor->unk2D0;
     if (data == NULL) {
         return;
     }
-    if ((u16)D_800C5A90[actor->id] != 0) {
-        if (anim >= (u16)D_800C5A90[actor->id]) {
+    if (D_800C5A90[actor->id] != 0) {
+        if (anim >= D_800C5A90[actor->id]) {
             return;
         }
     } else {
@@ -3577,7 +3577,7 @@ void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 a
         func_1505DFDC(actor);
         return;
     }
-    if (anim < (u16)D_800C5A90[idx]) {
+    if (anim < D_800C5A90[idx]) {
         if (animTable[0][0] != 999) {
             entry = animTable[anim];
             animTable = NULL; // matching: dead store and do-while(0) shape the block like the original

@@ -3,11 +3,9 @@
 #include "functions.h"
 #undef func_1506160C
 /* variables.h types these as scalars; they are redeclared below as arrays. */
-#define D_800C3E80 D_800C3E80_hdr
 #define D_800D19A0 D_800D19A0_hdr
 #define D_800D2040 D_800D2040_hdr
 #include "variables.h"
-#undef D_800C3E80
 #undef D_800D19A0
 #undef D_800D2040
 
@@ -88,7 +86,6 @@ typedef struct VtxRange {
     /* 0x8 */ s32 bone;
 } VtxRange;
 
-extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
 extern s32 D_800D19A0[]; // model data per object id
 extern u8 D_800D2040[]; // per object id counter
 
@@ -1867,7 +1864,7 @@ void func_1502FBE8(Actor *obj) {
         D_800C3638 = 0;
     }
     if (oldAnims != D_800D1588[model]) {
-        if (obj->unk84.uh >= (u16)D_800C5A90[model]) {
+        if (obj->unk84.uh >= D_800C5A90[model]) {
             obj->unk84.uh = 0xFFFF;
             func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         } else {
