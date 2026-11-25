@@ -325,53 +325,22 @@ void func_1516AA70(TextBox *box) {
     func_1516CC58(box);
 }
 
+/* Sprite parameters passed to func_15094F70 / func_15095A48. */
 typedef struct {
-    u8 pad0[6];
-    s16 w;
-    s16 h;
-    u8 alpha;
-    u8 r;
-    u8 g;
-    u8 flags;
-    u8 padE[2];
-    void *tex;
-} Sprite_1516B6BC;
+    /* 0x00 */ u8 pad0[6];
+    /* 0x06 */ s16 w;
+    /* 0x08 */ s16 h;
+    /* 0x0A */ u8 alpha;
+    /* 0x0B */ u8 unkB;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 flags; /* SPRITE_FLIP_* */
+    /* 0x0E */ u8 padE[2];
+    /* 0x10 */ void *tex;
+} TextBoxSprite;
 
-typedef struct {
-    s32 unk0;
-    char pad4[0x24];
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-} Data_1516B6BC;
+#define SPRITE_FLIP_X 1 /* set while the body is left of the anchor */
+#define SPRITE_FLIP_Y 2 /* set while the body is below the anchor */
 
-typedef struct {
-    char pad0[0xE];
-    u8 unkE;
-    char padF;
-    Data_1516B6BC *unk10;
-    char pad14;
-    u8 unk15;
-    char pad16[4];
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    char pad1E[0xA];
-    f32 unk28;
-    char pad2C[0xC];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    char pad50[8];
-    f32 unk58;
-    f32 unk5C;
-    char pad60[0x10];
-    f32 unk70;
-} Obj_1516B6BC;
 /* Sprite texture header (D_8009055C body, D_8009056C bubble body, D_8009057C / D_8009059C tails,
  * D_8009058C bubble circle). */
 typedef struct {
@@ -382,42 +351,45 @@ typedef struct {
 
 extern TextBoxTexture D_8009055C;
 extern TextBoxTexture D_8009057C;
-#define WGFX1516B6BC(pkt, a, b) { Gfx *_g = (Gfx *)(pkt); _g->words.w0 = (u32)(a); _g->words.w1 = (u32)(b); }
 extern TextBoxTexture D_8009056C;
 extern TextBoxTexture D_8009058C;
 extern TextBoxTexture D_8009059C;
-extern s32 D_800A4AC8[][2];
-extern s32 D_800A4B90;
-extern s32 D_800A4B94;
-extern s32 D_800BE9C8[];
+/* Render mode pairs: cycle 1 and cycle 2 blender settings. */
+extern struct {
+    u32 cycle1;
+    u32 cycle2;
+} D_800A4AC8[];
+extern Gfx *D_800BE9C8[];
 extern s32 D_800BEBA4;
 extern u8 D_800D2DA8;
 extern u8 D_800D2DA9;
 extern u8 D_800D2DAA;
 extern u8 D_800E0BDC;
-Gfx *func_15094F70(Gfx *, TextBoxTexture *, s32, Sprite_1516B6BC *, s32, s32, s32, s32, s32);
-Gfx *func_15095A48(Gfx *, Sprite_1516B6BC *, f32, f32);
-Gfx *func_1516C934(Gfx *, Obj_1516B6BC *, s32, s32, s32, s32);
+Gfx *func_15094F70(Gfx *, TextBoxTexture *, s32, TextBoxSprite *, s32, s32, s32, s32, s32);
+Gfx *func_15095A48(Gfx *, TextBoxSprite *, f32, f32);
+Gfx *func_1516C934(Gfx *, TextBox *, s32, s32, s32, s32);
 
-Gfx *func_1516B6BC(Gfx *gfx, Obj_1516B6BC *obj, s32 arg2) {
-    Sprite_1516B6BC sprite;
-    s32 pad80;
+/* Draws a text box: shadow, body, tail (or thought-bubble circles), then the text via func_1516C934.
+ * Returns gfx unchanged if the display list would overflow. */
+Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
+    TextBoxSprite sprite;
+    s32 pad; // matching: unused stack slot
     f32 xoff;
     f32 yoff;
-    s32 flag;
-    s32 scale;
+    s32 plain;
+    s32 fade;
     s32 overflow;
     Gfx *start;
-    f32 tw;
-    f32 th;
+    f32 texW; // matching: dead copies; converting the texture size first orders the FP registers
+    f32 texH;
 
     start = gfx;
-    if (obj->unk10->unk0 & 4) {
-        flag = 1;
+    if (box->config->flags & 4) {
+        plain = TRUE;
     } else {
-        flag = 0;
+        plain = FALSE;
     }
-    if (obj->unkE == 0) {
+    if (box->visible == 0) {
         return gfx;
     }
     if (D_800E0BDC == 0) {
@@ -426,156 +398,158 @@ Gfx *func_1516B6BC(Gfx *gfx, Obj_1516B6BC *obj, s32 arg2) {
     D_800D2DAA = 0;
     D_800D2DA9 = D_800D2DAA;
     D_800D2DA8 = D_800D2DA9;
-    scale = D_800E0BDC + 1;
+    fade = D_800E0BDC + 1;
     sprite.flags = 0;
-    sprite.alpha = (64 * scale) >> 8;
-    tw = (f32)D_8009055C.width;
-    th = (f32)D_8009055C.height;
-    sprite.w = (2.0f * obj->unk38 + 1.0f) / (f32)D_8009055C.width * 2355.19995117f * obj->unk28;
-    sprite.h = (obj->unk3C + 1.0f) / (f32)D_8009055C.height * 4259.83984375f * obj->unk28;
-    xoff = obj->unk38 / (f32)D_8009055C.width * (f32)D_8009057C.width * 0.25f * obj->unk28;
-    yoff = obj->unk3C / (f32)D_8009055C.height * (f32)D_8009057C.height * 0.5f * obj->unk28;
-    obj->unk48 = cosf(obj->unk58 + 3.14159274101f) * (obj->unk38 * 0.5f) * 1.14999997616f * obj->unk28 + obj->unk40 - xoff;
-    obj->unk4C = sinf(obj->unk58 + 3.14159274101f) * (obj->unk3C * 0.5f) * 1.03999996185f * obj->unk28 + obj->unk44 - yoff;
-    WGFX1516B6BC(gfx++, 0xE7000000, 0);
-    WGFX1516B6BC(gfx++, 0xFC30B261, 0xFF67FFFF);
-    WGFX1516B6BC(gfx++, 0xEF002C0F, D_800A4AC8[25][0] | D_800A4AC8[25][1] | 4);
-    if (obj->unk10->unk0 & 2) {
-        sprite.alpha = (f32)obj->unk1B * 64.0f / 255.0f;
-        sprite.alpha = (sprite.alpha * scale) >> 8;
+    sprite.alpha = (64 * fade) >> 8;
+    texW = (f32)D_8009055C.width;
+    texH = (f32)D_8009055C.height;
+    sprite.w = (2.0f * box->width + 1.0f) / (f32)D_8009055C.width * 2355.19995117f * box->scale;
+    sprite.h = (box->height + 1.0f) / (f32)D_8009055C.height * 4259.83984375f * box->scale;
+    xoff = box->width / (f32)D_8009055C.width * (f32)D_8009057C.width * 0.25f * box->scale;
+    yoff = box->height / (f32)D_8009055C.height * (f32)D_8009057C.height * 0.5f * box->scale;
+    box->bodyX = cosf(box->angle + 3.14159274101f) * (box->width * 0.5f) * 1.14999997616f * box->scale + box->x - xoff;
+    box->bodyY = sinf(box->angle + 3.14159274101f) * (box->height * 0.5f) * 1.03999996185f * box->scale + box->y - yoff;
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
+                      TEXEL0, 0);
+    gDPSetOtherMode(gfx++, G_TF_BILERP | G_TC_FILT | 0xF, D_800A4AC8[25].cycle1 | D_800A4AC8[25].cycle2 | G_ZS_PRIM);
+    if (box->config->flags & TEXTBOX_BUBBLES) {
+        sprite.alpha = (f32)box->bubbleAlpha[0] * 64.0f / 255.0f;
+        sprite.alpha = (sprite.alpha * fade) >> 8;
         gfx = func_15094F70(gfx, &D_8009056C, 0, &sprite, 0, 0, 0, 2, 3);
     } else {
         gfx = func_15094F70(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
     }
-    if (!flag) {
-        gfx = func_15095A48(gfx, &sprite, obj->unk48 + 5.0f, obj->unk4C + -5.0f);
+    if (!plain) {
+        gfx = func_15095A48(gfx, &sprite, box->bodyX + 5.0f, box->bodyY + -5.0f);
     }
-    if (obj->unk58 > 0.0f && obj->unk58 < 3.14159274101f) {
-        sprite.flags &= ~2;
+    if (box->angle > 0.0f && box->angle < 3.14159274101f) {
+        sprite.flags &= ~SPRITE_FLIP_Y;
     } else {
-        sprite.flags |= 2;
+        sprite.flags |= SPRITE_FLIP_Y;
     }
-    if (obj->unk58 > 1.5707963705f && obj->unk58 < 4.71238899231f) {
-        sprite.flags |= 1;
+    if (box->angle > 1.5707963705f && box->angle < 4.71238899231f) {
+        sprite.flags |= SPRITE_FLIP_X;
     } else {
-        sprite.flags &= ~1;
+        sprite.flags &= ~SPRITE_FLIP_X;
     }
-    overflow = (D_800BEBA4 < (((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3)) ? 1 : 0;
-    if (overflow != 0) {
+    overflow = (gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
+    if (overflow) {
         return start;
     }
-    if (obj->unk10->unk0 & 2) {
-        if (obj->unk15 == 1) {
-            obj->unk70 = obj->unk5C;
+    if (box->config->flags & TEXTBOX_BUBBLES) {
+        if (box->state == TEXTBOX_STATE_INIT) {
+            box->bubbleX = box->anchorX;
         }
         gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
-        sprite.alpha = (f32)obj->unk1C * 64.0f / 255.0f;
-        sprite.alpha = (sprite.alpha * scale) >> 8;
-        if (obj->unk58 > 1.5707963705f) {
-            obj->unk70 = obj->unk70 + ((obj->unk40 + xoff) - obj->unk70) * 0.300000011921f;
-            gfx = func_15095A48(gfx, &sprite, obj->unk70, obj->unk44 - yoff);
+        sprite.alpha = (f32)box->bubbleAlpha[1] * 64.0f / 255.0f;
+        sprite.alpha = (sprite.alpha * fade) >> 8;
+        if (box->angle > 1.5707963705f) {
+            box->bubbleX = box->bubbleX + ((box->x + xoff) - box->bubbleX) * 0.300000011921f;
+            gfx = func_15095A48(gfx, &sprite, box->bubbleX, box->y - yoff);
         } else {
-            obj->unk70 = obj->unk70 + ((obj->unk40 - xoff) - obj->unk70) * 0.300000011921f;
-            gfx = func_15095A48(gfx, &sprite, obj->unk70, obj->unk44 - yoff);
+            box->bubbleX = box->bubbleX + ((box->x - xoff) - box->bubbleX) * 0.300000011921f;
+            gfx = func_15095A48(gfx, &sprite, box->bubbleX, box->y - yoff);
         }
         sprite.w /= 2;
         sprite.h /= 2;
-        sprite.alpha = (f32)obj->unk1D * 64.0f / 255.0f;
-        sprite.alpha = (sprite.alpha * scale) >> 8;
+        sprite.alpha = (f32)box->bubbleAlpha[2] * 64.0f / 255.0f;
+        sprite.alpha = (sprite.alpha * fade) >> 8;
         gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
-        if (obj->unk58 > 1.5707963705f) {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40 - 2.5f, obj->unk44 + -2.5f);
+        if (box->angle > 1.5707963705f) {
+            gfx = func_15095A48(gfx, &sprite, box->x - 2.5f, box->y + -2.5f);
         } else {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40 + 2.5f, obj->unk44 + -2.5f);
+            gfx = func_15095A48(gfx, &sprite, box->x + 2.5f, box->y + -2.5f);
         }
     } else {
         gfx = func_15094F70(gfx, &D_8009057C, 0, &sprite, 0, 0, 0, 2, 3);
-        if (!flag) {
-            if (obj->unk58 > 1.5707963705f) {
-                gfx = func_15095A48(gfx, &sprite, obj->unk40 + xoff - 2.5f, obj->unk44 - yoff + -2.5f);
+        if (!plain) {
+            if (box->angle > 1.5707963705f) {
+                gfx = func_15095A48(gfx, &sprite, box->x + xoff - 2.5f, box->y - yoff + -2.5f);
             } else {
-                gfx = func_15095A48(gfx, &sprite, obj->unk40 - xoff + 2.5f, obj->unk44 - yoff + -2.5f);
+                gfx = func_15095A48(gfx, &sprite, box->x - xoff + 2.5f, box->y - yoff + -2.5f);
             }
         }
     }
-    overflow = (D_800BEBA4 < (((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3)) ? 1 : 0;
-    if (overflow != 0) {
+    overflow = (gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
+    if (overflow) {
         return start;
     }
-    if (flag) {
+    if (plain) {
         D_800D2DA8 = D_800D2DA9 = D_800D2DAA = 0;
     } else {
-        D_800D2DA8 = obj->unk10->unk28;
-        D_800D2DA9 = obj->unk10->unk29;
-        D_800D2DAA = obj->unk10->unk2A;
+        D_800D2DA8 = box->config->r;
+        D_800D2DA9 = box->config->g;
+        D_800D2DAA = box->config->b;
     }
     sprite.flags = 0;
-    if (flag) {
+    if (plain) {
         sprite.alpha = 0x55;
     } else {
         sprite.alpha = 0xFF;
     }
-    sprite.alpha = (sprite.alpha * scale) >> 8;
-    WGFX1516B6BC(gfx++, 0xE7000000, 0);
-    WGFX1516B6BC(gfx++, 0xFC30B261, 0xFF67FFFF);
-    WGFX1516B6BC(gfx++, 0xEF002C0F, D_800A4AC8[25][0] | D_800A4AC8[25][1] | 4);
-    if (obj->unk58 > 0.0f && obj->unk58 < 3.14159274101f) {
-        sprite.flags &= ~2;
+    sprite.alpha = (sprite.alpha * fade) >> 8;
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
+                      TEXEL0, 0);
+    gDPSetOtherMode(gfx++, G_TF_BILERP | G_TC_FILT | 0xF, D_800A4AC8[25].cycle1 | D_800A4AC8[25].cycle2 | G_ZS_PRIM);
+    if (box->angle > 0.0f && box->angle < 3.14159274101f) {
+        sprite.flags &= ~SPRITE_FLIP_Y;
     } else {
-        sprite.flags |= 2;
+        sprite.flags |= SPRITE_FLIP_Y;
     }
-    if (obj->unk58 > 1.5707963705f && obj->unk58 < 4.71238899231f) {
-        sprite.flags |= 1;
+    if (box->angle > 1.5707963705f && box->angle < 4.71238899231f) {
+        sprite.flags |= SPRITE_FLIP_X;
     } else {
-        sprite.flags &= ~1;
+        sprite.flags &= ~SPRITE_FLIP_X;
     }
-    sprite.w = obj->unk38 / (f32)D_8009055C.width * 2355.19995117f * obj->unk28;
-    sprite.h = obj->unk3C / (f32)D_8009055C.height * 4259.83984375f * obj->unk28;
-    if (obj->unk10->unk0 & 2) {
+    sprite.w = box->width / (f32)D_8009055C.width * 2355.19995117f * box->scale;
+    sprite.h = box->height / (f32)D_8009055C.height * 4259.83984375f * box->scale;
+    if (box->config->flags & TEXTBOX_BUBBLES) {
         gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
-        sprite.alpha = obj->unk1C;
-        sprite.alpha = (sprite.alpha * scale) >> 8;
-        gfx = func_15095A48(gfx, &sprite, obj->unk70, obj->unk44 - yoff);
+        sprite.alpha = box->bubbleAlpha[1];
+        sprite.alpha = (sprite.alpha * fade) >> 8;
+        gfx = func_15095A48(gfx, &sprite, box->bubbleX, box->y - yoff);
         sprite.w /= 2;
         sprite.h /= 2;
         gfx = func_15094F70(gfx, &D_8009058C, 0, &sprite, 0, 0, 0, 2, 3);
-        sprite.alpha = obj->unk1D;
-        sprite.alpha = (sprite.alpha * scale) >> 8;
-        if (obj->unk58 > 1.5707963705f) {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40, obj->unk44);
+        sprite.alpha = box->bubbleAlpha[2];
+        sprite.alpha = (sprite.alpha * fade) >> 8;
+        if (box->angle > 1.5707963705f) {
+            gfx = func_15095A48(gfx, &sprite, box->x, box->y);
         } else {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40, obj->unk44);
+            gfx = func_15095A48(gfx, &sprite, box->x, box->y);
         }
-    } else if (obj->unk10->unk0 & 8) {
+    } else if (box->config->flags & 8) {
         gfx = func_15094F70(gfx, &D_8009059C, 0, &sprite, 0, 0, 0, 2, 3);
-        if (obj->unk58 > 1.5707963705f) {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40 + xoff, obj->unk44 - yoff);
+        if (box->angle > 1.5707963705f) {
+            gfx = func_15095A48(gfx, &sprite, box->x + xoff, box->y - yoff);
         } else {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40 - xoff, obj->unk44 - yoff);
+            gfx = func_15095A48(gfx, &sprite, box->x - xoff, box->y - yoff);
         }
     } else {
         gfx = func_15094F70(gfx, &D_8009057C, 0, &sprite, 0, 0, 0, 2, 3);
-        if (obj->unk58 > 1.5707963705f) {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40 + xoff, obj->unk44 - yoff);
+        if (box->angle > 1.5707963705f) {
+            gfx = func_15095A48(gfx, &sprite, box->x + xoff, box->y - yoff);
         } else {
-            gfx = func_15095A48(gfx, &sprite, obj->unk40 - xoff, obj->unk44 - yoff);
+            gfx = func_15095A48(gfx, &sprite, box->x - xoff, box->y - yoff);
         }
     }
-    sprite.w = 2.0f * obj->unk38 / (f32)D_8009055C.width * 2355.19995117f * obj->unk28;
-    sprite.h = obj->unk3C / (f32)D_8009055C.height * 4259.83984375f * obj->unk28;
-    if (obj->unk10->unk0 & 2) {
-        sprite.alpha = obj->unk1B;
-        sprite.alpha = (sprite.alpha * scale) >> 8;
+    sprite.w = 2.0f * box->width / (f32)D_8009055C.width * 2355.19995117f * box->scale;
+    sprite.h = box->height / (f32)D_8009055C.height * 4259.83984375f * box->scale;
+    if (box->config->flags & TEXTBOX_BUBBLES) {
+        sprite.alpha = box->bubbleAlpha[0];
+        sprite.alpha = (sprite.alpha * fade) >> 8;
         gfx = func_15094F70(gfx, &D_8009056C, 0, &sprite, 0, 0, 0, 2, 3);
     } else {
         gfx = func_15094F70(gfx, &D_8009055C, 0, &sprite, 0, 0, 0, 2, 3);
     }
-    gfx = func_15095A48(gfx, &sprite, (s32)obj->unk48, (s32)obj->unk4C);
-    overflow = (D_800BEBA4 < (((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3)) ? 1 : 0;
-    if (overflow != 0) {
+    gfx = func_15095A48(gfx, &sprite, (s32)box->bodyX, (s32)box->bodyY);
+    overflow = (gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4) ? TRUE : FALSE;
+    if (overflow) {
         return start;
     }
-    return func_1516C934(gfx, obj, 0, 0, 0, (obj->unk1A * scale) >> 8);
+    return func_1516C934(gfx, box, 0, 0, 0, (box->textAlpha * fade) >> 8);
 }
 
 /* Returns the start of page `index` of a config's text: pages are separated by runs of NULs. */
@@ -609,38 +583,20 @@ u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source) {
     return str;
 }
 
-typedef struct {
-    u32 flags;
-} Struct1516C934Font;
-
-typedef struct {
-    u8 pad0[0x10];
-    Struct1516C934Font *unk10;
-    u8 pad14[0x10];
-    u8 *unk24;
-    u8 pad28[0x8];
-    f32 unk30;
-    f32 unk34;
-    u8 pad38[0x18];
-    f32 unk50;
-    f32 unk54;
-} Struct1516C934;
-
 Gfx *func_150417AC(Gfx *, f32, f32, u8 *, u8, u8, u8, u8, f32, f32, s32);
 extern u8 D_800859A0[];
 
 Gfx *func_1516C934(gfx, arg1, r, g, b, a)
     Gfx *gfx;
-    Obj_1516B6BC *arg1;
+    TextBox *arg1;
     u8 r;
     u8 g;
     u8 b;
     u8 a;
 {
-#define ARG1 ((Struct1516C934 *)arg1)
     Gfx *original;
     u8 line[84];
-    Struct1516C934 *text;
+    TextBox *text;
     f32 offset;
     s32 i;
     s32 n;
@@ -648,27 +604,27 @@ Gfx *func_1516C934(gfx, arg1, r, g, b, a)
 
     i = 0;
     n = 0;
-    text = ARG1;
+    text = arg1;
     original = gfx;
 lbl:
     {
         f32 x;
         f32 y;
 
-        x = ARG1->unk50 - ARG1->unk30;
-        y = ARG1->unk54 - ARG1->unk34;
+        x = arg1->centerX - arg1->halfTextWidth;
+        y = arg1->centerY - arg1->halfTextHeight;
         gSPDisplayList(gfx++, D_800859A0);
         first = 1;
-        while (text->unk24[i] == '\n') {
+        while (text->text[i] == '\n') {
             i++;
         }
         do {
-            if ((D_800BEBA4 < (((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3) ? 1 : 0) != 0) {
+            if ((gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4 ? TRUE : FALSE) != 0) {
                 return original;
             }
             if (1) {
             }
-            line[n] = text->unk24[i];
+            line[n] = text->text[i];
             if (line[n] == '\n') {
                 line[n] = 0;
             }
@@ -683,15 +639,15 @@ lbl:
                 } else {
                     first = 0;
                 }
-                if (text->unk10->flags & 0x20000) {
-                    offset = ARG1->unk30 - (f32)(width >> 1) - 1.0f;
+                if (text->config->flags & 0x20000) {
+                    offset = arg1->halfTextWidth - (f32)(width >> 1) - 1.0f;
                 } else {
                     offset = 0.0f;
                 }
-                if (text->unk10->flags & 0x40000) {
+                if (text->config->flags & 0x40000) {
                     gfx = func_150417AC(gfx, x + offset + 1.0f, y, line, 0xFF, 0xFF, 0xFF, a, 4096.0f, 4096.0f, n);
                     n = 0;
-                } else if (!(text->unk10->flags & 4)) {
+                } else if (!(text->config->flags & 4)) {
                     gfx = func_150417AC(gfx, x + offset + 1.0f, y, line, 0, 0, 0, a, 4096.0f, 4096.0f, n);
                     n = 0;
                 } else {
@@ -702,10 +658,9 @@ lbl:
             } else {
                 n++;
             }
-        } while (ARG1->unk24[i++] != 0);
+        } while (arg1->text[i++] != 0);
     }
     return gfx;
-#undef ARG1
 }
 
 /* What D_800BE628 points to. */
