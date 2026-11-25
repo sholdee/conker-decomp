@@ -51,7 +51,7 @@ extern u8 **D_800E0BD8;
 extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
 extern s32 D_800E0A90;
-extern s8 D_800E0B96;
+extern u8 D_800E0B96;
 extern u8 D_800E0B94;
 extern u8 D_8008FDA4;
 extern u16 D_800BE930[4]; /* button bits per controller (menu reads) */
@@ -101,15 +101,7 @@ extern f32 D_8008FDE8;
 extern OSContPad D_800BE918[4];
 extern s32 D_8008FE24;
 extern s8 D_8008FD84;
-/*
- * D_8008FEFC is a function-scope `static s16 timer = 240;` of func_151DE8F0 in the
- * original source (uopt keeps it in a register and writes it back at each region exit),
- * but game .data is not linked from C. Each write-back is spelled through a different
- * neighbouring data symbol (all == &D_8008FEFC) so IDO neither hoists the address nor
- * drops the repeated stores. Restore the static once the file's .data is linked.
- */
 extern u8 D_8008FF08[];
-#define TIMER_ALIAS(sym, off) (*(s16 *)((u8 *)&(sym) + (off)))
 extern f32 D_8008FE38;
 extern f32 D_8008FE3C;
 extern s8 D_8008FDE4;
@@ -128,12 +120,13 @@ void func_151E0B70(void);
 void func_151E1744(void);
 void func_151E1214(void);
 
+/* Menu frame update: turns the pads into MENU_* input bits, then runs the active menu page. */
 void func_151DE8F0(void) {
-    static s16 D_8008FEFC = 240;
+    static s16 messageTimer = 240;
     s32 i;
     s32 j;
-    s16 timer;
-    OSContPad *pad;
+    s16 unused; // matching: unused stack slot sets IDO's frame layout
+    OSContPad *cont;
 
     if (D_8008FDA4 < 5) {
         if (D_8008FDA4 == 0) {
@@ -150,13 +143,12 @@ void func_151DE8F0(void) {
         D_8008FDA4++;
     } else {
     lbl1:
-        if (0) goto lbl1; /* dead goto: splits the block so as1 xbb skips a cross-branch hoist */
+        if (0) goto lbl1; // matching: dead goto splits the block so as1 xbb skips a cross-branch hoist
         if (D_8008FE30 == 0) {
             func_1500764C();
         }
     }
     if (D_8008FD80) {
-    lbl2:
         D_800DBFF0->unk2C = 0x80000;
         func_1501D348(D_800BE9F0, 1, 0, 0, 0);
         D_8008FD80 = 0;
@@ -175,18 +167,18 @@ void func_151DE8F0(void) {
     }
     for (i = 0; i != 4; i++) {
         D_8008FDD4->padInput[i] = 0;
-        if (*(u8 *)&D_800E0B96 == 0) {
-            pad = &D_800BE918[i];
-            if (D_8008FDD4->stickY[i] > -50 && pad->stick_y <= -50) {
+        if (D_800E0B96 == 0) {
+            cont = &D_800BE918[i];
+            if (D_8008FDD4->stickY[i] > -50 && cont->stick_y <= -50) {
                 D_8008FDD4->padInput[i] |= MENU_DOWN;
             }
-            if (D_8008FDD4->stickY[i] < 50 && pad->stick_y >= 50) {
+            if (D_8008FDD4->stickY[i] < 50 && cont->stick_y >= 50) {
                 D_8008FDD4->padInput[i] |= MENU_UP;
             }
-            if (D_8008FDD4->stickX[i] > -50 && pad->stick_x <= -50) {
+            if (D_8008FDD4->stickX[i] > -50 && cont->stick_x <= -50) {
                 D_8008FDD4->padInput[i] |= MENU_LEFT;
             }
-            if (D_8008FDD4->stickX[i] < 50 && pad->stick_x >= 50) {
+            if (D_8008FDD4->stickX[i] < 50 && cont->stick_x >= 50) {
                 D_8008FDD4->padInput[i] |= MENU_RIGHT;
             }
             if (D_800BE930[i] & START_BUTTON) {
@@ -204,16 +196,17 @@ void func_151DE8F0(void) {
             if (D_800BE930[i] & R_CBUTTONS) {
                 D_8008FDD4->padInput[i] |= MENU_CRIGHT;
             }
-            D_8008FDD4->stickY[i] = pad->stick_y;
-            D_8008FDD4->stickX[i] = pad->stick_x;
+            D_8008FDD4->stickY[i] = cont->stick_y;
+            D_8008FDD4->stickX[i] = cont->stick_x;
         } else {
         lblQ:
-            if (0) goto lblQ; /* same as1 xbb fence as above */
+            if (0) goto lblQ; // matching: same as1 xbb fence as above
             D_8008FDD4->stickX[i] = 0;
             D_8008FDD4->stickY[i] = 0;
         }
         if (D_8008FDD4->stickX[i] > -50 && D_8008FDD4->stickX[i] < 50) {
             D_8008FDD4->repeatX[i] = 0;
+            // matching: store via an alias of D_8008FDDC so IDO re-materialises its address
             *(s8 *)((u8 *)&D_8008FDE0 - 4) = D_8008FDDC & ~(1 << i);
         } else if (!(D_8008FDDC & (1 << i))) {
             D_8008FDD4->repeatX[i] += D_800BE9E4;
@@ -234,37 +227,34 @@ void func_151DE8F0(void) {
     }
     D_8008FDD4->input = D_8008FDD4->padInput[0];
     if (D_800C35EA == 1) {
-    lbl4:
         D_8008FE24 = 0;
         if (D_800E0A90 < 0x546 && D_800BE930[0] != 0) {
             D_8008FD84 = 1;
         }
         return;
     }
-lbl5:
-    if (D_8008FEFC > 0) {
-
-        D_8008FEFC -= D_800BE9E4;
-        if (D_8008FEFC > 60) {
+    if (messageTimer > 0) {
+        messageTimer -= D_800BE9E4;
+        if (messageTimer > 60) {
             s32 alpha;
 
-            if (D_8008FEFC > 180) {
-                alpha = 0xFF - ((D_8008FEFC - 180) << 3);
+            if (messageTimer > 180) {
+                alpha = 0xFF - ((messageTimer - 180) << 3);
                 if (alpha < 0) {
                     alpha = 0;
                 }
             } else {
-                alpha = (D_8008FEFC - 60) << 3;
+                alpha = (messageTimer - 60) << 3;
                 if (alpha > 0xFF) {
                     alpha = 0xFF;
                 }
                 if (alpha == 0xFF) {
-                    if (D_8008FEFC > 120) {
-                        D_8008FEFC = 140;
+                    if (messageTimer > 120) {
+                        messageTimer = 140;
                     }
                 }
                 if (D_8008FDD4->input & MENU_ACCEPT) {
-                    D_8008FEFC = 120;
+                    messageTimer = 120;
                 }
             }
             func_1504332C(0xFF, 0x32, 0x32, alpha - (alpha >> 2));
@@ -278,17 +268,17 @@ lbl5:
     }
     D_8008FDD4->prevPage = D_8008FDD4->page;
     {
-    s32 v;
+        s32 fade;
 
-    v = (D_8008FDD4->unk8 - 0.5f) * 512.0f;
-    if (v < 0) {
-        v = 0;
-    } else if (v > 0xFF) {
-        v = 0xFF;
+        fade = (D_8008FDD4->unk8 - 0.5f) * 512.0f;
+        if (fade < 0) {
+            fade = 0;
+        } else if (fade > 0xFF) {
+            fade = 0xFF;
+        }
+        D_800E0A94 = fade;
     }
-    D_800E0A94 = v;
-    }
-    if (D_8008FDD4->unk8 >= (f32)0.5) {
+    if (D_8008FDD4->unk8 >= (f32)0.5) { // matching: a double constant narrowed, not 0.5f
         if (D_8008FDD4->unk8 < 1.0f) {
             D_8008FDD4->input &= ~MENU_ACCEPT;
         }
