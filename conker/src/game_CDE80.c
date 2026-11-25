@@ -75,7 +75,6 @@ void func_150A09D0(s32 arg0) {
     u32 count;
     s32 i;
 
-    arg0 = arg0;
     for (i = 0; i < D_800D3094; i++) {
         switch (ZONE_TYPE(&D_800D3098[i])) {
         case 2:
@@ -179,23 +178,22 @@ void func_150A0D8C(void) {
                 if (obj->interaction_state == 0) continue;
                 if (obj->unk5 != 0 && obj->unk5 != 1) continue;
                 if (func_150A1DA0(obj, &D_800D3098[i], 1) != 0) continue;
-                {
-                    dy = obj->y_position - D_800D3098[i].y;
-                    if (D_800D3098[i].subtype == 0) {
-                        if (func_150AD9A0((s16)(obj->x_position - D_800D3098[i].x), dy,
-                                          (s16)(obj->z_position - D_800D3098[i].z)) < D_800D3098[i].radius) {
-                            fade = D_800D3098[i].radius * 0.200000003f;
-                            if (fade > 100.0f) {
-                                fade = 100.0f;
-                            }
-                            func_15035808(2, j, D_800D3098[i].x, D_800D3098[i].y, D_800D3098[i].z, 0.0f,
-                                          D_800D3098[i].yaw, D_800D3098[i].radius - fade, D_800D3098[i].radius,
-                                          255.0f);
+
+                dy = obj->y_position - D_800D3098[i].y;
+                if (D_800D3098[i].subtype == 0) {
+                    if (func_150AD9A0((s16)(obj->x_position - D_800D3098[i].x), dy,
+                                      (s16)(obj->z_position - D_800D3098[i].z)) < D_800D3098[i].radius) {
+                        fade = D_800D3098[i].radius * 0.2f;
+                        if (fade > 100.0f) {
+                            fade = 100.0f;
                         }
-                    } else {
-                        func_15035808(1, j, obj->x_position, obj->unk180, obj->z_position,
-                                      0.0f, 0.0f, 100.0f, 150.0f, 255.0f);
+                        func_15035808(2, j, D_800D3098[i].x, D_800D3098[i].y, D_800D3098[i].z, 0.0f,
+                                      D_800D3098[i].yaw, D_800D3098[i].radius - fade, D_800D3098[i].radius,
+                                      255.0f);
                     }
+                } else {
+                    func_15035808(1, j, obj->x_position, obj->unk180, obj->z_position,
+                                  0.0f, 0.0f, 100.0f, 150.0f, 255.0f);
                 }
             }
         }
@@ -221,7 +219,7 @@ void func_150A104C(struct108 *cam, TriggerZone **zones, s32 count) {
     cam->unk364 = -10000.0f;
     cam->unk84 &= ~0x40000;
     while (count != 0) {
-        if (!zones) {
+        if (!zones) { // matching: this empty test steers IDO's callee-saved register order (mask in s3)
         }
         if (*zones != NULL && func_150A1DA0(&probe, *zones, 0) == 0) {
             if (ZONE_TYPE(*zones) == 1) {
@@ -288,15 +286,14 @@ void func_150A11C4(struct127 *actor) {
     u32 i;
     u32 base;
     u64 *word;
-    u64 *prev; /* also holds the actor's y (s16) until the box scan: one variable, one register */
+    u64 *prev; // matching: also holds the actor's y (s16) until the box scan (one variable, one register)
     u32 bestUnk18;
     s32 unk127;
     s32 x;
-    s32 y; /* matching: unused (y lives in prev); keeps the -g3 frame layout */
+    s32 y; // matching: unused (y lives in prev) but it shifts the -g3 stack frame
     s16 z;
     struct108 *cam;
     ZoneBounds *box;
-    ZoneBounds **tbl; /* matching: unused; keeps the -g3 frame layout */
     u64 mask[3];
     s32 found;
     s32 k;
@@ -431,7 +428,8 @@ void func_150A11C4(struct127 *actor) {
                         s32 flag;
                         f32 height;
 
-                        if (*((u8 *)actor->unk31C + 0x95) == 0 && actor->stunned == 0 && actor->health != 0 &&
+                        /* unk95 is read as u8 here (s8 in structs.h); yaw * 65536/360 is a binary angle */
+                        if (*(u8 *)&actor->unk31C->unk95 == 0 && actor->stunned == 0 && actor->health != 0 &&
                             actor->disable_run == 0 &&
                             (actor->unk31C->unk11A == 0 || D_800BE9F0 == 6) && actor->unk44 > 8.0f) {
                             height = D_800D3098[i].y + D_800D3098[i].height;
@@ -444,11 +442,11 @@ void func_150A11C4(struct127 *actor) {
                             }
                             if (angle > 0x2000 && angle < 0x6000) {
                                 actor->unk31C->unk97 = flag;
-                                *((u8 *)actor->unk31C + 0x96) = 0;
+                                actor->unk31C->pad96 = 0;
                                 actor->disable_jump = 18;
-                                *((u8 *)actor->unk31C + 0x95) = i + 1;
+                                actor->unk31C->unk95 = i + 1;
                                 if (D_800D3098[i].unk18 != 0) {
-                                    *((u8 *)actor->unk31C + 0x95) |= 0x80;
+                                    *(u8 *)&actor->unk31C->unk95 |= 0x80;
                                 }
                             }
                         }
@@ -667,37 +665,28 @@ s32 func_150A1DA0(struct127 *actor, TriggerZone *zone, s32 withMargin) {
     return 1;
 }
 
-/* Type-2 zone: plays its sound (func_1000FA64) the first time it is triggered; unk20 latches it. */
+/* Type-2 zone: plays its positional sound (func_1000FA64) once; unk20 latches it until reset. */
 void func_150A23E4(TriggerZone *zone) {
-    s32 var_t0;
-    s32 var_v1;
-    u8 temp_t1;
-    s32 temp_t3;
-    s32 temp_t4;
-    u32 temp_v0;
+    s32 flags;
+    s32 farFlag;
 
     if (zone->unk20 == 0) {
-        var_v1 = 0;
-        var_t0 = 8;
+        farFlag = 0;
+        flags = 8;
         if (ZONE_SHAPE(zone) == 0) {
-            var_v1 = 0x8000;
+            farFlag = 0x8000;
         }
-        temp_t1 = zone->subtype;
-        temp_t3 = temp_t1 & 0x7F;
-        if ((s32)temp_t1 >> 7) {
-            var_t0 = 0x108;
+        if (zone->subtype >> 7) {
+            flags = 0x108;
         }
-        temp_t4 = temp_t3 * 327;
-        temp_v0 = zone->unk1C;
-        func_1000FA64(temp_v0 >> 16, zone->x, zone->y, zone->z, temp_t4,
-            zone->unk18 | var_v1, temp_v0 & 0xFFFF, 0, 0, 0, var_t0, 0);
+        func_1000FA64(zone->unk1C >> 16, zone->x, zone->y, zone->z, (zone->subtype & 0x7F) * 327,
+                      zone->unk18 | farFlag, zone->unk1C & 0xFFFF,
+                      NULL, NULL, NULL, flags, 0);
         zone->unk20 = 1;
-trailing_label:
-        ;
-        return;
+    fence:; // matching: keeps as1 from moving the store above into the branch delay slot
+    } else {
+        zone->unk20 = 1;
     }
-    zone->unk20 = 1;
-    return;
 }
 
 s32 func_15183290(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
