@@ -6,12 +6,6 @@
 #undef func_150ADA20
 s32 func_150ADA20(void);
 
-extern f32 D_8009FE7C;
-extern f32 D_8009FE80;
-extern f32 D_8009FE84;
-extern f32 D_8009FE88;
-extern f32 D_8009FE8C;
-extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 
 typedef struct {
     f32 x;
@@ -289,118 +283,110 @@ s32 func_150BB450(Particle_150BAFEC *particle) {
     return 1;
 }
 
-s32 func_150BB498(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5,
-                  s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
-                  s32 arg12, s32 arg13, u8 arg14) {
-    s16 angle;
-    f32 spB8;
-    f32 spB4;
-    f32 spB0;
-    f32 spAC;
-    f32 temp_f2;
-    struct {
-        s32 pad00;
-        f32 unk00;
-        f32 unk04;
-        f32 unk08;
-        f32 unk0C;
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-        f32 unk1C;
-        f32 unk20;
-        f32 unk24;
-        f32 unk28;
-        f32 unk2C;
-        f32 unk30;
-        f32 unk34;
-        f32 unk38;
-        f32 unk3C;
-        f32 unk40;
-        f32 unk44;
-        f32 unk48;
-        f32 unk4C;
-        s32 unk50;
-        s16 unk54;
-        s16 unk56;
-        u8 unk58;
-        u8 pad59[3];
-        s32 unk5C;
-        u8 unk60;
-        u8 unk61;
-        u8 unk62;
-        u8 unk63;
-        u8 unk64;
-        u8 unk65;
-        u8 unk66;
-        u8 unk67;
-        u8 unk68;
-        u8 pad69;
-        u8 unk6A;
-        u8 pad6B;
-        s32 unk6C;
-        u8 unk70;
-        u8 pad71;
-        s16 unk72;
-        s16 unk74;
-        u8 pad76[6];
-    } sp2C;
+/* Spawn template passed to func_15132A4C (same layout as PieceSpawn in game_1028F0.c). */
+typedef struct {
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 scaleXZ;
+    /* 0x0C */ f32 scaleY;
+    /* 0x10 */ f32 rot[3];
+    /* 0x1C */ f32 unk1C[3];
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 unk67;
+    /* 0x68 */ u8 unk68;
+    /* 0x69 */ u8 unk69;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6C */ s32 unk6C;
+    /* 0x70 */ u8 unk70;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+    /* 0x78 */ s32 unk78;
+} PieceSpawn_150BB498;
 
-    arg0 = arg8 - 0x40;
-    spB8 = func_151423D8(arg0);
-    spB4 = func_151423D8((u8)arg8);
+extern s32 func_15132A4C(PieceSpawn_150BB498 *, s32, s32, s32, u8, s32);
 
-    sp2C.unk50 = 0x9E8;
-    sp2C.unk10 = 0.0f;
-    sp2C.unk14 = 0.0f;
-    sp2C.unk18 = 0.0f;
-    sp2C.unk1C = 1.0f;
-    sp2C.unk20 = 1.0f;
-    sp2C.unk24 = 1.0f;
-    sp2C.unk28 = arg2;
-    sp2C.unk2C = arg3;
-    sp2C.unk30 = arg4;
-    sp2C.unk04 = D_8009FE7C;
+/* Spawns one piece at (x, y, z) thrown along `yaw` at a random pitch, with random spin and size. */
+s32 func_150BB498(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,
+                  s32 arg9, s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
+    s16 pitch;
+    f32 cosYaw;
+    f32 sinYaw;
+    f32 cosPitch;
+    f32 sinPitch;
+    f32 speed;
+    PieceSpawn_150BB498 piece;
+    f32 scale;
 
-    angle = (func_150ADA20() % 13U) - 0x34;
-    arg0 = angle - 0x40;
-    spB0 = func_151423D8(arg0);
-    spAC = func_151423D8((u8)angle);
+    cosYaw = func_151423D8(yaw - 0x40);
+    sinYaw = func_151423D8(yaw);
 
-    temp_f2 = (func_150ADA68() * 9.0f) + 3.0f;
-    sp2C.unk34 = (temp_f2 * spAC) * spB8;
-    sp2C.unk38 = -temp_f2 * spB0;
-    sp2C.unk3C = (temp_f2 * spAC) * spB4;
+    piece.unk50 = 0x9E8;
+    piece.rot[0] = 0.0f;
+    piece.rot[1] = 0.0f;
+    piece.rot[2] = 0.0f;
+    piece.unk1C[0] = 1.0f;
+    piece.unk1C[1] = 1.0f;
+    piece.unk1C[2] = 1.0f;
+    piece.pos.x = x;
+    piece.pos.y = y;
+    piece.pos.z = z;
+    piece.unk04 = 0.2f;
 
-    sp2C.unk40 = (func_150ADA68() * 50.0f) + -25.0f;
-    sp2C.unk44 = 0.0f;
-    sp2C.unk48 = (func_150ADA68() * 50.0f) + -25.0f;
-    sp2C.unk54 = (func_150ADA20() % 68U) + 0x26;
+    pitch = func_150ADA20() % 13U - 52;
+    cosPitch = func_151423D8(pitch - 0x40);
+    sinPitch = func_151423D8(pitch);
 
-    sp2C.unk4C = (func_150ADA68() * D_8009FE80) + D_8009FE84;
-    sp2C.unk00 = 1.0f;
+    speed = func_150ADA68() * 9.0f + 3.0f;
+    piece.vel.x = speed * sinPitch * cosYaw;
+    piece.vel.y = -speed * cosPitch;
+    piece.vel.z = speed * sinPitch * sinYaw;
 
-    temp_f2 = (func_150ADA68() * D_8009FE88) + D_8009FE8C;
-    sp2C.unk56 = 0x1F;
-    sp2C.unk58 = 0;
-    sp2C.unk5C = 0;
-    sp2C.unk08 = temp_f2;
-    sp2C.unk60 = 0xFF;
-    sp2C.unk61 = 1;
-    sp2C.unk62 = 0;
-    sp2C.unk63 = 0;
-    sp2C.unk64 = 0;
-    sp2C.unk65 = 0;
-    sp2C.unk66 = 0;
-    sp2C.unk67 = 0;
-    sp2C.unk68 = 0;
-    sp2C.unk6A = 0;
-    sp2C.unk6C = 0;
-    sp2C.unk70 = 0;
-    sp2C.unk72 = 1;
-    sp2C.unk74 = 0xFF;
-    sp2C.unk0C = temp_f2;
+    piece.unk40 = func_150ADA68() * 50.0f + -25.0f;
+    piece.unk44 = 0.0f;
+    piece.unk48 = func_150ADA68() * 50.0f + -25.0f;
+    piece.unk54 = func_150ADA20() % 68U + 38;
 
-    func_15132A4C(&sp2C.unk00, 3, 0xFF, 0, arg14, 0);
+    piece.unk4C = func_150ADA68() * -0.1f + -0.3f;
+    piece.unk00 = 1.0f;
+
+    scale = func_150ADA68() * 18.80000114f + 5.6f;
+    piece.unk56 = 31;
+    piece.unk58 = 0;
+    piece.unk5C = 0;
+    piece.scaleXZ = scale;
+    piece.unk60 = 0xFF;
+    piece.unk61 = 1;
+    piece.unk62 = 0;
+    piece.unk63 = 0;
+    piece.unk64 = 0;
+    piece.unk65 = 0;
+    piece.unk66 = 0;
+    piece.unk67 = 0;
+    piece.unk68 = 0;
+    piece.unk6A = 0;
+    piece.unk6C = 0;
+    piece.unk70 = 0;
+    piece.unk72 = 1;
+    piece.unk74 = 0xFF;
+    piece.scaleY = scale;
+
+    func_15132A4C(&piece, 3, 0xFF, 0, arg14, 0);
     return 1;
 }
