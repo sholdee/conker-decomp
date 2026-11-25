@@ -195,14 +195,6 @@ void func_15003570(void) {
     func_10004074(buf);
 }
 
-/* The D_800D3300 hit records (variables.h declares D_800D3300 as a pointer, but it is the array). */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} HitRecord;
-
-#define sHitRecords ((HitRecord *)&D_800D3300)
-
 extern void func_15001460(s32 dl);
 extern void func_15002754(void);
 extern s32 func_15002878(void);
@@ -258,8 +250,8 @@ void func_15003668(s32 unused) {
     func_150026E8(2);
 
     D_800D2C68 = 0;
-    sHitRecords[0].unk0 = 0;
-    sHitRecords[0].unk4 = D_800DBE3C << 8;
+    D_800D3300[0].height = 0;
+    D_800D3300[0].tri = (s32 *)(D_800DBE3C << 8);
     func_1510F800(0);
 
     size = (func_15002878() + 7) & ~7;

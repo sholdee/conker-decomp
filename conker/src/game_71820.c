@@ -2,12 +2,10 @@
 // The headers declare these symbols with placeholder types; this file redeclares them with their real ones.
 #include "functions.h"
 #define D_800CBE00 D_800CBE00_s32
-#define D_800D3300 D_800D3300_hdr
 #define D_800DBE3C D_800DBE3C_hdr
 #define D_800DBE5C D_800DBE5C_hdr
 #include "variables.h"
 #undef D_800CBE00
-#undef D_800D3300
 #undef D_800DBE3C
 #undef D_800DBE5C
 
@@ -383,12 +381,6 @@ typedef struct CollisionHit {
 } CollisionHit;
 
 /* One candidate triangle returned by the func_150A3A70/func_150A4FA0/func_150A43E0 grid queries. */
-typedef struct Game71820Candidate {
-    /* 0x00 */ s32 height;         // 24.8 fixed point
-    /* 0x04 */ s32 *vertices;      // entry in the D_800DBE3C triangle table: three vertex-array bases
-    /* 0x08 */ s32 index;          // vertex index (or byte offset) into each base
-    /* 0x0C */ s32 surface;        // index into D_800DBEF4
-} Game71820Candidate;
 
 s32 func_150A3A70(s32, s32);
 s32 func_150A4FA0(s32, s32);
@@ -398,7 +390,6 @@ s32 func_150A6500(s16, s16, s32 *, u16);
 s32 func_150A3FC4(f32, f32, s32, CollisionTri *, f32 *);
 extern u8 *D_800DBE3C;
 extern s32 *D_800DBE5C;
-extern Game71820Candidate D_800D3300[];
 extern u8 D_800D37E0[];
 extern u8 D_800D3830[];
 extern f32 D_800DBE68;
@@ -429,14 +420,14 @@ s32 func_15044ED0(struct17 *pos, f32 top, CollisionHit *hit) {
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         u32 j;
         s32 index;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        index = candidate->index;
+        vertices = candidate->tri;
+        index = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             Vtx *vtx = (Vtx *)vertices[j] + index;
             hit->tri.v[j].x = vtx->v.ob[0];
@@ -444,7 +435,7 @@ s32 func_15044ED0(struct17 *pos, f32 top, CollisionHit *hit) {
             hit->tri.v[j].z = vtx->v.ob[2];
         }
         {
-            s32 triangle = ((u8 *)candidate->vertices - D_800DBE3C) / 12;
+            s32 triangle = ((u8 *)candidate->tri - D_800DBE3C) / 12;
             hit->material = D_800DBE5C[triangle];
         }
         hit->flags |= 5;
@@ -487,14 +478,14 @@ s32 func_150450CC(struct17 *pos, f32 bottom, CollisionHit *hit) {
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         u32 j;
         s32 index;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        index = candidate->index;
+        vertices = candidate->tri;
+        index = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             Vtx *vtx = (Vtx *)vertices[j] + index;
             hit->tri.v[j].x = vtx->v.ob[0];
@@ -502,7 +493,7 @@ s32 func_150450CC(struct17 *pos, f32 bottom, CollisionHit *hit) {
             hit->tri.v[j].z = vtx->v.ob[2];
         }
         if (D_800DBE5C != NULL) {
-            s32 triangle = ((u8 *)candidate->vertices - D_800DBE3C) / 12;
+            s32 triangle = ((u8 *)candidate->tri - D_800DBE3C) / 12;
             hit->material = D_800DBE5C[triangle];
         } else {
             hit->material = 0;
@@ -557,14 +548,14 @@ s32 func_15045384(struct17 *pos, f32 top, CollisionHit *hit) {
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         u32 j;
         s32 offset;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        offset = candidate->index;
+        vertices = candidate->tri;
+        offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             s16 *point = (s16 *)(vertices[j] + offset);
             hit->tri.v[j].x = point[0];
@@ -608,14 +599,14 @@ s32 func_1504554C(struct17 *pos, f32 bottom, CollisionHit *hit) {
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         u32 j;
         s32 offset;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        offset = candidate->index;
+        vertices = candidate->tri;
+        offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             s16 *point = (s16 *)(vertices[j] + offset);
             hit->tri.v[j].x = point[0];
@@ -690,7 +681,7 @@ s32 func_15045880(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         s32 j;
         s32 offset;
@@ -698,15 +689,15 @@ s32 func_15045880(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
         u32 surface;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        offset = candidate->index;
+        vertices = candidate->tri;
+        offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             s16 *point = (s16 *)(vertices[j] + offset);
             hit->tri.v[j].x = point[0];
             hit->tri.v[j].y = point[1];
             hit->tri.v[j].z = point[2];
         }
-        surface = candidate->surface;
+        surface = candidate->unkC;
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
@@ -717,9 +708,9 @@ s32 func_15045880(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
         }
         hit->flags |= 6;
         {
-            CollisionHit *alias; // matching: this alias and re-reading candidate->surface make IDO reload both
+            CollisionHit *alias; // matching: this alias and re-reading candidate->unkC make IDO reload both
 
-            if ((D_800DBEF4[surface = candidate->surface].viewFlags & 0x80) == 0x80) {
+            if ((D_800DBEF4[surface = candidate->unkC].viewFlags & 0x80) == 0x80) {
                 alias = hit;
                 alias->flags |= 1;
             }
@@ -754,7 +745,7 @@ s32 func_15045AE4(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         s32 j;
         s32 offset;
@@ -762,15 +753,15 @@ s32 func_15045AE4(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         u32 surface;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        offset = candidate->index;
+        vertices = candidate->tri;
+        offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             s16 *point = (s16 *)(vertices[j] + offset);
             hit->tri.v[j].x = point[0];
             hit->tri.v[j].y = point[1];
             hit->tri.v[j].z = point[2];
         }
-        surface = candidate->surface;
+        surface = candidate->unkC;
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
@@ -781,9 +772,9 @@ s32 func_15045AE4(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         }
         hit->flags |= 6;
         {
-            CollisionHit *alias; // matching: this alias and re-reading candidate->surface make IDO reload both
+            CollisionHit *alias; // matching: this alias and re-reading candidate->unkC make IDO reload both
 
-            if ((D_800DBEF4[surface = candidate->surface].viewFlags & 0x80) == 0x80) {
+            if ((D_800DBEF4[surface = candidate->unkC].viewFlags & 0x80) == 0x80) {
                 alias = hit;
                 alias->flags |= 1;
             }
@@ -818,7 +809,7 @@ s32 func_15045D48(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         s32 j;
         s32 offset;
@@ -826,15 +817,15 @@ s32 func_15045D48(struct17 *pos, f32 top, s32 *set, CollisionHit *hit) {
         s32 surface;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        offset = candidate->index;
+        vertices = candidate->tri;
+        offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             s16 *point = (s16 *)(vertices[j] + offset);
             hit->tri.v[j].x = point[0];
             hit->tri.v[j].y = point[1];
             hit->tri.v[j].z = point[2];
         }
-        surface = candidate->surface;
+        surface = candidate->unkC;
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
@@ -877,7 +868,7 @@ s32 func_15045F8C(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         }
     }
     if (best != -1) {
-        Game71820Candidate *candidate;
+        GroundCandidate *candidate;
         s32 *vertices;
         s32 j;
         s32 offset;
@@ -885,15 +876,15 @@ s32 func_15045F8C(struct17 *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         s32 surface;
 
         candidate = &D_800D3300[best];
-        vertices = candidate->vertices;
-        offset = candidate->index;
+        vertices = candidate->tri;
+        offset = candidate->vtxBase;
         for (j = 0; j != 3; j++) {
             s16 *point = (s16 *)(vertices[j] + offset);
             hit->tri.v[j].x = point[0];
             hit->tri.v[j].y = point[1];
             hit->tri.v[j].z = point[2];
         }
-        surface = candidate->surface;
+        surface = candidate->unkC;
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {

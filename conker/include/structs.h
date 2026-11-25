@@ -3318,6 +3318,14 @@ typedef struct {
     u8 unkC;
 } struct258;
 
+/* A ground-probe candidate hit (func_150A3A70 / func_150A43E0 fill the D_800D3300 array with these). */
+typedef struct GroundCandidate {
+    /* 0x0 */ s32 height;  // 24.8 fixed point
+    /* 0x4 */ s32 *tri;    // collision triangle (a D_800DBE3C entry): three vertex offsets from vtxBase
+    /* 0x8 */ s32 vtxBase; // 0 for the static world mesh
+    /* 0xC */ s32 unkC;    // group or object index (D_800DBEF4), depending on the probe type
+} GroundCandidate;
+
 /* One on-screen view (a player's region of the framebuffer). D_800BE628 points at an array of these,
  * one per player view (allocated in game_476D0.c). */
 typedef struct RenderView {

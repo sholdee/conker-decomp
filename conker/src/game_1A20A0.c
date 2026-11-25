@@ -45,12 +45,6 @@ typedef struct SwarmModel {
 } SwarmModel;
 #define gSwarmModels ((SwarmModel *)D_800DDE80)
 
-typedef struct HeightSample {
-    s32 height;
-    u8 pad04[0xC];
-} HeightSample;
-#define gHeightSamples ((HeightSample *)&D_800D3300) /* filled by func_150A3A70 */
-
 void *func_15167A68(s32, s32, s32, s32, u8, u8);
 u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
@@ -183,10 +177,10 @@ void func_15174FA4(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 ar
         if (samples == 0) {
             func_1516979C((struct102 *)actor);
         } else {
-            lowest = gHeightSamples[0].height;
+            lowest = D_800D3300[0].height;
             for (j = 1; j < samples; j++) {
-                if (gHeightSamples[j].height < lowest) {
-                    lowest = gHeightSamples[j].height;
+                if (D_800D3300[j].height < lowest) {
+                    lowest = D_800D3300[j].height;
                 }
             }
             lowest >>= 8;

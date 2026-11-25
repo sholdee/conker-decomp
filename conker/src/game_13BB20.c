@@ -19,17 +19,6 @@ typedef struct ZoneNode {
     /* 0xC */ s16 child;    // byte offset to the first child, 0 = leaf
 } ZoneNode;
 
-/* Ground-probe hit records written to D_800D3300 by func_150A3A70 and friends. */
-typedef struct GroundHit {
-    /* 0x0 */ s32 height;  // 24.8 fixed point
-    /* 0x4 */ s32 *tri;    // collision triangle: three vertex offsets from vtxBase
-    /* 0x8 */ s32 vtxBase; // 0 for the static world mesh
-    /* 0xC */ s32 unkC;    // group or object index, depending on the probe type
-} GroundHit;
-
-// D_800D3300 is declared as a pointer in variables.h, but it is the hit array itself.
-#define sGroundHits ((GroundHit *)&D_800D3300)
-
 extern ZoneNode *D_800DBE48;
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
@@ -53,8 +42,8 @@ s32 func_1510E670(s32 index) {
     f32 normal[3];
     f32 normalY;
 
-    tri = sGroundHits[index].tri;
-    vtxBase = sGroundHits[index].vtxBase;
+    tri = D_800D3300[index].tri;
+    vtxBase = D_800D3300[index].vtxBase;
     if (tri != NULL) {
         v0 = (s16 *)(tri[0] + vtxBase);
         v1 = (s16 *)(tri[1] + vtxBase);
@@ -177,7 +166,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
     s32 dummyFlags;
     s32 triIndex;
     s32 propNum;
-    GroundHit *hit;
+    GroundCandidate *hit;
     s32 *tri;
     s16 *vtx;
     s32 vtxBase;
@@ -251,7 +240,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                     if (count != 0) {
                         bestPropY = noFloor;
                         for (i = 0; i < count; i++) {
-                            height = sGroundHits[i].height * 0.00390625f;
+                            height = D_800D3300[i].height * 0.00390625f;
                             if (bestPropY < height && height < ceilingY) {
                                 bestPropHit = i;
                                 bestPropY = height;
@@ -260,8 +249,8 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                         *outPropFloorY = bestPropY;
                     }
                     if (*outPropFloorY != noFloor && outPropVerts != NULL) {
-                        tri = sGroundHits[bestPropHit].tri;
-                        propVtxBase = sGroundHits[bestPropHit].vtxBase;
+                        tri = D_800D3300[bestPropHit].tri;
+                        propVtxBase = D_800D3300[bestPropHit].vtxBase;
                         for (i = 0; i < 3; i++) {
                             propVtx = (s16 *)(tri[i] + propVtxBase);
                             outPropVerts[i][0] = propVtx[0];
@@ -286,7 +275,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
             for (i = 0; i < count; i++) {
                 f32 curReach;
 
-                height = sGroundHits[i].height / 256.0f;
+                height = D_800D3300[i].height / 256.0f;
                 if (noFallback == 0 && allowFallback != 0 && *outFloorY == noFloor
                     && (noFloor == noFloor || height < noFloor)) { // matching: tautology IDO still compiles
                     s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
@@ -340,7 +329,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                     *outType = bestType;
                 }
                 if (bestHit != -1) {
-                    hit = &sGroundHits[bestHit];
+                    hit = &D_800D3300[bestHit];
                     allowFallback = FALSE;
                     *outFloorY = hit->height / 256.0f;
                     if (*outFloorY < noFloor) {
@@ -376,7 +365,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                         *outFlags = 0;
                     }
                 } else if (type == PROBE_PROP && outFlags != NULL) {
-                    D_800DBE60 = sGroundHits[bestHit].unkC + 1;
+                    D_800DBE60 = D_800D3300[bestHit].unkC + 1;
                     if (D_800DBEF4[D_800DBE60 - 1].materials != NULL) {
                         *outFlags = D_800DBEF4[D_800DBE60 - 1].materials[triIndex - D_800DBEF4[D_800DBE60 - 1].firstTri];
                     } else {
@@ -386,7 +375,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                     *outFlags = 0;
                 }
                 if (type == PROBE_OBJECT) {
-                    objectNum = sGroundHits[bestHit].unkC + 1;
+                    objectNum = D_800D3300[bestHit].unkC + 1;
                 }
             }
             if (count >= 2) {
@@ -396,13 +385,13 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                     ceilingFrom = *outFloorY;
                 }
                 for (i = 0; i < count; i++) {
-                    height = sGroundHits[i].height / 256.0f;
+                    height = D_800D3300[i].height / 256.0f;
                     if (ceilingFrom < height && height < ceilingY) {
                         if (!func_1510E670(i)) {
                             s32 ceilingTri;
 
                             ceilingY = height;
-                            ceilingTri = (s32)sGroundHits[i].tri;
+                            ceilingTri = (s32)D_800D3300[i].tri;
                             triIndex = WORLD_TRI_INDEX(ceilingTri);
                             if (type == PROBE_WORLD) {
                                 if (sWorldMaterials != NULL) {
@@ -412,7 +401,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                                 }
                             } else if (type == PROBE_PROP) {
                                 s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
-                                propNum = sGroundHits[i].unkC + 1;
+                                propNum = D_800D3300[i].unkC + 1;
                                 if (D_800DBEF4[propNum - 1].materials != NULL) {
                                     ceilingFlags = D_800DBEF4[propNum - 1].materials[triIndex - D_800DBEF4[propNum - 1].firstTri];
                                 } else {
@@ -484,7 +473,7 @@ f32 func_1510F648(f32 x, f32 y, f32 z) {
     func_150A64C8((s32)x, (s32)z, &groups, iy);
     func_150A44F0(groups, &D_800D3830, 0);
     if (func_150A43E0((s32)x, (s32)z, groups, &D_800D3830)) {
-        height = sGroundHits[0].height * 0.00390625f;
+        height = D_800D3300[0].height * 0.00390625f;
     } else {
         height = -10000.0f;
     }
@@ -572,7 +561,7 @@ s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 *outTri) {
     s32 count;
     s32 bestIndex;
     s32 i;
-    GroundHit *hits;
+    GroundCandidate *hits;
     f32 fy;
     f32 bestDist;
     f32 dist;
@@ -583,7 +572,7 @@ s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 *outTri) {
         return -10000;
     }
 
-    hits = sGroundHits;
+    hits = D_800D3300;
     bestIndex = 0;
     fy = y;
     bestDist = fy - hits[0].height * 0.00390625f;

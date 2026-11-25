@@ -220,17 +220,6 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
     }
 }
 
-/* Ground-probe hit records written to D_800D3300 by func_150A43E0. */
-typedef struct GroundHit {
-    s32 height; // 24.8 fixed point
-    s32 *tri;   // collision triangle: three vertex-buffer offsets
-    s32 unk8;
-    s32 unkC;
-} GroundHit;
-
-// D_800D3300 is declared as a pointer in variables.h, but it is the hit array itself.
-#define sGroundHits ((GroundHit *)&D_800D3300)
-
 extern void func_150A44F0(s32, s16 *, s32);
 extern s32 func_150A43E0(s32, s32, s32, s16 *);
 extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
@@ -278,9 +267,9 @@ void func_150E4928(WorldObject *obj) {
             if (found) {
                 best = -0x800000;
                 while (found--) {
-                    if (best < sGroundHits[found].height) {
-                        best = sGroundHits[found].height;
-                        tri = sGroundHits[found].tri;
+                    if (best < D_800D3300[found].height) {
+                        best = D_800D3300[found].height;
+                        tri = D_800D3300[found].tri;
                         height = best / 256.0f;
                     }
                 }
