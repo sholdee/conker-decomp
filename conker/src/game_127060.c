@@ -1,50 +1,26 @@
 #include <ultra64.h>
+// matching: redeclared below with the types this file was built against (functions.h has a u8 return
+// for func_150ADA20, which adds masks, and an s32 arg1 for func_1513D2F0, whose cast swaps registers)
 #define func_1513D2F0 func_1513D2F0_hdr
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
+#define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
+/* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
+#define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
+#undef D_800D3098
 #undef func_1513D2F0
-void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
+#undef func_150ADA20
+extern struct178 *D_800D3098;
+u32 func_150ADA20(void);
+void *func_1513D2F0(void *spawn, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8,
+                    s32 dataSize, u8 owner, s32 kind);
 
 
-extern s32 D_800BE628;
-extern s32 D_80082FA4;
-void func_15110360(s32 arg0, f32 arg1[4][4], f32 arg2, f32 arg3, f32 arg4);
-Gfx *func_15110544(Gfx *gfx, s32 a, s32 b, s32 c, s32 d, u8 r, u8 g, u8 bl);
-void func_150FB4C0(Gfx *gfx, f32 mtx[4][4]);
-
+/* Per-spark data of a burst spark (func_150F9BB0), stored at 0x110 of the spawned object. */
 typedef struct {
-    u8  pad0[0x24];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-} Struct150F9AB0;
-void func_150F9AB0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
-
-typedef struct {
-    /* 0x000 */ u8 pad0[0x3B];
-    /* 0x03B */ u8 unk3B;
-    /* 0x03C */ u8 pad3C[0x110];
-    /* 0x14C */ f32 unk14C;
-    /* 0x150 */ f32 unk150;
-} Actor150F9BB0;
-
-typedef struct {
-    /* 0x00 */ Actor150F9BB0 *unk0;
-    /* 0x04 */ u8 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-} Data150F9BB0; /* 0x18 */
-
-typedef struct {
-    /* 0x00 */ Actor150F9BB0 *unk0;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 unk5;
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;
+    /* 0x05 */ u8 index;
     /* 0x08 */ f32 unk8;
     /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
@@ -61,24 +37,66 @@ typedef struct {
     /* 0x3C */ f32 unk3C;
     /* 0x40 */ f32 unk40;
     /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ struct260 *unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s8 unk58;
-} Ext150F9BB0; /* 0x5C */
+    /* 0x48 */ f32 width;
+    /* 0x4C */ f32 height;
+    /* 0x50 */ struct260 *effect;
+    /* 0x54 */ f32 ownerScale;
+    /* 0x58 */ u8 flags;
+} BurstSparkData; /* 0x5C */
 
+/* A spark object (func_1513D2F0) of the burst. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x34];
+    /* 0x034 */ struct17 pos;
+    /* 0x040 */ struct17 dir;
+    /* 0x04C */ u8 pad4C[0x110 - 0x4C];
+    /* 0x110 */ BurstSparkData data;
+} BurstSpark;
+
+/* Per-glow data of a burst glow (func_150F9BB0), stored at 0x170 of the spawned object. */
+typedef struct {
+    /* 0x00 */ s16 unk0;
+    /* 0x04 */ f32 size;
+    /* 0x08 */ struct260 *effect;
+    /* 0x0C */ u8 index;
+    /* 0x10 */ struct127 *owner;
+    /* 0x14 */ u8 ownerId;
+} BurstGlowData; /* 0x18 */
+
+/* A glow object (func_151407D0) of the burst. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x34];
+    /* 0x034 */ struct17 pos;
+    /* 0x040 */ struct17 dir;
+    /* 0x04C */ u8 pad4C[0x58 - 0x4C];
+    /* 0x058 */ s32 flags;
+    /* 0x05C */ u8 pad5C[0x170 - 0x5C];
+    /* 0x170 */ BurstGlowData data;
+} BurstGlow;
+
+/* Effect data of the burst effect (updated by func_150FA1B8). */
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;
+    /* 0x08 */ BurstSpark *sparks[2];
+    /* 0x10 */ BurstGlow *glows[2];
+} BurstData; /* 0x18 */
+
+typedef struct {
+    /* 0x00 */ struct260 header; /* header.unkE: age in frames */
+    /* 0x24 */ u8 pad24[4];
+    /* 0x28 */ BurstData data;
+} BurstEffect;
+
+/* Spawn parameters shared by func_1513D2F0 and func_151407D0. */
 typedef struct {
     /* 0x00 */ u8 unk0;
     /* 0x01 */ u8 unk1;
     /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
+    /* 0x04 */ s16 lifetime;
     /* 0x08 */ s32 unk8;
     /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
+    /* 0x10 */ u8 color[4];
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ struct17 unk1C;
@@ -96,8 +114,9 @@ typedef struct {
     /* 0x50 */ s32 unk50;
     /* 0x54 */ s16 unk54;
     /* 0x56 */ s16 unk56;
-} Spawn150F9BB0; /* 0x58 */
+} SpawnParams; /* 0x58 */
 
+/* Shape parameters of a glow (func_151407D0). */
 typedef struct {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 unk4;
@@ -128,350 +147,287 @@ typedef struct {
     /* 0x57 */ u8 unk57;
     /* 0x58 */ u8 unk58;
     /* 0x59 */ s8 unk59;
-} Emit150F9BB0; /* 0x5C */
+} GlowShape; /* 0x5C */
 
-typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ struct260 *unk8;
-    /* 0x0C */ u8 unkC;
-    /* 0x10 */ Actor150F9BB0 *unk10;
-    /* 0x14 */ u8 unk14;
-} Sub150F9BB0; /* 0x18 */
-
+/* Event argument of func_151D8868. */
 typedef struct {
     /* 0x00 */ u8 type;
-    /* 0x01 */ u8 pad1;
     /* 0x02 */ s16 duration;
     /* 0x04 */ u8 field4;
     /* 0x05 */ u8 field5;
     /* 0x06 */ s8 field6;
-} Event150F9BB0;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ void *unk8[2];
-    /* 0x10 */ void *unk10[2];
-} Slots150F9BB0;
+} Event151D8868;
 
 extern s32 D_800A1CC0;
 void *func_151407D0(void *, s32, void *, u8, u8, u8, u8, s8, u8, s32);
 void func_151D8868(void *, s32, u8, s32);
 s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_150F9BB0(Actor150F9BB0 *arg0, u8 arg1, s32 arg2) {
-    struct260 *obj;
-    Data150F9BB0 data;
-    Slots150F9BB0 *slots;
+/* Spawns the burst effect on actor: two sparks and two glows that follow its second matrix. */
+void func_150F9BB0(struct127 *actor, u8 owner, s32 kind) {
+    BurstEffect *effect;
+    BurstData data;
+    BurstData *burst;
 
-    data.unk0 = arg0;
-    data.unk4 = arg0->unk3B;
-    data.unk8 = 0;
-    data.unkC = 0;
-    data.unk10 = 0;
-    data.unk14 = 0;
-    obj = func_15149130(0x46, -1, 0x4D, -1, 1, 0x33, (struct37 *)0x18, arg1, arg2);
-    if (obj != NULL) {
-        slots = (Slots150F9BB0 *)((u8 *)obj + 0x28);
-        memcpy(slots, &data, 0x18);
+    data.owner = actor;
+    data.ownerId = actor->unique_id;
+    data.sparks[0] = NULL;
+    data.sparks[1] = NULL;
+    data.glows[0] = NULL;
+    data.glows[1] = NULL;
+    effect = (BurstEffect *)func_15149130(70, -1, 0x4D, -1, 1, 0x33, (struct37 *)sizeof(data), owner, kind);
+    if (effect != NULL) {
+        burst = &effect->data;
+        memcpy(burst, &data, sizeof(data));
         {
-            Ext150F9BB0 ext;
-            Spawn150F9BB0 spawn;
+            BurstSparkData spark;
+            SpawnParams spawn;
 
-        ext.unk58 = 0;
-        ext.unk54 = (arg0->unk14C + arg0->unk150) * 0.5f;
-        ext.unk0 = arg0;
-        ext.unk4 = arg0->unk3B;
-        ext.unk8 = 15.04527187f;
-        ext.unk10 = 5.867655754f;
-        ext.unk18 = 12.11144447f;
-        ext.unkC = 0.3961740136f;
-        ext.unk24 = 0.0f;
-        ext.unk28 = 0.0f;
-        ext.unk38 = 0.0f;
-        spawn.unk14 = 0.0f;
-        spawn.unk18 = 0.0f;
-        ext.unk3C = 0.0f;
-        ext.unk48 = 1.0f;
-        ext.unk40 = 1.0f;
-        ext.unk4C = 1.0f;
-        ext.unk44 = 1.0f;
-        ext.unk14 = 0.1042563021f;
-        ext.unk20 = 0.5197371244f;
-        ext.unk1C = 0.3440458775f;
-        ext.unk2C = 160.0f;
-        ext.unk30 = 95.0f;
-        ext.unk34 = 207.5f;
-        ext.unk50 = obj;
-        spawn.unk0 = 0x5F;
-        spawn.unk1 = 8;
-        spawn.unk2 = 0x2203;
-        spawn.unk4 = 0x12C;
-        spawn.unk8 = 0;
-        spawn.unkC = 0;
-        spawn.unk10 = 0xFF;
-        spawn.unk11 = 0xFF;
-        spawn.unk12 = 0xFF;
-        spawn.unk13 = 0xFF;
-        spawn.unk1C = *(struct17 *)&D_800A5480;
-        spawn.unk28 = *(struct17 *)&D_800A5480;
-        spawn.unk34 = 1.0f;
-        spawn.unk38 = 1.0f;
-        spawn.unk3C = 1.0f;
-        spawn.unk40 = 0x40EC0000;
-        spawn.unk44 = 0;
-        spawn.unk45 = 0xFF;
-        spawn.unk46 = 0;
-        spawn.unk47 = 7;
-        spawn.unk48 = 0;
-        for (ext.unk5 = 0; ext.unk5 < 2; ext.unk5++) {
-            slots->unk8[ext.unk5] = func_1513D2F0(&spawn, &D_800A4AA0, 0, 0x25, 0, 0x1D, ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, 0x5C, arg1, arg2);
-            if (slots->unk8[ext.unk5] != NULL) {
-                memcpy((u8 *)slots->unk8[ext.unk5] + 0x110, &ext, 0x5C);
+            spark.flags = 0;
+            spark.ownerScale = (actor->xz_scale + actor->y_scale) * 0.5f;
+            spark.owner = actor;
+            spark.ownerId = actor->unique_id;
+            spark.unk8 = 15.045272f;
+            spark.unk10 = 5.8676558f;
+            spark.unk18 = 12.111444f;
+            spark.unkC = 0.396174f;
+            spark.unk24 = 0.0f;
+            spark.unk28 = 0.0f;
+            spark.unk38 = 0.0f;
+            spawn.unk14 = 0.0f;
+            spawn.unk18 = 0.0f;
+            spark.unk3C = 0.0f;
+            spark.width = 1.0f;
+            spark.unk40 = 1.0f;
+            spark.height = 1.0f;
+            spark.unk44 = 1.0f;
+            spark.unk14 = 0.1042563f;
+            spark.unk20 = 0.5197371f;
+            spark.unk1C = 0.34404588f;
+            spark.unk2C = 160.0f;
+            spark.unk30 = 95.0f;
+            spark.unk34 = 207.5f;
+            spark.effect = &effect->header;
+            spawn.unk0 = 0x5F;
+            spawn.unk1 = 8;
+            spawn.unk2 = 0x2203;
+            spawn.lifetime = 300;
+            spawn.unk8 = 0;
+            spawn.unkC = 0;
+            spawn.color[0] = 0xFF;
+            spawn.color[1] = 0xFF;
+            spawn.color[2] = 0xFF;
+            spawn.color[3] = 0xFF;
+            spawn.unk1C = *(struct17 *)&D_800A5480;
+            spawn.unk28 = *(struct17 *)&D_800A5480;
+            spawn.unk34 = 1.0f;
+            spawn.unk38 = 1.0f;
+            spawn.unk3C = 1.0f;
+            spawn.unk40 = 0x40EC0000;
+            spawn.unk44 = 0;
+            spawn.unk45 = 0xFF;
+            spawn.unk46 = 0;
+            spawn.unk47 = 7;
+            spawn.unk48 = 0;
+            for (spark.index = 0; spark.index < 2; spark.index++) {
+                burst->sparks[spark.index] = func_1513D2F0(&spawn, &D_800A4AA0, 0, 0x25, 0, 0x1D, ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0, sizeof(spark), owner, kind);
+                if (burst->sparks[spark.index] != NULL) {
+                    memcpy(&burst->sparks[spark.index]->data, &spark, sizeof(spark));
+                }
             }
         }
-        }
         {
-            Emit150F9BB0 emit;
-            Spawn150F9BB0 spawn2;
-            Sub150F9BB0 sub;
+            GlowShape shape;
+            SpawnParams spawn;
+            BurstGlowData glow;
 
-        sub.unk0 = 0;
-        sub.unk4 = 1.0f;
-        sub.unk10 = arg0;
-        sub.unk8 = obj;
-        sub.unk14 = arg0->unk3B;
-        emit.unk1C = 0.6999999881f;
-        emit.unk20 = 9.999999975e-07f;
-        emit.unk24 = -1;
-        emit.unk34 = -1;
-        emit.unk28 = -1;
-        emit.unk38 = -1;
-        emit.unk2C = -1;
-        emit.unk3C = -1;
-        emit.unk30 = -1;
-        emit.unk40 = -1;
-        emit.unk0 = 50.29999924f;
-        emit.unk4 = 50.29999924f;
-        emit.unk8 = 30.89999962f;
-        emit.unkC = 30.89999962f;
-        emit.unk10 = 0.1000000015f;
-        emit.unk14 = 0.1000000015f;
-        emit.unk18 = 1.0f;
-        emit.unk44 = 0;
-        emit.unk48 = 1.0f;
-        emit.unk4C = 0;
-        emit.unk4E = 0;
-        emit.unk50 = 0;
-        emit.unk52 = 0;
-        emit.unk54 = 0;
-        emit.unk55 = 0;
-        emit.unk56 = 0;
-        emit.unk57 = 0;
-        emit.unk58 = 0xF;
-        emit.unk59 = -1;
-        spawn2.unk0 = 0x60;
-        spawn2.unk1 = 3;
-        spawn2.unk2 = 0x2203;
-        spawn2.unk4 = 0x12C;
-        spawn2.unk8 = 0;
-        spawn2.unkC = 0;
-        spawn2.unk10 = 0xFF;
-        spawn2.unk11 = 0xFF;
-        spawn2.unk12 = 0xFF;
-        spawn2.unk13 = 0xFF;
-        spawn2.unk14 = 100.0f;
-        spawn2.unk18 = 100.0f;
-        spawn2.unk1C = *(struct17 *)&D_800A5480;
-        spawn2.unk28 = *(struct17 *)&D_800A5480;
-        spawn2.unk34 = 1.0f;
-        spawn2.unk38 = 1.0f;
-        spawn2.unk3C = 1.0f;
-        spawn2.unk40 = 0xCD2002;
-        spawn2.unk44 = 0xFF;
-        spawn2.unk45 = 0xFF;
-        spawn2.unk46 = 0;
-        spawn2.unk47 = 7;
-        spawn2.unk48 = 0;
-        spawn2.unk4C = 0xFF;
-        for (sub.unkC = 0; sub.unkC < 2; sub.unkC++) {
-            slots->unk10[sub.unkC] = func_151407D0(&emit, 0x78, &spawn2, 0, 0x2A, 0, 0, -1, arg1, arg2);
-            if (slots->unk10[sub.unkC] != NULL) {
-                memcpy((u8 *)slots->unk10[sub.unkC] + 0x170, &sub, 0x18);
+            glow.unk0 = 0;
+            glow.size = 1.0f;
+            glow.owner = actor;
+            glow.effect = &effect->header;
+            glow.ownerId = actor->unique_id;
+            shape.unk1C = 0.7f;
+            shape.unk20 = 1e-06f;
+            shape.unk24 = -1;
+            shape.unk34 = -1;
+            shape.unk28 = -1;
+            shape.unk38 = -1;
+            shape.unk2C = -1;
+            shape.unk3C = -1;
+            shape.unk30 = -1;
+            shape.unk40 = -1;
+            shape.unk0 = 50.3f;
+            shape.unk4 = 50.3f;
+            shape.unk8 = 30.9f;
+            shape.unkC = 30.9f;
+            shape.unk10 = 0.1f;
+            shape.unk14 = 0.1f;
+            shape.unk18 = 1.0f;
+            shape.unk44 = 0;
+            shape.unk48 = 1.0f;
+            shape.unk4C = 0;
+            shape.unk4E = 0;
+            shape.unk50 = 0;
+            shape.unk52 = 0;
+            shape.unk54 = 0;
+            shape.unk55 = 0;
+            shape.unk56 = 0;
+            shape.unk57 = 0;
+            shape.unk58 = 15;
+            shape.unk59 = -1;
+            spawn.unk0 = 0x60;
+            spawn.unk1 = 3;
+            spawn.unk2 = 0x2203;
+            spawn.lifetime = 300;
+            spawn.unk8 = 0;
+            spawn.unkC = 0;
+            spawn.color[0] = 0xFF;
+            spawn.color[1] = 0xFF;
+            spawn.color[2] = 0xFF;
+            spawn.color[3] = 0xFF;
+            spawn.unk14 = 100.0f;
+            spawn.unk18 = 100.0f;
+            spawn.unk1C = *(struct17 *)&D_800A5480;
+            spawn.unk28 = *(struct17 *)&D_800A5480;
+            spawn.unk34 = 1.0f;
+            spawn.unk38 = 1.0f;
+            spawn.unk3C = 1.0f;
+            spawn.unk40 = 0xCD2002;
+            spawn.unk44 = 0xFF;
+            spawn.unk45 = 0xFF;
+            spawn.unk46 = 0;
+            spawn.unk47 = 7;
+            spawn.unk48 = 0;
+            spawn.unk4C = 0xFF;
+            for (glow.index = 0; glow.index < 2; glow.index++) {
+                burst->glows[glow.index] = func_151407D0(&shape, 0x78, &spawn, 0, 0x2A, 0, 0, -1, owner, kind);
+                if (burst->glows[glow.index] != NULL) {
+                    memcpy(&burst->glows[glow.index]->data, &glow, sizeof(glow));
+                }
             }
-        }
         }
     }
     {
-        Event150F9BB0 event;
+        Event151D8868 event;
 
-    event.type = 1;
-    event.duration = 0x46;
-    event.field5 = 1;
-    event.field4 = 8;
-    event.field6 = -1;
-    func_151D8868(&event, 0, arg1, arg2);
-    func_15160A58(arg0, 1, &D_800A1CC0, 3, 0x46, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, arg1, arg2);
+        event.type = 1;
+        event.duration = 70;
+        event.field5 = 1;
+        event.field4 = 8;
+        event.field6 = -1;
+        func_151D8868(&event, 0, owner, kind);
+        func_15160A58(actor, 1, &D_800A1CC0, 3, 70, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, owner, kind);
     }
 }
 
-extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
+extern s32 func_15145EA4(void *offsets, void *results, Mtx *mtx, s32 count);
 extern struct17 D_800A1CCC;
 extern struct17 D_800A1CD8;
 extern struct17 D_800A1CE4;
 extern struct17 D_800A1CF0;
 
-typedef struct {
-    u8 pad0[0x48];
-    f32 unk48;
-    f32 unk4C;
-    u8 pad50[0x8];
-    u8 unk58;
-} SubA_150FA1B8;
+/*
+ * Burst effect update: ends when the owner is gone, keeps the sparks and glows on the owner's
+ * second matrix (hiding them while it has none), and shows them once the effect is 10 frames old.
+ */
+void func_150FA1B8(BurstEffect *effect) {
+    struct127 *actor;
+    BurstData *burst;
 
-typedef struct {
-    u8 pad0[0x34];
-    struct17 unk34;
-    struct17 unk40;
-    u8 pad4C[0x110 - 0x4C];
-    SubA_150FA1B8 unk110;
-} Struct150FA1B8_A;
-
-typedef struct {
-    u8 pad0[0x4];
-    f32 unk4;
-} SubB_150FA1B8;
-
-typedef struct {
-    u8 pad0[0x34];
-    struct17 unk34;
-    struct17 unk40;
-    u8 pad4C[0xC];
-    s32 unk58;
-    u8 pad5C[0x170 - 0x5C];
-    SubB_150FA1B8 unk170;
-} Struct150FA1B8_B;
-
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x3B - 4];
-    u8 unk3B;
-    u8 pad3C[0x1D4 - 0x3C];
-    s32 unk1D4;
-} Struct150FA1B8_C;
-
-typedef struct {
-    Struct150FA1B8_C *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    Struct150FA1B8_A *unk8[2];
-    Struct150FA1B8_B *unk10[2];
-} Struct150FA1B8_D;
-
-typedef struct {
-    u8 pad0[0xE];
-    s16 unkE;
-    u8 pad10[0x18];
-    Struct150FA1B8_D unk28;
-} Struct150FA1B8;
-
-void func_150FA1B8(Struct150FA1B8 *arg0) {
-    Struct150FA1B8_C *c;
-    Struct150FA1B8_D *d;
-
-    c = arg0->unk28.unk0;
-    d = &arg0->unk28;
-    if ((c->unk0 == 0) || (c->unk3B != d->unk4)) {
-        arg0->unkE = -1;
+    actor = effect->data.owner;
+    burst = &effect->data;
+    if ((actor->interaction_state == 0) || (actor->unique_id != burst->ownerId)) {
+        effect->header.unkE = -1;
         return;
     }
-    if (c->unk1D4 != 0) {
-        struct17 sp88[2];
-        struct17 sp70[2];
-        s32 sp6C;
-        struct17 *sp5C[4];
-        struct17 *sp4C[4];
-        Struct150FA1B8_A *a;
-        Struct150FA1B8_B *b;
+    if (actor->unk1D4 != NULL) {
+        struct17 positions[2];
+        struct17 directions[2];
+        s32 pad; // matching: unused stack slot
+        struct17 *offsets[4];
+        struct17 *results[4];
+        BurstSpark *spark;
+        BurstGlow *glow;
         u8 i;
 
-        sp5C[0] = &D_800A1CCC;
-        sp5C[1] = &D_800A1CD8;
-        sp5C[2] = &D_800A1CE4;
-        sp5C[3] = &D_800A1CF0;
-        sp4C[0] = &sp88[0];
-        sp4C[1] = &sp88[1];
-        sp4C[2] = &sp70[0];
-        sp4C[3] = &sp70[1];
-        func_15145EA4(sp5C, sp4C, c->unk1D4 + 0x40, 4);
+        offsets[0] = &D_800A1CCC;
+        offsets[1] = &D_800A1CD8;
+        offsets[2] = &D_800A1CE4;
+        offsets[3] = &D_800A1CF0;
+        results[0] = &positions[0];
+        results[1] = &positions[1];
+        results[2] = &directions[0];
+        results[3] = &directions[1];
+        func_15145EA4(offsets, results, (Mtx *)actor->unk1D4 + 1, 4);
         for (i = 0; i < 2; i++) {
-            if (d->unk8[i] != NULL) {
-                a = d->unk8[i];
-                a->unk110.unk58 |= 1;
-                a->unk34 = sp88[i];
-                a->unk40 = sp70[i];
+            if (burst->sparks[i] != NULL) {
+                spark = burst->sparks[i];
+                spark->data.flags |= 1;
+                spark->pos = positions[i];
+                spark->dir = directions[i];
             }
-            if (d->unk10[i] != NULL) {
-                b = d->unk10[i];
-                b->unk58 |= 2;
-                b->unk58 &= ~4;
-                b->unk34 = sp88[i];
-                b->unk40 = sp70[i];
+            if (burst->glows[i] != NULL) {
+                glow = burst->glows[i];
+                glow->flags |= 2;
+                glow->flags &= ~4;
+                glow->pos = positions[i];
+                glow->dir = directions[i];
             }
         }
     } else {
-        SubA_150FA1B8 *sa;
-        u8 j;
+        BurstSparkData *sparkData;
+        u8 i;
 
-        for (j = 0; j < 2; j++) {
-            if (d->unk8[j] != NULL) {
-                sa = &d->unk8[j]->unk110;
-                sa->unk58 &= ~1;
+        for (i = 0; i < 2; i++) {
+            if (burst->sparks[i] != NULL) {
+                sparkData = &burst->sparks[i]->data;
+                sparkData->flags &= ~1;
             }
-            if (d->unk10[j] != NULL) {
-                d->unk10[j]->unk58 &= ~2;
+            if (burst->glows[i] != NULL) {
+                burst->glows[i]->flags &= ~2;
             }
         }
     }
     {
-        u8 k;
-        s32 pad;
+        u8 i;
+        s32 pad; // matching: unused local; removing it reschedules the loop
 
-        for (k = 0; k < 2; k++) {
-            if (d->unk8[k] != NULL) {
-                SubA_150FA1B8 *sa = &d->unk8[k]->unk110;
+        for (i = 0; i < 2; i++) {
+            if (burst->sparks[i] != NULL) {
+                BurstSparkData *sparkData = &burst->sparks[i]->data;
 
-                if (arg0->unkE < 10) {
-                    sa->unk48 = 0.0f;
-                    sa->unk4C = 0.0f;
+                if (effect->header.unkE < 10) {
+                    sparkData->width = 0.0f;
+                    sparkData->height = 0.0f;
                 } else {
-                    sa->unk48 = 6.0f;
-                    sa->unk4C = 15.0f;
+                    sparkData->width = 6.0f;
+                    sparkData->height = 15.0f;
                 }
             }
-            if (d->unk10[k] != NULL) {
-                SubB_150FA1B8 *sb = &d->unk10[k]->unk170;
+            if (burst->glows[i] != NULL) {
+                BurstGlowData *glowData = &burst->glows[i]->data;
 
-                if (arg0->unkE < 10) {
-                    sb->unk4 = 0.0f;
+                if (effect->header.unkE < 10) {
+                    glowData->size = 0.0f;
                 } else {
-                    sb->unk4 = 1.306000113f;
+                    glowData->size = 1.306000113f;
                 }
             }
         }
     }
 }
 
-void func_150FA468(struct102 *arg0, s32 arg1, u8 arg2) {
-    if (arg2 == 0x4C) {
-        *(s8 *)((s32)arg0 + 0x11) = -1;
+/* Event handler: events 0x4C-0x4F set effect->unk11; 0x4C and 0x4F also call func_1515D4D4 (all 0 / all 0xFF). */
+void func_150FA468(struct260 *effect, s32 arg1, u8 event) {
+    if (event == 0x4C) {
+        effect->unk11 = -1;
         func_1515D4D4(0, 0, 0, 0xFF);
-    } else if (arg2 == 0x4D) {
-        *(u8 *)((s32)arg0 + 0x11) = 0x1E;
-    } else if (arg2 == 0x4E) {
-        *(s8 *)((s32)arg0 + 0x11) = -1;
-    } else if (arg2 == 0x4F) {
-        *(s8 *)((s32)arg0 + 0x11) = -1;
+    } else if (event == 0x4D) {
+        effect->unk11 = 30;
+    } else if (event == 0x4E) {
+        effect->unk11 = -1;
+    } else if (event == 0x4F) {
+        effect->unk11 = -1;
         func_1515D4D4(0xFF, 0xFF, 0xFF, 0xFF);
     }
 }
@@ -502,7 +458,7 @@ typedef struct {
     s16 unk44;
     s16 unk46;
     s32 unk48;
-} Pkt150FA520A;
+} Spawn15153F18;
 
 typedef struct {
     s16 unk00;
@@ -530,8 +486,9 @@ typedef struct {
     u8 unk40;
     u8 pad41[3];
     f32 unk44;
-} Pkt150FA520B;
+} Spawn15150178;
 
+/* Particle spawn template passed to func_15130280. */
 typedef struct {
     s32 unk0;
     s32 unk4;
@@ -559,7 +516,7 @@ typedef struct {
     struct17 unk3C;
     struct17 vel;
     f32 unk54;
-    u32 unk58;
+    u32 flags;
     s32 unk5C;
     u8 unk60;
     u8 unk61;
@@ -572,248 +529,268 @@ typedef struct {
     s16 unk68;
     u8 pad6A[2];
     f32 unk6C;
-} Particle150FA520;
+} ParticleSpawn; /* 0x70 */
 
+/* A particle created by func_15130280; this caller's data lives at 0xA8. */
 typedef struct {
-    u8 pad0[0x1D4];
-    s32 unk1D4;
-} Obj150FA520;
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ f32 data[5];
+} ImpactParticle;
 
 extern struct17 D_800A1CFC[];
-extern void func_15143134(void *, struct17 *, s32);
-extern void func_1504715C(void *, void *);
+extern void func_15143134(struct17 *offset, struct17 *out, Mtx *mtx);
+extern void func_1504715C(void *ground, struct127 *actor);
 extern void func_15153F18(s16 *, void *, void *, u8, s32);
 extern void func_15150178(s16 *, void *, void *, u8, s32);
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+extern ImpactParticle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
 extern void func_151C329C(struct17 *, u8, s32);
 
-void func_150FA520(Obj150FA520 *arg0, u8 arg1, u8 arg2, s32 arg3) {
+/*
+ * Spawns an impact at offset D_800A1CFC[point] in actor's sixth matrix: two func_15153F18 /
+ * func_15150178 bursts, a particle with a random rise, and func_151C329C at the point.
+ */
+void func_150FA520(struct127 *actor, u8 point, u8 owner, s32 kind) {
     struct17 pos;
-    u8 scratch[0x24];
+    u8 ground[0x24];
 
-    if (arg0->unk1D4) {
-        func_15143134(&D_800A1CFC[arg1], &pos, arg0->unk1D4 + 0x140);
-        func_1504715C(scratch, arg0);
+    if (actor->unk1D4) {
+        func_15143134(&D_800A1CFC[point], &pos, (Mtx *)actor->unk1D4 + 5);
+        func_1504715C(ground, actor);
         {
-            Pkt150FA520A a;
+            Spawn15153F18 first;
 
-        a.pos = pos;
-        a.unk14 = 4.0f;
-        a.unk2C = 9;
-        a.unk2E = 6;
-        a.unk02 = 0xFF;
-        a.unk04 = -0x28;
-        a.unk00 = 0;
-        a.unk06 = 0x32;
-        a.unk30 = 3;
-        a.unk32 = 1;
-        a.unk34 = 0x1E;
-        a.unk36 = 0x32;
-        a.unk38 = 0x64;
-        a.unk3A = 0x64;
-        a.unk44 = 0x10;
-        a.unk46 = 0xF;
-        a.unk48 = 0;
-        a.unk3C = 1;
-        a.unk18 = 3.879999876f;
-        a.unk1C = 0.6940000057f;
-        a.unk20 = 0.4500000179f;
-        a.unk24 = 12.0f;
-        a.unk28 = 13.90000057f;
-        a.unk40 = 1.0f;
-        func_15153F18(&a.unk00, &a.pos, scratch, arg2, arg3);
+            first.pos = pos;
+            first.unk14 = 4.0f;
+            first.unk2C = 9;
+            first.unk2E = 6;
+            first.unk02 = 0xFF;
+            first.unk04 = -40;
+            first.unk00 = 0;
+            first.unk06 = 0x32;
+            first.unk30 = 3;
+            first.unk32 = 1;
+            first.unk34 = 0x1E;
+            first.unk36 = 0x32;
+            first.unk38 = 0x64;
+            first.unk3A = 0x64;
+            first.unk44 = 0x10;
+            first.unk46 = 0xF;
+            first.unk48 = 0;
+            first.unk3C = 1;
+            first.unk18 = 3.879999876f;
+            first.unk1C = 0.694f;
+            first.unk20 = 0.4500000179f;
+            first.unk24 = 12.0f;
+            first.unk28 = 13.90000057f;
+            first.unk40 = 1.0f;
+            func_15153F18(&first.unk00, &first.pos, ground, owner, kind);
         }
         {
-            Pkt150FA520B b;
+            Spawn15150178 second;
 
-        b.pos = pos;
-        b.unk14 = 7;
-        b.unk16 = 6;
-        b.unk00 = 0;
-        b.unk02 = 0xFF;
-        b.unk04 = -0x3F;
-        b.unk06 = 0x18;
-        b.unk20 = 0x23;
-        b.unk22 = 0xB;
-        b.unk2C = 0x64;
-        b.unk2D = 0x64;
-        b.unk38 = 1;
-        b.unk39 = 1;
-        b.unk40 = 1;
-        b.unk18 = 8.0f;
-        b.unk1C = 10.0f;
-        b.unk24 = -1.266000032f;
-        b.unk28 = 0.4660000205f;
-        b.unk30 = 123.0f;
-        b.unk34 = 104.0f;
-        b.unk3C = 1.0f;
-        b.unk44 = 0.3000000119f;
-        func_15150178(&b.unk00, &b.pos, scratch, arg2, arg3);
+            second.pos = pos;
+            second.unk14 = 7;
+            second.unk16 = 6;
+            second.unk00 = 0;
+            second.unk02 = 0xFF;
+            second.unk04 = -63;
+            second.unk06 = 0x18;
+            second.unk20 = 0x23;
+            second.unk22 = 0xB;
+            second.unk2C = 0x64;
+            second.unk2D = 0x64;
+            second.unk38 = 1;
+            second.unk39 = 1;
+            second.unk40 = 1;
+            second.unk18 = 8.0f;
+            second.unk1C = 10.0f;
+            second.unk24 = -1.266f;
+            second.unk28 = 0.4660000205f;
+            second.unk30 = 123.0f;
+            second.unk34 = 104.0f;
+            second.unk3C = 1.0f;
+            second.unk44 = 0.3f;
+            func_15150178(&second.unk00, &second.pos, ground, owner, kind);
         }
         {
-            Particle150FA520 spawn;
+            ParticleSpawn spawn;
             f32 data[5];
-            void *ret;
+            ImpactParticle *particle;
 
-        data[0] = 0.0f;
-        data[2] = 1369.429932f;
-        data[1] = func_150ADA68() * 3.0f + 10.0f;
-        data[3] = func_150ADA68() * 100.0f + 100.0f;
-        data[4] = data[3] / (data[1] * data[1]);
-        spawn.unk1B = data[3];
-        spawn.unk1D = 0x79;
-        spawn.unk8 = 0x4403;
-        spawn.unk0 = 0x200005;
-        spawn.unk4 = 0;
-        spawn.unkC = 0;
-        spawn.unk10 = 0;
-        spawn.unk18 = 0xDC;
-        spawn.unk19 = 0xDC;
-        spawn.unk1A = 0xFF;
-        spawn.unk17 = 0xFF;
-        spawn.unk14 = 0xFF;
-        spawn.unk15 = 0xFF;
-        spawn.unk16 = 0xFF;
-        spawn.unk1C = 0xFF;
-        spawn.pos = pos;
-        spawn.unk3C = *(struct17 *)&D_800A5480;
-        spawn.unk1E = 1;
-        spawn.unk20 = 0xFF;
-        spawn.unk22 = 1;
-        spawn.unk24 = 1.0f;
-        spawn.unk58 = 0x4C000 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-        spawn.unk60 = 6;
-        spawn.unk61 = 6;
-        spawn.unk62 = 0x27;
-        spawn.unk63 = -1;
-        spawn.unk64 = -1;
-        spawn.unk65 = 0;
-        spawn.unk5C = 0;
-        spawn.unk66 = 0xFF;
-        spawn.vel = *(struct17 *)&D_800A5480;
-        spawn.unkA = 0x12C;
-        spawn.unk28 = 0.0f;
-        spawn.unk2C = 0.0f;
-        spawn.unk54 = 0.0f;
-        ret = func_15130280(&spawn, 1, 0, 0x14, arg2, arg3);
-        if (ret != NULL) {
-            memcpy((u8 *)ret + 0xA8, data, 0x14);
+            data[0] = 0.0f;
+            data[2] = 1369.429932f;
+            data[1] = func_150ADA68() * 3.0f + 10.0f;
+            data[3] = func_150ADA68() * 100.0f + 100.0f;
+            data[4] = data[3] / (data[1] * data[1]);
+            spawn.unk1B = data[3];
+            spawn.unk1D = 0x79;
+            spawn.unk8 = 0x4403;
+            spawn.unk0 = 0x200005;
+            spawn.unk4 = 0;
+            spawn.unkC = 0;
+            spawn.unk10 = 0;
+            spawn.unk18 = 0xDC;
+            spawn.unk19 = 0xDC;
+            spawn.unk1A = 0xFF;
+            spawn.unk17 = 0xFF;
+            spawn.unk14 = 0xFF;
+            spawn.unk15 = 0xFF;
+            spawn.unk16 = 0xFF;
+            spawn.unk1C = 0xFF;
+            spawn.pos = pos;
+            spawn.unk3C = *(struct17 *)&D_800A5480;
+            spawn.unk1E = 1;
+            spawn.unk20 = 0xFF;
+            spawn.unk22 = 1;
+            spawn.unk24 = 1.0f;
+            spawn.flags = 0x4C000 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
+            spawn.unk60 = 6;
+            spawn.unk61 = 6;
+            spawn.unk62 = 0x27;
+            spawn.unk63 = -1;
+            spawn.unk64 = -1;
+            spawn.unk65 = 0;
+            spawn.unk5C = 0;
+            spawn.unk66 = 0xFF;
+            spawn.vel = *(struct17 *)&D_800A5480;
+            spawn.unkA = 300;
+            spawn.unk28 = 0.0f;
+            spawn.unk2C = 0.0f;
+            spawn.unk54 = 0.0f;
+            particle = func_15130280(&spawn, 1, 0, sizeof(data), owner, kind);
+            if (particle != NULL) {
+                memcpy(particle->data, data, sizeof(data));
+            }
         }
-        }
-        func_151C329C(&pos, arg2, arg3);
+        func_151C329C(&pos, owner, kind);
     }
 }
 
-void func_150FAA40(u8 arg0, s32 arg1) {
-    struct {
-        s32 unk0;
-        s32 unk4;
-        f32 unk8;
-    } sp3C;
-    struct260 *temp_v0;
+/* Data of the emitter effect started by func_150FAA40 and updated by func_150FAAEC. */
+typedef struct {
+    /* 0x00 */ s32 from; /* endpoints, resolved with func_1514470C */
+    /* 0x04 */ s32 to;
+    /* 0x08 */ f32 pending; /* fractional count of spawns due */
+} EmitterData;
+
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xC - 0x2];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0x28 - 0xD];
+    /* 0x28 */ EmitterData data;
+} EmitterEffect;
+
+/* Starts the (single) emitter effect between D_800D3098 records 35 and 34. */
+void func_150FAA40(u8 owner, s32 kind) {
+    EmitterData data;
+    EmitterEffect *effect;
 
     if (D_80088B60 == 0) {
-        sp3C.unk0 = *(s32 *)&D_800D3098 + 0x71C;
-        sp3C.unk4 = *(s32 *)&D_800D3098 + 0x6E8;
-        sp3C.unk8 = 0.0f;
+        data.from = (s32)&D_800D3098[35];
+        data.to = (s32)&D_800D3098[34];
+        data.pending = 0.0f;
 
-        temp_v0 = func_15149130(0x12C, -1, 0x57, -1, 0, 0x46, (struct37 *)0xC, arg0, arg1);
-        if (temp_v0 != NULL) {
+        effect = (EmitterEffect *)func_15149130(300, -1, 0x57, -1, 0, 0x46, (struct37 *)sizeof(data), owner, kind);
+        if (effect != NULL) {
             D_80088B60 = 1;
         }
-        if (temp_v0 != NULL) {
-            memcpy((void *)((s32)temp_v0 + 0x28), &sp3C, 0xC);
+        if (effect != NULL) { // matching: a second test; one merged if mismatches
+            memcpy(&effect->data, &data, sizeof(data));
         }
     }
 }
 
+/* A list of spawn variants: an id and a scale for each. */
 typedef struct {
-    u8 count;
-    s16 *ids;
-    f32 *scales;
-} Rec150FA;
+    /* 0x00 */ u8 count;
+    /* 0x04 */ s16 *ids;
+    /* 0x08 */ f32 *scales;
+} VariantList;
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    f32 unk8;
-} Emit150FA;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    Emit150FA unk28;
-} Emitter150FA;
-
-extern Rec150FA D_80088B20[];
+extern VariantList D_80088B20[];
 void func_1514470C(s32, struct17 *);
-void func_150F4570(struct17 *arg0, struct17 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+void func_150F4570(struct17 *from, struct17 *to, u8 id, f32 duration, f32 rate, f32 scale, u8 arg6, s32 arg7, u8 owner,
+                   s32 kind);
 
-void func_150FAAEC(Emitter150FA *arg0) {
-    Emit150FA *e;
-    struct17 a;
-    struct17 b;
+/* Emitter update: spawns func_150F4570 effects between the two endpoints, 0.08-0.26 per frame (times D_800BE9A4). */
+void func_150FAAEC(EmitterEffect *effect) {
+    EmitterData *data;
+    struct17 from;
+    struct17 to;
     u8 i;
-    f32 speed;
-    u32 n;
-    Rec150FA *rec;
+    f32 duration;
+    VariantList *variants;
 
-    e = &arg0->unk28;
-    n = 3;
-    e->unk8 += (0.08000000566f + func_150ADA68() * 0.1800000072f) * D_800BE9A4;
-    if (1.0f < e->unk8) {
-        do {
-            func_1514470C(e->unk0, &a);
-            func_1514470C(e->unk4, &b);
-            rec = &D_80088B20[1];
-            i = func_150ADA20() % rec->count;
-            speed = func_150ADA68() * 25.0f + 30.0f;
-            func_150F4570(&a, &b, rec->ids[i], speed, 1.0f / speed,
-                          rec->scales[i] * (func_150ADA68() * (f32)1 + (f32)1), 1, func_150ADA20() % n + 0x2EE,
-                          arg0->unkC, arg0->unk1);
-            e->unk8 -= 1.0f;
-        } while (1.0f < e->unk8);
+    data = &effect->data;
+    data->pending += (0.08000000566f + func_150ADA68() * 0.18f) * D_800BE9A4;
+    while (data->pending > 1.0f) {
+        func_1514470C(data->from, &from);
+        func_1514470C(data->to, &to);
+        variants = &D_80088B20[1];
+        i = func_150ADA20() % variants->count;
+        duration = func_150ADA68() * 25.0f + 30.0f;
+        // matching: the "* 1" is kept; a plain random + 1.0f schedules differently
+        func_150F4570(&from, &to, variants->ids[i], duration, 1.0f / duration,
+                      variants->scales[i] * (func_150ADA68() * 1 + 1), 1, func_150ADA20() % 3 + 750,
+                      effect->unkC, effect->unk1);
+        data->pending -= 1.0f;
     }
 }
 
-void func_150FACE4(struct102 *arg0, s32 arg1, u8 arg2) {
-    switch (arg2) {
-        case 0x4E:
-        case 0x4F:
-            func_1516972C(arg0);
-            break;
+/* Event handler: events 0x4E and 0x4F call func_1516972C on the object. */
+void func_150FACE4(struct102 *obj, s32 arg1, u8 event) {
+    if ((event == 0x4E) || (event == 0x4F)) {
+        func_1516972C(obj);
     }
 }
 
 extern void func_1515F170(s32 arg0, u8 arg1);
 
+/* Calls func_1515F170 for 8 and 0xB, then func_151494E0 with D_800D3098 record 25 (0x30) and 0x4D. */
 void func_150FAD28(void) {
     func_1515F170(8, 0);
     func_1515F170(0xB, 1);
-    func_151494E0(*(s32 *)&D_800D3098 + 0x514, 0x30);
+    func_151494E0((s32)&D_800D3098[25], 0x30);
     func_151494E0(0, 0x4D);
 }
 
+/* Counterpart of func_150FAD28: func_1515F170 for 8 and 7, func_151494E0 with record 25 (0x31) and 0x4C. */
 void func_150FAD78(void) {
     func_1515F170(8, 1);
     func_1515F170(7, 0);
-    func_151494E0(*(s32 *)&D_800D3098 + 0x514, 0x31);
+    func_151494E0((s32)&D_800D3098[25], 0x31);
     func_151494E0(0, 0x4C);
 }
 
-void func_150FADC8(s32 *arg0, s32 arg1, u8 arg2) {
-    if (arg2 == 0x53) {
-        arg0[0x16] |= 2;
-    } else if (arg2 == 0x54) {
-        arg0[0x16] &= ~2;
+typedef struct {
+    /* 0x00 */ u8 pad0[0x58];
+    /* 0x58 */ s32 flags;
+} Obj150FADC8;
+
+/* Event handler: event 0x53 sets flag 2 of the object, event 0x54 clears it. */
+void func_150FADC8(Obj150FADC8 *obj, s32 arg1, u8 event) {
+    if (event == 0x53) {
+        obj->flags |= 2;
+    } else if (event == 0x54) {
+        obj->flags &= ~2;
     }
 }
 
-extern void *func_15157010(void *, s32, f32, s32, s32, s32, u8, s32);
-extern void *func_1515548C(void *, s32, s32, s32, s32, u8, s32);
+/* Objects created by func_15157010 / func_1515548C; this caller stores a tag in each. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x120];
+    /* 0x120 */ s16 tag;
+} TaggedModel;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x70];
+    /* 0x70 */ s16 tag;
+} TaggedSprite;
+
+extern TaggedModel *func_15157010(void *, s32, f32, s32, s32, s32, u8, s32);
+extern TaggedSprite *func_1515548C(void *, s32, s32, s32, s32, u8, s32);
 
 typedef struct {
     /* 0x00 */ u8 unk00;
@@ -853,7 +830,7 @@ typedef struct {
     /* 0x50 */ s32 unk50;
     /* 0x54 */ s16 unk54;
     /* 0x56 */ s16 unk56;
-} S150FAE18Main;
+} Spawn15157010;
 
 typedef struct {
     /* 0x00 */ f32 unk00;
@@ -892,98 +869,102 @@ typedef struct {
     /* 0x4C */ f32 unk4C;
     /* 0x50 */ f32 unk50;
     /* 0x54 */ f32 unk54;
-} S150FAE18Part;
+} Spawn1515548C;
 
-void func_150FAE18(s16 arg0, u8 arg1, s32 arg2) {
-    s16 pad;
-    s16 id;
+/*
+ * Spawns a func_15157010 object and a row of 8 func_1515548C sprites (the first with kind 0xCE,
+ * the rest 0xC5/0xC4), each tagged with duration in its data.
+ */
+void func_150FAE18(s16 duration, u8 owner, s32 kind) {
+    s16 pad; // matching: unused stack slot
+    s16 tag;
 
-    id = arg0;
+    tag = duration;
     {
-    S150FAE18Main spC4;
-    void *ret;
+        Spawn15157010 model;
+        void *spawned; // matching: one variable for both spawned objects (separate ones reallocate)
 
-    spC4.unk38 = 0;
-    spC4.unk00 = 0x61;
-    spC4.unk01 = 3;
-    spC4.unk02 = 4;
-    spC4.unk03 = 2;
-    spC4.unk04 = 0;
-    spC4.unk06 = arg0;
-    spC4.unk08 = 0xA5;
-    spC4.unk0C = 0x17;
-    spC4.unk10 = 0;
-    spC4.unk14 = 0x200405;
-    spC4.unk18 = 0x60200;
-    spC4.unk2D = 8;
-    spC4.unk1C = 1;
-    spC4.unk20 = 0x38;
-    spC4.unk2C = 0;
-    spC4.unk24 = 0x80;
-    spC4.unk28 = 0x20;
-    spC4.unk30 = 0xFF;
-    spC4.unk31 = 0xFF;
-    spC4.unk32 = 0xFF;
-    spC4.unk33 = 0xFF;
-    spC4.unk34 = 0xFF;
-    spC4.unk35 = 0xFF;
-    spC4.unk36 = 0xFF;
-    spC4.unk37 = 0xFF;
-    spC4.unk3C = 0;
-    spC4.unk40 = 0;
-    spC4.unk41 = 1;
-    spC4.unk44 = *(struct17 *)&D_800A5480;
-    spC4.unk54 = 0xA;
-    spC4.unk56 = 0x19;
-    ret = func_15157010(&spC4, 0, 1.0, 0, 0, 2, arg1, arg2);
-    if (ret != NULL) {
-        memcpy((u8 *)ret + 0x120, &id, 2);
-    }
-    {
-    S150FAE18Part sp68;
-    u8 i;
-    const s16 tbl[8] = { 0xCE, 0xC5, 0xC4, 0xC4, 0xC4, 0xC4, 0xC4, 0xC4 };
-
-    sp68.unk04 = 62.0f;
-    sp68.unk12 = arg0;
-    sp68.unk14 = 0x29;
-    sp68.unk16 = 0xA;
-    sp68.unk18 = 0x19;
-    sp68.unk08 = 16.0f;
-    sp68.unk0C = 16.0f;
-    sp68.unk1A = 0;
-    sp68.unk1B = 0xFF;
-    sp68.unk1C = 0xFF;
-    sp68.unk1D = 0xFF;
-    sp68.unk1E = 0xFF;
-    sp68.unk1F = 0xFF;
-    sp68.unk20 = 0xFF;
-    sp68.unk21 = 0xFF;
-    sp68.unk22 = 0xFF;
-    sp68.unk23 = 0xFF;
-    sp68.unk24 = 0;
-    sp68.unk28 = 0x200405;
-    sp68.unk2C = 0x60200;
-    sp68.unk40 = 0;
-    sp68.unk41 = 7;
-    sp68.unk30 = 0x19;
-    sp68.unk34 = 0x22;
-    sp68.unk38 = 0x80;
-    sp68.unk3C = 0x20;
-    sp68.unk44 = 0;
-    sp68.unk48 = 1.0f;
-    sp68.unk4C = 1.0f;
-    sp68.unk50 = 0.0f;
-    sp68.unk54 = 0.0f;
-    for (i = 0; i < 8; i++) {
-        sp68.unk00 = i * 24.75f + -65.0f;
-        sp68.unk10 = tbl[i];
-        ret = func_1515548C(&sp68, 0xE, 0, 0, 2, arg1, arg2);
-        if (ret != NULL) {
-            memcpy((u8 *)ret + 0x70, &id, 2);
+        model.unk38 = 0;
+        model.unk00 = 0x61;
+        model.unk01 = 3;
+        model.unk02 = 4;
+        model.unk03 = 2;
+        model.unk04 = 0;
+        model.unk06 = duration;
+        model.unk08 = 0xA5;
+        model.unk0C = 0x17;
+        model.unk10 = 0;
+        model.unk14 = 0x200405;
+        model.unk18 = 0x60200;
+        model.unk2D = 8;
+        model.unk1C = 1;
+        model.unk20 = 0x38;
+        model.unk2C = 0;
+        model.unk24 = 0x80;
+        model.unk28 = 0x20;
+        model.unk30 = 0xFF;
+        model.unk31 = 0xFF;
+        model.unk32 = 0xFF;
+        model.unk33 = 0xFF;
+        model.unk34 = 0xFF;
+        model.unk35 = 0xFF;
+        model.unk36 = 0xFF;
+        model.unk37 = 0xFF;
+        model.unk3C = 0;
+        model.unk40 = 0;
+        model.unk41 = 1;
+        model.unk44 = *(struct17 *)&D_800A5480;
+        model.unk54 = 10;
+        model.unk56 = 25;
+        spawned = func_15157010(&model, 0, 1.0, 0, 0, 2, owner, kind);
+        if (spawned != NULL) {
+            memcpy(&((TaggedModel *)spawned)->tag, &tag, sizeof(tag));
         }
-    }
-    }
+        {
+            Spawn1515548C sprite;
+            u8 i;
+            const s16 kinds[8] = { 0xCE, 0xC5, 0xC4, 0xC4, 0xC4, 0xC4, 0xC4, 0xC4 };
+
+            sprite.unk04 = 62.0f;
+            sprite.unk12 = duration;
+            sprite.unk14 = 0x29;
+            sprite.unk16 = 10;
+            sprite.unk18 = 25;
+            sprite.unk08 = 16.0f;
+            sprite.unk0C = 16.0f;
+            sprite.unk1A = 0;
+            sprite.unk1B = 0xFF;
+            sprite.unk1C = 0xFF;
+            sprite.unk1D = 0xFF;
+            sprite.unk1E = 0xFF;
+            sprite.unk1F = 0xFF;
+            sprite.unk20 = 0xFF;
+            sprite.unk21 = 0xFF;
+            sprite.unk22 = 0xFF;
+            sprite.unk23 = 0xFF;
+            sprite.unk24 = 0;
+            sprite.unk28 = 0x200405;
+            sprite.unk2C = 0x60200;
+            sprite.unk40 = 0;
+            sprite.unk41 = 7;
+            sprite.unk30 = 25;
+            sprite.unk34 = 0x22;
+            sprite.unk38 = 0x80;
+            sprite.unk3C = 0x20;
+            sprite.unk44 = 0;
+            sprite.unk48 = 1.0f;
+            sprite.unk4C = 1.0f;
+            sprite.unk50 = 0.0f;
+            sprite.unk54 = 0.0f;
+            for (i = 0; i < 8; i++) {
+                sprite.unk00 = -65.0f + i * 24.75f;
+                sprite.unk10 = kinds[i];
+                spawned = func_1515548C(&sprite, 14, 0, 0, 2, owner, kind);
+                if (spawned != NULL) {
+                    memcpy(&((TaggedSprite *)spawned)->tag, &tag, sizeof(tag));
+                }
+            }
+        }
     }
 }
 
@@ -1002,36 +983,28 @@ typedef struct Func150FB188Transform {
     f32 field10;
 } Func150FB188Transform;
 
-void func_15157DEC(u8 *, u8 *);
+void func_15157DEC(Func150FB188State *, Func150FB188Transform *);
 
-s32 func_150FB188(Func150FB188State *arg0) {
+/* Sets obj->field54..5C to (-95, -80, 0) and calls func_15157DEC with {0, 0, 0, 0.3, 0.3}. */
+s32 func_150FB188(Func150FB188State *obj) {
     Func150FB188Transform transform;
 
-    arg0->field5C = 0.0f;
-    arg0->field54 = -95.0f;
-    arg0->field58 = -80.0f;
+    obj->field5C = 0.0f;
+    obj->field54 = -95.0f;
+    obj->field58 = -80.0f;
     transform.field0 = 0.0f;
     transform.field4 = 0.0f;
     transform.field8 = 0.0f;
     transform.fieldC = 0.3f;
     transform.field10 = 0.3f;
-    func_15157DEC((u8 *)arg0, (u8 *)&transform);
+    func_15157DEC(obj, &transform);
     return 1;
 }
 
 extern s32 func_151D710C(s32, s32, s32, s32, s32);
 extern void func_15157F80(s32, s32, s32, s32, s32);
 
+/* Passes func_151D710C's result, with the same remaining arguments, to func_15157F80. */
 void func_150FB1E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_15157F80(func_151D710C(arg0, arg1, arg2, arg3, arg4), arg1, arg2, arg3, arg4);
 }
-void func_150FB240(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4);
-s32 func_150FB29C(void *arg0);
-
-extern void func_150FB240(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4);
-s32 func_150FB2E0(void *arg0);
-
-extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
-void func_150FEC28(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
-void func_151D4408(struct17 *, struct17 *, s32, struct127 *, f32, s32, s32);
-void func_150FB324(struct127 *arg0, s32 arg1, s32 arg2);

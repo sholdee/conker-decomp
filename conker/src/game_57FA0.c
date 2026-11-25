@@ -1,13 +1,17 @@
 #include <ultra64.h>
 
+/* functions.h declares func_1502B7F0 with fixed parameters; it is variadic. */
+#define func_1502B7F0 func_1502B7F0_fixed_args
 #include "functions.h"
+#undef func_1502B7F0
 #include "variables.h"
 
 #include "macros.h"
+#include "libc/stdarg.h"
 
-extern void *allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-extern void func_10004074(void *arg0);
-extern s32 func_10006240(void *arg0, void *arg1, u32 arg2);
+extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
+extern void func_10004074(void *ptr);                     /* frees an allocate_memory() buffer */
+extern s32 func_10006240(void *src, void *dst, u32 arg2); /* decompresses; returns the size written */
 
 void func_1502AAF0(void) {
 }
@@ -15,473 +19,451 @@ void func_1502AAF0(void) {
 void func_1502AAF8(s32 arg0) {
 }
 
+/* One 8-byte entry of the ROM asset table at D_AB1950. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-} struct_game_57FA0_0;
+    s32 offset; /* added to the table base to reach the next level */
+    s32 info;   /* bits 0-27: size (0 = missing), bits 28-30: compression (1 = compressed),
+                 * bit 31: last entry (tables loaded into RAM, see func_1502B4A8) */
+} RomTableEntry;
 
+/* Most-recently-used cache of ROM table entries; the newest is at the end. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-} struct_game_57FA0_1;
+    u32 romAddr;  /* address of the entry in ROM, with bit 31 set */
+    s32 lastUsed; /* value of D_800C3D60 when the entry was last read */
+    RomTableEntry entry;
+} RomTableCacheLine;
 
-extern struct_game_57FA0_0 D_800C3D68[];
-extern u8 D_800C3EA0;
+extern RomTableCacheLine D_800C3D68[16];
 
-void func_1502AB04(s32 arg0, s32 *arg1, s32 arg2, s32 arg3) {
-    struct_game_57FA0_0 *entry;
-    struct_game_57FA0_1 *payload;
-    struct_game_57FA0_1 *src;
-    u32 count;
+/* Drops the oldest `count` cache lines and appends `count` entries read from `romAddr` onwards. */
+void func_1502AB04(s32 count, RomTableEntry *entries, s32 tick, u32 romAddr) {
+    u32 n;
     u32 i;
 
-    count = arg0;
-    if (count != 0) {
-        bcopy(&D_800C3D68[count], D_800C3D68, ((-(s32)count) << 4) + 0x100);
+    n = count; // matching: using the parameter directly allocates registers differently
+    if (n != 0) {
+        bcopy(&D_800C3D68[n], D_800C3D68, (16 - n) * sizeof(RomTableCacheLine));
     }
 
-    for (i = 0x10 - count; i < 0x10; i++) {
-        entry = &D_800C3D68[i];
-        payload = (struct_game_57FA0_1 *)&entry->unk8;
-        src = (struct_game_57FA0_1 *)arg1;
-        *payload = *src;
-        arg1 += 2;
-        entry->unk4 = arg2;
-        entry->unk0 = arg3;
-        arg3 += 8;
+    for (i = 16 - n; i < 16; i++) {
+        D_800C3D68[i].entry = *entries++;
+        D_800C3D68[i].lastUsed = tick;
+        D_800C3D68[i].romAddr = romAddr;
+        romAddr += sizeof(RomTableEntry);
     }
 }
 
-extern u32 D_800C3D60;
+extern u32 D_800C3D60; /* bumped on every cache miss */
 
-s32 func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2) {
+/*
+ * Looks up entry `index` of the ROM table at `table` and returns its offset, storing its info word in
+ * *info. Hits move to the newest cache line; misses DMA the entry and the one after it into the cache.
+ */
+s32 func_1502AC88(u8 *table, s32 index, s32 *info) {
     u8 buf[0x38];
-    u32 romAddr;
-    u32 size;
-    s32 *dst;
-    s32 ret;
-    s32 *ptr;
+    u32 dmaAddr;
+    u32 dmaSize;
+    RomTableEntry *dmaBuf;
+    s32 offset;
+    RomTableEntry *entries;
     u32 i;
     u32 j;
-    struct_game_57FA0_0 tmp;
+    RomTableCacheLine line;
 
-    arg0 += arg1 * 8;
-    arg0 = (u8 *)((u32)arg0 | 0x80000000);
+    table += index * sizeof(RomTableEntry);
+    table = (u8 *)((u32)table | 0x80000000);
 
     for (i = 0; i < 16; i++) {
-        if ((u32)arg0 == D_800C3D68[i].unk0) {
-            tmp = D_800C3D68[i];
+        if ((u32)table == D_800C3D68[i].romAddr) {
+            line = D_800C3D68[i];
             for (j = i; j < 15; j++) {
                 D_800C3D68[j] = D_800C3D68[j + 1];
             }
-            D_800C3D68[15] = tmp;
-            D_800C3D68[15].unk4 = D_800C3D60;
-            *arg2 = D_800C3D68[15].unkC;
-            return D_800C3D68[15].unk8;
+            D_800C3D68[15] = line;
+            D_800C3D68[15].lastUsed = D_800C3D60;
+            *info = D_800C3D68[15].entry.info;
+            return D_800C3D68[15].entry.offset;
         }
     }
 
     D_800C3D60++;
-    romAddr = (u32)arg0 & 0x7FFFFFF0;
-    size = (((u32)arg0 & 0xE) + 0x1F) & ~0xF;
-    dst = (s32 *)((u32)buf & ~0xF);
-    func_10004514(romAddr, dst, size, 1);
-    ptr = (s32 *)((u8 *)dst + ((u32)arg0 & 0xF));
-    ret = ptr[0];
-    *arg2 = ptr[1];
-    func_1502AB04(2, ptr, D_800C3D60, (u32)arg0);
-    return ret;
+    dmaAddr = (u32)table & 0x7FFFFFF0;
+    dmaSize = (((u32)table & 0xE) + 0x1F) & ~0xF;
+    dmaBuf = (RomTableEntry *)((u32)buf & ~0xF);
+    func_10004514(dmaAddr, dmaBuf, dmaSize, 1);
+    entries = (RomTableEntry *)((u8 *)dmaBuf + ((u32)table & 0xF));
+    offset = entries[0].offset;
+    *info = entries[0].info;
+    func_1502AB04(2, entries, D_800C3D60, (u32)table);
+    return offset;
 }
-s32 func_1502AF04(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    typedef struct { u32 address; u32 flags; } Relocation;
+
+/*
+ * DMAs `count` entries of the ROM table at `table`, starting at entry `index`, into `buf` (16-byte
+ * aligned within it) and rebases each entry's offset onto the table. Returns the first entry.
+ */
+RomTableEntry *func_1502AF04(u8 *table, u8 *buf, s32 index, s32 count) {
     u32 i;
-    s32 source;
-    u8 *aligned;
-    Relocation *entries;
+    s32 romAddr;
+    u8 *dst;
+    RomTableEntry *entries;
 
-    arg2 <<= 3;
-    source = (s32)arg0 + arg2;
-    aligned = (u8 *)((arg1 + 8) & ~0xF);
-    func_10004514(source & ~0xF, aligned, ((source & 0xE) + (arg3 << 3) + 0xF) & ~0xF, 1);
-    entries = (Relocation *)((s32)aligned + (source & 0xFU));
-    for (i = 0; i < (u32)arg3; i++) {
-        entries[i].address += (u32)arg0;
+    index *= sizeof(RomTableEntry);
+    romAddr = (s32)table + index;
+    dst = (u8 *)(((s32)buf + 8) & ~0xF);
+    func_10004514(romAddr & ~0xF, dst, ((romAddr & 0xE) + count * 8 + 0xF) & ~0xF, 1);
+    entries = (RomTableEntry *)((u32)dst + (romAddr & 0xF));
+    for (i = 0; i < count; i++) {
+        entries[i].offset += (u32)table;
     }
-    return (s32)aligned + (source & 0xFU);
+    return entries;
 }
-extern u8 D_AB1950;
-s32 func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2);
-s32 func_1502AF04(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 
-s32 func_1502B020(s32 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    u8 *offset;
-    s32 *tmp;
-    s32 n;
-    s32 sp38;
+extern u8 D_AB1950[]; /* root ROM table */
 
-    sp38 = 1;
-    offset = &D_AB1950;
-    tmp = &arg1 + 1;
+/*
+ * Follows `depth` table indices (the variadic arguments) down from the root ROM table. Returns the
+ * ROM address reached, or 0 if an entry is missing, and stores the last entry's size in *size.
+ */
+u8 *func_1502B020(s32 *size, s32 depth, ...) {
+    va_list args;
+    u8 *addr;
+    s32 index;
+    s32 info;
 
-    for (; arg1 != 0; arg1--) {
-        tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-        n = *(tmp - 1);
-        if (sp38 != 0) {
-            offset += func_1502AC88(offset, n, &sp38);
+    info = 1;
+    addr = D_AB1950;
+    va_start(args, depth);
+
+    for (; depth != 0; depth--) {
+        index = va_arg(args, s32);
+        if (info != 0) {
+            addr += func_1502AC88(addr, index, &info);
         }
-        sp38 = sp38 & 0xFFFFFFF;
+        info &= 0xFFFFFFF;
     }
 
-    if (arg0 != 0) {
-        *arg0 = sp38 & 0xFFFFFFF;
+    if (size != NULL) {
+        *size = info & 0xFFFFFFF;
     }
 
-    if (sp38 == 0) {
-        return 0;
-    } else {
-        return (s32)offset;
+    if (info == 0) {
+        return NULL;
     }
+    return addr;
 }
-s32 func_1502B110(u8 *offset, s32 arg1, s32 arg2, u32 arg3) {
-    u8 *unused;
-    s32 *tmp;
-    s32 more;
-    s32 ret;
-    s32 n;
 
-    unused = offset;
-    more = 1;
-    ret = 0;
-    if (offset != 0) {
-    } else {
-        offset = &D_AB1950;
+/*
+ * Follows `depth - 1` table indices from `table` (the root table if NULL), then loads `count` entries
+ * of the table reached, starting at the last index, into `buf` (see func_1502AF04).
+ */
+RomTableEntry *func_1502B110(u8 *table, s32 count, u8 *buf, u32 depth, ...) {
+    va_list args;
+    s32 index;
+    s32 info;
+    RomTableEntry *entries;
+
+    info = 1;
+    entries = NULL;
+    if (table == NULL) {
+        table = D_AB1950;
     }
 
-    tmp = (s32 *)(&arg3 + 1);
-    for (; arg3 >= 2U; arg3--) {
-        tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-        n = *(tmp - 1);
-        if (more != 0) {
-            offset += func_1502AC88(offset, n, &more);
+    va_start(args, depth);
+    for (; depth > 1; depth--) {
+        index = va_arg(args, s32);
+        if (info != 0) {
+            table += func_1502AC88(table, index, &info);
         }
-        more = more & 0xFFFFFFF;
+        info &= 0xFFFFFFF;
     }
 
-    tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-    n = *(tmp - 1);
-    if (more != 0) {
-        ret = func_1502AF04(offset, arg2, n, arg1);
+    index = va_arg(args, s32);
+    if (info != 0) {
+        entries = func_1502AF04(table, buf, index, count);
     }
 
-    return ret;
+    return entries;
 }
-s32 func_1502B224(s32 arg0, void *arg1, u32 arg2, u32 arg3) {
+/*
+ * Loads the ROM data at `romAddr` described by the table info word `info` into `dst`, decompressing
+ * it if compressed. A nonzero `maxSize` caps the size read. Returns the size loaded (0 if out of memory).
+ */
+s32 func_1502B224(u8 *romAddr, void *dst, u32 info, u32 maxSize) {
     u32 size;
-    void *buf;
-    s32 expected;
+    void *packed;
+    s32 unpackedSize;
 
-    size = ((arg2 & 0x0FFFFFFF) + 1) & ~1;
-    if (arg3 != 0) {
-        if (arg3 < size) {
-            size = arg3;
-        }
+    size = ((info & 0x0FFFFFFF) + 1) & ~1;
+    if (maxSize != 0 && maxSize < size) {
+        size = maxSize;
     }
 
-    if ((arg2 & 0x70000000) == 0x10000000) {
-        buf = allocate_memory(size, 1, 2, 2);
-        if (buf == 0) {
+    if ((info & 0x70000000) == 0x10000000) {
+        packed = allocate_memory(size, 1, 2, 2);
+        if (packed == NULL) {
             return 0;
         }
 
-        func_10004514(arg0, buf, (size + 0xF) & ~0xF, 1);
-        expected = *(s32 *)buf & 0x7FFFFFFF;
-        if ((size = func_10006240(buf, arg1, D_8003809C)) == expected) {
-        } else {
+        func_10004514((s32)romAddr, packed, (size + 0xF) & ~0xF, 1);
+        /* The first word of compressed data is its unpacked size. */
+        unpackedSize = *(s32 *)packed & 0x7FFFFFFF;
+        if ((size = func_10006240(packed, dst, D_8003809C)) != unpackedSize) {
             D_8003C8E0 = 0x0C000036;
             func_150AD770();
         }
-        func_10004074(buf);
+        func_10004074(packed);
         return size;
     }
 
-    func_10004514(arg0, arg1, (size + 0xF) & ~0xF, 1);
+    func_10004514((s32)romAddr, dst, (size + 0xF) & ~0xF, 1);
     return size;
 }
-s32 func_1502B350(u8 *arg0, s32 arg1, s32 *arg2) {
-    u32 size;
-    void *buf;
-    void *out;
+/*
+ * Allocates a buffer and loads the ROM data at `romAddr` described by `info` into it, decompressing
+ * it into a second buffer if compressed. Stores the size loaded in *size and returns the buffer, or
+ * NULL on failure.
+ */
+void *func_1502B350(u8 *romAddr, s32 info, u32 *size) {
+    u32 loadSize;
+    void *packed;
+    void *data;
 
-    size = ((arg1 & 0x0FFFFFFF) + 1) & ~1;
-    out = buf = allocate_memory(size, 1, 2, 2);
-    if (buf == NULL) {
-        return 0;
+    loadSize = ((info & 0x0FFFFFFF) + 1) & ~1;
+    data = packed = allocate_memory(loadSize, 1, 2, 2);
+    if (packed == NULL) {
+        return NULL;
     }
-    func_10004514((s32)arg0, buf, (size + 0xF) & ~0xF, 1);
-    if ((arg1 & 0x70000000) == 0x10000000) {
-        *arg2 = *(s32 *)buf & 0x7FFFFFFF;
-        if (*arg2 != 0) {
-            out = NULL;
-            if ((u32)*arg2 < 1000000) {
-                out = allocate_memory((u32)*arg2, 1, 2, 2);
-                if (out != NULL) {
-                    size = func_10006240(buf, out, D_8003809C);
+    func_10004514((s32)romAddr, packed, (loadSize + 0xF) & ~0xF, 1);
+    if ((info & 0x70000000) == 0x10000000) {
+        *size = *(s32 *)packed & 0x7FFFFFFF;
+        if (*size != 0) {
+            data = NULL;
+            if (*size < 1000000) {
+                data = allocate_memory(*size, 1, 2, 2);
+                if (data != NULL) {
+                    loadSize = func_10006240(packed, data, D_8003809C);
                 } else {
-                    size = 0;
+                    loadSize = 0;
                 }
             } else {
-                size = 0;
+                loadSize = 0;
             }
         } else {
-            out = NULL;
-            size = 0;
+            data = NULL;
+            loadSize = 0;
         }
-        func_10004074(buf);
+        func_10004074(packed);
     }
-    *arg2 = size;
-    return (s32)out;
+    *size = loadSize;
+    return data;
 }
-/* Offset-table entry: unk0 is rebased onto the table (-1 = none); bit 31 of unk4 ends the table. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Pair1502B4A8;
-
-s32 func_1502B4A8(Pair1502B4A8 *arg0, s32 arg1) {
+/*
+ * Turns a table of `count` entries loaded into RAM into pointers: masks each info word down to its
+ * size and rebases each offset onto the table (missing entries become NULL). A `count` of 0 means the
+ * table ends at the first entry with bit 31 of its info set. Returns the entry count.
+ */
+s32 func_1502B4A8(RomTableEntry *table, s32 count) {
     s32 i;
 
-    if (arg1 == 0) {
-        while ((arg0[arg1++].unk4 & 0x80000000) == 0) {
+    if (count == 0) {
+        while ((table[count++].info & 0x80000000) == 0) {
         }
     }
-    for (i = 0; i < arg1; i++) {
-        arg0[i].unk4 &= 0x0FFFFFFF;
-        if (arg0[i].unk0 == -1 || arg0[i].unk4 == 0) {
-            arg0[i].unk0 = 0;
+    for (i = 0; i < count; i++) {
+        table[i].info &= 0x0FFFFFFF;
+        if (table[i].offset == -1 || table[i].info == 0) {
+            table[i].offset = 0;
         } else {
-            arg0[i].unk0 += (s32)arg0;
+            table[i].offset += (s32)table;
         }
     }
-    return arg1;
+    return count;
 }
-extern u8 D_AB1950;
-s32 func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2);
-s32 func_1502B350(u8 *arg0, s32 arg1, s32 *arg2);
 
-s32 func_1502B5C8(s32 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    s32 *more;
-    u8 *offset;
-    s32 *tmp;
-    s32 sp40;
-    s32 ret;
-    s32 sp38;
-    s32 n;
+/*
+ * Follows `depth` table indices from the root ROM table and loads the data reached into a new buffer
+ * (see func_1502B350). Stores the size loaded in *size if non-NULL; returns the buffer or NULL.
+ */
+void *func_1502B5C8(u32 *size, s32 depth, ...) {
+    u32 *found;
+    u8 *addr;
+    va_list args;
+    u32 localSize;
+    void *data;
+    s32 info;
+    s32 index;
 
-    more = &sp40;
-    if (arg0 != 0) {
-        more = arg0;
+    found = &localSize;
+    if (size != NULL) {
+        found = size;
     }
 
-    *more = 1;
-    offset = &D_AB1950;
-    tmp = &arg1 + 1;
+    *found = 1;
+    addr = D_AB1950;
+    va_start(args, depth);
 
-    if (arg1 != 0) {
-        do {
-            tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-            n = *(tmp - 1);
-            if (*more != 0) {
-                offset += func_1502AC88(offset, n, &sp38);
-            }
-            *more = sp38 & 0xFFFFFFF;
-        } while (--arg1 != 0);
+    for (; depth != 0; depth--) {
+        index = va_arg(args, s32);
+        if (*found != 0) {
+            addr += func_1502AC88(addr, index, &info);
+        }
+        *found = info & 0xFFFFFFF;
     }
 
-    if (*more != 0) {
-        ret = func_1502B350(offset, sp38, more);
+    if (*found != 0) {
+        data = func_1502B350(addr, info, found);
     } else {
-        ret = 0;
+        data = NULL;
     }
 
-    return ret;
+    return data;
 }
-s32 func_1502B4A8(Pair1502B4A8 *arg0, s32 arg1);
+/*
+ * Like func_1502B5C8, but the data loaded is a table of `count` entries (0 = terminated by bit 31),
+ * which is turned into pointers by func_1502B4A8. Stores the entry count in *countOut if non-NULL.
+ */
+RomTableEntry *func_1502B6BC(u32 *size, s32 count, s32 *countOut, s32 depth, ...) {
+    u32 *found;
+    u8 *addr;
+    u32 localSize;
+    va_list args;
+    RomTableEntry *table;
+    s32 info;
+    s32 index;
 
-s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3) {
-    s32 *more;
-    u8 *offset;
-    s32 *tmp;
-    s32 sp44;
-    s32 ret;
-    s32 sp38;
-    s32 n;
-
-    more = &sp44 + 1;
-    if (arg0 != 0) {
-        more = arg0;
+    found = &localSize;
+    if (size != NULL) {
+        found = size;
     }
 
-    *more = 1;
-    offset = &D_AB1950;
-    tmp = &arg3 + 1;
+    *found = 1;
+    addr = D_AB1950;
+    va_start(args, depth);
 
-    if (arg3 != 0) {
-        do {
-            tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-            n = *(tmp - 1);
-            if (*more != 0) {
-                offset += func_1502AC88(offset, n, &sp38);
-            }
-            *more = sp38 & 0xFFFFFFF;
-        } while (--arg3 != 0);
+    for (; depth != 0; depth--) {
+        index = va_arg(args, s32);
+        if (*found != 0) {
+            addr += func_1502AC88(addr, index, &info);
+        }
+        *found = info & 0xFFFFFFF;
     }
 
-    if (*more != 0) {
-        ret = func_1502B350(offset, sp38, more);
-        if (*more != 0 && ret != 0) {
-            arg1 = func_1502B4A8(ret, arg1);
+    if (*found != 0) {
+        table = func_1502B350(addr, info, found);
+        if (*found != 0 && table != NULL) {
+            count = func_1502B4A8(table, count);
         } else {
-            arg1 = 0;
+            count = 0;
         }
-        if (arg2 != 0) {
-            *arg2 = arg1;
+        if (countOut != NULL) {
+            *countOut = count;
         }
     } else {
-        ret = 0;
+        table = NULL;
     }
 
-    return ret;
+    return table;
 }
-s32 func_1502B7F0(s32 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    u8 *offset;
-    s32 *tmp;
-    s32 n;
-    s32 sp38;
-    s32 sp34;
+/*
+ * Follows `depth` table indices from the root ROM table and loads the data reached into a new buffer
+ * (see func_1502B350), stored in *data (NULL if missing). Returns the size loaded.
+ */
+u32 func_1502B7F0(void **data, s32 depth, ...) {
+    va_list args;
+    u8 *addr;
+    s32 index;
+    u32 size;
+    s32 info;
 
-    sp38 = 1;
-    offset = &D_AB1950;
-    tmp = &arg1 + 1;
+    size = 1;
+    addr = D_AB1950;
+    va_start(args, depth);
 
-    for (; arg1 != 0; arg1--) {
-        tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-        n = *(tmp - 1);
-        if (sp38 != 0) {
-            offset += func_1502AC88(offset, n, &sp34);
+    for (; depth != 0; depth--) {
+        index = va_arg(args, s32);
+        if (size != 0) {
+            addr += func_1502AC88(addr, index, &info);
         }
-        sp38 = sp34 & 0xFFFFFFF;
+        size = info & 0xFFFFFFF;
     }
 
-    if (sp38 != 0) {
-        *arg0 = func_1502B350(offset, sp34, &sp38);
+    if (size != 0) {
+        *data = func_1502B350(addr, info, &size);
     } else {
-        *arg0 = 0;
+        *data = NULL;
     }
 
-    return sp38;
+    return size;
 }
 
-s32 func_1502B8E0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    u8 *offset;
-    s32 *tmp;
-    s32 n;
-    s32 more;
-    s32 sp34;
+/*
+ * Follows `depth` table indices from the root ROM table and loads the data reached into `dst` (see
+ * func_1502B224), at most `maxSize` bytes if nonzero. Returns the size loaded, or 0 if missing.
+ */
+s32 func_1502B8E0(void *dst, u32 maxSize, s32 depth, ...) {
+    u8 *addr;
+    va_list args;
+    s32 index;
+    s32 size;
+    s32 info;
 
-    more = 1;
-    offset = &D_AB1950;
-    tmp = &arg2 + 1;
+    size = 1;
+    addr = D_AB1950;
+    va_start(args, depth);
 
-    for (; arg2 != 0; arg2--) {
-        tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-        n = *(tmp - 1);
-        if (more != 0) {
-            offset += func_1502AC88(offset, n, &sp34);
+    for (; depth != 0; depth--) {
+        index = va_arg(args, s32);
+        if (size != 0) {
+            addr += func_1502AC88(addr, index, &info);
         }
-        more = sp34 & 0xFFFFFFF;
+        size = info & 0xFFFFFFF;
     }
 
-    if (more != 0) {
-        more = func_1502B224(offset, arg0, sp34, arg1);
+    if (size != 0) {
+        size = func_1502B224(addr, dst, info, maxSize);
     }
 
-    return more;
+    return size;
 }
 
-s32 func_1502B9B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    u8 *offset;
-    s32 *tmp;
-    s32 n;
-    s32 more;
-    s32 stack0;
-    s32 pad[3];
-    s32 stack2[2];
-    s32 stack1[2];
-    s32 pad0;
+/*
+ * Follows `depth` table indices from the root ROM table and returns the size the data reached takes
+ * once loaded: its stored size, or for compressed data the header word read from ROM. 0 if missing.
+ */
+s32 func_1502B9B4(s32 depth, ...) {
+    u8 *addr;
+    va_list args;
+    s32 size;
+    s32 index;
+    s32 info;
+    u64 buf[3];
+    s32 *header;
 
-    more = 1;
-    offset = &D_AB1950;
-    tmp = &arg0 + 1;
+    size = 1;
+    addr = D_AB1950;
+    va_start(args, depth);
 
-    for (; arg0 != 0; arg0--) {
-        tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-        n = *(tmp - 1);
-        if (more != 0) {
-            offset += func_1502AC88(offset, n, &stack0);
+    for (; depth != 0; depth--) {
+        index = va_arg(args, s32);
+        if (size != 0) {
+            addr += func_1502AC88(addr, index, &info);
         }
-        more = stack0 & 0xFFFFFFF;
+        size = info & 0xFFFFFFF;
     }
 
-    if (more != 0) {
-        more = ((stack0 & 0xFFFFFFF) + 1) & -2;
-        if ((stack0 & 0x70000000) == 0x10000000) {
-            tmp = stack1;
-            if (((s32)stack1 & 8) != 0) {
-                tmp = stack2;
+    if (size != 0) {
+        size = ((info & 0xFFFFFFF) + 1) & ~1;
+        if ((info & 0x70000000) == 0x10000000) {
+            /* DMA needs a 16-byte aligned buffer. */
+            header = (s32 *)&buf[0];
+            if ((s32)header & 8) {
+                header = (s32 *)&buf[1];
             }
-            func_10004514((s32)offset, tmp, 0x10, 1);
-            more = tmp[0];
+            func_10004514((s32)addr, header, 0x10, 1);
+            size = header[0];
         }
     }
 
-    return more;
+    return size;
 }
-// NON-MATCHING: maybe 50% there?
-// s32 func_1502B9B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-//
-//     s32 stack2[2];
-//     s32 stack1[2];
-//     s32 stack0[5];
-//
-//     s32 more;
-//     s32 offset;
-//     s32 *tmp;
-//     s32 i;
-//
-//     more = 1;
-//     offset = &D_00AB1950;
-//     tmp = &arg1;
-//
-//     for (i = arg0; i != 0; i--) {
-//         tmp = ALIGN4(tmp) + 4;
-//         if (more != 0) {
-//             offset += func_1502AC88(offset, tmp - 4, &stack0);
-//         }
-//         more = *stack0 & 0xFFFFFFF;
-//     }
-//
-//     if (more != 0) {
-//         more = ALIGN2(stack0[0] & 0xFFFFFFF);
-//         if ((*stack0 & 0x70000000) == 0x10000000) {
-//             if (((s32) &stack1 & 8) != 0) {
-//                 *stack1 = &stack2;
-//             }
-//             func_10004514(offset, stack1, 0x10, 1); // decompress?
-//             more = *stack1;
-//         }
-//     }
-//
-//     return more;
-// }

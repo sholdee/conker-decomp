@@ -4,147 +4,147 @@
 
 extern f32 cosf(f32);
 extern f32 sinf(f32);
+// matching: 0.01745329238f (degrees to radians); the literal allocates registers differently than this load
 extern f32 D_800A7154;
-extern f32 D_800A7158;
-extern s32 D_800BE9E4;
 extern void func_1510E82C(s32 *, s32, f32 *, s32, s32 *, s32, f32, f32, f32, f32, s32, s32);
 
-struct Obj15171CA0 {
-    char pad0[0x16];
-    s16 unk16;
-    char pad18[0x26 - 0x18];
-    s16 unk26;
-    char pad28[0x36 - 0x28];
-    s16 unk36;
-    char pad38[0x46 - 0x38];
-    s16 unk46;
-    char pad48[0x50 - 0x48];
-    s16 unk50;
-    s16 unk52;
-    s16 unk54;
-    u16 unk56;
-    u8  unk58;
-    u8  unk59;
-};
+/* Sprite animation (same layout as SpriteAnim in game_1944C0.c). */
+typedef struct {
+    /* 0x0 */ s32 *frames; // one segmented texture address (< 0x10000000) or a table of frameCount addresses
+    /* 0x4 */ u8 frameCount;
+    /* 0x5 */ u8 pad5;
+    /* 0x6 */ u16 width;
+    /* 0x8 */ u16 height;
+    /* 0xA */ u8 unkA; // 5: two-texture (two-cycle) animation
+} SpriteAnim;
 
-extern struct Obj15171CA0 *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern SpriteAnim *D_8008CA4C[];
 
-struct Obj15171CA0 *func_15171CA0(s16 arg0, u16 arg1, u8 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) {
-    struct Obj15171CA0 *ret = func_15167A68(arg5 == 0 ? 0xF : 0x43, arg7, 0x60, 1, arg6, 1);
-    if (ret == 0) {
+/* A textured sprite particle: one quad, drawn by func_151720C4. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ Vtx vtx[4];
+    /* 0x50 */ s16 lifetime;  // drawn while >= 2; 0 starts the -3 -> -1 removal countdown
+    /* 0x52 */ s16 animFrame; // 8.8 fixed point frame index
+    /* 0x54 */ s16 animSpeed;
+    /* 0x56 */ u16 color;     // RGBA5551
+    /* 0x58 */ u8 animIndex;  // index into D_8008CA4C
+    /* 0x59 */ u8 flags;      // 1: cloud blend, 2: flat quad, 4: play animation once, 8: texture-only combine
+} Particle19F150;
+
+extern Particle19F150 *func_15167A68(s32, s32, s32, s32, s32, s32);
+
+/* Allocates a particle and initialises its animation state. */
+Particle19F150 *func_15171CA0(s16 lifetime, u16 color, u8 animIndex, s32 flags, s32 animSpeed, s32 arg5, u8 arg6,
+                              s32 arg7) {
+    Particle19F150 *particle = func_15167A68(arg5 == 0 ? 0xF : 0x43, arg7, sizeof(Particle19F150), 1, arg6, 1);
+
+    if (particle == NULL) {
         return NULL;
     }
-    ret->unk50 = arg0;
-    ret->unk52 = 0;
-    ret->unk54 = arg4;
-    ret->unk56 = arg1;
-    ret->unk58 = arg2;
-    ret->unk59 = arg3;
-    ret->unk16 = 0;
-    ret->unk26 = 0;
-    ret->unk36 = 0;
-    ret->unk46 = 0;
-    return ret;
+    particle->lifetime = lifetime;
+    particle->animFrame = 0;
+    particle->animSpeed = animSpeed;
+    particle->color = color;
+    particle->animIndex = animIndex;
+    particle->flags = flags;
+    particle->vtx[0].v.flag = 0;
+    particle->vtx[1].v.flag = 0;
+    particle->vtx[2].v.flag = 0;
+    particle->vtx[3].v.flag = 0;
+    return particle;
 }
 
-struct Some15171F04 {
-    u8 pad0[4];
-    u8 unk4;
-    u8 pad5;
-    u16 unk6;
-    u16 unk8;
-};
-extern struct Some15171F04 *D_8008CA4C[];
-s32 func_15172B20(void *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, u8 arg7);
-typedef struct {
-    s16 ob[3];
-    u16 flag;
-    s16 tc[2];
-    u8 cn[4];
-} VtxD4C;
+s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, u8 width);
 
-#define VTX ((VtxD4C *)((u8 *)temp + 0x10))
+/*
+ * Spawns a sprite particle at (x, y, z). Normally the quad is laid on the floor below a point `dist` away along
+ * `angle`; with flags & 2 it is a flat horizontal square of half-size `size`.
+ */
+void func_15171D4C(f32 x, f32 y, f32 z, s16 lifetime, u16 color, u8 animIndex, f32 angle, s32 dist, s32 size,
+                   s32 flags, s32 animSpeed, s32 arg11, u8 arg12, s32 arg13) {
+    Particle19F150 *particle;
 
-void func_15171D4C(f32 arg0, f32 arg1, f32 arg2, s16 arg3, u16 arg4, u8 arg5, f32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, u8 argC, s32 argD) {
-    struct Obj15171CA0 *temp;
-
-    temp = func_15171CA0(arg3, arg4, arg5, arg9, argA, argB, argC, argD);
-    if (temp != NULL) {
-        if (!(arg9 & 2)) {
-            if (func_15172B20((u8 *)temp + 0x10, arg0, arg1, arg2, arg6, arg7, arg8, D_8008CA4C[temp->unk58]->unk6) == 0) {
-                func_1516972C((struct102 *)temp);
+    particle = func_15171CA0(lifetime, color, animIndex, flags, animSpeed, arg11, arg12, arg13);
+    if (particle != NULL) {
+        if (!(flags & 2)) {
+            if (func_15172B20(particle->vtx, x, y, z, angle, dist, size, D_8008CA4C[particle->animIndex]->width) == 0) {
+                func_1516972C((struct102 *)particle);
             }
         } else {
-            VTX[0].ob[0] = VTX[3].ob[0] = arg0 - (f32)arg8;
-            VTX[1].ob[0] = VTX[2].ob[0] = (f32)arg8 + arg0;
-            VTX[0].ob[1] = VTX[1].ob[1] = VTX[2].ob[1] = VTX[3].ob[1] = arg1;
-            VTX[0].ob[2] = VTX[1].ob[2] = arg2 - (f32)arg8;
-            VTX[2].ob[2] = VTX[3].ob[2] = (f32)arg8 + arg2;
-            VTX[0].tc[0] = VTX[3].tc[0] = 0x2000;
-            VTX[1].tc[0] = VTX[2].tc[0] = (D_8008CA4C[arg5]->unk6 + 0x100) << 5;
-            VTX[0].tc[1] = VTX[1].tc[1] = 0x2000;
-            VTX[2].tc[1] = VTX[3].tc[1] = (D_8008CA4C[arg5]->unk8 + 0x100) << 5;
+            particle->vtx[0].v.ob[0] = particle->vtx[3].v.ob[0] = x - (f32)size;
+            particle->vtx[1].v.ob[0] = particle->vtx[2].v.ob[0] = (f32)size + x;
+            particle->vtx[0].v.ob[1] = particle->vtx[1].v.ob[1] = particle->vtx[2].v.ob[1] = particle->vtx[3].v.ob[1] = y;
+            particle->vtx[0].v.ob[2] = particle->vtx[1].v.ob[2] = z - (f32)size;
+            particle->vtx[2].v.ob[2] = particle->vtx[3].v.ob[2] = (f32)size + z;
+            particle->vtx[0].v.tc[0] = particle->vtx[3].v.tc[0] = 0x2000;
+            particle->vtx[1].v.tc[0] = particle->vtx[2].v.tc[0] = (D_8008CA4C[animIndex]->width + 0x100) << 5;
+            particle->vtx[0].v.tc[1] = particle->vtx[1].v.tc[1] = 0x2000;
+            particle->vtx[2].v.tc[1] = particle->vtx[3].v.tc[1] = (D_8008CA4C[animIndex]->height + 0x100) << 5;
         }
     }
 }
 
-#undef VTX
+s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width);
 
-s32 func_151725FC(void *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7);
+/* Spawns a sprite particle laid on collision triangle `tri` at (x, y, z). */
+void func_15171F04(f32 x, f32 y, f32 z, s32 tri, s16 lifetime, u16 color, u8 animIndex, s32 size, s32 flags,
+                   s32 animSpeed, s32 arg10, u8 arg11, s32 arg12) {
+    Particle19F150 *particle;
 
-void func_15171F04(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s16 arg4, u16 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, u8 arg11, s32 arg12) {
-    struct Obj15171CA0 *temp;
-
-    temp = func_15171CA0(arg4, arg5, arg6, arg8, arg9, arg10, arg11, arg12);
-    if (temp != NULL) {
-        if (func_151725FC((u8 *)temp + 0x10, arg3, arg0, arg1, arg2, 0.0f, arg7, D_8008CA4C[temp->unk58]->unk6) == 0) {
-            func_1516972C((struct102 *)temp);
+    particle = func_15171CA0(lifetime, color, animIndex, flags, animSpeed, arg10, arg11, arg12);
+    if (particle != NULL) {
+        if (func_151725FC(particle->vtx, tri, x, y, z, 0.0f, size, D_8008CA4C[particle->animIndex]->width) == 0) {
+            func_1516972C((struct102 *)particle);
         }
     }
 }
 
-void func_15171FC0(struct Obj15171CA0 *arg0) {
-    s32 temp_v0;
+/* Per-frame update: counts the lifetime down by the frame delta and advances the animation. */
+void func_15171FC0(Particle19F150 *particle) {
+    s32 lifetime;
+    s32 frameCount;
 
-    temp_v0 = arg0->unk50;
-    if (temp_v0 < -1) {
-        arg0->unk50 = temp_v0 + 1;
-        if (arg0->unk50 == -1) {
-            func_1516972C((struct102 *)arg0);
+    lifetime = particle->lifetime;
+    if (lifetime < -1) {
+        particle->lifetime = lifetime + 1;
+        if (particle->lifetime == -1) {
+            func_1516972C((struct102 *)particle);
         }
         return;
     }
 
-    if (temp_v0 == 0) {
-        arg0->unk50 = -3;
+    if (lifetime == 0) {
+        particle->lifetime = -3;
         return;
     }
 
-    if (temp_v0 == -1) {
+    if (lifetime == -1) {
         return;
     }
 
-    if ((arg0->unk59 & 4) == 0) {
-        if (D_800BE9E4 < temp_v0) {
-            arg0->unk50 = temp_v0 - D_800BE9E4;
+    if (!(particle->flags & 4)) {
+        if (D_800BE9E4 < lifetime) {
+            particle->lifetime = lifetime - D_800BE9E4;
         } else {
-            arg0->unk50 = 0;
+            particle->lifetime = 0;
         }
     }
 
-    arg0->unk52 += arg0->unk54;
-    temp_v0 = D_8008CA4C[arg0->unk58]->unk4;
-    if ((arg0->unk52 / 256) < temp_v0) {
+    particle->animFrame += particle->animSpeed;
+    frameCount = D_8008CA4C[particle->animIndex]->frameCount;
+    if (particle->animFrame / 256 < frameCount) {
         return;
     }
 
-    if (arg0->unk59 & 4) {
-        arg0->unk50 = -3;
+    if (particle->flags & 4) {
+        particle->lifetime = -3;
     } else {
-        arg0->unk52 = (temp_v0 << 8) - 0x100;
+        particle->animFrame = (frameCount << 8) - 0x100;
     }
 }
 
+/* Cached draw state shared by all sprite particles: texture, frame, cycle|combine mode, primitive colour. */
 extern s32 D_800DD1B4;
 extern s32 D_800DD1B8;
 extern s16 D_800DD1BC;
@@ -153,288 +153,300 @@ extern s16 D_800DD1C2;
 extern s16 D_800DD1C4;
 extern s16 D_800DD1C6;
 extern s32 D_800D2C9C;
-struct Some151720C4 {
-    s32 unk0;
-    u8 pad4[6];
-    u8 unkA;
+/* Filled in by func_15094F70; unused here. */
+struct TexState151720C4 {
+    s32 unk0[5];
 };
-struct Sprite151720C4 { s32 unk0[5]; };
-#define WGFX151720C4(pkt, a, b) { Gfx *_g = (Gfx *)(pkt); _g->words.w0 = (u32)(a); _g->words.w1 = (u32)(b); }
-Gfx *func_15094F70(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
+Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 
-Gfx *func_151720C4(Gfx *gfx, struct Obj15171CA0 *arg1, s32 arg2) {
+/*
+ * Draws a sprite particle (once its lifetime is >= 2), setting the texture, cycle type, render mode, combiner and
+ * primitive colour only when they differ from the cached state in D_800DD1B4..D_800DD1C6.
+ */
+Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
     s32 r;
     s32 g;
     s32 b;
     s32 a;
-    s32 ptr;
-    s32 cyc;
-    s32 mode;
-    s32 newCyc;
-    s32 newMode;
-    struct Sprite151720C4 sprite;
+    s32 *frames;
+    s32 cycle;
+    s32 combine;
+    s32 newCycle;
+    s32 newCombine;
+    struct TexState151720C4 texState;
     s32 tex;
     s32 frame;
-    s32 update;
-    struct Some151720C4 *entry;
+    s32 needSync;
+    SpriteAnim *anim;
     s32 othermodeH;
-    s32 othermodeL;
+    s32 othermodeL; // sic: left unset (garbage) when the cycle type is already current
 
-    update = 1;
-    if (arg1->unk50 >= 2) {
-    entry = (struct Some151720C4 *)D_8008CA4C[arg1->unk58];
-    frame = arg1->unk52 >> 8;
-    ptr = entry->unk0;
-    tex = ptr;
-    if ((u32)ptr >= 0x10000000) {
-        tex = ((s32 *)ptr)[frame];
-        frame = 0;
-    }
-    if (tex != D_800DD1B4 || frame != D_800DD1B8) {
-        gfx = func_15094F70(gfx, (s32)entry, arg1->unk52, (s32)&sprite, 0, 0, 0, 2, 3);
-        D_800DD1B4 = tex;
-        D_800DD1B8 = frame;
-    }
-    cyc = D_800DD1BC & 0xF;
-    mode = D_800DD1BC & 0xF0;
-    if (!(arg1->unk59 & 1)) {
-        newCyc = 1;
-    } else {
-        newCyc = 2;
-    }
-    if (entry->unkA == 5) {
-        newCyc += 2;
-    }
-    if (cyc != newCyc) {
-        cyc = newCyc;
-        if (update) {
-            gDPPipeSync(gfx++);
+    needSync = 1;
+    if (particle->lifetime >= 2) {
+        anim = D_8008CA4C[particle->animIndex];
+        frame = particle->animFrame >> 8;
+        frames = anim->frames;
+        tex = (s32)frames;
+        if ((u32)frames >= 0x10000000) {
+            tex = frames[frame];
+            frame = 0;
         }
-        update = 0;
-        switch (newCyc) {
-        case 1:
-            othermodeH = 0;
-            othermodeL = 0x504DD8;
-            break;
-        case 2:
-            othermodeH = 0;
-            othermodeL = 0x504B50;
-            break;
-        case 3:
-            othermodeH = 0x100000;
-            othermodeL = 0xC184DD8;
-            break;
-        case 4:
-            othermodeH = 0x100000;
-            othermodeL = 0xC184B50;
-            break;
+        if (tex != D_800DD1B4 || frame != D_800DD1B8) {
+            gfx = func_15094F70(gfx, anim, particle->animFrame, &texState, 0, 0, 0, 2, 3);
+            D_800DD1B4 = tex;
+            D_800DD1B8 = frame;
         }
-        gDPSetAlphaCompare(gfx++, G_AC_NONE);
-        gSPClearGeometryMode(gfx++, G_FOG | G_LOD);
-    }
-    gfx = func_15142FBC(gfx, othermodeH | G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_DISABLE, othermodeL, (u8 *)&update);
-    if (!(arg1->unk59 & 8)) {
-        if (entry->unkA == 0) {
-            if (arg1->unk56) {
-                newMode = 0x10;
-            } else {
-                newMode = 0x20;
+        cycle = D_800DD1BC & 0xF;
+        combine = D_800DD1BC & 0xF0;
+        if (!(particle->flags & 1)) {
+            newCycle = 1;
+        } else {
+            newCycle = 2;
+        }
+        if (anim->unkA == 5) {
+            newCycle += 2;
+        }
+        if (cycle != newCycle) {
+            cycle = newCycle;
+            if (needSync) {
+                gDPPipeSync(gfx++);
             }
-        } else if (entry->unkA == 5) {
-            if (arg1->unk56) {
-                newMode = 0x60;
+            needSync = 0;
+            switch (newCycle) {
+            case 1:
+                othermodeH = G_CYC_1CYCLE;
+                othermodeL = G_RM_AA_ZB_XLU_DECAL | G_RM_AA_ZB_XLU_DECAL2;
+                break;
+            case 2:
+                othermodeH = G_CYC_1CYCLE;
+                othermodeL = G_RM_ZB_CLD_SURF | G_RM_ZB_CLD_SURF2;
+                break;
+            case 3:
+                othermodeH = G_CYC_2CYCLE;
+                othermodeL = G_RM_PASS | G_RM_AA_ZB_XLU_DECAL2;
+                break;
+            case 4:
+                othermodeH = G_CYC_2CYCLE;
+                othermodeL = G_RM_PASS | G_RM_ZB_CLD_SURF2;
+                break;
+            }
+            gDPSetAlphaCompare(gfx++, G_AC_NONE);
+            gSPClearGeometryMode(gfx++, G_FOG | G_LOD);
+        }
+        // sic: passes the high byte of the s32 needSync
+        gfx = func_15142FBC(gfx, othermodeH | G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE |
+                                     G_AD_DISABLE,
+                            othermodeL, (u8 *)&needSync);
+        if (!(particle->flags & 8)) {
+            if (anim->unkA == 0) {
+                if (particle->color) {
+                    newCombine = 0x10;
+                } else {
+                    newCombine = 0x20;
+                }
+            } else if (anim->unkA == 5) {
+                if (particle->color) {
+                    newCombine = 0x60;
+                } else {
+                    newCombine = 0x50;
+                }
             } else {
-                newMode = 0x50;
+                newCombine = 0x30;
             }
         } else {
-            newMode = 0x30;
+            newCombine = 0x40;
         }
-    } else {
-        newMode = 0x40;
-    }
-    if (mode != newMode) {
-        mode = newMode;
-        if (update) {
-            gDPPipeSync(gfx++);
+        if (combine != newCombine) {
+            combine = newCombine;
+            if (needSync) {
+                gDPPipeSync(gfx++);
+            }
+            switch (newCombine) {
+            case 0x10:
+                gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0,
+                                  PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0);
+                break;
+            case 0x20:
+                gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0,
+                                  0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
+                break;
+            case 0x30:
+                gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0,
+                                  0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
+                break;
+            case 0x40:
+                gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, TEXEL0,
+                                  0, 0, 0, TEXEL0, 0, 0, 0, TEXEL0);
+                break;
+            case 0x50:
+                gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL1, 0,
+                                  0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
+                break;
+            case 0x60:
+                gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL1, 0,
+                                  0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
+                break;
+            }
         }
-        switch (newMode) {
-        case 0x10:
-            WGFX151720C4(gfx++, 0xFC30B261, 0xFF67FFFF);
-            break;
-        case 0x20:
-            WGFX151720C4(gfx++, 0xFCFFB3FF, 0xFF64FE7F);
-            break;
-        case 0x30:
-            WGFX151720C4(gfx++, 0xFCFF97FF, 0xFF2DFEFF);
-            break;
-        case 0x40:
-            WGFX151720C4(gfx++, 0xFCFFFFFF, 0xFFFCF279);
-            break;
-        case 0x50:
-            WGFX151720C4(gfx++, 0xFCFFB5FF, 0xFFFCFE38);
-            break;
-        case 0x60:
-            WGFX151720C4(gfx++, 0xFC30B5FF, 0xFFFFFE38);
-            break;
+        D_800DD1BC = cycle | combine;
+        r = (particle->color >> 8) & 0xF8;
+        g = (particle->color >> 3) & 0xF8;
+        b = (particle->color << 2) & 0xF8;
+        if (particle->lifetime >= 26) {
+            a = 0xFF;
+        } else {
+            a = particle->lifetime * 10;
         }
-    }
-    D_800DD1BC = cyc | mode;
-    r = (arg1->unk56 >> 8) & 0xF8;
-    g = (arg1->unk56 >> 3) & 0xF8;
-    b = (arg1->unk56 << 2) & 0xF8;
-    if (arg1->unk50 >= 0x1A) {
-        a = 0xFF;
-    } else {
-        a = arg1->unk50 * 10;
-    }
-    if (r != D_800DD1C0 || g != D_800DD1C2 || b != D_800DD1C4 || a != D_800DD1C6) {
-        D_800DD1C0 = r;
-        D_800DD1C2 = g;
-        D_800DD1C4 = b;
-        D_800DD1C6 = a;
-        if (update) {
-            gDPPipeSync(gfx++);
+        if (r != D_800DD1C0 || g != D_800DD1C2 || b != D_800DD1C4 || a != D_800DD1C6) {
+            D_800DD1C0 = r;
+            D_800DD1C2 = g;
+            D_800DD1C4 = b;
+            D_800DD1C6 = a;
+            if (needSync) {
+                gDPPipeSync(gfx++);
+            }
+            gDPSetPrimColor(gfx++, 1, 0, r, g, b, a);
         }
-        gDPSetPrimColor(gfx++, 1, 0, r, g, b, a);
-    }
-    gSPVertex(gfx++, (u8 *)arg1 + 0x10, 4, 0);
-    gSP1Triangle(gfx++, 0, 1, 2, 0);
-    gSP1Triangle(gfx++, 0, 2, 3, 0);
+        gSPVertex(gfx++, particle->vtx, 4, 0);
+        gSP1Triangle(gfx++, 0, 1, 2, 0);
+        gSP1Triangle(gfx++, 0, 2, 3, 0);
     }
     return gfx;
 }
 
-typedef struct {
-    s16 ob[3];
-    u16 flag;
-    s16 tc[2];
-    u8 cn[4];
-} Vtx151725FC;
+extern s32 func_1510E388(s32 tri, void *verts, f32 *slopeX, f32 *slopeZ);
+/* Quad corner texture coordinates for 64-, 32- and 16-texel-wide textures. */
+extern s16 D_800A6FD0[4][2];
+extern s16 D_800A6FE0[4][2];
+extern s16 D_800A6FF0[4][2];
 
-extern s32 func_1510E388(s32, void *, f32 *, f32 *);
-extern s16 D_800A6FD0[];
-extern s16 D_800A6FE0[];
-extern s16 D_800A6FF0[];
-
-s32 func_151725FC(void *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7) {
+/*
+ * Fills `vtx` with a quad of half-size `size` lying on the slope of collision triangle `tri`, centred on (x, y, z),
+ * with its texture coordinates (for a texture `width` texels wide) rotated by `angle` degrees.
+ */
+s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u8 width) {
     f32 lenA;
     f32 lenB;
-    f32 minsq;
+    f32 minLenSq;
     f32 denom;
-    f32 unused1;
+    f32 unused1; // matching: unused1..unused4 keep the original stack layout
     f32 unused2;
     f32 unused3;
-    f32 v[2][3];
+    f32 axis[2][3];
     f32 unused4;
-    f32 angle;
-    f32 z;
-    f32 x;
-    f32 cx;
-    f32 cy;
-    f32 cs;
-    f32 sn;
-    s16 (*tbl)[2];
-    Vtx151725FC *vtx;
+    f32 theta;
+    f32 slopeZ;
+    f32 slopeX;
+    f32 centerS;
+    f32 centerT;
+    f32 cosT;
+    f32 sinT;
+    s16 (*cornerUV)[2];
+    Vtx *quad; // matching: the texture-coordinate loop must index the parameter, the others this copy
     s32 n;
     s32 i;
 
-    vtx = arg0;
-    n = arg6 / 16;
+    quad = vtx;
+    n = size / 16;
     if (n == 0) {
         n = 1;
     }
-    if (func_1510E388(arg1, 0, &x, &z) == 0) {
+    if (func_1510E388(tri, NULL, &slopeX, &slopeZ) == 0) {
         return 0;
     }
-    v[0][0] = 0.0f;
-    v[0][2] = -n;
-    v[0][1] = x * v[0][0] + z * v[0][2];
-    denom = (z + z) * (-v[0][1] - v[0][1]) + ((-v[0][2] - v[0][2]) + (-v[0][2] - v[0][2]));
+    axis[0][0] = 0.0f;
+    axis[0][2] = -n;
+    axis[0][1] = slopeX * axis[0][0] + slopeZ * axis[0][2];
+    denom = (slopeZ + slopeZ) * (-axis[0][1] - axis[0][1]) + ((-axis[0][2] - axis[0][2]) + (-axis[0][2] - axis[0][2]));
     if (denom == 0.0f) {
         denom = 0.001000000047f;
     }
-    v[1][0] = -n;
-    v[1][1] = ((x * v[1][0] + x * v[1][0]) * (-v[0][2] - v[0][2])) / denom;
-    if (z == 0.0f) {
-        v[1][2] = 0.0f;
+    axis[1][0] = -n;
+    axis[1][1] = ((slopeX * axis[1][0] + slopeX * axis[1][0]) * (-axis[0][2] - axis[0][2])) / denom;
+    if (slopeZ == 0.0f) {
+        axis[1][2] = 0.0f;
     } else {
-        v[1][2] = (v[1][1] - x * v[1][0]) / z;
+        axis[1][2] = (axis[1][1] - slopeX * axis[1][0]) / slopeZ;
     }
-    lenA = v[0][0] * v[0][0] + v[0][1] * v[0][1] + v[0][2] * v[0][2];
+    lenA = axis[0][0] * axis[0][0] + axis[0][1] * axis[0][1] + axis[0][2] * axis[0][2];
     if (lenA > 100000000.0f) {
         lenA = 100000000.0f;
     }
-    minsq = n * n;
-    if (lenA < minsq) {
-        lenA = minsq;
+    minLenSq = n * n;
+    if (lenA < minLenSq) {
+        lenA = minLenSq;
     }
     lenA = sqrtf(lenA);
-    lenB = v[1][0] * v[1][0] + v[1][1] * v[1][1] + v[1][2] * v[1][2];
+    lenB = axis[1][0] * axis[1][0] + axis[1][1] * axis[1][1] + axis[1][2] * axis[1][2];
     if (lenB > 100000000.0f) {
         lenB = 100000000.0f;
     }
-    if (lenB < minsq) {
-        lenB = minsq;
+    if (lenB < minLenSq) {
+        lenB = minLenSq;
     }
     lenB = sqrtf(lenB);
     for (i = 0; i < 3; i++) {
-        v[0][i] = v[0][i] * arg6 / lenA;
-        v[1][i] = v[1][i] * arg6 / lenB;
-        vtx[0].ob[i] = v[0][i];
-        vtx[1].ob[i] = v[1][i];
-        vtx[2].ob[i] = -v[0][i];
-        vtx[3].ob[i] = -v[1][i];
+        axis[0][i] = axis[0][i] * size / lenA;
+        axis[1][i] = axis[1][i] * size / lenB;
+        quad[0].v.ob[i] = axis[0][i];
+        quad[1].v.ob[i] = axis[1][i];
+        quad[2].v.ob[i] = -axis[0][i];
+        quad[3].v.ob[i] = -axis[1][i];
     }
-    angle = (arg5 - 225.0f) * 0.01745329238f;
-    cs = cosf(angle);
-    sn = sinf(angle);
-    if ((u8)arg7 == 0x10) {
-        cy = cx = 256.0f;
-        tbl = (s16 (*)[2])D_800A6FF0;
-    } else if ((u8)arg7 == 0x20) {
-        cy = cx = 512.0f;
-        tbl = (s16 (*)[2])D_800A6FE0;
+    theta = (angle - 225.0f) * 0.01745329238f;
+    cosT = cosf(theta);
+    sinT = sinf(theta);
+    if (width == 0x10) {
+        centerT = centerS = 256.0f;
+        cornerUV = D_800A6FF0;
+    } else if (width == 0x20) {
+        centerT = centerS = 512.0f;
+        cornerUV = D_800A6FE0;
     } else {
-        cy = cx = 1024.0f;
-        tbl = (s16 (*)[2])D_800A6FD0;
+        centerT = centerS = 1024.0f;
+        cornerUV = D_800A6FD0;
     }
     for (i = 0; i < 4; i++) {
-        ((Vtx151725FC *)arg0)[i].tc[0] = ((tbl[i][0] - cx) * cs - (tbl[i][1] - cy) * sn) + cx + 8192.0f;
-        ((Vtx151725FC *)arg0)[i].tc[1] = ((tbl[i][0] - cx) * sn + (tbl[i][1] - cy) * cs) + cy + 8192.0f;
+        vtx[i].v.tc[0] = ((cornerUV[i][0] - centerS) * cosT - (cornerUV[i][1] - centerT) * sinT) + centerS + 8192.0f;
+        vtx[i].v.tc[1] = ((cornerUV[i][0] - centerS) * sinT + (cornerUV[i][1] - centerT) * cosT) + centerT + 8192.0f;
     }
     for (i = 0; i < 4; i++) {
-        vtx[i].ob[0] = vtx[i].ob[0] + arg2;
-        vtx[i].ob[1] = vtx[i].ob[1] + arg3;
-        vtx[i].ob[2] = vtx[i].ob[2] + arg4;
+        quad[i].v.ob[0] = quad[i].v.ob[0] + x;
+        quad[i].v.ob[1] = quad[i].v.ob[1] + y;
+        quad[i].v.ob[2] = quad[i].v.ob[2] + z;
     }
     return 1;
 }
 
 
-s32 func_15172B20(void *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, u8 arg7) {
-    struct sp15172B20 {
-        s32 unk0;
-        f32 unk4;
+/*
+ * Finds the floor below the point `dist` away from (x, z) along `angle` degrees and lays a quad of half-size `size`
+ * on it (see func_151725FC). Returns 0 when there is no floor.
+ */
+s32 func_15172B20(Vtx *vtx, f32 x, f32 y, f32 z, f32 angle, s32 dist, s32 size, u8 width) {
+    struct FloorHit {
+        s32 tri;
+        f32 floorY;
         s32 unk8;
         s32 unkC;
     };
-    f32 temp_f0;
-    f32 temp_f6;
-    struct sp15172B20 sp40;
-    f32 temp_f12;
+    f32 sinT;
+    f32 cosT;
+    struct FloorHit floor;
+    f32 theta;
 
-    temp_f12 = (arg4 - 90.0f) * D_800A7154;
-    temp_f6 = cosf(temp_f12);
-    temp_f0 = sinf(temp_f12);
-    arg1 += (f32) arg5 * temp_f0;
-    arg3 += (f32) arg5 * temp_f6;
-    func_1510E82C(&sp40.unk0, 0, &sp40.unk4, 0, &sp40.unk8, 0, arg1, arg2, arg3, arg2, 0, 0);
-    if (sp40.unk0 == 0) {
+    theta = (angle - 90.0f) * D_800A7154;
+    cosT = cosf(theta);
+    sinT = sinf(theta);
+    x += (f32)dist * sinT;
+    z += (f32)dist * cosT;
+    func_1510E82C(&floor.tri, 0, &floor.floorY, 0, &floor.unk8, 0, x, y, z, y, 0, 0);
+    if (floor.tri == 0) {
         return 0;
     }
-    if (sp40.unk4 == D_800A7158) {
+    if (floor.floorY == -10000.0f) {
         return 0;
     }
-    return func_151725FC(arg0, sp40.unk0, arg1, sp40.unk4, arg3, arg4, arg6, arg7);
+    return func_151725FC(vtx, floor.tri, x, floor.floorY, z, angle, size, width);
 }

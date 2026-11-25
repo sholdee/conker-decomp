@@ -2,126 +2,138 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Per-view screen record, 0x180 bytes each, in the array that D_800BE628 points to. */
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-} struct150948C0;
+    /* 0x000 */ u8 pad0[0xC];
+    /* 0x00C */ f32 halfWidth;
+    /* 0x010 */ f32 halfHeight;
+    /* 0x014 */ f32 unk14; // sprite x scale (func_15095B08, unscaled sprites)
+    /* 0x018 */ f32 unk18;
+    /* 0x01C */ f32 unk1C; // sprite x scale (func_15095B08, perspective sprites)
+    /* 0x020 */ f32 unk20;
+    /* 0x024 */ f32 top;
+    /* 0x028 */ f32 bottom;
+    /* 0x02C */ f32 left;
+    /* 0x030 */ f32 right;
+    /* 0x034 */ f32 centerX;
+    /* 0x038 */ f32 centerY;
+    /* 0x03C */ u8 pad3C[4];
+    /* 0x040 */ Vp viewport[2]; // one per frame buffer (D_800BE9C0)
+    /* 0x060 */ u8 pad60[0xA0];
+    /* 0x100 */ Mtx mtx[2];     // one per frame buffer
+} View; // size 0x180
 
+#define gViews ((View *)D_800BE628)
+
+/* A texture as the sprite and tile loaders take it (D_800D2C90 is the shared one). */
 typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[2];
-    s32 unk4;
-} struct1509499C_arg0;
+    /* 0x0 */ u32 addr;  // RAM address, or an asset id below 0x10000000
+    /* 0x4 */ u16 width;
+    /* 0x6 */ u16 height;
+    /* 0x8 */ u8 fmt;    // G_IM_FMT_*; 5 = colour image plus a second 4-bit tile
+    /* 0x9 */ u8 siz;    // G_IM_SIZ_*
+    /* 0xA */ u8 frames; // animation frames (0 = still)
+} Texture;
 
-extern f32 *D_800D2C20;
-void func_1509499C(struct1509499C_arg0 *, s32 *);
-void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-void func_150948C0(void *arg0, s32 arg1);
-void func_1509499C(struct1509499C_arg0 *arg0, s32 *arg1);
-void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
-void func_15094E98(void);
+/* A texture as stored in the asset tables, converted into a Texture by func_15095060. */
+typedef struct {
+    /* 0x0 */ u32 addr;  // asset id, or a pointer to a table of per-frame addresses
+    /* 0x4 */ u8 frames;
+    /* 0x5 */ u8 pad5;
+    /* 0x6 */ u16 width;
+    /* 0x8 */ u16 height;
+    /* 0xA */ u8 fmt;
+    /* 0xB */ u8 siz;
+} TextureDesc;
 
-extern Mtx D_800D2CA8[];
+/* A sprite to draw (see func_15095D34). */
+typedef struct {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 scaleX;
+    /* 0x08 */ s16 scaleY;
+    /* 0x0A */ u8 alpha;
+    /* 0x0B */ u8 animSpeed;
+    /* 0x0C */ u8 animTimer; // 8 ticks per frame; bit 7 = playing backwards (ping-pong textures)
+    /* 0x0D */ u8 flip;      // bit 0: flip s, bit 1: flip t
+    /* 0x0E */ u8 padE[2];
+    /* 0x10 */ Texture *tex;
+} SpriteParams;
+
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 void func_150A7A00(void *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 
-typedef struct {
-    u8 pad0[0xC];
-    f32 unkC;
-    f32 unk10;
-    u8 pad14[0x20];
-    f32 unk34;
-    f32 unk38;
-    u8 pad3C[0x144];
-} struct1509563C; // size 0x180
+extern f32 D_800D2CA8[][4][4];
 
-void func_15094EA0(s32 arg0) {
-    f32 sp58[4][4];
-    f32 sp18[4][4];
+/* Combines view `view`'s current projection and view matrices into D_800D2CA8[view]. */
+void func_15094EA0(s32 view) {
+    f32 projection[4][4];
+    f32 viewMtx[4][4];
 
-    guMtxL2F(&sp58, &((Mtx *)((s32 *)&D_800DC2A0)[D_800BE9C0])[arg0]);
-    guMtxL2F(&sp18, (Mtx *)((u8 *)((struct259 *)D_800BE628 + arg0) + (D_800BE9C0 << 6) + 0x100));
-    func_150A7A48(&sp58, &sp18, (f32 (*)[4])&D_800D2CA8[arg0]);
+    guMtxL2F(projection, &((Mtx **)&D_800DC2A0)[D_800BE9C0][view]);
+    guMtxL2F(viewMtx, &gViews[view].mtx[D_800BE9C0]);
+    func_150A7A48(projection, viewMtx, D_800D2CA8[view]);
 }
 
 extern Gfx D_800873D0[];
-extern u8 * D_800D2CA0;
+extern u8 *D_800D2CA0;
 
-Gfx *func_15094F40(Gfx *arg0) {
-    gSPDisplayList(arg0++, D_800873D0);
-    D_800D2CA0 = 0;
-    return arg0;
+/* Emits display list D_800873D0 and forgets the last loaded texture address. */
+Gfx *func_15094F40(Gfx *gfx) {
+    gSPDisplayList(gfx++, D_800873D0);
+    D_800D2CA0 = NULL;
+    return gfx;
 }
 
-typedef struct {
-    u32 unk0;
-    u8 unk4;
-    u8 pad5;
-    u16 unk6;
-    u16 unk8;
-    u8 unkA;
-    u8 unkB;
-} struct15095060_arg0;
+void func_15095060(TextureDesc *desc, s32 frame, SpriteParams *sprite);
+Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg);
+extern Texture D_800D2C90;
 
-typedef struct {
-    u32 unk0;
-    u16 unk4;
-    u16 unk6;
-    u8 unk8;
-    u8 unk9;
-    u8 unkA;
-} struct15095060_d;
-
-typedef struct {
-    u8 pad0[0x10];
-    struct15095060_d *unk10;
-} struct15095060_arg2;
-
-extern void func_15095060(struct15095060_arg0 *, s32, struct15095060_arg2 *);
-extern Gfx *func_150950D4(Gfx *, struct15095060_d *, s32, s32, s32, s32, s32, s32, s32, s32);
-extern struct15095060_d D_800D2C90;
-
-Gfx *func_15094F70(Gfx *arg0, struct15095060_arg0 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
-    func_15095060(arg1, arg2, (struct15095060_arg2 *)arg3);
-    return func_150950D4((Gfx *)arg0, &D_800D2C90, arg4, arg5, 0, arg6, arg7, 0x100, 0x100, arg8);
+/* Loads frame `frame >> 8` of `desc` as tile `tile` at tmem `tmem`, with the tile origin at (256, 256). */
+Gfx *func_15094F70(Gfx *gfx, TextureDesc *desc, s32 frame, SpriteParams *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm, s32 assetArg) {
+    func_15095060(desc, frame, sprite);
+    return func_150950D4(gfx, &D_800D2C90, tmem, tile, 0, sfrac, cm, 0x100, 0x100, assetArg);
 }
 
-void func_15094FE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10) {
-    func_15095060((struct15095060_arg0 *)arg1, arg2, (struct15095060_arg2 *)arg3);
-    func_150950D4((Gfx *)arg0, &D_800D2C90, arg4, arg5, 0, arg6, arg7, arg8, arg9, arg10);
+/* As func_15094F70, with the tile origin (s, t) given. */
+Gfx *func_15094FE8(Gfx *gfx, TextureDesc *desc, s32 frame, SpriteParams *sprite, s32 tmem, s32 tile, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg) {
+    func_15095060(desc, frame, sprite);
+    return func_150950D4(gfx, &D_800D2C90, tmem, tile, 0, sfrac, cm, s, t, assetArg);
 }
 
-void func_15095060(struct15095060_arg0 *arg0, s32 arg1, struct15095060_arg2 *arg2) {
-    u32 temp_v0;
+/* Fills the shared texture D_800D2C90 from `desc`, and points `sprite` (if any) at it. */
+void func_15095060(TextureDesc *desc, s32 frame, SpriteParams *sprite) {
+    u32 addr;
 
-    if (arg2 != 0) {
-        arg2->unk10 = &D_800D2C90;
+    if (sprite != NULL) {
+        sprite->tex = &D_800D2C90;
     }
 
-    temp_v0 = arg0->unk0;
-    if (temp_v0 < 0x10000000U) {
-        D_800D2C90.unk0 = temp_v0;
+    addr = desc->addr;
+    if (addr < 0x10000000U) {
+        D_800D2C90.addr = addr;
     } else {
-        D_800D2C90.unk0 = ((u32 *)temp_v0)[arg1 >> 8];
+        D_800D2C90.addr = ((u32 *)addr)[frame >> 8];
     }
 
-    D_800D2C90.unk4 = arg0->unk6;
-    D_800D2C90.unk6 = arg0->unk8;
-    D_800D2C90.unk8 = arg0->unkA;
-    D_800D2C90.unk9 = arg0->unkB;
-    D_800D2C90.unkA = arg0->unk4;
+    D_800D2C90.width = desc->width;
+    D_800D2C90.height = desc->height;
+    D_800D2C90.fmt = desc->fmt;
+    D_800D2C90.siz = desc->siz;
+    D_800D2C90.frames = desc->frames;
 }
 
 extern s32 func_1510D0EC(s32, s32, s32, s32);
+// Per-G_IM_SIZ tables, as libultra's G_IM_SIZ_*_INCR, _SHIFT, line-bits and _LOAD_BLOCK.
 extern u8 D_8009DEB0[];
 extern u8 D_8009DEB4[];
 extern u8 D_8009DEB8[];
 extern u8 D_8009DEBC[];
-extern s32 D_800D2C9C;
+extern s32 D_800D2C9C; // G_TT_RGBA16 when the last loaded texture has a palette, else G_TT_NONE
 
-Gfx *func_150950D4(Gfx *gfx, struct15095060_d *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 arg9) {
+/* Loads frame `frame` of `tex` (and its palette) into tmem, as tile `tile` placed at (s, t). */
+Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg) {
     s32 width;
     s32 size;
     s32 masks;
@@ -129,480 +141,425 @@ Gfx *func_150950D4(Gfx *gfx, struct15095060_d *tex, s32 tmem, s32 tile, s32 fram
     s32 i;
     s32 fmt;
 
-    if (tex->unkA == 0) {
+    if (tex->frames == 0) {
         frame = 0;
     }
-    size = D_8009DEB0[tex->unk9] + tex->unk4 * tex->unk6;
-    if (tex->unk8 == 5) {
-        size += (tex->unk4 * tex->unk6) / 4;
+    size = D_8009DEB0[tex->siz] + tex->width * tex->height;
+    if (tex->fmt == 5) {
+        size += (tex->width * tex->height) / 4;
     }
-    size >>= D_8009DEB4[tex->unk9];
-    D_800D2CA0 = (u8 *)tex->unk0;
+    size >>= D_8009DEB4[tex->siz];
+    D_800D2CA0 = (u8 *)tex->addr;
     if ((u32)D_800D2CA0 < 0x10000000) {
-        D_800D2CA0 = (u8 *)func_1510D0EC((s32)D_800D2CA0, 0, arg9, 0);
+        D_800D2CA0 = (u8 *)func_1510D0EC((s32)D_800D2CA0, 0, assetArg, 0);
     }
-    if (D_800D2CA0 != (u8 *)0x80000000) {
+    if (D_800D2CA0 != (u8 *)0x80000000) { // the loader's "no asset" value
         D_800D2CA0 += (size + size) * frame;
     }
-    if (tex->unk9 == 0) {
-        width = tex->unk4 >> 1;
+    if (tex->siz == G_IM_SIZ_4b) {
+        width = tex->width >> 1;
     } else {
-        width = tex->unk4;
+        width = tex->width;
     }
     masks = 1;
-    for (i = 2; i < tex->unk4; i <<= 1) {
+    for (i = 2; i < tex->width; i <<= 1) {
         masks++;
     }
     maskt = 1;
-    for (i = 2; i < tex->unk6; i <<= 1) {
+    for (i = 2; i < tex->height; i <<= 1) {
         maskt++;
     }
-    if (tex->unk8 != 5) {
-        fmt = tex->unk8;
+    if (tex->fmt != 5) {
+        fmt = tex->fmt;
     } else {
-        fmt = 0;
+        fmt = G_IM_FMT_RGBA;
     }
     gDPPipeSync(gfx++);
-    gDPSetTextureImage(gfx++, fmt, D_8009DEBC[tex->unk9], 1, D_800D2CA0);
-    gDPSetTile(gfx++, fmt, D_8009DEBC[tex->unk9], 0, tmem, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPSetTextureImage(gfx++, fmt, D_8009DEBC[tex->siz], 1, D_800D2CA0);
+    gDPSetTile(gfx++, fmt, D_8009DEBC[tex->siz], 0, tmem, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
     gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, size - 1, 0);
-    gDPSetTile(gfx++, fmt, tex->unk9, (D_8009DEB8[tex->unk9] * width + 7) >> 3, tmem, tile, 0, cm, maskt, 0, cm, masks, 0);
-    gDPSetTileSize(gfx++, tile, (s << 2) + sfrac, t << 2, ((tex->unk4 + s - 1) << 2) + sfrac, (tex->unk6 + t - 1) << 2);
-    if (tex->unk8 == 5) {
-        gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, (D_8009DEB8[G_IM_SIZ_4b] * (width >> 1) + 7) >> 3, tmem + (width * tex->unk6) / 4, tile + 1, 0, cm, maskt, 0, cm, masks, 0);
-        gDPSetTileSize(gfx++, tile + 1, (s << 2) + sfrac, t, ((tex->unk4 + s - 1) << 2) + sfrac, (tex->unk6 + t - 1) << 2);
+    gDPSetTile(gfx++, fmt, tex->siz, (D_8009DEB8[tex->siz] * width + 7) >> 3, tmem, tile, 0, cm, maskt, 0, cm, masks, 0);
+    gDPSetTileSize(gfx++, tile, (s << 2) + sfrac, t << 2, ((tex->width + s - 1) << 2) + sfrac, (tex->height + t - 1) << 2);
+    if (tex->fmt == 5) {
+        gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, (D_8009DEB8[G_IM_SIZ_4b] * (width >> 1) + 7) >> 3, tmem + (width * tex->height) / 4, tile + 1, 0, cm, maskt, 0, cm, masks, 0);
+        gDPSetTileSize(gfx++, tile + 1, (s << 2) + sfrac, t, ((tex->width + s - 1) << 2) + sfrac, (tex->height + t - 1) << 2);
     }
-    if (tex->unk8 == 2) {
+    if (tex->fmt == G_IM_FMT_CI) {
         s32 bits;
-        s32 count;
+        s32 colors;
 
-        if (tex->unk9 == 0) {
+        if (tex->siz == G_IM_SIZ_4b) {
             bits = 4;
-            count = 15;
+            colors = 15;
         } else {
             bits = 8;
-            count = 255;
+            colors = 255;
         }
-        gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, D_800D2CA0 + (tex->unk4 * tex->unk6 * bits) / 8);
+        // the palette follows the texels
+        gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, D_800D2CA0 + (tex->width * tex->height * bits) / 8);
         gDPLoadSync(gfx++);
-        gDPLoadTLUTCmd(gfx++, 6, count);
-        D_800D2C9C = 0x8000;
+        gDPLoadTLUTCmd(gfx++, G_TX_LOADTILE - 1, colors);
+        D_800D2C9C = G_TT_RGBA16;
     } else {
-        D_800D2C9C = 0;
+        D_800D2C9C = G_TT_NONE;
     }
     return gfx;
 }
 
-s32 func_1509563C(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 arg7) {
-    f32 temp_f14;
-    f32 temp_f12;
-    f32 temp_f0;
-    f32 temp_f2;
-    struct1509563C *temp_v1;
-
-    func_150A7A00(&D_800D2CA8[D_80082FA4], arg0, arg1, arg2, arg3, arg4, arg5, arg6);
-    temp_f14 = *arg6;
-    if ((arg7 <= temp_f14) || (temp_f14 <= D_800D9B20)) {
-        return 0;
-    }
-    temp_f12 = 1.0f / temp_f14;
-    temp_v1 = &((struct1509563C *)D_800BE628)[D_80082FA4];
-    temp_f0 = *arg3;
-    temp_f2 = *arg4;
-    temp_f0 = (temp_v1->unkC + 5.0f) * temp_f0 * temp_f12;
-    temp_f2 = (temp_v1->unk10 + 5.0f) * temp_f2 * temp_f12;
-    temp_f0 += temp_v1->unk34;
-    temp_f2 = temp_v1->unk38 - temp_f2;
-    *arg3 = temp_f0;
-    *arg4 = temp_f2;
-    return 1;
-}
-
-s32 func_1509563C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
-void func_15095B08(s32, f32, f32, f32, s32, s32 *);
-s32 func_15095A90(s32, s32, f32, f32, f32, s32, s32, s32, s32);
-Gfx *func_15095D34();
-
-struct Pt15095760 {
-    s16 x;
-    s16 y;
-    s16 z;
-};
-
-#define WGFX15095760(pkt, a, b)     \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
-
-s32 func_15095760(Gfx *arg0, struct Pt15095760 *arg1) {
-    f32 sp44;
-    f32 sp40;
-    f32 sp3C;
-    f32 sp38;
-
-    if (func_1509563C((f32)arg1->x, (f32)arg1->y, (f32)arg1->z, &sp44, &sp40, &sp3C, &sp38, 4000.0f) == 0) {
-        return (s32)arg0;
-    }
-    gDPPipeSync(arg0++);
-    gDPSetPrimDepth(arg0++,
-        (s32)(((sp3C / sp38) * (f32)*(s16 *)(((s32)D_800BE628 + D_80082FA4 * 0x180 + (D_800BE9C0 << 4)) + 0x44)
-            + (f32)*(s16 *)(((s32)D_800BE628 + D_80082FA4 * 0x180 + (D_800BE9C0 << 4)) + 0x4C)) * 32.0f), 0);
-    return func_15095A90((s32)arg0, (s32)arg1, sp44, sp40, sp38, 1, 0, 0, 0);
-}
-
-typedef struct Cmd150958B0 {
-    u32 w0;
-    u32 w1;
-} Cmd150958B0;
-
-Cmd150958B0 *func_150958B0(Cmd150958B0 *arg0, s16 *arg1, s32 *arg2) {
-    f32 sp44;
-    f32 sp40;
-    f32 sp3C;
-    f32 sp38;
-
-    if (func_1509563C((f32)arg1[0], (f32)arg1[1], (f32)arg1[2], &sp44, &sp40, &sp3C, &sp38, 4000.0f) == 0) {
-        *arg2 = 0;
-        return arg0;
-    }
-    func_15095B08((s32)arg1, sp44, sp40, sp38, 1, arg2);
-    if (*arg2 != 0) {
-        { Cmd150958B0 *command = arg0++; command->w0 = 0xE7000000; command->w1 = 0; }
-        { Cmd150958B0 *command = arg0++; command->w0 = _SHIFTL(0xEE, 24, 8); command->w1 = _SHIFTL(sp3C / sp38 * 16352.0f + 16352.0f, 16, 16) | _SHIFTL(0, 0, 16); }
-    }
-    return arg0;
-}
-
-void func_15095A48(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
-    func_15095A90(arg0, arg1, arg2, arg3, 4096.0f, 0, 0, 0, 0);
-}
-
-s32 func_15095A90(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
-    s32 sp24;
-
-    func_15095B08(arg1, arg2, arg3, arg4, arg5, &sp24);
-    if (sp24 != 0) {
-        arg0 = func_15095D34(arg0, arg1, arg6, arg7, arg8);
-    }
-    return arg0;
-}
-
-extern f32 D_800380A4;
-extern f32 D_800D2C70;
-extern f32 D_800D2C74;
-extern f32 D_800D2C78;
-extern f32 D_800D2C7C;
-extern f32 D_800D2C80;
-extern f32 D_800D2C84;
-extern f32 D_800D2C88;
-
-typedef struct {
-    u8 pad0[4];
-    u16 unk4;
-    u16 unk6;
-} Struct15095B08_sub;
-
-typedef struct {
-    u8 pad0[6];
-    s16 unk6;
-    s16 unk8;
-    u8 padA[6];
-    Struct15095B08_sub *unk10;
-} Struct15095B08_arg0;
-
-typedef struct {
-    u8 pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0x180 - 0x34];
-} Struct15095B08_cam;
-
-void func_15095B08(s32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, s32 *arg5) {
-    Struct15095B08_arg0 *obj = (Struct15095B08_arg0 *)arg0;
-    Struct15095B08_cam *cam;
-    Struct15095B08_sub *sub;
-    f32 sx;
-    f32 sy;
-    f32 inv;
+/* Projects (x, y, z) through view D_80082FA4. Writes screen x/y to *outX/*outY and the clip z/w;
+ * returns 0 when w is outside (D_800D9B20, maxW). */
+s32 func_1509563C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW, f32 maxW) {
     f32 w;
-    f32 h;
-    s16 a;
-    s16 b;
+    f32 invW;
+    f32 screenX;
+    f32 screenY;
+    View *view;
 
-    *arg5 = 0;
-    if (obj->unk6 != 0) {
-        if (obj->unk8 != 0) {
-            sx = obj->unk6;
-            sy = obj->unk8;
-            sx *= D_800380A0;
-            sy *= D_800380A4;
-            if (arg4 != 0) {
-                cam = &((Struct15095B08_cam *)D_800BE628)[D_80082FA4];
-                sx *= cam->unk1C;
-                sy *= cam->unk20;
-            } else {
-                cam = &((Struct15095B08_cam *)D_800BE628)[D_80082FA4];
-                sx *= cam->unk14;
-                sy *= cam->unk18;
-            }
-            sub = obj->unk10;
-            inv = 1.0f / arg3;
-            w = (f32)(u32)sub->unk4 * sx * inv;
-            h = (f32)(u32)sub->unk6 * sy * inv;
-            arg1 = arg1 - w * 0.5f;
-            arg2 = arg2 - h * 0.5f;
-            if (cam->unk2C <= arg1 + w && arg1 < cam->unk30 && cam->unk24 <= arg2 + h && arg2 < cam->unk28) {
-                *arg5 = 1;
-            }
-            D_800D2C70 = sx;
-            D_800D2C74 = sy;
-            D_800D2C78 = arg1;
-            D_800D2C7C = arg2;
-            D_800D2C80 = arg3;
-            D_800D2C84 = w;
-            D_800D2C88 = h;
-        }
+    func_150A7A00(D_800D2CA8[D_80082FA4], x, y, z, outX, outY, outZ, outW);
+    w = *outW;
+    if ((maxW <= w) || (w <= D_800D9B20)) {
+        return FALSE;
     }
+    invW = 1.0f / w;
+    view = &gViews[D_80082FA4];
+    screenX = *outX;
+    screenY = *outY;
+    screenX = (view->halfWidth + 5.0f) * screenX * invW;
+    screenY = (view->halfHeight + 5.0f) * screenY * invW;
+    screenX += view->centerX;
+    screenY = view->centerY - screenY;
+    *outX = screenX;
+    *outY = screenY;
+    return TRUE;
 }
 
-Gfx *func_15095D34();
+void func_15095B08(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 *visible);
+Gfx *func_15095A90(Gfx *gfx, SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 sOffset, s32 tOffset, s32 extraWidth);
+Gfx *func_15095D34(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffset, s32 extraWidth);
 
-void func_15095D0C(s32 arg0, s32 arg1) {
-    func_15095D34(arg0, arg1, 0, 0, 0);
+/* Draws `sprite` at its world position, depth-tested at its projected depth. */
+Gfx *func_15095760(Gfx *gfx, SpriteParams *sprite) {
+    f32 screenX;
+    f32 screenY;
+    f32 clipZ;
+    f32 clipW;
+
+    if (!func_1509563C(sprite->x, sprite->y, sprite->z, &screenX, &screenY, &clipZ, &clipW, 4000.0f)) {
+        return gfx;
+    }
+    gDPPipeSync(gfx++);
+    gDPSetPrimDepth(gfx++,
+        (s32)(((clipZ / clipW) * gViews[D_80082FA4].viewport[D_800BE9C0].vp.vscale[2]
+            + gViews[D_80082FA4].viewport[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
+    return func_15095A90(gfx, sprite, screenX, screenY, clipW, TRUE, 0, 0, 0);
 }
-typedef struct {
-    u8 pad0[4];
-    u16 unk4;
-    u16 unk6;
-    u8 pad8[2];
-    u8 unkA;
-} Struct15095D34_sub;
 
-typedef struct {
-    u8 pad0[0xA];
-    u8 unkA;
-    u8 unkB;
-    u8 unkC;
-    u8 unkD;
-    u8 padE[2];
-    Struct15095D34_sub *unk10;
-} Struct15095D34_obj;
+/* Places `sprite` at its world position; if it is on screen, emits its depth and sets *visible. */
+Gfx *func_150958B0(Gfx *gfx, SpriteParams *sprite, s32 *visible) {
+    f32 screenX;
+    f32 screenY;
+    f32 clipZ;
+    f32 clipW;
 
-extern u8 D_800D2DA8;
+    if (!func_1509563C(sprite->x, sprite->y, sprite->z, &screenX, &screenY, &clipZ, &clipW, 4000.0f)) {
+        *visible = FALSE;
+        return gfx;
+    }
+    func_15095B08(sprite, screenX, screenY, clipW, TRUE, visible);
+    if (*visible) {
+        gDPPipeSync(gfx++);
+        gDPSetPrimDepth(gfx++, clipZ / clipW * 16352.0f + 16352.0f, 0);
+    }
+    return gfx;
+}
+
+/* Draws `sprite` centred on screen position (x, y). */
+Gfx *func_15095A48(Gfx *gfx, SpriteParams *sprite, f32 x, f32 y) {
+    return func_15095A90(gfx, sprite, x, y, 4096.0f, FALSE, 0, 0, 0);
+}
+
+/* Places `sprite` centred on screen position (x, y) at depth z and draws it if it is on screen. */
+Gfx *func_15095A90(Gfx *gfx, SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 sOffset, s32 tOffset, s32 extraWidth) {
+    s32 visible;
+
+    func_15095B08(sprite, x, y, z, projected, &visible);
+    if (visible) {
+        gfx = func_15095D34(gfx, sprite, sOffset, tOffset, extraWidth);
+    }
+    return gfx;
+}
+
+// Sprite placement computed by func_15095B08 for func_15095D34.
+extern f32 D_800D2C70; // x scale
+extern f32 D_800D2C74; // y scale
+extern f32 D_800D2C78; // left
+extern f32 D_800D2C7C; // top
+extern f32 D_800D2C80; // depth
+extern f32 D_800D2C84; // width
+extern f32 D_800D2C88; // height
+
+/* Computes `sprite`'s screen rectangle centred on (x, y) at depth z, and whether it is on screen. */
+void func_15095B08(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 *visible) {
+    View *view;
+    Texture *tex;
+    f32 scaleX;
+    f32 scaleY;
+    f32 invZ;
+    f32 width;
+    f32 height;
+
+    *visible = FALSE;
+    if (sprite->scaleX == 0 || sprite->scaleY == 0) {
+        return;
+    }
+    scaleX = sprite->scaleX;
+    scaleY = sprite->scaleY;
+    scaleX *= D_800380A0;
+    scaleY *= D_800380A4;
+    if (projected) { // matching: the view address is computed in each branch
+        view = &gViews[D_80082FA4];
+        scaleX *= view->unk1C;
+        scaleY *= view->unk20;
+    } else {
+        view = &gViews[D_80082FA4];
+        scaleX *= view->unk14;
+        scaleY *= view->unk18;
+    }
+    tex = sprite->tex;
+    invZ = 1.0f / z;
+    width = (u32)tex->width * scaleX * invZ;
+    height = (u32)tex->height * scaleY * invZ;
+    x -= width * 0.5f;
+    y -= height * 0.5f;
+    if (view->left <= x + width && x < view->right && view->top <= y + height && y < view->bottom) {
+        *visible = TRUE;
+    }
+    D_800D2C70 = scaleX;
+    D_800D2C74 = scaleY;
+    D_800D2C78 = x;
+    D_800D2C7C = y;
+    D_800D2C80 = z;
+    D_800D2C84 = width;
+    D_800D2C88 = height;
+}
+
+/* Draws `sprite` at the placement from func_15095B08, without offsets. */
+Gfx *func_15095D0C(Gfx *gfx, SpriteParams *sprite) {
+    return func_15095D34(gfx, sprite, 0, 0, 0);
+}
+
+extern u8 D_800D2DA8; // sprite prim colour r, g, b (used while D_800D2DAB is 0)
 extern u8 D_800D2DA9;
 extern u8 D_800D2DAA;
 
-Gfx *func_15095D34(Gfx *arg0, Struct15095D34_obj *arg1, s32 arg2, s32 arg3, s32 arg4) {
+/* Draws `sprite` at the placement func_15095B08 computed, then advances its animation. */
+Gfx *func_15095D34(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffset, s32 extraWidth) {
     f32 x;
     f32 y;
     f32 z;
-    f32 w;
-    f32 h;
-    s32 isx;
-    s32 isy;
+    f32 width;
+    f32 height;
+    s32 scaleX;
+    s32 scaleY;
     s32 iy;
     s32 dsdx;
     s32 dtdy;
     s32 s;
     s32 t;
     s32 tfrac;
-    s32 flags;
+    s32 flip;
     s32 step;
     s32 iz;
-    s32 pad;
+    s32 unused; // matching: see the dead division below
 
-
-    isx = D_800D2C70;
-    isy = D_800D2C74;
+    scaleX = D_800D2C70;
+    scaleY = D_800D2C74;
     x = D_800D2C78;
     y = D_800D2C7C;
     z = D_800D2C80;
-    if (arg3 != 0) {
+    if (tOffset != 0) {
         D_800D2C84 -= (D_800D2C70 + D_800D2C70) / D_800D2C80;
         D_800D2C88 -= (D_800D2C74 + D_800D2C74) / D_800D2C80;
         x += D_800D2C70 / D_800D2C80;
         y += D_800D2C74 / D_800D2C80;
     }
-    w = D_800D2C84;
-    h = D_800D2C88;
+    width = D_800D2C84;
+    height = D_800D2C88;
     iy = y;
     iz = z;
-    if (w < 2.0f) {
-        w = 2.0f;
+    if (width < 2.0f) {
+        width = 2.0f;
     }
-    dsdx = (iz << 10) / isx;
-    dtdy = (iz << 10) / isy;
-    pad = ((s32)z << 10) / isx;
+    dsdx = (iz << 10) / scaleX;
+    dtdy = (iz << 10) / scaleY;
+    unused = ((s32)z << 10) / scaleX; // matching: dead early division sets uopt's spill-slot colouring
     if (D_800D2DAB == 0) {
-        gDPSetPrimColor(arg0++, 1, 0, D_800D2DA8, D_800D2DA9, D_800D2DAA, arg1->unkA);
+        gDPSetPrimColor(gfx++, 1, 0, D_800D2DA8, D_800D2DA9, D_800D2DAA, sprite->alpha);
     }
-    tfrac = (s32)(((32.0f - (y - (f32)(s32)y) * 32) * z) / isy);
-    s = (s32)(((32.0f - (x - (f32)(s32)x) * 32) * z) / isx) + arg2 + 0x2000;
-    t = tfrac + arg3 + 0x2000;
-    if (arg1->unkD != 0) {
-        flags = arg1->unkD;
-        if (flags & 1) {
-            s = (arg1->unk10->unk4 + 0xFF) << 5;
+    tfrac = (s32)(((32.0f - (y - (f32)(s32)y) * 32) * z) / scaleY);
+    s = (s32)(((32.0f - (x - (f32)(s32)x) * 32) * z) / scaleX) + sOffset + 0x2000;
+    t = tfrac + tOffset + 0x2000;
+    if (sprite->flip != 0) {
+        flip = sprite->flip;
+        if (flip & 1) {
+            s = (sprite->tex->width + 0xFF) << 5;
             dsdx = -dsdx & 0xFFFF;
         }
-        if (flags & 2) {
-            t = ((arg1->unk10->unk6 + 0xFF) << 5) - tfrac;
+        if (flip & 2) {
+            t = ((sprite->tex->height + 0xFF) << 5) - tfrac;
             dtdy = -dtdy & 0xFFFF;
         }
     }
-    gSPScisTextureRectangle(arg0++, (s32)x << 2, (s32)y << 2, ((s32)(arg4 + w - 1.0f) + (s32)x) << 2,
-                            ((s32)(h - 1.0f) + iy) << 2, 0, s, t, dsdx, dtdy);
-    if (arg1->unk10->unkA != 0) {
-        step = arg1->unkB * D_800BE9A0;
-        if (arg1->unk10->unkA & 0x80) {
-            if (arg1->unkC & 0x80) {
-                arg1->unkC -= step;
-                if (!(arg1->unkC & 0x80)) {
-                    arg1->unkC = (arg1->unkC + step) & 0x7F;
+    gSPScisTextureRectangle(gfx++, (s32)x << 2, (s32)y << 2, ((s32)(extraWidth + width - 1.0f) + (s32)x) << 2,
+                            ((s32)(height - 1.0f) + iy) << 2, G_TX_RENDERTILE, s, t, dsdx, dtdy);
+    if (sprite->tex->frames != 0) {
+        step = sprite->animSpeed * D_800BE9A0;
+        if (sprite->tex->frames & 0x80) {
+            // ping-pong: bit 7 of animTimer is the direction
+            if (sprite->animTimer & 0x80) {
+                sprite->animTimer -= step;
+                if (!(sprite->animTimer & 0x80)) {
+                    sprite->animTimer = (sprite->animTimer + step) & 0x7F;
                 }
             } else {
-                arg1->unkC += step;
-                if (arg1->unkC >= (arg1->unk10->unkA & 0x7F) * 8) {
-                    arg1->unkC = (arg1->unkC - step) | 0x80;
+                sprite->animTimer += step;
+                if (sprite->animTimer >= (sprite->tex->frames & 0x7F) * 8) {
+                    sprite->animTimer = (sprite->animTimer - step) | 0x80;
                 }
             }
         } else {
-            arg1->unkC += step;
-            if (arg1->unkC >= arg1->unk10->unkA * 8) {
-                arg1->unkC -= arg1->unk10->unkA * 8;
+            sprite->animTimer += step;
+            if (sprite->animTimer >= sprite->tex->frames * 8) {
+                sprite->animTimer -= sprite->tex->frames * 8;
             }
         }
     }
-    return arg0;
+    return gfx;
 }
 
-Gfx *func_1509629C(Gfx *gfx, struct15095060_arg0 *tex, f32 scaleX, f32 scaleY, f32 x, f32 y, s32 width, s32 height, s32 flags, s32 sOff, s32 xPad, s32 frame) {
-    s32 w;
-    s32 h;
+/* Draws `desc` as a width x height image at (x, y) scaled by (scaleX, scaleY) / 4096, split into
+ * tiles of the texture's size (one asset per tile, frame `frame` starting at frame * tile count).
+ * flags: bit 0 = tiles carry a 1-texel border, bit 1 = flip s, bit 2 = flip t. */
+Gfx *func_1509629C(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f32 y, s32 width, s32 height,
+                   s32 flags, s32 sOffset, s32 extraWidth, s32 frame) {
     s32 tileW;
-    s32 lastH;
     s32 tileH;
+    s32 fullTileW;
+    s32 lastTileH;
+    s32 fullTileH;
     s32 i;
     s32 j;
     s32 s;
-    s32 tt;
+    s32 t;
     s32 iy;
-    f32 y2;
-    f32 hf;
-    f32 cy;
+    f32 bottom;
+    f32 tileHf;
+    f32 top;
     s32 dsdx;
     s32 dtdy;
-    s32 nx;
-    s32 ny;
-    f32 cx;
+    s32 cols;
+    s32 rows;
+    f32 left;
     s32 dx;
     s32 sBase;
     s32 tBase;
-    s32 xl;
-    s32 xh;
-    f32 x2;
-    s32 yl;
-    s32 yh;
+    s32 ulx;
+    s32 unused;
+    f32 right;
+    s32 pad[2]; // matching: frame size
     s32 dy;
-    struct15095060_arg0 t;
+    TextureDesc tile;
 
-    dtdy = 0;
-    w = tex->unk6;
-    h = tex->unk8;
+    tileW = desc->width;
+    tileH = desc->height;
     if (flags & 1) {
-        w -= 2;
-        h -= 2;
+        tileW -= 2;
+        tileH -= 2;
     }
-    tileW = w;
-    tileH = h;
+    fullTileW = tileW;
+    fullTileH = tileH;
     if (flags & 2) {
         dsdx = (s32)(-4194304.0f / scaleX) & 0xFFFF;
-        sBase = (tex->unk6 + 0xFF) << 5;
+        sBase = (desc->width + 0xFF) << 5;
     } else {
         dsdx = (s32)(4194304.0f / scaleX);
         sBase = 0x2000;
     }
     if (flags & 4) {
         dtdy = (s32)(-4194304.0f / scaleY) & 0xFFFF;
-        tBase = (tex->unk8 + 0xFF) << 5;
+        tBase = (desc->height + 0xFF) << 5;
     } else {
         dtdy = (s32)(4194304.0f / scaleY);
         tBase = 0x2000;
     }
-    nx = (width + w - 1) / w;
-    ny = (height + h - 1) / h;
-    t.unk0 = tex->unk0;
+    cols = (width + tileW - 1) / tileW;
+    rows = (height + tileH - 1) / tileH;
+    tile.addr = desc->addr;
     x -= (width * scaleX) / 8192;
-    t.unk0 += frame * nx * ny;
+    tile.addr += frame * cols * rows;
     y -= (height * scaleY) / 8192;
-    t.unk6 = tex->unk6;
-    t.unkA = tex->unkA;
-    t.unkB = tex->unkB;
-    t.unk4 = 1;
-    lastH = height - (ny - 1) * h;
-    cx = x;
-    for (i = 0; i < nx; i++) {
-        xh = i + 1;
-        h = lastH;
-        hf = (h * scaleY) / 4096;
-        t.unk8 = h;
-        cy = y;
-        if (i == nx - 1) {
-            w = width - (nx - 1) * tileW;
-            t.unk6 = w;
+    tile.width = desc->width;
+    tile.fmt = desc->fmt;
+    tile.siz = desc->siz;
+    tile.frames = 1;
+    lastTileH = height - (rows - 1) * tileH;
+    left = x;
+    for (i = 0; i < cols; i++) {
+        unused = i + 1; // matching: dead store orders uopt's spill slots
+        // the top row of each column takes the leftover height; the rows below it are full tiles
+        tileH = lastTileH;
+        tileHf = (tileH * scaleY) / 4096;
+        tile.height = tileH;
+        top = y;
+        if (i == cols - 1) {
+            tileW = width - (cols - 1) * fullTileW;
+            tile.width = tileW;
             if (flags & 1) {
-                t.unk6 += 2;
+                tile.width += 2;
             }
         }
         s = sBase;
-        x2 = cx;
-        x2 += (w * scaleX) / 4096;
+        right = left;
+        right += (tileW * scaleX) / 4096;
         if (flags & 1) {
-            s += (s32)(32 - (cx - (s32)cx) * 32.0f * (4096 / scaleX));
+            s += (s32)(32 - (left - (s32)left) * 32.0f * (4096 / scaleX));
         }
-        s += sOff;
+        s += sOffset;
         if (flags & 1) {
-            t.unk8 += 2;
+            tile.height += 2;
         }
-    lbl_unused:;
-        for (j = 0; j < ny; j++) {
-            y2 = cy + hf;
-            tt = tBase;
+    lbl_unused:; // matching: extra basic block flips two register colourings
+        for (j = 0; j < rows; j++) {
+            bottom = top + tileHf;
+            t = tBase;
             if (flags & 1) {
-                tt += (s32)(32 - (cy - (s32)cy) * 32.0f * (4096 / scaleY));
+                t += (s32)(32 - (top - (s32)top) * 32.0f * (4096 / scaleY));
             }
-            iy = (s32)cy;
-            gfx = func_15094F70(gfx, &t, 0, 0, 0, 0, 0, 2, 3);
-            t.unk0++;
-            dx = (s32)x2 - (s32)cx;
-            dy = (s32)y2 - iy;
-            xl = (s32)cx * 4;
-            gSPScisTextureRectangle(gfx++, xl, iy * 4, ((s32)cx + dx + xPad) * 4,
-                                    (iy + dy) * 4, 0, s, tt, dsdx, dtdy);
+            iy = (s32)top;
+            gfx = func_15094F70(gfx, &tile, 0, NULL, 0, 0, 0, G_TX_CLAMP, 3);
+            tile.addr++;
+            dx = (s32)right - (s32)left;
+            dy = (s32)bottom - iy;
+            ulx = (s32)left * 4;
+            gSPScisTextureRectangle(gfx++, ulx, iy * 4, ((s32)left + dx + extraWidth) * 4,
+                                    (iy + dy) * 4, G_TX_RENDERTILE, s, t, dsdx, dtdy);
             if (j == 0) {
-                t.unk8 = tex->unk8;
-                h = tileH;
-                hf = (h * scaleY) / 4096;
+                tile.height = desc->height;
+                tileH = fullTileH;
+                tileHf = (tileH * scaleY) / 4096;
             }
-            cy = y2;
+            top = bottom;
         }
-        cx = x2;
+        left = right;
     }
     return gfx;
 }
 
 extern Gfx D_80087408[];
 
-Gfx *func_15096934(Gfx *arg0) {
-    gSPDisplayList(arg0++, D_80087408);
+/* Emits display list D_80087408 and clears D_800D2DAB (back to the sprite prim colour). */
+Gfx *func_15096934(Gfx *gfx) {
+    gSPDisplayList(gfx++, D_80087408);
     D_800D2DAB = 0;
-    return arg0;
+    return gfx;
 }

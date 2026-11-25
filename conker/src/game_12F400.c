@@ -1,313 +1,83 @@
 #include <ultra64.h>
-#define func_10010F30 func_10010F30_void
-#define func_1513D4B8 func_1513D4B8_void
 #include "functions.h"
-#undef func_10010F30
-#undef func_1513D4B8
-extern s32 func_10010F30(s32, u16, u8, s16, u8);
-extern void *func_1513D4B8(void *, void *, u8, u8, u8, u8, u8, s32, u8, s32);
 #include "variables.h"
 
-extern void func_151D5D60();
-extern s32 func_15144E80(struct17 *, struct17 *, struct17 *, struct17 *);
+extern void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *isNew);
+extern s32 func_15144E80(void *, struct17 *, struct17 *, struct17 *);
 extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
 
-typedef struct {
-    char pad_0[0x197];
-    u8 field_0x197;
-} ObjectState197;
-
-typedef struct {
-    char pad_0[0x31C];
-    ObjectState197 *field_0x31C;
-} ObjectWithState197;
-
-typedef struct {
-    ObjectWithState197 *field_0x0;
-    char pad_0[0x1E];
-    u8 field_0x22;
-    char pad_1[0x1];
-    s32 field_0x24;
-    s32 field_0x28;
-    s32 field_0x2C;
-    s32 field_0x30;
-    s32 field_0x34;
-} Field124ChildBlock;
-
-typedef struct {
-    char pad_0[0x18];
-    s32 field_0x18;
-    char pad_1[0x8C];
-    s32 field_0xA8;
-    char pad_2[0x24];
-    s32 field_0xD0;
-    u8 field_0xD4;
-    char pad_3[0x4F];
-    s32 field_0x124;
-    char pad_4[0x48];
-    s32 field_0x170;
-    u8 field_0x174;
-} Field124Owner;
-
+/* A quad particle (same layout as Particle in game_169510.c), followed by its motion state at 0x110. */
 typedef struct {
     char pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
+    f32 width;
+    f32 height;
+    struct17 pos;
     char pad40[0x80];
-    char unkC0[0x40];
-    s16 *unk100[4];
-    u8 unk110;
+    Vtx vtxTemplate[4];
+    Vtx *vtxBuffers[4]; /* per viewport, refreshed from vtxTemplate */
+    u8 flags;
     u8 unk111;
     u8 unk112[0xC];
 } Struct15101F50;
 
+/* Fills the viewport's vertex buffer with a quad centred on pos, half-axes axisU * width and axisV * height. */
+Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
+    s32 pad; // matching: unused stack slot in the original frame
+    Vtx *vtx;
+    Vtx *ret;
+    struct17 axisU;
+    struct17 axisV;
+    u8 isNew;
 
-typedef struct {
-    u8 *obj;
-    u8 unk4;
-    u8 pad5[3];
-    struct17 unk8;
-    struct17 unk14;
-    u8 unk20;
-    s8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 pad24[0x14];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
-    f32 unk8C;
-    s16 unk90;
-    u8 pad92[2];
-} Data15100600;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 unk10, unk11, unk12, unk13;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44, unk45, unk46, unk47;
-    u8 pad48[0x10];
-} Spawn15100600;
-
-typedef struct {
-    u8 unk0;
-    u8 pad1[0x13];
-    void *unk14;
-} Data2_15100600;
-
-typedef struct {
-    u8 unk0;
-    s8 unk1;
-    s16 unk2;
-    u8 unk4;
-    u8 pad5[3];
-} Hdr15100600;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Hdr2_15100600;
-
-typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14, unk15, unk16, unk17;
-    u8 unk18, unk19, unk1A, unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 pad66[0xA];
-} Effect15100600;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    void *unk28;
-    u8 unk2C;
-    u8 pad2D[3];
-} Data3_15100600;
-
-typedef struct {
-    f32 unk0, unk4, unk8, unkC, unk10, unk14, unk18, unk1C, unk20;
-    s32 unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44;
-    f32 unk48;
-    s16 unk4C, unk4E, unk50, unk52;
-    u8 unk54, unk55, unk56, unk57, unk58;
-    u8 pad59[3];
-} Emit15100600;
-
-typedef struct {
-    void *unk0;
-    u8 unk4;
-    u8 pad5[3];
-} Data4_15100600;
-
-extern void *func_15130374(void *, u8, s32, u8, s32);
-extern void *func_151407D0(void *, s32, void *, u8, u8, u8, u8, s8, u8, s32);
-extern void *func_151602C0(void *, void *, s32, u8, u8, u8, u8, u8, s32, u8, s32);
-s32 func_15100600(u8 *arg0, f32 *arg1, f32 *arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE);
-
-typedef struct {
-    u8 pad0[0x24];
-    struct102 *unk24;
-    struct102 *unk28;
-    struct102 *unk2C;
-    struct102 *unk30;
-    struct102 *unk34;
-} Block15101148;
-void func_15101090(u8 *arg0);
-void func_15101148(u8 *arg0);
-void func_151011E8(Field124Owner *arg0);
-void func_15101210(Field124Owner *arg0);
-
-void func_151617C4(struct210 *arg0);
-void func_15101238(Field124Owner *arg0);
-
-void func_151617E4(struct210 *arg0);
-void func_15101260(Field124Owner *arg0);
-
-void func_1513173C(struct210 *);
-void func_15101288(Field124Owner *arg0);
-
-void func_1513175C(struct210 *);
-void func_151012B0(Field124Owner *arg0);
-void func_151012D8(Field124Owner *arg0);
-void func_15101300(Field124Owner *arg0);
-void func_15101328(Field124Owner *arg0);
-void func_15101350(Field124Owner *arg0);
-
-s16 *func_15101F50(Struct15101F50 *arg0, s16 arg1) {
-    s32 unused;
-    s16 *var_v0;
-    s16 *ret;
-    struct17 sp40;
-    struct17 sp34;
-    u8 sp33;
-
-    func_151D5D60(arg0->unk100, arg1, 0x40, &var_v0, &sp33);
-    ret = var_v0;
-    if (var_v0) {
-        if (sp33) {
-            memcpy(arg0->unk100[arg1], arg0->unkC0, 0x40);
-            memcpy(arg0->unk100[arg1] + 0x20, arg0->unkC0, 0x40);
+    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vtx, &isNew);
+    ret = vtx; // matching: the result is returned from its own stack copy, not by reloading vtx
+    // matching: an early `if (vtx == NULL) return NULL;` lays out the branches differently
+    if (vtx != NULL) {
+        if (isNew) {
+            memcpy(particle->vtxBuffers[viewport], particle->vtxTemplate, sizeof(particle->vtxTemplate));
+            memcpy(particle->vtxBuffers[viewport] + 4, particle->vtxTemplate, sizeof(particle->vtxTemplate));
         }
     } else {
-        return 0;
+        return NULL;
     }
 
-    if (!(arg0->unk110 & 1)) {
-        return 0;
+    if (!(particle->flags & 1)) {
+        return NULL;
     }
 
-    if (func_15144E80((struct17 *)arg0->unk112, &sp40, &sp34, 0) == 0) {
-        return 0;
+    if (func_15144E80(particle->unk112, &axisU, &axisV, NULL) == 0) {
+        return NULL;
     }
 
-    func_15145128(&sp40, &sp40, 0, 0);
-    func_15145128(&sp34, &sp34, 0, 0);
+    func_15145128(&axisU, &axisU, NULL, NULL);
+    func_15145128(&axisV, &axisV, NULL, NULL);
 
-    sp40.unk0 *= arg0->unk2C;
-    sp40.unk4 *= arg0->unk2C;
-    sp40.unk8 *= arg0->unk2C;
-    sp34.unk0 *= arg0->unk30;
-    sp34.unk4 *= arg0->unk30;
-    sp34.unk8 *= arg0->unk30;
+    axisU.unk0 *= particle->width;
+    axisU.unk4 *= particle->width;
+    axisU.unk8 *= particle->width;
+    axisV.unk0 *= particle->height;
+    axisV.unk4 *= particle->height;
+    axisV.unk8 *= particle->height;
 
-    var_v0[0] = (arg0->unk34 - sp40.unk0) + sp34.unk0;
-    var_v0[1] = (arg0->unk38 - sp40.unk4) + sp34.unk4;
-    var_v0[2] = (arg0->unk3C - sp40.unk8) + sp34.unk8;
-    var_v0[3] = 0;
-    var_v0[8] = (arg0->unk34 + sp40.unk0) + sp34.unk0;
-    var_v0[9] = (arg0->unk38 + sp40.unk4) + sp34.unk4;
-    var_v0[10] = (arg0->unk3C + sp40.unk8) + sp34.unk8;
-    var_v0[11] = 0;
-    var_v0[16] = (arg0->unk34 + sp40.unk0) - sp34.unk0;
-    var_v0[17] = (arg0->unk38 + sp40.unk4) - sp34.unk4;
-    var_v0[18] = (arg0->unk3C + sp40.unk8) - sp34.unk8;
-    var_v0[19] = 0;
-    var_v0[24] = (arg0->unk34 - sp40.unk0) - sp34.unk0;
-    var_v0[25] = (arg0->unk38 - sp40.unk4) - sp34.unk4;
-    var_v0[26] = (arg0->unk3C - sp40.unk8) - sp34.unk8;
-    var_v0[27] = 0;
+    vtx[0].v.ob[0] = (particle->pos.unk0 - axisU.unk0) + axisV.unk0;
+    vtx[0].v.ob[1] = (particle->pos.unk4 - axisU.unk4) + axisV.unk4;
+    vtx[0].v.ob[2] = (particle->pos.unk8 - axisU.unk8) + axisV.unk8;
+    vtx[0].v.flag = 0;
+    vtx[1].v.ob[0] = (particle->pos.unk0 + axisU.unk0) + axisV.unk0;
+    vtx[1].v.ob[1] = (particle->pos.unk4 + axisU.unk4) + axisV.unk4;
+    vtx[1].v.ob[2] = (particle->pos.unk8 + axisU.unk8) + axisV.unk8;
+    vtx[1].v.flag = 0;
+    vtx[2].v.ob[0] = (particle->pos.unk0 + axisU.unk0) - axisV.unk0;
+    vtx[2].v.ob[1] = (particle->pos.unk4 + axisU.unk4) - axisV.unk4;
+    vtx[2].v.ob[2] = (particle->pos.unk8 + axisU.unk8) - axisV.unk8;
+    vtx[2].v.flag = 0;
+    vtx[3].v.ob[0] = (particle->pos.unk0 - axisU.unk0) - axisV.unk0;
+    vtx[3].v.ob[1] = (particle->pos.unk4 - axisU.unk4) - axisV.unk4;
+    vtx[3].v.ob[2] = (particle->pos.unk8 - axisU.unk8) - axisV.unk8;
+    vtx[3].v.flag = 0;
 
     return ret;
 }
-
-extern f32 D_800BE9A4;
 
 typedef struct {
     u8 pad0[0x14];
@@ -315,11 +85,16 @@ typedef struct {
 } Sub151022AC_2C;
 
 typedef struct {
+    u8 pad0[0x28];
+    u8 rgba[4];
+} Sub151022AC_24;
+
+typedef struct {
     u8 pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
+    f32 width;
+    f32 height;
     u8 pad34[0x28];
-    u8 unk5C;
+    u8 alpha;
 } Sub151022AC_28;
 
 typedef struct {
@@ -328,104 +103,124 @@ typedef struct {
     f32 unk3C;
 } Sub151022AC_34;
 
+/* Randomly wandering spin, scale and alpha, pushed out to the linked objects each frame. */
 typedef struct {
     u8 pad0[0x24];
-    u8 *unk24;
-    Sub151022AC_28 *unk28;
-    Sub151022AC_2C *unk2C;
+    Sub151022AC_24 *linked24;
+    Sub151022AC_28 *linked28;
+    Sub151022AC_2C *linked2C;
     u8 pad30[4];
-    Sub151022AC_34 *unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
+    Sub151022AC_34 *linked34;
+    f32 scale;
+    f32 targetScale;
+    f32 scaleBlend;
     u8 pad44[0xC];
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
-    f32 unk8C;
-} Block151022AC;
+    f32 angle;
+    f32 rate;
+    f32 rotation;
+    f32 velocity;
+    f32 targetVelocity;
+    f32 velocityRange;
+    f32 timer;
+    f32 timerRange;
+    f32 velocityBlend;
+    f32 alpha;
+    f32 targetAlpha;
+    f32 alphaBase;
+    f32 alphaRange;
+    f32 alphaTimer;
+    f32 alphaTimerRange;
+    f32 alphaBlend;
+} Flicker151022AC;
 
-s32 func_151022AC(u8 *arg0) {
-    Block151022AC *p;
-    Sub151022AC_28 *s28;
-    Sub151022AC_2C *s2C;
-    Sub151022AC_34 *s34;
-    f32 tmp;
+typedef struct {
+    u8 pad0[0x5C];
+    u8 alpha;
+    u8 pad5D[0xB3];
+    Flicker151022AC flicker;
+} Owner151022AC;
 
-    *(f32 *)(arg0 + 0x160) += *(f32 *)(arg0 + 0x164) * D_800BE9A4;
-    p = (Block151022AC *)(arg0 + 0x110);
-    p->unk50 = func_15144B68(*(f32 *)(arg0 + 0x160));
-    p->unk58 += p->unk5C * D_800BE9A4;
-    while (p->unk58 > 32767.0f) {
-        p->unk58 -= 65536.0f;
+/* Per-frame update: advances the angle and spin, and eases scale and alpha toward random targets. */
+s32 func_151022AC(Owner151022AC *obj) {
+    Flicker151022AC *state;
+    Sub151022AC_28 *quad;
+    Sub151022AC_2C *particles;
+    Sub151022AC_34 *child;
+
+    state = &obj->flicker;
+    state->angle += state->rate * D_800BE9A4;
+    state->angle = func_15144B68(state->angle);
+    state->rotation += state->velocity * D_800BE9A4;
+    while (state->rotation > 32767.0f) {
+        state->rotation -= 65536.0f;
     }
-    while (p->unk58 < -32768.0f) {
-        p->unk58 += 65536.0f;
+    while (state->rotation < -32768.0f) {
+        state->rotation += 65536.0f;
     }
-    p->unk68 -= D_800BE9A4;
-    if (p->unk68 < 0.0f) {
-        p->unk68 = func_150ADA68() * p->unk6C;
-        p->unk60 = func_150ADA68() * (p->unk64 + p->unk64) - p->unk64;
+    state->timer -= D_800BE9A4;
+    if (state->timer < 0.0f) {
+        state->timer = func_150ADA68() * state->timerRange;
+        state->targetVelocity = func_150ADA68() * (state->velocityRange + state->velocityRange) - state->velocityRange;
     }
-    p->unk5C += (p->unk60 - p->unk5C) * p->unk70;
-    p->unk38 += (p->unk3C - p->unk38) * p->unk40;
-    if (p->unk28 != NULL) {
-        s28 = p->unk28;
-        tmp = (func_150ADA68() * 0.200000003f + 0.400000006f) * p->unk38;
-        s28->unk30 = tmp;
-        s28->unk2C = tmp;
+    state->velocity += (state->targetVelocity - state->velocity) * state->velocityBlend;
+    state->scale += (state->targetScale - state->scale) * state->scaleBlend;
+    if (state->linked28 != NULL) {
+        quad = state->linked28;
+        quad->width = quad->height = (func_150ADA68() * 0.2f + 0.4f) * state->scale;
     }
-    p->unk84 -= D_800BE9A4;
-    if (p->unk84 < 0.0f) {
-        p->unk84 = func_150ADA68() * p->unk88;
-        p->unk78 = func_150ADA68() * p->unk80 + p->unk7C;
+    state->alphaTimer -= D_800BE9A4;
+    if (state->alphaTimer < 0.0f) {
+        state->alphaTimer = func_150ADA68() * state->alphaTimerRange;
+        state->targetAlpha = func_150ADA68() * state->alphaRange + state->alphaBase;
     }
-    p->unk74 += (p->unk78 - p->unk74) * p->unk8C;
-    arg0[0x5C] = p->unk74;
-    if (p->unk28 != NULL) {
-        p->unk28->unk5C = arg0[0x5C];
+    state->alpha += (state->targetAlpha - state->alpha) * state->alphaBlend;
+    obj->alpha = state->alpha;
+    if (state->linked28 != NULL) {
+        state->linked28->alpha = obj->alpha;
     }
-    if (p->unk24 != NULL) {
-        p->unk24[0x2B] = arg0[0x5C];
+    if (state->linked24 != NULL) {
+        state->linked24->rgba[3] = obj->alpha;
     }
-    if (p->unk2C != NULL) {
-        s2C = p->unk2C;
-        s2C->unk14[0x2F] = (func_150ADA20() & 3) + 2;
+    if (state->linked2C != NULL) {
+        particles = state->linked2C;
+        particles->unk14[0x2F] = (func_150ADA20() & 3) + 2;
     }
-    if (p->unk34 != NULL) {
-        s34 = p->unk34;
-        tmp = func_150ADA68() * 10.0f + 120.0f;
-        s34->unk3C = tmp;
-        s34->unk38 = tmp;
+    if (state->linked34 != NULL) {
+        child = state->linked34;
+        child->unk38 = child->unk3C = func_150ADA68() * 10.0f + 120.0f;
     }
     return 1;
 }
 
-s32 func_151025F4(u8 *arg0, s32 arg1) {
-    f32 *v1 = (f32 *)(arg0 + 0xA8);
-    f32 sin0[2];
-    f32 sin1;
+/* A 2D sine wobble: offset = base + amplitude * sin(phase), with phase advancing at speed. */
+typedef struct {
+    f32 offset[2];
+    f32 base[2];
+    f32 amplitude[2];
+    f32 phase[2];
+    f32 speed[2];
+} Wobble151025F4;
 
-    sin0[0] = sinf(v1[6]);
-    sin1 = sinf(v1[7]);
-    v1[0] = v1[4] * sin0[0] + v1[2];
-    v1[1] = v1[5] * sin1 + v1[3];
-    v1[6] = v1[8] * D_800BE9A4 + v1[6];
-    v1[7] = v1[9] * D_800BE9A4 + v1[7];
-    v1[6] = func_15144B68(v1[6]);
-    v1[7] = func_15144B68(v1[7]);
+typedef struct {
+    u8 pad0[0xA8];
+    Wobble151025F4 wobble;
+} Owner151025F4;
+
+/* Per-frame update of the owner's wobble offset. */
+s32 func_151025F4(Owner151025F4 *obj, s32 arg1) {
+    Wobble151025F4 *wobble = &obj->wobble;
+    s32 pad; // matching: unused stack slot in the original frame
+    f32 sinX;
+    f32 sinY;
+
+    sinX = sinf(wobble->phase[0]);
+    sinY = sinf(wobble->phase[1]);
+    wobble->offset[0] = wobble->amplitude[0] * sinX + wobble->base[0];
+    wobble->offset[1] = wobble->amplitude[1] * sinY + wobble->base[1];
+    wobble->phase[0] += wobble->speed[0] * D_800BE9A4;
+    wobble->phase[1] += wobble->speed[1] * D_800BE9A4;
+    wobble->phase[0] = func_15144B68(wobble->phase[0]);
+    wobble->phase[1] = func_15144B68(wobble->phase[1]);
     return 1;
 }
 
@@ -434,93 +229,132 @@ extern f32 D_800A21F4[][3];
 extern u8 D_800A2248[];
 s32 func_15100600(u8 *, f32 *, f32 *, u8, s16, u8, u8, u8, f32, f32, f32, f32, u8, u8, s32);
 
-s32 func_151026BC(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
-    s32 a;
-    s32 b;
+/* Starts effect `kind` on obj, using the effect tables for its parameters; picks one of two styles by object id. */
+s32 func_151026BC(struct127 *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
+    s32 unk5;
+    s32 unk6;
 
-    if (arg0 == NULL) {
+    if (obj == NULL) {
         return 0;
     }
-    switch (arg0[4]) {
+    switch (obj->id) {
         case 0x58:
         case 0x5B:
         case 0x80:
-            a = 0x32;
-            b = 0xFF;
+            unk5 = 0x32;
+            unk6 = 0xFF;
             break;
         case 0x5A:
         case 0x5F:
         case 0x74:
         case 0x75:
         case 0x7A:
-            a = 0xFF;
-            b = 0;
+            unk5 = 0xFF;
+            unk6 = 0;
             break;
         default:
-            if ((*(u8 **)(arg0 + 0x31C))[0x78] == 0x3B) {
-                a = 0xFF;
-                b = 0;
+            if (obj->unk31C->unk78 == 0x3B) {
+                unk5 = 0xFF;
+                unk6 = 0;
             } else {
-                a = 0x32;
-                b = 0xFF;
+                unk5 = 0x32;
+                unk6 = 0xFF;
             }
             break;
     }
-    return func_15100600(arg0, D_800A21A0[arg2], D_800A21F4[arg2], D_800A2248[arg2], arg1, a, b, 0, 20.0f, 20, 4.0f, 0.07999999821f, arg3, arg4, arg5);
+    // matching: the int 20 is converted separately; 20.0f would share one register with the other 20.0f
+    return func_15100600((u8 *)obj, D_800A21A0[kind], D_800A21F4[kind], D_800A2248[kind], arg1, unk5, unk6, 0,
+                         20.0f, 20, 4.0f, 0.08f, arg3, arg4, arg5);
 }
 
-void func_151027E8(struct210 *arg0) {
-    s8 sp18[5];
+/* Message payload: an actor reference. */
+typedef struct {
+    struct127 *actor;
+    u8 actorId;
+} ActorRefMsg;
 
-    *(struct210 **)&sp18[0] = arg0;
-    sp18[4] = *(u8 *)((s32)arg0 + 0x3B);
-    func_151403A8(&sp18, 0x1A);
+/* Sends message 0x1A for `actor` (stops the effect started by func_151026BC). */
+void func_151027E8(struct127 *actor) {
+    ActorRefMsg msg;
+
+    msg.actor = actor;
+    msg.actorId = actor->unique_id;
+    func_151403A8((s32)&msg, 0x1A);
 }
 
-s32 func_1510281C(Field124Owner *arg0, s16 arg1) {
-    Field124ChildBlock *p = (Field124ChildBlock *)(arg0->field_0xD0 + 0x110);
-    ObjectWithState197 *v1;
+typedef struct {
+    u8 pad0[0x197];
+    u8 unk197;
+} LinkedState1510281C;
 
-    if (arg1 != p->field_0x22) {
-        goto tail;
-    }
-    v1 = p->field_0x0;
-    if (v1 != 0) {
-        if (v1->field_0x31C->field_0x197 == 0) {
-            goto tail;
+typedef struct {
+    u8 pad0[0x31C];
+    LinkedState1510281C *unk31C;
+} LinkedObj1510281C;
+
+/* State block at +0x110 of the objects referenced by Owner1510281C. */
+typedef struct {
+    LinkedObj1510281C *linked;
+    u8 pad4[0x1E];
+    u8 unk22;
+} Block1510281C;
+
+typedef struct {
+    u8 pad0[0x110];
+    Block1510281C block;
+} Obj1510281C;
+
+typedef struct {
+    u8 pad0[0xD0];
+    Obj1510281C *unkD0;
+    u8 unkD4;
+    u8 padD5[0x9B];
+    Obj1510281C *unk170;
+    u8 unk174;
+} Owner1510281C;
+
+/* Returns 0 if unkD0's block is keyed to `key` and its linked object is missing or busy, else bit 0 of unkD4. */
+s32 func_1510281C(Owner1510281C *owner, s16 key) {
+    Block1510281C *block = &owner->unkD0->block;
+    LinkedObj1510281C *linked;
+
+    if (key == block->unk22) {
+        linked = block->linked;
+        if (linked == NULL || linked->unk31C->unk197 != 0) {
+            return 0;
         }
     }
-    return 0;
-tail:
-    if (!(arg0->field_0xD4 & 1)) {
+    if (!(owner->unkD4 & 1)) {
         return 0;
     }
     return 1;
 }
 
-s32 func_15102884(struct210 *arg0, s32 arg1) {
-    if (!(*(u8 *)((s32)arg0 + 0xAC) & 1)) {
+typedef struct {
+    u8 pad0[0xAC];
+    u8 unkAC;
+} Obj15102884;
+
+/* Returns bit 0 of obj->unkAC. */
+s32 func_15102884(Obj15102884 *obj, s32 arg1) {
+    if (!(obj->unkAC & 1)) {
         return 0;
     }
     return 1;
 }
 
-s32 func_151028AC(Field124Owner *arg0, s16 arg1) {
-    Field124ChildBlock *p = (Field124ChildBlock *)(arg0->field_0x170 + 0x110);
-    ObjectWithState197 *v1;
+/* Same test as func_1510281C, on unk170 and unk174. */
+s32 func_151028AC(Owner1510281C *owner, s16 key) {
+    Block1510281C *block = &owner->unk170->block;
+    LinkedObj1510281C *linked;
 
-    if (arg1 != p->field_0x22) {
-        goto tail;
-    }
-    v1 = p->field_0x0;
-    if (v1 != 0) {
-        if (v1->field_0x31C->field_0x197 == 0) {
-            goto tail;
+    if (key == block->unk22) {
+        linked = block->linked;
+        if (linked == NULL || linked->unk31C->unk197 != 0) {
+            return 0;
         }
     }
-    return 0;
-tail:
-    if (!(arg0->field_0x174 & 1)) {
+    if (!(owner->unk174 & 1)) {
         return 0;
     }
     return 1;

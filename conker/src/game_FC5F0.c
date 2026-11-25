@@ -1,180 +1,172 @@
 #include <ultra64.h>
+// matching: functions.h declares func_150ADA20 as returning u8, but the callers here use its full s32 result
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
 s32 func_150ADA20(void);
 #include "variables.h"
 
-extern s32 (*D_800888A0[])(struct260 *);
+/* Header shared by the objects func_15149130 creates; each object type's own data starts at 0x28. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xC - 0x2];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE; // set to -1 to remove the object
+    /* 0x10 */ u8 pad10[0x28 - 0x10];
+} ObjHeader;
 
-struct struct_150D032C_prefix {
-    u8 bytes[5];
-};
+/* Ground probe result filled by func_1504715C. */
+typedef struct {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ u8 pad4[0x24 - 0x4];
+} Ground;
 
-extern struct struct_150D032C_prefix D_800A0880;
-extern f32 D_800A0888;
-void func_15042D94(s32, s32, s32, u8 *);
+/* Data of an object that emits particles around an actor while that actor has bones. */
+typedef struct {
+    /* 0x00 */ struct127 *actor;
+    /* 0x04 */ u8 actorId; // the actor's unique_id when the emitter was attached
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ f32 spawnCredit; // one particle is emitted per whole unit
+} ActorEmitterState;
 
 typedef struct {
-    s32 unk0;
-    u8 pad4[0x3B - 4];
-    u8 unk3B;
-    u8 pad3C[0x1D4 - 0x3C];
-    s32 unk1D4;
-} Obj150CF140;
+    /* 0x00 */ ObjHeader header;
+    /* 0x28 */ ActorEmitterState state;
+} ActorEmitter;
 
-typedef struct {
-    Obj150CF140 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    f32 unk8;
-} Sub150CF140;
-
-typedef struct {
-    u8 pad0[1];
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    u8 pad10[0x18];
-    Sub150CF140 unk28;
-} Arg150CF140;
-
-typedef struct {
-    f32 value;
-    u8 pad[0x20];
-} Floor150CF140;
-
-void func_1504715C(Floor150CF140 *, Obj150CF140 *);
-void func_15143794(s16, s16, f32, f32 *);
-void func_1515C244(Obj150CF140 *, f32 *, f32 *, f32 *);
+void func_1504715C(Ground *, struct127 *);
+void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
+void func_1515C244(struct127 *, f32 *center, f32 *, f32 *);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
-                   s32, Floor150CF140 *, s32, s32, s32, s32);
+                   s32, Ground *, s32, s32, s32, s32);
 
-void func_150CF140(Arg150CF140 *arg0) {
-    Sub150CF140 *sub;
-    Obj150CF140 *obj;
-    f32 pos[3];
+/* Emitter update: removes itself once its actor is gone or replaced, otherwise emits particles
+   from a sphere around the actor's center at a random rate. */
+void func_150CF140(ActorEmitter *emitter) {
+    ActorEmitterState *state;
+    struct127 *actor;
+    f32 center[3];
     f32 radius;
-    Floor150CF140 floor;
-    f32 lo;
-    f32 hi;
-    f32 sp74[3];
-    f32 sp80[3];
-    u8 angle;
+    Ground ground;
+    f32 extentA;
+    f32 extentB;
+    f32 pos[3];
+    f32 vel[3];
+    u8 yaw;
 
-    obj = arg0->unk28.unk0;
-    sub = &arg0->unk28;
-    if ((obj->unk0 == 0) || (obj->unk3B != sub->unk4)) {
-        arg0->unkE = -1;
+    actor = emitter->state.actor;
+    state = &emitter->state;
+    if ((actor->interaction_state == 0) || (actor->unique_id != state->actorId)) {
+        emitter->header.unkE = -1;
         return;
     }
-    if (obj->unk1D4 != 0) {
-        sub->unk8 += (0.05999999866f + (func_150ADA68() * 0.07039999962f)) * D_800BE9A4;
-        func_1515C244(obj, pos, &lo, &hi);
-        radius = (lo + hi) * 0.5f;
-        func_1504715C(&floor, obj);
-        while (sub->unk8 > 1.0f) {
-            angle = func_150ADA20() & 0xFF;
-            func_15143794(angle, (s16)((func_150ADA20() % 76U) - 0x40), radius, sp74);
-            sp74[0] += pos[0];
-            sp74[1] += pos[1];
-            sp74[2] += pos[2];
-            func_15143794(angle, (s16)((func_150ADA20() % 54U) - 0x38), (func_150ADA68() * 1.443000078f) + 2.268000126f, sp80);
-            func_151D9014(sp74, sp80, 5, (func_150ADA68() * 0.2860000134f) + -0.7870000601f, (func_150ADA20() % 21U) + 0x1E, (func_150ADA20() % 156U) + 0x64, (func_150ADA68() * 50.0f) + 48.0f, 1, 1.0f, 1.0f, 0, &floor, 1, 0, arg0->unkC, arg0->unk1);
-            sub->unk8 -= 1.0f;
+    if (actor->unk1D4 != NULL) {
+        state->spawnCredit += (0.06f + (func_150ADA68() * 0.0704f)) * D_800BE9A4;
+        func_1515C244(actor, center, &extentA, &extentB);
+        radius = (extentA + extentB) * 0.5f;
+        func_1504715C(&ground, actor);
+        while (state->spawnCredit > 1.0f) {
+            yaw = func_150ADA20() & 0xFF;
+            func_15143794(yaw, (s16)((func_150ADA20() % 76U) - 64), radius, pos);
+            pos[0] += center[0];
+            pos[1] += center[1];
+            pos[2] += center[2];
+            func_15143794(yaw, (s16)((func_150ADA20() % 54U) - 56), (func_150ADA68() * 1.4430001f) + 2.2680001f, vel);
+            func_151D9014(pos, vel, 5, (func_150ADA68() * 0.286f) + -0.78700006f, (func_150ADA20() % 21U) + 30,
+                          (func_150ADA20() % 156U) + 100, (func_150ADA68() * 50.0f) + 48.0f, 1, 1.0f, 1.0f, 0,
+                          &ground, 1, 0, emitter->header.unkC, emitter->header.unk1);
+            state->spawnCredit -= 1.0f;
         }
     }
 }
 
+/* Message payload for func_150CF484: message 0 names an actor that went away, message 0x2D two
+   actors that swapped places. */
 typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA_150CF484;
-
-typedef struct {
-    s32 unk0;
-    union {
-        s32 w4;
-        u8  b4;
+    /* 0x00 */ struct127 *actorA;
+    /* 0x04 */ union {
+        struct127 *actorB;
+        u8 id;
     } u4;
-    u8  unk8;
-    u8  unk9;
-} ArgB_150CF484;
+    /* 0x08 */ u8 actorAId;
+    /* 0x09 */ u8 actorBId;
+} ActorMsg;
 
-void func_150CF484(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_150CF484 *temp_v0 = (SubA_150CF484 *)((u8 *)arg0 + 0x28);
-    ArgB_150CF484 *b = (ArgB_150CF484 *)arg1;
-    s32 b0;
+/* Emitter message handler: dies with its actor and follows it through a swap. */
+void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
+    ActorEmitterState *state = &emitter->state;
+    struct127 *actorA;
 
-    if (arg2 == 0) {
-        b0 = b->unk0;
-        if ((b0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
+    if (type == 0) {
+        actorA = msg->actorA; // matching: loaded before the state field, via a named local
+        if ((actorA == state->actor) || (msg->u4.id == state->actorId)) {
+            func_1516972C((struct102 *)emitter);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (type == 0x2D) {
+        if (state->actor == msg->actorA) {
+            state->actor = msg->u4.actorB;
+            state->actorId = msg->actorBId;
+        } else if (state->actor == msg->u4.actorB) {
+            state->actor = msg->actorA;
+            state->actorId = msg->actorAId;
         }
     }
 }
 
-extern void func_151CF898(struct127 *, f32, f32);
+void func_151CF898(struct127 *, f32, f32);
 
 void func_150CF530(s32 arg0) {
     func_151CF898(&D_800CC2D0[0], D_800CC2D0[0].y_position + 300.0f, -10000.0f);
 }
 
-extern s8 *D_80088890;
-extern s8 *D_80088894;
-extern s8 *D_80088898;
-extern s8 *D_8008889C;
+/* Texture scroll offsets; >> 7 gives the 10.2 fixed-point tile coordinate. */
+extern s32 D_80088890;
+extern s32 D_80088894;
+extern s32 D_80088898;
+extern s32 D_8008889C;
 
+/* Advances the texture scroll offsets by the frames elapsed. */
 void func_150CF578(s32 arg0) {
     D_80088890 += D_800BE9E4 * 26;
     D_80088894 -= D_800BE9E4 * 28;
     D_80088898 -= D_800BE9E4 * 28;
 }
 
-#define WGFX150CF5E8(pkt, a, b)     \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
-
-Gfx *func_150CF5E8(Gfx *arg0) {
-    WGFX150CF5E8(arg0++, (0xF2000000 | ((((s32)D_80088890 >> 7) & 0xFFF) << 12) | (((s32)D_80088894 >> 7) & 0xFFF)), 0x0047E47E);
-    WGFX150CF5E8(arg0++, (0xF2000000 | ((((s32)D_80088898 >> 7) & 0xFFF) << 12) | (((s32)D_8008889C >> 7) & 0xFFF)), 0x0147E47E);
-    return arg0;
+/* Sets the scrolled tile sizes of tiles 0 and 1. */
+Gfx *func_150CF5E8(Gfx *gfx) {
+    gDPSetTileSize(gfx++, 0, D_80088890 >> 7, D_80088894 >> 7, 0x47E, 0x47E);
+    gDPSetTileSize(gfx++, 1, D_80088898 >> 7, D_8008889C >> 7, 0x47E, 0x47E);
+    return gfx;
 }
 
 typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ u8  unk10;
-    /* 0x11 */ u8  pad11;
+    f32 x;
+    f32 y;
+} Vec2f;
+
+/* Parameters for func_1515548C, which spawns a 2D particle. */
+typedef struct {
+    /* 0x00 */ Vec2f pos;
+    /* 0x08 */ f32 scaleX;
+    /* 0x0C */ f32 scaleY;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 pad11;
     /* 0x12 */ s16 unk12;
-    /* 0x14 */ s16 unk14;
+    /* 0x14 */ s16 flags;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  unk1A;
-    /* 0x1B */ u8  unk1B;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  unk1E;
-    /* 0x1F */ u8  unk1F;
-    /* 0x20 */ u8  unk20;
-    /* 0x21 */ u8  unk21;
-    /* 0x22 */ u8  unk22;
-    /* 0x23 */ u8  unk23;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 unk21;
+    /* 0x22 */ u8 unk22;
+    /* 0x23 */ u8 unk23;
     /* 0x24 */ s32 unk24;
     /* 0x28 */ s32 unk28;
     /* 0x2C */ s32 unk2C;
@@ -182,575 +174,521 @@ typedef struct {
     /* 0x34 */ s32 unk34;
     /* 0x38 */ s32 unk38;
     /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ u8  unk44;
-    /* 0x45 */ u8  pad45[3];
+    /* 0x40 */ u8 unk40;
+    /* 0x41 */ u8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 pad45[3];
     /* 0x48 */ f32 unk48;
     /* 0x4C */ f32 unk4C;
     /* 0x50 */ f32 unk50;
     /* 0x54 */ f32 unk54;
-} struct_150CF680;
+} ParticleSpawn;
 
+/* Particle motion: while flags & 1, hop from startX to startX + distance along an arc. */
 typedef struct {
-    /* 0x00 */ u8  unk0;
-    /* 0x01 */ u8  pad1[3];
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-} struct_150CF680b;
+    /* 0x00 */ u8 flags;
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ f32 phase; // 0 to 1 over the hop
+    /* 0x08 */ f32 startX;
+    /* 0x0C */ f32 distance;
+} HopMotion;
 
-void *func_1515548C(struct_150CF680 *, s32, s32, s32, s32, u8, s32);
-
-void func_150CF680(s16 arg0, u8 arg1, s32 arg2) {
-    struct_150CF680 sp40;
-    struct_150CF680b sp30;
-    void *temp_v0;
-
-    sp40.unk4 = 72.0f;
-    sp40.unk10 = 0xC1;
-    sp40.unk12 = arg0;
-    sp40.unk14 = 0x31;
-    sp40.unk16 = 1;
-    sp40.unk18 = 0xFF;
-    sp40.unk1A = 8;
-    sp40.unk1B = 0xFF;
-    sp40.unk1C = 0xFF;
-    sp40.unk1D = 0xFF;
-    sp40.unk1E = 0xFF;
-    sp40.unk1F = 0xFF;
-    sp40.unk20 = 0xFF;
-    sp40.unk21 = 0xFF;
-    sp40.unk22 = 0xFF;
-    sp40.unk23 = 0xFF;
-    sp40.unk28 = 0x200004;
-
-    sp30.unk0 = 0;
-    sp30.unk4 = 0.0f;
-    sp40.unk0 = -300.0f;
-    sp30.unk8 = -300.0f;
-    sp30.unkC = 0.0f;
-    sp40.unkC = 7.5f;
-    sp40.unk8 = 7.5f;
-    sp40.unk24 = 0;
-    sp40.unk2C = 0x9F0601;
-    sp40.unk40 = 0;
-    sp40.unk41 = 0xA;
-    sp40.unk30 = 0x17;
-    sp40.unk34 = 0x44;
-    sp40.unk38 = 0x80;
-    sp40.unk3C = 0x20;
-    sp40.unk4C = 1.0f;
-    sp40.unk48 = 1.0f;
-    sp40.unk54 = 0.0f;
-    sp40.unk50 = 0.0f;
-    sp40.unk44 = (u8)D_80082FA0;
-
-    temp_v0 = func_1515548C(&sp40, 0xC, 0, 0, 0x10, arg1, arg2);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x70, &sp30, 0x10);
-    }
-}
+/* Particle motion: fall under gravity and bounce on a floor line (y grows downwards). */
+typedef struct {
+    /* 0x00 */ Vec2f vel;
+    /* 0x08 */ f32 gravity;
+    /* 0x0C */ f32 floorY;
+} BounceMotion;
 
 typedef struct {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 2];
+    /* 0x02 */ u8 pad2[0xC - 0x2];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[3];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
+    /* 0x10 */ Vec2f pos;
     /* 0x18 */ u8 pad18[0x70 - 0x18];
-    /* 0x70 */ struct_150CF680b unk70;
-} Obj150CF800;
+    /* 0x70 */ union {
+        HopMotion hop;
+        BounceMotion bounce;
+    } motion;
+} Particle;
 
-typedef struct {
-    f32 x;
-    f32 y;
-} Vec2_150CF800;
+Particle *func_1515548C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
 
-typedef struct {
-    u8 pad[8];
-    s8 (*unk8)(void);
-} Struct8008FCD0;
+/* Spawns the hopping particle, waiting off screen at (-300, 72). */
+void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
+    ParticleSpawn spawn;
+    HopMotion hop;
+    Particle *particle;
 
-extern Struct8008FCD0 D_8008FCD0;
-void func_15143874(s16, f32, f32 *, f32 *);
+    spawn.pos.y = 72.0f;
+    spawn.unk10 = 0xC1;
+    spawn.unk12 = unk12;
+    spawn.flags = 0x31;
+    spawn.unk16 = 1;
+    spawn.unk18 = 0xFF;
+    spawn.unk1A = 8;
+    spawn.unk1B = 0xFF;
+    spawn.unk1C = 0xFF;
+    spawn.unk1D = 0xFF;
+    spawn.unk1E = 0xFF;
+    spawn.unk1F = 0xFF;
+    spawn.unk20 = 0xFF;
+    spawn.unk21 = 0xFF;
+    spawn.unk22 = 0xFF;
+    spawn.unk23 = 0xFF;
+    spawn.unk28 = 0x200004;
 
-s32 func_150CF800(Obj150CF800 *arg0) {
-    f32 t;
-    struct_150CF680 sp;
-    f32 vel[4];
+    hop.flags = 0;
+    hop.phase = 0.0f;
+    spawn.pos.x = -300.0f;
+    hop.startX = -300.0f;
+    hop.distance = 0.0f;
+    spawn.scaleY = 7.5f;
+    spawn.scaleX = 7.5f;
+    spawn.unk24 = 0;
+    spawn.unk2C = 0x9F0601;
+    spawn.unk40 = 0;
+    spawn.unk41 = 10;
+    spawn.unk30 = 0x17;
+    spawn.unk34 = 0x44;
+    spawn.unk38 = 0x80;
+    spawn.unk3C = 0x20;
+    spawn.unk4C = 1.0f;
+    spawn.unk48 = 1.0f;
+    spawn.unk54 = 0.0f;
+    spawn.unk50 = 0.0f;
+    spawn.unk44 = D_80082FA0;
+
+    particle = func_1515548C(&spawn, 12, 0, 0, 0x10, unkC, unk1);
+    if (particle != NULL) {
+        memcpy(&particle->motion.hop, &hop, sizeof(hop));
+    }
+}
+
+extern s8 (*D_8008FCD0[])(void);
+void func_15143874(s16 angle, f32 distance, f32 *x, f32 *y);
+
+/* Hopping particle update: follows the hop arc and, on landing, kicks up 2 to 5 bouncing
+   dust particles. */
+s32 func_150CF800(Particle *hopper) {
+    f32 phase;
+    ParticleSpawn spawn;
+    BounceMotion dust;
     s8 count;
-    s32 r;
-    s32 b1;
-    void *obj;
-    struct_150CF680b *sub;
+    s32 rand;
+    s32 bit2;
+    Particle *particle;
+    HopMotion *hop;
 
-    sub = &arg0->unk70;
-    if (sub->unk0 & 1) {
-        sub->unk4 += 0.1900000125f * D_800BE9A4;
-        t = sub->unk4;
-        if (t >= 1.0f) {
-            sub->unk4 = 1.0f;
-            sub->unk0 &= ~1;
+    hop = &hopper->motion.hop;
+    if (hop->flags & 1) {
+        hop->phase += 0.19000001f * D_800BE9A4;
+        phase = hop->phase;
+        if (phase >= 1.0f) {
+            hop->phase = 1.0f;
+            hop->flags &= ~1;
             count = (func_150ADA20() & 3) + 2;
-            vel[3] = arg0->unk14 + 15.0f;
-            *(Vec2_150CF800 *)&sp.unk0 = *(Vec2_150CF800 *)&arg0->unk10;
-            sp.unk16 = 0xC;
-            sp.unk18 = 0x15;
-            sp.unk1A = 0;
-            sp.unk1B = 0xFF;
-            sp.unk1C = 0xFF;
-            sp.unk1D = 0xFF;
-            sp.unk1F = 0xFF;
-            sp.unk20 = 0xFF;
-            sp.unk21 = 0xFF;
-            sp.unk22 = 0xFF;
-            sp.unk23 = 0xFF;
-            sp.unk24 = 0;
-            sp.unk28 = 0x200004;
-            sp.unk2C = 0x9F0601;
-            sp.unk40 = 0;
-            sp.unk41 = 0xA;
-            sp.unk30 = 0x17;
-            sp.unk34 = 0x44;
-            sp.unk38 = 0x80;
-            sp.unk3C = 0x20;
-            sp.unk48 = 1.0f;
-            sp.unk4C = 1.0f;
-            sp.unk54 = 0.0f;
-            sp.unk50 = 0.0f;
-            sp.unk44 = (u8)D_80082FA0;
+            dust.floorY = hopper->pos.y + 15.0f;
+            spawn.pos = hopper->pos;
+            spawn.unk16 = 12;
+            spawn.unk18 = 0x15;
+            spawn.unk1A = 0;
+            spawn.unk1B = 0xFF;
+            spawn.unk1C = 0xFF;
+            spawn.unk1D = 0xFF;
+            spawn.unk1F = 0xFF;
+            spawn.unk20 = 0xFF;
+            spawn.unk21 = 0xFF;
+            spawn.unk22 = 0xFF;
+            spawn.unk23 = 0xFF;
+            spawn.unk24 = 0;
+            spawn.unk28 = 0x200004;
+            spawn.unk2C = 0x9F0601;
+            spawn.unk40 = 0;
+            spawn.unk41 = 10;
+            spawn.unk30 = 0x17;
+            spawn.unk34 = 0x44;
+            spawn.unk38 = 0x80;
+            spawn.unk3C = 0x20;
+            spawn.unk48 = 1.0f;
+            spawn.unk4C = 1.0f;
+            spawn.unk54 = 0.0f;
+            spawn.unk50 = 0.0f;
+            spawn.unk44 = D_80082FA0;
             for (; count > 0; count--) {
-                sp.unk1E = (func_150ADA20() % 101U) + 0x9B;
-                sp.unk10 = D_8008FCD0.unk8();
-                r = func_150ADA20();
-                t = (func_150ADA68() * 2) + 2.5f;
-                func_15143874((s16)((r % 65U) - 0xA0), t, &vel[0], &vel[1]);
-                vel[2] = (func_150ADA68() * 0.3330000043f) + 0.4040000141f;
-                sp.unk8 = sp.unkC = (func_150ADA68() * 1.789999962f) + 1.699999928f;
-                sp.unk12 = (func_150ADA20() % 26U) + 0x1E;
+                spawn.unk1E = (func_150ADA20() % 101U) + 155;
+                spawn.unk10 = D_8008FCD0[2]();
+                rand = func_150ADA20();
+                phase = (func_150ADA68() * 2) + 2.5f; // matching: the hop phase's register holds the dust speed
+                func_15143874((s16)((rand % 65U) - 160), phase, &dust.vel.x, &dust.vel.y);
+                dust.gravity = (func_150ADA68() * 0.333f) + 0.404f;
+                spawn.scaleX = spawn.scaleY = (func_150ADA68() * 1.79f) + 1.6999999f;
+                spawn.unk12 = (func_150ADA20() % 26U) + 30;
                 if (func_150ADA20() & 1) {
-                    b1 = 2;
+                    bit2 = 2;
                 } else {
-                    b1 = 0;
+                    bit2 = 0;
                 }
                 if (func_150ADA20() & 1) {
-                    r = 4;
+                    rand = 4; // matching: reusing rand's register for this flag bit
                 } else {
-                    r = 0;
+                    rand = 0;
                 }
-                sp.unk14 = r | 1 | b1 | 8 | 0x10 | 0x20;
-                obj = func_1515548C(&sp, 0xD, 0, 0, 0x10, arg0->unkC, arg0->unk1);
-                if (obj != NULL) {
-                    memcpy((u8 *)obj + 0x70, vel, 0x10);
+                spawn.flags = rand | 1 | bit2 | 8 | 0x10 | 0x20; // matching: folding the constants into 0x39 changes the code
+                particle = func_1515548C(&spawn, 13, 0, 0, 0x10, hopper->unkC, hopper->unk1);
+                if (particle != NULL) {
+                    memcpy(&particle->motion.bounce, &dust, sizeof(dust));
                 }
             }
-            t = sub->unk4;
+            phase = hop->phase;
         }
-        arg0->unk10 = sub->unk8 + (t * sub->unkC);
-        arg0->unk14 = (sinf(sub->unk4 * 3.141592741f) * -17.5f) + 72.0f;
+        hopper->pos.x = hop->startX + (phase * hop->distance);
+        hopper->pos.y = (sinf(hop->phase * 3.1415927f) * -17.5f) + 72.0f;
     }
     return 1;
 }
 
-struct sub150CFBEC {
-    u8 unk0;
-    u8 pad[3];
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-};
+/* Hopping particle message handler: message 0x52 starts a hop to the x given in the payload. */
+void func_150CFBEC(Particle *hopper, f32 *targetX, u8 type) {
+    HopMotion *hop = &hopper->motion.hop;
 
-struct par150CFBEC {
-    char pad10[0x10];
-    f32 unk10;
-    char pad14[0x70 - 0x14];
-    struct sub150CFBEC unk70;
-};
-
-void func_150CFBEC(struct par150CFBEC *arg0, f32 *arg1, u8 arg2) {
-    struct sub150CFBEC *temp = &arg0->unk70;
-
-    if (arg2 == 0x52) {
-        temp->unk0 |= 1;
-        temp->unk4 = 0.0f;
-        temp->unk8 = arg0->unk10;
-        temp->unkC = arg1[0] - arg0->unk10;
+    if (type == 0x52) {
+        hop->flags |= 1;
+        hop->phase = 0.0f;
+        hop->startX = hopper->pos.x;
+        hop->distance = targetX[0] - hopper->pos.x;
     }
 }
 
-extern void func_1515572C(f32 *, s32);
+void func_1515572C(f32 *, s32);
 
-void func_150CFC38(f32 arg0) {
-    f32 sp1C;
+/* Sends message 0x52: hop to targetX. */
+void func_150CFC38(f32 targetX) {
+    f32 payload = targetX;
 
-    sp1C = arg0;
-    func_1515572C(&sp1C, 0x52);
+    func_1515572C(&payload, 0x52);
 }
 
-extern f32 D_800A0878;
-extern f32 D_800A087C;
+/* Bouncing particle update: integrates the motion and bounces off the floor, damped. */
+s32 func_150CFC60(Particle *particle) {
+    BounceMotion *m = &particle->motion.bounce;
 
-s32 func_150CFC60(f32 *arg0) {
-    f32 *p = &arg0[28];
-    arg0[4] += p[0] * D_800BE9A4;
-    arg0[5] += (p[1] * D_800BE9A4) + (((0.5f * p[2]) * D_800BE9A4) * D_800BE9A4);
-    p[1] += p[2] * D_800BE9A4;
-    if (p[3] < arg0[5]) {
-        arg0[5] = p[3];
-        p[0] = p[0] * D_800A0878;
-        p[1] = fabsf(p[1]) * D_800A087C;
+    particle->pos.x += m->vel.x * D_800BE9A4;
+    particle->pos.y += (m->vel.y * D_800BE9A4) + (((0.5f * m->gravity) * D_800BE9A4) * D_800BE9A4);
+    m->vel.y += m->gravity * D_800BE9A4;
+    if (m->floorY < particle->pos.y) {
+        particle->pos.y = m->floorY;
+        m->vel.x *= 0.3f;
+        m->vel.y = fabsf(m->vel.y) * -0.15f;
     }
     return 1;
 }
 
-unsigned char *func_150CFD20(unsigned char *arg0) {
-    if (*arg0 != 0xBD && *arg0 != 0) {
-        do {
-            arg0++;
-        } while (*arg0 != 0xBD && *arg0 != 0);
+/* Returns the end of the line at str: its 0xBD line break or the string's terminating 0. */
+u8 *func_150CFD20(u8 *str) {
+    while (*str != 0xBD && *str != 0) {
+        str++;
     }
-    return arg0;
+    return str;
 }
 
-unsigned char *func_150CFD5C(unsigned char *arg0) {
-    if (*arg0 != 0) {
-        do {
-            arg0++;
-        } while (*arg0 != 0);
+/* Returns the end (terminating 0) of str. */
+u8 *func_150CFD5C(u8 *str) {
+    while (*str != 0) {
+        str++;
     }
-    return arg0;
+    return str;
 }
 
-extern unsigned char *func_150CFD20(unsigned char *);
+/* Returns the length of the line at str and stores its end in *lineEnd. */
+s32 func_150CFD84(u8 *str, u8 **lineEnd) {
+    u8 *end;
 
-s32 func_150CFD84(unsigned char *arg0, unsigned char **arg1) {
-    unsigned char *temp;
-
-    temp = func_150CFD20(arg0);
-    *arg1 = temp;
-    return temp - arg0;
+    end = func_150CFD20(str);
+    *lineEnd = end;
+    return end - str;
 }
 
-s32 func_150CFDB8(unsigned char *arg0) {
-    s32 best;
-    unsigned char *end;
-    unsigned char *sp2C;
+/* Returns the length of the longest line in str. */
+s32 func_150CFDB8(u8 *str) {
+    s32 longest;
+    u8 *end;
+    u8 *lineEnd;
 
-    best = 0;
-    end = func_150CFD5C(arg0);
-    while (arg0 < end) {
-        s32 v = func_150CFD84(arg0, &sp2C);
-        if (best < v) {
-            best = v;
+    longest = 0;
+    end = func_150CFD5C(str);
+    while (str < end) {
+        s32 len = func_150CFD84(str, &lineEnd);
+        if (longest < len) {
+            longest = len;
         }
-        arg0 = sp2C + 1;
+        str = lineEnd + 1;
     }
-    return best;
+    return longest;
 }
 
-struct inner150CFE3C {
-    char pad0[0x14];
-    u8 unk14;
-    u8 unk15;
-    char pad16[0x18 - 0x16];
-    u8 *unk18[1];
-};
+/* Text box data (at 0x28 in its object): shows a string one line at a time. */
+typedef struct {
+    /* 0x00 */ u8 id; // matched against message 0x51's payload
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ u8 *str;
+    /* 0x08 */ u8 flags; // bit 0: a new line is being shown this frame
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ u8 *line;
+    /* 0x10 */ u8 *lineEnd;
+    /* 0x14 */ u8 lineLen;
+    /* 0x15 */ u8 page; // which of lines[] holds the current line; the other holds the previous one
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ u8 *lines[2]; // NUL-terminated copies of lines, each as long as the longest line
+    /* 0x20 */ void *style; // the display style's own state, which follows this struct
+    /* 0x24 */ s8 updateFn; // index into D_800888A0, or -1
+    /* 0x25 */ u8 msgFn; // index into D_800888B0
+    /* 0x26 */ u8 pad26[2];
+} TextBox;
 
-struct flat150CFE3C {
-    char pad0[0x34];
-    u8 *unk34;
-    char pad38[0x3C - 0x38];
-    u8 unk3C;
-    u8 unk3D;
-    char pad3E[0x40 - 0x3E];
-    u8 *unk40[1];
-};
+typedef struct {
+    /* 0x00 */ ObjHeader header;
+    /* 0x28 */ TextBox text;
+} TextObj;
 
-union par150CFE3C {
-    struct flat150CFE3C flat;
-    struct {
-        char pad0[0x28];
-        struct inner150CFE3C inner;
-    } sub;
-};
+/* Copies the current line into lines[page]. */
+void func_150CFE3C(TextObj *obj) {
+    TextBox *text = &obj->text;
 
-void func_150CFE3C(union par150CFE3C *arg0) {
-    struct inner150CFE3C *inner;
-
-    inner = &arg0->sub.inner;
-    memcpy(arg0->flat.unk40[arg0->flat.unk3D], arg0->flat.unk34, arg0->flat.unk3C);
-    inner->unk18[inner->unk15][inner->unk14] = 0;
+    memcpy(text->lines[text->page], text->line, text->lineLen);
+    text->lines[text->page][text->lineLen] = 0;
 }
 
-struct inner150CFE98 {
-    char pad0[0x8];
-    u8 unk8;
-    char pad9[0xC - 0x9];
-    u8 *unkC;
-    u8 *unk10;
-    u8 unk14;
-    u8 unk15;
-};
+/* Moves on to the next line, if there is one. */
+void func_150CFE98(TextObj *obj) {
+    TextBox *text = &obj->text;
 
-void func_150CFE98(arg0)
-union par150CFE3C *arg0;
-{
-    struct inner150CFE98 *inner = (struct inner150CFE98 *)((char *)arg0 + 0x28);
-
-    if (*inner->unk10 != 0) {
-        inner->unkC = inner->unk10 + 1;
-        inner->unk14 = func_150CFD84(inner->unk10 + 1, &inner->unk10);
-        inner->unk15 ^= 1;
-        func_150CFE3C(arg0);
-        inner->unk8 |= 1;
+    if (*text->lineEnd != 0) {
+        text->line = text->lineEnd + 1;
+        text->lineLen = func_150CFD84(text->lineEnd + 1, &text->lineEnd);
+        text->page ^= 1;
+        func_150CFE3C(obj);
+        text->flags |= 1;
     }
 }
 
-struct frame150CFF10 {
-    u8  unk0;
-    s32 unk4;
-    u8  unk8;
-    s32 unkC;
-    u8 *unk10;
-    u8  unk14;
-    u8  unk15;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    u8  unk24;
-    u8  unk25;
-};
+/* Creates a text box object for str, with styleSize bytes of style state (left zeroed). */
+TextObj *func_150CFF10(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn, u8 msgFn, u8 arg6, s32 arg7) {
+    TextBox init;
+    TextObj *obj;
+    s32 lineSize;
+    TextBox *text;
 
-extern s32 func_150CFDB8(unsigned char *);
+    init.msgFn = msgFn;
+    init.updateFn = updateFn;
+    init.page = 0;
+    init.flags = 1;
+    init.str = str;
+    init.line = str;
+    init.id = id;
+    init.lineLen = func_150CFD84(str, &init.lineEnd);
+    init.lines[0] = NULL;
+    init.lines[1] = NULL;
+    init.style = NULL;
 
-struct out150CFF10 {
-    char pad0[0x18];
-    u8 *unk18;
-    u8 *unk1C;
-    u8 *unk20;
-};
+    lineSize = func_150CFDB8(str) + 1;
 
-void *func_150CFF10(u8 arg0, s32 arg1, s16 arg2, s32 arg3, s8 arg4, u8 arg5, u8 arg6, void *arg7) {
-    struct frame150CFF10 tmp;
-    struct260 *temp_v0;
-    s32 temp;
-    struct out150CFF10 *base;
-
-    tmp.unk25 = arg5;
-    tmp.unk24 = arg4;
-    tmp.unk15 = 0;
-    tmp.unk8 = 1;
-    tmp.unk4 = arg1;
-    tmp.unkC = arg1;
-    tmp.unk0 = arg0;
-    tmp.unk14 = func_150CFD84((unsigned char *)arg1, &tmp.unk10);
-    tmp.unk18 = 0;
-    tmp.unk1C = 0;
-    tmp.unk20 = 0;
-
-    temp = func_150CFDB8((unsigned char *)arg1) + 1;
-
-    temp_v0 = func_15149130(arg2, -1, -1, 5, 3, 0x47, (struct37 *)(arg3 + 0x2A + (temp - 1) * 2), arg6, (s32)arg7);
-    if (temp_v0 != NULL) {
-        base = (struct out150CFF10 *)((u8 *)temp_v0 + 0x28);
-        memcpy(base, &tmp, 0x28);
-        base->unk20 = (u8 *)base + 0x28;
-        base->unk18 = base->unk20 + arg3;
-        base->unk1C = base->unk18 + temp;
-        *base->unk18 = 0;
-        *base->unk1C = 0;
-        func_150CFE3C((union par150CFE3C *)temp_v0);
+    obj = (TextObj *)func_15149130(duration, -1, -1, 5, 3, 0x47, (struct37 *)(sizeof(TextBox) + styleSize + lineSize * 2), arg6, arg7);
+    if (obj != NULL) {
+        text = &obj->text;
+        memcpy(text, &init, sizeof(TextBox));
+        text->style = text + 1;
+        text->lines[0] = (u8 *)text->style + styleSize;
+        text->lines[1] = text->lines[0] + lineSize;
+        *text->lines[0] = 0;
+        *text->lines[1] = 0;
+        func_150CFE3C(obj);
     }
-    return temp_v0;
+    return obj;
 }
 
-s32 func_150D0034(s32 arg0, struct260 *arg1, s32 arg2) {
-    u8 *temp_v1;
-    s32 ret;
+extern s32 (*D_800888A0[])(TextObj *);
 
-    if (*(volatile s8 *)((u8 *)arg1 + 0x4C) == -1) {
-        temp_v1 = (u8 *)arg1 + 0x28;
-    } else {
-        ret = D_800888A0[*(s8 *)((u8 *)arg1 + 0x4C)](arg1);
-        if (ret == 0) {
-            arg1->unkE = -1;
-            return arg0;
-        }
-        temp_v1 = (u8 *)arg1 + 0x28;
+/* Text box update: runs the style's update function, removing the box when it returns 0. */
+s32 func_150D0034(s32 arg0, TextObj *obj, s32 arg2) {
+    TextBox *text = &obj->text;
+
+    if ((text->updateFn != -1) && (D_800888A0[text->updateFn](obj) == 0)) {
+        obj->header.unkE = -1;
+        return arg0;
     }
-
-    temp_v1[8] &= ~1;
+    text->flags &= ~1;
     return arg0;
 }
 
-extern s32 (*D_800888B0[])(s32 *, s32, u8);
+extern void (*D_800888B0[])(TextObj *, u8 *, u8);
 
-s32 func_150D00C0(s32 *a0, s32 a1, u8 a2) {
-    s32 (*fn)(s32 *, s32, u8);
+/* Text box message handler: message 0x51 with this box's id advances the line; the style's
+   handler gets every other message. */
+void func_150D00C0(TextObj *obj, u8 *payload, u8 type) {
+    void (*handler)(TextObj *, u8 *, u8);
 
-    if (a2 == 0x51) {
-        if (*((u8 *)a0 + 0x28) == *((u8 *)a1)) {
-            func_150CFE98();
+    if (type == 0x51) {
+        if (obj->text.id == *payload) {
+            func_150CFE98(obj);
         }
     } else {
-        fn = D_800888B0[*((u8 *)a0 + 0x4D)];
-        if (fn != 0) {
-            fn(a0, a1, a2);
+        handler = D_800888B0[obj->text.msgFn];
+        if (handler != NULL) {
+            handler(obj, payload, type);
         }
     }
 }
 
-extern void *func_150CFF10(u8, s32, s16, s32, s8, u8, u8, void *);
+/* Style 0 state: frames left in the crossfade to a new line. */
+typedef struct {
+    /* 0x00 */ s8 fadeTimer;
+    /* 0x01 */ u8 pad1[7];
+} CrossfadeStyle;
 
-struct frame150D0134 {
-    u8 unk0;
-    u8 pad[7];
-};
+/* Creates a text box that crossfades between lines (style 0). */
+void func_150D0134(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
+    CrossfadeStyle style;
+    TextObj *obj;
 
-void func_150D0134(u8 arg0, s32 arg1, s16 arg2, u8 arg3, void *arg4) {
-    struct frame150D0134 sp30;
-    void *ret;
-
-    sp30.unk0 = 0;
-    ret = func_150CFF10(arg0, arg1, arg2, 8, 0, 0, arg3, arg4);
-    if (ret != 0) {
-        memcpy(*(void **)((u8 *)ret + 0x48), &sp30.unk0, 1);
+    style.fadeTimer = 0;
+    obj = func_150CFF10(id, str, duration, 8, 0, 0, arg3, arg4);
+    if (obj != NULL) {
+        memcpy(obj->text.style, &style.fadeTimer, sizeof(style.fadeTimer));
     }
 }
 
-s32 func_150D01A0(struct260 *arg0) {
-    s8 *state;
+void func_15042D94(s32 x, s32 y, s32, u8 *str);
+
+/* Style 0 update: draws the current line fading in over 8 frames and the previous one fading out. */
+s32 func_150D01A0(TextObj *obj) {
+    s8 *fadeTimer;
     u8 alpha;
     u8 fade;
-    struct inner150CFE3C *inner;
+    TextBox *text;
 
-    state = *(s8 **)((u8 *)arg0 + 0x48);
-    inner = (struct inner150CFE3C *)((u8 *)arg0 + 0x28);
-    if (((u8 *)arg0)[0x30] & 1) {
-        *state = 8;
+    text = &obj->text;
+    fadeTimer = text->style;
+    if (text->flags & 1) {
+        *fadeTimer = 8;
     }
-    if (*state > 0) {
-        fade = *state * 31;
-        alpha = 0xFF - fade;
-        *state -= D_800BE9E4;
+    if (*fadeTimer > 0) {
+        fade = *fadeTimer * 31;
+        alpha = 255 - fade;
+        *fadeTimer -= D_800BE9E4;
     } else {
-        alpha = 0xFF;
+        alpha = 255;
         fade = 0;
     }
     if (alpha) {
         func_1504332C(0xCE, 0xC4, 0x61, alpha);
-        func_15042D94(0x92, 0xBE, 0x81, inner->unk18[inner->unk15]);
+        func_15042D94(0x92, 0xBE, 0x81, text->lines[text->page]);
     }
     if (fade) {
         func_1504332C(0xCE, 0xC4, 0x61, fade);
-        func_15042D94(0x92, 0xBE, 0x81, inner->unk18[inner->unk15 ^ 1]);
+        func_15042D94(0x92, 0xBE, 0x81, text->lines[text->page ^ 1]);
     }
     return 1;
 }
 
-struct frame150D02B4 {
-    f32 unk0;
-    s16 unk4;
-    u8 pad[2];
-};
+/* Style 1 state: how much of the line has been typed out. */
+typedef struct {
+    /* 0x00 */ f32 progress; // fraction of the next character
+    /* 0x04 */ s16 shown; // characters typed so far
+    /* 0x06 */ u8 pad6[2];
+} TypewriterStyle;
 
-void func_150D02B4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, void *arg4) {
-    void *ret;
-    struct frame150D02B4 sp2C;
+/* Creates a text box that types out each line behind a "C:> " prompt (style 1). */
+void func_150D02B4(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
+    TextObj *obj;
+    TypewriterStyle style;
 
-    sp2C.unk4 = 0;
-    sp2C.unk0 = 0.0f;
-    ret = func_150CFF10(arg0, arg1, arg2, 8, 1, 0, arg3, arg4);
-    if (ret != 0) {
-        memcpy(*(void **)((u8 *)ret + 0x48), &sp2C.unk0, 8);
+    style.shown = 0;
+    style.progress = 0.0f;
+    obj = func_150CFF10(id, str, duration, 8, 1, 0, arg3, arg4);
+    if (obj != NULL) {
+        memcpy(obj->text.style, &style, sizeof(style));
     }
 }
 
-struct frame150D032C {
-    f32 unk0;
-    s16 unk4;
-    u8 pad[2];
-};
+/* Style 1 update: types out the current line and draws it after the prompt, with a cursor. */
+s32 func_150D032C(TextObj *obj) {
+    TextBox *text;
+    TypewriterStyle *style;
+    u8 buf[0x50];
+    u8 prompt[] = "C:> ";
 
-s32 func_150D032C(struct260 *arg0) {
-    struct inner150CFE3C *inner;
-    struct frame150D032C *state;
-    u8 sp28[0x50];
-    struct struct_150D032C_prefix sp20;
+    text = &obj->text;
+    style = text->style;
 
-    inner = (struct inner150CFE3C *)((u8 *)arg0 + 0x28);
-    sp20 = D_800A0880;
-    state = *(struct frame150D032C **)((u8 *)arg0 + 0x48);
-
-    if (((u8 *)arg0)[0x30] & 1) {
-        state->unk4 = 0;
-        state->unk0 = 0.0f;
+    if (text->flags & 1) {
+        style->shown = 0;
+        style->progress = 0.0f;
     }
 
-    if (state->unk0 < (f32)inner->unk14) {
-        state->unk0 = state->unk0 + (D_800A0888 * D_800BE9A4);
-        if (state->unk0 > 1.0f) {
-            do {
-                state->unk4 = state->unk4 + 1;
-                if (inner->unk14 < state->unk4) {
-                    state->unk4 = inner->unk14;
-                }
-                state->unk0 = state->unk0 - 1.0f;
-            } while (state->unk0 > 1.0f);
+    if (style->progress < (f32)text->lineLen) {
+        style->progress += 0.437f * D_800BE9A4;
+        while (style->progress > 1.0f) {
+            style->shown++;
+            if (text->lineLen < style->shown) {
+                style->shown = text->lineLen;
+            }
+            style->progress -= 1.0f;
         }
     }
 
-    memcpy(sp28, &sp20, 4);
-    memcpy(&sp28[4], inner->unk18[inner->unk15], state->unk4);
-    sp28[state->unk4 + 4] = 0x20;
-    sp28[state->unk4 + 5] = 0xBB;
-    sp28[state->unk4 + 6] = 0;
+    memcpy(buf, prompt, 4);
+    memcpy(&buf[4], text->lines[text->page], style->shown);
+    buf[style->shown + 4] = ' ';
+    buf[style->shown + 5] = 0xBB;
+    buf[style->shown + 6] = 0;
     func_1504332C(0, 0xFF, 0, 0x96);
-    func_15042D94(0xF, 0xBE, 0x80, sp28);
+    func_15042D94(15, 0xBE, 0x80, buf);
     return 1;
 }
 
-void func_150D04C4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, void *arg4) {
-    struct frame150D0134 sp30;
-    void *ret;
+/* Creates a text box that crossfades between lines more slowly, in white (style 2). */
+void func_150D04C4(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
+    CrossfadeStyle style;
+    TextObj *obj;
 
-    sp30.unk0 = 0;
-    ret = func_150CFF10(arg0, arg1, arg2, 8, 2, 0, arg3, arg4);
-    if (ret != 0) {
-        memcpy(*(void **)((u8 *)ret + 0x48), &sp30.unk0, 1);
+    style.fadeTimer = 0;
+    obj = func_150CFF10(id, str, duration, 8, 2, 0, arg3, arg4);
+    if (obj != NULL) {
+        memcpy(obj->text.style, &style.fadeTimer, sizeof(style.fadeTimer));
     }
 }
 
-s32 func_150D0534(struct260 *arg0) {
-    s8 *state;
+/* Style 2 update: like func_150D01A0 but white and over 20 frames. */
+s32 func_150D0534(TextObj *obj) {
+    s8 *fadeTimer;
     u8 alpha;
     u8 fade;
-    struct inner150CFE3C *inner;
+    TextBox *text;
 
-    state = *(s8 **)((u8 *)arg0 + 0x48);
-    inner = (struct inner150CFE3C *)((u8 *)arg0 + 0x28);
-    if (((u8 *)arg0)[0x30] & 1) {
-        *state = 0x14;
+    text = &obj->text;
+    fadeTimer = text->style;
+    if (text->flags & 1) {
+        *fadeTimer = 20;
     }
-    if (*state > 0) {
-        fade = *state * 12;
-        alpha = 0xFF - fade;
-        *state -= D_800BE9E4;
+    if (*fadeTimer > 0) {
+        fade = *fadeTimer * 12;
+        alpha = 255 - fade;
+        *fadeTimer -= D_800BE9E4;
     } else {
-        alpha = 0xFF;
+        alpha = 255;
         fade = 0;
     }
     if (alpha) {
         func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-        func_15042D94(0x14, 0x14, 0x80, inner->unk18[inner->unk15]);
+        func_15042D94(20, 20, 0x80, text->lines[text->page]);
     }
     if (fade) {
         func_1504332C(0xFF, 0xFF, 0xFF, fade);
-        func_15042D94(0x14, 0x14, 0x80, inner->unk18[inner->unk15 ^ 1]);
+        func_15042D94(20, 20, 0x80, text->lines[text->page ^ 1]);
     }
     return 1;
 }

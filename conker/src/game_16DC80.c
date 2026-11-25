@@ -289,7 +289,7 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
                     if (onScreen != 0) {
                         params->screenX[view] = screen[0];
                         params->screenY[view] = screen[1];
-                        /* matching: rightScale Vp_t[2] member indexed directly allocates FP registers differently */
+                        // matching: indexing a Vp_t[2] member directly allocates FP registers differently
                         vp = (GlowView *)((u8 *)D_800BE628 + view * sizeof(GlowView) + D_800BE9C0 * sizeof(Vp_t));
                         glowDepth = (vp->vpTransZ + projZ * invDepth * vp->vpScaleZ) * 32.0f;
                     } else {
@@ -301,7 +301,7 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
                         visible = FALSE;
                     }
                     if (visible) {
-                        s32 pad3;
+                        s32 pad3; // matching: unused local keeps the stack layout
                         params->visibility[view] += (u16)(0xFF - params->visibility[view]) >> 3;
                     } else {
                         params->visibility[view] -= params->visibility[view] >> 3;
@@ -538,8 +538,9 @@ struct Data_151417C4 {
 };
 void func_15169260(struct Data_151417C4 *, s32, u8 *, u8);
 
+/* Sends func_15169260 the one-byte payload arg0, addressed with the two words of D_8008A074. */
 void func_151417C4(u8 arg0, u8 arg1) {
-    u8 payload[4];
+    u8 payload[1];
     struct Data_151417C4 data;
 
     data = *(struct Data_151417C4 *)D_8008A074;
