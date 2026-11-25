@@ -3,6 +3,22 @@
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * Heap block header. Every block (free or allocated) starts with one; the
+ * payload handed out by func_10003C6C starts right after it. The top byte of
+ * taggedSize is the block's tag (0 = free), the low 24 bits its payload size.
+ */
+typedef struct AllocatorBlock {
+    struct AllocatorBlock *next;
+    struct AllocatorBlock *prev;
+    u32 taggedSize;
+} AllocatorBlock;
+
+typedef struct AllocatorFreeBlock {
+    AllocatorBlock header;
+    struct AllocatorFreeBlock *nextFree;
+    struct AllocatorFreeBlock *prevFree;
+} AllocatorFreeBlock;
 
 s32 allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return func_10003C6C(arg0, arg1, arg2, 0, arg3);
@@ -182,18 +198,6 @@ s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 arg4) {
     osSetIntMask(intMask);
     return (s32)blk + 0xC;
 }
-typedef struct AllocatorBlock {
-    struct AllocatorBlock *next;
-    struct AllocatorBlock *prev;
-    u32 taggedSize;
-} AllocatorBlock;
-
-typedef struct AllocatorFreeBlock {
-    AllocatorBlock header;
-    struct AllocatorFreeBlock *nextFree;
-    struct AllocatorFreeBlock *prevFree;
-} AllocatorFreeBlock;
-
 void func_10004074(void *arg0) {
     AllocatorFreeBlock *block;
     AllocatorFreeBlock *neighbor;
@@ -281,77 +285,67 @@ void func_10004074(void *arg0) {
     }
 }
 
+/* Frees every tag-2 block and counts tags 3 and 4 down by one (so they expire on later passes). */
 void func_10004250(void) {
-    s32 temp_v0;
-    u32 temp_v1;
+    u32 tag;
+    AllocatorBlock *block;
     OSIntMask mask;
-    struct54 *node;
 
     mask = osSetIntMask(1);
-
-    if (node = D_800380B4) {
-        do {
-            temp_v1 = node->unk8;
-            temp_v0 = temp_v1 >> 0x18;
-            if (2 == temp_v0) {
-                func_10004074(&node->unkC);
-            } else if ((temp_v0 == 3) || (temp_v0 == 4)) {
-                node->unk8 = ((temp_v0 - 1) << 0x18) | (temp_v1 & 0xFFFFFF);
-            }
-        } while(node = node->unk0);
+    for (block = (AllocatorBlock *)D_800380B4; block != NULL; block = block->next) {
+        tag = block->taggedSize >> 24;
+        if (tag == 2) {
+            func_10004074(block + 1);
+        } else if (tag == 3 || tag == 4) {
+            block->taggedSize = ((tag - 1) << 24) | (block->taggedSize & 0xFFFFFF);
+        }
     }
     osSetIntMask(mask);
 }
 
+/* Frees every block tagged 1-4. */
 void func_10004308(void) {
-    u32 temp_t6;
-    struct54 *node;
+    u32 tag;
+    AllocatorBlock *block;
     OSIntMask mask;
 
     mask = osSetIntMask(1);
-    node = D_800380B4;
+    block = (AllocatorBlock *)D_800380B4;
     func_15042D50();
-
-    if (node) {
-        do {
-            temp_t6 = node->unk8 >> 24;
-            if (temp_t6 == 1 || temp_t6 == 2 || temp_t6 == 3 || temp_t6 == 4) {
-                func_10004074(&node->unkC);
-            }
+    for (; block != NULL; block = block->next) {
+        tag = block->taggedSize >> 24;
+        if (tag == 1 || tag == 2 || tag == 3 || tag == 4) {
+            func_10004074(block + 1);
         }
-        while (node = node->unk0);
     }
     osSetIntMask(mask);
 }
 
-void func_100043B4(s32 *arg0, u32 arg1) {
+/* Replaces the tag of the allocated block whose payload is ptr. */
+void func_100043B4(s32 *ptr, u32 tag) {
     OSIntMask mask;
-    struct54 *node;
+    AllocatorBlock *block;
 
     mask = osSetIntMask(1);
-    node = (struct54 *)((u32)arg0 - 0xC);
-    node->unk8 = (node->unk8 & 0xFFFFFF) | (arg1 << 24);
+    // matching: integer subtraction; pointer arithmetic folds the -0xC into the load/store offsets
+    block = (AllocatorBlock *)((u32)ptr - sizeof(AllocatorBlock));
+    block->taggedSize = (block->taggedSize & 0xFFFFFF) | (tag << 24);
     osSetIntMask(mask);
 }
-// NON-MATCHING: missing an addiu
-// void func_100043B4(s32 *arg0, u32 arg1) {
-//     OSIntMask mask = osSetIntMask(1);
-//     *(arg0 - 1) = (arg1 << 24) | *(arg0 - 1) & 0xFFFFFF;
-//     osSetIntMask(mask);
-// }
 
+/* Rescans the free list for the largest free block, caching it and its size. */
 void func_1000440C(void) {
-    struct54 *foo;
-    struct54 *last_good_foo;
-    s32 tmp0;
+    AllocatorFreeBlock *block;
+    AllocatorFreeBlock *largest;
+    s32 largestSize;
 
-    for (foo = D_800380B8, tmp0 = NULL; foo != NULL; foo = (struct54 *)foo->unkC) {
-        if (tmp0 < (s32) foo->unk8) {
-            tmp0 = foo->unk8;
-            last_good_foo = foo;
+    for (block = (AllocatorFreeBlock *)D_800380B8, largestSize = 0; block != NULL; block = block->nextFree) {
+        if (largestSize < (s32)block->header.taggedSize) {
+            largestSize = block->header.taggedSize;
+            largest = block;
         }
     }
 
-    D_800380B0 = last_good_foo;
-    D_8002AC30 = tmp0;
+    D_800380B0 = (struct54 *)largest;
+    D_8002AC30 = largestSize;
 }
