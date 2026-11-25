@@ -1156,13 +1156,13 @@ s32 func_15088A08(Racer *racer, f32 step) {
         }
         if (racer->maxLap < racer->lap) {
             racer->maxLap = racer->lap;
-            if ((idx < D_8008FD90) && (racer->state == 0) && (racer->raceTime > 0)) {
+            if (idx < D_8008FD90 && racer->state == 0 && racer->raceTime > 0) {
                 if (lim >= racer->maxLap) {
                     t = racer->raceTime - racer->lapStartTime;
                     if (t > 32000) {
                         t = 32000;
                     }
-                    if ((D_800E0C10[idx] <= 0) || (t < D_800E0C10[idx])) {
+                    if (D_800E0C10[idx] <= 0 || t < D_800E0C10[idx]) {
                         D_800E0C10[idx] = t;
                     }
                     racer->lastLapTime = t;
@@ -1644,7 +1644,7 @@ s32 func_15089F9C(s32 player) {
     best = -1000000.0f;
     for (i = 0; i < count; i++) {
         bit = 1 << i;
-        if ((states[i] != 3) && (mask & bit) &&
+        if (states[i] != 3 && (mask & bit) &&
             (D_800D23B0->unk16C0[player] & (bit << 16))) {
             other = &D_800CC2D0[i];
             if (other != NULL) {
@@ -1885,7 +1885,7 @@ s32 func_1508A6FC(void) {
         if ((activeMask & bit) || isNew) {
             obj = &D_800CC2D0[i];
             team = teams[i];
-            if ((team != 0) && (D_800D23B0->gameType == 0xB9)) {
+            if (team != 0 && D_800D23B0->gameType == 0xB9) {
                 obj->unk1E4 = 1;
             }
             old = attackTimers[i];
@@ -1903,7 +1903,7 @@ s32 func_1508A6FC(void) {
             if (countdowns[i] < 0) {
                 countdowns[i] = 0;
             }
-            if ((arr19C[i] == 3) && ((arr25C[i] & 0x1F) >= 0x1D)) {
+            if (arr19C[i] == 3 && (arr25C[i] & 0x1F) >= 0x1D) {
                 func_1508EC5C(i, 0x8000);
             }
             attackers[i] = D_800E0BB8[i];
@@ -1913,7 +1913,7 @@ s32 func_1508A6FC(void) {
             }
             arr39C[i] = func_150859AC(i, 4);
             layers[i] = func_15085DA8(obj->y_position);
-            if (((arr39C[i] == 0) || isNew) || (obj->pad2FC[1] != 0)) {
+            if (arr39C[i] == 0 || isNew || obj->pad2FC[1] != 0) {
                 if (arr35C[i] == 0) {
                     if (obj->unk20F != 0xFF) {
                         D_800D23B0->unk59C[i] = obj->unk20F;
@@ -1944,12 +1944,12 @@ s32 func_1508A6FC(void) {
                 arr35C[i] = 0;
             }
             flag = 1;
-            if ((arr31C[i] != 0) && (D_800D23B0->gameType != 0xB8)) {
+            if (arr31C[i] != 0 && D_800D23B0->gameType != 0xB8) {
                 reset = 0;
-                if ((arr19C[i] != 1) && (aimTimes[i] < 30)) {
+                if (arr19C[i] != 1 && aimTimes[i] < 30) {
                     type = obj->unk232;
                     obj->unk222 = arr31C[i] - 2;
-                    if ((type != 4) && (type != 5)) {
+                    if (type != 4 && type != 5) {
                         func_1508EBF8(i, 4);
                     }
                     if (type == 4) {
@@ -1974,7 +1974,7 @@ s32 func_1508A6FC(void) {
                     attackTimers[i] = 0;
                     old = -1;
                 }
-                if ((attackTimers[i] >= 0) && (old < 0)) {
+                if (attackTimers[i] >= 0 && old < 0) {
                     bit = 1;
                 }
                 if (D_800872C4[D_800E0BD0] != -1 && aimTimes[i] >= D_800872C4[D_800E0BD0]) {
@@ -1982,7 +1982,7 @@ s32 func_1508A6FC(void) {
                 }
                 D_800D23B0->side[i] += (D_800D23B0->sideGoal[i] - D_800D23B0->side[i]) >> 2;
                 D_800D23B0->drop[i] += (D_800D23B0->dropGoal[i] - D_800D23B0->drop[i]) >> 2;
-                if (func_1508CAD8(i, arr31C[i] - 2, bit, reset, D_800D23B0->side[i], D_800D23B0->drop[i]) && (arr19C[i] != 1)) {
+                if (func_1508CAD8(i, arr31C[i] - 2, bit, reset, D_800D23B0->side[i], D_800D23B0->drop[i]) && arr19C[i] != 1) {
                     aimTimes[i] = 0;
                 }
                 if (attackTimers[i] == 0) {
@@ -2002,7 +2002,7 @@ s32 func_1508A6FC(void) {
                     }
                 }
             }
-            if (flag && (D_800D23B0->gameType != 0xB8)) {
+            if (flag && D_800D23B0->gameType != 0xB8) {
                 attackTimers[i] = -D_800872E0[D_800E0BD0];
             }
             flags = obj->unk22C & 0x200;
@@ -2411,10 +2411,10 @@ s32 func_1508BF14(void) {
     for (pass = 0; pass != 2; pass++) {
         for (i = 0; i < numPlayers; i++) {
             n = 0;
-            if ((kinds[i] == 2) || (kinds[i] == 3)) {
+            if (kinds[i] == 2 || kinds[i] == 3) {
                 n = 1;
             }
-            if ((n && (pass == 0)) || (!n && (pass != 0))) {
+            if ((n && pass == 0) || (!n && pass != 0)) {
                 if (teams[i] == myTeam) {
                     bestSlot = -1;
                     bestCost = 10000000;
@@ -2424,7 +2424,7 @@ s32 func_1508BF14(void) {
                                 cost = -1;
                                 n = j * 16;
                                 end = n + 16;
-                                while ((n < end) && (links[n] != -1)) {
+                                while (n < end && links[n] != -1) {
                                     if (links[n] == i) {
                                         cost = costs[n];
                                         n = end;
@@ -2743,7 +2743,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
             hasCam = 0;
         }
         type = OBJ_STATE(obj)->unk78;
-        if ((type == 9) || (type == 0x38) || (type == 0x15)) {
+        if (type == 9 || type == 0x38 || type == 0x15) {
             hasCam = 0;
         }
         victim = func_1505EEF4(target & 0xFFFF0FFF);
@@ -2752,11 +2752,11 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         }
         flagA = 0;
         mode = 0;
-        if ((type == 0x24) || (type == 0x18) || (type == 0x23) || (type == 0x41)) {
+        if (type == 0x24 || type == 0x18 || type == 0x23 || type == 0x41) {
             flagA = 1;
         } else if (type == 9) {
             mode = 1;
-        } else if ((type == 0x15) || (type == 0x1B) || (type == 3)) {
+        } else if (type == 0x15 || type == 0x1B || type == 3) {
             mode = 1;
             if (type != 0x1B) {
                 mode = 3;
@@ -2775,7 +2775,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         }
         dx = 0.0f;
         dz = 0.0f;
-        if ((D_800D23B0->gameType == 0xB9) || (D_800E0BD0 >= 3)) {
+        if (D_800D23B0->gameType == 0xB9 || D_800E0BD0 >= 3) {
             switch (OBJ_STATE(obj)->unk78) {
                 case 0x18:
                 case 0x41:
@@ -2831,7 +2831,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         } else {
             f32 tx;
 
-            if (((dist < 100.0f) || (type == 3)) && (dropOffset != 0)) {
+            if ((dist < 100.0f || type == 3) && dropOffset != 0) {
                 dropOffset = 0;
                 if (sideOffset == 0) {
                     sideOffset = 50;
@@ -2858,7 +2858,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         if (diff > 180.0f) {
             diff = -360.0f + diff;
         }
-        if ((diff > 45.0f) || (diff < -45.0f)) {
+        if (diff > 45.0f || diff < -45.0f) {
             result = 1;
         }
         if (aimAtPoint == 0) {
@@ -2924,7 +2924,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
         }
         if (mode != 0) {
             if (type == 0x1B) {
-                if ((h < -50.0f) && (D_800D23B0->unk16C0[player] & (0x10001 << target))) {
+                if (h < -50.0f && (D_800D23B0->unk16C0[player] & (0x10001 << target))) {
                     OBJ_STATE(obj)->buttons |= Z_TRIG;
                     OBJ_STATE(obj)->unk8E = 2;
                 }
@@ -3253,7 +3253,7 @@ void func_1508DC24(void) {
                 }
             } else {
                 func_15080620(i, 1, cur, 0);
-                if ((cur == 0) && (prev != 3)) {
+                if (cur == 0 && prev != 3) {
                     D_800CC2D0[i].unk31C->unk78 = 0;
                 }
                 if (prev == 0x20) {
@@ -3265,17 +3265,17 @@ void func_1508DC24(void) {
             }
         }
         base = D_800D23B0;
-        if ((D_80087340 == i) && (base->gameType != 0xB8)) {
+        if (D_80087340 == i && base->gameType != 0xB8) {
             setId = func_1508E780(cur);
             found = 0;
             numAttached = func_15033E28(&D_800CC2D0[i], attached);
-            if ((numAttached == 0) && (D_800CC2D0[i].unk31C->unk11A == 2) && (setId != 0x55) && (setId != 0x2E)) {
+            if (numAttached == 0 && D_800CC2D0[i].unk31C->unk11A == 2 && setId != 0x55 && setId != 0x2E) {
                 func_15083568(&D_800CC2D0[i], setId, 1.0f, 0);
                 if (setId == 0x1D) {
                     func_15083568(&D_800CC2D0[i], 0x1E, 1.0f, 0);
                 }
             }
-            if ((numAttached != 0) && (cur != 0x20)) {
+            if (numAttached != 0 && cur != 0x20) {
                 if (setId != -1) {
                     setId &= ~0x1000;
                     for (j = 0; j < numAttached; j++) {
@@ -3290,7 +3290,7 @@ void func_1508DC24(void) {
                             found = 1;
                         }
                     }
-                    if ((found == 0) && (D_800CC2D0[i].unk31C->unk11A == 2) && (setId != 0x55) && (setId != 0x2E)) {
+                    if (found == 0 && D_800CC2D0[i].unk31C->unk11A == 2 && setId != 0x55 && setId != 0x2E) {
                         func_15083568(&D_800CC2D0[i], setId, 1.0f, 0);
                         if (setId == 0x1D) {
                             func_15083568(&D_800CC2D0[i], 0x1E, 1.0f, 0);
