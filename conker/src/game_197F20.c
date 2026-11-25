@@ -104,262 +104,225 @@ extern MessageEntry *D_800DD258;
 extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source);
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 unk9;
-    char padA[0x26 - 0xA];
-    u16 unk26;
-    char pad28[3];
-    u8 unk2B;
-    void (*unk2C)(void *, s32, s32);
-} Struct1516AA70_Data;
-
-typedef struct {
-    char pad0[0xD];
-    u8 unkD;
-    u8 unkE;
-    u8 unkF;
-    Struct1516AA70_Data *unk10;
-    u8 unk14;
-    u8 unk15;
-    s16 unk16;
-    s16 unk18;
-    u8 unk1A;
-    u8 unk1B[3];
-    u8 unk1E;
-    u8 unk1F;
-    s8 unk20;
-    char pad21[3];
-    u8 *unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    char pad38[8];
-    f32 unk40;
-    f32 unk44;
-    char pad48[0x14];
-    f32 unk5C;
-    f32 unk60;
-    char pad64[0xC];
-    f32 unk70;
-} Struct1516AA70;
-
-extern u8 D_800CC4B3[][0x32C];
+extern u8 D_800CC4B3[][0x32C]; /* byte 0x1E3 of each D_800CC2D0 object, set by func_1516A7B0 */
 s32 func_151F2CDC(void);
-void func_1516CC58();
+void func_1516CC58(); // matching: unprototyped (a prototype changes AA70's register allocation)
 
-void func_1516AA70(Struct1516AA70 *arg0) {
-    Struct1516AA70_Data *data;
-    struct108 *sp48;
-    s32 sp44;
-    s32 sp40;
-    s32 sp3C;
-    s32 flag;
-    s32 done;
+/* Per-frame update of a text box: runs the open / page / close state machine, then re-places it. */
+void func_1516AA70(TextBox *box) {
+    s32 unused; // matching: unused local, needed for the original stack frame
+    struct108 *player;
+    s32 width;
+    s32 height;
+    s32 advance;
+    s32 skip;
+    s32 advancePage;
 
-    sp48 = D_800DBFF0;
-    flag = arg0->unk10->unk0 & 0x400;
-    if (arg0->unk10->unk2B != 0 && D_800C35EA != 1) {
-        arg0->unk10->unk8 = 0;
-        func_1516972C((struct102 *)arg0);
+    player = D_800DBFF0;
+    skip = box->config->flags & TEXTBOX_SKIP_ANIM;
+    if (box->config->unk2B != 0 && D_800C35EA != 1) {
+        box->config->numPages = 0;
+        func_1516972C((struct102 *)box);
         return;
     }
-    arg0->unk40 = arg0->unk5C;
-    arg0->unk44 = arg0->unk60;
-    switch (arg0->unk15) {
-    case 0x1:
-        arg0->unk16 = 0;
-        arg0->unk18 = 0;
-        if (flag) {
-            arg0->unk2C = 1.0f;
+    box->x = box->anchorX;
+    box->y = box->anchorY;
+    switch (box->state) {
+    case TEXTBOX_STATE_INIT:
+        box->timer = 0;
+        box->fadeTimer = 0;
+        if (skip) {
+            box->scaleSpeed = 1.0f;
         } else {
-            arg0->unk2C = 0.3333333433f;
+            box->scaleSpeed = 0.333333343f;
         }
-        if (arg0->unk10->unk0 & 2) {
-            arg0->unk1B[2] = 0;
-            arg0->unk1B[1] = 0;
-            arg0->unk1B[0] = 0;
-            arg0->unk1E = 2;
-            arg0->unk16 = 4;
-            arg0->unk18 = 10;
-            arg0->unk15 = 8;
-            arg0->unk28 = 1.0f;
-            func_1516CC58(arg0);
-            arg0->unkE = 1;
-            arg0->unk70 = arg0->unk5C;
+        if (box->config->flags & TEXTBOX_BUBBLES) {
+            box->bubbleAlpha[2] = 0;
+            box->bubbleAlpha[1] = 0;
+            box->bubbleAlpha[0] = 0;
+            box->bubbleIndex = 2;
+            box->timer = 4;
+            box->fadeTimer = 10;
+            box->state = TEXTBOX_STATE_BUBBLES;
+            box->scale = 1.0f;
+            func_1516CC58(box);
+            box->visible = TRUE;
+            box->bubbleX = box->anchorX;
         } else {
-            arg0->unk15 = 2;
+            box->state = TEXTBOX_STATE_GROW;
         }
-        arg0->unk30 = 1.0f;
-        arg0->unk34 = 1.0f;
-        arg0->unk1A = 0;
+        box->halfTextWidth = 1.0f;
+        box->halfTextHeight = 1.0f;
+        box->textAlpha = 0;
         break;
-    case 0x2:
-        func_150428D4(arg0->unk24, &sp44, &sp40, &sp3C);
-        arg0->unk30 = sp44 >> 1;
-        arg0->unk34 = sp40 >> 1;
-        arg0->unk28 += arg0->unk2C * D_800BE9A4;
-        if (flag) {
-            arg0->unk18 = 0;
+    case TEXTBOX_STATE_GROW:
+        func_150428D4(box->text, &width, &height, &advance);
+        box->halfTextWidth = width >> 1;
+        box->halfTextHeight = height >> 1;
+        box->scale += box->scaleSpeed * D_800BE9A4;
+        if (skip) {
+            box->fadeTimer = 0;
         }
-        if (arg0->unk28 > 0.75f && arg0->unk18 == 0) {
-            arg0->unk18 = 10;
+        if (box->scale > 0.75f && box->fadeTimer == 0) {
+            box->fadeTimer = 10;
         }
-        if (arg0->unk18 != 0) {
-            arg0->unk18 -= D_800BE9A0;
-            arg0->unk18 = (arg0->unk18 < 0) ? 0 : arg0->unk18;
-            arg0->unk1A = (10.0f - arg0->unk18) / 10.0f * 255.0f;
+        if (box->fadeTimer != 0) {
+            box->fadeTimer -= D_800BE9A0;
+            box->fadeTimer = (box->fadeTimer < 0) ? 0 : box->fadeTimer;
+            box->textAlpha = (10.0f - box->fadeTimer) / 10.0f * 255.0f;
         }
-        if (arg0->unk28 > 1.0f) {
-            arg0->unk28 = 1.0f;
-            arg0->unk15 = 4;
-            arg0->unk16 = 180;
+        if (box->scale > 1.0f) {
+            box->scale = 1.0f;
+            box->state = TEXTBOX_STATE_SETTLE;
+            box->timer = 180;
         }
-        arg0->unkE = 1;
+        box->visible = TRUE;
         break;
-    case 0x4:
-        if (flag) {
-            arg0->unk16 = 0;
+    case TEXTBOX_STATE_SETTLE:
+        if (skip) {
+            box->timer = 0;
         }
-        arg0->unk16 -= D_800BE9A0 * 45;
-        arg0->unk16 = (arg0->unk16 < 0) ? 0 : arg0->unk16;
-        arg0->unk18 -= D_800BE9A0;
-        arg0->unk18 = (arg0->unk18 < 0) ? 0 : arg0->unk18;
-        arg0->unk1A = (10.0f - arg0->unk18) / 10.0f * 255.0f;
-        if (arg0->unk16 == 0) {
-            arg0->unk15 = 0x10;
+        box->timer -= D_800BE9A0 * 45;
+        box->timer = (box->timer < 0) ? 0 : box->timer;
+        box->fadeTimer -= D_800BE9A0;
+        box->fadeTimer = (box->fadeTimer < 0) ? 0 : box->fadeTimer;
+        box->textAlpha = (10.0f - box->fadeTimer) / 10.0f * 255.0f;
+        if (box->timer == 0) {
+            box->state = TEXTBOX_STATE_TEXT_IN;
         }
         break;
-    case 0x8:
-        arg0->unk16 -= D_800BE9A0;
-        arg0->unk16 = (arg0->unk16 < 0) ? 0 : arg0->unk16;
-        arg0->unk1B[arg0->unk1E] = (4 - (f32)arg0->unk16) / 4 * 170.0f;
-        if (arg0->unk16 == 0) {
-            if (--arg0->unk1E > 100) {
-                arg0->unk15 = 0x10;
-                arg0->unk18 = 10;
+    case TEXTBOX_STATE_BUBBLES:
+        /* fade the circles in one at a time, from the anchor outwards */
+        box->timer -= D_800BE9A0;
+        box->timer = (box->timer < 0) ? 0 : box->timer;
+        box->bubbleAlpha[box->bubbleIndex] = (4 - (f32)box->timer) / 4 * 170.0f;
+        if (box->timer == 0) {
+            if (--box->bubbleIndex > 100) {
+                box->state = TEXTBOX_STATE_TEXT_IN;
+                box->fadeTimer = 10;
             } else {
-                arg0->unk16 = 4;
+                box->timer = 4;
             }
         }
         break;
-    case 0x40:
-        arg0->unk16 -= D_800BE9A0;
-        arg0->unk16 = (arg0->unk16 < 0) ? 0 : arg0->unk16;
-        if (flag) {
-            arg0->unk16 = 0;
+    case TEXTBOX_STATE_TEXT_OUT:
+        box->timer -= D_800BE9A0;
+        box->timer = (box->timer < 0) ? 0 : box->timer;
+        if (skip) {
+            box->timer = 0;
         }
-        arg0->unk1A = arg0->unk16 / 10.0f * 255.0f;
-        if (arg0->unk16 == 0) {
-            arg0->unk20++;
-            if (arg0->unk20 < arg0->unk10->unk8) {
-                arg0->unk24 = func_1516C878((TextBoxConfig *)arg0->unk10, arg0->unk20, arg0->unkD);
-                arg0->unk18 = 10;
-                arg0->unk15 = 0x10;
-                arg0->unk10->unk0 |= 0x2000;
-                if (arg0->unk10->unk2C != NULL) {
-                    arg0->unk10->unk2C(arg0->unk10, arg0->unk20 - 1, arg0->unk15);
+        box->textAlpha = box->timer / 10.0f * 255.0f;
+        if (box->timer == 0) {
+            box->page++;
+            if (box->page < box->config->numPages) {
+                box->text = func_1516C878(box->config, box->page, box->source);
+                box->fadeTimer = 10;
+                box->state = TEXTBOX_STATE_TEXT_IN;
+                box->config->flags |= TEXTBOX_CB_PAGE_ENDED;
+                if (box->config->callback != NULL) {
+                    box->config->callback(box->config, box->page - 1, box->state);
                 }
-                arg0->unk10->unk0 &= ~0x2000;
+                box->config->flags &= ~TEXTBOX_CB_PAGE_ENDED;
             } else {
-                arg0->unk18 = 5;
-                arg0->unk15 = 0x80;
-                arg0->unk28 = 1.0f;
-                arg0->unk2C = 0.25f;
+                box->fadeTimer = 5;
+                box->state = TEXTBOX_STATE_SHRINK;
+                box->scale = 1.0f;
+                box->scaleSpeed = 0.25f;
             }
         }
-        if (!flag) {
+        if (!skip) {
             break;
         }
-    case 0x10:
-        func_150428D4(arg0->unk24, &sp44, &sp40, &sp3C);
-        arg0->unk30 = sp44 >> 1;
-        arg0->unk34 = sp40 >> 1;
-        arg0->unk18 -= D_800BE9A0;
-        arg0->unk18 = (arg0->unk18 < 0) ? 0 : arg0->unk18;
-        if (flag) {
-            arg0->unk18 = 0;
+        /* fallthrough */
+    case TEXTBOX_STATE_TEXT_IN:
+        func_150428D4(box->text, &width, &height, &advance);
+        box->halfTextWidth = width >> 1;
+        box->halfTextHeight = height >> 1;
+        box->fadeTimer -= D_800BE9A0;
+        box->fadeTimer = (box->fadeTimer < 0) ? 0 : box->fadeTimer;
+        if (skip) {
+            box->fadeTimer = 0;
         }
-        arg0->unk1A = (10.0f - arg0->unk18) / 10.0f * 255.0f;
-        if (arg0->unk18 == 0) {
-            arg0->unk16 = arg0->unk10->unk26;
-            arg0->unk15 = 0x20;
-            arg0->unk10->unk0 |= 0x4000;
+        box->textAlpha = (10.0f - box->fadeTimer) / 10.0f * 255.0f;
+        if (box->fadeTimer == 0) {
+            box->timer = box->config->duration;
+            box->state = TEXTBOX_STATE_SHOW;
+            box->config->flags |= TEXTBOX_CB_PAGE_SHOWN;
         }
-        if (!flag) {
+        if (!skip) {
             break;
         }
-    case 0x20: {
+        /* fallthrough */
+    case TEXTBOX_STATE_SHOW: {
         s32 bits;
-        done = 0;
-        if ((u16)(arg0->unk10->unk0 & 0x4000)) {
-            if (arg0->unk10->unk2C != NULL) {
-                arg0->unk10->unk2C(arg0->unk10, arg0->unk20, arg0->unk15);
+
+        advancePage = FALSE;
+        // matching: the (u16) casts on these two flag tests each take one ugen temp register
+        if ((u16)(box->config->flags & TEXTBOX_CB_PAGE_SHOWN)) {
+            if (box->config->callback != NULL) {
+                box->config->callback(box->config, box->page, box->state);
             }
-            arg0->unk10->unk0 &= ~0x4000;
+            box->config->flags &= ~TEXTBOX_CB_PAGE_SHOWN;
         }
-        arg0->unk16 -= D_800BE9A0;
-        arg0->unk16 = (arg0->unk16 < 0) ? 0 : arg0->unk16;
-        if ((u16)(arg0->unk10->unk0 & 0x10) && arg0->unk14 == 0) {
-            if (!(arg0->unk10->unk0 & 0x20) || func_151F2CDC() == 0) {
-                if ((arg0->unk10->unk0 & 0x80) && arg0->unk20 + 1 == arg0->unk10->unk8) {
-                    if (D_800BE710[0] & 0x4000) {
-                        arg0->unk20 = -1;
-                        done = 1;
+        box->timer -= D_800BE9A0;
+        box->timer = (box->timer < 0) ? 0 : box->timer;
+        if ((u16)(box->config->flags & TEXTBOX_INPUT) && box->unk14 == 0) {
+            if (!(box->config->flags & TEXTBOX_INPUT_CHECK) || func_151F2CDC() == 0) {
+                if ((box->config->flags & TEXTBOX_B_RESTARTS) && box->page + 1 == box->config->numPages) {
+                    if (D_800BE710[0] & B_BUTTON) {
+                        box->page = -1;
+                        advancePage = TRUE;
                         D_800D1994 = 0;
-                    } else if (D_800BE710[0] & 0x8000) {
-                        done = 1;
+                    } else if (D_800BE710[0] & A_BUTTON) {
+                        advancePage = TRUE;
                     }
-                } else if (D_800BE710[0] & 0x8000) {
-                    done = 1;
-                } else if (!(arg0->unk10->unk0 & 0x40) && (D_800BE710[0] & 0x4000)) {
-                    done = 1;
-                    arg0->unk20 = arg0->unk10->unk8;
+                } else if (D_800BE710[0] & A_BUTTON) {
+                    advancePage = TRUE;
+                } else if (!(box->config->flags & TEXTBOX_NO_B_SKIP) && (D_800BE710[0] & B_BUTTON)) {
+                    advancePage = TRUE;
+                    box->page = box->config->numPages;
                 }
             }
         }
-        bits = arg0->unk10->unk0 & 0xF00;
-        if (bits & 0x100) {
-            arg0->unk10->unk0 &= ~0x100;
-            done = 1;
-            bits = arg0->unk10->unk0 & 0xF00;
+        bits = box->config->flags & (TEXTBOX_CLOSE | TEXTBOX_HOLD | TEXTBOX_SKIP_ANIM | 0x800);
+        if (bits & TEXTBOX_CLOSE) {
+            box->config->flags &= ~TEXTBOX_CLOSE;
+            advancePage = TRUE;
+            bits = box->config->flags & (TEXTBOX_CLOSE | TEXTBOX_HOLD | TEXTBOX_SKIP_ANIM | 0x800);
         }
-        if (!(bits & 0x200) && done) {
-            arg0->unk16 = 10;
-            arg0->unk15 = 0x40;
+        if (!(bits & TEXTBOX_HOLD) && advancePage) {
+            box->timer = 10;
+            box->state = TEXTBOX_STATE_TEXT_OUT;
         }
     }
         break;
-    case 0x80:
-        if (arg0->unk10->unk0 & 2) {
-            arg0->unk18 -= D_800BE9A0;
-            arg0->unk18 = (arg0->unk18 < 0) ? 0 : arg0->unk18;
-            arg0->unk1B[0] = arg0->unk18 / 5.0f * 85.0f;
-            arg0->unk1B[1] = arg0->unk1B[0];
-            arg0->unk1B[2] = arg0->unk1B[0];
+    case TEXTBOX_STATE_SHRINK:
+        if (box->config->flags & TEXTBOX_BUBBLES) {
+            box->fadeTimer -= D_800BE9A0;
+            box->fadeTimer = (box->fadeTimer < 0) ? 0 : box->fadeTimer;
+            box->bubbleAlpha[0] = box->fadeTimer / 5.0f * 85.0f;
+            box->bubbleAlpha[1] = box->bubbleAlpha[0];
+            box->bubbleAlpha[2] = box->bubbleAlpha[0];
         } else {
-            arg0->unk28 -= arg0->unk2C * D_800BE9A4;
+            box->scale -= box->scaleSpeed * D_800BE9A4;
         }
-        if (arg0->unk28 < 0.0f || arg0->unk18 == 0) {
-            arg0->unk28 = 0.0f;
-            arg0->unk15 = 0;
-            arg0->unk20 = 0;
-            arg0->unk10->unk0 |= 0x1000;
-            if (arg0->unk10->unk2C != NULL) {
-                arg0->unk10->unk2C(arg0->unk10, arg0->unk20, arg0->unk15);
+        if (box->scale < 0.0f || box->fadeTimer == 0) {
+            box->scale = 0.0f;
+            box->state = 0;
+            box->page = 0;
+            box->config->flags |= TEXTBOX_CB_CLOSED;
+            if (box->config->callback != NULL) {
+                box->config->callback(box->config, box->page, box->state);
             }
-            arg0->unk10->unk0 &= ~0x1000;
-            D_800CC4B3[arg0->unk10->unk9][0] = 0;
-            *(s16 *)((u8 *)sp48 + 0x6CC) = 0;
-            arg0->unk10->unk8 = 0;
-            func_1516972C((struct102 *)arg0);
+            box->config->flags &= ~TEXTBOX_CB_CLOSED;
+            D_800CC4B3[box->config->objIndex][0] = 0;
+            *(s16 *)((u8 *)player + 0x6CC) = 0; /* struct108 has no field here yet */
+            box->config->numPages = 0;
+            func_1516972C((struct102 *)box);
         }
         break;
     }
-    func_1516CC58(arg0);
+    func_1516CC58(box);
 }
 
 typedef struct {
