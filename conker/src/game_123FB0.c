@@ -49,7 +49,7 @@ void func_150F6B00(Camera *actor) {
         }
         vertical = -20.0f;
         func_1509BFB0(3, 0x4003, 3, (s32)lateral, (s32)vertical, (s32)LERP(-5530.0f, 1198.0f, blend)); // z of the segment ends
-        func_15049688(&actor->yaw, func_15048FC8((struct17 *)&D_800D9A50) - 180.0f, (f32 *)&actor->unk7C8, 8.0f, 10.0f, actor->dt);
+        func_15049688(&actor->yaw, func_15048FC8((struct17 *)&D_800D9A50) - 180.0f, &actor->yawEaseVel, 8.0f, 10.0f, actor->dt);
         actor->yawRad = actor->yaw * 0.01745329238f; // degrees to radians
     } else {
         actor->flags &= 0x3FFFEFFF;

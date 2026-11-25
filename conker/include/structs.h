@@ -2134,7 +2134,7 @@ struct Camera {
     /* 0x7BC */ f32 unk7BC;
     /* 0x7C0 */ f32 unk7C0;
     /* 0x7C4 */ u8 pad7C4[0x4];
-    /* 0x7C8 */ s32 unk7C8;
+    /* 0x7C8 */ f32 yawEaseVel;                      /* velocity of yaw while func_15049688 eases it (game_14F130.c, game_123FB0.c) */
     /* 0x7CC */ s32 unk7CC;
     /* 0x7D0 */ f32 sideVel;
     /* 0x7D4 */ f32 liftVel;
@@ -2213,15 +2213,16 @@ struct Camera {
     /* 0x960 */ f32 unk960;
     /* 0x964 */ f32 unk964;
     /* 0x968 */ f32 unk968;
-    /* 0x96C */ f32 unk96C;
-    /* 0x970 */ f32 unk970;
+    /* 0x96C */ f32 speed;                           /* yaw easing speed and limit for func_15049688 (game_14F130.c) */
+    /* 0x970 */ f32 limit;
     /* 0x974 */ f32 unk974;
     /* 0x978 */ f32 unk978;
-    /* 0x97C */ f32 unk97C;
-    /* 0x980 */ f32 unk980;
+    /* 0x97C */ f32 targetSpeed;
+    /* 0x980 */ f32 targetLimit;
     /* 0x984 */ f32 unk984;
     /* 0x988 */ f32 unk988;
-    /* 0x98C */ u8 pad98C[0x8];
+    /* 0x98C */ f32 speedVel;
+    /* 0x990 */ f32 limitVel;
     /* 0x994 */ f32 sideOffset;
     /* 0x998 */ f32 sideOffsetVel;
     /* 0x99C */ f32 sideOffsetTarget;

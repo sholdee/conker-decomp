@@ -441,11 +441,11 @@ void func_15129934(Camera *cam) {
         }
         cam->unk974 = 1.0f;
         cam->unk964 = 1.0f;
-        cam->unk97C = 1.0f;
-        cam->unk96C = 1.0f;
+        cam->targetSpeed = 1.0f;
+        cam->speed = 1.0f;
         cam->unk978 = 2.0f;
         cam->unk968 = 2.0f;
-        cam->unk980 = 2.0f;
-        cam->unk970 = 2.0f;
+        cam->targetLimit = 2.0f;
+        cam->limit = 2.0f;
     }
 }
