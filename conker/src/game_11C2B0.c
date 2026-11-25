@@ -947,8 +947,8 @@ extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
 extern void func_15102B38(struct127 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
 s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
 
-/* Fires a shot from gun slot `slot` of `actor` (only once actor->unk2EC reaches 90),
- * with a spark burst and a trail at the muzzle. */
+/* Fires a projectile (func_151C229C) from gun slot `slot` of `actor` once actor->unk2EC
+ * reaches 90, with a spark burst and a func_15102B38 effect at the muzzle. */
 s32 func_150F03F8(actor, slot, arg2, arg3)
     struct127 *actor;
     u8 slot;
@@ -1489,115 +1489,116 @@ void func_150F1170(TrailEmitter *emitter) {
     }
 }
 
-void func_150F15F8(s32 arg0, s32 arg1, u8 arg2) {
-    s32 *p = &arg0;
-    s32 q;
-    s32 b0;
+/* Message handler of an actor's trail emitter: released by message 0x43 for its actor,
+ * other messages go to the generic func_15149514. */
+void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
+    TrailEmitter **self = &emitter; // matching: address-taken args stay in their stack slots
+    ActorMsg **msg = (ActorMsg **)&data;
+    TrailLink *link;
+    struct127 *msgActor;
 
-    if (arg2 == 0x43) {
-        b0 = *(s32 *)arg1;
-        q = *p + 0x28;
-        if ((b0 == *(s32 *)q) || (*(u8 *)(q + 4) == *(u8 *)(*(s32 *)&arg1 + 4))) {
-            func_1516972C((struct102 *)*p);
+    if (type == 0x43) {
+        msgActor = ((ActorMsg *)data)->ref.actor;
+        link = &(*self)->link;
+        if ((msgActor == link->actor) || (link->actorId == (*msg)->ref.actorId)) {
+            func_1516972C((struct102 *)*self);
         }
     } else {
-        q = *p + 0x28;
-        func_15149514(arg1, arg2, q, q + 4, *p);
-    }
-}
-
-struct func150F1684_sub {
-    s32 unk0;
-    u8 unk4;
-};
-
-void func_150F1684(struct func150F1684_sub *arg0, struct func150F1684_sub *arg1, u8 arg2) {
-    struct func150F1684_sub *temp = (struct func150F1684_sub *)((s32)arg0 + 0x18);
-    s32 word;
-
-    if (arg2 == 0x43) {
-        word = arg1->unk0;
-        if ((temp->unk0 == word) || (arg1->unk4 == temp->unk4)) {
-            func_1516972C((struct102 *)arg0);
-        }
+        link = &(*self)->link;
+        func_15149514(data, type, (s32)&link->actor, (s32)&link->actorId, (s32)*self);
     }
 }
 
 typedef struct {
-    u8 pad0[4];
-    u8 unk4;
-    u8 pad5[0x8F];
-    s32 unk94;
-    u8 pad98[0x13C];
-    s32 unk1D4;
-} Struct150F16DC;
+    struct127 *actor;
+    u8 actorId;
+} ActorRef;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x18];
+    /* 0x18 */ ActorRef ref;
+} ActorBound;
+
+/* Message handler of an object bound to an actor: released by message 0x43 for that actor. */
+void func_150F1684(ActorBound *self, ActorMsg *msg, u8 type) {
+    ActorRef *ref = &self->ref;
+    struct127 *msgActor;
+
+    if (type == 0x43) {
+        msgActor = msg->ref.actor;
+        if ((ref->actor == msgActor) || (msg->ref.actorId == ref->actorId)) {
+            func_1516972C((struct102 *)self);
+        }
+    }
+}
 
 extern f32 D_800A168C[][4][2][3];
 extern f32 D_800A174C[][4][2][3];
 extern u8 D_800A180C[][2];
 
-void func_150F16DC(Struct150F16DC *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    struct17 pos;
-    u8 idx;
+/* Spark burst and func_15102B38 effect at gun slot `slot` of `actor`, muzzle variant
+ * `variant` (0-3); actors with id 0x23 use the second table set. */
+void func_150F16DC(actor, slot, variant, arg3, arg4)
+    struct127 *actor;
+    u8 slot;
+    u8 variant;
+    u8 arg3;
+    s32 arg4;
+{
+    struct17 muzzle;
+    u8 kind;
 
-    if (arg0 == NULL) {
+    if (actor == NULL) {
         return;
     }
-    if (((u8 *)&arg2)[3] >= 4) {
+    if (variant >= 4) {
         return;
     }
-    if (((u8 *)&arg1)[3] >= 2) {
+    if (slot >= 2) {
         return;
     }
-    if (arg0->unk4 == 0x23) {
-        idx = 1;
+    if (actor->id == 0x23) {
+        kind = 1;
     } else {
         const u8 masks[2] = { 4, 2 };
-        if (masks[((u8 *)&arg1)[3]] & arg0->unk94) {
+        if (masks[slot] & actor->unk94) {
             return;
         }
-        idx = 0;
+        kind = 0;
     }
     {
-        s32 srcs[1];
-        s32 dsts[1];
+        f32 *src[1];
+        f32 *dst[1];
         Header hdr;
-        Header2 hdr2;
-        f32 sp5C[2];
-        s32 sp58;
+        Header2 origin;
+        f32 params[2];
+        s32 randB;
         f32 rand0;
-        s32 sp50;
-        f32 (*sp4C)[3];
-        u8 *sp48;
+        s32 randA;
 
-        if (arg0->unk1D4 == 0) {
+        if (actor->unk1D4 == NULL) {
             return;
         }
-        srcs[0] = (s32)D_800A168C[idx][((u8 *)&arg2)[3]][((u8 *)&arg1)[3]];
-        dsts[0] = (s32)&pos;
-        sp50 = (D_800A180C[idx][((u8 *)&arg1)[3]] << 6) + arg0->unk1D4;
-        sp48 = &D_800A180C[idx][((u8 *)&arg1)[3]];
-        sp4C = D_800A168C[idx][((u8 *)&arg2)[3]];
-        func_15145EA4(srcs, dsts, sp50, 1);
+        src[0] = D_800A168C[kind][variant][slot];
+        dst[0] = &muzzle.unk0;
+        func_15145EA4(src, dst, (Mtx *)actor->unk1D4 + D_800A180C[kind][slot], 1);
         hdr.unk0 = 3;
         hdr.unk1 = -1;
         hdr.unk2 = (func_150ADA20() % 5U) + 4;
         hdr.unk4 = 0;
-        hdr2.unk0 = pos.unk0;
-        hdr2.unk4 = pos.unk4;
-        hdr2.unk8 = pos.unk8;
-        sp50 = (func_150ADA20() % 51U) + 0x50;
-        func_151602C0(&hdr, &hdr2, sp50, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
-                      ((u8 *)&arg3)[3], arg4);
-        sp5C[1] = (func_150ADA68() * 701.0f + 1925.0f) * 0.001000000047f;
-        sp5C[0] = (func_150ADA68() * 1155.0f + 1526.0f) * 0.1000000015f;
-        sp50 = func_150ADA20();
-        sp58 = func_150ADA20();
+        origin.unk0 = muzzle.unk0;
+        origin.unk4 = muzzle.unk4;
+        origin.unk8 = muzzle.unk8;
+        randA = (func_150ADA20() % 51U) + 80;
+        func_151602C0(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
+        params[1] = (func_150ADA68() * 701.0f + 1925.0f) * 0.001000000047f;
+        params[0] = (func_150ADA68() * 1155.0f + 1526.0f) * 0.1000000015f;
+        randA = func_150ADA20();
+        randB = func_150ADA20();
         rand0 = func_150ADA68() * 1877.0f + 2414.0f;
-        func_15102B38((struct127 *)arg0, *sp48, sp4C[((u8 *)&arg1)[3]],
-                      D_800A174C[idx][((u8 *)&arg2)[3]][((u8 *)&arg1)[3]], sp5C,
-                      (sp50 % 6U) + 8, (sp58 % 1U) + 0xFF, rand0, &pos, 0xFF, 0, -1,
-                      ((u8 *)&arg3)[3], arg4);
+        func_15102B38(actor, D_800A180C[kind][slot], D_800A168C[kind][variant][slot],
+                      D_800A174C[kind][variant][slot], params, (randA % 6U) + 8, (randB % 1U) + 0xFF,
+                      rand0, &muzzle, 0xFF, 0, -1, arg3, arg4);
     }
 }
 
