@@ -1,5 +1,9 @@
 #include <ultra64.h>
+/* functions.h types func_150ADA20 as returning u8; it returns a full u32 random number. */
+#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u32 func_150ADA20(void);
 #include "variables.h"
 #include "libc/string.h"
 
@@ -134,11 +138,11 @@ void func_1504715C(FloorProbe *probe, struct127 *obj);
 
 /* Spawns a dust emitter effect (func_15191D54) on `owner`'s bone; it emits dust particles at `offset`
  * in the bone's space at a randomised rate. Returns the effect, or NULL without an owner. */
-struct260 *func_15191BE0(struct127 *owner, vertex *offset, u8 bone, f32 rateBase, f32 rateRandom,
-                         s16 duration, f32 gravityBase, f32 gravityRandom, s16 lifetimeBase,
-                         s16 lifetimeRandom, u8 alphaBase, u8 alphaRandom, f32 sizeBase, f32 sizeRandom,
-                         f32 unk60, u8 kind, u8 arg16, s32 arg17) {
-    struct260 *effect;
+DustEmitter *func_15191BE0(struct127 *owner, vertex *offset, u8 bone, f32 rateBase, f32 rateRandom,
+                          s16 duration, f32 gravityBase, f32 gravityRandom, s16 lifetimeBase,
+                          s16 lifetimeRandom, u8 alphaBase, u8 alphaRandom, f32 sizeBase, f32 sizeRandom,
+                          f32 unk60, u8 kind, u8 arg16, s32 arg17) {
+    DustEmitter *effect;
     DustEmitterData data;
 
     if (owner == NULL) {
@@ -166,122 +170,73 @@ struct260 *func_15191BE0(struct127 *owner, vertex *offset, u8 bone, f32 rateBase
     data.kind = kind;
 
     // the header's struct37 * parameter is really the size of the effect's data
-    effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x1D, -1, (duration == -1) ? 0 : 1, 0x1D,
-                           (struct37 *)sizeof(data), arg16, arg17);
+    effect = (DustEmitter *)func_15149130((duration == -1) ? 300 : duration, -1, 0x1D, -1,
+                                          (duration == -1) ? 0 : 1, 0x1D, (struct37 *)sizeof(data), arg16,
+                                          arg17);
     if (effect != NULL) {
-        memcpy(&((DustEmitter *)effect)->data, &data, sizeof(data));
+        memcpy(&effect->data, &data, sizeof(data));
     }
     return effect;
 }
 
-struct Struct15191D54Owner {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x198];
-    s32 unk1D4;
-};
-
-struct Struct15191D54Local {
-    struct Struct15191D54Owner *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    Header2 unk8;
-    s32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    s32 unk28[8];
-    f32 unk48;
-    f32 unk4C;
-    s16 unk50;
-    s16 unk52;
-    u8 unk54;
-    u8 unk55;
-    u8 pad56[2];
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    u8 unk64;
-    u8 pad65[3];
-};
-
-struct Struct15191D54Arg0 {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    u8 pad10[0x18];
-    struct Struct15191D54Local unk28;
-};
-
-void func_15143134(void *, f32 *, s32);
-s32 func_1514672C(f32 *);
-s32 func_15046F84(f32 *, s32, f32, f32 *);
-DustParticle *func_1519203C(vertex *position, vertex *velocity, f32 gravity, s32 lifetime, u8 alpha,
+void func_15143134(vertex *in, vertex *out, void *matrix);
+s32 func_1514672C(vertex *pos);
+s32 func_15046F84(vertex *pos, s32 arg1, f32 minY, FloorProbe *probe);
+DustParticle *func_1519203C(vertex *position, vertex *velocity, f32 gravity, s16 lifetime, u8 alpha,
                             u8 brightness, f32 size, s32 unused, f32 floorY, FloorData *floor, u8 kind,
                             u8 arg11, s32 arg12);
-extern f32 D_800A80E8;
-extern f32 D_800A80EC;
-extern f32 D_800A80F0;
 
-void func_15191D54(struct Struct15191D54Arg0 *arg0) {
-    struct Struct15191D54Owner *owner;
-    struct Struct15191D54Local *local;
-    f32 spB4[3];
-    f32 scale;
-    f32 spA4[3];
-    f32 rand;
-    s32 flag;
-    u32 r1;
-    u32 r2;
-    f32 dist;
+/* Dust emitter effect update: frees the effect once its owner is gone, otherwise accumulates the
+ * emission rate and spawns one dust particle (func_1519203C) per whole unit at the emitter's bone. */
+void func_15191D54(DustEmitter *effect) {
+    struct127 *owner;
+    DustEmitterData *data;
+    vertex position;
+    f32 floorY;
+    vertex velocity;
+    s32 hit;
+    f32 minY;
 
-    owner = arg0->unk28.unk0;
-    local = &arg0->unk28;
-    if ((owner->unk0 == 0) || (owner->unk3B != local->unk4)) {
-        arg0->unkE = -1;
+    owner = effect->data.owner;
+    data = &effect->data;
+    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+        effect->head.state = -1;
         return;
     }
-    local->unk18 += (local->unk1C + (func_150ADA68() * local->unk20)) * D_800BE9A4;
-    if (local->unk18 > 1.0f) {
-        if (owner->unk1D4 != 0) {
-            func_15143134(&local->unk8, spB4, owner->unk1D4 + local->unk14);
-            if (local->unk60 > 0.0f) {
-                if (func_1514672C(spB4) == 0) {
-                    scale = D_800A80E8;
+    data->accum += (data->rateBase + func_150ADA68() * data->rateRandom) * D_800BE9A4;
+    if (data->accum > 1.0f) {
+        if (owner->unk1D4 != NULL) {
+            func_15143134(&data->offset, &position, (u8 *)owner->unk1D4 + data->matrixOffset);
+            if (data->unk60 > 0.0f) {
+                if (func_1514672C(&position) == 0) {
+                    floorY = -9500.0f;
                 } else {
-                    dist = D_800A80EC;
-                    if (func_15046F84(spB4, 0, dist, &local->unk24) != 0) {
-                        scale = local->unk24;
+                    minY = -9500.0f;
+                    if (func_15046F84(&position, 0, minY, &data->floor) != 0) {
+                        floorY = data->floor.y;
                     } else {
-                        scale = dist;
+                        floorY = minY;
                     }
                 }
             } else {
-                scale = D_800A80F0;
+                floorY = -9500.0f;
             }
             do {
-                flag = (func_150ADA68() < local->unk60) ? 1 : 0;
-                spA4[0] = 0.0f;
-                spA4[1] = 0.0f;
-                spA4[2] = 0.0f;
-                rand = func_150ADA68();
-                r1 = func_150ADA20();
-                r2 = func_150ADA20();
-                func_1519203C((vertex *)spB4, (vertex *)spA4, ((f32)rand * local->unk4C) + local->unk48,
-                              (s16)((r1 % (u32)(local->unk52 + 1)) + local->unk50),
-                              (r2 % (u32)(local->unk55 + 1)) + local->unk54, 0xFF,
-                              (func_150ADA68() * local->unk5C) + local->unk58, flag, scale,
-                              (FloorData *)local->unk28, local->unk64, arg0->unkC, arg0->unk1);
-                local->unk18 -= 1.0f;
-            } while (local->unk18 > 1.0f);
+                hit = (func_150ADA68() < data->unk60) ? TRUE : FALSE;
+                velocity.x = 0.0f;
+                velocity.y = 0.0f;
+                velocity.z = 0.0f;
+                func_1519203C(&position, &velocity,
+                              func_150ADA68() * data->gravityRandom + data->gravityBase,
+                              func_150ADA20() % (data->lifetimeRandom + 1) + data->lifetimeBase,
+                              func_150ADA20() % (data->alphaRandom + 1) + data->alphaBase, 0xFF,
+                              func_150ADA68() * data->sizeRandom + data->sizeBase, hit, floorY,
+                              &data->floor.data, data->kind, effect->head.unkC, effect->head.unk1);
+                data->accum -= 1.0f;
+            } while (data->accum > 1.0f);
         } else {
-            while (local->unk18 > 1.0f) {
-                local->unk18 -= 1.0f;
+            while (data->accum > 1.0f) {
+                data->accum -= 1.0f;
             }
         }
     }
@@ -292,7 +247,7 @@ extern u8 (*D_8008FCD0[])(void);
 
 /* Spawns a dust particle at `position` that pulses in size and splashes when it falls below floorY
  * (update func 0xF, func_1519257C). */
-DustParticle *func_1519203C(vertex *position, vertex *velocity, f32 gravity, s32 lifetime, u8 alpha,
+DustParticle *func_1519203C(vertex *position, vertex *velocity, f32 gravity, s16 lifetime, u8 alpha,
                             u8 brightness, f32 size, s32 unused, f32 floorY, FloorData *floor, u8 kind,
                             u8 arg11, s32 arg12) {
     DustParticle *particle;
@@ -335,7 +290,7 @@ DustParticle *func_1519203C(vertex *position, vertex *velocity, f32 gravity, s32
     }
     desc.flags = flipT | (PARTICLE_LIFETIME | PARTICLE_GRAVITY | PARTICLE_MOVE | PARTICLE_FADE |
                           PARTICLE_HANDLERS | PARTICLE_DRAW_FUNC) | flipS | PARTICLE_LIT;
-    desc.timer = (s16)lifetime + 18;
+    desc.timer = lifetime + 18;
     desc.fadeStart = 18;
     desc.fadeRate = 14;
     desc.primColorMode = 6;
@@ -428,7 +383,8 @@ u8 func_1519257C(DustParticle *particle, struct17 *prevPos) {
     return alive;
 }
 
-extern Header2 D_800A8030[];
+/* Dust emitter presets, indexed by kind (see func_151925C4). */
+extern vertex D_800A8030[];
 extern u8 D_800A8060[];
 extern f32 D_800A8064[];
 extern f32 D_800A8074[];
@@ -441,17 +397,18 @@ extern f32 D_800A80C4[];
 extern f32 D_800A80D4[];
 extern u8 D_800A80E4[];
 
-s32 func_151925C4(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
+/* Spawns the dust emitter preset that suits obj's id (func_15191BE0) for `duration` frames, -1 for
+ * the default. Returns the effect, or NULL when obj is NULL or has no preset. */
+DustEmitter *func_151925C4(struct127 *obj, s16 duration, u8 arg2, s32 arg3) {
     s32 kind;
-    s32 result;
-    u8 mode;
+    DustEmitter *effect;
 
-    if (arg0 == 0) {
-        return 0;
+    if (obj == NULL) {
+        return NULL;
     }
     kind = -1;
-    result = 0;
-    switch (arg0[4]) {
+    effect = NULL;
+    switch (obj->id) {
     case 0:
     case 1:
     case 2:
@@ -470,16 +427,12 @@ s32 func_151925C4(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
         break;
     }
     if (kind != -1) {
-        result = (s32)func_15191BE0((struct Struct15191BE0Arg0 *)arg0, &D_800A8030[kind],
-                               D_800A8060[kind], D_800A8064[kind],
-                               D_800A8074[kind], arg1,
-                               D_800A8084[kind], D_800A8094[kind],
-                               D_800A80A4[kind], D_800A80AC[kind],
-                               0x64, 0x9B, D_800A80B4[kind],
-                               D_800A80C4[kind], D_800A80D4[kind],
-                               D_800A80E4[kind], arg2, arg3);
+        effect = func_15191BE0(obj, &D_800A8030[kind], D_800A8060[kind], D_800A8064[kind], D_800A8074[kind],
+                               duration, D_800A8084[kind], D_800A8094[kind], D_800A80A4[kind],
+                               D_800A80AC[kind], 100, 155, D_800A80B4[kind], D_800A80C4[kind],
+                               D_800A80D4[kind], D_800A80E4[kind], arg2, arg3);
     }
-    return result;
+    return effect;
 }
 
 /* Effect callback for the dust emitter: hands func_15169850 the owner reference. */
