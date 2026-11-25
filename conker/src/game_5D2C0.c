@@ -1,4 +1,5 @@
 #include <ultra64.h>
+/* functions.h declares func_15083568 as void; it returns the new Attachment (declared below). */
 #define func_15083568 func_15083568_orig
 #include "functions.h"
 #undef func_15083568
@@ -13,7 +14,6 @@ extern void func_1503E5F8();
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 extern void func_10004074(void *ptr);
 void func_1518CA04(s32 model);
-s32 func_1503F62C(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4, void *arg5, void *arg6);
 
 /* File header of an attachment model, as returned by func_1502B6BC. */
 typedef struct ModelHeader {
@@ -146,7 +146,7 @@ void func_15031C14(Attachment *att);
 Attachment *func_15083568(struct127 *obj, s32 setId, f32 arg2, s32 arg3);
 void func_1503F5B8(AnimInstance *anim, s32 arg1, s32 animId, f32 arg3, f32 arg4, s32 arg5);
 void func_1503F7B8(AnimInstance *anim);
-
+s32 func_1503F62C(s32 model, s32 animSet, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg5, AnimInstance **anim);
 
 /* Loads the attachment's model, making private per-frame vertex copies when the owner needs them. */
 s32 func_1502FFD8(Attachment *att, struct127 *owner) {
@@ -517,8 +517,8 @@ void func_15031A50(Attachment *att, struct127 *owner);
 
 /* Attaches `model` to bone `bone` of `owner` as part of set `setId`. Returns NULL on failure, or
  * (unless flags & 8) when that model of that set is already attached. */
-Attachment *func_15030AF4(struct127 *owner, s32 model, s32 bone, s32 flags, s32 arg4, s32 arg5, s32 lifetime,
-                          s32 setId, s32 handler, u16 *ownerStates, s32 arg10, s32 parentSet, s32 parentMtx) {
+Attachment *func_15030AF4(struct127 *owner, s32 model, s32 bone, s32 flags, s32 unk15, s32 unk16, s32 lifetime,
+                          s32 setId, s32 handler, u16 *ownerStates, s32 unk17, s32 parentSet, s32 parentMtx) {
     Attachment *att;
     Attachment *next;
     s32 err;
@@ -571,10 +571,10 @@ Attachment *func_15030AF4(struct127 *owner, s32 model, s32 bone, s32 flags, s32 
     att->ownerStates[0] = ownerStates[0];
     att->ownerStates[1] = ownerStates[1];
     att->ownerStates[2] = ownerStates[2];
-    att->unk17 = arg10;
+    att->unk17 = unk17;
     att->anim = NULL;
-    att->unk15 = arg4;
-    att->unk16 = arg5;
+    att->unk15 = unk15;
+    att->unk16 = unk16;
     att->parentSet = parentSet;
     att->parentMtx = parentMtx;
     att->hiddenDLists = 0;
@@ -582,7 +582,7 @@ Attachment *func_15030AF4(struct127 *owner, s32 model, s32 bone, s32 flags, s32 
     att->unk50 = NULL;
     att->updated = 0;
     att->rotZ = 0;
-    if ((arg5 == 4) || (flags & 4)) {
+    if ((unk16 == 4) || (flags & 4)) {
         att->mtx = allocate_memory(2 * sizeof(Mtx), 1, 2, 2);
         if (att->mtx == NULL) {
             err = 1;
@@ -689,6 +689,8 @@ Gfx *func_15030F94(Gfx *gdl, struct127 *owner, s32 view, s32 arg3) {
     return gdl;
 }
 
+/* Finds the matrix to draw `att` with this frame (*mtx) and the bone matrix it follows (*boneMtx).
+ * Returns 0 when none is available yet. */
 s32 func_15031070(Attachment *att, struct127 *owner, Mtx **mtx, Mtx **boneMtx) {
     Attachment *parent;
 
@@ -874,6 +876,7 @@ Gfx *func_150311C4(Gfx *gdl, Attachment *att, struct127 *owner, s32 view, s32 ar
     return gdl;
 }
 
+/* Sets the alpha of attachment number `index` of set `setId` on `owner`. */
 void func_1503192C(struct127 *owner, s32 setId, s32 alpha, s32 index) {
     Attachment *att;
 
@@ -2425,6 +2428,7 @@ s32 func_1503327C(Attachment *att, struct127 *owner) {
     return 0;
 }
 
+/* Hook: removes the attachment after 30 ticks with its owner out of water and unk118 < unk180. */
 s32 func_15033328(Attachment *att, struct127 *owner) {
     s32 delta;
 
@@ -2487,6 +2491,7 @@ s32 func_15033440(Attachment *att, struct127 *owner) {
     return 0;
 }
 
+/* Scrolls the tile of model 0x37's 4th G_SETTILESIZE, wrapping s and t within the tile size. */
 s32 func_150334B8(Attachment *att, struct127 *owner) {
     Gfx *gfx;
     s32 count;
@@ -2792,6 +2797,7 @@ s32 func_15033BDC(AttachmentSound *sound, s32 arg1, s32 *arg2, s32 arg3, s32 arg
     return 1;
 }
 
+/* Hook: removes the attachment once its owner's unk5 becomes 3. */
 s32 func_15033E00(Attachment *att, struct127 *owner) {
     if (owner->unk5 == 3) {
         return 1;
@@ -2799,6 +2805,7 @@ s32 func_15033E00(Attachment *att, struct127 *owner) {
     return 0;
 }
 
+/* Stores every attachment of `owner` into `out` and returns how many there are. */
 s32 func_15033E28(struct127 *owner, Attachment **out) {
     Attachment *head;
     Attachment *att;
