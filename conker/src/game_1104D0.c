@@ -10,7 +10,7 @@ extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 /* 18 bytes copied verbatim from an effect into each particle it spawns. */
 typedef struct {
     s16 unk0[9];
-} EffectParams;
+} SpawnCopyParams;
 
 /*
  * Object type 0x27: moves from pos toward target (a fixed point, a Actor or a followed f32[3]) at
@@ -39,7 +39,7 @@ typedef struct HomingEffect {
     /* 0x4C */ f32 particleAccum;
     /* 0x50 */ f32 sparkAccum;
     /* 0x54 */ f32 groundY;
-    /* 0x58 */ EffectParams params;
+    /* 0x58 */ SpawnCopyParams params;
     /* 0x6A */ u8 pad6A[2];
     /* 0x6C */ s32 unk6C;
     /* 0x70 */ u8 unk70;
@@ -231,7 +231,7 @@ typedef struct {
     /* 0x20 */ Vec3f unk20;
     /* 0x2C */ Vec3f unk2C;
     /* 0x38 */ Vec3f unk38;
-    /* 0x44 */ EffectParams params;
+    /* 0x44 */ SpawnCopyParams params;
     /* 0x56 */ s16 unk56;
     /* 0x58 */ u8 unk58;
     /* 0x59 */ u8 unk59;

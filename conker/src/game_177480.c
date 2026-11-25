@@ -26,7 +26,7 @@ typedef struct {
     /* 0x44 */ s16 unk24Timer;
     /* 0x46 */ s16 unk156;
     /* 0x48 */ s16 unk158;
-} EffectParams;
+} FlickerParams;
 
 /* Effect instance shared by the update callbacks in this file. */
 typedef struct {
@@ -52,7 +52,7 @@ typedef struct {
     /* 0x075 */ u8 pad75[0x4B];
     /* 0x0C0 */ Vtx vtxTemplate[4];
     /* 0x100 */ Vtx *vtxBuffers[4];
-    /* 0x110 */ EffectParams params;
+    /* 0x110 */ FlickerParams params;
 } Effect;
 
 #define EFFECT_WIDTH_GROWN  2
@@ -97,7 +97,7 @@ Vtx *func_15149FD0(Effect *effect, s16 index) {
 
 /* Flickers width, height and unk24 towards random targets that are re-rolled on timers. */
 s32 func_1514A19C(Effect *effect) {
-    EffectParams *params;
+    FlickerParams *params;
 
     params = &effect->params;
 
@@ -130,7 +130,7 @@ s32 func_1514A19C(Effect *effect) {
 
 /* Grows width and height towards their targets; once both are within 95%, calls func_1513F680(..., 4, ...). */
 s32 func_1514A380(Effect *effect) {
-    EffectParams *params;
+    FlickerParams *params;
     s32 done;
 
     done = TRUE;
