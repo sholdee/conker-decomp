@@ -3,6 +3,31 @@
 #include "variables.h"
 
 
+/* Per-kind data of the swinging-light particle (Particle.extra): a sine swing whose amplitude and speed
+ * either ramp for `timer` seconds after a hit or ease back toward their targets. */
+typedef struct {
+    /* 0x00 */ f32 out;         // current swing angle, used as the particle's roll
+    /* 0x04 */ f32 amp;
+    /* 0x08 */ f32 phase;
+    /* 0x0C */ f32 speed;
+    /* 0x10 */ f32 targetAmp;
+    /* 0x14 */ f32 targetSpeed;
+    /* 0x18 */ f32 timer;
+    /* 0x1C */ f32 ampRate;
+    /* 0x20 */ f32 speedRate;
+} LampSwing; // size 0x24
+
+/* Head of a pooled physics particle (full layout in game_15F680.c), carrying a LampSwing as its extra data. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x18];
+    /* 0x018 */ f32 sizeXZ;
+    /* 0x01C */ f32 sizeY;
+    /* 0x020 */ u8 pad20[0x18];
+    /* 0x038 */ vertex pos;
+    /* 0x044 */ u8 pad44[0x170 - 0x44];
+    /* 0x170 */ LampSwing swing;
+} Particle;
+
 typedef struct {
     f32 x, y, z;
 } Vec3_151B8DB0;
@@ -275,60 +300,50 @@ void func_151B8DB0(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
 }
 
 
-typedef struct {
-    f32 out;
-    f32 amp;
-    f32 phase;
-    f32 speed;
-    f32 targetAmp;
-    f32 targetSpeed;
-    f32 timer;
-    f32 ampRate;
-    f32 speedRate;
-} Osc151B9214;
 
-s32 func_151B9214(u8 *arg0) {
-    Osc151B9214 *s;
+/* Particle update (D_800898B0 slot 9): advances the swing and its amplitude/speed ramps. */
+s32 func_151B9214(Particle *particle) {
+    LampSwing *swing = &particle->swing;
 
-    s = (Osc151B9214 *)(arg0 + 0x170);
-    s->phase += s->speed * D_800BE9A4;
-    s->phase = func_15144B68(s->phase);
-    s->out = sinf(s->phase) * s->amp;
-    if (s->timer > 0.0f) {
-        s->timer -= D_800BE9A4;
-        s->speed += s->speedRate * D_800BE9A4;
-        s->amp = s->amp + s->ampRate * D_800BE9A4;
+    swing->phase += swing->speed * D_800BE9A4;
+    swing->phase = func_15144B68(swing->phase);
+    swing->out = sinf(swing->phase) * swing->amp;
+    if (swing->timer > 0.0f) {
+        swing->timer -= D_800BE9A4;
+        swing->speed += swing->speedRate * D_800BE9A4;
+        swing->amp += swing->ampRate * D_800BE9A4;
     } else {
-        s->speed += (s->targetSpeed - s->speed) * 0.0234f;
-        s->amp += (s->targetAmp - s->amp) * 0.0234f;
+        swing->speed += (swing->targetSpeed - swing->speed) * 0.0234f;
+        swing->amp += (swing->targetAmp - swing->amp) * 0.0234f;
     }
     return 1;
 }
 
-void func_150A8050(f32 (*)[4], f32, f32, f32);
+/* Matrix callback (D_8008998C slot 4): the particle rolled by its swing angle, scaled by its size and
+ * placed at its position. */
+s32 func_151B9310(Mtx *dest, Particle *particle) {
+    f32 mtx[4][4];
+    s32 pad[2]; // matching: unused stack space below the matrix
 
-s32 func_151B9310(s32 *arg0, s32 *arg1) {
-    f32 m[18];
+    func_150A8050(mtx, 0.0f, 0.0f, particle->swing.out);
 
-    func_150A8050((f32 (*)[4])&m[2], 0.0f, 0.0f, *(f32 *)((u8 *)arg1 + 0x170));
+    mtx[3][0] = particle->pos.x;
+    mtx[3][1] = particle->pos.y;
+    mtx[3][2] = particle->pos.z;
 
-    m[14] = *(f32 *)((u8 *)arg1 + 0x38);
-    m[15] = *(f32 *)((u8 *)arg1 + 0x3C);
-    m[16] = *(f32 *)((u8 *)arg1 + 0x40);
+    mtx[0][0] = particle->sizeXZ * mtx[0][0];
+    mtx[0][1] = particle->sizeXZ * mtx[0][1];
+    mtx[0][2] = particle->sizeXZ * mtx[0][2];
 
-    m[2] = *(f32 *)((u8 *)arg1 + 0x18) * m[2];
-    m[3] = *(f32 *)((u8 *)arg1 + 0x18) * m[3];
-    m[4] = *(f32 *)((u8 *)arg1 + 0x18) * m[4];
+    mtx[1][0] = particle->sizeY * mtx[1][0];
+    mtx[1][1] = particle->sizeY * mtx[1][1];
+    mtx[1][2] = particle->sizeY * mtx[1][2];
 
-    m[6] = *(f32 *)((u8 *)arg1 + 0x1C) * m[6];
-    m[7] = *(f32 *)((u8 *)arg1 + 0x1C) * m[7];
-    m[8] = *(f32 *)((u8 *)arg1 + 0x1C) * m[8];
+    mtx[2][0] = particle->sizeXZ * mtx[2][0];
+    mtx[2][1] = particle->sizeXZ * mtx[2][1];
+    mtx[2][2] = particle->sizeXZ * mtx[2][2];
 
-    m[10] = *(f32 *)((u8 *)arg1 + 0x18) * m[10];
-    m[11] = *(f32 *)((u8 *)arg1 + 0x18) * m[11];
-    m[12] = *(f32 *)((u8 *)arg1 + 0x18) * m[12];
-
-    guMtxF2L((f32 (*)[4])&m[2], (Mtx *)arg0);
+    guMtxF2L(mtx, dest);
     return 1;
 }
 
@@ -394,11 +409,9 @@ s32 func_151B9408(u8 *actor) {
     return 1;
 }
 
-extern f32 D_800AA56C;
-extern f32 D_800AA570;
-
-void func_151B9660(s32 *arg0) {
-    *(f32 *)((u8 *)arg0 + 0x188) = 5.0f;
-    *(f32 *)((u8 *)arg0 + 0x18C) = D_800AA56C;
-    *(f32 *)((u8 *)arg0 + 0x190) = D_800AA570;
+/* Event 0x1B handler for model 0x22 (see func_15133588): starts a 5-unit ramp of the swing. */
+void func_151B9660(Particle *particle) {
+    particle->swing.timer = 5.0f;
+    particle->swing.ampRate = 9.256800652f;
+    particle->swing.speedRate = 0.005399999209f;
 }
