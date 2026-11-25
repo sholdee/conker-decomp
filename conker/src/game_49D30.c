@@ -105,7 +105,6 @@ extern u8 D_800C3C9C;
 extern u8 D_800D2E40;
 extern s32 func_1501D2C4(s32, s32);
 extern u8 D_800C35AA;
-extern f32 D_80096A1C;
 extern void func_1507F640(void);
 extern void func_1508F060(void);
 extern void func_150242F8(s32, s32);
@@ -2736,62 +2735,62 @@ SeqSubtitle *func_150234A4(s32 track, s32 replaceOpen) {
     return slot;
 }
 
-s32 func_150235DC(s32 arg0) {
-    struct127 *temp_v0;
-    struct127 *temp_v1;
-    void *temp_a0;
-    s8 temp_v0_2;
+/* Give object 1 back to normal control after a cutscene: stop it, drop it to the floor or leave it
+   swimming, and clear its movement locks. */
+s32 func_150235DC(s32 scene) {
+    struct127 *obj;
+    void *unk31C;
+    s8 zero;
 
     D_800CC2D0[0].unk25C &= ~0x200;
     if (D_800C35AA == 0) {
-        temp_v0 = func_15083E90(1);
-        if (temp_v0 != 0) {
-            temp_v1 = temp_v0;
-            D_800C3E78 = temp_v0 - D_800CC2D0;
-            temp_a0 = temp_v0->unk31C;
-            temp_v0->xz_velocity = 0.0f;
-            if (temp_a0 != 0) {
-                *(f32 *)temp_a0 = 0.0f;
+        obj = func_15083E90(1);
+        if (obj != NULL) {
+            D_800C3E78 = obj - D_800CC2D0;
+            unk31C = obj->unk31C;
+            obj->xz_velocity = 0.0f;
+            if (unk31C != NULL) {
+                *(f32 *)unk31C = 0.0f;
             }
-            *(f32 *)((u8 *)temp_v0 + 0x54) = 0.0f;
-            temp_v0->unkCC = 0;
-            temp_v0->unkD0 = 0;
+            *(f32 *)&obj->pad54 = 0.0f;
+            obj->unkCC = 0;
+            obj->unkD0 = 0;
 
-            if ((D_80096A1C != temp_v0->unk118) && (temp_v0->y_position < temp_v0->unk118)) {
-                temp_v0->in_water = 1;
-                temp_v0->y_velocity = 0.0f;
-                temp_v0->gravity = 0.0f;
-                if (((temp_v0->unk118 - 50.0f) < temp_v0->unk1A6) || ((((u8 *)temp_v0->unk31C)[0x20] & 1) != 0)) {
-                    temp_v1->unkB2 = 0;
+            if ((-10000.0f != obj->unk118) && (obj->y_position < obj->unk118)) {
+                obj->in_water = 1;
+                obj->y_velocity = 0.0f;
+                obj->gravity = 0.0f;
+                if (((obj->unk118 - 50.0f) < obj->unk1A6) || ((((u8 *)obj->unk31C)[0x20] & 1) != 0)) {
+                    obj->unkB2 = 0;
                     func_1508F060();
                 }
             } else {
-                temp_v0->in_water = 0;
-                temp_v0->unkB2 = 0;
-                temp_v0->y_velocity = -4.0f;
-                temp_v0->y_position = temp_v0->unk180;
-                temp_v0->unk1CC = temp_v0->unk180;
-                temp_v0->gravity = 5.0f;
+                obj->in_water = 0;
+                obj->unkB2 = 0;
+                obj->y_velocity = -4.0f;
+                obj->y_position = obj->unk180;
+                obj->unk1CC = obj->unk180;
+                obj->gravity = 5.0f;
             }
 
-            temp_v1->unk81 = 0;
-            temp_v1->unk83 = 0;
-            temp_v1->disable_run = 0;
-            temp_v1->disable_jump = 0;
-            temp_v1->stunned = 0;
-            temp_v1->unk28 = temp_v1->y_position - temp_v1->unk180;
-            D_800D154C = temp_v1;
+            obj->unk81 = 0;
+            obj->unk83 = 0;
+            obj->disable_run = 0;
+            obj->disable_jump = 0;
+            obj->stunned = 0;
+            obj->unk28 = obj->y_position - obj->unk180;
+            D_800D154C = obj;
             func_1507F640();
-            ((u8 *)temp_v1->unk31C)[0x23] = 0;
-            temp_v1->unk287 = 0;
-            temp_v0_2 = temp_v1->unk287;
-            temp_v1->unk276 = 0;
-            temp_v1->unk282 = 0;
-            temp_v1->unk278 = 0;
-            temp_v1->unk286 = temp_v0_2;
-            temp_v1->unk285 = temp_v0_2;
-            temp_v1->unk284 = temp_v0_2;
-            return temp_v0_2;
+            ((u8 *)obj->unk31C)[0x23] = 0;
+            obj->unk287 = 0;
+            zero = obj->unk287;
+            obj->unk276 = 0;
+            obj->unk282 = 0;
+            obj->unk278 = 0;
+            obj->unk286 = zero;
+            obj->unk285 = zero;
+            obj->unk284 = zero;
+            return zero;
         }
     }
 }
@@ -2806,30 +2805,39 @@ extern void func_15061B4C(void);
 extern void func_1502178C(struct127 *, s32, s32);
 extern s32 func_150229E4(struct127 *);
 void func_15022998(s32 *arg0);
-void func_1502378C(void)
-{
-  s32 new_var;
-  s32 *new_var2;
-  s32 i;
-  s32 limit;
-  s32 active;
-  struct127 *obj;
-  obj = D_800CC2D0;
- i = 0; if (D_800C3654[0] != 0) { func_1504A730(); return; } for (active = 1, limit = 0x19; i != (limit ^ 0); obj++) { if (obj->interaction_state != 0) { D_800C3E78 = i;
-      func_15022998(new_var2 = (s32 *) obj);
-      func_1507E73C(obj);
-      new_var = func_150229E4(obj);
-      if (new_var != 0)
-      {
- do { } while (0);
-        func_1502178C(obj, 0, -1);
-        func_150627D4(obj);
-        func_1507FEA0(obj);
-        obj->unk2FF = active & 0xFFFFFFFF;
-      }
-    }
-    i++;
-  }
+/* Per-frame update of the cutscene's objects (unless D_800C3654[0] hands it to func_1504A730): run
+   each live object's handler and apply the track of objects bound to one. */
+void func_1502378C(void) {
+    s32 bound;
+    s32 i;
+    s32 limit;
+    s32 one;
+    struct127 *obj;
 
-  func_15061B4C();
+    obj = D_800CC2D0;
+    i = 0;
+    if (D_800C3654[0] != 0) {
+        func_1504A730();
+        return;
+    }
+    // matching: 1 and 25 live in registers; the no-op `^ 0` and `& 0xFFFFFFFF` and the empty
+    // do-while steer IDO's scheduling of them
+    for (one = 1, limit = 25; i != (limit ^ 0); obj++) {
+        if (obj->interaction_state != 0) {
+            D_800C3E78 = i;
+            func_15022998((s32 *)obj);
+            func_1507E73C(obj);
+            bound = func_150229E4(obj);
+            if (bound != 0) {
+                do { } while (0);
+                func_1502178C(obj, 0, -1);
+                func_150627D4(obj);
+                func_1507FEA0(obj);
+                obj->unk2FF = one & 0xFFFFFFFF;
+            }
+        }
+        i++;
+    }
+
+    func_15061B4C();
 }
