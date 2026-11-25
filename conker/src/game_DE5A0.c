@@ -9,7 +9,28 @@
 #include "variables.h"
 #undef D_800D1550
 #undef D_800D2104
-extern f32 D_800D1550; // matching: as an f32[] (header type) the multiply schedules differently
+
+f32 func_15048A40(u8 arg0); // header declares it as returning void
+u32 func_150ADA20(void);    // header declares it as returning u8; callers here use the full word
+f32 func_150489B0(u8 arg0);
+void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
+void func_15052760(struct127 *arg0, s16 arg1);
+s32 func_150535F4(struct127 *arg0);
+void func_150562FC(struct127 *arg0);
+void func_15056B08(struct127 *arg0);
+void func_150585F0(struct127 *arg0, f32 arg1);
+void func_150597FC(struct127 *arg0);
+void func_1505A770(struct127 *arg0);
+struct127 *func_1505EEB0(s32 state, s32 *outIdx);
+void func_1510F800(s32);
+s32 func_1510F8D8(s16, s16, s16, s32);
+s32 func_15167D84(void *, s32, s32, s32, s32, s32);
+
+extern s32 D_8008CAE0;
+extern u8 D_800B86A4[][0x32C];
+extern f32 D_800CC2E4;
+extern f32 D_800CC2EC;
+extern f32 D_800D1550; // matching: as the header's f32[] the multiply in func_150B10F0 schedules differently
 
 /* One point of a path: s16 world coordinates (as in game_A28B0.c). */
 typedef struct {
@@ -66,10 +87,6 @@ void func_150B10F0(struct127 *obj) {
     func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-void func_15056B08(struct127 *arg0);
-s32  func_150535F4(struct127 *arg0);
-void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
-
 /* Holds the object at its path's centre height and eases unkC4 toward its turn rate (clamped to +-6). */
 void func_150B12FC(struct127 *obj) {
     s16 turn;
@@ -105,12 +122,6 @@ void func_150B12FC(struct127 *obj) {
         func_1502178C(obj, 0, -1);
     }
 }
-
-void func_15056B08(struct127 *arg0);
-void func_150585F0(struct127 *arg0, f32 arg1);
-void func_15052760(struct127 *arg0, s16 arg1);
-s32  func_150535F4(struct127 *arg0);
-void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
 
 /* D_800D20FC is a table of 0x30-byte spawn records. */
 typedef struct {
@@ -191,10 +202,6 @@ void func_150B1484(struct127 *obj) {
     }
 }
 
-struct127 *func_1505EEB0(s32 state, s32 *outIdx);
-void func_15056B08(struct127 *arg0);
-void func_1505A770(struct127 *arg0);
-
 /*
  * Pairs the object with the first actor in state 10 (`other`). With unk1E5 == 2 the object sits on top of
  * `other`; otherwise `other` hangs 170 below the object, swaying (unkB8) with the phase unk7E and spinning
@@ -238,107 +245,116 @@ void func_150B17DC(struct127 *obj) {
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.0054931640625f;
 }
 
+/* Particle spawn request copied by func_15167D84 (field names as in game_10A350.c's Game10A350Emission). */
 typedef struct {
-    s32 flags;
-    s32 unk4;
-    u8 pad08[4];
-    s16 unkC, unkE;
-    s16 x, y, z, velocityX, velocityZ;
-    s16 unk1A;
-    s8 fractionX, fractionY, fractionZ, mode;
-    s16 velocityY, size, unk24, unk26, life;
-    s8 fade;
-    u8 unk2B;
-    u8 red, green, blue, alpha;
-    u8 pad30[4];
-    s16 kind;
-} Packet150B19E0;
+    /* 0x00 */ s32 texture;
+    /* 0x04 */ s32 surface;
+    /* 0x08 */ u8 pad08[4];
+    /* 0x0C */ s16 frame;
+    /* 0x0E */ s16 frame_rate;
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ s16 velocity_x;
+    /* 0x18 */ s16 velocity_z;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ s8 fraction_x;
+    /* 0x1D */ s8 fraction_y;
+    /* 0x1E */ s8 fraction_z;
+    /* 0x1F */ s8 callback;
+    /* 0x20 */ s16 velocity_y;
+    /* 0x22 */ s16 acceleration;
+    /* 0x24 */ s16 width;
+    /* 0x26 */ s16 height;
+    /* 0x28 */ s16 lifetime;
+    /* 0x2A */ s8 fade;
+    /* 0x2B */ u8 unk2B;
+    /* 0x2C */ u8 red;
+    /* 0x2D */ u8 green;
+    /* 0x2E */ u8 blue;
+    /* 0x2F */ u8 alpha;
+    /* 0x30 */ u8 pad30[4];
+    /* 0x34 */ s16 flags;
+    /* 0x36 */ u8 pad36[2];
+} ParticleSpawn;
 
-extern f32 func_15048A40(u8 arg0);
-extern u32 func_150ADA20(void);
-extern f32 func_150489B0(u8 arg0);
-extern void func_150562FC(struct127 *arg0);
-extern void func_150597FC(struct127 *arg0);
-extern void func_1510F800(s32);
-extern s32 func_1510F8D8(s16, s16, s16, s32);
-extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
-extern s32 D_8008CAE0;
-extern f32 D_800CC2E4;
-extern f32 D_800CC2EC;
-extern u8 D_800B86A4[][0x32C];
-
-void func_150B19E0(struct127 *arg0) {
+/*
+ * Keeps the object stunned with fixed state flags, eases unkB8 toward 0 (or -20 when on a track with unk21C >= 9
+ * and D_800B86A4's row clear or D_800CC250 bit 2 set), and
+ * now and then emits a particle at a random point around it that drifts with the player's motion.
+ */
+void func_150B19E0(struct127 *obj) {
     f32 target;
-    f32 dist;
+    f32 radius;
     f32 speed;
     f32 sine;
     f32 cosine;
-    Packet150B19E0 packet;
-    u32 r;
+    ParticleSpawn particle;
+    u32 random; // reused for both random draws
     u8 angle;
 
     target = 0.0f;
-    arg0->unkB0 = 0x19;
-    arg0->unkF8 &= ~4;
-    arg0->unk13C = 0;
-    arg0->unkF8 |= 0x80;
-    if (arg0->xz_velocity > 1.0f) {
-        arg0->unkF8 |= 4;
+    obj->unkB0 = 25;
+    obj->unkF8 &= ~4;
+    obj->unk13C = 0;
+    obj->unkF8 |= 0x80;
+    if (obj->xz_velocity > 1.0f) {
+        obj->unkF8 |= 4;
     }
-    arg0->stunned = 0xA;
-    arg0->unk239 = 3;
-    arg0->unkFC = 0xA7;
-    arg0->unk80 = 1;
-    if (arg0->unk25C & 0x40) {
-        arg0->unk25C &= ~0x40;
-        arg0->old_x_position = D_800CC2E4;
-        arg0->old_z_position = D_800CC2EC;
+    obj->stunned = 10;
+    obj->unk239 = 3;
+    obj->unkFC = 0xA7;
+    obj->unk80 = 1;
+    if (obj->unk25C & 0x40) {
+        obj->unk25C &= ~0x40;
+        obj->old_x_position = D_800CC2E4;
+        obj->old_z_position = D_800CC2EC;
     }
-    if (arg0->unk13D != 0) {
-        func_150562FC(arg0);
-        if ((D_800B86A4[arg0->unk13D][0] == 0 || (D_800CC250 & 4)) && arg0->unk21C >= 9) {
+    if (obj->unk13D != 0) {
+        func_150562FC(obj);
+        if ((D_800B86A4[obj->unk13D][0] == 0 || (D_800CC250 & 4)) && obj->unk21C >= 9) {
             target = -20.0f;
         }
     }
-    arg0->unkB8 += (target - arg0->unkB8) * 0.200000003f;
-    arg0->unk40 = (s16)(arg0->unk7A + 0x4000) * 0.0054931640625f;
-    func_15059140(arg0);
-    func_150597FC(arg0);
-    func_1505E650(arg0, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
-    func_1502178C(arg0, 0, -1);
-    if (arg0->unk13D != 0 && (u8)func_150ADA20() < 40U) {
-        r = func_150ADA20() % 40U;
-        dist = arg0->xz_scale * r;
+    obj->unkB8 += (target - obj->unkB8) * 0.2f;
+    obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.0054931640625f;
+    func_15059140(obj);
+    func_150597FC(obj);
+    func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    func_1502178C(obj, 0, -1);
+    if (obj->unk13D != 0 && (u8)func_150ADA20() < 40U) {
+        random = func_150ADA20() % 40U;
+        radius = obj->xz_scale * random;
         angle = func_150ADA20();
         sine = func_150489B0(angle);
         cosine = func_15048A40(angle);
-        packet.unkC = 0;
-        packet.unkE = 0;
-        packet.flags = D_8008CAE0;
-        packet.x = arg0->x_position + sine * dist;
-        packet.y = arg0->y_position;
-        packet.z = arg0->z_position + cosine * dist;
+        particle.frame = 0;
+        particle.frame_rate = 0;
+        particle.texture = D_8008CAE0;
+        particle.x = obj->x_position + sine * radius;
+        particle.y = obj->y_position;
+        particle.z = obj->z_position + cosine * radius;
         func_1510F800(0);
-        packet.unk4 = func_1510F8D8(packet.x, packet.y, packet.z, 0);
+        particle.surface = func_1510F8D8(particle.x, particle.y, particle.z, 0);
         angle = D_800CC2D0[0].unk76 >> 8;
         speed = D_800CC2D0[0].xz_velocity * 64.0f;
-        packet.velocityX = func_150489B0(angle) * speed;
-        packet.velocityZ = func_15048A40(angle) * -speed;
-        packet.unk1A = -30;
-        packet.mode = 7;
-        packet.velocityY = 0;
-        packet.size = -80;
-        r = (u8)func_150ADA20();
-        packet.unk2B = r;
-        packet.unk24 = (s32)(r << 12) / 5100 + 0xCC;
-        packet.unk26 = (s32)(r << 12) / 12750 + 0x51;
-        packet.life = 400;
-        packet.fade = 0;
-        packet.red = 0xFF;
-        packet.green = 0xFF;
-        packet.blue = 0;
-        packet.alpha = 0xFF;
-        packet.kind = 0;
-        func_15167D84(&packet, 0, 0, -1, 0xFF, 0);
+        particle.velocity_x = func_150489B0(angle) * speed;
+        particle.velocity_z = func_15048A40(angle) * -speed;
+        particle.unk1A = -30;
+        particle.callback = 7;
+        particle.velocity_y = 0;
+        particle.acceleration = -80;
+        random = (u8)func_150ADA20();
+        particle.unk2B = random;
+        particle.width = (s32)(random << 12) / 5100 + 204;
+        particle.height = (s32)(random << 12) / 12750 + 81;
+        particle.lifetime = 400;
+        particle.fade = 0;
+        particle.red = 0xFF;
+        particle.green = 0xFF;
+        particle.blue = 0;
+        particle.alpha = 0xFF;
+        particle.flags = 0;
+        func_15167D84(&particle, 0, 0, -1, 0xFF, 0);
     }
 }
