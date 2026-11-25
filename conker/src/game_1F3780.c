@@ -180,100 +180,105 @@ void func_151C69CC(struct127 *arg0, struct17 *out, u8 side) {
     func_15143134(&D_800AAB08[side], out, matrix);
 }
 
+/* A 0x64-byte projectile description, passed to func_150F7470. */
 typedef struct {
-    u8 pad0[8];
-    struct17 pos;
-    u8 pad14[0x2C - 0x14];
-    struct17 unk2C;
-    u8 pad38[0x59 - 0x38];
-    u8 unk59;
-    u8 pad5A[0x64 - 0x5A];
-} Func151C6A28Big;
+    /* 0x00 */ u8 pad0[8];
+    /* 0x08 */ struct17 pos;
+    /* 0x14 */ u8 pad14[0x2C - 0x14];
+    /* 0x2C */ struct17 end;
+    /* 0x38 */ u8 pad38[0x59 - 0x38];
+    /* 0x59 */ u8 count;
+    /* 0x5A */ u8 pad5A[0x64 - 0x5A];
+} ShotDesc;
 
-extern struct17 D_800AAB38[];
-extern struct17 D_800AAB50[];
-s32 func_15142A5C(struct127 *arg0);
-void func_151D5148(struct127 *arg0);
-extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
-void func_151D3F14(struct17 *arg0, u8 arg1, s32 arg2);
-void func_151D4408(struct17 *, struct17 *, s32, struct127 *, f32, u8, s32);
-s32 func_1514ECE0(s32, s16, void *);
-void func_150F7470(struct17 *, s32, s32, s32, s32, Func151C6A28Big *, f32, f32, f32, struct127 *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+/* The object whose shot description func_151C6A28 copies. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ ShotDesc shot;
+} ShotHolder;
 
-void func_151C6A28(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3) {
-    struct17 sp124;
-    struct17 sp118;
-    struct17 sp10C;
-    s32 sp108;
+typedef struct {
+    /* 0x00 */ u8 pad0[0x28];
+    /* 0x28 */ ShotHolder holder;
+    /* 0x9C */ u8 flags;
+} ShotSource;
 
-    if ((arg0 != NULL) && (arg1 < 2) && (func_15142A5C(arg0) == 0)) {
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ ShotSource *source;
+} ShotSourceEntry;
+
+s32 func_1514ECE0(s32, s16, ShotSourceEntry **);
+void func_150F7470(struct17 *, s32, s32, s32, s32, ShotDesc *, f32, f32, f32, struct127 *, s32, s32, s32, s32, s32, s32,
+                   s32, s32, u8, s32);
+
+/* Emits this side's effects (func_151D3F14, func_151D4408, func_151C6D70) from its joint points, then fires a
+ * copy of the shot described by the owner's 0x1B entry, its end pushed 10% beyond its start. */
+void func_151C6A28(struct127 *arg0, u8 side, u8 arg2, s32 arg3) {
+    struct17 origin;
+    struct17 start;
+    struct17 dir;
+    s32 matrix;
+
+    if ((arg0 != NULL) && (side < 2) && (func_15142A5C(arg0) == 0)) {
         func_151D5148(arg0);
-        if (*(s32 *)&arg0->unk1D4 != 0) {
+        if (arg0->unk1D4 != NULL) {
             {
-                struct17 *spFC[3];
-                struct17 *spF0[3];
+                struct17 *points[3];
+                struct17 *results[3];
 
-                sp108 = *(s32 *)&arg0->unk1D4 + D_800AAB00[arg1];
-                spFC[0] = &D_800AAB08[arg1];
-                spFC[1] = &D_800AAB38[arg1];
-                spFC[2] = &D_800AAB50[arg1];
-                spF0[0] = &sp124;
-                spF0[1] = &sp118;
-                spF0[2] = &sp10C;
-                func_15145EA4(spFC, spF0, sp108, 3);
-                if (0) { sp10C.unk0 = 0.0f; }
-                if (0) { sp10C.unk0 = 1.0f; }
-                if (0) { sp10C.unk0 = 2.0f; }
-                if (0) { sp10C.unk0 = 3.0f; }
-                if (0) { sp10C.unk0 = 4.0f; }
-                if (0) { sp10C.unk0 = 5.0f; }
-                if (0) { sp10C.unk0 = 6.0f; }
-                if (0) { sp10C.unk0 = 7.0f; }
-                if (0) { sp10C.unk0 = 8.0f; }
-                if (0) { sp10C.unk0 = 9.0f; }
-                if (0) { sp10C.unk0 = 10.0f; }
-                if (0) { sp10C.unk0 = 11.0f; }
-                sp10C.unk0 -= sp118.unk0;
-                sp10C.unk4 -= sp118.unk4;
-                sp10C.unk8 -= sp118.unk8;
+                matrix = (s32)arg0->unk1D4 + D_800AAB00[side];
+                points[0] = &D_800AAB08[side];
+                points[1] = &D_800AAB38[side];
+                points[2] = &D_800AAB50[side];
+                results[0] = &origin;
+                results[1] = &start;
+                results[2] = &dir;
+                func_15145EA4(points, results, matrix, 3);
+                // matching: six dead ifs (fewer fail) change uopt's register choice: arg0 stays on the stack
+                if (0) {} if (0) {} if (0) {} if (0) {} if (0) {} if (0) {}
+                dir.unk0 -= start.unk0;
+                dir.unk4 -= start.unk4;
+                dir.unk8 -= start.unk8;
             }
-            func_151D3F14(&sp124, arg2, arg3);
-            func_151D4408(&sp118, &sp10C, sp108, arg0, 1.0f, arg2, arg3);
-            func_151C6D70(arg0, arg1, &sp124, -1, arg2, arg3);
+            func_151D3F14(&origin, arg2, arg3);
+            func_151D4408(&start, &dir, matrix, arg0, 1.0f, arg2, arg3);
+            func_151C6D70(arg0, side, &origin, -1, arg2, arg3);
             {
-                u8 *temp;
-                struct17 spE0;
-                void *spDC;
-                u8 *p28;
-                Func151C6A28Big *src;
+                ShotSource *source;
+                struct17 end;
+                ShotSourceEntry *entry;
+                ShotHolder *holder;
+                ShotDesc *src;
 
-                if (func_1514ECE0(*(s32 *)((u8 *)arg0 + 0x2F4), 0x1B, &spDC) != 0) {
-                    temp = *(u8 **)((u8 *)spDC + 0x10);
-                    p28 = temp + 0x28;
-                    if (temp[0x9C] & 1) {
-                        src = (Func151C6A28Big *)(p28 + 0x10);
-                        if (p28[0x69] != 0) {
-                            if (src->unk59 >= 2) {
+                /* 0x2F4 lies in struct127's pad2F0 */
+                if (func_1514ECE0(*(s32 *)((u8 *)arg0 + 0x2F4), 0x1B, &entry) != 0) {
+                    source = entry->source;
+                    holder = &source->holder;
+                    if (source->flags & 1) {
+                        src = &holder->shot;
+                        if (src->count != 0) {
+                            if (src->count >= 2) {
                                 f32 dx;
                                 f32 dy;
                                 f32 dz;
 
-                                dx = src->pos.unk0 - sp124.unk0;
-                                dy = src->pos.unk4 - sp124.unk4;
-                                dz = src->pos.unk8 - sp124.unk8;
-                                spE0.unk0 = (dx * 1.100000024f) + sp124.unk0;
-                                spE0.unk4 = (dy * 1.100000024f) + sp124.unk4;
-                                spE0.unk8 = (dz * 1.100000024f) + sp124.unk8;
+                                dx = src->pos.unk0 - origin.unk0;
+                                dy = src->pos.unk4 - origin.unk4;
+                                dz = src->pos.unk8 - origin.unk8;
+                                end.unk0 = (dx * 1.100000024f) + origin.unk0;
+                                end.unk4 = (dy * 1.100000024f) + origin.unk4;
+                                end.unk8 = (dz * 1.100000024f) + origin.unk8;
                             } else {
-                                spE0 = src->pos;
+                                end = src->pos;
                             }
                             {
-                                Func151C6A28Big sp64;
+                                ShotDesc shot;
 
-                                sp64 = *src;
-                                sp64.unk2C = spE0;
-                                func_150F7470(&sp124, 0, 0, 0, 0, &sp64, 54.00000381f, 0.01851851679f, 500.0f, arg0, 0,
-                                              (src->unk59 >= 2) ? 0 : 1, 1, 0, 0x1A, -1, 0, 1, arg2, arg3);
+                                shot = *src;
+                                shot.end = end;
+                                func_150F7470(&origin, 0, 0, 0, 0, &shot, 54.00000381f, 0.01851851679f, 500.0f, arg0, 0,
+                                              (src->count >= 2) ? 0 : 1, 1, 0, 0x1A, -1, 0, 1, arg2, arg3);
                             }
                         }
                     }
