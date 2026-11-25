@@ -646,7 +646,7 @@ def cmd_land(a):
             run("make -j16 2>&1", MAIN)
 
         (MAIN / BIN).unlink(missing_ok=True)
-        r = run("make -j16 2>&1", MAIN)
+        r = run("make -B -j16 2>&1", MAIN)  # full rebuild: no header deps in the Makefile
         still = {Path(x).stem for x in stubbed_asm(MAIN)}
         landed = sorted(before - still)
         if sha1(MAIN / BIN) != INNER_SHA or not landed:

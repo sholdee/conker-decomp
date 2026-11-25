@@ -149,7 +149,10 @@ def build(ws):
     wc = ws / "conker"
     ensure_build(wc)
     (wc / BIN).unlink(missing_ok=True)
-    r = run("make -j8 2>&1", wc, timeout=1800)
+    # The Makefile has no header dependencies: after any include/ change, rebuild everything (~15 s),
+    # or stale objects would hide breakage in files that use the changed header.
+    hdr = any(str(f).startswith("include/") for f in changed_files(ws))
+    r = run(f"make {'-B ' if hdr else ''}-j8 2>&1", wc, timeout=1800)
     return wc, r
 
 
@@ -236,7 +239,7 @@ def cmd_land(a):
         for f, data in merged.items():
             (MAIN / f).write_bytes(data)
         (MAIN / BIN).unlink(missing_ok=True)
-        r = run("make -j16 2>&1", MAIN)
+        r = run("make -B -j16 2>&1", MAIN)  # full rebuild: no header deps in the Makefile
         if not (MAIN / BIN).exists() or sha1(MAIN / BIN) != INNER_SHA:
             for f, data in backup.items():
                 if data is None:
