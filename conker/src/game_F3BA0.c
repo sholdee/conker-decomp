@@ -10,13 +10,12 @@
  * own update clears it and dies once a frame passes without it.
  */
 
-struct Emitter;
 
 /* The effects a watcher keeps alive, stored in the watcher's extra data. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x14];
     /* 0x14 */ FlickerSprite *volatile sprite; // matching: volatile keeps IDO from reusing the NULL test's load
-    /* 0x18 */ struct Emitter *volatile emitter;
+    /* 0x18 */ WatcherEmitter *volatile emitter;
 } WatcherEffects;
 
 /* A character watcher with WatcherEffects as extra data. */
@@ -24,19 +23,6 @@ typedef struct {
     /* 0x00 */ CharacterWatcher watcher;
     /* 0x58 */ WatcherEffects effects;
 } Watcher;
-
-/* Extra data of the emitter, after its 0x58-byte BloodDrip body (game_161520.c). */
-typedef struct {
-    /* 0x00 */ Watcher *owner;
-    /* 0x04 */ u8 keepAlive;
-    /* 0x08 */ f32 ceiling;    /* height the particles rise to */
-} EmitterLink;
-
-typedef struct Emitter {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x48];
-    /* 0x58 */ EmitterLink link;
-} Emitter;
 
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];
@@ -47,12 +33,12 @@ void *memcpy(void *, const void *, u32);
 s32 func_15045800(f32 *pos, s32 mask, f32 bottom, CollisionHit *hit);
 void func_15143134(Vec3f *in, Vec3f *out, MtxF *matrix);
 u8 func_151D8E20(void);
-Emitter *func_1513418C(BloodDripDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
+WatcherEmitter *func_1513418C(BloodDripDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
 RiseParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize);
 void func_1513F6C0(FlickerSprite *sprite, u8 updateFn, u8 expireFn);
 
 FlickerSprite *func_150C6D90(Watcher *watcher);
-Emitter *func_150C68C4(Actor *character, Watcher *watcher);
+WatcherEmitter *func_150C68C4(Actor *character, Watcher *watcher);
 
 extern Vec3f D_800887E0;
 /* matching: rodata holds second copies of these constants, which repeated literals would fold into the first */
@@ -110,7 +96,7 @@ void func_150C6870(Watcher *watcher) {
     Actor *character = watcher->watcher.character;
 
     if (watcher->effects.emitter != NULL) {
-        EmitterLink *link = &watcher->effects.emitter->link;
+        WatcherEmitterLink *link = &watcher->effects.emitter->link;
 
         link->keepAlive = 1;
     } else {
@@ -122,15 +108,15 @@ void func_150C6870(Watcher *watcher) {
  * Attaches an emitter to the character; its particles rise to the surface found above the
  * character (or 5000 units up when there is none).
  */
-Emitter *func_150C68C4(Actor *character, Watcher *watcher) {
+WatcherEmitter *func_150C68C4(Actor *character, Watcher *watcher) {
     BloodDripDesc desc;
-    EmitterLink link;
-    Emitter *emitter;
+    WatcherEmitterLink link;
+    WatcherEmitter *emitter;
 
     {
         f32 pos[3];
 
-        link.owner = watcher;
+        link.owner = &watcher->watcher;
         link.keepAlive = 1;
         pos[0] = character->x_position;
         pos[1] = character->y_position + D_800A0450;
@@ -156,15 +142,15 @@ Emitter *func_150C68C4(Actor *character, Watcher *watcher) {
     desc.emitter = 5;
     desc.callback = 2;
     desc.unk2D = 3;
-    emitter = func_1513418C(&desc, sizeof(EmitterLink), 0xFF, 0);
+    emitter = func_1513418C(&desc, sizeof(WatcherEmitterLink), 0xFF, 0);
     if (emitter != NULL) {
-        memcpy(&emitter->link, &link, sizeof(EmitterLink));
+        memcpy(&emitter->link, &link, sizeof(WatcherEmitterLink));
     }
     return emitter;
 }
 
-/* Emitter func 5: spawns one rising particle at (x, y, z), drifting against the emitter's motion. */
-void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Emitter *emitter) {
+/* WatcherEmitter func 5: spawns one rising particle at (x, y, z), drifting against the emitter's motion. */
+void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, WatcherEmitter *emitter) {
     ParticleDesc desc;
     RiseParticle *particle;
     RiseMotion motion;
@@ -225,8 +211,8 @@ void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Emitter *emitter
     }
 }
 
-/* Emitter callback 2: returns whether the watcher refreshed keepAlive since the last call. */
-s32 func_150C6D1C(Emitter *emitter) {
+/* WatcherEmitter callback 2: returns whether the watcher refreshed keepAlive since the last call. */
+s32 func_150C6D1C(WatcherEmitter *emitter) {
     s32 alive = 1;
 
     if (!emitter->link.keepAlive) {
@@ -236,17 +222,17 @@ s32 func_150C6D1C(Emitter *emitter) {
     return alive;
 }
 
-/* Emitter teardown (D_80089AAC[3]): detaches the emitter from its watcher. */
-void func_150C6D40(Emitter *emitter) {
-    WatcherEffects *effects = &emitter->link.owner->effects;
+/* WatcherEmitter teardown (D_80089AAC[3]): detaches the emitter from its watcher. */
+void func_150C6D40(WatcherEmitter *emitter) {
+    WatcherEffects *effects = &((Watcher *)emitter->link.owner)->effects;
 
     effects->emitter = NULL;
     func_151346EC(&emitter->header);
 }
 
-/* Emitter teardown (D_80089AD4[3]): detaches the emitter from its watcher. */
-void func_150C6D68(Emitter *emitter) {
-    WatcherEffects *effects = &emitter->link.owner->effects;
+/* WatcherEmitter teardown (D_80089AD4[3]): detaches the emitter from its watcher. */
+void func_150C6D68(WatcherEmitter *emitter) {
+    WatcherEffects *effects = &((Watcher *)emitter->link.owner)->effects;
 
     effects->emitter = NULL;
     func_1513470C(&emitter->header);

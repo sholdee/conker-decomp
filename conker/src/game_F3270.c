@@ -3,141 +3,100 @@
 #include "variables.h"
 #include "effects.h"
 
-struct GameF3270Emitter;
-
-/* Wobble state copied to 0xB0 of the particle spawned by func_150C6460. */
-typedef struct {
-    /* 0x00 */ struct GameF3270Emitter *owner;
-    /* 0x04 */ u8 alive; // set by the owner every frame, cleared by the update
-    /* 0x08 */ f32 base;
-    /* 0x0C */ f32 range;
-    /* 0x10 */ f32 target;
-    /* 0x14 */ s16 timer;
-    /* 0x16 */ s16 periodMin;
-    /* 0x18 */ s16 periodRange;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 rate;
-} GameF3270Wobble; // size 0x20
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ s32 flags;
-    /* 0x1C */ u8 pad1C[0x8];
-    /* 0x24 */ s32 unk24; // eased toward wobble.target
-    /* 0x28 */ u8 pad28[0x88];
-    /* 0xB0 */ GameF3270Wobble wobble;
-} GameF3270Particle;
-
-/* Link state copied to 0x58 of the object spawned by func_150C5F94. */
-typedef struct {
-    /* 0x00 */ struct GameF3270Emitter *owner;
-    /* 0x04 */ u8 alive; // set by the owner every frame, cleared by the update
-    /* 0x08 */ f32 surfaceY;
-} GameF3270Link; // size 0xC
-
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x48];
-    /* 0x58 */ GameF3270Link link;
-} GameF3270LinkedObject;
-
 /* The objects an emitter keeps alive; each clears its own slot when it is destroyed. */
 // matching: volatile makes IDO reload the slot after the NULL test (func_150C5DC0, func_150C5F40)
 typedef struct {
-    /* 0x0 */ GameF3270Particle *volatile particle;
-    /* 0x4 */ GameF3270LinkedObject *volatile linked;
+    /* 0x0 */ FlickerSprite *volatile particle;
+    /* 0x4 */ WatcherEmitter *volatile linked;
 } GameF3270Children;
 
+/* A character watcher with GameF3270Children as extra data. */
 typedef struct GameF3270Emitter {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ Actor *actor;
-    /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ CollisionHit surface; // written by the surface probe
+    /* 0x00 */ CharacterWatcher watcher;
     /* 0x58 */ GameF3270Children children;
 } GameF3270Emitter;
 
-GameF3270Particle *func_150C6460(GameF3270Emitter *emitter);
-GameF3270LinkedObject *func_150C5F94(Actor *actor, GameF3270Emitter *emitter);
+FlickerSprite *func_150C6460(GameF3270Emitter *emitter);
+WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter);
 s32 func_1513F6C0(void *obj, s32 arg1, s32 arg2);
 void *memcpy(void *, const void *, u32);
 
 /* Keeps the emitter's particle alive, spawning it if it doesn't exist yet. */
 void func_150C5DC0(GameF3270Emitter *emitter) {
     if (emitter->children.particle != NULL) {
-        GameF3270Wobble *wobble = &emitter->children.particle->wobble;
+        SpriteFlicker *flicker = &emitter->children.particle->flicker;
 
-        wobble->alive = TRUE;
+        flicker->keepAlive = TRUE;
     } else {
         emitter->children.particle = func_150C6460(emitter);
     }
 }
 
 /* Particle update: eases unk24 toward a target re-rolled at random intervals. Returns whether it stays alive. */
-s8 func_150C5E0C(GameF3270Particle *particle) {
+s8 func_150C5E0C(FlickerSprite *particle) {
     s8 alive;
-    GameF3270Wobble *wobble;
+    SpriteFlicker *flicker;
 
     alive = TRUE;
-    wobble = &particle->wobble;
-    if (!wobble->alive) {
+    flicker = &particle->flicker;
+    if (!flicker->keepAlive) {
         alive = FALSE;
     }
-    wobble->alive = FALSE;
-    wobble->timer -= D_800BE9E4;
-    if (wobble->timer < 0) {
-        wobble->timer = func_150ADA20() % (u32)(wobble->periodRange + 1) + wobble->periodMin;
-        wobble->target = func_150ADA68() * wobble->range + wobble->base;
+    flicker->keepAlive = FALSE;
+    flicker->timer -= D_800BE9E4;
+    if (flicker->timer < 0) {
+        flicker->timer = func_150ADA20() % (u32)(flicker->delayRange + 1) + flicker->minDelay;
+        flicker->target = func_150ADA68() * flicker->targetRange + flicker->minTarget;
     }
-    particle->unk24 += (s32)((wobble->target - (f32)particle->unk24) * wobble->rate);
+    particle->quad.def.frameSpeed += (s32)((flicker->target - (f32)particle->quad.def.frameSpeed) * flicker->easing);
     return alive;
 }
 
 /* Particle destructor: detaches it from its emitter. */
-s32 func_150C5EFC(GameF3270Particle *particle) {
-    GameF3270Children *children = &particle->wobble.owner->children;
+s32 func_150C5EFC(FlickerSprite *particle) {
+    GameF3270Children *children = &((GameF3270Emitter *)particle->flicker.owner)->children;
 
     children->particle = NULL;
-    particle->flags |= 2;
-    particle->wobble.owner = NULL;
+    particle->quad.def.flags |= 2;
+    particle->flicker.owner = NULL;
     func_1513F6C0(particle, 0, 0);
     return 0;
 }
 
 /* Keeps the emitter's linked object alive, spawning it if it doesn't exist yet. */
 void func_150C5F40(GameF3270Emitter *emitter) {
-    Actor *actor = emitter->actor;
+    Actor *actor = emitter->watcher.character;
 
     if (emitter->children.linked != NULL) {
-        GameF3270Link *link = &emitter->children.linked->link;
+        WatcherEmitterLink *link = &emitter->children.linked->link;
 
-        link->alive = TRUE;
+        link->keepAlive = TRUE;
     } else {
         emitter->children.linked = func_150C5F94(actor, emitter);
     }
 }
 
 s32 func_15045800(Vec3f *from, s32 arg1, f32 minY, CollisionHit *hit);
-GameF3270LinkedObject *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3);
+WatcherEmitter *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3);
 
 /* Spawns the emitter's linked object, recording the surface height above the actor. */
-GameF3270LinkedObject *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {
+WatcherEmitter *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {
     BloodDripDesc desc;
-    GameF3270Link link;
-    GameF3270LinkedObject *obj;
+    WatcherEmitterLink link;
+    WatcherEmitter *obj;
 
-    link.owner = emitter;
-    link.alive = TRUE;
+    link.owner = &emitter->watcher;
+    link.keepAlive = TRUE;
     {
         Vec3f from;
 
         from.x = actor->x_position;
         from.y = actor->y_position + 5000.0f;
         from.z = actor->z_position;
-        if (func_15045800(&from, 0, actor->y_position - 100.0f, &emitter->surface) != 0) {
-            link.surfaceY = emitter->surface.height;
+        if (func_15045800(&from, 0, actor->y_position - 100.0f, &emitter->watcher.hit) != 0) {
+            link.ceiling = emitter->watcher.hit.height;
         } else {
-            link.surfaceY = actor->y_position + 5000.0f;
+            link.ceiling = actor->y_position + 5000.0f;
         }
     }
     desc.target[0] = 0;
@@ -167,15 +126,10 @@ typedef struct {
     /* 0xA8 */ RiseMotion motion;
 } GameF3270BurstObject;
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x60];
-    /* 0x60 */ f32 unk60;
-} GameF3270BurstSource;
-
 GameF3270BurstObject *func_151303BC(ParticleDesc *burst, u8 arg1, s32 arg2);
 
 /* Spawns one randomised particle at (x, y, z), moving against (vx, vz) at a fifth of its speed. */
-void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, GameF3270BurstSource *source) {
+void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, WatcherEmitter *source) {
     ParticleDesc burst;
     GameF3270BurstObject *spawned;
     RiseMotion motion;
@@ -209,7 +163,7 @@ void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, GameF3270BurstSo
     burst.fadeStart = 30;
     burst.fadeRate = 8;
     burst.pos.z = z;
-    motion.ceiling = source->unk60;
+    motion.ceiling = source->link.ceiling;
     motion.maxRiseSpeed = 4.0f;
     motion.swayPerSpeed = 0.25f;
     motion.widthPhase = 0;
@@ -244,27 +198,27 @@ void func_150C60D8(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz, GameF3270BurstSo
 }
 
 /* Linked-object update: returns whether its owner kept it alive this frame. */
-s32 func_150C63EC(GameF3270LinkedObject *obj) {
+s32 func_150C63EC(WatcherEmitter *obj) {
     s32 alive = TRUE;
 
-    if (!obj->link.alive) {
+    if (!obj->link.keepAlive) {
         alive = FALSE;
     }
-    obj->link.alive = FALSE;
+    obj->link.keepAlive = FALSE;
     return alive;
 }
 
 /* Linked-object destructor: detaches it from its emitter. */
-void func_150C6410(GameF3270LinkedObject *obj) {
-    GameF3270Children *children = &obj->link.owner->children;
+void func_150C6410(WatcherEmitter *obj) {
+    GameF3270Children *children = &((GameF3270Emitter *)obj->link.owner)->children;
 
     children->linked = NULL;
     func_151346EC(&obj->header);
 }
 
 /* Linked-object destructor: detaches it from its emitter. */
-void func_150C6438(GameF3270LinkedObject *obj) {
-    GameF3270Children *children = &obj->link.owner->children;
+void func_150C6438(WatcherEmitter *obj) {
+    GameF3270Children *children = &((GameF3270Emitter *)obj->link.owner)->children;
 
     children->linked = NULL;
     func_1513470C(&obj->header);
@@ -275,13 +229,13 @@ void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
 u8 func_151D8E20(void);
 
 /* Spawns the emitter's particle on the surface below the actor, if there is one within 200 units. */
-GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
-    GameF3270Particle *particle;
+FlickerSprite *func_150C6460(GameF3270Emitter *emitter) {
+    FlickerSprite *particle;
     Vec3f pos;
     Actor *actor;
 
     particle = NULL;
-    actor = emitter->actor;
+    actor = emitter->watcher.character;
     if (actor->unk1D4) {
         Vec3f origin;
 
@@ -298,9 +252,9 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
         probe.x = pos.x;
         probe.y = pos.y + 200.0f;
         probe.z = pos.z;
-        if (func_15045800(&probe, 0, pos.y - 200.0f, &emitter->surface) != 0) {
+        if (func_15045800(&probe, 0, pos.y - 200.0f, &emitter->watcher.hit) != 0) {
             SpriteDef desc;
-            GameF3270Wobble wobble;
+            SpriteFlicker flicker;
             f32 size;
             u8 colorIndex;
             s32 rand2;
@@ -308,18 +262,18 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
             s32 rand0;
 
             colorIndex = func_151D8E20();
-            probe.y = emitter->surface.height;
+            probe.y = emitter->watcher.hit.height;
             size = func_150ADA68() * 50.0f + 100.0f;
-            wobble.owner = emitter;
-            wobble.alive = TRUE;
-            wobble.base = 26214.4f;
-            wobble.range = 32768.0f;
-            wobble.target = 0.0f;
-            wobble.timer = 0;
-            wobble.periodMin = 10;
-            wobble.periodRange = 10;
-            wobble.rate = 0.231f;
-            desc.frameSpeed = (s32)(wobble.range * 0.5f + wobble.base);
+            flicker.owner = &emitter->watcher;
+            flicker.keepAlive = TRUE;
+            flicker.minTarget = 26214.4f;
+            flicker.targetRange = 32768.0f;
+            flicker.target = 0.0f;
+            flicker.timer = 0;
+            flicker.minDelay = 10;
+            flicker.delayRange = 10;
+            flicker.easing = 0.231f;
+            desc.frameSpeed = (s32)(flicker.targetRange * 0.5f + flicker.minTarget);
             desc.texture = 56;
             desc.flags = 0x20300;
             desc.lifetime = 300;
@@ -337,11 +291,11 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
             rand1 = func_150ADA20();
             rand2 = func_150ADA20();
             // matching: the explicit & 0xFF on rand0 (a (u8) cast emits no andi)
-            particle = (GameF3270Particle *)func_1513C73C(
-                (s32)&desc, 8, 2, (s32)&emitter->surface.tri, probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
-                (rand2 & 1) * 2 + (rand1 & 1), 32, emitter->header.owner, emitter->header.kind);
+            particle = (FlickerSprite *)func_1513C73C(
+                (s32)&desc, 8, 2, (s32)&emitter->watcher.hit.tri, probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
+                (rand2 & 1) * 2 + (rand1 & 1), 32, emitter->watcher.header.owner, emitter->watcher.header.kind);
             if (particle != NULL) {
-                memcpy(&particle->wobble, &wobble, sizeof(wobble));
+                memcpy(&particle->flicker, &flicker, sizeof(flicker));
             }
         }
     }

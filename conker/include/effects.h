@@ -2322,6 +2322,22 @@ typedef struct FlickerSprite {
     /* 0xB0 */ SpriteFlicker flicker;
 } FlickerSprite; /* size 0xD0 */
 
+/* Extra data at 0x58 of a watcher's rising-particle emitter (func_1513418C, game_161520.c). Like
+ * SpriteFlicker, the owning watcher sets keepAlive every frame, the emitter's update clears it and the
+ * emitter dies once it is not refreshed; its destructor clears the owner's pointer to it. */
+typedef struct WatcherEmitterLink {
+    /* 0x00 */ CharacterWatcher *owner;
+    /* 0x04 */ u8 keepAlive;
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ f32 ceiling;       /* height the particles rise to: the surface above the character */
+} WatcherEmitterLink; /* size 0xC */
+
+typedef struct WatcherEmitter {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x48];    /* the blood-drip body (game_161520.c) */
+    /* 0x58 */ WatcherEmitterLink link;
+} WatcherEmitter; /* size 0x64 */
+
 #define DYNMODEL_FLAG_LIFETIME      1
 #define DYNMODEL_FLAG_VIEWPORT_MASK 2
 
