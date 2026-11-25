@@ -290,10 +290,9 @@ void func_1511F4D0(Prop *prop) {
             }
         }
     }
-    /* the products are unsigned (multu), the divisions signed */
-    prop[0].y = home[2] + (s32)((u32)openY * span) / 13;
-    prop[1].y = home[2] - (s32)((u32)(span + 1) * openY) / 13;
-    next = (s32)((u32)openX * span) / 13;
+    prop[0].y = home[2] + openY * span / 13;
+    prop[1].y = home[2] - (span + 1) * openY / 13;
+    next = openX * span / 13;
     prop[2].x = home[1] - next;
     prop[3].x = home[1] + next;
     prop->work.door.open = (openY & 0xFFFF) | ((openX & 0xFFFF) << 16);
@@ -308,61 +307,42 @@ void func_1511F768(Prop *prop, s32 arg1) {
     }
 }
 
-struct Obj1511F788 {
-    u8 pad0[0x12];
-    s16 unk12;
-    u8 pad14[0x4];
-    f32 unk18;
-    u8 pad1C[0x20];
-    s32 unk3C;
-    u8 pad40[0x1C];
-    s16 unk5C;
-    u8 pad5E[0x10];
-    s8 unk6E;
-    u8 pad6F[0xD];
-    s32 unk7C;
-    s32 unk80;
-    s32 unk84;
-};
-
-union Temp1511F788 {
-    struct {
-        f32 pad;
-        s32 w;
-    } s;
-    f64 d;
-};
-
-void func_1511F788(struct Obj1511F788 *arg0) {
-    s32 dummy;
-    union Temp1511F788 temp;
-    s16 initial;
+/*
+ * Bobs the prop up and down by 25 units (moveY carries this frame's movement). Once started
+ * (state 1) it waits params frames, then (state 2) sinks until it is far below the level and
+ * marks itself finished.
+ */
+void func_1511F788(Prop *prop) {
+    s32 pad[2]; // matching: pad and pad2 are unused stack slots of the original frame
+    s32 waitTime;
+    s32 pad2;
+    s16 startY;
     s32 state;
 
-    initial = (s16)(s32)((f32)arg0->unk12 + arg0->unk18);
-    temp.s.w = arg0->unk3C;
-    temp.s.w = (temp.s.w * 0x3C) / 0x3C;
+    startY = prop->y + prop->yOffset;
+    waitTime = prop->params.word; // matching: params goes through waitTime first
+    waitTime = waitTime * 60 / 60;
     if (D_800BE9B4 != 0) {
-        arg0->unk7C = func_150ADA20() & 0xFFFF;
+        prop->work.bob.phase = func_150ADA20() & 0xFFFF;
     }
 
-    arg0->unk18 = cosf((f32)arg0->unk7C * 0.0054931640625f) * 25.0f;
-    state = arg0->unk80;
-    arg0->unk7C = arg0->unk7C + (D_800BE9E4 * 10);
+    prop->yOffset = cosf(prop->work.bob.phase * 0.0054931640625f) * 25.0f;
+    state = prop->work.bob.state;
+    prop->work.bob.phase += D_800BE9E4 * 10;
 
     if (state == 1) {
-        arg0->unk84 = arg0->unk84 + D_800BE9E4;
-        if (temp.s.w < arg0->unk84) {
-            arg0->unk80 = 2;
+        prop->work.bob.timer += D_800BE9E4;
+        if (waitTime < prop->work.bob.timer) {
+            prop->work.bob.state = 2;
         }
     } else if (state == 2) {
-        arg0->unk12 = arg0->unk12 - D_800BE9E4;
-        if (arg0->unk12 < -10000) {
-            ((u8 *)arg0)[0x6E] = 1;
+        prop->y -= D_800BE9E4;
+        if (prop->y < -10000) {
+            prop->finished = TRUE;
         }
     }
 
-    arg0->unk5C = (s32)(((f32)arg0->unk12 + arg0->unk18) - (f32)initial);
+    prop->moveY = (prop->y + prop->yOffset) - startY;
 }
 
 /* Copies the position of the prop this one is linked to. */
