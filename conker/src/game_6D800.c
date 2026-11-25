@@ -19,7 +19,7 @@ void func_15040350(void *arg0, u32 arg1) {
 
 // contains jump relative
 void func_10007DA0(void);
-s32 func_15040754(struct148 *arg0);
+s32 func_15040754(Gfx *gfx);
 void func_15040CC8(u8 *arg0);
 
 #define FLUSH()                              \
@@ -79,7 +79,7 @@ void func_150403C8(void *arg0, u32 arg1, s32 arg2) {
                 D_800C68A0 = 1;
                 break;
             case 0x01:
-                sp40 = func_15040754((struct148 *)gfx);
+                sp40 = func_15040754((Gfx *)gfx);
                 break;
             case -0x03:
                 D_800848B0 = gfx[1];
@@ -131,203 +131,262 @@ void func_150403C8(void *arg0, u32 arg1, s32 arg2) {
     }
 }
 
-s32 func_1504072C(s32 arg0) {
-    if ((arg0 & 7) != 0) {
+/** Returns whether a display list address is not 8-byte aligned. */
+s32 func_1504072C(s32 addr) {
+    if (addr & 7) {
         return 1;
     }
     return 0;
 }
 
-void func_15040748(s32 arg0) {
+/** Command handler for every opcode without its own entry (empty). */
+void func_15040748(Gfx *gfx) {
 }
 
-s32 func_15040754(struct148 *arg0) { // overly simple
-    s32 temp_a2;
-    s32 temp_a1;
+/**
+ * G_VTX check: returns nonzero when the first vertex index (v0 + n minus n)
+ * is negative or the vertex source address is misaligned.
+ */
+s32 func_15040754(Gfx *gfx) {
+    s32 first = (gfx->words.w0 >> 1) & 0x7F; // v0 + n
+    s32 count = (gfx->words.w0 >> 12) & 0xFF;
 
-    temp_a1 = (arg0->unk0 >> 1) & 0x7F;
-    temp_a2 = (arg0->unk0 >> 12) & 0xFF;
-    temp_a1 = temp_a1 - temp_a2;
-
-    if (temp_a1 < 0) {
+    first -= count;
+    if (first < 0) {
         return 1;
     }
-    return func_1504072C(arg0->unk4);
+    return func_1504072C(gfx->words.w1);
 }
 
+/** G_VTX command handler (empty). */
 void func_150407A0(void) {
 }
 
-void func_150407A8(s32 arg0) {
+/** G_MODIFYVTX command handler (empty). */
+void func_150407A8(Gfx *gfx) {
 }
 
-void func_150407B4(s32 arg0) {
+/** G_CULLDL command handler (empty). */
+void func_150407B4(Gfx *gfx) {
 }
 
-void func_150407C0(s32 arg0) {
+/** G_BRANCH_Z command handler (empty). */
+void func_150407C0(Gfx *gfx) {
 }
 
-void func_150407CC(s32 arg0) {
+/** G_LINE3D command handler (empty). */
+void func_150407CC(Gfx *gfx) {
 }
 
-void func_150407D8(s32 arg0) {
+/** G_RDPHALF_1 command handler (empty). */
+void func_150407D8(Gfx *gfx) {
 }
 
-void func_150407E4(s32 arg0) {
+/** G_RDPHALF_2 command handler (empty). */
+void func_150407E4(Gfx *gfx) {
 }
 
-void func_150407F0(s32 arg0) {
+/** G_SETKEYGB command handler (empty). */
+void func_150407F0(Gfx *gfx) {
 }
 
-void func_150407FC(s32 arg0) {
+/** G_SETKEYR command handler (empty). */
+void func_150407FC(Gfx *gfx) {
 }
 
-void func_15040808(s32 arg0) {
+/** G_QUAD command handler (empty). */
+void func_15040808(Gfx *gfx) {
 }
 
-void func_15040814(s32 arg0) {
+/** G_TRI2 command handler (empty). */
+void func_15040814(Gfx *gfx) {
 }
 
-void func_15040820(s32 arg0) {
+/** Command handler for opcodes 0x10-0x1F (empty). */
+void func_15040820(Gfx *gfx) {
 }
 
-s32 func_1504082C(u32 *arg0) {
-    s32 tmp0 = (*arg0 >> 16) & 0xff;
-    s32 tmp1 = (*arg0 >> 8) & 0xff;
-    s32 tmp2 = (*arg0 >> 0) & 0xff;
+/**
+ * G_TRI1 check: the three vertex indices are stored doubled, so an odd byte
+ * means a corrupt command. Returns nonzero in that case.
+ */
+s32 func_1504082C(u32 *w0) {
+    s32 v0 = (*w0 >> 16) & 0xFF;
+    s32 v1 = (*w0 >> 8) & 0xFF;
+    s32 v2 = *w0 & 0xFF;
 
-    if ((tmp0 & 1) || (tmp1 & 1) || (tmp2 & 1)) {
+    if ((v0 & 1) || (v1 & 1) || (v2 & 1)) {
         return 1;
-    } else {
-        return 0;
     }
+    return 0;
 }
 
-void func_1504086C(s32 arg0) {
+/** G_TRI1 command handler (empty). */
+void func_1504086C(Gfx *gfx) {
 }
 
-void func_15040878(s32 arg0) {
+/** G_LOADTLUT command handler (empty). */
+void func_15040878(Gfx *gfx) {
 }
 
-void func_15040884(s32 arg0) {
+/** G_LOADTILE command handler (empty). */
+void func_15040884(Gfx *gfx) {
 }
 
-void func_15040890(s32 arg0) {
+/** G_RDPTILESYNC command handler (empty). */
+void func_15040890(Gfx *gfx) {
 }
 
-void func_1504089C(s32 arg0) {
+/** G_RDPFULLSYNC command handler (empty). */
+void func_1504089C(Gfx *gfx) {
 }
 
-void func_150408A8(s32 arg0) {
+/** G_RDPPIPESYNC command handler (empty). */
+void func_150408A8(Gfx *gfx) {
 }
 
-void func_150408B4(s32 arg0) {
+/** G_RDPLOADSYNC command handler (empty). */
+void func_150408B4(Gfx *gfx) {
 }
 
-void func_150408C0(s32 arg0) {
+/** G_SETCOMBINE command handler (empty). */
+void func_150408C0(Gfx *gfx) {
 }
 
+/** G_DL check: returns nonzero when the branch target is misaligned. */
 s32 func_150408CC(struct148 *arg0) {
-    func_1504072C(arg0->unk4);
+    return func_1504072C(arg0->unk4);
 }
 
-void func_150408F0(s32 arg0) {
+/** G_DL command handler (empty). */
+void func_150408F0(Gfx *gfx) {
 }
 
-void func_150408FC(s32 arg0) {
+/** G_SETOTHERMODE_H command handler (empty). */
+void func_150408FC(Gfx *gfx) {
 }
 
-void func_15040908(s32 arg0) {
+/** G_SETOTHERMODE_L command handler (empty). */
+void func_15040908(Gfx *gfx) {
 }
 
-void func_15040914(s32 arg0) {
+/** G_SETCONVERT command handler (empty). */
+void func_15040914(Gfx *gfx) {
 }
 
-void func_15040920(s32 arg0) {
+/** G_SETSCISSOR command handler (empty). */
+void func_15040920(Gfx *gfx) {
 }
 
-void func_1504092C(s32 arg0) {
+/** G_NOOP command handler (empty). */
+void func_1504092C(Gfx *gfx) {
 }
 
-void func_15040938(s32 arg0) {
+/** G_SPNOOP command handler (empty). */
+void func_15040938(Gfx *gfx) {
 }
 
-void func_15040944(s32 arg0) {
+/** G_SETCIMG command handler (empty). */
+void func_15040944(Gfx *gfx) {
 }
 
-void func_15040950(s32 arg0) {
+/** G_SETZIMG command handler (empty). */
+void func_15040950(Gfx *gfx) {
 }
 
-void func_1504095C(s32 arg0) {
+/** G_SETTIMG command handler (empty). */
+void func_1504095C(Gfx *gfx) {
 }
 
-void func_15040968(s32 arg0) {
+/** G_SETENVCOLOR command handler (empty). */
+void func_15040968(Gfx *gfx) {
 }
 
-void func_15040974(s32 arg0) {
+/** G_SETPRIMCOLOR command handler (empty). */
+void func_15040974(Gfx *gfx) {
 }
 
-void func_15040980(s32 arg0) {
+/** G_SETBLENDCOLOR command handler (empty). */
+void func_15040980(Gfx *gfx) {
 }
 
-void func_1504098C(s32 arg0) {
+/** G_SETFOGCOLOR command handler (empty). */
+void func_1504098C(Gfx *gfx) {
 }
 
-void func_15040998(s32 arg0) {
+/** G_SPECIAL_3 command handler (empty). */
+void func_15040998(Gfx *gfx) {
 }
 
-void func_150409A4(s32 arg0) {
+/** G_SPECIAL_2 command handler (empty). */
+void func_150409A4(Gfx *gfx) {
 }
 
-void func_150409B0(s32 arg0) {
+/** G_SPECIAL_1 command handler (empty). */
+void func_150409B0(Gfx *gfx) {
 }
 
-void func_150409BC(s32 arg0) {
+/** G_DMA_IO command handler (empty). */
+void func_150409BC(Gfx *gfx) {
 }
 
-void func_150409C8(s32 arg0) {
+/** G_SETFILLCOLOR command handler (empty). */
+void func_150409C8(Gfx *gfx) {
 }
 
-void func_150409D4(s32 arg0) {
+/** G_FILLRECT command handler (empty). */
+void func_150409D4(Gfx *gfx) {
 }
 
-void func_150409E0(s32 arg0) {
+/** G_TEXRECT command handler (empty). */
+void func_150409E0(Gfx *gfx) {
 }
 
-void func_150409EC(s32 arg0) {
+/** G_TEXRECTFLIP command handler (empty). */
+void func_150409EC(Gfx *gfx) {
 }
 
-void func_150409F8(s32 arg0) {
+/** G_LOADBLOCK command handler (empty). */
+void func_150409F8(Gfx *gfx) {
 }
 
-void func_15040A04(s32 arg0) {
+/** G_SETTILE command handler (empty). */
+void func_15040A04(Gfx *gfx) {
 }
 
-void func_15040A10(s32 arg0) {
+/** G_SETTILESIZE command handler (empty). */
+void func_15040A10(Gfx *gfx) {
 }
 
-void func_15040A1C(s32 arg0) {
+/** G_ENDDL command handler (empty). */
+void func_15040A1C(Gfx *gfx) {
 }
 
-void func_15040A28(s32 arg0) {
+/** G_POPMTX command handler (empty). */
+void func_15040A28(Gfx *gfx) {
 }
 
-void func_15040A34(s32 arg0) {
+/** G_MTX command handler (empty). */
+void func_15040A34(Gfx *gfx) {
 }
 
-void func_15040A40(s32 arg0) {
+/** G_GEOMETRYMODE command handler (empty). */
+void func_15040A40(Gfx *gfx) {
 }
 
 void func_15040A4C(void) {
 }
 
-void func_15040A54(s32 arg0) {
+/** G_LOAD_UCODE command handler (empty). */
+void func_15040A54(Gfx *gfx) {
 }
 
-void func_15040A60(s32 arg0) {
+/** G_MOVEMEM command handler (empty). */
+void func_15040A60(Gfx *gfx) {
 }
 
-void func_15040A6C(s32 arg0) {
+/** G_MOVEWORD command handler (empty). */
+void func_15040A6C(Gfx *gfx) {
 }
 
 // contains delay slot
@@ -482,11 +541,14 @@ void func_15040CC8(u8 *arg0) {
 //     }
 // }
 
-void func_15040D60(s32 arg0) {
+/** G_SETPRIMDEPTH command handler (empty). */
+void func_15040D60(Gfx *gfx) {
 }
 
-void func_15040D6C(s32 arg0) {
+/** G_TEXTURE command handler (empty). */
+void func_15040D6C(Gfx *gfx) {
 }
 
-void func_15040D78(s32 arg0) {
+/** G_RDPSETOTHERMODE command handler (empty). */
+void func_15040D78(Gfx *gfx) {
 }
