@@ -54,6 +54,7 @@ void func_151A1010(f32 x, f32 y, f32 z, s16 duration, f32 scaleA, f32 scaleB, u8
                   15.0f * scaleA, 10.0f * scaleA, 18, offset + 16, arg6, arg7);
 }
 
+/* Empty in this build; func_151A0E40, func_151A0F28 and func_151A1010 call it with full parameter lists. */
 void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
                   f32 arg4, s32 arg5, s32 arg6, s32 arg7,
                   s32 arg8, s32 arg9, f32 arg10, s32 arg11,
@@ -203,7 +204,7 @@ typedef struct {
 } DriftParticleData;
 
 extern SpriteAnim D_80090B60[];
-extern s32 func_15167D84(void *, s32, s32, s32, s32, s32);
+Particle *func_15167D84(ParticleTemplate *, s32, s32, s8, u8, s32);
 
 /* Spawns particles at random points in a sphere around the emitter; each drifts back to the centre. */
 void func_151A11E4(Emitter *emitter) {
@@ -300,7 +301,7 @@ void func_151A11E4(Emitter *emitter) {
             data.velSubX = (u8)(s32)(vx * 256.0f);
             data.velSubY = (u8)(s32)(horiz * 256.0f);
             data.velSubZ = (u8)(s32)(dist * 256.0f);
-            particle = (Particle *)func_15167D84(&packet, 0, sizeof(data), -1, emitter->unkC, emitter->unk1);
+            particle = func_15167D84(&packet, 0, sizeof(data), -1, emitter->unkC, emitter->unk1);
             if (particle != NULL) {
                 memcpy(particle + 1, &data, sizeof(data));
             }
@@ -389,11 +390,11 @@ typedef struct {
     /* 0x1A */ s16 unk1A;
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s32 pad20;
 } EffectData151A18DC;
 
 /* Creates a type 3 func_151491F4 effect from the spawner's settings. */
 void func_151A18DC(EffectSpawner *spawner) {
+    s32 pad; // matching: unused stack slot
     EffectData151A18DC data;
     struct260 *effect;
 
@@ -408,7 +409,7 @@ void func_151A18DC(EffectSpawner *spawner) {
 
     effect = func_151491F4(spawner->unk3C, -1, 3, 1, 0, 0x20, spawner->unkC, spawner->unk1);
     if (effect != NULL) {
-        memcpy((u8 *)effect + 0x28, &data, 0x20);
+        memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
 }
 
@@ -502,7 +503,7 @@ void func_151A1998(Emitter *emitter) {
             packet.subX = (s32)(x * 256.0f) & 0xFF;
             packet.subY = (s32)(y * 256.0f) & 0xFF;
             packet.subZ = (s32)(z * 256.0f) & 0xFF;
-            particle = (Particle *)func_15167D84(&packet, 0, sizeof(data), -1, emitter->unkC, emitter->unk1);
+            particle = func_15167D84(&packet, 0, sizeof(data), -1, emitter->unkC, emitter->unk1);
             if (particle != NULL) {
                 memcpy(particle + 1, &data, sizeof(data));
             }
@@ -671,7 +672,7 @@ void func_151A1FB4(Emitter *emitter) {
             packet.subX = (s32)(x * 256.0f) & 0xFF;
             packet.subY = (s32)(y * 256.0f) & 0xFF;
             packet.subZ = (s32)(z * 256.0f) & 0xFF;
-            particle = (Particle *)func_15167D84(&packet, 0, sizeof(data), -1, emitter->unkC, emitter->unk1);
+            particle = func_15167D84(&packet, 0, sizeof(data), -1, emitter->unkC, emitter->unk1);
             if (particle != NULL) {
                 memcpy(particle + 1, &data, sizeof(data));
             }
@@ -895,7 +896,7 @@ s32 func_151A2960(DescParticle *particle, struct17 *prevPos) {
 void func_151A2C24(struct17 *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
                    s32 count, f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase,
                    s16 delayRange, s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart,
-                   s8 eventFunc, u8 arg13, s32 arg14, s32 useAngles);
+                   s8 eventFunc, u8 arg13, s32 arg14, u8 useAngles);
 
 /* Bursts `count` particles from pos moving at yaw/pitch with a speed that falls off over the burst. */
 void func_151A2A14(struct17 *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope, s32 count,
@@ -943,7 +944,7 @@ extern BurstColors D_8008F8E8;
 void func_151A2C24(struct17 *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
                    s32 count, f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase,
                    s16 delayRange, s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart,
-                   s8 eventFunc, u8 arg13, s32 arg14, s32 useAngles) {
+                   s8 eventFunc, u8 arg13, s32 arg14, u8 useAngles) {
     s16 minFade;
     s16 delay;
     f32 t;
@@ -954,7 +955,7 @@ void func_151A2C24(struct17 *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 s
     s32 color;
     BurstColors colors;
 
-    if ((u8)useAngles == 0) {
+    if (!useAngles) {
         velocityFunc = func_151A2B84;
     } else {
         velocityFunc = func_151A2BD0;
@@ -968,7 +969,7 @@ void func_151A2C24(struct17 *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 s
     step = 1.0f / (f32)count;
     while (count != 0) {
         f32 rand;
-        s32 a;
+        s32 a;  // matching: a and b are reused for the alpha roll and the event time
         s32 b;
 
         delay = func_150ADA20() % (u32)(delayRange + 1) + delayBase;
