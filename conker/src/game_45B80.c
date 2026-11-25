@@ -271,7 +271,7 @@ void func_15018DFC(void) {
     func_150619A8();
     func_1501C870();
     if (D_800BEAC0 == 0) {
-        if (D_800C35EA == 1) {
+        if (D_800C35EA[0] == 1) {
             func_1502378C();
         } else {
             func_1504A730();

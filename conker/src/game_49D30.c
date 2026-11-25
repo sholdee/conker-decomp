@@ -1,10 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 /* variables.h declares these with the wrong types; they are redeclared below with the types this file uses. */
-#define D_800C35EA D_800C35EA_hdr
 #define D_800C3CA0 D_800C3CA0_hdr
 #include "variables.h"
-#undef D_800C35EA
 #undef D_800C3CA0
 
 /* Cutscene ("sequence") data is kept per scene slot (0/1) and per track (up to 30 tracks). */
@@ -60,7 +58,6 @@ typedef struct {
 
 /* Current animated values of a track (one SeqTrackState array per slot at D_800C3958). Which property
    each unk field holds depends on the track's SeqTrackInfo type. */
-extern u8 D_800C35EA[];
 
 extern u16 *D_800C35C8[];
 extern u16 *D_800C35D8[];

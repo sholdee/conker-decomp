@@ -391,7 +391,7 @@ void func_1507F640(void) {
 
     speed = 1.0f;
     blend = 4.0f;
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return;
     }
     if (D_800D154C->unk5 == 4) {
@@ -680,7 +680,7 @@ void func_1507FEA0(Actor *actor) {
     if (countdown != 0) {
         actor->unk13A = countdown - 1;
     }
-    if (idle->active == TRUE && D_800C35EA != 1) {
+    if (idle->active == TRUE && D_800C35EA[0] != 1) {
         limit = 0xFFFF - D_800BE9E4;
         timer = idle->timer;
         if (timer < limit) {

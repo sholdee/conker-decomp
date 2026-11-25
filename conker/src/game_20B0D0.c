@@ -123,12 +123,12 @@ void func_151DDC20(void) {
     if (D_800BE9F0 == 0x22) {
         reducedMenu = 1;
     }
-    if ((D_800C35EA != 1) || (D_800BE9F0 != 0x18) || (D_800C35E8 != 1)) {
+    if ((D_800C35EA[0] != 1) || (D_800BE9F0 != 0x18) || (D_800C35E8 != 1)) {
         if (func_1517EFDC() != 0) {
             blocked = 1;
         }
     }
-    if ((D_800C35EA == 1) && (D_800C3683 != 0)) {
+    if ((D_800C35EA[0] == 1) && (D_800C3683 != 0)) {
         blocked = 1;
     }
     if (D_8008FEEC > 0) {

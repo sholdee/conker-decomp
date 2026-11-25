@@ -1167,7 +1167,7 @@ Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, 
         obj->unk301 = 1;
     }
     obj->unk314 = func_1515D440();
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         blocked = 1;
     } else {
         blocked = 0;

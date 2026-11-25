@@ -95,7 +95,7 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
     camera = &D_800DBFF0[view];
     D_800BEBA0 = 1;
     skipWorld = FALSE;
-    if (D_800C35EA == 1 && D_800C3662 != 0) {
+    if (D_800C35EA[0] == 1 && D_800C3662 != 0) {
         skipWorld = TRUE;
     }
     if (D_800D18A0 & (1 << view)) {

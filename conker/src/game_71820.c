@@ -336,7 +336,7 @@ void func_15044DE8(void) {
     if (D_800CC2D0[0].stunned || D_800CC2D0[0].immune) {
         return;
     }
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         func_1505D024(&D_800CC2D0[0], 4, D_800CC2D0[0].unk7A, -1);
     }
 }

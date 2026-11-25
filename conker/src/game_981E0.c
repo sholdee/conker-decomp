@@ -278,7 +278,7 @@ f32 func_1506AD30(Actor *obj, f32 time, u8 filtered) {
             D_800D1580 = obj->events[obj->unk138].parameter;
             D_800D1874 = *(f32 *)&D_800D1580;
             token = ((struct197Hidden *)obj->unk2D0)->token;
-            if (D_800C35EA == 0 || D_800C365E != 0) {
+            if (D_800C35EA[0] == 0 || D_800C365E != 0) {
                 id = obj->events[obj->unk138].id;
                 if (filtered) {
                     s32 i;
@@ -1256,7 +1256,7 @@ void func_1506D4F4(void) {
 }
 
 void func_1506D538(void) {
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         func_1507D4F8(D_800C3E78);
     }
 }
@@ -3010,7 +3010,7 @@ void func_15071F54(void) {
 }
 
 void func_15071F80(void) {
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         D_800D154C->unk138++;
     }
 }

@@ -558,7 +558,7 @@ s32 func_15159184(Actor *chr, u8 mode) {
     s32 ret;
 
     if ((mode == 2) || (mode == 3)) {
-        if (D_800C35EA != 1) {
+        if (D_800C35EA[0] != 1) {
             ret = 0;
         } else if ((chr->unk118 - 75.0f) < chr->y_position) {
             ret = 1;

@@ -36,7 +36,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
 
     switch (event) {
     case 1:
-        if (D_800C35EA == 0) {
+        if (D_800C35EA[0] == 0) {
             value = D_800BE9F0;
             if (D_800D3840 == 6) {
                 func_15022190(params->args[0], params->args[1], params->args[2], params->args[3] * FIX16_TO_F32);
@@ -53,7 +53,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
         }
         return 0;
     case 4:
-        if (D_800C35EA == 0) {
+        if (D_800C35EA[0] == 0) {
             if (D_800D3840 == 6) {
                 func_15022190(params->args[0], params->args[1], params->args[2], params->args[3] * FIX16_TO_F32);
             }
@@ -66,7 +66,7 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
         }
         return 0;
     case 3:
-        if (D_800C35EA == 0) {
+        if (D_800C35EA[0] == 0) {
             extra0 = params->args[0];
             extra1 = params->args[1];
             value2 = D_800BE9F0;
@@ -120,7 +120,7 @@ s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
         if (D_800C35C4 != 0) {
             return 0;
         }
-        if (D_800C35EA == 0) {
+        if (D_800C35EA[0] == 0) {
             return 1;
         }
         if (id == D_800C3C98) {
@@ -128,21 +128,21 @@ s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
         }
         return 1;
     case 2:
-        if ((D_800C35EA == 1) && (id == D_800C3C98)) {
+        if ((D_800C35EA[0] == 1) && (id == D_800C3C98)) {
             return 1;
         }
         return 0;
     case 3:
-        if ((D_800C35EA == 1) && (id == D_800C35E8)) {
+        if ((D_800C35EA[0] == 1) && (id == D_800C35E8)) {
             return 1;
         }
         return 0;
     case 4:
-        return D_800C35EA != 1;
+        return D_800C35EA[0] != 1;
     case 5:
         return D_800C3672;
     case 6:
-        if ((D_800C35EA == 1) && (id == D_800C35E8)) {
+        if ((D_800C35EA[0] == 1) && (id == D_800C35E8)) {
             return 1;
         }
         return 0;

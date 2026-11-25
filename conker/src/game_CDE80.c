@@ -34,7 +34,7 @@ void func_150A09D0(s32 ticks) {
                               D_800D3098[i].unk18);
                 D_800D3098[i].unk20 = 0;
             }
-            if (D_800C35EA == 1) {
+            if (D_800C35EA[0] == 1) {
                 if (func_150A1DA0(D_800CC2D0, &D_800D3098[i], 0) == 0) {
                     func_150A23E4(&D_800D3098[i]);
                 }
@@ -456,7 +456,7 @@ void func_150A11C4(Actor *actor) {
                     __osPiGetAccess();
                     osPiRawReadIo(func_150A1040(0xB0000054), &raw);
                     __osPiRelAccess();
-                    if (func_150A1040(raw) == 0x1090C2B && D_800C35EA == 0 && actor->health != 0) {
+                    if (func_150A1040(raw) == 0x1090C2B && D_800C35EA[0] == 0 && actor->health != 0) {
                         func_15172E7C(actor, D_800D3098[i].subtype, D_800D3098[i].unk18);
                         if (D_800BE9F0 != D_800D3098[i].subtype) {
                             actor->immune = 0xFF;
@@ -478,7 +478,7 @@ void func_150A11C4(Actor *actor) {
                     break;
                 case 13:
                     if (unk127 != 0xFF && !(prevBits & 1) && D_800E0B94 == 0 && actor->health != 0 &&
-                        D_800C35EA == 0) {
+                        D_800C35EA[0] == 0) {
                         if (D_800D3098[i].subtype == 0) {
                             D_800D3098[i].disabled = 1;
                         }

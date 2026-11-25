@@ -138,7 +138,7 @@ void func_150F2D14(Emitter *emitter) {
     Particle *spawned;
 
     state = &emitter->state;
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return;
     }
     target = state->target;

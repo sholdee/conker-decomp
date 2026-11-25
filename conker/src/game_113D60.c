@@ -84,7 +84,7 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
     Game113D60Emission emission;
     Game113D60Effect *effect;
 
-    if ((actor != 0) && ((D_800C35EA != 1) || (D_800C35E8 != 9))) {
+    if ((actor != 0) && ((D_800C35EA[0] != 1) || (D_800C35E8 != 9))) {
         source = &D_800A1190[sourceIndex];
         if ((func_150ADA68() < source->chance) && (source->start != -1)) {
             if (source->end != -1) {

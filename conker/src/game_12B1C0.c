@@ -9,7 +9,7 @@ void func_150FDD10(s32 arg0) {
     Actor *obj;
 
     func_15103828();
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         obj = &D_800CC2D0[0];
         do {
             if (obj->id == 0x28) {

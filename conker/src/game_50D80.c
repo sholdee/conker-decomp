@@ -337,8 +337,8 @@ void func_150242F8(s32 mode, s32 scene) {
     s32 time;
     s32 queued;
 
-    // matching: D_800C35EA must stay the scalar declared in variables.h (an array extern addresses it differently)
-    if ((D_800C3C8C != 2) && ((&D_800C35EA)[scene] == 1) && (D_800C3C9A != 0)) {
+    // matching: indexing through &D_800C35EA[0] rather than the array changes register allocation
+    if ((D_800C3C8C != 2) && ((&D_800C35EA[0])[scene] == 1) && (D_800C3C9A != 0)) {
         D_800C3638 = 0;
         queued = 0;
         for (track = 0; track < D_800C363A[scene]; track++) {

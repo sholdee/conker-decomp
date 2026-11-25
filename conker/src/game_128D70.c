@@ -379,7 +379,7 @@ void func_150FC614(EmitterObj *obj) {
 
     state = &obj->state;
     owner = state->owner;
-    if ((owner->interaction_state == 0) || (owner->id == 0xFF) || (owner->unique_id != state->ownerUniqueId) || (D_800C35EA == 1)) {
+    if ((owner->interaction_state == 0) || (owner->id == 0xFF) || (owner->unique_id != state->ownerUniqueId) || (D_800C35EA[0] == 1)) {
         obj->unkE = -1;
         return;
     }

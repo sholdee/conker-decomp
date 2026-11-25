@@ -230,7 +230,7 @@ void func_151DE8F0(void) {
         }
     }
     D_8008FDD4->input = D_8008FDD4->padInput[0];
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         D_8008FE24 = 0;
         if (D_800E0A90 < 0x546 && D_800BE930[0] != 0) {
             D_8008FD84 = 1;

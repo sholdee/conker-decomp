@@ -61,7 +61,7 @@ void func_1516AA70(TextBox *box) {
 
     player = D_800DBFF0;
     skip = box->config->flags & TEXTBOX_SKIP_ANIM;
-    if (box->config->unk2B != 0 && D_800C35EA != 1) {
+    if (box->config->unk2B != 0 && D_800C35EA[0] != 1) {
         box->config->numPages = 0;
         func_1516972C((struct102 *)box);
         return;

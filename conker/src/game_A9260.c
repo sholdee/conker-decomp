@@ -41,7 +41,7 @@ void func_1507BDB0(AnimPlay *anim, f32 rate, Actor *obj, s32 mode) {
     }
 
     if (obj != NULL) {
-        if (D_800C35EA == 0) {
+        if (D_800C35EA[0] == 0) {
             if (D_800BE9A4 < 2.0f) {
                 rate = D_800BE9A4 * rate;
             } else {
@@ -71,7 +71,7 @@ void func_1507BDB0(AnimPlay *anim, f32 rate, Actor *obj, s32 mode) {
 
     jumped = 0;
     if (obj != NULL) {
-        if (((&D_800C35EA)[mode] != 1) || (D_800C365E[mode] != 0)) {
+        if ((D_800C35EA[mode] != 1) || (D_800C365E[mode] != 0)) {
             result = func_1506AD30(D_800D154C, time, 0);
             if (result != 0.0f) {
                 time = result;
@@ -87,7 +87,7 @@ void func_1507BDB0(AnimPlay *anim, f32 rate, Actor *obj, s32 mode) {
                 obj->events = NULL;
                 anim->speed = 0.0f;
             }
-            if (D_800C35EA == 0) {
+            if (D_800C35EA[0] == 0) {
                 anim->callback();
             }
             if (oldAnimId != anim->animId) {

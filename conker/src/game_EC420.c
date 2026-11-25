@@ -268,7 +268,7 @@ void func_150BF21C(WorldObject *obj) {
     height = BOB_WORK(obj)->height;
     bob = 0.0f;
     rate = 0.05f;
-    if (D_800C35EA == 0) {
+    if (D_800C35EA[0] == 0) {
         paused = FALSE;
     } else if (D_800C35E8 == 1) {
         paused = FALSE;
@@ -375,7 +375,7 @@ void func_150BF760(WorldObject *obj) {
     s32 slot;
     f32 progress = 0.0f;
 
-    if (D_800C35EA != 1 || D_800C35E8 == 1) {
+    if (D_800C35EA[0] != 1 || D_800C35E8 == 1) {
         func_1511B51C(obj);
         if (SCROLL_WORK(&obj[1])->texScroll == NULL) {
             SCROLL_WORK(&obj[1])->texScroll = func_15195FB0(obj, D_800902B8, 1, -1, 0, 0, -8);

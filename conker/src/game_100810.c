@@ -442,7 +442,7 @@ s32 func_150D3FD4(TrailActor *actor) {
 
     state = actor->state;
     points = actor->points;
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         if (func_1515C0F8(state->owner, &vel) != 0) {
             speed = func_15143E64(vel);
         } else {
@@ -1015,7 +1015,7 @@ s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
     snd->y = state->owner->y_position;
     snd->z = state->owner->z_position;
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         snd->volume = volume >> 1;
         *arg2 >>= 1;
     } else {

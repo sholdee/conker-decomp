@@ -1026,7 +1026,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
                     value = 0;
                 }
             }
-            if (D_800C35EA == 1 && D_800C3C9E != -1) {
+            if (D_800C35EA[0] == 1 && D_800C3C9E != -1) {
                 if (D_800C3C9E == 0) {
                     value = 0;
                 } else {
@@ -1369,7 +1369,7 @@ Gfx *func_151EC3E8(Gfx *gfx) {
     static u8 D_800900D4;
     s32 alpha;
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         D_800900D4 = 0;
         return gfx;
     }

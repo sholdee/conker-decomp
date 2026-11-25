@@ -114,7 +114,7 @@ void func_15122AE0(void) {
         camera = &D_800DBFF0[i];
         if (func_150859AC(i, 0) || (i == 0)) {
             camera->dt = dt;
-            if ((D_800BEAC0 == 0) || (D_800C35EA != 0) || (D_800D2DB4 != 0)) {
+            if ((D_800BEAC0 == 0) || (D_800C35EA[0] != 0) || (D_800D2DB4 != 0)) {
                 func_151239CC(camera, 5);
                 func_15122C5C(camera);
             } else {

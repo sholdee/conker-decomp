@@ -149,7 +149,7 @@ void func_150F706C(BeamObj *obj) {
         return;
     }
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         if (beam->ends[0] != NULL && beam->ends[1] != NULL) {
             beam->ends[0]->mode = 3;
             beam->ends[1]->mode = 3;

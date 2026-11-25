@@ -26,7 +26,7 @@ void func_15052590(Actor *obj) {
         func_150AFC68(D_800C3E78, 2, 0x3FC, 6, 0xFF, 0);
     }
 
-    if ((D_800C35EA != 1) || ((D_800C3654[0] != 0) && (func_150229E4(obj) == 0))) {
+    if ((D_800C35EA[0] != 1) || ((D_800C3654[0] != 0) && (func_150229E4(obj) == 0))) {
         func_15053750(obj);
         func_1504BB88(obj);
         obj->unk80 = 10;

@@ -519,7 +519,7 @@ s32 func_1507D754(Actor *obj) {
                 spawned = func_151149AC(1);
             }
             handle = func_1507515C(obj);
-            if (handle != NULL && D_800C35EA != 1) {
+            if (handle != NULL && D_800C35EA[0] != 1) {
                 func_15136C3C(handle, 1, 1, 1, 1, 0, 0xFF, 1);
             }
         }
@@ -705,7 +705,7 @@ void func_1507DFE4(s32 resource, s32 arg1) {
     s32 kind;
     s32 type;
 
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         func_15084D70(0, resource, 1, pos, vec, &unk4F, &angle, &unk44, &unk48, 1, &type);
         yaw = (f32)(angle - 64) * (360.0f / 256.0f) + 180.0f;
         if (type == 0) {

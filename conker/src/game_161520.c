@@ -268,7 +268,7 @@ void func_151342BC(BloodDrip *drip) {
     if (drip->accumulator > 7.0f) {
         drip->accumulator = 7.0f;
     }
-    if ((drip->desc.flags & 0x20) && (D_800C35EA == 1)) {
+    if ((drip->desc.flags & 0x20) && (D_800C35EA[0] == 1)) {
         while (drip->accumulator > 1.0f) {
             drip->accumulator -= 1.0f;
         }

@@ -129,7 +129,7 @@ void func_1511B07C(WorldObject *obj) {
     moveX = 0;
     moveZ = 0;
     sound = 0;
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         if (func_15022B08(obj - D_800DBEF4, 0) != 0) {
             return;
         }

@@ -272,7 +272,7 @@ void func_1503B9BC(s32 objIndex) {
         speed = obj->xz_velocity;
         speed = CLAMP(speed, 0.0f, 30.0f);
         bob = 60.0f - (speed + speed);
-        if (D_800C35EA == 1 && D_800C3C9D < 100) {
+        if (D_800C35EA[0] == 1 && D_800C3C9D < 100) {
             bob *= D_800C3C9D;
             bob *= 0.01f;
         }

@@ -56,7 +56,7 @@ void func_1515FDA0(s32 arg0) {
                 continue;
             }
             visible = TRUE;
-            if ((effect->desc.flags & 2) && (D_800C35EA == 1)) {
+            if ((effect->desc.flags & 2) && (D_800C35EA[0] == 1)) {
                 visible = FALSE;
             }
             if ((effect->desc.flags & 8) && ((func_15181CC8(0) == 0) || (func_1517EF00(0) != 0))) {

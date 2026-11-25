@@ -354,7 +354,7 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     if (D_800D2458 != 0) {
         gfx = func_150938BC(gfx);
     }
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return gfx;
     }
     if (D_8008CD00 != 0) {

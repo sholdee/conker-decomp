@@ -124,7 +124,7 @@ s32 func_15096A68(s32 slot) {
 void func_15096D08(void) {
     s32 i;
 
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         for (i = 0; i < 3; i++) {
             if (D_800D2DC0[i].state != 0 && func_15096A68(i) != 0) {
                 break;

@@ -400,9 +400,9 @@ void func_15175958(SwarmActor *actor) {
         return;
     }
     alpha = actor->alpha;
-    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && D_800BE9F0 == 6 && D_800C35EA != 0 && D_800C35E8 == 0xF) {
+    if ((actor->modelIndex == 8 || actor->modelIndex == 9) && D_800BE9F0 == 6 && D_800C35EA[0] != 0 && D_800C35E8 == 0xF) {
         actor->flags &= ~8;
-        if (D_800C35EA == 0 || D_800C35E8 != 0xF) {
+        if (D_800C35EA[0] == 0 || D_800C35E8 != 0xF) {
             func_1516972C((struct102 *)actor);
             return;
         }
@@ -605,7 +605,7 @@ void func_15175958(SwarmActor *actor) {
         actor->x = actor->rollStep * cosPitch + -3478.0f;
         actor->z = actor->rollStep * sinPitch + 3858.0f;
         actor->y -= 100.0f / (actor->rollStep - 60.0f + 4.0f);
-        if (actor->y < -3100.0f || D_800C35EA == 0 || D_800C35E8 != 0xF) {
+        if (actor->y < -3100.0f || D_800C35EA[0] == 0 || D_800C35E8 != 0xF) {
             func_1516972C((struct102 *)actor);
             return;
         }

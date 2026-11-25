@@ -171,7 +171,7 @@ void func_1504ADD0(void) {
     Actor *obj;
     OSContPad noPad;
 
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         for (i = 0; i < 25; i++) {
             obj = &D_800CC2D0[i];
             if (obj->interaction_state == 0) {
@@ -610,7 +610,7 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
             D_800CC2B2 /= 3;
         }
     }
-    if (D_800C35EA == 0 && obj->unk31C->unk16 == 0) {
+    if (D_800C35EA[0] == 0 && obj->unk31C->unk16 == 0) {
         obj->unk282 = 30;
         obj->unk276 = 0;
     }

@@ -109,7 +109,7 @@ void func_15036CE8(void) {
             }
             break;
     }
-    if (D_800C35EA == 1 && D_800C3FFA == 0) {
+    if (D_800C35EA[0] == 1 && D_800C3FFA == 0) {
         D_800C3FFA = 1;
         return;
     }
@@ -666,7 +666,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
     D_800C3FD0[0] = -99999.0f;
     D_800C3FD0[1] = -99999.0f;
     D_800C3FD0[2] = -99999.0f;
-    if ((&D_800C35EA)[0] == 1 || (&D_800C35EA)[1] == 1) {
+    if (D_800C35EA[0] == 1 || D_800C35EA[1] == 1) {
         return;
     }
     obj = &D_800CC2D0[objIndex];
@@ -841,7 +841,7 @@ s32 func_150380C0(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 
     found = -1;
     allowSameId = 1;
     excludedId = -1;
-    if ((&D_800C35EA)[0] == 1 || (&D_800C35EA)[1] == 1) {
+    if (D_800C35EA[0] == 1 || D_800C35EA[1] == 1) {
         out[0] = -99999.0f;
         out[1] = -99999.0f;
         out[2] = -99999.0f;
@@ -1206,7 +1206,7 @@ void func_15038620(s32 bone, s32 refBone, f32 *target, s32 objIndex, s32 limitId
         ratePitch = D_800981A0[rateIdx][1];
         maxYaw = D_800981A0[rateIdx][2];
         maxPitch = D_800981A0[rateIdx][3];
-        if (D_800C35EA == 1) {
+        if (D_800C35EA[0] == 1) {
             rateYaw = 1.0f;
             ratePitch = 1.0f;
             maxYaw = 5.0f;

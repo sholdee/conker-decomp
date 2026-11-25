@@ -489,7 +489,7 @@ void func_151BF81C(CounterEffect *effect) {
         return;
     }
     if (!(display->flags & 1)) {
-        if (D_800C35EA == 1) {
+        if (D_800C35EA[0] == 1) {
             return;
         }
         if (func_15181CC8(0) == 0) {

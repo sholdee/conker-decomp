@@ -194,7 +194,7 @@ void func_15108BC0(DynModel *model) {
 
     if (track == TRACK_NONE) {
         lamp->height = 226.0f;
-    } else if (D_800C35EA == 1) {
+    } else if (D_800C35EA[0] == 1) {
         SeqTrackState *state = &D_800C3958[0][track];
 
         lamp->height = state->y;

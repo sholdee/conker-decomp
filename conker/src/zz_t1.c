@@ -30,7 +30,7 @@ void func_1515FDA0(s32 arg0) {
                     slot = &((Node1515FDA0 **)D_800DD198)[D_800DD190];
                 } else if (node->unk10 != -1) {
                     run = 1;
-                    if ((node->unkE & 2) && (D_800C35EA == 1)) {
+                    if ((node->unkE & 2) && (D_800C35EA[0] == 1)) {
                         run = 0;
                     }
                     if ((node->unkE & 8) && ((func_15181CC8(0) == 0) || (func_1517EF00(0) != 0))) {

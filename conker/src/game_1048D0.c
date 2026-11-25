@@ -386,7 +386,7 @@ void func_150D7928(Actor *obj) {
         } else {
             obj->unkC8 = 44.0f;
         }
-        if (speed > 0.2f && obj->unk28 < 10.0f && obj->health != 0 && D_800C35EA != 1) {
+        if (speed > 0.2f && obj->unk28 < 10.0f && obj->health != 0 && D_800C35EA[0] != 1) {
             volume = (s32)(1000.0f * speed);
             if (volume > 18000) {
                 volume = 18000;

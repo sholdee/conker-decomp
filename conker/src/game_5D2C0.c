@@ -2425,7 +2425,7 @@ s32 func_1503327C(Attachment *att, Actor *owner) {
 s32 func_15033328(Attachment *att, Actor *owner) {
     s32 delta;
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return 0;
     }
     if (owner->in_water == 0) {
@@ -2447,7 +2447,7 @@ s32 func_15033328(Attachment *att, Actor *owner) {
 s32 func_150333A8(Attachment *att, Actor *owner) {
     ActorCtl *unk;
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return 0;
     }
     if (owner->in_water != 0) {
@@ -2686,7 +2686,7 @@ s32 func_15033838(Attachment *att, Actor *owner) {
  * unless D_800BEA0C is set. */
 s32 func_150339C8(Attachment *att, Actor *owner) {
     func_150334B8(att, owner);
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         if (D_800BEA0C != 0) {
             if (att->unk3C != 0) {
                 func_1000FD38(func_15033BDC, att, (s32)owner);
@@ -2867,7 +2867,7 @@ void func_15033EC4(s32 a, s32 b) {
 s32 func_15033F0C(Attachment *att, Actor *owner) {
     ActorCtl *unk;
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return 0;
     }
     unk = owner->unk31C;
@@ -2886,7 +2886,7 @@ s32 func_15033F0C(Attachment *att, Actor *owner) {
 s32 func_15033F70(Attachment *att, Actor *owner) {
     ActorCtl *unk;
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return 0;
     }
     unk = owner->unk31C;

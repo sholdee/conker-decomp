@@ -33,7 +33,7 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
     if (obj == NULL) {
         return;
     }
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         func_10010630(0x2BB, obj, 0x7FFF, 1000, 2000);
         func_10010630(0x2BA, obj, 0x7FFF, 1000, 2000);
     }

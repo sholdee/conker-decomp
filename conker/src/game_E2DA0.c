@@ -31,7 +31,7 @@ typedef struct GameCommand {
 
 /** Emits command 0x1A carrying object objIndex's facing angle (skipped when D_800C35EA == 1). */
 GameCommand *func_150B58F0(GameCommand *cmd, s32 objIndex) {
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return cmd;
     }
     cmd->opcode = 0x1A;

@@ -2811,7 +2811,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
         attacker->unkD0 = 0;
         return 0;
     }
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return 0;
     }
     attackIdx = attacker->unkD0 - 1;
@@ -2964,7 +2964,7 @@ s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
     Entry1505C1E4 *table;
 
     table = (Entry1505C1E4 *)&D_8009A9F8;
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return 0;
     }
     if ((flags & 0x20000) && (victim->immune != 0)) {
@@ -3526,7 +3526,7 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 a
         } else {
             state->anim &= 0xFFFF7FFF;
         }
-        if (D_800C35EA == 1 && (state->anim & 0x8000)) {
+        if (D_800C35EA[0] == 1 && (state->anim & 0x8000)) {
             state->unk8 = arg9;
         }
     }
@@ -4372,7 +4372,7 @@ void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 neste
     s32 idx;
 
     result = 0;
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         return;
     }
     held = 0;

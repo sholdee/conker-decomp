@@ -176,8 +176,8 @@ void func_15112A80(s32 player) {
                     obj->viewFlags &= ~(1 << view);
                     // matching: empty then-branch orders uopt's live ranges (see func_15112A80 notes)
                     if (!(obj->inactive != 1 && !(obj->state & 8) && (obj->flags & 1) && obj->alpha != 0 &&
-                          (D_800C3658[player] != 0 || (&D_800C35EA)[player] != 1 || func_15022B08(i, player) != 0) &&
-                          (((&D_800C35EA)[player] == 1 && func_15022B08(i, player) != 0) ||
+                          (D_800C3658[player] != 0 || D_800C35EA[player] != 1 || func_15022B08(i, player) != 0) &&
+                          ((D_800C35EA[player] == 1 && func_15022B08(i, player) != 0) ||
                            !(obj->effectFlags & 0x100) || func_1503F800(&obj->unk98, obj->x, obj->z, view, 0) == 0))) {
                     } else {
                         f32 (*mtx)[4];
@@ -463,7 +463,7 @@ void func_15113C88(void) {
         }
         do { // matching: without this wrapper uopt stops keeping &D_800C3658 in a saved register
             if ((obj->state & 8) || obj->unk4C == 0 || (obj->flags & 0x10) == 0x10 || hidden ||
-                (D_800C3658[0] == 0 && D_800C35EA == 1 && func_15022B08(i, 0) == 0) || !(obj->flags & 1)) {
+                (D_800C3658[0] == 0 && D_800C35EA[0] == 1 && func_15022B08(i, 0) == 0) || !(obj->flags & 1)) {
                 show = FALSE;
             } else {
                 show = TRUE;

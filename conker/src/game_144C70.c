@@ -711,7 +711,7 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
     }
     WORK(prop)->swing.speed = speed;
     if (D_800BE9B4 != 0 || angle != prop->rotY) {
-        if (D_800C35EA == 1 && func_15022B08(prop - D_800DBEF4, 0) != 0) {
+        if (D_800C35EA[0] == 1 && func_15022B08(prop - D_800DBEF4, 0) != 0) {
             angle = prop->rotY;
         } else {
             prop->rotY = angle;

@@ -120,7 +120,7 @@ Gfx *func_15154D80(Gfx *gfx, ScreenSprite *sprite, s16 viewport) {
     if ((sprite->info.flags & 0x10) && (viewport != sprite->info.viewport)) {
         return gfx;
     }
-    if ((sprite->info.flags & 0x40) && (D_800C35EA == 1)) {
+    if ((sprite->info.flags & 0x40) && (D_800C35EA[0] == 1)) {
         return gfx;
     }
     /* flag bits 11 and up: per viewport, skip unless func_15181CC8 and func_1517EF00 allow it */

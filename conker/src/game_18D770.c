@@ -801,7 +801,7 @@ s32 func_15161A68(struct225 *effect) {
     // matching: both the table-address local and the (s32) read of unk18 are needed for IDO's register order
     SeqTrackState **table = D_800C3958;
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         f32 value;
         SeqTrackState *source = *table + (s32)effect->unk18;
 

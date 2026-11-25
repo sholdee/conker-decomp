@@ -717,7 +717,7 @@ void func_150C3230(Actor *obj) {
             target = NULL;
         }
 
-        if ((D_800BE616 == 0) && (D_800C35EA == 0) && (obj->unk65 == 0)) {
+        if ((D_800BE616 == 0) && (D_800C35EA[0] == 0) && (obj->unk65 == 0)) {
             obj->unk2E4 = 0;
         }
 

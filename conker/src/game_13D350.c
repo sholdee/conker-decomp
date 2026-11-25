@@ -96,7 +96,7 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     if (D_800BE635 != 0) {
         gfx = func_15110544(gfx, 0, 0, D_800BE620, D_800BE624, 0, 0, 0);
     }
-    if (D_800C35EA == 1 && D_800C3681 != 0) {
+    if (D_800C35EA[0] == 1 && D_800C3681 != 0) {
         return gfx;
     }
     pitch = 360.0f - (D_800DBFF0[D_80082FA4].pitch + D_800DCDE0[D_80082FA4].pitch);
@@ -308,7 +308,7 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
         }
         break;
     case 0x13:
-        if (D_800C35EA == 1 && (D_800C35E8 == 2 || D_800C35E8 == 1)) {
+        if (D_800C35EA[0] == 1 && (D_800C35E8 == 2 || D_800C35E8 == 1)) {
             ret = 320;
         } else if (y < 1900.0f) {
             ret = 270;
@@ -717,7 +717,7 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
             yaw += 360.0f;
         }
     } else if (D_800BE9F0 == 0x3C ||
-               (D_800BE9F0 == 0x13 && D_800C35EA == 1 && (D_800C35E8 == 2 || D_800C35E8 == 1))) {
+               (D_800BE9F0 == 0x13 && D_800C35EA[0] == 1 && (D_800C35E8 == 2 || D_800C35E8 == 1))) {
         gfx = func_15110544(gfx, RENDER_VIEWS[D_80082FA4].left, RENDER_VIEWS[D_80082FA4].top,
                             RENDER_VIEWS[D_80082FA4].right - 1.0f, RENDER_VIEWS[D_80082FA4].bottom, 0, 0, 0);
     }

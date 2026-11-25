@@ -275,7 +275,7 @@ visible:;
     if (D_800C3E7C * sizeof(Mtx) < D_800C3E88 + numBones * sizeof(Mtx) - D_800C3E8C) {
         return;
     }
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         range = 10000;
     }
     dist = func_150AD9A0(D_800DBFF0->eye.x - D_800CC2D0[objIndex].x_position,

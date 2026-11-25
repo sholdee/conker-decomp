@@ -95,7 +95,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             if (c == 0) {
                 break;
             }
-            if (D_800C35EA == 0) {
+            if (D_800C35EA[0] == 0) {
                 return 1;
             }
             break;
@@ -111,7 +111,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             if (c == 0) {
                 break;
             }
-            if (D_800C35EA == 1) {
+            if (D_800C35EA[0] == 1) {
                 return 1;
             }
             break;

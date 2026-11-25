@@ -403,7 +403,7 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
     f32 closure;
 
     if (D_800DDE40 != 0) {
-        if (D_800C35EA == 1) {
+        if (D_800C35EA[0] == 1) {
             f32 scale;
 
             closure = *D_800DDE44 * 0.01f;

@@ -175,7 +175,7 @@ void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
     func_15123070(view);
 
     view->status |= 4;
-    if (D_800BE9F0 != 0x21 && D_800C35EA != 1) {
+    if (D_800BE9F0 != 0x21 && D_800C35EA[0] != 1) {
         func_1512D560(view, 5, NULL);
         // the header declares D_800C3600 as a struct168 pointer, but it is the struct itself
         D_800C3600.unkC = view->yaw;

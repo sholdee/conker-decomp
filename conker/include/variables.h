@@ -894,7 +894,7 @@ extern u8  D_800BEAC1;
 extern u16 D_800C18B8[];
 extern u8  D_800C35C4;
 extern u8  D_800C35C5;
-extern u8  D_800C35EA;
+extern u8  D_800C35EA[2]; // per cutscene scene slot (0/1): cutscene state, 1 = playing
 extern struct168 D_800C3600; // scripted camera shot
 extern u8  D_800C3638;
 extern u8 D_800C3654[];

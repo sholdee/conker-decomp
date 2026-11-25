@@ -438,7 +438,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
     oldMix = state >> 8;
     if (!(state & 0x80)) {
         func_1000E40C(34, 24000);
-        if (D_800C35EA == 1) {
+        if (D_800C35EA[0] == 1) {
             func_1000DF68(34, 20, 1);
         }
         state = 0x80;
@@ -535,7 +535,7 @@ u32 func_1000BF60(u32 state, u8 channel, f32 x, f32 y, f32 z) {
 s32 func_1000C350(s32 state, u8 channel, f32 x, f32 y, f32 z) {
     if (!(state & 0x80)) {
         state |= 0x80;
-        if (D_800C35EA != 1) {
+        if (D_800C35EA[0] != 1) {
             func_1000886C(channel, 30, 1);
             func_1000886C(channel, 1, 1);
             func_1000E40C(35, 25000);

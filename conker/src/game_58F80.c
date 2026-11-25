@@ -566,7 +566,7 @@ void func_1502C6E8(s32 index, s16 player, s32 mode) {
     } else if (D_800BE616 != 0) {
         lod = 1;
     }
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         lod = 0;
     }
     if (maxLod < lod) {
@@ -1042,7 +1042,7 @@ load:
             {
                 s16 scale;
 
-                if (D_800C35EA != 1) {
+                if (D_800C35EA[0] != 1) {
                     scale = obj->y_scale * obj->unkCC;
                 } else {
                     scale = 0;
@@ -1272,7 +1272,7 @@ void func_1502E4C4(s32 index) {
     yOffset = (((ModelBounds *)D_800D1C90[id])->centreY + obj->unkCC) * obj->y_scale;
     obj->unk270 = width;
     range = obj->unk10;
-    if (D_800C35EA == 1 && D_800C3660 == 0) {
+    if (D_800C35EA[0] == 1 && D_800C3660 == 0) {
         range = 0;
     }
     maxDist = 0;
@@ -1309,7 +1309,7 @@ void func_1502E4C4(s32 index) {
             if (maxDist < dist) {
                 maxDist = dist;
             }
-            if ((obj->unk66 & 0x80) != 0x80 && dist <= cullDist && D_800C35EA != 1) {
+            if ((obj->unk66 & 0x80) != 0x80 && dist <= cullDist && D_800C35EA[0] != 1) {
                 inside = TRUE;
             }
         }
@@ -1326,7 +1326,7 @@ void func_1502E4C4(s32 index) {
                 func_1506160C(obj, 9, 0, 0, i);
                 event = -1;
             }
-            if ((obj->unkF8 & 0x800000) && event != 8 && D_800C35EA != 1 && func_1503F904(obj, i, oldMask) != 0) {
+            if ((obj->unkF8 & 0x800000) && event != 8 && D_800C35EA[0] != 1 && func_1503F904(obj, i, oldMask) != 0) {
                 inside = TRUE;
             }
         } else {
@@ -1347,7 +1347,7 @@ void func_1502E4C4(s32 index) {
     if (obj->camera != NULL && (obj->camera->mode == 0x10000 || obj->unk31C->aimState != 0)) {
         obj->unk74 |= 1 << index;
     }
-    if (D_800C35EA != 1) {
+    if (D_800C35EA[0] != 1) {
         if (obj->unk2FC != 0) {
             obj->unk74 |= obj->unk2FC;
         }
@@ -1854,7 +1854,7 @@ void func_1502FBE8(Actor *obj) {
     model = obj->modelIds[lod];
     func_150837D4(obj - D_800CC2D0, model, 0);
     obj->lod = lod;
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         D_800C3638 = 0;
     }
     if (oldAnims != D_800D1588[model]) {
@@ -1868,7 +1868,7 @@ void func_1502FBE8(Actor *obj) {
             func_1505E650(obj, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         }
     }
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         D_800C3638 = 1;
     }
     func_1507EABC(obj);

@@ -299,7 +299,7 @@ s8 func_15101378(Beam *beam) {
     } else {
         endIsHit = 1;
         bones = owner->boneMtx;
-        if (bones != NULL && (D_800C35EA != 1 || (owner->unk74 & 0xF) != 0xF)) {
+        if (bones != NULL && (D_800C35EA[0] != 1 || (owner->unk74 & 0xF) != 0xF)) {
             boneMtx = bones[data->bone];
             func_15143134(&data->localStart, &beam->start, boneMtx);
             if (data->flags & 2) {

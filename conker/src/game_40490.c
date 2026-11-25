@@ -467,7 +467,7 @@ s32 func_15013C38(TriggerZone *obj) {
         return 1;
     }
 
-    if (D_800C35EA == 1) {
+    if (D_800C35EA[0] == 1) {
         if ((D_800C35E8 == 15) || (D_800C35E8 == 16) || (D_800C35E8 == 17)) {
             return 1;
         }

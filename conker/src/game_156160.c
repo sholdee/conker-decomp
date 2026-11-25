@@ -1,10 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 // variables.h declares these as arrays/ints; the code uses them as pointers.
-#define D_800C35EA D_800C35EA_header
 #include "variables.h"
-#undef D_800C35EA
-extern u8 D_800C35EA[];
 
 struct Entry151298C0 {
     s16 unk0;

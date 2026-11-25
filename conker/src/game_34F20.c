@@ -111,7 +111,6 @@ extern s8 D_800E0A00;
 extern u8 D_800E0B94;
 extern u8 D_800E0B99;
 extern u8 D_800E0BD1;
-extern u8 D_800C35EA;
 
 
 void func_15007B3C(void) {
@@ -275,7 +274,7 @@ void func_15007B3C(void) {
     if ((D_800E0B99 != 0) || (D_800DDE38 == 2)) {
         s32 enabled = 1;
 
-        if ((D_800C35EA == 1) || (D_800DDE38 == 1)) {
+        if ((D_800C35EA[0] == 1) || (D_800DDE38 == 1)) {
             enabled = 0;
         }
         if (enabled) {
@@ -350,7 +349,7 @@ void func_150082CC(void) {
 
     if (D_800C35C4 != 0) {
         if (D_800C35C5 == 0) {
-            D_800C35EA = 2;
+            D_800C35EA[0] = 2;
         }
         D_800C35C4 = 0;
         func_1501D348(D_800BE9F0, tmp, 0, D_800C3C90, D_800C3C94);
