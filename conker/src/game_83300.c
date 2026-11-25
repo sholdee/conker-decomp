@@ -3805,6 +3805,7 @@ void func_1505E874(s32 sourceIdx, struct127 *actor) {
         func_1505E650(actor, anim, animSpeed, blend, 0.0f, 0.0f, 0);
     }
 }
+/* Allocates an actor slot: a free one, else one in state 0x27 is released and reused. Returns it cleared. */
 struct127 *func_1505ED34(void) {
     s32 i;
     struct127 *ptr;
@@ -3850,105 +3851,111 @@ struct127 *func_1505ED34(void) {
     return ptr;
 }
 
-struct127 *func_1505EEB0(s32 state, s32 *arg1) {
+/* The first actor in `state` (or past the end); its index goes to *outIdx. */
+struct127 *func_1505EEB0(s32 state, s32 *outIdx) {
     struct127 *ptr;
     s32 i;
 
     for (ptr = D_800CC2D0, i = 0; (i < 25) && (state != ptr->interaction_state); i++, ptr++) {
     }
 
-    *arg1 = i;
+    *outIdx = i;
     return ptr;
 }
 
-struct127 *func_1505EEF4(s32 arg0) {
-    struct127 *tmp = (struct127 *)&D_800CC2D0;
+/* The first live actor following path `pathIdx` (unk13F), or NULL. */
+struct127 *func_1505EEF4(s32 pathIdx) {
+    struct127 *actor = D_800CC2D0;
     s32 i;
 
     for (i = 0; i < 25; i++) {
-        if ((tmp->interaction_state != 0) && (arg0 == tmp->unk13F)) {
-            return tmp;
+        if ((actor->interaction_state != 0) && (pathIdx == actor->unk13F)) {
+            return actor;
         }
-        tmp++;
+        actor++;
     }
     return NULL;
 }
+
+/* matching: aliases of D_800CC2D0[0].unk127 and &D_800CC2D0[1]; IDO addresses each symbol separately */
 extern u8 D_800CC3F7;
 extern struct127 D_800CC5FC;
 
-struct127 *func_1505EFD0(s32 arg0) {
-    struct127 *ptr;
+/* The live actor whose unk127 is `key`, or NULL. */
+struct127 *func_1505EFD0(s32 key) {
+    struct127 *actor;
     s32 i;
 
-    ptr = &D_800CC5FC;
+    actor = &D_800CC5FC;
     if (D_800CC2D0[0].interaction_state != 0) {
-        if (arg0 == D_800CC3F7) {
-            return (struct127 *)(D_800CC2D4 - 4);
+        if (key == D_800CC3F7) {
+            return (struct127 *)(D_800CC2D4 - 4); /* &D_800CC2D0[0] */
         }
     }
 
-    for (i = 1; i < 25; i++, ptr++) {
-        if ((ptr->interaction_state != 0) && (arg0 == ptr->unk127)) {
-            return ptr;
+    for (i = 1; i < 25; i++, actor++) {
+        if ((actor->interaction_state != 0) && (key == actor->unk127)) {
+            return actor;
         }
     }
     return NULL;
 }
-struct127 *func_1505F0AC(s32 arg0) {
-    struct127 *tmp = (struct127 *)&D_800CC2D0;
+
+/* The first live actor of type `id`, or NULL. */
+struct127 *func_1505F0AC(s32 id) {
+    struct127 *actor = D_800CC2D0;
     s32 i;
 
     for (i = 0; i < 25; i++) {
-        if ((tmp->interaction_state != 0) && (arg0 == tmp->id)) {
-            return tmp;
+        if ((actor->interaction_state != 0) && (id == actor->id)) {
+            return actor;
         }
-        tmp++;
+        actor++;
     }
     return NULL;
 }
-void func_1505F188(struct127 *argp) {
-#define arg0 ((u32)argp)
+/* Clears an actor slot and sets its default fields. */
+void func_1505F188(struct127 *actor) {
     s32 *p;
     f32 one;
     f32 initial;
 
-    for (p = (s32 *)arg0; p < (s32 *)(arg0 + 0x32C); p++) {
+    for (p = (s32 *)actor; p < (s32 *)(actor + 1); p++) {
         *p = 0;
     }
     one = 1.0f;
     initial = -10000.0f;
-    *(s8 *)((u8 *)arg0 + 0x2FD) = 2;
-    *(s16 *)((u8 *)arg0 + 0x38) = -0x2710;
-    *(f32 *)((u8 *)arg0 + 0x14C) = one;
-    *(f32 *)((u8 *)arg0 + 0x150) = one;
-    *(f32 *)((u8 *)arg0 + 0x118) = initial;
-    *(f32 *)((u8 *)arg0 + 0x180) = initial;
-    *(f32 *)((u8 *)arg0 + 0x24) = 3.3f;
-    *(u8 *)((u8 *)arg0 + 0x1DC) = 0xFF;
-    *(u8 *)((u8 *)arg0 + 0x127) = 0xFF;
-    *(u16 *)((u8 *)arg0 + 0x84) = 0xFFFF;
-    *(u8 *)((u8 *)arg0 + 0x13F) = 0xFF;
-    *(s32 *)((u8 *)arg0 + 0x2C4) = (s32) (arg0 + 4);
-    *(s8 *)((u8 *)arg0 + 0x2C8) = 1;
-    *(s8 *)((u8 *)arg0 + 0x2C9) = 1;
-    *(u8 *)((u8 *)arg0 + 4) = 0xFF;
-    *(s8 *)((u8 *)arg0 + 0x2CB) = 0x32;
-    *(f32 *)((u8 *)arg0 + 0x48) = one;
-    *(s8 *)((u8 *)arg0 + 0x6E) = (s8) ((func_150ADA20() % 50U) + 0x32);
-    func_150615DC((void *) arg0);
-    *(u8 *)((u8 *)arg0 + 0x1DD) = 0xFF;
-    *(u8 *)((u8 *)arg0 + 0x1DE) = 0xFF;
-    *(u8 *)((u8 *)arg0 + 0x1DF) = 0xFF;
-    *(s16 *)((u8 *)arg0 + 0x18C) = 0;
-    *(s16 *)((u8 *)arg0 + 0x18E) = 0;
-    *(s16 *)((u8 *)arg0 + 0x190) = 0;
-    *(s16 *)((u8 *)arg0 + 0x192) = 0;
-    *(s16 *)((u8 *)arg0 + 0x194) = 0;
-    *(s16 *)((u8 *)arg0 + 0x196) = 0xA;
-    *(s16 *)((u8 *)arg0 + 0x198) = 0xA;
-    *(s16 *)((u8 *)arg0 + 0x19A) = 0;
-    *(s16 *)((u8 *)arg0 + 0x19C) = 0;
-#undef arg0
+    actor->pad2FC[1] = 2;
+    *(s16 *)&actor->unk38 = -10000;
+    actor->xz_scale = one;
+    actor->y_scale = one;
+    actor->unk118 = initial;
+    actor->unk180 = initial;
+    actor->gravity = 3.3f;
+    ((u8 *)&actor->pad1DC)[0] = 0xFF;
+    actor->unk127 = 0xFF;
+    actor->unk84.uh = 0xFFFF;
+    actor->unk13F = 0xFF;
+    *(s32 *)&actor->pad288[0x3C] = (s32)&actor->id; /* 0x2C4 */
+    actor->pad288[0x40] = 1; /* 0x2C8 */
+    actor->unk2C9 = 1;
+    actor->id = 0xFF;
+    actor->unk2CB = 50;
+    actor->unk48 = one;
+    actor->unk6E = (func_150ADA20() % 50U) + 50;
+    func_150615DC(actor);
+    ((u8 *)&actor->pad1DC)[1] = 0xFF;
+    ((u8 *)&actor->pad1DC)[2] = 0xFF;
+    ((u8 *)&actor->pad1DC)[3] = 0xFF;
+    ((s16 (*)[3])&actor->unk18C)[0][0] = 0;
+    ((s16 (*)[3])&actor->unk18C)[0][1] = 0;
+    ((s16 (*)[3])&actor->unk18C)[0][2] = 0;
+    ((s16 (*)[3])&actor->unk18C)[1][0] = 0;
+    ((s16 (*)[3])&actor->unk18C)[1][1] = 0;
+    ((s16 (*)[3])&actor->unk18C)[1][2] = 10;
+    ((s16 (*)[3])&actor->unk18C)[2][0] = 10;
+    ((s16 (*)[3])&actor->unk18C)[2][1] = 0;
+    ((s16 (*)[3])&actor->unk18C)[2][2] = 0;
 }
 extern u8 D_80099428[];
 void func_1000EFB4();
