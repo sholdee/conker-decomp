@@ -311,7 +311,7 @@ Beam *func_150EEF80(struct127 *actor, u8 slot, u8 arg2, s32 arg3) {
         }
         emitterLink.beam = beam;
         emitterLink.accum = 0.0f;
-        emitter = (BeamEmitter *)func_15149130(300, -1, 0x22, -1, 0, 0x20, (struct37 *)8, arg2, arg3);
+        emitter = (BeamEmitter *)func_15149130(300, -1, 0x22, -1, 0, 0x20, (struct37 *)sizeof(EmitterLink), arg2, arg3);
         link->emitter = emitter;
         if (emitter != NULL) {
             memcpy(&emitter->link, &emitterLink, sizeof(emitterLink));
@@ -934,8 +934,10 @@ extern f32 D_800A1640[][3];
 extern f32 D_800A1658[][3];
 extern u8 D_800A1670[];
 extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
-extern void func_15102B38(struct127 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
-s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
+extern void func_15102B38(struct127 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8,
+                          s32);
+s32 func_151C229C(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, struct127 *,
+                  s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 
 /* Fires a projectile (func_151C229C) from slot `slot` of `actor` once actor->unk2EC
  * reaches 90, with a spark burst and a func_15102B38 effect at the muzzle. */
@@ -1380,7 +1382,8 @@ void func_150F10D4(struct127 *actor) {
     link.lastPos.y = actor->y_position;
     link.lastPos.z = actor->z_position;
 
-    emitter = (TrailEmitter *)func_15149130(300, -1, 0x4C, -1, 0, 0x3A, (struct37 *)sizeof(TrailLink), 0xFF, 1);
+    emitter = (TrailEmitter *)func_15149130(300, -1, 0x4C, -1, 0, 0x3A, (struct37 *)sizeof(TrailLink),
+                                            0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->link, &link, sizeof(link));
     }
