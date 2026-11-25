@@ -742,7 +742,7 @@ void func_151E3344(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha, s8 fa
     value = (u8)drawAlpha; // matching: dead store, orders spill temps (see function top)
     if (fade) {
         D_800E0A82 += 0x5C;
-        if (D_800E0A82 >= 0x100) {
+        if (D_800E0A82 > 255) {
             D_800E0A82 = 0xFF;
         }
         drawAlpha = D_800E0A82;
@@ -1003,20 +1003,21 @@ void func_151E4264(void) {
     }
 }
 
+/* Plays the mode's intro cue (entry unk6) and waits in state 5, or sets up the match directly. */
 void func_151E4314(void) {
     struct Struct151E4314 *entry;
-    s32 idx;
-    s32 arg1;
+    s32 cueIdx;
+    s32 param;
 
-    idx = D_800AB68C[D_8008FDD4->unk42].unk6;
-    if (idx >= 0) {
-        entry = &D_800AB7A4[idx];
+    cueIdx = D_800AB68C[D_8008FDD4->unk42].unk6;
+    if (cueIdx >= 0) {
+        entry = &D_800AB7A4[cueIdx];
         if (D_800E0C00[0]) {
-            arg1 = entry->unk3;
+            param = entry->unk3;
         } else {
-            arg1 = entry->unk2;
+            param = entry->unk2;
         }
-        func_1501D348(entry->unk0, arg1, 0, 0, 0);
+        func_1501D348(entry->unk0, param, 0, 0, 0);
         D_8008FD80 = 1;
         D_800E0B94 = 5;
         D_8008FD8C = 1;
@@ -1081,7 +1082,7 @@ void func_151E43DC(void) {
         }
         if (D_8008FD80 == 2 || D_8008FD80 == 3 || D_8008FD80 == 4) {
             D_8008FDCC += D_800BE9E4 * 4;
-            if (D_8008FDCC >= 0x100) {
+            if (D_8008FDCC > 255) {
                 D_8008FDCC = 0xFF;
             }
             D_800E0BDC = 0xFF - D_8008FDCC;
@@ -1147,11 +1148,11 @@ void func_151E43DC(void) {
             func_15042D94(0x53, 0xB4, 1, D_800AB8FC, (D_8008FE2C == 0) + 0x21);
             func_15042D94(0xD5, 0xB4, 1, D_800AB900, (D_8008FE2C == 1) + 0xE);
             func_15042D94(0x94, 0xB4, 1, D_800AB904, 0x1A);
-            if ((D_800E0B9A & 0x8000) || D_800E0A90 > 0x960) {
+            if ((D_800E0B9A & 0x8000) || D_800E0A90 > 2400) {
                 if (D_800C35EA == 1 && func_151F2CDC() == 1) {
                     func_151F2D6C(0, 0x2DE0);
                 }
-                if (D_800E0A90 > 0x960) {
+                if (D_800E0A90 > 2400) {
                     D_8008FE2C = 1;
                 }
                 D_800E0B94 = 7;
@@ -1196,10 +1197,11 @@ extern s8 D_800E0AC1;
 extern s8 D_800E0AC2;
 extern s8 D_800E0AC3;
 
+/* End of round: picks the results screen state and cue from the mode entry (unk7) and the ranks. */
 void func_151E4BD8(void) {
-    s8 idx;
+    s8 resultCue;
     s8 count;
-    s16 arg1;
+    s16 param;
     s32 i;
 
     D_8008FE2C = 0;
@@ -1207,7 +1209,7 @@ void func_151E4BD8(void) {
     D_8008FDA4 = 0;
     D_800E0A90 = 0;
     count = 0;
-    idx = D_800AB68C[D_8008FDD4->unk42].unk7;
+    resultCue = D_800AB68C[D_8008FDD4->unk42].unk7;
     D_8008FDC0 &= 0xF369;
     if (D_800AB68C[D_8008FDD4->unk42].unk5 >= 0) {
         for (i = 0; i < 4; i++) {
@@ -1217,14 +1219,14 @@ void func_151E4BD8(void) {
         }
         count = count >= 2;
     }
-    if (idx < 0 || count != 0) {
-        if (idx == -2 && D_800E0A86 == 0) {
+    if (resultCue < 0 || count != 0) {
+        if (resultCue == -2 && D_800E0A86 == 0) {
             D_800E0B94 = 6;
             D_8008FD80 = 2;
             D_8008FDC0 = 0;
             return;
         }
-        arg1 = 0x1D;
+        param = 0x1D;
         if (count == 0) {
             D_800E0B94 = 3;
         } else {
@@ -1232,12 +1234,12 @@ void func_151E4BD8(void) {
             D_8008FD80 = 4;
         }
     } else {
-        arg1 = D_800AB7BC[idx].unk0;
+        param = D_800AB7BC[resultCue].unk0;
         D_800E0B94 = 6;
         D_8008FD80 = 1;
     }
     D_800D2E40 = 0;
-    func_1501C730(6, arg1, 0, 0, 1);
+    func_1501C730(6, param, 0, 0, 1);
     func_151E557C();
     D_8008FD8C = 1;
     D_8008FD90 = 1;
@@ -1270,7 +1272,7 @@ void func_151E4E00(void) {
 void func_151E4E64(void) {
     func_151E530C();
     func_151E55A8();
-    if (D_800E0A90 >= 0x4B1) {
+    if (D_800E0A90 > 1200) {
         D_800E0B9A |= 0x8000;
     }
     if (D_800E0B9A != 0) {
@@ -1284,8 +1286,9 @@ extern f32 D_8008FDD0;
 extern f32 D_800DDDC8;
 extern f32 D_800DDDD8;
 
+/* Advances the screen fade D_800E0B96; once fully faded, runs the pending transition D_800E0A88. */
 void func_151E4EE8(void) {
-    s32 v;
+    s32 fade;
 
     D_8008FDD0 = 1.0f - (f32)D_800E0B96 / 255.0f;
     if (D_8008FD74 == 0xFF) {
@@ -1304,11 +1307,11 @@ void func_151E4EE8(void) {
             return;
         }
     } else if (D_800E0B96 != 0xFF) {
-        v = D_800E0B96 + D_800BE9E4 * D_8008FD74;
-        if (v >= 0x100) {
-            v = 0xFF;
+        fade = D_800E0B96 + D_800BE9E4 * D_8008FD74;
+        if (fade > 255) {
+            fade = 0xFF;
         }
-        D_800E0B96 = v;
+        D_800E0B96 = fade;
         return;
     }
     D_800E0B96 = 0xFF;
@@ -1345,7 +1348,7 @@ extern u8 D_800AB570[];
 void func_151E50C8(void) {
     s32 i;
 
-    for (i = 0; i < 0x17; i++) D_800E0BE0[i] = D_8008FE54[i];
+    for (i = 0; i < 23; i++) D_800E0BE0[i] = D_8008FE54[i]; // matching: one line (-g3 line numbers steer as1)
     D_800E0A90 = 0;
     func_151E6BFC();
     if (D_8008FDD4 == NULL) {
@@ -1362,11 +1365,12 @@ void func_151E50C8(void) {
     D_800E0B95 = D_800E0B94;
 }
 
+/* Per-frame menu update: reads input, loads the text bank and runs the handler for state D_800E0B94. */
 void func_151E51EC(void) {
-    u8 state;
+    u8 prevState;
     s32 timer;
 
-    state = D_800E0B94;
+    prevState = D_800E0B94;
     D_8003C8E0 = 0x08000000;
     D_800E0BDC = 0xFF;
     func_15042D78(0x81);
@@ -1390,34 +1394,34 @@ void func_151E51EC(void) {
 
     if (D_800E0B94 != 7) {
         D_800E0A90 += D_800BE9E4;
-        if (D_800E0B94 == state) {
-        } else {
-            D_800E0B95 = state;
+        if (D_800E0B94 != prevState) {
+            D_800E0B95 = prevState;
             D_800E0A90 = 0;
         }
     }
     D_8003C8E0 = 0;
 }
 
+/* Fades the screen in, or derives the fade from the state's unk8 transition. */
 void func_151E530C(void) {
-    s32 v;
-    struct Struct151E5034 *p;
+    s32 fade;
+    struct Struct151E5034 *state;
 
     if (D_800E0B94 != 2) {
         if (D_800E0B96 != 0) {
-            v = D_800E0B96 - D_800BE9E4 * D_8008FD74;
-            if (v < 0) {
-                v = 0;
+            fade = D_800E0B96 - D_800BE9E4 * D_8008FD74;
+            if (fade < 0) {
+                fade = 0;
             }
-            D_800E0B96 = v;
+            D_800E0B96 = fade;
         }
-        p = D_8008FDD4;
-        if (p != NULL && p->unk2B == 0 && p->unkC > 0.0f && p->unk8 > 0.5f) {
-            v = (p->unk8 - 0.5f) * 524.0f;
-            if (v >= 0x100) {
-                v = 0xFF;
+        state = D_8008FDD4;
+        if (state != NULL && state->unk2B == 0 && state->unkC > 0.0f && state->unk8 > 0.5f) {
+            fade = (state->unk8 - 0.5f) * 524.0f;
+            if (fade > 255) {
+                fade = 0xFF;
             }
-            D_800E0B96 = v;
+            D_800E0B96 = fade;
         }
     }
 }
@@ -1466,8 +1470,9 @@ void func_151E557C(void) {
     D_80084060[3] = 3;
 }
 
+/* Ping-pongs the pulse level D_800E0B97 between 0 and 255. */
 void func_151E55A8(void) {
-    s32 temp;
+    s32 level;
     s32 step;
     s32 direction;
 
@@ -1477,16 +1482,16 @@ void func_151E55A8(void) {
     } else {
         step = -D_800BE9E4 * 8;
     }
-    temp = D_800E0B97;
-    temp += step;
-    if (temp >= 0x100) {
-        temp = 0x1FE - temp;
+    level = D_800E0B97;
+    level += step;
+    if (level > 255) {
+        level = 0x1FE - level;
         D_800E0B98 = direction ^ 1;
-    } else if (temp < 0) {
-        temp = -temp;
+    } else if (level < 0) {
+        level = -level;
         D_800E0B98 = direction ^ 1;
     }
-    D_800E0B97 = temp;
+    D_800E0B97 = level;
 }
 
 extern u8 D_800E0A8C;
@@ -1503,8 +1508,6 @@ s8 func_151E564C(void) {
     return D_8008FDC8;
 }
 
-extern u8 *D_800872A0;
-
 struct Struct151E565C {
     char pad0[0x29];
     s8 unk29;
@@ -1512,36 +1515,42 @@ struct Struct151E565C {
     char pad2B[0x84 - 0x2B];
 };
 
+extern struct Struct151E565C *D_800872A0;
+
+/*
+ * Checks whether the match is over (score/time limits, players or teams left) and computes the
+ * rank of every player (or team) into D_800E0AC0. Caches and returns the result in D_800E0C20.
+ */
 s32 func_151E565C(void) {
     s32 i;
     s32 j;
-    s32 *pi;
+    s32 *pi; // matching: pi/pj are unused but keep the frame slots
     s32 k;
     s32 team;
     s32 hits;
-    s16 best;
+    s16 winScore;
     s16 score;
     s16 other;
-    s8 mask;
-    s32 result;
-    s32 stats[16];
-    s32 cat;
+    s8 liveTeams;
+    s32 gameOver;
+    s32 teamStats[16];
+    s32 statBase;
     s32 *pj;
 
-    result = 0;
+    gameOver = 0;
     if (*(s8 *)&D_800E0C20 != 0) {
         return 1;
     }
     if (D_800E0BE0[3] >= 3 && D_8008FD78 <= 0) {
         D_800E0AAA = -1;
-        result = 1;
+        gameOver = 1;
     }
     if (D_8008FDC8 != 0) {
-        best = -1;
+        winScore = -1;
         for (i = 0; i < D_8008FD8C; i++) {
             if (D_800E0BE0[6] != 0 && D_8008FDD4->unk46[i] >= D_800E0BE0[6]) {
-                result = 1;
-                best = D_800E0BE0[6];
+                gameOver = 1;
+                winScore = D_800E0BE0[6];
             }
             if (D_800D18A0 & (1 << i)) {
                 if (D_800E0AB0[i] == -1) {
@@ -1550,7 +1559,7 @@ s32 func_151E565C(void) {
             }
         }
         if (D_800BE618 - D_8008FD70 < 2 || *(s8 *)&D_8008FD94 - D_8008FD70 <= 0) {
-            result = 1;
+            gameOver = 1;
         }
         D_800E0AAA = -1;
         if (D_8008FDC0 & 0x80) {
@@ -1558,10 +1567,10 @@ s32 func_151E565C(void) {
                 if (D_800E0AB0[i] != -1) {
                     D_800E0AC0[i] = D_800E0AB0[i];
                 } else {
-                    if (((struct Struct151E565C *)D_800872A0)[i].unk2A == 0x7F) {
-                        D_800E0AC0[i] = ((struct Struct151E565C *)D_800872A0)[i].unk29;
+                    if (D_800872A0[i].unk2A == 0x7F) {
+                        D_800E0AC0[i] = D_800872A0[i].unk29;
                     } else {
-                        D_800E0AC0[i] = ((struct Struct151E565C *)D_800872A0)[i].unk2A;
+                        D_800E0AC0[i] = D_800872A0[i].unk2A;
                     }
                 }
             }
@@ -1573,14 +1582,14 @@ s32 func_151E565C(void) {
                     } else {
                         D_800E0AC0[i] = 1;
                         score = D_8008FDD4->unk46[i];
-                        if (score >= best) {
+                        if (score >= winScore) {
                             score += 1000;
                         }
                         score -= D_800E0AD0[i];
                         for (j = 0; j < D_8008FD8C; j++) {
                             if (j != i && D_800E0AB0[j] == -1 && D_80087270[j] != 10) {
                                 other = D_8008FDD4->unk46[j];
-                                if (other >= best) {
+                                if (other >= winScore) {
                                     other += 1000;
                                 }
                                 other -= D_800E0AD0[j];
@@ -1601,22 +1610,22 @@ s32 func_151E565C(void) {
                 }
             }
         }
-        *(s8 *)&D_800E0C20 = result;
-        return result;
+        *(s8 *)&D_800E0C20 = gameOver;
+        return gameOver;
     }
 
     for (k = 0; k < 16; k++) {
-        stats[k] = 0;
+        teamStats[k] = 0;
     }
-    k = 0;
+    k = 0; // matching: k is 0 here; teamStats[i + k] below shares CSE temps like the target
     for (i = 0; i < D_8008FD8C; i++) {
-        team = *(u8 *)&D_800CC2D0[i].pad128;
-        stats[team] += D_8008FDD4->unk46[i];
-        stats[team + 4] += func_150859AC(i, 3) * 6 + func_150859AC(i, 4);
-        stats[team + 8] = func_150859AC(team, 6);
-        stats[team + 12] += D_800CC2D0[i].unk31C->unk1AA;
+        team = *(u8 *)&D_800CC2D0[i].pad128 /* team; 1st byte of an unnamed field */;
+        teamStats[team] += D_8008FDD4->unk46[i];
+        teamStats[team + 4] += func_150859AC(i, 3) * 6 + func_150859AC(i, 4);
+        teamStats[team + 8] = func_150859AC(team, 6);
+        teamStats[team + 12] += D_800CC2D0[i].unk31C->unk1AA;
     }
-    cat = 8;
+    statBase = 8;
     team = -1;
     switch (D_8008FDD4->unk42) {
         case 0:
@@ -1628,14 +1637,14 @@ s32 func_151E565C(void) {
             team = D_800E0BE0[0x12];
             break;
         case 9:
-            cat = (D_800E0BE0[3] < 3) ? 4 : 0;
+            statBase = (D_800E0BE0[3] < 3) ? 4 : 0;
             break;
     }
     if (team > 0) {
         for (i = 0; i < D_800E0BB0; i++) {
-            j = stats[i + cat];
+            j = teamStats[i + statBase];
             if (j >= team) {
-                result = 1;
+                gameOver = 1;
                 D_800E0AAA = i;
             }
         }
@@ -1649,13 +1658,13 @@ s32 func_151E565C(void) {
         D_800E0AC0[i] = 1;
         for (j = 0; j < D_800E0BB0; j++) {
             if (j != i && D_800E0AB0[j] == -1) {
-                if (stats[i + cat] < stats[j + cat]) {
+                if (teamStats[i + statBase] < teamStats[j + statBase]) {
                     D_800E0AC0[i]++;
-                } else if (stats[i + cat] == stats[j + cat]) {
-                    if (stats[i + k] < stats[j + k]) {
+                } else if (teamStats[i + statBase] == teamStats[j + statBase]) {
+                    if (teamStats[i + k] < teamStats[j + k]) {
                         D_800E0AC0[i]++;
-                    } else if (stats[i + k] == stats[j + k]) {
-                        if (stats[j + 12] < stats[i + 12]) {
+                    } else if (teamStats[i + k] == teamStats[j + k]) {
+                        if (teamStats[j + 12] < teamStats[i + 12]) {
                             D_800E0AC0[i]++;
                         }
                     }
@@ -1663,19 +1672,19 @@ s32 func_151E565C(void) {
             }
         }
     }
-    mask = 0;
+    liveTeams = 0;
     j = 0;
     for (i = 0; i < D_8008FD8C; i++) {
         if (D_80087270[i] != 10) {
             team = *(u8 *)&D_800CC2D0[i].pad128;
             if (!(D_800D18A0 & (1 << i))) {
-                mask |= 1 << team;
+                liveTeams |= 1 << team;
             }
         }
     }
     hits = 0;
     for (i = 0; i < 4; i++) {
-        if (mask & (1 << i)) {
+        if (liveTeams & (1 << i)) {
             j++;
             if (D_800E0AA8 & (1 << i)) {
                 hits++;
@@ -1685,11 +1694,11 @@ s32 func_151E565C(void) {
         }
     }
     if (hits == 0 || j < 2) {
-        result = 1;
+        gameOver = 1;
         D_800E0AAA = -1;
     }
-    *(s8 *)&D_800E0C20 = result;
-    return result;
+    *(s8 *)&D_800E0C20 = gameOver;
+    return gameOver;
 }
 
 extern u8 D_800BE616;
@@ -2568,7 +2577,7 @@ void func_151E8214(void) {
         if (func_1517EFDC() == 0) {
             D_800E0A90 = 0;
         }
-        if (D_800E0A90 >= 0xA1) {
+        if (D_800E0A90 > 160) {
             D_8008FDCC = 0;
             D_800E0B94 = 8;
             D_8008FD8C = 1;
@@ -2584,7 +2593,7 @@ void func_151E8214(void) {
 void func_151E82B8(void) {
     func_151E530C();
     if (D_800E0A80 == -1) {
-        if (D_800E0A90 >= 0x79) {
+        if (D_800E0A90 > 120) {
             D_800E0B94 = 9;
             D_800E0A90 = 0;
             D_8008FDCC = 0xFF;
@@ -2597,7 +2606,7 @@ void func_151E82B8(void) {
         D_800E0A80 = 0;
     }
 
-    if (D_800E0A90 >= 0x1BE) {
+    if (D_800E0A90 > 445) {
         if (D_800E0A80 >= 0) {
             while (D_800E0BD8[D_800E0A80][0] != 0x2A) {
                 D_800E0A80++;
@@ -2620,7 +2629,7 @@ void func_151E83E8(void) {
     if (func_1517EFDC() == 0) {
         D_800E0A90 = 0;
     }
-    if (D_800E0A90 >= 0x65) {
+    if (D_800E0A90 > 100) {
         func_151E5034();
         D_8008FDA4 = 0;
         D_800E0B94 = 1;
