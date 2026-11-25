@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 D_80090324[];
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern void func_151616D0(u8, u8, s32);
 

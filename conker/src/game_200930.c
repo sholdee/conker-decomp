@@ -930,8 +930,6 @@ void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u
     }
 }
 
-extern Vec3f *D_8008FC8C[];
-extern u8 *D_8008FC94[];
 void func_151D5A18(Actor *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, u8);
 void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
 void func_150636A4(Actor *);

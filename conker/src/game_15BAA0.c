@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s16 D_80082FA6;
 Gfx *func_1501A680(Gfx *gfx);
 
 /**

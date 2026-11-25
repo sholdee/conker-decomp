@@ -449,8 +449,6 @@ void func_150FFC3C(Actor *obj) {
     }
 }
 
-extern Vec3f *D_8008FC8C[];
-extern u8 *D_8008FC94[];
 void func_151D5A18(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1,
                    Vec3f *arg5, u8 arg6);
 void func_151D3E6C(Actor *obj, Vec3f *arg1, Vec3f *arg2, s32 arg3);

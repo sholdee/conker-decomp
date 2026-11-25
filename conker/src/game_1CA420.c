@@ -475,7 +475,6 @@ s32 func_1519D454(Trail *trail) {
     return 1;
 }
 
-extern u8 D_80090CD4[];
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 Gfx *func_15142E24(Gfx *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);

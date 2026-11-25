@@ -26,7 +26,6 @@ typedef Gfx *(*SkyDrawFunc)(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f
 
 Gfx *func_151106A8(Gfx *);
 s32 func_151108C4(f32, f32, f32, f32, f32);
-extern s16 D_80082FA6;
 extern u8 D_800D9B69;
 extern u8 D_800D9B6A;
 extern u8 D_800D9B6B;
@@ -201,7 +200,6 @@ Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
     return gfx;
 }
 
-extern u8 D_800BEAC2;
 
 /* On view 0, clears the depth buffer (fills it with the maximum depth) and switches back to the framebuffer;
  * in split screen also draws the black divider bars, and blacks out the whole screen while D_800BEAC2 is set. */
@@ -559,7 +557,6 @@ Gfx *func_15110CFC(Gfx *gfx, Vtx **vtxBufPtr, s32 firstTex, Vtx *quad, s32 arg4,
     return gfx;
 }
 
-extern s32 *D_800891BC[];
 void func_15111858(void);
 
 /* Switches the sky to `sky`: 1 frees the sky data and generates the star field; otherwise, while a textured sky

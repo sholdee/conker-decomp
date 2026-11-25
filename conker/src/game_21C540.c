@@ -39,7 +39,6 @@ extern u8 __osContLastCmd;
 extern u32 __osContPifRam[16];
 extern u32 D_80042A4C;
 extern OSMesgQueue __osEepromTimerQ;
-extern OSMesg D_80042A90;
 
 void __osPackRequestData(u8 cmd);
 void __osContGetInitData(u8 *pattern, OSContStatus *data);

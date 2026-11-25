@@ -56,7 +56,6 @@ void func_15094EA0(s32 view) {
     func_150A7A48(projection, viewMtx, D_800D2CA8[view]);
 }
 
-extern Gfx D_800873D0[];
 
 /* Emits display list D_800873D0 and forgets the last loaded texture address. */
 Gfx *func_15094F40(Gfx *gfx) {
@@ -105,10 +104,6 @@ void func_15095060(TextureDesc *desc, s32 frame, SpriteParams *sprite) {
 
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 // Per-G_IM_SIZ tables, as libultra's G_IM_SIZ_*_INCR, _SHIFT, line-bits and _LOAD_BLOCK.
-extern u8 D_8009DEB0[];
-extern u8 D_8009DEB4[];
-extern u8 D_8009DEB8[];
-extern u8 D_8009DEBC[];
 
 /* Loads frame `frame` of `tex` (and its palette) into tmem, as tile `tile` placed at (s, t). */
 Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg) {
@@ -533,7 +528,6 @@ Gfx *func_1509629C(Gfx *gfx, TextureDesc *desc, f32 scaleX, f32 scaleY, f32 x, f
     return gfx;
 }
 
-extern Gfx D_80087408[];
 
 /* Emits display list D_80087408 and clears D_800D2DAB (back to the sprite prim colour). */
 Gfx *func_15096934(Gfx *gfx) {

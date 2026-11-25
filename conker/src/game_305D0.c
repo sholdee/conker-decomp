@@ -54,8 +54,6 @@ typedef struct {
 
 extern s32 D_800B0E10[];
 extern s32 D_800B0E20[];
-extern u8  D_800B0E38;
-extern s32 D_800B0E40[];
 extern LevelModelEntry *D_800B0E50;
 
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);

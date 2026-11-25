@@ -25,14 +25,11 @@ extern u8 D_800BE530[];
 extern s16 D_800BE550[];
 void func_15012C84(struct_func_15012C84 *arg0, u32 arg1);
 extern struct_func_15012C84 *D_800B0E10[];
-extern s32 D_800B0E40[];
 extern s32 D_800B0E44;
 extern s32 D_800B0E48;
 extern s32 D_800B0E4C;
 typedef struct { u8 c[3]; } struct_func_150127B0_rgb;
-extern u8 D_800B0E38;
 extern u8 ***D_800BE520;
-extern u16 *D_800BE524;
 extern u8 D_800BE564;
 
 void func_150127B0(void) {

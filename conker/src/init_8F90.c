@@ -138,7 +138,6 @@ extern u32 D_8002AE50; /* bank DMAs in flight */
 extern FxParams D_8002AE54;
 extern u8 D_8002C960[];
 extern void *D_8003E380;
-extern s32 D_8003E384;
 extern AudioMgr D_8003E388;
 extern AudioInfo *D_8003E390[3]; /* D_8003E388.audioInfo */
 extern BankState D_800406A0;

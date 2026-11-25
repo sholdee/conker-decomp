@@ -1671,7 +1671,6 @@ void func_151CAD28(Camera *player, u8 big) {
     }
 }
 
-extern u8 D_800BEAC2;
 
 /* Draws the zoom lens: saves the 24x24 framebuffer block under it, then writes it back
  * magnified towards the centre, mirrored into all four quadrants. */

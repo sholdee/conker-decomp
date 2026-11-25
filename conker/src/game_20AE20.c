@@ -5,9 +5,6 @@
 /* Settings record (23 entries) with its defaults and valid [min, max] ranges. */
 // matching: static, not extern; IDO then knows the copy loop's stores can't alias the source
 static s8 D_800E0BE0[23];
-extern s8 D_8008FE54[23];
-extern s8 D_8008FE6C[23];
-extern s8 D_8008FE84[23];
 
 /* Resets every setting to its default. */
 void func_151DD970(void) {

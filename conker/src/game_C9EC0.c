@@ -733,7 +733,6 @@ typedef struct Node1509DBBC {
     /* 0x48 */ u8 type;
 } Node1509DBBC;
 
-extern s32 D_800A6060[];
 extern Node1509DBBC *D_800DCE50[][0x68];
 void func_150E36BC(s32 handle, s32 *hi, s32 *result, s32 *lo);
 

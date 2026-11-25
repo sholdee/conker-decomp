@@ -25,7 +25,6 @@ typedef struct {
     /* 0x110 */ ParticleMotion motion;
 } FxParticle;
 
-extern u8 D_80084060[]; /* player -> controller channel map (game_48FD0.c) */
 /* Code range checksummed by func_150B9ED0 (anti-tamper: a mismatch breaks player 1's controller mapping). */
 extern s32 func_151E7EF8[];
 extern s32 func_151E7F60[];

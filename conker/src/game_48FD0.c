@@ -10,10 +10,7 @@ extern s32 osMotorStart(OSPfs *pfs);
 extern s32 osMotorStop(OSPfs *pfs);
 extern s32 _MakeMotorData(OSMesgQueue *mq, OSPfs *pfs, s32 channel);
 
-extern u8 D_80084060[];
 extern OSTimer D_800BE6E0;
-extern u8 D_800BEAC2;
-extern u8 D_800BEAC3;
 
 void func_1501C0F0(u8 player, f32 onTime, f32 offTime);
 
@@ -29,7 +26,6 @@ void func_1501BB20(void) {
 extern u16 D_800BE700[];
 extern u16 D_800BE708[];
 extern u16 D_800BE718[];
-extern u8 D_800BE740;
 extern u8 D_800E0B95;
 void func_1501C57C(void);
 void func_151DD8C0(void);
@@ -251,7 +247,6 @@ void func_1501C53C(void) {
 }
 
 extern u8 D_80084068;
-extern u8 *D_800BE3F0;
 void func_151DCFD8(s32);
 u8 func_151DD460(OSMesgQueue *);
 void func_15007168(void);

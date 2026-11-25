@@ -222,8 +222,6 @@ void func_150D5A4C(struct260 *effect) {
     func_15149368(effect);
 }
 
-extern s32 *D_80089A20[];
-extern s32 D_800A3F14[];
 
 s32 func_15134070(Actor *);
 s32 func_15145128(Vec3f *, Vec3f *, s32 *, s32 *);

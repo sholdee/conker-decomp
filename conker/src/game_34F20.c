@@ -84,7 +84,6 @@ void func_150169A0(s32);
 void func_15017930(s32);
 void func_150A11C4(void *);
 void func_151E81EC(void);
-extern s32 D_8003E384;
 
 
 extern s32 D_800DC9F0;

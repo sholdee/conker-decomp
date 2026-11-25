@@ -960,7 +960,6 @@ typedef struct {
     /* 0x28 */ DiskEmitter emitter;
 } DiskEmitterObject;
 
-extern u8 D_800BE9EB;
 extern float sinf(float);
 extern float cosf(float);
 void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);

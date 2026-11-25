@@ -30,7 +30,6 @@ void func_15015F40(s16 count, s32 map) {
 }
 
 /* Centre (x, y) of each of up to 5 views, for screen layouts 0-3 (1 to 4 views). */
-extern s16 D_800BE668[4][5][2];
 
 /* Fills the per-layout view sizes and view centres for a screen of `width` x `height`. */
 void func_15015FBC(s32 width, s32 height) {

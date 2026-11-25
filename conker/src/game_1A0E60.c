@@ -9,7 +9,6 @@
 extern Vtx *D_800B0E10;                 // level mesh vertices
 extern u8 (*D_800BE510)[3];             // base RGB of each vertex
 extern u8 (***D_800BE520)[3];           // [set][group][i]: base RGB of each group vertex
-extern u16 *D_800BE524;                 // first D_800BE510 entry of each prop
 extern WorldObject *func_151149AC(u8);
 
 /* Fades the vertices of color set colorSet (group group, or every group when group is 0xFF) from their

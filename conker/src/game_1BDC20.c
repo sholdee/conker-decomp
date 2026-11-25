@@ -180,8 +180,6 @@ typedef struct {
 } EmitterKind; /* size 0x18 */
 
 extern EmitterKind D_8008FA70[];
-extern u8 D_800AB310[];
-extern u8 D_800AB404[];
 void func_1504715C(Ground *ground, Actor *actor);
 void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
 void func_1513F680(Particle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn);

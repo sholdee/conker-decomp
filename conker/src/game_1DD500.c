@@ -367,7 +367,6 @@ typedef struct Game1DD500Mount {
 void func_1513F680(Game1DD500Particle *, u8, u8, u8, u8);
 extern Game1DD500Mount D_800AA12C[11];
 extern Game1DD500Mount D_800AA1DC[11]; /* actor type 0x36 */
-extern u8 D_800AB310[];
 
 /* Emitter task update: carries attached particles with the owner's joints, releases expired ones and spawns new ones. */
 void func_151B0B88(Game1DD500Task *task) {

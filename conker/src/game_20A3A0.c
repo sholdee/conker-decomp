@@ -3,7 +3,6 @@
 #include "variables.h"
 
 extern OSTimer D_80042A58;
-extern OSMesg D_80042A90;
 extern OSMesgQueue __osEepromTimerQ;
 extern OSMesgQueue *D_800E0A20;
 extern u8 D_800E0A24;

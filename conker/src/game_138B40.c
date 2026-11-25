@@ -13,7 +13,6 @@ extern f32 D_800D35E8;
 
 #define D_800D35E4 ((&D_800D35E8)[-1])
 extern u8 D_800C3662;
-extern u8 D_800BEBA0;
 extern LookAt D_800D9B90[];
 extern u8 D_800D9E21;
 extern s32 D_800D9E28;

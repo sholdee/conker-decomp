@@ -22,7 +22,6 @@ typedef struct PathGraph {
     /* 0x4 */ PathNode nodes[1];
 } PathGraph;
 
-extern s16 D_80087290; /* node count */
 extern s16 D_80087294;
 extern PathNode *D_800D2350; /* nodes */
 PathGraph *func_1502B5C8(s32 *, s32, s32, s32);
@@ -97,7 +96,6 @@ s32 func_15085BE8(void) {
     return overlap;
 }
 
-extern u8 D_8008729C;
 extern s32 D_800D2354;
 extern f32 sqrtf(f32);
 f32 func_15086D94(f32, f32, f32, f32, f32);
@@ -246,7 +244,6 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 nGoals, s8 nAvoid, u8 *goals, u8 *avoi
     return nearest;
 }
 
-extern u8 D_80087298; /* goal node reached by the last search, 0xFF if none */
 f32 func_15086BD0(s32 a, s32 b);
 
 /*

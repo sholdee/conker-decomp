@@ -157,7 +157,6 @@ void func_150EB614(WorldObject *obj) {
     }
 }
 
-extern u8 D_800BE9EB;
 extern Vec3f D_800A1490;
 extern Vec3f D_800A149C;
 extern Vec3f D_800A14A8[4];

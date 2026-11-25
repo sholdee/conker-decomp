@@ -39,7 +39,6 @@ void func_15000AC0(void) {
 
 extern u8 D_800DBEA8[];
 extern Vtx *D_800DBE88[][2];
-extern s32 *D_800891BC[];
 extern u8 D_800DBEAB;
 extern u8 D_800DBEAC;
 extern s32 func_1510D0EC(s32, s32, s32, s32);

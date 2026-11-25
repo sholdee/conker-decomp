@@ -14,7 +14,6 @@ typedef struct {
 
 extern void func_1501D348(s32, s32, s32, s32, s32);
 extern s32 D_800D3840;
-extern u8 D_800C35C2;
 extern u8 D_800C35C3;
 extern u8 D_800C3C99;
 extern u8 D_800C3C9C;

@@ -348,8 +348,6 @@ typedef struct {
 /* Computes the plane of a triangle; the (unnormalised) normal lands in D_800CC210..D_800CC218. */
 extern void func_15049350(Tri150E5810);
 
-extern u8 D_8009187C[];
-extern u8 D_800918A0[];
 extern u8 D_800918AC[];
 extern u8 D_80090520[];
 extern void func_150440A0(MtxF arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);

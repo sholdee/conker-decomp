@@ -300,7 +300,6 @@ extern struct {
     u32 cycle1;
     u32 cycle2;
 } D_800A4AC8[];
-extern s32 D_800BEBA4;
 extern u8 D_800D2DA8;
 extern u8 D_800D2DA9;
 extern u8 D_800D2DAA;

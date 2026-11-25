@@ -71,7 +71,6 @@ extern s32 func_151464B8(s32);
 extern Trail *func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
                             s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
                             TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
-extern u8 D_800BE630[];
 extern u8 func_151D8E20(void);
 
 /* Creates a spray emitter from desc; bit 0 of its flags records whether arg1 was set. */

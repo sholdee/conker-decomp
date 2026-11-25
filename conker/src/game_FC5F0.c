@@ -109,10 +109,6 @@ void func_150CF530(s32 arg0) {
 }
 
 /* Texture scroll offsets; >> 7 gives the 10.2 fixed-point tile coordinate. */
-extern s32 D_80088890;
-extern s32 D_80088894;
-extern s32 D_80088898;
-extern s32 D_8008889C;
 
 /* Advances the texture scroll offsets by the frames elapsed. */
 void func_150CF578(s32 arg0) {

@@ -8,7 +8,6 @@ void func_150A7960(MtxF, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_150D82B0(s32 arg0) {
 }
 
-extern s32 D_80090298[];
 
 /* First byte of a Gfx command: its opcode, read as a signed byte. */
 #define GFX_OPCODE(gfx) (*(s8 *)(gfx))

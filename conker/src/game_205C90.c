@@ -37,7 +37,6 @@ typedef struct {
     /* 0x18 */ RumbleFalloff falloff;
 } RumbleFalloffObj;
 
-extern u8 D_80084060[]; /* controller port of each player, >= 4: none */
 extern Vec3f *func_15144B34(s32 view);
 extern f32 func_15143E64(Vec3f *);
 extern void (*D_8008FCC0[])(RumbleObj *);
@@ -64,8 +63,6 @@ s32 func_151D87E0(u8 playerMask) {
     return FALSE;
 }
 
-extern u8 D_800BEAC2;
-extern u8 D_800BEAC3;
 s32 func_15181CC8(s32 view);
 s32 func_1517EF00(s32 view);
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);

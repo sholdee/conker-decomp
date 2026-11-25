@@ -56,6 +56,7 @@ extern f32 D_8002C848;
 
 extern f32 D_8002C920;
 
+extern s32 D_8003E384;
 extern u32 D_80042450[512]; // chunk0 offsets
 
 extern char D_8002C6B0[];
@@ -327,6 +328,7 @@ extern s32 *D_800428F8;
 
 // BSS ENDS AT D_80043B40
 
+extern OSMesg D_80042A90;
 extern s32  D_80043B40[]; // 0xFE0-byte block past BSS end (TLB slot table in 45B80)
 extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 
@@ -350,7 +352,13 @@ extern void (*D_80082F40[])(void);
 extern void (*D_80082F70[])(void);
 extern s32  D_80082FA0;
 extern s32  D_80082FA4;
+extern s16 D_80082FA6;
+extern u8 D_80082FC0[];
+extern u8 D_80083140[];
+extern u8 D_80084060[]; /* controller port of each player, >= 4: none */
 extern u8   D_80084064;
+extern u8 D_80084160[];
+extern u8 D_80084190[];
 extern Vtx  D_80084300[5];
 extern s16  D_80084480;
 extern void (*D_800844B0[])(s32 arg0);
@@ -381,23 +389,37 @@ extern f32 D_800860CC[];
 extern u16 D_800860E4[];
 extern void (*D_80086150[])(s32);
 extern void (*D_80086730[])(void);
+extern u8 * D_80086CAC[];
 extern s8  D_80087260;
 extern s8  D_80087264;
+extern s8 D_80087268;
 extern s8  D_8008726C;
 extern s8  D_80087270[];
 extern u8  D_80087280[];
+extern s16 D_80087290; /* node count */
+extern u8 D_80087298; /* goal node reached by the last search, 0xFF if none */
+extern u8 D_8008729C;
 extern u32 D_80087380;
 
+extern Gfx D_800873D0[];
+extern Gfx D_80087408[];
 extern u64 D_800885B0;
 extern Actor *D_80088720;
 extern Actor *D_80088730;
 extern s32 D_80088750;
 extern Vec3f D_80088724;
+extern s32 D_80088890;
+extern s32 D_80088894;
+extern s32 D_80088898;
+extern s32 D_8008889C;
 extern u8  D_80088980;
 extern u8  D_80088B40;
 extern u8  D_80088B60;
 extern u8  D_80088B90;
 extern u8  D_80088BB0;
+extern u8 D_80089120[4]; // per collision set: 1 = enabled
+extern s32 * D_800891BC[];
+extern Mtx ** D_80089250[]; // per frame buffer: one Mtx per object
 extern s32 D_800894B0;
 extern s32 D_80089520;
 extern s32 D_80089524[]; // struct arrays?
@@ -412,6 +434,8 @@ extern void (*D_80089EF0[])(void);
 extern void (*D_80089EF8[])(void);
 extern void (*D_80089F2C[])(void);
 extern void (*D_80089F60[])(s32, s32, u8);
+extern f32 D_800895B0;
+extern s32 * D_80089A20[];
 extern s32 D_8008A074[2];
 extern struct32 D_8008A0B4[];
 extern s32  D_8008A084[];
@@ -429,20 +453,52 @@ extern s32 (*D_8008B36C[])(void);
 extern void (*D_8008B370[])(struct225 *effect, s32 arg1, u8 eventId); // light event handlers
 extern void (*D_8008B374[])(struct225 *effect);
 
+extern AttachmentType * D_8008ABE8[];
 extern ObjType D_8008B4A8[104];
 
 
 extern u8   D_8008CEB0;
 extern u8   D_8008CD00;
+extern s32 D_8008CEB4; /* axis D_800DDD18 is sorted along: 0 = x, else z */
 extern f32 *D_8008CFFC[]; // per LevelHeader.unk10: sun position (game_1AB530 FLARE_SUN)
 
+extern Vec3f * D_8008FC8C[];
+extern u8 * D_8008FC94[];
+extern s8 D_8008FD70;
+extern s32 D_8008FD78;
+extern s8 D_8008FD7C;
+extern u8 D_8008FD80;
 extern s8   D_8008FD8C;
 extern s8   D_8008FD90;
 extern s8   D_8008FD94;
+extern s8 D_8008FD9C;
+extern u8 D_8008FDA4;
 extern s8   D_8008FDA8;
 extern u16  D_8008FDBC;
 
 /* 8009 */
+extern u16 D_8008FDC0;
+extern s8 D_8008FDC8;
+extern s16 D_8008FDCC;
+extern s8 D_8008FDE0;
+extern s8 D_8008FDE4;
+extern f32 D_8008FDE8;
+extern f32 D_8008FE1C;
+extern f32 D_8008FE20;
+extern s8 D_8008FE2C;
+extern u8 D_8008FE34;
+extern f32 D_8008FE38;
+extern f32 D_8008FE3C;
+extern s8 D_8008FE40; /* number of players in D_8008FE44 */
+extern s8 D_8008FE44[]; /* controller of each player; -2: extra slot, -1: unused */
+extern s8 D_8008FE54[23];
+extern s8 D_8008FE6C[23];
+extern s8 D_8008FE84[23];
+extern s8 D_8008FEF0;
+extern s8 D_8008FEF8;
+extern s8 D_8008FF00;
+extern u8 D_8008FF04;
+extern s32 D_80090298[]; // texture ids
 extern s32 D_800902B8;
 extern s32 D_800902E4;
 extern s32 D_800902E8;
@@ -455,6 +511,17 @@ extern s32 D_80090320;
 
 extern s32 jtbl_80091A30[];
 
+extern s32 D_80090324[];
+extern u8 D_80090514[];
+extern u8 D_80090CD4[];
+extern u8 D_80090D70[];
+extern u8 D_80090DE8[];
+extern u8 D_80091100[];
+extern u8 D_80091238[];
+extern s32 D_80091564[];
+extern s32 D_800917B8;
+extern u8 D_8009187C[];
+extern u8 D_800918A0[];
 extern s32 D_80091AF0[];
 extern s32 D_80091C04[];
 extern u16 D_80091D20[]; // per texture: compressed size
@@ -590,6 +657,7 @@ extern u8  D_80099A43;
 extern u8 D_80099AB4[];
 extern u8 D_80099ABC[];
 
+extern u8 D_80099AC4[];
 extern f32 D_80099C1C;
 extern f32 D_80099C34;
 extern f32 D_80099C38;
@@ -639,6 +707,10 @@ extern s32 D_8009DCE0;
 
 extern s32 D_8009DCCC;
 
+extern u8 D_8009DEB0[];
+extern u8 D_8009DEB4[];
+extern u8 D_8009DEB8[];
+extern u8 D_8009DEBC[];
 extern f32 D_8009F6C0; // 0.01745329238474369f
 
 /* 800A0000 */
@@ -659,6 +731,7 @@ extern f32 D_800A2154;
 // extern struct201 D_800A2CD0[];
 extern u8  D_800A2CD0[][3];
 
+extern s32 D_800A3F14[];
 extern u8 D_800A3FB4[]; // "power"
 extern u8 D_800A3FBC[]; // "../Effects/Blood/blood.c"
 extern s32 D_800A4AA0; //?
@@ -679,6 +752,7 @@ extern f32 D_800A56C8;
 extern s32 D_800A5770[];
 
 // in game_18D770.c
+extern s32 D_800A6060[3]; /* { 0x36, 0x4C, 0x5B }: the model effect types */
 extern u8  D_800A6690[5];  // "scale"
 extern u8  D_800A6698[24]; // "../Effects/Light/light.c"
 extern f32 D_800A66B4[3];  // { 0.0f, -415.0f, 0.0f }
@@ -730,6 +804,7 @@ extern f32 D_800A6B10;
 extern u16 D_800AB140[];
 extern s32 D_800AB168[1];
 // game_2062D0.c
+extern u8 D_800AB310[];
 extern u8  D_800AB340[3]; // 88, 64, 62
 extern u8  D_800AB344[5]; // 46, 48, 45, 51, 52
 extern u8  D_800AB34C[4]; // 96, 97, 98, 99
@@ -748,6 +823,8 @@ extern s32 D_800AB3D8[4]; // 96, 97, 98, 99
 extern Vec3f D_800AB3E8; // zero vector
 extern f32 D_800AB3EC; //-1.0f
 
+extern u8 D_800AB3F4[];
+extern u8 D_800AB404[];
 extern f32 D_800AB464;
 extern f32 D_800AB468;
 extern f32 D_800AB46C; // 0.0003000000142492354f
@@ -768,6 +845,7 @@ extern f32 D_800A548C[];
 
 /* 800B0000 */
 
+extern s32 D_800AB754[];
 extern s32  D_800B0DC0;
 extern s32  D_800B0DC4;
 extern s32  D_800B0DC8;
@@ -785,6 +863,8 @@ extern Gfx *D_800B0E04;
 extern VtxColorGroup **D_800B0E30; // groups of each vertex color set
 extern u8 *D_800B0E34; // group count of each vertex color set
 
+extern u8 D_800B0E38;
+extern s32 D_800B0E40[];
 extern s32 D_800B0E58[7762];
 
 extern u16 D_800B87A0[]; // per texture: size
@@ -792,22 +872,34 @@ extern u16 D_800B87A0[]; // per texture: size
 extern s8  D_800BC448[]; // per texture: frames left before it is freed (0 = not loaded)
 
 extern u32 D_800BE3E4; // saved clock (seconds)
+extern u8 * D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
 extern ParticleResource D_800BE4A0[15];
 extern struct14 *D_800BE4F0;
 extern BounceRecord *D_800BE4E0;
 extern u8  D_800BE500[5]; // might be a struct?
+extern u16 * D_800BE524; // first D_800BE510 entry of each prop
 extern u16 *D_800BE570; // RGBA16 screen copy, D_800BE620 x D_800BE624 (game_203340)
 extern u8  D_800BE574;
 extern u8  D_800BE575;
+extern u8 D_800BE580[]; /* bit set over text ids */
+extern u8 D_800BE590;
+extern u16 D_800BE598[];
 extern s32 *D_800BE5A8[]; // per spawn model type: data loaded by func_1502B7F0
 extern s32 D_800BE5D0;
 extern u8  D_800BE5E0;
 extern u8 D_800BE619;
 extern u8 D_800BE61A;
+extern u8 D_800BE630[];
+extern s16 D_800BE668[4][5][2];
+extern f32 D_800BE6C0[]; // per-player smoothed light pitch (degrees, -180..180)
+extern f32 D_800BE6D0[]; // per-player smoothed light yaw (degrees, 0..360)
+extern u8 D_800BE740;
 extern u16 D_800BE930[4]; // button bits per controller (menu reads)
 extern u8  D_800BE9A0;
 extern f32 D_800BE9A4;
 extern f32 D_800BE9A8;
+extern s32 D_800BE9AC;
+extern u8 D_800BE9EB;
 extern s32 D_800BE9F0;
 
 
@@ -868,6 +960,7 @@ extern s32  D_800BE9E4; // frames elapsed this update
 extern s32  D_800BE9E8;
 extern u8   D_800BE9EC;
 extern u8   D_800BE9ED;
+extern s16 D_800BE9F2;
 extern s32 D_800BE9F4;   // current scene / game mode id
 extern s32  D_800BE9F8;
 
@@ -889,9 +982,16 @@ extern u8  D_800BEAC1;
 
 /* 800C0000 */
 
+extern u8 D_800BEAC2;
+extern u8 D_800BEAC3;
 extern u64 *D_800BEB9C; // RSP ucode data, right after its text in D_800C1060
+extern u8 D_800BEBA0;
+extern s32 D_800BEBA4;
 extern u64 D_800C1060[]; // RSP ucode text buffer
 extern u16 D_800C18B8[];
+extern s32 D_800C35B8[]; /* time at the previous update */
+extern u8 D_800C35C0[];
+extern u8 D_800C35C2;
 extern u8  D_800C35C4;
 extern u8  D_800C35C5;
 extern u8 D_800C35E8[2]; // per scene: changes with each run of the scene

@@ -116,8 +116,6 @@ extern u8 D_800CBD5E; // wave phase
 extern u8 *D_80085990[]; // per-font glyph bitmaps, 0xE0 bytes each
 extern FontGlyph *D_80085994[]; // per-font glyph metrics
 extern Gfx D_800859A0[];
-extern Gfx D_800873D0[];
-extern Gfx D_80087408[];
 extern u8 D_800915DC[];
 extern u8 D_800915EC[];
 extern u8 D_800915FC[];
@@ -139,7 +137,6 @@ extern u8 D_80091740[];
 extern u8 D_80091750[];
 extern u8 D_80091764[];
 extern s32 D_800A4AC8[][2];
-extern s32 D_800BEBA4;
 f32 cosf(f32);
 Gfx *func_15094F70(Gfx *, u8 *, s32, GlyphSprite *, s32, s32, s32, s32, s32);
 Gfx *func_15095A48(Gfx *, GlyphSprite *, f32, f32);

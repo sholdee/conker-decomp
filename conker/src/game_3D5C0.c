@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-extern s32 D_80090298[];
 
 void func_15010110(void) {
     struct179 tmp;

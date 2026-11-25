@@ -360,7 +360,6 @@ s32 func_15184DF0(s32 objIndex, s32 view, f32 *halfX, f32 *halfY, f32 *halfZ) {
 extern Gfx D_8008D448[];
 extern Vp D_8008D3E8;
 extern Mtx D_89470;
-extern s16 D_80082FA6;
 Gfx *func_1501A680(Gfx *gfx);
 extern s32 func_1506196C(Actor *, s32);
 extern Gfx *func_1502CCFC(Gfx *, s32, s32, MtxF *, s32, s32 *, s32, s32);
@@ -769,7 +768,6 @@ s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *
 
 extern s32 D_8008D3E0; /* shadow vertex budget for this frame */
 extern Gfx D_8008D410[];
-extern s32 D_800BEBA4;
 extern Vp D_800DF090[];
 extern u8 D_800DF0E0;
 extern s32 func_150849CC(Actor *, s32 *);

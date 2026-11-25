@@ -269,10 +269,7 @@ typedef struct Game70200Sprite {
 extern Gfx D_800859A0[];
 extern Game70200Glyph D_800859E0[];
 extern s32 D_80085CD0;
-extern s32 D_800BE9AC;
 extern Game70200Sprite D_80090060;
-extern f32 D_8008FE1C;
-extern f32 D_8008FE20;
 void func_10004074(void *);
 void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 s32 func_1509563C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);

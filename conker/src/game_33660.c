@@ -11,7 +11,6 @@ extern s32 _MakeMotorData(OSMesgQueue *mq, OSPfs *pfs, s32 channel);
 
 extern OSContStatus D_800BE2C0[];
 extern s32 D_800BE72C;
-extern u8  D_800BE740;
 
 
 void func_150061B0(void) {

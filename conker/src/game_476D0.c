@@ -168,8 +168,6 @@ void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f3
 }
 
 extern f32 D_80082FA8[];
-extern s16 D_800BE668[][5][2];
-extern u8 D_800BE630[];
 void func_1501B0A0(s32 view, s32 layout);
 
 /* Lays out view `view` for screen layout `layout` (D_800BE668 holds each view's centre) and sets up its

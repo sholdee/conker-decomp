@@ -69,8 +69,6 @@ void func_151A0AF8(SparkEmitterEffect *effect) {
 }
 
 extern u8 D_8008F8D0[];
-extern u8 D_8009187C[];
-extern u8 D_800918A0[];
 
 /*
  * Particle kind 4 spawn callback (D_8008AA00): a fast spark thrown out in a random

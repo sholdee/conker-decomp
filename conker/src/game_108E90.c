@@ -10,7 +10,6 @@ typedef struct {
     u8 sceneTag;
 } PuffTimer;
 
-extern u8 D_80090514[];
 
 void func_15152F70(SimplePuffSpray *config, u8 sceneTag);
 void func_15153298(BillboardBurst *config, u8 sceneTag, s32 arg2);

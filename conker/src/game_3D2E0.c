@@ -22,7 +22,6 @@ void func_1500FE30(void) {
     }
 }
 
-extern s32 D_800917B8;
 extern void func_1510C4AC(s32, s32, s32, s32);
 
 void func_1500FF9C(void) {

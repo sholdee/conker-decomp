@@ -42,7 +42,6 @@ extern u8 D_800A5ED8[];
 /* Attachment type tables. */
 extern void (*D_8008AB58[])(s32);
 extern s32 (*D_8008AB64[])(s32, s32, s32);
-extern AttachmentType *D_8008ABE8[];
 
 /* Emitter offsets. */
 extern Vec3f D_800A58A0;

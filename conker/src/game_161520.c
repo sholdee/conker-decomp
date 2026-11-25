@@ -1376,9 +1376,7 @@ void func_15150D1C(DecalSpray *, u8, s32);
 void func_151A9834(Vec3f *, f32, f32, GroundHit *, s32, u8, s8 *, u8, s32);
 void func_151C61A0(s32, s32, u8, s32);
 void func_1513A48C(Vec3f *, u8, s32);
-extern s32 *D_80089A20[];
 extern f32 D_800A3C30;
-extern s32 D_800A3F14[];
 extern s32 D_800A3F64[];
 
 

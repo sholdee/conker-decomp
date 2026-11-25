@@ -23,7 +23,6 @@ typedef struct CamSound {
     /* 0x24 */ u16 voice;
 } CamSound;
 
-extern f32 D_800895B0;
 extern f32 D_800DC000;
 extern f32 D_800C3614;
 extern f32 D_800C3618;

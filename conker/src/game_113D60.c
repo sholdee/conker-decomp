@@ -843,7 +843,6 @@ void func_150E88C0(Game113D60TimerEffect *effect) {
 }
 
 extern Game113D60Ids2 D_80088A80;
-extern u8 D_800BE9EB;
 void func_150E8A80(void);
 void func_150E90DC(void);
 

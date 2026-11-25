@@ -161,7 +161,6 @@ extern void func_151DC484(f32 *, struct199 *, s32, u8, s32);
 extern void func_15102B38(s32, u8, s32, s32, f32 *, s32, s32, f32, s32, s32, s32, s32, u8, s32);
 extern void func_150E1570(Actor *, f32, f32, f32, f32, f32, f32, s32, s32);
 
-extern u8 *D_80086CAC[];
 u16 func_10011EB8(s32 arg0, u16 *arg1, s32 arg2);
 s32 func_1510F8CC(s32);
 extern Actor *func_1505EEB0(s32 state, s32 *arg1);
@@ -176,7 +175,6 @@ extern void *func_1515D440(void);
 extern s32 func_15158BD0(Actor *, s32, s32);
 extern void func_1514EC1C(s32, Actor *, s32);
 extern u8 D_800C3E90;
-extern u8 D_80099AC4[];
 extern void func_15145974(void *, f32 *, f32 *);
 extern Actor *func_1505EEF4(s32 arg0);
 extern void func_151A3390(void *arg0, u8 arg1);

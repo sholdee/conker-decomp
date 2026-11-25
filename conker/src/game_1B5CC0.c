@@ -274,7 +274,6 @@ typedef struct DrawEntry {
 } DrawEntry;
 
 extern DrawEntry **D_80089240[]; // per view
-extern Mtx **D_80089250[];       // per frame buffer: one Mtx per object
 extern u16 D_800DBEE8[];         // per view: entries in D_80089240
 
 /*

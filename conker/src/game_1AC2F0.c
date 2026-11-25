@@ -392,7 +392,6 @@ extern f32 *D_800DDE44; // closure, percent
 extern f32 *D_800DDE48; // hole x, percent of the view width
 extern f32 *D_800DDE4C; // hole y, percent of the view height
 extern Gfx D_8008D018[];
-extern s32 D_80090298[]; // texture ids
 extern s32 func_1510D0EC(s32, s32 *, s32, s32); // texture address of a texture id
 
 /* Draws the iris wipe of `view`: black around a round hole, with optional sight marks and overlay. */

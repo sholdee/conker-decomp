@@ -346,7 +346,6 @@ typedef struct {
     /* 0x6 */ s8 unk6;
 } Fx151D8868;
 
-extern u8 D_800BE9EB;
 extern void func_1508EE0C(s32, s32);
 extern void func_15164F0C(u8, u8, void *, u8, s32);
 extern void func_1518B6B0(f32, f32, f32, s32, s32);

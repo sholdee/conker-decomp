@@ -62,7 +62,6 @@ extern struct Struct151E4314 D_800AB7A4[];
 extern s8 D_800E0C00[];
 extern s8 D_800E0BEB;
 extern s16 D_800E0A80;
-extern s16 D_8008FDCC;
 extern u8 **D_800E0BD8;
 extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
@@ -71,13 +70,10 @@ extern s32 D_800E0A90;
 extern s8 D_8008FE28;
 extern u8 D_800E0B96;
 extern u8 D_800D2E40;
-extern u8 D_8008FDA4;
 extern s16 D_800E0B9A;
 extern u8 D_800E0B95;
 extern u8 D_800E0BDC;
-extern s32 D_800AB754[];
 extern void (*D_800E0A88)(void);
-extern s8 D_8008FDE0;
 extern void (*D_8008FDEC[])(void);
 void func_1501C730(s32, s32, s32, s32, s32);
 void func_15042D94(s32, s32, u8, char *, ...);
@@ -96,11 +92,8 @@ void func_1509CDDC(s32);
 void func_1509CF28(s32, s32 *);
 void func_1509D054(void);
 void func_1509D08C(s32, s32, s32 *, s32 *);
-extern s8 D_8008FD70;
 extern s16 D_8008FDAC;
 extern u8 D_8008FDB4;
-extern s8 D_8008FF00;
-extern u8 D_8008FF04;
 extern s8 D_800D23A8;
 extern u8 D_800E0B99;
 extern s8 D_800E0BB1;
@@ -108,9 +101,6 @@ extern u8 D_800E0BD1;
 
 static Actor *D_800E0BA0[4]; /* characters spawned by func_151E7F60 */
 static s8 D_800E0BE0[23]; /* option values (see func_151E3344) */
-extern s8 D_8008FE54[];
-extern s8 D_8008FE6C[];
-extern s8 D_8008FE84[];
 void func_151DDBA0(void);
 
 extern u8 D_800E0B97;
@@ -120,20 +110,15 @@ void func_151DE7D4(void);
 
 extern u8 D_8008FD74;
 
-extern u8 D_8008FD80;
 extern struct Struct151E5034 *D_8008FDD4;
 
 extern s8 D_800E0BE9;
-extern u8 D_8008FE34;
-extern f32 D_8008FDE8;
 extern u8 D_800E0A97;
 void func_151E7E9C(void);
 
-extern s8 D_8008FE2C;
 void func_15042E3C(char *, ...);
 void func_151E327C(void);
 
-extern s8 D_8008FE44[];
 extern u8 D_800E0B8C;
 extern s8 D_800E0B90[];
 void func_151E7F60(s32 arg0, s32 arg1);
@@ -148,7 +133,6 @@ void func_151E43DC(void);
 
 extern s8 D_800E0BCE[];
 extern s8 D_800E0BEE;
-extern u8 D_800BE740;
 
 /*
  * For modes whose entry has unk8 == 8: finds connected controllers (D_800BE740) that are not yet in the
@@ -238,9 +222,6 @@ typedef struct {
 extern Entry151E7F60 D_800AB57C[];
 extern s16 D_800AB77C[];
 extern s16 D_800AB790[];
-extern s8 D_8008FD9C;
-extern s32 D_8008FD78;
-extern s8 D_8008FD7C;
 extern s8 D_8008FD88;
 extern s8 D_8008FF37[];
 extern s8 D_800E0AB0[];
@@ -255,10 +236,6 @@ extern s8 D_800E0BD0;
 extern s16 D_800E0C10[];
 extern s32 D_800E0C18[];
 extern s8 D_800D2130;
-extern s8 D_80087268;
-extern u8 D_80084060[];
-extern s8 D_8008FDC8;
-extern u16 D_8008FDC0;
 
 /* Sets up a match from the current mode's table entry: roster, teams, rules flags and per-player kinds. */
 void func_151E2834(void) {
@@ -531,9 +508,6 @@ void func_151E327C(void) {
 extern s8 D_800AB64C[];
 extern s16 D_800E0A82;
 extern s8 D_800E0A84;
-extern f32 D_8008FE38;
-extern f32 D_8008FE3C;
-extern s8 D_8008FDE4;
 extern char D_800AB89C[];
 extern char D_800AB8A0[];
 extern char D_800AB8A4[];

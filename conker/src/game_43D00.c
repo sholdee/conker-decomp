@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800BE590;
-extern u16 D_800BE598[];
 extern u8 D_800D2100;
 
 /* Collects the distinct spawn-table model types (< 0xBB) and the data func_1502B7F0 loads for each. */

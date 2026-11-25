@@ -366,7 +366,6 @@ void func_15004574(void) {
 void func_150045BC(void) {
 }
 
-extern Mtx **D_80089250[];
 extern s16 D_800D37E0;
 extern MtxF D_800DBF48;
 extern void func_151150B0(WorldObject *obj);

@@ -175,7 +175,6 @@ Gfx *func_1513F4E4(Gfx *, u8, u8 *);
 Gfx *func_15142B7C(Gfx *, s32, s32);
 Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
-extern u8 D_80090D70[];
 extern s32 D_800A4AC8[][2];
 
 /*

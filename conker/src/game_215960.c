@@ -40,7 +40,6 @@ extern HudSprite D_800917F8;
 extern HudSprite D_80091804;
 extern HudSprite D_80091810;
 extern Gfx *(*D_8008FFF4[])(Gfx *);
-extern u8 D_800BE740;
 extern s8 D_800E0BD3;
 extern u8 **D_800E0BD8;
 extern u8 D_7FB;
@@ -102,7 +101,6 @@ Gfx *func_151E84B0(Gfx *gfx) {
 extern Gfx *(*D_8008FFC0[])(Gfx *);
 extern HudModel *D_80090058;
 extern s16 D_800E0C78;
-extern s32 D_800BEBA4;
 
 /* Draws the per-mode overlay; if it overran the display list buffer, discards what it wrote. */
 Gfx *func_151E8620(Gfx *gfx) {
@@ -132,8 +130,6 @@ Gfx *func_151E8620(Gfx *gfx) {
     return gfx;
 }
 
-extern f32 D_8008FE1C;
-extern f32 D_8008FE20;
 /* Emits a scissored texture rectangle, scaled by the current screen scale factors. */
 Gfx *func_151E86E4(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy) {
     f32 yScale;
@@ -158,9 +154,7 @@ extern s8 D_800E0BB0;
 extern u8 D_D10;
 extern u8 D_D14;
 extern u8 D_D16;
-extern u16 D_8008FDC0;
 extern u16 D_800E0BCC;
-extern s32 D_800BE9AC;
 extern u8 D_8009006C[];
 extern u8 D_80090070[];
 extern s32 func_15086D48(s32, s32);
@@ -381,7 +375,6 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     return gfx;
 }
 
-extern s8 D_80087268;
 extern s16 D_800E0AA0[];
 extern s8 D_800E0C00[];
 
@@ -519,9 +512,6 @@ typedef struct {
 } ScoreState;
 
 extern ScoreState *D_8008FDD4;
-extern s8 D_8008FDC8;
-extern s8 D_8008FD7C;
-extern s8 D_8008FE44[];
 extern s8 D_800E0AC0[];
 extern s16 D_800E0AD0[];
 extern u8 D_800ABAA8;
@@ -901,8 +891,6 @@ extern u8 D_80E;
 extern u8 D_82F;
 extern u8 D_830;
 extern u8 D_891;
-extern s32 *D_800891BC[];
-extern s8 D_8008FEF0;
 extern HudModel *D_8009005C;
 extern s16 D_800C3C9E;
 typedef struct {
@@ -916,7 +904,6 @@ s32 func_1509BE40(s32, s32, s32);
 Struct1509B570 *func_1509B570(s32);
 Gfx *func_150900F0(Gfx *, s32);
 
-extern s16 D_8008FDCC;
 extern s16 D_800E0C30;
 extern Mtx D_800E0C38;
 void func_151EDB58(HudModel *model);
@@ -1338,7 +1325,6 @@ Gfx *func_151EC1F0(Gfx *gfx) {
 
 
 extern u8 D_800E0A95;
-extern s8 D_8008FEF8;
 extern void *D_800900BC[];
 Gfx *func_151EC648(Gfx *);
 Gfx *func_151EE184(Gfx *);
@@ -1400,9 +1386,6 @@ Gfx *func_151EC3E8(Gfx *gfx) {
 
 extern f32 sinf(f32);
 extern f32 cosf(f32);
-extern f32 D_8008FDE8;
-extern s8 D_8008FE2C;
-extern s8 D_8008FE40;
 extern u8 *D_800900D8[];
 extern u8 *D_800900FC[];
 extern s8 D_800E0B90[];
@@ -1674,10 +1657,6 @@ Gfx *func_151ED1E0(Gfx *gfx) {
 }
 
 
-extern u8 D_8009DEB0[];
-extern u8 D_8009DEB4[];
-extern u8 D_8009DEB8[];
-extern u8 D_8009DEBC[];
 
 /* Sets up the load and render tiles for a sprite; stores its LoadBlock texel count in *blockSizeOut. */
 Gfx *func_151ED29C(Gfx *gfx, HudSprite *sprite, s32 *blockSizeOut) {

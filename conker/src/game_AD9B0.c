@@ -9,7 +9,6 @@
 #define BIT_IS_SET(bits, n) ((bits)[(n) >> 3] & (1 << ((n) & 7)))
 
 extern TriggerZone *D_800D199C;   /* zone to disable once the text box closes */
-extern u8 D_800BE580[];           /* bit set over text ids */
 extern u8 D_800D2E40;
 
 TextResource *func_1502B6BC(s32, s32, s32, s32, s32, s32, s32);

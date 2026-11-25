@@ -301,8 +301,6 @@ Gfx *func_150911F4(Gfx *);
 Gfx *func_15094F40(Gfx *);
 Gfx *func_15096934(Gfx *);
 void func_1518CA04(s32);
-extern f32 D_8008FE1C;
-extern s32 D_800BEBA4;
 
 /* Builds this level's overlay display list: blocks, water, bubbles and HUD. Returns the
  * original pointer (drops everything) if the frame's display list buffer would overflow. */
@@ -363,7 +361,6 @@ Gfx *func_1508FD38(register Gfx *gfx) {
     }
     return gfx;
 }
-extern s16 D_8008FDCC;
 extern s16 D_8009DC90[][3];
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
@@ -768,8 +765,6 @@ void func_1509093C(void) {
 
 extern u8 D_80083440[];
 extern u8 D_800835C0[];
-extern u8 D_80084160[];
-extern u8 D_80084190[];
 
 /* Draws the water surface mesh animated by func_1509093C. */
 Gfx *func_150911F4(Gfx *gfx) {
@@ -907,7 +902,6 @@ extern u8 D_800873B4[];
 extern u8 D_800873BC[];
 extern u8 D_800873C4[];
 extern u8 D_800873C8[];
-extern u16 D_8008FDC0;
 extern HudScore *D_8008FDD4;
 extern s8 D_800E0AC0[];
 extern HudNames *D_800E0BD8;

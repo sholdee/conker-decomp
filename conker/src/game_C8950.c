@@ -244,7 +244,6 @@ void func_1509BA04(s32 unloadAll) {
 
 void func_15096D08(void);
 s32 func_1509BE40(s32, s32, s32, ...);
-extern s16 D_800BE9F2;
 extern s32 D_800D2E48;
 extern s32 D_800D2F58;
 

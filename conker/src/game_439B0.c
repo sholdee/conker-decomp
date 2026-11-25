@@ -4,7 +4,6 @@
 #include "variables.h"
 
 extern s32 func_1502B020(s32 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern u8 D_800BE580[];
 
 
 void func_15016500(void) {

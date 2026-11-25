@@ -117,10 +117,6 @@ s32 func_151F2CDC(void);
 void func_151F2BE8(void);
 void func_151F2C4C(void);
 extern s32 D_800DC9F0;
-extern u8 D_800BEAC2;
-extern u8 D_800BE630[];
-extern u8 D_800BEBA0;
-extern s32 D_800BEBA4;
 extern LookAt D_800D9B90[];
 
 /*
@@ -647,7 +643,6 @@ Gfx *func_15019E60(Gfx *gfx) {
 }
 
 extern u32 D_800BE610;
-extern s32 D_800BE9AC;
 extern s32 D_800BE9B0;
 extern f32 D_800BE9B8;
 extern f32 D_800BE9BC;

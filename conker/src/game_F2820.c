@@ -154,7 +154,6 @@ void func_150C5568(StripObj *strip) {
     }
 }
 
-extern u8 D_80090DE8[];
 extern s32 D_800A4AC8[][2];
 
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);

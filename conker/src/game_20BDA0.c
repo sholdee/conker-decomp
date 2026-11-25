@@ -46,7 +46,6 @@ extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
 extern s32 D_800E0A90;
 extern u8 D_800E0B96;
-extern u8 D_8008FDA4;
 /* One entry of the menu's game-mode table (D_800AB68C[]) */
 typedef struct {
     /* 0x0 */ s16 nameText;
@@ -61,12 +60,10 @@ typedef struct {
 } MenuEntry;
 
 extern MenuEntry D_800AB68C[];
-extern s32 D_800AB754[];
 extern char D_800AB850[];
 extern void (*D_800E0A88)(void);
 extern u8 D_800E0A95; /* current page's fade level, 0-0xFF */
 extern s8 D_800E0A96; /* page to switch to once faded out; -1: none */
-extern s8 D_8008FDE0;
 void func_15042D94(s32, s32, s32, char *, ...);
 void func_151E2404(void);
 void func_151E3344(s32, s32, s32, s32, s32);
@@ -75,9 +72,6 @@ s32 func_151F2CDC(void);
 s32 func_1509CF28(s32, s32 *);
 void func_1509D054(void);
 s32 func_1509D08C(s32, s32, s32 *, s32 *);
-extern s8 D_8008FD70;
-extern s8 D_8008FF00;
-extern u8 D_8008FF04;
 extern s8 D_800E0BB1;
 
 extern s8 D_800E0BE0[];
@@ -87,26 +81,16 @@ void func_151DD9E4(void);
 extern s8 D_8008FE30;
 extern s8 D_8008FD74;
 
-extern u8 D_8008FD80;
 extern struct Struct151E5034 *D_8008FDD4;
 
 
 
 extern s8 D_8008FDDC;
-extern s8 D_8008FE44[]; /* controller of each player; -2: extra slot, -1: unused */
 extern u8 D_800E0A94; /* menu brightness, scales the page alpha */
-extern s8 D_8008FEF8;
-extern s8 D_8008FE40; /* number of players in D_8008FE44 */
-extern s8 D_8008FE2C;
-extern u8 D_8008FE34;
-extern f32 D_8008FDE8;
 
 extern s32 D_8008FE24;
 extern s8 D_8008FD84;
 extern u8 D_8008FF08[];
-extern f32 D_8008FE38;
-extern f32 D_8008FE3C;
-extern s8 D_8008FDE4;
 void func_151EDF4C(void);
 void func_15007778(void);
 void func_151E81EC(void);

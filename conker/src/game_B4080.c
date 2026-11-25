@@ -173,7 +173,6 @@ extern s8 D_800D2398;
 extern s8 D_800D2399;
 extern MpGame *D_800D23B0;
 s32 func_1508802C(Racer *racer, Actor *obj, s32 mode);
-extern s16 D_80087290;
 extern PathNode *D_800D2350;
 extern f32 sqrtf(f32);
 u8 func_15085DA8(f32 arg0);
@@ -2640,7 +2639,6 @@ s32 func_1508CA88(void) {
 }
 
 
-extern s32 D_800BE9AC;
 extern s8 D_800872D8[];
 void func_150DA5EC(Actor *, f32);
 

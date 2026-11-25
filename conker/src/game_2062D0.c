@@ -693,8 +693,6 @@ typedef struct {
     SplashState *state;
 } Splash;
 
-extern u8 D_800AB3F4[];
-extern u8 D_800AB404[];
 extern Splash *func_15147DA0(EffectTemplate *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                              TrailRender *, s32, s32, s32);
 

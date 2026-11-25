@@ -725,7 +725,6 @@ typedef struct {
     s32 unk8;
 } Entry1514306C;
 extern Entry1514306C D_80090B60[];
-extern s32 D_80091564[];
 extern s32 D_80091514;
 extern s32 D_800915B0;
 

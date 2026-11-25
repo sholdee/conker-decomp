@@ -99,7 +99,6 @@ extern s32 D_800D3830;
 extern s32 func_150A4FA0(s32, s32);
 extern s32 func_150A6568(s16, s16, s32 *, u16, s32, s32, s32, s32);
 extern s32 D_800D37E0;
-extern u8 D_80089120[];
 extern f32 D_800DBE54;
 extern f32 D_800DBE58;
 extern u16 D_800DBE60;

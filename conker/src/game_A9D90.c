@@ -300,7 +300,6 @@ void func_15085430(Actor *, s32, s32);
 void func_15181DC8(s32);
 void func_15082A44(SpawnRecord *, s32, s32, s32, s32);
 void func_15088D58(Actor *);
-extern s16 D_800BE9F2;
 
 /* Re-initialises obj through func_15060F28/func_15082A44 (health back to D_8008726C), keeping a few state bytes. */
 void func_1507D1D8(Actor *obj) {

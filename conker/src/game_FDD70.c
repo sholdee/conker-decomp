@@ -3,10 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern s32 D_80088890;
-extern s32 D_80088894;
-extern s32 D_80088898;
-extern s32 D_8008889C;
 extern s32 *D_800DBF94; /* per prop: bit i set while D_800CC2D0[i] stands on it */
 
 extern WorldObject *func_151149AC(u8 id); /* the prop whose id is `id` */

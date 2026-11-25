@@ -206,7 +206,6 @@ void func_15167310(void) {
 }
 
 extern Mtx D_80089470;
-extern s32 D_800BEBA4;
 extern s32 D_800DD1B4;
 extern s32 D_800DD1B8;
 extern s16 D_800DD1BC;

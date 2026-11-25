@@ -327,8 +327,6 @@ visible:;
     }
 }
 
-extern u8 D_80082FC0[];
-extern u8 D_80083140[];
 
 /*
  * Draws the queued reflections of attachment `att`: its display lists once per reflection, with

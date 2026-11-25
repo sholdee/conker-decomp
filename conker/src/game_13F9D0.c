@@ -135,7 +135,6 @@ typedef struct DrawEntry {
 } DrawEntry;
 
 extern DrawEntry **D_80089240[]; // per view
-extern Mtx **D_80089250[];       // per frame buffer: one Mtx per object
 extern u16 D_800DBEE8[];         // per view: entries in D_80089240
 extern u8 D_800C3658[];
 
@@ -365,7 +364,6 @@ Gfx *func_150CF5E8(Gfx *gfx);
 Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, MtxF mtx, s32, s32, s32);
 extern u8 D_80083D40[];
 extern u8 D_80083EC0[];
-extern s32 D_800BEBA4;
 
 /*
  * Draws one object in one view, if it belongs to this pass (opaque pass: alpha 255 and no flags bit 0x10).

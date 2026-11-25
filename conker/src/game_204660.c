@@ -575,7 +575,6 @@ Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 
-extern u8 D_80090CD4[];
 
 /*
  * Draws the trail as a ribbon 11 units wide, spread sideways by view's cos/sin (D_800DD1E8/D_800DD1D8), from

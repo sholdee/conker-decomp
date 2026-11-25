@@ -35,7 +35,6 @@ extern u16 *D_800C35D8[];          /* each track's event count */
 extern u8 D_800C363A[];            /* track count */
 extern SeqTrackInfo *D_800C35F0[];
 extern s32 D_800C35B0[];           /* current time */
-extern s32 D_800C35B8[];           /* time at the previous update */
 extern s32 D_800C3640[];           /* end time */
 
 extern WorldObject *func_151149AC(s32);
@@ -321,7 +320,6 @@ void func_150241B4(SeqQueueEntry *queue, s32 *count, SeqEvent *event, s32 track,
     (*count)++;
 }
 
-extern u8 D_800C35C0[];
 extern u8 D_800C3C8C;
 
 /*
@@ -414,7 +412,6 @@ extern u8 D_800C3658[];
 extern u8 D_800C365A[];
 extern u8 D_800C365C[];
 extern u8 D_800C365E[];
-extern u8 D_800C35C2;
 extern u8 D_800C35C3;
 extern f32 D_800C364C;
 extern f32 D_800C3650;
@@ -1250,7 +1247,6 @@ typedef struct {
 
 extern u8 *D_800C3960[][30];
 extern s16 *D_800C3868[][30];
-extern AttachmentType *D_8008ABE8[];
 extern s32 D_8008CA50;
 extern f32 *D_800AAA90;
 typedef struct {

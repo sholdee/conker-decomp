@@ -121,8 +121,6 @@ extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f
 extern f32 func_15144BC8(f32);
 extern s8 func_151E564C(void);
 extern s8 func_151E565C(void);
-extern u8 D_80087298;
-extern u8 D_8008729C;
 extern u8 D_800D18A9;
 /* D_800D2350: per-node info, indexed by the node ids func_15086D48 returns. */
 typedef struct {

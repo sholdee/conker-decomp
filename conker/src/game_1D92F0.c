@@ -114,8 +114,6 @@ typedef struct {
 } FxSprayParams; // size 0x30
 
 extern FxSprayParams D_800A9068[];
-extern u8 D_800AB3F4[];
-extern u8 D_800AB404[];
 s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *,
                   FxSurfaceHit *, s32, s32);
 

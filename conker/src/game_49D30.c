@@ -111,7 +111,6 @@ typedef struct {
 
 extern GfxSchedTask *D_800BEAD4;
 extern GfxSchedTask D_800BEAD8[];
-extern u8 D_800BEBA0;
 extern u64 *D_800BEAD0;
 extern u64 D_800BEBB0[];
 extern u64 D_800CBE10[];
@@ -322,8 +321,6 @@ s32 func_1501CFF8(s32 scene) {
     return sum;
 }
 
-extern s32 D_800C35B8[];
-extern u8 D_800C35C0[];
 extern u16 D_800C3C8E;
 extern u8 D_800C35F8;
 extern f32 D_800C3648;
@@ -338,7 +335,6 @@ extern u8 D_800C3660[];
 extern u8 D_800C3662;
 extern u8 D_800C3C8C;
 extern u8 D_800C3C8D;
-extern u8 D_800C35C2;
 extern u8 D_800C3A58;
 extern f32 D_800C35A4;
 extern s8 D_800C3C8A;

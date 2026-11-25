@@ -128,7 +128,6 @@ void func_150DF920(s32 arg0) {
     }
 }
 
-extern s32 D_80090324[];
 
 /* Binds segments 2..4 to the textures of the three materials func_150DF920 scrolls: an
  * active material gets entry 9 + D_800DD405 of D_80090324, an inactive one entry 8. */

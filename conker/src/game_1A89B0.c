@@ -137,7 +137,6 @@ s32 func_1517B7F8(Game1A89B0Position *pos, Vtx *vtx, s32 *phase, u8 *alpha) {
     return 0;
 }
 
-extern s32 D_8008CEB4; /* axis D_800DDD18 is sorted along: 0 = x, else z */
 extern Game1A89B0Position *D_800DDD18;
 
 /* Quicksorts D_800DDD18[first..last] by x, or by z when D_8008CEB4 is set (pivot = last element). */

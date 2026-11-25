@@ -254,7 +254,6 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 extern Vec3f *func_15144B34(s32);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
-extern u8 D_80090CD4[];
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -816,7 +815,6 @@ s32 func_151B7998(EffectObject *obj) {
     return 1;
 }
 
-extern u8 D_80091100[];
 
 /* Draws the ribbon as a camera-facing strip 58 units wide, from the newest point to the oldest. */
 Gfx *func_151B7C38(EffectObject *obj, Gfx *gfx, s16 view) {
