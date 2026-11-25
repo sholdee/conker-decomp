@@ -704,23 +704,7 @@ typedef struct {
 
 /* Particle object created by func_151303BC / func_15130280 from a ParticleDesc6C. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1E];
-    /* 0x2B */ u8 alpha;
-    /* 0x2C */ u8 pad2C[0xC];
-    /* 0x38 */ f32 width;
-    /* 0x3C */ f32 height;
-    /* 0x40 */ Vec3f position;
-    /* 0x4C */ Vec3f offset;
-    /* 0x58 */ Vec3f velocity;
-    /* 0x64 */ u8 pad64[4];
-    /* 0x68 */ u32 flags; /* 0x2000: dies above RiseMotion.ceiling */
-    /* 0x6C */ u8 pad6C[0x14];
-    /* 0x80 */ CollisionHit ground;
-    /* 0xA4 */ u8 padA4[4];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ union {
         RiseMotion rise;
         OscillateMotion oscillate;
@@ -746,21 +730,21 @@ u8 func_15159594(Particle *particle, ParticleUpdateArg *arg1) {
 
     alive = 1;
     if (func_151596BC(particle, arg1) != 0) {
-        if (particle->velocity.y > 0.0f) {
+        if (particle->head.desc.vel.y > 0.0f) {
             Vec3f pos;
 
-            pos.x = particle->position.x + particle->offset.x;
+            pos.x = particle->head.desc.pos.x + particle->head.desc.offset.x;
             pos.y = arg1->unk4;
-            pos.z = particle->position.z + particle->offset.z;
+            pos.z = particle->head.desc.pos.z + particle->head.desc.offset.z;
             if (func_1514672C(&pos) == 0) {
                 return 0;
             }
-            found = func_15046C00(&pos, 0, particle->position.y, &particle->ground);
+            found = func_15046C00(&pos, 0, particle->head.desc.pos.y, &particle->head.floor);
             if (found != 0) {
-                pos.y = particle->ground.height;
-                if (particle->ground.source == 3) {
+                pos.y = particle->head.floor.height;
+                if (particle->head.floor.source == 3) {
                     func_151DBCBC(func_151D8E20(), particle->motion.rise.baseSize * 0.200000003f, 0xFF,
-                                  (s32)&particle->ground.tri, &pos, particle->unkC, particle->unk1);
+                                  (s32)&particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
                 }
                 alive = 0;
             }
@@ -785,24 +769,24 @@ s32 func_151596BC(Particle *particle, ParticleUpdateArg *arg1) {
     rise->heightPhase += rise->heightPhaseStep * D_800BE9E4;
     sin0 = func_151423D8(rise->widthPhase - 0x40);
     sin1 = func_151423D8(rise->heightPhase - 0x40);
-    particle->width = rise->baseSize + (rise->widthWobble * sin0);
-    particle->height = rise->baseSize + (rise->heightWobble * sin1);
+    particle->head.desc.width = rise->baseSize + (rise->widthWobble * sin0);
+    particle->head.desc.height = rise->baseSize + (rise->heightWobble * sin1);
 
-    if (0.0f < particle->velocity.y) {
-        if (rise->maxRiseSpeed < particle->velocity.y) {
-            particle->velocity.y = rise->maxRiseSpeed;
+    if (0.0f < particle->head.desc.vel.y) {
+        if (rise->maxRiseSpeed < particle->head.desc.vel.y) {
+            particle->head.desc.vel.y = rise->maxRiseSpeed;
         }
-        sway = particle->velocity.y * rise->swayPerSpeed;
+        sway = particle->head.desc.vel.y * rise->swayPerSpeed;
         rise->swayPhaseX += rise->swayPhaseStepX * D_800BE9E4;
         rise->swayPhaseZ += rise->swayPhaseStepZ * D_800BE9E4;
         sin0 = func_151423D8(rise->swayPhaseX - 0x40);
         sin1 = func_151423D8(rise->swayPhaseZ - 0x40);
-        particle->offset.x = (rise->swayX * sin0) * sway;
-        particle->offset.z = (rise->swayZ * sin1) * sway;
+        particle->head.desc.offset.x = (rise->swayX * sin0) * sway;
+        particle->head.desc.offset.z = (rise->swayZ * sin1) * sway;
     }
 
-    if (particle->flags & 0x2000) {
-        if (rise->ceiling < (particle->offset.y + particle->position.y)) {
+    if (particle->head.desc.flags & 0x2000) {
+        if (rise->ceiling < (particle->head.desc.offset.y + particle->head.desc.pos.y)) {
             alive = 0;
         }
     }
@@ -1036,16 +1020,16 @@ s32 func_1515A11C(Particle *particle, ParticleUpdateArg *arg1) {
     osc->heightPhase += osc->heightPhaseStep * D_800BE9E4;
     sin0 = func_151423D8(osc->widthPhase - 0x40);
     sin1 = func_151423D8(osc->heightPhase - 0x40);
-    particle->width = osc->baseSize + (osc->widthWobble * sin0);
-    particle->height = osc->baseSize + (osc->heightWobble * sin1);
+    particle->head.desc.width = osc->baseSize + (osc->widthWobble * sin0);
+    particle->head.desc.height = osc->baseSize + (osc->heightWobble * sin1);
     if ((osc && osc) && osc) { // matching: these dead tests of osc steer IDO's schedule of the angle update
     }
     osc->angle += osc->angleSpeed * D_800BE9A4;
     osc->angle = func_15144B68(osc->angle);
     sin0 = sinf(osc->angle);
-    particle->offset.x = osc->direction.x * sin0;
-    particle->offset.y = osc->direction.y * sin0;
-    particle->offset.z = osc->direction.z * sin0;
+    particle->head.desc.offset.x = osc->direction.x * sin0;
+    particle->head.desc.offset.y = osc->direction.y * sin0;
+    particle->head.desc.offset.z = osc->direction.z * sin0;
     return 1;
 }
 
@@ -1149,10 +1133,10 @@ s32 func_1515A60C(Particle *particle, ParticleUpdateArg *arg1) {
     s32 i;
 
     drift = &particle->motion.drift;
-    particle->width = (func_151423D8(drift->widthPhase - 0x40) * drift->widthWobble) + drift->baseSize;
-    particle->height = (func_151423D8(drift->heightPhase - 0x40) * drift->heightWobble) + drift->baseSize;
-    particle->offset.x = func_151423D8(drift->swayPhaseX - 0x40) * drift->swayX;
-    particle->offset.z = func_151423D8(drift->swayPhaseZ - 0x40) * drift->swayZ;
+    particle->head.desc.width = (func_151423D8(drift->widthPhase - 0x40) * drift->widthWobble) + drift->baseSize;
+    particle->head.desc.height = (func_151423D8(drift->heightPhase - 0x40) * drift->heightWobble) + drift->baseSize;
+    particle->head.desc.offset.x = func_151423D8(drift->swayPhaseX - 0x40) * drift->swayX;
+    particle->head.desc.offset.z = func_151423D8(drift->swayPhaseZ - 0x40) * drift->swayZ;
 
     drift->widthPhase += drift->widthPhaseStep * D_800BE9E4;
     drift->heightPhase += drift->heightPhaseStep * D_800BE9E4;
@@ -1160,9 +1144,9 @@ s32 func_1515A60C(Particle *particle, ParticleUpdateArg *arg1) {
     drift->swayPhaseZ += drift->swayPhaseStepZ * D_800BE9E4;
 
     for (i = D_800BE9E4; i > 0; i--) {
-        particle->velocity.x *= drift->damping;
-        particle->velocity.y *= drift->damping;
-        particle->velocity.z *= drift->damping;
+        particle->head.desc.vel.x *= drift->damping;
+        particle->head.desc.vel.y *= drift->damping;
+        particle->head.desc.vel.z *= drift->damping;
     }
     return 1;
 }
@@ -1176,29 +1160,29 @@ u8 func_1515A78C(Particle *particle, ParticleUpdateArg *arg1) {
     alive = 1;
     drift = &particle->motion.drift;
     func_1515A60C(particle, arg1);
-    if (particle->velocity.y < 0.0f) {
+    if (particle->head.desc.vel.y < 0.0f) {
         return 1;
     }
-    pos.x = particle->position.x + particle->offset.x;
+    pos.x = particle->head.desc.pos.x + particle->head.desc.offset.x;
     pos.y = arg1->unk4;
-    pos.z = particle->position.z + particle->offset.z;
+    pos.z = particle->head.desc.pos.z + particle->head.desc.offset.z;
     if (drift->groundHeight == GROUND_UNKNOWN) {
         if (func_1514672C(&pos) == 0) {
             return 0;
         }
-        if (func_15046C00(&pos, 0, particle->position.y, &particle->ground) != 0) {
-            pos.y = particle->ground.height;
+        if (func_15046C00(&pos, 0, particle->head.desc.pos.y, &particle->head.floor) != 0) {
+            pos.y = particle->head.floor.height;
             alive = 0;
         }
-    } else if (drift->groundHeight <= particle->position.y) {
+    } else if (drift->groundHeight <= particle->head.desc.pos.y) {
         pos.y = drift->groundHeight;
         alive = 0;
     }
     if (alive == 0) {
         if (func_150ADA68() < 0.200000003f) {
-            if (particle->ground.source == 3) {
-                func_151DBCBC(func_151D8E20(), drift->baseSize * 0.200000003f, particle->alpha,
-                              (s32)&particle->ground.tri, &pos, particle->unkC, particle->unk1);
+            if (particle->head.floor.source == 3) {
+                func_151DBCBC(func_151D8E20(), drift->baseSize * 0.200000003f, particle->head.desc.alpha,
+                              (s32)&particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
             }
         }
     }
