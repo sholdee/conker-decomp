@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "macros.h"
 
 /* File-local view of struct108 (the per-player camera, layout and names as in game_14FF90.c's Camera):
    only the members used here. include/structs.h has pads over several of them. */
@@ -71,14 +72,14 @@ void func_1512A390(Camera *camera);
 #define SQ(x) ((x) * (x))
 
 void func_15122440(Camera *camera) {
-    vertex v = D_800894C8;
-    f32 tmp;
+    vertex offset = D_800894C8;
+    f32 horiz;
     f32 yaw;
     f32 pitch;
-    f32 s;
-    f32 x;
-    f32 z;
-    f32 y;
+    f32 sinYaw;
+    f32 goalX;
+    f32 goalZ;
+    f32 goalY;
 
     yaw = (camera->player->unk40 + 90.0f) * 0.01745329238f;
     func_1512A390(camera);
@@ -95,7 +96,7 @@ void func_15122440(Camera *camera) {
     if (camera->player->unk102) {
         pitch *= 0.5f;
     }
-    pitch = (pitch < -88.0f) ? -88.0f : ((pitch > 88.0f) ? 88.0f : pitch);
+    pitch = CLAMP(pitch, -88.0f, 88.0f);
     if (fabsf(D_800894C0 - pitch) < 10.0f) {
         pitch = D_800894C0;
     } else {
@@ -104,56 +105,56 @@ void func_15122440(Camera *camera) {
     pitch *= 0.01745329238f;
     func_15123070(camera);
     if (camera->contPad->button & R_TRIG) {
-        v.x = 150.0f;
+        offset.x = 150.0f;
     } else {
-        v.x = camera->targetDistance;
+        offset.x = camera->targetDistance;
     }
     if ((camera->player->unk102 != 0) && (camera->unk3E8 == 0)) {
         if (camera->distance < camera->targetDistance) {
-            v.x = camera->distance;
+            offset.x = camera->distance;
         }
     }
-    tmp = cosf(pitch) * v.x;
-    v.y = sinf(pitch) * v.x;
-    v.x = tmp;
+    horiz = cosf(pitch) * offset.x;
+    offset.y = sinf(pitch) * offset.x;
+    offset.x = horiz;
 lbl:
     {
-    f32 c;
-    s = sinf(yaw);
-    c = cosf(yaw);
+    f32 cosYaw;
+    sinYaw = sinf(yaw);
+    cosYaw = cosf(yaw);
     camera->unk3DC = yaw;
     do {
-    v.z = -v.x * s;
-    v.x = v.x * c;
-    v.y = (v.y < -200.0f) ? -200.0f : ((v.y > 200.0f) ? 200.0f : v.y);
+    offset.z = -offset.x * sinYaw;
+    offset.x = offset.x * cosYaw;
+    offset.y = CLAMP(offset.y, -200.0f, 200.0f);
     } while (0);
-    v.x += camera->target.x;
-    v.y += camera->target.y;
-    v.z += camera->target.z;
+    offset.x += camera->target.x;
+    offset.y += camera->target.y;
+    offset.z += camera->target.z;
     }
     {
     f32 accel = 1.0f;
-    f32 maxv = 2.200000048f;
-    x = v.x;
-    y = v.y;
-    z = v.z;
+    f32 maxSpeed = 2.200000048f;
+    goalX = offset.x;
+    goalY = offset.y;
+    goalZ = offset.z;
     if (camera->snap) {
-        camera->eye.x = x;
-        camera->eye.y = y;
-        camera->eye.z = z;
+        camera->eye.x = goalX;
+        camera->eye.y = goalY;
+        camera->eye.z = goalZ;
         camera->eyeVel.x = 0.0f;
         camera->eyeVel.y = 0.0f;
         camera->eyeVel.z = 0.0f;
     } else {
-        accel += accel;
-        maxv += maxv;
+        accel *= 2.0f;
+        maxSpeed *= 2.0f;
         if (camera->player->unk102) {
-            accel += accel;
-            maxv += maxv;
+            accel *= 2.0f;
+            maxSpeed *= 2.0f;
         }
-        func_150495B0(&camera->eye.x, x, &camera->eyeVel.x, accel, maxv, camera->dt);
-        func_150495B0(&camera->eye.y, y, &camera->eyeVel.y, accel, maxv, camera->dt);
-        func_150495B0(&camera->eye.z, z, &camera->eyeVel.z, accel, maxv, camera->dt);
+        func_150495B0(&camera->eye.x, goalX, &camera->eyeVel.x, accel, maxSpeed, camera->dt);
+        func_150495B0(&camera->eye.y, goalY, &camera->eyeVel.y, accel, maxSpeed, camera->dt);
+        func_150495B0(&camera->eye.z, goalZ, &camera->eyeVel.z, accel, maxSpeed, camera->dt);
     }
     }
     if ((camera->player->unk102 == 0) && !(camera->buttonsPressed & R_TRIG)) {
