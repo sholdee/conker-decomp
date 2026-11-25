@@ -364,9 +364,6 @@ void func_150177F8(void);
 void func_1501C860(void);
 void func_1501C870(void);
 
-void func_15040350(void *arg0, u32 arg1);
-s32  func_1504082C(u32 *arg0);
-s32 func_150408CC(Gfx *gfx);
 void func_15042D50(void);
 void func_15042D78(u8 arg0);
 void func_150432BC(f32 arg0);
@@ -1044,7 +1041,6 @@ void func_1501748C(s16 arg0);
 Gfx *func_1501A490(Gfx *dl, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode);
 u32 func_1502B7F0(void **data, s32 depth, ...);
 ModelAttachment *func_1503195C(Actor *, s32, s32);
-void func_150403C8(void *arg0, u32 arg1, s32 arg2);
 s32 func_15043BB8(MsgRing *ring, u8 *message, s32 size);
 f32  func_15047C00(f32 arg0);
 f32  func_15047D60(f32 arg0);

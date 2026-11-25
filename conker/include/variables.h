@@ -294,7 +294,6 @@ extern Color24 D_80084110[]; // screen fade colours for func_1517EE40, picked by
 extern u8 D_80084160[];
 extern u8 D_80084190[];
 extern Vtx  D_80084300[5];
-extern s16  D_80084480;
 extern void (*D_800844B0[])(s32 arg0);
 extern s32  D_800848B0;
 
