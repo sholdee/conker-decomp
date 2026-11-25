@@ -79,20 +79,6 @@ typedef struct {
     /* 0x28 */ Vtx *vtx[2]; // one per frame buffer
 } AttachmentView;
 
-/* Actor fields this file reads that the shared definition only has as padding (pad66, unk301[]). */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x66];
-    /* 0x066 */ u8 unk66;
-    /* 0x067 */ u8 pad67[0x29A];
-    /* 0x301 */ u8 unk301;
-    /* 0x302 */ u8 unk302;
-    /* 0x303 */ u8 pad303;
-    /* 0x304 */ s32 unk304[4]; // one per view
-    /* 0x314 */ u8 (*unk314)[8]; // one per frame buffer
-} ActorTail;
-
-#define ACTOR_TAIL(index) ((ActorTail *)&D_800CC2D0[index])
-
 Gfx *func_1515E544(Gfx *gfx, s32, u8, u8, void *);
 Gfx *func_15094F70(Gfx *gfx, void *, s32, void *, s32, s32, s32, s32, s32);
 extern Gfx D_80084350[];
@@ -132,11 +118,11 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     }
     func_15036570(index, bones[9], bones[4]);
     gSPDisplayList(gfx++, D_80084350);
-    gfx = func_1515E544(gfx, ACTOR_TAIL(index)->unk304[view], ACTOR_TAIL(index)->unk301,
-                        ACTOR_TAIL(index)->unk302, ACTOR_TAIL(index)->unk314[D_800BE9C0]);
-    if ((ACTOR_TAIL(index)->unk66 & 0xC) == 0xC) {
+    gfx = func_1515E544(gfx, D_800CC2D0[index].unk304[view], D_800CC2D0[index].unk301,
+                        D_800CC2D0[index].unk302, D_800CC2D0[index].unk314[D_800BE9C0]);
+    if ((D_800CC2D0[index].unk66 & 0xC) == 0xC) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
-    } else if ((ACTOR_TAIL(index)->unk66 & 0xC) != 8 && !(attachment->flags & 1)) {
+    } else if ((D_800CC2D0[index].unk66 & 0xC) != 8 && !(attachment->flags & 1)) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
     } else if (D_800DCD7C != 0) {
         gSPSetGeometryMode(gfx++, G_LIGHTING);

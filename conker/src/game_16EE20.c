@@ -2315,23 +2315,12 @@ extern u8 D_800D9E20;
 extern u8 D_800D9E21;
 void *func_1515D914(void *, s16, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32, s32, s32);
 void *func_1515E544(void *, s32, u8, u8, void *);
-/* Per-slot texture overrides an actor carries in its tail (Actor has these in unk301[]). */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x301];
-    /* 0x301 */ u8 unk301;
-    /* 0x302 */ u8 unk302;
-    /* 0x303 */ u8 pad303;
-    /* 0x304 */ s32 unk304[4];
-    /* 0x314 */ void *unk314;
-} ActorTail;
-
 /*
  * Draws `slot` of a model: with the owning actor's own textures (mode 1, falling back to the shared
  * ones in mode 2 when the actor is gone or has none), or plainly through func_1515D914.
  */
 void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s16 slot, struct17 *pos,
                     u8 flags, s32 arg8) {
-    ActorTail *tail = (ActorTail *)actor;
     s32 tex;
     s32 unk18;
 
@@ -2342,7 +2331,7 @@ void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s
             if (mode == 1) {
                 if (actor != NULL) {
                     if ((actor->interaction_state == 0) || (actor->unique_id != uniqueId) ||
-                        (actor->id == 0xFF) || (tail->unk302 == 0)) {
+                        (actor->id == 0xFF) || (actor->unk302 == 0)) {
                         mode = 2;
                     }
                 } else {
@@ -2351,9 +2340,9 @@ void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s
             }
             switch (mode) {
             case 1:
-                gfx = func_1515E544(gfx, tail->unk304[slot],
-                                    tail->unk301, tail->unk302,
-                                    tail->unk314);
+                gfx = func_1515E544(gfx, actor->unk304[slot],
+                                    actor->unk301, actor->unk302,
+                                    actor->unk314);
                 break;
             case 2:
                 gfx = func_1515E544(gfx, D_800D9E10[slot], D_800D9E20, D_800D9E21, D_800D9BD0[slot][D_800BE9C0]);

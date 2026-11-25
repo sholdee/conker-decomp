@@ -7,24 +7,6 @@ extern f32 D_800DC004; // camera transition height (see func_15128030)
 
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 accel, f32 maxSpeed, f32 dt);
 
-/* The player object the camera follows (Camera.player, a Actor): the fields Actor does not
-   declare yet (0x137, 0x17C) or declares as a union (0x84). */
-typedef struct CamPlayer {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ f32 y_position;
-    /* 0x01C */ u8 pad1C[0x68];
-    /* 0x084 */ u16 unk84;
-    /* 0x086 */ u8 pad86[0x27];
-    /* 0x0AD */ u8 in_water;
-    /* 0x0AE */ u8 padAE[0x54];
-    /* 0x102 */ u8 unk102;
-    /* 0x103 */ u8 pad103[0x34];
-    /* 0x137 */ u8 unk137;
-    /* 0x138 */ u8 pad138[0x44];
-    /* 0x17C */ f32 unk17C;
-    /* 0x180 */ f32 unk180;
-} CamPlayer;
-
 /*
  * Eases the camera's height above unk354 (eyeY - unk354) towards its target height: the preset
  * height, kept 40 units below the player's unk17C and inside [minHeight, maxHeight].
@@ -51,10 +33,10 @@ void func_1512E140(Camera *camera) {
         targetHeight *= 1.5f;
     }
     if (!(camera->flags & 0x10)) {
-        if (camera->player->unk180 < ((CamPlayer *)camera->player)->unk17C) {
-            ceiling = ((CamPlayer *)camera->player)->unk17C - 40.0f;
+        if (camera->player->unk180 < camera->player->ceilingY) {
+            ceiling = camera->player->ceilingY - 40.0f;
             // matching: the second test recomputes unk17C - 40.0f instead of reusing ceiling
-            if (ceiling < camera->unk354 + targetHeight && camera->unk354 < ((CamPlayer *)camera->player)->unk17C - 40.0f) {
+            if (ceiling < camera->unk354 + targetHeight && camera->unk354 < camera->player->ceilingY - 40.0f) {
                 targetHeight = ceiling - camera->unk354;
                 cappedByCeiling = TRUE;
             } else {
@@ -79,7 +61,7 @@ void func_1512E140(Camera *camera) {
         } else if (camera->player->y_position - camera->player->unk180 > 600.0f && !(camera->status & 0x400) &&
                    camera->player->in_water == 0 && camera->player->unk102 == 0 &&
                    camera->playerExt->rope == NULL && camera->playerExt->unk95 == 0 &&
-                   ((CamPlayer *)camera->player)->unk137 == 0 && ((CamPlayer *)camera->player)->unk84 != 0x194 && !(camera->status & 0x80)) {
+                   camera->player->unk137 == 0 && camera->player->unk84.uh != 0x194 && !(camera->status & 0x80)) {
             return;
         }
         if ((camera->mode & 0x100) || cappedByCeiling) {

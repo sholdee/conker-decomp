@@ -2465,7 +2465,7 @@ void func_151E7F60(s32 slotIdx, s32 charIdx) {
             bzero(obj->unk31C, 0x1C0);
         }
         if (kind == 0x3B) {
-            obj->unk68 = slotIdx + 1;
+            obj->unk68[0] = slotIdx + 1;
         }
         func_15083384(obj, D_800AB57C[charIdx].unk6);
         func_1505E650(obj, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);

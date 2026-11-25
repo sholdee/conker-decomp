@@ -1194,8 +1194,7 @@ struct Actor {
     u8  unk65;  // used
     /* 0x66 */  u8  unk66;      // flags
     u8  pad67;
-    /* 0x68 */  u8  unk68;
-    /* 0x69 */  u8  unk69;
+    /* 0x68 */  u8  unk68[2];    // texture frame of each animated part (eyes), from eyeCode
     /* 0x6A */  u8  eyeClosed[2]; // per eye, toggled by blinking
     /* 0x6C */  u8  eyeCode[2];   // >= 10: set by the current expression
     s8  unk6E;
@@ -1494,9 +1493,10 @@ struct Actor {
     u8  unk2FF;
     u8  unk300;
     /* 0x301 */ u8  unk301;
-    /* 0x302 */ u8  unk302[2];
+    /* 0x302 */ u8  unk302;
+    /* 0x303 */ u8  unk303;
     /* 0x304 */ s32 unk304[4]; // one per view
-    /* 0x314 */ void *unk314;
+    /* 0x314 */ u8 (*unk314)[8]; // one per frame buffer
     /* 0x318 */ Camera *camera;
     /* 0x31C */ ActorCtl *unk31C;
     /* 0x320 */ u32 unk320;

@@ -3981,9 +3981,8 @@ void func_151AE264(Actor *arg0);
 void func_151C6EA0(Actor *arg0, s32 arg1, s32 arg2);
 void func_1506160C(Actor *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_1506045C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4);
-/* ActorCtl/Actor bytes that the shared headers leave as padding */
+/* ActorCtl bytes that the shared header leaves as padding */
 #define MOVEMENT_FIELD(off, T) (*(T *)((u8 *)actor->unk31C + (off)))
-#define ACTOR_FIELD(off, T) (*(T *)((u8 *)actor + (off)))
 /* Player controls for jumping, swimming and the hover (anim 0xE9), from the controller pad. */
 void func_1505F298(Actor *actor, OSContPad *pad) {
     s32 anim;
@@ -4023,7 +4022,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
     } else if (actor->y_velocity > 0.0f) {
         height += 50.0f;
     }
-    if (ACTOR_FIELD(0x110, u8) != 0) {
+    if (actor->unk110 != 0) {
         buttons = pad->button & ~0x2000;
     } else {
         buttons = pad->button;
@@ -4100,26 +4099,26 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
         }
         return;
     }
-    if (ACTOR_FIELD(0x137, u8) == 1) {
+    if (actor->unk137 == 1) {
         anim = 0;
         if (MOVEMENT_FIELD(0x53, u8) == 0) {
             if (pad->stick_y >= 0x33) {
                 speed = 2.200000048f;
                 actor->unk31C->unk54 = 0xC;
                 anim = 0xEA;
-                ACTOR_FIELD(0x137, u8) = 0;
+                actor->unk137 = 0;
                 actor->disable_run = 0x10;
                 actor->unk81 = 1;
                 actor->gravity = 5.0f;
                 actor->y_velocity = 48.0f;
             } else if (pad->stick_y < -0x32) {
                 anim = 0x38;
-                ACTOR_FIELD(0x137, u8) = 0;
+                actor->unk137 = 0;
                 actor->gravity = 3.5f;
             }
         }
         if ((D_800CC288 & 0x8000) || (actor->unk31C->unk84 != 0)) {
-            ACTOR_FIELD(0x137, u8) = 2;
+            actor->unk137 = 2;
             anim = 0x40;
             speed = 3.0f;
         }
@@ -4140,7 +4139,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
         }
     }
     if ((jumpType != 0) || (height <= 0.0f) || (actor->unk31C->unk55 != 0)) {
-        ACTOR_FIELD(0x137, u8) = 0;
+        actor->unk137 = 0;
         jumped = 0;
         animArg4 = 0.0f;
         if (D_800CC288 & 0x8000) {
@@ -4287,7 +4286,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
             }
             height = 25.0f;
             actor->unkB8 = 0.0f;
-            ACTOR_FIELD(0x110, u8) = 0;
+            actor->unk110 = 0;
             actor->unk100 &= 0x53;
         }
         anim = 0;
@@ -4321,13 +4320,13 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
         }
         actor->unk31C->unk54 = 0;
     } else if ((D_800CC288 & 0x8000) && (actor->unk31C->unk4E == 0)) {
-        if ((actor->unk84.uh != 0x3B) && (actor->unk84.uh != 0x3C) && (ACTOR_FIELD(0x137, u8) == 0) && (actor->unk13C == 0) &&
+        if ((actor->unk84.uh != 0x3B) && (actor->unk84.uh != 0x3C) && (actor->unk137 == 0) && (actor->unk13C == 0) &&
             (MOVEMENT_FIELD(0x95, u8) == 0) && (actor->unk31C->unk31 == 0) && (height > 55.0f)) {
             if ((actor->unk118 != -10000.0f) && ((actor->unk118 - actor->unk180) > 100.0f)) {
                 actor->gravity = 6.0f;
                 actor->unk81 = 1;
                 actor->disable_run = 0x78;
-                ACTOR_FIELD(0x137, u8) = 0;
+                actor->unk137 = 0;
                 anim = 0x3B;
                 actor->unk1CC = actor->y_position;
             }
@@ -4398,7 +4397,6 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
     }
 }
 #undef MOVEMENT_FIELD
-#undef ACTOR_FIELD
 /* Runs the player's current action/item (unk31C->unk75, overridden by context) for this frame's input. */
 void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 nested) {
     s32 stunned;
@@ -5020,9 +5018,6 @@ void func_150F1CB0(Actor *arg0);
 extern s32 *D_800C4020[];
 extern s32 D_8009942C[];
 
-/* Actor bytes 0x68..0x6D (padding in the shared header) */
-#define OBJB(o, off) (((u8 *)(o))[off])
-
 /* Per-frame texture/morph animations of actor types that have them (once per type for most). */
 void func_15061B4C(void) {
     Actor *unused; // matching: stack slot
@@ -5101,41 +5096,42 @@ void func_15061B4C(void) {
             }
             if (D_800CC298.unkF >= 4) {
                 D_800CC298.unkF = 0;
-                if (OBJB(&D_800CC2D0[i], 0x69) == 5) {
-                    OBJB(&D_800CC2D0[i], 0x69) = 0;
+                if (D_800CC2D0[i].unk68[1] == 5) {
+                    D_800CC2D0[i].unk68[1] = 0;
                 } else {
-                    OBJB(&D_800CC2D0[i], 0x69)++;
+                    D_800CC2D0[i].unk68[1]++;
                 }
-                if (OBJB(&D_800CC2D0[i], 0x69) >= 3) {
-                    OBJB(&D_800CC2D0[i], 0x68) = 5 - OBJB(&D_800CC2D0[i], 0x69);
+                if (D_800CC2D0[i].unk68[1] >= 3) {
+                    D_800CC2D0[i].unk68[0] = 5 - D_800CC2D0[i].unk68[1];
                 } else {
-                    OBJB(&D_800CC2D0[i], 0x68) = OBJB(&D_800CC2D0[i], 0x69);
+                    D_800CC2D0[i].unk68[0] = D_800CC2D0[i].unk68[1];
                 }
-                OBJB(&D_800CC2D0[i], 0x68) += 0xF;
+                D_800CC2D0[i].unk68[0] += 0xF;
             } else {
                 D_800CC298.unkF += D_800BE9E4;
             }
         } else if (id == 0x45) {
-            s32 val = OBJB(&D_800CC2D0[i], 0x6D);
+            s32 val = D_800CC2D0[i].eyeCode[1];
 
             if (val >= 10) {
                 val -= 10;
             } else {
                 val = val * 2 + 6;
             }
-            OBJB(&D_800CC2D0[i], 0x68) = val;
+            D_800CC2D0[i].unk68[0] = val;
         } else if (id == 0x5B) {
             s32 v;
             s32 k;
 
+            // matching: eyeCode[k] / unk68[k] as fields change how IDO strength-reduces k
             for (k = 0; k < 2; k++) {
-                v = OBJB(&D_800CC2D0[i], 0x6C + k);
+                v = ((u8 *)&D_800CC2D0[i])[0x6C + k]; // eyeCode[k]
                 if (v >= 10) {
                     v -= 10;
                 } else {
                     v = D_8009942C[v];
                 }
-                OBJB(&D_800CC2D0[i], 0x68 + k) = v;
+                ((u8 *)&D_800CC2D0[i])[0x68 + k] = v; // unk68[k]
             }
         } else if (id == 0x54) {
             f32 scale;
@@ -5173,18 +5169,18 @@ void func_15061B4C(void) {
             }
         } else if (id == 0x42) {
             if ((D_800CC2D0[i].unk84.uh == 2) || (D_800CC2D0[i].unk84.uh == 1)) {
-                if (OBJB(&D_800CC2D0[i], 0x68) == 0xD) {
-                    OBJB(&D_800CC2D0[i], 0x68) = 0xC;
+                if (D_800CC2D0[i].unk68[0] == 0xD) {
+                    D_800CC2D0[i].unk68[0] = 0xC;
                 }
                 if ((func_150ADA20() & 3) == 0) {
-                    if (OBJB(&D_800CC2D0[i], 0x68) == 0x15) {
-                        OBJB(&D_800CC2D0[i], 0x68) = 0xC;
+                    if (D_800CC2D0[i].unk68[0] == 0x15) {
+                        D_800CC2D0[i].unk68[0] = 0xC;
                     } else {
-                        OBJB(&D_800CC2D0[i], 0x68) = 0x15;
+                        D_800CC2D0[i].unk68[0] = 0x15;
                     }
                 }
             } else {
-                OBJB(&D_800CC2D0[i], 0x68) = 0xD;
+                D_800CC2D0[i].unk68[0] = 0xD;
             }
         } else if (id == 0x7B) {
             func_150F1CB0(&D_800CC2D0[i]);

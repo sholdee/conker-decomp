@@ -12,9 +12,6 @@
 /* variables.h declares D_800BE728 as s32[]; it holds a pointer to the per-controller OSContPad pointers. */
 #define CONT_PADS (*(OSContPad ***)&D_800BE728)
 
-/* Actor has only pad134 over this byte. */
-#define PLAYER_UNK137(obj) (((u8 *)(obj))[0x137])
-
 #define DEG2RAD 0.01745329238474369f
 
 /* Sound emitter handed to the aim sound callbacks by func_1000FA64. */
@@ -382,7 +379,7 @@ void func_151236D0(Camera *camera) {
     wasBelow = camera->status & 1;
     if (camera->playerExt != NULL) {
         if ((camera->playerExt->rope != NULL) ||
-            ((camera->playerExt->unk95 != 0) && (PLAYER_UNK137(camera->player) == 0))) {
+            ((camera->playerExt->unk95 != 0) && (camera->player->unk137 == 0))) {
             camera->status |= 0x40;
         } else {
             camera->status &= ~0x40;
@@ -905,7 +902,7 @@ void func_15124C38(Camera *camera, f32 *outY) {
                 goalY = camera->player->y_position + height * 0.25f;
             } else if (camera->flags & 0x20000000) {
                 goalY = camera->player->unk180 + height;
-            } else if ((D_800C3671 != 0) || (PLAYER_UNK137(camera->player) != 0) ||
+            } else if ((D_800C3671 != 0) || (camera->player->unk137 != 0) ||
                        (camera->player->unk84.uh == 0x194) || (camera->player->in_water == 1)) {
                 goalY = camera->player->y_position + height;
             } else if ((-10000.0f == camera->unk360) && !(camera->flags & 0x20000000) && !(camera->flags & 0x200000) &&
