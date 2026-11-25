@@ -5,9 +5,27 @@
 #undef func_15048A40
 #undef func_150ADA20
 #define D_800D1550 D_800D1550_hdr
+#define D_800D2104 D_800D2104_hdr
 #include "variables.h"
 #undef D_800D1550
+#undef D_800D2104
 extern f32 D_800D1550; // matching: as an f32[] (header type) the multiply schedules differently
+
+/* One point of a path: s16 world coordinates (as in game_A28B0.c). */
+typedef struct {
+    s16 x;
+    s16 y;
+    s16 z;
+    u16 unk6;
+} PathPoint;
+
+/* A path, D_800D2104[n]: a centre point followed by its waypoints. */
+typedef struct {
+    PathPoint center;
+    PathPoint points[1];
+} Path;
+
+extern Path **D_800D2104; // header declares it as s32 *
 
 /* Remembers the object's x/z, and drags a swimming player who comes within range down and sideways around it. */
 void func_150B10F0(struct127 *obj) {
@@ -52,35 +70,39 @@ void func_15056B08(struct127 *arg0);
 s32  func_150535F4(struct127 *arg0);
 void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
 
-void func_150B12FC(struct127 *arg0) {
-    s16 pad;
+/* Holds the object at its path's centre height and eases unkC4 toward its turn rate (clamped to +-6). */
+void func_150B12FC(struct127 *obj) {
+    s16 turn;
     s16 prevAngle;
-    f32 delta;
+    f32 leanStep;
 
-    prevAngle = *(s16 *)&arg0->unk76;
-    arg0->unk80 = 0xA;
+    prevAngle = obj->unk76;
+    obj->unk80 = 10;
     {
-    f32 y;
-    y = (f32)((s16 *)D_800D2104[arg0->unk13F])[1];
-    func_15058EA4(arg0, y, 1.0f, y, -0.6999999881f, 12.0f, -16.0f);
+        f32 height;
+
+        height = D_800D2104[obj->unk13F]->center.y;
+        func_15058EA4(obj, height, 1.0f, height, -0.7f, 12.0f, -16.0f);
     }
-    func_15056B08(arg0);
-    prevAngle = prevAngle - arg0->unk76;
-    delta = (f32)(s16)(prevAngle * 6) * 0.00390625f - arg0->unkC4;
-    if (delta > 6.0f) {
-        delta = 6.0f;
-    } else if (delta < -6.0f) {
-        delta = -6.0f;
+    func_15056B08(obj);
+    prevAngle -= obj->unk76;
+    turn = prevAngle * 6;
+    leanStep = (f32)turn * 0.00390625f - obj->unkC4;
+    if (leanStep > 6.0f) {
+        leanStep = 6.0f;
+    } else if (leanStep < -6.0f) {
+        leanStep = -6.0f;
     }
-    arg0->unk148 = arg0->unk148 + (delta - arg0->unk148) * 0.05000000075f;
     {
-    f32 t;
-    arg0->unkC4 += arg0->unk148;
+        f32 current = obj->unk148;
+
+        obj->unk148 += (leanStep - current) * 0.05f;
+        obj->unkC4 += obj->unk148;
     }
-    arg0->unk40 = (f32)(s16)(arg0->unk7A + 0x4000) * 0.005493164f;
-    func_15059140(arg0);
-    if (func_150535F4(arg0) == 0) {
-        func_1502178C(arg0, 0, -1);
+    obj->unk40 = (f32)(s16)(obj->unk7A + 0x4000) * 0.005493164f;
+    func_15059140(obj);
+    if (func_150535F4(obj) == 0) {
+        func_1502178C(obj, 0, -1);
     }
 }
 
@@ -96,12 +118,6 @@ typedef struct {
     s16  field_0x8;
     char pad_A[0x26];
 } SpawnRecord;
-
-/* A window onto the 8-byte path points D_800D2104 points at. */
-typedef struct {
-    char pad_0[0xA];
-    s16  field_0xA;
-} PathPointWindow;
 
 void func_150B1484(struct127 *arg0) {
     s16 prevAngle;
@@ -134,7 +150,7 @@ void func_150B1484(struct127 *arg0) {
             offsetY = (s16)arg0->unk224;
             if (offsetY != 0) {
                 if (offsetY == 10000) {
-                    targetY = (f32)((PathPointWindow *)((u8 *)D_800D2104[arg0->unk13F] + (arg0->unk21E * 8)))->field_0xA;
+                    targetY = D_800D2104[arg0->unk13F]->points[arg0->unk21E].y;
                 } else if ((arg0->id == 0x50) || (arg0->id == 5) || (arg0->id == 0xAD) || (arg0->id == 0xAE) || (arg0->id == 0xAF)) {
                     targetY = (f32)(offsetY * 8);
                 } else {
@@ -146,7 +162,7 @@ void func_150B1484(struct127 *arg0) {
                 f32 maxSpeed;
 
                 if (arg0->id == 0x44) {
-                    targetY = (f32)((PathPointWindow *)((u8 *)D_800D2104[arg0->unk13F] + (arg0->unk21E * 8)))->field_0xA;
+                    targetY = D_800D2104[arg0->unk13F]->points[arg0->unk21E].y;
                     gravity = 3.0f;
                     maxSpeed = 12.0f;
                 } else {
