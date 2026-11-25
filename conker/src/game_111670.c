@@ -272,36 +272,42 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
     }
 }
 
+/* Ground-probe hit records written to D_800D3300 by func_150A43E0. */
 typedef struct unkfunc_1510F8D8 {
-    s32 unk0;
-    s32 unk4;
+    s32 height; // 24.8 fixed point
+    s32 *tri;   // collision triangle: three vertex-buffer offsets
     s32 unk8;
     s32 unkC;
 } unkfunc_1510F8D8;
 
+/* 0xA0-byte entries of the D_800DBEF4 array. */
 typedef struct Struct150E4928 {
     /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s16 unk14;
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
     /* 0x16 */ u8 pad16[0xA];
-    /* 0x20 */ s32 unk20[8];
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ s32 *unk44;
+    /* 0x20 */ s32 vertexBuffers[8]; // indexed by D_800BE9C0
+    /* 0x40 */ s32 material;         // used when materials is NULL
+    /* 0x44 */ s32 *materials;       // per-surface materials, from surface firstSurface on
     /* 0x48 */ u8 pad48[8];
-    /* 0x50 */ u16 unk50;
+    /* 0x50 */ u16 radius;           // random scatter around (x, z)
     /* 0x52 */ u8 pad52[6];
-    /* 0x58 */ u16 unk58;
+    /* 0x58 */ u16 firstSurface;
     /* 0x5A */ u8 pad5A[0x46];
 } Struct150E4928;
 
 extern void func_150A44F0(s32, s16 *, s32);
 extern s32 func_150A43E0(s32, s32, s32, s16 *);
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
+extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_1511490C(f32 arg0[4][4], void *arg1);
 extern void func_1510F800(s32);
 
-void func_150E4928(Struct150E4928 *arg0) {
+/*
+ * Probes the ground below `obj` (up to 5 random points within its radius), then spawns the hit
+ * surface's impact effects there, passing the hit triangle transformed by obj's matrix.
+ */
+void func_150E4928(Struct150E4928 *obj) {
     s16 idx;
     s32 i;
     s32 found;
@@ -312,7 +318,7 @@ void func_150E4928(Struct150E4928 *arg0) {
     s32 best;
     s32 z;
     f32 height;
-    s32 type;
+    s32 material;
     Vtx vtx[3];
     f32 outx;
     f32 outy;
@@ -320,27 +326,28 @@ void func_150E4928(Struct150E4928 *arg0) {
     f32 mtx[4][4];
 
     height = -10000.0f;
+    i = obj - (Struct150E4928 *)D_800DBEF4;
     tries = 5;
-    if (arg0 - (Struct150E4928 *)D_800DBEF4 < D_800DBEF0 && arg0 - (Struct150E4928 *)D_800DBEF4 >= 0) {
-        idx = arg0 - (Struct150E4928 *)D_800DBEF4;
+    if (i < D_800DBEF0 && i >= 0) {
+        idx = i;
         found = 0;
         func_1510F800(2);
         func_150A44F0(1, &idx, 0);
         while (tries != 0) {
-            x = arg0->unk10;
-            z = arg0->unk14;
-            if (arg0->unk50 != 0) {
-                x += (func_151EF610() % arg0->unk50) * 2 - arg0->unk50;
-                z += (func_151EF610() % arg0->unk50) * 2 - arg0->unk50;
+            x = obj->x;
+            z = obj->z;
+            if (obj->radius != 0) {
+                x += (func_151EF610() % obj->radius) * 2 - obj->radius;
+                z += (func_151EF610() % obj->radius) * 2 - obj->radius;
             }
             found = func_150A43E0(x, z, 1, &idx);
             if (found) {
                 best = -0x800000;
                 while (found--) {
-                    if (best < ((unkfunc_1510F8D8 *)&D_800D3300)[found].unk0) {
-                        best = ((unkfunc_1510F8D8 *)&D_800D3300)[found].unk0;
-                        tri = (s32 *)((unkfunc_1510F8D8 *)&D_800D3300)[found].unk4;
-                        height = best * 0.00390625f;
+                    if (best < ((unkfunc_1510F8D8 *)&D_800D3300)[found].height) {
+                        best = ((unkfunc_1510F8D8 *)&D_800D3300)[found].height;
+                        tri = ((unkfunc_1510F8D8 *)&D_800D3300)[found].tri;
+                        height = best / 256.0f;
                     }
                 }
                 tries = 0;
@@ -350,25 +357,26 @@ void func_150E4928(Struct150E4928 *arg0) {
             }
         }
         if (found) {
-            if (arg0->unk44 != NULL) {
+            if (obj->materials != NULL) {
                 i = ((s32)tri - D_800DBE3C) / 12;
-                type = arg0->unk44[i - arg0->unk58];
+                material = obj->materials[i - obj->firstSurface];
             } else {
-                type = arg0->unk40;
+                material = obj->material;
             }
-            func_1511490C(mtx, arg0);
+            func_1511490C(mtx, obj);
             if (tri != NULL) {
+                // matching: IDO keeps the sum in one register only when built up in i
                 i = tri[0];
-                i += arg0->unk20[D_800BE9C0];
+                i += obj->vertexBuffers[D_800BE9C0];
                 verts[0] = (s16 *)i;
                 i = tri[1];
-                i += arg0->unk20[D_800BE9C0];
+                i += obj->vertexBuffers[D_800BE9C0];
                 verts[1] = (s16 *)i;
                 i = tri[2];
-                i += arg0->unk20[D_800BE9C0];
+                i += obj->vertexBuffers[D_800BE9C0];
                 verts[2] = (s16 *)i;
                 for (i = 0; i < 3; i++) {
-                    func_150A7960((f32 *)mtx, verts[i][0], verts[i][1], verts[i][2], &outx, &outy, &outz);
+                    func_150A7960(mtx, verts[i][0], verts[i][1], verts[i][2], &outx, &outy, &outz);
                     vtx[i].v.ob[0] = outx;
                     vtx[i].v.ob[1] = outy;
                     vtx[i].v.ob[2] = outz;
@@ -376,38 +384,45 @@ void func_150E4928(Struct150E4928 *arg0) {
                 }
                 tri = (s32 *)verts;
             }
-            func_150E4550(x, height, z, 1, func_1510F8CC(type), (s16 **)tri, 0);
+            func_150E4550(x, height, z, 1, func_1510F8CC(material), (s16 **)tri, 0);
         }
     }
 }
 
 
-void func_150E4CBC(struct42 *arg0) {
-    s32 temp_v0;
-    s32 temp_t0;
-    s32 temp_a1;
+typedef struct Struct150E4CBC {
+    /* 0x00 */ u8 pad0[0x90];
+    /* 0x90 */ s32 timer;
+    /* 0x94 */ s16 unk94;
+    /* 0x96 */ s16 unk96;
+    /* 0x98 */ s16 unk98; // set to -1 when the effect is finished
+    /* 0x9A */ u8 pad9A[8];
+    /* 0xA2 */ s16 unkA2;
+    /* 0xA4 */ s16 unkA4;
+    /* 0xA6 */ u8 padA6[0xE];
+    /* 0xB4 */ u8 alpha;
+} Struct150E4CBC;
 
-    temp_v0 = arg0->unk90;
-    if (temp_v0 < 9) {
-        arg0->unkA4 = (s32)((f32)(((temp_v0 * 0x5A) / 9) * arg0->unk96) * 0.00390625f);
+/*
+ * Per-frame update (from a handler table): unkA4 ramps up to 90/256 of unk96 over the first 9 ticks
+ * and back down afterwards while alpha fades by 17 per tick; finished at alpha 0 or after 608 ticks.
+ */
+void func_150E4CBC(Struct150E4CBC *fx) {
+    if (fx->timer < 9) {
+        fx->unkA4 = (f32)(fx->timer * 90 / 9 * fx->unk96) / 256.0f;
     } else {
-        arg0->unkA4 = (s32)((f32)((0x5A - (((temp_v0 * 0x5A) - 0x32A) / 0x258)) * arg0->unk96) * 0.00390625f);
-        temp_t0 = D_800BE9E4 * 17;
-        temp_a1 = *(u8 *)((u8 *)arg0 + 0xB4);
-        if (temp_t0 < temp_a1) {
-            *(u8 *)((u8 *)arg0 + 0xB4) = temp_a1 - temp_t0;
-            temp_v0 = arg0->unk90;
+        fx->unkA4 = (f32)((90 - (fx->timer * 90 - 810) / 600) * fx->unk96) / 256.0f;
+        if (fx->alpha > D_800BE9E4 * 17) {
+            fx->alpha -= D_800BE9E4 * 17;
         } else {
-            *(s16 *)((u8 *)arg0 + 0x98) = -1;
-            temp_v0 = arg0->unk90;
+            fx->unk98 = -1;
         }
     }
-    arg0->unkA2 = (s32)((f32)arg0->unk94 * 14.0f) >> 8;
-    if (temp_v0 >= 0x261) {
-        *(s16 *)((u8 *)arg0 + 0x98) = -1;
-        temp_v0 = arg0->unk90;
+    fx->unkA2 = (s32)(fx->unk94 * 14.0f) >> 8;
+    if (fx->timer > 608) {
+        fx->unk98 = -1;
     }
-    arg0->unk90 = temp_v0 + D_800BE9E4;
+    fx->timer += D_800BE9E4;
 }
 
 typedef struct {
@@ -519,7 +534,7 @@ void func_150E4E04(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s16 **arg5,
         z /= len;
         if (arg6 != 0xFF && fabsf(y) < 0.8999999762f) {
             func_150440A0(mtx, 0.0f, 0.0f, 0.0f, x, y, z, 0.0f, 1.0f, 0.0f);
-            func_150A7960((f32 *)mtx, 0.0f, 0.0f, 1.0f, &D_800D9960[arg6].unk10, &D_800D9960[arg6].unk14, &D_800D9960[arg6].unk18);
+            func_150A7960(mtx, 0.0f, 0.0f, 1.0f, &D_800D9960[arg6].unk10, &D_800D9960[arg6].unk14, &D_800D9960[arg6].unk18);
         } else {
             noSurface = 1;
         }
@@ -580,7 +595,7 @@ void func_150E4E04(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s16 **arg5,
                 z = func_150489B0(angle);
             } else {
                 cs = func_15048A40(angle);
-                func_150A7960((f32 *)mtx, cs * 0.5f, func_150489B0(angle) * 0.5f, 1.0f, &x, &y, &z);
+                func_150A7960(mtx, cs * 0.5f, func_150489B0(angle) * 0.5f, 1.0f, &x, &y, &z);
             }
             vx = 0.3149999976f * x;
             vy = y;
