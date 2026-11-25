@@ -7,39 +7,42 @@ extern f32 sqrtf(f32);
 
 #pragma function sqrtf
 
-void func_15043D90(Mtx *m, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
-    f32 sp18[4][4];
+/* Builds an Mtx from a rotation (func_150A8050), per-axis scale and translation. */
+void func_15043D90(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY, f32 scaleZ, f32 x, f32 y, f32 z) {
+    f32 mtx[4][4];
 
-    func_150A8050(&sp18, arg1, arg2, arg3);
-    sp18[3][0] = arg7;
-    sp18[3][1] = arg8;
-    sp18[3][2] = arg9;
-    sp18[0][0] *= arg4;
-    sp18[0][1] *= arg4;
-    sp18[0][2] *= arg4;
-    sp18[1][0] *= arg5;
-    sp18[1][1] *= arg5;
-    sp18[1][2] *= arg5;
-    sp18[2][0] *= arg6;
-    sp18[2][1] *= arg6;
-    sp18[2][2] *= arg6;
-    guMtxF2L(&sp18, m);
+    func_150A8050(mtx, rotX, rotY, rotZ);
+    mtx[3][0] = x;
+    mtx[3][1] = y;
+    mtx[3][2] = z;
+    mtx[0][0] *= scaleX;
+    mtx[0][1] *= scaleX;
+    mtx[0][2] *= scaleX;
+    mtx[1][0] *= scaleY;
+    mtx[1][1] *= scaleY;
+    mtx[1][2] *= scaleY;
+    mtx[2][0] *= scaleZ;
+    mtx[2][1] *= scaleZ;
+    mtx[2][2] *= scaleZ;
+    guMtxF2L(mtx, m);
 }
 
-void func_15043E68(Mtx *m, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6) {
-    f32 sp18[4][4];
+/* Builds an Mtx from a rotation (func_150A8050) and translation. */
+void func_15043E68(Mtx *m, f32 rotX, f32 rotY, f32 rotZ, f32 x, f32 y, f32 z) {
+    f32 mtx[4][4];
 
-    func_150A8050(&sp18, arg1, arg2, arg3);
-    sp18[3][0] = arg4;
-    sp18[3][1] = arg5;
-    sp18[3][2] = arg6;
-    guMtxF2L(&sp18, m);
+    func_150A8050(mtx, rotX, rotY, rotZ);
+    mtx[3][0] = x;
+    mtx[3][1] = y;
+    mtx[3][2] = z;
+    guMtxF2L(mtx, m);
 }
 
-void func_15043EC8(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32 arg6) {
-    mtx[3][0] = arg4;
-    mtx[3][1] = arg5;
-    mtx[3][2] = arg6;
+/* Sets mtx's translation and scales its three basis rows by x, y and z. */
+void func_15043EC8(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 transX, f32 transY, f32 transZ) {
+    mtx[3][0] = transX;
+    mtx[3][1] = transY;
+    mtx[3][2] = transZ;
     mtx[0][0] *= x;
     mtx[0][1] *= x;
     mtx[0][2] *= x;
@@ -51,75 +54,79 @@ void func_15043EC8(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32 a
     mtx[2][2] *= z;
 }
 
-void func_15043F6C(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
-    func_150A9B0C(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
-    arg0[3][0] = arg7;
-    arg0[3][1] = arg8;
-    arg0[3][2] = arg9;
-    arg0[0][3] = 0.0f;
-    arg0[1][3] = 0.0f;
-    arg0[2][3] = 0.0f;
-    arg0[3][3] = 1.0f;
+/* Builds a rotate-scale matrix (func_150A9B0C) with translation x, y, z and a clean last column. */
+void func_15043F6C(f32 mtx[4][4], f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scaleY, f32 scaleZ, f32 x, f32 y, f32 z) {
+    func_150A9B0C(mtx, rotX, rotY, rotZ, scaleX, scaleY, scaleZ);
+    mtx[3][0] = x;
+    mtx[3][1] = y;
+    mtx[3][2] = z;
+    mtx[0][3] = 0.0f;
+    mtx[1][3] = 0.0f;
+    mtx[2][3] = 0.0f;
+    mtx[3][3] = 1.0f;
 }
 
-void func_15043FF0(vertex *arg0, struct113 *arg1) {
-    arg0->x = arg1->unk18;
-    arg0->y = arg1->unk1A;
-    arg0->z = arg1->unk1C;
-    arg0->x += arg1->unk38 * 0.000015258789f; // this is 1 / 65536
-    arg0->y += arg1->unk3A * 0.000015258789f;
-    arg0->z += arg1->unk3C * 0.000015258789f;
+/* Converts a 16.16 fixed-point position (integer parts at unk18, fractions at unk38) to floats. */
+void func_15043FF0(vertex *out, struct113 *src) {
+    out->x = src->unk18;
+    out->y = src->unk1A;
+    out->z = src->unk1C;
+    out->x += src->unk38 * (1.0f / 65536.0f);
+    out->y += src->unk3A * (1.0f / 65536.0f);
+    out->z += src->unk3C * (1.0f / 65536.0f);
 }
 
-void func_150440A0(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
-    f32 temp_f20;
-    f32 temp_f22;
-    f32 temp_f24;
-    f32 temp_f26;
-    f32 temp_f28;
-    f32 temp_f30;
-    f32 temp_f2;
-    f32 one;
+/*
+ * Builds a look-at orientation from eye, target and up: columns hold the right, up and look axes
+ * (look is the negated eye->target direction, as in guLookAtF), and the translation row is the eye itself.
+ */
+void func_150440A0(f32 mtx[4][4], f32 eyeX, f32 eyeY, f32 eyeZ, f32 atX, f32 atY, f32 atZ, f32 upX, f32 upY, f32 upZ) {
+    f32 lookX;
+    f32 lookY;
+    f32 lookZ;
+    f32 rightX;
+    f32 rightY;
+    f32 rightZ;
+    f32 invLen;
 
-    temp_f20 = arg4 - arg1;
-    temp_f22 = arg5 - arg2;
-    temp_f24 = arg6 - arg3;
-    temp_f2 = -1.0f / sqrtf((temp_f20 * temp_f20) + (temp_f22 * temp_f22) + (temp_f24 * temp_f24));
-    temp_f20 *= temp_f2;
-    temp_f22 *= temp_f2;
-    temp_f24 *= temp_f2;
+    lookX = atX - eyeX;
+    lookY = atY - eyeY;
+    lookZ = atZ - eyeZ;
+    invLen = -1.0f / sqrtf((lookX * lookX) + (lookY * lookY) + (lookZ * lookZ));
+    lookX *= invLen;
+    lookY *= invLen;
+    lookZ *= invLen;
 
-    temp_f26 = (arg8 * temp_f24) - (arg9 * temp_f22);
-    temp_f28 = (arg9 * temp_f20) - (arg7 * temp_f24);
-    temp_f30 = (arg7 * temp_f22) - (arg8 * temp_f20);
-    temp_f2 = 1.0f / sqrtf((temp_f26 * temp_f26) + (temp_f28 * temp_f28) + (temp_f30 * temp_f30));
-    temp_f26 *= temp_f2;
-    temp_f28 *= temp_f2;
-    temp_f30 *= temp_f2;
+    rightX = (upY * lookZ) - (upZ * lookY);
+    rightY = (upZ * lookX) - (upX * lookZ);
+    rightZ = (upX * lookY) - (upY * lookX);
+    invLen = 1.0f / sqrtf((rightX * rightX) + (rightY * rightY) + (rightZ * rightZ));
+    rightX *= invLen;
+    rightY *= invLen;
+    rightZ *= invLen;
 
-    arg7 = (temp_f22 * temp_f30) - (temp_f24 * temp_f28);
-    arg8 = (temp_f24 * temp_f26) - (temp_f20 * temp_f30);
-    arg9 = (temp_f20 * temp_f28) - (temp_f22 * temp_f26);
-    temp_f2 = 1.0f / sqrtf((arg7 * arg7) + (arg8 * arg8) + (arg9 * arg9));
-    arg7 *= temp_f2;
-    arg8 *= temp_f2;
-    arg9 *= temp_f2;
+    upX = (lookY * rightZ) - (lookZ * rightY);
+    upY = (lookZ * rightX) - (lookX * rightZ);
+    upZ = (lookX * rightY) - (lookY * rightX);
+    invLen = 1.0f / sqrtf((upX * upX) + (upY * upY) + (upZ * upZ));
+    upX *= invLen;
+    upY *= invLen;
+    upZ *= invLen;
 
-    arg0[0][0] = temp_f26;
-    arg0[1][0] = arg7;
-    arg0[2][0] = temp_f20;
-    arg0[3][0] = arg1;
-    arg0[0][1] = temp_f28;
-    arg0[1][1] = arg8;
-    arg0[2][1] = temp_f22;
-    arg0[3][1] = arg2;
-    arg0[0][2] = temp_f30;
-    one = 1.0f;
-    arg0[1][2] = arg9;
-    arg0[2][2] = temp_f24;
-    arg0[3][2] = arg3;
-    arg0[0][3] = 0.0f;
-    arg0[1][3] = 0.0f;
-    arg0[2][3] = 0.0f;
-    arg0[3][3] = one;
+    mtx[0][0] = rightX;
+    mtx[1][0] = upX;
+    mtx[2][0] = lookX;
+    mtx[3][0] = eyeX;
+    mtx[0][1] = rightY;
+    mtx[1][1] = upY;
+    mtx[2][1] = lookY;
+    mtx[3][1] = eyeY;
+    mtx[0][2] = rightZ;
+    mtx[1][2] = upZ;
+    mtx[2][2] = lookZ;
+    mtx[3][2] = eyeZ;
+    mtx[0][3] = 0.0f;
+    mtx[1][3] = 0.0f;
+    mtx[2][3] = 0.0f;
+    mtx[3][3] = 1.0f;
 }
