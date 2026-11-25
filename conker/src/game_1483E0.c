@@ -145,12 +145,12 @@ void func_1511B07C(WorldObject *obj) {
         func_1511F990(obj, 1);
     }
     mode = obj->task_flag & TASK_FLAG_STATE;
-    if (mode == 3 || mode == 2) {
+    if (mode == TASK_FLAG_ON || mode == TASK_FLAG_GOING_ON) {
         switch (state) {
         case 0:
             targetX = -69;
             targetZ = -120;
-            if (mode == 2) {
+            if (mode == TASK_FLAG_GOING_ON) {
                 sound = 0x4E;
             }
             moveX = 1;
@@ -162,7 +162,7 @@ void func_1511B07C(WorldObject *obj) {
             break;
         case 2:
             targetX = 100;
-            if (mode == 2) {
+            if (mode == TASK_FLAG_GOING_ON) {
                 sound = 0x4E;
             }
             break;
@@ -174,13 +174,13 @@ void func_1511B07C(WorldObject *obj) {
             targetX = 270;
             targetZ = -1878;
             moveZ = 1;
-            if (mode == 2) {
+            if (mode == TASK_FLAG_GOING_ON) {
                 sound = 0x4E;
             }
             break;
         case 5:
             targetZ = 140;
-            if (mode == 2) {
+            if (mode == TASK_FLAG_GOING_ON) {
                 sound = 0x4C1;
             }
             break;
@@ -192,7 +192,7 @@ void func_1511B07C(WorldObject *obj) {
             targetX = -4100;
             targetZ = 422;
             moveX = 1;
-            if (mode == 2) {
+            if (mode == TASK_FLAG_GOING_ON) {
                 sound = 0x4E;
             }
             break;
@@ -202,14 +202,14 @@ void func_1511B07C(WorldObject *obj) {
         case 4:
             maxSpeed = 15.0f;
             moveX = 1;
-            if (mode == 1) {
+            if (mode == TASK_FLAG_GOING_OFF) {
                 sound = 0x4E;
             }
             break;
         case 7:
             maxSpeed = 15.0f;
             moveZ = 1;
-            if (mode == 1) {
+            if (mode == TASK_FLAG_GOING_OFF) {
                 sound = 0x4E;
             }
             break;
@@ -219,7 +219,7 @@ void func_1511B07C(WorldObject *obj) {
         func_15114D24(obj, sound, 0x7D00, 100, 2500, 1);
     }
     speed = WORK(obj)->w1511B07C.speed;
-    if (mode == 0 || mode == 3) {
+    if (mode == TASK_FLAG_OFF || mode == TASK_FLAG_ON) {
         speed = 0.0f;
         obj->x = targetX;
         obj->z = targetZ;
@@ -249,9 +249,9 @@ void func_1511B07C(WorldObject *obj) {
             step = speed;
         }
         obj->z += step;
-    } else if (mode == 2 || mode == 1) {
+    } else if (mode == TASK_FLAG_GOING_ON || mode == TASK_FLAG_GOING_OFF) {
         // matching: the embedded &= makes IDO store the cleared flags before merging
-        obj->task_flag = ((mode == 2) ? 3 : 0) | (obj->task_flag &= ~TASK_FLAG_STATE);
+        obj->task_flag = ((mode == TASK_FLAG_GOING_ON) ? TASK_FLAG_ON : TASK_FLAG_OFF) | (obj->task_flag &= ~TASK_FLAG_STATE);
         if (obj->sound_id != 0) {
             func_100111C8(obj->sound_id);
             obj->sound_id = 0;
@@ -280,10 +280,10 @@ void func_1511B51C(WorldObject *obj) {
     target = openAngle;
     angle = obj->v;
     velocity = WORK(obj)->w1511B51C.velocity;
-    if (mode == 0 || mode == 1) {
+    if (mode == TASK_FLAG_OFF || mode == TASK_FLAG_GOING_OFF) {
         target = 0.0f;
     }
-    if (mode == 0 || mode == 3) {
+    if (mode == TASK_FLAG_OFF || mode == TASK_FLAG_ON) {
         angle = target;
         velocity = 0.0f;
     }
@@ -305,9 +305,9 @@ void func_1511B51C(WorldObject *obj) {
                 velocity = 0.0f;
                 angle = target;
                 if (target == 0.0f) {
-                    mode = 0;
+                    mode = TASK_FLAG_OFF;
                 } else {
-                    mode = 3;
+                    mode = TASK_FLAG_ON;
                 }
             }
         } else if (diff > 0.0f) {
@@ -545,7 +545,7 @@ void func_1511BEBC(WorldObject *obj) {
             }
             WORK(obj)->w1511BEBC.restAndTimer = (u16)obj->y;
             restY = obj->y;
-            if (mode == 3) {
+            if (mode == TASK_FLAG_ON) {
                 obj->y = restY;
             }
         }
@@ -555,7 +555,7 @@ void func_1511BEBC(WorldObject *obj) {
         pos[0] = obj->x;
         pos[1] = obj->y + -729.0f; // matching: "- 729.0f" emits sub.s instead of add.s
         pos[2] = obj->z;
-        if (mode != 3 && mode != 1) {
+        if (mode != TASK_FLAG_ON && mode != TASK_FLAG_GOING_OFF) {
             for (i = 0; i < D_8008FD8C; i++) {
                 player = &camera_global_Cameras[i];
                 if (player->playerExt->unk6B >= 4) {
@@ -575,7 +575,7 @@ void func_1511BEBC(WorldObject *obj) {
                 }
             }
         }
-        if (target == NULL && (mode == 2 || mode == 1)) {
+        if (target == NULL && (mode == TASK_FLAG_GOING_ON || mode == TASK_FLAG_GOING_OFF)) {
             for (i = 0; i < D_8008FD8C; i++) {
                 character = &movement_obj[i];
                 if (character->mv->unk6B != 0) {
@@ -584,12 +584,12 @@ void func_1511BEBC(WorldObject *obj) {
                 }
             }
         }
-        if (target != NULL || mode == 2) {
+        if (target != NULL || mode == TASK_FLAG_GOING_ON) {
             if (target != NULL && triggered == 0) {
                 func_15060A30(0x16B, target);
             }
             if (flag4 == 0) {
-                mode = 2;
+                mode = TASK_FLAG_GOING_ON;
                 if (triggered == 0) {
                     timer = 50;
                     triggered++;
@@ -616,7 +616,7 @@ void func_1511BEBC(WorldObject *obj) {
                     obj->y = obj->y - velocity;
                     if (obj->y <= restY - 300.0f) {
                         obj->y = restY - 300.0f;
-                        mode = 3;
+                        mode = TASK_FLAG_ON;
                         triggered = 0;
                         velocity = 0.0f;
                         if (target != NULL) {
@@ -655,18 +655,18 @@ void func_1511BEBC(WorldObject *obj) {
                 target->mv->holdY = pos[1];
                 target->mv->holdZ = pos[2];
             }
-        } else if (flag8 == 0 || mode == 1) {
+        } else if (flag8 == 0 || mode == TASK_FLAG_GOING_OFF) {
             if (obj->y < restY) {
                 if (triggered == 0) {
                     triggered++;
                 }
-                mode = 1;
+                mode = TASK_FLAG_GOING_OFF;
                 velocity += 1.299999952f;
                 obj->y = obj->y + velocity;
                 if (obj->y >= restY) {
                     obj->y = restY;
                     triggered = 0;
-                    mode = 0;
+                    mode = TASK_FLAG_OFF;
                     velocity = 0.0f;
                 }
             }
@@ -731,8 +731,8 @@ void func_1511C638(WorldObject *obj) {
     } else {
         third = NULL;
     }
-    if (mode == 1) {
-        mode = 0;
+    if (mode == TASK_FLAG_GOING_OFF) {
+        mode = TASK_FLAG_OFF;
         obj->alpha = 0;
         next->inactive = 0;
         if (third != NULL) {
@@ -743,7 +743,7 @@ void func_1511C638(WorldObject *obj) {
         }
     }
     if (D_800BE9B4 != 0) {
-        if (mode == 3) {
+        if (mode == TASK_FLAG_ON) {
             obj->alpha = 0xFF;
             next->inactive = 1;
             if (third != NULL) {
@@ -757,7 +757,7 @@ void func_1511C638(WorldObject *obj) {
             }
         }
     }
-    if (mode == 2) {
+    if (mode == TASK_FLAG_GOING_ON) {
         if (WORK(obj)->w1511C638.delay < 0) {
             WORK(obj)->w1511C638.delay += D_800BE9E4;
         } else {
@@ -803,12 +803,12 @@ void func_1511C638(WorldObject *obj) {
             WORK(obj)->w1511C638.fade += D_800BE9E4 * 30;
             if (WORK(obj)->w1511C638.fade >= 0xFF) {
                 WORK(obj)->w1511C638.fade = 0xFF;
-                mode = 3;
+                mode = TASK_FLAG_ON;
             }
             if (obj->moveData.word != 0xFF) {
                 func_15173C60(WORK(obj)->w1511C638.fade, obj->moveData.word);
             }
-            if (mode == 3) {
+            if (mode == TASK_FLAG_ON) {
                 WORK(obj)->w1511C638.delay = 0;
                 WORK(obj)->w1511C638.fade = 0;
             }
@@ -1222,15 +1222,15 @@ void func_1511DBC4(WorldObject *obj) {
     }
 
     mode = obj->task_flag & TASK_FLAG_STATE;
-    if (mode == 0) {
+    if (mode == TASK_FLAG_OFF) {
         obj->v = 0.0f;
-    } else if (mode == 3) {
+    } else if (mode == TASK_FLAG_ON) {
         obj->v = 90.0f;
         wobble = cosf(swing->time * 0.01745329238f);
         wobble *= 0.5f;
         obj->v += wobble;
         swing->time += 3.0f * (f32)D_800BE9E4;
-    } else if (mode == 2) {
+    } else if (mode == TASK_FLAG_GOING_ON) {
         if (obj->v == 0.0f) {
             swing->velocity = 0.0f;
             swing->accel = 0.0f;
@@ -1239,7 +1239,7 @@ void func_1511DBC4(WorldObject *obj) {
         swing->velocity += swing->accel;
         obj->v += swing->velocity;
         if (obj->v >= 90.0f) {
-            mode = 3;
+            mode = TASK_FLAG_ON;
             obj->v = 90.0f;
         }
     } else {
@@ -1247,7 +1247,7 @@ void func_1511DBC4(WorldObject *obj) {
             obj->v -= (f32)D_800BE9E4;
         } else {
             obj->v = 0.0f;
-            mode = 0;
+            mode = TASK_FLAG_OFF;
         }
     }
 

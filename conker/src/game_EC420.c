@@ -283,7 +283,7 @@ void func_150BF760(WorldObject *obj) {
             progress = anim->frame / (anim->numFrames - 2.0f);
         }
         obj[1].v = 0.0f;
-        if (mode == 2) {
+        if (mode == TASK_FLAG_GOING_ON) {
             if (progress <= 0.75f) {
                 obj[1].v = -sinf(progress * 3.141592741f * 1.333333254f) * 10.0f;
             }
@@ -297,18 +297,18 @@ void func_150BF760(WorldObject *obj) {
                 actor->intelwalk = 2;
                 actor->unk218 = NULL;
             }
-        } else if (mode == 3) {
+        } else if (mode == TASK_FLAG_ON) {
             if (actor != NULL && progress >= 1.0f) {
                 func_15060F28(actor, 0);
             }
-        } else if (mode == 0) {
+        } else if (mode == TASK_FLAG_OFF) {
             if (progress >= 0.25f) {
                 obj[1].v = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
             }
             if (actor != NULL && progress >= 1.0f) {
                 func_15060F28(actor, 0);
             }
-        } else if (mode == 1) {
+        } else if (mode == TASK_FLAG_GOING_OFF) {
             if (progress >= 0.25f) {
                 obj[1].v = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
             }
@@ -384,7 +384,7 @@ void func_150BFA7C(WorldObject *platform) {
     }
     if ((platform->object_status & 4) && movement_obj[0].mv->unk57 == 1) {
         func_1518B6B0(movement_obj[0].xpos, movement_obj[0].ypos, movement_obj[0].zpos, 0xFF, 0);
-        if (state == 0) {
+        if (state == TASK_FLAG_OFF) {
             func_15164F0C(3, D_800BE9EB, NULL, 0xFF, 0);
             fx.flags = 1;
             fx.duration = 60;
@@ -394,18 +394,18 @@ void func_150BFA7C(WorldObject *platform) {
             func_151D8868(&fx, 0, 0xFF, 0);
         }
     }
-    if (state == 3) {
+    if (state == TASK_FLAG_ON) {
         if (lowered != platform->y) {
             platform->y = lowered;
         }
         if (!(platform->object_status & 4) && !(platform->task_flag & TASK_FLAG_LOCKED)) {
-            state = 1;
+            state = TASK_FLAG_GOING_OFF;
         }
-    } else if (state == 0) {
+    } else if (state == TASK_FLAG_OFF) {
         if (top != platform->y) {
             platform->y = top;
         }
-    } else if (state == 2) {
+    } else if (state == TASK_FLAG_GOING_ON) {
         WORK(platform)->unk80 += D_800BE9E4;
         if (WORK(platform)->unk80 < 0) {
             platform->t = ((f32)(func_151EF610() % 5) - 2.0f) * 0.125f;
@@ -442,10 +442,10 @@ void func_150BFA7C(WorldObject *platform) {
                 WORK(&platform[1])->home += diff;
                 WORK(&platform[1])->home |= 0x80000000;
                 WORK(&platform[1])->unk80 = 0;
-                if (kind == 4 && state != 3) {
+                if (kind == 4 && state != TASK_FLAG_ON) {
                     func_1518CD20(platform, 0xFF, 0);
                 }
-                state = 3;
+                state = TASK_FLAG_ON;
                 platform->v = 0.0f;
                 platform->t = 0.0f;
                 if (kind == 2) {
@@ -456,12 +456,12 @@ void func_150BFA7C(WorldObject *platform) {
                 }
             }
         }
-    } else if (state == 1) {
-        state = 1; // matching: redundant store steers register allocation
+    } else if (state == TASK_FLAG_GOING_OFF) {
+        state = TASK_FLAG_GOING_OFF; // matching: redundant store steers register allocation
         platform->y += 3;
         if (platform->y >= top) {
             platform->y = top;
-            state = 0;
+            state = TASK_FLAG_OFF;
         }
     }
     platform->task_flag &= ~TASK_FLAG_STATE;

@@ -99,21 +99,21 @@ void func_150C4E9C(WorldObject *obj) {
         scroll = WORK(obj)->scroll.state;
     }
     // matching: the texture index is loaded as a symbol address (lui/addiu), not as a literal
-    if (mode == 0 || mode == 2) {
+    if (mode == TASK_FLAG_OFF || mode == TASK_FLAG_GOING_ON) {
         texture = (s32)&D_2C1;
     } else {
         texture = (s32)&D_1C0;
     }
-    if (mode == 0 || mode == 3) {
+    if (mode == TASK_FLAG_OFF || mode == TASK_FLAG_ON) {
         scroll->speed = 0.0f;
         scroll->unkC = 0.0f;
-    } else if (mode == 2) {
+    } else if (mode == TASK_FLAG_GOING_ON) {
         if (scroll->speed < 300.0f) {
             scroll->speed += 25.0f * D_800BE9E4;
         } else {
             scroll->speed = 300.0f;
         }
-    } else if (mode == 1) {
+    } else if (mode == TASK_FLAG_GOING_OFF) {
         s32 t;
         s32 startT;
 
