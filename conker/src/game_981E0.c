@@ -1967,49 +1967,49 @@ void func_1506EFB4(void) {
     D_800D154C->unk282 = 0;
 }
 
-void func_1506EFC8(s32 arg0) {
+void func_1506EFC8(s32 cmd) {
     if (D_800D154C->id != 0x8C) {
         func_150BB760(D_800D154C);
     }
 }
 
-void func_1506F004(s32 arg0) {
+void func_1506F004(s32 cmd) {
     func_150BCBBC(D_800D154C);
 }
 
-void func_1506F02C(s32 arg0) {
+void func_1506F02C(s32 cmd) {
     func_150BA4C0(D_800D154C, 0xFF, 0);
 }
 
-void func_1506F05C(s32 arg0) {
+void func_1506F05C(s32 cmd) {
     func_151925C4(D_800D154C, 50, 0xFF, 1);
 }
 
-void func_1506F090(s32 arg0) {
+void func_1506F090(s32 cmd) {
     func_151925C4(D_800D154C, -1, 0xFF, 1);
 }
 
-void func_1506F0C4(s32 arg0) {
+void func_1506F0C4(s32 cmd) {
     func_150C1260(D_800D154C, 0);
 }
 
-void func_1506F0F0(s32 arg0) {
+void func_1506F0F0(s32 cmd) {
     func_150C1260(D_800D154C, 1);
 }
 
-void func_1506F11C(s32 arg0) {
+void func_1506F11C(s32 cmd) {
     func_150BABE0(D_800D154C, 0, 0xFF);
 }
 
-void func_1506F14C(s32 arg0) {
+void func_1506F14C(s32 cmd) {
     func_150BABE0(D_800D154C, 1, 0xFF);
 }
 
-void func_1506F17C(s32 arg0) {
+void func_1506F17C(s32 cmd) {
     func_150AEEB0(D_800D154C, 0xFF);
 }
 
-void func_1506F1A8(s32 arg0) {
+void func_1506F1A8(s32 cmd) {
     Func151994B8Desc descriptor;
     struct127 *obj;
 
@@ -2106,11 +2106,11 @@ void func_1506F1A8(s32 arg0) {
     func_151994B8(0, &descriptor, 0xFF, 0);
 }
 
-void func_1506F524(s32 arg0) {
+void func_1506F524(s32 cmd) {
     func_15197A7C(D_800D154C);
 }
 
-void func_1506F54C(s32 arg0) {
+void func_1506F54C(s32 cmd) {
     Func151994B8Desc descriptor;
 
     descriptor.owner = D_800D154C;
@@ -2205,163 +2205,163 @@ void func_1506F54C(s32 arg0) {
     func_151994B8(0, &descriptor, 0xFF, 0);
 }
 
-void func_1506F8C0(s32 arg0) {
+void func_1506F8C0(s32 cmd) {
     func_1519EF70(D_800D154C, 0, 0);
 }
 
-void func_1506F8F0(s32 arg0) {
+void func_1506F8F0(s32 cmd) {
     func_150E2EA4(D_800D154C, D_800D154C->unique_id, 0x14, -1, 482.0f, -127.0f, -45.0f, 659.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
-void func_1506F9C0(s32 arg0) {
+void func_1506F9C0(s32 cmd) {
     func_150E2EA4(D_800D154C, D_800D154C->unique_id, 0x14, -1, 241.0f, -127.0f, -45.0f, 418.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
-void func_1506FA90(s32 arg0) {
+void func_1506FA90(s32 cmd) {
     func_150E2EA4(D_800D154C, D_800D154C->unique_id, 0x1A, -1, -181.0f, -218.0f, -1.0f, -681.0f, -584.0f, -2.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
-void func_1506FB60(s32 arg0) {
+void func_1506FB60(s32 cmd) {
     if (func_151044F4() != 0) {
-        func_151C6A28(D_800D154C, (arg0 - 0x13) & 0xFF, 0xFF, 0);
+        func_151C6A28(D_800D154C, (cmd - 0x13) & 0xFF, 0xFF, 0);
     } else {
-        func_151C62D0(D_800D154C, (arg0 - 0x13) & 0xFF, 0, 0, -1, 0xFF, 0);
+        func_151C62D0(D_800D154C, (cmd - 0x13) & 0xFF, 0, 0, -1, 0xFF, 0);
     }
 }
 
-void func_1506FBE8(s32 arg0) {
+void func_1506FBE8(s32 cmd) {
     func_151A0A10(D_800D154C, 0x46, 0xFF, 0);
 }
 
-void func_1506FC1C(s32 arg0) {
+void func_1506FC1C(s32 cmd) {
     func_151A0A10(D_800D154C, 0x28, 0xFF, 0);
 }
 
-void func_1506FC50(s32 arg0) {
+void func_1506FC50(s32 cmd) {
     func_1519E688();
 }
 
-void func_1506FC74(s32 arg0) {
+void func_1506FC74(s32 cmd) {
     func_1519E6BC(D_800D154C);
 }
 
-void func_1506FC9C(s32 arg0) {
+void func_1506FC9C(s32 cmd) {
     func_150B3AB0(D_800D154C, 0xFF);
 }
 
-void func_1506FCC8(s32 arg0) {
+void func_1506FCC8(s32 cmd) {
     func_15196438(D_800D154C, 6, 0xFF, 0);
 }
 
-void func_1506FCFC(s32 arg0) {
+void func_1506FCFC(s32 cmd) {
     func_15196438(D_800D154C, 5, 0xFF, 0);
 }
 
 
-void func_1506FD30(s32 arg0) {
+void func_1506FD30(s32 cmd) {
     func_150E2EA4(D_800D154C, D_800D154C->unique_id, 1, -1, 0.0f, 0, 345.0f, 0.0f, 0, 414.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 1, 50.0f);
 }
 
-void func_1506FDF0(s32 arg0) {
+void func_1506FDF0(s32 cmd) {
     func_151AABC4(D_800D154C, 0);
 }
 
-void func_1506FE1C(s32 arg0) {
+void func_1506FE1C(s32 cmd) {
     func_151AABC4(D_800D154C, 1);
 }
 
-void func_1506FE48(s32 arg0) {
+void func_1506FE48(s32 cmd) {
     func_151AABC4(D_800D154C, 0);
 }
 
-void func_1506FE74(s32 arg0) {
+void func_1506FE74(s32 cmd) {
     func_151AABC4(D_800D154C, 1);
 }
 
-void func_1506FEA0(s32 arg0) {
+void func_1506FEA0(s32 cmd) {
     func_151AABC4(D_800D154C, 2);
 }
 
-void func_1506FECC(s32 arg0) {
+void func_1506FECC(s32 cmd) {
     func_151AABC4(D_800D154C, 3);
 }
 
-void func_1506FEF8(s32 arg0) {
+void func_1506FEF8(s32 cmd) {
     func_151AB920(D_800D154C, 0);
 }
 
-void func_1506FF24(s32 arg0) {
+void func_1506FF24(s32 cmd) {
     func_151AB920(D_800D154C, 1);
 }
 
-void func_1506FF50(s32 arg0) {
+void func_1506FF50(s32 cmd) {
     func_151AB930(D_800D154C);
 }
 
-void func_1506FF78(s32 arg0) {
+void func_1506FF78(s32 cmd) {
     func_150CBF80(D_800D154C, 0, 1, 0xFF);
 }
 
-void func_1506FFAC(s32 arg0) {
+void func_1506FFAC(s32 cmd) {
     func_150CBF80(D_800D154C, 1, 1, 0xFF);
 }
 
-void func_1506FFE0(s32 arg0) {
+void func_1506FFE0(s32 cmd) {
     func_150CBF80(D_800D154C, 2, 1, 0xFF);
 }
 
-void func_15070014(s32 arg0) {
+void func_15070014(s32 cmd) {
     func_150CA150(D_800D154C);
 }
 
-void func_1507003C(s32 arg0) {
+void func_1507003C(s32 cmd) {
     func_151B01B8(D_800D154C, 0);
     func_151B09BC(D_800D154C, 0, 0x3E8, 0xFF, 0);
 }
 
-void func_15070084(s32 arg0) {
+void func_15070084(s32 cmd) {
     func_151AECA0(D_800D154C, 0xFF, 1);
 }
 
-void func_150700B4(s32 arg0) {
+void func_150700B4(s32 cmd) {
     func_151B03B8(D_800D154C, 0xFF, 1);
 }
 
-void func_150700E4(s32 arg0) {
+void func_150700E4(s32 cmd) {
     func_15193660(D_800D154C, 0xFF, 1);
 }
 
-void func_15070114(s32 arg0) {
+void func_15070114(s32 cmd) {
     func_151937F4(D_800D154C, 0xFF, 1);
 }
 
-void func_15070144(s32 arg0) {
-    struct198 tmp;
-    s32 tmp0;
+void func_15070144(s32 cmd) {
+    struct198 info;
+    s32 mode;
 
-    tmp.unk0 = 1;
-    tmp.unk8 = 0;
-    tmp.unkC = 0;
-    tmp.unk4 = D_800D154C;
+    info.unk0 = 1;
+    info.unk8 = 0;
+    info.unkC = 0;
+    info.unk4 = D_800D154C;
 
     if (D_800BE9F0 == 0x2B) {
-        tmp0 = 3;
+        mode = 3;
     } else {
-        tmp0 = 0;
+        mode = 0;
     }
-    func_151C0698(D_800D154C, 0, &tmp, tmp0, 0xFF, 1);
+    func_151C0698(D_800D154C, NULL, &info, mode, 0xFF, 1);
     func_151C1FB8(D_800D154C);
 }
 
-void func_150701C4(s32 arg0) {
+void func_150701C4(s32 cmd) {
     func_151C5280(D_800D154C, 0xFF, 1);
 }
 
-void func_150701F4(s32 arg0) {
+void func_150701F4(s32 cmd) {
     func_151C9740(D_800D154C, 0xFF, 1);
 }
 
-void func_15070224(s32 arg0) {
+void func_15070224(s32 cmd) {
     Header header;
     Header2 header2;
 
@@ -2370,9 +2370,9 @@ void func_15070224(s32 arg0) {
     header.unk2 = (func_150ADA20() % 5U) + 4;
     header.unk4 = 0;
 
-    header2.unk0 = (s32) D_800D154C->x_position;
-    header2.unk4 = (s32) D_800D154C->y_position;
-    header2.unk8 = (s32) D_800D154C->z_position;
+    header2.unk0 = D_800D154C->x_position;
+    header2.unk4 = D_800D154C->y_position;
+    header2.unk8 = D_800D154C->z_position;
 
     func_151602C0(&header, &header2, (func_150ADA20() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
 }
@@ -2391,17 +2391,18 @@ typedef struct {
     struct127 *unkC;
 } Info_15070300;
 
-void func_15070300(s32 arg0) {
+/* Objects 0x77 / 0x28: fires (func_151C0698, else func_1506CE6C), then spawns effect func_15102B38 at bone 4. */
+void func_15070300(s32 cmd) {
     u8 flag;
     struct127 *obj;
     u8 mode;
     struct127 *other;
     u8 idx;
     Info_15070300 info;
-    Vec3w_15070D24 sp80;
-    Vec3w_15070D24 sp74;
-    f32 sp6C[2];
-    f32 sp60[3];
+    Vec3w_15070D24 localPos;
+    Vec3w_15070D24 vec74;
+    f32 randoms[2];
+    f32 worldPos[3];
     s32 *srcs[1];
     f32 *dsts[1];
 
@@ -2410,13 +2411,13 @@ void func_15070300(s32 arg0) {
         mode = 1;
         obj = D_800D154C;
         idx = D_800D154C - D_800CC2D0;
-        if ((idx < 2) && (D_800E0BCE[idx] != 0)) {
+        if (idx < 2 && D_800E0BCE[idx] != 0) {
             flag = 1;
             other = &D_800CC2D0[D_800E0BCE[idx]];
-            goto done;
+            goto done; // matching: an else branch drops the dead flag = 0 below
         }
         flag = 0;
-        if (((u8 *)obj->unk31C)[0x197] != 0) {
+        if (HIDDEN126(obj->unk31C)->unk197 != 0) {
             flag = 1;
         } else {
             flag = 0;
@@ -2426,7 +2427,7 @@ void func_15070300(s32 arg0) {
         obj = func_1507515C(D_800D154C);
         mode = 0;
         flag = 0;
-        if (((u8 *)obj->unk31C)[0x197] != 0) {
+        if (HIDDEN126(obj->unk31C)->unk197 != 0) {
             flag = 1;
         } else {
             flag = 0;
@@ -2442,7 +2443,7 @@ void func_15070300(s32 arg0) {
         if (D_800D154C->unk31C->unk128 & 0x10) {
             D_800D1580 = 10;
             mode = 2;
-            (*(u16 *)((u8 *)D_800D154C->unk31C + 0x12C))--;
+            HIDDEN126(D_800D154C->unk31C)->unk12C--;
         } else {
             D_800D1580 = 9;
         }
@@ -2464,29 +2465,29 @@ void func_15070300(s32 arg0) {
     if ((D_800D154C->unk74 & 0xF) == 0xF) {
         return;
     }
-    sp80 = D_80099B70;
-    sp74 = D_80099B7C;
-    sp6C[0] = (func_150ADA68() * 30.0f) + 40.0f;
-    sp6C[1] = (func_150ADA68() * 2.512f) + 3.5900002f;
-    srcs[0] = (s32 *)&sp80;
-    dsts[0] = sp60;
-    func_15145EA4(srcs, dsts, (s32)D_800D154C->unk1D4 + 0x100, 1);
-    func_15102B38((s32)D_800D154C, 4, (s32)&sp80, (s32)&sp74, sp6C,
-                  ((func_150ADA20() + 0U) % 5U) + 5, ((func_150ADA20() + 0U) % 0x38U) + 0xC8,
+    localPos = D_80099B70;
+    vec74 = D_80099B7C;
+    randoms[0] = (func_150ADA68() * 30.0f) + 40.0f;
+    randoms[1] = (func_150ADA68() * 2.512f) + 3.5900002f;
+    srcs[0] = (s32 *)&localPos;
+    dsts[0] = worldPos;
+    func_15145EA4(srcs, dsts, (s32)((Mtx *)D_800D154C->unk1D4 + 4), 1);
+    func_15102B38((s32)D_800D154C, 4, (s32)&localPos, (s32)&vec74, randoms,
+                  (func_150ADA20() % 5U) + 5, (func_150ADA20() % 56U) + 200,
                   (func_150ADA68() * 510.0f) + 1296.0f,
-                  (s32)sp60, 0xFF, 0, -1, 0xFF, 1);
-    func_151C1860(sp60, 0xFF, 1);
+                  (s32)worldPos, 0xFF, 0, -1, 0xFF, 1);
+    func_151C1860(worldPos, 0xFF, 1);
 }
 
-void func_15070690(s32 arg0) {
-    func_150EEE00(D_800D154C, (arg0 - 0x3E) & 0xFF, arg0);
+void func_15070690(s32 cmd) {
+    func_150EEE00(D_800D154C, (cmd - 0x3E) & 0xFF, cmd);
 }
 
-void func_150706C4(s32 arg0) {
-    func_150EEF40(D_800D154C, (arg0 - 0x3E) & 0xFF, arg0);
+void func_150706C4(s32 cmd) {
+    func_150EEF40(D_800D154C, (cmd - 0x3E) & 0xFF, cmd);
 }
 
-void func_150706F8(s32 arg0) {
+void func_150706F8(s32 cmd) {
     if ((D_800D154C->unk94 & 0x10) == 0) {
         func_150F03F8(D_800D154C, 0, 0xFF, 1);
     }
@@ -2495,31 +2496,31 @@ void func_150706F8(s32 arg0) {
     }
 }
 
-void func_15070760(s32 arg0) {
+void func_15070760(s32 cmd) {
     func_150EBEC0(D_800D154C, 0, 0xFF, 1);
 }
 
-void func_15070794(s32 arg0) {
+void func_15070794(s32 cmd) {
     func_150EBEC0(D_800D154C, 1, 0xFF, 1);
 }
 
-void func_150707C8(s32 arg0) {
+void func_150707C8(s32 cmd) {
     func_150FDDA0(D_800D154C, 0xFF, 1);
 }
 
-void func_150707F8(s32 arg0) {
+void func_150707F8(s32 cmd) {
     func_150FDF38(D_800D154C, 0xFF, 1, 0, 0);
 }
 
-void func_15070830(s32 arg0) {
+void func_15070830(s32 cmd) {
     func_150FE320(D_800D154C, 0xFF, 1);
 }
 
-void func_15070860(s32 arg0) {
+void func_15070860(s32 cmd) {
     func_150FE49C(D_800D154C, 0xFF, 1, 0, 0);
 }
 
-void func_15070898(s32 arg0) {
+void func_15070898(s32 cmd) {
     Func151994B8Desc descriptor;
 
     descriptor.owner = D_800D154C;
@@ -2614,7 +2615,7 @@ void func_15070898(s32 arg0) {
     func_151994B8(0, &descriptor, 0xFF, 0);
 }
 
-void func_15070C18(s32 arg0) {
+void func_15070C18(s32 cmd) {
     func_15199834(D_800D154C);
 }
 
@@ -2633,15 +2634,15 @@ void func_15070C40(u8 arg0) {
     func_15103E40(owner, temp_a1, &tmp, arg0, 0, 0xFF, 0);
 }
 
-void func_15070CDC(s32 arg0) {
+void func_15070CDC(s32 cmd) {
     func_15070C40(1);
 }
 
-void func_15070D00(s32 arg0) {
+void func_15070D00(s32 cmd) {
     func_15070C40(0);
 }
 
-void func_15070D24(s32 arg0) {
+void func_15070D24(s32 cmd) {
     Stack_15070D24 sp4C;
 
     sp4C.sp84 = D_80099B88;
@@ -2679,7 +2680,7 @@ void func_15070D24(s32 arg0) {
 extern Vec3w_15070D24 D_80099BA0;
 extern Vec3w_15070D24 D_80099BAC;
 extern void func_151D5334(struct17*, f32, f32, f32, s32, s32, s32);
-void func_15070F60(s32 arg0) {
+void func_15070F60(s32 cmd) {
     Stack_15070D24 sp58;
 
     sp58.sp84 = D_80099BA0;
@@ -2696,9 +2697,9 @@ void func_15070F60(s32 arg0) {
     sp58.sp70[0] = (func_150ADA68() * 180.0f) + 150.0f;
     sp58.sp70[1] = func_150ADA68() * 2.0f + 2.5f;
 
-    func_15143134(&sp58.sp84, sp58.sp64, ((u8)arg0 ? 1 : 2) * 0x40 + (s32)D_800D154C->unk1D4);
+    func_15143134(&sp58.sp84, sp58.sp64, ((u8)cmd ? 1 : 2) * 0x40 + (s32)D_800D154C->unk1D4);
 
-    func_15102B38((s32)D_800D154C, (*((u8 *)&arg0 + 3)) ? 1 : 2, (s32)&sp58.sp84, (s32)&sp58.sp78, sp58.sp70,
+    func_15102B38((s32)D_800D154C, (*((u8 *)&cmd + 3)) ? 1 : 2, (s32)&sp58.sp84, (s32)&sp58.sp78, sp58.sp70,
                   ((func_150ADA20() + 0U) % 5U) + 5, ((func_150ADA20() + 0U) % 0x9CU) + 0x64,
                   (func_150ADA68() * 4000.0f) + 4000.0f,
                   (s32)sp58.sp64, 0xFF, 0, -1, 0xFF, 0);
@@ -2716,15 +2717,15 @@ void func_15070F60(s32 arg0) {
     func_151D5404((struct17 *)sp58.sp64, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
     func_151D5334((struct17 *)sp58.sp64, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
 }
-void func_15071230(s32 arg0) {
+void func_15071230(s32 cmd) {
     func_15070F60(0);
 }
 
-void func_15071254(s32 arg0) {
+void func_15071254(s32 cmd) {
     func_15070F60(1);
 }
 
-void func_15071278(s32 arg0) {
+void func_15071278(s32 cmd) {
     func_150FC438(D_800D154C, 0, 1, D_800D154C->unk84.ub[1]);
 }
 
@@ -2741,7 +2742,7 @@ struct sp18_150712AC {
     /* 0x7 */ u8 unk7;
 };
 
-void func_150712AC(s32 arg0) {
+void func_150712AC(s32 cmd) {
     struct sp18_150712AC sp18;
 
     func_150FE860(D_800D154C, 0xFF, 1);
@@ -2758,7 +2759,7 @@ void func_150712AC(s32 arg0) {
 extern void func_150FF084(struct127 *arg0, s32 arg1, s32 arg2);
 extern void func_150FED30(struct127 *arg0, s32 arg1, s32 arg2);
 
-void func_15071360(s32 arg0) {
+void func_15071360(s32 cmd) {
     struct sp18_150712AC sp18;
 
     if (func_151044F4() != 0) {
@@ -2776,50 +2777,50 @@ void func_15071360(s32 arg0) {
     }
 }
 
-void func_15071434(s32 arg0) {
+void func_15071434(s32 cmd) {
     func_150FF840(D_800D154C, 1, 0, 0xFF, 1);
 }
 
-void func_15071470(s32 arg0) {
+void func_15071470(s32 cmd) {
     func_150FF840(D_800D154C, 0, 0, 0xFF, 1);
 }
 
-void func_150714AC(s32 arg0) {
+void func_150714AC(s32 cmd) {
     func_150FF840(D_800D154C, 0, 1, 0xFF, 1);
 }
 
-void func_150714E8(s32 arg0) {
+void func_150714E8(s32 cmd) {
     func_151D5714(D_800D154C, &D_800A2148, &D_800A2154, D_80088BB0, 1.0f, 0xFF, 1);
 }
 
-void func_15071544(s32 arg0) {
+void func_15071544(s32 cmd) {
     func_151D4668(D_800D154C);
     func_151D469C(D_800D154C, 4, 0x78, 0xFF, 1);
 }
 
-void func_1507158C(s32 arg0) {
+void func_1507158C(s32 cmd) {
     func_151D4668(D_800D154C);
     func_151D469C(D_800D154C, 2, 0x78, 0xFF, 1);
 }
 
-void func_150715D4(s32 arg0) {
+void func_150715D4(s32 cmd) {
     func_151D4668(D_800D154C);
     func_151D469C(D_800D154C, 3, 0x78, 0xFF, 1);
 }
 
-void func_1507161C(s32 arg0) {
+void func_1507161C(s32 cmd) {
 
 }
 
-void func_15071628(s32 arg0) {
-    func_151D0058(D_800D154C, (arg0 - 0x55) & 0xFF, 0xFF, 1);
+void func_15071628(s32 cmd) {
+    func_151D0058(D_800D154C, (cmd - 0x55) & 0xFF, 0xFF, 1);
 }
 
-void func_15071668(s32 arg0) {
+void func_15071668(s32 cmd) {
     func_151D0024(D_800D154C);
 }
 
-void func_15071690(s32 arg0) {
+void func_15071690(s32 cmd) {
     struct127 *temp_a0;
     s32 pad0;
     s32 sp1C;
@@ -2831,7 +2832,7 @@ void func_15071690(s32 arg0) {
     }
 }
 
-void func_150716EC(s32 arg0) {
+void func_150716EC(s32 cmd) {
     struct17 tmp;
     struct127 *temp_v0;
 
@@ -2842,7 +2843,7 @@ void func_150716EC(s32 arg0) {
     func_151D5404(&tmp, 1502.0f, 3000.0f, 0.00033333333f, 0xC, 0xF, 0xFF, 0);
 }
 
-void func_15071764(s32 arg0) {
+void func_15071764(s32 cmd) {
     struct127 *sp34 = func_15083E90(18);
     if (sp34 != NULL) {
         func_150F0BEC(sp34);
@@ -2851,7 +2852,7 @@ void func_15071764(s32 arg0) {
     }
 }
 
-void func_150717E0(s32 arg0) {
+void func_150717E0(s32 cmd) {
     struct {
         struct127 *unk0;
         u8 unk4;
@@ -2867,15 +2868,15 @@ void func_150717E0(s32 arg0) {
     }
 }
 
-void func_15071830(s32 arg0) {
+void func_15071830(s32 cmd) {
     func_150F9BB0(D_800D154C, 0xFF, 1);
 }
 
-void func_15071860(s32 arg0) {
+void func_15071860(s32 cmd) {
     func_1519072C(D_800D154C);
 }
 
-void func_15071888(s32 arg0) {
+void func_15071888(s32 cmd) {
     func_151D5714(D_800D154C, &D_800A1FB0, &D_800A1FBC, D_80088B90, 0.7f, 0xFF, 1);
 }
 
@@ -2883,7 +2884,7 @@ extern u32 D_80099BB8;
 void func_15143134(void *, void *, s32);
 void func_151C329C(s32 arg0, s32 arg1, s32 arg2);
 
-void func_150718E4(s32 arg0) {
+void func_150718E4(s32 cmd) {
     f32 *p;
     f32 sp24[2];
     u32 sp20;
@@ -2898,23 +2899,23 @@ void func_150718E4(s32 arg0) {
     }
 }
 
-void func_15071998(s32 arg0) {
+void func_15071998(s32 cmd) {
     func_150FA520(D_800D154C, 0, 0xFF, 1);
 }
 
-void func_150719CC(s32 arg0) {
+void func_150719CC(s32 cmd) {
     func_150FA520(D_800D154C, 1, 0xFF, 1);
 }
 
-void func_15071A00(s32 arg0) {
+void func_15071A00(s32 cmd) {
     func_150FA520(D_800D154C, 2, 0xFF, 1);
 }
 
-void func_15071A34(s32 arg0) {
+void func_15071A34(s32 cmd) {
     func_151D09A8(D_800D154C, 0xFF, 1);
 }
 
-void func_15071A64(s32 arg0) {
+void func_15071A64(s32 cmd) {
     struct199 tmp;
 
     if (!(func_150ADA20() & 1) && (D_800D154C->unk1D4 != 0) && ((D_800D154C->unk74 & 0xF) != 0xF) &&
@@ -2953,7 +2954,7 @@ extern f32 D_80099BC8[3][3];
 extern u8 D_80099BEC[];
 extern u8 D_80099C04[];
 
-void func_15071B18(s32 arg0) {
+void func_15071B18(s32 cmd) {
     Game981E0EffectPoint point;
     u8 collision[0x24];
 
@@ -2994,15 +2995,16 @@ void func_15071B18(s32 arg0) {
     }
 }
 
-void func_15071D08(s32 arg0) {
+void func_15071D08(s32 cmd) {
     func_150F2230(D_800D154C, 0xFF, 1);
 }
 
+/* Runs handler D_80086150[D_800D1580], passing it the command. */
 void func_15071D38(void) {
     void (*func)(s32);
 
     func = D_80086150[D_800D1580];
-    if (func != 0) {
+    if (func != NULL) {
         func(D_800D1580);
     }
 }
