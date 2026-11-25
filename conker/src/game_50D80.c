@@ -1928,7 +1928,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                                     f32 *p1;
                                     f32 *p2;
 
-                                    p1 = &D_800AAA90.x;
+                                    p1 = (f32 *)&D_800AAA90.x;
                                     p2 = vec;
                                     if (func_1514654C(obj, attachment, 0, &p1, &p2, 1) != 0) {
                                         func_151C5588(obj, vec, 0x46, sceneTag, 1);
