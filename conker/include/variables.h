@@ -121,8 +121,8 @@ extern struct07  *D_8002BA44;
 
 extern s16  D_8002BC10[];
 extern s16  D_8002BD0E[];
-extern s64  D_8002BD10;
-extern s32  D_8002BD14;
+extern u64  D_8002BD10; // osClockRate
+extern s32  D_8002BD14; // low word of osClockRate (D_8002BD10)
 extern s32  D_8002BD18;
 extern s32  D_8002BD20; // init ok?
 extern s32  D_8002BD60;
@@ -1232,7 +1232,7 @@ extern f32 D_800D136C;
 
 extern s32 D_800D1510;
 extern f32 D_800D1550; // frame time step
-extern s32 D_800D1580; // array?
+extern s32 D_800D1580; // parameter of the animation event being run (D_800D1874: the same bits as an f32)
 extern s16 D_800D1582;
 extern u8  D_800D1583;
 extern ActorAnim *D_800D1588[187]; // per model id: animation table, after its AnimHeader (see func_1503D660)
