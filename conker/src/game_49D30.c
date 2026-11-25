@@ -1772,11 +1772,14 @@ typedef struct {
     f32 unk34;
     u8 pad38[0x16];
     u8 unk4E;
-    u8 pad4F[0x20];
+    u8 pad4F[0x1F];
+    u8 unk6E;
     u8 unk6F;
-    u8 pad70[0x1A];
+    u8 pad70[2];
+    u8 unk72;
+    u8 pad73[0x17];
     u8 unk8A;
-} Obj15020EC4;
+} SeqActor; // struct131 with the fields this file uses (include/structs.h still pads them)
 
 typedef struct { f32 x, y, z; } V3f15020EC4;
 V3f15020EC4 D_800C3620;
@@ -1797,7 +1800,7 @@ void func_15020EC4(s32 scene) {
     s32 pass;
     struct108 *player;
     SeqTrackState *state;
-    Obj15020EC4 *actor;
+    SeqActor *actor;
     f32 tilt3C;
     f32 tilt40;
 
@@ -1885,9 +1888,9 @@ void func_15020EC4(s32 scene) {
                         MSG2.unk30 = tilt3C;
                         MSG2.unk34 = tilt40;
                     } else if (ENT(scene, track)->unk2 == 3) {
-                        Obj15020EC4 *actor3;
+                        SeqActor *actor3;
 
-                        actor3 = (Obj15020EC4 *)func_151149AC(ENT(scene, track)->unk3);
+                        actor3 = (SeqActor *)func_151149AC(ENT(scene, track)->unk3);
                         if (actor3 == NULL) {
                             continue;
                         }
@@ -1911,7 +1914,7 @@ void func_15020EC4(s32 scene) {
                         func_1512D560(player, 7, &MSG2);
                     }
                 } else if (ENT(scene, track)->type == 3) {
-                    actor = (Obj15020EC4 *)func_151149AC(ENT(scene, track)->unk2);
+                    actor = (SeqActor *)func_151149AC(ENT(scene, track)->unk2);
                     if (actor == NULL) {
                         continue;
                     }
@@ -2247,35 +2250,37 @@ void func_150222E0(s32 track, s32 scene) {
     }
 }
 
-void func_15022398(s32 arg0, s32 arg1) {
-    struct127 *temp_v0;
-    s32 temp_a1;
-    s32 temp_id;
+/* Make sure the object bound to the scene's track `track` exists: spawn it from its D_800D20FC
+   slot if needed and add it to the scene's D_800C3518 list. */
+void func_15022398(s32 track, s32 scene) {
+    struct127 *obj;
+    s32 slot;
+    s32 id;
 
-    if (D_800C35C8[arg1][arg0] != 0) {
-        if (D_800C35F0[arg1][arg0].type == 2) {
-            temp_id = D_800C35F0[arg1][arg0].unk2;
-            temp_a1 = func_15083E0C(temp_id);
-            if (temp_a1 != -1) {
-                temp_v0 = func_1505EEF4(temp_a1);
-                if (temp_v0 != 0) {
-                    if (temp_v0->unk5 == 3) {
-                        if (D_800C35F0 != &D_800C35F0[arg1]) {
-                            temp_v0->unk5 = 4;
+    if (D_800C35C8[scene][track] != 0) {
+        if (D_800C35F0[scene][track].type == 2) {
+            id = D_800C35F0[scene][track].unk2;
+            slot = func_15083E0C(id);
+            if (slot != -1) {
+                obj = func_1505EEF4(slot);
+                if (obj != NULL) {
+                    if (obj->unk5 == 3) {
+                        if (D_800C35F0 != &D_800C35F0[scene]) {
+                            obj->unk5 = 4;
                         } else {
-                            temp_v0->unk5 = 0;
+                            obj->unk5 = 0;
                         }
                     }
-                    if (temp_id == 1) {
-                        temp_v0->unkF4 &= -0x2B;
+                    if (id == 1) {
+                        obj->unkF4 &= -0x2B;
                     }
                 } else {
-                    if (temp_a1 < D_800D2100) {
-                        func_15082A44((struct_game49D30_2 *)((temp_a1 * 0x30) + (s32)D_800D20FC), temp_a1, 0, arg1, 0);
-                        temp_v0 = func_1505EEF4(temp_a1);
-                        if (temp_v0 != 0) {
-                            func_1505E650(temp_v0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 1);
-                            func_1502225C(((s32)temp_v0 - (s32)D_800CC2D0) / (s32)sizeof(struct127), arg1);
+                    if (slot < D_800D2100) {
+                        func_15082A44((struct_game49D30_2 *)((slot * 0x30) + (s32)D_800D20FC), slot, 0, scene, 0);
+                        obj = func_1505EEF4(slot);
+                        if (obj != NULL) {
+                            func_1505E650(obj, 0, 0.0f, 0.0f, 0.0f, 0.0f, 1);
+                            func_1502225C(obj - D_800CC2D0, scene);
                         }
                     }
                 }
@@ -2284,61 +2289,66 @@ void func_15022398(s32 arg0, s32 arg1) {
     }
 }
 
-void func_15022528(s32 arg0) {
-    s32 i;
+/* Apply every object track of the scene to its object (func_1502178C). */
+void func_15022528(s32 scene) {
+    s32 track;
     struct127 *obj;
 
-    for (i = 0; i < D_800C363A[arg0]; i++) {
-        if (D_800C35D0[arg0][i] == 0) {
+    for (track = 0; track < D_800C363A[scene]; track++) {
+        if (D_800C35D0[scene][track] == 0) {
             continue;
         }
-        if (D_800C35C8[arg0][i] == 0) {
+        if (D_800C35C8[scene][track] == 0) {
             continue;
         }
-        if (D_800C35F0[arg0][i].type == 2) {
-            obj = func_15083E90(D_800C35F0[arg0][i].unk2);
+        if (D_800C35F0[scene][track].type == 2) {
+            obj = func_15083E90(D_800C35F0[scene][track].unk2);
             if (obj != NULL) {
-                func_1502178C(obj, arg0, i);
+                func_1502178C(obj, scene, track);
             }
         }
     }
 }
 
-void func_15022640(s32 arg0, s32 arg1) {
+/* Add `id` to the scene's D_800C3550 list unless it is already there. */
+void func_15022640(s32 id, s32 scene) {
     s32 i;
     s32 count;
     s32 limit;
-    u8 *count_ptr;
+    u8 *countPtr;
 
     i = 0;
-    count_ptr = &D_800C354A[arg1];
-    count = *count_ptr;
+    countPtr = &D_800C354A[scene];
+    count = *countPtr;
     limit = count;
+    // matching: a do-while over a copy of the count, as in func_1502225C
     if (count > 0) {
         do {
-            if (arg0 == D_800C3550[arg1][i]) {
+            if (id == D_800C3550[scene][i]) {
                 return;
             }
             i++;
         } while (i < limit);
     }
 
-    D_800C3550[arg1][count] = arg0;
-    *count_ptr = count + 1;
+    D_800C3550[scene][count] = id;
+    *countPtr = count + 1;
 }
 
-void func_150226BC(s32 arg0, s32 arg1) {
-    struct131 *temp_v0;
-    SeqTrackInfo *temp_v1;
+/* If the actor bound to the scene's track `track` has unk6E set, record its unk72 id
+   (func_15022640) and clear the flag. */
+void func_150226BC(s32 track, s32 scene) {
+    SeqActor *actor;
+    SeqTrackInfo *info;
 
-    if (D_800C35C8[arg1][arg0] != 0) {
-        temp_v1 = &D_800C35F0[arg1][arg0];
-        if (temp_v1->type == 3) {
-            temp_v0 = func_151149AC(temp_v1->unk2);
-            if (temp_v0 != 0) {
-                if (*(u8 *)((u8 *)temp_v0 + 0x6E) == 1) {
-                    func_15022640(*(u8 *)((u8 *)temp_v0 + 0x72), arg1);
-                    *(u8 *)((u8 *)temp_v0 + 0x6E) = 0;
+    if (D_800C35C8[scene][track] != 0) {
+        info = &D_800C35F0[scene][track];
+        if (info->type == 3) {
+            actor = (SeqActor *)func_151149AC(info->unk2);
+            if (actor != NULL) {
+                if (actor->unk6E == 1) {
+                    func_15022640(actor->unk72, scene);
+                    actor->unk6E = 0;
                 }
             }
         }
@@ -2348,61 +2358,64 @@ void func_150226BC(s32 arg0, s32 arg1) {
 extern u8 D_800C363A[];
 extern void func_150226BC(s32, s32);
 
-void func_15022754(s32 arg0) {
-    s32 i;
+void func_15022754(s32 scene) {
+    s32 track;
 
-    for (i = 0; i < D_800C363A[arg0]; i++) {
-        func_150226BC(i, arg0);
+    for (track = 0; track < D_800C363A[scene]; track++) {
+        func_150226BC(track, scene);
     }
 }
 
-void func_150227BC(s32 arg0) {
+/* Set unk6E again on every actor recorded in the scene's D_800C3550 list. */
+void func_150227BC(s32 scene) {
     s32 i;
     u8 *count;
 
-    count = &D_800C354A[arg0];
+    count = &D_800C354A[scene];
     for (i = 0; i < *count; i++) {
-        *(s8 *)((u8 *)func_151149AC(D_800C3550[arg0][i]) + 0x6E) = 1;
+        ((SeqActor *)func_151149AC(D_800C3550[scene][i]))->unk6E = 1;
     }
 }
 
 extern void func_15022398(s32, s32);
 extern void func_150222E0(s32, s32);
 
-void func_15022848(s32 arg0) {
-    s32 i;
+void func_15022848(s32 scene) {
+    s32 track;
 
-    if (D_800C35EA[arg0] == 1) {
+    if (D_800C35EA[scene] == 1) {
         D_800C3638 = 0;
-        for (i = 0; i < D_800C363A[arg0]; i++) {
-            func_15022398(i, arg0);
-            func_150222E0(i, arg0);
+        for (track = 0; track < D_800C363A[scene]; track++) {
+            func_15022398(track, scene);
+            func_150222E0(track, scene);
         }
         D_800C3638 = 1;
     }
 }
 
-void func_150228E4(s32 arg0) {
+/* Call func_15060F28 on every live object in the scene's D_800C3518 list. */
+void func_150228E4(s32 scene) {
     s32 i;
     s32 count;
-    u8 *actor;
-    u8 *countp;
+    struct127 *obj;
+    u8 *countPtr;
 
-    countp = &D_800C3510[arg0];
-    count = *countp;
+    countPtr = &D_800C3510[scene];
+    count = *countPtr;
     for (i = 0; i < count; i++) {
-        actor = ((u8 (*)[0x32C])D_800CC2D0)[*(arg0 * 0x19 + (u8 *)D_800C3518 + i)];
-        if (*(s32 *)actor != 0) {
-            func_15060F28((struct127 *)actor, 0);
-            count = *countp;
+        obj = &D_800CC2D0[D_800C3518[scene][i]];
+        if (obj->interaction_state != 0) {
+            func_15060F28(obj, 0);
+            count = *countPtr;
         }
     }
 }
 
-void func_15022998(s32 *arg0) {
-    if ((*arg0 == 0x1B) || (*arg0 == 4)) {
-        if (D_80086014[*arg0] != 0) {
-            D_80086014[*arg0](arg0);
+/* Run the D_80086014 handler of an object whose state (its first word) is 0x1B or 4. */
+void func_15022998(s32 *obj) {
+    if ((*obj == 0x1B) || (*obj == 4)) {
+        if (D_80086014[*obj] != 0) {
+            D_80086014[*obj](obj);
         }
     }
 }
