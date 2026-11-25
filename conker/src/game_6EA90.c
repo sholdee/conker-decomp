@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
 extern u8 D_80085930[]; // font charset, 95 entries
 
 s32 func_15042C40(u8 ch);
@@ -95,14 +94,6 @@ typedef struct {
     /* 0x0E */ u8 padE[2];
 } GlyphSprite;
 
-/* Metrics of one font glyph, in texels. */
-typedef struct {
-    /* 0x0 */ u8 w;
-    /* 0x1 */ u8 h;
-    /* 0x2 */ u8 x; /* advance before the glyph */
-    /* 0x3 */ u8 y; /* drop below the line top */
-} FontGlyph;
-
 extern u8 D_800CBD50; // control/icon code of the current character, 0xFF if none
 extern u8 D_800CBD57; // current primitive colour r, g, b, a (D_800CBD57-5A)
 extern u8 D_800CBD58;
@@ -113,7 +104,6 @@ extern u8 D_800CBD5C; // flash phase
 extern u8 D_800CBD5D; // waving text on
 extern u8 D_800CBD5E; // wave phase
 extern u8 *D_80085990[]; // per-font glyph bitmaps, 0xE0 bytes each
-extern FontGlyph *D_80085994[]; // per-font glyph metrics
 extern u8 D_800915DC[];
 extern u8 D_800915EC[];
 extern u8 D_800915FC[];

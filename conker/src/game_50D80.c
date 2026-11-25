@@ -3,16 +3,6 @@
 #include "effects.h"
 #include "variables.h"
 
-/* One 8-byte cutscene script event. Each track starts with a 4-event header whose value is the start time. */
-typedef struct {
-    /* 0x0 */ s8 type;
-    /* 0x1 */ u8 delta; /* time step to the next event; 0 chains events at the same time */
-    /* 0x2 */ s16 value;
-    /* 0x4 */ s8 unk4;
-    /* 0x5 */ s8 unk5;
-    /* 0x6 */ s16 unk6;
-} SeqEvent;
-
 /* An event queued for dispatch by func_150241B4, kept sorted by time. */
 typedef struct SeqQueueEntry {
     /* 0x0 */ SeqEvent *event;
@@ -21,10 +11,7 @@ typedef struct SeqQueueEntry {
     /* 0xA */ u16 index;
 } SeqQueueEntry;
 
-
-
 /* Cutscene state, indexed by scene (and track). */
-extern SeqEvent *D_800C3688[][30]; /* each track's events */
 
 extern WorldObject *func_151149AC(s32);
 extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
@@ -276,7 +263,6 @@ void func_15024130(s32 count, s32 scene) {
     }
 }
 
-
 /*
  * Inserts an event into the time-sorted dispatch queue. When the queue is full
  * it is flushed (dispatched) first and the new event is dropped.
@@ -306,7 +292,6 @@ void func_150241B4(SeqQueueEntry *queue, s32 *count, SeqEvent *event, s32 track,
     queue[pos].time = time;
     (*count)++;
 }
-
 
 /*
  * Queues and dispatches every event of `scene` whose time falls in
@@ -1167,7 +1152,6 @@ typedef struct {
     /* 0x1D */ u8 unk1D;
     /* 0x1E */ u8 pad1E[6];
 } EvFloor;
-
 
 typedef struct {
     s32 unk0;
@@ -2487,7 +2471,6 @@ extern void func_15188810(Actor *, s32, s32);
 extern void func_1518894C(WorldObject *, s32, s32);
 extern void func_15188AD0(Actor *);
 extern void func_151D66F0(s32, s32);
-
 
 /*
  * Third cutscene event handler: sounds (types 6 and 10), func_1000xxxx audio

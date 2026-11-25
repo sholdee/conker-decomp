@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-
 /* Event argument of func_151D8868. */
 typedef struct {
     /* 0x00 */ u8 type;
@@ -454,14 +453,6 @@ void func_150FAA40(u8 owner, s32 kind) {
     }
 }
 
-/* A list of spawn variants: an id and a scale for each. */
-typedef struct {
-    /* 0x00 */ u8 count;
-    /* 0x04 */ s16 *ids;
-    /* 0x08 */ f32 *scales;
-} VariantList;
-
-extern VariantList D_80088B20[];
 void func_1514470C(s32, Vec3f *);
 void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 duration, f32 rate, f32 scale, u8 arg6, s32 arg7, u8 owner,
                    s32 kind);

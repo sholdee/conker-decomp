@@ -12,16 +12,8 @@
 #define TEXTBOX_CB_PAGE_ENDED   0x2000  /* set while the callback runs: a page was left */
 #define TEXTBOX_CB_PAGE_SHOWN   0x4000  /* set while the callback runs: a page is fully shown */
 
-/* Message table entry (D_800DD254 / D_800DD258). */
-typedef struct {
-    u8 *data;
-    s32 unk4;
-} MessageEntry;
-
 #define TEXTBOX_STATE_INIT 0x1
 
-extern MessageEntry *D_800DD254;
-extern MessageEntry *D_800DD258;
 
 extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source);

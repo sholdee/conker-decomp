@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-
 /* Flags of SpiralState. */
 #define SPIRAL_FADE_NEAR 1 /* fade out as the camera gets close */
 #define SPIRAL_SOUND 2     /* plays a positional sound */
@@ -233,14 +232,6 @@ void func_150F4D5C(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind
     }
 }
 
-/* A list of spawn variants: an id and a scale for each. */
-typedef struct {
-    /* 0x00 */ u8 count;
-    /* 0x04 */ s16 *ids;
-    /* 0x08 */ f32 *scales;
-} VariantList;
-
-extern VariantList D_80088B20[];
 extern s32 (*D_80088B38[])();
 extern void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 

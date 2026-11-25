@@ -371,6 +371,7 @@ extern s16  D_80084480;
 extern void (*D_800844B0[])(s32 arg0);
 extern s32  D_800848B0;
 
+extern FontGlyph *D_80085994[];
 extern Gfx D_800859A0[]; // shared display list (2D/sprite render setup)
 extern f32 D_80085FD0;
 extern f32 D_80085FD4;
@@ -422,6 +423,7 @@ extern s32 D_80088894;
 extern s32 D_80088898;
 extern s32 D_8008889C;
 extern u8  D_80088980;
+extern VariantList D_80088B20[];
 extern u8  D_80088B40;
 extern u8  D_80088B60;
 extern u8  D_80088B90;
@@ -1059,6 +1061,7 @@ extern u8 D_800C3680;
 extern u8  D_800C3681;
 extern u8  D_800C3682;
 extern u8  D_800C3683;
+extern SeqEvent *D_800C3688[][30]; // cutscene script event tracks per scene
 extern SeqPathKey *D_800C3868[][30]; // per scene and track: path keyframes
 extern SeqTrackState *D_800C3958[]; // per scene: the track states
 extern u8 * D_800C3960[][30];
@@ -1577,6 +1580,8 @@ extern s32 D_800DD220;
 extern s32 D_800DD224;
 extern void *D_800DD228;
 extern s32 D_800DD230;
+extern MessageEntry *D_800DD254;
+extern MessageEntry *D_800DD258;
 extern u8   D_800DD2C0[16]; // per player: spawn point
 extern u8   D_800DD2D0;
 extern u8   D_800DD2A0[4];

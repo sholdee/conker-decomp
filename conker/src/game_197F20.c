@@ -23,12 +23,6 @@
 #define TEXTBOX_CENTERED        0x20000 /* centre each text line */
 #define TEXTBOX_WHITE_TEXT      0x40000
 
-/* Message table entry (D_800DD254 / D_800DD258). */
-typedef struct {
-    u8 *data;
-    s32 unk4;
-} MessageEntry;
-
 /* TextBox.state */
 #define TEXTBOX_STATE_INIT      0x1
 #define TEXTBOX_STATE_GROW      0x2
@@ -39,8 +33,6 @@ typedef struct {
 #define TEXTBOX_STATE_TEXT_OUT  0x40
 #define TEXTBOX_STATE_SHRINK    0x80
 
-extern MessageEntry *D_800DD254;
-extern MessageEntry *D_800DD258;
 
 extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source);

@@ -4262,4 +4262,36 @@ typedef struct {
     /* 0x17 */ u8  soundTimer;
 } WavePreset; /* size 0x18 */
 
+/* Metrics of one font glyph, in texels (the FontGlyph of game_6EA90.c). */
+typedef struct {
+    /* 0x0 */ u8 w;
+    /* 0x1 */ u8 h;
+    /* 0x2 */ u8 x; /* advance before the glyph */
+    /* 0x3 */ u8 y; /* drop below the line top */
+} FontGlyph;
+
+/* A list of spawn variants: an id and a scale for each. */
+typedef struct {
+    /* 0x00 */ u8 count;
+    /* 0x04 */ s16 *ids;
+    /* 0x08 */ f32 *scales;
+} VariantList;
+
+/* One 8-byte cutscene script event (D_800C3688[scene][track][i]). Each track starts with a
+   4-event header whose value is the start time (see game_50D80.c). */
+typedef struct {
+    /* 0x0 */ s8 type;
+    /* 0x1 */ u8 delta; /* time step to the next event; 0 chains events at the same time */
+    /* 0x2 */ s16 value;
+    /* 0x4 */ s8 unk4;
+    /* 0x5 */ s8 unk5;
+    /* 0x6 */ s16 unk6;
+} SeqEvent;
+
+/* Message table entry (D_800DD254 / D_800DD258). */
+typedef struct {
+    /* 0x0 */ u8 *data;
+    /* 0x4 */ s32 unk4;
+} MessageEntry;
+
 #endif

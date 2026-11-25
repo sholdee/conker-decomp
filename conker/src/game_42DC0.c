@@ -39,15 +39,6 @@ void func_15015920(s16 font) {
     func_10004074(buffer);
 }
 
-/* Metrics of one font glyph, in texels (the FontGlyph of game_6EA90.c). */
-typedef struct {
-    /* 0x0 */ u8 w;
-    /* 0x1 */ u8 h;
-    /* 0x2 */ u8 x; /* advance before the glyph */
-    /* 0x3 */ u8 y; /* drop below the line top */
-} FontGlyph;
-
-extern FontGlyph *D_80085994[];  // per-font glyph metrics
 extern u8 (*D_80085990[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
 
 /*

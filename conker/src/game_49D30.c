@@ -4,18 +4,6 @@
 
 /* Cutscene ("sequence") data is kept per scene slot (0/1) and per track (up to 30 tracks). */
 
-/* One 8-byte cutscene script event (D_800C3688[scene][track][i]). Each track starts with a
-   4-event header whose value is the start time (see game_50D80.c). */
-typedef struct {
-    /* 0x0 */ s8 type;
-    /* 0x1 */ u8 delta; /* time step to the next event; 0 chains events at the same time */
-    /* 0x2 */ s16 value;
-    /* 0x4 */ s8 unk4;
-    /* 0x5 */ s8 unk5;
-    /* 0x6 */ s16 unk6;
-} SeqEvent;
-
-
 /* A channel keyframe: a timed value for one animated property (D_800C3778[scene][track][key]). */
 typedef struct {
     /* 0x0 */ f32 value;
@@ -23,7 +11,6 @@ typedef struct {
     /* 0x5 */ u8 channel;
     /* 0x6 */ s16 time;
 } SeqChannelKey; // size 0x8
-
 
 /* Arc-length data for a track's path (D_800C3A50[scene][track]), plus the cubic of the cached segment. */
 typedef struct {
@@ -54,15 +41,12 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack);
 void func_1501E81C(s32 skipped, s32 scene);
 s32 func_150229E4(Actor *obj);
 extern s32 func_1502B6BC(s32 *, s32, s32 *, s32, s32, s32, s32);
-extern SeqEvent *D_800C3688[][30];
 extern s32 D_800C3668[];
 extern s32 func_15023BB0(SeqEvent *, s32, s32, SeqEvent **, s32, s32, s32, s32, s32, s32, s32);
 void func_15022640(s32 id, s32 scene);
 extern WorldObject *func_151149AC(u8);
 extern Actor *func_1505EEF4(s32);
 extern void func_15082A44(void *, s32, s32, s32, s32);
-
-
 
 extern SeqTrackPath *D_800C3A50[];
 extern SeqSubtitle D_800C3D48; /* == &D_800C3CA0[3] */
@@ -209,7 +193,6 @@ void func_1501CC3C(void) {
         func_10004514(alt->dataStart + (s32)D_2D4B0, D_800BEAD0, alt->dataEnd - alt->dataStart, 1);
     }
 }
-
 
 /* Mark every track's active-event table (D_800C3960) as empty. */
 void func_1501CDC0(s32 scene) {
