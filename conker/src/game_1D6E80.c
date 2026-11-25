@@ -10,17 +10,7 @@ s32 func_150ADA20(void);
 
 extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_151EF610(void);
-extern f32 D_800A8F74;
-extern f32 D_800A8F78;
-extern f32 D_800A8F7C;
-extern f32 D_800A8F84;
-extern f32 D_800A8F88;
-extern f32 D_800A8F8C;
-extern f32 D_800A8F90;
-extern f32 D_800A8FEC;
 extern f32 D_800A9014;
-extern s32 func_15045800(f32 *, s32, f32, s32);
-extern s32 func_151ABE40(f32 *, s32, s32, s32, s32);
 extern s32 func_10010FFC(s32, s32, s32, s32, s32, s32);
 extern void func_151AA264(void *, s32);
 extern void func_151ABE00(void *);
@@ -93,206 +83,244 @@ typedef struct {
     f32 unk34;
 } struct_151A9EC0_arg;
 
-void func_151A99D0(u8 *arg0) {
-    u8 *v1 = *((u8 **)(arg0 + 0x18));
-    f32 sp30[3];
+/* Ground probe result filled in by func_15045800 (same layout as game_71820.c's Game71820Hit). */
+typedef struct GroundHit {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ s16 points[9];
+    /* 0x18 */ s32 object;
+    /* 0x1C */ u8 flags;
+    /* 0x1D */ u8 active;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ s32 unk20;
+} GroundHit; // size 0x24
 
-    goto dummy_label_151A99D0; dummy_label_151A99D0: ;
-    sp30[0] = *((f32 *)(v1 + 0x14));
-    if (D_800A8F74 < (*((f32 *)(v1 + 0x118)))) {
-        sp30[1] = (*((f32 *)(v1 + 0x118))) + 100.0f;
-    } else {
-        sp30[1] = (*((f32 *)(v1 + 0x18))) + 150.0f;
-    }
-    sp30[2] = *((f32 *)(v1 + 0x1C));
-    ((s32 *)sp30)[-1] = (s32)(arg0 + 0x34);
-    if (func_15045800(sp30, 0, sp30[1] - 300.0f, (s32)(arg0 + 0x34)) != 0) {
-        sp30[1] = *((f32 *)(arg0 + 0x34));
-        func_151ABE40(sp30, ((s32 *)sp30)[-1], 3, arg0[0xC], arg0[0x1]);
-    }
-}
+/* Callback block attached to an actor; the callbacks below drop effects onto the ground under it. */
+typedef struct ActorTask {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x8];
+    /* 0x18 */ struct127 *actor;
+    /* 0x1C */ u8 pad1C[0x18];
+    /* 0x34 */ GroundHit hit;
+} ActorTask;
 
-void func_151A9AA4(u8 *arg0) {
-    u8 *v1 = *((u8 **)(arg0 + 0x18));
-    f32 sp30[3];
-    s32 temp;
+extern s32 func_15045800(f32 *pos, s32 arg1, f32 minY, GroundHit *hit);
+extern s32 func_151ABE40(f32 *pos, GroundHit *hit, s32 kind, s32 arg3, s32 arg4);
 
-    goto dummy_label_151A9AA4; dummy_label_151A9AA4: ;
-    sp30[0] = *((f32 *)(v1 + 0x14));
-    if (D_800A8F78 < (*((f32 *)(v1 + 0x118)))) {
-        sp30[1] = (*((f32 *)(v1 + 0x118))) + 100.0f;
-    } else {
-        sp30[1] = (*((f32 *)(v1 + 0x18))) + 150.0f;
-    }
-    sp30[2] = *((f32 *)(v1 + 0x1C));
-    temp = (s32)(arg0 + 0x34);
-    if (func_15045800(sp30, 0, sp30[1] - 300.0f, temp) != 0) {
-        sp30[1] = *((f32 *)(arg0 + 0x34));
-        func_151ABE40(sp30, temp, 3, arg0[0xC], arg0[0x1]);
-        func_10010FFC(0, 0x11, 0x5208, 0, 0, (s32)v1);
-    }
-    func_151ABE00(v1);
-}
+/* Probes the ground under the task's actor and spawns ground effect 3 there. */
+void func_151A99D0(ActorTask *task) {
+    struct127 *actor = task->actor;
 
-void func_151A9BA0(u8 *arg0) {
-    u8 *v1 = *((u8 **)(arg0 + 0x18));
-    f32 sp30[3];
-    s32 temp;
+    {
+        f32 pos[3];
 
-    goto dummy_label_151A9BA0; dummy_label_151A9BA0: ;
-    sp30[0] = *((f32 *)(v1 + 0x14));
-    if (D_800A8F7C < (*((f32 *)(v1 + 0x118)))) {
-        sp30[1] = (*((f32 *)(v1 + 0x118))) + 100.0f;
-    } else {
-        sp30[1] = (*((f32 *)(v1 + 0x18))) + 150.0f;
-    }
-    sp30[2] = *((f32 *)(v1 + 0x1C));
-    temp = (s32)(arg0 + 0x34);
-    if (func_15045800(sp30, 0, sp30[1] - 300.0f, temp) != 0) {
-        sp30[1] = *((f32 *)(arg0 + 0x34));
-        func_151ABE40(sp30, temp, 1, arg0[0xC], arg0[0x1]);
-        func_10010FFC(0, 0x11, 0x5208, 0, 0, (s32)v1);
+        pos[0] = actor->x_position;
+        if (-9500.0f < actor->unk118) {
+            pos[1] = actor->unk118 + 100.0f;
+        } else {
+            pos[1] = actor->y_position + 150.0f;
+        }
+        pos[2] = actor->z_position;
+        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
+            pos[1] = task->hit.height;
+            func_151ABE40(pos, &task->hit, 3, task->unkC, task->unk1);
+        }
     }
 }
 
-extern f32 D_800A8F80;
+void func_151A9AA4(ActorTask *task) {
+    struct127 *actor = task->actor;
 
-void func_151A9CA0(u8 *arg0) {
-    u8 *v1 = *((u8 **)(arg0 + 0x18));
-    f32 sp30[3];
+    {
+        f32 pos[3];
+        GroundHit *hit;
 
-    if ((*((u8 **)(v1 + 0x31C)) != NULL) && ((*((u8 **)(v1 + 0x31C)))[0x95] != 0)) {
+        pos[0] = actor->x_position;
+        if (-9500.0f < actor->unk118) {
+            pos[1] = actor->unk118 + 100.0f;
+        } else {
+            pos[1] = actor->y_position + 150.0f;
+        }
+        pos[2] = actor->z_position;
+        hit = &task->hit;
+        if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
+            pos[1] = task->hit.height;
+            func_151ABE40(pos, hit, 3, task->unkC, task->unk1);
+            func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
+        }
+    }
+    func_151ABE00(actor);
+}
+
+void func_151A9BA0(ActorTask *task) {
+    struct127 *actor = task->actor;
+
+    {
+        f32 pos[3];
+        GroundHit *hit;
+
+        pos[0] = actor->x_position;
+        if (-9500.0f < actor->unk118) {
+            pos[1] = actor->unk118 + 100.0f;
+        } else {
+            pos[1] = actor->y_position + 150.0f;
+        }
+        pos[2] = actor->z_position;
+        hit = &task->hit;
+        if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
+            pos[1] = task->hit.height;
+            func_151ABE40(pos, hit, 1, task->unkC, task->unk1);
+            func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
+        }
+    }
+}
+
+
+void func_151A9CA0(ActorTask *task) {
+    struct127 *actor = task->actor;
+    f32 pos[3];
+
+    if ((actor->unk31C != NULL) && ((u8)actor->unk31C->unk95 != 0)) {
         return;
     }
-    sp30[0] = *((f32 *)(v1 + 0x14));
-    if (D_800A8F80 < (*((f32 *)(v1 + 0x118)))) {
-        sp30[1] = (*((f32 *)(v1 + 0x118))) + 100.0f;
+    pos[0] = actor->x_position;
+    if (-9500.0f < actor->unk118) {
+        pos[1] = actor->unk118 + 100.0f;
     } else {
-        sp30[1] = (*((f32 *)(v1 + 0x18))) + 150.0f;
+        pos[1] = actor->y_position + 150.0f;
     }
-    sp30[2] = *((f32 *)(v1 + 0x1C));
-    if (func_15045800(sp30, 0, sp30[1] - 300.0f, (s32)(arg0 + 0x34)) != 0) {
-        sp30[1] = *((f32 *)(arg0 + 0x34));
-        func_151ABE40(sp30, (s32)(arg0 + 0x34), 1, arg0[0xC], arg0[0x1]);
-        func_10010FFC(0, 8, 0x6978, 0, 0, (s32)v1);
+    pos[2] = actor->z_position;
+    if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
+        pos[1] = task->hit.height;
+        func_151ABE40(pos, &task->hit, 1, task->unkC, task->unk1);
+        func_10010FFC(0, 8, 0x6978, 0, 0, actor);
     }
-    func_151AA264(v1, (s32)(arg0 + 0x34));
-    func_151ABE00(v1);
+    func_151AA264(actor, &task->hit);
+    func_151ABE00(actor);
 }
 
-void func_151A9DC0(u8 *arg0) {
-    u8 *v1 = *((u8 **)(arg0 + 0x18));
-    f32 sp30[3];
-    s32 temp;
+void func_151A9DC0(ActorTask *task) {
+    struct127 *actor = task->actor;
 
-    goto dummy_label_151A9DC0; dummy_label_151A9DC0: ;
-    sp30[0] = *((f32 *)(v1 + 0x14));
-    if (D_800A8F84 < (*((f32 *)(v1 + 0x118)))) {
-        sp30[1] = (*((f32 *)(v1 + 0x118))) + 100.0f;
-    } else {
-        sp30[1] = (*((f32 *)(v1 + 0x18))) + 150.0f;
-    }
-    sp30[2] = *((f32 *)(v1 + 0x1C));
-    temp = (s32)(arg0 + 0x34);
-    if (func_15045800(sp30, 0, sp30[1] - 300.0f, temp) != 0) {
-        sp30[1] = *((f32 *)(arg0 + 0x34));
-        func_151ABE40(sp30, temp, 2, arg0[0xC], arg0[0x1]);
-        func_10010FFC(0, 0x11, 0x5208, 0, 0, (s32)v1);
-    }
-}
+    {
+        f32 pos[3];
+        GroundHit *hit;
 
-void func_151A9EC0(u8 *arg0) {
-    u8 *v1 = *((u8 **)(arg0 + 0x18));
-    f32 sp30[3];
-    s32 temp;
-
-    goto dummy_label_151A9EC0; dummy_label_151A9EC0: ;
-    sp30[0] = *((f32 *)(v1 + 0x14));
-    if (D_800A8F88 < (*((f32 *)(v1 + 0x118)))) {
-        sp30[1] = (*((f32 *)(v1 + 0x118))) + 100.0f;
-    } else {
-        sp30[1] = (*((f32 *)(v1 + 0x18))) + 150.0f;
-    }
-    sp30[2] = *((f32 *)(v1 + 0x1C));
-    temp = (s32)(arg0 + 0x34);
-    if (func_15045800(sp30, 0, sp30[1] - 300.0f, temp) != 0) {
-        sp30[1] = *((f32 *)(arg0 + 0x34));
-        func_151ABE40(sp30, temp, 2, arg0[0xC], arg0[0x1]);
-        func_10010FFC(0, 8, 0x6978, 0, 0, (s32)v1);
-    }
-    func_151AA264(v1, temp);
-    func_151ABE00(v1);
-}
-
-void func_151A9FC8(u8 *arg0) {
-    u8 *v0 = *((u8 **)(arg0 + 0x18));
-    f32 sp30[3];
-
-    goto dummy_label_151A9FC8; dummy_label_151A9FC8: ;
-    sp30[0] = *((f32 *)(v0 + 0x14));
-    if (D_800A8F8C < (*((f32 *)(v0 + 0x118)))) {
-        sp30[1] = (*((f32 *)(v0 + 0x118))) + 100.0f;
-    } else {
-        sp30[1] = (*((f32 *)(v0 + 0x18))) + 150.0f;
-    }
-    sp30[2] = *((f32 *)(v0 + 0x1C));
-    ((s32 *)sp30)[-1] = (s32)(arg0 + 0x34);
-    if (func_15045800(sp30, 0, sp30[1] - 300.0f, (s32)(arg0 + 0x34)) != 0) {
-        sp30[1] = *((f32 *)(arg0 + 0x34));
-        func_151ABE40(sp30, ((s32 *)sp30)[-1], 4, arg0[0xC], arg0[0x1]);
+        pos[0] = actor->x_position;
+        if (-9500.0f < actor->unk118) {
+            pos[1] = actor->unk118 + 100.0f;
+        } else {
+            pos[1] = actor->y_position + 150.0f;
+        }
+        pos[2] = actor->z_position;
+        hit = &task->hit;
+        if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
+            pos[1] = task->hit.height;
+            func_151ABE40(pos, hit, 2, task->unkC, task->unk1);
+            func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
+        }
     }
 }
 
-void func_151AA09C(u8 *arg0) {
-    u8 *v1 = *((u8 **)(arg0 + 0x18));
-    f32 sp30[3];
+void func_151A9EC0(ActorTask *task) {
+    struct127 *actor = task->actor;
 
-    goto dummy_label_151AA09C; dummy_label_151AA09C: ;
-    sp30[0] = *((f32 *)(v1 + 0x14));
-    if (D_800A8F90 < (*((f32 *)(v1 + 0x118)))) {
-        sp30[1] = (*((f32 *)(v1 + 0x118))) + 100.0f;
-    } else {
-        sp30[1] = (*((f32 *)(v1 + 0x18))) + 150.0f;
+    {
+        f32 pos[3];
+        GroundHit *hit;
+
+        pos[0] = actor->x_position;
+        if (-9500.0f < actor->unk118) {
+            pos[1] = actor->unk118 + 100.0f;
+        } else {
+            pos[1] = actor->y_position + 150.0f;
+        }
+        pos[2] = actor->z_position;
+        hit = &task->hit;
+        if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
+            pos[1] = task->hit.height;
+            func_151ABE40(pos, hit, 2, task->unkC, task->unk1);
+            func_10010FFC(0, 8, 0x6978, 0, 0, actor);
+        }
     }
-    sp30[2] = *((f32 *)(v1 + 0x1C));
-    ((s32 *)sp30)[-1] = (s32)(arg0 + 0x34);
-    if (func_15045800(sp30, 0, sp30[1] - 300.0f, (s32)(arg0 + 0x34)) != 0) {
-        sp30[1] = *((f32 *)(arg0 + 0x34));
-        func_151ABE40(sp30, ((s32 *)sp30)[-1], 4, arg0[0xC], arg0[0x1]);
+    func_151AA264(actor, &task->hit);
+    func_151ABE00(actor);
+}
+
+void func_151A9FC8(ActorTask *task) {
+    struct127 *actor = task->actor;
+
+    {
+        f32 pos[3];
+
+        pos[0] = actor->x_position;
+        if (-9500.0f < actor->unk118) {
+            pos[1] = actor->unk118 + 100.0f;
+        } else {
+            pos[1] = actor->y_position + 150.0f;
+        }
+        pos[2] = actor->z_position;
+        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
+            pos[1] = task->hit.height;
+            func_151ABE40(pos, &task->hit, 4, task->unkC, task->unk1);
+        }
+    }
+}
+
+void func_151AA09C(ActorTask *task) {
+    struct127 *actor = task->actor;
+
+    {
+        f32 pos[3];
+
+        pos[0] = actor->x_position;
+        if (-9500.0f < actor->unk118) {
+            pos[1] = actor->unk118 + 100.0f;
+        } else {
+            pos[1] = actor->y_position + 150.0f;
+        }
+        pos[2] = actor->z_position;
+        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
+            pos[1] = task->hit.height;
+            func_151ABE40(pos, &task->hit, 4, task->unkC, task->unk1);
+        }
     }
 }
 
 void func_151AA170(s32 arg0) {
 }
 
-struct s_151AA210_arg {
-    char pad0[0x18];
-    s32 unk18;
-    u8 unk1C;
-};
+typedef struct {
+    /* 0x00 */ u8 pad0[0x18];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+} Task151AA17C;
 
-struct s_151AA210_buf {
-    s32 unk0;
-    u8 unk4;
-};
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ u8 unk4;
+} Msg151AA17C;
 
 extern void func_15147D64(s32, s32);
-extern void func_1519F3B8(struct s_151AA210_arg *);
-
-void func_151AA17C(struct s_151AA210_arg *arg0) {
-    s32 temp;
-    struct s_151AA210_buf sp1C;
-
-    temp = arg0->unk18;
-    sp1C.unk0 = temp;
-    sp1C.unk4 = arg0->unk1C;
-    temp = (s32)&sp1C;
-    func_15147D64(temp, 0xA);
-    func_151494E0(temp, 0xA);
-    func_1519F3B8(arg0);
-}
-
+extern void func_1519F3B8(Task151AA17C *);
 extern void func_1519F400(void);
+
+void func_151AA17C(Task151AA17C *task) {
+    s32 word;
+    Msg151AA17C msg;
+
+    word = task->unk18;
+    msg.unk0 = word;
+    msg.unk4 = task->unk1C;
+    word = (s32)&msg; // matching: one int local reused for &msg; a pointer local is rematerialized instead
+    func_15147D64(word, 10);
+    func_151494E0(word, 10);
+    func_1519F3B8(task);
+}
 
 void func_151AA1D0(void) {
     func_1519F400();
@@ -302,17 +330,17 @@ void func_151AA1F0(void) {
     func_1519F400();
 }
 
-void func_151AA210(struct s_151AA210_arg *arg0) {
-    s32 temp;
-    struct s_151AA210_buf sp1C;
+void func_151AA210(Task151AA17C *task) {
+    s32 word;
+    Msg151AA17C msg;
 
-    temp = arg0->unk18;
-    sp1C.unk0 = temp;
-    sp1C.unk4 = arg0->unk1C;
-    temp = (s32)&sp1C;
-    func_15147D64(temp, 0xA);
-    func_151494E0(temp, 0xA);
-    func_1519F3B8(arg0);
+    word = task->unk18;
+    msg.unk0 = word;
+    msg.unk4 = task->unk1C;
+    word = (s32)&msg; // matching: one int local reused for &msg; a pointer local is rematerialized instead
+    func_15147D64(word, 10);
+    func_151494E0(word, 10);
+    func_1519F3B8(task);
 }
 
 void func_151AA264(void *arg0, s32 arg1) {
@@ -1020,26 +1048,28 @@ s32 func_151AB180(u8 *arg0) {
     return 0;
 }
 
-void func_151AB1C4(u8 *arg0) {
-    u8 *v1 = *((u8 **)(arg0 + 0x18));
-    f32 sp30[3];
-    s32 temp;
+void func_151AB1C4(ActorTask *task) {
+    struct127 *actor = task->actor;
 
-    goto dummy_label_151AB1C4; dummy_label_151AB1C4: ;
-    sp30[0] = *((f32 *)(v1 + 0x14));
-    if (D_800A8FEC < (*((f32 *)(v1 + 0x118)))) {
-        sp30[1] = (*((f32 *)(v1 + 0x118))) + 100.0f;
-    } else {
-        sp30[1] = (*((f32 *)(v1 + 0x18))) + 150.0f;
+    {
+        f32 pos[3];
+        GroundHit *hit;
+
+        pos[0] = actor->x_position;
+        if (-9500.0f < actor->unk118) {
+            pos[1] = actor->unk118 + 100.0f;
+        } else {
+            pos[1] = actor->y_position + 150.0f;
+        }
+        pos[2] = actor->z_position;
+        hit = &task->hit;
+        if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
+            pos[1] = task->hit.height;
+            func_151ABE40(pos, hit, 3, task->unkC, task->unk1);
+            func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
+        }
     }
-    sp30[2] = *((f32 *)(v1 + 0x1C));
-    temp = (s32)(arg0 + 0x34);
-    if (func_15045800(sp30, 0, sp30[1] - 300.0f, temp) != 0) {
-        sp30[1] = *((f32 *)(arg0 + 0x34));
-        func_151ABE40(sp30, temp, 3, arg0[0xC], arg0[0x1]);
-        func_10010FFC(0, 0x11, 0x5208, 0, 0, (s32)v1);
-    }
-    func_151AA264(v1, temp);
+    func_151AA264(actor, &task->hit);
 }
 
 void *func_151AB2C4(struct_151AB2C4_arg *arg0, s32 arg1) {
