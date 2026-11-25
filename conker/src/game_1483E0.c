@@ -5,6 +5,14 @@
 #undef func_15048A40
 #include "variables.h"
 
+/*
+ * Per-type update routines for 0xA0-byte level objects (the D_800DBEF4 array, struct131).
+ * Shared layout: rotation f32[3] at 0x0, position s16[3] at 0x10, vertex count at 0x16,
+ * vertex buffers at 0x20 (double-buffered by D_800BE9C0) and 0x28 (source), packed param at
+ * 0x3C, mode in the low two bits of 0x73 (0 closed, 1 closing, 2 opening, 3 open), alpha at
+ * 0x8A, and per-type state at 0x7C-0x87. Each routine views the object through its own struct.
+ */
+
 extern f32 func_15048A40(u8);
 extern f32 func_150489B0(u8);
 extern void *allocate_memory(s32, s32, s32, s32);
@@ -17,29 +25,6 @@ extern void func_1518804C(s32, f32);
 extern void func_15173C60(s32, s32);
 extern void func_15060A30(s32, void *);
 extern void func_1511A494(void *, s32 *, s32 *);
-
-/* Per-character trap state that func_1511BEBC drives while a character is caught. */
-struct CharacterTrap {
-    u8 pad0[0x6B];
-    u8 state;
-    s16 x;
-    s16 y;
-    s16 z;
-};
-
-/* The 0x32C-byte character object (struct127) as func_1511BEBC sees it. */
-struct TrapCharacter {
-    u8 pad0[0x14];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad20[0xC6];
-    s16 height;
-    u8 padE8[0x234];
-    struct CharacterTrap *trap;
-    u8 pad320[0xC];
-};
-
 
 struct Obj1511AF30 {
     f32 rotX;
@@ -548,13 +533,35 @@ struct Obj1511BEBC {
     s16 y;
     s16 z;
     u8 pad16[0x1E];
-    f32 scale;
+    f32 scaleZ;
     u8 pad38[0x3B];
     u8 flags;
     u8 pad74[0x8];
     s32 restAndTimer; /* low 16 bits: rest height, high 16 bits: timer */
     s32 triggered;
     f32 velocity;
+};
+
+/* Per-character trap state that func_1511BEBC drives while a character is caught. */
+struct CharacterTrap {
+    u8 pad0[0x6B];
+    u8 state;
+    s16 x;
+    s16 y;
+    s16 z;
+};
+
+/* The 0x32C-byte character object (struct127) as func_1511BEBC sees it. */
+struct TrapCharacter {
+    u8 pad0[0x14];
+    f32 x;
+    f32 y;
+    f32 z;
+    u8 pad20[0xC6];
+    s16 height;
+    u8 padE8[0x234];
+    struct CharacterTrap *trap;
+    u8 pad320[0xC];
 };
 
 /* The 0x9A0-byte player (struct108) as func_1511BEBC sees it. */
@@ -597,7 +604,7 @@ void func_1511BEBC(struct Obj1511BEBC *obj) {
     triggered = obj->triggered;
     velocity = obj->velocity;
     if (D_800BE9F0 == 10) {
-        radiusSq = (obj->scale * 100.0f) * (obj->scale * 100.0f);
+        radiusSq = (obj->scaleZ * 100.0f) * (obj->scaleZ * 100.0f);
         if (obj->restAndTimer == 0) {
             if (obj->y == 0) {
                 obj->y = 1;
@@ -742,6 +749,7 @@ void func_1511BEBC(struct Obj1511BEBC *obj) {
     }
 }
 
+/* Update routine for objects that need none. */
 void func_1511C540(void) {
 }
 
