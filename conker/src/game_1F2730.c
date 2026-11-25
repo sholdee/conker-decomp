@@ -12,7 +12,6 @@ void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4);
 void func_151C56A4(f32 *pos, u8 arg1, s32 arg2);
 
 /* Model-space points that func_1514654C transforms through model part 0x46 into world space. */
-extern Vec3f D_800AAA90;
 extern Vec3f D_800AAAA8;
 
 /* Spawns a func_151C229C effect along a segment at `obj`: offset along func_15145740's `dir` from its
@@ -84,7 +83,6 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 extern void func_15102B38(Actor *, u8, Vec3f *, Vec3f *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
-extern Vec3f D_800AAA9C;
 
 /* Spawns a func_15102B38 effect at `pos` on `obj` with randomized scale and parameters. */
 void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4) {

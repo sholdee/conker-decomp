@@ -391,7 +391,6 @@ typedef struct {
 
 extern s8 D_800E0BF4;
 extern s32 D_80090214[];
-extern f32 D_800C3678;
 
 extern void func_1501C730(s32, s32, s32, s32, s32);
 extern void func_15023440(SeqSubtitle *, s32);
@@ -1207,7 +1206,6 @@ typedef struct {
 } Ev151D8868;
 
 extern s32 D_8008CA50;
-extern f32 *D_800AAA90;
 typedef struct {
     u8 c[3][6];
 } EvColors;
@@ -1968,7 +1966,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                                     f32 *p1;
                                     f32 *p2;
 
-                                    p1 = (f32 *)&D_800AAA90;
+                                    p1 = &D_800AAA90.x;
                                     p2 = vec;
                                     if (func_1514654C(obj, bone, 0, &p1, &p2, 1) != 0) {
                                         func_151C5588(obj, vec, 0x46, sceneTag, 1);

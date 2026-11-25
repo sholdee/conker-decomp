@@ -295,7 +295,6 @@ s32 func_1501CFF8(s32 scene) {
 }
 
 extern f32 D_800C35A4;
-extern f32 D_800C3678;
 void func_150233BC(void);
 
 /* Reset the per-scene cutscene state before a new script is loaded. */

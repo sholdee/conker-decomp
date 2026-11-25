@@ -2306,7 +2306,6 @@ typedef struct Entry1505C1E4 {
     /* 0x26 */ u8 pad26[2];
 } Entry1505C1E4;
 
-extern f32 D_800CC270, D_800CC274, D_800CC278;
 f32 func_1506AD30(Actor *, f32, s32, s32);
 void func_151AE264(Actor *);
 void func_151E5FF4(void *, Actor *, u8);

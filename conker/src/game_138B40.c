@@ -9,7 +9,6 @@ extern Gfx *D_800B0E08;
 // matching: 0x800D35E4 has no symbol; addressing it as D_800D35E0[1] lets IDO share one %hi, the original doesn't
 
 #define D_800D35E4 ((&D_800D35E8)[-1])
-extern s32 D_800D9E28;
 
 void func_150A7A48(MtxF a, MtxF b, MtxF out);
 void func_1501B22C(s32 view);
@@ -117,7 +116,7 @@ Gfx *func_1510B9D0(Gfx *gfx, s16 view) {
     }
     gfx = func_1515D914(gfx, view, D_800DBFF0[view].eye.x, D_800DBFF0[view].eye.y, D_800DBFF0[view].eye.z, 0,
                         D_800D9E10[view], D_800D9E20, D_800D9BD0[view][D_800BE9C0], &D_800D9E21, 1, 0, 0x25,
-                        &D_800D9E28);
+                        D_800D9E28);
     if (!skipWorld) {
         if (D_800BE9F0 != 5) {
             if (D_800BEAAA) {

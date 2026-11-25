@@ -807,6 +807,8 @@ extern f32 D_800A6B08;
 extern f32 D_800A6B0C;
 extern f32 D_800A6B10;
 
+extern Vec3f D_800AAA90; // bone-attachment offset (zero point)
+extern Vec3f D_800AAA9C;
 extern u16 D_800AB140[];
 extern s32 D_800AB168[1];
 // game_2062D0.c
@@ -1028,6 +1030,7 @@ extern u8  D_800C3670;
 extern u8  D_800C3671;
 extern u8 D_800C3672;
 extern f32 D_800C3674;
+extern f32 D_800C3678; // camera transition parameter (999.0f = unset); D_800C367C is its duration
 extern s32 D_800C367C;
 extern u8 D_800C3680;
 extern u8  D_800C3681;
@@ -1137,6 +1140,9 @@ extern s32 D_800CC268;
 extern u8 D_800CC26C;
 extern u8 D_800CC26D;
 extern u8  D_800CC26E;
+extern f32 D_800CC270; // attacker position saved at the hit (x, z, y)
+extern f32 D_800CC274;
+extern f32 D_800CC278;
 extern u8  D_800CC27C;
 extern s32 D_800CC280;
 extern OSContPad *D_800CC284; // the current player's controller input
@@ -1329,6 +1335,8 @@ extern u8 *D_800D3668; // per-face shadow flag table
 extern u8 *D_800D366C; // end of D_800D3668
 extern f32 D_800D3670;
 extern s16 D_800D3674;
+extern u16 D_800D37E0[40]; // grid-query result: triangle indices (u16 list for func_150A43E0 / func_150A44F0)
+extern u16 D_800D3830[]; // second grid-query triangle index buffer
 extern s32 D_800D3840;
 extern s32 D_800D3858;
 
@@ -1389,6 +1397,7 @@ extern u8  D_800D9E20;
 extern MtxF D_800D9C10[]; // per view: view matrix
 extern MtxF D_800D9D10[]; // per view: view matrix * projection
 extern u8 D_800D9E21; // light count byte func_1515D914 stored for player 0
+extern PointLight *D_800D9E28[]; // point lights func_1515D914 picked this frame
 extern u8  D_800D9E64;
 extern u16 D_800D9E70[4][3];
 extern u8 D_800D9E88[4][3];

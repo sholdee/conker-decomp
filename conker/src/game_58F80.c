@@ -58,7 +58,6 @@ extern ObjTexture *D_800C5338[];
 extern D_800C666FEntry D_800C666F[];
 extern u8 D_800C3E98[];
 extern u8 D_C3E98[];
-extern u8 D_800D9E28[];
 extern MtxF D_800D2CA8[]; // view matrix per player
 extern u8 D_800832C0[];
 extern u8 *D_8008422C[];

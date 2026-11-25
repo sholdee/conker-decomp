@@ -1006,10 +1006,9 @@ void func_151872B0(s32 level) {
 }
 
 
-extern void func_150A44F0(s32, s16 *, s32);
-extern ShadowVtx *func_150A5E44(s16 *, ShadowVtx *, f32 *, ShadowVtx *);
+extern void func_150A44F0(s32, u16 *, s32);
+extern ShadowVtx *func_150A5E44(u16 *, ShadowVtx *, f32 *, ShadowVtx *);
 
-extern s16 D_800D37E0[];
 extern s32 D_800DF0E4;
 
 /*

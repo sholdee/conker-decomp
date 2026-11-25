@@ -648,7 +648,6 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
     return 1;
 }
 
-extern u8 D_800D9E28[];
 extern void func_1502D54C(s32, s32 *);
 extern void func_1502D630(Actor *, s32 *, s32, s32);
 extern void func_1502CC34(Actor *, s32, s32, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *);
