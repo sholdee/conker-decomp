@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_151D5D60();
+extern void func_151D5D60(u8 **buffers, s16 index, s32 size, void **out, u8 *isNew);
 
 /* Particle spawn descriptor passed to func_15149550. */
 typedef struct {
@@ -537,7 +537,7 @@ void func_1514B364(struct17 *position, Struct1514B364Hit *ground, u8 arg2, s32 a
         spawn.unk66 = 12;
         spawn.unk68 = 1;
         spawn.unk6A = 0;
-        spawn.unk6C = 1.f;
+        spawn.unk6C = 1.0; // matching: a double literal; 1.0f loads differently
         spawn.unk70 = -1;
         spawn.unk71 = 0;
         spawn.unk72 = -1;
@@ -746,7 +746,7 @@ void *func_1514B8E4(struct17 *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3,
     } else {
         flag = 0;
     }
-    particle = func_1513D2F0(&desc, (s32)&D_800A4AA0, arg8, arg9, argA, 0x1C, flag | 2, 0, 0, argF + 0x50, arg10, arg11);
+    particle = func_1513D2F0(&desc, (s32)&D_800A4AA0, arg8, arg9, argA, 28, flag | 2, 0, 0, argF + 80, arg10, arg11);
     if (particle != NULL) {
         memcpy((u8 *)particle + 0x110, &extra, sizeof(extra));
     }
