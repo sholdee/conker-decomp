@@ -2,6 +2,8 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "libc/stdlib.h"
+#include "libc/string.h"
 
 void func_10004074(void *ptr);
 void func_10005BE0(void);
@@ -56,15 +58,12 @@ void func_100014C4(s32 arg0) {
     __osRestoreInt(saveMask);
 }
 
-// this is a loopy mutha. contains delay slot so insert nop after .L1000183C
+/* printf conversion state (libultra xstdio.h). */
 typedef struct {
-    long quot;
-    long rem;
-} ldiv_t;
-ldiv_t ldiv(long num, long denom);
-
-typedef struct {
-    union { long long ll; double ld; } v;
+    union {
+        long long ll;
+        double ld;
+    } v;
     unsigned char *s;
     int n0;
     int nz0;
@@ -79,12 +78,14 @@ typedef struct {
     char qual;
 } _Pft;
 
-void *memcpy(void *, const void *, unsigned int);
-extern double D_8002BF20[];
-extern char D_8002BF68[];
-extern char D_8002BF6C[];
-extern double D_8002BF78;
-s16 func_100019F0(s16 *arg0, struct05 *arg1);
+#define FLAGS_MINUS 4
+#define FLAGS_HASH 8
+#define FLAGS_ZERO 16
+
+/* 10^(2^i): scales the value by powers of ten one exponent bit at a time. */
+static const double sPowersOfTen[] = { 1e1, 1e2, 1e4, 1e8, 1e16, 1e32, 1e64, 1e128, 1e256 };
+
+s16 func_100019F0(s16 *pex, _Pft *px);
 void func_10001AA8(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp);
 
 /* _Ldtob (libultra xldtob.c). Unlike the SDK, this copy builds its 0.0/1.0 constants as
@@ -113,9 +114,9 @@ void func_10001550(void *arg0, unsigned char code) {
         px->prec = 1;
     }
 
-    err = func_100019F0(&xexp, (struct05 *)px);
+    err = func_100019F0(&xexp, px);
     if (err > 0) {
-        memcpy(px->s, err == 2 ? D_8002BF68 : D_8002BF6C, px->n1 = 3);
+        memcpy(px->s, err == 2 ? "NaN" : "Inf", px->n1 = 3);
         return;
     } else if (err == 0) {
         nsig = 0;
@@ -134,7 +135,7 @@ void func_10001550(void *arg0, unsigned char code) {
 
                 for (i = 0; n > 0; n >>= 1, i++) {
                     if (n & 1) {
-                        ldval *= D_8002BF20[i];
+                        ldval *= sPowersOfTen[i];
                     }
                 }
             } else if (xexp > 0) {
@@ -144,7 +145,7 @@ void func_10001550(void *arg0, unsigned char code) {
 
                 for (n = xexp, i = 0; n > 0; n >>= 1, i++) {
                     if (n & 1) {
-                        factor *= D_8002BF20[i];
+                        factor *= sPowersOfTen[i];
                     }
                 }
 
@@ -163,7 +164,7 @@ void func_10001550(void *arg0, unsigned char code) {
                 long lo = ldval;
 
                 if ((gen -= 8) > 0) {
-                    ldval = (ldval - lo) * D_8002BF78;
+                    ldval = (ldval - lo) * 1e8;
                 }
 
                 for (p += 8, j = 8; lo > 0 && --j >= 0;) {
@@ -212,43 +213,31 @@ void func_10001550(void *arg0, unsigned char code) {
 }
 
 
-s16 func_100019F0(s16 *arg0, struct05 *arg1) {
-    s16 temp_v1 = (arg1->unk0 & 0x7FF0) >> 4;
+/* _Ldunscale (libultra xldtob.c): splits the double in px into its binary exponent
+ * (stored to *pex) and a fraction in [0.5, 1). Returns 2 for NaN, 1 for infinity,
+ * -1 for a finite nonzero value and 0 for zero. */
+s16 func_100019F0(s16 *pex, _Pft *px) {
+    u16 *ps = (u16 *)px;
+    s16 xchar = (ps[0] & 0x7FF0) >> 4;
 
-    if (temp_v1 == 0x7FF) {
-        s32 ret;
-        *arg0 = 0;
-        if ((arg1->unk0 & 0xF) || (arg1->unk2) || (arg1->unk4) || (arg1->unk6)) {
-            ret = 2;
-        }
-        else {
-            ret = 1;
-        }
-        return ret;
-    }
-
-    if (temp_v1 > 0) {
-        arg1->unk0 = (arg1->unk0 & 0x800F) | 0x3FF0;
-        *arg0 = temp_v1 - 0x3FE; // 1022
+    if (xchar == 0x7FF) {
+        *pex = 0;
+        return (ps[0] & 0xF) || ps[1] || ps[2] || ps[3] ? 2 : 1;
+    } else if (xchar > 0) {
+        ps[0] = (ps[0] & 0x800F) | 0x3FF0;
+        *pex = xchar - 0x3FE;
         return -1;
+    } else if (xchar < 0) {
+        return 2;
+    } else {
+        *pex = 0;
+        return 0;
     }
-
-    if (temp_v1 < 0) {
-      return 2;
-    }
-
-    *arg0 = 0;
-    return 0;
 }
-
-
-#define FLAGS_HASH 8
-#define FLAGS_ZERO 16
-#define FLAGS_MINUS 4
 
 void func_10001AA8(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp) {
     if (nsig <= 0) {
-        p = D_8002BF70;
+        p = (unsigned char *)"0";
         nsig = 1;
     }
 
