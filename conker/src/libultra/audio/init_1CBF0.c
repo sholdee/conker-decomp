@@ -1,4 +1,4 @@
-/* n_synthInternals.h declares n_alFxNew with the heap and bus swapped; the real signature is below. */
+/* n_synthInternals.h declares n_alFxNew over ALFx/ALSynConfig; this file defines it over its own N_ALFx/N_ALSynConfig. */
 #define n_alFxNew n_alFxNew_hdr_decl
 #include "n_synthInternals.h"
 #undef n_alFxNew

@@ -134,7 +134,6 @@ s32  func_10012E04(s32 *arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5);
 s32  func_10012F94(struct124 *arg0, f32 *arg1);
 void func_100131D8(s32 *arg0);
 void func_100131FC(struct13 *arg0, s32 arg1);
-s32  func_10015878(struct04 *arg0);
 void func_10016E90(SndState *arg0);
 void func_10016F00(SndState *state);
 SndState *func_10017100(s32 arg0, s16 arg1);
@@ -148,13 +147,12 @@ void func_10017870(u8 arg0);
 void func_10017944(s32 arg0, u32 arg1);
 
 
-void n_alInit(struct07 *arg0, s32 arg1);
+void n_alInit(void *globals, void *config);
 void n_alClose(s32 arg0);
 s32  _n_timeToSamplesNoRound(s32 micros);
 s32  _n_timeToSamples(s32 micros);
 f32  alCents2Ratio(s32 arg0);
 void func_1001A3E0(struct24 *arg0, s32 arg1, s32 arg2, s32 arg3);
-s32  __n_vsDelta(struct07 *arg0, s32 arg1);
 void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]);
 void func_1001CD54(struct125 *arg0);
 f32  func_1001CEA4(s32 arg0);
@@ -863,8 +861,6 @@ void func_10001550(void *arg0, u8 arg1);
 // s32  func_10002DB0(s32 arg0, s32 arg1);
 //func_10002E50
 void func_100030A0(OSPri priority, OSMesgQueue *mesgQueue, OSMesg *arg2, s32 arg3);
-struct00* func_10003220(struct00 *arg0);
-void func_10003330(struct00 *arg0);
 //func_100034E0
 //func_10003658
 // void func_100038C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);

@@ -116,8 +116,6 @@ extern u16  D_8002B9F4[]; /* default music eventMasks */
 
 extern s16  D_8002BA30;
 
-extern struct07  *D_8002BA40;
-extern struct07  *D_8002BA44;
 
 extern s16  D_8002BC10[];
 extern s16  D_8002BD0E[];

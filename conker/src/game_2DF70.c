@@ -1082,7 +1082,7 @@ s32 func_15002FA0(s32 value) {
  * expected one, the table length unk12 is halved.
  */
 void func_15002FB4(s32 map) {
-    struct00 *res; // TBD
+    LevelSettingsAsset *res;
     s32 count;
     s32 loaded;
     LevelHeader *info;
@@ -1090,7 +1090,7 @@ void func_15002FB4(s32 map) {
 
     res = func_1502B6BC(&loaded, 0, &count, 2, 21, map);
     if (count != 0 && (res->unk4 << 8) != 0) {
-        D_800B0DF0 = res->unk0;
+        D_800B0DF0 = res->header;
         if (loaded == 0) {
             D_8003C8E0 = 0xC000037;
             func_150AD770();
@@ -1111,7 +1111,7 @@ void func_15002FB4(s32 map) {
     info = D_800B0DF0;
     if (info->unk12 != 0) {
         D_800D2F3C = info->unk12;
-        D_800D2F40 = res->unk8;
+        D_800D2F40 = res->idList;
     } else {
         D_800D2F3C = 0;
         D_800D2F40 = NULL;

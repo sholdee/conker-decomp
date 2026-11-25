@@ -26,53 +26,6 @@ struct QuadSprite;
   uw -> unsigned word (u16)
 */
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;   // used
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;  // used
-} struct00; // size 0x1C
-
-typedef struct {
-    s16 unk0;   // used
-    s16 unk2;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;  // used
-    s32 unk18;  // used
-    s32 unk1C;
-    s32 unk20;
-    u16 unk24;  // used
-    s16 unk26;
-    s16 unk28;  // used
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s8  unk30;
-    s8  unk31;
-    s8  unk32;
-    s8  unk33;
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    s32 unk48;  // used
-    s32 unk4C;  // used
-    s32 unk50;  // used
-    s32 unk54;
-    s32 unk58;
-    s32 unk5C;
-    s32 unk60;
-    u8  unk64;
-    u8  unk65;
-} struct04;
-
 struct struct12 {
     s32 unk0;
     s32 unk4;
@@ -83,63 +36,6 @@ struct struct12 {
     s32 unk10;
     s32 unk14;
 };
-
-typedef struct {
-    s32 unk0;
-} struct36;
-
-/* One synthesizer aux bus as game code sees it (struct07.unk48 = n_syn->auxBus, stride 0x44; init_1E4A0.c
- * creates its effect at unk20). The audio files use their own views (init_1E530.c FxBus, init_210C0.c AuxBus,
- * N_ALAuxBus in n_synthInternals.h), which do not agree on every field. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    s32 unk30;
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    s32 unk40;
-} struct37; /* size 0x44 */
-
-typedef struct {
-    s32 unk0;     // used
-    s32 unk4;     // used
-    s32 unk8;     // used
-    s32 unkC;     // used
-    s32 unk10;    // used
-    s32 unk14;    // used
-    s32 unk18;    // used
-    s32 unk1C;    // used
-    s32 unk20;    // used
-    s32 unk24;    // used
-    s32 unk28;    // used
-    void (*unk2C)(s32 arg0);
-    s32 unk30;
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    struct36 *unk40;
-    s32 unk44;    // used
-    struct37 *unk48; // used: the aux buses
-    s32 unk4C;    // used
-    s32 unk50;    // used
-    s32 unk54;
-    s32 unk58;
-    s32 unk5C;
-    s32 unk60;
-    s32 unk64;
-    s32 unk68;
-} struct07;
 
 typedef struct {
     s32 unk0;
@@ -410,6 +306,21 @@ typedef struct TimedEffect {
     /* 0x24 */ u8 pad24[4];
 } TimedEffect; /* size 0x28; the effect's data follows */
 
+/* Position data of an object emitter (a TimedEffect from func_151491F4 whose expire callback
+ * func_15193390, game_1C0840.c, spawns object type 0x45 there). */
+typedef struct EmitterPos {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 floorY; // -10000 = no floor
+    /* 0x08 */ u8 unk8;
+} EmitterPos;
+
+typedef struct ObjectEmitter {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ EmitterPos pos;
+} ObjectEmitter;
+
 /* Music settings of a level (LevelHeader.music), applied by func_150000B0: up to two songs, each with
  * two parameters (func_1000E40C / func_1000E46C). */
 typedef struct LevelMusic {
@@ -469,6 +380,14 @@ typedef struct LevelHeader {
     /* 0x4A */ u8  unk4A;           // callback, D_8008600C
     /* 0x4B */ u8  assetList;       // index into D_80082B20, 0 = none
 } LevelHeader; // size 0x4C
+
+/* The level settings resource as returned by func_1502B6BC (table 21, func_15002FB4): the
+ * LevelHeader and the id list published as D_800D2F40. */
+typedef struct LevelSettingsAsset {
+    /* 0x00 */ LevelHeader *header;
+    /* 0x04 */ s32 unk4;     // low 24 bits nonzero when present
+    /* 0x08 */ u16 *idList;  // D_800D2F40, LevelHeader.unk12 entries
+} LevelSettingsAsset;
 
 /* A ring buffer of length-prefixed messages (game_70200.c: func_15043A00 / func_15043BB8 / func_15043CA4). */
 typedef struct MsgRing {

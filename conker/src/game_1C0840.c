@@ -26,19 +26,6 @@ typedef struct ObjectSpawn {
     /* 0xA5 */ u8 padA5[0xB]; // matching: the frame needs 0xB0 bytes, though only 0xA8 are cleared
 } ObjectSpawn;
 
-typedef struct EmitterPos {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 floorY; // -10000 = no floor
-    /* 0x08 */ u8 unk8;
-} EmitterPos;
-
-typedef struct ObjectEmitter {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterPos pos;
-} ObjectEmitter;
-
 /*
  * Spawns object type 0x45 at the emitter's position, resting on its floor height (or 200 units
  * below it, clearing pos.unk8, when it has none), then rearms the emitter's cooldown to 100..227.

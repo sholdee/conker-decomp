@@ -165,7 +165,7 @@ void n_alSynNew(ALSynConfig *c) {
     }
     SYN->unk3C = heap;
 }
-// void n_alSynNew(struct07 *arg0) {
+// void n_alSynNew(ALSynConfig *arg0) {
 //     s32 sp44;
 //     // s32 sp40;
 //     // void *sp3C;

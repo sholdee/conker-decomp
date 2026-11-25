@@ -1,9 +1,7 @@
 #include <ultra64.h>
 
-#include "functions.h"
-#include "variables.h"
-
+#include "n_libaudio.h"
 
 void n_alSynDelete(void) {
-    D_8002BA44->unk0 = 0;
+    n_syn->head = NULL;
 }
