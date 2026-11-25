@@ -17,6 +17,8 @@ void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 #define D_800D2590 D_800D2590_hdr
 #define D_800D2454 D_800D2454_hdr
 #define D_800D23D0 D_800D23D0_hdr
+#define D_800D244C D_800D244C_hdr
+#define D_800BE628 D_800BE628_hdr
 #include "variables.h"
 #undef D_800D24C8
 #undef D_800D2460
@@ -24,6 +26,8 @@ void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 #undef D_800D2590
 #undef D_800D2454
 #undef D_800D23D0
+#undef D_800D244C
+#undef D_800BE628
 extern s32 func_150ADA20(void);
 void func_1508F9F4(void);
 void func_1508F0D4(void);
@@ -33,6 +37,19 @@ extern f32 D_800D2890[3];
 extern Mtx D_800D2590[6][2];
 extern u16 D_800D2454;
 extern Mtx D_800D23D0;
+extern Mtx *D_800D244C;
+
+/* Per-player screen viewport (split screen), bounds in screen pixels. */
+typedef struct HudView {
+    u8 pad0[0x24];
+    f32 top;
+    f32 bottom;
+    f32 left;
+    f32 right;
+    u8 pad34[0x180 - 0x34];
+} HudView;
+
+extern HudView *D_800BE628;
 
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15042D94(s32, s32, u8, s32 *, ...);
@@ -897,66 +914,62 @@ Gfx *func_150911F4(Gfx *gfx) {
     return gfx;
 }
 
-Gfx* func_15091534(Gfx* arg0, struct257 *arg1, u8 *arg2) {
-    s32 temp_v0;
+/* Loads HUD icon sheet D_D16 + `sheet` (a 64x64 CI4 texture with its palette after it).
+ * Sets *loaded when the texture was available. */
+Gfx *func_15091534(Gfx *gfx, s32 sheet, u8 *loaded) {
+    s32 tex;
 
-    *arg2 = 0;
-    temp_v0 = func_1510D0EC((s32)arg1 + (s32)D_D16, 0, 3, 0);
+    *loaded = FALSE;
+    tex = func_1510D0EC(sheet + (s32)D_D16, 0, 3, 0);
 
-    if (temp_v0 != (s32)0x80000000) {
-        gDPSetTextureImage(arg0++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, temp_v0);
-        gDPSetTile(arg0++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
-        gDPLoadSync(arg0++);
-        gDPLoadBlock(arg0++, G_TX_LOADTILE, 0, 0, 1023, 0);
-        gDPPipeSync(arg0++);
-        gDPSetTile(arg0++, G_IM_FMT_CI, G_IM_SIZ_4b, 4, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
-        gDPSetTileSize(arg0++, G_TX_RENDERTILE, 0, 0, 0xFC, 0xFC);
-        gDPSetTextureImage(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, temp_v0 + 0x800);
-        gDPLoadSync(arg0++);
-        gDPLoadTLUTCmd(arg0++, 6, 15);
-        gDPSetOtherMode(arg0++, 0x00AC3F, 0x00504244);
+    if (tex != (s32)0x80000000) {
+        gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, tex);
+        gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
+        gDPLoadSync(gfx++);
+        gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 1023, 0);
+        gDPPipeSync(gfx++);
+        gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b, 4, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
+        gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 0xFC, 0xFC);
+        gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, tex + 0x800);
+        gDPLoadSync(gfx++);
+        gDPLoadTLUTCmd(gfx++, 6, 15);
+        gDPSetOtherMode(gfx++, 0x00AC3F, 0x00504244);
 
-        *arg2 = 1;
+        *loaded = TRUE;
     }
 
-    return arg0;
+    return gfx;
 }
 
-void func_150916B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    volatile s32 pad[2];
+/* Prints a race time given in frames (60 per second) as minutes, seconds and hundredths,
+ * capped at 99 minutes; a negative time prints the placeholder strings instead. */
+void func_150916B4(s32 x, s32 y, s32 frames, s32 style) {
+    s32 pad[2]; // matching: reserves the original frame size
     s32 seconds;
     s32 hundredths;
 
-    if (arg2 >= 0x57030) {
-        arg2 = 0x57030;
+    if (frames >= 99 * 60 * 60) {
+        frames = 99 * 60 * 60;
     }
 
-    hundredths = ((arg2 % 60) * 100) / 60;
+    hundredths = ((frames % 60) * 100) / 60;
     if (hundredths >= 100) {
         hundredths = 99;
     }
 
-    arg0 -= 8;
-    if (arg2 >= 0) {
-        seconds = arg2 / 60;
-        func_15042D94((arg0 - (((seconds / 60) >= 10) ? 5 : 0)) - 8, arg1, (u8)arg3, &D_8009DCC0, seconds / 60);
-        func_15042D94(arg0, arg1, arg3, &D_8009DCC4, seconds % 60);
-        func_15042D94(arg0 + 0x10, arg1, arg3, &D_8009DCCC, hundredths);
+    x -= 8;
+    if (frames >= 0) {
+        seconds = frames / 60;
+        func_15042D94((x - (((seconds / 60) >= 10) ? 5 : 0)) - 8, y, (u8)style, &D_8009DCC0, seconds / 60);
+        func_15042D94(x, y, style, &D_8009DCC4, seconds % 60);
+        func_15042D94(x + 16, y, style, &D_8009DCCC, hundredths);
         return;
     }
 
-    func_15042D94(arg0 - 8, arg1, (u8)arg3, &D_8009DCD4);
-    func_15042D94(arg0, arg1, arg3, &D_8009DCD8);
-    func_15042D94(arg0 + 0x10, arg1, arg3, &D_8009DCE0);
+    func_15042D94(x - 8, y, (u8)style, &D_8009DCD4);
+    func_15042D94(x, y, style, &D_8009DCD8);
+    func_15042D94(x + 16, y, style, &D_8009DCE0);
 }
-typedef struct HudView {
-    u8 pad0[0x24];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0x180 - 0x34];
-} HudView;
 
 typedef struct HudBars {
     u8 b[4];
@@ -981,7 +994,6 @@ typedef struct HudTime {
     u8 pad28[0x84 - 0x28];
 } HudTime;
 
-#define HUD_VIEWS ((HudView *)D_800BE628)
 #define HUD_U8(p, off) (*(u8 *)((u8 *)(p) + (off)))
 #define HUD_S8(p, off) (*(s8 *)((u8 *)(p) + (off)))
 #define HUD_U16(p, off) (*(u16 *)((u8 *)(p) + (off)))
@@ -1040,7 +1052,7 @@ Gfx *func_150918EC(Gfx *gfx) {
     mode = 0;
     grenades = 0;
     bars = D_800873B0;
-    width = HUD_VIEWS->unk30 - HUD_VIEWS->unk2C;
+    width = D_800BE628->right - D_800BE628->left;
     gSPDisplayList((Gfx *)gfx++, D_80087390);
     func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
     step = 0x400;
@@ -1056,8 +1068,8 @@ Gfx *func_150918EC(Gfx *gfx) {
         ok = 0;
         for (i = 0; i <= D_80082FA0; i++) {
             if (D_80087270[i] != 10) {
-                y3 = HUD_VIEWS[i].unk2C;
-                y = HUD_VIEWS[i].unk24 + rows[6];
+                y3 = D_800BE628[i].left;
+                y = D_800BE628[i].top + rows[6];
                 if (D_8008FDC0 & 2) {
                     if (!loaded) {
                         n = func_1510D0EC((s32)D_D14, 0, 3, 0);
@@ -1106,9 +1118,9 @@ Gfx *func_150918EC(Gfx *gfx) {
         ok = 0;
         for (i = 0; i <= D_80082FA0; i++) {
             if (D_80087270[i] != 10) {
-                y3 = HUD_VIEWS[i].unk2C + rows[5];
-                right = HUD_VIEWS[i].unk30 - rows[5];
-                y = HUD_VIEWS[i].unk24 + rows[5];
+                y3 = D_800BE628[i].left + rows[5];
+                right = D_800BE628[i].right - rows[5];
+                y = D_800BE628[i].top + rows[5];
                 if (D_8008FDC0 & 4) {
                     p = &D_800CC2D0[i];
                     n = 1;
@@ -1188,7 +1200,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                         j = 0;
                         if (!loaded) {
                             loaded = 1;
-                            gfx = (Gfx *)func_15091534((Gfx *)gfx, NULL, &ok);
+                            gfx = func_15091534(gfx, 0, &ok);
                         }
                         x = (right - rows[25]) * 4;
                         t = D_800873B4[lap / 3] << 5;
@@ -1211,7 +1223,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                 }
                 if (D_8008FDC0 & 0x10) {
                     if (!loaded) {
-                        gfx = (Gfx *)func_15091534((Gfx *)gfx, NULL, &ok);
+                        gfx = func_15091534(gfx, 0, &ok);
                     }
                     s = func_150859AC(i, 4);
                     x = rows[22] + y3;
@@ -1237,8 +1249,8 @@ Gfx *func_150918EC(Gfx *gfx) {
         for (i = 0; i <= D_80082FA0; i++) {
             if (D_80087270[i] != 10) {
 
-                right = HUD_VIEWS[i].unk30 - 5.0f;
-                y = HUD_VIEWS[i].unk24 + 5.0f;
+                right = D_800BE628[i].right - 5.0f;
+                y = D_800BE628[i].top + 5.0f;
                 n = 1;
                 lap = -1;
                 ex3 = 0;
@@ -1289,7 +1301,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                 if (lap >= 0) {
                     if (!loaded) {
                         loaded = 1;
-                        gfx = (Gfx *)func_15091534((Gfx *)gfx, (struct257 *)1, &ok);
+                        gfx = func_15091534(gfx, 1, &ok);
                     }
                     x = right - rows[25];
                     y2 = (lap % 3) * 25;
@@ -1320,8 +1332,8 @@ Gfx *func_150918EC(Gfx *gfx) {
         }
         for (i = 0; i <= D_80082FA0; i++) {
             if (bars.b[i]) {
-                x = (s32)HUD_VIEWS[i].unk30 - laps;
-                w = (s32)HUD_VIEWS[i].unk24 + 10;
+                x = (s32)D_800BE628[i].right - laps;
+                w = (s32)D_800BE628[i].top + 10;
                 gDPFillRectangle((Gfx *)gfx++, x - bars.b[i], w, x, w + 4);
             }
         }
@@ -1347,9 +1359,9 @@ Gfx *func_150918EC(Gfx *gfx) {
         for (i = 0; i <= D_80082FA0; i++) {
             j = D_800CC2D0[i].unk31C->unk75;
             if ((j &= 0x7F) == 0x26 || j == 0x3A) {
-                x = (s32)HUD_VIEWS[i].unk30 - 15;
+                x = (s32)D_800BE628[i].right - 15;
                 x *= 4;
-                w = (s32)HUD_VIEWS[i].unk24 + 5;
+                w = (s32)D_800BE628[i].top + 5;
                 w *= 4;
                 if (0x1A == D_800BE9F0 || 0x3F == D_800BE9F0) {
                     F5d = 11;
@@ -1383,18 +1395,18 @@ Gfx *func_150918EC(Gfx *gfx) {
     if ((D_8008FDC0 & 0x80) && D_800872A0 != NULL) {
         lap_total = D_800E0BE7;
         for (i = 0; i <= D_80082FA0; i++) {
-            w = (s32)HUD_VIEWS[i].unk24 + 5;
+            w = (s32)D_800BE628[i].top + 5;
             func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
             if (D_800872A0[i].unk20 > 0) {
-                x = (s32)HUD_VIEWS[i].unk2C;
+                x = (s32)D_800BE628[i].left;
                 func_150916B4(x + 0x17, w + 0x19, D_800872A0[i].unk20, 0xC0);
             }
-            x = (s32)HUD_VIEWS[i].unk2C + (width >> 1);
+            x = (s32)D_800BE628[i].left + (width >> 1);
             lap = (s8)(D_800872A0[i].unk27 + 1);
             if (lap <= lap_total) {
                 func_15042D94(x, w, 0xC1, (s32 *)"%s", D_800E0BD8->name[D_800E0AC0[i]]);
-                func_15042D94((s32)HUD_VIEWS[i].unk2C + 0x1D, w + 0xE, 0xC1, (s32 *)"lap %d/%d", lap, lap_total);
-                func_150916B4(x, (s32)HUD_VIEWS[i].unk28 - 0xC, D_800872A0[i].unk1C, 0xC0);
+                func_15042D94((s32)D_800BE628[i].left + 0x1D, w + 0xE, 0xC1, (s32 *)"lap %d/%d", lap, lap_total);
+                func_150916B4(x, (s32)D_800BE628[i].bottom - 0xC, D_800872A0[i].unk1C, 0xC0);
             }
         }
     }
@@ -1407,7 +1419,7 @@ Gfx *func_150918EC(Gfx *gfx) {
         f32 az;
         scale = 0.01300000027f;
         i = 0;
-        x = (s32)HUD_VIEWS->unk30 - rows[32];
+        x = (s32)D_800BE628->right - rows[32];
         x *= 4;
         if (D_8008FE1C != 1.0f) {
             shift = 6;
@@ -1429,7 +1441,7 @@ Gfx *func_150918EC(Gfx *gfx) {
         HUD_GW(gfx++, 0xEF002C3F, 0x00504244);
         for (i = 0; i < D_8008FD90; i++) {
             if (func_150859AC(i, 3) > 0) {
-                w = rows[21] + ((s32)HUD_VIEWS[i].unk24 + rows[24]);
+                w = rows[21] + ((s32)D_800BE628[i].top + rows[24]);
                 w *= 4;
                 gDPPipeSync((Gfx *)gfx++);
                 HUD_GW(gfx++, 0xFB000000, 0xFFFFFF80);
@@ -1465,54 +1477,58 @@ Gfx *func_150918EC(Gfx *gfx) {
     return gfx;
 }
 
-void func_15093818(s32 arg0) {
-    if ((arg0 != 0) && (D_800D2458 == 0)) {
+/* Turns the on-screen clock (func_150938BC) on or off, loading its model when turned on. */
+void func_15093818(s32 enable) {
+    if ((enable != 0) && (D_800D2458 == 0)) {
         D_800D2458 = 1;
         func_15093878();
         return;
     }
-    if ((arg0 == 0) && (D_800D2458 != 0)) {
+    if ((enable == 0) && (D_800D2458 != 0)) {
         D_800D2458 = 0;
     }
 }
 
+/* Loads the clock model and allocates its two (double-buffered) matrices. */
 void func_15093878(void) {
     D_800D2448 = func_1518C900(0xBA);
-    D_800D244C = allocate_memory(0x80, 1, 1, 0);
+    D_800D244C = allocate_memory(2 * sizeof(Mtx), 1, 1, 0);
 }
 
 extern s32 D_800D2450;
 extern u8 D_11AD[];
-void func_150A7D00(s32, f32, f32, f32);
+void func_150A7D00(Mtx *, f32, f32, f32);
 
-Gfx *func_150938BC(Gfx *arg0) {
+/* Draws the clock: the four digits of D_800D2450 (frame count, 30 per second) as minutes and
+ * seconds go into segments 1-4 as digit textures from D_11AD, then the clock model. */
+Gfx *func_150938BC(Gfx *gfx) {
     s32 x = 120;
     s32 y = 129;
     s32 z = -303;
-    s32 i;
-    s32 val;
+    s32 segment;
+    s32 value;
     s32 tex;
 
-    val = (D_800D2450 / 30) % 60;
-    i = 4;
+    value = (D_800D2450 / 30) % 60;
+    segment = 4;
     do {
-        tex = func_1510D0EC((s32)D_11AD + (val % 10), 0, 3, 0);
+        tex = func_1510D0EC((s32)D_11AD + (value % 10), 0, 3, 0);
         if (tex == (s32)0x80000000) {
-            return arg0;
+            return gfx;
         }
-        gSPSegment((Gfx *)arg0++, i, tex);
-        if (i == 3) {
-            val = (D_800D2450 / 30) / 60;
+        gSPSegment(gfx++, segment, tex);
+        if (segment == 3) {
+            value = (D_800D2450 / 30) / 60;
         } else {
-            val = val / 10;
+            value = value / 10;
         }
-        i--;
-    } while (i != 0);
+        segment--;
+    } while (segment != 0);
 
-    func_150A7D00((D_800BE9C0 << 6) + D_800D244C, x, y, z);
-    gSPMatrix((Gfx *)arg0++, (D_800BE9C0 << 6) + D_800D244C, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPDisplayList((Gfx *)arg0++, D_800D2448);
-    return arg0;
+    func_150A7D00(&D_800D244C[D_800BE9C0], x, y, z);
+    gSPMatrix(gfx++, &D_800D244C[D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPDisplayList(gfx++, D_800D2448);
+    return gfx;
 }
 extern u8 D_CF2[];
 extern u8 D_800AB62C[][3];
@@ -1580,11 +1596,9 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *rows, s32 mode, u8 big) {
             struct127 *obj;
             struct108 *cam;
             struct108 *c2;
-            u8 *p;
 
-            p = (u8 *)D_800BE628 + i * 0x180;
-            x = (((s32)*(f32 *)(p + 0x30) - rows[7]) - off) * 4;
-            y = ((s32)*(f32 *)(p + 0x24) + rows[21] + off) * 4;
+            x = (((s32)D_800BE628[i].right - rows[7]) - off) * 4;
+            y = ((s32)D_800BE628[i].top + rows[21] + off) * 4;
             obj = &D_800CC2D0[i];
             if (big) {
                 x -= 0x1C6;
