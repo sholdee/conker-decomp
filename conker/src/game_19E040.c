@@ -39,8 +39,25 @@ typedef struct {
     /* 0x10 */ f32 rotation[3];
 } BurstPiece;
 
-extern f32 D_800A6E90[6][3];
-extern BurstPiece D_800A6ED8[6];
+/* Start offsets of the six burst models of func_15170B90. */
+const f32 D_800A6E90[6][3] = {
+    { 37.2f, -15.0f, -46.8f },
+    { -19.6f, 49.8f, -47.1f },
+    { 13.8f, 59.7f, 30.0f },
+    { 27.8f, -30.3f, 44.0f },
+    { -37.4f, -47.6f, -32.9f },
+    { -48.2f, -16.0f, 30.4f },
+};
+
+/* The six pieces func_15170F4C throws out of the actor (model, start offset, rotation). */
+const BurstPiece D_800A6ED8[6] = {
+    { 338, { -6.0f, 84.0f, 89.0f }, { -40.0f, 0.0f, 0.0f } },
+    { 338, { 89.0f, 75.0f, -57.0f }, { -40.0f, 120.0f, 0.0f } },
+    { 338, { -79.0f, 59.0f, -57.0f }, { -40.0f, 240.0f, 0.0f } },
+    { 338, { 92.0f, -60.0f, -59.0f }, { 30.0f, 60.0f, 0.0f } },
+    { 338, { 19.0f, -59.0f, -89.0f }, { 37.0f, 180.0f, 0.0f } },
+    { 338, { -92.0f, -66.0f, 55.0f }, { 36.0f, 300.0f, 0.0f } },
+};
 
 f32 func_150489B0(u8);
 void *func_1518C900(s32);
@@ -331,7 +348,7 @@ void func_151718F0(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 sizeScale,
     u32 r1;
     u32 r2;
     s32 pad; // matching: moves colors to the target's stack slot
-    const u8 colors[1][3] = { { 0x45, 0x53, 0x68 } };
+    u8 colors[1][3] = { { 0x45, 0x53, 0x68 } };
 
     if (count != 0) {
         angle = 0;
