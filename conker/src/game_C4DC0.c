@@ -79,8 +79,6 @@ extern ObjScriptCmd *func_1507BB28(s32, s32);
 extern void func_1507CD64(Actor *, s32);
 extern void func_1507D1D8(Actor *);
 extern void func_1507D4F8(s32);
-extern void func_1507EB2C(Actor *);
-extern void func_1507EB4C(Actor *, s32);
 extern void func_15080620(s32, s32, s32, s32);
 extern void func_150836CC(Actor *, s32);
 extern s32 func_15084000(s32);

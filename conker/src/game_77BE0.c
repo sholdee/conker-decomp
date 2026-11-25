@@ -38,7 +38,6 @@ void func_1507D4F8(s32);
 s32 func_1504C8BC(Actor *);
 void func_150A11C4(void *);
 void func_150A278C(void *);
-void func_1507E73C(void *);
 void func_1504AF10(Actor *, s32, s32);
 void func_15061B4C(void);
 void func_15080C64(void);
@@ -583,8 +582,6 @@ void func_1504BC38(Actor *obj) {
         }
     }
 }
-
-void func_1507EB2C(void *arg0);
 
 void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     s32 pad[2]; // matching: the frame has two unused words

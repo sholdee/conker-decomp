@@ -29,7 +29,6 @@ typedef struct {
    each unk field holds depends on the track's SeqTrackInfo type. */
 
 extern u16 *D_800C35C8[];
-extern void func_1507E7E4(void *, s32, s32, s32, s32);
 s32 func_1501D2C4(s32 map, s32 cutscene);
 extern u8 D_800C35AA;
 extern void func_1507F640(void);
@@ -749,8 +748,6 @@ void func_1501E2F8(s32 scene) {
     }
 }
 
-void func_15080228(void);
-
 /* Advance the scene clock D_800C35B0 by this frame's ticks, clamped to the end time. */
 void func_1501E400(s32 scene) {
     if (D_800C3A58 != 0) {
@@ -815,8 +812,6 @@ void func_1501E540(s32 scene) {
         D_800C3668[scene] = 0;
     }
 }
-
-void func_1507EABC(void *);
 
 /* For each object bound to a track: wrap its eyeCode counters at 10 and call func_1507EABC. */
 void func_1501E73C(s32 scene) {
@@ -2538,7 +2533,6 @@ s32 func_150235DC(s32 scene) {
 }
 
 extern void func_1504A730(void);
-extern void func_1507E73C(Actor *);
 extern void func_1507FEA0(Actor *);
 extern void func_15061B4C(void);
 void func_15022998(s32 *obj);

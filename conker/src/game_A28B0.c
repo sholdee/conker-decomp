@@ -1616,13 +1616,13 @@ void func_150798F8(void) {
 }
 
 void func_15079928(void) {
-    s32 mask;
+    u16 timer;
 
-    mask = ((D_800D1891 << 16) + D_800D1892) & 0xFFFF;
-    if (mask == 0) {
-        mask = 0xFFFF;
+    timer = (D_800D1891 << 16) + D_800D1892;
+    if (timer == 0) {
+        timer = 0xFFFF;
     }
-    func_1507E7E4(D_800D154C, D_800D1890, D_800D1893, mask, 0);
+    func_1507E7E4(D_800D154C, D_800D1890, D_800D1893, timer, 0);
 }
 
 void func_15079988(void) {

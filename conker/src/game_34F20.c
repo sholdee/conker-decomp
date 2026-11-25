@@ -56,7 +56,6 @@ void func_1501CC3C(void);
 void func_15044370(void);
 void func_1507DFE4(s32, s32);
 s32 func_1507E114(s32);
-void func_15080200(void);
 void func_1509BBA0(s32);
 s32 func_1509C2A4(void);
 void func_1509C3A0(void);

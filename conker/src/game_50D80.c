@@ -380,8 +380,6 @@ extern void func_15023440(SeqSubtitle *, s32);
 extern SeqSubtitle *func_150234A4(s32, s32);
 extern s32 func_15052F9C(Actor *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_15053430(Actor *);
-extern void func_1507E7E4(void *, s32, s32, s32, s32);
-extern void func_1507EB4C(void *, s32);
 extern void func_150836CC(Actor *, s32);
 extern s32 func_15083FB0(s32);
 extern void func_150B648C(u8);
@@ -507,7 +505,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 } else {
                     duration = func_15023BB0(event, event->type, track, &found, 0, 0, 0, 0, 0, 0, scene) - eventTime;
                 }
-                func_1507E7E4(obj, event->value & 0xFF, 3, duration & 0xFFFF, event->unk4);
+                func_1507E7E4(obj, event->value, 3, duration, event->unk4);
             }
         }
     } else if (event->type == 0xD) {

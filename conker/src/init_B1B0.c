@@ -65,7 +65,6 @@ void func_1000D96C(s32 newId, s32 oldId, s32 transition);
 void func_1000DEC4(void);
 void func_10008C04(u8, u8, s32);
 s32 func_10008CE8(u8, s32);
-void func_1507E7E4(Actor *, u8, u8, u16, s32);
 void func_15178EFC(s32 arg0);
 s32 func_151F2CDC(void);
 

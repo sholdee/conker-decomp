@@ -207,7 +207,6 @@ extern void *func_15158BD0(Actor *, s32, s32);
 extern void func_15145974(void *, f32 *, f32 *);
 extern Actor *func_1505EEF4(s32 arg0);
 extern void func_151A3390(void *arg0, u8 arg1);
-extern void func_1507E7E4(u8 *, u8, u8, u16, s32);
 void func_1516F1C0(s32, s32, u8, s32);
 void func_1516F2F8(u8, s32, s32, s32, u8, s32);
 void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
@@ -1279,7 +1278,7 @@ void func_1506D584(void) {
         if (value != 0xFFFF) {
             value = (u32)(value / divisor);
         }
-        func_1507E7E4((u8 *)obj, hi, lo, value, 0);
+        func_1507E7E4(obj, hi, lo, value, 0);
     }
 }
 

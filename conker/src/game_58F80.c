@@ -102,9 +102,6 @@ void func_1505DFDC(Actor *);
 void func_1506160C(Actor *obj, s32 arg1, u8 arg2, u8 arg3, s32 player);
 s32 func_1506196C(Actor *, s32);
 void func_1507C22C(s32);
-void func_1507E3C0(Actor *);
-u8 *func_1507E908(Actor *, s32);
-void func_1507EABC(Actor *);
 void func_150837D4(s32, s32, s32);
 s32 func_150838EC(Actor *, s32, s32, f32);
 s32 func_150849A0(Actor *);
@@ -1496,7 +1493,7 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
     Actor *obj;
     u8 texIndex[2];
     s32 id;
-    u8 *override;
+    ExpressionRecord *override;
     s32 i;
     ObjTexture *tex;
 
@@ -1514,8 +1511,8 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
             if (override != NULL) {
                 s32 overrideTex[2];
 
-                overrideTex[0] = override[0];
-                overrideTex[1] = override[1];
+                overrideTex[0] = override->eyeCode[0];
+                overrideTex[1] = override->eyeCode[1];
                 if (override != NULL) { // matching: dropping this redundant re-test changes the code
                     if (overrideTex[i] != D_800D1C90[id]->texture[i][2]) {
                         if (obj->eyeCode[i] == 0) {
