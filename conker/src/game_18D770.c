@@ -65,10 +65,10 @@ struct225 *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3);
 s32  func_15161A68(struct225 *arg0);
 struct225 *func_15161E24(struct127 *actor, u8 unk5, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
 s32  func_15161F2C(struct225 *effect);
-struct225 *func_15162034(s32 arg0, u8 arg1, s32 arg2);
+struct225 *func_15162034(struct226 *light, u8 arg1, s32 arg2);
 void func_15162110(s32 arg0);
-struct225 *func_15162740(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
-struct225 *func_1516284C(Header *header, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 size, u8 arg8, u8 arg9, s32 argA);
+struct225 *func_15162740(struct226 *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
+struct225 *func_1516284C(Header *header, Header2 *position, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 extraSize, u8 kind, u8 arg9, s32 argA);
 void func_15162EF8(struct239 *arg0);
 void func_15162F50(struct239 *arg0);
 struct225 *func_15162FAC(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
@@ -901,427 +901,301 @@ void func_15161F4C(struct225 *effect, ActorEvent *event, u8 eventId) {
     }
 }
 
-struct225 *func_15162034(s32 arg0, u8 arg1, s32 arg2) {
-    struct225 *temp_v0;
+struct225 *func_15162034(struct226 *light, u8 arg1, s32 arg2) {
+    struct225 *effect;
     Header header;
-    f32 src[8];
+    LightJitter jitter;
 
     header.unk0 = 0;
     header.unk1 = 2;
-    header.unk2 = 0x12C;
+    header.unk2 = 300;
     header.unk4 = 6;
 
-    src[1] = 15.0f;
-    src[0] = 22.0f;
+    jitter.low = 15.0f;
+    jitter.mid = 22.0f;
 
-    src[2] = 45.0f;
-    src[3] = 1.0f;
-    src[4] = 0.0f;
-    src[5] = 10.0f;
-    src[6] = D_800A6AF0;
-    src[7] = 127.0f;
+    jitter.high = 45.0f;
+    jitter.target = 1.0f;
+    jitter.timer = 0.0f;
+    jitter.interval = 10.0f;
+    jitter.smoothing = 0.2488999963f;
+    jitter.level = 127.0f;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg1, arg2);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &src, sizeof(src));
+    effect = func_1516037C(&header, light, sizeof(jitter), arg1, arg2);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &jitter, sizeof(jitter));
     }
-    return temp_v0;
+    return effect;
 }
 
+/* Colour cycle: colour = base + amplitude * sin(phase). */
+typedef struct {
+    struct17 base;
+    struct17 amplitude;
+    f32 phase;
+    f32 speed; // phase advance per frame
+} LightColourPulse;
+
+/* Starts a global colour cycle object (see func_151621B8). */
 void func_15162110(s32 arg0) {
-    struct236 *temp_v0;
-    f32 src[8];
+    struct236 *object;
+    LightColourPulse pulse;
 
-    src[1] = 15.0f;
-    src[2] = 0.0f;
-    src[4] = 15.0f;
-    src[5] = 0.0f;
-    src[6] = 0.0f;
-    src[0] = 42.5f;
-    src[3] = 37.5f;
-    src[7] = D_800A6AF4;
+    pulse.base.unk4 = 15.0f;
+    pulse.base.unk8 = 0.0f;
+    pulse.amplitude.unk4 = 15.0f;
+    pulse.amplitude.unk8 = 0.0f;
+    pulse.phase = 0.0f;
+    pulse.base.unk0 = 42.5f;
+    pulse.amplitude.unk0 = 37.5f;
+    pulse.speed = 0.07609999925f;
 
-    temp_v0 = func_15149130(300, -1, 30, -1, 0, 0, sizeof(src), 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk28, &src, sizeof(src));
+    object = func_15149130(300, -1, 30, -1, 0, 0, sizeof(pulse), 0xFF, 1);
+    if (object != NULL) {
+        memcpy(&object->unk28, &pulse, sizeof(pulse));
     }
 }
 
-void func_151621B8(struct236 *arg0) {
-    struct235 *temp_v0;
-    f32 temp_f0;
+/* Sets the colour passed to func_1515D4D4 from the object's colour cycle and advances it. */
+void func_151621B8(struct236 *object) {
+    LightColourPulse *pulse;
+    f32 sine;
 
-    temp_v0 = &arg0->unk28;
-    temp_f0 = sinf(temp_v0->unk18);
+    pulse = (LightColourPulse *)&object->unk28;
+    sine = sinf(pulse->phase);
 
     func_1515D4D4(
-        (u8)(temp_v0->unk0 + (temp_f0 * temp_v0->unkC)),
-        (u8)(temp_v0->unk4 + (temp_f0 * temp_v0->unk10)),
-        (u8)(temp_v0->unk8 + (temp_f0 * temp_v0->unk14)),
+        (u8)(pulse->base.unk0 + (sine * pulse->amplitude.unk0)),
+        (u8)(pulse->base.unk4 + (sine * pulse->amplitude.unk4)),
+        (u8)(pulse->base.unk8 + (sine * pulse->amplitude.unk8)),
         0);
-    temp_v0->unk18 += temp_v0->unk1C * D_800BE9A4;
-    temp_v0->unk18 = func_15144B68(temp_v0->unk18);
+    pulse->phase += pulse->speed * D_800BE9A4;
+    pulse->phase = func_15144B68(pulse->phase);
 }
-// NON-MATCHING: not quite right here
-// struct235 *func_151621B8(struct236 *arg0) {
-//     struct235 *temp_v0;
-//     f32 temp_f0;
-//     u8 temp_a0;
-//     u8 temp_a1;
-//     u8 temp_a2;
-//
-//     temp_v0 = &arg0->unk28;
-//     temp_f0 = sinf(temp_v0->unk18);
-//
-//     temp_a0 = temp_v0->unk0 + (temp_f0 * temp_v0->unkC);
-//     temp_a1 = temp_v0->unk4 + (temp_f0 * temp_v0->unk10);
-//     temp_a2 = temp_v0->unk8 + (temp_f0 * temp_v0->unk14);
-//
-//
-//     func_1515D4D4(temp_a0, temp_a1, temp_a2, 0);
-//     temp_v0->unk18 += temp_v0->unk1C * D_800BE9A4;
-//     temp_v0->unk18 = func_15144B68(temp_v0->unk18);
-//
-//     return temp_v0;
-// }
 
-struct vec3w { s32 unk0; s32 unk4; s32 unk8; };
-
-struct225 *func_151623F4(struct226 *arg0, u8 arg1, u8 arg2, u8 arg3, s8 arg4, s16 arg5, u8 arg6, s32 arg7) {
-    struct {
-        struct vec3w a;
-        struct vec3w b;
-        f32 c;
-        f32 d;
-    } sp30;
+/* Creates a colour-cycling effect; `kind` (0-2) picks the base, amplitude and speed tables. */
+struct225 *func_151623F4(struct226 *light, u8 kind, u8 type, u8 arg3, s8 update, s16 lifetime, u8 arg6, s32 arg7) {
+    LightColourPulse pulse;
     Header header;
-    struct225 *temp_v0;
+    struct225 *effect;
 
-    if (arg1 >= 3) {
+    if (kind >= 3) {
         return NULL;
     }
 
-    sp30.a = *(struct vec3w *)D_800A670C[arg1];
-    sp30.b = *(struct vec3w *)D_800A6730[arg1];
+    pulse.base = *(struct17 *)D_800A670C[kind];
+    pulse.amplitude = *(struct17 *)D_800A6730[kind];
 
-    sp30.c = 0.0f;
-    sp30.d = D_800A6754[arg1];
+    pulse.phase = 0.0f;
+    pulse.speed = D_800A6754[kind];
     header.unk0 = arg3;
-    header.unk1 = arg4;
-    header.unk2 = arg5;
-    header.unk4 = arg2;
+    header.unk1 = update;
+    header.unk2 = lifetime;
+    header.unk4 = type;
 
-    temp_v0 = func_1516037C(&header, arg0, 0x20, arg6, arg7);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x18), &sp30, 0x20);
+    effect = func_1516037C(&header, light, sizeof(pulse), arg6, arg7);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &pulse, sizeof(pulse));
     }
-    return temp_v0;
+    return effect;
 }
-s32 func_15162510(void *arg0) {
-    typedef struct {
-        f32 unk0;
-        f32 unk4;
-        f32 unk8;
-        f32 unkC;
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-        f32 unk1C;
-    } Struct15162510;
-    register Struct15162510 *temp_v1;
-    f32 temp_f0;
 
-    temp_v1 = (Struct15162510 *)((s32)arg0 + 0x18);
-    temp_f0 = sinf(*(f32 *)((s32)arg0 + 0x30));
+/* Sets the light's colour from the effect's colour cycle and advances it. */
+s32 func_15162510(struct225 *effect) {
+    LightColourPulse *pulse;
+    f32 sine;
 
-    (*(struct226 **)((s32)arg0 + 0x14))->unk5 = temp_v1->unk0 + (temp_f0 * temp_v1->unkC);
-    (*(struct226 **)((s32)arg0 + 0x14))->unk6 = temp_v1->unk4 + (temp_f0 * temp_v1->unk10);
-    (*(struct226 **)((s32)arg0 + 0x14))->unk7 = temp_v1->unk8 + (temp_f0 * temp_v1->unk14);
+    pulse = (LightColourPulse *)&effect->unk18;
+    sine = sinf(pulse->phase);
 
-    temp_v1->unk18 += temp_v1->unk1C * D_800BE9A4;
-    temp_v1->unk18 = func_15144B68(temp_v1->unk18);
+    effect->unk14->unk5 = pulse->base.unk0 + (sine * pulse->amplitude.unk0);
+    effect->unk14->unk6 = pulse->base.unk4 + (sine * pulse->amplitude.unk4);
+    effect->unk14->unk7 = pulse->base.unk8 + (sine * pulse->amplitude.unk8);
+
+    pulse->phase += pulse->speed * D_800BE9A4;
+    pulse->phase = func_15144B68(pulse->phase);
     return 1;
 }
-// s32 func_15162510(struct237 *arg0) {
-//     struct235 *temp_v1;
-//     f32 temp_f0;
-//
-//     temp_f0 = sinf(arg0->unk18.unk18);
-//     temp_v1 = &arg0->unk18;
-//
-//     arg0->unk14->unk5 = temp_v1->unk0 + (temp_f0 * arg0->unk0[2]);
-//     arg0->unk14->unk6 = temp_v1->unk4 + (temp_f0 * temp_v1->unk10);
-//     arg0->unk14->unk7 = temp_v1->unk8 + (temp_f0 * temp_v1->unk14);
-//
-//     temp_v1->unk18 += temp_v1->unk1C * D_800BE9A4;
-//     temp_v1->unk18 = func_15144B68(temp_v1->unk18);
-//     return 1;
-// }
 
-struct225 *func_15162740(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7) {
-    struct225 *temp_v0;
+/* Creates a jitter effect; `kind` (0-23) picks mid, low and high from tables. */
+struct225 *func_15162740(struct226 *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7) {
+    struct225 *effect;
     Header header;
-    f32 src[8];
+    LightJitter jitter;
 
-    if (arg1 >= 24) {
-        return 0;
-    }
-
-    src[0] = D_800A67C0[arg1];
-    src[1] = D_800A6760[arg1];
-    src[2] = D_800A6820[arg1];
-    src[3] = 1.0f;
-    src[4] = 0.0f;
-    src[5] = 10.0f;
-    src[6] = D_800A6AF8;
-    src[7] = 127.0f;
-
-    header.unk0 = arg3;
-    header.unk1 = arg5;
-    header.unk2 = arg4;
-    header.unk4 = arg2;
-
-    temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg6, arg7);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &src, sizeof(src));
-    }
-    return temp_v0;
-}
-
-struct225 *func_1516284C(Header *header, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 offset, u8 arg8, u8 arg9, s32 argA) {
-    struct225 *temp_v0;
-    f32 src[8];
-
-    if (arg8 >= 0x18) {
-        return 0;
-    }
-
-    src[0] = D_800A67C0[arg8];
-    src[1] = D_800A6760[arg8];
-    src[2] = D_800A6820[arg8];
-    src[3] = 1.0f;
-    src[4] = 0.0f;
-    src[5] = 10.0f;
-    src[6] = D_800A6AFC;
-    src[7] = 127.0f;
-    temp_v0 = func_151602C0(header, arg1, 0, arg2, arg3, arg4, arg5, arg6, offset + sizeof(src), arg9, argA);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &src, sizeof(src));
-    }
-    return temp_v0;
-}
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s8  unk24;
-    s8  unk25;
-    s8  unk26;
-    s8  unk27;
-    s8  unk28;
-} Src1516295C;
-
-struct225 *func_1516295C(struct226 *arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, s8 arg6, s8 arg7, s8 arg8, s8 arg9, s32 argA, u8 argB, s32 argC) {
-    struct225 *temp_v0;
-    Header header;
-    Src1516295C src;
-
-    if (arg1 >= 5) {
+    if (kind >= 24) {
         return NULL;
     }
 
-    src.unk25 = arg6;
-    src.unk26 = arg7;
-    src.unk27 = arg8;
-    src.unk28 = arg9;
-    src.unk0 = D_800A6880[arg1];
-    src.unk4 = D_800A6894[arg1];
-    src.unk8 = D_800A6880[arg1] - D_800A6894[arg1];
-    src.unkC = D_800A68A8[arg1];
-    src.unk10 = D_800A68BC[arg1];
-    src.unk14 = D_800A68BC[arg1] + D_800A68D0[arg1];
-    src.unk18 = (D_800A68BC[arg1] + D_800A68D0[arg1]) + D_800A68E4[arg1];
-    src.unk1C = ((D_800A68BC[arg1] + D_800A68D0[arg1]) + D_800A68E4[arg1]) + D_800A68D0[arg1];
+    jitter.mid = D_800A67C0[kind];
+    jitter.low = D_800A6760[kind];
+    jitter.high = D_800A6820[kind];
+    jitter.target = 1.0f;
+    jitter.timer = 0.0f;
+    jitter.interval = 10.0f;
+    jitter.smoothing = 0.2488999963f;
+    jitter.level = 127.0f;
 
+    header.unk0 = arg3;
+    header.unk1 = update;
+    header.unk2 = lifetime;
+    header.unk4 = type;
 
-    if (src.unkC < D_800A68BC[arg1]) {
-        src.unk24 = 0;
-    } else if (src.unkC < src.unk14) {
-        src.unk24 = 1;
-    } else if (src.unkC < src.unk18) {
-        src.unk24 = 2;
-    } else if (src.unkC < src.unk1C) {
-        src.unk24 = 3;
+    effect = func_1516037C(&header, light, sizeof(jitter), arg6, arg7);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &jitter, sizeof(jitter));
+    }
+    return effect;
+}
+
+/* Like func_15162740, but also creates the light at `position`; `extraSize` bytes follow the jitter payload. */
+struct225 *func_1516284C(Header *header, Header2 *position, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 extraSize, u8 kind, u8 arg9, s32 argA) {
+    struct225 *effect;
+    LightJitter jitter;
+
+    if (kind >= 24) {
+        return NULL;
+    }
+
+    jitter.mid = D_800A67C0[kind];
+    jitter.low = D_800A6760[kind];
+    jitter.high = D_800A6820[kind];
+    jitter.target = 1.0f;
+    jitter.timer = 0.0f;
+    jitter.interval = 10.0f;
+    jitter.smoothing = 0.2488999963f;
+    jitter.level = 127.0f;
+    effect = func_151602C0(header, position, 0, arg2, arg3, arg4, arg5, arg6, extraSize + sizeof(jitter), arg9, argA);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &jitter, sizeof(jitter));
+    }
+    return effect;
+}
+
+/* Payload of func_15162B28: a repeating low / rise / high / fall intensity cycle. */
+typedef struct {
+    f32 high;
+    f32 low;
+    f32 range;     // high - low
+    f32 time;      // position in the cycle
+    f32 riseStart;
+    f32 riseEnd;
+    f32 fallStart;
+    f32 period;    // also the end of the fall
+    f32 invRamp;   // 1 / rise (and fall) duration
+    u8  state;     // 0 low, 1 rising, 2 high, 3 falling
+    s8  onLow;     // D_8008B364 callback run on entering each state, or -1
+    s8  onRise;
+    s8  onHigh;
+    s8  onFall;
+} LightCycle; // the effect reserves 0x30 bytes for it
+
+/* Creates a cycle effect; `kind` (0-4) picks the levels and phase lengths from tables. */
+struct225 *func_1516295C(struct226 *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, s8 onLow, s8 onRise, s8 onHigh, s8 onFall, s32 extraSize, u8 argB, s32 argC) {
+    struct225 *effect;
+    Header header;
+    LightCycle cycle;
+
+    if (kind >= 5) {
+        return NULL;
+    }
+
+    cycle.onLow = onLow;
+    cycle.onRise = onRise;
+    cycle.onHigh = onHigh;
+    cycle.onFall = onFall;
+    cycle.high = D_800A6880[kind];
+    cycle.low = D_800A6894[kind];
+    cycle.range = D_800A6880[kind] - D_800A6894[kind];
+    cycle.time = D_800A68A8[kind];
+    cycle.riseStart = D_800A68BC[kind];
+    cycle.riseEnd = D_800A68BC[kind] + D_800A68D0[kind];
+    cycle.fallStart = (D_800A68BC[kind] + D_800A68D0[kind]) + D_800A68E4[kind];
+    cycle.period = ((D_800A68BC[kind] + D_800A68D0[kind]) + D_800A68E4[kind]) + D_800A68D0[kind];
+
+    if (cycle.time < D_800A68BC[kind]) {
+        cycle.state = 0;
+    } else if (cycle.time < cycle.riseEnd) {
+        cycle.state = 1;
+    } else if (cycle.time < cycle.fallStart) {
+        cycle.state = 2;
+    } else if (cycle.time < cycle.period) {
+        cycle.state = 3;
     } else {
-        src.unk24 = 4;
+        cycle.state = 4;
     }
 
     header.unk0 = arg3;
-    header.unk1 = arg5;
-    header.unk2 = arg4;
-    header.unk4 = arg2;
+    header.unk1 = update;
+    header.unk2 = lifetime;
+    header.unk4 = type;
 
-    src.unk20 = 1.0f / D_800A68D0[arg1];
+    cycle.invRamp = 1.0f / D_800A68D0[kind];
 
-    temp_v0 = func_1516037C(&header, arg0, argA + 0x30, argB, argC);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &src, 0x30);
+    // matching: the original copies 0x30 bytes, 4 more than sizeof(cycle)
+    effect = func_1516037C(&header, light, extraSize + 0x30, argB, argC);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &cycle, 0x30);
     }
-    return temp_v0;
+    return effect;
 }
-// s32 func_1516295C(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, s8 arg6, s8 arg7, s8 arg8, s8 arg9, s32 argA, u8 argB, s32 argC) {
-//     struct225 *temp_v0;
-//     Header header;
-//     struct238 src;
-//
-//     f32 temp_f0;
-//     f32 temp_f12;
-//     f32 temp_f16;
-//     f32 temp_f18;
-//     f32 temp_f2;
-//     f32 temp_f8;
-//
-//     if (arg1 >= 5) {
-//         return 0;
-//     }
-//
-//     temp_f2 = D_800A6880[arg1];
-//     temp_f12 = D_800A6894[arg1];
-//     temp_f8 = D_800A68A8[arg1];
-//     temp_f0 = D_800A68BC[arg1];
-//     temp_f18 = D_800A68D0[arg1];
-//     temp_f16 = D_800A68E4[arg1] ;
-//
-//     src.unk0 = temp_f2; // sp30
-//     src.unk4 = temp_f12;
-//     src.unk8 = temp_f2 - temp_f12;
-//     src.unkC = temp_f8;
-//     src.unk10 = temp_f0;
-//     src.unk14 = temp_f18 + temp_f0;
-//     src.unk18 = temp_f18 + temp_f0 + temp_f16;
-//     src.unk1C = temp_f18 + temp_f0 + temp_f16 + temp_f18;
-//
-//     src.unk25 = arg6;
-//     src.unk26 = arg7;
-//     src.unk27 = arg8;
-//     src.unk28 = arg9;
-//
-//     if (src.unkC < temp_f0) {
-//         src.unk24 = 0;
-//     } else if (src.unkC < src.unk14) {
-//         src.unk24 = 1;
-//     } else if (src.unkC < src.unk18) {
-//         src.unk24 = 2;
-//     } else if (src.unkC < src.unk1C) {
-//         src.unk24 = 3;
-//     } else {
-//         src.unk24 = 4;
-//     }
-//
-//     header.unk0 = arg3;
-//     header.unk1 = arg5;
-//     header.unk2 = arg4;
-//     header.unk4 = arg2;
-//
-//     src.unk20 = 1.0f / temp_f18;
-//
-//     temp_v0 = func_1516037C(&header, arg0, argA + 0x30, argB, argC);
-//     if (temp_v0 != NULL) {
-//         memcpy(&temp_v0->unk18, &src, 0x30);
-//     }
-//     return temp_v0;
-// }
 
-// a biggun'
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    u8  unk24;
-    s8  unk25;
-    s8  unk26;
-    s8  unk27;
-    s8  unk28;
-} Sub15162B28;
+extern void (*D_8008B364[])(struct225 *, s32);
 
-typedef struct {
-    u8 pad0[0x14];
-    struct226 *unk14;
-    Sub15162B28 unk18;
-} Arg15162B28;
-
-extern void (*D_8008B364[])(Arg15162B28 *, s32);
-
-s32 func_15162B28(Arg15162B28 *arg0) {
-    Sub15162B28 *sub;
-    s8 idx;
-    u8 prev;
+/* Sets the intensity for the current point of the cycle, runs the state's callback on a state change, and advances time. */
+s32 func_15162B28(struct225 *effect) {
+    LightCycle *cycle;
+    s8 callback;
+    u8 prevState;
     s32 state;
 
-    prev = arg0->unk18.unk24;
-    sub = &arg0->unk18;
-    if (arg0->unk18.unkC < arg0->unk18.unk10) {
-        arg0->unk14->unk2F = sub->unk4;
-        sub->unk24 = 0;
+    cycle = (LightCycle *)&effect->unk18;
+    prevState = cycle->state;
+    if (cycle->time < cycle->riseStart) {
+        effect->unk14->unk2F = cycle->low;
+        cycle->state = 0;
+    } else if (cycle->time < cycle->riseEnd) {
+        f32 t;
+
+        t = (cycle->time - cycle->riseStart) * cycle->invRamp;
+        effect->unk14->unk2F = cycle->low + cycle->range * t;
+        cycle->state = 1;
+    } else if (cycle->time < cycle->fallStart) {
+        effect->unk14->unk2F = cycle->high;
+        cycle->state = 2;
     } else {
-        if (sub->unkC < sub->unk14) {
-            f32 t;
+        f32 t;
 
-            t = (sub->unkC - sub->unk10) * sub->unk20;
-            arg0->unk14->unk2F = sub->unk4 + sub->unk8 * t;
-            sub->unk24 = 1;
-        } else {
-            if (sub->unkC < sub->unk18) {
-                arg0->unk14->unk2F = sub->unk0;
-                sub->unk24 = 2;
-            } else {
-                f32 t;
-
-                t = 1.0f - (sub->unkC - sub->unk18) * sub->unk20;
-                arg0->unk14->unk2F = sub->unk4 + sub->unk8 * t;
-                sub->unk24 = 3;
-            }
-        }
+        t = 1.0f - (cycle->time - cycle->fallStart) * cycle->invRamp;
+        effect->unk14->unk2F = cycle->low + cycle->range * t;
+        cycle->state = 3;
     }
-    state = sub->unk24;
-    if (state != prev) {
+    state = cycle->state;
+    if (state != prevState) {
         switch (state) {
         case 0:
-            idx = sub->unk25;
+            callback = cycle->onLow;
             break;
         case 1:
-            idx = sub->unk26;
+            callback = cycle->onRise;
             break;
         case 2:
-            idx = sub->unk27;
+            callback = cycle->onHigh;
             break;
         case 3:
-            idx = sub->unk28;
+            callback = cycle->onFall;
             break;
         default:
-            idx = -1;
+            callback = -1;
             break;
         }
-        if (idx != -1) {
-            D_8008B364[idx](arg0, state);
+        if (callback != -1) {
+            D_8008B364[callback](effect, state);
         }
     }
-    sub->unkC += D_800BE9A4;
-    while (sub->unk1C < sub->unkC) {
-        sub->unkC -= sub->unk1C;
+    cycle->time += D_800BE9A4;
+    while (cycle->period < cycle->time) {
+        cycle->time -= cycle->period;
     }
     return 1;
 }
