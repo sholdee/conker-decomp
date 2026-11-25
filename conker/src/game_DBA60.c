@@ -3,7 +3,8 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Updates unk84 flag bits 0x4, 0x4000, 0x10000 and 0x1000000 from func_1509BE40 queries, unless D_800D2E4C disables them. */
+/* Updates flag bits in unk84 (0x4, 0x4000, 0x10000, 0x1000000) from func_1509BE40 queries; the first two
+   checks are skipped when D_800D2E4C->unk4 bit 0x80 / unk1 bit 4 are set. */
 void func_150AE5B0(struct108 *arg0) {
     if (!(D_800D2E4C->unk4 & 0x80)) {
         if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
