@@ -396,18 +396,14 @@ void func_15063B64(struct127 *arg0) {
     }
 }
 
-/* Object-level asm-differ reports score 40 here, but the difference is NOT codegen: all
- * 137 instructions, registers, branch targets, delay slots and IDO's peel-1-then-unroll-by-4
- * are identical. The only differing words are four relocation ADDENDS, where the extracted
- * .s names interior symbols of D_800CC2D0[26] (D_800CC5FC = +0x32C, D_800CC2D4 = +0x4,
- * D_800CC335 = +0x65, D_800D121C = +0x4F4C) and C naturally spells them as base+offset.
- * Both resolve to the same linked addresses, so the ROM bytes are identical -- which the
- * force-clean full-ROM sha1 gate confirms. */
-struct127 *func_15063C60(struct127 *arg0, s32 arg1) {
+/* Returns the active object with id `id` that is linked (unk65) to arg0, or NULL.
+ * (asm-differ shows relocation-addend diffs here: the .s names interior symbols of
+ * D_800CC2D0[], C spells them base+offset; the linked bytes are identical.) */
+struct127 *func_15063C60(struct127 *arg0, s32 id) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
-        if ((D_800CC2D0[i].interaction_state != 0) && (arg1 == D_800CC2D0[i].id) &&
+        if ((D_800CC2D0[i].interaction_state != 0) && (id == D_800CC2D0[i].id) &&
             (((arg0 - D_800CC2D0) + 1) == D_800CC2D0[i].unk65)) {
             return &D_800CC2D0[i];
         }
@@ -415,81 +411,44 @@ struct127 *func_15063C60(struct127 *arg0, s32 arg1) {
     return NULL;
 }
 
-typedef struct Ctl15063E84 {
-    u8 pad0[0x27];
-    u8 unk27;
-    u8 pad28[0x50];
-    u8 unk78;
-    u8 pad79[0x1C];
-    u8 unk95;
-    u8 pad96[0x84];
-    u8 unk11A;
-} Ctl15063E84;
-
-/* struct126 declares unk95 as s8; golden reads it with lbu, so view the block through a local u8 layout. */
-#define CTLX ((Ctl15063E84 *)arg0->unk31C)
-
-s32 func_15063E84(struct127 *arg0, u16 anim, u16 flags, s32 arg3, s32 arg4) {
+/* Starts `anim` as a new action when the object stands on the ground with nothing else going
+ * on and the 0x4000 button is pressed. Returns `anim`, or 999 when the action can't start. */
+s32 func_15063E84(struct127 *arg0, u16 anim, u16 flags, s32 action, s32 buttons) {
     s32 state;
 
-    if (arg4 & 0x4000) {
-        if (arg0->unk28 == 0.0f) {
-            if (arg0->y_velocity <= 0.0f) {
-                if (CTLX->unk95 == 0) {
-                    if (arg0->unk84.uh != anim) {
-                        state = CTLX->unk11A;
-                        if (state == 0 || state == 2) {
-                            if (CTLX->unk27 == 0) {
-                                if (arg3 != 0 && arg0->disable_jump != 0) {
-                                    return 999;
-                                }
-                                if (flags & 1) {
-                                    arg0->disable_jump = 20;
-                                }
-                                if (arg3 != 0) {
-                                    if (CTLX->unk11A == 2) {
-                                        return 999;
-                                    }
-                                    CTLX->unk11A = 1;
-                                } else {
-                                    CTLX->unk11A = 3;
-                                }
-                                CTLX->unk78 = arg3;
-                                arg0->disable_run = 0xFF;
-                                arg0->unk83 = 0xFF;
-                                return anim;
-                            }
-                        }
-                    }
-                }
+    if ((buttons & 0x4000) && (arg0->unk28 == 0.0f) && (arg0->y_velocity <= 0.0f) &&
+        (CTL(arg0)->unk95 == 0) && (arg0->unk84.uh != anim)) {
+        state = CTL(arg0)->unk11A;
+        if ((state == 0 || state == 2) && (CTL(arg0)->unk27 == 0)) {
+            if (action != 0 && arg0->disable_jump != 0) {
+                return 999;
             }
+            if (flags & 1) {
+                arg0->disable_jump = 20;
+            }
+            if (action != 0) {
+                if (CTL(arg0)->unk11A == 2) {
+                    return 999;
+                }
+                CTL(arg0)->unk11A = 1;
+            } else {
+                CTL(arg0)->unk11A = 3;
+            }
+            CTL(arg0)->action = action;
+            arg0->disable_run = 0xFF;
+            arg0->unk83 = 0xFF;
+            return anim;
         }
     }
     return 999;
 }
 
-#undef CTLX
-
-typedef struct {
-    u8 pad0[0xB8];
-    f32 unkB8;
-    f32 unkBC;
-    f32 unkC0;
-    u8 padC4[0x109 - 0xC4];
-    u8 unk109;
-    u8 pad10A[0x13C - 0x10A];
-    f32 unk13C;
-    f32 unk140;
-    f32 unk144;
-    u8 pad148[0x16C - 0x148];
-    f32 unk16C;
-    f32 unk170;
-} s15063FA0;
-
-void func_15063FA0(struct127 *arg0, s32 arg1) {
-    f32 sp84;
-    f32 sp80;
-    f32 sp7C;
+/* Fires a shot of kind `kind` (2, 3, 6, 0x12) from the object's muzzle (unk13C..unk144),
+ * aimed along its yaw/pitch or, when unk109 is set, at the point unkB8..unkC0. */
+void func_15063FA0(struct127 *arg0, s32 kind) {
+    f32 velX;
+    f32 velY;
+    f32 velZ;
     f32 dist;
     f32 pos[3];
     f32 off[2];
@@ -501,12 +460,12 @@ void func_15063FA0(struct127 *arg0, s32 arg1) {
     f32 dx;
     f32 dy;
     f32 dz;
-    s15063FA0 *p;
+    ActorCtl *ctl;
 
     dist = 300.0f;
     height = 0.0f;
     radius = 0.0f;
-    switch (arg1) {
+    switch (kind) {
     case 2:
         radius = 27.0f;
         break;
@@ -516,98 +475,107 @@ void func_15063FA0(struct127 *arg0, s32 arg1) {
         dist = 500.0f;
         break;
     }
-    angle = ((s15063FA0 *)arg0->unk31C)->unk16C * 0.01745329238f;
+    angle = CTL(arg0)->unk16C * 0.01745329238f;
     off[0] = sinf(angle) * radius;
     off[1] = cosf(angle) * radius;
-    pos[0] = off[0] + ((s15063FA0 *)arg0->unk31C)->unk13C;
-    pos[1] = ((s15063FA0 *)arg0->unk31C)->unk140 + height;
-    pos[2] = off[1] + ((s15063FA0 *)arg0->unk31C)->unk144;
-    p = (s15063FA0 *)arg0->unk31C;
-    if (p->unk109 == 0) {
-        pitch = -p->unk170;
-        yaw = p->unk16C + 90.0f;
+    pos[0] = off[0] + CTL(arg0)->unk13C;
+    pos[1] = CTL(arg0)->unk140 + height;
+    pos[2] = off[1] + CTL(arg0)->unk144;
+    ctl = CTL(arg0);
+    if (ctl->unk109 == 0) {
+        pitch = -ctl->unk170;
+        yaw = ctl->unk16C + 90.0f;
     } else {
-        dx = p->unkB8 - pos[0];
-        dy = p->unkBC - pos[1];
-        dz = p->unkC0 - pos[2];
+        dx = ctl->unkB8 - pos[0];
+        dy = ctl->unkBC - pos[1];
+        dz = ctl->unkC0 - pos[2];
         pitch = func_150484A0(dy, sqrtf(dx * dx + dz * dz)) * 57.29577637f;
         yaw = func_150484A0(dx, dz) * 57.29577637f;
     }
-    func_1505A184((s16)(pitch * 182.0444489f), dist, 0.0f, &sp84, &sp80, &sp7C);
-    sp80 = -sp80;
-    func_1506C460(yaw, sp84, sp80, 0.0f, 100, arg1, 0.0f, 0.5f, (s32)pos, 1, 1);
+    func_1505A184((s16)(pitch * 182.0444489f), dist, 0.0f, &velX, &velY, &velZ);
+    velY = -velY;
+    func_1506C460(yaw, velX, velY, 0.0f, 100, kind, 0.0f, 0.5f, (s32)pos, 1, 1);
 }
 
+s32 func_1505DADC(struct127 *, u16 *, s32, s32, s32);
 
-s32 func_1505DADC(void *, u16 *, s32, s32, s32);
-
-u16 func_150641D8(void *arg0, u16 arg1, u16 arg2, u16 arg3) {
+/* Picks animA or animB at random; if one of them is already playing, picks animC instead
+ * (or returns 999 while unk107 < 40). Returns 999 when animC is already playing. */
+u16 func_150641D8(struct127 *arg0, u16 animA, u16 animB, u16 animC) {
     u16 selected;
-    u8 *actor = arg0;
-    u16 output;
+    struct127 *actor = arg0;  // matching: the copy reserves the extra stack slot IDO gave the original
+    u16 angle;
 
-    output = 0;
-    selected = arg1;
+    angle = 0;
+    selected = animA;
     if (func_150ADA20() & 1) {
-        selected = arg2;
+        selected = animB;
     }
-    if ((arg1 == *(u16 *)(actor + 0x84)) || (arg2 == *(u16 *)(actor + 0x84))) {
-        if (actor[0x107] < 0x28) {
-            return 0x3E7;
+    if ((actor->unk84.uh == animA) || (actor->unk84.uh == animB)) {
+        if (actor->unk107 < 40) {
+            return 999;
         }
-        selected = arg3;
+        selected = animC;
     }
-    if (arg3 == *(u16 *)(actor + 0x84)) {
-        selected = 0x3E7;
+    if (actor->unk84.uh == animC) {
+        selected = 999;
     }
-    if (func_1505DADC(actor, &output, 0, 0xFE, 0x40) != 0xFF) {
-        *(u16 *)(actor + 0x76) = output;
+    if (func_1505DADC(actor, &angle, 0, 0xFE, 0x40) != 0xFF) {
+        actor->unk76 = angle;
     }
-    *(u8 *)(actor + 0x83) = 0xFF;
+    actor->unk83 = 0xFF;
     return selected;
 }
 
 extern s32 D_800CC28C;
+
+/* A libultra fixed-point Mtx viewed as its integer and fraction halves. */
+typedef struct MtxParts {
+    s16 whole[4][4];
+    u16 frac[4][4];
+} MtxParts;
 void func_15074664(void);
 void func_15060A30(s32 arg0, struct127 *arg1);
 void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 
-void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4) {
+/* Handles the scripted move requested in unk7B, then the default B-button move; plays the
+ * chosen animation unless `noPlay` is set. */
+void func_150642AC(struct127 *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
     s32 anim;
     f32 speed;
     f32 blend;
     struct127 *obj;
-    struct126 *inner;
-    u8 *sub;
+    s32 pad;  // matching: unused stack slot
+    MtxParts *mtx;
     f32 dx;
     f32 dist;
     f32 dz;
     s16 x;
     s16 z;
-    f32 sp44;
-    f32 sp40;
-    f32 sp3C;
+    f32 pushX;
+    f32 pushY;
+    f32 pushZ;
 
     anim = 0;
     speed = 1.0f;
     blend = 4.0f;
-    if (arg4 != 0) {
-        arg1 &= ~0x4000;
-        D_800CC28C &= ~0x4000;
+    if (lockB) {
+        buttons &= ~B_BUTTON;
+        D_800CC28C &= ~B_BUTTON;
     }
-    if (arg0->unk31C->pad79[2] != 0) {
-        switch (arg0->unk31C->pad79[2]) {
+    if (CTL(arg0)->unk7B != 0) {
+        switch (CTL(arg0)->unk7B) {
         case 1: {
-            s16 pad;
+            s16 pad;  // matching: unused stack slot
 
             arg0->unk83 = 0xFF;
             arg0->disable_run = 0xFF;
             x = (arg0->unk2E4 >> 16) & 0xFFFF;
             z = arg0->unk2E4 & 0xFFFF;
             arg0->unk84.uh = 0;
-            arg0->unk31C->unk30 = 0xD;
-            *(f32 *)&arg0->unk31C->unk28 = x;
-            *(f32 *)&arg0->unk31C->unk2C = z;
+            CTL(arg0)->unk30 = 0xD;
+            CTL(arg0)->unk28 = x;
+            CTL(arg0)->unk2C = z;
             anim = 0x96;
             arg0->unk76 = arg0->unk2E8 & 0xFFFF;
         }
@@ -623,14 +591,14 @@ void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4) {
             func_15074664();
             if (arg0->in_water != 0 || (s32)arg0->unk28 != 0) {
                 func_15083568(arg0, 0x17, 1.0f, 0);
-                arg0->unk31C->unk11A = 2;
+                CTL(arg0)->unk11A = 2;
             } else {
                 arg0->disable_run = 0xFF;
                 arg0->disable_jump = 0xFF;
                 arg0->unk83 = 0xFF;
                 speed = 3.0f;
                 anim = 0x151;
-                arg0->unk31C->unk11A = 1;
+                CTL(arg0)->unk11A = 1;
             }
             break;
         case 4:
@@ -638,14 +606,14 @@ void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4) {
             func_15074664();
             if (arg0->in_water != 0 || (s32)arg0->unk28 != 0) {
                 func_150836CC(arg0, 0x17);
-                arg0->unk31C->unk11A = 0;
+                CTL(arg0)->unk11A = 0;
             } else {
                 arg0->disable_run = 0xFF;
                 arg0->disable_jump = 0xFF;
                 arg0->unk83 = 0xFF;
                 speed = 3.0f;
                 anim = 0x14E;
-                arg0->unk31C->unk11A = 3;
+                CTL(arg0)->unk11A = 3;
             }
             break;
         case 5:
@@ -658,11 +626,11 @@ void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4) {
             }
             if (obj->unk2E4 >= 100) {
                 if (obj->unk1D4 != NULL) {
-                    sub = (u8 *)obj->unk1D4 + 0x140;
-                    arg0->y_position = *(s16 *)(sub + 0x1A) + 20;
+                    mtx = &((MtxParts *)obj->unk1D4)[5];
+                    arg0->y_position = mtx->whole[3][1] + 20;
                 }
             }
-            if (arg1 & 0x8000) {
+            if (buttons & A_BUTTON) {
                 if (obj->unk2E4 == 100) {
                     obj->unk2E4 = 0x7A;
                     obj->unk2E8 = 0x7A;
@@ -673,7 +641,7 @@ void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4) {
             break;
         case 6:
         case 8:
-            if ((arg1 & 0x4000) && (arg2 <= 0.0f)) {
+            if ((buttons & B_BUTTON) && (arg2 <= 0.0f)) {
                 speed = 2.0f;
                 arg0->unk83 = 0xFF;
                 arg0->disable_run = 0xFF;
@@ -709,16 +677,16 @@ void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4) {
                 u16 angle;
 
                 angle = func_1505A630(-dx, dz, 0);
-                func_1505A184(angle, 20.0f, 0.0f, &sp44, &sp40, &sp3C);
-                func_1505A250(sp44, sp40, (1200.0f - dist) * 0.001000000047f, &arg0->unk16C, &arg0->unk170);
+                func_1505A184(angle, 20.0f, 0.0f, &pushX, &pushY, &pushZ);
+                func_1505A250(pushX, pushY, (1200.0f - dist) * 0.001000000047f, &arg0->unk16C, &arg0->unk170);
             }
             break;
         default:
             break;
         }
-        arg0->unk31C->pad79[2] = 0;
+        CTL(arg0)->unk7B = 0;
     }
-    if (arg0->unk31C->unk198 == 0 && anim == 0 && (arg1 & 0x4000) && (arg0->unk31C->unk4E & 0xF) != 1 &&
+    if (CTL(arg0)->unk198 == 0 && anim == 0 && (buttons & B_BUTTON) && (CTL(arg0)->unk4E & 0xF) != 1 &&
         arg2 <= 0.0f && arg0->disable_run != 0xFF) {
         if (arg0->unk13C >= 100) {
             if (!(arg0->unk25C & 0x20)) {
@@ -734,10 +702,10 @@ void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4) {
                 arg0->unk83 = 0xFF;
                 arg0->disable_run = 0xFF;
             }
-        } else if ((arg0->unk31C->unk75 == 0 && arg0->unk31C->pad79[3] == 0) || arg0->unk31C->unk4E == 2) {
+        } else if ((CTL(arg0)->unk75 == 0 && CTL(arg0)->unk7C == 0) || CTL(arg0)->unk4E == 2) {
             if (D_800BE9F0 != 0x2D && D_800BE9F0 != 0x2B && D_800BE9F0 != 0x30 && D_800BE9F0 != 0x34) {
                 anim = 0x33;
-                if ((s16)arg0->unk31C->unk8 != 0) {
+                if (CTL(arg0)->unk8 != 0) {
                     arg0->unk83 = 0xFF;
                     arg0->disable_run = 0xFF;
                     speed = 1.600000024f;
@@ -753,11 +721,11 @@ void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4) {
                         anim = 0x354;
                     }
                     speed = 1.350000024f;
-                    if (arg0->unk31C->unk84 == 0 && arg0->unk31C->unk4E == 0) {
+                    if (CTL(arg0)->unk84 == 0 && CTL(arg0)->unk4E == 0) {
                         arg0->disable_run = 0xFF;
                         arg0->y_velocity = -4.0f;
-                        arg0->unk76 = arg0->unk31C->unk4C;
-                        speed = 1.0;
+                        arg0->unk76 = CTL(arg0)->unk4C;
+                        speed = 1.0;  // matching: double literal; 1.0f drops its .rodata entry
                         anim = 0x46;
                     }
                     arg0->unk80 = 1;
@@ -766,34 +734,36 @@ void func_150642AC(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4) {
             }
         }
     }
-    if (anim != 0 && anim != 999 && arg3 == 0) {
+    if (anim != 0 && anim != 999 && !noPlay) {
         func_1505E650(arg0, anim, speed, blend, 0.0f, 0.0f, 0);
     }
 }
 
-void func_150649A0(s32 arg0, s32 arg1) {
+/* Copies object srcIndex's animation position (unk2D0->unk8) to object dstIndex, keeping it
+ * below dstIndex's unk18. */
+void func_150649A0(s32 srcIndex, s32 dstIndex) {
     struct127 *objects;
     struct197 *dst;
     struct197 *src;
 
     objects = D_800CC2D0;
-    dst = objects[arg1].unk2D0;
-    src = objects[arg0].unk2D0;
+    dst = objects[dstIndex].unk2D0;
+    src = objects[srcIndex].unk2D0;
 
-    if (dst != 0) {
-        if (src != 0) {
-            dst->unk8 = src->unk8;
-            if (dst->unk18 <= dst->unk8) {
-                dst->unk8 = dst->unk18 - 1.0f;
-            }
+    if (dst != NULL && src != NULL) {
+        dst->unk8 = src->unk8;
+        if (dst->unk18 <= dst->unk8) {
+            dst->unk8 = dst->unk18 - 1.0f;
         }
     }
 }
 
+/* Plays the animation that pairs with what the linked object (unk65) is doing, and syncs
+ * this object's animation to it. */
 void func_15064A14(struct127 *arg0) {
     struct127 *partner;
     s32 anim;
-    s32 big;
+    s32 variant;
 
     partner = &D_800CC2D0[arg0->unk65 - 1];
     anim = 0xF;
@@ -814,11 +784,11 @@ void func_15064A14(struct127 *arg0) {
     } else if (partner->id == 0x21) {
         anim = 0x169;
     } else if (partner->id == 0x8A) {
-        big = ((arg0->unk31C != NULL) && (((u8 *)arg0->unk31C)[0x1B2] != 0)) ? 1 : 0;
+        variant = ((arg0->unk31C != NULL) && (CTL(arg0)->unk1B2 != 0)) ? 1 : 0;
         if (partner->unk232 == 4) {
-            anim = big ? 0x350 : 0x1A4;
+            anim = variant ? 0x350 : 0x1A4;
         } else {
-            anim = big ? 0x34F : 0x1A1;
+            anim = variant ? 0x34F : 0x1A1;
         }
     }
     func_1505E650(arg0, anim, 1.0f, 6.0f, 0.0f, 0.0f, 0);
