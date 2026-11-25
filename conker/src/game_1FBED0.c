@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "libc/string.h"
 
 typedef struct { f32 x, y, z; } TrailVec3;
 typedef struct { f32 x, z; } TrailVec2;
@@ -21,7 +22,7 @@ typedef struct {
     /* 0x14 */ TrailVec2 normal;
     /* 0x1C */ u8 flags;
     /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
+    /* 0x24 */ f32 angle;
 } TrailInfo; /* 0x28 */
 
 /* Spawn parameters passed to func_15147A80. */
@@ -51,7 +52,6 @@ typedef struct {
     /* 0x50 */ f32 fade;
 } Motion;
 
-extern f32 D_800AB008;
 extern TrailObject *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 s32 func_151CEC10(TrailVec3 *pos, TrailOwner *owner, void *target);
 
@@ -105,7 +105,7 @@ TrailObject *func_151CEAAC(TrailOwner *owner, void *target, u8 arg2, u8 arg3, s3
 
     info.unk20 = func_150ADA68() * 400.0f + 400.0f;
     random = func_150ADA68();
-    info.unk24 = (random + random) * D_800AB008;
+    info.angle = (random + random) * 3.141592741f; /* random angle in [0, 2pi) */
 
     if (!func_151CEC10(&spawn.pos, owner, target)) {
         spawn.pos.x = 0.0f;
