@@ -428,19 +428,20 @@ void func_1511B7D4(struct Obj1511B7D4 *obj) {
 
 struct Obj1511BA24 {
     u8 pad0[0x3C];
-    s32 unk3C;
+    s32 param;
     u8 pad40[0x4A];
-    u8 unk8A;
+    u8 alpha;
 };
 
-void func_1511BA24(struct Obj1511BA24 *arg0) {
-    f32 sp1C;
+/* Sets the alpha from a 0..1 level looked up by the param, never fully transparent. */
+void func_1511BA24(struct Obj1511BA24 *obj) {
+    f32 level;
 
-    sp1C = 0.0f;
-    func_15188010(arg0->unk3C, &sp1C);
-    arg0->unk8A = sp1C * 255.0f;
-    if (arg0->unk8A == 0) {
-        arg0->unk8A = 1;
+    level = 0.0f;
+    func_15188010(obj->param, &level);
+    obj->alpha = level * 255.0f;
+    if (obj->alpha == 0) {
+        obj->alpha = 1;
     }
 }
 
@@ -466,16 +467,17 @@ typedef struct Game1483E0State {
     u8 reference_id;
     u8 unknown40[0x3C];
     Game1483E0UvPair *coords;
-    void *reference;
+    struct127 *reference;
 } Game1483E0State;
 
 extern f32 D_800A31D0;
 extern f32 D_800A31D4;
-extern f32 D_800A31D8;
-extern f32 D_800A31DC;
 
-void func_1511BB04(Game1483E0State *arg0, f32 arg1, f32 arg2,
-                   f32 arg3, f32 arg4) {
+/*
+ * Scrolls the mesh's texture coordinates so the texture stays fixed in world space under
+ * (refX, refZ), scaled by 1/scaleS and 1/scaleT. Copies the source mesh into both buffers on first use.
+ */
+void func_1511BB04(Game1483E0State *obj, f32 refX, f32 refZ, f32 scaleS, f32 scaleT) {
     Game1483E0UvPair *coords;
     s32 i;
     f32 s_offset;
@@ -483,84 +485,71 @@ void func_1511BB04(Game1483E0State *arg0, f32 arg1, f32 arg2,
     f32 s_scale;
     f32 t_scale;
 
-    if (arg0->coords == 0) {
-        coords = allocate_memory(arg0->count * 4, 1, 0, 0);
-        arg0->coords = coords;
-        for (i = 0; i < arg0->count; i++) {
-            coords[i].s = arg0->source[i].s;
-            coords[i].t = arg0->source[i].t;
-            arg0->buffers[0][i] = arg0->source[i];
-            arg0->buffers[1][i] = arg0->source[i];
-            arg0->buffers[0][i].x += arg0->x;
-            arg0->buffers[0][i].y += arg0->y;
-            arg0->buffers[0][i].z += arg0->z;
-            arg0->buffers[1][i].x += arg0->x;
-            arg0->buffers[1][i].y += arg0->y;
-            arg0->buffers[1][i].z += arg0->z;
+    if (obj->coords == NULL) {
+        coords = allocate_memory(obj->count * sizeof(Game1483E0UvPair), 1, 0, 0);
+        obj->coords = coords;
+        for (i = 0; i < obj->count; i++) {
+            coords[i].s = obj->source[i].s;
+            coords[i].t = obj->source[i].t;
+            obj->buffers[0][i] = obj->source[i];
+            obj->buffers[1][i] = obj->source[i];
+            obj->buffers[0][i].x += obj->x;
+            obj->buffers[0][i].y += obj->y;
+            obj->buffers[0][i].z += obj->z;
+            obj->buffers[1][i].x += obj->x;
+            obj->buffers[1][i].y += obj->y;
+            obj->buffers[1][i].z += obj->z;
         }
     }
 
-    coords = arg0->coords;
-    s_offset = arg1 - ((f32)arg0->x + D_800A31D0);
-    t_offset = arg2 - ((f32)arg0->z + D_800A31D4);
+    coords = obj->coords;
+    s_offset = refX - ((f32)obj->x + D_800A31D0);
+    t_offset = refZ - ((f32)obj->z + D_800A31D4);
     s_offset = -s_offset;
-    s_offset *= D_800A31D8;
-    t_offset *= D_800A31DC;
+    s_offset *= 4.300000191f;
+    t_offset *= 4.300000191f;
     s_offset -= 1024.0f;
     t_offset -= 1024.0f;
     s_scale = 1.0f;
     t_scale = 1.0f;
-    if (arg3 != 1.0f) {
-        s_scale = 1.0f / arg3;
+    if (scaleS != 1.0f) {
+        s_scale = 1.0f / scaleS;
     }
-    if (arg4 != 1.0f) {
-        t_scale = 1.0f / arg4;
+    if (scaleT != 1.0f) {
+        t_scale = 1.0f / scaleT;
     }
-    for (i = 0; i < arg0->count; i++) {
-        arg0->buffers[D_800BE9C0][i].s =
-            (s16)(((f32)coords[i].s + s_offset) * s_scale + 1024.0f);
-        arg0->buffers[D_800BE9C0][i].t =
-            (s16)(((f32)coords[i].t + t_offset) * t_scale + 1024.0f);
+    for (i = 0; i < obj->count; i++) {
+        obj->buffers[D_800BE9C0][i].s = (s16)(((f32)coords[i].s + s_offset) * s_scale + 1024.0f);
+        obj->buffers[D_800BE9C0][i].t = (s16)(((f32)coords[i].t + t_offset) * t_scale + 1024.0f);
     }
 }
 
-struct Obj1511BDF4 {
-    u8  pad0[0x3F];
-    u8  unk3F;
-    u8  pad40[0x40];
-    struct127 *unk80;
-};
+/* Projects the mesh texture under its reference object (or the object numbered reference_id). */
+void func_1511BDF4(Game1483E0State *obj) {
+    struct127 *reference;
 
-extern void func_1511BB04(Game1483E0State *, f32, f32, f32, f32);
-
-void func_1511BDF4(struct Obj1511BDF4 *arg0) {
-    struct127 *temp;
-    struct127 *sp;
-
-    temp = arg0->unk80;
-    if (temp != 0) {
-        sp = temp;
+    if (obj->reference != NULL) {
+        reference = obj->reference;
     } else {
-        sp = func_15083E90(arg0->unk3F);
+        reference = func_15083E90(obj->reference_id);
     }
-    if (sp != 0) {
-        func_1511BB04((Game1483E0State *)arg0, sp->x_position, sp->z_position, 1.0f, 1.0f);
+    if (reference != NULL) {
+        func_1511BB04(obj, reference->x_position, reference->z_position, 1.0f, 1.0f);
     }
 }
 
 struct Obj1511BE5C {
     u8  pad0[0x4];
-    f32 unk4;
+    f32 rotY;
     u8  pad8[0x8];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
+    s16 x;
+    s16 y;
+    s16 z;
 };
 
-extern f32 D_800A31E0;
-
-void func_1511BE5C(struct Obj1511BE5C *arg0) {
-    arg0->unk4 = func_150484A0((f32)arg0->unk10 - D_800DBFF0->unk2F8, (f32)arg0->unk14 - D_800DBFF0->unk300) * D_800A31E0;
+/* Turns the object to face the camera (yaw in degrees). */
+void func_1511BE5C(struct Obj1511BE5C *obj) {
+    obj->rotY = func_150484A0((f32)obj->x - D_800DBFF0->unk2F8, (f32)obj->z - D_800DBFF0->unk300) * 57.29577637f;
 }
 
 struct Obj1511BEBC {
