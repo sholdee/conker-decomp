@@ -5,6 +5,24 @@
 s32 func_151BB0E0();
 void func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
+typedef struct {
+    f32 x, y, z;
+} Vec3f;
+
+/* Collision surface record, from the func_150AC9C0 ray cast or a floor query. */
+typedef struct {
+    s16 unk[9];
+} Surface;
+
+/* Floor below a point, from func_1504715C / func_15046C80. */
+typedef struct {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ Surface surf;
+    /* 0x16 */ u8 pad16[0x24 - 0x16];
+} FloorInfo;
+
+void func_1504715C(FloorInfo *, struct127 *);
+
 /* Effect objects keep a per-type extra-data block at 0xF8 + extraOffset. */
 typedef struct {
     u8 pad0[0x50];
@@ -239,10 +257,6 @@ void func_151BA468(struct260 *effect, EffectMsg *msg, u8 msgType) {
     }
 }
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
 /* Spawn descriptor read by func_1514FCE8. */
 typedef struct {
     /* 0x00 */ s16 unk0;
@@ -313,9 +327,8 @@ extern f32 D_800AA62C[];
 extern Vec3f D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[], D_800AA6D8[];
 extern f32 D_800AA708[];
 void func_1514FCE8(Desc1514FCE8 *, u8, s32);
-extern void func_1504715C(void *, void *);
 extern void func_1503F404(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern void func_1513264C(Part1513264C *, s32, s32, void *, s32, u8, s32);
+extern void func_1513264C(Part1513264C *, s32, s32, FloorInfo *, s32, u8, s32);
 extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 
 /*
@@ -324,7 +337,7 @@ extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
  */
 void func_151BA518(struct127 *obj, u8 arg1, s32 arg2) {
     Desc1514FCE8 burst;
-    u8 floorInfo[0x24];
+    FloorInfo floor;
     Vec3f objPos;
     Part1513264C part;
     f32 outA2, outA1, outA0, outB2, outB1, outB0;
@@ -377,7 +390,7 @@ void func_151BA518(struct127 *obj, u8 arg1, s32 arg2) {
     }
     func_1514FCE8(&burst, arg1, arg2);
     if ((obj->unk1D4 != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
-        func_1504715C(floorInfo, obj);
+        func_1504715C(&floor, obj);
         mtx = (Mtx *)((u8 *)obj->unk1D4 + 0x40);
         {
             typedef s32 T151; // matching: a declaration makes -g3 open a scope here, which steers the scheduler
@@ -431,7 +444,7 @@ void func_151BA518(struct127 *obj, u8 arg1, s32 arg2) {
         part.pos.x += 109.0f;
         part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
         part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-        func_1513264C(&part, 3, 0xFF, floorInfo, 0, arg1, arg2);
+        func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
 
         speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
         part.lifetime = (func_150ADA20() % 36U) + 30;
@@ -451,7 +464,7 @@ void func_151BA518(struct127 *obj, u8 arg1, s32 arg2) {
         part.pos = objPos;
         part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
         part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-        func_1513264C(&part, 3, 0xFF, floorInfo, 0, arg1, arg2);
+        func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
 
         part.unk56 = 0x29;
         for (i = 0; i != 4; i++) {
@@ -472,7 +485,7 @@ void func_151BA518(struct127 *obj, u8 arg1, s32 arg2) {
                 part.pos = objPos;
                 part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
                 part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-                func_1513264C(&part, 3, 0xFF, floorInfo, 0, arg1, arg2);
+                func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
             }
         }
 
@@ -498,7 +511,7 @@ void func_151BA518(struct127 *obj, u8 arg1, s32 arg2) {
                 part.pos.z += D_800AA660[j].z;
                 part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
                 part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-                func_1513264C(&part, 3, 0xFF, floorInfo, 0, arg1, arg2);
+                func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
             }
         }
 
@@ -524,7 +537,7 @@ void func_151BA518(struct127 *obj, u8 arg1, s32 arg2) {
                 part.pos.z += D_800AA6D8[k].z;
                 part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
                 part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-                func_1513264C(&part, 3, 0xFF, floorInfo, 0, arg1, arg2);
+                func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
             }
         }
     }
@@ -659,11 +672,6 @@ s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *spee
 end:
     return 1;
 }
-
-/* Collision surface record filled in by the func_150AC9C0 ray cast. */
-typedef struct {
-    s16 unk[9];
-} Surface;
 
 /* Effect descriptor read by func_1514FBFC. */
 typedef struct {
@@ -821,151 +829,120 @@ void func_151BB61C(struct127 *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
     }
 }
 
-typedef struct Vec3i_151BBA9C {
-    s32 x;
-    s32 y;
-    s32 z;
-} Vec3i_151BBA9C;
+/* Spawn descriptor read by func_15152190. */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ s16 unk14;
+    /* 0x16 */ s16 unk16;
+    /* 0x18 */ s16 unk18;
+    /* 0x1A */ s16 unk1A;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+} Desc15152190;
 
-typedef struct Effect_151BBA9C {
-    s16 field00;
-    s16 field02;
-    s16 field04;
-    s16 field06;
-    s32 field08;
-    s32 field0C;
-    Vec3i_151BBA9C position;
-    f32 field1C;
-    f32 field20;
-    f32 field24;
-    f32 field28;
-    f32 field2C;
-    f32 field30;
-    s32 field34;
-    s32 field38;
-    f32 field3C;
-    f32 field40;
-    f32 field44;
-    f32 field48;
-    s16 field4C;
-    s16 field4E;
-    s16 field50;
-    s16 field52;
-    s16 field54;
-    s16 field56;
-    s8 field58;
-    u8 pad59[3];
-} Effect_151BBA9C;
-
-typedef struct Config_151BBA9C {
-    s32 countBase, countRange;
-    Vec3f position;
-    s16 yawBase, yawRange, pitchBase, pitchRange;
-    f32 speedBase, speedRange, durationBase, durationRange;
-    s16 lifeBase, lifeRange;
-    f32 sizeBase, sizeRange, jitter;
-} Config_151BBA9C;
-
-void func_15152190(void *, void *, void *, s32, f32, s32, s32, s32);
-s32 func_15046C80(f32 *, u16, f32, void *);
-void func_1504715C(void *, void *);
+void func_15152190(Desc15152190 *, Vec3f *, Vec3f *, s32, f32, s32, s32, s32);
+s32 func_15046C80(Vec3f *, u16, f32, FloorInfo *);
 extern Vec3f D_8008FBA0;
 extern Vec3f D_8008FBAC;
-extern f32 D_800AA80C;
-extern f32 D_800AA810;
-extern f32 D_800AA814;
-extern f32 D_800AA818;
-extern f32 D_800AA81C;
-extern f32 D_800AA820;
-extern f32 D_800AA824;
-extern f32 D_800AA828;
 
-void func_151BBA9C(s32 arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4) {
+/*
+ * Impact effect halfway between `a` and `b`: a burst there, a ground impact on the floor below it,
+ * and a shower of debris.
+ */
+void func_151BBA9C(struct127 *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
     Vec3f center;
-    Effect_151BBA9C effect;
-    f32 contact[8];
-    f32 ground;
+    Desc1514FCE8 burst;
+    FloorInfo floor;
     Vec3f probe;
     Vec3f hit;
+    Vec3f edgeA;
+    Vec3f edgeB;
     Vec3f normal;
-    Vec3f tangent;
-    Vec3f facing;
 
-    if (arg0 != 0) {
-        center.x = (arg2[0] + arg1[0]) * 0.5f;
-        center.y = (arg2[1] + arg1[1]) * 0.5f;
-        center.z = (arg2[2] + arg1[2]) * 0.5f;
+    if (obj != NULL) {
+        center.x = (b[0] + a[0]) * 0.5f;
+        center.y = (b[1] + a[1]) * 0.5f;
+        center.z = (b[2] + a[2]) * 0.5f;
         func_151C04F8(&center, arg3, arg4);
         func_151C05A4(&center, arg3, arg4);
         func_151C05F0(&center, arg3, arg4);
         func_15055A2C(1, center.x, center.y, center.z, 0);
         func_151BBEE4(&center, arg3, arg4);
-        effect.field00 = 0;
-        effect.field02 = 0xFF;
-        effect.field04 = -0x40;
-        effect.field06 = 0x47;
-        effect.field08 = 6;
-        effect.field0C = 4 >> ((D_80082FA0 >= 2) ? 1 : 0);
-        effect.position = *(Vec3i_151BBA9C *)&center;
-        effect.field34 = 7;
-        effect.field1C = 23.0f;
-        effect.field20 = 30.0f;
-        effect.field24 = 45.0f;
-        effect.field28 = 53.0f;
-        effect.field2C = 203.0f;
-        effect.field30 = 414.0f;
-        effect.field38 = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
-        effect.field4C = 0x19;
-        effect.field4E = 0xF;
-        effect.field50 = 0x64;
-        effect.field52 = 0x64;
-        effect.field54 = 0xC;
-        effect.field56 = 0x14;
-        effect.field3C = 15.0f;
-        effect.field40 = D_800AA80C;
-        effect.field44 = D_800AA810;
-        effect.field48 = D_800AA814;
+        burst.unk0 = 0;
+        burst.unk2 = 0xFF;
+        burst.unk4 = -0x40;
+        burst.unk6 = 0x47;
+        burst.unk8 = 6;
+        burst.unkC = 4 >> ((D_80082FA0 >= 2) ? 1 : 0);
+        burst.pos = center;
+        burst.unk34 = 7;
+        burst.unk1C = 23.0f;
+        burst.unk20 = 30.0f;
+        burst.unk24 = 45.0f;
+        burst.unk28 = 53.0f;
+        burst.unk2C = 203.0f;
+        burst.unk30 = 414.0f;
+        burst.unk38 = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
+        burst.unk4C[0] = 25;
+        burst.unk4C[1] = 15;
+        burst.unk4C[2] = 100;
+        burst.unk4C[3] = 100;
+        burst.unk4C[4] = 12;
+        burst.unk4C[5] = 20;
+        burst.unk3C = 15.0f;
+        burst.unk40 = 0.8720000386f;
+        burst.unk44 = -0.3980000317f;
+        burst.unk48 = 0.3640000224f;
         if (D_80082FA0 >= 2 || D_8008FD8C >= 8) {
-            effect.field58 = -1;
+            burst.unk58 = -1;
         } else {
-            effect.field58 = 0;
+            burst.unk58 = 0;
         }
-        func_1514FCE8((Desc1514FCE8 *)&effect, arg3, arg4);
-        func_1504715C(&ground, (void *)arg0);
+        func_1514FCE8(&burst, arg3, arg4);
+        func_1504715C(&floor, obj);
         probe.x = center.x;
         probe.y = center.y + 100.0f;
         probe.z = center.z;
-        if (func_15046C80(&probe.x, 0, center.y - 1000.0f, &ground) != 0) {
+        if (func_15046C80(&probe, 0, center.y - 1000.0f, &floor) != 0) {
             hit.x = probe.x;
-            hit.y = ground;
+            hit.y = floor.height;
             hit.z = probe.z;
-            func_151BBFBC((Surface *)contact, &hit, arg3, arg4);
-            if (func_15144E80((Surface *)contact, &normal, &tangent, &facing) != 0 && facing.y < 0.0f) {
+            func_151BBFBC(&floor.surf, &hit, arg3, arg4);
+            if (func_15144E80(&floor.surf, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
                 func_151C0644(&hit, arg3, arg4);
             }
         }
         {
-            Config_151BBA9C config;
+            Desc15152190 debris;
             Vec3f first = D_8008FBA0;
             Vec3f second = D_8008FBAC;
 
-            config.countBase = 4;
-            config.countRange = 8;
-            config.position = center;
-            config.speedBase = 12.0f;
-            config.speedRange = 6.0f;
-            config.yawBase = 0;
-            config.yawRange = 0xFF;
-            config.pitchBase = -0x3F;
-            config.pitchRange = 0x57;
-            config.lifeBase = 0x32;
-            config.lifeRange = 0xA;
-            config.durationBase = D_800AA818;
-            config.durationRange = D_800AA81C;
-            config.sizeBase = D_800AA820;
-            config.sizeRange = D_800AA824;
-            config.jitter = D_800AA828;
-            func_15152190(&config, &first, &second, 3, 0.0f, 1, arg3, arg4);
+            debris.unk0 = 4;
+            debris.unk4 = 8;
+            debris.pos = center;
+            debris.unk1C = 12.0f;
+            debris.unk20 = 6.0f;
+            debris.unk14 = 0;
+            debris.unk16 = 0xFF;
+            debris.unk18 = -0x3F;
+            debris.unk1A = 0x57;
+            debris.unk2C = 50;
+            debris.unk2E = 10;
+            debris.unk24 = -1.438000083f;
+            debris.unk28 = 0.4490000308f;
+            debris.unk30 = 0.2480000108f;
+            debris.unk34 = 0.09900000691f;
+            debris.unk38 = 22.85900116f;
+            func_15152190(&debris, &first, &second, 3, 0.0f, 1, arg3, arg4);
         }
     }
 }
