@@ -150,304 +150,280 @@ TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list) {
     return emitter;
 }
 
+/*
+ * struct127 bytes 0x1AC..0x1BA (padding in structs.h): the two points trails are emitted from
+ * and the actor's facing direction in 1/256 units.
+ */
 typedef struct {
-    f32 pos[3];
+    /* 0x1AC */ Vec3s points[2];
+    /* 0x1B8 */ s8 dirX;
+    /* 0x1B9 */ u8 pad1B9;
+    /* 0x1BA */ s8 dirZ;
+} ActorTrailPoints;
+
+#define ACTOR_TRAIL_POINTS(actor) ((ActorTrailPoints *)&(actor)->pad1AC)
+
+/* Trail types (see game_175250.c). */
+
+/* Spawn description passed to func_15147DA0 (first argument). */
+typedef struct {
+    Vec3f pos;
     s16 unkC;
     s16 unkE;
     s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 pad16[2];
-} Spawn1518BD60;
+    u8 pad14;
+    u8 pointCount;
+} TrailSpawn;
 
+/* One point of a trail; the points form a ring buffer. */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-    u8 unk19;
+    Vec3f pos;
+    f32 velocityY;
+    u16 phase; /* texture coordinate along the trail */
+    u8 pad12[2];
+} TrailPoint;
+
+/* Motion and appearance block that func_15147DA0 copies from its second argument. */
+typedef struct {
+    f32 halfWidth;
+    Vec3f velocity;
+    f32 gravity;
+    u8 pad14[4];
+    u8 flags;
+    u8 texture;
     u8 unk1A;
     u8 unk1B;
-    u8 pad1C[4];
-} Part1518BD60;
+    s16 unk1C;
+    s16 unk1E;
+} TrailMotion; /* size 0x20 */
 
+/* Render settings that func_15147DA0 copies from its 12th argument. */
 typedef struct {
     s32 unk0;
     s32 unk4;
     s32 unk8;
-    s32 unkC;
-    s32 unk10;
+    s32 renderMode;
+    union {
+        s32 word;
+        u8 bytes[4];
+    } unk10;
     s32 unk14;
     s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 pad1E[2];
-} Style1518BD60;
+    s8 unk1C;
+    s8 unk1D;
+} TrailRender; /* size 0x20 */
 
 typedef struct {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x184 - 0x3C];
-    u32 unk184;
-    u8 pad188[0x1AC - 0x188];
-    s16 unk1AC[2][3];
-    u8 pad1B8[0x1D4 - 0x1B8];
-    s32 unk1D4;
-} Target1518BD60;
+    TrailMotion motion;
+    u8 state;      /* 0x20: handler index */
+    u8 unk21;
+    u8 finishFn;
+    u8 hitFn;
+    u8 hitKind3Fn;
+    u8 unk25;
+    u8 pad26[2];
+    TrailRender render; /* 0x28 */
+} TrailParams; /* size 0x48 */
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    s16 unk20;
-    s16 unk22;
-    Target1518BD60 *unk24;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 pad2B;
-    s32 unk2C[2];
-    f32 unk34[2];
-    f32 unk3C[2];
-} Emitter1518BD60;
+    /* 0x00 */ ObjLink link;
+    /* 0x10 */ Vec3f position;
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ u8 pad1E[7];
+    /* 0x25 */ u8 capacity; /* number of points in the ring buffer */
+    /* 0x26 */ u8 pad26[6];
+    /* 0x2C */ s8 count;
+    /* 0x2D */ s8 start;    /* oldest point */
+    /* 0x2E */ s8 end;      /* one past the newest point */
+    /* 0x2F */ u8 pad2F[0x65];
+    /* 0x94 */ TrailPoint *points;
+    /* 0x98 */ TrailParams *params;
+} Trail;
 
 typedef struct {
-    Emitter1518BD60 *owner;
-    u8 index;
-} Link1518BD60;
+    TrailEmitter *emitter;
+    s8 point; /* which of the owner's two points the trail follows */
+} TrailEmitterLink;
 
-extern void *func_15147DA0(Spawn1518BD60 *, Part1518BD60 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, Style1518BD60 *, s32, s32, s32);
+/* Params of a trail spawned by a TrailEmitter: the TrailParams, then emitter data. */
+typedef struct {
+    /* 0x00 */ TrailParams base;
+    /* 0x48 */ TrailEmitterLink link;
+    /* 0x50 */ Vec3f offsets[1]; /* per trail point, relative to the emit point */
+} EmitterTrailParams;
 
-void func_1518BD60(Emitter1518BD60 *arg0) {
+extern Trail *func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
+                            s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
+                            TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
+
+/* Trail emitter update: while the owner is alive, spawns a trail from each point when its timer runs out. */
+void func_1518BD60(TrailEmitter *emitter) {
     u8 i;
-    s32 idx;
-    void *ret;
-    Spawn1518BD60 spawn;
-    Part1518BD60 part;
-    s32 pad;
-    Style1518BD60 style;
+    s32 point;
+    Trail *trail;
+    TrailSpawn spawn;
+    TrailMotion motion;
+    s32 pad; // matching: stack slot between motion and render
+    TrailRender render;
     f32 speed;
     f32 sinA;
     f32 cosA;
     s32 angle;
-    Target1518BD60 *obj;
-    Link1518BD60 *link;
+    struct127 *owner;
+    TrailEmitterLink *link;
 
     for (i = 0; i < 2; i++) {
-        arg0->unk2C[i] -= D_800BE9E4;
-        obj = arg0->unk24;
-        if (obj != NULL && obj->unk0 != 0 && obj->unk1D4 != 0 && obj->unk3B == arg0->unk28) {
-            if (arg0->unk2C[i] < 0) {
-                idx = i;
-                if (idx) {}
-                angle = func_150ADA20() % (u32)(arg0->unk22 + 1);
+        emitter->timers[i] -= D_800BE9E4;
+        owner = emitter->params.owner;
+        if (owner != NULL && owner->interaction_state != 0 && owner->unk1D4 != NULL &&
+            owner->unique_id == emitter->params.ownerId) {
+            if (emitter->timers[i] < 0) {
+                point = i;
+                if (point) {} // matching: a second use keeps the copy of i in its own register
+                angle = func_150ADA20() % (u32)(emitter->params.angleRange + 1);
                 sinA = func_151423D8(angle);
                 cosA = func_151423D8(angle - 0x40);
-                speed = func_150ADA68() * arg0->unk14 + arg0->unk10;
-                arg0->unk2C[i] = func_150ADA20() % 23U + 5;
-                style.unk0 = 0;
-                style.unk4 = 1;
-                style.unk8 = 0x160600;
-                style.unkC = 3;
-                style.unk10 = 0x10;
-                style.unk14 = 0x80;
-                style.unk18 = 0x20;
-                style.unk1C = 0;
-                style.unk1D = 9;
-                spawn.unk15 = func_150ADA20() % (u32)(arg0->unk20 + 1) + 3;
+                speed = func_150ADA68() * emitter->params.speedRange + emitter->params.speedMin;
+                emitter->timers[i] = func_150ADA20() % 23U + 5;
+                render.unk0 = 0;
+                render.unk4 = 1;
+                render.unk8 = 0x160600;
+                render.renderMode = 3;
+                render.unk10.word = 0x10;
+                render.unk14 = 0x80;
+                render.unk18 = 0x20;
+                render.unk1C = 0;
+                render.unk1D = 9;
+                spawn.pointCount = func_150ADA20() % (u32)(emitter->params.pointRange + 1) + 3;
                 spawn.unk10 = 1;
                 spawn.unkE = 1;
-                spawn.unkC = func_150ADA20() % 21U + 0x50;
-                part.unk19 = arg0->unk29;
-                part.unk0 = func_150ADA68() * arg0->unk1C + arg0->unk18;
-                part.unk8 = 0.0f;
-                part.unk10 = 0.6539999843f;
-                part.unk4 = speed * cosA;
-                part.unkC = speed * sinA;
-                part.unk18 = arg0->unk2A | 8;
-                part.unk1A = 0xFF - ((u8)(arg0->unk24->unk184 >> 5) << 6);
-                part.unk1B = -1;
-                ret = func_15147DA0(&spawn, &part, spawn.unk15 * 0xC + 8, 5, 1, 0, 2, 1, 0, 0, 0, &style, 0, arg0->unkC, arg0->unk1);
-                if (ret != NULL) {
-                    link = (Link1518BD60 *)((u8 *)*(void **)((u8 *)ret + 0x98) + 0x48);
-                    link->owner = arg0;
-                    link->index = idx;
+                spawn.unkC = func_150ADA20() % 21U + 80;
+                motion.texture = emitter->params.texture;
+                motion.halfWidth = func_150ADA68() * emitter->params.halfWidthRange + emitter->params.halfWidthMin;
+                motion.velocity.y = 0.0f;
+                motion.gravity = 0.6539999843f;
+                motion.velocity.x = speed * cosA;
+                motion.velocity.z = speed * sinA;
+                motion.flags = emitter->params.flags | 8;
+                motion.unk1A = 0xFF - ((u8)((u32)emitter->params.owner->unk184 >> 5) << 6);
+                motion.unk1B = 0xFF;
+                trail = func_15147DA0(&spawn, &motion, spawn.pointCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
+                                      0, &render, 0, emitter->link.owner, emitter->link.list);
+                if (trail != NULL) {
+                    link = &((EmitterTrailParams *)trail->params)->link;
+                    link->emitter = emitter;
+                    link->point = point;
                 }
-                obj = arg0->unk24;
+                owner = emitter->params.owner;
             }
-            arg0->unk34[i] = obj->unk1AC[i][0];
-            arg0->unk3C[i] = arg0->unk24->unk1AC[i][2];
+            emitter->prevX[i] = ACTOR_TRAIL_POINTS(owner)->points[i].x;
+            emitter->prevZ[i] = ACTOR_TRAIL_POINTS(emitter->params.owner)->points[i].z;
         }
     }
 }
 
-typedef struct { f32 x, y, z; } Vec3f_C0B8;
-typedef struct { s16 x, y, z; } Vec3s_C0B8;
-
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x1AC - 0x3C];
-    Vec3s_C0B8 points[2];
-    s8 unk1B8;
-    u8 pad1B9;
-    s8 unk1BA;
-    u8 pad1BB[0x1D4 - 0x1BB];
-    s32 unk1D4;
-} Model_C0B8;
-
-typedef struct {
-    u8 pad0[0x24];
-    Model_C0B8 *model;
-    u8 unk28;
-    u8 pad29[0x34 - 0x29];
-    f32 unk34[2];
-    f32 unk3C[2];
-} Obj_C0B8;
-
-typedef struct {
-    Obj_C0B8 *obj;
-    s8 idx;
-} Sub_C0B8;
-
-typedef struct {
-    u8 pad0[4];
-    f32 vx;
-    f32 vy;
-    f32 vz;
-    f32 grav;
-    u8 pad14[4];
-    u8 flags;
-    u8 pad19[7];
-    u8 state;
-    u8 pad21[0x48 - 0x21];
-    Sub_C0B8 sub;
-    Vec3f_C0B8 offs[1];
-} Ctrl_C0B8;
-
-typedef struct {
-    Vec3f_C0B8 pos;
-    f32 w;
-    u16 ang;
-} Elem_C0B8;
-
-typedef struct {
-    u8 pad0[0x25];
-    u8 max;
-    u8 pad26[6];
-    s8 n;
-    s8 tail;
-    s8 head;
-    u8 pad2F[0x94 - 0x2F];
-    Elem_C0B8 *elems;
-    Ctrl_C0B8 *ctrl;
-} Trail_C0B8;
-
-s32 func_1518C0B8(Trail_C0B8 *arg0) {
-    Ctrl_C0B8 *ctrl;
-    Elem_C0B8 *elems;
+/*
+ * Trail update for trails spawned by a TrailEmitter: moves each point by its velocity and gravity
+ * relative to the owner's emit point (rotated by the owner's facing), then either grows the trail by
+ * one point or, once full, hands the owner's motion to the trail and lets it go.
+ * Returns 0 when the owner is gone.
+ */
+s32 func_1518C0B8(Trail *trail) {
+    EmitterTrailParams *params;
+    TrailPoint *points;
     s32 i;
-    Sub_C0B8 *sub;
-    Vec3f_C0B8 *offs;
-    Vec3f_C0B8 pos;
-    f32 dx;
-    f32 dz;
-    f32 len2;
-    f32 c;
-    f32 s;
-    f32 inv;
-    u16 ang;
-    u16 step;
-    f32 ox;
-    f32 oz;
-    f32 invdt;
-    f32 rx;
-    f32 rz;
+    TrailEmitterLink *link;
+    Vec3f *offsets;
+    Vec3f pos;
+    f32 dirX;
+    f32 dirZ;
+    f32 lenSq;
+    f32 cosA;
+    f32 sinA;
+    f32 invLen;
+    u16 phase;
+    u16 phaseStep;
+    f32 ownerVelX;
+    f32 ownerVelZ;
+    f32 invDt;
+    f32 velX;
+    f32 velZ;
 
-    elems = arg0->elems;
-    ctrl = arg0->ctrl;
-    sub = &ctrl->sub;
-    offs = ctrl->offs;
-    i = arg0->tail;
-    if (sub->obj->model == NULL || sub->obj->model->unk0 == 0 || sub->obj->model->unk1D4 == 0 ||
-        sub->obj->model->unk3B != sub->obj->unk28) {
+    points = trail->points;
+    params = (EmitterTrailParams *)trail->params;
+    link = &params->link;
+    offsets = params->offsets;
+    i = trail->start;
+    if (link->emitter->params.owner == NULL || link->emitter->params.owner->interaction_state == 0 ||
+        link->emitter->params.owner->unk1D4 == NULL ||
+        link->emitter->params.owner->unique_id != link->emitter->params.ownerId) {
         return 0;
     }
-    pos.x = sub->obj->model->points[sub->idx].x;
-    pos.y = sub->obj->model->points[sub->idx].y;
-    pos.z = sub->obj->model->points[sub->idx].z;
-    dx = sub->obj->model->unk1B8 * 0.00390625f;
-    dz = sub->obj->model->unk1BA * 0.00390625f;
-    len2 = dx * dx + dz * dz;
-    if (len2) {
+    pos.x = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->points[link->point].x;
+    pos.y = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->points[link->point].y;
+    pos.z = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->points[link->point].z;
+    dirX = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->dirX * (1.0f / 256);
+    dirZ = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->dirZ * (1.0f / 256);
+    lenSq = dirX * dirX + dirZ * dirZ;
+    if (lenSq) {
+        // matching: a slotless block-scope decl adds the -g3 line that gives the nop after the mul.s
         extern f32 sqrtf(f32);
 
-        inv = 1.0f / sqrtf(len2);
-        c = dx * inv;
-        s = dz * inv;
+        invLen = 1.0f / sqrtf(lenSq);
+        cosA = dirX * invLen;
+        sinA = dirZ * invLen;
     } else {
-        s = c = 0.0f;
+        sinA = cosA = 0.0f;
     }
-    while (i != arg0->head) {
-        elems[i].w -= ctrl->grav * D_800BE9A4;
-        offs[i].x += ctrl->vx * D_800BE9A4;
-        offs[i].y += elems[i].w;
-        offs[i].z += ctrl->vz * D_800BE9A4;
-        elems[i].pos.x = (pos.x + offs[i].x * s) + offs[i].z * c;
-        elems[i].pos.y = offs[i].y + pos.y;
-        elems[i].pos.z = (pos.z + offs[i].z * s) - offs[i].x * c;
+    while (i != trail->end) {
+        points[i].velocityY -= params->base.motion.gravity * D_800BE9A4;
+        offsets[i].x += params->base.motion.velocity.x * D_800BE9A4;
+        offsets[i].y += points[i].velocityY;
+        offsets[i].z += params->base.motion.velocity.z * D_800BE9A4;
+        points[i].pos.x = (pos.x + offsets[i].x * sinA) + offsets[i].z * cosA;
+        points[i].pos.y = offsets[i].y + pos.y;
+        points[i].pos.z = (pos.z + offsets[i].z * sinA) - offsets[i].x * cosA;
         i++;
-        if (i == arg0->max) {
+        if (i == trail->capacity) {
             i = 0;
         }
     }
-    if (arg0->n < arg0->max - 1) {
-        ang = 0;
-        step = 0;
-        if (arg0->n != 0) {
-            step = 0x1000 / arg0->n;
+    if (trail->count < trail->capacity - 1) {
+        phase = 0;
+        phaseStep = 0;
+        if (trail->count != 0) {
+            phaseStep = 0x1000 / trail->count;
         }
-        elems[arg0->head].pos = pos;
-        elems[arg0->head].w = 0.0f;
-        offs[arg0->head].x = 0.0f;
-        offs[arg0->head].y = 0.0f;
-        offs[arg0->head].z = 0.0f;
-        arg0->n++;
-        arg0->head++;
-        if (arg0->head == arg0->max) {
-            arg0->head = 0;
+        points[trail->end].pos = pos;
+        points[trail->end].velocityY = 0.0f;
+        offsets[trail->end].x = 0.0f;
+        offsets[trail->end].y = 0.0f;
+        offsets[trail->end].z = 0.0f;
+        trail->count++;
+        trail->end++;
+        if (trail->end == trail->capacity) {
+            trail->end = 0;
         }
-        for (i = arg0->tail; i != arg0->head;) {
-            elems[i].ang = ang;
+        for (i = trail->start; i != trail->end;) {
+            points[i].phase = phase;
             i++;
-            ang += step;
-            if (i == arg0->max) {
+            phase += phaseStep;
+            if (i == trail->capacity) {
                 i = 0;
             }
         }
     } else {
-        invdt = 1.0f / D_800BE9A4;
-        rx = ctrl->vx * s + ctrl->vz * c;
-        rz = ctrl->vz * s - ctrl->vx * c;
-        ox = (pos.x - sub->obj->unk34[sub->idx]) * invdt;
-        oz = (pos.z - sub->obj->unk3C[sub->idx]) * invdt;
-        ctrl->vx = rx + ox;
-        ctrl->vz = rz + oz;
-        if (ctrl->flags & 0x17) {
-            ctrl->state = 3;
+        invDt = 1.0f / D_800BE9A4;
+        velX = params->base.motion.velocity.x * sinA + params->base.motion.velocity.z * cosA;
+        velZ = params->base.motion.velocity.z * sinA - params->base.motion.velocity.x * cosA;
+        ownerVelX = (pos.x - link->emitter->prevX[link->point]) * invDt;
+        ownerVelZ = (pos.z - link->emitter->prevZ[link->point]) * invDt;
+        params->base.motion.velocity.x = velX + ownerVelX;
+        params->base.motion.velocity.z = velZ + ownerVelZ;
+        if (params->base.motion.flags & 0x17) {
+            params->base.state = 3;
         } else {
-            ctrl->state = 2;
+            params->base.state = 2;
         }
     }
     return 1;
