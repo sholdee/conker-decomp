@@ -164,7 +164,8 @@ typedef struct AttachmentOwner {
 #define ATTACHMENTS(obj) (((AttachmentOwner *)(obj))->attachments)
 
 extern void func_15147D64(void *event, u8 eventId);
-extern void func_1519E3BC(struct127 *owner, s16 lifetime, u8 arg2, s32 arg3);
+extern /* Restarts the kind 3 and 4 trails on owner and spawns a func_151491F4 object. */
+void func_1519E3BC(struct127 *owner, s16 lifetime, u8 arg2, s32 arg3);
 extern Trail *func_1519D030(struct127 *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5);
 extern void func_1519E688(void);
 extern s32 func_1514ED3C(struct Attachment *list, s32 handle, struct Attachment **out);
@@ -195,6 +196,7 @@ void func_1519CFA0(Trail *trail) {
 
 extern void func_151478F4(Trail *);
 
+/* Trail teardown (two variants): detaches it from its owner's attachments first. */
 void func_1519CFD0(Trail *trail) {
     TrailData *data;
 
@@ -219,7 +221,6 @@ Trail *func_1519D030(struct127 *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 
     TrailData data;
     Trail *trail;
     TrailSpec *spec;
-    s32 flag;
 
     spec = &D_800A8B80[specIndex];
 
@@ -239,8 +240,7 @@ Trail *func_1519D030(struct127 *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 
     spawn.lifetime = lifetime;
     data.spawnCount = 0.0f;
 
-    flag = (arg3 != 0) ? 1 : 0;
-    spawn.flags = flag | 2;
+    spawn.flags = (arg3 ? 1 : 0) | 2;
 
     data.gravity = spec->gravity;
     data.spawnRate = spec->spawnRate;
@@ -391,7 +391,7 @@ s32 func_1519D454(Trail *trail) {
     }
     prevX = trail->pos.x;
     prevZ = trail->pos.z;
-    if (started == 0 && func_1519E304(data, &trail->pos, trail->pos.x, trail->pos.y, trail->pos.z, data->follow) == 0) {
+    if (!started && func_1519E304(data, &trail->pos, trail->pos.x, trail->pos.y, trail->pos.z, data->follow) == 0) {
         func_1519CFA0(trail);
         taskData.owner = data->owner;
         taskData.ownerId = data->owner->unique_id;
@@ -470,15 +470,15 @@ s32 func_1519D454(Trail *trail) {
         data->lastPos = pos;
         data->time = time;
     }
+    /* Move all points along with the owner. */
     {
-    TrailPoint *point;
+        TrailPoint *point;
 
-    i = trail->tail;
-    moveX = data->owner->x_position - data->ownerPos.x;
-    moveY = data->owner->y_position - data->ownerPos.y;
-    moveZ = data->owner->z_position - data->ownerPos.z;
-    if (i != trail->head) {
-        do {
+        i = trail->tail;
+        moveX = data->owner->x_position - data->ownerPos.x;
+        moveY = data->owner->y_position - data->ownerPos.y;
+        moveZ = data->owner->z_position - data->ownerPos.z;
+        while (i != trail->head) {
             i--;
             if (i < 0) {
                 i = trail->capacity - 1;
@@ -487,11 +487,10 @@ s32 func_1519D454(Trail *trail) {
             point->pos.x += moveX;
             point->pos.y += moveY;
             point->pos.z += moveZ;
-        } while (i != trail->head);
-    }
-    data->ownerPos.x = data->owner->x_position;
-    data->ownerPos.y = data->owner->y_position;
-    data->ownerPos.z = data->owner->z_position;
+        }
+        data->ownerPos.x = data->owner->x_position;
+        data->ownerPos.y = data->owner->y_position;
+        data->ownerPos.z = data->owner->z_position;
     }
     return 1;
 }
@@ -729,6 +728,7 @@ s32 func_1519E304(TrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t) {
     return 1;
 }
 
+/* Restarts the kind 3 and 4 trails on owner and spawns a func_151491F4 object. */
 void func_1519E3BC(struct127 *owner, s16 lifetime, u8 arg2, s32 arg3) {
     func_1519E688();
     func_1519D030(owner, 3, 300, 0, arg2, arg3);
@@ -792,7 +792,7 @@ void func_1519E61C(struct102 *task, TrailEvent *event, u8 eventId) {
     }
 }
 
-void func_1519E65C(s32 arg0) {
+void func_1519E65C(s32 unused) {
     func_1519CF70(3);
     func_1519CF70(4);
 }
@@ -804,6 +804,7 @@ void func_1519E688(void) {
     func_15147D64(NULL, 9);
 }
 
+/* Stops the kind 3 and 4 trails and, unless one is pending, starts the func_1519E754 task for owner. */
 void func_1519E6BC(struct127 *owner) {
     TrailTaskData taskData;
 
@@ -848,6 +849,7 @@ void func_1519E754(TrailTask *task) {
     }
 }
 
+/* func_1519E570 for the func_1519E6BC task, which also clears D_800E0920. */
 void func_1519E818(TrailTask *task, TrailEvent *event, u8 eventId) {
     TrailTaskData *data = &task->data;
 
@@ -869,6 +871,7 @@ void func_1519E818(TrailTask *task, TrailEvent *event, u8 eventId) {
     }
 }
 
+/* Trail task teardown (two variants): detaches it from its owner's attachments first. */
 void func_1519E8CC(TrailTask *task) {
     func_1514EDF0((s32)task, task->data.owner);
     func_1514933C((struct260 *)task);
