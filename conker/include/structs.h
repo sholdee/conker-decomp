@@ -1227,7 +1227,7 @@ struct Actor {
     /* 0x68 */  u8  unk68[2];    // texture frame of each animated part (eyes), from eyeCode
     /* 0x6A */  u8  eyeClosed[2]; // per eye, toggled by blinking
     /* 0x6C */  u8  eyeCode[2];   // >= 10: set by the current expression
-    s8  unk6E;
+    /* 0x6E */  u8  blinkTimer;
     /* 0x6F */  u8  expression;   // current expression index
     /* 0x70 */  u8  defaultExpression;
     /* 0x71 */  u8  expressionPriority;
@@ -1339,7 +1339,7 @@ struct Actor {
     u16 pad12E;
     u32 pad130;
     /* 0x134 */ u8  unk134;
-    /* 0x135 */ u8  unk135;  // morph duration
+    /* 0x135 */ u8  morphDuration;
     /* 0x136 */ u8  unk136;  // sprite texture
     /* 0x137 */ u8  unk137;
     u8  unk138;

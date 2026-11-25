@@ -309,7 +309,7 @@ void func_1502BD84(Actor *obj, s32 index) {
             func_150A4B04(obj);
         }
         if (obj->morph != NULL) {
-            func_1517AD00(obj->unk134, obj->unk135, index);
+            func_1517AD00(obj->unk134, obj->morphDuration, index);
         }
     }
 }

@@ -3938,7 +3938,7 @@ void func_1505F188(Actor *actor) {
     actor->id = 0xFF;
     actor->unk2CB = 50;
     actor->unk48 = one;
-    actor->unk6E = (func_150ADA20() % 50U) + 50;
+    actor->blinkTimer = (func_150ADA20() % 50U) + 50;
     func_150615DC(actor);
     ((u8 *)&actor->pad1DC)[1] = 0xFF;
     ((u8 *)&actor->pad1DC)[2] = 0xFF;

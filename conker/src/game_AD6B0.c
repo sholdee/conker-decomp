@@ -4,9 +4,6 @@
 
 /*
  * Scripted expression control for the current object.
- *
- * Actor leaves 0x72 and 0x134-0x135 as padding. game_AB760.c's ExpressionActor view names
- * them: 0x72 u16 expressionTimer (0xFFFE = frozen), 0x134 u8 unk134, 0x135 u8 morphDuration.
  */
 
 extern void func_15080430(Actor *actor, s32 expression, s32 morphDuration);
@@ -64,15 +61,15 @@ void func_15080348(Actor *actor) {
         } else {
             index = D_800D192C;
             if (D_800427F0 > 1000) {
-                countdown = ((u8 *)actor)[0x135]; // morphDuration
+                countdown = actor->morphDuration;
                 index++;
                 countdown -= D_800BE9E4;
                 if (countdown < 0) {
                     if (index >= 5) {
                         index = 0;
                     }
-                    ((u8 *)actor)[0x134] = D_8009BD10[index];
-                    ((u8 *)actor)[0x135] = (func_151EF610() % 7) + 4;
+                    actor->unk134 = D_8009BD10[index];
+                    actor->morphDuration = (func_151EF610() % 7) + 4;
                     D_800D192C = index;
                 }
             }
@@ -93,10 +90,10 @@ void func_15080430(Actor *actor, s32 expression, s32 morphDuration) {
         if (func_1507E968(actor) > 0) {
             if (expression == 0) {
                 D_800D1928 = 0;
-                *(u16 *)((u8 *)actor + 0x72) = 20; // expressionTimer
+                actor->expressionTimer = 20;
                 func_1507E500(actor, 0, 10);
             } else {
-                *(u16 *)((u8 *)actor + 0x72) = 0xFFFE; // expressionTimer: frozen
+                actor->expressionTimer = 0xFFFE; // frozen
                 if (expression == 1) {
                     D_800D1928 = 2;
                 } else {

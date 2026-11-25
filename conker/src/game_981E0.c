@@ -1269,7 +1269,7 @@ void func_1506D538(void) {
 }
 
 void func_1506D570(void) {
-    D_800D154C->unk6E = 0;
+    D_800D154C->blinkTimer = 0;
 }
 
 /*
