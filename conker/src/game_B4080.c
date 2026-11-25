@@ -2680,10 +2680,9 @@ extern s8 D_800872D8[];
 void func_150DA5EC(struct127 *, f32);
 
 #define INNER(o) ((CAD8Inner *)(o)->unk31C)
-#define OBJ obj
 
 
-s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+s32 func_1508CAD8(s32 player, s32 target, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     CAD8Def *def;
     f32 dz;
     f32 dx;
@@ -2714,20 +2713,20 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 
     doInner = 1;
     result = 0;
-    obj = &D_800CC2D0[arg0];
+    obj = &D_800CC2D0[player];
     ratio = ((f32 *)D_800BE628)[0x70 / 4] / ((f32 *)D_800BE628)[0x6C / 4];
-    if (arg1 != -1) {
-        cam = OBJ->camera;
+    if (target != -1) {
+        cam = obj->camera;
         if (cam != NULL) {
             hasCam = 1;
         } else {
             hasCam = 0;
         }
-        type = INNER(OBJ)->unk78;
+        type = INNER(obj)->unk78;
         if ((type == 9) || (type == 0x38) || (type == 0x15)) {
             hasCam = 0;
         }
-        def = func_1505EEF4(arg1 & 0xFFFF0FFF);
+        def = func_1505EEF4(target & 0xFFFF0FFF);
         if (def == NULL) {
             return 1;
         }
@@ -2757,7 +2756,7 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
         dx = 0.0f;
         dz = 0.0f;
         if ((D_800D23B0->gameType == 0xB9) || (D_800E0BD0 >= 3)) {
-            switch (INNER(OBJ)->unk78) {
+            switch (INNER(obj)->unk78) {
                 case 0x18:
                 case 0x41:
                     V = 0.01600000076f;
@@ -2777,9 +2776,9 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
                     break;
             }
             if (V != 0.0f) {
-                dx = def->x - OBJ->x_position;
-                dz = def->z - OBJ->z_position;
-                dy = def->y - OBJ->y_position;
+                dx = def->x - obj->x_position;
+                dz = def->z - obj->z_position;
+                dy = def->y - obj->y_position;
                 dy = sqrtf((dx * dx) + (dy * dy) + (dz * dz));
                 V = (dy * V) / D_800D23B0->ticks;
                 dx = (def->x - def->oldX) * V;
@@ -2787,13 +2786,13 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
             }
         }
         if (arg3 == 0) {
-            dx = (def->x + dx) - D_800D23B0->unk17A8[arg0];
-            dz = (def->z + dz) - D_800D23B0->unk1828[arg0];
+            dx = (def->x + dx) - D_800D23B0->unk17A8[player];
+            dz = (def->z + dz) - D_800D23B0->unk1828[player];
         } else {
-            dx = ((f32)def->unk1A4 + dx) - D_800D23B0->unk17A8[arg0];
-            dz = ((f32)def->unk1A8 + dz) - D_800D23B0->unk1828[arg0];
+            dx = ((f32)def->unk1A4 + dx) - D_800D23B0->unk17A8[player];
+            dz = ((f32)def->unk1A8 + dz) - D_800D23B0->unk1828[player];
         }
-        scale = D_800D23B0->unk1868[arg0] * (f32)D_800BE9E4;
+        scale = D_800D23B0->unk1868[player] * (f32)D_800BE9E4;
         if (type == 3) {
             scale = 1.0f;
             arg5 = 0;
@@ -2802,10 +2801,10 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
         if (scale > 1.0f) {
             scale = 1.0f;
         }
-        D_800D23B0->unk17A8[arg0] += dx * scale;
-        D_800D23B0->unk1828[arg0] += dz * scale;
-        dx = D_800D23B0->unk17A8[arg0] - OBJ->x_position;
-        dz = D_800D23B0->unk1828[arg0] - OBJ->z_position;
+        D_800D23B0->unk17A8[player] += dx * scale;
+        D_800D23B0->unk1828[player] += dz * scale;
+        dx = D_800D23B0->unk17A8[player] - obj->x_position;
+        dz = D_800D23B0->unk1828[player] - obj->z_position;
         dist = sqrtf((dx * dx) + (dz * dz));
         if (dist < 1.0f) {
             dist = 1.0f;
@@ -2829,9 +2828,9 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
         }
         ang = (f32)func_1505A630(dx, -dz, 0) * 0.005493164f;
         if (type != 3) {
-            curYaw = INNER(OBJ)->unk16C;
+            curYaw = INNER(obj)->unk16C;
         } else {
-            curYaw = OBJ->unk40 - 90.0f;
+            curYaw = obj->unk40 - 90.0f;
         }
         ang = func_15144BC8(ang);
         curYaw = func_15144BC8(curYaw);
@@ -2843,14 +2842,14 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
             result = 1;
         }
         if (arg3 == 0) {
-            cur = ((def->y + height) - (f32)arg5) - D_800D23B0->unk17E8[arg0];
+            cur = ((def->y + height) - (f32)arg5) - D_800D23B0->unk17E8[player];
         } else {
-            cur = ((f32)def->unk1A6 - (f32)arg5) - D_800D23B0->unk17E8[arg0];
+            cur = ((f32)def->unk1A6 - (f32)arg5) - D_800D23B0->unk17E8[player];
         }
-        D_800D23B0->unk17E8[arg0] += cur * scale;
-        cur = INNER(OBJ)->unk140 - D_800D23B0->unk17E8[arg0];
+        D_800D23B0->unk17E8[player] += cur * scale;
+        cur = INNER(obj)->unk140 - D_800D23B0->unk17E8[player];
         ang = (f32)func_1505A630(dist, cur, 0) * 0.005493164f;
-        curYaw = INNER(OBJ)->unk170;
+        curYaw = INNER(obj)->unk170;
         while (ang > 180.0f) {
             ang -= 360.0f;
         }
@@ -2886,28 +2885,28 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
             roll = 0.0f;
         }
         if (doInner != 0) {
-            ptr = &INNER(OBJ)->unk90;
-            INNER(OBJ)->unk16C = INNER(OBJ)->unk16C - diff;
-            INNER(OBJ)->unk170 = ang;
-            func_15048758(&INNER(OBJ)->unk16C);
-            INNER(OBJ)->unk174 = INNER(OBJ)->unk16C;
-            INNER(OBJ)->unk178 = INNER(OBJ)->unk170;
-            INNER(OBJ)->unk85 = 0;
-            INNER(OBJ)->unk86 = 0;
+            ptr = &INNER(obj)->unk90;
+            INNER(obj)->unk16C = INNER(obj)->unk16C - diff;
+            INNER(obj)->unk170 = ang;
+            func_15048758(&INNER(obj)->unk16C);
+            INNER(obj)->unk174 = INNER(obj)->unk16C;
+            INNER(obj)->unk178 = INNER(obj)->unk170;
+            INNER(obj)->unk85 = 0;
+            INNER(obj)->unk86 = 0;
         } else if (hasCam != 0) {
             ptr = &cam->unk1A4;
             ((s8 *)cam->unk36C)[2] = (s32)yaw;
             ((s8 *)cam->unk36C)[3] = (s32)-roll;
         } else {
-            ptr = &INNER(OBJ)->unk90;
-            INNER(OBJ)->unk85 = (s32)yaw;
-            INNER(OBJ)->unk86 = (s32)-roll;
+            ptr = &INNER(obj)->unk90;
+            INNER(obj)->unk85 = (s32)yaw;
+            INNER(obj)->unk86 = (s32)-roll;
         }
         if (mode != 0) {
             if (type == 0x1B) {
-                if ((h < -50.0f) && (D_800D23B0->unk16C0[arg0] & (0x10001 << arg1))) {
-                    INNER(OBJ)->unk8A |= 0x2000;
-                    INNER(OBJ)->unk8E = 2;
+                if ((h < -50.0f) && (D_800D23B0->unk16C0[player] & (0x10001 << target))) {
+                    INNER(obj)->unk8A |= 0x2000;
+                    INNER(obj)->unk8E = 2;
                 }
             } else if (type == 3) {
                 f32 f;
@@ -2921,47 +2920,47 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
                     f = 1.0f;
                 }
                 f = (f * 0.02569000237f) + 0.01724099927f;
-                INNER(OBJ)->unk86 = 0;
-                INNER(OBJ)->unk85 = 0;
-                OBJ->unk76 -= (s32)(yaw * 16.0f);
-                OBJ->unk7A = OBJ->unk76;
-                OBJ->unk40 = (f32)(s16)(OBJ->unk7A + 0x4000) * 0.005493164f;
-                func_150DA5EC(OBJ, f);
-            } else if (D_800D23B0->unk29C[arg0] >= 0) {
-                INNER(OBJ)->unk8A = 0x2000;
+                INNER(obj)->unk86 = 0;
+                INNER(obj)->unk85 = 0;
+                obj->unk76 -= (s32)(yaw * 16.0f);
+                obj->unk7A = obj->unk76;
+                obj->unk40 = (f32)(s16)(obj->unk7A + 0x4000) * 0.005493164f;
+                func_150DA5EC(obj, f);
+            } else if (D_800D23B0->unk29C[player] >= 0) {
+                INNER(obj)->unk8A = 0x2000;
                 if (mode == 1) {
-                    INNER(OBJ)->unk8E = 2;
-                    if (D_800872D8[D_800E0BD0] < D_800D23B0->unk29C[arg0]) {
-                        INNER(OBJ)->unk8A &= 0xDFFF;
-                        INNER(OBJ)->unk8E = 0;
+                    INNER(obj)->unk8E = 2;
+                    if (D_800872D8[D_800E0BD0] < D_800D23B0->unk29C[player]) {
+                        INNER(obj)->unk8A &= 0xDFFF;
+                        INNER(obj)->unk8E = 0;
                     }
                 } else if (mode == 2) {
                     if (arg2 != 0) {
-                        INNER(OBJ)->unk8E = 0xA;
+                        INNER(obj)->unk8E = 0xA;
                     } else {
-                        INNER(OBJ)->unk8A &= 0xDFFF;
+                        INNER(obj)->unk8A &= 0xDFFF;
                     }
                 } else {
-                    INNER(OBJ)->unk8E = 2;
+                    INNER(obj)->unk8E = 2;
                 }
             }
         } else if (arg2 != 0) {
             if (flagA != 0) {
-                INNER(OBJ)->unk8C = 0;
-                INNER(OBJ)->unk8A = 0;
+                INNER(obj)->unk8C = 0;
+                INNER(obj)->unk8A = 0;
             } else {
-                INNER(OBJ)->unk8C = 0x2000;
-                INNER(OBJ)->unk8F = 1;
+                INNER(obj)->unk8C = 0x2000;
+                INNER(obj)->unk8F = 1;
             }
         } else if (flagA != 0) {
             if (cam != NULL) {
                 *cam->unk36C |= 0x2000;
             }
-            INNER(OBJ)->unk8A = 0x2000;
-            INNER(OBJ)->unk8E = 2;
+            INNER(obj)->unk8A = 0x2000;
+            INNER(obj)->unk8E = 2;
         }
-        INNER(OBJ)->unk8A |= 0x10;
-        INNER(OBJ)->unk8E = 1;
+        INNER(obj)->unk8A |= 0x10;
+        INNER(obj)->unk8E = 1;
         *ptr += (h - *ptr) * 0.125f;
         if (hasCam != 0) {
             cam->unk1A8 = cam->unk1A4 * ratio;
@@ -2972,7 +2971,6 @@ s32 func_1508CAD8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     }
     return result;
 }
-#undef OBJ
 #undef INNER
 
 extern s16 D_80087320[][3];
