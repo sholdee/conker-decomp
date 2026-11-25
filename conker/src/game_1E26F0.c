@@ -169,12 +169,7 @@ Gfx *func_151B5328(Gfx *gdl, BeamEffect *effect, s16 viewIdx) {
         } else {
             fade = data->fadeMax;
         }
-        i = 0;
-        cur = start;
-        angle = 0.0f;
-        t = 0.0f;
-        count = 0.0f;
-        do {
+        for (i = 0, cur = start, angle = 0.0f, t = 0.0f, count = 0.0f; i < 10; i++) {
             wave = sinf(angle);
             w = 1.0f - wave * fade;
             vtx[0].v.ob[0] = perp.x * w + cur.x;
@@ -226,8 +221,7 @@ Gfx *func_151B5328(Gfx *gdl, BeamEffect *effect, s16 viewIdx) {
             angle += 0.31415927f;
             t += 204.8f;
             count += 0.1f;
-            i++;
-        } while (i != 10);
+        }
     }
     if (failed) {
         effect->state = -1;
