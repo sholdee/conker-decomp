@@ -2,130 +2,149 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Rumble effect objects: a timed rumble on the controllers of the players in a mask. */
 
-extern u8 D_80084060[];
-extern struct17 *func_15144B34(s32);
-extern f32 func_15143E64(struct17 *);
-extern void (*D_8008FCC0[])(struct102 *);
-void func_1501C010(u8, u8);
-void func_1501C17C(u8);
+/* Spawn parameters of a rumble, copied into RumbleObj.params. */
+typedef struct {
+    /* 0x0 */ u8 flags;       /* bit 0: duration counts down */
+    /* 0x1 */ u8 unk1;
+    /* 0x2 */ s16 duration;
+    /* 0x4 */ u8 strength;    /* 0 (off) to 8 (full), see func_1501C010 */
+    /* 0x5 */ u8 playerMask;  /* bit i: player i */
+    /* 0x6 */ s8 updateKind;  /* index into D_8008FCC0, -1: none */
+    /* 0x7 */ u8 unk7;
+} RumbleParams;
+
+/* Distance falloff data of a RumbleFalloffObj. */
+typedef struct {
+    /* 0x00 */ struct17 pos;
+    /* 0x0C */ f32 innerRadius;  /* full strength inside this distance */
+    /* 0x10 */ f32 falloffRange; /* zero strength beyond innerRadius + falloffRange */
+    /* 0x14 */ f32 falloffScale; /* strength lost per unit beyond innerRadius */
+    /* 0x18 */ u8 view;
+} RumbleFalloff;
 
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-} Struct151D8C00;
+    /* 0x00 */ u8 pad0[0xE];    /* object header */
+    /* 0x0E */ RumbleParams params;
+    /* 0x16 */ u8 appliedStrength;
+    /* 0x17 */ u8 pad17;
+} RumbleObj; /* followed by the spawner's extra data */
 
-s32 func_151D87E0(u8 arg0) {
-    u8 v;
-    u8 i;
+/* A rumble whose strength falls off with distance from the camera. */
+typedef struct {
+    /* 0x00 */ RumbleObj base;
+    /* 0x18 */ RumbleFalloff falloff;
+} RumbleFalloffObj;
 
-    for (i = 0; i < 4; i++) {
-        if (arg0 & (1 << i)) {
-            v = D_80084060[i];
-            if (v >= 4) {
-                return 0;
+extern u8 D_80084060[]; /* controller port of each player, >= 4: none */
+extern struct17 *func_15144B34(s32 view);
+extern f32 func_15143E64(struct17 *);
+extern void (*D_8008FCC0[])(RumbleObj *);
+void func_1501C010(u8 player, u8 strength);
+void func_1501C17C(u8 player);
+
+/* Returns whether any player in `playerMask` has a rumble pak; false at the first player without a
+ * controller. */
+s32 func_151D87E0(u8 playerMask) {
+    u8 port;
+    u8 player;
+
+    for (player = 0; player < 4; player++) {
+        if (playerMask & (1 << player)) {
+            port = D_80084060[player];
+            if (port >= 4) {
+                return FALSE;
             }
-            if (D_800BE944[v] != 0) {
-                return 1;
+            if (D_800BE944[port] != 0) {
+                return TRUE;
             }
         }
     }
-    return 0;
+    return FALSE;
 }
 
 extern u8 D_800BEAC1;
 extern u8 D_800BEAC2;
 extern u8 D_800BEAC3;
-s32 func_15181CC8(s32);
-s32 func_1517EF00(s32);
+s32 func_15181CC8(s32 view);
+s32 func_1517EF00(s32 view);
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
-typedef struct {
-    u8 pad0[4];
-    u8 unk4;
-    u8 unk5;
-} Struct151D8868In;
-
-typedef struct {
-    u8 pad0[0x13];
-    u8 unk13;
-    u8 pad14[2];
-    u8 unk16;
-} Struct151D8868Out;
-
-void *func_151D8868(Struct151D8868In *arg0, s32 arg1, u8 arg2, s32 arg3) {
-    Struct151D8868Out *obj;
-    u8 j;
+/* Spawns a rumble object (kind 0x3F) with `dataSize` bytes of extra data and starts the rumble.
+ * Returns NULL while D_800E0B94 or any of D_800BEAC0..3 is set, when no player in the mask has a rumble pak, or when
+ * any of those players' views is irised or fading. */
+RumbleObj *func_151D8868(RumbleParams *params, s32 dataSize, u8 arg2, s32 arg3) {
+    RumbleObj *obj;
+    u8 player;
 
     if (D_800E0B94 != 0) {
         return NULL;
     }
-    if (func_151D87E0(arg0->unk5) == 0) {
+    if (!func_151D87E0(params->playerMask)) {
         return NULL;
     }
     if (D_800BEAC0 != 0 || D_800BEAC1 != 0 || D_800BEAC2 != 0 || D_800BEAC3 != 0) {
         return NULL;
     }
     {
-        u8 i;
-    for (i = 0; i <= D_80082FA0; i++) {
-        if (arg0->unk5 & (1 << i)) {
-            if (func_15181CC8(i) == 0 || func_1517EF00(i) != 0) {
-                return NULL;
+        u8 view;
+
+        for (view = 0; view <= D_80082FA0; view++) {
+            if (params->playerMask & (1 << view)) {
+                if (!func_15181CC8(view) || func_1517EF00(view) != 0) {
+                    return NULL;
+                }
             }
         }
     }
-    }
-    obj = func_15167A68(0x3F, arg3, arg1 + 0x18, 1, arg2, 1);
+    obj = func_15167A68(0x3F, arg3, dataSize + sizeof(RumbleObj), 1, arg2, 1);
     if (obj == NULL) {
         return NULL;
     }
-    memcpy((u8 *)obj + 0xE, arg0, 8);
-    for (j = 0; j < 4; j++) {
-        if (obj->unk13 & (1 << j)) {
-            func_1501C010(j, arg0->unk4);
+    memcpy(&obj->params, params, sizeof(RumbleParams));
+    for (player = 0; player < 4; player++) {
+        if (obj->params.playerMask & (1 << player)) {
+            func_1501C010(player, params->strength);
         }
     }
-    obj->unk16 = arg0->unk4;
+    obj->appliedStrength = params->strength;
     return obj;
 }
 
-void func_151D8A24(struct102 *arg0) {
-    u8 dummy[4];
-    s32 temp;
-    u8 i;
-    s32 index;
+/* Per-frame update: counts the duration down, runs the update handler, re-applies a changed
+ * strength, and destroys the object once the duration has run out. */
+void func_151D8A24(RumbleObj *obj) {
+    u8 pad[4]; // matching: unused stack slot in the original frame
+    u8 expired;
+    u8 player;
+    s32 updateKind;
 
-    ((u8 *)&temp)[3] = 0;
-    if (arg0->unkE & 1) {
-        arg0->unk10 -= D_800BE9E4;
-        if (arg0->unk10 < 0) {
-            ((u8 *)&temp)[3] = 1;
+    expired = FALSE;
+    if (obj->params.flags & 1) {
+        obj->params.duration -= D_800BE9E4;
+        if (obj->params.duration < 0) {
+            expired = TRUE;
         }
     }
 
-    index = *(s8 *)&arg0->unk14;
-    if (index != -1) {
-        D_8008FCC0[index](arg0);
+    updateKind = obj->params.updateKind;
+    if (updateKind != -1) {
+        D_8008FCC0[updateKind](obj);
     }
 
-    if (arg0->unk12 != ((u8 *)arg0)[0x16]) {
-        for (i = 0; i < 4; i++) {
-            if (arg0->unk13 & (1 << i)) {
-                func_1501C17C(i);
-                func_1501C010(i, arg0->unk12);
+    if (obj->appliedStrength != obj->params.strength) {
+        for (player = 0; player < 4; player++) {
+            if (obj->params.playerMask & (1 << player)) {
+                func_1501C17C(player);
+                func_1501C010(player, obj->params.strength);
             }
         }
-        ((u8 *)arg0)[0x16] = arg0->unk12;
+        obj->appliedStrength = obj->params.strength;
     }
 
-    if (((u8 *)&temp)[3] != 0) {
-        func_1516972C(arg0);
+    if (expired) {
+        func_1516972C((struct102 *)obj);
     }
 }
 
@@ -163,33 +182,34 @@ void func_151D8BB4(struct102 *arg0) {
     func_15169824(arg0);
 }
 
-void func_151D8C00(u8 *, Struct151D8C00 *);
+void func_151D8C00(RumbleObj *obj, RumbleFalloff *falloff);
 
-void func_151D8BE0(u8 *arg0) {
-    func_151D8C00(arg0, arg0 + 0x18);
+void func_151D8BE0(RumbleFalloffObj *obj) {
+    func_151D8C00(&obj->base, &obj->falloff);
 }
 
-void func_151D8C00(u8 *arg0, Struct151D8C00 *arg1) {
-    f32 temp_f12;
-    struct17 sp28;
-    struct17 *temp_v0;
-    f32 temp_f0;
+/* Sets the rumble strength from the distance between `falloff->pos` and the view's camera. */
+void func_151D8C00(RumbleObj *obj, RumbleFalloff *falloff) {
+    f32 scale;
+    struct17 delta;
+    struct17 *camera;
+    f32 dist;
 
-    temp_v0 = func_15144B34(arg1->unk18);
-    sp28.unk0 = arg1->unk0 - temp_v0->unk0;
-    sp28.unk4 = arg1->unk4 - temp_v0->unk4;
-    sp28.unk8 = arg1->unk8 - temp_v0->unk8;
+    camera = func_15144B34(falloff->view);
+    delta.unk0 = falloff->pos.unk0 - camera->unk0;
+    delta.unk4 = falloff->pos.unk4 - camera->unk4;
+    delta.unk8 = falloff->pos.unk8 - camera->unk8;
 
-    temp_f0 = func_15143E64(&sp28);
-    if (temp_f0 < arg1->unkC) {
-        temp_f12 = 1.0f;
-    } else if (arg1->unkC + arg1->unk10 < temp_f0) {
-        temp_f12 = 0.0f;
+    dist = func_15143E64(&delta);
+    if (dist < falloff->innerRadius) {
+        scale = 1.0f;
+    } else if (falloff->innerRadius + falloff->falloffRange < dist) {
+        scale = 0.0f;
     } else {
-        temp_f12 = 1.0f - (temp_f0 - arg1->unkC) * arg1->unk14;
+        scale = 1.0f - (dist - falloff->innerRadius) * falloff->falloffScale;
     }
 
-    arg0[0x12] = (u32)(temp_f12 * 8.0f);
+    obj->params.strength = scale * 8.0f;
 }
 
 void func_151D8D5C(struct102 *arg0, s32 arg1, u8 arg2) {
