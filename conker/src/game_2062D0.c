@@ -14,7 +14,7 @@ s32 func_150ADA20(void);
 s32 func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
 s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, struct17 *pos, s32 arg7, s32 arg8);
 s32 func_1514672C(struct17 *arg0);
-s32 func_15046C80(f32 *arg0, s32 arg1, f32 arg2, void *arg3);
+s32 func_15046C80(struct17 *point, s32 arg1, f32 startY, f32 *floorY);
 void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, struct17 *pos, u8 arg5, s32 arg6);
 void func_151DAB58(u8 kind, f32 size, u8 arg2, struct17 *pos, volatile u8 arg4, u8 arg5, s32 arg6);
 s32 func_15131918(struct17 *vel, f32 scale);
@@ -383,7 +383,8 @@ u8 func_151D9534(Particle *particle, struct17 *arg1) {
         if (func_1514672C(&point) == 0) {
             return 0;
         }
-        if (func_15046C80((f32 *)&point, 0, particle->desc.pos.unk4, &particle->floorY) != 0) {
+        if (func_15046C80(&point, 0,
+ particle->desc.pos.unk4, &particle->floorY) != 0) {
             point.unk4 = particle->floorY + 2.0f;
             if (particle->data.wobble.flags & WOBBLE_FLAG_BOUNCE) {
                 particle->desc.pos.unk4 = (particle->desc.scaleY * 0.060000002f) + point.unk4;
@@ -1373,12 +1374,13 @@ typedef struct {
 extern void func_15153F18(SplashBurstSpec *spec, struct17 *params, s32 arg2, u8 arg3, s32 arg4);
 extern void func_15150178(DropBurstSpec *spec, struct17 *params, s32 arg2, u8 arg3, s32 arg4);
 
-void func_151DBAA8(struct17 *pos, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+/* Throws `count` splashes of effect kind `kind` from `pos`. */
+void func_151DBAA8(struct17 *pos, s32 count, u8 kind, u8 arg3, s32 arg4) {
     SplashBurstSpec splash;
 
     splash.pos = *pos;
 
-    splash.count = arg1;
+    splash.count = count;
 
     splash.angles.angle1Range = 0xFF;
     splash.angles.angle2 = -64;
@@ -1405,7 +1407,7 @@ void func_151DBAA8(struct17 *pos, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
     splash.unk48 = 0;
     splash.unk40Chance = 0.5f;
 
-    splash.kind = arg2;
+    splash.kind = kind;
 
     func_15153F18(&splash, &splash.pos, 0, arg3, arg4);
 
@@ -1558,7 +1560,9 @@ void func_151DC034(struct17 *pos, f32 size, u8 arg2, s16 lifetime, u8 kind, u8 a
     desc.unk6C = 1000.0f;
     func_15130280(&desc, 1, 0, 0, arg5, arg6);
 }
-void func_151DC260(struct17 *pos, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+
+/* Throws a splash burst plus a burst of wobbling drops of effect kind `kind` from `pos`. */
+void func_151DC260(struct17 *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
     SplashBurstSpec splash;
 
     splash.pos = *pos;
@@ -1584,7 +1588,7 @@ void func_151DC260(struct17 *pos, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
     splash.speed = 12.0f;
     splash.speedRange = 11.0f;
     splash.unk40Chance = 1.0f;
-    splash.kind = arg2;
+    splash.kind = kind;
     func_15153F18(&splash, &splash.pos, arg1, arg3, arg4);
 
     {
@@ -1606,7 +1610,7 @@ void func_151DC260(struct17 *pos, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
         drops.unk38 = 1;
         drops.gravity = -1.266f;
         drops.gravityRange = 0.46600002f;
-        drops.kind = arg2;
+        drops.kind = kind;
         drops.size = 123.0f;
         drops.sizeRange = 134.0f;
         drops.wobble = 1;
@@ -1615,7 +1619,9 @@ void func_151DC260(struct17 *pos, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
         func_15150178(&drops, &drops.pos, arg1, arg3, arg4);
     }
 }
-void func_151DC484(struct17 *pos, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+
+/* Smaller variant of func_151DC260: splash burst plus wobbling drops of effect kind `kind`. */
+void func_151DC484(struct17 *pos, s32 arg1, u8 kind, u8 arg3, s32 arg4) {
     SplashBurstSpec splash;
 
     splash.pos = *pos;
@@ -1641,7 +1647,7 @@ void func_151DC484(struct17 *pos, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
     splash.speed = 8.0f;
     splash.speedRange = 5.0f;
     splash.unk40Chance = 1.0f;
-    splash.kind = arg2;
+    splash.kind = kind;
     func_15153F18(&splash, &splash.pos, arg1, arg3, arg4);
 
     {
@@ -1665,7 +1671,7 @@ void func_151DC484(struct17 *pos, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
         drops.speedRange = 3.0f;
         drops.gravity = -1.23f;
         drops.gravityRange = 0.47500002f;
-        drops.kind = arg2;
+        drops.kind = kind;
         drops.wobble = 1;
         drops.unk3CChance = 0.6f;
         drops.bounceChance = 0.0f;
