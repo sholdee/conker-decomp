@@ -1462,7 +1462,7 @@ void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
     emitter.position = *pos;
     emitter.ceiling = ceiling;
     emitter.settings = data->settings;
-    obj = (RiseEmitterObject *)func_15149130((u32)func_150ADA20() % (data->types.range + 1) + data->types.base,
+    obj = (RiseEmitterObject *)func_15149130(func_150ADA20() % (data->types.range + 1) + data->types.base,
                                              -1, 0x3F, -1, 1, 0, (struct37 *)sizeof(RiseEmitter), spawner->unkC,
                                              spawner->unk1);
     if (obj != NULL) {
@@ -1535,7 +1535,7 @@ void func_1515AB88(RiseEmitterObject *obj) {
             rise.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
             rise.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * rise.baseSize;
             spawn.unk54 = (func_150ADA68() * emitter->settings.unk54Random) + emitter->settings.unk54Base;
-            spawn.color1[3] = ((u32)func_150ADA20() % (emitter->settings.alphaRange + 1)) + emitter->settings.alphaBase;
+            spawn.color1[3] = (func_150ADA20() % (emitter->settings.alphaRange + 1)) + emitter->settings.alphaBase;
             flipX = (func_150ADA20() & 1) ? 0x40 : 0;
             flipY = (func_150ADA20() & 1) ? 0x80 : 0;
             spawn.flags = flipY | 6 | flipX | 0x8000 | 0x4000 | 0x2000 | 0x1000;

@@ -2,17 +2,13 @@
 /* include/functions.h declares func_15169260's first parameter as s32; func_150E8930 passes
  * a struct address that IDO must build directly in a0, which only a pointer parameter
  * produces.  The header declaration is renamed out of the way and a file-local prototype
- * is used instead (same approach as game_10CD70.c).  Likewise func_150ADA20 returns the full
- * 32-bit random value (callers take it modulo n), not the u8 functions.h declares, and the
+ * is used instead (same approach as game_10CD70.c).  Likewise the
  * seventh argument of func_15149130 is the size of the effect data, not a struct37 pointer. */
 #define func_15169260 func_15169260_s32_decl_in_functions_h
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
 #undef func_15169260
-#undef func_150ADA20
 #undef func_15149130
-u32 func_150ADA20(void);
 void func_15169260(void *, s32, s32, s32);
 struct260 *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
 #include "variables.h"

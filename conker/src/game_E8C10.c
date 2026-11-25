@@ -1,9 +1,5 @@
 #include <ultra64.h>
-// matching: this file needs func_150ADA20 to return s32; the u8 declaration in functions.h changes codegen
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-s32 func_150ADA20(void);
 #include "variables.h"
 
 
@@ -541,7 +537,7 @@ s32 func_150BC488(struct127 *actor) {
                 speed = func_150ADA68() * 5.0f + 8.0f;
                 heading = func_150ADA20() & 0x7F;
                 // matching: the (u32) cast is needed
-                pitch = 0x20 - ((u32)func_150ADA20() & 0x3F);
+                pitch = 0x20 - (func_150ADA20() & 0x3F);
                 headingSine = func_151423D8(heading);
                 headingCosine = func_151423D8(heading - 0x40);
                 pitchSine = func_151423D8(pitch);
@@ -624,9 +620,9 @@ s32 func_150BCBBC(struct127 *actor) {
             sizeA = func_150ADA68() * 0.03f + 0.01f;
             // matching: the unsigned offset and the casts are needed as written
             if (func_150ADA20() & 1) {
-                heading = (u8)((actor->unk76 >> 8) + (s32)(8 - ((u32)func_150ADA20() & 0xF)));
+                heading = (u8)((actor->unk76 >> 8) + (s32)(8 - (func_150ADA20() & 0xF)));
             } else {
-                heading = (u8)((actor->unk76 >> 8) + (s32)(8 - ((u32)func_150ADA20() & 0xF)) - 0x80);
+                heading = (u8)((actor->unk76 >> 8) + (s32)(8 - (func_150ADA20() & 0xF)) - 0x80);
             }
             headingSine = func_151423D8(heading);
             headingCosine = func_151423D8(heading - 0x40);

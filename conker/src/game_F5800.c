@@ -90,7 +90,7 @@ void func_150C851C(s32 scale) {
         minSpeed = (scale * 300) >> 8;
         for (i = 0; i < RECORD_COUNT; i++) {
             speed = minSpeed; // matching: one combined expression shifts the code
-            speed += (u32)func_150ADA20() % range;
+            speed += func_150ADA20() % range;
             sRecords[i].targetSpeed = speed;
         }
     }

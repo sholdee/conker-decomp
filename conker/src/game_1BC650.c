@@ -382,7 +382,7 @@ void func_1518F8E0(Emitter *emitter) {
             do {
                 if (emitter->count < params->tmpl.maxCount) {
                     set = params->tmpl.anchorSet;
-                    anchor = &((BoneAnchor *)D_800E0990[set])[(u32)func_150ADA20() % ((u16 *)D_800E0968)[set]];
+                    anchor = &((BoneAnchor *)D_800E0990[set])[func_150ADA20() % ((u16 *)D_800E0968)[set]];
                     size.x = func_150ADA68() * params->tmpl.sizeXRange + params->tmpl.sizeX;
                     size.y = func_150ADA68() * params->tmpl.sizeYRange + params->tmpl.sizeY;
                     func_15143134(&anchor->offset, &pos, (Mtx *)owner->unk1D4 + anchor->bone);

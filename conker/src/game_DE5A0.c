@@ -1,17 +1,11 @@
 #include <ultra64.h>
-#define func_15048A40 func_15048A40_hdr
-#define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
-#undef func_15048A40
-#undef func_150ADA20
 #define D_800D1550 D_800D1550_hdr
 #define D_800D2104 D_800D2104_hdr
 #include "variables.h"
 #undef D_800D1550
 #undef D_800D2104
 
-f32 func_15048A40(u8 arg0); // header declares it as returning void
-u32 func_150ADA20(void);    // header declares it as returning u8; callers here use the full word
 f32 func_150489B0(u8 arg0);
 void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
 void func_15052760(struct127 *arg0, s16 arg1);

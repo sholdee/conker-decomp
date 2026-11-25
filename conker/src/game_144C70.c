@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_15048A40 as returning void
-#define func_15048A40 func_15048A40_void_decl_in_functions_h
 #include "functions.h"
-#undef func_15048A40
 #include "variables.h"
 
 /* One F3DEX2 display-list command, read a byte at a time. */
@@ -950,7 +947,6 @@ void func_151194D4(WorldObject *prop, PropVtx *seed, s32 minDistSq, s32 group) {
     }
 }
 
-extern f32 func_15048A40(u8 angle);
 extern f32 func_150489B0(u8 angle);
 
 /*

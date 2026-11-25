@@ -1,10 +1,5 @@
 #include <ultra64.h>
-/* functions.h types func_150ADA20 as returning u8; golden spills/uses the full u32 return
- * (same shadow-prototype idiom as game_121A20.c). */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 /* An actor's bone matrix: struct127.unk1D4 points at an array of these. */

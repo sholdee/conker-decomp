@@ -1,9 +1,6 @@
 #include <ultra64.h>
 // matching: func_151B8908's spill slot needs func_150ADA20 declared returning s32, not u8
-#define func_150ADA20 func_150ADA20_u8_proto
 #include "functions.h"
-#undef func_150ADA20
-s32 func_150ADA20(void);
 
 extern u8 D_800AA490;
 extern f32 D_800DCA24;

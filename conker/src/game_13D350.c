@@ -1,16 +1,13 @@
 #include <ultra64.h>
-// functions.h declares these two with the wrong signatures; this file declares them below.
+// functions.h declares func_1502B7F0 with the wrong signature; this file declares it below.
 #define func_1502B7F0 func_1502B7F0__proto
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_1502B7F0
-#undef func_150ADA20
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
 
-u32 func_150ADA20(void);
 void func_1502B7F0(void **dest, s32 arg1, s32 arg2, s32 arg3);
 void func_10004074(void *data);
 void func_1510D694(s32 arg0);

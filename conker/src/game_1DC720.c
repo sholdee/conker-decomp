@@ -1,10 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_150ADA20 as returning u8, but it returns a full 32-bit random
- * value (dsra32 v0) and func_151AF388 spills it as a word, so this file declares its own. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 /* Descriptor copied into a new emitter effect by func_1513418C (same layout as game_10CD70.c's

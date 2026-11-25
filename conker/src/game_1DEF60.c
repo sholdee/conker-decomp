@@ -1,8 +1,5 @@
 #include <ultra64.h>
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void); /* random number; functions.h declares it u8, but the % here uses the full u32 */
 #include "variables.h"
 
 void *memcpy(void *, const void *, u32);

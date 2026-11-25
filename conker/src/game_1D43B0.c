@@ -1,9 +1,5 @@
 #include <ultra64.h>
-/* func_150ADA20 returns a full 32-bit value; the shared header narrows it to u8 */
-#define func_150ADA20 func_150ADA20_u8
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 /* Debris emitter settings read by func_151A6F00. Angles are 0..255 binary angles. */

@@ -1,10 +1,6 @@
-/* functions.h declares func_150ADA20 as returning u8; it returns a full u32 random number. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 
 void func_151541B8(vertex *, f32, f32, f32, f32, u8, s32);
 

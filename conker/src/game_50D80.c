@@ -1,11 +1,7 @@
 #include <ultra64.h>
 #define func_1514D3B0 func_1514D3B0_hdr
-#define func_15048A40 func_15048A40_void_proto
-#define func_150ADA20 func_150ADA20_u8_proto
 #include "functions.h"
 #undef func_1514D3B0
-#undef func_15048A40
-#undef func_150ADA20
 /* variables.h declares these with the wrong types; they are redeclared below with the types this file uses. */
 #define D_800C3958 D_800C3958_hdr
 #define D_800C3654 D_800C3654_hdr
@@ -1357,8 +1353,6 @@ extern void func_150E2DB4(struct127 *, u8, s16, s32, f32, f32, f32, f32, f32, f3
 extern void func_1516E778(f32 *, s32, s8, u8, s32);
 extern void func_150BEF7C(s32);
 extern f32 func_150489B0(u8);
-extern f32 func_15048A40(u8);
-extern u32 func_150ADA20(void);
 extern void func_1516F548(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151DC8BC(f32 *, s16, s32, s32, s32, s32);
 extern void func_150BA4C0(struct127 *, u8, s32);

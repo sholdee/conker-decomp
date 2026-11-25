@@ -1,11 +1,8 @@
 #include <ultra64.h>
-// matching: functions.h declares func_10010F88 void and func_150ADA20 u8; callers here use full s32 results
+// matching: functions.h declares func_10010F88 void; callers here use its s32 result
 #define func_10010F88 func_10010F88_void_decl_in_functions_h
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_10010F88
-#undef func_150ADA20
-s32 func_150ADA20(void);
 #include "variables.h"
 
 extern f32 D_800A1BD8;

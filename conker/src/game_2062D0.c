@@ -1,16 +1,13 @@
 #include <ultra64.h>
 
 // functions.h declares these three with other return types; this file uses the s32 versions below.
-#define func_150ADA20 func_150ADA20_orig
 #define func_1513D668 func_1513D668_void_proto
 #define func_151DA08C func_151DA08C_void_proto
 #include "functions.h"
-#undef func_150ADA20
 #undef func_1513D668
 #undef func_151DA08C
 #include "variables.h"
 
-s32 func_150ADA20(void);
 s32 func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
 s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, struct17 *pos, s32 arg7, s32 arg8);
 s32 func_1514672C(struct17 *arg0);

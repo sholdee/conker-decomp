@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_15048A40 as returning void; hide that prototype and declare the real one.
-#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
-#undef func_15048A40
 #include "variables.h"
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
@@ -114,7 +111,6 @@ typedef struct {
     /* 0x94 */ Shadow *shadow;
 } Game13F9D0Obj;
 
-extern f32 func_15048A40(u8 angle); /* sin */
 extern f32 func_150489B0(u8 angle); /* cos */
 extern s32 func_150A3FC4(f32, f32, s32, Point3s *, f32 *);
 s32 func_1510E388(Point3s **triPtrs, Point3s *tri, f32 *slopeX, f32 *slopeZ);

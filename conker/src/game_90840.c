@@ -1,14 +1,12 @@
 #include <ultra64.h>
 /* functions.h declares these with prototypes that do not fit how this file calls them. */
 #define func_15083568 func_15083568_void_proto
-#define func_150ADA20 func_150ADA20_u8_proto
 #define func_1000FA64 func_1000FA64_hdr
 #define func_1000FF90 func_1000FF90_hdr
 #define func_100109D0 func_100109D0_hdr
 #define func_10010A3C func_10010A3C_hdr
 #include "functions.h"
 #undef func_15083568
-#undef func_150ADA20
 #undef func_1000FA64
 #undef func_1000FF90
 #undef func_100109D0
@@ -17,7 +15,6 @@ s32 func_100109D0();
 s32 func_10010A3C();
 s32 func_1000FF90(void *arg0, s32 arg1, s32 arg2);
 u16 func_1000FA64(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5, s16 arg6, void *arg7, void *arg8, void *arg9, s32 argA, s32 argB);
-u32 func_150ADA20(void);
 struct127 *func_15083568(struct127 *, s32, f32, s32);
 #include "variables.h"
 

@@ -1,10 +1,5 @@
 #include <ultra64.h>
-// matching: functions.h declares func_150ADA20 as returning u8, but this file was built against an
-// int-returning prototype (u8 results spill as bytes into a smaller frame), so hide the shared one.
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-s32 func_150ADA20(void);
 #include "variables.h"
 
 /*

@@ -1,9 +1,5 @@
 #include <ultra64.h>
-// matching: func_150ADA20 returns a full u32 here (callers mask it); functions.h declares it u8
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 void func_1514373C(f32, f32, f32 *, f32 *);

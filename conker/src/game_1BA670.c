@@ -472,7 +472,7 @@ void func_1518D6E0(Emitter *emitter) {
                         func_1513F680(slot->particle, data->tmpl->unk3B, data->tmpl->unk3C, data->tmpl->unk3D,
                                       data->tmpl->unk3E);
                         slot->particle->lifetime =
-                            (u32)func_150ADA20() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
+                            func_150ADA20() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
                         slot->particle->flags |= 1;
                         slot->particle = NULL;
                         self->count--;
@@ -532,7 +532,7 @@ void func_1518D6E0(Emitter *emitter) {
                     while (ok && numFree != 0 && !(self->accum < 1.0f) && self->count < info->maxCount) {
                         s32 skip;
 
-                        skip = (u32)func_150ADA20() % (numFree + 1);
+                        skip = func_150ADA20() % (numFree + 1);
                         while (skip--) {
                             prevFree = freeSlot;
                             freeSlot = freeSlot->next;
@@ -590,7 +590,7 @@ void func_1518D6E0(Emitter *emitter) {
                                               (Mtx *)self->params.owner->unk1D4 + info->points[idx].bone);
                             }
                             freeSlot->particle->prevPos = freeSlot->particle->pos;
-                            freeSlot->timer = (u32)func_150ADA20() % (info->lifeRange + 1) + info->lifeMin;
+                            freeSlot->timer = func_150ADA20() % (info->lifeRange + 1) + info->lifeMin;
                             freeSlot = freeSlot->next;
                             prevFree->next = freeSlot;
                             self->count++;

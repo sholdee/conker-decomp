@@ -2,11 +2,7 @@
 /* functions.h declares these with signatures that don't match their real ones; rename them out of the way. */
 #define func_15178E14 func_15178E14_header_mismatch
 #define func_10010F88 func_10010F88_hdr
-#define func_150ADA20 func_150ADA20_hdr
-#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
-#undef func_150ADA20
-#undef func_15048A40
 #undef func_15178E14
 #undef func_10010F88
 #include "variables.h"
@@ -14,8 +10,6 @@
 extern s32 func_15168118();
 extern f32 sqrtf(f32);
 
-u32 func_150ADA20(void);
-f32 func_15048A40(u8);
 f32 func_150489B0(u8);
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern s32 D_8008CA64;

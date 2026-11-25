@@ -1,10 +1,6 @@
 #include <ultra64.h>
-// matching: functions.h declares func_150ADA20 as returning u8, but its callers here use the full u32
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #include "variables.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 
 /*
  * A falling stream: a ring buffer of points that fall under gravity and, where they reach the

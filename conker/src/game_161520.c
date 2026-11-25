@@ -1,12 +1,9 @@
 #include <ultra64.h>
 /* This file needs other prototypes for these two than functions.h declares. */
-#define func_150ADA20 func_150ADA20_u8proto
 #define func_151D9B8C func_151D9B8C_s32proto
 #include "functions.h"
-#undef func_150ADA20
 #undef func_151D9B8C
 void func_151D9B8C(u8, f32, u8, void *, struct17 *, s16, u8, u8, u8, u8, s32);
-u32 func_150ADA20(void);
 #include "variables.h"
 
 extern void func_15153F18(void *, void *, s32, u8, s32);

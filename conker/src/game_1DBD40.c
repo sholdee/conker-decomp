@@ -1,10 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_150ADA20 as returning u8, but it returns a full word
- * (the callers here keep all 32 bits), so this file declares it itself. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 void func_151AE984(f32 *, f32, f32, f32, s32, u8);

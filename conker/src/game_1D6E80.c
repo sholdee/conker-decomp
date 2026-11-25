@@ -1,11 +1,8 @@
 #include <ultra64.h>
 /* functions.h declares these two with the wrong return types; use the ones this file needs. */
 #define func_10010F30 func_10010F30_void
-#define func_150ADA20 func_150ADA20_orig
 #include "functions.h"
 #undef func_10010F30
-#undef func_150ADA20
-s32 func_150ADA20(void);
 #include "variables.h"
 
 extern s32 func_10010F30(s32, u16, u8, s16, u8);

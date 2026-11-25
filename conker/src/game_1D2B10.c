@@ -1,9 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_150ADA20 as returning u8; this file's code needs its full u32 result.
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 /* Spawn region an emitter scatters its particles over. */

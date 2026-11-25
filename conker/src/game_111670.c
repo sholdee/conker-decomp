@@ -1,9 +1,10 @@
 #include <ultra64.h>
-// functions.h declares func_15048A40 as returning void; hide that prototype and declare the real one.
-#define func_15048A40 func_15048A40_hdr
+// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
+// prototype (callers use the low byte without masking it), so it keeps that view.
+#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_15048A40
-extern f32 func_15048A40(u8 arg0);
+#undef func_150ADA20
+u8 func_150ADA20(void);
 #include "variables.h"
 #include "effects.h"
 

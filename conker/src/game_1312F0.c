@@ -11,7 +11,6 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } GroundHit; /* 0x24 */
 
-u32 func_150ADA20(void);
 f32 func_150ADA68(void);
 void func_1504715C(GroundHit *, struct127 *);
 s32 func_15046C80(struct17 *, s32, f32, GroundHit *);

@@ -116,7 +116,7 @@ void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 angleA, s16 angleB, s16 
     }
     for (i = 0; i < count; i++) {
         py = y;
-        angle = (u32)func_150ADA20() % range + low;
+        angle = func_150ADA20() % range + low;
         dirX = func_151423D8(angle - 0x40);
         dirZ = func_151423D8(angle);
         px = radius * dirX + x;
@@ -159,7 +159,7 @@ void func_1514C858(f32 x, f32 y, f32 z, f32 radius, s16 yaw, s16 angleA, s16 ang
         low = angleA;
     }
     for (i = 0; i < count; i++) {
-        angle = (u32)func_150ADA20() % range + low;
+        angle = func_150ADA20() % range + low;
         elevY = func_151423D8(angle - 0x40);
         elevH = func_151423D8(angle);
         px = radius * yawX * elevH + x;

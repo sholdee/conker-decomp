@@ -1,11 +1,7 @@
 #include <ultra64.h>
-/* functions.h declares func_15048A40 as returning void; it returns f32 */
-#define func_15048A40 func_15048A40_void_unused
 #include "functions.h"
-#undef func_15048A40
 #include "variables.h"
 
-extern f32 func_15048A40(u8 angle);
 extern f32 func_150489B0(u8 angle);
 extern void *allocate_memory(s32, s32, s32, s32);
 extern void func_1511490C(f32 mtx[4][4], void *obj);
@@ -113,7 +109,7 @@ void func_1511A838(Game147C70State *mesh) {
             invRadius = 1.0f / radius;
         }
         for (i = 0; i < mesh->vertexCount; i++) {
-            phaseOffsets[i] = (u32)func_150ADA20() % 255;
+            phaseOffsets[i] = func_150ADA20() % 255;
             dx = base[i].ob[0];
             dz = base[i].ob[2];
             dx *= dx;

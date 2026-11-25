@@ -2,7 +2,12 @@
 // an s32 moves regalloc in func_150D2924, so hide the header prototype and redeclare it here
 #define func_1513D2F0 func_1513D2F0_hdr
 #include <ultra64.h>
+// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
+// prototype (callers use the low byte without masking it), so it keeps that view.
+#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
+#undef func_150ADA20
+u8 func_150ADA20(void);
 #include "variables.h"
 #undef func_1513D2F0
 void *func_1513D2F0(void *params, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9,

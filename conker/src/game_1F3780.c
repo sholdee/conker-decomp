@@ -1,12 +1,5 @@
 #include <ultra64.h>
-/* include/functions.h declares func_150ADA20 as returning u8, but the routine returns a full
- * word (its asm ends in dsra32 with no mask); func_151C62D0 copies the result with a plain
- * move, which a u8 declaration cannot produce. Rename the header's declaration out of the
- * way and declare the real return type file-locally. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-s32 func_150ADA20(void);
 #include "variables.h"
 
 /* Per-side (0, 1) tables: byte offset of the side's joint matrix in struct127.unk1D4, and model-space points

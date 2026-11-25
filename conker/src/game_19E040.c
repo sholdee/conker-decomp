@@ -1,10 +1,6 @@
 #include <ultra64.h>
 /* functions.h declares these two with the wrong return types; hide its prototypes. */
-#define func_150ADA20 func_150ADA20_u8_proto
-#define func_15048A40 func_15048A40_void_proto
 #include "functions.h"
-#undef func_150ADA20
-#undef func_15048A40
 #include "variables.h"
 
 /*
@@ -59,8 +55,6 @@ extern f32 D_800A6E90[6][3];
 extern BurstPiece D_800A6ED8[6];
 extern s32 D_800BE9F0;
 
-u32 func_150ADA20(void);
-f32 func_15048A40(u8);
 f32 func_150489B0(u8);
 void *func_1518C900(s32);
 void func_15168BE4(ModelFxTemplate *, u8, s32);

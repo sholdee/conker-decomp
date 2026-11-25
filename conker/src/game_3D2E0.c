@@ -24,7 +24,7 @@ void func_1500FE30(void) {
     for (i = 0; i < 10; i++) {
         ((Struct1500FE30 *)D_800BE4E0)[i].unk0 = i / 5;
         ((Struct1500FE30 *)D_800BE4E0)[i].unk2 = -1;
-        ((Struct1500FE30 *)D_800BE4E0)[i].unk4 = (u32)func_150ADA20() % 5;
+        ((Struct1500FE30 *)D_800BE4E0)[i].unk4 = func_150ADA20() % 5;
     }
     func_150C851C(100);
     for (i = 0; i < 10; i++) {

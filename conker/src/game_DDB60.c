@@ -1,10 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_150ADA20 as returning u8, but it returns the full 32-bit random value
- * (callers take it modulo n with divu), so its header declaration is renamed out of the way. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 

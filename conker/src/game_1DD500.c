@@ -1,14 +1,11 @@
 #include <ultra64.h>
 /* functions.h declares these three with stale signatures; hide them there and declare the real ones here. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_151D9B8C func_151D9B8C_decl_in_functions_h
 #define func_1513D524 func_1513D524_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
 #undef func_151D9B8C
 #undef func_1513D524
 void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
-u32 func_150ADA20(void);
 #include "variables.h"
 
 typedef struct { f32 x, y, z; } Vec3f;

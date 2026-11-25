@@ -1,9 +1,5 @@
 #include <ultra64.h>
-/* functions.h narrows func_150ADA20's return to u8; the code here uses all 32 bits. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 /* Same layout as SpawnRegion in game_131F30.c and game_16EE20.c. */

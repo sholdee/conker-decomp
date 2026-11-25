@@ -1,14 +1,9 @@
 #include <ultra64.h>
-/* functions.h narrows func_150ADA20's return to u8 (the code uses all 32 bits) and declares the
- * message handlers below with struct207, whose 0x28 is a pointer; here 0x28 holds the state inline. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_15105548 func_15105548_decl_in_functions_h
 #define func_15105848 func_15105848_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
 #undef func_15105548
 #undef func_15105848
-u32 func_150ADA20(void);
 #include "variables.h"
 
 typedef struct { f32 x, y, z; } Vec3f;

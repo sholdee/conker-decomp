@@ -1,9 +1,5 @@
 #include <ultra64.h>
-/* func_150ADA20 returns a full 32-bit value (asm: dsra32 v0); the shared header narrows it to u8 */
-#define func_150ADA20 func_150ADA20_u8
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 typedef struct { f32 x, y, z; } Vec3f;

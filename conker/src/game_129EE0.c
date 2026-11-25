@@ -1,12 +1,9 @@
 #include <ultra64.h>
-// functions.h declares these two with the wrong return types (func_1513EDE4 returns its Vtx *, and
-// func_150ADA20's result is used as a full u32), so its declarations are renamed away and redeclared below.
+// functions.h declares func_1513EDE4 with the wrong return type (it returns its Vtx *), so its
+// declaration is renamed away and redeclared below.
 #define func_1513EDE4 func_1513EDE4_orig
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_1513EDE4
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 extern void func_150FCBC0(u8 arg0);

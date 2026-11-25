@@ -1,9 +1,6 @@
 #include <ultra64.h>
-#define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
-#undef func_150ADA20
 // matching: callers here treat the random number as u32 (functions.h declares it u8)
-u32 func_150ADA20(void);
 #include "variables.h"
 
 /* Debris description passed to func_15152190 (same layout as game_DC6B0.c's DebrisBurst): a random

@@ -1036,7 +1036,7 @@ s32 func_15014F6C(LevelObject *obj) {
     /* unk18 holds a minimum and a range: unkC is random in [min, min + range] */
     data.unk4 = obj->unk18 & 0xFFFF;
     data.unk8 = (obj->unk18 >> 16) & 0xFFFF;
-    data.unkC = ((u32)func_150ADA20() % (u32)(data.unk8 + 1)) + data.unk4;
+    data.unkC = (func_150ADA20() % (u32)(data.unk8 + 1)) + data.unk4;
     func_150A8050(data.mtx, obj->rotX, obj->rotY, 0.0f);
 
     data.mtx[3][0] = obj->x;

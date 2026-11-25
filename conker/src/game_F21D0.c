@@ -1,11 +1,7 @@
 #include <ultra64.h>
-// functions.h declares func_15048A40 as void; it returns f32
-#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
-#undef func_15048A40
 #include "variables.h"
 
-extern f32 func_15048A40(u8 angle);
 
 /* An object func_150C4D20 swings like a pendulum about angle 0. */
 typedef struct {

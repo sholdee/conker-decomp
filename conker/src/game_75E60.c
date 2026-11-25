@@ -1,9 +1,7 @@
 #include <ultra64.h>
 
-#define func_15048A40 func_15048A40_hdr /* functions.h declares it returning void */
 #include "functions.h"
 #include "variables.h"
-#undef func_15048A40
 
 /*
  * Angles here are u8 binary angles: 256 steps per full turn, so 64 is a right angle.

@@ -1,9 +1,5 @@
 #include <ultra64.h>
-#define func_15048A40 func_15048A40_hdr
-#define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
-#undef func_15048A40
-#undef func_150ADA20
 #include "variables.h"
 
 
@@ -46,8 +42,6 @@ typedef struct {
     /* 0xEC */ u8 state;
 } Debris;
 
-extern f32 func_15048A40(u8);
-extern s32 func_150ADA20(void);
 extern s32 func_1510F800(s32);
 extern s32 func_1510F8D8(s32, s32, s32, s32);
 void func_15171200(s32, s32, f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, s32);
@@ -148,7 +142,8 @@ void func_15169C70(Debris *debris) {
                           debris->list);
             if (debris->kind == 2) {
                 if (func_150ADA20() & 0x8000) {
-                    debris->spinX = (f32)(func_150ADA20() >> 16) * 0.000152587890625f + 40.0f;
+                    // matching: the original treats this random draw as signed (sra + signed int->float)
+                    debris->spinX = (f32)((s32)func_150ADA20() >> 16) * 0.000152587890625f + 40.0f;
                 }
             } else if (debris->kind == 5) {
                 func_151709B4(debris->x, debris->y + 10.0f, debris->z, 4, debris->velY * 200.0f,
@@ -280,9 +275,9 @@ void func_1516A538(SplashFx *fx) {
     s32 level;
 
     if (fx->frame >= 0x300) {
-        texture = (u32)func_150ADA20() % 3;
+        texture = func_150ADA20() % 3;
         level = fx->unk25;
-        angle = (u32)func_150ADA20() % 360;
+        angle = func_150ADA20() % 360;
         func_15171D4C(fx->x, fx->y - 10, fx->z, 100, 0, texture + 0x20, angle, 0,
                       (level * 25) / 255 + 25, 0, 0x100, 0, fx->owner, fx->list);
     }

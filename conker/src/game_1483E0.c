@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_15048A40 as returning void; it returns the cosine table value.
-#define func_15048A40 func_15048A40_void_decl_in_functions_h
 #include "functions.h"
-#undef func_15048A40
 #include "variables.h"
 
 /*
@@ -13,7 +10,6 @@
  * 0x8A, and per-type state at 0x7C-0x87. Each routine views the object through its own struct.
  */
 
-extern f32 func_15048A40(u8);
 extern f32 func_150489B0(u8);
 extern void *allocate_memory(s32, s32, s32, s32);
 extern void *func_151149AC(u32);
@@ -54,7 +50,7 @@ void func_1511AF30(struct Obj1511AF30 *obj) {
         }
         obj->wobble = 0.0f;
     } else {
-        roll = (u32)func_150ADA20() % 1000;
+        roll = func_150ADA20() % 1000;
         if (roll < 500) {
             obj->wobbleTarget = roll * 5.0f * level * 0.002000000095f * 0.009999999776f;
         }

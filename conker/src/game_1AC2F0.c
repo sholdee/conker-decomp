@@ -1,8 +1,6 @@
 #include <ultra64.h>
-#define func_15048A40 func_15048A40_hdr
 #define func_15149130 func_15149130_hdr
 #include "functions.h"
-#undef func_15048A40
 #undef func_15149130
 #define D_800DDDAC D_800DDDAC_hdr
 #define D_800DDDB0 D_800DDDB0_hdr
@@ -42,7 +40,6 @@ typedef struct {
 
 extern f32 D_800D9D10[][4][4]; // per-view projection matrices
 
-f32 func_15048A40(u8 angle); // -1..1 wave over a 256-step angle (used as a sine)
 
 /* Colour fade (func_1517EE40) */
 extern FadeColor D_800DDDA0[]; // colour

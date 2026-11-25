@@ -1,18 +1,15 @@
 #include <ultra64.h>
-// matching: functions.h declares func_15083E90 as taking s32 and func_150ADA20 as returning u8; the
-// callers here need a u8 parameter and a full u32 return, so hide those declarations
+// matching: functions.h declares func_15083E90 as taking s32; the callers here need a u8 parameter,
+// so hide that declaration
 #define func_15083E90 func_15083E90_s32_decl_in_functions_h
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_15083E90
-#undef func_150ADA20
 /* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
 #define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
 #undef D_800D3098
 
 struct127 *func_15083E90(u8);
-u32 func_150ADA20(void);
 extern struct178 *D_800D3098;
 
 /* One 0x30-byte spawn slot of the D_800D20FC table (struct258 in structs.h is not the real layout). */

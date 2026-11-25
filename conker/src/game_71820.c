@@ -1,8 +1,6 @@
 #include <ultra64.h>
 // The headers declare these symbols with placeholder types; this file redeclares them with their real ones.
-#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
-#undef func_15048A40
 #define D_800CBE00 D_800CBE00_s32
 #define D_800D3300 D_800D3300_hdr
 #define D_800DBE3C D_800DBE3C_hdr
@@ -275,7 +273,6 @@ void func_15044A28(void) {
     }
 }
 
-extern f32 func_15048A40(u8); // sine of a 256-step angle (header declares it void)
 extern f32 func_150489B0(u8); // cosine of a 256-step angle
 
 /* Check 0: whether the player's bounds overlap the volume's box, rotated about Y by its angle. */

@@ -1,9 +1,7 @@
 #include <ultra64.h>
 // matching: callers here use the full s32 return of these, unlike their functions.h prototypes
-#define func_150ADA20 func_150ADA20_u8_proto
 #define func_10010F30 func_10010F30_void
 #include "functions.h"
-#undef func_150ADA20
 #undef func_10010F30
 #include "variables.h"
 
@@ -11,7 +9,6 @@ typedef struct {
     f32 x, y, z;
 } Vec3f;
 
-extern s32 func_150ADA20(void);
 extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_1000B060(f32, f32, u32);
 extern void func_1000E7A0(u32, s32);

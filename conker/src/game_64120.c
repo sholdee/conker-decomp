@@ -1,7 +1,10 @@
 #include <ultra64.h>
-#define func_15048A40 func_15048A40_hdr
+// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
+// prototype (callers use the low byte without masking it), so it keeps that view.
+#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_15048A40
+#undef func_150ADA20
+u8 func_150ADA20(void);
 #include "variables.h"
 
 s32 func_150380C0(f32 *, s32, s32, s32, f32, s32, f32 *, s32, s32, s32, s32);
@@ -1736,7 +1739,6 @@ void func_1503A7F0(void) {
     D_800C3FFA = pass;
     func_1503A678();
 }
-f32 func_15048A40(u8 arg0);
 
 f32 func_150489B0(u8);
 s32 func_15022024(f32 *, f32 *, s32, s32);

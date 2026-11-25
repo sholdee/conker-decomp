@@ -1,10 +1,6 @@
-/* functions.h declares func_150ADA20 as returning u8; the code here needs the s32 version. */
-#define func_150ADA20 func_150ADA20_orig
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#undef func_150ADA20
-s32 func_150ADA20(void);
 
 /* Ground probe result filled by func_1504715C / func_15046C80. */
 typedef struct {

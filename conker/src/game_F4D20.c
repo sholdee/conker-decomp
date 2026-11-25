@@ -1,10 +1,6 @@
 #include <ultra64.h>
 // functions.h declares these two as returning void / u8; hide those prototypes and redeclare them below.
-#define func_15048A40 func_15048A40_hdr
-#define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
-#undef func_15048A40
-#undef func_150ADA20
 #include "variables.h"
 
 /* An 8-byte entry of the list at F4D20Obj.unk1C; the list ends with an entry whose kind is -14. */
@@ -107,8 +103,6 @@ void func_150C7968(F4D20Obj *obj) {
     }
 }
 
-extern f32 func_15048A40(u8 angle); /* sin */
-extern u32 func_150ADA20(void); /* random */
 extern void func_1000D96C(s32 newId, s32 oldId, s32 transition);
 extern void func_1000DE1C(s32, s32);
 extern f32 func_150489B0(u8 angle); /* cos */

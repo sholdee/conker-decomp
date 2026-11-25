@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_15048A40 as void; it returns f32 (declared below). */
-#define func_15048A40 func_15048A40_void_unused
 #include "functions.h"
-#undef func_15048A40
 #include "variables.h"
 
 
@@ -438,7 +435,6 @@ void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s
 extern s16 D_800A6E30[][7];
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern f32 func_150489B0(u8);
-extern f32 func_15048A40(u8);
 void func_15170034(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 
 
@@ -594,7 +590,7 @@ void func_1516DB90(Emitter *arg0) {
                 scaleX = emitter->scaleX;
                 scaleY = emitter->scaleY;
                 if (emitter->scaleXRandom != 0) {
-                    scaleRandom = (u32)func_150ADA20() % (u32)emitter->scaleXRandom;
+                    scaleRandom = func_150ADA20() % (u32)emitter->scaleXRandom;
                 } else {
                     scaleRandom = 0;
                 }
@@ -604,38 +600,38 @@ void func_1516DB90(Emitter *arg0) {
                 } else {
                     scaleX += scaleRandom;
                     if (emitter->scaleYRandom != 0) {
-                        scaleY += (u32)func_150ADA20() % (u32)emitter->scaleYRandom;
+                        scaleY += func_150ADA20() % (u32)emitter->scaleYRandom;
                     }
                 }
                 if (!(emitter->flags & 8) && !(emitter->flags & 0x80)) {
                     velocityY = emitter->velocityY;
                     if (emitter->velocityYRandom != 0) {
-                        velocityY += (u32)func_150ADA20() % emitter->velocityYRandom;
+                        velocityY += func_150ADA20() % emitter->velocityYRandom;
                     }
                     velXHigh = emitter->velocityXHigh;
                     if (emitter->velocityXHighRandom != 0) {
-                        velXHigh += (u32)func_150ADA20() % emitter->velocityXHighRandom;
+                        velXHigh += func_150ADA20() % emitter->velocityXHighRandom;
                         if (velXHigh >= 0x100) {
                             velXHigh = 0xFF;
                         }
                     }
                     velXLow = emitter->velocityXLow;
                     if (emitter->velocityXLowRandom != 0) {
-                        velXLow += (u32)func_150ADA20() % emitter->velocityXLowRandom;
+                        velXLow += func_150ADA20() % emitter->velocityXLowRandom;
                         if (velXLow >= 0x100) {
                             velXLow = 0xFF;
                         }
                     }
                     velZHigh = emitter->velocityZHigh;
                     if (emitter->velocityZHighRandom != 0) {
-                        velZHigh += (u32)func_150ADA20() % emitter->velocityZHighRandom;
+                        velZHigh += func_150ADA20() % emitter->velocityZHighRandom;
                         if (velZHigh >= 0x100) {
                             velZHigh = 0xFF;
                         }
                     }
                     velZLow = emitter->velocityZLow;
                     if (emitter->velocityZLowRandom != 0) {
-                        velZLow += (u32)func_150ADA20() % emitter->velocityZLowRandom;
+                        velZLow += func_150ADA20() % emitter->velocityZLowRandom;
                         if (velZLow >= 0x100) {
                             velZLow = 0xFF;
                         }

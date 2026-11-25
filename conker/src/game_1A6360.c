@@ -1,9 +1,12 @@
 #include <ultra64.h>
 /* The shared headers declare these with the wrong types; hide those declarations and redeclare below. */
-#define func_15048A40 func_15048A40_hdr
 #define func_10010F30 func_10010F30_void
+// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
+// prototype (callers use the low byte without masking it), so it keeps that view.
+#define func_150ADA20 func_150ADA20_functions_h
 #include "functions.h"
-#undef func_15048A40
+#undef func_150ADA20
+u8 func_150ADA20(void);
 #undef func_10010F30
 #define D_800DD444 D_800DD444_hdr
 #define D_800C35EA D_800C35EA_hdr
@@ -78,7 +81,6 @@ extern f32 sqrtf(f32);
 extern void func_10004074(void *);
 extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern void *allocate_memory(s32, s32, s32, s32);
-extern f32 func_15048A40(u8);
 extern f32 func_150489B0(u8);
 void func_1516865C(QuadFxData *q, s32 r, s32 g, s32 b, s32 a);
 QuadFx *func_15168800(QuadFxData *src, s32 owner, s32 list);

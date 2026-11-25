@@ -1,10 +1,6 @@
 #include <ultra64.h>
 
-// matching: functions.h declares func_150ADA20 as returning u8, but the callers here use its full s32 result
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-s32 func_150ADA20(void);
 #include "variables.h"
 
 void func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);

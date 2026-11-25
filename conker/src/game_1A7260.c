@@ -108,8 +108,8 @@ void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkA
         particle->y = y;
         particle->z = z;
         particle->velY = velY;
-        particle->velX = ((u32)func_150ADA20() % speedRange) - (speedRange >> 1);
-        particle->velZ = ((u32)func_150ADA20() % speedRange) - (speedRange >> 1);
+        particle->velX = (func_150ADA20() % speedRange) - (speedRange >> 1);
+        particle->velZ = (func_150ADA20() % speedRange) - (speedRange >> 1);
         if (unkAC == 5) {
             particle->x += particle->velX * 4;
             particle->y -= particle->velY * 4;
@@ -118,9 +118,9 @@ void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkA
         particle->rotX = 0;
         particle->rotY = 0;
         particle->rotZ = 0;
-        particle->spinX = ((u32)func_150ADA20() % spinRange) - (spinRange >> 1);
-        particle->spinY = ((u32)func_150ADA20() % spinRange) - (spinRange >> 1);
-        particle->spinZ = ((u32)func_150ADA20() % spinRange) - (spinRange >> 1);
+        particle->spinX = (func_150ADA20() % spinRange) - (spinRange >> 1);
+        particle->spinY = (func_150ADA20() % spinRange) - (spinRange >> 1);
+        particle->spinZ = (func_150ADA20() % spinRange) - (spinRange >> 1);
         rnd = func_150ADA20() & 0x7F;
         particle->scale = (rnd + 140) * 0.01f;
         particle->timer = timer;
@@ -150,10 +150,10 @@ void func_1517A1EC(Particle *particle) {
         s32 sign;
         u32 drag;
 
-        drag = (u32)func_150ADA20() % particle->dragRange;
+        drag = func_150ADA20() % particle->dragRange;
         sign = (particle->velX < 0) ? -1 : 1;
         particle->velX += -sign * drag;
-        drag = (u32)func_150ADA20() % particle->dragRange;
+        drag = func_150ADA20() % particle->dragRange;
         sign = (particle->velZ < 0) ? -1 : 1;
         particle->velZ += -sign * drag;
     }
@@ -244,19 +244,19 @@ void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
             particle->x = x;
             particle->z = z;
             particle->rotX = 90;
-            particle->rotY = (u32)func_150ADA20() % 360;
+            particle->rotY = func_150ADA20() % 360;
             particle->rotZ = 0;
             particle->velX = 0;
             particle->velZ = 0;
             particle->texture = texture;
-            rnd = ((u32)func_150ADA20() % 80) + 100;
+            rnd = (func_150ADA20() % 80) + 100;
             particle->scale = rnd * 0.01f;
             particle->velY = size * 0.4f;
-            rnd = (u32)func_150ADA20() % (u32)range;
+            rnd = func_150ADA20() % (u32)range;
             half = size * 0.5f;
             particle->spinX = rnd - half;
-            particle->spinY = ((u32)func_150ADA20() % (u32)range) - half;
-            particle->spinZ = ((u32)func_150ADA20() % (u32)range) - half;
+            particle->spinY = (func_150ADA20() % (u32)range) - half;
+            particle->spinZ = (func_150ADA20() % (u32)range) - half;
             particle->timer = 0;
             particle->alpha = 0xFF;
         }
@@ -347,7 +347,7 @@ void func_1517AA20(f32 size, s32 x, s32 y, s32 z, s32 count) {
             offsetZ = func_150ADA20() & 0x3F;
             offsetX -= 32;
             offsetZ -= 32;
-            chunkSize = (f32)(((u32)func_150ADA20() % (u32)range) >> 4) + size;
+            chunkSize = (f32)((func_150ADA20() % (u32)range) >> 4) + size;
             func_1517A644(chunkSize, func_150ADA20() & 1, x + offsetX, y, z + offsetZ);
         }
     }

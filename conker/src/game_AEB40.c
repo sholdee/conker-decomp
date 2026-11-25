@@ -3,7 +3,6 @@
 // functions.h and variables.h declare several of the symbols below with types that do not fit how
 // this file uses them (struct127 lacks or mistypes many object fields, model tables are declared as
 // plain s32, ...). Their header declarations are renamed out of the way and redeclared further down.
-#define func_150ADA20 func_150ADA20_hdr
 #define func_15083E90 func_15083E90_hdr
 #define func_15083568 func_15083568_hdr
 #define func_1505E650 func_1505E650_hdr
@@ -13,7 +12,6 @@
 #define func_1506160C func_1506160C_hdr
 #define func_15062BDC func_15062BDC_hdr
 #include "functions.h"
-#undef func_150ADA20
 #undef func_15083E90
 #undef func_15083568
 #undef func_1505E650
@@ -361,8 +359,6 @@ extern u16 D_800C5628[];
 extern u16 D_800C57A0[];
 extern f32 D_800D9C10[][4][4];
 
-// func_150ADA20 returns a full-width random value here (functions.h has it as u8).
-extern s32 func_150ADA20(void);
 extern void func_1505E650(GameObj *obj, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
 extern GameObj *func_1505F0AC(s32);
 extern void func_15060F28(GameObj *obj, s32 arg1);
@@ -1867,7 +1863,7 @@ void func_15084C30(GameObj *obj) {
 
     if (obj->id == 0x94) {
         anim = obj->unk2D0;
-        phase = (u32)func_150ADA20() % (s32)anim->unk18;
+        phase = func_150ADA20() % (s32)anim->unk18;
         anim->unk8 = phase;
     }
 }

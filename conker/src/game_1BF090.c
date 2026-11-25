@@ -1,9 +1,5 @@
 #include <ultra64.h>
-/* functions.h types func_150ADA20 as returning u8; it returns a full u32 random number. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 #include "libc/string.h"
 

@@ -1,9 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_150ADA20 as returning u8; this file uses its full u32 result.
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 /* State block that func_150FC438 copies into its spawned object at offset 0x28. */

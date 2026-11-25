@@ -1428,7 +1428,7 @@ void func_151256BC(struct108 *camera) {
     f32 targetScale;
 
     if ((CAM->mode & 0x80000) || ((CAM->status & 8) && !(CAM->mode & 0x40000))) {
-        amount = (f32)((u32)func_150ADA20() % 3);
+        amount = (f32)(func_150ADA20() % 3);
         twoPi = 6.2831854820251465f;
         CAM->swayPhase += ((amount + amount) * DEG2RAD) * D_800BE9A4;
         while (twoPi < CAM->swayPhase) {

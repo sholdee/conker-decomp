@@ -1,11 +1,8 @@
 #include <ultra64.h>
 // matching: functions.h declares these with other return types; the file needs the s32 forms
 #define func_10010F88 func_10010F88_void
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_10010F88
-#undef func_150ADA20
-s32 func_150ADA20(void);
 #include "variables.h"
 #include "effects.h"
 

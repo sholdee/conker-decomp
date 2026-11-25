@@ -1,10 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_150ADA20 as returning u8, but it returns a full word and the
- * callers here use all of it (divu on v0), so this file declares it locally. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 /* Surface hit record from a ground/collision probe (cf. GroundHit in game_1D6E80.c). */

@@ -1,12 +1,8 @@
 #include <ultra64.h>
 
-#define func_15048A40 func_15048A40_hdr
-#define func_150ADA20 func_150ADA20_hdr
 #define func_150A7CB0 func_150A7CB0_hdr
 #define func_1502B7F0 func_1502B7F0_hdr
 #include "functions.h"
-#undef func_15048A40
-#undef func_150ADA20
 #undef func_150A7CB0
 #undef func_1502B7F0
 void func_1509093C(void);
@@ -26,7 +22,6 @@ void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 #undef D_800D2454
 #undef D_800D23D0
 #undef D_800D244C
-extern s32 func_150ADA20(void);
 void func_1508F9F4(void);
 void func_1508F0D4(void);
 void func_1508F7BC(void);
@@ -231,7 +226,6 @@ void func_1508F9C4(void) {
     D_800D2410[D_800D2456++] = 0.0f;
 }
 
-extern f32 func_15048A40(u8 arg0);
 
 /* Spawns and animates the bubbles while player 1 is in water (driven by its unkB2 counter). */
 void func_1508F9F4(void) {

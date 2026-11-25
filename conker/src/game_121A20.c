@@ -1,12 +1,9 @@
 #include <ultra64.h>
 /* functions.h declares these two with other return types; they are redeclared below. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_10010F88 func_10010F88_void_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
 #undef func_10010F88
 // matching: the full 32-bit random value is used here; the header's u8 return adds a mask
-u32 func_150ADA20(void);
 /* Returns the playing sound's handle. */
 s32 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16 y, s16 z, s16 nearDistance,
                   s16 farDistance);

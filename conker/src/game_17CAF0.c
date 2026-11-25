@@ -1,11 +1,7 @@
 #include <ultra64.h>
-// matching: functions.h declares func_150ADA20 as returning u8; the code here uses the full s32 result
-#define func_150ADA20 func_150ADA20_hdr_decl
 #include "functions.h"
-#undef func_150ADA20
 #include "variables.h"
 
-extern s32 func_150ADA20(void);
 
 struct Vec3F { f32 x; f32 y; f32 z; };
 

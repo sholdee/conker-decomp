@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
-#undef func_150ADA20
 #include "variables.h"
 
 
@@ -15,8 +13,6 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } GroundHit; /* 0x24 */
 
-// matching: functions.h declares func_150ADA20 as returning u8; the % below needs the full u32
-extern u32 func_150ADA20(void);
 void func_1504715C(GroundHit *, struct127 *);
 s32 func_15046C80(struct17 *, s32, f32, GroundHit *);
 void func_151D3FF4(struct17 *, u8, s32);

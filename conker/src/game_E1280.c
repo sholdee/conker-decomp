@@ -610,8 +610,8 @@ void func_150B5088(Trail *trail) {
         x = state->baseVel.x + preset->radius * sinB * cosA;
         y = state->baseVel.y - preset->radius * cosB;
         z = state->baseVel.z + preset->radius * sinB * sinA;
-        spawn.capacity = ((u32)func_150ADA20() % (preset->capacityRange + 1)) + preset->capacity;
-        spawn.unkC = ((u32)func_150ADA20() % (preset->unk1E + 1)) + preset->unk1C;
+        spawn.capacity = (func_150ADA20() % (preset->capacityRange + 1)) + preset->capacity;
+        spawn.unkC = (func_150ADA20() % (preset->unk1E + 1)) + preset->unk1C;
         particle.unk0 = func_150ADA68() * preset->unk10 + preset->unkC;
         particle.unk10 = func_150ADA68() * preset->unk18 + preset->unk14;
         particle.vel.x = speed * x;

@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_15048A40 as returning void; this file uses the sine it returns. */
-#define func_15048A40 func_15048A40_hdr0
 #include "functions.h"
-#undef func_15048A40
 #include "variables.h"
 
 typedef struct {
@@ -47,7 +44,6 @@ void *memcpy(void *, const void *, u32);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-f32 func_15048A40(u8 angle);
 f32 func_150489B0(u8 angle);
 void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b);
 void func_1514EDF0(Emitter *handle, struct127 *owner);

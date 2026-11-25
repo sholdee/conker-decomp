@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_150ADA20 (random) as returning u8; this file needs the full u32 */
-#define func_150ADA20 func_150ADA20_u8_proto
 #include "functions.h"
-#undef func_150ADA20
 #include "variables.h"
 
 
@@ -54,7 +51,6 @@ typedef struct HeightSample {
 } HeightSample;
 #define gHeightSamples ((HeightSample *)&D_800D3300) /* filled by func_150A3A70 */
 
-u32 func_150ADA20(void);
 void *func_15167A68(s32, s32, s32, s32, u8, u8);
 u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,

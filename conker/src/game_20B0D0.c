@@ -1,9 +1,5 @@
 #include <ultra64.h>
-// matching: functions.h declares func_150ADA20 as returning u8, but this file uses its full 32-bit result
-#define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 struct Struct151E5034 {

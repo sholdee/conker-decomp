@@ -1,13 +1,8 @@
 #include <ultra64.h>
-/* matching: this file calls func_150ADA20 as returning u32 (functions.h says u8); a u8 return
- * spills the random values as bytes. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 /* functions.h declares func_15149130 with a struct37 * where this file passes the data size. */
 #define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
 #undef func_15149130
-u32 func_150ADA20(void);
 #include "variables.h"
 
 /* Direction spread of a burst: func_15143794 takes a random angle from each range (see game_2062D0.c). */

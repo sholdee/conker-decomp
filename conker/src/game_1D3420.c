@@ -1,10 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_150ADA20 as returning u8, but callers here use bits above 0xFF of its
- * result (`& 0x300`), so redeclare it with its real 32-bit return. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-u32 func_150ADA20(void);
 #include "variables.h"
 
 /* An object that can trigger a one-shot effect at its position. */

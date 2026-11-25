@@ -552,7 +552,7 @@ s32 func_1519F7F0(Trail *trail) {
             point->fadeDelay = config->pointFadeDelay;
             point->fade = 255;
             point->texS = config->texS;
-            config->texS += config->texSStep + (u32)func_150ADA20() % (config->texSStepRandom + 1);
+            config->texS += config->texSStep + func_150ADA20() % (config->texSStepRandom + 1);
             point->x += point->vel.x * age;
             point->z += point->vel.z * age;
             {

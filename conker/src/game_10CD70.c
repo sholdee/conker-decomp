@@ -1,13 +1,5 @@
 #include <ultra64.h>
-/* include/functions.h declares func_150ADA20 as returning u8.  The golden code for
- * func_150DFEFC feeds its result straight into `divu` with no zero-extension, which a
- * u8-returning declaration cannot produce, so the real return type is a word.  Per project
- * policy the shared header is left alone and the correct prototype is made file-local:
- * the header's declaration is renamed out of the way while functions.h is included. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-s32 func_150ADA20(void);
 /* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the
  * table (func_150DF8C0 dereferences the symbol's first word), so it gets a local declaration. */
 #define D_800D3098 D_800D3098_array_decl_in_variables_h

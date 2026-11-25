@@ -1,14 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_150ADA20 as returning u8 (its asm returns a full word) and
- * func_15048A40 as void (it returns an f32); rename those declarations away and use
- * file-local prototypes instead. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
-#define func_15048A40 func_15048A40_void_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-#undef func_15048A40
-f32 func_15048A40(u8);
-u32 func_150ADA20(void);
 #include "variables.h"
 
 /*

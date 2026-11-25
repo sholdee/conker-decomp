@@ -1,17 +1,14 @@
 #include <ultra64.h>
-// matching: redeclared below with the types this file was built against (functions.h has a u8 return
-// for func_150ADA20, which adds masks, and an s32 arg1 for func_1513D2F0, whose cast swaps registers)
+// matching: redeclared below with the types this file was built against (functions.h has an s32 arg1
+// for func_1513D2F0, whose cast swaps registers)
 #define func_1513D2F0 func_1513D2F0_hdr
-#define func_150ADA20 func_150ADA20_hdr
 #include "functions.h"
 /* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
 #define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
 #undef D_800D3098
 #undef func_1513D2F0
-#undef func_150ADA20
 extern struct178 *D_800D3098;
-u32 func_150ADA20(void);
 void *func_1513D2F0(void *spawn, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8,
                     s32 dataSize, u8 owner, s32 kind);
 

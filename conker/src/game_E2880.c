@@ -1,11 +1,5 @@
 #include <ultra64.h>
-/* include/functions.h declares func_150ADA20 (a random number) as returning u8, but
- * func_150B54A8 feeds its result straight into `divu` without zero-extending it, so it
- * really returns a word. The shared header is left alone; the right prototype is local. */
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
-#undef func_150ADA20
-s32 func_150ADA20(void);
 #include "variables.h"
 
 extern void func_151D2AB0(s32);

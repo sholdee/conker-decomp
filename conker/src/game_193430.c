@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_15048A40 as returning void; hide that prototype and declare the real f32 one below
-#define func_15048A40 func_15048A40_hdr
 #include "functions.h"
-#undef func_15048A40
 #include "variables.h"
 
 extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
@@ -128,7 +125,6 @@ void func_15166204(QuadEffect *effect) {
     effect->life = life;
 }
 
-extern f32 func_15048A40(u8);
 extern f32 func_150489B0(u8);
 
 /* Draws the effect: rebuilds this frame's quad vertices and fades alpha out over the effect's life. */

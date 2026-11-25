@@ -1,10 +1,8 @@
 #include <ultra64.h>
 
-#define func_150ADA20 func_150ADA20_u8_proto
 #define func_10010154 func_10010154_hdr
 #define func_10010630 func_10010630_hdr
 #include "functions.h"
-#undef func_150ADA20
 #undef func_10010154
 #undef func_10010630
 /* volume (arg2) is unsigned at the call sites. */
@@ -218,7 +216,6 @@ typedef struct EffectLocals {
 extern Vec3w D_80099B88;
 extern Vec3w D_80099B94;
 extern Vec3w D_80099BBC;
-extern s32 func_150ADA20(void);
 extern void func_15143134(void *, void *, s32);
 extern void func_151DC484(f32 *, struct199 *, s32, u8, s32);
 extern void func_15102B38(s32, u8, s32, s32, f32 *, s32, s32, f32, s32, s32, s32, s32, u8, s32);
@@ -3640,7 +3637,7 @@ void func_1507342C(void) {
         target = D_800D154C->camera;
         if (func_15037698(D_800D154C - D_800CC2D0, 23, 23, target->unk2F8, target->unk2FC, target->unk300,
                           &dist, 30.0f, 0, 0) != 0 &&
-            (u32)func_150ADA20() % 1000 < 200) {
+            func_150ADA20() % 1000 < 200) {
             hit = 1;
         }
         obj = (struct127 *)func_15073118((u8 *)D_800D154C, 23, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
@@ -3669,11 +3666,11 @@ void func_1507342C(void) {
         f32 spread;
 
         spread = D_800D154C->unk2E4 * 0.01f;
-        t = (s32)((u32)func_150ADA20() % 40 - 20) * spread;
+        t = (s32)(func_150ADA20() % 40 - 20) * spread;
         y = 58.4f + t;
-        t = (s32)((u32)func_150ADA20() % 40 - 20) * spread;
+        t = (s32)(func_150ADA20() % 40 - 20) * spread;
         x = 42.8f + t;
-        func_15073118((u8 *)D_800D154C, 14, 0x42, 0.0f, 0.0f, 16.0f, (s32)((u32)func_150ADA20() % 40 - 20) * spread, x, y, 2.9f, 100);
+        func_15073118((u8 *)D_800D154C, 14, 0x42, 0.0f, 0.0f, 16.0f, (s32)(func_150ADA20() % 40 - 20) * spread, x, y, 2.9f, 100);
     } else if (D_800D1580 == 2) {
         obj = (struct127 *)func_15073118((u8 *)D_800D154C, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
         obj->unkB8 = 180.0f;
@@ -3681,11 +3678,11 @@ void func_1507342C(void) {
     } else if (D_800D1580 == 3) {
         f32 t;
 
-        t = (s32)((u32)func_150ADA20() % 40 - 20) * 10.0f;
+        t = (s32)(func_150ADA20() % 40 - 20) * 10.0f;
         y = 58.4f + t;
-        t = (s32)((u32)func_150ADA20() % 40 - 20) * 10.0f;
+        t = (s32)(func_150ADA20() % 40 - 20) * 10.0f;
         x = 42.8f + t;
-        func_15073118((u8 *)D_800D154C, 14, 0x88, 0.0f, 0.0f, 16.0f, (s32)((u32)func_150ADA20() % 40 - 20) * 10.0f, x, y, 2.9f, 100);
+        func_15073118((u8 *)D_800D154C, 14, 0x88, 0.0f, 0.0f, 16.0f, (s32)(func_150ADA20() % 40 - 20) * 10.0f, x, y, 2.9f, 100);
     }
 }
 

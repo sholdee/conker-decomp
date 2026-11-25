@@ -1,10 +1,8 @@
 #include <ultra64.h>
 /* functions.h has placeholder prototypes for these (void returns, no args); hide them while it is
  * included and declare the real ones below. */
-#define func_15048A40 func_15048A40_hdr
 #define func_150DE32C func_150DE32C_hdr
 #include "functions.h"
-#undef func_15048A40
 #undef func_150DE32C
 /* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
 #define D_800D3098 D_800D3098_array_decl_in_variables_h
@@ -18,7 +16,6 @@ extern struct178 *D_800D3098;
 /* variables.h declares D_800A5480 as one f32; it is a vector (copied whole into ParticleDef.rot). */
 extern vertex D_800A5480;
 
-extern f32 func_15048A40(u8 angle);
 extern s32 func_150A32B4(struct178 *, s32, s32, s32);
 extern WorldObject *func_151149AC(u8);
 extern void func_150A2864(s32, s32);
