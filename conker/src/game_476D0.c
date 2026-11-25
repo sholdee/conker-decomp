@@ -3,29 +3,47 @@
 #include "functions.h"
 #include "variables.h"
 
-struct struct1501A764Sub {
-    u8 pad0[4];
-    s16 unk4;
-    u8 pad6[6];
-    s16 unkC;
-    u8 padE[2];
-};
+/* One on-screen view (a player's region of the framebuffer); D_800BE628 points at an array of these. */
+typedef struct RenderView {
+    /* 0x000 */ u8 unk0;
+    /* 0x001 */ u8 onScreen;
+    /* 0x002 */ u8 pad2[2];
+    /* 0x004 */ f32 width;
+    /* 0x008 */ f32 height;
+    /* 0x00C */ f32 halfWidth;
+    /* 0x010 */ f32 halfHeight;
+    /* 0x014 */ f32 unk14;
+    /* 0x018 */ f32 unk18;
+    /* 0x01C */ u8 pad1C[8];
+    /* 0x024 */ f32 top;
+    /* 0x028 */ f32 bottom;
+    /* 0x02C */ f32 left;
+    /* 0x030 */ f32 right;
+    /* 0x034 */ f32 centerX;
+    /* 0x038 */ f32 centerY;
+    /* 0x03C */ u8 pad3C[4];
+    /* 0x040 */ Vp viewports[2]; // indexed by the framebuffer index D_800BE9C0
+    /* 0x060 */ f32 aspect;
+    /* 0x064 */ f32 unk64;
+    /* 0x068 */ f32 unk68;
+    /* 0x06C */ f32 fovX; // degrees
+    /* 0x070 */ f32 fovY; // degrees
+    /* 0x074 */ f32 frustumFovX;
+    /* 0x078 */ f32 frustumFovY;
+    /* 0x07C */ f32 pixelTanX; // tan(fovX / 2) / halfWidth
+    /* 0x080 */ f32 pixelTanY; // tan(fovY / 2) / halfHeight
+    /* 0x084 */ f32 unk84;
+    /* 0x088 */ f32 frustumPlanes[4][3]; // left, right, top, bottom side-plane normals
+    /* 0x0B8 */ u8 padB8[0xC8];
+} RenderView; // size 0x180
 
-struct struct1501A764 {
-    u8 pad0[0xC];
-    f32 unkC;
-    f32 unk10;
-    u8 pad14[0x20];
-    f32 unk34;
-    f32 unk38;
-    u8 pad3C[0x144];
-};
+/* variables.h declares these as s32; they hold pointers to arrays of views and viewports. */
+#define RENDER_VIEWS ((RenderView *)D_800BE628)
+#define VIEWPORTS ((Vp *)D_800BE62C)
+#define VIEW_MATRICES ((f32 (*)[4][4])D_800D9D10)
 
-struct struct1501A764c {
-    u8 pad0[0x40];
-    struct struct1501A764Sub unk40[1];
-    u8 pad50[0x130];
-};
+/* variables.h declares D_800BE638 as s32; it starts the per-layout view widths (D_800BE650 has the heights). */
+#define VIEW_WIDTHS (&D_800BE638)
 
 void func_1501A8C0(s32 arg0, s32 arg1, s32 arg2, s16 arg3);
 s32 func_1501AE94(s32 arg0);
@@ -232,153 +250,105 @@ Gfx *func_1501A6CC(Gfx *arg0, s32 a, s32 b, s32 c, s32 d) {
     return arg0;
 }
 
-void func_150A7A00(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32* arg4, f32* arg5, f32* arg6, f32* arg7);
-void func_1501A764(s16 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6) {
-    f32 sp34;
-    f32 sp30;
-    f32 sp2C;
-    f32 sp28;
+void func_150A7A00(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW);
 
-    func_150A7A00((s32)((u8 *)&D_800D9D10 + (arg0 << 6)), arg1, arg2, arg3, &sp34, &sp30, &sp2C, &sp28);
-    sp28 = 1.0f / sp28;
-    *arg4 = (((struct struct1501A764 *)D_800BE628)[arg0].unk34 + (((struct struct1501A764 *)D_800BE628)[arg0].unkC + 5.0f) * sp34 * sp28);
-    *arg5 = (((struct struct1501A764 *)D_800BE628)[arg0].unk38 - ((((struct struct1501A764 *)D_800BE628)[arg0].unk10 + 5.0f) * sp30 * sp28));
-    *arg6 = (((sp2C * sp28) * (f32)((struct struct1501A764c *)D_800BE628)[arg0].unk40[D_800BE9C0].unk4) + (f32)((struct struct1501A764c *)D_800BE628)[arg0].unk40[D_800BE9C0].unkC) * 32.0f;
+/* Projects a world point through view's matrix to screen x, y and a depth value. */
+void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *depth) {
+    f32 projX;
+    f32 projY;
+    f32 projZ;
+    f32 invW;
+
+    func_150A7A00(VIEW_MATRICES[view], x, y, z, &projX, &projY, &projZ, &invW);
+    invW = 1.0f / invW;
+    *screenX = RENDER_VIEWS[view].centerX + (RENDER_VIEWS[view].halfWidth + 5.0f) * projX * invW;
+    *screenY = RENDER_VIEWS[view].centerY - (RENDER_VIEWS[view].halfHeight + 5.0f) * projY * invW;
+    *depth = (projZ * invW * RENDER_VIEWS[view].viewports[D_800BE9C0].vp.vscale[2] +
+              RENDER_VIEWS[view].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f;
 }
-// void func_1501A764(s16 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6) {
-//     f32 sp34;
-//     f32 sp30;
-//     f32 sp2C;
-//     f32 sp28;
-//     struct140 *temp_v0_2;
-//
-//     func_150A7A00(arg1, arg2, &D_800D9D10 + (arg0 << 6), arg1, arg2, arg3, &sp34, &sp30, &sp2C, &sp28);
-//     sp28 = 1.0f / sp28;
-//     // temp_v1 = arg0 * 0x180;
-//     temp_v0_2 = &D_800BE628[arg0];
-//     // sp28 = temp_f8;
-//     *arg4 = (((temp_v0_2->unkC + 5.0f) * sp34 * sp28) + temp_v0_2->unk34);
-//     temp_v0_2 = &D_800BE628 [arg0];
-//     *arg5 = (temp_v0_2->unk38 - ((temp_v0_2->unk10 + 5.0f) * sp30 * sp28));
-//     temp_v0_2 = &D_800BE628[arg0].unk50[D_800BE9C0];  // (D_800BE9C0 * 0x10);
-//     *arg6 = (((f32) temp_v0_2->unk4C + (sp2C * sp28 * (f32) temp_v0_2->unk44)) * 32.0f);
-// }
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[2];
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 pad1C[8];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    u8 pad3C[4];
-    Vp unk40[2];
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70;
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
-    u8 pad88[0xF8];
-} struct1501A8C0;
 
 extern f32 D_80082FA8[];
 extern s16 D_800BE668[][5][2];
 extern u8 D_800BE630[];
 void func_1501B0A0(s32 arg0, s32 arg1);
 
-void func_1501A8C0(s32 arg0, s32 arg1, s32 arg2, s16 arg3) {
-    f32 sp44;
-    f32 sp40;
-    f32 sp3C;
-    f32 sp38;
-    f32 sp34;
-    f32 temp_f20;
-    f32 temp_f2;
-    f32 temp_f0;
-    f32 temp_f12;
-    f32 temp_f14;
-    f32 t;
-    f32 t2;
-    s16 *tbl;
+/* Lays out view `view` for screen layout `layout` (D_800BE668 holds each view's centre) and sets up its
+ * projection and viewport, with depth range zRange. */
+void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3) {
+    f32 pad[3]; // matching: unused locals that size the -g3 stack frame
+    f32 halfFov;
+    f32 sine;
+    f32 fullWidth;
+    f32 fullAspect;
+    f32 aspect;
+    f32 vpWidth;
+    f32 vpHeight;
+    s16 *center;
 
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk4 = (&D_800BE638)[arg1];
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk8 = ((s32 *)&D_800BE650)[arg1];
-    if (arg1 != 0) {
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk4 -= 2.0f;
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk8 -= 2.0f;
+    RENDER_VIEWS[view].width = VIEW_WIDTHS[layout];
+    RENDER_VIEWS[view].height = D_800BE650[layout];
+    if (layout != 0) {
+        RENDER_VIEWS[view].width -= 2.0f;
+        RENDER_VIEWS[view].height -= 2.0f;
     }
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk64 = D_80082FA8[arg1];
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk68 = 2.0f;
-    if (arg1 == 1) {
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk4 *= D_800BE6B8;
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk6C = 103.0199966f * D_800BE6B8;
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk70 = 50.0f;
+    RENDER_VIEWS[view].unk64 = D_80082FA8[layout];
+    RENDER_VIEWS[view].unk68 = 2.0f;
+    if (layout == 1) {
+        RENDER_VIEWS[view].width *= D_800BE6B8;
+        RENDER_VIEWS[view].fovX = 103.02f * D_800BE6B8;
+        RENDER_VIEWS[view].fovY = 50.0f;
     } else {
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk6C = 60.59999847f;
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk70 = 50.0f;
+        RENDER_VIEWS[view].fovX = 60.6f;
+        RENDER_VIEWS[view].fovY = 50.0f;
     }
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk74 = ((struct1501A8C0 *)D_800BE628)[arg0].unk6C;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk78 = ((struct1501A8C0 *)D_800BE628)[arg0].unk70;
-    tbl = D_800BE668[arg1][arg0];
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk60 = ((struct1501A8C0 *)D_800BE628)[arg0].unk4 / ((struct1501A8C0 *)D_800BE628)[arg0].unk8;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unkC = ((struct1501A8C0 *)D_800BE628)[arg0].unk4 * 0.5f;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk10 = ((struct1501A8C0 *)D_800BE628)[arg0].unk8 * 0.5f;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk34 = tbl[0];
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk38 = tbl[1];
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk2C = ((struct1501A8C0 *)D_800BE628)[arg0].unk34 - ((struct1501A8C0 *)D_800BE628)[arg0].unkC;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk24 = ((struct1501A8C0 *)D_800BE628)[arg0].unk38 - ((struct1501A8C0 *)D_800BE628)[arg0].unk10;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk30 = ((struct1501A8C0 *)D_800BE628)[arg0].unk34 + ((struct1501A8C0 *)D_800BE628)[arg0].unkC;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk28 = ((struct1501A8C0 *)D_800BE628)[arg0].unk38 + ((struct1501A8C0 *)D_800BE628)[arg0].unk10;
+    RENDER_VIEWS[view].frustumFovX = RENDER_VIEWS[view].fovX;
+    RENDER_VIEWS[view].frustumFovY = RENDER_VIEWS[view].fovY;
+    center = D_800BE668[layout][view];
+    RENDER_VIEWS[view].aspect = RENDER_VIEWS[view].width / RENDER_VIEWS[view].height;
+    RENDER_VIEWS[view].halfWidth = RENDER_VIEWS[view].width * 0.5f;
+    RENDER_VIEWS[view].halfHeight = RENDER_VIEWS[view].height * 0.5f;
+    RENDER_VIEWS[view].centerX = center[0];
+    RENDER_VIEWS[view].centerY = center[1];
+    RENDER_VIEWS[view].left = RENDER_VIEWS[view].centerX - RENDER_VIEWS[view].halfWidth;
+    RENDER_VIEWS[view].top = RENDER_VIEWS[view].centerY - RENDER_VIEWS[view].halfHeight;
+    RENDER_VIEWS[view].right = RENDER_VIEWS[view].centerX + RENDER_VIEWS[view].halfWidth;
+    RENDER_VIEWS[view].bottom = RENDER_VIEWS[view].centerY + RENDER_VIEWS[view].halfHeight;
     if (arg3 != 0) {
-        func_1501B0A0(arg0, arg1);
+        func_1501B0A0(view, layout);
     } else {
-        temp_f2 = D_800BE638;
-        temp_f12 = temp_f2 / (f32)((s32 *)&D_800BE650)[0];
-        temp_f14 = ((struct1501A8C0 *)D_800BE628)[arg0].unk4 / ((struct1501A8C0 *)D_800BE628)[arg0].unk8;
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk14 = (((struct1501A8C0 *)D_800BE628)[arg0].unk4 / temp_f2) * (temp_f12 / temp_f14);
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk18 = ((struct1501A8C0 *)D_800BE628)[arg0].unk8 / (f32)((s32 *)&D_800BE650)[0];
+        fullWidth = VIEW_WIDTHS[0];
+        fullAspect = fullWidth / (f32)D_800BE650[0];
+        aspect = RENDER_VIEWS[view].width / RENDER_VIEWS[view].height;
+        RENDER_VIEWS[view].unk14 = (RENDER_VIEWS[view].width / fullWidth) * (fullAspect / aspect);
+        RENDER_VIEWS[view].unk18 = RENDER_VIEWS[view].height / (f32)D_800BE650[0];
     }
-    temp_f20 = ((struct1501A8C0 *)D_800BE628)[arg0].unk6C * 0.5f * 0.01745329238f;
-    sp34 = sinf(temp_f20);
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk7C = sp34 / (cosf(temp_f20) * ((struct1501A8C0 *)D_800BE628)[arg0].unkC);
-    temp_f20 = ((struct1501A8C0 *)D_800BE628)[arg0].unk70 * 0.5f * 0.01745329238f;
-    sp34 = sinf(temp_f20);
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk80 = sp34 / (cosf(temp_f20) * ((struct1501A8C0 *)D_800BE628)[arg0].unk10);
-    t = ((struct1501A8C0 *)D_800BE628)[arg0].unk4 + 10.0f;
-    ((Vp *)D_800BE62C)[arg0].vp.vscale[0] = t + t;
-    t2 = ((struct1501A8C0 *)D_800BE628)[arg0].unk8 + 10.0f;
-    ((Vp *)D_800BE62C)[arg0].vp.vscale[1] = t2 + t2;
-    ((Vp *)D_800BE62C)[arg0].vp.vscale[2] = arg2 >> 1;
-    ((Vp *)D_800BE62C)[arg0].vp.vscale[3] = 0;
-    ((Vp *)D_800BE62C)[arg0].vp.vtrans[0] = ((struct1501A8C0 *)D_800BE628)[arg0].unk34 * 4.0f;
-    ((Vp *)D_800BE62C)[arg0].vp.vtrans[1] = ((struct1501A8C0 *)D_800BE628)[arg0].unk38 * 4.0f;
-    ((Vp *)D_800BE62C)[arg0].vp.vtrans[2] = arg2 >> 1;
-    ((Vp *)D_800BE62C)[arg0].vp.vtrans[3] = 0;
-    do {
-        ((struct1501A8C0 *)D_800BE628)[arg0].unk40[D_800BE9C0] = ((Vp *)D_800BE62C)[arg0];
+    halfFov = RENDER_VIEWS[view].fovX * 0.5f * 0.01745329238f;
+    sine = sinf(halfFov);
+    RENDER_VIEWS[view].pixelTanX = sine / (cosf(halfFov) * RENDER_VIEWS[view].halfWidth);
+    halfFov = RENDER_VIEWS[view].fovY * 0.5f * 0.01745329238f;
+    sine = sinf(halfFov);
+    RENDER_VIEWS[view].pixelTanY = sine / (cosf(halfFov) * RENDER_VIEWS[view].halfHeight);
+    vpWidth = RENDER_VIEWS[view].width + 10.0f;
+    VIEWPORTS[view].vp.vscale[0] = vpWidth + vpWidth;
+    vpHeight = RENDER_VIEWS[view].height + 10.0f;
+    VIEWPORTS[view].vp.vscale[1] = vpHeight + vpHeight;
+    VIEWPORTS[view].vp.vscale[2] = zRange >> 1;
+    VIEWPORTS[view].vp.vscale[3] = 0;
+    VIEWPORTS[view].vp.vtrans[0] = RENDER_VIEWS[view].centerX * 4.0f;
+    VIEWPORTS[view].vp.vtrans[1] = RENDER_VIEWS[view].centerY * 4.0f;
+    VIEWPORTS[view].vp.vtrans[2] = zRange >> 1;
+    VIEWPORTS[view].vp.vtrans[3] = 0;
+    do { // matching: the loop scope changes IDO's register allocation for the copies below
+        RENDER_VIEWS[view].viewports[D_800BE9C0] = VIEWPORTS[view];
     } while (0);
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk40[!D_800BE9C0] = ((struct1501A8C0 *)D_800BE628)[arg0].unk40[D_800BE9C0];
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk84 = 1.0f;
-    ((struct1501A8C0 *)D_800BE628)[arg0].unk1 = func_1501AE94(arg0);
-    func_1501AF44(&((struct1501A8C0 *)(arg0 * 0x180 + D_800BE628))->unk2C, &((struct1501A8C0 *)(arg0 * 0x180 + D_800BE628))->unk24,
-                  &((struct1501A8C0 *)(arg0 * 0x180 + D_800BE628))->unk30, &((struct1501A8C0 *)(arg0 * 0x180 + D_800BE628))->unk28);
-    func_1510B32C(arg0, 0.0f, 0.0f, ((struct1501A8C0 *)D_800BE628)[arg0].unk84);
-    D_800BE630[arg0] = arg0;
+    RENDER_VIEWS[view].viewports[!D_800BE9C0] = RENDER_VIEWS[view].viewports[D_800BE9C0];
+    RENDER_VIEWS[view].unk84 = 1.0f;
+    RENDER_VIEWS[view].onScreen = func_1501AE94(view);
+    // matching: index + base (not RENDER_VIEWS[view]) sets IDO's addu operand order
+    func_1501AF44(&(view + RENDER_VIEWS)->left, &(view + RENDER_VIEWS)->top, &(view + RENDER_VIEWS)->right,
+                  &(view + RENDER_VIEWS)->bottom);
+    func_1510B32C(view, 0.0f, 0.0f, RENDER_VIEWS[view].unk84);
+    D_800BE630[view] = view;
 }
 
 s32 func_1501AE94(s32 arg0) {
@@ -452,9 +422,9 @@ void func_1501AF44(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
 
 void func_1510B128(s32, f32, f32, f32, f32);
 
-void func_1501B0A0(s32 arg0, s32 arg1) {
-    f32 angleX;
-    f32 angleY;
+void func_1501B0A0(s32 view, s32 layout) {
+    f32 halfFovX;
+    f32 halfFovY;
     f32 tanX;
     f32 tanY;
     f32 distX;
@@ -462,83 +432,45 @@ void func_1501B0A0(s32 arg0, s32 arg1) {
     f32 x;
     f32 y;
 
-    angleX = ((struct1501A8C0 *)D_800BE628)[arg0].unk6C * 0.008726646f;
-    angleY = ((struct1501A8C0 *)D_800BE628)[arg0].unk70 * 0.008726646f;
-    tanX = sinf(angleX) / cosf(angleX);
-    tanY = sinf(angleY) / cosf(angleY);
-    distX = (f32)(&D_800BE638)[arg1] / (2.0f * tanX);
-    distY = (f32)D_800BE650[arg1] / (2.0f * tanY);
-    x = func_150484A0(((struct1501A8C0 *)D_800BE628)[arg0].unkC, distX) * 114.59155f - ((struct1501A8C0 *)D_800BE628)[arg1].unk6C;
-    y = func_150484A0(((struct1501A8C0 *)D_800BE628)[arg0].unk10, distY) * 114.59155f - ((struct1501A8C0 *)D_800BE628)[arg1].unk70;
-    func_1510B128(arg0, x, y, 1.0f, 0.0f);
+    halfFovX = RENDER_VIEWS[view].fovX * 0.008726646f;
+    halfFovY = RENDER_VIEWS[view].fovY * 0.008726646f;
+    tanX = sinf(halfFovX) / cosf(halfFovX);
+    tanY = sinf(halfFovY) / cosf(halfFovY);
+    distX = (f32)VIEW_WIDTHS[layout] / (2.0f * tanX);
+    distY = (f32)D_800BE650[layout] / (2.0f * tanY);
+    x = func_150484A0(RENDER_VIEWS[view].halfWidth, distX) * 114.59155f - RENDER_VIEWS[layout].fovX;
+    y = func_150484A0(RENDER_VIEWS[view].halfHeight, distY) * 114.59155f - RENDER_VIEWS[layout].fovY;
+    func_1510B128(view, x, y, 1.0f, 0.0f);
 }
 
-void func_1501B22C(s32 arg0) {
+/* Builds the four side-plane normals of view's frustum from its frustum fov. */
+void func_1501B22C(s32 viewIndex) {
     f32 s;
     f32 n;
     f32 c;
-    f32 hx;
-    struct1501A8C0 *view;
-    f32 hy;
+    f32 halfFovX;
+    RenderView *view;
+    f32 halfFovY;
 
-    view = (struct1501A8C0 *)(D_800BE628 + arg0 * 0x180);
-    hx = view->unk74 * 0.5f;
-    hy = view->unk78 * 0.5f;
-    c = cosf(-hx * 0.017453292f);
-    s = sinf(-hx * 0.017453292f);
+    view = viewIndex + RENDER_VIEWS; // matching: index + base sets IDO's register order
+    halfFovX = view->frustumFovX * 0.5f;
+    halfFovY = view->frustumFovY * 0.5f;
+    c = cosf(-halfFovX * 0.017453292f);
+    s = sinf(-halfFovX * 0.017453292f);
     n = -c;
-    *(f32 *)((u8 *)view + 0x88) = -n;
-    *(f32 *)((u8 *)view + 0x94) = n;
-    *(f32 *)((u8 *)view + 0x9C) = s;
-    *(f32 *)((u8 *)view + 0x90) = s;
-    *(f32 *)((u8 *)view + 0x98) = 0.0f;
-    *(f32 *)((u8 *)view + 0x8C) = 0.0f;
-    c = cosf(hy * 0.017453292f);
-    s = -sinf(hy * 0.017453292f);
+    view->frustumPlanes[0][0] = -n;
+    view->frustumPlanes[1][0] = n;
+    view->frustumPlanes[1][2] = s;
+    view->frustumPlanes[0][2] = s;
+    view->frustumPlanes[1][1] = 0.0f;
+    view->frustumPlanes[0][1] = 0.0f;
+    c = cosf(halfFovY * 0.017453292f);
+    s = -sinf(halfFovY * 0.017453292f);
     n = -c;
-    *(f32 *)((u8 *)view + 0xA0) = 0.0f;
-    *(f32 *)((u8 *)view + 0xA4) = n;
-    *(f32 *)((u8 *)view + 0xA8) = s;
-    *(f32 *)((u8 *)view + 0xAC) = 0.0f;
-    *(f32 *)((u8 *)view + 0xB0) = -n;
-    *(f32 *)((u8 *)view + 0xB4) = s;
+    view->frustumPlanes[2][0] = 0.0f;
+    view->frustumPlanes[2][1] = n;
+    view->frustumPlanes[2][2] = s;
+    view->frustumPlanes[3][0] = 0.0f;
+    view->frustumPlanes[3][1] = -n;
+    view->frustumPlanes[3][2] = s;
 }
-// JUSTREG: I think?
-// void func_1501B22C(s32 arg0) {
-//     f32 tmp0;
-//     f32 tmp1;
-//     f32 tmp2;
-//     f32 tmp3;
-//     f32 tmp4;
-//     f32 tmp5;
-//     f32 tmp6;
-//     f32 tmp7;
-//
-//     struct259 *temp_s0;
-//
-//     temp_s0 = D_800BE628 + (arg0 * 0x180);
-//     tmp0 = temp_s0->unk74 * 0.5f;
-//     tmp7 = -tmp0;
-//     tmp5 = temp_s0->unk78 * 0.5f;
-//     tmp7 *= D_80096900;
-//     tmp3 = cosf(tmp7);
-//     tmp7 = sinf(tmp7);
-//     temp_s0->unk9C = tmp7;
-//     temp_s0->unk90 = tmp7;
-//     tmp3 = -tmp3;
-//     temp_s0->unk88 = -tmp3;
-//     temp_s0->unk94 = tmp3;
-//     temp_s0->unk98 = 0.0f;
-//     temp_s0->unk8C = 0.0f;
-//     tmp6 = tmp5 * D_80096904;
-//     tmp2 = cosf(tmp6);
-//     tmp0 = sinf(tmp6);
-//     tmp4 = -tmp2;
-//     tmp0 = -tmp0;
-//     temp_s0->unkA0 = 0.0f;
-//     temp_s0->unkB0 = -tmp4;
-//     temp_s0->unkA8 = tmp0;
-//     temp_s0->unkB4 = tmp0;
-//     temp_s0->unkAC = 0.0f;
-//     temp_s0->unkA4 = tmp4;
-// }
