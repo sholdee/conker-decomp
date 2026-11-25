@@ -1264,6 +1264,7 @@ extern char D_800AB858[];
 extern char D_800AB85C[];
 extern char D_800AB860[];
 
+/* Computer-player page: up/right and down/left change the number of CPU players D_8008FDA0 (list entries of -2). */
 void func_151E1214(void) {
     s32 alpha;
     s8 *limits;
@@ -1289,8 +1290,9 @@ void func_151E1214(void) {
         D_800E0A95 = alpha;
     }
     func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+    // unk5 is -(preset + 1) here, so D_8008FEE3[-unk5] is the preset's entry of D_8008FEE4[]
     limits = D_800AB74C[D_8008FEE3[-D_800AB68C[D_8008FDD4->selection].unk5]];
-    limit = *(limits - 1 + D_8008FE40);
+    limit = (limits - 1)[D_8008FE40]; // matching: limits[D_8008FE40 - 1] schedules differently
     for (i = 0; i < D_8008FE40; i++) {
         if (D_8008FE44[i] >= 0) {
             if (D_8008FDD4->padInput[D_8008FE44[i]] & (MENU_UP | MENU_RIGHT)) {
@@ -1322,7 +1324,7 @@ void func_151E1214(void) {
         D_8008FE44[i] = -2;
         D_800E0C00[i] = 0;
     }
-    for (i = limit; i < 16; i++) D_8008FE44[i] = -1;
+    for (i = limit; i < 16; i++) D_8008FE44[i] = -1; // matching: on one line; -g3 line numbers steer as1
     if (alpha == 0xFF && (D_8008FDD4->input & MENU_ACCEPT)) {
         D_800E0B94 = 7;
         D_8008FD74 = 8;
@@ -1334,15 +1336,15 @@ void func_151E1214(void) {
         }
     }
     func_15042D94(0x94, 0x55, 1, D_800AB858, 0x1A);
-    x = 0xA1 - D_8008FE40 * 13 - D_8008FDA0 * 10;
+    x = 161 - D_8008FE40 * 13 - D_8008FDA0 * 10;
     for (i = 0; i < limit; i++) {
         func_150432FC(x, 0x82);
         if (D_8008FE44[i] >= 0) {
             func_15042E3C(D_800AB85C, D_8008FE44[i] + 1);
-            x += 0x1A;
+            x += 26;
         } else {
             func_15042E3C(D_800AB860, 5);
-            x += 0x14;
+            x += 20;
         }
     }
     if (alpha == 0xFF && (D_8008FDD4->input & MENU_BACK)) {
