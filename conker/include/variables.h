@@ -170,23 +170,6 @@ extern u8  D_8003A584;
 extern OSTimer D_8003A588; /* audio start timer */
 extern OSScMsg D_8003A5C8; /* pre-NMI message */
 
-/* scheduler state, defined in init_50A0.c */
-extern OSMesgQueue D_8003B1E8;
-extern OSMesgQueue D_8003B200;
-extern OSMesgQueue D_8003B218;
-
-extern OSMesgQueue *D_8003B230;
-extern SchedulerClient *D_8003B234; /* scheduler client list */
-extern u8 D_8003B238;
-extern u8 D_8003B239;
-extern u8 D_8003B23A;
-extern OSScMsg D_8003B240; /* retrace message */
-
-extern OSThread    D_8003B6A0;
-
-extern OSMesgQueue D_8003B9D0;
-extern OSThread    D_8003B9F0;
-
 extern u8   D_8003BC30[][64];
 extern u8   D_8003BD30[][64];
 extern u8   D_8003BE30[32];

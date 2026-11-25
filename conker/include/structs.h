@@ -2850,13 +2850,6 @@ typedef struct RenderView {
     /* 0x100 */ Mtx projectionMtx[2]; // indexed by the framebuffer index D_800BE9C0
 } RenderView; // size 0x180
 
-/* A thread that receives the scheduler's retrace message; func_100051C8 links it into D_8003B234. */
-typedef struct SchedulerClient {
-    /* 0x0 */ struct SchedulerClient *next;
-    /* 0x4 */ OSMesgQueue *msgQ;
-    /* 0x8 */ u32 flags; /* bit 0: don't send retrace messages */
-} SchedulerClient;
-
 /* A vertical cylinder that confines actors (func_15055E50): x/z centre, base y, height h; r is the radius,
    bit 15 set = keep-out cylinder, clear = the actor must stay inside one of the set's cylinders. */
 typedef struct {

@@ -74,13 +74,6 @@ void func_1000440C(void);
 void func_10004470(void);
 void func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
 void func_10004674(void);
-void func_10004F00(void);
-void func_10004FE0(void);
-void func_10005020(void);
-void func_100051C8(SchedulerClient *client, OSMesgQueue *msgQ);
-void func_100051E8(void);
-void func_10005218(void);
-void func_10005298(void);
 void func_100084D8(u8 arg0);
 s32  func_1000853C(u8 arg0);
 void func_10008570(u8 player, OSMesgQueue *queue);
@@ -903,10 +896,6 @@ s32 func_10003C6C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_100043B4(s32 *arg0, u32 arg1);
 //func_100046E4
 void func_1000480C(u32 devAddr, void *dramAddr, u32 size);
-void func_100049E0(void *arg0);
-//func_10004DB0
-void func_100050A0(OSMesgQueue *arg0);
-void func_100052A0(s32 arg0);
 //func_10005570
 //func_100056A0
 //func_100057E0
