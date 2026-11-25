@@ -373,94 +373,52 @@ s32 func_151CD7BC(Emitter *emitter) {
     return 1;
 }
 
-typedef struct Game1FA770Trail {
-    f32 x;
-    f32 y;
-    u8 pad08[0xC];
-    s16 alpha;
-    u8 pad16[0x6];
-} Game1FA770Trail;
-
-s32 func_151CDB94(u8 *actor) {
-    Game1FA770Trail *trail;
-    Game1FA770Trail *start;
-    Game1FA770Trail *cur;
+/* Fades a stream's ends: alpha ramps up over the lowest 19.7% of its height and down over the top 10%. */
+s32 func_151CDB94(Emitter *emitter) {
+    StreamParticle *particles;
+    StreamParticle *oldest;
+    StreamParticle *particle;
     s32 i;
-    f32 range;
-    f32 inv;
-    f32 d;
-    f32 fade;
-    f32 k;
+    f32 height;
+    f32 invHeight;
+    f32 rise;
+    f32 fadeOutScale;
+    f32 fadeInScale;
 
-    trail = *(Game1FA770Trail **)(actor + 0x94);
-    if (*(s8 *)(actor + 0x2C) <= 0) {
+    particles = emitter->particles;
+    if (emitter->count <= 0) {
         return 1;
     }
-    i = *(s8 *)(actor + 0x2E) - 1;
+    i = emitter->head - 1;
     if (i < 0) {
-        i = actor[0x25] - 1;
+        i = emitter->capacity - 1;
     }
-    start = &trail[*(s8 *)(actor + 0x2D)];
-    cur = &trail[i];
-    range = fabsf(cur->y - start->y);
-    if (range == 0.0f) {
+    oldest = &particles[emitter->tail];
+    particle = &particles[i];
+    height = fabsf(particle->pos.y - oldest->pos.y);
+    if (height == 0.0f) {
         return 1;
     }
-    inv = 1.0f / range;
-    fade = inv * 10.0f;
-    i = *(s8 *)(actor + 0x2D);
+    invHeight = 1.0f / height;
+    fadeOutScale = invHeight * 10.0f;
+    i = emitter->tail;
     do {
-        cur = &trail[i];
-        d = cur->y - start->y;
-        cur->alpha = 0xFF;
-        if (d < range * 0.1970000118f) {
-            k = inv * 5.076141834f;
-            cur->alpha = (u8)(d * k * 255.0f);
-        } else if (range - range * 0.1000000015f < d) {
-            cur->alpha = (u8)((range - d) * fade * 255.0f);
+        particle = &particles[i];
+        rise = particle->pos.y - oldest->pos.y;
+        particle->alpha = 0xFF;
+        if (rise < height * 0.1970000118f) {
+            fadeInScale = invHeight * 5.076141834f; /* 1 / 0.197 */
+            particle->alpha = (u8)(rise * fadeInScale * 255.0f);
+        } else if (height - height * 0.1f < rise) {
+            particle->alpha = (u8)((height - rise) * fadeOutScale * 255.0f);
         }
         i++;
-        if (i >= actor[0x25]) {
+        if (i >= emitter->capacity) {
             i = 0;
         }
-    } while (i != *(s8 *)(actor + 0x2E));
+    } while (i != emitter->head);
     return 1;
 }
-
-typedef struct {
-    f32 x, y, z;
-} Vec3_151CDE20;
-
-typedef struct {
-    Vec3_151CDE20 pos;
-    f32 unkC;
-    f32 width;
-    s16 alpha;
-    s16 pad16;
-    f32 tc;
-} Seg151CDE20;
-
-typedef struct {
-    char pad0[0x4C];
-    u8 unk4C;
-} Sub151CDE20;
-
-typedef struct {
-    char pad0[0x10];
-    Vec3_151CDE20 pos;
-    char pad1C[2];
-    u16 flags;
-    char pad20[5];
-    u8 count;
-    char pad26[6];
-    s8 unk2C;
-    s8 last;
-    s8 first;
-    char pad2F[0x84 - 0x2F];
-    char buffers[0x10];
-    Seg151CDE20 *segs;
-    Sub151CDE20 *sub;
-} Obj151CDE20;
 
 extern s32 D_800AAEE0[];
 extern u8 D_80090B60[][12];
@@ -470,117 +428,124 @@ extern struct {
     s32 unk4;
 } D_800A4AC8[];
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-void func_151D5D60(void *, s16, s32, void **, u8 *);
+Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *update,
+                   s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 otherModeH, s32 otherModeL, u8 *update);
+Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *update);
+void func_151D5D60(void *buffers, s16 index, s32 size, void **out, u8 *fresh);
 
-Gfx *func_151CDE20(Obj151CDE20 *arg0, Gfx *gfx, s16 arg2) {
+/* Draws a stream as a camera-facing ribbon: one quad per pair of neighbouring particles, newest to oldest. */
+Gfx *func_151CDE20(Emitter *emitter, Gfx *gfx, s16 view) {
     Vtx *vtx;
-    Seg151CDE20 *segs;
-    Sub151CDE20 *sub;
+    StreamParticle *particles;
+    StreamData *data;
     u8 update;
-    s32 i;
-    s32 k;
-    Vec3_151CDE20 b;
-    Vec3_151CDE20 a;
-    f32 dx;
-    f32 dz;
+    s32 next;
+    s32 cur;
+    Vec3f nextPos;
+    Vec3f curPos;
+    f32 offsetZ;
+    f32 offsetX;
 
-    if (arg0->unk2C >= 2) {
-        func_151D5D60(arg0->buffers, arg2, (arg0->count * 2 + 10) * sizeof(Vtx), (void **)&vtx, 0);
+    if (emitter->count >= 2) {
+        func_151D5D60(emitter->buffers, view, (emitter->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
-            sub = arg0->sub;
-            segs = arg0->segs;
+            data = emitter->data;
+            particles = emitter->particles;
             update = 1;
-            gfx = func_15142E24(gfx, (s32)D_80090B60[D_800AAEE0[sub->unk4C]], 0, 0, 0, 0, D_800AAEE0[sub->unk4C], 0, 0, &update, 3);
+            gfx = func_15142E24(gfx, (s32)D_80090B60[D_800AAEE0[data->unk4C]], 0, 0, 0, 0, D_800AAEE0[data->unk4C], 0,
+                                0, &update, 3);
             gfx = func_1513F4E4(gfx, 0x4E, &update);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-            gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
-            if (arg0->flags & 2) {
-                i = arg0->first - 1;
-                if (i < 0) i = arg0->count - 1;
-                a = arg0->pos;
-                k = i;
+            gfx = func_15142FBC(gfx,
+                                D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+                                D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
+            /* While emitting, the ribbon starts at the emitter itself. */
+            if (emitter->flags & EMITTER_FLAG_EMITTING) {
+                next = emitter->head - 1;
+                if (next < 0) next = emitter->capacity - 1; // matching: one line, so -g3 line numbers keep as1's order
+                curPos = emitter->pos;
+                cur = next;
             } else {
-                k = arg0->first - 1;
-                if (k < 0) {
-                    k = arg0->count - 1;
+                cur = emitter->head - 1;
+                if (cur < 0) {
+                    cur = emitter->capacity - 1;
                 }
-                i = k - 1;
-                if (i < 0) {
-                    i = arg0->count - 1;
+                next = cur - 1;
+                if (next < 0) {
+                    next = emitter->capacity - 1;
                 }
-                a = segs[k].pos;
+                curPos = particles[cur].pos;
             }
-            b = segs[i].pos;
-            dx = D_800DD1D8[arg2] * segs[k].width;
-            dz = D_800DD1E8[arg2] * segs[k].width;
-            vtx->v.ob[0] = a.x + dz;
-            vtx->v.ob[1] = a.y;
-            vtx->v.ob[2] = a.z - dx;
+            nextPos = particles[next].pos;
+            offsetZ = D_800DD1D8[view] * particles[cur].width;
+            offsetX = D_800DD1E8[view] * particles[cur].width;
+            vtx->v.ob[0] = curPos.x + offsetX;
+            vtx->v.ob[1] = curPos.y;
+            vtx->v.ob[2] = curPos.z - offsetZ;
             vtx->v.tc[0] = 0;
-            vtx->v.tc[1] = segs[k].tc;
+            vtx->v.tc[1] = particles[cur].tc;
             vtx->v.cn[0] = 0xFF;
             vtx->v.cn[1] = 0xFF;
             vtx->v.cn[2] = 0xFF;
-            vtx->v.cn[3] = segs[k].alpha;
+            vtx->v.cn[3] = particles[cur].alpha;
             vtx->v.flag = 0;
             vtx++;
-            vtx->v.ob[0] = a.x - dz;
-            vtx->v.ob[1] = a.y;
-            vtx->v.ob[2] = a.z + dx;
+            vtx->v.ob[0] = curPos.x - offsetX;
+            vtx->v.ob[1] = curPos.y;
+            vtx->v.ob[2] = curPos.z + offsetZ;
             vtx->v.tc[0] = 0x7FF;
-            vtx->v.tc[1] = segs[k].tc;
+            vtx->v.tc[1] = particles[cur].tc;
             vtx->v.cn[0] = 0xFF;
             vtx->v.cn[1] = 0xFF;
             vtx->v.cn[2] = 0xFF;
-            vtx->v.cn[3] = segs[k].alpha;
+            vtx->v.cn[3] = particles[cur].alpha;
             vtx->v.flag = 0;
             vtx++;
             do {
-                dx = D_800DD1D8[arg2] * segs[i].width;
-                dz = D_800DD1E8[arg2] * segs[i].width;
-                vtx->v.ob[0] = b.x + dz;
-                vtx->v.ob[1] = b.y;
-                vtx->v.ob[2] = b.z - dx;
+                offsetZ = D_800DD1D8[view] * particles[next].width;
+                offsetX = D_800DD1E8[view] * particles[next].width;
+                vtx->v.ob[0] = nextPos.x + offsetX;
+                vtx->v.ob[1] = nextPos.y;
+                vtx->v.ob[2] = nextPos.z - offsetZ;
                 vtx->v.tc[0] = 0;
-                vtx->v.tc[1] = segs[i].tc;
+                vtx->v.tc[1] = particles[next].tc;
                 vtx->v.cn[0] = 0xFF;
                 vtx->v.cn[1] = 0xFF;
                 vtx->v.cn[2] = 0xFF;
-                vtx->v.cn[3] = segs[i].alpha;
+                vtx->v.cn[3] = particles[next].alpha;
                 vtx->v.flag = 0;
                 vtx++;
-                vtx->v.ob[0] = b.x - dz;
-                vtx->v.ob[1] = b.y;
-                vtx->v.ob[2] = b.z + dx;
+                vtx->v.ob[0] = nextPos.x - offsetX;
+                vtx->v.ob[1] = nextPos.y;
+                vtx->v.ob[2] = nextPos.z + offsetZ;
                 vtx->v.tc[0] = 0x7FF;
-                vtx->v.tc[1] = segs[i].tc;
+                vtx->v.tc[1] = particles[next].tc;
                 vtx->v.cn[0] = 0xFF;
                 vtx->v.cn[1] = 0xFF;
                 vtx->v.cn[2] = 0xFF;
-                vtx->v.cn[3] = segs[i].alpha;
+                vtx->v.cn[3] = particles[next].alpha;
                 vtx->v.flag = 0;
                 vtx++;
                 gSPVertex(gfx++, vtx - 4, 4, 0);
                 gSP1Triangle(gfx++, 0, 1, 2, 0);
                 gSP1Triangle(gfx++, 1, 3, 2, 0);
-                if (segs[k].tc < segs[i].tc) {
-                    memcpy(vtx, vtx - 2, 0x20);
+                /* The texture coordinate wrapped: restart the strip from a copy shifted back by one period. */
+                if (particles[cur].tc < particles[next].tc) {
+                    memcpy(vtx, vtx - 2, 2 * sizeof(Vtx));
                     vtx[-2].v.tc[1] -= 0x4000;
                     vtx++;
                     vtx[-2].v.tc[1] -= 0x4000;
                     vtx++;
                 }
-                k = i;
-                i--;
-                if (i < 0) {
-                    i = arg0->count - 1;
+                cur = next;
+                next--;
+                if (next < 0) {
+                    next = emitter->capacity - 1;
                 }
-                a = segs[k].pos;
-                b = segs[i].pos;
-            } while (k != arg0->last);
+                curPos = particles[cur].pos;
+                nextPos = particles[next].pos;
+            } while (cur != emitter->tail);
         }
     }
     return gfx;
