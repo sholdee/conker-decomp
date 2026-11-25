@@ -2,30 +2,83 @@
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * A trail effect attached to a character (struct127): a ring buffer of points that is drawn as a
+ * ribbon, two particle emitters that follow the owner and three looping sounds driven by its state.
+ */
 
+/* variables.h declares D_800BE728 as s32[]; it holds a pointer to the per-controller OSContPad pointers. */
+#define CONT_PADS (*(OSContPad ***)&D_800BE728)
+
+/* Spawn header passed to func_15147A80; the actor keeps a copy of it at 0x10. */
 typedef struct {
     struct17 pos;
     s16 unkC;
-    u16 unkE;
+    u16 flags;      // 4: pos was found on the owner's model
     s32 unk10;
     u8 unk14;
-    u8 unk15;
+    u8 maxPoints;   // ring buffer size
     u8 pad16[2];
     s32 unk18;
-} Hdr150D3360;
+} TrailSpawn; // size 0x1C
+
+/* Written by func_15147A80's caller into a particle object at 0x170, read by func_150D4CC4. */
+typedef struct {
+    s16 timer;
+    f32 targetScale;
+} ParticleTail;
+
+/* A particle object returned by func_151407D0. */
+typedef struct {
+    u8 pad0[0x18];
+    u8 kind;
+    u8 pad19[0x34 - 0x19];
+    struct17 pos;
+    struct17 dir;
+    u8 pad4C[0xC];
+    s32 flags;
+    u8 pad5C[0x158 - 0x5C];
+    f32 scale;
+    u8 pad15C[0x170 - 0x15C];
+    ParticleTail tail;
+} Particle;
+
+/* Per-trail state, at TrailActor.state; also the sound callbacks' user data. */
+typedef struct {
+    struct127 *owner;
+    u8 ownerId;         // owner->unique_id, to notice the owner slot being reused
+    u8 mode;            // 0, 1 or 2 (from owner speed or stick tilt); selects sounds and sizes
+    u8 pad6[2];
+    struct126 *unk8;    // func_1503195C(owner, 0x79 / 0x7A)
+    Particle *effects[2];
+    f32 unk14;          // eased toward unk18 each frame
+    f32 unk18;
+} TrailState; // size 0x1C
 
 typedef struct {
-    struct127 *unk0;
-    u8 unk4;
-    u8 unk5;
-    u8 pad6[2];
-    struct126 *unk8;
-    s32 unkC;
-    s32 unk10;
-    f32 unk14;
-    f32 unk18;
-} Data150D3360;
+    struct17 pos;
+    f32 len;            // distance from the previous point
+    f32 width;
+} TrailPoint;
 
+/* The actor returned by func_15147A80. */
+typedef struct {
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[3];
+    TrailSpawn spawn;
+    s8 numPoints;       // points in the ring buffer
+    s8 tail;            // oldest point
+    s8 head;            // next point to write
+    u8 pad2F[0x84 - 0x2F];
+    Vtx *vtxBufs[4];
+    TrailPoint *points;
+    TrailState *state;
+} TrailActor;
+
+/* First argument of func_151407D0. */
 typedef struct {
     f32 unk0, unk4, unk8, unkC, unk10, unk14, unk18, unk1C, unk20;
     s32 unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44;
@@ -33,23 +86,24 @@ typedef struct {
     s16 unk4C, unk4E, unk50, unk52;
     u8 unk54, unk55, unk56, unk57, unk58;
     s8 unk59;
-} Emit150D3360;
+} ParticleParams;
 
+/* Third argument of func_151407D0. */
 typedef struct {
-    u8 unk0;
+    u8 kind;
     u8 unk1;
     s16 unk2;
     s16 unk4;
     u8 pad6[2];
     s32 unk8;
     s32 unkC;
-    u8 unk10, unk11, unk12, unk13;
+    u8 color[4];
     f32 unk14;
     f32 unk18;
-    struct17 unk1C;
-    struct17 unk28;
-    f32 unk34, unk38, unk3C;
-    s32 unk40;
+    struct17 pos;
+    struct17 dir;
+    f32 scale[3];
+    s32 flags;
     u8 unk44, unk45, unk46, unk47;
     s32 unk48;
     u8 unk4C;
@@ -57,185 +111,179 @@ typedef struct {
     s32 unk50;
     s16 unk54;
     s16 unk56;
-} Spawn150D3360;
-
-typedef struct {
-    s16 unk0;
-    f32 unk4;
-} Tail150D3360;
-
-typedef struct {
-    struct127 *unk0;
-    s32 unk4[6];
-} Ret150D3360;
+} ParticleDesc;
 
 extern s32 D_800A09C0[];
-s32 func_150D4AE0(struct17 *arg0, struct17 *arg1, struct127 *arg2, struct126 *arg3);
+s32 func_150D4AE0(struct17 *pos, struct17 *dir, struct127 *owner, struct126 *arg3);
 s32 func_150D5124();
-void *func_151407D0(void *, s32, void *, u8, u8, u8, u8, s8, u8, s32);
-void *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+Particle *func_151407D0(ParticleParams *, s32, ParticleDesc *, u8, u8, u8, u8, s8, u8, s32);
+TrailActor *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
-void func_150D3360(struct127 *arg0, u8 arg1, s32 arg2) {
-    Hdr150D3360 hdr;
-    Data150D3360 data;
+/* Spawns a trail on `owner` with its sounds and two particle emitters. */
+void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
+    TrailSpawn spawn;
+    TrailState init;
     struct126 *s126;
     struct17 dir;
-    Data150D3360 *s0;
+    TrailState *state;
 
-    hdr.unk15 = 0x19;
-    hdr.unkC = 0x12C;
-    hdr.unkE = 0x12;
-    hdr.unk10 = 0xF;
-    hdr.unk14 = 1;
-    data.unk18 = 20.0f;
-    data.unk14 = 20.0f;
-    data.unk5 = 1;
-    data.unkC = 0;
-    data.unk10 = 0;
-    data.unk0 = arg0;
-    data.unk4 = arg0->unique_id;
-    s126 = func_1503195C(arg0, (arg0->id == 0x48) ? 0x7A : 0x79, 0);
+    spawn.maxPoints = 25;
+    spawn.unkC = 300;
+    spawn.flags = 0x12;
+    spawn.unk10 = 15;
+    spawn.unk14 = 1;
+    init.unk18 = 20.0f;
+    init.unk14 = 20.0f;
+    init.mode = 1;
+    init.effects[0] = NULL;
+    init.effects[1] = NULL;
+    init.owner = owner;
+    init.ownerId = owner->unique_id;
+    s126 = func_1503195C(owner, (owner->id == 0x48) ? 0x7A : 0x79, 0);
     if (s126 != NULL) {
-        if (func_150D4AE0(&hdr.pos, &dir, arg0, data.unk8 = s126) != 0) {
-            hdr.unkE |= 4;
+        // matching: the store to init.unk8 must be scheduled inside the call's argument setup
+        if (func_150D4AE0(&spawn.pos, &dir, owner, (init.unk8 = s126)) != 0) {
+            spawn.flags |= 4;
         } else {
-            hdr.pos.unk0 = 0.0f;
-            hdr.pos.unk4 = 0.0f;
-            hdr.pos.unk8 = 0.0f;
+            spawn.pos.unk0 = 0.0f;
+            spawn.pos.unk4 = 0.0f;
+            spawn.pos.unk8 = 0.0f;
             dir.unk0 = 0.0f;
             dir.unk8 = 0.0f;
             dir.unk4 = 500.0f;
         }
-        s0 = func_15147A80(&hdr, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
-        if (s0 != NULL) {
-            s0 = *(Data150D3360 **)((u8 *)s0 + 0x98);
-            memcpy(s0, &data, 0x1C);
+        // matching: one local holds the actor and then its state (a separate actor local adds a stack slot)
+        state = (TrailState *)func_15147A80(&spawn, 0x20, 0x14, 0, 0xD, 0xD, 0, 0, 0, arg1, arg2);
+        if (state != NULL) {
+            state = ((TrailActor *)state)->state;
+            memcpy(state, &init, sizeof(TrailState));
             if (D_8008FD8C < 5) {
-                func_1000FA64(0x5B3, s0->unk0->x_position, s0->unk0->y_position, s0->unk0->z_position, 0x3E8, 0x3E8, 0xC8, (s32)func_150D5124, s0, 0x5B3, 0xC, 0);
+                func_1000FA64(0x5B3, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5B3, 12, 0);
             }
-            func_1000FA64(0x5B4, s0->unk0->x_position, s0->unk0->y_position, s0->unk0->z_position, 0x3E8, 0x3E8, 0xC8, (s32)func_150D5124, s0, 0x5B4, 0xC, 0);
-            if (D_8008FD8C < 7 || arg0->camera != NULL) {
-                func_1000FA64(0x5BC, s0->unk0->x_position, s0->unk0->y_position, s0->unk0->z_position, 0x3E8, 0x3E8, 0xC8, (s32)func_150D5124, s0, 0x5BC, 0xC, 0);
-            }
-            {
-                Emit150D3360 emit;
-                Spawn150D3360 spawn;
-
-                emit.unk0 = 200.0f;
-                emit.unk4 = 40.0f;
-                emit.unk8 = 40.0f;
-                emit.unkC = 40.0f;
-                emit.unk10 = 0.05000000075f;
-                emit.unk14 = 0.05000000075f;
-                emit.unk18 = 0.4499999881f;
-                emit.unk1C = 0.3000000119f;
-                emit.unk20 = 9.999999975e-07f;
-                emit.unk24 = -1;
-                emit.unk34 = -1;
-                emit.unk28 = -1;
-                emit.unk38 = -1;
-                emit.unk2C = -1;
-                emit.unk3C = -1;
-                emit.unk30 = -1;
-                emit.unk40 = -1;
-                emit.unk44 = 0;
-                emit.unk48 = 1.0f;
-                emit.unk4C = 0;
-                emit.unk4E = 0;
-                emit.unk50 = 0;
-                emit.unk52 = 0;
-                emit.unk54 = 0;
-                emit.unk55 = 0;
-                emit.unk56 = 0;
-                emit.unk57 = 0;
-                emit.unk58 = 0;
-                emit.unk59 = -1;
-                spawn.unk0 = 0x15;
-                spawn.unk1 = 3;
-                spawn.unk2 = 0x5503;
-                spawn.unk4 = 0x12C;
-                spawn.unk8 = 0;
-                spawn.unkC = 0;
-                spawn.unk10 = 0xFF;
-                spawn.unk11 = 0xFF;
-                spawn.unk12 = 0xFF;
-                spawn.unk13 = 0xFF;
-                spawn.unk14 = 100.0f;
-                spawn.unk18 = 100.0f;
-                spawn.unk1C = hdr.pos;
-                spawn.unk28 = dir;
-                spawn.unk34 = 1.0f;
-                spawn.unk38 = 1.0f;
-                spawn.unk3C = 1.0f;
-                spawn.unk40 = 0xCD2006;
-                spawn.unk44 = 0xFF;
-                spawn.unk45 = 0xFF;
-                spawn.unk46 = 0;
-                spawn.unk47 = 6;
-                spawn.unk48 = 0;
-                spawn.unk4C = 0xFF;
-                s0->unkC = (s32)func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, arg1, arg2);
+            func_1000FA64(0x5B4, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5B4, 12, 0);
+            if (D_8008FD8C < 7 || owner->camera != NULL) {
+                func_1000FA64(0x5BC, state->owner->x_position, state->owner->y_position, state->owner->z_position, 1000, 1000, 200, (s32)func_150D5124, state, 0x5BC, 12, 0);
             }
             {
-                Emit150D3360 emit;
-                Spawn150D3360 spawn;
-                Tail150D3360 tail;
+                ParticleParams params;
+                ParticleDesc desc;
 
-                tail.unk0 = 0;
-                tail.unk4 = 1.0f;
-                emit.unk0 = emit.unk4 = 45.0f;
-                emit.unk8 = emit.unkC = 25.5f;
-                emit.unk14 = emit.unk10 = 0.1000000015f;
-                emit.unk18 = 1.0f;
-                emit.unk24 = -1;
-                emit.unk34 = -1;
-                emit.unk28 = -1;
-                emit.unk38 = -1;
-                emit.unk2C = -1;
-                emit.unk3C = -1;
-                emit.unk30 = -1;
-                emit.unk40 = -1;
-                emit.unk44 = 0;
-                emit.unk48 = 1.0f;
-                emit.unk4C = 0;
-                emit.unk4E = 0;
-                emit.unk50 = 0;
-                emit.unk52 = 0;
-                emit.unk54 = 0;
-                emit.unk55 = 0;
-                emit.unk56 = 0;
-                emit.unk57 = 0;
-                emit.unk58 = 0;
-                emit.unk59 = -1;
-                emit.unk1C = 0.8000000119f;
-                emit.unk20 = 9.999999975e-07f;
-                spawn.unk0 = *(D_800A09C0 + (func_150ADA20() & 3));
-                spawn.unk1 = 3;
-                spawn.unk2 = 0x2203;
-                spawn.unk4 = 0x12C;
-                spawn.unk8 = 0;
-                spawn.unkC = 0;
-                spawn.unk10 = 0xFF;
-                spawn.unk11 = 0xFF;
-                spawn.unk12 = 0xFF;
-                spawn.unk13 = 0xFF;
-                spawn.unk14 = 100.0f;
-                spawn.unk18 = 100.0f;
-                spawn.unk1C = hdr.pos;
-                spawn.unk28 = dir;
-                spawn.unk40 = 0xCD2006;
-                spawn.unk44 = 0xFF;
-                spawn.unk45 = 0xFF;
-                spawn.unk46 = 0;
-                spawn.unk47 = 7;
-                spawn.unk48 = 0;
-                spawn.unk4C = 0xFF;
-                spawn.unk34 = 1.0f;
-                spawn.unk38 = 1.0f;
-                spawn.unk3C = 1.0f;
-                s0->unk10 = (s32)func_151407D0(&emit, 0x68, &spawn, 0, 0x27, 0, 0, -1, arg1, arg2);
-                if (s0->unk10 != 0) {
-                    memcpy((u8 *)s0->unk10 + 0x170, &tail, 8);
+                params.unk0 = 200.0f;
+                params.unk4 = 40.0f;
+                params.unk8 = 40.0f;
+                params.unkC = 40.0f;
+                params.unk10 = 0.05000000075f;
+                params.unk14 = 0.05000000075f;
+                params.unk18 = 0.4499999881f;
+                params.unk1C = 0.3000000119f;
+                params.unk20 = 9.999999975e-07f;
+                params.unk24 = -1;
+                params.unk34 = -1;
+                params.unk28 = -1;
+                params.unk38 = -1;
+                params.unk2C = -1;
+                params.unk3C = -1;
+                params.unk30 = -1;
+                params.unk40 = -1;
+                params.unk44 = 0;
+                params.unk48 = 1.0f;
+                params.unk4C = 0;
+                params.unk4E = 0;
+                params.unk50 = 0;
+                params.unk52 = 0;
+                params.unk54 = 0;
+                params.unk55 = 0;
+                params.unk56 = 0;
+                params.unk57 = 0;
+                params.unk58 = 0;
+                params.unk59 = -1;
+                desc.kind = 0x15;
+                desc.unk1 = 3;
+                desc.unk2 = 0x5503;
+                desc.unk4 = 300;
+                desc.unk8 = 0;
+                desc.unkC = 0;
+                desc.color[0] = 0xFF;
+                desc.color[1] = 0xFF;
+                desc.color[2] = 0xFF;
+                desc.color[3] = 0xFF;
+                desc.unk14 = 100.0f;
+                desc.unk18 = 100.0f;
+                desc.pos = spawn.pos;
+                desc.dir = dir;
+                desc.scale[0] = 1.0f;
+                desc.scale[1] = 1.0f;
+                desc.scale[2] = 1.0f;
+                desc.flags = 0xCD2006;
+                desc.unk44 = 0xFF;
+                desc.unk45 = 0xFF;
+                desc.unk46 = 0;
+                desc.unk47 = 6;
+                desc.unk48 = 0;
+                desc.unk4C = 0xFF;
+                state->effects[0] = func_151407D0(&params, 0x60, &desc, 0, 0, 0, 0, -1, arg1, arg2);
+            }
+            {
+                ParticleParams params;
+                ParticleDesc desc;
+                ParticleTail tail;
+
+                tail.timer = 0;
+                tail.targetScale = 1.0f;
+                params.unk0 = params.unk4 = 45.0f;
+                params.unk8 = params.unkC = 25.5f;
+                params.unk14 = params.unk10 = 0.1000000015f;
+                params.unk18 = 1.0f;
+                params.unk24 = -1;
+                params.unk34 = -1;
+                params.unk28 = -1;
+                params.unk38 = -1;
+                params.unk2C = -1;
+                params.unk3C = -1;
+                params.unk30 = -1;
+                params.unk40 = -1;
+                params.unk44 = 0;
+                params.unk48 = 1.0f;
+                params.unk4C = 0;
+                params.unk4E = 0;
+                params.unk50 = 0;
+                params.unk52 = 0;
+                params.unk54 = 0;
+                params.unk55 = 0;
+                params.unk56 = 0;
+                params.unk57 = 0;
+                params.unk58 = 0;
+                params.unk59 = -1;
+                params.unk1C = 0.8000000119f;
+                params.unk20 = 9.999999975e-07f;
+                // matching: indexing D_800A09C0[...] costs IDO an extra 8-byte stack slot
+                desc.kind = *(D_800A09C0 + (func_150ADA20() & 3));
+                desc.unk1 = 3;
+                desc.unk2 = 0x2203;
+                desc.unk4 = 300;
+                desc.unk8 = 0;
+                desc.unkC = 0;
+                desc.color[0] = 0xFF;
+                desc.color[1] = 0xFF;
+                desc.color[2] = 0xFF;
+                desc.color[3] = 0xFF;
+                desc.unk14 = 100.0f;
+                desc.unk18 = 100.0f;
+                desc.pos = spawn.pos;
+                desc.dir = dir;
+                desc.flags = 0xCD2006;
+                desc.unk44 = 0xFF;
+                desc.unk45 = 0xFF;
+                desc.unk46 = 0;
+                desc.unk47 = 7;
+                desc.unk48 = 0;
+                desc.unk4C = 0xFF;
+                desc.scale[0] = 1.0f;
+                desc.scale[1] = 1.0f;
+                desc.scale[2] = 1.0f;
+                state->effects[1] = func_151407D0(&params, 0x68, &desc, 0, 0x27, 0, 0, -1, arg1, arg2);
+                if (state->effects[1] != NULL) {
+                    memcpy(&state->effects[1]->tail, &tail, sizeof(ParticleTail));
                 }
             }
         }
