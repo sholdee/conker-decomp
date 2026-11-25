@@ -531,50 +531,54 @@ void func_151BA518(struct127 *obj, u8 arg1, s32 arg2) {
 }
 
 
-void func_151BB044(struct127 *arg0) {
-    func_1000FA64(0x4A7, (s16)(s32)arg0->x_position,
-                  (s16)(s32)arg0->y_position,
-                  (s16)(s32)arg0->z_position, 0x2000, 0x320, 0xC8,
-                  (s32)func_151BB0E0, arg0, 0, 8, 0);
+/* Starts sound 0x4A7 at `obj`; func_151BB0E0 keeps it updated. */
+void func_151BB044(struct127 *obj) {
+    func_1000FA64(0x4A7, obj->x_position, obj->y_position, obj->z_position, 0x2000, 0x320, 0xC8,
+                  (s32)func_151BB0E0, obj, 0, 8, 0);
 }
 s32 func_1000F568(s32, s32);
 
+/* A playing positional sound, as seen by its update callback. */
 typedef struct {
     /* 0x00 */ u16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ s16 z;
     /* 0x08 */ u8 pad8[0x10 - 0x8];
-    /* 0x10 */ s32 unk10;
+    /* 0x10 */ s32 flags;
     /* 0x14 */ u8 pad14[0x18 - 0x14];
-    /* 0x18 */ struct127 *unk18;
-    /* 0x1C */ u32 unk1C;
+    /* 0x18 */ struct127 *obj;
+    /* 0x1C */ u32 userData; /* bits 0-6 state, 7 fading in, 8-15 fade volume, 16-27 timer */
     /* 0x20 */ u8 pad20[0x24 - 0x20];
     /* 0x24 */ u16 unk24;
-} Snd151BB0E0;
+} SoundChannel;
 
-s32 func_151BB0E0(Snd151BB0E0 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 *arg4,
-                  s32 arg5, u16 *arg6) {
+/*
+ * Update callback of the sounds started by func_151BB044: follows the object, switches between the
+ * 0x4A7/0x4A8/0x4A9 sounds by how it moves, and fades the volume. Returns 1 when the sound should stop.
+ */
+s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *speedOut,
+                  s32 arg5, u16 *soundId) {
     struct127 *obj;
     s32 state;
-    s32 prev;
+    s32 prevState;
     s32 sound;
     s32 param;
-    s32 vol;
+    s32 fade;
     s32 timer;
-    s32 flag;
+    s32 fadingIn;
 
-    obj = arg0->unk18;
+    obj = chan->obj;
     if ((obj != NULL) && (obj->health != 0)) {
         state = 0;
         sound = 0;
-        prev = arg0->unk1C & 0x7F;
-        vol = (arg0->unk1C >> 8) & 0xFF;
-        timer = (arg0->unk1C >> 16) & 0xFFF;
-        flag = (arg0->unk1C >> 7) & 1;
-        arg0->unk2 = obj->x_position;
-        arg0->unk4 = obj->y_position;
-        arg0->unk6 = obj->z_position;
+        prevState = chan->userData & 0x7F;
+        fade = (chan->userData >> 8) & 0xFF;
+        timer = (chan->userData >> 16) & 0xFFF;
+        fadingIn = (chan->userData >> 7) & 1;
+        chan->x = obj->x_position;
+        chan->y = obj->y_position;
+        chan->z = obj->z_position;
         if (((obj->xz_velocity > 1.0f) && (obj->unk44 > 0.0f)) ||
             ((obj->xz_velocity < -1.0f) && (obj->unk44 < 0.0f))) {
             state = 1;
@@ -582,25 +586,25 @@ s32 func_151BB0E0(Snd151BB0E0 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 *arg4,
                    ((obj->xz_velocity < -5.0f) && (obj->unk44 >= 0.0f))) {
             state = 2;
         }
-        /* Emits no code. The four extra reads of state raise its uopt register
-           priority above sound's, which puts state in v1 and sound in t0. */
+        // matching: emits no code; the extra reads of state raise its uopt register priority
+        // above sound's, which puts state in v1 and sound in t0
         if (state + state + state + state) {}
-        if ((state ^ prev) & 0x7F) {
-            if ((((state ^ prev) & 0x7F) & 2) && (state & 2)) {
+        if ((state ^ prevState) & 0x7F) {
+            if ((((state ^ prevState) & 0x7F) & 2) && (state & 2)) {
                 sound = 0x4A5;
             } else {
                 sound = func_1000F568(0x4A3, 4);
             }
             if (!func_10010894(obj)) {
-                func_10010154(sound, obj, 0x6D60, 0x12C, 0x708);
+                func_10010154(sound, obj, 0x6D60, 300, 1800);
             }
             sound = 0;
         }
-        if ((state != 0) && (*arg6 == 0x4A7)) {
+        if ((state != 0) && (*soundId == 0x4A7)) {
             sound = 0x4A8;
             param = 0x2EE0;
-        } else if ((state == 0) && ((*arg6 == 0x4A9) || (*arg6 == 0x4A8))) {
-            if (*arg6 == 0x4A9) {
+        } else if ((state == 0) && ((*soundId == 0x4A9) || (*soundId == 0x4A8))) {
+            if (*soundId == 0x4A9) {
                 return 1;
             }
             sound = 0x4A7;
@@ -609,21 +613,21 @@ s32 func_151BB0E0(Snd151BB0E0 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 *arg4,
         if (sound != 0) {
             func_1000FA64(sound, obj->x_position, obj->y_position, obj->z_position, param, 0x320, 0xC8,
                           (s32)func_151BB0E0, obj, state | 0x12CFF00, 8, 0);
-            goto end;
+            goto end; // matching: a plain return 1 here is scheduled differently
         }
-        if (*arg6 != 0x4A7) {
+        if (*soundId != 0x4A7) {
             if (timer == 0) {
-                *arg2 = (*arg2 * vol) >> 8;
-                if (flag) {
-                    vol += 8;
-                    if (vol >= 0x100) {
-                        vol = 0xFF;
-                        timer = (func_150ADA20() & 0x200) + 0x12C;
-                        flag = 0;
+                *volume = (*volume * fade) >> 8;
+                if (fadingIn) {
+                    fade += 8;
+                    if (fade >= 0x100) {
+                        fade = 0xFF;
+                        timer = (func_150ADA20() & 0x200) + 300;
+                        fadingIn = FALSE;
                     }
                 } else {
-                    vol -= 8;
-                    if (vol <= 0) {
+                    fade -= 8;
+                    if (fade <= 0) {
                         return 1;
                     }
                 }
@@ -631,24 +635,24 @@ s32 func_151BB0E0(Snd151BB0E0 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 *arg4,
                 timer -= D_800BE9E4;
                 if (timer <= 0) {
                     timer = 0;
-                    if (*arg6 == 0x4A8) {
+                    if (*soundId == 0x4A8) {
                         func_1000FA64(0x4A9, obj->x_position, obj->y_position, obj->z_position, 0x2EE0, 0x320,
                                       0xC8, (s32)func_151BB0E0, obj, state | 0x880, 8, 0);
-                        timer = (func_150ADA20() & 0x200) + 0x384;
+                        timer = (func_150ADA20() & 0x200) + 900;
                     }
                 }
             }
-            *arg4 = fabsf(obj->xz_velocity) * obj->unkB8 * 0.5f;
+            *speedOut = fabsf(obj->xz_velocity) * obj->unkB8 * 0.5f;
         }
-        arg0->unk1C = (flag << 7) | state | (vol << 8) | (timer << 16);
-        if ((*arg2 == 0) || (arg0->unk10 & 0x80)) {
-            if (arg0->unk24 != 0) {
-                func_100111C8(arg0->unk24);
-                arg0->unk24 = 0;
+        chan->userData = (fadingIn << 7) | state | (fade << 8) | (timer << 16);
+        if ((*volume == 0) || (chan->flags & 0x80)) {
+            if (chan->unk24 != 0) {
+                func_100111C8(chan->unk24);
+                chan->unk24 = 0;
             }
-            *arg6 = 0;
-            arg0->unk10 &= ~0x80;
-            *arg2 = 0;
+            *soundId = 0;
+            chan->flags &= ~0x80;
+            *volume = 0;
         }
         return 0;
     }
