@@ -13,7 +13,8 @@ s32 func_1515D6D0(s32 gfx, s32 player);
 // (pointer-typed loads pick different registers in func_1501878C's command appends)
 // This file's .bss, defined before variables.h declares the globals: IDO lays out .bss in the order
 // it first sees each name.
-f32 D_800BE5E8[11]; // the last 10 frame deltas; the 11th word is D_800BE610, the leftover tick remainder
+f32 D_800BE5E8[10]; // the last 10 frame deltas
+u32 D_800BE610;     // the leftover tick remainder
 u8 D_800BE614;
 u8 D_800BE615;
 u8 D_800BE616;
@@ -645,7 +646,6 @@ Gfx *func_15019E60(Gfx *gfx) {
     return func_15043384(func_151E8620(func_1501A490(gfx, 0xFF, 0, 0, 0, 0)));
 }
 
-extern u32 D_800BE610;
 extern s32 D_800BE9B0;
 extern f32 D_800BE9B8;
 extern f32 D_800BE9BC;
@@ -673,7 +673,7 @@ void func_15019F20(void) {
             ticks = 0;
             D_800BE9A4 = 0.0f;
         } else {
-            i = ((u32 *)D_800BE5E8)[10]; // matching: D_800BE610 read via the array keeps its address out of CSE
+            i = ((u32 *)D_800BE5E8)[10]; // matching: reads D_800BE610 (the word after the array) through D_800BE5E8, keeping its address out of CSE
             i += ticks;
             D_800BE9A4 = (f32)ticks / (f32)(u32)rate;
             D_800BE9E4 = D_800BE9A4;
