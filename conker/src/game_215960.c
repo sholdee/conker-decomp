@@ -347,7 +347,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     }
     if (nearTarget || (team != -1)) {
         if (D_8008FDC0 & 0x4000) {
-            i = (s32)(&D_D16 + 1);
+            i = (s32)(&D_D16 + 1); // matching: the loop counter doubles as the texture id
         } else {
             i = (s32)&D_D16;
         }
