@@ -44,7 +44,6 @@ void func_15187D6C(f32 *arg0, f32 arg1, f32 arg2, f32 arg3);
 void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJitter, f32 scaleYZ, f32 scaleX) {
     BurstEffect *burst;
     s32 i;
-    s32 a;
 
     burst = func_15167A68(6, 0, sizeof(BurstEffect), 1, 0xFF, 1);
     if (burst != NULL) {
@@ -60,20 +59,20 @@ void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJit
         burst->duration = duration;
         burst->scaleYZ = scaleYZ;
         burst->scaleX = scaleX;
-        for (i = 0, a = 0; a != 1080; a += 90, i++) {
-            if (a < 360) {
-                burst->pieces[i].rotX = 7 - (func_150ADA20() & 0xFU);
+        for (i = 0; i < 12; i++) {
+            if (i < 4) {
+                burst->pieces[i].rotX = 7U - (func_150ADA20() & 15U);
                 burst->pieces[i].rotY = 0.0f;
-                burst->pieces[i].rotZ = (func_150ADA20() & 0x3FU) + (a - 30) * 1;
+                burst->pieces[i].rotZ = (func_150ADA20() & 63U) + (i * 90 - 30);
                 burst->pieces[i].rotMode = 0;
-            } else if (a < 720) {
+            } else if (i < 8) {
                 burst->pieces[i].rotX = 0.0f;
-                burst->pieces[i].rotY = (func_150ADA20() & 0x3FU) + (a - 570) * 1;
-                burst->pieces[i].rotZ = 7 - (func_150ADA20() & 0xFU);
+                burst->pieces[i].rotY = (func_150ADA20() & 63U) + (i * 90 - 570);
+                burst->pieces[i].rotZ = 7U - (func_150ADA20() & 15U);
                 burst->pieces[i].rotMode = 0;
             } else {
-                burst->pieces[i].rotX = (func_150ADA20() & 0x3FU) + (a - 30) * 1;
-                burst->pieces[i].rotY = 97 - (func_150ADA20() & 0xFU);
+                burst->pieces[i].rotX = (func_150ADA20() & 63U) + (i * 90 - 30);
+                burst->pieces[i].rotY = 97U - (func_150ADA20() & 15U);
                 burst->pieces[i].rotZ = 0.0f;
                 burst->pieces[i].rotMode = 1;
             }
@@ -82,71 +81,85 @@ void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJit
             } else {
                 burst->pieces[i].speed = speed;
             }
-            burst->pieces[i].offset = func_150ADA20() & 0xFU;
+            burst->pieces[i].offset = func_150ADA20() & 15U;
             burst->pieces[i].elapsed = 0;
             burst->pieces[i].duration = duration - (func_150ADA20() & durationJitter);
         }
     }
 }
 
-void func_15187978(BurstEffect *arg0) {
+/* Per-frame update: advances the burst timer and slides each piece outwards, slowing as it ages. */
+void func_15187978(BurstEffect *burst) {
     s32 i;
 
-    if (arg0->timer < 0) {
-        func_10004074(arg0->pieces);
-        func_1516972C((struct102 *)arg0);
+    if (burst->timer < 0) {
+        func_10004074(burst->pieces);
+        func_1516972C((struct102 *)burst);
         return;
     }
-    arg0->timer += D_800BE9E4;
-    if (arg0->duration < arg0->timer) {
-        arg0->timer = -10;
-    } else if (arg0->timer >= 0) {
+    burst->timer += D_800BE9E4;
+    if (burst->duration < burst->timer) {
+        burst->timer = -10;
+    } else if (burst->timer >= 0) {
         for (i = 0; i < 12; i++) {
-            if (arg0->pieces[i].elapsed < arg0->pieces[i].duration) {
-                arg0->pieces[i].elapsed += D_800BE9E4;
-                if (arg0->pieces[i].duration < arg0->pieces[i].elapsed) {
-                    arg0->pieces[i].elapsed = arg0->pieces[i].duration;
+            if (burst->pieces[i].elapsed < burst->pieces[i].duration) {
+                burst->pieces[i].elapsed += D_800BE9E4;
+                if (burst->pieces[i].duration < burst->pieces[i].elapsed) {
+                    burst->pieces[i].elapsed = burst->pieces[i].duration;
                 }
-                arg0->pieces[i].offset += arg0->pieces[i].speed - arg0->pieces[i].speed / 3.0f * arg0->pieces[i].elapsed / arg0->pieces[i].duration;
+                burst->pieces[i].offset += burst->pieces[i].speed
+                    - burst->pieces[i].speed / 3.0f * burst->pieces[i].elapsed / burst->pieces[i].duration;
             }
         }
     }
 }
 
-Gfx *func_15187A98(Gfx *gdl, BurstEffect *arg1, s32 arg2) {
+/* Draws the 12 burst pieces, each fading out over its own duration. */
+Gfx *func_15187A98(Gfx *gdl, BurstEffect *burst, s32 arg2) {
     s32 i;
     s32 alpha;
-    f32 spB8[4][4];
-    f32 sp78[4][4];
-    Gfx *g2;
-    Gfx *g3;
+    f32 mtx[4][4];
+    f32 rot[4][4];
+    Gfx *primCmd;
+    Gfx *mtxCmd;
 
-    /* dead stores: give g2/g3 their uopt bit positions before the alpha expression (register coloring order) */
-    g2 = NULL; g3 = NULL;
-    if (arg1->timer >= 0) {
-    func_150A7DA0(spB8, arg1->x, arg1->y, arg1->z);
-    guMtxF2L2(spB8, &arg1->mtx[D_800BE9C0]);
-    for (i = 0; i < 12; i++) {
-        gSPMatrix(gdl++, &arg1->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        func_150A7DA0(spB8, arg1->pieces[i].offset, 0.0f, 0.0f);
-        spB8[0][0] *= arg1->scaleX;
-        spB8[1][1] *= arg1->scaleYZ;
-        spB8[2][2] *= arg1->scaleYZ;
-        if (arg1->pieces[i].rotMode == 0) {
-            func_150A8050(sp78, arg1->pieces[i].rotX, arg1->pieces[i].rotY, arg1->pieces[i].rotZ);
-        } else {
-            func_15187D6C(sp78, arg1->pieces[i].rotX, arg1->pieces[i].rotY, arg1->pieces[i].rotZ);
+    // matching: dead stores give these pointers an earlier uopt bit position than the alpha expression,
+    // which steers IDO's register coloring order
+    primCmd = NULL;
+    mtxCmd = NULL;
+    if (burst->timer >= 0) {
+        func_150A7DA0(mtx, burst->x, burst->y, burst->z);
+        guMtxF2L2(mtx, &burst->mtx[D_800BE9C0]);
+        for (i = 0; i < 12; i++) {
+            gSPMatrix(gdl++, &burst->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+            func_150A7DA0(mtx, burst->pieces[i].offset, 0.0f, 0.0f);
+            mtx[0][0] *= burst->scaleX;
+            mtx[1][1] *= burst->scaleYZ;
+            mtx[2][2] *= burst->scaleYZ;
+            if (burst->pieces[i].rotMode == 0) {
+                func_150A8050(rot, burst->pieces[i].rotX, burst->pieces[i].rotY, burst->pieces[i].rotZ);
+            } else {
+                func_15187D6C(rot, burst->pieces[i].rotX, burst->pieces[i].rotY, burst->pieces[i].rotZ);
+            }
+            func_150A7A48(mtx, rot, mtx);
+            guMtxF2L(mtx, &burst->pieces[i].mtx[D_800BE9C0]);
+            alpha = (burst->pieces[i].duration - burst->pieces[i].elapsed) * 255 / burst->pieces[i].duration;
+            // matching: gDPSetPrimColor/gSPMatrix written out via named pointers (see the dead stores above);
+            // each block's pad takes the stack slot of the macro's _g, and one line per command lets as1
+            // schedule the w0/w1 stores freely (-g3 line numbers)
+            {
+                s32 pad;
+                primCmd = gdl++; primCmd->words.w0 = _SHIFTL(G_SETPRIMCOLOR, 24, 8) | _SHIFTL(1, 8, 8) | _SHIFTL(0, 0, 8); primCmd->words.w1 = _SHIFTL(255, 24, 8) | _SHIFTL(255, 16, 8) | _SHIFTL(255, 8, 8) | _SHIFTL(alpha, 0, 8);
+            }
+            {
+                s32 pad;
+                mtxCmd = gdl++; mtxCmd->words.w0 = _SHIFTL(G_MTX, 24, 8) | _SHIFTL((sizeof(Mtx) - 1) / 8, 19, 5) | _SHIFTL((G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW) ^ G_MTX_PUSH, 0, 8); mtxCmd->words.w1 = (u32)&burst->pieces[i].mtx[D_800BE9C0];
+            }
+            gSPVertex(gdl++, D_8008D538, 4, 0);
+            gSP1Triangle(gdl++, 0, 1, 2, 0);
+            gSP1Triangle(gdl++, 0, 1, 3, 0);
+            gSP1Triangle(gdl++, 0, 2, 3, 0);
         }
-        func_150A7A48(spB8, sp78, spB8);
-        guMtxF2L(spB8, &arg1->pieces[i].mtx[D_800BE9C0]);
-        alpha = (arg1->pieces[i].duration - arg1->pieces[i].elapsed) * 0xFF / arg1->pieces[i].duration;
-        { s32 pad; g2 = gdl++; g2->words.w0 = (_SHIFTL(G_SETPRIMCOLOR, 24, 8) | _SHIFTL(1, 8, 8) | _SHIFTL(0, 0, 8)); g2->words.w1 = (_SHIFTL(0xFF, 24, 8) | _SHIFTL(0xFF, 16, 8) | _SHIFTL(0xFF, 8, 8) | _SHIFTL(alpha, 0, 8)); }
-        { s32 pad; g3 = gdl++; g3->words.w0 = (_SHIFTL((G_MTX),24,8)|_SHIFTL(((sizeof(Mtx))-1)/8,19,5)|_SHIFTL((0)/8,8,8)|_SHIFTL(((G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW)^G_MTX_PUSH),0,8)); g3->words.w1 = (unsigned int)(&arg1->pieces[i].mtx[D_800BE9C0]); }
-        gSPVertex(gdl++, D_8008D538, 4, 0);
-        gSP1Triangle(gdl++, 0, 1, 2, 0);
-        gSP1Triangle(gdl++, 0, 1, 3, 0);
-        gSP1Triangle(gdl++, 0, 2, 3, 0);
-    }
     }
     return gdl;
 }
