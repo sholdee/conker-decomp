@@ -5,9 +5,11 @@
 #undef func_15048A40
 #define D_800D2104 D_800D2104_hdr
 #define D_80099A3C D_80099A3C_hdr
+#define D_800D2110 D_800D2110_hdr
 #include "variables.h"
 #undef D_800D2104
 #undef D_80099A3C
+#undef D_800D2110
 
 /*
  * Object script interpreter commands.
@@ -33,6 +35,7 @@ typedef struct {
 } Path;
 
 extern Path **D_800D2104; // header declares it as s32 *
+extern s16 *D_800D2110;    // header declares it as s16[]
 
 typedef struct {
     u8 unk0;
@@ -735,9 +738,9 @@ void func_15077190(void) {
     s32 id = (D_800D1890 << 8) | D_800D1891;
 
     if (id != 0) {
-        s32 volume = D_800D1892 << 7;
+        s32 param = D_800D1892 << 7;
 
-        func_10010630(id, D_800D154C, volume, 500, 2500);
+        func_10010630(id, D_800D154C, param, 500, 2500);
     }
 }
 
@@ -1436,7 +1439,7 @@ void func_1507900C(void) {
 void func_1507903C(void) {
     if (func_15078A60(0) != 0) {
         D_800D154C->unk218 = func_1507BB28(0, D_800D1890);
-        D_800D154C->unk218 -= 1;
+        D_800D154C->unk218--;
     }
 }
 
@@ -1449,54 +1452,57 @@ void func_15079090(void) {
 void func_150790C4(void) {
     if (func_15078A60(D_800C3E78) != 0) {
         D_800D154C->unk218 = func_1507BB28(0, D_800D1890);
-        D_800D154C->unk218 -= 1;
+        D_800D154C->unk218--;
     }
 }
 
-u8 func_1507911C(void) {
-    s16 temp_a2;
+/* Jumps to arg0 when the y (arg3 & 2: x) of object 0 (arg3 & 1: this object) is below (s16)(arg1:arg2). */
+void func_1507911C(void) {
+    s16 limit;
     s16 coord;
-    u8 idx;
+    u8 index;
 
-    temp_a2 = (D_800D1891 << 8) | D_800D1892;
-    idx =  D_800D1893 & 1;
-    if (idx != 0) {
-        idx = D_800C3E78;
+    limit = (D_800D1891 << 8) | D_800D1892;
+    index = D_800D1893 & 1;
+    if (index != 0) {
+        index = D_800C3E78;
     }
-    coord = D_800CC2D0[idx].y_position;
-    if ((D_800D1893 & 2) != 0) {
-        coord = D_800CC2D0[idx].x_position;
+    coord = D_800CC2D0[index].y_position;
+    if (D_800D1893 & 2) {
+        coord = D_800CC2D0[index].x_position;
     }
-    if (coord < temp_a2) {
+    if (coord < limit) {
         func_15075400(D_800D1890);
     }
 }
 
 void func_150791F0(void) {
-    if ((s32) D_800D154C->unk2C9 < (s32) D_800D1890) {
-        D_800D154C->unk1C9 = (u8)0xFFU;
+    if (D_800D154C->unk2C9 < D_800D1890) {
+        D_800D154C->unk1C9 = 0xFF;
     } else {
         D_800D154C->unk1C9 = D_800D1890;
     }
 }
 
+/* Calls func_1505D024 with the direction from gate unk251 to the object (never 0) and holds for a tick. */
 void func_15079228(void) {
-    struct127 *temp_v1;
-    struct178 *temp_v0;
-    f32 temp_f0;
-    f32 temp_f2;
-    u16 temp_a2;
+    struct127 *obj;
+    struct178 *gate;
+    f32 x;
+    f32 z;
+    u16 angle;
 
-    temp_v0 = &(*(struct178 **)&D_800D3098)[D_800D154C->unk251];
-    temp_v1 = D_800D154C;
-    temp_f0 = temp_v0->unk0;
-    temp_f2 = temp_v0->unk4;
-    temp_a2 = func_1505A630(temp_v1->x_position - temp_f0, temp_f2 - temp_v1->z_position, 0);
-    if (temp_a2 == 0) {
-        temp_a2 = 1;
+    // D_800D3098 holds a pointer (the header declares an array); the load through its address matches
+    gate = &(*(struct178 **)&D_800D3098)[D_800D154C->unk251];
+    obj = D_800D154C;
+    x = gate->unk0;
+    z = gate->unk4;
+    angle = func_1505A630(obj->x_position - x, z - obj->z_position, 0);
+    if (angle == 0) {
+        angle = 1;
     }
-    func_1505D024(D_800D154C, D_800D1890, temp_a2, -1);
-    D_800D154C->unk218 -= 1;
+    func_1505D024(D_800D154C, D_800D1890, angle, -1);
+    D_800D154C->unk218--;
     D_800D154C->unk21C = 1;
 }
 
@@ -1505,158 +1511,137 @@ void func_150792E0(void) {
 }
 
 void func_150792FC(void) {
-    D_800D154C->unk2F8 &= 0xFFF8;
+    D_800D154C->unk2F8 &= ~7;
     D_800D154C->unk2F8 |= D_800D1890;
 }
 
+/* Restarts the object found by func_150768DC on script arg0. */
 void func_15079334(void) {
-    struct127 *tmp;
+    struct127 *found;
 
     if (D_800D154C->unkA8 != 0) {
-        tmp = &D_800CC2D0[D_800D154C->unkA8 & 0x7F];
-        tmp->unk218 = 0;
-        tmp->unk232 = D_800D1890;
+        found = &D_800CC2D0[D_800D154C->unkA8 & 0x7F];
+        found->unk218 = NULL;
+        found->unk232 = D_800D1890;
     }
 }
 
 void func_15079390(void) {
-    u16 tmp0 = D_800D1890;
-    u8 tmp1 = D_800D1891;
-    u8 tmp2 = D_800D1892;
-    func_1514D3B0(D_800D154C, tmp0, tmp1, tmp2);
+    u16 param0 = D_800D1890;
+    u8 param1 = D_800D1891;
+    u8 param2 = D_800D1892;
+
+    func_1514D3B0(D_800D154C, param0, param1, param2);
 }
 
+/* Places waypoint arg0 at a random point up to 550 units from object 0, clamped to +-1200. */
 void func_150793D8(void) {
-    f32 sp34;
-    f32 sp30;
-    f32 sp2C;
-    s16 pad0;
+    f32 offsetX;
+    f32 offsetZ;
+    f32 third;
+    s16 pad0; // matching: unused stack slots
     s16 pad1;
     s16 pad2;
     s16 x;
     s16 z;
 
-    x = (s16)(s32)D_800CC2D0->x_position;
-    z = (s16)(s32)D_800CC2D0->z_position;
-    if ((x < -1180) || (x >= 1181) || (z < -1180) || (z >= 1181)) {
+    x = (s16)(s32)D_800CC2D0[0].x_position;
+    z = (s16)(s32)D_800CC2D0[0].z_position;
+    if ((x < -1180) || (x > 1180) || (z < -1180) || (z > 1180)) {
         x = 0;
         z = 0;
     }
 
-    func_1505A184(func_150ADA20(), 550.0f, 0.0f, &sp34, &sp30, &sp2C);
+    func_1505A184(func_150ADA20(), 550.0f, 0.0f, &offsetX, &offsetZ, &third);
 
-    x = (s16)(s32)((f32)x + sp34);
-    z = (s16)(s32)((f32)z + sp30);
+    x = (s16)(s32)((f32)x + offsetX);
+    z = (s16)(s32)((f32)z + offsetZ);
     if (x < -1200) {
         x = -1200;
     }
-    if (x >= 1201) {
+    if (x > 1200) {
         x = 1200;
     }
     if (z < -1200) {
         z = -1200;
     }
-    if (z >= 1201) {
+    if (z > 1200) {
         z = 1200;
     }
 
-    *(s16 *)((u8 *)D_800D2104[D_800D154C->unk13F] + (D_800D1890 * 8) + 8) = x;
-    *(s16 *)((u8 *)D_800D2104[D_800D154C->unk13F] + (D_800D1890 * 8) + 0xC) = z;
+    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].x = x;
+    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].z = z;
 }
 
+/* Sets the speeds for a jump that lands on the target. */
 void func_15079570(void) {
-    f32 temp;
-    f32 d2;
+    f32 dist;
+    f32 time;
 
-    temp = func_1505A6F8(D_800D154C, &D_800CC2D0[D_800D154C->unk222]);
+    dist = func_1505A6F8(D_800D154C, &D_800CC2D0[D_800D154C->unk222]);
     D_800D154C->unk44 = D_800D154C->xz_velocity;
-    d2 = 2.0f * (temp / D_800D154C->unk44);
-    D_800D154C->y_velocity = (D_800D154C->gravity * d2) * 0.5f;
-    D_800D154C->y_velocity += 2.0f * ((*(f32*)((u8*)D_800CC2E8 + D_800D154C->unk222 * 812) - D_800D154C->y_position) / d2);
+    time = 2.0f * (dist / D_800D154C->unk44);
+    D_800D154C->y_velocity = (D_800D154C->gravity * time) * 0.5f;
+    D_800D154C->y_velocity += 2.0f * ((D_800CC2D0[D_800D154C->unk222].y_position - D_800D154C->y_position) / time);
 }
-// void func_15079570(void) {
-//     f32 temp_f2;
-//
-//     temp_f2 = func_1505A6F8(D_800D154C, &D_800CC2D0[ D_800D154C->unk222]);
-//     D_800D154C->unk44 = D_800D154C->xz_velocity;
-//     temp_f2 = 2.0f * (temp_f2 / D_800D154C->unk44);
-//     D_800D154C->y_velocity = D_800D154C->gravity * temp_f2 * 0.5f;
-//     D_800D154C->y_velocity += ((D_800CC2E8[D_800D154C->unk222 * 203] - D_800D154C->y_position) / temp_f2) * 2.0f;
-// }
 
+/* Restarts the object with unique id arg0 on script arg1. */
 void func_1507965C(void) {
-    s32 idx;
-    struct127 *temp_v1;
+    s32 index;
+    struct127 *obj;
 
-    idx = func_15083FB0(D_800D1890);
-    if (idx != -1) {
-        temp_v1 = &D_800CC2D0[idx];
-        temp_v1->unk232 = D_800D1891;
-        temp_v1->unk218 = 0;
-        temp_v1->unk23A = 0;
+    index = func_15083FB0(D_800D1890);
+    if (index != -1) {
+        obj = &D_800CC2D0[index];
+        obj->unk232 = D_800D1891;
+        obj->unk218 = NULL;
+        obj->unk23A = 0;
     }
 }
 
+/* arg2: sets `immune` of the object with unique id arg0 to arg1; else jumps to arg1 when that object is stunned. */
 void func_150796CC(void) {
-    s32 idx = func_15083FB0(D_800D1890);
+    s32 index = func_15083FB0(D_800D1890);
+
     if (D_800D1892 != 0) {
-        if (idx != -1) {
-            D_800CC3F5[idx * sizeof(struct127)] = D_800D1891;
+        if (index != -1) {
+            D_800CC2D0[index].immune = D_800D1891;
         }
-    } else if ((idx != -1) && (D_800CC3D4[idx * sizeof(struct127)] != 0)) {
+    } else if ((index != -1) && (D_800CC2D0[index].stunned != 0)) {
         func_15075400(D_800D1891);
     }
 }
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-} CoordPair15079790;
-
+/* arg2: removes the object (type 0xFF); else makes it type 0x3A placed randomly within 250 of its path's centre. */
 void func_15079790(void) {
-    s16 temp_t1;
-    s16 temp_t0;
+    s16 offsetX;
+    s16 offsetZ;
 
     if (D_800D1892 != 0) {
         D_800D154C->id = 0xFF;
     } else {
         D_800D154C->id = 0x3A;
-        temp_t1 = (func_150ADA20() % 0x1F4U) - 0xFA;
-        temp_t0 = (func_150ADA20() % 0x1F4U) - 0xFA;
-        D_800D154C->x_position = ((CoordPair15079790 **)D_800D2104)[D_800D154C->unk13F]->unk0 + temp_t1;
-        D_800D154C->z_position = ((CoordPair15079790 **)D_800D2104)[D_800D154C->unk13F]->unk4 + temp_t0;
+        offsetX = (func_150ADA20() % 500U) - 250;
+        offsetZ = (func_150ADA20() % 500U) - 250;
+        D_800D154C->x_position = D_800D2104[D_800D154C->unk13F]->center.x + offsetX;
+        D_800D154C->z_position = D_800D2104[D_800D154C->unk13F]->center.z + offsetZ;
     }
 }
 
-// seriously, D_800D2104?
-// void func_15079790(void) {
-//     s16 temp_t1;
-//     s16 temp_t0;
-//
-//     if (D_800D1892 != 0) {
-//         D_800D154C->id = 0xFF;
-//     } else {
-//         D_800D154C->id = 0x3A;
-//         temp_t1 = (func_150ADA20() % 0x1F4U) - 0xFA;
-//         temp_t0 = (func_150ADA20() % 0x1F4U) - 0xFA;
-//         D_800D154C->x_position = (s32)&D_800D2104[D_800D154C->unk13F] + temp_t1;
-//         D_800D154C->z_position = (s32)&D_800D2104[D_800D154C->unk13F + 1] + temp_t0;
-//     }
-// }
-
+/* Starts a move with object 0's speed plus (s8)arg2, clamped to [arg1, 250]. */
 void func_15079880(void) {
-    s32 tmp = D_800CC30C[0] + (s8)D_800D1892;
+    s32 speed = D_800CC2D0[0].xz_velocity + (s8)D_800D1892;
 
-    if (tmp < D_800D1891) {
-        tmp = D_800D1891;
-    } else if (tmp >= 251) {
-        tmp = 250;
+    if (speed < D_800D1891) {
+        speed = D_800D1891;
+    } else if (speed > 250) {
+        speed = 250;
     }
-    D_800D1892 = tmp;
+    D_800D1892 = speed;
     func_15075548();
 }
 
+/* Jumps to arg0 when the object is near its current waypoint (see func_150781F4). */
 void func_150798F8(void) {
     D_800D1891 = D_800D154C->unk21E;
     func_150781F4();
@@ -1665,7 +1650,7 @@ void func_150798F8(void) {
 void func_15079928(void) {
     s32 mask;
 
-    mask = ((D_800D1891 << 0x10) + D_800D1892) & 0xFFFF;
+    mask = ((D_800D1891 << 16) + D_800D1892) & 0xFFFF;
     if (mask == 0) {
         mask = 0xFFFF;
     }
@@ -1677,11 +1662,12 @@ void func_15079988(void) {
 }
 
 void func_150799B4(void) {
-    s32 temp_a0 = (D_800D1890 << 8) + D_800D1891;
+    s32 id = (D_800D1890 << 8) + D_800D1891;
+
     if (D_800D1892 != 0) {
-        temp_a0 += func_150ADA20() % (u32) D_800D1892;
+        id += func_150ADA20() % (u32)D_800D1892;
     }
-    func_15060A30(temp_a0, D_800D154C);
+    func_15060A30(id, D_800D154C);
 }
 
 void func_15079A28(void) {
@@ -1690,20 +1676,17 @@ void func_15079A28(void) {
 }
 
 void func_15079A58(void) {
-    (*(s16 **)&D_800D2110)[D_800D154C->unk13F] = (D_800D1890 << 8) + D_800D1891;
+    D_800D2110[D_800D154C->unk13F] = (D_800D1890 << 8) + D_800D1891;
 }
-// void func_15079A58(void) {
-//     s16 tmp = (D_800D1890 << 8) + D_800D1891;
-//     D_800D2110[D_800D154C->unk13F] = tmp;
-// }
 
+/* Returns the direction from object `arg0` to the centre of the current object's path. */
 u16 func_15079A98(s32 arg0) {
-    struct169 *temp_v0;
-    struct127 *temp_v1;
+    Path *path;
+    struct127 *obj;
 
-    temp_v0 = ((struct169**)D_800D2104)[D_800D154C->unk13F];
-    temp_v1 = &D_800CC2D0[arg0];
-    return func_1505A630(temp_v0->unk0 - temp_v1->x_position, temp_v1->z_position - temp_v0->unk4, 0);
+    path = D_800D2104[D_800D154C->unk13F];
+    obj = &D_800CC2D0[arg0];
+    return func_1505A630(path->center.x - obj->x_position, obj->z_position - path->center.z, 0);
 }
 
 void func_15079B30(void) {
