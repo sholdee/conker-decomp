@@ -60,11 +60,6 @@ void func_150CEF10(Camera *arg0);
 void func_150EC4B0(Camera *arg0);
 void func_150FCA00(Camera *arg0);
 
-void func_1510550C(EffectHeader *arg0, s32 arg1, u8 arg2);
-typedef struct BoltArcObj BoltArcObj; /* game_131F30.c */
-typedef struct SparkObj SparkObj;     /* game_131F30.c */
-void func_15105548(BoltArcObj *obj, s32 *arg1, u8 msg);
-void func_15105848(SparkObj *obj, s32 arg1, u8 msg);
 void func_15122AE0(void);
 void func_15124B18(Camera *arg0);
 void func_15123508(Camera *arg0);
@@ -164,7 +159,6 @@ f32  func_150AD900(f32 *arg0, f32 *arg1);
 f32  func_150AD930(f32 *arg0);
 u32  func_150ADA20(void);
 f32  func_150ADA68(void);
-void func_150E2EA4(Actor*, s32, s32, s32, f32, f32, f32, f32, f32, f32, s32, s32, s32, f32, f32, s32, f32);
 s32  func_15123934(Camera *camera, s32 newMode, s32 newMotion, s32 newTightness, CameraMode slot);
 s32  func_151239CC(Camera *camera, CameraMode slot);
 void func_15127EB8(Camera *arg0);

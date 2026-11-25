@@ -254,8 +254,6 @@ struct BoltRingEffect {
     /* 0x28 */ BoltRingData data;
 };
 
-extern void func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, s32 type, s32 owner, s32 kind);
-
 /**
  * While the emitter is not in state 1, spawns bolts between random points on the rim of its
  * cylinder at a randomized rate; sends message 0x4A (see func_150B6450) when it enters state 1.

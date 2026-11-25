@@ -3,17 +3,9 @@
 #include "functions.h"
 #undef func_1514B8E4
 #include "variables.h"
-#include "effects.h"
-
-Bolt *func_151A7950(BoltDef *, s32, u8, s32);
-Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3);
-
-void func_151A8340(Bolt *, s16, s16, f32, s16);
 
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
-
-void func_151A8340(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth);
 
 
 /*
@@ -67,9 +59,6 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
 
 extern s32 (*D_8008F980[])(Emitter *);
 extern void (*D_8008F970[])(Emitter *, Vec3f *, f32, u8);
-
-void func_151A8F1C(Emitter *, Vec3f *, f32 *, f32 *);
-void func_151A8F6C(Emitter *, Vec3f *, f32 *, f32 *);
 
 /*
  * Per-frame update: runs the update hook (0 kills the object), then while switched on (and its zone
@@ -147,8 +136,6 @@ void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
     *top = def->pos.y;
     *bottom = def->bottom;
 }
-
-void func_151A931C(Emitter *, u8 *, u8);
 
 /* Message handler: type 1 emitters are switched on and off by messages. */
 void func_151A9024(Emitter *emitter, u8 *msg, u8 msgType) {
@@ -303,27 +290,6 @@ void func_151A931C(Emitter *emitter, u8 *msg, u8 msgType) {
         }
     }
 }
-
-typedef struct {
-    s16 base;
-    s16 range;
-} RangeS16; /* base + rand % (range + 1) */
-
-/* User data of a type 2 emitter: the particles spawn hook 1 (func_151A9634) launches. */
-typedef struct {
-    /* 0x00 */ f32 vec0Base;         /* the two floats passed to func_1514B8E4: base + rand * range */
-    /* 0x04 */ f32 vec1Base;
-    /* 0x08 */ f32 vec0Range;
-    /* 0x0C */ f32 vec1Range;
-    /* 0x10 */ RangeS16 unk10;
-    /* 0x14 */ RangeS16 unk14;       /* goes into the particle's extra data */
-    /* 0x18 */ RangeS16 unk18;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ f32 unk20Base;        /* goes into the particle's extra data */
-    /* 0x24 */ f32 unk20Range;
-    /* 0x28 */ u8 flags;             /* 1: particle kind 0x71 (else 0x13 or 0x14); 2: clear the 2 flag */
-} ParticleSettings; /* size 0x2C */
 
 /* One of the nine emitter presets of func_151A9390. */
 typedef struct {

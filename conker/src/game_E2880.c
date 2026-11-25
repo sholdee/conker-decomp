@@ -41,9 +41,6 @@ OwnerSparkEffect *func_150B53D0(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     return effect;
 }
 
-extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
-extern void func_15107B78(Actor *, s32, s32, s32, s32);
-
 /* Per-frame update of a spark effect: ends it once the owner is gone, else spawns sparks around it. */
 void func_150B54A8(OwnerSparkEffect *effect) {
     OwnerSparkData *data;

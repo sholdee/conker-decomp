@@ -4828,8 +4828,6 @@ typedef struct Game83300Step4 {
 } Game83300Step4;
 extern Game83300Step4 D_800860F0;
 
-void func_150F1CB0(Actor *arg0);
-
 /* Per-frame texture/morph animations of actor types that have them (once per type for most). */
 void func_15061B4C(void) {
     Actor *unused; // matching: stack slot

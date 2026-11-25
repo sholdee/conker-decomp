@@ -9,7 +9,6 @@
 RegionNode *func_1515F1B0();
 
 
-void func_151A9390(s32 arg0, s32 arg1, TriggerZone *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
 /* Spawn handler of each zone type (TriggerZone.kind >> 2, see enum ZoneType); NULL spawns nothing. */
 s32 (*gZoneSpawnHandlers[26])(TriggerZone *) = {
     /*  0 */ NULL,

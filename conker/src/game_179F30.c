@@ -33,7 +33,6 @@ const Vec3f D_800A58B8 = { 0.0f, 66.0f, 274.0f };
 const Vec3f D_800A58C4 = { 0.0f, 31.0f, 73.0f };
 
 /* Elsewhere. */
-void *func_150C5370(void *desc, s32 payloadSize);
 
 
 

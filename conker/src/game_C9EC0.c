@@ -274,7 +274,6 @@ s32 func_1509D08C(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out) {
     return 1;
 }
 
-extern void *func_150F6DE4(Actor *);
 extern u8 D_8009F0D0;
 
 /* Starts script command `cmdId` with arguments `cmd`; returns a handle for commands 4-6. */
@@ -470,8 +469,6 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
 }
 
 
-extern void func_150F6DB0(Actor *);
-extern void func_150C5C9C(Actor *);
 
 /* Ends script command `cmdId` started by func_1509D180. */
 s32 func_1509D780(s32 cmdId, ScriptCmd *cmd) {

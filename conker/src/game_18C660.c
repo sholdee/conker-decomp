@@ -8,8 +8,6 @@ struct ZoneLinkObj {
     Actor *unk98;
 };
 
-struct ZoneLinkObj *func_15105C24(s32 owner);
-
 /* A node of a list of spawn regions with their cached volume and area. */
 RegionNode *func_1515F1B0(TriggerZone *region) {
     RegionNode *node;

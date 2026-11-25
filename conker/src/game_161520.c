@@ -1276,8 +1276,6 @@ void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) 
                     arg6[0xC], arg6[1]);
 }
 
-void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, u8, s8 *, u8, s32);
-
 
 /*
  * Blood effects for a hit on actor: arg3 runs func_1513A24C (arg5 lowers its count), arg1

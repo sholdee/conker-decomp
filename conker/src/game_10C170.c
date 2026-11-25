@@ -129,8 +129,6 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
     }
 }
 
-void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, u8, s32, u8, s32);
-
 /*
  * Effect update: drops the effect's position onto the ground below it (if any), spawns a
  * point effect (func_150E83AC) there and scatters 3-5 func_151A9834 spawns around it.

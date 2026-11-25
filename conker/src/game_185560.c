@@ -1263,8 +1263,6 @@ struct SpawnerSource {
     /* 0x1F */ u8 variant; /* index into D_800A636C */
 };
 
-Spawner *func_151A8B20(EmitterDef *info, s16 arg1, s32 dataSize, u8 arg3, s32 arg4);
-
 /* Creates a spawner object for src from template D_800A636C[src->variant] (variant 0 only). */
 // matching: volatile makes IDO reload src from its stack slot
 void func_1515A974(SpawnerSource *volatile src, s32 arg1) {

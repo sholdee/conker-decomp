@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 static const s32 D_800A18C0[3] = { 0xBD, 0xBE, 0xBF };
 static const f32 D_800A18CC[3] = { 1.0f, 1.0f, 1.0f };

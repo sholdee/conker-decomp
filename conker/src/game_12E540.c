@@ -1,137 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 struct DescParticleHead;
-
-typedef struct RayBeam RayBeam;
-
-/* Aim state of the beam's owner (owner->aim). */
-typedef struct {
-    u8 pad0[0xB4];
-    f32 targetDist;
-    Vec3f targetPos;
-    u8 padC4[0x24];
-    Vec3f targetDir;
-    CollisionTri targetHit;
-    u8 pad106[3];
-    u8 targetType; // 0 = no target
-    u8 pad10A[0x8D];
-    u8 unk197;
-} BeamOwnerAim;
-
-/* The actor the beam is attached to. */
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x38];
-    u8 unk74;
-    u8 pad75[0x15F];
-    MtxF *boneMtx;
-    u8 pad1D8[0x144];
-    BeamOwnerAim *aim;
-} BeamOwner;
-
-/* How a child object refers back to its beam. */
-typedef struct {
-    RayBeam *beam;
-    u8 flags; // 1 = visible
-} RayBeamLink;
-
-/* beam->data.startFx: placed at the beam's start, sized by the beam's width. */
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x28];
-    f32 sizeX;
-    f32 sizeY;
-    Vec3f pos;
-    u8 pad4C[0x5C];
-    f32 baseSizeX;
-    f32 baseSizeY;
-    u8 padB0[0x20];
-    RayBeamLink link;
-} BeamStartFx;
-
-typedef struct {
-    u8 flags; // 1 = visible
-    u8 pad1;
-    CollisionTri hit;
-    RayBeam *beam;
-} BeamHitFxData;
-
-/* beam->data.hitFx: placed just short of the hit point on type 1 hits. */
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x24];
-    Vec3f pos;
-    u8 pad40[0xD0];
-    BeamHitFxData data;
-} BeamHitFx;
-
-
-/* beam->data.line: spans the beam from start to end. */
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x24];
-    Vec3f start;
-    Vec3f end;
-    u8 pad4C[0xC];
-    s32 unk58;
-    u8 pad5C[0x114];
-    RayBeamLink link;
-} BeamLine;
-
-/* beam->data.endFx: placed at the beam's end on type 2 and 3 hits. */
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x30];
-    Vec3f pos;
-    u8 pad4C[0x5C];
-    RayBeamLink link;
-} BeamEndFx;
-
-/* RayBeam.data */
-typedef struct {
-    BeamOwner *owner;
-    u8 unk4; // must match owner->unk3B
-    u8 pad5[3];
-    Vec3f localStart;  // in bone space
-    Vec3f localTarget; // in bone space
-    u8 bone;
-    u8 pad21;
-    u8 unk22;
-    u8 flags; // 1 = drawn, 2 = aimed by the owner
-    BeamStartFx *startFx;
-    BeamHitFx *hitFx;
-    LightEffect *endPoint; // light at the beam's end; its payload (data.object) is the RayBeam
-    BeamLine *line;
-    BeamEndFx *endFx;
-    f32 width;
-    u8 pad3C[8];
-    f32 length;
-    f32 scrollBase;  // texture scroll speed = scrollBase + scrollRange * sin(scrollPhase)
-    f32 scrollRange;
-    f32 scrollPhase;
-    u8 pad54[4];
-    f32 texOffset;
-    u8 pad5C[0x34];
-    s16 unk90;
-} RayBeamData;
-
-/* A beam that runs from a bone of its owner to the aim target or the first collision on the way
- * (placed by func_15101378, drawn by func_151019C4). */
-struct RayBeam {
-    EffectHeader header;
-    u8 pad10[0x24];
-    Vec3f start;
-    Vec3f end;
-    u8 pad4C[0x74];
-    Vtx vtxTemplate[4];
-    Vtx *vtxBuf[4];
-    RayBeamData data;
-};
 
 /* Releases the beam's child objects, then destroys it. */
 void func_15101090(RayBeam *beam) {
@@ -430,8 +301,6 @@ s8 func_15101378(RayBeam *beam) {
     }
     return result;
 }
-
-
 
 /*
  * Builds this frame's quad for the beam as seen from viewport `viewport`: four vertices from start to

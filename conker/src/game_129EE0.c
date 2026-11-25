@@ -283,8 +283,6 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_15107B78(Actor *, s32, s32, s32, s32);
-
 /*
  * Per-frame update of the func_150FCFD4 particle: follows its owner (calling func_15107B78 on it at a random
  * rate), grows to maxWidth while its timer falls from 50 to 20 and shrinks below 10, firing a

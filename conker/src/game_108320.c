@@ -1,47 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Self-propelled beam quad (func_150DAE70 / func_150DB114). */
-typedef struct {
-    Vec3f vel;
-    f32 size;
-    f32 sizeRate;
-    f32 scaleX;     /* pulses between 0.8 and 1.2 */
-    f32 scaleY;
-    f32 scaleXRate;
-    f32 scaleYRate;
-    f32 damping;
-    u8  fadeRate;
-} BeamMotion;
-
-/* Quad that follows externally owned values (func_150DB518 / func_150DB630 / func_150DB714). */
-typedef struct {
-    f32 *pos;
-    f32 *angle;     /* degrees */
-    f32 *halfWidth;
-    f32 *halfHeight;
-    f32 *alpha;
-} LinkedQuad;
-
-/* Quad particle created by func_1513D524 (a DefParticleHead view) with this file's motion after it. */
-typedef struct {
-    u8  pad0[0x2C];
-    f32 halfWidth;
-    f32 halfHeight;
-    Vec3f pos;
-    Vec3f dir;
-    u8  pad4C[0x10];
-    u8  alpha;
-    u8  pad5D[0x63];
-    Vtx_t template[4];
-    Vtx_t *buffers[4];  /* each holds two copies of the 4-vertex quad */
-    union {
-        BeamMotion beam;
-        LinkedQuad linked;
-    } u;
-} BeamQuad;
 
 extern Vec3f D_80088910[];
 extern Vec3f D_8008891C[];

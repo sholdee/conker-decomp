@@ -1,30 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Effect data of the wavy beam drawn between two actors' bones (func_151B5328). */
-typedef struct {
-    /* 0x000 */ Vtx vertices[2][44];  // double-buffered, indexed by D_800BE9C0
-    /* 0x580 */ Actor *first;
-    /* 0x584 */ u8 firstId;             // first->unique_id, to notice the slot being reused
-    /* 0x585 */ u8 pad585[3];
-    /* 0x588 */ Actor *second;
-    /* 0x58C */ u8 secondId;
-    /* 0x58D */ u8 pad58D[3];
-    /* 0x590 */ f32 width;
-    /* 0x594 */ f32 fadeStart;          // beam length where the wave starts
-    /* 0x598 */ f32 fadeEnd;            // beam length where the wave is at fadeMax
-    /* 0x59C */ f32 fadeScale;          // 1 / (fadeEnd - fadeStart)
-    /* 0x5A0 */ f32 fadeMax;            // wave amplitude, as a fraction of width
-    /* 0x5A4 */ u8 unk5A4[4];
-} WavyBeamData; // size 0x5A8
-
-/* The wavy beam effect (func_151B5240). */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ WavyBeamData data;
-} WavyBeamEffect;
 
 /* Spawns a beam effect between actors 0x17 and 0x16. */
 WavyBeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {

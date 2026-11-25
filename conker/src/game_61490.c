@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-GameCommand *func_150F1B48(GameCommand *, s32);
-
 /* Builds the command list for actor `index`, dispatching on its id, and terminates it with 0x1000. */
 void func_15033FE0(GameCommand *commands, s32 index) {
     Actor *actor;

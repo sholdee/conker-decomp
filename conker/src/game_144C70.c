@@ -46,8 +46,6 @@ typedef union {
 #define PROP_SET_MOTION(prop, motion) \
     ((prop)->task_flag &= ~TASK_FLAG_STATE, (prop)->task_flag |= (motion))
 
-extern void func_15104A80(WorldObject *prop);
-
 /*
  * Lowers the prop by a level-dependent distance (state MOVING -> ARRIVED) and raises it back to its
  * saved home height (RETURNING -> REST).

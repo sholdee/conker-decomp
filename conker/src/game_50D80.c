@@ -3,12 +3,20 @@
 #define func_1516E778 func_1516E778_header
 #define func_1516F2F8 func_1516F2F8_header
 #define func_151DC8BC func_151DC8BC_header
+#define func_150F6890 func_150F6890_header
+#define func_15107B78 func_15107B78_header
 #include "functions.h"
 #undef func_1510A344
 #undef func_1516E778
 #undef func_1516F2F8
 #undef func_151DC8BC
+#undef func_150F6890
+#undef func_15107B78
 #include "variables.h"
+
+// matching: the definitions take s32; this file narrows these arguments to s16 and u8
+void func_150F6890(Actor *, s16, u8, s32);
+void func_15107B78(Actor *, s16, s16, u8, s32);
 
 /* Screen fade colours for func_1517EE40, picked by sequence events (black, white). */
 Color24 D_80084110[2] = { { 0, 0, 0 }, { 0xFF, 0xFF, 0xFF } };
@@ -341,10 +349,6 @@ void func_150242F8(s32 mode, s32 scene) {
 
 extern s32 D_80090214[];
 
-extern void func_150C5C74(Actor *);
-extern void func_150C5C9C(Actor *);
-extern void func_150F5420(s32, s32, s32, s32);
-extern void func_151A9390(s32, s32, s32, f32 *, f32, f32, s32, s32, s32);
 
 /*
  * First cutscene event handler: subtitles (types 7, 0xE-0x10, 0x12; shown only
@@ -1096,22 +1100,12 @@ extern void func_151F2BA8(void);
 extern void func_151F2BE8(void);
 extern void func_151F2C4C(void);
 extern void func_151F2D6C(s32, s32);
-extern void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
-extern void func_150E2DB4(Actor *, u8, s16, s32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32);
 extern void func_1516E778(f32 *, s32, s8, u8, s32); // matching: s8 where the definition has u8 (arg 3)
 // matching: s16 where the definition has s32 (arg 2); s32 where the definition has u8 (args 3-5)
 extern void func_151DC8BC(f32 *, s16, s32, s32, s32, s32);
 // matching: an s16 duration where the definition has s32 (the call truncates it)
 extern void func_1510A344(Actor *, s16, u8, s32);
-extern void func_150F5C08(Actor *, s16, u8, s32);
-extern void func_150F6890(Actor *, s16, u8, s32);
-extern void func_151B5240(s16, u8, s32);
-extern void func_150DB518(f32 *, f32 *, f32 *, f32 *, f32 *, s32, s32, s32);
 extern void func_1516F2F8(s32, s32, s32, s32, s32, s32); // matching: s32 where the definition has u8 (args 1, 5)
-extern void func_15107B78(Actor *, s16, s16, u8, s32);
-extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s32, s32, u8 *, s32, s32);
-extern void func_150F16DC(Actor *, u8, u8, u8, s32);
-extern void func_150DAE70(Actor *, s32, u8, s32);
 
 /*
  * Second cutscene event handler: types 0xB (func_1001263C / func_151F2xxx) and

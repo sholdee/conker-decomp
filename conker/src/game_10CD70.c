@@ -243,9 +243,6 @@ struct BoltEmitter {
     /* 0x28 */ BoltSource src;
 };
 
-extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
-extern void func_15107B78(Actor *, s32, s32, s32, s32);
-
 /* Spawns flashes (func_151602C0), light-blue bolts (func_15107700) and func_15107B78 effects
  * around the emitter's source actor, each on its own random timer,
  * and ends the emitter (unkE = -1) once that actor is gone or its slot was reused. */

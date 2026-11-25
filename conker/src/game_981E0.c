@@ -10,13 +10,20 @@
 // matching: two calls here pass a different number of arguments than these take, so the file keeps them unprototyped
 #define func_151942E8 func_151942E8_effect_h
 #define func_151B5BA0 func_151B5BA0_effect_h
+// matching: these two are called here with the command byte as an extra third argument
+#define func_150EEE00 func_150EEE00_hdr
+#define func_150EEF40 func_150EEF40_hdr
 #define func_1505DADC func_1505DADC_header // matching: this file keeps its own declarations of these
 #include "functions.h"
 #undef func_151942E8
 #undef func_151B5BA0
+#undef func_150EEE00
+#undef func_150EEF40
 #undef func_1505DADC
 void func_151942E8();
 void func_151B5BA0();
+void func_150EEE00();
+void func_150EEF40();
 #undef func_151C6A28
 void func_151C6A28(Actor *, s32, s32, s32);
 #undef func_151C62D0
@@ -202,7 +209,6 @@ typedef struct {
 
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 s32 func_151F2CDC(void);
-extern void func_150F16DC(Actor *, u8, u8, s32, s32);
 
 /* One entry of an object's timed event list. */
 typedef struct TimedEvent {

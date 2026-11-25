@@ -1,9 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-Bolt *func_151A7950(BoltDef *, s32, u8, s32);
 
 /*
  * Allocates a bolt for def with extraSize bytes of user data after its points. The local points run
@@ -34,8 +31,6 @@ Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
 
 extern s32 (*D_8008F940[])(Bolt *);
 extern s32 (*D_8008F948[])(Bolt *);
-
-void func_151A8340(Bolt *, s16, s16, f32, s16);
 
 /*
  * Per-frame update: counts down the lifetime, runs the update hooks, re-jitters the points when the
@@ -479,15 +474,4 @@ void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
         }
     }
 }
-
-void func_151A8F1C(Emitter *, Vec3f *, f32 *, f32 *);
-void func_151A8F6C(Emitter *, Vec3f *, f32 *, f32 *);
-
-void func_151A8F1C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom);
-
-void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom);
-
-void func_151A931C(Emitter *, u8 *, u8);
-
-void func_151A931C(Emitter *emitter, u8 *msg, u8 msgType);
 

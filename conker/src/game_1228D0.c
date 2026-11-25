@@ -3,7 +3,6 @@
 #include "functions.h"
 #undef func_151D9014
 #include "variables.h"
-#include "effects.h"
 
 extern u8 D_80091930;
 extern u8 D_8009193C;
@@ -64,8 +63,6 @@ void func_150F5420(s32 fadeIn, s32 hold, s32 fadeOut, s32 style) {
     desc.frame = 0;
     func_15169968(&desc);
 }
-
-void func_150F55C8(Sprite2D *);
 
 /* Grows the sprite as its timer runs down, then updates its fade. */
 void func_150F5590(Sprite2D *sprite) {
@@ -236,20 +233,6 @@ s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
     return 0;
 }
 
-/* Data of the spark effect spawned by func_150F5C08 and run by func_150F5C98 (sparks along a
- * segment of the owner's bone 5). */
-typedef struct {
-    Actor *owner;
-    u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
-    u8 pad5[3];
-    f32 accum;  /* sparks owed; one is spawned per whole unit */
-} SparkData;
-
-typedef struct {
-    TimedEffect base;
-    SparkData data;
-} BoneSparkEffect;
-
 /* Spawns a spark effect (func_150F5C98) on `owner`. */
 void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     SparkData data;
@@ -369,37 +352,6 @@ void func_150F6138(BoneSparkEffect *effect, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
-typedef struct ModelBeamEffect ModelBeamEffect;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x48];
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ ModelBeamEffect *effect; /* the beam effect that drives this beam */
-    /* 0x54 */ u8 pad54[0x58 - 0x54];
-    /* 0x58 */ u8 flags; /* bit 0 = shown */
-} BeamPart;
-
-/* Something drawn between two points (a beam or streak). */
-typedef struct {
-    DefParticleHead head; /* head.def.pos / rot: the two end points */
-    BeamPart part;
-} ModelBeam;
-
-/* ModelBeamEffect.data: the owner, and the beam and flash it drives. */
-typedef struct {
-    Actor *owner;
-    u8 ownerId;
-    u8 pad5[3];
-    ModelBeam *beam;
-    LightEffect *flash; /* created by func_151602C0 */
-} ModelBeamData;
-
-struct ModelBeamEffect {
-    TimedEffect base;
-    ModelBeamData data;
-};
-
 extern f32 D_800A1B18[3];
 extern f32 D_800A1B24[3];
 
@@ -481,7 +433,6 @@ void func_150F6368(ModelBeamEffect *effect) {
     func_1514933C(&effect->base);
 }
 
-
 void func_150F6394(ModelBeamEffect *effect) {
     func_150F631C(effect);
     func_15149368(&effect->base);
@@ -522,15 +473,12 @@ void func_150F6484(DefParticleHead *obj) {
     func_151411A4(obj);
 }
 
-
 void func_150F64B0(DefParticleHead *obj) {
     func_150F6478(obj);
     func_151411C4(obj);
 }
 
-
 extern f32 D_800A1B30[3];
-void *func_15107C1C(Actor *, u8, void *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, s32, s32);
 
 /* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
  * frames calls func_10010F88(0x679) at the owner, makes a flash at a point of the model and emits

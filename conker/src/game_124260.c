@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Sends message 0x3E (func_151494E0) for `owner`; beams it owns destroy themselves on it. */
 void func_150F6DB0(Actor *owner) {
@@ -11,30 +10,6 @@ void func_150F6DB0(Actor *owner) {
     msg.uniqueId = owner->unique_id;
     func_151494E0((s32)&msg, 0x3E);
 }
-
-/* A sprite spawned by func_15130280 that marks one end of the beam. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x30];
-    /* 0x40 */ Vec3f pos;
-    /* 0x4C */ u8 pad4C[0x74 - 0x4C];
-    /* 0x74 */ s8 mode; /* 3 or -1 (see func_150F706C) */
-} BeamEnd;
-
-/* Per-object state of a beam (0x78 bytes, copied in by func_150F6DE4). */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; /* owner->unique_id */
-    /* 0x08 */ BeamEnd *ends[2];
-    /* 0x10 */ RayHit ray;
-    /* 0x74 */ u8 flags;
-} BeamState;
-
-/* A beam object allocated by func_15149130. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ BeamState beam;
-} BeamObj;
 
 /* Spawns a beam object for `owner`, with two end sprites (blue-tinted, then red-tinted). */
 BeamObj *func_150F6DE4(Actor *owner) {
@@ -103,7 +78,6 @@ BeamObj *func_150F6DE4(Actor *owner) {
     }
     return obj;
 }
-
 
 /* Per-frame update: re-casts the beam from the owner and moves the end sprites to where it hits. */
 void func_150F706C(BeamObj *obj) {
@@ -183,7 +157,6 @@ void func_150F7310(BeamObj *obj, ActorRef *msg, u8 msgId) {
         func_15149514((s32)msg, msgId, &beam->owner, &beam->ownerId, *objp);
     }
 }
-
 
 /* Destroys the beam's end sprites and detaches the beam from its owner. */
 void func_150F739C(BeamObj *obj) {

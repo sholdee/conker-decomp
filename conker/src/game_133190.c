@@ -1,66 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* One point of the Bezier sampled at parameter t, with a frame for the sideways jitter. */
-typedef struct BoltSample {
-    /* 0x00 */ f32 t;
-    /* 0x04 */ Vec3f pos;
-    /* 0x10 */ Vec3f tangent;
-    /* 0x1C */ Vec3f normal;
-    /* 0x28 */ Vec3f binormal;
-} BoltSample; /* size 0x34 */
-
-typedef struct BoltFlare {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x30];
-    /* 0x40 */ Vec3f pos;
-} BoltFlare;
-
-/*
- * A bolt object. It is followed in memory by desc.segments BoltSamples (func_151061E0),
- * desc.segments + 2 jittered joint points (func_151061EC) and the per-kind user data.
- */
-typedef struct BoltObj {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ BoltDesc desc;
-    /* 0x60 */ void *userData;
-    /* 0x64 */ f32 step;           /* Bezier parameter step, 1 / (segments + 1) */
-    /* 0x68 */ s16 rejitterTimer;
-    /* 0x6A */ u8 pad6A[2];
-    /* 0x6C */ BoltFlare *flares[2];
-    /* 0x74 */ u8 vtxBuf[0x10];
-    /* 0x84 */ s32 vtxBufSize;
-} BoltObj; /* size 0x88 */
-
-/* A chain of bolts along a randomly spaced line of points, one bolt (link) at a time. */
-typedef struct BoltChain {
-    /* 0x00 */ s32 count;          /* number of points */
-    /* 0x04 */ s32 index;          /* point where the next link starts */
-    /* 0x08 */ BoltObj *link;      /* the live link, NULL once it is gone */
-    /* 0x0C */ Vec3f *points;
-    /* 0x10 */ BoltChainConfig config;
-    /* 0x40 */ u8 kind;            /* index into D_80088C38 */
-    /* 0x41 */ u8 pad41[3];
-} BoltChain; /* size 0x44 */
-
-typedef struct BoltChainObj {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ BoltChain chain;
-    /* 0x6C */ u8 pad6C[4];
-    /* 0x70 */ Vec3f points[1];    /* chain.count points */
-} BoltChainObj;
-
-void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread);
-void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
-void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2);
-void func_15107F54(Actor *actor, u8 bone, Vec3f *localPos, Vec3f *out);
-BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
-void func_15106214(BoltObj *bolt);
-void func_15106610(BoltObj *bolt);
-BoltSample *func_151061E0(BoltObj *bolt);
-Vec3f *func_151061EC(BoltObj *bolt);
 
 extern s32 (*D_80088C10[])(BoltObj *bolt, u8 *moved);
 
@@ -190,15 +130,6 @@ Vec3f *func_151061EC(BoltObj *bolt) {
     s32 segments = bolt->desc.segments;
     return (Vec3f *)((BoltSample *)(bolt + 1) + segments);
 }
-
-f32 func_151064B4(f32 t);
-f32 func_151064DC(f32 t);
-f32 func_15106510(f32 t);
-f32 func_15106540(f32 t);
-f32 func_15106558(f32 t);
-f32 func_15106584(f32 t);
-f32 func_151065BC(f32 t);
-f32 func_151065EC(f32 t);
 
 /* Samples the Bezier at t = step, 2 * step, ...: position, tangent and a frame around the tangent. */
 void func_15106214(BoltObj *bolt) {
@@ -465,7 +396,6 @@ void func_15106EF8(BoltObj *bolt) {
     func_15169804(&bolt->header);
 }
 
-
 /* Destroys the bolt's resources, then hands it to func_15169824. */
 void func_15106F24(BoltObj *bolt) {
     func_15106E78(bolt);
@@ -605,7 +535,6 @@ void func_1510764C(BoltChainObj *obj) {
     func_1514933C(&obj->base);
 }
 
-
 void func_15107678(BoltChainObj *obj) {
     func_1510761C(obj);
     func_15149368(&obj->base);
@@ -697,7 +626,6 @@ BoltObj *func_15107700(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments,
     }
     return bolt;
 }
-
 
 /* D_80088C28 handler for kind 2. */
 void func_151078E4(BoltObj *bolt, s32 arg1, u8 arg2) {

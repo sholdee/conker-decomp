@@ -186,7 +186,6 @@ void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
 }
 
 extern Vec3f D_800AAEEC[];
-void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, s32, s8 *, u8, s32);
 
 /* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
  * spin, plus three more effects at 200 units above it. */
