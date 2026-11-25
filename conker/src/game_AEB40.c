@@ -345,7 +345,7 @@ extern SpawnRecord *D_800D20FC;
 extern u16 *D_800D2110;
 extern Struct800D2138 D_800D2138;
 extern u8 (*D_800BE628)[0x180];   // one 0x180-byte entry per player
-extern f32 D_8009CC3C;
+extern f32 D_8009CC3C;  // matching: 20000.0f, but as a literal IDO loads it into a different register
 extern u8 *D_800D210C;
 extern s16 D_800D2132;
 extern u8 D_800D2100;
@@ -1502,6 +1502,7 @@ GameObj *func_15083E90(u8 id) {
     if (id == 0) {
         return NULL;
     }
+    // matching: a walking pointer; indexing D_800CC2D0[i] makes IDO unroll the loop differently
     obj = D_800CC2D0;
     for (i = 0; i < 26; i++) {
         if (obj->interaction_state != 0 && obj->unique_id == id) {
