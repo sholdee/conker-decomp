@@ -5,14 +5,6 @@
 
 /* Trail types (see game_175250.c). */
 
-/* One point of a trail; the points form a ring buffer. */
-typedef struct {
-    Vec3f pos;
-    f32 velocityY;
-    u16 phase; /* texture coordinate along the trail */
-    u8 pad12[2];
-} TrailPoint;
-
 /* Params of a trail spawned by a SprayEmitter: the TrailParams, then the floor height. */
 typedef struct {
     /* 0x00 */ TrailParams base;
@@ -23,7 +15,7 @@ typedef struct {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ TrailPoint *points;
+    /* 0x94 */ MotionTrailPoint *points;
     /* 0x98 */ SprayTrailParams *params;
 } Trail;
 
@@ -205,7 +197,7 @@ void func_15189A00(SprayEmitter *emitter) {
 s32 func_15189EBC(Trail *trail) {
     f64 chance;
     SprayTrailParams *params = trail->params;
-    TrailPoint *points = trail->points;
+    MotionTrailPoint *points = trail->points;
     Vec3f splashPos;
 
     if (points[trail->head.start].pos.y < params->floorY) {

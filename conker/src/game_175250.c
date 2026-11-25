@@ -3,33 +3,17 @@
 #include "variables.h"
 #include "effects.h"
 
-/* One point of a trail; the points form a ring buffer (0x14 bytes each). */
-typedef struct {
-    Vec3f pos;
-    f32 velocityY;
-    u16 phase; /* texture coordinate along the trail */
-    u8 pad12[2];
-} TrailPoint;
-
-typedef struct {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ CollisionHit collision;
-    /* 0x84 */ u8 buffers[0x10];
-    /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailParams *params;
-} Trail;
-
-extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern MotionTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Creates a trail object from a spawn description, motion block and render settings. */
-Trail *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
-                     s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
-                     s32 arg12, u8 arg13, s32 arg14) {
-    Trail *trail;
+MotionTrail *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
+                           s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
+                           s32 arg12, u8 arg13, s32 arg14) {
+    MotionTrail *trail;
     TrailParams *params;
 
     spawn->kind = 1;
-    trail = func_15147A80(spawn, extraSize + sizeof(TrailParams), sizeof(TrailPoint), 1, 0, 1, arg9, arg10,
+    trail = func_15147A80(spawn, extraSize + sizeof(TrailParams), sizeof(MotionTrailPoint), 1, 0, 1, arg9, arg10,
                           arg12, arg13, arg14);
     if (trail == NULL) {
         return NULL;
@@ -52,10 +36,10 @@ extern TrailFunc D_8008A3F8[];
 extern TrailFunc D_8008A42C[];
 
 /* Runs the trail's update handlers and fades; returns whether it is still alive. */
-s8 func_15147EB8(Trail *trail) {
+s8 func_15147EB8(MotionTrail *trail) {
     TrailParams *params;
     s8 done;
-    TrailPoint *points;
+    MotionTrailPoint *points;
     s16 unk1C;
     s32 fade;
     s32 ret;
@@ -117,7 +101,7 @@ extern struct {
 } D_800A4AC8[];
 
 /* Draws the trail as a camera-facing ribbon of quads, newest point first. */
-Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
+Gfx *func_1514803C(MotionTrail *trail, Gfx *gfx, s16 arg2) {
     TrailParams *params;
     Vtx *vtx;
     u8 update;
@@ -126,7 +110,7 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
     s32 i;
     s32 j;
     Vec3f *cam;
-    TrailPoint *points;
+    MotionTrailPoint *points;
     f32 toCamX;
     f32 toCamY;
     f32 toCamZ;
@@ -287,8 +271,8 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
 }
 
 /* Moves every point by the trail's velocity and gravity, then appends the current position. */
-s32 func_151488C4(Trail *trail) {
-    TrailPoint *points;
+s32 func_151488C4(MotionTrail *trail) {
+    MotionTrailPoint *points;
     TrailParams *params;
     s32 phase;
     struct {
@@ -347,9 +331,9 @@ s32 func_151488C4(Trail *trail) {
 }
 
 /* Moves every point by the trail's velocity and gravity, newest to oldest. */
-s32 func_15148AF4(Trail *trail) {
+s32 func_15148AF4(MotionTrail *trail) {
     s32 idx;
-    TrailPoint *points;
+    MotionTrailPoint *points;
     TrailParams *params;
 
     points = trail->points;
@@ -368,16 +352,16 @@ s32 func_15148AF4(Trail *trail) {
     return 1;
 }
 
-typedef s32 (*TrailHitFunc)(Trail *, f32, f32, f32, f32, void *);
+typedef s32 (*TrailHitFunc)(MotionTrail *, f32, f32, f32, f32, void *);
 extern TrailHitFunc D_8008A430[];
 extern TrailHitFunc D_8008A450[];
 s32 func_15046C80(f32 *, u16, f32, CollisionHit *);
 
 /* Like func_15148AF4, then tests the oldest point's fall against the ground and runs a hit handler. */
-s32 func_15148BA4(Trail *trail) {
+s32 func_15148BA4(MotionTrail *trail) {
     s32 index;
     TrailParams *params;
-    TrailPoint *points;
+    MotionTrailPoint *points;
     Vec3f oldPosition;
     Vec3f position;
     u8 callback;
@@ -429,12 +413,12 @@ s32 func_15148BA4(Trail *trail) {
 }
 
 /* Drops the newest point and respaces the remaining points' phases; fails below three points. */
-s32 func_15148DE0(Trail *trail) {
+s32 func_15148DE0(MotionTrail *trail) {
     s32 idx;
     u16 step;
     u16 phase;
     TrailParams *params;
-    TrailPoint *points;
+    MotionTrailPoint *points;
 
     if (trail->head.count >= 3) {
         trail->head.count--;
@@ -465,7 +449,7 @@ s32 func_15148DE0(Trail *trail) {
 }
 
 /* Handler: switches the trail to state 4. */
-s32 func_15148EF8(Trail *trail, s32 arg1, s32 arg2, s32 arg3) {
+s32 func_15148EF8(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3) {
     TrailParams *params = trail->params;
 
     params->state = 4;
@@ -527,7 +511,7 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
 }
 
 /* Fades the trail in: alpha = 8 per unit of unk1C, capped at 255. */
-s32 func_151490C8(Trail *trail) {
+s32 func_151490C8(MotionTrail *trail) {
     TrailParams *params = trail->params;
     s32 alpha = trail->head.tmpl.life * 8;
 

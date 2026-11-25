@@ -128,24 +128,6 @@ TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list) {
     return emitter;
 }
 
-/* Trail types (see game_175250.c). */
-
-/* One point of a trail; the points form a ring buffer. */
-typedef struct {
-    Vec3f pos;
-    f32 velocityY;
-    u16 phase; /* texture coordinate along the trail */
-    u8 pad12[2];
-} TrailPoint;
-
-typedef struct {
-    /* 0x00 */ EffectObjHead head;
-    /* 0x60 */ u8 pad60[0x24];
-    /* 0x84 */ u8 unk84[0x10];
-    /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailParams *params;
-} Trail;
-
 typedef struct {
     TrailEmitter *emitter;
     s8 point; /* which of the owner's two points the trail follows */
@@ -158,15 +140,15 @@ typedef struct {
     /* 0x50 */ Vec3f offsets[1]; /* per trail point, relative to the emit point */
 } EmitterTrailParams;
 
-extern Trail *func_15147DA0(EffectTemplate18 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
-                            s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
-                            TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
+extern MotionTrail *func_15147DA0(EffectTemplate18 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
+                                  s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
+                                  TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
 
-/* Trail emitter update: while the owner is alive, spawns a trail from each point when its timer runs out. */
+/* MotionTrail emitter update: while the owner is alive, spawns a trail from each point when its timer runs out. */
 void func_1518BD60(TrailEmitter *emitter) {
     u8 i;
     s32 point;
-    Trail *trail;
+    MotionTrail *trail;
     EffectTemplate18 spawn;
     TrailMotion motion;
     s32 pad; // matching: stack slot between motion and render
@@ -229,14 +211,14 @@ void func_1518BD60(TrailEmitter *emitter) {
 }
 
 /*
- * Trail update for trails spawned by a TrailEmitter: moves each point by its velocity and gravity
+ * MotionTrail update for trails spawned by a TrailEmitter: moves each point by its velocity and gravity
  * relative to the owner's emit point (rotated by the owner's facing), then either grows the trail by
  * one point or, once full, hands the owner's motion to the trail and lets it go.
  * Returns 0 when the owner is gone.
  */
-s32 func_1518C0B8(Trail *trail) {
+s32 func_1518C0B8(MotionTrail *trail) {
     EmitterTrailParams *params;
-    TrailPoint *points;
+    MotionTrailPoint *points;
     s32 i;
     TrailEmitterLink *link;
     Vec3f *offsets;
@@ -335,8 +317,8 @@ s32 func_1518C0B8(Trail *trail) {
     return 1;
 }
 
-/* Trail fade: alpha (motion.alpha) follows 8 * unk1C, capped at 0xFF. */
-s32 func_1518C540(Trail *trail) {
+/* MotionTrail fade: alpha (motion.alpha) follows 8 * unk1C, capped at 0xFF. */
+s32 func_1518C540(MotionTrail *trail) {
     s32 alpha;
     TrailParams *params;
 
@@ -376,11 +358,11 @@ void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a);
 void *func_15168800(QuadFxData *src, s32 owner, s32 list);
 u8 func_151D8E20(void);
 
-/* Trail hit handler: spawns a QuadFx puff where the trail's oldest point hit at height `hitY`. */
-s32 func_1518C57C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
+/* MotionTrail hit handler: spawns a QuadFx puff where the trail's oldest point hit at height `hitY`. */
+s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
     QuadFxData fx;
     TrailParams *params;
-    TrailPoint *points;
+    MotionTrailPoint *points;
 
     params = trail->params;
     points = trail->points;
@@ -403,10 +385,10 @@ s32 func_1518C57C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
 }
 
 /* Same as func_1518C57C, plus a func_151D8E20() effect (arg5) at the hit point. */
-s32 func_1518C69C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5) {
+s32 func_1518C69C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5) {
     QuadFxData fx;
     TrailParams *params;
-    TrailPoint *points;
+    MotionTrailPoint *points;
 
     params = trail->params;
     points = trail->points;
@@ -439,7 +421,7 @@ s32 func_1518C69C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5
 }
 
 /*
- * Trail emitter message handler: follows its owner through an actor swap (type 0x2D) and is
+ * MotionTrail emitter message handler: follows its owner through an actor swap (type 0x2D) and is
  * destroyed when the owner goes away (type 0).
  */
 void func_1518C850(TrailEmitter *emitter, s32 data, u8 type) {

@@ -2327,4 +2327,22 @@ typedef struct DynModelDesc {
     /* 0x3A */ u8 pad3A[2];
 } DynModelDesc; /* size 0x3C */
 
+/* One point of a func_15147DA0 trail (game_175250.c); the points form the object's ring buffer. */
+typedef struct MotionTrailPoint {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 velocityY;
+    /* 0x10 */ u16 phase;       /* texture coordinate along the trail */
+    /* 0x12 */ u8 pad12[2];
+} MotionTrailPoint; /* size 0x14 */
+
+/* A trail made by func_15147DA0 (game_175250.c): an EffectObjHead object whose points move by TrailMotion
+ * and collide with the floor. */
+typedef struct MotionTrail {
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ CollisionHit collision;
+    /* 0x84 */ u8 buffers[0x10];
+    /* 0x94 */ MotionTrailPoint *points;
+    /* 0x98 */ TrailParams *params;
+} MotionTrail; /* size 0x9C */
+
 #endif
