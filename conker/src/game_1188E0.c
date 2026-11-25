@@ -28,7 +28,7 @@ extern s32 D_80088AB0[8];
 extern s32 func_150A34B0(GateCylinder *cyl, vertex *start, vertex *end, vertex *hit);
 extern void func_150A2864(s32, s32);
 s32 func_150EB484(vertex *start, vertex *end, vertex *hit);
-void func_150EBC80(GateCylinder *gate, u8 arg1, s32 arg2);
+void func_150EBC80(GateCylinder *gate, u8 owner, s32 kind);
 
 /* Tests the segment from start to start + delta against the gate cylinders. */
 void func_150EB430(vertex *start, vertex *delta, vertex *hit) {
@@ -303,54 +303,51 @@ void func_150EB8C4(void) {
     }
 }
 
-typedef struct Game1188E0Event {
-    u8 type;
-    u8 pad1;
-    s16 duration;
-    u8 field4;
-    u8 field5;
-    s8 field6;
-    u8 pad7;
-} Game1188E0Event;
+/* Argument of func_151D8868 (CameraEvent in game_E0F60.c). */
+typedef struct {
+    /* 0x0 */ u8 type;
+    /* 0x1 */ u8 pad1;
+    /* 0x2 */ s16 duration;
+    /* 0x4 */ u8 unk4;
+    /* 0x5 */ u8 cameraMask;
+    /* 0x6 */ s8 unk6;
+    /* 0x7 */ u8 pad7;
+} CameraEvent;
 
-typedef struct Game1188E0Vec3f {
-    f32 x;
-    f32 y;
-    f32 z;
-} Game1188E0Vec3f;
+void *func_151D8868(CameraEvent *event, s32 arg1, u8 owner, s32 kind);
 
-void *func_151D8868(void *, s32, u8, s32);
-
-void func_150EBC80(GateCylinder *arg0, u8 arg1, s32 arg2) {
-    Game1188E0Vec3f position;
+/*
+ * Effect burst at a gate cylinder: a func_150E83AC effect lasting 300-400 frames, a camera event
+ * (type 1, 15-35 long), func_15164F0C, and the func_151D3FF4/func_151D5514/func_151541B8 trio at
+ * the cylinder's base and again half its height up.
+ */
+void func_150EBC80(GateCylinder *gate, u8 owner, s32 kind) {
+    vertex position;
     f32 random;
     f32 step;
-    Game1188E0Event event;
-    f32 scale;
-    u8 index;
+    CameraEvent event;
+    f32 growth;
+    u8 i;
 
-    position.x = ((s16 *)arg0)[0];
-    position.y = ((s16 *)arg0)[1];
-    position.z = ((s16 *)arg0)[2];
-    step = ((s16 *)arg0)[4] * 0.5f;
-    func_150E83AC(&position, (s16)((func_150ADA20() % 101U) + 0x12C),
-                  arg1, arg2);
+    position.x = gate->x;
+    position.y = gate->y;
+    position.z = gate->z;
+    step = gate->height * 0.5f;
+    func_150E83AC(&position, func_150ADA20() % 101U + 300, owner, kind);
     event.type = 1;
-    event.duration = (func_150ADA20() % 21U) + 0xF;
-    event.field4 = 0;
-    event.field6 = -1;
-    event.field5 = 1;
-    func_151D8868(&event, 0, arg1, arg2);
-    func_15164F0C(0, 0, 0, arg1, arg2);
-    scale = 1.640999913f;
-    index = 0;
-    do {
-        func_151D3FF4(&position, arg1, arg2);
-        func_151D5514(&position, arg1, arg2);
+    event.duration = func_150ADA20() % 21U + 15;
+    event.unk4 = 0;
+    event.unk6 = -1;
+    event.cameraMask = 1;
+    func_151D8868(&event, 0, owner, kind);
+    func_15164F0C(0, 0, NULL, owner, kind);
+    growth = 1.640999913f; // matching: a local (not a literal) is loaded once into a saved FP register
+    for (i = 0; i < 2; i++) {
+        func_151D3FF4(&position, owner, kind);
+        func_151D5514(&position, owner, kind);
         random = func_150ADA68();
-        func_151541B8(&position, random * 4.0f + 12.0f, scale,
-                     (f32)((func_150ADA20() % 56U) + 0xC8), 0.0f, arg1, arg2);
-        index++;
+        func_151541B8(&position, random * 4.0f + 12.0f, growth,
+                      func_150ADA20() % 56U + 200, 0.0f, owner, kind);
         position.y += step;
-    } while (index < 2);
+    }
 }
