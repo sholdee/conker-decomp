@@ -1607,57 +1607,14 @@ void func_1514470C(SpawnRegion *region, f32 *out) {
         return;
     }
 }
-f32 func_15144A74(struct17 *arg0, struct17 *arg1) {
-    return arg0->unk0 * arg1->unk0 + arg0->unk4 * arg1->unk4 + arg0->unk8 * arg1->unk8;
-}
-f32 func_15144AA8(s32 arg0) {
-    f32 v = D_800DBFF0[arg0].unk380;
-    if (360.0f < v) {
-        do {
-            v -= 360.0f;
-        } while (360.0f < v);
-    }
-    if (v < 0.0f) {
-        do {
-            v += 360.0f;
-        } while (v < 0.0f);
-    }
-    return v;
-}
-struct17 *func_15144B34(s32 arg0) {
-    return (struct17 *)&D_800DBFF0[arg0].unk2F8;
-}
-f32 func_15144B68(f32 arg0);
-extern f32 D_800A56A4;
-f32 func_15144B68(f32 arg0)
-{
-  f32 new_var;
-  new_var = D_800A56A4;
-  if (1)
-  {
-    f32 v = arg0;
-    if (new_var < v)
-    {
-      do
-      {
-        v -= new_var;
-      }
-      while (new_var < v);
-    }
-    if (v < 0.0f)
-    {
-      do
-      {
-        v += new_var;
-      }
-      while (v < 0.0f);
-    }
-    return v;
-  }
+/* Dot product. */
+f32 func_15144A74(struct17 *a, struct17 *b) {
+    return a->unk0 * b->unk0 + a->unk4 * b->unk4 + a->unk8 * b->unk8;
 }
 
-f32 func_15144BC8(f32 arg0) {
-    f32 v = arg0;
+/* D_800DBFF0[index].unk380 wrapped into [0, 360] degrees. */
+f32 func_15144AA8(s32 index) {
+    f32 v = D_800DBFF0[index].unk380;
     if (360.0f < v) {
         do {
             v -= 360.0f;
@@ -1671,129 +1628,172 @@ f32 func_15144BC8(f32 arg0) {
     return v;
 }
 
-s32 func_15144C2C(s16 arg0) {
-    s16 tmp1 = arg0;
-
-    while (tmp1 >= 256)
-    {
-        tmp1 -= 255;
-    }
-    while (tmp1 < 0)
-    {
-        tmp1 += 255;
-    }
-
-    return tmp1;
+struct17 *func_15144B34(s32 index) {
+    return (struct17 *)&D_800DBFF0[index].unk2F8;
 }
 
-f32 func_15144C8C(f32 arg0, f32 arg1) {
-    f32 tmp;
-
-    arg0 = func_15144B68(arg0);
-    tmp = fabsf(arg0 - func_15144B68(arg1));
-    if (D_800A56A8 < tmp) {
-        tmp = D_800A56AC - tmp;
+/* Wraps an angle into [0, 2 pi] radians. */
+f32 func_15144B68(f32 angle) {
+    f32 v = angle;
+    if (6.2831855f < v) {
+        do {
+            v -= 6.2831855f;
+        } while (6.2831855f < v);
     }
-    return tmp;
+    if (v < 0.0f) {
+        do {
+            v += 6.2831855f;
+        } while (v < 0.0f);
+    }
+    return v;
 }
 
+/* Wraps an angle into [0, 360] degrees. */
+f32 func_15144BC8(f32 angle) {
+    f32 v = angle;
+    if (360.0f < v) {
+        do {
+            v -= 360.0f;
+        } while (360.0f < v);
+    }
+    if (v < 0.0f) {
+        do {
+            v += 360.0f;
+        } while (v < 0.0f);
+    }
+    return v;
+}
+
+/* Wraps a value into [0, 255] in steps of 255. */
+s32 func_15144C2C(s16 value) {
+    s16 v = value;
+
+    while (v >= 256) {
+        v -= 255;
+    }
+    while (v < 0) {
+        v += 255;
+    }
+
+    return v;
+}
+
+/* Unsigned angular distance between two angles in radians, in [0, pi]. */
+f32 func_15144C8C(f32 a, f32 b) {
+    f32 diff;
+
+    a = func_15144B68(a);
+    diff = fabsf(a - func_15144B68(b));
+    if (3.1415927f < diff) {
+        diff = 6.2831855f - diff;
+    }
+    return diff;
+}
+
+/* Per-viewport record (0x180 bytes) of the table D_800BE628 points to. */
 typedef struct {
-    char pad0[0xC];
-    f32 unkC;
-    f32 unk10;
-    char pad14[0x20];
-    f32 unk34;
-    f32 unk38;
-    char pad3C[0x144];
-} Struct15144CEC;
+    /* 0x000 */ char pad0[0xC];
+    /* 0x00C */ f32 unkC;  /* half width? */
+    /* 0x010 */ f32 unk10; /* half height? */
+    /* 0x014 */ char pad14[0x20];
+    /* 0x034 */ f32 unk34; /* screen centre x */
+    /* 0x038 */ f32 unk38; /* screen centre y */
+    /* 0x03C */ char pad3C[0x144];
+} Viewport15144CEC;
+
 void func_150A7A00(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 *arg7);
 
-s32 func_15144CEC(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, u8 arg5) {
-    f32 sp44;
-    f32 sp40;
-    f32 sp3C;
+/*
+ * Projects world point pos through viewport's matrix (D_800D9D10) to screen coordinates in screen[2].
+ * Returns 0 when the depth is outside (D_800D9B20, 6000). The optional outputs get the projection's
+ * remaining terms and 1 / depth.
+ */
+s32 func_15144CEC(f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDepth, u8 viewport) {
+    f32 a;
+    f32 depth;
+    f32 invDepth;
     f32 x;
     f32 y;
 
-    if (arg2 == NULL) {
-        arg2 = &sp44;
+    if (outA == NULL) {
+        outA = &a;
     }
-    if (arg3 == NULL) {
-        arg3 = &sp40;
+    if (outDepth == NULL) {
+        outDepth = &depth;
     }
-    if (arg4 == NULL) {
-        arg4 = &sp3C;
+    if (outInvDepth == NULL) {
+        outInvDepth = &invDepth;
     }
-    func_150A7A00((s32)((u8 *)&D_800D9D10 + (arg5 << 6)), arg0[0], arg0[1], arg0[2], arg1, arg1 + 1, arg2, arg3);
-    if ((6000.0f <= *arg3) || (*arg3 <= D_800D9B20)) {
+    func_150A7A00((s32)((u8 *)D_800D9D10 + viewport * sizeof(Mtx)), pos[0], pos[1], pos[2], screen, screen + 1,
+                  outA, outDepth);
+    if ((6000.0f <= *outDepth) || (*outDepth <= D_800D9B20)) {
         return 0;
     }
-    if (*arg3 != 0.0f) {
-        *arg4 = 1.0f / *arg3;
+    if (*outDepth != 0.0f) {
+        *outInvDepth = 1.0f / *outDepth;
     } else {
         return 0;
     }
-    x = ((Struct15144CEC *)D_800BE628)[arg5].unkC;
-    y = ((Struct15144CEC *)D_800BE628)[arg5].unk10;
-    arg1[0] = ((Struct15144CEC *)D_800BE628)[arg5].unk34 + (arg1[0] * (x + 5.0f)) * *arg4;
-    arg1[1] = ((Struct15144CEC *)D_800BE628)[arg5].unk38 - (arg1[1] * (y + 5.0f)) * *arg4;
+    x = ((Viewport15144CEC *)D_800BE628)[viewport].unkC;
+    y = ((Viewport15144CEC *)D_800BE628)[viewport].unk10;
+    screen[0] = ((Viewport15144CEC *)D_800BE628)[viewport].unk34 + (screen[0] * (x + 5.0f)) * *outInvDepth;
+    screen[1] = ((Viewport15144CEC *)D_800BE628)[viewport].unk38 - (screen[1] * (y + 5.0f)) * *outInvDepth;
     return 1;
 }
-struct struct_15144E80 {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-};
 
-s32 func_15144E80(struct struct_15144E80 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3) {
-    struct17 sp54;
-    struct17 sp48;
-    struct17 sp3C;
-    struct17 sp30;
-    struct17 sp24;
-    struct17 sp18;
+/* A triangle as three s16 vertices. */
+typedef struct {
+    s16 v0[3];
+    s16 v1[3];
+    s16 v2[3];
+} Tri15144E80;
 
-    if (arg3 != NULL) {
-    } else {
-        arg3 = &sp30;
+/*
+ * Edge vectors of a triangle: normal = (v0 - v1) x (v2 - v1), binormal = edge x normal, edge = v0 - v1.
+ * Returns 0 for a degenerate triangle (two equal vertices). `normal` may be NULL.
+ */
+s32 func_15144E80(Tri15144E80 *tri, struct17 *binormal, struct17 *edgeOut, struct17 *normal) {
+    f32 c[3];
+    f32 b[3];
+    f32 a[3];
+    struct17 normalBuf;
+    struct17 edge0;
+    struct17 edge1;
+
+    if (normal == NULL) {
+        normal = &normalBuf;
     }
 
-    ((struct17 *)&sp3C)->unk0 = (f32)arg0->unk0;
-    ((struct17 *)&sp3C)->unk4 = (f32)arg0->unk2;
-    ((struct17 *)&sp3C)->unk8 = (f32)arg0->unk4;
-    ((struct17 *)&sp48)->unk0 = (f32)arg0->unk6;
-    ((struct17 *)&sp48)->unk4 = (f32)arg0->unk8;
-    ((struct17 *)&sp48)->unk8 = (f32)arg0->unkA;
-    ((struct17 *)&sp54)->unk0 = (f32)arg0->unkC;
-    ((struct17 *)&sp54)->unk4 = (f32)arg0->unkE;
-    ((struct17 *)&sp54)->unk8 = (f32)arg0->unk10;
+    a[0] = tri->v0[0];
+    a[1] = tri->v0[1];
+    a[2] = tri->v0[2];
+    b[0] = tri->v1[0];
+    b[1] = tri->v1[1];
+    b[2] = tri->v1[2];
+    c[0] = tri->v2[0];
+    c[1] = tri->v2[1];
+    c[2] = tri->v2[2];
 
-    if ((((struct17 *)&sp48)->unk0 == ((struct17 *)&sp3C)->unk0) && (((struct17 *)&sp48)->unk4 == ((struct17 *)&sp3C)->unk4) && (((struct17 *)&sp48)->unk8 == ((struct17 *)&sp3C)->unk8)) {
+    if ((a[0] == b[0]) && (a[1] == b[1]) && (a[2] == b[2])) {
         return 0;
     }
-    if ((((struct17 *)&sp54)->unk0 == ((struct17 *)&sp3C)->unk0) && (((struct17 *)&sp54)->unk4 == ((struct17 *)&sp3C)->unk4) && (((struct17 *)&sp54)->unk8 == ((struct17 *)&sp3C)->unk8)) {
+    if ((a[0] == c[0]) && (a[1] == c[1]) && (a[2] == c[2])) {
         return 0;
     }
-    if ((((struct17 *)&sp54)->unk0 == ((struct17 *)&sp48)->unk0) && (((struct17 *)&sp54)->unk4 == ((struct17 *)&sp48)->unk4) && (((struct17 *)&sp54)->unk8 == ((struct17 *)&sp48)->unk8)) {
+    if ((b[0] == c[0]) && (b[1] == c[1]) && (b[2] == c[2])) {
         return 0;
     }
 
-    sp24.unk0 = ((struct17 *)&sp3C)->unk0 - ((struct17 *)&sp48)->unk0;
-    sp24.unk4 = ((struct17 *)&sp3C)->unk4 - ((struct17 *)&sp48)->unk4;
-    sp24.unk8 = ((struct17 *)&sp3C)->unk8 - ((struct17 *)&sp48)->unk8;
-    sp18.unk0 = ((struct17 *)&sp54)->unk0 - ((struct17 *)&sp48)->unk0;
-    sp18.unk4 = ((struct17 *)&sp54)->unk4 - ((struct17 *)&sp48)->unk4;
-    sp18.unk8 = ((struct17 *)&sp54)->unk8 - ((struct17 *)&sp48)->unk8;
+    edge0.unk0 = a[0] - b[0];
+    edge0.unk4 = a[1] - b[1];
+    edge0.unk8 = a[2] - b[2];
+    edge1.unk0 = c[0] - b[0];
+    edge1.unk4 = c[1] - b[1];
+    edge1.unk8 = c[2] - b[2];
 
-    func_151450B4(&sp24, &sp18, arg3);
-    func_151450B4(&sp24, arg3, arg1);
-    *arg2 = sp24;
+    func_151450B4(&edge0, &edge1, normal);
+    func_151450B4(&edge0, normal, binormal);
+    *edgeOut = edge0;
     return 1;
 }
 
