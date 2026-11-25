@@ -62,7 +62,7 @@ void func_15193660(struct127 *actor, u8 arg1, s32 arg2) {
 
     if ((actor != NULL) && (actor->interaction_state != 0)) {
         bones = actor->unk1D4;
-        if (actor->unk1D4 == NULL) {
+        if (actor->unk1D4 == NULL) { // matching: the original reloads the field rather than testing bones
             return;
         }
         func_15142314(bones, 10, &burst.position);
@@ -301,7 +301,7 @@ void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Emitter *e
     motion.rotation.y = func_150ADA68() * 360.0f;
     motion.rotation.z = func_150ADA68() * 360.0f;
     func_150ADA68();
-    motion.unkC = 340.0f * D_800A81F0; // matching: a literal here would be constant-folded
+    motion.unkC = 340.0f * D_800A81F0; // matching: the original multiplies at run time; a literal 0.001f would be constant-folded
     motion.unk1C.x = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;
     motion.unk1C.y = 0.0f;
     motion.unk1C.z = ((func_150ADA68() * 1000.0f) + -500.0f) * 0.009999999776f;
