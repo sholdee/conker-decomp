@@ -119,7 +119,7 @@ typedef union {
 extern Particle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
 extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 extern s32 func_1515C0F8(struct127 *arg0, f32 **arg1);
-extern void func_15182670(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_15182670(u8, u8, u8, u8, s32, u8, u8, s32);
 extern void *func_15154884(vertex *, f32, f32, f32, u8, s32);
 
 /* Attaches a FollowEffect (func_150D54C8) to obj. */
@@ -325,7 +325,7 @@ void func_151C05F0(void *, u8, s32);
 void func_151C0360(void *, void *, u8, s32);
 void func_150D6388(vertex *pos, u8 arg1, s32 arg2);
 void func_150D6434(vertex *pos, u8 arg1, s32 arg2);
-void func_150D65F0(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
+void func_150D65F0(f32 *pos, s32 *arg1, u8 arg2, s32 arg3);
 void func_150D66A4(u8 arg0, u8 arg1, s32 arg2);
 
 void func_150D5A6C(struct127 *arg0, u8 arg1, s32 arg2) {
@@ -508,7 +508,7 @@ void func_150D5A6C(struct127 *arg0, u8 arg1, s32 arg2) {
     }
     if (hit && arg0->camera != NULL) {
         if ((sp17C & 0x1F) == 0xE) {
-            func_150D65F0((s32)sp188, (s32)&sp19C, arg1, arg2);
+            func_150D65F0(sp188, &sp19C, arg1, arg2);
         } else {
             func_151C0360(sp188, &sp19C, arg1, arg2);
         }
@@ -565,61 +565,60 @@ typedef struct {
     /* 0x50 */ s8  unk50;
 } Struct150D64E8;
 
-void func_150D64E8(Struct150D64E8 *arg0, f32 *arg1) {
-    arg0->unk00 = 6;
-    arg0->unk04 = 3;
-    arg1[0] = 1263.0f;
-    arg0->unk14 = 0.08999999613f;
-    arg0->unk18 = 0.03029999882f;
-    arg0->unk1C = 150.0f;
-    arg0->unk20 = 105.0f;
-    arg0->unk24 = 396.0f;
-    arg0->unk28 = 612.0f;
-    arg0->unk2C = 4;
-    arg0->unk30 = 3;
-    arg0->unk34 = 25.0f;
-    arg0->unk38 = 0.8120000362f;
-    arg0->unk3C = -2.0f;
-    arg0->unk40 = 1.618000031f;
-    arg0->unk44 = 20;
-    arg0->unk46 = 30;
-    arg0->unk48 = 100;
-    arg0->unk4A = 100;
-    arg0->unk4C = 12;
-    arg0->unk4E = 20;
+void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
+    info->unk00 = 6;
+    info->unk04 = 3;
+    *outValue = 1263.0f;
+    info->unk14 = 0.08999999613f;
+    info->unk18 = 0.03029999882f;
+    info->unk1C = 150.0f;
+    info->unk20 = 105.0f;
+    info->unk24 = 396.0f;
+    info->unk28 = 612.0f;
+    info->unk2C = 4;
+    info->unk30 = 3;
+    info->unk34 = 25.0f;
+    info->unk38 = 0.8120000362f;
+    info->unk3C = -2.0f;
+    info->unk40 = 1.618000031f;
+    info->unk44 = 20;
+    info->unk46 = 30;
+    info->unk48 = 100;
+    info->unk4A = 100;
+    info->unk4C = 12;
+    info->unk4E = 20;
 
     if (D_80082FA0 >= 2 || D_8008FD8C >= 8) {
-        arg0->unk50 = -1;
+        info->unk50 = -1;
     } else {
-        arg0->unk50 = 0;
+        info->unk50 = 0;
     }
 }
 
-void func_151A5D58(f32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_151A5D58(f32, u8, f32 *, s32 *, s32, s32, s32, u8, s32);
 
-void func_150D65F0(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
-    union { u32 w; f64 _a; } temp_a;
-    f32 temp_f0;
-    u32 temp_b;
+void func_150D65F0(f32 *pos, s32 *arg1, u8 arg2, s32 arg3) {
+    u32 rand3;
+    u32 rand2;
+    f32 rand1;
 
-    temp_f0 = func_150ADA68();
-    temp_a.w = func_150ADA20();
-    temp_b = func_150ADA20();
-    func_151A5D58(temp_f0 * 100.0f + 150.0f, ((temp_a.w % 71) + 0x82) & 0xFF, arg0, arg1,
-                  (temp_b % 31) + 0x32, 0, 1, arg2, arg3);
+    rand1 = func_150ADA68();
+    rand2 = func_150ADA20();
+    rand3 = func_150ADA20();
+    func_151A5D58(rand1 * 100.0f + 150.0f, rand2 % 71 + 130, pos, arg1, rand3 % 31 + 50, 0, 1, arg2, arg3);
 }
 
 void func_150D66A4(u8 arg0, u8 arg1, s32 arg2) {
-    u32 temp1;
-    u32 temp0;
+    u32 rand2;
+    u32 rand1;
 
-    temp0 = func_150ADA20();
-    temp1 = func_150ADA20();
-    func_15182670(0xFF, 0xFF, 0xFF, (u8)(temp0 % 0x38 + 0xC8), temp1 % 6 + 0x19, arg0, arg1, arg2);
+    rand1 = func_150ADA20();
+    rand2 = func_150ADA20();
+    func_15182670(0xFF, 0xFF, 0xFF, rand1 % 56 + 200, rand2 % 6 + 25, arg0, arg1, arg2);
 }
 
 void func_150D6C98(struct127 *obj, vertex *out);
-extern void func_15143794(s16, s16, f32, f32 *);
+extern void func_15143794(s16, s16, f32, vertex *);
 
 /* Spawns 15-25 drift particles and one grow particle that follow obj. */
 void func_150D6730(struct127 *obj, u8 arg1, s32 arg2) {
@@ -651,12 +650,12 @@ void func_150D6730(struct127 *obj, u8 arg1, s32 arg2) {
     spawn.unk16 = 0x4B;
     spawn.unk1C = 0xFF;
     func_150D6C98(obj, &spawn.pos);
-    spawn.unk1E = 0xF;
-    spawn.unk20 = 0x11;
+    spawn.unk1E = 15;
+    spawn.unk20 = 17;
     spawn.flags = 0x84DE01;
     spawn.unk60 = 8;
     spawn.unk61 = 6;
-    spawn.unk62 = 0x1E;
+    spawn.unk62 = 30;
     spawn.unk63 = -1;
     spawn.unk64 = -1;
     spawn.unk65 = 8;
@@ -672,8 +671,8 @@ void func_150D6730(struct127 *obj, u8 arg1, s32 arg2) {
         spawn.unk28 = spawn.unk2C = func_150ADA68() * 207.0f + 238.0f;
         r1 = func_150ADA20();
         r2 = func_150ADA20();
-        func_15143794(r1 & 0xFF, r2 % 36U - 25, func_150ADA68() * 30.0f + 25.0f, &spawn.vel.x);
-        spawn.unk54 = func_150ADA68() * (f32)0;
+        func_15143794(r1 & 0xFF, r2 % 36U - 25, func_150ADA68() * 30.0f + 25.0f, &spawn.vel);
+        spawn.unk54 = func_150ADA68() * (f32)0; // matching: keeps the multiply that a 0.0f literal folds away
         spawn.flags &= ~0xC0;
         r1 = (func_150ADA20() & 1) ? 0x80 : 0;
         r2 = (func_150ADA20() & 1) ? 0x40 : 0;
@@ -686,55 +685,56 @@ void func_150D6730(struct127 *obj, u8 arg1, s32 arg2) {
     } while (count > 0);
 
     {
-    s32 pad;
-    grow.owner = obj;
-    grow.ownerId = obj->unique_id;
-    grow.time = 0.0f;
-    grow.growth = 2392.159912f;
-    grow.lifetime = func_150ADA68() * 3.0f + 9.0f;
-    grow.fadeStart = func_150ADA68() * 80.0f + 100.0f;
-    grow.fadeRate = grow.fadeStart / (grow.lifetime * grow.lifetime);
-    growSpawn.unk1B = (u32)grow.fadeStart;
-    growSpawn.unk1D = 0x79;
-    growSpawn.unk8 = 0x4403;
-    growSpawn.unk0 = 0x200005;
-    growSpawn.unk4 = 0;
-    growSpawn.unkC = 0;
-    growSpawn.unk10 = 0;
-    growSpawn.unk18 = 0xFF;
-    growSpawn.unk19 = 0xFF;
-    growSpawn.unk1A = 0xDF;
-    growSpawn.unk17 = 0xFF;
-    growSpawn.unk14 = 0xFF;
-    growSpawn.unk15 = 0xFF;
-    growSpawn.unk16 = 0xFF;
-    growSpawn.unk1C = 0xFF;
-    func_150D6C98(obj, &growSpawn.pos);
-    growSpawn.unk3C = *(vertex *)&D_800A5480;
-    growSpawn.unk1E = 1;
-    growSpawn.unk20 = 0xFF;
-    growSpawn.unk22 = 1;
-    growSpawn.unk24 = 1.0f;
-    r1 = (func_150ADA20() & 1) ? 0x40 : 0;
-    r2 = (func_150ADA20() & 1) ? 0x80 : 0;
-    growSpawn.flags = r2 | 0x4C000 | r1;
-    growSpawn.unk60 = 6;
-    growSpawn.unk61 = 6;
-    growSpawn.unk62 = 0x1F;
-    growSpawn.unk63 = -1;
-    growSpawn.unk64 = -1;
-    growSpawn.unk65 = 9;
-    growSpawn.unk5C = 0;
-    growSpawn.unk66 = 0xFF;
-    growSpawn.vel = *(vertex *)&D_800A5480;
-    growSpawn.unkA = 300;
-    growSpawn.unk2C = 0.0f;
-    growSpawn.unk28 = 0.0f;
-    growSpawn.unk54 = 0.0f;
-    particle = func_15130280(&growSpawn, 1, 0, 0x1C, arg1, arg2);
-    if (particle != NULL) {
-        memcpy(&particle->data.grow, &grow, sizeof(grow));
-    }
+        s32 pad; // matching: an unused slot in a separate scope keeps the frame layout
+
+        grow.owner = obj;
+        grow.ownerId = obj->unique_id;
+        grow.time = 0.0f;
+        grow.growth = 2392.159912f;
+        grow.lifetime = func_150ADA68() * 3.0f + 9.0f;
+        grow.fadeStart = func_150ADA68() * 80.0f + 100.0f;
+        grow.fadeRate = grow.fadeStart / (grow.lifetime * grow.lifetime);
+        growSpawn.unk1B = grow.fadeStart;
+        growSpawn.unk1D = 0x79;
+        growSpawn.unk8 = 0x4403;
+        growSpawn.unk0 = 0x200005;
+        growSpawn.unk4 = 0;
+        growSpawn.unkC = 0;
+        growSpawn.unk10 = 0;
+        growSpawn.unk18 = 0xFF;
+        growSpawn.unk19 = 0xFF;
+        growSpawn.unk1A = 0xDF;
+        growSpawn.unk17 = 0xFF;
+        growSpawn.unk14 = 0xFF;
+        growSpawn.unk15 = 0xFF;
+        growSpawn.unk16 = 0xFF;
+        growSpawn.unk1C = 0xFF;
+        func_150D6C98(obj, &growSpawn.pos);
+        growSpawn.unk3C = *(vertex *)&D_800A5480;
+        growSpawn.unk1E = 1;
+        growSpawn.unk20 = 0xFF;
+        growSpawn.unk22 = 1;
+        growSpawn.unk24 = 1.0f;
+        r1 = (func_150ADA20() & 1) ? 0x40 : 0;
+        r2 = (func_150ADA20() & 1) ? 0x80 : 0;
+        growSpawn.flags = r2 | 0x4C000 | r1;
+        growSpawn.unk60 = 6;
+        growSpawn.unk61 = 6;
+        growSpawn.unk62 = 31;
+        growSpawn.unk63 = -1;
+        growSpawn.unk64 = -1;
+        growSpawn.unk65 = 9;
+        growSpawn.unk5C = 0;
+        growSpawn.unk66 = 0xFF;
+        growSpawn.vel = *(vertex *)&D_800A5480;
+        growSpawn.unkA = 300;
+        growSpawn.unk2C = 0.0f;
+        growSpawn.unk28 = 0.0f;
+        growSpawn.unk54 = 0.0f;
+        particle = func_15130280(&growSpawn, 1, 0, 0x1C, arg1, arg2);
+        if (particle != NULL) {
+            memcpy(&particle->data.grow, &grow, sizeof(grow));
+        }
     }
 }
 
