@@ -3439,7 +3439,7 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 a
             actor->events = *(struct TimedEvent **)(animEntry + 2);
             *(s8 *)&actor->unk138 = 0;
             actor->unk103 = 0;
-            actor->unkB4 = 0.0f;
+            actor->lastEventTime = 0.0f;
             if (index < D_8008FD8C) {
                 Actor *player = &D_800CC2D0[index];
 

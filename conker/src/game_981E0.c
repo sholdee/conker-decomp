@@ -24,37 +24,6 @@ extern u8 D_80099A3E;
 extern u8 D_80099AB4[];
 extern u8 D_80099ABC[];
 
-/*
- * Actor fields that include/structs.h only covers with padding, as a same-layout view.
- * (Fold into Actor in the central pass.)
- */
-typedef struct struct127Hidden {
-    /* 0x000 */ u8 pad0[0x70];
-    /* 0x070 */ u8 unk70;
-    /* 0x071 */ u8 pad71[0xB4 - 0x71];
-    /* 0x0B4 */ f32 lastEventTime;  /* func_1506AD30 */
-    /* 0x0B8 */ u8 padB8[0xC8 - 0xB8];
-    /* 0x0C8 */ f32 unkC8;
-    /* 0x0CC */ u8 padCC[0x136 - 0xCC];
-    /* 0x136 */ u8 unk136;
-    /* 0x137 */ u8 unk137;
-    /* 0x138 */ u8 pad138[0x160 - 0x138];
-    /* 0x160 */ s16 unk160;
-    /* 0x162 */ u8 pad162[0x1C4 - 0x162];
-    /* 0x1C4 */ struct TimedEvent *events; /* timed event list, index unk138 */
-    /* 0x1C8 */ u8 pad1C8[0x288 - 0x1C8];
-    /* 0x288 */ u8 unk288;
-    /* 0x289 */ u8 pad289[0x2D8 - 0x289];
-    /* 0x2D8 */ f32 unk2D8;
-    /* 0x2DC */ f32 unk2DC;
-    /* 0x2E0 */ f32 unk2E0;
-    /* 0x2E4 */ u8 pad2E4[0x304 - 0x2E4];
-    /* 0x304 */ s32 unk304[4];
-    /* 0x314 */ s32 *unk314;
-    /* 0x318 */ u8 pad318[0x32C - 0x318];
-} struct127Hidden;
-#define HIDDEN(obj) ((struct127Hidden *)(obj))
-
 /* The object func_1503195C returns (only the word at 0x3C is read here). */
 typedef struct {
     /* 0x00 */ u8 pad0[0x3C];
@@ -215,7 +184,7 @@ extern void func_1506AC8C(Actor *, s32, s32);
 extern Actor *func_1505ED34(void);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern s32 func_1515D480(s32);
-extern s32 *func_1515D440(void);
+extern void *func_1515D440(void);
 extern s32 func_15158BD0(Actor *, s32, s32);
 extern void func_1514EC1C(s32, Actor *, s32);
 extern u8 D_800C3E90;
@@ -300,17 +269,17 @@ f32 func_1506AD30(Actor *obj, f32 time, u8 filtered) {
         return 0.0f;
     }
     D_800D1878 = 0.0f;
-    if (time < HIDDEN(obj)->lastEventTime) {
+    if (time < obj->lastEventTime) {
         obj->unk138 = 0;
     }
     D_800D1880 = 1;
-    while (HIDDEN(obj)->events != NULL && HIDDEN(obj)->events[obj->unk138].time <= time && D_800D1880 != 0) {
-        if (HIDDEN(obj)->events[obj->unk138].time < 900.0f) {
-            D_800D1580 = HIDDEN(obj)->events[obj->unk138].parameter;
+    while (obj->events != NULL && obj->events[obj->unk138].time <= time && D_800D1880 != 0) {
+        if (obj->events[obj->unk138].time < 900.0f) {
+            D_800D1580 = obj->events[obj->unk138].parameter;
             D_800D1874 = *(f32 *)&D_800D1580;
             token = ((struct197Hidden *)obj->unk2D0)->token;
             if (D_800C35EA == 0 || D_800C365E != 0) {
-                id = HIDDEN(obj)->events[obj->unk138].id;
+                id = obj->events[obj->unk138].id;
                 if (filtered) {
                     s32 i;
                     for (i = 0; filtered; i++) {
@@ -901,7 +870,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
             func_15060F28(obj, 0);
         }
     }
-    HIDDEN(obj)->unk136 = 11;
+    obj->unk136 = 11;
     obj->interaction_state = 4;
     obj->health = 1;
     obj->unk7A = D_800D154C->unk7A;
@@ -932,7 +901,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
             obj->y_position = D_800D154C->y_position + minHeight;
         }
     }
-    HIDDEN(obj)->unk160 = 110;
+    obj->unk160 = 110;
     obj->unique_id = 0xFF - (obj - D_800CC2D0);
     if (kind == 0 || kind == 1) {
         obj->unk5 = 2;
@@ -940,12 +909,12 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     } else {
         obj->unk5 = 5;
         for (i = 0; i <= D_80082FA0; i++) {
-            HIDDEN(obj)->unk304[i] = func_1515D480(1);
+            obj->unk304[i] = func_1515D480(1);
         }
-        if (HIDDEN(obj)->unk304[i - 1] != 0) {
+        if (obj->unk304[i - 1] != 0) {
             obj->unk301 = 1;
         }
-        HIDDEN(obj)->unk314 = func_1515D440();
+        obj->unk314 = func_1515D440();
         switch (kind) {
         case 2:
             obj->unkB8 = 260.0f;
@@ -1314,7 +1283,7 @@ void func_1506D584(void) {
     u8 hi;
     u8 lo;
 
-    if (HIDDEN(obj)->unk70 != 0x2A) {
+    if (obj->defaultExpression != 0x2A) {
         hi = D_800D1580 >> 24;
         lo = (D_800D1580 >> 16) & 0xFF;
         value = D_800D1580 & 0xFFFF;
@@ -1358,7 +1327,7 @@ void func_1506D74C(void) {
         D_800D154C->y_velocity = 0.0f;
     }
     D_800D154C->y_position += 70.0f;
-    HIDDEN(D_800D154C)->unk137 = 0;
+    D_800D154C->unk137 = 0;
     D_800D154C->disable_run = 0;
     func_1505A184(D_800D154C->unk76, D_800D1580, 0, &xOff, &zOff, &yOff);
     func_1505E650(D_800D154C, 15, 1.0f, 0.0f, 0.0f, 0.0f, 0);
@@ -1687,7 +1656,7 @@ s32 func_1506E46C(Actor *obj, s32 *command, s32 mode) {
         }
     }
     if (id >= 2000) {
-        entry = D_800BE5A8[HIDDEN(obj)->unk288][id - 2000];
+        entry = D_800BE5A8[obj->unk288][id - 2000];
         if (entry == 0) {
             return 0;
         }
@@ -3093,7 +3062,7 @@ void func_15071FDC(void) {
     } else {
         if (D_800D154C->unk2E8 >= 113) {
             anim = 741;
-            HIDDEN(D_800D154C)->unk2E0 = 0.0f;
+            D_800D154C->unk2E0 = 0.0f;
         } else {
             anim = 50;
             player->unk76 = D_800D154C->unk76;
@@ -3104,9 +3073,9 @@ void func_15071FDC(void) {
         }
         D_800D154C->unk2E4 = 50;
     }
-    player->y_velocity = HIDDEN(D_800D154C)->unk2D8;
-    player->gravity = HIDDEN(D_800D154C)->unk2DC;
-    player->xz_velocity = HIDDEN(D_800D154C)->unk2E0;
+    player->y_velocity = D_800D154C->unk2D8;
+    player->gravity = D_800D154C->unk2DC;
+    player->xz_velocity = D_800D154C->unk2E0;
     player->unk81 = 1;
     func_1505E650(player, anim, 1.0f, 2.0f, 6.0f, 0.0f, 0);
     D_800CC2D0[0].unk31C->unk31 = visible;
@@ -3581,19 +3550,19 @@ u8 *func_15073118(u8 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, 
     obj->xz_scale = 0.5f;
     obj->y_scale = 0.5f;
     if (anim == 0x1F) {
-        HIDDEN(obj)->unkC8 = 10.0f;
+        obj->unkC8 = 10.0f;
     }
     obj->unk278 = anim;
     obj->unk5 = 5;
     obj->unique_id = 255U - (obj - D_800CC2D0);
     func_15083568(obj, anim, 1.0f, 0);
     for (i = 0; i <= D_80082FA0; i++) {
-        HIDDEN(obj)->unk304[i] = func_1515D480(1);
+        obj->unk304[i] = func_1515D480(1);
     }
-    if (HIDDEN(obj)->unk304[i - 1] != 0) {
+    if (obj->unk304[i - 1] != 0) {
         obj->unk301 = 1;
     }
-    HIDDEN(obj)->unk314 = func_1515D440();
+    obj->unk314 = func_1515D440();
     func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
     return (u8 *)obj;
 }

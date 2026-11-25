@@ -1244,7 +1244,7 @@ struct Actor {
     s8  unkB0;
     u8  padB1;
     u16 unkB2;  // (oxygen?)
-    /* 0xB4 */  f32 unkB4;
+    /* 0xB4 */  f32 lastEventTime; // animation time of the last timed event (func_1506AD30)
     f32 unkB8;  // used
     /* 0xBC */  f32 unkBC;
     /* 0xC0 */  f32 target_speed;

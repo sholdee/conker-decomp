@@ -150,7 +150,7 @@ void func_1507BDB0(AnimPlay *anim, f32 rate, Actor *obj, s32 mode) {
             func_1506AD30(D_800D154C, anim->time, 0);
         }
         // structs.h declares 0xB4 as s32 padB4; it holds the object's f32 animation time
-        obj->unkB4 = anim->time;
+        obj->lastEventTime = anim->time;
     }
 }
 
