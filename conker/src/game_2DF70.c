@@ -89,7 +89,7 @@ void func_15000AD0(s32 arg0) {
     if (D_800B0DF0->unk8 == 4) {
         size = (D_80082FA0 != 1) ? 0x130 : 0x1C0;
         for (i = 0; i <= D_80082FA0; i++) {
-            vtx = (Vtx *)allocate_memory(size * 32, 1, 2, 0);
+            vtx = (Vtx *)allocate_memory(size * 32, 1, 2, 0); // two buffers of `size` Vtx
             D_800DBE88[i][0] = vtx;
             D_800DBE88[i][1] = D_800DBE88[i][0] + size;
         }
@@ -281,7 +281,7 @@ void func_15000AD0(s32 arg0) {
         }
         D_800DBEB0 = (void *)allocate_memory((D_80082FA0 + 1) * 0x80, 1, 1, 0);
         for (i = 0; i <= D_80082FA0; i++) {
-            vtx = (Vtx *)allocate_memory(0x80, 1, 1, 0);
+            vtx = (Vtx *)allocate_memory(2 * 4 * sizeof(Vtx), 1, 1, 0);
             D_800DBE88[i][0] = vtx;
             D_800DBE88[i][1] = vtx + 4;
             for (j = 0; j < 2; j++) {
@@ -355,7 +355,6 @@ void func_15001460(Gfx *dl) {
         gfx = &dl[i];
         numTris = 0;
         opcode = *(s8 *)gfx;
-        t = 0;
         if ((opcode >> 4) == 1) {
             // Conker's G_TRI4 (opcodes 0x10-0x1F): four triangles, 5-bit vertex indices
             tris[0][0] = (gfx->words.w1 >> 25) & 0x1F;
