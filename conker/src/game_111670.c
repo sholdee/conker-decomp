@@ -76,7 +76,7 @@ void func_150E42F8(s32 count) {
         if (noHit != y && surface != 0) {
             idx = (surface - D_800DBE3C) / 12;
             if (idx >= 0 && idx < D_800DBE4C) {
-                material = func_1510F8CC(((s32 *)D_800DBE5C)[idx]);
+                material = func_1510F8CC(D_800DBE5C[idx]);
                 if (material != 0) {
                     func_150E4550(x, y, z, 0, material, (s16 **)surface, 0xFF);
                 }

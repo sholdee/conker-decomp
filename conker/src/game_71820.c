@@ -3,11 +3,9 @@
 #include "functions.h"
 #define D_800CBE00 D_800CBE00_s32
 #define D_800DBE3C D_800DBE3C_hdr
-#define D_800DBE5C D_800DBE5C_hdr
 #include "variables.h"
 #undef D_800CBE00
 #undef D_800DBE3C
-#undef D_800DBE5C
 
 /* A timed node in the D_800CBE00 list, allocated by func_15044964. */
 typedef struct TriggerNode {
@@ -382,7 +380,6 @@ void func_150A44F0(s32, void *, s32);
 s32 func_150A6500(s16, s16, s32 *, u16);
 s32 func_150A3FC4(f32, f32, s32, CollisionTri *, f32 *);
 extern u8 *D_800DBE3C;
-extern s32 *D_800DBE5C;
 extern u8 D_800D37E0[];
 extern u8 D_800D3830[];
 extern f32 D_800DBE68;

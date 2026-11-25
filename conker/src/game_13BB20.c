@@ -108,8 +108,7 @@ extern f32 D_800DBE6C;
 extern f32 D_800DBE70;
 extern s32 *D_800DBF94;
 
-// D_800DBE5C (declared s32) points at the world mesh's per-triangle materials, or is NULL.
-#define sWorldMaterials (*(s32 **)&D_800DBE5C)
+// D_800DBE5C points at the world mesh's per-triangle materials, or is NULL.
 // World-mesh triangles are 12 bytes (three vertex offsets) from D_800DBE3C on.
 #define WORLD_TRI_INDEX(tri) (((s32)(tri) - D_800DBE3C) / 12)
 
@@ -345,8 +344,8 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                 }
                 triIndex = WORLD_TRI_INDEX(floorTri);
                 if (type == PROBE_WORLD && outFlags != NULL) {
-                    if (sWorldMaterials != NULL) {
-                        *outFlags = sWorldMaterials[triIndex];
+                    if (D_800DBE5C != NULL) {
+                        *outFlags = D_800DBE5C[triIndex];
                     } else {
                         *outFlags = 0;
                     }
@@ -380,8 +379,8 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                             ceilingTri = (s32)D_800D3300[i].tri;
                             triIndex = WORLD_TRI_INDEX(ceilingTri);
                             if (type == PROBE_WORLD) {
-                                if (sWorldMaterials != NULL) {
-                                    ceilingFlags = sWorldMaterials[triIndex];
+                                if (D_800DBE5C != NULL) {
+                                    ceilingFlags = D_800DBE5C[triIndex];
                                 } else {
                                     ceilingFlags = 0;
                                 }

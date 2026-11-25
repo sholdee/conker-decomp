@@ -286,10 +286,10 @@ s32 func_1500390C(s32 addr) {
 void func_150039B0(s32 arg0) {
 }
 
-/* Sets D_800DBE5C to `addr` + 8, or to 0 when `addr` is 0. */
+/* Sets D_800DBE5C to `addr` + 8 (past the material block's header), or to NULL when `addr` is 0. */
 void func_150039BC(s32 addr) {
-    D_800DBE5C = addr;
-    if (D_800DBE5C) {
-        D_800DBE5C += 8;
+    D_800DBE5C = (u32 *)addr;
+    if (D_800DBE5C != NULL) {
+        D_800DBE5C += 2;
     }
 }

@@ -6,14 +6,12 @@
 #define D_800BE4A0 D_800BE4A0_header
 #define D_800DDA90 D_800DDA90_header
 #define D_800B0DF0 D_800B0DF0_header
-#define D_800DBE5C D_800DBE5C_header
 #include "variables.h"
 #undef D_800DCD80
 #undef D_800DCD84
 #undef D_800BE4A0
 #undef D_800DDA90
 #undef D_800B0DF0
-#undef D_800DBE5C
 
 
 typedef struct Game36680PointLink {
@@ -999,7 +997,6 @@ typedef struct Game36680EmitterChoice {
 extern Game36680EmitterChoice D_8008CF00[][8];
 extern Game36680Emitter D_8008CEB8[];
 extern s32 D_8008CEB4;
-extern u32 *D_800DBE5C;
 extern u8 D_800DDC10[];
 extern s16 D_800DDC90[60];
 extern void func_1510F800(s32);
