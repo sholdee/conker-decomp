@@ -12,341 +12,316 @@
 void func_1509093C(void);
 void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 #define D_800D24C8 D_800D24C8_hdr
+#define D_800D2460 D_800D2460_hdr
+#define D_800D2890 D_800D2890_hdr
+#define D_800D2590 D_800D2590_hdr
 #include "variables.h"
 #undef D_800D24C8
+#undef D_800D2460
+#undef D_800D2890
+#undef D_800D2590
 extern s32 func_150ADA20(void);
 void func_1508F9F4(void);
 void func_1508F0D4(void);
 void func_1508F7BC(void);
 extern u8 D_800CC49A;
+extern f32 D_800D2890[3];
+extern Mtx D_800D2590[6][2];
 
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15042D94(s32, s32, u8, s32 *, ...);
 extern u8 D_D16[];
 
-// need to figure out D_800D2460
+/* One rising bubble sprite of the underwater HUD effect. */
+typedef struct Bubble {
+    s16 x;
+    s16 y;
+    s16 originX;
+    s16 size;
+    s16 radius;
+    s16 timer;
+    u8 accel;
+    u8 state;
+    u8 angle;
+    u8 phase;
+} Bubble;
+
+extern Bubble D_800D2460[6];
+
+/* Resets all bubbles to the idle state. */
 void func_1508F060(void) {
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        D_800D2460[i][13] = 0;
+        D_800D2460[i].state = 0;
     }
     D_800D24C0 = 0;
 }
 
+/* Per-frame update of the platform, the bubbles and the water surface. */
 void func_1508F0A4(void) {
     func_1508F0D4();
     func_1508F9F4();
     func_1509093C();
 }
 
-void func_1508F0D4(void)
-{
-  s32 t;
-  s32 i;
-  s32 j;
-  s32 pad1;
-  s32 n;
-  struct256 *p;
-  struct256 **pp;
-  s32 pad2;
-  f32 cnt;
-  f32 target;
-  f32 base;
-  f32 d;
-  f32 cur;
-  f32 inc;
-  pp = &D_800D245C;
-  p = D_800D245C;
-  while (p != 0)
-  {
-    p->unk94 -= 5.0f;
-    p->unk84 += p->unk90;
-    p->unk88 += p->unk94;
-    p->unk8C += p->unk98;
-    p->unk9C += p->unkA8;
-    p->unkA0 += p->unkAC;
-    p->unkA4 += p->unkB0;
-    t = p->unkB4;
-    t -= D_800BE9E4;
-    if (t <= 0)
-    {
-      *pp = p->unk80;
-      func_100043B4((s32 *) p, 3);
-    }
-    else
-    {
-      p->unkB4 = t;
-      pp = &p->unk80;
-    }
-    p = p->unk80;
-  }
+/* Moves the falling debris particles and slides the platform towards its target height. */
+void func_1508F0D4(void) {
+    s32 timer;
+    s32 i;
+    s32 j;
+    s32 pad1; // matching: unused stack slot in the original frame
+    s32 count;
+    struct256 *node;
+    struct256 **link;
+    f32 target;
+    f32 base;
+    f32 cur;
+    f32 inc;
 
-  if (D_800CC49A < D_800D2457)
-  {
-    if (p->unkA8)
-    {
-    }
-    D_800D2444 = 0xF0;
-    while (D_800CC49A != D_800D2457)
-    {
-      D_800D2457--;
-      if (D_800D2428[0] == ((f32) D_8009DCB4[3]))
-      {
-        func_1508F7BC();
-      }
-    }
-
-    func_10010F30(0x1A6, 0x7FFF, 0x40, 0, 0);
-  }
-  else
-    if (D_800D2457 < D_800CC49A)
-  {
-    D_800D2444 = 0xF0;
-    while (D_800CC49A != D_800D2457)
-    {
-      D_800D2457++;
-      if (D_800D2428[0] == ((f32) D_8009DCB4[3]))
-      {
-        func_1508F9C4();
-      }
-    }
-
-  }
-  if (D_800D2444 != 0)
-  {
-    cur = D_800D2428[0];
-    target = (f32) D_8009DCB4[3];
-    if (cur == target)
-    {
-      D_800D2444 -= D_800BE9E4;
-      if (D_800D2444 <= 0)
-      {
-        D_800D2444 = 0;
-      }
-      for (j = 0; j < 4; j += 2)
-      {
-        for (i = 0; i < D_800BE9E4; i++)
-        {
-          ((f32 *) (&D_800D2890))[j] += D_800D2438[j] * (-0.1000000015f);
-          ((f32 *) (&D_800D2890))[j] *= 0.8500000238f;
-          D_800D2438[j] += ((f32 *) (&D_800D2890))[j] * ((f32) D_800BE9E4);
+    link = &D_800D245C;
+    node = D_800D245C;
+    while (node != NULL) {
+        node->unk94 -= 5.0f;
+        node->unk84 += node->unk90;
+        node->unk88 += node->unk94;
+        node->unk8C += node->unk98;
+        node->unk9C += node->unkA8;
+        node->unkA0 += node->unkAC;
+        node->unkA4 += node->unkB0;
+        timer = node->unkB4;
+        timer -= D_800BE9E4;
+        if (timer <= 0) {
+            *link = node->unk80;
+            func_100043B4((s32 *)node, 3);
+        } else {
+            node->unkB4 = timer;
+            link = &node->unk80;
         }
-
-      }
-
+        node = node->unk80;
     }
-    else
-      if (D_800D2457 < D_800D2456)
-    {
-      n = D_800D2456 - D_800D2457;
-      D_800D2428[0] += 50.0f * ((f32) D_800BE9E4);
-      if (target <= D_800D2428[0])
-      {
-        D_800D2428[0] = target;
-        for (i = 0; i < n; i++)
-        {
-          func_1508F7BC();
-        }
 
+    if (D_800CC49A < D_800D2457) {
+        // matching: an empty if here splits the block; IDO's layout of the branch below depends on it
+        if (node != NULL) {
+        }
+        D_800D2444 = 240;
+        while (D_800CC49A != D_800D2457) {
+            D_800D2457--;
+            if (D_800D2428[0] == (f32)D_8009DCB4[3]) {
+                func_1508F7BC();
+            }
+        }
         func_10010F30(0x1A6, 0x7FFF, 0x40, 0, 0);
-      }
-    }
-    else
-    {
-      n = D_800D2457 - D_800D2456;
-      D_800D2428[0] += 50.0f * ((f32) D_800BE9E4);
-      if (target <= D_800D2428[0])
-      {
-        D_800D2428[0] = target;
-        for (i = 0; i < n; i++)
-        {
-          func_1508F9C4();
+    } else if (D_800D2457 < D_800CC49A) {
+        D_800D2444 = 240;
+        while (D_800CC49A != D_800D2457) {
+            D_800D2457++;
+            if (D_800D2428[0] == (f32)D_8009DCB4[3]) {
+                func_1508F9C4();
+            }
         }
-
-      }
     }
-  }
-  else
-  {
-    cur = D_800D2428[0];
-    base = (f32) D_8009DCB4[0];
-    if (D_800D2428[0] != ((f32) D_8009DCB4[0]))
-    {
-      target = (((f32) D_8009DCB4[3]) - D_800D2428[0]) * 0.1000000015f;
-      if (target < 0.009999999776f)
-      {
-        target = 0.009999999776f;
-      }
-      D_800D2428[0] -= target * ((f32) D_800BE9E4);
-      if (D_800D2428[0] < base)
-      {
-        D_800D2428[0] = base;
-      }
+    if (D_800D2444 != 0) {
+        cur = D_800D2428[0];
+        target = D_8009DCB4[3];
+        if (cur == target) {
+            D_800D2444 -= D_800BE9E4;
+            if (D_800D2444 <= 0) {
+                D_800D2444 = 0;
+            }
+            for (j = 0; j < 4; j += 2) {
+                for (i = 0; i < D_800BE9E4; i++) {
+                    D_800D2890[j] += D_800D2438[j] * -0.1f;
+                    D_800D2890[j] *= 0.85f;
+                    D_800D2438[j] += D_800D2890[j] * (f32)D_800BE9E4;
+                }
+            }
+        } else if (D_800D2457 < D_800D2456) {
+            count = D_800D2456 - D_800D2457;
+            D_800D2428[0] += 50.0f * (f32)D_800BE9E4;
+            if (target <= D_800D2428[0]) {
+                D_800D2428[0] = target;
+                for (i = 0; i < count; i++) {
+                    func_1508F7BC();
+                }
+                func_10010F30(0x1A6, 0x7FFF, 0x40, 0, 0);
+            }
+        } else {
+            count = D_800D2457 - D_800D2456;
+            D_800D2428[0] += 50.0f * (f32)D_800BE9E4;
+            if (target <= D_800D2428[0]) {
+                D_800D2428[0] = target;
+                for (i = 0; i < count; i++) {
+                    func_1508F9C4();
+                }
+            }
+        }
+    } else {
+        cur = D_800D2428[0];
+        base = D_8009DCB4[0];
+        if (D_800D2428[0] != (f32)D_8009DCB4[0]) {
+            target = ((f32)D_8009DCB4[3] - D_800D2428[0]) * 0.1f;
+            if (target < 0.01f) {
+                target = 0.01f;
+            }
+            D_800D2428[0] -= target * (f32)D_800BE9E4;
+            if (D_800D2428[0] < base) {
+                D_800D2428[0] = base;
+            }
+        }
     }
-  }
-  for (i = 0; i < 6; i++)
-  {
-    if (D_800D2410[i] != 1.0f)
-    {
-      inc = D_800BE9E4 * 0.02999999933f;
-      D_800D2410[i] += inc;
-      if (D_800D2410[i] > 1.0f)
-      {
-        D_800D2410[i] = 1.0f;
-      }
+    for (i = 0; i < 6; i++) {
+        if (D_800D2410[i] != 1.0f) {
+            inc = D_800BE9E4 * 0.03f;
+            D_800D2410[i] += inc;
+            if (D_800D2410[i] > 1.0f) {
+                D_800D2410[i] = 1.0f;
+            }
+        }
     }
-  }
-
 }
 
+/* Removes one block from the platform and spawns a debris particle at its old position. */
 void func_1508F7BC(void) {
-    f32 sp48[4][4];
-    f32 sp44;
-    struct256 *temp_v0;
+    f32 mtx[4][4];
+    f32 unused;
+    struct256 *node;
 
     D_800D2456 -= 1;
-    D_800D2890.unk0 = (u32) (func_150ADA20() % 5U);
-    D_800D2890.unk8 = sqrtf(25.0f - (D_800D2890.unk0 * D_800D2890.unk0));
-    temp_v0 = allocate_memory(sizeof(*temp_v0), 1, 1, 0);
-    temp_v0->unk80 = D_800D245C;
-    D_800D245C = temp_v0;
-    guMtxL2F(&sp48, (D_800D2456 << 7) + ((D_800BE9C0 ^ 1) << 6) + &D_800D2590);
-    func_1503E5F8(&sp48, &temp_v0->unk84, &temp_v0->unk88, &temp_v0->unk8C, &temp_v0->unk9C, &temp_v0->unkA0, &temp_v0->unkA4, &sp44, &sp44, &sp44);
-
-    temp_v0->unk90 = (u32)((func_150ADA20() & 0xF) + 10);
-    temp_v0->unk94 = (u32)((func_150ADA20() & 0x1F) + 20);
-    temp_v0->unk98 = 0.0f;
-    temp_v0->unkA8 = (u32)(func_150ADA20() & 0xF);
-    temp_v0->unkAC = (u32)(func_150ADA20() & 0xF);
-    temp_v0->unkB0 = (u32)(func_150ADA20() & 0xF);
-    temp_v0->unkB4 = 120;
+    D_800D2890[0] = func_150ADA20() % 5U;
+    D_800D2890[2] = sqrtf(25.0f - D_800D2890[0] * D_800D2890[0]);
+    node = allocate_memory(sizeof(*node), 1, 1, 0);
+    node->unk80 = D_800D245C;
+    D_800D245C = node;
+    guMtxL2F(mtx, &D_800D2590[D_800D2456][D_800BE9C0 ^ 1]);
+    func_1503E5F8(mtx, &node->unk84, &node->unk88, &node->unk8C, &node->unk9C, &node->unkA0, &node->unkA4,
+                  &unused, &unused, &unused);
+    node->unk90 = (func_150ADA20() & 0xFU) + 10;
+    node->unk94 = (func_150ADA20() & 0x1FU) + 20;
+    node->unk98 = 0.0f;
+    node->unkA8 = func_150ADA20() & 0xFU;
+    node->unkAC = func_150ADA20() & 0xFU;
+    node->unkB0 = func_150ADA20() & 0xFU;
+    node->unkB4 = 120;
 }
 
+/* Adds one block back to the platform; it grows in from zero scale. */
 void func_1508F9C4(void) {
     D_800D2410[D_800D2456++] = 0.0f;
 }
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    u8 unkC;
-    u8 state;
-    u8 unkE;
-    u8 unkF;
-} BC510Bubble;
 extern f32 func_15048A40(u8 arg0);
 
+/* Spawns and animates the bubbles while the player's air is running out underwater. */
 void func_1508F9F4(void) {
     s32 i;
     s32 v;
-    s32 flag;
-    s32 d;
-    s32 n;
-    s32 t;
-    s32 u;
+    s32 spawn;
+    s32 dt;
+    s32 duration;
+    s32 size;
+    s32 air;
     s32 j;
-    s32 x;
+    s32 y;
 
-    u = D_800D24C0;
-    if (u != 0) {
-        u -= D_800BE9E4;
-        if (u < 0) {
-            u = 0;
+    air = D_800D24C0;
+    if (air != 0) {
+        air -= D_800BE9E4;
+        if (air < 0) {
+            air = 0;
         }
-        D_800D24C0 = u;
+        D_800D24C0 = air;
     }
     if (D_800CC2D0[0].in_water) {
-        u = D_800CC2D0[0].unkB2;
+        air = D_800CC2D0[0].unkB2;
     } else {
-        u = 0;
+        air = 0;
     }
-    if (u > 90) {
-        n = u / 240;
-        if (n > 6) {
-            n = 6;
+    if (air > 90) {
+        duration = air / 240;
+        if (duration > 6) {
+            duration = 6;
         }
-        n = 6 - n;
-        n = n * 9;
-        if (n == 0) {
-            flag = 0;
+        duration = 6 - duration;
+        duration = duration * 9;
+        if (duration == 0) {
+            spawn = 0;
         }
     } else {
-        flag = 0;
+        spawn = 0;
     }
     for (i = 0; i < 6; i++) {
-        BC510Bubble *p = (BC510Bubble *)D_800D2460[i];
+        Bubble *p = &D_800D2460[i];
         if (p->state == 2) {
-            v = p->unkA;
+            v = p->timer;
             v -= D_800BE9E4;
             if (v <= 0) {
                 v = 6;
                 p->state = 3;
             }
-            p->unkA = v;
+            p->timer = v;
         }
-    sw:
         switch (p->state) {
         case 0:
+    // matching: the two labels split case 0 into extra blocks; IDO then drops a bnel at the loop end
     LX: ;
         l0:
-            if (flag != 0 && D_800D24C0 == 0) {
+            if (spawn != 0 && D_800D24C0 == 0) {
                 D_800D24C0 = 10;
                 p->state = 1;
-                p->unk0 = 0xFC;
-                p->unk2 = 0x60;
-                p->unk6 = 0;
-                p->unkC = 0;
-                p->unkE = func_150ADA20();
-                p->unk8 = 0x500;
-                p->unk4 = 0xFC - ((s32)(p->unk8 * func_15048A40(p->unkE)) >> 8);
-                p->unkF = 0;
-                p->unkA = n;
+                p->x = 252;
+                p->y = 96;
+                p->size = 0;
+                p->accel = 0;
+                p->angle = func_150ADA20();
+                p->radius = 0x500;
+                p->originX = 252 - ((s32)(p->radius * func_15048A40(p->angle)) >> 8);
+                p->phase = 0;
+                p->timer = duration;
             }
             break;
         case 1:
-            v = p->unk6;
+            v = p->size;
             v += D_800BE9E4 * 200;
             if (v >= 0x666) {
                 p->state = 2;
                 v = 0x666;
             }
-            p->unk6 = v;
+            p->size = v;
             break;
         case 2:
-            d = D_800BE9E4;
+            dt = D_800BE9E4;
             j = 0;
-            v = p->unkC;
-            if (v < 0x20) {
-                v = v + d;
-                if (v > 0x20) {
-                    v = 0x20;
+            v = p->accel;
+            if (v < 32) {
+                v = v + dt;
+                if (v > 32) {
+                    v = 32;
                 }
-                p->unkC = v;
+                p->accel = v;
             }
-            x = p->unk2;
-            x -= (d * p->unkC) >> 4;
-            *(volatile s16 *)&p->unk2 = x;
-            t = *(volatile s16 *)&p->unk6;
-            if (d > 0) {
+            y = p->y;
+            y -= (dt * p->accel) >> 4;
+            // matching: volatile keeps the size load after the y store
+            *(volatile s16 *)&p->y = y;
+            size = *(volatile s16 *)&p->size;
+            if (dt > 0) {
                 do {
                     j++;
-                    t = (t * 0x104) >> 8;
-                } while (j < d);
+                    size = (size * 0x104) >> 8;
+                } while (j < dt);
             }
-            p->unk6 = t;
-            p->unkE += d * 5;
-            p->unk8 += d * 30;
-            p->unk0 = ((s32)(func_15048A40(p->unkE) * p->unk8) >> 8) + p->unk4;
-            p->unkF += D_800BE9E4 * 10;
+            p->size = size;
+            p->angle += dt * 5;
+            p->radius += dt * 30;
+            p->x = ((s32)(func_15048A40(p->angle) * p->radius) >> 8) + p->originX;
+            p->phase += D_800BE9E4 * 10;
+        // matching: label steers block layout of case 2's exit
         lbl:
             break;
         case 3:
-            if (p->unkA == 0) {
+            if (p->timer == 0) {
                 p->state = 0;
             }
             break;
