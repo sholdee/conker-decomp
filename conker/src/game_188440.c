@@ -2,105 +2,102 @@
 #include "functions.h"
 #include "variables.h"
 
-
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_1515AF90;
+    f32 x, y, z;
+} Vec3f;
 
+/* Data copied into a func_151491F4 particle at offset 0x28 by func_1515AF90. */
 typedef struct {
-    Vec3f_1515AF90 position;
-    f32 scale;
-    f32 zero;
-    f32 ground;
-} GameAF90Packet;
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ f32 scale;
+    /* 0x10 */ f32 zero;
+    /* 0x14 */ f32 ground;
+} GroundParticle;
 
+/* Result of a floor probe (CollisionHit in game_71820.c). */
 typedef struct {
-    f32 height;
-    s16 points[9];
-    s32 object;
-    u8 flags;
-    u8 active;
-    u8 pad1E[2];
-    s32 field20;
-} Game71820Hit_1515AF90;
+    /* 0x00 */ f32 height;
+    /* 0x04 */ s16 tri[9];
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 material;
+    /* 0x1C */ u8 flags;
+    /* 0x1D */ u8 source;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ void *surface;
+} GroundHit;
 
-s32 func_1504697C(Vec3f_1515AF90 *, u16, f32, Game71820Hit_1515AF90 *);
-extern f32 D_800A6420;
-extern f32 D_800A6424;
-extern f32 D_800A6428;
-extern f32 D_800A642C;
-extern f32 D_800A6430;
-extern f32 D_800A6434;
+s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, GroundHit *hit);
 
-void func_1515AF90(s16 arg0) {
+/*
+ * With a 1-in-16 chance, spawns a particle (func_151491F4) on the ground 107-2010 units from
+ * the player's camera, at an angle within 20 units of its yaw (unk380, converted from degrees).
+ */
+void func_1515AF90(s16 player) {
     if (!(func_150ADA20() & 0xF)) {
-        void *result;
-        GameAF90Packet packet;
-        Vec3f_1515AF90 *base;
-        s32 offset;
+        void *particle;
+        GroundParticle effect;
+        Vec3f *eye;
+        s32 yaw;
         u8 valid;
         s16 angle;
-        f32 radius;
+        f32 distance;
         f32 cosine;
         f32 sine;
-        Game71820Hit_1515AF90 hit;
-        Vec3f_1515AF90 query;
-        Game71820Hit_1515AF90 lowerHit;
-        Vec3f_1515AF90 lowerQuery;
-        f32 lowerHeight;
+        GroundHit hit;
+        Vec3f probe;
+        GroundHit lowerHit;
+        Vec3f lowerProbe;
+        f32 bottom;
 
-        valid = 1;
-        base = (Vec3f_1515AF90 *)&D_800DBFF0[arg0].unk2F8;
-        offset = D_800DBFF0[arg0].unk380 * D_800A6420;
+        valid = TRUE;
+        eye = (Vec3f *)&D_800DBFF0[player].unk2F8;
+        yaw = D_800DBFF0[player].unk380 * 0.7111111283f;
         {
             u32 roll = func_150ADA20();
 
-            angle = (roll % 41U) + offset - 0x14;
-            radius = func_150ADA68() * D_800A6424 + 107.0f;
+            angle = (roll % 41U) + yaw - 20;
+            distance = func_150ADA68() * 1903.0f + 107.0f;
             cosine = func_151423D8(angle);
             sine = func_151423D8(angle - 0x40);
-            packet.position.x = base->x - radius * sine;
-            packet.position.z = base->z - radius * cosine;
+            effect.position.x = eye->x - distance * sine;
+            effect.position.z = eye->z - distance * cosine;
         }
-        query.x = packet.position.x;
-        hit.object = 0;
+        probe.x = effect.position.x;
+        hit.material = 0;
         hit.flags = 0;
-        hit.active = 0;
-        hit.field20 = 0;
-        query.y = D_800A6428;
-        query.z = packet.position.z;
-        hit.height = D_800A642C;
-        if (func_1504697C(&query, 0, base->y, &hit) != 0) {
-            packet.ground = hit.height;
+        hit.source = 0;
+        hit.surface = NULL;
+        probe.y = 19500.0f;
+        probe.z = effect.position.z;
+        hit.height = -10000.0f;
+        if (func_1504697C(&probe, 0, eye->y, &hit)) {
+            effect.ground = hit.height;
         } else {
-            valid = 0;
+            valid = FALSE;
         }
         if (valid) {
-            lowerHeight = base->y + -250.0f;
-            lowerHit.field20 = 0;
-            lowerHit.active = 0;
+            bottom = eye->y + -250.0f;
+            lowerHit.surface = NULL;
+            lowerHit.source = 0;
             lowerHit.flags = 0;
-            lowerHit.object = 0;
-            lowerHit.height = D_800A6430;
-            lowerQuery.x = packet.position.x;
-            lowerQuery.y = base->y;
-            lowerQuery.z = packet.position.z;
-            if (func_1504697C(&lowerQuery, 0, lowerHeight, &lowerHit) != 0) {
-                packet.position.y = lowerHit.height;
+            lowerHit.material = 0;
+            lowerHit.height = -10000.0f;
+            lowerProbe.x = effect.position.x;
+            lowerProbe.y = eye->y;
+            lowerProbe.z = effect.position.z;
+            if (func_1504697C(&lowerProbe, 0, bottom, &lowerHit)) {
+                effect.position.y = lowerHit.height;
             } else {
-                packet.position.y = lowerHeight;
+                effect.position.y = bottom;
             }
         }
-        func_150ADA68();
-        packet.scale = 195.0f * D_800A6434;
-        packet.zero = 0.0f;
+        effect.scale = (func_150ADA68() * 0.0f + 195.0f) * 0.001000000047f;
+        effect.zero = 0.0f;
         if (valid) {
             angle = (func_150ADA20() % 61U) + 5;
-            result = func_151491F4(angle, -1, 0xC, 1, 7, 0x18, 0xFF, 0);
-            if (result != NULL) {
-                memcpy((u8 *)result + 0x28, &packet, sizeof(packet));
+            particle = func_151491F4(angle, -1, 12, 1, 7, 0x18, 0xFF, 0);
+            if (particle != NULL) {
+                memcpy((u8 *)particle + 0x28, &effect, sizeof(effect));
             }
         }
     }
