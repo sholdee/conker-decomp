@@ -27,7 +27,6 @@ extern u16 D_800BE700[];
 extern u16 D_800BE708[];
 extern u16 D_800BE718[];
 void func_1501C57C(void);
-void func_151DD8C0(void);
 
 
 /* Reads the controllers into the per-player pads (D_80084060 maps player slots to channels),
@@ -247,7 +246,6 @@ void func_1501C53C(void) {
 
 extern u8 D_80084068;
 void func_151DCFD8(s32);
-u8 func_151DD460(OSMesgQueue *);
 void func_15007168(void);
 void func_15006590(s32 eepromSlot);
 void func_15006BEC(s32 saveSlot);

@@ -1080,7 +1080,7 @@ void func_15002FB4(s32 map) {
     s32 count;
     s32 loaded;
     LevelHeader *info;
-    s32 romWord;
+    u32 romWord;
 
     res = func_1502B6BC(&loaded, 0, &count, 2, 21, map);
     if (count != 0 && (res->unk4 << 8) != 0) {

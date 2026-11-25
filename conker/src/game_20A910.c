@@ -4,7 +4,6 @@
 
 void __osSiGetAccess(void);
 void __osSiRelAccess(void);
-s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data); /* __osEepStatus */
 
 /* func_151DD460 = osEepromProbe: returns EEPROM_TYPE_4K / EEPROM_TYPE_16K, or 0 if none. */
 s32 func_151DD460(OSMesgQueue *mq) {

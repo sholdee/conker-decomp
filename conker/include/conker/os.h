@@ -18,4 +18,38 @@
  *   game_21D5F0.c
  */
 
+/* init_2E50.c (src/libultra/io/piint.h declares it too, for pimgr.c) */
+void func_10002E50(void *arg); /* __osDevMgrMain with Rare's PI-thread interlock */
+
+/* game_20A5F0.c */
+s32 func_151DD140(OSMesgQueue *mq, u8 address, u8 *buffer); /* osEepromRead */
+void func_151DD304(u8 address);                              /* __osPackEepReadData */
+
+/* game_20A850.c */
+/* func_151DD3A0 (osEepromLongRead) returns s32, but its only caller, game_33990.c, must see a void
+ * return to match. IDO rejects two different declarations, so game_33990.c declares it. */
+
+/* game_20A910.c */
+s32 func_151DD460(OSMesgQueue *mq); /* osEepromProbe */
+
+/* game_20A990.c */
+s32 func_151DD4E0(OSMesgQueue *mq, u8 address, u8 *buffer);  /* osEepromWrite: one block */
+void func_151DD65C(u8 address, u8 *buffer);                  /* __osPackEepWriteData */
+s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data);      /* __osEepStatus */
+void func_151DD8C0(void);                                    /* demo playback */
+
+/* game_21C4F0.c */
+s32 func_151EF040(u32 devAddr, u32 *data); /* osPiReadIo */
+f32 func_151EF080(f32 arg0);
+
+/* game_21C540.c */
+s32 func_151EF090(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data); /* osContInit */
+void func_151EF288(u8 *pattern, OSContStatus *data);                    /* __osContGetInitData */
+void func_151EF358(u8 cmd);                                             /* __osPackRequestData */
+
+/* game_21CAF0.c */
+void func_151EF640(u32 func);
+
+/* game_21D5F0.c: guMtxXFMF and guMtxCatF, declared by PR/gu.h */
+
 #endif

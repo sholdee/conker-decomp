@@ -41,9 +41,8 @@ extern u8 D_800BE35A[];
 extern s8 D_800E0BE0[0x1C];
 
 /* EEPROM access (game_20A3A0.c, game_20A850.c) */
-extern void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* read; matching: declared void (returns s32) */
+extern void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* read; matching: declared void (returns s32), so conker/os.h does not declare it */
 extern s32 func_151DCEF0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* timed write */
-extern s32 func_151DD4E0(OSMesgQueue *mq, u8 block, u8 *buffer);           /* write one block */
 extern void func_151DD9E4(void);
 extern void func_151E7EF8(void);
 

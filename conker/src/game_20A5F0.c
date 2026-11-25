@@ -15,8 +15,6 @@ extern OSPifRam D_800E0A30;
  */
 extern u8 __osContLastCmd;
 s32 __osSiRawStartDma(s32 dir, void *dramAddr);
-s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data);
-void func_151DD304(u8 address);
 
 s32 func_151DD140(OSMesgQueue *mq, u8 address, u8 *buffer) {
     s32 ret = 0;

@@ -579,7 +579,6 @@ void func_151F00E0(MtxF arg0, MtxF arg1, MtxF arg2);
 /* non-matching */
 
 // s32  func_10002DB0(s32 arg0, s32 arg1);
-//func_10002E50
 void func_100030A0(OSPri priority, OSMesgQueue *mesgQueue, OSMesg *arg2, s32 arg3);
 //func_100034E0
 //func_10003658

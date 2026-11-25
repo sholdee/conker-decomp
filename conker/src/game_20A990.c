@@ -20,8 +20,6 @@ s32 __osSiRawStartDma(s32 dir, void *dramAddr);
  *       pointer in $a0 and starts short-lived temps at $t8; we use $a0/$v0/$t7).  Six
  *       spellings of the frame-pointer expression all land within 45-50.
  */
-s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data);
-void func_151DD65C(u8 address, u8 *buffer);
 
 s32 func_151DD4E0(OSMesgQueue *mq, u8 address, u8 *buffer) {
     s32 ret = 0;
