@@ -1158,4 +1158,90 @@ typedef struct DebrisSpray {
     /* 0x41 */ u8 pad41[3];
 } DebrisSpray; /* size 0x44 */
 
+/* func_15150D1C (game_17CAF0.c): casts countBase + rand % (countRange + 1) rays from pos in random directions
+ * and spawns a func_151D9B8C emitter on each suitable surface hit closer than maxDistance. */
+typedef struct DecalSpray {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ AngleRange angles;
+    /* 0x1C */ f32 maxDistance;
+    /* 0x20 */ f32 sizeBase;
+    /* 0x24 */ f32 sizeRange;
+    /* 0x28 */ s16 unk28;           /* base of func_151D9B8C's arg2 */
+    /* 0x2A */ s16 unk2A;           /* its range */
+    /* 0x2C */ u8 kind;
+    /* 0x2D */ u8 pad2D[3];
+} DecalSpray; /* size 0x30 */
+
+/* func_15150F90 (game_17CAF0.c): countBase + rand % (countRange + 1) randomly rotated pieces (func_1518A3C0)
+ * flying out of pos. */
+typedef struct PieceSpray {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ f32 speedBase;
+    /* 0x18 */ f32 speedRange;
+    /* 0x1C */ AngleRange angles;
+    /* 0x24 */ f32 directionBase;   /* length of the direction vector */
+    /* 0x28 */ f32 directionRange;
+    /* 0x2C */ f32 jitter;          /* x/z jitter is random in [-jitter, jitter] */
+    /* 0x30 */ f32 sizeBase;
+    /* 0x34 */ f32 sizeRange;
+    /* 0x38 */ f32 scale;
+    /* 0x3C */ u8 kind;
+    /* 0x3D */ u8 pad3D;
+    /* 0x3E */ s16 lifeBase;
+    /* 0x40 */ s16 lifeRange;
+} PieceSpray; /* size 0x44 */
+
+/* func_15151D6C (game_17CAF0.c): DebrisBurst thrown off a surface triangle, inside the cone around its
+ * normal. */
+typedef struct SurfaceDebrisBurst {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ TriangleSource source;
+    /* 0x38 */ f32 speedBase;
+    /* 0x3C */ f32 speedRange;
+    /* 0x40 */ f32 gravityBase;
+    /* 0x44 */ f32 gravityRange;
+    /* 0x48 */ s16 lifeBase;
+    /* 0x4A */ s16 lifeRange;
+    /* 0x4C */ f32 scaleBase;       /* times the variant's scale */
+    /* 0x50 */ f32 scaleRange;
+    /* 0x54 */ f32 spin;            /* rotVel.x / rotVel.z are random in [-spin, spin] */
+} SurfaceDebrisBurst; /* size 0x58 */
+
+/* func_151539B4 (game_17CAF0.c): countBase + rand % (countRange + 1) streaks (func_15156190) at pos, each
+ * pointing at a random yaw and pitch. Note the yaw/pitch order differs from AngleRange. */
+typedef struct StreakBurst {
+    /* 0x00 */ s16 countBase;
+    /* 0x02 */ s16 countRange;
+    /* 0x04 */ Vec3f pos;
+    /* 0x10 */ s16 yawBase;
+    /* 0x12 */ s16 pitchBase;
+    /* 0x14 */ s16 yawRange;
+    /* 0x16 */ s16 pitchRange;
+    /* 0x18 */ f32 headSpeedBase;
+    /* 0x1C */ f32 headSpeedRange;
+    /* 0x20 */ f32 tailSpeedBase;
+    /* 0x24 */ f32 tailSpeedRange;
+    /* 0x28 */ Color8 headColor;
+    /* 0x2C */ Color8 tailColor;
+    /* 0x30 */ u8 flags;
+    /* 0x31 */ u8 pad31;
+    /* 0x32 */ s16 lifetimeBase;
+    /* 0x34 */ s16 lifetimeRange;
+    /* 0x36 */ u16 renderMode;
+    /* 0x38 */ f32 widthBase;
+    /* 0x3C */ f32 widthRange;
+    /* 0x40 */ u8 alphaBase;
+    /* 0x41 */ u8 alphaRange;
+    /* 0x42 */ s16 fadeStart;
+    /* 0x44 */ s16 fadeRate;
+    /* 0x46 */ u8 kind;
+    /* 0x47 */ u8 pad47;
+} StreakBurst; /* size 0x48 */
+
 #endif

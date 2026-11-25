@@ -1408,26 +1408,10 @@ void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) 
                     arg6[0xC], arg6[1]);
 }
 
-typedef struct Blood36C3CSpray {
-    s32 countBase;
-    s32 countRange;
-    Vec3f origin;
-    s16 angleBase;
-    s16 angleRange;
-    s16 pitchBase;
-    s16 pitchRange;
-    f32 maxDistance;
-    f32 sizeBase;
-    f32 sizeRange;
-    s16 lifeBase;
-    s16 lifeRange;
-    u8 kind;
-} Blood36C3CSpray;
-
 void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
 void func_1513A24C(Vec3f *, s32 *, f32 *, s32, f32, u8, u8, u8 *, void *,
                    u8, s32);
-void func_15150D1C(Blood36C3CSpray *, u8, s32);
+void func_15150D1C(DecalSpray *, u8, s32);
 void func_151A9834(Vec3f *, f32, f32, GroundHit *, s32, u8, s8 *, u8, s32);
 void func_151C61A0(s32, s32, u8, s32);
 void func_1513A48C(Vec3f *, u8, s32);
@@ -1449,7 +1433,7 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     f32 scale;
     GroundHit hit;
     s32 kind;
-    Blood36C3CSpray spray;
+    DecalSpray spray;
     s8 heavy;
 
     if (actor == NULL) {
@@ -1476,13 +1460,13 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     if (arg1 != 0) {
         spray.countBase = 12;
         spray.countRange = 3;
-        spray.origin = position;
-        spray.angleBase = 0;
-        spray.angleRange = 255;
-        spray.pitchBase = -64;
-        spray.pitchRange = 69;
-        spray.lifeBase = 150;
-        spray.lifeRange = 100;
+        spray.pos = position;
+        spray.angles.yawBase = 0;
+        spray.angles.yawRange = 255;
+        spray.angles.pitchBase = -64;
+        spray.angles.pitchRange = 69;
+        spray.unk28 = 150;
+        spray.unk2A = 100;
         spray.maxDistance = 998.0f;
         spray.sizeBase = 25.0f;
         spray.sizeRange = 10.0f;

@@ -264,23 +264,6 @@ typedef struct PuffSpray84 {
     /* 0x82 */ s16 unk82;           /* copied to the motion block's 0x1E */
 } PuffSpray84;
 
-/* Spawn request for func_15150D1C. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s8 unk2C;
-} Spawn15150D1C;
-
 /* What lies under an object, filled in by func_1504715C. */
 typedef struct {
     u8 unk0[0x24];
@@ -292,7 +275,7 @@ void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, 
 void func_15143134(Vec3f *, Vec3f *, Mtx *);
 void func_15143794(s16, s16, f32, Vec3f *);
 s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
-void func_15150D1C(Spawn15150D1C *, u8, s32);
+void func_15150D1C(DecalSpray *, u8, s32);
 void func_151A9834(Vec3f *, f32, f32, FloorInfo *, s32, s32, s8 *, u8, s32);
 void func_15151A38(PuffSpray84 *, u8, s32);
 void func_1504715C(FloorInfo *, Actor *);
@@ -405,21 +388,21 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
             func_15151A38(&cfg, arg1, arg2);
         }
         {
-            Spawn15150D1C cfg2;
+            DecalSpray cfg2;
 
-            cfg2.unk0 = 15;
-            cfg2.unk4 = 6;
+            cfg2.countBase = 15;
+            cfg2.countRange = 6;
             cfg2.pos = pos;
-            cfg2.unk14 = 0;
-            cfg2.unk16 = 0xFF;
-            cfg2.unk18 = -29;
-            cfg2.unk1A = 40;
-            cfg2.unk1C = 375.0f;
-            cfg2.unk20 = 20.0f;
-            cfg2.unk24 = 40.0f;
+            cfg2.angles.yawBase = 0;
+            cfg2.angles.yawRange = 0xFF;
+            cfg2.angles.pitchBase = -29;
+            cfg2.angles.pitchRange = 40;
+            cfg2.maxDistance = 375.0f;
+            cfg2.sizeBase = 20.0f;
+            cfg2.sizeRange = 40.0f;
             cfg2.unk28 = 120;
             cfg2.unk2A = 120;
-            cfg2.unk2C = 2;
+            cfg2.kind = 2;
             func_15150D1C(&cfg2, arg1, arg2);
         }
         {

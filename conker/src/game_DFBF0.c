@@ -28,22 +28,36 @@ typedef struct Fx151A6F00Args {
     s16 unk56, unk58;
 } Fx151A6F00Args;
 
-/* Parameter block for func_151539B4. */
-typedef struct Fx151539B4Args {
-    s16 unk00, unk02;
-    Vec3f pos;
-    s16 angle;
-    s16 unk12, unk14, unk16;
-    f32 unk18, unk1C, unk20, unk24;
-    u8 unk28, unk29, unk2A, unk2B, unk2C, unk2D, unk2E, unk2F, unk30;
-    u8 pad31;
-    s16 unk32, unk34, unk36;
-    f32 unk38, unk3C;
-    u8 unk40, unk41;
-    s16 unk42, unk44;
-    u8 unk46;
-    s32 unk48;
-} Fx151539B4Args;
+/* matching: StreakBurst plus 0x4 bytes; the stack frame needs the larger size. */
+typedef struct StreakBurst4C {
+    /* 0x00 */ s16 countBase;
+    /* 0x02 */ s16 countRange;
+    /* 0x04 */ Vec3f pos;
+    /* 0x10 */ s16 yawBase;
+    /* 0x12 */ s16 pitchBase;
+    /* 0x14 */ s16 yawRange;
+    /* 0x16 */ s16 pitchRange;
+    /* 0x18 */ f32 headSpeedBase;
+    /* 0x1C */ f32 headSpeedRange;
+    /* 0x20 */ f32 tailSpeedBase;
+    /* 0x24 */ f32 tailSpeedRange;
+    /* 0x28 */ Color8 headColor;
+    /* 0x2C */ Color8 tailColor;
+    /* 0x30 */ u8 flags;
+    /* 0x31 */ u8 pad31;
+    /* 0x32 */ s16 lifetimeBase;
+    /* 0x34 */ s16 lifetimeRange;
+    /* 0x36 */ u16 renderMode;
+    /* 0x38 */ f32 widthBase;
+    /* 0x3C */ f32 widthRange;
+    /* 0x40 */ u8 alphaBase;
+    /* 0x41 */ u8 alphaRange;
+    /* 0x42 */ s16 fadeStart;
+    /* 0x44 */ s16 fadeRate;
+    /* 0x46 */ u8 kind;
+    /* 0x47 */ u8 pad47;
+    /* 0x48 */ u8 pad48[0x4];
+} StreakBurst4C;
 
 /* Parameter block for func_150B3F5C. */
 typedef struct Fx150B3F5CArgs {
@@ -67,7 +81,7 @@ extern PipeIds D_8009F950;
 extern PipeIds D_8009F95C;
 extern void func_151A6F00(Fx151A6F00Args *, s32, u8, s32);
 extern void func_1514C858(f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, f32, s32, u8);
-extern void func_151539B4(Fx151539B4Args *, u8);
+extern void func_151539B4(StreakBurst4C *, u8);
 extern void func_15152F70(SimplePuffSpray *, u8);
 extern void func_150B3F5C(Fx150B3F5CArgs *, Vec3f *, s32);
 
@@ -75,7 +89,7 @@ extern void func_150B3F5C(Fx150B3F5CArgs *, Vec3f *, s32);
 void func_150B2740(u8 pipe, u8 arg1) {
     Fx151A6F00Args argsA;
     s16 i;
-    Fx151539B4Args argsB;
+    StreakBurst4C argsB;
     SimplePuffSpray argsC;
     f32 yawSin; // matching: also holds the debris size; a separate local mismatches
     f32 yawCos;
@@ -114,36 +128,36 @@ void func_150B2740(u8 pipe, u8 arg1) {
         yawSin = (func_150ADA68() * 73.0f) + 31.0f;
         func_1514C858(D_8009F920[pipe].pos.x, D_8009F920[pipe].pos.y, D_8009F920[pipe].pos.z, yawSin, D_8009F920[pipe].yaw + 0x40, 0, 0xFF, (func_150ADA20() % 3U) + 4, 9, 0, 0.009615384974f, 0, arg1);
     }
-    argsB.unk00 = 30;
-    argsB.unk02 = 15;
+    argsB.countBase = 30;
+    argsB.countRange = 15;
     argsB.pos = D_8009F920[pipe].pos;
-    argsB.angle = D_8009F920[pipe].yaw - 0x40;
-    argsB.unk14 = 128;
-    argsB.unk12 = -45;
-    argsB.unk16 = 90;
-    argsB.unk28 = 0xFF;
-    argsB.unk29 = 0xFF;
-    argsB.unk2A = 0xFF;
-    argsB.unk2B = 0xFF;
-    argsB.unk2C = 0xFF;
-    argsB.unk2D = 0xFF;
-    argsB.unk2E = 0xFF;
-    argsB.unk2F = 0xFF;
-    argsB.unk30 = 9;
-    argsB.unk32 = 16;
-    argsB.unk34 = 22;
-    argsB.unk36 = 0x1601;
-    argsB.unk40 = 0x7F;
-    argsB.unk41 = 0x7F;
-    argsB.unk42 = 10;
-    argsB.unk44 = 25;
-    argsB.unk46 = 0;
-    argsB.unk18 = 6.0f;
-    argsB.unk1C = 2.549999952f;
-    argsB.unk20 = 2.700000048f;
-    argsB.unk24 = 3.419999838f;
-    argsB.unk38 = 4.139999866f;
-    argsB.unk3C = 4.859999657f;
+    argsB.yawBase = D_8009F920[pipe].yaw - 0x40;
+    argsB.yawRange = 128;
+    argsB.pitchBase = -45;
+    argsB.pitchRange = 90;
+    argsB.headColor.red = 0xFF;
+    argsB.headColor.green = 0xFF;
+    argsB.headColor.blue = 0xFF;
+    argsB.headColor.alpha = 0xFF;
+    argsB.tailColor.red = 0xFF;
+    argsB.tailColor.green = 0xFF;
+    argsB.tailColor.blue = 0xFF;
+    argsB.tailColor.alpha = 0xFF;
+    argsB.flags = 9;
+    argsB.lifetimeBase = 16;
+    argsB.lifetimeRange = 22;
+    argsB.renderMode = 0x1601;
+    argsB.alphaBase = 0x7F;
+    argsB.alphaRange = 0x7F;
+    argsB.fadeStart = 10;
+    argsB.fadeRate = 25;
+    argsB.kind = 0;
+    argsB.headSpeedBase = 6.0f;
+    argsB.headSpeedRange = 2.549999952f;
+    argsB.tailSpeedBase = 2.700000048f;
+    argsB.tailSpeedRange = 3.419999838f;
+    argsB.widthBase = 4.139999866f;
+    argsB.widthRange = 4.859999657f;
     func_151539B4(&argsB, arg1);
     {
     // matching: a declaration here opens a -g3 lexical block, which steers as1's scheduling

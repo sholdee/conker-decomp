@@ -14,29 +14,6 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } GroundHit; // size 0x24
 
-/* Burst config for func_15150F90 (same layout as in game_17CAF0.c and game_1EC390.c). */
-typedef struct {
-    /* 0x00 */ s32 countBase;
-    /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3f position;
-    /* 0x14 */ f32 speedBase;
-    /* 0x18 */ f32 speedRange;
-    /* 0x1C */ s16 yawBase;
-    /* 0x1E */ s16 yawRange;
-    /* 0x20 */ s16 pitchBase;
-    /* 0x22 */ s16 pitchRange;
-    /* 0x24 */ f32 directionBase;
-    /* 0x28 */ f32 directionRange;
-    /* 0x2C */ f32 jitter;
-    /* 0x30 */ f32 sizeBase;
-    /* 0x34 */ f32 sizeRange;
-    /* 0x38 */ f32 scale;
-    /* 0x3C */ u8  kind;
-    /* 0x3D */ u8  pad3D;
-    /* 0x3E */ s16 lifeBase;
-    /* 0x40 */ s16 lifeRange;
-} Game150F90Config;
-
 void func_1504715C(GroundHit *hit, Actor *actor);
 s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, GroundHit *hit);
 void func_15141F78(u8, GroundHit *, f32, u8, Vec3f *, u8);
@@ -46,7 +23,7 @@ void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
 extern u8 (*D_8008FD04)(void);
 extern u8 (*D_8008FD1C)(void);
 extern u8 (*D_8008FD30)(void);
-void func_15150F90(Game150F90Config *config, u8 arg1, u8 arg2, s32 arg3);
+void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3);
 void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
 struct260 *func_15130374(void *, u8, s32, u8, s32);
 
@@ -125,19 +102,19 @@ s32 func_15146970(s32 kind, Actor *actor) {
 /* Burst of func_15150F90 pieces from the actor's bone on `side`. */
 void func_15146A98(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
-    Game150F90Config burst;
+    PieceSpray burst;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
         func_15146890(&pos, (Actor *)actor, NULL, side);
         burst.countBase = 5;
         burst.countRange = 22;
-        burst.position = pos;
+        burst.pos = pos;
         burst.speedBase = 0.024999999f;
         burst.speedRange = 0.0199f;
-        burst.yawBase = 0;
-        burst.yawRange = 255;
-        burst.pitchBase = -20;
-        burst.pitchRange = 14;
+        burst.angles.yawBase = 0;
+        burst.angles.yawRange = 255;
+        burst.angles.pitchBase = -20;
+        burst.angles.pitchRange = 14;
         burst.directionBase = 6.0f;
         burst.directionRange = 3.0f;
         burst.jitter = 7.9760003f;

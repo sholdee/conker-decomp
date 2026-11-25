@@ -238,35 +238,6 @@ Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
     return gfx;
 }
 
-/* A burst of streak particles (func_151539B4); same layout as struct Local151539B4Arg in game_17CAF0.c. */
-typedef struct {
-    /* 0x00 */ s16 countBase;
-    /* 0x02 */ s16 countRange;
-    /* 0x04 */ Vec3f pos;
-    /* 0x10 */ s16 yawBase;
-    /* 0x12 */ s16 pitchBase;
-    /* 0x14 */ s16 yawRange;
-    /* 0x16 */ s16 pitchRange;
-    /* 0x18 */ f32 headSpeedBase;
-    /* 0x1C */ f32 headSpeedRange;
-    /* 0x20 */ f32 tailSpeedBase;
-    /* 0x24 */ f32 tailSpeedRange;
-    /* 0x28 */ Color8 headColor;
-    /* 0x2C */ Color8 tailColor;
-    /* 0x30 */ u8 flags;
-    /* 0x31 */ u8 pad31;
-    /* 0x32 */ s16 lifetimeBase;
-    /* 0x34 */ s16 lifetimeRange;
-    /* 0x36 */ u16 renderMode;
-    /* 0x38 */ f32 widthBase;
-    /* 0x3C */ f32 widthRange;
-    /* 0x40 */ u8 alphaBase;
-    /* 0x41 */ u8 alphaRange;
-    /* 0x42 */ s16 fadeStart;
-    /* 0x44 */ s16 fadeRate;
-    /* 0x46 */ u8 kind;
-} StreakBurstDesc;
-
 /* A streak burst plus one particle at the same point (func_151568F8). */
 typedef struct {
     /* 0x00 */ Vec3f pos;
@@ -325,7 +296,7 @@ typedef struct {
     /* 0x8C */ u8 unk8C;
 } StreakBurstEffectDesc;
 
-extern void func_151539B4(StreakBurstDesc *, u8);
+extern void func_151539B4(StreakBurst *, u8);
 extern void func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns the streak burst and the particle described by desc. */
@@ -333,7 +304,7 @@ void func_151568F8(desc, owner)
     StreakBurstEffectDesc *desc;
     u8 owner;
 {
-    StreakBurstDesc burst;
+    StreakBurst burst;
     ParticleDesc particle;
 
     burst.countBase = desc->countBase;

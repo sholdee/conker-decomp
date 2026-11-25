@@ -595,26 +595,6 @@ end:
     return 1;
 }
 
-/* Effect descriptor read by func_15151D6C. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    Vec3f pos;      /* 0x08 */
-    Vec3f vel;      /* 0x14 */
-    SurfaceTriangle surf;     /* 0x20 */
-    u8 pad32[2];
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    s16 unk48;
-    s16 unk4A;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-} Desc15151D6C;
-
 /* wrapped in structs so the tables are copied by struct assignment */
 typedef struct { s32 v[9]; } S32x9;
 typedef struct { f32 v[9]; } F32x9;
@@ -625,7 +605,7 @@ s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, SurfaceTriangle *, f32 *, f
 s32 func_15145C90(s32 hitInfo);
 s32 func_15144E80(SurfaceTriangle *, Vec3f *, Vec3f *, Vec3f *);
 void func_1514FBFC(SurfaceJetSpray *, u8, s32);
-void func_15151D6C(Desc15151D6C *, s32 *, f32 *, s32, u8, s32);
+void func_15151D6C(SurfaceDebrisBurst *, s32 *, f32 *, s32, u8, s32);
 void func_151C04F8(Vec3f *, u8, s32);
 void func_151C05A4(Vec3f *, u8, s32);
 void func_151C05F0(Vec3f *, u8, s32);
@@ -695,26 +675,26 @@ void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
             {
                 S32x9 colors;
                 F32x9 scales;
-                Desc15151D6C desc;
+                SurfaceDebrisBurst desc;
                 colors = D_800AA718;
                 scales = D_800AA73C;
-                desc.unk0 = 6;
-                desc.unk4 = 6;
+                desc.countBase = 6;
+                desc.countRange = 6;
                 desc.pos = hit;
-                desc.vel.x = -delta.x;
-                desc.vel.y = -delta.y;
-                desc.vel.z = -delta.z;
-                desc.surf = surf;
-                desc.unk34 = 456.0f;
-                desc.unk38 = 0.02000000142f;
-                desc.unk3C = 0.02000000142f;
-                desc.unk40 = -1.71f;
-                desc.unk44 = 0.448f;
-                desc.unk48 = 50;
-                desc.unk4A = 20;
-                desc.unk4C = 0.499f;
-                desc.unk50 = 0.7010000348f;
-                desc.unk54 = 21.502f;
+                desc.source.normal.x = -delta.x;
+                desc.source.normal.y = -delta.y;
+                desc.source.normal.z = -delta.z;
+                desc.source.triangle = surf;
+                desc.source.spread = 456.0f;
+                desc.speedBase = 0.02000000142f;
+                desc.speedRange = 0.02000000142f;
+                desc.gravityBase = -1.71f;
+                desc.gravityRange = 0.448f;
+                desc.lifeBase = 50;
+                desc.lifeRange = 20;
+                desc.scaleBase = 0.499f;
+                desc.scaleRange = 0.7010000348f;
+                desc.spin = 21.502f;
                 func_15151D6C(&desc, colors.v, scales.v, 9, arg3, arg4);
             }
         }

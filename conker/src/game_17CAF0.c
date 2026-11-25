@@ -421,25 +421,12 @@ void func_1515080C(DebrisSpray *config, s32 *variantIds, f32 *variantScales, s32
         }
     }
 }
-struct Local15150D1CArg {
-    s32 countBase;
-    s32 countRange;
-    Vec3f origin;
-    AngleRange angles;
-    f32 maxDistance;
-    f32 unk20;
-    f32 unk24;
-    s16 unk28;
-    s16 unk2A;
-    u8 unk2C;
-};
-
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 extern s32 func_15145C90(s32);
 
 /* Casts a random number of rays from config->origin and spawns a decal (func_151D9B8C) on each
  * suitable surface hit closer than config->maxDistance. */
-void func_15150D1C(struct Local15150D1CArg *config, u8 arg1, s32 arg2) {
+void func_15150D1C(DecalSpray *config, u8 arg1, s32 arg2) {
     s16 *hitTriangle;
     Vec3f direction;
     s16 triangle[9];
@@ -454,11 +441,11 @@ void func_15150D1C(struct Local15150D1CArg *config, u8 arg1, s32 arg2) {
         func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
                       (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),
                       100.0f, &direction.x);
-        if (func_150AC9C0(config->origin.x, config->origin.y, config->origin.z,
+        if (func_150AC9C0(config->pos.x, config->pos.y, config->pos.z,
                           direction.x, direction.y, direction.z, NULL, hitTriangle,
                           &hit.x, &hit.y, &hit.z, &distance, &surface, 0, 0.0f) != 0
             && func_15145C90(surface) != 0 && distance < config->maxDistance) {
-            func_151D9B8C(config->unk2C, (func_150ADA68() * config->unk24) + config->unk20,
+            func_151D9B8C(config->kind, (func_150ADA68() * config->sizeRange) + config->sizeBase,
                           (func_150ADA20() % 156U) + 100, (s32)hitTriangle, &hit,
                           (func_150ADA20() % (u32)(config->unk2A + 1)) + config->unk28,
                           1, 1, 1, arg1, arg2);
@@ -467,21 +454,10 @@ void func_15150D1C(struct Local15150D1CArg *config, u8 arg1, s32 arg2) {
     }
 }
 
-typedef struct {
-    s32 countBase, countRange;
-    Vec3f position;
-    f32 speedBase, speedRange;
-    AngleRange angles;
-    f32 directionBase, directionRange, jitter;
-    f32 sizeBase, sizeRange, scale;
-    u8 kind, pad3D;
-    s16 lifeBase, lifeRange;
-} Game150F90Config;
-
 void *func_1518A3C0(Vec3f *, Vec3f *, f32, Vec3f *, Vec3f *, f32, f32, u8, s16, u8, s32, u8, s32);
 
-/* Spawns a random number of randomly rotated pieces (func_1518A3C0) flying out of config->position. */
-void func_15150F90(Game150F90Config *config, u8 arg1, u8 arg2, s32 arg3) {
+/* Spawns a random number of randomly rotated pieces (func_1518A3C0) flying out of config->pos. */
+void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3) {
     Vec3f jitter;
     f32 width;
     s32 count;
@@ -501,7 +477,7 @@ void func_15150F90(Game150F90Config *config, u8 arg1, u8 arg2, s32 arg3) {
                       &direction.x);
         jitter.x = func_150ADA68() * width - config->jitter;
         jitter.z = func_150ADA68() * width - config->jitter;
-        func_1518A3C0(&config->position, &rotation,
+        func_1518A3C0(&config->pos, &rotation,
                       func_150ADA68() * config->speedRange + config->speedBase,
                       &direction, &jitter,
                       func_150ADA68() * config->sizeRange + config->sizeBase,
@@ -791,29 +767,11 @@ void func_15151A38(PuffSpray *config, u8 arg1, s32 arg2) {
     }
 }
 
-struct Arg15151D6C {
-    s32 countBase;
-    s32 countRange;
-    Vec3f position;
-    Vec3f normal;
-    s16 triangle[9];
-    f32 spread;
-    f32 speedBase;
-    f32 speedRange;
-    f32 unk40;
-    f32 unk44;
-    s16 unk48;
-    s16 unk4A;
-    f32 scaleBase;
-    f32 scaleRange;
-    f32 spin; /* spawn.spin.x/z are random in [-spin, spin] */
-};
-
 extern void *func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 
 /* Spawns a random number of pieces off a surface triangle, each moving in a random direction inside
  * the cone around the triangle's normal and using a random entry of the variant tables. */
-void func_15151D6C(struct Arg15151D6C *config, s32 *variantIds, f32 *variantScales, u32 variantCount, u8 arg4, s32 arg5) {
+void func_15151D6C(SurfaceDebrisBurst *config, s32 *variantIds, f32 *variantScales, u32 variantCount, u8 arg4, s32 arg5) {
     s32 count;
     s32 variant;
     ParticleSpawn78 spawn;
@@ -831,11 +789,11 @@ void func_15151D6C(struct Arg15151D6C *config, s32 *variantIds, f32 *variantScal
     f32 speed;
     f32 pad[2]; // matching: unused stack slots in the original frame
 
-    if (func_15144E80(config->triangle, &axis0, &axis1, &normal) != 0) {
+    if (func_15144E80(config->source.triangle.v, &axis0, &axis1, &normal) != 0) {
         func_15145128(&axis0, &axis0, &length0, &inverse0);
         func_15145128(&axis1, &axis1, &length1, &inverse1);
         func_15145128(&normal, &normal, &normalLength, &normalInverse);
-        if (func_15144A74(&normal, &config->normal) < 0.0f) {
+        if (func_15144A74(&normal, &config->source.normal) < 0.0f) {
             normal.x = -normal.x;
             normal.y = -normal.y;
             normal.z = -normal.z;
@@ -848,7 +806,7 @@ void func_15151D6C(struct Arg15151D6C *config, s32 *variantIds, f32 *variantScal
         spawn.scale.x = 1.0f;
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
-        spawn.pos = config->position;
+        spawn.pos = config->pos;
         spawn.rotVel.y = 0.0f;
         spawn.flags = 0x29E8;
         count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
@@ -870,7 +828,7 @@ void func_15151D6C(struct Arg15151D6C *config, s32 *variantIds, f32 *variantScal
         spawn.fadeRate = 21;
         while (count != 0) {
             speed = (func_150ADA68() * config->speedRange) + config->speedBase;
-            func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * config->spread, &first, &second);
+            func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * config->source.spread, &first, &second);
             spawn.vel.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
             spawn.vel.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
             spawn.vel.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
@@ -886,8 +844,8 @@ void func_15151D6C(struct Arg15151D6C *config, s32 *variantIds, f32 *variantScal
         randomizeSpin:
             spawn.rotVel.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
             spawn.rotVel.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
-            spawn.gravity = (func_150ADA68() * config->unk44) + config->unk40;
-            spawn.lifetime = (func_150ADA20() % (u32)(config->unk4A + 1)) + config->unk48;
+            spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
+            spawn.lifetime = (func_150ADA20() % (u32)(config->lifeRange + 1)) + config->lifeBase;
             func_15132A4C(&spawn, 3, 0xFF, 0, arg4, arg5);
             count--;
         }
@@ -1423,34 +1381,6 @@ void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-struct Local151539B4Arg {
-    s16 countBase;
-    s16 countRange;
-    Vec3f position;
-    s16 yawBase;
-    s16 pitchBase;
-    s16 yawRange;
-    s16 pitchRange;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    Color8 color0;
-    Color8 color1;
-    u8 unk30;
-    u8 pad31;
-    s16 unk32;
-    s16 unk34;
-    u16 unk36;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 unk41;
-    s16 unk42;
-    s16 unk44;
-    u8 unk46;
-};
-
 /* First argument of func_15156190. */
 struct Local151539B4Spawn {
     Vec3f position;
@@ -1476,7 +1406,7 @@ extern void func_15156190(struct Local151539B4Spawn *, u8, s32, u8, s32);
 
 /* Spawns a random number of particles (func_15156190) at config->position, each pointing at a random
  * yaw and pitch (a direction of length 10). */
-void func_151539B4(struct Local151539B4Arg *config, u8 arg1) {
+void func_151539B4(StreakBurst *config, u8 arg1) {
     struct Local151539B4Spawn spawn;
     s32 count;
     s16 yaw;
@@ -1488,19 +1418,19 @@ void func_151539B4(struct Local151539B4Arg *config, u8 arg1) {
     f32 sinYaw;
 
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
-    spawn.position = config->position;
-    spawn.color0.red = config->color0.red;
-    spawn.color0.green = config->color0.green;
-    spawn.color0.blue = config->color0.blue;
-    spawn.color0.alpha = config->color0.alpha;
-    spawn.color1.red = config->color1.red;
-    spawn.color1.green = config->color1.green;
-    spawn.color1.blue = config->color1.blue;
-    spawn.color1.alpha = config->color1.alpha;
-    spawn.unk28 = config->unk30;
-    spawn.unk2C = config->unk36;
-    spawn.unk36 = config->unk42;
-    spawn.unk38 = config->unk44;
+    spawn.position = config->pos;
+    spawn.color0.red = config->headColor.red;
+    spawn.color0.green = config->headColor.green;
+    spawn.color0.blue = config->headColor.blue;
+    spawn.color0.alpha = config->headColor.alpha;
+    spawn.color1.red = config->tailColor.red;
+    spawn.color1.green = config->tailColor.green;
+    spawn.color1.blue = config->tailColor.blue;
+    spawn.color1.alpha = config->tailColor.alpha;
+    spawn.unk28 = config->flags;
+    spawn.unk2C = config->renderMode;
+    spawn.unk36 = config->fadeStart;
+    spawn.unk38 = config->fadeRate;
     while (count != 0) {
         yaw = (func_150ADA20() % (u32)(config->yawRange + 1)) + config->yawBase;
         pitch = (func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitchBase;
@@ -1512,12 +1442,12 @@ void func_151539B4(struct Local151539B4Arg *config, u8 arg1) {
         spawn.direction.x = horizontal * sinYaw;
         spawn.direction.y = -10.0f * sinPitch;
         spawn.direction.z = horizontal * cosYaw;
-        spawn.unk18 = (func_150ADA68() * config->unk1C) + config->unk18;
-        spawn.unk1C = (func_150ADA68() * config->unk24) + config->unk20;
-        spawn.unk2A = (func_150ADA20() % (u32)(config->unk34 + 1)) + config->unk32;
-        spawn.unk30 = (func_150ADA68() * config->unk3C) + config->unk38;
-        spawn.unk34 = (func_150ADA20() % (u32)(config->unk41 + 1)) + config->unk40;
-        func_15156190(&spawn, config->unk46, 0, arg1, 0);
+        spawn.unk18 = (func_150ADA68() * config->headSpeedRange) + config->headSpeedBase;
+        spawn.unk1C = (func_150ADA68() * config->tailSpeedRange) + config->tailSpeedBase;
+        spawn.unk2A = (func_150ADA20() % (u32)(config->lifetimeRange + 1)) + config->lifetimeBase;
+        spawn.unk30 = (func_150ADA68() * config->widthRange) + config->widthBase;
+        spawn.unk34 = (func_150ADA20() % (u32)(config->alphaRange + 1)) + config->alphaBase;
+        func_15156190(&spawn, config->kind, 0, arg1, 0);
         count--;
     }
 }

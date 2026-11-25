@@ -77,46 +77,23 @@ void *func_151BEEE0(f32 rotY, Vec3f *pos, s32 arg2, u8 arg3, u8 variant, u8 arg5
     }
 }
 
-/* Burst config for func_15150F90 (same layout as in game_17CAF0.c). */
-typedef struct {
-    /* 0x00 */ s32 countBase;
-    /* 0x04 */ s32 countRange;
-    /* 0x08 */ Vec3f position;
-    /* 0x14 */ f32 speedBase;
-    /* 0x18 */ f32 speedRange;
-    /* 0x1C */ s16 yawBase;
-    /* 0x1E */ s16 yawRange;
-    /* 0x20 */ s16 pitchBase;
-    /* 0x22 */ s16 pitchRange;
-    /* 0x24 */ f32 directionBase;
-    /* 0x28 */ f32 directionRange;
-    /* 0x2C */ f32 jitter;
-    /* 0x30 */ f32 sizeBase;
-    /* 0x34 */ f32 sizeRange;
-    /* 0x38 */ f32 scale;
-    /* 0x3C */ u8  kind;
-    /* 0x3D */ u8  pad3D;
-    /* 0x3E */ s16 lifeBase;
-    /* 0x40 */ s16 lifeRange;
-} Game150F90Config;
-
-void func_15150F90(Game150F90Config *config, u8 arg1, u8 arg2, s32 arg3);
+void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3);
 void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3);
 
 /* Spawns two particle bursts at pos: one through func_15150F90, one through func_15153634. */
 void func_151BF0C8(Vec3f *pos) {
-    Game150F90Config first;
+    PieceSpray first;
     SpriteBurst second;
 
     first.countBase = 24;
     first.countRange = 10;
-    first.position = *pos;
+    first.pos = *pos;
     first.speedBase = 0.06260000169f;
     first.speedRange = 0.05810000002f;
-    first.yawBase = 0;
-    first.yawRange = 255;
-    first.pitchBase = -50;
-    first.pitchRange = 60;
+    first.angles.yawBase = 0;
+    first.angles.yawRange = 255;
+    first.angles.pitchBase = -50;
+    first.angles.pitchRange = 60;
     first.directionBase = 13.0f;
     first.directionRange = 13.0f;
     first.jitter = 10.3760004f;
