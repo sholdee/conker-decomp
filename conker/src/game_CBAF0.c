@@ -2,14 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* A script command as built by the dispatchers func_1509BE40/func_1509BFB0: the handler's id and arg
- * words followed by the command's parameters. */
-typedef struct ScriptCmd {
-    /* 0x00 */ s32 id;
-    /* 0x04 */ s32 arg;
-    /* 0x08 */ s32 a[6];
-} ScriptCmd;
-
 /* Word count of the current script command (2 + its parameter count). */
 
 void func_151F2D6C(s32, s32);
@@ -24,16 +16,16 @@ s32 func_1509E640(s32 id, s32 opcode, ScriptCmd *cmd) {
         s32 volume = 0x7FFF;
 
         if (D_800D3840 >= 3) {
-            volume = cmd->a[0];
+            volume = cmd->a[0].w;
         }
         func_1001263C(id, volume, 64);
         return 1;
     }
     case 1:
         if (D_800D3840 == 4) {
-            func_151F2D6C(cmd->a[0], cmd->a[1]);
+            func_151F2D6C(cmd->a[0].w, cmd->a[1].w);
         } else {
-            func_151F2D6C(cmd->a[0], 0);
+            func_151F2D6C(cmd->a[0].w, 0);
         }
         return 1;
     case 2:
@@ -64,31 +56,31 @@ s32 func_1509E730(s32 id, u32 opcode, ScriptCmd *cmd) {
 
     switch (opcode) {
     case 0:
-        func_1000D96C(id & 0xFFF, cmd->a[0], cmd->a[1]);
+        func_1000D96C(id & 0xFFF, cmd->a[0].w, cmd->a[1].w);
         return 1;
     case 2:
-        func_1000DF68(id & 0xFFF, cmd->a[0], 0);
+        func_1000DF68(id & 0xFFF, cmd->a[0].w, 0);
         return 1;
     case 5:
-        func_1000DF68(id & 0xFFF, cmd->a[0], 1);
+        func_1000DF68(id & 0xFFF, cmd->a[0].w, 1);
         return 1;
     case 1:
-        func_1000DE1C(id & 0xFFF, cmd->a[0]);
+        func_1000DE1C(id & 0xFFF, cmd->a[0].w);
         return 1;
     case 3:
         if (D_800D3840 == 5) {
-            return func_1000E46C(id & 0xFFF, cmd->a[0], cmd->a[1], cmd->a[2]);
+            return func_1000E46C(id & 0xFFF, cmd->a[0].w, cmd->a[1].w, cmd->a[2].w);
         }
-        return func_1000E46C(id & 0xFFF, cmd->a[0], cmd->a[1], 60);
+        return func_1000E46C(id & 0xFFF, cmd->a[0].w, cmd->a[1].w, 60);
     case 4:
         if (D_800D3840 == 5) {
-            return func_1000E654(id & 0xFFF, cmd->a[0], cmd->a[1], cmd->a[2] & 0xFFF);
+            return func_1000E654(id & 0xFFF, cmd->a[0].w, cmd->a[1].w, cmd->a[2].w & 0xFFF);
         }
-        return func_1000E654(id & 0xFFF, cmd->a[0], cmd->a[1], id & 0xFFF);
+        return func_1000E654(id & 0xFFF, cmd->a[0].w, cmd->a[1].w, id & 0xFFF);
     case 6:
         mode = 1;
         if (D_800D3840 == 3) {
-            mode = cmd->a[0];
+            mode = cmd->a[0].w;
         }
         func_1000E054(id & 0xFFF, mode);
         return 1;
