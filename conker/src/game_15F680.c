@@ -10,11 +10,12 @@
 #define D_800DC464 D_800DC464_s32_decl_in_variables_h
 #define D_800DC468 D_800DC468_u16_decl_in_variables_h
 #include "variables.h"
-
-#define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
 #undef D_800DC460
 #undef D_800DC464
 #undef D_800DC468
+
+#define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
+
 /* One loaded particle model, shared by every live particle that uses it (D_800DC468 counts them). */
 typedef struct ParticleNode {
     /* 0x0 */ s32 *resource;
@@ -104,7 +105,7 @@ typedef struct Particle {
     /* 0x14C */ s32 unk14C;
     /* 0x150 */ u8 unk150;
     /* 0x151 */ u8 pad151[3];
-    /* 0x154 */ s32 unk154[4];
+    /* 0x154 */ s32 unk154[4]; // allocations held as s32 (a pointer type changes func_151325C8's code)
     /* 0x164 */ s32 unk164;
     /* 0x168 */ s32 unk168;
     /* 0x16C */ u8 pad16C[4];
@@ -472,7 +473,7 @@ void func_15132A88(Particle *particle) {
 extern u8 D_80083740[];
 extern u8 D_800838C0[];
 extern Gfx *(*D_800899A4[])(Gfx *gfx, Particle *particle, s16 arg2);
-Gfx *func_15142B7C(Gfx *gfx, s32 setFlags, s32 clearFlags);
+Gfx *func_15142B7C(Gfx *gfx, s32 setGeometryMode, s32 clearGeometryMode);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 alpha, u8 *state);
 Gfx *func_151462C8(Gfx *gfx, s32 *arg1, u8 arg2, struct127 *owner, u8 ownerId, s16 arg5, f32 *pos, u8 arg7,
                    s32 arg8);
@@ -507,10 +508,10 @@ Gfx *func_15132B80(Gfx *gfx, Particle *arg1, s16 arg2) {
     }
     gfx = func_15142C10(gfx, 0, 0, 0, particle->alpha, &state);
     gfx = func_15142B7C(gfx,
-                        ((particle->flags & 0x800) ? 0x20000 : 0) | ((particle->flags & 0x1000) ? 0x400000 : 0) | 1 |
-                            4 | 0x200000,
-                        ((particle->flags & 0x800) ? 0 : 0x20000) | ((particle->flags & 0x1000) ? 0 : 0x400000) |
-                            0x600 | 0x10000 | 0x40000 | 0x80000);
+                        ((particle->flags & 0x800) ? G_LIGHTING : 0) | ((particle->flags & 0x1000) ? 0x400000 : 0) |
+                            G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH,
+                        ((particle->flags & 0x800) ? 0 : G_LIGHTING) | ((particle->flags & 0x1000) ? 0 : 0x400000) |
+                            G_CULL_BOTH | G_FOG | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
     if (particle->flags & 0x800) {
         gfx = func_151462C8(gfx, &particle->unk14C, particle->unk7A, particle->owner, particle->ownerId, arg2,
                             &particle->pos.x, (particle->flags & 0x1000) ? 1 : 0, particle->floor.unk18);
