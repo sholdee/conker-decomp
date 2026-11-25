@@ -253,7 +253,7 @@ typedef struct AnimHeader {
     /* 0xC */ s32 unkC;
 } AnimHeader;
 
-/* Relocates the offsets of animation table `anims` and stores its length in D_800C5A90[id]. */
+/* Relocates the offsets of the animation table starting at anim and stores its length in D_800C5A90[id]. */
 void func_1503D484(ActorAnim *anim, s32 id) {
     ActorAnim *anims = anim;
 
@@ -307,13 +307,13 @@ s32 func_1503D5F0(s32 id) {
     return id;
 }
 
+/* D_800D1588[id] while it still points at the header (the original re-reads it on every use). */
+#define HEADER (((AnimHeader **)D_800D1588)[id])
+
 /*
  * Loads the animation table of model id (shared by its group, see func_1503D510) into
  * D_800D1588[id], unless it is already loaded. Returns 0, or 4 if it is missing.
  */
-/* D_800D1588[id] while it still points at the header (the original re-reads it on every use). */
-#define HEADER (((AnimHeader **)D_800D1588)[id])
-
 s32 func_1503D660(s32 id, s32 arg1) {
     u32 size;
     AnimHeader *data;
@@ -339,7 +339,7 @@ s32 func_1503D660(s32 id, s32 arg1) {
     if (HEADER->reactions != 0) {
         HEADER->reactions += (s32)HEADER;
     }
-    HEADER = HEADER + 1;
+    HEADER++; // now the animation table proper
     func_1503D484((ActorAnim *)HEADER, id);
     func_1503D510(id);
     return 0;
@@ -356,10 +356,12 @@ s32 func_1503D774(s32 id, s32 arg1) {
         return 0;
     }
     table = func_1502B6BC(&size, 2, NULL, 2, 17, id);
+    // matching: if/else (an early return without the else schedules the stores differently)
     if (table == NULL) {
         D_800D1C90[id] = NULL;
         return 2;
     } else {
+        // the original stores the table, then replaces it with its first entry
         D_800D1C90[id] = table;
         D_800D1C90[id] = table->unk0;
     }
@@ -367,7 +369,7 @@ s32 func_1503D774(s32 id, s32 arg1) {
 }
 
 /*
- * Saves the texture coordinates of the vertices that model 0x24 animates (0x5E of them, from its
+ * Saves the texture coordinates of the vertices that model 0x24 animates (94 of them, from its
  * first vertex index on) into D_800C6360[id]. Returns 1 when out of memory.
  */
 s32 func_1503D804(s32 id) {
@@ -378,7 +380,7 @@ s32 func_1503D804(s32 id) {
     s32 i;
 
     if (id == 0x24) {
-        count = 0x5E;
+        count = 94;
         first = 0;
     } else {
         first = -1;
@@ -416,6 +418,7 @@ void func_1503D984(s32 id) {
     Gfx *dl;
     s8 op;
 
+    // only the first display-list part is counted; the binary keeps the one-pass loop
     for (i = 0; i < 1; i++) {
         dl = D_800C4488[id][i];
         for (j = 0; (op = dl[j].words.w0 >> 24) != (s8)G_ENDDL; j++) {
@@ -455,7 +458,7 @@ s32 func_1503DA3C(s32 id, s32 index) {
  */
 s32 func_1503DA9C(struct127 *obj, s32 id, s32 model, s32 loadTextures) {
     struct129 *def;
-    s32 pad;
+    Gfx *dl;
     s32 ret;
     s32 i;
 
@@ -473,7 +476,8 @@ s32 func_1503DA9C(struct127 *obj, s32 id, s32 model, s32 loadTextures) {
         if (loadTextures && D_800C5628[id] != 0 && (u32)D_800C5338[id]->addr < 0x10000000) {
             ret = func_1503DC3C(id);
             for (i = 0; i < D_800C4778[id]; i++) {
-                func_1510CE60(D_800C4488[id][i], 0, 0, 0x3E, NULL);
+                dl = D_800C4488[id][i];
+                func_1510CE60(dl, 0, 0, 0x3E, NULL);
             }
         }
     }
