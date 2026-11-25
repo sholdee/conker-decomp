@@ -854,37 +854,41 @@ typedef struct Game40490144B8Packet {
 
 void func_15145974(void *, f32 *, f32 *);
 
-s32 func_150144B8(u8 *arg0) {
+/** Spawns an effect along the object's rotation, configured by the bytes of unk18 and unk1C. */
+s32 func_150144B8(LevelObject *obj) {
     Game40490144B8Packet packet;
-    register u32 value;
-    struct { f32 direction[3]; f32 matrix[16]; } scratch;
+    u32 value; // matching: holds the random number, then the effect address; two locals grow the frame
+    struct {
+        f32 direction[3];
+        f32 matrix[4][4];
+    } scratch;
 
-    arg0[0x16] |= 4;
+    obj->flags |= 4;
     if (D_80082FA0 >= 2) {
         return 1;
     }
-    func_150A8050((void *)scratch.matrix, *(f32 *)(arg0 + 0xC), *(f32 *)(arg0 + 0x10), 0.0f);
-    func_150A7960(scratch.matrix, 0.0f, 100.0f, 0.0f, &scratch.direction[0], &scratch.direction[1], &scratch.direction[2]);
+    func_150A8050(scratch.matrix, obj->rotX, obj->rotY, 0.0f);
+    func_150A7960(scratch.matrix[0], 0.0f, 100.0f, 0.0f, &scratch.direction[0], &scratch.direction[1], &scratch.direction[2]);
     func_15145974(scratch.direction, &packet.angleX, &packet.angleY);
     packet.angleX *= 0.017453292f;
     packet.angleY *= 0.017453292f;
-    packet.low = *(u32 *)(arg0 + 0x18) & 0xFFU;
-    packet.range = (*(u32 *)(arg0 + 0x18) >> 8) & 0xFFU;
+    packet.low = obj->unk18 & 0xFF;
+    packet.range = (obj->unk18 >> 8) & 0xFF;
     value = func_150ADA20();
-    packet.owner = arg0;
+    packet.owner = obj;
     packet.choice = value % (u32)(packet.range + 1) + packet.low;
-    packet.countX = (*(u32 *)(arg0 + 0x18) >> 16) & 0xFFU;
-    packet.countY = (*(u32 *)(arg0 + 0x18) >> 24) & 0xFFU;
-    packet.sizeX = (f32)(*(u32 *)(arg0 + 0x1C) & 0xFFU) * 0.015625f;
-    packet.sizeY = (f32)((*(u32 *)(arg0 + 0x1C) >> 8) & 0xFFU) * 0.015625f;
-    packet.steps = (f32)((*(u32 *)(arg0 + 0x1C) >> 24) & 0xFFU);
+    packet.countX = (obj->unk18 >> 16) & 0xFF;
+    packet.countY = (obj->unk18 >> 24) & 0xFF;
+    packet.sizeX = (f32)(obj->unk1C & 0xFF) * 0.015625f;
+    packet.sizeY = (f32)((obj->unk1C >> 8) & 0xFF) * 0.015625f;
+    packet.steps = (f32)((obj->unk1C >> 24) & 0xFF);
     packet.inverse = 1.0f / packet.steps;
-    packet.height = (f32)*(s16 *)(arg0 + 8) * packet.inverse;
-    packet.arc = func_150484A0((f32)*(s16 *)(arg0 + 6), (f32)*(s16 *)(arg0 + 8));
-    packet.factor = (f32)((*(u32 *)(arg0 + 0x1C) >> 16) & 0xFFU) * 0.00390625f * 0.7853982f;
-    value = (u32)func_15149130(0x12C, -1, 0x2A, -1, 0, 0, 0x38, 0xFF, 0);
+    packet.height = (f32)obj->sizeY * packet.inverse;
+    packet.arc = func_150484A0(obj->sizeX, obj->sizeY);
+    packet.factor = (f32)((obj->unk1C >> 16) & 0xFF) * 0.00390625f * 0.7853982f;
+    value = (u32)func_15149130(300, -1, 0x2A, -1, 0, 0, sizeof(packet), 0xFF, 0);
     if (value != 0) {
-        memcpy((void *)((u32)value + 0x28U), &packet, 0x38);
+        memcpy((void *)((u32)value + 0x28U), &packet, sizeof(packet));
     }
     return 1;
 }
@@ -910,50 +914,50 @@ typedef struct Game40490PlanePacket {
     s8 bytes[4];
 } Game40490PlanePacket;
 
-s32 func_1501474C(void *arg) {
+/** Spawns an effect over the object's rotated rectangle (sizeX by sizeZ, sizeY high). */
+s32 func_1501474C(LevelObject *obj) {
     Game40490PlanePacket packet;
-    void *result;
+    struct260 *effect;
     Game40490PlanePoint corners[4];
     f32 s;
     f32 c;
     f32 z;
-    u8 *arg0;
+    s32 pad; // matching: stack slot of a local the original had here
     f32 x;
 
-    arg0 = arg;
-    arg0[0x16] |= 4;
-    x = *(s16 *)arg0;
-    z = *(s16 *)(arg0 + 4);
-    s = sinf(*(f32 *)(arg0 + 0x10) * D_80096690);
-    c = cosf(*(f32 *)(arg0 + 0x10) * D_80096694);
-    corners[0].x = *(s16 *)(arg0 + 0xA) * s + (*(s16 *)(arg0 + 6) * c + x);
-    corners[0].z = *(s16 *)(arg0 + 0xA) * c + z - *(s16 *)(arg0 + 6) * s;
-    corners[1].x = -*(s16 *)(arg0 + 0xA) * s + (*(s16 *)(arg0 + 6) * c + x);
-    corners[1].z = -*(s16 *)(arg0 + 0xA) * c + z - *(s16 *)(arg0 + 6) * s;
-    corners[2].x = -*(s16 *)(arg0 + 0xA) * s + (-*(s16 *)(arg0 + 6) * c + x);
-    corners[2].z = -*(s16 *)(arg0 + 0xA) * c + z - -*(s16 *)(arg0 + 6) * s;
-    corners[3].x = *(s16 *)(arg0 + 0xA) * s + (-*(s16 *)(arg0 + 6) * c + x);
-    corners[3].z = *(s16 *)(arg0 + 0xA) * c + z - -*(s16 *)(arg0 + 6) * s;
+    obj->flags |= 4;
+    x = obj->x;
+    z = obj->z;
+    s = sinf(obj->rotY * 0.01745329238f);
+    c = cosf(obj->rotY * 0.01745329238f);
+    corners[0].x = obj->sizeX * c + x + obj->sizeZ * s;
+    corners[0].z = obj->sizeZ * c + z - obj->sizeX * s;
+    corners[1].x = obj->sizeX * c + x + -obj->sizeZ * s;
+    corners[1].z = -obj->sizeZ * c + z - obj->sizeX * s;
+    corners[2].x = -obj->sizeX * c + x + -obj->sizeZ * s;
+    corners[2].z = -obj->sizeZ * c + z - -obj->sizeX * s;
+    corners[3].x = -obj->sizeX * c + x + obj->sizeZ * s;
+    corners[3].z = obj->sizeZ * c + z - -obj->sizeX * s;
     packet.start = corners[1];
     packet.end = corners[2];
     packet.edge[0] = corners[0].x - corners[1].x;
     packet.edge[1] = corners[0].z - corners[1].z;
     packet.edge[2] = corners[3].x - corners[2].x;
     packet.edge[3] = corners[3].z - corners[2].z;
-    packet.top = *(s16 *)(arg0 + 8) + *(s16 *)(arg0 + 2);
-    packet.bottom = *(s16 *)(arg0 + 2);
-    packet.scaleX = (f32)(*(u32 *)(arg0 + 0x1C) & 0xFF) * 0.00390625f * 0.5f;
-    packet.scaleZ = (f32)((*(u32 *)(arg0 + 0x1C) >> 8) & 0xFF) * 0.00390625f * 0.5f;
+    packet.top = obj->y + obj->sizeY;
+    packet.bottom = obj->y;
+    packet.scaleX = (f32)(obj->unk1C & 0xFF) * 0.00390625f * 0.5f;
+    packet.scaleZ = (f32)((obj->unk1C >> 8) & 0xFF) * 0.00390625f * 0.5f;
     packet.unk30 = 0.0f;
-    packet.unk34 = (f32)((*(u32 *)(arg0 + 0x1C) >> 16) & 0xFF) * 0.00390625f * 250.0f;
-    packet.unk38 = (f32)((*(u32 *)(arg0 + 0x1C) >> 24) & 0xFF) * 0.00390625f * 250.0f;
-    packet.bytes[0] = *(u32 *)(arg0 + 0x18) & 0xFF;
-    packet.bytes[1] = (*(u32 *)(arg0 + 0x18) >> 8) & 0xFF;
-    packet.bytes[2] = (*(u32 *)(arg0 + 0x18) >> 16) & 0xFF;
-    packet.bytes[3] = (*(u32 *)(arg0 + 0x18) >> 24) & 0xFF;
-    result = func_15149130(0x12C, -1, 0x2C, -1, 0, 0, 0x40, 0xFF, 0);
-    if (result != NULL) {
-        memcpy((u8 *)result + 0x28, &packet, 0x40);
+    packet.unk34 = (f32)((obj->unk1C >> 16) & 0xFF) * 0.00390625f * 250.0f;
+    packet.unk38 = (f32)((obj->unk1C >> 24) & 0xFF) * 0.00390625f * 250.0f;
+    packet.bytes[0] = obj->unk18 & 0xFF;
+    packet.bytes[1] = (obj->unk18 >> 8) & 0xFF;
+    packet.bytes[2] = (obj->unk18 >> 16) & 0xFF;
+    packet.bytes[3] = (obj->unk18 >> 24) & 0xFF;
+    effect = func_15149130(300, -1, 0x2C, -1, 0, 0, sizeof(packet), 0xFF, 0);
+    if (effect != NULL) {
+        memcpy((u8 *)effect + 0x28, &packet, sizeof(packet));
     }
     return 1;
 }
