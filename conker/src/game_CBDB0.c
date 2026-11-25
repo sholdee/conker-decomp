@@ -14,19 +14,11 @@ typedef union {
 /* Script-set scratch words of an object (its WorldObject.work), each a float or a raw value. */
 #define WORK(obj) ((FloatOrWord *)(obj)->work.words)
 
-/* Per-behaviour handlers (D_80088C90, see game_30E90.c). */
-typedef struct {
-    void (*update)(WorldObject *obj);
-    void (*onContact)(WorldObject *obj, Actor *actor);
-    s32 unk8;
-} Struct80088C90;
-
 extern WorldObject *func_151149AC(u8 id);
 extern s32 func_15086D48(s32);
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
 extern void func_150E4928(WorldObject *);
 extern void func_15173C90(s32, s32, s32);
-extern Struct80088C90 D_80088C90[];
 
 /* Script "set" handler for the object with id `id`: applies operation `op` with operands cmd[2..]. */
 s32 func_1509E900(s32 id, s32 op, s32 *cmd) {

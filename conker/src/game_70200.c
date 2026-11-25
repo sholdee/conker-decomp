@@ -266,7 +266,6 @@ typedef struct Game70200Sprite {
     s16 height;
 } Game70200Sprite;
 
-extern Gfx D_800859A0[];
 extern Game70200Glyph D_800859E0[];
 extern s32 D_80085CD0;
 extern Game70200Sprite D_80090060;

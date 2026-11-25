@@ -1594,20 +1594,6 @@ void func_151E2284(void) {
     D_8008FD80 = 0;
 }
 
-typedef struct {
-    s8 unk0;
-    s8 unk1;
-    s8 unk2;
-    u8 unk3;
-    u8 unk4;
-    u8 unk5;
-    u8 unk6;
-    u8 unk7;
-    u8 unk8;
-    u8 unk9;
-} ModeSettings;
-
-extern ModeSettings *D_80082BBC; /* saved settings, one record per mode */
 
 /* Loads the selected mode's saved settings (D_80082BBC[mode]) into the live settings D_800E0BE0[]. */
 void func_151E22BC(void) {

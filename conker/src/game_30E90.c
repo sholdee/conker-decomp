@@ -51,13 +51,6 @@ typedef struct {
     /* 0x28 */ Vtx vertices[1];
 } ModelAsset;
 
-/* Per-behaviour handlers (D_80088C90). */
-typedef struct {
-    ObjectFunc update;
-    ObjectFunc onContact;
-    s32 unk92;
-} ObjectBehavior;
-
 /* Defaults for objects of the second (grouped) list, indexed by model id (D_800A26C0). */
 typedef struct {
     /* 0x0 */ u8 unk4C;
@@ -84,7 +77,6 @@ typedef struct {
 } DlCommand;
 
 extern LevelModelEntry *D_800B0E50;
-extern ObjectBehavior D_80088C90[];
 extern GroupedObjectDefaults D_800A26C0[];
 extern void *D_800DBED0[4];
 extern void *D_800DBEE0;
@@ -166,7 +158,7 @@ void func_150039E0(s32 level, s32 arg1) {
             }
             obj->update = D_80088C90[base[i].behavior.index].update;
             obj->onContact = D_80088C90[base[i].behavior.index].onContact;
-            obj->unk92 = D_80088C90[base[i].behavior.index].unk92;
+            obj->unk92 = D_80088C90[base[i].behavior.index].unk8;
             if (base[i].behavior.index == 22) {
                 isBehavior22 = TRUE;
             }

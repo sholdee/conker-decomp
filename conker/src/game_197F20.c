@@ -518,7 +518,6 @@ u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source) {
 }
 
 Gfx *func_150417AC(Gfx *, f32, f32, u8 *, u8, u8, u8, u8, f32, f32, s32);
-extern u8 D_800859A0[];
 
 /* Draws the current page of a text box line by line ('\n' separates lines), tinted r/g/b/a.
  * Returns gfx unchanged if the display list would overflow. */

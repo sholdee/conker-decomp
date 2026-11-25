@@ -57,7 +57,6 @@ void func_1503FB08(void) {
 
 extern u8 D_80084498;     // selected task (index into the list of tasks in use)
 extern char D_8008449C[]; // "ERROR"
-extern Gfx D_800859A0[];
 extern char D_80098930[]; // "RESETTING ALL TASKS"
 extern char D_80098944[]; // "."
 extern char D_80098948[]; // "RESET TO PLAY !"

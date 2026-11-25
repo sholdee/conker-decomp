@@ -14,19 +14,6 @@
  * one line.
  */
 
-typedef struct Struct33990 {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ s8 unk1;
-    /* 0x02 */ s8 unk2;
-    /* 0x03 */ s8 unk3;
-    /* 0x04 */ s8 unk4;
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ u8 unk8;
-    /* 0x09 */ u8 unk9;
-} Struct33990; /* size = 0xA */
-
 /* EEPROM requests, queued in D_80082BB4 (argument in D_800BE3EC) and run by func_1501C57C. */
 enum EepromRequest {
     EEPROM_REQ_NONE,
@@ -43,7 +30,6 @@ extern u8 D_800BE2F0[0x70];
 extern u8 D_800BE35A[];
 extern s8 D_800E0BE0[0x1C];
 static s8 D_800BE3D8[4]; /* save slot loaded from each EEPROM save file, -1 if none */
-extern Struct33990 *D_80082BBC;
 
 /* EEPROM access (game_20A3A0.c, game_20A850.c) */
 extern void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* read; matching: declared void (returns s32) */

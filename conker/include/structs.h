@@ -4028,4 +4028,25 @@ typedef struct PropSounds {
     /* 0xA */ s16 arriveLead; /* movers: how early (in units of the move rate) to play `arrive` */
 } PropSounds; /* size 0xC */
 
+/* Per-behaviour handlers of level objects (D_80088C90, indexed by the placement's behaviour index). */
+typedef struct ObjectBehavior {
+    /* 0x0 */ void (*update)(WorldObject *obj);
+    /* 0x4 */ void (*onContact)(WorldObject *obj, Actor *actor);
+    /* 0x8 */ s32 unk8; /* copied to WorldObject.unk92 */
+} ObjectBehavior; /* size 0xC */
+
+/* Saved settings of one multiplayer mode (D_80082BBC[mode]); func_151E22BC copies them into D_800E0BE0[]. */
+typedef struct ModeSettings {
+    /* 0x0 */ s8 unk0;
+    /* 0x1 */ s8 unk1; /* -> D_800E0BE0[2], at least 1 */
+    /* 0x2 */ s8 unk2; /* -> D_800E0BE0[3] */
+    /* 0x3 */ u8 unk3; /* -> D_800E0BE0[16], 0..4 */
+    /* 0x4 */ u8 unk4; /* -> D_800E0BE0[17] */
+    /* 0x5 */ u8 unk5; /* mode-specific setting (D_800E0BE0[4] / [13] / [18] / [7]) */
+    /* 0x6 */ u8 unk6; /* mode-specific setting (D_800E0BE0[14] / [19]) */
+    /* 0x7 */ u8 unk7;
+    /* 0x8 */ u8 unk8; /* -> D_800E0BE0[22] */
+    /* 0x9 */ u8 unk9; /* -> D_800E0BE0[6] */
+} ModeSettings; /* size 0xA */
+
 #endif

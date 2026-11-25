@@ -114,7 +114,6 @@ extern u8 D_800CBD5D; // waving text on
 extern u8 D_800CBD5E; // wave phase
 extern u8 *D_80085990[]; // per-font glyph bitmaps, 0xE0 bytes each
 extern FontGlyph *D_80085994[]; // per-font glyph metrics
-extern Gfx D_800859A0[];
 extern u8 D_800915DC[];
 extern u8 D_800915EC[];
 extern u8 D_800915FC[];

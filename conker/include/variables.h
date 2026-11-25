@@ -341,6 +341,7 @@ extern s32 *D_80082B20[]; // per level (LevelHeader.assetList): zero-terminated 
                           // starts here; init_1050 first DMAs its 16-byte header in (word 0: compressed data offset).
 extern void (*D_80082B40[])(Camera *);
 extern s8   D_80082BB4; // pending EEPROM request (game_33990)
+extern ModeSettings *D_80082BBC; // saved settings, one record per multiplayer mode
 extern u8   D_80082BC0;
 extern u8   D_80082BE0[4];
 extern u8   D_80082BE4[5];
@@ -370,6 +371,7 @@ extern s16  D_80084480;
 extern void (*D_800844B0[])(s32 arg0);
 extern s32  D_800848B0;
 
+extern Gfx D_800859A0[]; // shared display list (2D/sprite render setup)
 extern f32 D_80085FD0;
 extern f32 D_80085FD4;
 extern f32 D_80085FD8;
@@ -423,6 +425,7 @@ extern u8  D_80088B40;
 extern u8  D_80088B60;
 extern u8  D_80088B90;
 extern u8  D_80088BB0;
+extern ObjectBehavior D_80088C90[]; // level-object behaviour handlers
 extern u8 D_80089120[4]; // per collision set: 1 = enabled
 extern s32 * D_800891BC[];
 extern Mtx ** D_80089250[]; // per frame buffer: one Mtx per object
