@@ -295,7 +295,6 @@ Gfx *func_151720C4(Gfx *gfx, Particle19F150 *particle, s32 arg2) {
     return gfx;
 }
 
-extern s32 func_1510E388(s32 tri, void *verts, f32 *slopeX, f32 *slopeZ);
 /* Quad corner texture coordinates (S10.5) for 64-, 32- and 16-texel-wide textures. */
 static const s16 D_800A6FD0[4][2] = { { 64 << 5, 0 }, { 0, 0 }, { 0, 64 << 5 }, { 64 << 5, 64 << 5 } };
 static const s16 D_800A6FE0[4][2] = { { 32 << 5, 0 }, { 0, 0 }, { 0, 32 << 5 }, { 32 << 5, 32 << 5 } };
@@ -332,7 +331,7 @@ s32 func_151725FC(Vtx *vtx, s32 tri, f32 x, f32 y, f32 z, f32 angle, s32 size, u
     if (n == 0) {
         n = 1;
     }
-    if (func_1510E388(tri, NULL, &slopeX, &slopeZ) == 0) {
+    if (func_1510E388((Vec3s **)tri, NULL, &slopeX, &slopeZ) == 0) {
         return 0;
     }
     axis[0][0] = 0.0f;

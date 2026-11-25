@@ -16,8 +16,6 @@
     (((z) == 9) || ((z) == 0x38) || ((z) == 0x39) || ((z) == 0x37) || ((z) == 0x3B) || ((z) == 0x15) || \
      ((z) == 0x26) || ((z) == 0x3A))
 
-void func_151C9BA0(Camera *camera, s32 zone);
-void func_151C9ED4(Camera *camera);
 void func_151216F8(Camera *camera);
 void func_151218C4(Camera *camera);
 void func_1510E7A4(s32, s32, f32 *, void *, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);

@@ -483,7 +483,6 @@ void func_1510F800() { // matching: a declared s32 parameter changes the code
     func_150A49F4();
 }
 
-void func_1510E388(void *, void *, f32 *, f32 *);
 extern f32 D_800A2D9C; // matching: 0.02f as a literal grows the frame by 8 bytes
 
 /*

@@ -425,7 +425,6 @@ extern void func_150B0348(Actor *, s32, s32);
 extern void func_150BFFE0(Actor *);
 extern void func_150D85AC(Actor *);
 extern void func_150F1D10(Actor *, s32, s32);
-extern void func_151C9740(Actor *, s32, s32);
 extern void func_151CFA4C(Actor *, s32, s32);
 extern void func_150BE494(Actor *, s32, s32);
 extern void func_150AEB9C(Actor *);

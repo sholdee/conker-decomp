@@ -22,7 +22,7 @@ struct Shadow {
 }; /* size = 0x128 or 0x13A */
 
 /* Allocates a shadow for owner and sets up its two quads' texture coordinates. */
-Shadow *func_1510D970(s32 ownerType, u8 *owner, s32 texture, s32 createFlags, s32 flags) {
+Shadow *func_1510D970(s32 ownerType, void *owner, s32 texture, s32 createFlags, s32 flags) {
     Shadow *shadow;
     s32 size;
     s32 i;
@@ -66,7 +66,6 @@ Shadow *func_1510D970(s32 ownerType, u8 *owner, s32 texture, s32 createFlags, s3
 
 extern f32 func_150489B0(u8 angle); /* cos */
 extern s32 func_150A3FC4(f32, f32, s32, Vec3s *, f32 *);
-s32 func_1510E388(Vec3s **triPtrs, Vec3s *tri, f32 *slopeX, f32 *slopeZ);
 extern void func_1510E7A4(s32, Vec3s *, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);
 
 /* Places the shadow under its owner and builds its quad, tilted to the floor and faded with height. */

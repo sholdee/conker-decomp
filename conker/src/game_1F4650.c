@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern void func_15145974(Vec3f *, f32 *, f32 *);
 extern void func_1000FD38(void *, void *, s32);
@@ -11,7 +10,6 @@ extern s32 func_151ABE40(f32 *, CollisionHit *, s32, u8, s32);
 
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, void *, s32, f32);
-extern s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
 
 /* Casts rays both ways from the beam's midpoint and spawns a sight beam between the two surfaces hit. */
 s32 func_151C71A0(SightBeamParams *beam) {
@@ -82,19 +80,6 @@ s32 func_151C71A0(SightBeamParams *beam) {
     return 1;
 }
 
-typedef struct {
-    u8 pad0[0x6F];
-    u8 unk6F;
-} SightStatusBlock;
-
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x48];
-    s32 flags;
-    u8 pad5C[0x12C];
-    SightStatusBlock *status;
-} SightStatusObject;
-
 /* Message 0x20 (see func_151C8674). */
 typedef struct {
     Actor *actor;
@@ -110,8 +95,6 @@ typedef struct {
 extern void func_1510F800(s32);
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 extern LightEffect *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
-struct SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
-s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
 
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
 s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
@@ -444,9 +427,6 @@ void func_151C8674(s32 actor, s32 source) {
         func_151403A8((s32)&msg, 0x20);
     }
 }
-
-s32 func_151C87E0(Actor *actor, SightBeamObject *obj);
-void func_151C899C(Actor *actor, SightBeamObject *obj);
 
 /* Message handler of a sight beam object. */
 void func_151C86AC(SightBeamObject *obj, void *msg, u8 msgId) {
@@ -909,7 +889,6 @@ extern void *func_151541B8(void *, f32, f32, f32, f32, u8, s32);
 extern void func_151D5334(void *, f32, f32, f32, u8, u8, s32);
 extern void func_151D5514(void *, u8, s32);
 extern void func_151D3FF4(f32 *, u8, s32);
-void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2);
 
 /* Explosion at an actor's position: ground scorch, smoke, debris and sound. */
 void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
@@ -993,41 +972,4 @@ s32 func_151C9B64(SightStatusObject *obj, u8 *visible) {
     }
     return 1;
 }
-
-void func_151C9ED4(Camera *player);
-void func_151C9F38(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4);
-void func_151CA6A0(Camera *player, u8 big);
-void func_151CAD28(Camera *player, u8 big);
-void func_151CAB78(Camera *player, u8 big);
-void func_151CCE94(Camera *);
-void func_151C9DE8(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
-void func_151CC524(Camera *, u8, u8, u8, u8, u8);
-void func_151CC840(Camera *, u8, u8, u8, u8, u8);
-void func_151CCD1C(Camera *, u8, u8, u8);
-void func_151CCF08(Camera *, u8, s8, u8);
-void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4);
-
-void func_151C9DE8(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
-void func_151C9ED4(Camera *player);
-
-f32 func_151CC1D4(SightSprite *sprite);
-
-void func_151C9F38(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4);
-void func_151CA6A0(Camera *player, u8 big);
-
-void func_151CAB78(Camera *player, u8 big);
-
-void func_151CAD28(Camera *player, u8 big);
-
-void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4);
-
-f32 func_151CC1D4(SightSprite *sprite);
-
-void func_151CC524(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5);
-
-void func_151CC840(Camera *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg5);
-void func_151CCD1C(Camera *player, u8 red, u8 green, u8 blue);
-void func_151CCE94(Camera *player);
-
-void func_151CCF08(Camera *player, u8 arg1, s8 arg2, u8 arg3);
 

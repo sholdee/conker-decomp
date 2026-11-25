@@ -10,7 +10,6 @@ typedef struct {
 } Msg_CD860;
 
 void func_150A3444(s32, s16, s16, s16);
-void func_151C970C(s32, void *);
 void func_150A2864(s32, s32);
 void func_150A2940(s32, s32, s32);
 void func_150A3398(s32, u16, s32, s32, s32, s32);
@@ -39,7 +38,7 @@ s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
     case 5:
         // matching: `== 0` would compile to sltiu; the inverted test keeps the branchy form
         mode = (msg->params[0] == 999) ? 2 : (msg->params[0] != 0) ? 0 : 1;
-        func_151C970C(mode, &zones[slot]);
+        func_151C970C(mode, (s32)&zones[slot]);
         break;
     }
     return 0;

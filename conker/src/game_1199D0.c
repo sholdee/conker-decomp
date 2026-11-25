@@ -178,8 +178,6 @@ void func_150ECB8C(EmitterEffect *effect) {
     }
 }
 
-extern void func_151C9AC0(Actor *, u8, s32);
-
 /* Runs func_151C9AC0 on obj and flashes it green. */
 void func_150ECC00(Actor *obj, u8 owner, s32 kind) {
     func_151C9AC0(obj, owner, kind);

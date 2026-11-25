@@ -2,16 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* A shadow-polygon vertex while it is clipped in light space. */
-typedef struct ClipVtx {
-    f32 x;       /* light-space position, clipped against the shadow frustum */
-    f32 y;
-    f32 z;
-    s16 modelX;  /* model-space position, interpolated along */
-    s16 modelY;
-    s16 modelZ;
-} ClipVtx;       /* size 0x14 */
-
 /* Per clip plane: edge intersection, and the inside test. */
 extern ClipVtx *(*D_8008D498[])(ClipVtx *, ClipVtx *, ClipVtx *);
 extern s32 (*D_8008D4C0[])(ClipVtx *);
@@ -598,15 +588,6 @@ ClipVtx *func_15185DD4(ClipVtx *in, s32 count, s32 plane, ClipVtx *out) {
     return out;
 }
 
-/* A shadow-receiving vertex: light-space position and a pointer to its model-space position. */
-typedef struct ShadowVtx {
-    f32 x;
-    f32 y;
-    f32 z;
-    s16 *model;
-    s32 unk10;
-} ShadowVtx; /* size 0x14 */
-
 /*
  * Clips polygon in[0..count-1] to the shadow frustum and emits it as textured vertices in out, with the
  * shadow texture coordinates and fade alpha. When split is set, the result is also cut at x == 0 and
@@ -760,8 +741,6 @@ s32 func_1518652C(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx 
     }
     return 0;
 }
-
-s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *end, s32 count);
 
 extern s32 D_8008D3E0; /* shadow vertex budget for this frame */
 extern Gfx D_8008D410[];

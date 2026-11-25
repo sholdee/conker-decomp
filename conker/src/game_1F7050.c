@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern f32 sinf(f32);
 extern void func_1514373C(f32, f32, f32 *, f32 *);
@@ -13,40 +12,7 @@ extern void func_15160274(s32, s32, s32);
 extern void func_1515572C(s32, s32);
 extern void func_151A561C(s32, s32);
 
-extern s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
-
-struct SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
-s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
-s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
-
-s32 func_151C87E0(Actor *actor, SightBeamObject *obj);
-void func_151C899C(Actor *actor, SightBeamObject *obj);
-
-s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
-
-s32 func_151C87E0(Actor *actor, SightBeamObject *obj);
-
-void func_151C899C(Actor *actor, SightBeamObject *obj);
-
-SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
-
-void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2);
-
-void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2);
-
 extern u8 D_800CBFA8[][0x32C];
-void func_151C9ED4(Camera *player);
-void func_151C9F38(Camera *player, u8 type, u8 arg2, s8 arg3, u8 arg4);
-void func_151CA6A0(Camera *player, u8 big);
-void func_151CAD28(Camera *player, u8 big);
-void func_151CAB78(Camera *player, u8 big);
-void func_151CCE94(Camera *);
-void func_151C9DE8(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4);
-void func_151CC524(Camera *, u8, u8, u8, u8, u8);
-void func_151CC840(Camera *, u8, u8, u8, u8, u8);
-void func_151CCD1C(Camera *, u8, u8, u8);
-void func_151CCF08(Camera *, u8, s8, u8);
-void func_151CB5FC(Camera *player, u8 kind, u8 arg2, s8 arg3, u8 arg4);
 
 /* Starts the screen/player effects for player state `state` (some held items force state 27). */
 void func_151C9BA0(Camera *player, s32 state) {
@@ -130,21 +96,6 @@ void func_151C9ED4(Camera *player) {
     func_151494E0((s32)&msg, 0x21);
     D_8008CD00 = 0;
 }
-
-/* Message 0x37 (see func_151CB918). */
-typedef struct {
-    u8 side;
-    Camera *player;
-} SightPanelMsg;
-
-f32 func_151CC1D4(SightSprite *sprite);
-
-/* Effect spawned by func_151CCE94; +0x20 holds the owning player. */
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x10];
-    Camera *player;
-} SightOwnedEffect;
 
 extern void (*D_8008FC10[])(SightSprite *, void **, u8);
 const SightColor D_800AAC80 = { 255.0f, 0.0f, 0.0f, 255.0f };
@@ -446,23 +397,6 @@ void func_151CAB78(Camera *player, u8 big) {
         memcpy(&sprite->payload, &payload, sizeof(SightSpritePayload));
     }
 }
-
-/* State of the lens effect (func_151CB110), stored at +0x18 of its object. */
-typedef struct {
-    Camera *player;
-    RenderView *view;
-    u16 *pixels;
-    s32 left;
-    u32 topOffset;
-} SightLens;
-
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x8];
-    SightLens lens;
-    u8 pad2C[4];
-    u16 pixels[24 * 24]; /* 24x24 copy of the framebuffer under the lens */
-} SightLensObject;
 
 /* Spawns the corner brackets of the zoom sight and, unless D_800BE616 is set, its centre lens. */
 void func_151CAD28(Camera *player, u8 big) {

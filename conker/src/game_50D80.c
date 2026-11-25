@@ -418,9 +418,6 @@ extern s32 func_1519D030(void *, s32, s32, s32, s32, s32);
 extern s32 func_151A4FD0(s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151A9390(s32, s32, s32, f32 *, f32, f32, s32, s32, s32);
 extern void func_151BE850(f32 *, f32, s32, s32, s32, s32, s32);
-extern void func_151C970C(s32, TriggerZone *);
-extern void func_151C9DE8(void *, u8, s8, u8, s32);
-extern void func_151C9ED4(Camera *);
 extern void func_151CD35C(s32);
 extern void func_151CD394(s32);
 extern void func_151DE7D4(void);
@@ -727,7 +724,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 0x12, 0x13, 0x14, 0x15 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(2, &zones[ids[i]]);
+                        func_151C970C(2, (s32)&zones[ids[i]]);
                     }
                     break;
                 }
@@ -1251,7 +1248,6 @@ extern void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15143134(const f32 *, f32 *, void *);
 extern void func_151C329C(f32 *, u8, s32);
 extern void func_15107B78(Actor *, s16, s16, u8, s32);
-extern void func_151CC290(Camera *);
 extern void func_1519EA78(f32 *, u16, f32, u8, s32);
 extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s32, s32, u8 *, s32, s32);
 extern void func_150F16DC(Actor *, u8, u8, u8, s32);
@@ -2021,7 +2017,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 6, 7, 8, 9 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(1, &zones[ids[i]]);
+                        func_151C970C(1, (s32)&zones[ids[i]]);
                     }
                     break;
                 }
@@ -2029,7 +2025,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_15107B78(obj, func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x40, sceneTag, 1);
                     break;
                 case 13:
-                    func_151CC290(camera_global_Cameras);
+                    func_151CC290((s32)camera_global_Cameras);
                     break;
                 case 14: {
                     f32 p[3];

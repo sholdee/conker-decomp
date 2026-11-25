@@ -628,7 +628,6 @@ void *func_1513D668(void *def, void *colors, u8 updateFn1, u8 updateFn2, u8 expi
                          motionSize, argD, argE);
 }
 
-s32 func_1510E388(s32, s32, f32 *, f32 *);
 s32 func_15144E80(s32, Vec3f *, Vec3f *, Vec3f *);
 s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 
@@ -666,7 +665,7 @@ s32 func_1513D6FC(ParticleAxes *axes, s16 angle, f32 width, f32 height, s32 arg4
         sinA = func_151423D8(angle);
         widthSin = width * sinA;
         heightSin = height * sinA;
-        if (func_1510E388(arg4, arg5, &slopeX, &slopeZ) == 0) {
+        if (func_1510E388((Vec3s **)arg4, (Vec3s *)arg5, &slopeX, &slopeZ) == 0) {
             return 0;
         }
         {
@@ -1033,7 +1032,7 @@ s32 func_1513E2AC(s32 sprite, s32 arg1, s32 surface, f32 x, f32 y, f32 z, f32 wi
         v[3].ob[2] = z - uz - vz;
         return 1;
     }
-    if (func_1510E388(arg1, surface, &slopeX, &slopeZ) == 0) {
+    if (func_1510E388((Vec3s **)arg1, (Vec3s *)surface, &slopeX, &slopeZ) == 0) {
         return 0;
     }
     heightSin = height * sinA;

@@ -431,8 +431,6 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
     return gfx;
 }
 
-extern Shadow *func_1510D970(s32, void *, s32, s32, s32);
-
 /* Creates or frees each object's shadow depending on whether the object is shown (in every active view). */
 void func_15113C88(void) {
     s32 i;
