@@ -1035,8 +1035,9 @@ typedef struct {
     /* 0x0BC */ f32 unkBC;
     /* 0x0C0 */ f32 unkC0;
     /* 0x0C4 */ u8  padC4[0x18];
-    /* 0x0DC */ f32 unkDC[3];
-    /* 0x0E8 */ u8  padE8[0x20];
+    /* 0x0DC */ vertex unkDC;
+    /* 0x0E8 */ vertex unkE8;      // a direction (func_15145974 turns it into heading/elevation)
+    /* 0x0F4 */ u8  padF4[0x14];
     /* 0x108 */ u8  unk108;
     /* 0x109 */ u8  unk109;
     /* 0x10A */ u8  pad10A[0xA];

@@ -54,29 +54,11 @@ typedef struct struct127Hidden {
 } struct127Hidden;
 #define HIDDEN(obj) ((struct127Hidden *)(obj))
 
-/* Same for ActorCtl (Actor.unk31C). */
-typedef struct struct126Hidden {
-    /* 0x000 */ f32 unk0;
-    /* 0x004 */ u8 pad4[0x24 - 0x4];
-    /* 0x024 */ s16 unk24;
-    /* 0x026 */ u8 pad26[0x3C - 0x26];
-    /* 0x03C */ s32 unk3C;
-    /* 0x040 */ u8 pad40[0xA8 - 0x40];
-    /* 0x0A8 */ f32 unkA8;
-    /* 0x0AC */ u8 unkAC;
-    /* 0x0AD */ s8 unkAD;
-    /* 0x0AE */ u8 padAE[0xDC - 0xAE];
-    /* 0x0DC */ f32 unkDC[3];
-    /* 0x0E8 */ u8 unkE8[0x12C - 0xE8];
-    /* 0x12C */ u16 unk12C;
-    /* 0x12E */ u8 pad12E[0x170 - 0x12E];
-    /* 0x170 */ f32 unk170;
-    /* 0x174 */ u8 pad174[0x197 - 0x174];
-    /* 0x197 */ u8 unk197;
-    /* 0x198 */ u8 pad198[0x19C - 0x198];
-    /* 0x19C */ u16 unk19C;
-} struct126Hidden;
-#define HIDDEN126(ext) ((struct126Hidden *)(ext))
+/* The object func_1503195C returns (only the word at 0x3C is read here). */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x3C];
+    /* 0x3C */ s32 unk3C;
+} Attached1503195C;
 
 void func_15131D4C(s32 arg0, s32 arg1);
 void func_1506BF5C(void);
@@ -791,7 +773,7 @@ void func_1506BF5C(void) {
             break;
         }
         if (D_800D154C->unk31C != NULL) {
-            level = HIDDEN126(D_800D154C->unk31C)->unk0;
+            level = D_800D154C->unk31C->unk0;
         } else {
             level = D_800D154C->y_velocity;
         }
@@ -1212,10 +1194,10 @@ void func_1506CE6C(void) {
         break;
     case 3:
         dist = 500.0f;
-        func_15145974(HIDDEN126(D_800CC2D0[0].unk31C)->unkE8, &heading, &elevation);
-        vec[0] = HIDDEN126(D_800CC2D0[0].unk31C)->unkDC[0];
-        vec[1] = HIDDEN126(D_800CC2D0[0].unk31C)->unkDC[1];
-        vec[2] = HIDDEN126(D_800CC2D0[0].unk31C)->unkDC[2];
+        func_15145974(&D_800CC2D0[0].unk31C->unkE8, &heading, &elevation);
+        vec[0] = D_800CC2D0[0].unk31C->unkDC.x;
+        vec[1] = D_800CC2D0[0].unk31C->unkDC.y;
+        vec[2] = D_800CC2D0[0].unk31C->unkDC.z;
         allocExt = 1;
         pos = vec;
         elevation = -elevation;
@@ -2443,7 +2425,7 @@ void func_15070300(s32 cmd) {
             goto done; // matching: an else branch drops the dead flag = 0 below
         }
         flag = 0;
-        if (HIDDEN126(obj->unk31C)->unk197 != 0) {
+        if (obj->unk31C->aimState != 0) {
             flag = 1;
         } else {
             flag = 0;
@@ -2453,7 +2435,7 @@ void func_15070300(s32 cmd) {
         obj = func_1507515C(D_800D154C);
         mode = 0;
         flag = 0;
-        if (HIDDEN126(obj->unk31C)->unk197 != 0) {
+        if (obj->unk31C->aimState != 0) {
             flag = 1;
         } else {
             flag = 0;
@@ -2469,7 +2451,7 @@ void func_15070300(s32 cmd) {
         if (D_800D154C->unk31C->unk128 & 0x10) {
             D_800D1580 = 10;
             mode = 2;
-            HIDDEN126(D_800D154C->unk31C)->unk12C--;
+            D_800D154C->unk31C->unk12C--;
         } else {
             D_800D1580 = 9;
         }
@@ -3423,21 +3405,21 @@ void func_15072B44(void) {
         anim = 0x3E;
         break;
     case 0x10C:
-        if (HIDDEN126(D_800D154C->unk31C)->unk197) {
+        if (D_800D154C->unk31C->aimState) {
             anim = 0x10A;
         } else {
             func_1507F640();
         }
         break;
     case 0x156:
-        if (HIDDEN126(D_800D154C->unk31C)->unk197) {
+        if (D_800D154C->unk31C->aimState) {
             anim = 0x157;
         } else {
             func_1507F640();
         }
         break;
     case 0x167:
-        if (HIDDEN126(D_800D154C->unk31C)->unk197) {
+        if (D_800D154C->unk31C->aimState) {
             anim = 0x165;
         } else {
             func_1507F640();
@@ -3509,7 +3491,7 @@ void func_15072F10(void) {
     s16 pitch;
 
     pitch = (s16)(D_800D154C->unk1D1 * 200);
-    HIDDEN126(D_800D154C->unk31C)->unk24 -= 1;
+    D_800D154C->unk31C->unk24 -= 1;
     func_1505A184((u16)(D_800D154C->unk7A - D_800D154C->unk31C->unk12), 2000.0f, pitch * 0.0054931640625f,
                   &targetX, &targetZ, &targetY);
     targetX = targetX * 5000.0f + D_800D154C->x_position;
@@ -3754,10 +3736,10 @@ void func_15073B38(void) {
     param = &D_800D1580; // matching: both globals are accessed through pointer locals
     objp = &D_800D154C;
     low = *param & 0xFFFF;
-    HIDDEN126((*objp)->unk31C)->unkA8 = low;
+    (*objp)->unk31C->ropeSwingForce = low;
     mid = (*param >> 16) & 0xFF;
-    HIDDEN126((*objp)->unk31C)->unkAC = (u32)mid;
-    HIDDEN126((*objp)->unk31C)->unkAD = (*param >> 24) & 0xFF;
+    (*objp)->unk31C->ropeSwingAngle = (u32)mid;
+    (*objp)->unk31C->ropeSwingTimer = (*param >> 24) & 0xFF;
 }
 
 void func_15073C28(void) {
@@ -3909,14 +3891,14 @@ void func_15073FA0(void) {
                 obj->z_position = player->z_position;
             }
             if (D_800BE616 != 0) {
-                obj->unk2E4 = HIDDEN126(player->unk31C)->unk19C;
+                obj->unk2E4 = player->unk31C->unk19C;
                 state = 5;
                 player->unk31C->unk19B = 0;
                 D_800D154C->unk31C->unk78 = 0;
                 cmd = (D_800D1580 >> 16) & 1;
                 obj->gravity = 4.0; // matching: double literal
                 player = D_800D154C;
-                speed = ((f32)(0xF0 - HIDDEN126(player->unk31C)->unk19C) * 60.0f) / 240.0f;
+                speed = ((f32)(0xF0 - player->unk31C->unk19C) * 60.0f) / 240.0f;
                 speed += 40.0f;
                 if (cmd) {
                     speed = 0.0f;
@@ -3924,7 +3906,7 @@ void func_15073FA0(void) {
                 if (player->unk31C->unk198 != 0) {
                     {
                         typedef s32 padT; // matching: as above
-                        func_1505A184((u16)(s32)((45.0f - HIDDEN126(player->unk31C)->unk170) * 182.04445f) & 0xFFFF, speed * 4.0f, 0.0f, &x1, &y1, &z1);
+                        func_1505A184((u16)(s32)((45.0f - player->unk31C->aimPitch) * 182.04445f) & 0xFFFF, speed * 4.0f, 0.0f, &x1, &y1, &z1);
                         obj->y_velocity = -y1;
                     }
                     player = D_800D154C;
@@ -3937,7 +3919,7 @@ void func_15073FA0(void) {
                     slot = (s32)func_1503195C(player, 0x2C, 0);
                 }
                 if (slot != 0) {
-                    obj->unk8E = HIDDEN126(slot)->unk3C;
+                    obj->unk8E = ((Attached1503195C *)slot)->unk3C;
                     func_100100E0(func_15033BDC, (void *)slot, D_800D154C, func_1000EE70, obj, obj->unique_id);
                 }
                 player = D_800D154C;
@@ -4037,7 +4019,7 @@ void func_150746F0(void) {
             if (ext != NULL) {
                 camera = target->camera;
                 if (camera != NULL) {
-                    if (HIDDEN126(ext)->unk197 != 0) {
+                    if (ext->aimState != 0) {
                         func_1517F488(0xFF, 0, 0, 180, 20, camera->playerIndex);
                     }
                 }

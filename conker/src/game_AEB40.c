@@ -43,28 +43,6 @@
 #undef D_800D2138
 #undef D_800D2132
 
-// File-local view of the 0x31C extension block of a game object (header ActorCtl, 0x1C0 bytes).
-typedef struct GameObjExt {
-    /* 0x000 */ u8 pad0[0x56];
-    /* 0x056 */ u8 unk56;
-    /* 0x057 */ u8 pad57[0x2D];
-    /* 0x084 */ u8 unk84;
-    /* 0x085 */ u8 pad85[0x115];
-    /* 0x19A */ u8 grenade_count;
-    /* 0x19B */ u8 pad19B[0xF];
-    /* 0x1AA */ s16 unk1AA;
-    /* 0x1AC */ u8 pad1AC;
-    /* 0x1AD */ u8 unk1AD;
-    /* 0x1AE */ u8 pad1AE;
-    /* 0x1AF */ u8 unk1AF;
-    /* 0x1B0 */ s8 unk1B0;
-    /* 0x1B1 */ u8 pad1B1;
-    /* 0x1B2 */ u8 unk1B2;
-    /* 0x1B3 */ u8 pad1B3[0x5];
-    /* 0x1B8 */ f32 unk1B8;
-    /* 0x1BC */ u8 pad1BC[0x4];
-} GameObjExt; // size 0x1C0
-
 // One 0x30-byte entry of the level's spawn table D_800D20FC.
 typedef struct SpawnRecord {
     /* 0x00 */ u16 flags;
@@ -254,7 +232,7 @@ typedef struct GameObj {
     /* 0x304 */ s32 unk304[4];      // one per player
     /* 0x314 */ s32 *unk314;
     /* 0x318 */ Camera *camera;
-    /* 0x31C */ GameObjExt *unk31C;
+    /* 0x31C */ ActorCtl *unk31C;
     /* 0x320 */ u8 pad320[0xC];
 } GameObj; // size 0x32C
 
@@ -625,7 +603,7 @@ s32 func_15081E78(GameObj *self, RayHit *hit, s32 kind) {
     f32 pitch;
     u8 playImpact;
     GameObj *obj;
-    GameObjExt *ext;
+    ActorCtl *ext;
     // matching: volatile keeps IDO from hoisting the li/lw of noHealth out of the if/else
     volatile s32 noHealth;
     s32 longShot;
@@ -983,8 +961,8 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     ret = idx + 1;
     func_15084488(spawn, obj->unk13F, arg3);
     if ((idx < D_8008FD8C) || (type == 0x98) || (type == 0x28)) {
-        obj->unk31C = allocate_memory(sizeof(GameObjExt), 1, 0, 0);
-        bzero(obj->unk31C, sizeof(GameObjExt));
+        obj->unk31C = allocate_memory(sizeof(ActorCtl), 1, 0, 0);
+        bzero(obj->unk31C, sizeof(ActorCtl));
         obj->unk31C->unk1B8 = 5.0f;
     }
     obj->unique_id = spawn->unique_id;
@@ -1022,7 +1000,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
             obj->unk128 = func_151E5F64(obj->unk127);
             obj->unk31C->grenade_count = D_800D2130;
             obj->unk31C->unk1AF = 0x40;
-            obj->unk31C->unk1B0 = -1;
+            obj->unk31C->lastSpawnIndex = -1;
         }
     }
     obj->health = spawn->unkE & 0xF;
@@ -1166,7 +1144,7 @@ void func_150832AC(GameObj *obj) {
 void func_15083384(GameObj *obj, s32 arg1) {
     s32 partSet;
     s32 group;
-    GameObjExt *ext;
+    ActorCtl *ext;
 
     partSet = -1;
     switch (arg1) {

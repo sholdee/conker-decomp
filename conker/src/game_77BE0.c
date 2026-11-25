@@ -3,66 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-// File-local views of a game object (Actor, the 0x32C-byte entries of D_800CC2D0) and of the
-// extension block it points to at 0x31C (ActorCtl). include/structs.h lacks or mistypes several
-// fields used here (0x12 is a u16, 0x38 an s16, 0xBC an f32, ...); fold them in during the central pass.
-typedef struct GameObjExt {
-    /* 0x000 */ u8 pad0[0x4];
-    /* 0x004 */ s32 unk4;
-    /* 0x008 */ s16 unk8;
-    /* 0x00A */ u8 padA[0x1];
-    /* 0x00B */ u8 unkB;
-    /* 0x00C */ u8 padC[0x2];
-    /* 0x00E */ u16 unkE;
-    /* 0x010 */ u16 unk10;
-    /* 0x012 */ s16 unk12;
-    /* 0x014 */ u16 unk14;
-    /* 0x016 */ u8 unk16;
-    /* 0x017 */ u8 unk17;
-    /* 0x018 */ u8 pad18[0x2];
-    /* 0x01A */ u8 unk1A;
-    /* 0x01B */ u8 pad1B[0x1];
-    /* 0x01C */ f32 unk1C;
-    /* 0x020 */ u8 unk20;
-    /* 0x021 */ u8 unk21;
-    /* 0x022 */ s8 unk22;
-    /* 0x023 */ u8 pad23[0xF];
-    /* 0x032 */ u16 unk32;
-    /* 0x034 */ u8 pad34[0x3];
-    /* 0x037 */ u8 unk37;
-    /* 0x038 */ u8 pad38[0x4];
-    /* 0x03C */ u8 unk3C;
-    /* 0x03D */ u8 pad3D[0x9];
-    /* 0x046 */ s16 unk46;
-    /* 0x048 */ u8 pad48[0x2];
-    /* 0x04A */ s8 chased;
-    /* 0x04B */ s8 chasing;
-    /* 0x04C */ u8 pad4C[0x2];
-    /* 0x04E */ u8 unk4E;
-    /* 0x04F */ u8 pad4F[0x7];
-    /* 0x056 */ u8 unk56;
-    /* 0x057 */ u8 unk57;
-    /* 0x058 */ u8 pad58[0x10];
-    /* 0x068 */ s16 unk68;
-    /* 0x06A */ u8 pad6A[0x1];
-    /* 0x06B */ u8 unk6B;
-    /* 0x06C */ u8 pad6C[0xC];
-    /* 0x078 */ u8 unk78;
-    /* 0x079 */ u8 pad79[0x1C];
-    /* 0x095 */ u8 unk95;
-    /* 0x096 */ u8 pad96[0x84];
-    /* 0x11A */ u8 unk11A;
-    /* 0x11B */ u8 pad11B[0x5];
-    /* 0x120 */ u8 unk120;
-    /* 0x121 */ u8 pad121[0x74];
-    /* 0x195 */ s8 unk195;
-    /* 0x196 */ u8 pad196[0x2];
-    /* 0x198 */ u8 unk198;
-    /* 0x199 */ u8 pad199[0xF];
-    /* 0x1A8 */ u8 unk1A8;
-    /* 0x1A9 */ u8 pad1A9[0x3];
-} GameObjExt; // size 0x1AC
-
 typedef struct GameObj {
     /* 0x000 */ s32 interaction_state;
     /* 0x004 */ u8 id;
@@ -153,7 +93,7 @@ typedef struct GameObj {
     /* 0x300 */ u8 unk300;
     /* 0x301 */ u8 pad301[0x17];
     /* 0x318 */ Camera *camera;
-    /* 0x31C */ GameObjExt *unk31C;
+    /* 0x31C */ ActorCtl *unk31C;
     /* 0x320 */ u8 pad320[0xC];
 } GameObj; // size 0x32C
 
@@ -806,7 +746,7 @@ void func_1504C0E8(GameObj *obj, s32 arg1, f32 arg2) {
     s32 pressed;
     f32 speed;
     s32 anim;
-    GameObjExt *ext;
+    ActorCtl *ext;
     f32 diff;
 
     if (D_800CC2B2 == 0 && (ext = obj->unk31C)->unk12 >= -29 && ext->unk12 < 30) {
@@ -938,7 +878,7 @@ void func_1504C854(Actor *obj) {
 }
 
 s32 func_1504C8BC(GameObj *obj) {
-    GameObjExt *ext;
+    ActorCtl *ext;
 
     ext = obj->unk31C;
     if (ext == NULL) {
