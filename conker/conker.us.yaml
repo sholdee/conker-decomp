@@ -1222,7 +1222,7 @@ segments:
       - [0x23C824, rodata]
       - [0x23C830, .rodata, game_623D0]
       - [0x23C838, rodata]
-      - [0x23C840, rodata]
+      - [0x23C840, .rodata, game_63A20]
       - [0x23C850, rodata]
       - [0x23CB10, rodata]
       - [0x23CD10, .rodata, game_64120]
