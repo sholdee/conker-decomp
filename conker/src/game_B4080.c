@@ -156,6 +156,43 @@ typedef struct MpGame {
     /* 0x1868 */ f32 unk1868[16];
 } MpGame;
 
+/*
+ * File-local view of the per-actor state at struct127::unk31C. structs.h types it as
+ * struct126, which has 0x90 as s8 and leaves 0x129..0x194 and everything past 0x1AB
+ * as padding; this view covers the fields used here that struct126 lacks.
+ */
+typedef struct ObjState {
+    /* 0x000 */ u8 pad0[0x78];
+    /* 0x078 */ u8 unk78;
+    /* 0x079 */ u8 pad79[0xC];
+    /* 0x085 */ u8 unk85;
+    /* 0x086 */ u8 unk86;
+    /* 0x087 */ u8 pad87[3];
+    /* 0x08A */ u16 unk8A;
+    /* 0x08C */ u16 unk8C;
+    /* 0x08E */ s8 unk8E;
+    /* 0x08F */ s8 unk8F;
+    /* 0x090 */ f32 unk90;
+    /* 0x094 */ u8 pad94[0x129 - 0x94];
+    /* 0x129 */ u8 unk129;
+    /* 0x12A */ u8 unk12A;
+    /* 0x12B */ u8 pad12B;
+    /* 0x12C */ s16 unk12C;
+    /* 0x12E */ u8 pad12E[0x140 - 0x12E];
+    /* 0x140 */ f32 unk140;
+    /* 0x144 */ u8 pad144[0x16C - 0x144];
+    /* 0x16C */ f32 yaw;
+    /* 0x170 */ f32 pitch;
+    /* 0x174 */ f32 unk174;
+    /* 0x178 */ f32 unk178;
+    /* 0x17C */ u8 pad17C[0x1AC - 0x17C];
+    /* 0x1AC */ u8 unk1AC;
+    /* 0x1AD */ u8 pad1AD[2];
+    /* 0x1AF */ u8 unk1AF;
+} ObjState;
+
+#define OBJ_STATE(obj) ((ObjState *)(obj)->unk31C)
+
 extern s8 D_800D239A;
 extern s8 D_800D2398;
 extern s8 D_800D2399;
@@ -1753,6 +1790,21 @@ void func_1508EBF8(s32, s32);
 s32 func_1508DAEC(s32, s32);
 void func_1508B3F8(void);
 
+/* 0x180-byte per-player viewport records at D_800BE628 (HudView in game_BC510.c). */
+typedef struct HudView {
+    /* 0x00 */ u8 pad0[0x24];
+    /* 0x24 */ f32 top;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 left;
+    /* 0x30 */ f32 right;
+    /* 0x34 */ u8 pad34[0x6C - 0x34];
+    /* 0x6C */ f32 unk6C;
+    /* 0x70 */ f32 unk70;
+    /* 0x74 */ u8 pad74[0x180 - 0x74];
+} HudView;
+
+#define HUD_VIEWS ((HudView *)D_800BE628)
+
 /* Per-frame update of every player's multiplayer state; returns a mask of players that respawned. */
 s32 func_1508A6FC(void) {
     s32 i;
@@ -1789,7 +1841,7 @@ s32 func_1508A6FC(void) {
     s32 j;
     s32 pad2; // matching: unused stack slot in the original frame
     s32 flags;
-    u8 *vp;
+    HudView *vp;
 
     result = 0;
     i = 0;
@@ -1949,7 +2001,7 @@ s32 func_1508A6FC(void) {
                 arr19C[i] = 0;
                 arr1C[i] = 1;
             }
-            if (*((u8 *)obj->unk31C + 0x1AC) != 0) { /* past the end of struct126 */
+            if (OBJ_STATE(obj)->unk1AC != 0) {
                 arr25C[i] = 20;
             }
         } else {
@@ -1968,12 +2020,12 @@ s32 func_1508A6FC(void) {
         func_1508B3F8();
     }
     if (D_800D23B0->gameType == 0xB9) {
-        half = ((s32) (((f32 *) D_800BE628)[0x30 / 4] - ((f32 *) D_800BE628)[0x2C / 4])) >> 1;
+        half = (s32)(HUD_VIEWS[0].right - HUD_VIEWS[0].left) >> 1;
         func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
         for (j = 0; j <= D_80082FA0; j++) {
-            if ((*((u8 *) (&D_800CC2D0[j].pad128))) == 0) {
-                vp = ((u8 *) D_800BE628) + (j * 0x180);
-                func_15042D94((s32) ((*((f32 *) (vp + 0x2C))) + ((f32) half)), (s32) ((*((f32 *) (vp + 0x24))) + 6.0f), 1, "%d", arr1574[j] / 60);
+            if (*(u8 *)&D_800CC2D0[j].pad128 == 0) {
+                vp = &HUD_VIEWS[j];
+                func_15042D94(vp->left + half, vp->top + 6.0f, 1, "%d", arr1574[j] / 60);
             }
         }
 
@@ -2387,30 +2439,7 @@ s32 func_1508C194(s32 arg0) {
     return 0;
 }
 
-typedef struct GameB4080SightInner {
-    u8 pad0[0x75];
-    u8 kind75;
-    u8 pad76[0xE];
-    u8 flag84;
-    u8 pad85[0x8F];
-    s16 height114;
-} GameB4080SightInner;
-
-typedef struct GameB4080SightActor {
-    s32 type;
-    u8 pad4[0x10];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad20[0x184];
-    s16 pointX;
-    s16 pointY;
-    s16 pointZ;
-    u8 pad1AA[0x172];
-    GameB4080SightInner *inner;
-} GameB4080SightActor;
-
-void *func_1505EEF4(s32);
+struct127 *func_1505EEF4(s32);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *,
                   f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
 extern s16 D_800872C4[];
@@ -2419,11 +2448,11 @@ extern s16 D_800872C4[];
 void func_1508C1A4(s32 a, s32 b) {
     s32 blocked;
     s32 seen;
-    GameB4080SightActor *from;
-    GameB4080SightActor *to;
+    struct127 *from;
+    struct127 *to;
     s32 fromFlag;
     s32 toFlag;
-    GameB4080SightInner *fromInner;
+    struct126 *fromInner;
     f32 distance;
     f32 hitX;
     f32 hitY;
@@ -2441,40 +2470,41 @@ void func_1508C1A4(s32 a, s32 b) {
     from = func_1505EEF4(a & 0xFFFF0FFF);
     to = func_1505EEF4(b & 0xFFFF0FFF);
     if (from != NULL && to != NULL) {
-        x0 = from->x;
-        z0 = from->z;
-        fromInner = from->inner;
-        fromFlag = fromInner->flag84;
+        x0 = from->x_position;
+        z0 = from->z_position;
+        fromInner = from->unk31C;
+        fromFlag = fromInner->unk84;
         if (fromFlag) {
-            y0 = from->y + fromInner->height114 * 0.75f;
-            if ((fromInner->kind75 & 0x7F) == 9) {
+            y0 = from->y_position + (s16)fromInner->unk114 * 0.75f;
+            if ((fromInner->unk75 & 0x7F) == 9) {
                 y0 -= 50.0f;
             }
-        } else if (from->type == 0x1F) {
-            y0 = from->y + 80.0f;
-        } else if (to->inner->flag84 && D_800872C4[D_800E0BD0] != -1) {
-            x0 = from->pointX;
-            y0 = from->pointY;
-            z0 = from->pointZ;
+        } else if (from->interaction_state == 0x1F) {
+            y0 = from->y_position + 80.0f;
+        } else if (to->unk31C->unk84 && D_800872C4[D_800E0BD0] != -1) {
+            /* 0x1A4..0x1A9 is an s16 point; structs.h types it as u16 pad1A4/s16 unk1A6/u32 pad1A8 */
+            x0 = (s16)from->pad1A4;
+            y0 = from->unk1A6;
+            z0 = *(s16 *)&from->pad1A8;
         } else {
-            y0 = from->y + 40.0f;
+            y0 = from->y_position + 40.0f;
         }
-        x1 = to->x;
-        z1 = to->z;
-        toFlag = to->inner->flag84;
+        x1 = to->x_position;
+        z1 = to->z_position;
+        toFlag = to->unk31C->unk84;
         if (toFlag) {
-            y1 = to->y + to->inner->height114 * 0.75f;
-            if ((to->inner->kind75 & 0x7F) == 9) {
+            y1 = to->y_position + (s16)to->unk31C->unk114 * 0.75f;
+            if ((to->unk31C->unk75 & 0x7F) == 9) {
                 y1 -= 50.0f;
             }
-        } else if (to->type == 0x1F) {
-            y1 = to->y + 80.0f;
+        } else if (to->interaction_state == 0x1F) {
+            y1 = to->y_position + 80.0f;
         } else if (fromFlag && D_800872C4[D_800E0BD0] != -1) {
-            x1 = to->pointX;
-            y1 = to->pointY;
-            z1 = to->pointZ;
+            x1 = (s16)to->pad1A4;
+            y1 = to->unk1A6;
+            z1 = *(s16 *)&to->pad1A8;
         } else {
-            y1 = to->y + 40.0f;
+            y1 = to->y_position + 40.0f;
         }
         distance = sqrtf((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0) +
                          (z1 - z0) * (z1 - z0));
@@ -2640,52 +2670,21 @@ s32 func_1508CA88(void) {
     return temp;
 }
 
-typedef struct {
-    u8 pad0[0x78];
-    u8 unk78;
-    u8 pad79[0xC];
-    u8 unk85;
-    u8 unk86;
-    u8 pad87[3];
-    u16 unk8A;
-    u16 unk8C;
-    s8 unk8E;
-    s8 unk8F;
-    f32 unk90;
-    u8 pad94[0xAC];
-    f32 unk140;
-    u8 pad144[0x28];
-    f32 unk16C;
-    f32 unk170;
-    f32 unk174;
-    f32 unk178;
-} CAD8Inner;
-
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x10];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad20[0xC];
-    f32 oldX;
-    f32 oldY;
-    f32 oldZ;
-    u8 pad38[0x16C];
-    s16 unk1A4;
-    s16 unk1A6;
-    s16 unk1A8;
-} CAD8Def;
 
 extern s32 D_800BE9AC;
 extern s8 D_800872D8[];
 void func_150DA5EC(struct127 *, f32);
 
-#define INNER(o) ((CAD8Inner *)(o)->unk31C)
 
 
-s32 func_1508CAD8(s32 player, s32 target, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    CAD8Def *def;
+/*
+ * Steers bot `player` toward player `target`: eases the smoothed aim point (unk17A8/17E8/1828)
+ * toward the target (its position, or its 0x1A4 point if aimAtPoint), offset sideways by
+ * sideOffset and down by dropOffset, turns the actor's yaw/pitch to it and sets the unk8A/unk8C
+ * bits (0x2000, 0x10) when it should fire. Returns 1 while the yaw error exceeds 45 degrees.
+ */
+s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, s32 dropOffset) {
+    struct127 *victim;
     f32 dz;
     f32 dx;
     f32 dy;
@@ -2716,7 +2715,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 arg2, s32 arg3, s32 arg4, s32 arg5
     doInner = 1;
     result = 0;
     obj = &D_800CC2D0[player];
-    ratio = ((f32 *)D_800BE628)[0x70 / 4] / ((f32 *)D_800BE628)[0x6C / 4];
+    ratio = HUD_VIEWS[0].unk70 / HUD_VIEWS[0].unk6C;
     if (target != -1) {
         cam = obj->camera;
         if (cam != NULL) {
@@ -2724,12 +2723,12 @@ s32 func_1508CAD8(s32 player, s32 target, s32 arg2, s32 arg3, s32 arg4, s32 arg5
         } else {
             hasCam = 0;
         }
-        type = INNER(obj)->unk78;
+        type = OBJ_STATE(obj)->unk78;
         if ((type == 9) || (type == 0x38) || (type == 0x15)) {
             hasCam = 0;
         }
-        def = func_1505EEF4(target & 0xFFFF0FFF);
-        if (def == NULL) {
+        victim = func_1505EEF4(target & 0xFFFF0FFF);
+        if (victim == NULL) {
             return 1;
         }
         flagA = 0;
@@ -2748,17 +2747,17 @@ s32 func_1508CAD8(s32 player, s32 target, s32 arg2, s32 arg3, s32 arg4, s32 arg5
             mode = 2;
         }
         if (type == 3) {
-            arg3 = 0;
+            aimAtPoint = 0;
         }
         height = 40.0f;
-        if (def->unk0 == 0x1F) {
-            arg3 = 0;
+        if (victim->interaction_state == 0x1F) {
+            aimAtPoint = 0;
             height = 80.0f;
         }
         dx = 0.0f;
         dz = 0.0f;
         if ((D_800D23B0->gameType == 0xB9) || (D_800E0BD0 >= 3)) {
-            switch (INNER(obj)->unk78) {
+            switch (OBJ_STATE(obj)->unk78) {
                 case 0x18:
                 case 0x41:
                     V = 0.01600000076f;
@@ -2778,27 +2777,27 @@ s32 func_1508CAD8(s32 player, s32 target, s32 arg2, s32 arg3, s32 arg4, s32 arg5
                     break;
             }
             if (V != 0.0f) {
-                dx = def->x - obj->x_position;
-                dz = def->z - obj->z_position;
-                dy = def->y - obj->y_position;
+                dx = victim->x_position - obj->x_position;
+                dz = victim->z_position - obj->z_position;
+                dy = victim->y_position - obj->y_position;
                 dy = sqrtf((dx * dx) + (dy * dy) + (dz * dz));
                 V = (dy * V) / D_800D23B0->ticks;
-                dx = (def->x - def->oldX) * V;
-                dz = (def->z - def->oldZ) * V;
+                dx = (victim->x_position - victim->old_x_position) * V;
+                dz = (victim->z_position - victim->old_z_position) * V;
             }
         }
-        if (arg3 == 0) {
-            dx = (def->x + dx) - D_800D23B0->unk17A8[player];
-            dz = (def->z + dz) - D_800D23B0->unk1828[player];
+        if (aimAtPoint == 0) {
+            dx = (victim->x_position + dx) - D_800D23B0->unk17A8[player];
+            dz = (victim->z_position + dz) - D_800D23B0->unk1828[player];
         } else {
-            dx = ((f32)def->unk1A4 + dx) - D_800D23B0->unk17A8[player];
-            dz = ((f32)def->unk1A8 + dz) - D_800D23B0->unk1828[player];
+            dx = ((f32)(s16)victim->pad1A4 + dx) - D_800D23B0->unk17A8[player];
+            dz = ((f32)*(s16 *)&victim->pad1A8 + dz) - D_800D23B0->unk1828[player];
         }
-        scale = D_800D23B0->unk1868[player] * (f32)D_800BE9E4;
+        scale = D_800D23B0->unk1868[player] * D_800BE9E4;
         if (type == 3) {
             scale = 1.0f;
-            arg5 = 0;
-            arg4 = 0;
+            dropOffset = 0;
+            sideOffset = 0;
         }
         if (scale > 1.0f) {
             scale = 1.0f;
@@ -2813,24 +2812,24 @@ s32 func_1508CAD8(s32 player, s32 target, s32 arg2, s32 arg3, s32 arg4, s32 arg5
         } else {
             f32 tx;
 
-            if (((dist < 100.0f) || (type == 3)) && (arg5 != 0)) {
-                arg5 = 0;
-                if (arg4 == 0) {
-                    arg4 = 50;
+            if (((dist < 100.0f) || (type == 3)) && (dropOffset != 0)) {
+                dropOffset = 0;
+                if (sideOffset == 0) {
+                    sideOffset = 50;
                 }
             }
-            mag = arg4;
+            mag = sideOffset;
             if (type == 9) {
-                mag = arg4 * 1.25f;
+                mag = sideOffset * 1.25f;
             }
             mag = mag / dist;
             tx = dx;
             dx -= dz * mag;
             dz += tx * mag;
         }
-        ang = (f32)func_1505A630(dx, -dz, 0) * 0.005493164f;
+        ang = func_1505A630(dx, -dz, 0) * 0.005493164f;
         if (type != 3) {
-            curYaw = INNER(obj)->unk16C;
+            curYaw = OBJ_STATE(obj)->yaw;
         } else {
             curYaw = obj->unk40 - 90.0f;
         }
@@ -2843,15 +2842,15 @@ s32 func_1508CAD8(s32 player, s32 target, s32 arg2, s32 arg3, s32 arg4, s32 arg5
         if ((diff > 45.0f) || (diff < -45.0f)) {
             result = 1;
         }
-        if (arg3 == 0) {
-            cur = ((def->y + height) - (f32)arg5) - D_800D23B0->unk17E8[player];
+        if (aimAtPoint == 0) {
+            cur = ((victim->y_position + height) - dropOffset) - D_800D23B0->unk17E8[player];
         } else {
-            cur = ((f32)def->unk1A6 - (f32)arg5) - D_800D23B0->unk17E8[player];
+            cur = ((f32)victim->unk1A6 - (f32)dropOffset) - D_800D23B0->unk17E8[player];
         }
         D_800D23B0->unk17E8[player] += cur * scale;
-        cur = INNER(obj)->unk140 - D_800D23B0->unk17E8[player];
-        ang = (f32)func_1505A630(dist, cur, 0) * 0.005493164f;
-        curYaw = INNER(obj)->unk170;
+        cur = OBJ_STATE(obj)->unk140 - D_800D23B0->unk17E8[player];
+        ang = func_1505A630(dist, cur, 0) * 0.005493164f;
+        curYaw = OBJ_STATE(obj)->pitch;
         while (ang > 180.0f) {
             ang -= 360.0f;
         }
@@ -2887,28 +2886,28 @@ s32 func_1508CAD8(s32 player, s32 target, s32 arg2, s32 arg3, s32 arg4, s32 arg5
             roll = 0.0f;
         }
         if (doInner != 0) {
-            ptr = &INNER(obj)->unk90;
-            INNER(obj)->unk16C = INNER(obj)->unk16C - diff;
-            INNER(obj)->unk170 = ang;
-            func_15048758(&INNER(obj)->unk16C);
-            INNER(obj)->unk174 = INNER(obj)->unk16C;
-            INNER(obj)->unk178 = INNER(obj)->unk170;
-            INNER(obj)->unk85 = 0;
-            INNER(obj)->unk86 = 0;
+            ptr = &OBJ_STATE(obj)->unk90;
+            OBJ_STATE(obj)->yaw -= diff;
+            OBJ_STATE(obj)->pitch = ang;
+            func_15048758(&OBJ_STATE(obj)->yaw);
+            OBJ_STATE(obj)->unk174 = OBJ_STATE(obj)->yaw;
+            OBJ_STATE(obj)->unk178 = OBJ_STATE(obj)->pitch;
+            OBJ_STATE(obj)->unk85 = 0;
+            OBJ_STATE(obj)->unk86 = 0;
         } else if (hasCam != 0) {
             ptr = &cam->unk1A4;
             ((s8 *)cam->unk36C)[2] = (s32)yaw;
             ((s8 *)cam->unk36C)[3] = (s32)-roll;
         } else {
-            ptr = &INNER(obj)->unk90;
-            INNER(obj)->unk85 = (s32)yaw;
-            INNER(obj)->unk86 = (s32)-roll;
+            ptr = &OBJ_STATE(obj)->unk90;
+            OBJ_STATE(obj)->unk85 = (s32)yaw;
+            OBJ_STATE(obj)->unk86 = (s32)-roll;
         }
         if (mode != 0) {
             if (type == 0x1B) {
                 if ((h < -50.0f) && (D_800D23B0->unk16C0[player] & (0x10001 << target))) {
-                    INNER(obj)->unk8A |= 0x2000;
-                    INNER(obj)->unk8E = 2;
+                    OBJ_STATE(obj)->unk8A |= 0x2000;
+                    OBJ_STATE(obj)->unk8E = 2;
                 }
             } else if (type == 3) {
                 f32 f;
@@ -2917,52 +2916,52 @@ s32 func_1508CAD8(s32 player, s32 target, s32 arg2, s32 arg3, s32 arg4, s32 arg5
                 if (f < 0.0f) {
                     f = 0.0f;
                 }
-                f = (sinf((f32)(D_800BE9AC & 0x3F) * 0.09815625101f) * 0.174999997f) + f;
+                f = (sinf((D_800BE9AC & 0x3F) * 0.09815625101f) * 0.174999997f) + f;
                 if (f > 1.0f) {
                     f = 1.0f;
                 }
                 f = (f * 0.02569000237f) + 0.01724099927f;
-                INNER(obj)->unk86 = 0;
-                INNER(obj)->unk85 = 0;
+                OBJ_STATE(obj)->unk86 = 0;
+                OBJ_STATE(obj)->unk85 = 0;
                 obj->unk76 -= (s32)(yaw * 16.0f);
                 obj->unk7A = obj->unk76;
                 obj->unk40 = (f32)(s16)(obj->unk7A + 0x4000) * 0.005493164f;
                 func_150DA5EC(obj, f);
             } else if (D_800D23B0->unk29C[player] >= 0) {
-                INNER(obj)->unk8A = 0x2000;
+                OBJ_STATE(obj)->unk8A = 0x2000;
                 if (mode == 1) {
-                    INNER(obj)->unk8E = 2;
+                    OBJ_STATE(obj)->unk8E = 2;
                     if (D_800872D8[D_800E0BD0] < D_800D23B0->unk29C[player]) {
-                        INNER(obj)->unk8A &= 0xDFFF;
-                        INNER(obj)->unk8E = 0;
+                        OBJ_STATE(obj)->unk8A &= 0xDFFF;
+                        OBJ_STATE(obj)->unk8E = 0;
                     }
                 } else if (mode == 2) {
-                    if (arg2 != 0) {
-                        INNER(obj)->unk8E = 0xA;
+                    if (fire != 0) {
+                        OBJ_STATE(obj)->unk8E = 0xA;
                     } else {
-                        INNER(obj)->unk8A &= 0xDFFF;
+                        OBJ_STATE(obj)->unk8A &= 0xDFFF;
                     }
                 } else {
-                    INNER(obj)->unk8E = 2;
+                    OBJ_STATE(obj)->unk8E = 2;
                 }
             }
-        } else if (arg2 != 0) {
+        } else if (fire != 0) {
             if (flagA != 0) {
-                INNER(obj)->unk8C = 0;
-                INNER(obj)->unk8A = 0;
+                OBJ_STATE(obj)->unk8C = 0;
+                OBJ_STATE(obj)->unk8A = 0;
             } else {
-                INNER(obj)->unk8C = 0x2000;
-                INNER(obj)->unk8F = 1;
+                OBJ_STATE(obj)->unk8C = 0x2000;
+                OBJ_STATE(obj)->unk8F = 1;
             }
         } else if (flagA != 0) {
             if (cam != NULL) {
                 *cam->unk36C |= 0x2000;
             }
-            INNER(obj)->unk8A = 0x2000;
-            INNER(obj)->unk8E = 2;
+            OBJ_STATE(obj)->unk8A = 0x2000;
+            OBJ_STATE(obj)->unk8E = 2;
         }
-        INNER(obj)->unk8A |= 0x10;
-        INNER(obj)->unk8E = 1;
+        OBJ_STATE(obj)->unk8A |= 0x10;
+        OBJ_STATE(obj)->unk8E = 1;
         *ptr += (h - *ptr) * 0.125f;
         if (hasCam != 0) {
             cam->unk1A8 = cam->unk1A4 * ratio;
@@ -2973,7 +2972,6 @@ s32 func_1508CAD8(s32 player, s32 target, s32 arg2, s32 arg3, s32 arg4, s32 arg5
     }
     return result;
 }
-#undef INNER
 
 extern s16 D_80087320[][3];
 void func_1508EB90(s32 arg0, s32 arg1, s32 arg2);
@@ -2997,7 +2995,7 @@ s32 func_1508D850(s32 player) {
     obj = &D_800CC2D0[player];
     off = player * 4;
     target = (s32 *)(targets + off);
-    obj->unk31C->pad129[0] = *target;
+    OBJ_STATE(obj)->unk129 = *target;
     if (*target < 0) {
         return 0;
     }
@@ -3011,7 +3009,7 @@ s32 func_1508D850(s32 player) {
     } else {
         range = 2;
     }
-    limit = ((s16 *)D_80087320)[D_800E0BD0 * 3 + range];
+    limit = ((s16 *)D_80087320)[D_800E0BD0 * 3 + range]; // matching: the [level][range] form computes the address differently
     if (limit < *(s32 *)(timers + off)) {
         *(s32 *)(timers + off) = 0;
         if (*(s32 *)((s8 *)D_800D23B0->unk16C0 + off) & (0x10000 << *target)) {
@@ -3019,9 +3017,9 @@ s32 func_1508D850(s32 player) {
         }
     }
     if (*(s32 *)(timers + off) == 0) {
-        obj->unk31C->pad129[1] = 0;
+        OBJ_STATE(obj)->unk12A = 0;
         if (D_800872E8[D_800E0BD0] < (s32)(func_150ADA68() * 100.0f)) {
-            obj->unk31C->pad129[1] = 1;
+            OBJ_STATE(obj)->unk12A = 1;
         }
     }
 }
@@ -3199,12 +3197,12 @@ void func_1508DC24(void) {
                     }
                     D_800CC2D0[i].unk31C->unk128 = cur;
                     if (cur == 1) {
-                        *(s16 *)((u8 *)D_800CC2D0[i].unk31C + 0x12C) = 0x258;
+                        OBJ_STATE(&D_800CC2D0[i])->unk12C = 0x258;
                     } else if (cur == 0x80) {
-                        *(s16 *)((u8 *)D_800CC2D0[i].unk31C + 0x12C) = 0x708;
+                        OBJ_STATE(&D_800CC2D0[i])->unk12C = 0x708;
                         func_1502EA0C(&D_800CC2D0[i], 0, 0, 0xFF, 0xBF, 4);
                     } else if (cur == 0x10) {
-                        *(s16 *)((u8 *)D_800CC2D0[i].unk31C + 0x12C) = 3;
+                        OBJ_STATE(&D_800CC2D0[i])->unk12C = 3;
                     }
                 } else {
                     func_15080620(i, 1, cur, 0);
@@ -3359,16 +3357,16 @@ void func_1508DC24(void) {
                     D_800D23B0->unk5C[j] = 1;
                 }
                 if ((kind = D_800D23B0->gameType) == 0xB9) {
-                    *(s16 *)((u8 *)D_800CC2D0[j].unk31C + 0x12C) = 0x258;
+                    OBJ_STATE(&D_800CC2D0[j])->unk12C = 0x258;
                 }
                 if ((kind = D_800D23B0->gameType) == 0xB8) {
-                    if (arr1174[i] == (pp = *(u8 *)((u8 *)D_800CC2D0[j].unk31C + 0x128))) {
+                    if (arr1174[i] == (pp = D_800CC2D0[j].unk31C->unk128)) {
                         if (arr1174[i] == 1) {
-                            *(s16 *)((u8 *)D_800CC2D0[j].unk31C + 0x12C) = 0x258;
+                            OBJ_STATE(&D_800CC2D0[j])->unk12C = 0x258;
                         } else if (arr1174[i] == 0x80) {
-                            *(s16 *)((u8 *)D_800CC2D0[j].unk31C + 0x12C) = 0x708;
+                            OBJ_STATE(&D_800CC2D0[j])->unk12C = 0x708;
                         } else if (arr1174[i] == 0x10) {
-                            *(s16 *)((u8 *)D_800CC2D0[j].unk31C + 0x12C) = 3;
+                            OBJ_STATE(&D_800CC2D0[j])->unk12C = 3;
                         }
                     }
                 }
@@ -3535,7 +3533,7 @@ s32 func_1508E89C(s32 player, s32 source) {
             obj->unk31C->unk84 = 0;
             obj->immune = 90;
             obj->unk31C->unk1AA = savedRot;
-            *((u8 *)obj->unk31C + 0x1AF) = 0x40;
+            OBJ_STATE(obj)->unk1AF = 0x40;
             func_15128774(obj->camera, obj);
             (*(s8 *)&D_8008FD94)++;
         }
