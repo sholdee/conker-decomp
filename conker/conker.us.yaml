@@ -1964,6 +1964,8 @@ segments:
       - [0x24F308, rodata]
       - [0x24F35C, .rodata, game_1EB6C0]
       - [0x24F370, rodata]
+      - [0x24F39C, .rodata, game_1EBD00]
+      - [0x24F3A0, rodata]
       - [0x24F3F0, rodata]
       - [0x24F490, rodata]
       - [0x24F550, rodata]
