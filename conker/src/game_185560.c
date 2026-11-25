@@ -754,7 +754,7 @@ typedef struct {
         OscillateMotion oscillate;
         ParticleDriftMotion drift;
     } motion;
-} Particle;
+} EffectMotionParticle;
 
 /* Second argument of the particle update callbacks; only unk4 is read here. */
 typedef struct {
@@ -762,13 +762,13 @@ typedef struct {
     /* 0x04 */ f32 unk4;
 } ParticleUpdateArg;
 
-s32 func_151596BC(Particle *particle, ParticleUpdateArg *arg1);
+s32 func_151596BC(EffectMotionParticle *particle, ParticleUpdateArg *arg1);
 u8 func_151D8E20(void);
 s32 func_15046C00(Vec3f *pos, u16 arg1, f32 maxHeight, CollisionHit *hit);
 s32 func_1514672C(Vec3f *pos);
 
 /* Update callback: rises and sways; dies on reaching the ground hit above it (splashing when ground.source is 3). */
-u8 func_15159594(Particle *particle, ParticleUpdateArg *arg1) {
+u8 func_15159594(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     u8 alive;
     s32 found;
 
@@ -800,7 +800,7 @@ u8 func_15159594(Particle *particle, ParticleUpdateArg *arg1) {
 }
 
 /* Update callback: wobbles the size, caps the rise speed and sways with it; dies above the ceiling. */
-s32 func_151596BC(Particle *particle, ParticleUpdateArg *arg1) {
+s32 func_151596BC(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     RiseMotion *rise;
     f32 sin0;
     f32 sin1;
@@ -837,13 +837,13 @@ s32 func_151596BC(Particle *particle, ParticleUpdateArg *arg1) {
     return alive;
 }
 
-Particle *func_151303BC(ParticleDesc6C *spawn, s32 arg1, s32 motionSize);
+EffectMotionParticle *func_151303BC(ParticleDesc6C *spawn, s32 arg1, s32 motionSize);
 
 /* Spawns one rising particle (func_151596BC family) at pos with the given velocity. */
-Particle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
+EffectMotionParticle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
     f32 size;
     ParticleDesc6C spawn;
-    Particle *particle;
+    EffectMotionParticle *particle;
     RiseMotion rise;
 
     spawn.texture = 0x2F;
@@ -951,7 +951,7 @@ void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *out
 /* Emitter update: spawns oscillating particles at random points of a rotated disk. */
 void func_15159C08(DiskEmitterObject *obj) {
     DiskEmitter *emitter;
-    Particle *particle;
+    EffectMotionParticle *particle;
 
     emitter = &obj->emitter;
     if (func_151454BC(D_800BE9EB, 3000.0f, (Vec3f *)emitter)) {
@@ -1054,7 +1054,7 @@ void func_15159C08(DiskEmitterObject *obj) {
 
 
 /* Update callback: wobbles the size and moves the offset along direction by sin(angle). */
-s32 func_1515A11C(Particle *particle, ParticleUpdateArg *arg1) {
+s32 func_1515A11C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     OscillateMotion *osc;
     f32 sin0;
     f32 sin1;
@@ -1080,9 +1080,9 @@ s32 func_1515A11C(Particle *particle, ParticleUpdateArg *arg1) {
 void *func_15130280(ParticleDesc6C *spawn, u8 arg1, CollisionHit *ground, s32 motionSize, u8 arg4, s32 arg5);
 
 /* Spawns one drifting particle; with no horizontal velocity it lands on the ground below pos. */
-Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, CollisionHit *ground, f32 size,
+EffectMotionParticle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, CollisionHit *ground, f32 size,
                         s16 lifetime, u8 alpha, u8 arg8, u8 arg9, s32 argA) {
-    Particle *particle;
+    EffectMotionParticle *particle;
     s32 pad; // matching: 4 unused frame bytes sit above spawn
     ParticleDesc6C spawn;
     ParticleDriftMotion drift;
@@ -1172,7 +1172,7 @@ Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, Coll
 }
 
 /* Update callback: wobbles the size, sways the offset and damps the velocity. */
-s32 func_1515A60C(Particle *particle, ParticleUpdateArg *arg1) {
+s32 func_1515A60C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     ParticleDriftMotion *drift;
     s32 i;
 
@@ -1196,7 +1196,7 @@ s32 func_1515A60C(Particle *particle, ParticleUpdateArg *arg1) {
 }
 
 /* Update callback: drifts, then dies on reaching the ground (sometimes splashing on surface 3). */
-u8 func_1515A78C(Particle *particle, ParticleUpdateArg *arg1) {
+u8 func_1515A78C(EffectMotionParticle *particle, ParticleUpdateArg *arg1) {
     ParticleDriftMotion *drift;
     u8 alive;
     Vec3f pos;
@@ -1375,7 +1375,7 @@ void func_1515AB88(RiseEmitterObject *obj) {
         s32 pad; // matching: 4 unused frame bytes sit above spawn
         ParticleDesc6C spawn;
         RiseMotion rise;
-        Particle *particle;
+        EffectMotionParticle *particle;
         s32 flipY;
         s32 flipX;
 

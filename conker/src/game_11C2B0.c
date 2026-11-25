@@ -996,7 +996,7 @@ typedef struct {
         ActorParticleLink actor;
         TrailParticleLink trail;
     } link;
-} Particle;
+} AttachedSpriteParticle;
 
 extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 
@@ -1004,7 +1004,7 @@ extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 void func_150F0BEC(Actor *actor) {
     ParticleDesc spawn;
     ActorParticleLink link;
-    Particle *particle;
+    AttachedSpriteParticle *particle;
     s32 flipY;
     s32 flipX;
 
@@ -1069,7 +1069,7 @@ void func_150F0BEC(Actor *actor) {
 }
 
 /* Per-frame update of an actor-following particle: tracks the actor and pulses its size and alpha. */
-s32 func_150F0E48(Particle *particle, s32 arg1) {
+s32 func_150F0E48(AttachedSpriteParticle *particle, s32 arg1) {
     ActorParticleLink *link;
     Actor *actor;
 
@@ -1096,7 +1096,7 @@ s32 func_150F0E48(Particle *particle, s32 arg1) {
 
 /* Message handler of an actor-following particle: follows its actor through an identity
  * swap (type 0x2D) and is released when the actor goes away (types 0 and 0x43). */
-void func_150F1020(Particle *particle, s32 data, u8 type) {
+void func_150F1020(AttachedSpriteParticle *particle, s32 data, u8 type) {
     ActorParticleLink *link = &particle->link.actor;
     ActorMsg *msg = (ActorMsg *)data;
     Actor *msgActor;
@@ -1164,7 +1164,7 @@ void func_150F1170(ActorTrailEmitter *emitter) {
     f32 dz;
     ParticleDesc spawn;
     TrailParticleLink ext;
-    Particle *particle;
+    AttachedSpriteParticle *particle;
     s32 flipY;
 
     actor = emitter->link.actor;

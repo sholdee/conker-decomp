@@ -19,7 +19,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ FlashParticleData data;
-} Particle;
+} AreaFlashParticle;
 
 /* Points the emitter spawns particles around: a centre, a radius and a height range. */
 typedef struct {
@@ -45,7 +45,7 @@ typedef struct {
     /* 0x28 */ AreaEmitterData data;
 } AreaEmitter;
 
-extern Particle *func_15130280(ParticleDesc *desc, u8 kind, s32, s32 dataSize, u8, s32);
+extern AreaFlashParticle *func_15130280(ParticleDesc *desc, u8 kind, s32, s32 dataSize, u8, s32);
 extern void func_1514373C(f32 angle, f32 radius, f32 *x, f32 *z);
 
 /* Emitter update: accumulates 0.03..0.04 particles per unit of D_800BE9A4 and, while enabled,
@@ -59,7 +59,7 @@ void func_151082D0(AreaEmitter *emitter) {
         if (data->flags & EMITTER_ENABLED) {
             ParticleDesc desc;
             FlashParticleData extra;
-            Particle *particle;
+            AreaFlashParticle *particle;
 
             desc.texture = 0x74;
             desc.renderMode = 0x5310;
@@ -124,7 +124,7 @@ void func_151082D0(AreaEmitter *emitter) {
 /* Update of func_151082D0's particles: picks the animation frame from the time since birth and
  * until death, randomly starts an 11-unit flash (drawn with draw function 3), and kills the
  * particle when its life runs out. Returns 0 to kill it. */
-s32 func_15108658(Particle *particle, s32 arg1) {
+s32 func_15108658(AreaFlashParticle *particle, s32 arg1) {
     FlashParticleData *data = &particle->data;
     f32 elapsed = data->lifetime - data->life;
 

@@ -115,7 +115,7 @@ u8 func_151D8FE0(void) {
 #define WOBBLE_FLAG_FIXED_SIZE 1 /* skip the size wobble */
 #define WOBBLE_FLAG_BOUNCE     2 /* bounce on the floor instead of bursting */
 
-/* Per-particle data of a func_151D9014 particle (Particle.data). */
+/* Per-particle data of a func_151D9014 particle (SteamParticle.data). */
 typedef struct {
     f32 size;
     u8 phaseX;
@@ -134,7 +134,7 @@ typedef struct {
 #define SPIN_FLAG_SPIN 1 /* oscillate desc.unk3C */
 #define SPIN_FLAG_DRAG 2 /* scale the velocity by `drag` every frame */
 
-/* Per-particle data of a func_151DB5D0 particle (Particle.data). */
+/* Per-particle data of a func_151DB5D0 particle (SteamParticle.data). */
 typedef struct {
     u8 flags;
     f32 drag;
@@ -154,17 +154,17 @@ typedef struct {
         SteamWobble wobble;
         ParticleSpin spin;
     } data;
-} Particle;
+} SteamParticle;
 
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
-s32 func_151D9450(Particle *particle, Vec3f *arg1);
-u8 func_151D9534(Particle *particle, Vec3f *arg1);
+extern SteamParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
+s32 func_151D9450(SteamParticle *particle, Vec3f *arg1);
+u8 func_151D9534(SteamParticle *particle, Vec3f *arg1);
 
 /* Spawns a wobbling sprite particle of effect kind `kind`; lifetime -99 means it never times out. */
-Particle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+SteamParticle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
                         f32 burstScale, f32 altBurstScale, u8 argA, s32 argB, s32 wobbles, s32 bounces, u8 argE,
                         s32 argF) {
-    Particle *particle;
+    SteamParticle *particle;
     ParticleDesc desc;
     SteamWobble wobble;
 
@@ -234,7 +234,7 @@ Particle *func_151D9014(Vec3f *pos, Vec3f *vel, u8 kind, f32 gravity, s16 lifeti
 }
 
 /* Per-frame update of a func_151D9014 particle; returns 0 once it should be removed. */
-s32 func_151D93F4(Particle *particle, Vec3f *arg1) {
+s32 func_151D93F4(SteamParticle *particle, Vec3f *arg1) {
     s32 alive;
 
     if (func_151D9450(particle, arg1) != 0) {
@@ -250,7 +250,7 @@ s32 func_151D93F4(Particle *particle, Vec3f *arg1) {
 }
 
 /* Wobbles the particle's two scale axes around its base size. */
-s32 func_151D9450(Particle *particle, Vec3f *arg1) {
+s32 func_151D9450(SteamParticle *particle, Vec3f *arg1) {
     SteamWobble *wobble;
 
     wobble = &particle->data.wobble;
@@ -268,7 +268,7 @@ s32 func_151D9450(Particle *particle, Vec3f *arg1) {
  * Floor collision: once the particle falls below arg1's height, finds the floor under it and either
  * bounces (WOBBLE_FLAG_BOUNCE) or bursts into smaller effects. Returns 0 when the particle is gone.
  */
-u8 func_151D9534(Particle *particle, Vec3f *arg1) {
+u8 func_151D9534(SteamParticle *particle, Vec3f *arg1) {
     volatile u8 alive; // matching: IDO keeps the result in its stack slot and reloads it after each call
     Vec3f point;
     SteamWobble *wobble;
@@ -573,7 +573,7 @@ s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5
     return effect;
 }
 
-Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime, u8 arg8,
+SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime, u8 arg8,
                         s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
 /* Steam effect update: wobbles the scale and emits func_151DB5D0 particles around the base. */
@@ -1045,10 +1045,10 @@ extern void (*D_8008FD38[])(ParticleDesc *);
  * Spawns a sprite particle of effect kind `kind` at `pos` (lifetime -1: never times out). With `spin` set
  * its desc.unk3C oscillates (func_151DB97C); a `drag` other than 1.0f scales its velocity each frame.
  */
-Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime, u8 arg8,
+SteamParticle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 gravity, s16 lifetime, u8 arg8,
                         s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD) {
     ParticleDesc desc;
-    Particle *particle;
+    SteamParticle *particle;
     ParticleSpin data;
 
     data.flags = (spin ? SPIN_FLAG_SPIN : 0) | ((drag == 1.0f) ? 0 : SPIN_FLAG_DRAG);
@@ -1110,7 +1110,7 @@ Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 dr
 }
 
 /* func_151DB5D0 particle update: applies drag and oscillates desc.unk3C on three axes. */
-s32 func_151DB97C(Particle *particle, s32 arg1) {
+s32 func_151DB97C(SteamParticle *particle, s32 arg1) {
     ParticleSpin *spin;
     s32 pad; // matching: unused stack slot
     f32 waveY;

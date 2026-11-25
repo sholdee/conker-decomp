@@ -43,9 +43,9 @@ typedef struct {
         FollowDriftData drift;
         GrowParticleData grow;
     } data;
-} Particle;
+} FollowParticle;
 
-extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
+extern FollowParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 extern s32 func_1515C0F8(Actor *arg0, f32 **arg1);
 extern void func_15182670(u8, u8, u8, u8, s32, u8, u8, s32);
@@ -519,7 +519,7 @@ void func_150D6730(Actor *obj, u8 arg1, s32 arg2) {
     s32 count;
     ParticleDesc spawn;
     FollowDriftData drift;
-    Particle *particle;
+    FollowParticle *particle;
     ParticleDesc growSpawn;
     GrowParticleData grow;
     s32 r1;
@@ -642,7 +642,7 @@ void func_150D6C98(Actor *obj, Vec3f *out) {
 void func_15131958(Vec3f *, f32);
 
 /* Drift particle update: follows the owner and integrates offset/velocity; returns 0 to kill. */
-s32 func_150D6CC4(Particle *particle, s32 arg1) {
+s32 func_150D6CC4(FollowParticle *particle, s32 arg1) {
     FollowDriftData *data;
     Actor *owner;
 
@@ -674,7 +674,7 @@ s32 func_150D6CC4(Particle *particle, s32 arg1) {
 }
 
 /* Drift particle message handler: dies with its owner and follows it through message 0x2D. */
-void func_150D6E60(Particle *particle, ActorMsg *msg, u8 type) {
+void func_150D6E60(FollowParticle *particle, ActorMsg *msg, u8 type) {
     FollowDriftData *data = &particle->data.drift;
     Actor *object;
 
@@ -699,7 +699,7 @@ void func_150D6E60(Particle *particle, ActorMsg *msg, u8 type) {
 }
 
 /* Grow particle update: follows the owner, grows and fades; returns 0 once its lifetime is over. */
-s32 func_150D6F0C(Particle *particle, s32 arg1) {
+s32 func_150D6F0C(FollowParticle *particle, s32 arg1) {
     GrowParticleData *data;
     Actor *owner;
     f32 size;
@@ -727,7 +727,7 @@ s32 func_150D6F0C(Particle *particle, s32 arg1) {
 }
 
 /* Grow particle message handler: dies with its owner and follows it through message 0x2D. */
-void func_150D7068(Particle *particle, ActorMsg *msg, u8 type) {
+void func_150D7068(FollowParticle *particle, ActorMsg *msg, u8 type) {
     GrowParticleData *data = &particle->data.grow;
     Actor *object;
 
