@@ -1336,16 +1336,6 @@ s32 func_1508DAEC(s32, s32);
 void func_1508B3F8(void);
 void func_1508B20C(f32 x, f32 y, f32 z, f32 r);
 
-/* Flood fill over the path graph from a point, collecting the nodes just outside a radius. */
-typedef struct PathSearch {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 z;
-    /* 0x08 */ f32 radiusSq;
-    /* 0x0C */ f32 dist[8];
-    /* 0x2C */ s16 count;
-    /* 0x2E */ u8 ids[8];
-    /* 0x36 */ u8 visited[0x20]; /* bitset of visited node ids */
-} PathSearch;
 void func_1508B3F8(void);
 
 s32 func_1508C5B8(s32, s32);
