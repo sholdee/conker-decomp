@@ -7,6 +7,29 @@
 
 extern f32 sqrtf(f32);
 
+/* ParticleDesc.flags */
+#define PARTICLE_LIFETIME          0x1      /* timer counts down; the particle dies below 0 */
+#define PARTICLE_GRAVITY           0x2
+#define PARTICLE_MOVE              0x4
+#define PARTICLE_ANIM_PINGPONG     0x8
+#define PARTICLE_ANIM_END_KILLS    0x10
+#define PARTICLE_ANIM_START_KILLS  0x20
+#define PARTICLE_FLIP_S            0x40
+#define PARTICLE_FLIP_T            0x80
+#define PARTICLE_FADE              0x200    /* alpha fades once timer < fadeStart */
+#define PARTICLE_SCALE             0x400    /* size changes once timer < scaleStart */
+#define PARTICLE_SCALE_MUL         0x800    /* multiply the size by scaleRate instead of adding it */
+#define PARTICLE_USE_OFFSET        0x1000
+#define PARTICLE_HANDLERS          0x4000   /* handlerSet is valid */
+#define PARTICLE_DRAW_FUNC         0x8000
+#define PARTICLE_LIT               0x10000  /* env color comes from func_1515E888 */
+#define PARTICLE_VIEW_MASK         0x20000
+#define PARTICLE_VIEWS             0x40000
+#define PARTICLE_SCALE_WIDTH_ONLY  0x80000
+#define PARTICLE_SCALE_HEIGHT_ONLY 0x100000
+#define PARTICLE_MAX_SIZE          0x200000
+#define PARTICLE_MIN_SIZE          0x400000
+
 /* Spawn parameters of a particle; func_15130280 copies them to Particle.desc. */
 typedef struct ParticleDesc {
     /* 0x00 */ s32 unk0;
@@ -161,12 +184,16 @@ void func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
     func_15130374(desc, kind, dataSize, 0xFF, 0);
 }
 
-typedef struct ParticleAnim {
+typedef struct ParticleTexture {
+    u8 pad0[4];
     u8 frameCount;
-    u8 pad1[0xB];
-} ParticleAnim;
+    u8 pad5;
+    u16 width;
+    u16 height;
+    u8 padA[2];
+} ParticleTexture;
 
-extern ParticleAnim D_80090B64[];
+extern ParticleTexture D_80090B60[];
 extern s32 (*D_80089760[])(Particle *, struct17 *);
 extern void (*D_80089800[])(Particle *);
 
@@ -176,28 +203,27 @@ void func_151303EC(Particle *p) {
     struct17 prevPos;
     u8 dead;
     s32 i;
-    s32 unused;
     s32 maxFrame;
     s32 rate;
     s32 frameCount;
 
     dead = FALSE;
-    if (p->desc.flags & 1) {
+    if (p->desc.flags & PARTICLE_LIFETIME) {
         p->desc.timer -= D_800BE9E4;
         if (p->desc.timer < 0) {
             dead = TRUE;
         }
     }
-    if (p->desc.flags & 2) {
+    if (p->desc.flags & PARTICLE_GRAVITY) {
         p->desc.vel.unk4 += p->desc.gravity * D_800BE9A4;
     }
     prevPos = p->desc.pos;
-    if (p->desc.flags & 4) {
+    if (p->desc.flags & PARTICLE_MOVE) {
         p->desc.pos.unk0 += p->desc.vel.unk0 * D_800BE9A4;
         p->desc.pos.unk4 += p->desc.vel.unk4 * D_800BE9A4;
         p->desc.pos.unk8 += p->desc.vel.unk8 * D_800BE9A4;
     }
-    if (p->desc.flags & 0x200) {
+    if (p->desc.flags & PARTICLE_FADE) {
         if (p->desc.timer < p->desc.fadeStart) {
             i = (s16)(p->desc.timer * p->desc.fadeRate);
             if (i < p->desc.alpha) {
@@ -205,14 +231,14 @@ void func_151303EC(Particle *p) {
             }
         }
     }
-    if ((p->desc.flags & 0x400) && (p->desc.timer < p->desc.scaleStart)) {
-        if (p->desc.flags & 0x800) {
+    if ((p->desc.flags & PARTICLE_SCALE) && (p->desc.timer < p->desc.scaleStart)) {
+        if (p->desc.flags & PARTICLE_SCALE_MUL) {
             i = D_800BE9E4;
-            if (p->desc.flags & 0x80000) {
+            if (p->desc.flags & PARTICLE_SCALE_WIDTH_ONLY) {
                 for (; i != 0; i--) {
                     p->desc.width *= p->desc.scaleRate;
                 }
-            } else if (p->desc.flags & 0x100000) {
+            } else if (p->desc.flags & PARTICLE_SCALE_HEIGHT_ONLY) {
                 for (; i != 0; i--) {
                     p->desc.height *= p->desc.scaleRate;
                 }
@@ -223,10 +249,10 @@ void func_151303EC(Particle *p) {
                 }
             }
         } else {
-            if (!(p->desc.flags & 0x80000)) {
+            if (!(p->desc.flags & PARTICLE_SCALE_WIDTH_ONLY)) {
                 p->desc.height += p->desc.scaleRate * D_800BE9E4;
             }
-            if (!(p->desc.flags & 0x100000)) {
+            if (!(p->desc.flags & PARTICLE_SCALE_HEIGHT_ONLY)) {
                 p->desc.width += p->desc.scaleRate * D_800BE9E4;
             }
         }
@@ -234,13 +260,13 @@ void func_151303EC(Particle *p) {
     if (!dead) {
         rate = p->desc.frameRate;
         if (rate != 0) {
-            frameCount = D_80090B64[p->desc.texture].frameCount;
+            frameCount = D_80090B60[p->desc.texture].frameCount;
             maxFrame = (frameCount << 16) - 1;
             p->desc.frame += rate * D_800BE9E4;
             if (maxFrame < p->desc.frame) {
-                if (p->desc.flags & 0x10) {
+                if (p->desc.flags & PARTICLE_ANIM_END_KILLS) {
                     dead = TRUE;
-                } else if (p->desc.flags & 8) {
+                } else if (p->desc.flags & PARTICLE_ANIM_PINGPONG) {
                     p->desc.frame = maxFrame - p->desc.frame % maxFrame;
                     p->desc.frameRate = -rate;
                 } else {
@@ -249,9 +275,9 @@ void func_151303EC(Particle *p) {
                     } while (maxFrame < p->desc.frame);
                 }
             } else if (p->desc.frame < 0) {
-                if (p->desc.flags & 0x20) {
+                if (p->desc.flags & PARTICLE_ANIM_START_KILLS) {
                     dead = TRUE;
-                } else if (p->desc.flags & 8) {
+                } else if (p->desc.flags & PARTICLE_ANIM_PINGPONG) {
                     p->desc.frame = -p->desc.frame % maxFrame;
                     p->desc.frameRate = -rate;
                 } else {
@@ -287,27 +313,19 @@ typedef struct ParticleView {
     /* 0x40 */ Vp_t vp[(0x180 - 0x40) / 0x10];
 } ParticleView; /* size 0x180, D_800BE628 points to one per view */
 
-typedef struct ParticleTexture {
-    u8 pad0[6];
-    u16 width;
-    u16 height;
-    u8 padA[2];
-} ParticleTexture;
-
 typedef struct ParticleRenderMode {
     s32 unk0;
     s32 unk4;
 } ParticleRenderMode;
 
 extern s32 (*D_80089804[])(Particle *, s16);
-extern ParticleTexture D_80090B60[];
 extern ParticleRenderMode D_800A4AC8[];
 extern s32 D_800D2C9C;
 s32 func_15144CEC(struct17 *, f32 *, f32 *, f32 *, f32 *, s32);
 void func_1513137C(s16 *r, s16 *g, s16 *b, s16 *a, Particle *p);
 void func_1513164C(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s16 *envG, s16 *envB, s16 *envA, Particle *p);
 void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142E24(Gfx *arg0, ParticleTexture *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
@@ -340,23 +358,23 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
     f32 lrx;
     f32 lry;
 
-    if ((p->desc.flags & 0x40000) && !(p->desc.views & (1 << viewIdx))) {
+    if ((p->desc.flags & PARTICLE_VIEWS) && !(p->desc.views & (1 << viewIdx))) {
         return gfx;
     }
     needSync = TRUE;
     mode = p->desc.renderMode & 0xFF;
     shade = (p->desc.renderMode & 0xFF00) >> 8;
-    if (p->desc.flags & 0x8000) {
+    if (p->desc.flags & PARTICLE_DRAW_FUNC) {
         if (p->desc.drawFunc != -1 && D_80089804[p->desc.drawFunc](p, viewIdx) == 0) {
             return gfx;
         }
     }
-    if (p->desc.flags & 0x20000) {
+    if (p->desc.flags & PARTICLE_VIEW_MASK) {
         if (p->desc.viewMask != NULL && !(p->desc.viewMask->views & (1 << viewIdx))) {
             return gfx;
         }
     }
-    if (p->desc.flags & 0x1000) {
+    if (p->desc.flags & PARTICLE_USE_OFFSET) {
         pos.unk0 = p->desc.pos.unk0 + p->desc.offset.unk0;
         pos.unk4 = p->desc.pos.unk4 + p->desc.offset.unk4;
         pos.unk8 = p->desc.pos.unk8 + p->desc.offset.unk8;
@@ -376,7 +394,7 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
         view = (ParticleView *)(D_800BE628 + viewIdx * 0x180);
         sizeX = p->desc.width * scale * view->scaleX * 16.94900131f;
         sizeY = p->desc.height * scale * view->scaleY * 16.94900131f;
-        if (p->desc.flags & 0x200000) {
+        if (p->desc.flags & PARTICLE_MAX_SIZE) {
             if (p->desc.maxSize < sizeX) {
                 sizeX = p->desc.maxSize;
             }
@@ -384,7 +402,7 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
                 sizeY = p->desc.maxSize;
             }
         }
-        if (p->desc.flags & 0x400000) {
+        if (p->desc.flags & PARTICLE_MIN_SIZE) {
             if (sizeX < p->desc.minSize) {
                 sizeX = p->desc.minSize;
             }
@@ -396,10 +414,7 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
         lrx = screen[0] + sizeX;
         uly = screen[1] - sizeY;
         lry = screen[1] + sizeY;
-        if (view->clipLeft <= lrx) {
-        if (ulx <= view->clipRight) {
-        if (view->clipTop <= lry) {
-        if (uly <= view->clipBottom) {
+        if (view->clipLeft <= lrx && ulx <= view->clipRight && view->clipTop <= lry && uly <= view->clipBottom) {
             s32 dtdy;
 
             ulx *= 4.0f;
@@ -412,8 +427,8 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
             }
             gDPSetPrimDepth(gfx++, (s32)((depth * scale * ((ParticleView *)D_800BE628)[viewIdx].vp[D_800BE9C0].vscale[2] + ((ParticleView *)D_800BE628)[viewIdx].vp[D_800BE9C0].vtrans[2]) * 32.0f), 0);
             tex = &D_80090B60[p->desc.texture];
-            texW = (u32)tex->width;
-            texH = (u32)tex->height;
+            texW = tex->width;
+            texH = tex->height;
             height = lry - uly;
             if (ulx < lrx) {
                 dsdx = (4096.0f * texW) / (lrx - ulx);
@@ -427,15 +442,15 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
             }
             s = 0;
             t = 0;
-            if (p->desc.flags & 0x40) {
+            if (p->desc.flags & PARTICLE_FLIP_S) {
                 s = (tex->width - 1) << 5;
                 dsdx = -dsdx & 0xFFFF;
             }
-            if (p->desc.flags & 0x80) {
+            if (p->desc.flags & PARTICLE_FLIP_T) {
                 t = (tex->height - 1) << 5;
                 dtdy = -dtdy & 0xFFFF;
             }
-            if (p->desc.flags & 0x10000) {
+            if (p->desc.flags & PARTICLE_LIT) {
                 u8 color[4];
 
                 func_1513137C(&primR, &primG, &primB, &primA, p);
@@ -451,12 +466,9 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
             gfx = func_15142B7C(gfx, p->desc.unk0, p->desc.unk4 | 0x10000 | 0x100000);
             gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &needSync);
             gfx = func_15142C10(gfx, envR, envG, envB, envA, &needSync);
-            gfx = func_15142E24(gfx, (s32)&D_80090B60[p->desc.texture], p->desc.frame, 2, 0, 0, p->desc.texture, 0, 0, &needSync, (p->desc.flags & 0x800000) ? 0x3E : 3);
+            gfx = func_15142E24(gfx, &D_80090B60[p->desc.texture], p->desc.frame, 2, 0, 0, p->desc.texture, 0, 0, &needSync, (p->desc.flags & 0x800000) ? 0x3E : 3);
             gfx = func_15142FBC(gfx, ((p->desc.flags & 0x100) ? 0x100000 : 0) | D_800D2C9C | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4 | 4, &needSync);
             gSPScisTextureRectangle(gfx++, (s32)ulx, (s32)uly, (s32)lrx, (s32)lry, 0, s, t, dsdx, dtdy);
-        }
-        }
-        }
         }
     }
 end:
@@ -597,14 +609,12 @@ s32 func_1513170C(Particle *p, struct17 *prevPos) {
     return TRUE;
 }
 
-void func_1513173C(void) {
-    extern void func_15169804();
-    func_15169804();
+void func_1513173C(Particle *p) {
+    func_15169804((struct102 *)p);
 }
 
-void func_1513175C(void) {
-    extern void func_15169824();
-    func_15169824();
+void func_1513175C(Particle *p) {
+    func_15169824((struct102 *)p);
 }
 
 extern void (*D_80089814[])(Particle *);
@@ -612,7 +622,7 @@ extern void (*D_80089814[])(Particle *);
 void func_1513177C(Particle *p) {
     s32 set;
 
-    if (p->desc.flags & 0x4000) {
+    if (p->desc.flags & PARTICLE_HANDLERS) {
         set = p->desc.handlerSet;
     } else {
         set = 0;
@@ -625,7 +635,7 @@ extern s32 (*D_80089844[])(Particle *);
 s32 func_151317C8(Particle *p) {
     s32 set;
 
-    if (p->desc.flags & 0x4000) {
+    if (p->desc.flags & PARTICLE_HANDLERS) {
         set = p->desc.handlerSet;
     } else {
         set = 0;
@@ -641,8 +651,8 @@ s32 func_15131814(s32 arg0, s32 arg1) {
 void func_15131828(Particle *p, f32 *amplitude, u8 *phase, u8 *phaseStep) {
     p->desc.offset.unk0 = amplitude[0] * func_151423D8((u8)(phase[0] - 0x40));
     p->desc.offset.unk8 = amplitude[1] * func_151423D8((u8)(phase[1] - 0x40));
-    phase[0] = phaseStep[0] * D_800BE9E4 + phase[0];
-    phase[1] = phaseStep[1] * D_800BE9E4 + phase[1];
+    phase[0] += phaseStep[0] * D_800BE9E4;
+    phase[1] += phaseStep[1] * D_800BE9E4;
 }
 
 /* Scales vel->y by drag once per elapsed tick. */
@@ -650,7 +660,7 @@ void func_151318E8(struct17 *vel, f32 drag) {
     s32 i;
 
     for (i = D_800BE9E4; i > 0; i--) {
-        vel->unk4 = vel->unk4 * drag;
+        vel->unk4 *= drag;
     }
 }
 
@@ -659,8 +669,8 @@ void func_15131918(struct17 *vel, f32 drag) {
     s32 i;
 
     for (i = D_800BE9E4; i > 0; i--) {
-        vel->unk0 = vel->unk0 * drag;
-        vel->unk8 = vel->unk8 * drag;
+        vel->unk0 *= drag;
+        vel->unk8 *= drag;
     }
 }
 
@@ -669,9 +679,9 @@ void func_15131958(struct17 *vel, f32 drag) {
     s32 i;
 
     for (i = D_800BE9E4; i > 0; i--) {
-        vel->unk0 = vel->unk0 * drag;
-        vel->unk4 = vel->unk4 * drag;
-        vel->unk8 = vel->unk8 * drag;
+        vel->unk0 *= drag;
+        vel->unk4 *= drag;
+        vel->unk8 *= drag;
     }
 }
 
@@ -731,16 +741,16 @@ s32 func_15131B3C(Particle *p, struct17 *prevPos) {
 // matching: hit is indexed as f32[3]; struct17 access swaps IDO's add.s operands
 s32 func_15131B7C(Particle *p, struct17 *prevPos, f32 *hit, ParticleBounce *bounce) {
     p->desc.pos.unk4 = p->desc.height * 0.06000000238f + hit[1];
-    p->desc.vel.unk0 = p->desc.vel.unk0 * bounce->restitution;
-    p->desc.vel.unk4 = p->desc.vel.unk4 * -bounce->restitution;
-    p->desc.vel.unk8 = p->desc.vel.unk8 * bounce->restitution;
+    p->desc.vel.unk0 *= bounce->restitution;
+    p->desc.vel.unk4 *= -bounce->restitution;
+    p->desc.vel.unk8 *= bounce->restitution;
     if (fabsf(p->desc.vel.unk4) < 1.997000098f) {
         p->desc.vel.unk0 = 0.0f;
         p->desc.vel.unk4 = 0.0f;
         p->desc.vel.unk8 = 0.0f;
         p->desc.gravity = 0.0f;
         bounce->flags &= ~1;
-        p->desc.flags &= ~6;
+        p->desc.flags &= ~(PARTICLE_GRAVITY | PARTICLE_MOVE);
     }
     return TRUE;
 }
@@ -750,7 +760,7 @@ extern void (*D_80089878[])(Particle *, s32, u8);
 void func_15131C2C(Particle *p, s32 arg1, u8 arg2) {
     void (*handler)(Particle *, s32, u8);
 
-    if (p->desc.flags & 0x4000) {
+    if (p->desc.flags & PARTICLE_HANDLERS) {
         handler = D_80089878[p->desc.handlerSet];
         if (handler != NULL) {
             handler(p, arg1, arg2);
@@ -760,8 +770,8 @@ void func_15131C2C(Particle *p, s32 arg1, u8 arg2) {
 
 /* Advances phase[0..1] and sets *outX/*outY to base plus amplitude[i] times the phase's wave value. */
 void func_15131C84(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX, f32 *outY) {
-    phase[0] = phaseStep[0] * D_800BE9E4 + phase[0];
-    phase[1] = phaseStep[1] * D_800BE9E4 + phase[1];
+    phase[0] += phaseStep[0] * D_800BE9E4;
+    phase[1] += phaseStep[1] * D_800BE9E4;
     *outX = amplitude[0] * func_151423D8((u8)(phase[0] - 0x40)) + base;
     *outY = amplitude[1] * func_151423D8((u8)(phase[1] - 0x40)) + base;
 }
@@ -789,7 +799,7 @@ s32 func_15131DEC(Particle *p, struct17 *prevPos) {
     p->desc.height = size;
     p->desc.width = size;
 
-    p->desc.alpha = (u32)(p->data.flash.startAlpha - ((p->data.flash.alphaDecay * elapsed) * elapsed));
+    p->desc.alpha = (u32)(p->data.flash.startAlpha - p->data.flash.alphaDecay * elapsed * elapsed);
     p->data.flash.elapsed = elapsed + D_800BE9A4;
 
     if (p->data.flash.duration < p->data.flash.elapsed) {
@@ -808,9 +818,8 @@ Particle *func_15131EE4(struct17 *pos, f32 size, u8 arg2, s32 arg3) {
 
     flash.elapsed = 0.0f;
     flash.growth = 594.4899902f * size;
-    flash.duration = func_150ADA68();
-    flash.duration = (flash.duration + flash.duration) + 5.0f;
-    flash.startAlpha = (func_150ADA68() * 15.0f) + 240.0f;
+    flash.duration = func_150ADA68() * 2.0f + 5.0f;
+    flash.startAlpha = func_150ADA68() * 15.0f + 240.0f;
     flash.alphaDecay = flash.startAlpha / (flash.duration * flash.duration);
 
     desc.alpha = (u32)flash.startAlpha;
@@ -835,17 +844,9 @@ Particle *func_15131EE4(struct17 *pos, f32 size, u8 arg2, s32 arg3) {
     desc.scaleStart = 1;
     desc.scaleRate = 1.0f;
 
-    if (func_150ADA20() & 1) {
-        flipX = 0x40;
-    } else {
-        flipX = 0;
-    }
-    if (func_150ADA20() & 1) {
-        flipY = 0x80;
-    } else {
-        flipY = 0;
-    }
-    desc.flags = flipY | 0x4C000 | flipX;
+    flipX = (func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0;
+    flipY = (func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0;
+    desc.flags = flipY | (PARTICLE_VIEWS | PARTICLE_DRAW_FUNC | PARTICLE_HANDLERS) | flipX;
     desc.primColorMode = 6;
     desc.envColorMode = 6;
     desc.updateFunc = 0x27;
