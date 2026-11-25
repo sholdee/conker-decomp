@@ -60,7 +60,7 @@ typedef struct Prop {
             s32 home; /* (y << 16) | x, saved on the first update */
             s32 unk80;
             s32 open; /* (x opening << 16) | y opening, each 0..13 */
-        } door;
+        } opening;
         struct {
             s32 phase;
             s32 state;
@@ -256,11 +256,11 @@ void func_1511F4D0(Prop *prop) {
     }
     span = prop->params.word; // matching: loaded into span before the conversion
     span = span * prop->scaleY;
-    next = prop->work.door.open;
+    next = prop->work.opening.open;
     openX = (next >> 16) & 0xFFFF;
     openY = next & 0xFFFF;
-    if (prop->work.door.home == 0) {
-        prop->work.door.home = (prop->x & 0xFFFF) | ((prop->y & 0xFFFF) << 16);
+    if (prop->work.opening.home == 0) {
+        prop->work.opening.home = (prop->x & 0xFFFF) | ((prop->y & 0xFFFF) << 16);
         if (motion == PROP_ARRIVED) {
             openY = 13;
             openX = 13;
@@ -269,8 +269,8 @@ void func_1511F4D0(Prop *prop) {
             openY = 0;
         }
     }
-    home[1] = (s16)(prop->work.door.home & 0xFFFF);
-    home[2] = (s16)((prop->work.door.home >> 16) & 0xFFFF);
+    home[1] = (s16)(prop->work.opening.home & 0xFFFF);
+    home[2] = (s16)((prop->work.opening.home >> 16) & 0xFFFF);
     if (motion == PROP_MOVING) {
         next = openY + D_800BE9E4;
         if (next < 13) {
@@ -309,7 +309,7 @@ void func_1511F4D0(Prop *prop) {
     next = openX * span / 13;
     prop[2].x = home[1] - next;
     prop[3].x = home[1] + next;
-    prop->work.door.open = (openY & 0xFFFF) | ((openX & 0xFFFF) << 16);
+    prop->work.opening.open = (openY & 0xFFFF) | ((openX & 0xFFFF) << 16);
     prop->state &= ~3;
     prop->state |= motion;
 }
