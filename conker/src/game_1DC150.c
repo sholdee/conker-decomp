@@ -12,55 +12,59 @@ u32 func_150ADA20(void);
 
 void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
 
+/* Parameter block for func_15153F18; the s16 header (unk0..unk6) is passed separately. */
 typedef struct {
-    s16 field00;
-    s16 field02;
-    s16 field04;
-    s16 field06;
-    f32 position[3];
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    f32 field20;
-    f32 field24;
-    f32 field28;
-    s16 field2C;
-    s16 field2E;
-    s16 field30;
-    s16 field32;
-    s16 field34;
-    s16 field36;
-    s16 field38;
-    s16 field3A;
-    u8 field3C;
-    u8 pad3D[3];
-    f32 field40;
-    s16 field44;
-    s16 field46;
-    s32 field48;
-} Packet_151AECA0;
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ f32 position[3];
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x2E */ s16 unk2E;
+    /* 0x30 */ s16 unk30;
+    /* 0x32 */ s16 unk32;
+    /* 0x34 */ s16 unk34;
+    /* 0x36 */ s16 unk36;
+    /* 0x38 */ s16 unk38;
+    /* 0x3A */ s16 unk3A;
+    /* 0x3C */ u8 unk3C;
+    /* 0x3D */ u8 pad3D[3];
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ s16 unk44;
+    /* 0x46 */ s16 unk46;
+    /* 0x48 */ s32 unk48;
+} BurstParams;
 
+/* Ground hit filled by func_1504715C / func_15046C80. */
 typedef struct {
-    f32 y;
-    u8 unk4[0x19];
-    u8 unk1D;
-    u8 pad1E[6];
-} Floor_151AECA0;
+    /* 0x00 */ f32 height;
+    /* 0x04 */ u8 unk4[0x19];
+    /* 0x1D */ u8 surfaceType;
+    /* 0x1E */ u8 pad1E[6];
+} GroundHit;
 
 void func_15153F18(s16 *, void *, s32, s32, s32);
-void func_1504715C(void *, void *);
-s32 func_15046C80(f32 *, s32, f32, void *);
+void func_1504715C(GroundHit *, struct127 *);
+s32 func_15046C80(f32 *, s32, f32, GroundHit *);
 void func_15143874(s16, f32, f32 *, f32 *);
 void func_15136698(f32, f32, u8, u8, s32, void *, f32 *, s32, s32, s32, s32);
 
-void func_151AECA0(f32 *arg0, u8 arg1, s32 arg2) {
-    Floor_151AECA0 floor;
-    Packet_151AECA0 packet;
+/* Spawns a ground burst effect around obj: one func_15153F18 burst, 7-12 scattered
+ * func_151D9B8C / func_151DAB58 particles on the ground, and a func_15136698 effect under obj. */
+void func_151AECA0(struct127 *obj, u8 arg1, s32 arg2) {
+    GroundHit ground;
+    BurstParams burst;
     s32 count;
     f32 probe[3];
     f32 pos[3];
-    f32 pos2[3];
-    f32 probe2[3];
+    f32 center[3];
+    f32 centerProbe[3];
     f32 unused0;
     f32 unusedA;
     f32 unusedB;
@@ -76,63 +80,63 @@ void func_151AECA0(f32 *arg0, u8 arg1, s32 arg2) {
     f32 unused10;
     f32 unused11;
     f32 height;
-    u32 r1;
-    u32 r2;
-    f32 g1;
-    f32 g2;
+    u32 randA;
+    u32 randB;
+    f32 randF1;
+    f32 randF2;
     volatile u32 angle;
 
-    if (arg0 == NULL) {
+    if (obj == NULL) {
         return;
     }
-    func_1504715C(&floor, arg0);
+    func_1504715C(&ground, obj);
 lbD:
-    packet.position[0] = arg0[5];
-    packet.position[1] = arg0[6];
-    packet.position[2] = arg0[7];
-    packet.field14 = 5.079999924f;
-    packet.field2C = 0xA;
-    packet.field2E = 0;
-    packet.field02 = 0xFF;
-    packet.field04 = -0x3F;
-    packet.field00 = 0;
-    packet.field06 = 0x2D;
-    packet.field30 = 3;
-    packet.field32 = 2;
-    packet.field34 = 0x28;
-    packet.field36 = 0x14;
-    packet.field38 = 0x9B;
-    packet.field3A = 0x64;
-    packet.field44 = 0x10;
-    packet.field46 = 0xF;
-    packet.field48 = 0;
-    packet.field3C = 0;
-    packet.field18 = 3.019999981f;
-    packet.field1C = 0.807000041f;
-    packet.field20 = 0.7010000348f;
-    packet.field24 = 18.0f;
-    packet.field28 = 11.80000019f;
-    packet.field40 = 0.5f;
-    func_15153F18(&packet.field00, packet.position, (s32)&floor, 0xFF, 1);
+    burst.position[0] = obj->x_position;
+    burst.position[1] = obj->y_position;
+    burst.position[2] = obj->z_position;
+    burst.unk14 = 5.079999924f;
+    burst.unk2C = 10;
+    burst.unk2E = 0;
+    burst.unk2 = 255;
+    burst.unk4 = -63;
+    burst.unk0 = 0;
+    burst.unk6 = 45;
+    burst.unk30 = 3;
+    burst.unk32 = 2;
+    burst.unk34 = 40;
+    burst.unk36 = 20;
+    burst.unk38 = 155;
+    burst.unk3A = 100;
+    burst.unk44 = 16;
+    burst.unk46 = 15;
+    burst.unk48 = 0;
+    burst.unk3C = 0;
+    burst.unk18 = 3.019999981f;
+    burst.unk1C = 0.807000041f;
+    burst.unk20 = 0.7010000348f;
+    burst.unk24 = 18.0f;
+    burst.unk28 = 11.80000019f;
+    burst.unk40 = 0.5f;
+    func_15153F18(&burst.unk0, burst.position, (s32)&ground, 255, 1);
 lbA:
     count = (func_150ADA20() % 6) + 7;
-    probe[1] = arg0[6] + 100;
+    probe[1] = obj->y_position + 100;
     while (count != 0) {
         angle = func_150ADA20();
         func_15143874((u8)angle, (func_150ADA68() * 59.0f) + 90.0f, &pos[0], &pos[2]);
 lbC:
-        pos[0] += arg0[5];
-        pos[2] += arg0[7];
+        pos[0] += obj->x_position;
+        pos[2] += obj->z_position;
         probe[0] = pos[0];
         probe[2] = pos[2];
-        if (func_15046C80(probe, 0, arg0[6] - 500.0f, &floor) == 0 || floor.unk1D == 3) {
+        if (func_15046C80(probe, 0, obj->y_position - 500.0f, &ground) == 0 || ground.surfaceType == 3) {
             return;
         }
-        pos[1] = floor.y;
+        pos[1] = ground.height;
         pos[1] += 10.0f;
         if (func_150ADA20() & 1) {
             func_151D9B8C(0, (func_150ADA68() * 4.5f) + 15.0f, (func_150ADA68() * 100.0f) + 155.0f,
-                          floor.unk4, (struct17 *)pos, 100, 0, 1, 0, arg1, arg2);
+                          ground.unk4, (struct17 *)pos, 100, 0, 1, 0, arg1, arg2);
         } else {
             func_151DAB58(0, (func_150ADA68() * 5.900000095f) + 6.099999905f, (func_150ADA68() * 100) + 155,
                           pos, 1, arg1, arg2);
@@ -140,24 +144,24 @@ lbC:
         count--;
     }
 lbB:
-    pos2[0] = arg0[5];
-    pos2[1] = arg0[6];
-    pos2[2] = arg0[7];
-    probe2[0] = pos2[0];
-    probe2[1] = pos2[1] + 100.0f;
-    probe2[2] = pos2[2];
-    if (func_15046C80(probe2, 0, pos2[1] - 500.0f, &floor) == 0 || floor.unk1D == 3) {
+    center[0] = obj->x_position;
+    center[1] = obj->y_position;
+    center[2] = obj->z_position;
+    centerProbe[0] = center[0];
+    centerProbe[1] = center[1] + 100.0f;
+    centerProbe[2] = center[2];
+    if (func_15046C80(centerProbe, 0, center[1] - 500.0f, &ground) == 0 || ground.surfaceType == 3) {
         return;
     }
-    pos2[1] = floor.y;
-    pos2[1] += 10.0f;
-    g1 = func_150ADA68();
-    g2 = func_150ADA68();
-    r1 = func_150ADA20();
-    r2 = func_150ADA20();
-    func_15136698(((g1 * 30.0f) + 90.0f) * 0.001000000047f,
-                  ((g2 * 103.0f) + 103.0f) * 9.999999747e-06f,
-                  (r1 % 101) + 0x9B, (r2 % 101) + 0x64,
-                  (func_150ADA20() % 56) + 0x46, floor.unk4, pos2, 0, 1, arg1, arg2);
+    center[1] = ground.height;
+    center[1] += 10.0f;
+    randF1 = func_150ADA68();
+    randF2 = func_150ADA68();
+    randA = func_150ADA20();
+    randB = func_150ADA20();
+    func_15136698(((randF1 * 30.0f) + 90.0f) * 0.001000000047f,
+                  ((randF2 * 103.0f) + 103.0f) * 9.999999747e-06f,
+                  (randA % 101) + 155, (randB % 101) + 100,
+                  (func_150ADA20() % 56) + 70, ground.unk4, center, 0, 1, arg1, arg2);
 lbl:;
 }
