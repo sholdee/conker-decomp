@@ -313,4 +313,17 @@ typedef struct GlowParams {
     } anim;
 } GlowParams; /* size 0x84 */
 
+/* Attachment of a type 0xB glow (func_15189FF0, game_1B74A0.c), stored in GlowParams.anim's place at
+ * glow+0x170: two points (p0, p1) given in the space of bone `bone` of `target`, which func_1518A094
+ * transforms every frame. */
+typedef struct EmitterAttach {
+    /* 0x00 */ Vec3f p0;
+    /* 0x0C */ Vec3f p1;
+    /* 0x18 */ struct Actor *target;
+    /* 0x1C */ u8 bone;
+    /* 0x1D */ u8 targetId;   /* the target's unique_id */
+    /* 0x1E */ s8 handler;    /* index into D_8008D5A0, or -1 */
+    /* 0x1F */ u8 pad1F;
+} EmitterAttach; /* size 0x20 */
+
 #endif

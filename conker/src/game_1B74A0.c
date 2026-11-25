@@ -1,47 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Object spawn parameters (see game_179F30.c); only passed through here. */
-typedef struct SpawnParams SpawnParams;
-
-/* Emitter parameters; func_151407D0 copies them into the spawned object at +0x110. */
-typedef struct EmitterParams {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8 pad24[0x20];
-    /* 0x44 */ u8 *unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ u8 pad4C[8];
-    /* 0x54 */ u8 unk54;
-    /* 0x55 */ u8 unk55;
-    /* 0x56 */ u8 unk56;
-    /* 0x57 */ u8 unk57;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-} EmitterParams;
-
-/* Tells a spawned emitter how to follow its owner: two points (p0, p1) given in the space of
- * bone `bone` of `target`, which func_1518A094 transforms every frame. */
-typedef struct EmitterAttach {
-    /* 0x00 */ Vec3f p0;
-    /* 0x0C */ Vec3f p1;
-    /* 0x18 */ Actor *target;
-    /* 0x1C */ u8 bone;
-    /* 0x1D */ u8 targetId; // the target's unique_id
-    /* 0x1E */ s8 handler;  // index into D_8008D5A0, or -1
-    /* 0x1F */ u8 pad1F;
-} EmitterAttach;
+#include "effects.h"
 
 /* The object func_151407D0 spawns for func_15189FF0. Bytes 0x18.. hold a copy of the
- * SpawnParams, so `color` and `p0`/`p1` mirror SpawnParams unk10 and unk1C..unk38. */
+ * ParticleDef, so `color` and `p0`/`p1` mirror ParticleDef rgba, pos and rot. */
 typedef struct Emitter {
     /* 0x000 */ u8 pad0[0x28];
     /* 0x028 */ u8 color[4];
@@ -51,7 +14,7 @@ typedef struct Emitter {
     /* 0x04C */ u8 pad4C[0xC];
     /* 0x058 */ s32 flags;
     /* 0x05C */ u8 pad5C[0x110 - 0x5C];
-    /* 0x110 */ EmitterParams params;
+    /* 0x110 */ GlowShape params;
     /* 0x16C */ u8 pad16C[4];
     /* 0x170 */ EmitterAttach attach;
 } Emitter;
@@ -74,7 +37,7 @@ typedef struct {
     /* 0x9 */ u8 idB;
 } SwapTargetMsg;
 
-Emitter *func_151407D0(EmitterParams *, s32, SpawnParams *, u8, u8, u8, u8, s32, s32, s32);
+Emitter *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s32, s32, s32);
 void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* Emitter handlers run by func_1518A094 before it follows the bone. Returning 0 ends the emitter's
@@ -82,11 +45,11 @@ void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *out
 extern s32 (*D_8008D5A0[])(Emitter *, u8 *);
 
 /* Spawns an emitter (type 0xB) that follows the bone described by `attach`. */
-Emitter *func_15189FF0(SpawnParams *spawn, EmitterParams *params, EmitterAttach *attach, u8 arg3, u8 arg4,
+Emitter *func_15189FF0(ParticleDef *spawn, GlowShape *params, EmitterAttach *attach, u8 arg3, u8 arg4,
                        u8 arg5, u8 arg6) {
     Emitter *emitter;
 
-    params->unk58 = 0xB;
+    params->type = 0xB;
     emitter = func_151407D0(params, 0x80, spawn, arg3, arg4, arg5, arg6, -1, 0xFF, 1);
     if (emitter != NULL) {
         EmitterAttach *dst = &emitter->attach;
@@ -143,15 +106,15 @@ s32 func_1518A094(Emitter *emitter) {
 
 /* Handler: sets params unk18/unk1C and the color from the target's byte 0x68; 15 clears flag 2 and stops. */
 s32 func_1518A214(Emitter *emitter, u8 *follow) {
-    EmitterParams *params;
+    GlowShape *params;
     f32 value;
 
     params = &emitter->params;
     switch (((AttachTargetBytes *)emitter->attach.target)->unk68 - 15) {
     default: // < 15 or > 17
         value = 0.6f;
-        params->unk18 = value;
-        params->unk1C = value;
+        params->alpha1 = value;
+        params->alpha0 = value;
         emitter->color[2] = 0;
         emitter->color[1] = 0;
         emitter->color[0] = 0xFF;
@@ -163,8 +126,8 @@ s32 func_1518A214(Emitter *emitter, u8 *follow) {
         break;
     case 1: // 16
         value = 0.3f;
-        params->unk18 = value;
-        params->unk1C = value;
+        params->alpha1 = value;
+        params->alpha0 = value;
         emitter->color[0] = 0x80;
         emitter->color[1] = 0;
         emitter->color[2] = 0;
@@ -172,8 +135,8 @@ s32 func_1518A214(Emitter *emitter, u8 *follow) {
         break;
     case 2: // 17
         value = 0.6f;
-        params->unk18 = value;
-        params->unk1C = value;
+        params->alpha1 = value;
+        params->alpha0 = value;
         emitter->color[0] = 0xFF;
         emitter->color[1] = 0;
         emitter->color[2] = 0;
