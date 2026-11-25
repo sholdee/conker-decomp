@@ -376,65 +376,69 @@ Gfx *func_1517F9F4(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 view) {
     return gfx;
 }
 
-Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 tex, f32 dx, f32 dy, s32 arg5) {
-    s32 va;
-    s32 vb;
-    f32 cx;
-    f32 cy;
-    f32 y0;
-    f32 x1;
-    f32 y1;
+/* Draws a `size`-pixel texture four times around the iris hole of `view`, mirrored into each
+ * quadrant and pushed out by dx,dy; `texSize` is the texture's width in texels. */
+Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view) {
+    s32 tmpA;
+    s32 tmpB;
+    f32 centerX;
+    f32 centerY;
+    f32 lowerY;
+    f32 leftX;
+    f32 upperY;
     f32 fsize;
-    s32 f[2];
+    s32 frac[2]; // texel fractions
 
-    cx = D_800DDDE8[arg5][0] + gRenderViews[arg5].halfWidth;
-    cy = D_800DDDE8[arg5][1] + gRenderViews[arg5].halfHeight;
-    y0 = cy + dy;
+    // matching: the dead stores to tmpA/tmpB and the reuse of `view` as a temporary steer
+    // IDO's spill-slot assignment; the cleaner forms tried all move the stack slots
+    centerX = D_800DDDE8[view][0] + gRenderViews[view].halfWidth;
+    centerY = D_800DDDE8[view][1] + gRenderViews[view].halfHeight;
+    lowerY = centerY + dy;
     fsize = size;
-    va = (s32)(cx + dx) << 2;
-    vb = (s32)((cx + dx) * 32.0f) & 0x1F;
+    tmpA = (s32)(centerX + dx) << 2;
+    tmpB = (s32)((centerX + dx) * 32.0f) & 0x1F;
     gSPScisTextureRectangle(gfx++,
-        va, (s32)y0 << 2,
-        (s32)((cx + dx) + fsize) << 2, (s32)(y0 + fsize) << 2,
+        tmpA, (s32)lowerY << 2,
+        (s32)((centerX + dx) + fsize) << 2, (s32)(lowerY + fsize) << 2,
         G_TX_RENDERTILE,
-        ((s32)((cx + dx) * 32.0f) & 0x1F) + (tex << 5),
-        ((s32)(y0 * 32.0f) & 0x1F) + (tex << 5),
-        -(u16)((f32)tex / fsize * 1024.0f), -(u16)((f32)tex / fsize * 1024.0f));
-    y1 = cy - dy;
-    x1 = cx - dx;
-    va = (s32)((cy - dy) - (f32)size);
-    vb = (s32)((cx - dx) - (f32)size);
-    f[1] = (s32)((x1 - fsize) * 32.0f) & 0x1F;
-    f[0] = (s32)((y1 - fsize) * 32.0f) & 0x1F;
+        ((s32)((centerX + dx) * 32.0f) & 0x1F) + (texSize << 5),
+        ((s32)(lowerY * 32.0f) & 0x1F) + (texSize << 5),
+        -(u16)((f32)texSize / fsize * 1024.0f), -(u16)((f32)texSize / fsize * 1024.0f));
+    upperY = centerY - dy;
+    leftX = centerX - dx;
+    tmpA = (s32)((centerY - dy) - (f32)size);
+    tmpB = (s32)((centerX - dx) - (f32)size);
+    frac[1] = (s32)((leftX - fsize) * 32.0f) & 0x1F;
+    frac[0] = (s32)((upperY - fsize) * 32.0f) & 0x1F;
     gSPScisTextureRectangle(gfx++,
-        (s32)(x1 - fsize) << 2, (s32)(y1 - fsize) << 2,
-        (s32)(cx - dx) << 2, (s32)y1 << 2,
+        (s32)(leftX - fsize) << 2, (s32)(upperY - fsize) << 2,
+        (s32)(centerX - dx) << 2, (s32)upperY << 2,
         G_TX_RENDERTILE,
-        0x1F - f[1],
-        0x1F - f[0],
-        (u16)((f32)tex / fsize * 1024.0f), (u16)((f32)tex / fsize * 1024.0f));
-    y1 = (cy - dy) - (f32)size;
-    f[1] = (s32)((cx + dx) * 32.0f) & 0x1F;
-    va = (s32)(cx + dx) << 2;
-    vb = (s32)((cy - dy) - fsize) << 2;
-    arg5 = (s32)(cy - dy) << 2;
+        0x1F - frac[1],
+        0x1F - frac[0],
+        (u16)((f32)texSize / fsize * 1024.0f), (u16)((f32)texSize / fsize * 1024.0f));
+    upperY = (centerY - dy) - (f32)size;
+    frac[1] = (s32)((centerX + dx) * 32.0f) & 0x1F;
+    tmpA = (s32)(centerX + dx) << 2;
+    tmpB = (s32)((centerY - dy) - fsize) << 2;
+    view = (s32)(centerY - dy) << 2;
     gSPScisTextureRectangle(gfx++,
-        va, vb,
-        (s32)((cx + dx) + fsize) << 2, arg5,
+        tmpA, tmpB,
+        (s32)((centerX + dx) + fsize) << 2, view,
         G_TX_RENDERTILE,
-        f[1] + (tex << 5),
-        0x1F - f[0],
-        -(u16)((f32)tex / fsize * 1024.0f), (u16)((f32)tex / fsize * 1024.0f));
-    arg5 = 0x1F - ((s32)(((cx - dx) - fsize) * 32.0f) & 0x1F);
-    vb = (s32)(cx - dx) << 2;
-    va = (s32)((cx - dx) - (f32)size) << 2;
+        frac[1] + (texSize << 5),
+        0x1F - frac[0],
+        -(u16)((f32)texSize / fsize * 1024.0f), (u16)((f32)texSize / fsize * 1024.0f));
+    view = 0x1F - ((s32)(((centerX - dx) - fsize) * 32.0f) & 0x1F);
+    tmpB = (s32)(centerX - dx) << 2;
+    tmpA = (s32)((centerX - dx) - (f32)size) << 2;
     gSPScisTextureRectangle(gfx++,
-        va, (s32)y0 << 2,
-        vb, (s32)(y0 + fsize) << 2,
+        tmpA, (s32)lowerY << 2,
+        tmpB, (s32)(lowerY + fsize) << 2,
         G_TX_RENDERTILE,
-        arg5,
-        ((s32)(y0 * 32.0f) & 0x1F) + (tex << 5),
-        (u16)((f32)tex / fsize * 1024.0f), -(u16)((f32)tex / fsize * 1024.0f));
+        view,
+        ((s32)(lowerY * 32.0f) & 0x1F) + (texSize << 5),
+        (u16)((f32)texSize / fsize * 1024.0f), -(u16)((f32)texSize / fsize * 1024.0f));
     return gfx;
 }
 
@@ -444,8 +448,7 @@ extern f32 *D_800DDE48; // hole x, percent of the view width
 extern f32 *D_800DDE4C; // hole y, percent of the view height
 extern Gfx D_8008D018[];
 extern s32 D_80090298[]; // texture ids
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
-Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view);
+extern s32 func_1510D0EC(s32, s32 *, s32, s32); // texture address of a texture id
 
 /* Draws the iris wipe of `view`: black around a round hole, with optional sight marks and overlay. */
 Gfx *func_15180580(Gfx *gfx, s32 view) {
@@ -499,6 +502,7 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
         bottom = gRenderViews[view].bottom;
         right = gRenderViews[view].right;
         size = (s32)(-399.0f * closure + 400.0f);
+        // black bands above, below, left and right of the hole
         uly = top;
         ulx = left;
         lry = (s32)((D_800DDDE8[view][1] + gRenderViews[view].halfHeight) - size);
@@ -524,6 +528,7 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
             gDPSetOtherMode(gfx++, 0x002C0F, 0x0F0A4004);
             gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
             gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
+            // crosshair (and corner marks), first as a 1-pixel-wider outline, then on top
             for (i = 0; i < 2; i++) {
                 uly = (s32)(gRenderViews[view].halfHeight - 1);
                 lry = (s32)(gRenderViews[view].halfHeight + 1);
@@ -595,7 +600,8 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
                    G_TX_NOLOD);
         gDPSetTileSize(gfx++, G_TX_RENDERTILE, 2, 2, 0xFE, 0xFE);
         gDPSetOtherMode(gfx++, 0x002CFF, 0x005011C4);
-        gfx = func_1517FB9C(gfx, size, 0x40, 0, 0, view);
+        // matching: integer 0 offsets; 0.0f literals change the float register allocation
+        gfx = func_1517FB9C(gfx, size, 64, 0, 0, view);
         if (D_800DDE1C[view] != 0) {
             gDPPipeSync(gfx++);
             gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, func_1510D0EC(D_80090298[2], NULL, 3, 0));
@@ -603,7 +609,7 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
             gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x7FF, 0);
             gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_CLAMP,
                        6, G_TX_NOLOD);
-            gfx = func_1517FB9C(gfx, size / 2, 0x40, 0, 0, view);
+            gfx = func_1517FB9C(gfx, size / 2, 64, 0, 0, view);
             if (D_800DDE1C[view] == 2) {
                 gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
                 gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
@@ -612,8 +618,8 @@ Gfx *func_15180580(Gfx *gfx, s32 view) {
                 gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x3FF, 0);
                 gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 8, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 5, G_TX_NOLOD,
                            G_TX_CLAMP, 5, G_TX_NOLOD);
-                gfx = func_1517FB9C(gfx, size / 4, 0x20, 32.0f, 28.0f, view);
-                gfx = func_1517FB9C(gfx, size / 4, 0x20, 28.0f, 32.0f, view);
+                gfx = func_1517FB9C(gfx, size / 4, 32, 32.0f, 28.0f, view);
+                gfx = func_1517FB9C(gfx, size / 4, 32, 28.0f, 32.0f, view);
                 if (D_800DDD78[view] < 2) {
                     D_800DDD78[view]++;
                 } else {
@@ -655,7 +661,6 @@ extern Game1AC2F0Player D_800CC2D0[];
 void func_150A7960(void *mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern f32 D_800A7260[]; // scripted iris hold closure, by D_80082FA0
 extern f32 D_800A7270[]; // scripted iris final closure, by D_80082FA0
-extern u8 D_800BE9B4;
 
 /* Updates the iris of every view: scripted irises step through the player's mode states,
  * tracking irises follow the player, and free irises run at their speed until open or closed. */
