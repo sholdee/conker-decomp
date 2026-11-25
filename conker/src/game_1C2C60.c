@@ -3,11 +3,13 @@
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_1513D2F0 func_1513D2F0_hdr
 #define func_1513D524 func_1513D524_hdr
+#define func_15195AA8 func_15195AA8_hdr
 #include "functions.h"
 #undef func_151422C0
 #undef func_150ADA20
 #undef func_1513D2F0
 #undef func_1513D524
+#undef func_15195AA8
 u32 func_150ADA20(void);
 void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB);
 #define D_800DBFF0 D_800DBFF0_hdr
@@ -21,7 +23,6 @@ void *memcpy(void *, const void *, u32);
 void func_1519CDB0(s32, f32, s32);
 extern void *allocate_memory(s32, s32, s32, s32);
 
-s32 func_15195DD4(s32, s32, s32, s32, s32, s32, s32);
 s32 func_151422C0();
 struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
@@ -30,33 +31,68 @@ extern char D_800A8A48[];
 extern f32 D_800A8AA8;
 extern f32 D_800A8AF8;
 
-extern s32 D_800E08E0;
-extern s32 D_800E08E4;
-extern s32 D_800E08E8;
-extern s32 D_800E08EC;
+/* Generic doubly linked list node; every list allocated by func_151957B0 starts with one. */
+typedef struct ListNode {
+    struct ListNode *prev;
+    struct ListNode *next;
+} ListNode;
+
+/* Head/tail of the texture-scroll reference list (TexScrollRef) and the texture-scroll list (TexScroll). */
+extern ListNode *D_800E08E0;
+extern ListNode *D_800E08E4;
+extern ListNode *D_800E08E8;
+extern ListNode *D_800E08EC;
+/* Next automatic (negative) texture-scroll id. */
 extern s32 D_800E08F0;
 
-typedef struct Struct151957B0 {
-    struct Struct151957B0 *prev;
-    struct Struct151957B0 *next;
-} Struct151957B0;
+/* The opcode byte of a display-list command. */
+#define DL_OPCODE(cmd) (*(s8 *)&(cmd))
 
-void *func_151957B0(s32 size, void *head, void *tail) {
-    Struct151957B0 *node;
-    Struct151957B0 *prev;
+/* A G_SETTILESIZE run inside some display list that a TexScroll rewrites every frame. */
+typedef struct TexScrollRef {
+    /* 0x00 */ ListNode link;
+    /* 0x08 */ Gfx *dl;
+    /* 0x0C */ u16 cmdIndex;
+    /* 0x0E */ u8 count;
+    /* 0x0F */ u8 pad0F;
+    /* 0x10 */ struct TexScrollRef *next;
+} TexScrollRef;
+
+/* A scrolling texture: patches the G_SETTILESIZE commands that follow its G_SETTIMG. */
+typedef struct TexScroll {
+    /* 0x00 */ struct TexScroll *prev;
+    /* 0x04 */ struct TexScroll *next;
+    /* 0x08 */ s16 id;
+    /* 0x0A */ s16 width;
+    /* 0x0C */ s16 height;
+    /* 0x0E */ u16 scrollS;
+    /* 0x10 */ u16 scrollT;
+    /* 0x12 */ s8 speedS;
+    /* 0x13 */ s8 speedT;
+    /* 0x14 */ u8 levelCount;
+    /* 0x15 */ char pad15[0x3];
+    /* 0x18 */ TexScrollRef *refs;
+    /* 0x1C */ s16 cmdIndex[2][5]; /* per main display list (D_800B0E00[0] / [1]), -1 = unused */
+    /* 0x30 */ u8 cmdCount[2][5];
+} TexScroll;
+
+/* Allocates a `size`-byte list node and appends it to the list (*head, *tail). */
+void *func_151957B0(s32 size, ListNode **head, ListNode **tail) {
+    ListNode *node;
+    ListNode *last;
 
     node = allocate_memory(size, 1, 0, 0);
-    if (node != 0) {
-        node->next = 0;
-        prev = *(Struct151957B0 **)tail;
-        if (prev != 0) {
-            node->prev = prev;
-            (*(Struct151957B0 **)tail)->next = node;
-            *(Struct151957B0 **)tail = node;
+    if (node != NULL) {
+        node->next = NULL;
+        last = *tail;
+        if (last != NULL) {
+            node->prev = last;
+            (*tail)->next = node;
+            *tail = node;
         } else {
-            node->prev = 0;
-            *(Struct151957B0 **)tail = node;
-            *(Struct151957B0 **)head = node;
+            node->prev = NULL;
+            *tail = node;
+            *head = node;
         }
     }
     return node;
@@ -65,356 +101,284 @@ void *func_151957B0(s32 size, void *head, void *tail) {
 void trailing_151957B0(void) {
 }
 
+/* Empties both texture-scroll lists. */
 void func_1519582C(void) {
-    D_800E08E0 = D_800E08E4 = 0;
-    D_800E08E8 = D_800E08EC = 0;
+    D_800E08E0 = D_800E08E4 = NULL;
+    D_800E08E8 = D_800E08EC = NULL;
     D_800E08F0 = -2;
 }
 
-typedef struct {
-    s8 type;
-    char pad[3];
-    s32 val;
-} Struct15195868;
-
-extern s32 D_800B0E58[];
-
-#define TYPE(n) (*(s8 *)(arg0 + ((n) << 3)))
-#define VAL(n) (((Struct15195868 *)arg0)[n].val)
-
-s32 func_15195868(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
+/*
+ * Finds the `occurrence`-th G_SETTIMG in `dl` that loads texture D_800B0E58[texture] (any texture when
+ * `texture` is 0). Returns the index of the G_SETTILESIZE that follows it, or -1, and stores in *levels how
+ * many (G_SETTILESIZE, G_SETTILE) pairs follow.
+ */
+s32 func_15195868(Gfx *dl, s32 texture, s32 occurrence, s32 *levels) {
     s32 i;
     s32 c;
-    s8 d;
-    s8 e;
+    s8 op;
+    s8 nextOp;
 
-    *arg3 = 0;
+    *levels = 0;
     i = -1;
-loop:
-    i++;
-    while (TYPE(i) != -3 && TYPE(i) != -0x21) {
+    for (;;) {
         i++;
+        while (DL_OPCODE(dl[i]) != (s8)G_SETTIMG && DL_OPCODE(dl[i]) != (s8)G_ENDDL) {
+            i++;
+        }
+        if (DL_OPCODE(dl[i]) == (s8)G_ENDDL) {
+            return -1;
+        }
+        if ((dl[i].words.w1 == D_800B0E58[texture] || texture == 0) && occurrence-- <= 0) {
+            break;
+        }
     }
-    if (TYPE(i) == -0x21) {
-        return -1;
-    }
-    if ((VAL(i) == D_800B0E58[arg1] || arg1 == 0) && arg2-- < 1) {
-        goto found;
-    }
-    goto loop;
-found:
-    d = TYPE(i);
-    while (d != -0xE) {
+    op = DL_OPCODE(dl[i]);
+    while (op != (s8)G_SETTILESIZE) {
         i++;
-        d = TYPE(i);
+        op = DL_OPCODE(dl[i]);
     }
     c = i;
     do {
-        (*arg3)++;
-        d = TYPE(++c);
-        e = TYPE(++c);
-    } while (d == -0xB && e == -0xE);
+        (*levels)++;
+        op = DL_OPCODE(dl[++c]);
+        nextOp = DL_OPCODE(dl[++c]);
+    } while (op == (s8)G_SETTILE && nextOp == (s8)G_SETTILESIZE);
     return i;
 }
 
-extern void *func_151957B0(s32, void *, void *);
-extern s32 D_800E08E0;
-extern s32 D_800E08E4;
-extern s32 D_800E08E8;
-extern s32 D_800E08EC;
-
-typedef struct Struct15195984 {
-    struct Struct15195984 *prev;
-    struct Struct15195984 *next;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    u8 unk12;
-    u8 unk13;
-    u8 unk14;
-    char pad15[0x18 - 0x15];
-    s32 unk18;
-    s16 unk1C[5];
-    s16 unk26[5];
-    u8 unk30[5];
-    u8 unk35[5];
-} Struct15195984;
-
-void *func_15195984(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    Struct15195984 *v0;
+/* Allocates a TexScroll for texture `id`; `size`/`pos` are the w1/w0 words of its G_SETTILESIZE. */
+TexScroll *func_15195984(s32 id, s32 size, s32 pos, s32 doubled) {
+    TexScroll *scroll;
     s32 i;
-    s32 hi;
-    s32 lo;
+    s32 width;
+    s32 height;
 
-    v0 = func_151957B0(0x3C, &D_800E08E8, &D_800E08EC);
-    if (v0 != 0) {
-        v0->unk18 = 0;
+    scroll = func_151957B0(sizeof(TexScroll), &D_800E08E8, &D_800E08EC);
+    if (scroll != NULL) {
+        scroll->refs = NULL;
         for (i = 0; i < 5; i++) {
-            v0->unk1C[i] = -1;
+            scroll->cmdIndex[0][i] = -1;
         }
         for (i = 0; i < 5; i++) {
-            v0->unk26[i] = -1;
+            scroll->cmdIndex[1][i] = -1;
         }
-        v0->unk8 = arg0;
-        hi = ((arg1 >> 12) & 0xFFF) + 2;
-        lo = (arg1 & 0xFFF) + 2;
-        if (arg3 != 0) {
-            hi <<= 1;
-            lo <<= 1;
+        scroll->id = id;
+        width = ((size >> 12) & 0xFFF) + 2;
+        height = (size & 0xFFF) + 2;
+        if (doubled) {
+            width <<= 1;
+            height <<= 1;
         }
-        v0->unkE = (arg2 >> 12) & 0xFFF;
-        v0->unk10 = arg2 & 0xFFF;
-        v0->unkA = hi;
-        v0->unkC = lo;
-        v0->unkE = (u16)v0->unkE << 3;
-        v0->unk10 = (u16)v0->unk10 << 3;
-        v0->unk14 = 1;
+        scroll->scrollS = (pos >> 12) & 0xFFF;
+        scroll->scrollT = pos & 0xFFF;
+        scroll->width = width;
+        scroll->height = height;
+        scroll->scrollS = scroll->scrollS << 3;
+        scroll->scrollT = scroll->scrollT << 3;
+        scroll->levelCount = 1;
     }
-    return v0;
+    return scroll;
 }
 
-s16 func_15195A84(s16 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    return arg0;
+s16 func_15195A84(s16 cmdIndex, s32 arg1, s32 arg2, s32 arg3) {
+    return cmdIndex;
 }
 
-typedef struct {
-    s32 pos;
-    s32 size;
-} Struct15195DD4Cmd;
-
-extern s32 func_15195868(s32, s32, s32, s32 *);
-
-void *func_15195AA8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+/*
+ * Registers every (or the `occurrence`-th, when not -1) use of texture `texture` in main display list `which`
+ * of `dl` with a TexScroll scrolling by (speedS, speedT).
+ */
+TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 which, s32 speedS,
+                         s32 speedT) {
     s32 idx;
-    s32 key;
+    s32 slot;
     s32 size;
-    s32 depth;
+    s32 levels;
     s32 pos;
-    s32 i = arg3;
-    Struct15195984 *node = 0;
+    s32 i = occurrence;
+    TexScroll *scroll = NULL;
 
-    if (arg0 == 0) {
-        return 0;
+    if (dl == NULL) {
+        return NULL;
     }
-    if (arg3 == -1) {
+    if (occurrence == -1) {
         i = 0;
     }
     do {
-        idx = func_15195868(arg0, arg1, i, &depth);
+        idx = func_15195868(dl, texture, i, &levels);
         if (idx == -1) {
-            arg3 = 0;
+            occurrence = 0;
         } else {
-            if (arg1 == 0) {
-                arg1 = D_800E08F0;
+            if (texture == 0) {
+                texture = D_800E08F0;
             }
-            size = ((Struct15195DD4Cmd *) arg0 + idx)->size;
-            pos = ((Struct15195DD4Cmd *) arg0 + idx)->pos;
-            node = (Struct15195984 *) D_800E08E8;
-            if (arg4 != 0) {
-                key = -1;
+            size = dl[idx].words.w1;
+            pos = dl[idx].words.w0;
+            scroll = (TexScroll *)D_800E08E8;
+            // matching: dead store left over from func_15195DD4's lookup slot; removing it moves branches
+            if (isNew) {
+                slot = -1;
             } else {
-                key = arg1;
+                slot = texture;
             }
-            while ((node != 0) && (node->unk8 != 0)) {
-                node = node->next;
+            while (scroll != NULL && scroll->id != 0) {
+                scroll = scroll->next;
             }
-            if (node == 0) {
-                node = func_15195984(arg1, size, pos, arg2);
-                if (node != 0) {
-                    arg4 = 0;
-                    node->unk12 = arg6;
-                    node->unk13 = arg7;
+            if (scroll == NULL) {
+                scroll = func_15195984(texture, size, pos, doubled);
+                if (scroll != NULL) {
+                    isNew = FALSE;
+                    scroll->speedS = speedS;
+                    scroll->speedT = speedT;
                 } else {
-                    return 0;
+                    return NULL;
                 }
             } else {
-                idx = func_15195A84(idx, (s32) node, size, arg2);
-                arg4 = 0;
+                idx = func_15195A84(idx, (s32)scroll, size, doubled);
+                isNew = FALSE;
             }
-            if (node->unk14 < depth) {
-                node->unk14 = depth;
+            if (scroll->levelCount < levels) {
+                scroll->levelCount = levels;
             }
-            if (arg5 == 0) {
-                key = 0;
-                while (key < 5 && node->unk1C[key] != -1) {
-                    key++;
+            if (which == 0) {
+                slot = 0;
+                while (slot < 5 && scroll->cmdIndex[0][slot] != -1) {
+                    slot++;
                 }
-                if (key < 5) {
-                    node->unk1C[key] = idx;
-                    node->unk30[key] = depth;
+                if (slot < 5) {
+                    scroll->cmdIndex[0][slot] = idx;
+                    scroll->cmdCount[0][slot] = levels;
                 }
             } else {
-                key = 0;
-                while (key < 5 && node->unk26[key] != -1) {
-                    key++;
+                slot = 0;
+                while (slot < 5 && scroll->cmdIndex[1][slot] != -1) {
+                    slot++;
                 }
-                if (key < 5) {
-                    node->unk26[key] = idx;
-                    node->unk35[key] = depth;
+                if (slot < 5) {
+                    scroll->cmdIndex[1][slot] = idx;
+                    scroll->cmdCount[1][slot] = levels;
                 }
             }
             i++;
         }
-    } while (arg3 == -1);
-    if (arg1 == D_800E08F0) {
+    } while (occurrence == -1);
+    if (texture == D_800E08F0) {
         D_800E08F0--;
     }
-    return node;
+    return scroll;
 }
 
-typedef struct Struct15195D00 {
-    char pad0[0x8];
-    s32 unk8;
-    u16 unkC;
-    u8 unkE;
-    u8 unkF;
-    struct Struct15195D00 *unk10;
-} Struct15195D00;
+/* Adds a reference to the `count` tile-size commands at dl[cmdIndex] to `scroll`, unless already present. */
+void func_15195D00(TexScroll *scroll, Gfx *dl, s32 cmdIndex, s32 count) {
+    TexScrollRef *ref;
+    TexScrollRef *next;
 
-void func_15195D00(Struct15195984 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    Struct15195D00 *temp_v1;
-    Struct15195D00 *temp_v0;
-    s32 temp_arg3;
-
-    temp_v0 = (Struct15195D00 *) arg0->unk18;
-    if (temp_v0 != 0) {
-        temp_v1 = temp_v0;
+    next = scroll->refs;
+    if (next != NULL) {
+        ref = next;
         do {
-            if ((arg1 == temp_v1->unk8) && (arg2 == temp_v1->unkC)) {
+            if (dl == ref->dl && cmdIndex == ref->cmdIndex) {
                 return;
             }
-            temp_v0 = temp_v1->unk10;
-            if (temp_v0 != 0) {
-                temp_v1 = temp_v0;
-                temp_v0 = temp_v0->unk10;
+            next = ref->next;
+            if (next != NULL) {
+                ref = next;
+                next = next->next;
             }
-        } while (temp_v0 != 0);
-        temp_v0 = func_151957B0(0x14, &D_800E08E0, &D_800E08E4);
-        temp_v1->unk10 = temp_v0;
+        } while (next != NULL);
+        next = func_151957B0(sizeof(TexScrollRef), &D_800E08E0, &D_800E08E4);
+        ref->next = next;
     } else {
-        temp_v0 = func_151957B0(0x14, &D_800E08E0, &D_800E08E4);
-        arg0->unk18 = (s32) temp_v0;
+        next = func_151957B0(sizeof(TexScrollRef), &D_800E08E0, &D_800E08E4);
+        scroll->refs = next;
     }
-    temp_v0->unk8 = arg1;
-    temp_v0->unkC = arg2;
-    temp_arg3 = arg3;
-    temp_v0->unkE = temp_arg3;
-    temp_v0->unk10 = 0;
+    next->dl = dl;
+    next->cmdIndex = cmdIndex;
+    next->count = count;
+    next->next = NULL;
 }
 
-extern s32 func_15195868(s32, s32, s32, s32 *);
-
-s32 func_15195DD4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+/* Like func_15195AA8, but records the uses in an arbitrary display list `dl` (as TexScrollRefs). */
+TexScroll *func_15195DD4(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
+                         s32 speedT) {
     s32 idx;
     s32 key;
     s32 size;
-    s32 depth;
+    s32 levels;
     s32 pos;
-    s32 i = arg3;
-    Struct15195984 *node;
+    s32 i = occurrence;
+    TexScroll *scroll;
 
-    if (arg0 == 0) {
-        return 0;
+    if (dl == NULL) {
+        return NULL;
     }
     if (D_800BEAC0 != 0) {
-        return 0;
+        return NULL;
     }
-    if (arg3 == -1) {
+    if (occurrence == -1) {
         i = 0;
     }
     do {
-        idx = func_15195868(arg0, arg1, i, &depth);
+        idx = func_15195868(dl, texture, i, &levels);
         if (idx == -1) {
-            arg3 = 0;
+            occurrence = 0;
         } else {
-            if (arg1 == 0) {
-                arg1 = D_800E08F0;
+            if (texture == 0) {
+                texture = D_800E08F0;
             }
-            if (arg4 != 0) {
+            if (isNew) {
                 key = -1;
             } else {
-                key = arg1;
+                key = texture;
             }
-            node = (Struct15195984 *) D_800E08E8;
-            while ((node != 0) && (key != node->unk8)) {
-                node = node->next;
+            scroll = (TexScroll *)D_800E08E8;
+            while (scroll != NULL && key != scroll->id) {
+                scroll = scroll->next;
             }
-            size = ((Struct15195DD4Cmd *) arg0 + idx)->size;
-            pos = ((Struct15195DD4Cmd *) arg0 + idx)->pos;
-            if (node == 0) {
-                node = func_15195984(arg1, size, pos, arg2);
-                if (node != 0) {
-                    arg4 = 0;
-                    node->unk12 = arg5;
-                    node->unk13 = arg6;
+            size = dl[idx].words.w1;
+            pos = dl[idx].words.w0;
+            if (scroll == NULL) {
+                scroll = func_15195984(texture, size, pos, doubled);
+                if (scroll != NULL) {
+                    isNew = FALSE;
+                    scroll->speedS = speedS;
+                    scroll->speedT = speedT;
                 } else {
-                    return 0;
+                    return NULL;
                 }
             } else {
-                idx = func_15195A84(idx, (s32) node, size, arg2);
-                arg4 = 0;
+                idx = func_15195A84(idx, (s32)scroll, size, doubled);
+                isNew = FALSE;
             }
-            if (node->unk14 < depth) {
-                node->unk14 = depth;
+            if (scroll->levelCount < levels) {
+                scroll->levelCount = levels;
             }
-            func_15195D00(node, arg0, idx, depth);
+            func_15195D00(scroll, dl, idx, levels);
             i++;
         }
-    } while (arg3 == -1);
-    if (arg1 == D_800E08F0) {
+    } while (occurrence == -1);
+    if (texture == D_800E08F0) {
         D_800E08F0--;
     }
-    return (s32) node;
+    return scroll;
 }
 
 typedef struct {
     char pad_0x0[0x1C];
-    s32 field_0x1C;
+    Gfx *dl;
 } ResourceEntry;
 
-s32 func_15195FB0(ResourceEntry *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
-    return func_15195DD4(arg0->field_0x1C, arg1, arg2, arg3, arg4, arg5, arg6);
+TexScroll *func_15195FB0(ResourceEntry *res, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
+                         s32 speedT) {
+    return func_15195DD4(res->dl, texture, doubled, occurrence, isNew, speedS, speedT);
 }
 
-typedef struct {
-    /* 0x0 */ u32 w0;
-    /* 0x4 */ u32 w1;
-} Cmd15195FF0;
-
-typedef struct Sub15195FF0 {
-    /* 0x00 */ char pad00[0x8];
-    /* 0x08 */ Cmd15195FF0 *unk08;
-    /* 0x0C */ u16 unk0C;
-    /* 0x0E */ u8 unk0E;
-    /* 0x0F */ u8 unk0F;
-    /* 0x10 */ struct Sub15195FF0 *unk10;
-} Sub15195FF0;
-
-typedef struct Struct15195FF0 {
-    /* 0x00 */ struct Struct15195FF0 *prev;
-    /* 0x04 */ struct Struct15195FF0 *next;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 unk0A;
-    /* 0x0C */ s16 unk0C;
-    /* 0x0E */ u16 unk0E;
-    /* 0x10 */ u16 unk10;
-    /* 0x12 */ s8 unk12;
-    /* 0x13 */ s8 unk13;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ char pad15[0x3];
-    /* 0x18 */ Sub15195FF0 *unk18;
-    /* 0x1C */ s16 unk1C[5];
-    /* 0x26 */ s16 unk26[5];
-    /* 0x30 */ u8 unk30[5];
-    /* 0x35 */ u8 unk35[5];
-} Struct15195FF0;
-
-void func_15195FF0(Cmd15195FF0 *arg0, Cmd15195FF0 *arg1) {
-    Struct15195FF0 *node;
-    u32 sp5C[8];
-    Sub15195FF0 *sub;
+/* Advances every TexScroll and rewrites the G_SETTILESIZE commands it is registered in. */
+void func_15195FF0(Gfx *dl0, Gfx *dl1) {
+    TexScroll *scroll;
+    u32 tileSize[8];
+    TexScrollRef *ref;
     s32 uls;
     s32 ult;
     s32 w;
@@ -425,12 +389,12 @@ void func_15195FF0(Cmd15195FF0 *arg0, Cmd15195FF0 *arg1) {
     s32 k;
     s32 idx;
 
-    node = (Struct15195FF0 *)D_800E08E8;
-    while (node != NULL) {
-        w = node->unk0A;
-        h = node->unk0C;
-        x = node->unk0E;
-        y = node->unk10;
+    scroll = (TexScroll *)D_800E08E8;
+    while (scroll != NULL) {
+        w = scroll->width;
+        h = scroll->height;
+        x = scroll->scrollS;
+        y = scroll->scrollT;
         uls = x / 8 + 2;
         ult = y / 8 + 2;
         if (uls >= w) {
@@ -439,16 +403,16 @@ void func_15195FF0(Cmd15195FF0 *arg0, Cmd15195FF0 *arg1) {
         if (ult >= h) {
             ult = ult - h;
         }
-        for (i = 0; i < 8 && i < node->unk14; i++) {
-            sp5C[i] = 0xF2000000 | ((uls & 0xFFF) << 12) | (ult & 0xFFF);
+        for (i = 0; i < 8 && i < scroll->levelCount; i++) {
+            tileSize[i] = (G_SETTILESIZE << 24) | ((uls & 0xFFF) << 12) | (ult & 0xFFF);
             uls /= 2;
             ult /= 2;
         }
         w *= 8;
         h *= 8;
         if (D_800BEAC0 == 0) {
-            x += node->unk12 * D_800BE9E4;
-            y += node->unk13 * D_800BE9E4;
+            x += scroll->speedS * D_800BE9E4;
+            y += scroll->speedT * D_800BE9E4;
         }
         if (x < 0) {
             x += w;
@@ -460,42 +424,43 @@ void func_15195FF0(Cmd15195FF0 *arg0, Cmd15195FF0 *arg1) {
         } else if (y >= h) {
             y -= h;
         }
-        node->unk0E = x;
-        node->unk10 = y;
-        for (k = 0; k < 5 && node->unk1C[k] != -1; k++) {
-            idx = node->unk1C[k];
-            for (i = 0; i < node->unk30[k]; i++) {
-                arg0[idx].w0 = sp5C[i];
+        scroll->scrollS = x;
+        scroll->scrollT = y;
+        for (k = 0; k < 5 && scroll->cmdIndex[0][k] != -1; k++) {
+            idx = scroll->cmdIndex[0][k];
+            for (i = 0; i < scroll->cmdCount[0][k]; i++) {
+                dl0[idx].words.w0 = tileSize[i];
                 idx += 2;
             }
         }
-        for (k = 0; k < 5 && node->unk26[k] != -1; k++) {
-            idx = node->unk26[k];
-            for (i = 0; i < node->unk35[k]; i++) {
-                arg1[idx].w0 = sp5C[i];
+        for (k = 0; k < 5 && scroll->cmdIndex[1][k] != -1; k++) {
+            idx = scroll->cmdIndex[1][k];
+            for (i = 0; i < scroll->cmdCount[1][k]; i++) {
+                dl1[idx].words.w0 = tileSize[i];
                 idx += 2;
             }
         }
-        sub = node->unk18;
-        while (sub != NULL) {
-            idx = sub->unk0C;
-            for (i = 0; i < sub->unk0E; i++, idx += 2) {
-                sub->unk08[idx].w0 = sp5C[i];
+        ref = scroll->refs;
+        while (ref != NULL) {
+            idx = ref->cmdIndex;
+            for (i = 0; i < ref->count; i++, idx += 2) {
+                ref->dl[idx].words.w0 = tileSize[i];
             }
-            if (sub->unk10 != NULL) {
-                sub = sub->unk10;
+            if (ref->next != NULL) {
+                ref = ref->next;
             } else {
-                sub = NULL;
+                ref = NULL;
             }
         }
-        node = node->next;
+        scroll = scroll->next;
     }
 }
 
-void func_15196318(u8 *arg0, s32 arg1, s32 arg2) {
-    if (arg0 != 0) {
-        arg0[0x12] = arg1;
-        arg0[0x13] = arg2;
+/* Sets the scroll speed of a TexScroll. */
+void func_15196318(TexScroll *scroll, s32 speedS, s32 speedT) {
+    if (scroll != NULL) {
+        scroll->speedS = speedS;
+        scroll->speedT = speedT;
     }
 }
 
