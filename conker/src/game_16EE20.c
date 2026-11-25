@@ -2438,7 +2438,7 @@ s32 func_1514654C(Actor *actor, AttachPoint *point, s32 index, f32 **offsets, f3
         if (func_15031070(part, actor, &partMtx, &partCount) == 0) {
             return 0;
         }
-        /* ActorCtl (shared header) has no field for the word at 0x48 */
+        /* func_1503195C returns a part object, not an ActorCtl (functions.h types it ActorCtl *) */
         if (*(s32 *)((u8 *)part + 0x48) != 0) {
             mtx = &partMtx[point->partBone];
         } else {

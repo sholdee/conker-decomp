@@ -210,7 +210,7 @@ void func_151A9CA0(ActorTask *task) {
     f32 pos[3];
 
     // matching: structs.h types unk95 as s8, but this read is unsigned (lbu)
-    if ((actor->unk31C != NULL) && ((u8)actor->unk31C->unk95 != 0)) {
+    if ((actor->unk31C != NULL) && (actor->unk31C->unk95 != 0)) {
         return;
     }
     pos[0] = actor->x_position;

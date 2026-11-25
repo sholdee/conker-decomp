@@ -1788,7 +1788,7 @@ s32 func_151279A0(Actor *obj, OSContPad *contPad) {
     s32 buttons;
     f32 angle;
 
-    ext = (ActorCtl *)obj->unk31C;
+    ext = obj->unk31C;
     zone = ext->unk78;
     dt = D_800BE9E4 * (1.0f / 60.0f);
     if ((zone == 0xC) || (zone == 0x1B)) {
@@ -2107,7 +2107,7 @@ void func_1512868C(Camera *camera) {
     index = camera->playerIndex;
     camera->player = player = &D_800CC2D0[index];
     camera->controller = camera->unk3CC = index;
-    camera->playerExt = (ActorCtl *)player->unk31C;
+    camera->playerExt = player->unk31C;
     camera->liftTarget = 0.0f;
     camera->sideTarget = 0.0f;
     camera->lift = 0.0f;

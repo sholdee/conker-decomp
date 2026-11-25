@@ -104,7 +104,7 @@ typedef struct {
     PathPoint pts[1];
 } PathData;
 
-/* Raw field access for bytes of Actor / ActorCtl that structs.h declares only as padding or with
+/* Raw field access for bytes of Actor that structs.h declares only as padding or with
  * another width (the shared headers are not edited in this pass). */
 /* Index of an object in the D_800CC2D0 object table. */
 #define OBJ_INDEX(o) ((o) - D_800CC2D0)

@@ -964,7 +964,7 @@ void func_15031A50(Attachment *att, Actor *owner) {
     case 0x5A:
         unk = owner->unk31C;
         if (unk != NULL) {
-            *(u16 *)((u8 *)unk + 0x1A6) += 0xAA; // not covered by ActorCtl yet
+            unk->unk1A6 += 0xAA;
         }
         break;
     case 0x90:
@@ -1031,7 +1031,7 @@ void func_15031C14(Attachment *att) {
         case 0x5A:
             unk = owner->unk31C;
             if (unk != NULL) {
-                *(u16 *)((u8 *)unk + 0x1A6) -= 0xAA; // not covered by ActorCtl yet
+                unk->unk1A6 -= 0xAA;
             }
             break;
         case 0x90:

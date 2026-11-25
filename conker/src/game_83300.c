@@ -3966,7 +3966,6 @@ void func_151AE264(Actor *arg0);
 void func_151C6EA0(Actor *arg0, s32 arg1, s32 arg2);
 void func_1506160C(Actor *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_1506045C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4);
-/* ActorCtl bytes that the shared header leaves as padding */
 /* Player controls for jumping, swimming and the hover (anim 0xE9), from the controller pad. */
 void func_1505F298(Actor *actor, OSContPad *pad) {
     s32 anim;
@@ -4723,7 +4722,7 @@ void func_15060F28(Actor *actor, s32 mode) {
     func_15060D54(actor);
     func_15188AD0(actor);
     if (actor->unk31C != NULL) {
-        func_10004074((void *)(s32)actor->unk31C);
+        func_10004074((void *)(s32)actor->unk31C); // matching: passing actor->unk31C directly mismatches
     }
     func_1505F188(actor);
 }

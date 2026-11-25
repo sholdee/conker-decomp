@@ -1401,7 +1401,7 @@ s32 func_15078A60(s32 index) {
         break;
     case 9:
         value = 0;
-        if (((s16)D_800CC2D0[index].unk31C->unk8 != 0) && (D_800CC2D0[index].unk31C->unk16 != 0)) {
+        if ((D_800CC2D0[index].unk31C->unk8 != 0) && (D_800CC2D0[index].unk31C->unk16 != 0)) {
             value = 2;
         }
         break;

@@ -2462,7 +2462,7 @@ void func_1508C1A4(s32 a, s32 b) {
         z1 = to->z_position;
         toFlag = to->unk31C->unk84;
         if (toFlag) {
-            y1 = to->y_position + (s16)to->unk31C->unk114 * 0.75f;
+            y1 = to->y_position + to->unk31C->unk114 * 0.75f;
             if ((to->unk31C->unk75 & 0x7F) == 9) {
                 y1 -= 50.0f;
             }
