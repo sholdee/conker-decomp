@@ -111,25 +111,19 @@ typedef struct {
     f32 unk44;
 } Params15150178;
 
-/* Pickup object (Obj15119FC0 in game_147470.c; only the fields used here). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s16 position[3];
-} Pickup;
-
 extern void func_1504715C(void *ground, Actor *actor);
 extern void func_15153F18(s16 *params, f32 *pos, void *ground, s32 arg3, s32 arg4);
 extern void func_15150178(s16 *params, f32 *pos, void *ground, s32 arg3, s32 arg4);
 
 /* Spawns the func_15153F18 and func_15150178 bursts at `pickup`, on the ground under `player`. */
-void func_151D69B4(Pickup *pickup, Actor *player) {
+void func_151D69B4(WorldObject *pickup, Actor *player) {
     u8 ground[0x24]; // ground probe result (Ground in game_1228D0.c)
     Params15153F18 first;
 
     func_1504715C(ground, player);
-    first.pos[0] = pickup->position[0];
-    first.pos[1] = pickup->position[1];
-    first.pos[2] = pickup->position[2];
+    first.pos[0] = pickup->x;
+    first.pos[1] = pickup->y;
+    first.pos[2] = pickup->z;
     first.unk14 = 2.49000001f;
     first.unk2C = 3;
     first.unk2E = 3;
@@ -157,9 +151,9 @@ void func_151D69B4(Pickup *pickup, Actor *player) {
     {
         Params15150178 second;
 
-        second.pos[0] = pickup->position[0];
-        second.pos[1] = pickup->position[1];
-        second.pos[2] = pickup->position[2];
+        second.pos[0] = pickup->x;
+        second.pos[1] = pickup->y;
+        second.pos[2] = pickup->z;
         second.unk14 = 0xF;
         second.unk16 = 6;
         second.unk00 = 0;
