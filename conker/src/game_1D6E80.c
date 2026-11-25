@@ -13,8 +13,6 @@ extern s32 func_151EF610(void);
 extern f32 D_800A9014;
 extern s32 func_10010FFC(s32, s32, s32, s32, s32, struct127 *);
 extern void *func_15190770(void *, s32, s32, s32);
-extern void func_151346EC(u8 *);
-extern void func_1513470C(u8 *);
 extern u8 func_151D8E20(void);
 extern f32 D_800A8FA0;
 
@@ -94,7 +92,9 @@ typedef struct {
 } FlickerFxPayload;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x24];
+    /* 0x00 */ u8 pad0[0x18];
+    /* 0x18 */ s32 flags;
+    /* 0x1C */ u8 pad1C[0x8];
     /* 0x24 */ s32 value;
     /* 0x28 */ u8 pad28[0x88];
     /* 0xB0 */ FlickerFxPayload payload;
@@ -676,6 +676,8 @@ f32 func_151AAA4C(PulseFx *fx) {
 }
 
 LoopSoundFx *func_151AB2C4(struct127 *actor, ActorTask *task);
+extern void func_151346EC(LoopSoundFx *fx);
+extern void func_1513470C(LoopSoundFx *fx);
 
 /* Refreshes the task's pulse and loop-sound effects, spawning whichever is missing. */
 void func_151AAABC(ActorTask *task) {
@@ -832,28 +834,29 @@ void func_151AABC4(u8 *arg0, u8 arg1) {
 }
 
 typedef struct {
-    u8 pad_0x0[0x1B];
-    u8 field_0x1B;
-} AlphaFadePayload;
+    /* 0x00 */ u8 pad0[0x1B];
+    /* 0x1B */ u8 unk1B;
+} Obj151AADBC_98;
 
 typedef struct {
-    u8 pad_0x0[0x1C];
-    s16 field_0x1C;
-    u8 pad_0x1E[0x7A];
-    AlphaFadePayload *field_0x98;
-} AlphaFadeOwner;
+    /* 0x00 */ u8 pad0[0x1C];
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ u8 pad1E[0x7A];
+    /* 0x98 */ Obj151AADBC_98 *unk98;
+} Obj151AADBC;
 
-s32 func_151AADBC(AlphaFadeOwner *arg0) {
-    AlphaFadePayload *p;
-    s32 v1;
+/* Caps obj->unk98->unk1B at obj->unk1C * 16 (at most 255). */
+s32 func_151AADBC(Obj151AADBC *obj) {
+    Obj151AADBC_98 *target;
+    s32 limit;
 
-    p = arg0->field_0x98;
-    v1 = arg0->field_0x1C << 4;
-    if (v1 >= 0x100) {
-        v1 = 0xFF;
+    target = obj->unk98;
+    limit = obj->unk1C << 4;
+    if (limit >= 0x100) {
+        limit = 0xFF;
     }
-    if (v1 < p->field_0x1B) {
-        p->field_0x1B = v1;
+    if (limit < target->unk1B) {
+        target->unk1B = limit;
     }
     return 1;
 }
@@ -944,54 +947,35 @@ void func_151AADF8(ActorTask *task) {
     }
 }
 
-extern f32  func_150ADA68(void);
 
-typedef struct {
-    /* 0x00 */ u8  pad0[0x4];
-    /* 0x04 */ u8  unk4;
-    /* 0x05 */ u8  pad5[0x3];
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  pad1A[0x2];
-    /* 0x1C */ f32 unk1C;
-} struct_AB090;
+/* FlickerFx update: eases fx->value toward a target re-rolled after a random delay. */
+s32 func_151AB090(FlickerFx *fx) {
+    s8 alive = TRUE;
+    FlickerFxPayload *flicker = &fx->payload;
 
-typedef struct {
-    /* 0x00 */ u8  pad0[0x24];
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ u8  pad28[0x88];
-    /* 0xB0 */ struct_AB090 unkB0;
-} struct_AB090_root;
-
-s32 func_151AB090(struct_AB090_root *arg0) {
-    s8 ret = 1;
-    struct_AB090 *v1 = &arg0->unkB0;
-
-    if (*((u8 *)arg0 + 0xB4) == 0) {
-        ret = 0;
+    if (fx->payload.keepAlive == 0) {
+        alive = FALSE;
     }
-    v1->unk4 = 0;
-    v1->unk14 -= D_800BE9E4;
-    if (v1->unk14 < 0) {
-        v1->unk14 = (func_150ADA20() % (u32)(v1->unk18 + 1)) + v1->unk16;
-        v1->unk10 = func_150ADA68() * v1->unkC + v1->unk8;
+    flicker->keepAlive = 0;
+    flicker->timer -= D_800BE9E4;
+    if (flicker->timer < 0) {
+        flicker->timer = (func_150ADA20() % (u32)(flicker->delayRange + 1)) + flicker->minDelay;
+        flicker->target = func_150ADA68() * flicker->targetRange + flicker->minTarget;
     }
-    arg0->unk24 += (s32)((v1->unk10 - (f32)arg0->unk24) * v1->unk1C);
-    return ret;
+    fx->value += (s32)((flicker->target - (f32)fx->value) * flicker->easing);
+    return alive;
 }
 
-extern s32 func_1513F6C0(void *arg0, s32 arg1, s32 arg2);
+extern s32 func_1513F6C0(FlickerFx *fx, s32 arg1, s32 arg2);
 
-s32 func_151AB180(u8 *arg0) {
-    s32 *temp = (s32 *)((*(u8 **)((u8 *)arg0 + 0xB0)) + 0x58);
-    temp[6] = 0;
-    *(s32 *)((u8 *)arg0 + 0x18) |= 2;
-    *(u8 **)((u8 *)arg0 + 0xB0) = 0;
-    func_1513F6C0(arg0, 0, 0);
+/* FlickerFx destructor: detaches from the owner task. */
+s32 func_151AB180(FlickerFx *fx) {
+    ActorTaskFx *ownerFx = &fx->payload.owner->fx;
+
+    ownerFx->flicker = NULL;
+    fx->flags |= 2;
+    fx->payload.owner = NULL;
+    func_1513F6C0(fx, 0, 0);
     return 0;
 }
 
@@ -1142,79 +1126,48 @@ void func_151AB3A4(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
     if (spawned != NULL) memcpy((u8 *)spawned + 0xA8, &motion, 0x28);
 }
 
-typedef struct {
-    u8 pad_0x0[0x4];
-    u8 field_0x4;
-    u8 pad_0x5[0x1];
-    u16 field_0x6;
-} SoundHandlePlayback;
+/* LoopSoundFx update: keeps sound 0x355 playing while D_800DBFF0->unk5F0 bit 0 is set. */
+s32 func_151AB6B8(LoopSoundFx *fx) {
+    u8 alive;
+    LoopSoundFxPayload *sound;
 
-typedef struct {
-    u8 pad_0x0[0x1C];
-    s32 field_0x1C;
-} SoundHandleState;
-
-typedef struct {
-    u8 pad_0x0[0x58];
-    s32 field_0x58;
-    u8 pad_0x5C[0x2];
-    volatile u16 field_0x5E;
-} SoundHandleOwner;
-
-s32 func_151AB6B8(SoundHandleOwner *arg0) {
-    u8 ret;
-    SoundHandlePlayback *temp_v1;
-
-    ret = 1;
-    temp_v1 = (SoundHandlePlayback *)&arg0->field_0x58;
-    if (arg0->field_0x5E != 0) {
-        if (D_800DBFF0->unk5F0 & 1) {
-        } else {
-            func_100111C8(temp_v1->field_0x6);
-            temp_v1->field_0x6 = 0;
-            goto done_sound;
-        }
+    alive = TRUE;
+    sound = &fx->payload;
+    if ((fx->payload.soundHandle != 0) && !(D_800DBFF0->unk5F0 & 1)) {
+        func_100111C8(sound->soundHandle);
+        sound->soundHandle = 0;
+    } else if ((sound->soundHandle == 0) && (D_800DBFF0->unk5F0 & 1)) {
+        sound->soundHandle = func_10010F30(0x355, 32000, 64, 0, 0);
     }
-    if (temp_v1->field_0x6 == 0) {
-        if (D_800DBFF0->unk5F0 & 1) {
-            temp_v1->field_0x6 = func_10010F30(0x355, 0x7D00, 0x40, 0, 0);
-        }
+    if (sound->keepAlive == 0) {
+        alive = FALSE;
     }
-
-done_sound:
-    if (temp_v1->field_0x4 == 0) {
-        ret = 0;
-    }
-    temp_v1->field_0x4 = 0;
-    return ret;
+    sound->keepAlive = 0;
+    return alive;
 }
 
-void func_151AB788(SoundHandleOwner *arg0) {
-    union {
-        SoundHandleState *v0;
-        f64 align;
-    } sp18;
+/* LoopSoundFx destructor (variant 1): stops the sound and detaches from the owner task. */
+void func_151AB788(LoopSoundFx *fx) {
+    LoopSoundFxPayload *sound = &fx->payload;
+    ActorTaskFx *ownerFx = &sound->owner->fx;
 
-    sp18.v0 = (SoundHandleState *)(arg0->field_0x58 + 0x58);
-    if (arg0->field_0x5E != 0) {
-        func_100111C8(arg0->field_0x5E);
+    if (fx->payload.soundHandle != 0) {
+        func_100111C8(sound->soundHandle);
     }
-    sp18.v0->field_0x1C = 0;
-    func_151346EC((u8 *)arg0);
+    ownerFx->sound = NULL;
+    func_151346EC(fx);
 }
 
-void func_151AB7D8(SoundHandleOwner *arg0) {
-    union {
-        SoundHandleState *v0;
-        f64 align;
-    } sp18;
+/* LoopSoundFx destructor (variant 2): stops the sound and detaches from the owner task. */
+void func_151AB7D8(LoopSoundFx *fx) {
+    LoopSoundFxPayload *sound = &fx->payload;
+    ActorTaskFx *ownerFx = &sound->owner->fx;
 
-    sp18.v0 = (SoundHandleState *)(arg0->field_0x58 + 0x58);
-    if (arg0->field_0x5E != 0) {
-        func_100111C8(arg0->field_0x5E);
+    if (fx->payload.soundHandle != 0) {
+        func_100111C8(sound->soundHandle);
     }
-    sp18.v0->field_0x1C = 0;
-    func_1513470C((u8 *)arg0);
+    ownerFx->sound = NULL;
+    func_1513470C(fx);
 }
 
 void func_151AB828(u8 *arg0) {
