@@ -4700,21 +4700,40 @@ void func_15060F28(struct127 *actor, s32 mode) {
             D_800D210C[actor->unk13F] = 0;
         }
     }
-    if (*(void **)((u8 *)actor + 0x260) != NULL) func_10004074(*(void **)((u8 *)actor + 0x260));
-    if (*(s32 *)((u8 *)actor + 0x264) != 0) func_10004074((void *)*(s32 *)((u8 *)actor + 0x264));
-    if (*(s32 *)((u8 *)actor + 0x268) != 0) func_10004074((void *)*(s32 *)((u8 *)actor + 0x268));
-    if (*(s32 *)((u8 *)actor + 0x26C) != 0) func_10004074((void *)*(s32 *)((u8 *)actor + 0x26C));
-    if (*(void **)((u8 *)actor + 0x1D8) != NULL) func_10004074(*(void **)((u8 *)actor + 0x1D8));
-    if (*(struct102 **)((u8 *)actor + 0x2D4) != NULL) func_1516972C(*(struct102 **)((u8 *)actor + 0x2D4));
+    /* free the allocations held in the actor's padding (0x260..0x26C, 0x1D8, ...) */
+    if (*(void **)((u8 *)actor + 0x260) != NULL) {
+        func_10004074(*(void **)((u8 *)actor + 0x260));
+    }
+    if (*(s32 *)((u8 *)actor + 0x264) != 0) {
+        func_10004074((void *)*(s32 *)((u8 *)actor + 0x264));
+    }
+    if (*(s32 *)((u8 *)actor + 0x268) != 0) {
+        func_10004074((void *)*(s32 *)((u8 *)actor + 0x268));
+    }
+    if (*(s32 *)((u8 *)actor + 0x26C) != 0) {
+        func_10004074((void *)*(s32 *)((u8 *)actor + 0x26C));
+    }
+    if (*(void **)((u8 *)actor + 0x1D8) != NULL) {
+        func_10004074(*(void **)((u8 *)actor + 0x1D8));
+    }
+    if (*(struct102 **)((u8 *)actor + 0x2D4) != NULL) {
+        func_1516972C(*(struct102 **)((u8 *)actor + 0x2D4));
+    }
     if (*(s32 **)((u8 *)actor + 0x304) != NULL) {
         s32 i;
         for (i = 0; i <= D_80082FA0; i = (u8)(i + 1)) {
             func_100043B4(*(s32 **)((u8 *)actor + (i * 4) + 0x304), 4);
         }
     }
-    if (*(s32 *)((u8 *)actor + 0x314) != 0) func_100043B4((s32 *)*(s32 *)((u8 *)actor + 0x314), 4);
-    if (actor->unk2D0 != NULL) func_10004074(actor->unk2D0);
-    if (*(void **)((u8 *)actor + 0x324) != NULL) func_10004074(*(void **)((u8 *)actor + 0x324));
+    if (*(s32 *)((u8 *)actor + 0x314) != 0) {
+        func_100043B4((s32 *)*(s32 *)((u8 *)actor + 0x314), 4);
+    }
+    if (actor->unk2D0 != NULL) {
+        func_10004074(actor->unk2D0);
+    }
+    if (*(void **)((u8 *)actor + 0x324) != NULL) {
+        func_10004074(*(void **)((u8 *)actor + 0x324));
+    }
     if ((actor->unk31C != NULL) && (*(void **)((u8 *)actor->unk31C + 0x11C) != NULL)) {
         func_10004074(*(void **)((u8 *)actor->unk31C + 0x11C));
     }
@@ -4722,7 +4741,9 @@ void func_15060F28(struct127 *actor, s32 mode) {
     func_150303E4(actor);
     func_15060D54(actor);
     func_15188AD0(actor);
-    if (actor->unk31C != NULL) func_10004074((void *)(s32)actor->unk31C);
+    if (actor->unk31C != NULL) {
+        func_10004074((void *)(s32)actor->unk31C);
+    }
     func_1505F188(actor);
 }
 
