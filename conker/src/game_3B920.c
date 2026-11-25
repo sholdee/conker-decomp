@@ -7,7 +7,6 @@
 void func_1500AC14(void);
 void func_1500BEC0(void);
 void func_1500E5C0(void);
-void func_15012370(void);
 void func_150127B0(void);
 void func_15012FE0(void);
 void func_151645C4(u8 enable);

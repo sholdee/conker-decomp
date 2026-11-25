@@ -33,7 +33,6 @@ typedef struct SpinDebrisParticle {
 } SpinDebrisParticle; // size 0xB8
 
 void func_1510E82C(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
-Gfx *func_1510B7B4(Gfx *gfx, s32 player);
 Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
 Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 Gfx *func_1517A9A8(Gfx *gfx, s32 texture);

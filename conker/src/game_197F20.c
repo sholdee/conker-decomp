@@ -590,7 +590,6 @@ lbl: // matching: unused label; with the block below it sets IDO's register prio
     return gfx;
 }
 
-void func_1501A764(s16, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *screenZ);
 void func_1516D0CC(TextBox *box, f32 *x, f32 *y, f32 *angle);
 
 /* Places a text box: its anchor comes from screen percentages or from its object's projected position,

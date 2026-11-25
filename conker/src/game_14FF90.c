@@ -61,7 +61,6 @@ void func_1515BA48(s32 arg0);
 void func_1515BA54(s16 arg0);
 void func_1515BA80(s16 arg0);
 void func_1515BAAC(s16 arg0);
-void func_1510B128(s32, f32, f32, f32, f32);
 void func_15097798(u8);
 void func_15130230(Camera *camera, s32 arg1);
 void func_15125A6C(Camera *camera);

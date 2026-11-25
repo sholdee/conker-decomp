@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-Gfx *func_1501A680(Gfx *gfx);
-
 /**
  * Copies one row of the z-buffer (D_800BE9C4, D_800BE620 pixels wide; row index at
  * camera+0x8BA) into the camera's one-row buffer unk8BC by drawing a 1-pixel-high

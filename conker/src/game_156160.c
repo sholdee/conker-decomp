@@ -38,7 +38,6 @@ void func_1512D6F0(Camera *);
 void func_1512E8E0(Camera *);
 void func_151287E0(Camera *, s32, s32);
 void func_151283B8(Camera *);
-void func_1510B128(s32, f32, f32, f32, f32);
 void func_1501B320(s32);
 void func_1510E7A4(s32 *, s32 *, f32 *, f32 *, s32 *, s32, f32, f32, f32, f32, u16, s32, f32, f32);
 void func_151236D0(Camera *);

@@ -347,10 +347,8 @@ s32 func_15184DF0(s32 objIndex, s32 view, f32 *halfX, f32 *halfY, f32 *halfZ) {
 extern Gfx D_8008D448[];
 extern Vp D_8008D3E8;
 extern Mtx D_89470;
-Gfx *func_1501A680(Gfx *gfx);
 extern s32 func_1506196C(Actor *, s32);
 extern Gfx *func_1502CCFC(Gfx *, s32, s32, MtxF *, s32, s32 *, s32, s32);
-Gfx *func_1510B7B4(Gfx *gfx, s32 idx);
 
 /*
  * Renders object objIndex in black into the 64x64 shadow texture at D_800DF088 through slot's light

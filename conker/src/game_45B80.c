@@ -31,7 +31,6 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 player, s32 list);
 Gfx *func_15174AA4(Gfx *gfx, s32 arg1, s32 player);
 Gfx *func_15174B48(Gfx *gfx, s32 arg1, s32 player);
 void func_1517D7B0(Gfx **gfx, s32 arg1);
-Gfx *func_1510B7B4(Gfx *gfx, s32 player);
 Gfx *func_15188D00(Gfx *gfx, s32 arg1, s16 player);
 Gfx *func_151D6778(Gfx *gfx);
 Gfx *func_1502BAD0(Gfx *gfx, s32 arg1, s16 player);
@@ -89,11 +88,8 @@ void func_150186D0(void) {
     }
 
 void func_151E51EC(void);
-void func_1510B3B0(void);
-void func_1510B51C(void);
 void func_1501905C(void);
 s32 func_15019130(void);
-Gfx *func_1501A680(Gfx *);
 void func_1515D69C(void);
 void func_15167310(void);
 void func_15018F80(s16);
@@ -330,7 +326,6 @@ void func_1509BA04(s32);
 void func_1509BBA0(s32);
 void func_1501E400(s32);
 void func_15034F20(void);
-void func_1510B690(void);
 void func_1510F800(s32);
 void func_15044A28(void);
 void func_150242F8(s32, s32);

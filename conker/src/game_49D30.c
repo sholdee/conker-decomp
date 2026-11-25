@@ -68,7 +68,6 @@ extern u64 *D_800BEAD0;
 extern u64 D_800BEBB0[];
 extern u64 D_800CBE10[];
 extern u64 D_8003A5E8[];
-extern void func_1501A39C(void);
 void func_1501CC3C(void);
 
 /* Append a parameterless GBI command (gDPNoParam) at the display-list write head D_800BE9D0. */

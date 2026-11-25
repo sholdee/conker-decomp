@@ -42,7 +42,6 @@ extern u8 D_800E0C85;
 extern s32 func_1510D0EC(s32, s32, s32, s32); // matching: s32 params; converting &D_xxx ids to int steers scheduling
 void func_15042D94(s32 x, s32 y, u8 flags, void *fmt, ...);
 Gfx *func_15096934(Gfx *);
-Gfx *func_1501A6CC(Gfx *gfx, s32, s32, s32, s32); /* fills a screen rectangle */
 
 /* Draws the HUD overlay: shared HUD, the per-mode overlay, and a blinking warning message. */
 Gfx *func_151E84B0(Gfx *gfx) {

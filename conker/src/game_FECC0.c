@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-Gfx *func_1501A680(Gfx *gfx);
 Gfx *func_150950D4(Gfx *gfx, Texture *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 s, s32 t, s32 assetArg);
 void func_150A7A48(MtxF a, MtxF b, MtxF out);
 void func_151102CC(MtxF mtx, f32 pitch, f32 yaw, f32 roll);

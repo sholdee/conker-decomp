@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-// matching: func_1501A490 is defined below with the display list as an integer (functions.h gives callers the
+// matching: func_1501A490 is defined below with the display list as an integer (conker/view.h gives callers the
 // Gfx * prototype); a Gfx * parameter, even copied into an integer local, changes its code.
 #define func_1501A490 func_1501A490_hdr
 // matching: this file calls func_150006E0, which takes no arguments, with the level; hide the header's prototype
@@ -13,10 +13,6 @@ void func_150006E0(s32 level);
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
-
-void func_1501A8C0(s32 view, s32 layout, s32 zRange, s16 arg3);
-s32 func_1501AE94(s32 viewIndex);
-void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom);
 
 /* Allocates the views for numPlayers players (numPlayers + 2 of them, or 1 when it is 0) and lays out views
  * 0..numPlayers with layout numPlayers, plus a layout-0 (full-screen) view after them. */
@@ -172,7 +168,6 @@ void func_1501A764(s16 view, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f3
 }
 
 extern f32 D_80082FA8[];
-void func_1501B0A0(s32 view, s32 layout);
 
 /* Lays out view `view` for screen layout `layout` (D_800BE668 holds each view's centre) and sets up its
  * projection and viewport, with depth range zRange. */
@@ -316,8 +311,6 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
         *bottom = clamped;
     }
 }
-
-void func_1510B128(s32, f32, f32, f32, f32);
 
 /* Passes func_1510B128 the angles (degrees) that view's half-size subtends at the distance where the layout's
  * full width/height fills view's fov, less the fov of view `layout`. */

@@ -221,7 +221,6 @@ extern f32 D_800DC1F0;
 extern f32 D_800DC1F4;
 extern f32 D_800DC1F8;
 extern f32 D_800DC1FC;
-void func_1501A764(s32, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_1508EF80(Vec3f *arg0, Vec3f *arg1, f32 arg2, Vec3f *arg3);
 void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth);
 s32 func_1512B730(Camera *arg0, f32 *offset, f32 *unused);
