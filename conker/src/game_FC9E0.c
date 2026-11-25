@@ -41,6 +41,7 @@ typedef struct {
     /* 0x0C */ f32 floorY;
 } BounceMotion;
 
+/* A screen sprite made by func_1515548C (ScreenSprite in game_182140.c, 0x70 bytes) with its motion data. */
 typedef struct {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;
@@ -53,15 +54,15 @@ typedef struct {
         HopMotion hop;
         BounceMotion bounce;
     } motion;
-} Particle;
+} HopSprite;
 
-Particle *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
+HopSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 
 /* Spawns the hopping particle, waiting off screen at (-300, 72). */
 void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
     ScreenSpriteInfo spawn;
     HopMotion hop;
-    Particle *particle;
+    HopSprite *particle;
 
     spawn.y = 72.0f;
     spawn.texture = 0xC1;
@@ -112,14 +113,14 @@ void func_15143874(s16 angle, f32 distance, f32 *x, f32 *y);
 
 /* Hopping particle update: follows the hop arc and, on landing, kicks up 2 to 5 bouncing
    dust particles. */
-s32 func_150CF800(Particle *hopper) {
+s32 func_150CF800(HopSprite *hopper) {
     f32 phase;
     ScreenSpriteInfo spawn;
     BounceMotion dust;
     s8 count;
     s32 rand;
     s32 bit2;
-    Particle *particle;
+    HopSprite *particle;
     HopMotion *hop;
 
     hop = &hopper->motion.hop;
@@ -192,7 +193,7 @@ s32 func_150CF800(Particle *hopper) {
 }
 
 /* Hopping particle message handler: message 0x52 starts a hop to the x given in the payload. */
-void func_150CFBEC(Particle *hopper, f32 *targetX, u8 type) {
+void func_150CFBEC(HopSprite *hopper, f32 *targetX, u8 type) {
     HopMotion *hop = &hopper->motion.hop;
 
     if (type == 0x52) {
@@ -213,7 +214,7 @@ void func_150CFC38(f32 targetX) {
 }
 
 /* Bouncing particle update: integrates the motion and bounces off the floor, damped. */
-s32 func_150CFC60(Particle *particle) {
+s32 func_150CFC60(HopSprite *particle) {
     BounceMotion *m = &particle->motion.bounce;
 
     particle->pos.x += m->vel.x * D_800BE9A4;

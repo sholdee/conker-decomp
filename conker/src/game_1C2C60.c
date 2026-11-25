@@ -450,7 +450,7 @@ void func_15196318(TexScroll *scroll, s32 speedS, s32 speedT) {
 }
 
 /* One point of an effect's ring buffer (0x24 bytes). */
-typedef struct Particle {
+typedef struct JetPoint {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ Vec3f vel;
     /* 0x18 */ f32 size;
@@ -460,7 +460,7 @@ typedef struct Particle {
     /* 0x20 */ u8 texS; /* texture s offset */
     /* 0x21 */ u8 spawnedChild;
     /* 0x22 */ u8 pad22[0x2];
-} Particle;
+} JetPoint;
 
 /* Effect object created by func_15147A80: a ring buffer of points plus a kind-specific state block. */
 typedef struct CharacterFlamethrowerActor {
@@ -737,7 +737,7 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     spawn.pos.y = jet.start.y;
     spawn.pos.z = jet.start.z;
     jet.timeCarry = 0.0f;
-    actor = func_15147A80(&spawn, sizeof(CharacterFlamethrowerJet), sizeof(Particle), 2, 2, 2, 0, 0, 0, arg2, arg3);
+    actor = func_15147A80(&spawn, sizeof(CharacterFlamethrowerJet), sizeof(JetPoint), 2, 2, 2, 0, 0, 0, arg2, arg3);
     if (actor != NULL) {
         state = actor->state;
         memcpy(actor->state, &jet, sizeof(CharacterFlamethrowerJet));
@@ -758,7 +758,7 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index);
 /* Per-frame jet update: moves, fades and retires its particles, then runs its update callbacks. */
 s32 func_15196748(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
-    Particle *points;
+    JetPoint *points;
     s32 i;
     s16 n;
     u8 scale;
@@ -863,7 +863,7 @@ void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end);
  */
 s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     CharacterFlamethrowerJet *jet;
-    Particle *points;
+    JetPoint *points;
     Vec3f end;
     s32 unused; // matching: unused locals (also pad4-pad7) keep the original frame size
     s32 matrix;
@@ -1003,7 +1003,7 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     Vec3f *eye;
     Vec3f next;
     Vec3f cur;
-    Particle *points;
+    JetPoint *points;
     CharacterFlamethrowerJet *jet;
     s32 i;
     s32 j;
@@ -1414,9 +1414,9 @@ void func_15198054(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
  */
 void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
     CharacterFlamethrowerJet *jet;
-    Particle *points;
-    Particle *cur;
-    Particle *next;
+    JetPoint *points;
+    JetPoint *cur;
+    JetPoint *next;
     JetChildPreset *preset;
     s32 i;
     SceneParticle *ret;
@@ -1438,7 +1438,7 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
     jet = actor->state;
     points = actor->points;
     preset = &D_800A8710[jet->childPreset];
-    cur = (Particle *)((u8 *)points + index * sizeof(Particle)); // matching: byte-offset form keeps the addu operand order
+    cur = (JetPoint *)((u8 *)points + index * sizeof(JetPoint)); // matching: byte-offset form keeps the addu operand order
     jet->childAccum += jet->childRate;
     cur->spawnedChild = TRUE;
     if ((i = index + 1) == actor->head.tmpl.itemCount) {
@@ -1485,7 +1485,7 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
         spawn.rgba[2] = 0;
         spawn.rgba[3] = 0x68;
         spawn.renderModes = 0x301;
-        next = (Particle *)((u8 *)points + i * sizeof(Particle));
+        next = (JetPoint *)((u8 *)points + i * sizeof(JetPoint));
         data.velA = next->vel;
         data.velB = cur->vel;
         do {
@@ -1527,7 +1527,7 @@ extern s32 func_1518D1C0(Actor *, s32, s32, s32, s32, s32, const char *);
 /* Jet update callback: a point inside object 0's (the player's) cylinder hits it and retires the older points. */
 s32 func_15198570(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
-    Particle *points;
+    JetPoint *points;
     Actor *obj;
     s32 i;
     Vec3f pos;
@@ -1574,7 +1574,7 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
 /* Jet update callback: a point near any other active object (of the first 25) retires the older points. */
 s32 func_151987CC(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
-    Particle *points;
+    JetPoint *points;
     Actor *obj;
     s32 i;
     s32 j;
@@ -1652,7 +1652,7 @@ s32 func_1510F8D8(s32, s32, s32, s32);
  */
 s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet = actor->state;
-    Particle *points = actor->points;
+    JetPoint *points = actor->points;
     Actor *owner;
     ActorCtl *sub;
     ListedObject *head;
@@ -1729,7 +1729,7 @@ void func_15198C60(void) {
 
 /* Jet callback (D_8008F894): moves the jet's sound to its oldest point. */
 void func_15198C90(CharacterFlamethrowerActor *actor) {
-    Particle *points;
+    JetPoint *points;
     CharacterFlamethrowerJet *jet;
     u16 sound;
 

@@ -21,7 +21,7 @@ typedef struct ParticleLink {
 
 /* A 0x34-byte sprite particle, spawned by func_1516D4E8 and updated every frame by the
  * handler that D_8008CBA0 holds for its kind. The bytes from 0x26 on depend on the kind. */
-typedef struct Particle {
+typedef struct StyleParticle {
     /* 0x00 */ u8 unk0;
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 pad2[0xA];
@@ -85,7 +85,7 @@ typedef struct Particle {
         } ramp;
     } u;
     /* 0x30 */ ParticleLink *link;
-} Particle;
+} StyleParticle;
 
 /* A 0x4C-byte particle emitter, spawned by func_1516D99C and run by func_1516DB90. Most of
  * its bytes are the template that func_1516D4E8 gets for each particle it spawns. */
@@ -146,8 +146,8 @@ typedef struct SpriteEmitter {
     /* 0x49 */ u8 pad49[3];
 } SpriteEmitter;
 
-void func_1516F864(Particle *particle);
-void func_1516F94C(Particle *particle, s32 factor);
+void func_1516F864(StyleParticle *particle);
+void func_1516F94C(StyleParticle *particle, s32 factor);
 extern ParticleLink *func_150448D0(s32, s32, s32, s32, s32, s32, s32, s16 *, s16 *);
 
 
@@ -175,9 +175,9 @@ void func_1516D4E8(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
     u8 unk2C; u8 unk2D; u8 unk2E; u8 unk2F; s16 scaleX; s16 scaleY; u8 lifetime; s16 velocityY;
     s32 isAlt; s32 linkArg; u8 unkC; s32 unk1;
 {
-    Particle *particle;
+    StyleParticle *particle;
 
-    particle = func_15167A68(isAlt != 0 ? 0x67 : 0x12, unk1, sizeof(Particle), 0, unkC, 1);
+    particle = func_15167A68(isAlt != 0 ? 0x67 : 0x12, unk1, sizeof(StyleParticle), 0, unkC, 1);
     if (particle != NULL) {
         particle->x = x;
         particle->y = y;
@@ -218,9 +218,9 @@ void func_1516D4E8(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
 /* The int-argument prototype that callers use (game_19E040.c declares the same one). */
 void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-extern s32 (*D_8008CBA0[])(Particle *);
+extern s32 (*D_8008CBA0[])(StyleParticle *);
 
-void func_1516D678(Particle *particle) {
+void func_1516D678(StyleParticle *particle) {
     s32 value;
     ParticleLink *link;
 
@@ -271,7 +271,7 @@ Gfx *func_15142E24(Gfx *gfx, s32 texture, s32 frame, s32 arg3, s32 arg4, s32 arg
 Gfx *func_15142FBC(Gfx *gfx, s32 othermodeH, s32 othermodeL, u8 *synced);
 Gfx *func_15095760(Gfx *gfx, ParticleSprite *sprite);
 
-Gfx *func_1516D738(Gfx *gfx, Particle *particle, s32 arg2) {
+Gfx *func_1516D738(Gfx *gfx, StyleParticle *particle, s32 arg2) {
     ParticleSprite sprite;
     s32 pad; // matching: unused stack slot in the original frame
     EffectTexture *texture;
@@ -662,14 +662,14 @@ void func_1516E778(f32 *position, s32 duration, u8 texture, u8 arg3, s32 arg4) {
 extern u8 D_800A6E00[];
 extern u8 D_800A6E0C[][3];
 
-s32 func_1516E8CC(Particle *particle) {
+s32 func_1516E8CC(StyleParticle *particle) {
     s32 alpha;
     s32 intensity;
     s32 scale;
     s32 i;
     f32 t;
     f32 u;
-    Particle *p; // matching: IDO keeps this copy of the argument in its own register
+    StyleParticle *p; // matching: IDO keeps this copy of the argument in its own register
 
     p = particle;
     alpha = particle->alpha;
@@ -727,7 +727,7 @@ s32 func_1516E8CC(Particle *particle) {
 static void func_1516ECA4_pad(void) {
 }
 
-s32 func_1516ECAC(Particle *particle) {
+s32 func_1516ECAC(StyleParticle *particle) {
     s32 lifetime;
     s32 alpha;
     s32 size;
@@ -742,7 +742,7 @@ s32 func_1516ECAC(Particle *particle) {
                 alpha = 0xFF;
             }
             particle->alpha = alpha;
-            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
+            lifetime = ((volatile StyleParticle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     } else {
         if (alpha != 0) {
@@ -751,7 +751,7 @@ s32 func_1516ECAC(Particle *particle) {
                 alpha = 0;
             }
             particle->alpha = alpha;
-            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
+            lifetime = ((volatile StyleParticle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     }
 
@@ -797,7 +797,7 @@ void func_1516EED4(s32 object, s32 threshold, u8 arg2, s32 arg3) {
 }
 
 /* Per-style tables, indexed by u.drift.unk2C. */
-s32 func_1516F024(Particle *particle) {
+s32 func_1516F024(StyleParticle *particle) {
     u8 pad[16]; // matching: the original frame has 16 unused bytes here
     s32 style;
     struct StyleTable damping;
@@ -824,7 +824,7 @@ s32 func_1516F024(Particle *particle) {
                 alpha = limit;
             }
             particle->alpha = alpha;
-            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
+            lifetime = ((volatile StyleParticle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     } else {
         if (alpha != 0) {
@@ -833,7 +833,7 @@ s32 func_1516F024(Particle *particle) {
                 alpha = 0;
             }
             particle->alpha = alpha;
-            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
+            lifetime = ((volatile StyleParticle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     }
 
@@ -909,7 +909,7 @@ void func_1516F548(
 }
 
 /* x and z are 8.8 fixed point with their fractions in u.drift; the velocities are 8.8 too. */
-void func_1516F864(Particle *particle) {
+void func_1516F864(StyleParticle *particle) {
     s32 x;
     s32 velocity;
     s32 z;
@@ -937,7 +937,7 @@ void func_1516F864(Particle *particle) {
 }
 
 /* Scales the X velocity by factor / 256. */
-void func_1516F8EC(Particle *particle, s32 factor) {
+void func_1516F8EC(StyleParticle *particle, s32 factor) {
     s32 velocity;
 
     velocity = particle->u.drift.velocityXHigh << 8;
@@ -948,7 +948,7 @@ void func_1516F8EC(Particle *particle, s32 factor) {
 }
 
 /* Scales the Z velocity by factor / 256. */
-void func_1516F91C(Particle *particle, s32 factor) {
+void func_1516F91C(StyleParticle *particle, s32 factor) {
     s32 velocity;
 
     velocity = particle->u.drift.velocityZHigh << 8;
@@ -958,12 +958,12 @@ void func_1516F91C(Particle *particle, s32 factor) {
     particle->u.drift.velocityZLow = velocity & 0xFF;
 }
 
-void func_1516F94C(Particle *particle, s32 factor) {
+void func_1516F94C(StyleParticle *particle, s32 factor) {
     func_1516F8EC(particle, factor);
     func_1516F91C(particle, factor);
 }
 
-void func_1516F984(Particle *particle, s32 factor) {
+void func_1516F984(StyleParticle *particle, s32 factor) {
     s32 velocity;
 
     func_1516F94C(particle, factor);
@@ -972,7 +972,7 @@ void func_1516F984(Particle *particle, s32 factor) {
     particle->velocityY = velocity >> 8;
 }
 
-s32 func_1516F9C4(Particle *particle) {
+s32 func_1516F9C4(StyleParticle *particle) {
     s32 lifetime;
     s32 alpha;
     s32 scale;
@@ -986,7 +986,7 @@ s32 func_1516F9C4(Particle *particle) {
                 alpha = 0xFF;
             }
             particle->alpha = alpha;
-            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
+            lifetime = ((volatile StyleParticle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     } else {
         if (alpha != 0) {
@@ -999,7 +999,7 @@ s32 func_1516F9C4(Particle *particle) {
         scale = (alpha << 9) >> 8;
         particle->scaleY = scale;
         particle->scaleX = scale;
-        lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the scale stores
+        lifetime = ((volatile StyleParticle *)particle)->lifetime; // matching: reloaded only after the scale stores
     }
 
     if (lifetime == 0 && alpha == 0) {
@@ -1021,7 +1021,7 @@ void func_1516FA88(s16 x, s16 y, s16 z, s32 isAlt, u8 arg4, s32 arg5) {
         isAlt, 0, 0, arg4, arg5);
 }
 
-s32 func_1516FBCC(Particle *particle) {
+s32 func_1516FBCC(StyleParticle *particle) {
     s32 v; /* alpha, then growth, then blend */
     s32 from;
     s32 to;
@@ -1077,7 +1077,7 @@ s32 func_1516FBCC(Particle *particle) {
     return 0;
 }
 
-s32 func_1516FD50(Particle *particle) {
+s32 func_1516FD50(StyleParticle *particle) {
     s32 lifetime;
     s32 alpha;
     s32 scale;
@@ -1091,7 +1091,7 @@ s32 func_1516FD50(Particle *particle) {
                 alpha = 0xFF;
             }
             particle->alpha = alpha;
-            lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the alpha store
+            lifetime = ((volatile StyleParticle *)particle)->lifetime; // matching: reloaded only after the alpha store
         }
     } else {
         if (alpha != 0) {
@@ -1104,7 +1104,7 @@ s32 func_1516FD50(Particle *particle) {
         scale = (alpha << 9) >> 8;
         particle->scaleY = scale;
         particle->scaleX = scale;
-        lifetime = ((volatile Particle *)particle)->lifetime; // matching: reloaded only after the scale stores
+        lifetime = ((volatile StyleParticle *)particle)->lifetime; // matching: reloaded only after the scale stores
     }
 
     if (lifetime == 0 && alpha == 0) {
@@ -1296,7 +1296,7 @@ void func_15170500(s16 x, s16 y, s16 z, s32 angle, s32 isParticle, u8 arg5, s32 
     }
 }
 
-s32 func_151707E0(Particle *particle) {
+s32 func_151707E0(StyleParticle *particle) {
     s32 lifetime;
     s32 alpha;
     s32 velocityX;
