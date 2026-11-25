@@ -170,23 +170,6 @@ typedef struct {
 } PaddedMtxF15133A94;
 
 typedef struct {
-    u8 pad_0[0x10];
-    f32 field_0x10;
-    f32 field_0x14;
-    u8 pad_1[0x24];
-    f32 field_0x3C;
-    u8 pad_2[0x4];
-    f32 field_0x44;
-    f32 field_0x48;
-    f32 field_0x4C;
-    f32 field_0x50;
-    f32 field_0x54;
-    f32 field_0x58;
-    f32 field_0x5C;
-    s32 field_0x60;
-} MotionFields15133;
-
-typedef struct {
     s32 unk0;
     s32 unk4;
 } Data15133E3C;
@@ -735,78 +718,58 @@ s32 func_15133510(Mtx *mtx, Particle *particle) {
     return 1;
 }
 
-extern void (*D_800899F8[])(void *, void *, u8);
-void func_151B9660(void *arg0);
-typedef struct 
-{
-  u8 pad_0[0x60];
-  s32 field_0x60;
-  u8 pad_64[2];
-  u16 field_0x66;
-  u8 field_0x68;
-  u8 pad_69[0x13];
-  s32 field_0x7C;
-  u8 field_0x80;
-} Func15133588Arg0;
-typedef struct 
-{
-  s32 field_0x0;
-  s32 field_0x4;
-  u8 field_0x8;
-  u8 field_0x9;
-} Func15133588Arg1;
-void func_15133588(Func15133588Arg0 *arg0, Func15133588Arg1 *arg1, u8 arg2)
-{
-  s32 temp_v0;
-  s32 temp_v0_2;
-  s32 temp_v1;
-  u8 var_v0;
-  void (*callback)(void *, void *, u8);
-  temp_v0 = arg2;
-  if ((temp_v0 == 0x1B) && (arg0->field_0x66 == 0x22))
-  {
-    func_151B9660(arg0);
-  }
-  if (temp_v0 == 0x2D)
-  {
-    temp_v0_2 = arg1->field_0x0;
-    ;
-    if (temp_v0_2 == arg0->field_0x7C)
-    {
-      arg0->field_0x7C = arg1->field_0x4;
-      arg0->field_0x80 = arg1->field_0x9;
-    }
-    else
-      if (arg0->field_0x7C != arg1->field_0x4)
-    {
-    }
-    else
-    {
-      arg0->field_0x7C = temp_v0_2;
-      arg0->field_0x80 = arg1->field_0x8;
-      second_update_done:
-      ;
+/* Event 0 payload: an object going away (also handled by func_15133DE8). */
+typedef struct {
+    struct127 *obj;
+    u8 id;
+} ParticleEventRemove;
 
-      ;
-      ;
+/* Event 0x2D payload: two objects trading places. */
+typedef struct {
+    struct127 *a;
+    struct127 *b;
+    u8 aId;
+    u8 bId;
+} ParticleEventSwap;
+
+typedef void (*ParticleEventFn)(Particle *particle, void *data, u8 event);
+extern ParticleEventFn D_800899F8[];
+void func_151B9660(Particle *particle);
+
+/* Event handler: follow an owner swap (0x2D), forget a removed owner (0), then pass the event on to the
+ * variant's handler in D_800899F8. */
+void func_15133588(Particle *particle, void *data, u8 event) {
+    s32 pad[2]; // matching: unused stack slots
+    s32 variant;
+    ParticleEventFn handler;
+    struct127 *obj;
+
+    if (event == 0x1B && particle->model == 0x22) {
+        func_151B9660(particle);
     }
-  }
-  else
-    if (temp_v0 == 0)
-  {
-    temp_v0_2 = arg1->field_0x0;
-    if ((temp_v0_2 == arg0->field_0x7C) || (arg0->field_0x80 == (*((u8 *) (&arg1->field_0x4)))))
-    {
-      arg0->field_0x7C = 0;
-      arg0->field_0x80 = 0;
+    if (event == 0x2D) {
+        obj = ((ParticleEventSwap *)data)->a;
+        if (obj == particle->owner) {
+            particle->owner = ((ParticleEventSwap *)data)->b;
+            particle->ownerId = ((ParticleEventSwap *)data)->bId;
+        } else if (particle->owner == ((ParticleEventSwap *)data)->b) {
+            particle->owner = obj;
+            particle->ownerId = ((ParticleEventSwap *)data)->aId;
+        // matching: an (unused) label here keeps as1 from filling this branch's delay slot
+        swapped:;
+        }
+    } else if (event == 0) {
+        obj = ((ParticleEventRemove *)data)->obj;
+        if (obj == particle->owner || ((ParticleEventRemove *)data)->id == particle->ownerId) {
+            particle->owner = NULL;
+            particle->ownerId = 0;
+        }
     }
-  }
-  var_v0 = (arg0->field_0x60 & 0x100) ? (arg0->field_0x68) : (0);
-  callback = D_800899F8[var_v0];
-  if (0 != callback)
-  {
-    callback(arg0, arg1, arg2);
-  }
+    variant = (particle->flags & 0x100) ? particle->variant : 0;
+    handler = D_800899F8[variant];
+    if (handler != NULL) {
+        handler(particle, data, event);
+    }
 }
 
 
@@ -878,28 +841,30 @@ s32 func_15133894(Particle *particle) {
     return result;
 }
 
-s32 func_151339D4(MotionFields15133 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
-    f32 temp;
+/* Floor handler: rest on the floor and bounce, scaling velocity and spin by elasticity. */
+s32 func_151339D4(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight) {
+    f32 elasticity;
 
-    arg0->field_0x3C = arg0->field_0x10 + arg4;
-    temp = arg0->field_0x14;
-    arg0->field_0x44 = arg0->field_0x44 * temp;
-    arg0->field_0x48 = arg0->field_0x48 * -temp;
-    arg0->field_0x4C = arg0->field_0x4C * temp;
-    arg0->field_0x50 = arg0->field_0x50 * temp;
-    arg0->field_0x54 = arg0->field_0x54 * temp;
-    arg0->field_0x58 = arg0->field_0x58 * temp;
+    particle->pos.y = particle->radius + floorHeight;
+    elasticity = particle->elasticity;
+    particle->vel.x = particle->vel.x * elasticity;
+    particle->vel.y = particle->vel.y * -elasticity;
+    particle->vel.z = particle->vel.z * elasticity;
+    particle->rotVel.x = particle->rotVel.x * elasticity;
+    particle->rotVel.y = particle->rotVel.y * elasticity;
+    particle->rotVel.z = particle->rotVel.z * elasticity;
     return 1;
 }
 
-s32 func_15133A50(MotionFields15133 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
-    arg0->field_0x3C = arg0->field_0x10 + arg4;
-    arg0->field_0x44 = 0.0f;
-    arg0->field_0x48 = 0.0f;
-    arg0->field_0x4C = 0.0f;
-    arg0->field_0x50 = 0.0f;
-    arg0->field_0x54 = 0.0f;
-    arg0->field_0x58 = 0.0f;
+/* Floor handler: stop dead on the floor. */
+s32 func_15133A50(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight) {
+    particle->pos.y = particle->radius + floorHeight;
+    particle->vel.x = 0.0f;
+    particle->vel.y = 0.0f;
+    particle->vel.z = 0.0f;
+    particle->rotVel.x = 0.0f;
+    particle->rotVel.y = 0.0f;
+    particle->rotVel.z = 0.0f;
     return 1;
 }
 
@@ -938,46 +903,46 @@ s32 func_15133A94(Mtx *arg0, u8 *arg1) {
     return 1;
 }
 
-s32 func_15133B98(MotionFields15133 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
-    f32 temp;
+/* Floor handler: bounce like func_151339D4, and come to rest (clearing the motion flags) once the
+ * rebound is slower than 4. */
+s32 func_15133B98(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, FloorSurface *surface) {
+    f32 elasticity;
 
-    temp = arg0->field_0x14;
-    arg0->field_0x3C = arg0->field_0x10 + arg4;
-    arg0->field_0x44 = arg0->field_0x44 * temp;
-    arg0->field_0x48 = arg0->field_0x48 * -temp;
-    arg0->field_0x4C = arg0->field_0x4C * temp;
-    arg0->field_0x50 = arg0->field_0x50 * temp;
-    arg0->field_0x54 = arg0->field_0x54 * temp;
-    arg0->field_0x58 = arg0->field_0x58 * temp;
-    if (fabsf(arg0->field_0x48) < 4.0f) {
-        arg0->field_0x60 &= -0x6A;
-        arg0->field_0x44 = 0.0f;
-        arg0->field_0x48 = 0.0f;
-        arg0->field_0x4C = 0.0f;
-        arg0->field_0x50 = 0.0f;
-        arg0->field_0x54 = 0.0f;
-        arg0->field_0x58 = 0.0f;
-        arg0->field_0x5C = 0.0f;
+    elasticity = particle->elasticity;
+    particle->pos.y = particle->radius + floorHeight;
+    particle->vel.x = particle->vel.x * elasticity;
+    particle->vel.y = particle->vel.y * -elasticity;
+    particle->vel.z = particle->vel.z * elasticity;
+    particle->rotVel.x = particle->rotVel.x * elasticity;
+    particle->rotVel.y = particle->rotVel.y * elasticity;
+    particle->rotVel.z = particle->rotVel.z * elasticity;
+    if (fabsf(particle->vel.y) < 4.0f) {
+        particle->flags &= ~0x69;
+        particle->vel.x = 0.0f;
+        particle->vel.y = 0.0f;
+        particle->vel.z = 0.0f;
+        particle->rotVel.x = 0.0f;
+        particle->rotVel.y = 0.0f;
+        particle->rotVel.z = 0.0f;
+        particle->gravity = 0.0f;
     }
     return 1;
 }
 
-s32 func_15133C58(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
-    func_15133B98(arg0, arg1, arg2, arg3, arg4, arg5);
+/* Floor handler: func_15133B98, plus (half the time) a random sound 0x2DE..0x2E6 at the hit position. */
+s32 func_15133C58(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, FloorSurface *surface) {
+    func_15133B98(particle, x, y, z, floorHeight, surface);
     if (func_150ADA20() & 1) {
-        func_10010F88(((u32)func_150ADA20() % 9) + 0x2DE, 0x2EE0, 0, 0, 0,
-                      (s32)*(f32 *)&arg1, (s32)*(f32 *)&arg2, (s32)*(f32 *)&arg3,
-                      0x1F4, 0x3E8);
+        func_10010F88((func_150ADA20() % 9U) + 0x2DE, 12000, 0, 0, 0, x, y, z, 500, 1000);
     }
     return 1;
 }
 
-s32 func_15133D20(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
-    func_15133B98(arg0, arg1, arg2, arg3, arg4, arg5);
+/* Floor handler: func_15133B98, plus (half the time) a random sound 0x1B8..0x1C1 at the hit position. */
+s32 func_15133D20(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, FloorSurface *surface) {
+    func_15133B98(particle, x, y, z, floorHeight, surface);
     if (func_150ADA20() & 1) {
-        func_10010F88(((u32)func_150ADA20() % 10) + 0x1B8, 0x5DC0, 0, 0, 0,
-                      (s32)*(f32 *)&arg1, (s32)*(f32 *)&arg2, (s32)*(f32 *)&arg3,
-                      0x1F4, 0x3E8);
+        func_10010F88((func_150ADA20() % 10U) + 0x1B8, 24000, 0, 0, 0, x, y, z, 500, 1000);
     }
     return 1;
 }
