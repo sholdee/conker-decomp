@@ -22,7 +22,6 @@ typedef struct {
     /* 0x34 */ u8 pad34[0x14C];
 } ViewRec;
 
-extern ZScanParams D_80089590[];
 /* State of one z-buffer occlusion scan (see func_1512B630). */
 typedef struct {
     u8 unk0;
@@ -41,7 +40,8 @@ typedef struct {
 } ZScanSet;
 
 extern ZScanSet D_800DC0C0[4];
-extern ZScanParams D_800DC200[][4];
+extern ZScanParams D_80089590[4];
+extern ZScanParams D_800DC200[4][4];
 
 void func_15123A54(struct108 *arg0);
 
@@ -199,13 +199,15 @@ typedef struct {
     /* 0x964 */ u8 pad964[0x3C];
 } CamView;
 
-void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
-void func_1507C3E0(CamObj *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
+void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 delta);
+void func_1507C3E0(CamObj *obj, s16 *height, s16 *width, s16 *depth);
 s32 func_150A3FC4(f32, f32, s32, void *, void *);
 void func_1510E8BC(void *a0, void *a1, void *a2, void *a3, void *arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s32 arg10, s32 arg11, f32 arg12, f32 arg13, s32 arg14);
 void func_151236D0(void *);
 s32 func_15125490(void *);
 
+/* Updates the camera's floor heights (unk35C, unk360; -10000 means none found) and the height it aims for
+ * (unk354), with special cases for the camera modes and the tracked objects. */
 void func_1512A390(CamView *arg0) {
     f32 unused28;
     s32 flag4E;
@@ -387,8 +389,8 @@ extern f32 D_800DC1F8;
 extern f32 D_800DC1FC;
 void func_1501A764(s32, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_1508EF80(struct17 *arg0, struct17 *arg1, f32 arg2, struct17 *arg3);
-void func_1512B1B8(CamView *arg0, s32 arg1, s32 arg2, s32 arg3);
-s32 func_1512B730(CamView *arg0, f32 *offset, f32 *arg2);
+void func_1512B1B8(CamView *arg0, s32 screenX, s32 screenY, s32 depth);
+s32 func_1512B730(CamView *arg0, f32 *offset, f32 *unused);
 void func_1512C150(CamView *arg0);
 s32 func_1512B53C(CamView *arg0);
 
@@ -605,7 +607,7 @@ s32 func_1512B630(CamView *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 
 
 /* Turns the left/right z-buffer scans into a sideways correction *offset for the camera.
  * Returns whether either side is blocked. */
-s32 func_1512B730(CamView *arg0, f32 *offset, f32 *arg2) {
+s32 func_1512B730(CamView *arg0, f32 *offset, f32 *unused) {
     s32 blocked;
     u8 state0;
     u8 state1;
@@ -882,7 +884,6 @@ void func_1512C200(s32 arg0) {
 
 extern f32 D_800895B0;
 #define SQ(x) ((x) * (x))
-void func_1508EF80(struct17 *arg0, struct17 *arg1, f32 arg2, struct17 *arg3);
 
 /* Keeps the camera outside the circle of radius unk938 around unk93C (horizontally), pushing it out to the edge. */
 void func_1512C20C(CamView *arg0) {
