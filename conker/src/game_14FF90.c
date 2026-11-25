@@ -27,7 +27,6 @@ extern f32 D_800DC000;
 extern f32 D_800C3614;
 extern f32 D_800C3618;
 extern f32 D_800C361C;
-extern Vec3f D_800C3620; // game_49D30.c's; its .y is the gCamShot.at.angles.pitch word
 /* Camera distance presets, indexed by Camera.DistIndex: { tripod magnitude, height }. */
 const f32 D_800A34B0[4][2] = {
     { 267.0f, 100.0f },

@@ -560,8 +560,6 @@ void func_1511898C(WorldObject *prop) {
 }
 
 
-extern s32 func_15022B08(s32, s32);
-
 /*
  * A door that swings rotY between 0 and the signed angle in the low 10 bits of its params, bouncing
  * at the ends. Bits 24-31 of params pick a light (or similar) faded with the opening.

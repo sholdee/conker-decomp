@@ -425,7 +425,6 @@ void func_15056A00(Actor *actor, u8 turn, u8 row) {
 }
 ObjScriptCmd *func_1507BB28(s32, s32);
 void func_1507BC14(Actor *);
-s32 func_150229E4(Actor *);
 
 /*
  * Per-frame AI for a path/chase actor: picks the point to head for from its mode (unk223),
@@ -1045,7 +1044,6 @@ void func_150585F0(Actor *actor, f32 decel) {
     }
 }
 
-void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
 s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
 ObjScriptCmd *func_1507BB28(s32, s32);
 
@@ -5008,7 +5006,6 @@ void func_15061B4C(void) {
         }
     }
 }
-s32 func_150229E4(Actor *);
 s32 func_150A6360(void *, void *, f32, f32, f32, f32, f32, f32);
 
 /*

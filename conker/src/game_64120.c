@@ -952,7 +952,6 @@ typedef struct {
 
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
 extern f32 D_800981A0[][4]; /* per rate index: yaw rate, pitch rate, yaw max step, pitch max step */
-s32 func_15021DB8(f32 *, f32 *, f32 *, f32 *, s32, s32);
 
 /*
  * Turns bone matrix `bone` of object objIndex (measured against refBone) toward target (-99999 for none),
@@ -1670,8 +1669,6 @@ void func_1503A7F0(void) {
     D_800C3FFA = pass;
     func_1503A678();
 }
-
-s32 func_15022024(f32 *, f32 *, s32, s32);
 
 
 #define CLAMP(x, lo, hi) ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))

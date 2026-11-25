@@ -2,16 +2,12 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_15022190(s16, s16, s16, f32);
-extern void func_150221E8(s16, s16, s16, f32);
-
 typedef struct {
     s32 unk0;
     s32 unk4;
     s32 args[6];
 } Struct_1509C440;
 
-extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_1509C8FC(s32 ref, s32 alt);
 
 /* Fixed-point 16.16 to float scale. */

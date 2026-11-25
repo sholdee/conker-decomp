@@ -273,7 +273,6 @@ extern u8 D_80083A40[];
 extern u8 D_80083BC0[];
 extern u8 D_80084060[]; /* controller port of each player, >= 4: none */
 extern u8   D_80084064;
-extern Color24 D_80084110[]; // screen fade colours for func_1517EE40, picked by sequence events
 extern u8 D_80084160[];
 extern u8 D_80084190[];
 extern Vtx  D_80084300[5];

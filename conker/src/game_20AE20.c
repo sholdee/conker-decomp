@@ -473,7 +473,6 @@ void func_151DE8E8(void) {
 #define MENU_CLEFT  0x40 /* C-left */
 #define MENU_CRIGHT 0x80 /* C-right */
 
-extern void func_1501D348(s32, s32, s32, s32, s32);
 extern char D_800AB850[];
 extern s8 D_800E0A96; /* page to switch to once faded out; -1: none */
 void func_151E2404(void);

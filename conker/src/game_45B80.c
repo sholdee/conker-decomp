@@ -83,7 +83,6 @@ void func_1515D69C(void);
 void func_15189118(s32);
 void func_15125628(void);
 void func_1517CFC4(void);
-void func_1501C880(s32, s32);
 s32 func_151F2CDC(void);
 void func_151F2BE8(void);
 void func_151F2C4C(void);
@@ -302,11 +301,6 @@ void func_1501905C(void) {
 
 void func_1509BA04(s32);
 void func_1509BBA0(s32);
-void func_1501E400(s32);
-void func_150242F8(s32, s32);
-void func_1501EC38(s32);
-void func_15020EC4(s32);
-void func_1501E2F8(s32);
 void func_15094EA0(s32);
 void func_15188B74(s32);
 void func_1515D6C8(void);

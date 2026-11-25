@@ -129,8 +129,6 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
     }
 }
 
-s32 func_150229E4(Actor *obj);
-
 /* Steps the animation of every active object; with onlyType4 set, only objects whose unk5 is 4. */
 void func_1507C22C(s32 onlyType4) {
     s32 i;

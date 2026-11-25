@@ -189,7 +189,6 @@ void func_150A104C(Camera *cam, TriggerZone **zoneList, s32 count) {
 extern s32 D_800D3278;
 
 void func_1512D560(Camera *, s32, TriggerZone *);
-void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackArg);
 s32 __osPiGetAccess(void);
 void __osPiRelAccess(void);
 s32 osPiRawReadIo(u32, u32 *);

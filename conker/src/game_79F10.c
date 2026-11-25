@@ -30,8 +30,6 @@ u8 func_150ADA20(void);
 
 #include "variables.h"
 
-void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
-
 
 void func_1504CA60(Actor *actor) {
     f32 range;

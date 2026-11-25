@@ -133,8 +133,6 @@ void func_1511A6FC(WorldObject *obj) {
     func_1511A494(obj, &WORK(obj)->texIndices, &WORK(obj)->animState);
 }
 
-extern s32 func_15022B08(s32, s32);
-
 /* When D_800C35EA is 1 and func_15022B08 accepts this object's index, clears unk7C and unk18;
  * then runs func_151162D4 and advances the texture animation. */
 void func_1511A738(WorldObject *obj) {

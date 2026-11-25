@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_15022190(s16, s16, s16, f32);
-extern void func_1501D348(s32, s32, s32, s32, s32);
 extern void func_1509C3A0(void);
 
 /* Puts obj into state 2 with the given timer. */

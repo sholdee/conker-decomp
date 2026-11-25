@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
-
 /**
  * Eases the object's unkC4 toward its turn rate: the change from prevAngle to the current moving angle,
  * scaled by 100 / D_800CC264.

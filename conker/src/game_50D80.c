@@ -6,54 +6,15 @@
 #undef func_1510A344
 #undef func_1516E778
 #undef func_1516F2F8
-#include "effects.h"
 #include "variables.h"
 
 /* Screen fade colours for func_1517EE40, picked by sequence events (black, white). */
 Color24 D_80084110[2] = { { 0, 0, 0 }, { 0xFF, 0xFF, 0xFF } };
 
-/* An event queued for dispatch by func_150241B4, kept sorted by time. */
-typedef struct SeqQueueEntry {
-    /* 0x0 */ SeqEvent *event;
-    /* 0x4 */ s32 time;
-    /* 0x8 */ u8 track;
-    /* 0xA */ u16 index;
-} SeqQueueEntry;
-
 /* Cutscene state, indexed by scene (and track). */
-
-extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
-extern s32 func_150265CC(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
-extern s32 func_15029BB8(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32, s32);
-extern void func_1502A8A0(SeqEvent *, s32, s32, s32, s32);
 
 void func_150238D0(void) {
 }
-
-/* Per-sound state allocated by func_15029BB8 for a cutscene sound event (0x10 bytes). */
-typedef struct {
-    /* 0x0 */ u8 scene;
-    /* 0x1 */ u8 track;
-    /* 0x2 */ u8 stopAtEnd;  /* stop when the scene reaches its end time */
-    /* 0x4 */ u16 remaining; /* ticks left, 0xFFFF = unlimited */
-    /* 0x6 */ u16 duration;
-    /* 0x8 */ u16 fadeIn;
-    /* 0xA */ u16 fadeOut;
-    /* 0xC */ u16 volume;
-    /* 0xE */ u8 sceneTag;   /* D_800C35E8[scene] when the sound started */
-} SeqSound;
-
-/* The sound voice handed to the func_150238D8 callback. */
-typedef struct {
-    /* 0x00 */ u8 pad0[2];
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[8];
-    /* 0x10 */ s32 flags;
-    /* 0x14 */ u8 pad14[4];
-    /* 0x18 */ SeqSound *userData;
-} SeqVoice;
 
 
 /*
@@ -379,8 +340,6 @@ void func_150242F8(s32 mode, s32 scene) {
 extern u8 D_800D9890; // game_E4070.c
 extern s32 D_80090214[];
 
-extern void func_15023440(SeqSubtitle *, s32);
-extern SeqSubtitle *func_150234A4(s32, s32);
 extern void func_150B7220(s32, s32, s32, s32);
 extern void func_150C5C74(Actor *);
 extern void func_150C5C9C(Actor *);
@@ -1162,21 +1121,17 @@ extern void func_151619A0(s32, s16, u8, s32);
 extern void func_15108FFC(s32, s32, u8);
 extern void func_15190770(Ev15190770 *, s32, u8, s32);
 extern void func_150F5C08(Actor *, s16, u8, s32);
-extern void func_1519EB8C(SeqTrackState *, u16, s16, u8, s32);
 extern void func_150F6890(Actor *, s16, u8, s32);
 extern void func_151925C4(Actor *, s16, u8, s32);
-extern void func_1519ED84(SeqTrackState *, u16, s16, u8, s32);
 extern void func_151B5240(s16, u8, s32);
 extern void func_15192D48(Actor *, s16, u8, s32);
 extern void func_151B09BC(Actor *, s32, s16, u8, s32);
 extern void func_150DB518(f32 *, f32 *, f32 *, f32 *, f32 *, s32, s32, s32);
-extern s32 func_1519E970(s16, EvNodeData *, s32, f32 *, f32 *, s32, s32);
 extern void func_1516F2F8(s32, s32, s32, s32, s32, s32); // matching: s32 where the definition has u8 (args 1, 5)
 extern void func_151090DC(void);
 extern void func_151CFA4C(Actor *, u8, s32);
 extern void func_151D5648(f32 *, u8, s32);
 extern void func_15107B78(Actor *, s16, s16, u8, s32);
-extern void func_1519EA78(f32 *, u16, f32, u8, s32);
 extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s32, s32, u8 *, s32, s32);
 extern void func_150F16DC(Actor *, u8, u8, u8, s32);
 extern void func_15193660(Actor *, u8, s32);
@@ -1757,7 +1712,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 node = obj->attachments;
                 while (node != NULL) {
                     if (node->type == kind || func_1514D4B8(D_8008ABE8[kind]->firstChild, node->type) != 0) {
-                        ((EvNodeData *)node->handle)->unk30 = func_1519E970(duration, node->handle, 0,
+                        ((EvNodeData *)node->handle)->unk30 = (s32)func_1519E970(duration, (EvTimerOwner *)node->handle, 0,
                                                                            &D_800C3958[scene][track].unk30,
                                                                            &D_800C3958[scene][track].unk20, sceneTag, 0);
                     }
@@ -1952,7 +1907,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     } else {
                         scale = 1.0f;
                     }
-                    func_1519EA78(p, id, scale, sceneTag, 1);
+                    func_1519EA78((Vec3f *)p, id, scale, sceneTag, 1);
                     break;
                 }
                 case 15: {

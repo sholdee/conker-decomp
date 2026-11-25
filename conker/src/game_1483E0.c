@@ -8,8 +8,6 @@
  * (Work1483E0, one member per routine).
  */
 
-extern s32 func_15022B08(s32, s32);
-
 struct Wave1511CB44;
 struct Swing1511DBC4;
 struct Pulse1511DF6C;

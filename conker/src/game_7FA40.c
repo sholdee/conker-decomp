@@ -3,9 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
-s32 func_150229E4(Actor *arg0);
-
 /* Object update step shared by several behaviours: runs the common per-object helpers. */
 void func_15052590(Actor *obj) {
     s32 flags;

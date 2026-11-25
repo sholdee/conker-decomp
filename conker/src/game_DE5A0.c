@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
-
 extern s32 D_8008CAE0;
 extern u8 D_800B86A4[][0x32C];
 
