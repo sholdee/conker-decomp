@@ -1904,7 +1904,7 @@ typedef struct ParticleTexFile {
 } ParticleTexFile; // size 0x10
 
 /* A camera message payload (func_1512D560 types 7, 8 and 10, applied by func_15128CB0 in game_156160.c);
- * D_800C3600 is the shared one that cutscenes and zones fill in. */
+ * D_800C3600 is the shared one that cutscenes and TriggerZones fill in. */
 typedef struct CamShot {
     /* 0x00 */ s32 mode;     /* type 7: 0 or 2 = look at at.focus; otherwise aim by at.angles */
     /* 0x04 */ s32 unk4;     /* index into D_800C35EA (cutscene scene) */

@@ -3,8 +3,8 @@
 #include "variables.h"
 #include "effects.h"
 
-/* An entry of the object table at D_800D3098 (TriggerZone, a blob in structs.h): a collision
-   cylinder at (x, y, z); see CollisionCylinder in game_D0960.c. */
+/* The D_800D3098 TriggerZones used here are collision cylinders (ZONE_AREA_CYLINDER, tested by
+   func_150A34B0 in game_D0960.c). */
 
 extern s32 D_80088AA0[4];
 extern s32 D_80088AB0[8];

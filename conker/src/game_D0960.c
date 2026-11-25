@@ -2,36 +2,16 @@
 #include "functions.h"
 #include "variables.h"
 
-/* An entry of the object table at D_800D3098 (TriggerZone, a blob in structs.h).
-   Its collision volume is a vertical cylinder at (x, y, z), rotated by rotX then rotY
-   (degrees); the sines and cosines of the two angles are cached at 0x24-0x30. */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radius;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ s16 padA;
-    /* 0x0C */ f32 rotX;
-    /* 0x10 */ f32 rotY;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 pad16[0xE];
-    /* 0x24 */ f32 sinRotX;
-    /* 0x28 */ f32 cosRotX;
-    /* 0x2C */ f32 sinRotY;
-    /* 0x30 */ f32 cosRotY;
-} CollisionCylinder; /* size 0x34 */
 
-s32 func_150A3504(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *hit);
+s32 func_150A3504(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit);
 
-/* Tests the segment p0-p1 against cyl (skipped when unk14 == 1 or unk15 & 3 is set);
+/* Tests the segment p0-p1 against cyl (only an active ZONE_AREA_CYLINDER zone);
    on a hit writes the entry point to hit and returns TRUE. */
-s32 func_150A34B0(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *hit) {
-    if (cyl->unk14 == 1) {
+s32 func_150A34B0(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit) {
+    if (cyl->inactive == 1) {
         return FALSE;
     }
-    if (!(cyl->unk15 & 3)) {
+    if (ZONE_AREA_TYPE(cyl) == ZONE_AREA_CYLINDER) {
         return func_150A3504(cyl, p0, p1, hit);
     }
     return FALSE;
@@ -41,7 +21,7 @@ s32 func_150A34B0(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *hit) {
    segment to the height slab [0, height] and to the radius, and on overlap writes the first
    contact point (back in world space) to hit and returns TRUE.
    func_150AD78C / func_150AD780 are sin / cos of an angle in radians. */
-s32 func_150A3504(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *hit) {
+s32 func_150A3504(TriggerZone *cyl, f32 *p0, f32 *p1, f32 *hit) {
     s32 i;
     f32 scale;
     f32 tSlabMin;
@@ -64,17 +44,17 @@ s32 func_150A3504(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *hit) {
     f32 t1; // matching: the roots go through their own stack slots before lo/hi
     f32 t2;
 
-    /* Rotate p0, then p1, into cylinder space (rotate by rotY, then rotX). */
+    /* Rotate p0, then p1, into cylinder space (rotate by yaw, then pitch). */
     dx = p0[0] - cyl->x;
     dy = p0[1] - cyl->y;
     dz = p0[2] - cyl->z;
     for (i = 0; i < 2; i++) {
-        c = cyl->cosRotY;
-        s = cyl->sinRotY;
+        c = cyl->cosYaw;
+        s = cyl->sinYaw;
         local[i][0] = dx * c - dz * s;
         dz = dz * c + dx * s;
-        c = cyl->cosRotX;
-        s = cyl->sinRotX;
+        c = cyl->cosPitch;
+        s = cyl->sinPitch;
         local[i][2] = dz * c - dy * s;
         local[i][1] = dy * c + dz * s;
         if (i == 0) {
@@ -95,7 +75,7 @@ s32 func_150A3504(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *hit) {
 
         scale = 1.0f / dir[1];
         tSlabMin = -org[1] * scale;
-        tSlabMax = (cyl->height - local[0][1]) * scale;
+        tSlabMax = (cyl->ySize - local[0][1]) * scale;
         if (tSlabMax < tSlabMin) {
             tmp = tSlabMin;
             tSlabMin = tSlabMax;
@@ -111,7 +91,7 @@ s32 func_150A3504(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *hit) {
             tSlabMax = 1.0f;
         }
     } else {
-        if (org[1] < 0.0f || cyl->height < local[0][1]) {
+        if (org[1] < 0.0f || cyl->ySize < local[0][1]) {
             return FALSE;
         }
         tSlabMin = 0.0f;
@@ -123,7 +103,7 @@ s32 func_150A3504(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *hit) {
         return FALSE;
     }
     b = 2.0f * (dir[0] * org[0] + dir[2] * org[2]);
-    disc = b * b - 4.0f * a * ((org[0] * org[0] + org[2] * org[2]) - cyl->radius * cyl->radius);
+    disc = b * b - 4.0f * a * ((org[0] * org[0] + org[2] * org[2]) - cyl->xSize * cyl->xSize);
     if (disc < 0.0f) {
         return FALSE;
     }
@@ -164,13 +144,13 @@ s32 func_150A3504(CollisionCylinder *cyl, f32 *p0, f32 *p1, f32 *hit) {
         hx = org[0] + dir[0] * a;
         hy = org[1] + dir[1] * a;
         hz = org[2] + dir[2] * a;
-        /* Rotate the contact point back to world space (by -rotX, then -rotY). */
-        ang = -(cyl->rotX * 0.01745329238f);
+        /* Rotate the contact point back to world space (by -pitch, then -yaw). */
+        ang = -(cyl->pitch * 0.01745329238f);
         s = func_150AD78C(ang);
         c = func_150AD780(ang);
         hit[2] = hz * c - hy * s;
         hit[1] = hy * c + hz * s;
-        ang = -(cyl->rotY * 0.01745329238f);
+        ang = -(cyl->yaw * 0.01745329238f);
         s = func_150AD78C(ang);
         c = func_150AD780(ang);
         hit[0] = hx * c - hit[2] * s;
