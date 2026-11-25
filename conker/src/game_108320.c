@@ -100,49 +100,45 @@ void func_150DAE70(BeamOwner *owner, s32 type, u8 arg2, s32 arg3) {
     f32 distSq;
     f32 invDist;
     Effect *effect;
-    BoneMtx *bones;
 
-    if (owner != NULL) {
-        bones = owner->bones;
-        if (bones != NULL) {
-            mtx = &bones[D_80088928[type]];
-            func_15143134(&D_80088910[type], &from, mtx);
-            func_15143134(&D_8008891C[type], &to, mtx);
-            vel.x = D_8008892C[type] * (to.x - from.x);
-            vel.y = D_8008892C[type] * (to.y - from.y);
-            vel.z = D_8008892C[type] * (to.z - from.z);
-            distSq = (vel.x * vel.x) + (vel.z * vel.z);
-            if (!(fabsf(distSq) < 9.999999747e-05f)) {
-                spawn.unk0 = 0x17;
-                spawn.unkC = 0x243A;
-                spawn.unk8 = 0;
-                spawn.unk40 = 0x401;
-                spawn.unk4 = D_80088930[type];
-                spawn.alpha = 255;
-                spawn.unk45 = 255;
-                // matching: the three stores share one line so as1 keeps IDO's t6-t9 constant order
-                spawn.color[2] = 200; spawn.color[1] = 200; spawn.color[0] = 200;
-                spawn.color[3] = 200;
-                spawn.unk2 = 0x401;
-                spawn.pos = from;
-                spawn.scale.x = 1.0f;
-                spawn.scale.y = 1.0f;
-                invDist = 1.0f / sqrtf(distSq);
-                spawn.scale.z = 1.0f;
-                spawn.dir.x = vel.z * invDist;
-                spawn.dir.y = 0.0f;
-                spawn.dir.z = vel.x * invDist;
-                effect = func_1513D524(&spawn, 9, 0, 0, 7, 0, 0x2C, arg2, arg3);
-                if (effect != NULL) {
-                    effect->u.beam.vel = vel;
-                    effect->u.beam.size = D_80088934[type];
-                    effect->u.beam.sizeRate = D_80088938[type];
-                    effect->u.beam.scaleXRate = D_80088944[type];
-                    effect->u.beam.scaleYRate = D_80088948[type];
-                    effect->u.beam.scaleX = effect->u.beam.scaleY = 1.0f;
-                    effect->u.beam.damping = D_8008893C[type];
-                    effect->u.beam.fadeRate = D_80088940[type];
-                }
+    if (owner != NULL && owner->bones != NULL) {
+        mtx = &owner->bones[D_80088928[type]];
+        func_15143134(&D_80088910[type], &from, mtx);
+        func_15143134(&D_8008891C[type], &to, mtx);
+        vel.x = D_8008892C[type] * (to.x - from.x);
+        vel.y = D_8008892C[type] * (to.y - from.y);
+        vel.z = D_8008892C[type] * (to.z - from.z);
+        distSq = (vel.x * vel.x) + (vel.z * vel.z);
+        if (!(fabsf(distSq) < 9.999999747e-05f)) {
+            spawn.unk0 = 0x17;
+            spawn.unkC = 0x243A;
+            spawn.unk8 = 0;
+            spawn.unk40 = 0x401;
+            spawn.unk4 = D_80088930[type];
+            spawn.alpha = 255;
+            spawn.unk45 = 255;
+            // matching: the three stores share one line so as1 keeps IDO's t6-t9 constant order
+            spawn.color[2] = 200; spawn.color[1] = 200; spawn.color[0] = 200;
+            spawn.color[3] = 200;
+            spawn.unk2 = 0x401;
+            spawn.pos = from;
+            spawn.scale.x = 1.0f;
+            spawn.scale.y = 1.0f;
+            invDist = 1.0f / sqrtf(distSq);
+            spawn.scale.z = 1.0f;
+            spawn.dir.x = vel.z * invDist;
+            spawn.dir.y = 0.0f;
+            spawn.dir.z = vel.x * invDist;
+            effect = func_1513D524(&spawn, 9, 0, 0, 7, 0, 0x2C, arg2, arg3);
+            if (effect != NULL) {
+                effect->u.beam.vel = vel;
+                effect->u.beam.size = D_80088934[type];
+                effect->u.beam.sizeRate = D_80088938[type];
+                effect->u.beam.scaleXRate = D_80088944[type];
+                effect->u.beam.scaleYRate = D_80088948[type];
+                effect->u.beam.scaleX = effect->u.beam.scaleY = 1.0f;
+                effect->u.beam.damping = D_8008893C[type];
+                effect->u.beam.fadeRate = D_80088940[type];
             }
         }
     }
@@ -151,15 +147,13 @@ void func_150DAE70(BeamOwner *owner, s32 type, u8 arg2, s32 arg3) {
 /* Beam update: moves, pulses the quad's scale and fades out. Returns 0 once fully faded. */
 s32 func_150DB114(Effect *effect) {
     BeamMotion *beam;
-    f32 damping;
     s16 alpha;
 
     beam = &effect->u.beam;
-    damping = beam->damping;
     alpha = effect->alpha;
-    beam->vel.x *= damping;
-    beam->vel.y *= damping;
-    beam->vel.z *= damping;
+    beam->vel.x *= beam->damping;
+    beam->vel.y *= beam->damping;
+    beam->vel.z *= beam->damping;
     effect->pos.x += beam->vel.x * D_800BE9A4;
     effect->pos.y += beam->vel.y * D_800BE9A4;
     effect->pos.z += beam->vel.z * D_800BE9A4;
