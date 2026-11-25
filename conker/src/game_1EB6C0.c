@@ -228,33 +228,27 @@ void func_151BE644(BurstSpark *spark) {
     }
 }
 
+/* Teardown of a burst spark: clears its slot in the burst, then runs the particle teardown func_1513CA6C. */
 void func_151BE674(BurstSpark *spark) {
     func_151BE644(spark);
     func_1513CA6C((struct210 *)spark);
 }
 
+/* Teardown of a burst spark: clears its slot in the burst, then runs the particle teardown func_1513CAA0. */
 void func_151BE6A0(BurstSpark *spark) {
     func_151BE644(spark);
     func_1513CAA0((struct210 *)spark);
 }
 
-/* Glow textures a burst glow picks from at random (0x60..0x63). */
-typedef struct {
-    s32 textures[4];
-} GlowTextures;
-
-extern GlowTextures D_800AA7A8;
-
 /* Per-frame update of a burst glow: switches it to a random texture every 3-10 frames and eases its scale. */
 s32 func_151BE6CC(BurstGlow *glow) {
-    s32 pad; // matching: unused stack slot
-    GlowTextures choices;
+    s32 pad; // matching: unused stack slot above textures
+    s32 textures[4] = { 0x60, 0x61, 0x62, 0x63 };
     BurstGlowShape *shape = &glow->shape;
 
-    choices = D_800AA7A8;
     glow->data.textureTimer -= D_800BE9E4;
     if (glow->data.textureTimer < 0) {
-        glow->particle.texture = choices.textures[func_150ADA20() & 3];
+        glow->particle.texture = textures[func_150ADA20() & 3];
         glow->data.textureTimer = (func_150ADA20() & 7) + 3;
     }
     shape->scale += (glow->data.targetScale - shape->scale) * 0.65000004f;
@@ -277,11 +271,13 @@ void func_151BE7C8(BurstGlow *glow) {
     }
 }
 
+/* Teardown of a burst glow: clears its slot in the burst, then runs the particle teardown func_151411A4. */
 void func_151BE7F8(BurstGlow *glow) {
     func_151BE7C8(glow);
     func_151411A4((struct210 *)glow);
 }
 
+/* Teardown of a burst glow: clears its slot in the burst, then runs the particle teardown func_151411C4. */
 void func_151BE824(BurstGlow *glow) {
     func_151BE7C8(glow);
     func_151411C4((struct210 *)glow);
