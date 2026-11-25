@@ -122,7 +122,7 @@ u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, 
 void func_10017780(u8 arg0, u16 arg1);
 s32 *allocate_memory(s32, s32, s32, s32);
 struct31 *func_10017438(s32, s16, u16, u8, f32, u8, u8, struct31 **);
-s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 arg3, s32 arg4, s32 arg5, s32 arg6,
+s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 field18, s32 dx0, s32 dy0, s32 dz0,
                   s32 farDistance, s32 nearDistance, s32 *pan, s32 *volume, s32 *distance);
 
 // The callbacks below reuse a record's owner/key words (0x18, 0x1C) for their own state.
@@ -516,6 +516,7 @@ s32 func_1000F568(s32 base, s32 count) {
     return base + pick;
 }
 
+// Volume scale (and *pan) of a sound at (x, y, z) for the nearest listener. arg0 is unused.
 s32 func_1000F6B8(s32 arg0, s16 x, s16 y, s16 z, s32 *pan, s32 nearDistance, s32 farDistance) {
     s32 volume;
     SoundSpatialRecord *listener;
