@@ -3,8 +3,8 @@
 #include "variables.h"
 
 /*
- * Joint-matrix trails ("afterimages") drawn behind objects. Each trail keeps
- * numFrames past copies of its owner's joint matrices, double-buffered on
+ * Bone-matrix trails ("afterimages") drawn behind objects. Each trail keeps
+ * numFrames past copies of its owner's bone matrices, double-buffered on
  * D_800BE9C0, and draws them with increasing transparency.
  * D_800DF7C8[0] lists type-0 trails (struct127 owners),
  * D_800DF7C8[1] lists type-1 trails (world object owners, one matrix).
@@ -49,7 +49,7 @@ void func_15188A58(Trail *trail, Trail **list);
 /* Starts (or extends) a type-0 trail behind a game object. */
 void func_15188810(struct127 *object, s32 duration, s32 maxDist) {
     Trail *trail;
-    s32 numJoints;
+    s32 numBones;
     s32 size;
     s32 pad; // matching: unused slot, moves size's spill to sp+0x20
     MtxS16 *frames;
@@ -66,13 +66,13 @@ void func_15188810(struct127 *object, s32 duration, s32 maxDist) {
 
     trail = allocate_memory(sizeof(Trail), 1, 0, 0);
     if (trail != NULL) {
-        numJoints = func_1502DB20(object->id);
-        if (numJoints == 0) {
+        numBones = func_1502DB20(object->id);
+        if (numBones == 0) {
             func_10004074(trail);
             return;
         }
 
-        size = numJoints * 3 * 2 * sizeof(Mtx);
+        size = numBones * 3 * 2 * sizeof(Mtx);
         frames = allocate_memory(size, 1, 1, 1);
         if (frames == NULL) {
             func_10004074(trail);
@@ -262,12 +262,12 @@ Gfx *func_15188D00(Gfx *gfx, s32 listIndex, s16 player) {
 /*
  * Type-0 update: shifts the history one frame. Frame i of the current half
  * (D_800BE9C0) takes frame i + 1 of the other half, and the last frame takes
- * the owner's current joint matrices.
+ * the owner's current bone matrices.
  */
 void func_15188E48(Trail *trail) {
     s32 i;
     s32 numFrames;
-    s32 numJoints;
+    s32 numBones;
     s32 curBase;
     s32 prevBase;
     MtxS16 *src;
@@ -275,11 +275,11 @@ void func_15188E48(Trail *trail) {
     s32 size;
 
     numFrames = trail->numFrames;
-    numJoints = func_1502DB20(trail->owner.object->id);
-    curBase = D_800BE9C0 * (numJoints * numFrames);
-    prevBase = (D_800BE9C0 ^ 1) * (numJoints * numFrames);
+    numBones = func_1502DB20(trail->owner.object->id);
+    curBase = D_800BE9C0 * (numBones * numFrames);
+    prevBase = (D_800BE9C0 ^ 1) * (numBones * numFrames);
     for (i = 0; i < numFrames; i++) {
-        size = numJoints * sizeof(Mtx);
+        size = numBones * sizeof(Mtx);
         if (i == numFrames - 1) {
             dst = (MtxS16 *)trail->owner.object->unk1D4;
             if (dst == NULL) {
@@ -288,9 +288,9 @@ void func_15188E48(Trail *trail) {
             }
             src = dst; // matching: sharing dst with the NULL-checked pointer steers regalloc
         } else {
-            src = &trail->frames[(i + 1) * numJoints + prevBase];
+            src = &trail->frames[(i + 1) * numBones + prevBase];
         }
-        dst = &trail->frames[i * numJoints + curBase];
+        dst = &trail->frames[i * numBones + curBase];
         bcopy(src, dst, size);
     }
     if (trail->numFilled != trail->numFrames) {
@@ -358,21 +358,21 @@ void func_15188F84(Trail *arg) {
 
 /*
  * Limits how far apart consecutive history frames of list `listIndex` may be:
- * when a frame's root joint is more than maxDist from the next newer frame's
- * (or the owner's current one), every joint of the frame is pulled toward the
+ * when a frame's root bone is more than maxDist from the next newer frame's
+ * (or the owner's current one), every bone of the frame is pulled toward the
  * newer frame to that distance.
  */
 void func_15189118(s32 listIndex) {
     Trail *trail;
     s32 numFrames;
-    s32 numJoints;
+    s32 numBones;
     s32 base;
     s32 i;
     s32 j;
     f32 maxDist;
     MtxS16 *cur;
     MtxS16 *newer;
-    MtxS16 *jointMtx;
+    MtxS16 *bones;
     f32 dist;
     f32 ratio;
     f32 cx;
@@ -385,20 +385,20 @@ void func_15189118(s32 listIndex) {
     for (trail = sTrailLists[listIndex]; trail != NULL; trail = trail->next) {
         if (trail->maxDist != 0) {
             numFrames = trail->numFrames;
-            numJoints = func_1502DB20(trail->owner.object->id);
-            base = D_800BE9C0 * numJoints * numFrames;
+            numBones = func_1502DB20(trail->owner.object->id);
+            base = D_800BE9C0 * numBones * numFrames;
             maxDist = trail->maxDist;
             for (i = trail->numFilled - 1; i >= 0; i--) {
-                cur = &trail->frames[i * numJoints + base];
+                cur = &trail->frames[i * numBones + base];
                 if (i + 1 == trail->numFilled) {
-                    jointMtx = (MtxS16 *)trail->owner.object->unk1D4;
-                    if (jointMtx == NULL) {
+                    bones = (MtxS16 *)trail->owner.object->unk1D4;
+                    if (bones == NULL) {
                         trail->numFilled = 0;
                         break;
                     }
-                    newer = jointMtx; // matching: a separate NULL-checked temp keeps the branch layout
+                    newer = bones; // matching: a separate NULL-checked temp keeps the branch layout
                 } else {
-                    newer = &trail->frames[(i + 1) * numJoints + base];
+                    newer = &trail->frames[(i + 1) * numBones + base];
                 }
                 cx = MTX_TRANSLATION(cur, 0);
                 cy = MTX_TRANSLATION(cur, 1);
@@ -409,7 +409,7 @@ void func_15189118(s32 listIndex) {
                 dist = sqrtf((cx - nx) * (cx - nx) + (cy - ny) * (cy - ny) + (cz - nz) * (cz - nz));
                 if (maxDist < dist && dist != 0.0f) {
                     ratio = maxDist / dist;
-                    for (j = 0; j < numJoints; j++) {
+                    for (j = 0; j < numBones; j++) {
                         cx = MTX_TRANSLATION(cur, 0);
                         cy = MTX_TRANSLATION(cur, 1);
                         cz = MTX_TRANSLATION(cur, 2);
