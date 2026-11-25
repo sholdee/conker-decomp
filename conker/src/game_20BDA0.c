@@ -40,19 +40,12 @@ struct Struct151E5034 {
 #define MENU_CLEFT  0x40 /* C-left */
 #define MENU_CRIGHT 0x80 /* C-right */
 
-struct Struct151E4314 {
-    s16 unk0;
-    s8 unk2;
-    s8 unk3;
-};
-
 extern s8 D_800E0C00[];
-extern u8 **D_800E0BD8;
+extern char **D_800E0BD8; /* text strings */
 extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
 extern s32 D_800E0A90;
 extern u8 D_800E0B96;
-extern u8 D_800E0B94;
 extern u8 D_8008FDA4;
 extern u16 D_800BE930[4]; /* button bits per controller (menu reads) */
 /* One entry of the menu's game-mode table (D_800AB68C[]) */
@@ -75,7 +68,6 @@ extern void (*D_800E0A88)(void);
 extern u8 D_800E0A95;
 extern s8 D_800E0A96;
 extern s8 D_8008FDE0;
-extern void (*D_8008FDEC[])(void);
 void func_15042D94(s32, s32, s32, char *, ...);
 void func_151E2404(void);
 void func_151E3344(s32, s32, s32, s32, s32);
@@ -271,7 +263,7 @@ void func_151DE8F0(void) {
                 }
             }
             func_1504332C(0xFF, 0x32, 0x32, alpha - (alpha >> 2));
-            func_15042D94(0x94, 0xC0, 0x81, (char *)D_800E0BD8[0x8F]);
+            func_15042D94(0x94, 0xC0, 0x81, D_800E0BD8[0x8F]);
         }
     }
     D_800DBFF0->unk2C = 0x80000;
@@ -365,7 +357,6 @@ void func_151DE8F0(void) {
 extern s8 D_800E0BE9;
 extern u8 D_800E0A97;
 extern char D_800AB800[];
-void func_1001263C(s32 arg0, s32 arg1, s32 arg2);
 struct216 *func_1507BB28(s32, s32);
 void func_1000DE1C(s32, s32);
 void func_151E7E9C(void);
@@ -466,7 +457,7 @@ extern s8 D_8008FDB0;
 extern s8 D_800AB804[];
 extern char D_800AB810[];
 extern s8 D_800BE91B; /* == D_800BE918[0].stick_y; the field spelling mismatches */
-extern u8 **D_800E0B88;
+extern char **D_800E0B88; /* text strings */
 void func_151E30C4(void);
 
 /*
@@ -721,7 +712,7 @@ draw_rows: // matching: unused label splits the basic block for as1
         b = (D_8008FF08[color + 2] * shade) >> 8;
         func_1504332C(r, g, b, rowAlpha);
         if ((y >= 0x46) && (y < height + 0x50) && (pass == 0)) {
-            func_15042D94(0x94, y + 0xF, 0x81, (char *)D_800E0B88[list[i] + offset]);
+            func_15042D94(0x94, y + 0xF, 0x81, D_800E0B88[list[i] + offset]);
         }
         y += 11;
         i++;
@@ -751,7 +742,7 @@ draw_rows: // matching: unused label splits the basic block for as1
 }
 
 /* Saved-record slot (D_800BE3F8[]); see game_33990.c */
-struct Struct151DFF38 {
+typedef struct {
     /* 0x0 */ u32 time;  /* in seconds */
     /* 0x4 */ s32 score;
     /* 0x8 */ s32 id;    /* -1: empty slot */
@@ -759,7 +750,7 @@ struct Struct151DFF38 {
     /* 0xD */ s8 padD;
     /* 0xE */ s8 unkE;
     /* 0xF */ s8 padF;
-};
+} RecordSlot;
 
 extern char D_800AB814[];
 extern char D_800AB818[];
@@ -779,7 +770,7 @@ void func_151DFF38(void) {
     u8 alpha;
     s32 sfx;
     s32 score;
-    struct Struct151DFF38 *entry;
+    RecordSlot *entry;
     s32 y;
 
     alpha = D_800E0A94;
@@ -796,7 +787,7 @@ void func_151DFF38(void) {
     }
     func_150432FC(0x94, 0x46);
     // variables.h declares D_800BE3F8 as a pointer; it is the slot array itself
-    entry = &((struct Struct151DFF38 *)&D_800BE3F8)[slot];
+    entry = &((RecordSlot *)&D_800BE3F8)[slot];
     if (entry->id == -1) {
         D_8008FE2C = 0;
     }
