@@ -1751,6 +1751,24 @@ typedef struct TrailMotion {
     /* 0x1E */ s16 unk1E;
 } TrailMotion; /* size 0x20 */
 
+/* Preset of a burst of func_15147DA0 particles thrown out around a point: radius and launch speed, then the
+ * ranges of each particle's TrailMotion and EffectTemplate values (value = base + rand * range, or for the s16
+ * pairs base + rand % (range + 1)). Tables: D_8009FBF0 (trail bursts, game_E1280.c), D_800A8728 (flamethrower
+ * jet scatter, game_1C2C60.c). */
+typedef struct ScatterPreset {
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 speed;
+    /* 0x08 */ f32 speedRange;
+    /* 0x0C */ f32 halfWidth;       /* TrailMotion.halfWidth */
+    /* 0x10 */ f32 halfWidthRange;
+    /* 0x14 */ f32 gravity;         /* TrailMotion.gravity */
+    /* 0x18 */ f32 gravityRange;
+    /* 0x1C */ s16 life;            /* EffectTemplate.life */
+    /* 0x1E */ s16 lifeRange;
+    /* 0x20 */ s16 itemCount;       /* EffectTemplate.itemCount */
+    /* 0x22 */ s16 itemCountRange;
+} ScatterPreset; /* size 0x24 */
+
 /* matching: the first 0x1C bytes of TrailMotion (callers that never set unk1C/unk1E; func_15147DA0 copies
  * past its end); a full TrailMotion on the stack changes the frame. */
 typedef struct TrailMotion1C {

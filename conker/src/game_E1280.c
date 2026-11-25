@@ -503,22 +503,7 @@ void func_150B5060(Trail *trail) {
     state->flags |= TRAIL_STOPPED;
 }
 
-/* Settings for one burst of particles, selected by TrailState.burstPreset. */
-typedef struct {
-    /* 0x00 */ f32 radius;
-    /* 0x04 */ f32 speed;
-    /* 0x08 */ f32 speedRange;
-    /* 0x0C */ f32 unkC;  /* particle.unk0 = unkC + rand * unk10 */
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14; /* particle.unk10 = unk14 + rand * unk18 */
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ s16 unk1C; /* spawn.unkC = unk1C + rand % (unk1E + 1) */
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 capacity;
-    /* 0x22 */ s16 capacityRange;
-} TrailBurstPreset; // size = 0x24
-
-extern TrailBurstPreset D_8009FBF0[];
+extern ScatterPreset D_8009FBF0[];
 extern s32 func_15147DA0(EffectTemplate *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 
 /* Throws out a burst of particles around the trail's emitter, one per whole unit of burstAccum. */
@@ -537,7 +522,7 @@ void func_150B5088(Trail *trail) {
     f32 sinB;
     u8 angA;
     u8 angB;
-    TrailBurstPreset *preset;
+    ScatterPreset *preset;
 
     state = trail->state;
     preset = &D_8009FBF0[state->burstPreset];
@@ -569,10 +554,10 @@ void func_150B5088(Trail *trail) {
         x = state->baseVel.x + preset->radius * sinB * cosA;
         y = state->baseVel.y - preset->radius * cosB;
         z = state->baseVel.z + preset->radius * sinB * sinA;
-        spawn.itemCount = (func_150ADA20() % (preset->capacityRange + 1)) + preset->capacity;
-        spawn.life = (func_150ADA20() % (preset->unk1E + 1)) + preset->unk1C;
-        particle.halfWidth = func_150ADA68() * preset->unk10 + preset->unkC;
-        particle.gravity = func_150ADA68() * preset->unk18 + preset->unk14;
+        spawn.itemCount = (func_150ADA20() % (preset->itemCountRange + 1)) + preset->itemCount;
+        spawn.life = (func_150ADA20() % (preset->lifeRange + 1)) + preset->life;
+        particle.halfWidth = func_150ADA68() * preset->halfWidthRange + preset->halfWidth;
+        particle.gravity = func_150ADA68() * preset->gravityRange + preset->gravity;
         particle.velocity.x = speed * x;
         particle.velocity.y = speed * y;
         particle.velocity.z = speed * z;

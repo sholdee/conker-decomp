@@ -1738,29 +1738,14 @@ void func_15198D40(CharacterFlamethrowerActor *actor) {
 void func_15198D7C(CharacterFlamethrowerActor *actor) {
 }
 
-/* Preset in D_800A8728 for the particles func_15198D88 scatters around a jet's end point. */
-typedef struct JetScatterPreset {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    s16 unk1C;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-} JetScatterPreset;
-
-extern JetScatterPreset D_800A8728[];
+extern ScatterPreset D_800A8728[];
 extern s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 
 /* Spawns scatterAccum particles (func_15147DA0) flying from the actor towards random points around `end`. */
 void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     TrailRender style;
     CharacterFlamethrowerJet *jet;
-    JetScatterPreset *preset;
+    ScatterPreset *preset;
     EffectTemplate18 spawn;
     TrailMotion motion;
     f32 px;
@@ -1793,21 +1778,21 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     style.primMode = 0;
     style.envMode = 9;
     do {
-        speed = (func_150ADA68() * preset->unk8) + preset->unk4;
+        speed = (func_150ADA68() * preset->speedRange) + preset->speed;
         a = func_150ADA20() & 0xFF;
         b = func_150ADA20() & 0xFF;
         sinA = func_151423D8((u8)(a - 0x40));
         cosA = func_151423D8(a);
         sinB = func_151423D8((u8)(b - 0x40));
         cosB = func_151423D8(b);
-        rad = preset->unk0;
+        rad = preset->radius;
         px = end->x + (rad * cosB * sinA);
         py = end->y - (rad * sinB);
         pz = end->z + (rad * cosB * cosA);
-        spawn.itemCount = (func_150ADA20() % (u32)(preset->unk22 + 1)) + preset->unk20;
-        spawn.life = (func_150ADA20() % (u32)(preset->unk1E + 1)) + preset->unk1C;
-        motion.halfWidth = (func_150ADA68() * preset->unk10) + preset->unkC;
-        motion.gravity = (func_150ADA68() * preset->unk18) + preset->unk14;
+        spawn.itemCount = (func_150ADA20() % (u32)(preset->itemCountRange + 1)) + preset->itemCount;
+        spawn.life = (func_150ADA20() % (u32)(preset->lifeRange + 1)) + preset->life;
+        motion.halfWidth = (func_150ADA68() * preset->halfWidthRange) + preset->halfWidth;
+        motion.gravity = (func_150ADA68() * preset->gravityRange) + preset->gravity;
         motion.velocity.x = (px - actor->pos.x) * speed;
         motion.velocity.y = (py - actor->pos.y) * speed;
         motion.velocity.z = (pz - actor->pos.z) * speed;
