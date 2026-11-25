@@ -851,65 +851,70 @@ void func_151A90C0(LevelObject *obj, s32 kind) {
     }
 }
 
-struct S6_151A91AC { s16 unk0; s16 unk2; s16 unk4; };
-extern struct S6_151A91AC D_8008F9A4;
+typedef struct {
+    s16 ids[3];
+} SpriteChoices;
 
-struct Loc_151A91AC {
-    s32 unk0;
-    s16 unk4;
-    u8  unk6;
-    u8  unk7;
-    s32 unk8;
-    s32 unkC;
-    u8  unk10;
-    u8  unk11;
-    u8  unk12;
-    u8  unk13;
-    u8  unk14;
-    u8  unk15;
-    u8  unk16;
-    u8  unk17;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-};
+extern SpriteChoices D_8008F9A4;
 
-void func_151A91AC(u8 *arg0, f32 *arg1, s32 arg2, s32 arg3) {
-    struct Loc_151A91AC sp64;
-    f32 fval;
-    struct S6_151A91AC sp58;
-    u32 idx;
-    s32 r3;
-    s32 r2;
+/* Spawn descriptor passed to func_1513C650. */
+typedef struct {
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 unk6;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s32 unk24;
+    /* 0x28 */ s32 unk28;
+} SpriteSpawn;
 
-    sp58 = D_8008F9A4;
-    fval = func_150ADA68() * 50.0f + 50.0f;
-    idx = (u32)func_150ADA20() % 3U;
+/* Spawn hook 0: a sprite of random size (50 to 100) using one of three D_8008F9A4 images, at pos. */
+void func_151A91AC(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
+    SpriteSpawn spawn;
+    f32 size;
+    SpriteChoices choices;
+    u32 pick;
+    s32 rand2;
+    s32 rand1;
 
-    sp64.unk6 = (u8)((s16 *)&sp58)[idx];
-    sp64.unk7 = 0;
-    sp64.unk16 = 0;
-    sp64.unk17 = 7;
-    sp64.unk8 = 0;
-    sp64.unkC = 0;
-    sp64.unk0 = 0x1701;
-    sp64.unk4 = 0x3C;
-    sp64.unk10 = 0xA0;
-    sp64.unk11 = 0xFF;
-    sp64.unk12 = 0;
-    sp64.unk13 = 0;
-    sp64.unk14 = 0;
-    sp64.unk15 = 0xFF;
-    sp64.unk18 = 0x3B0002;
+    choices = D_8008F9A4;
+    size = func_150ADA68() * 50.0f + 50.0f;
+    pick = func_150ADA20() % 3;
 
-    r2 = func_150ADA20();
-    r3 = func_150ADA20();
-    func_1513C650((s32)&sp64, 1, 0, (s32)(arg0 + 0x58), arg1[0], arg1[1], arg1[2],
-                  fval, fval, r2 & 0xFF,
-                  (r3 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
-                  arg0[0xC], arg0[1]);
+    spawn.unk6 = choices.ids[pick];
+    spawn.unk7 = 0;
+    spawn.unk16 = 0;
+    spawn.unk17 = 7;
+    spawn.unk8 = 0;
+    spawn.unkC = 0;
+    spawn.flags = 0x1701;
+    spawn.lifetime = 60;
+    spawn.unk10 = 0xA0;
+    spawn.unk11 = 0xFF;
+    spawn.unk12 = 0;
+    spawn.unk13 = 0;
+    spawn.unk14 = 0;
+    spawn.unk15 = 0xFF;
+    spawn.unk18 = 0x3B0002;
+
+    rand1 = func_150ADA20();
+    rand2 = func_150ADA20();
+    func_1513C650((s32)&spawn, 1, 0, (s32)emitter->state.ground.unk4, pos->x, pos->y, pos->z,
+                  size, size, rand1 & 0xFF,
+                  (rand2 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
+                  emitter->unkC, emitter->unk1);
 }
 
 /* Type 1 message handler: 0x17 switches the emitter on, 0x18 off, when the message carries its id. */
@@ -934,167 +939,142 @@ void func_151A931C(Emitter *emitter, u8 *msg, u8 msgType) {
 }
 
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    u8  unk8;
-    u8  unk9;
-    u8  unkA;
-    u8  unkB;
-    u8  unkC;
-    u8  padD[3];
-    void *unk10;
-} Def_151A9390;
+    s16 base;
+    s16 range;
+} RangeS16; /* base + rand % (range + 1) */
 
+/* User data of a type 2 emitter: the particles spawn hook 1 (func_151A9634) launches. */
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_151A9390;
+    /* 0x00 */ f32 vec0Base;         /* the two floats passed to func_1514B8E4: base + rand * range */
+    /* 0x04 */ f32 vec1Base;
+    /* 0x08 */ f32 vec0Range;
+    /* 0x0C */ f32 vec1Range;
+    /* 0x10 */ RangeS16 unk10;
+    /* 0x14 */ RangeS16 unk14;       /* goes into the particle's extra data */
+    /* 0x18 */ RangeS16 unk18;
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ f32 unk20Base;        /* goes into the particle's extra data */
+    /* 0x24 */ f32 unk20Range;
+    /* 0x28 */ u8 flags;             /* 1: particle kind 0x71 (else 0x13 or 0x14); 2: clear the 2 flag */
+} ParticleSettings; /* size 0x2C */
 
+/* One of the nine emitter presets of func_151A9390. */
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-} Pos_151A9390;
+    /* 0x00 */ f32 rate;
+    /* 0x04 */ f32 rateRange;
+    /* 0x08 */ u8 unk8;              /* unk8..unkC go to func_1516284C */
+    /* 0x09 */ u8 unk9;
+    /* 0x0A */ u8 unkA;
+    /* 0x0B */ u8 unkB;
+    /* 0x0C */ u8 unkC;
+    /* 0x10 */ ParticleSettings *settings;
+} EmitterPreset;
 
-typedef struct {
-    u8  unk0;
-    u8  pad1[3];
-    void *unk4;
-    f32 unk8;
-    f32 unkC;
-    Vec3f_151A9390 unk10;
-    f32 unk1C;
-    f32 unk20;
-    s8  unk24;
-    s8  unk25;
-    s8  unk26;
-    u8  pad27;
-} Header_151A9390;
-
-extern Def_151A9390 D_8008F9AC[];
+extern EmitterPreset D_8008F9AC[];
 
 void *func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
-void func_151A9390(u8 arg0, u8 arg1, Pos_151A9390 *arg2, Vec3f_151A9390 *arg3,
-                   f32 arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8) {
-    Header_151A9390 hdr;
-    s32 effect;
+/*
+ * Spawns particle emitter preset `preset` (0-8) on obj, or at pos when given. options:
+ * 1 EMITTER_ZONED, 2 EMITTER_NO_PROBE, 4 also call func_1516284C there, 8 and 0x10 set settings
+ * flags 1 and 2. lifetime -1 means untimed.
+ */
+void func_151A9390(u8 options, u8 preset, LevelObject *obj, Vec3f *pos,
+                   f32 bottom, f32 radius, s16 lifetime, u8 arg7, s32 arg8) {
+    EmitterDef def;
+    Emitter *emitter;
 
-    if (arg1 >= 9) {
+    if (preset >= 9) {
         return;
     }
 
-    hdr.unk0 = 1 | ((arg2 != NULL) ? 2 : 0) | ((arg0 & 1) ? 4 : 0) | ((arg0 & 2) ? 8 : 0);
-    hdr.unk4 = arg2;
-    hdr.unk8 = D_8008F9AC[arg1].unk0;
-    hdr.unkC = D_8008F9AC[arg1].unk4;
-    if (arg3 != NULL) {
-        hdr.unk10 = *arg3;
+    def.flags = EMITTER_ON | ((obj != NULL) ? EMITTER_ANCHORED : 0) | ((options & 1) ? EMITTER_ZONED : 0) |
+                ((options & 2) ? EMITTER_NO_PROBE : 0);
+    def.anchor = obj;
+    def.rate = D_8008F9AC[preset].rate;
+    def.rateRange = D_8008F9AC[preset].rateRange;
+    if (pos != NULL) {
+        def.pos = *pos;
     } else {
-        hdr.unk10.x = 0.0f;
-        hdr.unk10.y = 0.0f;
-        hdr.unk10.z = 0.0f;
+        def.pos.x = 0.0f;
+        def.pos.y = 0.0f;
+        def.pos.z = 0.0f;
     }
-    hdr.unk1C = arg4;
-    hdr.unk20 = arg5;
-    hdr.unk24 = 2;
-    hdr.unk25 = -1;
-    hdr.unk26 = 1;
+    def.bottom = bottom;
+    def.radius = radius;
+    def.type = 2;
+    def.update = -1;
+    def.spawn = 1;
 
-    effect = func_151A8B20(&hdr, arg6, 0x2C, arg7, arg8);
-    if (effect != 0) {
-        u8 *ptr;
+    emitter = func_151A8B20(&def, lifetime, sizeof(ParticleSettings), arg7, arg8);
+    if (emitter != NULL) {
+        ParticleSettings *settings;
 
-        ptr = (u8 *)(effect + 0x80);
-        memcpy(ptr, D_8008F9AC[arg1].unk10, 0x2C);
-        if (arg0 & 8) {
-            ptr[0x28] |= 1;
+        settings = (ParticleSettings *)emitter->data;
+        memcpy(settings, D_8008F9AC[preset].settings, sizeof(ParticleSettings));
+        if (options & 8) {
+            settings->flags |= 1;
         }
-        if (arg0 & 0x10) {
-            ptr[0x28] |= 2;
+        if (options & 0x10) {
+            settings->flags |= 2;
         }
     }
 
-    if (arg0 & 4) {
+    if (options & 4) {
         Header spawn;
-        s32 pos[3];
+        s32 spawnPos[3];
 
-        spawn.unk0 = ((arg6 == -1) ? 0 : 1) | 2;
+        spawn.unk0 = ((lifetime == -1) ? 0 : 1) | 2;
         spawn.unk1 = 2;
-        spawn.unk2 = (arg6 == -1) ? 0x12C : arg6;
-        spawn.unk4 = D_8008F9AC[arg1].unkB;
+        spawn.unk2 = (lifetime == -1) ? 300 : lifetime;
+        spawn.unk4 = D_8008F9AC[preset].unkB;
 
-        if (arg3 != NULL) {
-            pos[0] = (s32)arg3->x;
-            pos[1] = (s32)arg3->y;
-            pos[2] = (s32)arg3->z;
+        if (pos != NULL) {
+            spawnPos[0] = pos->x;
+            spawnPos[1] = pos->y;
+            spawnPos[2] = pos->z;
         } else {
-            pos[0] = arg2->unk0;
-            pos[1] = arg2->unk2;
-            pos[2] = arg2->unk4;
+            spawnPos[0] = obj->x;
+            spawnPos[1] = obj->y;
+            spawnPos[2] = obj->z;
         }
 
-        func_1516284C(&spawn, pos, D_8008F9AC[arg1].unk8, D_8008F9AC[arg1].unk9,
-                      D_8008F9AC[arg1].unkA, 0xFF, 0, 0, D_8008F9AC[arg1].unkC,
+        func_1516284C(&spawn, spawnPos, D_8008F9AC[preset].unk8, D_8008F9AC[preset].unk9,
+                      D_8008F9AC[preset].unkA, 0xFF, 0, 0, D_8008F9AC[preset].unkC,
                       0xFF, 1);
     }
 }
 
-typedef struct Emitter_151A9634 {
-    f32 field0;
-    f32 field4;
-    f32 field8;
-    f32 fieldC;
-    s16 field10;
-    s16 field12;
-    s16 field14;
-    s16 field16;
-    s16 field18;
-    s16 field1A;
-    s16 field1C;
-    s16 field1E;
-    f32 field20;
-    f32 field24;
-    u8 flags28;
-} Emitter_151A9634;
+/* Extra data stored at 0x160 of each particle. */
+typedef struct {
+    f32 unk0;
+    s16 unk4;
+} ParticleExtra;
 
-typedef struct Actor_151A9634 {
-    u8 pad0;
-    u8 field1;
-    u8 pad2[0xA];
-    u8 fieldC;
-    u8 padD[0x73];
-    Emitter_151A9634 emitter;
-} Actor_151A9634;
-
-typedef struct Payload_151A9634 {
-    f32 field0;
-    s16 field4;
-} Payload_151A9634;
-
-s32 func_1514B8E4(s32, f32 *, s16, s32, s32, f32, f32, f32,
+s32 func_1514B8E4(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_151A9634(Actor_151A9634 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    f32 position[2];
+/* Spawn hook 1: launches one particle at pos with values drawn from the emitter's ParticleSettings. */
+void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
+    f32 vec[2];
     s32 choice;
-    Payload_151A9634 payload;
+    ParticleExtra extra;
     s32 kind;
     s32 flags;
-    s32 result;
-    Emitter_151A9634 *emitter;
-    u32 random2;
-    u32 random1;
+    s32 particle;
+    ParticleSettings *settings;
+    u32 rand2;
+    u32 rand1;
 
-    emitter = &arg0->emitter;
-    position[0] = func_150ADA68() * emitter->field8 + emitter->field0;
-    position[1] = func_150ADA68() * emitter->fieldC + emitter->field4;
-    payload.field0 = func_150ADA68() * emitter->field24 + emitter->field20;
-    payload.field4 = func_150ADA20() % (u32)(emitter->field16 + 1) + emitter->field14;
-    random1 = func_150ADA20();
-    random2 = func_150ADA20();
-    if (emitter->flags28 & 1) {
+    settings = (ParticleSettings *)emitter->data;
+    vec[0] = func_150ADA68() * settings->vec0Range + settings->vec0Base;
+    vec[1] = func_150ADA68() * settings->vec1Range + settings->vec1Base;
+    extra.unk0 = func_150ADA68() * settings->unk20Range + settings->unk20Base;
+    extra.unk4 = func_150ADA20() % (u32)(settings->unk14.range + 1) + settings->unk14.base;
+    rand1 = func_150ADA20();
+    rand2 = func_150ADA20();
+    if (settings->flags & 1) {
         kind = 0x71;
     } else {
         if (func_150ADA20() & 1) {
@@ -1102,16 +1082,16 @@ void func_151A9634(Actor_151A9634 *arg0, s32 arg1, s32 arg2, s32 arg3) {
         } else {
             choice = 0x14;
         }
-        kind = choice;
+        kind = choice; // matching: the extra copy shapes IDO's register use
     }
-    flags = (emitter->flags28 & 2) ? 0 : 2;
-    result = func_1514B8E4(arg1, position,
-        (s16)(random1 % (u32)(emitter->field12 + 1) + emitter->field10),
-        (random2 % (u32)(emitter->field1A + 1) + emitter->field18) & 0xFF,
+    flags = (settings->flags & 2) ? 0 : 2;
+    particle = func_1514B8E4(pos, vec,
+        (s16)(rand1 % (u32)(settings->unk10.range + 1) + settings->unk10.base),
+        (rand2 % (u32)(settings->unk18.range + 1) + settings->unk18.base) & 0xFF,
         0, 0.0f, 1.0f, 1.0f, 0x21, 0x23, 2, kind, flags,
-        emitter->field1C, emitter->field1E, 8, arg0->fieldC, arg0->field1);
-    if (result != 0) {
-        memcpy((u8 *)result + 0x160, &payload, 8);
+        settings->unk1C, settings->unk1E, 8, emitter->unkC, emitter->unk1);
+    if (particle != 0) {
+        memcpy((u8 *)particle + 0x160, &extra, sizeof(extra));
     }
 }
 
