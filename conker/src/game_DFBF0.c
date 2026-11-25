@@ -2,13 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct PipeVec3f {
-    f32 x, y, z;
-} PipeVec3f;
-
 /* One of the three exploding pipes: where it is and which way it faces. */
 typedef struct PipeSpot {
-    PipeVec3f pos;
+    vertex pos;
     u8 yaw;
 } PipeSpot;
 
@@ -20,7 +16,7 @@ typedef struct PipeIds {
 typedef struct Fx151A6F00Args {
     s16 unk00;
     s16 pad02;
-    PipeVec3f pos;
+    vertex pos;
     s16 unk10;
     s16 pad12;
     f32 unk14;
@@ -34,7 +30,7 @@ typedef struct Fx151A6F00Args {
 /* Parameter block for func_151539B4. */
 typedef struct Fx151539B4Args {
     s16 unk00, unk02;
-    PipeVec3f pos;
+    vertex pos;
     s16 angle;
     s16 unk12, unk14, unk16;
     f32 unk18, unk1C, unk20, unk24;
@@ -50,7 +46,7 @@ typedef struct Fx151539B4Args {
 
 /* Parameter block for func_15152F70. */
 typedef struct Fx15152F70Args {
-    PipeVec3f pos;
+    vertex pos;
     f32 unk0C, unk10, unk14, unk18, unk1C, unk20;
     s16 unk24, unk26;
     s16 angle;
@@ -63,7 +59,7 @@ typedef struct Fx15152F70Args {
 
 /* Parameter block for func_150B3F5C. */
 typedef struct Fx150B3F5CArgs {
-    PipeVec3f vel;
+    vertex vel;
     f32 unk0C;
     u8 unk10;
     f32 unk14, unk18;
@@ -78,16 +74,16 @@ typedef struct Fx150B3F5CArgs {
     f32 unk3C;
 } Fx150B3F5CArgs;
 
-extern PipeSpot D_8009F920[];
+extern PipeSpot D_8009F920[3];
 extern PipeIds D_8009F950;
 extern PipeIds D_8009F95C;
 extern void func_151A6F00(Fx151A6F00Args *, s32, u8, s32);
 extern void func_1514C858(f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, f32, s32, u8);
 extern void func_151539B4(Fx151539B4Args *, u8);
 extern void func_15152F70(Fx15152F70Args *, u8);
-extern void func_150B3F5C(Fx150B3F5CArgs *, PipeVec3f *, s32);
+extern void func_150B3F5C(Fx150B3F5CArgs *, vertex *, s32);
 
-/* Spawns the full explosion effect (debris, smoke, sparks, sounds) for pipe `pipe`. */
+/* Explodes pipe `pipe`: fires the four effect spawners at its spot and plays two sounds there. */
 void func_150B2740(u8 pipe, u8 arg1) {
     Fx151A6F00Args argsA;
     s16 i;
@@ -95,7 +91,7 @@ void func_150B2740(u8 pipe, u8 arg1) {
     Fx15152F70Args argsC;
     f32 yawSin; // matching: also holds the debris size; a separate local mismatches
     f32 yawCos;
-    PipeVec3f origin;
+    vertex origin;
     Fx150B3F5CArgs argsD;
 
     func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
