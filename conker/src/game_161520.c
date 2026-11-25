@@ -2125,7 +2125,7 @@ typedef struct {
     s32 unk78;
 } BloodChunkDesc;
 
-extern void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
+extern void func_1503F404(void *matrix, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
 extern void func_15143794(s16, s16, f32, f32 *);
@@ -2141,7 +2141,7 @@ void func_15138424(struct127 *actor, Vec3f *position, s32 kind, void *arg3, u8 a
     Vec3f a;
     Vec3f b;
 
-    func_1503F404((s32)BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
+    func_1503F404(BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
     spawn.unk1C = 1.0f;
     spawn.radius = 20.0f;
     spawn.bounce = 0.5610000491f;
@@ -2473,7 +2473,7 @@ void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 a
         u32 yaw;
         u32 pitch;
 
-        func_1503F404((s32)BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
+        func_1503F404(BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
                       &position.x, &position.y, &position.z,
                       &second[0], &second[1], &second[2]);
         packet.radius = 1.0f;
@@ -2684,7 +2684,7 @@ void func_15139768(struct127 *actor, f32 *origin, f32 scale, void *hit, u8 arg4,
         }
         {
             s32 q; // matching: unused stack slot
-            func_1503F404((s32)BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
+            func_1503F404(BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
         }
         spawn2.radius = 1.0f;
         spawn2.bounce = 0.6490000486f;
@@ -2809,7 +2809,7 @@ void func_15139D74(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
         u8 j;
         u8 bit;
 
-        func_1503F404((s32)BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
+        func_1503F404(BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
                       &position.x, &position.y, &position.z,
                       &second[0], &second[1], &second[2]);
         packet.radius = 1.0f;
@@ -3033,7 +3033,7 @@ extern u8 D_800A4278[];
 extern s32 D_800A4280[];
 extern s32 D_800A4290[];
 extern struct17 D_800A42A0[];
-extern void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
+extern void func_1503F404(void *matrix, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
 extern void func_15143794(s16, s16, f32, f32 *);
@@ -3110,7 +3110,7 @@ void func_1513A6E0(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
         func_1513A5E0((Vec3f *)origin, arg3 & 0xFF, arg4);
         {
             s32 q; // matching: unused stack slot
-            func_1503F404((s32)BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
+            func_1503F404(BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
         }
         spawn2.radius = 1.0f;
         spawn2.bounce = 0.6490000486f;
@@ -3237,7 +3237,7 @@ void func_1513ABB8(struct127 *actor, f32 *origin, u8 variant, void *hit, u8 arg4
         u8 j;
         u8 bit;
 
-        func_1503F404((s32)BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
+        func_1503F404(BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
                       &position.x, &position.y, &position.z,
                       &second[0], &second[1], &second[2]);
         packet.radius = 1.0f;
@@ -3375,7 +3375,7 @@ void func_1513B0F8(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
     if ((actor->unk74 & 0xF) == 0xF) {
         return;
     }
-    func_1503F404((s32)BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
+    func_1503F404(BONE_MATRIX(actor, 12), &first[0], &first[1], &first[2],
                   &rotation.x, &rotation.y, &rotation.z,
                   &second[0], &second[1], &second[2]);
     drop.radius = 1.0f;
