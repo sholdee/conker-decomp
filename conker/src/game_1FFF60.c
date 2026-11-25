@@ -72,7 +72,7 @@ void func_151D2AB0(s32 index) {
 
     D_800E0950[index]++;
     if (D_800E0950[index] < 2) {
-        D_800E0990[index] = func_1502B5C8(&loadInfo, 2, 9, D_800AB140[index]);
+        D_800E0990[index] = (struct BoneAnchor *)func_1502B5C8(&loadInfo, 2, 9, D_800AB140[index]);
         D_800E0968[index] = loadInfo >> 4;
     }
 }
@@ -82,7 +82,7 @@ void func_151D2B4C(s32 index) {
     if (D_800E0950[index] != 0) {
         D_800E0950[index]--;
         if (D_800E0950[index] == 0) {
-            func_100043B4(D_800E0990[index], 4);
+            func_100043B4((s32 *)D_800E0990[index], 4);
         }
     }
 }

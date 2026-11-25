@@ -162,8 +162,8 @@ extern u64 *D_80036B98;
 extern u32  D_80038070;
 extern u16  D_80038074;
 extern u8   D_80038080;
-extern u32  D_80038090;
-extern u32  D_80038094;
+extern u32  D_80038090; // RDP output buffer address (u64 *); matching: init_3930 must store it as an integer like D_80038098/9C so IDO shares the constants
+extern u32  D_80038094; // its end address (same as D_80038090)
 extern u32  D_80038098;
 extern u32  D_8003809C;
 extern f32  D_800380A0;
@@ -1108,8 +1108,8 @@ extern u32 D_800D3094; // number of trigger zones in D_800D3098
 extern TriggerZone *D_800D3098; // level placement / marker table (0x34-byte records)
 extern GroundCandidate D_800D3300[]; // ground-probe hits
 extern u8  D_800D35DC; // 1-based slot of the actor being updated (0 = none)
-extern s32 D_800D3668;
-extern s32 D_800D366C;
+extern u8 *D_800D3668; // per-face shadow flag table
+extern u8 *D_800D366C; // end of D_800D3668
 extern f32 D_800D3670;
 extern s16 D_800D3674;
 extern s32 D_800D3858;
@@ -1336,7 +1336,7 @@ extern void *D_800E0940;
 extern u8   D_800E0950[20]; // reference counts (game_1FFF60)
 extern s32  D_800E0964;
 extern u16  D_800E0968[]; // anchor count per set (D_800E0990)
-extern s32  D_800E0990[];
+extern struct BoneAnchor *D_800E0990[]; // anchor set per resource (type in 1BC650)
 extern u8   D_800E0A10;
 extern StreamVoice D_800E0D80; // the streaming music player's voice
 

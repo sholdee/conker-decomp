@@ -289,7 +289,7 @@ void func_15007B3C(void) {
 void func_150081E4(void) {
     s32 i;
 
-    D_800D3668 = 0;
+    D_800D3668 = NULL;
     D_800CBE00 = NULL;
     D_800DDD64 = NULL;
 

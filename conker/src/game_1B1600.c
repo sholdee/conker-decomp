@@ -726,7 +726,7 @@ s32 func_1518652C(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx 
                         p++;
                     }
                     if (face < 0x1760) {
-                        if (((u8 *)D_800D3668)[face] == 1) {
+                        if (D_800D3668[face] == 1) {
                             bits[face >> 5] |= 1 << (face & 0x1F);
                             if (maxFace < face) {
                                 maxFace = face;
