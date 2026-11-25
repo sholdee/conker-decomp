@@ -26,7 +26,9 @@ extern u8 D_80099A3E;
 typedef struct struct127Hidden {
     /* 0x000 */ u8 pad0[0x70];
     /* 0x070 */ u8 unk70;
-    /* 0x071 */ u8 pad71[0x136 - 0x71];
+    /* 0x071 */ u8 pad71[0xC8 - 0x71];
+    /* 0x0C8 */ f32 unkC8;
+    /* 0x0CC */ u8 padCC[0x136 - 0xCC];
     /* 0x136 */ u8 unk136;
     /* 0x137 */ u8 unk137;
     /* 0x138 */ u8 pad138[0x160 - 0x138];
@@ -39,7 +41,7 @@ typedef struct struct127Hidden {
     /* 0x2E0 */ f32 unk2E0;
     /* 0x2E4 */ u8 pad2E4[0x304 - 0x2E4];
     /* 0x304 */ s32 unk304[4];
-    /* 0x314 */ s32 unk314;
+    /* 0x314 */ s32 *unk314;
     /* 0x318 */ u8 pad318[0x32C - 0x318];
 } struct127Hidden;
 #define HIDDEN(obj) ((struct127Hidden *)(obj))
@@ -3366,6 +3368,7 @@ void func_15072AF8(void) {
     func_1505E650(D_800D154C, D_800D154C->unk84.uh + 1, 1.0f, 6.0f, 0.0f, 0.0f, 0);
 }
 
+/* Picks the follow-up animation for the current animation unk84 and plays it. */
 void func_15072B44(void) {
     s32 state;
     s32 anim = -1;
@@ -3422,29 +3425,28 @@ void func_15072B44(void) {
         anim = 0x3E;
         break;
     case 0x10C:
-        if (*((u8 *)D_800D154C->unk31C + 0x197)) {
+        if (HIDDEN126(D_800D154C->unk31C)->unk197) {
             anim = 0x10A;
         } else {
             func_1507F640();
         }
         break;
     case 0x156:
-        if (*((u8 *)D_800D154C->unk31C + 0x197)) {
+        if (HIDDEN126(D_800D154C->unk31C)->unk197) {
             anim = 0x157;
         } else {
             func_1507F640();
         }
         break;
     case 0x167:
-        if (*((u8 *)D_800D154C->unk31C + 0x197)) {
+        if (HIDDEN126(D_800D154C->unk31C)->unk197) {
             anim = 0x165;
         } else {
             func_1507F640();
         }
         break;
     default:
-        if ((state == 0xBE) ||
-            ((state == 0xC1) && !(*(s32 *)((u8 *)D_800D154C->unk31C + 0x38) & 0x2000))) {
+        if (state == 0xBE || (state == 0xC1 && !(D_800D154C->unk31C->unk38 & 0x2000))) {
             anim = 0xBF;
         }
         break;
@@ -3468,21 +3470,21 @@ void func_15072DA0(void) {
 void func_15072DD8(void) {
     func_15083568(D_800D154C, D_800D1580, 1.0f, 0);
 
-    if ((D_800D154C->unk31C != 0) && (D_800D154C->unk31C->unk11A == 1)) {
-        D_800D154C->unk31C->unk11A = (u8)2U;
+    if (D_800D154C->unk31C != NULL && D_800D154C->unk31C->unk11A == 1) {
+        D_800D154C->unk31C->unk11A = 2;
     }
 }
 
 void func_15072E38(void) {
     func_150836CC(D_800D154C, D_800D1580);
 
-    if (D_800D154C->unk31C != 0) {
-        D_800D154C->unk31C->unk11A = (u8)0;
+    if (D_800D154C->unk31C != NULL) {
+        D_800D154C->unk31C->unk11A = 0;
     }
 }
 
 void func_15072E7C(void) {
-    D_800D154C->unk10C = (s16) D_800D1580;
+    D_800D154C->unk10C = D_800D1580;
 }
 
 void func_15072E98(void) {
@@ -3490,38 +3492,40 @@ void func_15072E98(void) {
 }
 
 void func_15072EC0(void) {
-    struct197 *tmp;
+    struct197 *anim;
 
-    tmp = D_800D154C->unk2D0;
-    if (tmp->unk10 < D_800D1874) {
+    anim = D_800D154C->unk2D0;
+    if (anim->unk10 < D_800D1874) {
         D_800D154C->unk10C = 0;
     }
 }
 
 void func_15072EF4(void) {
-    D_800D154C->stunned = (s8) D_800D1580;
+    D_800D154C->stunned = D_800D1580;
 }
 
 void func_15072F10(void) {
-    f32 sp4C;
-    f32 sp48;
-    f32 sp44;
-    s16 temp;
+    f32 targetX;
+    f32 targetZ;
+    f32 targetY;
+    s16 pitch;
 
-    temp = (s16)(D_800D154C->unk1D1 * 200);
-    *(s16 *)((u8 *)D_800D154C->unk31C + 0x24) -= 1;
-    func_1505A184((u16)(D_800D154C->unk7A - D_800D154C->unk31C->unk12), 2000.0f, (f32)temp * 0.005493164f, &sp4C, &sp48, &sp44);
-    sp4C = sp4C * 5000.0f + D_800D154C->x_position;
-    sp48 = sp48 * 5000.0f + D_800D154C->z_position;
-    sp44 = sp44 * 5000.0f + D_800D154C->y_position;
-    func_150E1570(D_800D154C, D_800D154C->x_position, D_800D154C->y_position + (f32)D_800D154C->unkD6, D_800D154C->z_position, sp4C, sp44, sp48, D_800C3E78, 0x12);
+    pitch = (s16)(D_800D154C->unk1D1 * 200);
+    HIDDEN126(D_800D154C->unk31C)->unk24 -= 1;
+    func_1505A184((u16)(D_800D154C->unk7A - D_800D154C->unk31C->unk12), 2000.0f, pitch * 0.0054931640625f,
+                  &targetX, &targetZ, &targetY);
+    targetX = targetX * 5000.0f + D_800D154C->x_position;
+    targetZ = targetZ * 5000.0f + D_800D154C->z_position;
+    targetY = targetY * 5000.0f + D_800D154C->y_position;
+    func_150E1570(D_800D154C, D_800D154C->x_position, D_800D154C->y_position + D_800D154C->unkD6,
+                  D_800D154C->z_position, targetX, targetY, targetZ, D_800C3E78, 18);
 }
 
 void func_1507304C(void) {
 }
 
 void func_15073054(void) {
-    D_800D154C->unk22E = (s16) D_800D1580;
+    D_800D154C->unk22E = D_800D1580;
 }
 
 void func_15073070(void) {
@@ -3533,31 +3537,25 @@ void func_15073078(void) {
 }
 
 void func_150730A4(void) {
-    D_800D154C->unk1FF = (u8)3;
-    D_800D154C->unk200 = (s8) D_800D1580;
+    D_800D154C->unk1FF = 3;
+    D_800D154C->unk200 = D_800D1580;
 }
 
 void func_150730D0(void) {
-    struct127 *temp_v0;
-
     if (D_800D1580 == 1) {
-        temp_v0 = D_800D154C;
-        temp_v0->unk2F8 |= 0x100;
+        D_800D154C->unk2F8 |= 0x100;
     } else {
-        temp_v0 = D_800D154C;
-        temp_v0->unk2F8 &= 0xFEFF;
-      }
+        D_800D154C->unk2F8 &= 0xFEFF;
+    }
 }
 
 
-typedef struct {
-    u8 pad_0[0x300];
-    s32 field_0x300;
-    s32 field_0x304[4];
-    s32 *field_0x314;
-} Game981E0ActorSlots;
-
-u8 *func_15073118(u8 *arg0, s32 arg1, s32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s32 argA) {
+/*
+ * Spawns a projectile (state 0x21) playing animation `anim`, at bone `bone` of `parent` offset by
+ * (offX, offY, offZ), or at the parent's position. Returns the new object.
+ */
+u8 *func_15073118(u8 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, f32 yawOffset, f32 speed,
+                  f32 yVelocity, f32 gravity, s32 unk83) {
     Mtx *mtx;
     f32 mf[4][4];
     struct127 *obj;
@@ -3567,33 +3565,33 @@ u8 *func_15073118(u8 *arg0, s32 arg1, s32 arg2, f32 arg3, f32 arg4, f32 arg5, f3
     s32 i;
 
     obj = func_1505ED34();
-    obj->gravity = arg9;
-    obj->y_velocity = arg8;
-    obj->xz_velocity = arg7;
-    obj->unk83 = argA;
-    if ((((struct127 *)arg0)->unk1D4 != 0) && (arg1 != -1)) {
-        mtx = (Mtx *)((struct127 *)arg0)->unk1D4 + arg1;
+    obj->gravity = gravity;
+    obj->y_velocity = yVelocity;
+    obj->xz_velocity = speed;
+    obj->unk83 = unk83;
+    if (((struct127 *)parent)->unk1D4 != NULL && bone != -1) {
+        mtx = (Mtx *)((struct127 *)parent)->unk1D4 + bone;
         if (D_800C3E90 != 0) {
             guMtxL2F(mf, mtx);
             mtx = (Mtx *)mf;
         }
-        func_150A7960((f32 *)mtx, arg3, arg4, arg5, &x, &y, &z);
+        func_150A7960((f32 *)mtx, offX, offY, offZ, &x, &y, &z);
     } else {
-        x = ((struct127 *)arg0)->x_position;
-        y = ((struct127 *)arg0)->y_position;
-        z = ((struct127 *)arg0)->z_position;
+        x = ((struct127 *)parent)->x_position;
+        y = ((struct127 *)parent)->y_position;
+        z = ((struct127 *)parent)->z_position;
     }
     obj->x_position = x;
     obj->y_position = y;
     obj->z_position = z;
-    obj->unk76 = obj->unk7A = (f32)((struct127 *)arg0)->unk7A + arg6 * 182.04445f;
+    obj->unk76 = obj->unk7A = ((struct127 *)parent)->unk7A + yawOffset * 182.04445f;
     obj->interaction_state = 0x21;
     obj->immune = 0xFF;
     obj->unkF8 = 2;
-    if (arg2 != 0x42) {
+    if (anim != 0x42) {
         obj->unkF8 = 0x100E;
     }
-    obj->pad66 = ((struct127 *)arg0)->pad66 & 0xC;
+    obj->pad66 = ((struct127 *)parent)->pad66 & 0xC;
     obj->unkE4 = 10;
     obj->unkE6 = 10;
     obj->unkEC = 1.0f;
@@ -3602,20 +3600,20 @@ u8 *func_15073118(u8 *arg0, s32 arg1, s32 arg2, f32 arg3, f32 arg4, f32 arg5, f3
     obj->unkE0 = 1.0f;
     obj->xz_scale = 0.5f;
     obj->y_scale = 0.5f;
-    if (arg2 == 0x1F) {
-        *(f32 *)&obj->padC8 = 10.0f;
+    if (anim == 0x1F) {
+        HIDDEN(obj)->unkC8 = 10.0f;
     }
-    obj->unk278 = arg2;
+    obj->unk278 = anim;
     obj->unk5 = 5;
     obj->unique_id = 255U - (obj - D_800CC2D0);
-    func_15083568(obj, arg2, 1.0f, 0);
+    func_15083568(obj, anim, 1.0f, 0);
     for (i = 0; i <= D_80082FA0; i++) {
-        ((Game981E0ActorSlots *)obj)->field_0x304[i] = func_1515D480(1);
+        HIDDEN(obj)->unk304[i] = func_1515D480(1);
     }
-    if ((&((Game981E0ActorSlots *)obj)->field_0x300)[i] != 0) {
+    if (HIDDEN(obj)->unk304[i - 1] != 0) {
         obj->unk301[0] = 1;
     }
-    ((Game981E0ActorSlots *)obj)->field_0x314 = func_1515D440();
+    HIDDEN(obj)->unk314 = func_1515D440();
     func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
     return (u8 *)obj;
 }
