@@ -2,6 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
+typedef struct {
+    f32 x, y, z;
+} Vec3f;
+
 /* Spawn parameters of a particle (same layout as ParticleDesc in game_15D730.c). */
 typedef struct {
     /* 0x00 */ s32 unk0;
@@ -26,9 +30,9 @@ typedef struct {
     /* 0x24 */ f32 scaleRate;
     /* 0x28 */ f32 width;
     /* 0x2C */ f32 height;
-    /* 0x30 */ struct17 pos;
-    /* 0x3C */ struct17 offset;
-    /* 0x48 */ struct17 vel;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f offset;
+    /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 gravity;
     /* 0x58 */ s32 flags;
     /* 0x5C */ void *viewMask;
@@ -139,9 +143,9 @@ void func_150C4120(struct127 *owner, s16 duration, u8 arg2, s32 arg3) {
         spawn.b2 = 0;
         spawn.alpha = 0xFF;
         spawn.brightness = 0xFF;
-        spawn.pos = *(struct17 *)&D_800A5480;
-        spawn.offset = *(struct17 *)&D_800A5480;
-        spawn.vel = *(struct17 *)&D_800A5480;
+        spawn.pos = *(Vec3f *)&D_800A5480;
+        spawn.offset = *(Vec3f *)&D_800A5480;
+        spawn.vel = *(Vec3f *)&D_800A5480;
         spawn.scaleStart = 1;
         spawn.gravity = 0.0f;
         spawn.scaleRate = 1.0f;
@@ -167,165 +171,143 @@ void func_150C4120(struct127 *owner, s16 duration, u8 arg2, s32 arg3) {
     }
 }
 
+/* Ground probe result filled by func_1504715C (same layout as GroundHit in game_105760.c). */
 typedef struct {
-    f32 x, y, z;
-} Vec3f_C44A4;
+    f32 height;
+    s16 points[9];
+    s32 unk18;
+    u8 flags;
+    u8 unk1D;
+    s32 unk20;
+} GroundHit; /* size 0x24 */
 
-typedef struct {
-    u8 pad0[0x40];
-    Vec3f_C44A4 pos; /* 0x40 */
-    u8 pad4C[0x74 - 0x4C];
-    s8 unk74;
-} Sub28C_C44A4;
-
-typedef struct {
-    struct127 *obj;      /* 0x00 */
-    u8 id;               /* 0x04 */
-    u8 pad5[3];
-    f32 unk8;            /* 0x08 */
-    Sub28C_C44A4 *unkC;  /* 0x0C */
-    f32 unk10;           /* 0x10 */
-    s16 unk14;           /* 0x14 */
-    u8 unk16;            /* 0x16 */
-    u8 pad17;
-    s32 unk18;           /* 0x18 */
-} Sub28_C44A4;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    u8 pad10[0x18];
-    Sub28_C44A4 unk28;
-} Arg_C44A4;
-
-extern void func_1504715C(void *, struct127 *);
-extern s32 func_1514654C(struct127 *, struct126 *, s32, void *, void *, s32);
-extern void func_15143134(void *, void *, s32);
-extern void func_15143794(s32, s32, f32, f32 *);
-extern s32 func_1515C0F8(struct127 *, f32 **);
-extern void func_151C36D8(void *, s32, s32);
-extern void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, void *, s32, s32, s32, s32);
-extern Vec3f_C44A4 D_800A0350[];
+extern void func_1504715C(GroundHit *, struct127 *);
+extern s32 func_1514654C(struct127 *, struct126 *, s32, Vec3f **, Vec3f **, s32);
+extern void func_15143134(Vec3f *, Vec3f *, Mtx *);
+extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
+extern s32 func_1515C0F8(struct127 *, Vec3f **);
+extern void func_151C36D8(Vec3f *, s32, s32);
+extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, void *, s32, s32, s32, s32);
+extern Vec3f D_800A0350[];
 extern u8 D_800A0374[];
-extern Vec3f_C44A4 D_800A0378[];
+extern Vec3f D_800A0378[];
 extern u8 D_800A03A8[];
 
-void func_150C44A4(Arg_C44A4 *arg0) {
-    struct127 *obj;
-    Sub28_C44A4 *s;
-    Vec3f_C44A4 spFC;
-    Vec3f_C44A4 spF0;
-    f32 f;
+/* Per-frame update of the func_150C4120 effect: keeps its particle at a point on the owner and emits
+ * smaller particles from there. Frees the effect once the owner is gone. */
+void func_150C44A4(Effect *effect) {
+    struct127 *owner;
+    EffectData *data;
+    Vec3f pos;
+    Vec3f offset;
+    f32 progress;
     s32 i;
     f32 t;
-    u8 spC0[0x24];
-    Vec3f_C44A4 *spBC;
-    Vec3f_C44A4 *spB8;
-    struct126 *v0;
-    s32 flag;
-    f32 *spAC;
-    f32 spA0[3];
-    s32 r1;
-    s32 r0;
-    f32 f20;
-    f32 f22;
+    GroundHit ground;
+    Vec3f *offsetPtr;
+    Vec3f *posPtr;
+    struct126 *bone;
+    s32 emit;
+    Vec3f *wind;
+    Vec3f vel;
+    s32 rand1;
+    s32 rand0;
+    f32 randF0;
+    f32 randF1;
 
-    obj = arg0->unk28.obj;
-    s = &arg0->unk28;
-    if ((obj->interaction_state == 0) || (obj->unique_id != s->id)) {
-        arg0->unkE = -1;
+    owner = effect->data.owner;
+    data = &effect->data;
+    if ((owner->interaction_state == 0) || (owner->unique_id != data->ownerId)) {
+        effect->state = -1;
         return;
     }
-    if ((obj->unk1D4 == NULL) || (s->unk16 & 2)) {
-        if (s->unkC != NULL) {
-            s->unkC->unk74 = 3;
+    if ((owner->unk1D4 == NULL) || (data->flags & 2)) {
+        if (data->particle != NULL) {
+            data->particle->desc.drawFunc = 3;
         }
         return;
     }
-    func_1504715C(spC0, obj);
-    if (s->unk18 == 0) {
-        s->unk18 = func_10010154(0x96, obj, 0x36B0, 0x190, 0x4268);
+    func_1504715C(&ground, owner);
+    if (data->unk18 == 0) {
+        data->unk18 = func_10010154(150, owner, 0x36B0, 400, 0x4268);
     }
-    if (s->unk16 & 1) {
-        v0 = func_1503195C(obj, s->unk14, 0);
-        if (v0 == NULL) {
+    if (data->flags & 1) {
+        bone = func_1503195C(owner, data->unk14, 0);
+        if (bone == NULL) {
             return;
         }
-        if (*(s32 *)((u8 *)obj + 0x2EC) != 0) {
-            f = *(f32 *)((u8 *)obj + 0x2D8) * *(f32 *)((u8 *)obj + 0x2DC);
+        /* struct127 has no fields at 0x2D8/0x2DC yet */
+        if (owner->unk2EC != 0) {
+            progress = *(f32 *)((u8 *)owner + 0x2D8) * *(f32 *)((u8 *)owner + 0x2DC);
         } else {
-            f = 0.0f;
+            progress = 0.0f;
         }
-        i = f * 4.0f;
+        i = progress * 4.0f;
         if (i >= 4) {
             i = 3;
         }
-        t = (f - i * 0.25f) * 4.0f;
-        spF0.x = D_800A0378[i].x * t;
-        spF0.y = D_800A0378[i].y * t;
-        spF0.z = D_800A0378[i].z * t;
-        spBC = &spF0;
-        spB8 = &spFC;
-        if (func_1514654C(obj, v0, D_800A03A8[i], &spBC, &spB8, 1) == 0) {
-            spFC.x = obj->x_position;
-            spFC.y = obj->y_position + 800.0f;
-            spFC.z = obj->z_position;
+        t = (progress - i * 0.25f) * 4.0f;
+        offset.x = D_800A0378[i].x * t;
+        offset.y = D_800A0378[i].y * t;
+        offset.z = D_800A0378[i].z * t;
+        offsetPtr = &offset;
+        posPtr = &pos;
+        if (func_1514654C(owner, bone, D_800A03A8[i], &offsetPtr, &posPtr, 1) == 0) {
+            pos.x = owner->x_position;
+            pos.y = owner->y_position + 800.0f;
+            pos.z = owner->z_position;
         }
     } else {
-        if (obj->unk2E8 != 0) {
-            f = (f32)obj->unk2E4 / (f32)obj->unk2E8;
+        if (owner->unk2E8 != 0) {
+            progress = (f32)owner->unk2E4 / (f32)owner->unk2E8;
         } else {
-            f = 1.0f;
+            progress = 1.0f;
         }
-        i = f * 3.0f;
+        i = progress * 3.0f;
         if (i >= 3) {
             i = 2;
         }
-        t = (f - i * 0.33333334f) * 3.0f;
-        spF0.x = D_800A0350[i].x * t;
-        spF0.y = D_800A0350[i].y * t;
-        spF0.z = D_800A0350[i].z * t;
-        func_15143134(&spF0, &spFC, (D_800A0374[i] << 6) + (s32)obj->unk1D4);
+        t = (progress - i * 0.33333334f) * 3.0f;
+        offset.x = D_800A0350[i].x * t;
+        offset.y = D_800A0350[i].y * t;
+        offset.z = D_800A0350[i].z * t;
+        func_15143134(&offset, &pos, (Mtx *)owner->unk1D4 + D_800A0374[i]);
     }
-    if (s->unkC != NULL) {
-        s->unkC->unk74 = -1;
-        s->unkC->pos = spFC;
+    if (data->particle != NULL) {
+        data->particle->desc.drawFunc = -1;
+        data->particle->desc.pos = pos;
     }
-    flag = 1;
-    if ((D_800BE9F0 == 2) && (func_150A29C8(obj - D_800CC2D0, 0x4065) == 0)) {
-        flag = 0;
+    emit = TRUE;
+    if ((D_800BE9F0 == 2) && (func_150A29C8(owner - D_800CC2D0, 0x4065) == 0)) {
+        emit = FALSE;
     }
-    if (flag) {
-        s->unk8 += (0.1290000081f + func_150ADA68() * 0.1170000061f) * D_800BE9A4;
-        while (s->unk8 > 1.0f) {
-            func_151C36D8(&spFC, arg0->unkC, arg0->unk1);
-            s->unk8 -= 1.0f;
+    if (emit) {
+        data->unk8 += (0.1290000081f + func_150ADA68() * 0.1170000061f) * D_800BE9A4;
+        while (data->unk8 > 1.0f) {
+            func_151C36D8(&pos, effect->unkC, effect->unk1);
+            data->unk8 -= 1.0f;
         }
     }
-    s->unk10 += (0.1300000101f + func_150ADA68() * 0.2f) * D_800BE9A4;
-    if (s->unk10 > 1.0f) {
-        if (func_1515C0F8(obj, &spAC) == 0) {
-            spAC = &D_800A5480;
+    data->unk10 += (0.1300000101f + func_150ADA68() * 0.2f) * D_800BE9A4;
+    if (data->unk10 > 1.0f) {
+        if (func_1515C0F8(owner, &wind) == 0) {
+            wind = (Vec3f *)&D_800A5480;
         }
         do {
-            r1 = func_150ADA20();
-            r0 = func_150ADA20();
-            func_15143794((s16)(r1 & 0xFF), (s16)((r0 % 25U) - 0x40), func_150ADA68() * 2.597000122f + 4.870000362f, spA0);
-            spA0[0] -= spAC[0] * 0.6f;
-            spA0[2] -= spAC[2] * 0.6f;
-            f20 = func_150ADA68();
-            r1 = func_150ADA20();
-            r0 = func_150ADA20();
-            f22 = func_150ADA68();
-            func_151D9014(&spFC, spA0, 0xC, f20 * 0.2580000162f + -0.6080000401f, (r1 % 41U) + 60, (r0 % 56U) + 200,
-                          f22 * 160.0f + 121.0f, func_150ADA68() < 0.7000000477f, 1.0f, 1.0f, 0, spC0, 1, 1,
-                          arg0->unkC, arg0->unk1);
-            s->unk10 -= 1.0f;
-        } while (s->unk10 > 1.0f);
+            rand1 = func_150ADA20();
+            rand0 = func_150ADA20();
+            func_15143794(rand1 & 0xFF, (rand0 % 25U) - 0x40, func_150ADA68() * 2.597000122f + 4.870000362f, &vel);
+            vel.x -= wind->x * 0.6f;
+            vel.z -= wind->z * 0.6f;
+            randF0 = func_150ADA68();
+            rand1 = func_150ADA20();
+            rand0 = func_150ADA20();
+            randF1 = func_150ADA68();
+            func_151D9014(&pos, &vel, 0xC, randF0 * 0.2580000162f + -0.6080000401f, (rand1 % 41U) + 60, (rand0 % 56U) + 200,
+                          randF1 * 160.0f + 121.0f, func_150ADA68() < 0.7000000477f, 1.0f, 1.0f, 0, &ground, 1, 1,
+                          effect->unkC, effect->unk1);
+            data->unk10 -= 1.0f;
+        } while (data->unk10 > 1.0f);
     }
 }
 
