@@ -454,7 +454,7 @@ void func_150FDC2C(Actor150FD514 *actor) {
         func_1516972C((EffectHeader *)ext->unk24);
     }
     if (ext->groundParticle != NULL) {
-        func_1516972C((EffectHeader *)ext->groundParticle);
+        func_1516972C(&ext->groundParticle->head.header);
     }
     if (ext->soundHandle != 0) {
         func_100111C8(ext->soundHandle);

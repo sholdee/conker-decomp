@@ -797,10 +797,10 @@ void func_150D4C2C(TrailActor *actor) {
     func_1000FD38(func_150D5124, state, 0x5B4);
     func_1000FD38(func_150D5124, state, 0x5BC);
     if (state->effects[0] != NULL) {
-        func_1516972C((EffectHeader *)state->effects[0]);
+        func_1516972C(&state->effects[0]->head.header);
     }
     if (state->effects[1] != NULL) {
-        func_1516972C((EffectHeader *)state->effects[1]);
+        func_1516972C(&state->effects[1]->head.header);
     }
 }
 

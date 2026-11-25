@@ -660,7 +660,7 @@ Rope *func_151AE590(u8 id) {
         for (j = 0; j < 2; j++) {
             rope = D_800DCE50[j][D_800A9270[i]];
             while (rope != NULL) {
-                Rope *next = rope->header.next;
+                Rope *next = (Rope *)rope->header.next;
 
                 if (rope->id == id) {
                     return rope;

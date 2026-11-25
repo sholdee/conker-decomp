@@ -346,7 +346,7 @@ void func_151D3354(BoneFollower *follower) {
 /* Destroys every follower in the group. */
 void func_151D33B8(ActorFollowerGroup *group) {
     while (group->count > 0) {
-        func_1516972C((EffectHeader *)group->head);
+        func_1516972C(&group->head->header);
     }
 }
 

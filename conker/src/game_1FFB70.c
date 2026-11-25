@@ -39,7 +39,7 @@ ScreenOverlay *func_151D26C0(s16 id) {
 void func_151D2718(s16 id) {
     ScreenOverlay *overlay;
 
-    for (overlay = D_800DCE50[1][0x3C]; overlay != NULL; overlay = overlay->header.next) {
+    for (overlay = D_800DCE50[1][0x3C]; overlay != NULL; overlay = (ScreenOverlay *)overlay->header.next) {
         if (id == overlay->id) {
             overlay->speed = -2;
         }

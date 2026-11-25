@@ -227,7 +227,7 @@ PlayerMarker *func_15155FD4(s32 playerId) {
     PlayerMarker *marker;
 
     for (list = 0; list < 2; list++) {
-        for (marker = D_800DCE50[list][OBJ_TYPE_PLAYER_MARKER]; marker != NULL; marker = marker->header.next) {
+        for (marker = D_800DCE50[list][OBJ_TYPE_PLAYER_MARKER]; marker != NULL; marker = (PlayerMarker *)marker->header.next) {
             if (playerId == marker->playerId) {
                 return marker;
             }

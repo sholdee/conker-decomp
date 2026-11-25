@@ -321,7 +321,7 @@ void func_151412BC(void) {
                         }
                     }
                 }
-                obj = obj->header.next;
+                obj = (GlowObj *)obj->header.next;
             }
         }
     }

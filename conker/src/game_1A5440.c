@@ -431,7 +431,7 @@ extern SwarmMember *D_800DCF3C; /* list of live swarm members */
 Swarm *func_15178B98(u8 tag) {
     Swarm *swarm;
 
-    for (swarm = D_800DCF38; swarm != NULL; swarm = swarm->header.next) {
+    for (swarm = D_800DCF38; swarm != NULL; swarm = (Swarm *)swarm->header.next) {
         if (swarm->tag == tag) {
             return swarm;
         }
@@ -493,7 +493,7 @@ void func_15178DA4(Swarm *swarm) {
     member = D_800DCF3C;
     func_100111C8(swarm->sfxHandle);
     while (member != NULL) {
-        next = member->header.next;
+        next = (SwarmMember *)member->header.next;
         if (swarm == member->s.swarm) {
             func_1516972C(&member->header);
         }

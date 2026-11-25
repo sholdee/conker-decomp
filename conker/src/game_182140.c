@@ -246,7 +246,7 @@ s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount) {
         do {
             sprite = D_800DCE50[table][lists.id[i]];
             while (sprite != NULL) {
-                next = sprite->header.next;
+                next = (ScreenSprite *)sprite->header.next;
                 k = kindCount;
                 found = 0;
                 while (k > 0 && !found) {

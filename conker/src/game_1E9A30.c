@@ -911,16 +911,16 @@ void func_151BE138(BurstEffect *effect) {
     BurstData *data = &effect->data;
 
     if (data->sparks[0] != NULL) {
-        func_1516972C((EffectHeader *)data->sparks[0]);
+        func_1516972C(&data->sparks[0]->head.header);
     }
     if (data->sparks[1] != NULL) {
-        func_1516972C((EffectHeader *)data->sparks[1]);
+        func_1516972C(&data->sparks[1]->head.header);
     }
     if (data->glows[0] != NULL) {
-        func_1516972C((EffectHeader *)data->glows[0]);
+        func_1516972C(&data->glows[0]->head.header);
     }
     if (data->glows[1] != NULL) {
-        func_1516972C((EffectHeader *)data->glows[1]);
+        func_1516972C(&data->glows[1]->head.header);
     }
 }
 

@@ -258,7 +258,7 @@ void func_1515C158(void) {
     ActorTracker *tracker;
 
     for (list = 0; list < 2; list++) {
-        for (tracker = D_800DCE50[list][0x32]; tracker != NULL; tracker = tracker->header.next) {
+        for (tracker = D_800DCE50[list][0x32]; tracker != NULL; tracker = (ActorTracker *)tracker->header.next) {
             tracker->unk44 = 0;
             tracker->unk48 = -1;
         }

@@ -533,7 +533,7 @@ void func_150F631C(BeamEffect *effect) {
     BeamData *data = &effect->data;
 
     if (data->beam != NULL) {
-        func_1516972C((EffectHeader *)data->beam);
+        func_1516972C(&data->beam->head.header);
     }
     if (data->flash != NULL) {
         func_1516972C((EffectHeader *)data->flash);
