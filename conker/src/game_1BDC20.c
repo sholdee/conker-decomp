@@ -14,12 +14,11 @@ f32 sqrtf(f32);
 
 void func_15169260(s32 *types, s32 count, struct ActorRef *ref, u8 msg);
 void func_15169850(struct ActorRef *ref, u8 msg, struct127 **actor, u8 *actorId, struct102 *self);
-extern void func_151D5D60();
-extern void func_1513F680();
-extern void func_15143134(void *, void *, void *);
-extern void *func_1513D524(void *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern u8 func_151D8E20(void);
+void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
+void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize,
+                    u8 owner, s32 list);
+void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
+u8 func_151D8E20(void);
 
 typedef struct {
     f32 x, y, z;
@@ -131,7 +130,7 @@ typedef struct {
 
 typedef struct DripSlot {
     /* 0x0 */ Particle *drop;
-    /* 0x4 */ s32 timer;            /* frames until the drop falls */
+    /* 0x4 */ s32 timer;            /* ticks until the drop falls */
     /* 0x8 */ struct DripSlot *next;
 } DripSlot;
 
@@ -215,16 +214,18 @@ typedef struct {
     /* 0x00 */ u8 dropKind;         /* D_800A9D40 index */
     /* 0x04 */ s32 numMounts;
     /* 0x08 */ BoneMount *mounts;
-    /* 0x0C */ f32 rate;            /* drops per second */
+    /* 0x0C */ f32 rate;            /* new drops per unit of D_800BE9A4 */
     /* 0x10 */ s32 maxDrops;
-    /* 0x14 */ s16 holdMin;         /* frames a drop hangs before it falls */
+    /* 0x14 */ s16 holdMin;         /* D_800BE9E4 ticks a drop hangs before it falls */
     /* 0x16 */ s16 holdRange;
 } EmitterKind; /* size 0x18 */
 
 extern EmitterKind D_8008FA70[];
 extern u8 D_800AB310[];
 extern u8 D_800AB404[];
-extern void func_1504715C(Ground *, struct127 *);
+void func_1504715C(Ground *ground, struct127 *actor);
+void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
+void func_1513F680(Particle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn);
 
 /*
  * Update of the emitter: keeps its hanging drops on their bones and lets them fall when their time is up,
@@ -272,7 +273,7 @@ void func_15190898(DripEmitter *emitter) {
             for (i = 0, slot = emitter->slots; i < kind->numMounts; i++, slot++) {
                 if (slot->drop != NULL) {
                     slot->drop->def.rot = slot->drop->def.pos;
-                    func_15143134(&kind->mounts[i], &slot->drop->def.pos, (Mtx *)emitter->link.actor->unk1D4 + kind->mounts[i].bone);
+                    func_15143134(&kind->mounts[i].offset, &slot->drop->def.pos, (Mtx *)emitter->link.actor->unk1D4 + kind->mounts[i].bone);
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
                         Particle *falling = slot->drop;
@@ -357,10 +358,13 @@ void func_15190898(DripEmitter *emitter) {
                         motion.wobble = newKind->wobble;
                         motion.phaseSpeed[0] = func_150ADA20() % 5U + 4;
                         motion.phaseSpeed[1] = func_150ADA20() % 5U + 4;
-                        func_15143134(&kind->mounts[index], &def.pos, (Mtx *)emitter->link.actor->unk1D4 + kind->mounts[index].bone);
+                        func_15143134(&kind->mounts[index].offset, &def.pos, (Mtx *)emitter->link.actor->unk1D4 + kind->mounts[index].bone);
                         def.rot = def.pos;
                         if (emitter->link.actor->unk118 < def.pos.y - motion.baseSize.height - motion.wobble.height) {
-                            drop = func_1513D524(&def, 12, 0, 0, 13, ((func_150ADA20() % 1) ? 1 : 0) | (D_800AB404[emitter->kind] ? 0 : 2), sizeof(DripMotion), 0xFF, 0);
+                            /* the random flip bit is always 0 (% 1), but still advances the RNG */
+                            drop = func_1513D524(&def, 12, 0, 0, 13,
+                                                 ((func_150ADA20() % 1) ? 1 : 0) | (D_800AB404[emitter->kind] ? 0 : 2),
+                                                 sizeof(DripMotion), 0xFF, 0);
                             head->drop = drop;
                             if (drop != NULL) {
                                 memcpy(&drop->motion, &motion, sizeof(motion));
@@ -489,8 +493,6 @@ Vtx *func_1519108C(Particle *drop, s16 vp) {
 
     return ret;
 }
-
-extern void func_1513F680();
 
 /* Lets go of every drop the emitter still holds and clears its slots. */
 void func_15191400(DripEmitter *emitter) {
