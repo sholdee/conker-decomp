@@ -3,13 +3,23 @@
 /* func_15149130's seventh argument is the size of the effect data, not a struct37 pointer. */
 #define func_1000FA64 func_1000FA64_narrow_proto
 #define func_15149130 func_15149130_struct37_decl_in_functions_h
+#define func_15144598 func_15144598_header
 #include "functions.h"
 #undef func_1000FA64
 #undef func_15149130
+#undef func_15144598
 struct260 *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
 #define D_800D3098 D_800D3098_header
+#define D_800D9A20 D_800D9A20_header
+#define D_800D9A24 D_800D9A24_header
+#define D_800D9AA0 D_800D9AA0_header
+#define D_800E0900 D_800E0900_header
 #include "variables.h"
 #undef D_800D3098
+#undef D_800D9A20
+#undef D_800D9A24
+#undef D_800D9AA0
+#undef D_800E0900
 
 /* A level object placement: one 0x34-byte entry of the table D_800D3098 points to. The object's
  * type (unk15 >> 2) selects its spawn handler from D_80082E30. */
@@ -33,8 +43,14 @@ typedef struct LevelObject {
 } LevelObject;
 
 extern LevelObject *D_800D3098;
+/* Level objects registered by their spawn handlers (the header types them as struct134). */
+extern LevelObject *D_800D9A20;
+extern LevelObject *D_800D9A24;
+extern LevelObject *D_800D9AA0[3];
+extern LevelObject *D_800E0900[6];
+f32 func_15144598(LevelObject *obj);
 
-void func_151A9390(s32 arg0, s32 arg1, struct134 *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
+void func_151A9390(s32 arg0, s32 arg1, struct LevelObject *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
 extern s32 (*D_80082E30[])(LevelObject *);
 extern void (*D_80082F28[])(struct LevelObject *, f32);
 extern f32 D_80096650;
@@ -605,120 +621,128 @@ s32 func_15013D38(LevelObject *obj) {
     return 1;
 }
 
-s32 func_15013DE8(struct47 *arg0) {
-    Struct15013DE8 sp30;
-    f32 tmpA;
-    f32 tmpB;
+/** Emits particles from the object's position, scaled by its sizeX and sizeY. */
+s32 func_15013DE8(LevelObject *obj) {
+    Struct15013DE8 params;
+    f32 scaleX;
+    f32 scaleY;
 
-    arg0->unk16 |= 4;
+    obj->flags |= 4;
 
-    tmpA = arg0->unk6 * D_80096654;
-    tmpB = arg0->unk8 * D_80096658;
+    scaleX = obj->sizeX * 0.05000000075f;
+    scaleY = obj->sizeY * 0.01999999955f;
 
-    sp30.unk22 = 0x1A4D + ((sp30.unk20 = 0x6231), 0);
-    sp30.unk26 = 0;
-    sp30.unk27 = 0;
-    sp30.unk28 = 0;
-    sp30.unk29 = 0xFF;
-    sp30.unk2A = 0;
-    sp30.unk2D = 0xFF;
-    sp30.unk30 = 0;
-    sp30.unk2E = 0;
-    sp30.unk2F = 0;
-    sp30.unk34 = 0;
-    sp30.unk3C = D_8009665C;
+    params.unk20 = 0x6231; params.unk22 = 0x1A4D; // matching: on one line, as1 keeps these stores in this order
+    params.unk26 = 0;
+    params.unk27 = 0;
+    params.unk28 = 0;
+    params.unk29 = 0xFF;
+    params.unk2A = 0;
+    params.unk2D = 0xFF;
+    params.unk30 = 0;
+    params.unk2E = 0;
+    params.unk2F = 0;
+    params.unk34 = 0;
+    params.unk3C = 99999.89844f;
 
-    sp30.unk0 = arg0->unk0;
-    sp30.unk4 = arg0->unk2;
-    sp30.unk8 = arg0->unk4;
+    params.unk0 = obj->x;
+    params.unk4 = obj->y;
+    params.unk8 = obj->z;
 
-    sp30.unk24 = 0x12C;
-    sp30.unk38 = 0.0f;
-    sp30.unk40 = D_80096660;
-    sp30.unk44 = D_80096664;
+    params.unk24 = 300;
+    params.unk38 = 0.0f;
+    params.unk40 = 0.04500000179f;
+    params.unk44 = 0.6999999881f;
 
-    sp30.unk2C = (func_150ADA20() % 0x38U) + 0xC8;
+    params.unk2C = (func_150ADA20() % 56U) + 200;
 
-    sp30.unkC = D_80096668 * tmpA;
-    sp30.unk14 = D_8009666C * tmpA;
-    sp30.unk18 = (D_80096674 * tmpB) + ((sp30.unk10 = D_80096670 * tmpB), 0);
-    sp30.unk1C = D_80096678 * tmpB;
+    params.unkC = 22.60000038f * scaleX;
+    params.unk14 = 13.78600025f * scaleX;
+    params.unk10 = 57.96900177f * scaleY; params.unk18 = 42.7140007f * scaleY; // matching: on one line, as1 keeps these stores in this order
+    params.unk1C = 118.7630005f * scaleY;
 
-    func_15149550(&sp30, 0xA, 1, arg0->unk18 ? 2 : 1, 0xFF, 1);
+    func_15149550(&params, 10, 1, obj->unk18 ? 2 : 1, 0xFF, 1);
     return 1;
 }
 
-s32 func_15013F9C(s32 arg0) {
-    func_151CD2C0(arg0, 0xFF, 1);
+s32 func_15013F9C(LevelObject *obj) {
+    func_151CD2C0(obj, 0xFF, 1);
     return 1;
 }
 
-s32 func_15013FC4(struct133 *arg0) {
-    u8 idx = arg0->unk1B;
-    void (*func)(void) = D_80082F40[idx];
+/** Runs the object's handler from D_80082F40, chosen by the low byte of unk18. */
+s32 func_15013FC4(LevelObject *obj) {
+    u8 index = ((u8 *)&obj->unk18)[3];
+    void (*handler)(void) = D_80082F40[index];
 
-    if (func != NULL) {
-        func();
+    if (handler != NULL) {
+        handler();
     }
     return 1;
 }
 
-s32 func_15014004(struct134 *arg0) {
-    s32 temp_v1 = arg0->unk1C;
-    if (temp_v1 < 0) {
+/** Registers the object in slot unk1C (0-5) of D_800E0900. */
+s32 func_15014004(LevelObject *obj) {
+    s32 slot = obj->unk1C;
+
+    if (slot < 0) {
         return 1;
     }
-    if (temp_v1 >= 6) {
+    if (slot >= 6) {
         return 1;
     }
-    D_800E0900[temp_v1] = arg0;
+    D_800E0900[slot] = obj;
     return 1;
 }
 
-s32 func_15014040(struct134 *arg0) {
-    s32 temp_v0 = arg0->unk18;
-    arg0->unk16 |= 4;
-    if (temp_v0 == 0) {
-        D_800D9A20 = arg0;
-    } else if (temp_v0 == 1) {
-        D_800D9A24 = arg0;
+/** Registers the object as D_800D9A20 (unk18 == 0) or D_800D9A24 (unk18 == 1). */
+s32 func_15014040(LevelObject *obj) {
+    s32 which = obj->unk18;
+
+    obj->flags |= 4;
+    if (which == 0) {
+        D_800D9A20 = obj;
+    } else if (which == 1) {
+        D_800D9A24 = obj;
     }
     return 1;
 }
 
-s32 func_1501407C(s32 arg0) {
-    D_800D987C = (u8)0;
+s32 func_1501407C(LevelObject *obj) {
+    D_800D987C = 0;
     return 1;
 }
 
-s32 func_15014094(struct134 *arg0) {
+/* Declared s32 but returns no value; giving it a return value or void changes the code. */
+s32 func_15014094(LevelObject *obj) {
     struct {
-        struct134 *unk0;
+        LevelObject *unk0;
         f32 unk4;
         f32 unk8;
         s32 unkC;
         u8 pad10[0x1C];
         s8 unk2C;
         u8 pad2D[7];
-    } tmp;
-    struct260 *temp_v0;
+    } data;
+    struct260 *effect;
 
-    arg0->unk16 |= 4;
-    tmp.unk0 = arg0;
-    tmp.unk4 = func_15144598(arg0);
-    tmp.unk8 = 0.0f;
+    obj->flags |= 4;
+    data.unk0 = obj;
+    data.unk4 = func_15144598(obj);
+    data.unk8 = 0.0f;
 
     func_1510F800(0);
-    tmp.unkC = func_1510FD20(arg0->unk0, arg0->unk4);
-    tmp.unk2C = 0;
+    data.unkC = func_1510FD20(obj->x, obj->z);
+    data.unk2C = 0;
 
-    temp_v0 = func_15149130(0x12C, -1, 0x21, -1, 0, 0, 0x34, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &tmp, 0x34);
+    effect = func_15149130(300, -1, 0x21, -1, 0, 0, sizeof(data), 0xFF, 1);
+    if (effect != NULL) {
+        memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
 }
 
-s32 func_15014144(struct134 *arg0) {
+/** Calls func_151A9390 for the object with option bits taken from unk18 (bit 1 inverted). */
+s32 func_15014144(LevelObject *obj) {
     s32 flags;
     s32 bit8;
     s32 bit4;
@@ -726,116 +750,93 @@ s32 func_15014144(struct134 *arg0) {
     s32 bit1;
     s32 bit16;
 
-    flags = arg0->unk18;
+    flags = obj->unk18;
+    bit8 = (flags & 8) ? 8 : 0;
+    bit4 = (flags & 4) ? 4 : 0;
+    bit2 = (flags & 2) ? 0 : 2;
+    bit1 = (flags & 1) ? 1 : 0;
+    bit16 = (flags & 0x10) ? 0x10 : 0;
 
-    if (flags & 8) {
-        bit8 = 8;
-    } else {
-        bit8 = 0;
-    }
-
-    if (flags & 4) {
-        bit4 = 4;
-    } else {
-        bit4 = 0;
-    }
-
-    if (flags & 2) {
-        bit2 = 0;
-    } else {
-        bit2 = 2;
-    }
-
-    if (flags & 1) {
-        bit1 = 1;
-    } else {
-        bit1 = 0;
-    }
-
-    if (flags & 0x10) {
-        bit16 = 0x10;
-    } else {
-        bit16 = 0;
-    }
-
-    func_151A9390((u8)(bit16 | bit1 | bit2 | bit4 | bit8), *((u8 *)arg0 + 0x1F), arg0, 0, *(f32 *)&D_8009667C, 100.0f, -1, 0xFF, 1);
+    func_151A9390((u8)(bit16 | bit1 | bit2 | bit4 | bit8), ((u8 *)&obj->unk1C)[3], obj, 0, -10000.0f, 100.0f, -1, 0xFF, 1);
     return 1;
 }
 
-s32 func_15014220(struct16 *arg0) {
+s32 func_15014220(LevelObject *obj) {
     struct {
         f32 unk0;
-        struct16 *unk4;
+        LevelObject *unk4;
         u8 unk8;
-    } tmp;
-    struct260 *temp_v0;
+    } data;
+    struct260 *effect;
 
-    arg0->unk16 |= 4;
-    tmp.unk8 = 1;
-    tmp.unk4 = arg0;
-    tmp.unk0 = 0.0f;
+    obj->flags |= 4;
+    data.unk8 = 1;
+    data.unk4 = obj;
+    data.unk0 = 0.0f;
 
-    temp_v0 = func_15149130(0x12C, -1, 0x26, -1, 0, 0x24, 0xC, 0xFF, 0);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
+    effect = func_15149130(300, -1, 0x26, -1, 0, 0x24, sizeof(data), 0xFF, 0);
+    if (effect != NULL) {
+        memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
     return 1;
 }
 
-s32 func_150142AC(struct134 *arg0) {
-    s32 idx;
+/** Registers the object in slot (low byte of unk18, 0-2) of D_800D9AA0. */
+s32 func_150142AC(LevelObject *obj) {
+    s32 slot;
 
-    idx = ((u8 *)arg0)[0x1B];
-    arg0->unk16 |= 4;
-    if ((idx < 0) || (idx >= 3)) {
+    slot = ((u8 *)&obj->unk18)[3];
+    obj->flags |= 4;
+    if ((slot < 0) || (slot >= 3)) {
         return 1;
     }
-    D_800D9AA0[idx] = arg0;
+    D_800D9AA0[slot] = obj;
     return 1;
 }
 
-s32 func_150142EC(struct134 *arg0) {
+s32 func_150142EC(LevelObject *obj) {
     struct {
-        struct134 *unk0;
+        LevelObject *unk0;
         f32 unk4;
         f32 unk8;
         f32 unkC;
         f32 unk10;
         f32 unk14;
-    } tmp;
-    struct260 *temp_v0_2;
-    f32 temp_f4;
-    f32 temp_f6;
-    f32 temp_f2;
-    f32 temp_f8;
-    register f32 temp_f0;
+    } data;
+    struct260 *effect;
+    f32 a;
+    f32 b;
+    f32 c;
+    f32 d;
+    f32 scale;
 
-    arg0->unk16 |= 4;
+    obj->flags |= 4;
     if (D_80082FA0 >= 2) {
         return 1;
     }
 
-    if ((((u8 *)D_800D2E4C)[0x11] & 4) && (D_800BE9F0 == 0x13)) {
+    if ((((u8 *)D_800D2E4C)[0x11] & 4) && (D_800BE9F0 == 0x13)) { // low byte of D_800D2E4C->unk10
         return 1;
     }
 
-    temp_f4 = (f32)(arg0->unk1C & 0xFFFFU) * D_80096680;
-    temp_f6 = (f32)(((u32)arg0->unk1C >> 16) & 0xFFFFU) * D_80096680;
-    temp_f2 = (f32)(arg0->unk20 & 0xFFFFU) * D_80096680;
-    temp_f8 = (f32)(((u32)arg0->unk20 >> 16) & 0xFFFFU) * D_80096680;
+    /* four 16-bit values, in thousandths */
+    a = (f32)(obj->unk1C & 0xFFFF) * 0.001000000047f;
+    b = (f32)((obj->unk1C >> 16) & 0xFFFF) * 0.001000000047f;
+    c = (f32)(obj->unk20 & 0xFFFF) * 0.001000000047f;
+    d = (f32)((obj->unk20 >> 16) & 0xFFFF) * 0.001000000047f;
 
-    temp_f0 = func_1514462C((s32)arg0);
+    scale = func_1514462C((s32)obj);
 
-    tmp.unk0 = arg0;
-    tmp.unk4 = (temp_f4 * temp_f0) * D_80096684;
-    tmp.unk8 = (temp_f6 * temp_f0) * D_80096684;
-    tmp.unkC = temp_f2;
-    tmp.unk10 = temp_f8;
-    tmp.unk14 = 0.0f;
+    data.unk0 = obj;
+    data.unk4 = (a * scale) * 1.271515948e-10f;
+    data.unk8 = (b * scale) * 1.271515948e-10f;
+    data.unkC = c;
+    data.unk10 = d;
+    data.unk14 = 0.0f;
 
-    temp_v0_2 = func_15149130(0x12C, -1, 0x29, -1, 0, 0, 0x18, 0xFF, 0);
-    if (temp_v0_2 != NULL) {
-        memcpy((u8 *)temp_v0_2 + 0x28, &tmp, 0x18);
+    effect = func_15149130(300, -1, 0x29, -1, 0, 0, sizeof(data), 0xFF, 0);
+    if (effect != NULL) {
+        memcpy((u8 *)effect + 0x28, &data, sizeof(data));
     }
     return 1;
 }
