@@ -2,9 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A1970;
-extern f32 D_800A1980;
-extern f32 D_800A1984;
 extern f32 D_800A1950[];
 
 s32 func_1509BE40();
@@ -287,39 +284,43 @@ void func_150F337C(Particle *particle, s16 viewport) {
     func_15140410(particle, &particle->state.axisU, &particle->state.axisV, viewport);
 }
 
-void func_150F33B0(struct131 *arg0) {
+typedef struct {
+    /* 0x00 */ u8 pad0[0x4F];
+    /* 0x4F */ u8 unk4F_hi : 7;
+    /* 0x4F */ u8 unk4F_0 : 1;
+} Struct150F33B0;
+
+/* Sets bit 0 of obj->unk4F unless D_800DBFF0->unk300 is below -2000. */
+void func_150F33B0(Struct150F33B0 *obj) {
     if (D_800DBFF0->unk300 < -2000.0f) {
-        *(u8*)&arg0->unk4F &= ~1;
+        obj->unk4F_0 = 0;
         return;
     }
-
-    *(u8*)&arg0->unk4F = (*(u8*)&arg0->unk4F & 0xFF) | 1;
+    obj->unk4F_0 = 1;
 }
 
-void func_150F33F8(s32 arg0) {
-    s16 *temp_v0_2;
-
-    if (D_800DBFF0[arg0].unk300 < D_800A1970) {
-        if (D_800DBFF0[arg0].unk2FC > 840.0f) {
-            temp_v0_2 = (s16 *)D_800D9A40;
-            *temp_v0_2 |= 1 << arg0;
+/* While D_800DBFF0[player].unk300 is below -2100, mirrors (unk2FC > 840) into bit `player` of *D_800D9A40. */
+void func_150F33F8(s32 player) {
+    if (D_800DBFF0[player].unk300 < -2100.0f) {
+        if (D_800DBFF0[player].unk2FC > 840.0f) {
+            *(s16 *)D_800D9A40 |= 1 << player;
             return;
         }
-        temp_v0_2 = (s16 *)D_800D9A40;
-        *temp_v0_2 &= ~(1 << arg0);
+        *(s16 *)D_800D9A40 &= ~(1 << player);
     }
 }
 
-f32 func_150F34A0(s32 arg0, f32 arg1) {
-    f32 var_f2;
+/* Animation speed for `pitch`: 0.75, or faster the further it is below -5. */
+f32 func_150F34A0(struct127 *obj, f32 pitch) {
+    f32 speed;
 
-    if (arg1 < -5.0f) {
-        var_f2 = (arg1 * -0.01f) + 0.7f;
+    if (pitch < -5.0f) {
+        speed = pitch * -0.01f + 0.7f;
     } else {
-        var_f2 = 0.75f;
+        speed = 0.75f;
     }
 
-    return var_f2;
+    return speed;
 }
 
 typedef struct {
@@ -634,7 +635,7 @@ void func_150F34F4(struct127 *arg0) {
             animSpeed = 0.5f;
         }
     } else {
-        animSpeed = func_150F34A0((s32)arg0, pitch);
+        animSpeed = func_150F34A0(arg0, pitch);
     }
     anim = 0xF;
     if ((arg0->unkB8 > 40.0f) && (pitch > 20.0f)) {
