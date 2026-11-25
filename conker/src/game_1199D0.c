@@ -77,21 +77,10 @@ void func_150EC520(Effect *effect) {
     }
 }
 
-/* Per-particle data of the particles the source effect emits. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 unk2;
-    /* 0x03 */ u8 unk3;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-} SourceParticleData;
-
 /* Live particle, as created by func_15130280 from a ParticleDesc. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ SourceParticleData data;
+    /* 0xA8 */ WobbleData data;
 } Particle;
 
 extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
@@ -104,10 +93,10 @@ void func_150EC6B0(Effect *effect) {
     source->accumulator += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
     if (source->accumulator > 1.0f) {
         ParticleDesc spawn;
-        SourceParticleData data;
+        WobbleData data;
         Particle *particle;
 
-        data.unkC = 0.9704700112f;
+        data.drag = 0.9704700112f;
         spawn.texture = 0x6C;
         spawn.renderMode = 0x5103;
         spawn.unk0 = 0x200005;
@@ -116,8 +105,8 @@ void func_150EC6B0(Effect *effect) {
         spawn.flags = 0x80DE07;
         spawn.primColorMode = 8;
         spawn.envColorMode = 6;
-        data.unk0 = 0;
-        data.unk1 = 0;
+        data.phase[0] = 0;
+        data.phase[1] = 0;
         spawn.unk4 = 0;
         spawn.frame = 0;
         spawn.frameRate = 0;
@@ -143,10 +132,10 @@ void func_150EC6B0(Effect *effect) {
         spawn.vel.y = 0.0f;
         spawn.vel.z = 0.0f;
         do {
-            data.unk2 = func_150ADA20() % 5U + 4;
-            data.unk3 = func_150ADA20() % 5U + 4;
-            data.unk4 = func_150ADA68() * 11.0f;
-            data.unk8 = func_150ADA68() * 11.0f;
+            data.phaseStep[0] = func_150ADA20() % 5U + 4;
+            data.phaseStep[1] = func_150ADA20() % 5U + 4;
+            data.amplitude[0] = func_150ADA68() * 11.0f;
+            data.amplitude[1] = func_150ADA68() * 11.0f;
             spawn.gravity = func_150ADA68() * 0.172f + 0.09800000489f;
             spawn.flags &= ~0xC0;
             spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);

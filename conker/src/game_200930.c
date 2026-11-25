@@ -9,7 +9,7 @@ extern s32 allocate_memory(s32, s32, s32, s32);
 
 void func_1503F404(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-void func_15131828(void *, void *, void *, void *);
+void func_15131828(void *, f32 *, u8 *, u8 *);
 void func_15131958(void *, f32, void *);
 void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 
@@ -490,17 +490,6 @@ void func_151D469C(obj, posFunc, arg2, arg3, arg4)
     }
 }
 
-/* User data of a puff spawned by func_151D4794 (object + 0xA8). */
-typedef struct {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ u8 unk2;
-    /* 0x3 */ u8 unk3;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ f32 unk8;
-    /* 0xC */ f32 unkC;
-} Extra151D4794;
-
 /* An effect created by func_151D469C; its user data is an ObjEmitter. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
@@ -540,10 +529,10 @@ void func_151D4794(EmitterEffect *effect) {
         emitter->spawnTimer += (0.200000003f + func_150ADA68() * 0.2090000063f) * D_800BE9A4;
         if (emitter->spawnTimer > 1.0f) {
             ParticleDesc spawn;
-            Extra151D4794 extra;
+            WobbleData extra;
             void *ret;
 
-            extra.unkC = 0.9156860113f;
+            extra.drag = 0.9156860113f;
             spawn.texture = 108;
             spawn.renderMode = 0x5103;
             spawn.unk0 = 0x200005;
@@ -583,12 +572,12 @@ void func_151D4794(EmitterEffect *effect) {
                 spawn.vel.x = diff.x * D_800BE9A8 * 0.2980000079f;
                 spawn.vel.y = diff.y * D_800BE9A8 * 0.2980000079f;
                 spawn.vel.z = diff.z * D_800BE9A8 * 0.2980000079f;
-                extra.unk0 = func_150ADA20() & 0xFF;
-                extra.unk1 = func_150ADA20() & 0xFF;
-                extra.unk2 = func_150ADA20() % 5U + 4;
-                extra.unk3 = func_150ADA20() % 5U + 4;
-                extra.unk4 = func_150ADA68() * 6.0f;
-                extra.unk8 = func_150ADA68() * 6.0f;
+                extra.phase[0] = func_150ADA20() & 0xFF;
+                extra.phase[1] = func_150ADA20() & 0xFF;
+                extra.phaseStep[0] = func_150ADA20() % 5U + 4;
+                extra.phaseStep[1] = func_150ADA20() % 5U + 4;
+                extra.amplitude[0] = func_150ADA68() * 6.0f;
+                extra.amplitude[1] = func_150ADA68() * 6.0f;
                 spawn.gravity = func_150ADA68() * 0.1800000072f + 0.1300000101f;
                 spawn.flags &= ~0xC0;
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
@@ -626,20 +615,20 @@ void func_151D4C38(EmitterEffect *effect, ActorRef *handle, u8 msg) {
     }
 }
 
-/* A smoke puff spawned by func_151D4794, with its Extra151D4794 user data. */
+/* A smoke puff spawned by func_151D4794, with its WobbleData user data. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x58];
     /* 0x58 */ u8 unk58[0x50];
-    /* 0xA8 */ Extra151D4794 extra;
+    /* 0xA8 */ WobbleData extra;
 } Puff151D4794;
 
 /* Puff update callback. */
 s32 func_151D4D04(Puff151D4794 *puff, s32 arg1) {
-    Extra151D4794 *extra;
+    WobbleData *extra;
 
     extra = &puff->extra;
-    func_15131828(puff, &extra->unk4, extra, &extra->unk2);
-    func_15131958(puff->unk58, extra->unkC, extra);
+    func_15131828(puff, extra->amplitude, extra->phase, extra->phaseStep);
+    func_15131958(puff->unk58, extra->drag, extra);
     return 1;
 }
 

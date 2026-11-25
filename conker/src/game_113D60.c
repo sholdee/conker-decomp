@@ -688,14 +688,12 @@ void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind) {
     }
 }
 
-/* Extra data of the particles func_150E8470 spawns, stored at 0xA8 of each particle. */
+/* Extra data of the particles func_150E8470 spawns, stored at 0xA8 of each particle: effects.h WobbleData
+ * without the drag (the particles are spawned with only these 0xC bytes). */
 typedef struct {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ u8 unk2;
-    /* 0x3 */ u8 unk3;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ f32 unk8;
+    /* 0x0 */ u8 phase[2];
+    /* 0x2 */ u8 phaseStep[2];
+    /* 0x4 */ f32 amplitude[2];
 } Game113D60ParticleExtra;
 
 typedef struct {
@@ -736,8 +734,8 @@ void func_150E8470(Game113D60EmitterEffect *effect) {
         arg.envColorMode = 6;
         arg.updateFunc = 0x19;
         arg.deathFunc = -1;
-        extra.unk0 = 0;
-        extra.unk1 = 0;
+        extra.phase[0] = 0;
+        extra.phase[1] = 0;
         arg.unk4 = 0;
         arg.frame = 0;
         arg.frameRate = 0;
@@ -761,10 +759,10 @@ void func_150E8470(Game113D60EmitterEffect *effect) {
         arg.vel.y = 0.0f;
         arg.vel.z = 0.0f;
         do {
-            extra.unk2 = func_150ADA20() % 5 + 4;
-            extra.unk3 = func_150ADA20() % 5 + 4;
-            extra.unk4 = func_150ADA68() * 13.0f;
-            extra.unk8 = func_150ADA68() * 13.0f;
+            extra.phaseStep[0] = func_150ADA20() % 5 + 4;
+            extra.phaseStep[1] = func_150ADA20() % 5 + 4;
+            extra.amplitude[0] = func_150ADA68() * 13.0f;
+            extra.amplitude[1] = func_150ADA68() * 13.0f;
             arg.gravity = (func_150ADA68() * 40.0f + 68.0f) * 0.001000000047f;
             arg.flags &= ~0xC0;
             arg.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
@@ -784,7 +782,7 @@ extern s32 func_15131828(Game113D60Particle *, f32 *, u8 *, u8 *);
 
 /* Update callback of the particles func_150E8470 spawns. */
 s32 func_150E8824(Game113D60Particle *particle, s32 arg1) {
-    func_15131828(particle, &particle->extra.unk4, &particle->extra.unk0, &particle->extra.unk2);
+    func_15131828(particle, particle->extra.amplitude, particle->extra.phase, particle->extra.phaseStep);
     return 1;
 }
 

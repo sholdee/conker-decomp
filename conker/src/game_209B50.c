@@ -78,21 +78,10 @@ void func_151DC8BC(Vec3f *pos, s32 duration, u8 burst, u8 randomColors, u8 owner
     }
 }
 
-/* Per-particle data of particles with update function 0x16 (ParticleDesc.updateFunc). */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 unk2;
-    /* 0x03 */ u8 unk3;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-} ParticleUpdate16Data;
-
 /* Particle created by func_15130280 (only the fields used here). */
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];
-    /* 0xA8 */ ParticleUpdate16Data data;
+    /* 0xA8 */ WobbleData data;
 } Particle;
 
 extern Particle *func_15130280(ParticleDesc *desc, u8, s32, s32 dataSize, u8, s32);
@@ -106,16 +95,16 @@ void func_151DC97C(Emitter *emitter) {
     data->accum += (0.136f + func_150ADA68() * 0.12100001f) * D_800BE9A4;
     if (data->accum > 1.0f) {
         ParticleDesc desc;
-        ParticleUpdate16Data extra;
+        WobbleData extra;
         Particle *particle;
         u8 colorIndex;
 
-        extra.unkC = 0.97047f;
+        extra.drag = 0.97047f;
         desc.texture = 0x6C;
         desc.renderMode = 0x5103;
         desc.unk0 = 0x200005;
-        extra.unk0 = 0;
-        extra.unk1 = 0;
+        extra.phase[0] = 0;
+        extra.phase[1] = 0;
         desc.unk4 = 0;
         desc.frame = 0;
         desc.frameRate = 0;
@@ -148,10 +137,10 @@ void func_151DC97C(Emitter *emitter) {
             desc.b2 = 0x30;
         }
         do {
-            extra.unk2 = func_150ADA20() % 5U + 4;
-            extra.unk3 = func_150ADA20() % 5U + 4;
-            extra.unk4 = func_150ADA68() * 50.0f;
-            extra.unk8 = func_150ADA68() * 50.0f;
+            extra.phaseStep[0] = func_150ADA20() % 5U + 4;
+            extra.phaseStep[1] = func_150ADA20() % 5U + 4;
+            extra.amplitude[0] = func_150ADA68() * 50.0f;
+            extra.amplitude[1] = func_150ADA68() * 50.0f;
             desc.gravity = func_150ADA68() * 0.15100001f + 0.19100001f;
             desc.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
             desc.flags |= ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) | ((func_150ADA20() & 1) ? PARTICLE_FLIP_T : 0);

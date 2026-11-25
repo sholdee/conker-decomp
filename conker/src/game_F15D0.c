@@ -3,15 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Per-particle data of a pulsing particle: two sizes oscillating around a base size
- * (same layout as ParticlePulse in game_15D730.c). */
-typedef struct {
-    u8 phase[2];
-    s8 phaseStep[2];
-    f32 baseSize;
-    f32 amplitude[2];
-} ParticlePulse;
-
 /* Partial view of the particle func_15130280 creates (Particle in game_15D730.c). */
 typedef struct {
     /* 0x00 */ EffectHeader header;

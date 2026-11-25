@@ -47,7 +47,7 @@ typedef struct {
 extern s32 func_151EF610(void);
 extern void func_1000D96C(s32, s32, s32);
 extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_15131828(void *, f32 *, void *, u8 *);
+extern void func_15131828(void *, f32 *, u8 *, u8 *);
 extern void func_15131958(void *, f32, void *);
 
 /* Trail anchor point: 20 units above the actor. */
@@ -768,29 +768,18 @@ void func_150DA5EC(Actor *actor, f32 speedScale) {
     func_15147D64(&msg, 0x44);
 }
 
-/* Per-particle data stored in the sparks spawned by func_150DA67C. */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} SparkData;
-
 typedef struct {
     u8 pad0[0x58];
     u8 unk58[0x50];
-    SparkData spark;
+    WobbleData spark;
 } Spark;
 
 s32 func_150DA628(Spark *particle, s32 arg1) {
-    SparkData *spark;
+    WobbleData *spark;
 
     spark = &particle->spark;
-    func_15131828(particle, &spark->unk4, spark, &spark->unk2);
-    func_15131958(particle->unk58, spark->unkC, spark);
+    func_15131828(particle, spark->amplitude, spark->phase, spark->phaseStep);
+    func_15131958(particle->unk58, spark->drag, spark);
     return 1;
 }
 
@@ -815,10 +804,10 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
             data->sparkAccum += (0.1990000159f + func_150ADA68() * 0.1540000141f) * D_800BE9A4;
             if (data->sparkAccum > 1.0f) {
                 ParticleDesc spawn;
-                SparkData sub;
+                WobbleData sub;
                 Spark *spark;
 
-                sub.unkC = 0.9936270118f;
+                sub.drag = 0.9936270118f;
                 spawn.texture = 0x6C;
                 spawn.renderMode = 0x5103;
                 spawn.unk0 = 0x200005;
@@ -850,12 +839,12 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
                 spawn.pos = hit->pos;
                 spawn.vel = D_800A5480;
                 do {
-                    sub.unk0 = func_150ADA20();
-                    sub.unk1 = (s16)func_150ADA20(); // matching: the s16 cast gives IDO's extra move
-                    sub.unk2 = (func_150ADA20() % 5U) + 4;
-                    sub.unk3 = (func_150ADA20() % 5U) + 4;
-                    sub.unk4 = func_150ADA68() * 10.0f;
-                    sub.unk8 = func_150ADA68() * 10.0f;
+                    sub.phase[0] = func_150ADA20();
+                    sub.phase[1] = (s16)func_150ADA20(); // matching: the s16 cast gives IDO's extra move
+                    sub.phaseStep[0] = (func_150ADA20() % 5U) + 4;
+                    sub.phaseStep[1] = (func_150ADA20() % 5U) + 4;
+                    sub.amplitude[0] = func_150ADA68() * 10.0f;
+                    sub.amplitude[1] = func_150ADA68() * 10.0f;
                     spawn.gravity = func_150ADA68() * 0.0910000056f + 0.1010000035f;
                     spawn.flags &= ~0xC0;
                     spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);

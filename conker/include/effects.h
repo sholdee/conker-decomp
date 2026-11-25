@@ -2220,4 +2220,21 @@ typedef struct RumbleParams {
     /* 0x7 */ u8 unk7;
 } RumbleParams; /* size 0x8 */
 
+/* Per-particle data (at 0xA8) of wobbling particles: the offset moves around an x/z ellipse
+ * (func_15131828) and the velocity is scaled by drag per tick (func_15131958). */
+typedef struct WobbleData {
+    /* 0x00 */ u8 phase[2];      /* x and z angles of the wobble ellipse */
+    /* 0x02 */ u8 phaseStep[2];  /* added to phase per tick */
+    /* 0x04 */ f32 amplitude[2]; /* x and z radii */
+    /* 0x0C */ f32 drag;         /* velocity scale per tick */
+} WobbleData; /* size 0x10 */
+
+/* Per-particle data for func_15131D9C: two sizes oscillating around a base size. */
+typedef struct ParticlePulse {
+    /* 0x00 */ u8 phase[2];
+    /* 0x02 */ s8 phaseStep[2];
+    /* 0x04 */ f32 baseSize;
+    /* 0x08 */ f32 amplitude[2];
+} ParticlePulse; /* size 0x10 */
+
 #endif

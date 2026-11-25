@@ -26,14 +26,6 @@ typedef struct ParticleBounce {
     f32 restitution;
 } ParticleBounce;
 
-/* Per-particle data for func_15131D9C: two sizes oscillating around a base size. */
-typedef struct ParticlePulse {
-    u8 phase[2];
-    s8 phaseStep[2];
-    f32 baseSize;
-    f32 amplitude[2];
-} ParticlePulse;
-
 /* Per-particle data for func_15131DEC (spawned by func_15131EE4). */
 typedef struct ParticleFlash {
     f32 elapsed;

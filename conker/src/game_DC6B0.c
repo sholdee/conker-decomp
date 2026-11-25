@@ -52,14 +52,6 @@ void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
     func_151CF898(arg0, range->unk2 + range->unk8, range->unk2);
 }
 
-/* Per-particle data of the wobbling particles func_150AF328 spawns (updated by func_150AF6E4). */
-typedef struct {
-    /* 0x00 */ u8 phase[2];     /* x and z angles of the wobble ellipse */
-    /* 0x02 */ u8 phaseStep[2]; /* added to phase per tick */
-    /* 0x04 */ f32 amplitude[2];
-    /* 0x0C */ f32 drag;        /* velocity scale per tick */
-} WobbleData;
-
 /* A particle created by func_15130280. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x58];
