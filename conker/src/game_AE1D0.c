@@ -138,7 +138,8 @@ s32 func_1508108C(struct127 *obj) {
 }
 
 
-s32 func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, struct17 *arg4, struct17 *arg5, f32 *arg6, f32 *arg7);
+/* Ray vs. sphere: nonzero on a hit, with the entry/exit points and their ray parameters. */
+s32 func_151452C4(struct17 *origin, struct17 *dir, struct17 *centre, f32 radius, struct17 *outNear, struct17 *outFar, f32 *outTNear, f32 *outTFar);
 
 /* Ray vs. per-bone hit-sphere test for one actor.  Broad phase: build the whole-object
  * bounding sphere from D_800D1C90[obj->id] and ray-test it; if that hits, walk the model's
@@ -182,7 +183,7 @@ s32 func_1508114C(struct127 *obj, struct17 *rayOrigin, struct17 *rayDir, struct1
     count = D_8009CBCC[type];
     *outDist = -1.0f;
     centre.unk0 = obj->x_position;
-    centre.unk4 = (((ModelBounds *)D_800D1C90[obj->id])->body_height * obj->y_scale) + obj->y_position;
+    centre.unk4 = ((ModelBounds *)D_800D1C90[obj->id])->body_height * obj->y_scale + obj->y_position;
     centre.unk8 = obj->z_position;
     radius = ((ModelBounds *)D_800D1C90[obj->id])->body_radius * obj->y_scale;
     if (func_151452C4(rayOrigin, rayDir, &centre, radius, &near, &far, &tNear, &tFar) == 0) {
@@ -193,26 +194,27 @@ s32 func_1508114C(struct127 *obj, struct17 *rayOrigin, struct17 *rayDir, struct1
     if (count > 0) {
         p = spheres;
         do {
-            if (((1 << p->bone) & obj->unk9C) != 0) {
-                goto next;
-            }
-            bones = (BoneMtx *)obj->unk1D4;
-            local.unk0 = p->x;
-            local.unk4 = p->y;
-            local.unk8 = p->z;
-            // matching: byte offset keeps IDO's base+offset addu order (&bones[i] emits offset+base)
-            func_15143134(&local, &centre, (BoneMtx *)((u8 *)bones + p->bone * sizeof(BoneMtx)));
-            if (func_151452C4(rayOrigin, rayDir, &centre, p->radius * obj->xz_scale, &near, &far, &tNear, &tFar) != 0) {
-                if ((*outDist == -1.0f) || ((tNear < *outDist) && (p->part >= bestPart))) {
-                    *outDist = tNear;
-                    bestNear = near;
-                    bestFar = far;
-                    bestCentre = centre;
-                    bestIndex = i;
-                    bestPart = p->part;
+            // matching: empty then-branch; `if (!(mask))` makes IDO rotate the s-registers
+            if ((1 << p->bone) & obj->unk9C) {
+                /* bone masked off in obj->unk9C */
+            } else {
+                bones = (BoneMtx *)obj->unk1D4;
+                local.unk0 = p->x;
+                local.unk4 = p->y;
+                local.unk8 = p->z;
+                // matching: byte offset keeps IDO's base+offset addu order (&bones[i] emits offset+base)
+                func_15143134(&local, &centre, (BoneMtx *)((u8 *)bones + p->bone * sizeof(BoneMtx)));
+                if (func_151452C4(rayOrigin, rayDir, &centre, p->radius * obj->xz_scale, &near, &far, &tNear, &tFar) != 0) {
+                    if (*outDist == -1.0f || (tNear < *outDist && p->part >= bestPart)) {
+                        *outDist = tNear;
+                        bestNear = near;
+                        bestFar = far;
+                        bestCentre = centre;
+                        bestIndex = i;
+                        bestPart = p->part;
+                    }
                 }
             }
-        next:
             i++;
             p++;
         } while (i != count);
