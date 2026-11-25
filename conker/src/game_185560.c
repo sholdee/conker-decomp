@@ -3,30 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/*
- * Effect actor allocated by func_15167A68. Bytes 0x10..0x53 are copied from a 0x44-byte
- * template; type-specific data follows the 0xF8-byte header.
- */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ EffectActorTemplate tmpl;
-    /* 0x58 */ Mtx mtx[2]; /* double-buffered by D_800BE9C0 */
-    /* 0xD8 */ s32 attachment; /* start of the block func_151462C8 reads */
-    /* 0xDC */ u8 unkDC;
-    /* 0xDD */ u8 padDD[3];
-    /* 0xE0 */ s32 *handles[4]; /* one per D_80082FA0 + 1 */
-    /* 0xF0 */ s32 *sharedHandle;
-    /* 0xF4 */ s32 unkF4;
-    /* 0xF8 */ union {
-        TumbleMotion motion;
-        f32 size;
-        struct {
-            s16 duration;
-            s32 alphaPerTick;
-        } fade;
-    } data;
-} EffectActor;
-
 extern s32 *func_1515D480(s32);
 extern s32 *func_1515D440(void);
 

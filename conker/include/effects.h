@@ -2027,6 +2027,36 @@ typedef struct TumbleMotion {
     /* 0x2C */ f32 drag;
 } TumbleMotion; /* size 0x30 */
 
+/* Alpha fade-out read by func_15158AFC once the lifetime drops below duration. */
+typedef struct EffectFade {
+    /* 0x00 */ s16 duration;
+    /* 0x04 */ s32 alphaPerTick;
+} EffectFade; /* size 0x8 */
+
+/* Effect actor (object type 0x37, or 0x55 when large) allocated by func_151580B0 (game_185560.c) through
+ * func_15167A68. Bytes 0x10..0x53 are copied from its template; the type-specific data follows the
+ * 0xF8-byte head. */
+typedef struct EffectActor {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ EffectActorTemplate tmpl;
+    /* 0x58 */ Mtx mtx[2]; /* double-buffered by D_800BE9C0 */
+    /* 0xD8 */ s32 attachment; /* start of the block func_151462C8 reads */
+    /* 0xDC */ u8 unkDC;
+    /* 0xDD */ u8 padDD[3];
+    /* 0xE0 */ s32 *handles[4]; /* one per D_80082FA0 + 1 */
+    /* 0xF0 */ s32 *sharedHandle;
+    /* 0xF4 */ s32 unkF4;
+    /* 0xF8 */ union {
+        TumbleMotion motion; /* func_15158684 / func_1515858C */
+        f32 size;
+        EffectFade fade;     /* func_15158AFC */
+        struct {
+            /* 0xF8 */ EffectFade fade;
+            /* 0x100 */ TumbleMotion motion;
+        } piece;             /* tumbling piece of func_1518A3C0 (game_1B7870.c) */
+    } data;
+} EffectActor; /* size 0xF8 + the type-specific data */
+
 /* func_15152520 (game_17CAF0.c): spawns countBase + rand % (countRange + 1) tumbling model effects
  * (func_15157898) at position, each launched at a random yaw/pitch and speed with a random spin. */
 typedef struct ModelBurst {
