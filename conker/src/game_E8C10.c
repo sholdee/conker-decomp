@@ -154,7 +154,7 @@ s32 func_150BBB5C(Actor *actor) {
         offsetX = actor->speed * sine * 0.5f;
         offsetZ = actor->speed * cosine * 0.5f;
         // matching: the no-op mask is needed; without it IDO emits different code here
-        alpha = (actor->ob_matrix_ptr != NULL) ? 0xFF - ((((u32)actor->unk184 >> 5) & 0x7FFFFFF) << 6) : 0xFF;
+        alpha = (actor->ob_matrix_ptr != NULL) ? 0xFF - ((((u32)actor->floorMaterial >> 5) & 0x7FFFFFF) << 6) : 0xFF;
         request.unk8A = 0x80;
         request.unk88 = 0;
         request.unk8C = actor->xpos;

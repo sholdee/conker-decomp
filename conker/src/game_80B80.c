@@ -102,18 +102,18 @@ void func_150538CC(Actor *obj) {
     Actor *target;
 
     done = 0;
-    kind = (u16)obj->unk278;
+    kind = (u16)obj->headEffectState;
     sweep = (s8)obj->unk284;
     hitFlags = 0;
-    if (((kind == 2) || (kind == 18)) && (u16)obj->unk282) {
-        if (D_800BE9E4 < (u16)obj->unk282) {
-            obj->unk282 = (u16)obj->unk282 - D_800BE9E4;
+    if (((kind == 2) || (kind == 18)) && (u16)obj->headEffectTimer) {
+        if (D_800BE9E4 < (u16)obj->headEffectTimer) {
+            obj->headEffectTimer = (u16)obj->headEffectTimer - D_800BE9E4;
         } else {
             // matching: dead leftover; keeps the target's dead `move a0,v0` (as1 drops the subu, not the copy)
-            left = (u16)obj->unk282 - D_800BE9E4;
+            left = (u16)obj->headEffectTimer - D_800BE9E4;
             if (left + left) {
             }
-            obj->unk282 = 0;
+            obj->headEffectTimer = 0;
             obj->ygrav = 1.0f;
         }
     }
@@ -456,7 +456,7 @@ void func_150548E4(Actor *obj) {
 
     for (i = 0; i < D_8008FD8C; i++) {
         if ((movement_obj[i].stand_on_char == (obj - movement_obj) + 1) && (owner->intelwalk == 1)) {
-            owner->unk218 = NULL;
+            owner->scriptCmd = NULL;
             if (func_150ADA20() & 1) {
                 owner->intelwalk = 2;
                 sfx = 0x1DB;
@@ -658,7 +658,7 @@ void func_15054F74(Actor *obj) {
             obj->taskint[0] -= D_800BE9E4;
         } else {
             obj->intelwalk = 6;
-            obj->unk218 = NULL;
+            obj->scriptCmd = NULL;
         }
     }
 }
@@ -678,7 +678,7 @@ void func_1505528C(Actor *obj) {
     s32 timer;
     Actor *target;
 
-    kind = (u16)obj->unk278;
+    kind = (u16)obj->headEffectState;
     hitFlags = 0;
     hoverHeight = 0.0f;
 
@@ -745,7 +745,7 @@ void func_1505528C(Actor *obj) {
     if (obj->shad <= hoverHeight) {
         obj->count1++;
         hitFlags |= 2;
-        if ((obj->unk184 & 0x1F) == 0xE) {
+        if ((obj->floorMaterial & 0x1F) == 0xE) {
             func_1514AD9C(&obj->xpos, 0xFF, 0);
             func_15060F28(obj, 1);
             return;

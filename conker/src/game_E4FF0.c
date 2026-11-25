@@ -219,7 +219,7 @@ void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
             burst.render.envMode = 7;
             burst.unk80 = 10;
             burst.unk82 = 25;
-            burst.unk84 = obj->unk184;
+            burst.unk84 = obj->floorMaterial;
             func_15151A38(&burst, arg1, arg2);
         }
     }

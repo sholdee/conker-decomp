@@ -1180,7 +1180,7 @@ void func_1504715C(CollisionHit *hit, Actor *obj) {
     } else {
         hit->tri = obj->floorTri;
     }
-    hit->material = obj->unk184;
+    hit->material = obj->floorMaterial;
     hit->flags = 6;
     if (obj->propNum != 0) {
         surface = obj->propNum - 1;

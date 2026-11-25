@@ -510,7 +510,7 @@ s32 func_15132DDC(Particle *particle) {
             probe.xpos = particle->pos.x;
             probe.ypos = particle->pos.y;
             probe.zpos = particle->pos.z;
-            probe.unk188 = 0;
+            probe.floorTriVerts = 0;
             probe.floorTri = particle->floor.tri;
             probe.shad = 1.0f;
             probe.scale_xz = 1.0f;

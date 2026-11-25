@@ -419,7 +419,7 @@ void func_15056A00(Actor *actor, u8 turn, u8 row) {
     }
     entry = &D_80099A3C[row][col];
     if (*entry != 0xFF) {
-        actor->unk218--;
+        actor->scriptCmd--;
         actor->unk21C = 20000;
         actor->unk223 = 0xD;
         actor->stickspeed = 0.0f;
@@ -469,7 +469,7 @@ void func_15056B08(Actor *actor) {
 
     scanForTargets = 1;
     if (actor->unk23A) {
-        actor->unk218 = func_1507BB28(4, actor->unk23A);
+        actor->scriptCmd = func_1507BB28(4, actor->unk23A);
         actor->unk21C = 0;
         actor->unk23A = 0;
     }
@@ -514,7 +514,7 @@ void func_15056B08(Actor *actor) {
     }
     if ((actor->task_attrib & 1) && ((state == 0) || (state == 5))) {
         if (func_1505693C(actor, actor->unk259[2]) != 0) {
-            actor->unk218 = func_1507BB28(1, actor->unk233);
+            actor->scriptCmd = func_1507BB28(1, actor->unk233);
             actor->unk21C = 0;
             actor->unkA8 = actor->unk259[2] | 0x80;
             actor->unk222 = actor->unk259[2];
@@ -599,7 +599,7 @@ void func_15056B08(Actor *actor) {
                     angle = func_1505A630(dx, -dz, 0);
                     if (actor->unk237 &&
                         (((((actor->angle - angle) >> 8) + (actor->unk237 / 2)) & 0xFF) < actor->unk237)) {
-                        actor->unk218 = func_1507BB28(2, actor->unk234);
+                        actor->scriptCmd = func_1507BB28(2, actor->unk234);
                         actor->unk21C = 0;
                     }
                 }
@@ -652,14 +652,14 @@ void func_15056B08(Actor *actor) {
                 }
             }
             if (best != 0) {
-                actor->unk218 = func_1507BB28(0, actor->unk241);
+                actor->scriptCmd = func_1507BB28(0, actor->unk241);
                 actor->unk21C = 0;
                 actor->unk222 = best - 1;
                 actor->unkA8 = best + 0x7F;
                 actor->unk22E = 5;
                 if (actor->unk242 != 0) {
                     D_800D154C = &movement_obj[best - 1];
-                    movement_obj[best - 1].unk218 = func_1507BB28(0, actor->unk242);
+                    movement_obj[best - 1].scriptCmd = func_1507BB28(0, actor->unk242);
                     movement_obj[best - 1].unk21C = 0;
                     movement_obj[best - 1].unk222 = dc_glbl_CharNum;
                     D_800D154C = actor;
@@ -726,9 +726,9 @@ void func_15056B08(Actor *actor) {
                     }
                     if (spotted) {
                         if (alertKind == 0) {
-                            actor->unk218 = func_1507BB28(3, actor->unk235);
+                            actor->scriptCmd = func_1507BB28(3, actor->unk235);
                         } else {
-                            actor->unk218 = func_1507BB28(1, actor->unk233);
+                            actor->scriptCmd = func_1507BB28(1, actor->unk233);
                         }
                         actor->unk21C = 0;
                         actor->unk222 = spotted - 1;
@@ -823,7 +823,7 @@ void func_15056B08(Actor *actor) {
         if ((info->unk19 < turnDiff) && (state != 2)) {
             speed = 0.0f;
             if (actor->unk24A && (actor->speed > 15.0f)) {
-                actor->unk218 = func_1507BB28(6, actor->unk24A);
+                actor->scriptCmd = func_1507BB28(6, actor->unk24A);
                 actor->unk21C = 0;
                 actor->unk222 = 0;
             }
@@ -1094,13 +1094,13 @@ void func_15058898(Actor *actor, f32 prevY) {
         fastFloor = movement_obj[flags].noshove & 2;
     }
     if (!fastFloor ||
-        !func_150A3FC4(actor->xpos, actor->zpos, actor->unk188, actor->floorTri.v, &groundY)) {
+        !func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &groundY)) {
         if (actor->noshove & 8) {
             floorOut = &actor->unk118;
         } else {
             floorOut = NULL;
         }
-        func_1510E8BC(&actor->unk188, actor->floorTri.v, &groundY, floorOut, &actor->unk184, &actor->floorType,
+        func_1510E8BC(&actor->floorTriVerts, actor->floorTri.v, &groundY, floorOut, &actor->floorMaterial, &actor->floorType,
                       actor->xpos, actor->ypos, actor->zpos, prevY, 0, actor, -10000.0f,
                       actor->ypos, actor->noshove & 0x04000000);
     } else if (actor->noshove & 8) {
@@ -1134,7 +1134,7 @@ void func_15058898(Actor *actor, f32 prevY) {
                 }
                 actor->intelwalk = actor->unk24E;
                 actor->unk24E = 0;
-                actor->unk218 = NULL;
+                actor->scriptCmd = NULL;
                 actor->fangle = (actor->langle = actor->angle);
             }
             if (actor->noshove & 0x1000) {
@@ -1167,8 +1167,8 @@ void func_15058898(Actor *actor, f32 prevY) {
                 }
             }
             if (!(actor->noshove & 2) ||
-                !func_150A3FC4(actor->xpos, actor->zpos, actor->unk188, actor->floorTri.v, &groundY)) {
-                func_1510E8BC(&actor->unk188, actor->floorTri.v, &groundY, &actor->unk118, &actor->unk184,
+                !func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &groundY)) {
+                func_1510E8BC(&actor->floorTriVerts, actor->floorTri.v, &groundY, &actor->unk118, &actor->floorMaterial,
                               &actor->floorType, actor->xpos, actor->ypos, actor->zpos, prevY, 0,
                               actor, -10000.0f, actor->ypos, actor->noshove & 0x04000000);
             }
@@ -1183,7 +1183,7 @@ void func_15058898(Actor *actor, f32 prevY) {
                 actor->yspd = 0.0f;
                 actor->ygrav = 0.0f;
                 actor->speed = 0.0f;
-                actor->unk218 = func_1507BB28(0, actor->unk255);
+                actor->scriptCmd = func_1507BB28(0, actor->unk255);
                 actor->unk21C = 0;
                 actor->unk255 = 0;
                 return;
@@ -1930,7 +1930,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
                 actor->mv->prop = 0;
             }
             actor->unk100 &= 0xFD;
-            if ((((u32)actor->unk184 >> 12) & 0xF) == 1) {
+            if ((((u32)actor->floorMaterial >> 12) & 0xF) == 1) {
                 if (D_800BE9F0 == 0x14) {
                     func_1513783C(actor, 0xFF, 1);
                     func_1507CD64(actor, 8);
@@ -1955,7 +1955,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
                 hurt = 0;
                 anim = 0x30;
                 if (D_800BE9F0 != 0x29) {
-                    floorType = actor->unk184;
+                    floorType = actor->floorMaterial;
                     if (((((u32)floorType >> 12) & 0xF) == 2) || ((floorType == 0x13) & 0x1F)) {
                         anim = 0xC8;
                         func_15060B70(0x1B8, actor);
@@ -2057,7 +2057,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
                         other = &movement_obj[actor->stand_on_char - 1];
                         if (other->unk24C != 0) {
                             found = 1;
-                            other->unk218 = 0;
+                            other->scriptCmd = 0;
                             other->intelwalk = other->unk24C;
                         }
                     }
@@ -2104,7 +2104,7 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
                     }
                     if ((actor->animseq.uh == 0x3B) || (actor->animseq.uh == 0x3C)) {
                         u32 surface;
-                        surface = actor->unk184 & 0x1F;
+                        surface = actor->floorMaterial & 0x1F;
                         landState = 0xFE;
                         keepLandFlags = 0;
                         actor->count5 = 0xFF;
@@ -2366,7 +2366,7 @@ void func_1505B9C4(Actor *attacker, Actor *victim, HitReaction *base, HitReactio
                 }
                 if (v != 0) {
                     other->intelwalk = v;
-                    other->unk218 = NULL;
+                    other->scriptCmd = NULL;
                 }
                 other->unk2FC = 0;
                 other->lifting = 0;
@@ -2414,7 +2414,7 @@ void func_1505B9C4(Actor *attacker, Actor *victim, HitReaction *base, HitReactio
     if ((D_800BE616 == 0) || (victim->type != 1)) {
         victim->unk21C = 0;
         if (base[index].unk24 & 0x100) {
-            victim->unk218 = NULL;
+            victim->scriptCmd = NULL;
         }
     }
     slot = victimSlot - 1;
@@ -2598,7 +2598,7 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, HitReaction *table, s32 index,
                     attacker->ivehitit = 0x3C;
                     victim->events = NULL;
                     victim->intelwalk = rules[i].unk3;
-                    victim->unk218 = NULL;
+                    victim->scriptCmd = NULL;
                     victim->norun = 1;
                     victim->doing_hit = 0;
                     D_800D1580 = table[index].unk4;
@@ -2625,7 +2625,7 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, HitReaction *table, s32 index,
                         func_1506E5FC();
                         attacker->doing_hit = 0;
                         attacker->intelwalk = 0xD;
-                        attacker->unk218 = NULL;
+                        attacker->scriptCmd = NULL;
                         done = TRUE;
                     }
                     break;
@@ -2869,7 +2869,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
         if (((s32 (*)[0x32C / 4])&D_800B2CD0)[attacker->unk108][0] == 1) {
             if (attacker->unk254 != 0) {
                 attacker->intelwalk = attacker->unk254;
-                attacker->unk218 = NULL;
+                attacker->scriptCmd = NULL;
             }
         }
         if (!(hit->unk24 & 4)) {
@@ -3628,7 +3628,7 @@ void func_1505E874(s32 sourceIdx, Actor *actor) {
                     deathKind = 0xA;
                 } else if (actor->inwater != 0) {
                     deathKind = 4;
-                } else if ((((actor->unk184 & 0x1F) == 0xE) || ((actor->unk184 & 0x1F) == 0x13)) &&
+                } else if ((((actor->floorMaterial & 0x1F) == 0xE) || ((actor->floorMaterial & 0x1F) == 0x13)) &&
                            (D_800BE9F0 != 0x34)) {
                     deathKind = 0xD;
                 } else {
@@ -4091,10 +4091,10 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
                             sound = 0x7E2;
                         }
                         actor->ygrav = 4.0f;
-                        if ((actor->unk184 & 0x1F) == 0xC) {
+                        if ((actor->floorMaterial & 0x1F) == 0xC) {
                             actor->yspd *= 0.6999999881f;
                         }
-                        if ((actor->unk184 & 0x1F) == 0x13) {
+                        if ((actor->floorMaterial & 0x1F) == 0x13) {
                             anim = 0x32;
                             actor->yspd *= 0.5500000119f;
                         }
@@ -4396,7 +4396,7 @@ void func_15060778(s32 sound, Actor *actor, u16 rate, s32 level, s32 minDist, s3
     if (flags & 8) {
         channel = 0;
     } else {
-        channel = ((u32)actor->unk184 >> 3) & 0x30;
+        channel = ((u32)actor->floorMaterial >> 3) & 0x30;
     }
     switch (flags & 3) {
     case 1:

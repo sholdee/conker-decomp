@@ -193,7 +193,7 @@ s32 func_1000EE70(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
         if (*volume != 0) {
             uid = record->callback_param2.val & 0xFF;
             if ((obj->type != 0) && (uid == obj->unique_id)) {
-                *mix = (((u32)obj->unk184 >> 3) & 0x30) * 2;
+                *mix = (((u32)obj->floorMaterial >> 3) & 0x30) * 2;
                 record->x = obj->xpos;
                 record->y = obj->ypos;
                 record->z = obj->zpos;
@@ -235,7 +235,7 @@ s32 func_1000EFB4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
             if (owner->type != 0) {
                 for (id = record->callback_param2.ids; *id != 0; id++) {
                     if ((owner->animseq.uh == *id) || !(record->flags & 1)) {
-                        *mix = (((u32)owner->unk184 >> 3) & 0x30) * 2;
+                        *mix = (((u32)owner->floorMaterial >> 3) & 0x30) * 2;
                         record->x = owner->xpos;
                         record->y = owner->ypos;
                         record->z = owner->zpos;
@@ -658,7 +658,7 @@ s32 func_10010154(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDi
         return 0;
     }
     if (obj->CameraPtr != NULL) {
-        u32 mixFlags = obj->unk184;
+        u32 mixFlags = obj->floorMaterial;
 
         handle = func_10010BE8(obj->unk8E, sound, volume, 64, 0, ((mixFlags >> 3) & 0x30) * 2,
                                D_80041FD9);
@@ -701,7 +701,7 @@ s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farD
         s32 mix;
 
         bus = D_80041FD9;
-        mix = (((u32)obj->unk184 >> 3) & 0x30) * 2;
+        mix = (((u32)obj->floorMaterial >> 3) & 0x30) * 2;
         if ((obj->mv != NULL) && (obj->mv->unk94 == 1)) {
             bus = 1;
             volume = 0x7FFF;
@@ -745,7 +745,7 @@ void func_10010630(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farD
     if (volume) {}
     if (obj->type != 0) {
         if (obj->CameraPtr != NULL) {
-            u32 mixFlags = obj->unk184;
+            u32 mixFlags = obj->floorMaterial;
 
             func_10010F30(sound, (u16)volume, 64, 0, ((mixFlags >> 3) & 0x30) * 2);
         } else {

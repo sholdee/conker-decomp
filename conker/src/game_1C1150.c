@@ -367,7 +367,7 @@ void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
             s32 slot = other->attach_char - 1;
 
             movement_obj[slot].intelwalk = 10;
-            movement_obj[slot].unk218 = NULL;
+            movement_obj[slot].scriptCmd = NULL;
             other->attach_char = 0;
         }
         break;

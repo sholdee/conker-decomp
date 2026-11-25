@@ -849,7 +849,7 @@ void func_151D1138(TrackerEffect *effect) {
     data->delta.z = data->pos.z - data->prevPos.z;
     data->dist = func_15143E64(&data->delta);
 
-    state = func_1510F8CC(owner->unk184);
+    state = func_1510F8CC(owner->floorMaterial);
     if (data->dist > 300.0f || data->dist <= 0.0f || owner->shad != 0.0f || owner->inwater != 0 ||
         state == 5 || state == 6 || state == 9 || state == 13 || state == 14) {
         finished = TRUE;

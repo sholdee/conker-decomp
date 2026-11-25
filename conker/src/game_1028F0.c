@@ -91,7 +91,7 @@ void func_150D54C8(FollowEffect *effect) {
         effect->base.header.state = -1;
         return;
     }
-    if (owner->shad < 8.0f && (owner->unk184 & 0x1F) == 0xE) {
+    if (owner->shad < 8.0f && (owner->floorMaterial & 0x1F) == 0xE) {
         // matching: (f32)1 keeps the multiply by 1.0 that a 1.0f literal would fold away
         data->spawnAccum += (3.000000238f + func_150ADA68() * (f32)1) * D_800BE9A4;
         if (data->spawnAccum > 1.0f) {
@@ -244,7 +244,7 @@ void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2) {
     if (type == 99) {
         return;
     }
-    if ((obj->unk184 & 0x1F) == 0xE) {
+    if ((obj->floorMaterial & 0x1F) == 0xE) {
         func_10010630(0x434, obj, 32000, 700, 2000);
     } else {
         func_10010630(0x4C8, obj, -32000, 700, 2000);

@@ -342,7 +342,7 @@ void func_150F34F4(Actor *actor) {
             rider->carried = 0;
             rider->speed = actor->speed;
             rider->intelwalk = 0x21;
-            rider->unk218 = 0;
+            rider->scriptCmd = 0;
             rider->stunned = 0;
             rider->noshove &= ~0x400;
             actor->lifting = 0;
@@ -363,7 +363,7 @@ void func_150F34F4(Actor *actor) {
         }
         actor->stickspeed = mag * 0.35f;
         actor->intelwalk = 7;
-        actor->unk218 = 0;
+        actor->scriptCmd = 0;
         if ((D_800CC288 & (A_BUTTON | B_BUTTON)) || (actor->shad > 100.0f)) {
             actor->intelwalk = 8;
             actor->unk102 = 1;
@@ -526,7 +526,7 @@ void func_150F34F4(Actor *actor) {
                 rider->carried = 0;
                 rider->speed = actor->speed;
                 rider->intelwalk = 0x21;
-                rider->unk218 = 0;
+                rider->scriptCmd = 0;
                 rider->stunned = 0;
                 rider->noshove &= ~0x400;
                 actor->lifting = 0;

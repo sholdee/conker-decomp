@@ -1795,7 +1795,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                     obj->unkCC = 0;
                     rescaled = 0;
                     D_800D35DC = (target - movement_obj) + 1;
-                    func_1510E7A4(&obj->unk188, obj->floorTri.v, &floorY, &obj->unk118, &obj->unk184, &obj->floorType,
+                    func_1510E7A4(&obj->floorTriVerts, obj->floorTri.v, &floorY, &obj->unk118, &obj->floorMaterial, &obj->floorType,
                                   obj->xpos, obj->ypos, obj->zpos, obj->ypos, 0, obj,
                                   -10000.0f, target->ypos);
                     ((u8 *)&D_800D35E0)[-4] = 0;
@@ -2002,11 +2002,11 @@ void func_150222E0(s32 track, s32 scene) {
                 obj->eyeCode[1] = 0;
                 obj->eyeClosed[0] = 0;
                 obj->eyeClosed[1] = 0;
-                obj->unk282 = 0;
-                obj->unk27A[0] = 0;
-                obj->unk27A[1] = 0;
-                obj->unk27E[0] = 0;
-                obj->unk27E[1] = 0;
+                obj->headEffectTimer = 0;
+                obj->headYaw[0] = 0;
+                obj->headYaw[1] = 0;
+                obj->headPitch[0] = 0;
+                obj->headPitch[1] = 0;
                 func_1507E7E4(obj, 0, 3, 0xFFFF, 0xA);
                 obj->expressionPriority = 0;
             }
@@ -2529,9 +2529,9 @@ s32 func_150235DC(s32 scene) {
             obj->mv->door_walkf_time = 0;
             obj->unk287 = 0;
             zero = obj->unk287;
-            obj->unk276 = 0;
-            obj->unk282 = 0;
-            obj->unk278 = 0;
+            obj->headEffect = 0;
+            obj->headEffectTimer = 0;
+            obj->headEffectState = 0;
             // matching: the (u8) casts keep the register allocation of the u8 view this was matched with
             obj->unk286 = (u8)zero;
             obj->unk285 = (u8)zero;

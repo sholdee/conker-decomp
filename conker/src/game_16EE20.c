@@ -111,7 +111,7 @@ void func_15141A7C(Actor *actor, s32 arg1) {
     if (D_800BE616 == 0) {
         selector = func_15141C0C(actor);
         if (D_8008A084[selector] != 0) {
-            handler = ((EffectSelector)D_8008A084[selector])(func_15141CC0(func_1510F8CC(actor->unk184)), actor);
+            handler = ((EffectSelector)D_8008A084[selector])(func_15141CC0(func_1510F8CC(actor->floorMaterial)), actor);
             if (handler != -1) {
                 if (D_8008A0B4[handler].unk0 != 0) {
                     if (D_8008A0B4[handler].unk4 > 0) {

@@ -733,7 +733,7 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
                                     owner->unk314[D_800BE9C0]);
             } else {
                 gdl = func_1515D914(gdl, view, (s32)owner->xpos, (s32)owner->ypos, (s32)owner->zpos,
-                                    owner->unk184, owner->unk304[view], owner->unk301,
+                                    owner->floorMaterial, owner->unk304[view], owner->unk301,
                                     owner->unk314[D_800BE9C0], &owner->unk302, 2,
                                     owner->unk1DD, v, D_800D9E28);
             }

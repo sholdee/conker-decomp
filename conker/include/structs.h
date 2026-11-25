@@ -1158,18 +1158,18 @@ struct Actor {
     /* 0x03A */ s8  unk3A;
     /* 0x03B */ u8  unique_id;
     /* 0x03C */ f32 speed;
-    /* 0x040 */ f32 theta;  // used
+    /* 0x040 */ f32 theta;
     /* 0x044 */ f32 stickspeed;
     /* 0x048 */ f32 speedup;
     /* 0x04C */ f32 animsp;
     /* 0x050 */ f32 wantanimsp;   // not accessed in US code
     /* 0x054 */ f32 unk54;
     /* 0x058 */ s32 unk58;
-    /* 0x05C */ s32 basemtx;  // used
+    /* 0x05C */ s32 basemtx;
     /* 0x060 */ s16 unk60;    // texture scroll
     /* 0x062 */ s16 unk62;    // its speed
     /* 0x064 */ s8  unk64;
-    /* 0x065 */ u8  attach_char;  // used
+    /* 0x065 */ u8  attach_char;
     /* 0x066 */ u8  unk66;      // flags
     /* 0x067 */ u8  pad67;
     /* 0x068 */ u8  unk68[2];    // texture frame of each animated part (eyes), from eyeCode
@@ -1191,7 +1191,7 @@ struct Actor {
     /* 0x080 */ u8  count2;  // counter
     /* 0x081 */ u8  count3;  // counter
     /* 0x082 */ u8  count4;  // counter
-    /* 0x083 */ u8  count5;  // used
+    /* 0x083 */ u8  count5;
     /* 0x084 */ union {
         u16 uh;
         u8  ub[2];
@@ -1199,11 +1199,11 @@ struct Actor {
     /* 0x086 */ u8  unk86;
     /* 0x087 */ u8  unk87;
     /* 0x088 */ u8  unk88;
-    /* 0x089 */ u8  norun;   // slowdown?
-    /* 0x08A */ u8  nojump; // unk8A;
+    /* 0x089 */ u8  norun;
+    /* 0x08A */ u8  nojump;
     /* 0x08B */ u8  pad8B;
-    /* 0x08C */ u16 unk8C;  // used
-    /* 0x08E */ u16 unk8E;  // used
+    /* 0x08C */ u16 unk8C;
+    /* 0x08E */ u16 unk8E;
     /* 0x090 */ s16 unk90;    // saved unkE4
     /* 0x092 */ u16 unk92;
     /* 0x094 */ s32 unk94;
@@ -1226,7 +1226,7 @@ struct Actor {
     /* 0x0B1 */ u8  padB1;
     /* 0x0B2 */ u16 unkB2;  // (oxygen?)
     /* 0x0B4 */ f32 lastEventTime; // animation time of the last timed event (func_1506AD30)
-    /* 0x0B8 */ f32 vtilt;  // used
+    /* 0x0B8 */ f32 vtilt;
     /* 0x0BC */ f32 unkBC;
     /* 0x0C0 */ f32 wantspeed;
     /* 0x0C4 */ f32 lean_angle;
@@ -1240,8 +1240,8 @@ struct Actor {
     /* 0x0D6 */ s16 unkD6;    // ... and centre height above the position
     /* 0x0D8 */ s16 unkD8;
     /* 0x0DA */ s16 unkDA;
-    /* 0x0DC */ f32 unkDC;    // used
-    /* 0x0E0 */ f32 unkE0;    // used
+    /* 0x0DC */ f32 unkDC;
+    /* 0x0E0 */ f32 unkE0;
     /* 0x0E4 */ s16 bodyRadius;  // body cylinder (func_15062AC4, collisions in game_83300)
     /* 0x0E6 */ s16 bodyHeight;
     /* 0x0E8 */ s16 bodyOffsetY; // its centre's height above the position (scaled by scale_y)
@@ -1251,11 +1251,11 @@ struct Actor {
     /* 0x0F4 */ s32 mvmt_control;
     /* 0x0F8 */ s32 noshove;
     /* 0x0FC */ s32 unkFC;
-    /* 0x100 */ u8  unk100;   // used
+    /* 0x100 */ u8  unk100;
     /* 0x101 */ u8  unk101;
     /* 0x102 */ u8  unk102;
     /* 0x103 */ u8  unk103;
-    /* 0x104 */ u8  stunned; //unk104;
+    /* 0x104 */ u8  stunned;
     /* 0x105 */ u8  stunnednum;
     /* 0x106 */ u8  stunnedseq;
     /* 0x107 */ u8  ivehitit;
@@ -1276,7 +1276,7 @@ struct Actor {
     /* 0x122 */ u8  unk122;
     /* 0x123 */ u8  unk123;
     /* 0x124 */ u8  owner;
-    /* 0x125 */ u8  imune; // used
+    /* 0x125 */ u8  imune;
     /* 0x126 */ u8  unk126;  // owner index into movement_obj
     /* 0x127 */ u8  playernumber;
     /* 0x128 */ u8  team;
@@ -1294,7 +1294,7 @@ struct Actor {
     /* 0x139 */ u8  unk139;  // requested sequence
     /* 0x13A */ u8  unk13A;  // its countdown
     /* 0x13B */ u8  unk13B;
-    /* 0x13C */ u8  lifting; // used
+    /* 0x13C */ u8  lifting;
     /* 0x13D */ u8  carried;
     /* 0x13E */ u8  unk13E;
     /* 0x13F */ u8  listpos; // index of its spawn record in D_800D20FC, 0xFF = none
@@ -1318,8 +1318,8 @@ struct Actor {
     /* 0x178 */ f32 unk178;
     /* 0x17C */ f32 ceilingY;
     /* 0x180 */ f32 floorY;
-    /* 0x184 */ u32 unk184;     // floor material from the floor probe
-    /* 0x188 */ void *unk188;     // floor triangle found by the floor probe: its three vertex pointers (Vec3s *[3], game_13AE20)
+    /* 0x184 */ u32 floorMaterial;  // from the floor probe: low 5 bits surface kind, bits 5+ shade
+    /* 0x188 */ void *floorTriVerts; // floor triangle found by the floor probe: its three vertex pointers (Vec3s *[3], game_13AE20)
     /* 0x18C */ CollisionTri floorTri; // the floor triangle under the actor
     /* 0x19E */ u16 floorTriIndex;
     /* 0x1A0 */ u16 propNum;   // db_Object_array index + 1 of the prop stood on, 0 = none
@@ -1375,7 +1375,7 @@ struct Actor {
     /* 0x212 */ u8  unk212[0x2];
     /* 0x214 */ s16 unk214;
     /* 0x216 */ s16 unk216;      // distance bias (game_C4DC0)
-    /* 0x218 */ ObjScriptCmd *unk218; // current script command
+    /* 0x218 */ ObjScriptCmd *scriptCmd; // current script command
     /* 0x21C */ u16 unk21C;
     /* 0x21E */ u8  unk21E;
     /* 0x21F */ u8  unk21F;
@@ -1394,14 +1394,14 @@ struct Actor {
     /* 0x22E */ u16 unk22E;   // cooldown
     /* 0x230 */ u8  pad230;
     /* 0x231 */ u8  unk231;
-    /* 0x232 */ u8  intelwalk; // used
+    /* 0x232 */ u8  intelwalk;
     /* 0x233 */ u8  unk233;
     /* 0x234 */ u8  unk234;
     /* 0x235 */ u8  unk235;
     /* 0x236 */ u8  unk236;
     /* 0x237 */ u8  unk237;
     /* 0x238 */ u8  unk238;
-    /* 0x239 */ s8  intelhitroute; // used
+    /* 0x239 */ s8  intelhitroute;
     /* 0x23A */ u8  unk23A;
     /* 0x23B */ u8  unk23B;
     /* 0x23C */ u8  unk23C;
@@ -1441,16 +1441,16 @@ struct Actor {
     /* 0x270 */ f32 cull_radius_xz;
     /* 0x274 */ u8  stand_on_char; // movement_obj index + 1 of the object stood on, 0 = none
     /* 0x275 */ u8  touching_char;  // movement_obj index + 1
-    /* 0x276 */ u8  unk276;      // head-turn effect kind, 0-6 (func_1503D9B4)
+    /* 0x276 */ u8  headEffect;      // head-turn effect kind, 0-6 (func_1503D9B4)
     /* 0x277 */ u8  pad277;
-    /* 0x278 */ u16 unk278;      // effect state
-    /* 0x27A */ s16 unk27A[2];   // yaw of head parts 1 and 0
-    /* 0x27E */ s16 unk27E[2];   // pitch of head parts 1 and 0
-    /* 0x282 */ u16 unk282;      // effect frames left, 0xFFFF = endless
-    /* 0x284 */ s8  unk284;      // effect offset for unk27A[0]
-    /* 0x285 */ s8  unk285;      // ... for unk27E[0]
-    /* 0x286 */ s8  unk286;      // ... for unk27A[1]
-    /* 0x287 */ s8  unk287;      // ... for unk27E[1]
+    /* 0x278 */ u16 headEffectState; // effect state
+    /* 0x27A */ s16 headYaw[2];   // yaw of head parts 1 and 0
+    /* 0x27E */ s16 headPitch[2]; // pitch of head parts 1 and 0
+    /* 0x282 */ u16 headEffectTimer; // effect frames left, 0xFFFF = endless
+    /* 0x284 */ s8  unk284;      // effect offset for headYaw[0]
+    /* 0x285 */ s8  unk285;      // ... for headPitch[0]
+    /* 0x286 */ s8  unk286;      // ... for headYaw[1]
+    /* 0x287 */ s8  unk287;      // ... for headPitch[1]
     /* 0x288 */ u8  unk288;
     /* 0x289 */ u8  pad289[0x3];
     /* 0x28C */ u8 *modelData[7][2]; // per model in modelIds, per frame buffer

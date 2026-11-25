@@ -2125,7 +2125,7 @@ Gfx *func_151EE184(Gfx *gfx) {
                     obj->intelwalk = cheatType;
                     D_800D154C = obj;
                     dc_glbl_CharNum = D_800D154C - movement_obj;
-                    obj->unk218 = func_1507BB28(0, obj->intelwalk);
+                    obj->scriptCmd = func_1507BB28(0, obj->intelwalk);
                     obj->unk21C = 0;
                 }
                 D_800E0C83 = 0;

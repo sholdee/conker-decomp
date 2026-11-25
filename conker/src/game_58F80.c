@@ -149,7 +149,7 @@ Gfx *func_1502BAD0(Gfx *gdl, s32 mode, s16 player) {
                 continue;
             }
         } else if (mode == 0) {
-            if (!((obj->unk184 >> 9) & 1)) {
+            if (!((obj->floorMaterial >> 9) & 1)) {
                 continue;
             }
         } else if (mode == 1) {
@@ -688,7 +688,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
             lightFlags |= 8;
         }
         gdl = func_1515D914(gdl, player, (s32)obj->xpos, (s32)obj->ypos, (s32)obj->zpos,
-                            obj->unk184, obj->unk304[player], obj->unk301, obj->unk314[D_800BE9C0],
+                            obj->floorMaterial, obj->unk304[player], obj->unk301, obj->unk314[D_800BE9C0],
                             &obj->unk302, 2, obj->unk1DD, lightFlags, D_800D9E28);
     }
     colourSet = -1;
@@ -1750,8 +1750,8 @@ Gfx *func_1502F9FC(Gfx *gdl, s32 index) {
     if (D_800C5338[id] != NULL) {
         for (i = 0; i < 2; i++) {
             tex = &D_800C5338[id][texIndex];
-            uls = (u16)(movement_obj[index].unk27A[i] + 2);
-            ult = (u16)(movement_obj[index].unk27E[i] + 2);
+            uls = (u16)(movement_obj[index].headYaw[i] + 2);
+            ult = (u16)(movement_obj[index].headPitch[i] + 2);
             lrs = (u16)(tex->width * 4 - 2);
             lrt = (u16)(tex->height * 4 - 2);
             tile = 5 - i;

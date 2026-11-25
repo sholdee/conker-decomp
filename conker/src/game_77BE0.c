@@ -89,7 +89,7 @@ void func_1504A730(void) {
             obj->old_xpos = obj->xpos;
             obj->old_ypos = obj->ypos;
             obj->old_zpos = obj->zpos;
-            D_800CC27C = (obj->unk184 >> 28) & 7;
+            D_800CC27C = (obj->floorMaterial >> 28) & 7;
             step = D_800BE9A4;
             if (D_800BE616 != 0 && (D_8008FDBC & 0x100)) {
                 maxStep = 5.0f;
@@ -375,7 +375,7 @@ f32 func_1504B0FC(Actor *obj, f32 arg1) {
             targetPitch = -20.0f;
         }
         if (obj->shad < 40.0f) {
-            func_1510F820(obj->unk188, obj->floorTri.v, &out0, &out1, &out2, &out3, &out4);
+            func_1510F820(obj->floorTriVerts, obj->floorTri.v, &out0, &out1, &out2, &out3, &out4);
             out3 = func_1505210C(obj, out3, out4, &out4, 180.0f);
             if (out4 < obj->vtilt) {
                 obj->vtilt += (out4 - obj->vtilt) * 0.2f;
@@ -442,7 +442,7 @@ void func_1504BA38(Actor *obj) {
         unk1 = entry->unk1; // matching: dead use of entry here sets the register allocation
         return;
     }
-    entry = &D_80099140[obj->unk184 & 0x1F];
+    entry = &D_80099140[obj->floorMaterial & 0x1F];
     unk2 = entry->unk2;
     if (unk2 != 0 && obj->unkAA == 0) {
         obj->unkAA = unk2;
@@ -608,8 +608,8 @@ void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
         }
     }
     if (D_800C35EA[0] == 0 && obj->mv->pissed_hangover == 0) {
-        obj->unk282 = 30;
-        obj->unk276 = 0;
+        obj->headEffectTimer = 30;
+        obj->headEffect = 0;
     }
 }
 

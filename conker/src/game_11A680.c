@@ -339,7 +339,7 @@ void func_150ED748(Actor *obj) {
             }
             if (D_800BE710[buttonPad] & Z_TRIG) {
                 obj->unk21C = 0;
-                obj->unk218 = func_1507BB28(0, 2);
+                obj->scriptCmd = func_1507BB28(0, 2);
             }
         }
         if (obj->norun != 0) {

@@ -212,7 +212,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->intelwalk = cmd->a[0];
         D_800D154C = obj;
         dc_glbl_CharNum = OBJ_INDEX(D_800D154C);
-        obj->unk218 = func_1507BB28(0, obj->intelwalk);
+        obj->scriptCmd = func_1507BB28(0, obj->intelwalk);
         obj->unk21C = 0;
         break;
     case 0x61: {
@@ -303,7 +303,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->intelwalk = cmd->a[1];
         D_800D154C = obj;
         dc_glbl_CharNum = OBJ_INDEX(D_800D154C);
-        obj->unk218 = func_1507BB28(0, obj->intelwalk);
+        obj->scriptCmd = func_1507BB28(0, obj->intelwalk);
         obj->unk21C = 0;
         break;
     case 0x5B:
@@ -505,7 +505,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
                 func_1505E650(other, cmd->a[2], cmd->a[3] * 1.52587890625e-05f, cmd->a[4] * 1.52587890625e-05f, 0.0f, 0.0f, 0);
                 break;
             case 2:
-                other->unk218 = NULL;
+                other->scriptCmd = NULL;
                 other->intelwalk = cmd->a[2];
                 break;
             }
@@ -555,7 +555,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x35:
         D_800D154C = obj;
         dc_glbl_CharNum = OBJ_INDEX(D_800D154C);
-        obj->unk218 = func_1507BB28(0, cmd->a[0]);
+        obj->scriptCmd = func_1507BB28(0, cmd->a[0]);
         obj->unk21C = 0;
         break;
     case 0x36:

@@ -295,7 +295,7 @@ void func_150BF760(WorldObject *obj) {
             }
             if (actor->intelwalk != 2) {
                 actor->intelwalk = 2;
-                actor->unk218 = NULL;
+                actor->scriptCmd = NULL;
             }
         } else if (mode == TASK_FLAG_ON) {
             if (actor != NULL && progress >= 1.0f) {
@@ -320,7 +320,7 @@ void func_150BF760(WorldObject *obj) {
             }
             if (actor == NULL && actor->intelwalk != 3) { /* sic: the original tests actor == NULL */
                 actor->intelwalk = 3;
-                actor->unk218 = NULL;
+                actor->scriptCmd = NULL;
             }
         }
     }

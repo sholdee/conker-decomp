@@ -92,7 +92,7 @@ void func_150AE790(AttachedEffect *effect) {
         spawn.kind = 1;
         spawn.flags = 1;
         motion.texture = 0;
-        motion.shade = 0xFF - (((u32)link->owner->unk184 >> 5) & 3) * 64;
+        motion.shade = 0xFF - (((u32)link->owner->floorMaterial >> 5) & 3) * 64;
         motion.unk14 = link->owner->floorY;
         motion.flags = 8;
         motion.alpha = 0xFF;

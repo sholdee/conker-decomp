@@ -19,7 +19,7 @@ Actor *func_15052F58(s32 index, s32 arg1) {
 
     obj = &movement_obj[index];
     obj->lifting = 0;
-    obj->unk218 = NULL;
+    obj->scriptCmd = NULL;
     obj->intelwalk = arg1;
     return obj;
 }
@@ -96,7 +96,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
         obj->intelhitroute = arg7;
         obj->mv->jump_on_char = 0;
         arg0->intelwalk = arg5;
-        arg0->unk218 = NULL;
+        arg0->scriptCmd = NULL;
         if (arg4 != 0) {
             func_1506160C(obj, 1, 0, 0, 0);
             obj->unk101 |= 0x40;
@@ -128,7 +128,7 @@ void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxInd
         obj->norun = 0xFF;
         obj->angle = arg0->langle;
         arg0->intelwalk = arg3;
-        arg0->unk218 = NULL;
+        arg0->scriptCmd = NULL;
         func_1505E650(obj, 50, 1.3f, 4.0f, 0.0f, 0.0f, 0);
         movement_obj[arg0->owner].mv->gpoint = 70;
         movement_obj[arg0->owner].mv->swing_xvel = arg0->xpos;

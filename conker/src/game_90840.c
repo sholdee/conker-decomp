@@ -1471,7 +1471,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     } else {
                         obj->animseq.uh = 0;
                     }
-                    obj->unk218 = func_1507BB28(1, mode);
+                    obj->scriptCmd = func_1507BB28(1, mode);
                     obj->unk21C = 0;
                     D_800D154C = arg0;
                     obj->unk22E = 0;
@@ -2135,7 +2135,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     }
                     obj->stunned = 0;
                     obj->carried = 0;
-                    obj->unk218 = NULL;
+                    obj->scriptCmd = NULL;
                     obj->intelwalk = 2;
                     arg0->lifting = 0;
                     arg0->count5 = 0;
@@ -2245,8 +2245,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         arg0->count5 = 0xFF;
                         arg0->mv->ReloadTimer = 0x78;
                         anim = 0x156;
-                        if ((arg0->CameraPtr != NULL) && (((arg0->unk184 & 0x1F) == 5) || ((arg0->unk184 & 0x1F) == 3) ||
-                                                       ((arg0->unk184 & 0x1F) == 6) || ((arg0->unk184 & 0x1F) == 9))) {
+                        if ((arg0->CameraPtr != NULL) && (((arg0->floorMaterial & 0x1F) == 5) || ((arg0->floorMaterial & 0x1F) == 3) ||
+                                                       ((arg0->floorMaterial & 0x1F) == 6) || ((arg0->floorMaterial & 0x1F) == 9))) {
                             func_10010558((func_150ADA20() % 3U) + 0x2EB, arg0, 0x7D00, 0x64, 0x78, 0x6E);
                         }
                     } else if (arg0->animseq.uh != 0x156) {
@@ -2563,9 +2563,9 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->speed = 0.0f;
                 arg0->mv->rt_context_b = act;
                 anim = 0x26F;
-                arg0->unk276 = 6;
-                arg0->unk282 = 0x64;
-                arg0->unk278 = 0;
+                arg0->headEffect = 6;
+                arg0->headEffectTimer = 0x64;
+                arg0->headEffectState = 0;
                 arg0->unk284 = 0;
                 func_15080828(1);
             }
@@ -2580,12 +2580,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         } else {
             s32 sounds[2] = { 0x39, 0x35 };
 
-            arg0->unk282 = 0x64;
+            arg0->headEffectTimer = 0x64;
             if ((s8)arg0->unk284 == 0) {  // matching: read signed (lb); Actor declares u8
-                arg0->unk278 = (u16)arg0->unk278 + D_800BE9E4;
-                if (((func_150ADA20() % 120U) + 0xB4) < (u16)arg0->unk278) {
+                arg0->headEffectState = (u16)arg0->headEffectState + D_800BE9E4;
+                if (((func_150ADA20() % 120U) + 0xB4) < (u16)arg0->headEffectState) {
                     func_1507E7E4(arg0, sounds[func_150ADA20() & 1], 1, (func_150ADA20() % 180U) + 0x1A4, 0);
-                    arg0->unk278 = 0;
+                    arg0->headEffectState = 0;
                     arg0->unk284 = 1;
                 }
             } else if (((s8)arg0->unk284 != 0) && (arg0->expression == arg0->defaultExpression)) {
@@ -2633,7 +2633,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         func_100109D0(obj);
                     }
                     obj->intelwalk = animHold;
-                    obj->unk218 = NULL;
+                    obj->scriptCmd = NULL;
                     arg0->mv->shotCount = 1;
                     if ((animGrab != obj->animseq.uh) || ((D_800C3A58 != 0) && (animSpecial != 0))) {
                         func_150FC438(obj, arg0, 0, animGrab);
@@ -2650,7 +2650,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     }
                 } else if ((D_800C3A58 != 0) && (animSpecial != obj->intelwalk) && (animSpecial != 0)) {
                     obj->intelwalk = animSpecial;
-                    obj->unk218 = NULL;
+                    obj->scriptCmd = NULL;
                 } else if (arg0->mv->shotCount == 1) {
                     arg0->mv->shotCount = 0;
                     if (func_1000FF90(func_1000EC24, -1, -1) == -1) {
@@ -2667,7 +2667,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     arg0->mv->ReloadTimer = 0x96;
                     func_1000FA64((func_150ADA20() % 3U) + 0x618, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x1F4, 0xC8, func_1000EC24, (void *)0x1E, 0, 0x300, 0);
                     obj->intelwalk = next;
-                    obj->unk218 = NULL;
+                    obj->scriptCmd = NULL;
                 }
             }
             anim = 999;

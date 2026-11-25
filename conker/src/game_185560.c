@@ -454,7 +454,7 @@ s32 func_15159084(Actor *chr, u8 mode) {
     s32 ret;
     s32 flags;
 
-    flags = chr->unk184 & 0x1F;
+    flags = chr->floorMaterial & 0x1F;
     if ((mode == 2) || (mode == 3)) {
         ret = 0;
     } else {

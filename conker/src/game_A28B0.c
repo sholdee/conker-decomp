@@ -42,19 +42,19 @@ void func_15075400(s32 target) {
     u8 i;
 
     if (target < 247) {
-        D_800D154C->unk218 += target;
+        D_800D154C->scriptCmd += target;
         return;
     }
 
     for (i = 0; i < 100; i++) {
-        if (D_800D154C->unk218->op < 247) {
-            D_800D154C->unk218++;
+        if (D_800D154C->scriptCmd->op < 247) {
+            D_800D154C->scriptCmd++;
         } else {
-            label = D_800D154C->unk218->op;
-            D_800D154C->unk218 = (ObjScriptCmd *)((u8 *)D_800D154C->unk218 + 1);
+            label = D_800D154C->scriptCmd->op;
+            D_800D154C->scriptCmd = (ObjScriptCmd *)((u8 *)D_800D154C->scriptCmd + 1);
             if (target == label) {
                 // the interpreter steps past the current command after this returns
-                D_800D154C->unk218--;
+                D_800D154C->scriptCmd--;
                 return;
             }
         }
@@ -308,9 +308,9 @@ void func_15075DE8(void) {
     if (D_800D1893 != 0) {
         D_800D154C->intelwalk = D_800D1893;
     }
-    D_800D154C->unk218 = func_1507BB28(0, D_800D1891);
+    D_800D154C->scriptCmd = func_1507BB28(0, D_800D1891);
     // the interpreter steps past the current command after this returns
-    D_800D154C->unk218--;
+    D_800D154C->scriptCmd--;
 }
 
 void func_15075E6C(void) {
@@ -500,7 +500,7 @@ void func_150766D0(void) {
     if (((D_800D154C->shad > 0.0f) && (D_800D1890 == 0)) ||
         ((D_800D1890 * 50 < D_800D154C->shad) && (D_800D1890 != 0))) {
         D_800D154C->unk21C = 99;
-        D_800D154C->unk218--;
+        D_800D154C->scriptCmd--;
     }
 }
 
@@ -587,13 +587,13 @@ void func_150768DC(void) {
     }
 
     if (D_800D154C->unkA8 != 0) {
-        D_800D154C->unk218 = func_1507BB28(0, D_800D1893);
-        D_800D154C->unk218--;
+        D_800D154C->scriptCmd = func_1507BB28(0, D_800D1893);
+        D_800D154C->scriptCmd--;
         script = D_800D1892;
         if (script != 0) {
             foundIndex = D_800D154C->unkA8;
             found = &movement_obj[foundIndex & 0x7F];
-            found->unk218 = NULL;
+            found->scriptCmd = NULL;
             found->intelwalk = script;
             found->unk222 = self;
         }
@@ -1009,7 +1009,7 @@ void func_15077B80(void) {
 void func_15077BB4(void) {
     Actor *obj = func_1505F0AC(D_800D1891);
 
-    obj->unk218 = NULL;
+    obj->scriptCmd = NULL;
     obj->intelwalk = D_800D1890;
 }
 
@@ -1409,8 +1409,8 @@ void func_1507900C(void) {
 
 void func_1507903C(void) {
     if (func_15078A60(0) != 0) {
-        D_800D154C->unk218 = func_1507BB28(0, D_800D1890);
-        D_800D154C->unk218--;
+        D_800D154C->scriptCmd = func_1507BB28(0, D_800D1890);
+        D_800D154C->scriptCmd--;
     }
 }
 
@@ -1422,8 +1422,8 @@ void func_15079090(void) {
 
 void func_150790C4(void) {
     if (func_15078A60(dc_glbl_CharNum) != 0) {
-        D_800D154C->unk218 = func_1507BB28(0, D_800D1890);
-        D_800D154C->unk218--;
+        D_800D154C->scriptCmd = func_1507BB28(0, D_800D1890);
+        D_800D154C->scriptCmd--;
     }
 }
 
@@ -1473,7 +1473,7 @@ void func_15079228(void) {
         angle = 1;
     }
     func_1505D024(D_800D154C, D_800D1890, angle, -1);
-    D_800D154C->unk218--;
+    D_800D154C->scriptCmd--;
     D_800D154C->unk21C = 1;
 }
 
@@ -1492,7 +1492,7 @@ void func_15079334(void) {
 
     if (D_800D154C->unkA8 != 0) {
         found = &movement_obj[D_800D154C->unkA8 & 0x7F];
-        found->unk218 = NULL;
+        found->scriptCmd = NULL;
         found->intelwalk = D_800D1890;
     }
 }
@@ -1565,7 +1565,7 @@ void func_1507965C(void) {
     if (index != -1) {
         obj = &movement_obj[index];
         obj->intelwalk = D_800D1891;
-        obj->unk218 = NULL;
+        obj->scriptCmd = NULL;
         obj->unk23A = 0;
     }
 }
@@ -1712,7 +1712,7 @@ select_object: // matching: unused label, splits the block for the scheduler
         dc_glbl_CharNum = index;
         if (D_800D154C->intelwalk != D_800D1890) {
             D_800D154C->intelwalk = D_800D1890;
-            D_800D154C->unk218 = func_1507BB28(0, D_800D154C->intelwalk);
+            D_800D154C->scriptCmd = func_1507BB28(0, D_800D154C->intelwalk);
             D_800D154C->unk21C = 0;
         }
         dc_glbl_CharNum = savedIndex;
@@ -1798,8 +1798,8 @@ void func_15079FBC(void) {
 
     if ((movement_obj[0].attach_char == 0) || (movement_obj[0].stickspeed < 5.0f)) {
         D_800D154C->intelwalk = D_800D1891;
-        D_800D154C->unk218 = func_1507BB28(0, D_800D154C->intelwalk);
-        D_800D154C->unk218--;
+        D_800D154C->scriptCmd = func_1507BB28(0, D_800D154C->intelwalk);
+        D_800D154C->scriptCmd--;
         return;
     }
 
@@ -2191,7 +2191,7 @@ void func_1507B058(void) {
             D_800D154C->intelwalk = D_800D1891;
             /* fallthrough */
         case 2:
-            D_800D154C->unk218 = func_1507BB28(0, D_800D1891);
+            D_800D154C->scriptCmd = func_1507BB28(0, D_800D1891);
             D_800D154C->unk21C = 0;
         }
     }
@@ -2318,7 +2318,7 @@ void func_1507B630(void) {
         }
     } else {
         // repeat this command
-        D_800D154C->unk218--;
+        D_800D154C->scriptCmd--;
     }
     D_800D154C->unk21C = 100;
 }
@@ -2326,7 +2326,7 @@ void func_1507B630(void) {
 void func_1507B6E0(void) {
     if ((D_800D154C->norun != 0) || (D_800D154C->shad > 5.0f)) {
         // repeat this command
-        D_800D154C->unk218--;
+        D_800D154C->scriptCmd--;
         D_800D154C->unk21C = 100;
     }
 }
@@ -2478,7 +2478,7 @@ ObjScriptCmd *func_1507BB28(s32 arg0, s32 scriptId) {
  */
 void func_1507BC14(Actor *obj) {
     if (obj->unk21C != 0) {
-        if (obj->unk218 != NULL) {
+        if (obj->scriptCmd != NULL) {
             if (obj->unk21C != 25500) {
                 obj->unk21C = obj->unk21C - D_800CC264;
             }
@@ -2496,22 +2496,22 @@ void func_1507BC14(Actor *obj) {
         }
     }
 
-    if (obj->unk218 == NULL) {
-        obj->unk218 = func_1507BB28(0, obj->intelwalk);
+    if (obj->scriptCmd == NULL) {
+        obj->scriptCmd = func_1507BB28(0, obj->intelwalk);
         obj->unk21C = 0;
     }
 
     while (obj->unk21C == 0) {
-        if (obj->unk218->op >= 247) {
+        if (obj->scriptCmd->op >= 247) {
             // a label: skip its single byte
-            obj->unk218 = (ObjScriptCmd *)((u8 *)obj->unk218 + 1);
+            obj->scriptCmd = (ObjScriptCmd *)((u8 *)obj->scriptCmd + 1);
         } else {
-            D_800D1890 = obj->unk218->args[0];
-            D_800D1891 = obj->unk218->args[1];
-            D_800D1892 = obj->unk218->args[2];
-            D_800D1893 = obj->unk218->args[3];
-            D_80086730[obj->unk218->op]();
-            obj->unk218++;
+            D_800D1890 = obj->scriptCmd->args[0];
+            D_800D1891 = obj->scriptCmd->args[1];
+            D_800D1892 = obj->scriptCmd->args[2];
+            D_800D1893 = obj->scriptCmd->args[3];
+            D_80086730[obj->scriptCmd->op]();
+            obj->scriptCmd++;
         }
     }
 }

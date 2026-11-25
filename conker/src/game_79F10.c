@@ -293,9 +293,9 @@ void func_1504CB98(Actor *actor) {
     if (actor->energy == 0) {
         actor->norun = 0x14;
         if ((actor->stunned == 0) && (actor->mv->death_State == 0)) {
-            if ((actor->unk184 & 0x1F) == 0xE) {
+            if ((actor->floorMaterial & 0x1F) == 0xE) {
                 func_1507CD64(actor, 0xD);
-            } else if ((actor->unk184 & 0x1F) == 0x13) {
+            } else if ((actor->floorMaterial & 0x1F) == 0x13) {
                 func_1507CD64(actor, 0xD);
             } else {
                 func_1507CD64(actor, 0);
@@ -1046,7 +1046,7 @@ void func_1504CB98(Actor *actor) {
                         diff = actor->angle - otherFacing;
                         quadrant = (diff + 0x2000) & 0xC000;
                         if (quadrant & 0x4000) {
-                            movement_obj[D_800CC26C].unk218 = NULL;
+                            movement_obj[D_800CC26C].scriptCmd = NULL;
                             movement_obj[D_800CC26C].intelwalk = 2;
                             movement_obj[D_800CC26C].angle = otherFacing + quadrant;
                             actor->angle = movement_obj[D_800CC26C].angle;
@@ -1132,8 +1132,8 @@ void func_1504CB98(Actor *actor) {
         } else {
             probeTop = actor->old_ypos;
         }
-        if ((actor->unk118 != -10000.0f) || ((actor->noshove & 2) == 0) || ((func_150A3FC4(actor->xpos, actor->zpos, actor->unk188, actor->floorTri.v, &floorY) == 0))) {
-            func_1510E8BC(&actor->unk188, actor->floorTri.v, &floorY, &actor->unk118, &actor->unk184, &actor->floorType, actor->xpos, actor->ypos, actor->zpos, probeTop, 0, actor, -10000.0f, actor->ypos, actor->noshove & 0x04000000);
+        if ((actor->unk118 != -10000.0f) || ((actor->noshove & 2) == 0) || ((func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &floorY) == 0))) {
+            func_1510E8BC(&actor->floorTriVerts, actor->floorTri.v, &floorY, &actor->unk118, &actor->floorMaterial, &actor->floorType, actor->xpos, actor->ypos, actor->zpos, probeTop, 0, actor, -10000.0f, actor->ypos, actor->noshove & 0x04000000);
             if (actor->unk118 < actor->unk120) {
                 actor->unk118 = actor->unk120;
             }
@@ -1159,8 +1159,8 @@ void func_1504CB98(Actor *actor) {
         if ((startX != actor->xpos) || (startZ != actor->zpos)) {
             scratch = -10000.0f;
             actor->mvmt_control |= 0x10000;
-            if ((scratch != actor->unk118) || (floorY != scratch) || !(actor->noshove & 2) || (func_150A3FC4(actor->xpos, actor->zpos, actor->unk188, actor->floorTri.v, &floorY) == 0)) {
-                func_1510E8BC(&actor->unk188, actor->floorTri.v, &floorY, &actor->unk118, &actor->unk184, &actor->floorType, actor->xpos, actor->ypos, actor->zpos, probeTop, 0, actor, scratch, actor->ypos, actor->noshove & 0x04000000);
+            if ((scratch != actor->unk118) || (floorY != scratch) || !(actor->noshove & 2) || (func_150A3FC4(actor->xpos, actor->zpos, actor->floorTriVerts, actor->floorTri.v, &floorY) == 0)) {
+                func_1510E8BC(&actor->floorTriVerts, actor->floorTri.v, &floorY, &actor->unk118, &actor->floorMaterial, &actor->floorType, actor->xpos, actor->ypos, actor->zpos, probeTop, 0, actor, scratch, actor->ypos, actor->noshove & 0x04000000);
                 if (actor->unk118 < actor->unk120) {
                     actor->unk118 = actor->unk120;
                 }
@@ -1221,7 +1221,7 @@ void func_1504CB98(Actor *actor) {
                 }
             }
         }
-        D_800CC27C = (actor->unk184 >> 28) & 7;
+        D_800CC27C = (actor->floorMaterial >> 28) & 7;
         if (D_800CC27C >= 7) {
             D_800CC27C = 0;
         }
@@ -1296,11 +1296,11 @@ void func_1504CB98(Actor *actor) {
                                 animSpeed = -(climbInput * 0.025f);
                             }
                         }
-                        actor->unk184 &= ~0x1F;
+                        actor->floorMaterial &= ~0x1F;
                         if (D_800BE9F0 == 0x23) {
-                            actor->unk184 |= 9;
+                            actor->floorMaterial |= 9;
                         } else {
-                            actor->unk184 |= 3;
+                            actor->floorMaterial |= 3;
                         }
                         if ((climbTop - 80.0f) <= actor->ypos) {
                             if (!(actor->mv->ladder & 0x80)) {
@@ -1337,7 +1337,7 @@ void func_1504CB98(Actor *actor) {
             }
         }
     }
-    if ((actor->shad == 0.0f) && (actor->mv->transport != 2) && (actor->energy != 0) && ((actor->unk184 & 0x1F) == 0xE)) {
+    if ((actor->shad == 0.0f) && (actor->mv->transport != 2) && (actor->energy != 0) && ((actor->floorMaterial & 0x1F) == 0xE)) {
         func_1505D024(actor, 1, actor->langle, -1);
         actor->unk10B |= 0x80;
     }
@@ -1535,11 +1535,11 @@ void func_150511E8(Actor *actor) {
             scale = 7.0f;
             rise = 0.6000000238f;
         }
-        func_1510F820(actor->unk188, actor->floorTri.v, &normalX, &normalZ, &leanRate, &slopeX, &slopeZ);
+        func_1510F820(actor->floorTriVerts, actor->floorTri.v, &normalX, &normalZ, &leanRate, &slopeX, &slopeZ);
         if (actor->noshove & 0x100000) {
             f32 pitch;
 
-            func_1510F820(actor->unk188, actor->floorTri.v, &normalX, &normalZ, &leanRate, &slopeX, &slopeZ);
+            func_1510F820(actor->floorTriVerts, actor->floorTri.v, &normalX, &normalZ, &leanRate, &slopeX, &slopeZ);
             roll = func_1505210C(actor, slopeX, slopeZ, &pitch, 50.0f);
             pitch *= gain;
             actor->vtilt += (pitch - actor->vtilt) * damping;
@@ -1636,7 +1636,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
         normalZ = 0.0f;
         leanRate = 3.0f;
         if (actor->mv->transport == 2) {
-            func_1510F820(actor->unk188, actor->floorTri.v, &normalX, &normalZ, &leanRate, &roll, &pitch);
+            func_1510F820(actor->floorTriVerts, actor->floorTri.v, &normalX, &normalZ, &leanRate, &roll, &pitch);
             if ((((roll * roll) + (pitch * pitch)) > 1.39999998f) && ((roll * roll) + (pitch * pitch) < 1000.0f)) {
                 actor->nojump = 6;
                 if ((height < 80.0f) && (actor->norun == 0)) {
@@ -1654,9 +1654,9 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
             func_1510F820(NULL, actor->floorTri.v, &normalX, &normalZ, &leanRate, &roll, &pitch);
         }
         if ((actor->mv->transport == 0) && (actor->mv->bot == 0) &&
-            (((D_800CC27C == 0) && ((((roll * roll) + (pitch * pitch)) > 1.0f) || (((actor->unk184 >> 12) & 0xF) == 4))) ||
+            (((D_800CC27C == 0) && ((((roll * roll) + (pitch * pitch)) > 1.0f) || (((actor->floorMaterial >> 12) & 0xF) == 4))) ||
              ((D_800CC27C != 0) && (actor->mv->env_suit != 0))) &&
-            (((actor->unk184 >> 12) & 0xF) != 3)) {
+            (((actor->floorMaterial >> 12) & 0xF) != 3)) {
             D_800CC27C = 1;
             bumped = 1;
         }

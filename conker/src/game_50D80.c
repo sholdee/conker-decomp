@@ -2343,8 +2343,8 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
             t = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene);
             if (event->unk4 == 0) {
-                obj->unk276 = 1;
-                obj->unk282 = t - eventTime;
+                obj->headEffect = 1;
+                obj->headEffectTimer = t - eventTime;
             }
         } else if (event->value == 0x27) {
             f32 speed;

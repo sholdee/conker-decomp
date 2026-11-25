@@ -398,14 +398,14 @@ s32 func_150D942C(Trail *trail) {
                         target->taskint[2] = 1;
                         if (target->character_type == 0x3A) {
                             target->intelwalk = 10;
-                            target->unk218 = NULL;
+                            target->scriptCmd = NULL;
                         } else if (target->character_type == 0x10 && target->unk251 == 1) {
                             func_1505A250(target->xpos - hit.pos.x, target->zpos - hit.pos.z,
                                           ((1.0f - (totalLen - 50.0f) * 0.001052631531f) * 0.4550000131f) + 0.2010000050f,
                                           &target->ob_slopex, &target->ob_slopey);
                             if (target->intelwalk == 15) {
                                 s32 pad; // matching: -g3 block scope
-                                target->unk218 = NULL;
+                                target->scriptCmd = NULL;
                             }
                         } else if (target->character_type == 0x10) {
                             dx = cur->pos.x - owner->xpos;
@@ -418,14 +418,14 @@ s32 func_150D942C(Trail *trail) {
                             if (target->imune == 0) {
                                 s32 pad; // matching: -g3 block scope
                                 target->intelwalk = 15;
-                                target->unk218 = NULL;
+                                target->scriptCmd = NULL;
                             }
                         } else if (target->character_type == 0x91) {
                             target->intelwalk = 3;
-                            target->unk218 = NULL;
+                            target->scriptCmd = NULL;
                         } else if (target->character_type == 0x90) {
                             target->intelwalk = 44;
-                            target->unk218 = NULL;
+                            target->scriptCmd = NULL;
                         } else {
                             ownerIndex = owner - movement_obj;
                             func_1505D024(target, 0xE0036, ((u16)(func_150484A0(dir[0], dir[2]) * 10430.37793f) - 0x4000) | 1, ownerIndex);

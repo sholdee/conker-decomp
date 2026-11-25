@@ -355,7 +355,7 @@ void func_1507D1D8(Actor *obj) {
     obj->unk210 = 0xFF;
     obj->unk211 = 0xFF;
     obj->intelwalk = 1;
-    obj->unk218 = NULL;
+    obj->scriptCmd = NULL;
     obj->mv->spawnIndex = player;
     if (D_800BE616 != 0) {
         obj->imune = 150;

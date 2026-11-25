@@ -193,7 +193,7 @@ void func_1518BD60(TrailEmitter *emitter) {
                 motion.velocity.x = speed * cosA;
                 motion.velocity.z = speed * sinA;
                 motion.flags = emitter->params.flags | 8;
-                motion.shade = 0xFF - ((u8)((u32)emitter->params.owner->unk184 >> 5) << 6);
+                motion.shade = 0xFF - ((u8)((u32)emitter->params.owner->floorMaterial >> 5) << 6);
                 motion.alpha = 0xFF;
                 trail = func_15147DA0(&spawn, &motion, spawn.itemCount * sizeof(Vec3f) + 8, 5, 1, 0, 2, 1, 0, 0,
                                       0, &render, 0, emitter->link.owner, emitter->link.kind);

@@ -335,7 +335,7 @@ void func_1506B2BC(void) {
     Actor *obj = func_150721E8(D_800D154C);
 
     if (obj != NULL && (obj - movement_obj) + 1 == movement_obj[0].stand_on_char) {
-        D_800D154C->unk218 = NULL;
+        D_800D154C->scriptCmd = NULL;
         D_800D154C->intelwalk = 4;
     }
 }
@@ -698,7 +698,7 @@ void func_1506BF5C(void) {
         if (D_80082FA0 >= 2) {
             break;
         }
-        type = func_1510F8CC(D_800D154C->unk184);
+        type = func_1510F8CC(D_800D154C->floorMaterial);
         if (type == 0xC && D_800D154C->unkCC > -17.0f) {
             sound = func_1000F568(0x9C, 2);
         } else if (D_800D154C->unk118 != -10000.0f && D_800D154C->ypos <= D_800D154C->unk118) {
@@ -1017,10 +1017,10 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     obj->scale_xz = scale;
     obj->scale_y = scale;
     obj->unk66 = D_800D154C->unk66 & 0xC;
-    obj->unk278 = kind;
+    obj->headEffectState = kind;
     obj->unk284 = arg10;
     if (kind == 2 || kind == 18) {
-        obj->unk282 = 60;
+        obj->headEffectTimer = 60;
     }
     switch (kind) {
     case 1:
@@ -1199,7 +1199,7 @@ void func_1506D2E8(void) {
     D_800D2104[obj->listpos][1].z = D_800D154C->zpos + zOff;
     D_800D2104[obj->listpos][1].y = D_800D154C->ypos + yOff;
     obj->attach_char = 0;
-    obj->unk218 = NULL;
+    obj->scriptCmd = NULL;
 
     if ((D_800D1580 & 0xFF00) != 0) {
         obj->ypos = D_800D154C->ypos + 70.0f;
@@ -1884,9 +1884,9 @@ void func_1506EED8(void) {
 }
 
 void func_1506EEF4(void) {
-    D_800D154C->unk276 = (D_800D1580 >> 16) & 0xFFFF;
-    D_800D154C->unk278 = (D_800D1580 >> 24) & 0xFF;
-    D_800D154C->unk282 = D_800D1580 & 0xFFFF;
+    D_800D154C->headEffect = (D_800D1580 >> 16) & 0xFFFF;
+    D_800D154C->headEffectState = (D_800D1580 >> 24) & 0xFF;
+    D_800D154C->headEffectTimer = D_800D1580 & 0xFFFF;
     D_800D154C->unk284 = 0;
     D_800D154C->unk285 = 0;
     D_800D154C->unk286 = 0;
@@ -1902,15 +1902,15 @@ void func_1506EF5C(void) {
     index = (D_800D1580 >> 16) & 0xFF;
     first = (D_800D1580 >> 8) & 0xFF;
     second = D_800D1580 & 0xFF;
-    D_800D154C->unk282 = 0xFFFF;
-    D_800D154C->unk276 = 5;
+    D_800D154C->headEffectTimer = 0xFFFF;
+    D_800D154C->headEffect = 5;
     index *= 2;
     (&D_800D154C->unk284)[index] = first;
     (&D_800D154C->unk285)[index] = second;
 }
 
 void func_1506EFB4(void) {
-    D_800D154C->unk282 = 0;
+    D_800D154C->headEffectTimer = 0;
 }
 
 void func_1506EFC8(s32 cmd) {
@@ -3152,7 +3152,7 @@ void func_1507266C(void) {
     obj->unk101 = 4;
     obj->stunned = 0;
     obj->imune = 0xFF;
-    obj->unk218 = NULL;
+    obj->scriptCmd = NULL;
     obj->bodyRadius = 0;
     obj->bodyHeight = 0;
     obj->intelwalk = packed;
@@ -3184,7 +3184,7 @@ void func_150727F0(void) {
 
     for (i = 0; i < 25; i++) {
         if (movement_obj[i].type != 0 && dc_glbl_CharNum + 1 == movement_obj[i].attach_char) {
-            movement_obj[i].unk218 = NULL;
+            movement_obj[i].scriptCmd = NULL;
             movement_obj[i].intelwalk = D_800D1580;
         }
     }
@@ -3471,7 +3471,7 @@ Actor *func_15073118(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 
     if (anim == 0x1F) {
         obj->unkC8 = 10.0f;
     }
-    obj->unk278 = anim;
+    obj->headEffectState = anim;
     obj->drawtype = 5;
     obj->unique_id = 255U - (obj - movement_obj);
     func_15083568(obj, anim, 1.0f, 0);
@@ -3568,7 +3568,7 @@ void func_150738E8(void) {
         movement_obj[index].angle = D_800D154C->langle;
         movement_obj[index].attach_char = 0;
         movement_obj[index].intelwalk = 6;
-        movement_obj[index].unk218 = NULL;
+        movement_obj[index].scriptCmd = NULL;
         movement_obj[index].stunned = 0;
         movement_obj[index].langle = 0xE000;
         func_1505E650(D_800D154C, 151, 1.0f, 5.0f, 0.0f, 0.0f, 0);
@@ -3926,7 +3926,7 @@ void func_150747E4(void) {
     if (i != 0) {
         i = i - 1;
         movement_obj[i].intelwalk = D_800D1580;
-        movement_obj[i].unk218 = NULL;
+        movement_obj[i].scriptCmd = NULL;
     }
 }
 
@@ -3967,7 +3967,7 @@ void func_1507490C(void) {
     if (D_800D154C->lifting != 0) {
         if (movement_obj[index].carried >= 100) {
             movement_obj[index].intelwalk = D_800D1580;
-            movement_obj[index].unk218 = NULL;
+            movement_obj[index].scriptCmd = NULL;
             movement_obj[index].stunned = 0;
         }
     }
@@ -4066,18 +4066,18 @@ void func_15074C00(s32 self, Actor *other, s32 result) {
 void func_15074C80(Actor *self, Actor *other) {
     s32 anim;
 
-    if ((u16)self->unk278 == 17) {
+    if ((u16)self->headEffectState == 17) {
         func_151942E8(self, other);
     }
 
-    if ((u16)self->unk278 == 2 || (u16)self->unk278 == 18 || (u16)self->unk278 == 3 || (u16)self->unk278 == 6) {
+    if ((u16)self->headEffectState == 2 || (u16)self->headEffectState == 18 || (u16)self->headEffectState == 3 || (u16)self->headEffectState == 6) {
         if (other->energy == 0) {
-            if ((u16)self->unk278 == 2) {
+            if ((u16)self->headEffectState == 2) {
                 anim = 0x2A;
-            } else if ((u16)self->unk278 == 18) {
+            } else if ((u16)self->headEffectState == 18) {
                 anim = 0x2F;
             } else {
-                if ((u16)self->unk278 == 3) {
+                if ((u16)self->headEffectState == 3) {
                     anim = 0x39;
                 } else {
                     anim = 0x51;
@@ -4134,7 +4134,7 @@ void func_15074EE8(Actor *self, Actor *other, s32 result) {
 
 void func_15074F30(Actor *self, Actor *other, s32 result) {
     self->intelwalk = other->unk109;
-    self->unk218 = NULL;
+    self->scriptCmd = NULL;
 }
 
 /* Sends `other` towards (-2641, 3039). */

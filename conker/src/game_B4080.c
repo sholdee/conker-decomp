@@ -647,7 +647,7 @@ s32 func_1508802C(Racer *racer, Actor *obj, s32 mode) {
     obj->intelwalk = mode;
     D_800D154C = obj;
     dc_glbl_CharNum = racer->actorIndex;
-    obj->unk218 = func_1507BB28(0, mode);
+    obj->scriptCmd = func_1507BB28(0, mode);
     obj->unk21C = 0;
     obj->imune = 0xFF;
     racer->state = 2;

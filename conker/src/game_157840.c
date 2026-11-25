@@ -597,7 +597,7 @@ void func_1512BB10(Camera *arg0) {
             probe.ypos = arg0->eye.y;
         }
         probe.zpos = arg0->eye.z;
-        probe.unk188 = arg0->TrianglePtr;
+        probe.floorTriVerts = arg0->TrianglePtr;
         probe.shad = probe.ypos - arg0->unk354;
         probe.floorY = arg0->unk354;
         probe.yspd = 0.0f;

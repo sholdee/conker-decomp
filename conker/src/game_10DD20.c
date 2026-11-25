@@ -84,7 +84,7 @@ void func_150E0BE0(Actor *obj) {
             counter = obj->unk251; // matching: reusing counter keeps both in v0
             if (counter != 3) {
                 obj->fangle = D_800CC346;
-                obj->unk218 = NULL;
+                obj->scriptCmd = NULL;
                 obj->intelwalk = 4;
                 if (counter == 2) {
                     obj->intelwalk = 2;

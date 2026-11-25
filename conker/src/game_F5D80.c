@@ -413,7 +413,7 @@ void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
             if ((behind >= 0.0f) && (behind < 250.0f)) {
                 if (actor->character_type == 0x53) {
                     actor->norun = 10;
-                    actor->unk218 = NULL;
+                    actor->scriptCmd = NULL;
                     actor->intelwalk = 0x13;
                     if (movement_obj[actor->owner].attach_char != 0) {
                         actor->intelwalk = 0x14;

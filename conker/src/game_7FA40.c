@@ -41,7 +41,7 @@ void func_15052590(Actor *obj) {
         obj->theta = (s16)(obj->langle + 0x4000) * (360.0f / 65536.0f);
         func_15059140(obj);
 
-        if ((obj->shad == 0.0f) && ((obj->unk184 & 0x1F) == 14)) {
+        if ((obj->shad == 0.0f) && ((obj->floorMaterial & 0x1F) == 14)) {
             obj->energy = 0;
         }
 

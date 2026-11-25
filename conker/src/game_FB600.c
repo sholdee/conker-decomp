@@ -268,7 +268,7 @@ void func_150CE740(Actor *obj) {
         }
         obj->norun = 180;
         obj->intelwalk = D_800A080F[action];
-        obj->unk218 = NULL;
+        obj->scriptCmd = NULL;
         if ((obj->intelwalk == 0x22) && (obj->taskint[0] == 0)) {
             obj->mv->shotsfired++;
         }
@@ -295,7 +295,7 @@ void func_150CE740(Actor *obj) {
             obj->fangle = ((func_150ADA20() % 10000U) + heading) - 5000;
             obj->stickspeed = (obj->stickspeed * 0.5f) + 22.0f;
             if ((u8)(((s32)(obj->angle - obj->fangle) >> 8) - 0x50) < 0x60) {
-                obj->unk218 = NULL;
+                obj->scriptCmd = NULL;
                 obj->intelwalk = 0x10;
             }
         } else if (obj->stickspeed < 5.0f) {
@@ -321,7 +321,7 @@ void func_150CE740(Actor *obj) {
                 } else {
                     obj->intelwalk = 3;
                 }
-                obj->unk218 = NULL;
+                obj->scriptCmd = NULL;
             }
         }
     }

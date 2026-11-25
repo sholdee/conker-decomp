@@ -1795,16 +1795,16 @@ void func_1503A830(Actor *obj) {
     mtx[1][3] = 0.0f;
     mtx[0][3] = 0.0f;
     yaw[0] = pitch[0] = 0.0f;
-    if (obj->unk282 == 0) {
-        obj->unk278 = 0;
+    if (obj->headEffectTimer == 0) {
+        obj->headEffectState = 0;
         obj->unk284 = 0;
         obj->unk285 = 0;
         obj->unk286 = 0;
         obj->unk287 = 0;
     }
-    if (obj->unk282 != 0) {
+    if (obj->headEffectTimer != 0) {
         aim = 0;
-        if (obj->unk276 == 0) {
+        if (obj->headEffect == 0) {
             s32 phase0;
             s32 phase1;
             f32 sinV;
@@ -1812,17 +1812,17 @@ void func_1503A830(Actor *obj) {
             s32 pad68; // matching: -g3 stack slot
             f32 scale;
             f32 amp;
-            obj->unk27A[0] -= obj->unk284;
-            obj->unk27E[0] -= obj->unk285;
-            obj->unk27A[1] -= obj->unk286;
-            obj->unk27E[1] -= obj->unk287;
-            phase0 = obj->unk278 & 0xFF;
-            phase1 = obj->unk278 >> 8;
+            obj->headYaw[0] -= obj->unk284;
+            obj->headPitch[0] -= obj->unk285;
+            obj->headYaw[1] -= obj->unk286;
+            obj->headPitch[1] -= obj->unk287;
+            phase0 = obj->headEffectState & 0xFF;
+            phase1 = obj->headEffectState >> 8;
             phase0 += D_800BE9E4 * 3;
             phase1 -= D_800BE9E4 * 4;
-            obj->unk278 = (phase1 << 8) | phase0;
-            if (obj->unk282 < 30) {
-                scale = (f32)(obj->unk282 + 0U) / 30.0f; // matching: unsigned int to float conversion
+            obj->headEffectState = (phase1 << 8) | phase0;
+            if (obj->headEffectTimer < 30) {
+                scale = (f32)(obj->headEffectTimer + 0U) / 30.0f; // matching: unsigned int to float conversion
             } else {
                 scale = 1.0f;
             }
@@ -1835,13 +1835,13 @@ void func_1503A830(Actor *obj) {
             cosV = func_150489B0(phase1);
             obj->unk286 = sinV * amp;
             obj->unk287 = cosV * amp;
-        } else if (obj->unk276 == 1) {
-            if (obj->unk278 == 0) {
-                obj->unk278 = 1;
+        } else if (obj->headEffect == 1) {
+            if (obj->headEffectState == 0) {
+                obj->headEffectState = 1;
                 obj->unk287 += func_150ADA20() % 20U;
             }
-            if (obj->unk282 < 0xAE) {
-                speed = obj->unk282 / 6 + 1;
+            if (obj->headEffectTimer < 0xAE) {
+                speed = obj->headEffectTimer / 6 + 1;
             } else {
                 speed = 30;
             }
@@ -1854,7 +1854,7 @@ void func_1503A830(Actor *obj) {
             pitch[0] = obj->unk285;
             yaw[1] = obj->unk286;
             pitch[1] = obj->unk287;
-        } else if (obj->unk276 == 2) {
+        } else if (obj->headEffect == 2) {
             Mtx *model;
 
             aim = 1;
@@ -1870,31 +1870,31 @@ void func_1503A830(Actor *obj) {
                     }
                 }
             }
-        } else if (obj->unk276 == 3) {
+        } else if (obj->headEffect == 3) {
             f32 (*targetBone)[4];
 
-            if (obj->unk278 != -1) { // always true for the u16; matching: removing it changes the code
+            if (obj->headEffectState != -1) { // always true for the u16; matching: removing it changes the code
                 targetBone = (f32 (*)[4])obj->ob_matrix_ptr;
                 if (targetBone != NULL) {
-                    targetBone = ((MtxF *)targetBone)[obj->unk278];
+                    targetBone = ((MtxF *)targetBone)[obj->headEffectState];
                     D_800C3FE8[0] = targetBone[3][0];
                     D_800C3FE8[1] = targetBone[3][1];
                     D_800C3FE8[2] = targetBone[3][2];
                 }
             }
-        } else if (obj->unk276 == 4) {
+        } else if (obj->headEffect == 4) {
             if (obj->animseq.uh == 0x26) {
-                if (obj->unk278 == 0) {
+                if (obj->headEffectState == 0) {
                     obj->unk284 -= D_800BE9E4;
                     if (obj->unk284 < -20) {
                         obj->unk284 = -20;
-                        obj->unk278 = 1;
+                        obj->headEffectState = 1;
                     }
                 } else {
                     obj->unk284 += D_800BE9E4 * 3;
                     if (obj->unk284 > 20) {
                         obj->unk284 = 20;
-                        obj->unk278 = 0;
+                        obj->headEffectState = 0;
                     }
                 }
                 obj->unk287 = 0;
@@ -1902,10 +1902,10 @@ void func_1503A830(Actor *obj) {
                 obj->unk285 = obj->unk287;
                 snap = 1;
             } else {
-                obj->unk282 = 0;
+                obj->headEffectTimer = 0;
                 aim = 1;
             }
-        } else if (obj->unk276 == 5) {
+        } else if (obj->headEffect == 5) {
             f32 kx = 0.3543307185f;
             f32 ky = 0.236220479f;
 
@@ -1915,7 +1915,7 @@ void func_1503A830(Actor *obj) {
             pitch[1] = obj->unk287 * ky;
             clamp = 0;
             mirror = 0;
-        } else if (obj->unk276 == 6) {
+        } else if (obj->headEffect == 6) {
             if (obj->mv->rt_context_b == 0x2A) {
                 pitch[0] = 30.0f;
                 yaw[0] = -6.0f;
@@ -1924,18 +1924,18 @@ void func_1503A830(Actor *obj) {
                 yaw[0] = 0; // matching: integer zeros; 0.0f changes the code
                 yaw[1] = 0;
                 pitch[0] = 0;
-                if (obj->unk27E[0] == 0) {
-                    obj->unk276 = 0;
+                if (obj->headPitch[0] == 0) {
+                    obj->headEffect = 0;
                 }
             }
             mirror = 0;
             pitch[1] = pitch[0];
         }
-        if (obj->unk282 != 0xFFFF) {
-            if (obj->unk282 >= D_800BE9E4) {
-                obj->unk282 -= D_800BE9E4;
+        if (obj->headEffectTimer != 0xFFFF) {
+            if (obj->headEffectTimer >= D_800BE9E4) {
+                obj->headEffectTimer -= D_800BE9E4;
             } else {
-                obj->unk282 = 0;
+                obj->headEffectTimer = 0;
             }
         }
     }
@@ -1971,7 +1971,7 @@ void func_1503A830(Actor *obj) {
             yaw[0] = pitch[0] = 0.0f;
         }
     }
-    if (obj->unk282 == 0 && func_15022024(yaw, pitch, obj - movement_obj, 0)) {
+    if (obj->headEffectTimer == 0 && func_15022024(yaw, pitch, obj - movement_obj, 0)) {
         clamp = 1;
         mirror = 0;
         snap = 0;
@@ -1995,21 +1995,21 @@ void func_1503A830(Actor *obj) {
     yaw1 = -yaw1;
     pitch0 = (pitch[0] >= 0.0f) ? D_800D1C90[id]->headPitch[0] * pitch[0] / 30.0f : D_800D1C90[id]->headPitch[1] * pitch[0] / -15.0f;
     pitch1 = (pitch[1] >= 0.0f) ? D_800D1C90[id]->headPitch[0] * pitch[1] / 30.0f : D_800D1C90[id]->headPitch[1] * pitch[1] / -15.0f;
-    APPROACH(obj->unk27A[0], (s32)yaw1);
-    APPROACH(obj->unk27A[1], (s32)yaw0);
-    APPROACH(obj->unk27E[0], (s32)pitch1);
-    APPROACH(obj->unk27E[1], (s32)pitch0);
+    APPROACH(obj->headYaw[0], (s32)yaw1);
+    APPROACH(obj->headYaw[1], (s32)yaw0);
+    APPROACH(obj->headPitch[0], (s32)pitch1);
+    APPROACH(obj->headPitch[1], (s32)pitch0);
     if (snap) {
-        obj->unk27A[0] = obj->unk284;
-        obj->unk27E[0] = obj->unk285;
-        obj->unk27A[1] = obj->unk286;
-        obj->unk27E[1] = obj->unk287;
+        obj->headYaw[0] = obj->unk284;
+        obj->headPitch[0] = obj->unk285;
+        obj->headYaw[1] = obj->unk286;
+        obj->headPitch[1] = obj->unk287;
     }
-    if (obj->unk282 != 0 && obj->unk276 == 0) {
-        obj->unk27A[0] += obj->unk284;
-        obj->unk27E[0] += obj->unk285;
-        obj->unk27A[1] += obj->unk286;
-        obj->unk27E[1] += obj->unk287;
+    if (obj->headEffectTimer != 0 && obj->headEffect == 0) {
+        obj->headYaw[0] += obj->unk284;
+        obj->headPitch[0] += obj->unk285;
+        obj->headYaw[1] += obj->unk286;
+        obj->headPitch[1] += obj->unk287;
     }
 }
 

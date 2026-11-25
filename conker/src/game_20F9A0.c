@@ -1592,7 +1592,7 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
             } else if (attacker->character_type == 0x80) {
                 sourceState = -1;
                 if ((source != attacker) && (source->type == 4)) {
-                    sourceState = (u16)source->unk278;
+                    sourceState = (u16)source->headEffectState;
                 }
                 if (attacker->character_type == victim->character_type) {
                     if ((victimIdx < D_8008FD90) && (D_8008FDD4->stats[victimIdx].unkA >= 4)) {
@@ -1642,7 +1642,7 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
             } else if (attacker->character_type == 0x3B) {
                 sourceState2 = -1;
                 if ((source != attacker) && (source->type == 4)) {
-                    sourceState2 = (u16)source->unk278;
+                    sourceState2 = (u16)source->headEffectState;
                 }
                 if (sourceState2 == 2) {
                     if ((victim->energy <= 0) || ((func_150ADA20() & 7) == 7)) {

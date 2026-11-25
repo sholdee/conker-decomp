@@ -311,7 +311,7 @@ void func_151DF1BC(void) {
                 obj->intelwalk = anim;
                 D_800D154C = obj;
                 dc_glbl_CharNum = D_800D154C - movement_obj;
-                obj->unk218 = func_1507BB28(0, obj->intelwalk);
+                obj->scriptCmd = func_1507BB28(0, obj->intelwalk);
                 obj->unk21C = 0;
                 obj->unk201 = 0x14;
             }

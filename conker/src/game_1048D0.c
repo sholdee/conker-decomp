@@ -243,7 +243,7 @@ void func_150D7928(Actor *obj) {
         n = player->langle;
         obj->bodyRadius = 0;
         obj->floorY = player->floorY;
-        obj->unk184 = player->unk184;
+        obj->floorMaterial = player->floorMaterial;
         /* copy the player's floor triangle */
         dst = &obj->floorTri.v[0].x;
         src = &player->floorTri.v[0].x;
@@ -255,8 +255,8 @@ void func_150D7928(Actor *obj) {
         obj->stickspeed = player->lean_angle;
         if (id == 0x7F) {
             player->imune = 20;
-            player->unk184 &= ~0x1F;
-            player->unk184 |= 4;
+            player->floorMaterial &= ~0x1F;
+            player->floorMaterial |= 4;
             obj->ypos = player->ypos;
             obj->xpos += (player->xpos - obj->xpos) * 0.5f;
             obj->zpos += (player->zpos - obj->zpos) * 0.5f;
