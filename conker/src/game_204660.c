@@ -461,65 +461,70 @@ s32 func_151D7A38(Trail *trail) {
 
 extern f32 func_15144528(f32, f32, f32);
 
+/*
+ * Shapes the trail, walking from the newest point to the oldest: limits its length to 80 (shortening
+ * the last segment and dropping older points), scrolls the texture along it, and fades the alpha out
+ * over the oldest 70%.
+ */
 s32 func_151D7CD0(Trail *trail) {
-    TrailData *sub;
-    TrailPoint *entries;
-    f32 len;
-    TrailPoint *entry;
-    vertex *prev;
-    struct17 d;
+    TrailData *data;
+    TrailPoint *points;
+    f32 totalLength;
+    TrailPoint *point;
+    vertex *newerPos;
+    struct17 delta;
     s32 i;
-    f32 t;
-    f32 c;
-    f32 inv1;
+    f32 cut;
+    f32 pad; // matching: an unused local IDO still gives a stack slot
+    f32 invLength;
     s32 j;
-    TrailPoint *e2;
-    f32 sum2;
+    TrailPoint *texPoint;
+    f32 distance;
     s32 k;
-    TrailPoint *e3;
-    f32 sum;
-    f32 a;
-    f32 b;
-    f32 inv;
+    TrailPoint *fadePoint;
+    f32 fadeDist;
+    f32 opaqueLength;
+    f32 fadeLength;
+    f32 invFadeLength;
 
-    sub = trail->data;
-    entries = trail->points;
+    data = trail->data;
+    points = trail->points;
     if (trail->count >= 2) {
-        len = 0;
+        totalLength = 0;
         i = trail->head;
         if (trail->flags & 2) {
-            prev = &trail->pos;
+            newerPos = &trail->pos;
         } else {
             i--;
             if (i < 0) {
                 i = trail->capacity - 1;
             }
-            prev = &entries[i].pos;
+            newerPos = &points[i].pos;
         }
         do {
-            f32 dist;
+            f32 length;
 
             i--;
             if (i < 0) {
                 i = trail->capacity - 1;
             }
-            entry = &entries[i];
-            d.unk0 = entry->pos.x - prev->x;
-            d.unk4 = entry->pos.y - prev->y;
-            d.unk8 = entry->pos.z - prev->z;
-            dist = func_15143E64(&d);
-            len += dist;
-            entry->length = dist;
-            if (len > 80.0f) {
-                if (entry->length != 0.0f) {
-                    inv1 = 1.0f / entry->length;
-                    t = (len - 80.0f) * inv1;
-                    entry->pos.x -= d.unk0 * t;
-                    entry->pos.y -= d.unk4 * t;
-                    entry->pos.z -= d.unk8 * t;
-                    entry->length = entry->length * (1.0f - t);
+            point = &points[i];
+            delta.unk0 = point->pos.x - newerPos->x;
+            delta.unk4 = point->pos.y - newerPos->y;
+            delta.unk8 = point->pos.z - newerPos->z;
+            length = func_15143E64(&delta);
+            totalLength += length;
+            point->length = length;
+            if (totalLength > 80.0f) {
+                if (point->length != 0.0f) {
+                    invLength = 1.0f / point->length;
+                    cut = (totalLength - 80.0f) * invLength;
+                    point->pos.x -= delta.unk0 * cut;
+                    point->pos.y -= delta.unk4 * cut;
+                    point->pos.z -= delta.unk8 * cut;
+                    point->length = point->length * (1.0f - cut);
                 }
-                len = 80.0f;
+                totalLength = 80.0f;
                 while (i != trail->tail) {
                     trail->tail++;
                     if (trail->tail == trail->capacity) {
@@ -528,50 +533,50 @@ s32 func_151D7CD0(Trail *trail) {
                     trail->count--;
                 }
             }
-            prev = &entry->pos;
+            newerPos = &point->pos;
         } while (i != trail->tail);
     }
     if (trail->count >= 2) {
-        sub->texPhase += -41.0f * D_800BE9A4;
-        sub->texPhase = func_15144528(sub->texPhase, 16383.0f, -16384.0f);
-        sum2 = 0;
+        data->texPhase += -41.0f * D_800BE9A4;
+        data->texPhase = func_15144528(data->texPhase, 16383.0f, -16384.0f);
+        distance = 0;
         j = trail->head;
         do {
             j--;
             if (j < 0) {
                 j = trail->capacity - 1;
             }
-            e2 = &entries[j];
-            sum2 += e2->length;
-            e2->texU = func_15144528(sub->texPhase + sum2 * 46.87999725f, 16383.0f, -16384.0f);
+            texPoint = &points[j];
+            distance += texPoint->length;
+            texPoint->texU = func_15144528(data->texPhase + distance * 46.87999725f, 16383.0f, -16384.0f);
         } while (j != trail->tail);
     }
     if (trail->count >= 2) {
-        sum = 0;
-        a = len * 0.2990000248f;
-        b = len - a;
-        inv = 1.0f / b;
+        fadeDist = 0;
+        opaqueLength = totalLength * 0.2990000248f;
+        fadeLength = totalLength - opaqueLength;
+        invFadeLength = 1.0f / fadeLength;
         k = trail->head;
         do {
-            f32 c3;
+            f32 into;
 
             k--;
             if (k < 0) {
                 k = trail->capacity - 1;
             }
-            e3 = &entries[k];
-            if (a < sum) {
-                s32 pad;
+            fadePoint = &points[k];
+            if (opaqueLength < fadeDist) {
+                s32 pad; // matching: stack layout
 
-                c3 = sum - a;
-                if (b < c3) {
-                    c3 = b;
+                into = fadeDist - opaqueLength;
+                if (fadeLength < into) {
+                    into = fadeLength;
                 }
-                e3->alpha = (b - c3) * inv * 60.0f;
+                fadePoint->alpha = (fadeLength - into) * invFadeLength * 60.0f;
             } else {
-                e3->alpha = 60;
+                fadePoint->alpha = 60;
             }
-            sum += e3->length;
+            fadeDist += fadePoint->length;
         } while (k != trail->tail);
     }
     return 1;
@@ -581,153 +586,154 @@ typedef struct {
     s32 unk0;
     s32 unk4;
 } Mode151D80C4;
-typedef struct {
-    u8 pad0[0xC];
-} Tex151D80C4;
-extern Tex151D80C4 D_80090B60[];
 extern Mode151D80C4 D_800A4AC8[];
 extern s32 D_800D2C9C;
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *needSync, s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 
 extern u8 D_80090CD4[];
 
-Gfx *func_151D80C4(Trail *trail, Gfx *gfx, s16 arg2) {
-    TrailData *sub;
-    vertex cur;
-    vertex prev;
+/*
+ * Draws the trail as a ribbon 11 units wide, spread sideways by view's cos/sin (D_800DD1E8/D_800DD1D8), from
+ * the head back to the oldest point. A fading trail scales the alpha by timer * 12.
+ */
+Gfx *func_151D80C4(Trail *trail, Gfx *gfx, s16 view) {
+    TrailData *data;
+    vertex pos;
+    vertex newerPos;
     s32 i;
-    s32 j;
-    TrailPoint *entries;
-    u8 update;
-    u8 prevA;
-    u8 curA;
+    s32 newest;
+    TrailPoint *points;
+    u8 needSync;
+    u8 newerAlpha;
     u8 alpha;
-    s32 last;
-    TrailPoint *p;
-    f32 prevU;
-    f32 curU;
-    f32 dx;
+    u8 fade;
+    s32 newer;
+    TrailPoint *point;
+    f32 newerU;
+    f32 u;
+    f32 sideX;
     Vtx *vtx;
-    f32 dz;
+    f32 sideZ;
 
     if (trail->count < 2) {
         return gfx;
     }
-    sub = trail->data;
-    entries = trail->points;
-    func_151D5D60(trail->unk84, arg2, (trail->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, 0);
+    data = trail->data;
+    points = trail->points;
+    func_151D5D60(trail->unk84, view, (trail->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, 0);
     if (vtx == NULL) {
         return gfx;
     }
-    update = 1;
-    gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &update, 0x3E);
+    needSync = 1;
+    gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &needSync, 0x3E);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-    gfx = func_1513F4E4(gfx, 0x4C, &update);
-    gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].unk0 | D_800A4AC8[1].unk4, &update);
+    gfx = func_1513F4E4(gfx, 0x4C, &needSync);
+    gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].unk0 | D_800A4AC8[1].unk4, &needSync);
     if (trail->flags & 2) {
         i = trail->head - 1;
         if (i < 0) {
             i = trail->capacity - 1;
         }
-        prev = trail->pos;
-        prevA = 0;
-        prevU = sub->texPhase;
+        newerPos = trail->pos;
+        newerAlpha = 0;
+        newerU = data->texPhase;
     } else {
-        j = trail->head - 1;
-        if (j < 0) {
-            j = trail->capacity - 1;
+        newest = trail->head - 1;
+        if (newest < 0) {
+            newest = trail->capacity - 1;
         }
-        i = j - 1;
+        i = newest - 1;
         if (i < 0) {
             i = trail->capacity - 1;
         }
-        prev = entries[j].pos;
-        prevA = entries[j].alpha;
-        prevU = entries[j].texU;
+        newerPos = points[newest].pos;
+        newerAlpha = points[newest].alpha;
+        newerU = points[newest].texU;
     }
-    p = (TrailPoint *)((u8 *)entries + i * sizeof(TrailPoint));
-    cur = p->pos;
-    dx = D_800DD1E8[arg2] * 5.5f;
-    curA = p->alpha;
-    dz = D_800DD1D8[arg2] * 5.5f;
-    curU = p->texU;
+    point = (TrailPoint *)((u8 *)points + i * sizeof(TrailPoint)); // matching: byte offset puts points first in the addu
+    pos = point->pos;
+    sideX = D_800DD1E8[view] * 5.5f;
+    alpha = point->alpha;
+    sideZ = D_800DD1D8[view] * 5.5f;
+    u = point->texU;
     if (trail->flags & 8) {
-        alpha = trail->timer * 12;
+        fade = trail->timer * 12;
     } else {
-        alpha = 0xFF;
+        fade = 0xFF;
     }
-    prevA = (prevA * alpha) >> 8;
-    vtx->v.ob[0] = prev.x + dx;
-    vtx->v.ob[1] = prev.y;
-    vtx->v.ob[2] = prev.z - dz;
-    vtx->v.tc[0] = prevU;
+    newerAlpha = (newerAlpha * fade) >> 8;
+    vtx->v.ob[0] = newerPos.x + sideX;
+    vtx->v.ob[1] = newerPos.y;
+    vtx->v.ob[2] = newerPos.z - sideZ;
+    vtx->v.tc[0] = newerU;
     vtx->v.tc[1] = 0x800;
     vtx->v.cn[0] = 0xFF;
     vtx->v.cn[1] = 0xFF;
     vtx->v.cn[2] = 0xFF;
-    vtx->v.cn[3] = prevA;
+    vtx->v.cn[3] = newerAlpha;
     vtx->v.flag = 0;
     vtx++;
-    vtx->v.ob[0] = prev.x - dx;
-    vtx->v.ob[1] = prev.y;
-    vtx->v.ob[2] = prev.z + dz;
-    vtx->v.tc[0] = prevU;
+    vtx->v.ob[0] = newerPos.x - sideX;
+    vtx->v.ob[1] = newerPos.y;
+    vtx->v.ob[2] = newerPos.z + sideZ;
+    vtx->v.tc[0] = newerU;
     vtx->v.tc[1] = 0;
     vtx->v.cn[0] = 0xFF;
     vtx->v.cn[1] = 0xFF;
     vtx->v.cn[2] = 0xFF;
-    vtx->v.cn[3] = prevA;
+    vtx->v.cn[3] = newerAlpha;
     vtx->v.flag = 0;
     vtx++;
     do {
-        curA = (curA * alpha) >> 8;
-        vtx->v.ob[0] = cur.x + dx;
-        vtx->v.ob[1] = cur.y;
-        vtx->v.ob[2] = cur.z - dz;
-        vtx->v.tc[0] = curU;
+        alpha = (alpha * fade) >> 8;
+        vtx->v.ob[0] = pos.x + sideX;
+        vtx->v.ob[1] = pos.y;
+        vtx->v.ob[2] = pos.z - sideZ;
+        vtx->v.tc[0] = u;
         vtx->v.tc[1] = 0x800;
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
-        vtx->v.cn[3] = curA;
+        vtx->v.cn[3] = alpha;
         vtx->v.flag = 0;
         vtx++;
-        vtx->v.ob[0] = cur.x - dx;
-        vtx->v.ob[1] = cur.y;
-        vtx->v.ob[2] = cur.z + dz;
-        vtx->v.tc[0] = curU;
+        vtx->v.ob[0] = pos.x - sideX;
+        vtx->v.ob[1] = pos.y;
+        vtx->v.ob[2] = pos.z + sideZ;
+        vtx->v.tc[0] = u;
         vtx->v.tc[1] = 0;
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
-        vtx->v.cn[3] = curA;
+        vtx->v.cn[3] = alpha;
         vtx->v.flag = 0;
         vtx++;
         gSPVertex(gfx++, vtx - 4, 4, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
         gSP1Triangle(gfx++, 1, 3, 2, 0);
-        if (curU < prevU) {
+        if (u < newerU) {
+            /* texU wrapped around: restart the strip from copies of the last two vertices, one period back */
             memcpy(vtx, vtx - 2, sizeof(Vtx) * 2);
             vtx[-2].v.tc[0] -= 0x8000;
             vtx++;
             vtx[-2].v.tc[0] -= 0x8000;
             vtx++;
         }
-        last = i;
+        newer = i;
         i--;
         if (i < 0) {
             i = trail->capacity - 1;
         }
-                p = (TrailPoint *)((u8 *)entries + i * sizeof(TrailPoint));
-        cur = p->pos;
-        curA = p->alpha;
-        prevU = entries[last].texU;
-        curU = p->texU;
-    } while (last != trail->tail);
+        point = &points[i];
+        pos = point->pos;
+        alpha = point->alpha;
+        newerU = points[newer].texU;
+        u = point->texU;
+    } while (newer != trail->tail);
     return gfx;
 }
 
