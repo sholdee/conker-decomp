@@ -1510,7 +1510,6 @@ extern s32 *D_80089A20[];
 extern f32 D_800A3C30;
 extern s32 D_800A3F14[];
 extern s32 D_800A3F64[];
-extern f32 D_800A4630;
 
 
 /*
@@ -1559,7 +1558,7 @@ void func_15136C3C(struct127 *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
         spray.pitchRange = 69;
         spray.lifeBase = 150;
         spray.lifeRange = 100;
-        spray.maxDistance = D_800A4630;
+        spray.maxDistance = 998.0f;
         spray.sizeBase = 25.0f;
         spray.sizeRange = 10.0f;
         if ((&D_800A3FF8 == &D_800A3FD8[kind]) || (&D_800A40C8 == &D_800A3FD8[kind]) ||
@@ -1593,191 +1592,177 @@ extern void func_15143874(s16, f32, f32 *, f32 *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 extern s32 func_15145C90(s32);
 extern void func_151DC034(struct17 *, f32, s32, s16, u8, u8, s32);
-s32 func_15137C64(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3,
-                  struct17 *arg4, struct17 *arg5, struct17 *arg6, struct17 *arg7);
+s32 func_15137C64(struct17 *start, struct17 *end, struct17 *dir, struct17 *side, struct17 *up,
+                  struct17 *from, struct17 *to, struct17 *direction);
 
-void func_15136F50(void *arg0, void *arg1, void *arg2, u8 arg3, u8 arg4, s32 arg5) {
-    struct17 v0;
-    struct17 v1;
-    struct17 v2;
-    struct17 v3;
-    struct17 v4;
-    u8 pad0;
+/* Blood for an impact from `from` to `to`: a burst, a spray along the decalPos and wall decals. */
+void func_15136F50(struct17 *from, struct17 *to, struct17 *direction, u8 arg3, u8 arg4, s32 arg5) {
+    struct17 start;
+    struct17 end;
+    struct17 dir;
+    struct17 side;
+    struct17 up;
+    u8 pad0; // matching: pad0-pad3 and pad9 are unused stack slots of the original
     u8 doSparks;
     u8 doDecals;
-    s32 n;
-    f32 sin1;
-    f32 cos1;
-    Vec3f vel1;
-    f32 fa;
-    f32 fb;
-    f32 sin2;
-    f32 cos2;
-    Vec3f vel2;
-    s32 ret;
-    u32 r;
-    s16 cnt;
+    s32 count;
+    f32 sideOffset;
+    f32 upOffset;
+    Vec3f velocity;
+    f32 randomA;
+    f32 randomB;
+    f32 sparkSide;
+    f32 sparkUp;
+    Vec3f sparkVelocity;
+    s32 frame;
+    u32 random;
+    s16 sparks;
     s32 j;
-    f32 sin3;
-    f32 cos3;
+    f32 decalSide;
+    f32 decalUp;
     s32 pad1;
     s32 pad2;
     f32 normal[3];
-    struct17 hit;
-    f32 dist;
+    struct17 decalPos;
+    f32 distance;
     s32 surface;
     s32 pad3;
 
     doSparks = 1;
     doDecals = 1;
-    ret = func_15137C64(&v0, &v1, &v2, &v3, &v4, arg0, arg1, arg2);
-    if (ret != 0) {
-        if (ret == 2) {
+    frame = func_15137C64(&start, &end, &dir, &side, &up, from, to, direction);
+    if (frame != 0) {
+        if (frame == 2) {
             doSparks = 0;
             doDecals = 0;
         }
-        fa = func_150ADA68();
-        r = func_150ADA20();
-        func_151DC034(&v0, fa * 192.0f + 192.0f, (r % 101U + 0x9B) & 0xFF, (func_150ADA20() & 7) + 0xF, arg3, arg4, arg5);
+        randomA = func_150ADA68();
+        random = func_150ADA20();
+        func_151DC034(&start, randomA * 192.0f + 192.0f, (random % 101U + 0x9B) & 0xFF, (func_150ADA20() & 7) + 0xF, arg3, arg4, arg5);
         {
         s32 pad9;
-        n = (func_150ADA20() & 3) + 4;
-        for (; n > 0; n--) {
-            fa = func_150ADA68() * 0.09290000051f + 0.06430000067f;
-            r = func_150ADA20();
-            func_15143874(r & 0xFF, func_150ADA68() * 50.0f, &cos1, &sin1);
-            vel1.x = (v2.unk0 * 100.0f + v3.unk0 * cos1 + v4.unk0 * sin1) * fa;
-            vel1.y = (v2.unk4 * 100.0f + v3.unk4 * cos1 + v4.unk4 * sin1) * fa;
-            vel1.z = (v2.unk8 * 100.0f + v3.unk8 * cos1 + v4.unk8 * sin1) * fa;
-            fb = func_150ADA68();
-            fa = func_150ADA68();
-            r = func_150ADA20();
-            func_151DB5D0(arg3, &v1, &vel1, fb * 80.0f + 120.0f, 1.033617973f, 0.959544003f, fa * 0,
-                          r % 31U + 0x1E, func_150ADA20() % 156U + 0x64, 0x2E, 5, 0, arg4, arg5);
+        count = (func_150ADA20() & 3) + 4;
+        for (; count > 0; count--) {
+            randomA = func_150ADA68() * 0.09290000051f + 0.06430000067f;
+            random = func_150ADA20();
+            func_15143874(random & 0xFF, func_150ADA68() * 50.0f, &upOffset, &sideOffset);
+            velocity.x = (dir.unk0 * 100.0f + side.unk0 * upOffset + up.unk0 * sideOffset) * randomA;
+            velocity.y = (dir.unk4 * 100.0f + side.unk4 * upOffset + up.unk4 * sideOffset) * randomA;
+            velocity.z = (dir.unk8 * 100.0f + side.unk8 * upOffset + up.unk8 * sideOffset) * randomA;
+            randomB = func_150ADA68();
+            randomA = func_150ADA68();
+            random = func_150ADA20();
+            func_151DB5D0(arg3, &end, &velocity, randomB * 80.0f + 120.0f, 1.033617973f, 0.959544003f, randomA * 0,
+                          random % 31U + 0x1E, func_150ADA20() % 156U + 0x64, 0x2E, 5, 0, arg4, arg5);
         }
         }
         if (doSparks) {
-            cnt = (func_150ADA20() & 3) + 4;
-            if (cnt != 0) {
+            sparks = (func_150ADA20() & 3) + 4;
+            if (sparks != 0) {
                 do {
-                    r = func_150ADA20();
-                    func_15143874(r & 0xFF, func_150ADA68() * 2 + 6.0f, &cos2, &sin2);
-                    vel2.x = v3.unk0 * cos2 + v4.unk0 * sin2;
-                    vel2.y = v3.unk4 * cos2 + v4.unk4 * sin2;
-                    vel2.z = v3.unk8 * cos2 + v4.unk8 * sin2;
-                    r = func_150ADA20();
-                    fa = func_150ADA68();
-                    func_151DA6F8(&v0, &vel2, 0.0f, r % 6U + 8, 0xFF, fa * 1.300000072f + 1.899999976f,
+                    random = func_150ADA20();
+                    func_15143874(random & 0xFF, func_150ADA68() * 2 + 6.0f, &sparkUp, &sparkSide);
+                    sparkVelocity.x = side.unk0 * sparkUp + up.unk0 * sparkSide;
+                    sparkVelocity.y = side.unk4 * sparkUp + up.unk4 * sparkSide;
+                    sparkVelocity.z = side.unk8 * sparkUp + up.unk8 * sparkSide;
+                    random = func_150ADA20();
+                    randomA = func_150ADA68();
+                    func_151DA6F8(&start, &sparkVelocity, 0.0f, random % 6U + 8, 0xFF, randomA * 1.300000072f + 1.899999976f,
                                   func_150ADA20() % 3U + 4, 0, 1.0f, 1.0f, 1, arg3, 0, 0x10, 0xF, 0, arg4, arg5);
-                    cnt--;
-                } while (cnt != 0);
+                    sparks--;
+                } while (sparks != 0);
             }
         }
         if (doDecals && D_800BE616) {
-            n = (func_150ADA20() & 3) + 3;
-            if (n != 0) {
+            count = (func_150ADA20() & 3) + 3;
+            if (count != 0) {
                 do {
-                    r = func_150ADA20();
-                    func_15143874(r & 0xFF, func_150ADA68() * 140.0f, &cos3, &sin3);
-                    if (func_150AC9C0(v1.unk0, v1.unk4, v1.unk8,
-                                      v2.unk0 * 100.0f + v3.unk0 * cos3 + v4.unk0 * sin3,
-                                      v2.unk4 * 100.0f + v3.unk4 * cos3 + v4.unk4 * sin3,
-                                      v2.unk8 * 100.0f + v3.unk8 * cos3 + v4.unk8 * sin3,
-                                      0, normal, &hit.unk0, &hit.unk4, &hit.unk8, &dist, &surface, 0, 0.0f) != 0 &&
-                        func_15145C90(surface) != 0 && dist < 1999.0f) {
-                        fa = func_150ADA68();
-                        r = func_150ADA20();
-                        func_151D9B8C(arg3, fa * 16.0f + 25.0f, r % 156U + 0x64, normal, &hit,
+                    random = func_150ADA20();
+                    func_15143874(random & 0xFF, func_150ADA68() * 140.0f, &decalUp, &decalSide);
+                    if (func_150AC9C0(end.unk0, end.unk4, end.unk8,
+                                      dir.unk0 * 100.0f + side.unk0 * decalUp + up.unk0 * decalSide,
+                                      dir.unk4 * 100.0f + side.unk4 * decalUp + up.unk4 * decalSide,
+                                      dir.unk8 * 100.0f + side.unk8 * decalUp + up.unk8 * decalSide,
+                                      0, normal, &decalPos.unk0, &decalPos.unk4, &decalPos.unk8, &distance, &surface, 0, 0.0f) != 0 &&
+                        func_15145C90(surface) != 0 && distance < 1999.0f) {
+                        randomA = func_150ADA68();
+                        random = func_150ADA20();
+                        func_151D9B8C(arg3, randomA * 16.0f + 25.0f, random % 156U + 0x64, normal, &decalPos,
                                       func_150ADA20() % 101U + 0x64, 1, 1, 1, arg4, arg5);
                     }
-                    n--;
-                } while (n != 0);
+                    count--;
+                } while (count != 0);
             }
         }
     }
 }
 
 
-typedef struct BloodImpactActor {
-    u8 pad0[4];
-    u8 kind;
-    u8 pad5[0x6F];
-    u8 flags74;
-    u8 pad75[0x8F];
-    u8 state104;
-    u8 pad105[0x20];
-    u8 state125;
-    u8 pad126[0xA4];
-    u8 count;
-    u8 pad1CB[9];
-    void *transforms;
-} BloodImpactActor;
-
-void func_15136F50(void *, void *, void *, u8, u8, s32);
-void func_151C329C(void *, u8, s32);
-void func_151C577C(void *, void *, void *, u8, u8, u8, u8, s32);
+void func_151C329C(struct17 *, u8, s32);
+void func_151C577C(struct17 *, struct17 *, struct17 *, u8, u8, u8, u8, s32);
 void func_151036B4(void *, u8, s32);
 
-void func_15137610(BloodImpactActor *arg0, void *arg1, void *arg2,
-                   void *arg3, u8 arg4, s32 arg5) {
+/* Picks the impact effect for a hit on actor (NULL: plain blood) from its model and state. */
+void func_15137610(struct127 *actor, struct17 *from, struct17 *to,
+                   struct17 *direction, u8 arg4, s32 arg5) {
     s32 mode;
 
-    if (arg0 != 0) {
-        if (arg0->transforms == 0 || (arg0->flags74 & 0xF) == 0xF ||
-            (s32)arg0->count <= 0) {
+    if (actor != 0) {
+        if (actor->unk1D4 == 0 || (actor->unk74 & 0xF) == 0xF ||
+            (s32)actor->health <= 0) {
             return;
         }
-        mode = arg0->kind;
+        mode = actor->id;
         switch (mode) {
             case 5:
-            case 0xAD:
-            case 0xAE:
-            case 0xAF:
+            case 173:
+            case 174:
+            case 175:
                 mode = 3;
                 break;
-            case 0x5B:
-            case 0x70:
-            case 0xA6:
-            case 0xB2:
-            case 0xB4:
-                func_151036B4(arg1, arg4, arg5);
+            case MODEL_RODENT:
+            case MODEL_GREGG_THE_GRIM_REAPER_SCYTHE:
+            case 166:
+            case MODEL_GREGG_THE_GRIM_REAPER_HOODED:
+            case MODEL_GREGG_THE_GRIM_REAPER_WITHOUT_ROBE:
+                func_151036B4(from, arg4, arg5);
                 mode = 2;
                 break;
-            case 0x28:
-            case 0x77:
-            case 0x8A:
-            case 0x8C:
+            case 40:
+            case 119:
+            case 138:
+            case 140:
                 if ((func_150ADA20() & 1) == 0) {
                     mode = 2;
                     break;
                 }
                 return;
-            case 0x42:
+            case 66:
                 if ((func_150ADA20() & 3) == 0) {
                     mode = 2;
                     break;
                 }
                 return;
-            case 0x5A:
-            case 0x5F:
-            case 0x74:
-            case 0x75:
-            case 0x7A:
-            case 0x8D:
-            case 0xB1:
-                mode = arg0->state125;
+            case MODEL_TEDIZ:
+            case MODEL_TEDIZ_AMMUNITION_BELT:
+            case MODEL_TEDIZ_VARIANT_1:
+            case MODEL_TEDIZ_VARIANT_2:
+            case MODEL_TEDIZ_VARIANT_3:
+            case 141:
+            case MODEL_TEDIZ_BROAD_SHOULDERED_VARIANT:
+                mode = actor->immune;
                 if (mode == 0xFF) {
                     if ((func_150ADA20() & 0x1F) == 0) {
                         mode = 1;
                         break;
                     }
-                } else if (mode == 0 && arg0->state104 == 0) {
+                } else if (mode == 0 && actor->stunned == 0) {
                     mode = 1;
                     break;
                 }
                 return;
             default:
-                if (arg0->state125 == 0 && arg0->state104 == 0) {
+                if (actor->immune == 0 && actor->stunned == 0) {
                     mode = 0;
                 } else {
                     return;
@@ -1789,17 +1774,17 @@ void func_15137610(BloodImpactActor *arg0, void *arg1, void *arg2,
     }
     switch (mode) {
         case 1:
-            func_151C577C(arg1, arg2, arg3, 1, 1, 1, arg4, arg5);
+            func_151C577C(from, to, direction, 1, 1, 1, arg4, arg5);
             return;
         case 2:
-            func_151C329C(arg1, arg4, arg5);
+            func_151C329C(from, arg4, arg5);
             return;
         case 3:
-            func_15136F50(arg1, arg2, arg3, 1, arg4, arg5);
+            func_15136F50(from, to, direction, 1, arg4, arg5);
             return;
         default:
         case 0:
-            func_15136F50(arg1, arg2, arg3, 0, arg4, arg5);
+            func_15136F50(from, to, direction, 0, arg4, arg5);
             return;
     }
 }
