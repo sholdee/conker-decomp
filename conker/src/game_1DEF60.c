@@ -2,13 +2,12 @@
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
-u32 func_150ADA20(void);
+u32 func_150ADA20(void); /* random number; functions.h declares it u8, but the % here uses the full u32 */
 #include "variables.h"
 
 void *memcpy(void *, const void *, u32);
-void func_15143134(f32 *, f32 *, s32);
-void func_15143874(s16, f32, f32 *, f32 *);
-struct260 *func_15130374(void *, u8, s32, u8, s32);
+void func_15143134(vertex *in, vertex *out, s32 angle);
+void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 
 typedef struct {
     u8 pad0[0x3B];
@@ -49,9 +48,44 @@ typedef union {
     } remove;
 } Msg151B1FAC;
 
-typedef struct { f32 v[3]; } Vec3_151B1B34;
-extern Vec3_151B1B34 D_8008FAD0;
-extern Vec3_151B1B34 D_8008FADC;
+/* Particle spawn template passed to func_15130374 (same layout as ParticleSpawn in game_1368C0.c). */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 lifetime;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 color0[4];
+    /* 0x18 */ u8 color1[4];
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 fadeDuration;
+    /* 0x20 */ s16 fadeStep;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ vertex position;
+    /* 0x3C */ vertex unk3C;
+    /* 0x48 */ vertex velocity;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ s32 flags; /* 0x40, 0x80: random flips */
+    /* 0x5C */ u8 pad5C[4];
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ s8 unk62;
+    /* 0x63 */ s8 unk63;
+} ParticleSpawn;
+
+/* Live particle returned by func_15130374; its extra data starts at 0xA8. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ f32 unkA8;
+} Particle1DEF60;
+
+Particle1DEF60 *func_15130374(ParticleSpawn *spawn, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
+
 
 /* Spawns the task that func_151B1B34 updates for this owner. */
 void func_151B1AB0(Owner151B1AB0 *owner) {
@@ -71,135 +105,97 @@ void func_151B1AB0(Owner151B1AB0 *owner) {
     }
 }
 
-void func_151B1B34(Task151B1AB0 *arg0) {
-    Data151B1AB0 *p;
-    struct260 *ret;
-    f32 *src;
-    f32 f;
-    struct {
-        s32 unk00;
-        s32 unk04;
-        s16 unk08;
-        s16 unk0A;
-        s32 unk0C;
-        s32 unk10;
-        u8 unk14;
-        u8 unk15;
-        u8 unk16;
-        u8 unk17;
-        u8 unk18;
-        u8 unk19;
-        u8 unk1A;
-        u8 unk1B;
-        u8 unk1C;
-        u8 unk1D;
-        s16 unk1E;
-        s16 unk20;
-        s16 unk22;
-        f32 unk24;
-        f32 unk28;
-        f32 unk2C;
-        f32 unk30;
-        f32 unk34;
-        f32 unk38;
-        f32 unk3C;
-        f32 unk40;
-        f32 unk44;
-        f32 unk48;
-        f32 unk4C;
-        f32 unk50;
-        f32 unk54;
-        s32 unk58;
-        u8 pad5C[4];
-        u8 unk60;
-        u8 unk61;
-        u8 unk62;
-        s8 unk63;
-    } spC4;
-    f32 zero;
-    f32 spBC;
-    f32 spB0[3];
-    f32 spA4[3];
+/* Per-frame update: emits particles from two points beside the owner at a randomised rate. */
+void func_151B1B34(Task151B1AB0 *task) {
+    Data151B1AB0 *data;
+    Particle1DEF60 *particle;
+    vertex *origin;
+    f32 size;
+    ParticleSpawn spawn;
+    f32 zero; // matching: 0.0f held in one FP register for every store
+    f32 extra;
+    vertex emitPointA;
+    vertex emitPointB;
 
-    p = &arg0->data;
-    p->timer += (697.0f + (func_150ADA68() * 342.0f)) * 0.001000000047f * D_800BE9A4;
-    if (p->timer > 1.0f) {
-        if (p->owner->unk1D4 != 0) {
+    data = &task->data;
+    data->timer += (697.0f + (func_150ADA68() * 342.0f)) * 0.001000000047f * D_800BE9A4;
+    if (data->timer > 1.0f) {
+        if (data->owner->unk1D4 != 0) {
             {
-                Vec3_151B1B34 sp98 = D_8008FAD0;
-                func_15143134(sp98.v, spB0, p->owner->unk1D4 + 0x800);
+                vertex offset = {19.0f, 0.0f, 25.0f};
+                func_15143134(&offset, &emitPointA, data->owner->unk1D4 + 0x800);
             }
             {
-                Vec3_151B1B34 sp8C = D_8008FADC;
-                func_15143134(sp8C.v, spA4, p->owner->unk1D4 + 0x640);
+                vertex offset = {19.0f, 0.0f, 25.0f};
+                func_15143134(&offset, &emitPointB, data->owner->unk1D4 + 0x640);
             }
             zero = 0.0f;
-            spC4.unk1D = 0x29;
-            spC4.unk08 = 0xE03;
-            spC4.unk00 = 0x200005;
-            spC4.unk04 = 0;
-            spC4.unk18 = 0xB0;
-            spC4.unk19 = 0xA0;
-            spC4.unk1A = 0x2A;
-            spC4.unk14 = 0x40;
-            spC4.unk15 = 0xB;
-            spC4.unk16 = 0x6A;
-            spC4.unk0C = 0;
-            spC4.unk10 = 0;
-            spC4.unk17 = 0xFF;
-            spC4.unk1C = 0xFF;
-            spC4.unk60 = 3;
-            spC4.unk61 = 3;
-            spC4.unk54 = zero;
-            spC4.unk58 = 0xE05;
-            spC4.unk62 = 0xA;
-            spC4.unk63 = -1;
-            spC4.unk1E = 0x1E;
-            spC4.unk20 = 8;
-            spC4.unk22 = 0x32;
-            spC4.unk24 = 1.02700007f;
-            spBC = 0.9240000248f;
+            spawn.unk1D = 0x29;
+            spawn.unk8 = 0xE03;
+            spawn.unk0 = 0x200005;
+            spawn.unk4 = 0;
+            spawn.color1[0] = 0xB0;
+            spawn.color1[1] = 0xA0;
+            spawn.color1[2] = 0x2A;
+            spawn.color0[0] = 0x40;
+            spawn.color0[1] = 0xB;
+            spawn.color0[2] = 0x6A;
+            spawn.unkC = 0;
+            spawn.unk10 = 0;
+            spawn.color0[3] = 0xFF;
+            spawn.unk1C = 0xFF;
+            spawn.unk60 = 3;
+            spawn.unk61 = 3;
+            spawn.unk54 = zero;
+            spawn.flags = 0xE05;
+            spawn.unk62 = 0xA;
+            spawn.unk63 = -1;
+            spawn.fadeDuration = 30;
+            spawn.fadeStep = 8;
+            spawn.unk22 = 50;
+            spawn.unk24 = 1.02700007f;
+            extra = 0.9240000248f;
             do {
                 {
                     s16 angle;
-                    u8 shade;
+                    u8 baseAngle;
 
-                    spC4.unk0A = (func_150ADA20() % 41U) + 30;
-                    spC4.unk1B = (func_150ADA20() % 156U) + 100;
-                    f = (func_150ADA68() * 104.0f) + 199.0f;
-                    spC4.unk2C = spC4.unk28 = f;
-                    src = (func_150ADA20() & 1) ? spB0 : spA4;
-                    shade = (p->owner->unk7A >> 8) + 0x40;
-                    angle = (func_150ADA20() % 100U) + shade - 49;
-                    func_15143874(angle, 36.0f, &spC4.unk30, &spC4.unk38);
-                    spC4.unk34 = zero;
-                    spC4.unk30 += src[0];
-                    spC4.unk34 = src[1];
-                    spC4.unk38 += src[2];
-                    func_15143874(angle, ((func_150ADA68() * 1497.0f) + 995.0f) * 0.009999999776f, &spC4.unk48, &spC4.unk50);
-                    spC4.unk4C = zero;
+                    spawn.lifetime = (func_150ADA20() % 41U) + 30;
+                    spawn.color1[3] = (func_150ADA20() % 156U) + 100;
+                    size = (func_150ADA68() * 104.0f) + 199.0f;
+                    spawn.height = spawn.width = size;
+                    origin = (func_150ADA20() & 1) ? &emitPointA : &emitPointB;
+                    baseAngle = (data->owner->unk7A >> 8) + 0x40;
+                    angle = (func_150ADA20() % 100U) + baseAngle - 49;
+                    func_15143874(angle, 36.0f, &spawn.position.x, &spawn.position.z);
+                    spawn.position.y = zero; // matching: dead store steers the scheduler
+                    spawn.position.x += origin->x;
+                    spawn.position.y = origin->y;
+                    spawn.position.z += origin->z;
+                    func_15143874(angle, ((func_150ADA68() * 1497.0f) + 995.0f) * 0.009999999776f,
+                                  &spawn.velocity.x, &spawn.velocity.z);
+                    spawn.velocity.y = zero;
                 }
-                spC4.unk58 &= ~0xC0;
+                spawn.flags &= ~0xC0;
                 if (func_150ADA20() & 1) {
-                    spC4.unk58 |= 0x40;
+                    spawn.flags |= 0x40;
                 }
                 if (func_150ADA20() & 1) {
-                    spC4.unk58 |= 0x80;
+                    spawn.flags |= 0x80;
                 }
-                ret = func_15130374(&spC4, 1, 4, arg0->unkC, arg0->unk1);
-                if (ret != 0) {
-                    memcpy((u8 *)ret + 0xA8, &spBC, 4);
+                particle = func_15130374(&spawn, 1, sizeof(extra), task->unkC, task->unk1);
+                if (particle != NULL) {
+                    memcpy(&particle->unkA8, &extra, sizeof(extra));
                 }
-                p->timer -= 1.0f;
-            } while (p->timer > 1.0f);
+                data->timer -= 1.0f;
+            } while (data->timer > 1.0f);
         } else {
-            while (p->timer > 1.0f) {
-                p->timer -= 1.0f;
+            while (data->timer > 1.0f) {
+                data->timer -= 1.0f;
             }
         }
     }
 }
-
 
 /* Message handler for the task: follows an owner swap, or destroys itself when its owner goes away. */
 void func_151B1FAC(Task151B1AB0 *task, Msg151B1FAC *msg, u8 kind) {
