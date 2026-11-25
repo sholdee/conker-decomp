@@ -286,24 +286,12 @@ void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
     }
 }
 
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 unk1C;
-    u8 pad1D[0x7];
-} Struct1514B364Hit;
-
-extern s32 func_15046C80(Vec3f *, s32, f32, Struct1514B364Hit *);
+extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 extern void func_15152B38(TrailBurst *, u8, s32);
 extern void func_15152F70(SimplePuffSpray *, u8);
 
 /* If func_15046C80 finds ground within 200 units of `position`, spawns a cluster of effects there. */
-void func_1514B364(Vec3f *position, Struct1514B364Hit *ground, u8 arg2, s32 arg3) {
+void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
     Vec3f pos;
 
     pos = *position;
@@ -445,7 +433,7 @@ void func_1514B364(Vec3f *position, Struct1514B364Hit *ground, u8 arg2, s32 arg3
         randC = func_150ADA20();
         sum = (randB & 1) + (randA & 1);
         func_1513D668(&desc, 0, 18, 29, 0, sum, (u8)randC,
-                      100.0f, 100.0f, 0, (s32)&ground->unk04, 0, 0, arg2, arg3);
+                      100.0f, 100.0f, 0, (s32)&ground->tri, 0, 0, arg2, arg3);
     }
 }
 

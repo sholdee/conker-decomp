@@ -6,17 +6,9 @@
 extern f32 D_800A05E0[];
 extern f32 D_800A05EC[];
 
-/* Ground probe result filled by func_1504715C / func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ f32 unk04[6];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 pad1D[7];
-} GroundHit; /* size 0x24 */
-
 void func_15143134(f32 *, f32 *, Mtx *);
-void func_1504715C(GroundHit *, Actor *);
-s32 func_15046C80(f32 *, s32, f32, GroundHit *);
+void func_1504715C(CollisionHit *, Actor *);
+s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 void func_15143794(s16, s16, f32, f32 *);
 
 /*
@@ -24,7 +16,7 @@ void func_15143794(s16, s16, f32, f32 *);
  * (bone 40 or 47) into `pos`.
  * If `ground` is non-NULL, also probes the ground below that point into it.
  */
-s32 func_150CB0E0(f32 *pos, Actor *actor, GroundHit *ground, u8 side) {
+s32 func_150CB0E0(f32 *pos, Actor *actor, CollisionHit *ground, u8 side) {
     f32 probe[3];
     f32 *offset;
     Mtx *bone;
@@ -105,7 +97,7 @@ s32 func_1518ABD0(s32, DustParticle *, s32);
 /* Spawns a dust puff (tinted by func_150CCD90) on the ground below the actor's bone on `side`. */
 void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
     f32 pos[3];
-    GroundHit ground;
+    CollisionHit ground;
     f32 fr;
     f32 fg;
     f32 fb;
@@ -187,7 +179,7 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
         desc.unk47 = 6;
         angleOffset = (side == 1) ? -8 : 8;
         particle = func_1513D668(&desc, colors, 0, 0x17, 0, 0, (actor->unk7A >> 8) - angleOffset,
-                                 500.0f, 500.0f, 0, ground.unk04, 1, 8, 0xFF, 0);
+                                 500.0f, 500.0f, 0, (s32)&ground.tri, 1, 8, 0xFF, 0);
         if (particle != NULL) {
             memcpy(&particle->growth, &growth, sizeof(growth));
             if (func_1518ABD0(D_800D98E0, particle, 2) == 0) {

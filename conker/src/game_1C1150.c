@@ -3,13 +3,7 @@
 #include "variables.h"
 #include "effects.h"
 
-// Ground info for an object, as filled in by func_1504715C.
-typedef struct GroundInfo {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ u8 unk4[0x20];
-} GroundInfo;
-
-extern void func_1504715C(GroundInfo *ground, Actor *obj);
+extern void func_1504715C(CollisionHit *ground, Actor *obj);
 
 // Parameters for func_151D8868.
 typedef struct {
@@ -29,15 +23,15 @@ extern s32 func_1518D1C0(Actor *obj, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 
 extern u8 D_800A8244[];
 
 extern void func_151C329C(f32 *pos, u8 arg1, s32 arg2);
-extern void func_151DC260(f32 *pos, GroundInfo *ground, s32 type, u8 arg3, s32 arg4);
-extern void func_151DC484(f32 *pos, GroundInfo *ground, s32 type, u8 arg3, s32 arg4);
+extern void func_151DC260(f32 *pos, CollisionHit *ground, s32 type, u8 arg3, s32 arg4);
+extern void func_151DC484(f32 *pos, CollisionHit *ground, s32 type, u8 arg3, s32 arg4);
 extern s32 func_150A11C4;
 extern s32 func_150A1DA0;
 
 // Spawns one of several effects at the point D_800CC2C0, picked by obj's id.
 void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
     f32 pos[3];
-    GroundInfo ground;
+    CollisionHit ground;
     s32 type;
 
     func_1504715C(&ground, obj);
@@ -122,13 +116,13 @@ void func_15194394(Actor *self, Actor *other, u8 *arg2) {
     }
 }
 
-extern void func_15153F18(AngleRange *angles, SplashSpray *spray, GroundInfo *ground, u8 arg3, s32 arg4);
+extern void func_15153F18(AngleRange *angles, SplashSpray *spray, CollisionHit *ground, u8 arg3, s32 arg4);
 extern void *func_151AE7B0(Actor *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);
 
 // Spawns a burst of effects from other when its id is 0-4.
 void func_15194408(Actor *self, Actor *other) {
     SplashSpraySpec burst;
-    GroundInfo ground;
+    CollisionHit ground;
 
     switch (other->id) {
     case 0:
@@ -188,7 +182,7 @@ void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
     Vec3f pos;
     s16 facingYaw;
     SplashSpraySpec burst;
-    GroundInfo ground;
+    CollisionHit ground;
 
     facingYaw = (self->unk7A >> 8) - 0x40; // unk7A is a u16 angle; >> 8 makes it a byte angle
     pos.x = other->x_position;
@@ -260,7 +254,7 @@ void func_15194794(Actor *self, Actor *other, u8 *arg2) {
 void func_15194810(Actor *self, Actor *other, u8 *arg2) {
     Vec3f pos;
     SplashSpraySpec burst;
-    GroundInfo ground;
+    CollisionHit ground;
     Struct15195738Small params;
 
     switch (other->id) {
@@ -437,10 +431,10 @@ void func_15194DA4(Actor *self, Actor *other, u8 *arg2) {
     func_15194FF4(self, other, TRUE);
 }
 
-extern void func_1514B364(f32 *pos, GroundInfo *ground, u8 arg2, s32 arg3);
+extern void func_1514B364(f32 *pos, CollisionHit *ground, u8 arg2, s32 arg3);
 
 void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
-    GroundInfo ground;
+    CollisionHit ground;
 
     if (D_800BE616 != 0) {
         func_15194DA4(self, other, arg2);

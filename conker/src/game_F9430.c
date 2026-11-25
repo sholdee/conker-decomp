@@ -23,14 +23,6 @@ typedef struct {
     /* 0x28 */ s16 yawOffset;
 } GroundBurstDef;
 
-/* Ground probe result filled by func_1504715C / func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ f32 unk4[6];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 pad1D[7];
-} GroundHit;
-
 /* Per-corner colour passed to func_1513D668. */
 typedef struct {
     /* 0x0 */ s16 r;
@@ -66,8 +58,8 @@ typedef struct {
 } GrowParticle;
 
 extern GroundBurstDef D_800A0640[];
-void func_1504715C(GroundHit *, Actor *);
-s32 func_15046C80(f32 *, s32, f32, GroundHit *);
+void func_1504715C(CollisionHit *, Actor *);
+s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 void func_15143134(f32 *in, f32 *out, MtxF *mtx);
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, void *, u8);
@@ -85,7 +77,7 @@ void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
     u8 r;
     u8 g;
     u8 b;
-    GroundHit ground;
+    CollisionHit ground;
 
     if (owner == NULL || owner->unk1D4 == NULL) {
         return;
@@ -163,7 +155,7 @@ lbl: // matching: unused label ends the basic block so the pos[1] store stays ou
         extra.growDelay = (spawn.lifetime - (func_150ADA20() % (u32)(def->growDelayRange + 1))) - def->growDelayMin;
         extra.growRate = ((func_150ADA68() * def->growRateRange) + def->growRateMin) * spawn.width;
         particle = func_1513D668(&spawn, colors, 0, 0x18, 0, 0, (owner->unk7A >> 8) + def->yawOffset,
-                                 500.0f, 500.0f, 0, ground.unk4, 1, 8, arg3, arg2);
+                                 500.0f, 500.0f, 0, (s32)&ground.tri, 1, 8, arg3, arg2);
         if (particle != NULL) {
             memcpy(&particle->extra, &extra, sizeof(extra));
         }

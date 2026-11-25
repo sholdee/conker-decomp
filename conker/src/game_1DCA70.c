@@ -12,24 +12,16 @@ typedef struct {
     /* 0x04 */ f32 growRate;     // size gained per frame
 } SprayGrowth;
 
-/* Ground probe result filled by func_1504715C / func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ f32 unk04[6];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 pad1D[7];
-} GroundHit; /* size 0x24 */
-
 void func_15143134(f32 *, f32 *, Mtx *);
-void func_1504715C(GroundHit *, Actor *);
-s32 func_15046C80(f32 *, s32, f32, GroundHit *);
+void func_1504715C(CollisionHit *, Actor *);
+s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 
 /*
  * Transforms the fixed offset for `side` (1 or 2) by that side's bone matrix of the actor
  * (bone 32 or 25) into `pos`.
  * If `ground` is non-NULL, also probes the ground below that point into it.
  */
-s32 func_151AF5C0(f32 *pos, Actor *actor, GroundHit *ground, u8 side) {
+s32 func_151AF5C0(f32 *pos, Actor *actor, CollisionHit *ground, u8 side) {
     f32 probe[3];
     f32 *offset;
     Mtx *bone;
@@ -93,7 +85,7 @@ void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6
  */
 void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
     f32 pos[3];
-    GroundHit ground;
+    CollisionHit ground;
     f32 fr;
     f32 fg;
     f32 fb;
@@ -172,7 +164,7 @@ void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
     desc.unk46 = 0;
     desc.unk47 = 6;
     particle = func_1513D668(&desc, colors, 0, 0x16, 0, 0, (actor->unk7A >> 8) - ((side == 1) ? -10 : 10),
-                             500.0f, 500.0f, 0, ground.unk04, 1, 8, 0xFF, 0);
+                             500.0f, 500.0f, 0, (s32)&ground.tri, 1, 8, 0xFF, 0);
     if (particle != NULL) {
         memcpy(&particle->growth, &growth, sizeof(growth));
     }

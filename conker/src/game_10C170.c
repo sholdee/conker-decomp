@@ -137,15 +137,9 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
     }
 }
 
-/* Result of a ground probe (func_1504697C). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 pad4[0x20];
-} GroundHit; /* size 0x24 */
-
-s32 func_1504697C(Vec3f *, s32, f32, GroundHit *);
+s32 func_1504697C(Vec3f *, s32, f32, CollisionHit *);
 void func_150E83AC(Vec3f *, s16, u8, s32);
-void func_151A9834(Vec3f *, f32, f32, GroundHit *, s32, u8, s32, u8, s32);
+void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, u8, s32, u8, s32);
 
 /*
  * Effect update: drops the effect's position onto the ground below it (if any), spawns a
@@ -153,7 +147,7 @@ void func_151A9834(Vec3f *, f32, f32, GroundHit *, s32, u8, s32, u8, s32);
  */
 void func_150DF334(PointEffect *effect) {
     Vec3f *pos;
-    GroundHit hit;
+    CollisionHit hit;
     u8 onGround;
     Vec3f groundPos;
     Vec3f probe;

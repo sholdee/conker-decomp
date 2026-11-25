@@ -137,19 +137,6 @@ void func_150FCFB0(s32 arg0) {
     func_15103828();
 }
 
-/* Ground probe result filled by func_1504715C / func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 pad1D[0x7];
-} GroundHit; /* 0x24 */
-
 typedef struct Actor150FD514 Actor150FD514;
 
 /* State that follows the particle (its ParticleMotion slot at 0x110). */
@@ -166,7 +153,7 @@ typedef struct {
     /* 0x24 */ s32 unk24;       /* from func_1516284C, released with func_1516972C */
     /* 0x28 */ Actor150FD514 *groundParticle;
     /* 0x2C */ f32 emitCounter;
-    /* 0x30 */ GroundHit ground;
+    /* 0x30 */ CollisionHit ground;
     /* 0x54 */ u16 soundHandle;
     /* 0x56 */ u16 soundHandle2;
     /* 0x58 */ u8 burstDone;
@@ -180,8 +167,8 @@ struct Actor150FD514 {
 };
 
 extern s32 D_800A1EEC[];
-extern void func_1504715C(GroundHit *, Actor *);
-extern s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
+extern void func_1504715C(CollisionHit *, Actor *);
+extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 extern void func_1505D024(Actor *, s32, u16, s32);
 extern s32 func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
@@ -190,7 +177,7 @@ extern s32 func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32,
  * positioned sound, a func_1516284C effect and (on ground) a second particle lying on the ground.
  */
 void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
-    GroundHit ground;
+    CollisionHit ground;
     Vec3f pos;
     u8 onGround;
     Vec3f probe;
@@ -313,7 +300,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
                 groundDef.unk50 = 0;
                 groundDef.fadeStart = 1;
                 groundDef.fadeRate = 0xFF;
-                dst->groundParticle = (Actor150FD514 *)func_1513D594(&groundDef, &D_800A4AA0, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, (s32)&ground.unk04, 0, 0, 0, 0, arg1, arg2);
+                dst->groundParticle = (Actor150FD514 *)func_1513D594(&groundDef, &D_800A4AA0, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, (s32)&ground.tri, 0, 0, 0, 0, arg1, arg2);
             }
         }
     }
@@ -378,7 +365,7 @@ s32 func_150FD514(Actor150FD514 *particle) {
                 groundPos.x = particle->head.def.pos.x;
                 groundPos.y = ext->ground.height;
                 groundPos.z = particle->head.def.pos.z;
-                func_150E7FEC(func_150ADA68() * 78.0f + 125.0f, (u8)((func_150ADA20() % 76) + 180), &ext->ground.unk04, &groundPos,
+                func_150E7FEC(func_150ADA68() * 78.0f + 125.0f, (u8)((func_150ADA20() % 76) + 180), &ext->ground.tri, &groundPos,
                               (func_150ADA20() % 207) + 302, 0, 1, 0, 0, 0, particle->head.header.owner, 0);
                 func_150E83AC(&groundPos, (func_150ADA20() % 80) + 243, particle->head.header.owner, particle->head.header.kind);
             }

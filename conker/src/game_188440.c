@@ -11,19 +11,7 @@ typedef struct {
     /* 0x14 */ f32 upperFloorY; // highest floor between the camera's eye and y = 19500
 } GroundParticle;
 
-/* Result of a floor probe (CollisionHit in game_71820.c). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ s16 tri[9];
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 material;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 source;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ void *surface;
-} GroundHit;
-
-s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, GroundHit *hit);
+s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
 
 /*
  * With a 1-in-16 chance, spawns a particle (func_151491F4) 107-2010 units from the player's camera,
@@ -41,9 +29,9 @@ void func_1515AF90(s16 player) {
         f32 distance;
         f32 cosine;
         f32 sine;
-        GroundHit hit;
+        CollisionHit hit;
         Vec3f probe;
-        GroundHit lowerHit;
+        CollisionHit lowerHit;
         Vec3f lowerProbe;
         f32 bottom;
 
