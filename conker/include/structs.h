@@ -2625,18 +2625,46 @@ typedef struct {
     s32 unk4;
 } struct234; // size 0x8;
 
-/* Variable-size per-id record, kept in the doubly linked list D_800D2F48 sorted by id (game_C8950).
- * The payload (dataSize bytes) lives inside the same allocation at dataOffset. */
+/* IdRecord.TaskID: bits 9-0 are the task id, bits 15-10 flags. The four original flag names are from
+ * the Oct 2000 debugger table; neither PURGE nor SUSPEND set means RUN_BETWEEN_SECTIONS. */
+#define TASK_ID_MASK             0x03FF
+#define TASK_FLAGS               0xFC00
+#define RUN_INIT_ONCE_ONLY       0x0400 /* the init entry runs only when the task is created */
+#define DO_NOT_CLEAR_BSS         0x0800 /* a PURGE task keeps its BSS when it is reloaded */
+#define PURGE_BETWEEN_SECTIONS   0x1000 /* freed when LoadSection is not the current level */
+#define SUSPEND_BETWEEN_SECTIONS 0x2000 /* not run while LoadSection is not the current level */
+#define TASK_INIT_PENDING        0x4000 /* the init entry has not run yet */
+#define TASK_FINISHED            0x8000 /* the done entry has run; the task no longer runs */
+
+#define TASK_ID(task) ((task)->TaskID & ~TASK_FLAGS)
+
+/* Entry points of a task's script (the `mode` of func_150ADAF0, which interprets it). */
+enum TaskEntry {
+    TASK_ENTRY_START, /* the script right after the 0x20-byte header, run when the task is created */
+    TASK_ENTRY_INIT,  /* InitOffset */
+    TASK_ENTRY_RUN,   /* RunOffset, every frame */
+    TASK_ENTRY_PURGE, /* PurgeOffset, before the task is freed */
+    TASK_ENTRY_DONE   /* DoneOffset, once the task's done flag (D_800D2E4C bit) is set */
+};
+
+/* A loaded task (script and its BSS in one allocation), kept in the doubly linked list D_800D2F48
+ * (the task working set) sorted by task id (game_C8950). The offsets are from the record's start.
+ * original: Task WorkingSet (rom_debug_struct.c) */
 typedef struct IdRecord {
-    /* 0x00 */ u16 key;         // bits 0-9: id; bits 10-15: state flags
-    /* 0x02 */ u16 unk2;        // compared with D_800BE9F0
-    /* 0x04 */ u16 size;        // size of the whole allocation
-    /* 0x06 */ u16 dataSize;
-    /* 0x08 */ u16 unk8;
-    /* 0x0A */ u16 dataOffset;
-    /* 0x0C */ u8  padC[0xC];
-    /* 0x18 */ struct IdRecord *next;
-    /* 0x1C */ struct IdRecord *prev;
+    /* 0x00 */ u16 TaskID;       // task id and flags (TASK_ID_MASK, TASK_FLAGS)
+    /* 0x02 */ u16 LoadSection;  // the level (D_800BE9F0) the task was loaded in
+    /* 0x04 */ u16 TaskSize;     // size of the whole allocation
+    /* 0x06 */ u16 BSSSize;
+    /* 0x08 */ u16 DataOffset;
+    /* 0x0A */ u16 BssOffset;
+    /* 0x0C */ u16 unkC;
+    /* 0x0E */ u16 InitOffset;
+    /* 0x10 */ u16 RunOffset;
+    /* 0x12 */ u16 PurgeOffset;
+    /* 0x14 */ u16 DoneOffset;
+    /* 0x16 */ u16 unk16;
+    /* 0x18 */ struct IdRecord *NextTaskPtr;
+    /* 0x1C */ struct IdRecord *PrevTaskPtr;
 } IdRecord; // size 0x20
 
 typedef struct IdRecordList {

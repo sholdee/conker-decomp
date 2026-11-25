@@ -30,15 +30,15 @@ void func_150177F8(void) {
 
 IdRecord *func_1509B704(s16 id);
 
-/* Stamps every listed record that has flag 0x1000 with D_800BE9F0, then reloads the records. */
+/* Moves every listed PURGE_BETWEEN_SECTIONS task to the current level (LoadSection), then reloads the tasks. */
 void func_15017868(void) {
     IdRecord *node;
     s32 i;
 
     for (i = 0; i < D_800D2F3C; i++) {
         node = func_1509B704(D_800D2F40[i]);
-        if (node != NULL && (node->key & 0x1000)) {
-            node->unk2 = D_800BE9F0;
+        if (node != NULL && (node->TaskID & PURGE_BETWEEN_SECTIONS)) {
+            node->LoadSection = D_800BE9F0;
         }
     }
     func_1509BA04(0);
