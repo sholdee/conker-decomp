@@ -1,4 +1,5 @@
 #include <ultra64.h>
+// functions.h declares func_15048A40 as returning void; hide that prototype and declare the real one.
 #define func_15048A40 func_15048A40_hdr
 #include "functions.h"
 #undef func_15048A40
@@ -7,40 +8,23 @@ extern f32 func_15048A40(u8 arg0);
 
 extern s32 func_151EF610(void);
 
-extern f32 D_800A1140;
-extern f32 D_800A1144;
-extern f32 D_800A1148;
-extern f32 D_800A114C;
-extern f32 D_800A1150;
-extern f32 D_800A1154;
-extern f32 D_800A1158;
-extern f32 D_800A115C;
 extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 
+/* Chunk spawn request for func_15132A4C. */
 typedef struct Struct150E5558 {
     /* 0x00 */ f32 unk00;
     /* 0x04 */ f32 unk04;
     /* 0x08 */ f32 unk08;
     /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
+    /* 0x10 */ f32 rot[3];    // degrees
+    /* 0x1C */ f32 scale[3];
+    /* 0x28 */ f32 pos[3];
+    /* 0x34 */ f32 vel[3];
+    /* 0x40 */ f32 unk40[3];  // random in [-3, 3)
     /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
+    /* 0x50 */ s32 flags;
+    /* 0x54 */ s16 lifetime;
+    /* 0x56 */ s16 kind;
     /* 0x58 */ u8 unk58;
     /* 0x59 */ u8 pad59[3];
     /* 0x5C */ s32 unk5C;
@@ -623,82 +607,84 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
     }
 }
 
-void func_150E5558(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7) {
-    Struct150E5558 sp34;
-    f32 var_f16;
-    f32 var_f2;
-    f32 temp_f2;
-    f32 temp_f6;
+/* Launches a chunk of debris `kind` from (x, y, z), flying along (dirX, -dirY, dirZ) and oriented to match. */
+void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, s32 size) {
+    Struct150E5558 chunk;
+    f32 pitch;
+    f32 yaw;
+    f32 speed;
+    f32 rand;
 
-    bzero(&sp34, sizeof(sp34));
+    bzero(&chunk, sizeof(chunk));
 
-    if (arg4 != 0.0f) {
-        var_f16 = func_150484A0(arg3, arg4) * D_800A1140;
+    if (dirY != 0.0f) {
+        pitch = func_150484A0(dirX, dirY) * 57.29577637f; // radians to degrees
     } else {
-        var_f16 = 90.0f;
+        pitch = 90.0f;
     }
 
-    if (arg5 != 0.0f) {
-        var_f2 = func_150484A0(arg3, arg5) * D_800A1144;
+    if (dirZ != 0.0f) {
+        yaw = func_150484A0(dirX, dirZ) * 57.29577637f;
     } else {
-        var_f2 = 90.0f;
+        yaw = 90.0f;
     }
 
-    sp34.unk14 = var_f2;
-    sp34.unk18 = var_f16;
-    sp34.unk1C = 1.0f;
-    sp34.unk20 = 1.0f;
-    sp34.unk24 = 1.0f;
-    sp34.unk00 = 1.0f;
-    sp34.unk08 = sp34.unk0C = D_800A1148;
-    sp34.unk28 = arg0;
-    sp34.unk2C = arg1;
-    sp34.unk30 = arg2;
-    sp34.unk10 = 0.0f;
+    chunk.rot[1] = yaw;
+    chunk.rot[2] = pitch;
+    chunk.scale[0] = 1.0f;
+    chunk.scale[1] = 1.0f;
+    chunk.scale[2] = 1.0f;
+    chunk.unk00 = 1.0f;
+    chunk.unk08 = 0.1700000018f;
+    chunk.unk0C = 0.1700000018f;
+    chunk.pos[0] = x;
+    chunk.pos[1] = y;
+    chunk.pos[2] = z;
+    chunk.rot[0] = 0.0f;
 
-    if (arg6 == 4) {
-        sp34.unk56 = 6;
-        sp34.unk04 = D_800A114C;
-    } else if (arg6 == 9) {
-        sp34.unk56 = 8;
-        sp34.unk04 = D_800A1150;
+    if (kind == 4) {
+        chunk.kind = 6;
+        chunk.unk04 = 0.6000000238f;
+    } else if (kind == 9) {
+        chunk.kind = 8;
+        chunk.unk04 = 0.3000000119f;
     } else {
-        sp34.unk56 = 7;
-        sp34.unk04 = D_800A1154;
+        chunk.kind = 7;
+        chunk.unk04 = 0.3000000119f;
     }
 
-    sp34.unk54 = (func_151EF610() % 60) + 0x3C;
-    sp34.unk50 = 0x29E9;
+    chunk.lifetime = func_151EF610() % 60 + 60;
+    chunk.flags = 0x29E9;
 
-    temp_f6 = func_150ADA68();
-    sp34.unk4C = D_800A1158;
-    temp_f2 = (temp_f6 * D_800A115C) + 1.5f;
-    sp34.unk34 = temp_f2 * arg3;
-    sp34.unk38 = -temp_f2 * arg4;
-    sp34.unk3C = temp_f2 * arg5;
+    rand = func_150ADA68();
+    chunk.unk4C = -0.7799999714f;
+    speed = rand * 4.599999905f + 1.5f;
+    chunk.vel[0] = speed * dirX;
+    chunk.vel[1] = -speed * dirY;
+    chunk.vel[2] = speed * dirZ;
 
-    sp34.unk40 = (func_150ADA68() * 6.0f) + -3.0f;
-    sp34.unk48 = (func_150ADA68() * 6.0f) + -3.0f;
-    temp_f6 = (func_150ADA68() * 6.0f) + -3.0f;
-    sp34.unk58 = 0;
-    sp34.unk5C = 0;
-    sp34.unk44 = temp_f6;
-    sp34.unk60 = 0xFF;
-    sp34.unk61 = 1;
-    sp34.unk62 = 0;
-    sp34.unk63 = 3;
-    sp34.unk64 = 0;
-    sp34.unk65 = 0;
-    sp34.unk66 = 0;
-    sp34.unk67 = 0;
-    sp34.unk68 = 0;
-    sp34.unk6A = 2;
-    sp34.unk6C = 0;
-    sp34.unk70 = 0;
-    sp34.unk72 = 0x20;
-    sp34.unk74 = 7;
+    chunk.unk40[0] = func_150ADA68() * 6.0f + -3.0f;
+    chunk.unk40[2] = func_150ADA68() * 6.0f + -3.0f;
+    rand = func_150ADA68() * 6.0f + -3.0f;
+    chunk.unk58 = 0;
+    chunk.unk5C = 0;
+    chunk.unk40[1] = rand;
+    chunk.unk60 = 0xFF;
+    chunk.unk61 = 1;
+    chunk.unk62 = 0;
+    chunk.unk63 = 3;
+    chunk.unk64 = 0;
+    chunk.unk65 = 0;
+    chunk.unk66 = 0;
+    chunk.unk67 = 0;
+    chunk.unk68 = 0;
+    chunk.unk6A = 2;
+    chunk.unk6C = 0;
+    chunk.unk70 = 0;
+    chunk.unk72 = 0x20;
+    chunk.unk74 = 7;
 
-    func_15132A4C(&sp34, 3, 0xFF, 0, 0xFF, 0);
+    func_15132A4C(&chunk, 3, 0xFF, 0, 0xFF, 0);
 }
 
 
