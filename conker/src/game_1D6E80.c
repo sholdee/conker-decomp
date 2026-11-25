@@ -1,5 +1,5 @@
-/* 08 14 18 1C 20 24 28 2C 2E 02 04 06 00 30 32 34 36 38 3A 3C 44 46 48 40 */
 #include <ultra64.h>
+/* functions.h declares these two with the wrong return types; use the ones this file needs. */
 #define func_10010F30 func_10010F30_void
 #define func_150ADA20 func_150ADA20_orig
 #include "functions.h"
@@ -14,7 +14,6 @@ extern f32 D_800A9014;
 extern s32 func_10010FFC(s32, s32, s32, s32, s32, struct127 *);
 extern void *func_15190770(void *, s32, s32, s32);
 extern u8 func_151D8E20(void);
-extern f32 D_800A8FA0;
 
 /* Spawn descriptor for func_1513418C. */
 typedef struct {
@@ -428,7 +427,7 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
     pos[0] = x;
     pos[1] = y;
     pos[2] = z;
-    func_1515A238(pos, vel, (func_150ADA68() * 311.0f + 454.0f) * D_800A8FA0, 0.972683012f, surface,
+    func_1515A238(pos, vel, (func_150ADA68() * 311.0f + 454.0f) * 0.001000000047f, 0.972683012f, surface,
                   func_150ADA68() * 101.0f + 101.0f, func_150ADA20() % 31U + 50, func_150ADA20() % 101U + 100,
                   1, task->unkC, task->unk1);
 }
@@ -519,19 +518,15 @@ typedef struct {
     /* 0x00 */ f32 x;
     /* 0x04 */ f32 y;
     /* 0x08 */ f32 z;
-} Vec3F_AA6D8;
+} Vec3f;
 
+/* Particle burst descriptor for func_151303BC. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x74];
-    /* 0x74 */ f32 unk74;
-} struct_AA6D8_arg5;
-
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 unk0A;
-    /* 0x0C */ s32 unk0C;
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 unkA;
+    /* 0x0C */ s32 unkC;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ u8 unk14;
     /* 0x15 */ u8 unk15;
@@ -549,30 +544,28 @@ typedef struct {
     /* 0x24 */ f32 unk24;
     /* 0x28 */ f32 unk28;
     /* 0x2C */ f32 unk2C;
-    /* 0x30 */ Vec3F_AA6D8 unk30;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
+    /* 0x30 */ Vec3f pos;
+    /* 0x3C */ Vec3f unk3C;
+    /* 0x48 */ Vec3f vel;
     /* 0x54 */ f32 unk54;
     /* 0x58 */ s32 unk58;
-    /* 0x5C */ u8 pad5C[0x4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ s8 unk60;
+    /* 0x61 */ s8 unk61;
+    /* 0x62 */ s8 unk62;
     /* 0x63 */ s8 unk63;
-} struct_AA6D8_params;
+    /* 0x64 */ u8 pad64[0xC];
+} BurstDesc;
 
+/* Payload copied to +0xA8 of a spawned burst. */
 typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ u8 unk04;
-    /* 0x05 */ u8 unk05;
-    /* 0x06 */ u8 unk06;
-    /* 0x07 */ u8 unk07;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
+    /* 0x00 */ f32 size;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 unk5;
+    /* 0x06 */ u8 unk6;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ u8 unk18;
@@ -581,86 +574,86 @@ typedef struct {
     /* 0x1B */ u8 unk1B;
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8 pad24[0x4];
-} struct_AA6D8_extra;
+    /* 0x24 */ f32 unk24;
+} BurstPayload;
 
-void *func_151303BC(s32, u8, s32);
+typedef struct {
+    /* 0x00 */ u8 pad0[0x74];
+    /* 0x74 */ f32 unk74;
+} Obj151AA6D8;
 
-void func_151AA6D8(Vec3F_AA6D8 *arg0, Vec3F_AA6D8 *arg1, s32 arg2, s32 arg3, f32 arg4, struct_AA6D8_arg5 *arg5) {
-    void *temp_v0;
-    f32 temp_f2;
-    s32 padAC;
-    struct_AA6D8_params params;
-    s32 pad44;
-    struct_AA6D8_extra extra;
+void *func_151303BC(BurstDesc *desc, u8 arg1, s32 payloadSize);
 
-    params.unk1D = 0x2F;
-    params.unk08 = 0xC01;
-    params.unk00 = 0x200005;
-    params.unk04 = 0;
-    params.unk1A = 0;
-    params.unk19 = 0;
-    params.unk18 = 0;
-    params.unk17 = 0;
-    params.unk16 = 0;
-    params.unk15 = 0;
-    params.unk14 = 0;
-    params.unk10 = 0;
-    params.unk0C = 0;
-    params.unk1C = 0xFF;
-    params.unk22 = 0;
-    params.unk24 = 0.0f;
-    params.unk58 = 0x1207;
-    params.unk60 = 5;
-    params.unk61 = 5;
-    params.unk62 = 4;
-    params.unk63 = -1;
-    params.unk3C = 0.0f;
-    params.unk40 = 0.0f;
-    params.unk44 = 0.0f;
-    params.unk1E = 0x14;
-    params.unk20 = 0xC;
-    extra.unk04 = 0;
-    extra.unk05 = 0;
-    extra.unk18 = 0;
-    extra.unk19 = 0;
-    extra.unk10 = 3.5f;
-    extra.unk14 = 0.2857142985f;
+/* Spawns a particle burst moving from `from` toward `to`, advanced by `t` frames. */
+void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
+    BurstDesc burst;
+    void *spawned;
+    BurstPayload payload;
 
-    params.unk48 = (arg1->x - arg0->x) * arg5->unk74;
-    params.unk4C = (arg1->y - arg0->y) * arg5->unk74;
-    params.unk50 = (arg1->z - arg0->z) * arg5->unk74;
-    params.unk30 = *arg0;
-    params.unk30.x += params.unk48 * arg4;
-    params.unk30.y += params.unk4C * arg4;
-    params.unk30.z += params.unk50 * arg4;
+    burst.unk1D = 0x2F;
+    burst.unk8 = 0xC01;
+    burst.flags = 0x200005;
+    burst.unk4 = 0;
+    burst.unk1A = 0;
+    burst.unk19 = 0;
+    burst.unk18 = 0;
+    burst.unk17 = 0;
+    burst.unk16 = 0;
+    burst.unk15 = 0;
+    burst.unk14 = 0;
+    burst.unk10 = 0;
+    burst.unkC = 0;
+    burst.unk1C = 0xFF;
+    burst.unk22 = 0;
+    burst.unk24 = 0.0f;
+    burst.unk58 = 0x1207;
+    burst.unk60 = 5;
+    burst.unk61 = 5;
+    burst.unk62 = 4;
+    burst.unk63 = -1;
+    burst.unk3C.x = 0.0f;
+    burst.unk3C.y = 0.0f;
+    burst.unk3C.z = 0.0f;
+    burst.unk1E = 20;
+    burst.unk20 = 12;
+    payload.unk4 = 0;
+    payload.unk5 = 0;
+    payload.unk18 = 0;
+    payload.unk19 = 0;
+    payload.unk10 = 3.5f;
+    payload.unk14 = 0.2857142985f;
+
+    burst.vel.x = (to->x - from->x) * obj->unk74;
+    burst.vel.y = (to->y - from->y) * obj->unk74;
+    burst.vel.z = (to->z - from->z) * obj->unk74;
+    burst.pos = *from;
+    burst.pos.x += burst.vel.x * t;
+    burst.pos.y += burst.vel.y * t;
+    burst.pos.z += burst.vel.z * t;
 
     if (func_150ADA20() & 1) {
-        params.unk58 |= 0x40;
+        burst.unk58 |= 0x40;
     }
     if (func_150ADA20() & 1) {
-        params.unk58 |= 0x80;
+        burst.unk58 |= 0x80;
     }
 
-    params.unk0A = (func_150ADA20() % 51U) + 0x32;
-    params.unk1B = (func_150ADA20() % 101U) + 0x64;
-    temp_f2 = (func_150ADA68() * 39.0f) + 31.0f;
-    params.unk28 = temp_f2;
-    extra.unk00 = temp_f2;
-    params.unk2C = temp_f2;
-    extra.unk06 = (func_150ADA20() % 5U) + 4;
-    extra.unk07 = (func_150ADA20() % 5U) + 4;
-    extra.unk08 = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk00;
-    extra.unk0C = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk00;
-    extra.unk1A = (func_150ADA20() % 5U) + 4;
-    extra.unk1B = (func_150ADA20() % 5U) + 4;
-    extra.unk1C = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * extra.unk00;
-    extra.unk20 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * extra.unk00;
-    params.unk54 = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001000000047f;
+    burst.unkA = (func_150ADA20() % 51U) + 50;
+    burst.unk1B = (func_150ADA20() % 101U) + 100;
+    payload.size = burst.unk28 = burst.unk2C = (func_150ADA68() * 39.0f) + 31.0f;
+    payload.unk6 = (func_150ADA20() % 5U) + 4;
+    payload.unk7 = (func_150ADA20() % 5U) + 4;
+    payload.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
+    payload.unkC = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
+    payload.unk1A = (func_150ADA20() % 5U) + 4;
+    payload.unk1B = (func_150ADA20() % 5U) + 4;
+    payload.unk1C = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
+    payload.unk20 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
+    burst.unk54 = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001000000047f;
 
-    temp_v0 = func_151303BC((s32)&params, 2, 0x28);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0xA8, &extra, 0x28);
+    spawned = func_151303BC(&burst, 2, sizeof(payload));
+    if (spawned != NULL) {
+        memcpy((u8 *)spawned + 0xA8, &payload, sizeof(payload));
     }
 }
 
@@ -1036,94 +1029,78 @@ LoopSoundFx *func_151AB2C4(struct127 *actor, ActorTask *task) {
     return fx;
 }
 
-typedef struct Game1D6E80Burst {
-    s32 flags, zero4;
-    s16 texture, lifetime;
-    s32 zeroC, zero10;
-    u8 zero14, zero15, zero16, zero17, zero18, zero19, zero1A;
-    u8 alpha, maximum, kind;
-    s16 duration, period, zero22;
-    f32 zero24, width, height;
-    f32 x, y, z;
-    f32 zero3C, zero40, zero44;
-    f32 vx, vy, vz, rotation;
-    s32 mode, unused5C;
-    s8 field60, field61, field62, field63;
-    u8 pad64[0xC];
-} Game1D6E80Burst;
+typedef struct {
+    /* 0x00 */ u8 pad0[0x60];
+    /* 0x60 */ f32 unk60;
+} Obj151AB3A4;
 
-typedef struct Game1D6E80BurstMotion {
-    f32 size;
-    u8 mode0, mode1, count0, count1;
-    f32 amount0, amount1, speed, damping;
-    u8 mode2, mode3, count2, count3;
-    f32 amount2, amount3, sourceScale;
-} Game1D6E80BurstMotion;
-
-void *func_151303BC(s32, u8, s32);
-extern f32 D_800A8FF4, D_800A8FF8, D_800A8FFC, D_800A9000;
-extern f32 D_800A9004, D_800A9008, D_800A900C, D_800A9010;
-
-void func_151AB3A4(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
-                  f32 arg4, f32 arg5, void *arg6) {
-    Game1D6E80Burst burst;
+/* Spawns a particle burst at (x, y, z) drifting against (dx, dz). */
+void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *obj) {
+    BurstDesc burst;
     void *spawned;
-    Game1D6E80BurstMotion motion;
-    burst.kind = 0x2F;
-    burst.texture = 0xC01;
+    BurstPayload payload;
+
+    burst.unk1D = 0x2F;
+    burst.unk8 = 0xC01;
     burst.flags = 0x200005;
-    burst.zero4 = 0;
-    burst.zero1A = 0;
-    burst.zero19 = 0;
-    burst.zero18 = 0;
-    burst.zero17 = 0;
-    burst.zero16 = 0;
-    burst.zero15 = 0;
-    burst.zero14 = 0;
-    burst.zero10 = 0;
-    burst.zeroC = 0;
-    burst.maximum = 0xFF;
-    burst.zero22 = 0;
-    burst.zero24 = 0.0f;
-    burst.mode = 0x3207;
-    burst.field60 = 5;
-    burst.field61 = 5;
-    burst.field62 = 4;
-    burst.field63 = -1;
-    burst.x = arg0;
-    burst.y = arg1;
-    burst.zero3C = 0.0f;
-    burst.zero40 = 0.0f;
-    burst.zero44 = 0.0f;
-    burst.duration = 30;
-    burst.period = 8;
-    burst.z = arg2;
-    motion.sourceScale = *(f32 *)((u8 *)arg6 + 0x60);
-    motion.speed = 4.0f;
-    motion.damping = 0.25f;
-    motion.mode0 = 0;
-    motion.mode1 = 0;
-    motion.mode2 = 0;
-    motion.mode3 = 0;
-    burst.vx = -arg3 * 0.2f;
-    burst.vy = 0.0f;
-    burst.vz = -arg5 * 0.2f;
-    if (func_150ADA20() & 1) burst.mode |= 0x40;
-    if (func_150ADA20() & 1) burst.mode |= 0x80;
-    burst.lifetime = func_150ADA20() % 51U + 106;
-    burst.alpha = func_150ADA20() % 101U + 100;
-    motion.size = burst.width = burst.height = func_150ADA68() * 62.0f + 41.0f;
-    motion.count0 = func_150ADA20() % 5U + 4;
-    motion.count1 = func_150ADA20() % 5U + 4;
-    motion.amount0 = (func_150ADA68() * 0.25f + D_800A8FF8) * motion.size;
-    motion.amount1 = (func_150ADA68() * 0.25f + D_800A8FFC) * motion.size;
-    motion.count2 = func_150ADA20() % 5U + 4;
-    motion.count3 = func_150ADA20() % 5U + 4;
-    motion.amount2 = (func_150ADA68() * D_800A9000 + D_800A9004) * motion.size;
-    motion.amount3 = (func_150ADA68() * D_800A9008 + D_800A900C) * motion.size;
-    burst.rotation = (func_150ADA68() * 60.0f + 21.0f) * D_800A9010;
-    spawned = func_151303BC((s32)&burst, 2, 0x28);
-    if (spawned != NULL) memcpy((u8 *)spawned + 0xA8, &motion, 0x28);
+    burst.unk4 = 0;
+    burst.unk1A = 0;
+    burst.unk19 = 0;
+    burst.unk18 = 0;
+    burst.unk17 = 0;
+    burst.unk16 = 0;
+    burst.unk15 = 0;
+    burst.unk14 = 0;
+    burst.unk10 = 0;
+    burst.unkC = 0;
+    burst.unk1C = 0xFF;
+    burst.unk22 = 0;
+    burst.unk24 = 0.0f;
+    burst.unk58 = 0x3207;
+    burst.unk60 = 5;
+    burst.unk61 = 5;
+    burst.unk62 = 4;
+    burst.unk63 = -1;
+    burst.pos.x = x;
+    burst.pos.y = y;
+    burst.unk3C.x = 0.0f;
+    burst.unk3C.y = 0.0f;
+    burst.unk3C.z = 0.0f;
+    burst.unk1E = 30;
+    burst.unk20 = 8;
+    burst.pos.z = z;
+    payload.unk24 = obj->unk60;
+    payload.unk10 = 4.0f;
+    payload.unk14 = 0.25f;
+    payload.unk4 = 0;
+    payload.unk5 = 0;
+    payload.unk18 = 0;
+    payload.unk19 = 0;
+    burst.vel.x = -dx * 0.2f;
+    burst.vel.y = 0.0f;
+    burst.vel.z = -dz * 0.2f;
+    if (func_150ADA20() & 1) {
+        burst.unk58 |= 0x40;
+    }
+    if (func_150ADA20() & 1) {
+        burst.unk58 |= 0x80;
+    }
+    burst.unkA = (func_150ADA20() % 51U) + 106;
+    burst.unk1B = (func_150ADA20() % 101U) + 100;
+    payload.size = burst.unk28 = burst.unk2C = (func_150ADA68() * 62.0f) + 41.0f;
+    payload.unk6 = (func_150ADA20() % 5U) + 4;
+    payload.unk7 = (func_150ADA20() % 5U) + 4;
+    payload.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
+    payload.unkC = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
+    payload.unk1A = (func_150ADA20() % 5U) + 4;
+    payload.unk1B = (func_150ADA20() % 5U) + 4;
+    payload.unk1C = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
+    payload.unk20 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
+    burst.unk54 = ((func_150ADA68() * 60.0f) + 21.0f) * 0.001000000047f;
+    spawned = func_151303BC(&burst, 2, sizeof(payload));
+    if (spawned != NULL) {
+        memcpy((u8 *)spawned + 0xA8, &payload, sizeof(payload));
+    }
 }
 
 /* LoopSoundFx update: keeps sound 0x355 playing while D_800DBFF0->unk5F0 bit 0 is set. */
