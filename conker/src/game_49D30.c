@@ -2,13 +2,40 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Track data is kept per player slot (0/1) and per track (up to 30 tracks). */
+
+/* A path keyframe: a point the track's actor moves through (D_800C3868[slot][track][key]). */
+typedef struct {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 z;
+    /* 0x6 */ u16 unk6;
+} PathKey; // size 0x8
+
+/* A channel keyframe: a timed value for one animated property (D_800C3778[slot][track][key]). */
+typedef struct {
+    /* 0x0 */ f32 value;
+    /* 0x4 */ u8 interp;
+    /* 0x5 */ u8 channel;
+    /* 0x6 */ s16 time;
+} ChannelKey; // size 0x8
+
+/* What a track drives (D_800C35F0[slot][track]); type 2 tracks name an actor id in unk2. */
+typedef struct {
+    /* 0x0 */ u16 type;
+    /* 0x2 */ u8 unk2;
+    /* 0x3 */ u8 unk3;
+    /* 0x4 */ s16 yOffset;
+    /* 0x6 */ s16 unk6;
+} TrackInfo; // size 0x8
+
 extern u16 *D_800C35C8[];
 extern u16 *D_800C35D8[];
-extern u8 *D_800C35F0[];
+extern TrackInfo *D_800C35F0[];
 extern u8 D_800C363A[];
 extern void func_1507E7E4(void *, s32, s32, s32, s32);
 extern s8 D_8008FD84[];
-extern u8 D_800C35E8;
+extern u8 D_800C35E8[];
 extern s32 D_800C35B0[];
 extern s32 D_800C3640[];
 extern u8 D_800C3C99;
@@ -47,22 +74,15 @@ typedef struct {
 
 typedef struct {
     s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u16 unk6;
-} struct_game49D30_1;
-
-typedef struct {
-    s16 unk0;
     u8 pad2[0x32];
     s32 unk34;
 } struct_game49D30_2;
 
 extern struct_game49D30_0 *D_800C3A50[];
-extern struct_game49D30_1 *D_800C3868[][30];
+extern PathKey *D_800C3868[][30];
 extern struct_game49D30_2 D_800C3D48;
 extern s32 func_1501F72C(s32, f32, f32 *, s32, s32 *);
-extern void func_1501FFE8(f32 *, struct_game49D30_1 *, s32, s32);
+extern void func_1501FFE8(f32 *, PathKey *, s32, s32);
 extern void func_1516D2E0(s32);
 extern void func_1516D328(s32);
 
@@ -217,7 +237,7 @@ void func_1501CC3C(void) {
     }
 }
 
-extern s32 D_800C3960[];
+extern u8 *D_800C3960[][30];
 
 void func_1501CDC0(s32 arg0) {
     s32 i;
@@ -225,7 +245,7 @@ void func_1501CDC0(s32 arg0) {
 
     for (i = 0; i < D_800C363A[arg0]; i++) {
         for (j = 0; j < 16; j++) {
-            ((u8 *(*)[30])D_800C3960)[arg0][i][j] = 0xFF;
+            D_800C3960[arg0][i][j] = 0xFF;
         }
     }
 }
@@ -237,13 +257,8 @@ typedef struct {
     s16 unk12;
 } struct_1501CE54_0;
 
-typedef struct {
-    u8 pad0[6];
-    s16 unk6;
-} struct_1501CE54_1;
-
-extern s32 D_800C35D0;
-extern struct_1501CE54_1 *D_800C3778[][30];
+extern u16 *D_800C35D0[];
+extern ChannelKey *D_800C3778[][30];
 
 void func_1501CE54(s32 arg0) {
     s32 found;
@@ -272,10 +287,10 @@ void func_1501CE54(s32 arg0) {
         if (found == 0) {
             for (i = 0; i < D_800C363A[arg0]; i++) {
                 if (D_800C35C8[arg0][i] != 0) {
-                    idx = ((u16 **)&D_800C35D0)[arg0][i];
+                    idx = D_800C35D0[arg0][i];
                     if (idx) {
-                        if (D_800C3640[arg0] < D_800C3778[arg0][i][idx - 1].unk6) {
-                            D_800C3640[arg0] = D_800C3778[arg0][i][idx - 1].unk6;
+                        if (D_800C3640[arg0] < D_800C3778[arg0][i][idx - 1].time) {
+                            D_800C3640[arg0] = D_800C3778[arg0][i][idx - 1].time;
                         }
                     }
                 }
@@ -471,7 +486,7 @@ void func_1501D348(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
             D_800C35C5 = 1;
             return;
         }
-        (&D_800C35E8)[arg2] = arg1;
+        D_800C35E8[arg2] = arg1;
         if (state != 2) {
             D_800C35A8 = D_800BE9F0;
             D_800C3C98 = arg1;
@@ -490,8 +505,8 @@ void func_1501D348(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
             if (size < hdr->n0) {
                 size = hdr->n0;
             }
-            ((u16 **)&D_800C35D0)[arg2] = allocate_memory(size * 2, 1, 0, 0);
-            bzero(((u16 **)&D_800C35D0)[arg2], size * 2);
+            D_800C35D0[arg2] = allocate_memory(size * 2, 1, 0, 0);
+            bzero(D_800C35D0[arg2], size * 2);
             size = hdr->n2;
             if (size < hdr->n0) {
                 size = hdr->n0;
@@ -508,25 +523,25 @@ void func_1501D348(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
             }
             ((void **)&D_800C3958)[arg2] = allocate_memory(hdr->n0 * 0x44, 1, 0, 0);
             for (i = 0; i < hdr->n0; i++) {
-                ((void *(*)[30])D_800C3960)[arg2][i] = allocate_memory(0x10, 1, 0, 0);
+                D_800C3960[arg2][i] = allocate_memory(0x10, 1, 0, 0);
             }
             for (i = 0; i < hdr->n0; i++) {
                 D_800C35D8[arg2][i] = 0;
-                ((u16 **)&D_800C35D0)[arg2][i] = 0;
+                D_800C35D0[arg2][i] = 0;
                 D_800C35C8[arg2][i] = 0;
             }
             D_800C363A[arg2] = hdr->n0;
             k = 1;
             for (i = 0; i < hdr->n0; i++) {
                 D_800C35C8[arg2][i] = data[k].b >> 3;
-                D_800C3868[arg2][i] = (struct_game49D30_1 *)data[k].a;
+                D_800C3868[arg2][i] = (PathKey *)data[k].a;
                 k++;
             }
-            D_800C35F0[arg2] = (u8 *)data[k].a;
+            D_800C35F0[arg2] = (TrackInfo *)data[k].a;
             k += hdr->n0;
             for (i = 0; i < hdr->n1; i++) {
-                ((u16 **)&D_800C35D0)[arg2][i] = data[k].b >> 3;
-                D_800C3778[arg2][i] = (struct_1501CE54_1 *)data[k].a;
+                D_800C35D0[arg2][i] = data[k].b >> 3;
+                D_800C3778[arg2][i] = (ChannelKey *)data[k].a;
                 k++;
             }
             for (i = 0; i < hdr->n2; i++) {
@@ -756,7 +771,7 @@ s32 func_1501E05C(s32 arg0) {
         *(s8 *)temp_v1 = 0;
         return 1;
 check_mode_1d:
-        if (D_800C35E8 != 5) {
+        if (D_800C35E8[0] != 5) {
             return 0;
         }
     }
@@ -773,7 +788,7 @@ check_mode_1d:
             if (D_800D2E40 != 0) {
                 return 1;
             }
-            if (func_1501D2C4(temp_a2, (&D_800C35E8)[arg0]) != 0) {
+            if (func_1501D2C4(temp_a2, D_800C35E8[arg0]) != 0) {
                 if ((D_800C3C99 != 0) || ((D_800C35B0[arg0] + 0x1E) < D_800C3640[arg0])) {
                     return 1;
                 }
@@ -866,9 +881,7 @@ void func_1501E400(s32 arg0) {
 
 void func_10004074(s32);
 extern s32 D_800C35E0[];
-extern s32 D_800C35D0;
 extern s32 D_800C3D50;
-extern s32 D_800C3960[];
 
 void func_1501E540(s32 arg0) {
     s32 index;
@@ -903,11 +916,11 @@ void func_1501E540(s32 arg0) {
             } while (index < (s32)*count);
         }
         func_10004074((s32)D_800C35C8[arg0]);
-        func_10004074(*(s32 *)((u8 *)&D_800C35D0 + arg0 * 4));
+        func_10004074((s32)D_800C35D0[arg0]);
         func_10004074((s32)D_800C35D8[arg0]);
         func_10004074(D_800C35E0[arg0]);
         D_800C35C8[arg0] = 0;
-        *(s32 *)((u8 *)&D_800C35D0 + arg0 * 4) = 0;
+        D_800C35D0[arg0] = 0;
         D_800C35D8[arg0] = 0;
         D_800C35E0[arg0] = 0;
         func_10004074(D_800C3D50);
@@ -932,8 +945,8 @@ void func_1501E73C(s32 arg0) {
     Obj1501E73C *obj;
 
     for (i = 0; i < D_800C363A[arg0]; i++) {
-        if (*(u16 *)&D_800C35F0[arg0][i * 8] == 2) {
-            obj = (Obj1501E73C *)func_15083E90(D_800C35F0[arg0][i * 8 + 2]);
+        if (D_800C35F0[arg0][i].type == 2) {
+            obj = (Obj1501E73C *)func_15083E90(D_800C35F0[arg0][i].unk2);
             if (obj == NULL) {
                 continue;
             }
@@ -965,13 +978,13 @@ void func_1501E81C(s32 arg0, s32 arg1) {
             struct { u8 unk0; } sp40;
             s32 var_v0;
 
-            sp40.unk0 = (&D_800C35E8)[arg1];
+            sp40.unk0 = D_800C35E8[arg1];
             var_v0 = arg0 ? 0xF : 0x10;
             func_15169040((u8 *)&sp40, var_v0);
         }
         D_800C35B8[arg1] = -100;
         D_800C35B0[arg1] = D_800C3C8E;
-        func_1501D258(D_800BE9F0, (&D_800C35E8)[arg1]);
+        func_1501D258(D_800BE9F0, D_800C35E8[arg1]);
         (&D_800C35EA)[arg1] = 0;
         D_800C3638 = 0;
         func_1501E73C(arg1);
@@ -1110,12 +1123,6 @@ typedef struct {
     f32 unk40;
 } Out1501EC38;
 
-typedef struct {
-    f32 value;
-    u8 interp;
-    u8 channel;
-    s16 time;
-} Key1501EC38;
 extern f32 func_150497E0(f32 *, s32, f32);
 void func_1501FC8C(s32 arg0, f32 arg1, f32 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
 void func_1501FE68(s32 arg0, f32 arg1, f32 *arg2, s32 arg3);
@@ -1143,21 +1150,21 @@ void func_1501EC38(s32 arg0) {
     s32 ch;
     s32 q;
     s32 next;
-    Key1501EC38 *key;
+    ChannelKey *key;
 
     if ((&D_800C35EA)[arg0] == 1) {
         D_800C3638 = 0;
         for (i = 0; i < D_800C363A[arg0]; i++) {
             if (D_800C35C8[arg0][i] != 0) {
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk0 = D_800C3868[arg0][i]->unk0;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk4 = D_800C3868[arg0][i]->unk2;
-                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk8 = D_800C3868[arg0][i]->unk4;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk0 = D_800C3868[arg0][i]->x;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk4 = D_800C3868[arg0][i]->y;
+                ((Out1501EC38 **)&D_800C3958)[arg0][i].unk8 = D_800C3868[arg0][i]->z;
             } else {
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk0 = 0.0f;
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk4 = 0.0f;
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk8 = 0.0f;
             }
-            if (*(u16 *)&D_800C35F0[arg0][i * 8] == 4) {
+            if (D_800C35F0[arg0][i].type == 4) {
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unkC = 64.0f;
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk10 = 0.0f;
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk14 = 20.0f;
@@ -1183,21 +1190,21 @@ void func_1501EC38(s32 arg0) {
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk30 = -9999.0f;
             }
             ((Out1501EC38 **)&D_800C3958)[arg0][i].unk38 = 0.0f;
-            if (*(u16 *)&D_800C35F0[arg0][i * 8] == 1) {
+            if (D_800C35F0[arg0][i].type == 1) {
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = -9999.0f;
-            } else if (*(u16 *)&D_800C35F0[arg0][i * 8] == 2) {
+            } else if (D_800C35F0[arg0][i].type == 2) {
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = 255.0f;
-            } else if (*(u16 *)&D_800C35F0[arg0][i * 8] == 5) {
+            } else if (D_800C35F0[arg0][i].type == 5) {
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk18 = 32.0f;
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk1C = 32.0f;
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = 1.0f;
-            } else if (*(u16 *)&D_800C35F0[arg0][i * 8] == 3) {
+            } else if (D_800C35F0[arg0][i].type == 3) {
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk18 = -9999.0f;
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk1C = -9999.0f;
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk20 = -9999.0f;
                 ((Out1501EC38 **)&D_800C3958)[arg0][i].unk34 = 255.0f;
             }
-            if (((Key1501EC38 *(*)[30])D_800C3778)[arg0][i] != NULL) {
+            if (D_800C3778[arg0][i] != NULL) {
                 for (j = 0; j < 15; j++) {
                     hi[j] = -9999;
                     lo[j] = -9999;
@@ -1207,8 +1214,8 @@ void func_1501EC38(s32 arg0) {
                     first[j] = -9999.0f;
                     last[j] = -9999.0f;
                 }
-                for (j = 0; j < ((u16 **)&D_800C35D0)[arg0][i]; j++) {
-                    key = &((Key1501EC38 *(*)[30])D_800C3778)[arg0][i][j];
+                for (j = 0; j < D_800C35D0[arg0][i]; j++) {
+                    key = &D_800C3778[arg0][i][j];
                     ch = key->channel;
                     if (idx[ch] == -9999) {
                         if (key->time >= D_800C35B0[arg0]) {
@@ -1255,11 +1262,11 @@ void func_1501EC38(s32 arg0) {
                                 remaining++;
                             }
                             skip = 0;
-                            for (m = 0; m < ((u16 **)&D_800C35D0)[arg0][i]; m++) {
+                            for (m = 0; m < D_800C35D0[arg0][i]; m++) {
                                 if (remaining == 0) {
                                     break;
                                 }
-                                key = &((Key1501EC38 *(*)[30])D_800C3778)[arg0][i][m];
+                                key = &D_800C3778[arg0][i][m];
                                 if (j == key->channel) {
                                     if (skip == start) {
                                         pts[q++] = key->value;
@@ -1279,8 +1286,8 @@ void func_1501EC38(s32 arg0) {
                         } else {
                             n = 0;
                             k = 0;
-                            for (; k < ((u16 **)&D_800C35D0)[arg0][i]; k++) {
-                                key = &((Key1501EC38 *(*)[30])D_800C3778)[arg0][i][k];
+                            for (; k < D_800C35D0[arg0][i]; k++) {
+                                key = &D_800C3778[arg0][i][k];
                                 if (j == key->channel) {
                                     if (found == -1) {
                                         if (n == idx[j] - 1) {
@@ -1294,9 +1301,9 @@ void func_1501EC38(s32 arg0) {
                                     }
                                 }
                             }
-                            r[j] = ((Key1501EC38 *(*)[30])D_800C3778)[arg0][i][next].value - ((Key1501EC38 *(*)[30])D_800C3778)[arg0][i][found].value;
+                            r[j] = D_800C3778[arg0][i][next].value - D_800C3778[arg0][i][found].value;
                             r[j] *= t;
-                            r[j] += ((Key1501EC38 *(*)[30])D_800C3778)[arg0][i][found].value;
+                            r[j] += D_800C3778[arg0][i][found].value;
                         }
                     }
                 }
@@ -1511,7 +1518,7 @@ void func_1501FE68(s32 arg0, f32 arg1, f32 *arg2, s32 arg3) {
     }
 }
 
-void func_1501FFE8(f32 *arg0, struct_game49D30_1 *arg1, s32 arg2, s32 arg3) {
+void func_1501FFE8(f32 *arg0, PathKey *arg1, s32 arg2, s32 arg3) {
     s32 flags;
     s32 start;
     s32 count;
@@ -1538,9 +1545,9 @@ void func_1501FFE8(f32 *arg0, struct_game49D30_1 *arg1, s32 arg2, s32 arg3) {
 
     for (i = start; i < start + count; outIdx++, i++) {
         outOffset = outIdx * 12;
-        *(f32 *)((u8 *)arg0 + outOffset + 0) = (f32) arg1[i].unk0;
-        *(f32 *)((u8 *)arg0 + outOffset + 4) = (f32) arg1[i].unk2;
-        *(f32 *)((u8 *)arg0 + outOffset + 8) = (f32) arg1[i].unk4;
+        *(f32 *)((u8 *)arg0 + outOffset + 0) = (f32) arg1[i].x;
+        *(f32 *)((u8 *)arg0 + outOffset + 4) = (f32) arg1[i].y;
+        *(f32 *)((u8 *)arg0 + outOffset + 8) = (f32) arg1[i].z;
     }
 
     if (!(flags & 1)) {
@@ -1725,14 +1732,6 @@ typedef struct {
 } Elem15020EC4; // size 0x44
 
 typedef struct {
-    u16 type;
-    u8 kind;
-    u8 idx;
-    s16 yoff;
-    s16 pad6;
-} Ent15020EC4; // size 0x8
-
-typedef struct {
     s32 unk0;
     s32 unk4;
     f32 unk8;
@@ -1776,7 +1775,8 @@ extern void func_1517D5FC(s16, s16, s16, s32, s32, s32);
 s32 func_15023264(s32 arg0, s32 arg1);
 
 #define MSG2 (*(Msg15020EC4 *)&D_800C3600)
-#define ENT(a, i) ((Ent15020EC4 *)(D_800C35F0[a] + (i) * 8))
+// matching: byte-offset form of &D_800C35F0[a][i]; plain indexing swaps two s-registers here
+#define ENT(a, i) ((TrackInfo *)((u8 *)D_800C35F0[a] + (i) * 8))
 #define ELEM(a, i) (&((Elem15020EC4 **)&D_800C3958)[a][i])
 
 void func_15020EC4(s32 arg0) {
@@ -1795,7 +1795,7 @@ void func_15020EC4(s32 arg0) {
         }
         for (j = 0; j != 2; j++) {
             for (i = 0; i < D_800C363A[arg0]; i++) {
-                if (((u16 **)&D_800C35D0)[arg0][i] == 0) {
+                if (D_800C35D0[arg0][i] == 0) {
                     continue;
                 }
                 if (D_800C35C8[arg0][i] == 0) {
@@ -1848,45 +1848,45 @@ void func_15020EC4(s32 arg0) {
                     MSG2.unk14 = e->unk0;
                     MSG2.unk18 = e->unk4;
                     MSG2.unk1C = e->unk8;
-                                        if (ENT(arg0, i)->kind == 1) {
+                                        if (ENT(arg0, i)->unk2 == 1) {
                         MSG2.unk0 = 0;
-                        MSG2.unk20 = ELEM(arg0, (s8)ENT(arg0, i)->idx)->unk0;
-                        MSG2.unk24 = ELEM(arg0, (s8)ENT(arg0, i)->idx)->unk4 + ENT(arg0, i)->yoff + (e = ELEM(arg0, i))->unk38;
-                        MSG2.unk28 = ELEM(arg0, (s8)ENT(arg0, i)->idx)->unk8;
+                        MSG2.unk20 = ELEM(arg0, (s8)ENT(arg0, i)->unk3)->unk0;
+                        MSG2.unk24 = ELEM(arg0, (s8)ENT(arg0, i)->unk3)->unk4 + ENT(arg0, i)->yOffset + (e = ELEM(arg0, i))->unk38;
+                        MSG2.unk28 = ELEM(arg0, (s8)ENT(arg0, i)->unk3)->unk8;
                         MSG2.unk2C = -e->unk14;
                         MSG2.unk30 = f22;
                         MSG2.unk34 = f20;
-                    } else if (ENT(arg0, i)->kind == 2) {
+                    } else if (ENT(arg0, i)->unk2 == 2) {
 {
     struct127 *ob;
 
-                        ob = func_15083E90(ENT(arg0, i)->idx);
+                        ob = func_15083E90(ENT(arg0, i)->unk3);
                         if (ob == NULL) {
                             continue;
                         }
                         MSG2.unk0 = 0;
                         D_800C3620.x = ob->x_position;
-                        D_800C3620.y = ob->y_position + ENT(arg0, i)->yoff + (e = ELEM(arg0, i))->unk38;
+                        D_800C3620.y = ob->y_position + ENT(arg0, i)->yOffset + (e = ELEM(arg0, i))->unk38;
                         D_800C3620.z = ob->z_position;
                         MSG2.unk2C = -e->unk14;
                         MSG2.unk30 = f22;
                         MSG2.unk34 = f20;
 }
-                    } else if (ENT(arg0, i)->kind == 3) {
+                    } else if (ENT(arg0, i)->unk2 == 3) {
                         Obj15020EC4 *ob3;
 
-                        ob3 = (Obj15020EC4 *)func_151149AC(ENT(arg0, i)->idx);
+                        ob3 = (Obj15020EC4 *)func_151149AC(ENT(arg0, i)->unk3);
                         if (ob3 == NULL) {
                             continue;
                         }
                         MSG2.unk0 = 0;
                         D_800C3620.x = ob3->unk10;
-                        D_800C3620.y = (ob3->unk12 + ENT(arg0, i)->yoff) + (e = ELEM(arg0, i))->unk38;
+                        D_800C3620.y = (ob3->unk12 + ENT(arg0, i)->yOffset) + (e = ELEM(arg0, i))->unk38;
                         D_800C3620.z = ob3->unk14;
                         MSG2.unk2C = -e->unk14;
                         MSG2.unk30 = f22;
                         MSG2.unk34 = f20;
-                    } else if (ENT(arg0, i)->kind == 0) {
+                    } else if (ENT(arg0, i)->unk2 == 0) {
                         MSG2.unk0 = 1;
                         MSG2.unk20 = -e->unk14;
                         MSG2.unk24 = e->unkC;
@@ -1899,7 +1899,7 @@ void func_15020EC4(s32 arg0) {
                         func_1512D560(player, 7, &MSG2);
                     }
                 } else if (ENT(arg0, i)->type == 3) {
-                    o = (Obj15020EC4 *)func_151149AC(ENT(arg0, i)->kind);
+                    o = (Obj15020EC4 *)func_151149AC(ENT(arg0, i)->unk2);
                     if (o == NULL) {
                         continue;
                     }
@@ -1931,14 +1931,14 @@ void func_15020EC4(s32 arg0) {
                 } else if (ENT(arg0, i)->type == 2) {
                     struct127 *ob2;
 
-                    ob2 = func_15083E90(ENT(arg0, i)->kind);
+                    ob2 = func_15083E90(ENT(arg0, i)->unk2);
                     func_1502178C(ob2, arg0, i);
                 } else if (ENT(arg0, i)->type == 4) {
                     s32 arr[3];
 
-                    arr[0] = ENT(arg0, i)->kind;
-                    arr[1] = ENT(arg0, i)->kind;
-                    arr[2] = ENT(arg0, i)->kind;
+                    arr[0] = ENT(arg0, i)->unk2;
+                    arr[1] = ENT(arg0, i)->unk2;
+                    arr[2] = ENT(arg0, i)->unk2;
                 } else if (ENT(arg0, i)->type == 5) {
                     e = ELEM(arg0, i);
                     if (e->unk34 >= 1.0f) {
@@ -1981,7 +1981,7 @@ void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2) {
     f32 floorY;
     struct127 *obj;
     s32 end;
-    Sel1502178C *sel;
+    TrackInfo *sel;
     f32 angle;
     f32 old[3];
     s32 start;
@@ -1998,9 +1998,9 @@ void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2) {
         }
         for (i = start; i < end; i++) {
             if (D_800C35C8[arg1][i] == 0) continue; {
-                sel = &((Sel1502178C *)D_800C35F0[arg1])[i];
-                if (sel->kind == 2) {
-                    obj = func_15083E90(sel->actor);
+                sel = &D_800C35F0[arg1][i];
+                if (sel->type == 2) {
+                    obj = func_15083E90(sel->unk2);
                     if (obj != NULL && obj == arg0) {
                         old[0] = obj->x_position;
                         old[1] = obj->y_position;
@@ -2098,8 +2098,8 @@ s32 func_15021DB8(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5
         if (((u16 *)D_800C35C8[arg5])[index] == 0) {
             continue;
         }
-        if (((Game49D30Selection *)D_800C35F0[arg5])[index].kind != 2 ||
-            ((u8 (*)[0x32C])&D_800CC2D0)[arg4][0x3B] != ((Game49D30Selection *)D_800C35F0[arg5])[index].actor) {
+        if (D_800C35F0[arg5][index].type != 2 ||
+            ((u8 (*)[0x32C])&D_800CC2D0)[arg4][0x3B] != D_800C35F0[arg5][index].unk2) {
             continue;
         }
         choices = ((u8 *(*)[30])D_800C3960)[arg5][index];
@@ -2162,7 +2162,7 @@ s32 func_15022024(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3) {
     }
     for (i = 0; i < D_800C363A[arg3]; i++) {
         if (D_800C35C8[arg3][i] != 0) {
-            if (((Elem15022024 *)D_800C35F0[arg3])[i].unk0 == 2 && D_800CC2D0[arg2].unique_id == ((Elem15022024 *)D_800C35F0[arg3])[i].unk2) {
+            if (D_800C35F0[arg3][i].type == 2 && D_800CC2D0[arg2].unique_id == D_800C35F0[arg3][i].unk2) {
                 arg0[1] = 0.0f;
                 arg1[1] = 0.0f;
                 arg0[0] = 0.0f;
@@ -2241,12 +2241,12 @@ void func_1502225C(s32 arg0, s32 arg1) {
 
 void func_150222E0(s32 arg0, s32 arg1) {
     struct127 *temp_v0;
-    u8 *temp_v1;
+    TrackInfo *temp_v1;
 
     if (D_800C35C8[arg1][arg0] != 0) {
-        temp_v1 = &D_800C35F0[arg1][arg0 * 8];
-        if (*(u16 *)temp_v1 == 2) {
-            temp_v0 = func_15083E90(temp_v1[2]);
+        temp_v1 = &D_800C35F0[arg1][arg0];
+        if (temp_v1->type == 2) {
+            temp_v0 = func_15083E90(temp_v1->unk2);
             if (temp_v0 != 0) {
                 *(u8 *)((u8 *)temp_v0 + 0x6C) = 0;
                 *(u8 *)((u8 *)temp_v0 + 0x6D) = 0;
@@ -2270,8 +2270,8 @@ void func_15022398(s32 arg0, s32 arg1) {
     s32 temp_id;
 
     if (D_800C35C8[arg1][arg0] != 0) {
-        if (*(u16 *)&D_800C35F0[arg1][arg0 * 8] == 2) {
-            temp_id = D_800C35F0[arg1][(arg0 * 8) + 2];
+        if (D_800C35F0[arg1][arg0].type == 2) {
+            temp_id = D_800C35F0[arg1][arg0].unk2;
             temp_a1 = func_15083E0C(temp_id);
             if (temp_a1 != -1) {
                 temp_v0 = func_1505EEF4(temp_a1);
@@ -2306,14 +2306,14 @@ void func_15022528(s32 arg0) {
     struct127 *obj;
 
     for (i = 0; i < D_800C363A[arg0]; i++) {
-        if (((u16 **)&D_800C35D0)[arg0][i] == 0) {
+        if (D_800C35D0[arg0][i] == 0) {
             continue;
         }
         if (D_800C35C8[arg0][i] == 0) {
             continue;
         }
-        if (*(u16 *)&D_800C35F0[arg0][i * 8] == 2) {
-            obj = func_15083E90(D_800C35F0[arg0][i * 8 + 2]);
+        if (D_800C35F0[arg0][i].type == 2) {
+            obj = func_15083E90(D_800C35F0[arg0][i].unk2);
             if (obj != NULL) {
                 func_1502178C(obj, arg0, i);
             }
@@ -2346,12 +2346,12 @@ void func_15022640(s32 arg0, s32 arg1) {
 
 void func_150226BC(s32 arg0, s32 arg1) {
     struct131 *temp_v0;
-    u8 *temp_v1;
+    TrackInfo *temp_v1;
 
     if (D_800C35C8[arg1][arg0] != 0) {
-        temp_v1 = &D_800C35F0[arg1][arg0 * 8];
-        if (*(u16 *)temp_v1 == 3) {
-            temp_v0 = func_151149AC(temp_v1[2]);
+        temp_v1 = &D_800C35F0[arg1][arg0];
+        if (temp_v1->type == 3) {
+            temp_v0 = func_151149AC(temp_v1->unk2);
             if (temp_v0 != 0) {
                 if (*(u8 *)((u8 *)temp_v0 + 0x6E) == 1) {
                     func_15022640(*(u8 *)((u8 *)temp_v0 + 0x72), arg1);
@@ -2461,7 +2461,7 @@ s32 func_150229E4(struct127 *arg0)
   {
     if (D_800C35C8[idx][i] != 0)
     {
-      if (((*((u16 *) (&D_800C35F0[idx][i * 8]))) == 2) && (id == D_800C35F0[idx][(i * 8) + 2]))
+      if (D_800C35F0[idx][i].type == 2 && id == D_800C35F0[idx][i].unk2)
       {
         if (slot == 0)
         {
@@ -2480,7 +2480,7 @@ s32 func_15022B08(s32 arg0, s32 arg1) {
 
     for (i = 0; i < D_800C363A[arg1]; i++) {
         if (D_800C35C8[arg1][i] != 0) {
-            if (D_800C35F0[arg1][(i * 8) + 2] == ((u8 *)*(&D_800DBEF4) + (arg0 * 0xA0))[0x72]) {
+            if (D_800C35F0[arg1][i].unk2 == ((u8 *)*(&D_800DBEF4) + (arg0 * 0xA0))[0x72]) {
                 return 1;
             }
         }
@@ -2488,13 +2488,6 @@ s32 func_15022B08(s32 arg0, s32 arg1) {
 
     return 0;
 }
-
-typedef struct {
-    f32 unk0;
-    u8 pad4;
-    u8 unk5;
-    u8 pad6[2];
-} struct_15022BA4_0;
 
 void func_15022BA4(s32 arg0) {
     s32 i;
@@ -2507,29 +2500,29 @@ void func_15022BA4(s32 arg0) {
     f32 dx;
     f32 dy;
     f32 dz;
-    struct_game49D30_1 *p;
+    PathKey *p;
 
     for (i = 0; i < D_800C363A[arg0]; i++) {
         if (D_800C35C8[arg0][i] == 0) {
             continue;
         }
-        if (*(u16 *)&D_800C35F0[arg0][i * 8] == 6) {
+        if (D_800C35F0[arg0][i].type == 6) {
             if (D_800C3663 == 0) {
                 p = D_800C3868[arg0][i];
-                func_15022190(p->unk0, p->unk2, p->unk4, 0.0f);
+                func_15022190(p->x, p->y, p->z, 0.0f);
             }
-            if (D_800C35F0[arg0][i * 8 + 2] == 0) {
+            if (D_800C35F0[arg0][i].unk2 == 0) {
                 struct127 *obj;
-                obj = func_15083E90(D_800C35F0[arg0][i * 8 + 3]);
+                obj = func_15083E90(D_800C35F0[arg0][i].unk3);
                 if (obj == NULL) {
                     return;
                 }
                 x = obj->x_position;
                 y = obj->y_position;
                 z = obj->z_position;
-            } else if (D_800C35F0[arg0][i * 8 + 2] == 1) {
+            } else if (D_800C35F0[arg0][i].unk2 == 1) {
                 struct131 *obj;
-                obj = (struct131 *)(s8)D_800C35F0[arg0][i * 8 + 3];
+                obj = (struct131 *)(s8)D_800C35F0[arg0][i].unk3;
                 obj = func_151149AC((s32)obj);
                 if (obj == NULL) {
                     return;
@@ -2541,18 +2534,18 @@ void func_15022BA4(s32 arg0) {
                 return;
             }
             p = D_800C3868[arg0][i];
-            dx = x - p->unk0;
-            dy = y - p->unk2;
-            dz = z - p->unk4;
+            dx = x - p->x;
+            dy = y - p->y;
+            dz = z - p->z;
             for (j = 0; j < D_800C363A[arg0]; j++) {
                 for (k = 0; k < D_800C35C8[arg0][j]; k++) {
-                    D_800C3868[arg0][j][k].unk0 = D_800C3868[arg0][j][k].unk0 + dx;
-                    D_800C3868[arg0][j][k].unk2 = D_800C3868[arg0][j][k].unk2 + dy;
-                    D_800C3868[arg0][j][k].unk4 = D_800C3868[arg0][j][k].unk4 + dz;
+                    D_800C3868[arg0][j][k].x = D_800C3868[arg0][j][k].x + dx;
+                    D_800C3868[arg0][j][k].y = D_800C3868[arg0][j][k].y + dy;
+                    D_800C3868[arg0][j][k].z = D_800C3868[arg0][j][k].z + dz;
                 }
             }
             return;
-        } else if (*(u16 *)&D_800C35F0[arg0][i * 8] == 7) {
+        } else if (D_800C35F0[arg0][i].type == 7) {
             f32 c;
             f32 s;
             f32 t;
@@ -2561,48 +2554,48 @@ void func_15022BA4(s32 arg0) {
             f32 rz;
             f32 nx;
             f32 f;
-            struct_15022BA4_0 *e;
+            ChannelKey *e;
 
             f = 0.0f;
-            for (j = 0; j < ((u16 **)&D_800C35D0)[arg0][i]; j++) {
-                e = &((struct_15022BA4_0 *)D_800C3778[arg0][i])[j];
-                if (e->unk5 == 7) {
-                    f = e->unk0;
+            for (j = 0; j < D_800C35D0[arg0][i]; j++) {
+                e = &D_800C3778[arg0][i][j];
+                if (e->channel == 7) {
+                    f = e->value;
                     break;
                 }
             }
             if (D_800C3663 == 0) {
                 p = D_800C3868[arg0][i];
-                func_15022190(p->unk0, p->unk2, p->unk4, f);
+                func_15022190(p->x, p->y, p->z, f);
             }
             t = D_800C3594 - f;
             D_800C35A4 = t;
             p = D_800C3868[arg0][i];
             ang = t * 0.01745329238f;
-            x = p->unk0;
-            y = p->unk2;
-            z = p->unk4;
+            x = p->x;
+            y = p->y;
+            z = p->z;
             c = cosf(ang);
             s = sinf(ang);
             dy = D_800C358C[1] - y;
             for (j = 0; j < D_800C363A[arg0]; j++) {
                 for (k = 0, flag = 0; k < D_800C35C8[arg0][j]; k++) {
-                    rx = D_800C3868[arg0][j][k].unk0 - x;
-                    rz = D_800C3868[arg0][j][k].unk4 - z;
+                    rx = D_800C3868[arg0][j][k].x - x;
+                    rz = D_800C3868[arg0][j][k].z - z;
                     nx = rx * c + rz * s;
                     rz = -rx * s + rz * c;
-                    D_800C3868[arg0][j][k].unk0 = D_800C358C[0] + nx;
-                    D_800C3868[arg0][j][k].unk2 = D_800C3868[arg0][j][k].unk2 + dy;
-                    D_800C3868[arg0][j][k].unk4 = D_800C358C[2] + rz;
+                    D_800C3868[arg0][j][k].x = D_800C358C[0] + nx;
+                    D_800C3868[arg0][j][k].y = D_800C3868[arg0][j][k].y + dy;
+                    D_800C3868[arg0][j][k].z = D_800C358C[2] + rz;
                 }
                 if (D_800C35D8[arg0][j] != 0 && ((s8 *)D_800C3688[arg0][j])[0x20] == 7) {
                     flag = 1;
                 }
                 if (flag == 0) {
-                    for (k = 0; k < ((u16 **)&D_800C35D0)[arg0][j]; k++) {
-                        e = &((struct_15022BA4_0 *)D_800C3778[arg0][j])[k];
-                        if (e->unk5 == 7) {
-                            e->unk0 = e->unk0 + t;
+                    for (k = 0; k < D_800C35D0[arg0][j]; k++) {
+                        e = &D_800C3778[arg0][j][k];
+                        if (e->channel == 7) {
+                            e->value = e->value + t;
                         }
                     }
                 }
@@ -2620,7 +2613,7 @@ s32 func_15023264(s32 arg0, s32 arg1) {
     s16 *found;
     u8 **entry;
     u8 *ptr;
-    u8 *records;
+    TrackInfo *records;
 
     result = -1;
     best = 0x1869F;
@@ -2651,12 +2644,12 @@ s32 func_15023264(s32 arg0, s32 arg1) {
         if (i < D_800C363A[arg0]) {
             records = D_800C35F0[arg0];
             do {
-                if (*(u16 *)records == 1) {
+                if (records->type == 1) {
                     result = i;
                     break;
                 }
                 i++;
-                records += 8;
+                records++;
             } while (i < D_800C363A[arg0]);
         }
     }
