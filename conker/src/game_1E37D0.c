@@ -743,159 +743,143 @@ s32 func_151B76CC(EffectObject *obj, Vec3f *pos) {
     return 1;
 }
 
-s32 func_151B77F4(EffectObject *arg0) {
+/* Moves the ribbon to its source position (D_8008FB90[selector]) and appends a point there. Returns 0 once the source is gone. */
+s32 func_151B77F4(EffectObject *obj) {
     RingState *state;
-    RingPoint *entries;
+    RingPoint *points;
     Vec3f previous;
     Vec3f delta;
     f32 distance;
 
-    state = arg0->state;
-    entries = arg0->points;
+    state = obj->state;
+    points = obj->points;
     if (D_800BE9E4 > 0) {
-        previous = arg0->pos;
-        if (D_8008FB90[state->selector](arg0, &arg0->pos) == 0) {
+        previous = obj->pos;
+        if (D_8008FB90[state->selector](obj, &obj->pos) == 0) {
             return 0;
         }
         if (state->linked != NULL) {
-            state->linked->pos = arg0->pos;
+            state->linked->pos = obj->pos;
         }
-        delta.x = arg0->pos.x - previous.x;
-        delta.y = arg0->pos.y - previous.y;
-        delta.z = arg0->pos.z - previous.z;
+        delta.x = obj->pos.x - previous.x;
+        delta.y = obj->pos.y - previous.y;
+        delta.z = obj->pos.z - previous.z;
         distance = func_15143E64(&delta);
         {
-            RingPoint *entry = &entries[arg0->head];
+            RingPoint *point = &points[obj->head];
 
-            entry->pos = arg0->pos;
-            entry->distance = distance;
-            entry->alpha = 0xFF;
+            point->pos = obj->pos;
+            point->distance = distance;
+            point->alpha = 0xFF;
         }
-        arg0->head++;
-        if (arg0->head == arg0->capacity) {
-            arg0->head = 0;
+        obj->head++;
+        if (obj->head == obj->capacity) {
+            obj->head = 0;
         }
-        arg0->count++;
-        if (arg0->head == arg0->tail) {
-            arg0->tail++;
-            if (arg0->tail == arg0->capacity) {
-                arg0->tail = 0;
+        obj->count++;
+        if (obj->head == obj->tail) {
+            obj->tail++;
+            if (obj->tail == obj->capacity) {
+                obj->tail = 0;
             }
-            arg0->count--;
+            obj->count--;
         }
     }
     return 1;
 }
 
-s32 func_151B7998(EffectObject *arg0)
-{
-  RingPoint *entries;
-  f32 total;
-  f32 scale;
-  s32 i;
-  s32 prev;
-  f32 t;
-  RingPoint *cur;
-  RingPoint *next;
-  f32 dx;
-  f32 dy;
-  f32 dz;
-  f32 dist;
-  f32 inv;
-  f32 k;
-  s32 j;
-  entries = arg0->points;
-  if (arg0->count >= 2)
-  {
-    total = 0.0f;
-    i = arg0->head - 1;
-    if (i < 0)
-    {
-      i = arg0->capacity - 1;
-    }
-    while (i != arg0->tail)
-    {
-      prev = i;
-      i--;
-      if (i < 0)
-      {
-        i = arg0->capacity - 1;
-      }
-      cur = &entries[prev];
-      total += cur->distance;
-      if ((scale = 1198.0f) < total)
-      {
-        next = &entries[i];
-        if (cur->distance != 0)
-        {
-          t = (total - scale) / cur->distance;
-          dx = next->pos.x - cur->pos.x;
-          dy = next->pos.y - cur->pos.y;
-          dz = next->pos.z - cur->pos.z;
-          next->pos.x = next->pos.x - (dx * t);
-          next->pos.y = next->pos.y - (dy * t);
-          next->pos.z = next->pos.z - (dz * t);
-          cur->distance = cur->distance * (1.0f - t);
+/* Trims the ribbon to at most 1198 units of length, then fades its points from the head (opaque) to the tail. */
+s32 func_151B7998(EffectObject *obj) {
+    RingPoint *points;
+    f32 total;
+    f32 scale;
+    s32 i;
+    s32 prev;
+    f32 t;
+    RingPoint *cur;
+    RingPoint *next;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 dist;
+    f32 alphaScale;
+    s32 j;
+
+    points = obj->points;
+    if (obj->count >= 2) {
+        total = 0.0f;
+        i = obj->head - 1;
+        if (i < 0) {
+            i = obj->capacity - 1;
         }
-        total = scale;
-        while (i != arg0->tail)
-        {
-          arg0->tail++;
-          if (arg0->tail == arg0->capacity)
-          {
- goto dummy_label_317127; dummy_label_317127: ;
-            arg0->tail = 0;
-          }
-          arg0->count--;
+        while (i != obj->tail) {
+            prev = i;
+            i--;
+            if (i < 0) {
+                i = obj->capacity - 1;
+            }
+            cur = &points[prev];
+            total += cur->distance;
+            scale = 1198.0f;
+            if (total > scale) {
+                next = &points[i];
+                if (cur->distance != 0) {
+                    t = (total - scale) / cur->distance;
+                    dx = next->pos.x - cur->pos.x;
+                    dy = next->pos.y - cur->pos.y;
+                    dz = next->pos.z - cur->pos.z;
+                    next->pos.x -= dx * t;
+                    next->pos.y -= dy * t;
+                    next->pos.z -= dz * t;
+                    cur->distance *= 1.0f - t;
+                }
+                total = scale;
+                while (i != obj->tail) {
+                    obj->tail++;
+                    if (obj->tail == obj->capacity) {
+                    wrap:; // matching: the label splits the basic block, which IDO needs here
+                        obj->tail = 0;
+                    }
+                    obj->count--;
+                }
+            }
         }
 
-      }
+        if (total != 0) {
+            scale = 1.0f / total;
+        } else {
+            scale = 0.0f;
+        }
+        ; // matching: an empty statement IDO needs for the scheduling
     }
-
-    if (total != 0)
-    {
-      scale = 1.0f / total;
+    if (obj->count >= 2) {
+        j = obj->head;
+        dist = total;
+        alphaScale = 255.0f * scale;
+        do {
+            j--;
+            if (j < 0) {
+                j = obj->capacity - 1;
+            }
+            cur = &points[j];
+            cur->alpha = dist * alphaScale;
+            dist -= cur->distance;
+            next:; // matching: the label splits the basic block, which IDO needs here
+        } while (j != obj->tail);
     }
-    else
-    {
-      scale = 0.0f;
-    }
-    { }
-  }
-  if (arg0->count >= 2)
-  {
-    j = arg0->head;
-    dist = total;
-    k = 255.0f * scale;
-    do
-    {
-      j--;
-      if (j < 0)
-      {
-        j = arg0->capacity - 1;
-      }
-      cur = &entries[j];
-      cur->alpha = dist * k;
-      dist -= cur->distance;
-      next_iter:
-      ;
-
-      ;
-    }
-    while (j != arg0->tail);
-  }
-  return 1;
+    return 1;
 }
 
 extern u8 D_80091100[];
 
-Gfx *func_151B7C38(EffectObject *arg0, Gfx *arg1, s16 arg2) {
+/* Draws the ribbon as a camera-facing strip 58 units wide, from the newest point to the oldest. */
+Gfx *func_151B7C38(EffectObject *obj, Gfx *gfx, s16 view) {
     Vec3f next;
     Vec3f cur;
     s32 index;
     s32 previous;
     Vec3f *camera;
-    RingPoint *entries;
+    RingPoint *points;
     Vec3f toCamera;
     Vec3f delta;
     Vec3f normal;
@@ -905,32 +889,32 @@ Gfx *func_151B7C38(EffectObject *arg0, Gfx *arg1, s16 arg2) {
     u8 nextAlpha;
     Vtx_t *vtx;
 
-    if (arg0->count < 2) {
-        return arg1;
+    if (obj->count < 2) {
+        return gfx;
     }
-    entries = arg0->points;
-    func_151D5D60((u8 *)arg0 + 0x84, arg2, (arg0->capacity * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
+    points = obj->points;
+    func_151D5D60(obj->buffers, view, (obj->capacity * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
     if (vtx == NULL) {
-        return arg1;
+        return gfx;
     }
-    camera = (Vec3f *)func_15144B34(arg2);
+    camera = func_15144B34(view);
     flag = 1;
-    arg1 = func_15142E24(arg1, (s32)D_80091100, 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
-    arg1 = func_15142B7C(arg1, 0x200005, 0x1F0600);
-    arg1 = func_1513F4E4(arg1, 0x56, &flag);
-    arg1 = func_15142FBC(arg1, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &flag);
-    previous = arg0->head - 1;
+    gfx = func_15142E24(gfx, (s32)D_80091100, 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
+    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+    gfx = func_1513F4E4(gfx, 0x56, &flag);
+    gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &flag);
+    previous = obj->head - 1;
     if (previous < 0) {
-        previous = arg0->capacity - 1;
+        previous = obj->capacity - 1;
     }
     index = previous - 1;
     if (index < 0) {
-        index = arg0->capacity - 1;
+        index = obj->capacity - 1;
     }
-    cur = entries[previous].pos;
-    curAlpha = entries[previous].alpha;
-    next = entries[index].pos;
-    nextAlpha = entries[index].alpha;
+    cur = points[previous].pos;
+    curAlpha = points[previous].alpha;
+    next = points[index].pos;
+    nextAlpha = points[index].alpha;
     delta.x = cur.x - next.x;
     delta.y = cur.y - next.y;
     delta.z = cur.z - next.z;
@@ -1006,58 +990,45 @@ Gfx *func_151B7C38(EffectObject *arg0, Gfx *arg1, s16 arg2) {
         vtx->cn[3] = nextAlpha;
         vtx->flag = 0;
         vtx++;
-        gSPVertex(arg1++, vtx - 4, 4, 0);
-        gSP2Triangles(arg1++, 0, 1, 2, 0, 1, 3, 2, 0);
+        gSPVertex(gfx++, vtx - 4, 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 1, 3, 2, 0);
         previous = index;
         index--;
         if (index < 0) {
-            index = arg0->capacity - 1;
+            index = obj->capacity - 1;
         }
-        if (previous != arg0->tail) {
-            cur = entries[previous].pos;
-            next = entries[index].pos;
-            nextAlpha = entries[index].alpha;
+        if (previous != obj->tail) {
+            cur = points[previous].pos;
+            next = points[index].pos;
+            nextAlpha = points[index].alpha;
         }
-    } while (previous != arg0->tail);
-    return arg1;
+    } while (previous != obj->tail);
+    return gfx;
 }
 
-extern void (*D_8008FB98[])(void *, s32, u8);
+/* Message handlers of ribbon effects, indexed by RingState.selector; entries may be NULL. */
+extern void (*D_8008FB98[])(EffectObject *, void *, u8);
 
-void func_151B82CC(void *arg0, s32 arg1, u8 arg2) {
-    void *v0 = *(void **)((u8 *)arg0 + 0x98);
-    void (*f)(void *, s32, u8) = D_8008FB98[*(u8 *)((u8 *)v0 + 0x8)];
-    if (f != 0) {
-        f(arg0, arg1, arg2);
+/* Message handler of a ribbon: forwards the message to D_8008FB98[selector], if there is one. */
+void func_151B82CC(EffectObject *obj, void *msg, u8 msgType) {
+    RingState *state = obj->state;
+    void (*handler)(EffectObject *, void *, u8) = D_8008FB98[state->selector];
+
+    if (handler != NULL) {
+        handler(obj, msg, msgType);
     }
 }
 
-struct S151B8318 {
-    s32 unk0;
-    u8 unk4;
-};
+/* D_8008FB98 handler of a ribbon that follows a TrailTarget: message 0 naming the target destroys the ribbon. */
+void func_151B8318(EffectObject *obj, TrailTargetRef *msg, u8 msgType) {
+    RingState *state = obj->state;
+    TrailTargetRef *ref = state->args;
 
-struct T151B8318 {
-    s32 unk0;
-    struct S151B8318 *unk4;
-};
+    if (msgType == 0) {
+        TrailTarget *target = msg->target;
 
-void func_151B8318(struct102 *arg0, struct S151B8318 *arg1, u8 arg2) {
-    int new_var;
-    struct T151B8318 *v0 = *(struct T151B8318 **)((u8 *)arg0 + 0x98);
-    struct S151B8318 *v1 = v0->unk4;
-
-    if (arg2 == 0) {
-        if ((v1->unk0 == (new_var = arg1->unk0)) || (arg1->unk4 == v1->unk4)) {
-            func_1516972C(arg0);
+        if (target == ref->target || msg->targetUnk3B == ref->targetUnk3B) {
+            func_1516972C((struct102 *)obj);
         }
     }
 }
-void func_151B8370(void *arg0);
-
-extern void func_151B8370(void *);
-extern void func_151478F4(void *);
-void func_151B83A0(void *arg0);
-
-extern void func_15147928(void *);
-void func_151B83CC(void *arg0);
