@@ -5323,76 +5323,110 @@ void func_15062800(struct127 *a, struct127 *b) {
     func_150627D4(b);
 }
 
-void func_15062AC4(struct127 *arg0) {
-    if (arg0->unkE6 && arg0->unkE4) {
-        f32 tmp = arg0->unkE4;
-        arg0->unkEC = tmp / arg0->unkE6;
-        arg0->unkF0 = arg0->unkE6 / tmp;
+/* Recomputes the body cylinder ratios: unkEC = radius / height, unkF0 = height / radius (radius unkE4, height unkE6). */
+void func_15062AC4(struct127 *actor) {
+    if (actor->unkE6 && actor->unkE4) {
+        f32 radius = actor->unkE4;
+        actor->unkEC = radius / actor->unkE6;
+        actor->unkF0 = actor->unkE6 / radius;
     } else {
-        arg0->unkF0 = arg0->unkEC = 0.0f;
+        actor->unkF0 = actor->unkEC = 0.0f;
     }
 }
 
-void func_15062B1C(struct127 *arg0, f32 arg1) {
-    arg0->unkE4 = arg0->xz_scale * arg1;
-    func_15062AC4(arg0);
+/* Sets the body radius to xz_scale * radius. */
+void func_15062B1C(struct127 *actor, f32 radius) {
+    actor->unkE4 = actor->xz_scale * radius;
+    func_15062AC4(actor);
 }
 
-void func_15062B50(struct127 *arg0, f32 arg1) {
-    arg0->unkE6 = arg0->y_scale * arg1;
-    func_15062AC4(arg0);
+/* Sets the body height to y_scale * height. */
+void func_15062B50(struct127 *actor, f32 height) {
+    actor->unkE6 = actor->y_scale * height;
+    func_15062AC4(actor);
 }
 
-void func_15062B84(struct127 *arg0) {
-    if (arg0->unkD4 && arg0->unkD2) {
-        f32 tmp = arg0->unkD2;
-        arg0->unkDC = tmp / arg0->unkD4;
-        arg0->unkE0 = arg0->unkD4 / tmp;
+/* func_15062AC4 for the hit cylinder (radius unkD2, height unkD4). */
+void func_15062B84(struct127 *actor) {
+    if (actor->unkD4 && actor->unkD2) {
+        f32 radius = actor->unkD2;
+        actor->unkDC = radius / actor->unkD4;
+        actor->unkE0 = actor->unkD4 / radius;
     } else {
-        arg0->unkDC = 0.0f;
-        arg0->unkE0 = 0.0f;
+        actor->unkDC = 0.0f;
+        actor->unkE0 = 0.0f;
     }
 }
 
-void func_15062BDC(struct127 *arg0, f32 arg1, f32 arg2) {
-    struct124 *temp_v0;
+/* Sets the actor's scale and rescales its hit and body cylinders from the type info. */
+void func_15062BDC(struct127 *actor, f32 xzScale, f32 yScale) {
+    struct124 *info;
 
-    arg0->xz_scale = arg1;
-    arg0->y_scale = arg2;
-    if (arg0->id != 255) {
-        temp_v0 = D_800D1C90[arg0->id];
-        arg0->unkD2 = (s32) (temp_v0->unk20 * arg0->xz_scale);
-        arg0->unkD4 = (s32) (temp_v0->unk22 * arg0->y_scale);
-        arg0->unkD6 = (s32) (temp_v0->unk24 * arg0->y_scale);
-        arg0->unkE4 = (s32) (temp_v0->unk1A * arg0->xz_scale);
-        arg0->unkE6 = (s32) (temp_v0->unk1C * arg0->y_scale);
-        arg0->unkE8 = (s32) (temp_v0->unk1E * arg0->y_scale);
-        func_15062AC4(arg0);
-        func_15062B84(arg0);
+    actor->xz_scale = xzScale;
+    actor->y_scale = yScale;
+    if (actor->id != 255) {
+        info = D_800D1C90[actor->id];
+        actor->unkD2 = (s32) (info->unk20 * actor->xz_scale);
+        actor->unkD4 = (s32) (info->unk22 * actor->y_scale);
+        actor->unkD6 = (s32) (info->unk24 * actor->y_scale);
+        actor->unkE4 = (s32) (info->unk1A * actor->xz_scale);
+        actor->unkE6 = (s32) (info->unk1C * actor->y_scale);
+        actor->unkE8 = (s32) (info->unk1E * actor->y_scale);
+        func_15062AC4(actor);
+        func_15062B84(actor);
     }
 }
 
-typedef struct { s32 unk0; s32 unk4; } Entry62D10;
+typedef struct {
+    s32 unk0; /* flags in the top byte, s:t packed 12:12 */
+    s32 unk4; /* tile size - 2, packed the same way */
+} Entry62D10;
 extern Entry62D10 **D_800C4488[];
 extern s32 D_800D19A0;
-void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    Entry62D10 *base, *entry; s32 packed, modX, modY, newX, newY, tmp, flag;
-    newX = 0; modX = 0; modY = 0;
-    if ((&D_800D19A0)[arg0] == 0) return;
-    base = D_800C4488[arg0][arg4];
-    packed = ((Entry62D10 *)((u8 *)base + arg1 * 8))->unk4;
-    modX = ((packed >> 12) & 0xFFF) + 2;
-    modY = (packed & 0xFFF) + 2;
-    entry = ((Entry62D10 *)((u8 *)base + arg1 * 8));
+/*
+ * Scrolls texture tile `tile` of actor type `type` (set `set`) by (ds, dt), wrapping at the tile size;
+ * with `absolute` set the coordinates are set instead. Coordinates are packed 12:12 in unk0.
+ */
+void func_15062D10(s32 type, s32 tile, s32 ds, s32 dt, s32 set, s32 absolute) {
+    Entry62D10 *base, *entry;
+    s32 packed, wrapS, wrapT, newS, newT, tmp, flag;
+
+    newS = 0;
+    wrapS = 0;
+    wrapT = 0;
+    if ((&D_800D19A0)[type] == 0) {
+        return;
+    }
+    base = D_800C4488[type][set];
+    packed = ((Entry62D10 *)((u8 *)base + tile * 8))->unk4; // matching: byte offsets, not base[tile]
+    wrapS = ((packed >> 12) & 0xFFF) + 2;
+    wrapT = (packed & 0xFFF) + 2;
+    entry = ((Entry62D10 *)((u8 *)base + tile * 8));
     packed = entry->unk0;
-    flag = arg5;
-    if (flag != 0) newX = arg2 & 0xFFF;
-    else { tmp = ((packed >> 12) & 0xFFF) + arg2; newX = tmp;
-           if (modX < tmp) newX = tmp - modX; else if (tmp < 0) newX = tmp + modX; }
-    if (flag != 0) newY = arg3 & 0xFFF;
-    else { tmp = (packed & 0xFFF) + arg3; newY = tmp;
-           if (modY < tmp) newY = tmp - modY; else if (tmp < 0) newY = tmp + modY; }
-    packed = (packed & 0xFF000000) | (newY & 0xFFF) | ((newX & 0xFFF) << 12);
+    flag = absolute;
+    if (flag != 0) {
+        newS = ds & 0xFFF;
+    } else {
+        tmp = ((packed >> 12) & 0xFFF) + ds;
+        newS = tmp;
+        if (wrapS < tmp) {
+            newS = tmp - wrapS;
+        } else if (tmp < 0) {
+            newS = tmp + wrapS;
+        }
+    }
+    if (flag != 0) {
+        newT = dt & 0xFFF;
+    } else {
+        tmp = (packed & 0xFFF) + dt;
+        newT = tmp;
+        if (wrapT < tmp) {
+            newT = tmp - wrapT;
+        } else if (tmp < 0) {
+            newT = tmp + wrapT;
+        }
+    }
+    packed = (packed & 0xFF000000) | (newT & 0xFFF) | ((newS & 0xFFF) << 12);
     entry->unk0 = packed;
 }
 typedef struct Entry62E24 {
@@ -5404,19 +5438,19 @@ typedef struct Entry62E24 {
 extern Entry62E24 *D_800C5338[];
 void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
 
-void func_15062E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+void func_15062E24(s32 type, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
     s32 i;
     s32 w;
     s32 h;
     Vtx *vtx;
 
-    if (D_800C6360[arg0] != 0) {
+    if (D_800C6360[type] != 0) {
         for (i = 0; i < 25; i++) {
             if (D_800CC2D0[i].interaction_state == 0) continue;
-            if (arg0 != D_800CC2D0[i].id) continue;
+            if (type != D_800CC2D0[i].id) continue;
             if (D_800CC2D0[i].unk2FA == 0) continue;
-                w = D_800C5338[arg0][arg5].unk8;
-                h = D_800C5338[arg0][arg5].unkA;
+                w = D_800C5338[type][arg5].unk8;
+                h = D_800C5338[type][arg5].unkA;
                 if (arg6 != 0) {
                     w *= 2;
                     h *= 2;
@@ -5424,7 +5458,7 @@ void func_15062E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
                 vtx = ((Vtx **)&D_800CC2D0[i].pad288[4])[D_800BE9C0];
                 if (vtx != NULL) {
                     vtx += arg1;
-                    func_15094AB8(vtx, (s16 (*)[2])D_800C6360[arg0] + arg3, arg2, arg4, h, w);
+                    func_15094AB8(vtx, (s16 (*)[2])D_800C6360[type] + arg3, arg2, arg4, h, w);
                 }
         }
     }
