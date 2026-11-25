@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Per-type state of a sprite effect, at sprite + 0x110. */
 typedef struct {
@@ -49,60 +50,6 @@ typedef struct {
     } data;
 } EffectSprite;
 
-/* 0x50-byte emitter template (D_8008D630), copied into EmitterParams after `accum`. */
-typedef struct {
-    /* 0x00 */ f32 rate;
-    /* 0x04 */ f32 rateRange;
-    /* 0x08 */ f32 burstBase;
-    /* 0x0C */ f32 burstRange;
-    /* 0x10 */ f32 sizeX;
-    /* 0x14 */ f32 sizeY;
-    /* 0x18 */ f32 sizeXRange;
-    /* 0x1C */ f32 sizeYRange;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21Range;
-    /* 0x22 */ s16 lifeMin;
-    /* 0x24 */ s16 lifeRange;
-    /* 0x26 */ u8 pad26[2];
-    /* 0x28 */ s32 maxCount;
-    /* 0x2C */ f32 velocityScale;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34Range;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ s16 unk3C;
-    /* 0x3E */ s16 unk3E;
-    /* 0x40 */ s16 unk40;
-    /* 0x42 */ s16 unk42Range;
-    /* 0x44 */ s32 anchorSet;
-    /* 0x48 */ u8 flags;
-    /* 0x49 */ u8 pad49[3];
-    /* 0x4C */ f32 unk4C;
-} EmitterTemplate; /* 0x50 */
-
-typedef struct {
-    /* 0x00 */ f32 accum;
-    /* 0x04 */ EmitterTemplate tmpl;
-    /* 0x54 */ struct225 *child;
-    /* 0x58 */ s8 updateFunc;
-    /* 0x59 */ s8 unk59Func;
-    /* 0x5A */ u8 unk5A;
-    /* 0x5B */ u8 pad5B;
-} EmitterParams; /* 0x5C */
-
-/* Object returned by func_151D2F00. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[3];
-    /* 0x10 */ Actor *owner;
-    /* 0x14 */ u8 pad14[0xC];
-    /* 0x20 */ s16 count;
-    /* 0x22 */ u8 pad22[0xE];
-    /* 0x30 */ EmitterParams params;
-} Emitter;
-
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
@@ -133,14 +80,14 @@ typedef struct {
     /* 0x19 */ u8 unk19;
     /* 0x1A */ u8 unk1A;
     /* 0x1C */ void *sprite;
-    /* 0x20 */ Emitter *parent;
+    /* 0x20 */ AnchorEmitter *parent;
 } EmitterParticleDesc;
 
 /* Particle created by func_151D2BA4 from an EmitterParticleDesc. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x2C];
     /* 0x2C */ EffectSprite *sprite;
-    /* 0x30 */ Emitter *parent;
+    /* 0x30 */ AnchorEmitter *parent;
     /* 0x34 */ Vec3f pos;
 } EmitterParticle;
 
@@ -169,7 +116,7 @@ typedef struct {
 } ChildOwner;
 
 typedef struct {
-    /* 0x00 */ Emitter *emitter;
+    /* 0x00 */ AnchorEmitter *emitter;
     /* 0x04 */ f32 params[8];
     /* 0x24 */ ChildOwner owner;
     /* 0x2C */ Header header;
@@ -186,16 +133,16 @@ void func_1514BF50(EffectSprite *);
 struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 void func_151D2AB0(s32);
 void func_151D2BA4(EmitterParticleDesc *, Vec3f *, s32, u8, s32);
-Emitter *func_151D2F00(EmitterDesc *, s32, u8, s32);
+AnchorEmitter *func_151D2F00(EmitterDesc *, s32, u8, s32);
 
 s32 func_1518FDC4(Actor *obj, u8 *kind, u8 variant);
-Emitter *func_1518F5D0(Actor *owner, EmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
+AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
                        s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9);
-void func_1518F8E0(Emitter *emitter);
-struct225 *func_1519021C(Emitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
+void func_1518F8E0(AnchorEmitter *emitter);
+struct225 *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
 
-extern EmitterTemplate *D_8008D630[];
-extern s32 (*D_8008D67C[])(Emitter *);
+extern AnchorEmitterTemplate *D_8008D630[];
+extern s32 (*D_8008D67C[])(AnchorEmitter *);
 extern void (*D_8008D680[])(void);
 
 /* Moves three sprite values toward random targets that are re-rolled on timers. */
@@ -264,7 +211,7 @@ void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2) {
 }
 
 /* Creates emitter `index` of the kind matching `owner`'s object id. */
-Emitter *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind,
+AnchorEmitter *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind,
                        u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
     u8 pad[4]; // matching: unused stack slot
     u8 kind;
@@ -280,13 +227,13 @@ Emitter *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 u
 }
 
 /* Creates an emitter attached to `owner` from `tmpl`; duration -1 means none (uses 300). */
-Emitter *func_1518F5D0(Actor *owner, EmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
+AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
                        s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
     EmitterDesc desc;
     u8 pad[4]; // matching: unused stack slot
-    EmitterParams params;
-    EmitterParams *dest;
-    Emitter *emitter;
+    AnchorEmitterParams params;
+    AnchorEmitterParams *dest;
+    AnchorEmitter *emitter;
     s8 hasDuration;
 
     params.accum = 0.0f;
@@ -312,7 +259,7 @@ Emitter *func_1518F5D0(Actor *owner, EmitterTemplate *tmpl, s16 duration, s8 upd
     emitter = func_151D2F00(&desc, arg7 + 0x60, arg8, arg9);
     if (emitter != NULL) {
         dest = &emitter->params;
-        memcpy(dest, &params, sizeof(EmitterParams));
+        memcpy(dest, &params, sizeof(AnchorEmitterParams));
         if (childKind != -1) {
             dest->child = func_1519021C(emitter, owner, childKind, duration, arg8, arg9);
         } else {
@@ -326,8 +273,8 @@ Emitter *func_1518F5D0(Actor *owner, EmitterTemplate *tmpl, s16 duration, s8 upd
 }
 
 /* Accumulates the emission rate, spawns particles, then runs the emitter's update callback. */
-s32 func_1518F7C4(Emitter *emitter) {
-    EmitterParams *params;
+s32 func_1518F7C4(AnchorEmitter *emitter) {
+    AnchorEmitterParams *params;
 
     params = &emitter->params;
     params->accum += (params->tmpl.rate + func_150ADA68() * params->tmpl.rateRange) * D_800BE9A4;
@@ -338,8 +285,8 @@ s32 func_1518F7C4(Emitter *emitter) {
     return 1;
 }
 
-void func_1518F858(Emitter *emitter) {
-    EmitterParams *params = &emitter->params;
+void func_1518F858(AnchorEmitter *emitter) {
+    AnchorEmitterParams *params = &emitter->params;
 
     if (emitter->params.unk59Func != -1) {
         D_8008D680[params->unk59Func]();
@@ -347,8 +294,8 @@ void func_1518F858(Emitter *emitter) {
 }
 
 /* Emits a random-sized burst of particles. */
-void func_1518F89C(Emitter *emitter) {
-    EmitterParams *params;
+void func_1518F89C(AnchorEmitter *emitter) {
+    AnchorEmitterParams *params;
 
     params = &emitter->params;
     params->accum = func_150ADA68() * params->tmpl.burstRange + params->tmpl.burstBase;
@@ -356,8 +303,8 @@ void func_1518F89C(Emitter *emitter) {
 }
 
 /* Spawns one particle at a random bone anchor of the owner per whole unit in `accum`. */
-void func_1518F8E0(Emitter *emitter) {
-    EmitterParams *params;
+void func_1518F8E0(AnchorEmitter *emitter) {
+    AnchorEmitterParams *params;
     Actor *owner;
     SpriteSize size;
     Vec3f pos;
@@ -439,8 +386,8 @@ s32 func_1518FC44(EmitterParticle *particle, Vec3f *target) {
 void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
     EffectSprite *sprite;
     SpriteMotion *motion;
-    EmitterParams *params;
-    Emitter *parent;
+    AnchorEmitterParams *params;
+    AnchorEmitter *parent;
 
     sprite = particle->sprite;
     if (particle->parent == NULL) {
@@ -725,7 +672,7 @@ u8 *func_1519003C(Actor *obj, s32 *found) {
 }
 
 /* Creates the child sprite of an emitter, colored from the D_800A67C0/6760/6820 tables. */
-struct225 *func_1519021C(Emitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
+struct225 *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
     ChildDesc desc;
     Header2 pos;
     struct225 *child;

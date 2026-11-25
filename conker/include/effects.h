@@ -1586,6 +1586,60 @@ typedef struct BoltDesc {
     /* 0x4D */ u8 pad4D[3];
 } BoltDesc; /* size 0x50 */
 
+/* func_1518F5D0 (game_1BC650.c): emitter template (D_8008D630), copied into AnchorEmitterParams after `accum`. */
+typedef struct AnchorEmitterTemplate {
+    /* 0x00 */ f32 rate;
+    /* 0x04 */ f32 rateRange;
+    /* 0x08 */ f32 burstBase;
+    /* 0x0C */ f32 burstRange;
+    /* 0x10 */ f32 sizeX;
+    /* 0x14 */ f32 sizeY;
+    /* 0x18 */ f32 sizeXRange;
+    /* 0x1C */ f32 sizeYRange;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 unk21Range;
+    /* 0x22 */ s16 lifeMin;
+    /* 0x24 */ s16 lifeRange;
+    /* 0x26 */ u8 pad26[2];
+    /* 0x28 */ s32 maxCount;
+    /* 0x2C */ f32 velocityScale;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34Range;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ s16 unk3C;
+    /* 0x3E */ s16 unk3E;
+    /* 0x40 */ s16 unk40;
+    /* 0x42 */ s16 unk42Range;
+    /* 0x44 */ s32 anchorSet;
+    /* 0x48 */ u8 flags;
+    /* 0x49 */ u8 pad49[3];
+    /* 0x4C */ f32 unk4C;
+} AnchorEmitterTemplate; /* size 0x50 */
+
+typedef struct AnchorEmitterParams {
+    /* 0x00 */ f32 accum;
+    /* 0x04 */ AnchorEmitterTemplate tmpl;
+    /* 0x54 */ struct225 *child;
+    /* 0x58 */ s8 updateFunc;
+    /* 0x59 */ s8 unk59Func;
+    /* 0x5A */ u8 unk5A;
+    /* 0x5B */ u8 pad5B;
+} AnchorEmitterParams; /* size 0x5C */
+
+/* Emitter object created by func_1518F5D0 (game_1BC650.c; an object of func_151D2F00). */
+typedef struct AnchorEmitter {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[3];
+    /* 0x10 */ struct Actor *owner;
+    /* 0x14 */ u8 pad14[0xC];
+    /* 0x20 */ s16 count;
+    /* 0x22 */ u8 pad22[0xE];
+    /* 0x30 */ AnchorEmitterParams params;
+} AnchorEmitter; /* size 0x8C */
+
 /* func_151580B0 (game_185560.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
  * at +0x10. Like EffectParams, but the actor draws one display list from D_8008AFB8. */
 typedef struct EffectActorTemplate {
