@@ -136,14 +136,11 @@ typedef struct {
 } TexturePair;
 
 
+/* Timed effect of func_150DE7C0: particles that travel between two zones. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ZonePairEmitter link;
-} Emitter;
+} ZonePairEffect;
 
 void *memcpy(void *, const void *, u32);
 void func_1514470C(s32, Vec3f *);
@@ -154,7 +151,7 @@ const TexturePair D_800A0D00 = { { 0xBE, 0xBF } };
 
 /* Every 200-400 frames, spawns a particle (texture 0xBE or 0xBF) at the link's source position that
  * travels to its target position at a random speed of 25-55 (0xBF ones at 0.18 of that). */
-void func_150DE7C0(Emitter *emitter) {
+void func_150DE7C0(ZonePairEffect *emitter) {
     ZonePairEmitter *link;
     Vec3f target;
     Vec3f delta;
@@ -222,8 +219,8 @@ void func_150DE7C0(Emitter *emitter) {
         def.scale.x = 1.0f;
         def.scale.y = 1.0f;
         def.scale.z = 1.0f;
-        particle = func_1513D2F0(&def, &D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, emitter->unkC,
-                                 emitter->unk1);
+        particle = func_1513D2F0(&def, &D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, emitter->base.header.owner,
+                                 emitter->base.header.kind);
         if (particle != NULL) {
             memcpy(&particle->travel, &travel, sizeof(travel));
         }

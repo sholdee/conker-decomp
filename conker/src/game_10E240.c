@@ -20,12 +20,13 @@ typedef struct {
     /* 0x04 */ WorldObject *prop;
     /* 0x08 */ Struct1510FD20 *lookup; // func_1510FD20 at the prop's x/z
     /* 0x0C */ f32 accum; // particles owed; one is emitted per whole unit
-} Emitter;
+} PropEmitter;
 
+/* Timed effect of func_150E114C. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Emitter emitter;
-} EmitterEffect;
+    /* 0x28 */ PropEmitter emitter;
+} PropEmitterEffect;
 
 extern u8 D_800A0FE0[];
 extern WorldObject *func_151149AC(u8);
@@ -98,7 +99,7 @@ void func_150E0D90(Camera *camera) {
 /* Spawns the emitter effect for prop D_800A0FE0[index] (index 0 or 1); returns it, or NULL. */
 TimedEffect *func_150E1060(u8 index, u8 owner, s32 kind) {
     TimedEffect *effect;
-    Emitter emitter;
+    PropEmitter emitter;
 
     if (index < 0) { // matching: always false for a u8, but removing it changes the code
         return NULL;
@@ -120,7 +121,7 @@ TimedEffect *func_150E1060(u8 index, u8 owner, s32 kind) {
 
     effect = func_15149130(300, -1, 0x1F, -1, 0, 0x1F, sizeof(emitter), owner, kind);
     if (effect != NULL) {
-        memcpy(&((EmitterEffect *)effect)->emitter, &emitter, sizeof(emitter));
+        memcpy(&((PropEmitterEffect *)effect)->emitter, &emitter, sizeof(emitter));
     }
     return effect;
 }
@@ -133,8 +134,8 @@ extern void func_15145CD0(WorldObject *, Vec3f **, f32 **, s32);
 
 /* Emitter effect update: accumulates a random rate and, while the emitter's lookup has one of the
  * low D_80082FA0 + 1 bits set, emits one particle per whole unit along D_800A0FE4 -> D_800A0FFC. */
-void func_150E114C(EmitterEffect *effect) {
-    Emitter *emitter;
+void func_150E114C(PropEmitterEffect *effect) {
+    PropEmitter *emitter;
     s32 i;
     s16 mask;
     s32 pad[2]; // matching: two unused stack words above args

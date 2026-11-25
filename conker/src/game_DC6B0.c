@@ -64,16 +64,13 @@ typedef struct {
 typedef struct {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 spawnAccum;
-} EmitterData;
+} SmokeEmitterData;
 
+/* Timed effect of func_150AF328. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ EmitterData data;
-} Emitter;
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ SmokeEmitterData data;
+} SmokeEmitter;
 
 extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_15131828(Particle *, f32 *amplitude, u8 *phase, u8 *phaseStep);
@@ -81,8 +78,8 @@ extern void func_15131958(Vec3f *vel, f32 drag);
 
 /* Emitter update: accumulates 0.1352..0.305 particles per unit of D_800BE9A4 and spawns one
  * randomly sized particle at the emitter's position for each whole one. */
-void func_150AF328(Emitter *emitter) {
-    EmitterData *data;
+void func_150AF328(SmokeEmitter *emitter) {
+    SmokeEmitterData *data;
 
     data = &emitter->data;
     data->spawnAccum += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
@@ -137,7 +134,7 @@ void func_150AF328(Emitter *emitter) {
             spawn.alpha = func_150ADA20() % 101U + 100;
             spawn.timer = func_150ADA20() % 51U + 80;
             spawn.width = spawn.height = func_150ADA68() * 71.0f + 80.0f;
-            particle = func_15130280(&spawn, 0, 0, 0x10, emitter->unkC, emitter->unk1);
+            particle = func_15130280(&spawn, 0, 0, 0x10, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->wobble, &wobble, sizeof(wobble));
             }

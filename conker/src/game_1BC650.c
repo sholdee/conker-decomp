@@ -35,19 +35,20 @@ typedef struct {
     } data;
 } EffectSprite;
 
+/* What func_151D2F00 (game_1FFF60.c) copies to ActorFollowerGroup.actor: the group's fields 0x10-0x1F. */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
     /* 0x05 */ u8 pad5;
     /* 0x06 */ s16 duration;
-    /* 0x08 */ s8 hasDuration;
-    /* 0x09 */ s8 unk9;
-    /* 0x0A */ s8 unkA;
-    /* 0x0B */ s8 unkB;
-    /* 0x0C */ s8 unkC;
-    /* 0x0D */ s8 unkD;
+    /* 0x08 */ s8 hasDuration; /* the group's flags: bit 0 = timer counts down */
+    /* 0x09 */ s8 updateFn;
+    /* 0x0A */ s8 trackFn;
+    /* 0x0B */ s8 untrackFn;
+    /* 0x0C */ s8 expireFn;
+    /* 0x0D */ s8 kind;
     /* 0x0E */ u8 padE[2];
-} EmitterDesc;
+} FollowerGroupDesc;
 
 /* One entry of a bone anchor set (D_800E0990). */
 typedef struct BoneAnchor {
@@ -114,7 +115,7 @@ void func_1514BF50(EffectSprite *);
 LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 void func_151D2AB0(s32);
 void func_151D2BA4(EmitterParticleDesc *, Vec3f *, s32, u8, s32);
-AnchorEmitter *func_151D2F00(EmitterDesc *, s32, u8, s32);
+AnchorEmitter *func_151D2F00(FollowerGroupDesc *, s32, u8, s32);
 
 s32 func_1518FDC4(Actor *obj, u8 *kind, u8 variant);
 AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
@@ -214,7 +215,7 @@ AnchorEmitter *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc
 /* Creates an emitter attached to `owner` from `tmpl`; duration -1 means none (uses 300). */
 AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
                        s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
-    EmitterDesc desc;
+    FollowerGroupDesc desc;
     u8 pad[4]; // matching: unused stack slot
     AnchorEmitterParams params;
     AnchorEmitterParams *dest;
@@ -235,11 +236,11 @@ AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 dura
     }
     hasDuration = (duration == -1) ? 0 : 1;
     desc.hasDuration = hasDuration;
-    desc.unk9 = 0;
-    desc.unkA = 0;
-    desc.unkB = 0;
-    desc.unkC = 0;
-    desc.unkD = 1;
+    desc.updateFn = 0;
+    desc.trackFn = 0;
+    desc.untrackFn = 0;
+    desc.expireFn = 0;
+    desc.kind = 1;
 
     emitter = func_151D2F00(&desc, arg7 + 0x60, arg8, arg9);
     if (emitter != NULL) {

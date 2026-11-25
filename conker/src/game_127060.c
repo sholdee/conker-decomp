@@ -418,24 +418,25 @@ typedef struct {
     /* 0x00 */ s32 from; /* endpoints, resolved with func_1514470C */
     /* 0x04 */ s32 to;
     /* 0x08 */ f32 pending; /* fractional count of spawns due */
-} EmitterData;
+} LineEmitterData;
 
+/* Timed effect of func_150FAAEC. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterData data;
-} EmitterEffect;
+    /* 0x28 */ LineEmitterData data;
+} LineEmitter;
 
 /* Starts the (single) emitter effect between zones records 35 and 34. */
 void func_150FAA40(u8 owner, s32 kind) {
-    EmitterData data;
-    EmitterEffect *effect;
+    LineEmitterData data;
+    LineEmitter *effect;
 
     if (D_80088B60 == 0) {
         data.from = (s32)&zones[35];
         data.to = (s32)&zones[34];
         data.pending = 0.0f;
 
-        effect = (EmitterEffect *)func_15149130(300, -1, 0x57, -1, 0, 0x46, sizeof(data), owner, kind);
+        effect = (LineEmitter *)func_15149130(300, -1, 0x57, -1, 0, 0x46, sizeof(data), owner, kind);
         if (effect != NULL) {
             D_80088B60 = 1;
         }
@@ -450,8 +451,8 @@ void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 duration, f32 rate, f32 sc
                    s32 kind);
 
 /* Emitter update: spawns func_150F4570 effects between the two endpoints, 0.08-0.26 per frame (times D_800BE9A4). */
-void func_150FAAEC(EmitterEffect *effect) {
-    EmitterData *data;
+void func_150FAAEC(LineEmitter *effect) {
+    LineEmitterData *data;
     Vec3f from;
     Vec3f to;
     u8 i;

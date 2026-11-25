@@ -89,7 +89,7 @@ typedef struct Particle {
 
 /* A 0x4C-byte particle emitter, spawned by func_1516D99C and run by func_1516DB90. Most of
  * its bytes are the template that func_1516D4E8 gets for each particle it spawns. */
-typedef struct Emitter {
+typedef struct SpriteEmitter {
     /* 0x00 */ u8 unk0; /* 0x11, or 0x66 for an emitter whose particles are 0x67s */
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 pad2[0xA];
@@ -144,7 +144,7 @@ typedef struct Emitter {
     /* 0x47 */ u8 bone;
     /* 0x48 */ u8 particleLink;
     /* 0x49 */ u8 pad49[3];
-} Emitter;
+} SpriteEmitter;
 
 void func_1516F864(Particle *particle);
 void func_1516F94C(Particle *particle, s32 factor);
@@ -353,9 +353,9 @@ void func_1516D99C(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
     u16 velocityYRandom; u16 flags; u8 interval; u8 chance; u8 burst; u8 speed; u8 startOffset;
     s32 isAlt; u8 bone; u8 particleLink; u8 unkC; s32 unk1;
 {
-    Emitter *emitter;
+    SpriteEmitter *emitter;
 
-    emitter = func_15167A68(isAlt != 0 ? 0x66 : 0x11, unk1, sizeof(Emitter), 0, unkC, 1);
+    emitter = func_15167A68(isAlt != 0 ? 0x66 : 0x11, unk1, sizeof(SpriteEmitter), 0, unkC, 1);
     if (emitter != NULL) {
         emitter->x = x;
         emitter->y = y;
@@ -422,8 +422,8 @@ extern f32 func_150489B0(u8);
 void func_15170034(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 
 
-void func_1516DB90(Emitter *arg0) {
-    Emitter *emitter; // matching: IDO keeps this copy of the argument in its own register
+void func_1516DB90(SpriteEmitter *arg0) {
+    SpriteEmitter *emitter; // matching: IDO keeps this copy of the argument in its own register
     s32 i;
     s16 scaleX;
     s16 scaleY;

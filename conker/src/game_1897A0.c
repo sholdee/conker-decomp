@@ -407,16 +407,13 @@ typedef struct {
     /* 0x0 */ EmitterOrigin *origin;
     /* 0x4 */ f32 accum;  /* particles owed; one is emitted per whole unit */
     /* 0x8 */ u8 preset;  /* index into D_800A64A0 */
-} EmitterState;
+} TrailBurstState;
 
+/* Timed effect of func_1515D130. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ EmitterState emitter;
-} Emitter;
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ TrailBurstState emitter;
+} TrailBurstEmitter;
 
 /* Emission preset in D_800A64A0. */
 typedef struct {
@@ -439,18 +436,18 @@ typedef struct {
     /* 0x38 */ s16 shrinkStart;
     /* 0x3A */ u8 pad3A[2];
     /* 0x3C */ f32 shrinkFactor;
-} EmitterPreset; /* size 0x40 */
+} TrailBurstPreset; /* size 0x40 */
 
 /* Burst description for func_15152B38, which spawns a randomised batch of trails with func_1515C2F0. */
 
-extern EmitterPreset D_800A64A0[];
+extern TrailBurstPreset D_800A64A0[];
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 extern void func_15152B38(TrailBurst *, u8, s32);
 
 /* Emits trail bursts at random points on a sphere around the origin, at the preset's random rate. */
-void func_1515D130(Emitter *owner) {
-    EmitterPreset *preset;
-    EmitterState *emitter;
+void func_1515D130(TrailBurstEmitter *owner) {
+    TrailBurstPreset *preset;
+    TrailBurstState *emitter;
     TrailBurst burst;
     s32 yaw;
     s32 pitch;
@@ -515,7 +512,7 @@ void func_1515D130(Emitter *owner) {
         burst.pos.x += emitter->origin->x;
         burst.pos.y += emitter->origin->y;
         burst.pos.z += emitter->origin->z;
-        func_15152B38(&burst, owner->unkC, owner->unk1);
+        func_15152B38(&burst, owner->base.header.owner, owner->base.header.kind);
         emitter->accum -= 1.0f;
     }
 }

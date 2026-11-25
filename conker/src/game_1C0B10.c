@@ -97,10 +97,10 @@ typedef struct {
     /* 0x1C */ Actor *owner;
     /* 0x20 */ u8 pad20[0x54];
     /* 0x74 */ f32 scale; /* scales (to - from) into the spawn velocity */
-} Emitter;
+} SegmentEmitter;
 
 /* Sets the emitter's velocity scale. */
-s32 func_151938E4(Emitter *emitter) {
+s32 func_151938E4(SegmentEmitter *emitter) {
     emitter->scale = 0.40200001f;
     return TRUE;
 }
@@ -112,7 +112,7 @@ void func_15157898(EffectParams *params, EffectMotion *motion, s32, f32, s32, s3
  * Spawns one particle on the segment `from` -> `to`, at fraction `t` along it, moving with velocity
  * (to - from) * emitter->scale. Skipped while the owner is in water or moving slower than 8.1.
  */
-void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Emitter *emitter) {
+void func_151938FC(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, SegmentEmitter *emitter) {
     EffectParams params;
     EffectMotion motion;
     Vec3f *ownerMotion;

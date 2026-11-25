@@ -16,13 +16,13 @@ typedef struct {
     /* 0x05 */ u8 prevUnk222; // target->unk222 seen last frame
     /* 0x08 */ f32 timer;     // one particle is emitted per 1.0 accumulated
     /* 0x0C */ s8 count;      // particles left in the current burst
-} EmitterState;
+} BoneBurstState;
 
 /* The emitter object spawned by func_150F2C8C. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterState state;
-} Emitter;
+    /* 0x28 */ BoneBurstState state;
+} BoneBurstEmitter;
 
 /* State each emitted particle keeps after its Particle (copied in by func_150F2D14, updated by func_150F3214). */
 typedef struct {
@@ -98,8 +98,8 @@ void func_150F2A60(s32 arg0) {
 
 /* Spawns an emitter object that follows `target` (see func_150F2D14). */
 void func_150F2C8C(Actor *target) {
-    EmitterState state;
-    Emitter *emitter;
+    BoneBurstState state;
+    BoneBurstEmitter *emitter;
 
     state.target = target;
     state.targetId = target->unique_id;
@@ -107,7 +107,7 @@ void func_150F2C8C(Actor *target) {
     state.timer = 0.0f;
     state.count = 0;
 
-    emitter = (Emitter *)func_15149130(300, -1, 0x5C, -1, 0, 0x44, 0x10, 0xFF, 1);
+    emitter = (BoneBurstEmitter *)func_15149130(300, -1, 0x5C, -1, 0, 0x44, 0x10, 0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->state, &state, sizeof(state));
     }
@@ -119,8 +119,8 @@ extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 
 /* Emitter update: while the target lives, emits a burst of 3 particles from its bone 15 each time its unk222
  * changes to a nonzero value. */
-void func_150F2D14(Emitter *emitter) {
-    EmitterState *state;
+void func_150F2D14(BoneBurstEmitter *emitter) {
+    BoneBurstState *state;
     Actor *target;
     ParticleDef def;
     ParticleState particle;
@@ -209,7 +209,7 @@ void func_150F2D14(Emitter *emitter) {
 }
 
 /* Hands the emitter's target pointer and id to func_15169850. */
-void func_150F3194(Emitter *emitter, s32 arg1, u8 arg2) {
+void func_150F3194(BoneBurstEmitter *emitter, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &emitter->state.target, &emitter->state.targetId, emitter);
 }
 

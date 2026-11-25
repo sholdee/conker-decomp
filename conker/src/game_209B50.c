@@ -50,19 +50,19 @@ typedef struct {
     /* 0x0C */ f32 accum;        /* particles still to emit; func_151DC97C emits one per whole unit */
     /* 0x10 */ u8 randomColors;  /* nonzero: each particle takes one of three random colour pairs */
     /* 0x11 */ u8 pad11[3];
-} EmitterData; /* 0x14 */
+} ColorEmitterData; /* 0x14 */
 
 /* Effect created by func_15149130 (only the fields used here). */
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterData data;
-} Emitter;
+    /* 0x28 */ ColorEmitterData data;
+} ColorEmitter;
 
 /* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by func_151DC97C
  * (D_8008A4E8[0x5B]), preceded by a func_151DC6A0 burst when `burst` is set. */
 void func_151DC8BC(Vec3f *pos, s32 duration, u8 burst, u8 randomColors, u8 owner, s32 kind) {
-    EmitterData data;
-    Emitter *emitter;
+    ColorEmitterData data;
+    ColorEmitter *emitter;
 
     if (burst) {
         func_151DC6A0(pos, owner, kind);
@@ -88,8 +88,8 @@ extern Particle *func_15130280(ParticleDesc *desc, u8, s32, s32 dataSize, u8, s3
 
 /* Update function of the func_151DC8BC emitter: emits particles at its position at a random rate
  * of (0.136 to 0.257) * D_800BE9A4 per frame, in a fixed colour or one of three random colour pairs. */
-void func_151DC97C(Emitter *emitter) {
-    EmitterData *data;
+void func_151DC97C(ColorEmitter *emitter) {
+    ColorEmitterData *data;
 
     data = &emitter->data;
     data->accum += (0.136f + func_150ADA68() * 0.12100001f) * D_800BE9A4;

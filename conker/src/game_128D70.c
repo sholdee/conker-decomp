@@ -20,13 +20,13 @@ typedef struct {
     /* 0x1C */ u8 otherUniqueId;
     /* 0x1D */ u8 unk1D;
     /* 0x1E */ u8 pad1E[2];
-} EmitterState; // size 0x20
+} TwoSidedEmitterState; // size 0x20
 
 /* The object spawned by func_150FC438. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterState state;
-} EmitterObj;
+    /* 0x28 */ TwoSidedEmitterState state;
+} TwoSidedEmitter;
 
 
 /* Effect descriptor passed to func_15164780. */
@@ -293,9 +293,9 @@ void func_150FC368(Particle_150FC368 *particle) {
 /* Spawns an emitter object that follows `owner` (see func_150FC614); when `other` has a camera, also
  * creates an effect for that camera. */
 void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
-    EmitterState state;
-    EmitterObj *obj;
-    EmitterState *dest;
+    TwoSidedEmitterState state;
+    TwoSidedEmitter *obj;
+    TwoSidedEmitterState *dest;
     EmitterEffect effect;
 
     state.owner = owner;
@@ -318,7 +318,7 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
         state.otherUniqueId = 0xFF;
     }
 
-    obj = (EmitterObj *)func_15149130(300, -1, 0x27, -1, 0, 0x25, 0x20, 0xFF, 1);
+    obj = (TwoSidedEmitter *)func_15149130(300, -1, 0x27, -1, 0, 0x25, 0x20, 0xFF, 1);
     if (obj != NULL) {
         dest = &obj->state;
         memcpy(dest, &state, sizeof(state));
@@ -349,8 +349,8 @@ extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 
 /* Per-frame update of an emitter: destroys it once its owner is gone or changed, otherwise fires
  * func_150FB8C0 from alternating sides whenever the spawn timer runs out. */
-void func_150FC614(EmitterObj *obj) {
-    EmitterState *state;
+void func_150FC614(TwoSidedEmitter *obj) {
+    TwoSidedEmitterState *state;
     Actor *owner;
     RumbleParams spark;
 
@@ -396,8 +396,8 @@ void func_150FC614(EmitterObj *obj) {
 
 /* Message handler: type 0 destroys the emitter when it names the owner or the other object, type 0x2D
  * swaps two objects, retargeting the emitter's owner or other object. */
-void func_150FC818(EmitterObj *obj, ActorMsg *msg, u8 msgType) {
-    EmitterState *state = &obj->state;
+void func_150FC818(TwoSidedEmitter *obj, ActorMsg *msg, u8 msgType) {
+    TwoSidedEmitterState *state = &obj->state;
     Actor *msgObj;
     Actor *msgObjA;
     Actor *owner;

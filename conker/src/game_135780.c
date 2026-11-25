@@ -37,24 +37,21 @@ typedef struct {
     /* 0x00 */ f32 spawnAccum;
     /* 0x04 */ EmitterArea *area;
     /* 0x08 */ u8 flags;
-} EmitterData;
+} AreaEmitterData;
 
+/* Timed effect of func_151082D0. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;   /* passed to func_15130280 as its 6th argument */
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;   /* passed to func_15130280 as its 5th argument */
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ EmitterData data;
-} Emitter;
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ AreaEmitterData data;
+} AreaEmitter;
 
 extern Particle *func_15130280(ParticleDesc *desc, u8 kind, s32, s32 dataSize, u8, s32);
 extern void func_1514373C(f32 angle, f32 radius, f32 *x, f32 *z);
 
 /* Emitter update: accumulates 0.03..0.04 particles per unit of D_800BE9A4 and, while enabled,
  * spawns one at a random point of the emitter's area for each whole one. */
-void func_151082D0(Emitter *emitter) {
-    EmitterData *data;
+void func_151082D0(AreaEmitter *emitter) {
+    AreaEmitterData *data;
 
     data = &emitter->data;
     data->spawnAccum += (0.030000001f + func_150ADA68() * 0.010000001f) * D_800BE9A4;
@@ -110,7 +107,7 @@ void func_151082D0(Emitter *emitter) {
                 desc.pos.y = data->area->y + data->area->height * func_150ADA68();
                 desc.flags = ((func_150ADA20() & 1) ? PARTICLE_FLIP_S : 0) | PARTICLE_DRAW_FUNC | PARTICLE_HANDLERS;
                 desc.alpha = (func_150ADA20() & 0x7F) + 0x80;
-                particle = func_15130280(&desc, 2, 0, sizeof(extra), emitter->unkC, emitter->unk1);
+                particle = func_15130280(&desc, 2, 0, sizeof(extra), emitter->base.header.owner, emitter->base.header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->data, &extra, sizeof(extra));
                 }
@@ -165,8 +162,8 @@ s32 func_15108658(Particle *particle, s32 arg1) {
 }
 
 /* Event handler of the func_151082D0 emitter: event 0x2B enables spawning, 0x2C disables it. */
-void func_151087FC(Emitter *emitter, s32 arg1, u8 event) {
-    EmitterData *data = &emitter->data;
+void func_151087FC(AreaEmitter *emitter, s32 arg1, u8 event) {
+    AreaEmitterData *data = &emitter->data;
 
     if (event == 0x2B) {
         data->flags |= EMITTER_ENABLED;

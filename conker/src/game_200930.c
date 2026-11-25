@@ -490,13 +490,13 @@ void func_151D469C(obj, posFunc, arg2, arg3, arg4)
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ ObjEmitter emitter;
-} EmitterEffect;
+} ObjEmitterEffect;
 
 extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 extern f32 func_15143E64(Vec3f *);
 
 /* Effect update: tracks the emitter's point on its object and spawns smoke puffs along the path it moved. */
-void func_151D4794(EmitterEffect *effect) {
+void func_151D4794(ObjEmitterEffect *effect) {
     ObjEmitter *emitter;
     u8 wasValid;
     Vec3f prev;
@@ -592,7 +592,7 @@ void func_151D4794(EmitterEffect *effect) {
 
 /* Effect message handler: 0x3C (see func_151D4668) destroys the effect when it belongs to the given
    object; 4 marks its tracked point as invalid. */
-void func_151D4C38(EmitterEffect *effect, ActorRef *handle, u8 msg) {
+void func_151D4C38(ObjEmitterEffect *effect, ActorRef *handle, u8 msg) {
     ObjEmitter *emitter;
 
     emitter = &effect->emitter;

@@ -80,14 +80,11 @@ typedef struct {
     /* 0x22 */ s16 growRateRange;
 } EmitterParams;
 
+/* Timed effect of the sphere emitters below (func_151A11E4, func_151A1998, func_151A1FB4). */
 typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterParams params;
-} Emitter;
+} SphereEmitter;
 
 /*
  * Extra data of the particles spawned by func_151A11E4, read by its callback func_151A175C.
@@ -117,7 +114,7 @@ extern EffectTexture D_80090B60[];
 BillboardParticle *func_15167D84(BillboardTemplate *, s32, s32, s8, u8, s32);
 
 /* Spawns particles at random points in a sphere around the emitter; each drifts back to the centre. */
-void func_151A11E4(Emitter *emitter) {
+void func_151A11E4(SphereEmitter *emitter) {
     EmitterParams *params;
     BillboardTemplate packet;
     ConvergeParticleData data;
@@ -211,7 +208,7 @@ void func_151A11E4(Emitter *emitter) {
             data.velSubX = (u8)(s32)(vx * 256.0f);
             data.velSubY = (u8)(s32)(horiz * 256.0f);
             data.velSubZ = (u8)(s32)(dist * 256.0f);
-            particle = func_15167D84(&packet, 0, sizeof(data), -1, emitter->unkC, emitter->unk1);
+            particle = func_15167D84(&packet, 0, sizeof(data), -1, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(particle + 1, &data, sizeof(data));
             }
@@ -338,7 +335,7 @@ typedef struct {
 } PuffParticleData;
 
 /* Spawns particles at random points in a sphere around the emitter; they stay where they are. */
-void func_151A1998(Emitter *emitter) {
+void func_151A1998(SphereEmitter *emitter) {
     EmitterParams *params;
     BillboardTemplate packet;
     PuffParticleData data;
@@ -413,7 +410,7 @@ void func_151A1998(Emitter *emitter) {
             packet.subX = (s32)(x * 256.0f) & 0xFF;
             packet.subY = (s32)(y * 256.0f) & 0xFF;
             packet.subZ = (s32)(z * 256.0f) & 0xFF;
-            particle = func_15167D84(&packet, 0, sizeof(data), -1, emitter->unkC, emitter->unk1);
+            particle = func_15167D84(&packet, 0, sizeof(data), -1, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(particle + 1, &data, sizeof(data));
             }
@@ -502,7 +499,7 @@ typedef struct {
 } SmokeParticleData;
 
 /* Spawns particles at random points in a sphere around the emitter; they grow, tint and accelerate. */
-void func_151A1FB4(Emitter *emitter) {
+void func_151A1FB4(SphereEmitter *emitter) {
     EmitterParams *params;
     BillboardTemplate packet;
     SmokeParticleData data;
@@ -582,7 +579,7 @@ void func_151A1FB4(Emitter *emitter) {
             packet.subX = (s32)(x * 256.0f) & 0xFF;
             packet.subY = (s32)(y * 256.0f) & 0xFF;
             packet.subZ = (s32)(z * 256.0f) & 0xFF;
-            particle = func_15167D84(&packet, 0, sizeof(data), -1, emitter->unkC, emitter->unk1);
+            particle = func_15167D84(&packet, 0, sizeof(data), -1, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(particle + 1, &data, sizeof(data));
             }
