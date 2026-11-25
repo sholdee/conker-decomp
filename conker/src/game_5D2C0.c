@@ -4,81 +4,16 @@
 #undef func_15083568
 #include "variables.h"
 
-extern f32 D_80097B68;
-extern f32 D_800970DC;
 extern u8 D_800BEA0C;
 extern s32 D_800902BC[];
 void func_1000FD38(void *, void *, s32);
 s32 func_15033BDC();
-
-
-
-extern void func_150A7A48(f32 arg0[4][4], f32 arg1[4][4], f32 arg2[4][4]);
+extern void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 out[4][4]);
 extern void func_1503E5F8();
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-extern void func_10004074(void *arg0);
-void func_1518CA04(s32 arg0);
+extern void func_10004074(void *ptr);
+void func_1518CA04(s32 model);
 s32 func_1503F62C(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4, void *arg5, void *arg6);
-
-typedef struct Game5D2C0EffectState {
-    u8 pad_0[0x1];
-    u8 field_0x01;
-    u8 field_0x02;
-    u8 pad_0x03[0x1F];
-    s16 field_0x22;
-    u8 pad_0x24[0x14];
-    s32 field_0x38;
-    s32 field_0x3C;
-} Game5D2C0EffectState;
-
-typedef struct Game5D2C0EventState {
-    u8 pad_0[0x5];
-    u8 field_0x05;
-} Game5D2C0EventState;
-
-typedef struct Game5D2C0FlagState {
-    u8 pad_0[0x3];
-    u8 field_0x03;
-} Game5D2C0FlagState;
-
-typedef struct Game5D2C0ActorState {
-    u8 pad_0[0x11A];
-    u8 field_0x11A;
-    u8 pad_0x11B[0x81];
-    u16 field_0x19C;
-} Game5D2C0ActorState;
-
-typedef struct Game5D2C0PositionState {
-    s32 field_0x00;
-    u8 pad_0x04[0x10];
-    f32 field_0x14;
-    f32 field_0x18;
-    f32 field_0x1C;
-    u8 pad_0x20[0x64];
-    u16 field_0x84;
-    u8 pad_0x86[0x27];
-    u8 field_0xAD;
-    u8 pad_0xAE[0x6A];
-    f32 field_0x118;
-    u8 pad_0x11C[0x64];
-    f32 field_0x180;
-    u8 pad_0x184[0x198];
-    Game5D2C0ActorState *field_0x31C;
-} Game5D2C0PositionState;
-
-typedef struct Game5D2C0AnimationState {
-    u8 pad_0[0x4];
-    u16 field_0x04;
-    u8 pad_0x06[0x2];
-    f32 field_0x08;
-    u8 pad_0x0C[0xC];
-    f32 field_0x18;
-} Game5D2C0AnimationState;
-
-typedef struct Game5D2C0AnimationOwner {
-    u8 pad_0[0x48];
-    struct197 *field_0x48;
-} Game5D2C0AnimationOwner;
 
 /* File header of an attachment model, as returned by func_1502B6BC. */
 typedef struct ModelHeader {
@@ -212,26 +147,6 @@ Attachment *func_15083568(struct127 *obj, s32 setId, f32 arg2, s32 arg3);
 void func_1503F5B8(AnimInstance *anim, s32 arg1, s32 animId, f32 arg3, f32 arg4, s32 arg5);
 void func_1503F7B8(AnimInstance *anim);
 
-typedef struct Func15030158Arg0 {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[6];
-    u8 unk8;
-    u8 unk9;
-    u8 padA[0x1A];
-    s32 unk24;
-    void *unk28;
-    void *unk2C;
-    s32 unk30;
-    void *unk34;
-    u8 pad38[0xC];
-    void *unk44;
-    void *unk48;
-    void *unk4C;
-    void *unk50;
-    struct Func15030158Arg0 *unk54;
-    struct Func15030158Arg0 *unk58;
-} Func15030158Arg0;
 
 /* Loads the attachment's model, making private per-frame vertex copies when the owner needs them. */
 s32 func_1502FFD8(Attachment *att, struct127 *owner) {
@@ -1237,385 +1152,343 @@ s32 func_15031E7C(Attachment *att, struct127 *owner) {
     return 0;
 }
 
-typedef struct F15031FC8Anim {
-    u8 pad0[0x4];
-    u16 unk4;
-    u8 pad6[0x2];
-    f32 unk8;
-    u8 padC[0xC];
-    f32 unk18;
-    u8 pad1C[0x1D];
-    s8 unk39;
-    s16 unk3A;
-    s16 unk3C;
-    u8 pad3E[0x215 - 0x3E];
-    u8 unk215;
-} F15031FC8Anim;
-
-typedef struct F15031FC8Arg0 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 pad3[0x15];
-    s16 unk18;
-    u8 pad1A[0x4];
-    s16 unk1E;
-    s16 unk20;
-    u8 pad22[0x26];
-    F15031FC8Anim *unk48;
-} F15031FC8Arg0;
-
-typedef struct F15031FC8Arg1 {
-    u8 pad0[0x4];
-    u8 unk4;
-    u8 unk5;
-    u8 pad6[0x1E];
-    f32 unk24;
-    u8 pad28[0x14];
-    f32 unk3C;
-    u8 pad40[0x44];
-    u16 unk84;
-    u8 pad86[0x2D0 - 0x86];
-    F15031FC8Anim *unk2D0;
-    u8 pad2D4[0x14];
-    s32 unk2E8;
-} F15031FC8Arg1;
-
 extern s32 D_800902D0;
 extern s32 D_800902D4;
-extern void func_1505E060(F15031FC8Anim *arg0);
+extern void func_1505E060(AnimInstance *anim);
 
-s32 func_15031FC8(F15031FC8Arg0 *arg0, F15031FC8Arg1 *arg1) {
-    F15031FC8Anim *sub;
-    s32 anim;
-    u8 pad1;
-    s32 id;
-    F15031FC8Anim *a;
-    s32 cur;
-    f32 lim;
-    s32 pad;
-    s32 flag;
+/* Hook for held/worn props: picks the prop's animation (and for some models its bone and parent)
+ * from the owner's id and state, then keeps its frame in step with the owner's animation. */
+s32 func_15031FC8(Attachment *att, struct127 *owner) {
+    AnimInstance *ownerAnim;
+    s32 animId;
+    u8 pad1; // matching: stack padding
+    s32 state;
+    AnimInstance *anim;
+    s32 curAnimId;
+    f32 lastFrame;
+    s32 pad; // matching: stack padding
+    s32 syncAll;
 
-    sub = arg1->unk2D0;
-    anim = -1;
-    a = arg0->unk48;
-    if (a == NULL) {
+    ownerAnim = (AnimInstance *)owner->unk2D0;
+    animId = -1;
+    anim = att->anim;
+    if (anim == NULL) {
         return 0;
     }
-    cur = a->unk4 & ~0x8000;
-    id = arg1->unk84;
-    flag = 1;
-    switch (arg1->unk4) {
+    curAnimId = anim->anim & ~0x8000;
+    state = owner->unk84.uh;
+    syncAll = TRUE;
+    switch (owner->id) {
     case 0x58:
-        if (arg0->unk1 == 0x9B) {
-            arg0->unk2 = 0x12;
+        if (att->model == 0x9B) {
+            att->bone = 0x12;
         }
-        switch (id) {
+        switch (state) {
         case 39:
-            anim = 3;
+            animId = 3;
             break;
         case 40:
-            anim = 4;
+            animId = 4;
             break;
         case 2:
-            anim = 1;
+            animId = 1;
             break;
         case 3:
-            anim = 0;
+            animId = 0;
             break;
         default:
-            anim = 0;
-            if (arg0->unk1 == 0x9B) {
-                anim = 3;
+            animId = 0;
+            if (att->model == 0x9B) {
+                animId = 3;
             }
             break;
         }
         break;
     case 0x5B:
-        anim = 0;
+        animId = 0;
         break;
     case 0x5A:
     case 0x74:
     case 0x7A:
-        if (arg1->unk2E8 != 0) {
-            arg0->unk18 = D_800902D4;
+        if (owner->unk2E8 != 0) {
+            att->seg6Id = D_800902D4;
         } else {
-            arg0->unk18 = D_800902D0;
+            att->seg6Id = D_800902D0;
         }
-        switch (id) {
+        switch (state) {
         case 6:
-            anim = 7;
+            animId = 7;
             break;
         case 38:
         case 39:
-            anim = 0xF;
+            animId = 0xF;
             break;
         case 1:
         case 42:
-            anim = 3;
+            animId = 3;
             break;
         case 0:
-            anim = 5;
+            animId = 5;
             break;
         case 3:
-            anim = 6;
+            animId = 6;
             break;
         case 7:
-            anim = 2;
+            animId = 2;
             break;
         case 10:
-            anim = 4;
+            animId = 4;
             break;
         case 15:
         case 30:
-            anim = 8;
+            animId = 8;
             break;
         case 19:
-            anim = 0xD;
+            animId = 0xD;
             break;
         case 4:
-            anim = 9;
+            animId = 9;
             break;
         case 5:
-            anim = 0xA;
+            animId = 0xA;
             break;
         case 16:
-            anim = 0xB;
+            animId = 0xB;
             break;
         case 8:
-            anim = 0x10;
+            animId = 0x10;
             break;
         case 20:
-            anim = 0xE;
+            animId = 0xE;
             break;
         case 21:
-            anim = 0xE;
+            animId = 0xE;
             break;
         case 0x50:
-            anim = 0x13;
+            animId = 0x13;
             break;
         case 0x51:
-            anim = 0x14;
+            animId = 0x14;
             break;
         default:
-            anim = 6;
+            animId = 6;
             break;
         }
         break;
     default:
-        switch (arg0->unk1) {
+        switch (att->model) {
         case 0x9E:
-            arg0->unk2 = 9;
-            arg0->unk1E = 0x41;
-            arg0->unk20 = 1;
-            switch (id) {
+            att->bone = 9;
+            att->parentSet = 0x41;
+            att->parentMtx = 1;
+            switch (state) {
             case 0x1D6:
-                anim = 1;
+                animId = 1;
                 break;
             case 0x1D7:
-                anim = 2;
-                arg0->unk2 = 0x13;
+                animId = 2;
+                att->bone = 0x13;
                 break;
             case 0x257:
-                anim = 4;
-                arg0->unk2 = 0x13;
+                animId = 4;
+                att->bone = 0x13;
                 break;
             case 0x275:
-                anim = 5;
-                arg0->unk2 = 0x13;
+                animId = 5;
+                att->bone = 0x13;
                 break;
             case 0x1D8:
-                anim = 3;
+                animId = 3;
                 break;
             }
-            flag = 0;
-            if (arg0->unk2 == 0x13) {
-                arg0->unk1E = 0;
+            syncAll = FALSE;
+            if (att->bone == 0x13) {
+                att->parentSet = 0;
             }
             break;
         case 0x9B:
-            anim = 0;
-            if (arg1->unk5 == 5) {
-                arg0->unk2 = 0;
-            } else if (arg1->unk4 == 0x8B) {
-                arg0->unk2 = 6;
-                switch (id) {
+            animId = 0;
+            if (owner->unk5 == 5) {
+                att->bone = 0;
+            } else if (owner->id == 0x8B) {
+                att->bone = 6;
+                switch (state) {
                 case 12:
-                    anim = 6;
+                    animId = 6;
                     break;
                 case 19:
-                    anim = 7;
+                    animId = 7;
                     break;
                 }
             } else {
-                arg0->unk2 = 9;
-                switch (id) {
+                att->bone = 9;
+                switch (state) {
                 case 0x22E:
-                    anim = 5;
+                    animId = 5;
                     break;
                 case 0x1B7:
-                    anim = 1;
+                    animId = 1;
                     break;
                 case 0x1B8:
-                    anim = 2;
+                    animId = 2;
                     break;
                 }
             }
             break;
         case 0x9F:
-            anim = 0;
-            if (arg1->unk5 == 5) {
-                arg0->unk2 = 0;
-            } else if (arg1->unk4 == 0xB5) {
-                arg0->unk2 = 0x12;
-                switch (id) {
+            animId = 0;
+            if (owner->unk5 == 5) {
+                att->bone = 0;
+            } else if (owner->id == 0xB5) {
+                att->bone = 0x12;
+                switch (state) {
                 case 0x34:
-                    anim = 1;
+                    animId = 1;
                     break;
                 case 0x35:
-                    anim = 2;
+                    animId = 2;
                     break;
                 case 0x36:
-                    anim = 3;
+                    animId = 3;
                     break;
                 case 0x37:
-                    anim = 4;
+                    animId = 4;
                     break;
                 }
             } else {
-                arg0->unk2 = 9;
+                att->bone = 9;
             }
             break;
         case 0x9C:
-            anim = 8;
+            animId = 8;
             break;
         case 0x9D:
-            anim = 0;
-            if (arg1->unk5 == 5) {
-                arg0->unk2 = 0;
-            } else if (arg1->unk4 == 0x8B) {
-                arg0->unk2 = 6;
-                switch (id) {
+            animId = 0;
+            if (owner->unk5 == 5) {
+                att->bone = 0;
+            } else if (owner->id == 0x8B) {
+                att->bone = 6;
+                switch (state) {
                 case 19:
                 case 32:
-                    anim = 4;
+                    animId = 4;
                     break;
                 case 34:
-                    anim = 3;
+                    animId = 3;
                     break;
                 }
             } else {
-                arg0->unk2 = 9;
-                switch (id) {
+                att->bone = 9;
+                switch (state) {
                 case 0x21C:
-                    anim = 1;
+                    animId = 1;
                     break;
                 case 0x241:
-                    anim = 2;
+                    animId = 2;
                     break;
                 }
             }
             break;
         case 0x9A:
-            switch (arg1->unk4) {
+            switch (owner->id) {
             case 0x87:
-                arg0->unk2 = 0x12;
-                switch (id) {
+                att->bone = 0x12;
+                switch (state) {
                 case 1:
-                    anim = 1;
+                    animId = 1;
                     break;
                 case 5:
-                    anim = 2;
+                    animId = 2;
                     break;
                 default:
-                    anim = 0;
+                    animId = 0;
                     break;
                 }
                 break;
             case 0x99:
-                arg0->unk2 = 0x15;
-                switch (id) {
+                att->bone = 0x15;
+                switch (state) {
                 case 20:
-                    anim = 3;
+                    animId = 3;
                     break;
                 case 21:
-                    anim = 4;
+                    animId = 4;
                     break;
                 case 22:
-                    anim = 5;
+                    animId = 5;
                     break;
                 case 23:
-                    anim = 6;
+                    animId = 6;
                     break;
                 case 24:
-                    anim = 7;
+                    animId = 7;
                     break;
                 case 26:
-                    anim = 8;
+                    animId = 8;
                     break;
                 case 27:
-                    anim = 9;
+                    animId = 9;
                     break;
                 case 28:
-                    anim = 0xA;
+                    animId = 0xA;
                     break;
                 case 29:
-                    anim = 0xB;
+                    animId = 0xB;
                     break;
                 case 30:
-                    anim = 0xC;
+                    animId = 0xC;
                     break;
                 case 31:
-                    anim = 0xD;
+                    animId = 0xD;
                     break;
                 case 32:
-                    anim = 0xE;
+                    animId = 0xE;
                     break;
                 case 33:
-                    anim = 0xF;
+                    animId = 0xF;
                     break;
                 case 34:
-                    anim = 0x10;
+                    animId = 0x10;
                     break;
                 case 35:
-                    anim = 0x11;
+                    animId = 0x11;
                     break;
                 default:
-                    anim = 0;
+                    animId = 0;
                     break;
                 }
                 break;
             }
             break;
         case 0x8D:
-            switch (id) {
+            switch (state) {
             case 0x323:
-                anim = 1;
+                animId = 1;
                 break;
             case 0x324:
-                anim = 2;
+                animId = 2;
                 break;
             default:
-                anim = 0;
+                animId = 0;
                 break;
             }
             break;
         case 0x8E:
-            switch (id) {
+            switch (state) {
             case 0xB4:
-                anim = 0;
+                animId = 0;
                 break;
             case 0xB6:
-                anim = 1;
+                animId = 1;
                 break;
             case 0xB5:
-                anim = 2;
+                animId = 2;
                 break;
             case 0xDD:
-                anim = 3;
+                animId = 3;
                 break;
             case 0xDE:
-                anim = 3;
+                animId = 3;
                 break;
             default:
                 return 1;
@@ -1623,853 +1496,853 @@ s32 func_15031FC8(F15031FC8Arg0 *arg0, F15031FC8Arg1 *arg1) {
             break;
         case 0x8F:
         case 0x90:
-            switch (id) {
+            switch (state) {
             case 0xB9:
-                anim = 1;
+                animId = 1;
                 break;
             case 0xAE:
-                anim = 2;
+                animId = 2;
                 break;
             case 0xDA:
-                anim = 3;
+                animId = 3;
                 break;
             case 0x104:
-                anim = 4;
+                animId = 4;
                 break;
             case 0x107:
-                anim = 5;
+                animId = 5;
                 break;
             case 0x10B:
-                anim = 6;
+                animId = 6;
                 break;
             case 0x11E:
-                anim = 7;
+                animId = 7;
                 break;
             case 0x11F:
-                anim = 8;
+                animId = 8;
                 break;
             case 0x134:
-                anim = 9;
+                animId = 9;
                 break;
             case 0x135:
-                anim = 0xA;
+                animId = 0xA;
                 break;
             case 0x136:
-                anim = 0xB;
+                animId = 0xB;
                 break;
             case 0x13B:
-                anim = 0xD;
+                animId = 0xD;
                 break;
             case 0x13C:
-                anim = 0xE;
+                animId = 0xE;
                 break;
             case 0x145:
-                anim = 0xF;
+                animId = 0xF;
                 break;
             case 0x146:
-                anim = 0x10;
+                animId = 0x10;
                 break;
             case 0x141:
-                anim = 0x11;
+                animId = 0x11;
                 break;
             case 0x147:
-                anim = 0x12;
+                animId = 0x12;
                 break;
             case 0x14B:
-                anim = 0x16;
+                animId = 0x16;
                 break;
             case 0x14A:
-                anim = 0x15;
+                animId = 0x15;
                 break;
             case 0x149:
-                anim = 0x14;
+                animId = 0x14;
                 break;
             case 0x148:
-                anim = 0x13;
+                animId = 0x13;
                 break;
             case 0x151:
-                anim = 0x18;
+                animId = 0x18;
                 break;
             case 0x17F:
-                anim = 0x1A;
+                animId = 0x1A;
                 break;
             case 0x180:
-                anim = 0x1B;
+                animId = 0x1B;
                 break;
             case 0x181:
-                anim = 0x1C;
+                animId = 0x1C;
                 break;
             case 0x182:
-                anim = 0x1D;
+                animId = 0x1D;
                 break;
             case 0x186:
-                anim = 0x1E;
+                animId = 0x1E;
                 break;
             case 0x187:
-                anim = 0x1F;
+                animId = 0x1F;
                 break;
             case 0x189:
-                anim = 0x20;
+                animId = 0x20;
                 break;
             case 0x18C:
-                anim = 0x21;
+                animId = 0x21;
                 break;
             case 0x18D:
-                anim = 0x22;
+                animId = 0x22;
                 break;
             case 0x18E:
-                anim = 0x23;
+                animId = 0x23;
                 break;
             case 0x1A0:
-                anim = 0x24;
+                animId = 0x24;
                 break;
             case 0x1A3:
-                anim = 0x25;
+                animId = 0x25;
                 break;
             case 0x1B3:
-                anim = 0x26;
+                animId = 0x26;
                 break;
             case 0x1B4:
-                anim = 0x27;
+                animId = 0x27;
                 break;
             case 0x1B5:
-                anim = 0x28;
+                animId = 0x28;
                 break;
             case 0x1B6:
-                anim = 0x29;
+                animId = 0x29;
                 break;
             case 0x1B7:
-                anim = 0x2A;
+                animId = 0x2A;
                 break;
             case 0x1B8:
-                anim = 0x2B;
+                animId = 0x2B;
                 break;
             case 0x1BD:
-                anim = 0x2C;
+                animId = 0x2C;
                 break;
             case 0x1BE:
-                anim = 0x2D;
+                animId = 0x2D;
                 break;
             case 0x1BF:
-                anim = 0x2E;
+                animId = 0x2E;
                 break;
             case 0x1C0:
-                anim = 0x2F;
+                animId = 0x2F;
                 break;
             case 0x1C1:
-                anim = 0x30;
+                animId = 0x30;
                 break;
             case 0x1C2:
-                anim = 0x31;
+                animId = 0x31;
                 break;
             case 0x1C3:
-                anim = 0x32;
+                animId = 0x32;
                 break;
             case 0x1C4:
-                anim = 0x33;
+                animId = 0x33;
                 break;
             case 0x1C5:
-                anim = 0x34;
+                animId = 0x34;
                 break;
             case 0x1C6:
-                anim = 0x35;
+                animId = 0x35;
                 break;
             case 0x1C7:
-                anim = 0x36;
+                animId = 0x36;
                 break;
             case 0x1C8:
-                anim = 0x37;
+                animId = 0x37;
                 break;
             case 0x1C9:
-                anim = 0x38;
+                animId = 0x38;
                 break;
             case 0x1CA:
-                anim = 0x39;
+                animId = 0x39;
                 break;
             case 0x1D1:
-                anim = 0x3A;
+                animId = 0x3A;
                 break;
             case 0x1D2:
-                anim = 0x3B;
+                animId = 0x3B;
                 break;
             case 0x1D3:
-                anim = 0x3C;
+                animId = 0x3C;
                 break;
             case 0x1D5:
-                anim = 0x3D;
+                animId = 0x3D;
                 break;
             case 0x1D9:
-                anim = 0x3E;
+                animId = 0x3E;
                 break;
             case 0x1DA:
-                anim = 0x3F;
+                animId = 0x3F;
                 break;
             case 0x1DB:
-                anim = 0x40;
+                animId = 0x40;
                 break;
             case 0x1E3:
-                anim = 0x41;
+                animId = 0x41;
                 break;
             case 0x1E4:
-                anim = 0x42;
+                animId = 0x42;
                 break;
             case 0x1E5:
-                anim = 0x43;
+                animId = 0x43;
                 break;
             case 0x1E6:
-                anim = 0x44;
+                animId = 0x44;
                 break;
             case 0x1E7:
-                anim = 0x45;
+                animId = 0x45;
                 break;
             case 0x1E8:
-                anim = 0x47;
+                animId = 0x47;
                 break;
             case 0x1E9:
-                anim = 0x44;
+                animId = 0x44;
                 break;
             case 0x1F0:
-                anim = 0x48;
+                animId = 0x48;
                 break;
             case 0x1F1:
-                anim = 0x49;
+                animId = 0x49;
                 break;
             case 0x1F2:
-                anim = 0x4A;
+                animId = 0x4A;
                 break;
             case 0x201:
-                anim = 0x4B;
+                animId = 0x4B;
                 break;
             case 0x202:
-                anim = 0x4D;
+                animId = 0x4D;
                 break;
             case 0x203:
-                anim = 0x4E;
+                animId = 0x4E;
                 break;
             case 0x204:
-                anim = 0x4F;
+                animId = 0x4F;
                 break;
             case 0x200:
-                anim = 0x50;
+                animId = 0x50;
                 break;
             case 0x205:
-                anim = 0x51;
+                animId = 0x51;
                 break;
             case 0x208:
-                anim = 0x52;
+                animId = 0x52;
                 break;
             case 0x209:
-                anim = 0x53;
+                animId = 0x53;
                 break;
             case 0x20A:
-                anim = 0x54;
+                animId = 0x54;
                 break;
             case 0x20B:
-                anim = 0x55;
+                animId = 0x55;
                 break;
             case 0x20C:
-                anim = 0x56;
+                animId = 0x56;
                 break;
             case 0x211:
-                anim = 0x57;
+                animId = 0x57;
                 break;
             case 0x212:
-                anim = 0x58;
+                animId = 0x58;
                 break;
             case 0x216:
-                anim = 0x59;
+                animId = 0x59;
                 break;
             case 0x217:
-                anim = 0x5A;
+                animId = 0x5A;
                 break;
             case 0x218:
-                anim = 0x5B;
+                animId = 0x5B;
                 break;
             case 0x219:
-                anim = 0x5C;
+                animId = 0x5C;
                 break;
             case 0x21A:
-                anim = 0x5D;
+                animId = 0x5D;
                 break;
             case 0x21B:
-                anim = 0x5E;
+                animId = 0x5E;
                 break;
             case 0xA8:
-                anim = 0x5F;
+                animId = 0x5F;
                 break;
             case 0x1FD:
-                anim = 0x4C;
+                animId = 0x4C;
                 break;
             case 0x228:
-                anim = 0x62;
+                animId = 0x62;
                 break;
             case 0x22E:
-                anim = 0x63;
+                animId = 0x63;
                 break;
             case 0x22F:
-                anim = 0x64;
+                animId = 0x64;
                 break;
             case 0x232:
-                anim = 0x61;
+                animId = 0x61;
                 break;
             case 0x220:
-                anim = 0x60;
+                animId = 0x60;
                 break;
             case 0x23A:
-                anim = 0x65;
+                animId = 0x65;
                 break;
             case 0x23B:
-                anim = 0x66;
+                animId = 0x66;
                 break;
             case 0x24D:
-                anim = 0x6E;
+                animId = 0x6E;
                 break;
             case 0x21C:
-                anim = 0x6F;
+                animId = 0x6F;
                 break;
             case 0x241:
-                anim = 0x70;
+                animId = 0x70;
                 break;
             case 0x23C:
-                anim = 0x67;
+                animId = 0x67;
                 break;
             case 0x24B:
-                anim = 0x6D;
+                animId = 0x6D;
                 break;
             case 0x24A:
-                anim = 0x6C;
+                animId = 0x6C;
                 break;
             case 0x249:
-                anim = 0x6B;
+                animId = 0x6B;
                 break;
             case 0x248:
-                anim = 0x6A;
+                animId = 0x6A;
                 break;
             case 0x246:
-                anim = 0x69;
+                animId = 0x69;
                 break;
             case 0x245:
-                anim = 0x68;
+                animId = 0x68;
                 break;
             case 0x25C:
-                anim = 0x71;
+                animId = 0x71;
                 break;
             case 0x25D:
-                anim = 0x72;
+                animId = 0x72;
                 break;
             case 0x25E:
-                anim = 0x73;
+                animId = 0x73;
                 break;
             case 0x260:
-                anim = 0x74;
+                animId = 0x74;
                 break;
             case 0x266:
-                anim = 0x77;
+                animId = 0x77;
                 break;
             case 0x267:
-                anim = 0x78;
+                animId = 0x78;
                 break;
             case 0x268:
-                anim = 0x79;
+                animId = 0x79;
                 break;
             case 0x26A:
-                anim = 0x7A;
+                animId = 0x7A;
                 break;
             case 0x26B:
-                anim = 0x7B;
+                animId = 0x7B;
                 break;
             case 0x26C:
-                anim = 0x7C;
+                animId = 0x7C;
                 break;
             case 0x26D:
-                anim = 0x7D;
+                animId = 0x7D;
                 break;
             case 0x275:
-                anim = 0x7E;
+                animId = 0x7E;
                 break;
             case 0x1D6:
-                anim = 0x7F;
+                animId = 0x7F;
                 break;
             case 0x1D7:
-                anim = 0x86;
+                animId = 0x86;
                 break;
             case 0x1D8:
-                anim = 0x85;
+                animId = 0x85;
                 break;
             case 0x276:
-                anim = 0x80;
+                animId = 0x80;
                 break;
             case 0x277:
-                anim = 0x81;
+                animId = 0x81;
                 break;
             case 0x278:
-                anim = 0x82;
+                animId = 0x82;
                 break;
             case 0x265:
-                anim = 0x76;
+                animId = 0x76;
                 break;
             case 0x27F:
-                anim = 0x83;
+                animId = 0x83;
                 break;
             case 0x280:
-                anim = 0x84;
+                animId = 0x84;
                 break;
             case 0x281:
-                anim = 0x87;
+                animId = 0x87;
                 break;
             case 0x282:
-                anim = 0x88;
+                animId = 0x88;
                 break;
             case 0x290:
-                anim = 0x89;
+                animId = 0x89;
                 break;
             case 0x291:
-                anim = 0x8A;
+                animId = 0x8A;
                 break;
             case 0x292:
-                anim = 0x8B;
+                animId = 0x8B;
                 break;
             case 0x293:
-                anim = 0x8C;
+                animId = 0x8C;
                 break;
             case 0x294:
-                anim = 0x8D;
+                animId = 0x8D;
                 break;
             case 0x295:
-                anim = 0x8E;
+                animId = 0x8E;
                 break;
             case 0x298:
-                anim = 0x8F;
+                animId = 0x8F;
                 break;
             case 0x29A:
-                anim = 0x90;
+                animId = 0x90;
                 break;
             case 0x29B:
-                anim = 0x91;
+                animId = 0x91;
                 break;
             case 0x29C:
-                anim = 0x92;
+                animId = 0x92;
                 break;
             case 0x29D:
-                anim = 0x93;
+                animId = 0x93;
                 break;
             case 0x2A9:
-                anim = 0x94;
+                animId = 0x94;
                 break;
             case 0x2AA:
-                anim = 0x95;
+                animId = 0x95;
                 break;
             case 0x2AC:
-                anim = 0x96;
+                animId = 0x96;
                 break;
             case 0x2AD:
-                anim = 0x97;
+                animId = 0x97;
                 break;
             case 0x2AE:
-                anim = 0x98;
+                animId = 0x98;
                 break;
             case 0x2AF:
-                anim = 0x99;
+                animId = 0x99;
                 break;
             case 0x2B0:
-                anim = 0x9A;
+                animId = 0x9A;
                 break;
             case 0x2B2:
-                anim = 0x9B;
+                animId = 0x9B;
                 break;
             case 0x2B3:
-                anim = 0x9C;
+                animId = 0x9C;
                 break;
             case 0x2B4:
-                anim = 0x9D;
+                animId = 0x9D;
                 break;
             case 0x2B5:
-                anim = 0x9E;
+                animId = 0x9E;
                 break;
             case 0x2B6:
-                anim = 0x9F;
+                animId = 0x9F;
                 break;
             case 0x2B8:
-                anim = 0xA0;
+                animId = 0xA0;
                 break;
             case 0x2B9:
-                anim = 0xA1;
+                animId = 0xA1;
                 break;
             case 0x2BA:
-                anim = 0xA2;
+                animId = 0xA2;
                 break;
             case 0x2BB:
-                anim = 0xA3;
+                animId = 0xA3;
                 break;
             case 0x2BC:
-                anim = 0xA4;
+                animId = 0xA4;
                 break;
             case 0x2BD:
-                anim = 0xA5;
+                animId = 0xA5;
                 break;
             case 0x2BE:
-                anim = 0xA6;
+                animId = 0xA6;
                 break;
             case 0x2BF:
-                anim = 0xA7;
+                animId = 0xA7;
                 break;
             case 0x2C0:
-                anim = 0xA8;
+                animId = 0xA8;
                 break;
             case 0x2C1:
-                anim = 0xA9;
+                animId = 0xA9;
                 break;
             case 0x2C4:
-                anim = 0xAA;
+                animId = 0xAA;
                 break;
             case 0x2CF:
-                anim = 0xAB;
+                animId = 0xAB;
                 break;
             case 0x2DA:
-                anim = 0xAC;
+                animId = 0xAC;
                 break;
             case 0x2DB:
-                anim = 0xAD;
+                animId = 0xAD;
                 break;
             case 0x2DD:
-                anim = 0xAE;
+                animId = 0xAE;
                 break;
             case 0x2DC:
-                anim = 0xAF;
+                animId = 0xAF;
                 break;
             case 0x2D9:
-                anim = 0xB0;
+                animId = 0xB0;
                 break;
             case 0x2DF:
-                anim = 0xB1;
+                animId = 0xB1;
                 break;
             case 0x2E0:
-                anim = 0xB2;
+                animId = 0xB2;
                 break;
             case 0x2E1:
-                anim = 0xB3;
+                animId = 0xB3;
                 break;
             case 0x2E2:
-                anim = 0xB4;
+                animId = 0xB4;
                 break;
             case 0x2E3:
-                anim = 0xB5;
+                animId = 0xB5;
                 break;
             case 0x2EC:
-                anim = 0xB6;
+                animId = 0xB6;
                 break;
             case 0x2ED:
-                anim = 0xB7;
+                animId = 0xB7;
                 break;
             case 0x2EE:
-                anim = 0xB8;
+                animId = 0xB8;
                 break;
             case 0x2EF:
-                anim = 0xB9;
+                animId = 0xB9;
                 break;
             case 0x2F0:
-                anim = 0xBA;
+                animId = 0xBA;
                 break;
             case 0x2F1:
-                anim = 0xBB;
+                animId = 0xBB;
                 break;
             case 0x2F8:
-                anim = 0xBC;
+                animId = 0xBC;
                 break;
             case 0x2F9:
-                anim = 0xBD;
+                animId = 0xBD;
                 break;
             case 0x301:
-                anim = 0xBE;
+                animId = 0xBE;
                 break;
             case 0x304:
-                anim = 0xBF;
+                animId = 0xBF;
                 break;
             case 0x305:
-                anim = 0xC0;
+                animId = 0xC0;
                 break;
             case 0x306:
-                anim = 0xC1;
+                animId = 0xC1;
                 break;
             case 0x307:
-                anim = 0xC2;
+                animId = 0xC2;
                 break;
             case 0x308:
-                anim = 0xC3;
+                animId = 0xC3;
                 break;
             case 0x309:
-                anim = 0xC4;
+                animId = 0xC4;
                 break;
             case 0x30A:
-                anim = 0xC5;
+                animId = 0xC5;
                 break;
             case 0x30B:
-                anim = 0xC6;
+                animId = 0xC6;
                 break;
             case 0x30C:
-                anim = 0xC7;
+                animId = 0xC7;
                 break;
             case 0x30D:
-                anim = 0xC8;
+                animId = 0xC8;
                 break;
             case 0x30E:
-                anim = 0xC9;
+                animId = 0xC9;
                 break;
             case 0x30F:
-                anim = 0xCA;
+                animId = 0xCA;
                 break;
             case 0x314:
-                anim = 0xCB;
+                animId = 0xCB;
                 break;
             case 0x315:
-                anim = 0xCC;
+                animId = 0xCC;
                 break;
             case 0x316:
-                anim = 0xCD;
+                animId = 0xCD;
                 break;
             case 0x317:
-                anim = 0xCE;
+                animId = 0xCE;
                 break;
             case 0x318:
-                anim = 0xCF;
+                animId = 0xCF;
                 break;
             case 0x319:
-                anim = 0xD0;
+                animId = 0xD0;
                 break;
             case 0x31C:
-                anim = 0xD1;
+                animId = 0xD1;
                 break;
             case 0x31D:
-                anim = 0xD2;
+                animId = 0xD2;
                 break;
             case 0x31E:
-                anim = 0xD3;
+                animId = 0xD3;
                 break;
             case 0x320:
-                anim = 0xD4;
+                animId = 0xD4;
                 break;
             case 0x31F:
-                anim = 0xD5;
+                animId = 0xD5;
                 break;
             case 0x321:
-                anim = 0xD6;
+                animId = 0xD6;
                 break;
             case 0x322:
-                anim = 0xD7;
+                animId = 0xD7;
                 break;
             case 0x323:
-                anim = 0xD8;
+                animId = 0xD8;
                 break;
             case 0x324:
-                anim = 0xD9;
+                animId = 0xD9;
                 break;
             case 0x326:
-                anim = 0xDA;
+                animId = 0xDA;
                 break;
             case 0x327:
-                anim = 0xDB;
+                animId = 0xDB;
                 break;
             case 0x328:
-                anim = 0xDC;
+                animId = 0xDC;
                 break;
             case 0x32B:
-                anim = 0xDD;
+                animId = 0xDD;
                 break;
             case 0x32C:
-                anim = 0xDE;
+                animId = 0xDE;
                 break;
             case 0x32D:
-                anim = 0xDF;
+                animId = 0xDF;
                 break;
             case 0x32E:
-                anim = 0xE0;
+                animId = 0xE0;
                 break;
             case 0x32F:
-                anim = 0xE1;
+                animId = 0xE1;
                 break;
             case 0x330:
-                anim = 0xE2;
+                animId = 0xE2;
                 break;
             case 0x331:
-                anim = 0xE3;
+                animId = 0xE3;
                 break;
             case 0x332:
-                anim = 0xE4;
+                animId = 0xE4;
                 break;
             case 0x333:
-                anim = 0xE5;
+                animId = 0xE5;
                 break;
             case 0x334:
-                anim = 0xE6;
+                animId = 0xE6;
                 break;
             case 0x335:
-                anim = 0xE7;
+                animId = 0xE7;
                 break;
             case 0x345:
-                anim = 0xE8;
+                animId = 0xE8;
                 break;
             case 0x347:
-                anim = 0xEA;
+                animId = 0xEA;
                 break;
             case 0x348:
-                anim = 0xEB;
+                animId = 0xEB;
                 break;
             case 0x349:
-                anim = 0xEC;
+                animId = 0xEC;
                 break;
             case 0x34A:
-                anim = 0xED;
+                animId = 0xED;
                 break;
             case 0x34B:
-                anim = 0xEE;
+                animId = 0xEE;
                 break;
             case 0x34C:
-                anim = 0xEF;
+                animId = 0xEF;
                 break;
             case 0x34D:
-                anim = 0xF0;
+                animId = 0xF0;
                 break;
             case 0x240:
-                anim = 0xE9;
+                animId = 0xE9;
                 break;
             default:
-                anim = 0;
+                animId = 0;
                 break;
             }
             break;
         case 0x83:
-            switch (id) {
+            switch (state) {
             case 0x5E:
-                anim = 0;
+                animId = 0;
                 break;
             case 0x5F:
             case 0xFA:
-                anim = 1;
+                animId = 1;
                 break;
             case 0x60:
-                anim = 2;
+                animId = 2;
                 break;
             case 0xB3:
-                anim = 3;
+                animId = 3;
                 break;
             default:
                 return 1;
             }
             break;
         case 0x85:
-            if (id == 0x13E) {
-                anim = 5;
-            } else if (id == 0x13F) {
-                anim = 4;
-            } else if (id == 0x7C) {
-                anim = 2;
-            } else if (arg1->unk3C > 0.0f) {
-                anim = 1;
+            if (state == 0x13E) {
+                animId = 5;
+            } else if (state == 0x13F) {
+                animId = 4;
+            } else if (state == 0x7C) {
+                animId = 2;
+            } else if (owner->xz_velocity > 0.0f) {
+                animId = 1;
             } else {
-                anim = 0;
+                animId = 0;
             }
             break;
         case 0x88:
-            switch (id) {
+            switch (state) {
             default:
-                anim = 2;
+                animId = 2;
                 break;
             case 0x11:
-                anim = 0;
+                animId = 0;
                 break;
             case 0x26:
-                anim = 1;
+                animId = 1;
                 break;
             }
             break;
         case 0x98:
-            if (arg1->unk4 == 0x8B) {
-                arg0->unk2 = 6;
-                anim = 5;
+            if (owner->id == 0x8B) {
+                att->bone = 6;
+                animId = 5;
                 break;
             }
-            switch (id) {
+            switch (state) {
             case 0x12C:
-                anim = 0;
+                animId = 0;
                 break;
             case 0x12D:
-                anim = 3;
+                animId = 3;
                 break;
             case 0x142:
-                anim = 4;
+                animId = 4;
                 break;
             case 0x12E:
             case 0x358:
-                anim = 2;
+                animId = 2;
                 break;
             case 0x2AA:
-                anim = 6;
+                animId = 6;
                 break;
             default:
                 return 1;
             }
             break;
         case 0x87:
-            switch (id) {
+            switch (state) {
             case 0x172:
-                anim = 0;
+                animId = 0;
                 break;
             case 0x174:
-                anim = 2;
+                animId = 2;
                 break;
             case 0x17A:
-                anim = 3;
+                animId = 3;
                 break;
             case 0x171:
             case 0x173:
-                anim = 1;
+                animId = 1;
                 break;
             default:
                 return 1;
             }
             break;
         case 0x89:
-            if (arg1->unk5 == 5) {
-                anim = 3;
-                arg0->unk2 = 0;
+            if (owner->unk5 == 5) {
+                animId = 3;
+                att->bone = 0;
                 break;
             }
-            switch (id) {
+            switch (state) {
             case 0x49:
-                anim = 0;
-                arg0->unk2 = 9;
+                animId = 0;
+                att->bone = 9;
                 break;
             case 0x47:
-                anim = 1;
-                arg0->unk2 = 9;
+                animId = 1;
+                att->bone = 9;
                 break;
             case 0x81:
-                anim = 2;
-                arg0->unk2 = 0x13;
+                animId = 2;
+                att->bone = 0x13;
                 break;
             default:
                 return 1;
             }
             break;
         case 0x91:
-            if (arg1->unk5 == 5) {
-                arg0->unk2 = 0;
-                if (arg1->unk24 == 0.0f) {
-                    anim = 3;
+            if (owner->unk5 == 5) {
+                att->bone = 0;
+                if (owner->gravity == 0.0f) {
+                    animId = 3;
                 } else {
-                    anim = 0;
+                    animId = 0;
                 }
             } else {
-                arg0->unk2 = 0xE;
-                switch (id) {
+                att->bone = 0xE;
+                switch (state) {
                 default:
-                    anim = 4;
+                    animId = 4;
                     break;
                 case 0x12:
-                    anim = 2;
+                    animId = 2;
                     break;
                 case 0x10:
-                    anim = 1;
+                    animId = 1;
                     break;
                 }
             }
@@ -2477,37 +2350,38 @@ s32 func_15031FC8(F15031FC8Arg0 *arg0, F15031FC8Arg1 *arg1) {
         }
         break;
     }
-    if (anim != -1) {
-        func_1503F5B8((AnimInstance *)arg0->unk48, 0, anim, 0.0f, 0.0f, 1);
+    if (animId != -1) {
+        func_1503F5B8(att->anim, 0, animId, 0.0f, 0.0f, 1);
     }
-    if (sub != NULL) {
-        a = arg0->unk48;
-        if (anim != cur) {
-            goto skip1;
+    if (ownerAnim != NULL) {
+        anim = att->anim;
+        // matching: an if-block here makes IDO keep animId in s0; only the gotos match
+        if (animId != curAnimId) {
+            goto copy_frame;
         }
-        if (sub->unk3C != 0x3FF) {
-            goto skip1;
+        if (ownerAnim->unk3C != 0x3FF) {
+            goto copy_frame;
         }
-        func_1505E060(a);
-        a = arg0->unk48;
-    skip1:
-        a->unk8 = sub->unk8;
-        a = arg0->unk48;
-        if (flag && (a->unk39 != 0 || a->unk215 == 0)) {
-            a->unk3A = sub->unk3A;
-            arg0->unk48->unk3C = sub->unk3C;
-            a = arg0->unk48;
+        func_1505E060(anim);
+        anim = att->anim;
+    copy_frame:
+        anim->frame = ownerAnim->frame;
+        anim = att->anim;
+        if (syncAll && (anim->unk39 != 0 || anim->unk215 == 0)) {
+            anim->unk3A = ownerAnim->unk3A;
+            att->anim->unk3C = ownerAnim->unk3C;
+            anim = att->anim;
         }
-        lim = a->unk18 - 1.0f;
-        if (lim <= a->unk8) {
-            a->unk8 = lim;
+        lastFrame = anim->numFrames - 1.0f;
+        if (lastFrame <= anim->frame) {
+            anim->frame = lastFrame;
         }
     }
     return 0;
 }
 
 /* D_800841C0 (.data) holds this function's address: restores as1's indirect-jump-target view. */
-static s32 (*const D_800841D4_entry[])(F15031FC8Arg0 *, F15031FC8Arg1 *) = { func_15031FC8 };
+static AttachmentHook const D_800841D4_entry[] = { func_15031FC8 };
 
 
 /* Hook: plays the owner's unk2E4 animation on the attachment and keeps it in step with the owner's frame. */
