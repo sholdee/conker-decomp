@@ -231,6 +231,7 @@ void func_15086C68(void) {
 
 extern void func_150A3194(s32, s32, s32, s32, s32);
 
+/* Calls func_150A3194(3, 11, ...) at path node `index`. */
 void func_15086C70(s32 index) {
     s16 z = D_800D2350[index].z;
 
@@ -709,6 +710,7 @@ void func_15087EF0(s32 index, struct127 *obj) {
     obj->unk76 = r;
 }
 
+/* Binds racer `index` to actor `actorIndex`. */
 void func_15087FC4(s32 index, s32 actorIndex) {
     Racer *racer;
     if (D_800872A0 == NULL) {
@@ -800,6 +802,7 @@ s32 func_15088218(s32 index) {
     return (v << 4) + (s32)(racer->segmentT * 16.0f);
 }
 
+/* Returns racer `index`'s speed, truncated (0 without racers). */
 s32 func_15088270(s32 index) {
     Racer *racer;
     if (D_800872A0 == NULL) {
@@ -809,6 +812,7 @@ s32 func_15088270(s32 index) {
     return (s32)racer->speed;
 }
 
+/* Returns racer `index`'s lap (0 without racers). */
 s32 func_150882B0(s32 index) {
     Racer *racer;
     if (D_800872A0 == NULL) {
@@ -1007,6 +1011,7 @@ void func_15088780(void) {
     }
 }
 
+/* Returns whether racer 0's camNodes[2] is 0xFF (no node). */
 s32 func_150887F8(void) {
     Racer *racers = D_800872A0;
     if (racers == NULL) {
@@ -2047,6 +2052,7 @@ typedef struct ScoreTable {
 
 extern ScoreTable *D_8008FDD4;
 
+/* Returns player's score record value (0 for a non-human player). */
 s32 func_1508B194(s32 player) {
     if (player >= D_8008FD90) {
         return 0;
@@ -2055,6 +2061,7 @@ s32 func_1508B194(s32 player) {
     return D_8008FDD4->records[player].unk0;
 }
 
+/* Clears player's score record value. */
 void func_1508B1D4(s32 player) {
     if (player < D_8008FD90) {
         D_8008FDD4->records[player].unk0 = 0;
@@ -2085,6 +2092,10 @@ typedef struct PathSearch {
     /* 0x36 */ u8 visited[0x20]; /* bitset of visited node ids */
 } PathSearch;
 
+/*
+ * Flood-fills the path graph from node `id`, marking visited nodes; nodes farther than
+ * s->radiusSq from (s->x, s->z) end the walk and are collected (up to 8) with their squared distance.
+ */
 void func_1508B2A8(u8 id, PathSearch *s) {
     PathNode *node;
     f32 dx;
@@ -2207,6 +2218,11 @@ void func_1508B3F8(void) {
 s32 func_1508C5B8(s32, s32);
 s32 func_1508A1BC(void);
 
+/*
+ * Picks the best opponent for player unk4: the active player with the lowest path cost to it,
+ * scaled by weights[unk4][] / 255 (and 0.8 for its current target). Stores it in unk49C and
+ * the distance in unk45C. Returns 0.
+ */
 s32 func_1508B9BC(void) {
     s32 mode;
     s32 count;
@@ -2240,37 +2256,33 @@ s32 func_1508B9BC(void) {
     weights = D_800D23B0->weights[current];
     winner = -1;
     minimum = 10000000;
-    index = 0;
-    if (count > 0) {
-        do {
-            if (active[index] > 0) {
-                cost = -1;
-                if (index != current) {
-                    cursor = index * 16;
-                    end = cursor + 16;
-                    while (cursor < end && neighbors[cursor] != -1) {
-                        if (neighbors[cursor] == current) {
-                            cost = costs[cursor];
-                            cursor = end;
-                        } else {
-                            cursor++;
-                        }
+    for (index = 0; index < count; index++) {
+        if (active[index] > 0) {
+            cost = -1;
+            if (index != current) {
+                cursor = index * 16;
+                end = cursor + 16;
+                while (cursor < end && neighbors[cursor] != -1) {
+                    if (neighbors[cursor] == current) {
+                        cost = costs[cursor];
+                        cursor = end;
+                    } else {
+                        cursor++;
                     }
-                    if (cost != -1) {
-                        value = (f32)(u32)weights[index] * 0.003921569f;
-                        if (index == targets[current]) {
-                            value *= 0.8f;
-                        }
-                        cost = (s32)((f32)cost * value);
-                        if (cost < minimum) {
-                            minimum = cost;
-                            winner = index;
-                        }
+                }
+                if (cost != -1) {
+                    value = weights[index] * (1.0f / 255.0f);
+                    if (index == targets[current]) {
+                        value *= 0.8f;
+                    }
+                    cost = cost * value;
+                    if (cost < minimum) {
+                        minimum = cost;
+                        winner = index;
                     }
                 }
             }
-            index++;
-        } while (index != count);
+        }
     }
     D_800D23B0->unk49C[current] = winner;
     if (winner != -1) {
@@ -2436,7 +2448,7 @@ s32 func_1508BF14(void) {
     return 0;
 }
 
-s32 func_1508C194(s32 arg0) {
+s32 func_1508C194(s32 player) {
     return 0;
 }
 
@@ -2624,26 +2636,29 @@ s32 func_1508C5B8(s32 player, s32 checks) {
     return D_800D23B0->unk16C0[player];
 }
 
+/*
+ * Advances unk1702 round-robin over the D_8008FD8C actors; returns the next active one with
+ * unk31C->unk84 set that isn't in D_800D18A0, or -1.
+ */
 s32 func_1508C9CC(void) {
     s32 count;
     s32 ret;
     s8 cur;
     struct127 *obj;
-    struct126 *unk31C;
+    struct126 *state;
 
     count = 0;
     ret = -1;
     cur = D_800D23B0->unk1702;
     do {
-        cur = (s8)(cur + 1);
+        cur++;
         if (cur >= D_8008FD8C) {
             cur = 0;
         }
-
         obj = &D_800CC2D0[cur];
         if (obj->interaction_state != 0) {
-            unk31C = obj->unk31C;
-            if ((unk31C != 0) && (unk31C->unk84 != 0) && ((D_800D18A0 & (1 << cur)) == 0)) {
+            state = obj->unk31C;
+            if (state != NULL && state->unk84 != 0 && !(D_800D18A0 & (1 << cur))) {
                 count = D_8008FD8C;
                 ret = cur;
             }
@@ -2977,6 +2992,11 @@ extern s16 D_80087320[][3];
 void func_1508EB90(s32 arg0, s32 arg1, s32 arg2);
 extern f32 D_8009DA8C;
 
+/*
+ * Copies player's target to its state (unk129). Once its timer passes the distance-dependent
+ * limit for this level it is reset (with func_1508EC5C-style 0x61 if the target is seen), and
+ * while the timer is 0, unk12A is set at random.
+ */
 s32 func_1508D850(s32 player) {
     s8 *timers;
     s8 *targets;
@@ -3410,6 +3430,7 @@ void func_1508DC24(void) {
 void func_1508E6C8(void) {
 }
 
+/* Per item `type` value (100000 by default). */
 s32 func_1508E6D0(s32 type) {
     switch (type) {
     case 0x3F:
@@ -3447,6 +3468,7 @@ s32 func_1508E6D0(s32 type) {
     }
 }
 
+/* Returns the attachment set id for item `type`, or -1; bit 0x1000 is a flag on it. */
 s32 func_1508E780(s32 type) {
     if (D_800D23B0->gameType != 0xB8) {
         switch (type) {
@@ -3572,16 +3594,19 @@ s32 func_1508E89C(s32 player, s32 source) {
     return 0;
 }
 
+/* Calls func_1509BFB0(1, actor | 0x2000, id, param) for player's actor (unk13F). */
 void func_1508EB90(s32 player, s32 id, s32 param) {
     s32 temp = D_800CC2D0[player].unk13F;
     func_1509BFB0(1, temp | 0x2000, id, param);
 }
 
+/* func_1508EB90(player, 0x14, param). */
 void func_1508EBF8(s32 player, s32 param) {
     s32 temp = D_800CC2D0[player].unk13F;
     func_1509BFB0(1, temp | 0x2000, 0x14, param);
 }
 
+/* func_1508EB90(player, 0x61, param). */
 void func_1508EC5C(s32 player, s32 param) {
     s32 temp = D_800CC2D0[player].unk13F;
     func_1509BFB0(1, temp | 0x2000, 0x61, param);
