@@ -5,19 +5,6 @@
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
 
-/* A node of the level's path graph (loaded by func_15085B70), 0x10 bytes. */
-typedef struct PathNode {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ u8 layer; /* height band, see func_15085DA8 */
-    /* 0x7 */ u8 unk7;  /* id looked up by func_15086D48 */
-    /* 0x8 */ u8 unk8;
-    /* 0x9 */ u8 links[5]; /* neighbouring nodes, 0xFF = none */
-    /* 0xE */ u8 type;
-    /* 0xF */ u8 param;
-} PathNode;
-
 /* A circular area registered with func_1508B20C. */
 typedef struct MpZone {
     /* 0x0 */ f32 radiusSq;
@@ -120,7 +107,6 @@ extern s8 D_800D2398;
 extern s8 D_800D2399;
 extern MpGame *D_800D23B0;
 s32 func_1508802C(Racer *racer, Actor *obj, s32 mode);
-extern PathNode *D_800D2350;
 extern f32 sqrtf(f32);
 u8 func_15085DA8(f32 arg0);
 s32 func_15085DF8(f32 arg0, f32 arg1, f32 arg2, s8 arg3, s8 arg4);

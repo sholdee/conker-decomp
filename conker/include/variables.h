@@ -1272,6 +1272,7 @@ extern PathPoint **D_800D2104;
 extern u8 *D_800D2108;
 extern u8 * D_800D210C;
 extern s8 D_800D2130;
+extern PathNode *D_800D2350; // the level path graph nodes (func_15085B70)
 extern s32 D_800D2354;
 extern f32 D_800D239C;
 extern f32 D_800D23A0;

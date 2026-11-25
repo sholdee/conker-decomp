@@ -2,17 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-// Camera path node (D_800D2350); links are node indices, 0xFF = none.
-typedef struct {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ u8 pad6[0x3];
-    /* 0x9 */ u8 links[5];
-    /* 0xE */ u8 padE[0x2];
-} CamPathNode;
-
-extern CamPathNode *D_800D2350;
 
 void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 Actor *func_1505EEF4(s32 arg0);
@@ -80,7 +69,7 @@ void func_1512E8E0(Camera *camera) {
             Vec3f best;
             Vec3f closest;
             f32 dy;
-            CamPathNode *node;
+            PathNode *node;
             f32 dz;
 
             // Find the closest point to the camera on the path segments leaving its nearest node.

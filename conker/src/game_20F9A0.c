@@ -1808,12 +1808,6 @@ void func_151E6BFC(void) {
 }
 
 typedef struct {
-    u8 pad0[9];
-    u8 links[5];
-    u8 padE[2];
-} Node151E6C1C;
-
-typedef struct {
     u16 unk0;
     u16 unk2;
 } Snd151E6C1C;
@@ -1828,7 +1822,6 @@ extern f32 D_8008FF90[];
 extern u8 D_8008FFB0[2][6];
 extern Snd151E6C1C D_800AB908[];
 extern Snd151E6C1C D_800AB920[];
-extern Node151E6C1C *D_800D2350;
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
 extern s32 func_15086D48(s32);
 extern void func_1000D96C(s32, s32, s32);
@@ -1863,8 +1856,8 @@ void func_151E6C1C(s32 index) {
     Snd151E6C1C *sounds;
     WorldObject *r;
     WorldObject *r2;
-    Node151E6C1C *node;
-    Node151E6C1C *cur;
+    PathNode *node;
+    PathNode *cur;
     s32 seg;
     u8 link;
     s32 state;

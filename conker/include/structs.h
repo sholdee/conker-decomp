@@ -4226,4 +4226,17 @@ typedef struct Racer {
     /* 0x4C */ CamParams cam;
 } Racer; /* size 0x84 */
 
+/* A node of the level's path graph (loaded by func_15085B70), 0x10 bytes. */
+typedef struct PathNode {
+    /* 0x0 */ s16 x;
+    /* 0x2 */ s16 y;
+    /* 0x4 */ s16 z;
+    /* 0x6 */ u8 layer; /* height band, see func_15085DA8 */
+    /* 0x7 */ u8 unk7;  /* id looked up by func_15086D48 */
+    /* 0x8 */ u8 unk8;
+    /* 0x9 */ u8 links[5]; /* neighbouring nodes, 0xFF = none */
+    /* 0xE */ u8 type;
+    /* 0xF */ u8 param;
+} PathNode; /* size 0x10 */
+
 #endif
