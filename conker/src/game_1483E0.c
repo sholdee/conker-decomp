@@ -40,9 +40,6 @@ struct TrapCharacter {
     u8 pad320[0xC];
 };
 
-extern f32 D_800A3210;
-extern f32 D_800A3214;
-
 
 struct Obj1511AF30 {
     f32 rotX;
@@ -1294,114 +1291,117 @@ void func_1511D7BC(Game1483E0WaveMesh *mesh) {
 
 struct Obj1511D9E4 {
     u8 pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u16 unk16;
+    s16 x;
+    s16 y;
+    s16 z;
+    u16 count;
     u8 pad18[0x8];
-    Vtx *unk20[2];
-    Vtx *unk28;
+    Vtx *buffers[2];
+    Vtx *source;
     u8 pad2C[0x10];
-    s32 unk3C;
+    s32 param; /* bits 24-31, 16-23: rotation args; bits 0-15: speed in 1/100 degree */
     u8 pad40[0x3C];
-    s16 (*unk7C)[2];
-    f32 unk80;
+    s16 (*uv)[2];
+    f32 uvAngle;
 };
 
-extern void func_15094AB8(Vtx *arg0, s16 (*arg1)[2], s32 arg2, f32 arg3, s32 arg4, s32 arg5);
-
-void func_1511D9E4(struct Obj1511D9E4 *arg0) {
+/* Rotates the mesh texture coordinates at the speed in the param; places both buffers on first use. */
+void func_1511D9E4(struct Obj1511D9E4 *obj) {
     s16 (*uv)[2];
-    s32 hi;
-    s32 mid;
+    s32 arg4;
+    s32 arg5;
     s32 i;
     f32 speed;
 
-    if (arg0->unk7C == NULL) {
-        uv = arg0->unk7C = allocate_memory(arg0->unk16 * 4, 1, 0, 0);
-        for (i = 0; i < arg0->unk16; i++) {
-            uv[i][0] = arg0->unk28[i].v.tc[0] - 0x2000;
-            uv[i][1] = arg0->unk28[i].v.tc[1] - 0x2000;
+    if (obj->uv == NULL) {
+        uv = obj->uv = allocate_memory(obj->count * 4, 1, 0, 0);
+        for (i = 0; i < obj->count; i++) {
+            uv[i][0] = obj->source[i].v.tc[0] - 0x2000;
+            uv[i][1] = obj->source[i].v.tc[1] - 0x2000;
         }
-        for (i = 0; i < arg0->unk16; i++) {
-            arg0->unk20[0][i].v.ob[0] = arg0->unk20[1][i].v.ob[0] = arg0->unk28[i].v.ob[0] + arg0->unk10;
-            arg0->unk20[0][i].v.ob[1] = arg0->unk20[1][i].v.ob[1] = arg0->unk28[i].v.ob[1] + arg0->unk12;
-            arg0->unk20[0][i].v.ob[2] = arg0->unk20[1][i].v.ob[2] = arg0->unk28[i].v.ob[2] + arg0->unk14;
+        for (i = 0; i < obj->count; i++) {
+            obj->buffers[0][i].v.ob[0] = obj->buffers[1][i].v.ob[0] = obj->source[i].v.ob[0] + obj->x;
+            obj->buffers[0][i].v.ob[1] = obj->buffers[1][i].v.ob[1] = obj->source[i].v.ob[1] + obj->y;
+            obj->buffers[0][i].v.ob[2] = obj->buffers[1][i].v.ob[2] = obj->source[i].v.ob[2] + obj->z;
         }
     } else {
-        uv = arg0->unk7C;
+        uv = obj->uv;
     }
-    hi = arg0->unk3C >> 24;
-    mid = (arg0->unk3C >> 16) & 0xFF;
-    speed = (f32)(s16)(arg0->unk3C & 0xFFFF) * 0.01;
-    arg0->unk80 += speed * D_800BE9E4;
-    func_15094AB8(arg0->unk20[D_800BE9C0], uv, arg0->unk16, arg0->unk80, hi, mid);
+    arg4 = obj->param >> 24;
+    arg5 = (obj->param >> 16) & 0xFF;
+    speed = (f32)(s16)(obj->param & 0xFFFF) * 0.01;
+    obj->uvAngle += speed * D_800BE9E4;
+    func_15094AB8(obj->buffers[D_800BE9C0], uv, obj->count, obj->uvAngle, arg4, arg5);
 }
 
-struct Obj1511DBC4Sub {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
+struct Swing1511DBC4 {
+    f32 time;
+    f32 velocity;
+    f32 accel;
+    f32 jerk;
 };
 
 struct Obj1511DBC4 {
     u8 pad0[0x8];
-    f32 unk8;
+    f32 angle;
     u8 padC[0x67];
-    u8 unk73;
+    u8 flags;
     u8 pad74[0x8];
-    struct Obj1511DBC4Sub *unk7C;
+    struct Swing1511DBC4 *swing;
 };
 
-void func_1511DBC4(struct Obj1511DBC4 *arg0) {
-    s32 state;
-    struct Obj1511DBC4Sub *temp;
-    f32 ftemp;
+/*
+ * Opens the object to 90 degrees with ever-increasing acceleration, wobbles slightly while open,
+ * and closes one degree per frame.
+ */
+void func_1511DBC4(struct Obj1511DBC4 *obj) {
+    s32 mode;
+    struct Swing1511DBC4 *swing;
+    f32 wobble;
 
-    if (arg0->unk7C == NULL) {
-        temp = allocate_memory(0x10, 1, 0, 0);
-        arg0->unk7C = temp;
-        temp->unk0 = 0.0f;
-        temp->unk4 = 0.0f;
-        temp->unk8 = 0.0f;
-        temp->unkC = D_800A3210;
+    if (obj->swing == NULL) {
+        swing = allocate_memory(sizeof(struct Swing1511DBC4), 1, 0, 0);
+        obj->swing = swing;
+        swing->time = 0.0f;
+        swing->velocity = 0.0f;
+        swing->accel = 0.0f;
+        swing->jerk = 0.02500000037f;
     } else {
-        temp = arg0->unk7C;
+        swing = obj->swing;
     }
 
-    state = arg0->unk73 & 3;
-    if (state == 0) {
-        arg0->unk8 = 0.0f;
-    } else if (state == 3) {
-        arg0->unk8 = 90.0f;
-        ftemp = cosf(temp->unk0 * D_800A3214);
-        ftemp = ftemp * 0.5f;
-        arg0->unk8 = arg0->unk8 + ftemp;
-        temp->unk0 = temp->unk0 + (3.0f * (f32)D_800BE9E4);
-    } else if (state == 2) {
-        if (arg0->unk8 == 0.0f) {
-            temp->unk4 = 0.0f;
-            temp->unk8 = 0.0f;
+    mode = obj->flags & 3;
+    if (mode == 0) {
+        obj->angle = 0.0f;
+    } else if (mode == 3) {
+        obj->angle = 90.0f;
+        wobble = cosf(swing->time * 0.01745329238f);
+        wobble *= 0.5f;
+        obj->angle += wobble;
+        swing->time += 3.0f * (f32)D_800BE9E4;
+    } else if (mode == 2) {
+        if (obj->angle == 0.0f) {
+            swing->velocity = 0.0f;
+            swing->accel = 0.0f;
         }
-        temp->unk8 = temp->unk8 + temp->unkC;
-        temp->unk4 = temp->unk4 + temp->unk8;
-        arg0->unk8 = arg0->unk8 + temp->unk4;
-        if (arg0->unk8 >= 90.0f) {
-            state = 3;
-            arg0->unk8 = 90.0f;
+        swing->accel += swing->jerk;
+        swing->velocity += swing->accel;
+        obj->angle += swing->velocity;
+        if (obj->angle >= 90.0f) {
+            mode = 3;
+            obj->angle = 90.0f;
         }
     } else {
-        if ((f32)D_800BE9E4 < arg0->unk8) {
-            arg0->unk8 = arg0->unk8 - (f32)D_800BE9E4;
+        if ((f32)D_800BE9E4 < obj->angle) {
+            obj->angle -= (f32)D_800BE9E4;
         } else {
-            arg0->unk8 = 0.0f;
-            state = 0;
+            obj->angle = 0.0f;
+            mode = 0;
         }
     }
 
-    arg0->unk73 &= 0xFFFC;
-    arg0->unk73 |= state;
+    obj->flags &= ~3;
+    obj->flags |= mode;
 }
 
 void func_10010558(u16, void *, s32, s32, s32, s32);
