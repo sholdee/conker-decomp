@@ -1,6 +1,10 @@
 #include <ultra64.h>
 
+// matching: func_1501A490 is defined below with the display list as an integer (functions.h gives callers the
+// Gfx * prototype); a Gfx * parameter, even copied into an integer local, changes its code.
+#define func_1501A490 func_1501A490_hdr
 #include "functions.h"
+#undef func_1501A490
 #include "variables.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
@@ -77,7 +81,7 @@ void func_1501A39C(void) {
 
 /* Emits a pipe sync and a scissor around view viewIndex (the whole drawable area for 0xFF), clipping its
  * bottom edge to maxBottom when that is non-zero. Returns the advanced display list. */
-// matching: functions.h types the display list as s32 and IDO's -g3 frame only fits one Gfx * per command,
+// matching: the display list is advanced as an integer and IDO's -g3 frame only fits one Gfx * per command,
 // so gDPPipeSync/gDPSetScissor are expanded by hand, each advancing gfx before its stores (the sync must stay
 // on one line: -g3 line numbers steer the scheduler).
 s32 func_1501A490(s32 gfx, s16 viewIndex, s32 arg2, s32 arg3, s32 maxBottom, s32 mode) {

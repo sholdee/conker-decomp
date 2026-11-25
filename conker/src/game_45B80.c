@@ -485,7 +485,7 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1);
 Gfx *func_15019464(Gfx *gfx, s16 player) {
     func_1510B958(player);
     gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
-    gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
+    gfx = func_1501A490(gfx, player, 0, 0, 0, 0);
     if (D_800BEAC0 != 0) {
         return gfx;
     }
@@ -517,7 +517,7 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
         gfx = (Gfx *)func_1515D6D0((s32)func_1510B7B4(gfx, player), player);
         func_1510B958(player);
         gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
-        gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
+        gfx = func_1501A490(gfx, player, 0, 0, 0, 0);
     }
     gfx = func_151135C4(gfx, 1, player);
     if (D_800BE575 == 2) {
@@ -526,7 +526,7 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
     gfx = func_151674F8(gfx, 6, player, 0);
     gfx = func_151674F8(gfx, 6, player, 1);
     gfx = func_15186794(gfx, player);
-    gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
+    gfx = func_1501A490(gfx, player, 0, 0, 0, 0);
     gfx = func_1502BAD0(gfx, 1, player);
     gfx = func_15035FE8(gfx, player);
     gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
@@ -568,7 +568,7 @@ Gfx *func_150198FC(Gfx *gfx) {
     } else {
         gSPViewport(gfx++, &D_800BE628[0].viewports[0]);
     }
-    gfx = (Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0);
+    gfx = func_1501A490(gfx, 0xFF, 0, 0, 0, 0);
     if (D_800BEAC0 != 0) {
         if (D_80082F90 == 0) {
             gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_800BE9C4);
@@ -606,7 +606,7 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player);
 /* Draws player's late pass (group 4 display lists) into their viewport. */
 Gfx *func_15019BB8(Gfx *gfx, s32 player) {
     gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
-    gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
+    gfx = func_1501A490(gfx, player, 0, 0, 0, 0);
     gfx = func_1517F4D8(gfx, player);
     gfx = func_1517F3A0(gfx, player);
     gfx = func_15180580(gfx, player);
@@ -623,7 +623,7 @@ Gfx *func_15019BB8(Gfx *gfx, s32 player) {
 /* Loads player's viewport and projection, then draws group 5 display lists. */
 Gfx *func_15019CC8(Gfx *gfx, s32 player) {
     gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
-    gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
+    gfx = func_1501A490(gfx, player, 0, 0, 0, 0);
     gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
     gSPMatrix(gfx++, &D_800BE628[player].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
     if (D_800BE9F0 == 0x1D) {
@@ -646,7 +646,7 @@ Gfx *func_15019E60(Gfx *gfx) {
     } else {
         gSPViewport(gfx++, &D_800BE628[0].viewports[0]);
     }
-    return func_15043384(func_151E8620((Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0)));
+    return func_15043384(func_151E8620(func_1501A490(gfx, 0xFF, 0, 0, 0, 0)));
 }
 
 extern u32 D_800BE610;

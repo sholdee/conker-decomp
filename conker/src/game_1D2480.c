@@ -101,7 +101,7 @@ Gfx *func_151A5170(Gfx *gfx, struct Obj151A4FD0 *effect, s32 arg2) {
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
     gDPSetPrimColor(gfx++, 1, 0, effect->red, effect->green, effect->blue, 255);
-    func_1501A490((s32)gfx, arg2, 0, 0, 0, 3);
+    func_1501A490(gfx, arg2, 0, 0, 0, 3);
     state = 0;
     gfx = func_15142FBC(gfx, 0xC00, 0x0F0A4004, &state);
 

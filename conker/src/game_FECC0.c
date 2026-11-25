@@ -54,7 +54,7 @@ Gfx *func_150D1810(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, f32 tScroll, s32 arg5
     gDPSetOtherMode(gfx++, G_TP_PERSP | G_TF_BILERP | G_TC_FILT | 0xF,
                     G_RM_OPA_SURF | G_RM_OPA_SURF2 | G_ZS_PRIM);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gfx = (Gfx *)func_1501A490((s32)gfx, D_80082FA4, 0, 0, 0, 0); // takes the view index as s16
+    gfx = func_1501A490(gfx, D_80082FA4, 0, 0, 0, 0); // takes the view index as s16
     gfx = func_1501A680(gfx);
     gfx = func_150950D4(gfx, &tex, 0, 0, 0, 0, G_TX_CLAMP, 256, 256, 3);
     func_151102CC(rotation, 0.0f, 0.0f, roll);

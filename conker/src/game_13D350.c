@@ -131,7 +131,7 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     if (visible != 0) {
         gfx = D_800891D8[D_800B0DF0->unk8](gfx, x, y, z, pitch, yaw, roll, visible);
     }
-    gfx = (Gfx *)func_1501A490((s32)gfx, D_80082FA6, 0, 0, 0, 0);
+    gfx = func_1501A490(gfx, D_80082FA6, 0, 0, 0, 0);
     gSPSetGeometryMode(gfx++, G_CULL_BACK);
     return gfx;
 }
@@ -167,7 +167,7 @@ Gfx *func_151103C8(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
     if (D_80082FA0 != 0) {
         if (D_80082FA4 == 0) {
             gDPPipeSync(gfx++);
-            gfx = (Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0);
+            gfx = func_1501A490(gfx, 0xFF, 0, 0, 0, 0);
             gDPSetFillColor(gfx++, (GPACK_RGBA5551(0, 0, 0, 1) << 16) | GPACK_RGBA5551(0, 0, 0, 1));
             gfx = func_1501A6CC(gfx, 0, (D_800BE624 >> 1) - 6, D_800BE620, (D_800BE624 >> 1) + 6);
             if (D_80082FA0 != 1) {
@@ -213,13 +213,13 @@ Gfx *func_151106A8(Gfx *gfx) {
         gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
         gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_800BE9C4);
         gDPSetFillColor(gfx++, (GPACK_ZDZ(G_MAXFBZ, 0) << 16) | GPACK_ZDZ(G_MAXFBZ, 0));
-        gfx = (Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0);
+        gfx = func_1501A490(gfx, 0xFF, 0, 0, 0, 0);
         gDPFillRectangle(gfx++, 2, 0, D_800BE620 - 2, D_800BE624);
         gDPPipeSync(gfx++);
         gfx = func_1501A680(gfx);
         if (D_80082FA0 != 0) {
             gDPPipeSync(gfx++);
-            gfx = (Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0);
+            gfx = func_1501A490(gfx, 0xFF, 0, 0, 0, 0);
             gDPSetFillColor(gfx++, (GPACK_RGBA5551(0, 0, 0, 1) << 16) | GPACK_RGBA5551(0, 0, 0, 1));
             gfx = func_1501A6CC(gfx, 0, (D_800BE624 >> 1) - 6, D_800BE620, (D_800BE624 >> 1) + 6);
             if (D_80082FA0 != 1) {
@@ -709,7 +709,7 @@ Gfx *func_15111AF4(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, 
     tlutCounts = D_800891F8;
     tiles = D_800891FC;
     gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
-    gfx = func_1501A680((Gfx *)func_1501A490((s32)gfx, D_80082FA6, 0, 0, 0, 0));
+    gfx = func_1501A680(func_1501A490(gfx, D_80082FA6, 0, 0, 0, 0));
     fov = (D_80082FA0 != 1) ? 80.0f : 95.0f;
     if (D_800BE9F0 == 0x41) {
         yaw -= 119.0f;
