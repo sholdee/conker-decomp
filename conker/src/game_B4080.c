@@ -1489,7 +1489,7 @@ void func_150896EC(Racer *racer, struct127 *obj, s32 leave) {
 }
 
 void func_15089BB0(void) {
-    D_800D23B0 = 0;
+    D_800D23B0 = NULL;
 }
 
 void *func_1509B570(s32);
@@ -1498,6 +1498,7 @@ extern f32 D_800872B0[], D_800872F8[];
 extern s8 D_800872F0[], D_800E0BD0;
 extern s32 D_800D2E48;
 
+/* Loads the multiplayer game resource D_800D2E48 and resets its per-player state. */
 s32 func_15089BC0(void) {
     f32 *scales;
     s32 i;
@@ -1506,31 +1507,34 @@ s32 func_15089BC0(void) {
 
     id = D_800D2E48;
     resource = func_1509B570(id);
-    if (resource == NULL) return 0;
+    if (resource == NULL) {
+        return 0;
+    }
+    // matching: identical separate case bodies, as in the original jump table
     switch (id) {
     case 0xB9:
-        D_800D23B0 = (s8 *)resource;
+        D_800D23B0 = resource;
         break;
     case 0xB8:
-        D_800D23B0 = (s8 *)resource;
+        D_800D23B0 = resource;
         break;
     case 0xBB:
-        D_800D23B0 = (s8 *)resource;
+        D_800D23B0 = resource;
         break;
     case 0xBA:
-        D_800D23B0 = (s8 *)resource;
+        D_800D23B0 = resource;
         break;
     case 0xB7:
-        D_800D23B0 = (s8 *)resource;
+        D_800D23B0 = resource;
         break;
     case 0xBD:
-        D_800D23B0 = (s8 *)resource;
+        D_800D23B0 = resource;
         break;
     case 0xBE:
-        D_800D23B0 = (s8 *)resource;
+        D_800D23B0 = resource;
         break;
     default:
-        D_800D23B0 = 0;
+        D_800D23B0 = NULL;
         return 0;
     }
     func_1508BC20();
@@ -1554,7 +1558,11 @@ s32 func_15089BC0(void) {
     return 0;
 }
 
-s32 func_15089F9C(s32 arg0) {
+/*
+ * Picks the opponent `player` should go for: the one whose distance scores best on a sine
+ * curve between a minimum and maximum range. Returns its index or -1.
+ */
+s32 func_15089F9C(s32 player) {
     f32 dx;
     f32 dz;
     f32 val;
@@ -1575,9 +1583,9 @@ s32 func_15089F9C(s32 arg0) {
     states = D_800D23B0->team;
     mask = D_800D23B0->activeMask;
     count = D_800D23B0->numPlayers;
-    off = arg0 * 4;
+    off = player * 4; // matching: dead store that IDO still schedules
     bestIdx = -1;
-    if (D_800D23B0->unk15C[arg0] == 0) {
+    if (D_800D23B0->unk15C[player] == 0) {
         minDist = 750.0f;
         maxDist = 3500.0f;
     } else {
@@ -1588,10 +1596,10 @@ s32 func_15089F9C(s32 arg0) {
     for (i = 0; i < count; i++) {
         bit = 1 << i;
         if ((states[i] != 3) && (mask & bit) &&
-            (D_800D23B0->unk16C0[arg0] & (bit << 16))) {
+            (D_800D23B0->unk16C0[player] & (bit << 16))) {
             other = &D_800CC2D0[i];
             if (other != NULL) {
-                self = &D_800CC2D0[arg0];
+                self = &D_800CC2D0[player];
                 dx = self->x_position - other->x_position;
                 dz = self->z_position - other->z_position;
                 dist = sqrtf((dx * dx) + (dz * dz));
@@ -1614,6 +1622,10 @@ s32 func_15089F9C(s32 arg0) {
     return bestIdx;
 }
 
+/*
+ * Advances to the next player (unk1704) and rebuilds its target list: the opposing players
+ * sorted by a weighted distance (targets / targetDists rows).
+ */
 s32 func_1508A1BC(void) {
     s32 i;
     s32 j;
@@ -1625,8 +1637,8 @@ s32 func_1508A1BC(void) {
     s32 cur;
     s32 myMask;
     s32 *active;
+    s32 *layers;
     s32 *teams;
-    s32 *states;
     u32 row;
     s32 count;
     s32 rawDist;
@@ -1638,14 +1650,14 @@ s32 func_1508A1BC(void) {
     struct127 *other;
     struct127 *self;
 
-    states = D_800D23B0->team;
+    teams = D_800D23B0->team;
     mask = D_800D23B0->activeMask;
     count = D_800D23B0->numPlayers;
     kinds = D_800D23B0->unk15C;
     active = D_800D23B0->unk39C;
-    teams = D_800D23B0->layer;
-    ids = D_800D23B0->targets;
-    dists = D_800D23B0->targetDists;
+    layers = D_800D23B0->layer;
+    ids = D_800D23B0->targets[0];
+    dists = D_800D23B0->targetDists[0];
     D_800D23B0->unk1704++;
     if (D_800D23B0->unk1704 == D_800D23B0->numPlayers) {
         D_800D23B0->unk1704 = 0;
@@ -1653,15 +1665,16 @@ s32 func_1508A1BC(void) {
     cur = D_800D23B0->unk1704;
     row = cur * 16;
     if (!((1 << cur) & mask)) {
+        // matching: one-line loop (the -g3 line numbers steer the unrolled stores' order)
         for (i = 0; i < 16; i++) ids[row + i] = -1;
         return 0;
     }
     n = 0;
     minDist = 32000;
-    myTeam = states[cur];
+    myTeam = teams[cur];
     myMask = D_800D23B0->unk16C0[cur];
     for (i = 0; i < count; i++) {
-        if (active[i] > 0 && myTeam != states[i]) {
+        if (active[i] > 0 && myTeam != teams[i]) {
             other = &D_800CC2D0[i];
             self = &D_800CC2D0[cur];
             if (other != NULL) {
@@ -1671,7 +1684,7 @@ s32 func_1508A1BC(void) {
                 dist = 32000;
             }
             rawDist = dist;
-            if (teams[cur] != teams[i]) {
+            if (layers[cur] != layers[i]) {
                 dist += 500;
             }
             if ((0x10000 << i) & myMask) {
@@ -1701,6 +1714,7 @@ s32 func_1508A1BC(void) {
                 dist *= D_800D23B0->unk16B8;
             }
             if (dist >= 0) {
+                /* insertion sort into this player's row; matching: the row + index forms fix addu operand order */
                 j = 0;
                 while (j < n && (dists + row)[j] < dist) {
                     j++;
@@ -1718,7 +1732,7 @@ s32 func_1508A1BC(void) {
             }
         }
     }
-    for (i = n; i < 16; i++) ids[row + i] = -1;
+    for (i = n; i < 16; i++) ids[row + i] = -1; // matching: one-line loop, as above
     if (D_800D23B0->nearestEnemyDist) {
         D_800D23B0->nearestEnemyDist[cur] = minDist;
     }
@@ -2241,8 +2255,8 @@ s32 func_1508B9BC(void) {
     count = D_800D23B0->numPlayers;
     current = D_800D23B0->unk4;
     active = D_800D23B0->unk39C;
-    neighbors = D_800D23B0->targets;
-    costs = D_800D23B0->targetDists;
+    neighbors = D_800D23B0->targets[0];
+    costs = D_800D23B0->targetDists[0];
     targets = D_800D23B0->unk11C;
     if (count >= 9) {
         mode = 4;
@@ -2390,8 +2404,8 @@ s32 func_1508BF14(void) {
     owners = D_800D23B0->team;
     bestCosts = D_800D23B0->unk45C;
     bestSlots = D_800D23B0->unk49C;
-    links = D_800D23B0->targets;
-    costs = D_800D23B0->targetDists;
+    links = D_800D23B0->targets[0];
+    costs = D_800D23B0->targetDists[0];
     owner = owners[myIdx];
 
     for (i = 0; i < numSlots; i++) counts[i] = 0;
