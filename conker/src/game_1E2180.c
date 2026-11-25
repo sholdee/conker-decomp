@@ -46,11 +46,12 @@ Emitter *func_1513418C(EmitterDesc *, s32, u8, s32);
 void func_151D9014(f32 *position, f32 *velocity, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8,
                    s32);
 
-/* Attaches emitter 8 (func_151B4E4C) to bone 2 of `actor`, unless its blood profile has none. */
+/* Attaches emitter 8 (func_151B4E4C) to bone 2 of `actor` for 40-60 frames, unless its blood profile
+ * rules it out (unkE == 2). The emitter's 1-byte payload records whether unkE == 1. */
 Emitter *func_151B4CD0(struct127 *actor, u8 arg1, s32 arg2) {
     Emitter *emitter;
     EmitterDesc desc;
-    u8 payload[4];
+    u8 payload[1];
     s32 profile;
 
     if (actor == NULL) {
@@ -78,7 +79,7 @@ Emitter *func_151B4CD0(struct127 *actor, u8 arg1, s32 arg2) {
     desc.offset[2] = 16.0f;
     desc.radius = 15.0f;
     desc.rate = 0.448f;
-    desc.flags = 6;
+    desc.flags = 0x06; /* ON_BONE | LIFETIME (BLOOD_DRIP_* in game_161520.c) */
     desc.lifetime = func_150ADA20() % 21U + 40;
     desc.emitter = 8;
     desc.callback = -1;
@@ -113,26 +114,27 @@ void func_151B4E4C(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Emitter *e
 void func_151B4EA4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5) {
     f32 speed;
     f32 velocity[3];
-    s32 c;
-    f32 g;
-    u32 b;
-    u32 a;
-    f32 f;
+    s32 coin;
+    f32 fracB;
+    u32 randB;
+    u32 randA;
+    f32 fracA;
 
+    // matching: named temporaries; passing the calls inline changes the stack frame
     speed = 0.20500001f;
     velocity[0] = -dirX * speed;
     velocity[1] = -dirY * speed;
     velocity[2] = -dirZ * speed;
-    f = func_150ADA68();
-    a = func_150ADA20();
-    b = func_150ADA20();
-    g = func_150ADA68();
-    c = func_150ADA20() & 1;
-    func_151D9014(position, velocity, arg4, f * 0.497f + -1.0f, a % 31 + 20, b % 101 + 155, g * 152.0f + 109.0f, c,
-                  1.7f, 1.7f, 0, 0, 1, 0, arg5, 1);
+    fracA = func_150ADA68();
+    randA = func_150ADA20();
+    randB = func_150ADA20();
+    fracB = func_150ADA68();
+    coin = func_150ADA20() & 1;
+    func_151D9014(position, velocity, arg4, fracA * 0.497f + -1.0f, randA % 31 + 20, randB % 101 + 155,
+                  fracB * 152.0f + 109.0f, coin, 1.7f, 1.7f, 0, 0, 1, 0, arg5, 1);
 }
 
-/* Attaches emitter 9 (func_151B50A4) to bone 2 of `actor` for 300 frames. */
+/* Attaches emitter 9 (func_151B50A4) to bone 2 of `actor`. */
 Emitter *func_151B4FE0(struct127 *actor, u8 arg1, s32 arg2) {
     Emitter *emitter;
     EmitterDesc desc;
@@ -150,12 +152,12 @@ Emitter *func_151B4FE0(struct127 *actor, u8 arg1, s32 arg2) {
     desc.offset[2] = 16.0f;
     desc.radius = 9.8f;
     desc.rate = 0.143f;
-    desc.flags = 2;
+    desc.flags = 0x02; /* ON_BONE */
     desc.lifetime = 300;
     desc.emitter = 9;
     desc.callback = -1;
     desc.unk2D = 8;
-    emitter = func_1513418C(&desc, 0, arg1, arg2);
+    emitter = func_1513418C(&desc, 0, arg1, arg2); // matching: the named result keeps the 0x38-byte frame
     return emitter;
 }
 
@@ -175,21 +177,26 @@ void func_151B50A4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Emitter *e
 void func_151B50F4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4) {
     f32 speed;
     f32 velocity[3];
-    u8 flag;
-    f32 c;
-    u32 b;
-    u32 a;
-    f32 f;
+    u8 coin;
+    f32 scaledB;
+    u32 randB;
+    u32 randA;
+    f32 fracA;
 
+    // matching: named temporaries; passing the calls inline changes the stack frame
     speed = 0.13000001f;
     velocity[0] = -dirX * speed;
     velocity[1] = -dirY * speed;
     velocity[2] = -dirZ * speed;
-    flag = (func_150ADA20() & 1) ? 1 : 0;
-    f = func_150ADA68();
-    a = func_150ADA20();
-    b = func_150ADA20();
-    c = func_150ADA68() * 202.0f + 142.0f;
-    func_151D9014(position, velocity, 0, f * 0.126f + -0.702f, (a & 0xF) + 10, b % 45 + 137, c, flag, 1.7f, 1.7f, 0,
-                  0, 1, 0, arg4, 1);
+    if (func_150ADA20() & 1) {
+        coin = 1;
+    } else {
+        coin = 0;
+    }
+    fracA = func_150ADA68();
+    randA = func_150ADA20();
+    randB = func_150ADA20();
+    scaledB = func_150ADA68() * 202.0f + 142.0f;
+    func_151D9014(position, velocity, 0, fracA * 0.126f + -0.702f, (randA & 0xF) + 10, randB % 45 + 137, scaledB,
+                  coin, 1.7f, 1.7f, 0, 0, 1, 0, arg4, 1);
 }
