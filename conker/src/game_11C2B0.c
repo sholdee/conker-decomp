@@ -1127,17 +1127,17 @@ typedef struct {
     /* 0x04 */ u8 actorId;
     /* 0x08 */ f32 accum;              /* particles owed, spawned one per 1.0 */
     /* 0x0C */ Vec3f lastPos;          /* actor position on the previous frame */
-} TrailLink; /* 0x18 */
+} ActorTrailLink; /* 0x18 */
 
 typedef struct {
     /* 0x00 */ TimedEffect base;
-    /* 0x28 */ TrailLink link;
-} TrailEmitter;
+    /* 0x28 */ ActorTrailLink link;
+} ActorTrailEmitter;
 
 /* Attaches a trail emitter (func_150F1170) to `actor`. */
 void func_150F10D4(Actor *actor) {
-    TrailLink link;
-    TrailEmitter *emitter;
+    ActorTrailLink link;
+    ActorTrailEmitter *emitter;
 
     link.actor = actor;
     link.actorId = actor->unique_id;
@@ -1146,7 +1146,7 @@ void func_150F10D4(Actor *actor) {
     link.lastPos.y = actor->ypos;
     link.lastPos.z = actor->zpos;
 
-    emitter = (TrailEmitter *)func_15149130(300, -1, 0x4C, -1, 0, 0x3A, sizeof(TrailLink),
+    emitter = (ActorTrailEmitter *)func_15149130(300, -1, 0x4C, -1, 0, 0x3A, sizeof(ActorTrailLink),
                                             0xFF, 1);
     if (emitter != NULL) {
         memcpy(&emitter->link, &link, sizeof(link));
@@ -1155,8 +1155,8 @@ void func_150F10D4(Actor *actor) {
 
 /* Per-frame update of an actor's trail emitter: scatters particles along the path the actor moved
  * this frame; the emitter ends when the actor goes away. */
-void func_150F1170(TrailEmitter *emitter) {
-    TrailLink *link;
+void func_150F1170(ActorTrailEmitter *emitter) {
+    ActorTrailLink *link;
     Actor *actor;
     Vec3f last;
     f32 dx;
@@ -1248,10 +1248,10 @@ void func_150F1170(TrailEmitter *emitter) {
 
 /* Message handler of an actor's trail emitter: released by message 0x43 for its actor,
  * other messages go to the generic func_15149514. */
-void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
-    TrailEmitter **self = &emitter; // matching: address-taken args stay in their stack slots
+void func_150F15F8(ActorTrailEmitter *emitter, s32 data, u8 type) {
+    ActorTrailEmitter **self = &emitter; // matching: address-taken args stay in their stack slots
     ActorMsg **msg = (ActorMsg **)&data;
-    TrailLink *link;
+    ActorTrailLink *link;
     Actor *msgActor;
 
     if (type == 0x43) {
