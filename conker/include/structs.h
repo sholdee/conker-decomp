@@ -517,7 +517,6 @@ typedef struct {
     u8  unk1F;
 } struct47;
 
-
 typedef struct {
     s32 unk0;   // used
     s32 unk4;   // used
@@ -735,7 +734,6 @@ typedef struct ObjPartsState {
     /* 0x0F */ u8 state;         /* PARTS_STATE_* */
 } ObjPartsState;
 
-
 typedef struct {
     u8 pad[0xEC];
 } struct150; // size 0xEC
@@ -843,7 +841,6 @@ typedef struct ObjType {
 typedef struct {
     u8 pad[0x20];
 } struct117; // used as OSMesg
-
 
 struct struct119 {
     s16 unk0;
@@ -2103,7 +2100,6 @@ typedef struct {
     f32 unk34;  // used
 } struct154;
 
-
 /* Camera command playback state (Camera.cmdState, at 0x6CC). */
 typedef struct CamCmdState {
     /* 0x00 */ s16 unk0;
@@ -2483,20 +2479,6 @@ struct Camera {
     /* 0x99C */ f32 sideOffsetTarget;
 }; // size 0x9A0
 
-
-
-// func_80002E50
-typedef struct {
-    u16 unk0;
-    u16 unk2;
-    OSMesgQueue *unk4;
-    OSMesgQueue *unk8;
-    OSMesgQueue *unkC;
-    OSMesgQueue *unk10;
-    s32 (*unk14)(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-    s32 (*unk18)(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-} struct158;
-
 typedef struct {
     s16 unk0;
     s16 unk2;
@@ -2590,27 +2572,6 @@ typedef struct ParticleTexFile {
 } ParticleTexFile; // size 0x10
 
 typedef struct {
-    f32 unk0;   // used
-    f32 unk4;   // used
-    f32 unk8;   // used
-    f32 unkC;
-    f32 unk10;  // used
-    f32 unk14;  // used
-    f32 unk18;  // used
-    f32 unk1C;
-    f32 unk20;  // used
-    f32 unk24;  // used
-    f32 unk28;  // used
-    f32 unk2C;
-} struct164;
-
-typedef struct {
-    s32 unk0;
-    u8  pad[0x14];
-    f32 unk18;
-} struct165;
-
-typedef struct {
     s32 unk0;  // used
     s32 unk4;  // used
     s32 unk8;  // used
@@ -2634,126 +2595,6 @@ typedef struct {
     /* 0x38 */ u8  pad38[0x24];
     /* 0x5C */ f32 unk5C;
 } struct168; // a scripted camera shot (func_1512D560 message), D_800C3600
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    u8  pad12[0x3];
-    u8  unk15;
-} struct169;
-
-typedef struct {
-    s32 unk0; // sp60
-    u8  pad4[0x10];
-    f32 unk18;
-    f32 unk1C;
-    u8  pad20[0x4];
-    f32 unk24;
-    s8  unk28;
-    s8  unk29;
-    s8  unk2A;
-    s8  unk2B;
-    f32 unk2C; // sp8C
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    u8  pad3C[0x4];
-    s32 unk40; // sp A0  // guess f32
-    f32 unk44;           // guess f32
-    s16 unk48;
-    s16 unk4A;
-    f32 unk4C;           // guess f32
-    f32 unk50; // spB0   // guess f32
-    s8  unk54;
-    s8  unk55;
-    s8  unk56;
-    s8  unk57;
-    s8  unk58;
-    s8  unk59;
-    s8  unk5A;
-    s8  unk5B;
-    s8  unk5C;
-    s8  unk5D;
-    s16 unk5E;
-    s16 unk60; // spc0
-    s16 unk62;
-    f32 unk64;
-    f32 unk68;
-    f32 unk6C;
-    f32 unk70; // spD0
-    f32 unk74;
-    f32 unk78;
-    f32 unk7C;
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
-    f32 unk8C;
-    f32 unk90; // spF0
-    f32 unk94;
-    s32 unk98;
-    s32 unk9C;
-    s8  unkA0; // sp100
-    s8  unkA1;
-    s8  unkA2;
-    s8  unkA3;
-    s8  unkA4;
-    s8  unkA5;
-} struct170;
-
-typedef struct {
-    f32 unk0;   // sp8C
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;  // sp9C
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;  // spAC
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;  // spBC
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40; // spCC
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50; // spDC
-    f32 unk54;
-    s32 unk58;
-    s16 unk5C;
-    s16 unk5E;
-    s8  unk60; // spEC
-    u8  pad61[0x3];
-    s32 unk64;
-    s8  unk68;
-    s8  unk69;
-    s8  unk6A;
-    s8  unk6B;
-    s8  unk6C;
-    s8  unk6D;
-    s8  unk6E;
-    s8  unk6F;
-    s8  unk70; // spFC
-    s8  unk71;
-    s8  unk72;
-    u8  unk73;
-    s32 unk74; // sp100
-    s8  unk78;
-    u8  pad79;
-    s16 unk7A;
-    s16 unk7C;
-} struct171;
 
 typedef struct {
     s32 unk0;
@@ -3091,82 +2932,11 @@ typedef struct SpawnPoint {
 } SpawnPoint; // size 0x18
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    struct158* unk8;
-} struct188;
-
-typedef struct struct189 struct189;
-
-struct struct189 {
-    s32 unk0;
-    s32 unk4;
-    struct189* unk8;
-};
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    u8  padC[0x8];
-    f32 unk14;
-    u8  pad18[0x8];
-    f32 unk20;
-    u8  pad24[0xC];
-} struct190;
-
-typedef struct {
-    f32 unk0;
-    u8  pad4[0x3C];
-    f32 unk40;
-    u8  pad44[0x3C];
-    f32 unk80;
-    u8  pad84[0x2C];
-    f32 unkA4;
-    f32 unkA8;
-    f32 unkAC;
-    u8  padB0[0x4];
-    f32 unkB4;
-    u8  padB8[0x3C];
-    f32 unkF4;
-    u8  padF8[0x3C];
-    f32 unk134;
-    u8  unk138[0x3C];
-    f32 unk174;
-    f32 unk178;
-    f32 unk17C;
-    f32 unk180;
-    f32 unk184;
-    f32 unk188;
-    f32 unk18C;
-    f32 unk190;
-    f32 unk194;
-} struct191; // size 0x194
-
-typedef struct {
-    f32 unk0;
-    s32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-} struct192; // size 0x14
-
-typedef struct {
     Actor *unk0;
     Actor *unk4;
     u8 unk8;
     u8 unk9;
 } struct193;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    s16 unk14;
-} struct194;
-
 
 typedef struct {
     s32 unk0;
@@ -3190,48 +2960,11 @@ typedef struct {
 } struct200;
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-} struct201;
-
-typedef struct {
     u8  pad0[0x1C];
     s16 unk1C;
     u8  pad1E[0xA];
     s8  unk28;
 } struct202;
-
-typedef struct {
-    u16 unk0;
-    u16 unk2;
-    u16 unk4;
-    u16 unk6;
-    u16 unk8;
-    u16 unkA;
-    u8  padC[0x4];
-    s32 unk10;
-    u8  pad14;
-    u8  unk15;
-} struct208;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    u8  pad8[0x3];
-    u8  unkB;
-    u8  padC[0x4];
-    f32 unk10;
-    f32 unk14;
-    u8  pad18[0x3];
-    u8  unk1B;
-    u8  pad1C[0x4];
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    u8  pad2C[0x3];
-    u8  unk2F;
-} struct209;
 
 typedef struct {
     f32 unk0;
@@ -3251,29 +2984,6 @@ typedef struct {
     u8  unk8;
     u8  unk9;
 } struct212;
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    u8  pad8[0x8];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    u8  pad18[0x8];
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    s16 unk26;
-    u8  pad28[0x8];
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    u8  pad38[0x8];
-} struct213;
 
 typedef struct {
     u8 pad0[0x7];
@@ -3298,29 +3008,12 @@ typedef struct {
     s32 unk14;
 } struct215;
 
-
 /* One 5-byte command of an object script (Actor.unk218, run by func_1507BC14 in game_A28B0.c): op indexes the
  * command table D_80086730, args are copied to D_800D1890..D_800D1893; an op >= 247 is a 1-byte label. */
 struct ObjScriptCmd {
     /* 0x0 */ u8 op;
     /* 0x1 */ u8 args[4];
 };
-
-typedef struct {
-  f32 unk0;
-  s32 unk4;
-  u8  pad8[0x7];
-  u8  unkF;
-} struct217;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8  unk8;
-    u8  pad9[9];
-    u8  unk12;
-} struct219;
-
 
 typedef struct {
     s32 unk0;
@@ -3331,26 +3024,6 @@ typedef struct {
     u8  unk8;
     u8  unk9;
 } struct223;
-
-typedef struct struct224 struct224;
-
-struct struct224 {
-    u8  pad0[0x10];
-    s32 unk10;
-    u8  unk14;
-    u8  pad15[0xB];
-    s16 unk20;
-    u8  pad22[0x2];
-    s32 unk24;
-    s32 unk28;
-    u8  unk2C[0x4];
-    struct224 *unk30;
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    s32 unk40;
-    struct224 *unk44;
-};
 
 /*
  * Light effect payloads (game_18D770.c, "../Effects/Light/light.c"). Each is stored inline at
@@ -3603,88 +3276,6 @@ typedef struct {
     s32 unk4;
 } struct234; // size 0x8;
 
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s8  unk24;
-    s8  unk25;
-    s8  unk26;
-    s8  unk27;
-    s8  unk28;
-    s8  pad29[0x7];
-} struct238;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-} struct241; // size 0x34
-
-typedef struct {
-    f32 unk0;
-    u8  unk4;
-    u8  pad5[0x3];
-} struct243;
-
-typedef struct {
-    s32 unk0;
-    u8  unk4;
-    u8  unk5;
-    u8  pad6[0x2];
-} struct244;
-
-typedef struct {
-    s32 unk0; // ptr
-    s32 unk4; // ptr
-    s32 unk8; // ptr
-    s8  unkC;
-    u8  unkD;
-    u8  padE[0x2];
-} struct245; // size 0x10
-
-typedef struct {
-    u8  pad0[0x8];
-    u8 *unk8; // ptr?
-    u8  unkC[0x4];
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    u8  unk2C[0x4];
-    s32 unk30;
-} struct246;
-
-
-typedef struct {
-    u16 unk0; // is this a pointer?
-    u16 unk2;
-    u16 unk4;
-    u16 unk6;
-    u16 unk8;
-    u16 unkA;
-} struct248; // size 0xC;
-
 /* Variable-size per-id record, kept in the doubly linked list D_800D2F48 sorted by id (game_C8950).
  * The payload (dataSize bytes) lives inside the same allocation at dataOffset. */
 typedef struct IdRecord {
@@ -3729,11 +3320,6 @@ struct BlockDebris {
     /* 0xB4 */ u8 timer;
     /* 0xB5 */ u8 padB5[0x3];
 }; /* size 0xB8 */
-
-typedef struct {
-    u8 pad0[0xD16];
-    s16 unkD16;
-} struct257;
 
 /*
  * Heap block header. Every block (free or allocated) starts with one; the
@@ -3945,7 +3531,6 @@ typedef struct RenderView {
     /* 0x0FC */ u8  padFC[4];
     /* 0x100 */ Mtx projectionMtx[2]; // indexed by the framebuffer index D_800BE9C0
 } RenderView; // size 0x180
-
 
 /* A thread that receives the scheduler's retrace message; func_100051C8 links it into D_8003B234. */
 typedef struct SchedulerClient {
