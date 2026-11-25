@@ -801,29 +801,29 @@ void func_151BB61C(struct127 *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
             fx.unk74 = 0;
             func_1514FBFC(&fx, arg3, arg4);
             {
-            S32x9 colors;
-            F32x9 scales;
-            Desc15151D6C desc;
-            colors = D_800AA718;
-            scales = D_800AA73C;
-            desc.unk0 = 6;
-            desc.unk4 = 6;
-            desc.pos = hit;
-            desc.vel.x = -delta.x;
-            desc.vel.y = -delta.y;
-            desc.vel.z = -delta.z;
-            desc.surf = surf;
-            desc.unk34 = 456.0f;
-            desc.unk38 = 0.02000000142f;
-            desc.unk3C = 0.02000000142f;
-            desc.unk40 = -1.71f;
-            desc.unk44 = 0.448f;
-            desc.unk48 = 50;
-            desc.unk4A = 20;
-            desc.unk4C = 0.499f;
-            desc.unk50 = 0.7010000348f;
-            desc.unk54 = 21.502f;
-            func_15151D6C(&desc, colors.v, scales.v, 9, arg3, arg4);
+                S32x9 colors;
+                F32x9 scales;
+                Desc15151D6C desc;
+                colors = D_800AA718;
+                scales = D_800AA73C;
+                desc.unk0 = 6;
+                desc.unk4 = 6;
+                desc.pos = hit;
+                desc.vel.x = -delta.x;
+                desc.vel.y = -delta.y;
+                desc.vel.z = -delta.z;
+                desc.surf = surf;
+                desc.unk34 = 456.0f;
+                desc.unk38 = 0.02000000142f;
+                desc.unk3C = 0.02000000142f;
+                desc.unk40 = -1.71f;
+                desc.unk44 = 0.448f;
+                desc.unk48 = 50;
+                desc.unk4A = 20;
+                desc.unk4C = 0.499f;
+                desc.unk50 = 0.7010000348f;
+                desc.unk54 = 21.502f;
+                func_15151D6C(&desc, colors.v, scales.v, 9, arg3, arg4);
             }
         }
     }
@@ -947,6 +947,7 @@ void func_151BBA9C(struct127 *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
     }
 }
 
+/* Spawns a short-lived effect at `pos` with a random size and lifetime. */
 void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
     Header header;
     Header2 header2;
@@ -960,31 +961,32 @@ void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
     header2.unk4 = (s32) pos->y;
     header2.unk8 = (s32) pos->z;
 
-    func_151602C0(&header, &header2, (func_150ADA20() % 0x15U) + 0x1E, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
+    func_151602C0(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
 void func_150E7FEC(f32, s32, Surface *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
 
+/* Spawns a randomised func_150E7FEC effect on surface `surf` at `pos`. */
 void func_151BBFBC(Surface *surf, Vec3f *pos, s32 arg2, s32 arg3) {
-    union { u32 w; f64 _a; } r1;
-    f32 temp_f;
-    u32 r2;
+    s32 pad; // matching: unused stack slot
+    u32 rnd1;
+    f32 rnd0;
+    u32 rnd2;
 
-    temp_f = func_150ADA68();
-    r1.w = func_150ADA20();
-    r2 = func_150ADA20();
-    func_150E7FEC(temp_f * 75.0f + 75.0f, ((r1.w % 0x38) + 0xC8) & 0xFF, surf, pos,
-                  (r2 % 0xCD) + 0x12B, 1, 1, 0, 0, 0, (u8)arg2, 0);
+    rnd0 = func_150ADA68();
+    rnd1 = func_150ADA20();
+    rnd2 = func_150ADA20();
+    func_150E7FEC(rnd0 * 75.0f + 75.0f, ((rnd1 % 56) + 200) & 0xFF, surf, pos,
+                  (rnd2 % 205) + 299, 1, 1, 0, 0, 0, (u8)arg2, 0);
 }
 
-extern f32 D_800AA82C;
 extern u8 D_800AA760;
 extern u8 D_800AA76C;
-void func_15160CDC(s32, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_15160CDC(struct127 *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_151BC074(s32 arg0) {
-    if (arg0 != 0) {
-        func_15160CDC(arg0, 1, &D_800AA760, &D_800AA76C, D_800AA82C, 2, 0x12C,
+void func_151BC074(struct127 *obj) {
+    if (obj != NULL) {
+        func_15160CDC(obj, 1, &D_800AA760, &D_800AA76C, 0.01769899949f, 2, 300,
                       0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
     }
 }
