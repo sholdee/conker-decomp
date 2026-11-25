@@ -1,4 +1,6 @@
 #include <ultra64.h>
+// matching: func_1000E770 is defined with two parameters but called here with four, so this file
+// uses an unprototyped declaration (below) instead of the one in functions.h.
 #define func_1000E770 func_1000E770_2args
 #include "functions.h"
 #undef func_1000E770

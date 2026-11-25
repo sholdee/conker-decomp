@@ -1,9 +1,7 @@
 #include <ultra64.h>
 
-/*
- * The shared headers declare these with parameter types that would change the code here (extra
- * narrowing in callers) or the variable type; hide those declarations and declare them below.
- */
+// matching: the shared headers declare these with parameter types that would change the code here
+// (extra narrowing in callers) or the variable type; hide those declarations and declare them below.
 #define func_1000F91C func_1000F91C_hdr
 #include "functions.h"
 #undef func_1000F91C

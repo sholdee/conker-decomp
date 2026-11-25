@@ -1,6 +1,6 @@
 #include <ultra64.h>
-/* functions.h declares func_151D9B8C's 4th parameter as s32 where a pointer keeps the
- * matching codegen, so it gets a file-local prototype. */
+// matching: functions.h declares func_151D9B8C (as defined) with an s32 4th parameter; this file
+// was compiled against a void * view, which schedules the call differently.
 #define func_151D9B8C func_151D9B8C_s32_decl_in_functions_h
 #include "functions.h"
 #undef func_151D9B8C

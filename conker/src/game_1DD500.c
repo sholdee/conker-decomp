@@ -1,5 +1,6 @@
 #include <ultra64.h>
-/* functions.h declares these three with stale signatures; hide them there and declare the real ones here. */
+// matching: functions.h declares func_151D9B8C (as defined) with an s32 4th parameter; this file
+// was compiled against a void * view, which schedules the call differently.
 #define func_151D9B8C func_151D9B8C_decl_in_functions_h
 #include "functions.h"
 #undef func_151D9B8C

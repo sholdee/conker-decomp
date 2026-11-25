@@ -1,5 +1,6 @@
 #include <ultra64.h>
-/* This file needs other prototypes for these two than functions.h declares. */
+// matching: functions.h declares func_151D9B8C (as defined) with an s32 4th parameter; this file
+// was compiled against a void * view, which schedules the call differently.
 #define func_151D9B8C func_151D9B8C_s32proto
 #include "functions.h"
 #undef func_151D9B8C
