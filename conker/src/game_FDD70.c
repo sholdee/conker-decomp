@@ -4,7 +4,6 @@
 #include "effects.h"
 
 
-extern WorldObject *func_151149AC(u8 id); /* the prop whose id is `id` */
 extern void func_151951E0(Actor *);
 extern void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 extern void func_1507CD64(Actor *, s32);

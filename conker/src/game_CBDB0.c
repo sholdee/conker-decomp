@@ -14,7 +14,6 @@ typedef union {
 /* Script-set scratch words of an object (its WorldObject.touch), each a float or a raw value. */
 #define WORK(obj) ((FloatOrWord *)&(obj)->touch)
 
-extern WorldObject *func_151149AC(u8 id);
 extern s32 func_15086D48(s32);
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
 extern void func_150E4928(WorldObject *);
@@ -163,9 +162,7 @@ s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
     return 0;
 }
 
-extern s32 func_15114050(WorldObject *, s32);
 extern s32 func_15084000(s32);
-extern s32 func_151140C4(WorldObject *);
 
 /* Script "query" handler for the object with id `id`: returns the value that operation `op` asks for. */
 s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
@@ -254,7 +251,6 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
 extern Actor *func_1505EEF4(s32 path);
 extern s32 func_1000F568(s32 base, s32 count);
 extern s32 func_15103C14(s32, s32, s32, s32, s32);
-extern void func_15114D24(WorldObject *, s32, s32, s16, s32, s32);
 /* K&R definitions below (they narrow their short params from the stack); these are their promoted prototypes. */
 s32 func_1509F354(s32 first, s32 last, s32 unplayed, u32 volume, s32 path, s32 nearDistance, s32 farDistance);
 void func_1509F47C(s32 first, s32 last, s32 volume, s32 objId, s32 nearDistance, s32 farDistance);

@@ -426,7 +426,6 @@ extern void func_150D85AC(Actor *);
 extern void func_150F1D10(Actor *, s32, s32);
 extern void func_151CFA4C(Actor *, s32, s32);
 extern void func_151BA518(Actor *, s32, s32);
-extern WorldObject *func_151149AC(s32);
 extern void func_15136C3C(void *, s32, s32, s32, s32, s32, s32, s32);
 extern void func_151A6C90(Actor *, s32, s32);
 extern void func_150E0870(Actor *, s32, s32);

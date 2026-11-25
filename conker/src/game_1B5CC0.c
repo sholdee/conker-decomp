@@ -449,8 +449,6 @@ Gfx *func_151895F4(Gfx *gfx, BoneTrail *trail, s16 player) {
     return gfx;
 }
 
-extern Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, MtxS16 *mtx, s32 view, s32 distance, s32 pass);
-
 /* Type-1 draw: draws the owner world object once per history frame, oldest faintest. */
 Gfx *func_151897A4(Gfx *gfx, BoneTrail *trail, s16 player) {
     s32 i;
@@ -473,7 +471,7 @@ Gfx *func_151897A4(Gfx *gfx, BoneTrail *trail, s16 player) {
     for (i = 0; i < numFilled; i++) {
         objAlpha = ((i + 3) * 32 * alpha) >> 8;
         trail->owner.worldObj->alpha = objAlpha;
-        gfx = func_151137D4(gfx, trail->owner.worldObj, &trail->frames[base + i], player, 0, 0);
+        gfx = func_151137D4(gfx, trail->owner.worldObj, (Mtx *)&trail->frames[base + i], player, 0, 0);
     }
     trail->owner.worldObj->alpha = saved;
     return gfx;

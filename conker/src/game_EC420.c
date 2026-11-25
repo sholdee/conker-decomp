@@ -138,8 +138,6 @@ typedef struct {
 
 #define BOB_WORK(obj) ((BobWork *)&(obj)->touch)
 
-extern void func_15114D24(WorldObject *, s32, s32, s16, s16, s32);
-extern void func_15114F04(WorldObject *, s32, s32);
 extern void func_150A7DA0(f32 [4][4], f32, f32, f32);
 extern void func_15043F6C(f32 [4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
 extern void func_150A7A48(f32 [4][4], f32 [4][4], f32 [4][4]);
@@ -215,7 +213,7 @@ void func_150BF21C(WorldObject *obj) {
                 if (obj->sound_id == 0) {
                     func_15114D24(obj, 0xB9, 0x3E80, 1000, 4000, 0);
                 }
-                func_15114F04(obj, 0x3E80, speed * 500.0f);
+                func_15114F04((s32)obj, 0x3E80, speed * 500.0f);
             } else {
                 height = obj->moveData.word;
                 if (speed < 0.0f) {

@@ -41,7 +41,6 @@ s32 func_150229E4(Actor *obj);
 extern s32 D_800C3668[];
 extern s32 func_15023BB0(SeqEvent *, s32, s32, SeqEvent **, s32, s32, s32, s32, s32, s32, s32);
 void func_15022640(s32 id, s32 scene);
-extern WorldObject *func_151149AC(u8);
 extern Actor *func_1505EEF4(s32);
 extern void func_15082A44(void *, s32, s32, s32, s32);
 

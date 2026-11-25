@@ -1354,7 +1354,6 @@ s32 func_1508DAEC(s32 player, s32 mode);
 
 
 s32 func_1508E780(s32 arg0);
-WorldObject *func_151149AC(u8);
 s32 func_1508E780(s32 type);
 
 s32 func_1508E89C(s32 player, s32 source);

@@ -310,7 +310,6 @@ void func_150A7960(MtxF mf, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ
 void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,
                    s16 *outType, f32 x, f32 y, f32 z, f32 refY, s32 group, void *obj, f32 minY, f32 maxY);
 void func_1510F800(s32);
-void func_1511490C(MtxF mf, WorldObject *obj);
 void func_15004A4C(void);
 
 /*

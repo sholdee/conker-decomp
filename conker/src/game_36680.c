@@ -469,8 +469,6 @@ void func_1500A79C(s32 light, s32 id) {
 
 extern u8 D_80082BF4[6];
 
-extern WorldObject *func_151149AC(u8);
-
 /** Attaches the light to the object func_151149AC returns for `id`, starting at its position. */
 void func_1500A7E8(s32 light, s32 id) {
     LightEffectHeader header;

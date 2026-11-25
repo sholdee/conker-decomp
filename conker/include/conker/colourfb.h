@@ -38,7 +38,6 @@ ScreenEffect *func_1515FF74(EffectDesc *desc, s32 dataSize, u8 owner, s32 list);
 void func_1515FFEC(ScreenEffect *effect);
 void func_15160090(ScreenEffect *effect, s32 data, u8 event);
 s32 func_151600D8(ColourFrameBufferEffect *effect);
-/* func_15160274(s32 data, u8 event) has no prototype here: its one caller, in game_1F7050.c, passes a third
- * argument and declares it itself. */
+void func_15160274(s32 data, u8 event);
 
 #endif

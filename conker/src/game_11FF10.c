@@ -50,7 +50,6 @@ extern struct {
     u8 unk120;
 } *D_800CC5EC;
 extern u8 D_800CC40C;
-WorldObject *func_151149AC(s32);
 void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(Actor *, s32);
 
@@ -68,7 +67,7 @@ void func_150F2A60(s32 arg0) {
         if (D_800CC5EC->unk120 == 0) {
             // matching: `| 0` hides the induction variable, so IDO keeps `slti` instead of testing i != 2
             for (i = 0; i < 2; i = (i + 1) | 0) {
-                entry = func_151149AC((0xFA - i) & 0xFF);
+                entry = func_151149AC(0xFA - i);
                 entryIndex = entry - db_Object_array;
                 if (gWorldObjectContacts[entryIndex] & 1) {
                     if (D_800CC40C != 0) {

@@ -16,7 +16,6 @@ typedef struct SeqQueueEntry {
 
 /* Cutscene state, indexed by scene (and track). */
 
-extern WorldObject *func_151149AC(s32);
 extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
 extern s32 func_150265CC(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
 extern s32 func_15029BB8(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32, s32);

@@ -29,7 +29,6 @@ typedef struct {
 } PropEmitterEffect;
 
 extern u8 D_800A0FE0[];
-extern WorldObject *func_151149AC(u8);
 extern void func_1510F800(s32);
 
 s32 func_1509BE40(s32, s32, s32, s32);

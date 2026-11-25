@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-extern WorldObject *func_151149AC(u32);
 extern void func_15117798(WorldObject *obj);
 
 struct DObj800CC5EC {

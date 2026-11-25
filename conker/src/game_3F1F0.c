@@ -4,7 +4,6 @@
 #include "variables.h"
 
 extern u8 D_800A1C00[][8];
-extern WorldObject *func_151149AC(u8);
 
 typedef struct {
     /* 0x00 */ s16 unk0;

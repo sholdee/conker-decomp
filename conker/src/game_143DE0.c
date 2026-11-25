@@ -25,7 +25,6 @@ extern VertexAnim D_80089320[];
 extern RomFile D_8002AAD0[];
 
 extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_15114D24(WorldObject *obj, s32 sound, s32 arg2, s16 arg3, s16 arg4, s32 flags);
 void func_151169B4(WorldObject *obj);
 void func_15116BAC(WorldObject *obj);
 

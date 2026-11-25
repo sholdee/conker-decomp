@@ -31,7 +31,11 @@ u8 D_800E0BDC;
 // matching: defined here, not extern; IDO then knows the copy loop's stores can't alias the source
 s8 D_800E0BE0[0x1C];
 
+// matching: func_151E6C1C was built against a func_151149AC prototype with an s32 id; hide the header's prototype
+#define func_151149AC func_151149AC_hdr
 #include "functions.h"
+#undef func_151149AC
+WorldObject *func_151149AC(s32 id);
 #include "variables.h"
 
 void func_151DDC20(void);
@@ -3866,7 +3870,6 @@ extern Snd151E6C1C D_800AB920[];
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
 extern s32 func_15086D48(s32);
 extern void func_1000D96C(s32, s32, s32);
-WorldObject *func_151149AC(s32);
 extern f32 sinf(f32);
 
 #define UNK2AC_F32 (*(f32 *)&obj->focus.z) // an f32; structs.h declares Camera.unk2AC as s32

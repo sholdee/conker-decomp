@@ -4,24 +4,6 @@
 
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
 
-/* Turret settings (WorldObject.moveData.data); angles in degrees. */
-typedef struct Turret15112520Cfg {
-    /* 0x00 */ f32 speedNear;
-    /* 0x04 */ f32 speedFar;
-    /* 0x08 */ f32 maxStep;
-    /* 0x0C */ f32 yawMax;
-    /* 0x10 */ f32 yawMin;
-    /* 0x14 */ f32 yawMargin;
-    /* 0x18 */ f32 pitchMax;
-    /* 0x1C */ f32 pitchMin;
-    /* 0x20 */ f32 pitchMargin;
-    /* 0x24 */ f32 baseYaw;
-    /* 0x28 */ f32 basePitch;
-    /* 0x2C */ f32 range;
-    /* 0x30 */ u16 sfx;
-    /* 0x32 */ u16 sfxCooldown; // frames before the motor sound can start again
-} Turret15112520Cfg;
-
 extern f32 D_800DBEC0; // turret's squared distance to the player
 
 /* Turret settings in the data (no code reads this name; a turret object's moveData can point here). */
@@ -257,7 +239,6 @@ void func_15113180(void) {
     }
 }
 
-void func_1511490C(MtxF mtx, WorldObject *obj);
 void func_150A7B80(void *);
 
 /* Writes this frame's model matrix for every object in each view's draw list. */
@@ -319,7 +300,6 @@ void func_15113218(void) {
 }
 
 Gfx *func_151733D8(Gfx *gfx, s32);
-Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance, s32 pass);
 Gfx *func_1515E544(Gfx *gfx, s32, s32, s32, void *);
 
 /* Draws one view's object list; translucent selects the pass (objects with flags bit 0x10 or alpha < 255). */
@@ -547,8 +527,6 @@ s32 func_151140C4(WorldObject *obj) {
     return 0;
 }
 
-void func_1511473C(Actor *actor, s32 objIndex);
-
 /* Dispatches this frame's actor contacts to each object's onContact callback and carries riding actors. */
 void func_15114188(void) {
     s32 i;
@@ -742,17 +720,6 @@ void func_15114B94(u32 index) {
         index--;
     }
 }
-
-/* A sound started by func_15114D24 that follows its object. */
-typedef struct ObjSound {
-    /* 0x00 */ u8 pad0[2];
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[0x10];
-    /* 0x18 */ WorldObject *obj;
-    /* 0x1C */ s32 positioned;
-} ObjSound;
 
 /* Sound callback: moves the sound to its object (once, or every call when *follow is set). Returns 1 if not. */
 s32 func_15114CC4(ObjSound *sound, s32 arg1, s32 *follow, s32 arg3) {

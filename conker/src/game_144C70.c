@@ -240,7 +240,6 @@ void func_15117D3C(WorldObject *prop, Actor *obj) {
     }
 }
 
-extern WorldObject *func_151149AC(u32 id);
 extern void func_1511F31C(WorldObject *prop);
 
 /* Rotates the local point (x, y, z) by the prop's X then Y rotation and adds its position. */
@@ -279,7 +278,6 @@ void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
 
 
 extern void func_15060A30(s32, Actor *);
-extern void func_15114D24(WorldObject *prop, s32 sound, s32, s32, s32, s32);
 
 /*
  * A hinged prop that grabs an object close to its anchor point, swings rotX up to a level-dependent

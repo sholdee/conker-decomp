@@ -1,5 +1,9 @@
 #include <ultra64.h>
+// matching: func_151C9ED4 calls func_15160274 with a third argument; hide the header's prototype
+#define func_15160274 func_15160274_hdr
 #include "functions.h"
+#undef func_15160274
+void func_15160274(s32, s32, s32);
 #include "variables.h"
 
 extern f32 sinf(f32);
@@ -7,8 +11,6 @@ extern void func_1514373C(f32, f32, f32 *, f32 *);
 extern void func_15145974(Vec3f *, f32 *, f32 *);
 
 extern void *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
-// matching: func_15160274 takes (s32 data, u8 event); func_151C9ED4 passes a third argument
-extern void func_15160274(s32, s32, s32);
 extern void func_1515572C(s32, s32);
 extern void func_151A561C(s32, s32);
 

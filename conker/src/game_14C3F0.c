@@ -33,8 +33,6 @@ typedef union {
 #define WORK(prop) ((Work14C3F0 *)&(prop)->touch)
 
 extern void *allocate_memory(s32, s32, s32, s32);
-extern WorldObject *func_151149AC(u8 id); /* the prop whose id is `id`, or NULL */
-extern void func_1511490C(MtxF mtx, WorldObject *prop);
 extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* State of func_1511EF40's swing, allocated on its first update. */

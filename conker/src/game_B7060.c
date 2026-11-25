@@ -1594,7 +1594,6 @@ s32 func_1508E780(s32 arg0);
 void func_1502EA50(Actor *);
 void func_15080620(s32, s32, s32, s32);
 void func_151027E8(Actor *);
-WorldObject *func_151149AC(u8);
 void func_15030158(ModelAttachment *, s32);
 s32 func_15033E28(Actor *, ModelAttachment **);
 
@@ -2110,7 +2109,6 @@ void func_1508EDBC(s32 index) {
 }
 
 void aim_removePoint(s32);
-void func_15114B94(u32);
 
 /* Fires every entry of the link group containing (type, id), then clears the group. */
 void func_1508EE0C(u16 type, u16 id) {

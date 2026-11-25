@@ -5,7 +5,6 @@
 
 
 extern u8 D_800D9946[];
-extern WorldObject *func_151149AC(u32);
 
 // ???
 void func_150104F0(void) {

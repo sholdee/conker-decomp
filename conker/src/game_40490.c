@@ -146,7 +146,6 @@ extern const s32 D_8009658C[];
 extern const s32 D_800965A0[];
 extern const s32 D_800965B4[];
 void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s32, s32);
-extern WorldObject *func_151149AC(u8);
 
 /** Spawns the particle emitter a level object describes; data2 selects the kind of emitter. */
 s32 func_150130B4(TriggerZone *obj) {

@@ -32,8 +32,6 @@ void func_150D13A0(s32 arg0) {
     func_15059C84(arg0);
 }
 
-extern WorldObject *func_151149AC(u32);
-
 void func_150D1410(s32 arg0) {
     WorldObject *temp;
 

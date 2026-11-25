@@ -10,11 +10,9 @@
 
 extern f32 func_150489B0(u8);
 extern void *allocate_memory(s32, s32, s32, s32);
-extern WorldObject *func_151149AC(u32);
 extern void func_15188010(s32, f32 *);
 extern s32 func_15022B08(s32, s32);
 extern void func_1511F990(void *, s32);
-extern void func_15114D24(void *, s32, s32, s32, s32, s32);
 extern void func_1518804C(s32, f32);
 extern void func_15173C60(s32, s32);
 extern void func_15060A30(s32, void *);

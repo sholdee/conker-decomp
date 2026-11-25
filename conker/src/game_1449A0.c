@@ -9,7 +9,6 @@
 #define WORK(obj) ((MoverWork *)&(obj)->touch)
 
 
-extern void func_15114D24(WorldObject *obj, s32 sound, s32 arg2, s16 arg3, s16 arg4, s32 flags);
 f32 func_151172D8(WorldObject *obj, f32 angle);
 f32 func_15117518(WorldObject *obj, f32 angle);
 
