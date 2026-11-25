@@ -34,7 +34,7 @@ void func_10003ACC(s32 red, s32 green, s32 blue) {
     u32 color;
 
     byteCount = (u32)D_800BE620 * (u32)D_800BE624 * 2;
-    pixels = (u16 *)D_8002AAE8[0];
+    pixels = D_8002AAE8[0];
     if (pixels != 0) {
         color = (((u32)red << 8) & 0xF800) | (((u32)green << 3) & 0x7C0) | ((blue >> 2) & 0x3E) | 1;
         count = (s32)byteCount >> 1;
@@ -43,7 +43,7 @@ void func_10003ACC(s32 red, s32 green, s32 blue) {
             pixels = &(*(u16 (*)[])second)[i + 1];
             pixels[-1] = color;
         }
-        second = (u16 *)D_8002AAE8[1];
+        second = D_8002AAE8[1];
         for (i = 0; i < count; i++) {
             second[i] = color;
         }
