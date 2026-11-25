@@ -506,62 +506,63 @@ void func_15194EA8(struct127 *self, struct127 *other, u8 *arg2) {
     func_15194BF0(self, other, &result);
 }
 
-void func_15194F48(s32 arg0, struct127* arg1, s32 arg2) {
-    f32 sp34[3];
+void func_15194F48(struct127 *self, struct127 *other, u8 *arg2) {
+    f32 pos[3];
 
-    sp34[0] = arg1->x_position;
-    sp34[1] = arg1->y_position + 50.0f;
-    sp34[2] = arg1->z_position;
-    func_151C0098(sp34, arg1, 1, 0xFF, 1);
-    func_15136C3C(arg1, 0, 0, 1, 0, 0, 0xFF, 1);
-    func_15145A50(arg1);
-    func_1507CD64(arg1, 6);
+    pos[0] = other->x_position;
+    pos[1] = other->y_position + 50.0f;
+    pos[2] = other->z_position;
+    func_151C0098(pos, other, 1, 0xFF, 1);
+    func_15136C3C(other, 0, 0, 1, 0, 0, 0xFF, 1);
+    func_15145A50(other);
+    func_1507CD64(other, 6);
 }
 
 typedef struct {
     s32 unk0;
     s32 unk4;
-    struct127 *unk8;
+    struct127 *source;
 } Struct15194FF4;
 
-extern s32 func_1518F51C(void *arg0, u8 arg1, s32 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
-extern void func_15190518(void *arg0);
+extern u8 *func_1518F51C(struct127 *obj, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+extern void func_15190518(struct127 *obj);
 
-void func_15194FF4(arg0, arg1, arg2)
-struct127 *arg0;
-struct127 *arg1;
+void func_15194FF4(self, other, arg2)
+struct127 *self;
+struct127 *other;
 u8 arg2;
 {
-    u8 *ret;
-    Struct15194FF4 sp48;
+    u8 *spawned;
+    Struct15194FF4 info;
 
-    func_15190518(arg1);
-    switch (arg1->id) {
-    case 0x0: case 0x1: case 0x2: case 0x3: case 0x4: case 0x11: case 0x14: case 0x16:
-    case 0x3b: case 0x50: case 0x53: case 0x58: case 0x5a: case 0x5f: case 0x70: case 0x74:
-    case 0x75: case 0x7a: case 0x80: case 0x87: case 0x88: case 0x90: case 0x96: case 0x98:
-    case 0x99: case 0x9c: case 0x9d: case 0x9f: case 0xa0: case 0xb0: case 0xb1: case 0xb2:
-    case 0xb4:
+    func_15190518(other);
+    switch (other->id) {
+    case 0x00: case 0x01: case 0x02: case 0x03: case 0x04: case 0x11: case 0x14: case 0x16:
+    case 0x3B: case 0x50: case 0x53: case 0x58: case 0x5A: case 0x5F: case 0x70: case 0x74:
+    case 0x75: case 0x7A: case 0x80: case 0x87: case 0x88: case 0x90: case 0x96: case 0x98:
+    case 0x99: case 0x9C: case 0x9D: case 0x9F: case 0xA0: case 0xB0: case 0xB1: case 0xB2:
+    case 0xB4:
         if (D_800BE616 != 0) {
-            sp48.unk0 = 0x7D;
-            sp48.unk4 = 5;
-            if ((arg0->id == 0xFF) && (arg0->unk124 != 0)) {
-                sp48.unk8 = &D_800CC2D0[arg0->unk124 - 1];
+            info.unk0 = 0x7D;
+            info.unk4 = 5;
+            if (self->id == 0xFF && self->unk124 != 0) { // an id-0xFF object names its owner by slot + 1
+                info.source = &D_800CC2D0[self->unk124 - 1];
             } else {
-                sp48.unk8 = arg0;
+                info.source = self;
             }
-            ret = (u8 *)func_1518F51C(arg1, 0, 250, arg2 ? 0 : -1, arg2 ? 0 : -1, 8, arg2 ? 1 : 0, arg2 ? 0xC : 0, 0xFF, 1);
-            if ((ret != 0) && (arg2 != 0)) {
-                memcpy(ret + 0x90, &sp48, 0xC);
+            spawned = func_1518F51C(other, 0, 250, arg2 ? 0 : -1, arg2 ? 0 : -1, 8, arg2 ? 1 : 0, arg2 ? 12 : 0, 0xFF, 1);
+            if (spawned != NULL && arg2 != 0) {
+                memcpy(spawned + 0x90, &info, sizeof(info));
                 {
-                    u8 *temp = (u8 *)arg1->unk31C;
-                    if (temp != NULL) {
-                        temp[0x1AC] = 1;
+                    u8 *ext = (u8 *)other->unk31C; // unk31C is longer than struct126 declares
+
+                    if (ext != NULL) {
+                        ext[0x1AC] = 1;
                     }
                 }
             }
         } else {
-            func_1518F51C(arg1, 0, 300, -1, -1, 8, 0, 0, 0xFF, 1);
+            func_1518F51C(other, 0, 300, -1, -1, 8, 0, 0, 0xFF, 1);
         }
         break;
     }
@@ -574,55 +575,54 @@ extern void func_150D10E4(void *arg0, u8 arg1);
 #define U8AT(p, off) (*(u8 *)((u8 *)(p) + (off)))
 #define F32AT(p, off) (*(f32 *)((u8 *)(p) + (off)))
 
-void func_151951E0(struct127 *arg0) {
-    struct127 *obj;
+void func_151951E0(struct127 *obj) {
+    struct127 *copy;
 
-    arg0->health = 0;
-    func_1507CD64(arg0, 5);
-    func_15194AB4(arg0);
-    arg0->interaction_state = 0x28;
-    arg0->xz_velocity = -3.0f;
-    F32AT(arg0, 0xBC) = -10.0f - (func_150ADA20() % 5U);
-    arg0->unk148 = (func_150ADA20() % 10U) - 5.0f;
-    arg0->y_velocity = 0.0f;
-    arg0->gravity = 0.0f;
-    obj = func_1505ED34();
+    obj->health = 0;
+    func_1507CD64(obj, 5);
+    func_15194AB4(obj);
     obj->interaction_state = 0x28;
-    obj->id = arg0->id;
-    obj->immune = 0xFF;
-    obj->stunned = 0xFF;
-    obj->x_position = arg0->x_position;
-    obj->y_position = arg0->y_position;
-    obj->z_position = arg0->z_position;
-    obj->unk40 = arg0->unk40;
-    obj->unk76 = arg0->unk76;
-    obj->unk7A = arg0->unk7A;
-    obj->unkB8 = arg0->unkB8;
-    obj->xz_scale = arg0->xz_scale;
-    obj->y_scale = arg0->y_scale;
-    obj->xz_velocity = 10.0f;
-    F32AT(obj, 0xBC) = (func_150ADA20() % 5U) + 10.0f;
+    obj->xz_velocity = -3.0f;
+    F32AT(obj, 0xBC) = -10.0f - (func_150ADA20() % 5U);
     obj->unk148 = (func_150ADA20() % 10U) - 5.0f;
-    U8AT(obj, 0x68) = U8AT(arg0, 0x68);
-    U8AT(obj, 0x69) = U8AT(arg0, 0x69);
-    U8AT(obj, 0x6A) = U8AT(arg0, 0x6A);
-    U8AT(obj, 0x6B) = U8AT(arg0, 0x6B);
-    U8AT(obj, 0x6C) = U8AT(arg0, 0x6C);
-    U8AT(obj, 0x6D) = U8AT(arg0, 0x6D);
-    obj->unk76 += (func_150ADA20() % 10922U) - 5461.33349609375f;
-    obj->unk40 = (arg0->unk76 + 0x4000) * 0.0054931640625f;
-    obj->unkF8 = arg0->unkF8;
-    obj->unk9C |= 0x0FFF0000;
-    func_150838EC(obj, arg0->unk84.uh, 0, arg0->animation_speed);
-    func_150D10E4(arg0, 0);
-    func_150D10E4(obj, 1);
+    obj->y_velocity = 0.0f;
+    obj->gravity = 0.0f;
+    copy = func_1505ED34();
+    copy->interaction_state = 0x28;
+    copy->id = obj->id;
+    copy->immune = 0xFF;
+    copy->stunned = 0xFF;
+    copy->x_position = obj->x_position;
+    copy->y_position = obj->y_position;
+    copy->z_position = obj->z_position;
+    copy->unk40 = obj->unk40;
+    copy->unk76 = obj->unk76;
+    copy->unk7A = obj->unk7A;
+    copy->unkB8 = obj->unkB8;
+    copy->xz_scale = obj->xz_scale;
+    copy->y_scale = obj->y_scale;
+    copy->xz_velocity = 10.0f;
+    F32AT(copy, 0xBC) = (func_150ADA20() % 5U) + 10.0f;
+    copy->unk148 = (func_150ADA20() % 10U) - 5.0f;
+    U8AT(copy, 0x68) = U8AT(obj, 0x68);
+    U8AT(copy, 0x69) = U8AT(obj, 0x69);
+    U8AT(copy, 0x6A) = U8AT(obj, 0x6A);
+    U8AT(copy, 0x6B) = U8AT(obj, 0x6B);
+    U8AT(copy, 0x6C) = U8AT(obj, 0x6C);
+    U8AT(copy, 0x6D) = U8AT(obj, 0x6D);
+    copy->unk76 += (func_150ADA20() % 10922U) - 65536.0f / 12;
+    copy->unk40 = (obj->unk76 + 0x4000) * (360.0f / 65536);
+    copy->unkF8 = obj->unkF8;
+    copy->unk9C |= 0x0FFF0000;
+    func_150838EC(copy, obj->unk84.uh, 0, obj->animation_speed);
+    func_150D10E4(obj, 0);
+    func_150D10E4(copy, 1);
 }
 
-extern f32 D_800A8708;
-extern void func_1514373C(f32, f32, f32 *, f32 *);
-extern void func_15137610(struct127 *, f32 *, f32 *, f32 *, u8, s32);
+extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
+extern void func_15137610(struct127 *obj, f32 *from, f32 *to, f32 *dir, u8 arg4, s32 arg5);
 
-void func_15195528(struct127 *arg0, struct127 *arg1, s32 arg2) {
+void func_15195528(struct127 *self, struct127 *other, u8 *arg2) {
     f32 angle;
     f32 from[3];
     f32 to[3];
@@ -630,24 +630,24 @@ void func_15195528(struct127 *arg0, struct127 *arg1, s32 arg2) {
     f32 dx;
     f32 dz;
 
-    if (arg0 != NULL) {
-        angle = arg0->unk40 - 90.0f;
-    } else if (arg1 != NULL) {
-        angle = arg1->unk40 - 90.0f;
+    if (self != NULL) {
+        angle = self->unk40 - 90.0f;
+    } else if (other != NULL) {
+        angle = other->unk40 - 90.0f;
     } else {
         angle = func_150ADA68() * 360.0f;
     }
-    func_1514373C(angle * D_800A8708, 1.0f, &dir[0], &dir[2]);
+    func_1514373C(angle * 0.01745329238f, 1.0f, &dir[0], &dir[2]);
     dir[1] = 0.0f;
     dx = dir[0] * 20.0f;
-    from[0] = arg1->x_position + dx;
-    from[1] = arg1->y_position + 50.0f;
+    from[0] = other->x_position + dx;
+    from[1] = other->y_position + 50.0f;
     dz = dir[2] * 20.0f;
-    from[2] = arg1->z_position + dz;
-    to[0] = arg1->x_position - dx;
-    to[1] = arg1->y_position + 50.0f;
-    to[2] = arg1->z_position - dz;
-    func_15137610(arg1, from, to, dir, 0xFF, 1);
+    from[2] = other->z_position + dz;
+    to[0] = other->x_position - dx;
+    to[1] = other->y_position + 50.0f;
+    to[2] = other->z_position - dz;
+    func_15137610(other, from, to, dir, 0xFF, 1);
 }
 
 void func_15195650(struct127 *self, struct127 *other, u8 *arg2) {
@@ -655,29 +655,26 @@ void func_15195650(struct127 *self, struct127 *other, u8 *arg2) {
     func_151B09BC(self, other, 1000, 0xFF, 0);
 }
 
-extern void func_15145A50(struct127 *arg0);
-extern void func_1507CD64(struct127 *arg0, s32 arg1);
-
-void func_15195698(struct127 *arg0, struct127 *arg1, s32 arg2) {
-    if (arg1->health == 0) {
-        if (arg1->unk127 != 0xFF) {
-            func_15136C3C(arg1, 1, 1, 1, 1, 0, 0xFF, 1);
-            func_15145A50(arg1);
-            func_1507CD64(arg1, 6);
+void func_15195698(struct127 *self, struct127 *other, u8 *arg2) {
+    if (other->health == 0) {
+        if (other->unk127 != 0xFF) {
+            func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
+            func_15145A50(other);
+            func_1507CD64(other, 6);
         }
     }
-    if (arg0->id == 0x47) {
-        arg0->health = 0;
+    if (self->id == 0x47) {
+        self->health = 0;
     }
 }
 
-void func_15195738(s32 arg0, s32 arg1, s32 arg2) {
-    Struct15195738Small sp18;
+void func_15195738(struct127 *self, struct127 *other, u8 *arg2) {
+    Struct15195738Small params;
 
-    sp18.unk0 = 1;
-    sp18.unk2 = (func_150ADA20() % 0xBU) + 0x14;
-    sp18.unk4 = 8;
-    sp18.unk6 = -1;
-    sp18.unk5 = 1;
-    func_151D8868(&sp18, 0, 0xFF, 0);
+    params.unk0 = 1;
+    params.unk2 = (func_150ADA20() % 11U) + 20;
+    params.unk4 = 8;
+    params.unk6 = -1;
+    params.unk5 = 1;
+    func_151D8868(&params, 0, 0xFF, 0);
 }
