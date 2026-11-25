@@ -66,18 +66,19 @@ typedef struct {
     /* 0x94A */ u8  pad94A[0x56];
 } CameraZoneView; /* size 0x9A0, as struct108 */
 
-void func_1000FC18(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4);
-s32 func_150A1DA0(struct127 *actor, TriggerZone *zone, s32 useActorRadius);
+void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, s32 farDistance); /* stops a positional sound */
+s32 func_150A1DA0(struct127 *actor, TriggerZone *zone, s32 withMargin);
 void func_150A23E4(TriggerZone *zone);
 
-/* Per-frame update of the zones that run without an actor inside them. */
-void func_150A09D0(s32 arg0) {
-    u32 count;
+/* Per-frame update of the zone state that does not depend on an actor (ticks is unused). */
+void func_150A09D0(s32 ticks) {
+    u32 countdown;
     s32 i;
 
     for (i = 0; i < D_800D3094; i++) {
         switch (ZONE_TYPE(&D_800D3098[i])) {
-        case 2:
+        case 2: /* sound zone: unk20 is 1 while occupied (func_150A23E4 sets it each time); a zone left
+                   unoccupied for a whole update gets its looping sound stopped */
             if (D_800D3098[i].unk20 == 1) {
                 D_800D3098[i].unk20 ^= 3;
             } else if (D_800D3098[i].unk20 == 2) {
@@ -94,7 +95,7 @@ void func_150A09D0(s32 arg0) {
                 }
             }
             break;
-        case 7:
+        case 7: /* music-channel zone (func_1000E46C sets channel volumes) */
             if (ZONE_SHAPE(&D_800D3098[i]) == 3) {
                 D_800D3098[i].unk20 = 0;
             } else {
@@ -111,17 +112,18 @@ void func_150A09D0(s32 arg0) {
             break;
         case 4:
             if (D_800D3098[i].subtype != 9) {
-                count = D_800D3098[i].unk1C & 0xFF;
-                if (count != 0) {
+                /* count down the respawn delay of the object func_150A24C0 spawned */
+                countdown = D_800D3098[i].unk1C & 0xFF;
+                if (countdown != 0) {
                     if (!D_800D3098[i].disabled) {
-                        count--;
+                        countdown--;
                     } else {
-                        count = 0;
+                        countdown = 0;
                     }
-                    D_800D3098[i].unk1C = (D_800D3098[i].unk1C & ~0xFF) | count;
-                    if (count == 0) {
-                        count = D_800D3098[i].unk1C;
-                        D_800DDF5C[(count >> 8) & 0xFF] = 0;
+                    D_800D3098[i].unk1C = (D_800D3098[i].unk1C & ~0xFF) | countdown;
+                    if (countdown == 0) {
+                        countdown = D_800D3098[i].unk1C;
+                        D_800DDF5C[(countdown >> 8) & 0xFF] = 0;
                         D_800D3098[i].unk1C &= 0xFFFF0000;
                     }
                 }
@@ -153,13 +155,14 @@ void func_150A09D0(s32 arg0) {
 void func_150A0D14(TriggerZone *zone) {
     f32 angle;
 
-    angle = zone->pitch * 0.01745329238f;
+    angle = zone->pitch * 0.01745329238f; /* degrees to radians */
     zone->sinPitch = func_150AD78C(angle);
     zone->cosPitch = func_150AD780(angle);
     angle = zone->yaw * 0.01745329238f;
     zone->sinYaw = func_150AD78C(angle);
     zone->cosYaw = func_150AD780(angle);
 }
+
 void func_15035808(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 s32 func_150AD9A0(s16, s16, s16);
 
@@ -201,8 +204,8 @@ void func_150A0D8C(void) {
 }
 
 /* Offsets a value by 0x400; used to hide the cartridge-check address and value in func_150A11C4. */
-s32 func_150A1040(s32 arg0) {
-    return arg0 + 0x400;
+s32 func_150A1040(s32 value) {
+    return value + 0x400;
 }
 
 /* Tests the camera position against the given zones and applies the type-1 (camera) ones. */
@@ -277,9 +280,9 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
 s32 __osPiGetAccess(void);
 void __osPiRelAccess(void);
 s32 osPiRawReadIo(u32, u32 *);
-void func_150A24C0(TriggerZone *zone, s32 arg1);
+void func_150A24C0(TriggerZone *zone, s32 unk127);
 void func_15172E7C(struct127 *actor, s32 arg1, s32 arg2);
-void func_150A25D4(TriggerZone *zone, struct127 *actor, s32 arg2, s64 prevBits);
+void func_150A25D4(TriggerZone *zone, struct127 *actor, s32 unk127, s64 prevBits);
 
 /* Finds the zones that contain the actor (narrowed through the zone bounding boxes) and applies them. */
 void func_150A11C4(struct127 *actor) {
@@ -665,7 +668,7 @@ s32 func_150A1DA0(struct127 *actor, TriggerZone *zone, s32 withMargin) {
     return 1;
 }
 
-/* Type-2 zone: plays its positional sound (func_1000FA64) once; unk20 latches it until reset. */
+/* Type-2 zone occupied: starts its looping positional sound (func_1000FA64) if it is not playing yet. */
 void func_150A23E4(TriggerZone *zone) {
     s32 flags;
     s32 farFlag;
@@ -709,39 +712,40 @@ typedef struct {
     /* 0x20 */ u32 unk20;
 } TriggerZoneBytes;
 
-/* Type-4 zone: spawns its object (func_15183290) once its countdown in the low byte of unk1C is 0. */
-void func_150A24C0(TriggerZone *zone, s32 arg1) {
-    s32 temp_v0;
-    s32 var_v0;
-    s32 type;
-    s32 sub;
-    s32 posY;
+/* Type-4 zone: spawns its object (func_15183290) once the countdown in the low byte of unk1C is 0;
+   while the zone stays occupied the countdown is held at 2 or more. */
+void func_150A24C0(TriggerZone *zone, s32 unk127) {
+    s32 handle;
+    s32 countdown;
+    s32 subtype;
+    s32 lo18;
+    s32 hi18;
     s32 b1A;
     s32 b1C;
     s32 b1D;
-    s32 w20;
+    s32 unk20;
 
-    if (arg1 != 0xFF) {
-        if (((zone->unk1C & 0xFF) == 0) || (zone->subtype == 9)) {
-            type = zone->subtype;
-            sub = zone->unk18 & 0xFF;
-            posY = ((TriggerZoneBytes *)zone)->unk18;
+    if (unk127 != 0xFF) {
+        if ((zone->unk1C & 0xFF) == 0 || zone->subtype == 9) {
+            /* matching: each argument goes through its own local, in this order */
+            subtype = zone->subtype;
+            lo18 = zone->unk18 & 0xFF;
+            hi18 = ((TriggerZoneBytes *)zone)->unk18;
             b1A = ((TriggerZoneBytes *)zone)->unk1A;
             b1C = ((TriggerZoneBytes *)zone)->unk1C;
             b1D = ((TriggerZoneBytes *)zone)->unk1D;
-            w20 = zone->unk20;
-            temp_v0 = func_15183290(zone->x, zone->y + (b1D * 0x10), zone->z,
-                                    sub, type, zone->radius, arg1,
-                                    posY, b1A, b1C, w20);
-            if ((temp_v0 != -1) && (zone->subtype != 9)) {
-                zone->unk1C = (temp_v0 << 8) | 0xF0 | (zone->unk1C & 0xFFFF0000);
+            unk20 = zone->unk20;
+            handle = func_15183290(zone->x, zone->y + b1D * 16, zone->z, lo18, subtype, zone->radius, unk127,
+                                   hi18, b1A, b1C, unk20);
+            if (handle != -1 && zone->subtype != 9) {
+                zone->unk1C = (handle << 8) | 0xF0 | (zone->unk1C & 0xFFFF0000);
             }
         } else {
-            var_v0 = (zone->unk1C & 0xFF);
-            if (var_v0 < 2) {
-                var_v0 = 2;
+            countdown = zone->unk1C & 0xFF;
+            if (countdown < 2) {
+                countdown = 2;
             }
-            zone->unk1C = (zone->unk1C & ~0xFF) | var_v0;
+            zone->unk1C = (zone->unk1C & ~0xFF) | countdown;
         }
     }
 }
@@ -752,26 +756,27 @@ void func_150E7290(s32 arg0, s32 owner, s32 kind);
 void func_150E68B0(struct127 *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex);
 void func_151CE51C(struct127 *actor, TriggerZone *zone);
 
-/* Type-12 zone: subtype-specific effect on the actor inside it. */
-void func_150A25D4(TriggerZone *zone, struct127 *actor, s32 arg2, s64 prevBits) {
+/* Type-12 zone: subtype-specific effect on the actor inside it; prevBits bit 0 is "was inside last time". */
+void func_150A25D4(TriggerZone *zone, struct127 *actor, s32 unk127, s64 prevBits) {
     switch (zone->subtype) {
     case 0:
         break;
     case 1:
-        if (arg2 != 0xFF) {
-            func_150E7290(arg2, 0xFF, 0);
+        if (unk127 != 0xFF) {
+            func_150E7290(unk127, 0xFF, 0);
         }
         break;
     case 2:
-        if (arg2 != 0xFF) {
-            D_800D9EB8[arg2][0] = zone->unk18;
-            D_800D9EB8[arg2][1] = zone->unk1C;
-            D_800D9EB8[arg2][2] = zone->unk20;
+        if (unk127 != 0xFF) {
+            /* colour: one byte each from unk18, unk1C, unk20 */
+            D_800D9EB8[unk127][0] = zone->unk18;
+            D_800D9EB8[unk127][1] = zone->unk1C;
+            D_800D9EB8[unk127][2] = zone->unk20;
         }
         break;
     case 3:
-        if (arg2 != 0xFF) {
-            func_150E68B0(actor, arg2, zone, ((TriggerZoneBytes *)zone)->unk1B);
+        if (unk127 != 0xFF) {
+            func_150E68B0(actor, unk127, zone, ((TriggerZoneBytes *)zone)->unk1B);
         }
         break;
     case 6: {
@@ -839,7 +844,7 @@ void func_150A2864(u32 id, s32 disabled) {
 /* Sets zone id's unk18 and subtype (-1 leaves one unchanged) and clears its unk1C. */
 void func_150A2940(s32 id, s32 unk18, s32 subtype) {
     id &= 0xFFF;
-    if ((u32)id < D_800D3094) {
+    if (id < D_800D3094) {
         if (unk18 != -1) {
             D_800D3098[id].unk18 = unk18;
         }
@@ -919,7 +924,7 @@ s32 func_150A2D84(s32 camIndex, s32 id) {
 
     cam = &D_800DBFF0[camIndex];
     id &= 0xFFF;
-    if (D_800D3094 < (u32)id) {
+    if (D_800D3094 < id) {
         return 1;
     }
     probe.x_position = cam->unk2F8;
@@ -933,7 +938,7 @@ s32 func_150A2D84(s32 camIndex, s32 id) {
 }
 
 /* Returns 1 if the point is behind (or on) the zone's rotated plane, else 0.
- * The dead u/z computations are needed: they reproduce the original's register allocation
+ * matching: the dead u/z computations reproduce the original's register allocation
  * (u reserves $f16 so t lands in $f18) and block IDO's (a - b <= 0) -> (a <= b) fold. */
 s32 func_150A2E4C(TriggerZone *zone, f32 x, f32 y, f32 z) {
     f32 s;
@@ -963,45 +968,36 @@ s32 func_150A2E4C(TriggerZone *zone, f32 x, f32 y, f32 z) {
 
 /* Returns whether actor `actor` is behind gate zone id (0 for zones that are not gates, 1 for bad ids). */
 s32 func_150A2EE4(s32 actor, s32 id) {
-    TriggerZone *base;
-    s32 ret;
-
     id &= 0xFFF;
-    if (D_800D3094 < (u32)id) {
+    if (D_800D3094 < id) {
         return 1;
     }
-    base = D_800D3098;
-    ret = 0;
-    if (ZONE_SHAPE(&base[id]) == 3) {
-        return func_150A2E4C(base + id, D_800CC2D0[actor].x_position, D_800CC2D0[actor].y_position,
+    if (ZONE_SHAPE(&D_800D3098[id]) == 3) {
+        return func_150A2E4C(&D_800D3098[id], D_800CC2D0[actor].x_position, D_800CC2D0[actor].y_position,
                              D_800CC2D0[actor].z_position);
     }
-    return ret;
+    return 0;
 }
 
 /* As func_150A2EE4, for camera `camIndex`'s position. */
 s32 func_150A2FA4(s32 camIndex, s32 id) {
-    TriggerZone *base;
     struct108 *cam;
-    s32 ret;
 
     cam = &D_800DBFF0[camIndex];
     id &= 0xFFF;
-    if (D_800D3094 < (u32)id) {
+    if (D_800D3094 < id) {
         return 1;
     }
-    ret = 0;
-    if (ZONE_SHAPE(&(base = D_800D3098)[id]) == 3) {
-        return func_150A2E4C(base + id, cam->unk2F8, cam->unk2FC, cam->unk300);
+    if (ZONE_SHAPE(&D_800D3098[id]) == 3) {
+        return func_150A2E4C(&D_800D3098[id], cam->unk2F8, cam->unk2FC, cam->unk300);
     }
-    return ret;
+    return 0;
 }
 
 /* Returns 1 if the point is inside an enabled type-3 zone of the given subtype. */
 s32 func_150A3058(s32 subtype, s16 x, s16 y, s16 z) {
-    u8 pad[4]; // matching: unused stack slot
+    u8 pad[4]; // matching: unused local of the original (frame layout)
     struct127 probe;
-    TriggerZone *base;
     s32 i;
 
     probe.x_position = x;
@@ -1013,11 +1009,10 @@ s32 func_150A3058(s32 subtype, s16 x, s16 y, s16 z) {
     probe.old_z_position = z;
 
     for (i = 0; i < D_800D3094; i++) {
-        base = D_800D3098;
-        if (base[i].disabled == 0) {
-            if (3 == ZONE_TYPE(&base[i])) {
-                if (base[i].subtype == subtype) {
-                    if (func_150A1DA0(&probe, &base[i], 0) == 0) {
+        if (!D_800D3098[i].disabled) {
+            if (ZONE_TYPE(&D_800D3098[i]) == 3) {
+                if (D_800D3098[i].subtype == subtype) {
+                    if (func_150A1DA0(&probe, &D_800D3098[i], 0) == 0) {
                         return 1;
                     }
                 }
@@ -1057,7 +1052,7 @@ TriggerZone *func_150A3194(s32 type, s32 subtype, s32 x, s32 y, s32 z) {
 /* Returns 1 if the point is inside the zone. */
 s32 func_150A32B4(TriggerZone *zone, s32 x, s32 y, s32 z) {
     struct127 probe;
-    u8 pad[8]; // matching: unused stack slot
+    u8 pad[8]; // matching: unused local of the original (frame layout)
 
     probe.x_position = x;
     probe.old_x_position = x;
