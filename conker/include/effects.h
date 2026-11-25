@@ -407,6 +407,38 @@ typedef struct FloorParticle {
     /* 0x170 */ f32 floorY;
 } FloorParticle;
 
+/* game_1ED0F0.c's views of the objects func_151B8908 and func_151B8400 return, defined there. */
+struct FollowFx;
+struct Bullet88;
+
+/* Per-bullet state, stored at Bullet.state (0xD0 bytes). */
+typedef struct BulletState {
+    /* 0x000 */ RayHit ray;
+    /* 0x064 */ f32 lifetime;
+    /* 0x068 */ f32 speed;
+    /* 0x06C */ Actor *owner;
+    /* 0x070 */ IgnoreList ignore;
+    /* 0x080 */ LightEffect *trail;
+    /* 0x084 */ struct FollowFx *follow; /* func_151B8908 (game_1E58B0.c) */
+    /* 0x088 */ struct Bullet88 *unk88;  /* func_151B8400's particle (game_1E58B0.c) */
+    /* 0x08C */ void *unk8C;
+    /* 0x090 */ u16 sound;
+    /* 0x092 */ u8 impactType;
+    /* 0x093 */ u8 pad93;
+    /* 0x094 */ f32 passTimer;
+    /* 0x098 */ Vec3f passPos;
+    /* 0x0A4 */ CollisionHit pass;
+    /* 0x0C8 */ u8 flags; /* bit 0: the trace went through a pass-through surface */
+    /* 0x0C9 */ u8 padC9[3];
+    /* 0x0CC */ s32 mode;
+} BulletState; /* size 0xD0 */
+
+/* A bullet: a ModelParticle (func_15132A4C) spawned by func_151C0698 (game_1ED0F0.c) and updated by
+ * func_151C1180, with its BulletState as data. */
+typedef struct Bullet {
+    /* 0x000 */ ModelParticle head;
+    /* 0x170 */ BulletState state;
+} Bullet; /* size 0x240 */
 
 /* A particle's width and height, copied as one struct by some callers. */
 typedef struct ParticleSize {

@@ -6,17 +6,6 @@
 
 extern u8 D_800AA490;
 
-/* The leading fields of a bullet object (see func_151C0698 in game_1ED0F0.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 fxList;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 fxOwner;
-    /* 0x0D */ u8 padD[0x2B];
-    /* 0x38 */ Vec3f pos;
-    /* 0x44 */ Vec3f vel;
-} Bullet;
-
 /* A particle spawned by func_151B8400, which keeps its bullet at 0x110. */
 typedef struct {
     /* 0x000 */ DefParticleHead head;
@@ -44,10 +33,10 @@ BulletParticle *func_151B8400(Bullet *bullet) {
     spawn.def.rgba[3] = 0xFF;
     spawn.def.width = 9.0f;
     spawn.def.height = 1.0f;
-    spawn.def.pos = spawn.def.rot = bullet->pos;
-    spawn.def.scale.x = bullet->vel.x * 0.25f;
-    spawn.def.scale.y = bullet->vel.y * 0.25f;
-    spawn.def.scale.z = bullet->vel.z * 0.25f;
+    spawn.def.pos = spawn.def.rot = bullet->head.pos;
+    spawn.def.scale.x = bullet->head.vel.x * 0.25f;
+    spawn.def.scale.y = bullet->head.vel.y * 0.25f;
+    spawn.def.scale.z = bullet->head.vel.z * 0.25f;
     spawn.def.flags = 0x0CCC0000;
     spawn.def.unk44 = 0xC8;
     spawn.def.unk45 = 0xFF;
@@ -59,8 +48,8 @@ BulletParticle *func_151B8400(Bullet *bullet) {
     spawn.def.fadeStart = 50;
     spawn.def.fadeRate = 5;
 
-    particle = func_1513D2F0(&spawn.def, &D_800AA490, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, bullet->fxOwner,
-                             bullet->fxList);
+    particle = func_1513D2F0(&spawn.def, &D_800AA490, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, bullet->head.header.owner,
+                             bullet->head.header.kind);
     if (particle != NULL) {
         memcpy(&particle->bullet, &spawn.owner, sizeof(spawn.owner));
     }
@@ -73,7 +62,7 @@ s32 func_151B85AC(BulletParticle *particle) {
     Bullet *bullet = particle->bullet;
 
     if (bullet != NULL) {
-        particle->head.def.pos = bullet->pos;
+        particle->head.def.pos = bullet->head.pos;
         particle->head.def.rot.x += particle->head.def.scale.x * D_800BE9A4;
         particle->head.def.rot.y += particle->head.def.scale.y * D_800BE9A4;
         particle->head.def.rot.z += particle->head.def.scale.z * D_800BE9A4;
@@ -97,9 +86,9 @@ void func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
     BloodTrailDesc20 desc;
 
     desc.radius = 10.0f;
-    desc.x = &bullet->pos.x;
-    desc.y = &bullet->pos.y;
-    desc.z = &bullet->pos.z;
+    desc.x = &bullet->head.pos.x;
+    desc.y = &bullet->head.pos.y;
+    desc.z = &bullet->head.pos.z;
     desc.rate = 0.2074999958f * D_800DCA24;
     desc.lifetime = 300;
     desc.flags = 0;
@@ -173,7 +162,7 @@ void func_151B8908(Bullet *bullet) {
     spawn.alpha = 0xFF;
     spawn.brightness = 0xFF;
     spawn.width = spawn.height = func_150ADA68() * 500.0f + 900.0f;
-    spawn.pos = bullet->pos;
+    spawn.pos = bullet->head.pos;
     spawn.offset = D_800A5480;
     spawn.vel = D_800A5480;
     spawn.fadeStart = 1;
@@ -191,5 +180,5 @@ void func_151B8908(Bullet *bullet) {
     spawn.handlerSet = 0;
     spawn.viewMask = 0;
     spawn.views = 0xFF;
-    func_15130280(&spawn, 1, 0, 0, bullet->fxOwner, bullet->fxList);
+    func_15130280(&spawn, 1, 0, 0, bullet->head.header.owner, bullet->head.header.kind);
 }

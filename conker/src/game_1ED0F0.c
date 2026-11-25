@@ -244,51 +244,16 @@ void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList) {
 }
 
 
-typedef struct {
+typedef struct FollowFx {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 pad10[0x30];
     /* 0x40 */ Vec3f pos;
 } FollowFx;
 
-typedef struct {
+typedef struct Bullet88 {
     /* 0x000 */ u8 pad0[0x110];
     /* 0x110 */ s32 unk110;
 } Bullet88;
-
-/* Per-bullet state, stored at Bullet.state (0xD0 bytes). */
-typedef struct {
-    /* 0x000 */ RayHit ray;
-    /* 0x064 */ f32 lifetime;
-    /* 0x068 */ f32 speed;
-    /* 0x06C */ Actor *owner;
-    /* 0x070 */ IgnoreList ignore;
-    /* 0x080 */ LightEffect *trail;
-    /* 0x084 */ FollowFx *follow;
-    /* 0x088 */ Bullet88 *unk88;
-    /* 0x08C */ void *unk8C;
-    /* 0x090 */ u16 sound;
-    /* 0x092 */ u8 impactType;
-    /* 0x093 */ u8 pad93;
-    /* 0x094 */ f32 passTimer;
-    /* 0x098 */ Vec3f passPos;
-    /* 0x0A4 */ CollisionHit pass;
-    /* 0x0C8 */ u8 flags; /* bit 0: the trace went through a pass-through surface */
-    /* 0x0C9 */ u8 padC9[3];
-    /* 0x0CC */ s32 mode;
-} BulletState;
-
-/* A bullet object, spawned by func_151C0698 and updated by func_151C1180. */
-typedef struct {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 fxList;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 fxOwner;
-    /* 0x00D */ u8 padD[0x2B];
-    /* 0x038 */ Vec3f pos;
-    /* 0x044 */ Vec3f vel;
-    /* 0x050 */ u8 pad50[0x120];
-    /* 0x170 */ BulletState state;
-} Bullet;
 
 /* A positional sound; see func_151C110C. */
 typedef struct {
@@ -531,9 +496,9 @@ s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 ar
 
     bullet = emitter->bullet;
     if (bullet != NULL && *arg2 != NULL) {
-        emitter->x = bullet->pos.x;
-        emitter->y = bullet->pos.y;
-        emitter->z = bullet->pos.z;
+        emitter->x = bullet->head.pos.x;
+        emitter->y = bullet->head.pos.y;
+        emitter->z = bullet->head.pos.z;
         return 0;
     }
 
@@ -566,33 +531,33 @@ s32 func_151C1180(Bullet *bullet) {
     delta.y = state->ray.dir.y * step;
     delta.z = state->ray.dir.z * step;
     if (D_800E0930 != NULL) {
-        if (((s32 (*)(Vec3f *, Vec3f *, Vec3f *))D_800E0930)(&bullet->pos, &delta, &hitPos) != 0) {
+        if (((s32 (*)(Vec3f *, Vec3f *, Vec3f *))D_800E0930)(&bullet->head.pos, &delta, &hitPos) != 0) {
             func_15055A2C(0, hitPos.x, hitPos.y, hitPos.z, 0);
             func_151C1654(&hitPos, &state->ray.dir, state->owner, state->impactType, NULL);
-            func_151BFDA0(&hitPos, &state->ray.dir, !(state->flags & 1), bullet->fxOwner, bullet->fxList);
+            func_151BFDA0(&hitPos, &state->ray.dir, !(state->flags & 1), bullet->head.header.owner, bullet->head.header.kind);
             return FALSE;
         }
     }
     if (step) {
     fence: // matching: an unused label splits IDO's basic block here
-        func_15081690(state->owner, bullet->pos.x, bullet->pos.y, bullet->pos.z, delta.x, delta.y, delta.z,
+        func_15081690(state->owner, bullet->head.pos.x, bullet->head.pos.y, bullet->head.pos.z, delta.x, delta.y, delta.z,
                       &hit, step, 1, 0, 1, 3, &state->ignore, state->mode);
 
         if (hit.hitType >= 2) {
             func_15055A2C(1, hit.pos.x, hit.pos.y, hit.pos.z, 0);
             func_151C1654(&hit.pos, &state->ray.dir, state->owner, state->impactType, NULL);
-            func_151C0098(&hit.pos, hit.obj, !(state->flags & 1), bullet->fxOwner, bullet->fxList);
+            func_151C0098(&hit.pos, hit.obj, !(state->flags & 1), bullet->head.header.owner, bullet->head.header.kind);
             return FALSE;
         }
     }
-    bullet->pos.x += bullet->vel.x * D_800BE9A4;
-    bullet->pos.y += bullet->vel.y * D_800BE9A4;
-    bullet->pos.z += bullet->vel.z * D_800BE9A4;
+    bullet->head.pos.x += bullet->head.vel.x * D_800BE9A4;
+    bullet->head.pos.y += bullet->head.vel.y * D_800BE9A4;
+    bullet->head.pos.z += bullet->head.vel.z * D_800BE9A4;
     if (state->flags & 1) {
         if (state->passTimer > 0.0f) {
             state->passTimer -= D_800BE9A4;
             if (state->passTimer <= 0.0f) {
-                func_151ABE40(&state->passPos, &state->pass, 2, bullet->fxOwner, bullet->fxList);
+                func_151ABE40(&state->passPos, &state->pass, 2, bullet->head.header.owner, bullet->head.header.kind);
             }
         }
     }
@@ -601,21 +566,21 @@ s32 func_151C1180(Bullet *bullet) {
         if (state->ray.hitType == 1) {
             func_15055A2C(0, state->ray.pos.x, state->ray.pos.y, state->ray.pos.z, 0);
             func_151C1654(&state->ray.pos, &state->ray.dir, state->owner, state->impactType, &state->ray.tri);
-            func_151BFE84(&state->ray.tri, &state->ray.pos, &bullet->vel, !(state->flags & 1),
-                          bullet->fxOwner, bullet->fxList);
+            func_151BFE84(&state->ray.tri, &state->ray.pos, &bullet->head.vel, !(state->flags & 1),
+                          bullet->head.header.owner, bullet->head.header.kind);
         }
         return FALSE;
     }
     trail = state->trail;
     if (trail != NULL) {
-        trail->light->x = bullet->pos.x;
-        if ((bullet->fxList && bullet->fxList) && bullet->fxList) { // matching: no-op that steers register choice for trail
+        trail->light->x = bullet->head.pos.x;
+        if ((bullet->head.header.kind && bullet->head.header.kind) && bullet->head.header.kind) { // matching: no-op that steers register choice for trail
         }
-        trail->light->y = bullet->pos.y;
-        trail->light->z = bullet->pos.z;
+        trail->light->y = bullet->head.pos.y;
+        trail->light->z = bullet->head.pos.z;
     }
     if (state->follow != NULL) {
-        state->follow->pos = bullet->pos;
+        state->follow->pos = bullet->head.pos;
     }
     return TRUE;
 }
