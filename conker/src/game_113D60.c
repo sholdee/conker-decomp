@@ -722,7 +722,7 @@ typedef struct {
 } Game113D60ParticleExtra;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ Game113D60ParticleExtra extra;
 } Game113D60Particle;
 

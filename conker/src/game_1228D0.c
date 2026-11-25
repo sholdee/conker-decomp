@@ -324,7 +324,7 @@ void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
 
 /* Partial view of the particle func_15130280 creates. */
 typedef struct {
-    u8 pad0[0xA8];
+    DescParticleHead head;
     f32 unkA8;
 } Particle;
 

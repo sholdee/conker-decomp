@@ -654,7 +654,7 @@ extern s32 func_1514F6E8(ConeBasis *);
 extern void func_1514F808(ConeBasis *, f32, Vec3f *);
 /* Partial view of the particle func_15130280 creates. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ struct260 *effect; /* effect that travels with the particle */
 } CarrierParticle;
 

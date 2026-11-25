@@ -96,7 +96,7 @@ typedef struct {
 
 /* Live particle, as created by func_15130280 from a ParticleDesc. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ SourceParticleData data;
 } Particle;
 

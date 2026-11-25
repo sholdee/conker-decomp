@@ -134,7 +134,7 @@ typedef struct {
 
 /* Live particle, as created by func_15130280; the caller-defined data starts at 0xA8. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ ParticleData data;
 } Particle;
 

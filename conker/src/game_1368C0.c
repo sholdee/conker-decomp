@@ -62,7 +62,7 @@ typedef struct {
 
 /* Live particle returned by func_15130374; its extra data (dataSize bytes) starts at 0xA8. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 unkA8;
 } Particle1368C0;
 

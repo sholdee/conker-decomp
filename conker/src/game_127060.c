@@ -289,7 +289,7 @@ void func_150FA468(struct260 *effect, s32 arg1, u8 event) {
 
 /* A particle created by func_15130280; this caller's data lives at 0xA8. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 data[5];
 } ImpactParticle;
 

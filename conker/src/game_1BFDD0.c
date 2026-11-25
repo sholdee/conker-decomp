@@ -27,7 +27,7 @@ typedef struct {
 
 /* Live particle returned by func_15130374; its caller-sized data starts at 0xA8. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 drag; /* read by update func 10 (func_151316DC) */
 } Particle1BFDD0;
 
