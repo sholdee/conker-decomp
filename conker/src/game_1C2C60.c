@@ -23,12 +23,9 @@ void *memcpy(void *, const void *, u32);
 void func_1519CDB0(s32, f32, s32);
 extern void *allocate_memory(s32, s32, s32, s32);
 
-s32 func_151422C0();
+s32 func_151422C0(s32, const char *, s32, s32, const char *, s32);
 struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
-extern char D_800A8A40[];
-extern char D_800A8A48[];
-extern f32 D_800A8AA8;
 extern f32 D_800A8AF8;
 
 /* Generic doubly linked list node; every list allocated by func_151957B0 starts with one. */
@@ -486,7 +483,7 @@ typedef struct Particle {
     /* 0x1C */ s16 life;
     /* 0x1E */ s8 holdTimer;
     /* 0x1F */ u8 alpha;
-    /* 0x20 */ u8 phase;
+    /* 0x20 */ u8 texS; /* texture s offset */
     /* 0x21 */ u8 spawnedChild;
     /* 0x22 */ u8 pad22[0x2];
 } Particle;
@@ -532,7 +529,7 @@ typedef struct CharacterFlamethrowerJetTemplate {
     /* 0x00 */ s16 unk0;
     /* 0x04 */ f32 gravity;
     /* 0x08 */ f32 emitRate;
-    /* 0x0C */ u8 unkC;
+    /* 0x0C */ u8 shade;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ u8 bone;
     /* 0x18 */ Vec3f startOffset;
@@ -581,8 +578,8 @@ typedef struct CharacterFlamethrowerJet {
     /* 0x44 */ f32 targetSpeed;
     /* 0x48 */ f32 emitRate;
     /* 0x4C */ f32 emitAccum;
-    /* 0x50 */ u8 phase;
-    /* 0x51 */ u8 unk51;
+    /* 0x50 */ u8 texS; /* texture s offset given to the next point */
+    /* 0x51 */ u8 shade; /* ribbon grey level */
     /* 0x52 */ u8 fadeRate;
     /* 0x53 */ u8 life;
     /* 0x54 */ u8 holdTime;
@@ -671,7 +668,7 @@ CharacterFlamethrowerActor *func_15196438(EffectOwner *owner, s32 preset, u8 arg
     jet.owner = owner;
     jet.unk4 = owner->unk3B;
     jet.flags = 2;
-    jet.phase = 0;
+    jet.texS = 0;
     jet.emitAccum = 0.0f;
     jet.unk70 = 0.0f;
     jet.sparkAccum = 0.0f;
@@ -682,7 +679,7 @@ CharacterFlamethrowerActor *func_15196438(EffectOwner *owner, s32 preset, u8 arg
     spawn.unkC = entry->unk0;
     jet.gravity = entry->gravity;
     jet.emitRate = entry->emitRate;
-    jet.unk51 = entry->unkC;
+    jet.shade = entry->shade;
     spawn.unk15 = entry->unk10;
     jet.bone = entry->bone;
     jet.startOffset = entry->startOffset;
@@ -988,8 +985,8 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
             points[actor->head].life = jet->life;
             points[actor->head].holdTimer = jet->holdTime;
             points[actor->head].alpha = 255;
-            points[actor->head].phase = jet->phase;
-            jet->phase += (func_150ADA20() % 6) + 3;
+            points[actor->head].texS = jet->texS;
+            jet->texS += (func_150ADA20() % 6) + 3;
             points[actor->head].vel.y += jet->gravity * t;
             points[actor->head].pos.x += points[actor->head].vel.x * t;
             points[actor->head].pos.y += points[actor->head].vel.y * t;
@@ -1045,41 +1042,6 @@ f32 sqrtf(f32);
 extern CharacterFlamethrowerBeamCamera *D_800DBFF0;
 
 typedef struct {
-    Vec3f_15197C10 pos;
-    u8 pad0C[0xC];
-    f32 size;
-    s16 life;
-    u8 pad1E;
-    u8 alpha;
-    u8 level;
-    u8 pad21[3];
-} Point15197148;
-
-typedef struct {
-    u8 pad0[0x51];
-    u8 color;
-    u8 pad52[0xA];
-    f32 width;
-} Style15197148;
-
-typedef struct {
-    u8 pad0[0x10];
-    Vec3f_15197C10 pos;
-    u8 pad1C[2];
-    u16 flags1E;
-    u8 pad20[5];
-    u8 capacity;
-    u8 pad26[6];
-    s8 count;
-    s8 tail;
-    s8 head;
-    u8 pad2F[0x84 - 0x2F];
-    u8 buffers[0x10];
-    Point15197148 *points;
-    Style15197148 *style;
-} Owner15197148;
-
-typedef struct {
     s32 id;
     u16 width;
     u16 height;
@@ -1106,32 +1068,33 @@ Gfx *func_1513F4E4(Gfx *, u8, u8 *);
 Gfx *func_15142B7C(Gfx *, s32, s32);
 Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
 
-Gfx *func_15197148(Owner15197148 *arg0, Gfx *gfx, s16 arg2) {
+/* Draws a jet as a camera-facing ribbon through its points, oldest last. */
+Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     Vtx_t *vtx;
-    Vec3f_15197C10 *eye;
-    Vec3f_15197C10 next;
-    Vec3f_15197C10 cur;
-    Point15197148 *points;
-    Style15197148 *style;
+    Vec3f *eye;
+    Vec3f next;
+    Vec3f cur;
+    Particle *points;
+    CharacterFlamethrowerJet *jet;
     s32 i;
     s32 j;
-    Vec3f_15197C10 toCam;
-    Vec3f_15197C10 delta;
-    Vec3f_15197C10 n;
+    Vec3f toCam;
+    Vec3f delta;
+    Vec3f n;
     f32 len;
-    u8 prev;
-    u8 level;
+    u8 curTexS;
+    u8 nextTexS;
     u8 flag;
     u8 alpha;
     f32 width;
-    s32 old;
+    s32 newStrip;
 
-    if (arg0->count >= 2) {
-        func_151D5D60(arg0->buffers, arg2, (arg0->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+    if (actor->count >= 2) {
+        func_151D5D60(actor->buffers, view, (actor->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
-            eye = &D_800DBFF0[arg2].position;
-            style = arg0->style;
-            points = arg0->points;
+            eye = &D_800DBFF0[view].position;
+            jet = actor->state;
+            points = actor->points;
             flag = 1;
             {
                 TexDesc15197148 tex;
@@ -1144,33 +1107,33 @@ Gfx *func_15197148(Owner15197148 *arg0, Gfx *gfx, s16 arg2) {
                 tex.unkE = D_800915B0.unk8;
                 tex.unkF = D_800915B0.unk9;
                 gfx = (Gfx *)func_15142E24((s32)gfx, (s32)&tex.idp, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
-                gfx = func_15142C10(gfx, style->color, style->color, style->color, 0xFF, &flag);
+                gfx = func_15142C10(gfx, jet->shade, jet->shade, jet->shade, 0xFF, &flag);
                 gfx = func_15142B7C(gfx, 1, 0x160600);
                 gfx = func_1513F4E4(gfx, 0xB, &flag);
                 gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, 0x5049D8, &flag);
-                if (arg0->flags1E & 2) {
-                    j = arg0->head - 1;
+                if (actor->flags1E & 2) {
+                    j = actor->head - 1;
                     if (j < 0) {
-                        j = arg0->capacity - 1;
+                        j = actor->capacity - 1;
                     }
-                    cur = arg0->pos;
+                    cur = actor->pos;
                     next = points[j].pos;
-                    level = points[j].level;
-                    prev = points[j].level;
-                    width = style->width;
+                    nextTexS = points[j].texS;
+                    curTexS = points[j].texS;
+                    width = jet->size;
                 } else {
-                    i = arg0->head - 1;
+                    i = actor->head - 1;
                     if (i < 0) {
-                        i = arg0->capacity - 1;
+                        i = actor->capacity - 1;
                     }
                     j = i - 1;
                     if (j < 0) {
-                        j = arg0->capacity - 1;
+                        j = actor->capacity - 1;
                     }
                     cur = points[i].pos;
                     next = points[j].pos;
-                    prev = points[i].level;
-                    level = points[j].level;
+                    curTexS = points[i].texS;
+                    nextTexS = points[j].texS;
                     width = points[j].size;
                 }
                 delta.x = cur.x - next.x;
@@ -1199,7 +1162,7 @@ Gfx *func_15197148(Owner15197148 *arg0, Gfx *gfx, s16 arg2) {
                 vtx->ob[0] = cur.x + n.x;
                 vtx->ob[1] = cur.y + n.y;
                 vtx->ob[2] = cur.z + n.z;
-                vtx->tc[0] = (prev + 0x100) << 6;
+                vtx->tc[0] = (curTexS + 0x100) << 6;
                 vtx->tc[1] = 0x47C0;
                 vtx->cn[0] = 0xFF;
                 vtx->cn[1] = 0xFF;
@@ -1210,7 +1173,7 @@ Gfx *func_15197148(Owner15197148 *arg0, Gfx *gfx, s16 arg2) {
                 vtx->ob[0] = cur.x - n.x;
                 vtx->ob[1] = cur.y - n.y;
                 vtx->ob[2] = cur.z - n.z;
-                vtx->tc[0] = (prev + 0x100) << 6;
+                vtx->tc[0] = (curTexS + 0x100) << 6;
                 vtx->tc[1] = 0x4000;
                 vtx->cn[0] = 0xFF;
                 vtx->cn[1] = 0xFF;
@@ -1231,8 +1194,8 @@ Gfx *func_15197148(Owner15197148 *arg0, Gfx *gfx, s16 arg2) {
                     len = sqrtf(n.x * n.x + n.y * n.y + n.z * n.z);
                     if (len == 0.0f) {
                         n.x = 0.0f;
-                    n.y = 0.0f;
-                    n.z = 0.0f;
+                        n.y = 0.0f;
+                        n.z = 0.0f;
                     } else {
                         f32 scale;
 
@@ -1245,7 +1208,7 @@ Gfx *func_15197148(Owner15197148 *arg0, Gfx *gfx, s16 arg2) {
                     vtx->ob[0] = next.x + n.x;
                     vtx->ob[1] = next.y + n.y;
                     vtx->ob[2] = next.z + n.z;
-                    vtx->tc[0] = (level + 0x100) << 6;
+                    vtx->tc[0] = (nextTexS + 0x100) << 6;
                     vtx->tc[1] = 0x47C0;
                     vtx->cn[0] = 0xFF;
                     vtx->cn[1] = 0xFF;
@@ -1256,7 +1219,7 @@ Gfx *func_15197148(Owner15197148 *arg0, Gfx *gfx, s16 arg2) {
                     vtx->ob[0] = next.x - n.x;
                     vtx->ob[1] = next.y - n.y;
                     vtx->ob[2] = next.z - n.z;
-                    vtx->tc[0] = (level + 0x100) << 6;
+                    vtx->tc[0] = (nextTexS + 0x100) << 6;
                     vtx->tc[1] = 0x4000;
                     vtx->cn[0] = 0xFF;
                     vtx->cn[1] = 0xFF;
@@ -1267,9 +1230,9 @@ Gfx *func_15197148(Owner15197148 *arg0, Gfx *gfx, s16 arg2) {
                     gSPVertex(gfx++, vtx - 4, 4, 0);
                     gSP1Triangle(gfx++, 0, 1, 2, 0);
                     gSP1Triangle(gfx++, 1, 3, 2, 0);
-                    old = prev < level;
-                    prev = level;
-                    if (old) {
+                    newStrip = curTexS < nextTexS;
+                    curTexS = nextTexS;
+                    if (newStrip) {
                         memcpy(vtx, vtx - 2, 0x20);
                         vtx[-2].tc[0] -= 0x4000;
                         vtx++;
@@ -1279,12 +1242,12 @@ Gfx *func_15197148(Owner15197148 *arg0, Gfx *gfx, s16 arg2) {
                     i = j;
                     j--;
                     if (j < 0) {
-                        j = arg0->capacity - 1;
+                        j = actor->capacity - 1;
                     }
                     cur = points[i].pos;
                     next = points[j].pos;
-                    level = points[j].level;
-                } while (i != arg0->tail);
+                    nextTexS = points[j].texS;
+                } while (i != actor->tail);
             }
         }
     }
@@ -1292,80 +1255,85 @@ Gfx *func_15197148(Owner15197148 *arg0, Gfx *gfx, s16 arg2) {
 }
 
 
-extern f32 D_800A8AA4;
-
 f32 func_151979F8(s32 arg0) {
-    return D_800A8AA4;
+    return 1.32f;
 }
 
 f32 func_15197A0C(s32 arg0) {
-    return (f32)func_151422C0(0xA, (s32) D_800A8A40, 1, 0x1F4, (s32) D_800A8A48, 0x8CC) * D_800A8AA8;
+    return func_151422C0(10, "power", 1, 500, "../Effects/CharacterFlameThrower/characterflamethrower.c", 2252) * 0.01f;
 }
-
-extern f32 D_800A8AAC;
 
 f32 func_15197A68(s32 arg0) {
-    return D_800A8AAC;
+    return 10.9f;
 }
 
-struct ConkerStruct15197A7C {
-    s32 unk0;
-    u8 unk4;
-};
+/* Message payload naming an effect owner (func_15147D64). */
+typedef struct EffectOwnerRef {
+    EffectOwner *owner;
+    u8 ownerId;
+} EffectOwnerRef;
 
-extern void func_15147D64(struct ConkerStruct15197A7C *, s32);
+extern void func_15147D64(EffectOwnerRef *, s32);
 
-void func_15197A7C(u8 *arg0) {
-    struct ConkerStruct15197A7C sp18;
+/* Sends message 8 for `owner`, which stops its jets (see func_15198054). */
+void func_15197A7C(EffectOwner *owner) {
+    EffectOwnerRef ref;
 
-    if (arg0 != 0) {
-        sp18.unk0 = (s32) arg0;
-        sp18.unk4 = arg0[0x3B];
-        func_15147D64(&sp18, 8);
+    if (owner != NULL) {
+        ref.owner = owner;
+        ref.ownerId = owner->unk3B;
+        func_15147D64(&ref, 8);
     }
 }
 
-s32 func_15197AB4(f32 *arg0)
-{
-  int dummy;
-  arg0[0x50] = arg0[0x57] * arg0[0x50];
-  arg0[0x51] += arg0[0x56] * D_800BE9A4;
-  dummy = (arg0 != 0);
-  arg0[0x52] = arg0[0x57] * arg0[0x52];
-  arg0[0x53] = arg0[0x58] * arg0[0x53];
-  arg0[0x54] += arg0[0x56] * D_800BE9A4;
-  arg0[0x55] = arg0[0x58] * arg0[0x55];
-  arg0[0xD] += arg0[0x50] * D_800BE9A4;
-  arg0[0xE] += arg0[0x51] * D_800BE9A4;
-  arg0[0xF] += arg0[0x52] * D_800BE9A4;
-  arg0[0x10] += arg0[0x53] * D_800BE9A4;
-  arg0[0x11] += arg0[0x54] * D_800BE9A4;
-  arg0[0x12] += arg0[0x55] * D_800BE9A4;
-  return 1;
+/* A particle of the shared particle system (func_1513D2F0); only the fields these callbacks use. */
+typedef struct SceneParticle {
+    /* 0x000 */ char pad0[0x1C];
+    /* 0x01C */ s16 life;
+    /* 0x01E */ char pad1E[0xE];
+    /* 0x02C */ f32 unk2C;
+    /* 0x030 */ f32 unk30;
+    /* 0x034 */ Vec3f posA;
+    /* 0x040 */ Vec3f posB;
+    /* 0x04C */ char pad4C[0x10];
+    /* 0x05C */ u8 alpha;
+    /* 0x05D */ char pad5D[0x140 - 0x5D];
+    /* 0x140 */ Vec3f velA;
+    /* 0x14C */ Vec3f velB;
+    /* 0x158 */ f32 gravity;
+    /* 0x15C */ f32 dragA;
+    /* 0x160 */ f32 dragB;
+    /* 0x164 */ f32 shrinkRate;
+    /* 0x168 */ s16 fadeStart;
+    /* 0x16A */ s16 alphaPerLife;
+} SceneParticle;
+
+/* Particle callback: applies drag and gravity to both end points' velocities, then moves them. */
+s32 func_15197AB4(SceneParticle *p) {
+    p->velA.x *= p->dragA;
+    p->velA.y += p->gravity * D_800BE9A4;
+    p->velA.z *= p->dragA;
+    p->velB.x *= p->dragB;
+    p->velB.y += p->gravity * D_800BE9A4;
+    p->velB.z *= p->dragB;
+    p->posA.x += p->velA.x * D_800BE9A4;
+    p->posA.y += p->velA.y * D_800BE9A4;
+    p->posA.z += p->velA.z * D_800BE9A4;
+    p->posB.x += p->velB.x * D_800BE9A4;
+    p->posB.y += p->velB.y * D_800BE9A4;
+    p->posB.z += p->velB.z * D_800BE9A4;
+    return 1;
 }
 
-typedef struct {
-    char pad0[0x1C];
-    s16 unk1C;
-    char pad1E[0x2C - 0x1E];
-    f32 unk2C;
-    f32 unk30;
-    char pad34[0x5C - 0x34];
-    u8 unk5C;
-    char pad5D[0x164 - 0x5D];
-    f32 unk164;
-    s16 unk168;
-    s16 unk16A;
-} Struct15197BBC;
+/* Particle callback: shrinks unk2C/unk30 by shrinkRate and fades alpha out over the last fadeStart frames. */
+s32 func_15197BBC(SceneParticle *p) {
+    s16 life;
 
-s32 func_15197BBC(Struct15197BBC *arg0) {
-    s16 temp;
-
-    temp = arg0->unk1C;
-    arg0->unk30 = arg0->unk30 - (arg0->unk30 * arg0->unk164);
-    arg0->unk2C = arg0->unk2C - (arg0->unk2C * arg0->unk164);
-    if (temp < arg0->unk168) {
-        arg0->unk5C = temp * arg0->unk16A;
+    life = p->life;
+    p->unk30 = p->unk30 - (p->unk30 * p->shrinkRate);
+    p->unk2C = p->unk2C - (p->unk2C * p->shrinkRate);
+    if (life < p->fadeStart) {
+        p->alpha = life * p->alphaPerLife;
     }
     return 1;
 }
@@ -2448,13 +2416,14 @@ void *func_151994B8(s32 arg0, CharacterFlamethrowerSetup *arg1, u8 arg2, s32 arg
     return result;
 }
 
-void func_15199834(u8 *arg0) {
-    struct ConkerStruct15197A7C sp18;
+/* Sends message 0x26 for `owner`, which stops its flames (see func_1519986C). */
+void func_15199834(EffectOwner *owner) {
+    EffectOwnerRef ref;
 
-    if (arg0 != 0) {
-        sp18.unk0 = (s32) arg0;
-        sp18.unk4 = arg0[0x3B];
-        func_15147D64(&sp18, 0x26);
+    if (owner != NULL) {
+        ref.owner = owner;
+        ref.ownerId = owner->unk3B;
+        func_15147D64(&ref, 0x26);
     }
 }
 
