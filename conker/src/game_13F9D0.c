@@ -724,27 +724,29 @@ void func_15113E54(s32 arg0) {
         }
     }
 }
-extern s32 *D_800DBF94;
+extern s32 *D_800DBF94; // per object: bit N set when actor D_800CC2D0[N] touches it
 
-s32 func_15114050(struct131 *arg0, s32 arg1) {
-    if (((u8 *)arg0)[0x4F] & 0x80) {
-        if (arg1 == -1) {
-            return 1;
+/* Whether actor `actor` (any actor if -1) touches obj; only objects with flags bit 0x80 track contacts. */
+s32 func_15114050(Game13F9D0Obj *obj, s32 actor) {
+    if (obj->flags & 0x80) {
+        if (actor == -1) {
+            return TRUE;
         }
-        if (D_800DBF94[arg0 - D_800DBEF4] & (1 << arg1)) {
-            return 1;
+        if (D_800DBF94[obj - OBJECTS] & (1 << actor)) {
+            return TRUE;
         }
     }
-    return 0;
+    return FALSE;
 }
 
-s32 func_151140C4(struct131 *arg0) {
+/* The lowest-numbered actor touching obj, or 0. */
+s32 func_151140C4(Game13F9D0Obj *obj) {
     s32 i;
 
     i = 0;
-    if (((u8 *)arg0)[0x4F] & 0x80) {
+    if (obj->flags & 0x80) {
         for (; i != 32; i++) {
-            if (D_800DBF94[arg0 - D_800DBEF4] & (1 << i)) {
+            if (D_800DBF94[obj - OBJECTS] & (1 << i)) {
                 return i;
             }
         }
@@ -752,21 +754,9 @@ s32 func_151140C4(struct131 *arg0) {
     return 0;
 }
 
-typedef struct Struct15114188 {
-    u8  pad0[0x4F];
-    /* 0x4F */ u8  unk4F;
-    u8  pad50[0x28];
-    /* 0x78 */ void (*unk78)(struct Struct15114188 *, struct127 *);
-    u8  pad7C[0x16];
-    /* 0x92 */ u8  unk92;
-    u8  pad93[0xD];
-} Struct15114188; /* size 0xA0 */
+void func_1511473C(Game13F9D0Actor *actor, s32 objIndex);
 
-struct Game13F9D0MovingActor;
-void func_1511473C(struct Game13F9D0MovingActor *arg0, s32 arg1);
-
-#define OBJS ((Struct15114188 *)D_800DBEF4)
-
+/* Dispatches this frame's actor contacts to each object's onContact callback and carries riding actors. */
 void func_15114188(void) {
     s32 i;
     s32 j;
@@ -775,41 +765,27 @@ void func_15114188(void) {
         if (D_800DBF94[i] != 0) {
             for (j = 0; j < 25 && D_800DBF94[i] != 0; j++) {
                 if (D_800DBF94[i] & (1 << j)) {
-                    D_800DBF94[i] ^= (1 << j);
-                    if (OBJS[i].unk78 != NULL && (OBJS[i].unk92 != 0 || D_800CC2D0[j].unk127 != 0xFF)) {
-                        OBJS[i].unk78((Struct15114188 *)(i * 0xA0 + (u8 *)D_800DBEF4), &D_800CC2D0[j]);
+                    D_800DBF94[i] ^= 1 << j;
+                    if (OBJECTS[i].onContact != NULL && (OBJECTS[i].unk92 != 0 || D_800CC2D0[j].unk127 != 0xFF)) {
+                        OBJECTS[i].onContact(i + OBJECTS, &D_800CC2D0[j]); // matching: addu operand order
                     }
-                    if ((OBJS[i].unk4F & 4) == 4 && !(OBJS[i].unk4F & 8)) {
-                        func_1511473C((struct Game13F9D0MovingActor *)&D_800CC2D0[j], i);
+                    if ((OBJECTS[i].flags & 4) == 4 && !(OBJECTS[i].flags & 8)) {
+                        func_1511473C(&ACTORS[j], i);
                     }
                 }
             }
-            OBJS[i].unk4F &= ~0x8C;
+            OBJECTS[i].flags &= ~0x8C;
         }
     }
 }
 
-typedef struct {
-    /* 0x00 */ f32 rotX;
-    /* 0x04 */ f32 rotY;
-    /* 0x08 */ f32 rotZ;
-    /* 0x0C */ u8 pad0C[4];
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u8 pad16[0x44];
-    /* 0x5A */ s16 ox;
-    /* 0x5C */ s16 oy;
-    /* 0x5E */ s16 oz;
-    /* 0x60 */ f32 a;
-    /* 0x64 */ f32 b;
-    /* 0x68 */ f32 c;
-    /* 0x6C */ u8 pad6C[0x34];
-} Struct15114348;
+void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
-void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
-
-void func_15114348(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+/*
+ * Moves the point (*x, *y, *z) along with object objIndex: rotates it about the object by this frame's spin
+ * (around the object's own axes) and adds the object's move delta.
+ */
+void func_15114348(s32 objIndex, f32 *x, f32 *y, f32 *z) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -831,63 +807,52 @@ void func_15114348(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     zaxis[0] = 0.0f;
     zaxis[1] = 0.0f;
     zaxis[2] = 1.0f;
-    dx = *arg1 - ((Struct15114348 *)D_800DBEF4)[arg0].x;
-    dy = *arg2 - ((Struct15114348 *)D_800DBEF4)[arg0].y;
-    dz = *arg3 - ((Struct15114348 *)D_800DBEF4)[arg0].z;
-    if (((Struct15114348 *)D_800DBEF4)[arg0].rotX != 0.0f) {
-        guRotateF(m, ((Struct15114348 *)D_800DBEF4)[arg0].rotX, 1, 0, 0);
+    dx = *x - OBJECTS[objIndex].x;
+    dy = *y - OBJECTS[objIndex].y;
+    dz = *z - OBJECTS[objIndex].z;
+    if (OBJECTS[objIndex].rotX != 0.0f) {
+        guRotateF(m, OBJECTS[objIndex].rotX, 1, 0, 0);
         func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
         func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
     }
-    if (((Struct15114348 *)D_800DBEF4)[arg0].rotZ != 0.0f) {
-        guRotateF(m, ((Struct15114348 *)D_800DBEF4)[arg0].rotZ, zaxis[0], zaxis[1], zaxis[2]);
+    if (OBJECTS[objIndex].rotZ != 0.0f) {
+        guRotateF(m, OBJECTS[objIndex].rotZ, zaxis[0], zaxis[1], zaxis[2]);
         func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
         func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
     }
-    if (((Struct15114348 *)D_800DBEF4)[arg0].rotY != 0.0f) {
-        guRotateF(m, ((Struct15114348 *)D_800DBEF4)[arg0].rotY, yaxis[0], yaxis[1], yaxis[2]);
+    if (OBJECTS[objIndex].rotY != 0.0f) {
+        guRotateF(m, OBJECTS[objIndex].rotY, yaxis[0], yaxis[1], yaxis[2]);
         func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
         func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
     }
-    guRotateF(m, ((Struct15114348 *)D_800DBEF4)[arg0].a, xaxis[0], xaxis[1], xaxis[2]);
-    guRotateF(m2, ((Struct15114348 *)D_800DBEF4)[arg0].c, zaxis[0], zaxis[1], zaxis[2]);
+    guRotateF(m, OBJECTS[objIndex].spinX, xaxis[0], xaxis[1], xaxis[2]);
+    guRotateF(m2, OBJECTS[objIndex].spinZ, zaxis[0], zaxis[1], zaxis[2]);
     func_150A7A48(m, m2, m);
-    guRotateF(m2, ((Struct15114348 *)D_800DBEF4)[arg0].b, yaxis[0], yaxis[1], yaxis[2]);
+    guRotateF(m2, OBJECTS[objIndex].spinY, yaxis[0], yaxis[1], yaxis[2]);
     func_150A7A48(m, m2, m);
     func_150A7960(m, dx, dy, dz, &rx, &ry, &rz);
-    rx = ((Struct15114348 *)D_800DBEF4)[arg0].ox + (rx - dx);
-    ry = ((Struct15114348 *)D_800DBEF4)[arg0].oy + (ry - dy);
-    rz = ((Struct15114348 *)D_800DBEF4)[arg0].oz + (rz - dz);
-    *arg1 += rx;
-    *arg2 += ry;
-    *arg3 += rz;
+    rx = OBJECTS[objIndex].moveX + (rx - dx);
+    ry = OBJECTS[objIndex].moveY + (ry - dy);
+    rz = OBJECTS[objIndex].moveZ + (rz - dz);
+    *x += rx;
+    *y += ry;
+    *z += rz;
 }
-
-typedef struct Game13F9D0MovingActor {
-    u8 pad0[0x14];
-    f32 xyz[3];
-    u8 pad20[0x56];
-    u16 angle;
-    u8 pad78[2];
-    s16 angleCopy;
-    u8 pad7C[0xBB];
-    u8 active;
-} Game13F9D0MovingActor;
 
 extern f32 D_800A2F60;
 extern u16 D_800CBDA0[];
 
-void func_1511473C(Game13F9D0MovingActor *arg0, s32 arg1) {
-    if (arg0 == 0 || arg1 >= D_800DBEF0) {
+/* Carries an actor standing on object objIndex: moves it with the object and turns it by the object's yaw spin. */
+void func_1511473C(Game13F9D0Actor *actor, s32 objIndex) {
+    if (actor == NULL || objIndex >= D_800DBEF0) {
         return;
     }
-    func_15114348(arg1, &arg0->xyz[0], &arg0->xyz[1], &arg0->xyz[2]);
-    arg0->angle += *(f32 *)((u8 *)D_800DBEF4 + (arg1 * 0xA0) + 0x64) * D_800A2F60;
-    if ((arg0->active != 0) && ((arg1 + 1) == D_800CBDA0[((s32)((u8 *)arg0 - (u8 *)D_800CC2D0) / 0x32C)])) {
-        arg0->angleCopy = arg0->angle;
+    func_15114348(objIndex, &actor->pos[0], &actor->pos[1], &actor->pos[2]);
+    actor->movingAngle += OBJECTS[objIndex].spinY * D_800A2F60;
+    if (actor->unk137 != 0 && objIndex + 1 == D_800CBDA0[actor - ACTORS]) {
+        actor->facingAngle = actor->movingAngle;
     }
 }
-
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 
 /* Builds an object's rotation matrix: yaw first, then pitch/roll (func_150A8050 makes Euler rotations). */
@@ -910,70 +875,61 @@ void func_1511490C(f32 mtx[4][4], Game13F9D0Obj *obj) {
     func_150A7CB0(scale, obj->scaleX, obj->scaleY, obj->scaleZ);
     func_150A7A48(scale, mtx, mtx);
 }
-struct131 *func_151149AC(u8 id) {
+/* The object whose id is `id`, or NULL (id 0 never matches). */
+Game13F9D0Obj *func_151149AC(u8 id) {
     s32 i;
-    s32 offset;
-    struct131 *base;
-    struct131 *ptr;
 
     if (id == 0) {
         return NULL;
     }
-
-    i = 0;
-    if (D_800DBEF0 > 0) {
-        base = D_800DBEF4;
-        offset = 0;
-        ptr = base;
-        do {
-            i++;
-            if (((u8 *)ptr)[0x72] == id) {
-                return (struct131 *)((u8 *)offset + (s32)base);
-            }
-            offset += sizeof(struct131);
-            ptr++;
-        } while (i < D_800DBEF0);
+    for (i = 0; i < D_800DBEF0; i++) {
+        if (OBJECTS[i].id == id) {
+            return i + OBJECTS;
+        }
     }
     return NULL;
 }
 
-#define EF8 (*(s32 **)&D_800DBEF8)
-#define EFC (*(u8 **)&D_800DBEFC)
-#define O ((struct131 *)((u8 *)D_800DBEF4 + offset))
-#define EF8 (*(s32 **)&D_800DBEF8)
-#define EFC (*(u8 **)&D_800DBEFC)
-#define O ((struct131 *)((u8 *)D_800DBEF4 + offset))
+#define HANDLES (*(s32 **)&D_800DBEF8)      // per object: handle released with func_10004074
+#define RELEASE_DELAY (*(u8 **)&D_800DBEFC) // per object: frames to keep the handle once hidden
+
+/* Releases the handle of each object that is no longer drawn (after its delay, if it is unattached). */
 void func_15114A1C(void) {
     s32 i;
-    s32 offset;
-    s32 p;
-    i = 0; offset = 0;
-    if (D_800DBEF0 > 0) { do {
-        
-        if ((((u8 *)O)[0x70] & 1) != 1) {
-            p = EF8[i]; if (&D_800DBEF8) {}
-            if (EF8[i] != 0) {
-                
-                if (O->unk4E != 3 && !(O->unk6F & 0x80)) {
-                    { s32 j; j = i; if (j) {} func_10004074(EF8[j]); if (p) {} EF8[j] = 0; }
-                } else if (EFC[i] != 0) {
-                    EFC[i]--; 
-                } else {
-                    { s32 j; j = i; if (j) {} func_10004074(EF8[j]); EF8[j] = 0; }
-                }
-                
-            }
-            
-        } else if (!(O->unk6F & 0x80)) {
-            EF8[i] = 0;
-        }
-        
-    i++; offset += 0xA0; } while (i < D_800DBEF0); }
-}
-#undef EF8
-#undef EFC
-#undef O
+    s32 handle;
 
+    for (i = 0; i < D_800DBEF0; i++) {
+        if ((OBJECTS[i].state & 1) != 1) {
+            // matching: the dead copies (handle, j) and empty ifs steer uopt's register choices (see notes)
+            handle = HANDLES[i];
+            if (&D_800DBEF8) {}
+            if (HANDLES[i] != 0) {
+                if (OBJECTS[i].attach != 3 && !(OBJECTS[i].viewFlags & 0x80)) {
+                    s32 j;
+
+                    j = i;
+                    if (j) {}
+                    func_10004074(HANDLES[j]);
+                    if (handle) {}
+                    HANDLES[j] = 0;
+                } else if (RELEASE_DELAY[i] != 0) {
+                    RELEASE_DELAY[i]--;
+                } else {
+                    s32 j;
+
+                    j = i;
+                    if (j) {}
+                    func_10004074(HANDLES[j]);
+                    HANDLES[j] = 0;
+                }
+            }
+        } else if (!(OBJECTS[i].viewFlags & 0x80)) {
+            HANDLES[i] = 0;
+        }
+    }
+}
+#undef HANDLES
+#undef RELEASE_DELAY
 typedef struct Struct15114B94 {
     u8 pad0[0x4C];
     u8 enabled;
