@@ -196,7 +196,7 @@ typedef struct {
 
 extern SpriteAnim *D_8008CA4C[];
 
-void func_15169070(s32, s32, s32, u8);
+void func_15169070(s32 first, s32 last, s32 event, u8 eventType);
 
 /* Calls every object type's per-frame global hook (D_8008B4A8[i].unk18). */
 void func_15167010(void) {
@@ -340,7 +340,7 @@ extern s32 D_800DD21C;
 extern s32 D_800DD220;
 extern s32 D_800DD224;
 extern s32 D_800DD228;
-void func_15168F84(s32 arg0, s32 *arg1, s32 *arg2);
+void func_15168F84(s32 group, s32 *first, s32 *last);
 
 /*
  * Draws every object of list `list` whose type is in group `group` (see func_15168F84). Draw mode 1 types
@@ -1157,95 +1157,97 @@ Gfx *func_15168C4C(Gfx *gfx, ModelFx *fx, s32 arg2) {
     return gfx;
 }
 
-void func_15168E34(s32 *arg0, s32 arg1) {
-    s32 val = *arg0;
-    if ((val & 0x0F000000) == 0) {
-        *arg0 = val + arg1;
+/* Adds `offset` to an address unless it is segmented. */
+void func_15168E34(s32 *addr, s32 offset) {
+    s32 value = *addr;
+
+    if ((value & 0x0F000000) == 0) {
+        *addr = value + offset;
     }
 }
-typedef struct { s8 unk0; s8 unk1; s8 unk2; u8 unk3; u32 unk4; } Struct15168F08;
 
-// PERMUTER CANDIDATE / JUSTREG (best 717): mirrors matched sibling func_15168F08 but calls
-// func_15168E34; the call forces saved-reg promotion and a delay-slot reschedule (target puts
-// a0=&p->unk4 in the first beq slot + distributes i++ into the bnel slots) that drives a whole-
-// function saved-register rotation (base s1 vs s4). Not steerable from C. Best reconstruction:
-// permuter NO ZERO, best 360 (improved from 717)
-void func_15168E54(s8 *arg0, s32 arg1) {
+/* One display list command seen as bytes: opcode, two parameter bytes, a third (G_MOVEMEM index), w1. */
+typedef struct {
+    /* 0x0 */ s8 opcode;
+    /* 0x1 */ s8 unk1;
+    /* 0x2 */ s8 unk2;
+    /* 0x3 */ u8 index;
+    /* 0x4 */ u32 addr;
+} DLCommand;
+
+#define IS_RELOCATABLE(cmd) \
+    ((cmd)->opcode == G_VTX || ((cmd)->opcode == (s8)G_MOVEMEM && (cmd)->index == G_MV_MATRIX))
+
+/* Relocates the vertex and matrix addresses of a display list by `offset` (segmented ones are left alone). */
+void func_15168E54(s8 *dl, s32 offset) {
     s32 i;
-    s8 *p;
+    DLCommand *cmd;
 
-    for (i = 0; arg0[i << 3] != -0x21; i++) {
-        p = arg0 + (i << 3);
-        if ((*p == 1) || ((*p == -0x24) && (*(u8 *)(p + 3) == 0xE))) {
-            func_15168E34((s32 *)(p + 4), arg1);
+    // matching: byte-pointer indexing (not a DLCommand array) gives the target's saved-register use
+    for (i = 0; dl[i << 3] != (s8)G_ENDDL; i++) {
+        cmd = (DLCommand *)(dl + (i << 3));
+        if (IS_RELOCATABLE(cmd)) {
+            func_15168E34((s32 *)&cmd->addr, offset);
         }
     }
 }
-// void func_15168E54(Struct15168F08 *arg0, s32 arg1) {
-//     s32 i; Struct15168F08 *p; s8 tag;
-//     i = 0; p = arg0;
-//     if (arg0->unk0 == -0x21) { return; }
-//     p = &arg0[i]; tag = p->unk0;
-//     do {
-//         i++;
-//         if ((p->unk0 == 1) || ((p->unk0 == -0x24) && (p->unk3 == 0xE))) {
-//             func_15168E34((s32 *)&p->unk4, arg1);
-//         }
-//         p = &arg0[i];
-//         do { tag = p->unk0; } while (0);
-//     } while (p->unk0 != -0x21);
-// }
 
-void func_15168F08(Struct15168F08 *arg0, s32 arg1) {
+/* Rebases the vertex and matrix addresses of a display list: drops their segment and adds `base`. */
+void func_15168F08(DLCommand *dl, s32 base) {
     s32 i;
-    Struct15168F08 *p;
-    s8 tag;
+    DLCommand *cmd;
+    s8 opcode;
 
+    // matching: the early-out, the dead `opcode` loads and the do-while(0) reproduce the target's
+    // double opcode load and register use; plain for/while loops do not
     i = 0;
-    p = arg0;
-    if (arg0->unk0 == -0x21) {
+    cmd = dl;
+    if (dl->opcode == (s8)G_ENDDL) {
         return;
     }
-    p = &arg0[i];
-    tag = p->unk0;
+    cmd = &dl[i];
+    opcode = cmd->opcode;
     do {
         i++;
-        if ((p->unk0 == 1) || ((p->unk0 == -0x24) && (p->unk3 == 0xE))) {
-            p->unk4 = p->unk4 & 0xFFFFFF;
-            p->unk4 += arg1;
+        if (IS_RELOCATABLE(cmd)) {
+            cmd->addr = cmd->addr & 0xFFFFFF;
+            cmd->addr += base;
         }
-        p = &arg0[i];
+        cmd = &dl[i];
         do {
-            tag = p->unk0;
+            opcode = cmd->opcode;
         } while (0);
-    } while (p->unk0 != -0x21);
+    } while (cmd->opcode != (s8)G_ENDDL);
 }
-void func_15168F84(s32 arg0, s32 *arg1, s32 *arg2) {
-    if (arg0 == 0) {
-        *arg1 = 0x1;
-        *arg2 = 0x41;
-    } else if (arg0 == 1) {
-        *arg1 = 0x42;
-        *arg2 = 0x4F;
-    } else if (arg0 == 2) {
-        *arg1 = 0x50;
-        *arg2 = 0x58;
-    } else if (arg0 == 3) {
-        *arg1 = 0x59;
-        *arg2 = 0x5C;
-    } else if (arg0 == 5) {
-        *arg1 = 0x61;
-        *arg2 = 0x63;
-    } else if (arg0 == 6) {
-        *arg1 = 0x64;
-        *arg2 = 0x65;
+/* Gives the range [*first, *last) of object types drawn together as draw group `group`. */
+void func_15168F84(s32 group, s32 *first, s32 *last) {
+    if (group == 0) {
+        *first = 1;
+        *last = 65;
+    } else if (group == 1) {
+        *first = 66;
+        *last = 79;
+    } else if (group == 2) {
+        *first = 80;
+        *last = 88;
+    } else if (group == 3) {
+        *first = 89;
+        *last = 92;
+    } else if (group == 5) {
+        *first = 97;
+        *last = 99;
+    } else if (group == 6) {
+        *first = 100;
+        *last = 101;
     } else {
-        *arg1 = 0x5D;
-        *arg2 = 0x60;
+        *first = 93;
+        *last = 96;
     }
 }
-void func_15169040(s32 arg0, u8 arg1) {
-    func_15169070(0, 0x68, arg0, arg1);
+
+/* Sends an event to every object of every type. */
+void func_15169040(s32 event, u8 eventType) {
+    func_15169070(0, OBJ_TYPE_COUNT, event, eventType);
 }
 void func_15143D18(s32 *, s32 *, s32, s32);
 void func_1516968C(struct102 *arg0, u8 *arg1, u8 arg2);
