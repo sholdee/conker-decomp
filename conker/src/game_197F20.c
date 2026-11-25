@@ -288,11 +288,11 @@ void func_1516AA70(TextBox *box) {
                 }
             }
         }
-        bits = box->config->flags & (TEXTBOX_CLOSE | TEXTBOX_HOLD | TEXTBOX_SKIP_ANIM | 0x800);
+        bits = box->config->flags & 0xF00;
         if (bits & TEXTBOX_CLOSE) {
             box->config->flags &= ~TEXTBOX_CLOSE;
             advancePage = TRUE;
-            bits = box->config->flags & (TEXTBOX_CLOSE | TEXTBOX_HOLD | TEXTBOX_SKIP_ANIM | 0x800);
+            bits = box->config->flags & 0xF00;
         }
         if (!(bits & TEXTBOX_HOLD) && advancePage) {
             box->timer = 10;
@@ -683,9 +683,7 @@ typedef struct {
 
 #define VIEW ((TextBoxView *)D_800BE628)
 
-extern f32 cosf(f32);
-extern f32 sinf(f32);
-void func_1501A764(s16 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6);
+void func_1501A764(s16, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *screenZ);
 void func_1516D0CC(TextBox *box, f32 *x, f32 *y, f32 *angle);
 
 /* Places a text box: its anchor comes from screen percentages or from its object's projected position,
