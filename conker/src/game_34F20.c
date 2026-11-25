@@ -291,7 +291,7 @@ void func_150081E4(void) {
 
     D_800D3668 = 0;
     D_800CBE00 = NULL;
-    D_800DDD64 = 0;
+    D_800DDD64 = NULL;
 
     for (i = 0; i < 2; i++)
     {

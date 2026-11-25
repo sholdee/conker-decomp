@@ -15,37 +15,19 @@ extern void func_10004074(void *ptr);
 #define FLARE_FLASH     2 /* also drives the screen flash level D_800DD2D0 */
 #define FLARE_DIRECTED  4 /* depth is only updated while the viewer is inside the cone dir/minFacing */
 
-typedef struct LensFlare {
-    /* 0x00 */ f32 pos[3];
-    /* 0x0C */ f32 screenX;
-    /* 0x10 */ f32 screenY;
-    /* 0x14 */ f32 dir[3];
-    /* 0x20 */ f32 minFacing;
-    /* 0x24 */ struct LensFlare *next;
-    /* 0x28 */ s16 brightness;
-    /* 0x2A */ u16 zbufSample; /* z-buffer value under (screenX, screenY), read by func_1517E1AC */
-    /* 0x2C */ u16 depth;      /* the flare's own z-buffer depth, from func_1517EC1C */
-    /* 0x2E */ u8 flags;
-    /* 0x2F */ u8 type;
-    /* 0x30 */ u8 alpha;
-} LensFlare; // size 0x34
-
-/* D_800DDD64 (declared s32 in variables.h) is the head of the flare list. */
-#define sFlareList (*(LensFlare **)&D_800DDD64)
-
 /* Appends a new flare of the given type and alpha to the end of the flare list. */
 LensFlare *func_1517E080(s32 type, s32 alpha) {
     LensFlare *flare;
     LensFlare **link;
 
-    flare = sFlareList;
+    flare = D_800DDD64;
     if (flare != NULL) {
         while (flare->next != NULL) {
             flare = flare->next;
         }
         link = &flare->next;
     } else {
-        link = &sFlareList;
+        link = &D_800DDD64;
     }
 
     flare = allocate_memory(sizeof(LensFlare), 1, 0, 1);
@@ -67,10 +49,10 @@ LensFlare *func_1517E080(s32 type, s32 alpha) {
 void func_1517E134(LensFlare *flare) {
     LensFlare *prev;
 
-    if (flare == sFlareList) {
-        sFlareList = flare->next;
+    if (flare == D_800DDD64) {
+        D_800DDD64 = flare->next;
     } else {
-        prev = sFlareList;
+        prev = D_800DDD64;
         while (prev != NULL && prev->next != flare) {
             prev = prev->next;
         }
@@ -88,7 +70,7 @@ void func_1517E1AC(void) {
     f32 x;
     f32 y;
 
-    for (cur = sFlareList; cur != NULL; cur = cur->next) {
+    for (cur = D_800DDD64; cur != NULL; cur = cur->next) {
         x = cur->screenX;
         if (x >= 0.0f && x < (f32)D_800BE620) {
             y = cur->screenY;
@@ -130,7 +112,7 @@ Gfx *func_1517E28C(Gfx *gfx, s32 arg1) {
     u8 *flash;
 
     D_800DDD60 = FALSE;
-    for (flare = sFlareList; flare != NULL; flare = flare->next) {
+    for (flare = D_800DDD64; flare != NULL; flare = flare->next) {
         if (flare->alpha != 0) {
             hidden = FALSE;
             if (flare->flags & FLARE_SUN) {

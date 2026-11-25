@@ -3830,6 +3830,47 @@ typedef struct VtxTri {
     /* 0x0 */ s32 v[3];
 } VtxTri;
 
+/* The part of a WaveDeformer that the func_150A6FA0 family of vertex routines reads. */
+typedef struct {
+    /* 0x00 */ f32 falloff;   // 1 / (radius / 100)^2
+    /* 0x04 */ f32 amplitude;
+    /* 0x08 */ u16 radius;
+    /* 0x0A */ s16 center[3]; // relative to the object's position
+    /* 0x10 */ u16 phase;     // 12-bit; the routines advance it by speed every frame
+    /* 0x12 */ s8 speed;
+    /* 0x13 */ s8 phaseStep;  // phase offset per hundred model units of distance
+    /* 0x14 */ u8 unk14[6];   // only used by mode 1
+    /* 0x1A */ u8 pad1A[2];
+} WaveParams;
+
+/* Moves an object's vertices in a sine wave (game_1A48C0; D_800DD410 holds pointers to them). */
+typedef struct WaveDeformer {
+    /* 0x00 */ u8 objectId;
+    /* 0x01 */ u8 flags;
+    /* 0x02 */ u8 sharesObject; // an earlier deformer already targets this object
+    /* 0x03 */ u8 pad3;
+    /* 0x04 */ WaveParams params;
+    /* 0x20 */ f32 *vertexWeight; // WAVE_WEIGHTED only
+    /* 0x24 */ s8 *vertexPhase;
+    /* 0x28 */ u8 *vertexAngle;   // mode 2 only; byte angle (256 per turn)
+} WaveDeformer; // size 0x2C
+
+/* A lens flare (game_1AB530); D_800DDD64 heads the list. */
+typedef struct LensFlare {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 screenX;
+    /* 0x10 */ f32 screenY;
+    /* 0x14 */ f32 dir[3];
+    /* 0x20 */ f32 minFacing;
+    /* 0x24 */ struct LensFlare *next;
+    /* 0x28 */ s16 brightness;
+    /* 0x2A */ u16 zbufSample; /* z-buffer value under (screenX, screenY), read by func_1517E1AC */
+    /* 0x2C */ u16 depth;      /* the flare's own z-buffer depth, from func_1517EC1C */
+    /* 0x2E */ u8 flags;
+    /* 0x2F */ u8 type;
+    /* 0x30 */ u8 alpha;
+} LensFlare; // size 0x34
+
 /* One 12-byte entry of the world-mesh triangle table D_800DBE3C (built by func_15000F04 in game_2DF70):
  * the triangle's three vertices. Collision code reads the same words as offsets from a vertex base,
  * which is 0 for the static world mesh. */

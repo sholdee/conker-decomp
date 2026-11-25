@@ -10,6 +10,6 @@ void func_15012780(void) {
     D_800DD418 = 0;
     for (i = 0; i < 2; i++)
     {
-        D_800DD410[i] = 0;
+        D_800DD410[i] = NULL;
     }
 }

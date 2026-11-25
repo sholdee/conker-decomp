@@ -2,38 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
-/* The part of a WaveDeformer that the func_150A6FA0 family of vertex routines reads. */
-typedef struct {
-    /* 0x00 */ f32 falloff;   // 1 / (radius / 100)^2
-    /* 0x04 */ f32 amplitude;
-    /* 0x08 */ u16 radius;
-    /* 0x0A */ s16 center[3]; // relative to the object's position
-    /* 0x10 */ u16 phase;     // 12-bit; the routines advance it by speed every frame
-    /* 0x12 */ s8 speed;
-    /* 0x13 */ s8 phaseStep;  // phase offset per hundred model units of distance
-    /* 0x14 */ u8 unk14[6];   // only used by mode 1
-    /* 0x1A */ u8 pad1A[2];
-} WaveParams;
-
 /* WaveDeformer.flags */
 #define WAVE_MODE_MASK 3     // which vertex routine runs (0, 1 or 2)
 #define WAVE_WEIGHTED 4      // per-vertex falloff weights
 #define WAVE_DIRECTIONAL 0x10 // phase follows distance along a heading instead of from the center
-
-/* Moves an object's vertices in a sine wave (one entry of D_800DD410, size 0x2C). */
-typedef struct {
-    /* 0x00 */ u8 objectId;
-    /* 0x01 */ u8 flags;
-    /* 0x02 */ u8 sharesObject; // an earlier deformer already targets this object
-    /* 0x03 */ u8 pad3;
-    /* 0x04 */ WaveParams params;
-    /* 0x20 */ f32 *vertexWeight; // WAVE_WEIGHTED only
-    /* 0x24 */ s8 *vertexPhase;
-    /* 0x28 */ u8 *vertexAngle;   // mode 2 only; byte angle (256 per turn)
-} WaveDeformer;
-
-/* variables.h declares D_800DD410 as s32[2]; it holds the WaveDeformer pointers, D_800DD418 counts them. */
-#define gWaveDeformers ((WaveDeformer **)D_800DD410)
 
 extern WorldObject *func_151149AC(u8);
 void *allocate_memory(s32, s32, s32, s32);
@@ -72,13 +44,13 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
     if (deformer != NULL) {
         u8 headingAngle;
 
-        gWaveDeformers[D_800DD418++] = deformer;
+        D_800DD410[D_800DD418++] = deformer;
         obj = func_151149AC(objectId);
         shared = FALSE;
         deformer->objectId = objectId;
         deformer->flags = flags;
         for (i = 0; i < D_800DD418 - 1; i++) {
-            other = gWaveDeformers[i];
+            other = D_800DD410[i];
             if (other->objectId == objectId) {
                 shared = TRUE;
                 break;
@@ -185,7 +157,7 @@ void func_15177A94(void) {
     s32 j;
 
     for (i = 0; i < D_800DD418; i++) {
-        deformer = gWaveDeformers[i];
+        deformer = D_800DD410[i];
         obj = func_151149AC(deformer->objectId);
         if (obj->viewFlags & 0xF) {
             // the first deformer on an object starts from its base vertices, later ones stack
@@ -219,7 +191,7 @@ void func_15177A94(void) {
         }
     }
     for (i = 0; i < D_800DD418; i++) {
-        deformer = gWaveDeformers[i];
+        deformer = D_800DD410[i];
         if (func_151149AC(deformer->objectId)->viewFlags & 0xF) {
             if (!deformer->sharesObject) {
                 obj = func_151149AC(deformer->objectId);

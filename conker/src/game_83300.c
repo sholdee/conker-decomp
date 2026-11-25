@@ -4822,7 +4822,7 @@ void func_150617BC(Actor *actor) {
         for (i = 0; i <= D_80082FA0; i++) {
             if (actor->unkF & mask) {
                 if (actor->unkB[i] > 0) {
-                    if (((u8 *)&D_800DBFF4)[i] == 0) {
+                    if (D_800DBFF4[i] == 0) {
                         value = actor->unkB[i] - 50;
                         if (value < 0) {
                             value = 0;
@@ -4834,7 +4834,7 @@ void func_150617BC(Actor *actor) {
                 }
             } else {
                 if (actor->unkB[i] < 0xFF) {
-                    if (((u8 *)&D_800DBFF4)[i] == 0) {
+                    if (D_800DBFF4[i] == 0) {
                         value = actor->unkB[i] + 50;
                         if (value > 0xFF) {
                             value = 0xFF;

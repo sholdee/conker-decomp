@@ -1203,7 +1203,7 @@ extern u8  D_800DBF88;
 extern s32 D_800DBF8C;
 extern s32 D_800DBF90;
 extern Camera *D_800DBFF0;
-extern u8  D_800DBFF4[];
+extern u8  D_800DBFF4[4]; // per-player camera hold timers; *(s32 *)D_800DBFF4 tests all four at once
 extern u8  D_800DBFF5;
 extern u8  D_800DBFF6;
 extern u8  D_800DBFF7;
@@ -1263,7 +1263,7 @@ extern u8   D_800DD2A0[4];
 extern u8   D_800DD404;
 extern u8   D_800DD405;
 extern u8   D_800DD406;
-extern s32  D_800DD410[2];
+extern WaveDeformer *D_800DD410[2]; // D_800DD418 of them in use
 extern u8   D_800DD418;
 extern s16  D_800DD444; // state timer
 extern VtxMorphFrame **D_800DD460[2]; // [group][part][frame]
@@ -1278,7 +1278,7 @@ extern s32  D_800DDD0C;
 extern u8   D_800DDD1C;
 extern s32  D_800DDD20;
 extern u8   D_800DDD61;
-extern s32  D_800DDD64;
+extern LensFlare *D_800DDD64; // head of the lens flare list
 
 extern s8   D_800DDDAC[]; // per view: colour fade direction (nonzero: fading to the colour)
 extern u8   D_800DDDAD;
