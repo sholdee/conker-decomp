@@ -166,7 +166,7 @@ typedef struct {
 
 typedef struct {
     s32 unk0;
-} SoundDesc;
+} Desc15169260;
 
 typedef struct {
     /* 0x00 */ struct127 *owner;
@@ -174,14 +174,14 @@ typedef struct {
 } ChildOwner;
 
 typedef struct {
-    /* 0x00 */ s32 emitter;
+    /* 0x00 */ Emitter *emitter;
     /* 0x04 */ f32 params[8];
     /* 0x24 */ ChildOwner owner;
     /* 0x2C */ Header header;
     /* 0x34 */ s32 pad34;
 } ChildDesc;
 
-void func_15169260(SoundDesc *, s32, s32, u8);
+void func_15169260(Desc15169260 *, s32, s32, u8);
 void func_15169850(ContactKey *, u8, s32 *, u8 *, ContactObj *);
 void *memcpy(void *, const void *, u32);
 s32 func_1518E298();
@@ -196,10 +196,10 @@ void func_151D2BA4(EmitterParticleDesc *, struct17 *, s32, u8, s32);
 Emitter *func_151D2F00(EmitterDesc *, s32, u8, s32);
 
 s32 func_1518FDC4(struct127 *obj, u8 *kind, u8 variant);
-s32 func_1518F5D0(struct127 *owner, EmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
-                  s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9);
+Emitter *func_1518F5D0(struct127 *owner, EmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
+                       s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9);
 void func_1518F8E0(Emitter *emitter);
-struct225 *func_1519021C(s32 emitter, struct127 *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
+struct225 *func_1519021C(Emitter *emitter, struct127 *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
 
 extern EmitterTemplate *D_8008D630[];
 extern s32 (*D_8008D67C[])(Emitter *);
@@ -252,7 +252,7 @@ s32 func_1518F384(EffectSprite *sprite) {
 }
 
 void func_1518F45C(s32 arg0, u8 arg1) {
-    SoundDesc desc = { 0x21 };
+    Desc15169260 desc = { 0x21 };
 
     func_15169260(&desc, 1, arg0, arg1);
 }
@@ -271,24 +271,24 @@ void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2) {
 }
 
 /* Creates emitter `index` of the kind matching `owner`'s object id. */
-s32 func_1518F51C(struct127 *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind,
-                  u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
+Emitter *func_1518F51C(struct127 *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind,
+                       u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
     u8 pad[4]; // matching: unused stack slot
     u8 kind;
 
     if (owner == NULL) {
-        return 0;
+        return NULL;
     }
     if (func_1518FDC4(owner, &kind, index) == 0) {
-        return 0;
+        return NULL;
     }
     return func_1518F5D0(owner, &D_8008D630[kind][index], duration, updateFunc, unk59Func,
                          childKind, unk5A, arg7, arg8, arg9);
 }
 
 /* Creates an emitter attached to `owner` from `tmpl`; duration -1 means none (uses 300). */
-s32 func_1518F5D0(struct127 *owner, EmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
-                  s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
+Emitter *func_1518F5D0(struct127 *owner, EmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
+                       s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
     EmitterDesc desc;
     u8 pad[4]; // matching: unused stack slot
     EmitterParams params;
@@ -321,7 +321,7 @@ s32 func_1518F5D0(struct127 *owner, EmitterTemplate *tmpl, s16 duration, s8 upda
         dest = &emitter->params;
         memcpy(dest, &params, sizeof(EmitterParams));
         if (childKind != -1) {
-            dest->child = func_1519021C((s32)emitter, owner, childKind, duration, arg8, arg9);
+            dest->child = func_1519021C(emitter, owner, childKind, duration, arg8, arg9);
         } else {
             dest->child = NULL;
         }
@@ -329,7 +329,7 @@ s32 func_1518F5D0(struct127 *owner, EmitterTemplate *tmpl, s16 duration, s8 upda
         func_1000FA64(0x4D, owner->x_position, owner->y_position, owner->z_position, 15000, 2000, 800,
                       (s32)func_1518E298, emitter, (s32)owner, 0, 0);
     }
-    return (s32)emitter;
+    return emitter;
 }
 
 /* Accumulates the emission rate, spawns particles, then runs the emitter's update callback. */
@@ -732,7 +732,7 @@ u8 *func_1519003C(struct127 *obj, s32 *found) {
 }
 
 /* Creates the child sprite of an emitter, colored from the D_800A67C0/6760/6820 tables. */
-struct225 *func_1519021C(s32 emitter, struct127 *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
+struct225 *func_1519021C(Emitter *emitter, struct127 *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
     ChildDesc desc;
     Header2 pos;
     struct225 *child;
