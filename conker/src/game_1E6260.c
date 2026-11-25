@@ -3,8 +3,8 @@
 #include "variables.h"
 
 
-/* Per-kind data of the swinging-light particle (Particle.extra): a sine swing whose amplitude and speed
- * either ramp for `timer` seconds after a hit or ease back toward their targets. */
+/* Extra data of the swinging lamp particle: a sine swing whose amplitude and speed ramp at their rates
+ * while `timer` runs (started by func_151B9660), then ease back toward their targets. */
 typedef struct {
     /* 0x00 */ f32 out;         // current swing angle, used as the particle's roll
     /* 0x04 */ f32 amp;
@@ -120,7 +120,7 @@ struct225 *func_1516037C(Header *src, struct226 *arg1, s32 size, u8 arg3, s32 ar
 /* Light callback: spawns a swinging lamp of the given kind with a light effect (D_8008B0F0 slot 7) that
  * follows it, and a beam shining from it. */
 void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3) {
-    void *lamp;
+    void *obj; // matching: one local holds the lamp, then the effect (two locals shift the stack)
     ParticleSpawn spawn;
     LampSwing swing;
 
@@ -134,8 +134,7 @@ void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3) {
 
     spawn.radius = 1.0f;
     spawn.elasticity = 1.0f;
-    spawn.sizeY = D_800AA528[kind];
-    spawn.sizeXZ = spawn.sizeY;
+    spawn.sizeXZ = spawn.sizeY = D_800AA528[kind];
     spawn.rot.x = 0.0f;
     spawn.rot.y = 0.0f;
     spawn.rot.z = 0.0f;
@@ -170,25 +169,25 @@ void func_151B8DB0(s32 light, u8 kind, u8 arg2, s32 arg3) {
     spawn.ownerId = 0;
     spawn.fadeStart = 1;
     spawn.fadeRate = 255;
-    lamp = func_15132A4C(&spawn, 3, 255, sizeof(LampSwing), arg2, arg3);
-    if (lamp != NULL) {
+    obj = func_15132A4C(&spawn, 3, 255, sizeof(LampSwing), arg2, arg3);
+    if (obj != NULL) {
         Header header;
 
-        memcpy(&((Particle *)lamp)->swing, &swing, sizeof(swing));
+        memcpy(&((Particle *)obj)->swing, &swing, sizeof(swing));
         {
             SwingingLight data;
             SwingingLight *state;
 
-            data.lamp = lamp;
+            data.lamp = obj;
             data.beam = NULL;
             data.invScale = 1.0f / D_800AA528[kind];
             header.unk0 = 0;
             header.unk1 = 7;
             header.unk2 = 300;
             header.unk4 = 0x12;
-            lamp = func_1516037C(&header, (struct226 *)light, sizeof(data), arg2, arg3);
-            if (lamp != NULL) {
-                state = (SwingingLight *)&((struct225 *)lamp)->unk18;
+            obj = func_1516037C(&header, (struct226 *)light, sizeof(data), arg2, arg3);
+            if (obj != NULL) {
+                state = (SwingingLight *)&((struct225 *)obj)->unk18;
                 memcpy(state, &data, sizeof(data));
                 {
                     ParticleParams params;
@@ -285,17 +284,17 @@ s32 func_151B9310(Mtx *dest, Particle *particle) {
     mtx[3][1] = particle->pos.y;
     mtx[3][2] = particle->pos.z;
 
-    mtx[0][0] = particle->sizeXZ * mtx[0][0];
-    mtx[0][1] = particle->sizeXZ * mtx[0][1];
-    mtx[0][2] = particle->sizeXZ * mtx[0][2];
+    mtx[0][0] *= particle->sizeXZ;
+    mtx[0][1] *= particle->sizeXZ;
+    mtx[0][2] *= particle->sizeXZ;
 
-    mtx[1][0] = particle->sizeY * mtx[1][0];
-    mtx[1][1] = particle->sizeY * mtx[1][1];
-    mtx[1][2] = particle->sizeY * mtx[1][2];
+    mtx[1][0] *= particle->sizeY;
+    mtx[1][1] *= particle->sizeY;
+    mtx[1][2] *= particle->sizeY;
 
-    mtx[2][0] = particle->sizeXZ * mtx[2][0];
-    mtx[2][1] = particle->sizeXZ * mtx[2][1];
-    mtx[2][2] = particle->sizeXZ * mtx[2][2];
+    mtx[2][0] *= particle->sizeXZ;
+    mtx[2][1] *= particle->sizeXZ;
+    mtx[2][2] *= particle->sizeXZ;
 
     guMtxF2L(mtx, dest);
     return 1;
