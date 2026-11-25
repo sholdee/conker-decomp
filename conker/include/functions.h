@@ -1153,4 +1153,6 @@ s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset);
 void func_151FA130(void);
 void func_1019EA88(void);
 void func_15168B10(EffectHeader *obj, s32 type);
+#include "subsystems.h"
+
 #endif

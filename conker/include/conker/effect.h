@@ -1,0 +1,118 @@
+#ifndef CONKER_EFFECT_H
+#define CONKER_EFFECT_H
+
+#include <ultra64.h>
+#include "structs.h"
+
+/*
+ * Subsystem "effect": prototypes of the non-static functions and declarations of the globals
+ * that these files define, grouped by file in address order:
+ *   game/done/game_35CF0.c
+ *   game_35D20.c
+ *   game/done/game_36040.c
+ *   game_DB730.c
+ *   game_DBA60.c
+ *   game_DDB60.c
+ *   game_E0F60.c
+ *   game_E2880.c
+ *   game_E2DA0.c
+ *   game_E4FF0.c
+ *   game_E8090.c
+ *   game_E8C10.c
+ *   game_EB340.c
+ *   game_EBE60.c
+ *   game_EEE70.c
+ *   game_F15D0.c
+ *   game_F3BA0.c
+ *   game_F4B20.c
+ *   game_F5800.c
+ *   game_F5D80.c
+ *   game_FC410.c
+ *   game_FC5F0.c
+ *   game_FDBE0.c
+ *   game_FE850.c
+ *   game_FF0E0.c
+ *   game_1045D0.c
+ *   game_1048D0.c
+ *   game_108E90.c
+ *   game_109220.c
+ *   game_10B380.c
+ *   game/done/game_10B7C0.c
+ *   game_10B7D0.c
+ *   game/done/game_10C140.c
+ *   game_10C170.c
+ *   game_10CD70.c
+ *   game_10DD20.c
+ *   game_10E240.c
+ *   game_1104D0.c
+ *   game_111670.c
+ *   game_112F90.c
+ *   game_117490.c
+ *   game_118400.c
+ *   game_11F780.c
+ *   game/done/game_122650.c
+ *   game_1227F0.c
+ *   game_124920.c
+ *   game_127060.c
+ *   game_1286F0.c
+ *   game_128790.c
+ *   game_129DE0.c
+ *   game_129E80.c
+ *   game_129EE0.c
+ *   game_12B1C0.c
+ *   game_12B7D0.c
+ *   game_12D630.c
+ *   game/done/game_12D7E0.c
+ *   game_12D7F0.c
+ *   game_12F400.c
+ *   game_12FDD0.c
+ *   game_130B40.c
+ *   game_1312F0.c
+ *   game_1355D0.c
+ *   game_168A90.c
+ *   game_16EE20.c
+ *   game_173D40.c
+ *   game_174BF0.c
+ *   game/done/game_1765E0.c
+ *   game_179F30.c
+ *   game_182C30.c
+ *   game_1844C0.c
+ *   game_185560.c
+ *   game_193130.c
+ *   game/done/game_193420.c
+ *   game_193430.c
+ *   game_1944C0.c
+ *   game_19E040.c
+ *   game_1A1E50.c
+ *   game_1A6360.c
+ *   game_1B4A90.c
+ *   game_1B5370.c
+ *   game_1B7870.c
+ *   game_1B7EC0.c
+ *   game_1BD8B0.c
+ *   game_1BDA00.c
+ *   game_1BDB90.c
+ *   game_1BFCB0.c
+ *   game_1C0840.c
+ *   game_1C1150.c
+ *   game/done/game_1CC420.c
+ *   game_1D3420.c
+ *   game_1D3800.c
+ *   game_1D3FC0.c
+ *   game_1D4140.c
+ *   game_1D6E80.c
+ *   game_1D92F0.c
+ *   game_1DBB60.c
+ *   game_1DC150.c
+ *   game_1DD500.c
+ *   game_1E3050.c
+ *   game_1E5820.c
+ *   game_1E73B0.c
+ *   game_1EB6C0.c
+ *   game_1EBD00.c
+ *   game_1EBFD0.c
+ *   game_1FF760.c
+ *   game_1FFF60.c
+ */
+
+#endif

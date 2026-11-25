@@ -1,0 +1,97 @@
+#ifndef CONKER_PARTICLE_H
+#define CONKER_PARTICLE_H
+
+#include <ultra64.h>
+#include "structs.h"
+
+/*
+ * Subsystem "particle": prototypes of the non-static functions and declarations of the globals
+ * that these files define, grouped by file in address order:
+ *   game/done/game_35E80.c
+ *   game_39750.c
+ *   game_DC6B0.c
+ *   game_DF2D0.c
+ *   game_DF930.c
+ *   game_E5E90.c
+ *   game_E6A10.c
+ *   game_E7380.c
+ *   game_E7970.c
+ *   game_EDE60.c
+ *   game_EE710.c
+ *   game_EF410.c
+ *   game_F3270.c
+ *   game_F8590.c
+ *   game_F9430.c
+ *   game_FA240.c
+ *   game_FA360.c
+ *   game_FB060.c
+ *   game_FFBA0.c
+ *   game_1028F0.c
+ *   game_113480.c
+ *   game_113D60.c
+ *   game_116D40.c
+ *   game_1199D0.c
+ *   game_11FF10.c
+ *   game_121A20.c
+ *   game_128D70.c
+ *   game_12DAB0.c
+ *   game_135780.c
+ *   game_1368C0.c
+ *   game_15D730.c
+ *   game_15F680.c
+ *   game_169510.c
+ *   game_176A00.c
+ *   game_177480.c
+ *   game_177B50.c
+ *   game_1792B0.c
+ *   game_1792D0.c
+ *   game_179400.c
+ *   game_1797A0.c
+ *   game_17CAF0.c
+ *   game_183640.c
+ *   game_188440.c
+ *   game_193E50.c
+ *   game_197120.c
+ *   game_19A8B0.c
+ *   game_19F150.c
+ *   game_1A1B40.c
+ *   game_1A7260.c
+ *   game_1B74A0.c
+ *   game_1B81D0.c
+ *   game_1B8B60.c
+ *   game_1B9F30.c
+ *   game_1BA1D0.c
+ *   game_1BA670.c
+ *   game_1BB950.c
+ *   game_1BC650.c
+ *   game_1BD940.c
+ *   game_1BDC20.c
+ *   game_1BF090.c
+ *   game_1BFC70.c
+ *   game_1BFDD0.c
+ *   game_1C0B10.c
+ *   game_1CDEC0.c
+ *   game_1CE2F0.c
+ *   game_1D0600.c
+ *   game_1D2B10.c
+ *   game_1D3AB0.c
+ *   game_1D9A00.c
+ *   game_1DBD40.c
+ *   game_1DC720.c
+ *   game_1DCA70.c
+ *   game_1DEF60.c
+ *   game_1E30A0.c
+ *   game_1E34C0.c
+ *   game_1E5FF0.c
+ *   game_1E6B40.c
+ *   game_1E9820.c
+ *   game_1F1CD0.c
+ *   game_1FA770.c
+ *   game_1FBB80.c
+ *   game_200930.c
+ *   game_2062D0.c
+ *   game_209B50.c
+ *   game_20A290.c
+ */
+
+#endif

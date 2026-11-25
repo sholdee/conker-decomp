@@ -1523,4 +1523,6 @@ extern s32  D_151F3C4C;
 extern u16  D_BC000C02;
 extern s32  D_1FC007FC;
 
+#include "subsystems.h"
+
 #endif
