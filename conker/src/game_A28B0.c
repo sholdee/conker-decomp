@@ -1246,79 +1246,73 @@ void func_15078520(void) {
 
 extern f32 func_15048A40(u8);
 extern f32 func_150489B0(u8);
-typedef struct {
-    u8 pad[8];
-    struct { s16 x, y, z, w; } p[1];
-} Win78544;
 extern f32 sinf(f32);
 extern f32 cosf(f32);
 
+/*
+ * Places waypoint (arg0 & 0x3F) at a 12-bit signed offset (arg1:arg3 high nibble, arg2:arg3 low
+ * nibble, times 8) from the target, rotated by the target's facing (mode arg0 >> 6 == 0), not at all
+ * (mode 1) or by the direction from the target to this object (mode 2).
+ */
 void func_15078544(void) {
-    struct127 *obj;
+    struct127 *pad; // matching: unused stack slot
     f32 y;
     f32 x;
-    f32 ox;
-    f32 oz;
-    f32 s;
-    f32 c;
-    f32 ang;
-    u8 a;
+    f32 offsetX;
+    f32 offsetZ;
+    f32 sine;
+    f32 cosine;
+    f32 angle;
+    u8 facing;
     f32 z;
     s32 mode;
-    u8 v;
 
     mode = D_800D1890 >> 6;
     D_800D1890 &= 0x3F;
     x = D_800CC2D0[D_800D154C->unk222].x_position;
     z = D_800CC2D0[D_800D154C->unk222].z_position;
     y = D_800CC2D0[D_800D154C->unk222].y_position;
-    ox = ((((s8)D_800D1891 << 4) | (D_800D1893 >> 4)) * 8);
-    oz = ((((s8)D_800D1892 << 4) | (D_800D1893 & 0xF)) * 8);
+    offsetX = ((((s8)D_800D1891 << 4) | (D_800D1893 >> 4)) * 8);
+    offsetZ = ((((s8)D_800D1892 << 4) | (D_800D1893 & 0xF)) * 8);
     if (mode == 0) {
-        a = ((D_800CC2D0[D_800D154C->unk222].unk7A >> 8) & 0xFF) - 0x40;
-        s = func_15048A40(a);
-        c = func_150489B0(a);
+        facing = ((D_800CC2D0[D_800D154C->unk222].unk7A >> 8) & 0xFF) - 0x40;
+        sine = func_15048A40(facing);
+        cosine = func_150489B0(facing);
     } else if (mode == 1) {
-        s = 0.0f;
-        c = 1.0f;
+        sine = 0.0f;
+        cosine = 1.0f;
     } else {
-        ang = func_150484A0(D_800D154C->x_position - x, D_800D154C->z_position - z);
-        s = sinf(ang);
-        c = cosf(ang);
+        angle = func_150484A0(D_800D154C->x_position - x, D_800D154C->z_position - z);
+        sine = sinf(angle);
+        cosine = cosf(angle);
     }
-    x += ox * c + oz * s;
-    z += oz * c - ox * s;
-    ((Win78544 *)D_800D2104[D_800D154C->unk13F])->p[D_800D1890].x = x;
-    ((Win78544 *)D_800D2104[D_800D154C->unk13F])->p[D_800D1890].y = y;
-    ((Win78544 *)D_800D2104[D_800D154C->unk13F])->p[D_800D1890].z = z;
+    x += offsetX * cosine + offsetZ * sine;
+    z += offsetZ * cosine - offsetX * sine;
+    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].x = x;
+    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].y = y;
+    D_800D2104[D_800D154C->unk13F]->points[D_800D1890].z = z;
 }
-void func_1507879C(void) {
-    struct197 *temp_v0;
-    f32 temp_f0;
-    s32 temp_v1;
 
-    temp_v0 = (struct197 *)D_800CC5A0[D_800D154C->unk222].interaction_state;
-    temp_f0 = temp_v0->unk8;
-    temp_v1 = D_800D1892;
-    if (((temp_v1 == 0) && (temp_f0 < (f32)((u32)D_800D1891))) ||
-        ((temp_v1 == 1) && ((f32)((u32)D_800D1891) < temp_f0))) {
+/* Jumps to arg0 when the target's unk2D0->unk8 is below (arg2 == 0) or above (arg2 == 1) arg1. */
+void func_1507879C(void) {
+    struct197 *data;
+    f32 value;
+    s32 compare;
+
+    data = D_800CC2D0[D_800D154C->unk222].unk2D0;
+    value = data->unk8;
+    compare = D_800D1892;
+    if (((compare == 0) && (value < (f32)(u32)D_800D1891)) ||
+        ((compare == 1) && ((f32)(u32)D_800D1891 < value))) {
         func_15075400(D_800D1890);
     }
 }
-// NON-MATCHING: D_800CC5A0 ???
-// void func_1507879C(void) {
-//     f32 temp_f0 =  D_800CC5A0[D_800D154C->unk222].unk8;
-//
-//     if (((D_800D1892 == 0) && (temp_f0 < D_800D1891)) ||
-//         ((D_800D1892 == 1) && (temp_f0 > D_800D1891))) {
-//         func_15075400(D_800D1890);
-//     }
-// }
 
 void func_15078874(void) {
     D_800D154C->unk251 = D_800D1890;
 }
 
+/* Jumps to arg0 when unk251 is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void func_15078890(void) {
     if (((D_800D1892 == 0) && (D_800D154C->unk251 == D_800D1891)) ||
         ((D_800D1892 == 1) && (D_800D154C->unk251 != D_800D1891))) {
@@ -1326,35 +1320,38 @@ void func_15078890(void) {
     }
 }
 
+/* arg3: jumps to arg0 when the target is object 0; else when the target's unk251 is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void func_15078900(void) {
     if (D_800D1893 != 0) {
         if (D_800D154C->unk222 == 0) {
             func_15075400(D_800D1890);
         }
-    } else {
-        if (((D_800D1892 == 0) && (D_800D1891 == D_800CC521[D_800D154C->unk222 * 0x32C])) ||
-            ((D_800D1892 == 1) && (D_800D1891 != D_800CC521[D_800D154C->unk222 * 0x32C]))) {
-            func_15075400(D_800D1890);
-        }
+    } else if (((D_800D1892 == 0) && (D_800D1891 == D_800CC2D0[D_800D154C->unk222].unk251)) ||
+               ((D_800D1892 == 1) && (D_800D1891 != D_800CC2D0[D_800D154C->unk222].unk251))) {
+        func_15075400(D_800D1890);
     }
 }
 
+/* Copies unk8 and unkC of the target's unk2D0 data into the object's own. */
 void func_15078A08(void) {
-    struct197 *temp_a0;
-    struct197 *temp_v0;
+    struct197 *dst;
+    struct197 *src;
 
-    temp_v0 = D_800D154C->unk2D0;
-    temp_a0 = D_800CC5A0[D_800D154C->unk222].interaction_state; // wtf
-    temp_v0->unk8 = (f32) temp_a0->unk8;
-    temp_v0->unkC = (f32) temp_a0->unkC;
+    dst = D_800D154C->unk2D0;
+    src = D_800CC2D0[D_800D154C->unk222].unk2D0;
+    dst->unk8 = src->unk8;
+    dst->unkC = src->unkC;
 }
 
-// requires jump table
+/*
+ * Script condition: reads property arg2 of object `arg0` (or of object 0 / the target for some)
+ * and compares it with arg3 using operator arg1 (0 ==, 1 !=, 2 <, 3 >, 4 <=, 5 >=).
+ */
 s32 func_15078A60(s32 arg0) {
     s32 value;
     s32 diff;
-    s32 pad;
-    u8 angle;
+    s32 pad; // matching: unused stack slot
+    u8 facing;
 
     switch (D_800D1892) {
     case 0:
@@ -1376,9 +1373,11 @@ s32 func_15078A60(s32 arg0) {
         value = D_800CC2D0[arg0].unk44;
         break;
     case 6:
-        angle = D_800CC2D0[arg0].unk7A >> 8;
-        angle -= 0x40;
-        diff = (u8)(func_150484A0(D_800CC2D0[arg0].x_position - D_800D154C->x_position, D_800CC2D0[arg0].z_position - D_800D154C->z_position) * 40.74366379f) - angle;
+        // angle between the object's facing and the direction to it from the current object
+        facing = D_800CC2D0[arg0].unk7A >> 8;
+        facing -= 0x40;
+        diff = (u8)(func_150484A0(D_800CC2D0[arg0].x_position - D_800D154C->x_position,
+                                  D_800CC2D0[arg0].z_position - D_800D154C->z_position) * 40.74366379f) - facing;
         value = (u8)diff;
         if (value > 0x80) {
             value = 0x100 - value;
@@ -1424,6 +1423,7 @@ s32 func_15078A60(s32 arg0) {
         value = D_800CC2D0[arg0].disable_run;
         break;
     }
+    // matching: one line, as -g3 line numbers steer the scheduling of this test
     if (((D_800D1891 == 0) && (value == D_800D1893)) || ((D_800D1891 == 1) && (value != D_800D1893)) || ((D_800D1891 == 2) && (value < D_800D1893)) || ((D_800D1891 == 3) && (value > D_800D1893)) || ((D_800D1891 == 4) && (value <= D_800D1893)) || ((D_800D1891 == 5) && (value >= D_800D1893))) { return 1; } return 0;
 }
 
