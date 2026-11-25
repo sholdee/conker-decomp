@@ -1356,34 +1356,23 @@ void *func_15197C10(SceneParticle *beam, s16 view) {
     return result;
 }
 
-/* Payload of the messages sent to effects through func_15147D64. */
-typedef struct EffectMessage {
-    /* 0x0 */ Actor *owner;
-    /* 0x4 */ union {
-        u8 id;              /* messages 0, 2, 8 and 0x26: owner's unique_id */
-        Actor *other; /* message 0x2D: owner and other swap */
-    } u4;
-    /* 0x8 */ u8 ownerId; /* message 0x2D */
-    /* 0x9 */ u8 otherId; /* message 0x2D */
-} EffectMessage;
-
 void func_151993B4(CharacterFlamethrowerActor *actor);
 
 /* Message handler: dies when its owner is killed (0, 2, 8); follows an owner swap (0x2D). */
-void func_15198054(CharacterFlamethrowerActor *actor, EffectMessage *msg, u8 kind) {
+void func_15198054(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
     EffectOwnerRef *ref = actor->state;
 
     if (kind == 0 || kind == 2 || kind == 8) {
-        if (msg->owner == ref->owner || msg->u4.id == ref->ownerId) {
+        if (msg->ref.actor == ref->owner || msg->ref.uniqueId == ref->ownerId) {
             func_151993B4(actor);
         }
     } else if (kind == 0x2D) {
-        if (ref->owner == msg->owner) {
-            ref->owner = msg->u4.other;
-            ref->ownerId = msg->otherId;
-        } else if (ref->owner == msg->u4.other) {
-            ref->owner = msg->owner;
-            ref->ownerId = msg->ownerId;
+        if (ref->owner == msg->swap.actorA) {
+            ref->owner = msg->swap.actorB;
+            ref->ownerId = msg->swap.idB;
+        } else if (ref->owner == msg->swap.actorB) {
+            ref->owner = msg->swap.actorA;
+            ref->ownerId = msg->swap.idA;
         }
     }
 }
@@ -2213,20 +2202,20 @@ void func_15199834(Actor *owner) {
 
 
 /* Message handler: dies when its owner is killed (0, 2, 0x26); follows an owner swap (0x2D). */
-void func_1519986C(CharacterFlamethrowerActor *actor, EffectMessage *msg, u8 kind) {
+void func_1519986C(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
     EffectOwnerRef *ref = actor->state;
 
     if (kind == 0 || kind == 2 || kind == 0x26) {
-        if (msg->owner == ref->owner || msg->u4.id == ref->ownerId) {
+        if (msg->ref.actor == ref->owner || msg->ref.uniqueId == ref->ownerId) {
             func_1516972C((struct102 *)actor);
         }
     } else if (kind == 0x2D) {
-        if (ref->owner == msg->owner) {
-            ref->owner = msg->u4.other;
-            ref->ownerId = msg->otherId;
-        } else if (ref->owner == msg->u4.other) {
-            ref->owner = msg->owner;
-            ref->ownerId = msg->ownerId;
+        if (ref->owner == msg->swap.actorA) {
+            ref->owner = msg->swap.actorB;
+            ref->ownerId = msg->swap.idB;
+        } else if (ref->owner == msg->swap.actorB) {
+            ref->owner = msg->swap.actorA;
+            ref->ownerId = msg->swap.idA;
         }
     }
 }

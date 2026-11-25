@@ -267,37 +267,26 @@ s32 func_15158AFC(EffectActor *actor) {
     return 1;
 }
 
-/* Message passed to the effect message handlers; msgId 0x2D swaps owners first <-> second. */
-typedef struct {
-    /* 0x00 */ Actor *first;
-    /* 0x04 */ union {
-        Actor *ptr;
-        u8 uniqueId; /* msgId 0: unique id of `first` */
-    } second;
-    /* 0x08 */ u8 firstId;
-    /* 0x09 */ u8 secondId;
-} EffectMessage;
-
 /* Message handler: follows owner swaps (0x2D) and drops the owner when it goes away (0). */
-void func_15158B3C(EffectActor *actor, EffectMessage *msg, u8 msgId) {
+void func_15158B3C(EffectActor *actor, ActorMsg *msg, u8 msgId) {
     Actor *first;
 
     if (msgId == 0x2D) {
-        first = msg->first;
+        first = msg->swap.actorA;
         if (actor->tmpl.owner == first) {
-            actor->tmpl.owner = msg->second.ptr;
-            actor->tmpl.ownerId = msg->secondId;
+            actor->tmpl.owner = msg->swap.actorB;
+            actor->tmpl.ownerId = msg->swap.idB;
         } else {
-            if (actor->tmpl.owner == msg->second.ptr) {
+            if (actor->tmpl.owner == msg->swap.actorB) {
                 actor->tmpl.owner = first;
-                actor->tmpl.ownerId = msg->firstId;
+                actor->tmpl.ownerId = msg->swap.idA;
             }
         dummy_label_356969: ; // matching: the empty labelled statement splits IDO's basic block
         }
     } else if (msgId == 0) {
-        first = msg->first;
+        first = msg->ref.actor;
         if (actor->tmpl.owner != first) {
-            if (msg->second.uniqueId != actor->tmpl.ownerId) {
+            if (msg->ref.uniqueId != actor->tmpl.ownerId) {
                 return;
             }
         }
@@ -460,28 +449,28 @@ void func_15158D2C(CharacterWatcher *watcher) {
 void func_1519F400(void *);
 
 /* Message handler: frees the watcher when its character goes away (0), follows swaps (0x2D). */
-void func_15158FA4(void *self, EffectMessage *msg, u8 msgId) {
+void func_15158FA4(void *self, ActorMsg *msg, u8 msgId) {
     CharacterWatcher *watcher = self;
     Actor *first;
 
     if (msgId == 0) {
-        if ((msg->first == watcher->character) || (msg->second.uniqueId == watcher->characterId)) {
+        if ((msg->ref.actor == watcher->character) || (msg->ref.uniqueId == watcher->characterId)) {
             func_1516972C(self);
         }
     } else if (msgId == 0x2D) {
-        first = msg->first;
+        first = msg->swap.actorA;
         if (watcher->character == first) {
-            watcher->character = msg->second.ptr;
-            watcher->characterId = msg->secondId;
+            watcher->character = msg->swap.actorB;
+            watcher->characterId = msg->swap.idB;
         } else {
-            if (watcher->character == msg->second.ptr) {
+            if (watcher->character == msg->swap.actorB) {
                 watcher->character = first;
-                watcher->characterId = msg->firstId;
+                watcher->characterId = msg->swap.idA;
             }
         dummy_label_15158FA4: ; // matching: the empty labelled statement splits IDO's basic block
         }
     } else if (msgId == 4) {
-        if ((msg->first == watcher->character) || (msg->second.uniqueId == watcher->characterId)) {
+        if ((msg->ref.actor == watcher->character) || (msg->ref.uniqueId == watcher->characterId)) {
             func_1519F400(self);
         }
     }

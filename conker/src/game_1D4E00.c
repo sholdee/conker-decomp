@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void func_1514373C(f32, f32, f32 *, f32 *);
 
@@ -526,38 +527,27 @@ void func_151A8A20(Bolt *bolt, void *msg, u8 msgType) {
     }
 }
 
-/* Message 0x2D: two actors traded places (each with its unique_id). */
-typedef struct {
-    Actor *actorA;
-    union {
-        Actor *actorB;
-        u8 id;              /* message 0: the unique_id of the dying actor */
-    } u4;
-    u8 idA;
-    u8 idB;
-} BoltOwnerMsg;
-
 /*
  * Type 2 message handler (bolts from func_151A8624): message 0 destroys the bolt when its owner goes
  * away; message 0x2D re-attaches it when its owner is swapped for another actor.
  */
 void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
     BoltLink *link = bolt->link;
-    BoltOwnerMsg *msg = arg;
+    ActorMsg *msg = arg;
     Actor *actor;
 
     if (msgType == 0) {
-        actor = msg->actorA;
-        if ((actor == link->owner) || (link->ownerId == msg->u4.id)) {
+        actor = msg->ref.actor;
+        if ((actor == link->owner) || (link->ownerId == msg->ref.uniqueId)) {
             func_1516972C((struct102 *)bolt);
         }
     } else if (msgType == 0x2D) {
-        if (link->owner == msg->actorA) {
-            link->owner = msg->u4.actorB;
-            link->ownerId = msg->idB;
-        } else if (link->owner == msg->u4.actorB) {
-            link->owner = msg->actorA;
-            link->ownerId = msg->idA;
+        if (link->owner == msg->swap.actorA) {
+            link->owner = msg->swap.actorB;
+            link->ownerId = msg->swap.idB;
+        } else if (link->owner == msg->swap.actorB) {
+            link->owner = msg->swap.actorA;
+            link->ownerId = msg->swap.idA;
         }
     }
 }

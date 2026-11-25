@@ -449,41 +449,30 @@ s32 func_1518C69C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5
     return 1;
 }
 
-/* Message sent to objects about an actor (see game_105FC0.c's TrailMessage). */
-typedef struct {
-    Actor *actor;
-    union {
-        u8 actorId;        /* type 0 */
-        Actor *other;  /* type 0x2D */
-    } x4;
-    u8 actorId;  /* type 0x2D */
-    u8 otherId;  /* type 0x2D */
-} ActorMessage;
-
 /*
  * Trail emitter message handler: follows its owner through an actor swap (type 0x2D) and is
  * destroyed when the owner goes away (type 0).
  */
 void func_1518C850(TrailEmitter *emitter, s32 data, u8 type) {
-    ActorMessage *msg = (ActorMessage *)data;
+    ActorMsg *msg = (ActorMsg *)data;
     Actor *actor;
 
     if (type == 0x2D) {
-        actor = msg->actor;
+        actor = msg->swap.actorA;
         if (actor == emitter->params.owner) {
-            emitter->params.owner = msg->x4.other;
-            emitter->params.ownerId = msg->otherId;
+            emitter->params.owner = msg->swap.actorB;
+            emitter->params.ownerId = msg->swap.idB;
         } else {
-            if (emitter->params.owner == msg->x4.other) {
+            if (emitter->params.owner == msg->swap.actorB) {
                 emitter->params.owner = actor;
-                emitter->params.ownerId = msg->actorId;
+                emitter->params.ownerId = msg->swap.idA;
             }
         // matching: the label ends the block, so IDO emits the else path's own branch to the epilogue
         swapped:;
         }
     } else if (type == 0) {
-        actor = msg->actor;
-        if (actor == emitter->params.owner || msg->x4.actorId == emitter->params.ownerId) {
+        actor = msg->ref.actor;
+        if (actor == emitter->params.owner || msg->ref.uniqueId == emitter->params.ownerId) {
             func_1516972C((struct102 *)emitter);
         }
     }
