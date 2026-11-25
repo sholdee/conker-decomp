@@ -1,14 +1,12 @@
 #include <ultra64.h>
 
 #define func_1506160C func_1506160C_hdr
-#define func_1505841C func_1505841C_hdr
 #define func_1000F85C func_1000F85C_hdr
 #define func_1000F91C func_1000F91C_hdr
 #define func_10010BE8 func_10010BE8_hdr
 #define func_1505E874 func_1505E874_hdr
 #include "functions.h"
 #undef func_1506160C
-#undef func_1505841C
 #undef func_1000F85C
 #undef func_1000F91C
 #undef func_10010BE8
@@ -490,8 +488,6 @@ typedef struct ActorInfo15056B08 {
     u8 unk19;
 } ActorInfo15056B08;
 
-struct Func1505841CActor;
-void func_1505841C(struct Func1505841CActor *arg0, f32 arg1);
 struct216 *func_1507BB28(s32, s32);
 void func_1507BC14(struct127 *);
 s32 func_150229E4(struct127 *);
@@ -557,7 +553,7 @@ void func_15056B08(struct127 *actor) {
     faceTurnRate = actor->unk1E6;
     if (D_800D2108[actor->unk13F] == 0) {
         actor->xz_velocity = 0.0f;
-        func_1505841C((struct Func1505841CActor *)actor, 0.0f);
+        func_1505841C(actor, 0.0f);
         return;
     }
     state = mode;
@@ -974,7 +970,7 @@ void func_15056B08(struct127 *actor) {
         actor->unk76 = actor->unk78;
         actor->xz_velocity = speed;
     }
-    func_1505841C((struct Func1505841CActor *)actor, accel);
+    func_1505841C(actor, accel);
     if ((actor->unk22C & 8) && !(actor->unk1FC & 8)) {
         f32 a;
         f32 lim;
@@ -994,310 +990,130 @@ void func_15056B08(struct127 *actor) {
         actor->unkB8 = actor->unkB8 + a;
     }
 }
-typedef struct Func1505841CActor {
-    u8 pad0[0x28];
-    f32 vertical;
-    u8 pad2C[0x10];
-    f32 speed;
-    u8 pad40[0x10C];
-    f32 scale;
-    u8 pad150[0x80];
-    s8 pitch;
-    u8 pad1D1[0x52];
-    u8 mode;
-    u8 pad224[8];
-    u16 motion_flags;
-    u8 pad22E[0x16];
-    u16 animation;
-    u8 rate_flags;
-    u8 pad247[2];
-    u8 rate_low;
-    u8 pad24A[6];
-    u8 strength;
-    u8 pad251[0x7F];
-    void *field_2D0;
-} Func1505841CActor;
-
-void func_1505841C(Func1505841CActor *arg0, f32 arg1) {
-    void *inner;
+/* Plays the actor's movement animation (unk244) at a rate derived from its speed, or at `idleRate`. */
+void func_1505841C(struct127 *actor, f32 idleRate) {
+    struct197 *anim;
     f32 speed;
     f32 fade;
     f32 rate;
-    f32 scaled_speed;
+    f32 scaledSpeed;
     s32 flags;
 
-    flags = arg0->rate_flags;
-    rate = (f32)(((flags & 0x1F) << 8) + arg0->rate_low) * 0.0003906250058f;
+    flags = actor->unk246;
+    rate = (f32)(((flags & 0x1F) << 8) + actor->unk249) * 0.0003906250058f;
     if (!(flags & 0x80)) {
-        speed = arg0->speed;
-        if ((speed <= 1.0f) || ((arg0->motion_flags & 0x10) && (arg0->vertical == 0.0f))) {
-            rate = arg1;
+        speed = actor->xz_velocity;
+        if ((speed <= 1.0f) || ((actor->unk22C & 0x10) && (actor->unk28 == 0.0f))) {
+            rate = idleRate;
         } else {
-            scaled_speed = speed;
-            scaled_speed *= 0.5f / arg0->scale;
+            scaledSpeed = speed;
+            scaledSpeed *= 0.5f / actor->xz_scale;
             rate *= 10.0f;
-            rate = scaled_speed / rate + 0.1000000015f;
+            rate = scaledSpeed / rate + 0.1000000015f;
             if (!(flags & 0x20)) {
                 rate += 0.400000006f;
             }
         }
     }
-    if (arg0->mode == 0xD) {
-        rate = (f32)(arg0->strength & 0x7F) * 0.1000000015f;
+    if (actor->unk223 == 0xD) {
+        rate = (f32)(actor->unk250 & 0x7F) * 0.1000000015f;
     }
     if (flags == 0xFF) {
         rate = 0.0f;
     }
-    func_1505E650((struct127 *)arg0, arg0->animation, rate,
-                 (f32)arg0->pitch, 0.0f, 0.0f, 0);
-    if (arg0->rate_flags == 0xFF) {
-        fade = (f32)((s32 (*)[16])D_800418B0)[D_800419A0][0];
+    func_1505E650(actor, actor->unk244, rate, (f32)actor->unk1D0, 0.0f, 0.0f, 0);
+    if (actor->unk246 == 0xFF) {
+        fade = ((s32 (*)[16])D_800418B0)[D_800419A0][0];
         if (fade >= 0.0f) {
-            inner = arg0->field_2D0;
-            *(f32 *)((u8 *)inner + 8) = (*(f32 *)((u8 *)inner + 0x18) * (32768.0f - fade)) / 32768.0f;
+            anim = actor->unk2D0;
+            anim->unk8 = (anim->unk18 * (32768.0f - fade)) / 32768.0f;
         }
     }
 }
 
-// NON-MATCHING: JUSTREG
-// void func_1505841C(struct127 *arg0, f32 arg1) {
-//     struct197 *temp_v0_2;
-//     f32 temp_f0;
-//     f32 temp_f1;
-//     s32 idx;
-//
-//     temp_f0 = (((arg0->unk246 & 0x1F) << 8) + arg0->unk249) * 0.0003906250058f;
-//     if ((arg0->unk246 & 0x80) == 0) {
-//         if ((arg0->xz_velocity <= 1.0f) || (((arg0->unk22C & 0x10) != 0) && (arg0->unk28 == 0.0f))) {
-//             temp_f0 = arg1;
-//         } else {
-//             // regalloc off here
-//             temp_f1 = (arg0->xz_velocity * (0.5f / arg0->xz_scale));
-//             temp_f0 = temp_f1 / (temp_f0 * 10.0f);
-//             temp_f0 += 0.1000000015f;
-//
-//             if ((arg0->unk246 & 0x20) == 0) {
-//                 temp_f0 += 0.400000006f;
-//             }
-//         }
-//     }
-//     if (arg0->unk223 == 0xD) {
-//         temp_f0 = (arg0->unk250 & 0x7F) * 0.1000000015f;
-//     }
-//     if (arg0->unk246 == 0xFF) {
-//         temp_f0 = 0.0f;
-//     }
-//     func_1505E650(arg0, arg0->unk244, temp_f0, arg0->unk1D0, 0.0f, 0.0f, 0);
-//
-//     if (arg0->unk246 == 0xFF) {
-//         // regalloc off here
-//         idx = D_800419A0 << 4;
-//         temp_f0 = D_800418B0[idx];
-//         if (temp_f0 >= 0.0f) {
-//             temp_v0_2 = arg0->unk2D0;
-//             temp_v0_2->unk8 = (f32) ((temp_v0_2->unk18 * (32768.0f - temp_f0)) / 32768.0f);
-//         }
-//     }
-// }
-
-typedef struct Game83300Child585F0 {
-    u8 pad0[0x7D];
-    u8 field7D;
-} Game83300Child585F0;
-
-typedef struct Game83300State585F0 {
-    s32 kind;
-    u8 pad4[0x14];
-    f32 height18;
-    u8 pad1C[4];
-    f32 field20, field24, field28;
-    u8 pad2C[0x10];
-    f32 field3C;
-    u8 pad40[0x36];
-    u16 angle76, angle78, angle7A;
-    u8 pad7C[4];
-    u8 field80, field81, pad82, field83;
-    u8 pad84[0x29];
-    u8 modeAD;
-    u8 padAE[0xA];
-    f32 fieldB8;
-    u8 padBC[0x38];
-    s32 flagsF4, flagsF8;
-    u8 padFC[8];
-    u8 count104;
-    u8 pad105[4];
-    u8 strength109, pad10A, flags10B;
-    s16 timer10C;
-    u8 pad10E[0xA];
-    f32 ground118;
-    u8 pad11C[0xAE];
-    u8 field1CA, pad1CB;
-    f32 height1CC;
-    u8 pad1D0[0x18];
-    u8 field1E8, pad1E9;
-    u16 field1EA, field1EC;
-    u8 pad1EE[0x2E];
-    s16 cooldown21C;
-    u8 pad21E[0x1A];
-    u8 owner238, pad239, backup23A;
-    u8 pad23B[0xE1];
-    Game83300Child585F0 *child31C;
-} Game83300State585F0;
-
-void func_150585F0(u8 *arg0, f32 arg1) {
-    Game83300State585F0 *actor;
-    Game83300Child585F0 *child;
-    f32 value;
-    s32 mode;
-    s32 count;
+/* Per-frame update while the actor is stunned (stunned is the countdown; 255 = indefinitely). */
+void func_150585F0(struct127 *actor, f32 decel) {
+    struct126 *child;
+    f32 yVel;
+    s32 water;
+    s32 stun;
     s32 flags;
-    s32 copiedAngle;
+    s32 facing;
     u16 angle;
     s32 owner;
 
-    actor = (void *)arg0;
-    arg1 = (f32)(u32)actor->strength109 * 0.1000000015f;
-    func_1505A3A8(0.0f, actor, 1.0f, arg1, 0);
-    if (actor->height1CC < 100000.0f) {
-        actor->height1CC = actor->height18;
+    decel = (f32)(u32)actor->unk109 * 0.1000000015f;
+    func_1505A3A8(0.0f, actor, 1.0f, decel, 0);
+    if (actor->unk1CC < 100000.0f) {
+        actor->unk1CC = actor->y_position;
     }
-    mode = actor->modeAD;
-    if (mode != 0 && mode < 10) {
-        value = actor->field20;
-        actor->field24 = 0.0f;
-        if (value < 60.0f) {
-            actor->field20 = value * 0.8999999762f;
+    water = actor->in_water;
+    if (water != 0 && water < 10) {
+        yVel = actor->y_velocity;
+        actor->gravity = 0.0f;
+        if (yVel < 60.0f) {
+            actor->y_velocity = yVel * 0.8999999762f;
         }
-        if ((actor->ground118 - 60.0f) + 40.0f < actor->height18) {
-            actor->field81 = 0;
-            actor->field83 = 0;
-            actor->modeAD = 0;
-            actor->fieldB8 = 0.0f;
-            actor->field24 = 4.0f;
+        if ((actor->unk118 - 60.0f) + 40.0f < actor->y_position) {
+            actor->unk81 = 0;
+            actor->unk83 = 0;
+            actor->in_water = 0;
+            actor->unkB8 = 0.0f;
+            actor->gravity = 4.0f;
         }
     }
-    if (D_800BE616 == 0 || actor->kind != 1) {
-        actor->cooldown21C = 0;
+    if (D_800BE616 == 0 || actor->interaction_state != 1) {
+        actor->unk21C = 0;
     }
-    count = actor->count104;
-    if (count != 255) {
-        if (count != 254 && (actor->field1CA != 0 || actor->kind != 1)) {
-            actor->count104 = count - 1;
+    stun = actor->stunned;
+    if (stun != 255) {
+        if (stun != 254 && (actor->health != 0 || actor->interaction_state != 1)) {
+            actor->stunned = stun - 1;
         }
-        actor->timer10C -= D_800CC264;
-        if (actor->field28 < 0.200000003f && (actor->flagsF4 & 0x100)) {
-            actor->timer10C = 0;
+        actor->unk10C -= D_800CC264;
+        if (actor->unk28 < 0.200000003f && (actor->unkF4 & 0x100)) {
+            actor->unk10C = 0;
         }
-        if (actor->timer10C <= 0) {
-            child = actor->child31C;
-            if (child != 0) {
-                child->field7D = 0;
+        if (actor->unk10C <= 0) {
+            child = actor->unk31C;
+            if (child != NULL) {
+                child->matrix_physics = 0;
             }
-            actor->timer10C = 0;
-            func_1505E874(D_800C3E78, (struct127 *)actor);
+            actor->unk10C = 0;
+            func_1505E874(D_800C3E78, actor);
         }
-        if (actor->count104 == 0) {
-            copiedAngle = actor->angle7A;
-            actor->field3C = 0.0f;
-            actor->field81 = 0;
-            actor->angle78 = copiedAngle;
-            actor->angle76 = copiedAngle;
-            if (actor->modeAD != 0) {
-                actor->field20 = 0.0f;
-                if (actor->kind == 1) {
+        if (actor->stunned == 0) {
+            facing = actor->unk7A;
+            actor->xz_velocity = 0.0f;
+            actor->unk81 = 0;
+            actor->unk78 = facing;
+            actor->unk76 = facing;
+            if (actor->in_water != 0) {
+                actor->y_velocity = 0.0f;
+                if (actor->interaction_state == 1) {
                     func_1506B078();
                 }
-            } else if (actor->kind == 1) {
-                actor->field24 = 4.0f;
-                actor->flagsF8 &= 0xFFFF7FFF;
+            } else if (actor->interaction_state == 1) {
+                actor->gravity = 4.0f;
+                actor->unkF8 &= ~0x8000;
             }
-            owner = actor->owner238;
+            owner = actor->unk238;
             if (owner != 0) {
-                actor->backup23A = owner;
+                actor->unk23A = owner;
             }
         } else {
-            flags = actor->flags10B;
+            flags = actor->unk10B;
             if (!(flags & 2)) {
-                angle = actor->angle76;
+                angle = actor->unk76;
                 if (flags & 4) {
                     angle ^= 0x8000;
                 }
-                actor->field80 = 10;
-                func_150599C8((struct127 *)actor, 12, angle);
+                actor->unk80 = 10;
+                func_150599C8(actor, 12, angle);
             }
         }
     }
 }
-// NON-MATCHING: 80% there
-// void func_150585F0(struct127 *arg0) {
-//     f32 temp_f0;
-//     u16 phi_a2;
-//
-//     func_1505A3A8(arg0->unk109 * 0.1000000015f, arg0, 1.0f, arg0->unk109 * 0.1000000015f, 0);
-//     if (arg0->unk1CC < 100000.0f) {
-//         arg0->unk1CC = arg0->y_position;
-//     }
-//     if ((arg0->in_water != 0) && ((s32) arg0->in_water < 0xA)) {
-//         arg0->gravity = 0.0f;
-//         if (arg0->y_velocity < 60.0f) {
-//             arg0->y_velocity *= 0.8999999762f;
-//         }
-//         if (((arg0->unk118 - 60.0f) + 40.0f) < arg0->y_position) {
-//             arg0->unk81 = (u8)0;
-//             arg0->unk83 = (u8)0;
-//             arg0->in_water = (u8)0U;
-//             arg0->unkB8 = 0.0f;
-//             arg0->gravity = 4.0f;
-//         }
-//     }
-//     if ((D_800BE616 == 0) || (arg0->interaction_state != 1)) {
-//         arg0->unk21C = (u16)0;
-//     }
-//     if (arg0->stunned != 0xFF) {
-//         if (arg0->stunned != 0xFE) {
-//             if ((arg0->health != 0) || (1 != arg0->interaction_state)) {
-//                 arg0->stunned -= 1;
-//             }
-//         }
-//         arg0->unk10C -= D_800CC264;
-//         if ((arg0->unk28 < 0.200000003f) && ((arg0->unkF4 & 0x100) != 0)) {
-//             arg0->unk10C = (u16)0;
-//         }
-//         if ((s32) arg0->unk10C <= 0) {
-//             if (arg0->unk31C != 0) {
-//                 arg0->unk31C->matrix_physics = (u8)0;
-//             }
-//             arg0->unk10C = (u16)0;
-//             func_1505E874(0.0f, D_800C3E78);
-//         }
-//         if (arg0->stunned == 0) {
-//             arg0->xz_velocity = 0.0f;
-//             arg0->unk81 = (u8)0;
-//             arg0->unk76 = arg0->unk78 = arg0->unk7A;
-//             if (arg0->in_water != 0) {
-//                 arg0->y_velocity = 0.0f;
-//                 if (arg0->interaction_state == 1) {
-//                     func_1506B078();
-//                 }
-//             } else if (arg0->interaction_state == 1) {
-//                 arg0->unkF8 &= 0xFFFF7FFF;
-//                 arg0->gravity = 4.0f;
-//             }
-//             if (arg0->unk238 != 0) {
-//                 arg0->unk23A = arg0->unk238;
-//             }
-//         } else {
-//             if ((arg0->unk10B & 2) == 0) {
-//                 phi_a2 = arg0->unk76;
-//                 if ((arg0->unk10B & 4) != 0) {
-//                     phi_a2 ^= 0x8000;
-//                 }
-//                 arg0->unk80 = (u8)0xA;
-//                 func_150599C8(arg0, 12, phi_a2);
-//             }
-//         }
-//     }
-// }
 
 void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
 s32 func_150A3FC4(f32, f32, s32, void *, void *);
