@@ -41,7 +41,7 @@ u8   func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
 void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 void func_150611E8(struct127 *arg0, s32 arg1);
 void func_1505A770(void *arg0);
-void func_15059C84(void *arg0);
+void func_15059C84(struct127 *actor);
 void func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
 
 s32 func_15080738(s32 arg0);
@@ -1620,48 +1620,6 @@ u8 func_15059B54(struct127 *actor, u16 maxStep) {
     }
     return absDiff >> 8;
 }
-// NON-MATCHING: 90% there, missing an s16 cast
-// u8 func_15059B54(struct127 *arg0, u16 arg1) {
-//     s16 temp_t8;
-//     s16 temp_t8_2;
-//     s16 temp_t2;
-//     s32 temp_lo;
-//     s16 phi_a2;
-//
-//     temp_t8 = arg0->unk78 - arg0->unk76;
-//     phi_a2 = temp_t8;
-//     if (phi_a2 < 0) {
-//         phi_a2 = phi_a2 ^ 0xFFFF;
-//     }
-//     if (arg0->unk1EA != 0) {
-//         temp_lo = (s32) (arg0->unk1EA * D_800CC264) / 0x64;
-//         temp_t8_2 = arg0->unk1EC + temp_lo;
-//         temp_t2 = arg0->unk1EC - temp_lo;
-//         if (temp_t8_2 < temp_t8) {
-//             temp_t8 = temp_t8_2;
-//         }
-//         if (temp_t8 < temp_t2) {
-//             temp_t8 = temp_t2;
-//         }
-//     }
-//
-//     if (temp_t8 < 0) {
-//         temp_t8 ^= 0xFFFF;
-//     }
-//     if (temp_t8 < arg1) {
-//         arg1 = temp_t8;
-//     }
-//     if ((arg0->unkF4 & 1) == 0) {
-//         if (temp_t8 < 0) {
-//             arg0->unk76 -= arg1;
-//             arg0->unk1EC = -arg1;
-//         } else {
-//             arg0->unk76 += arg1;
-//             arg0->unk1EC = arg1;
-//         }
-//     }
-//     return phi_a2 >> 8;
-// }
 
 typedef struct Game83300Point {
     f32 values[3];
@@ -1673,7 +1631,8 @@ typedef struct Game83300Triangle {
 
 void func_15049350(Game83300Triangle);
 
-void func_15059C84(void *arg0) {
+/* Applies one frame of horizontal movement (speed along unk76, plus push velocities), following the floor slope. */
+void func_15059C84(struct127 *actor) {
     f32 x;
     f32 z;
     f32 y;
@@ -1685,38 +1644,35 @@ void func_15059C84(void *arg0) {
     f32 length;
     f32 scale;
 
-    speed = *(f32 *)((u8 *)arg0 + 0x3C);
-    angle = *(u16 *)((u8 *)arg0 + 0x76);
+    speed = actor->xz_velocity;
+    angle = actor->unk76;
     if (D_800D1548 == 1) {
         return;
     }
-    if (*((u8 *)arg0 + 0x1FC) & 8) {
-        *((u8 *)arg0 + 0x1FC) &= ~8;
+    if (actor->unk1FC & 8) {
+        actor->unk1FC &= ~8;
         return;
     }
-    if (*((u8 *)arg0 + 0x127) != 0xFF) {
-        if (*(s16 *)(*(u8 **)((u8 *)arg0 + 0x31C) + 0x46) > 0) {
-            angle += *(u16 *)(*(u8 **)((u8 *)arg0 + 0x31C) + 0x10);
-            *(u16 *)((u8 *)arg0 + 0x7A) = angle;
+    if (actor->unk127 != 0xFF) {
+        if (*(s16 *)((u8 *)actor->unk31C + 0x46) > 0) {
+            angle += *(u16 *)((u8 *)actor->unk31C + 0x10);
+            actor->unk7A = angle;
         }
     }
-    if (*(f32 *)((u8 *)arg0 + 0x3C) < 1.0f && *(f32 *)((u8 *)arg0 + 0x3C) >= 0.0f &&
-        !(*((u8 *)arg0 + 0x1FC) & 1)) {
-        if (*((u8 *)arg0 + 0x7E) < 0xFA) {
-            *((u8 *)arg0 + 0x7E) += 1;
+    if (actor->xz_velocity < 1.0f && actor->xz_velocity >= 0.0f && !(actor->unk1FC & 1)) {
+        if (actor->unk7E < 250) {
+            actor->unk7E += 1;
         }
-        if (*(f32 *)((u8 *)arg0 + 0x164) == 0.0f && *(f32 *)((u8 *)arg0 + 0x168) == 0.0f &&
-            *(f32 *)((u8 *)arg0 + 0x16C) == 0.0f && *(f32 *)((u8 *)arg0 + 0x170) == 0.0f) {
-            *(f32 *)((u8 *)arg0 + 0x1F4) = 0.0f;
+        if (actor->unk164 == 0.0f && actor->unk168 == 0.0f && actor->unk16C == 0.0f && actor->unk170 == 0.0f) {
+            *(f32 *)&actor->unk1F4 = 0.0f;
             return;
         }
     } else {
-        *((u8 *)arg0 + 0x7E) = 0;
+        actor->unk7E = 0;
     }
-    if ((*((u8 *)arg0 + 0xAD) != 0 && (*(u8 **)((u8 *)arg0 + 0x31C) == NULL ||
-                                        *(*(u8 **)((u8 *)arg0 + 0x31C) + 0x21) == 0)) ||
-        (*(u16 *)((u8 *)arg0 + 0x22C) & 8)) {
-        x = *(f32 *)((u8 *)arg0 + 0xB8);
+    if ((actor->in_water != 0 && (actor->unk31C == NULL || *((u8 *)actor->unk31C + 0x21) == 0)) ||
+        (actor->unk22C & 8)) {
+        x = actor->unkB8;
         if (x > 90.0f) {
             x = 90.0f;
         } else if (x < -90.0f) {
@@ -1725,34 +1681,33 @@ void func_15059C84(void *arg0) {
     } else {
         x = 0.0f;
     }
-    if (*((u8 *)arg0 + 0x1FC) & 1) {
-        *((u8 *)arg0 + 0x1FC) &= ~1;
+    if (actor->unk1FC & 1) {
+        actor->unk1FC &= ~1;
         if (D_800D1550) {
-            speed = 2.0f * (*(f32 *)((u8 *)arg0 + 0x14C) * *(f32 *)((u8 *)arg0 + 0x1F4) / D_800D1550);
+            speed = 2.0f * (actor->xz_scale * *(f32 *)&actor->unk1F4 / D_800D1550);
         }
-        *(f32 *)((u8 *)arg0 + 0x1F4) = *(f32 *)((u8 *)arg0 + 0x3C);
-        angle = *(u16 *)((u8 *)arg0 + 0x7A);
+        *(f32 *)&actor->unk1F4 = actor->xz_velocity;
+        angle = actor->unk7A;
     }
-    *(f32 *)((u8 *)arg0 + 0x1F4) = speed;
+    *(f32 *)&actor->unk1F4 = speed;
     func_1505A184(angle, speed, x, &x, &z, &y);
-    x += *(f32 *)((u8 *)arg0 + 0x164) + *(f32 *)((u8 *)arg0 + 0x16C);
-    z += *(f32 *)((u8 *)arg0 + 0x168) + *(f32 *)((u8 *)arg0 + 0x170);
-    if (*((u8 *)arg0 + 0xAD) == 0xA) {
+    x += actor->unk164 + actor->unk16C;
+    z += actor->unk168 + actor->unk170;
+    if (actor->in_water == 10) {
         y = 0.0f;
     }
-    if ((*(s32 *)arg0 != 1 || *(*(u8 **)((u8 *)arg0 + 0x31C) + 0x4F) == 0) &&
-        *(f32 *)((u8 *)arg0 + 0x28) <= 0.0f && *((u8 *)arg0 + 0xAD) == 0 &&
-        !(*(u16 *)((u8 *)arg0 + 0x22C) & 8)) {
+    if ((actor->interaction_state != 1 || *((u8 *)actor->unk31C + 0x4F) == 0) && actor->unk28 <= 0.0f &&
+        actor->in_water == 0 && !(actor->unk22C & 8)) {
+        /* project the step onto the floor triangle */
         for (i = 0; i < 3; i++) {
-            triangle.vertices[i].values[0] = *(s16 *)((u8 *)arg0 + 0x18C + i * 6);
-            triangle.vertices[i].values[1] = *(s16 *)((u8 *)arg0 + 0x18E + i * 6);
-            triangle.vertices[i].values[2] = *(s16 *)((u8 *)arg0 + 0x190 + i * 6);
+            triangle.vertices[i].values[0] = ((s16 (*)[3])&actor->unk18C)[i][0];
+            triangle.vertices[i].values[1] = ((s16 (*)[3])&actor->unk18C)[i][1];
+            triangle.vertices[i].values[2] = ((s16 (*)[3])&actor->unk18C)[i][2];
         }
         func_15049350(triangle);
         if (D_800CC214 != 0.0f) {
             vertical = (-D_800CC210 * x - D_800CC218 * z) / D_800CC214;
-            if (vertical > 4.0f || *(s32 *)arg0 != 1 ||
-                *(*(u8 **)((u8 *)arg0 + 0x31C) + 0x4E) != 2) {
+            if (vertical > 4.0f || actor->interaction_state != 1 || actor->unk31C->unk4E != 2) {
                 length = sqrtf(x * x + z * z + vertical * vertical);
                 if (length != 0.0f) {
                     scale = sqrtf(x * x + z * z);
@@ -1766,9 +1721,9 @@ void func_15059C84(void *arg0) {
     x *= D_800D1550;
     z *= D_800D1550;
     y *= D_800D1550;
-    *(f32 *)((u8 *)arg0 + 0x14) += x;
-    *(f32 *)((u8 *)arg0 + 0x1C) += z;
-    *(f32 *)((u8 *)arg0 + 0x18) += y;
+    actor->x_position += x;
+    actor->z_position += z;
+    actor->y_position += y;
 }
 f32 func_150AD780(f32);
 f32 func_150AD78C(f32);
@@ -1801,50 +1756,6 @@ void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4) {
 }
 
 
-// PERMUTER CANDIDATE best 3576 (control flow BYTE-PERFECT; entire diff is a systematic FP-register
-// rename: target promotes aa->callee-saved $f20 (+ frame to save it) & bb->$f14 via mtc1 up front,
-// but IDO keeps this leaf's aa/bb in temps $f2/$f0 with an arg-home spill. Copy-param-to-local and
-// scale-hoist tricks did not force the f20 promotion. Reconstruction below is logically exact.)
-// f32 func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4) {
-//     struct127 *obj = (struct127 *)arg1;
-//     f32 aa = arg2 * D_800D1550[0];
-//     f32 bb = arg3 * D_800D1550[0];
-//     f32 vel;
-//     if (D_800CC27C != 0) {
-//         if (obj->unk28 < 5.0f) {
-//             if (obj->interaction_state != 0x1E) aa = 0.0f;
-//         }
-//     }
-//     if (obj->interaction_state == 1) {
-//         if (obj->in_water != 0) { aa = 2.0f; bb = bb * 0.400000006f; }
-//         if (obj->unkA8 != 0) bb = bb * 0.25f;
-//         if (obj->unk81 != 0) {
-//             if (obj->unk81 & 0x40) {
-//                 if (obj->unk81 & 0x20) bb = 0.0f; else bb = 1.299999952f;
-//             } else {
-//                 bb = bb * 0.349999994f;
-//                 if (arg4 >= 0x2E) aa = aa * 0.5f;
-//                 if (arg4 >= 0x5B) arg0 = arg0 * 0.5f;
-//             }
-//         }
-//         if (obj->unkAE != 0) bb = bb * 0.200000003f;
-//     }
-//     if (arg0 < 0.0f) {
-//         vel = obj->xz_velocity;
-//         if (0.0f < vel) bb = bb + aa; else bb = aa;
-//     } else {
-//         vel = obj->xz_velocity;
-//         if (vel < 0.0f) aa = aa + bb;
-//     }
-//     if (arg0 < vel) {
-//         obj->xz_velocity = vel - bb;
-//         if (obj->xz_velocity < arg0) obj->xz_velocity = arg0;
-//     } else {
-//         if ((arg0 - 1.0f) < vel) aa = aa * 0.009999999776f;
-//         obj->xz_velocity = vel + aa;
-//         if (arg0 < obj->xz_velocity) obj->xz_velocity = arg0;
-//     }
-// }
 void func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4) {
     struct127 *obj = (struct127 *)arg1;
 
@@ -3913,22 +3824,6 @@ struct127 *func_1505EEB0(s32 state, s32 *arg1) {
     *arg1 = i;
     return ptr;
 }
-// I HATE LOOPS.
-// struct127 *func_1505EEB0(s32 state, s32 *arg1) {
-//     struct127 *tmp = D_800CC2D0;
-//     s32 i = 0;
-//
-//     if (state != tmp->interaction_state) {
-//         for (i = 0; i < 25; i++) {
-//             tmp = &D_800CC2D0[i];
-//             if (state == tmp->interaction_state)
-//                 break;
-//         }
-//     }
-//
-//     *arg1 = i;
-//     return tmp;
-// }
 
 struct127 *func_1505EEF4(s32 arg0) {
     struct127 *tmp = (struct127 *)&D_800CC2D0;
@@ -5549,26 +5444,6 @@ void func_15063168(struct127 *arg0) {
     }
 }
 
-// PERMUTER CANDIDATE best 1960 (structural match: all field save/restore + 2 calls correct;
-// target 8-aligns idx/cam spill slots leaving frame gaps at 0x28/0x4c and schedules a1=0 late).
-// void func_15082A44(struct129 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-// void func_15063254(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3) {
-//     struct129 *obj; s32 idx; struct108 *cam;
-//     f32 x, y, z, b8, u40, uC4; s32 rot;
-//     idx = arg0->unk13F;
-//     obj = arg0->unk144;
-//     obj->unk4 = arg1; obj->unk3 = arg2; obj->unk20 = arg3; obj->unk24 = arg3; obj->unk2 = 0;
-//     cam = arg0->camera;
-//     z = arg0->z_position; x = arg0->x_position; y = arg0->y_position;
-//     b8 = arg0->unkB8; u40 = arg0->unk40; uC4 = arg0->unkC4; rot = arg0->unk76;
-//     func_15060F28(arg0, 0);
-//     func_15082A44(obj, idx, 0, 0, (arg0 - D_800CC2D0) + 1);
-//     arg0->x_position = x; arg0->y_position = y; arg0->camera = cam; arg0->z_position = z;
-//     arg0->unkB8 = b8; arg0->unk40 = u40; arg0->unk76 = rot; arg0->unk7A = rot;
-//     arg0->old_x_position = x; arg0->old_y_position = y;
-//     arg0->unk1CC = arg0->y_position; arg0->old_z_position = arg0->z_position;
-//     arg0->unkC4 = uC4; cam->unk3D4 = (struct127 *) arg0->unk31C;
-// }
 void func_15082A44(void *, s32, s32, s32, s32);
 void func_15063254(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3) {
     struct129 *ptr;
