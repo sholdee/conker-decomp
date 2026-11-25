@@ -48,8 +48,7 @@ typedef struct ObjLink {
 
 extern void (*D_8008CA20[])(struct102 *);
 extern void (*D_8008C9C8[])(struct102 *);
-extern void (*D_8008CB64)(void);
-extern void (*D_8008CB70)(void);
+extern void (*D_8008CB64[3])(void);
 
 extern s16 D_800DD1C0;
 extern s16 D_800DD1C2;
@@ -153,20 +152,17 @@ loop:
     }
 }
 
+/* Calls each of the three hooks in D_8008CB64 that is set. */
 void func_1516706C(void) {
-    void (**funcp)(void);
-    void (**end)(void);
-    void (*func)(void);
+    s32 i;
 
-    funcp = &D_8008CB64; end = &D_8008CB70;
-    do {
-        func = *funcp;
-        if (func != NULL) {
-            func();
+    for (i = 0; i < 3; i++) {
+        if (D_8008CB64[i] != NULL) {
+            D_8008CB64[i]();
         }
-        funcp++;
-    } while (funcp != end);
+    }
 }
+
 /* Runs every type's unk0 callback on each object of both lists. */
 void func_151670C0(void) {
     s32 list;
@@ -248,22 +244,8 @@ void func_15167310(void) {
     }
 }
 
-typedef struct {
-    u8 pad0[0x8];
-    Gfx *(*unk8)(Gfx *, struct102 *, s16);
-    u8 padC[0x4];
-    Gfx *unk10;
-    Gfx *(*unk14)(Gfx *, s32, s32, s16);
-    u8 pad18[0x8];
-    Gfx *(*unk20)(Gfx *, s32, s16);
-    Gfx *unk24;
-    u8 pad28[0x8];
-    s8 unk30;
-    u8 pad31[0x3];
-} Struct151674F8;
-
 extern Mtx D_80089470;
-extern s32 D_800BE9C8[];
+extern Gfx *D_800BE9C8[];
 extern s32 D_800BEBA4;
 extern u32 D_800DD1B0;
 extern s32 D_800DD1B4;
@@ -290,32 +272,36 @@ extern s32 D_800DD224;
 extern s32 D_800DD228;
 void func_15168F84(s32 arg0, s32 *arg1, s32 *arg2);
 
-Gfx *func_151674F8(Gfx *gfx, s32 arg1, s16 arg2, s32 arg3) {
-    s32 i;
-    s32 start;
-    s32 end;
-    struct102 **slot;
+/*
+ * Draws every object of list `list` whose type is in group `group` (see func_15168F84). Draw mode 1 types
+ * drop any object that overflows the display list buffer; on overflow the pass is abandoned and the
+ * display list is rewound to the start of the type that overflowed.
+ */
+Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
+    s32 type;
+    s32 first;
+    s32 last;
+    struct102 **head;
     struct102 *node;
-    s32 overflow;
-    Gfx *orig0;
+    s32 overflowed;
+    Gfx *mode0Start;
     Gfx *prev;
-    Gfx *orig1;
-    s32 cond;
+    Gfx *mode1Start;
+    s32 full;
 
     gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    func_15168F84(arg1, &start, &end);
-    for (i = start; i < end; i++) {
-
-        if (((Struct151674F8 *)D_8008B4A8)[i].unk8 != NULL) {
-            slot = &D_800DCE50[arg3][i];
-            if (*slot != NULL) {
-                D_8003C8E0 = (i & 0xFFFFFF) | 0x7000000;
-                overflow = 0;
-                if (((Struct151674F8 *)D_8008B4A8)[i].unk30 == 0) {
-                    orig0 = gfx;
+    func_15168F84(group, &first, &last);
+    for (type = first; type < last; type++) {
+        if (OBJ_TYPES[type].draw != NULL) {
+            head = &D_800DCE50[list][type];
+            if (*head != NULL) {
+                D_8003C8E0 = (type & 0xFFFFFF) | 0x7000000;
+                overflowed = FALSE;
+                if (OBJ_TYPES[type].drawMode == 0) {
+                    mode0Start = gfx;
                 }
-                if (((Struct151674F8 *)D_8008B4A8)[i].unk30 == 1) {
-                    orig1 = gfx;
+                if (OBJ_TYPES[type].drawMode == 1) {
+                    mode1Start = gfx;
                 }
                 D_800D2DAB = 0;
                 D_800DD228 = 0;
@@ -339,71 +325,55 @@ Gfx *func_151674F8(Gfx *gfx, s32 arg1, s16 arg2, s32 arg3) {
                 D_800DD214 = 0;
                 D_800DD218 = 0;
                 D_800DD21C = 0;
-                if (((Struct151674F8 *)D_8008B4A8)[i].unk10 != NULL) {
-                    gSPDisplayList(gfx++, ((Struct151674F8 *)D_8008B4A8)[i].unk10);
+                if (OBJ_TYPES[type].drawBeginDL != NULL) {
+                    gSPDisplayList(gfx++, OBJ_TYPES[type].drawBeginDL);
                 }
-                if (((Struct151674F8 *)D_8008B4A8)[i].unk14 != NULL) {
-                    gfx = ((Struct151674F8 *)D_8008B4A8)[i].unk14(gfx, i, arg3, arg2);
+                if (OBJ_TYPES[type].drawBegin != NULL) {
+                    gfx = OBJ_TYPES[type].drawBegin(gfx, type, list, arg2);
                 }
                 gSPClearGeometryMode(gfx++, G_LIGHTING);
-                node = *slot;
-                if (((Struct151674F8 *)D_8008B4A8)[i].unk30 == 1) {
+                node = *head;
+                if (OBJ_TYPES[type].drawMode == 1) {
                     D_800DD190++;
-                    if (node != NULL) {
-                        do {
-                            prev = gfx;
-                            ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
-                            gfx = ((Struct151674F8 *)D_8008B4A8)[i].unk8(gfx, node, arg2);
-                            if ((((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3) > D_800BEBA4) {
-                                cond = 1;
-                            } else {
-                                cond = 0;
-                            }
-                            if (cond) {
-                                overflow = 1;
-                                gfx = prev;
-                            }
-                            node = ((struct102 **)D_800DD198)[D_800DD190];
-                        } while (node != NULL);
+                    while (node != NULL) {
+                        prev = gfx;
+                        OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                        gfx = OBJ_TYPES[type].draw(gfx, node, arg2);
+                        full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                        if (full) {
+                            overflowed = TRUE;
+                            gfx = prev;
+                        }
+                        node = OBJ_ITER_NEXT[D_800DD190];
                     }
                     D_800DD190--;
                 } else {
                     D_800DD190++;
-                    if (node != NULL) {
-                        do {
-                            ((struct102 **)D_800DD198)[D_800DD190] = (struct102 *)node->unk8;
-                            gfx = ((Struct151674F8 *)D_8008B4A8)[i].unk8(gfx, node, arg2);
-                            node = ((struct102 **)D_800DD198)[D_800DD190];
-                        } while (node != NULL);
+                    while (node != NULL) {
+                        OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
+                        gfx = OBJ_TYPES[type].draw(gfx, node, arg2);
+                        node = OBJ_ITER_NEXT[D_800DD190];
                     }
                     D_800DD190--;
                 }
-                if (((Struct151674F8 *)D_8008B4A8)[i].unk24 != NULL) {
-                    gSPDisplayList(gfx++, ((Struct151674F8 *)D_8008B4A8)[i].unk24);
+                if (OBJ_TYPES[type].drawEndDL != NULL) {
+                    gSPDisplayList(gfx++, OBJ_TYPES[type].drawEndDL);
                 }
-                if (((Struct151674F8 *)D_8008B4A8)[i].unk20 != NULL) {
-                    gfx = ((Struct151674F8 *)D_8008B4A8)[i].unk20(gfx, i, arg2);
+                if (OBJ_TYPES[type].drawEnd != NULL) {
+                    gfx = OBJ_TYPES[type].drawEnd(gfx, type, arg2);
                 }
-                if (overflow) {
-                    if ((((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3) > D_800BEBA4) {
-                        cond = 1;
-                    } else {
-                        cond = 0;
-                    }
-                    if (cond) {
+                if (overflowed) {
+                    full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                    if (full) {
                         gSPSetGeometryMode(gfx, G_ZBUFFER);
-                        return orig1;
+                        return mode1Start;
                     }
                 }
-                if (((Struct151674F8 *)D_8008B4A8)[i].unk30 == 0) {
-                    if ((((s32)gfx - D_800BE9C8[D_800BE9C0]) >> 3) > D_800BEBA4) {
-                        cond = 1;
-                    } else {
-                        cond = 0;
-                    }
-                    if (cond) {
+                if (OBJ_TYPES[type].drawMode == 0) {
+                    full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
+                    if (full) {
                         gSPSetGeometryMode(gfx, G_ZBUFFER);
-                        return orig0;
+                        return mode0Start;
                     }
                 }
                 D_8003C8E0 = 0;
