@@ -121,41 +121,6 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
     }
 }
 
-/* Effect spawn parameters (same layout as EffectParams in game_1844C0.c). */
-typedef struct {
-    /* 0x00 */ u8 flags;
-    /* 0x01 */ s8 updateFunc;   // index into D_8008AD90, -1 = none
-    /* 0x02 */ s8 updateFunc2;  // index into D_8008ADA0, -1 = none
-    /* 0x03 */ s8 preDrawFunc;  // index into D_8008ADBC, -1 = none
-    /* 0x04 */ s8 postDrawFunc; // index into D_8008ADCC, -1 = none
-    /* 0x05 */ u8 pad5;
-    /* 0x06 */ s16 lifetime;
-    /* 0x08 */ s32 model;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 otherModeH;
-    /* 0x14 */ s32 geometrySet;
-    /* 0x18 */ s32 geometryClear;
-    /* 0x1C */ s32 renderMode;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 otherModeH2;
-    /* 0x28 */ s32 otherModeH3;
-    /* 0x2C */ s8 primMode;
-    /* 0x2D */ s8 envMode;
-    /* 0x2E */ u8 pad2E[2];
-    /* 0x30 */ u8 color0[4];
-    /* 0x34 */ u8 color1[4];
-    /* 0x38 */ u8 unk38;
-    /* 0x39 */ u8 pad39[3];
-    /* 0x3C */ Actor *owner;
-    /* 0x40 */ u8 ownerId;
-    /* 0x41 */ u8 unk41;
-    /* 0x42 */ u8 pad42[2];
-    /* 0x44 */ Vec3f pos;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 fadeStart; // alpha fades once lifetime drops below this
-    /* 0x56 */ s16 fadeRate;
-} EffectParams; // size 0x58
-
 /* Model effect object (Effect in game_1844C0.c; only the fields used here). */
 typedef struct {
     /* 0x00 */ u8 header[0x10];
@@ -191,23 +156,23 @@ void func_151D6BFC(Actor *owner, u8 arg1, s32 arg2) {
     params.lifetime = 150;
     params.model = 0xA5;
     params.unkC = 0x17;
-    params.otherModeH = 0;
-    params.geometrySet = 0x220405;
-    params.geometryClear = 0x40200;
-    params.envMode = 8;
-    params.renderMode = 1;
-    params.unk20 = 0x38;
-    params.primMode = 0;
-    params.otherModeH2 = 0x80;
-    params.otherModeH3 = 0x20;
-    params.color0[0] = 0xFF;
-    params.color0[1] = 0xFF;
-    params.color0[2] = 0xFF;
-    params.color0[3] = 0xFF;
-    params.color1[0] = 0xFF;
-    params.color1[1] = 0xFF;
-    params.color1[2] = 0xFF;
-    params.color1[3] = 0xFF;
+    params.render.unk0 = 0;
+    params.render.setGeometryMode = 0x220405;
+    params.render.clearGeometryMode = 0x40200;
+    params.render.envMode = 8;
+    params.render.renderMode = 1;
+    params.render.unk10 = 0x38;
+    params.render.primMode = 0;
+    params.render.unk14 = 0x80;
+    params.render.unk18 = 0x20;
+    params.color0.red = 0xFF;
+    params.color0.green = 0xFF;
+    params.color0.blue = 0xFF;
+    params.color0.alpha = 0xFF;
+    params.color1.red = 0xFF;
+    params.color1.green = 0xFF;
+    params.color1.blue = 0xFF;
+    params.color1.alpha = 0xFF;
     params.owner = owner;
     params.ownerId = owner->unique_id;
     params.unk41 = 1;
@@ -322,7 +287,7 @@ void func_151D70CC(TextObj *obj, u8 *payload, u8 type) {
  * (else D_800838C0), then texture 0xC3 to segments 6 and 7.
  */
 Gfx *func_151D710C(Gfx *gfx, ModelEffect *fx, s16 view, u8 *needSync, u8 *proceed) {
-    if (fx->params.color0[3] < 0xFF) {
+    if (fx->params.color0.alpha < 0xFF) {
         gSPSegment(gfx++, 8, D_80083740);
     } else {
         gSPSegment(gfx++, 8, D_800838C0);

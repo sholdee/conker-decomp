@@ -1244,4 +1244,32 @@ typedef struct StreakBurst {
     /* 0x47 */ u8 pad47;
 } StreakBurst; /* size 0x48 */
 
+struct EffectMask;
+
+/* func_15157010 (game_1844C0.c): spawn parameters of a model effect, copied into the effect. */
+typedef struct EffectParams {
+    /* 0x00 */ u8 flags;
+    /* 0x01 */ s8 updateFunc;      /* index into D_8008AD90, -1 = none */
+    /* 0x02 */ s8 updateFunc2;     /* index into D_8008ADA0, -1 = none */
+    /* 0x03 */ s8 preDrawFunc;     /* index into D_8008ADBC, -1 = none */
+    /* 0x04 */ s8 postDrawFunc;    /* index into D_8008ADCC, -1 = none */
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ s16 lifetime;
+    /* 0x08 */ s32 model;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ TrailRender render;
+    /* 0x30 */ Color8 color0;
+    /* 0x34 */ Color8 color1;
+    /* 0x38 */ u8 unk38;
+    /* 0x39 */ u8 pad39[3];
+    /* 0x3C */ struct Actor *owner; /* see func_15169850 */
+    /* 0x40 */ u8 ownerId;
+    /* 0x41 */ u8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ Vec3f pos;
+    /* 0x50 */ struct EffectMask *mask;
+    /* 0x54 */ s16 fadeStart;      /* alpha fades once lifetime drops below this */
+    /* 0x56 */ s16 fadeRate;
+} EffectParams; /* size 0x58 */
+
 #endif

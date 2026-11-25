@@ -150,47 +150,6 @@ void func_151BF0C8(Vec3f *pos) {
     func_15153634(&second, 0xFF, 0xFF, 1);
 }
 
-/* First argument of func_15157010. */
-typedef struct {
-    /* 0x00 */ u8  unk00;
-    /* 0x01 */ s8  unk01;
-    /* 0x02 */ u8  unk02;
-    /* 0x03 */ s8  unk03;
-    /* 0x04 */ s8  unk04;
-    /* 0x05 */ u8  pad05;
-    /* 0x06 */ s16 unk06;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ u8  unk2C;
-    /* 0x2D */ u8  unk2D;
-    /* 0x2E */ u8  pad2E[2];
-    /* 0x30 */ u8  unk30;
-    /* 0x31 */ u8  unk31;
-    /* 0x32 */ u8  unk32;
-    /* 0x33 */ u8  unk33;
-    /* 0x34 */ u8  unk34;
-    /* 0x35 */ u8  unk35;
-    /* 0x36 */ u8  unk36;
-    /* 0x37 */ u8  unk37;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ u8  pad39[3];
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ Vec3f position;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} Config15157010;
-
 /* The block copied to the panel's +0x120. */
 typedef struct {
     /* 0x00 */ Vec3f unk0;
@@ -229,7 +188,7 @@ typedef struct {
     /* 0x28 */ CounterDisplay display;
 } CounterEffect;
 
-extern CounterPanel *func_15157010(Config15157010 *config, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 owner,
+extern CounterPanel *func_15157010(EffectParams *config, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 owner,
                                    s32 kind);
 extern CounterDigit *func_1515548C(ScreenSpriteInfo5C *arg, s32 arg1, s32 *ids, s32 idCount, s32 arg4, u8 owner,
                                    s32 kind);
@@ -262,48 +221,48 @@ void func_151BF340(u8 owner, s32 kind) {
         display = &effect->display;
         memcpy(display, &init, sizeof(init));
         {
-            Config15157010 panelConfig;
+            EffectParams panelConfig;
             PanelExtra panelExtra;
             ScreenSpriteInfo5C digitArg;
 
             panelConfig.unk38 = 0;
-            panelConfig.unk00 = 0xC0;
-            panelConfig.unk01 = -1;
-            panelConfig.unk02 = 5;
-            panelConfig.unk03 = 3;
-            panelConfig.unk04 = 0;
-            panelConfig.unk06 = 300;
-            panelConfig.unk08 = 0xA3;
-            panelConfig.unk0C = 8;
-            panelConfig.unk10 = 0x100000;
-            panelConfig.unk14 = 0x200004;
-            panelConfig.unk18 = 0x60601;
-            panelConfig.unk2D = 8;
-            panelConfig.unk1C = 1;
-            panelConfig.unk20 = 0x38;
-            panelConfig.unk2C = 0;
-            panelConfig.unk24 = 0x80;
-            panelConfig.unk28 = 0x20;
-            panelConfig.unk30 = 0xFF;
-            panelConfig.unk31 = 0xFF;
-            panelConfig.unk32 = 0xFF;
-            panelConfig.unk33 = 0xFF;
-            panelConfig.unk34 = 0xFF;
-            panelConfig.unk35 = 0xFF;
-            panelConfig.unk36 = 0xFF;
-            panelConfig.unk37 = 0xFF;
-            panelConfig.unk3C = 0;
-            panelConfig.unk40 = 0;
+            panelConfig.flags = 0xC0;
+            panelConfig.updateFunc = -1;
+            panelConfig.updateFunc2 = 5;
+            panelConfig.preDrawFunc = 3;
+            panelConfig.postDrawFunc = 0;
+            panelConfig.lifetime = 300;
+            panelConfig.model = 0xA3;
+            panelConfig.unkC = 8;
+            panelConfig.render.unk0 = 0x100000;
+            panelConfig.render.setGeometryMode = 0x200004;
+            panelConfig.render.clearGeometryMode = 0x60601;
+            panelConfig.render.envMode = 8;
+            panelConfig.render.renderMode = 1;
+            panelConfig.render.unk10 = 0x38;
+            panelConfig.render.primMode = 0;
+            panelConfig.render.unk14 = 0x80;
+            panelConfig.render.unk18 = 0x20;
+            panelConfig.color0.red = 0xFF;
+            panelConfig.color0.green = 0xFF;
+            panelConfig.color0.blue = 0xFF;
+            panelConfig.color0.alpha = 0xFF;
+            panelConfig.color1.red = 0xFF;
+            panelConfig.color1.green = 0xFF;
+            panelConfig.color1.blue = 0xFF;
+            panelConfig.color1.alpha = 0xFF;
+            panelConfig.owner = 0;
+            panelConfig.ownerId = 0;
             panelConfig.unk41 = 1;
-            panelConfig.unk54 = 1;
-            panelConfig.unk56 = 0xFF;
-            panelConfig.position.x = 300.0f;
+            panelConfig.fadeStart = 1;
+            panelConfig.fadeRate = 0xFF;
+            panelConfig.pos.x = 300.0f;
             if (D_800D2458) {
-                panelConfig.position.y = 32.0f;
+                panelConfig.pos.y = 32.0f;
             } else {
-                panelConfig.position.y = 79.0f;
+                panelConfig.pos.y = 79.0f;
             }
-            panelConfig.position.z = 0.0f;
+            panelConfig.pos.z = 0.0f;
             panelExtra.unk0 = D_800A5480;
             panelExtra.unkC = 0.3010000288f;
             panelExtra.unk10 = 0.3010000288f;
