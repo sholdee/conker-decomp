@@ -5,17 +5,10 @@
 typedef struct { f32 x, y, z; } TrailVec3;
 typedef struct { f32 x, z; } TrailVec2;
 
-typedef struct Vec3i151CD674 {
-    s32 x;
-    s32 y;
-    s32 z;
-} Vec3i151CD674;
-
 extern f32 D_800D9860;
 extern f32 func_15144AA8(s32);
 extern struct17 *func_15144B34(s32);
 extern s32 func_15046C80(struct17 *, s32, f32, f32 *);
-extern struct260 *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 f32 func_15143E64(struct17 *);
 struct260 *func_151CEAAC(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
 
@@ -155,14 +148,27 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 arg2) {
     return gfx;
 }
 
-/* Data of an actor that follows an owner: the owner, then the owner's unique id. */
+/* Data of a trail actor that follows an owner (copied in at spawn by func_151D1448). */
 typedef struct {
-    /* 0x0 */ s32 owner;
-    /* 0x4 */ s32 ownerId;
+    /* 0x00 */ void *owner; /* NULL once the owner lets go of the trail */
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ u8 unk8;
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 scale;
 } FollowerData;
 
+/* Trail actor created by func_15147A80 (see game_105FC0.c's Trail). */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x98];
+    /* 0x00 */ u8 pad0[0x1C];
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ u16 flags;
+    /* 0x20 */ u8 pad20[0x10];
+    /* 0x30 */ u8 unk30;
+    /* 0x31 */ u8 pad31[0x98 - 0x31];
     /* 0x98 */ FollowerData *data;
 } FollowerActor;
 
@@ -170,8 +176,8 @@ typedef struct {
 void func_151CF844(FollowerActor *actor, s32 arg1, u8 arg2) {
     FollowerData *data = actor->data;
 
-    if (data->owner != 0) {
-        func_15169850(arg1, arg2, (s32)&data->owner, (s32)&data->ownerId, (s32)actor);
+    if (data->owner != NULL) {
+        func_15169850(arg1, arg2, (s32)&data->owner, (s32)&data->unk4, (s32)actor);
     }
 }
 
@@ -997,258 +1003,244 @@ void func_151D09A8(struct127 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-void func_151D0ED8(void *arg0) {
-    if (*(struct102 **)((u8 *)arg0 + 0xA8) != 0) {
-        func_1516972C(*(struct102 *volatile *)((u8 *)arg0 + 0xA8));
+/* Frees the effect that travels with the particle. */
+void func_151D0ED8(CarrierParticle *particle) {
+    if (particle->effect != NULL) {
+        // matching: a volatile read makes IDO reload the pointer for the call, as the original does
+        func_1516972C(*(struct102 *volatile *)&particle->effect);
     }
 }
 
-void func_151D0ED8(void *arg0);
+void func_1513173C(CarrierParticle *particle);
+void func_1513175C(CarrierParticle *particle);
 
-void func_1513173C(void *arg0);
-
-void func_151D0F08(void *arg0) {
-    func_151D0ED8(arg0);
-    func_1513173C(arg0);
+/* Particle handler: frees the attached effect, then runs func_1513173C. */
+void func_151D0F08(CarrierParticle *particle) {
+    func_151D0ED8(particle);
+    func_1513173C(particle);
 }
 
-void func_1513175C(void *arg0);
-
-void func_151D0F34(void *arg0) {
-    func_151D0ED8(arg0);
-    func_1513175C(arg0);
+/* Particle handler: frees the attached effect, then runs func_1513175C. */
+void func_151D0F34(CarrierParticle *particle) {
+    func_151D0ED8(particle);
+    func_1513175C(particle);
 }
 
-extern s32 (*D_8008FC30[])(struct127 *, void *);
+/* Point functions: each writes a point of the object to out and returns whether it has one. */
+extern s32 (*D_8008FC30[])(struct127 *obj, struct17 *out);
 
-struct vec3_151D0F60 { f32 x; f32 y; f32 z; };
+/* Data of the tracker effect: follows one point of its owner and leaves a trail behind it. */
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ FollowerActor *trail; /* spawned by func_151D1448 */
+    /* 0x0C */ struct17 prevPos;
+    /* 0x18 */ struct17 pos;
+    /* 0x24 */ struct17 delta;
+    /* 0x30 */ f32 dist; /* distance moved this frame */
+    /* 0x34 */ u8 pointFn; /* index into D_8008FC30 */
+} TrackerData;
 
-void func_151D0F60(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3) {
-    struct260 *temp_v0;
-    struct {
-        struct127 *unk0;
-        u8 unk4;
-        u8 pad5[3];
-        s32 unk8;
-        struct vec3_151D0F60 unkC;
-        struct vec3_151D0F60 unk18;
-        struct vec3_151D0F60 unk24;
-        f32 unk30;
-        u8 unk34;
-    } sp34;
+typedef struct {
+    EffectHead head;
+    TrackerData data;
+} TrackerEffect;
 
-    sp34.unk0 = arg0;
-    sp34.unk4 = arg0->unique_id;
-    sp34.unk8 = 0;
+/* Spawns a tracker effect that follows the object's point D_8008FC30[pointFn]. */
+void func_151D0F60(struct127 *obj, u8 pointFn, u8 arg2, s32 arg3) {
+    TrackerEffect *effect;
+    TrackerData data;
 
-    if (D_8008FC30[arg1](arg0, &sp34.unk18) == 0) {
-        sp34.unk18 = *(struct vec3_151D0F60 *)&D_800A5480;
+    data.owner = obj;
+    data.ownerId = obj->unique_id;
+    data.trail = NULL;
+
+    if (D_8008FC30[pointFn](obj, &data.pos) == 0) {
+        data.pos = *(struct17 *)&D_800A5480;
     }
 
-    sp34.unkC = sp34.unk18;
-    sp34.unk24 = *(struct vec3_151D0F60 *)&D_800A5480;
-    sp34.unk30 = 0.0f;
-    sp34.unk34 = arg1;
+    data.prevPos = data.pos;
+    data.delta = *(struct17 *)&D_800A5480;
+    data.dist = 0.0f;
+    data.pointFn = pointFn;
 
-    temp_v0 = func_15149130(0x12C, -1, 0x5F, -1, 0, 0x48, (struct37 *)0x38, arg2, arg3);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp34, 0x38);
+    effect = (TrackerEffect *)func_15149130(300, -1, 0x5F, -1, 0, 0x48, (struct37 *)sizeof(data), arg2, arg3);
+    if (effect != NULL) {
+        memcpy(&effect->data, &data, sizeof(data));
     }
 }
 
-s32 func_151D1074(f32 *arg0, f32 *arg1) {
-    arg1[0] = arg0[5];
-    arg1[1] = arg0[96] + 8.0f;
-    arg1[2] = arg0[7];
-    return 1;
+/* Point function: 8 units above the object's unk180 height, at its x/z. */
+s32 func_151D1074(struct127 *obj, struct17 *out) {
+    out->unk0 = obj->x_position;
+    out->unk4 = obj->unk180 + 8.0f;
+    out->unk8 = obj->z_position;
+    return TRUE;
 }
 
-s32 func_151D10E4(void *arg0, s32 arg1, u8 arg2);
+s32 func_151D10E4(struct127 *obj, struct17 *out, u8 which);
 
-s32 func_151D10A4(void *arg0, s32 arg1) {
-    return func_151D10E4(arg0, arg1, 0);
+/* Point function: the object's model point 0. */
+s32 func_151D10A4(struct127 *obj, struct17 *out) {
+    return func_151D10E4(obj, out, 0);
 }
 
-s32 func_151D10C4(void *arg0, s32 arg1) {
-    return func_151D10E4(arg0, arg1, 1);
+/* Point function: the object's model point 1. */
+s32 func_151D10C4(struct127 *obj, struct17 *out) {
+    return func_151D10E4(obj, out, 1);
 }
 
 extern struct17 D_800AAF9C[];
 
-s32 func_151D10E4(void *arg0, s32 arg1, u8 arg2) {
-    s32 temp = (s32)((struct127 *)arg0)->unk1D4;
+/* Writes model point D_800AAF9C[which] of the object, in world space, to out. */
+s32 func_151D10E4(struct127 *obj, struct17 *out, u8 which) {
+    s32 joints = (s32)obj->unk1D4;
 
-    if (temp == 0) {
-        return 0;
+    if (joints == 0) {
+        return FALSE;
     }
-    func_15143134(&D_800AAF9C[arg2], (struct17 *)arg1, (struct255 *)(temp | 0));
-    return 1;
+    // matching: "| 0" keeps joints from being a plain copy, so IDO gives it v0 and which a3
+    func_15143134(&D_800AAF9C[which], out, (Mtx *)(joints | 0));
+    return TRUE;
 }
 
-typedef struct {
-    struct127 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    s32 unk8;
-    struct17 unkC;
-    struct17 unk18;
-    struct17 unk24;
-    f32 unk30;
-    u8 unk34;
-} Sub151D1138;
-
-extern f32 func_15143E64(struct17 *);
 extern s32 func_1510F8CC(s32);
-void func_151D13E0(struct260 *arg0);
-void func_151D1448();
+void func_151D13E0(TrackerEffect *effect);
+void func_151D1448(TrackerEffect *effect);
 
-void func_151D1138(struct260 *arg0) {
-    Sub151D1138 *sub;
-    struct127 *obj;
-    u8 finished = 0;
+/* Tracker update: follows the owner's point, and drops the trail when the point is lost, jumps more
+ * than 300 units, stops, or the owner is airborne, in water or in state 5, 6, 9, 13 or 14. */
+void func_151D1138(TrackerEffect *effect) {
+    TrackerData *data;
+    struct127 *owner;
+    u8 finished = FALSE;
     s32 state;
 
-    sub = (Sub151D1138 *)((u8 *)arg0 + 0x28);
-    obj = sub->unk0;
+    data = &effect->data;
+    owner = data->owner;
 
-    if (obj->interaction_state == 0 || obj->unique_id != sub->unk4) {
-        arg0->unkE = -1;
+    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+        effect->head.state = -1;
         return;
     }
 
-    sub->unkC = sub->unk18;
-    if (D_8008FC30[sub->unk34](obj, &sub->unk18) == 0) {
-        sub->unk18 = sub->unkC;
-        finished = 1;
+    data->prevPos = data->pos;
+    if (D_8008FC30[data->pointFn](owner, &data->pos) == 0) {
+        data->pos = data->prevPos;
+        finished = TRUE;
     }
 
-    sub->unk24.unk0 = sub->unk18.unk0 - sub->unkC.unk0;
-    sub->unk24.unk4 = sub->unk18.unk4 - sub->unkC.unk4;
-    sub->unk24.unk8 = sub->unk18.unk8 - sub->unkC.unk8;
-    sub->unk30 = func_15143E64(&sub->unk24);
+    data->delta.unk0 = data->pos.unk0 - data->prevPos.unk0;
+    data->delta.unk4 = data->pos.unk4 - data->prevPos.unk4;
+    data->delta.unk8 = data->pos.unk8 - data->prevPos.unk8;
+    data->dist = func_15143E64(&data->delta);
 
-    state = func_1510F8CC(obj->unk184);
-    if (sub->unk30 > 300.0f || sub->unk30 <= 0.0f || obj->unk28 != 0.0f || obj->in_water != 0 ||
-        state == 5 || state == 6 || state == 9 || state == 0xD || state == 0xE) {
-        finished = 1;
+    state = func_1510F8CC(owner->unk184);
+    if (data->dist > 300.0f || data->dist <= 0.0f || owner->unk28 != 0.0f || owner->in_water != 0 ||
+        state == 5 || state == 6 || state == 9 || state == 13 || state == 14) {
+        finished = TRUE;
     }
 
-    if (finished != 0) {
-        func_151D13E0(arg0);
-    } else if (sub->unk8 == 0) {
-        func_151D1448(arg0);
-    }
-}
-
-void func_151D1328(s32 arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
-}
-
-void func_151D13E0(struct260 *arg0);
-
-void func_151D1368(struct260 *arg0) {
-    func_151D13E0(arg0);
-}
-
-void func_151D1388(struct260 *arg0) {
-    func_151D1368(arg0);
-    func_1514933C(arg0);
-}
-
-void func_15149368(struct260 *arg0);
-
-void func_151D13B4(struct260 *arg0) {
-    func_151D1368(arg0);
-    func_15149368(arg0);
-}
-
-struct Obj151D13E0 {
-    char pad0[0x1C];
-    s16 unk1C;
-    u16 unk1E;
-    char pad20[0x10];
-    u8 unk30;
-    char pad31[0x67];
-    s32 *unk98;
-};
-
-struct Slot151D13E0 {
-    char pad0[0x8];
-    struct Obj151D13E0 *unk8;
-};
-
-void func_151D13E0(struct260 *arg0) {
-    struct Slot151D13E0 *slot = (struct Slot151D13E0 *)((char *)arg0 + 0x28);
-    struct Obj151D13E0 *obj;
-    s32 *p;
-
-    if (slot->unk8 != 0) {
-        p = slot->unk8->unk98;
-        slot->unk8->unk30 = 0;
-        slot->unk8->unk1E &= ~0x2;
-        slot->unk8->unk1E |= 0x8;
-        slot->unk8->unk1E |= 0x1;
-        slot->unk8->unk1C = 0x28;
-        *p = 0;
-        slot->unk8 = 0;
+    if (finished) {
+        func_151D13E0(effect);
+    } else if (data->trail == NULL) {
+        func_151D1448(effect);
     }
 }
 
-void func_151D1448(u8 *arg0) {
-    u8 *link;
+/* Message handler of the tracker effect: lets func_15169850 update or end the link to its owner. */
+void func_151D1328(TrackerEffect *effect, s32 arg1, u8 arg2) {
+    func_15169850(arg1, arg2, (s32)&effect->data.owner, (s32)&effect->data.ownerId, (s32)effect);
+}
+
+/* Tracker teardown: lets go of the trail. */
+void func_151D1368(TrackerEffect *effect) {
+    func_151D13E0(effect);
+}
+
+void func_151D1388(TrackerEffect *effect) {
+    func_151D1368(effect);
+    func_1514933C((struct260 *)effect);
+}
+
+void func_151D13B4(TrackerEffect *effect) {
+    func_151D1368(effect);
+    func_15149368((struct260 *)effect);
+}
+
+/* Lets go of the tracker's trail, which then fades out on its own. */
+void func_151D13E0(TrackerEffect *effect) {
+    TrackerData *data = &effect->data;
+    FollowerData *trailData;
+
+    if (data->trail != NULL) {
+        trailData = data->trail->data;
+        data->trail->unk30 = 0;
+        data->trail->flags &= ~0x2;
+        data->trail->flags |= 0x8;
+        data->trail->flags |= 0x1;
+        data->trail->unk1C = 40;
+        trailData->owner = NULL;
+        data->trail = NULL;
+    }
+}
+
+/* Spawn description passed to func_15147A80 (see game_105FC0.c's TrailSpawn). */
+typedef struct {
+    /* 0x00 */ struct17 pos;
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 unk18;
+} TrailSpawn;
+
+extern FollowerActor *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+
+/* Spawns the trail that follows the tracker effect. */
+void func_151D1448(TrackerEffect *effect) {
+    TrackerData *data;
     struct {
-        Vec3i151CD674 position;
-        s16 type;
-        s16 subtype;
-        s32 mode;
-        u8 flag;
-        u8 value;
-        u8 pad_16[2];
-        s32 reserved;
-        u8 *object;
-        f32 zero;
-        u8 color;
-        u8 pad_25[3];
-        f32 range;
-        f32 width;
-        f32 height;
-        f32 extent;
-        f32 source_value;
-    } packet;
-    u8 *state;
-    u8 *result;
+        TrailSpawn spawn;
+        FollowerData data;
+    } req;
+    struct127 *owner;
+    FollowerActor *trail;
 
-    link = arg0 + 0x28;
-    state = *(u8 **)link;
-    packet.object = arg0;
-    packet.color = 0xFF;
-    packet.zero = 0.0f;
-    if (state[4] == 0x25) {
-        packet.range = 800.0f;
-        packet.width = 36.0f;
-        packet.height = 50.0f;
-        packet.extent = 200.0f;
+    data = &effect->data;
+    owner = data->owner;
+    req.data.owner = effect;
+    req.data.unk8 = 0xFF;
+    req.data.unk4 = 0.0f;
+    if (owner->id == 0x25) {
+        req.data.unkC = 800.0f;
+        req.data.unk10 = 36.0f;
+        req.data.unk14 = 50.0f;
+        req.data.unk18 = 200.0f;
     } else {
         if (D_80082FA0 > 0) {
-            packet.range = 260.0f;
+            req.data.unkC = 260.0f;
         } else {
-            packet.range = 500.0f;
+            req.data.unkC = 500.0f;
         }
-        packet.width = 40.0f;
-        packet.height = 40.0f;
-        packet.extent = 180.0f;
+        req.data.unk10 = 40.0f;
+        req.data.unk14 = 40.0f;
+        req.data.unk18 = 180.0f;
     }
-    packet.source_value = *(f32 *)(*(u8 **)link + 0x14C);
-    packet.value = 0x19;
-    packet.position = *(Vec3i151CD674 *)(link + 0x18);
-    packet.type = 0x12C;
-    packet.subtype = 0x36;
-    packet.mode = 0x13;
-    packet.flag = 6;
-    packet.reserved = 0;
-    result = (u8 *)func_15147A80(&packet, 0x20, 0x28, 0, 0x11, 0x12, 0, 0, 0, arg0[0xC], arg0[1]);
-    if (result != 0) {
-        memcpy(*(void **)(result + 0x98), &packet.object, 0x20);
-        *(u8 **)(link + 8) = result;
+    req.data.scale = data->owner->xz_scale;
+    req.spawn.unk15 = 25;
+    req.spawn.pos = data->pos;
+    req.spawn.unkC = 300;
+    req.spawn.unkE = 54;
+    req.spawn.unk10 = 19;
+    req.spawn.unk14 = 6;
+    req.spawn.unk18 = 0;
+    trail = func_15147A80(&req.spawn, sizeof(FollowerData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->head.unkC, effect->head.unk1);
+    if (trail != NULL) {
+        memcpy(trail->data, &req.data, sizeof(FollowerData));
+        data->trail = trail;
     }
 }
