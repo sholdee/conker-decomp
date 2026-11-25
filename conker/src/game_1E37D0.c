@@ -29,7 +29,7 @@ typedef struct TrailTargetRef {
 } TrailTargetRef;
 
 /* State block of a trail effect (func_151B6320). */
-typedef struct TrailState {
+typedef struct TargetTrailState {
     /* 0x00 */ TrailTarget *target;
     /* 0x04 */ u8 targetUnk3B; /* target->unk3B when the trail was spawned */
     /* 0x05 */ u8 pad5[3];
@@ -40,17 +40,17 @@ typedef struct TrailState {
     /* 0x20 */ f32 texS; /* texture s at lastPos */
     /* 0x24 */ f32 distance; /* distance travelled at lastPos */
     /* 0x28 */ s32 unk28;
-} TrailState;
+} TargetTrailState;
 
 /* One point of a trail effect. */
-typedef struct TrailPoint {
+typedef struct TargetTrailPoint {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 life;
     /* 0x10 */ u8 alpha;
     /* 0x11 */ u8 pad11[3];
     /* 0x14 */ f32 texS;
     /* 0x18 */ f32 distance; /* distance travelled when emitted */
-} TrailPoint;
+} TargetTrailPoint;
 
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern EffectObject *func_15147A80(EffectTemplate18 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -60,7 +60,7 @@ void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2) {
     s32 top_dummy; // matching: stack pad
     EffectTemplate18 spawn;
     s32 pad_dummy; // matching: stack pad
-    TrailState state;
+    TargetTrailState state;
     EffectObject *obj;
 
     spawn.itemCount = 10;
@@ -79,7 +79,7 @@ void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2) {
     state.distance = 0.0f;
     spawn.kind = 13;
 
-    obj = func_15147A80(&spawn, 0x30, sizeof(TrailPoint), 11, 11, 11, 0, 0, 0, arg1, arg2);
+    obj = func_15147A80(&spawn, 0x30, sizeof(TargetTrailPoint), 11, 11, 11, 0, 0, 0, arg1, arg2);
     if (obj != NULL) {
         memcpy(obj->state, &state, sizeof(state));
     }
@@ -87,7 +87,7 @@ void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2) {
 
 /* Ages a trail's points, drops expired ones and sets the alpha of the rest. Returns 0 once the trail has finished. */
 s32 func_151B6420(EffectObject *obj) {
-    TrailPoint *points;
+    TargetTrailPoint *points;
     s32 i;
     f32 base;
     s32 alpha;
@@ -145,8 +145,8 @@ f32 func_15143E64(Vec3f *);
 
 /* Follows the trail's target and emits points along the path it moved. Stops the trail once the target is gone. */
 s32 func_151B65D4(EffectObject *obj) {
-    TrailState *state;
-    TrailPoint *points;
+    TargetTrailState *state;
+    TargetTrailPoint *points;
     TrailTarget *target;
     Vec3f delta;
     s32 pad0; // matching: stack pad
@@ -171,7 +171,7 @@ s32 func_151B65D4(EffectObject *obj) {
     state->pending += dist * 0.003721999936f * D_800BE9A4;
     state->targetTexS += dist * 4.409547806f;
     if (state->pending > 1.0f) {
-        TrailPoint *point;
+        TargetTrailPoint *point;
         Vec3f cur;
         f32 inv;
         f32 elapsed;
@@ -249,7 +249,7 @@ extern struct {
  * While flags & 2 is set the strip starts at the effect position itself. */
 Gfx *func_151B6928(EffectObject *obj, Gfx *gfx, s16 view) {
     Vtx *vtx;
-    TrailPoint *points;
+    TargetTrailPoint *points;
     Vec3f *camera;
     u8 flag;
     Vec3f next;
@@ -421,7 +421,7 @@ typedef struct SwapMessage {
 /* Message handler of a trail: message 0 (msg is a TrailTargetRef) stops the trail when it names its target;
  * message 0x2D (a SwapMessage) moves the trail to the other object of the swap. */
 void func_151B70B4(EffectObject *obj, void *msg, u8 msgType) {
-    TrailState *state;
+    TargetTrailState *state;
     TrailTarget *current;
     TrailTarget *objA;
 

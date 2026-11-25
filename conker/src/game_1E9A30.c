@@ -46,7 +46,7 @@ typedef struct {
     u8 alpha;
     u8 padF;
     f32 texU; /* texture coordinate along the ribbon */
-} TrailPoint;
+} RibbonTrailPoint;
 
 /* Trail state that follows the owner actor. */
 typedef struct {
@@ -56,21 +56,21 @@ typedef struct {
     f32 unk18;
     f32 texU;              /* 0x1C: texture coordinate reached by the owner */
     f32 lastTexU;          /* 0x20: texture coordinate of the newest point */
-} TrailData;
+} RibbonTrailData;
 
 /* Ribbon trail effect: a ring buffer of points from head (oldest) to tail (next write). */
 typedef struct {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 buffers[0x10];
-    /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailData *data;
-} TrailEffect;
+    /* 0x94 */ RibbonTrailPoint *points;
+    /* 0x98 */ RibbonTrailData *data;
+} RibbonTrail;
 
 /* Ages the trail: drops expired points and fades the last ones. Returns 0 once a finished trail is empty. */
-s32 func_151BC64C(TrailEffect *trail) {
-    TrailPoint *points;
-    TrailPoint *point;
+s32 func_151BC64C(RibbonTrail *trail) {
+    RibbonTrailPoint *points;
+    RibbonTrailPoint *point;
     s32 i;
     s16 lifetime;
     s32 alpha;
@@ -117,12 +117,12 @@ s32 func_151BC64C(TrailEffect *trail) {
 extern f32 func_15143E64(Vec3f *);
 
 /* Follows the owner and emits trail points evenly along the distance it moved. */
-s32 func_151BC794(TrailEffect *trail) {
-    TrailData *data;
-    TrailPoint *points;
+s32 func_151BC794(RibbonTrail *trail) {
+    RibbonTrailData *data;
+    RibbonTrailPoint *points;
     Actor *owner;
     Vec3f delta;
-    TrailPoint *point;
+    RibbonTrailPoint *point;
     f32 dist;
     f32 inv;
     f32 startU;
@@ -212,9 +212,9 @@ extern struct {
 } D_800A4AC8[];
 
 /* Draws the trail as a camera-facing ribbon, two vertices per point. */
-Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
+Gfx *func_151BCA90(RibbonTrail *trail, Gfx *gfx, s16 viewport) {
     Vtx *vtx;
-    TrailPoint *points;
+    RibbonTrailPoint *points;
     Vec3f *camPos;
     u8 dirty;
     Vec3f prev;
@@ -377,7 +377,7 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
 
 /* Message handler: message 0 for its owner finishes the trail; 0x2D makes it follow the owner through a swap. */
 /* Message handler: message 0 for its owner finishes the trail; 0x2D makes it follow the owner through a swap. */
-void func_151BD21C(TrailEffect *trail, ActorMsg *msg, u8 msgId) {
+void func_151BD21C(RibbonTrail *trail, ActorMsg *msg, u8 msgId) {
     ActorRef *owner;
     Actor *actor;
     Actor *actorA;
