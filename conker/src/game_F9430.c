@@ -1,4 +1,5 @@
 #include <ultra64.h>
+/* functions.h declares func_1513D668 as void; this file uses its real return value (declared below) */
 #define func_1513D668 func_1513D668_void_proto
 #include "functions.h"
 #undef func_1513D668
@@ -92,7 +93,7 @@ typedef struct {
     /* 0x28 */ f32 unk28;
     /* 0x2C */ s8 unk2C;
     /* 0x2D */ s8 unk2D;
-} RingSpawn;
+} Effect88D0Spawn;
 
 /* Per-particle data copied to 0x128 of a particle by func_150CBF80. */
 typedef struct {
@@ -120,18 +121,16 @@ GrowParticle *func_1513D668(GrowSpawn *spawn, CornerColor *colors, u8 arg2, u8 a
                             s32 argE);
 
 extern GroundBurstDef D_800A0640[];
-extern f32 D_800A06C4;
-extern f32 D_800A06C8;
 void func_1504715C(GroundHit *, struct127 *);
 s32 func_15046C80(f32 *, s32, f32, GroundHit *);
 void func_15143134(f32 *in, f32 *out, BoneMtx *mtx);
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, void *, u8);
-void func_150C88D0(RingSpawn *, s32, s32, s32);
+void func_150C88D0(Effect88D0Spawn *, s32, s32, s32);
 void *memcpy(void *, void *, s32);
 
 /* Spawns a burst at a bone-relative point of owner, dropped onto the ground below: a growing
-   ground-coloured particle, two func_1514C678 effects, a ring and a func_151D5404 effect. */
+   ground-coloured particle, two func_1514C678 effects, a func_150C88D0 effect and a func_151D5404 effect. */
 void func_150CBF80(struct127 *owner, u8 index, s32 arg2, u8 arg3) {
     f32 pos[3];
     GroundBurstDef *def;
@@ -148,6 +147,7 @@ void func_150CBF80(struct127 *owner, u8 index, s32 arg2, u8 arg3) {
     }
     func_1504715C(&ground, owner);
     def = &D_800A0640[index];
+    /* struct127.unk1D4 (typed struct255 * in structs.h) is the owner's bone matrix array */
     func_15143134(def->offset, pos, &((BoneMtx *)owner->unk1D4)[def->bone]);
     {
         f32 ray[3];
@@ -160,7 +160,7 @@ void func_150CBF80(struct127 *owner, u8 index, s32 arg2, u8 arg3) {
         }
     }
     pos[1] = ground.height;
-lbl: // matching: unused label ends the basic block so the store stays out of the jal delay slot
+lbl: // matching: unused label ends the basic block so the pos[1] store stays out of the jal delay slot
     func_150CCD90(pos[2], &fr, &fg, &fb);
     r = fr;
     g = fg;
@@ -224,33 +224,32 @@ lbl: // matching: unused label ends the basic block so the store stays out of th
             memcpy(&particle->extra, &extra, sizeof(extra));
         }
         {
-            RingSpawn ring;
+            Effect88D0Spawn fx;
             f32 d;
 
-            rnd = (func_150ADA20() % 1U) + 41;
+            rnd = (func_150ADA20() % 1U) + 41; // matching: a degenerate random range; the call and divu are in the ROM
             func_1514C678(pos[0], pos[1], pos[2], (func_150ADA68() * 50.0f) + 80.0f,
                           0, 0xFF, rnd, 0x11, 0, 0.0f, NULL, arg3);
-            d = D_800A06C4;
-lbl2: // matching: unused label ends the basic block so &ring isn't hoisted above the D_800A06C4 load
+            d = 13.90000057f;
+lbl2: // matching: unused label ends the basic block so &fx isn't hoisted above the 13.9f load
             {
-                s16 n1;
-                s16 n2;
+                s16 n1; // matching: a variable, not a literal, so IDO emits the runtime int-to-float convert
 
-                ring.position = *(Vec3 *)pos;
-                ring.unk10 = D_800A06C8;
-                ring.unkC = 1;
-                ring.unkD = -1;
-                ring.unk14 = 12;
-                ring.unk18 = 40;
-                ring.unk1A = 30;
+                fx.position = *(Vec3 *)pos;
+                fx.unk10 = 70.59999847f;
+                fx.unkC = 1;
+                fx.unkD = -1;
+                fx.unk14 = 12;
+                fx.unk18 = 40;
+                fx.unk1A = 30;
                 n1 = 10;
-                ring.unk1C = d / (f32)n1;
-                ring.unk20 = 25;
-                ring.unk24 = d / ring.unk20;
-                ring.unk2C = -1;
-                ring.unk2D = -1;
-                ring.unk28 = 0.0f;
-                func_150C88D0(&ring, 0, 0xFF, 1);
+                fx.unk1C = d / (f32)n1;
+                fx.unk20 = 25;
+                fx.unk24 = d / fx.unk20;
+                fx.unk2C = -1;
+                fx.unk2D = -1;
+                fx.unk28 = 0.0f;
+                func_150C88D0(&fx, 0, 0xFF, 1);
             }
         }
         {
@@ -272,7 +271,7 @@ s32 func_150CC638(GrowParticle *p) {
     GrowParticleExtra *extra;
 
     if (p->flags & 1) {
-        extra = &p->extra;
+        extra = &p->extra; // matching: the pointer is computed once and shared by both branches
         if (p->age < 32) {
             s32 fadeAlpha = p->age * 8;
 
@@ -404,7 +403,7 @@ s32 func_150CC8D4(DecayParticle *p, s32 arg1) {
     f32 *decay;
     s32 i;
 
-    decay = &p->decay;
+    decay = &p->decay; // matching: IDO keeps the factor's address in a register only via this pointer
     for (i = D_800BE9E4; i != 0; i--) {
         p->unk58 *= *decay;
         p->unk60 *= *decay;
