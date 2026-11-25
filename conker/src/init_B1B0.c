@@ -981,7 +981,7 @@ void func_1000D2F8(s32 index, f32 x, f32 y, f32 z) {
     // only does through these pointer views; offset is the byte offset of index in the tables
     channel = (u8)((u32 *)&index)[0];
     status = func_1000853C((u8)((u32 *)&index)[0]);
-    offset = (s32)((u32 *)&index)[0] * sizeof(*slot);
+    offset = ((u32 *)&index)[0] * sizeof(*slot);
     slot = (MusicTrack **)&(*(u8 (*)[])D_800417B0)[offset];
     track = *slot;
     if (track != NULL) {
@@ -996,7 +996,7 @@ void func_1000D2F8(s32 index, f32 x, f32 y, f32 z) {
             }
             track->fade.current = 0x7FFF;
             (*slot)->fade.target = 0x7FFF;
-            func_1000CC54((s32)((u32 *)&index)[0]);
+            func_1000CC54(((u32 *)&index)[0]);
             (*slot)->pendingJump = 0;
             (*slot)->jumpWait = 0;
         }
@@ -1021,7 +1021,7 @@ void func_1000D2F8(s32 index, f32 x, f32 y, f32 z) {
                             *slot = NULL;
                         } else {
                             *slot = (*slot)->next;
-                            (*slot)->channel = (s32)((u32 *)&index)[0];
+                            (*slot)->channel = ((u32 *)&index)[0];
                             (*slot)->startWait = 0;
                             *(s32 *)((u8 *)D_800418A0 + offset) = 0;
                             *(s32 *)((u8 *)D_80041890 + offset) = 0;
@@ -1037,7 +1037,7 @@ void func_1000D2F8(s32 index, f32 x, f32 y, f32 z) {
                                 track = *slot;
                             }
                             track->volume = 0;
-                            func_1000CC54((s32)((u32 *)&index)[0]);
+                            func_1000CC54(((u32 *)&index)[0]);
                             func_100084D8(channel);
                             if ((*slot)->mutedChannels != 0) {
                                 func_100088F0(channel, (*slot)->mutedChannels, 0);
@@ -1087,7 +1087,7 @@ void func_1000D2F8(s32 index, f32 x, f32 y, f32 z) {
                 (*slot)->duck.current = func_1000CD40(track->duck.current, track->duck.target, track->duck.rate);
                 (*slot)->rampWait = 0;
             }
-            func_1000CC54((s32)((u32 *)&index)[0]);
+            func_1000CC54(((u32 *)&index)[0]);
             track = *slot;
             if (track->followSync != 0 &&
                 ((syncTo = track->syncTo) == NULL || syncTo == track || syncTo->id <= 0 ||
