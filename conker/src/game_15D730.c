@@ -1,4 +1,5 @@
 #include <ultra64.h>
+/* functions.h declares func_15169260 with s32 params; this file passes a ParticleTypeList *. */
 #define func_15169260 func_15169260_s32_decl
 #include "functions.h"
 #undef func_15169260
@@ -199,7 +200,7 @@ extern void (*D_80089800[])(Particle *);
 
 /* Per-frame particle update: lifetime, motion, fade, scaling, animation and the update/death callbacks. */
 void func_151303EC(Particle *p) {
-    s32 unused2;
+    s32 pad; // matching: unused stack slot
     struct17 prevPos;
     u8 dead;
     s32 i;
@@ -225,7 +226,7 @@ void func_151303EC(Particle *p) {
     }
     if (p->desc.flags & PARTICLE_FADE) {
         if (p->desc.timer < p->desc.fadeStart) {
-            i = (s16)(p->desc.timer * p->desc.fadeRate);
+            i = (s16)(p->desc.timer * p->desc.fadeRate); // matching: reuses i; a separate local reallocates
             if (i < p->desc.alpha) {
                 p->desc.alpha = i;
             }
@@ -325,16 +326,16 @@ s32 func_15144CEC(struct17 *, f32 *, f32 *, f32 *, f32 *, s32);
 void func_1513137C(s16 *r, s16 *g, s16 *b, s16 *a, Particle *p);
 void func_1513164C(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s16 *envG, s16 *envB, s16 *envA, Particle *p);
 void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7);
-Gfx *func_15142E24(Gfx *arg0, ParticleTexture *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+Gfx *func_15142E24(Gfx *gfx, ParticleTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *needSync, s32 argA);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
+Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *needSync);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *needSync);
 
 /* Draws a particle as a screen-space textured rectangle in the given view. */
 Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
-    s32 pad0;
+    s32 pad; // matching: unused stack slot
     struct17 pos;
     u8 needSync;
     u8 mode;
@@ -391,6 +392,7 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
         s32 t;
         s32 dsdx;
 
+        // matching: byte-offset form; &((ParticleView *)D_800BE628)[viewIdx] schedules differently
         view = (ParticleView *)(D_800BE628 + viewIdx * 0x180);
         sizeX = p->desc.width * scale * view->scaleX * 16.94900131f;
         sizeY = p->desc.height * scale * view->scaleY * 16.94900131f;
@@ -471,7 +473,7 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
             gSPScisTextureRectangle(gfx++, (s32)ulx, (s32)uly, (s32)lrx, (s32)lry, 0, s, t, dsdx, dtdy);
         }
     }
-end:
+end: // matching: unused label; without it IDO returns gfx without the t2 copy
     return gfx;
 }
 
@@ -580,6 +582,7 @@ void func_15131514(s16 *r, s16 *g, s16 *b, s16 *a, Particle *p) {
     }
 }
 
+/* Picks both of a particle's colors. */
 void func_1513164C(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s16 *envG, s16 *envB, s16 *envA, Particle *p) {
     func_15131514(envR, envG, envB, envA, p);
     func_1513137C(primR, primG, primB, primA, p);
@@ -619,6 +622,7 @@ void func_1513175C(Particle *p) {
 
 extern void (*D_80089814[])(Particle *);
 
+/* Calls the particle's D_80089814 handler (set 0 without PARTICLE_HANDLERS). */
 void func_1513177C(Particle *p) {
     s32 set;
 
@@ -632,6 +636,7 @@ void func_1513177C(Particle *p) {
 
 extern s32 (*D_80089844[])(Particle *);
 
+/* Calls the particle's D_80089844 handler (set 0 without PARTICLE_HANDLERS). */
 s32 func_151317C8(Particle *p) {
     s32 set;
 
@@ -757,6 +762,7 @@ s32 func_15131B7C(Particle *p, struct17 *prevPos, f32 *hit, ParticleBounce *boun
 
 extern void (*D_80089878[])(Particle *, s32, u8);
 
+/* Calls the particle's D_80089878 handler, if it has one. */
 void func_15131C2C(Particle *p, s32 arg1, u8 arg2) {
     void (*handler)(Particle *, s32, u8);
 
@@ -776,6 +782,7 @@ void func_15131C84(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX
     *outY = amplitude[1] * func_151423D8((u8)(phase[1] - 0x40)) + base;
 }
 
+/* Calls func_15169260 with the three particle object types (see func_15130280). */
 void func_15131D4C(s32 arg0, u8 arg1) {
     ParticleTypeList types;
 
