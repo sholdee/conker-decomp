@@ -237,14 +237,9 @@ void func_151CF898(struct127 *arg0, f32 probeY, f32 arg2) {
     }
 }
 
+/* Spawn request for func_15151A38. */
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3_151CFA4C;
-
-typedef struct {
-    /* 0x00 */ Vec3_151CFA4C pos;
+    /* 0x00 */ struct17 pos;
     /* 0x0C */ f32 unk0C;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
@@ -287,45 +282,46 @@ typedef struct {
     /* 0x7E */ s16 pad7E;
     /* 0x80 */ s16 unk80;
     /* 0x82 */ s16 unk82;
-} Cfg1A38_151CFA4C;
+} Spawn15151A38;
 
+/* Particle spawn template for func_15132A4C: the layout of Particle 0x10..0x8B (see game_15F680.c),
+ * copied into the new particle. */
 typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ struct17 unk10;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 elasticity;
+    /* 0x08 */ f32 sizeXZ;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ struct17 rot;
+    /* 0x1C */ struct17 scale;
     /* 0x28 */ struct17 pos;
     /* 0x34 */ struct17 vel;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
+    /* 0x40 */ f32 rotVelX;
+    /* 0x44 */ f32 rotVelY;
+    /* 0x48 */ f32 rotVelZ;
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ s32 flags;
+    /* 0x54 */ s16 lifetime;
+    /* 0x56 */ s16 model;
+    /* 0x58 */ u8 variant;
     /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
+    /* 0x60 */ u8 alpha;
+    /* 0x61 */ u8 updateFn;
+    /* 0x62 */ u8 update2Fn;
+    /* 0x63 */ u8 floorHitFn;
+    /* 0x64 */ u8 floorType3Fn;
+    /* 0x65 */ u8 wallHitFn;
+    /* 0x66 */ u8 destroyFn;
+    /* 0x67 */ u8 squashFn;
+    /* 0x68 */ u8 matrixFn;
     /* 0x69 */ u8 pad69;
     /* 0x6A */ u8 unk6A;
-    /* 0x6C */ struct127 *unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-} Part151CFA4C;
+    /* 0x6C */ struct127 *owner;
+    /* 0x70 */ u8 ownerId;
+    /* 0x72 */ s16 fadeStart;
+    /* 0x74 */ s16 fadeRate;
+} ParticleSpawn;
 
+/* Spawn request for func_15150D1C. */
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
@@ -340,98 +336,99 @@ typedef struct {
     /* 0x28 */ s16 unk28;
     /* 0x2A */ s16 unk2A;
     /* 0x2C */ s8 unk2C;
-} Cfg0D1C_151CFA4C;
-
-typedef struct { s32 v[7]; } Ids151CFA4C;
+} Spawn15150D1C;
 
 extern struct17 D_800AAEEC[];
-extern Ids151CFA4C D_800AAF40;
+// matching: the model goes in as s32; a struct255 * argument changes the temp registers
 void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-void func_15143134(struct17 *, struct17 *, struct255 *);
+void func_15143134(struct17 *, struct17 *, Mtx *);
 void func_15143794(s16, s16, f32, struct17 *);
-s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
-void func_15150D1C(Cfg0D1C_151CFA4C *, u8, s32);
+s32 func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
+void func_15150D1C(Spawn15150D1C *, u8, s32);
 void func_151A9834(struct17 *, f32, f32, void *, s32, s32, s8 *, u8, s32);
-void func_15151A38(void *, u8, s32);
+void func_15151A38(Spawn15151A38 *, u8, s32);
 void func_1504715C(void *, struct127 *);
 
+/* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
+ * spin, plus three more effects at 200 units above it. */
 void func_151CFA4C(struct127 *arg0, u8 arg1, s32 arg2) {
-    struct17 c;
+    struct17 vecB;
     struct17 pos;
-    struct17 b;
-    struct17 a;
+    struct17 vecA;
+    struct17 vecC;
     u8 i;
 
     pos.unk0 = arg0->x_position;
     pos.unk4 = arg0->y_position + 200.0f;
     pos.unk8 = arg0->z_position;
     if (arg0->unk1D4) {
-        func_1503F404((s32)arg0->unk1D4, &b.unk0, &b.unk4, &b.unk8, &c.unk0, &c.unk4, &c.unk8, &a.unk0, &a.unk4, &a.unk8);
+        func_1503F404((s32)arg0->unk1D4, &vecA.unk0, &vecA.unk4, &vecA.unk8, &vecB.unk0, &vecB.unk4, &vecB.unk8,
+                      &vecC.unk0, &vecC.unk4, &vecC.unk8);
         {
-            Part151CFA4C p;
-            const s32 ids[7] = { 0x6F, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75 };
+            ParticleSpawn piece;
+            const s32 models[7] = { 0x6F, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75 };
 
-            p.unk0 = 1.0f;
-            p.unk4 = 0.6490000486f;
-            p.unk8 = p.unkC = (arg0->xz_scale + arg0->y_scale) * 0.5f;
-            p.unk10 = c;
-            p.unk1C = 1.0f;
-            p.unk20 = 0.0f;
-            p.unk24 = 1.0f;
-            p.unk44 = 0.0f;
-            p.unk58 = 0;
-            p.unk5C = 0;
-            p.unk60 = 0xFF;
-            p.unk62 = 0;
-            p.unk64 = 0;
-            p.unk65 = 0;
-            p.unk66 = 0;
-            p.unk67 = 0;
-            p.unk6A = 1;
-            p.unk6C = arg0;
-            p.unk70 = arg0->unique_id;
-            p.unk72 = 0xC;
-            p.unk74 = 0x15;
-            p.unk50 = 0x39E9;
-            p.unk61 = 0xD;
-            p.unk68 = 2;
-            p.unk63 = 7;
+            piece.radius = 1.0f;
+            piece.elasticity = 0.6490000486f;
+            piece.sizeXZ = piece.sizeY = (arg0->xz_scale + arg0->y_scale) * 0.5f;
+            piece.rot = vecB;
+            piece.scale.unk0 = 1.0f;
+            piece.scale.unk4 = 0.0f;
+            piece.scale.unk8 = 1.0f;
+            piece.rotVelY = 0.0f;
+            piece.variant = 0;
+            piece.unk5C = 0;
+            piece.alpha = 0xFF;
+            piece.update2Fn = 0;
+            piece.floorType3Fn = 0;
+            piece.wallHitFn = 0;
+            piece.destroyFn = 0;
+            piece.squashFn = 0;
+            piece.unk6A = 1;
+            piece.owner = arg0;
+            piece.ownerId = arg0->unique_id;
+            piece.fadeStart = 12;
+            piece.fadeRate = 21;
+            piece.flags = 0x39E9;
+            piece.updateFn = 13;
+            piece.matrixFn = 2;
+            piece.floorHitFn = 7;
             for (i = 0; i < 7; i++) {
-                u32 r1;
-                u32 r2;
+                u32 yaw;
+                u32 pitch;
 
-                p.unk56 = ids[i];
-                func_15143134(&D_800AAEEC[i], &p.pos, arg0->unk1D4);
-                r1 = func_150ADA20();
-                r2 = func_150ADA20();
-                func_15143794(r1 & 0xFF, (r2 % 25U) - 0x40, (func_150ADA68() * 11.44999981f) + 16.93000031f, &p.vel);
-                p.unk40 = (func_150ADA68() * 19.75200081f) + -9.876000404f;
-                p.unk48 = (func_150ADA68() * 19.75200081f) + -9.876000404f;
-                p.unk4C = (func_150ADA68() * 0.5180000067f) + -1.539000034f;
-                p.unk54 = (func_150ADA20() % 101U) + 100;
-                func_15132A4C(&p, 3, 0xFF, 0, arg1, arg2);
+                piece.model = models[i];
+                func_15143134(&D_800AAEEC[i], &piece.pos, (Mtx *)arg0->unk1D4);
+                yaw = func_150ADA20();
+                pitch = func_150ADA20();
+                func_15143794(yaw & 0xFF, (pitch % 25U) - 64, (func_150ADA68() * 11.44999981f) + 16.93000031f, &piece.vel);
+                piece.rotVelX = (func_150ADA68() * 19.75200081f) + -9.876000404f;
+                piece.rotVelZ = (func_150ADA68() * 19.75200081f) + -9.876000404f;
+                piece.gravity = (func_150ADA68() * 0.5180000067f) + -1.539000034f;
+                piece.lifetime = (func_150ADA20() % 101U) + 100;
+                func_15132A4C(&piece, 3, 0xFF, 0, arg1, arg2);
             }
         }
         {
-            Cfg1A38_151CFA4C cfg;
+            Spawn15151A38 cfg;
 
-            cfg.pos = *(Vec3_151CFA4C *)&pos;
+            cfg.pos = pos;
             cfg.unk0C = 8.0f;
             cfg.unk10 = 13.0f;
             cfg.unk14 = 0.8000000119f;
             cfg.unk18 = 0.400000006f;
             cfg.unk1C = 23.0f;
             cfg.unk20 = 7.0f;
-            cfg.unk24 = 0xD;
+            cfg.unk24 = 13;
             cfg.unk26 = 6;
             cfg.unk28 = 0;
             cfg.unk2A = 0xFF;
-            cfg.unk2C = -0x40;
-            cfg.unk2E = 0x32;
+            cfg.unk2C = -64;
+            cfg.unk2E = 50;
             cfg.unk30 = 3;
             cfg.unk32 = 2;
-            cfg.unk34 = 0x28;
-            cfg.unk36 = 0x19;
+            cfg.unk34 = 40;
+            cfg.unk36 = 25;
             cfg.unk38 = 9;
             cfg.unk39 = 1;
             cfg.unk3A = 0x48;
@@ -442,8 +439,8 @@ void func_151CFA4C(struct127 *arg0, u8 arg1, s32 arg2) {
             cfg.unk4C = 0;
             cfg.unk50 = 0;
             cfg.unk54 = 0;
-            cfg.unk55 = 0x96;
-            cfg.unk56 = 0x69;
+            cfg.unk55 = 150;
+            cfg.unk56 = 105;
             cfg.unk58 = 3;
             cfg.unk5C = 0xFF;
             cfg.unk60 = 0;
@@ -455,32 +452,32 @@ void func_151CFA4C(struct127 *arg0, u8 arg1, s32 arg2) {
             cfg.unk78 = 0x20;
             cfg.unk7C = 0;
             cfg.unk7D = 7;
-            cfg.unk80 = 0xA;
-            cfg.unk82 = 0x19;
+            cfg.unk80 = 10;
+            cfg.unk82 = 25;
             func_15151A38(&cfg, arg1, arg2);
         }
         {
-            Cfg0D1C_151CFA4C cfg2;
+            Spawn15150D1C cfg2;
 
-            cfg2.unk0 = 0xF;
+            cfg2.unk0 = 15;
             cfg2.unk4 = 6;
             cfg2.pos = pos;
             cfg2.unk14 = 0;
             cfg2.unk16 = 0xFF;
-            cfg2.unk18 = -0x1D;
-            cfg2.unk1A = 0x28;
+            cfg2.unk18 = -29;
+            cfg2.unk1A = 40;
             cfg2.unk1C = 375.0f;
             cfg2.unk20 = 20.0f;
             cfg2.unk24 = 40.0f;
-            cfg2.unk28 = 0x78;
-            cfg2.unk2A = 0x78;
+            cfg2.unk28 = 120;
+            cfg2.unk2A = 120;
             cfg2.unk2C = 2;
             func_15150D1C(&cfg2, arg1, arg2);
         }
         {
             u8 dst[0x24];
             s8 flag;
-            s32 pad;
+            s32 pad; // matching: unused stack slot in the original frame
 
             func_1504715C(dst, arg0);
             flag = 2;
@@ -489,94 +486,75 @@ void func_151CFA4C(struct127 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
-void func_151D0024(struct127 *arg0) {
-    struct {
-        s32 unk0;
-        u8 unk4;
-    } sp18;
+/* Message 0x18 (and 0): obj no longer exists. */
+typedef struct {
+    struct127 *obj;
+    u8 objId;
+} OwnerGoneMsg;
 
-    sp18.unk0 = (s32)arg0;
-    sp18.unk4 = arg0->unique_id;
-    func_151494E0((s32)&sp18, 0x18);
+/* Message 0x2D: objects a and b swapped places. */
+typedef struct {
+    struct127 *a;
+    struct127 *b;
+    u8 aId;
+    u8 bId;
+} OwnerSwapMsg;
+
+/* Tells every effect that follows the object that it is gone (message 0x18). */
+void func_151D0024(struct127 *obj) {
+    OwnerGoneMsg msg;
+
+    msg.obj = obj;
+    msg.objId = obj->unique_id;
+    func_151494E0((s32)&msg, 0x18);
 }
 
-void func_151D0058(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3) {
-    struct260 *temp_v0;
-    struct {
-        struct127 *unk0;
-        u8 unk4;
-        u8 pad5;
-        u16 unk6;
-        f32 unk8;
-        u8 unkC;
-        u8 unkD;
-        u8 padE;
-        u8 padF;
-    } sp3C;
+/* Data of the camera-facing strip effect spawned by func_151D0058 and drawn by func_151D014C. */
+typedef struct {
+    /* 0x0 */ struct127 *owner;
+    /* 0x4 */ u8 ownerId;   /* owner->unique_id at spawn; a mismatch means the owner died */
+    /* 0x5 */ u8 pad5;
+    /* 0x6 */ u16 ownerUnk84; /* owner->unk84 at spawn; the effect ends when it changes */
+    /* 0x8 */ f32 scale;
+    /* 0xC */ u8 alpha;
+    /* 0xD */ u8 variant;   /* which pair of model points the strip joins */
+    /* 0xE */ u8 padE[2];
+} StripEffectData;
 
-    sp3C.unk0 = arg0;
-    sp3C.unk4 = arg0->unique_id;
-    sp3C.unk8 = (arg0->xz_scale + arg0->y_scale) * 0.5f;
-    sp3C.unkD = arg1;
-    sp3C.unkC = (func_150ADA20() % 0x38U) + 0xC8;
-    sp3C.unk6 = arg0->unk84.uh;
+typedef struct {
+    /* 0x00 */ u8 pad0[0xE];
+    /* 0x0E */ s16 state; /* set to -1 to free the effect */
+    /* 0x10 */ u8 pad10[4];
+    /* 0x14 */ u8 vtxBuffer[0x14];
+    /* 0x28 */ StripEffectData data;
+} StripEffect;
 
-    temp_v0 = func_15149130(0x12C, -1, 0x61, 4, 0, 0x31, (struct37 *)0x10, arg2, arg3);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp3C, 0x10);
+/* Spawns a strip effect of the given variant on the object. */
+void func_151D0058(struct127 *obj, u8 variant, u8 arg2, s32 arg3) {
+    StripEffect *effect;
+    StripEffectData data;
+
+    data.owner = obj;
+    data.ownerId = obj->unique_id;
+    data.scale = (obj->xz_scale + obj->y_scale) * 0.5f;
+    data.variant = variant;
+    data.alpha = (func_150ADA20() % 56U) + 200;
+    data.ownerUnk84 = obj->unk84.uh;
+
+    effect = (StripEffect *)func_15149130(300, -1, 0x61, 4, 0, 0x31, (struct37 *)sizeof(data), arg2, arg3);
+    if (effect != NULL) {
+        memcpy(&effect->data, &data, sizeof(data));
     }
 }
 
-typedef struct {
-    char pad84[0x84];
-    u16 unk84;
-} ConkerStruct151D0128b;
+/* Ends the strip effect once its owner's unk84 has changed. */
+void func_151D0128(StripEffect *effect) {
+    struct127 *owner = effect->data.owner;
 
-typedef struct {
-    char padE[0xE];
-    s16 unkE;
-    char pad10[0x18];
-    ConkerStruct151D0128b *unk28;
-    char pad2C[0x2];
-    u16 unk2E;
-} ConkerStruct151D0128;
-
-void func_151D0128(ConkerStruct151D0128 *arg0) {
-    ConkerStruct151D0128b *p = arg0->unk28;
-    if (arg0->unk2E != p->unk84) {
-        arg0->unkE = -1;
+    if (effect->data.ownerUnk84 != owner->unk84.uh) {
+        effect->state = -1;
     }
 }
-
-typedef struct {
-    s32 unk0;
-    char pad4[0x3B - 4];
-    u8 unk3B;
-    char pad3C[0x1D4 - 0x3C];
-    s32 unk1D4;
-} Obj151D014C;
-
-typedef struct {
-    Obj151D014C *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    f32 unk8;
-    u8 unkC;
-    u8 unkD;
-} Sub151D014C;
-
-typedef struct {
-    char pad0[0xE];
-    s16 unkE;
-    char pad10[4];
-    u8 unk14[0x14];
-    Sub151D014C unk28;
-} Arg151D014C;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Mode151D014C;
 
 extern struct17 D_800AAF5C[];
 extern struct17 D_800AAF74;
@@ -584,80 +562,82 @@ extern u8 D_800AAF80[];
 extern u8 D_80091154[];
 Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 
-Gfx *func_151D014C(Gfx *gfx, Arg151D014C *arg1, s16 arg2) {
-    Sub151D014C *sub;
+/* Draws the strip effect: six camera-facing quads joining two of the owner's model points, pinched
+ * in the middle when the points are far apart. */
+Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 arg2) {
+    StripEffectData *data;
     Vtx *vtx;
-    Obj151D014C *obj;
+    struct127 *owner;
     u8 update;
-    struct17 *cam;
-    f32 mx;
-    f32 my;
-    f32 mz;
-    f32 n[3];
-    f32 s;
+    struct17 *camPos;
+    f32 midX;
+    f32 midY;
+    f32 midZ;
+    f32 side[3];
+    f32 taper;
     struct17 from;
     struct17 to;
     struct17 diff;
-    f32 stepx;
-    f32 stepy;
-    f32 stepz;
+    f32 stepX;
+    f32 stepY;
+    f32 stepZ;
     struct17 pos;
     f32 ang;
-    f32 t;
+    f32 progress;
     f32 dist;
     f32 amp;
     f32 tex;
     f32 unused;
-    f32 wx;
-    f32 wy;
-    f32 wz;
+    f32 offsetX;
+    f32 offsetY;
+    f32 offsetZ;
     s32 i;
 
-    obj = arg1->unk28.unk0;
-    sub = &arg1->unk28;
-    if (obj->unk0 == 0 || obj->unk3B != sub->unk4) {
-        arg1->unkE = -1;
+    owner = effect->data.owner;
+    data = &effect->data;
+    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
+        effect->state = -1;
         return gfx;
     }
-    if (obj->unk1D4 == 0) {
+    if (owner->unk1D4 == NULL) {
         return gfx;
     }
-    func_151D5D60(arg1->unk14, arg2, 0x1C0, (void **)&vtx, NULL);
+    func_151D5D60(effect->vtxBuffer, arg2, 0x1C0, (void **)&vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
     update = 1;
-    func_15143134(&D_800AAF5C[sub->unkD], &from, obj->unk1D4 + 0x80);
-    func_15143134(&D_800AAF74, &to, (D_800AAF80[sub->unkD] << 6) + obj->unk1D4);
-    cam = func_15144B34(arg2);
+    func_15143134(&D_800AAF5C[data->variant], &from, (Mtx *)owner->unk1D4 + 2);
+    func_15143134(&D_800AAF74, &to, (Mtx *)owner->unk1D4 + D_800AAF80[data->variant]);
+    camPos = func_15144B34(arg2);
     gfx = func_15142B7C(gfx, 0x200005, 0x60600);
     gfx = func_15142E24(gfx, (s32)D_80091154, 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
     gfx = func_1513F4E4(gfx, 0x3B, &update);
-    gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, sub->unkC, &update);
+    gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, data->alpha, &update);
     gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].cycle1 | D_800A4AC8[3].cycle2, &update);
     diff.unk0 = to.unk0 - from.unk0;
     diff.unk4 = to.unk4 - from.unk4;
     diff.unk8 = to.unk8 - from.unk8;
     dist = func_15143E64(&diff);
-    mx = diff.unk0 * 0.5f + from.unk0 - cam->unk0;
-    my = diff.unk4 * 0.5f + from.unk4 - cam->unk4;
-    mz = diff.unk8 * 0.5f + from.unk8 - cam->unk8;
-    wx = diff.unk4 * mz - my * diff.unk8;
-    wy = diff.unk8 * mx - mz * diff.unk0;
-    wz = diff.unk0 * my - mx * diff.unk4;
-    if (wx * wx + wy * wy + wz * wz == 0.0f) {
-        n[0] = 0.0f;
-        n[1] = 0.0f;
-        n[2] = 0.0f;
+    midX = diff.unk0 * 0.5f + from.unk0 - camPos->unk0;
+    midY = diff.unk4 * 0.5f + from.unk4 - camPos->unk4;
+    midZ = diff.unk8 * 0.5f + from.unk8 - camPos->unk8;
+    offsetX = diff.unk4 * midZ - midY * diff.unk8;
+    offsetY = diff.unk8 * midX - midZ * diff.unk0;
+    offsetZ = diff.unk0 * midY - midX * diff.unk4;
+    if (offsetX * offsetX + offsetY * offsetY + offsetZ * offsetZ == 0.0f) {
+        side[0] = 0.0f;
+        side[1] = 0.0f;
+        side[2] = 0.0f;
     } else {
-        amp = (35.0f * sub->unk8) / sqrtf(wx * wx + wy * wy + wz * wz);
-        n[0] = wx * amp;
-        n[1] = wy * amp;
-        n[2] = wz * amp;
+        amp = (35.0f * data->scale) / sqrtf(offsetX * offsetX + offsetY * offsetY + offsetZ * offsetZ);
+        side[0] = offsetX * amp;
+        side[1] = offsetY * amp;
+        side[2] = offsetZ * amp;
     }
-    stepx = diff.unk0 * 0.1666666716f;
-    stepy = diff.unk4 * 0.1666666716f;
-    stepz = diff.unk8 * 0.1666666716f;
+    stepX = diff.unk0 * 0.1666666716f;
+    stepY = diff.unk4 * 0.1666666716f;
+    stepZ = diff.unk8 * 0.1666666716f;
     if (dist < 20.0f) {
         amp = 0.0f;
     } else if (dist < 70.0f) {
@@ -665,13 +645,13 @@ Gfx *func_151D014C(Gfx *gfx, Arg151D014C *arg1, s16 arg2) {
     } else {
         amp = 0.6000000238f;
     }
-    /* One source line on purpose: as1 orders the hoisted loop constants against the copy by line number. */
-    pos = from; t = 0.0f; ang = 0.0f; tex = 0.0f; i = 0; do {
-        s = 1.0f - sinf(ang) * amp;
-        wx = n[0] * s;
-        vtx->v.ob[0] = (s32)(wx + pos.unk0);
-        vtx->v.ob[1] = (s32)(n[1] * s + pos.unk4);
-        vtx->v.ob[2] = (s32)(n[2] * s + pos.unk8);
+    // matching: one source line; as1 orders the hoisted loop constants against the copy by line number
+    pos = from; progress = 0.0f; ang = 0.0f; tex = 0.0f; i = 0; do {
+        taper = 1.0f - sinf(ang) * amp;
+        offsetX = side[0] * taper;
+        vtx->v.ob[0] = (s32)(offsetX + pos.unk0);
+        vtx->v.ob[1] = (s32)(side[1] * taper + pos.unk4);
+        vtx->v.ob[2] = (s32)(side[2] * taper + pos.unk8);
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
@@ -679,9 +659,9 @@ Gfx *func_151D014C(Gfx *gfx, Arg151D014C *arg1, s16 arg2) {
         vtx->v.tc[0] = 0;
         vtx->v.tc[1] = (s32)tex;
         vtx++;
-        vtx->v.ob[0] = (s32)(pos.unk0 - wx);
-        vtx->v.ob[1] = (s32)(pos.unk4 - n[1] * s);
-        vtx->v.ob[2] = (s32)(pos.unk8 - n[2] * s);
+        vtx->v.ob[0] = (s32)(pos.unk0 - offsetX);
+        vtx->v.ob[1] = (s32)(pos.unk4 - side[1] * taper);
+        vtx->v.ob[2] = (s32)(pos.unk8 - side[2] * taper);
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
@@ -689,13 +669,13 @@ Gfx *func_151D014C(Gfx *gfx, Arg151D014C *arg1, s16 arg2) {
         vtx->v.tc[0] = 0x7C0;
         vtx->v.tc[1] = (s32)tex;
         vtx++;
-        s = 1.0f - sinf(ang + 0.5235987902f) * amp;
-        wx = n[0] * s;
-        vtx->v.ob[0] = (s32)(pos.unk0 + stepx - wx);
-        wy = n[1] * s;
-        vtx->v.ob[1] = (s32)(pos.unk4 + stepy - wy);
-        wz = n[2] * s;
-        vtx->v.ob[2] = (s32)(pos.unk8 + stepz - wz);
+        taper = 1.0f - sinf(ang + 0.5235987902f) * amp;
+        offsetX = side[0] * taper;
+        vtx->v.ob[0] = (s32)(pos.unk0 + stepX - offsetX);
+        offsetY = side[1] * taper;
+        vtx->v.ob[1] = (s32)(pos.unk4 + stepY - offsetY);
+        offsetZ = side[2] * taper;
+        vtx->v.ob[2] = (s32)(pos.unk8 + stepZ - offsetZ);
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
@@ -703,11 +683,11 @@ Gfx *func_151D014C(Gfx *gfx, Arg151D014C *arg1, s16 arg2) {
         vtx->v.tc[0] = 0x7C0;
         vtx->v.tc[1] = (s32)(tex + 341.3333435f);
         vtx++;
-        /* Dead store on purpose: its two variable reads shift where uopt splits the basic block. */
-        unused = wx + wy;
-        vtx->v.ob[0] = (s32)(pos.unk0 + stepx + wx);
-        vtx->v.ob[1] = (s32)(pos.unk4 + stepy + wy);
-        vtx->v.ob[2] = (s32)(pos.unk8 + stepz + wz);
+        // matching: dead store; its two variable reads shift where uopt splits the basic block
+        unused = offsetX + offsetY;
+        vtx->v.ob[0] = (s32)(pos.unk0 + stepX + offsetX);
+        vtx->v.ob[1] = (s32)(pos.unk4 + stepY + offsetY);
+        vtx->v.ob[2] = (s32)(pos.unk8 + stepZ + offsetZ);
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
@@ -719,10 +699,10 @@ Gfx *func_151D014C(Gfx *gfx, Arg151D014C *arg1, s16 arg2) {
         gSPVertex(gfx++, vtx - 4, 4, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
         gSP1Triangle(gfx++, 0, 2, 3, 0);
-        pos.unk0 += stepx;
-        pos.unk4 += stepy;
-        pos.unk8 += stepz;
-        t += 0.1666666716f;
+        pos.unk0 += stepX;
+        pos.unk4 += stepY;
+        pos.unk8 += stepZ;
+        progress += 0.1666666716f;
         ang += 0.5235987902f;
         tex += 341.3333435f;
     } while (i != 6);
