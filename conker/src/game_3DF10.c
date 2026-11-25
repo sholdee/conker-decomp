@@ -165,7 +165,7 @@ void func_15010A60(void) {
             header.lightType = 0;
             snd = func_151602C0(&header, &header2, 0xC, 0xFF, 0xFF, 0xFF, 0xFF, 0, 4, 0xFF, 1);
             if (snd != NULL) {
-                memcpy((u8 *)snd + 0x18, &payload, 4);
+                memcpy(&snd->data.object, &payload, sizeof(payload));
             }
         }
     }

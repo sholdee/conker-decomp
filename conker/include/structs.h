@@ -3534,6 +3534,7 @@ typedef union LightEffectData {
     struct {
         /* 0x00 */ LightActorRef ref;
         /* 0x08 */ LightJitter jitter;
+        /* 0x28 */ void *user; // e.g. the AnchorEmitter of func_1519021C
     } actorJitter;    // func_151903D0
     struct {
         /* 0x00 */ LightTrack track;

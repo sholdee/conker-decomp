@@ -217,7 +217,7 @@ s32 func_151606A8(LightEffect *effect) {
     f32 y;
     f32 x;
 
-    mount = (WorldObject **)&effect->data;
+    mount = &effect->data.mount;
     func_150A8050(mtx.mf, (*mount)->rotX, (*mount)->rotY, (*mount)->rotZ);
     mtx.mf[3][0] = (*mount)->x;
     mtx.mf[3][1] = (*mount)->y;

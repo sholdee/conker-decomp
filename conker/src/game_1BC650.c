@@ -112,7 +112,7 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ AnchorEmitter *emitter;
-    /* 0x04 */ f32 params[8];
+    /* 0x04 */ LightJitter jitter;
     /* 0x24 */ ActorRef owner;
     /* 0x2C */ LightEffectHeader header;
     /* 0x34 */ s32 pad34;
@@ -676,14 +676,14 @@ LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 du
         return NULL;
     }
 
-    desc.params[0] = D_800A67C0[kind];
-    desc.params[1] = D_800A6760[kind];
-    desc.params[2] = D_800A6820[kind];
-    desc.params[3] = 1.0f;
-    desc.params[5] = 5.0f;
-    desc.params[4] = 0.0f;
-    desc.params[7] = 0.0f;
-    desc.params[6] = 0.2489f;
+    desc.jitter.mid = D_800A67C0[kind];
+    desc.jitter.low = D_800A6760[kind];
+    desc.jitter.high = D_800A6820[kind];
+    desc.jitter.target = 1.0f;
+    desc.jitter.interval = 5.0f;
+    desc.jitter.timer = 0.0f;
+    desc.jitter.level = 0.0f;
+    desc.jitter.smoothing = 0.2489f;
     desc.emitter = emitter;
 
     desc.header.flags = ((duration == -1) ? 0 : 1) | 2;
@@ -704,9 +704,9 @@ LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 du
 
     child = func_151602C0(&desc.header, &pos, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, arg4, arg5);
     if (child != NULL) {
-        memcpy((u8 *)child + 0x18, &desc.owner, sizeof(desc.owner));
-        memcpy((u8 *)child + 0x20, desc.params, sizeof(desc.params));
-        memcpy((u8 *)child + 0x40, &desc.emitter, sizeof(desc.emitter));
+        memcpy(&child->data.actorJitter.ref, &desc.owner, sizeof(desc.owner));
+        memcpy(&child->data.actorJitter.jitter, &desc.jitter, sizeof(desc.jitter));
+        memcpy(&child->data.actorJitter.user, &desc.emitter, sizeof(desc.emitter));
     }
     return child;
 }
