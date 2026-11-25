@@ -1,103 +1,16 @@
 #include <ultra64.h>
-#define func_1502B7F0 func_1502B7F0__proto
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #define func_1511FC2C func_1511FC2C__proto
 #define func_1511FC44 func_1511FC44__proto
 #define func_150A7CB0 func_150A7CB0__proto
 #include "functions.h"
-#undef func_1502B7F0
-#undef func_150ADA20
 #undef func_1511FC2C
 #undef func_1511FC44
 #undef func_150A7CB0
 #include "variables.h"
 
-u32 func_150ADA20(void);
 void func_150A7CB0(f32 mtx[4][4], f32 scaleX, f32 scaleY, f32 scaleZ); // functions.h types the scales s32
-
-extern u8 D_800DBEA8[];
-Gfx *func_15110544(Gfx *gfx, s32 a, s32 b, s32 c, s32 d, u8 r, u8 g, u8 bl);
-Gfx *func_1501A6CC(Gfx *arg0, s32 a, s32 b, s32 c, s32 d);
-
-typedef struct {
-    u8  pad0[0x24];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-} Struct151103C8;
-
-typedef struct Game13D350ViewAngles {
-    u8 pad0[0xC];
-    f32 pitch;
-    f32 yaw;
-    f32 roll;
-} Game13D350ViewAngles;
-
-typedef Gfx *(*Game13D350ViewDraw)(Gfx *, f32, f32, f32, f32, f32, f32, s32);
-
-Gfx *func_151106A8(Gfx *);
-s32 func_151108C4(f32, f32, f32, f32, f32);
-extern s16 D_80082FA6;
-extern u8 D_800D9B69;
-extern u8 D_800D9B6A;
-extern u8 D_800D9B6B;
-extern u8 D_800D9B6C;
-extern u8 D_800D9B6D;
-extern u8 D_800D9B6E;
-extern u8 D_800D9B6F;
-extern u8 D_800D9B70;
-extern u8 D_800D9B71;
-extern u8 D_800D9B72;
-extern u8 D_800D9B73;
-extern u8 D_800D9B79;
-extern u8 D_800D9B7A;
-extern u8 D_800D9B7B;
-extern u8 D_800D9B7C;
-extern u8 D_800D9B7D;
-extern u8 D_800D9B7E;
-extern u8 D_800D9B7F;
-extern u8 D_800D9B80;
-extern u8 D_800D9B81;
-extern u8 D_800D9B82;
-extern u8 D_800D9B83;
-extern Game13D350ViewAngles D_800DCDE0[];
-extern Game13D350ViewDraw D_800891D8[];
-Gfx *func_1510FEA0(Gfx *arg0, s32 arg1);
-
-extern s32 D_800BE628;
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
-void func_151102CC(f32 a0[4][4], f32 a1, f32 a2, f32 a3);
-void func_151102CC(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3);
-void func_15110360(s32 arg0, f32 arg1[4][4], f32 arg2, f32 arg3, f32 arg4);
-Gfx *func_151103C8(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3);
-
-Gfx *func_1501A680(Gfx *arg0);
-Gfx *func_1501A6CC(Gfx *arg0, s32 a, s32 b, s32 c, s32 d);
-Gfx *func_15110544(Gfx *gfx, s32 a, s32 b, s32 c, s32 d, u8 r, u8 g, u8 bl);
-Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3);
-
-extern u8 D_800BEAC2;
-Gfx *func_151106A8(Gfx *arg0);
-
-extern s32 *D_800DBE80;
-extern s32 *D_800891BC[];
-s32 func_1502B7F0();
 void func_10004074();
-void func_1510D694(s32);
-void func_15111858(void);
-void func_1511172C(s32 arg0);
-
-extern void *allocate_memory(s32, s32, s32, s32);
-
-typedef struct Star15111858 {
-    u16 x;
-    u16 y;
-    u16 z;
-    u8 unk6;
-    u8 unk7;
-} Star15111858;
-void func_15111858(void);
 
 typedef struct Turret15112520Cfg {
     /* 0x00 */ f32 speedNear;
@@ -273,7 +186,9 @@ typedef struct Game13F9D0Obj {
     /* 0x70 */ u8 state; // 1: static matrix, 8: removed, high nibble: objects following in its group
     /* 0x71 */ u8 pad71;
     /* 0x72 */ u8 id;
-    /* 0x73 */ u8 pad73[5];
+    /* 0x73 */ u8 pad73;
+    /* 0x74 */ u16 sound; // handle from func_15114D24
+    /* 0x76 */ u8 pad76[2];
     /* 0x78 */ void (*onContact)(struct Game13F9D0Obj *, struct127 *);
     /* 0x7C */ s32 unk7C;
     /* 0x80 */ s32 unk80;
@@ -853,7 +768,6 @@ void func_1511473C(Game13F9D0Actor *actor, s32 objIndex) {
         actor->facingAngle = actor->movingAngle;
     }
 }
-void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 
 /* Builds an object's rotation matrix: yaw first, then pitch/roll (func_150A8050 makes Euler rotations). */
 void func_151148A8(f32 mtx[4][4], Game13F9D0Obj *obj) {
@@ -928,120 +842,109 @@ void func_15114A1C(void) {
         }
     }
 }
-#undef HANDLES
-#undef RELEASE_DELAY
-typedef struct Struct15114B94 {
-    u8 pad0[0x4C];
-    u8 enabled;
-    u8 pad4D[2];
-    u8 flags;
-    u8 pad50[0x1E];
-    u8 unk6E;
-    u8 pad6F;
-    u8 state;
-    u8 pad71[0x1A];
-    u8 players[9];
-    struct102 *callback;
-    u8 pad98[8];
-} Struct15114B94;
+/* Removes object `index` (frees its unk94, marks it removed), then drops removed objects off the array's end. */
+void func_15114B94(u32 index) {
+    u32 ungrouped;
 
-void func_15114B94(u32 arg0) {
-    u32 threshold;
-
-    if (arg0 < D_800DBEF0) {
-        if (((Struct15114B94 *)D_800DBEF4)[arg0].callback != NULL) {
-            func_1516972C(((Struct15114B94 *)D_800DBEF4)[arg0].callback);
-            ((Struct15114B94 *)D_800DBEF4)[arg0].callback = NULL;
+    if (index < D_800DBEF0) {
+        if (OBJECTS[index].unk94 != NULL) {
+            func_1516972C(OBJECTS[index].unk94);
+            OBJECTS[index].unk94 = NULL;
         }
-        ((Struct15114B94 *)D_800DBEF4)[arg0].state |= 8;
-        ((Struct15114B94 *)D_800DBEF4)[arg0].unk6E = 1;
+        OBJECTS[index].state |= 8;
+        OBJECTS[index].unk6E = 1;
     }
-    arg0 = D_800DBEF0 - 1;
-    threshold = D_800DBEF0 - D_800DBF98;
-    while (D_800DBEF0 != 0 && (((Struct15114B94 *)D_800DBEF4)[arg0].state & 8)) {
-        if (arg0 >= threshold && D_800DBF98 != 0) {
+    index = D_800DBEF0 - 1;
+    ungrouped = D_800DBEF0 - D_800DBF98;
+    while (D_800DBEF0 != 0 && (OBJECTS[index].state & 8)) {
+        if (index >= ungrouped && D_800DBF98 != 0) {
             D_800DBF98--;
         } else {
-            threshold--;
+            ungrouped--;
         }
         D_800DBEF0--;
-        arg0--;
+        index--;
     }
 }
 
-s32 func_15114CC4(void *a0, s32 a1, s32 *a2, s32 a3) {
-    s16 *v1 = *(s16 **)((u8 *)a0 + 0x18);
+/* A sound started by func_15114D24 that follows its object. */
+typedef struct ObjSound {
+    /* 0x00 */ u8 pad0[2];
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ s16 z;
+    /* 0x08 */ u8 pad8[0x10];
+    /* 0x18 */ Game13F9D0Obj *obj;
+    /* 0x1C */ s32 positioned;
+} ObjSound;
 
-    if (v1 != 0 && (*a2 != 0 || *(s32 *)((u8 *)a0 + 0x1C) == 0)) {
-        *(s32 *)((u8 *)a0 + 0x1C) = 1;
-        *(s16 *)((u8 *)a0 + 0x2) = v1[8];
-        *(s16 *)((u8 *)a0 + 0x4) = v1[9];
-        *(s16 *)((u8 *)a0 + 0x6) = v1[10];
+/* Sound callback: moves the sound to its object (once, or every call when *follow is set). Returns 1 if not. */
+s32 func_15114CC4(ObjSound *sound, s32 arg1, s32 *follow, s32 arg3) {
+    Game13F9D0Obj *obj = sound->obj;
+
+    if (obj != NULL && (*follow != 0 || sound->positioned == 0)) {
+        sound->positioned = 1;
+        sound->x = obj->x;
+        sound->y = obj->y;
+        sound->z = obj->z;
         return 0;
     }
     return 1;
 }
 
-typedef struct {
-    char pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    char pad16[0x5E];
-    u16 unk74;
-} Struct15114D24;
-
 s32 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5,
                   s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
 
-void func_15114D24(Struct15114D24 *arg0, s32 arg1, s32 arg2, s16 arg3, s16 arg4, s32 arg5) {
-    u16 sfx;
+/*
+ * Plays sound `sfx` at obj, keeping the handle in obj->sound. sfx -1 stops it. flags: 1 keep it if already
+ * playing, 2 restart (positioned once), 4 one-shot, 8 don't stop or forget the current sound;
+ * otherwise the sound follows the object through func_15114CC4.
+ */
+void func_15114D24(Game13F9D0Obj *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 flags) {
+    u16 handle;
 
-    if (arg5 & 1) {
-        if (arg0->unk74 != 0) {
-            if (func_1001147C(arg0->unk74) == arg1) {
+    if (flags & 1) {
+        if (obj->sound != 0) {
+            if (func_1001147C(obj->sound) == sfx) {
                 return;
             }
         }
     }
 
-    if (arg1 == -1) {
-        if (arg0->unk74 != 0) {
-            func_100111C8(arg0->unk74);
-            arg0->unk74 = 0;
+    if (sfx == -1) {
+        if (obj->sound != 0) {
+            func_100111C8(obj->sound);
+            obj->sound = 0;
         }
         return;
     }
 
-    if (arg5 & 8) {
-        sfx = 0;
+    if (flags & 8) {
+        handle = 0;
     } else {
-        sfx = arg0->unk74;
+        handle = obj->sound;
     }
 
-    if (arg5 & 4) {
-        func_10010E78(sfx, arg1, arg2, 0, 0, -1, arg0->unk10, arg0->unk12,
-                      arg0->unk14, arg3, arg4);
-        if ((arg5 & 8) == 0) {
-            arg0->unk74 = 0;
+    if (flags & 4) {
+        func_10010E78(handle, sfx, arg2, 0, 0, -1, obj->x, obj->y, obj->z, arg3, arg4);
+        if ((flags & 8) == 0) {
+            obj->sound = 0;
         }
-    } else if (arg5 & 2) {
-        if (sfx != 0) {
-            func_1001123C(sfx);
-            sfx = 0;
+    } else if (flags & 2) {
+        if (handle != 0) {
+            func_1001123C(handle);
+            handle = 0;
         }
-        arg0->unk74 = func_10010E78(sfx, arg1, arg2, 0, 0, -1, arg0->unk10,
-                                    arg0->unk12, arg0->unk14, arg3, arg4);
+        obj->sound = func_10010E78(handle, sfx, arg2, 0, 0, -1, obj->x, obj->y, obj->z, arg3, arg4);
     } else {
-        if (sfx != 0) {
-            func_1001123C(sfx);
+        if (handle != 0) {
+            func_1001123C(handle);
         }
-        arg0->unk74 = func_1000FA64(arg1, arg0->unk10, arg0->unk12, arg0->unk14,
-                                    arg2, arg4, arg3, (s32)func_15114CC4, arg0,
-                                    0, 0, 0);
+        obj->sound = func_1000FA64(sfx, obj->x, obj->y, obj->z, arg2, arg4, arg3, (s32)func_15114CC4, obj, 0, 0, 0);
     }
 }
 
+/* Starts a sound through func_1001001C with func_15114CC4 as its callback. */
 void func_15114F04(s32 arg0, s32 arg1, s32 arg2) {
     func_1001001C(func_15114CC4, arg0, 0, arg1, arg2);
 }
@@ -1050,6 +953,10 @@ extern s32 D_800DBF9C;
 extern s32 D_800DBFA0;
 extern s32 D_800DBFA4;
 
+/*
+ * On D_800BE9F0 0x12, 0x13 and 0x36 only: checks both D_800DBDD8 lists (stops with error 0xC00005A on a bad
+ * entry), then stores the three arguments in D_800DBF9C..D_800DBFA4.
+ */
 void func_15114F44(s32 arg0, s32 arg1, s32 arg2) {
     s32 j;
     s32 i;
@@ -1059,7 +966,7 @@ void func_15114F44(s32 arg0, s32 arg1, s32 arg2) {
         for (j = 0; j < 2; j++) {
             list = (u32 (*)[3])D_800DBDD8[j];
             for (i = 0; i < D_800DBE18[j]; i++) {
-                /* every command word must be a KSEG0 address, 4-byte aligned */
+                /* each entry holds three KSEG0 addresses, 4-byte aligned */
                 if (((list[i][0] & 0xF0000000) != 0x80000000) || ((list[i][1] & 0xF0000000) != 0x80000000) ||
                     ((list[i][2] & 0xF0000000) != 0x80000000) ||
                     (list[i][0] & 3) || (list[i][1] & 3) || (list[i][2] & 3)) {
