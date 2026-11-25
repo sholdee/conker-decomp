@@ -586,19 +586,6 @@ s32 func_151BD42C(AgedBloodStrip *strip) {
     return 1;
 }
 
-/* ParticleDesc68.flags (see game_15D730.c) */
-#define PARTICLE_LIFETIME   0x1
-#define PARTICLE_GRAVITY    0x2
-#define PARTICLE_MOVE       0x4
-#define PARTICLE_FLIP_S     0x40
-#define PARTICLE_FLIP_T     0x80
-#define PARTICLE_FADE       0x200
-#define PARTICLE_SCALE      0x400
-#define PARTICLE_SCALE_MUL  0x800
-#define PARTICLE_USE_OFFSET 0x1000
-#define PARTICLE_HANDLERS   0x4000
-#define PARTICLE_DRAW_FUNC  0x8000
-
 /* matching: the first 0x68 bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
 typedef struct ParticleDesc68 {
     /* 0x00 */ s32 unk0;

@@ -25,15 +25,6 @@ typedef struct {
     /* 0x28 */ ObjectEmitterData data;
 } Effect1BFDD0;
 
-/* ParticleDesc.flags (see game_15D730.c) */
-#define PARTICLE_LIFETIME  0x1
-#define PARTICLE_MOVE      0x4
-#define PARTICLE_FLIP_S    0x40
-#define PARTICLE_FLIP_T    0x80
-#define PARTICLE_FADE      0x200
-#define PARTICLE_SCALE     0x400
-#define PARTICLE_SCALE_MUL 0x800
-
 /* Live particle returned by func_15130374; its caller-sized data starts at 0xA8. */
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];

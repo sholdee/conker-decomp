@@ -5,13 +5,6 @@
 #include "effects.h"
 #include "libc/string.h"
 
-/* ParticleDesc.flags (see game_15D730.c) */
-#define PARTICLE_LIFETIME 0x1
-#define PARTICLE_FLIP_S   0x40
-#define PARTICLE_FLIP_T   0x80
-#define PARTICLE_HANDLERS 0x4000
-#define PARTICLE_DRAW_FUNC 0x8000
-
 /* State of the effect, stored after its main particle. */
 typedef struct {
     /* 0x00 */ Actor *owner;

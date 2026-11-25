@@ -54,9 +54,6 @@ typedef struct {
     /* 0xA8 */ f32 unkA8;
 } Particle;
 
-#define PARTICLE_FLIP_S 0x40
-#define PARTICLE_FLIP_T 0x80
-
 Particle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
 
 /* Spawns a randomly sized purple/yellow particle (kind 1) at (x, y, z), launched along `yaw` at a random pitch. */

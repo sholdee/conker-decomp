@@ -4,10 +4,6 @@
 #include "effects.h"
 #include "libc/string.h"
 
-/* ParticleDesc.flags */
-#define PARTICLE_FLIP_S 0x40
-#define PARTICLE_FLIP_T 0x80
-
 typedef struct Particle {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ ParticleDesc desc;

@@ -3,11 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* ParticleDesc.flags (see game_15D730.c) */
-#define PARTICLE_FLIP_S    0x40
-#define PARTICLE_HANDLERS  0x4000
-#define PARTICLE_DRAW_FUNC 0x8000
-
 /*
  * Per-particle data of the particles func_151082D0 spawns (update function 0x18, func_15108658).
  * The animation frame steps 0 -> 1 -> 2 at the start of the particle's life and back at the end.

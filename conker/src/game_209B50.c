@@ -79,7 +79,6 @@ void func_151DC6A0(Vec3f *pos, u8 owner, s32 kind) {
     func_15182670(0xFF, 0xFF, 0xFF, func_150ADA20() % 51U + 150, func_150ADA20() % 5U + 8, 0, owner, kind);
 }
 
-
 /* Data of the effect spawned by func_151DC8BC and updated by func_151DC97C. */
 typedef struct {
     /* 0x00 */ Vec3f pos;
@@ -97,7 +96,6 @@ typedef struct {
     /* 0x0D */ u8 padD[0x1B];
     /* 0x28 */ EmitterData data;
 } Emitter;
-
 
 /* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by func_151DC97C
  * (D_8008A4E8[0x5B]), preceded by a func_151DC6A0 burst when `burst` is set. */
@@ -118,10 +116,6 @@ void func_151DC8BC(Vec3f *pos, s32 duration, u8 burst, u8 randomColors, u8 owner
         memcpy(&emitter->data, &data, sizeof(data));
     }
 }
-
-/* ParticleDesc.flags (see game_15D730.c) */
-#define PARTICLE_FLIP_S 0x40
-#define PARTICLE_FLIP_T 0x80
 
 /* Per-particle data of particles with update function 0x16 (ParticleDesc.updateFunc). */
 typedef struct {

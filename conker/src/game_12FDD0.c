@@ -49,15 +49,6 @@ typedef struct {
     /* 0x24 */ s16 unk24;
 } Struct1513C650Arg;
 
-/* ParticleDesc.flags (see game_15D730.c) */
-#define PARTICLE_LIFETIME  0x1
-#define PARTICLE_FLIP_S    0x40
-#define PARTICLE_FLIP_T    0x80
-#define PARTICLE_FADE      0x200
-#define PARTICLE_HANDLERS  0x4000
-#define PARTICLE_DRAW_FUNC 0x8000
-#define PARTICLE_VIEWS     0x40000
-
 void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 arg5, s32 arg6);
 
 /* Spawns a func_1513C650 effect of the given size on a surface (none for some materials on maps 0x36 and 0x26);

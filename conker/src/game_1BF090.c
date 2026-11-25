@@ -4,17 +4,6 @@
 #include "effects.h"
 #include "libc/string.h"
 
-/* ParticleDesc.flags (as in game_15D730.c) */
-#define PARTICLE_LIFETIME  0x1
-#define PARTICLE_GRAVITY   0x2
-#define PARTICLE_MOVE      0x4
-#define PARTICLE_FLIP_S    0x40
-#define PARTICLE_FLIP_T    0x80
-#define PARTICLE_FADE      0x200
-#define PARTICLE_HANDLERS  0x4000
-#define PARTICLE_DRAW_FUNC 0x8000
-#define PARTICLE_LIT       0x10000
-
 /* The part of a func_15046F84 probe result (from its +0x4) that dust particles keep for their splash. */
 typedef struct FloorData {
     /* 0x00 */ u8 unk0[0x10];
