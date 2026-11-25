@@ -7,51 +7,53 @@
 
 extern f32 func_15048A40(u8 arg0);
 
+/* An object func_150C4D20 swings like a pendulum about angle 0. */
 typedef struct {
-    f32 unk0;
-    u8 pad4[0xC];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[0x39];
-    u8 unk4F;
-    u8 pad50[0x10];
-    f32 unk60;
-    u8 pad64[0x18];
-    s32 unk7C;
-} Struct150C4D20;
+    /* 0x00 */ f32 angle; // degrees, wrapped into [0, 360)
+    /* 0x04 */ u8  pad4[0xC];
+    /* 0x10 */ s16 position[3];
+    /* 0x16 */ u8  pad16[0x39];
+    /* 0x4F */ u8  flags;
+    /* 0x50 */ u8  pad50[0x10];
+    /* 0x60 */ f32 angularVelocity; // degrees per frame
+    /* 0x64 */ u8  pad64[0x18];
+    /* 0x7C */ s32 phase; // drives the push of func_15048A40; plays sound 0xF each time it wraps 256
+} Pendulum;
 
-void func_150C4D20(Struct150C4D20 *arg0) {
-    f32 v;
-    f32 x;
-    f32 r;
-    s32 t;
+/* Swings the pendulum: a spring pulls it back toward angle 0, a periodic push from func_15048A40(phase)
+ * (plus a constant one while flags bit 2 is set) drives it, and 20% damping is applied every frame. */
+void func_150C4D20(Pendulum *pendulum) {
+    f32 velocity;
+    f32 angle;
+    f32 push;
+    s32 phase;
 
-    x = arg0->unk0;
-    v = arg0->unk60;
-    if (x > 180.0f) {
-        x -= 360.0f;
+    angle = pendulum->angle;
+    velocity = pendulum->angularVelocity;
+    if (angle > 180.0f) {
+        angle -= 360.0f;
     }
-    t = arg0->unk7C;
-    t += D_800BE9E4;
-    v -= x * 0.009f;
-    if ((f32)t >= 256.0f) {
-        t = (f32)t - 256.0f;
-        func_10010F88(0xF, 0x55F0, 0, 0, 0, arg0->unk10, arg0->unk12, arg0->unk14, 500, 1000);
+    phase = pendulum->phase;
+    phase += D_800BE9E4;
+    velocity -= angle * 0.009f;
+    if (phase >= 256.0f) {
+        phase -= 256.0f;
+        func_10010F88(0xF, 0x55F0, 0, 0, 0, pendulum->position[0], pendulum->position[1], pendulum->position[2],
+                      500, 1000);
     }
-    arg0->unk7C = t;
-    r = func_15048A40(t);
-    v += r * 0.1f;
-    if ((arg0->unk4F & 4) == 4) {
-        v += 0.1f;
+    pendulum->phase = phase;
+    push = func_15048A40(phase);
+    velocity += push * 0.1f;
+    if ((pendulum->flags & 4) == 4) {
+        velocity += 0.1f;
     }
-    v *= 0.8f;
-    arg0->unk60 = v;
-    arg0->unk0 += v;
-    if (arg0->unk0 < 0.0f) {
-        arg0->unk0 += 360.0f;
-    } else if (arg0->unk0 >= 360.0f) {
-        arg0->unk0 -= 360.0f;
+    velocity *= 0.8f;
+    pendulum->angularVelocity = velocity;
+    pendulum->angle += velocity;
+    if (pendulum->angle < 0.0f) {
+        pendulum->angle += 360.0f;
+    } else if (pendulum->angle >= 360.0f) {
+        pendulum->angle -= 360.0f;
     }
 }
 
