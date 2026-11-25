@@ -391,49 +391,9 @@ struct SparkObj {
     /* 0x28 */ SparkState state;
 };
 
-typedef struct SparkSpawn {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s8 unk14;
-    /* 0x15 */ u8 unk15;
-} SparkSpawn;
-
-typedef struct SparkParticle {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 vel[3];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E;
-    /* 0x1F */ u8 unk1F;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ u8 unk32;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ s8 unk38;
-    /* 0x39 */ u8 unk39;
-} SparkParticle;
-
 extern void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 extern void func_15143794(s16, s16, f32, f32 *);
-extern void func_1515C2F0(SparkSpawn *, s32, SparkParticle *, s32, s32, s32);
+extern void func_1515C2F0(EffectTemplate18 *, s32, TrailBurstParams *, s32, s32, s32);
 void func_151058B4(SparkObj *obj);
 
 /* Message handler: 0x38 bursts sparks and switches the effect on, 0x39 switches it off. */
@@ -453,8 +413,8 @@ void func_151058B4(SparkObj *obj) {
     SparkState *state;
     f32 count;
     u32 angle;
-    SparkSpawn spawn;
-    SparkParticle part;
+    EffectTemplate18 spawn;
+    TrailBurstParams part;
     f32 top;
     f32 bottom;
 
@@ -462,41 +422,41 @@ void func_151058B4(SparkObj *obj) {
     if (func_151464B8(state->unk8) == 0) {
         count = (func_150ADA68() * 0.0013f + 0.001899999916f) * state->rate;
         if (count > 1.0f) {
-            spawn.unkE = 0x15;
-            spawn.unk10 = 10;
+            spawn.flags = 0x15;
+            spawn.kind = 10;
             spawn.unk14 = -1;
-            part.unk14 = 4;
-            part.unk15 = 2;
-            part.unk16 = 3;
-            part.unk17 = 0x61;
-            part.unk18 = 0xF2;
-            part.unk19 = 0xFF;
-            part.unk1B = 0xFF;
-            part.unk1C = 0xFF;
-            part.unk1D = 0xFF;
-            part.unk1E = 0xFF;
-            part.unk1F = 0xFF;
-            part.unk20 = 3;
+            part.flags = 4;
+            part.primMode = 2;
+            part.envMode = 3;
+            part.color.red = 0x61;
+            part.color.green = 0xF2;
+            part.color.blue = 0xFF;
+            part.color2.red = 0xFF;
+            part.color2.green = 0xFF;
+            part.color2.blue = 0xFF;
+            part.color2.alpha = 0xFF;
+            part.colorLevel = 0xFF;
+            part.renderMode = 3;
             part.unk21 = 0x24;
-            part.unk24 = 0x200005;
-            part.unk28 = 0x60600;
-            part.unk2C = 20;
-            part.unk2E = 12;
-            part.unk30 = 1;
-            part.unk32 = 0;
-            part.unk34 = 1.0f;
+            part.setGeometryMode = 0x200005;
+            part.clearGeometryMode = 0x60600;
+            part.fadeStart = 20;
+            part.fadeRate = 12;
+            part.shrinkStart = 1;
+            part.shrinkPaused = 0;
+            part.shrinkFactor = 1.0f;
             part.unk38 = -1;
             part.unk39 = 0;
-            spawn.y = state->region->y;
+            spawn.pos.y = state->region->y;
             do {
-                part.unk1A = func_150ADA20() % 101U + 155;
-                spawn.unk15 = (func_150ADA20() & 3) + 3;
-                func_151432BC(state->region, &spawn.x, &spawn.z, &top, &bottom);
-                spawn.unkC = func_150ADA20() % 31U + 30;
-                part.unk0 = func_150ADA68() * 10.13f + 7.399999619f;
+                part.color.alpha = func_150ADA20() % 101U + 155;
+                spawn.itemCount = (func_150ADA20() & 3) + 3;
+                func_151432BC(state->region, &spawn.pos.x, &spawn.pos.z, &top, &bottom);
+                spawn.life = func_150ADA20() % 31U + 30;
+                part.width = func_150ADA68() * 10.13f + 7.399999619f;
                 angle = func_150ADA20();
-                func_15143794(angle & 0xFF, func_150ADA20() % 22U - 54, func_150ADA68() * 20.0f + 30.0f, part.vel);
-                part.unk10 = func_150ADA68() * 1.486000061f + -3.048f;
+                func_15143794(angle & 0xFF, func_150ADA20() % 22U - 54, func_150ADA68() * 20.0f + 30.0f, &part.vel.x);
+                part.gravity = func_150ADA68() * 1.486000061f + -3.048f;
                 func_1515C2F0(&spawn, 0, &part, 0, obj->header.owner, obj->header.kind);
                 count -= 1.0f;
             } while (count > 1.0f);

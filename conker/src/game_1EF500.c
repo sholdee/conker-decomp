@@ -125,35 +125,6 @@ typedef struct {
     u16 range;
 } FlybySound;
 
-/* Spawn template for func_1513D2F0 (0x58 bytes). */
-typedef struct Game1EF500TrailSpawn {
-    /* 0x00 */ u8 field00;
-    /* 0x01 */ u8 field01;
-    /* 0x02 */ s16 field02;
-    /* 0x04 */ s16 field04;
-    /* 0x06 */ u8 pad06[2];
-    /* 0x08 */ s32 field08;
-    /* 0x0C */ s32 field0C;
-    /* 0x10 */ u8 field10;
-    /* 0x11 */ u8 field11;
-    /* 0x12 */ u8 field12;
-    /* 0x13 */ u8 field13;
-    /* 0x14 */ f32 field14;
-    /* 0x18 */ f32 field18;
-    /* 0x1C */ Vec3f position;
-    /* 0x28 */ f32 field28[6];
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 field44;
-    /* 0x45 */ u8 field45;
-    /* 0x46 */ u8 field46;
-    /* 0x47 */ u8 field47;
-    /* 0x48 */ s32 field48;
-    /* 0x4C */ u8 field4C;
-    /* 0x4D */ u8 pad4D[7];
-    /* 0x54 */ s16 field54;
-    /* 0x56 */ s16 field56;
-} Game1EF500TrailSpawn;
-
 extern FlybySound D_8008FBE8[];
 extern s32 func_1000A420(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s32 *, s32);
 void func_151C436C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps);
@@ -178,7 +149,7 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
                                u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 arg20,
                                f32 dt, u8 arg22, s8 arg23, s32 extraSize, u8 arg25, s32 arg26) {
     Game1EF500Trail *result;
-    Game1EF500TrailSpawn spawn;
+    ParticleDef spawn;
     Game1EF500TrailExt ext;
     Vec3f sourceDir;
     u8 useSource;
@@ -240,32 +211,32 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
     ext.drift.z = ext.path.end.z * driftSpeed;
     ext.owner = owner;
     ext.ownerId = (owner != NULL) ? owner->unique_id : 99;
-    spawn.field00 = 0x41;
+    spawn.texture = 0x41;
     ext.scale = speed;
-    spawn.field01 = 4;
-    spawn.field02 = 0x4503;
-    spawn.field04 = 300;
-    spawn.field08 = 0;
-    spawn.field0C = 0;
-    spawn.field10 = 0;
-    spawn.field11 = 0;
-    spawn.field12 = 0;
-    spawn.field13 = 0xFF;
-    spawn.field44 = arg11;
-    spawn.field45 = 0xFF;
-    spawn.field18 = driftSpeed;
-    spawn.field14 = arg8;
-    spawn.position = *origin;
-    spawn.field28[0] = 0.0f;
-    spawn.field28[1] = 0.0f;
-    spawn.field28[2] = 0.0f;
-    spawn.field28[3] = 0.0f;
-    spawn.field28[4] = 0.0f;
-    spawn.field28[5] = 0.0f;
+    spawn.type = 4;
+    spawn.renderModes = 0x4503;
+    spawn.lifetime = 300;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.rgba[0] = 0;
+    spawn.rgba[1] = 0;
+    spawn.rgba[2] = 0;
+    spawn.rgba[3] = 0xFF;
+    spawn.unk44 = arg11;
+    spawn.unk45 = 0xFF;
+    spawn.height = driftSpeed;
+    spawn.width = arg8;
+    spawn.pos = *origin;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
+    spawn.scale.x = 0.0f;
+    spawn.scale.y = 0.0f;
+    spawn.scale.z = 0.0f;
     spawn.flags = 0xC04C0008;
-    spawn.field46 = 0;
-    spawn.field47 = 0;
-    spawn.field4C = arg22;
+    spawn.unk46 = 0;
+    spawn.unk47 = 0;
+    spawn.viewportMask = arg22;
     result = func_1513D2F0(&spawn, &D_800A4AA0, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), arg25, arg26);
     if (result != NULL) {
         u8 failed;
@@ -864,38 +835,38 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
                       scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, trail->unkC, trail->unk1);
     }
     if (func_150ADA68() < sparkChance) {
-        Game1EF500TrailSpawn spark;
+        ParticleDef spark;
         const s32 shade[6] = { 0x6D, 0x6D, 0x6E, 0x6E, 0x6D, 0x6D };
 
         ext = &trail->trail;
-        spark.field00 = shade[type];
-        spark.field01 = 0;
-        spark.field02 = 0x3B03;
-        spark.field04 = (func_150ADA20() % 6U) + 0xD;
-        spark.field08 = 0;
-        spark.field0C = 0;
-        spark.field10 = 0xFF;
-        spark.field11 = 0xFF;
-        spark.field12 = 0xFF;
-        spark.field13 = 0xFF;
-        spark.field14 = (func_150ADA68() * 5.0f) + 7.0f;
-        spark.field18 = (func_150ADA68() * 40.0f) + 10.0f;
-        spark.position = ext->path.hit;
-        spark.field28[0] = ext->path.hit.x - ext->path.end.x;
-        spark.field28[1] = ext->path.hit.y - ext->path.end.y;
-        spark.field28[2] = ext->path.hit.z - ext->path.end.z;
-        spark.field28[3] = 1.269999981f;
-        spark.field28[4] = 1.0f;
-        spark.field28[5] = 56.81999969f;
+        spark.texture = shade[type];
+        spark.type = 0;
+        spark.renderModes = 0x3B03;
+        spark.lifetime = (func_150ADA20() % 6U) + 0xD;
+        spark.frame = 0;
+        spark.frameSpeed = 0;
+        spark.rgba[0] = 0xFF;
+        spark.rgba[1] = 0xFF;
+        spark.rgba[2] = 0xFF;
+        spark.rgba[3] = 0xFF;
+        spark.width = (func_150ADA68() * 5.0f) + 7.0f;
+        spark.height = (func_150ADA68() * 40.0f) + 10.0f;
+        spark.pos = ext->path.hit;
+        spark.rot.x = ext->path.hit.x - ext->path.end.x;
+        spark.rot.y = ext->path.hit.y - ext->path.end.y;
+        spark.rot.z = ext->path.hit.z - ext->path.end.z;
+        spark.scale.x = 1.269999981f;
+        spark.scale.y = 1.0f;
+        spark.scale.z = 56.81999969f;
         spark.flags = (D_800BE616 ? 0x40000000 : 0) | 0x08DC0009;
-        spark.field44 = (func_150ADA20() % 76U) + 0xB4;
-        spark.field45 = 0xFF;
-        spark.field46 = 0;
-        spark.field47 = 7;
-        spark.field48 = 0;
-        spark.field4C = sparkArg;
-        spark.field54 = 8;
-        spark.field56 = 0x1F;
+        spark.unk44 = (func_150ADA20() % 76U) + 0xB4;
+        spark.unk45 = 0xFF;
+        spark.unk46 = 0;
+        spark.unk47 = 7;
+        spark.unk48 = 0;
+        spark.viewportMask = sparkArg;
+        spark.fadeStart = 8;
+        spark.fadeRate = 0x1F;
         func_1513D2F0(&spark, &D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, trail->unkC, trail->unk1);
     }
     if (func_150ADA68() < smokeChance) {

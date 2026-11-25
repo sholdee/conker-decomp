@@ -515,37 +515,8 @@ s32 func_150EFA4C(Spark *spark) {
     return 1;
 }
 
-typedef struct {
-    f32 unk0;
-    f32 vel[3];
-    f32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    u8 unk1F;
-    u8 unk20;
-    u8 unk21;
-    s32 unk24;
-    s32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    u8 unk32;
-    f32 unk34;
-    s8 unk38;
-    u8 unk39;
-} Part150EFB80;
-
 extern void func_15143794(s16, s16, f32, f32 *);
-extern void func_1515C2F0(EffectTemplate18 *, s32, Part150EFB80 *, s32, s32, s32);
+extern void func_1515C2F0(EffectTemplate18 *, s32, TrailBurstParams *, s32, s32, s32);
 
 /* Per-frame update of a beam's emitter: spawns about 0.36-0.66 particles per frame at the beam's end. */
 void func_150EFB80(BeamEmitter *emitter) {
@@ -554,7 +525,7 @@ void func_150EFB80(BeamEmitter *emitter) {
     u32 yaw;
     u32 pitch;
     EffectTemplate18 spawn;
-    Part150EFB80 part;
+    TrailBurstParams part;
     f32 pad; // matching: unused stack slot
 
     link = &emitter->link;
@@ -565,37 +536,37 @@ void func_150EFB80(BeamEmitter *emitter) {
             spawn.pos = beam->end;
             spawn.flags = 5;
             spawn.kind = 10;
-            part.unk14 = 4;
-            part.unk15 = 2;
-            part.unk16 = 3;
-            part.unk17 = 0x9D;
-            part.unk18 = 0x72;
-            part.unk19 = 0x2E;
-            part.unk1B = 0;
-            part.unk1C = 0;
-            part.unk1D = 0;
-            part.unk1E = 0;
-            part.unk1F = 0xFF;
-            part.unk20 = 3;
+            part.flags = 4;
+            part.primMode = 2;
+            part.envMode = 3;
+            part.color.red = 0x9D;
+            part.color.green = 0x72;
+            part.color.blue = 0x2E;
+            part.color2.red = 0;
+            part.color2.green = 0;
+            part.color2.blue = 0;
+            part.color2.alpha = 0;
+            part.colorLevel = 0xFF;
+            part.renderMode = 3;
             part.unk21 = 0x24;
-            part.unk24 = 0x200005;
-            part.unk28 = 0x60600;
-            part.unk2C = 12;
-            part.unk2E = 21;
-            part.unk30 = 1;
-            part.unk32 = 0;
-            part.unk34 = 1.0f;
+            part.setGeometryMode = 0x200005;
+            part.clearGeometryMode = 0x60600;
+            part.fadeStart = 12;
+            part.fadeRate = 21;
+            part.shrinkStart = 1;
+            part.shrinkPaused = 0;
+            part.shrinkFactor = 1.0f;
             part.unk38 = -1;
             part.unk39 = 0;
             do {
                 spawn.itemCount = func_150ADA20() % 3U + 3;
                 spawn.life = (func_150ADA20() & 0xF) + 40;
-                part.unk0 = func_150ADA68() * 10.0f + 22.0f;
+                part.width = func_150ADA68() * 10.0f + 22.0f;
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
-                func_15143794(yaw & 0xFF, pitch % 31U - 55, func_150ADA68() * 15.0f + 25.0f, part.vel);
-                part.unk10 = (func_150ADA68() * 740.0f + -1761.0f) * 0.001000000047f;
-                part.unk1A = func_150ADA20() % 101U + 155;
+                func_15143794(yaw & 0xFF, pitch % 31U - 55, func_150ADA68() * 15.0f + 25.0f, &part.vel.x);
+                part.gravity = (func_150ADA68() * 740.0f + -1761.0f) * 0.001000000047f;
+                part.color.alpha = func_150ADA20() % 101U + 155;
                 func_1515C2F0(&spawn, 0, &part, 0, emitter->unkC, emitter->unk1);
                 link->accum -= 1.0f;
             } while (link->accum > 1.0f);
