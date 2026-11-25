@@ -92,7 +92,7 @@ extern void func_15149550(EmitterParticle *, s32, s32, s32, s32, s32);
  * Per-frame update of a particle emitter effect: accumulates rate * scale * D_800BE9A4 and spawns one
  * particle per whole unit at a random point of the emitter's region, optionally snapped to the ground.
  */
-void func_151A5660(u8 *arg0) {
+void func_151A5660(u8 *effect) {
     ParticleEmitter *emitter;
     EmitterParticle particle;
     f32 low;
@@ -100,9 +100,9 @@ void func_151A5660(u8 *arg0) {
     f32 xScale;
     f32 yScale;
 
-    emitter = (ParticleEmitter *)(arg0 + 0x28);
+    emitter = (ParticleEmitter *)(effect + 0x28);
     if (emitter->region == NULL) {
-        *(s16 *)(arg0 + 0xE) = -1;
+        *(s16 *)(effect + 0xE) = -1;
         return;
     }
     if (emitter->region->state == 1) {
@@ -208,7 +208,7 @@ void func_151A5660(u8 *arg0) {
             particle.unk40 = func_150ADA68() * emitter->unk40Range + emitter->unk40Base;
             particle.unk44 = func_150ADA68() * emitter->unk44Range + emitter->unk44Base;
             particle.unk2C = func_150ADA20() % (emitter->unk2CRange + 1) + emitter->unk2CBase;
-            func_15149550(&particle, 10, 0, 0, arg0[0xC], arg0[1]);
+            func_15149550(&particle, 10, 0, 0, effect[0xC], effect[1]);
             emitter->pending -= 1.0f;
         } while (emitter->pending > 1.0f);
     }
