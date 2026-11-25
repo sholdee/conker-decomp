@@ -23,12 +23,12 @@ s32 func_15080738(s32 arg0);
 void func_150642AC(Actor *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4);
 s32 func_15065A5C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 
-struct Entry1505C1E4;
-void func_1505B9C4(Actor *attacker, Actor *victim, struct Entry1505C1E4 *base, struct Entry1505C1E4 *hit, u8 index, s32 victimSlot, u8 damageMask);
+struct HitReaction;
+void func_1505B9C4(Actor *attacker, Actor *victim, struct HitReaction *base, struct HitReaction *hit, u8 index, s32 victimSlot, u8 damageMask);
 extern void (*D_80086694[])(void *, Actor *, u8 *);
 s32 func_1506E46C(Actor *, s32 *, s32);
-struct Entry1505C1E4;
-s32 func_1505C1E4(Actor *arg0, Actor *arg1, struct Entry1505C1E4 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+struct HitReaction;
+s32 func_1505C1E4(Actor *arg0, Actor *arg1, struct HitReaction *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern MtxF *D_800CC4A4;
 void func_1505F188(Actor *arg0);
 s32 func_1505C7D8(Actor *arg0, s32 arg1);
@@ -2266,30 +2266,6 @@ void func_1505B5F8(Actor *actor, f32 floorY) {
         }
     }
 }
-/* One hit-reaction entry (0x28 bytes): what happens to an actor hit by an attack. */
-typedef struct Entry1505C1E4 {
-    /* 0x00 */ u8 unk0;  /* bit 0x80: this entry's reaction wins; & 0x7F: reaction anim kind */
-    /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ s32 unk4; /* sound to play */
-    /* 0x08 */ u8 unk8;  /* handler index into D_80086694 */
-    /* 0x09 */ u8 unk9;  /* hit-volume angle offset (high byte) / half width */
-    /* 0x0A */ u8 unkA;  /* hit-volume distance / half depth */
-    /* 0x0B */ u8 padB;
-    /* 0x0C */ s16 unkC; /* hit-volume height offset */
-    /* 0x0E */ u8 unkE;  /* hit-volume radius / side offset */
-    /* 0x0F */ u8 unkF;  /* 0x40: keep heading, 0x20: sets unk10B bit 2; masked: damage */
-    /* 0x10 */ u8 unk10; /* added to the attacker's heading (high byte) */
-    /* 0x11 */ u8 pad11[3];
-    /* 0x14 */ f32 xzVelocity;
-    /* 0x18 */ f32 yVelocity;
-    /* 0x1C */ f32 gravity;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 pad21;
-    /* 0x22 */ u8 unk22; /* 0x80: sets immune to & 0x3F */
-    /* 0x23 */ u8 pad23;
-    /* 0x24 */ u16 unk24; /* flags */
-    /* 0x26 */ u8 pad26[2];
-} Entry1505C1E4;
 
 f32 func_1506AD30(Actor *, f32, s32, s32);
 void func_151AE264(Actor *);
@@ -2300,7 +2276,7 @@ void func_15169070(s32, s32, void *, s32);
  * Applies a hit to `victim`: base[index] holds the attack's defaults and hit[index] the reaction chosen
  * for this victim. Sets knockback, damage and the reaction animation, and releases anything it carried.
  */
-void func_1505B9C4(Actor *attacker, Actor *victim, Entry1505C1E4 *base, Entry1505C1E4 *hit, u8 index,
+void func_1505B9C4(Actor *attacker, Actor *victim, HitReaction *base, HitReaction *hit, u8 index,
                    s32 victimSlot, u8 damageMask) {
     u8 reaction;
     s32 slot;
@@ -2501,21 +2477,21 @@ s16 func_1505C140(Actor *attacker, Actor *victim) {
 }
 
 /* The actor type's hit-reaction table (stored before its animation table), or the default one. */
-Entry1505C1E4 *func_1505C1A4(Actor *actor) {
-    Entry1505C1E4 **slot;
-    Entry1505C1E4 *ret;
+HitReaction *func_1505C1A4(Actor *actor) {
+    HitReaction **slot;
+    HitReaction *ret;
 
     if ((actor->id != 0xFF) && (D_800D1588[actor->id] != NULL)) {
         slot = &ANIM_HEADER(D_800D1588[actor->id])->hits; // matching: the address is formed before the load
         ret = *slot;
     } else {
-        ret = (Entry1505C1E4 *)&D_8009A9F8;
+        ret = D_8009A9F8;
     }
     return ret;
 }
 
-struct Entry1505C1E4;
-struct Entry1505C1E4;
+struct HitReaction;
+struct HitReaction;
 
 typedef struct {
     u8 unk0;
@@ -2534,13 +2510,13 @@ void func_15060B04(s32 arg0, Actor *arg1, s32 arg2);
  * table entry, cancel the hit or handle it specially; otherwise applies it with func_1505B9C4.
  * Returns hitMask with the victim's bit set when the hit landed.
  */
-s32 func_1505C1E4(Actor *attacker, Actor *victim, Entry1505C1E4 *table, s32 index, s32 victimSlot, s32 hitMask, s32 damageMask) {
+s32 func_1505C1E4(Actor *attacker, Actor *victim, HitReaction *table, s32 index, s32 victimSlot, s32 hitMask, s32 damageMask) {
     s32 i;
     u8 done;
     u8 kind;
     u8 count;
     u8 flags;
-    Entry1505C1E4 *entry;
+    HitReaction *entry;
     Rule1505C1E4 *rules;
     s32 angle;
     u8 type;
@@ -2597,20 +2573,20 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, Entry1505C1E4 *table, s32 inde
                 if (type == 5) {
                     u8 next;
                     next = rules[i].unk3;
-                    entry = (Entry1505C1E4 *)&D_8009A6D8[next - index];
+                    entry = &D_8009A6D8[next - index];
                     break;
                 }
                 if (type == 6) {
                     u8 next;
                     next = rules[i].unk3;
                     damageMask = 0;
-                    entry = (Entry1505C1E4 *)&D_8009A6D8[next - index];
+                    entry = &D_8009A6D8[next - index];
                     break;
                 }
                 if (type == 7) {
                     if ((table[index].unkF & damageMask) >= victim->health) {
                         idx = rules[i].unk3;
-                        entry = (Entry1505C1E4 *)&D_8009A6D8[idx - index];
+                        entry = &D_8009A6D8[idx - index];
                         victim->health = 0;
                         break;
                     }
@@ -2710,9 +2686,9 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
     s32 attackIdx;
     s32 ret;
     Actor *victim;
-    Entry1505C1E4 *hits;
+    HitReaction *hits;
     f32 dz2;
-    Entry1505C1E4 *hit;
+    HitReaction *hit;
     f32 x;
     f32 y;
     f32 z;
@@ -2768,10 +2744,10 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
     hits = func_1505C1A4(attacker);
     if (hits[attackIdx].unk24 & 0x80) {
         // matching: byte-offset form (not &hits[attackIdx]) keeps IDO's addu operand order
-        hit = (Entry1505C1E4 *)((u8 *)hits + attackIdx * sizeof(Entry1505C1E4));
+        hit = (HitReaction *)((u8 *)hits + attackIdx * sizeof(HitReaction));
         y = attacker->y_position;
     } else {
-        hit = (Entry1505C1E4 *)((u8 *)hits + attackIdx * sizeof(Entry1505C1E4));
+        hit = (HitReaction *)((u8 *)hits + attackIdx * sizeof(HitReaction));
         dist = (u32)hit->unkA;
         dist *= attacker->xz_scale / 0.125f;
         func_1505A184((hit->unk9 << 8) + attacker->unk7A, dist, 0.0f, &x, &z, &y);
@@ -2796,7 +2772,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
         if (i == selfSlot || victim->health == 0 || victim->immune != 0) {
             continue;
         }
-        hit = (Entry1505C1E4 *)((u8 *)hits + attackIdx * sizeof(Entry1505C1E4));
+        hit = (HitReaction *)((u8 *)hits + attackIdx * sizeof(HitReaction));
         if (i == attacker->unk124 && !(hit->unk24 & 0x1000)) {
             continue;
         }
@@ -2888,7 +2864,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
         }
     }
     if (ret != 0) {
-        hit = (Entry1505C1E4 *)((u8 *)hits + attackIdx * sizeof(Entry1505C1E4));
+        hit = (HitReaction *)((u8 *)hits + attackIdx * sizeof(HitReaction));
         /* unk108 holds victim slot | 0x80, and D_800B2CD0 + 0x80 * 0x32C is D_800CC2D0 */
         if (((s32 (*)[0x32C / 4])&D_800B2CD0)[attacker->unk108][0] == 1) {
             if (attacker->unk254 != 0) {
@@ -2911,9 +2887,9 @@ s32 func_1505D024(Actor *victim, s32 flags, u16 angle, s32 sourceSlot) {
     s32 pad;
     s32 ret;
     s32 slot;
-    Entry1505C1E4 *table;
+    HitReaction *table;
 
-    table = (Entry1505C1E4 *)&D_8009A9F8;
+    table = D_8009A9F8;
     if (D_800C35EA[0] == 1) {
         return 0;
     }
@@ -2976,12 +2952,12 @@ void func_1505D1C4(f32 x, f32 y, f32 z, s32 attackId, s32 sourceSlot, u16 angle,
 
 /* Starts the knockback reaction D_8009A6D8[entryIdx] on the actor. */
 void func_1505D2B8(Actor *actor, u8 entryIdx) {
-    struct253 *entry;
+    HitReaction *entry;
 
     entry = &D_8009A6D8[entryIdx];
-    actor->y_velocity = entry->unk18;
-    actor->xz_velocity = entry->unk14;
-    actor->gravity = entry->unk1C;
+    actor->y_velocity = entry->yVelocity;
+    actor->xz_velocity = entry->xzVelocity;
+    actor->gravity = entry->gravity;
     actor->stunned = 0xFE;
     actor->unk105 = 0;
     actor->unk106 = func_1505E7CC(actor->unk10E & 0x7F, actor);

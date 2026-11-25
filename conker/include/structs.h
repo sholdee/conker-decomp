@@ -1331,7 +1331,7 @@ typedef struct ActorAnim {
 /* The 16 bytes before a model's animation table (loaded as offsets, made absolute by func_1503D660). */
 typedef struct AnimHeader {
     /* 0x0 */ struct ScriptEntry *scripts;            // A28B0: script id -> script
-    /* 0x4 */ struct Entry1505C1E4 *hits;             // 83300: hit-reaction table (func_1505C1A4)
+    /* 0x4 */ struct HitReaction *hits;             // 83300: hit-reaction table (func_1505C1A4)
     /* 0x8 */ struct Game83300AnimEntry *reactions;   // 83300: reaction entries
     /* 0xC */ u32 reactionsSize;                      // byte size of reactions
 } AnimHeader; // size 0x10
@@ -3724,19 +3724,7 @@ typedef struct {
     s32 unk1C;
 } struct251;
 
-typedef struct {
-    u8 pad0[0x15];
-    u8 unk15;
-    u8 pad16[0x2];
-} struct252; // size 0x18
-
-typedef struct {
-    u8  pad0[0x14];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8  pad20[0x8];
-} struct253; // size 0x28
+  // size 0x28
 
 /* A debris particle of game_BC510.c's block stack (a block knocked off the top, func_1508F7BC), in the list
  * D_800D245C; func_1508F0D4 moves it and frees it when its timer runs out. */
@@ -4310,5 +4298,30 @@ typedef struct ZoneNode {
     /* 0xA */ s16 z;
     /* 0xC */ s16 child;    // byte offset to the first child, 0 = leaf
 } ZoneNode;
+
+/* One hit-reaction entry (tables D_8009A9F8, D_8009A6D8 and AnimHeader.hits): what happens to an actor hit by an attack. */
+typedef struct HitReaction {
+    /* 0x00 */ u8 unk0;  /* bit 0x80: this entry's reaction wins; & 0x7F: reaction anim kind */
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ s32 unk4; /* sound to play */
+    /* 0x08 */ u8 unk8;  /* handler index into D_80086694 */
+    /* 0x09 */ u8 unk9;  /* hit-volume angle offset (high byte) / half width */
+    /* 0x0A */ u8 unkA;  /* hit-volume distance / half depth */
+    /* 0x0B */ u8 padB;
+    /* 0x0C */ s16 unkC; /* hit-volume height offset */
+    /* 0x0E */ u8 unkE;  /* hit-volume radius / side offset */
+    /* 0x0F */ u8 unkF;  /* 0x40: keep heading, 0x20: sets unk10B bit 2; masked: damage */
+    /* 0x10 */ u8 unk10; /* added to the attacker's heading (high byte) */
+    /* 0x11 */ u8 pad11[3];
+    /* 0x14 */ f32 xzVelocity;
+    /* 0x18 */ f32 yVelocity;
+    /* 0x1C */ f32 gravity;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 pad21;
+    /* 0x22 */ u8 unk22; /* 0x80: sets immune to & 0x3F */
+    /* 0x23 */ u8 pad23;
+    /* 0x24 */ u16 unk24; /* flags */
+    /* 0x26 */ u8 pad26[2];
+} HitReaction; /* size 0x28 */
 
 #endif

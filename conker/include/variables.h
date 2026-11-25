@@ -720,8 +720,8 @@ extern f32 D_8009A1E4;
 extern f32 D_8009A220[];
 extern f32 D_8009A420[];
 extern f32 D_8009A620[];
-extern struct253 D_8009A6D8[];
-extern struct252 D_8009A9F8;
+extern HitReaction D_8009A6D8[]; // knockback reactions
+extern HitReaction D_8009A9F8[]; // hit-reaction table
 
 extern s16 D_8009DCB4[];
 extern s32 D_8009DCC0;
