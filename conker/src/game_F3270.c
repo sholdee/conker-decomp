@@ -3,16 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* The actor an emitter is attached to. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x14];
-    /* 0x014 */ Vec3f pos;
-    /* 0x020 */ u8 pad20[0x1B];
-    /* 0x03B */ u8 unk3B;
-    /* 0x03C */ u8 pad3C[0x198];
-    /* 0x1D4 */ s32 unk1D4; // when set, the emit point is D_800887D0 transformed by it
-} GameF3270Actor;
-
 struct GameF3270Emitter;
 
 /* Wobble state copied to 0xB0 of the particle spawned by func_150C6460. */
@@ -63,7 +53,7 @@ typedef struct GameF3270Emitter {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0xB];
-    /* 0x18 */ GameF3270Actor *actor;
+    /* 0x18 */ Actor *actor;
     /* 0x1C */ u8 pad1C[0x18];
     /* 0x34 */ f32 surfaceY; // written by the surface probe
     /* 0x38 */ u8 unk38[0x20];
@@ -71,7 +61,7 @@ typedef struct GameF3270Emitter {
 } GameF3270Emitter;
 
 GameF3270Particle *func_150C6460(GameF3270Emitter *emitter);
-GameF3270LinkedObject *func_150C5F94(GameF3270Actor *actor, GameF3270Emitter *emitter);
+GameF3270LinkedObject *func_150C5F94(Actor *actor, GameF3270Emitter *emitter);
 s32 func_1513F6C0(void *obj, s32 arg1, s32 arg2);
 void *memcpy(void *, const void *, u32);
 
@@ -119,7 +109,7 @@ s32 func_150C5EFC(GameF3270Particle *particle) {
 
 /* Keeps the emitter's linked object alive, spawning it if it doesn't exist yet. */
 void func_150C5F40(GameF3270Emitter *emitter) {
-    GameF3270Actor *actor = emitter->actor;
+    Actor *actor = emitter->actor;
 
     if (emitter->children.linked != NULL) {
         GameF3270Link *link = &emitter->children.linked->link;
@@ -134,7 +124,7 @@ s32 func_15045800(Vec3f *from, s32 arg1, f32 minY, f32 *hitY);
 GameF3270LinkedObject *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3);
 
 /* Spawns the emitter's linked object, recording the surface height above the actor. */
-GameF3270LinkedObject *func_150C5F94(GameF3270Actor *actor, GameF3270Emitter *emitter) {
+GameF3270LinkedObject *func_150C5F94(Actor *actor, GameF3270Emitter *emitter) {
     BloodDripDesc desc;
     GameF3270Link link;
     GameF3270LinkedObject *obj;
@@ -144,18 +134,18 @@ GameF3270LinkedObject *func_150C5F94(GameF3270Actor *actor, GameF3270Emitter *em
     {
         Vec3f from;
 
-        from.x = actor->pos.x;
-        from.y = actor->pos.y + 5000.0f;
-        from.z = actor->pos.z;
-        if (func_15045800(&from, 0, actor->pos.y - 100.0f, &emitter->surfaceY) != 0) {
+        from.x = actor->x_position;
+        from.y = actor->y_position + 5000.0f;
+        from.z = actor->z_position;
+        if (func_15045800(&from, 0, actor->y_position - 100.0f, &emitter->surfaceY) != 0) {
             link.surfaceY = emitter->surfaceY;
         } else {
-            link.surfaceY = actor->pos.y + 5000.0f;
+            link.surfaceY = actor->y_position + 5000.0f;
         }
     }
     desc.target[0] = 0;
     desc.target[1] = 0;
-    desc.ownerId = actor->unk3B;
+    desc.ownerId = actor->unique_id;
     desc.owner = actor;
     desc.bone = 0;
     desc.offset.x = 0.0f;
@@ -326,14 +316,14 @@ typedef struct {
 
 extern Vec3f D_800887D0;
 extern u8 D_800AB414[][3]; // RGB colours
-void func_15143134(Vec3f *in, Vec3f *out, s32 mtx);
+void func_15143134(Vec3f *in, Vec3f *out, MtxF *mtx);
 u8 func_151D8E20(void);
 
 /* Spawns the emitter's particle on the surface below the actor, if there is one within 200 units. */
 GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
     GameF3270Particle *particle;
     Vec3f pos;
-    GameF3270Actor *actor;
+    Actor *actor;
 
     particle = NULL;
     actor = emitter->actor;
@@ -343,9 +333,9 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
         origin = D_800887D0;
         func_15143134(&origin, &pos, actor->unk1D4);
     } else {
-        pos.x = actor->pos.x;
-        pos.y = actor->pos.y;
-        pos.z = actor->pos.z;
+        pos.x = actor->x_position;
+        pos.y = actor->y_position;
+        pos.z = actor->z_position;
     }
     {
         Vec3f probe;

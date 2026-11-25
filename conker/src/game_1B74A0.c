@@ -19,16 +19,6 @@ typedef struct Emitter {
     /* 0x170 */ EmitterAttach attach;
 } Emitter;
 
-/* Byte view of the attach target (Actor declares these offsets as padding). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x68];
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 pad69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B[4];
-    /* 0x6F */ u8 unk6F;
-} AttachTargetBytes;
-
 /* Payload of message 0x2D: two objects and their unique ids. */
 typedef struct {
     /* 0x0 */ Actor *objA;
@@ -110,7 +100,7 @@ s32 func_1518A214(Emitter *emitter, u8 *follow) {
     f32 value;
 
     params = &emitter->params;
-    switch (((AttachTargetBytes *)emitter->attach.target)->unk68 - 15) {
+    switch (emitter->attach.target->unk68[0] - 15) {
     default: // < 15 or > 17
         value = 0.6f;
         params->alpha1 = value;
@@ -148,7 +138,7 @@ s32 func_1518A214(Emitter *emitter, u8 *follow) {
 
 /* Handler: while the target's byte 0x6A is set, clears flag 2 and stops. */
 s32 func_1518A2E8(Emitter *emitter, u8 *follow) {
-    if (((AttachTargetBytes *)emitter->attach.target)->unk6A != 0) {
+    if (emitter->attach.target->eyeClosed[0] != 0) {
         emitter->flags &= ~2;
         *follow = FALSE;
     } else {
@@ -159,7 +149,7 @@ s32 func_1518A2E8(Emitter *emitter, u8 *follow) {
 
 /* Handler: once the target's byte 0x6F is clear, clears flag 2 and stops. */
 s32 func_1518A324(Emitter *emitter, u8 *follow) {
-    if (((AttachTargetBytes *)emitter->attach.target)->unk6F == 0) {
+    if (emitter->attach.target->expression == 0) {
         emitter->flags &= ~2;
         *follow = FALSE;
     } else {
