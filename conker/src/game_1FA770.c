@@ -237,183 +237,138 @@ Emitter *func_151CD4C0(source, unkC, id, arg3, arg4)
     return emitter;
 }
 
-typedef struct Game1FA770Particle {
-    f32 x;
-    f32 y;
-    u8 pad08[4];
-    f32 velocity;
-    u8 pad10[0xC];
-} Game1FA770Particle;
-
-typedef struct Vec3i151CD674 {
-    s32 x;
-    s32 y;
-    s32 z;
-} Vec3i151CD674;
-
-s32 func_151CD674(u8 *actor) {
-    u8 *owner;
-    Game1FA770Particle *particles;
-    Game1FA770Particle *particle;
-    s32 cursor;
+/* Moves a stream's particles under gravity; those that reach the floor are retired.
+ * Returns 0 once a stopped stream has run dry. */
+s32 func_151CD674(Emitter *emitter) {
+    StreamData *data;
+    StreamParticle *particles;
+    StreamParticle *particle;
+    s32 i;
     f32 velocity;
     f32 gravity;
-    f32 acceleration;
-    f32 step;
+    f32 halfGravity;
+    f32 dt;
     f32 travel;
-    f32 squared;
+    f32 dtSquared;
 
-    owner = *(u8 **)(actor + 0x98);
-    particles = *(Game1FA770Particle **)(actor + 0x94);
-    if ((*(s8 *)(actor + 0x2C) < 2) && (*(u16 *)(actor + 0x1E) & 8)) {
+    data = emitter->data;
+    particles = emitter->particles;
+    if (emitter->count < 2 && (emitter->flags & EMITTER_FLAG_STOPPED)) {
         return 0;
     }
-    cursor = *(s8 *)(actor + 0x2E);
-    if (cursor != *(s8 *)(actor + 0x2D)) {
-        gravity = -0.25500003f;
-        acceleration = -0.12750001f;
-        do {
-            cursor--;
-            if (cursor < 0) {
-                cursor = actor[0x25] - 1;
-            }
-            particle = &particles[cursor];
-            velocity = particle->velocity;
-            step = D_800BE9A4;
-            travel = velocity * step;
-            squared = step * step;
-            particle->y = particle->y + (travel + acceleration * squared);
-            particle->velocity = (f32)velocity + gravity * D_800BE9A4;
-            if (particle->y < *(f32 *)(owner + 0x44)) {
-                if (cursor != *(s8 *)(actor + 0x2D)) {
-                    do {
-                        *(s8 *)(actor + 0x2D) += 1;
-                        if (actor[0x25] == *(s8 *)(actor + 0x2D)) {
-                            *(s8 *)(actor + 0x2D) = 0;
-                        }
-                        *(s8 *)(actor + 0x2C) -= 1;
-                    } while (cursor != *(s8 *)(actor + 0x2D));
+    gravity = -0.25500003f;
+    halfGravity = -0.12750001f;
+    i = emitter->head;
+    while (i != emitter->tail) {
+        i--;
+        if (i < 0) {
+            i = emitter->capacity - 1;
+        }
+        particle = &particles[i];
+        velocity = particle->velocity;
+        dt = D_800BE9A4;
+        travel = velocity * dt;
+        dtSquared = dt * dt;
+        particle->pos.y += travel + halfGravity * dtSquared;
+        particle->velocity = (f32)velocity + gravity * D_800BE9A4; // matching: the no-op cast keeps velocity as the first add operand
+        if (particle->pos.y < data->floorY) {
+            while (i != emitter->tail) {
+                emitter->tail++;
+                if (emitter->tail == emitter->capacity) {
+                    emitter->tail = 0;
                 }
-                particles[*(s8 *)(actor + 0x2D)].y = *(f32 *)(owner + 0x44);
+                emitter->count--;
             }
-        } while (cursor != *(s8 *)(actor + 0x2D));
+            particles[emitter->tail].pos.y = data->floorY;
+        }
     }
-    *(Vec3i151CD674 *)(actor + 0x54) = *(Vec3i151CD674 *)(actor + 0x10);
+    emitter->prevPos = emitter->pos;
     return 1;
 }
 
-typedef struct Vec2f151CD7BC { f32 x; f32 z; } Vec2f151CD7BC;
-
-typedef struct Owner151CD7BC {
-    f32 amp0;
-    f32 amp1;
-    f32 phase0;
-    f32 phase1;
-    f32 rate0;
-    f32 rate1;
-    Vec2f151CD7BC pos;
+/* Spawns a stream's new particles at the emitter, swaying in x/z and wobbling in width. */
+s32 func_151CD7BC(Emitter *emitter) {
+    StreamData *data;
+    StreamParticle *particles;
+    StreamParticle *particle;
     f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 phase2;
-    f32 rate2;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-} Owner151CD7BC;
-
-typedef struct Particle151CD7BC {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 vel;
-    f32 unk10;
-    s16 alpha;
-    f32 unk18;
-} Particle151CD7BC;
-
-s32 func_151CD7BC(u8 *actor) {
-    Owner151CD7BC *owner;
-    Particle151CD7BC *particles;
-    Particle151CD7BC *p;
-    f32 h;
-    f32 dh;
+    f32 unk20Step;
     f32 dz;
     f32 dx;
-    Vec2f151CD7BC pos;
-    f32 inv;
-    f32 a;
-    f32 da;
-    f32 b;
-    f32 vel;
-    f32 db;
+    Vec2f pos;
+    f32 step;
+    f32 width;
+    f32 dWidth;
+    f32 tc;
+    f32 velocity;
+    f32 dTc;
     f32 gravity;
-    f32 acceleration;
+    f32 halfGravity;
     s32 tail;
 
-    owner = *(Owner151CD7BC **)(actor + 0x98);
-    particles = *(Particle151CD7BC **)(actor + 0x94);
-    owner->phase0 += owner->rate0 * D_800BE9A4;
-    owner->phase1 += owner->rate1 * D_800BE9A4;
-    owner->phase0 = func_15144B68(owner->phase0);
-    owner->phase1 = func_15144B68(owner->phase1);
-    owner->phase2 += owner->rate2 * D_800BE9A4;
-    owner->phase2 = func_15144B68(owner->phase2);
-    owner->unk40 += 0.2730129957f * D_800BE9A4;
-    owner->unk3C += (10220.0f + func_150ADA68() * 9434.0f) * 0.009999999776f * D_800BE9A4;
-    while (owner->unk3C >= 16384.0f) {
-        owner->unk3C -= 16384.0f;
+    data = emitter->data;
+    particles = emitter->particles;
+    data->swayPhaseX += data->swayRateX * D_800BE9A4;
+    data->swayPhaseZ += data->swayRateZ * D_800BE9A4;
+    data->swayPhaseX = func_15144B68(data->swayPhaseX);
+    data->swayPhaseZ = func_15144B68(data->swayPhaseZ);
+    data->widthPhase += data->widthRate * D_800BE9A4;
+    data->widthPhase = func_15144B68(data->widthPhase);
+    data->spawnCount += 0.2730129957f * D_800BE9A4;
+    data->tc += (10220.0f + func_150ADA68() * 9434.0f) * 0.01f * D_800BE9A4;
+    while (data->tc >= 16384.0f) {
+        data->tc -= 16384.0f;
     }
-    if (owner->unk40 > 1.0f) {
-        inv = 1.0f / owner->unk40;
-        h = owner->unk20 + D_800BE9A4;
-        dh = -(h * inv);
-        pos = owner->pos;
-        dx = (*(f32 *)(actor + 0x10) + (sinf(owner->phase0) * owner->amp0)) - owner->pos.x;
-        dz = (*(f32 *)(actor + 0x18) + (sinf(owner->phase1) * owner->amp1)) - owner->pos.z;
-        da = (owner->unk24 + (sinf(owner->phase2) * owner->unk28)) - owner->unk34;
-        db = owner->unk3C - owner->unk38;
-        a = owner->unk34;
-        b = owner->unk3C;
+    if (data->spawnCount > 1.0f) {
+        step = 1.0f / data->spawnCount;
+        unk20 = data->unk20 + D_800BE9A4;
+        unk20Step = -(unk20 * step);
+        pos = data->spawnPos;
+        dx = (emitter->pos.x + sinf(data->swayPhaseX) * data->swayAmpX) - data->spawnPos.x;
+        dz = (emitter->pos.z + sinf(data->swayPhaseZ) * data->swayAmpZ) - data->spawnPos.z;
+        dWidth = (data->baseWidth + sinf(data->widthPhase) * data->widthAmp) - data->width;
+        dTc = data->tc - data->unk38;
+        width = data->width;
+        tc = data->tc;
         gravity = -0.255000025f;
-        acceleration = -0.1275000125f;
-        vel = -3.772000074f;
-        while (owner->unk40 > 1.0f) {
-            p = &particles[*(s8 *)(actor + 0x2E)];
-            p->x = pos.x;
-            p->y = *(f32 *)(actor + 0x14);
-            p->z = pos.z;
-            p->vel = vel;
-            p->unk10 = a;
-            p->alpha = 0xFF;
-            p->unk18 = b;
-            p->y = p->y + ((vel * D_800BE9A4) + (acceleration * (D_800BE9A4 * D_800BE9A4)));
-            p->vel = (f32)vel + gravity * D_800BE9A4;
-            *(s8 *)(actor + 0x2E) += 1;
-            if (actor[0x25] == *(s8 *)(actor + 0x2E)) {
-                *(s8 *)(actor + 0x2E) = 0;
+        halfGravity = -0.1275000125f;
+        velocity = -3.772f;
+        while (data->spawnCount > 1.0f) {
+            particle = &particles[emitter->head];
+            particle->pos.x = pos.x;
+            particle->pos.y = emitter->pos.y;
+            particle->pos.z = pos.z;
+            particle->velocity = velocity;
+            particle->width = width;
+            particle->alpha = 0xFF;
+            particle->tc = tc;
+            particle->pos.y += velocity * D_800BE9A4 + halfGravity * (D_800BE9A4 * D_800BE9A4);
+            particle->velocity = (f32)velocity + gravity * D_800BE9A4; // matching: see func_151CD674
+            emitter->head++;
+            if (emitter->head == emitter->capacity) {
+                emitter->head = 0;
             }
-            tail = *(s8 *)(actor + 0x2D);
-            *(s8 *)(actor + 0x2C) += 1;
-            if (tail == *(s8 *)(actor + 0x2E)) {
-                *(s8 *)(actor + 0x2D) = tail + 1;
-                if (actor[0x25] == *(s8 *)(actor + 0x2D)) {
-                    *(s8 *)(actor + 0x2D) = 0;
+            /* The ring is full: drop the oldest particle. */
+            tail = emitter->tail;
+            emitter->count++;
+            if (tail == emitter->head) {
+                emitter->tail = tail + 1;
+                if (emitter->tail == emitter->capacity) {
+                    emitter->tail = 0;
                 }
-                *(s8 *)(actor + 0x2C) -= 1;
+                emitter->count--;
             }
-            pos.x += dx * inv;
-            pos.z += dz * inv;
-            a += da * inv;
-            b += db * inv;
-            h += dh;
-            owner->unk40 -= 1.0f;
+            pos.x += dx * step;
+            pos.z += dz * step;
+            width += dWidth * step;
+            tc += dTc * step;
+            unk20 += unk20Step;
+            data->spawnCount -= 1.0f;
         }
-        owner->pos = pos;
-        owner->unk34 = a;
-        owner->unk38 = b;
-        owner->unk20 = h;
+        data->spawnPos = pos;
+        data->width = width;
+        data->unk38 = tc;
+        data->unk20 = unk20;
     }
     return 1;
 }
