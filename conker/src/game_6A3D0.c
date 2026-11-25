@@ -467,7 +467,7 @@ void func_1503DD1C(s32 id) {
     for (i = 0; i < D_800C5628[id]; i++) {
         ObjTexture *tex = &D_800C5338[id][i];
 
-        if (tex->addr != 0x80000000 && tex->id != (s32)tex->addr) { // matching: signed compare
+        if (tex->addr != 0x80000000 && tex->id != (s32)tex->addr) { // matching: the cast keeps the original operand order
             func_1510D7AC(tex->id);
         }
     }

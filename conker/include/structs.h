@@ -4247,4 +4247,11 @@ typedef struct ObjTexture {
     /* 0xA */ u16 height;
 } ObjTexture; /* size 0xC */
 
+/* One morph group (D_800A7230): which model kind it applies to and how its vertices are split into parts. */
+typedef struct {
+    /* 0x0 */ u8 kind;
+    /* 0x1 */ u8 frameCount;
+    /* 0x2 */ u16 partVtxCounts[3];
+} VtxMorphGroup; /* size 0x8 */
+
 #endif

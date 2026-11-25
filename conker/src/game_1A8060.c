@@ -2,14 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One morph group: which model kind it applies to and how its vertices are split into parts. */
-typedef struct {
-    u8 kind;
-    u8 frameCount;
-    u16 partVtxCounts[3];
-} VtxMorphGroup;
 
-extern VtxMorphGroup D_800A7230[2];
 extern void func_10004074(void *);
 s32 func_150849A0(void *);
 extern void *allocate_memory(s32, s32, s32, s32);

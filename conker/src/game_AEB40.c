@@ -44,7 +44,6 @@ typedef struct RayHit {
 extern f32 D_8009CC3C;  // matching: 20000.0f, but as a literal IDO loads it into a different register
 extern PartSet D_80086CC4[];
 extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
-extern u8 D_800A7230[][8];
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern s32 func_10004074(void *);
@@ -794,7 +793,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     model = func_150849A0(obj);
     found = 0;
     for (i = 0; i < 2; i++) {
-        if (model == D_800A7230[i][0]) {
+        if (model == D_800A7230[i].kind) {
             found = 1;
             break;
         }

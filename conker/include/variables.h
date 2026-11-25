@@ -824,6 +824,7 @@ extern f32 D_800A6B08;
 extern f32 D_800A6B0C;
 extern f32 D_800A6B10;
 
+extern VtxMorphGroup D_800A7230[2]; // vertex morph groups
 extern Vec3f D_800AAA90; // bone-attachment offset (zero point)
 extern Vec3f D_800AAA9C;
 extern u16 D_800AB140[];
