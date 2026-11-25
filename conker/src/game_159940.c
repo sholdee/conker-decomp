@@ -12,23 +12,8 @@ void func_150A7DF0(Mtx *m, f32 rx, f32 ry, f32 rz); // rotation, angles in degre
 void func_150A7D00(Mtx *m, f32 x, f32 y, f32 z);    // translation
 s32 func_1502B5C8(s32 *size, s32 arg1, s32 arg2, s32 arg3);
 
-/* A translation plus a rotation (degrees) applied on top of a camera's view matrix. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ Vec3f rot;
-} CamOffset;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x54];
-    /* 0x54 */ Vec3f unk54;
-    /* 0x60 */ f32 unk60;
-    /* 0x64 */ u8 pad64[0x4];
-} Entry800DC2C0;
-
 extern CamOffset *D_800DC280[4]; // camera shake tables: one CamOffset delta per frame
 extern s32 D_800DC290[4];        // their lengths in frames
-extern CamOffset D_800DCDE0[];
-extern Entry800DC2C0 D_800DC2C0[];
 
 #define VIEW_MTX(player) (&D_800DC2A0[D_800BE9C0][player])
 
@@ -217,7 +202,7 @@ void func_1512C490(Camera *camera) {
             func_150A7DF0(&rotMtx,
                           D_800DCDE0[camera->playerIndex].rot.x + (camera->unk5D0 + camera->unk3A8 + camera->unk38C),
                           D_800DCDE0[camera->playerIndex].rot.y + camera->unk5E8,
-                          camera->swayAmount + D_800DC2C0[camera->playerIndex].unk60 * 0.5f +
+                          camera->swayAmount + D_800DC2C0[camera->playerIndex].output[3] * 0.5f +
                               D_800DCDE0[camera->playerIndex].rot.z);
             if (camera->mode == 0x40000) {
                 func_150A7DF0(&rotMtx, 0.0f, 0.0f, camera->swayAmount);
@@ -226,9 +211,9 @@ void func_1512C490(Camera *camera) {
         guMtxCatL(VIEW_MTX(camera->playerIndex), &rotMtx, VIEW_MTX(camera->playerIndex));
         func_1512D070(camera);
         if (!(camera->mode & 0x40000)) {
-            func_150A7D00(&transMtx, D_800DC2C0[camera->playerIndex].unk54.x + D_800DCDE0[camera->playerIndex].pos.x,
-                          D_800DC2C0[camera->playerIndex].unk54.y + D_800DCDE0[camera->playerIndex].pos.y,
-                          D_800DC2C0[camera->playerIndex].unk54.z + D_800DCDE0[camera->playerIndex].pos.z);
+            func_150A7D00(&transMtx, D_800DC2C0[camera->playerIndex].output[0] + D_800DCDE0[camera->playerIndex].pos.x,
+                          D_800DC2C0[camera->playerIndex].output[1] + D_800DCDE0[camera->playerIndex].pos.y,
+                          D_800DC2C0[camera->playerIndex].output[2] + D_800DCDE0[camera->playerIndex].pos.z);
             guMtxCatL(VIEW_MTX(camera->playerIndex), &transMtx, VIEW_MTX(camera->playerIndex));
         }
     }

@@ -4047,4 +4047,46 @@ typedef struct {
     /* 0x6 */ u16 id;
 } BoundCylinderSet; /* size 0x8 */
 
+/* An aim-impact slot (D_800D9960): where a shot from an owner at a given angle lands; tracers snap to it. */
+typedef struct {
+    /* 0x00 */ s16 unk0;           // compared with the owner's angle
+    /* 0x02 */ s8 unk2;            // compared with owner->unk1D1
+    /* 0x03 */ u8 ricochetChance;  // percent
+    /* 0x04 */ f32 x, y, z;
+    /* 0x10 */ f32 normal[3];      // surface normal at the hit
+} AimImpact; /* size 0x1C */
+
+/* A four-oscillator wobble driven by an attack/decay/sustain/release envelope, one per view (indexed by Camera.unk23D). */
+typedef struct {
+    /* 0x00 */ f32 frequency0;     /* oscillator frequencies in Hz (elapsed is in 30 fps frames) */
+    /* 0x04 */ f32 frequency1;     // matching: an f32[4] array here changes FP regalloc in func_1512D980
+    /* 0x08 */ f32 frequency2;
+    /* 0x0C */ f32 frequency3;
+    /* 0x10 */ f32 attackTime;
+    /* 0x14 */ f32 decayTime;
+    /* 0x18 */ f32 sustainTime;
+    /* 0x1C */ f32 releaseTime;
+    /* 0x20 */ f32 peak;
+    /* 0x24 */ f32 sustainLevel;
+    /* 0x28 */ f32 elapsed;       /* -1.0f when idle */
+    /* 0x2C */ f32 amplitude;
+    /* 0x30 */ f32 attackEnd;
+    /* 0x34 */ f32 decayEnd;
+    /* 0x38 */ f32 sustainEnd;
+    /* 0x3C */ f32 releaseEnd;
+    /* 0x40 */ f32 attackRate;
+    /* 0x44 */ f32 decayRate;
+    /* 0x48 */ f32 sustainRate;
+    /* 0x4C */ f32 releaseRate;
+    /* 0x50 */ s32 stage;         /* 0 = loaded, 1..4 = attack..release, 5 = finished */
+    /* 0x54 */ f32 output[4];    /* [0..2] camera translation, [3] roll */
+    /* 0x64 */ s32 mode;          /* nonzero: stage advances as the envelope runs */
+} ViewEnvelope;
+
+/* A translation plus a rotation (degrees) applied on top of a camera's view matrix. */
+typedef struct {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ Vec3f rot;
+} CamOffset;
+
 #endif

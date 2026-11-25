@@ -129,16 +129,7 @@ void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32
     }
 }
 
-/* An aim point a tracer snaps to when its owner's angle and unk1D1 match. */
-typedef struct {
-    s16 unk0;           // compared with the owner's angle
-    s8 unk2;            // compared with owner->unk1D1
-    u8 ricochetChance;  // percent
-    f32 x, y, z;
-    f32 normal[3];
-} Game10EF60Impact;
 
-extern Game10EF60Impact D_800D9960[];
 
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, u32 *, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);

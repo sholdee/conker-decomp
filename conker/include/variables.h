@@ -1366,6 +1366,7 @@ extern u8  D_800D992A[];
 extern u8  D_800D993A[];
 
 extern u8 D_800D9950[];
+extern AimImpact D_800D9960[]; // aim-impact slots (func_150E4550 / func_150E4E04 index them; 0xFF = none)
 extern struct HomingEffect *D_800D99D0[8]; // live homing effects by handle - 1 (defined in game_1104D0)
 extern TriggerZone *D_800D9A20[2]; // registered by func_15014040 (by unk18)
 extern s16 *D_800D9A40; // bit per player (game_11FF10)
@@ -1474,6 +1475,7 @@ extern CamPose *D_800DC020; // the level's camera pose table (D_80089550 entries
 extern CamPose *D_800DC024; // the pose game_15BD90 is moving to
 extern Mtx  *D_800DC2A0[2]; // per framebuffer: one view matrix per view
 extern CamMsgQueue *D_800DC2B0; // one per camera
+extern ViewEnvelope D_800DC2C0[4]; // per-view camera wobble envelope (game_15ABA0.c)
 extern s32 D_800DC9F0; /* live glow count */
 extern u8 D_800DCA20;
 extern f32 *D_800DCC10[][4];
@@ -1516,6 +1518,7 @@ extern u8 D_800DCD28[3];
 
 extern RegionNode *D_800DCDC4; // spawn regions; their areas add up to D_800DCD90
 extern u8   D_800DCDD0;
+extern CamOffset D_800DCDE0[4]; // per-player camera offset (position, rotation), summed from the wobbles (game_191C30.c)
 extern s8   D_800DD190;
 extern void *D_800DD198[6]; // per object-list walk depth (D_800DD190): the next node to visit
 extern s32 D_800DD1B0; // texture last loaded by func_1517A9A8
