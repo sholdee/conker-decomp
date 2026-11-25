@@ -469,7 +469,7 @@ void func_15001A08(void) {
     D_800B0DE0 = D_800B0DDC;
     D_800B0DCC = 0;
     D_800B0DD0 = 0;
-    D_800DBE30 = 0;
+    D_800DBE30[0] = 0;
     D_800DBE32 = 0;
     D_800DBE34 = 0;
     D_800DBE36 = 0;

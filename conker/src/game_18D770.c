@@ -1547,7 +1547,7 @@ struct225 *func_15163BE8(Actor *actor, u8 arg1, s32 arg2) {
     pulse.phase = func_150ADA68() * 6.283185482f;
     pulse.speed = D_800A69D4[6];
 
-    effect = func_15160A58(actor, 1, (Vec3f *)&D_800A6A0C, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(pulse), 1, arg1, arg2);
+    effect = func_15160A58(actor, 1, &D_800A6A0C, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(pulse), 1, arg1, arg2);
     if (effect != NULL) {
         memcpy(&((LightAttachPulse *)&effect->unk18)->pulse, &pulse, sizeof(pulse));
     }

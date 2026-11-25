@@ -881,16 +881,6 @@ typedef struct {
     u8 pad[0x20];
 } struct117; // used as OSMesg
 
-typedef struct {
-    u8  pad0[0x14];
-    s32 unk14;
-    f32 unk18;
-    u8  pad1C[0xfc];
-    s32 unk118;
-    s32 unk11C;
-    s32 unk120;
-    s32 unk124;
-} struct118;
 
 struct struct119 {
     s16 unk0;

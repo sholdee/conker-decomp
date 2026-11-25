@@ -56,7 +56,7 @@ void func_10001194(s32 arg) {
     if (D_8000030C == 0) { // osResetType: cold reset
         bzero(D_80043B40, clearSize);
     } else {
-        bzero(&D_800E9D10, 0x80400000 - (s32)&D_800E9D10);
+        bzero(D_800E9D10, 0x80400000 - (s32)D_800E9D10);
     }
     osInvalICache(D_80043B40, clearSize);
     osInvalDCache(D_80043B40, clearSize);

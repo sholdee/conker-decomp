@@ -471,7 +471,7 @@ void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, s16 lifetim
                       func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
                       arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
         arg8 && func_15144E80(arg3, &outA, &outB, &normal)) {
-        down = *(Vec3f *)&D_800AB3E8;
+        down = D_800AB3E8;
         func_15145128(&normal, &normal, NULL, NULL);
         if (func_15144A74(&normal, &down) < -0.5f) {
             s32 pad; // matching: stack slot that places drip at the target offset

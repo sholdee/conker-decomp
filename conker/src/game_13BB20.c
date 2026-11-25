@@ -598,7 +598,7 @@ void func_1510FC34(s32 index) {
     D_800DBDC8 = zone;
     zone = func_1510FE30(zone);
     D_800DBDC4 = zone;
-    cameraZone = &((s16 *)&D_800DBE30)[index];
+    cameraZone = &D_800DBE30[index];
     if (zone != *cameraZone) {
         *cameraZone = zone;
         func_150A6760(index);

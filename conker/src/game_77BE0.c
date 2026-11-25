@@ -432,6 +432,8 @@ typedef struct {
     s8 unk2;
 } Struct80099140;
 
+extern Struct80099140 D_80099140[];
+
 void func_1504BA38(Actor *obj) {
     Struct80099140 *entry;
     s8 unk2;
@@ -442,7 +444,7 @@ void func_1504BA38(Actor *obj) {
         unk1 = entry->unk1; // matching: dead use of entry here sets the register allocation
         return;
     }
-    entry = &((Struct80099140 *)D_80099140)[obj->unk184 & 0x1F];
+    entry = &D_80099140[obj->unk184 & 0x1F];
     unk2 = entry->unk2;
     if (unk2 != 0 && obj->unkAA == 0) {
         obj->unkAA = unk2;

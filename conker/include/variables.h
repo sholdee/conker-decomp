@@ -547,7 +547,6 @@ extern f32 D_80098DB4; // 0.008726646192371845
 
 extern f32 D_800990B0; // 0.6931471824645996f
 extern f32 D_800990B4; // 0.6931471824645996f
-extern s8  D_80099140[];
 extern u16 D_8009919C[6];
 extern f32 D_800991A8;
 extern f32 D_800991AC;
@@ -685,7 +684,7 @@ extern u8  D_800A6698[24]; // "../Effects/Light/light.c"
 extern f32 D_800A66B4[3];  // { 0.0f, -415.0f, 0.0f }
 extern f32 D_800A66C0[9];  // { 70.0f, 38.0f, 70.0f, 55.0f, 50.0f, 80.0f, 140.0f, 70.0f, 34.0f };
 extern s32 D_800A66E4[10]; // { 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108 }
-extern s32 D_800A6A0C;
+extern Vec3f D_800A6A0C;
 extern f32 D_800A6AD4;     // 0.005000000353902578f
 extern f32 D_800A6AD8;     // 6.2831854820251465f
 extern f32 D_800A6ADC;     // 0.10209999978542328f
@@ -746,7 +745,7 @@ extern s32 D_800AB3BC[3]; // 160, 161, 162
 extern s32 D_800AB3C8[1]; // 179
 extern s32 D_800AB3CC[3]; // 185, 186, 187
 extern s32 D_800AB3D8[4]; // 96, 97, 98, 99
-extern f32 D_800AB3E8; // 0.0f;
+extern Vec3f D_800AB3E8; // zero vector
 extern f32 D_800AB3EC; //-1.0f
 
 extern f32 D_800AB464;
@@ -931,11 +930,10 @@ extern u8  D_800CBD60;
 extern u8  D_800CBD61;
 extern u8  D_800CBD62;
 extern u8  D_800CBD63;
-extern s32 D_800CBD64;
 extern s16 D_800CBD70;
 extern s16 D_800CBD72;
 extern u8  D_800CBD74;
-extern u32 D_800CBD78;
+extern Actor *D_800CBD78; // text queue: anchor actor for the next text
 extern s16 D_800CBD7C;
 
 extern f32 D_800CBD80;
@@ -1183,7 +1181,7 @@ extern s32 D_800DBE24;
 extern s16 D_800DBE28;
 extern s16 D_800DBE2A;
 extern s16 D_800DBE2C;
-extern u16 D_800DBE30;
+extern s16 D_800DBE30[]; // per-view camera zone
 extern u16 D_800DBE32;
 extern u16 D_800DBE34;
 extern u16 D_800DBE36;
@@ -1337,7 +1335,7 @@ extern s32  D_800E0934;
 extern void *D_800E0940;
 extern u8   D_800E0950[20]; // reference counts (game_1FFF60)
 extern s32  D_800E0964;
-extern s16  D_800E0968[];
+extern u16  D_800E0968[]; // anchor count per set (D_800E0990)
 extern s32  D_800E0990[];
 extern u8   D_800E0A10;
 extern StreamVoice D_800E0D80; // the streaming music player's voice
@@ -1345,13 +1343,13 @@ extern StreamVoice D_800E0D80; // the streaming music player's voice
 // end of zero'd out section
 
 extern s32  D_800E9D00;
-extern s32  *D_800E9D10; // probably not struct54
+extern u8   D_800E9D10[]; // heap arena: from here to 0x80400000
 
 /* debugger variables */
 
 extern s32  D_16001B8C; // a struct
 extern s8   D_160036F3; // control stick Y-axis ?
-extern s32  D_16003848[];
+extern u8  *D_16003848[]; // exception names
 extern u8   D_16003888;
 extern u16  D_1600388C;
 extern s32  D_160038A0;
@@ -1361,10 +1359,10 @@ extern s32  D_16003890;
 extern s32  D_16003AF0;
 extern u8   D_16003AF4;
 extern s8   D_16003B1C;
-extern s32  D_16003B20[]; // array containing 0x20 structs?
+extern u8  *D_16003B20[]; // "REGISTERS", "STACK"
 extern s8   D_16003B28;
 extern s32  D_16003B4C;
-extern struct118 *D_1600389C; // array or struct?
+extern OSThread *D_1600389C; // faulted thread
 
 extern u8   D_160046AC[]; // data
 extern u8   D_160046D0[];
