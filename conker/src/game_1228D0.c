@@ -615,13 +615,13 @@ typedef struct {
     /* 0x04 */ u8 ownerId;
     /* 0x05 */ u8 pad5;
     /* 0x06 */ s16 timer; /* frames until the next burst */
-} BurstData;
+} FlashBurstData;
 
 typedef struct {
     EffectHeader head;
     u8 pad10[0x18];
-    BurstData data;
-} BurstEffect;
+    FlashBurstData data;
+} FlashBurstEffect;
 
 extern f32 D_800A1B30[3];
 void func_15143134(void *, f32 *, Mtx *);
@@ -631,8 +631,8 @@ void *func_15107C1C(Actor *, u8, void *, s16, s32, s32, s32, f32, f32, s32, s32,
 /* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
  * frames calls func_10010F88(0x679) at the owner, makes a flash at a point of the model and emits
  * 2 or 3 blue-white particles from it. */
-void func_150F64DC(BurstEffect *effect) {
-    BurstData *data;
+void func_150F64DC(FlashBurstEffect *effect) {
+    FlashBurstData *data;
     Actor *owner;
     s8 count;
 
@@ -688,7 +688,7 @@ void func_150F64DC(BurstEffect *effect) {
 }
 
 /* Effect callback for the burst effect: hands func_15169850 the owner reference. */
-void func_150F6850(BurstEffect *effect, s32 arg1, u8 arg2) {
+void func_150F6850(FlashBurstEffect *effect, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 

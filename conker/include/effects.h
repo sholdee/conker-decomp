@@ -1885,4 +1885,87 @@ typedef struct ModelBurst {
     /* 0x74 */ s16 fadeRate;
 } ModelBurst; /* size 0x78 */
 
+/* A particle object made by func_1513D2F0 / func_151407D0 (game_169510.c's Particle, 0x110 bytes), as seen
+ * by callers that keep their own data after it. Its ParticleDef copy is at 0x18. */
+typedef struct DefParticleHead {
+    /* 0x000 */ u8 pad0[0x18];
+    /* 0x018 */ ParticleDef def;
+    /* 0x070 */ u8 pad70[0xA0];
+} DefParticleHead; /* size 0x110 */
+
+/* Burst effect (func_150F9BB0 in game_127060.c, func_151BD828 in game_1E9A30.c): an effect object that
+ * keeps two sparks (func_1513D2F0 beams) and two glows (func_151407D0) on its owner actor. */
+struct BurstSpark;
+struct BurstGlow;
+
+typedef struct BurstData {
+    /* 0x00 */ struct Actor *owner;
+    /* 0x04 */ u8 ownerId;            /* owner->unique_id when spawned */
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ struct BurstSpark *sparks[2];
+    /* 0x10 */ struct BurstGlow *glows[2];
+} BurstData; /* size 0x18 */
+
+typedef struct BurstEffect {
+    /* 0x00 */ EffectHeader header;   /* header.state: age in frames; -1 frees */
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ BurstData data;
+} BurstEffect; /* size 0x40 */
+
+/* Per-spark data (at spark+0x110). Each flickering value has a countdown timer; when it runs out a new
+ * random target base + rand * range is picked. */
+typedef struct BurstSparkData {
+    /* 0x00 */ struct Actor *owner;
+    /* 0x04 */ u8 ownerId;
+    /* 0x05 */ u8 index;              /* slot in burst->data.sparks */
+    /* 0x06 */ u8 pad06[2];
+    /* 0x08 */ f32 widthBase;
+    /* 0x0C */ f32 heightBase;
+    /* 0x10 */ f32 widthRange;
+    /* 0x14 */ f32 heightRange;       /* one of the two height ranges */
+    /* 0x18 */ f32 widthTarget;
+    /* 0x1C */ f32 heightTarget;
+    /* 0x20 */ f32 heightRange2;      /* the other height range */
+    /* 0x24 */ f32 widthTimer;
+    /* 0x28 */ f32 heightTimer;
+    /* 0x2C */ f32 alphaBase;
+    /* 0x30 */ f32 alphaRange;
+    /* 0x34 */ f32 alphaTarget;
+    /* 0x38 */ f32 alphaTimer;
+    /* 0x3C */ f32 alpha;
+    /* 0x40 */ f32 beamWidth;         /* BeamScale passed to func_1513FAB4 (times scale) */
+    /* 0x44 */ f32 beamLength;
+    /* 0x48 */ f32 beamWidthTarget;
+    /* 0x4C */ f32 beamLengthTarget;
+    /* 0x50 */ BurstEffect *burst;
+    /* 0x54 */ f32 scale;             /* the owner's average scale */
+    /* 0x58 */ u8 flags;              /* bit 0: owner visible */
+    /* 0x59 */ u8 pad59[3];
+} BurstSparkData; /* size 0x5C */
+
+/* Per-glow data (at glow+0x170). */
+typedef struct BurstGlowData {
+    /* 0x00 */ s16 textureTimer;      /* frames until the next random texture */
+    /* 0x02 */ u8 pad02[2];
+    /* 0x04 */ f32 targetScale;       /* shape.scale eases towards it */
+    /* 0x08 */ BurstEffect *burst;
+    /* 0x0C */ u8 index;              /* slot in burst->data.glows */
+    /* 0x0D */ u8 pad0D[3];
+    /* 0x10 */ struct Actor *owner;
+    /* 0x14 */ u8 ownerId;
+    /* 0x15 */ u8 pad15[3];
+} BurstGlowData; /* size 0x18 */
+
+typedef struct BurstSpark {
+    /* 0x000 */ DefParticleHead particle;
+    /* 0x110 */ BurstSparkData data;
+} BurstSpark;
+
+typedef struct BurstGlow {
+    /* 0x000 */ DefParticleHead particle;   /* particle.def.flags bit 1: visible */
+    /* 0x110 */ GlowShape shape;
+    /* 0x16C */ u8 pad16C[4];
+    /* 0x170 */ BurstGlowData data;
+} BurstGlow;
+
 #endif

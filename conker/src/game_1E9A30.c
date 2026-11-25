@@ -678,83 +678,6 @@ void func_151BD7F4(Actor *actor) {
     func_151494E0((s32)&ref, 0x3B);
 }
 
-typedef struct BurstSpark BurstSpark;
-typedef struct BurstGlow BurstGlow;
-
-/* Data of the burst effect object (at 0x28). */
-typedef struct {
-    ActorRef owner;
-    BurstSpark *sparks[2];
-    BurstGlow *glows[2];
-} BurstData;
-
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x18];
-    BurstData data;
-} BurstEffect;
-
-/* Per-object data func_151BD828 copies into each spark (at spark+0x110). */
-typedef struct {
-    Actor *owner;
-    u8 ownerId;
-    u8 index;
-    u8 pad06[2];
-    f32 field08;
-    f32 field0C;
-    f32 field10;
-    f32 field14;
-    f32 field18;
-    f32 field1C;
-    f32 field20;
-    f32 field24;
-    f32 field28;
-    f32 field2C;
-    f32 field30;
-    f32 field34;
-    f32 field38;
-    f32 field3C;
-    f32 field40;
-    f32 field44;
-    f32 field48;
-    f32 field4C;
-    BurstEffect *burst;
-    f32 field54;
-    u8 flags;              /* bit 0: owner visible */
-    u8 pad59[3];
-} BurstSparkData;
-
-/* Per-object data func_151BD828 copies into each glow (at glow+0x170). */
-typedef struct {
-    s16 field00;
-    u8 pad02[2];
-    f32 field04;
-    BurstEffect *burst;
-    u8 index;
-    u8 pad0D[3];
-    Actor *owner;
-    u8 ownerId;
-    u8 pad15[3];
-} BurstGlowData;
-
-struct BurstSpark {
-    u8 pad0[0x34];
-    Vec3f start;        /* 0x34 */
-    Vec3f end;          /* 0x40 */
-    u8 pad4C[0x110 - 0x4C];
-    BurstSparkData data;   /* 0x110 */
-};
-
-struct BurstGlow {
-    u8 pad0[0x34];
-    Vec3f start;        /* 0x34 */
-    Vec3f end;          /* 0x40 */
-    u8 pad4C[0xC];
-    s32 flags;             /* 0x58: bit 1 visible */
-    u8 pad5C[0x170 - 0x5C];
-    BurstGlowData data;    /* 0x170 */
-};
-
 BurstGlow *func_151407D0(GlowShape *shape, u32 shapeSize, ParticleDef *desc, u8, u8, u8, u8, s8, u8, s32);
 
 /* Spawns the burst effect on actor: two sparks and two glows that the effect keeps on the actor. */
@@ -763,8 +686,8 @@ void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
     BurstData burst;
     BurstData *data;
 
-    burst.owner.actor = actor;
-    burst.owner.uniqueId = actor->unique_id;
+    burst.owner = actor;
+    burst.ownerId = actor->unique_id;
     burst.sparks[0] = NULL;
     burst.sparks[1] = NULL;
     burst.glows[0] = NULL;
@@ -778,23 +701,23 @@ void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
             ParticleDef sparkEffect;
 
             spark.flags = 0;
-            spark.field54 = (actor->xz_scale + actor->y_scale) * 0.5f;
+            spark.scale = (actor->xz_scale + actor->y_scale) * 0.5f;
             spark.owner = actor;
             spark.ownerId = actor->unique_id;
-            spark.field08 = 15.045272f;
-            spark.field10 = 5.8676558f;
-            spark.field18 = 12.111444f;
-            spark.field0C = 0.396174f;
-            spark.field24 = 0.0f;
-            spark.field28 = 0.0f;
-            spark.field38 = 0.0f;
+            spark.widthBase = 15.045272f;
+            spark.widthRange = 5.8676558f;
+            spark.widthTarget = 12.111444f;
+            spark.heightBase = 0.396174f;
+            spark.widthTimer = 0.0f;
+            spark.heightTimer = 0.0f;
+            spark.alphaTimer = 0.0f;
             sparkEffect.width = 0.0f;
             sparkEffect.height = 0.0f;
-            spark.field3C = 0.0f;
-            spark.field48 = 1.0f;
-            spark.field40 = 1.0f;
-            spark.field4C = 1.0f;
-            spark.field44 = 1.0f;
+            spark.alpha = 0.0f;
+            spark.beamWidthTarget = 1.0f;
+            spark.beamWidth = 1.0f;
+            spark.beamLengthTarget = 1.0f;
+            spark.beamLength = 1.0f;
             spark.burst = effect;
             sparkEffect.texture = 0x5F;
             sparkEffect.type = 8;
@@ -806,12 +729,12 @@ void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
             sparkEffect.rgba[1] = 0xFF;
             sparkEffect.rgba[2] = 0xFF;
             sparkEffect.rgba[3] = 0xFF;
-            spark.field14 = 0.1042563f;
-            spark.field20 = 0.5197371f;
-            spark.field1C = 0.34404588f;
-            spark.field2C = 160.0f;
-            spark.field30 = 95.0f;
-            spark.field34 = 207.5f;
+            spark.heightRange = 0.1042563f;
+            spark.heightRange2 = 0.5197371f;
+            spark.heightTarget = 0.34404588f;
+            spark.alphaBase = 160.0f;
+            spark.alphaRange = 95.0f;
+            spark.alphaTarget = 207.5f;
             sparkEffect.pos = D_800A5480;
             sparkEffect.rot = D_800A5480;
             sparkEffect.scale.x = 1.0f;
@@ -836,8 +759,8 @@ void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
             ParticleDef glowEffect;
             BurstGlowData glow;
 
-            glow.field00 = 0;
-            glow.field04 = 1.0f;
+            glow.textureTimer = 0;
+            glow.targetScale = 1.0f;
             glow.owner = actor;
             glow.burst = effect;
             glow.ownerId = actor->unique_id;
@@ -924,8 +847,8 @@ void func_151BDD8C(BurstEffect *effect) {
     s32 player;
 
     data = &effect->data;
-    owner = data->owner.actor;
-    if (owner->interaction_state == 0 || owner->unique_id != data->owner.uniqueId) {
+    owner = data->owner;
+    if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
         effect->header.state = -1;
         return;
     }
@@ -948,15 +871,15 @@ void func_151BDD8C(BurstEffect *effect) {
             if (data->sparks[i] != NULL) {
                 spark = data->sparks[i];
                 spark->data.flags |= 1;
-                spark->start = starts[i];
-                spark->end = ends[i];
+                spark->particle.def.pos = starts[i];
+                spark->particle.def.rot = ends[i];
             }
             if (data->glows[i] != NULL) {
                 glow = data->glows[i];
-                glow->flags |= 2;
-                glow->flags &= ~4;
-                glow->start = starts[i];
-                glow->end = ends[i];
+                glow->particle.def.flags |= 2;
+                glow->particle.def.flags &= ~4;
+                glow->particle.def.pos = starts[i];
+                glow->particle.def.rot = ends[i];
             }
         }
     } else {
@@ -967,7 +890,7 @@ void func_151BDD8C(BurstEffect *effect) {
                 sparkData->flags &= ~1;
             }
             if (data->glows[j] != NULL) {
-                data->glows[j]->flags &= ~2;
+                data->glows[j]->particle.def.flags &= ~2;
             }
         }
     }
@@ -978,20 +901,20 @@ void func_151BDD8C(BurstEffect *effect) {
                 BurstSparkData *sparkData = &data->sparks[k]->data;
 
                 if (D_800BE728[(u8)player]->button & A_BUTTON) {
-                    sparkData->field48 = 6.0f;
-                    sparkData->field4C = 21.0f;
+                    sparkData->beamWidthTarget = 6.0f;
+                    sparkData->beamLengthTarget = 21.0f;
                 } else {
-                    sparkData->field48 = 3.0f;
-                    sparkData->field4C = 8.0f;
+                    sparkData->beamWidthTarget = 3.0f;
+                    sparkData->beamLengthTarget = 8.0f;
                 }
             }
             if (data->glows[k] != NULL) {
                 BurstGlowData *glowData = &data->glows[k]->data;
 
                 if (D_800BE728[(u8)player]->button & A_BUTTON) {
-                    glowData->field04 = 1.5f;
+                    glowData->targetScale = 1.5f;
                 } else {
-                    glowData->field04 = 1.0f;
+                    glowData->targetScale = 1.0f;
                 }
             }
         }
