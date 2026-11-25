@@ -64,8 +64,6 @@ void func_1514F808(ConeBasis *cone, f32 speed, Vec3f *out) {
     out->z = (((cone->axis0.z * first) + (cone->axis1.z * second)) + cone->direction.z) * speed;
 }
 
-extern void func_151A2AD4(Vec3f *, Vec3f *, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
-
 /* Spawns a random number of particles from config->position, each moving in a random direction inside
  * the cone around `direction` (scaled by 1000 here) spanned by axis0/axis1. */
 void func_1514F8F8(JetSpray *config, Vec3f *direction, Vec3f *axis0, Vec3f *axis1, f32 spread, u8 arg5, s32 arg6) {
@@ -129,8 +127,6 @@ void func_1514FBFC(SurfaceJetSpray *emitter, u8 arg1, s32 arg2) {
         func_1514F8F8(&emitter->spray, &normal, &axis0, &axis1, emitter->source.spread, arg1, arg2);
     }
 }
-
-extern void func_151A2A14(Vec3f *, s16, s16, f32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
 
 void func_1514FCE8(JetSpraySpec *config, u8 arg1, s32 arg2) {
     s32 count;

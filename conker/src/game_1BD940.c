@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Object handled by func_15190454 (game_1BD8B0.c). */
 typedef struct Game1BD8B0Object Game1BD8B0Object;

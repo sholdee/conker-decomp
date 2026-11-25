@@ -187,10 +187,6 @@ s32 func_151A743C(BloodDebrisParticle *particle, f32 x, f32 y, f32 z, f32 floorY
     return 1;
 }
 
-s32 func_151A26EC(f32 *pos, f32 *offset, f32 *vel, f32 drag, f32 gravity, f32 size, s16 timer, u8 alpha,
-                  s16 fadeStart, s16 fadeOutStart, s16 eventTime, s8 eventFunc, u8 r, u8 g, u8 b,
-                  u8 argF, s32 arg10);
-
 
 
 /*

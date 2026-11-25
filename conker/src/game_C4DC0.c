@@ -66,8 +66,6 @@ s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
 extern ObjScriptCmd *func_1507BB28(s32, s32);
 extern void func_1518BA90(Actor *, s32, s32);
 extern void func_1518BBF4(Actor *);
-extern void func_15193660(Actor *, s32, s32);
-extern void func_151937F4(Actor *, s32, s32);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 extern s8 func_151E564C(void);
 extern s8 func_151E565C(void);

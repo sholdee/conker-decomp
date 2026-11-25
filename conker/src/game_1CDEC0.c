@@ -1,23 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void *memcpy(void *, const void *, u32);
-
-/* Data of the spark emitter effect, stored at 0x28 in the effect object from func_151491F4. */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ u8 variant;
-    /* 0x10 */ f32 accum; /* particles owed; one is emitted per whole unit */
-} PointSparkEmitter; // size 0x14
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ PointSparkEmitter emitter;
-} SparkEmitterEffect;
 
 /* Starts a spark emitter effect at the actor's position; the spark variant depends on the actor's unk184. */
 void func_151A0A10(Actor *actor, s16 duration, u8 owner, s32 arg3) {

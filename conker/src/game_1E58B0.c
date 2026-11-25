@@ -86,8 +86,6 @@ BloodTrail *func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
     return func_15134908(&desc, 0, fxOwner, fxList);
 }
 
-void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Emitter callback (D_80089B08): spawns one particle at (x, y, z), flung in a random direction and
  * pushed against the emitter's movement (dx, dy, dz). */
 void func_151B86F4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {

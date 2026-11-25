@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 #include "libc/math.h"
-#include "effects.h"
 
 /* Spawns a particle burst at bone 10 of `actor`. */
 void func_15193660(Actor *actor, u8 arg1, s32 arg2) {
@@ -82,18 +81,6 @@ void func_151937F4(Actor *owner, s32 arg1, s32 arg2) {
         func_15134DAC(&desc, 0);
     }
 }
-
-/* Particle emitter that func_151938E4 initialises and func_151938FC spawns from. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0xF];
-    /* 0x1C */ Actor *owner;
-    /* 0x20 */ u8 pad20[0x54];
-    /* 0x74 */ f32 scale; /* scales (to - from) into the spawn velocity */
-} SegmentEmitter;
 
 /* Sets the emitter's velocity scale. */
 s32 func_151938E4(SegmentEmitter *emitter) {

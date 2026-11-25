@@ -1,55 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 #include "libc/string.h"
-
-/* Per-particle data of a dust particle (func_1519203C, updated by func_1519257C). */
-typedef struct DustData {
-    /* 0x00 */ f32 baseSize;
-    /* 0x04 */ u8 phase[2];
-    /* 0x06 */ s8 phaseStep[2];
-    /* 0x08 */ f32 amplitude[2];
-    /* 0x10 */ f32 floorY;
-    /* 0x14 */ CollisionTri floor;  /* the floor triangle under the spawn point, for the splash */
-    /* 0x26 */ u8 kind;
-} DustData; /* 0x28 */
-
-/* A sprite particle (func_15130374) carrying DustData. */
-typedef struct DustParticle {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ DustData dust;
-} DustParticle; /* size 0xD0 */
-
-/* Data of the dust emitter effect (func_15191BE0, run by func_15191D54). */
-typedef struct DustEmitterData {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ Vec3f offset;      /* emitter position in the bone's space */
-    /* 0x14 */ s32 matrixOffset;   /* byte offset of the bone's 0x40-byte matrix in owner->ob_matrix_ptr */
-    /* 0x18 */ f32 accum;          /* particles owed; one is spawned per whole unit */
-    /* 0x1C */ f32 rateBase;
-    /* 0x20 */ f32 rateRandom;
-    /* 0x24 */ CollisionHit floor;
-    /* 0x48 */ f32 gravityBase;
-    /* 0x4C */ f32 gravityRandom;
-    /* 0x50 */ s16 lifetimeBase;
-    /* 0x52 */ s16 lifetimeRandom;
-    /* 0x54 */ u8 alphaBase;
-    /* 0x55 */ u8 alphaRandom;
-    /* 0x56 */ u8 pad56[2];
-    /* 0x58 */ f32 sizeBase;
-    /* 0x5C */ f32 sizeRandom;
-    /* 0x60 */ f32 unk60;          /* probability; > 0 also makes the particles probe the floor */
-    /* 0x64 */ u8 kind;
-    /* 0x65 */ u8 pad65[3];
-} DustEmitterData; /* 0x68 */
-
-typedef struct DustEmitter {
-    TimedEffect base;
-    DustEmitterData data;
-} DustEmitter;
 
 
 /* Spawns a dust emitter effect (func_15191D54) on `owner`'s bone; it emits dust particles at `offset`
@@ -93,10 +45,6 @@ DustEmitter *func_15191BE0(Actor *owner, Vec3f *offset, u8 bone, f32 rateBase, f
     }
     return effect;
 }
-
-DustParticle *func_1519203C(Vec3f *position, Vec3f *velocity, f32 gravity, s16 lifetime, u8 alpha,
-                            u8 brightness, f32 size, s32 unused, f32 floorY, CollisionTri *floor, u8 kind,
-                            u8 arg11, s32 arg12);
 
 /* Dust emitter effect update: frees the effect once its owner is gone, otherwise accumulates the
  * emission rate and spawns one dust particle (func_1519203C) per whole unit at the emitter's bone. */

@@ -922,8 +922,6 @@ void func_151AB828(ActorTask *task) {
     func_15141DA4(task->watcher.character, 0, 4);
 }
 
-extern void *func_15190770(ActorLink *desc, s32 arg1, s32 arg2, s32 arg3);
-
 /* For actors of kind 0-4 or 150: spawns a func_15190770 effect on the actor. */
 void func_151AB854(ActorTask *task) {
     Actor *actor;

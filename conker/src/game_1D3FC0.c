@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void func_151A6AB8(struct DefParticleHead *);
 ListObj *func_151A6BD8(s32 owner);
 
 void func_151A6B10(struct DefParticleHead *obj) {

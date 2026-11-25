@@ -1,26 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Two object-attached particle emitters (effects 0x23 and the caller-chosen type of func_15192D48):
  * their spawners, per-frame updates and message handlers. Each effect is a TimedEffect whose data at
  * 0x28 is a FixedEmitterData.
  */
-
-/* Data of the effects of this file that follow an object: an ObjectEmitterData (game_1368C0.c) without the
- * rate and the callbacks, which are fixed in code. */
-typedef struct {
-    /* 0x00 */ Actor *object;
-    /* 0x04 */ u8 objectId; /* object->unique_id when attached */
-    /* 0x08 */ f32 spawnAccum;
-} FixedEmitterData; /* size 0xC */
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ FixedEmitterData data;
-} Effect1BFDD0;
 
 /* Live particle returned by func_15130374; its caller-sized data starts at 0xA8. */
 typedef struct {

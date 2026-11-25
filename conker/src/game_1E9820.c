@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Drip emitter callback (D_80089A70[39]): spawns one particle at (x, y, z), flung in a random
  * direction and pushed against the drip's movement (dx, dy, dz). The func_151A26EC arguments
  * after velocity are drag, gravity, size, timer, alpha, fade timings and an (r, g, b) of (203, 0, 0). */

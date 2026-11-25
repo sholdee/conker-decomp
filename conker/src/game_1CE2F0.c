@@ -1,12 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-void func_151A11CC(f32, f32, f32, f32, f32, s32, s32, s32,
-                   s32, s32, f32, s32, s32, s32, s32, s32,
-                   s32, f32, s32, s32, s32, s32, s32, s32,
-                   s32, s32, s32, s32);
 
 void func_151A0E40(f32 x, f32 y, f32 z, u8 arg3, s32 arg4) {
     func_151A11CC(x, y, z, 163.0f, 2.019000053f, 160, 75, 1055, 1270,
@@ -62,28 +56,6 @@ void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
                   s32 arg20, s32 arg21, s32 arg22, s32 arg23,
                   s32 arg24, s32 arg25, s32 arg26, s32 arg27) {
 }
-
-/* Emitter settings at 0x28 of the emitter objects below. */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 radius;
-    /* 0x10 */ f32 spawnAccum;  /* += spawnRate * frame time; one particle per whole unit */
-    /* 0x14 */ f32 spawnRate;
-    /* 0x18 */ s16 frameStep;
-    /* 0x1A */ s16 frameStepRange;
-    /* 0x1C */ s16 size;
-    /* 0x1E */ s16 sizeRange;
-    /* 0x20 */ s16 growRate;
-    /* 0x22 */ s16 growRateRange;
-} EmitterParams;
-
-/* Timed effect of the sphere emitters below (func_151A11E4, func_151A1998, func_151A1FB4). */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ EmitterParams params;
-} SphereEmitter;
 
 /*
  * Extra data of the particles spawned by func_151A11E4, read by its callback func_151A175C.
@@ -259,31 +231,6 @@ void func_151A175C(BillboardParticle *particle) {
         particle->tmpl.width = particle->tmpl.height = particle->tmpl.life * data->shrinkStep;
     }
 }
-
-/* Object that spawns a func_151491F4 effect, passing on its settings from 0x28. */
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Words3;
-
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ Words3 unk28;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ s16 unk3C;
-    /* 0x3E */ s16 unk3E;
-    /* 0x40 */ s16 unk40;
-    /* 0x42 */ s16 unk42;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s16 unk48;
-} EffectSpawner;
 
 /* Data copied to 0x28 of the effect created by func_151A18DC. */
 typedef struct {
@@ -729,11 +676,6 @@ s32 func_151A2960(FadeEventParticle *particle, Vec3f *prevPos) {
     }
     return func_1513170C(particle, prevPos);
 }
-
-void func_151A2C24(Vec3f *pos, f32 *dir, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope,
-                   s32 count, f32 spread, f32 drag, f32 gravityBase, f32 gravityRange, s16 delayBase,
-                   s16 delayRange, s16 alphaBase, s16 alphaRange, s16 fadeStart, s16 fadeOutStart,
-                   s8 eventFunc, u8 arg13, s32 arg14, u8 useAngles);
 
 /* Bursts `count` particles from pos moving at yaw/pitch with a speed that falls off over the burst. */
 void func_151A2A14(Vec3f *pos, s16 yaw, s16 pitch, f32 speed, f32 sizeBase, f32 sizeSlope, s32 count,

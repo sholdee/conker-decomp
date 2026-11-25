@@ -337,8 +337,6 @@ void func_150E0348(Actor *actor, u8 arg1, s32 arg2) {
     func_1513418C(&desc, 0, arg1, arg2);
 }
 
-void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-
 /* Blood-drip emitter callback (D_80089A70): spawns one drop at (x, y, z), flung in a random
  * direction and pushed against the drip's movement (dx, dy, dz). */
 void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {

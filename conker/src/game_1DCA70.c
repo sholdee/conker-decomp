@@ -1,16 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern f32 D_800AA0F0[];
 extern f32 D_800AA0FC[];
-
-/* Growth applied by func_151AFC08, stored in the spray particle at 0x128. */
-typedef struct {
-    /* 0x00 */ s16 growEndTimer; // grows while desc.life is above this
-    /* 0x04 */ f32 growRate;     // size gained per frame
-} SprayGrowth;
 
 
 /*
@@ -63,13 +56,6 @@ typedef struct {
     s16 a;
     s16 unk8;
 } SprayColor;
-
-/* The spray particle func_151AF6D4 spawns; updated by func_151AFC08. */
-typedef struct {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ u8 pad110[0x18];
-    /* 0x128 */ SprayGrowth growth;
-} SprayParticle;
 
 /*
  * Spawns a spray particle on the ground below the emission point on the actor's `side`, plus a

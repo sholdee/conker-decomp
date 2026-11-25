@@ -447,8 +447,6 @@ typedef struct {
     Actor *source;
 } Struct15194FF4;
 
-extern void func_15190518(Actor *obj);
-
 void func_15194FF4(self, other, arg2)
 Actor *self;
 Actor *other;

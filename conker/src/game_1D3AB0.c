@@ -1,36 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* State at 0x110 of the particle emitter over a TriggerZone (func_151A6600, func_151A6AB8). */
-typedef struct ZoneEmitterState {
-    /* 0x00 */ TriggerZone *region;
-    /* 0x04 */ f32 angle;
-    /* 0x08 */ f32 angleSpeed;
-    /* 0x0C */ u8 padC[4];
-    /* 0x10 */ EffectHeader *unk10; /* released by func_151A6AB8 */
-    /* 0x14 */ u8 phase;
-    /* 0x15 */ u8 phaseSpeed;
-    /* 0x16 */ u8 alpha;      /* oscillates in [129, 255] with phase */
-    /* 0x17 */ u8 hasZone;    /* nonzero: register a zone around the object each frame */
-    /* 0x18 */ f32 pending;   /* particles owed, accumulated per frame */
-} ZoneEmitterState;
-
-typedef struct ZoneEmitter {
-    /* 0x000 */ u8 pad0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0x27];
-    /* 0x034 */ f32 x;
-    /* 0x038 */ f32 y;
-    /* 0x03C */ f32 z;
-    /* 0x040 */ u8 pad40[0x20];
-    /* 0x060 */ s16 *unk60;
-    /* 0x064 */ u8 pad64[0xAC];
-    /* 0x110 */ ZoneEmitterState state;
-} ZoneEmitter;
 
 /* Spins the emitter and, while func_151464B8 allows it, throws particles from random points of its region. */
 s32 func_151A6600(ZoneEmitter *obj) {
