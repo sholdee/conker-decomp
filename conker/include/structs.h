@@ -1540,7 +1540,7 @@ struct WorldObject {
     /* 0x40 */ s32 floorHitAttrib;   // collision material, used when materials is NULL
     /* 0x44 */ s32 *materials;       // per-triangle materials, from firstTri on
     /* 0x48 */ u8 pad48[4];
-    /* 0x4C */ u8 unk4C;
+    /* 0x4C */ u8 unk4C;            // 0: never drawn (func_15113C88)
     /* 0x4D */ u8 shadowSize;         // blob shadow radius in 4-unit steps, times xScale (game_13AE20.c)
     /* 0x4E */ u8 attach;            // < 3: own transform, 3: none, 101..124: rides actor movement_obj[attach - 100]
     /* 0x4F */ u8 object_status;

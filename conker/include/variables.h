@@ -1485,8 +1485,8 @@ extern u8 D_800DBEAB;
 extern u8 D_800DBEAC;
 extern Mtx *D_800DBEB0; // sky projection matrices, 2 per view
 extern u16 D_800DBEE8[]; // per view: entries in D_80089240
-extern s32 D_800DBEF0;
-extern WorldObject *db_Object_array; // D_800DBEF0 entries
+extern s32 D_800DBEF0; // number of db_Object_array entries
+extern WorldObject *db_Object_array; // original name (Oct 2000 debugger); D_800DBEF0 entries
 extern s32 *D_800DBEF8; // per object: handle released with func_10004074
 extern u8 *D_800DBEFC; // per object: frames to keep the handle once hidden
 extern u8  D_800DBF00;
