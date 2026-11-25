@@ -153,7 +153,6 @@ typedef struct {
 } VtxColor;
 
 extern TextureInfo D_80090B60[];
-extern f32 D_800A5184;
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip);
 void func_151400D0(Vtx *vtx, VtxColor *colors);
@@ -702,7 +701,7 @@ void *func_1513D2F0(void *def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expire
     func_151400D0(particle->vtxTemplate, colors);
     particle->active = 1;
     particle->unk14 = 0;
-    particle->unk78 = D_800A5184;
+    particle->unk78 = -10000.0f;
     particle->unk98 = 0;
     particle->unk95 = 0;
     particle->unk94 = 0;
@@ -810,7 +809,7 @@ s32 func_1513D6FC(struct211 *axes, s16 angle, f32 width, f32 height, s32 arg4, s
             // matching: p, q (and p2, q2, r2 below) are dead, but the original computed them
             p = fabsf(heightSin);
             q = sqrtf((heightSin * heightSin) + (t * t));
-            if (0 != heightCos) {
+            if (0 != heightCos) { // matching: operand order changes the FP compare
                 w = heightCos * slopeX;
                 v.z = w;
                 v.y = fabsf(heightCos) / sqrtf((heightCos * heightCos) + (w * w));
