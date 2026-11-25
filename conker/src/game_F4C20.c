@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-s32 func_1509BE40();
 
 void func_150C7770(Camera *arg0) {
     if (func_1509BE40(3, 0x2000, 0xAC, 0x401B, 0x401C, 0x401D) != 0) {

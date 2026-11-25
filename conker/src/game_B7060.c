@@ -18,7 +18,6 @@ void func_15089BB0(void) {
     D_800D23B0 = NULL;
 }
 
-void *func_1509B570(s32);
 /* Per-difficulty bot tuning (indexed by D_800E0BD0): this file's .data, in the original order. */
 f32 D_800872B0[5] = { 1.5f, 1.2f, 0.8f, 0.4f, 0.15f };
 s16 D_800872C4[5] = { -1, -1, 600, 240, 0 }; // aim time limit, -1 = none

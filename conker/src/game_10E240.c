@@ -4,7 +4,6 @@
 #define func_1509BFB0 func_1509BFB0_hdr
 #include "functions.h"
 #undef func_1509BFB0
-s32 func_1509BFB0(s32 num, s32, s32, ...);
 #include "variables.h"
 
 /* What func_1510FD20 returns for an x/z position. */
@@ -29,7 +28,6 @@ struct PropEmitterEffect {
 
 extern u8 D_800A0FE0[];
 
-s32 func_1509BE40(s32, s32, s32, s32);
 
 /* Sets camera distances when camera->CharContext is 9 (else when unk2C is 8), and flag bits in unk84
  * from func_1509BE40 queries for the levels level == 0x1E, 0x1B and 0x2F. */

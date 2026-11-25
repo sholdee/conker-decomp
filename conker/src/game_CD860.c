@@ -3,11 +3,11 @@
 #include "variables.h"
 
 /* A command/query message: an 8-byte header followed by word parameters. */
-typedef struct {
+struct Msg_CD860 {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
     /* 0x08 */ s32 params[5];
-} Msg_CD860;
+};
 
 /* Applies command `command` with the parameters in `msg` to record `slot`.
  * Returns 1 for commands 0-2 and 0 otherwise. */

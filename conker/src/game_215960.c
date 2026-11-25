@@ -831,8 +831,6 @@ extern u8 D_82F;
 extern u8 D_830;
 extern u8 D_891;
 s32 func_151E564C(void);
-s32 func_1509BE40(s32, s32, s32);
-Struct1509B570 *func_1509B570(s32);
 
 extern s16 D_800E0C30;
 extern Mtx D_800E0C38;
@@ -1898,7 +1896,6 @@ void func_151EDF4C(void) {
 }
 
 extern void func_150A7D00(void *, f32, f32, f32);
-extern ObjScriptCmd *func_1507BB28(s32, s32);
 
 /*
  * Text entry on a 3D letter grid (cursor D_800E0C81 row, D_800E0C80 column, text in D_800E0C7C):

@@ -478,9 +478,6 @@ extern s8 D_800E0A96; /* page to switch to once faded out; -1: none */
 void func_151E2404(void);
 void func_151E3344(s32, s32, s32, u8, s8);
 s32 func_151F2CDC(void);
-s32 func_1509CF28(s32, s32 *);
-void func_1509D054(void);
-s32 func_1509D08C(s32, s32, s32 *, s32 *);
 
 void func_151DD9E4(void);
 
@@ -729,7 +726,6 @@ void func_151DE8F0(void) {
 }
 
 extern char D_800AB800[];
-ObjScriptCmd *func_1507BB28(s32, s32);
 void func_151E7E9C(void);
 
 /* Menu page for unk2C == 1: fades in and out, toggling D_8008FEF8 and object 9's animation (0xE/0xF) each fade-out. */
@@ -2094,10 +2090,6 @@ void func_151E6964(s32);
 void func_151E55A8(void);
 void func_151E7EF8(void);
 void func_151F2D6C(s32, s32);
-s32 func_1509CA30(s32);
-s32 func_1509CA50(s32);
-void func_1509CC94(s32);
-void func_1509CDDC(s32);
 
 void func_151DE7D4(void);
 

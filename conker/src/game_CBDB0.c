@@ -243,15 +243,6 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
 /* Looks like the script format version: later versions carry more operands. */
 
 /* K&R definitions below (they narrow their short params from the stack); these are their promoted prototypes. */
-s32 func_1509F354(s32 first, s32 last, s32 unplayed, u32 volume, s32 path, s32 nearDistance, s32 farDistance);
-void func_1509F47C(s32 first, s32 last, s32 volume, s32 objId, s32 nearDistance, s32 farDistance);
-s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance);
-s32 func_1509F5A8(s32 first, s32 last, s32 volume);
-void func_1509F5F4(s32 sound, s32 volume, s32 path, s32 nearDistance, s32 farDistance, s32 force);
-void func_1509F660(s32 path, s32 secondVoice);
-s32 func_1509F6B0(s32 sound, s32 volume, s32 cents, s32 pan);
-s32 func_1509F6E8(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDistance);
-void func_1509F77C(s32 handle, s32 path, s32 cents, s32 nearDistance, s32 farDistance);
 
 /* Script "play sound" handler: plays `sound` the way cmd[1] selects (plain, ranged/positioned,
  * on an actor, at an actor's position...). Returns (handle << 16) | 0x7000, or 0 if none plays. */

@@ -30,7 +30,6 @@ typedef struct {
     } arg;
 } Msg15128CB0;
 
-s32 func_1509BE40(s32, s32, s32, s32);
 void func_1512D560(Camera *, s32, TriggerZone *);
 Msg15128CB0 *func_1512D604(Camera *);
 s32 func_1512D6B0(Camera *);

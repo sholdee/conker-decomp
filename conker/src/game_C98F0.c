@@ -2,13 +2,12 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
+struct Struct_1509C440 {
     s32 unk0;
     s32 unk4;
     s32 args[6];
-} Struct_1509C440;
+};
 
-void func_1509C8FC(s32 ref, s32 alt);
 
 /* Fixed-point 16.16 to float scale. */
 #define FIX16_TO_F32 (1.0f / 65536.0f)

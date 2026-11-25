@@ -160,12 +160,7 @@ void func_15047F00(MtxF mtx, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, 
 void func_15048134(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 f32  func_1504A5E0(f32 arg0);
 
-void func_15075498(void);
-void func_15075A50(void);
-void func_15075B60(void) ;
 
-void func_1509B4A0(s32 arg0, s32 arg1);
-void func_1509BFB0(s32 num, s32, s32, ...);
 void func_150CEF10(Camera *arg0);
 
 void func_150EC4B0(Camera *arg0);
@@ -295,7 +290,6 @@ void func_1001C224(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 
 f32  func_15047C00(f32 arg0);
 f32  func_15047D60(f32 arg0);
-void func_1507BAD0(void);
 void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
 void func_150A8050(MtxF mtx, f32 arg1, f32 arg2, f32 arg3);
 void func_150A9B0C(MtxF mtx, f32, f32, f32, f32, f32, f32);

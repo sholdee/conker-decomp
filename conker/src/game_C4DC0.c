@@ -3,10 +3,10 @@
 #include "variables.h"
 
 
-typedef struct {
+struct C4DC0_arg1 {
     u8 pad0[4];
     s32 unk4;
-} C4DC0_arg1;
+};
 
 
 /* Returns the object id for script id `scriptId` (| 0x2000 when nonzero), spawning it from its slot if needed. */
@@ -63,7 +63,6 @@ s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
 #define OBJ_INDEX(o) ((o) - movement_obj)
 
 
-extern ObjScriptCmd *func_1507BB28(s32, s32);
 extern void func_1518BA90(Actor *, s32, s32);
 extern void func_1518BBF4(Actor *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);

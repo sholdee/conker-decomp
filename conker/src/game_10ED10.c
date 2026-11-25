@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_1509BE40();
 
 extern f32 D_80088990[4];
 extern f32 D_800889A0[4];

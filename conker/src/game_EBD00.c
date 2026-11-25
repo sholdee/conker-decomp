@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_1509BE40(s32, ...);
 void func_151254F4(Camera *arg0, s32 arg1);
 void func_15123070(Camera *arg0);
 

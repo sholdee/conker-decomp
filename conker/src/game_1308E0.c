@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-s32 func_1509BE40(s32, s32, s32, s32);
 
 /* Sets flag bits in actor->flags: 0x01000000 while in water, and level-specific bits
  * from func_1509BE40 queries for the levels level == 0x34, 0x30 and 0x2D. */

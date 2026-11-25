@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_1509BE40(s32, s32, s32, s32);
 
 static const f32 D_800A1920[3] = { 0.0f, -45.0f, 0.0f };
 

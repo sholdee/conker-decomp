@@ -97,7 +97,6 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
     }
 }
 
-extern Struct1509B570 *func_1509B570(s32);
 
 /*
  * Spawns model effect 0xA5 on `owner` (updated by func_151D6E60, drawn with func_151D710C) and a text box

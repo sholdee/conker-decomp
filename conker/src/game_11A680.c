@@ -155,7 +155,6 @@ void func_150ED638(Actor *obj, s32 left, s32 right) {
     func_15062FC0(obj, 1, size, 0x800, 0x800, size, -left * 7, 0);
 }
 
-extern ObjScriptCmd *func_1507BB28(s32 arg0, s32 scriptId);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 /* Ray (origin, normalized dir) vs sphere (center, radius); 0 on a miss or when the near hit is behind. */
 

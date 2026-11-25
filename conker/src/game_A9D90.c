@@ -3,7 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1509C3A0(void);
 
 /* Puts obj into state 2 with the given timer. */
 void func_1507C8E0(Actor *obj, s32 timer) {

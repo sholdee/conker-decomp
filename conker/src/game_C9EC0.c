@@ -83,8 +83,6 @@ s32 func_1509CBD4(s32 index) {
     return 1;
 }
 
-void func_1509CCB4(s32 index);
-void func_1509CE64(u16 *list, void (*callback)(s32));
 
 void func_1509CC94(s32 index) {
     func_1509CCB4(index);

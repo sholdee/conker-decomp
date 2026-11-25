@@ -62,10 +62,6 @@ static char D_8008449C[] = "ERROR";
 extern char D_80098930[]; // "RESETTING ALL TASKS"
 extern char D_80098944[]; // "."
 extern char D_80098948[]; // "RESET TO PLAY !"
-char *func_1509CA10(s32);
-s32 func_1509CA78(s32);
-s32 func_1509CA98(s32);
-s32 func_1509CB68(void);
 s32 strlen(const char *);
 
 /* Bit `idx` of the task bitset at D_800D2E4C (see game_C9EC0.c). */

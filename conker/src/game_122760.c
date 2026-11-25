@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-s32 func_1509BE40(s32, s32, s32, s32);
 
 void func_150F52B0(s32 *arg0) {
     if (func_1509BE40(1, 0x401C, 6, 0x9000) != 0) {

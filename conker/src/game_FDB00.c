@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-s32 func_1509BE40();
 void func_151254F4(Camera *arg0, s32 arg1);
 
 void func_150D0650(Camera *arg0) {

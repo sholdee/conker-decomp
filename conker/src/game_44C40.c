@@ -27,7 +27,6 @@ void func_150177F8(void) {
     D_800D2E44 = 0;
 }
 
-IdRecord *func_1509B704(s16 id);
 
 /* Moves every listed PURGE_BETWEEN_SECTIONS task to the current level (LoadSection), then reloads the tasks. */
 void func_15017868(void) {

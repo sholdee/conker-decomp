@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_1509BE40(s32, s32, s32, s32);
 
 /* Get the position of one of the actor's bones (picked by `side`, 0x10 by default).  With a `hit`
    buffer, also look for the ground below that point and return func_15046C80's result. */

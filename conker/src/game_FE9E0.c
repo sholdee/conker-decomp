@@ -6,7 +6,6 @@
 extern f32 D_800A08D0; // 1.0f / 170.0f
 extern f32 D_800A08D4; // 24.6f
 
-s32 func_1509BE40();
 
 /* Unless camera->Mode is 0x40: with unk5F0 bit 0x80 set, scales distances (unk348/unk34C/unk374/unk1A4/unk1A8)
  * by the clamped xz speed (0..170, as a 0..1 fraction) and sets unk84 flags from func_1509BE40 queries;

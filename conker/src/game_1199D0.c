@@ -140,7 +140,6 @@ void func_150ECC00(Actor *obj, u8 owner, s32 kind) {
     func_150ECA68(obj, 0, 0xFF, 0, 0xFF, 4, -1, owner, kind);
 }
 
-s32 func_1509BE40(s32, s32, s32, ...);
 /* Current colour (r, g, b), its target and its easing velocity. */
 extern f32 D_80088AD0;
 extern f32 D_80088AD4;

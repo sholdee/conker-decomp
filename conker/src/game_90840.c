@@ -1008,7 +1008,6 @@ extern u16 D_800996C0[];
 extern u16 D_800996C8[];
 extern u16 D_800996D0[];
 extern WorldObject *D_800CC5EC;
-ObjScriptCmd *func_1507BB28(s32, s32);
 void func_150D8B88(Actor *);
 void func_151D4668(void *);
 void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4);

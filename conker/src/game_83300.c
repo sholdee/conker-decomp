@@ -423,8 +423,6 @@ void func_15056A00(Actor *actor, u8 turn, u8 row) {
         actor->speccnt = 0;
     }
 }
-ObjScriptCmd *func_1507BB28(s32, s32);
-void func_1507BC14(Actor *);
 
 /*
  * Per-frame AI for a path/chase actor: picks the point to head for from its mode (unk223),
@@ -1045,7 +1043,6 @@ void func_150585F0(Actor *actor, f32 decel) {
 }
 
 s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
-ObjScriptCmd *func_1507BB28(s32, s32);
 
 /* Updates the actor's floor height (unk180) and pushes it out of walls, reacting to a wall hit. */
 void func_15058898(Actor *actor, f32 prevY) {

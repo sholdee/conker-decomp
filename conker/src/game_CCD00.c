@@ -4,7 +4,7 @@
 
 
 /* Argument block of a command; the arguments start at 0x8. */
-typedef struct {
+struct CommandArgs {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
     /* 0x08 */ s32 unk8;
@@ -12,7 +12,7 @@ typedef struct {
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ s32 unk18;
-} CommandArgs;
+};
 
 typedef struct {
     u8 unk0;
@@ -27,9 +27,7 @@ extern s32 D_800D3004;
 #define ID_FLAG_BYTE(id) (*(((id) >> 3) + D_800D2E4C))
 #define ID_FLAG_BIT(id) (1 << ((id) & 7))
 
-IdRecord *func_1509B704(s16 id);
 void func_150AE280(void);
-void func_1509B5AC(s32 id, s32 reload);
 void func_151E53E8(s32 arg0);
 void func_151E8214(void);
 void func_151E4DC4(void);
@@ -200,12 +198,12 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
 }
 
 /* Argument block of a query; the arguments start at 0x8. */
-typedef struct {
+struct QueryArgs {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
     /* 0x08 */ s32 unk8;     // query 34: number of weights
     /* 0x0C */ s32 unkC[1];  // query 34: the weights
-} QueryArgs;
+};
 
 s32 func_151E5F64(s32 arg0);
 

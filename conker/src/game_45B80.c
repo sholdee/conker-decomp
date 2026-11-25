@@ -298,8 +298,6 @@ void func_1501905C(void) {
     func_10012020();
 }
 
-void func_1509BA04(s32);
-void func_1509BBA0(s32);
 void func_15188B74(s32);
 void func_1515D6C8(void);
 
@@ -557,7 +555,6 @@ Gfx *func_15019E60(Gfx *gfx) {
 extern s32 D_800BE9B0;
 extern f32 D_800BE9B8;
 extern f32 D_800BE9BC;
-void func_150A019C(void);
 
 /*
  * Frame timing: turns the ticks elapsed since the last frame (D_800BE9E4) into the frame delta

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-s32 func_1509BE40(s32, s32, s32, ...);
 /* Eases *value toward target, tracking its rate of change in *velocity. */
 
 /* Current values, targets and easing velocities of three channels. */

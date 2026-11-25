@@ -5,7 +5,6 @@
 static const f32 D_800A1950[3] = { 0.0f, 24.0f, 11.0f };
 static const f32 D_800A195C[3] = { 0.0f, 71.0f, 9.0f };
 
-s32 func_1509BE40();
 
 // matching: D_800CC5EC is movement_obj[0].mv; func_150F2A60 tests it through the array and reads through
 // this alias so IDO reloads it (as the original does) instead of reusing the first load

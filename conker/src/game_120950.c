@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_1509BE40();
 
 /* Animation speed for `pitch`: 0.75, or faster the further it is below -5. */
 f32 func_150F34A0(Actor *obj, f32 pitch) {
