@@ -141,22 +141,13 @@ typedef struct N_ALAuxBus_s {
  * n_synthesizer.c). Its layout is not the one N_ALAuxBus above describes. */
 struct AuxSrc;
 
-typedef struct AuxBusData {
-    /* 0x00 */ u8              pad0[0x2];
-    /* 0x02 */ u16             unk2;
-    /* 0x04 */ u8              pad4[0x28];
-    /* 0x2C */ void           *unk2C;
-    /* 0x30 */ void           *unk30;
-    /* 0x34 */ u8              pad34[0x4];
-} AuxBusData; /* size 0x38 */
-
 typedef struct AuxBus {
     /* 0x00 */ u8              pad0[0x14];
     /* 0x14 */ struct AuxSrc  *sources;  /* list of the sources' ALLinks (8 bytes into each AuxSrc) */
     /* 0x18 */ s32             unk18;
     /* 0x1C */ s32             unk1C;
     /* 0x20 */ u8              pad20[0x20];
-    /* 0x40 */ AuxBusData     *unk40;
+    /* 0x40 */ LowPass        *lowPass;
 } AuxBus; /* size 0x44 */
 
 void alN_PVoiceNew(N_PVoice *mv, ALDMANew dmaNew, ALHeap *hp);
@@ -193,7 +184,7 @@ s32 n_alSaveParam( s32 paramID, void *param);
 
 void n_alSaveNew(void);
 
-void init_lpfilter(ALLowPass *lp);
+void init_lpfilter(LowPass *lp);
 
 void n_alSynNew(ALSynConfig *c);
 void n_alSynDelete(void);

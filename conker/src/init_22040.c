@@ -5,7 +5,7 @@ extern f32 D_8002C834;
 extern f32 D_8002C838;
 
 /*
- * Shadow of N_PVoice covering the low-pass (ALLowPass) block Rare bolted on at
+ * Shadow of N_PVoice covering the low-pass (a LowPass, n_libaudio.h) block Rare bolted on at
  * 0xA0: fc / fgain / fcvec[16] / state pointer, plus the tap count at 0x99.
  */
 typedef struct {
@@ -22,7 +22,6 @@ typedef struct {
 } Voice;
 
 Cmd *func_10022460(Voice *, s16 *, Cmd *);
-void func_1001CF38(void *, f32);
 f32 sqrtf(f32);
 
 Cmd *func_10022040(Voice *voice, s16 *outp, s32 arg2, Cmd *p) {
@@ -50,7 +49,7 @@ Cmd *func_10022040(Voice *voice, s16 *outp, s32 arg2, Cmd *p) {
     }
     if (voice->fgain > 0) {
         if (voice->flags != 0) {
-            func_1001CF38(&voice->fc, 22050.0f);
+            func_1001CF38((LowPass *)&voice->fc, 22050.0f);
         }
         /* aLoadADPCM(32, fcvec): DMA the 16 filter coefficients into DMEM */
         loadCmd = ptr++;

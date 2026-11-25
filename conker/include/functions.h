@@ -733,7 +733,6 @@ Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus);
 //func_101A04F4
 //func_101A0538
 void func_1001C224(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_1001CF38(void *lowpass, f32 rate);
 
 u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_1501748C(s16 arg0);

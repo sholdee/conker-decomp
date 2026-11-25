@@ -3,7 +3,6 @@
 #include "n_synthInternals.h"
 
 
-void func_1001CF38(s32, f32);
 extern Acmd *(func_1001E530)(s32, Acmd *);
 
 
@@ -49,11 +48,11 @@ void func_1001DAA0(s32 arg0, s16 arg1, s32 arg2) {
     func_1001ED6C(sp1C, arg1, arg2);
 }
 
-void func_1001DAE4(ALVoiceConfig *arg0, s16 arg1, s32 *arg2) {
-    if (arg1 == 8) {
-        arg0->fxBus = (f32) *arg2 * 0.1f;
-    } else if (arg1 == 9) {
-        arg0->priority = *arg2;
+void func_1001DAE4(LowPass *lp, s16 paramID, s32 *value) {
+    if (paramID == 8) {
+        lp->fgain = (f32) *value * 0.1f;
+    } else if (paramID == 9) {
+        lp->fc = *value;
     }
-    func_1001CF38(arg0, n_syn->outputRate);
+    func_1001CF38(lp, n_syn->outputRate);
 }

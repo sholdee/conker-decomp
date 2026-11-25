@@ -42,7 +42,6 @@ extern s32  D_800E0DF8;
 extern u8   D_800E0E19;
 
 extern s32  _getRate(f32 ivol, f32 tvol, s32 count, u16 *ratel);
-extern void func_1001CF38(void *lowpass, f32 rate);
 extern s32  func_151F85C4(s32 arg0, s32 arg1, s32 arg2);
 extern s32  func_151F86B0(s32 arg0, s32 *arg1, s32 *arg2);
 
@@ -341,7 +340,7 @@ s32 func_151F2E88(s32 nSamples, Acmd **cmdList) {
             }
             if (D_800E0DB2 > 0) {
                 if (D_800E0DD8 != 0) {
-                    func_1001CF38(&D_800E0D80.unk30, 22020.0f);
+                    func_1001CF38((LowPass *)&D_800E0D80.unk30, 22020.0f);
                 }
                 {
                     Acmd *_a = (*cmdList)++;

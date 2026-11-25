@@ -16,22 +16,6 @@
  * picks the alternative output buffer when routing is on.
  */
 
-/* ALLowPass as this TU uses it.  synthInternals.h has `POLEF_STATE *fstate` at 0x28
- * and `first` at 0x2C; the ROM has them the other way round, with one filter state
- * per bus (func_1001F978 indexes `lw a0,0x2C(a0+bus*4)`).  Shadowed file-locally
- * because init_1CBF0.c uses the shared header and must not be disturbed; calls into
- * init_lpfilter cast back to the header's ALLowPass. */
-typedef struct {
-    s16          fc;          /* 0x00 */
-    s16          fgain;       /* 0x02 */
-    union {
-        s16  fccoef[16];
-        s64  force_aligned;
-    } fcvec;                  /* 0x08 */
-    s32          first;       /* 0x28 */
-    POLEF_STATE *fstate[2];   /* 0x2C */
-} LowPass;
-
 /* The chorus resampler attached to a delay section; one state per bus. */
 typedef struct {
     ALFilter        filter;   /* 0x00 */
@@ -229,7 +213,7 @@ s32 func_1001ED6C(void *filter, s32 paramID, void *param) {
     case 7: /* low-pass cutoff */
         if (f->delay[s].lp != NULL) {
             f->delay[s].lp->fc = val;
-            init_lpfilter((ALLowPass *)f->delay[s].lp);
+            init_lpfilter(f->delay[s].lp);
         }
         break;
     }

@@ -71,6 +71,27 @@ typedef struct {
     s32         sv_first;
 } N_ALSynth;
 
+/*
+ * Conker: Rare's low-pass (pole) filter, its version of synthInternals.h's ALLowPass. `first` and
+ * the filter state are swapped, and there is one A_POLEF state per main-out channel (L at DMEM
+ * 0x4E0, R at 0x650). Each aux bus has one (n_synthesizer.c allocates it, init_1FB40.c runs it on
+ * the main outs), and so has each delay section of the reverb (init_1CBF0.c, init_1E530.c).
+ */
+typedef struct LowPass {
+    /* 0x00 */  s16                 fc;
+    /* 0x02 */  s16                 fgain;
+    /* 0x04 */  u8                  pad4[0x4];
+    /* 0x08 */  union {
+                    s16             fccoef[16];
+                    s64             force_aligned;
+                } fcvec;
+    /* 0x28 */  s32                 first;      /* set when fc/fgain change, cleared once recomputed */
+    /* 0x2C */  POLEF_STATE         *fstate[2];
+} LowPass; /* size 0x38 */
+
+/* Conker: recomputes the coefficients of lp for the output rate (init_1CBF0.c). */
+void    func_1001CF38(LowPass *lp, f32 outputRate);
+
 
 void    n_alSynAddPlayer(ALPlayer *client);
 void    n_alSynAddSndPlayer(ALPlayer *client);

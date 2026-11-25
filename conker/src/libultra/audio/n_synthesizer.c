@@ -107,10 +107,10 @@ void n_alSynNew(ALSynConfig *c) {
         } else {
             SYN->unk48[i].unk1C = 0;
         }
-        SYN->unk48[i].unk40 = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 0x38);
-        SYN->unk48[i].unk40->unk2 = 0;
-        SYN->unk48[i].unk40->unk2C = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 8);
-        SYN->unk48[i].unk40->unk30 = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 8);
+        SYN->unk48[i].lowPass = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 0x38);
+        SYN->unk48[i].lowPass->fgain = 0;
+        SYN->unk48[i].lowPass->fstate[0] = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 8);
+        SYN->unk48[i].lowPass->fstate[1] = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 8);
     }
     SYN->unk44 = alHeapDBAlloc(0, 0, (ALHeap *)heap, 1, 0x14);
     SYN->unk44->unk4 = (s32)func_1001E530;
