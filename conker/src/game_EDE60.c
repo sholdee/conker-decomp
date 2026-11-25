@@ -43,7 +43,8 @@ typedef struct {
 } Emitter; /* size 0x48 */
 
 struct Particle {
-    /* 0x00 */ u8 pad0[0x40];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x30];
     /* 0x40 */ Vec3f anchor;
     /* 0x4C */ u8 pad4C[0xA8 - 0x4C];
     /* 0xA8 */ Emitter *owner;
@@ -73,7 +74,7 @@ void func_150C0A48(Emitter *emitter) {
     s16 i;
 
     for (i = emitter->activeHead; i != -1; i = emitter->slots[i].next) {
-        func_1516972C((EffectHeader *)emitter->slots[i].particle);
+        func_1516972C(&emitter->slots[i].particle->header);
     }
 }
 

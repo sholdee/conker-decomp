@@ -5,11 +5,8 @@
 
 /* A BloodTrail effect; the effect header's bytes 1 and 0xC are passed on to the drops it emits. */
 typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x40 - 0xD];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x30];
     /* 0x40 */ f32 size;       /* extra data: the size of the debris piece it follows */
 } BloodTrail;
 
@@ -177,7 +174,7 @@ s32 func_151A73EC(Particle *particle) {
 
     if (particle->lifetime < 32) {
         if (data->trail != NULL) {
-            func_1516972C((EffectHeader *)data->trail);
+            func_1516972C(&data->trail->header);
             data->trail = NULL;
         }
     }
@@ -198,7 +195,7 @@ s32 func_151A743C(Particle *particle, f32 x, f32 y, f32 z, f32 floorY) {
     data = &particle->debris;
     particle->pos.y = particle->radius + floorY;
     if (data->trail != NULL) {
-        func_1516972C((EffectHeader *)data->trail);
+        func_1516972C(&data->trail->header);
         data->trail = NULL;
     }
     if (data->stopSpeed < particle->vel.y) {
@@ -281,7 +278,7 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, BloodTrail *trai
     // matching: `+ -600.0f` (add.s); `- 600.0f` would emit sub.s
     func_151A26EC(pos, offset, vel, 1.0f, (rand.gravity * 591.0f + -600.0f) * 0.001000000047f,
                   (rand.size * 500.0f + 400.0f) * size, rand.timer % 21 + 15, func_150ADA20() % 101 + 100,
-                  15, 20, 0, -1, 86, 39, 0, trail->unkC, trail->unk1);
+                  15, 20, 0, -1, 86, 39, 0, trail->header.owner, trail->header.kind);
 }
 
 /* Extra data of the particles run by callbacks 0x14 and 0x15. The *Start fields are values of life. */
@@ -336,7 +333,7 @@ void func_151A7908(Particle *particle) {
     DebrisData *data = &particle->debris;
 
     if (data->trail != NULL) {
-        func_1516972C((EffectHeader *)data->trail);
+        func_1516972C(&data->trail->header);
         data->trail = NULL;
     }
 }

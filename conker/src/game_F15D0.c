@@ -14,7 +14,7 @@ typedef struct {
 
 /* Partial view of the particle func_15130280 creates (Particle in game_15D730.c). */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ParticleDesc desc;
     /* 0x80 */ u8 pad80[0xA8 - 0x80];
     /* 0xA8 */ ParticlePulse pulse;
@@ -262,7 +262,7 @@ void func_150C44A4(Effect *effect) {
 void func_150C4AD8(Effect *effect) {
     // matching: the s32 read keeps IDO from merging the test and the argument into one load
     if (*(s32 *)&effect->data.particle != 0) {
-        func_1516972C((EffectHeader *)effect->data.particle);
+        func_1516972C(&effect->data.particle->header);
     }
 }
 

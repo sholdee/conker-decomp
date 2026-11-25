@@ -609,7 +609,7 @@ void func_1518E308(Emitter *emitter) {
     emitter->accum = 0.0f;
     for (i = 0; i < 100; i++, slot++) {
         if (slot->particle != NULL) {
-            func_1516972C((EffectHeader *)slot->particle);
+            func_1516972C(&slot->particle->head.header);
         }
     }
     bzero(emitter->slots, sizeof(emitter->slots));

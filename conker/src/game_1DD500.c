@@ -234,11 +234,8 @@ typedef struct Game1DD500Motion {
 
 /* Particle object created by func_1513D524. */
 typedef struct Game1DD500Particle {
-    /* 0x000 */ u8 unk0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0xF];
+    /* 0x000 */ EffectHeader header;
+    /* 0x010 */ u8 pad10[0xC];
     /* 0x01C */ s16 life;
     /* 0x01E */ u8 pad1E[0xE];
     /* 0x02C */ f32 width;
@@ -527,9 +524,9 @@ s32 func_151B118C(Game1DD500Particle *particle) {
             size = ((motion->baseWidth + motion->swingWidth * 0.5f) + (motion->baseHeight + motion->swingHeight * 0.5f)) * 0.5f;
             if (func_150ADA20() & 1) {
                 func_151D9B8C(motion->unk25, size * 1.7f, particle->alpha, particle->ground.surface, splat, 100, 0, 1, 0,
-                              particle->unkC, particle->unk1);
+                              particle->header.owner, particle->header.kind);
             } else {
-                func_151DAB58(motion->unk25, size * 0.68f, particle->alpha, splat, 1, particle->unkC, particle->unk1);
+                func_151DAB58(motion->unk25, size * 0.68f, particle->alpha, splat, 1, particle->header.owner, particle->header.kind);
             }
             alive = FALSE;
         }
@@ -654,7 +651,7 @@ void func_151B1918(Game1DD500Task *task) {
         Game1DD500Slot *slot = &emitter->slots[i];
 
         if (slot->particle != NULL) {
-            func_1516972C((EffectHeader *)slot->particle);
+            func_1516972C(&slot->particle->header);
         }
         slot->particle = NULL;
         slot->timer = 0;
