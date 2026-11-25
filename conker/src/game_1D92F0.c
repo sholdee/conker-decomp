@@ -25,8 +25,8 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ f32 unk0;
-    /* 0x04 */ s16 countBase;
-    /* 0x06 */ u16 countRange;
+    /* 0x04 */ s16 base;
+    /* 0x06 */ u16 range;
 } FxSpawnRange; // size 0x8
 
 typedef struct {
@@ -48,7 +48,7 @@ extern FxSpawnRange D_800A9158[];
 extern FxImpactEntry D_800A925C[];
 
 u8 func_151D8E20(void);
-void func_1514C678(f32 x, f32 y, f32 z, f32, s32, s32, s32 count, s32, s32, f32, FxSpawnPayload *, s32);
+void func_1514C678(f32 x, f32 y, f32 z, f32, s32, s32, s32, s32, s32, f32, FxSpawnPayload *, s32);
 void func_151DBE80(u8, f32, f32, s16, vertex *, void *, s32, s32, s32, s32);
 
 /* Spawns the effects listed for impact type `type` at `pos` on surface `hit`. */
@@ -68,10 +68,10 @@ void func_151ABE40(vertex *pos, FxSurfaceHit *hit, s32 type, s32 arg3, s32 arg4)
         payload.unk4 = arg4;
         payload.kind = kind;
         {
-            FxSpawnRange *range = &D_800A9040[set->first];
+            FxSpawnRange *spawn = &D_800A9040[set->first];
 
-            func_1514C678(pos->x, pos->y, pos->z, range->unk0, 0, 255,
-                          func_150ADA20() % (range->countRange + 1) + range->countBase, 11, type, 0.0f,
+            func_1514C678(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
+                          func_150ADA20() % (spawn->range + 1) + spawn->base, 11, type, 0.0f,
                           &payload, (u8)arg3);
         }
     }
@@ -82,11 +82,11 @@ void func_151ABE40(vertex *pos, FxSurfaceHit *hit, s32 type, s32 arg3, s32 arg4)
         payload.unk4 = arg4;
         payload.kind = kind;
         {
-            FxSpawnRange *range = &D_800A9158[set->second];
+            FxSpawnRange *spawn = &D_800A9158[set->second];
 
             // matching: a plain (u8)arg3 is CSE'd with the first call's and spilled
-            func_1514C678(pos->x, pos->y, pos->z, range->unk0, 0, 255,
-                          func_150ADA20() % (range->countRange + 1) + range->countBase, 12, type, 0.0f,
+            func_1514C678(pos->x, pos->y, pos->z, spawn->unk0, 0, 255,
+                          func_150ADA20() % (spawn->range + 1) + spawn->base, 12, type, 0.0f,
                           &payload, (u8)(u16)arg3);
         }
     }
@@ -237,64 +237,73 @@ s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     return 1;
 }
 
-s32 func_151AC3CC(s16 *arg0) {
-    u8 *ptr = *(u8 **)((u8 *)arg0 + 0x98);
-    s32 val = arg0[0x1C / 2] << 3;
-    if (val >= 0x100) {
-        val = 0xFF;
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+} FxEmitterPoint; // size 0x14
+
+typedef struct {
+    /* 0x00 */ f32 scale;
+    /* 0x04 */ u8 pad4[0x17];
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 pad1C[4];
+    /* 0x20 */ u8 unk20;
+} FxEmitterData;
+
+/* Effect state passed to the callbacks in the D_8008A3F8 / D_8008A430 handler tables. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD[0xF];
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ u8 pad1E[0xF];
+    /* 0x2D */ s8 pointIndex;
+    /* 0x2E */ u8 pad2E[0x66];
+    /* 0x94 */ FxEmitterPoint *points;
+    /* 0x98 */ FxEmitterData *data;
+} FxEmitter;
+
+/* Lowers the effect's alpha to unk1C * 8 (capped at 255) once that is below it. */
+s32 func_151AC3CC(FxEmitter *emitter) {
+    FxEmitterData *data = emitter->data;
+    s32 alpha = emitter->unk1C * 8;
+
+    if (alpha >= 256) {
+        alpha = 255;
     }
-    if (val < ptr[0x1B]) {
-        ptr[0x1B] = val;
+    if (alpha < data->alpha) {
+        data->alpha = alpha;
     }
     return 1;
 }
 
-void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
-typedef struct {
-    f32 field_0x00;
-    f32 field_0x04;
-    f32 field_0x08;
-    f32 field_0x0C;
-    f32 field_0x10;
-} ObjectEffectSample;
+void func_151DAB58(u8, f32, u8, struct17 *, s32, u8, s32);
 
-typedef struct {
-    f32 field_0x00;
-    char pad_0x04[0x17];
-    u8 field_0x1B;
-    char pad_0x1C[0x4];
-    u8 field_0x20;
-} ObjectEffectPayloadData;
-
-typedef struct {
-    char pad_0[0x1];
-    u8 field_0x01;
-    char pad_0x02[0xA];
-    u8 field_0x0C;
-    char pad_0x0D[0x20];
-    s8 field_0x2D;
-    char pad_0x2E[0x66];
-    ObjectEffectSample *field_0x94;
-    ObjectEffectPayloadData *field_0x98;
-} ObjectEffectState;
-
-s32 func_151AC408(ObjectEffectState *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
-    ObjectEffectPayloadData *ptr = arg0->field_0x98;
-    ObjectEffectSample *arr = arg0->field_0x94;
-    f32 sp4C[3];
-    u8 color;
+/* Spawns a burst at the emitter's current point (with height `y`): randomly one of two
+ * effects, scaled from the emitter's data. */
+s32 func_151AC408(FxEmitter *emitter, s32 arg1, s32 arg2, s32 arg3, f32 y, s32 arg5) {
+    FxEmitterData *data = emitter->data;
+    FxEmitterPoint *points = emitter->points;
+    struct17 pos;
+    u8 kind;
     s32 life;
 
-    sp4C[0] = arr[arg0->field_0x2D].field_0x00;
-    sp4C[1] = arg4;
-    sp4C[2] = arr[arg0->field_0x2D].field_0x08;
-    color = func_151D8E20();
+    pos.unk0 = points[emitter->pointIndex].x;
+    pos.unk4 = y;
+    pos.unk8 = points[emitter->pointIndex].z;
+    kind = func_151D8E20();
     if (func_150ADA20() & 1) {
-        life = (func_150ADA20() % 41) + 80;
-        func_151D9B8C(color, ptr->field_0x00 * 6.0f, ptr->field_0x1B, (void *)arg5, (struct17 *)sp4C, life, 1, 1, 0, arg0->field_0x0C, arg0->field_0x01);
+        life = func_150ADA20() % 41 + 80;
+        func_151D9B8C(kind, data->scale * 6.0f, data->alpha, arg5, &pos, life, 1, 1, 0, emitter->unkC,
+                      emitter->unk1);
     } else {
-        func_151DAB58(color, ptr->field_0x00 * 1.5f, ptr->field_0x1B, sp4C, 1, arg0->field_0x0C, arg0->field_0x01);
+        func_151DAB58(kind, data->scale * 1.5f, data->alpha, &pos, 1, emitter->unkC, emitter->unk1);
     }
-    ptr->field_0x20 = 4;
+    data->unk20 = 4;
     return 1;
 }
