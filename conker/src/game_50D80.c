@@ -6,15 +6,50 @@
 #undef func_1514D3B0
 #undef func_15048A40
 #undef func_150ADA20
+#define D_800C3958 D_800C3958_hdr
 #include "variables.h"
+#undef D_800C3958
 
+/* One 8-byte cutscene script event. Each track starts with a 4-event header whose value is the start time. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 unk9;
-    u16 unkA;
-} Elem15024130;
+    /* 0x0 */ s8 type;
+    /* 0x1 */ u8 delta; /* time step to the next event; 0 chains events at the same time */
+    /* 0x2 */ s16 value;
+    /* 0x4 */ s8 unk4;
+    /* 0x5 */ s8 unk5;
+    /* 0x6 */ s16 unk6;
+} SeqEvent;
+
+/* An event queued for dispatch by func_150241B4, kept sorted by time. */
+typedef struct {
+    /* 0x0 */ SeqEvent *event;
+    /* 0x4 */ s32 time;
+    /* 0x8 */ u8 track;
+    /* 0xA */ u16 index;
+} SeqQueueEntry;
+
+/* Per-track state of a running cutscene (0x44 bytes); D_800C3958[scene] holds one per track. */
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+} SeqTrackState;
+
+extern SeqTrackState *D_800C3958[];
 
 typedef struct {
     u16 unk0;
@@ -22,15 +57,15 @@ typedef struct {
     u8 pad3[5];
 } Elem1502A8A0;
 
-extern Elem15024130 *D_800C3D50;
+extern SeqQueueEntry *D_800C3D50;
 extern u8 D_800C35E8[];
 extern Elem1502A8A0 *D_800C35F0[];
 
 extern struct131 *func_151149AC(s32);
-extern s32 func_1502460C(s32, s32, s32, s32, s32, struct127 *, struct131 *, f32 *, s32);
-extern s32 func_150265CC(s32, s32, s32, s32, s32, struct127 *, struct131 *, f32 *, s32);
-extern s32 func_15029BB8(s32, s32, s32, s32, s32, struct127 *, struct131 *, f32 *, s32, s32);
-extern void func_1502A8A0(s32, s32, s32, s32, s32);
+extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, struct127 *, struct131 *, f32 *, s32);
+extern s32 func_150265CC(SeqEvent *, s32, s32, s32, s32, struct127 *, struct131 *, f32 *, s32);
+extern s32 func_15029BB8(SeqEvent *, s32, s32, s32, s32, struct127 *, struct131 *, f32 *, s32, s32);
+extern void func_1502A8A0(SeqEvent *, s32, s32, s32, s32);
 
 
 void func_150238D0(void) {
@@ -67,8 +102,8 @@ extern s32 D_800C3640[];
 
 s32 func_150238D8(Obj150238D8 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
     Snd150238D8 *s;
-    struct233 *p;
-    struct233 *q;
+    SeqTrackState *p;
+    SeqTrackState *q;
     s32 a;
 
     s = arg0->unk18;
@@ -79,12 +114,12 @@ s32 func_150238D8(Obj150238D8 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 arg4, s3
         return 1;
     }
     if (s->unkE == D_800C35E8[s->unk0]) {
-        p = (&D_800C3958)[s->unk0];
+        p = D_800C3958[s->unk0];
         if (p != NULL) {
-            arg0->unk2 = p[s->unk1].unk0;
-            q = &(&D_800C3958)[s->unk0][s->unk1];
-            arg0->unk4 = *(f32 *)((u8 *)q + 0x38) + q->unk4;
-            arg0->unk6 = (&D_800C3958)[s->unk0][s->unk1].unk8;
+            arg0->unk2 = p[s->unk1].x;
+            q = &D_800C3958[s->unk0][s->unk1];
+            arg0->unk4 = q->unk38 + q->y;
+            arg0->unk6 = D_800C3958[s->unk0][s->unk1].z;
         }
     }
     if (s->unk4 != 0xFFFF) {
@@ -122,50 +157,41 @@ s32 func_150238D8(Obj150238D8 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 arg4, s3
     return 0;
 }
 
-typedef struct {
-    s8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s8 unk4;
-    s8 unk5;
-    s16 unk6;
-} Elem15023DE0;
-
-extern Elem15023DE0 *D_800C3688[][30];
+extern SeqEvent *D_800C3688[][30];
 extern u16 *D_800C35D8[];
 extern s32 D_800C35B0[];
 extern s32 D_800C3640[];
 
-s32 func_15023BB0(Elem15023DE0 *arg0, s32 arg1, s32 arg2, Elem15023DE0 **arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10) {
-    Elem15023DE0 *p;
+s32 func_15023BB0(SeqEvent *arg0, s32 arg1, s32 arg2, SeqEvent **arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10) {
+    SeqEvent *p;
     s32 time;
 
     if (D_800C3688[arg10][arg2] != NULL) {
-        time = D_800C3688[arg10][arg2]->unk2;
+        time = D_800C3688[arg10][arg2]->value;
         p = D_800C3688[arg10][arg2] + 4;
         while ((u32) (p - D_800C3688[arg10][arg2]) < D_800C35D8[arg10][arg2]) {
-            if ((p->unk1 == 0) && (p->unk0 == 0)) {
-                time = p->unk2;
+            if ((p->delta == 0) && (p->type == 0)) {
+                time = p->value;
             } else {
-                if ((arg0 < p) && (arg1 == p->unk0) && ((arg4 == 0) || ((arg4 == 1) && (arg5 == p->unk2))) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->unk4))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk5)))) {
+                if ((arg0 < p) && (arg1 == p->type) && ((arg4 == 0) || ((arg4 == 1) && (arg5 == p->value))) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->unk4))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk5)))) {
                     *arg3 = p;
                     return time;
                 }
-                while (p->unk1 == 0) {
-                    if (p->unk0 == 0) {
-                        time = p->unk2;
+                while (p->delta == 0) {
+                    if (p->type == 0) {
+                        time = p->value;
                         break;
                     }
                     p++;
                     if ((u32) (p - D_800C3688[arg10][arg2]) >= D_800C35D8[arg10][arg2]) {
                         break;
                     }
-                    if ((arg0 < p) && (arg1 == p->unk0) && ((arg4 == 0) || ((arg4 == 1) && (arg5 == p->unk2))) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->unk4))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk5)))) {
+                    if ((arg0 < p) && (arg1 == p->type) && ((arg4 == 0) || ((arg4 == 1) && (arg5 == p->value))) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->unk4))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk5)))) {
                         *arg3 = p;
                         return time;
                     }
                 }
-                time += p->unk1;
+                time += p->delta;
             }
             p++;
         }
@@ -175,8 +201,8 @@ s32 func_15023BB0(Elem15023DE0 *arg0, s32 arg1, s32 arg2, Elem15023DE0 **arg3, s
 }
 
 
-void func_15023DE0(Elem15023DE0 **arg0, Elem15023DE0 **arg1, s32 *arg2, s32 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11) {
-    Elem15023DE0 *p;
+void func_15023DE0(SeqEvent **arg0, SeqEvent **arg1, s32 *arg2, s32 *arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11) {
+    SeqEvent *p;
     s32 time;
     s32 curTime;
 
@@ -194,13 +220,13 @@ void func_15023DE0(Elem15023DE0 **arg0, Elem15023DE0 **arg1, s32 *arg2, s32 *arg
     }
 
     p = D_800C3688[arg11][arg4] + 4;
-    time = D_800C3688[arg11][arg4]->unk2;
+    time = D_800C3688[arg11][arg4]->value;
     while ((u32) (p - D_800C3688[arg11][arg4]) < D_800C35D8[arg11][arg4]) {
-        if ((p->unk1 == 0) && (p->unk0 == 0)) {
-            time = p->unk2;
+        if ((p->delta == 0) && (p->type == 0)) {
+            time = p->value;
         } else {
             if (time <= arg10) {
-                if ((arg5 == p->unk0) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->unk2))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk4)))) {
+                if ((arg5 == p->type) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->value))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk4)))) {
                     if (arg0 != NULL) {
                         *arg0 = p;
                     }
@@ -210,15 +236,15 @@ void func_15023DE0(Elem15023DE0 **arg0, Elem15023DE0 **arg1, s32 *arg2, s32 *arg
                 }
             }
             if (time > arg10) {
-                if ((arg5 == p->unk0) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->unk2))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk4)))) {
+                if ((arg5 == p->type) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->value))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk4)))) {
                     *arg1 = p;
                     *arg3 = time;
                     return;
                 }
             }
-            while (p->unk1 == 0) {
-                if (p->unk0 == 0) {
-                    time = p->unk2;
+            while (p->delta == 0) {
+                if (p->type == 0) {
+                    time = p->value;
                     break;
                 }
                 p++;
@@ -227,7 +253,7 @@ void func_15023DE0(Elem15023DE0 **arg0, Elem15023DE0 **arg1, s32 *arg2, s32 *arg
                 }
                 curTime = D_800C35B0[arg11];
                 if (time <= curTime) {
-                    if ((arg5 == p->unk0) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->unk2))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk4)))) {
+                    if ((arg5 == p->type) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->value))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk4)))) {
                         if (arg0 != NULL) {
                             *arg0 = p;
                         }
@@ -238,66 +264,60 @@ void func_15023DE0(Elem15023DE0 **arg0, Elem15023DE0 **arg1, s32 *arg2, s32 *arg
                     }
                 }
                 if (time > curTime) {
-                    if ((arg5 == p->unk0) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->unk2))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk4)))) {
+                    if ((arg5 == p->type) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == p->value))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == p->unk4)))) {
                         *arg1 = p;
                         *arg3 = time;
                         return;
                     }
                 }
             }
-            time += p->unk1;
+            time += p->delta;
         }
         p++;
     }
 }
 
-void func_15024130(s32 arg0, s32 arg1) {
+/* Dispatches the first `count` queued events of `scene` in order. */
+void func_15024130(s32 count, s32 scene) {
     s32 i;
-    s32 off;
-    Elem15024130 *e;
 
-    i = 0;
-    if (arg0 > 0) {
-        off = 0; do {
-            e = (Elem15024130 *)((u8 *)D_800C3D50 + off);
-            func_1502A8A0(e->unk0, e->unk8, e->unkA, e->unk4, arg1);
-            i++;
-            off += 0xC;
-        } while (i != arg0);
+    for (i = 0; i < count; i++) {
+        func_1502A8A0(D_800C3D50[i].event, D_800C3D50[i].track, D_800C3D50[i].index, D_800C3D50[i].time, scene);
     }
 }
 
 extern u16 D_800C3C9A;
 
-void func_150241B4(Elem15024130 *arr, s32 *count, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
-    s32 idx;
+/*
+ * Inserts an event into the time-sorted dispatch queue. When the queue is full
+ * it is flushed (dispatched) first and the new event is dropped.
+ */
+void func_150241B4(SeqQueueEntry *queue, s32 *count, SeqEvent *event, s32 track, s32 index, s32 time, s32 scene) {
+    s32 pos;
     s32 i;
 
     if (*count >= D_800C3C9A) {
-        func_15024130(*count, arg6);
+        func_15024130(*count, scene);
         *count = 0;
         return;
     }
-    idx = *count;
+    pos = *count;
     for (i = 0; i < *count; i++) {
-        if (arr[i].unk4 >= arg5) {
-            idx = i;
+        if (queue[i].time >= time) {
+            pos = i;
             break;
         }
     }
-    i = *count - 1;
-    if (i >= idx) {
-loop2:
-        arr[i + 1] = arr[i];
-        i--;
-        if (i >= idx) goto loop2;
+    for (i = *count - 1; i >= pos; i--) {
+        queue[i + 1] = queue[i];
     }
-    arr[idx].unk0 = arg2;
-    arr[idx].unk8 = arg3;
-    arr[idx].unkA = arg4;
-    arr[idx].unk4 = arg5;
+    queue[pos].event = event;
+    queue[pos].track = track;
+    queue[pos].index = index;
+    queue[pos].time = time;
     (*count)++;
 }
+
 extern s32 D_800C35B8[];
 extern u8 D_800C35C0[];
 extern u8 D_800C3C8C;
@@ -305,7 +325,7 @@ extern u8 D_800C363A[];
 
 void func_150242F8(s32 arg0, s32 arg1) {
     s32 i;
-    Elem15023DE0 *p;
+    SeqEvent *p;
     s32 time;
     s32 count;
 
@@ -317,20 +337,20 @@ void func_150242F8(s32 arg0, s32 arg1) {
                 extern s32 D_800C35B8[];
                 if (D_800C35B8[arg1] != D_800C35B0[arg1]) {
                     p = D_800C3688[arg1][i] + 4;
-                    time = D_800C3688[arg1][i]->unk2;
+                    time = D_800C3688[arg1][i]->value;
                     while ((u32) (p - D_800C3688[arg1][i]) < D_800C35D8[arg1][i]) {
-                        if ((p->unk1 == 0) && (p->unk0 == 0)) {
-                            time = p->unk2;
+                        if ((p->delta == 0) && (p->type == 0)) {
+                            time = p->value;
                         } else {
                             if ((time <= D_800C35B0[arg1]) && (time > D_800C35B8[arg1])) {
                                 for (;;) {
                                     if ((u32) (p - D_800C3688[arg1][i]) >= D_800C35D8[arg1][i]) {
                                         break;
                                     }
-                                    if (((arg0 == 0) && (p->unk0 != 0x11)) || ((arg0 == 1) && (p->unk0 == 0x11))) {
-                                        func_150241B4(D_800C3D50, &count, (s32) p, i, (u32) (p - D_800C3688[arg1][i]), time, arg1);
+                                    if (((arg0 == 0) && (p->type != 0x11)) || ((arg0 == 1) && (p->type == 0x11))) {
+                                        func_150241B4(D_800C3D50, &count, p, i, (u32) (p - D_800C3688[arg1][i]), time, arg1);
                                     }
-                                    if ((p->unk1 != 0) || ((p->unk1 == 0) && (p->unk0 == 0))) {
+                                    if ((p->delta != 0) || ((p->delta == 0) && (p->type == 0))) {
                                         break;
                                     } else {
                                         p++;
@@ -341,9 +361,9 @@ void func_150242F8(s32 arg0, s32 arg1) {
                             if (time > D_800C35B0[arg1]) {
                                 break;
                             }
-                            while (p->unk1 == 0) {
-                                if (p->unk0 == 0) {
-                                    time = p->unk2;
+                            while (p->delta == 0) {
+                                if (p->type == 0) {
+                                    time = p->value;
                                     break;
                                 }
                                 p++;
@@ -351,7 +371,7 @@ void func_150242F8(s32 arg0, s32 arg1) {
                                     break;
                                 }
                             }
-                            time += p->unk1;
+                            time += p->delta;
                         }
                         p++;
                     }
@@ -387,25 +407,10 @@ typedef struct {
 } Rec1502460C;
 
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    u8 pad18[0xC];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    u8 unk30[0x14];
-} Pos1502460C;
-
-typedef struct {
     struct127 *obj;
     u8 id;
 } ObjRef1502460C;
 
-#define POSTAB ((Pos1502460C **) &D_800C3958)
 #define FU8(p, o) (*(u8 *) ((u8 *) (p) + (o)))
 #define FS8(p, o) (*(s8 *) ((u8 *) (p) + (o)))
 #define FS16(p, o) (*(s16 *) ((u8 *) (p) + (o)))
@@ -498,28 +503,27 @@ extern void func_151CD394(s32);
 extern void func_151DE7D4(void);
 extern void func_151E53E8(s32);
 
-#define cmd ((Elem15023DE0 *) arg0)
-s32 func_1502460C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *arg5, struct131 *arg6, f32 *arg7, s32 arg8) {
+s32 func_1502460C(SeqEvent *event, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *arg5, struct131 *arg6, f32 *arg7, s32 arg8) {
 
-    if (D_800E0BF4 != 0 && (cmd->unk0 == 7 || cmd->unk0 == 0xE || cmd->unk0 == 0xF || cmd->unk0 == 0x10 || cmd->unk0 == 0x12)) {
+    if (D_800E0BF4 != 0 && (event->type == 7 || event->type == 0xE || event->type == 0xF || event->type == 0x10 || event->type == 0x12)) {
         s32 flag;
         Rec1502460C *rec;
         u8 *text;
         u8 colors[3][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xA0 }, { 0x3C, 0x3C, 0x3C } };
 
-        if ((cmd->unk0 == 7 && D_800BEAAB != 0) || (cmd->unk0 == 0xE && D_800BEAAB != 4) ||
-            (cmd->unk0 == 0xF && D_800BEAAB != 2) || (cmd->unk0 == 0x10 && D_800BEAAB != 3) ||
-            (cmd->unk0 == 0x12 && D_800BEAAB != 1)) {
+        if ((event->type == 7 && D_800BEAAB != 0) || (event->type == 0xE && D_800BEAAB != 4) ||
+            (event->type == 0xF && D_800BEAAB != 2) || (event->type == 0x10 && D_800BEAAB != 3) ||
+            (event->type == 0x12 && D_800BEAAB != 1)) {
             return 1;
         }
-        flag = cmd->unk4 == 0 ? 1 : 0;
+        flag = event->unk4 == 0 ? 1 : 0;
         rec = func_150234A4(arg1, flag);
         if (rec != NULL) {
-            if (cmd->unk4 == 0) {
+            if (event->unk4 == 0) {
                 if (rec->flagC != 0) {
                     func_1516D2E0(rec->handle);
                 }
-                text = D_800C35E0[arg4][cmd->unk2];
+                text = D_800C35E0[arg4][event->value];
                 if (*text == 0xBE) {
                     rec->flags = 0x8013;
                     text++;
@@ -533,27 +537,27 @@ s32 func_1502460C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                 rec->unk2A = 100;
                 rec->flagC = 1;
                 rec->unk28 = 0;
-                rec->unk1C = &POSTAB[arg4][arg1].unkC;
-                rec->unk20 = (f32 *) &POSTAB[arg4][arg1].unk10;
+                rec->unk1C = &D_800C3958[arg4][arg1].unkC;
+                rec->unk20 = &D_800C3958[arg4][arg1].unk10;
                 rec->unk2F = 1;
-                rec->unk24 = &POSTAB[arg4][arg1].unk14;
-                rec->unk2C = colors[cmd->unk5][0];
-                rec->unk2D = colors[cmd->unk5][1];
-                rec->unk2E = colors[cmd->unk5][2];
-                if (cmd->unk5 == 2) {
+                rec->unk24 = &D_800C3958[arg4][arg1].unk14;
+                rec->unk2C = colors[event->unk5][0];
+                rec->unk2D = colors[event->unk5][1];
+                rec->unk2E = colors[event->unk5][2];
+                if (event->unk5 == 2) {
                     rec->flags |= 0x40000;
                 }
                 rec->handle = func_1516A7B0(0, 0, 0, 0, &rec->flags, arg8);
-            } else if (cmd->unk4 == 1) {
-                func_15023440(rec, cmd->unk5);
+            } else if (event->unk4 == 1) {
+                func_15023440(rec, event->unk5);
             } else {
-                if (cmd->unk5 == 0) {
+                if (event->unk5 == 0) {
                     rec->handle = func_1516D378(rec->handle);
                 } else {
                     rec->handle = func_1516D3C4(rec->handle);
                 }
-                if (cmd->unk6 != 0) {
-                    s32 idx = cmd->unk6 - 1;
+                if (event->unk6 != 0) {
+                    s32 idx = event->unk6 - 1;
 
                     rec->unk2C = colors[idx][0];
                     rec->unk2D = colors[idx][1];
@@ -566,208 +570,208 @@ s32 func_1502460C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                 }
             }
         }
-    } else if (cmd->unk0 == 0xC) {
-        Elem15023DE0 *p;
+    } else if (event->type == 0xC) {
+        SeqEvent *p;
         s32 val;
 
-        if (cmd->unk2 != 0) {
-            if (cmd->unk6 != 0) {
-                func_1507EB4C(arg5, cmd->unk2);
+        if (event->value != 0) {
+            if (event->unk6 != 0) {
+                func_1507EB4C(arg5, event->value);
             } else {
-                if (cmd->unk5 != 0) {
+                if (event->unk5 != 0) {
                     val = 0xFFFF;
                 } else {
-                    val = func_15023BB0(cmd, cmd->unk0, arg1, &p, 0, 0, 0, 0, 0, 0, arg4) - arg3;
+                    val = func_15023BB0(event, event->type, arg1, &p, 0, 0, 0, 0, 0, 0, arg4) - arg3;
                 }
-                func_1507E7E4(arg5, cmd->unk2 & 0xFF, 3, val & 0xFFFF, cmd->unk4);
+                func_1507E7E4(arg5, event->value & 0xFF, 3, val & 0xFFFF, event->unk4);
             }
         }
-    } else if (cmd->unk0 == 0xD) {
+    } else if (event->type == 0xD) {
         struct126 *s;
 
         if (arg5 == NULL) {
             return 1;
         }
-        if (cmd->unk4 == 0) {
-            func_15083568(arg5, cmd->unk2 + 1, 1.0f, 0);
-        } else if (cmd->unk4 == 1) {
-            func_150836CC(arg5, cmd->unk2 + 1);
+        if (event->unk4 == 0) {
+            func_15083568(arg5, event->value + 1, 1.0f, 0);
+        } else if (event->unk4 == 1) {
+            func_150836CC(arg5, event->value + 1);
         } else {
-            s = func_1503195C(arg5, cmd->unk2 + 1, 0);
+            s = func_1503195C(arg5, event->value + 1, 0);
             if (s != NULL) {
-                if (cmd->unk4 == 2) {
-                    FS16(s, 0x18) = D_80090214[cmd->unk5];
-                } else if (cmd->unk4 == 3) {
-                    FS16(s, 0x1A) = D_80090214[cmd->unk5];
+                if (event->unk4 == 2) {
+                    FS16(s, 0x18) = D_80090214[event->unk5];
+                } else if (event->unk4 == 3) {
+                    FS16(s, 0x1A) = D_80090214[event->unk5];
                 }
             }
         }
-    } else if (cmd->unk0 == 4) {
-        Elem15023DE0 *p;
+    } else if (event->type == 4) {
+        SeqEvent *p;
         s32 val;
 
         if (arg5 == NULL) {
             return 1;
         }
-        val = (func_15023BB0(cmd, cmd->unk0, arg1, &p, 0, 0, 0, 0, 0, 0, arg4) - arg3) / 2;
+        val = (func_15023BB0(event, event->type, arg1, &p, 0, 0, 0, 0, 0, 0, arg4) - arg3) / 2;
         if (val >= 0x100) {
             val = 0xFF;
         } else if (val == 0) {
             val = 1;
         }
-        if (cmd->unk4 == 0) {
-            FU8(arg5, 0x134) = cmd->unk2;
+        if (event->unk4 == 0) {
+            FU8(arg5, 0x134) = event->value;
             FU8(arg5, 0x135) = val;
         }
-    } else if (cmd->unk0 == 3) {
-        if (cmd->unk2 >= D_800C363A[arg4]) {
+    } else if (event->type == 3) {
+        if (event->value >= D_800C363A[arg4]) {
             return 1;
         }
-        if (D_800C35F0[arg4][cmd->unk2].unk0 == 1 && D_800C35F8 != cmd->unk2) {
-            D_800C35F8 = cmd->unk2;
+        if (D_800C35F0[arg4][event->value].unk0 == 1 && D_800C35F8 != event->value) {
+            D_800C35F8 = event->value;
             D_800DBFF4[0] = 4;
             D_800DBFF0->unk5F0 |= 4;
         }
-    } else if (cmd->unk0 == 9) {
+    } else if (event->type == 9) {
         if (arg5 == NULL) {
             return 1;
         }
-        ((u8 *) arg5 + 0x6C)[cmd->unk4] = cmd->unk2 + 10;
-    } else if (cmd->unk0 == 1) {
+        ((u8 *) arg5 + 0x6C)[event->unk4] = event->value + 10;
+    } else if (event->type == 1) {
         s32 v;
 
         if (arg5 == NULL) {
             return 1;
         }
-        v = cmd->unk2;
+        v = event->value;
         if (v == 0) {
             v = 0xFF;
         }
         FU8(arg5, 0x1C9) = v;
-    } else if (cmd->unk0 == 5) {
-        if (cmd->unk2 == 0x3B) {
-            if (cmd->unk4 == 0) {
-                D_800DDE18 = (s32) &POSTAB[arg4][arg1].unk28;
+    } else if (event->type == 5) {
+        if (event->value == 0x3B) {
+            if (event->unk4 == 0) {
+                D_800DDE18 = (s32) &D_800C3958[arg4][arg1].unk28;
             } else {
                 D_800DDE18 = 0;
             }
-        } else if (cmd->unk2 == 8) {
-            D_800C3656[arg4] = !cmd->unk4;
-        } else if (cmd->unk2 == 9) {
-            D_800C3658[arg4] = !cmd->unk4;
-        } else if (cmd->unk2 == 0xD) {
-            ((u8 *) &D_800C3654)[arg4] = !cmd->unk4;
-        } else if (cmd->unk2 == 0x12) {
-            D_800C365A[arg4] = !cmd->unk4;
-        } else if (cmd->unk2 == 0x13) {
-            D_800C365C[arg4] = cmd->unk4;
-        } else if (cmd->unk2 == 0x15) {
-            D_800C365E[arg4] = !cmd->unk4;
-        } else if (cmd->unk2 == 0x14) {
+        } else if (event->value == 8) {
+            D_800C3656[arg4] = !event->unk4;
+        } else if (event->value == 9) {
+            D_800C3658[arg4] = !event->unk4;
+        } else if (event->value == 0xD) {
+            ((u8 *) &D_800C3654)[arg4] = !event->unk4;
+        } else if (event->value == 0x12) {
+            D_800C365A[arg4] = !event->unk4;
+        } else if (event->value == 0x13) {
+            D_800C365C[arg4] = event->unk4;
+        } else if (event->value == 0x15) {
+            D_800C365E[arg4] = !event->unk4;
+        } else if (event->value == 0x14) {
             if (arg5 == NULL) {
                 return 1;
             }
-            if (cmd->unk4 == 0) {
+            if (event->unk4 == 0) {
                 func_15053430(arg5);
             } else {
                 func_15060F28(arg5, 0);
             }
-        } else if (cmd->unk2 == 0x41) {
+        } else if (event->value == 0x41) {
             u8 colors[2][3] = { { 0xFF, 0, 0 }, { 0, 0, 0 } };
 
             if (arg5 == NULL) {
                 return 1;
             }
-            if (cmd->unk4 == 0) {
-                FU8(arg5, 0xA5) = colors[cmd->unk5][0];
-                FU8(arg5, 0xA6) = colors[cmd->unk5][1];
-                FU8(arg5, 0xA7) = colors[cmd->unk5][2];
+            if (event->unk4 == 0) {
+                FU8(arg5, 0xA5) = colors[event->unk5][0];
+                FU8(arg5, 0xA6) = colors[event->unk5][1];
+                FU8(arg5, 0xA7) = colors[event->unk5][2];
                 FU8(arg5, 0xA4) = 1;
-                FPTR(arg5, 0xA0) = &POSTAB[arg4][arg1].unk30;
+                FPTR(arg5, 0xA0) = &D_800C3958[arg4][arg1].unk30;
             } else {
                 FU8(arg5, 0xA4) = 0;
                 FPTR(arg5, 0xA0) = NULL;
             }
-        } else if (cmd->unk2 == 0x44) {
+        } else if (event->value == 0x44) {
             s32 a;
             s32 c;
 
-            if (cmd->unk5 != 0) {
-                c = cmd->unk6;
+            if (event->unk5 != 0) {
+                c = event->unk6;
                 a = 2;
             } else {
                 c = 0;
                 a = 1;
             }
-            func_1501C730(a, cmd->unk4, c, 0, 0);
-        } else if (cmd->unk2 == 0x17) {
+            func_1501C730(a, event->unk4, c, 0, 0);
+        } else if (event->value == 0x17) {
             if (arg5 == NULL) {
                 return 1;
             }
-            FU8(arg5, 0x1FF) = !cmd->unk4;
+            FU8(arg5, 0x1FF) = !event->unk4;
             if (FU8(arg5, 0x1FF) != 0) {
-                FU8(arg5, 0x1FF) += cmd->unk5;
+                FU8(arg5, 0x1FF) += event->unk5;
             }
-            if (cmd->unk4 == 0) {
-                FU8(arg5, 0x201) = cmd->unk6;
+            if (event->unk4 == 0) {
+                FU8(arg5, 0x201) = event->unk6;
             }
-        } else if (cmd->unk2 == 0x16) {
+        } else if (event->value == 0x16) {
             if (arg5 == NULL) {
                 return 1;
             }
-            FU8(arg5, 0x206) = !cmd->unk4;
+            FU8(arg5, 0x206) = !event->unk4;
             if (FU8(arg5, 0x206) != 0) {
-                FU8(arg5, 0x206) += cmd->unk5;
+                FU8(arg5, 0x206) += event->unk5;
             }
-            if (cmd->unk4 == 0) {
-                FU8(arg5, 0x208) = cmd->unk6;
+            if (event->unk4 == 0) {
+                FU8(arg5, 0x208) = event->unk6;
             }
-        } else if (cmd->unk2 == 0x18) {
-        } else if (cmd->unk2 == 0x1D) {
+        } else if (event->value == 0x18) {
+        } else if (event->value == 0x1D) {
             if (D_800C35F0[arg4][arg1].unk0 == 3 && arg6 != NULL) {
-                if (cmd->unk4 == 0) {
+                if (event->unk4 == 0) {
                     FU8(arg6, 0x6E) = 1;
                 } else {
                     FU8(arg6, 0x6E) = 0;
                 }
             }
-        } else if (cmd->unk2 == 0x1E) {
-            D_800C35C2 = cmd->unk4 + 1;
+        } else if (event->value == 0x1E) {
+            D_800C35C2 = event->unk4 + 1;
             D_800C35C3 = D_800BE9F0;
-        } else if (cmd->unk2 == 3) {
-            struct131 *actor = func_151149AC(FU8(cmd, 7));
+        } else if (event->value == 3) {
+            struct131 *actor = func_151149AC(FU8(event, 7));
 
             if (actor == NULL) {
                 return 1;
             }
             FU8(actor, 0x73) &= ~3;
-            if (cmd->unk5 == 0) {
+            if (event->unk5 == 0) {
                 FU8(actor, 0x73) |= 2;
             } else {
                 FU8(actor, 0x73) |= 1;
             }
-        } else if (cmd->unk2 == 0x6C) {
+        } else if (event->value == 0x6C) {
             f32 pos[3];
             f32 pos2[3];
 
-            switch (FU8(cmd, 4)) {
+            switch (FU8(event, 4)) {
                 case 0:
-                    pos[0] = POSTAB[arg4][arg1].x;
-                    pos[1] = POSTAB[arg4][arg1].y;
-                    pos[2] = POSTAB[arg4][arg1].z;
-                    func_151BE850(pos, POSTAB[arg4][arg1].unk10, 1, 0, 2, 0xFF, 1);
+                    pos[0] = D_800C3958[arg4][arg1].x;
+                    pos[1] = D_800C3958[arg4][arg1].y;
+                    pos[2] = D_800C3958[arg4][arg1].z;
+                    func_151BE850(pos, D_800C3958[arg4][arg1].unk10, 1, 0, 2, 0xFF, 1);
                     break;
                 case 1:
-                    pos2[0] = POSTAB[arg4][arg1].x;
-                    pos2[1] = POSTAB[arg4][arg1].y;
-                    pos2[2] = POSTAB[arg4][arg1].z;
+                    pos2[0] = D_800C3958[arg4][arg1].x;
+                    pos2[1] = D_800C3958[arg4][arg1].y;
+                    pos2[2] = D_800C3958[arg4][arg1].z;
                     func_151A9390(5, 1, 0, pos2, -10000.0f, 100.0f, -1, arg8, 1);
                     break;
                 case 2:
-                    func_151494E0(0, cmd->unk5 ? 0x2B : 0x2C);
+                    func_151494E0(0, event->unk5 ? 0x2B : 0x2C);
                     break;
                 case 3:
-                    if (cmd->unk5) {
+                    if (event->unk5) {
                         func_1515F170(1, 0);
                         func_1515F170(2, 1);
                     } else {
@@ -776,19 +780,19 @@ s32 func_1502460C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                     }
                     break;
                 case 4:
-                    func_151645C4(cmd->unk5);
+                    func_151645C4(event->unk5);
                     break;
                 case 5:
                     func_151616D0(0x28, 0x17, 0);
                     break;
                 case 6:
-                    func_151CD35C(cmd->unk5);
+                    func_151CD35C(event->unk5);
                     break;
                 case 7:
-                    func_1515F170(3, cmd->unk5 ? 0 : 1);
+                    func_1515F170(3, event->unk5 ? 0 : 1);
                     break;
                 case 8:
-                    func_150B648C(cmd->unk5);
+                    func_150B648C(event->unk5);
                     break;
                 case 9: {
                     u8 i;
@@ -824,7 +828,7 @@ s32 func_1502460C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                     func_15169040(0, 0x4F);
                     break;
                 case 18:
-                    func_151CD394(cmd->unk5);
+                    func_151CD394(event->unk5);
                     break;
                 case 19:
                     func_1515F170(0xB, 0);
@@ -836,7 +840,7 @@ s32 func_1502460C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                     }
                     break;
                 case 21:
-                    func_151494E0(0, cmd->unk5 != 0 ? 0x55 : 0x56);
+                    func_151494E0(0, event->unk5 != 0 ? 0x55 : 0x56);
                     break;
                 case 22:
                     if (arg5 != NULL) {
@@ -853,28 +857,28 @@ s32 func_1502460C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                     }
                     break;
             }
-        } else if (cmd->unk2 == 0x6E) {
+        } else if (event->value == 0x6E) {
             u8 *list;
             s32 count;
 
             list = func_1519003C(arg5, &count);
-            if (list != NULL && cmd->unk6 < count) {
-                func_1518F51C(arg5, list[cmd->unk6], -1, -1, -1, -1, 0, 0, 0xFF, 1);
+            if (list != NULL && event->unk6 < count) {
+                func_1518F51C(arg5, list[event->unk6], -1, -1, -1, -1, 0, 0, 0xFF, 1);
             }
-        } else if (cmd->unk2 == 5) {
+        } else if (event->value == 5) {
             s32 idx;
-            Elem15023DE0 *p;
+            SeqEvent *p;
             s32 val;
             s32 ids[4] = { 0xD, 0xE, 0xF, 0x10 };
             u8 c;
 
-            if (cmd->unk4 == 0) {
-                idx = cmd->unk5;
+            if (event->unk4 == 0) {
+                idx = event->unk5;
                 if (idx >= 4) {
                     idx = 3;
                 }
-                val = func_15023BB0(cmd, cmd->unk0, arg1, &p, 1, cmd->unk2, 0, 0, 1, cmd->unk5, arg4) - arg3;
-                if (cmd->unk6 != 0) {
+                val = func_15023BB0(event, event->type, arg1, &p, 1, event->value, 0, 0, 1, event->unk5, arg4) - arg3;
+                if (event->unk6 != 0) {
                     val = 999;
                     c = 0xFF;
                 } else {
@@ -882,24 +886,24 @@ s32 func_1502460C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                 }
                 func_1518D1C0(arg5, ids[idx], val, 0, c, 0, "Cutscene 1");
             }
-        } else if (cmd->unk2 == 0x36) {
-            if (cmd->unk4 == 0) {
+        } else if (event->value == 0x36) {
+            if (event->unk4 == 0) {
                 func_1519D030(arg5, 0, 300, 0, arg8, 0);
-            } else if (cmd->unk4 == 1) {
+            } else if (event->unk4 == 1) {
                 ObjRef1502460C ref;
 
                 ref.obj = arg5;
                 ref.id = arg5->unique_id;
                 func_15147D64(&ref, 7);
             }
-        } else if (cmd->unk2 == 0x30) {
+        } else if (event->value == 0x30) {
             u8 v;
 
             if (arg5 == NULL) {
                 return 1;
             }
             {
-                switch (cmd->unk4) {
+                switch (event->unk4) {
                     case 0:
                         v = 0xC;
                         break;
@@ -918,113 +922,113 @@ s32 func_1502460C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                 }
                 func_1514D3B0(arg5, 0xD, v, 0);
             }
-        } else if (cmd->unk2 == 0x46) {
-            if (cmd->unk4 != 0) {
+        } else if (event->value == 0x46) {
+            if (event->unk4 != 0) {
                 func_150C5C74((s32) arg5);
             } else {
                 func_150C5C9C((s32) arg5);
             }
-        } else if (cmd->unk2 == 0x25) {
-            if (cmd->unk4 != 0) {
-                D_800C364C = cmd->unk4;
+        } else if (event->value == 0x25) {
+            if (event->unk4 != 0) {
+                D_800C364C = event->unk4;
             } else {
                 D_800C364C = D_800D9B20;
             }
             func_1510B458(0, D_800C364C, D_800C3650);
-        } else if (cmd->unk2 == 0x58) {
-            if (cmd->unk6 != 0) {
-                D_800C3650 = cmd->unk6 * 10;
+        } else if (event->value == 0x58) {
+            if (event->unk6 != 0) {
+                D_800C3650 = event->unk6 * 10;
             } else {
                 D_800C3650 = D_800D9B1C;
             }
             func_1510B458(0, D_800C364C, D_800C3650);
-        } else if (cmd->unk2 == 0x3C) {
+        } else if (event->value == 0x3C) {
             s32 v;
 
             if (arg5 != NULL) {
-                v = cmd->unk4;
+                v = event->unk4;
                 v <<= 16;
-                v |= cmd->unk6;
-                if (cmd->unk5 == 0) {
+                v |= event->unk6;
+                if (event->unk5 == 0) {
                     arg5->unk94 = v;
-                } else if (cmd->unk5 == 1) {
+                } else if (event->unk5 == 1) {
                     arg5->unk94 |= v;
                 } else {
                     arg5->unk94 &= ~(v | 1);
                 }
             }
-        } else if (cmd->unk2 == 0x3D) {
+        } else if (event->value == 0x3D) {
             s32 r;
 
             if (arg5 != NULL) {
-                if (cmd->unk4 == 0) {
-                    r = func_15083FB0(FU8(cmd, 7));
+                if (event->unk4 == 0) {
+                    r = func_15083FB0(FU8(event, 7));
                     if (r != -1) {
                         arg5->unk101 |= 4;
                         arg5->unk65 = r + 1;
-                        arg5->unk5C = cmd->unk5;
+                        arg5->unk5C = event->unk5;
                     }
                 } else {
                     arg5->unk65 = 0;
                 }
             }
-        } else if (cmd->unk2 == 0x42) {
-            if (cmd->unk4 == 0) {
+        } else if (event->value == 0x42) {
+            if (event->unk4 == 0) {
                 D_800D9890 = 1;
-            } else if (cmd->unk4 == 1) {
+            } else if (event->unk4 == 1) {
                 D_800D9890 = 4;
-            } else if (cmd->unk4 == 3) {
+            } else if (event->unk4 == 3) {
                 D_800D9890 = 2;
-            } else if (cmd->unk4 == 4) {
+            } else if (event->unk4 == 4) {
                 D_800D9890 = 5;
-            } else if (cmd->unk4 == 5) {
+            } else if (event->unk4 == 5) {
                 D_800D9890 = 6;
-            } else if (cmd->unk4 == 6) {
+            } else if (event->unk4 == 6) {
                 D_800D9890 = 7;
-            } else if (cmd->unk4 == 7) {
+            } else if (event->unk4 == 7) {
                 D_800D9890 = 8;
-            } else if (cmd->unk4 == 8) {
+            } else if (event->unk4 == 8) {
                 D_800D9890 = 9;
-            } else if (cmd->unk4 == 9) {
+            } else if (event->unk4 == 9) {
                 D_800D9890 = 10;
             }
-        } else if (cmd->unk2 == 0x43) {
+        } else if (event->value == 0x43) {
             s32 time;
-            Elem15023DE0 *p;
+            SeqEvent *p;
 
-            if (cmd->unk4 == 0) {
-                time = func_15023BB0(cmd, cmd->unk0, arg1, &p, 1, cmd->unk2, 0, 0, 0, 0, arg4) - arg3;
-                func_150B7220(POSTAB[arg4][arg1].unk24, POSTAB[arg4][arg1].unk28, time, arg8);
+            if (event->unk4 == 0) {
+                time = func_15023BB0(event, event->type, arg1, &p, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+                func_150B7220(D_800C3958[arg4][arg1].unk24, D_800C3958[arg4][arg1].unk28, time, arg8);
             }
-        } else if (cmd->unk2 == 0x45) {
+        } else if (event->value == 0x45) {
             s32 time;
-            Elem15023DE0 *p;
+            SeqEvent *p;
 
-            if (cmd->unk4 == 0) {
-                time = func_15023BB0(cmd, cmd->unk0, arg1, &p, 1, cmd->unk2, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                time = func_15023BB0(event, event->type, arg1, &p, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
                 func_151A4FD0(0, time, 0xFF, 0, 0, D_800BE9E8, 0, 0);
             }
-        } else if (cmd->unk2 == 0x49) {
-            if (arg5 != NULL && cmd->unk4 < 3) {
-                ((s32 *) ((u8 *) arg5 + 0x2E4))[cmd->unk4] = cmd->unk6;
+        } else if (event->value == 0x49) {
+            if (arg5 != NULL && event->unk4 < 3) {
+                ((s32 *) ((u8 *) arg5 + 0x2E4))[event->unk4] = event->unk6;
             }
-        } else if (cmd->unk2 == 0x4B) {
+        } else if (event->value == 0x4B) {
             if (arg5 != NULL) {
-                arg5->unk9C = (cmd->unk6 & 0xFFFF) | ((cmd->unk5 & 0xFF) << 16) | ((cmd->unk4 & 0xFF) << 24);
+                arg5->unk9C = (event->unk6 & 0xFFFF) | ((event->unk5 & 0xFF) << 16) | ((event->unk4 & 0xFF) << 24);
             }
-        } else if (cmd->unk2 == 0x4A) {
-            if (cmd->unk4 == 0) {
-                func_10011FB0(cmd->unk5);
+        } else if (event->value == 0x4A) {
+            if (event->unk4 == 0) {
+                func_10011FB0(event->unk5);
             } else {
                 func_10011FB0(0);
             }
-        } else if (cmd->unk2 == 0x54) {
-            D_800C3660[arg4] = ~cmd->unk4;
-        } else if (cmd->unk2 == 0x55) {
-            func_150C851C(cmd->unk4);
-        } else if (cmd->unk2 == 0x59) {
+        } else if (event->value == 0x54) {
+            D_800C3660[arg4] = ~event->unk4;
+        } else if (event->value == 0x55) {
+            func_150C851C(event->unk4);
+        } else if (event->value == 0x59) {
             D_800C3C8B = 1;
-        } else if (cmd->unk2 == 0x5A) {
+        } else if (event->value == 0x5A) {
             D_800C3E78 = arg5 - D_800CC2D0;
             if (arg5->id == 0x53) {
                 arg5->unk124 = 0;
@@ -1036,7 +1040,7 @@ s32 func_1502460C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                 arg5->unk124 = 0;
                 func_15052F9C(arg5, 156.0f, 0x19, 4, 0, 0xF, 0xFF, 0, 1, 0);
             }
-        } else if (cmd->unk2 == 0x71) {
+        } else if (event->value == 0x71) {
             D_800CC2D0->unkCC = 0;
             FU8(D_800CC2D0->unk31C, 0x4E) = 0;
             D_800CC2D0->unk65 = 0;
@@ -1045,91 +1049,91 @@ s32 func_1502460C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
             if (arg5 != NULL) {
                 arg5->unk13C = 0;
             }
-        } else if (cmd->unk2 == 0x37) {
+        } else if (event->value == 0x37) {
             s32 val;
-            Elem15023DE0 *p;
+            SeqEvent *p;
             s32 v;
             u8 colors[3][3] = { { 0xFF, 0, 0 }, { 0, 0x35, 0x46 }, { 0xFF, 0xFF, 0xFF } };
 
-            val = func_15023BB0(cmd, cmd->unk0, arg1, &p, 1, cmd->unk2, 0, 0, 0, 0, arg4) - arg3;
-            if (cmd->unk4 == 0) {
-v = cmd->unk6 != 0 ? cmd->unk6 : 0x7F;
-                func_1517F488(colors[cmd->unk5][0], colors[cmd->unk5][1], colors[cmd->unk5][2], v, val, 0);
+            val = func_15023BB0(event, event->type, arg1, &p, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+v = event->unk6 != 0 ? event->unk6 : 0x7F;
+                func_1517F488(colors[event->unk5][0], colors[event->unk5][1], colors[event->unk5][2], v, val, 0);
             } else {
                 D_800DDE10 = 0;
             }
-        } else if (cmd->unk2 == 0x38) {
+        } else if (event->value == 0x38) {
             s32 val;
-            Elem15023DE0 *p;
+            SeqEvent *p;
             s32 v;
 
-            val = func_15023BB0(cmd, cmd->unk0, arg1, &p, 1, cmd->unk2, 0, 0, 0, 0, arg4) - arg3;
-            if (cmd->unk4 == 0) {
-v = cmd->unk6 != 0 ? cmd->unk6 : 4;
-                func_1517F720(cmd->unk5, val, v, 0x7F, 1);
+            val = func_15023BB0(event, event->type, arg1, &p, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+v = event->unk6 != 0 ? event->unk6 : 4;
+                func_1517F720(event->unk5, val, v, 0x7F, 1);
             } else {
                 D_800DDE08 = 0;
             }
-        } else if (cmd->unk2 == 0x5C) {
-            Elem15023DE0 *p;
+        } else if (event->value == 0x5C) {
+            SeqEvent *p;
             s32 total;
             s32 start;
             s32 end;
 
-            if (cmd->unk4 == 0) {
-                total = func_15023BB0(cmd, cmd->unk0, arg1, &p, 1, cmd->unk2, 1, 1, 1, cmd->unk5, arg4);
-                start = func_15023BB0(cmd, cmd->unk0, arg1, &p, 1, cmd->unk2, 1, 2, 1, cmd->unk5, arg4) - arg3;
+            if (event->unk4 == 0) {
+                total = func_15023BB0(event, event->type, arg1, &p, 1, event->value, 1, 1, 1, event->unk5, arg4);
+                start = func_15023BB0(event, event->type, arg1, &p, 1, event->value, 1, 2, 1, event->unk5, arg4) - arg3;
                 if (p == NULL) {
                     start = 0;
                 }
-                end = total - func_15023BB0(cmd, cmd->unk0, arg1, &p, 1, cmd->unk2, 1, 3, 1, cmd->unk5, arg4);
+                end = total - func_15023BB0(event, event->type, arg1, &p, 1, event->value, 1, 3, 1, event->unk5, arg4);
                 if (p == NULL) {
                     end = 0;
                 }
                 if (D_800BE9F0 == 0x18) {
-                    func_150F5420(start, total - arg3 - end - start, end, cmd->unk5);
+                    func_150F5420(start, total - arg3 - end - start, end, event->unk5);
                 } else if (D_800BE9F0 == 0x21) {
                     func_1510A930(start, total - arg3 - end - start, end);
                 }
             }
-        } else if (cmd->unk2 == 0x62) {
+        } else if (event->value == 0x62) {
             FU8(D_800B0DF0, 8) = 0;
-        } else if (cmd->unk2 == 0x7C) {
-            D_800C3681 = !cmd->unk4;
-        } else if (cmd->unk2 == 0x84) {
-            D_800C3682 = !cmd->unk4;
-        } else if (cmd->unk2 == 0x85) {
-            D_800C3683 = !cmd->unk4;
-        } else if (cmd->unk2 == 0x63) {
-            D_80041FDC = cmd->unk6;
-        } else if (cmd->unk2 == 0x64) {
-            if (cmd->unk4 == 0) {
+        } else if (event->value == 0x7C) {
+            D_800C3681 = !event->unk4;
+        } else if (event->value == 0x84) {
+            D_800C3682 = !event->unk4;
+        } else if (event->value == 0x85) {
+            D_800C3683 = !event->unk4;
+        } else if (event->value == 0x63) {
+            D_80041FDC = event->unk6;
+        } else if (event->value == 0x64) {
+            if (event->unk4 == 0) {
                 D_800DDE40 = 1;
-                D_800DDE44 = &POSTAB[arg4][arg1].unk28;
-                D_800DDE48 = &POSTAB[arg4][arg1].unk24;
-                D_800DDE4C = &POSTAB[arg4][arg1].unk2C;
+                D_800DDE44 = &D_800C3958[arg4][arg1].unk28;
+                D_800DDE48 = &D_800C3958[arg4][arg1].unk24;
+                D_800DDE4C = &D_800C3958[arg4][arg1].unk2C;
             } else {
                 D_800DDE40 = 0;
             }
-        } else if (cmd->unk2 == 0x66) {
-            if (cmd->unk4 == 0) {
+        } else if (event->value == 0x66) {
+            if (event->unk4 == 0) {
             }
-        } else if (cmd->unk2 == 0x67) {
+        } else if (event->value == 0x67) {
             func_151DE7D4();
-        } else if (cmd->unk2 == 0x73) {
+        } else if (event->value == 0x73) {
             func_151E53E8(0);
-        } else if (cmd->unk2 == 0x69) {
+        } else if (event->value == 0x69) {
             if (arg5 != NULL) {
-                if (cmd->unk4 == 0) {
+                if (event->unk4 == 0) {
                     arg5->gravity = 4.0f;
                     arg5->y_velocity = 20.0f;
-                } else if (cmd->unk4 == 1) {
+                } else if (event->unk4 == 1) {
                     arg5->gravity = 0.0f;
                     arg5->y_velocity = 0.0f;
-                } else if (cmd->unk4 == 2) {
+                } else if (event->unk4 == 2) {
                     func_150836CC(arg5, 0x11);
                     arg5->unkA9 = 0;
-                } else if (cmd->unk4 == 3) {
+                } else if (event->unk4 == 3) {
                     D_800C3E78 = arg5 - D_800CC2D0;
                     D_800CC2D0->unk13C = D_800C3E78 + 100;
                     D_800CC2D0->xz_velocity = 0.0f;
@@ -1138,69 +1142,69 @@ v = cmd->unk6 != 0 ? cmd->unk6 : 4;
                     *(u32 *) &arg5->unk5C = 9;
                     arg5->unk65 = 1;
                     arg5->unk101 |= 4;
-                } else if (cmd->unk4 == 4) {
+                } else if (event->unk4 == 4) {
                     FU8(D_800CC2D0->unk31C, 0x17) = 1;
-                } else if (cmd->unk4 == 5) {
+                } else if (event->unk4 == 5) {
                     D_800D154C = arg5;
                     func_15073F1C();
-                } else if (cmd->unk4 == 6) {
+                } else if (event->unk4 == 6) {
                     FU8(arg5->unk31C, 0x4E) = 0;
                 }
             }
-        } else if (cmd->unk2 == 0x6A) {
-            D_800C3674 = cmd->unk6;
-        } else if (cmd->unk2 == 0x7A) {
-            D_800C367C = cmd->unk5 * 60;
-            D_800C3678 = cmd->unk6;
-        } else if (cmd->unk2 == 0x6B) {
-        } else if (cmd->unk2 == 0x6D) {
-            D_800C3662 = !cmd->unk4;
-        } else if (cmd->unk2 == 0x74) {
-            D_800BEA0C = cmd->unk5;
-        } else if (cmd->unk2 == 0x6F) {
+        } else if (event->value == 0x6A) {
+            D_800C3674 = event->unk6;
+        } else if (event->value == 0x7A) {
+            D_800C367C = event->unk5 * 60;
+            D_800C3678 = event->unk6;
+        } else if (event->value == 0x6B) {
+        } else if (event->value == 0x6D) {
+            D_800C3662 = !event->unk4;
+        } else if (event->value == 0x74) {
+            D_800BEA0C = event->unk5;
+        } else if (event->value == 0x6F) {
             if (arg5 != NULL) {
-                ((u8 *) arg5 + 0x68)[cmd->unk4] = cmd->unk5;
+                ((u8 *) arg5 + 0x68)[event->unk4] = event->unk5;
             }
-        } else if (cmd->unk2 == 0x70) {
+        } else if (event->value == 0x70) {
             D_800C3C8C = 1;
-        } else if (cmd->unk2 == 0x72) {
+        } else if (event->value == 0x72) {
             if (arg5 != NULL) {
                 FF32(arg5, 0xC8) = FS16(D_800D1C90[arg5->id], 6);
             }
-        } else if (cmd->unk2 == 0x78) {
+        } else if (event->value == 0x78) {
             D_800C3C8D = 1;
-        } else if (cmd->unk2 == 0x79) {
+        } else if (event->value == 0x79) {
             if (arg6 != NULL) {
                 FS32(arg6, 0x84) = 0;
                 FS32(arg6, 0x80) = 0;
                 FS32(arg6, 0x7C) = 0;
             }
-        } else if (cmd->unk2 == 0x7B) {
+        } else if (event->value == 0x7B) {
             if (D_800BE9F0 == 0x1D) {
                 D_800C3680 = 1;
             }
-        } else if (cmd->unk2 == 0x7D) {
-            if (arg5 != NULL && cmd->unk4 == 0) {
+        } else if (event->value == 0x7D) {
+            if (arg5 != NULL && event->unk4 == 0) {
                 arg5->unk5 = 1;
             }
-        } else if (cmd->unk2 == 0x7E) {
+        } else if (event->value == 0x7E) {
             if (arg5 != NULL) {
                 D_800D18D0 = arg5 - D_800CC2D0;
             }
-        } else if (cmd->unk2 == 0x7F) {
+        } else if (event->value == 0x7F) {
             D_800DBEAC = 1;
-        } else if (cmd->unk2 == 0x80) {
-            D_800BE9ED = cmd->unk4;
-        } else if (cmd->unk2 == 0x81) {
-            func_15093818(cmd->unk4 ^ 1);
-            D_800D2450 = cmd->unk6 * 30;
-        } else if (cmd->unk2 == 0x82) {
-            D_800C3C9D = cmd->unk4;
+        } else if (event->value == 0x80) {
+            D_800BE9ED = event->unk4;
+        } else if (event->value == 0x81) {
+            func_15093818(event->unk4 ^ 1);
+            D_800D2450 = event->unk6 * 30;
+        } else if (event->value == 0x82) {
+            D_800C3C9D = event->unk4;
             if (D_800C3C9D > 100) {
                 D_800C3C9D = 100;
             }
-        } else if (cmd->unk2 == 0x83) {
-            D_800C3C9E = cmd->unk6;
+        } else if (event->value == 0x83) {
+            D_800C3C9E = event->unk6;
         } else {
             return 0;
         }
@@ -1209,26 +1213,6 @@ v = cmd->unk6 != 0 ? cmd->unk6 : 4;
     }
     return 1;
 }
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-} Ev3958;
 
 typedef struct EvNode {
     u8 pad0[0x10];
@@ -1340,10 +1324,10 @@ extern void func_1510A344(struct127 *, s16, u8, s32);
 extern void func_151619A0(s32, s16, u8, s32);
 extern void func_15108FFC(s32, s32, u8);
 extern void func_15190770(Ev15190770 *, s32, u8, s32);
-extern void func_150F802C(Ev3958 *, s16, u8, s32);
+extern void func_150F802C(SeqTrackState *, s16, u8, s32);
 extern void func_150AF738(s16, u8, s32);
 extern void func_150F5C08(struct127 *, s16, u8, s32);
-extern void func_1519EB8C(Ev3958 *, u16, s16, u8, s32);
+extern void func_1519EB8C(SeqTrackState *, u16, s16, u8, s32);
 extern void func_150C4120(struct127 *, s16, u8, s32);
 extern void func_150F6890(struct127 *, s16, u8, s32);
 extern void func_150D0134(u8, s32, s16, u8, s32);
@@ -1351,11 +1335,11 @@ extern void func_150D02B4(u8, s32, s16, u8, s32);
 extern void func_150D04C4(u8, s32, s16, u8, s32);
 extern void func_150CF680(s16, u8, s32);
 extern void func_151925C4(struct127 *, s16, u8, s32);
-extern void func_1519ED84(Ev3958 *, u16, s16, u8, s32);
+extern void func_1519ED84(SeqTrackState *, u16, s16, u8, s32);
 extern void func_150FAE18(s16, u8, s32);
 extern s32 func_15046C80(f32 *, s32, f32, EvFloor *);
 extern void func_15136698(f32, f32, u8, s32, s32, f32 *, f32 *, s32, s32, s32, s32);
-extern void func_150E3340(f32 *, s32 *, Ev3958 *, s16);
+extern void func_150E3340(f32 *, s32 *, SeqTrackState *, s16);
 extern void func_151D8868(Ev151D8868 *, s32, u8, s32);
 extern void func_151B5240(s16, u8, s32);
 extern void func_15192D48(struct127 *, s16, u8, s32);
@@ -1420,50 +1404,48 @@ extern void func_1518B6B0(f32, f32, f32, u8, s32);
 extern void func_1516ED68(s32, s32, u8, s32);
 extern void func_150C2804(f32 *, f32 *, f32 *, s16, s32, s32);
 
-#define EV ((Elem15023DE0 *)arg0)
-#define POS(a4, a1) (&((Ev3958 **)&D_800C3958)[a4][a1])
 
-s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *arg5, struct131 *arg6, f32 *arg7, s32 arg8) {
+s32 func_150265CC(SeqEvent *event, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *arg5, struct131 *arg6, f32 *arg7, s32 arg8) {
 
-    if (EV->unk0 == 0xB) {
+    if (event->type == 0xB) {
         s32 vol;
         s32 vol2;
         s32 delay;
-        Elem15023DE0 *found;
+        SeqEvent *found;
 
-        if (EV->unk4 == 0) {
-            if (EV->unk6 == 0) {
+        if (event->unk4 == 0) {
+            if (event->unk6 == 0) {
                 vol = 0x10000;
             } else {
-                vol = (EV->unk6 << 16) / 255;
+                vol = (event->unk6 << 16) / 255;
             }
-            func_1001263C(EV->unk2, vol, 0x40);
-        } else if (EV->unk4 == 1) {
-            delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 2, 0, 0, arg4) - arg3;
-            if (EV->unk6 == 0) {
+            func_1001263C(event->value, vol, 0x40);
+        } else if (event->unk4 == 1) {
+            delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 1, 2, 0, 0, arg4) - arg3;
+            if (event->unk6 == 0) {
                 vol2 = 0x10000;
             } else {
-                vol2 = (EV->unk6 << 16) / 255;
+                vol2 = (event->unk6 << 16) / 255;
             }
             delay = (delay * 0x5604) / 60;
             func_151F2D6C(vol2, delay);
-        } else if (EV->unk4 == 3) {
+        } else if (event->unk4 == 3) {
             func_151F2BA8();
-        } else if (EV->unk4 == 4) {
+        } else if (event->unk4 == 4) {
             func_151F2BE8();
-        } else if (EV->unk4 == 5) {
+        } else if (event->unk4 == 5) {
             func_151F2C4C();
         }
-    } else if (EV->unk0 == 0x11) {
-        if (EV->unk4 != 0) {
-            D_800C3960[arg4][arg1][EV->unk2] = arg2;
+    } else if (event->type == 0x11) {
+        if (event->unk4 != 0) {
+            D_800C3960[arg4][arg1][event->value] = arg2;
         } else {
-            D_800C3960[arg4][arg1][EV->unk2] = 0xFF;
+            D_800C3960[arg4][arg1][event->value] = 0xFF;
         }
-    } else if (EV->unk0 == 5) {
-        if (EV->unk2 == 0x11) {
+    } else if (event->type == 5) {
+        if (event->value == 0x11) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
             s32 dur;
             s32 idx;
             s32 c0;
@@ -1476,19 +1458,19 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
             s32 u;
             u8 colors[3][6] = { { 0xFF, 0xFF, 0xFF, 0x00, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xFF, 0x00, 0xAB, 0xFF }, { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } };
 
-            delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
-            if (EV->unk4 == 0) {
-                if (EV->unk6 == 0) {
+            delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                if (event->unk6 == 0) {
                     dur = 0x1000;
-                } else if (EV->unk6 > 200) {
-                    dur = EV->unk6;
+                } else if (event->unk6 > 200) {
+                    dur = event->unk6;
                 } else {
                     dur = 200;
                 }
-                if (EV->unk5 >= 3) {
+                if (event->unk5 >= 3) {
                     idx = 0;
                 } else {
-                    idx = EV->unk5;
+                    idx = event->unk5;
                 }
                 c0 = colors[idx][0];
                 c1 = colors[idx][1];
@@ -1504,71 +1486,71 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                               delay, u, u, 0xFF, 0xE, 8, 8, 0x25, 0, 0xFF, 8, 0, 0,
                               arg4, 0, 0, arg8, 0);
             }
-        } else if (EV->unk2 == 0xA) {
+        } else if (event->value == 0xA) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
-            if (EV->unk4 == 0) {
+            delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
                 func_151B9BF0(3, 3, 0, 0, 0, 0x320, 0x4B0, 0x190, 0xC8, 0x66, 0x1C7, 2, delay, arg7, arg8, 0);
             }
-        } else if (EV->unk2 == 0xB) {
+        } else if (event->value == 0xB) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
-            if (EV->unk4 == 0) {
+            delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
                 func_151B9BF0(0x2F, 1, 0, 0, 0, 0x7D0, 0x3E8, 0x190, 0xC8, 0x400, 0x400, 6, delay, arg7, arg8, 0);
             }
-        } else if (EV->unk2 == 0xC) {
+        } else if (event->value == 0xC) {
             Ev15167AD8 sp;
 
             sp.unk0 = D_8008CA50;
             sp.unk4 = 0;
             sp.unk6 = 0x100;
             sp.unk8 = arg7[0];
-            sp.unkA = arg7[1] + EV->unk4;
+            sp.unkA = arg7[1] + event->unk4;
             sp.unkC = arg7[2];
             sp.unkE = 0x5DC;
             sp.unk10 = 0x5DC;
             sp.unk12 = -10;
             sp.unk14 = 0;
             func_15167AD8(&sp, arg8, 1);
-        } else if (EV->unk2 == 0x19) {
+        } else if (event->value == 0x19) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
             s32 count;
 
-            delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
-            if (EV->unk4 == 0) {
-                count = EV->unk5;
+            delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                count = event->unk5;
                 if (count == 0) {
                     count = 0xC;
                 }
-                func_15177F90(count, arg7, 0xFF, arg7[0], arg7[1], arg7[2], 0, delay, arg8, 0, EV->unk6);
+                func_15177F90(count, arg7, 0xFF, arg7[0], arg7[1], arg7[2], 0, delay, arg8, 0, event->unk6);
             }
-        } else if (EV->unk2 == 0x1A) {
-            if (EV->unk4 != 0 && EV->unk4 == 1) {
+        } else if (event->value == 0x1A) {
+            if (event->unk4 != 0 && event->unk4 == 1) {
                 f32 from[3];
                 f32 to[3];
 
                 from[0] = D_800C3868[arg4][arg1][0];
                 from[1] = D_800C3868[arg4][arg1][1];
                 from[2] = D_800C3868[arg4][arg1][2];
-                to[0] = POS(arg4, arg1)->unk0;
-                to[1] = POS(arg4, arg1)->unk4 + POS(arg4, arg1)->unk38;
-                to[2] = POS(arg4, arg1)->unk8;
+                to[0] = D_800C3958[arg4][arg1].x;
+                to[1] = D_800C3958[arg4][arg1].y + D_800C3958[arg4][arg1].unk38;
+                to[2] = D_800C3958[arg4][arg1].z;
                 func_150B0094(from, to, arg8, 1);
             } else {
-                func_150E1AB0(0, D_800C3868[arg4][arg1][0], D_800C3868[arg4][arg1][1], D_800C3868[arg4][arg1][2], POS(arg4, arg1)->unk0, POS(arg4, arg1)->unk4 + POS(arg4, arg1)->unk38, POS(arg4, arg1)->unk8, 40.0f, 0.0f, 8.0f, 60.0f, 0x258, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                func_150E1AB0(0, D_800C3868[arg4][arg1][0], D_800C3868[arg4][arg1][1], D_800C3868[arg4][arg1][2], D_800C3958[arg4][arg1].x, D_800C3958[arg4][arg1].y + D_800C3958[arg4][arg1].unk38, D_800C3958[arg4][arg1].z, 40.0f, 0.0f, 8.0f, 60.0f, 0x258, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
             }
-        } else if (EV->unk2 == 0x1C) {
+        } else if (event->value == 0x1C) {
             s32 anim;
 
             if (arg5 == NULL) {
                 return 1;
             }
-            switch (EV->unk4) {
+            switch (event->unk4) {
                 case 0:
                     anim = 3;
                     break;
@@ -1579,15 +1561,15 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                     return 1;
             }
             func_150E2DB4(arg5, arg5->unique_id, anim, -1, 0.0f, 0.0f, 156.0f, 0.0f, 0.0f, 636.0f, 3, 0xA, 0xF0, 0);
-        } else if (EV->unk2 == 0x1B) {
+        } else if (event->value == 0x1B) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
-            if (EV->unk4 == 0) {
-                switch (*(u16 *)&EV->unk6) {
+            delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                switch (*(u16 *)&event->unk6) {
                     case 0:
-                        func_1516E778(arg7, delay, EV->unk5, arg8, 0);
+                        func_1516E778(arg7, delay, event->unk5, arg8, 0);
                         break;
                     case 1:
                         func_150BEF7C(delay);
@@ -1620,59 +1602,59 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                         break;
                 }
             }
-        } else if (EV->unk2 == 0x1F) {
+        } else if (event->value == 0x1F) {
             if (arg5 == NULL) {
                 return 1;
             }
             func_150BA4C0(arg5, arg8, 1);
-        } else if (EV->unk2 == 0) {
+        } else if (event->value == 0) {
             if (arg5 == NULL) {
                 return 1;
             }
             func_151A3390(arg5, arg8);
-        } else if (EV->unk2 == 0x20) {
+        } else if (event->value == 0x20) {
             func_15165F80(-1, arg7[0], arg7[1], arg7[2], 0x14, 0x14, 1, arg8, 1);
-        } else if (EV->unk2 == 6) {
-        } else if (EV->unk2 == 7) {
+        } else if (event->value == 6) {
+        } else if (event->value == 7) {
             func_150B2494(arg5, 9, -1);
-        } else if (EV->unk2 == 0x21) {
+        } else if (event->value == 0x21) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            if (EV->unk4 == 0) {
-                delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
                 func_15136A50(arg7, arg7 + 1, arg7 + 2, delay, arg8, 0);
             }
-        } else if (EV->unk2 == 0x60) {
+        } else if (event->value == 0x60) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            if (EV->unk4 == 0) {
-                delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
                 func_150CE150(arg5, delay, arg8, 0);
             }
-        } else if (EV->unk2 == 0x65) {
+        } else if (event->value == 0x65) {
             s8 val[4];
             s32 pad;
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            if (EV->unk4 == 2) {
-                switch (EV->unk5) {
+            if (event->unk4 == 2) {
+                switch (event->unk5) {
                     case 0x11:
                     case 0x12:
                     case 0x15:
-                        val[0] = EV->unk6;
+                        val[0] = event->unk6;
                         func_151494E0((s32)val, 0x51);
                         break;
                     case 0x13:
-                        func_150CFC38(((f32)EV->unk6 * 0.009999999776f * 300.0f) - 150.0f);
+                        func_150CFC38(((f32)event->unk6 * 0.009999999776f * 300.0f) - 150.0f);
                         break;
                 }
             }
-            if (EV->unk4 == 0) {
-                delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 1, 1, EV->unk5, arg4) - arg3;
-                switch (EV->unk5) {
+            if (event->unk4 == 0) {
+                delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 1, 1, 1, event->unk5, arg4) - arg3;
+                switch (event->unk5) {
                     case 1:
                         func_15109410(arg5, delay, -1, 0, 0.000709999993f, 0, arg8, 1);
                         break;
@@ -1697,9 +1679,9 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                     case 8: {
                         f32 p[3];
 
-                        p[0] = POS(arg4, arg1)->unk0;
-                        p[1] = POS(arg4, arg1)->unk4;
-                        p[2] = POS(arg4, arg1)->unk8;
+                        p[0] = D_800C3958[arg4][arg1].x;
+                        p[1] = D_800C3958[arg4][arg1].y;
+                        p[2] = D_800C3958[arg4][arg1].z;
                         func_151A9390(5, 1, 0, p, -10000.0f, 100.0f, delay, arg8, 1);
                         break;
                     }
@@ -1727,7 +1709,7 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                         break;
                     }
                     case 10:
-                        func_150F802C(POS(arg4, arg1), delay, arg8, 1);
+                        func_150F802C(&D_800C3958[arg4][arg1], delay, arg8, 1);
                         break;
                     case 11: {
                         s16 data[2];
@@ -1748,11 +1730,11 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                     case 13: {
                         u16 id;
 
-                        id = EV->unk6;
+                        id = event->unk6;
                         if (id >= 0xE9) {
                             id = 0;
                         }
-                        func_1519EB8C(POS(arg4, arg1), id, delay, arg8, 1);
+                        func_1519EB8C(&D_800C3958[arg4][arg1], id, delay, arg8, 1);
                         break;
                     }
                     case 15:
@@ -1772,10 +1754,10 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                         }
                         break;
                     case 17:
-                        func_150D0134(EV->unk6, D_800C35E0[arg4][EV->unk6], delay, arg8, 1);
+                        func_150D0134(event->unk6, D_800C35E0[arg4][event->unk6], delay, arg8, 1);
                         break;
                     case 18:
-                        func_150D02B4(EV->unk6, D_800C35E0[arg4][EV->unk6], delay, arg8, 1);
+                        func_150D02B4(event->unk6, D_800C35E0[arg4][event->unk6], delay, arg8, 1);
                         break;
                     case 19:
                         func_150CF680(delay, arg8, 1);
@@ -1784,16 +1766,16 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                         func_151925C4(arg5, delay, arg8, 1);
                         break;
                     case 21:
-                        func_150D04C4(EV->unk6, D_800C35E0[arg4][EV->unk6], delay, arg8, 1);
+                        func_150D04C4(event->unk6, D_800C35E0[arg4][event->unk6], delay, arg8, 1);
                         break;
                     case 22: {
                         u16 id;
 
-                        id = EV->unk6;
+                        id = event->unk6;
                         if (id >= 0xCF) {
                             id = 0;
                         }
-                        func_1519ED84(POS(arg4, arg1), id, delay, arg8, 1);
+                        func_1519ED84(&D_800C3958[arg4][arg1], id, delay, arg8, 1);
                         break;
                     }
                     case 23:
@@ -1805,9 +1787,9 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                         EvFloor floor;
                         s32 hit;
 
-                        pos[0] = POS(arg4, arg1)->unk0;
-                        pos[1] = POS(arg4, arg1)->unk4 + 100.0f;
-                        pos[2] = POS(arg4, arg1)->unk8;
+                        pos[0] = D_800C3958[arg4][arg1].x;
+                        pos[1] = D_800C3958[arg4][arg1].y + 100.0f;
+                        pos[2] = D_800C3958[arg4][arg1].z;
                         probe[0] = pos[0];
                         probe[1] = pos[1] + 100.0f;
                         probe[2] = pos[2];
@@ -1822,7 +1804,7 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                             hit = 0;
                         }
                         if (hit) {
-                            func_15136698((func_150ADA68() * 0.02000000142f) + 0.09000000358f, (func_150ADA68() * 0.0004399999743f) + 0.0008799999487f, (func_150ADA20() % 101) + 0x9B, 0xFF, delay, &floor.unk4, pos, !EV->unk6, 1, arg8, 1);
+                            func_15136698((func_150ADA68() * 0.02000000142f) + 0.09000000358f, (func_150ADA68() * 0.0004399999743f) + 0.0008799999487f, (func_150ADA20() % 101) + 0x9B, 0xFF, delay, &floor.unk4, pos, !event->unk6, 1, arg8, 1);
                         }
                         break;
                     }
@@ -1833,10 +1815,10 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                         from[0] = D_800C3868[arg4][arg1][0];
                         from[1] = D_800C3868[arg4][arg1][1];
                         from[2] = D_800C3868[arg4][arg1][2];
-                        to[0] = POS(arg4, arg1)->unk0;
-                        to[1] = POS(arg4, arg1)->unk4;
-                        to[2] = POS(arg4, arg1)->unk8;
-                        func_150E3340(from, to, POS(arg4, arg1), delay);
+                        to[0] = D_800C3958[arg4][arg1].x;
+                        to[1] = D_800C3958[arg4][arg1].y;
+                        to[2] = D_800C3958[arg4][arg1].z;
+                        func_150E3340(from, to, &D_800C3958[arg4][arg1], delay);
                         break;
                     }
                     case 26: {
@@ -1852,55 +1834,55 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                     }
                 }
             }
-        } else if (EV->unk2 == 0x5B) {
+        } else if (event->value == 0x5B) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            if (EV->unk4 == 0) {
-                delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
-                func_151B5240((EV->unk4 != 0) ? 5000 : delay, arg8, 0);
+            if (event->unk4 == 0) {
+                delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+                func_151B5240((event->unk4 != 0) ? 5000 : delay, arg8, 0);
             }
-        } else if (EV->unk2 == 0x5D) {
+        } else if (event->value == 0x5D) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            if (EV->unk4 == 0) {
-                delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
                 func_15192D48(arg5, delay, arg8, 0);
             }
-        } else if (EV->unk2 == 0x5E) {
+        } else if (event->value == 0x5E) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            if (EV->unk5 == 1) {
+            if (event->unk5 == 1) {
                 func_151B09BC(arg5, 0, 1000, arg8, 0);
-            } else if (EV->unk4 == 0) {
-                delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
+            } else if (event->unk4 == 0) {
+                delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
                 func_151B09BC(arg5, 0, delay, arg8, 0);
             }
-        } else if (EV->unk2 == 0x4C) {
+        } else if (event->value == 0x4C) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
             u8 *list;
             s32 count;
 
-            if (EV->unk4 == 0) {
-                delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
                 if (arg5->id == 0x49 || arg5->id == 0x58) {
                     list = func_1519003C(arg5, &count);
-                    if (list != NULL && EV->unk6 < count) {
-                        func_1518F51C(arg5, list[EV->unk6], delay, -1, -1, -1, 0, 0, arg8, 1);
+                    if (list != NULL && event->unk6 < count) {
+                        func_1518F51C(arg5, list[event->unk6], delay, -1, -1, -1, 0, 0, arg8, 1);
                     }
                 } else {
-                    func_1518D1C0(arg5, EV->unk5, delay, 0, arg8, 1, "Cutscene 2");
+                    func_1518D1C0(arg5, event->unk5, delay, 0, arg8, 1, "Cutscene 2");
                 }
             }
-        } else if (EV->unk2 == 0x53) {
-            if (EV->unk4 == 0) {
+        } else if (event->value == 0x53) {
+            if (event->unk4 == 0) {
                 s32 t;
-                Elem15023DE0 *found;
+                SeqEvent *found;
 
-                t = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4);
+                t = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4);
                 {
                     f32 *pos = arg7;
                     Ev15134908 sp;
@@ -1916,100 +1898,100 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                     func_15134908(&sp, 0, arg8, 0);
                 }
             }
-        } else if (EV->unk2 == 0x50) {
+        } else if (event->value == 0x50) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            if (EV->unk4 == 0) {
-                delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
                 func_150E9FE0(arg5, delay, arg8, 0);
             }
-        } else if (EV->unk2 == 0x51) {
+        } else if (event->value == 0x51) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            if (EV->unk4 == 0) {
-                delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
                 func_150EA500(arg5, delay, arg8, 0);
             }
-        } else if (EV->unk2 == 0x48) {
+        } else if (event->value == 0x48) {
             f32 offset[2];
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            if (EV->unk4 == 0) {
-                delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 1, EV->unk5, arg4) - arg3;
+            if (event->unk4 == 0) {
+                delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 1, event->unk5, arg4) - arg3;
                 offset[0] = (func_150ADA68() * 200.0f) + -100.0f;
                 offset[1] = (func_150ADA68() * 300.0f) + -150.0f;
                 func_151356D4(offset, (func_150ADA68() * 20.0f) + 10.0f, ((func_150ADA68() * 65.0f) + 35.0f) * 0.001000000047f, ((func_150ADA68() * 160.0f) + 200.0f) * 0.001000000047f, (func_150ADA20() % 101) + 100, 0xFF, (func_150ADA20() % 3) + 4, delay, 4, 0x40, arg8, 1);
             }
-        } else if (EV->unk2 == 0xF) {
+        } else if (event->value == 0xF) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
-            if (EV->unk4 == 0) {
+            delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
                 func_150C7020(arg5, (s16)delay, arg8, 1);
             }
-        } else if (EV->unk2 == 0x3E || EV->unk2 == 0x3F) {
-        } else if (EV->unk2 == 0x32) {
+        } else if (event->value == 0x3E || event->value == 0x3F) {
+        } else if (event->value == 0x32) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
-            if (EV->unk4 == 0) {
-                func_150DB518(arg7, &POS(arg4, arg1)->unk10, &POS(arg4, arg1)->unk18, &POS(arg4, arg1)->unk1C, &POS(arg4, arg1)->unk20, delay, arg8, 0);
+            delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                func_150DB518(arg7, &D_800C3958[arg4][arg1].unk10, &D_800C3958[arg4][arg1].unk18, &D_800C3958[arg4][arg1].unk1C, &D_800C3958[arg4][arg1].unk20, delay, arg8, 0);
             }
-        } else if (EV->unk2 == 0x34) {
+        } else if (event->value == 0x34) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
             u8 t;
             u8 kind;
             EvNode *node;
 
-            delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
-            if (EV->unk4 == 0) {
-                t = (EV->unk5 <= 0) ? EV->unk5 : 0;
+            delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                t = (event->unk5 <= 0) ? event->unk5 : 0;
                 if (t == 0) {
                     kind = 0xD;
                 }
                 node = *(EvNode **)((u8 *)arg5 + 0x2F4);
                 while (node != NULL) {
                     if (node->unk1C == kind || func_1514D4B8(D_8008ABE8[kind]->unk4, node->unk1C) != 0) {
-                        node->unk10->unk30 = func_1519E970(delay, node->unk10, 0, &POS(arg4, arg1)->unk30, &POS(arg4, arg1)->unk20, arg8, 0);
+                        node->unk10->unk30 = func_1519E970(delay, node->unk10, 0, &D_800C3958[arg4][arg1].unk30, &D_800C3958[arg4][arg1].unk20, arg8, 0);
                     }
                     node = node->unk14;
                 }
             }
-        } else if (EV->unk2 == 0x23) {
+        } else if (event->value == 0x23) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
             if (arg5 == NULL) {
                 return 1;
             }
-            delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
-            if (EV->unk4 == 0) {
+            delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
                 func_1516F2F8(arg5 - D_800CC2D0, delay, delay, 0, arg8, 0);
             }
-        } else if (EV->unk2 == 0x22) {
+        } else if (event->value == 0x22) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
             if (arg5 == NULL) {
                 return 1;
             }
-            delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
-            if (EV->unk4 == 0) {
+            delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
                 func_1516F1C0(arg5 - D_800CC2D0, delay, arg8, 0);
             }
-        } else if (EV->unk2 == 0x52) {
+        } else if (event->value == 0x52) {
             if (arg5 == NULL) {
                 return 1;
             }
             func_15136404(arg5, 90.0f, arg8, 1);
-        } else if (EV->unk2 == 0x5F) {
-            switch (*(u8 *)&EV->unk4) {
+        } else if (event->value == 0x5F) {
+            switch (*(u8 *)&event->unk4) {
                 case 0:
                     if (arg5 != NULL) {
                         f32 pos[3];
@@ -2058,7 +2040,7 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                                 func_150FB324(arg5, arg8, 1);
                                 break;
                             case 0x4A:
-                                func_150E06D8(arg5, EV->unk5, arg8, 1);
+                                func_150E06D8(arg5, event->unk5, arg8, 1);
                                 break;
                             case 0x97:
                                 func_150F97EC(arg5, arg8, 1);
@@ -2073,10 +2055,10 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                 case 3: {
                     f32 p[3];
 
-                    p[0] = POS(arg4, arg1)->unk0;
-                    p[1] = POS(arg4, arg1)->unk4;
-                    p[2] = POS(arg4, arg1)->unk8;
-                    func_151BE850(p, POS(arg4, arg1)->unk10, 1, 0, 2, arg8, 1);
+                    p[0] = D_800C3958[arg4][arg1].x;
+                    p[1] = D_800C3958[arg4][arg1].y;
+                    p[2] = D_800C3958[arg4][arg1].z;
+                    func_151BE850(p, D_800C3958[arg4][arg1].unk10, 1, 0, 2, arg8, 1);
                     break;
                 }
                 case 4:
@@ -2087,10 +2069,10 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                         struct126 *bone;
 
                         bone = NULL;
-                        if (EV->unk6 != 0) {
-                            bone = func_1503195C(arg5, EV->unk5 ? 0xA4 : 0xA5, 0);
+                        if (event->unk6 != 0) {
+                            bone = func_1503195C(arg5, event->unk5 ? 0xA4 : 0xA5, 0);
                         }
-                        func_151C62D0(arg5, EV->unk5, 1, bone, EV->unk5 ? 0xA4 : 0xA5, arg8, 1);
+                        func_151C62D0(arg5, event->unk5, 1, bone, event->unk5 ? 0xA4 : 0xA5, arg8, 1);
                     }
                     break;
                 case 6:
@@ -2120,7 +2102,7 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                         const s32 bones[3] = { 0x15, 0x20, 3 };
                         f32 out[3];
 
-                        switch (EV->unk5) {
+                        switch (event->unk5) {
                             case 0:
                                 sel = a[func_150ADA20() % 3];
                                 break;
@@ -2131,7 +2113,7 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                                 sel = c[func_150ADA20() % 6];
                                 break;
                         }
-                        func_15143134(sel, out, (u8 *)arg5->unk1D4 + (bones[EV->unk5] << 6));
+                        func_15143134(sel, out, (u8 *)arg5->unk1D4 + (bones[event->unk5] << 6));
                         func_151C329C(out, arg8, 1);
                     }
                     break;
@@ -2159,12 +2141,12 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                     p[0] = arg7[0];
                     p[1] = arg7[1];
                     p[2] = arg7[2];
-                    id = EV->unk5;
+                    id = event->unk5;
                     if (id >= 0xE9) {
                         id = 0;
                     }
-                    if (EV->unk6 != 0) {
-                        scale = EV->unk6 * 0.009999999776f;
+                    if (event->unk6 != 0) {
+                        scale = event->unk6 * 0.009999999776f;
                     } else {
                         scale = 1.0f;
                     }
@@ -2180,14 +2162,14 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                     colour[2] = 0xFF;
                     colour[3] = (func_150ADA20() % 61) + 0x96;
                     size = (func_150ADA68() * 20.0f) + 25.0f;
-                    if (EV->unk5 != 0) {
+                    if (event->unk5 != 0) {
                         size *= 0.349999994f;
                     }
                     func_15107700(arg5, func_150ADA20() & 0xFF, (func_150ADA20() % 129) - 0x3F, (func_150ADA20() % 21) + 0xA, 4, 40.0f, size, 0, 2, colour, arg8, 1);
                     break;
                 }
                 case 16:
-                    func_150F16DC(arg5, EV->unk5, ((u8 *)EV)[7], arg8, 1);
+                    func_150F16DC(arg5, event->unk5, ((u8 *)event)[7], arg8, 1);
                     break;
                 case 17: {
                     s32 unused;
@@ -2206,7 +2188,7 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                         f32 out[3];
                         const f32 offs[2][3] = { { -65.0f, 172.0f, 9.0f }, { 15.0f, 63.0f, 9.0f } };
 
-                        func_15143134(offs[EV->unk5], out, arg5->unk1D4);
+                        func_15143134(offs[event->unk5], out, arg5->unk1D4);
                         func_15131EE4(out, 0.6460000277f, arg8, 0);
                     }
                     break;
@@ -2217,13 +2199,13 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                         const f32 offs[8][3] = { { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { -5.0f, 25.0f, -7.0f }, { -11.0f, 28.0f, -5.0f }, { -4.0f, 30.0f, -4.0f }, { 3.0f, 30.0f, -8.0f } };
                         const u8 bones[8] = { 7, 8, 9, 10, 13, 14, 15, 16 };
 
-                        func_15143134(offs[EV->unk5], out, (u8 *)arg5->unk1D4 + (bones[EV->unk5] << 6));
+                        func_15143134(offs[event->unk5], out, (u8 *)arg5->unk1D4 + (bones[event->unk5] << 6));
                         func_15131EE4(out, 6.990000248f, arg8, 0);
                     }
                     break;
                 }
                 case 20: {
-                    Ev3958 *pos;
+                    SeqTrackState *pos;
                     struct {
                         u8 pad0[0x10];
                         s16 x;
@@ -2232,10 +2214,10 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                         u8 pad16[0x86];
                     } sp;
 
-                    pos = POS(arg4, arg1);
-                    sp.x = pos->unk0;
-                    sp.y = pos->unk4 + 50.0f;
-                    sp.z = pos->unk8;
+                    pos = &D_800C3958[arg4][arg1];
+                    sp.x = pos->x;
+                    sp.y = pos->y + 50.0f;
+                    sp.z = pos->z;
                     func_15170B90(&sp, 1, 1, 2, arg8, 0);
                     break;
                 }
@@ -2251,9 +2233,9 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
                     }
                     break;
             }
-        } else if (EV->unk2 == 0x40) {
+        } else if (event->value == 0x40) {
             func_151A0A10(arg5, 0x28, arg8, 1);
-        } else if (EV->unk2 == 0x4D) {
+        } else if (event->value == 0x4D) {
             struct {
                 s16 unk0;
                 f32 unk4;
@@ -2309,7 +2291,7 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
             sp.unk4C = -3.0f;
             sp.unk50 = 6.0f;
             func_151A6F00(&sp, 1, arg8, 1);
-        } else if (EV->unk2 == 0x4E) {
+        } else if (event->value == 0x4E) {
             struct {
                 s16 unk0;
                 f32 unk4;
@@ -2365,7 +2347,7 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
             sp.unk4C = -4.0f;
             sp.unk50 = 8.0f;
             func_151A6F00(&sp, 1, arg8, 1);
-        } else if (EV->unk2 == 0x4F) {
+        } else if (event->value == 0x4F) {
             struct {
                 s16 unk0;
                 s16 unk2;
@@ -2422,7 +2404,7 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
             sp.unk48 = 0;
             sp.unk40 = 0.5f;
             func_15153F18(&sp.unk0, &sp.unk8, 0, arg8, 1);
-        } else if (EV->unk2 == 0x24) {
+        } else if (event->value == 0x24) {
             f32 p[3];
             s32 count;
             u8 type;
@@ -2430,67 +2412,67 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
             p[0] = arg7[0];
             p[1] = arg7[1];
             p[2] = arg7[2];
-            count = (EV->unk4 != 0) ? EV->unk4 : 0xA;
-            type = EV->unk5;
+            count = (event->unk4 != 0) ? event->unk4 : 0xA;
+            type = event->unk5;
             if (type >= 0xD) {
                 type = 0;
             }
             func_151DBAA8(p, count, type, arg8, 0);
-        } else if (EV->unk2 == 0x10) {
+        } else if (event->value == 0x10) {
             u8 type;
 
-            type = EV->unk4;
+            type = event->unk4;
             if (type >= 0x1B) {
                 type = 0;
             }
             func_151AF4D0(arg5, type, arg8, 0);
-        } else if (EV->unk2 == 0x47) {
+        } else if (event->value == 0x47) {
             func_151925C4(arg5, 0x32, arg8, 0);
-        } else if (EV->unk2 == 0x2E) {
+        } else if (event->value == 0x2E) {
             func_150C1F60(arg8);
             func_150C2290(arg8);
             func_150C2424(arg8);
-        } else if (EV->unk2 == 0x31) {
+        } else if (event->value == 0x31) {
             func_150DAE70(arg5, 0, arg8, 0);
-        } else if (EV->unk2 == 0x33) {
+        } else if (event->value == 0x33) {
             u8 type;
-            Ev3958 *pos;
+            SeqTrackState *pos;
             s32 i4, i5, i6;
             f32 f7, f9, f10;
             s16 n;
 
-            if (EV->unk4 >= 0x10) {
+            if (event->unk4 >= 0x10) {
                 type = 0xF;
             } else {
-                type = EV->unk4;
+                type = event->unk4;
             }
-            pos = POS(arg4, arg1);
+            pos = &D_800C3958[arg4][arg1];
             i4 = pos->unk20 * 0.05000000075f;
             i5 = (pos->unk10 + 180.0f) * 0.7111111283f;
             i6 = pos->unkC * 0.7111111283f;
             f7 = (pos->unk38 * 0.1000000015f) + 0.5f;
             f9 = (pos->unk18 * 0.1000000015f) + 1.0f;
             f10 = pos->unk1C * 0.1000000015f;
-            n = (EV->unk5 != 0) ? EV->unk5 : 0x64;
+            n = (event->unk5 != 0) ? event->unk5 : 0x64;
             func_15148F1C(type, arg7[0], arg7[1], arg7[2], i4, i5, i6, f7, n, f9, f10, arg8);
-        } else if (EV->unk2 == 0x35) {
+        } else if (event->value == 0x35) {
             s32 type;
 
-            type = (EV->unk4 >= 2) ? 1 : EV->unk4;
+            type = (event->unk4 >= 2) ? 1 : event->unk4;
             func_150DB9E0(arg5, type, arg8);
-        } else if (EV->unk2 == 0x26) {
-            Elem15023DE0 *found;
+        } else if (event->value == 0x26) {
+            SeqEvent *found;
             s32 t;
 
             if (arg5 == NULL) {
                 return 1;
             }
-            t = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4);
-            if (EV->unk4 == 0) {
+            t = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4);
+            if (event->unk4 == 0) {
                 arg5->unk276 = 1;
                 arg5->unk282 = t - arg3;
             }
-        } else if (EV->unk2 == 0x27) {
+        } else if (event->value == 0x27) {
             f32 speed;
             f32 dist;
             s32 n;
@@ -2498,17 +2480,17 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
             speed = 1.0f;
             dist = 30.0f;
             n = 1;
-            if (EV->unk4 != 0) {
-                n = EV->unk4;
+            if (event->unk4 != 0) {
+                n = event->unk4;
             }
-            if (EV->unk5 != 0) {
-                speed = EV->unk5 * 0.1000000015f;
+            if (event->unk5 != 0) {
+                speed = event->unk5 * 0.1000000015f;
             }
-            if (EV->unk6 >= 0) {
-                dist = EV->unk6;
+            if (event->unk6 >= 0) {
+                dist = event->unk6;
             }
             func_1518B264(arg7, dist, speed, n, arg8);
-        } else if (EV->unk2 == 2) {
+        } else if (event->value == 2) {
             f32 speed;
             f32 dist;
             s32 n;
@@ -2516,65 +2498,65 @@ s32 func_150265CC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *a
             speed = 1.0f;
             dist = 30.0f;
             n = 1;
-            if (EV->unk4 != 0) {
-                n = EV->unk4;
+            if (event->unk4 != 0) {
+                n = event->unk4;
             }
-            if (EV->unk5 != 0) {
-                speed = EV->unk5 * 0.1000000015f;
+            if (event->unk5 != 0) {
+                speed = event->unk5 * 0.1000000015f;
             }
-            if (EV->unk6 >= 0) {
-                dist = EV->unk6;
+            if (event->unk6 >= 0) {
+                dist = event->unk6;
             }
             func_1518B2A8(arg7, dist, speed, n, 0x1E, 0x64, arg8);
-        } else if (EV->unk2 == 0x28) {
+        } else if (event->value == 0x28) {
             if (arg6 != NULL) {
                 func_15171600(arg6, arg8, 0);
             } else if (arg5 != NULL) {
                 func_15171BF4(arg5, arg8);
             }
-        } else if (EV->unk2 == 0x29) {
+        } else if (event->value == 0x29) {
             if (arg6 != NULL) {
                 func_15170EC4(arg6, arg8, 0);
             } else if (arg5 != NULL) {
                 func_151711C4(arg5);
             }
-        } else if (EV->unk2 == 0x2A) {
-        } else if (EV->unk2 == 0x2B) {
+        } else if (event->value == 0x2A) {
+        } else if (event->value == 0x2B) {
             func_1518B6B0(arg7[0], arg7[1], arg7[2], arg8, 0);
-        } else if (EV->unk2 == 0x2C) {
-            Elem15023DE0 *found;
+        } else if (event->value == 0x2C) {
+            SeqEvent *found;
             s32 pad[7];
 
-            func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4);
-            if (EV->unk4 == 0) {
+            func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4);
+            if (event->unk4 == 0) {
             }
-        } else if (EV->unk2 == 0x2F) {
+        } else if (event->value == 0x2F) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
             if (arg5 == NULL) {
                 return 1;
             }
-            if (EV->unk4 == 0) {
-                delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
                 func_1516ED68(arg5 - D_800CC2D0, delay, arg8, 0);
             }
-        } else if (EV->unk2 == 0x39) {
+        } else if (event->value == 0x39) {
             s32 delay;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            if (EV->unk4 == 0) {
-                delay = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
+                delay = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
                 func_150C2804(arg7, arg7 + 1, arg7 + 2, delay, arg8, 0);
             }
-        } else if (EV->unk2 == 0x3A) {
+        } else if (event->value == 0x3A) {
             f32 p[3];
             s32 count;
 
             p[0] = arg7[0];
             p[1] = arg7[1];
             p[2] = arg7[2];
-            count = (EV->unk4 != 0) ? EV->unk4 : 0xA;
+            count = (event->unk4 != 0) ? event->unk4 : 0xA;
             func_151DBAA8(p, count, 6, arg8, 0);
         } else {
             return 0;
@@ -2624,14 +2606,14 @@ extern Color15029BB8 D_80084110[];
 extern s8 D_800C3C8A;
 extern u16 D_800C3C8E;
 
-s32 func_15029BB8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *obj, struct131 *actor, f32 *pos, s32 flags, s32 arg9) {
-    if ((EV->unk0 == 6) || (EV->unk0 == 10)) {
+s32 func_15029BB8(SeqEvent *event, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *obj, struct131 *actor, f32 *pos, s32 flags, s32 arg9) {
+    if ((event->type == 6) || (event->type == 10)) {
         {
             s32 vol;
             s32 time;
             s32 t;
             s32 pad;
-            Elem15023DE0 *found;
+            SeqEvent *found;
             s32 fade;
             s32 fadeOut;
             s32 fadeIn;
@@ -2640,11 +2622,11 @@ s32 func_15029BB8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *o
 
             found = NULL;
             sflags = 0;
-            if ((EV->unk4 == 0) || (EV->unk0 == 6)) {
-                if (EV->unk6 == 0) {
+            if ((event->unk4 == 0) || (event->type == 6)) {
+                if (event->unk6 == 0) {
                     vol = 0xFF;
                 } else {
-                    vol = EV->unk6 & 0xFF;
+                    vol = event->unk6 & 0xFF;
                     if (vol < 0) {
                         vol = 0;
                     } else {
@@ -2652,34 +2634,34 @@ s32 func_15029BB8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *o
                         vol = pad;
                     }
                 }
-                time = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 1, 0, 0, arg4) - arg3;
-                if (EV->unk0 == 6) {
+                time = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 1, 1, 0, 0, arg4) - arg3;
+                if (event->type == 6) {
                     time = 0xFFFF;
                 } else if (found == NULL) {
                     time = 0xFFFF;
                 }
-                if ((arg9 != 0) && ((EV->unk0 != 10) || (found != NULL))) {
+                if ((arg9 != 0) && ((event->type != 10) || (found != NULL))) {
                     return 1;
                 }
-                fade = EV->unk5 * 50;
+                fade = event->unk5 * 50;
                 fadeOut = 0;
                 fadeIn = 0;
-                if (EV->unk0 == 10) {
-                    t = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 2, 0, 0, arg4);
+                if (event->type == 10) {
+                    t = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 1, 2, 0, 0, arg4);
                     if (found != NULL) {
                         t -= arg3;
                         if (t < time) {
                             fadeIn = t;
                         }
                     }
-                    t = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 3, 0, 0, arg4);
+                    t = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 1, 3, 0, 0, arg4);
                     if (found != NULL) {
                         t -= arg3;
                         if (t < time) {
                             fadeOut = time - t;
                         }
                     }
-                } else if (EV->unk4 == 2) {
+                } else if (event->unk4 == 2) {
                     sflags = 0x800;
                 } else {
                     sflags = 0x400;
@@ -2694,68 +2676,68 @@ s32 func_15029BB8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *o
                     snd->unk8 = fadeIn;
                     snd->unkA = fadeOut;
                     snd->unkC = (vol * 0x7FFF) >> 8;
-                    snd->unk2 = EV->unk0 == 10;
-                    func_1000FA64(EV->unk2, (s16)pos[0], (s16)pos[1], (s16)pos[2], snd->unkC, 0x7D00, 0x7918, (s32)func_150238D8, snd, 0, sflags, fade);
+                    snd->unk2 = event->type == 10;
+                    func_1000FA64(event->value, (s16)pos[0], (s16)pos[1], (s16)pos[2], snd->unkC, 0x7D00, 0x7918, (s32)func_150238D8, snd, 0, sflags, fade);
                 }
             }
         }
-    } else if (EV->unk0 == 8) {
+    } else if (event->type == 8) {
         {
             s32 time;
-            Elem15023DE0 *found;
+            SeqEvent *found;
 
-            if (EV->unk4 == 0) {
-                if ((arg9 != 0) && (func_1000E134(EV->unk2) != 0)) {
+            if (event->unk4 == 0) {
+                if ((arg9 != 0) && (func_1000E134(event->value) != 0)) {
                     return 1;
                 }
-                func_1000D96C(EV->unk2, 0, 0);
-                if (EV->unk6 != 0) {
+                func_1000D96C(event->value, 0, 0);
+                if (event->unk6 != 0) {
                 }
-            } else if (EV->unk4 == 1) {
-                func_1000E588(EV->unk2, EV->unk6 * 100, 1 << (EV->unk5 + 31));
-            } else if (EV->unk4 == 2) {
-                func_1000DF68(EV->unk2, EV->unk6 * 328, 1);
-            } else if (EV->unk4 == 3) {
-            } else if (EV->unk4 == 4) {
-                time = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 5, 1, EV->unk5, arg4) - arg3;
+            } else if (event->unk4 == 1) {
+                func_1000E588(event->value, event->unk6 * 100, 1 << (event->unk5 + 31));
+            } else if (event->unk4 == 2) {
+                func_1000DF68(event->value, event->unk6 * 328, 1);
+            } else if (event->unk4 == 3) {
+            } else if (event->unk4 == 4) {
+                time = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 1, 5, 1, event->unk5, arg4) - arg3;
                 if (arg9 != 0) {
-                    func_1000E588(EV->unk2, EV->unk6, 1 << (EV->unk5 + 31));
+                    func_1000E588(event->value, event->unk6, 1 << (event->unk5 + 31));
                 } else {
-                    func_1000E46C(EV->unk2, EV->unk6, 1 << (EV->unk5 + 31), time);
+                    func_1000E46C(event->value, event->unk6, 1 << (event->unk5 + 31), time);
                 }
-            } else if (EV->unk4 == 6) {
-                time = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 7, 0, 0, arg4) - arg3;
+            } else if (event->unk4 == 6) {
+                time = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 1, 7, 0, 0, arg4) - arg3;
                 if (time < 2) {
                     time = 1;
                 }
-                func_1000DF68(EV->unk2, EV->unk6 * 328, time);
-            } else if (EV->unk4 == 8) {
-                func_1000E654(EV->unk2, EV->unk6 + 1, 0, -1);
-            } else if (EV->unk4 == 9) {
-                func_1000DE1C(EV->unk2, 0);
+                func_1000DF68(event->value, event->unk6 * 328, time);
+            } else if (event->unk4 == 8) {
+                func_1000E654(event->value, event->unk6 + 1, 0, -1);
+            } else if (event->unk4 == 9) {
+                func_1000DE1C(event->value, 0);
             }
         }
-    } else if (EV->unk0 == 2) {
+    } else if (event->type == 2) {
         {
             f32 speed;
             f32 rate;
             f32 time;
-            Elem15023DE0 *found;
+            SeqEvent *found;
             s32 loop;
             s32 id;
 
             if (obj == NULL) {
                 return 1;
             }
-            time = func_15023BB0(EV, EV->unk0, arg1, &found, 0, 0, 0, 0, 0, 0, arg4) - arg3;
-            if (EV->unk4 == 0) {
+            time = func_15023BB0(event, event->type, arg1, &found, 0, 0, 0, 0, 0, 0, arg4) - arg3;
+            if (event->unk4 == 0) {
                 if (obj->unk2D0 == NULL) {
                     return 1;
                 }
                 rate = 5.0f;
-                id = EV->unk2;
-                if (EV->unk6 > 0) {
-                    rate = EV->unk6 - 1;
+                id = event->value;
+                if (event->unk6 > 0) {
+                    rate = event->unk6 - 1;
                 }
                 if (arg3 == D_800C3C8E) {
                     rate = 0.0f;
@@ -2779,113 +2761,113 @@ s32 func_15029BB8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *o
                 } else {
                     speed = 0.0f;
                 }
-                if (EV->unk5 != 0) {
+                if (event->unk5 != 0) {
                     speed = 0.0f;
                 }
                 func_1505E650(obj, id, speed, rate, 0.0f, 0.0f, loop);
             }
         }
-    } else if (EV->unk0 == 5) {
-            if (EV->unk2 == 1) {
-                Elem15023DE0 *found;
+    } else if (event->type == 5) {
+            if (event->value == 1) {
+                SeqEvent *found;
                 s32 time;
-                Elem15023DE0 *prev;
+                SeqEvent *prev;
                 s32 prevTime;
 
-                if (EV->unk4 == 0) {
-                    time = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
+                if (event->unk4 == 0) {
+                    time = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
                     if (arg9 != 0) {
                         time = 0;
                     }
-                    func_1517EE40(D_80084110[EV->unk5].unk0, D_80084110[EV->unk5].unk1, D_80084110[EV->unk5].unk2, time, !EV->unk6, 0);
-                    D_800C3C8A = !EV->unk6;
+                    func_1517EE40(D_80084110[event->unk5].unk0, D_80084110[event->unk5].unk1, D_80084110[event->unk5].unk2, time, !event->unk6, 0);
+                    D_800C3C8A = !event->unk6;
                 } else if (arg9 != 0) {
-                    func_15023DE0(&prev, &found, NULL, &prevTime, arg1, EV->unk0, 1, EV->unk2, 1, 0, D_800C35B0[arg4], arg4);
+                    func_15023DE0(&prev, &found, NULL, &prevTime, arg1, event->type, 1, event->value, 1, 0, D_800C35B0[arg4], arg4);
                     if (prev != NULL) {
                         func_1517EE40(D_80084110[prev->unk5].unk0, D_80084110[prev->unk5].unk1, D_80084110[prev->unk5].unk2, 0, !prev->unk6, 0);
                         D_800C3C8A = !prev->unk6;
                     }
                 }
-            } else if (EV->unk2 == 4) {
+            } else if (event->value == 4) {
                 s32 a;
 
                 if (obj != NULL) {
                     if (arg9 == 0) {
                         a = (obj->id == 0x4B) ? 2 : -1;
                         if (a != -1) {
-                            arg2 = (EV->unk4 == 0) ? -1 : EV->unk4 - 1;
+                            arg2 = (event->unk4 == 0) ? -1 : event->unk4 - 1;
                             func_1503DE70(obj, a, arg2);
                         }
                     } else {
                         func_15060F28(obj, 1);
                     }
                 }
-            } else if (EV->unk2 == 0x5C) {
-                Elem15023DE0 *found;
+            } else if (event->value == 0x5C) {
+                SeqEvent *found;
                 s32 fadeIn;
                 s32 fadeOut;
                 s32 start;
 
-                if (EV->unk4 == 0) {
+                if (event->unk4 == 0) {
                     if (arg9 == 0) {
-                        start = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 1, 1, EV->unk5, arg4);
-                        fadeIn = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 2, 1, EV->unk5, arg4) - arg3;
+                        start = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 1, 1, 1, event->unk5, arg4);
+                        fadeIn = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 1, 2, 1, event->unk5, arg4) - arg3;
                         if (found == NULL) {
                             fadeIn = 0;
                         }
-                        fadeOut = start - func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 1, 3, 1, EV->unk5, arg4);
+                        fadeOut = start - func_15023BB0(event, event->type, arg1, &found, 1, event->value, 1, 3, 1, event->unk5, arg4);
                         if (found == NULL) {
                             fadeOut = 0;
                         }
-                        func_150F5420(fadeIn, start - arg3 - fadeOut - fadeIn, fadeOut, EV->unk5);
+                        func_150F5420(fadeIn, start - arg3 - fadeOut - fadeIn, fadeOut, event->unk5);
                     }
                 }
-            } else if (EV->unk2 == 0x56) {
-                if (EV->unk4 == 0) {
+            } else if (event->value == 0x56) {
+                if (event->unk4 == 0) {
                     if (arg9 == 0) {
                         func_15178EFC(3);
                     }
                 } else if (arg9 != 0) {
                     func_15178EFC(2);
-                } else if (EV->unk5 == 0) {
+                } else if (event->unk5 == 0) {
                     func_15178EFC(0);
                 } else {
                     func_15178EFC(1);
                 }
-            } else if (EV->unk2 == 0x76) {
+            } else if (event->value == 0x76) {
                 s32 mode;
 
-                if (EV->unk4 == 1) {
+                if (event->unk4 == 1) {
                     mode = 0;
-                } else if (EV->unk5 == 1) {
+                } else if (event->unk5 == 1) {
                     mode = 2;
                 } else {
                     mode = 1;
                 }
-                func_151D66F0(EV->unk6, mode);
-            } else if (EV->unk2 == 0x2D) {
+                func_151D66F0(event->unk6, mode);
+            } else if (event->value == 0x2D) {
                 s32 time;
-                Elem15023DE0 *found;
+                SeqEvent *found;
 
-                time = func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3;
+                time = func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3;
                 if (actor != NULL) {
-                    if (EV->unk4 == 0) {
-                        func_1518894C(actor, time, EV->unk5);
+                    if (event->unk4 == 0) {
+                        func_1518894C(actor, time, event->unk5);
                     } else if (arg9 != 0) {
                     }
                 } else if (obj != NULL) {
-                    if (EV->unk4 == 0) {
-                        func_15188810(obj, time, EV->unk5);
+                    if (event->unk4 == 0) {
+                        func_15188810(obj, time, event->unk5);
                     } else if (arg9 != 0) {
                         func_15188AD0(obj);
                     }
                 }
-            } else if (EV->unk2 == 0x57) {
+            } else if (event->value == 0x57) {
                 s32 time;
-                Elem15023DE0 *found;
+                SeqEvent *found;
 
-                if (EV->unk4 == 0) {
-                    func_151557FC(0, func_15023BB0(EV, EV->unk0, arg1, &found, 1, EV->unk2, 0, 0, 0, 0, arg4) - arg3, 0.0f);
+                if (event->unk4 == 0) {
+                    func_151557FC(0, func_15023BB0(event, event->type, arg1, &found, 1, event->value, 0, 0, 0, 0, arg4) - arg3, 0.0f);
                 } else if (arg9 != 0) {
                     D_800C3E78 = 0;
                     func_15155F90();
@@ -2897,7 +2879,7 @@ s32 func_15029BB8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, struct127 *o
     return 1;
 }
 
-void func_1502A8A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void func_1502A8A0(SeqEvent *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     struct127 *obj;
     struct131 *actor;
     f32 *pos;
@@ -2922,7 +2904,7 @@ void func_1502A8A0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
         }
     }
     if (pos == NULL) {
-        pos = &(&D_800C3958)[arg4][arg1].unk0;
+        pos = &D_800C3958[arg4][arg1].x;
     }
     if (D_800C3C88 != 2) {
         if (func_1502460C(arg0, arg1, arg2, arg3, arg4, obj, actor, pos, flags)) {
