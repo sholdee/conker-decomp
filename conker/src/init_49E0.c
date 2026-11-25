@@ -136,9 +136,10 @@ void func_100049E0(void *arg) {
     }
 }
 
+/* Advances the graphics task state machine (D_8003A582) on a retrace while no audio task runs. */
 void func_10004DB0(void) {
     if (D_8003A582 == 0) {
-        if (osRecvMesg(&D_8003B1E8, &D_8002AC50, 0) == 0) {
+        if (osRecvMesg(&D_8003B1E8, (OSMesg *)&D_8002AC50, OS_MESG_NOBLOCK) == 0) {
             if ((osViGetCurrentFramebuffer() != D_8002AC50->framebuffer) &&
                 (osViGetNextFramebuffer() != D_8002AC50->framebuffer) &&
                 ((D_8003B23A == 0) || (D_8003B238 >= D_8003B239))) {
@@ -159,6 +160,7 @@ void func_10004DB0(void) {
         func_10004FE0();
     }
 }
+/* Starts the current graphics task D_8002AC50 on the RSP unless a reset is pending. */
 void func_10004F00(void) {
     if (D_8002AC5C == 0) {
         osSpTaskLoad(&D_8002AC50->list);
@@ -172,12 +174,13 @@ void func_10004F00(void) {
             D_8003B238 = 2;
         }
         D_800BE9E4 = D_8003B238;
-        D_8003B238 = 0 ;
+        D_8003B238 = 0;
         D_8003A582 = 1;
-        osSendMesg(D_8003B230, &D_8003B240, 0);
+        osSendMesg(D_8003B230, &D_8003B240, OS_MESG_NOBLOCK);
     }
 }
 
+/* Swaps in the finished frame, or waits (state 6) until at least one retrace has passed. */
 void func_10004FE0(void) {
     if (D_8003B238 <= 0) {
         D_8003A582 = 6;
@@ -186,14 +189,15 @@ void func_10004FE0(void) {
     }
 }
 
+/* Finishes the current graphics task: swaps its framebuffer if requested and notifies its owner. */
 void func_10005020(void) {
-    void *fb;
+    void *framebuffer;
 
     D_8003A582 = 0;
-    fb = D_8002AC50->framebuffer;
+    framebuffer = D_8002AC50->framebuffer;
     if ((D_8002AC50->flags & OS_SC_SWAPBUFFER) && (D_8002AC5C == 0)) {
-        func_1515FDA0(fb);
-        osViSwapBuffer(fb);
+        func_1515FDA0(framebuffer);
+        osViSwapBuffer(framebuffer);
     }
-    osSendMesg(D_8002AC50->msgQ, D_8002AC50->msg, 1);
+    osSendMesg(D_8002AC50->msgQ, D_8002AC50->msg, OS_MESG_BLOCK);
 }
