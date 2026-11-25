@@ -2,167 +2,254 @@
 
 #include "functions.h"
 #include "variables.h"
+#include <stddef.h>
 
+typedef struct {
+    f32 x, y, z;
+} Vec3f;
+
+/* D_80090B60[]: one entry per texture. */
 typedef struct {
     s32 unk0;
-    u8  unk4;
-    u8  unk5;
-    u16 unk6;
-    u16 unk8;
+    u8 numFrames;
+    u8 unk5;
+    u16 width;
+    u16 height;
     u16 unkA;
-} struct1513FFF4_80090B60;
+} TextureInfo;
 
+/* Model instance attached to a sprite or particle, drawn through func_151462C8. */
 typedef struct {
-    u8 pad0[0x8];
-    s16 unk8;
-    s16 unkA;
-    u8 padC[0x4];
-} struct1513FFF4;
+    s32 model;
+    u8 unk4;
+    u8 pad5[3];
+    s32 handles[4];     /* one per viewport, 0..D_80082FA0 */
+    s32 sharedHandle;
+    s32 unk1C;
+} ModelLink; /* size 0x20 */
 
+/* Spawn template of a sprite, copied to SpriteFx.def. */
 typedef struct {
-    u8  pad0[6];
-    u16 unk6;
-    u8  pad8[4];
-    s8  unkC;
-    s8  unkD;
-    s8  unkE;
-    s8  unkF;
-} Dst151400D0;
+    s32 flags;
+    s16 lifetime;
+    u8 texture;         /* D_80090B60 index, 0xFF = untextured */
+    u8 unk7;
+    s32 frame;          /* 16.16 animation frame */
+    s32 frameSpeed;
+    u8 unk10;           /* faded out with the lifetime (flag 0x8000) */
+    u8 unk11;
+    u8 rgba[4];
+    u8 unk16;
+    u8 unk17;
+    u32 renderModes;    /* low byte: D_800A4AC8 index, high half: combiner index */
+    s32 unk1C;
+    u8 viewportMask;
+    u8 pad21;
+    s16 fadeStart;      /* lifetime below which unk10 / rgba[3] fade */
+    s16 fadeRate;
+    u8 pad26[2];
+} SpriteDef; /* size 0x28 */
 
+/* Camera-facing quad effect created by func_1513C350. */
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    u16 unk8;
-} Src151400D0;
-
-typedef struct {
-    char pad_0x00[0x2C];
-    f32 field_0x2C;
-    f32 field_0x30;
-    char pad_0x34[0xF4];
-    f32 field_0x128;
-} ScaleUpdateState;
-
-extern struct1513FFF4_80090B60 D_80090B60[];
-extern f32 D_800A5184;
-void func_1513FFF4(struct1513FFF4 *arg0, u8 arg1, u8 arg2);
-void func_151400D0(Dst151400D0 *dst, Src151400D0 *src);
-
-
-typedef struct {
-    u8  pad0[0x10];
-    s32 unk10;
+    u8 pad0[0x10];
+    s32 active;         /* bit 0: alive */
     s32 unk14;
-    s32 unk18;
-    s16 unk1C;
-    u8  unk1E;
-    u8  pad1F[0x1];
-    s32 unk20;
-    s32 unk24;
-    u8  unk28;
-    u8  pad29[0x4];
-    u8  unk2D;
-    u8  pad2E[0xC];
-    s16 unk3A;
-    s16 unk3C;
-    u8  pad3E[0x42];
-    u8  unk80;
-    u8  unk81;
-} Anim1513C060;
+    SpriteDef def;
+    Vtx vtx[4];
+    u8 updateFn;        /* D_80089C70 index, 0 = none */
+    u8 expireFn;        /* D_80089CA8 index, 0 = none */
+    u8 pad82[2];
+    ModelLink link;
+    Vec3f pos;
+} SpriteFx;
 
-extern s32 (*D_80089C70[])(Anim1513C060 *);
-extern s32 (*D_80089CA8[])(Anim1513C060 *);
+/* Spawn template of a particle, copied to Particle.def. */
+typedef struct {
+    u8 texture;         /* D_80090B60 index, 0xFF = untextured */
+    u8 type;            /* selects the D_80089F64 handler */
+    u16 renderModes;    /* low byte: D_800A4AC8 index, high byte: combiner index */
+    s16 lifetime;
+    u8 pad6[2];
+    s32 frame;          /* 16.16 animation frame */
+    s32 frameSpeed;
+    u8 rgba[4];
+    f32 width;
+    f32 height;
+    Vec3f pos;
+    Vec3f rot;          /* beams (func_1513FAB4) use this as their end point */
+    Vec3f scale;
+    s32 flags;
+    u8 unk44;           /* faded out with the lifetime (flag 0x8000000) */
+    u8 unk45;
+    u8 unk46;
+    u8 unk47;
+    s16 *unk48;
+    u8 viewportMask;
+    u8 pad4D[3];
+    s32 unk50;
+    s16 fadeStart;      /* lifetime below which unk44 / rgba[3] fade */
+    s16 fadeRate;
+} ParticleDef; /* size 0x58 */
 
-void func_1513C060(Anim1513C060 *arg0) {
-    s32 rate;
-    s8 finished;
+/* Per-behaviour state that follows a particle. */
+typedef union {
+    struct {
+        Vec3f u;
+        Vec3f v;
+    } axes;             /* func_1513D6FC, func_1513F4B0 */
+    struct {
+        f32 unk0;
+        f32 unk4;
+        Vec3f vel;
+        Vec3f rotVel;
+        Vec3f scaleVel;
+        f32 gravity;
+    } drift;            /* func_1513E6E8 */
+    struct {
+        u8 pad0[0x18];
+        f32 rate;
+    } grow;             /* func_1513F6E8 */
+    struct {
+        Vec3f vel;
+        f32 gravity;
+        f32 drag;
+        Vec3f rotVel;
+    } ballistic;        /* func_1513F728 */
+} ParticleMotion;
+
+typedef struct Particle {
+    u8 pad0[4];
+    struct Particle *prev;
+    struct Particle *next;
+    u8 padC[4];
+    s32 active;         /* bit 0: alive */
+    s32 unk14;
+    ParticleDef def;
+    u8 updateFn1;       /* D_80089CB8 index, 0 = none */
+    u8 updateFn2;       /* D_80089D60 index, 0 = none */
+    u8 expireFn;        /* D_80089E10 index, 0 = none */
+    u8 vertexFn;        /* D_80089E1C index */
+    u8 unk74;
+    u8 pad75[3];
+    f32 unk78;
+    u8 pad7C[0x14];
+    s32 unk90;
+    u8 unk94;
+    u8 unk95;
+    u8 pad96[2];
+    s32 unk98;
+    ModelLink link;
+    u8 padBC[4];
+    Vtx vtxTemplate[4];
+    Vtx *vtxBuffers[4]; /* per viewport, refreshed from vtxTemplate */
+    ParticleMotion motion;
+} Particle;
+
+/* Source of the four vertex colours given to func_151400D0. */
+typedef struct {
+    s16 r, g, b, a;
+    u16 flag;
+} VtxColor;
+
+extern TextureInfo D_80090B60[];
+extern f32 D_800A5184;
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip);
+void func_151400D0(Vtx *vtx, VtxColor *colors);
+
+extern s32 (*D_80089C70[])(SpriteFx *);
+extern s32 (*D_80089CA8[])(SpriteFx *);
+
+/* Per-frame update of a sprite: lifetime, fading and texture animation. */
+void func_1513C060(SpriteFx *sprite) {
+    s32 speed;
+    s8 expired;
     s32 numFrames;
-    s32 limit;
-    s32 temp;
+    s32 lastFrame;
+    s32 faded;
 
-    if (!(arg0->unk10 & 1)) {
+    if (!(sprite->active & 1)) {
         return;
     }
 
-    finished = 0;
-    if (arg0->unk18 & 1) {
-        arg0->unk1C -= D_800BE9E4;
-        if (arg0->unk1C < 0) {
-            finished = 1;
+    expired = FALSE;
+    if (sprite->def.flags & 1) {
+        sprite->def.lifetime -= D_800BE9E4;
+        if (sprite->def.lifetime < 0) {
+            expired = TRUE;
         }
     }
-    if (arg0->unk80 != 0) {
-        if (D_80089C70[arg0->unk80](arg0) == 0) {
-            finished = 1;
+    if (sprite->updateFn != 0) {
+        if (D_80089C70[sprite->updateFn](sprite) == 0) {
+            expired = TRUE;
         }
     }
 
-    if ((arg0->unk18 & 0x8000) && !finished) {
-        if (arg0->unk1C < arg0->unk3A) {
-            temp = arg0->unk1C * arg0->unk3C;
-            if (temp < arg0->unk28) {
-                arg0->unk28 = temp;
+    if ((sprite->def.flags & 0x8000) && !expired) {
+        if (sprite->def.lifetime < sprite->def.fadeStart) {
+            faded = sprite->def.lifetime * sprite->def.fadeRate;
+            if (faded < sprite->def.unk10) {
+                sprite->def.unk10 = faded;
             }
         }
     }
-    if (arg0->unk18 & 0x10000) {
-        if (!finished) {
-            if (arg0->unk1C < arg0->unk3A) {
-                temp = arg0->unk1C * arg0->unk3C;
-                if (temp < arg0->unk28) {
-                    arg0->unk2D = temp;
+    if (sprite->def.flags & 0x10000) {
+        if (!expired) {
+            if (sprite->def.lifetime < sprite->def.fadeStart) {
+                faded = sprite->def.lifetime * sprite->def.fadeRate;
+                if (faded < sprite->def.unk10) {
+                    sprite->def.rgba[3] = faded;
                 }
             }
         }
     }
 
-    if (!finished) {
-        rate = arg0->unk24;
-        if (rate != 0) {
-            numFrames = D_80090B60[arg0->unk1E].unk4;
-            limit = (numFrames << 16) - 1;
-            arg0->unk20 += rate * D_800BE9E4;
-            if (limit < arg0->unk20) {
-                if (arg0->unk18 & 2) {
-                    finished = 1;
-                } else if (arg0->unk18 & 0x40) {
-                    arg0->unk24 = 0;
-                    arg0->unk20 = limit;
-                } else if (arg0->unk18 & 4) {
-                    arg0->unk20 = limit - (arg0->unk20 % limit);
-                    arg0->unk24 = -rate;
+    if (!expired) {
+        speed = sprite->def.frameSpeed;
+        if (speed != 0) {
+            numFrames = D_80090B60[sprite->def.texture].numFrames;
+            lastFrame = (numFrames << 16) - 1;
+            sprite->def.frame += speed * D_800BE9E4;
+            if (lastFrame < sprite->def.frame) {
+                if (sprite->def.flags & 2) {
+                    expired = TRUE;
+                } else if (sprite->def.flags & 0x40) {
+                    sprite->def.frameSpeed = 0;
+                    sprite->def.frame = lastFrame;
+                } else if (sprite->def.flags & 4) {
+                    sprite->def.frame = lastFrame - (sprite->def.frame % lastFrame);
+                    sprite->def.frameSpeed = -speed;
                 } else {
                     do {
-                        arg0->unk20 -= limit;
-                    } while (limit < arg0->unk20);
+                        sprite->def.frame -= lastFrame;
+                    } while (lastFrame < sprite->def.frame);
                 }
-            } else if (arg0->unk20 < 0) {
-                if (arg0->unk18 & 8) {
-                    finished = 1;
-                } else if (arg0->unk18 & 0x80) {
-                    arg0->unk24 = 0;
-                    arg0->unk20 = 0;
-                } else if (arg0->unk18 & 4) {
-                    arg0->unk20 = (-arg0->unk20) % limit;
-                    arg0->unk24 = -rate;
+            } else if (sprite->def.frame < 0) {
+                if (sprite->def.flags & 8) {
+                    expired = TRUE;
+                } else if (sprite->def.flags & 0x80) {
+                    sprite->def.frameSpeed = 0;
+                    sprite->def.frame = 0;
+                } else if (sprite->def.flags & 4) {
+                    sprite->def.frame = (-sprite->def.frame) % lastFrame;
+                    sprite->def.frameSpeed = -speed;
                 } else {
                     do {
-                        arg0->unk20 += limit;
-                    } while (arg0->unk20 < 0);
+                        sprite->def.frame += lastFrame;
+                    } while (sprite->def.frame < 0);
                 }
             }
         }
     }
 
-    if (finished) {
-        if (arg0->unk81 != 0) {
-            if (D_80089CA8[arg0->unk81](arg0) != 0) {
-                func_1516972C(arg0);
+    if (expired) {
+        if (sprite->expireFn != 0) {
+            if (D_80089CA8[sprite->expireFn](sprite) != 0) {
+                func_1516972C(sprite);
             }
         } else {
-            func_1516972C(arg0);
+            func_1516972C(sprite);
         }
     }
 }
@@ -477,174 +564,155 @@ void func_1513CF9C(s32 arg0, s32 arg1, u8 arg2) {
 void func_1513CFD0(s32 arg0, s32 arg1, s32 arg2) {
 }
 
-typedef struct {
-    u8  pad0[0x10];
-    s32 unk10;
-    u8  pad14[0x4];
-    u8  unk18;
-    u8  pad19[0x3];
-    s16 unk1C;
-    u8  pad1E[0x2];
-    s32 unk20;
-    s32 unk24;
-    u8  pad28[0x3];
-    u8  unk2B;
-    u8  pad2C[0x2C];
-    s32 unk58;
-    u8  unk5C;
-    u8  pad5D[0xF];
-    s16 unk6C;
-    s16 unk6E;
-    u8  unk70;
-    u8  unk71;
-    u8  unk72;
-} Anim1513CFE4;
+extern s32 (*D_80089CB8[])(Particle *);
+extern s32 (*D_80089D60[])(Particle *);
+extern s32 (*D_80089E10[])(Particle *);
 
-extern s32 (*D_80089CB8[])(Anim1513CFE4 *);
-extern s32 (*D_80089D60[])(Anim1513CFE4 *);
-extern s32 (*D_80089E10[])(Anim1513CFE4 *);
-
-void func_1513CFE4(Anim1513CFE4 *arg0) {
-    s32 rate;
-    s8 finished;
+/* Per-frame update of a particle: lifetime, fading and texture animation. */
+void func_1513CFE4(Particle *particle) {
+    s32 speed;
+    s8 expired;
     s32 numFrames;
-    s32 limit;
-    s32 temp;
+    s32 lastFrame;
+    s32 faded;
 
-    if (!(arg0->unk10 & 1)) {
+    if (!(particle->active & 1)) {
         return;
     }
 
-    finished = 0;
-    if (arg0->unk58 & 1) {
-        arg0->unk1C -= D_800BE9E4;
-        if (arg0->unk1C < 0) {
-            finished = 1;
+    expired = FALSE;
+    if (particle->def.flags & 1) {
+        particle->def.lifetime -= D_800BE9E4;
+        if (particle->def.lifetime < 0) {
+            expired = TRUE;
         }
     }
-    if (arg0->unk70 != 0) {
-        if (D_80089CB8[arg0->unk70](arg0) == 0) {
-            finished = 1;
+    if (particle->updateFn1 != 0) {
+        if (D_80089CB8[particle->updateFn1](particle) == 0) {
+            expired = TRUE;
         }
     }
-    if (arg0->unk71 != 0) {
-        if (D_80089D60[arg0->unk71](arg0) == 0) {
-            finished = 1;
+    if (particle->updateFn2 != 0) {
+        if (D_80089D60[particle->updateFn2](particle) == 0) {
+            expired = TRUE;
         }
     }
 
-    if ((arg0->unk58 & 0x8000000) && !finished) {
-        if (arg0->unk1C < arg0->unk6C) {
-            temp = arg0->unk1C * arg0->unk6E;
-            if (temp < arg0->unk5C) {
-                arg0->unk5C = temp;
+    if ((particle->def.flags & 0x8000000) && !expired) {
+        if (particle->def.lifetime < particle->def.fadeStart) {
+            faded = particle->def.lifetime * particle->def.fadeRate;
+            if (faded < particle->def.unk44) {
+                particle->def.unk44 = faded;
             }
         }
     }
-    if (arg0->unk58 & 0x10000000) {
-        if (!finished) {
-            if (arg0->unk1C < arg0->unk6C) {
-                temp = arg0->unk1C * arg0->unk6E;
-                if (temp < arg0->unk5C) {
-                    arg0->unk2B = temp;
+    if (particle->def.flags & 0x10000000) {
+        if (!expired) {
+            if (particle->def.lifetime < particle->def.fadeStart) {
+                faded = particle->def.lifetime * particle->def.fadeRate;
+                if (faded < particle->def.unk44) {
+                    particle->def.rgba[3] = faded;
                 }
             }
         }
     }
 
-    if (!finished) {
-        rate = arg0->unk24;
-        if (rate != 0) {
-            numFrames = D_80090B60[arg0->unk18].unk4;
-            limit = (numFrames << 16) - 1;
-            arg0->unk20 += rate * D_800BE9E4;
-            if (limit < arg0->unk20) {
-                if (arg0->unk58 & 0x800) {
-                    finished = 1;
-                } else if (arg0->unk58 & 0x400) {
-                    arg0->unk20 = limit - (arg0->unk20 % limit);
-                    arg0->unk24 = -rate;
+    if (!expired) {
+        speed = particle->def.frameSpeed;
+        if (speed != 0) {
+            numFrames = D_80090B60[particle->def.texture].numFrames;
+            lastFrame = (numFrames << 16) - 1;
+            particle->def.frame += speed * D_800BE9E4;
+            if (lastFrame < particle->def.frame) {
+                if (particle->def.flags & 0x800) {
+                    expired = TRUE;
+                } else if (particle->def.flags & 0x400) {
+                    particle->def.frame = lastFrame - (particle->def.frame % lastFrame);
+                    particle->def.frameSpeed = -speed;
                 } else {
                     do {
-                        arg0->unk20 -= limit;
-                    } while (limit < arg0->unk20);
+                        particle->def.frame -= lastFrame;
+                    } while (lastFrame < particle->def.frame);
                 }
-            } else if (arg0->unk20 < 0) {
-                if (arg0->unk58 & 0x1000) {
-                    finished = 1;
-                } else if (arg0->unk58 & 0x400) {
-                    arg0->unk20 = (-arg0->unk20) % limit;
-                    arg0->unk24 = -rate;
+            } else if (particle->def.frame < 0) {
+                if (particle->def.flags & 0x1000) {
+                    expired = TRUE;
+                } else if (particle->def.flags & 0x400) {
+                    particle->def.frame = (-particle->def.frame) % lastFrame;
+                    particle->def.frameSpeed = -speed;
                 } else {
                     do {
-                        arg0->unk20 += limit;
-                    } while (arg0->unk20 < 0);
+                        particle->def.frame += lastFrame;
+                    } while (particle->def.frame < 0);
                 }
             }
         }
     }
 
-    if (finished) {
-        if (arg0->unk72 != 0) {
-            if (D_80089E10[arg0->unk72](arg0) != 0) {
-                finished = 0;
+    if (expired) {
+        if (particle->expireFn != 0) {
+            if (D_80089E10[particle->expireFn](particle) != 0) {
+                expired = FALSE;
             }
         }
     }
-    if (finished) {
-        func_1516972C(arg0);
+    if (expired) {
+        func_1516972C(particle);
     }
 }
 
-void *func_1513D2F0(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB) {
-    struct210 *temp_v0;
+/* Allocates a particle from a template; motionSize extra bytes follow it for its behaviour state. */
+void *func_1513D2F0(void *def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 model,
+                    s32 arg8, s32 motionSize, u8 argA, s32 argB) {
+    Particle *particle;
     s32 flags;
-    s32 id;
+    s32 kind;
     s32 i;
 
-    flags = *(s32 *)((u8 *)arg0 + 0x40);
+    flags = ((ParticleDef *)def)->flags;
     if (flags & 0x800000) {
-        id = 0x56;
+        kind = 0x56;
     } else if (flags & 0x2000000) {
-        id = 0x49;
+        kind = 0x49;
     } else {
-        id = 0x1C;
+        kind = 0x1C;
     }
-    temp_v0 = func_15167A68(id, argB, arg9 + 0x110, 1, argA, (flags & 0x80000000U) ? 2 : 1);
-    if (temp_v0 == NULL) {
+    particle = func_15167A68(kind, argB, motionSize + offsetof(Particle, motion), 1, argA,
+                             (flags & 0x80000000U) ? 2 : 1);
+    if (particle == NULL) {
         return NULL;
     }
-    memcpy(&temp_v0->unk18.i.unk0, arg0, 0x58);
-    *(u8 *)((u8 *)temp_v0 + 0x70) = arg2;
-    *(u8 *)((u8 *)temp_v0 + 0x71) = arg3;
-    *(u8 *)((u8 *)temp_v0 + 0x72) = arg4;
-    *(u8 *)((u8 *)temp_v0 + 0x73) = arg5;
-    *(u8 *)((u8 *)temp_v0 + 0x74) = 0;
-    bzero(&temp_v0->unk100, 0x10);
-    func_1513FFF4((struct1513FFF4 *)((u8 *)temp_v0 + 0xC0), *(u8 *)((u8 *)temp_v0 + 0x18), arg6);
-    func_151400D0((Dst151400D0 *)((u8 *)temp_v0 + 0xC0), (Src151400D0 *)arg1);
-    temp_v0->unk10 = 1;
-    temp_v0->unk14 = 0;
-    *(f32 *)((u8 *)temp_v0 + 0x78) = D_800A5184;
-    *(s32 *)((u8 *)temp_v0 + 0x98) = 0;
-    *(u8 *)((u8 *)temp_v0 + 0x95) = 0;
-    *(u8 *)((u8 *)temp_v0 + 0x94) = 0;
-    *(s32 *)((u8 *)temp_v0 + 0x90) = 0;
-    *(s32 *)((u8 *)temp_v0 + 0x9C) = arg7;
-    *(s32 *)((u8 *)temp_v0 + 0xB8) = arg8;
-    *(u8 *)((u8 *)temp_v0 + 0xA0) = 0;
+    memcpy(&particle->def, def, sizeof(ParticleDef));
+    particle->updateFn1 = updateFn1;
+    particle->updateFn2 = updateFn2;
+    particle->expireFn = expireFn;
+    particle->vertexFn = vertexFn;
+    particle->unk74 = 0;
+    bzero(particle->vtxBuffers, sizeof(particle->vtxBuffers));
+    func_1513FFF4(particle->vtxTemplate, particle->def.texture, flip);
+    func_151400D0(particle->vtxTemplate, colors);
+    particle->active = 1;
+    particle->unk14 = 0;
+    particle->unk78 = D_800A5184;
+    particle->unk98 = 0;
+    particle->unk95 = 0;
+    particle->unk94 = 0;
+    particle->unk90 = 0;
+    particle->link.model = model;
+    particle->link.unk1C = arg8;
+    particle->link.unk4 = 0;
     for (i = 0; i < 4; i++) {
-        temp_v0->unkA4[i] = 0;
+        particle->link.handles[i] = 0;
     }
 
-    temp_v0->unkB4 = 0;
-    if (arg7) {
+    particle->link.sharedHandle = 0;
+    if (model) {
         for (i = 0; i <= D_80082FA0; i++) {
-            temp_v0->unkA4[i] = func_1515D480(arg7);
+            particle->link.handles[i] = func_1515D480(model);
         }
-        temp_v0->unkB4 = func_1515D440();
+        particle->link.sharedHandle = func_1515D440();
     }
-    return temp_v0;
+    return particle;
 }
 
 void func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
@@ -1701,10 +1769,12 @@ void func_1513F6C0(struct171 *arg0, u8 arg1, u8 arg2) {
     *(u8 *)((u8 *)arg0 + 0x81) = arg2;
 }
 
-s32 func_1513F6E8(ScaleUpdateState *arg0) {
-    f32 temp = arg0->field_0x128;
-    arg0->field_0x2C = arg0->field_0x2C + (temp * D_800BE9A4);
-    arg0->field_0x30 = arg0->field_0x30 + (temp * D_800BE9A4);
+/* Grows a particle's width and height by motion.grow.rate per second. */
+s32 func_1513F6E8(Particle *particle) {
+    f32 rate = particle->motion.grow.rate;
+
+    particle->def.width += rate * D_800BE9A4;
+    particle->def.height += rate * D_800BE9A4;
     return 1;
 }
 
@@ -1904,81 +1974,66 @@ void *func_1513FAB4(Beam1513FAB4 *arg0, u8 arg1, Scale1513FAB4 *arg2, s16 arg3) 
     return result;
 }
 
-void func_1513FFF4(struct1513FFF4 *arg0, u8 arg1, u8 arg2) {
-    struct1513FFF4_80090B60 *temp_v0;
-    u16 temp_v1;
-    u16 temp_a0;
-    s32 temp;
+/* Sets the texture coordinates of a quad to cover the whole texture, mirrored per the flip bits. */
+void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip) {
+    TextureInfo *tex;
+    u16 maxS;
+    u16 maxT;
+    s32 coord;
 
-    if (arg1 != 0xFF) {
-        temp_v0 = &D_80090B60[arg1];
-        temp_v1 = temp_v0->unk6 - 1;
-        temp_a0 = temp_v0->unk8 - 1;
+    if (texture != 0xFF) {
+        tex = &D_80090B60[texture];
+        maxS = tex->width - 1;
+        maxT = tex->height - 1;
 
-        if (arg2 & 1) {
-            temp = temp_v1 << 6;
+        if (flip & 1) {
+            coord = maxS << 6;
         } else {
-            temp = 0;
+            coord = 0;
         }
-        arg0[3].unk8 = temp;
-        arg0[0].unk8 = temp;
+        vtx[3].v.tc[0] = coord;
+        vtx[0].v.tc[0] = coord;
 
-        if (arg2 & 1) {
-            temp = 0;
+        if (flip & 1) {
+            coord = 0;
         } else {
-            temp = temp_v1 << 6;
+            coord = maxS << 6;
         }
-        arg0[2].unk8 = temp;
-        arg0[1].unk8 = temp;
+        vtx[2].v.tc[0] = coord;
+        vtx[1].v.tc[0] = coord;
 
-        if (arg2 & 2) {
-            temp = temp_a0 << 6;
+        if (flip & 2) {
+            coord = maxT << 6;
         } else {
-            temp = 0;
+            coord = 0;
         }
-        arg0[1].unkA = temp;
-        arg0[0].unkA = temp;
+        vtx[1].v.tc[1] = coord;
+        vtx[0].v.tc[1] = coord;
 
-        if (arg2 & 2) {
-            temp = 0;
+        if (flip & 2) {
+            coord = 0;
         } else {
-            temp = temp_a0 << 6;
+            coord = maxT << 6;
         }
-        arg0[3].unkA = temp;
-        arg0[2].unkA = temp;
+        vtx[3].v.tc[1] = coord;
+        vtx[2].v.tc[1] = coord;
     }
 }
 
-void func_151400D0(Dst151400D0 *dst, Src151400D0 *src) {
-    dst[0].unk6 = src[0].unk8;
-    dst += 3;
-    src += 3;
-    dst[-3].unkC = src[-3].unk0;
-    dst[-3].unkD = src[-3].unk2;
-    dst[-3].unkE = src[-3].unk4;
-    dst[-3].unkF = src[-3].unk6;
-    dst[-3].unk6 = 0;
+/* Copies four vertex colours into a quad. */
+void func_151400D0(Vtx *vtx, VtxColor *colors) {
+    s32 i;
 
-    dst[-2].unk6 = src[-2].unk8;
-    dst[-2].unkC = src[-2].unk0;
-    dst[-2].unkD = src[-2].unk2;
-    dst[-2].unkE = src[-2].unk4;
-    dst[-2].unkF = src[-2].unk6;
-    dst[-2].unk6 = 0;
-
-    dst[-1].unk6 = src[-1].unk8;
-    dst[-1].unkC = src[-1].unk0;
-    dst[-1].unkD = src[-1].unk2;
-    dst[-1].unkE = src[-1].unk4;
-    dst[-1].unkF = src[-1].unk6;
-    dst[-1].unk6 = 0;
-
-    dst[0].unk6 = src[0].unk8;
-    dst[0].unkC = src[0].unk0;
-    dst[0].unkD = src[0].unk2;
-    dst[0].unkE = src[0].unk4;
-    dst[0].unkF = src[0].unk6;
-    dst[0].unk6 = 0;
+    for (i = 0; i < 4; i++) {
+        vtx->v.flag = colors->flag;
+        vtx->v.cn[0] = colors->r;
+        vtx->v.cn[1] = colors->g;
+        vtx->v.cn[2] = colors->b;
+        vtx->v.cn[3] = colors->a;
+        vtx->v.flag = 0;
+        vtx++;
+        colors++;
+    }
 }
 
 void *func_15140190(void *arg0, s16 arg1) {
