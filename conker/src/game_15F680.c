@@ -27,7 +27,6 @@ extern s16 D_800DC468[];
 
 s32 func_151464B8(s16 *arg0);
 extern u8 D_800C3E90;
-extern s32 (*D_8008998C[])(s32);
 extern s32 D_800A3880[];
 extern s32 D_800DC640[];
 s32 *func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5);
@@ -168,50 +167,40 @@ typedef struct {
     s8 field_0x14A;
 } Func15132DDCArg0;
 
+/* Wall-collision query filled in by the caller and updated by func_15044380. */
 typedef struct {
-    s32 field_0x0;
-    u8 pad_4[0x10];
-    f32 field_0x14;
-    f32 field_0x18;
-    f32 field_0x1C;
-    u8 pad_20[0x8];
-    f32 field_0x28;
-    u8 pad_2C[0xB8];
-    s16 field_0xE4;
-    s16 field_0xE6;
-    u8 pad_E8[0x10];
-    s32 field_0xF8;
-    u8 pad_FC[0x50];
-    f32 field_0x14C;
-    f32 field_0x150;
-    u8 pad_154[0x2C];
-    f32 field_0x180;
-    u8 pad_184[0x4];
-    s32 field_0x188;
-    Bytes18_15132DDC field_0x18C;
-    u8 pad_19E[0x192];
-    f32 field_0x330[3];
-    f32 field_0x33C[3];
-} Func15132DDCLocals;
+    /* 0x000 */ s32 type;
+    /* 0x004 */ u8 pad4[0x10];
+    /* 0x014 */ vertex pos;
+    /* 0x020 */ u8 pad20[0x8];
+    /* 0x028 */ f32 unk28;
+    /* 0x02C */ u8 pad2C[0xB8];
+    /* 0x0E4 */ s16 unkE4;
+    /* 0x0E6 */ s16 unkE6;
+    /* 0x0E8 */ u8 padE8[0x10];
+    /* 0x0F8 */ s32 unkF8;
+    /* 0x0FC */ u8 padFC[0x50];
+    /* 0x14C */ f32 unk14C;
+    /* 0x150 */ f32 unk150;
+    /* 0x154 */ u8 pad154[0x2C];
+    /* 0x180 */ f32 floorHeight;
+    /* 0x184 */ u8 pad184[0x4];
+    /* 0x188 */ s32 unk188;
+    /* 0x18C */ Bytes18_15132DDC surface;
+    /* 0x19E */ u8 pad19E[0x192];
+} CollisionProbe; // size 0x330
 
-typedef s32 (*Func15132DDCCallback34)(Func15132DDCArg0 *, f32, f32, f32, f32, void *);
-typedef s32 (*Func15132DDCCallback70)(Func15132DDCArg0 *, f32, f32, f32, f32);
-typedef s32 (*Func15132DDCCallback74)(Func15132DDCArg0 *, void *, f32, f32, f32);
+/* Collision handlers; each gets the particle's position from before the move. Returning 0 stops the update. */
+typedef s32 (*ParticleFloorHitFn)(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight,
+                                  Bytes18_15132DDC *surface);
+typedef s32 (*ParticleFloorType3Fn)(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight);
+typedef s32 (*ParticleWallHitFn)(Particle *particle, CollisionProbe *probe, f32 x, f32 y, f32 z);
 
-extern Func15132DDCCallback34 D_80089934[];
-extern Func15132DDCCallback70 D_80089970[];
-extern Func15132DDCCallback74 D_80089974[];
+extern ParticleFloorHitFn D_80089934[];
+extern ParticleFloorType3Fn D_80089970[];
+extern ParticleWallHitFn D_80089974[];
 extern f32 D_800A386C;
 extern f32 D_800A3870;
-
-typedef struct {
-    u8 pad0[0x60];
-    u32 flags;
-    u8 pad64[0x8];
-    s16 *unk6C;
-    u8 pad70[0x8];
-    u8 unk78;
-} Obj15132A88;
 
 typedef struct {
     u8 pad_0[0x18];
@@ -546,220 +535,207 @@ Particle *func_15132A4C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 extraSize,
     return func_1513264C(spawn, arg1, arg2, NULL, extraSize, arg4, arg5);
 }
 
-void func_15132A88(Obj15132A88 *arg0) {
-    s16 *temp;
-    s32 ret;
-    s32 flags;
+typedef s32 (*ParticleMatrixFn)(Mtx *mtx, Particle *particle);
+extern ParticleMatrixFn D_8008998C[];
 
-    arg0->flags &= 0xFFDFFFFF;
-    if (arg0->flags & 0x20000) {
+/* Rebuild this frame's matrix through the matrixFn handler; flag 0x40000 says the particle is drawable.
+ * A handler result of -1 destroys the particle. */
+void func_15132A88(Particle *particle) {
+    s16 *unk6C;
+    s32 result;
+
+    particle->flags &= ~0x200000;
+    if (particle->flags & 0x20000) {
         return;
     }
 
-    if (arg0->flags & 0x400) {
-        temp = arg0->unk6C;
-        if (temp != NULL) {
-            if (func_151464B8(temp) != 0) {
-                return;
-            }
+    if (particle->flags & 0x400) {
+        unk6C = particle->unk6C;
+        if (unk6C != NULL && func_151464B8(unk6C) != 0) {
+            return;
         }
     }
 
-    flags = arg0->flags;
-    if (flags & 0x80000) {
-        arg0->flags = flags | 0x200000;
+    if (particle->flags & 0x80000) {
+        particle->flags |= 0x200000;
         return;
     }
 
-    ret = D_8008998C[arg0->unk78]((s32)arg0 + 0x90 + (D_800BE9C0 << 6));
-    if (ret == -1) {
-        func_1516972C((struct102 *)arg0);
+    result = D_8008998C[particle->matrixFn](&particle->mtx[D_800BE9C0], particle);
+    if (result == -1) {
+        func_1516972C((struct102 *)particle);
         return;
     }
 
-    if (ret == 0) {
-        arg0->flags &= 0xFFFBFFFF;
+    if (result == 0) {
+        particle->flags &= ~0x40000;
     } else {
-        arg0->flags |= 0x240000;
+        particle->flags |= 0x240000;
     }
 }
 
-typedef struct {
-    u8 pad_0[0x38];
-    u8 field_0x38[0x28];
-    s32 field_0x60;
-    u8 pad_64[0xC];
-    u8 field_0x70;
-    u8 pad_71[0x8];
-    s8 field_0x79;
-    u8 field_0x7A;
-    u8 pad_7B;
-    s32 field_0x7C;
-    u8 field_0x80;
-    u8 pad_81[0xB];
-    Gfx ***field_0x8C;
-    u8 field_0x90[0x98];
-    s32 field_0x128;
-    u8 pad_12C[0x20];
-    s32 field_0x14C[1];
-} Obj15132B80;
-
 extern u8 D_80083740[];
 extern u8 D_800838C0[];
-extern Gfx *(*D_800899A4[])(Gfx *, Obj15132B80 *, s16);
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-void *func_151462C8(void *arg0, s32 *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, struct17 *arg6, u8 arg7, s32 arg8);
+extern Gfx *(*D_800899A4[])(Gfx *gfx, Particle *particle, s16 arg2);
+Gfx *func_15142B7C(Gfx *gfx, s32 setFlags, s32 clearFlags);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 alpha, u8 *state);
+Gfx *func_151462C8(Gfx *gfx, s32 *arg1, u8 arg2, struct127 *owner, u8 ownerId, s16 arg5, f32 *pos, u8 arg7,
+                   s32 arg8);
 
-Gfx *func_15132B80(Gfx *gfx, Obj15132B80 *arg1, s16 arg2) {
-    Obj15132B80 *obj;
-    u8 sync;
+/* Draw a particle whose matrix func_15132A88 built this frame: segment 8, render state, optional extra
+ * commands from drawFn, then the matrix and the model's display list. */
+Gfx *func_15132B80(Gfx *gfx, Particle *arg1, s16 arg2) {
+    Particle *particle;
+    u8 state;
 
-    obj = arg1;
-    if (!(obj->field_0x60 & 0x200000)) {
+    particle = arg1; // matching: IDO allocates s0/s1 and the frame from this param copy
+
+    if (!(particle->flags & 0x200000)) {
         return gfx;
     }
-    if (obj->field_0x60 & 0x20000) {
+    if (particle->flags & 0x20000) {
         return gfx;
     }
-    if (!(obj->field_0x60 & 0x40000)) {
+    if (!(particle->flags & 0x40000)) {
         return gfx;
     }
-    sync = 1;
-    if (obj->field_0x70 < 0xFF) {
+    state = 1;
+    if (particle->alpha < 0xFF) {
         gSPSegment(gfx++, 8, D_80083740);
     } else {
         gSPSegment(gfx++, 8, D_800838C0);
     }
-    if (obj->field_0x60 & 0x10000) {
-        if (obj->field_0x79 != -1) {
-            gfx = D_800899A4[obj->field_0x79](gfx, obj, arg2);
+    if (particle->flags & 0x10000) {
+        if (particle->drawFn != -1) {
+            gfx = D_800899A4[particle->drawFn](gfx, particle, arg2);
         }
     }
-    gfx = func_15142C10(gfx, 0, 0, 0, obj->field_0x70, &sync);
+    gfx = func_15142C10(gfx, 0, 0, 0, particle->alpha, &state);
     gfx = func_15142B7C(gfx,
-                        ((obj->field_0x60 & 0x800) ? 0x20000 : 0) | ((obj->field_0x60 & 0x1000) ? 0x400000 : 0) | 1 | 4 | 0x200000,
-                        ((obj->field_0x60 & 0x800) ? 0 : 0x20000) | ((obj->field_0x60 & 0x1000) ? 0 : 0x400000) | 0x600 | 0x10000 | 0x40000 | 0x80000);
-    if (obj->field_0x60 & 0x800) {
-        gfx = func_151462C8(gfx, obj->field_0x14C, obj->field_0x7A, (void *)obj->field_0x7C, obj->field_0x80, arg2,
-                            (struct17 *)obj->field_0x38, (obj->field_0x60 & 0x1000) ? 1 : 0, obj->field_0x128);
+                        ((particle->flags & 0x800) ? 0x20000 : 0) | ((particle->flags & 0x1000) ? 0x400000 : 0) | 1 |
+                            4 | 0x200000,
+                        ((particle->flags & 0x800) ? 0 : 0x20000) | ((particle->flags & 0x1000) ? 0 : 0x400000) |
+                            0x600 | 0x10000 | 0x40000 | 0x80000);
+    if (particle->flags & 0x800) {
+        gfx = func_151462C8(gfx, &particle->unk14C, particle->unk7A, particle->owner, particle->ownerId, arg2,
+                            &particle->pos.x, (particle->flags & 0x1000) ? 1 : 0, particle->floor.unk18);
     }
-    gSPMatrix(gfx++, &obj->field_0x90[D_800BE9C0 << 6], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPDisplayList(gfx++, **obj->field_0x8C);
+    gSPMatrix(gfx++, &particle->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPDisplayList(gfx++, *particle->node->resource);
     return gfx;
 }
 
-s32 func_15132DDC(Func15132DDCArg0 *arg0) {
-    Func15132DDCLocals sp38;
-    register f32 temp_f0;
+/* Move a physics particle (gravity, velocity, spin) and collide it with the floor and walls, recording
+ * hits in hitFlags and calling the hit handlers. Returns 0 if a handler ended the update. */
+s32 func_15132DDC(Particle *particle) {
+    vertex prev;
+    vertex test;
+    CollisionProbe probe;
+    f32 speed;
 
-    if (arg0->field_0x60 & 7) {
-        memcpy(sp38.field_0x33C, &arg0->field_0x38, 0xC);
+    if (particle->flags & 7) {
+        memcpy(&prev, &particle->pos, sizeof(vertex));
     }
 
-    if (arg0->field_0x60 & 8) {
-        arg0->field_0x48 += arg0->field_0x5C * D_800BE9A4;
+    if (particle->flags & 8) {
+        particle->vel.y += particle->gravity * D_800BE9A4;
     }
 
-    if (arg0->field_0x60 & 0x20) {
-        arg0->field_0x38 += arg0->field_0x44 * D_800BE9A4;
-        arg0->field_0x3C += arg0->field_0x48 * D_800BE9A4;
-        arg0->field_0x40 += arg0->field_0x4C * D_800BE9A4;
+    if (particle->flags & 0x20) {
+        particle->pos.x += particle->vel.x * D_800BE9A4;
+        particle->pos.y += particle->vel.y * D_800BE9A4;
+        particle->pos.z += particle->vel.z * D_800BE9A4;
     }
 
-    if (arg0->field_0x60 & 0x40) {
-        arg0->field_0x20 += arg0->field_0x50 * D_800BE9A4;
-        arg0->field_0x24 += arg0->field_0x54 * D_800BE9A4;
-        arg0->field_0x28 += arg0->field_0x58 * D_800BE9A4;
+    if (particle->flags & 0x40) {
+        particle->rot.x += particle->rotVel.x * D_800BE9A4;
+        particle->rot.y += particle->rotVel.y * D_800BE9A4;
+        particle->rot.z += particle->rotVel.z * D_800BE9A4;
     }
 
-    if (arg0->field_0x60 & 7) {
-        sp38.field_0x330[0] = arg0->field_0x38;
-        sp38.field_0x330[1] = sp38.field_0x33C[1];
-        sp38.field_0x330[2] = arg0->field_0x40;
+    if (particle->flags & 7) {
+        test.x = particle->pos.x;
+        test.y = prev.y;
+        test.z = particle->pos.z;
 
-        if (func_15046C80(sp38.field_0x330, 0, arg0->field_0x3C - arg0->field_0x10, &arg0->field_0x110) != 0) {
-            if ((arg0->field_0x12D == 1) || ((arg0->field_0x12D == 2) && (arg0->field_0x12C & 1))) {
-                arg0->field_0x148 |= 1;
-                if (arg0->field_0x60 & 0x10) {
-                    temp_f0 = sqrtf((arg0->field_0x44 * arg0->field_0x44) +
-                                    (arg0->field_0x48 * arg0->field_0x48) +
-                                    (arg0->field_0x4C * arg0->field_0x4C));
-                    if (temp_f0 > 1.0f) {
-                        arg0->field_0x148 |= 8;
-                        arg0->field_0x140 = temp_f0;
-                        arg0->field_0x144 = 1.0f / temp_f0;
+        if (func_15046C80(&test.x, 0, particle->pos.y - particle->radius, &particle->floor) != 0) {
+            if (particle->floor.type == 1 || (particle->floor.type == 2 && (particle->floor.unk1C & 1))) {
+                particle->hitFlags |= 1;
+                if (particle->flags & 0x10) {
+                    speed = sqrtf(particle->vel.x * particle->vel.x + particle->vel.y * particle->vel.y +
+                                  particle->vel.z * particle->vel.z);
+                    if (speed > 1.0f) {
+                        particle->hitFlags |= 8;
+                        particle->speed = speed;
+                        particle->invSpeed = 1.0f / speed;
                     }
                 }
 
-                if (arg0->field_0x73 != 0) {
-                    if (D_80089934[arg0->field_0x73](arg0, sp38.field_0x33C[0], sp38.field_0x33C[1],
-                                                     sp38.field_0x33C[2], arg0->field_0x110,
-                                                     &arg0->field_0x114) == 0) {
+                if (particle->floorHitFn != 0) {
+                    if (D_80089934[particle->floorHitFn](particle, prev.x, prev.y, prev.z, particle->floor.height,
+                                                         &particle->floor.surface) == 0) {
                         return 0;
                     }
                 }
 
-                if (arg0->field_0x60 & 0x10) {
-                    memcpy(&arg0->field_0x134, &arg0->field_0x38, 0xC);
+                if (particle->flags & 0x10) {
+                    memcpy(particle->squashOrigin, &particle->pos, sizeof(vertex));
                 }
             }
 
-            if (arg0->field_0x12D == 3) {
-                arg0->field_0x148 |= 2;
-                if (arg0->field_0x74 != 0) {
-                    if (D_80089970[arg0->field_0x74](arg0, sp38.field_0x33C[0], sp38.field_0x33C[1],
-                                                     sp38.field_0x33C[2], arg0->field_0x110) == 0) {
+            if (particle->floor.type == 3) {
+                particle->hitFlags |= 2;
+                if (particle->floorType3Fn != 0) {
+                    if (D_80089970[particle->floorType3Fn](particle, prev.x, prev.y, prev.z,
+                                                           particle->floor.height) == 0) {
                         return 0;
                     }
                 }
             }
         }
 
-        if (arg0->field_0x60 & 4) {
-            sp38.field_0x0 = 4;
-            sp38.field_0x14 = arg0->field_0x38;
-            sp38.field_0x18 = arg0->field_0x3C;
-            sp38.field_0x1C = arg0->field_0x40;
-            sp38.field_0x188 = 0;
-            sp38.field_0x18C = arg0->field_0x114;
-            sp38.field_0x28 = 1.0f;
-            sp38.field_0x14C = 1.0f;
-            sp38.field_0xE4 = (s16)(s32)arg0->field_0x10;
-            sp38.field_0x150 = 1.0f;
-            sp38.field_0xE6 = (s16)(s32)arg0->field_0x10;
-            if (arg0->field_0x12C & 2) {
-                sp38.field_0x180 = arg0->field_0x110;
+        if (particle->flags & 4) {
+            probe.type = 4;
+            probe.pos.x = particle->pos.x;
+            probe.pos.y = particle->pos.y;
+            probe.pos.z = particle->pos.z;
+            probe.unk188 = 0;
+            probe.surface = particle->floor.surface;
+            probe.unk28 = 1.0f;
+            probe.unk14C = 1.0f;
+            probe.unkE4 = particle->radius;
+            probe.unk150 = 1.0f;
+            probe.unkE6 = particle->radius;
+            if (particle->floor.unk1C & 2) {
+                probe.floorHeight = particle->floor.height;
             } else {
-                sp38.field_0x180 = D_800A386C;
+                probe.floorHeight = D_800A386C;
             }
-            sp38.field_0xF8 = 0;
+            probe.unkF8 = 0;
 
-            if (func_15044380(sp38.field_0x33C[0], sp38.field_0x33C[1], sp38.field_0x33C[2], &sp38, 0, 0) != 0) {
-                arg0->field_0x148 |= 4;
-                if (arg0->field_0x60 & 0x10) {
-                    temp_f0 = sqrtf((arg0->field_0x44 * arg0->field_0x44) +
-                                    (arg0->field_0x48 * arg0->field_0x48) +
-                                    (arg0->field_0x4C * arg0->field_0x4C));
-                    if (temp_f0 > 1.0f) {
-                        arg0->field_0x148 |= 0x10;
-                        arg0->field_0x140 = temp_f0;
-                        arg0->field_0x144 = 1.0f / temp_f0;
-                        arg0->field_0x14A = (s8)(s32)(func_150484A0(sp38.field_0x14 - arg0->field_0x38,
-                                                                     sp38.field_0x1C - arg0->field_0x40) *
-                                                       D_800A3870);
+            if (func_15044380(prev.x, prev.y, prev.z, &probe, 0, 0) != 0) {
+                particle->hitFlags |= 4;
+                if (particle->flags & 0x10) {
+                    speed = sqrtf(particle->vel.x * particle->vel.x + particle->vel.y * particle->vel.y +
+                                  particle->vel.z * particle->vel.z);
+                    if (speed > 1.0f) {
+                        particle->hitFlags |= 0x10;
+                        particle->speed = speed;
+                        particle->invSpeed = 1.0f / speed;
+                        particle->squashAngle = func_150484A0(probe.pos.x - particle->pos.x,
+                                                              probe.pos.z - particle->pos.z) *
+                                                D_800A3870;
                     }
                 }
 
-                if (arg0->field_0x75 != 0) {
-                    if (D_80089974[arg0->field_0x75](arg0, &sp38, sp38.field_0x33C[0],
-                                                     sp38.field_0x33C[1], sp38.field_0x33C[2]) == 0) {
+                if (particle->wallHitFn != 0) {
+                    if (D_80089974[particle->wallHitFn](particle, &probe, prev.x, prev.y, prev.z) == 0) {
                         return 0;
                     }
                 }
 
-                if (arg0->field_0x60 & 0x10) {
-                    memcpy(&arg0->field_0x134, &arg0->field_0x38, 0xC);
+                if (particle->flags & 0x10) {
+                    memcpy(particle->squashOrigin, &particle->pos, sizeof(vertex));
                 }
             }
         }
