@@ -628,9 +628,6 @@ typedef struct {
     /* 0x48 */ AimHolderData *unk48;
 } AimHolder;
 
-/* D_800C6650 holds a pointer to D_800C6654 struct160 aim points (variables.h declares it as an array). */
-#define AIM_POINTS (*(struct160 **)D_800C6650)
-
 extern AimNodeTypes D_800843E0;
 extern u8 D_80084404[];
 extern AimNode *D_800DCE50[2][104];
@@ -729,7 +726,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
             idx = D_80084400;
             bestIdx = -1;
             do {
-                point = &AIM_POINTS[idx];
+                point = &((struct160 *)D_800C6650)[idx]; // matching: the no-op cast keeps the addu operand order
                 if (objX < point->unkE && point->unk10 < objX && (u16)point->unk6 == 0) {
                     radiusSq = point->unk8;
                     px = point->unk0;
@@ -811,8 +808,8 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         return;
     }
     if (foundKind == 2) {
-        if (AIM_POINTS[bestIdx].unk12 != 0) {
-            func_1507E9E8(obj, AIM_POINTS[bestIdx].unk12 - 1);
+        if (D_800C6650[bestIdx].unk12 != 0) {
+            func_1507E9E8(obj, D_800C6650[bestIdx].unk12 - 1);
         }
     } else if (foundKind == 3) {
         // matching: the empty branch keeps the shared epilogue branch IDO emits
