@@ -2250,6 +2250,52 @@ typedef struct TrackerTrail {
     /* 0x98 */ TrackerTrailData *state;
 } TrackerTrail;
 
+/* Head of the data of a particle stream (TimedEffect data at 0x28): every tick it emits `rate` particles from
+ * position, aimed along func_151436B4 angles that wobble as sines (func_151C4820, game_1F1CD0.c;
+ * func_150E6B84, game_113D60.c). */
+typedef struct ParticleStream {
+    /* 0x00 */ f32 angleX;        /* centre direction */
+    /* 0x04 */ f32 angleY;
+    /* 0x08 */ f32 amplitudeX;    /* of the angle wobble */
+    /* 0x0C */ f32 amplitudeY;
+    /* 0x10 */ f32 phaseX;
+    /* 0x14 */ f32 phaseY;
+    /* 0x18 */ f32 speedX;        /* phase advance per tick */
+    /* 0x1C */ f32 speedY;
+    /* 0x20 */ f32 time;
+    /* 0x24 */ f32 rate;          /* particles per tick */
+    /* 0x28 */ f32 remaining;     /* particles owed (emitted while above 1) */
+    /* 0x2C */ Vec3f position;
+} ParticleStream; /* size 0x38 */
+
+/* A stream of func_151C229C projectiles (TimedEffect tick callback 0x2B, func_151C4820, game_1F1CD0.c). */
+typedef struct ProjectileStream {
+    /* 0x00 */ ParticleStream stream;
+    /* 0x38 */ f32 speed;         /* func_151C229C's speed */
+    /* 0x3C */ f32 unk3C;         /* its arg7 */
+    /* 0x40 */ f32 unk40;         /* its arg10 */
+} ProjectileStream; /* size 0x44 */
+
+/* A timed emitter of ProjectileStreams (TimedEffect tick callback 0x2A, func_151C4644, game_1EF500.c; spawned by
+ * func_150144B8, game_40490.c): after a random delay it starts one stream and picks a new delay. */
+typedef struct StreamEmitter {
+    /* 0x00 */ s16 *position;     /* x, y, z (of the spawning TriggerZone) */
+    /* 0x04 */ s32 timer;
+    /* 0x08 */ s32 minDelay;
+    /* 0x0C */ s32 delayRange;
+    /* 0x10 */ s16 minLife;       /* of each stream */
+    /* 0x12 */ s16 lifeRange;
+    /* 0x14 */ f32 rateBase;      /* stream rate: rateBase + rand * rateRange */
+    /* 0x18 */ f32 rateRange;
+    /* 0x1C */ f32 angleX;        /* stream direction */
+    /* 0x20 */ f32 angleY;
+    /* 0x24 */ f32 spread;        /* max wobble amplitude */
+    /* 0x28 */ f32 wobbleSpeed;   /* phase speed of the wobble */
+    /* 0x2C */ f32 speed;         /* copied to ProjectileStream.speed, unk3C, unk40 */
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+} StreamEmitter; /* size 0x38 */
+
 /* Spawn parameters of a rumble effect object (func_151D8868, kind 0x3F; copied into RumbleObj.params):
  * a timed rumble on the controllers of the players in a mask. */
 typedef struct RumbleParams {

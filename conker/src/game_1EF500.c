@@ -988,86 +988,44 @@ s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     return alive;
 }
 
-/* Data of a timed particle emitter effect, after its 0x28-byte effect head. */
 typedef struct {
-    /* 0x00 */ s16 *position; /* x, y, z */
-    /* 0x04 */ s32 timer;
-    /* 0x08 */ s32 minimumDelay;
-    /* 0x0C */ s32 delayRange;
-    /* 0x10 */ s16 minimumLife;
-    /* 0x12 */ s16 lifeRange;
-    /* 0x14 */ f32 base;
-    /* 0x18 */ f32 jitter;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 spread;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-} Game1EF500TimedEmitter;
-
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
-    /* 0x28 */ Game1EF500TimedEmitter emitter;
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ StreamEmitter emitter;
 } Game1EF500TimedOwner;
 
-/* Data of each particle the timed emitter spawns (copied to the particle's +0x28). */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 angle10;
-    /* 0x14 */ f32 angle14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ Vec3f position;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-} Game1EF500TimedParticle; /* 0x44 */
-
-/* Timed emitter update: when its timer runs out, spawns one particle and picks a new random delay. */
+/* StreamEmitter update: when its timer runs out, starts one ProjectileStream and picks a new random delay. */
 void func_151C4644(Game1EF500TimedOwner *owner) {
-    Game1EF500TimedEmitter *emitter;
-    Game1EF500TimedParticle data;
+    StreamEmitter *emitter;
+    ProjectileStream data;
     TimedEffect *effect;
 
     emitter = &owner->emitter;
     emitter->timer -= D_800BE9E4;
     if (emitter->timer < 0) {
-        data.unk0 = emitter->unk1C;
-        data.unk4 = emitter->unk20;
-        data.unk8 = func_150ADA68() * emitter->spread;
-        data.unkC = func_150ADA68() * emitter->spread;
-        data.angle10 = func_150ADA68() * 6.283185482f; /* 2pi */
-        data.angle14 = func_150ADA68() * 6.283185482f;
-        data.unk18 = emitter->unk28;
-        data.unk1C = emitter->unk28;
-        data.unk20 = 0.0f;
-        data.unk24 = (func_150ADA68() * emitter->jitter) + emitter->base;
-        data.unk28 = 0.0f;
-        data.position.x = emitter->position[0];
-        data.position.y = emitter->position[1];
-        data.position.z = emitter->position[2];
-        data.unk38 = emitter->unk2C;
+        data.stream.angleX = emitter->angleX;
+        data.stream.angleY = emitter->angleY;
+        data.stream.amplitudeX = func_150ADA68() * emitter->spread;
+        data.stream.amplitudeY = func_150ADA68() * emitter->spread;
+        data.stream.phaseX = func_150ADA68() * 6.283185482f; /* 2pi */
+        data.stream.phaseY = func_150ADA68() * 6.283185482f;
+        data.stream.speedX = emitter->wobbleSpeed;
+        data.stream.speedY = emitter->wobbleSpeed;
+        data.stream.time = 0.0f;
+        data.stream.rate = (func_150ADA68() * emitter->rateRange) + emitter->rateBase;
+        data.stream.remaining = 0.0f;
+        data.stream.position.x = emitter->position[0];
+        data.stream.position.y = emitter->position[1];
+        data.stream.position.z = emitter->position[2];
+        data.speed = emitter->speed;
         data.unk3C = emitter->unk30;
         data.unk40 = emitter->unk34;
 
-        effect = func_15149130((s16)((func_150ADA20() % (u32)(emitter->lifeRange + 1)) + emitter->minimumLife),
-                               -1, 0x2B, -1, 1, 0, sizeof(data), owner->unkC, owner->unk1);
+        effect = func_15149130((s16)((func_150ADA20() % (u32)(emitter->lifeRange + 1)) + emitter->minLife),
+                               -1, 0x2B, -1, 1, 0, sizeof(data), owner->base.header.owner, owner->base.header.kind);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x28, &data, sizeof(data));
         }
 
-        emitter->timer = (func_150ADA20() % (u32)(emitter->delayRange + 1)) + emitter->minimumDelay;
+        emitter->timer = (func_150ADA20() % (u32)(emitter->delayRange + 1)) + emitter->minDelay;
     }
 }

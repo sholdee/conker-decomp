@@ -681,23 +681,12 @@ s32 func_150142EC(TriggerZone *obj) {
     }
     return 1;
 }
-typedef struct Game40490144B8Packet {
-    void *owner;
-    s32 choice;
-    s32 low;
-    s32 range;
-    s16 countX, countY;
-    f32 sizeX, sizeY;
-    f32 angleX, angleY;
-    f32 arc, factor;
-    f32 steps, inverse, height;
-} Game40490144B8Packet;
 
 void func_15145974(void *, f32 *, f32 *);
 
-/** Spawns an effect along the object's rotation, configured by the bytes of unk18 and unk1C. */
+/** Spawns a StreamEmitter aimed along the object's rotation, configured by the bytes of unk18 and unk1C. */
 s32 func_150144B8(TriggerZone *obj) {
-    Game40490144B8Packet packet;
+    StreamEmitter emitter;
     u32 value; // matching: holds the random number, then the effect address; two locals grow the frame
     struct {
         f32 direction[3];
@@ -710,26 +699,26 @@ s32 func_150144B8(TriggerZone *obj) {
     }
     func_150A8050(scratch.matrix, obj->pitch, obj->yaw, 0.0f);
     func_150A7960(scratch.matrix[0], 0.0f, 100.0f, 0.0f, &scratch.direction[0], &scratch.direction[1], &scratch.direction[2]);
-    func_15145974(scratch.direction, &packet.angleX, &packet.angleY);
-    packet.angleX *= 0.017453292f;
-    packet.angleY *= 0.017453292f;
-    packet.low = obj->unk18 & 0xFF;
-    packet.range = (obj->unk18 >> 8) & 0xFF;
+    func_15145974(scratch.direction, &emitter.angleX, &emitter.angleY);
+    emitter.angleX *= 0.017453292f;
+    emitter.angleY *= 0.017453292f;
+    emitter.minDelay = obj->unk18 & 0xFF;
+    emitter.delayRange = (obj->unk18 >> 8) & 0xFF;
     value = func_150ADA20();
-    packet.owner = obj;
-    packet.choice = value % (u32)(packet.range + 1) + packet.low;
-    packet.countX = (obj->unk18 >> 16) & 0xFF;
-    packet.countY = (obj->unk18 >> 24) & 0xFF;
-    packet.sizeX = (f32)(obj->unk1C & 0xFF) * 0.015625f;
-    packet.sizeY = (f32)((obj->unk1C >> 8) & 0xFF) * 0.015625f;
-    packet.steps = (f32)((obj->unk1C >> 24) & 0xFF);
-    packet.inverse = 1.0f / packet.steps;
-    packet.height = (f32)obj->height * packet.inverse;
-    packet.arc = func_150484A0(obj->radius, obj->height);
-    packet.factor = (f32)((obj->unk1C >> 16) & 0xFF) * 0.00390625f * 0.7853982f;
-    value = (u32)func_15149130(300, -1, 0x2A, -1, 0, 0, sizeof(packet), 0xFF, 0);
+    emitter.position = &obj->x;
+    emitter.timer = value % (u32)(emitter.delayRange + 1) + emitter.minDelay;
+    emitter.minLife = (obj->unk18 >> 16) & 0xFF;
+    emitter.lifeRange = (obj->unk18 >> 24) & 0xFF;
+    emitter.rateBase = (f32)(obj->unk1C & 0xFF) * 0.015625f;
+    emitter.rateRange = (f32)((obj->unk1C >> 8) & 0xFF) * 0.015625f;
+    emitter.speed = (f32)((obj->unk1C >> 24) & 0xFF);
+    emitter.unk30 = 1.0f / emitter.speed;
+    emitter.unk34 = (f32)obj->height * emitter.unk30;
+    emitter.spread = func_150484A0(obj->radius, obj->height);
+    emitter.wobbleSpeed = (f32)((obj->unk1C >> 16) & 0xFF) * 0.00390625f * 0.7853982f;
+    value = (u32)func_15149130(300, -1, 0x2A, -1, 0, 0, sizeof(emitter), 0xFF, 0);
     if (value != 0) {
-        memcpy((void *)((u32)value + 0x28U), &packet, sizeof(packet));
+        memcpy((void *)((u32)value + 0x28U), &emitter, sizeof(emitter));
     }
     return 1;
 }
