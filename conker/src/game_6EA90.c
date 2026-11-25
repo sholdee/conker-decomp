@@ -3,95 +3,82 @@
 #include "variables.h"
 
 
-extern u8 D_80084930;
-extern u8 D_800848D0[];
-extern u8 D_80085930;
-extern u8 D_80085931;
-extern u8 D_80085932;
-extern u8 D_80085933[];
+extern u8 D_80085930[]; // font charset, 95 entries
 
-#define WGFX(pkt, a, b)             \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
-Gfx *func_150412C0(Gfx *gfx);
+s32 func_15042C40(u8 ch);
 
-s32 func_15041480(u8 arg0);
-Gfx *func_15041508(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3);
-Gfx *func_150413FC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-s32 func_15041480(u8 arg0);
-Gfx *func_15041508(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3);
-
-
-void func_150415E0(s32 arg0, s32 *arg1, s32 *arg2, f32 *arg3, s32 *arg4, f32 *arg5) {
-    if ((arg0 >= 0xA8) && (arg0 < 0x100)) {
-        *arg5 = 1.0f;
-        switch (arg0) {
+/*
+ * Size and layout of a special (icon) glyph, codes 0xA8-0xFF: its width and height in texels, how far
+ * it is raised above the baseline, whether it keeps the current combiner (noCombine) and its scale.
+ * Other codes get a zero size.
+ */
+void func_150415E0(s32 glyph, s32 *width, s32 *height, f32 *yOffset, s32 *noCombine, f32 *scale) {
+    if (glyph >= 0xA8 && glyph < 0x100) {
+        *scale = 1.0f;
+        switch (glyph) {
             case 0xA8:
             case 0xA9:
-                *arg1 = 0x20;
-                *arg2 = 0x12;
-                *arg3 = 3.1f;
-                *arg4 = 1;
+                *width = 0x20;
+                *height = 0x12;
+                *yOffset = 3.1f;
+                *noCombine = 1;
                 break;
             case 0xAA:
             case 0xAB:
             case 0xAC:
             case 0xAD:
-                *arg1 = 0x20;
-                *arg2 = 0x1B;
-                *arg3 = 2.0f;
-                *arg4 = 1;
-                *arg5 = 0.603f;
+                *width = 0x20;
+                *height = 0x1B;
+                *yOffset = 2.0f;
+                *noCombine = 1;
+                *scale = 0.603f;
                 break;
             case 0xAE:
-                *arg1 = 0x10;
-                *arg2 = 0x11;
-                *arg3 = -1.6f;
-                *arg4 = 1;
+                *width = 0x10;
+                *height = 0x11;
+                *yOffset = -1.6f;
+                *noCombine = 1;
                 break;
             case 0xAF:
             case 0xB0:
-                *arg1 = 0x2E;
-                *arg2 = 0x10;
-                *arg3 = 2.0f;
-                *arg4 = 1;
+                *width = 0x2E;
+                *height = 0x10;
+                *yOffset = 2.0f;
+                *noCombine = 1;
                 break;
             case 0xB6:
             case 0xB7:
             case 0xB8:
             case 0xB9:
-                *arg1 = 0x10;
-                *arg2 = 0xC;
-                *arg3 = 2.0f;
-                *arg4 = 0;
+                *width = 0x10;
+                *height = 0xC;
+                *yOffset = 2.0f;
+                *noCombine = 0;
                 break;
             case 0xBA:
-                *arg4 = 0;
-                *arg3 = 0.2f;
-                *arg1 = 0x37;
-                *arg2 = 0xC;
+                *noCombine = 0;
+                *yOffset = 0.2f;
+                *width = 0x37;
+                *height = 0xC;
                 break;
             case 0xB1:
-                *arg1 = 0x26;
-                *arg2 = 0x18;
-                *arg3 = 2.0f;
-                *arg4 = 1;
-                *arg5 = 0.726f;
+                *width = 0x26;
+                *height = 0x18;
+                *yOffset = 2.0f;
+                *noCombine = 1;
+                *scale = 0.726f;
                 break;
             default:
-                *arg1 = 0xC;
-                *arg2 = 0x10;
-                *arg3 = 2.0f;
-                *arg4 = 0;
+                *width = 0xC;
+                *height = 0x10;
+                *yOffset = 2.0f;
+                *noCombine = 0;
                 break;
         }
     } else {
-        *arg3 = 0.0f;
-        *arg1 = 0;
-        *arg2 = 0;
+        *yOffset = 0.0f;
+        *width = 0;
+        *height = 0;
     }
 }
 
@@ -423,7 +410,8 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                 D_800D2DAB = 1;
                 gDPSetOtherMode(gfx++, 0x002C3F, D_800A4AC8[25][0] | D_800A4AC8[25][1] | 4);
                 if (noCombine == 0) {
-                    WGFX(gfx++, 0xFCFFB3FF, 0xFF65FEFF);
+                    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0,
+                                      0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
                 }
                 gfx = func_15094F70(gfx, tex, shift <<= 8, &sprite, 0, 0, 0, 2, 3);
                 if (D_800D2CA0 != 0x80000000) {
@@ -593,54 +581,27 @@ void func_150428D4(u8 *str, s32 *width, s32 *height, s32 *depth) {
     }
 }
 
-s32 func_15042C40(u8 arg0) {
+/* Maps a character to its glyph index in the font charset; lowercase folds to uppercase, space is 0x60. */
+s32 func_15042C40(u8 ch) {
     s32 i;
     u8 c;
-    u8 *ptr;
     s32 original;
 
-    original = arg0;
-    if ((original >= 0x61) && (original < 0x7B)) {
-        c = original - 0x20;
+    original = ch;
+    if (original >= 'a' && original <= 'z') {
+        c = original - ('a' - 'A');
     } else {
         c = original;
     }
 
-    if (original == 0x20) {
+    if (original == ' ') {
         return 0x60;
     }
 
-    i = 3;
-    if (D_80085930 == c) {
-        return 0;
-    }
-    if (D_80085931 == c) {
-        return 1;
-    }
-    if (D_80085932 == c) {
-        return 2;
-    }
-
-    ptr = D_80085933;
-    for (i = 3; ; ) {
-        if (c == ptr[0]) {
+    for (i = 0; i < 95; i++) {
+        if (c == D_80085930[i]) {
             return i;
         }
-        if (c == ptr[1]) {
-            return i + 1;
-        }
-        if (c == ptr[2]) {
-            return i + 2;
-        }
-        if (c == ptr[3]) {
-            return i + 3;
-        }
-        i += 4;
-        ptr += 4;
-        if (i != 0x5F) {
-            continue;
-        }
-        break;
     }
 
     return original;
