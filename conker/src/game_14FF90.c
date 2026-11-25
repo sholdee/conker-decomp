@@ -3,9 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A34B0[4][2];
-extern f32 D_800A3550;
-extern f32 D_800A3554;
 
 typedef struct {
     f32 x;
@@ -336,6 +333,36 @@ typedef struct CamView {
 CAMERA_CHECK(Camera_size, sizeof(Camera) == 0x9A0);
 CAMERA_CHECK(CamTransition_size, sizeof(CamTransition) == 0x50);
 
+/* Sound emitter handed to the aim sound callbacks by func_1000FA64. */
+typedef struct CamSound {
+    /* 0x00 */ u16 unk0;
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ s16 z;
+    /* 0x08 */ u8 pad8[0x8];
+    /* 0x10 */ s32 flags;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ struct108 *camera;
+    /* 0x1C */ u32 data;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ u16 voice;
+} CamSound;
+
+extern f32 D_800895B0;
+extern u8 D_800BEA0C;
+extern f32 D_800DC000;
+extern f32 D_800C3614;
+extern f32 D_800C3618;
+extern f32 D_800C361C;
+extern f32 D_800C3624;
+extern s8 D_800C365C;
+extern u8 D_800D1940;
+extern f32 D_800A34B0[4][2];
+extern f32 D_800A3550;
+extern f32 D_800A3554;
+extern u16 D_800894E0[2][3];
+extern f32 D_800DC004;
+
 void func_15120158(struct108 *camera);
 void func_15122C5C(struct108 *camera);
 void func_15121C80(struct108 *camera, f32 arg1);
@@ -361,31 +388,6 @@ void func_1515BA48(s32 arg0);
 void func_1515BA54(s16 arg0);
 void func_1515BA80(s16 arg0);
 void func_1515BAAC(s16 arg0);
-
-/* Per-frame update of every active player camera. */
-void func_15122AE0(void) {
-    struct108 *camera;
-    s16 i;
-    f32 dt;
-
-    dt = D_800BEA08 * (1.0f / 60.0f);
-
-    for (i = 0; i <= D_80082FA0; i++) {
-        camera = &D_800DBFF0[i];
-        if (func_150859AC(i, 0) || (i == 0)) {
-            CAM->dt = dt;
-            if ((D_800BEAC0 == 0) || (D_800C35EA != 0) || (D_800D2DB4 != 0)) {
-                func_151239CC(camera, 5);
-                func_15122C5C(camera);
-            } else {
-                func_15123934(camera, 0x2000, 0, CAM->unk134, 5);
-                func_1512C490(camera);
-            }
-        }
-    }
-    D_800894B0 += 1;
-}
-
 void func_1510B128(s32, f32, f32, f32, f32);
 void func_15097798(u8);
 void func_15130230(struct108 *camera, s32 arg1);
@@ -416,6 +418,42 @@ void func_1512C150(struct108 *camera);
 void func_151284C4(struct108 *camera);
 s32 func_15128540(struct108 *camera);
 void func_151287E0(struct108 *camera, f32 *outUnk5E8, f32 *outUnk3A8);
+void func_1511FC60(struct108 *camera);
+void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+s32 func_15125490(struct108 *camera);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s16 *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+void func_150AD8B0(struct17 *, struct17 *, struct17 *);
+void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
+void func_1507E1D0(struct127 *, f32 *, f32 *, f32 *);
+void func_1512D560(void *, s32, s32);
+void func_1509BFB0(s32 num, s32, s32, ...);
+void func_151C9BA0(struct108 *camera, s32 arg1);
+s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId);
+s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId);
+
+/* Per-frame update of every active player camera. */
+void func_15122AE0(void) {
+    struct108 *camera;
+    s16 i;
+    f32 dt;
+
+    dt = D_800BEA08 * (1.0f / 60.0f);
+
+    for (i = 0; i <= D_80082FA0; i++) {
+        camera = &D_800DBFF0[i];
+        if (func_150859AC(i, 0) || (i == 0)) {
+            CAM->dt = dt;
+            if ((D_800BEAC0 == 0) || (D_800C35EA != 0) || (D_800D2DB4 != 0)) {
+                func_151239CC(camera, 5);
+                func_15122C5C(camera);
+            } else {
+                func_15123934(camera, 0x2000, 0, CAM->unk134, 5);
+                func_1512C490(camera);
+            }
+        }
+    }
+    D_800894B0 += 1;
+}
 
 /* Per-frame update of one player camera: input, zone state, then either a special mode or the
    follow camera (focus, distance, angles, collision). */
@@ -541,10 +579,6 @@ void func_15123070(struct108 *camera) {
         CAM->unk390 += 360.0f;
     }
 }
-
-void func_1511FC60(struct108 *camera);
-void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
-s32 func_15125490(struct108 *camera);
 
 /* Whether the R-trigger camera is allowed this frame; pressing R then pushes mode 0x100 (slot 1). */
 void func_1512317C(struct108 *camera) {
@@ -751,11 +785,6 @@ s32 func_151239CC(struct108 *camera, s32 slot) {
     }
     return 0;
 }
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s16 *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-void func_150AD8B0(struct17 *, struct17 *, struct17 *);
-extern f32 D_800895B0;
-extern u8 D_800BEA0C;
-extern f32 D_800DC000;
 
 /* Follow-camera distance and yaw: look-behind (C-down), wall collision between focus and eye, and
    easing of the current distance; then places the eye behind the target at that distance. */
@@ -1124,9 +1153,6 @@ void func_15124B18(struct108 *camera) {
     }
 }
 
-void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
-void func_1507E1D0(struct127 *, f32 *, f32 *, f32 *);
-
 /* Height the camera target follows (player height scaled per state, plus status offsets). Stores it
    in *outY when outY is given; otherwise eases target.y toward it. */
 void func_15124C38(struct108 *camera, f32 *outY) {
@@ -1478,12 +1504,6 @@ void func_15125924(struct108 *camera) {
         }
     }
 }
-void func_1512D560(void *, s32, s32);
-extern f32 D_800C3614;
-extern f32 D_800C3618;
-extern f32 D_800C361C;
-extern f32 D_800C3624;
-extern s8 D_800C365C;
 
 /* Zone 0x2A: hands the camera to a scripted shot (D_800C3600) behind and beside the player. */
 void func_15125A6C(struct108 *camera) {
@@ -1516,6 +1536,7 @@ void func_15125A6C(struct108 *camera) {
         trig = sinf(angle);
         sideAngle = (yaw - 90.0f) * D_800A3554;
         sideSin = sinf(sideAngle);
+        // matching: the position fields go through their own symbols (SCRIPT_CAM.unk14.. moves code)
         D_800C3614 = (sideSin * sideRadius) + (CAM->player->x_position + (radius * trig));
         D_800C3618 = CAM->player->y_position + height;
         trig = cosf(angle);
@@ -1535,8 +1556,6 @@ void func_15125A6C(struct108 *camera) {
     }
 }
 
-void func_1509BFB0(s32 num, s32, s32, ...);
-extern u8 D_800D1940;
 /* Zones 3 and 0x1A (and 0x1A in level 0x42): plays the zone effect when unk7CC runs out and forces
    the R-trigger camera on; leaving the zone stops the effect. */
 void func_15125C40(struct108 *camera) {
@@ -1725,10 +1744,6 @@ void func_1512623C(struct127 *obj, CamPlayerExt *ext, s32 zone, f32 *outX, f32 *
         *outZ = obj->z_position;
     }
 }
-
-void func_151C9BA0(struct108 *camera, s32 arg1);
-s32 func_15127520();
-s32 func_151277B0();
 
 /* First-person aiming camera (R trigger in the aim zones): sets it up on the first frame, then steers
    yaw/pitch with the stick and zoom with C-up/C-down. Returns 1 while aiming. */
@@ -1955,22 +1970,6 @@ s32 func_15126378(struct108 *camera) {
     }
     // matching: no return for other aim states, as in the original
 }
-/* Sound emitter handed to the aim sound callbacks by func_1000FA64. */
-typedef struct CamSound {
-    /* 0x00 */ u16 unk0;
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[0x8];
-    /* 0x10 */ s32 flags;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ struct108 *camera;
-    /* 0x1C */ u32 data;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ u16 voice;
-} CamSound;
-
-extern u16 D_800894E0[2][3];
 
 /* Sound callback while aiming (zoom): follows the player and switches between the D_800894E0[index]
    sounds when the zoom changes or stops. Returns 1 when the aim ended. */
@@ -2215,8 +2214,6 @@ void func_15127FEC(struct108 *camera, s32 arg1, s32 arg2) {
     CAM->transition.startTarget.z = CAM->focus.z;
     func_1512A390();
 }
-
-extern f32 D_800DC004;
 
 /* Runs the camera transition started by func_15127FEC: eases target, yaw, distance (D_800DC000) and
    height (D_800DC004) from their start values to the follow camera's over `duration` frames.
