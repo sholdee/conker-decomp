@@ -284,9 +284,9 @@ s32 func_15044B78(TriggerVolume *volume) {
     s32 playerWidth;
     s32 playerDepth;
 
-    playerHalfHeight = D_800CC2D0[0].unk31C->unk114 >> 1;
-    playerWidth = D_800CC2D0[0].unk31C->unk116;
-    playerDepth = D_800CC2D0[0].unk31C->unk118;
+    playerHalfHeight = D_800CC2D0[0].unk31C->height >> 1;
+    playerWidth = D_800CC2D0[0].unk31C->width;
+    playerDepth = D_800CC2D0[0].unk31C->depth;
     dx = D_800CC2D0[0].x_position - volume->node.x;
     dy = (D_800CC2D0[0].y_position - volume->node.y) + playerHalfHeight;
     dz = D_800CC2D0[0].z_position - volume->node.z;

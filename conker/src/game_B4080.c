@@ -2444,7 +2444,7 @@ void func_1508C1A4(s32 a, s32 b) {
         fromInner = from->unk31C;
         fromFlag = fromInner->unk84;
         if (fromFlag) {
-            y0 = from->y_position + (s16)fromInner->unk114 * 0.75f;
+            y0 = from->y_position + fromInner->height * 0.75f;
             if ((fromInner->unk75 & 0x7F) == 9) {
                 y0 -= 50.0f;
             }
@@ -2462,7 +2462,7 @@ void func_1508C1A4(s32 a, s32 b) {
         z1 = to->z_position;
         toFlag = to->unk31C->unk84;
         if (toFlag) {
-            y1 = to->y_position + to->unk31C->unk114 * 0.75f;
+            y1 = to->y_position + to->unk31C->height * 0.75f;
             if ((to->unk31C->unk75 & 0x7F) == 9) {
                 y1 -= 50.0f;
             }

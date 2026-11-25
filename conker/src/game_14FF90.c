@@ -842,24 +842,24 @@ void func_15124C38(Camera *camera, f32 *outY) {
         if (camera->playerExt != NULL) {
             if ((camera->playerExt->unk4E & 0xF) == 1) {
                 if (camera->mode & 0x100) {
-                    height = camera->playerExt->unk114 * 0.65f;
+                    height = camera->playerExt->height * 0.65f;
                 } else {
-                    height = camera->playerExt->unk114 * 0.55f;
+                    height = camera->playerExt->height * 0.55f;
                 }
             } else if (camera->mode & 0x100) {
                 if (camera->zone == 0) {
                     if (camera->aim.pitch < -15.0f) {
-                        height = camera->player->unkCC + camera->playerExt->unk114 * 0.9f;
+                        height = camera->player->unkCC + camera->playerExt->height * 0.9f;
                     } else {
-                        height = camera->player->unkCC + camera->playerExt->unk114 * 0.75f;
+                        height = camera->player->unkCC + camera->playerExt->height * 0.75f;
                     }
                 } else {
-                    height = camera->player->unkCC + camera->playerExt->unk114 * 0.85f;
+                    height = camera->player->unkCC + camera->playerExt->height * 0.85f;
                 }
             } else if ((camera->snap == 0) && (camera->blocked != 0)) {
-                height = camera->player->unkCC + (f32)camera->playerExt->unk114;
+                height = camera->player->unkCC + (f32)camera->playerExt->height;
             } else {
-                height = camera->player->unkCC + camera->playerExt->unk114 * 0.75f;
+                height = camera->player->unkCC + camera->playerExt->height * 0.75f;
             }
             if (camera->status & 0x100) {
                 height += 50.0f;
@@ -1418,7 +1418,7 @@ void func_1512623C(Actor *obj, ActorCtl *ext, s32 zone, f32 *outX, f32 *outY, f3
 
     if (useObjectPos != 0) {
         *outX = obj->x_position;
-        *outY = obj->y_position + (ext->unk114 * 0.75f);
+        *outY = obj->y_position + (ext->height * 0.75f);
         *outZ = obj->z_position;
     }
 }
@@ -1486,7 +1486,7 @@ s32 func_15126378(Camera *camera) {
         func_151C9BA0(camera, zone);
         func_1512623C(viewer, camera->playerExt, zone, &camera->eye.x, &camera->eye.y, &camera->eye.z, camera->status & 0x10);
         camera->target.x = (sinf(yawRad) * 100.0f) + camera->eye.x;
-        camera->target.y = camera->player->y_position + (camera->playerExt->unk114 * 0.75f);
+        camera->target.y = camera->player->y_position + (camera->playerExt->height * 0.75f);
         camera->target.z = (cosf(yawRad) * 100.0f) + camera->eye.z;
         ext->aimEye = camera->eye;
         ext->unk18C = camera->yaw;
@@ -1815,7 +1815,7 @@ s32 func_151279A0(Actor *obj, OSContPad *contPad) {
         buttons = contPad->button;
         angle = (obj->unk40 - 90.0f) * DEG2RAD;
         pos.x = obj->x_position;
-        pos.y = obj->y_position + (ext->unk114 * 0.75f);
+        pos.y = obj->y_position + (ext->height * 0.75f);
         pos.z = obj->z_position;
         base = pos;
         pos.x = (sinf(angle) * 100.0f) + base.x;

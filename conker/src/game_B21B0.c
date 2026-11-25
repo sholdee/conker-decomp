@@ -238,7 +238,7 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     obj->unk28 = 0.0f;
     obj->unk180 = obj->y_position;
     if (obj->unk31C != NULL) {
-        func_1507C3E0(obj, &obj->unk31C->unk114, &obj->unk31C->unk116, &obj->unk31C->unk118);
+        func_1507C3E0(obj, &obj->unk31C->height, &obj->unk31C->width, &obj->unk31C->depth);
     }
     obj->unk1CC = obj->y_position;
     obj->unk2F8 &= ~0x10;

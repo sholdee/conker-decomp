@@ -2932,7 +2932,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
                 }
                 rx = victim->x_position;
                 if (victim->unk31C != NULL) {
-                    height = victim->unk31C->unk114 * 0.5f;
+                    height = victim->unk31C->height * 0.5f;
                 } else {
                     height = 20.0f;
                 }

@@ -63,7 +63,7 @@ void func_1512A390(Camera *arg0) {
     unused28 = arg0->player->unk28;
     if (arg0->playerExt != NULL) {
         flag4E = arg0->playerExt->unk4E;
-        targetHeight = arg0->playerExt->unk114;
+        targetHeight = arg0->playerExt->height;
     } else {
         flag4E = 0;
         func_1507C3E0(arg0->player, &height, &width, &depth);

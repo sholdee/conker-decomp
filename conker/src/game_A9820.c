@@ -4,7 +4,7 @@
 
 void func_1507C3E0(Actor *obj, s16 *height, s16 *width, s16 *depth);
 
-/* Refreshes the cached height/width/depth (ActorCtl unk114-unk118) of every object that has one. */
+/* Refreshes the cached height/width/depth (ActorCtl height, width, depth) of every object that has one. */
 void func_1507C370(void) {
     s32 i;
     Actor *obj = D_800CC2D0;
@@ -12,7 +12,7 @@ void func_1507C370(void) {
     for (i = 0; i < D_8008FD8C; i++, obj++) {
         ActorCtl *ext = obj->unk31C;
         if (ext != NULL) {
-            func_1507C3E0(obj, &ext->unk114, &ext->unk116, &ext->unk118);
+            func_1507C3E0(obj, &ext->height, &ext->width, &ext->depth);
         }
     }
 }

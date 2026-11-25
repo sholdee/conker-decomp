@@ -1036,9 +1036,9 @@ typedef struct {
     /* 0x108 */ u8  unk108;
     /* 0x109 */ u8  unk109;
     /* 0x10A */ u8  pad10A[0xA];
-    /* 0x114 */ s16 unk114;
-    /* 0x116 */ s16 unk116;
-    /* 0x118 */ s16 unk118;
+    /* 0x114 */ s16 height;      // cached size from func_1507C3E0
+    /* 0x116 */ s16 width;
+    /* 0x118 */ s16 depth;
     /* 0x11A */ u8  unk11A;
     /* 0x11B */ u8  spawnIndex;
     /* 0x11C */ struct BoneChain *boneChain;

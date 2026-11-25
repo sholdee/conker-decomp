@@ -454,7 +454,7 @@ void func_15121490(Actor *player, OSContPad *pad) {
             ext = player->unk31C;
             angle = (player->unk40 - 90.0f) * DEG2RAD;
             target.x = player->x_position;
-            target.y = player->y_position + ((f32)ext->unk114 * 0.75f);
+            target.y = player->y_position + ((f32)ext->height * 0.75f);
             target.z = player->z_position;
             eye = target;
             target.x = (sinf(angle) * 100.0f) + eye.x;
