@@ -204,55 +204,61 @@ void func_15055E50(struct127 *actor, s32 zoneSetId) {
     }
 }
 
-void func_15056150(struct127 *arg0) {
-    f32 temp_f0;
-    f32 temp_f12;
-    f32 temp_f14;
-    f32 temp_f16;
-    f32 temp_f18;
-    f32 temp_f20;
-    f32 temp_f22;
-    f32 temp_f2;
-    s16 *temp_v1;
+/* One point of an actor's path (D_800D2104[actor->unk13F]). */
+typedef struct PathPoint {
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 radius;
+} PathPoint;
 
-    if (arg0->unk2E8 != 0) {
-        temp_v1 = D_800D2104[arg0->unk13F];
-        temp_f2 = temp_v1[4];
-        temp_f12 = temp_v1[6];
-        temp_f14 = temp_v1[5];
-        temp_f16 = arg0->unk2E8;
-        temp_f16 = temp_f16 * 8.0f;
-        temp_f18 = arg0->x_position - temp_f2;
-        temp_f20 = arg0->z_position - temp_f12;
-        temp_f22 = arg0->y_position - temp_f14;
-        temp_f0 = sqrtf((temp_f18 * temp_f18) + (temp_f20 * temp_f20) + (temp_f22 * temp_f22) + 0.1000000015f);
-        temp_f18 *= 1.0f / temp_f0;
-        temp_f20 *= 1.0f / temp_f0;
-        temp_f22 *= 1.0f / temp_f0;
-        if (temp_f16 < temp_f0) {
-            arg0->x_position = temp_f18 * temp_f16 + temp_f2;
-            arg0->z_position = temp_f20 * temp_f16 + temp_f12;
-            arg0->y_position = temp_f22 * temp_f16 + temp_f14;
+/* Keeps the actor within unk2E8 * 8 units of its path's second point. */
+void func_15056150(struct127 *actor) {
+    f32 dist;
+    f32 centerX;
+    f32 centerZ;
+    f32 maxDist;
+    f32 dx;
+    f32 dz;
+    f32 dy;
+    f32 centerY;
+    PathPoint *path;
+
+    if (actor->unk2E8 != 0) {
+        path = ((PathPoint **)D_800D2104)[actor->unk13F];
+        centerX = path[1].x;
+        centerZ = path[1].z;
+        centerY = path[1].y;
+        maxDist = actor->unk2E8;
+        maxDist *= 8.0f; // matching: int->float convert must be its own statement
+        dx = actor->x_position - centerX;
+        dz = actor->z_position - centerZ;
+        dy = actor->y_position - centerY;
+        dist = sqrtf((dx * dx) + (dz * dz) + (dy * dy) + 0.1000000015f);
+        dx *= 1.0f / dist;
+        dz *= 1.0f / dist;
+        dy *= 1.0f / dist;
+        if (maxDist < dist) {
+            actor->x_position = dx * maxDist + centerX;
+            actor->z_position = dz * maxDist + centerZ;
+            actor->y_position = dy * maxDist + centerY;
         }
     }
 }
 
-void func_15056258(struct127 *arg0) {
-    f32 temp_f2;
-    f32 temp_f4;
+/* Moves the actor with the change in unk118 since last frame, scaled by its height above it. */
+void func_15056258(struct127 *actor) {
+    f32 delta;
     f32 heightFactor;
 
-    temp_f4 = arg0->unk11C;
-    temp_f2 = arg0->unk118 - arg0->unk11C;
-    arg0->unk11C = arg0->unk118;
-    heightFactor = 2.0f * (arg0->y_position - ((arg0->unk118 - 60.0f) - 170.0f));
-    if (!(heightFactor < 0.0f)) {
-        if (!(fabsf(temp_f2) > 30.0f)) {
-            if (heightFactor > 300.0f) {
-                heightFactor = 300.0f;
-            }
-            arg0->y_position += (heightFactor * temp_f2 * 0.002997000003f);
+    delta = actor->unk118 - actor->unk11C;
+    actor->unk11C = actor->unk118;
+    heightFactor = 2.0f * (actor->y_position - ((actor->unk118 - 60.0f) - 170.0f));
+    if (!(heightFactor < 0.0f) && !(fabsf(delta) > 30.0f)) {
+        if (heightFactor > 300.0f) {
+            heightFactor = 300.0f;
         }
+        actor->y_position += heightFactor * delta * 0.002997000003f;
     }
 }
 typedef struct Game83300AnimRate {
@@ -267,367 +273,161 @@ typedef struct Game83300AnimSet {
 } Game83300AnimSet;
 void func_150649A0(s32, s32);
 
-void func_150562FC(struct127 *arg0) {
-    s32 *animPtr;
+/* Moves the actor toward its host D_800CC2D0[unk13D - 100] and picks the carried animation. */
+void func_150562FC(struct127 *actor) {
+    s32 *animTable;
     Game83300AnimSet *anims;
-    s16 *sub;
+    s16 *hostData;
     u32 animIdx;
-    f32 temp_f0;
-    f32 sp70;
-    f32 sp6C;
-    f32 sp68;
-    s32 temp_v0_8;
-    u8 sp63;
+    f32 heightOffset;
+    f32 offsetX;
+    f32 offsetZ;
+    f32 offsetY;
+    s32 timer;
+    u8 hostIdx;
     f32 lerp;
     s32 variant;
-    s32 sp54;
-    s32 a2;
-    f32 sp4C;
+    s32 attached;
+    s32 animKind;
+    f32 animArg;
     f32 tx;
     f32 tz;
 
-    sp63 = arg0->unk13D - 100;
-    sp54 = 0;
-    sp4C = 5.0f;
-    arg0->immune = 30;
+    hostIdx = actor->unk13D - 100;
+    attached = 0;
+    animArg = 5.0f;
+    actor->immune = 30;
     variant = 0;
-    a2 = 13;
-    arg0->unk180 = D_800CC2D0[sp63].unk180;
-    arg0->unk1CC = arg0->y_position;
-    arg0->gravity = 4.5f;
-    arg0->y_velocity = 0.0;
-    temp_v0_8 = arg0->unk21C;
-    if (temp_v0_8 < 30) {
-        arg0->unk21C = (u32)temp_v0_8 + D_800BE9A0;
+    animKind = 13;
+    actor->unk180 = D_800CC2D0[hostIdx].unk180;
+    actor->unk1CC = actor->y_position;
+    actor->gravity = 4.5f;
+    actor->y_velocity = 0.0;
+    timer = actor->unk21C;
+    if (timer < 30) {
+        actor->unk21C = (u32)timer + D_800BE9A0; // matching: u32 cast keeps addu operand order
     }
-    if (arg0->id == 0x57) {
-        arg0->unk5C = 9;
-        if (arg0->unk21C < 10) {
+    if (actor->id == 0x57) {
+        actor->unk5C = 9;
+        if (actor->unk21C < 10) {
             return;
         }
-        sp54 = 1;
-        if (D_800CC2D0[sp63].unk84.uh == 0x114) {
-            a2 = 0x24;
+        attached = 1;
+        if (D_800CC2D0[hostIdx].unk84.uh == 0x114) {
+            animKind = 0x24;
         }
-        if (D_800CC2D0[sp63].unk84.uh == 0x116) {
+        if (D_800CC2D0[hostIdx].unk84.uh == 0x116) {
             variant = 1;
         }
-        if (D_800CC2D0[sp63].unk84.uh == 0x117) {
+        if (D_800CC2D0[hostIdx].unk84.uh == 0x117) {
             variant = 2;
         }
-        func_150649A0(sp63, D_800C3E78);
-    } else if (arg0->id == 0x8C) {
-        arg0->unk5C = 4;
-        if (arg0->unk21C < 10) {
+        func_150649A0(hostIdx, D_800C3E78);
+    } else if (actor->id == 0x8C) {
+        actor->unk5C = 4;
+        if (actor->unk21C < 10) {
             return;
         }
-        sp54 = 1;
-        if (D_800CC2D0[sp63].unk84.uh == 0x1A6) {
+        attached = 1;
+        if (D_800CC2D0[hostIdx].unk84.uh == 0x1A6) {
             variant = 1;
         }
-        if (D_800CC2D0[sp63].unk84.uh == 0x1A7) {
+        if (D_800CC2D0[hostIdx].unk84.uh == 0x1A7) {
             variant = 2;
         }
-        func_150649A0(sp63, D_800C3E78);
-    } else if ((arg0->id == 0xA8) || (arg0->id == 0xA9)) {
-        arg0->unk5C = 9;
-        sp54 = 1;
-        if (D_800CC2D0[sp63].unk84.uh == 0x1B0) {
+        func_150649A0(hostIdx, D_800C3E78);
+    } else if ((actor->id == 0xA8) || (actor->id == 0xA9)) {
+        actor->unk5C = 9;
+        attached = 1;
+        if (D_800CC2D0[hostIdx].unk84.uh == 0x1B0) {
             variant = 1;
         }
-        if (D_800CC2D0[sp63].unk84.uh == 0x1B1) {
+        if (D_800CC2D0[hostIdx].unk84.uh == 0x1B1) {
             variant = 2;
         }
-    } else if (arg0->id == 0x5E) {
-        arg0->unk5C = 9;
-        sp4C = 16.0f;
-        sp54 = 1;
-        if (D_800CC2D0[sp63].unk84.uh == 0x286) {
+    } else if (actor->id == 0x5E) {
+        actor->unk5C = 9;
+        animArg = 16.0f;
+        attached = 1;
+        if (D_800CC2D0[hostIdx].unk84.uh == 0x286) {
             variant = 2;
         }
-        if (D_800CC2D0[sp63].unk84.uh == 0x27E) {
+        if (D_800CC2D0[hostIdx].unk84.uh == 0x27E) {
             variant = 1;
         }
     }
-    animIdx = func_1505E7CC(a2, arg0);
-    animPtr = (s32 *)D_800D1588[arg0->id];
-    anims = (Game83300AnimSet *)animPtr[-2];
-    if ((D_800CC2D0[sp63].interaction_state == 1) && (D_800CC2D0[sp63].in_water != 0)) {
-        arg0->unk5C = 4;
-        sp54 = 1; if (anims[animIdx].e[1].anim != 0) {
+    animIdx = func_1505E7CC(animKind, actor);
+    animTable = (s32 *)D_800D1588[actor->id];
+    anims = (Game83300AnimSet *)animTable[-2];
+    if ((D_800CC2D0[hostIdx].interaction_state == 1) && (D_800CC2D0[hostIdx].in_water != 0)) {
+        actor->unk5C = 4;
+        attached = 1; if (anims[animIdx].e[1].anim != 0) { // matching: same line (as1 tie-break)
             variant = 1;
         }
     }
-    if (arg0->unk21C < 20) {
-        temp_v0_8 = arg0->unk21C;
-        lerp = (u32)temp_v0_8 / 50.0f;
+    if (actor->unk21C < 20) {
+        timer = actor->unk21C;
+        lerp = (u32)timer / 50.0f;
         if (D_800BE9B4 != 0) {
             lerp = 1.0f;
         }
     } else {
         lerp = 0.8000000119f;
     }
-    sp70 = (u32)arg0->unk10F;
-    func_150599C8(arg0, 0x10, D_800CC2D0[sp63].unk7A + (arg0->unk13E << 8));
-    if (D_800CC2D0[sp63].unk1D4 != NULL) {
-        temp_f0 = arg0->unk10C / 100;
-        if (D_800CC2D0[sp63].interaction_state != 0x15) {
-            sub = (s16 *)((u8 *)D_800CC2D0[sp63].unk1D4 + 0x240);
-            if (arg0->unk21C >= 7) {
-                arg0->y_position = sub[0xD];
-                if (arg0->unk21C < 14) {
-                    temp_f0 = ((u32)(s32)arg0->unk21C / 14.0f) * temp_f0;
+    offsetX = (u32)actor->unk10F;
+    func_150599C8(actor, 0x10, D_800CC2D0[hostIdx].unk7A + (actor->unk13E << 8));
+    if (D_800CC2D0[hostIdx].unk1D4 != NULL) {
+        heightOffset = actor->unk10C / 100;
+        if (D_800CC2D0[hostIdx].interaction_state != 0x15) {
+            hostData = (s16 *)((u8 *)D_800CC2D0[hostIdx].unk1D4 + 0x240);
+            if (actor->unk21C >= 7) {
+                actor->y_position = hostData[0xD];
+                if (actor->unk21C < 14) {
+                    heightOffset = ((u32)(s32)actor->unk21C / 14.0f) * heightOffset;
                 }
-                arg0->y_position += temp_f0;
+                actor->y_position += heightOffset;
             }
-            if (arg0->id == 0xE) {
-                arg0->unkC4 = 0.0;
-            } else if (arg0->id == 0x13) {
-                sp70 = 204.0f;
-                arg0->unkC4 = 0.0;
+            if (actor->id == 0xE) {
+                actor->unkC4 = 0.0;
+            } else if (actor->id == 0x13) {
+                offsetX = 204.0f;
+                actor->unkC4 = 0.0;
             }
         }
     }
-    if (D_800CC2D0[sp63].interaction_state == 0x15) {
-        animIdx = func_1505E7CC(0x39, arg0);
-        arg0->unk7A = D_800CC2D0[sp63].unk7A;
-        arg0->y_position = D_800CC2D0[sp63].y_position - 10.0f;
-        if ((arg0->unk28 > 100.0f) && (arg0->unk21C >= 21)) {
+    if (D_800CC2D0[hostIdx].interaction_state == 0x15) {
+        animIdx = func_1505E7CC(0x39, actor);
+        actor->unk7A = D_800CC2D0[hostIdx].unk7A;
+        actor->y_position = D_800CC2D0[hostIdx].y_position - 10.0f;
+        if ((actor->unk28 > 100.0f) && (actor->unk21C >= 21)) {
             variant = 1;
         } else {
-            sp4C = 0.0;
+            animArg = 0.0;
         }
-        sp70 = 0.0f;
-        arg0->unkC4 += (D_800CC2D0[sp63].unkC4 - arg0->unkC4) * 0.1199999973f;
-        arg0->xz_velocity = 0.0f;
+        offsetX = 0.0f;
+        actor->unkC4 += (D_800CC2D0[hostIdx].unkC4 - actor->unkC4) * 0.1199999973f;
+        actor->xz_velocity = 0.0f;
     }
-    func_1505A184(D_800CC2D0[sp63].unk7A, sp70, 0.0, &sp70, &sp6C, &sp68);
-    tx = D_800CC2D0[sp63].x_position + sp70;
-    tz = D_800CC2D0[sp63].z_position + sp6C;
-    arg0->x_position += (tx - arg0->x_position) * lerp;
-    arg0->z_position += (tz - arg0->z_position) * lerp;
+    func_1505A184(D_800CC2D0[hostIdx].unk7A, offsetX, 0.0, &offsetX, &offsetZ, &offsetY);
+    tx = D_800CC2D0[hostIdx].x_position + offsetX;
+    tz = D_800CC2D0[hostIdx].z_position + offsetZ;
+    actor->x_position += (tx - actor->x_position) * lerp;
+    actor->z_position += (tz - actor->z_position) * lerp;
     {
         f32 rate;
 
         rate = (u32)anims[animIdx].e[variant].rate;
-lbl:
+    split: // matching: block boundary moves the u32->f32 convert's register (f16 instead of f0)
         rate = rate / 100.0f;
-        func_1505E650(arg0, anims[animIdx].e[variant].anim, rate, sp4C, 0.0, 0, 0);
+        func_1505E650(actor, anims[animIdx].e[variant].anim, rate, animArg, 0.0, 0, 0);
     }
-    if (sp54 != 0) {
-        arg0->unk65 = sp63 + 1;
-        arg0->unk101 |= 4;
+    if (attached != 0) {
+        actor->unk65 = hostIdx + 1;
+        actor->unk101 |= 4;
     } else {
-        arg0->unk65 = 0;
+        actor->unk65 = 0;
     }
 }
-// NON-MATCHING: 10% of the way there...
-// void func_150562FC(struct127 *arg0) {
-//     f32 sp70;
-//     f32 sp6C;
-//     f32 sp68;
-//     u8 sp63;
-//     s32 sp54;
-//     f32 sp4C;
-//     f32 temp_f0;
-//     f32 temp_f12;
-//     f32 temp_f14;
-//
-//     s32 *temp_a3;
-//     // s32 temp_t1;
-//     s32 temp_t1_2;
-//     s32 temp_t2;
-//     s32 temp_t9;
-//     s32 temp_v0_6;
-//     struct255 *temp_v1_2;
-//     u16 temp_v0_2;
-//     u16 temp_v0_3;
-//     u16 temp_v0_4;
-//     u16 temp_v0_5;
-//     u16 temp_v0_7;
-//     u16 temp_v0_8;
-//     u16 temp_v1;
-//     u8 temp_v0;
-//     struct127 *temp_t0;
-//     struct127 *temp_t0_2;
-//     u8 *temp_v0_11;
-//     s32 phi_a2;
-//     s32 phi_t1;
-//     s32 phi_t1_2;
-//     s32 phi_t1_3;
-//     s32 phi_a2_2;
-//     f32 phi_f18;
-//     s32 phi_t1_4;
-//     f32 phi_f0;
-//     s32 phi_t1_5;
-//     s32 phi_t2;
-//
-//     sp63 = arg0->unk13D - 0x64;
-//     sp54 = 0;
-//     sp4C = 5.0f;
-//     arg0->immune = (u8)0x1E;
-//     temp_t0 = &D_800CC2D0[sp63];
-//     arg0->unk180 = (f32) temp_t0->unk180;
-//     arg0->unk1CC = (f32) arg0->y_position;
-//     arg0->gravity = 4.5f;
-//     arg0->y_velocity = 0.0f;
-//     if ((s32) arg0->unk21C < 0x1E) {
-//         arg0->unk21C += D_800BE9A0;
-//     }
-//     temp_v0 = arg0->id;
-//     if (temp_v0 == 0x57) {
-//         arg0->unk5C = 9;
-//         if ((s32) arg0->unk21C >= 0xA) {
-//             temp_v0_2 = temp_t0->unk84.uh;
-//             sp54 = 1;
-//             phi_a2 = 0xD;
-//             if (temp_v0_2 == 0x114) {
-//                 phi_a2 = 0x24;
-//             }
-//             phi_t1 = 0;
-//             if (temp_v0_2 == 0x116) {
-//                 phi_t1 = 1;
-//             }
-//             if (temp_v0_2 == 0x117) {
-//                 phi_t1 = 2;
-//             }
-//             func_150649A0(sp63, D_800C3E78, phi_a2);
-//             phi_t1_3 = phi_t1;
-//             phi_a2_2 = phi_a2;
-//         } else if (temp_v0 == 0x8C) {
-//             arg0->unk5C = 4;
-//             if ((s32) arg0->unk21C >= 0xA) {
-//                 temp_v0_2 = temp_t0->unk84.uh;
-//                 sp54 = 1;
-//                 phi_t1_2 = 0;
-//                 if (temp_v0_2 == 0x1A6) {
-//                     phi_t1_2 = 1;
-//                 }
-//                 if (temp_v0_2 == 0x1A7) {
-//                     phi_t1_2 = 2;
-//                 }
-//                 func_150649A0(sp63, D_800C3E78, 0xD);
-//                 phi_t1_3 = phi_t1_2;
-//                 phi_a2_2 = 0xD;
-//             }
-//         } else {
-//             if ((temp_v0 == 0xA8) || (temp_v0 == 0xA9)) {
-//                 arg0->unk5C = 9;
-//                 temp_v0_2 = temp_t0->unk84.uh;
-//                 sp54 = 1;
-//                 phi_t1_3 = 0;
-//                 if (temp_v0_2 == 0x1B0) {
-//                     phi_t1_3 = 1;
-//                 }
-//                 phi_a2_2 = 0xD;
-//                 if (temp_v0_2 == 0x1B1) {
-//                     phi_t1_3 = 2;
-//                     phi_a2_2 = 0xD;
-//                 }
-//             } else {
-//                 phi_t1_3 = 0;
-//                 phi_a2_2 = 0xD;
-//                 if (temp_v0 == 0x5E) {
-//                     arg0->unk5C = 9;
-//                     temp_v0_2 = temp_t0->unk84.uh;
-//                     sp54 = 1;
-//                     sp4C = 16.0f;
-//                     phi_t1_3 = 0;
-//                     if (temp_v0_2 == 0x286) {
-//                         phi_t1_3 = 2;
-//                     }
-//                     phi_a2_2 = 0xD;
-//                     if (temp_v0_2 == 0x27E) {
-//                         phi_t1_3 = 1;
-//                         phi_a2_2 = 0xD;
-//                     }
-//                 }
-//             }
-//         }
-//         temp_v0_6 = func_1505E7CC(phi_a2_2, arg0); //, phi_a2_2);
-//         temp_t0_2 = &D_800CC2D0[sp63];
-//         phi_t1_4 = phi_t1_3;
-//         temp_t2 = temp_v0_6;
-//         temp_a3 = D_800D1588[arg0->id] - 8;
-//         if (temp_t0_2->interaction_state == 1) {
-//             if (temp_t0_2->in_water != 0) {
-//                 temp_t9 = temp_v0_6 * 3;
-//                 arg0->unk5C = 4;
-//                 sp54 = 1;
-//                 if (((temp_a3 + (temp_t9 * 8)) + 14) != 0) { // unkE
-//                     phi_t1_4 = 1;
-//                 }
-//             }
-//         }
-//         if ((s32) arg0->unk21C < 0x14) {
-//             phi_f18 = (f32) (u32) arg0->unk21C / 50.0f;
-//             if (D_800BE9B4 != 0) {
-//                 phi_f18 = 1.0f;
-//             }
-//         } else {
-//             phi_f18 = 0.8000000119f;
-//         }
-//
-//         sp70 = (f32) arg0->unk10F;
-//
-//         func_150599C8(arg0, 0x10, (temp_t0_2->unk7A + (arg0->unk13E << 8)) & 0xFFFF); //, temp_a3);
-//         temp_t1_2 = phi_t1_4;
-//         temp_v1_2 = temp_t0_2->unk1D4;
-//         if (temp_v1_2 != 0) {
-//             temp_f0 = (f32) ((s32) arg0->unk10C / 0x64);
-//             if (temp_t0_2->interaction_state != 0x15) {
-//                 temp_v0_8 = arg0->unk21C;
-//                 if ((s32) temp_v0_8 >= 7) {
-//                     arg0->y_position = (f32) temp_v1_2->unk240->unk1A;
-//                     if ((s32) temp_v0_8 < 0xE) {
-//                         // temp_f6 = (f32) temp_v0_8;
-//                         temp_f0 = (temp_v0_8 / 14.0f) * temp_f0;
-//                     }
-//                     arg0->y_position = (f32) (arg0->y_position + temp_f0);
-//                 }
-//                 if (arg0->id == 0xE) {
-//                     arg0->unkC4 = 0.0f;
-//                 } else if (arg0->id == 0x13) {
-//                     sp70 = 204.0f;
-//                     arg0->unkC4 = 0.0f;
-//                 }
-//             }
-//         }
-//         phi_t1_5 = phi_t1_4;
-//         phi_t2 = temp_t2;
-//         if (temp_t0_2->interaction_state == 0x15) {
-//             phi_t2 = func_1505E7CC(0x39, arg0);
-//             arg0->unk7A = (u16) temp_t0_2->unk7A;
-//             arg0->y_position = (f32) (temp_t0_2->y_position - 10.0f);
-//             if ((arg0->unk28 > 100.0f) && ((s32) arg0->unk21C >= 0x15)) {
-//                 phi_t1_5 = 1;
-//             } else {
-//                 sp4C = 0.0f;
-//                 phi_t1_5 = phi_t1_4;
-//             }
-//             sp70 = 0.0f;
-//             temp_f0 = arg0->unkC4;
-//             arg0->xz_velocity = 0.0f;
-//             arg0->unkC4 = (f32) (temp_f0 + ((temp_t0_2->unkC4 - temp_f0) * 0.1199999973f));
-//         }
-//         func_1505A184(D_800CC2D0[sp63].unk7A,  sp70, 0, &sp70, &sp6C, &sp68);
-//         temp_t0_2 = &D_800CC2D0[sp63];
-//         temp_f12 = temp_t0_2->x_position + sp70;
-//
-//         temp_f14 = temp_t0_2->z_position + sp6C;
-//         arg0->x_position = (f32) (arg0->x_position + ((temp_f12 - arg0->x_position) * phi_f18));
-//         arg0->z_position = (f32) (arg0->z_position + ((temp_f14 - arg0->z_position) * phi_f18));
-//         temp_v0_11 = temp_a3 + (phi_t2 * 0x18) + (phi_t1_5 * 4);
-//         func_1505E650(arg0, temp_v0_11[0xA],  temp_v0_11[0xC] / 100.0f, sp4C, 0.0f, 0.0f, 0);
-//         if (sp54 != 0) {
-//             arg0->unk65 = (s8) (sp63 + 1);
-//             arg0->unk101 = (u8) (arg0->unk101 | 4);
-//         } else {
-//             arg0->unk65 = (u8)0;
-//         }
-//     }
-// }
-
 s32 func_1505693C(struct127 *arg0, s32 arg1) {
     f32 temp_f0;
     f32 temp_f12;
