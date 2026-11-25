@@ -380,7 +380,6 @@ void func_151718F0(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 sizeScale,
 }
 
 void func_150AEEB0(Actor *);
-void func_150BD740(Actor *, u8, s32);
 
 /* Effect hook for objects, by object id. */
 void func_15171BF4(Actor *obj, u8 owner) {

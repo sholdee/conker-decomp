@@ -19,10 +19,10 @@ typedef struct {
 } WatcherEffects;
 
 /* A character watcher with WatcherEffects as extra data. */
-typedef struct {
+struct Watcher {
     /* 0x00 */ CharacterWatcher watcher;
     /* 0x58 */ WatcherEffects effects;
-} Watcher;
+};
 
 void *memcpy(void *, const void *, u32);
 s32 func_15045800(f32 *pos, s32 mask, f32 bottom, CollisionHit *hit);
@@ -31,16 +31,13 @@ u8 func_151D8E20(void);
 WatcherEmitter *func_1513418C(BloodDripDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
 void func_1513F6C0(FlickerSprite *sprite, u8 updateFn, u8 expireFn);
 
-FlickerSprite *func_150C6D90(Watcher *watcher);
-WatcherEmitter *func_150C68C4(Actor *character, Watcher *watcher);
-
 extern Vec3f D_800887E0;
 /*
  * Heights above the character: where the ceiling ray-cast starts, and the ceiling used when it hits
  * nothing. They are loaded from .rodata (a 5000.0f literal would be built with lui); IDO 5.3 puts a
  * const aggregate there (a const scalar goes to .data).
  */
-const struct {
+const struct CeilingProbe {
     f32 rayStart;
     f32 defaultCeiling;
 } D_800A0450 = { 5000.0f, 5000.0f };

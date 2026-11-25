@@ -125,13 +125,13 @@ typedef struct {
 } StreamState; // size 0x11C
 
 /* The actor returned by func_15147A80. */
-typedef struct {
+struct StreamActor {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ StreamPoint *records;
     /* 0x98 */ StreamState *state;
-} StreamActor;
+};
 
 extern u8 D_800903C8[];
 extern u8 D_80090414[];

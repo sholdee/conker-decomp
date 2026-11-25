@@ -10,7 +10,7 @@ typedef struct {
     f32 z; /* cos of the segment angle */
 } RadialDir;
 
-typedef struct {
+struct RadialEffect {
     EffectHeader header;
     RadialEffectDef def; /* 0x10 */
     f32 size;            /* 0x40 */
@@ -23,7 +23,7 @@ typedef struct {
     RadialDir *dirs;     /* 0x360 */
     u8 *unk364;
     u8 data[1];          /* 0x368 */
-} RadialEffect;
+};
 
 /*
  * Allocates a ring effect from def. Behind the header: dirs[count], two vertex buffers of
@@ -327,12 +327,12 @@ Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *effect, s32 arg2) {
 }
 
 /* Object spawned by func_15130374 from a ParticleDesc packet. */
-typedef struct {
+struct ParticleObject {
     u8 pad0[0x10];
     ParticleDesc p;   /* 0x10 */
     u8 pad80[0x28];
     f32 damping;  /* 0xA8: velocity factor per tick, written by func_150CAA04 */
-} ParticleObject;
+};
 
 /* Ring emit callback 0: spawns a dark particle at pos, moving along heading. */
 void func_150C99B4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
@@ -423,10 +423,10 @@ void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
 }
 
 /* Object spawned by func_15132A4C from a ParticleSpawn. */
-typedef struct {
+struct BurstParticle {
     u8 pad0[0x10];
     ParticleSpawn p; /* 0x10 */
-} BurstParticle;
+};
 
 /* Ring emit callback 1: spawns a tumbling burst object at pos (the colour from func_150CCD90 goes unused). */
 void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
@@ -498,8 +498,6 @@ extern s32 func_15193CA0[];
 extern s32 func_151942B0[];
 void func_1504715C(void *, void *);
 s32 func_15046C80(void *, s32, f32, void *);
-
-void func_150CA930(Vec3f *pos);
 
 typedef struct {
     s32 unk0;

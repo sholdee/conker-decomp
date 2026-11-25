@@ -433,8 +433,6 @@ void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     func_1514B364(&other->xpos, &ground, 0xFF, 1);
 }
 
-extern void func_150B06B0(Actor *obj, Actor *other, u8 arg2, s32 arg3);
-
 void func_15194E54(Actor *self, Actor *other, u8 *arg2) {
     if (other->character_type == 0x3E || other->character_type == 0xA6) {
         func_150B06B0(other, self, 0xFF, 1);

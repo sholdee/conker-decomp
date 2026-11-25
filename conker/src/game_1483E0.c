@@ -517,8 +517,6 @@ void func_1511BE5C(WorldObject *obj) {
     obj->u = func_150484A0((f32)obj->x - camera_global_Cameras->eye.x, (f32)obj->z - camera_global_Cameras->eye.z) * 57.29577637f;
 }
 
-extern void func_150DDED0(void *);
-
 /* After a delay, lowers onto a player found beneath it and holds them at its position; rises back to rest otherwise. */
 void func_1511BEBC(WorldObject *obj) {
     f32 pos[3];

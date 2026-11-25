@@ -7,8 +7,6 @@ GameCommand *func_15034340(GameCommand *, s32);
 GameCommand *func_150343B0(GameCommand *, s32);
 GameCommand *func_15034420(GameCommand *, s32);
 s16 *func_150344A0(s16 *, s32);
-void *func_150BE438(void *, s32);
-GameCommand *func_150B58F0(GameCommand *, s32);
 GameCommand *func_150F1B48(GameCommand *, s32);
 GameCommand *func_150D8590(GameCommand *, s32);
 s32 func_1503DA3C(s32, s32);

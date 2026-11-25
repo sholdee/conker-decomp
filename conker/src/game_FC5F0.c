@@ -11,10 +11,10 @@ typedef struct {
     /* 0x08 */ f32 spawnCredit; // one particle is emitted per whole unit
 } ActorEmitterState;
 
-typedef struct {
+struct ActorEmitter {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ ActorEmitterState state;
-} ActorEmitter;
+};
 
 void func_1504715C(CollisionHit *, Actor *);
 void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);

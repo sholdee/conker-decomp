@@ -47,10 +47,10 @@ typedef struct {
 } OwnerLink;
 
 /* Effect object attached to an actor (created by func_150AEB9C). */
-typedef struct {
+struct AttachedEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ OwnerLink link;
-} AttachedEffect;
+};
 
 extern s32 D_8008CB14;
 extern s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
@@ -242,12 +242,12 @@ typedef struct {
     /* 0x1B */ u8 unk1B;
 } Sprite150AED9C;
 
-typedef struct {
+struct Particle150AED9C {
     /* 0x00 */ u8 pad0[0x1C];
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ u8 pad1E[0x98 - 0x1E];
     /* 0x98 */ Sprite150AED9C *sprite;
-} Particle150AED9C;
+};
 
 /* Sets the sprite's unk1B to unk1C * 8, capped at 255. Always returns 1. */
 s32 func_150AED9C(Particle150AED9C *particle) {

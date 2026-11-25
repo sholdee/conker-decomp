@@ -5,10 +5,10 @@
 
 
 /* The timer task func_151491F4 creates; func_150DBC60 is its tick callback. */
-typedef struct {
+struct PuffTimer {
     u8 pad0[0xC];
     u8 sceneTag;
-} PuffTimer;
+};
 
 
 void func_15152F70(SimplePuffSpray *config, u8 sceneTag);

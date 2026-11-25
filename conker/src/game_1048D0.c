@@ -4,14 +4,14 @@
 
 
 /* Object that receives message 0x36; the three bytes at 0x28 are set to pure red or green, so they look like an RGB tint. */
-typedef struct {
+struct TintedObject {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ u8 r;
     /* 0x29 */ u8 g;
     /* 0x2A */ u8 b;
     /* 0x2B */ u8 pad2B[0x2D];
     /* 0x58 */ s32 flags; /* bit 1: tint enabled */
-} TintedObject;
+};
 
 #define TINT_ENABLED 2
 #define MSG_SET_TINT 0x36

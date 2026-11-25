@@ -3,13 +3,11 @@
 #include "variables.h"
 #include "effects.h"
 
-s32 func_150DBD70(u8 kind);
-
 /* The trap object func_1511BEBC passes to its trigger callback. */
-typedef struct {
+struct TrapTrigger {
     /* 0x00 */ u8 pad0[0x72];
     /* 0x72 */ u8 tag;
-} TrapTrigger;
+};
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x20];
@@ -24,19 +22,19 @@ typedef struct {
     /* 0x10 */ f32 unk10;
 } EffectSpawnPoint;
 
-typedef struct {
+struct EffectSpawnSource {
     /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ EffectSpawnPoint *points;
     /* 0x98 */ EffectSpawnState *state;
-} EffectSpawnSource;
+};
 
 /* Timed effect spawned by a trap trigger (func_150DDED0). */
-typedef struct TrapEffect {
+struct TrapEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ u8 kind;      /* func_150DBD70 selector */
-} TrapEffect;
+};
 
 /* Trap trigger callback: spawns a timed effect (timer 100) whose kind follows the trap's tag (0xFB-0xFE). */
 void func_150DDED0(TrapTrigger *trap) {

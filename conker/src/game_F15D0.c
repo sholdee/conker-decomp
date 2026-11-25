@@ -16,10 +16,10 @@ typedef struct {
 } EffectData; /* size 0x1C */
 
 /* Effect object (TimedEffect is a shorter view of its head). */
-typedef struct {
+struct PulseEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ EffectData data;
-} PulseEffect;
+};
 
 /* Spawns an effect that follows `owner` (lifetime `duration`, -1 for the default 300) together with
  * a pulsing particle. */

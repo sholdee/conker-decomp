@@ -43,8 +43,6 @@ void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, f32 *o
     outPos[2] += owner->zpos;
 }
 
-void func_150B0C58(Actor *owner, u8 arg1, s32 arg2);
-
 /* func_150B0C58 with the default arguments (0xFF, 1). */
 void func_150B0C34(Actor *owner) {
     func_150B0C58(owner, 0xFF, 1);

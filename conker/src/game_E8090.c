@@ -85,7 +85,7 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
 }
 
 /* Live particle returned by func_15130374; its per-kind extra data starts at 0xA8. */
-typedef struct {
+struct Particle_150BAFEC {
     /* 0x00 */ u8 pad0[0x18];
     /* 0x18 */ s32 flags;
     /* 0x1C */ s16 life;
@@ -100,7 +100,7 @@ typedef struct {
     /* 0xAC */ u8 padAC[4];
     /* 0xB0 */ s16 fadeStart; /* extra data of the func_150BB408 particles */
     /* 0xB2 */ s16 fadeStep;
-} Particle_150BAFEC;
+};
 
 /* Spawns one particle at (x, y, z) flying off along `yaw` at a random pitch; it slows down by 0.95 per frame. */
 s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw,

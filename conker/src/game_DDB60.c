@@ -110,8 +110,3 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
         }
     }
 }
-
-void func_150B0C58(Actor *owner, u8 arg1, s32 arg2);
-void func_150B0C58(Actor *owner, u8 arg1, s32 arg2);
-
-void func_150B0D20(DDB60Effect *effect);

@@ -10,8 +10,6 @@ extern f32 D_8009FD48[3];
 // matching: the model is passed as s32; a pointer type moves the ob_matrix_ptr temp from v0 to a3
 void func_15143134(f32 *in, f32 *out, void *mtx);
 void func_1515C244(Actor *, f32 *, f32 *, f32 *);
-void func_150B82D0(Vec3f *, f32 *, f32 *, f32 *, u8, s32);
-void func_150B85C0(Vec3f *, f32 *, f32 *, u8, s32);
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 void func_15151A38(PuffSpray *, u8, s32);

@@ -99,7 +99,6 @@ typedef struct {
 
 extern void *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 extraSize, u8 owner,
                            s32 list);
-extern TextObj *func_150CFF10(u8 id, u8 *str, s16 duration, s32 styleSize, s8 updateFn, u8 msgFn, u8 arg6, s32 arg7);
 extern Struct1509B570 *func_1509B570(s32);
 
 /*

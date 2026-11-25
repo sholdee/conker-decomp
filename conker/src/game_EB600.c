@@ -3,10 +3,7 @@
 #include "variables.h"
 #include "effects.h"
 
-void func_150BDE90(Camera *owner, u8 arg1, s32 arg2);
-
 extern void *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
-void func_150BDF0C(EB340Obj *obj);
 
 /* Spawner message handler: destroys the spawner when its owner (event 0x21), or the
  * object whose +0x318 points at its owner (event 0), sends the message. */

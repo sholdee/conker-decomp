@@ -4,7 +4,6 @@
 
 
 extern void *allocate_memory(s32, s32, s32, s32);
-extern void func_150C851C(s32);
 
 void func_1500FE30(void) {
     s32 i;

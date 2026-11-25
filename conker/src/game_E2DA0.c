@@ -3,17 +3,12 @@
 #include "variables.h"
 #include "effects.h"
 
-void func_150B5A3C(Vec3f *pos, u8 owner, s32 kind);
-void func_150B5E34(Vec3f *pos, u8 owner, s32 kind);
-void func_150B6000(Vec3f *pos, u8 owner, s32 kind);
-void func_150B60E0(Actor *obj, Vec3f *out);
-
 /* Effect instance whose per-type data (from 0x28) tracks a game object. */
-typedef struct ObjBurstEffect {
+struct ObjBurstEffect {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Actor *obj;
     /* 0x2C */ u8 objUniqueId;
-} ObjBurstEffect;
+};
 
 void func_15152B38(TrailBurst *spawn, u8 owner, s32 kind);
 
@@ -256,14 +251,14 @@ void func_150B60E0(Actor *obj, Vec3f *out) {
 
 
 /* Effect instance whose per-type data (from 0x28) is a BoltRingData. */
-typedef struct {
+struct BoltRingEffect {
     /* 0x00 */ u8 unk0;
     /* 0x01 */ u8 kind;
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 owner;
     /* 0x0D */ u8 padD[0x1B];
     /* 0x28 */ BoltRingData data;
-} BoltRingEffect;
+};
 
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
 extern void func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *config, f32 spread, s32 type, s32 owner, s32 kind);
@@ -402,11 +397,11 @@ typedef struct {
     /* 0x2F */ u8 unk2F;
 } Output150B66DC;
 
-typedef struct {
+struct Arg150B66DC {
     /* 0x00 */ u8 pad0[0x14];
     /* 0x14 */ Output150B66DC *out;
     /* 0x18 */ Input150B66DC *in;
-} Arg150B66DC;
+};
 
 /** Sets out->unk9 for mode 15; otherwise clears it and sets out->unk2F (20 for mode 16, else 40). */
 s32 func_150B66DC(Arg150B66DC *ctx) {

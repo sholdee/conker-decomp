@@ -30,10 +30,10 @@ typedef struct {
     u8 flags; // bit 0: enabled
 } FF0E0State;
 
-typedef struct {
+struct FF0E0Object {
     TimedEffect base;
     FF0E0State state;
-} FF0E0Object;
+};
 
 /* Payload of message 0x32 (passed as the s32 argument). */
 typedef struct {

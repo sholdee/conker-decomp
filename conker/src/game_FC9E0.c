@@ -42,7 +42,7 @@ typedef struct {
 } BounceMotion;
 
 /* A screen sprite made by func_1515548C (ScreenSprite in game_182140.c, 0x70 bytes) with its motion data. */
-typedef struct {
+struct HopSprite {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 pad2[0xC - 0x2];
@@ -54,7 +54,7 @@ typedef struct {
         HopMotion hop;
         BounceMotion bounce;
     } motion;
-} HopSprite;
+};
 
 HopSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 

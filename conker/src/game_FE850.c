@@ -58,12 +58,12 @@ void func_150D146C(s32 arg0) {
 
 extern f32 D_800A08C0;
 
-typedef struct {
+struct Obj150D149C {
     TimedEffect base;
     /* 0x28 */ f32 unk28;
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
-} Obj150D149C;
+};
 
 void func_150D149C(Obj150D149C *arg0) {
     f32 *p = &arg0->unk28;

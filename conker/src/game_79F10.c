@@ -1,14 +1,11 @@
 #include <ultra64.h>
 
-// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
-// prototype (callers use the low byte without masking it), so it keeps that view.
-#define func_150ADA20 func_150ADA20_functions_h
-#include "functions.h"
-#undef func_150ADA20
-u8 func_150ADA20(void);
+#include "structs.h"
 
 /* This file's .bss (0x800CC280-0x800CC2BF). IDO lays out a unit's variables in the order of their first
-   declaration, so they are defined here, in address order, before variables.h declares them. */
+   declaration, so they are defined here, in address order, before variables.h declares them. The order
+   also depends on how many types and variables are declared before them (see init_50A0.c), so they come
+   before functions.h, whose subsystem headers change often. */
 s32 D_800CC280;
 OSContPad *D_800CC284; // the current player's controller input
 s32 D_800CC288;
@@ -23,6 +20,13 @@ f32 D_800CC2B4;
 u8 D_800CC2B8;
 u16 D_800CC2BA; // frame step of the actor being updated
 s32 D_800CC2BC;
+
+// matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
+// prototype (callers use the low byte without masking it), so it keeps that view.
+#define func_150ADA20 func_150ADA20_functions_h
+#include "functions.h"
+#undef func_150ADA20
+u8 func_150ADA20(void);
 
 #include "variables.h"
 
@@ -102,7 +106,6 @@ void func_1507FEA0(Actor *);
 void func_15087E54(u8, Actor *);
 s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
 void func_150D5A6C(Actor *, s32, s32);
-void func_150D7790(Actor *, s32);
 void func_1510E8BC(void **, s16 (*)[3], f32 *, f32 *, u32 *, s16 *, f32, f32, f32, f32, s32, Actor *, f32, f32, s32);
 void func_15121490(Actor *, OSContPad *);
 void func_151279A0(Actor *, OSContPad *);

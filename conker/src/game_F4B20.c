@@ -5,12 +5,12 @@
 
 /* Near-miss at 160/6300; see tools/nearmiss/func_150C7670.c */
 typedef struct { u8 pad00[0x14]; u8 *unk14; } Mid150C7670;
-typedef struct {
+struct Obj150C7670 {
     u8 pad00[0x70];
     u8 unk70;
     u8 pad71[0xFF];
     Mid150C7670 *unk170;
-} Obj150C7670;
+};
 
 s32 func_150C7670(Obj150C7670 *arg0) {
     f32 temp;

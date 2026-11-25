@@ -74,10 +74,3 @@ void func_150BDF0C(EB340Obj *obj) {
         spawn->timer = (func_150ADA20() % 151U) + 25;
     }
 }
-
-void func_150BE210(WorldObject *obj);
-
-// matching: 0.128f read through its rodata symbol; the plain literal allocates FP registers differently
-void func_150BE2E8(WorldObject *mover);
-
-

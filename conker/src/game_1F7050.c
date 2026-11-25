@@ -70,8 +70,6 @@ void func_151C9BA0(Camera *player, s32 state) {
     }
 }
 
-void func_150BDE90(void *, u8, s32);
-
 /* Effects for state 27 when level is 0x27 (see func_151C9BA0). */
 void func_151C9DE8(Camera *player, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
     func_151C9F38(player, 4, arg1, arg2, arg3);

@@ -163,7 +163,6 @@ s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
 }
 
 
-extern f32 func_150CF040(s32 arg0, s32 arg1);
 extern s32 func_1508CA88(void);
 extern s32 func_1508C9CC(void);
 extern s32 func_1508C5B8(s32 arg0, s32 arg1);
