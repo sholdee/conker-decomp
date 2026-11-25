@@ -354,7 +354,7 @@ void func_1508F9F4(void) {
 Gfx *func_150900F0(Gfx *, s32);
 Gfx *func_150918EC(Gfx *);
 Gfx *func_150938BC(Gfx *);
-Gfx *func_15093B58(Gfx *, s32, s16 *, s32, u8);
+Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large);
 Gfx *func_15090630(Gfx *);
 Gfx *func_150911F4(Gfx *);
 Gfx *func_15094F40(Gfx *);
@@ -1535,7 +1535,10 @@ extern u8 D_800AB62C[][3];
 extern u16 D_800E0BCC;
 u8 func_15085DA8(f32 arg0);
 
-Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *rows, s32 mode, u8 big) {
+/* Draws the radar: a disc around each local player (larger when `large`) with a dot for every
+ * visible other character, rotated by the camera heading; a dot gets a bar above or below it when
+ * the character is on a higher or lower floor (func_15085DA8). */
+Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
     f32 scale;
     f32 zoom;
     f32 sinv;
@@ -1549,30 +1552,30 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *rows, s32 mode, u8 big) {
     s32 j;
     s32 i;
     s32 tex;
-    s32 st;
-    s32 off;
-    s32 sz;
-    s8 h2;
-    s8 h;
-    s32 other;
+    s32 dotStep;
+    s32 radius;
+    s32 dotSize;
+    s8 otherFloor;
+    s8 floor;
+    s32 skip;
 
     scale = 0.01349999942f;
     radiusSq = 3136.0f;
-    st = step;
-    off = rows[16];
-    if (big) {
+    dotStep = step;
+    radius = scaled[16];
+    if (large) {
         zoom = 1.329000115f;
     } else {
         zoom = 1.0f;
     }
     if (D_8008FD90 == 1) {
-        scale = 0.02025000006f;
+        scale = 0.02025f;
         radiusSq = 7744.0f;
-        st = (step * 2) / 3;
-        off = rows[24];
+        dotStep = (step * 2) / 3;
+        radius = scaled[24];
     }
     scale *= D_8008FE1C;
-    sz = (D_8008FE1C == 1.0f) ? 4 : 6;
+    dotSize = (D_8008FE1C == 1.0f) ? 4 : 6;
     radiusSq *= D_8008FE1C;
     tex = func_1510D0EC((s32)(D_CF2 + 1), 0, 3, 0);
     if (tex == (s32)0x80000000) {
@@ -1584,40 +1587,41 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *rows, s32 mode, u8 big) {
     gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 511, 0);
     gDPPipeSync(gfx++);
     gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_8b, 4, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
-    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 0x7C, 0x7C);
-    gDPSetOtherMode(gfx++, mode | 0xF, 0x00504244);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 31 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
+    gDPSetOtherMode(gfx++, renderMode | 0xF, 0x00504244);
 
     for (i = 0; i < D_8008FD90; i++) {
         if (func_150859AC(i, 3) > 0) {
-            s32 half;
+            s32 halfSize;
             s32 dsdx;
             s32 x;
             s32 y;
             struct127 *obj;
             struct108 *cam;
-            struct108 *c2;
+            struct108 *cam2;
 
-            x = (((s32)D_800BE628[i].right - rows[7]) - off) * 4;
-            y = ((s32)D_800BE628[i].top + rows[21] + off) * 4;
+            x = (((s32)D_800BE628[i].right - scaled[7]) - radius) * 4;
+            y = ((s32)D_800BE628[i].top + scaled[21] + radius) * 4;
             obj = &D_800CC2D0[i];
-            if (big) {
-                x -= 0x1C6;
-                y -= 0x46;
+            if (large) {
+                x -= 454;
+                y -= 70;
             }
             gDPPipeSync(gfx++);
-            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0x80);
+            gDPSetEnvColor(gfx++, 255, 255, 255, 128);
             gDPSetCombine(gfx++, 0x129A25, 0xFF37FFFF);
-            if (big) {
-                half = (s32)((f32)(off * 4) * 0.8580000401f);
-                dsdx = (s32)((f32)(s32)(f32)st * 1.165501118f);
+            if (large) {
+                halfSize = (s32)((f32)(radius * 4) * 0.8580000401f);
+                // matching: the original rounds dotStep through s32 before scaling it
+                dsdx = (s32)((f32)(s32)(f32)dotStep * 1.165501118f);
             } else {
-                half = off * 4;
-                dsdx = st;
+                halfSize = radius * 4;
+                dsdx = dotStep;
             }
-            gSPScisTextureRectangle(gfx++, x - half, y - half, x + half, y + half, G_TX_RENDERTILE, 0, 0, dsdx, dsdx);
+            gSPScisTextureRectangle(gfx++, x - halfSize, y - halfSize, x + halfSize, y + halfSize, G_TX_RENDERTILE, 0, 0, dsdx, dsdx);
             gDPPipeSync(gfx++);
             gDPSetCombine(gfx++, 0x62FEC5, 0xFFFFFBFD);
-            gDPSetEnvColor(gfx++, 0xFF, 0x00, 0x00, 0xFF);
+            gDPSetEnvColor(gfx++, 255, 0, 0, 255);
             cam = &D_800DBFF0[i];
             angle = cam->unk37C * 0.01745327935f;
             sinv = sinf(angle);
@@ -1625,80 +1629,81 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *rows, s32 mode, u8 big) {
             if (obj->interaction_state != 0x25) {
                 /* as1 (-g3) orders equally ranked instructions of a block by source line, lowest
                  * first. The target schedule (li; lwc1; lwc1; sw) needs the px/pz loads emitted
-                 * before `other = -1` while that statement carries the lower line number. The
+                 * before `skip = -1` while that statement carries the lower line number. The
                  * numbers only have to exceed every real line of this file with
-                 * line(other = -1) < line(px/pz); the lines after them stay monotonic. */
+                 * line(skip = -1) < line(px/pz); the lines after them stay monotonic. */
 #line 20002
                 px = obj->x_position; pz = obj->z_position;
 #line 20000
-                other = -1;
-                h = func_15085DA8(obj->y_position);
+                skip = -1;
+                floor = func_15085DA8(obj->y_position);
             } else {
-                c2 = obj->camera;
+                cam2 = obj->camera;
                 obj = D_800CC2D0;
-                other = 0;
-                if (c2 != NULL && c2->unk23D == 3) {
-                    other = 1;
+                skip = 0;
+                if (cam2 != NULL && cam2->unk23D == 3) {
+                    skip = 1;
                 }
-                obj += other;
+                obj += skip;
                 px = obj->x_position;
                 pz = obj->z_position;
-                h = func_15085DA8(obj->y_position);
+                floor = func_15085DA8(obj->y_position);
             }
             for (j = 0; j != 25; j++) {
-                s32 col;
+                s32 color;
                 s32 rx;
                 s32 ry;
                 s32 xl;
                 s32 yl;
                 s32 xh;
                 s32 yh;
-                struct127 *o;
-                u8 *c;
+                struct127 *other;
+                u8 *rgb;
 
-                if (j == i || j == other) {
+                if (j == i || j == skip) {
                     continue;
                 }
-                o = &D_800CC2D0[j];
-                if (o->interaction_state != 0) {
-                    if (((s8 *)o->pad320)[8] != 0) {
-                        col = ((s8 *)o->pad320)[8] - 1;
+                other = &D_800CC2D0[j];
+                if (other->interaction_state != 0) {
+                    if ((s8)other->pad320[8] != 0) {
+                        color = (s8)other->pad320[8] - 1;
                         if (j < D_8008FD8C) {
                             if (func_150859AC(j, 3) <= 0) {
-                                col = -1;
+                                color = -1;
                             } else if (func_150859AC(j, 4) <= 0) {
-                                col = -1;
+                                color = -1;
                             } else if (D_800E0BCC & (1 << j)) {
-                                col = -1;
-                            } else if (o->health == 0) {
-                                col = -1;
-                            } else if ((o->unk31C->unk75 & 0x7F) == 0x21) {
-                                col = -1;
+                                color = -1;
+                            } else if (other->health == 0) {
+                                color = -1;
+                            } else if ((other->unk31C->unk75 & 0x7F) == 0x21) {
+                                color = -1;
                             }
                         }
-                        if (col != -1) {
-                            dx = (o->x_position - px) * scale;
-                            dz = (o->z_position - pz) * scale;
-                            col = col + col + col;
-                            c = D_800AB62C[0] + col;
+                        if (color != -1) {
+                            dx = (other->x_position - px) * scale;
+                            dz = (other->z_position - pz) * scale;
+                            // matching: the tripled index plus a row-0 pointer, not D_800AB62C[color]
+                            color = color + color + color;
+                            rgb = D_800AB62C[0] + color;
                             if (dx * dx + dz * dz < radiusSq) {
                                 gDPPipeSync(gfx++);
-                                gDPSetEnvColor(gfx++, c[0], c[1], c[2], 0xFF);
+                                gDPSetEnvColor(gfx++, rgb[0], rgb[1], rgb[2], 255);
                                 rx = (s32)((dx * cosv - dz * sinv) * zoom) + x;
                                 ry = (s32)((dx * sinv + dz * cosv) * zoom) + y;
-                                xh = rx + sz;
-                                xl = rx - sz;
-                                yh = ry + sz;
-                                yl = ry - sz;
+                                xh = rx + dotSize;
+                                xl = rx - dotSize;
+                                yh = ry + dotSize;
+                                yl = ry - dotSize;
                                 gSPScisTextureRectangle(gfx++, xl, yl, xh, yh, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
-                                h2 = func_15085DA8(o->y_position);
-                                if (h != h2) {
+                                otherFloor = func_15085DA8(other->y_position);
+                                if (floor != otherFloor) {
                                     gDPPipeSync(gfx++);
-                                    gDPSetEnvColor(gfx++, 0x00, 0x00, 0x00, 0xFF);
-                                    if (h < h2) {
-                                        gSPScisTextureRectangle(gfx++, xl, yl - sz, xh, yl, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
-                                    } else if (h2 < h) {
-                                        gSPScisTextureRectangle(gfx++, xl, yh, xh, yh + sz, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
+                                    gDPSetEnvColor(gfx++, 0, 0, 0, 255);
+                                    if (floor < otherFloor) {
+                                        gSPScisTextureRectangle(gfx++, xl, yl - dotSize, xh, yl, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
+                                    } else if (otherFloor < floor) {
+                                        gSPScisTextureRectangle(gfx++, xl, yh, xh, yh + dotSize, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
                                     }
                                 }
                             }
