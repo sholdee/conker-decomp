@@ -1545,44 +1545,40 @@ void func_15151A38(struct Local15151A38Arg *config, u8 arg1, s32 arg2) {
 }
 
 struct Arg15151D6C {
-    s32 unk0;
-    s32 unk4;
-    struct Vec3F unk8;
-    struct Vec3F unk14;
-    struct Vec3F unk20;
-    u8 pad2C[0x8];
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
+    s32 countBase;
+    s32 countRange;
+    struct Vec3F position;
+    struct Vec3F normal;
+    s16 triangle[9];
+    f32 spread;
+    f32 speedBase;
+    f32 speedRange;
     f32 unk40;
     f32 unk44;
     s16 unk48;
     s16 unk4A;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
+    f32 scaleBase;
+    f32 scaleRange;
+    f32 spin; /* spawn.spin.x/z are random in [-spin, spin] */
 };
 
-struct Spawn15151D6C {
+/* Spawn descriptor for func_15132A4C: the first 0x78 bytes of Spawn1513264C. */
+typedef struct {
     f32 unk00;
     f32 unk04;
     f32 unk08;
     f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
+    struct Vec3F rotation; /* degrees */
     f32 unk1C;
     f32 unk20;
     f32 unk24;
-    struct Vec3F unk28;
-    struct Vec3F unk34;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
+    struct Vec3F position;
+    struct Vec3F velocity;
+    struct Vec3F spin;
     f32 unk4C;
-    s32 unk50;
+    s32 flags;
     s16 unk54;
-    s16 unk56;
+    s16 variantId;
     u8 unk58;
     u8 pad59[3];
     s32 unk5C;
@@ -1604,217 +1600,168 @@ struct Spawn15151D6C {
     s16 unk72;
     s16 unk74;
     s16 pad76;
-};
+} Spawn15132A4C;
 
-
-void func_15151D6C(struct Arg15151D6C *arg0, s32 *arg1, f32 *arg2, u32 arg3, u8 arg4, s32 arg5) {
+/* Spawns a random number of pieces off a surface triangle, each moving in a random direction inside
+ * the cone around the triangle's normal and using a random entry of the variant tables. */
+void func_15151D6C(struct Arg15151D6C *config, s32 *variantIds, f32 *variantScales, u32 variantCount, u8 arg4, s32 arg5) {
     s32 count;
-    s32 idx;
-    struct Spawn15151D6C sp;
-    struct Vec3F right;
-    f32 rightLen;
-    f32 rightUnused;
-    struct Vec3F up;
-    f32 upLen;
-    f32 upUnused;
-    struct Vec3F fwd;
-    f32 fwdLen;
-    f32 fwdUnused;
-    f32 s;
-    f32 c;
-    f32 scale;
-    f32 spread1;
-    f32 spread2;
+    s32 variant;
+    Spawn15132A4C spawn;
+    struct Vec3F axis0;
+    f32 length0;
+    f32 inverse0;
+    struct Vec3F axis1;
+    f32 length1;
+    f32 inverse1;
+    struct Vec3F normal;
+    f32 normalLength;
+    f32 normalInverse;
+    f32 second;
+    f32 first;
+    f32 speed;
+    f32 pad[2]; // matching: unused stack slots in the original frame
 
-    if (func_15144E80(&arg0->unk20, &right, &up, &fwd) != 0) {
-        func_15145128(&right, &right, &rightLen, &rightUnused);
-        func_15145128(&up, &up, &upLen, &upUnused);
-        func_15145128(&fwd, &fwd, &fwdLen, &fwdUnused);
-        if (func_15144A74(&fwd, &arg0->unk14) < 0.0f) {
-            fwd.x = -fwd.x;
-            fwd.y = -fwd.y;
-            fwd.z = -fwd.z;
+    if (func_15144E80(config->triangle, &axis0, &axis1, &normal) != 0) {
+        func_15145128(&axis0, &axis0, &length0, &inverse0);
+        func_15145128(&axis1, &axis1, &length1, &inverse1);
+        func_15145128(&normal, &normal, &normalLength, &normalInverse);
+        if (func_15144A74(&normal, &config->normal) < 0.0f) {
+            normal.x = -normal.x;
+            normal.y = -normal.y;
+            normal.z = -normal.z;
         }
-        fwd.x *= 1000.0f;
-        fwd.y *= 1000.0f;
-        fwd.z *= 1000.0f;
-        sp.unk00 = 1.0f;
-        sp.unk04 = 1.0f;
-        sp.unk1C = 1.0f;
-        sp.unk20 = 1.0f;
-        sp.unk24 = 1.0f;
-        sp.unk28 = arg0->unk8;
-        sp.unk44 = 0.0f;
-        sp.unk50 = 0x29E8;
-        count = (func_150ADA20() % (u32)(arg0->unk4 + 1)) + arg0->unk0;
-        sp.unk58 = 0;
-        sp.unk5C = 0;
-        sp.unk60 = 0xFF;
-        sp.unk61 = 8;
-        sp.unk62 = 0;
-        sp.unk63 = 0;
-        sp.unk64 = 0;
-        sp.unk65 = 0;
-        sp.unk66 = 0;
-        sp.unk67 = 0;
-        sp.unk68 = 2;
-        sp.unk6A = 0;
-        sp.unk6C = 0;
-        sp.unk70 = 0;
-        sp.unk72 = 0xC;
-        sp.unk74 = 0x15;
-        if (count != 0) {
-            do {
-                scale = (func_150ADA68() * arg0->unk3C) + arg0->unk38;
-                func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * arg0->unk34, &c, &s);
-                sp.unk34.x = ((right.x * c) + (up.x * s) + fwd.x) * scale;
-                sp.unk34.y = ((right.y * c) + (up.y * s) + fwd.y) * scale;
-                sp.unk34.z = ((right.z * c) + (up.z * s) + fwd.z) * scale;
-                sp.unk10 = func_150ADA68() * 360.0f;
-                sp.unk14 = func_150ADA68() * 360.0f;
-                sp.unk18 = func_150ADA68() * 360.0f;
-            lbl1:
-                idx = func_150ADA20() % arg3;
-                sp.unk56 = arg1[idx];
-                sp.unk0C = (arg0->unk4C + (func_150ADA68() * arg0->unk50)) * arg2[idx];
-                sp.unk08 = sp.unk0C;
-            lbl2:
-                sp.unk40 = (func_150ADA68() * (arg0->unk54 + arg0->unk54)) - arg0->unk54;
-                sp.unk48 = (func_150ADA68() * (arg0->unk54 + arg0->unk54)) - arg0->unk54;
-                sp.unk4C = (func_150ADA68() * arg0->unk44) + arg0->unk40;
-                sp.unk54 = (func_150ADA20() % (u32)(arg0->unk4A + 1)) + arg0->unk48;
-                func_15132A4C(&sp, 3, 0xFF, 0, arg4, arg5);
-                count--;
-            } while (count != 0);
+        normal.x *= 1000.0f;
+        normal.y *= 1000.0f;
+        normal.z *= 1000.0f;
+        spawn.unk00 = 1.0f;
+        spawn.unk04 = 1.0f;
+        spawn.unk1C = 1.0f;
+        spawn.unk20 = 1.0f;
+        spawn.unk24 = 1.0f;
+        spawn.position = config->position;
+        spawn.spin.y = 0.0f;
+        spawn.flags = 0x29E8;
+        count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+        spawn.unk58 = 0;
+        spawn.unk5C = 0;
+        spawn.unk60 = 0xFF;
+        spawn.unk61 = 8;
+        spawn.unk62 = 0;
+        spawn.unk63 = 0;
+        spawn.unk64 = 0;
+        spawn.unk65 = 0;
+        spawn.unk66 = 0;
+        spawn.unk67 = 0;
+        spawn.unk68 = 2;
+        spawn.unk6A = 0;
+        spawn.unk6C = 0;
+        spawn.unk70 = 0;
+        spawn.unk72 = 12;
+        spawn.unk74 = 21;
+        while (count != 0) {
+            speed = (func_150ADA68() * config->speedRange) + config->speedBase;
+            func_15143874((s16)(func_150ADA20() & 0xFF), func_150ADA68() * config->spread, &first, &second);
+            spawn.velocity.x = ((axis0.x * first) + (axis1.x * second) + normal.x) * speed;
+            spawn.velocity.y = ((axis0.y * first) + (axis1.y * second) + normal.y) * speed;
+            spawn.velocity.z = ((axis0.z * first) + (axis1.z * second) + normal.z) * speed;
+            spawn.rotation.x = func_150ADA68() * 360.0f;
+            spawn.rotation.y = func_150ADA68() * 360.0f;
+            spawn.rotation.z = func_150ADA68() * 360.0f;
+        // matching: the labels end basic blocks, which keeps as1 from filling the calls' delay slots
+        pickVariant:
+            variant = func_150ADA20() % variantCount;
+            spawn.variantId = variantIds[variant];
+            spawn.unk0C = (config->scaleBase + (func_150ADA68() * config->scaleRange)) * variantScales[variant];
+            spawn.unk08 = spawn.unk0C;
+        randomizeSpin:
+            spawn.spin.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
+            spawn.spin.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
+            spawn.unk4C = (func_150ADA68() * config->unk44) + config->unk40;
+            spawn.unk54 = (func_150ADA20() % (u32)(config->unk4A + 1)) + config->unk48;
+            func_15132A4C(&spawn, 3, 0xFF, 0, arg4, arg5);
+            count--;
         }
     }
 }
 
 struct Arg15152190 {
-    s32 unk0;
-    s32 unk4;
-    struct Vec3F unk8;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    f32 unk1C;
-    f32 unk20;
+    s32 countBase;
+    s32 countRange;
+    struct Vec3F origin;
+    struct AngleRange angles;
+    f32 speedBase;
+    f32 speedRange;
     f32 unk24;
     f32 unk28;
     s16 unk2C;
     s16 unk2E;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
+    f32 scaleBase;
+    f32 scaleRange;
+    f32 spin; /* spawn.spin.x/z are random in [-spin, spin] */
 };
 
-struct Spawn15152190 {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    struct Vec3F unk28;
-    struct Vec3F unk34;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    s32 unk50;
-    s16 unk54;
-    s16 unk56;
-    u8 unk58;
-    u8 pad59[3];
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 unk67;
-    u8 unk68;
-    u8 pad69;
-    u8 unk6A;
-    u8 pad6B;
-    s32 unk6C;
-    u8 unk70;
-    u8 pad71;
-    s16 unk72;
-    s16 unk74;
-    s16 pad76;
-};
-
-void func_15152190(struct Arg15152190 *arg0, s32 *arg1, f32 *arg2, u32 arg3, f32 arg4, u8 arg5, u8 arg6, s32 arg7) {
+/* Spawns a random number of pieces in random directions around config->origin, each using a random
+ * entry of the variant tables. */
+void func_15152190(struct Arg15152190 *config, s32 *variantIds, f32 *variantScales, u32 variantCount, f32 radius, u8 arg5, u8 arg6, s32 arg7) {
     s32 count;
-    s32 idx;
-    struct Spawn15152190 sp70;
-    s16 a;
-    s16 b;
+    s32 variant;
+    Spawn15132A4C spawn;
+    s16 yaw;
+    s16 pitch;
 
-    sp70.unk00 = 1.0f;
-    sp70.unk04 = 1.0f;
-    sp70.unk1C = 1.0f;
-    sp70.unk20 = 1.0f;
-    sp70.unk24 = 1.0f;
-    sp70.unk44 = 0.0f;
-    sp70.unk50 = (arg5 ? 0x100000 : 0) | 0x29E8;
-    sp70.unk58 = 0;
-    sp70.unk5C = 0;
-    sp70.unk60 = 0xFF;
-    sp70.unk61 = 8;
-    sp70.unk62 = 0;
-    sp70.unk63 = 0;
-    sp70.unk64 = 0;
-    sp70.unk65 = 0;
-    sp70.unk66 = 0;
-    sp70.unk67 = 0;
-    sp70.unk68 = 2;
-    sp70.unk6A = 0;
-    sp70.unk6C = 0;
-    sp70.unk70 = 0;
-    sp70.unk72 = 0xC;
-    sp70.unk74 = 0x15;
-    count = (func_150ADA20() % (u32)(arg0->unk4 + 1)) + arg0->unk0;
-
-    if (count != 0) {
-        do {
-            a = (s16)((func_150ADA20() % (u32)(arg0->unk16 + 1)) + arg0->unk14);
-            b = (s16)((func_150ADA20() % (u32)(arg0->unk1A + 1)) + arg0->unk18);
-            sp70.unk10 = func_150ADA68() * 360.0f;
-            sp70.unk14 = func_150ADA68() * 360.0f;
-            sp70.unk18 = func_150ADA68() * 360.0f;
-            func_15143794(a, b, (func_150ADA68() * arg0->unk20) + arg0->unk1C, &sp70.unk34.x);
-            sp70.unk40 = (func_150ADA68() * (arg0->unk38 + arg0->unk38)) - arg0->unk38;
-            sp70.unk48 = (func_150ADA68() * (arg0->unk38 + arg0->unk38)) - arg0->unk38;
-            sp70.unk4C = (func_150ADA68() * arg0->unk28) + arg0->unk24;
-            sp70.unk54 = (func_150ADA20() % (u32)(arg0->unk2E + 1)) + arg0->unk2C;
-            func_15143794(a, b, arg4, &sp70.unk28.x);
-            sp70.unk28.x += arg0->unk8.x;
-            sp70.unk28.y += arg0->unk8.y;
-            sp70.unk28.z += arg0->unk8.z;
-
-        lbl1:
-            idx = func_150ADA20() % arg3;
-            sp70.unk56 = arg1[idx];
-            sp70.unk0C = (arg0->unk30 + (func_150ADA68() * arg0->unk34)) * arg2[idx];
-            sp70.unk08 = sp70.unk0C;
-            {
-                void *ret;
-                ret = func_15132A4C(&sp70, 3, 0xFF, 0, arg6, arg7);
-            }
-            count--;
-        } while (count != 0);
+    spawn.unk00 = 1.0f;
+    spawn.unk04 = 1.0f;
+    spawn.unk1C = 1.0f;
+    spawn.unk20 = 1.0f;
+    spawn.unk24 = 1.0f;
+    spawn.spin.y = 0.0f;
+    spawn.flags = (arg5 ? 0x100000 : 0) | 0x29E8;
+    spawn.unk58 = 0;
+    spawn.unk5C = 0;
+    spawn.unk60 = 0xFF;
+    spawn.unk61 = 8;
+    spawn.unk62 = 0;
+    spawn.unk63 = 0;
+    spawn.unk64 = 0;
+    spawn.unk65 = 0;
+    spawn.unk66 = 0;
+    spawn.unk67 = 0;
+    spawn.unk68 = 2;
+    spawn.unk6A = 0;
+    spawn.unk6C = 0;
+    spawn.unk70 = 0;
+    spawn.unk72 = 12;
+    spawn.unk74 = 21;
+    count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
+    while (count != 0) {
+        yaw = (func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase;
+        pitch = (func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase;
+        spawn.rotation.x = func_150ADA68() * 360.0f;
+        spawn.rotation.y = func_150ADA68() * 360.0f;
+        spawn.rotation.z = func_150ADA68() * 360.0f;
+        func_15143794(yaw, pitch, (func_150ADA68() * config->speedRange) + config->speedBase, &spawn.velocity.x);
+        spawn.spin.x = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
+        spawn.spin.z = (func_150ADA68() * (config->spin + config->spin)) - config->spin;
+        spawn.unk4C = (func_150ADA68() * config->unk28) + config->unk24;
+        spawn.unk54 = (func_150ADA20() % (u32)(config->unk2E + 1)) + config->unk2C;
+        func_15143794(yaw, pitch, radius, &spawn.position.x);
+        spawn.position.x += config->origin.x;
+        spawn.position.y += config->origin.y;
+        spawn.position.z += config->origin.z;
+    // matching: the label ends a basic block, which keeps as1 from filling a call's delay slot
+    pickVariant:
+        variant = func_150ADA20() % variantCount;
+        spawn.variantId = variantIds[variant];
+        spawn.unk0C = (config->scaleBase + (func_150ADA68() * config->scaleRange)) * variantScales[variant];
+        spawn.unk08 = spawn.unk0C;
+        {
+            void *piece; // matching: storing the unused result changes as1's ordering of the argument stores
+            piece = func_15132A4C(&spawn, 3, 0xFF, 0, arg6, arg7);
+        }
+        count--;
     }
 }
-
 void func_15152520(struct Local15152520Arg *arg0, u8 arg1, s32 arg2) {
     struct Local15152520ParamBlock paramBlock;
     struct Local15152520Motion motion;
