@@ -5,20 +5,6 @@
 /*
  * Behaviour handlers for scenery objects (WorldObject) that swing one rotation axis toward a target angle.
  */
-/* Behaviour scratch state (WorldObject.touch): a damped swing or a bounce. */
-typedef union MoverWork {
-    struct {
-        /* 0x7C */ f32 damping;
-        /* 0x80 */ f32 acceleration;
-        /* 0x84 */ f32 velocity;
-    } swing;
-    struct {
-        /* 0x7C */ f32 rebound; /* fraction of the velocity kept (reversed) when the target is crossed */
-        /* 0x80 */ f32 acceleration; /* per tick */
-        /* 0x84 */ f32 velocity;
-    } bounce;
-} MoverWork;
-
 #define WORK(obj) ((MoverWork *)&(obj)->touch)
 
 

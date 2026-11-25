@@ -77,14 +77,6 @@ void func_150BDF0C(EB340Obj *obj) {
 
 void func_150BE210(WorldObject *obj);
 
-/* Behaviour scratch state (WorldObject.touch) of func_150BE2E8: the end points of its path. */
-typedef struct {
-    /* 0x7C */ s16 from[3];
-    /* 0x82 */ s16 to[3];
-} MoverWork;
-
-#define MOVER_WORK(obj) ((MoverWork *)&(obj)->touch)
-
 // matching: 0.128f read through its rodata symbol; the plain literal allocates FP registers differently
 void func_150BE2E8(WorldObject *mover);
 

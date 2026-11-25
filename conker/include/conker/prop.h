@@ -34,4 +34,26 @@
  *   game_1AFC80.c
  */
 
+/* Behaviour scratch state (WorldObject.touch) of the scenery movers in game_1188E0.c, game_143DE0.c and
+ * game_1449A0.c (each file reaches it through its WORK(obj) macro). */
+typedef union MoverWork {
+    /* 0x7C */ s32 targetPos[3];  /* position to move to */
+    /* 0x7C */ f32 targetSpin[3]; /* rotation to turn to */
+    struct {
+        /* 0x7C */ s32 target; /* animation position to reach, 0..0xFFFF */
+        /* 0x80 */ u8 *frames; /* vertex frames loaded from ROM */
+        /* 0x84 */ s32 pos;
+    } anim;
+    struct {
+        /* 0x7C */ f32 damping;
+        /* 0x80 */ f32 acceleration;
+        /* 0x84 */ f32 velocity;
+    } swing;
+    struct {
+        /* 0x7C */ f32 rebound; /* fraction of the velocity kept (reversed) when the target is crossed */
+        /* 0x80 */ f32 acceleration; /* per tick */
+        /* 0x84 */ f32 velocity;
+    } bounce;
+} MoverWork;
+
 #endif

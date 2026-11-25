@@ -57,14 +57,6 @@ void func_150BE210(WorldObject *obj) {
     }
 }
 
-/* Behaviour scratch state (WorldObject.touch) of func_150BE2E8: the end points of its path. */
-typedef struct {
-    /* 0x7C */ s16 from[3];
-    /* 0x82 */ s16 to[3];
-} MoverWork;
-
-#define MOVER_WORK(obj) ((MoverWork *)&(obj)->touch)
-
 /* Variant tables of func_150BE494's debris (model ids and scales). */
 const s32 D_800A0010[10] = { 0xC6, 0xC7, 0xC8, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD };
 const f32 D_800A0038[10] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
@@ -88,12 +80,12 @@ void func_150BE2E8(WorldObject *mover) {
     f32 speed;
     f32 progress;
 
-    fromX = MOVER_WORK(mover)->from[0];
-    fromY = MOVER_WORK(mover)->from[1];
-    fromZ = MOVER_WORK(mover)->from[2];
-    toX = MOVER_WORK(mover)->to[0];
-    toY = MOVER_WORK(mover)->to[1];
-    toZ = MOVER_WORK(mover)->to[2];
+    fromX = PATH_MOVER_WORK(mover)->from[0];
+    fromY = PATH_MOVER_WORK(mover)->from[1];
+    fromZ = PATH_MOVER_WORK(mover)->from[2];
+    toX = PATH_MOVER_WORK(mover)->to[0];
+    toY = PATH_MOVER_WORK(mover)->to[1];
+    toZ = PATH_MOVER_WORK(mover)->to[2];
     speed = mover->moveData.half.hi * (1.0f / 16384.0f);
     progress = mover->moveData.half.lo * (1.0f / 16384.0f);
     speed -= speed * D_800A0068[0];

@@ -161,6 +161,14 @@ typedef struct {
 
 #define TURNER_WORK(obj) ((TurnerWork *)&(obj)->touch)
 
+/* Behaviour scratch state (WorldObject.touch) of func_150BE2E8 (game_EB600.c): the end points of its path. */
+typedef struct {
+    /* 0x7C */ s16 from[3];
+    /* 0x82 */ s16 to[3];
+} PathMoverWork;
+
+#define PATH_MOVER_WORK(obj) ((PathMoverWork *)&(obj)->touch)
+
 /* Two-halfword command, as in game_61490.c's GameCommand. */
 typedef struct {
     /* 0x00 */ s16 opcode;
