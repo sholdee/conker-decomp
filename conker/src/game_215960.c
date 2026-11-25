@@ -23,13 +23,23 @@ typedef struct {
     /* 0x28 */ f32 unk28[2][4][4];
 } GameStruct151ED90C;
 
+/* A HUD image drawn by func_151ED430: a texture id (split into 4KB chunks of consecutive ids) and its format. */
+typedef struct {
+    /* 0x00 */ void *texId;
+    /* 0x04 */ u16 pad4;
+    /* 0x06 */ u16 width;
+    /* 0x08 */ u16 height;
+    /* 0x0A */ u8 fmt;
+    /* 0x0B */ u8 siz;
+} HudSprite; /* size 0xC */
+
 extern s32 D_800E0A74;
 extern u8 D_800E0B96;
 extern u8 D_800E0B97;
 extern Gfx D_80090028;
-extern u8 D_800917F8;
-extern u8 D_80091804;
-extern u8 D_80091810;
+extern HudSprite D_800917F8;
+extern HudSprite D_80091804;
+extern HudSprite D_80091810;
 extern Gfx *(*D_8008FFF4[])(Gfx *);
 extern s32 D_80000300;
 extern u8 D_800BE616;
@@ -41,13 +51,13 @@ extern u8 D_7FB;
 extern u8 D_887;
 extern u8 D_800E0A94;
 extern u8 D_800E0C85;
-extern s32 D_8009013C;
+extern HudSprite D_8009013C;
 extern s32 func_1510D0EC(s32, s32, s32, s32); // matching: s32 params; converting &D_xxx ids to int steers scheduling
 extern s32 func_1502B7F0(s32 *, s32, s32);
 extern void func_10004074(void *);
 Gfx *func_151ED1E0(Gfx *);
 void func_15042D94();
-Gfx *func_151ED430(Gfx *, void *, s32, s32, s32, s32, f32, s32);
+Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 rows, f32 scale, s32 frame);
 Gfx *func_15096934(Gfx *);
 Gfx *func_1501A6CC(Gfx *arg0, s32 a, s32 b, s32 c, s32 d);
 
@@ -916,15 +926,7 @@ Gfx *func_151EADFC(Gfx *gfx, s32 x, s32 y, s32 value) {
 
     return gfx;
 }
-typedef struct {
-    /* 0x00 */ void *img;
-    /* 0x04 */ u16 pad4;
-    /* 0x06 */ u16 width;
-    /* 0x08 */ u16 height;
-    /* 0x0A */ u8 fmt;
-    /* 0x0B */ u8 siz;
-} Tex151EBB50;
-extern Tex151EBB50 D_80090060;
+extern HudSprite D_80090060;
 extern u8 D_1647;
 extern u8 D_1648;
 extern u8 D_1653;
@@ -1021,7 +1023,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
     }
     gSPDisplayList(gfx++, &D_80090028);
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
-    D_80090060.img = &D_891;
+    D_80090060.texId = &D_891;
     {
         s32 remaining;
         s32 pad; // matching: stack slot
@@ -1110,7 +1112,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
                 s32 pad4; // matching: stack slot
                 gDPPipeSync(gfx++);
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
-                D_80090060.img = &D_7F6;
+                D_80090060.texId = &D_7F6;
                 gfx = func_151EADFC(func_151ED430(gfx, &D_80090060, x + 0xA5, 0xAA, 1, 1, 1.0f, 0), x + 0xAD, 0x9B, value);
             }
         } else {
@@ -1193,8 +1195,8 @@ Gfx *func_151EB96C(Gfx *gfx) {
     return gfx;
 }
 
-extern Tex151EBB50 D_80090060;
-extern u8 D_800917EC;
+extern HudSprite D_80090060;
+extern HudSprite D_800917EC;
 extern u8 D_85D;
 extern u8 D_89C;
 extern s32 D_800E0A90;
@@ -1278,7 +1280,7 @@ Gfx *func_151EBB50(Gfx *gfx) {
         func_150432BC(1.0f);
         gDPPipeSync(gfx++);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
-        D_80090060.img = &D_89C;
+        D_80090060.texId = &D_89C;
         D_80090060.width = 0x10;
         D_80090060.height = 0x10;
         gfx = func_151ED430(gfx, &D_80090060, 0xC7, 0xB0, 1, 1, 1.0f, 0);
@@ -1302,7 +1304,7 @@ Gfx *func_151EBB50(Gfx *gfx) {
         gDPSetEnvColor(gfx++, 0xFF, 0, 0, alpha);
         D_80090060.fmt = 4;
         D_80090060.siz = 1;
-        D_80090060.img = &D_85D;
+        D_80090060.texId = &D_85D;
         D_80090060.width = 0x40;
         D_80090060.height = 0x40;
         gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x69, 3, 1, 1.0f, 0);
@@ -1440,7 +1442,7 @@ Gfx *func_151EC3E8(Gfx *gfx) {
             }
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
-            D_80090060.img = D_800900BC[D_8008FDD4->unk2C];
+            D_80090060.texId = D_800900BC[D_8008FDD4->unk2C];
             gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x1E, 3, 1, 1.0f, 0);
         }
         if (D_8008FDD4->unk8 >= 0.5f) {
@@ -1538,7 +1540,7 @@ Gfx *func_151EC648(Gfx *gfx) {
                     diff = 3;
                 }
             }
-            D_80090060.img = *image;
+            D_80090060.texId = *image;
             gfx = func_151ED430(gfx, &D_80090060, 0x94, y, diff, v, scale, 0);
             state = D_8008FDD4;
             progress = state->unk8;
@@ -1548,7 +1550,7 @@ Gfx *func_151EC648(Gfx *gfx) {
         if (alpha > 0) {
             gDPPipeSync(gfx++);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
-            D_80090060.img = &D_88C;
+            D_80090060.texId = &D_88C;
             gfx = func_151ED430(gfx, &D_80090060, 0x94, 0x1E, 3, 1, 1.0f, 0);
             state = D_8008FDD4;
         }
@@ -1580,7 +1582,7 @@ Gfx *func_151EC648(Gfx *gfx) {
                     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, listAlpha);
                     mid = (diff >> 1) + prev;
                     sc = diff / 32.0f;
-                    D_80090060.img = D_800900FC[j];
+                    D_80090060.texId = D_800900FC[j];
                     gfx = func_151ED430(gfx, &D_80090060, 0x53, mid, 2, 1, sc, -1);
                     if (D_8008FDE8 == 0.0f && i == 5 && D_8008FE2C == 0) {
                         v = (D_800BE9AC * 2) & 0x7F;
@@ -1592,7 +1594,7 @@ Gfx *func_151EC648(Gfx *gfx) {
                             v = 0xFF;
                         }
                         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, v);
-                        D_80090060.img = D_800900FC[j] + 2;
+                        D_80090060.texId = D_800900FC[j] + 2;
                         gfx = func_151ED430(gfx, &D_80090060, 0x53, mid, 2, 1, sc, -1);
                     }
                 }
@@ -1659,7 +1661,7 @@ Gfx *func_151EC648(Gfx *gfx) {
             D_800E0C88[slot] = alpha;
             gDPPipeSync(gfx++);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_800E0A95);
-            D_80090060.img = &D_89C + 2;
+            D_80090060.texId = &D_89C + 2;
             y = 0x8C - (s32)(alpha * 0.1428571492f);
             gfx = func_151ED430(gfx, &D_80090060, x, y, 1, 1, 1.0f, 0);
             if (alpha > 0) {
@@ -1674,7 +1676,7 @@ Gfx *func_151EC648(Gfx *gfx) {
                     alpha = 0xFF;
                 }
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
-                D_80090060.img = &D_87B;
+                D_80090060.texId = &D_87B;
                 gfx = func_151ED430(gfx, &D_80090060, x, 0x82, 1, 1, 1.0f, 0);
             }
             func_1504332C(0xFF, 0xFF, 0xFF, D_800E0A95);
@@ -1698,11 +1700,11 @@ Gfx *func_151EC648(Gfx *gfx) {
 
 extern u8 D_800E0B97;
 extern Gfx D_80090028;
-extern u8 D_8009181C;
-extern u8 D_80091828;
-Gfx *func_151ED430(Gfx *, void *, s32, s32, s32, s32, f32, s32);
+extern HudSprite D_8009181C;
+extern HudSprite D_80091828;
 Gfx *func_15096934(Gfx *);
 
+/* Draws a fading-in image with a tinted overlay (strength D_800E0B97). */
 Gfx *func_151ED09C(Gfx *gfx) {
     s32 alpha;
 
@@ -1720,6 +1722,7 @@ Gfx *func_151ED09C(Gfx *gfx) {
     return func_15096934(gfx);
 }
 
+/* Darkens the whole screen with a black rectangle of alpha D_800E0B96. */
 Gfx *func_151ED1E0(Gfx *gfx) {
     if (D_800E0B96 == 0) {
         return gfx;
@@ -1731,123 +1734,104 @@ Gfx *func_151ED1E0(Gfx *gfx) {
     return func_1501A6CC(gfx, 0, 0, D_800BE620, D_800BE624);
 }
 
-typedef struct {
-    /* 0x00 */ u8 pad0[6];
-    /* 0x06 */ u16 width;
-    /* 0x08 */ u16 height;
-    /* 0x0A */ u8 fmt;
-    /* 0x0B */ u8 siz;
-} GameTex151ED29C;
 
 extern u8 D_8009DEB0[];
 extern u8 D_8009DEB4[];
 extern u8 D_8009DEB8[];
 extern u8 D_8009DEBC[];
 
-Gfx *func_151ED29C(Gfx *gfx, GameTex151ED29C *tex, s32 *sizeOut) {
+/* Sets up the load and render tiles for a sprite (wrap masks from its size); returns the LoadBlock size. */
+Gfx *func_151ED29C(Gfx *gfx, HudSprite *sprite, s32 *blockSizeOut) {
     s32 masks;
     s32 maskt;
     s32 i;
     s32 fmt;
-    s32 size;
+    s32 blockSize;
 
-    size = D_8009DEB0[tex->siz] + tex->width * tex->height;
-    size >>= D_8009DEB4[tex->siz];
-    *sizeOut = size;
+    blockSize = D_8009DEB0[sprite->siz] + sprite->width * sprite->height;
+    blockSize >>= D_8009DEB4[sprite->siz];
+    *blockSizeOut = blockSize;
     masks = 1;
-    for (i = 2; i < tex->width; i <<= 1) {
+    for (i = 2; i < sprite->width; i <<= 1) {
         masks++;
     }
     maskt = 1;
-    for (i = 2; i < tex->height; i <<= 1) {
+    for (i = 2; i < sprite->height; i <<= 1) {
         maskt++;
     }
-    fmt = tex->fmt;
+    fmt = sprite->fmt;
     gDPPipeSync(gfx++);
-    gDPSetTile(gfx++, fmt, D_8009DEBC[tex->siz], 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
-    gDPSetTile(gfx++, fmt, tex->siz, (D_8009DEB8[tex->siz] * tex->width + 7) >> 3, 0, 0, 0, G_TX_CLAMP, maskt, 0, G_TX_CLAMP, masks, 0);
-    gDPSetTileSize(gfx++, 0, 0, 0, (tex->width - 1) << 2, (tex->height - 1) << 2);
+    gDPSetTile(gfx++, fmt, D_8009DEBC[sprite->siz], 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPSetTile(gfx++, fmt, sprite->siz, (D_8009DEB8[sprite->siz] * sprite->width + 7) >> 3, 0, 0, 0, G_TX_CLAMP, maskt, 0, G_TX_CLAMP, masks, 0);
+    gDPSetTileSize(gfx++, 0, 0, 0, (sprite->width - 1) << 2, (sprite->height - 1) << 2);
     return gfx;
 }
 
-typedef struct Game215960Sprite {
-    s32 resource;
-    u8 pad4[2];
-    u16 width;
-    u16 height;
-    u8 format;
-    u8 size;
-} Game215960Sprite;
-
-#define MIN_ED430(a, b) (((a) < (b)) ? (a) : (b))
-#define MAX_ED430(a, b) (((a) > (b)) ? (a) : (b))
-#undef MIN
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
-
-Gfx *func_151ED430(Gfx *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, s32 arg7) {
+/*
+ * Draws a sprite as a columns x rows grid of tiles centred on (x, y), streaming its texture in 4KB
+ * loads. A negative frame keeps the horizontal scale at 1.
+ */
+Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 rows, f32 scale, s32 frame) {
     s32 column;
     s32 row;
     s32 width;
     s32 height;
     s32 top;
     s32 blockSize;
-    s32 resource;
+    s32 texId;
     s32 dsdx;
     s32 dtdy;
-    s32 address;
-    s32 continued;
+    s32 image;
+    s32 midTexture;
     s32 remaining;
-    f32 scale;
+    f32 scaleX;
 
-    continued = 0;
-    arg0 = func_151ED29C(arg0, arg1, &blockSize);
-    if (arg7 < 0) {
-        scale = 1.0f;
-        arg7 = 0;
+    midTexture = 0;
+    gfx = func_151ED29C(gfx, sprite, &blockSize);
+    if (frame < 0) {
+        scaleX = 1.0f;
+        frame = 0;
     } else {
-        scale = arg6;
+        scaleX = scale;
     }
-    resource = ((Game215960Sprite *)arg1)->resource + arg7;
-    width = (u32)((Game215960Sprite *)arg1)->width * scale * D_8008FE1C;
-    height = (u32)((Game215960Sprite *)arg1)->height * arg6 * D_8008FE20;
-    dtdy = 1024.0f / (arg6 * D_8008FE20);
-    dsdx = 1024.0f / (scale * D_8008FE1C);
-    arg2 = arg2 * D_8008FE1C;
-    arg3 = arg3 * D_8008FE20;
-    arg2 -= (width * arg4) >> 1;
-    top = arg3 - ((height * arg5) >> 1);
-    for (column = 0; column < arg4; column++) {
-        arg3 = top;
-        for (row = 0; row < arg5; row++) {
-            if (!continued) {
-                address = func_1510D0EC(resource, (s32)&remaining, 3, 0);
+    texId = (s32)sprite->texId + frame;
+    width = (u32)sprite->width * scaleX * D_8008FE1C;
+    height = (u32)sprite->height * scale * D_8008FE20;
+    dtdy = 1024.0f / (scale * D_8008FE20);
+    dsdx = 1024.0f / (scaleX * D_8008FE1C);
+    x *= D_8008FE1C;
+    y *= D_8008FE20;
+    x -= (width * columns) >> 1;
+    top = y - ((height * rows) >> 1);
+    for (column = 0; column < columns; column++) {
+        y = top;
+        for (row = 0; row < rows; row++) {
+            if (!midTexture) {
+                image = func_1510D0EC(texId, (s32)&remaining, 3, 0);
             }
-            if (address != (s32)0x80000000) {
-                gDPPipeSync(arg0++);
-                gDPSetTextureImage(arg0++, ((Game215960Sprite *)arg1)->format, D_8009DEBC[((Game215960Sprite *)arg1)->size], 1, address);
-                gDPLoadBlock(arg0++, G_TX_LOADTILE, 0, 0, blockSize - 1, 0);
-                { Gfx *command = arg0++; command->words.w0 = (_SHIFTL(0xE4, 24, 8) | _SHIFTL(MAX_ED430((s16)(((arg2 + width) << 2)), 0), 12, 12) | _SHIFTL(MAX_ED430((s16)(((arg3 + height) << 2)), 0), 0, 12)); command->words.w1 = (_SHIFTL((0), 24, 3) | _SHIFTL(MAX_ED430((s16)((arg2 << 2)), 0), 12, 12) | _SHIFTL(MAX_ED430((s16)((arg3 << 2)), 0), 0, 12)); { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xE1, 24, 8); command->words.w1 = (u32)((_SHIFTL(((0) - (((s16)((arg2 << 2)) < 0) ? (((s16)(dsdx) < 0) ? (MAX_ED430((((s16)((arg2 << 2)) * (s16)(dsdx)) >> 7), 0)) : (MIN_ED430((((s16)((arg2 << 2)) * (s16)(dsdx)) >> 7), 0))) : 0)), 16, 16) | _SHIFTL(((0) - ((((arg3 << 2)) < 0) ? (((s16)(dtdy) < 0) ? (MAX_ED430((((s16)((arg3 << 2)) * (s16)(dtdy)) >> 7), 0)) : (MIN_ED430((((s16)((arg3 << 2)) * (s16)(dtdy)) >> 7), 0))) : 0)), 0, 16))); } { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xF1, 24, 8); command->words.w1 = (u32)((_SHIFTL((dsdx), 16, 16) | _SHIFTL((dtdy), 0, 16))); } }
+            if (image != (s32)0x80000000) {
+                gDPPipeSync(gfx++);
+                gDPSetTextureImage(gfx++, sprite->fmt, D_8009DEBC[sprite->siz], 1, image);
+                gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, blockSize - 1, 0);
+                gSPScisTextureRectangle(gfx++, x << 2, y << 2, (x + width) << 2, (y + height) << 2, 0, 0, 0, dsdx, dtdy);
             }
-            arg3 += height;
+            y += height;
             if (remaining > 0x1000) {
-                continued = 1;
-                if (address != 0) {
-                    address += (blockSize << ((Game215960Sprite *)arg1)->size) >> 1;
+                midTexture = 1;
+                if (image != 0) {
+                    image += (blockSize << sprite->siz) >> 1;
                 }
-                remaining -= (blockSize << ((Game215960Sprite *)arg1)->size) >> 1;
+                remaining -= (blockSize << sprite->siz) >> 1;
             } else {
-                continued = 0;
-                resource++;
+                midTexture = 0;
+                texId++;
             }
         }
-        arg2 += width;
+        x += width;
     }
-    gDPPipeSync(arg0++);
-    return arg0;
+    gDPPipeSync(gfx++);
+    return gfx;
 }
-#undef MIN
-#define MIN(a, b) ((b) < (a) ? (b) : (a))
-
 
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_1503F62C(s32, s32, void *, void *, void *, void *, void *);
@@ -2374,9 +2358,9 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 arg1) {
                 sp48 = 0;
                 count = func_1502B7F0(&sp48, 1, 0x1D);
                 if ((u32)arg1 < (u32)(count >> 1)) {
-                    D_8009013C = ((u16 *)sp48)[arg1];
+                    D_8009013C.texId = (void *)((u16 *)sp48)[arg1];
                 } else {
-                    D_8009013C = 0;
+                    D_8009013C.texId = NULL;
                 }
                 func_10004074((void *)sp48);
                 D_800E0C85 = arg1 + 1;
@@ -2384,7 +2368,7 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 arg1) {
         }
     }
 
-    if (D_8009013C != 0) {
+    if (D_8009013C.texId != NULL) {
         gDPPipeSync(gfx++);
         gfx = func_151ED430(gfx, &D_8009013C, 0x94, 0x60, 1, 2, 1.0f, 0);
     }
