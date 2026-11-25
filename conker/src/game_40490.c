@@ -3,10 +3,35 @@
 #define func_1000FA64 func_1000FA64_narrow_proto
 #include "functions.h"
 #undef func_1000FA64
+#define D_800D3098 D_800D3098_header
 #include "variables.h"
+#undef D_800D3098
+
+/* A level object placement: one 0x34-byte entry of the table D_800D3098 points to. The object's
+ * type (unk15 >> 2) selects its spawn handler from D_80082E30. */
+typedef struct LevelObject {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 sizeX;
+    /* 0x08 */ s16 sizeY;
+    /* 0x0A */ s16 sizeZ;
+    /* 0x0C */ f32 rotX;
+    /* 0x10 */ f32 rotY;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15; /* type << 2 | shape */
+    /* 0x16 */ u8 flags;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u32 unk18;
+    /* 0x1C */ u32 unk1C;
+    /* 0x20 */ u32 unk20;
+    /* 0x24 */ u8 pad24[0x10];
+} LevelObject;
+
+extern LevelObject *D_800D3098;
 
 void func_151A9390(s32 arg0, s32 arg1, struct134 *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
-extern void (*D_80082E30[])(struct178 *);
+extern s32 (*D_80082E30[])(LevelObject *);
 extern void (*D_80082F28[])(struct16 *, f32);
 extern f32 D_80096650;
 extern f32 D_80096648;
@@ -132,54 +157,23 @@ void func_15012FE0(void) {
     D_800BE575 = 0;
 }
 
+/** Runs the spawn handler of every level object, chosen by the object's type. */
 void func_15013000(void) {
-    void (**table)(struct178 *);
-    void (*func)(struct178 *);
-    s32 base;
-    struct178 *arg;
     u32 i;
-    s32 offset;
-    u32 count;
-    u8 idx;
 
     D_800DCDC4 = 0;
     D_800DCD90 = 0.0f;
-fence_15013000:
-    count = D_800D3094;
-    i = 0;
-    offset = 0;
-    if (count != 0) {
-        table = D_80082E30;
-        do {
-            base = *(s32 *)&D_800D3098;
-            idx = ((u8 *)base)[offset + 0x15];
-            func = table[(u8)((s32)idx >> 2)];
-            if (func != NULL) {
-                arg = (struct178 *)(offset + base);
-                func(arg);
-            }
-            i++;
-            offset += sizeof(struct178);
-        } while (i < (u32)D_800D3094);
+    // matching: the label ends the block, so IDO cannot hoist the D_800D3094 load above the stores
+start:
+    for (i = 0; i < D_800D3094; i++) {
+        u8 type = D_800D3098[i].unk15 >> 2;
+        s32 (*handler)(LevelObject *) = D_80082E30[type];
+
+        if (handler != NULL) {
+            handler(&D_800D3098[i]);
+        }
     }
 }
-// requires jump table
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 padA;
-    f32 unkC;
-    f32 unk10;
-    u8 pad14[2];
-    u8 unk16;
-    u8 pad17;
-    u32 unk18;
-    s32 unk1C;
-    u32 unk20;
-} Arg_150130B4;
 
 typedef struct {
     u8 unk00;
@@ -195,12 +189,12 @@ typedef struct {
     u8 unk13;
     f32 unk14;
     f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
+    f32 posX;
+    f32 posY;
+    f32 posZ;
+    f32 endX;
+    f32 endY;
+    f32 endZ;
     f32 unk34;
     f32 unk38;
     f32 unk3C;
@@ -234,104 +228,105 @@ typedef struct {
     u8 pad59[3];
 } StructAC_150130B4;
 
-typedef struct { s32 v[3]; } S32x3_150130B4;
-typedef struct { u8 v[6]; } U8x6_150130B4;
 
 typedef struct {
     f32 unk0;
     f32 unk4;
-    void *unk8;
+    struct131 *unk8;
     f32 unkC;
     f32 unk10;
     f32 unk14;
 } Payload18_150130B4;
 
-extern S32x3_150130B4 D_80096580;
 extern s32 D_8009658C[];
 extern s32 D_800965A0[];
 extern s32 D_800965B0[];
-extern U8x6_150130B4 D_80082E98;
 void *func_151407D0(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32);
-extern void *func_151149AC(u8);
+extern struct131 *func_151149AC(u8);
 
-s32 func_150130B4(Arg_150130B4 *arg0) {
-    StructAC_150130B4 spAC;
-    Struct54_150130B4 sp54;
-    s32 type;
-    s32 idx;
-    u8 flag;
+/** Spawns the particle emitter a level object describes; unk1C selects the kind of emitter. */
+s32 func_150130B4(LevelObject *obj) {
+    StructAC_150130B4 emit;
+    Struct54_150130B4 spawn;
+    s32 kind;
+    s32 texture;
+    u8 onGround;
     f32 mtx[4][4];
 
-    arg0->unk16 |= 4;
-    flag = (arg0->unk20 >> 24) & 0xFF;
-    type = arg0->unk1C;
-lbl3:
-    sp54.unk1C = arg0->unk0;
-    sp54.unk20 = arg0->unk2;
-    sp54.unk24 = arg0->unk4;
-    func_150A8050(mtx, arg0->unkC, arg0->unk10, 0.0f);
-    func_150A7960((f32 *)mtx, 0.0f, 0.0f, -500.0f, &sp54.unk28, &sp54.unk2C, &sp54.unk30);
-    sp54.unk28 += sp54.unk1C;
-    sp54.unk2C += sp54.unk20;
-    sp54.unk30 += sp54.unk24;
+    obj->flags |= 4;
+    onGround = (obj->unk20 >> 24) & 0xFF;
+    kind = obj->unk1C;
+    // matching: the labels split basic blocks, which as1 schedules separately
+start:
+    spawn.posX = obj->x;
+    spawn.posY = obj->y;
+    spawn.posZ = obj->z;
+    func_150A8050(mtx, obj->rotX, obj->rotY, 0.0f);
+    func_150A7960(mtx[0], 0.0f, 0.0f, -500.0f, &spawn.endX, &spawn.endY, &spawn.endZ);
+    spawn.endX += spawn.posX;
+    spawn.endY += spawn.posY;
+    spawn.endZ += spawn.posZ;
+    // matching: the typedef-only block scope changes how as1 schedules these stores
     {
-    typedef s32 PadT;
-    spAC.unk04 = arg0->unk6;
-    spAC.unk00 = spAC.unk04;
-    spAC.unk0C = arg0->unk8;
-    spAC.unk08 = spAC.unk0C;
-    spAC.unk18 = ((arg0->unk20 >> 8) & 0xFF) * 0.003921568859f;
+        typedef s32 PadT;
+
+        emit.unk04 = obj->sizeX;
+        emit.unk00 = emit.unk04;
+        emit.unk0C = obj->sizeY;
+        emit.unk08 = emit.unk0C;
+        emit.unk18 = ((obj->unk20 >> 8) & 0xFF) * 0.003921568859f;
     }
-    spAC.unk1C = (arg0->unk20 & 0xFF) * 0.003921568859f;
-    idx = (arg0->unk18 >> 24) & 0xFF;
-    sp54.unk00 = D_8009658C[idx];
-    sp54.unk02 = D_800965A0[idx] + 3;
-    sp54.unk04 = 0x12C;
-    sp54.unk08 = 0;
-    sp54.unk0C = 0;
-    sp54.unk10 = arg0->unk18 & 0xFF;
-    sp54.unk11 = (arg0->unk18 >> 8) & 0xFF;
-    sp54.unk12 = (arg0->unk18 >> 16) & 0xFF;
-    sp54.unk13 = 0xFF;
-    sp54.unk14 = 0.0f;
-    sp54.unk18 = 0.0f;
-    sp54.unk34 = 1.0f;
-    sp54.unk38 = 1.0f;
-    sp54.unk3C = 1.0f;
-    sp54.unk45 = 0xFF;
-    sp54.unk44 = 0xFF;
-    sp54.unk46 = 0;
-    sp54.unk47 = 6;
-    sp54.unk01 = 3;
-    spAC.unk54 = 0;
-    spAC.unk55 = 0;
-    spAC.unk56 = 0;
-    spAC.unk57 = 0;
-    spAC.unk48 = 1.0f;
-    spAC.unk10 = 0.4099999964f;
-    spAC.unk14 = 0.200000003f;
-    spAC.unk20 = 9.999999975e-07f;
-    if (flag) {
-lblx43:
+    emit.unk1C = (obj->unk20 & 0xFF) * 0.003921568859f;
+    texture = (obj->unk18 >> 24) & 0xFF;
+    spawn.unk00 = D_8009658C[texture];
+    spawn.unk02 = D_800965A0[texture] + 3;
+    spawn.unk04 = 300;
+    spawn.unk08 = 0;
+    spawn.unk0C = 0;
+    spawn.unk10 = obj->unk18 & 0xFF;
+    spawn.unk11 = (obj->unk18 >> 8) & 0xFF;
+    spawn.unk12 = (obj->unk18 >> 16) & 0xFF;
+    spawn.unk13 = 0xFF;
+    spawn.unk14 = 0.0f;
+    spawn.unk18 = 0.0f;
+    spawn.unk34 = 1.0f;
+    spawn.unk38 = 1.0f;
+    spawn.unk3C = 1.0f;
+    spawn.unk45 = 0xFF;
+    spawn.unk44 = 0xFF;
+    spawn.unk46 = 0;
+    spawn.unk47 = 6;
+    spawn.unk01 = 3;
+    emit.unk54 = 0;
+    emit.unk55 = 0;
+    emit.unk56 = 0;
+    emit.unk57 = 0;
+    emit.unk48 = 1.0f;
+    emit.unk10 = 0.4099999964f;
+    emit.unk14 = 0.200000003f;
+    emit.unk20 = 9.999999975e-07f;
+    if (onGround) {
+ground:
         func_1510F800(0);
-        sp54.unk48 = func_1510FD20((s32)sp54.unk1C, (s32)sp54.unk24);
+        spawn.unk48 = func_1510FD20((s32)spawn.posX, (s32)spawn.posZ);
     } else {
-        sp54.unk48 = 0;
-        flag = 0;
+        spawn.unk48 = 0;
+        onGround = FALSE; // matching: redundant store, but IDO's allocation needs it
     }
-    spAC.unk58 = 0;
-    sp54.unk40 = 0x2006 | (((arg0->unk20 >> 16) & 0xFF) ? 0x10 : 0) | (flag ? 0x01000000 : 0) | 0x40000 | 0x80000 | 0x10000 | 0x400000;
-    switch (type) {
+    emit.unk58 = 0;
+    spawn.unk40 = 0x2006 | (((obj->unk20 >> 16) & 0xFF) ? 0x10 : 0) | (onGround ? 0x01000000 : 0) | 0x40000 | 0x80000 | 0x10000 | 0x400000;
+    switch (kind) {
     case 8: {
-        f32 sp80[4];
-        void *temp_v0;
-        sp80[0] = 0.9750000238f;
-        sp80[1] = 0.3249999881f;
-        sp80[2] = 0.0f;
-        sp80[3] = 0.05959999934f;
-        temp_v0 = func_151407D0(&spAC, 0x70, &sp54, 0, 0x29, 0, 0, -1, 0xFF, 1);
-        if (temp_v0 != NULL) {
-            memcpy((u8 *)temp_v0 + 0x170, sp80, 0x10);
+        f32 extra[4];
+        void *particle;
+
+        extra[0] = 0.9750000238f;
+        extra[1] = 0.3249999881f;
+        extra[2] = 0.0f;
+        extra[3] = 0.05959999934f;
+        particle = func_151407D0(&emit, 0x70, &spawn, 0, 0x29, 0, 0, -1, 0xFF, 1);
+        if (particle != NULL) {
+            memcpy((u8 *)particle + 0x170, extra, sizeof(extra));
         }
         break;
     }
@@ -339,27 +334,29 @@ lblx43:
     case 2:
     case 3:
     case 4: {
-        void *temp;
-        spAC.unk58 = D_800965B0[type];
-        temp = func_151407D0(&spAC, 0x60, &sp54, 0, 0, 0, 0, -1, 0xFF, 1);
+        void *unused; // matching: the dead store of the result steers as1's scheduling
+
+        emit.unk58 = D_800965B0[kind];
+        unused = func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     }
     case 9:
     case 10:
     case 11:
     case 12: {
-        void *temp;
-        spAC.unk58 = D_800965A0[type];
-        temp = func_151407D0(&spAC, 0x60, &sp54, 0, 0, 0, 0, -1, 0xFF, 1);
+        void *unused; // matching: as above
+
+        emit.unk58 = D_800965A0[kind];
+        unused = func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     }
     case 5:
     case 6:
     case 7: {
-        S32x3_150130B4 sp68;
-        sp68 = D_80096580;
-        spAC.unk58 = sp68.v[type - 5];
-        func_151407D0(&spAC, 0x60, &sp54, 0, 0, 0, 0, -1, 0xFF, 1);
+        s32 ids[3] = { 12, 13, 14 };
+
+        emit.unk58 = ids[kind - 5];
+        func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     }
     case 13:
@@ -368,33 +365,33 @@ lblx43:
     case 16:
     case 17:
     case 18: {
-        void *temp_v0;
-        Payload18_150130B4 sp4C;
-        U8x6_150130B4 sp44;
-        sp44 = D_80082E98;
-        sp4C.unk8 = func_151149AC(sp44.v[type - 13]);
-        if (sp4C.unk8 == NULL) {
+        void *particle;
+        Payload18_150130B4 extra;
+        u8 ids[6] = { 2, 3, 4, 5, 6, 7 };
+
+        extra.unk8 = func_151149AC(ids[kind - 13]);
+        if (extra.unk8 == NULL) {
             return 1;
         }
-        sp4C.unk0 = -80.0f;
-        sp4C.unk4 = fabsf(-0.01250000019f);
-        sp4C.unkC = ((s16 *)sp4C.unk8)[8];
-        sp4C.unk10 = ((s16 *)sp4C.unk8)[9];
-        sp4C.unk14 = ((s16 *)sp4C.unk8)[10];
-        spAC.unk58 = 0;
-        temp_v0 = func_151407D0(&spAC, 0x78, &sp54, 0x25, 0, 0, 0, -1, 0xFF, 1);
-        if (temp_v0 != NULL) {
-            memcpy((u8 *)temp_v0 + 0x170, &sp4C, 0x18);
+        extra.unk0 = -80.0f;
+        extra.unk4 = fabsf(-0.01250000019f);
+        extra.unkC = extra.unk8->unk10;
+        extra.unk10 = extra.unk8->unk12;
+        extra.unk14 = extra.unk8->unk14;
+        emit.unk58 = 0;
+        particle = func_151407D0(&emit, 0x78, &spawn, 0x25, 0, 0, 0, -1, 0xFF, 1);
+        if (particle != NULL) {
+            memcpy((u8 *)particle + 0x170, &extra, sizeof(extra));
         }
         break;
     }
     case 19:
-        spAC.unk58 = 0x11;
-        sp54.unk40 &= ~2;
-        func_151407D0(&spAC, 0x60, &sp54, 0, 0, 0, 0, -1, 0xFF, 1);
+        emit.unk58 = 0x11;
+        spawn.unk40 &= ~2;
+        func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     default:
-        func_151407D0(&spAC, 0x60, &sp54, 0, 0, 0, 0, -1, 0xFF, 1);
+        func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         break;
     }
     return 1;
