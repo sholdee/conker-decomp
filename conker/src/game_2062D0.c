@@ -16,7 +16,7 @@ s32 func_1514672C(struct17 *arg0);
 s32 func_15046C80(f32 *arg0, s32 arg1, f32 arg2, void *arg3);
 void func_151D9FC0(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 void func_151DAB58(u8 kind, f32 size, u8 arg2, struct17 *pos, volatile u8 arg4, u8 arg5, s32 arg6);
-s32 func_15131918(s32 arg0, s32 arg1);
+s32 func_15131918(struct17 *vel, f32 scale);
 struct three;
 struct struct218XXX;
 extern void func_15153F18(struct struct218XXX *arg0, struct three *arg1, s32 arg2, u8 arg3, s32 arg4);
@@ -197,8 +197,8 @@ typedef struct {
     u8 unk1B;
     u8 unk1C;
     u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
+    s16 fadeFrames;
+    s16 fadeStep; /* 255 / fadeFrames */
     s16 unk22;
     f32 unk24;
     f32 scaleX;
@@ -239,6 +239,22 @@ typedef struct {
     u8 pad1A[2];
 } ParticleWobble; /* 0x1C */
 
+#define SPIN_FLAG_SPIN 1 /* oscillate desc.unk3C */
+#define SPIN_FLAG_DRAG 2 /* scale the velocity by `drag` every frame */
+
+/* Per-particle data of a func_151DB5D0 particle (Particle.data). */
+typedef struct {
+    u8 flags;
+    f32 drag;
+    u8 angleX;
+    u8 angleY;
+    u8 angleZ;
+    u8 stepX; /* signed steps, but the u8 angle sums wrap the same */
+    u8 stepY;
+    u8 stepZ;
+    struct17 amplitude;
+} ParticleSpin; /* 0x1C */
+
 /* A live sprite particle as returned by func_15130280. */
 typedef struct {
     u8 unk0;
@@ -252,7 +268,10 @@ typedef struct {
     u8 pad90[0xD];
     u8 unk9D;
     u8 pad9E[0xA];
-    ParticleWobble wobble;
+    union {
+        ParticleWobble wobble;
+        ParticleSpin spin;
+    } data;
 } Particle;
 
 extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
@@ -292,12 +311,12 @@ Particle *func_151D9014(struct17 *pos, struct17 *vel, u8 kind, f32 arg3, s16 lif
                  (D_800AB330[kind] ? 0x800000 : 0);
     if (lifetime == -99) {
         desc.unkA = 300;
-        desc.unk1E = 1;
-        desc.unk20 = 0xFF;
+        desc.fadeFrames = 1;
+        desc.fadeStep = 0xFF;
     } else {
         desc.unkA = lifetime + 18;
-        desc.unk1E = 18;
-        desc.unk20 = 14;
+        desc.fadeFrames = 18;
+        desc.fadeStep = 14;
     }
     desc.unk60 = 6;
     desc.unk61 = 8;
@@ -326,7 +345,7 @@ Particle *func_151D9014(struct17 *pos, struct17 *vel, u8 kind, f32 arg3, s16 lif
     wobble.flags = ((u8)argC ? 0 : WOBBLE_FLAG_FIXED_SIZE) | ((u8)argD ? WOBBLE_FLAG_BOUNCE : 0);
     particle = func_15130280(&desc, 1, argB, sizeof(wobble), argE, argF);
     if (particle != NULL) {
-        memcpy(&particle->wobble, &wobble, sizeof(wobble));
+        memcpy(&particle->data.wobble, &wobble, sizeof(wobble));
     }
     return particle;
 }
@@ -351,7 +370,7 @@ s32 func_151D93F4(Particle *particle, struct17 *arg1) {
 s32 func_151D9450(Particle *particle, struct17 *arg1) {
     ParticleWobble *wobble;
 
-    wobble = &particle->wobble;
+    wobble = &particle->data.wobble;
     if (wobble->flags & WOBBLE_FLAG_FIXED_SIZE) {
         return 1;
     }
@@ -382,7 +401,7 @@ u8 func_151D9534(Particle *particle, struct17 *arg1) {
         }
         if (func_15046C80((f32 *)&point, 0, particle->desc.pos.unk4, &particle->floorY) != 0) {
             point.unk4 = particle->floorY + 2.0f;
-            if (particle->wobble.flags & WOBBLE_FLAG_BOUNCE) {
+            if (particle->data.wobble.flags & WOBBLE_FLAG_BOUNCE) {
                 particle->desc.pos.unk4 = (particle->desc.scaleY * 0.060000002f) + point.unk4;
                 particle->desc.vel.unk0 *= 0.39900002f;
                 particle->desc.vel.unk4 *= -0.39900002f;
@@ -396,7 +415,7 @@ u8 func_151D9534(Particle *particle, struct17 *arg1) {
                 }
             } else {
                 alive = 0;
-                wobble = &particle->wobble;
+                wobble = &particle->data.wobble;
                 avgScale = (particle->desc.scaleX + particle->desc.scaleY) * 0.5f;
                 if (particle->unk9D == 3) {
                     func_151D9FC0(wobble->kind, wobble->altBurstScale * avgScale, particle->desc.unk1B,
@@ -696,7 +715,8 @@ s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5
     return effect;
 }
 
-void *func_151DB5D0(s32, f32 *, f32 *, f32, f32, f32, f32, s16, u8, s16, s16, u8, u8, s32);
+Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 arg6, s16 lifetime, u8 arg8,
+                        s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD);
 
 /* Steam effect update: wobbles the scale and emits func_151DB5D0 particles around the base. */
 s32 func_151DA368(SteamEffect *effect) {
@@ -946,79 +966,7 @@ s32 func_151DAA88(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
     state->unk20 = 4;
     return 1;
 }
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    struct17 unk1C;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    u8 unk4C;
-    u8 pad4D[3];
-    s32 unk50;
-    s16 unk54;
-    s16 unk56;
-} Struct151DAB58Local;
 
-typedef struct {
-    u8 field_0x00;
-    u8 field_0x01;
-    u8 pad_0x02[0x2];
-    f32 field_0x04;
-    f32 field_0x08;
-} Struct151DAB58Extra;
-
-typedef struct {
-    u8 field_0x00;
-    u8 pad_0x01[0x3];
-    s32 field_0x04;
-    u8 field_0x08;
-    u8 field_0x09;
-    u8 field_0x0A;
-    u8 field_0x0B;
-    u8 field_0x0C;
-    u8 field_0x0D;
-    u8 pad_0x0E[0x2];
-    f32 field_0x10;
-    f32 field_0x14;
-    f32 field_0x18;
-} AxisOscillator;
-
-typedef struct {
-    u8 pad_0x00[0x4C];
-    f32 field_0x4C;
-    f32 field_0x50;
-    f32 field_0x54;
-    u8 field_0x58;
-    u8 pad_0x59[0x4F];
-    AxisOscillator field_0xA8;
-    u8 pad_0xC4[0x4C];
-    Struct151DAB58Extra field_0x110;
-} AxisOscillatorOwner;
-
-typedef struct {
-    u32 field_0x00;
-} FrameDeltaWord;
 
 /* Data of a func_151DAB58 effect: squashes and stretches it on one phase. */
 typedef struct {
@@ -1287,154 +1235,102 @@ void func_151DB4CC(struct218 *arg0) {
     arg0->unk1A = (func_150ADA20() % 56U) + 200;
 }
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f151DB5D0;
+extern void (*D_8008FD38[])(ParticleDesc *);
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    Vec3f151DB5D0 unk30;
-    Vec3f151DB5D0 unk3C;
-    Vec3f151DB5D0 unk48;
-    f32 unk54;
-    s32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    s16 unk68;
-    f32 unk6C;
-} Spawn151DB5D0;
+/*
+ * Spawns a sprite particle of effect kind `kind` at `pos` (lifetime -1: never times out). With `spin` set
+ * its desc.unk3C oscillates (func_151DB97C); a `drag` other than 1.0f scales its velocity each frame.
+ */
+Particle *func_151DB5D0(s32 kind, f32 *pos, f32 *vel, f32 size, f32 arg4, f32 drag, f32 arg6, s16 lifetime, u8 arg8,
+                        s16 fadeFrames, s16 fadeStep, u8 spin, u8 argC, s32 argD) {
+    ParticleDesc desc;
+    Particle *particle;
+    ParticleSpin data;
 
-typedef struct {
-    u8 unk0;
-    f32 unk4;
-    u8 unk8;
-    u8 unk9;
-    u8 unkA;
-    s8 unkB;
-    s8 unkC;
-    s8 unkD;
-    Vec3f151DB5D0 unk10;
-} Extra151DB5D0;
-
-extern void (*D_8008FD38[])(Spawn151DB5D0 *);
-
-void *func_151DB5D0(s32 arg0, f32 *arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8,
-                    s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD) {
-    Spawn151DB5D0 spawn;
-    void *ret;
-    Extra151DB5D0 extra;
-
-    extra.unk0 = (argB ? 1 : 0) | ((arg5 == 1.0f) ? 0 : 2);
-    extra.unk4 = arg5;
-    extra.unk8 = 0;
-    extra.unk9 = 0;
-    extra.unkA = 0;
-    if (argB) {
-        extra.unkB = (func_150ADA20() % 7U) - 3;
-        extra.unkC = (func_150ADA20() % 7U) - 3;
-        extra.unkD = (func_150ADA20() % 7U) - 3;
-        extra.unk10.x = (func_150ADA68() * 0.05000000075f + 0.05000000075f) * arg3;
-        extra.unk10.y = (func_150ADA68() * 0.02999999933f + 0.02999999933f) * arg3;
-        extra.unk10.z = (func_150ADA68() * 0.05000000075f + 0.05000000075f) * arg3;
+    data.flags = (spin ? SPIN_FLAG_SPIN : 0) | ((drag == 1.0f) ? 0 : SPIN_FLAG_DRAG);
+    data.drag = drag;
+    data.angleX = 0;
+    data.angleY = 0;
+    data.angleZ = 0;
+    if (spin) {
+        data.stepX = (func_150ADA20() % 7U) - 3;
+        data.stepY = (func_150ADA20() % 7U) - 3;
+        data.stepZ = (func_150ADA20() % 7U) - 3;
+        data.amplitude.unk0 = (func_150ADA68() * 0.05f + 0.05f) * size;
+        data.amplitude.unk4 = (func_150ADA68() * 0.03f + 0.03f) * size;
+        data.amplitude.unk8 = (func_150ADA68() * 0.05f + 0.05f) * size;
     } else {
-        extra.unkB = 0;
-        extra.unkC = 0;
-        extra.unkD = 0;
-        extra.unk10 = *(Vec3f151DB5D0 *)&D_800A5480;
+        data.stepX = 0;
+        data.stepY = 0;
+        data.stepZ = 0;
+        data.amplitude = *(struct17 *)&D_800A5480;
     }
-    D_8008FD38[(u8)arg0](&spawn);
-    spawn.unk1D = 0x6C;
-    spawn.unk8 = 0x5103;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0x9F0600;
-    spawn.unkA = (arg7 == -1) ? 300 : arg7;
-    spawn.unkC = 0;
-    spawn.unk10 = 0;
-    spawn.unk17 = 0xFF;
-    spawn.unk28 = spawn.unk2C = arg3;
-    spawn.unk1B = arg8;
-    spawn.unk1C = 0xFF;
-    spawn.unk30 = *(Vec3f151DB5D0 *)arg1;
-    spawn.unk3C = *(Vec3f151DB5D0 *)&D_800A5480;
-    spawn.unk48 = *(Vec3f151DB5D0 *)arg2;
-    spawn.unk54 = arg6;
-    spawn.unk1E = arg9;
-    spawn.unk20 = argA;
-    spawn.unk22 = (arg7 == -1) ? 1 : arg7;
-    spawn.unk24 = arg4;
-    spawn.unk58 = ((arg7 == -1) ? 0 : 1) | 2 | 4 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x200 | 0x400 | 0x800 | (argB ? 0x1000 : 0) | 0x4000 | 0x8000 | 0x40000 | 0x800000;
-    spawn.unk60 = 8;
-    spawn.unk61 = 6;
-    spawn.unk62 = 5;
-    spawn.unk63 = -1;
-    spawn.unk64 = -1;
-    spawn.unk65 = 0;
-    spawn.unk5C = 0;
-    spawn.unk66 = 0xFF;
-    spawn.unk68 = 1000;
-    spawn.unk6C = 1000.0f;
-    ret = func_15130280(&spawn, 1, 0, 0x1C, argC, argD);
-    if (ret != NULL) {
-        memcpy((u8 *)ret + 0xA8, &extra, 0x1C);
+    D_8008FD38[(u8)kind](&desc);
+    desc.unk1D = 0x6C;
+    desc.unk8 = 0x5103;
+    desc.unk0 = 0x200005;
+    desc.unk4 = 0x9F0600;
+    desc.unkA = (lifetime == -1) ? 300 : lifetime;
+    desc.unkC = 0;
+    desc.unk10 = 0;
+    desc.unk17 = 0xFF;
+    desc.scaleX = desc.scaleY = size;
+    desc.unk1B = arg8;
+    desc.unk1C = 0xFF;
+    desc.pos = *(struct17 *)pos;
+    desc.unk3C = *(struct17 *)&D_800A5480;
+    desc.vel = *(struct17 *)vel;
+    desc.unk54 = arg6;
+    desc.fadeFrames = fadeFrames;
+    desc.fadeStep = fadeStep;
+    desc.unk22 = (lifetime == -1) ? 1 : lifetime;
+    desc.unk24 = arg4;
+    desc.flags = ((lifetime == -1) ? 0 : 1) | 2 | 4 | ((func_150ADA20() & 1) ? 0x40 : 0) |
+                 ((func_150ADA20() & 1) ? 0x80 : 0) | 0x200 | 0x400 | 0x800 | (spin ? 0x1000 : 0) | 0x4000 |
+                 0x8000 | 0x40000 | 0x800000;
+    desc.unk60 = 8;
+    desc.unk61 = 6;
+    desc.unk62 = 5;
+    desc.unk63 = -1;
+    desc.unk64 = -1;
+    desc.unk65 = 0;
+    desc.unk5C = 0;
+    desc.unk66 = 0xFF;
+    desc.unk68 = 1000;
+    desc.unk6C = 1000.0f;
+    particle = func_15130280(&desc, 1, 0, sizeof(data), argC, argD);
+    if (particle != NULL) {
+        memcpy(&particle->data.spin, &data, sizeof(data));
     }
-    return ret;
+    return particle;
 }
 
-s32 func_151DB97C(AxisOscillatorOwner *arg0, s32 arg1) {
-    AxisOscillator *p;
-    volatile FrameDeltaWord *delta;
-    f32 sp24;
-    f32 sp20;
+/* func_151DB5D0 particle update: applies drag and oscillates desc.unk3C on three axes. */
+s32 func_151DB97C(Particle *particle, s32 arg1) {
+    ParticleSpin *spin;
+    s32 pad; // matching: unused stack slot
+    f32 waveY;
+    f32 waveX;
 
-    if (!(arg0->field_0xA8.field_0x00 & 2)) {
-        p = &arg0->field_0xA8;
-    } else {
-        func_15131918((s32)&arg0->field_0x58, arg0->field_0xA8.field_0x04);
-        p = &arg0->field_0xA8;
+
+    spin = &particle->data.spin;
+    if (spin->flags & SPIN_FLAG_DRAG) {
+        func_15131918(&particle->desc.vel, spin->drag);
     }
+    if (spin->flags & SPIN_FLAG_SPIN) {
+        spin->angleX = spin->angleX + (spin->stepX * D_800BE9E4);
+        spin->angleY = spin->angleY + (spin->stepY * D_800BE9E4);
+        spin->angleZ = spin->angleZ + (spin->stepZ * D_800BE9E4);
 
-    delta = (volatile FrameDeltaWord *)&D_800BE9E4;
-    if (p->field_0x00 & 1) {
-        p->field_0x08 = p->field_0x08 + (p->field_0x0B * delta->field_0x00);
-        p->field_0x09 = p->field_0x09 + (p->field_0x0C * delta->field_0x00);
-        p->field_0x0A = p->field_0x0A + (p->field_0x0D * delta->field_0x00);
-
-        sp20 = func_151423D8((u8)(p->field_0x08 - 0x40));
-        sp24 = func_151423D8((u8)(p->field_0x09 - 0x40));
+        waveX = func_151423D8((u8)(spin->angleX - 0x40));
+        waveY = func_151423D8((u8)(spin->angleY - 0x40));
         {
-            f32 sp28;
+            f32 waveZ;
 
-            sp28 = func_151423D8((u8)(p->field_0x0A - 0x40));
-            arg0->field_0x4C = p->field_0x10 * sp20;
-            arg0->field_0x50 = p->field_0x14 * sp24;
-            arg0->field_0x54 = p->field_0x18 * sp28;
+            waveZ = func_151423D8((u8)(spin->angleZ - 0x40));
+            particle->desc.unk3C.unk0 = spin->amplitude.unk0 * waveX;
+            particle->desc.unk3C.unk4 = spin->amplitude.unk4 * waveY;
+            particle->desc.unk3C.unk8 = spin->amplitude.unk8 * waveZ;
         }
     }
     return 1;
