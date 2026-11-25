@@ -2,233 +2,107 @@
 #include "functions.h"
 #include "variables.h"
 
-struct Vec3F15109C20 {
-    f32 x;
-    f32 y;
-    f32 z;
-};
+/*
+ * Object-attached particle emitters: effects 0x1A, 0x1B and 0x1C (struct260s with their own data
+ * at 0x28), the per-frame updates that emit their particles, and their spawn callbacks.
+ */
 
-struct Arg15109C20 {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x6];
-    u8 unk13;
-    u8 pad14[0x14];
-    void *unk28;
-};
+/* Data of effect 0x1A (func_15109410 / func_151094FC). */
+typedef struct {
+    /* 0x00 */ struct127 *object;
+    /* 0x04 */ u8 objectId; /* object->unique_id when attached; a mismatch means the slot was reused */
+    /* 0x08 */ f32 spawnAccum;
+    /* 0x0C */ f32 spawnRate;
+    /* 0x10 */ s8 tickFunc; /* index into D_80088C60, -1: none */
+    /* 0x11 */ s8 emitFunc; /* index into D_80088C64, -1: none */
+} ObjectEmitterData; /* size 0x14 */
 
-struct Arg15109C20Sub {
-    u8 pad0[0x3B];
-    u8 unk3B;
-};
+/* Data of effect 0x1B (func_15109ED4 / func_15109FB8). */
+typedef struct {
+    /* 0x00 */ void *unk0; /* passed to func_1511490C to build the emitter's matrix */
+    /* 0x04 */ f32 spawnAccum;
+    /* 0x08 */ f32 spawnRate;
+    /* 0x0C */ s8 tickFunc; /* index into D_80088C60, -1: none */
+    /* 0x0D */ s8 emitFunc; /* index into D_80088C64, -1: none */
+} MatrixEmitterData; /* size 0x10 */
+
+/* Data of effect 0x1C (func_1510A344 / func_1510A40C). */
+typedef struct {
+    /* 0x00 */ struct127 *object;
+    /* 0x04 */ u8 objectId;
+    /* 0x08 */ f32 spawnAccum;
+    /* 0x0C */ f32 spawnRate;
+    /* 0x10 */ f32 spawnRateRandom; /* added to spawnRate scaled by a random [0, 1) */
+} PairEmitterData; /* size 0x14 */
+
+/* Head shared by the data of the effects that follow an object. */
+typedef struct {
+    /* 0x00 */ struct127 *object;
+    /* 0x04 */ u8 objectId;
+} TrackedObject;
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 unk9;
-} GameStruct1510A8CCa;
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 kind;
+    /* 0x02 */ u8 pad2[0xC - 0x2];
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 state; /* -1 ends the effect */
+    /* 0x10 */ u8 pad10[0x13 - 0x10];
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ u8 pad14[0x28 - 0x14];
+    /* 0x28 */ union {
+        TrackedObject tracked;
+        ObjectEmitterData object;
+        MatrixEmitterData matrix;
+        PairEmitterData pair;
+    } data;
+} Effect1368C0;
 
+/* Particle spawn template passed to func_15130374 (same layout as ParticleSpawn in game_12C1E0.c). */
 typedef struct {
-    s32 unk0;
-    u8 unk4;
-} GameStruct1510A8CCb;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 lifetime;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 color0[4];
+    /* 0x18 */ u8 color1[4];
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 fadeDuration;
+    /* 0x20 */ s16 fadeStep;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ vertex position;
+    /* 0x3C */ vertex unk3C;
+    /* 0x48 */ vertex velocity;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ s32 flags; /* 0x40, 0x80: random flips */
+    /* 0x5C */ u8 pad5C[4];
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ s8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ s8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 pad66[0x70 - 0x66];
+} ParticleSpawn; /* size 0x70 */
 
-extern f32 D_800A2650;
-extern f32 D_800A2654;
-extern f32 D_800A2658;
-extern f32 D_800A265C;
-extern f32 D_800A2660;
-extern f32 D_800A2664;
-extern f32 D_800A2668;
-extern f32 D_800A266C;
-extern f32 D_800A2670;
-extern f32 D_800A2674;
-extern f32 D_800A2678;
-extern f32 D_800A267C;
-extern f32 D_800A2680;
-extern void func_15132A4C(void *, s32, s32, s32, u8, s32);
-
-
-struct260 *func_15109410(void *arg0, s16 arg1, s8 arg2, s8 arg3, f32 arg4, s32 arg5, u8 arg6, s32 arg7) {
-    struct260 *temp_v0;
-    struct {
-        void *unk0;
-        u8 unk4;
-        u8 pad5;
-        u8 pad6;
-        u8 pad7;
-        f32 unk8;
-        f32 unkC;
-        u8 unk10;
-        u8 unk11;
-    } sp38;
-    s16 sp44;
-    u8 sp40;
-
-    if (arg0 == NULL) {
-        return NULL;
-    }
-
-    sp40 = 0;
-    if (arg1 < 0) {
-        sp44 = 0x12C;
-    } else {
-        sp40 = 1;
-        sp44 = (s16)arg1;
-    }
-
-    sp38.unk8 = 0.0f;
-    sp38.unkC = arg4;
-    sp38.unk10 = arg2;
-    sp38.unk11 = arg3;
-    sp38.unk0 = arg0;
-    sp38.unk4 = *(u8 *)((s32)arg0 + 0x3B);
-
-    temp_v0 = func_15149130(sp44, -1, 0x1A, -1, sp40, 0x1A, (struct37 *)((s32)arg5 + 0x14), arg6, arg7);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp38, 0x14);
-    }
-    return temp_v0;
-}
-
+/* Live particle returned by func_15130374; its extra data (dataSize bytes) starts at 0xA8. */
 typedef struct {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x1D4 - 0x3C];
-    s32 unk1D4;
-} Obj1368C0;
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ f32 unkA8;
+} Particle1368C0;
 
+/* Spawn descriptor for func_15152B38 (same layout as EmitterSpawn in game_124920.c). */
 typedef struct {
-    Obj1368C0 *unk0;
-    u8 unk4;
-    f32 unk8;
-    f32 unkC;
-    s8 unk10;
-    s8 unk11;
-} State151094FC;
-
-typedef struct {
-    u8 pad0[0xE];
-    s16 unkE;
-    u8 pad10[0x18];
-    State151094FC unk28;
-} Actor151094FC;
-
-extern const struct Vec3F15109C20 D_800A24B0[7];
-extern const f32 D_800A2504[7];
-extern const struct Vec3F15109C20 D_800A2520[6];
-extern void (*D_80088C60[])(void *);
-extern void (*D_80088C64[])(void *, struct Vec3F15109C20 *, struct Vec3F15109C20 *, struct Vec3F15109C20 *, struct Vec3F15109C20 *, struct Vec3F15109C20 *);
-extern void func_15143134(const void *, void *, s32);
-extern s32 func_15145128(void *, void *, f32 *, f32 *);
-
-void func_151094FC(Actor151094FC *arg0) {
-    State151094FC *state;
-    Obj1368C0 *obj;
-    struct Vec3F15109C20 a;
-    struct Vec3F15109C20 b;
-    struct Vec3F15109C20 c;
-    struct Vec3F15109C20 d;
-    struct Vec3F15109C20 e;
-    struct Vec3F15109C20 pos;
-    const struct Vec3F15109C20 *p;
-    s32 m;
-    s32 i;
-    f32 r;
-    f32 t;
-
-    state = &arg0->unk28;
-    obj = state->unk0;
-    if (obj->unk0 == 0 || obj->unk3B != state->unk4) {
-        arg0->unkE = -1;
-        return;
-    }
-    state->unk8 += state->unkC * D_800A2504[6] * D_800BE9A4;
-    if (state->unk11 != -1 && obj->unk1D4 != 0) {
-        while (state->unk8 > 1.0f) {
-            r = func_150ADA68() * D_800A2504[6];
-            for (i = 0; D_800A2504[i] < r; i++) {
-                r -= D_800A2504[i];
-            }
-            t = func_150ADA68();
-            p = &D_800A24B0[i];
-            pos.x = p[0].x + (p[1].x - p[0].x) * t;
-            pos.y = p[0].y + (p[1].y - p[0].y) * t;
-            pos.z = p[0].z + (p[1].z - p[0].z) * t;
-            m = obj->unk1D4 + 0x240;
-            func_15143134(&pos, &a, m);
-            func_15143134(&p[0], &b, m);
-            func_15143134(&p[1], &c, m);
-            func_15143134(&D_800A2520[i], &d, m);
-            t = func_150ADA68();
-            e.x = (d.x - c.x) * t + c.x - b.x;
-            e.y = (d.y - c.y) * t + c.y - b.y;
-            e.z = (d.z - c.z) * t + c.z - b.z;
-            func_15145128(&e, &e, NULL, NULL);
-            D_80088C64[state->unk11](arg0, &a, &b, &c, &d, &e);
-            state->unk8 -= 1.0f;
-        }
-    } else {
-        while (state->unk8 > 1.0f) {
-            state->unk8 -= 1.0f;
-        }
-    }
-    if (state->unk10 != -1) {
-        D_80088C60[state->unk10](arg0);
-    }
-}
-
-
-typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct Vec3F15109C20 unk30;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 pad66[0xA];
-} Effect15109848;
-
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ struct Vec3F15109C20 unk08;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ vertex pos;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;
@@ -267,299 +141,403 @@ typedef struct {
     /* 0x56 */ u8 unk56;
     /* 0x57 */ u8 unk57;
     /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
     /* 0x5C */ s32 unk5C;
     /* 0x60 */ s32 unk60;
     /* 0x64 */ s16 unk64;
     /* 0x66 */ s16 unk66;
     /* 0x68 */ s16 unk68;
     /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
     /* 0x6C */ f32 unk6C;
     /* 0x70 */ s8 unk70;
     /* 0x71 */ s8 unk71;
     /* 0x72 */ s8 unk72;
     /* 0x73 */ s8 unk73;
-} Spawn15109848;
+} EmitterSpawn; /* size 0x74 */
 
-extern struct260 *func_15130374(void *, u8, s32, u8, s32);
-extern void func_15152B38(void *, u8, s32);
+/* Debris spawn template passed to func_15132A4C (same layout as Particle150E9890 in game_116D40.c). */
+typedef struct {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 scaleXZ;
+    /* 0x0C */ f32 scaleY;
+    /* 0x10 */ f32 rot[3];
+    /* 0x1C */ f32 unk1C[3];
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 unk48;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8 unk58;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 unk67;
+    /* 0x68 */ u8 unk68;
+    /* 0x69 */ u8 unk69;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6C */ struct127 *object;
+    /* 0x70 */ u8 objectId;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+} DebrisSpawn; /* size 0x78 */
 
-void func_15109848(struct Arg15109C20 *arg0, struct Vec3F15109C20 *arg1, s32 arg2, s32 arg3, s32 arg4, struct Vec3F15109C20 *arg5) {
-    Effect15109848 fx;
-    f32 scale;
-    Spawn15109848 sp28;
+/* Payload of message 0x2D: two objects trade places. */
+typedef struct {
+    /* 0x00 */ struct127 *from;
+    /* 0x04 */ struct127 *to;
+    /* 0x08 */ u8 fromId;
+    /* 0x09 */ u8 toId;
+} ObjectSwapMessage;
 
-    scale = ((func_150ADA68() * 851.0f) + 525.0f) * 0.001000000047f;
-    fx.unk1D = 0x2B;
-    fx.unk08 = 0x4401;
-    fx.unk00 = 0x200005;
-    fx.unk04 = 0x20000;
-    fx.unk0A = (func_150ADA20() & 0xF) + 0xA;
-    fx.unk0C = 0;
-    fx.unk10 = 0;
-    fx.unk14 = 0xFF;
-    fx.unk15 = 0xFF;
-    fx.unk16 = 0xFF;
-    fx.unk17 = 0xFF;
-    fx.unk18 = 0xFF;
-    fx.unk19 = 0xFF;
-    fx.unk1A = 0xFF;
-    fx.unk1B = 0xFF;
-    fx.unk1C = 0xFF;
-    fx.unk28 = fx.unk2C = (func_150ADA68() * 25.0f) + 35.0f;
-    fx.unk30 = *arg1;
-    fx.unk3C = 0.0f;
-    fx.unk40 = 0.0f;
-    fx.unk44 = 0.0f;
-    fx.unk48 = arg5->x * scale;
-    fx.unk4C = arg5->y * scale;
-    fx.unk50 = arg5->z * scale;
-    fx.unk1E = 5;
-    fx.unk20 = 0x33;
-    fx.unk22 = 1;
-    fx.unk54 = 0.0f;
-    fx.unk24 = 1.0f;
-    fx.unk58 = (func_150ADA20() & 1 ? 0x40 : 0) | ((func_150ADA20() & 1 ? 0x80 : 0) | 5) | 0x200 | 0x4000 | 0x8000;
-    fx.unk60 = 6;
-    fx.unk61 = 6;
-    fx.unk62 = -1;
-    fx.unk63 = -1;
-    fx.unk64 = -1;
-    fx.unk65 = 4;
-    func_15130374(&fx, 1, 0, arg0->unkC, arg0->unk1);
+/* Emission segments of effect 0x1A: particles start on segment i (D_800A24B0[i] to
+ * D_800A24B0[i + 1]), picked with weight D_800A2504[i]; D_800A2504[6] is the weight total. */
+extern const vertex D_800A24B0[7];
+extern const f32 D_800A2504[7];
+extern const vertex D_800A2520[6];
+/* The same for effect 0x1B. */
+extern const vertex D_800A2568[7];
+extern const vertex D_800A25BC[6];
+/* Effect 0x1C's two emission points and the points their particles head for. */
+extern vertex D_800A2604;
+extern vertex D_800A2610;
+extern vertex D_800A261C;
+extern vertex D_800A2628;
 
-    sp28.unk00 = 1;
-    sp28.unk04 = 4;
-    sp28.unk08 = *arg1;
-    sp28.unk14 = 1.049999952f;
-    sp28.unk18 = 1.889999986f;
-    sp28.unk1C = -0.8150000572f;
-    sp28.unk20 = 0.5770000219f;
-    sp28.unk24 = 2.0f;
-    sp28.unk28 = 6.0f;
-    sp28.unk2C = 0;
-    sp28.unk2E = 0xFF;
-    sp28.unk30 = -0x40;
-    sp28.unk32 = 0x2E;
-    sp28.unk34 = 4;
-    sp28.unk38 = 3;
-    sp28.unk3C = 0x14;
-    sp28.unk3E = 0xF;
-    sp28.unk40 = 1;
-    sp28.unk42 = 0xC;
-    sp28.unk43 = 2;
-    sp28.unk44 = 3;
-    sp28.unk45 = 0xFF;
-    sp28.unk46 = 0xFF;
-    sp28.unk47 = 0xFF;
-    sp28.unk48 = 0xFF;
-    sp28.unk49 = 0;
-    sp28.unk4A = 0;
-    sp28.unk4B = 0;
-    sp28.unk4C = 0;
-    sp28.unk4D = 0xFF;
-    sp28.unk4E = 0xFF;
-    sp28.unk4F = 0xFF;
-    sp28.unk50 = 0xFF;
-    sp28.unk51 = 0;
-    sp28.unk52 = 0;
-    sp28.unk53 = 0;
-    sp28.unk54 = 0;
-    sp28.unk55 = 0xFF;
-    sp28.unk56 = 0;
-    sp28.unk57 = 3;
-    sp28.unk58 = 0x24;
-    sp28.unk5C = 0x200005;
-    sp28.unk60 = 0x60600;
-    sp28.unk64 = 0xA;
-    sp28.unk66 = 0x19;
-    sp28.unk68 = 1;
-    sp28.unk6A = 0;
-    sp28.unk6C = 1.0f;
-    sp28.unk70 = -1;
-    sp28.unk71 = 0;
-    sp28.unk72 = -1;
-    sp28.unk73 = -1;
-    func_15152B38(&sp28, arg0->unkC, arg0->unk1);
+/* Per-frame effect callbacks, and particle emitters called with
+ * (effect, point, segment start, segment end, segment tip, direction). */
+extern void (*D_80088C60[])(void *);
+extern void (*D_80088C64[])(void *, vertex *, vertex *, vertex *, vertex *, vertex *);
+
+extern void func_15143134(const vertex *, vertex *, void *);
+extern s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
+extern Particle1368C0 *func_15130374(ParticleSpawn *, u8, s32, u8, s32);
+extern void func_15132A4C(DebrisSpawn *, s32, s32, s32, u8, s32);
+extern void func_15152B38(EmitterSpawn *, u8, s32);
+extern void func_1511490C(f32 mtx[4][4], void *arg1);
+extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
+
+/*
+ * Creates effect 0x1A on `object`, lasting `duration` frames (negative: 300), emitting
+ * particles at `spawnRate` through D_80088C64[emitFunc]. `extraSize` more data bytes are reserved.
+ */
+struct260 *func_15109410(struct127 *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
+                         u8 owner, s32 kind) {
+    Effect1368C0 *effect;
+    ObjectEmitterData data;
+    s16 lifetime;
+    u8 timed;
+
+    if (object == NULL) {
+        return NULL;
+    }
+
+    timed = FALSE;
+    if (duration < 0) {
+        lifetime = 300;
+    } else {
+        timed = TRUE;
+        lifetime = duration;
+    }
+
+    data.spawnAccum = 0.0f;
+    data.spawnRate = spawnRate;
+    data.tickFunc = tickFunc;
+    data.emitFunc = emitFunc;
+    data.object = object;
+    data.objectId = object->unique_id;
+
+    effect = (Effect1368C0 *)func_15149130(lifetime, -1, 0x1A, -1, timed, 0x1A,
+                                           (struct37 *)(extraSize + sizeof(data)), owner, kind);
+    if (effect != NULL) {
+        memcpy(&effect->data, &data, sizeof(data));
+    }
+    return (struct260 *)effect;
 }
 
-void func_15109C20(struct Arg15109C20 *arg0, struct Vec3F15109C20 *arg1, s32 arg2, s32 arg3, s32 arg4, struct Vec3F15109C20 *arg5) {
-    s32 padA4;
-    struct Arg15109C20Sub *sub;
-    f32 scale;
-    s32 pad98;
-    struct {
-        f32 unk00;
-        f32 unk04;
-        f32 unk08;
-        f32 unk0C;
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-        f32 unk1C;
-        f32 unk20;
-        f32 unk24;
-        struct Vec3F15109C20 unk28;
-        f32 unk34;
-        f32 unk38;
-        f32 unk3C;
-        f32 unk40;
-        f32 unk44;
-        f32 unk48;
-        f32 unk4C;
-        s32 unk50;
-        s16 unk54;
-        s16 unk56;
-        u8 unk58;
-        u8 pad59[3];
-        s32 unk5C;
-        u8 unk60;
-        u8 unk61;
-        u8 unk62;
-        u8 unk63;
-        u8 unk64;
-        u8 unk65;
-        u8 unk66;
-        u8 unk67;
-        u8 unk68;
-        u8 pad69;
-        u8 unk6A;
-        u8 pad6B;
-        struct Arg15109C20Sub *unk6C;
-        u8 unk70;
-        u8 pad71;
-        s16 unk72;
-        s16 unk74;
-        u8 pad76[2];
-    } sp20;
+/*
+ * Effect 0x1A update: ends the effect when its object is gone, otherwise emits one particle per
+ * whole unit of spawnAccum from a random point on the object's emission segments.
+ */
+void func_151094FC(Effect1368C0 *effect) {
+    ObjectEmitterData *data;
+    struct127 *object;
+    vertex point;
+    vertex start;
+    vertex end;
+    vertex tip;
+    vertex dir;
+    vertex local;
+    const vertex *segment;
+    void *matrix;
+    s32 i;
+    f32 r;
+    f32 t;
 
-    sub = arg0->unk28;
-    scale = ((func_150ADA68() * D_800A2650) + D_800A2654) * D_800A2658;
-    sp20.unk00 = 1.0f;
-    sp20.unk04 = 1.0f;
-    sp20.unk08 = sp20.unk0C = ((func_150ADA68() * D_800A265C) + D_800A2660) * D_800A2664;
-    sp20.unk10 = func_150ADA68() * 360.0f;
-    sp20.unk14 = func_150ADA68() * 360.0f;
-    sp20.unk18 = func_150ADA68() * 360.0f;
-    sp20.unk1C = 1.0f;
-    sp20.unk20 = 1.0f;
-    sp20.unk24 = 1.0f;
-    sp20.unk28 = *arg1;
-    sp20.unk34 = arg5->x * scale;
-    sp20.unk38 = arg5->y * scale;
-    sp20.unk3C = arg5->z * scale;
-    sp20.unk40 = ((func_150ADA68() * D_800A2668) + D_800A266C) * D_800A2670;
-    sp20.unk44 = 0.0f;
-    sp20.unk48 = ((func_150ADA68() * D_800A2674) + D_800A2678) * D_800A267C;
-    sp20.unk4C = ((func_150ADA68() * 124.0f) + -231.0f) * D_800A2680;
-    sp20.unk50 = 0x29E8;
-    sp20.unk54 = (func_150ADA20() % 15U) + 0x14;
+    data = &effect->data.object;
+    object = data->object;
+    if (object->interaction_state == 0 || object->unique_id != data->objectId) {
+        effect->state = -1;
+        return;
+    }
+    data->spawnAccum += data->spawnRate * D_800A2504[6] * D_800BE9A4;
+    if (data->emitFunc != -1 && object->unk1D4 != NULL) {
+        while (data->spawnAccum > 1.0f) {
+            r = func_150ADA68() * D_800A2504[6];
+            for (i = 0; D_800A2504[i] < r; i++) {
+                r -= D_800A2504[i];
+            }
+            t = func_150ADA68();
+            segment = &D_800A24B0[i];
+            local.x = segment[0].x + (segment[1].x - segment[0].x) * t;
+            local.y = segment[0].y + (segment[1].y - segment[0].y) * t;
+            local.z = segment[0].z + (segment[1].z - segment[0].z) * t;
+            matrix = &object->unk1D4->unk240;
+            func_15143134(&local, &point, matrix);
+            func_15143134(&segment[0], &start, matrix);
+            func_15143134(&segment[1], &end, matrix);
+            func_15143134(&D_800A2520[i], &tip, matrix);
+            t = func_150ADA68();
+            dir.x = (tip.x - end.x) * t + end.x - start.x;
+            dir.y = (tip.y - end.y) * t + end.y - start.y;
+            dir.z = (tip.z - end.z) * t + end.z - start.z;
+            func_15145128(&dir, &dir, NULL, NULL);
+            D_80088C64[data->emitFunc](effect, &point, &start, &end, &tip, &dir);
+            data->spawnAccum -= 1.0f;
+        }
+    } else {
+        while (data->spawnAccum > 1.0f) {
+            data->spawnAccum -= 1.0f;
+        }
+    }
+    if (data->tickFunc != -1) {
+        D_80088C60[data->tickFunc](effect);
+    }
+}
+
+/* Particle emitter: a particle flying along `dir` from `point`, plus a func_15152B38 emitter there. */
+void func_15109848(Effect1368C0 *effect, vertex *point, vertex *start, vertex *end, vertex *tip, vertex *dir) {
+    ParticleSpawn spawn;
+    f32 speed;
+    EmitterSpawn emitter;
+
+    speed = (func_150ADA68() * 851.0f + 525.0f) * 0.001000000047f;
+    spawn.unk1D = 0x2B;
+    spawn.unk8 = 0x4401;
+    spawn.unk0 = 0x200005;
+    spawn.unk4 = 0x20000;
+    spawn.lifetime = (func_150ADA20() & 0xF) + 10;
+    spawn.unkC = 0;
+    spawn.unk10 = 0;
+    spawn.color0[0] = 0xFF;
+    spawn.color0[1] = 0xFF;
+    spawn.color0[2] = 0xFF;
+    spawn.color0[3] = 0xFF;
+    spawn.color1[0] = 0xFF;
+    spawn.color1[1] = 0xFF;
+    spawn.color1[2] = 0xFF;
+    spawn.color1[3] = 0xFF;
+    spawn.unk1C = 0xFF;
+    spawn.width = spawn.height = func_150ADA68() * 25.0f + 35.0f;
+    spawn.position = *point;
+    spawn.unk3C.x = 0.0f;
+    spawn.unk3C.y = 0.0f;
+    spawn.unk3C.z = 0.0f;
+    spawn.velocity.x = dir->x * speed;
+    spawn.velocity.y = dir->y * speed;
+    spawn.velocity.z = dir->z * speed;
+    spawn.fadeDuration = 5;
+    spawn.fadeStep = 0x33;
+    spawn.unk22 = 1;
+    spawn.unk54 = 0.0f;
+    spawn.unk24 = 1.0f;
+    spawn.flags = (func_150ADA20() & 1 ? 0x40 : 0) | ((func_150ADA20() & 1 ? 0x80 : 0) | 5) | 0x200 | 0x4000 | 0x8000;
+    spawn.unk60 = 6;
+    spawn.unk61 = 6;
+    spawn.unk62 = -1;
+    spawn.unk63 = -1;
+    spawn.unk64 = -1;
+    spawn.unk65 = 4;
+    func_15130374(&spawn, 1, 0, effect->owner, effect->kind);
+
+    emitter.unk0 = 1;
+    emitter.unk4 = 4;
+    emitter.pos = *point;
+    emitter.unk14 = 1.049999952f;
+    emitter.unk18 = 1.889999986f;
+    emitter.unk1C = -0.8150000572f;
+    emitter.unk20 = 0.5770000219f;
+    emitter.unk24 = 2.0f;
+    emitter.unk28 = 6.0f;
+    emitter.unk2C = 0;
+    emitter.unk2E = 0xFF;
+    emitter.unk30 = -0x40;
+    emitter.unk32 = 0x2E;
+    emitter.unk34 = 4;
+    emitter.unk38 = 3;
+    emitter.unk3C = 20;
+    emitter.unk3E = 15;
+    emitter.unk40 = 1;
+    emitter.unk42 = 0xC;
+    emitter.unk43 = 2;
+    emitter.unk44 = 3;
+    emitter.unk45 = 0xFF;
+    emitter.unk46 = 0xFF;
+    emitter.unk47 = 0xFF;
+    emitter.unk48 = 0xFF;
+    emitter.unk49 = 0;
+    emitter.unk4A = 0;
+    emitter.unk4B = 0;
+    emitter.unk4C = 0;
+    emitter.unk4D = 0xFF;
+    emitter.unk4E = 0xFF;
+    emitter.unk4F = 0xFF;
+    emitter.unk50 = 0xFF;
+    emitter.unk51 = 0;
+    emitter.unk52 = 0;
+    emitter.unk53 = 0;
+    emitter.unk54 = 0;
+    emitter.unk55 = 0xFF;
+    emitter.unk56 = 0;
+    emitter.unk57 = 3;
+    emitter.unk58 = 0x24;
+    emitter.unk5C = 0x200005;
+    emitter.unk60 = 0x60600;
+    emitter.unk64 = 10;
+    emitter.unk66 = 25;
+    emitter.unk68 = 1;
+    emitter.unk6A = 0;
+    emitter.unk6C = 1.0f;
+    emitter.unk70 = -1;
+    emitter.unk71 = 0;
+    emitter.unk72 = -1;
+    emitter.unk73 = -1;
+    func_15152B38(&emitter, effect->owner, effect->kind);
+}
+
+/* Particle emitter: a randomly sized and spun piece of debris thrown along `dir` from `point`. */
+void func_15109C20(Effect1368C0 *effect, vertex *point, vertex *start, vertex *end, vertex *tip, vertex *dir) {
+    s32 padA4; // matching: unused stack slots in the original frame
+    struct127 *object;
+    f32 speed;
+    s32 pad98;
+    DebrisSpawn debris;
+
+    object = effect->data.tracked.object;
+    speed = (func_150ADA68() * 4611.0f + 1581.0f) * 0.001000000047f;
+    debris.unk0 = 1.0f;
+    debris.unk4 = 1.0f;
+    debris.scaleXZ = debris.scaleY = (func_150ADA68() * 3522.0f + 4599.0f) * 9.999999975e-07f;
+    debris.rot[0] = func_150ADA68() * 360.0f;
+    debris.rot[1] = func_150ADA68() * 360.0f;
+    debris.rot[2] = func_150ADA68() * 360.0f;
+    debris.unk1C[0] = 1.0f;
+    debris.unk1C[1] = 1.0f;
+    debris.unk1C[2] = 1.0f;
+    debris.pos = *point;
+    debris.vel.x = dir->x * speed;
+    debris.vel.y = dir->y * speed;
+    debris.vel.z = dir->z * speed;
+    debris.unk40 = (func_150ADA68() * 24546.0f + -12273.0f) * 0.001000000047f;
+    debris.unk44 = 0.0f;
+    debris.unk48 = (func_150ADA68() * 24546.0f + -12273.0f) * 0.001000000047f;
+    debris.unk4C = (func_150ADA68() * 124.0f + -231.0f) * 0.001000000047f;
+    debris.unk50 = 0x29E8;
+    debris.unk54 = func_150ADA20() % 15U + 20;
 
     if (func_150ADA20() & 1) {
-        sp20.unk56 = 0x23;
+        debris.unk56 = 0x23;
     } else {
-        sp20.unk56 = 0x24;
+        debris.unk56 = 0x24;
     }
 
-    sp20.unk58 = 0;
-    sp20.unk5C = 0;
-    sp20.unk60 = 0xFF;
-    sp20.unk61 = 8;
-    sp20.unk62 = 0;
-    sp20.unk63 = 0;
-    sp20.unk64 = 0;
-    sp20.unk65 = 0;
-    sp20.unk66 = 0;
-    sp20.unk67 = 0;
-    sp20.unk68 = 2;
-    if (arg0->unk13 == 0x1A) {
-        sp20.unk6A = 1;
+    debris.unk58 = 0;
+    debris.unk5C = 0;
+    debris.unk60 = 0xFF;
+    debris.unk61 = 8;
+    debris.unk62 = 0;
+    debris.unk63 = 0;
+    debris.unk64 = 0;
+    debris.unk65 = 0;
+    debris.unk66 = 0;
+    debris.unk67 = 0;
+    debris.unk68 = 2;
+    if (effect->unk13 == 0x1A) {
+        debris.unk6A = 1;
     } else {
-        sp20.unk6A = 2;
+        debris.unk6A = 2;
     }
-    sp20.unk6C = sub;
-    sp20.unk70 = sub->unk3B;
-    sp20.unk72 = 0xA;
-    sp20.unk74 = 0x19;
+    debris.object = object;
+    debris.objectId = object->unique_id;
+    debris.unk72 = 10;
+    debris.unk74 = 25;
 
-    func_15132A4C(&sp20, 3, 0xFF, 0, arg0->unkC, arg0->unk1);
+    func_15132A4C(&debris, 3, 0xFF, 0, effect->owner, effect->kind);
 }
 
-struct260 *func_15109ED4(void *arg0, s16 arg1, s8 arg2, s8 arg3, f32 arg4, s32 arg5, u8 arg6, s32 arg7) {
-    struct260 *temp_v0;
-    struct {
-        void *unk0;
-        f32 unk4;
-        f32 unk8;
-        u8 unkC;
-        u8 unkD;
-    } sp34;
-    s16 sp44;
-    u8 sp40;
+/*
+ * Creates effect 0x1B for `arg0`, lasting `duration` frames (negative: 300), emitting particles at
+ * `spawnRate` through D_80088C64[emitFunc]. `extraSize` more data bytes are reserved.
+ */
+struct260 *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
+                         u8 owner, s32 kind) {
+    Effect1368C0 *effect;
+    MatrixEmitterData data;
+    s16 lifetime;
+    u8 timed;
 
     if (arg0 == NULL) {
         return NULL;
     }
 
-    sp40 = 0;
-    if (arg1 < 0) {
-        sp44 = 0x12C;
+    timed = FALSE;
+    if (duration < 0) {
+        lifetime = 300;
     } else {
-        sp40 = 1;
-        sp44 = (s16)arg1;
+        timed = TRUE;
+        lifetime = duration;
     }
 
-    sp34.unk4 = 0.0f;
-    sp34.unk8 = arg4;
-    sp34.unkC = arg2;
-    sp34.unkD = arg3;
-    sp34.unk0 = arg0;
+    data.spawnAccum = 0.0f;
+    data.spawnRate = spawnRate;
+    data.tickFunc = tickFunc;
+    data.emitFunc = emitFunc;
+    data.unk0 = arg0;
 
-    temp_v0 = func_15149130(sp44, -1, 0x1B, -1, sp40, 0x1B, (struct37 *)((s32)arg5 + 0x10), arg6, arg7);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp34, 0x10);
+    effect = (Effect1368C0 *)func_15149130(lifetime, -1, 0x1B, -1, timed, 0x1B,
+                                           (struct37 *)(extraSize + sizeof(data)), owner, kind);
+    if (effect != NULL) {
+        memcpy(&effect->data, &data, sizeof(data));
     }
-    return temp_v0;
+    return (struct260 *)effect;
 }
 
-extern const f32 D_800A2504[7];
-extern const struct Vec3F15109C20 D_800A2568[7];
-extern const struct Vec3F15109C20 D_800A25BC[6];
-extern void (*D_80088C60[])(void *);
-extern void (*D_80088C64[])(void *, struct Vec3F15109C20 *, struct Vec3F15109C20 *, struct Vec3F15109C20 *, struct Vec3F15109C20 *, struct Vec3F15109C20 *);
-extern s32 func_15145128(void *, void *, f32 *, f32 *);
+/*
+ * Effect 0x1B update: emits one particle per whole unit of spawnAccum from a random point on the
+ * emission segments, transformed by the matrix func_1511490C builds from data.unk0.
+ */
+void func_15109FB8(Effect1368C0 *effect) {
+    MatrixEmitterData *data;
 
-typedef struct {
-    void *unk0;
-    f32 unk4;
-    f32 unk8;
-    s8 unkC;
-    s8 unkD;
-} State15109FB8;
-
-typedef struct {
-    u8 pad0[0x28];
-    State15109FB8 unk28;
-} Actor15109FB8;
-
-extern void func_1511490C(f32 arg0[4][4], void *arg1);
-extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-
-void func_15109FB8(Actor15109FB8 *arg0) {
-    State15109FB8 *state;
-
-    state = &arg0->unk28;
-    state->unk4 += state->unk8 * D_800A2504[6] * D_800BE9A4;
-    if (state->unkD != -1) {
-        while (state->unk4 > 1.0f) {
+    data = &effect->data.matrix;
+    data->spawnAccum += data->spawnRate * D_800A2504[6] * D_800BE9A4;
+    if (data->emitFunc != -1) {
+        while (data->spawnAccum > 1.0f) {
             f32 mtx[4][4];
-            struct Vec3F15109C20 a;
-            struct Vec3F15109C20 b;
-            struct Vec3F15109C20 c;
-            struct Vec3F15109C20 d;
-            struct Vec3F15109C20 e;
-            const struct Vec3F15109C20 *p;
+            vertex point;
+            vertex start;
+            vertex end;
+            vertex tip;
+            vertex dir;
+            const vertex *segment;
             s32 i;
             f32 r;
             f32 t;
@@ -567,259 +545,184 @@ void func_15109FB8(Actor15109FB8 *arg0) {
             f32 y;
             f32 z;
 
-            func_1511490C(mtx, state->unk0);
+            func_1511490C(mtx, data->unk0);
             r = func_150ADA68() * D_800A2504[6];
             for (i = 0; D_800A2504[i] < r; i++) {
                 r -= D_800A2504[i];
             }
             t = func_150ADA68();
-            p = &D_800A2568[i];
-            x = p[0].x + (p[1].x - p[0].x) * t;
-            y = p[0].y + (p[1].y - p[0].y) * t;
-            z = p[0].z + (p[1].z - p[0].z) * t;
-            func_150A7960((f32 *)mtx, x, y, z, &a.x, &a.y, &a.z);
-            func_150A7960((f32 *)mtx, p[0].x, p[0].y, p[0].z, &b.x, &b.y, &b.z);
-            func_150A7960((f32 *)mtx, p[1].x, p[1].y, p[1].z, &c.x, &c.y, &c.z);
-            func_150A7960((f32 *)mtx, D_800A25BC[i].x, D_800A25BC[i].y, D_800A25BC[i].z, &d.x, &d.y, &d.z);
+            segment = &D_800A2568[i];
+            x = segment[0].x + (segment[1].x - segment[0].x) * t;
+            y = segment[0].y + (segment[1].y - segment[0].y) * t;
+            z = segment[0].z + (segment[1].z - segment[0].z) * t;
+            func_150A7960(mtx, x, y, z, &point.x, &point.y, &point.z);
+            func_150A7960(mtx, segment[0].x, segment[0].y, segment[0].z, &start.x, &start.y, &start.z);
+            func_150A7960(mtx, segment[1].x, segment[1].y, segment[1].z, &end.x, &end.y, &end.z);
+            func_150A7960(mtx, D_800A25BC[i].x, D_800A25BC[i].y, D_800A25BC[i].z, &tip.x, &tip.y, &tip.z);
             t = func_150ADA68();
-            e.x = (d.x - c.x) * t + c.x - b.x;
-            e.y = (d.y - c.y) * t + c.y - b.y;
-            e.z = (d.z - c.z) * t + c.z - b.z;
-            func_15145128(&e, &e, NULL, NULL);
-            D_80088C64[state->unkD](arg0, &a, &b, &c, &d, &e);
-            state->unk4 -= 1.0f;
+            dir.x = (tip.x - end.x) * t + end.x - start.x;
+            dir.y = (tip.y - end.y) * t + end.y - start.y;
+            dir.z = (tip.z - end.z) * t + end.z - start.z;
+            func_15145128(&dir, &dir, NULL, NULL);
+            D_80088C64[data->emitFunc](effect, &point, &start, &end, &tip, &dir);
+            data->spawnAccum -= 1.0f;
         }
     } else {
-        while (state->unk4 > 1.0f) {
-            state->unk4 -= 1.0f;
+        while (data->spawnAccum > 1.0f) {
+            data->spawnAccum -= 1.0f;
         }
     }
-    if (state->unkC != -1) {
-        D_80088C60[state->unkC](arg0);
+    if (data->tickFunc != -1) {
+        D_80088C60[data->tickFunc](effect);
     }
 }
 
-extern f32 D_800A2684;
-extern f32 D_800A2688;
+/* Creates effect 0x1C on `object`, lasting `duration` frames. */
+struct260 *func_1510A344(struct127 *object, s32 duration, u8 owner, s32 kind) {
+    Effect1368C0 *effect;
+    PairEmitterData data;
 
-struct260 *func_1510A344(void *arg0, s32 arg1, u8 arg2, s32 arg3) {
-    struct260 *temp_v0;
-    struct {
-        void *unk0;
-        u8 unk4;
-        u8 pad5;
-        u8 pad6;
-        u8 pad7;
-        f32 unk8;
-        f32 unkC;
-        f32 unk10;
-    } sp30;
-
-    if (arg0 == NULL) {
+    if (object == NULL) {
         return NULL;
     }
 
-    sp30.unk0 = arg0;
-    sp30.unk4 = *(u8 *)((s32)arg0 + 0x3B);
-    sp30.unk8 = 0.0f;
-    sp30.unkC = D_800A2684;
-    sp30.unk10 = D_800A2688;
+    data.object = object;
+    data.objectId = object->unique_id;
+    data.spawnAccum = 0.0f;
+    data.spawnRate = 0.2040000111f;
+    data.spawnRateRandom = 0.8220000267f;
 
-    temp_v0 = func_15149130((s16)arg1, -1, 0x1C, -1, 1, 0x1C, (struct37 *)0x14, arg2, arg3);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp30, 0x14);
+    effect = (Effect1368C0 *)func_15149130(duration, -1, 0x1C, -1, TRUE, 0x1C, (struct37 *)sizeof(data), owner, kind);
+    if (effect != NULL) {
+        memcpy(&effect->data, &data, sizeof(data));
     }
-    return temp_v0;
+    return (struct260 *)effect;
 }
 
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x1D4 - 0x3C];
-    s32 unk1D4;
-} Obj1510A40C;
-typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct Vec3F15109C20 unk30;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 pad66[0xA];
-} Effect1510A40C;
-typedef struct {
-    Obj1510A40C *unk0;
-    u8 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-} State1510A40C;
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    u8 pad10[0x18];
-    State1510A40C unk28;
-} Actor1510A40C;
-extern struct Vec3F15109C20 D_800A2604;
-extern struct Vec3F15109C20 D_800A2610;
-extern struct Vec3F15109C20 D_800A261C;
-extern struct Vec3F15109C20 D_800A2628;
-extern void func_15143134(const void *, void *, s32);
-extern struct260 *func_15130374(void *, u8, s32, u8, s32);
+/*
+ * Effect 0x1C update: ends the effect when its object is gone, otherwise emits particles from one
+ * of the object's two emission points (picked at random), flying towards that point's target.
+ */
+void func_1510A40C(Effect1368C0 *effect) {
+    PairEmitterData *data;
+    struct127 *object;
+    vertex points[2];
+    vertex dirs[2];
+    void *matrix;
+    ParticleSpawn spawn;
+    f32 extra;
+    f32 speed;
+    u8 side;
+    Particle1368C0 *particle;
 
-void func_1510A40C(Actor1510A40C *arg0) {
-    State1510A40C *state;
-    Obj1510A40C *obj;
-    struct Vec3F15109C20 pts[2];
-    struct Vec3F15109C20 dirs[2];
-    s32 m;
-    Effect1510A40C fx;
-    f32 val;
-    f32 scale;
-    u8 sel;
-    struct260 *ret;
-
-    state = &arg0->unk28;
-    obj = state->unk0;
-    if (obj->unk0 == 0 || obj->unk3B != state->unk4) {
-        arg0->unkE = -1;
+    data = &effect->data.pair;
+    object = data->object;
+    if (object->interaction_state == 0 || object->unique_id != data->objectId) {
+        effect->state = -1;
         return;
     }
-    state->unk8 += (state->unkC + func_150ADA68() * state->unk10) * D_800BE9A4;
-    if (state->unk8 > 1.0f && obj->unk1D4 != 0) {
-        m = obj->unk1D4 + 0x240;
-        func_15143134(&D_800A2604, &pts[0], m);
-        func_15143134(&D_800A2610, &pts[1], m);
-        func_15143134(&D_800A261C, &dirs[0], m);
-        func_15143134(&D_800A2628, &dirs[1], m);
-        dirs[0].x -= pts[0].x;
-        dirs[0].y -= pts[0].y;
-        dirs[0].z -= pts[0].z;
-        dirs[1].x -= pts[1].x;
-        dirs[1].y -= pts[1].y;
-        dirs[1].z -= pts[1].z;
-        val = 0.9108009934f;
-        fx.unk1D = 0x29;
-        fx.unk08 = 0xE03;
-        fx.unk00 = 0x200005;
-        fx.unk04 = 0;
-        fx.unk0C = 0;
-        fx.unk10 = 0;
-        fx.unk1E = 0x19;
-        fx.unk20 = 0xA;
-        fx.unk58 = 0xCE05;
-        fx.unk60 = 3;
-        fx.unk61 = 3;
-        fx.unk62 = 0x10;
-        fx.unk63 = -1;
-        fx.unk64 = -1;
-        fx.unk65 = 0;
-        fx.unk22 = 0x19;
-        fx.unk14 = 0xDD;
-        fx.unk15 = 0xD3;
-        fx.unk16 = 0xCD;
-        fx.unk17 = 0xFF;
-        fx.unk18 = 0x57;
-        fx.unk19 = 0x55;
-        fx.unk1A = 0x5A;
-        fx.unk1B = 0xFF;
-        fx.unk1C = 0xFF;
-        fx.unk24 = 1.043205976f;
-        fx.unk3C = 0.0f;
-        fx.unk40 = 0.0f;
-        fx.unk44 = 0.0f;
-        fx.unk54 = 0.0f;
+    data->spawnAccum += (data->spawnRate + func_150ADA68() * data->spawnRateRandom) * D_800BE9A4;
+    if (data->spawnAccum > 1.0f && object->unk1D4 != NULL) {
+        matrix = &object->unk1D4->unk240;
+        func_15143134(&D_800A2604, &points[0], matrix);
+        func_15143134(&D_800A2610, &points[1], matrix);
+        func_15143134(&D_800A261C, &dirs[0], matrix);
+        func_15143134(&D_800A2628, &dirs[1], matrix);
+        dirs[0].x -= points[0].x;
+        dirs[0].y -= points[0].y;
+        dirs[0].z -= points[0].z;
+        dirs[1].x -= points[1].x;
+        dirs[1].y -= points[1].y;
+        dirs[1].z -= points[1].z;
+        extra = 0.9108009934f;
+        spawn.unk1D = 0x29;
+        spawn.unk8 = 0xE03;
+        spawn.unk0 = 0x200005;
+        spawn.unk4 = 0;
+        spawn.unkC = 0;
+        spawn.unk10 = 0;
+        spawn.fadeDuration = 25;
+        spawn.fadeStep = 10;
+        spawn.flags = 0xCE05;
+        spawn.unk60 = 3;
+        spawn.unk61 = 3;
+        spawn.unk62 = 0x10;
+        spawn.unk63 = -1;
+        spawn.unk64 = -1;
+        spawn.unk65 = 0;
+        spawn.unk22 = 25;
+        spawn.color0[0] = 0xDD;
+        spawn.color0[1] = 0xD3;
+        spawn.color0[2] = 0xCD;
+        spawn.color0[3] = 0xFF;
+        spawn.color1[0] = 0x57;
+        spawn.color1[1] = 0x55;
+        spawn.color1[2] = 0x5A;
+        spawn.color1[3] = 0xFF;
+        spawn.unk1C = 0xFF;
+        spawn.unk24 = 1.043205976f;
+        spawn.unk3C.x = 0.0f;
+        spawn.unk3C.y = 0.0f;
+        spawn.unk3C.z = 0.0f;
+        spawn.unk54 = 0.0f;
         do {
             if (func_150ADA20() & 1) {
-                fx.unk58 |= 0x40;
+                spawn.flags |= 0x40;
             } else {
-                fx.unk58 &= ~0x40;
+                spawn.flags &= ~0x40;
             }
             if (func_150ADA20() & 1) {
-                fx.unk58 |= 0x80;
+                spawn.flags |= 0x80;
             } else {
-                fx.unk58 &= ~0x80;
+                spawn.flags &= ~0x80;
             }
-            sel = func_150ADA20() & 1;
-            scale = ((func_150ADA68() * 203.0f) + 96.0f) * 0.001f;
-            fx.unk0A = (func_150ADA20() & 0xF) + 0x14;
-            fx.unk28 = fx.unk2C = (func_150ADA68() * 60.0f) + 60.0f;
-            fx.unk30 = pts[sel];
-            fx.unk48 = dirs[sel].x * scale;
-            fx.unk4C = dirs[sel].y * scale;
-            fx.unk50 = dirs[sel].z * scale;
-            ret = func_15130374(&fx, 1, 4, arg0->unkC, arg0->unk1);
-            if (ret != NULL) {
-                memcpy((u8 *)ret + 0xA8, &val, 4);
+            side = func_150ADA20() & 1;
+            speed = (func_150ADA68() * 203.0f + 96.0f) * 0.001f;
+            spawn.lifetime = (func_150ADA20() & 0xF) + 20;
+            spawn.width = spawn.height = func_150ADA68() * 60.0f + 60.0f;
+            spawn.position = points[side];
+            spawn.velocity.x = dirs[side].x * speed;
+            spawn.velocity.y = dirs[side].y * speed;
+            spawn.velocity.z = dirs[side].z * speed;
+            particle = func_15130374(&spawn, 1, sizeof(extra), effect->owner, effect->kind);
+            if (particle != NULL) {
+                memcpy(&particle->unkA8, &extra, sizeof(extra));
             }
-            state->unk8 -= 1.0f;
-        } while (state->unk8 > 1.0f);
+            data->spawnAccum -= 1.0f;
+        } while (data->spawnAccum > 1.0f);
     } else {
-        while (state->unk8 > 1.0f) {
-            state->unk8 -= 1.0f;
+        while (data->spawnAccum > 1.0f) {
+            data->spawnAccum -= 1.0f;
         }
     }
 }
 
-void func_1510A870(void *arg0, GameStruct1510A8CCa *arg1, u8 arg2) {
-    GameStruct1510A8CCb *v0 = (GameStruct1510A8CCb *)((u8 *)arg0 + 0x28);
-    if (arg2 == 0x2D) {
-        if (v0->unk0 == arg1->unk0) {
-            v0->unk0 = arg1->unk4;
-            v0->unk4 = arg1->unk9;
-        } else if (v0->unk0 == arg1->unk4) {
-            v0->unk0 = arg1->unk0;
-            v0->unk4 = arg1->unk8;
+/* Message handler: on message 0x2D (two objects swapped), moves the effect to the other object. */
+void func_1510A870(Effect1368C0 *effect, ObjectSwapMessage *msg, u8 msgType) {
+    TrackedObject *tracked = &effect->data.tracked;
+
+    if (msgType == 0x2D) {
+        if (tracked->object == msg->from) {
+            tracked->object = msg->to;
+            tracked->objectId = msg->toId;
+        } else if (tracked->object == msg->to) {
+            tracked->object = msg->from;
+            tracked->objectId = msg->fromId;
         }
     }
 }
 
-void func_1510A8CC(void *arg0, GameStruct1510A8CCa *arg1, u8 arg2) {
-    GameStruct1510A8CCb *v0 = (GameStruct1510A8CCb *)((u8 *)arg0 + 0x28);
-    if (arg2 == 0x2D) {
-        if (v0->unk0 == arg1->unk0) {
-            v0->unk0 = arg1->unk4;
-            v0->unk4 = arg1->unk9;
-        } else if (v0->unk0 == arg1->unk4) {
-            v0->unk0 = arg1->unk0;
-            v0->unk4 = arg1->unk8;
+/* Message handler: the same as func_1510A870. */
+void func_1510A8CC(Effect1368C0 *effect, ObjectSwapMessage *msg, u8 msgType) {
+    TrackedObject *tracked = &effect->data.tracked;
+
+    if (msgType == 0x2D) {
+        if (tracked->object == msg->from) {
+            tracked->object = msg->to;
+            tracked->objectId = msg->toId;
+        } else if (tracked->object == msg->to) {
+            tracked->object = msg->from;
+            tracked->objectId = msg->fromId;
         }
     }
 }
