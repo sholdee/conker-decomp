@@ -2,150 +2,141 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Ground contact found by func_15046C80 below a probe point (as in game_173D40.c). */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    s32 unk8;
-} Struct150BEACC;
+    /* 0x00 */ f32 height;
+    /* 0x04 */ u8 surface[0x14];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 type;
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ s32 unk20;
+} GroundHit; // size 0x24
 
-typedef struct {
-    char pad_0[0x40];
-    f32 field_0x40;
-    char pad_1[0x190];
-    s32 field_0x1D4;
-} ActorFields;
+void func_15142314(struct255 *bones, s32 bone, vertex *out);
+void func_1504715C(GroundHit *hit, struct127 *actor);
+s32 func_15046C80(vertex *probe, s32 arg1, f32 bottom, GroundHit *hit);
+void func_15141F78(u8, GroundHit *, f32, u8, vertex *, u8);
+void func_15142180(u8, vertex *, s32, f32, f32);
+s32 func_1509BE40(s32, s32, s32, s32);
 
-void func_15142314(s32, s32, f32 *);
-void func_1504715C(s32, s32);
-s32 func_15046C80(f32 *, s32, f32, s32);
-extern void func_15141F78(u8, struct157 *, f32, u8, struct157 *, u8);
-extern void func_15142180(u8, Struct150BEACC *, s32, f32, f32);
-extern f32 D_800A00C0;
-extern f32 D_800A00C4;
-extern f32 D_800A00C8;
-extern f32 D_800A00CC;
-extern f32 D_800A00D0;
-extern f32 D_800A00D4;
-extern f32 D_800A00D8;
+/* Get the position of one of the actor's bones (picked by `side`, 0x10 by default).  With a `hit`
+   buffer, also look for the ground below that point and return func_15046C80's result. */
+s32 func_150BE9B0(vertex *pos, struct127 *actor, GroundHit *hit, u8 side) {
+    vertex probe;
+    s32 bone;
 
-s32 func_150BE9B0(f32 *arg0, ActorFields *arg1, s32 arg2, u8 arg3) {
-    f32 sp2C[3];
-    s32 temp_a1;
-
-    switch (arg3) {
+    switch (side) {
     case 4:
-        temp_a1 = 0x17;
+        bone = 0x17;
         break;
     case 5:
-        temp_a1 = 0x14;
+        bone = 0x14;
         break;
     case 6:
-        temp_a1 = 0xC;
+        bone = 0xC;
         break;
     case 7:
     default:
-        temp_a1 = 0x10;
+        bone = 0x10;
         break;
     }
-    func_15142314(arg1->field_0x1D4, temp_a1, arg0);
-    if (arg2 == 0) {
+    func_15142314(actor->unk1D4, bone, pos);
+    if (hit == NULL) {
         return 1;
     }
 
-    sp2C[0] = arg0[0];
-    sp2C[1] = arg0[1] + 10.0f;
-    sp2C[2] = arg0[2];
-    func_1504715C(arg2, (s32)arg1);
-    return func_15046C80(sp2C, 0, arg0[1] - 50.0f, arg2);
+    probe.x = pos->x;
+    probe.y = pos->y + 10.0f;
+    probe.z = pos->z;
+    func_1504715C(hit, actor);
+    return func_15046C80(&probe, 0, pos->y - 50.0f, hit);
 }
 
+/* Returns 0x11 for `arg0` 0 or 1, -1 otherwise. */
 s32 func_150BEAA8(s32 arg0, s32 arg1) {
-    switch (arg0) {
-    case 0:
-    case 1:
+    if (arg0 == 0 || arg0 == 1) {
         return 0x11;
-    default:
-        return -1;
     }
+    return -1;
 }
 
-void func_150BEACC(ActorFields *arg0, s32 arg1, s32 arg2) {
-    Struct150BEACC sp4C;
-    s32 sp2C[8];
-    s32 temp_a3;
+/* Effect 0xB at the ground below the actor's bone on `side`, plus effect 2 there when strength is
+   at least 76. */
+// matching: s32 actor (cast at each use) makes IDO reload it from the arg slot for each cast
+void func_150BEACC(s32 actor, s32 side, s32 strength) {
+    vertex pos;
+    GroundHit hit;
 
-    temp_a3 = (u8)arg1;
-    if (arg0->field_0x1D4 != 0) {
-        if (func_150BE9B0((f32 *)&sp4C, *(s32 *)&arg0, (s32)&sp2C[-1], temp_a3) != 0) {
-            func_15141F78(0xB, (struct157 *)&sp2C[-1], (f32)arg2 * D_800A00C0 * D_800A00C4,
-                          (u8)(u32)(arg0->field_0x40 * D_800A00C8),
-                          (struct157 *)&sp4C, temp_a3);
-            if (arg2 >= 0x4C) {
-                func_15142180(2, &sp4C, sp2C[5], 3.232000113f, D_800A00CC);
+    if (((struct127 *)actor)->unk1D4 != NULL) {
+        if (func_150BE9B0(&pos, (struct127 *)actor, &hit, side) != 0) {
+            func_15141F78(0xB, &hit, strength * (1.0f / 85.0f) * 3.177f,
+                          (u32)(((struct127 *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
+            if (strength >= 76) {
+                func_15142180(2, &pos, hit.unk18, 3.232f, 2.436f);
             }
         }
     }
 }
 
-s32 func_150BEC30(f32 *arg0, ActorFields *arg1, s32 arg2, u8 arg3) {
-    f32 sp2C[3];
-    s32 temp_a1;
+/* Same as func_150BE9B0 with bones 0x19 and 0x16 for sides 4 and 5. */
+s32 func_150BEC30(vertex *pos, struct127 *actor, GroundHit *hit, u8 side) {
+    vertex probe;
+    s32 bone;
 
-    switch (arg3) {
+    switch (side) {
     case 4:
-        temp_a1 = 0x19;
+        bone = 0x19;
         break;
     case 5:
-        temp_a1 = 0x16;
+        bone = 0x16;
         break;
     case 6:
-        temp_a1 = 0xC;
+        bone = 0xC;
         break;
     case 7:
     default:
-        temp_a1 = 0x10;
+        bone = 0x10;
         break;
     }
-    func_15142314(arg1->field_0x1D4, temp_a1, arg0);
-    if (arg2 == 0) {
+    func_15142314(actor->unk1D4, bone, pos);
+    if (hit == NULL) {
         return 1;
     }
 
-    sp2C[0] = arg0[0];
-    sp2C[1] = arg0[1] + 10.0f;
-    sp2C[2] = arg0[2];
-    func_1504715C(arg2, (s32)arg1);
-    return func_15046C80(sp2C, 0, arg0[1] - 50.0f, arg2);
+    probe.x = pos->x;
+    probe.y = pos->y + 10.0f;
+    probe.z = pos->z;
+    func_1504715C(hit, actor);
+    return func_15046C80(&probe, 0, pos->y - 50.0f, hit);
 }
 
+/* Returns 0x12 for `arg0` 0 or 1, -1 otherwise. */
 s32 func_150BED28(s32 arg0, s32 arg1) {
-    switch (arg0) {
-    case 0:
-    case 1:
+    if (arg0 == 0 || arg0 == 1) {
         return 0x12;
-    default:
-        return -1;
     }
+    return -1;
 }
 
-void func_150BED4C(ActorFields *arg0, s32 arg1, s32 arg2) {
-    Struct150BEACC sp4C;
-    s32 sp2C[8];
-    s32 temp_a3;
+/* Same as func_150BEACC with the func_150BEC30 bones and a scale factor of 2 instead of 3.177. */
+// matching: s32 actor (cast at each use) makes IDO reload it from the arg slot for each cast
+void func_150BED4C(s32 actor, s32 side, s32 strength) {
+    vertex pos;
+    GroundHit hit;
 
-    temp_a3 = (u8)arg1;
-    if (arg0->field_0x1D4 != 0) {
-        if (func_150BEC30((f32 *)&sp4C, *(s32 *)&arg0, (s32)&sp2C[-1], temp_a3) != 0) {
-            func_15141F78(0xB, (struct157 *)&sp2C[-1], ((f32)arg2 * D_800A00D0) * 2,
-                          (u8)(u32)(arg0->field_0x40 * D_800A00D4),
-                          (struct157 *)&sp4C, temp_a3);
-            if (arg2 >= 0x4C) {
-                func_15142180(2, &sp4C, sp2C[5], 3.232000113f, D_800A00D8);
+    if (((struct127 *)actor)->unk1D4 != NULL) {
+        if (func_150BEC30(&pos, (struct127 *)actor, &hit, side) != 0) {
+            func_15141F78(0xB, &hit, strength * (1.0f / 85.0f) * 2,
+                          (u32)(((struct127 *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
+            if (strength >= 76) {
+                func_15142180(2, &pos, hit.unk18, 3.232f, 2.436f);
             }
         }
     }
 }
 
+/* Sets or clears flag bits in unk84 from func_1509BE40 queries. */
 void func_150BEEB0(struct108 *arg0) {
     if (func_1509BE40(1, 0x4063, 6, 0x2000) || func_1509BE40(1, 0x4001, 6, 0x9000)) {
         arg0->unk84 |= 0x1010;
