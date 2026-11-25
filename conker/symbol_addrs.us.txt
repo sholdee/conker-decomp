@@ -324,3 +324,13 @@ D_800A4058 = 0x800A4058; // defined:true
 D_800A4068 = 0x800A4068; // defined:true
 D_800A40C8 = 0x800A40C8; // defined:true
 D_800A40F8 = 0x800A40F8; // defined:true
+
+// const data defined in C .rodata (splat must not make these absolute)
+D_80099A3C = 0x80099A3C; // defined:true  (game_981E0.c)
+D_80099AC4 = 0x80099AC4; // defined:true  (game_981E0.c)
+D_800A1C00 = 0x800A1C00; // defined:true  (game_125A50.c)
+D_800A2130 = 0x800A2130; // defined:true  (game_12CCF0.c)
+D_800A2148 = 0x800A2148; // defined:true  (game_12CCF0.c)
+D_800A2154 = 0x800A2154; // defined:true  (game_12CCF0.c)
+D_800A5480 = 0x800A5480; // defined:true  (game_16F770.c)
+D_800A548C = 0x800A548C; // defined:true  (game_16F770.c)
