@@ -68,11 +68,12 @@ extern void func_15166118(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 
 extern void func_151942E8();
 void func_151C0698(struct127 *arg0, struct127 *arg1, void *arg2, u8 arg3, s32 arg4, s32 arg5);
 
-struct func_1506F1A8_stack {
-    s32 unk00;
-    struct127 *unk04;
-    u8 unk08;
-    s8 unk09;
+/* Parameter block for func_151994B8 (CharacterFlamethrowerSetup in game_1C2C60.c). */
+typedef struct Func151994B8Desc {
+    s32 kind;
+    struct127 *owner;
+    u8 ownerUniqueId;
+    s8 joint;
     u8 pad0A[2];
     f32 unk0C;
     f32 unk10;
@@ -98,10 +99,10 @@ struct func_1506F1A8_stack {
     f32 unk48;
     s8 unk4C;
     u8 pad4D[3];
-    u8 unk50;
-    u8 unk51;
-    u8 unk52;
-    u8 unk53;
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
     s8 unk54;
     u8 pad55[3];
     f32 unk58;
@@ -163,9 +164,9 @@ struct func_1506F1A8_stack {
     f32 unk114;
     s16 unk118;
     s16 unk11A;
-};
+} Func151994B8Desc;
 
-void func_151994B8(s32 arg0, struct func_1506F1A8_stack *arg1, s32 arg2, s32 arg3);
+void func_151994B8(s32 arg0, Func151994B8Desc *arg1, s32 arg2, s32 arg3);
 
 /* matching: four scalars, not s32[4] (an array gets an 8-aligned, larger frame) */
 struct func_1506C32C_stack {
@@ -505,7 +506,7 @@ void func_1506B82C(void) {
 }
 
 void func_1506B860(void) {
-    func_1506B100(181, 0.6299999952316284f, 5.0f);
+    func_1506B100(181, 0.63f, 5.0f);
 }
 
 void func_1506B88C(void) {
@@ -1005,7 +1006,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     }
     obj->unk7A = angle;
     obj->unk76 = angle;
-    obj->unk40 = (s16)((u16)angle + 0x4000) * 0.0054931640625f;
+    obj->unk40 = (s16)((u16)angle + 0x4000) * 0.005493164f;
     obj->gravity = gravity;
     obj->y_velocity = yVelocity;
     obj->xz_velocity = speed;
@@ -1103,7 +1104,7 @@ void func_1506CE6C(void) {
     elevation = 45.0f;
     dist = 323.0f;
     scale = 0.5f;
-    heading = (D_800D154C->unk7A + 0x4000) * 0.0054931640625f;
+    heading = (D_800D154C->unk7A + 0x4000) * 0.005493164f;
     bone = -1;
     allocExt = 0;
     pos = NULL;
@@ -2009,100 +2010,100 @@ void func_1506F17C(s32 arg0) {
 }
 
 void func_1506F1A8(s32 arg0) {
-    struct func_1506F1A8_stack sp1C;
+    Func151994B8Desc descriptor;
     struct127 *obj;
 
     obj = D_800D154C;
-    sp1C.unk04 = obj;
-    sp1C.unk08 = obj->unique_id;
-    sp1C.unk14 = 80.0f;
-    sp1C.unk20 = 102.0f;
-    sp1C.unk24 = 0.1223f;
-    sp1C.unk28 = 0.6f;
-    sp1C.unk2C = 1200.0f;
-    sp1C.unk40 = 0.656f;
-    sp1C.unk30 = 26.0f;
-    sp1C.unk34 = 4.8f;
-    sp1C.unk44 = -187.0f;
-    sp1C.unk48 = 4.64f;
-    sp1C.unk58 = 0.00502f;
-    sp1C.unk5C = 0.003f;
-    sp1C.unk64 = 0.606f;
-    sp1C.unk6C = 0.418f;
-    sp1C.unk68 = 0.23900001f;
-    sp1C.unk70 = 0.20500001f;
-    sp1C.unk74 = 1.177f;
-    sp1C.unk78 = 0.572f;
-    sp1C.unk7C = 0.81900007f;
-    sp1C.unk80 = 0.846f;
-    sp1C.unk84 = 0.94086f;
-    sp1C.unk88 = 0.942411f;
-    sp1C.unk90 = 0.39200002f;
-    sp1C.unk98 = 0.008f;
-    sp1C.unkA8 = 0.24900001f;
-    sp1C.unkAC = 0.35200003f;
-    sp1C.unkBC = 14.0f;
-    sp1C.unkC0 = 9.0f;
-    sp1C.unkCC = 25.0f;
-    sp1C.unkD0 = 0.44000003f;
-    sp1C.unkD4 = 0.45100003f;
-    sp1C.unkEC = 0.30900002f;
-    sp1C.unk09 = 0xC;
-    sp1C.unk3E = 0xC8;
-    sp1C.unkF0 = 0.312f;
-    sp1C.unk38 = -1;
-    sp1C.unk39 = 2;
-    sp1C.unk3A = -1;
-    sp1C.unk4C = -1;
-    sp1C.unk00 = 0xF;
-    sp1C.unk54 = 1;
-    sp1C.unk50 = 0x3C;
-    sp1C.unk51 = 0xFF;
-    sp1C.unk52 = 0xEB;
-    sp1C.unk53 = 0x52;
-    sp1C.unkFC = 402.0f;
-    sp1C.unk60 = 0x1E;
-    sp1C.unk62 = 0xF;
-    sp1C.unk8C = 0xC;
-    sp1C.unk8E = 0x15;
-    sp1C.unk94 = 0x50;
-    sp1C.unk95 = 0x78;
-    sp1C.unkB0 = 4;
-    sp1C.unkB4 = 2;
-    sp1C.unkB8 = 0x1E;
-    sp1C.unkBA = 0x11;
-    sp1C.unk0C = 0.0f;
-    sp1C.unk10 = 0.0f;
-    sp1C.unk18 = 0.0f;
-    sp1C.unk1C = 0.0f;
-    sp1C.unk3B = 0;
-    sp1C.unk3C = 0;
-    sp1C.unk3D = 0;
-    sp1C.unk9C = 0.0f;
-    sp1C.unkA0 = 5.0f;
-    sp1C.unkA4 = 100.0f;
-    sp1C.unkC4 = 0.5f;
-    sp1C.unkC8 = 0.5f;
-    sp1C.unkD8 = 0x50;
-    sp1C.unkDA = 0x78;
-    sp1C.unkDC = 0x10;
-    sp1C.unkDE = 0xF;
-    sp1C.unkE0 = 0.0f;
-    sp1C.unkE4 = 5.0f;
-    sp1C.unkE8 = 100.0f;
-    sp1C.unkF4 = 0x28;
-    sp1C.unkF6 = 0xF;
-    sp1C.unkF8 = 0x50;
-    sp1C.unkFA = 0x50;
-    sp1C.unk118 = 0x14;
-    sp1C.unk11A = 0xC;
-    sp1C.unk100 = 303.0f;
-    sp1C.unk104 = 0.101f;
-    sp1C.unk108 = 0.19800001f;
-    sp1C.unk10C = 45.0f;
-    sp1C.unk110 = -0.65500003f;
-    sp1C.unk114 = 0.30800003f;
-    func_151994B8(0, &sp1C, 0xFF, 0);
+    descriptor.owner = obj;
+    descriptor.ownerUniqueId = obj->unique_id;
+    descriptor.unk14 = 80.0f;
+    descriptor.unk20 = 102.0f;
+    descriptor.unk24 = 0.1223f;
+    descriptor.unk28 = 0.6f;
+    descriptor.unk2C = 1200.0f;
+    descriptor.unk40 = 0.656f;
+    descriptor.unk30 = 26.0f;
+    descriptor.unk34 = 4.8f;
+    descriptor.unk44 = -187.0f;
+    descriptor.unk48 = 4.64f;
+    descriptor.unk58 = 0.00502f;
+    descriptor.unk5C = 0.003f;
+    descriptor.unk64 = 0.606f;
+    descriptor.unk6C = 0.418f;
+    descriptor.unk68 = 0.23900001f;
+    descriptor.unk70 = 0.20500001f;
+    descriptor.unk74 = 1.177f;
+    descriptor.unk78 = 0.572f;
+    descriptor.unk7C = 0.81900007f;
+    descriptor.unk80 = 0.846f;
+    descriptor.unk84 = 0.94086f;
+    descriptor.unk88 = 0.942411f;
+    descriptor.unk90 = 0.39200002f;
+    descriptor.unk98 = 0.008f;
+    descriptor.unkA8 = 0.24900001f;
+    descriptor.unkAC = 0.35200003f;
+    descriptor.unkBC = 14.0f;
+    descriptor.unkC0 = 9.0f;
+    descriptor.unkCC = 25.0f;
+    descriptor.unkD0 = 0.44000003f;
+    descriptor.unkD4 = 0.45100003f;
+    descriptor.unkEC = 0.30900002f;
+    descriptor.joint = 0xC;
+    descriptor.unk3E = 0xC8;
+    descriptor.unkF0 = 0.312f;
+    descriptor.unk38 = -1;
+    descriptor.unk39 = 2;
+    descriptor.unk3A = -1;
+    descriptor.unk4C = -1;
+    descriptor.kind = 0xF;
+    descriptor.unk54 = 1;
+    descriptor.red = 0x3C;
+    descriptor.green = 0xFF;
+    descriptor.blue = 0xEB;
+    descriptor.alpha = 0x52;
+    descriptor.unkFC = 402.0f;
+    descriptor.unk60 = 0x1E;
+    descriptor.unk62 = 0xF;
+    descriptor.unk8C = 0xC;
+    descriptor.unk8E = 0x15;
+    descriptor.unk94 = 0x50;
+    descriptor.unk95 = 0x78;
+    descriptor.unkB0 = 4;
+    descriptor.unkB4 = 2;
+    descriptor.unkB8 = 0x1E;
+    descriptor.unkBA = 0x11;
+    descriptor.unk0C = 0.0f;
+    descriptor.unk10 = 0.0f;
+    descriptor.unk18 = 0.0f;
+    descriptor.unk1C = 0.0f;
+    descriptor.unk3B = 0;
+    descriptor.unk3C = 0;
+    descriptor.unk3D = 0;
+    descriptor.unk9C = 0.0f;
+    descriptor.unkA0 = 5.0f;
+    descriptor.unkA4 = 100.0f;
+    descriptor.unkC4 = 0.5f;
+    descriptor.unkC8 = 0.5f;
+    descriptor.unkD8 = 0x50;
+    descriptor.unkDA = 0x78;
+    descriptor.unkDC = 0x10;
+    descriptor.unkDE = 0xF;
+    descriptor.unkE0 = 0.0f;
+    descriptor.unkE4 = 5.0f;
+    descriptor.unkE8 = 100.0f;
+    descriptor.unkF4 = 0x28;
+    descriptor.unkF6 = 0xF;
+    descriptor.unkF8 = 0x50;
+    descriptor.unkFA = 0x50;
+    descriptor.unk118 = 0x14;
+    descriptor.unk11A = 0xC;
+    descriptor.unk100 = 303.0f;
+    descriptor.unk104 = 0.101f;
+    descriptor.unk108 = 0.19800001f;
+    descriptor.unk10C = 45.0f;
+    descriptor.unk110 = -0.65500003f;
+    descriptor.unk114 = 0.30800003f;
+    func_151994B8(0, &descriptor, 0xFF, 0);
 }
 
 void func_1506F524(s32 arg0) {
@@ -2110,23 +2111,23 @@ void func_1506F524(s32 arg0) {
 }
 
 void func_1506F54C(s32 arg0) {
-    struct func_1506F1A8_stack descriptor;
+    Func151994B8Desc descriptor;
 
-    descriptor.unk04 = D_800D154C;
-    descriptor.unk08 = D_800D154C->unique_id;
-    descriptor.unk09 = 13;
+    descriptor.owner = D_800D154C;
+    descriptor.ownerUniqueId = D_800D154C->unique_id;
+    descriptor.joint = 13;
     descriptor.unk0C = 22.0f;
     descriptor.unk10 = 22.0f;
     descriptor.unk14 = 165.0f;
     descriptor.unk18 = 22.0f;
     descriptor.unk1C = 22.0f;
     descriptor.unk20 = 193.0f;
-    descriptor.unk24 = 1.13800001f;
-    descriptor.unk28 = 0.795000017f;
+    descriptor.unk24 = 1.138f;
+    descriptor.unk28 = 0.795f;
     descriptor.unk2C = 370.0f;
-    descriptor.unk40 = 0.61500001f;
-    descriptor.unk30 = 17.8000011f;
-    descriptor.unk34 = 4.9000001f;
+    descriptor.unk40 = 0.615f;
+    descriptor.unk30 = 17.800001f;
+    descriptor.unk34 = 4.9f;
     descriptor.unk3E = 159;
     descriptor.unk38 = 0;
     descriptor.unk39 = -1;
@@ -2135,38 +2136,38 @@ void func_1506F54C(s32 arg0) {
     descriptor.unk3C = 0;
     descriptor.unk3D = 0;
     descriptor.unk44 = -191.0f;
-    descriptor.unk48 = 7.8499999f;
+    descriptor.unk48 = 7.85f;
     descriptor.unk4C = -1;
-    descriptor.unk00 = 15;
+    descriptor.kind = 15;
     descriptor.unk54 = 1;
-    descriptor.unk50 = 60;
-    descriptor.unk51 = 255;
-    descriptor.unk52 = 235;
-    descriptor.unk53 = 82;
-    descriptor.unk58 = 0.00289999996f;
-    descriptor.unk5C = 0.00234999997f;
+    descriptor.red = 60;
+    descriptor.green = 255;
+    descriptor.blue = 235;
+    descriptor.alpha = 82;
+    descriptor.unk58 = 0.0029f;
+    descriptor.unk5C = 0.00235f;
     descriptor.unk60 = 35;
     descriptor.unk62 = 10;
-    descriptor.unk64 = 0.802000046f;
-    descriptor.unk6C = 0.367000014f;
-    descriptor.unk68 = 0.589000046f;
-    descriptor.unk70 = 0.307000011f;
-    descriptor.unk74 = 0.614000022f;
-    descriptor.unk78 = 0.299000025f;
+    descriptor.unk64 = 0.80200005f;
+    descriptor.unk6C = 0.367f;
+    descriptor.unk68 = 0.58900005f;
+    descriptor.unk70 = 0.307f;
+    descriptor.unk74 = 0.614f;
+    descriptor.unk78 = 0.29900003f;
     descriptor.unk7C = 0.0f;
-    descriptor.unk80 = 0.738000035f;
-    descriptor.unk84 = 0.962646008f;
-    descriptor.unk88 = 0.961867988f;
+    descriptor.unk80 = 0.73800003f;
+    descriptor.unk84 = 0.962646f;
+    descriptor.unk88 = 0.961868f;
     descriptor.unk8C = 15;
     descriptor.unk8E = 17;
-    descriptor.unk90 = 0.369000018f;
+    descriptor.unk90 = 0.36900002f;
     descriptor.unk94 = 80;
     descriptor.unk95 = 80;
-    descriptor.unk98 = 0.0240000002f;
+    descriptor.unk98 = 0.024f;
     descriptor.unk9C = 22.0f;
     descriptor.unkA0 = 58.0f;
     descriptor.unkA4 = 212.0f;
-    descriptor.unkA8 = 0.200000003f;
+    descriptor.unkA8 = 0.2f;
     descriptor.unkAC = 0.105000004f;
     descriptor.unkB0 = 3;
     descriptor.unkB4 = 2;
@@ -2174,11 +2175,11 @@ void func_1506F54C(s32 arg0) {
     descriptor.unkBA = 10;
     descriptor.unkBC = 6.0f;
     descriptor.unkC0 = 10.0f;
-    descriptor.unkC4 = 0.300000012f;
-    descriptor.unkC8 = 0.200000003f;
+    descriptor.unkC4 = 0.3f;
+    descriptor.unkC8 = 0.2f;
     descriptor.unkCC = 37.0f;
-    descriptor.unkD0 = 0.751000047f;
-    descriptor.unkD4 = 0.322000027f;
+    descriptor.unkD0 = 0.75100005f;
+    descriptor.unkD4 = 0.32200003f;
     descriptor.unkD8 = 80;
     descriptor.unkDA = 80;
     descriptor.unkDC = 15;
@@ -2186,19 +2187,19 @@ void func_1506F54C(s32 arg0) {
     descriptor.unkE0 = 22.0f;
     descriptor.unkE4 = 130.0f;
     descriptor.unkE8 = 306.0f;
-    descriptor.unkEC = 0.208000004f;
-    descriptor.unkF0 = 0.193000004f;
+    descriptor.unkEC = 0.208f;
+    descriptor.unkF0 = 0.193f;
     descriptor.unkF4 = 35;
     descriptor.unkF6 = 15;
     descriptor.unkF8 = 80;
     descriptor.unkFA = 100;
     descriptor.unkFC = 198.0f;
     descriptor.unk100 = 102.0f;
-    descriptor.unk104 = 0.0400000028f;
-    descriptor.unk108 = 0.0400000028f;
+    descriptor.unk104 = 0.040000003f;
+    descriptor.unk108 = 0.040000003f;
     descriptor.unk10C = 89.0f;
-    descriptor.unk110 = -0.495000035f;
-    descriptor.unk114 = 0.443000019f;
+    descriptor.unk110 = -0.49500004f;
+    descriptor.unk114 = 0.44300002f;
     descriptor.unk118 = 15;
     descriptor.unk11A = 17;
     func_151994B8(0, &descriptor, 0xFF, 0);
@@ -2209,18 +2210,15 @@ void func_1506F8C0(s32 arg0) {
 }
 
 void func_1506F8F0(s32 arg0) {
-    struct127* a0;
-    func_150E2EA4(a0 = D_800D154C, a0->unique_id, 0x14, -1, 482.0f, -127.0f, -45.0f, 659.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
+    func_150E2EA4(D_800D154C, D_800D154C->unique_id, 0x14, -1, 482.0f, -127.0f, -45.0f, 659.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
 void func_1506F9C0(s32 arg0) {
-    struct127* a0;
-    func_150E2EA4(a0 = D_800D154C, a0->unique_id, 0x14, -1, 241.0f, -127.0f, -45.0f, 418.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
+    func_150E2EA4(D_800D154C, D_800D154C->unique_id, 0x14, -1, 241.0f, -127.0f, -45.0f, 418.0f, -211.0f, -114.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
 void func_1506FA90(s32 arg0) {
-    struct127* a0;
-    func_150E2EA4(a0 = D_800D154C, a0->unique_id, 0x1A, -1, -181.0f, -218.0f, -1.0f, -681.0f, -584.0f, -2.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
+    func_150E2EA4(D_800D154C, D_800D154C->unique_id, 0x1A, -1, -181.0f, -218.0f, -1.0f, -681.0f, -584.0f, -2.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 0, 0.0f);
 }
 
 void func_1506FB60(s32 arg0) {
@@ -2261,8 +2259,7 @@ void func_1506FCFC(s32 arg0) {
 
 
 void func_1506FD30(s32 arg0) {
-    struct127* a0;
-    func_150E2EA4(a0 = D_800D154C, a0->unique_id, 1, -1, 0.0f, 0, 345.0f, 0.0f, 0, 414.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 1, 50.0f);
+    func_150E2EA4(D_800D154C, D_800D154C->unique_id, 1, -1, 0.0f, 0, 345.0f, 0.0f, 0, 414.0f, 3, 3, 5, 20.0f, (func_150ADA68() * 10.0f) + 40.0f, 1, 50.0f);
 }
 
 void func_1506FDF0(s32 arg0) {
@@ -2470,7 +2467,7 @@ void func_15070300(s32 arg0) {
     sp80 = D_80099B70;
     sp74 = D_80099B7C;
     sp6C[0] = (func_150ADA68() * 30.0f) + 40.0f;
-    sp6C[1] = (func_150ADA68() * 2.512000084f) + 3.590000153f;
+    sp6C[1] = (func_150ADA68() * 2.512f) + 3.5900002f;
     srcs[0] = (s32 *)&sp80;
     dsts[0] = sp60;
     func_15145EA4(srcs, dsts, (s32)D_800D154C->unk1D4 + 0x100, 1);
@@ -2523,22 +2520,22 @@ void func_15070860(s32 arg0) {
 }
 
 void func_15070898(s32 arg0) {
-    struct func_1506F1A8_stack descriptor;
+    Func151994B8Desc descriptor;
 
-    descriptor.unk04 = D_800D154C;
-    descriptor.unk08 = D_800D154C->unique_id;
-    descriptor.unk09 = 9;
-    descriptor.unk0C = -4.73400116f;
+    descriptor.owner = D_800D154C;
+    descriptor.ownerUniqueId = D_800D154C->unique_id;
+    descriptor.joint = 9;
+    descriptor.unk0C = -4.734001f;
     descriptor.unk10 = -111.957596f;
-    descriptor.unk14 = 33.4733963f;
-    descriptor.unk18 = -8.83799744f;
+    descriptor.unk14 = 33.473396f;
+    descriptor.unk18 = -8.837997f;
     descriptor.unk1C = -159.75f;
-    descriptor.unk20 = 33.4733963f;
-    descriptor.unk24 = 0.277999997f;
-    descriptor.unk28 = 0.828000069f;
+    descriptor.unk20 = 33.473396f;
+    descriptor.unk24 = 0.278f;
+    descriptor.unk28 = 0.82800007f;
     descriptor.unk2C = 312.0f;
-    descriptor.unk40 = 0.324999988f;
-    descriptor.unk30 = 7.0999999f;
+    descriptor.unk40 = 0.325f;
+    descriptor.unk30 = 7.1f;
     descriptor.unk34 = 5.0f;
     descriptor.unk3E = 0xB4;
     descriptor.unk38 = -1;
@@ -2548,70 +2545,70 @@ void func_15070898(s32 arg0) {
     descriptor.unk3C = -1;
     descriptor.unk3D = -1;
     descriptor.unk44 = -232.0f;
-    descriptor.unk48 = 9.06999969f;
+    descriptor.unk48 = 9.07f;
     descriptor.unk4C = -1;
-    descriptor.unk00 = 0xF;
+    descriptor.kind = 0xF;
     descriptor.unk54 = 0x11;
-    descriptor.unk50 = 0x3C;
-    descriptor.unk51 = 0xFF;
-    descriptor.unk52 = 0xEB;
-    descriptor.unk53 = 0x52;
-    descriptor.unk58 = 0.00688999984f;
-    descriptor.unk5C = 0.0103799999f;
+    descriptor.red = 0x3C;
+    descriptor.green = 0xFF;
+    descriptor.blue = 0xEB;
+    descriptor.alpha = 0x52;
+    descriptor.unk58 = 0.00689f;
+    descriptor.unk5C = 0.01038f;
     descriptor.unk60 = 0x19;
     descriptor.unk62 = 0xA;
-    descriptor.unk64 = 0.367000014f;
-    descriptor.unk6C = 0.256000012f;
-    descriptor.unk68 = 0.350000024f;
-    descriptor.unk70 = 0.205000013f;
-    descriptor.unk74 = 0.776000023f;
-    descriptor.unk78 = 0.811000049f;
+    descriptor.unk64 = 0.367f;
+    descriptor.unk6C = 0.256f;
+    descriptor.unk68 = 0.35000002f;
+    descriptor.unk70 = 0.20500001f;
+    descriptor.unk74 = 0.776f;
+    descriptor.unk78 = 0.81100005f;
     descriptor.unk7C = 0.125f;
-    descriptor.unk80 = 1.31100011f;
-    descriptor.unk84 = 0.935118973f;
-    descriptor.unk88 = 0.943452001f;
+    descriptor.unk80 = 1.3110001f;
+    descriptor.unk84 = 0.935119f;
+    descriptor.unk88 = 0.943452f;
     descriptor.unk8C = 0xC;
     descriptor.unk8E = 0x15;
-    descriptor.unk90 = 0.307000011f;
+    descriptor.unk90 = 0.307f;
     descriptor.unk94 = 0x50;
     descriptor.unk95 = 0x50;
-    descriptor.unk98 = 0.00200000009f;
-    descriptor.unk9C = -8.83799744f;
+    descriptor.unk98 = 0.002f;
+    descriptor.unk9C = -8.837997f;
     descriptor.unkA0 = -159.75f;
-    descriptor.unkA4 = 33.4733963f;
-    descriptor.unkA8 = 0.300000012f;
-    descriptor.unkAC = 0.401000023f;
+    descriptor.unkA4 = 33.473396f;
+    descriptor.unkA8 = 0.3f;
+    descriptor.unkAC = 0.40100002f;
     descriptor.unkB0 = 4;
     descriptor.unkB4 = 2;
     descriptor.unkB8 = 0x1A;
     descriptor.unkBA = 0x10;
     descriptor.unkBC = 6.0f;
     descriptor.unkC0 = 5;
-    descriptor.unkC4 = 0.300000012f;
-    descriptor.unkC8 = 0.300000012f;
+    descriptor.unkC4 = 0.3f;
+    descriptor.unkC8 = 0.3f;
     descriptor.unkCC = 50.0f;
     descriptor.unkD0 = 0.0f;
-    descriptor.unkD4 = 0.712000012f;
+    descriptor.unkD4 = 0.712f;
     descriptor.unkD8 = 0x50;
     descriptor.unkDA = 0x78;
     descriptor.unkDC = 0xF;
     descriptor.unkDE = 0x11;
-    descriptor.unkE0 = -8.83799744f;
+    descriptor.unkE0 = -8.837997f;
     descriptor.unkE4 = -159.75f;
-    descriptor.unkE8 = 33.4733963f;
-    descriptor.unkEC = 0.204000011f;
-    descriptor.unkF0 = 0.504000008f;
+    descriptor.unkE8 = 33.473396f;
+    descriptor.unkEC = 0.20400001f;
+    descriptor.unkF0 = 0.504f;
     descriptor.unkF4 = 0x1E;
     descriptor.unkF6 = 0xF;
     descriptor.unkF8 = 0x50;
     descriptor.unkFA = 0x50;
     descriptor.unkFC = 140.0f;
     descriptor.unk100 = 182.0f;
-    descriptor.unk104 = 0.160000011f;
+    descriptor.unk104 = 0.16000001f;
     descriptor.unk108 = 0.113000005f;
     descriptor.unk10C = 42.0f;
-    descriptor.unk110 = -0.518000007f;
-    descriptor.unk114 = 0.376000017f;
+    descriptor.unk110 = -0.518f;
+    descriptor.unk114 = 0.37600002f;
     descriptor.unk118 = 0xA;
     descriptor.unk11A = 0x19;
     func_151994B8(0, &descriptor, 0xFF, 0);
@@ -2716,8 +2713,8 @@ void func_15070F60(s32 arg0) {
     sp58.header2.unk8 = (s32)sp58.sp64[2];
 
     func_151602C0(&sp58.header, &sp58.header2, (func_150ADA20() % 0xC9U) + 0x37, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
-    func_151D5404((struct17 *)sp58.sp64, 506.0f, 1013.0f, 0.0009871668880805373f, 0xF, 0x14, 0xFF, 0);
-    func_151D5334((struct17 *)sp58.sp64, 506.0f, 1013.0f, 0.0009871668880805373f, 5, 0xFF, 0);
+    func_151D5404((struct17 *)sp58.sp64, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
+    func_151D5334((struct17 *)sp58.sp64, 506.0f, 1013.0f, 0.0009871669f, 5, 0xFF, 0);
 }
 void func_15071230(s32 arg0) {
     func_15070F60(0);
@@ -2842,7 +2839,7 @@ void func_150716EC(s32 arg0) {
     tmp.unk0 = temp_v0->x_position;
     tmp.unk4 = temp_v0->y_position;
     tmp.unk8 = temp_v0->z_position;
-    func_151D5404(&tmp, 1502.0f, 3000.0f, 0.00033333332976326346f, 0xC, 0xF, 0xFF, 0);
+    func_151D5404(&tmp, 1502.0f, 3000.0f, 0.00033333333f, 0xC, 0xF, 0xFF, 0);
 }
 
 void func_15071764(s32 arg0) {
@@ -3042,7 +3039,7 @@ void func_15071E3C(void) {
 void func_15071E58(void) {
     D_800D1878 = D_800D1580 & 0xFF;
     D_800D154C->unk244 = (D_800D1580 >> 8) & 0xFF;
-    func_1505E650(D_800D154C, D_800D154C->unk244, 1.2000000476837158f, 3.0f, D_800D1878, 0.0f, 0);
+    func_1505E650(D_800D154C, D_800D154C->unk244, 1.2f, 3.0f, D_800D1878, 0.0f, 0);
 }
 
 void func_15071ED4(void) {
@@ -3500,7 +3497,7 @@ void func_15072F10(void) {
 
     temp = (s16)(D_800D154C->unk1D1 * 200);
     *(s16 *)((u8 *)D_800D154C->unk31C + 0x24) -= 1;
-    func_1505A184((u16)(D_800D154C->unk7A - D_800D154C->unk31C->unk12), 2000.0f, (f32)temp * 0.0054931640625f, &sp4C, &sp48, &sp44);
+    func_1505A184((u16)(D_800D154C->unk7A - D_800D154C->unk31C->unk12), 2000.0f, (f32)temp * 0.005493164f, &sp4C, &sp48, &sp44);
     sp4C = sp4C * 5000.0f + D_800D154C->x_position;
     sp48 = sp48 * 5000.0f + D_800D154C->z_position;
     sp44 = sp44 * 5000.0f + D_800D154C->y_position;
@@ -3576,7 +3573,7 @@ u8 *func_15073118(u8 *arg0, s32 arg1, s32 arg2, f32 arg3, f32 arg4, f32 arg5, f3
     obj->x_position = x;
     obj->y_position = y;
     obj->z_position = z;
-    obj->unk76 = obj->unk7A = (f32)((struct127 *)arg0)->unk7A + arg6 * 182.0444489f;
+    obj->unk76 = obj->unk7A = (f32)((struct127 *)arg0)->unk7A + arg6 * 182.04445f;
     obj->interaction_state = 0x21;
     obj->immune = 0xFF;
     obj->unkF8 = 2;
@@ -3948,7 +3945,7 @@ void func_15073FA0(void) {
                 if (player->unk31C->unk198 != 0) {
                     {
                         typedef s32 padT;
-                        func_1505A184((u16)(s32)((45.0f - B(player->unk31C, 0x170, f32)) * 182.0444489f) & 0xFFFF, speed * 4.0f, 0.0f, &x1, &y1, &z1);
+                        func_1505A184((u16)(s32)((45.0f - B(player->unk31C, 0x170, f32)) * 182.04445f) & 0xFFFF, speed * 4.0f, 0.0f, &x1, &y1, &z1);
                         obj->y_velocity = -y1;
                     }
                     player = D_800D154C;
@@ -4000,13 +3997,13 @@ void func_15073FA0(void) {
                 }
             } else if (player->id == 0x9A) {
                 rnd = (func_150ADA20() & 0xFFF) - 0x800;
-                speed = (f32)(s16)(func_150ADA20() % 800U) * 0.009999999776f;
+                speed = (f32)(s16)(func_150ADA20() % 800U) * 0.01f;
                 state = 7;
                 func_1505A184(D_800D154C->unk76 + rnd, 30.0f - speed, 0.0f, &x2, &z2, &y2);
                 obj->x_position -= x2;
                 obj->z_position -= z2;
                 player = D_800D154C;
-                obj->xz_velocity = (player->xz_velocity * 1.350000024f) + 6.0f;
+                obj->xz_velocity = (player->xz_velocity * 1.35f) + 6.0f;
                 obj->y_velocity = player->y_velocity;
                 obj->immune = 0xFF;
                 obj->y_position = player->y_position - 40.0f;
