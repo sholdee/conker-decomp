@@ -1166,7 +1166,7 @@ segments:
       - [0x234300, rodata]
       - [0x234310, rodata]
       - [0x234320, rodata]
-      - [0x234330, rodata]
+      - {start: 0x234330, type: .data, name: game_1C2C60, linker_section_order: .rodata}
       - [0x234390, rodata]
       - [0x2343A0, rodata]
       - [0x2343C0, rodata]
