@@ -203,15 +203,11 @@ typedef struct {
     f32 rate;    /* 0..1, set by func_150CDB6C */
 } BurstTimer;
 
-/* Emitter object driven by func_150CD7F8; D_80088870 points at one. */
+/* Timed effect driven by func_150CD7F8 (a D_8008A4E8 tick callback); D_80088870 points at one. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unk0C;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BurstTimer timer;
-} BurstEmitter;
+} DriftBurstEmitter;
 
 extern BurstYaws D_80088874;
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
@@ -221,7 +217,7 @@ extern void func_15152874(DriftBurst *burst, u8 arg1, s32 arg2);
  * Emitter update: accumulates rate over time and, for each whole unit, spawns a burst at a random distance
  * along one of the D_80088874 yaws, but only if that yaw is within pi/8 of the current camera's heading.
  */
-void func_150CD7F8(BurstEmitter *emitter) {
+void func_150CD7F8(DriftBurstEmitter *emitter) {
     BurstTimer *timer = &emitter->timer;
     DriftBurst burst;
     BurstYaws yaws;
@@ -270,14 +266,14 @@ void func_150CD7F8(BurstEmitter *emitter) {
                 burst.speedRange = 25.2f;
                 burst.gravityBase = -1.108f;
                 burst.gravityRange = 0.201f;
-                func_15152874(&burst, emitter->unk0C, emitter->unk01);
+                func_15152874(&burst, emitter->base.header.owner, emitter->base.header.kind);
             }
             timer->pending -= 1.0f;
         } while (timer->pending > 1.0f);
     }
 }
 
-extern BurstEmitter *D_80088870;
+extern DriftBurstEmitter *D_80088870;
 
 /* Sets the burst emitter's rate from a 0..255 intensity. */
 void func_150CDB6C(s32 intensity) {

@@ -124,18 +124,15 @@ typedef struct {
     /* 0x14 */ f32 spawnAccum;
 } BurstSpawner;
 
+/* Timed effect driven by func_150E9E34 (a D_8008A4E8 tick callback). */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BurstSpawner spawner;
-} BurstEmitter;
+} RandomBurstEmitter;
 
 /* Emitter update (handler table entry): accumulates a random spawn rate and, for each whole unit,
  * fires a func_150E9890 burst at the spawner's source with a random direction and scale. */
-void func_150E9E34(BurstEmitter *emitter) {
+void func_150E9E34(RandomBurstEmitter *emitter) {
     BurstSpawner *spawner;
     Vec3f pos;
     Vec3f dir;
@@ -151,7 +148,7 @@ void func_150E9E34(BurstEmitter *emitter) {
         yaw = func_150ADA20();
         pitch = func_150ADA20();
         func_15143794(yaw & 0xFF, 0x40 - (pitch % 129U), func_150ADA68() * 600.0f * 0.01f, &dir);
-        func_150E9890(&pos, &dir, scale, emitter->unkC, emitter->unk1);
+        func_150E9890(&pos, &dir, scale, emitter->base.header.owner, emitter->base.header.kind);
         spawner->spawnAccum -= 1.0f;
     }
 }

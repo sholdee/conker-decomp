@@ -16,7 +16,7 @@ typedef struct {
     s16 duration;    /* 0x96 */
     u8 rotMode;      /* 0x98 0: func_150A8050, 1: func_15187D6C */
     u8 pad99[7];
-} BurstPiece; /* size 0xA0 */
+} FadeBurstPiece; /* size 0xA0 */
 
 /* Burst effect object: 12 pieces flying outwards from a point and fading. */
 typedef struct {
@@ -27,10 +27,10 @@ typedef struct {
     f32 z;               /* 0x98 */
     f32 scaleYZ;         /* 0x9C */
     f32 scaleX;          /* 0xA0 */
-    BurstPiece *pieces;  /* 0xA4 */
+    FadeBurstPiece *pieces;  /* 0xA4 */
     s16 timer;           /* 0xA8 */
     s16 duration;        /* 0xAA */
-} BurstEffect; /* size 0xB0 */
+} FadeBurstEffect; /* size 0xB0 */
 
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_10004074(void *);
@@ -43,12 +43,12 @@ void func_15187D6C(MtxF mtx, f32 rx, f32 ry, f32 rz);
 
 /* Spawns a burst effect at (x, y, z) with 12 pieces in three rings of four. */
 void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJitter, f32 scaleYZ, f32 scaleX) {
-    BurstEffect *burst;
+    FadeBurstEffect *burst;
     s32 i;
 
-    burst = func_15167A68(6, 0, sizeof(BurstEffect), 1, 0xFF, 1);
+    burst = func_15167A68(6, 0, sizeof(FadeBurstEffect), 1, 0xFF, 1);
     if (burst != NULL) {
-        burst->pieces = allocate_memory(BURST_NUM_PIECES * sizeof(BurstPiece), 1, 2, 1);
+        burst->pieces = allocate_memory(BURST_NUM_PIECES * sizeof(FadeBurstPiece), 1, 2, 1);
         if (burst->pieces == NULL) {
             func_1516972C(&burst->header);
             return;
@@ -90,7 +90,7 @@ void func_151875E0(f32 x, f32 y, f32 z, s32 speed, s32 duration, s32 durationJit
 }
 
 /* Per-frame update: advances the burst timer and slides each piece outwards, slowing as it ages. */
-void func_15187978(BurstEffect *burst) {
+void func_15187978(FadeBurstEffect *burst) {
     s32 i;
 
     if (burst->timer < 0) {
@@ -116,7 +116,7 @@ void func_15187978(BurstEffect *burst) {
 }
 
 /* Draws the 12 burst pieces, each fading out over its own duration. */
-Gfx *func_15187A98(Gfx *gdl, BurstEffect *burst, s32 arg2) {
+Gfx *func_15187A98(Gfx *gdl, FadeBurstEffect *burst, s32 arg2) {
     s32 i;
     s32 alpha;
     MtxF mtx;

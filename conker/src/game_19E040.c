@@ -37,7 +37,7 @@ typedef struct {
     /* 0x00 */ u16 modelId;
     /* 0x04 */ f32 offset[3];
     /* 0x10 */ f32 rotation[3];
-} BurstPiece;
+} ModelBurstPiece;
 
 /* Start offsets of the six burst models of func_15170B90. */
 const f32 D_800A6E90[6][3] = {
@@ -50,7 +50,7 @@ const f32 D_800A6E90[6][3] = {
 };
 
 /* The six pieces func_15170F4C throws out of the actor (model, start offset, rotation). */
-const BurstPiece D_800A6ED8[6] = {
+const ModelBurstPiece D_800A6ED8[6] = {
     { 338, { -6.0f, 84.0f, 89.0f }, { -40.0f, 0.0f, 0.0f } },
     { 338, { 89.0f, 75.0f, -57.0f }, { -40.0f, 120.0f, 0.0f } },
     { 338, { -79.0f, 59.0f, -57.0f }, { -40.0f, 240.0f, 0.0f } },
@@ -151,7 +151,7 @@ void func_15170EC4(WorldObject *actor, u8 owner, s32 list) {
 void func_15170F4C(WorldObject *actor, u8 owner, s32 list) {
     s32 i;
     ModelFxTemplate fx;
-    BurstPiece *piece;
+    ModelBurstPiece *piece;
     f32 x;
     f32 y;
     f32 z;
