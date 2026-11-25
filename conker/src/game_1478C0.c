@@ -2,7 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_1511A410(s32 arg0, s32 *arg1) {
+/**
+ * Scans a display list up to its G_ENDDL for the first two G_SETTIMG commands.
+ * Returns the index of the first one and stores the index of the second in *second.
+ */
+s32 func_1511A410(Gfx *dl, s32 *second) {
     s32 count;
     s32 found[2];
     s32 i;
@@ -10,135 +14,147 @@ s32 func_1511A410(s32 arg0, s32 *arg1) {
     found[0] = 0;
     found[1] = 0;
     count = 0;
-    for (i = 0; *(s8 *)((i << 3) + arg0) != -0x21 && count < 2; i++) {
-        switch (*(s8 *)((i << 3) + arg0)) {
-        case -3:
+    for (i = 0; *(s8 *)&dl[i] != (s8)G_ENDDL && count < 2; i++) {
+        switch (*(s8 *)&dl[i]) {
+        case (s8)G_SETTIMG:
             found[count++] = i;
             break;
         }
     }
-    *arg1 = found[1];
+    *second = found[1];
     return found[0];
 }
 
+/* An object whose display list textures are animated by func_1511A494 (same 0xA0 stride as struct131). */
 typedef struct {
-    s32 *unk0;
-    u8 unk4;
-    u8 unk5;
-    s8 unk6;
-    u8 unk7;
-    u8 unk8;
-    u8 pad9[3];
-} Struct1511A494Entry;
-
-typedef struct {
-    u8 pad0[0x1C];
-    s32 unk1C;
-    u8 pad20[0x34];
+    u8 pad0[0x18];
+    f32 unk18;
+    Gfx *dl;
+    u8 pad20[0x1C];
+    s32 unk3C;
+    u8 pad40[0x14];
     u16 unk54;
-} Struct1511A494Arg;
+    u8 pad56[0x26];
+    s32 unk7C;
+    s32 texIndices;
+    s32 animState;
+    u8 pad88[0x18];
+} TexAnimObject; // size 0xA0
 
-extern Struct1511A494Entry D_80089324[];
-extern Struct1511A494Entry D_80089444[];
-extern s32 func_1511A410(s32, s32 *);
+/* One texture animation: a sequence of texture assets, optionally restricted to one world. */
+typedef struct {
+    s32 *frames;
+    u8 frameCount;
+    u8 kind;
+    s8 world;
+    u8 ticksPerFrame;
+    u8 pingPong;
+    u8 pad9[3];
+} TexAnim;
+
+extern TexAnim D_80089324[24];
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern void func_1510D874(void *, s32, s32, s32, s32);
 
-void func_1511A494(Struct1511A494Arg *arg0, s32 *arg1, s32 *arg2) {
-    s32 pad64;
-    s32 sp60;
+/**
+ * Advances the texture animation that matches obj's kind in the current world and loads the
+ * current frame's texture into obj's display list.
+ * texIndices caches the G_SETTIMG indices found by func_1511A410 (second << 16 | first);
+ * animState packs the play direction and tick counter (direction << 16 | tick).
+ */
+void func_1511A494(TexAnimObject *obj, s32 *texIndices, s32 *animState) {
+    s32 pad; // matching: unused stack slot
+    s32 size;
     s32 i;
-    Struct1511A494Entry *found;
-    s32 id;
-    s32 frame;
-    s32 dir;
-    s32 sp48;
-    s32 type;
-    s32 width;
-    s32 offset;
-    s32 x;
+    TexAnim *anim;
+    s32 kind;
+    s32 tick;
+    s32 direction;
+    s32 second;
+    s32 flags;
+    s32 addr;
+    s32 paletteAddr;
+    s32 value;
 
-    found = NULL;
+    anim = NULL;
     for (i = 0; i < 24; i++) {
-        id = D_80089324[i].unk5;
-        if (D_80089324[i].unk6 != -1) {
-            if (D_800BE9F0 != D_80089324[i].unk6) {
+        kind = D_80089324[i].kind;
+        if (D_80089324[i].world != -1) {
+            if (D_800BE9F0 != D_80089324[i].world) {
                 continue;
             }
-            if (id != 0xFF) {
-                id |= 0x8000;
+            if (kind != 0xFF) {
+                kind |= 0x8000;
             }
         }
-        if (id == 0xFF || id == arg0->unk54) {
-            found = &D_80089324[i];
+        if (kind == 0xFF || kind == obj->unk54) {
+            anim = &D_80089324[i];
             break;
         }
     }
-    if (found != NULL) {
-        if (*arg1 == 0) {
-            x = func_1511A410(arg0->unk1C, &sp48);
-            *arg1 = (sp48 << 16) | x;
+    if (anim != NULL) {
+        if (*texIndices == 0) {
+            value = func_1511A410(obj->dl, &second);
+            *texIndices = (second << 16) | value;
         } else {
-            sp48 = (u16)(*arg1 >> 16);
+            second = (u16)(*texIndices >> 16);
         }
-        dir = (*arg2 >> 16) & 0xFFFF;
-        dir = (s16)dir;
-        frame = *arg2 & 0xFFFF;
-        if (dir == 0) {
-            dir = 1;
+        direction = (*animState >> 16) & 0xFFFF;
+        direction = (s16)direction;
+        tick = *animState & 0xFFFF;
+        if (direction == 0) {
+            direction = 1;
         }
-        frame += dir;
-        if (found->unk8 != 0) {
-            if (frame < 0) {
-                dir = 1;
-                frame = found->unk7;
-            } else if (frame >= found->unk4 * found->unk7) {
-                dir = -1;
-                frame = (found->unk4 - 1) * found->unk7;
+        tick += direction;
+        if (anim->pingPong) {
+            if (tick < 0) {
+                direction = 1;
+                tick = anim->ticksPerFrame;
+            } else if (tick >= anim->frameCount * anim->ticksPerFrame) {
+                direction = -1;
+                tick = (anim->frameCount - 1) * anim->ticksPerFrame;
             }
         } else {
-            if (frame >= found->unk4 * found->unk7) {
-                frame -= found->unk4 * found->unk7;
-                dir = 1;
+            if (tick >= anim->frameCount * anim->ticksPerFrame) {
+                tick -= anim->frameCount * anim->ticksPerFrame;
+                direction = 1;
             }
         }
-        x = found->unk0[frame / found->unk7];
-        offset = 0;
-        if (D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
-            type = 3;
+        value = anim->frames[tick / anim->ticksPerFrame];
+        paletteAddr = 0;
+        if (D_800BE9F0 == 6 || D_800BE9F0 == 59) {
+            flags = 3;
         } else {
-            type = 0x3E;
+            flags = 0x3E;
         }
-        width = func_1510D0EC(x, &sp60, type, 0);
-        if (sp48 != 0) {
-            offset = sp60 + width - 0x20;
+        addr = func_1510D0EC(value, &size, flags, 0);
+        if (second != 0) {
+            paletteAddr = size + addr - 0x20;
         }
-        func_1510D874(arg0, width, offset, 4, 5);
-        *arg2 = (dir << 16) | frame;
+        func_1510D874(obj, addr, paletteAddr, 4, 5);
+        *animState = (direction << 16) | tick;
     }
 }
 
-extern void func_15116110(void *);
+extern void func_15116110(TexAnimObject *);
 
-void func_1511A6FC(s32 *arg0) {
-    if (arg0[0xF] != 0) {
-        func_15116110(arg0);
+void func_1511A6FC(TexAnimObject *obj) {
+    if (obj->unk3C != 0) {
+        func_15116110(obj);
     }
-    func_1511A494(arg0, (u8 *)arg0 + 0x80, (u8 *)arg0 + 0x84);
+    func_1511A494(obj, &obj->texIndices, &obj->animState);
 }
 
-extern u8 D_800C35EA;
-extern struct131 *D_800DBEF4;
 extern s32 func_15022B08(s32, s32);
-extern void func_151162D4(void *);
+extern void func_151162D4(TexAnimObject *);
 
-void func_1511A738(struct131 *arg0) {
+void func_1511A738(TexAnimObject *obj) {
     if (D_800C35EA == 1) {
-        if (func_15022B08(arg0 - D_800DBEF4, 0) != 0) {
-            *(s32 *)((u8 *)arg0 + 0x7C) = 0;
-            *(f32 *)((u8 *)arg0 + 0x18) = 0.0f;
+        if (func_15022B08((struct131 *)obj - D_800DBEF4, 0) != 0) {
+            obj->unk7C = 0;
+            obj->unk18 = 0.0f;
         }
     }
-    func_151162D4(arg0);
-    func_1511A494(arg0, (u8 *)arg0 + 0x80, (u8 *)arg0 + 0x84);
+    func_151162D4(obj);
+    func_1511A494(obj, &obj->texIndices, &obj->animState);
 }
