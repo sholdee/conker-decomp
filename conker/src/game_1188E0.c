@@ -3,8 +3,10 @@
 #include "functions.h"
 #undef func_150EB430
 #define D_800D3098 D_800D3098_header
+#define D_800A5480 D_800A5480_header
 #include "variables.h"
 #undef D_800D3098
+#undef D_800A5480
 
 /* An entry of the object table at D_800D3098 (struct178, a blob in structs.h): a collision
    cylinder at (x, y, z); see CollisionCylinder in game_D0960.c. */
@@ -182,118 +184,122 @@ void func_150EB614(MoverObj *obj) {
     }
 }
 
+/* Spawn descriptor for func_1513264C (0x7C bytes; EffectSpawn in game_124920.c). */
 typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    struct17 unk10;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    struct17 unk28;
-    struct17 unk34;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    s32 unk50;
-    s16 unk54;
-    s16 unk56;
-    u8 unk58;
-    u8 pad59[3];
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 unk67;
-    u8 unk68;
-    s8 unk69;
-    u8 unk6A;
-    u8 pad6B;
-    s32 unk6C;
-    u8 unk70;
-    u8 pad71;
-    s16 unk72;
-    s16 unk74;
-    u8 pad76[2];
-    s32 unk78;
-} Func150EB8C4Spawn;
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ vertex unk10;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ vertex unk40;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8 unk58;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 unk67;
+    /* 0x68 */ u8 unk68;
+    /* 0x69 */ s8 unk69;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ struct127 *owner;
+    /* 0x70 */ u8 ownerId;
+    /* 0x71 */ u8 pad71;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+    /* 0x76 */ u8 pad76[2];
+    /* 0x78 */ s32 sound;
+} EffectSpawn;
 
 extern u8 D_800BE9EB;
-void func_150E83AC(void *, s16, u8, s32);
-void *func_15164F0C(u8, u8, void *, u8, s32);
-void func_151D3FF4(void *, u8, s32);
-void func_151D5514(void *, u8, s32);
-void *func_151541B8(void *, f32, f32, f32, f32, u8, s32);
-extern struct17 D_800A1490;
-extern struct17 D_800A149C;
-extern struct17 D_800A14A8[4];
+extern vertex D_800A1490;
+extern vertex D_800A149C;
+extern vertex D_800A14A8[4];
 extern u8 D_800A14D8[4];
-extern void func_15143794(s16, s16, f32, f32 *);
-extern s32 func_1513264C(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+extern vertex D_800A5480;
+void func_150E83AC(vertex *position, s16 duration, u8 owner, s32 kind);
+void *func_15164F0C(u8, u8, void *, u8 owner, s32 kind);
+void func_151D3FF4(vertex *pos, u8 owner, s32 kind);
+void func_151D5514(vertex *pos, u8 owner, s32 kind);
+void *func_151541B8(vertex *position, f32 duration, f32 growth, f32 alpha, f32 arg4, u8 owner, s32 kind);
+extern void func_15143794(s16 yaw, s16 pitch, f32 length, vertex *out);
+extern s32 func_1513264C(EffectSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 owner, s32 kind);
 
-void func_150EB8C4(void)
-{
-  Func150EB8C4Spawn spawn;
-  func_15164F0C(2, D_800BE9EB, 0, 0xFF, 1);
-  func_150E83AC(&D_800A149C, (s16) ((func_150ADA20() % 62U) + 0x78), 0xFF, 1);
-  func_151D5514(&D_800A1490, 0xFF, 1);
-  func_151D3FF4(&D_800A1490, 0xFF, 1);
-  func_151541B8(&D_800A1490, (func_150ADA68() * 4.0f) + 12.0f, 1.6409999f, (f32) ((func_150ADA20() % 56U) + 0xC8), 0.0f, 0xFF, 1);
-  {
-    u8 i;
-    s32 r1;
-    s32 r2;
-    spawn.unk0C = 1.0f;
-    spawn.unk08 = 1.0f;
-    spawn.unk00 = 9.0f;
-    spawn.unk04 = 0.4350000322f;
-    spawn.unk10 = *((struct17 *) (&D_800A5480));
-    spawn.unk44 = 0.0f;
-    spawn.unk1C = 1.0f;
-    spawn.unk20 = 1.0f;
-    spawn.unk24 = 1.0f;
-    spawn.unk50 = 0x29E9;
-    spawn.unk58 = 0;
-    spawn.unk5C = 0;
-    spawn.unk60 = 0xFF;
-    spawn.unk61 = 0xD;
-    spawn.unk62 = 0;
-    spawn.unk63 = 0xC;
-    if (r2)
-    {
-    }
-    spawn.unk64 = 0;
-    spawn.unk65 = 0;
-    spawn.unk66 = 0;
-    spawn.unk67 = 0;
-    spawn.unk68 = 2;
-    spawn.unk6A = 2;
-    spawn.unk6C = 0;
-    spawn.unk70 = 0;
-    spawn.unk72 = 0x19;
-    spawn.unk74 = 0xA;
-    spawn.unk78 = 0;
-    for (i = 0; i < 4; i++)
-    {
-      spawn.unk28 = D_800A14A8[i];
-      r1 = func_150ADA20();
-      r2 = func_150ADA20();
-      func_15143794((r1 % 26U) + 0x2D, (r2 & 0xF) - 0x19, (func_150ADA68() * 30.0f) + 15.0f, &spawn.unk34.unk0);
-      spawn.unk40 = (func_150ADA68() * 15.10800076f) + (-7.554000378f);
-      spawn.unk48 = (func_150ADA68() * 15.10800076f) + (-7.554000378f);
-      spawn.unk4C = (func_150ADA68() * 0.6170000434f) + (-1.621000051f);
-      spawn.unk54 = (func_150ADA20() % 51U) + 0x32;
-      spawn.unk56 = D_800A14D8[i];
-      func_1513264C(&spawn, 3, 0xFF, 0, 0, 0xFF, 1);
-    }
+/*
+ * Plays a fixed burst of effects: func_15164F0C, a func_150E83AC effect at D_800A149C lasting
+ * 120-181 frames, the func_151D5514/func_151D3FF4/func_151541B8 trio at D_800A1490, and four
+ * func_1513264C debris pieces thrown from the D_800A14A8 points at random yaw/pitch/speed.
+ */
+void func_150EB8C4(void) {
+    EffectSpawn spawn;
 
-  }
+    func_15164F0C(2, D_800BE9EB, NULL, 0xFF, 1);
+    func_150E83AC(&D_800A149C, func_150ADA20() % 62U + 120, 0xFF, 1);
+    func_151D5514(&D_800A1490, 0xFF, 1);
+    func_151D3FF4(&D_800A1490, 0xFF, 1);
+    func_151541B8(&D_800A1490, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
+                  func_150ADA20() % 56U + 200, 0.0f, 0xFF, 1);
+    {
+        u8 i;
+        s32 yaw;
+        s32 pitch;
+
+        spawn.unk0C = 1.0f;
+        spawn.unk08 = 1.0f;
+        spawn.unk00 = 9.0f;
+        spawn.unk04 = 0.4350000322f;
+        spawn.unk10 = D_800A5480;
+        spawn.unk40.y = 0.0f;
+        spawn.unk1C = 1.0f;
+        spawn.unk20 = 1.0f;
+        spawn.unk24 = 1.0f;
+        spawn.unk50 = 0x29E9;
+        spawn.unk58 = 0;
+        spawn.unk5C = 0;
+        spawn.unk60 = 0xFF;
+        spawn.unk61 = 13;
+        spawn.unk62 = 0;
+        spawn.unk63 = 12;
+        if (pitch) {
+        }
+        spawn.unk64 = 0;
+        spawn.unk65 = 0;
+        spawn.unk66 = 0;
+        spawn.unk67 = 0;
+        spawn.unk68 = 2;
+        spawn.unk6A = 2;
+        spawn.owner = NULL;
+        spawn.ownerId = 0;
+        spawn.unk72 = 25;
+        spawn.unk74 = 10;
+        spawn.sound = 0;
+        for (i = 0; i < 4; i++) {
+            spawn.pos = D_800A14A8[i];
+            yaw = func_150ADA20();
+            pitch = func_150ADA20();
+            func_15143794(yaw % 26U + 45, (pitch & 0xF) - 25, func_150ADA68() * 30.0f + 15.0f, &spawn.vel);
+            spawn.unk40.x = func_150ADA68() * 15.10800076f + -7.554000378f;
+            spawn.unk40.z = func_150ADA68() * 15.10800076f + -7.554000378f;
+            spawn.unk4C = func_150ADA68() * 0.6170000434f + -1.621000051f;
+            spawn.unk54 = func_150ADA20() % 51U + 50;
+            spawn.unk56 = D_800A14D8[i];
+            func_1513264C(&spawn, 3, 0xFF, 0, 0, 0xFF, 1);
+        }
+    }
 }
 
 typedef struct Game1188E0Event {
@@ -313,11 +319,6 @@ typedef struct Game1188E0Vec3f {
 } Game1188E0Vec3f;
 
 void *func_151D8868(void *, s32, u8, s32);
-void func_150E83AC(void *, s16, u8, s32);
-void *func_15164F0C(u8, u8, void *, u8, s32);
-void func_151D3FF4(void *, u8, s32);
-void func_151D5514(void *, u8, s32);
-void *func_151541B8(void *, f32, f32, f32, f32, u8, s32);
 
 void func_150EBC80(GateCylinder *arg0, u8 arg1, s32 arg2) {
     Game1188E0Vec3f position;
