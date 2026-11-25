@@ -11,10 +11,12 @@
 #define D_800CC2D0 D_800CC2D0_hdr
 #define D_800C3E80 D_800C3E80_hdr
 #define D_800D19A0 D_800D19A0_hdr
+#define D_800D2040 D_800D2040_hdr
 #include "variables.h"
 #undef D_800CC2D0
 #undef D_800C3E80
 #undef D_800D19A0
+#undef D_800D2040
 
 /* Streamed per-frame animation data (obj->anim). */
 typedef struct ObjAnim {
@@ -35,6 +37,12 @@ typedef struct ObjAnim {
     /* 0x048 */ u8 unk48;
     /* 0x049 */ u8 pad49[0x1D0 - 0x49];
 } ObjAnim; // size 0x1D0
+
+/* obj->unk144 (include/ declares it struct129, which ends at 0x28). */
+typedef struct ObjDef {
+    /* 0x00 */ u8 pad0[0x2E];
+    /* 0x2E */ u8 keepTime; // seconds (x30 frames) to keep the model's D_800D2040 counter; 0xFF = never set
+} ObjDef;
 
 /* struct126 (obj->unk31C) with the byte at 0x197 that struct126 still calls pad196[1]. */
 typedef struct GameObjExt {
@@ -122,7 +130,7 @@ typedef struct GameObj {
     /* 0x135 */ u8 unk135;
     /* 0x136 */ u8 unk136; // sprite texture
     /* 0x137 */ u8 pad137[0xD];
-    /* 0x144 */ struct129 *unk144;
+    /* 0x144 */ ObjDef *unk144;
     /* 0x148 */ u8 pad148[0x4];
     /* 0x14C */ f32 xz_scale;
     /* 0x150 */ f32 y_scale;
@@ -185,6 +193,7 @@ typedef struct GameObj {
 extern GameObj D_800CC2D0[];
 extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
 extern s32 D_800D19A0[]; // model data per object id
+extern u8 D_800D2040[]; // per object id counter
 
 /* struct104 (D_800B0DF0) with the s16 at 0x3E that struct104 still covers with pad2A; nonzero
    means level fog: objects take the level's fog colour and a distance-based fog alpha. */
@@ -1123,7 +1132,7 @@ void func_1502DB84(f32 mtx[4][4], s32 index) {
     s32 moved;
     u8 frameBuf[0x320];
     u8 remapBuf[0x44];
-    struct129 *unk144;
+    ObjDef *unk144;
 
     obj = &D_800CC2D0[index];
     id = obj->id;
@@ -1979,47 +1988,42 @@ void func_1502F948(GameObj *obj) {
     }
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u16 unk8;
-    u16 unkA;
-} Fn1502F9FCTex;
-Gfx *func_150C3160(Gfx *, void *);
+Gfx *func_150C3160(Gfx *, GameObj *);
 
-Gfx *func_1502F9FC(Gfx *gdl, s32 arg1) {
+/* Sets the scroll of the object's two scrolling textures (tiles 5 and 4) from unk27A/unk27E. */
+Gfx *func_1502F9FC(Gfx *gdl, s32 index) {
     s32 id;
-    s32 idx;
+    s32 texIndex;
     s32 i;
-    Fn1502F9FCTex *tex;
+    ObjTexture *tex;
     s32 uls;
     s32 ult;
     s32 lrs;
     s32 lrt;
     s32 tile;
 
-    id = D_800CC2D0[arg1].id;
+    id = D_800CC2D0[index].id;
     if (id == 0x89 || id == 0xBA) {
-        return func_150C3160(gdl, &D_800CC2D0[arg1]);
+        return func_150C3160(gdl, &D_800CC2D0[index]);
     }
     if (id == 0) {
-        idx = 14;
+        texIndex = 14;
     } else if (id == 0x96) {
-        idx = 7;
+        texIndex = 7;
     } else if (id == 0x28) {
-        idx = 4;
+        texIndex = 4;
     } else if (id == 1 || id == 2 || id == 3 || id == 4) {
-        idx = 5;
+        texIndex = 5;
     } else {
-        idx = 0;
+        texIndex = 0;
     }
     if (D_800C5338[id] != NULL) {
         for (i = 0; i < 2; i++) {
-            tex = &((Fn1502F9FCTex *)D_800C5338[id])[idx];
-            uls = (u16)(((s16 *)((u8 *)&D_800CC2D0[arg1] + 0x27A))[i] + 2);
-            ult = (u16)(((s16 *)((u8 *)&D_800CC2D0[arg1] + 0x27E))[i] + 2);
-            lrs = (u16)(tex->unk8 * 4 - 2);
-            lrt = (u16)(tex->unkA * 4 - 2);
+            tex = &D_800C5338[id][texIndex];
+            uls = (u16)(D_800CC2D0[index].unk27A[i] + 2);
+            ult = (u16)(D_800CC2D0[index].unk27E[i] + 2);
+            lrs = (u16)(tex->width * 4 - 2);
+            lrt = (u16)(tex->height * 4 - 2);
             tile = 5 - i;
             gDPSetTileSize(gdl++, tile, (u16)uls, (u16)ult, (u16)lrs, (u16)lrt);
         }
@@ -2027,87 +2031,78 @@ Gfx *func_1502F9FC(Gfx *gdl, s32 arg1) {
     return gdl;
 }
 
-extern void func_1507EABC(void *);
+extern void func_1507EABC(GameObj *);
 
-#define actor ((u8 *)arg0)
-void func_1502FBE8(GameObj *arg0) {
-    s32 next;
-    void *old;
-    s32 selection;
+/* Applies a requested LOD model change (lodRequest), restarting the animation if the new model
+   uses a different animation set. */
+void func_1502FBE8(GameObj *obj) {
+    s32 lod;
+    s32 oldAnims;
+    s32 model;
 
-    if (actor[0x1C9] == 0) {
+    if (obj->lodRequest == 0) {
         return;
     }
-    old = ((void **)D_800D1588)[actor[4]];
-    if (actor[0x1C9] == 0xFF) {
-        actor[0x1C9] = 0;
-        next = 0;
+    oldAnims = D_800D1588[obj->id];
+    if (obj->lodRequest == 0xFF) {
+        obj->lodRequest = 0;
+        lod = 0;
     } else {
-        next = actor[0x1C9] - 1;
-        if (next >= actor[0x2C9] || next == actor[0x1C8]) {
+        lod = obj->lodRequest - 1;
+        if (lod >= obj->unk2C9 || lod == obj->lod) {
             return;
         }
     }
-    selection = (*(u8 **)(actor + 0x2C4))[next];
-    func_150837D4((actor - (u8 *)D_800CC2D0) / 0x32C, selection, 0);
-    actor[0x1C8] = next;
+    model = obj->lodModels[lod];
+    func_150837D4(obj - D_800CC2D0, model, 0);
+    obj->lod = lod;
     if (D_800C35EA == 1) {
         D_800C3638 = 0;
     }
-    if (old != ((void **)D_800D1588)[selection]) {
-        if (*(u16 *)(actor + 0x84) >= ((u16 *)D_800C5A90)[selection]) {
-            *(u16 *)(actor + 0x84) = 0xFFFF;
-            func_1505E650(arg0, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    if (oldAnims != D_800D1588[model]) {
+        if (obj->unk84 >= (u16)D_800C5A90[model]) {
+            obj->unk84 = 0xFFFF;
+            func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         } else {
-            s32 anim = *(u16 *)(actor + 0x84);
+            s32 anim = obj->unk84;
 
-            *(u16 *)(actor + 0x84) = 0xFFFF;
-            func_1505E650(arg0, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+            obj->unk84 = 0xFFFF;
+            func_1505E650(obj, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
         }
     }
     if (D_800C35EA == 1) {
         D_800C3638 = 1;
     }
-    func_1507EABC(actor);
+    func_1507EABC(obj);
 }
-#undef actor
 
-typedef struct {
-    u8 pad0[0x2E];
-    u8 timer;
-} Sub_1502FD70;
-
-typedef struct {
-    u8 pad0[4];
-    u8 id;
-    u8 pad5[0x144 - 5];
-    Sub_1502FD70 *sub;
-} Actor_1502FD70;
-
+/* Refreshes the D_800D2040 counter of the object's model id (2 in one special case, 3 by default,
+   or keepTime seconds). */
 void func_1502FD70(GameObj *arg0) {
-    Actor_1502FD70 *actor = (Actor_1502FD70 *)arg0;
-    u8 id = actor->id;
-    u8 *slot;
+    GameObj *obj = arg0; // matching: the parameter copy changes register allocation
+    u8 id = obj->id;
+    u8 *counter;
 
-    if ((D_80038080 == 0) && (D_800BE9F0 == 0x1D)) {
-        ((u8 *)D_800D2040)[id] = 2;
+    if (D_80038080 == 0 && D_800BE9F0 == 0x1D) {
+        D_800D2040[id] = 2;
         return;
     }
-    slot = &((u8 *)D_800D2040)[id];
-    if (*slot != 0xFF) {
-        if (actor->sub != NULL) {
-            if (actor->sub->timer != 0xFF) {
-                if (actor->sub->timer != 0) {
-                    if (*slot < actor->sub->timer * 30) {
-                        *slot = actor->sub->timer * 30;
+    counter = &D_800D2040[id];
+    if (*counter != 0xFF) {
+        // matching: the shared default store needs the goto (an || condition reorders the tests)
+        if (obj->unk144 != NULL) {
+            if (obj->unk144->keepTime != 0xFF) {
+                if (obj->unk144->keepTime != 0) {
+                    if (*counter < obj->unk144->keepTime * 30) {
+                        *counter = obj->unk144->keepTime * 30;
                     }
                 } else {
-                    goto set3;
+                    goto useDefault;
                 }
             }
         } else {
-set3:
-            *slot = 3;
+        useDefault:
+            *counter = 3;
         }
     }
 }
