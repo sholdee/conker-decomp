@@ -113,7 +113,7 @@ extern u8 D_800C35E8;
 extern u8 D_800C3C98;
 extern u8 D_800C3672;
 
-/* Condition query for the same event table as func_1509C440 (table at 80088498). */
+/* Condition check per event; its table entry (80088498) sits near func_1509C440's (800884D4). */
 s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
     switch (event) {
     case 1:
