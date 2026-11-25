@@ -14,10 +14,13 @@
 /*
  * Object script interpreter commands.
  *
- * Each object runs a byte-code script (D_800D154C->unk218). A command is five bytes: an opcode
- * (< 247, an index into D_80086730) and four argument bytes, which the interpreter copies to
- * D_800D1890..D_800D1893 before calling the handler. Bytes >= 247 are one-byte jump labels.
- * The handlers below act on the current object, D_800D154C.
+ * Each object runs a byte-code script (struct127.unk218 points at its next command). A command
+ * is five bytes: an opcode (< 247, an index into D_80086730) and four argument bytes, which the
+ * interpreter copies to D_800D1890..D_800D1893 before calling the handler. Bytes >= 247 are
+ * one-byte jump labels.
+ * The handlers below act on the current object, D_800D154C (index D_800C3E78 in D_800CC2D0);
+ * their comments call the four argument bytes arg0..arg3. An object's "target" is the object
+ * D_800CC2D0[unk222], its current waypoint is unk21E of its path D_800D2104[unk13F].
  */
 
 /* One point of a path: s16 world coordinates. */
@@ -51,13 +54,13 @@ void func_15197A7C(struct127 *arg0);
 u8 func_15056A00(struct127 *arg0, u8 arg1, u8 arg2);
 struct216 *func_1507BB28(s32 arg0, s32 arg1);
 
-/* Jumps the script: skips `arg0` commands, or for arg0 >= 247 skips forward to label arg0. */
-void func_15075400(s32 arg0) {
+/* Jumps the script: skips `target` commands, or for target >= 247 skips forward to label `target`. */
+void func_15075400(s32 target) {
     u8 label;
     u8 i;
 
-    if (arg0 < 247) {
-        D_800D154C->unk218 += arg0;
+    if (target < 247) {
+        D_800D154C->unk218 += target;
         return;
     }
 
@@ -67,7 +70,7 @@ void func_15075400(s32 arg0) {
         } else {
             label = D_800D154C->unk218->unk0;
             D_800D154C->unk218 = (struct216 *)((u8 *)D_800D154C->unk218 + 1);
-            if (arg0 == label) {
+            if (target == label) {
                 // the interpreter steps past the current command after this returns
                 D_800D154C->unk218--;
                 return;
@@ -549,6 +552,7 @@ void func_150767F4(void) {
     u16 angle;
 
     target = &D_800CC2D0[D_800D154C->unk222];
+    // matching: the (s32) cast before narrowing to u16 is needed
     angle = (s32)func_1505A630(target->x_position - D_800D154C->x_position,
                                D_800D154C->z_position - target->z_position, 0);
     if ((((angle >> 8) - (D_800CC2D0[D_800D154C->unk222].unk7A >> 8) + D_800D1891) & 0xFF) < D_800D1891 * 2) {
@@ -576,7 +580,7 @@ void func_150768DC(void) {
 
     nearest = D_800D1890 * 8;
     D_800D154C->unkA8 = 0;
-    self = ((s32)D_800D154C - (s32)D_800CC2D0) / (s32)sizeof(struct127);
+    self = D_800D154C - D_800CC2D0;
 
     for (i = 0; i < 25; i++) {
         obj = &D_800CC2D0[i];
@@ -624,7 +628,7 @@ void func_15076B78(void) {
 
 /* Targets the last object below this one (all 25 if arg1) of type arg0 that is alive, and starts mode 9. */
 void func_15076B94(void) {
-    s32 i = ((s32)D_800D154C - (s32)D_800CC2D0) / (s32)sizeof(struct127);
+    s32 i = D_800D154C - D_800CC2D0;
 
     if (D_800D1891) {
         i = 25;
@@ -1347,10 +1351,10 @@ void func_15078A08(void) {
 }
 
 /*
- * Script condition: reads property arg2 of object `arg0` (or of object 0 / the target for some)
+ * Script condition: reads property arg2 of object `index` (or of object 0 / the target for some)
  * and compares it with arg3 using operator arg1 (0 ==, 1 !=, 2 <, 3 >, 4 <=, 5 >=).
  */
-s32 func_15078A60(s32 arg0) {
+s32 func_15078A60(s32 index) {
     s32 value;
     s32 diff;
     s32 pad; // matching: unused stack slot
@@ -1358,48 +1362,48 @@ s32 func_15078A60(s32 arg0) {
 
     switch (D_800D1892) {
     case 0:
-        value = D_800CC2D0[arg0].xz_velocity;
+        value = D_800CC2D0[index].xz_velocity;
         break;
     case 1:
-        value = D_800CC2D0[arg0].unk2E4;
+        value = D_800CC2D0[index].unk2E4;
         break;
     case 2:
-        value = D_800CC2D0[arg0].unk2E8;
+        value = D_800CC2D0[index].unk2E8;
         break;
     case 3:
-        value = D_800CC2D0[arg0].unk2EC;
+        value = D_800CC2D0[index].unk2EC;
         break;
     case 4:
-        value = D_800CC2D0[arg0].y_position;
+        value = D_800CC2D0[index].y_position;
         break;
     case 5:
-        value = D_800CC2D0[arg0].unk44;
+        value = D_800CC2D0[index].unk44;
         break;
     case 6:
         // angle between the object's facing and the direction to it from the current object
-        facing = D_800CC2D0[arg0].unk7A >> 8;
+        facing = D_800CC2D0[index].unk7A >> 8;
         facing -= 0x40;
-        diff = (u8)(func_150484A0(D_800CC2D0[arg0].x_position - D_800D154C->x_position,
-                                  D_800CC2D0[arg0].z_position - D_800D154C->z_position) * 40.74366379f) - facing;
+        diff = (u8)(func_150484A0(D_800CC2D0[index].x_position - D_800D154C->x_position,
+                                  D_800CC2D0[index].z_position - D_800D154C->z_position) * 40.74366379f) - facing;
         value = (u8)diff;
         if (value > 0x80) {
             value = 0x100 - value;
         }
         break;
     case 7:
-        value = D_800CC2D0[arg0].unk13C;
+        value = D_800CC2D0[index].unk13C;
         break;
     case 8:
-        value = D_800CC2D0[arg0].stunned;
+        value = D_800CC2D0[index].stunned;
         break;
     case 9:
         value = 0;
-        if (((s16)D_800CC2D0[arg0].unk31C->unk8 != 0) && (D_800CC2D0[arg0].unk31C->unk16 != 0)) {
+        if (((s16)D_800CC2D0[index].unk31C->unk8 != 0) && (D_800CC2D0[index].unk31C->unk16 != 0)) {
             value = 2;
         }
         break;
     case 10:
-        value = D_800CC2D0[arg0].unk28;
+        value = D_800CC2D0[index].unk28;
         break;
     case 11:
         value = D_800CC2D0[0].unk31C->unk78;
@@ -1417,13 +1421,13 @@ s32 func_15078A60(s32 arg0) {
         value = D_800CC2D0[D_800D154C->unk222].id;
         break;
     case 16:
-        value = D_800CC2D0[arg0].health;
+        value = D_800CC2D0[index].health;
         break;
     case 17:
         value = D_800CC2D0[D_800D154C->unk222].unk232;
         break;
     case 18:
-        value = D_800CC2D0[arg0].disable_run;
+        value = D_800CC2D0[index].disable_run;
         break;
     }
     // matching: one line, as -g3 line numbers steer the scheduling of this test
@@ -2210,7 +2214,7 @@ void func_1507B058(void) {
     s32 savedIndex = D_800C3E78;
 
     D_800D154C = func_15072208(D_800D154C, 0);
-    D_800C3E78 = ((s32)D_800D154C - (s32)&D_800CC2D0) / 0x32C;
+    D_800C3E78 = D_800D154C - D_800CC2D0;
 
     if (D_800D154C != NULL) {
         switch (D_800D1890) {
@@ -2392,7 +2396,7 @@ void func_1507B7E8(void) {
 
 /* Calls handler arg0 of D_80086150, preserving the current object. */
 void func_1507B884(void) {
-    s32 savedObj;
+    struct127 *savedObj;
     s32 savedIndex;
     u8 index;
     void (*handler)(s32);
@@ -2400,10 +2404,10 @@ void func_1507B884(void) {
     index = D_800D1890;
     handler = D_80086150[index];
     if (handler != NULL) {
-        savedObj = (s32)D_800D154C;
+        savedObj = D_800D154C;
         savedIndex = D_800C3E78;
         handler(index);
-        D_800D154C = (struct127 *)savedObj;
+        D_800D154C = savedObj;
         D_800C3E78 = savedIndex;
     }
 }
@@ -2431,7 +2435,7 @@ void func_1507B974(void) {
     if (D_800D154C->unk65 != 0) {
         obj = &D_800CC2D0[D_800D154C->unk65 - 1];
     }
-    if (D_800D1891 == *(u16 *)((u8 *)D_800D2104[obj->unk13F] + (obj->unk21E * 8) + (D_800D1893 << 3) + 6)) {
+    if (D_800D1891 == (&D_800D2104[obj->unk13F]->center)[obj->unk21E + D_800D1893].unk6) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
@@ -2467,8 +2471,8 @@ typedef struct {
 extern ScriptEntry D_80086A88[]; // default scripts, ended by a NULL script
 extern struct216 D_8009A120[];    // fallback script
 
-/* Returns script `arg1` of the current object's type, falling back to the default table. */
-struct216 *func_1507BB28(s32 arg0, s32 arg1) {
+/* Returns script `scriptId` of the current object's type, falling back to the default table. */
+struct216 *func_1507BB28(s32 arg0, s32 scriptId) {
     s32 typeData;
     ScriptEntry *table;
     s32 i;
@@ -2482,12 +2486,12 @@ struct216 *func_1507BB28(s32 arg0, s32 arg1) {
         return D_8009A120;
     }
     i = 0;
-    while (arg1 != table[i].id) {
+    while (scriptId != table[i].id) {
         if (table[i].script == NULL) {
             ScriptEntry *defaults = D_80086A88;
 
             i = 0;
-            while (arg1 != defaults[i].id) {
+            while (scriptId != defaults[i].id) {
                 if (defaults[i].script == NULL) {
                     /* end of the default table without a match: the original game hangs here */
                     while (1) {
@@ -2502,19 +2506,23 @@ struct216 *func_1507BB28(s32 arg0, s32 arg1) {
     return table[i].script;
 }
 
-void func_1507BC14(struct127 *arg0) {
-
-    if (arg0->unk21C != 0) {
-        if (arg0->unk218 != 0) {
-            if (arg0->unk21C != 25500) {
-                arg0->unk21C = arg0->unk21C - D_800CC264;
+/*
+ * Runs an object's script: counts down the wait timer unk21C (25500 waits forever) and, once it
+ * expires, executes commands until one sets a new wait time.
+ */
+void func_1507BC14(struct127 *obj) {
+    if (obj->unk21C != 0) {
+        if (obj->unk218 != NULL) {
+            if (obj->unk21C != 25500) {
+                obj->unk21C = obj->unk21C - D_800CC264;
             }
-            if ((arg0->unk21C >= 50000) || (arg0->unk21C == 0)) {
-                arg0->unk21C = 0;
-                if ((arg0->unkF4 & 0x400) != 0) {
-                    arg0->unk21C = 20000;
-                    arg0->unkF4 &= ~0x400;
-                    arg0->unkF4 |= 4;
+            if ((obj->unk21C >= 50000) || (obj->unk21C == 0)) {
+                // expired (or wrapped below zero)
+                obj->unk21C = 0;
+                if (obj->unkF4 & 0x400) {
+                    obj->unk21C = 20000;
+                    obj->unkF4 &= ~0x400;
+                    obj->unkF4 |= 4;
                 }
             } else {
                 return;
@@ -2522,21 +2530,22 @@ void func_1507BC14(struct127 *arg0) {
         }
     }
 
-    if (arg0->unk218 == 0) {
-        arg0->unk218 = func_1507BB28(0, arg0->unk232);
-        arg0->unk21C = 0;
+    if (obj->unk218 == NULL) {
+        obj->unk218 = func_1507BB28(0, obj->unk232);
+        obj->unk21C = 0;
     }
 
-    while (arg0->unk21C == 0) {
-        if (arg0->unk218->unk0 >= 0xF7) {
-            arg0->unk218 = (u8 *)(arg0->unk218) + 1;
+    while (obj->unk21C == 0) {
+        if (obj->unk218->unk0 >= 247) {
+            // a label: skip its single byte
+            obj->unk218 = (struct216 *)((u8 *)obj->unk218 + 1);
         } else {
-            D_800D1890 = arg0->unk218->unk1;
-            D_800D1891 = arg0->unk218->unk2;
-            D_800D1892 = arg0->unk218->unk3;
-            D_800D1893 = arg0->unk218->unk4;
-            D_80086730[arg0->unk218->unk0]();
-            arg0->unk218 = (u8 *)(arg0->unk218) + 5;
+            D_800D1890 = obj->unk218->unk1;
+            D_800D1891 = obj->unk218->unk2;
+            D_800D1892 = obj->unk218->unk3;
+            D_800D1893 = obj->unk218->unk4;
+            D_80086730[obj->unk218->unk0]();
+            obj->unk218++;
         }
     }
 }
