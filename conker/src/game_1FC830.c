@@ -1,318 +1,59 @@
-/* functions.h types func_1513D2F0 arg1 as s32; func_151CE6D0 needs a pointer arg1 (an int-typed
- * address changes which loop invariants IDO keeps in saved registers). */
-#define func_1513D2F0 func_1513D2F0_s32_decl_in_functions_h
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#undef func_1513D2F0
 
-void *func_151CD4C0();
-void func_151CE47C();
-
-struct Vec3w151CEC10;
-
-extern f32 D_800AB020;
-extern f32 D_800AB024;
-extern f32 D_800AB008;
-extern f32 D_800D9860;
-extern f32 func_15144AA8(s32);
-extern struct17 *func_15144B34(s32);
-extern s32 func_15046C80(f32 *, s32, f32, f32 *);
-extern struct260 *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-s32 func_151CEC10(struct Vec3w151CEC10 *, f32 *, void *);
-
-typedef struct {
-    char pad_0x0[0x48];
-    s32 field_0x48;
-} Func151CE4DCTemp;
-
-typedef struct {
-    char pad_0x0[0x98];
-    s32 field_0x98;
-} Func151CE4DCArg0;
-
-typedef struct {
-    char pad_0x0[0x30];
-    s32 field_0x30;
-} ConkerField30Object;
-
-typedef struct {
-    ConkerField30Object *field_0x0;
-} ConkerField0Slot;
-
-typedef struct {
-    char pad_0x0[0x98];
-    ConkerField0Slot *field_0x98;
-} ConkerField98Owner;
-struct260 *func_151CD2C0(void *arg0, u8 arg1, s32 arg2);
-void func_151CD35C(s32 arg0);
-void func_151CD394(s32 arg0);
-
-typedef struct {
-    void *unk0;
-    s32 unk4;
-    void *unk8;
-    u8 unkC;
-} Sub151CD3CC;
-void func_151CD3CC(struct260 *arg0, s32 arg1, u8 arg2);
-
-typedef struct Game1FA770Particle {
-    f32 x;
-    f32 y;
-    u8 pad08[4];
-    f32 velocity;
-    u8 pad10[0xC];
-} Game1FA770Particle;
+typedef struct { f32 x, y, z; } TrailVec3;
+typedef struct { f32 x, z; } TrailVec2;
 
 typedef struct Vec3i151CD674 {
     s32 x;
     s32 y;
     s32 z;
 } Vec3i151CD674;
-s32 func_151CD674(u8 *actor);
 
-typedef struct Vec2f151CD7BC { f32 x; f32 z; } Vec2f151CD7BC;
-
-typedef struct Owner151CD7BC {
-    f32 amp0;
-    f32 amp1;
-    f32 phase0;
-    f32 phase1;
-    f32 rate0;
-    f32 rate1;
-    Vec2f151CD7BC pos;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 phase2;
-    f32 rate2;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-} Owner151CD7BC;
-
-typedef struct Particle151CD7BC {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 vel;
-    f32 unk10;
-    s16 alpha;
-    f32 unk18;
-} Particle151CD7BC;
-s32 func_151CD7BC(u8 *actor);
-
-typedef struct Game1FA770Trail {
-    f32 x;
-    f32 y;
-    u8 pad08[0xC];
-    s16 alpha;
-    u8 pad16[0x6];
-} Game1FA770Trail;
-s32 func_151CDB94(u8 *actor);
-
-typedef struct {
-    char pad0[0x1E];
-    u16 unk1E;
-    char pad20[0x10];
-    u8 unk30;
-} ConkerStruct151CE47C;
-void func_151CE47C(ConkerStruct151CE47C *arg0);
-
-extern void func_151478F4(void *);
-void func_151CE49C(Func151CE4DCArg0 *arg0);
-
-extern void func_15147928(s32);
-void func_151CE4DC(Func151CE4DCArg0 *arg0);
-
-struct Obj151CE634 *func_151CE634(s32);
-void func_1515C1A0(void *, void *, f32 *, f32 *);
-s32 func_1505D024(void *, s32, u16, s32);
-
-typedef struct {
-    f32 position[3];
-    u8 unkC[0x10];
-} Game1FA770TrailPoint;
-void func_151CE51C(void *arg0, void *arg1);
-
-typedef struct Obj151CE634Sub {
-    u8 pad0[0x48];
-    s32 unk48;
-} Obj151CE634Sub;
-
-typedef struct Obj151CE634 {
-    u8 pad0[8];
-    struct Obj151CE634 *next;
-    u8 padC[0x20 - 0xC];
-    s32 unk20;
-    u8 pad24[0x98 - 0x24];
-    Obj151CE634Sub *unk98;
-} Obj151CE634;
-
-extern s32 D_800A5760[];
-extern Obj151CE634 *D_800DCE50[][0x68];
-Obj151CE634 *func_151CE634(s32 arg0);
-
-
-typedef struct Game1FBB80Owner {
-    s16 field00;
-    s16 mask;
-} Game1FBB80Owner;
-
-typedef struct Game1FBB80Effect {
-    void *shape;
-    f32 rate;
-    f32 accumulator;
-    Game1FBB80Owner *owner;
-    f32 height;
-} Game1FBB80Effect;
-
-typedef struct Game1FBB80Object {
-    u8 pad00, flags01;
-    u8 pad02[0xA];
-    u8 flags0C;
-    u8 pad0D[0x1B];
-    Game1FBB80Effect effect;
-} Game1FBB80Object;
-
-typedef struct Game1FBB80Packet {
-    u8 field00, field01;
-    s16 field02, field04;
-    u8 pad06[2];
-    s32 field08, field0C;
-    u8 field10, field11, field12, field13;
-    f32 field14, field18;
-    f32 x, y, z;
-    f32 field28, field2C, field30, field34, field38, field3C;
-    u32 flags40;
-    u8 field44, field45, field46, field47;
-    Game1FBB80Owner *owner;
-    u8 pad4C[0xC]; /* func_1513D2F0 copies the complete 0x58-byte packet. */
-} Game1FBB80Packet;
-
-s32 func_1504530C(void *, f32, void *);
-void *func_1513D2F0(void *, void *, u8, u8, u8, u8, u8, s32, s32, s32, u8, s32);
-void func_151432BC(void *, f32 *, f32 *, f32 *, f32 *);
-void func_151CE6D0(Game1FBB80Object *arg0);
-s32 func_151CEA20(f32 *arg0);
+extern f32 D_800D9860;
+extern f32 func_15144AA8(s32);
+extern struct17 *func_15144B34(s32);
+extern s32 func_15046C80(struct17 *, s32, f32, f32 *);
+extern struct260 *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+f32 func_15143E64(struct17 *);
 struct260 *func_151CEAAC(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
 
-struct Vec3w151CEC10 { s32 x, y, z; };
-s32 func_151CEC10(struct Vec3w151CEC10 *arg0, f32 *arg1, void *arg2);
-
-extern f32 D_800AB00C;
-extern f32 D_800AB010;
-f32 func_15143E64(struct17 *);
-
-typedef struct { f32 x, y, z; } TrailVec3;
-typedef struct { f32 x, z; } TrailVec2;
-typedef struct { f32 w[4]; } TrailQuad;
+/* One point of a ribbon trail. */
+typedef struct {
+    /* 0x00 */ TrailVec3 pos;
+    /* 0x0C */ u8 pad0C[8];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ TrailVec2 offset; /* half-width vector across the ribbon */
+    /* 0x20 */ f32 dirX;
+    /* 0x24 */ f32 dirZ;
+} RibbonPoint;
 
 typedef struct {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-} TrailSub;
+    struct127 *owner;
+} RibbonInfo;
 
+/* Actor that draws a ribbon through a ring buffer of points. */
 typedef struct {
-    TrailSub *sub;
-    u8 unk4;
-    u8 pad5[3];
-    void *unk8;
-    TrailVec2 scaled;
-    TrailVec2 normal;
-    u8 flags;
-} TrailInfo;
+    /* 0x00 */ u8 pad0[0x25];
+    /* 0x25 */ u8 capacity;
+    /* 0x26 */ u8 pad26[6];
+    /* 0x2C */ s8 numPoints;
+    /* 0x2D */ s8 head; /* oldest point */
+    /* 0x2E */ s8 tail; /* one past the newest point */
+    /* 0x2F */ u8 pad2F[0x55];
+    /* 0x84 */ u8 vtxBuffer[0x10];
+    /* 0x94 */ RibbonPoint *points;
+    /* 0x98 */ RibbonInfo *info;
+} RibbonActor;
 
+/* The two cycle words of a render mode. */
 typedef struct {
-    TrailVec3 pos;
-    f32 dist;
-    f32 invLen;
-    f32 unk14;
-    TrailVec2 scaled;
-    TrailVec2 normal;
-} TrailEntry;
+    s32 cycle1;
+    s32 cycle2;
+} RenderModePair;
 
-typedef struct {
-    u8 pad0[0x10];
-    TrailVec3 pos;
-    u8 pad1C[2];
-    u16 flags;
-    u8 pad20[5];
-    u8 count;
-    u8 pad26[6];
-    s8 num;
-    s8 tail;
-    s8 head;
-    u8 pad2F[0x65];
-    TrailEntry *entries;
-    TrailInfo *info;
-} TrailObj;
-s32 func_151CEC54(TrailObj *arg0);
-
-typedef struct {
-    f32 x, y, z, distance;
-    u8 pad10[4];
-    f32 wave;
-    u8 pad18[0x10];
-} Game1FC5D0Point;
-
-typedef struct {
-    u8 pad00[0x20];
-    f32 limit, phase;
-} Game1FC5D0Config;
-
-typedef struct {
-    u8 pad00[0x25];
-    u8 capacity;
-    u8 pad26[6];
-    s8 count;
-    s8 head;
-    s8 tail;
-    u8 pad2F[0x65];
-    Game1FC5D0Point *points;
-    Game1FC5D0Config *config;
-} Game1FC5D0Actor;
-s32 func_151CF120(Game1FC5D0Actor *arg0);
-
-
-typedef struct {
-    TrailVec3 pos;
-    u8 pad0C[8];
-    f32 width;
-    TrailVec2 off;
-    f32 dx, dz;
-} Ent151CF380;
-
-typedef struct {
-    u8 pad0[0x1D4];
-    s32 unk1D4;
-} Sub151CF380;
-
-typedef struct {
-    Sub151CF380 *sub;
-} Info151CF380;
-
-typedef struct {
-    u8 pad0[0x25];
-    u8 count;
-    u8 pad26[6];
-    s8 num;
-    s8 head;
-    s8 tail;
-    u8 pad2F[0x55];
-    u8 unk84[0x10];
-    Ent151CF380 *points;
-    Info151CF380 *info;
-} Obj151CF380;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Mode151CF380;
-
-extern Mode151CF380 D_800A4AC8[];
+extern RenderModePair D_800A4AC8[];
 extern s32 D_800D2C9C;
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
@@ -320,148 +61,176 @@ Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
-Gfx *func_151CF380(Obj151CF380 *arg0, Gfx *gfx, s16 arg2) {
-    Info151CF380 *info;
-    TrailVec3 b;
-    TrailVec3 a;
-    s32 i;
-    s32 j;
-    Ent151CF380 *points;
+/* Draws the ribbon from its newest point back to its oldest, one quad per segment. */
+Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 arg2) {
+    RibbonInfo *info;
+    TrailVec3 nextPos;
+    TrailVec3 curPos;
+    s32 cur;
+    s32 next;
+    RibbonPoint *points;
     u8 update;
-    f32 wa;
-    f32 ax;
-    f32 az;
-    f32 wb;
-    f32 bx;
-    f32 bz;
-    TrailVec2 d;
-    TrailVec2 c;
+    f32 curWidth;
+    f32 curX;
+    f32 curZ;
+    f32 nextWidth;
+    f32 nextX;
+    f32 nextZ;
+    TrailVec2 nextOffset;
+    TrailVec2 curOffset;
     Vtx *vtx;
 
-    if (arg0->num < 2) {
+    if (ribbon->numPoints < 2) {
         return gfx;
     }
-    info = arg0->info;
-    points = arg0->points;
-    if (info->sub != NULL && info->sub->unk1D4 == 0) {
+    info = ribbon->info;
+    points = ribbon->points;
+    if (info->owner != NULL && info->owner->unk1D4 == NULL) {
         return gfx;
     }
-    func_151D5D60(arg0->unk84, arg2, (arg0->count * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+    func_151D5D60(ribbon->vtxBuffer, arg2, (ribbon->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
     update = 1;
     gfx = func_15142B7C(func_15142C10(gfx, 0xED, 0xD2, 0x85, 0xC8, &update), 0x200005, 0x1F0600);
-    gfx = func_15142FBC(func_1513F4E4(gfx, 0x54, &update), D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].unk0 | D_800A4AC8[1].unk4, &update);
-    i = arg0->tail - 1;
-    if (i < 0) {
-        i = arg0->count - 1;
+    gfx = func_15142FBC(func_1513F4E4(gfx, 0x54, &update), D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].cycle1 | D_800A4AC8[1].cycle2, &update);
+    cur = ribbon->tail - 1;
+    if (cur < 0) {
+        cur = ribbon->capacity - 1;
     }
-    j = i - 1;
-    if (j < 0) {
-        j = arg0->count - 1;
+    next = cur - 1;
+    if (next < 0) {
+        next = ribbon->capacity - 1;
     }
-    a = points[i].pos;
-    wa = points[i].width;
-    ax = points[i].dx * wa;
-    az = points[i].dz * wa;
-    c = points[i].off;
-    b = points[j].pos;
-    wb = points[j].width;
-    bx = points[j].dx * wb;
-    bz = points[j].dz * wb;
-    d = points[j].off;
-    vtx->v.ob[0] = (s32)(a.x + c.x + ax);
-    vtx->v.ob[1] = (s32)a.y;
-    vtx->v.ob[2] = (s32)(a.z + c.z + az);
+    curPos = points[cur].pos;
+    curWidth = points[cur].width;
+    curX = points[cur].dirX * curWidth;
+    curZ = points[cur].dirZ * curWidth;
+    curOffset = points[cur].offset;
+    nextPos = points[next].pos;
+    nextWidth = points[next].width;
+    nextX = points[next].dirX * nextWidth;
+    nextZ = points[next].dirZ * nextWidth;
+    nextOffset = points[next].offset;
+    vtx->v.ob[0] = (s32)(curPos.x + curOffset.x + curX);
+    vtx->v.ob[1] = (s32)curPos.y;
+    vtx->v.ob[2] = (s32)(curPos.z + curOffset.z + curZ);
     vtx->v.flag = 0;
     vtx++;
-    vtx->v.ob[0] = (s32)(a.x - c.x + ax);
-    vtx->v.ob[1] = (s32)a.y;
-    vtx->v.ob[2] = (s32)(a.z - c.z + az);
+    vtx->v.ob[0] = (s32)(curPos.x - curOffset.x + curX);
+    vtx->v.ob[1] = (s32)curPos.y;
+    vtx->v.ob[2] = (s32)(curPos.z - curOffset.z + curZ);
     vtx->v.flag = 0;
     vtx++;
     do {
-        vtx->v.ob[0] = (s32)(b.x + d.x + bx);
-        vtx->v.ob[1] = (s32)b.y;
-        vtx->v.ob[2] = (s32)(b.z + d.z + bz);
+        vtx->v.ob[0] = (s32)(nextPos.x + nextOffset.x + nextX);
+        vtx->v.ob[1] = (s32)nextPos.y;
+        vtx->v.ob[2] = (s32)(nextPos.z + nextOffset.z + nextZ);
         vtx->v.flag = 0;
         vtx++;
-        vtx->v.ob[0] = (s32)(b.x - d.x + bx);
-        vtx->v.ob[1] = (s32)b.y;
-        vtx->v.ob[2] = (s32)(b.z - d.z + bz);
+        vtx->v.ob[0] = (s32)(nextPos.x - nextOffset.x + nextX);
+        vtx->v.ob[1] = (s32)nextPos.y;
+        vtx->v.ob[2] = (s32)(nextPos.z - nextOffset.z + nextZ);
         vtx->v.flag = 0;
         vtx++;
         gSPVertex(gfx++, vtx - 4, 4, 0);
         gSP2Triangles(gfx++, 0, 1, 2, 0, 1, 3, 2, 0);
-        i = j;
-        j--;
-        if (j < 0) {
-            j = arg0->count - 1;
+        cur = next;
+        next--;
+        if (next < 0) {
+            next = ribbon->capacity - 1;
         }
-        if (i != arg0->head) {
-            a = points[i].pos;
-            wa = points[i].width;
-            ax = points[i].dx * wa;
-            az = points[i].dz * wa;
-            b = points[j].pos;
-            wb = points[j].width;
-            bx = points[j].dx * wb;
-            bz = points[j].dz * wb;
-            d = points[j].off;
-            c = points[i].off;
+        if (cur != ribbon->head) {
+            curPos = points[cur].pos;
+            // matching: dead recompute of curWidth/curX/curZ (DCE'd) steers the address base IDO keeps
+            curWidth = points[cur].width;
+            curX = points[cur].dirX * curWidth;
+            curZ = points[cur].dirZ * curWidth;
+            nextPos = points[next].pos;
+            nextWidth = points[next].width;
+            nextX = points[next].dirX * nextWidth;
+            nextZ = points[next].dirZ * nextWidth;
+            nextOffset = points[next].offset;
+            curOffset = points[cur].offset;
         }
-    } while (i != arg0->head);
+    } while (cur != ribbon->head);
     return gfx;
 }
 
-struct s151CF844 { s32 pad[0x26]; s32 *unk98p; };
+/* Data of an actor that follows an owner: the owner, then the owner's unique id. */
+typedef struct {
+    /* 0x0 */ s32 owner;
+    /* 0x4 */ s32 ownerId;
+} FollowerData;
 
-void func_151CF844(struct s151CF844 *arg0, s32 arg1, u8 arg2) {
-    s32 *temp = arg0->unk98p;
-    if (temp[0] != 0) {
-        func_15169850(arg1, arg2, (s32)temp, (s32)temp + 4, (s32)arg0);
+typedef struct {
+    /* 0x00 */ u8 pad0[0x98];
+    /* 0x98 */ FollowerData *data;
+} FollowerActor;
+
+/* Message handler of a following actor: lets func_15169850 update or end the link to its owner. */
+void func_151CF844(FollowerActor *actor, s32 arg1, u8 arg2) {
+    FollowerData *data = actor->data;
+
+    if (data->owner != 0) {
+        func_15169850(arg1, arg2, (s32)&data->owner, (s32)&data->ownerId, (s32)actor);
     }
 }
 
+/* Common head of an effect object (struct260 is a shorter view); each effect keeps its own data
+ * from +0x28. */
 typedef struct {
-    char pad0[0x23D];
-    u8 unk23D;
-} ConkerStruct151CF898Camera;
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xC - 0x2];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 state; /* set to -1 to free the effect */
+    /* 0x10 */ u8 pad10[0x28 - 0x10];
+} EffectHead;
 
+/* Data of the ground effect spawned by func_151CF898. */
 typedef struct {
-    struct17 vec;
+    struct17 pos;
     f32 unkC;
-} ConkerStruct151CF898Payload;
+} GroundEffectData;
 
-void func_151CF898(struct127 *arg0, f32 arg1, f32 arg2) {
-    ConkerStruct151CF898Camera *camera;
-    struct17 sp58;
-    struct17 *pos;
+typedef struct {
+    EffectHead head;
+    GroundEffectData data;
+} GroundEffect;
+
+/* With probability 0.222, spawns an effect on the ground at a random point up to 2000 units from
+ * the camera of the object's player, within 40 degrees either side of the camera's yaw. */
+void func_151CF898(struct127 *arg0, f32 probeY, f32 arg2) {
+    struct108 *player;
+    struct17 spawnPos;
+    struct17 *camPos;
     f32 yaw;
     f32 angle;
     f32 distance;
-    ConkerStruct151CF898Payload sp38;
-    struct260 *temp_v0;
+    GroundEffectData data;
+    GroundEffect *effect;
 
-    camera = (ConkerStruct151CF898Camera *)arg0->camera;
-    if (camera != NULL) {
-        if (func_150ADA68() < D_800AB020) {
-            pos = func_15144B34(camera->unk23D);
-            yaw = func_15144AA8(camera->unk23D);
-            angle = ((func_150ADA68() * 80.0f) + (yaw - 40.0f)) * D_800AB024;
+    player = arg0->camera;
+    if (player != NULL) {
+        if (func_150ADA68() < 0.2220000178f) {
+            camPos = func_15144B34(player->unk23D);
+            yaw = func_15144AA8(player->unk23D);
+            angle = ((func_150ADA68() * 80.0f) + (yaw - 40.0f)) * 0.01745329238f;
             distance = func_150ADA68() * 2000.0f;
 
-            sp58.unk0 = pos->unk0 - (sinf(angle) * distance);
-            sp58.unk4 = arg1;
-            sp58.unk8 = pos->unk8 - (cosf(angle) * distance);
+            spawnPos.unk0 = camPos->unk0 - (sinf(angle) * distance);
+            spawnPos.unk4 = probeY;
+            spawnPos.unk8 = camPos->unk8 - (cosf(angle) * distance);
 
-            if (func_15046C80((f32 *)&sp58, 0, arg2, &D_800D9860) != 0) {
-                sp58.unk4 = D_800D9860;
-                sp38.vec = sp58;
-                sp38.unkC = 0.0f;
+            if (func_15046C80(&spawnPos, 0, arg2, &D_800D9860) != 0) {
+                spawnPos.unk4 = D_800D9860;
+                data.pos = spawnPos;
+                data.unkC = 0.0f;
 
-                temp_v0 = func_15149130((s16)((func_150ADA20() % 0x83U) + 0x33),
-                                        -1, 0x20, -1, 1, 0, (struct37 *)0x10, 0xFF, 1);
-                if (temp_v0 != NULL) {
-                    memcpy((u8 *)temp_v0 + 0x28, &sp38, 0x10);
+                effect = (GroundEffect *)func_15149130((s16)((func_150ADA20() % 131U) + 51), -1, 0x20, -1, 1, 0,
+                                                       (struct37 *)sizeof(data), 0xFF, 1);
+                if (effect != NULL) {
+                    memcpy(&effect->data, &data, sizeof(data));
                 }
             }
         }
@@ -865,7 +634,7 @@ Gfx *func_151D014C(Gfx *gfx, Arg151D014C *arg1, s16 arg2) {
     gfx = func_15142E24(gfx, (s32)D_80091154, 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
     gfx = func_1513F4E4(gfx, 0x3B, &update);
     gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, sub->unkC, &update);
-    gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
+    gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].cycle1 | D_800A4AC8[3].cycle2, &update);
     diff.unk0 = to.unk0 - from.unk0;
     diff.unk4 = to.unk4 - from.unk4;
     diff.unk8 = to.unk8 - from.unk8;
@@ -1493,171 +1262,3 @@ void func_151D1448(u8 *arg0) {
         *(u8 **)(link + 8) = result;
     }
 }
-
-typedef struct {
-    f32 x, y, z;
-} Vec3_151D15D0;
-
-typedef struct {
-    f32 x, z;
-} Vec2_151D15D0;
-
-typedef struct {
-    Vec3_151D15D0 pos;
-    f32 speed;
-    f32 invLen;
-    u8 alpha;
-    u8 pad15[3];
-    f32 unk18;
-    f32 unk1C;
-    Vec2_151D15D0 n;
-} Rec_151D15D0;
-
-typedef struct {
-    u8 pad0[0x18];
-    Vec3_151D15D0 pos;
-    f32 vx;
-    f32 vy;
-    f32 vz;
-    f32 speed;
-} Inner_151D15D0;
-
-typedef struct {
-    u8 pad0[0x28];
-    Inner_151D15D0 inner;
-} Base_151D15D0;
-
-typedef struct {
-    Base_151D15D0 *base;
-    f32 angle;
-} Src_151D15D0;
-
-typedef struct {
-    u8 pad0[0x10];
-    Vec3_151D15D0 pos;
-    u8 pad1C[2];
-    u16 flags;
-    u8 pad20[5];
-    u8 count;
-    u8 pad26[6];
-    s8 n;
-    s8 tail;
-    s8 head;
-    u8 pad2F[0x94 - 0x2F];
-    Rec_151D15D0 *recs;
-    Src_151D15D0 *src;
-} Obj_151D15D0;
-
-extern f32 func_15144528(f32, f32, f32);
-s32 func_151D15D0(Obj_151D15D0 *arg0);
-void func_151D223C(ConkerField98Owner *arg0);
-
-extern void func_151478F4(void *);
-void func_151D2258(s32 arg0);
-
-extern void func_15147928(s32);
-void func_151D2284(s32 arg0);
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3_151D22B0;
-
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3_151D22B0 pos;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s8 unk40;
-} Cfg080C_151D22B0;
-
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3_151D22B0 pos;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-} Cfg2190_151D22B0;
-
-typedef struct {
-    /* 0x00 */ Vec3_151D22B0 pos;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s8 unk38;
-    /* 0x39 */ s8 unk39;
-    /* 0x3A */ u8 unk3A;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ s32 unk44;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ s32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ u8 unk54;
-    /* 0x55 */ u8 unk55;
-    /* 0x56 */ u8 unk56;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60;
-    /* 0x64 */ s32 unk64;
-    /* 0x68 */ s32 unk68;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ s32 unk70;
-    /* 0x74 */ s32 unk74;
-    /* 0x78 */ s32 unk78;
-    /* 0x7C */ s8 unk7C;
-    /* 0x7D */ s8 unk7D;
-    /* 0x7E */ s16 pad7E;
-    /* 0x80 */ s16 unk80;
-    /* 0x82 */ s16 unk82;
-    /* 0x84 */ s32 pad84;
-} Cfg1A38_151D22B0;
-
-extern s32 D_800AB0B0[];
-extern f32 D_800AB0E0[];
-extern s32 D_800AB110[];
-extern f32 D_800AB114[];
-
-void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
-void func_1504715C(void *, struct127 *);
-void func_1515080C(Cfg080C_151D22B0 *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
-void func_15152190(Cfg2190_151D22B0 *, s32 *, f32 *, s32, f32, s32, u8, s32);
-void func_151D22B0(struct127 *arg0, u8 arg1, s32 arg2);
