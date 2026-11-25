@@ -1,8 +1,19 @@
 #include <ultra64.h>
+/* functions.h declares the sound starters func_10010F30/func_10010F88 void, but they return the
+ * voice handle, which the wrappers below hand back to their callers. */
+#define func_10010F30 func_10010F30_void_decl_in_functions_h
+#define func_10010F88 func_10010F88_void_decl_in_functions_h
 #include "functions.h"
+#undef func_10010F30
+#undef func_10010F88
+s32 func_10010F30(s32 sound, u16 volume, u8 pan, s16 cents, u8 mix);
+s32 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16 y, s16 z, s16 nearDistance,
+                  s16 farDistance);
+/* variables.h declares D_800D3098 as an array, but the code loads it as a pointer to the table. */
+#define D_800D3098 D_800D3098_array_decl_in_variables_h
 #include "variables.h"
-
-extern struct127 *func_1505EEF4();
+#undef D_800D3098
+extern struct178 *D_800D3098;
 
 /* Script operand value meaning "leave this field unchanged". */
 #define ARG_KEEP 0x7FFFFFFF
@@ -287,67 +298,77 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
     return 0;
 }
 
+/* Looks like the script format version: later versions carry more operands. */
 extern s32 D_800D3840;
-s32 func_1509F6B0();
-s32 func_1509F4E8();
-s32 func_1509F5A8();
-s32 func_1509F6E8();
-s32 func_15103C14();
+
+extern struct127 *func_1505EEF4(s32 path);
+extern s32 func_1000F568(s32 base, s32 count);
+extern s32 func_15103C14(s32, s32, s32, s32, s32);
+extern void func_15114D24(Struct1509E900 *, s32, s32, s16, s32, s32);
 s32 func_1509F354();
 s32 func_1509F47C();
+s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, s32 nearDistance);
+s32 func_1509F5A8(s32 first, s32 last, s32 volume);
 void func_1509F5F4();
+void func_1509F660(s32 path, s32 secondVoice);
+s32 func_1509F6B0(s32 sound, s32 volume, s32 cents, s32 pan);
+s32 func_1509F6E8(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDistance);
+void func_1509F77C(s32 handle, s32 path, s32 cents, s32 nearDistance, s32 farDistance);
 
-s32 func_1509EFF0(s32 arg0, u32 *arg1) {
+/* Script "play sound" handler: plays `sound` the way cmd[1] selects (plain, ranged/positioned,
+ * on an actor, at an actor's position...). Returns (handle << 16) | 0x7000, or 0 if none plays. */
+s32 func_1509EFF0(s32 sound, u32 *cmd) {
     s32 ret;
-    s32 a;
-    s32 b;
-    s32 c;
+    s32 cents;
+    s32 pan;
+    s32 force;
 
     if (D_800D3840 == 1) {
-        ret = func_1509F6B0(arg0, 0x7FFF, 0, 0x40);
+        ret = func_1509F6B0(sound, 0x7FFF, 0, 0x40);
     } else {
-        ret = arg1[1];
+        ret = cmd[1];
         switch (ret) {
         case 1:
-            b = 0x40;
+            pan = 0x40;
             if (D_800D3840 >= 4) {
-                a = arg1[3];
+                cents = cmd[3];
                 if (D_800D3840 == 5) {
-                    b = arg1[4];
+                    pan = cmd[4];
                 }
             } else {
-                a = 0;
+                cents = 0;
             }
-            ret = func_1509F6B0(arg0, arg1[2], a, b);
+            ret = func_1509F6B0(sound, cmd[2], cents, pan);
             break;
         case 0:
-            ret = arg1[5];
+            /* a random sound from sound..cmd[2], placed by cmd[5]: 0xTnnn = kind T, target nnn */
+            ret = cmd[5];
             switch (ret & 0xF000) {
             case 0x2000:
-                return func_1509F354(arg0, arg1[2] & 0xFFF, arg1[3], arg1[4], ret & 0xFFF, arg1[6], arg1[7]);
+                return func_1509F354(sound, cmd[2] & 0xFFF, cmd[3], cmd[4], ret & 0xFFF, cmd[6], cmd[7]);
             case 0x3000:
-                func_1509F47C(arg0, arg1[2] & 0xFFF, arg1[4], ret & 0xFFF, arg1[6], arg1[7]);
+                func_1509F47C(sound, cmd[2] & 0xFFF, cmd[4], ret & 0xFFF, cmd[6], cmd[7]);
                 return 0;
             case 0x4000:
-                return func_1509F4E8(arg0, arg1[2] & 0xFFF, arg1[4], ret & 0xFFF, arg1[6]);
+                return func_1509F4E8(sound, cmd[2] & 0xFFF, cmd[4], ret & 0xFFF, cmd[6]);
             default:
-                ret = func_1509F5A8(arg0, arg1[2] & 0xFFF, arg1[4]);
+                ret = func_1509F5A8(sound, cmd[2] & 0xFFF, cmd[4]);
                 break;
             }
             break;
         case 2:
-            c = 0;
-            if (D_800D3840 >= 7 && arg1[6] != 0) {
-                c = 1;
+            force = FALSE;
+            if (D_800D3840 >= 7 && cmd[6] != 0) {
+                force = TRUE;
             }
-            func_1509F5F4(arg0 & 0xFFF, arg1[2], arg1[3] & 0xFFF, arg1[4], arg1[5], c);
+            func_1509F5F4(sound & 0xFFF, cmd[2], cmd[3] & 0xFFF, cmd[4], cmd[5], force);
             ret = 0;
             break;
         case 3:
-            ret = func_1509F6E8(arg0, arg1[3] & 0xFFF, arg1[2], arg1[4], arg1[5]);
+            ret = func_1509F6E8(sound, cmd[3] & 0xFFF, cmd[2], cmd[4], cmd[5]);
             break;
         case 4:
-            func_15103C14(arg0, arg1[3] & 0xFFF, arg1[2], arg1[4], arg1[5]);
+            func_15103C14(sound, cmd[3] & 0xFFF, cmd[2], cmd[4], cmd[5]);
             return 0x7000;
         default:
             return 0;
@@ -359,26 +380,25 @@ s32 func_1509EFF0(s32 arg0, u32 *arg1) {
     return ret;
 }
 
-s32 func_1509F248(s32 arg0, u32 *arg1) {
+/* Script "stop sound" handler: stops the voice whose handle is in the command's top halfword. */
+s32 func_1509F248(s32 arg0, u32 *cmd) {
     if (arg0 != 0) {
-        func_100111C8((*arg1 & 0xFFFF0000) >> 16);
+        func_100111C8((cmd[0] & 0xFFFF0000) >> 16);
     }
     return 1;
 }
 
-void func_1509F660(s32 arg0, s32 arg1);
-void func_1509F77C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-
-s32 func_1509F284(s32 arg0, s32 arg1, u32 *arg2) {
-    switch (arg1) {
+/* Script actor-sound handler: stops (op 0/1) or moves (op 2) the sound of the actor on path cmd[2]. */
+s32 func_1509F284(s32 arg0, s32 op, u32 *cmd) {
+    switch (op) {
     case 1:
-        func_1509F660(arg2[2] & 0xFFF, 0);
+        func_1509F660(cmd[2] & 0xFFF, FALSE);
         return 1;
     case 0:
-        func_1509F660(arg2[2] & 0xFFF, 1);
+        func_1509F660(cmd[2] & 0xFFF, TRUE);
         return 1;
     case 2:
-        func_1509F77C((arg2[0] & 0xFFFF0000) >> 16, arg2[2] & 0xFFF, arg2[3], arg2[4], arg2[5]);
+        func_1509F77C((cmd[0] & 0xFFFF0000) >> 16, cmd[2] & 0xFFF, cmd[3], cmd[4], cmd[5]);
         return 1;
     }
     return 0;
@@ -388,143 +408,133 @@ s32 func_1509F33C(s32 arg0, s32 arg1, s32 arg2) {
     return 0;
 }
 
-s32 func_1509F354(arg0, arg1, arg2, arg3, arg4, arg5, arg6)
-    s32 arg0; s32 arg1; s32 arg2; s32 arg3; s32 arg4; s16 arg5; s32 arg6;
+/* Plays a random sound from first..last on the actor following `path`, picking only sounds whose
+ * bit is still set in `unplayed` (all of them when it is 0). Returns the mask minus the one played. */
+s32 func_1509F354(first, last, unplayed, volume, path, nearDistance, farDistance)
+    s32 first; s32 last; s32 unplayed; s32 volume; s32 path; s16 nearDistance; s32 farDistance;
 {
-    struct127 *temp;
-    s32 range;
-    u8 idx;
+    struct127 *actor;
+    s32 count;
+    u8 pick;
 
-    temp = func_1505EEF4(arg4);
-    if ((u32)arg3 >= 0x8000U) {
-        arg3 = 0x7FFF;
+    actor = func_1505EEF4(path);
+    if ((u32)volume >= 0x8000) {
+        volume = 0x7FFF;
     }
-    if (temp == 0) {
-        return arg2;
+    if (actor == NULL) {
+        return unplayed;
     }
-    if (func_10010894(temp) == 0) {
-        if (arg2 == 0) {
-            arg2 = (u32)-1 >> -(u8)(arg1 - arg0 + 1);
+    if (!func_10010894(actor)) {
+        if (unplayed == 0) {
+            unplayed = 0xFFFFFFFF >> (32 - (u8)(last - first + 1));
         }
-        range = (u8)(arg1 - arg0 + 1);
+        count = (u8)(last - first + 1);
         do {
-            idx = (u8)(func_150ADA20() % (u32)range);
-        } while (((1 << idx) & arg2) == 0);
+            pick = func_150ADA20() % (u32)count;
+        } while (!((1 << pick) & unplayed));
 
-        range = idx;
-        if (func_10010344((u16)(idx + arg0), temp, arg3, arg5, arg6) != 0) {
-            arg2 ^= 1 << range;
+        if (func_10010344(pick + first, actor, volume, nearDistance, farDistance)) {
+            unplayed ^= 1 << pick;
         }
     }
-    return arg2;
+    return unplayed;
 }
 
-extern s32 func_1000F568(s32, u8);
-extern void func_15114D24(Struct1509E900 *, s32, s32, s16, s32, s32);
-
-s32 func_1509F47C(arg0, arg1, arg2, arg3, arg4, arg5)
-    s32 arg0; s32 arg1; s32 arg2; s32 arg3; s16 arg4; s32 arg5;
+/* Plays a random sound from first..last on the object with id `objId`. */
+s32 func_1509F47C(first, last, volume, objId, nearDistance, farDistance)
+    s32 first; s32 last; s32 volume; s32 objId; s16 nearDistance; s32 farDistance;
 {
     Struct1509E900 *obj;
 
-    obj = func_151149AC(arg3);
-    func_15114D24(obj, func_1000F568(arg0, (u8)(arg1 - arg0 + 1)), arg2, arg4, arg5, 0);
+    obj = func_151149AC(objId);
+    func_15114D24(obj, func_1000F568(first, (u8)(last - first + 1)), volume, nearDistance, farDistance, 0);
 }
 
-void func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
-extern struct178 D_800D3098[73];
-extern s32 func_1000F568(s32, u8);
-s32 func_1509F4E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
+/* Plays a random sound from first..last at point `index` of the D_800D3098 table, whose halfword at
+ * 0x6 is the far distance (nearDistance is kept below it). */
+s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, s32 nearDistance) {
+    struct178 *point;
+    s32 farDistance;
+
+    point = &D_800D3098[index];
+    farDistance = *(s16 *)point->unk6;
+    if ((u32)nearDistance >= (u32)farDistance) {
+        nearDistance = farDistance - 1;
+    }
+    return func_10010F88(func_1000F568(first, (u8)(last - first + 1)), volume, 0, 0, 0, point->unk0, point->pad2,
+                         point->unk4, nearDistance, farDistance);
+}
+
+/* Plays a random sound from first..last, unpositioned. */
+s32 func_1509F5A8(s32 first, s32 last, s32 volume) {
+    return func_10010F30(func_1000F568(first, (u8)(last - first + 1)), volume, 0x40, 0, 0);
+}
+
+/* Plays `sound` on the actor following `path`, unless the actor is already playing one and `force` is clear. */
+void func_1509F5F4(sound, volume, path, nearDistance, farDistance, force)
+    u16 sound; s32 volume; s32 path; s16 nearDistance; s32 farDistance; s32 force;
 {
-  struct178 *e;
-  s32 h;
-  e = &((struct178 *) (*((s32 *) (&D_800D3098))))[0, arg3];
-  h = *((s16 *) (&e->unk6[0]));
-  if (((u32) arg4) >= ((u32) h))
-  {
-    arg4 = h - 1;
-  }
-  func_10010F88(func_1000F568(arg0, (u8) ((arg1 - arg0) + 1)), (u16) arg2, 0, 0, 0, e->unk0, e->pad2, e->unk4, arg4, h);
-}
+    struct127 *actor;
 
-extern s32 func_1000F568(s32, u8);
-
-
-extern s32 func_1000F568(s32, u8);
-
-s32 func_1509F5A8(s32 arg0, s32 arg1, s32 arg2) {
-    s32 temp;
-
-    temp = func_1000F568(arg0, (u8)(arg1 - arg0 + 1));
-    func_10010F30(temp, (u16)arg2, 0x40, 0, 0);
-}
-
-void func_1509F5F4(arg0, arg1, arg2, arg3, arg4, arg5)
-    u16 arg0; s32 arg1; s32 arg2; s16 arg3; s32 arg4; s32 arg5;
-{
-    struct127 *temp;
-
-    temp = func_1505EEF4(arg2);
-    if (temp != 0) {
-        if ((arg5 != 0) || (func_10010894(temp) == 0)) {
-            func_10010344(arg0, temp, arg1, arg3, arg4);
+    actor = func_1505EEF4(path);
+    if (actor != NULL) {
+        if (force || !func_10010894(actor)) {
+            func_10010344(sound, actor, volume, nearDistance, farDistance);
         }
     }
 }
 
-extern struct127 *func_1505EEF4();
+/* Stops the sound of the actor following `path`: its 0x8C voice if `secondVoice`, else its 0x8E voice. */
+void func_1509F660(s32 path, s32 secondVoice) {
+    struct127 *actor;
 
-void func_1509F660(s32 arg0, s32 arg1) {
-    struct127 *temp;
-
-    temp = func_1505EEF4(arg0);
-    if (temp != 0) {
-        if (arg1 != 0) {
-            func_10010A3C(temp);
+    actor = func_1505EEF4(path);
+    if (actor != NULL) {
+        if (secondVoice) {
+            func_10010A3C(actor);
         } else {
-            func_100109D0(temp);
+            func_100109D0(actor);
         }
     }
 }
 
-s32 func_1509F6B0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    func_10010F30(arg0, arg1, arg3, arg2, 0);
+/* Plays `sound` unpositioned. */
+s32 func_1509F6B0(s32 sound, s32 volume, s32 cents, s32 pan) {
+    return func_10010F30(sound, volume, pan, cents, 0);
 }
 
-s32 func_1509F6E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    struct127 *temp;
+/* Plays `sound` at the position of the actor following `path`. */
+s32 func_1509F6E8(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDistance) {
+    struct127 *actor;
     s32 x;
     s32 y;
     s32 z;
 
-    temp = func_1505EEF4(arg1);
-    if (temp == 0) {
+    actor = func_1505EEF4(path);
+    if (actor == NULL) {
         return 0;
     }
-    x = temp->x_position;
-    y = temp->y_position;
-    z = temp->z_position;
-    func_10010F88(arg0, (u16)arg2, 0, 0, 0, x, y, z, arg3, arg4);
+    x = actor->x_position;
+    y = actor->y_position;
+    z = actor->z_position;
+    return func_10010F88(sound, volume, 0, 0, 0, x, y, z, nearDistance, farDistance);
 }
 
-void func_1509F77C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    struct127 *temp;
+/* Moves the voice `handle` to the position of the actor following `path`. */
+void func_1509F77C(s32 handle, s32 path, s32 cents, s32 nearDistance, s32 farDistance) {
+    struct127 *actor;
     s32 x;
     s32 y;
     s32 z;
 
-    temp = func_1505EEF4(arg1);
-    x = temp->x_position;
-    y = temp->y_position;
-    z = temp->z_position;
-    func_1000F91C((u16)arg0, 0x7FFF, (s16)arg2, 0, 0,
-                  x, y, z, arg3, arg4);
+    actor = func_1505EEF4(path);
+    x = actor->x_position;
+    y = actor->y_position;
+    z = actor->z_position;
+    func_1000F91C(handle, 0x7FFF, cents, 0, 0, x, y, z, nearDistance, farDistance);
 }
 
 s32 func_1509F800(s32 arg0, s32 arg1, s32 arg2) {
-    arg0 = arg0;
-    arg1 = arg1;
-    arg2 = arg2;
     return 0;
 }
 
