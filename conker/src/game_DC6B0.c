@@ -284,56 +284,54 @@ GameDC6B0SmokeSprite *func_1515548C(GameDC6B0SmokePacket *, u8, s32, s32, s32, u
  * static spark sprite (lifetime capped at the source's maxLifetime) and restarts it randomly. */
 void func_150AF7C4(GameDC6B0SmokeSource *source) {
     GameDC6B0SmokeSprite *sprite;
-    struct {
-        GameDC6B0SmokeMotion motion;
-        GameDC6B0SmokePacket packet;
-    } puff;
+    GameDC6B0SmokePacket puff;
+    GameDC6B0SmokeMotion motion;
     GameDC6B0SmokeTimers *timers;
     GameDC6B0SmokePacket spark;
 
     timers = &source->timers;
     timers->puff -= D_800BE9E4;
     if (timers->puff < 0) {
-        puff.motion.x = func_150ADA68() * 280.0f + -140.0f;
-        puff.motion.y = func_150ADA68() * 50.0f;
-        puff.motion.phase = 2.0f * (func_150ADA68() * 3.141592741f);
-        puff.motion.unkC = func_150ADA68() * 0.2680000067f;
-        puff.packet.x = 0.0f;
-        puff.packet.y = 0.0f;
-        func_150ADA68();
-        puff.packet.selector = 0xFF;
-        puff.packet.scaleX = 1.0f;
-        puff.packet.scaleY = 115.0f;
-        puff.packet.lifetime = func_150ADA20() % 71U + 20;
-        if (source->maxLifetime < puff.packet.lifetime) {
-            puff.packet.lifetime = source->maxLifetime;
+        motion.x = func_150ADA68() * 280.0f + -140.0f;
+        motion.y = func_150ADA68() * 50.0f;
+        motion.phase = 2.0f * (func_150ADA68() * 3.141592741f);
+        motion.unkC = func_150ADA68() * 0.2680000067f;
+        puff.x = 0.0f;
+        puff.y = 0.0f;
+        func_150ADA68(); /* a random value the original draws and discards */
+        puff.selector = 0xFF;
+        puff.scaleX = 1.0f;
+        puff.scaleY = 115.0f;
+        puff.lifetime = func_150ADA20() % 71U + 20;
+        if (source->maxLifetime < puff.lifetime) {
+            puff.lifetime = source->maxLifetime;
         }
-        puff.packet.flags = 0x21;
-        puff.packet.field16 = 1;
-        puff.packet.field18 = 0xFF;
-        puff.packet.color0 = 0;
-        puff.packet.color1 = 0xFF;
-        puff.packet.color2 = 0xFF;
-        puff.packet.color3 = 0xFF;
-        puff.packet.color4 = func_150ADA20() % 71U + 40;
-        puff.packet.color5 = 0xFF;
-        puff.packet.color6 = 0xFF;
-        puff.packet.color7 = 0xFF;
-        puff.packet.color8 = 0xFF;
-        puff.packet.color9 = 0xFF;
-        puff.packet.field24 = 0;
-        puff.packet.field28 = 0x200004;
-        puff.packet.field2C = 0x1F0601;
-        puff.packet.field30 = 0x19;
-        puff.packet.field34 = 0x54;
-        puff.packet.field38 = 0x80;
-        puff.packet.field3C = 0x20;
-        puff.packet.field40 = 0;
-        puff.packet.field41 = 0xA;
-        puff.packet.field44 = 0;
-        sprite = func_1515548C(&puff.packet, 6, 0, 0, 0x10, source->group, source->owner);
+        puff.flags = 0x21;
+        puff.field16 = 1;
+        puff.field18 = 0xFF;
+        puff.color0 = 0;
+        puff.color1 = 0xFF;
+        puff.color2 = 0xFF;
+        puff.color3 = 0xFF;
+        puff.color4 = func_150ADA20() % 71U + 40;
+        puff.color5 = 0xFF;
+        puff.color6 = 0xFF;
+        puff.color7 = 0xFF;
+        puff.color8 = 0xFF;
+        puff.color9 = 0xFF;
+        puff.field24 = 0;
+        puff.field28 = 0x200004;
+        puff.field2C = 0x1F0601;
+        puff.field30 = 0x19;
+        puff.field34 = 0x54;
+        puff.field38 = 0x80;
+        puff.field3C = 0x20;
+        puff.field40 = 0;
+        puff.field41 = 0xA;
+        puff.field44 = 0;
+        sprite = func_1515548C(&puff, 6, 0, 0, 0x10, source->group, source->owner);
         if (sprite != NULL) {
-            memcpy(&sprite->motion, &puff.motion, sizeof(puff.motion));
+            memcpy(&sprite->motion, &motion, sizeof(motion));
         }
         timers->puff = func_150ADA20() % 41U + 45;
     }
