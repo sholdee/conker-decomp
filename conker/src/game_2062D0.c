@@ -232,8 +232,8 @@ typedef struct {
     s8 stepY;
     f32 amplitudeX;
     f32 amplitudeY;
-    f32 unk10; /* burst size factor */
-    f32 unk14; /* burst size factor for kind 3 */
+    f32 burstScale;
+    f32 altBurstScale;
     u8 kind;
     u8 flags;
     u8 pad1A[2];
@@ -320,9 +320,9 @@ Particle *func_151D9014(struct17 *pos, struct17 *vel, u8 kind, f32 arg3, s16 lif
     wobble.stepY = (func_150ADA20() % 6U) + 5;
     wobble.amplitudeX = ((func_150ADA68() * 0.25f) + 0.2f) * wobble.size;
     wobble.amplitudeY = ((func_150ADA68() * 0.25f) + 0.2f) * wobble.size;
-    wobble.unk10 = arg8;
+    wobble.burstScale = arg8;
     wobble.kind = kind;
-    wobble.unk14 = arg9;
+    wobble.altBurstScale = arg9;
     wobble.flags = ((u8)argC ? 0 : WOBBLE_FLAG_FIXED_SIZE) | ((u8)argD ? WOBBLE_FLAG_BOUNCE : 0);
     particle = func_15130280(&desc, 1, argB, sizeof(wobble), argE, argF);
     if (particle != NULL) {
@@ -399,13 +399,13 @@ u8 func_151D9534(Particle *particle, struct17 *arg1) {
                 wobble = &particle->wobble;
                 avgScale = (particle->desc.scaleX + particle->desc.scaleY) * 0.5f;
                 if (particle->unk9D == 3) {
-                    func_151D9FC0(wobble->kind, wobble->unk14 * avgScale, particle->desc.unk1B,
+                    func_151D9FC0(wobble->kind, wobble->altBurstScale * avgScale, particle->desc.unk1B,
                                   (s32)&particle->unk84, (s32)&point, particle->unkC, particle->unk1);
                 } else if (func_150ADA20() & 1) {
-                    func_151D9B8C(wobble->kind, (avgScale * 0.09f) * wobble->unk10, particle->desc.unk1B,
+                    func_151D9B8C(wobble->kind, (avgScale * 0.09f) * wobble->burstScale, particle->desc.unk1B,
                                   (s32)&particle->unk84, &point, 100, 0, 1, 0, particle->unkC, particle->unk1);
                 } else {
-                    func_151DAB58(wobble->kind, (avgScale * 0.025f) * wobble->unk10, particle->desc.unk1B, &point,
+                    func_151DAB58(wobble->kind, (avgScale * 0.025f) * wobble->burstScale, particle->desc.unk1B, &point,
                                   1, particle->unkC, particle->unk1);
                 }
             }
@@ -770,27 +770,28 @@ typedef struct {
     s8 unk15;
     u8 pad16[2];
     s32 unk18;
-} Spawn151DA6F8;
+} SplashSpawn; /* 0x1C */
 
 typedef struct {
-    f32 unk0;
-    struct17 unk4;
-    f32 unk10;
+    f32 scale;
+    struct17 vel;
+    f32 size;
     f32 unk14;
-    u8 unk18;
+    u8 flags;
     u8 unk19;
     u8 unk1A;
     u8 unk1B;
     s16 unk1C;
     s16 unk1E;
-} Part151DA6F8;
+} SplashMotion; /* 0x20 */
 
+/* Data a splash carries for the bursts it makes on impact (func_151DA938, func_151DAA88). */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    u8 unk8;
+    f32 burstScale;
+    f32 altBurstScale;
+    u8 kind;
     u8 pad9[3];
-} Extra151DA6F8;
+} SplashBurst; /* 0xC */
 
 typedef struct {
     s32 unk0;
@@ -803,57 +804,87 @@ typedef struct {
     u8 unk1C;
     u8 unk1D;
     u8 pad1E[2];
-} Style151DA6F8;
+} SplashStyle; /* 0x20 */
+
+/* The block a live splash points to at +0x98: its SplashMotion copy, state, and SplashBurst. */
+typedef struct {
+    SplashMotion motion;
+    u8 unk20;
+    u8 pad21[0x27];
+    SplashBurst burst;
+} SplashState;
+
+typedef struct {
+    struct17 pos;
+    f32 unkC;
+    f32 unk10;
+} SplashNode; /* 0x14 */
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x20];
+    s8 node;
+    u8 pad2E[0x66];
+    SplashNode *nodes;
+    SplashState *state;
+} Splash;
 
 extern u8 D_800AB3F4[];
 extern u8 D_800AB404[];
-extern void *func_15147DA0(Spawn151DA6F8 *, Part151DA6F8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, Style151DA6F8 *, s32, s32, s32);
+extern Splash *func_15147DA0(SplashSpawn *, SplashMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+                             SplashStyle *, s32, s32, s32);
 
-void *func_151DA6F8(struct17 *arg0, struct17 *arg1, f32 arg2, s16 arg3, u8 arg4, f32 arg5, s32 arg6, u8 arg7, f32 arg8, f32 arg9, u8 argA, u8 argB, s32 argC, s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11) {
-    void *ret;
-    Spawn151DA6F8 spawn;
-    Part151DA6F8 part;
-    Extra151DA6F8 extra;
+/* Spawns a splash of effect kind `kind` at `pos` moving with `vel`. */
+Splash *func_151DA6F8(struct17 *pos, struct17 *vel, f32 size, s16 lifetime, u8 arg4, f32 scale, s32 arg6, u8 arg7,
+                      f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, s32 argC, s16 argD, s16 argE, s32 argF,
+                      u8 arg10, s32 arg11) {
+    Splash *splash;
+    SplashSpawn spawn;
+    SplashMotion motion;
+    SplashBurst burst;
     s32 a;
     s32 b;
     s32 c;
     s32 d;
-    Style151DA6F8 style;
-    s32 v0;
-    s32 v1;
+    SplashStyle style;
+    s32 flag80;
+    s32 flag20;
 
     spawn.unk15 = arg6;
-    spawn.pos = *arg0;
-    spawn.unkC = arg3 + 0x10;
+    spawn.pos = *pos;
+    spawn.unkC = lifetime + 16;
     spawn.unkE = 0x35;
     spawn.unk10 = 1;
     spawn.unk14 = -1;
     spawn.unk18 = argF;
-    part.unk0 = arg5;
-    part.unk4 = *arg1;
-    part.unk10 = arg2;
-    part.unk14 = -10000.0f;
-    v1 = D_800AB404[argB] ? 0x20 : 0;
-    v0 = D_800AB330[argB] ? 0x80 : 0;
-    part.unk18 = v0 | 8 | v1 | 0x40;
-    part.unk19 = D_800AB3F4[argB];
-    part.unk1A = 0xFF;
-    part.unk1B = arg4;
-    part.unk1C = argD;
-    part.unk1E = argE;
+    motion.scale = scale;
+    motion.vel = *vel;
+    motion.size = size;
+    motion.unk14 = -10000.0f;
+    flag20 = D_800AB404[kind] ? 0x20 : 0;
+    flag80 = D_800AB330[kind] ? 0x80 : 0;
+    motion.flags = flag80 | 8 | flag20 | 0x40;
+    motion.unk19 = D_800AB3F4[kind];
+    motion.unk1A = 0xFF;
+    motion.unk1B = arg4;
+    motion.unk1C = argD;
+    motion.unk1E = argE;
     if (arg7 != 0) {
-        part.unk18 |= 3;
+        motion.flags |= 3;
         a = 7;
         b = 4;
     } else {
         a = 0;
         b = 0;
     }
-    extra.unk8 = argB;
-    extra.unk0 = arg8;
-    extra.unk4 = arg9;
+    burst.kind = kind;
+    burst.burstScale = burstScale;
+    burst.altBurstScale = altBurstScale;
     {
-        s32 pad;
+        s32 pad; // matching: unused stack slot
 
         style.unk0 = 0;
         style.unk4 = 0x220005;
@@ -871,117 +902,49 @@ void *func_151DA6F8(struct17 *arg0, struct17 *arg1, f32 arg2, s16 arg3, u8 arg4,
             c = 0;
             d = 0;
         }
-        ret = func_15147DA0(&spawn, &part, 0x10, 1, 0, 0, a, b, 0, c, d, &style, argC, arg10, arg11);
+        splash = func_15147DA0(&spawn, &motion, 16, 1, 0, 0, a, b, 0, c, d, &style, argC, arg10, arg11);
     }
-    if (ret != NULL) {
-        memcpy((u8 *)*(void **)((u8 *)ret + 0x98) + 0x48, &extra, sizeof(extra));
+    if (splash != NULL) {
+        memcpy(&splash->state->burst, &burst, sizeof(burst));
     }
-    return ret;
+    return splash;
 }
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-} Struct151DA938_elem;
-
-typedef struct {
-    u8 unk0[0x1];
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x20];
-    s8 unk2D;
-    u8 pad2E[0x66];
-    Struct151DA938_elem *unk94;
-    u8 *unk98;
-} Struct151DA938;
-
-typedef struct {
-    f32 unk0;
-    u8 pad4[0x4];
-    u8 unk8;
-} Struct151DA938_sub;
-
-typedef struct {
-    f32 unk0;
-    u8 pad4[0x17];
-    u8 unk1B;
-    u8 pad1C[0x4];
-    u8 unk20;
-    u8 pad21[0x27];
-    Struct151DA938_sub unk48;
-} Struct151DA938_v1;
 
 extern void func_151DAB58(u8, f32, u8, struct17 *, volatile u8, u8, s32);
-extern f32 D_800AB49C;
 
-s32 func_151DA938(Struct151DA938 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
-    Struct151DA938_v1 *v1 = (Struct151DA938_v1 *)arg0->unk98;
-    Struct151DA938_elem *base = arg0->unk94;
-    struct17 sp4C;
-    Struct151DA938_sub *sub = &v1->unk48;
+/* Splash impact handler: bursts into a func_151D9B8C emitter or a func_151DAB58 effect at floor height. */
+s32 func_151DA938(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 arg5) {
+    SplashState *state = splash->state;
+    SplashNode *nodes = splash->nodes;
+    struct17 point;
+    SplashBurst *burst = &state->burst;
 
-    sp4C.unk0 = base[arg0->unk2D].unk0;
-    sp4C.unk4 = arg4 + 2.0f;
-    sp4C.unk8 = base[arg0->unk2D].unk8;
+    point.unk0 = nodes[splash->node].pos.unk0;
+    point.unk4 = floorY + 2.0f;
+    point.unk8 = nodes[splash->node].pos.unk8;
     if (func_150ADA20() & 1) {
-        func_151D9B8C(sub->unk8, (v1->unk0 * 3.0f) * sub->unk0, v1->unk1B, arg5, &sp4C, 100, 0, 1, 0, arg0->unkC, arg0->unk1);
+        func_151D9B8C(burst->kind, (state->motion.scale * 3.0f) * burst->burstScale, state->motion.unk1B, arg5,
+                      &point, 100, 0, 1, 0, splash->unkC, splash->unk1);
     } else {
-        func_151DAB58(sub->unk8, (v1->unk0 * D_800AB49C) * sub->unk0, v1->unk1B, &sp4C, 1, arg0->unkC, arg0->unk1);
+        func_151DAB58(burst->kind, (state->motion.scale * 1.1f) * burst->burstScale, state->motion.unk1B, &point, 1,
+                      splash->unkC, splash->unk1);
     }
-    v1->unk20 = 4;
+    state->unk20 = 4;
     return 1;
 }
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-} Struct151DAA88_elem;
+/* Splash impact handler: a func_151D9FC0 burst at floor height. */
+s32 func_151DAA88(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 arg5) {
+    SplashState *state = splash->state;
+    SplashNode *nodes = splash->nodes;
+    struct17 point;
 
-typedef struct {
-    u8 unk0[0x1];
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x20];
-    s8 unk2D;
-    u8 pad2E[0x66];
-    Struct151DAA88_elem *unk94;
-    u8 *unk98;
-} Struct151DAA88;
-
-typedef struct {
-    f32 unk0;
-    u8 pad4[0x17];
-    u8 unk1B;
-    u8 pad1C[0x4];
-    u8 unk20;
-    u8 pad21[0x2B];
-    f32 unk4C;
-    u8 unk50;
-} Struct151DAA88_v1;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-} Vec3151DAA88;
-
-s32 func_151DAA88(Struct151DAA88 *arg0, f32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
-    Struct151DAA88_v1 *v1 = (Struct151DAA88_v1 *)arg0->unk98;
-    Struct151DAA88_elem *base = arg0->unk94;
-    Vec3151DAA88 sp34;
-
-    sp34.unk0 = base[arg0->unk2D].unk0;
-    sp34.unk4 = arg4;
-    sp34.unk8 = base[arg0->unk2D].unk8;
-    func_151D9FC0(v1->unk50, v1->unk0 * 11.0f * v1->unk4C, v1->unk1B, arg5, (s32)&sp34, arg0->unkC, arg0->unk1);
-    v1->unk20 = 4;
+    point.unk0 = nodes[splash->node].pos.unk0;
+    point.unk4 = floorY;
+    point.unk8 = nodes[splash->node].pos.unk8;
+    func_151D9FC0(state->burst.kind, state->motion.scale * 11.0f * state->burst.altBurstScale, state->motion.unk1B,
+                  arg5, (s32)&point, splash->unkC, splash->unk1);
+    state->unk20 = 4;
     return 1;
 }
 typedef struct {
