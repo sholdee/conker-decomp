@@ -251,6 +251,14 @@ def log(ws, res, n=None):
         f.write(json.dumps({"t": time.time(), "result": res, "funcs_differ": n}) + "\n")
 
 
+def refresh_accounting():
+    """Regenerate tools/accounting.tsv (committed with every land); False if the accounting fails."""
+    r = subprocess.run([sys.executable, str(REPO / "tools" / "accounting.py")], capture_output=True, text=True)
+    if r.returncode:
+        print(r.stdout[-1500:])
+    return r.returncode == 0
+
+
 def cmd_land(a):
     ws, m = ws_of(a.name)
     files = changed_files(ws)
@@ -320,7 +328,9 @@ def cmd_land(a):
             run("make -B -j16 2>&1", MAIN)
             print(r.stdout[-2500:])
             sys.exit("LAND-FAIL: main build does not match after merge; reverted")
-        git("add", *rels)
+        if not refresh_accounting():
+            sys.exit("LAND-FAIL: tools/accounting.py fails after this change (main is matching but uncommitted: fix and land again)")
+        git("add", *rels, "tools/accounting.tsv")
         for f in deleted:
             git("rm", "-q", "--cached", "--ignore-unmatch", str(Path("conker") / f))
         msg = f"cleanup: {m['file'] or m.get('tree')} [cw]"

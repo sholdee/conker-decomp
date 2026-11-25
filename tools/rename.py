@@ -162,7 +162,11 @@ def main():
             print("\n".join(errs) or r.stdout[-2000:])
             sys.exit("RENAME-FAIL: ROM mismatch or build error; everything restored")
         rels = [str(p.relative_to(REPO)) for p in changed if p.name not in AUTO]  # the auto files are gitignored
-        mw.git("add", *rels)
+        r = subprocess.run([sys.executable, str(REPO / "tools" / "accounting.py")], capture_output=True, text=True)
+        if r.returncode:
+            print(r.stdout[-1500:])
+            sys.exit("RENAME-FAIL: tools/accounting.py fails after the rename (tree left as is: inspect)")
+        mw.git("add", *rels, "tools/accounting.tsv")
         msg = f"rename: {len(pairs)} symbols" + (f" ({a.message})" if a.message else "")
         body = "\n".join(f"{o} -> {n}" for o, n in pairs)
         mw.git("commit", "-q", "-m", msg + "\n\n" + body + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>")
