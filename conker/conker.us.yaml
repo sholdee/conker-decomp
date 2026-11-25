@@ -1696,7 +1696,7 @@ segments:
       - [0x246E2C, rodata]
       - [0x246E30, .rodata, game_131A90]
       - [0x246E34, rodata]
-      - [0x246E40, rodata]
+      - [0x246E40, .rodata, game_131F30]
       - [0x246ED0, .rodata, game_133190]
       - [0x246EE8, rodata]
       - [0x246EF0, rodata]
