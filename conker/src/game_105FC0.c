@@ -287,18 +287,6 @@ s32 func_150D8FAC(Trail *trail) {
     return 1;
 }
 
-/* Result of the func_15081690 ray cast. */
-typedef struct {
-    Actor *obj;
-    f32 dist;
-    Vec3f pos;
-    u8 pad14[0x30];
-    CollisionTri surface;
-    u8 pad56[3];
-    u8 hit;             /* 0 none, 1 surface, 2+ object */
-    u8 pad5A[0xE];
-} RayHit;
-
 f32 sqrtf(f32);
 
 extern f32 func_15143E64(f32 *);
@@ -324,6 +312,7 @@ s32 func_150D942C(Trail *trail) {
     f32 len;
     f32 invLen;
     f32 dir[3];
+    s32 pad2; // matching: stack slot (the old local view of RayHit was 0x68 bytes)
     RayHit hit;
     TrailPoint *points;
     TrailPoint *prev;
@@ -402,9 +391,9 @@ s32 func_150D942C(Trail *trail) {
                     dir[2] = delta[2] * invLen;
                 }
                 func_15081690(owner, prev->pos.x, prev->pos.y, prev->pos.z, dir[0], dir[1], dir[2], &hit, cur->len, 0, 0, 1, -1, 0, 0);
-                if (hit.hit != 0) {
+                if (hit.hitType != 0) {
                     func_150DA67C(trail, &hit, dir);
-                    if (hit.hit >= 2) {
+                    if (hit.hitType >= 2) {
                         target = hit.obj;
                         target->unk2EC = 1;
                         if (target->id == 0x3A) {
@@ -799,8 +788,8 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
 
     data = trail->data;
     target = hit->obj;
-    if (hit->hit != 0) {
-        if (hit->hit >= 2 && (target->id == 0x33 || target->id == 0x3A)) {
+    if (hit->hitType != 0) {
+        if (hit->hitType >= 2 && (target->id == 0x33 || target->id == 0x3A)) {
             data->sparkAccum += (0.1990000159f + func_150ADA68() * 0.1540000141f) * D_800BE9A4;
             if (data->sparkAccum > 1.0f) {
                 ParticleDesc spawn;
@@ -885,7 +874,7 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
                 emit.speedBase = 0.01499999966f;
                 emit.speedRange = 0.00699999975f;
                 emit.unk38 = 0.200000003f;
-                if (hit->hit >= 2) {
+                if (hit->hitType >= 2) {
                     ConeBasis cone;
 
                     cone.flags = 1;
@@ -904,7 +893,7 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
                     spray.normal.x = -dir[0];
                     spray.normal.y = -dir[1];
                     spray.normal.z = -dir[2];
-                    spray.triangle = hit->surface;
+                    spray.triangle = hit->tri;
                     spray.spread = 300.0f;
                     do {
                         func_15153C84(&spray, &emit, &origin, trail->head.header.owner, trail->head.header.kind);
@@ -913,10 +902,10 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
                 }
             }
         }
-        if (hit->hit == 1) {
+        if (hit->hitType == 1) {
             data->surfaceAccum += (0.200000003f + func_150ADA68() * 0.1040000021f) * D_800BE9A4;
             while (data->surfaceAccum > 1.0f) {
-                func_151D9B8C(3, func_150ADA68() * 30.0f + 15.0f, (func_150ADA20() % 101U) + 100, (s32)&hit->surface, &hit->pos,
+                func_151D9B8C(3, func_150ADA68() * 30.0f + 15.0f, (func_150ADA20() % 101U) + 100, (s32)&hit->tri, &hit->pos,
                               (func_150ADA20() % 81U) + 60, 1, 1, 1, trail->head.header.owner, trail->head.header.kind);
                 data->surfaceAccum -= 1.0f;
             }

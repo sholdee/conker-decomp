@@ -180,26 +180,6 @@ typedef struct {
     /* 0x110 */ PuffState state;
 } PuffObj;
 
-/* Result of the func_15081690 ray cast. */
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ Vec3f unk14;
-    /* 0x20 */ Vec3f unk20;
-    /* 0x2C */ Vec3f unk2C;
-    /* 0x38 */ Vec3f unk38;
-    /* 0x44 */ u8 unk44[0x12];
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 hit;
-    /* 0x5A */ u8 unk5A;
-    /* 0x5B */ u8 pad5B;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60;
-    /* 0x64 */ u8 pad64[0xC];
-} RayHit;
-
 void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
                    s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
 void func_151D4DAC(s32, Actor *, Vec3f *, Vec3f *, RayHit *, s32, Vec3f *, u8, s32);
@@ -215,6 +195,7 @@ s8 func_150F78B4(EffectObj *obj) {
     s8 alive;
     f32 dt;
     f32 dist;
+    u8 pad[0xC]; // matching: stack space (the old local view of RayHit was 0x70 bytes)
     RayHit hit;
     f32 puffs;
     PuffObj *puff;
@@ -230,8 +211,8 @@ s8 func_150F78B4(EffectObj *obj) {
     if (state->flags & 2) {
         func_15081690(owner, obj->pos.x, obj->pos.y, obj->pos.z, state->dir.x, state->dir.y,
                       state->dir.z, &hit, dist, 1, 0, !(state->flags & 4), state->unkB0, 0, 0);
-        if (hit.hit >= 2) {
-            func_151D4DAC(hit.unk00, owner, &hit.pos, &hit.unk20, &hit, 0x1A, &state->dir, obj->unkC, obj->unk1);
+        if (hit.hitType >= 2) {
+            func_151D4DAC(hit.obj, owner, &hit.pos, &hit.far, &hit, 0x1A, &state->dir, obj->unkC, obj->unk1);
             if (state->flags & 1) {
                 func_150F7F8C(&hit.pos, obj->unkC, obj->unk1);
             }

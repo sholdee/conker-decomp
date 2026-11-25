@@ -52,15 +52,6 @@ typedef struct BoltChainObj {
     /* 0x70 */ Vec3f points[1];    /* chain.count points */
 } BoltChainObj;
 
-/* Result of the func_15081690 ray cast. */
-typedef struct RayHit {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ u8 pad14[0x59 - 0x14];
-    /* 0x59 */ u8 hit;
-    /* 0x5A */ u8 pad5A[0x64 - 0x5A];
-} RayHit;
-
 void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread);
 void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
 void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2);
@@ -709,7 +700,7 @@ BoltObj *func_15107700(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments,
         func_15107A20(actor, yaw, pitch, &desc.ctrl[0], &center);
         func_15081690(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, desc.ctrl[0].x - center.x, desc.ctrl[0].y - center.y, desc.ctrl[0].z - center.z, &hit, 0.0f, 0, 1, 1, -1, 0, 0);
     }
-    if (hit.hit == 0) {
+    if (hit.hitType == 0) {
         return NULL;
     }
     desc.ctrl[3] = hit.pos;
@@ -849,7 +840,7 @@ BoltObj *func_15107C1C(Actor *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 pitc
     func_15143794(yaw, pitch, 1.0f, &dir);
     func_15081690(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, dir.x, dir.y, dir.z, &hit, 300.0f, 0, 1, 1, -1, 0, 0);
 
-    if (hit.hit == 0) {
+    if (hit.hitType == 0) {
         desc.ctrl[3].x = desc.ctrl[0].x + dir.x * 300.0f;
         desc.ctrl[3].y = desc.ctrl[0].y + dir.y * 300.0f;
         desc.ctrl[3].z = desc.ctrl[0].z + dir.z * 300.0f;

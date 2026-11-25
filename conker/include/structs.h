@@ -1457,6 +1457,25 @@ typedef struct CollisionHit {
     /* 0x20 */ struct WorldObject *surface; // object surface hit (source 2-4), else NULL
 } CollisionHit; // size 0x24
 
+/* Result of a ray cast: func_15081690 (level mesh, then the actors' collision cylinders or models). */
+typedef struct RayHit {
+    /* 0x00 */ Actor *obj;                  // actor hit (hitType 2/3), else NULL
+    /* 0x04 */ f32 dist;                    // distance from origin to pos; -1.0f: no hit
+    /* 0x08 */ Vec3f pos;                   // hit point (entry point on an actor)
+    /* 0x14 */ Vec3f centre;                // model hit (hitType 3): centre of the part hit
+    /* 0x20 */ Vec3f far;                   // exit point on an actor; = pos on a level-mesh hit
+    /* 0x2C */ Vec3f origin;                // the ray
+    /* 0x38 */ Vec3f dir;
+    /* 0x44 */ CollisionTri tri;            // level triangle hit (hitType 1)
+    /* 0x56 */ u16 bone;                    // model hit: bone of the part hit
+    /* 0x58 */ u8 part;                     // model hit: part hit
+    /* 0x59 */ u8 hitType;                  // 0 none, 1 level mesh, 2 actor cylinder, 3 actor model
+    /* 0x5A */ u8 index;                    // model hit: index from func_1508114C
+    /* 0x5B */ u8 pad5B;
+    /* 0x5C */ struct WorldObject *surface; // level-mesh hit on an object surface, else NULL
+    /* 0x60 */ s32 material;                // level-mesh hit: surface material
+} RayHit; // size 0x64
+
 /* Per-actor vertex morph state (Actor.morph): blends from keyframe `prev` to keyframe `cur`. */
 typedef struct VtxMorphState {
     /* 0x0 */ f32 blend; // 0.0f (prev) .. 1.0f (cur)

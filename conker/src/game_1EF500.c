@@ -45,25 +45,6 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
     }
 }
 
-/* Result of a ray cast (func_15081690) or of a projectile's path setup (func_151C4B0C). */
-typedef struct Game1F1F60Hit {
-    /* 0x00 */ void *actor;
-    /* 0x04 */ f32 dist;
-    /* 0x08 */ Vec3f hit;
-    /* 0x14 */ Vec3f normal;
-    /* 0x20 */ Vec3f point;
-    /* 0x2C */ Vec3f start;
-    /* 0x38 */ Vec3f end; /* the ray direction */
-    /* 0x44 */ s16 surface[9];
-    /* 0x56 */ s16 field_56;
-    /* 0x58 */ s8 field_58;
-    /* 0x59 */ u8 type;
-    /* 0x5A */ s8 field_5A;
-    /* 0x5B */ u8 pad5B;
-    /* 0x5C */ WorldObject *field_5C;
-    /* 0x60 */ s32 field_60;
-} Game1F1F60Hit; /* 0x64 */
-
 /* Projectile state, stored at offset 0x110 of the object func_151C229C spawns. */
 typedef struct Game1EF500TrailExt {
     /* 0x00 */ u8 flags;
@@ -71,7 +52,7 @@ typedef struct Game1EF500TrailExt {
     /* 0x04 */ Vec3f velocity;
     /* 0x10 */ Vec3f accel; /* eases toward drift each frame; also the length of the drawn tail */
     /* 0x1C */ Vec3f drift;
-    /* 0x28 */ Game1F1F60Hit path;
+    /* 0x28 */ RayHit path;
     /* 0x8C */ f32 remaining; /* distance left before the projectile expires */
     /* 0x90 */ Actor *owner;
     /* 0x94 */ u8 ownerId; /* owner->unique_id at spawn */
@@ -122,7 +103,7 @@ s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 void *memcpy(void *, const void *, u32);
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
 s32 func_151D5B6C(Vec3f *, Vec3f *, Actor *, s8, s32);
-s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4, f32 arg5,
+s32 func_151C4B0C(RayHit *arg0, RayHit *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4, f32 arg5,
                   u8 arg6, Vec3f *arg7, Vec3f *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13,
                   u8 arg14, u8 arg15, s32 arg16, u8 arg17);
 
@@ -132,7 +113,7 @@ s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, Vec3f *arg2, Vec3f *
  * if that first update already ended it.
  */
 Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
-                               u8 altNormalized, Game1F1F60Hit *knownHit, f32 speed, f32 arg7, f32 arg8,
+                               u8 altNormalized, RayHit *knownHit, f32 speed, f32 arg7, f32 arg8,
                                f32 driftSpeed, f32 arg10, u8 arg11, Actor *owner, u8 arg13, u8 collide, u8 arg15,
                                u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 arg20,
                                f32 dt, u8 arg22, s8 arg23, s32 extraSize, u8 arg25, s32 arg26) {
@@ -188,15 +169,15 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
                       ext.handle, 0) == 0) {
         return NULL;
     }
-    ext.velocity.x = ext.path.end.x * speed;
-    ext.velocity.y = ext.path.end.y * speed;
-    ext.velocity.z = ext.path.end.z * speed;
+    ext.velocity.x = ext.path.dir.x * speed;
+    ext.velocity.y = ext.path.dir.y * speed;
+    ext.velocity.z = ext.path.dir.z * speed;
     ext.accel.x = 0.0f;
     ext.accel.y = 0.0f;
     ext.accel.z = 0.0f;
-    ext.drift.x = ext.path.end.x * driftSpeed;
-    ext.drift.y = ext.path.end.y * driftSpeed;
-    ext.drift.z = ext.path.end.z * driftSpeed;
+    ext.drift.x = ext.path.dir.x * driftSpeed;
+    ext.drift.y = ext.path.dir.y * driftSpeed;
+    ext.drift.z = ext.path.dir.z * driftSpeed;
     ext.owner = owner;
     ext.ownerId = (owner != NULL) ? owner->unique_id : 99;
     spawn.texture = 0x41;
@@ -287,7 +268,7 @@ s8 func_151C2734(Game1EF500Trail *trail) {
                 dy = player->eye.y - trail->head.def.pos.y;
                 dz = player->eye.z - trail->head.def.pos.z;
                 /* distance of the player ahead along the flight direction */
-                dot = ext->path.end.x * dx + dy * ext->path.end.y + dz * ext->path.end.z;
+                dot = ext->path.dir.x * dx + dy * ext->path.dir.y + dz * ext->path.dir.z;
                 if (dot < (u32)D_8008FBE8[sfxIndex].range * ext->scale &&
                     (D_8008FBE8[sfxIndex].range - 10) * ext->scale < dot) {
                     dist = sqrtf(dx * dx + dy * dy + dz * dz);
@@ -441,16 +422,16 @@ s32 func_151C2E94(Actor *obj, Actor *self) {
     return TRUE;
 }
 
-s32 func_151D4DAC(void *, Actor *, Vec3f *, Vec3f *, Game1F1F60Hit *, s32, Vec3f *, u8, u8);
+s32 func_151D4DAC(void *, Actor *, Vec3f *, Vec3f *, RayHit *, s32, Vec3f *, u8, u8);
 
 /* Impact handler: the projectile hit actor (at hitPos) during its ray cast. */
 s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
-                  Game1F1F60Hit *hit) {
-    return func_151D4DAC(actor, owner, hitPos, hitPoint, hit, trail->trail.fieldA4, &trail->trail.path.end,
+                  RayHit *hit) {
+    return func_151D4DAC(actor, owner, hitPos, hitPoint, hit, trail->trail.fieldA4, &trail->trail.path.dir,
                          trail->head.header.owner, trail->head.header.kind);
 }
 
-void func_15102920(f32, s32, s16 *, Vec3f *, s32, s32, s32, s32, u8, u8);
+void func_15102920(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, u8, u8);
 void func_15152B38(TrailBurst *, u8, s32);
 s32 func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
@@ -461,16 +442,16 @@ void func_151C2F48(Game1EF500Trail *trail) {
     Vec3i header2;
 
     ext = &trail->trail;
-    func_15102920((func_150ADA68() * 30.0f) + 8.0f, 0xFF, ext->path.surface, &ext->path.hit,
-                  (func_150ADA20() % 46U) + 25, 1, 1, ext->path.field_60, trail->head.header.owner, trail->head.header.kind);
+    func_15102920((func_150ADA68() * 30.0f) + 8.0f, 0xFF, &ext->path.tri, &ext->path.pos,
+                  (func_150ADA20() % 46U) + 25, 1, 1, ext->path.material, trail->head.header.owner, trail->head.header.kind);
     if (func_150ADA68() < 0.253000021f * D_800DCA24) {
         header.flags = 3;
         header.update = -1;
         header.lifetime = (func_150ADA20() % 7U) + 4;
         header.lightType = 0;
-        header2.x = ext->path.hit.x;
-        header2.y = ext->path.hit.y;
-        header2.z = ext->path.hit.z;
+        header2.x = ext->path.pos.x;
+        header2.y = ext->path.pos.y;
+        header2.z = ext->path.pos.z;
         func_151602C0(&header, &header2, (func_150ADA20() % 9U) + 12, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, trail->head.header.owner,
                       trail->head.header.kind);
 
@@ -479,7 +460,7 @@ void func_151C2F48(Game1EF500Trail *trail) {
 
             burst.countBase = 5 >> D_800DCA20;
             burst.countRange = 4 >> D_800DCA20;
-            burst.pos = ext->path.hit;
+            burst.pos = ext->path.pos;
             burst.sizeBase = 8.25f;
             burst.sizeRange = 5.859999657f;
             burst.gravityBase = 0.0f;
@@ -766,7 +747,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
     Game1EF500TrailExt *ext;
     s32 type;
 
-    material = trail->trail.path.field_60 & 0x1F;
+    material = trail->trail.path.material & 0x1F;
     if ((D_800BE9F0 == 0x2B) || (D_800BE9F0 == 0x30)) {
         switch (material) {
         case 1:
@@ -817,7 +798,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         debris.fadeStart = 0x20;
         debris.fadeRate = 7;
         ext = &trail->trail;
-        func_1513C650(&debris, 0, 0, (s32)ext->path.surface, ext->path.hit.x, ext->path.hit.y, ext->path.hit.z,
+        func_1513C650(&debris, 0, 0, (s32)&ext->path.tri, ext->path.pos.x, ext->path.pos.y, ext->path.pos.z,
                       scale, scale, func_150ADA20() & 0xFF, 0, 0, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
     if (func_150ADA68() < sparkChance) {
@@ -837,10 +818,10 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         spark.rgba[3] = 0xFF;
         spark.width = (func_150ADA68() * 5.0f) + 7.0f;
         spark.height = (func_150ADA68() * 40.0f) + 10.0f;
-        spark.pos = ext->path.hit;
-        spark.rot.x = ext->path.hit.x - ext->path.end.x;
-        spark.rot.y = ext->path.hit.y - ext->path.end.y;
-        spark.rot.z = ext->path.hit.z - ext->path.end.z;
+        spark.pos = ext->path.pos;
+        spark.rot.x = ext->path.pos.x - ext->path.dir.x;
+        spark.rot.y = ext->path.pos.y - ext->path.dir.y;
+        spark.rot.z = ext->path.pos.z - ext->path.dir.z;
         spark.scale.x = 1.269999981f;
         spark.scale.y = 1.0f;
         spark.scale.z = 56.81999969f;
@@ -888,7 +869,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         smoke.scaleRate = 1.049999952f;
         smoke.sizeBase = 60.0f;
         smoke.sizeRange = 65.0f;
-        smoke.pos = trail->trail.path.hit;
+        smoke.pos = trail->trail.path.pos;
         smoke.yawBase = 0;
         smoke.pitchBase = -40;
         smoke.yawRange = 0xFF;
@@ -917,9 +898,9 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         ext = &trail->trail;
         header.lifetime = (func_150ADA20() % 6U) + 3;
         header.lightType = 0;
-        header2.x = (s32)ext->path.hit.x;
-        header2.y = (s32)ext->path.hit.y;
-        header2.z = (s32)ext->path.hit.z;
+        header2.x = (s32)ext->path.pos.x;
+        header2.y = (s32)ext->path.pos.y;
+        header2.z = (s32)ext->path.pos.z;
         sel = func_150ADA20() & 1;
         func_151602C0(&header, &header2, (func_150ADA20() % 6U) + 0xA, color[sel][0], color[sel][1], color[sel][2], 0xFF, 0, 0, trail->head.header.owner, trail->head.header.kind);
     }
@@ -935,7 +916,7 @@ void func_151C436C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps) {
     }
 }
 
-void func_15081690(void *, f32, f32, f32, f32, f32, f32, Game1F1F60Hit *, f32, s32, s32, s32, s32, s32, s32);
+void func_15081690(void *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 
 /*
  * Casts a ray along the projectile's flight over the distance it moves this frame; on a hit,
@@ -946,7 +927,7 @@ u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     Actor *owner;
     f32 length;
     s32 pad[3]; // matching: unused stack space in the original frame
-    Game1F1F60Hit ray;
+    RayHit ray;
     s32 solid;
 
     owner = ext->owner;
@@ -961,10 +942,10 @@ u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
             Vec3f *from = &trail->head.def.pos;
 
             solid = !(ext->flags & TRAIL_FLAG_8);
-            func_15081690(owner, from->x, from->y, from->z, ext->path.end.x, ext->path.end.y, ext->path.end.z,
+            func_15081690(owner, from->x, from->y, from->z, ext->path.dir.x, ext->path.dir.y, ext->path.dir.z,
                           &ray, length, 1, 0, solid, ext->fieldA8, 0, ext->handle);
-            if (ray.type >= 2) {
-                func_151C2EF0(ray.actor, owner, trail, &ray.hit, &ray.point, &ray);
+            if (ray.hitType >= 2) {
+                func_151C2EF0(ray.obj, owner, trail, &ray.pos, &ray.far, &ray);
                 result = FALSE;
             }
         }
@@ -991,9 +972,9 @@ s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     if (ext->remaining <= 0.0f) {
         callback = (TrailHitCallback)D_800E0940;
         if (callback != NULL && (ext->flags & TRAIL_HIT_CALLBACK)) {
-            target = ext->path.field_5C;
+            target = ext->path.surface;
             if (target != NULL) {
-                callback(&ext->path.hit, target - D_800DBEF4);
+                callback(&ext->path.pos, target - D_800DBEF4);
             }
         }
         if (ext->flags & TRAIL_EXPIRE_HANDLER) {

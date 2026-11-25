@@ -21,16 +21,6 @@ typedef struct {
     /* 0x74 */ s8 mode; /* 3 or -1 (see func_150F706C) */
 } BeamEnd;
 
-/* Result of the func_15081690 ray cast. */
-typedef struct {
-    /* 0x00 */ u8 *hitObj;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ u8 pad14[0x59 - 0x14];
-    /* 0x59 */ u8 hit; /* 0: no hit */
-    /* 0x5A */ u8 pad5A[0x64 - 0x5A];
-} RayHit;
-
 /* Per-object state of a beam (0x78 bytes, copied in by func_150F6DE4). */
 typedef struct {
     /* 0x00 */ Actor *owner;
@@ -161,21 +151,21 @@ void func_150F706C(BeamObj *obj) {
     beam->flags |= 1;
 
     if (beam->ends[0] != NULL && beam->ends[1] != NULL) {
-        if (beam->ray.hit == 0) {
+        if (beam->ray.hitType == 0) {
             beam->ends[0]->mode = beam->ends[1]->mode = 3;
         } else {
             hitPos = beam->ray.pos;
             beam->ends[1]->pos = hitPos;
             beam->ends[0]->pos = hitPos;
 
-            if (beam->ray.hit == 1) {
+            if (beam->ray.hitType == 1) {
                 beam->ends[0]->mode = -1;
                 beam->ends[1]->mode = 3;
-            } else if (func_1506196C(beam->ray.hitObj, 0) < 0xFF) {
+            } else if (func_1506196C(beam->ray.obj, 0) < 0xFF) {
                 beam->ends[0]->mode = -1;
                 beam->ends[1]->mode = 3;
             } else {
-                func_1502EA98(beam->ray.hitObj, 0xFF, 0, 0, 0x7F, 0, 0x10);
+                func_1502EA98(beam->ray.obj, 0xFF, 0, 0, 0x7F, 0, 0x10);
                 beam->ends[0]->mode = 3;
                 beam->ends[1]->mode = -1;
             }

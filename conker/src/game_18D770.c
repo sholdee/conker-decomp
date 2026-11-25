@@ -385,16 +385,6 @@ LightEffect *func_15160CDC(Actor *actor, u8 bone, Vec3f *start, Vec3f *end, f32 
     return effect;
 }
 
-/* Result of func_15081690's ray cast. */
-typedef struct {
-    Actor *hit;
-    f32 distance;
-    f32 position[3];
-    u8 pad14[0x45];
-    u8 hitCount;
-    u8 pad5A[0xA];
-} RayHit;
-
 void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
 s32 func_15145EA4(f32 **in, f32 **out, MtxF mtx, s32 count);
@@ -445,7 +435,7 @@ s32 func_15160E30(LightEffect *effect) {
             }
         }
         func_15081690(actor, start[0], start[1], start[2], dir[0], dir[1], dir[2], &ray, 0.0f, 0, 0, 1, -1, 0, 0);
-        hitCount = ray.hitCount;
+        hitCount = ray.hitType;
         if (hitCount == 0) {
             effect->light->x = actor->x_position;
             effect->light->y = actor->y_position;
@@ -457,18 +447,18 @@ s32 func_15160E30(LightEffect *effect) {
         if ((beam->flags & 2) && hitCount >= 2) {
             Actor *hit;
 
-            hit = ray.hit;
+            hit = ray.obj;
             if (hit->id == 0x9E) {
                 hit->unk2E4 = 1;
             }
         }
-        effect->light->x = ray.position[0];
-        effect->light->y = ray.position[1];
-        effect->light->z = ray.position[2];
+        effect->light->x = ray.pos.x;
+        effect->light->y = ray.pos.y;
+        effect->light->z = ray.pos.z;
         {
             f32 intensity;
 
-            intensity = ray.distance * beam->scale;
+            intensity = ray.dist * beam->scale;
             if (intensity > 255.0f) {
                 intensity = 255.0f;
             }

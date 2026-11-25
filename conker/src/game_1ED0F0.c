@@ -243,25 +243,6 @@ void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList) {
     func_150E83AC(pos, func_150ADA20() % 62 + 120, fxOwner, fxList);
 }
 
-/* Result of a ray cast (func_15081690). */
-typedef struct {
-    /* 0x00 */ Actor *obj;
-    /* 0x04 */ f32 dist;
-    /* 0x08 */ Vec3f hitPos;
-    /* 0x14 */ Vec3f unk14;
-    /* 0x20 */ Vec3f unk20;
-    /* 0x2C */ Vec3f start;
-    /* 0x38 */ Vec3f dir;
-    /* 0x44 */ CollisionTri surface;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8  unk58;
-    /* 0x59 */ u8  hitType; /* 0: nothing, 1: end of trace, >= 2: hit */
-    /* 0x5A */ u8  unk5A;
-    /* 0x5B */ u8  pad5B;
-    /* 0x5C */ WorldObject *part;
-    /* 0x60 */ s32 unk60;
-} RayHit;
-
 /* Objects the bullet trace ignores (see func_151C1940). */
 typedef struct {
     /* 0x00 */ s32 count;
@@ -603,9 +584,9 @@ s32 func_151C1180(Bullet *bullet) {
                       &hit, step, 1, 0, 1, 3, &state->ignore, state->mode);
 
         if (hit.hitType >= 2) {
-            func_15055A2C(1, hit.hitPos.x, hit.hitPos.y, hit.hitPos.z, 0);
-            func_151C1654(&hit.hitPos, &state->ray.dir, state->owner, state->impactType, NULL);
-            func_151C0098(&hit.hitPos, hit.obj, !(state->flags & 1), bullet->fxOwner, bullet->fxList);
+            func_15055A2C(1, hit.pos.x, hit.pos.y, hit.pos.z, 0);
+            func_151C1654(&hit.pos, &state->ray.dir, state->owner, state->impactType, NULL);
+            func_151C0098(&hit.pos, hit.obj, !(state->flags & 1), bullet->fxOwner, bullet->fxList);
             return FALSE;
         }
     }
@@ -623,9 +604,9 @@ s32 func_151C1180(Bullet *bullet) {
     state->lifetime -= D_800BE9A4;
     if (state->lifetime <= 0.0f) {
         if (state->ray.hitType == 1) {
-            func_15055A2C(0, state->ray.hitPos.x, state->ray.hitPos.y, state->ray.hitPos.z, 0);
-            func_151C1654(&state->ray.hitPos, &state->ray.dir, state->owner, state->impactType, &state->ray.surface);
-            func_151BFE84(&state->ray.surface, &state->ray.hitPos, &bullet->vel, !(state->flags & 1),
+            func_15055A2C(0, state->ray.pos.x, state->ray.pos.y, state->ray.pos.z, 0);
+            func_151C1654(&state->ray.pos, &state->ray.dir, state->owner, state->impactType, &state->ray.tri);
+            func_151BFE84(&state->ray.tri, &state->ray.pos, &bullet->vel, !(state->flags & 1),
                           bullet->fxOwner, bullet->fxList);
         }
         return FALSE;
@@ -787,36 +768,36 @@ s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *a
     hit = FALSE;
 
     if (aimPos != NULL && aimDir != NULL) {
-        ray->start = *aimPos;
+        ray->origin = *aimPos;
         ray->dir = *aimDir;
-        func_151C1D5C(shooter, &ray->start, &ray->dir, ray, 0.0f, 0, 0, 1, 3, ignore, passPos,
+        func_151C1D5C(shooter, &ray->origin, &ray->dir, ray, 0.0f, 0, 0, 1, 3, ignore, passPos,
                       passDist, pass, mode);
 
         if (ray->hitType == 0) {
-            if (start->x != ray->start.x || start->y != ray->start.y || start->z != ray->start.z) {
-                ray->start = *start;
+            if (start->x != ray->origin.x || start->y != ray->origin.y || start->z != ray->origin.z) {
+                ray->origin = *start;
                 ray->dir = *aimDir;
             } else {
                 trace = FALSE;
             }
         } else {
-            if (start->x != ray->start.x || start->y != ray->start.y || start->z != ray->start.z) {
-                ray->start = *start;
-                ray->dir.x = ray->hitPos.x - start->x;
-                ray->dir.y = ray->hitPos.y - start->y;
-                ray->dir.z = ray->hitPos.z - start->z;
+            if (start->x != ray->origin.x || start->y != ray->origin.y || start->z != ray->origin.z) {
+                ray->origin = *start;
+                ray->dir.x = ray->pos.x - start->x;
+                ray->dir.y = ray->pos.y - start->y;
+                ray->dir.z = ray->pos.z - start->z;
                 if (func_15145128(&ray->dir, &ray->dir, &ray->dist, NULL) == 0) {
                     return FALSE;
                 }
             }
         }
     } else {
-        ray->start = *start;
+        ray->origin = *start;
         ray->dir = *dir;
     }
 
     if (trace) {
-        func_151C1D5C(shooter, &ray->start, &ray->dir, ray, 0.0f, 0, 1, 1, 3, ignore, passPos,
+        func_151C1D5C(shooter, &ray->origin, &ray->dir, ray, 0.0f, 0, 1, 1, 3, ignore, passPos,
                       passDist, pass, mode);
         if (ray->hitType != 0) {
             hit = TRUE;
@@ -826,24 +807,24 @@ s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *a
     if (!hit) {
         ray->obj = NULL;
         ray->dist = 5000.0f;
-        ray->start = *start;
+        ray->origin = *start;
         if (aimDir != NULL) {
             src = aimDir;
         } else {
             src = dir;
         }
         ray->dir = *src;
-        ray->hitPos.x = ray->start.x + ray->dir.x * 5000.0f;
-        ray->hitPos.y = ray->start.y + ray->dir.y * 5000.0f;
-        ray->hitPos.z = ray->start.z + ray->dir.z * 5000.0f;
-        ray->unk14 = ray->hitPos;
-        ray->unk20 = ray->hitPos;
-        ray->unk56 = 0;
-        ray->unk58 = 0;
+        ray->pos.x = ray->origin.x + ray->dir.x * 5000.0f;
+        ray->pos.y = ray->origin.y + ray->dir.y * 5000.0f;
+        ray->pos.z = ray->origin.z + ray->dir.z * 5000.0f;
+        ray->centre = ray->pos;
+        ray->far = ray->pos;
+        ray->bone = 0;
+        ray->part = 0;
         ray->hitType = 0;
-        ray->unk5A = 0;
-        ray->part = NULL;
-        ray->unk60 = 0;
+        ray->index = 0;
+        ray->surface = NULL;
+        ray->material = 0;
     }
     return TRUE;
 }
@@ -868,20 +849,20 @@ void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 ar
         func_15081690(shooter, pos.x, pos.y, pos.z, dir->x, dir->y, dir->z, ray, arg4, arg5,
                       arg6, arg7, arg8, ignore, mode);
         dist += ray->dist;
-        if (ray->part != NULL) {
-            WorldObject *p = ray->part;
+        if (ray->surface != NULL) {
+            WorldObject *p = ray->surface;
 
             if ((p->flags & 0x60) == 0x40) {
-                pos.x = ray->hitPos.x + ray->dir.x * 0.1f;
+                pos.x = ray->pos.x + ray->dir.x * 0.1f;
                 part = p;
-                pos.y = ray->hitPos.y + ray->dir.y * 0.1f;
-                pos.z = ray->hitPos.z + ray->dir.z * 0.1f;
-                *passPos = ray->hitPos;
+                pos.y = ray->pos.y + ray->dir.y * 0.1f;
+                pos.z = ray->pos.z + ray->dir.z * 0.1f;
+                *passPos = ray->pos;
                 *passDist = dist;
                 dist += 0.1f;
-                pass->height = ray->hitPos.y;
-                pass->tri = ray->surface;
-                pass->material = ray->unk60;
+                pass->height = ray->pos.y;
+                pass->tri = ray->tri;
+                pass->material = ray->material;
                 pass->flags = 7;
                 pass->source = 3;
                 pass->surface = part;
@@ -894,7 +875,7 @@ void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 ar
         }
     } while (more);
 
-    ray->start = *start;
+    ray->origin = *start;
     ray->dist = dist;
 }
 

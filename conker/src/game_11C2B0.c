@@ -275,14 +275,6 @@ Beam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     return beam;
 }
 
-/* Result record of the beam's hit test. */
-typedef struct {
-    void *object;
-    u8 pad4[0x55];
-    u8 count;
-    u8 pad5A[0xA];
-} BeamHit;
-
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
 void func_15081690(void *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
 s32 func_1505D024(void *, s32, s32, s32);
@@ -294,7 +286,7 @@ s32 func_150EF38C(Beam *beam) {
     Actor *actor;
     Actor *target;
     s16 *position;
-    BeamHit hit;
+    RayHit hit;
     f32 angle;
     void *object;
 
@@ -342,8 +334,8 @@ s32 func_150EF38C(Beam *beam) {
         func_15081690(actor, beam->head.def.pos.x, beam->head.def.pos.y, beam->head.def.pos.z,
                       link->direction.x, link->direction.y, link->direction.z,
                       &hit, link->distance, 1, 0, 1, 4, 0, 0);
-        if (hit.count >= 2) {
-            object = hit.object;
+        if (hit.hitType >= 2) {
+            object = hit.obj;
             func_1502EA98(object, 0xFF, 0, 0, 0x90, 0, 1);
             func_1505D024(object, 0xA0038, 0, actor - D_800CC2D0);
         }
