@@ -11,7 +11,7 @@
 
 s32 func_150ADA20(void);
 s32 func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
-s32 func_151DA08C(u8 arg0, f32 arg1, f32 arg2, u8 arg3, s16 arg4, s32 arg5, void *arg6, s32 arg7, s32 arg8);
+s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, struct17 *pos, s32 arg7, s32 arg8);
 s32 func_1514672C(struct17 *arg0);
 s32 func_15046C80(f32 *arg0, s32 arg1, f32 arg2, void *arg3);
 void func_151D9FC0(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
@@ -41,20 +41,7 @@ extern f32 D_800AB4A8;
 extern f32 D_800AB4AC;
 
 
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-    u8 pad19[3];
-} Struct151DA08CExtra;
-
+/* Effect descriptor consumed by func_1513D668 and func_1513D2F0 (copied to EffectBase.desc). */
 typedef struct {
     u8 unk0;
     u8 unk1;
@@ -67,16 +54,16 @@ typedef struct {
     u8 unk11;
     u8 unk12;
     u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    struct17 unk1C;
+    f32 scaleX;
+    f32 scaleY;
+    struct17 pos;
     f32 unk28;
     f32 unk2C;
     f32 unk30;
-    f32 unk34;
-    f32 unk38;
+    f32 unk34; /* scaleX multiplier */
+    f32 unk38; /* scaleY multiplier */
     f32 unk3C;
-    s32 unk40;
+    s32 flags;
     u8 unk44;
     u8 unk45;
     u8 unk46;
@@ -87,7 +74,38 @@ typedef struct {
     s32 unk50;
     s16 unk54;
     s16 unk56;
-} Struct151DA08CMain;
+} EffectDesc; /* 0x58 */
+
+/* Start of a live effect created from an EffectDesc. */
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0xB];
+    EffectDesc desc;
+} EffectBase; /* 0x70 */
+
+/* Data of a func_151DA08C effect: wobbles its scale and keeps spawning func_151DB5D0 particles. */
+typedef struct {
+    u8 phaseX;
+    u8 phaseY;
+    s8 stepX;
+    s8 stepY;
+    f32 amplitudeX;
+    f32 amplitudeY;
+    f32 spawnCredit;
+    f32 size;
+    f32 shrink; /* size multiplier per frame (timed effects) */
+    u8 kind;
+    u8 pad19[3];
+} SteamData; /* 0x1C */
+
+typedef struct {
+    EffectBase base;
+    u8 pad70[0xB8];
+    SteamData steam;
+} SteamEffect;
 
 
 /* Effect kind for the current context: D_800E0A10, or kind 10 when D_800BE9F0 is clear and func_150A29C8(0, 0x1C) fails. */
@@ -603,148 +621,142 @@ void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 
     }
 }
 
-s32 func_151DA08C(u8 arg0, f32 arg1, f32 arg2, u8 arg3, s16 arg4, s32 arg5, void *arg6, s32 arg7, s32 arg8) {
-    s32 ret;
-    Struct151DA08CMain main;
-    Struct151DA08CExtra extra;
-    s32 temp_v0;
+/* Starts a steam effect of kind `kind` at `pos` (lifetime -1: untimed, shrinking by `shrink` otherwise). */
+s32 func_151DA08C(u8 kind, f32 size, f32 shrink, u8 arg3, s16 lifetime, s32 arg5, struct17 *pos, s32 arg7, s32 arg8) {
+    s32 effect;
+    EffectDesc desc;
+    SteamData steam;
+    s32 rand3;
     s32 rand2;
     s32 rand1;
 
-    extra.unk0 = 0;
-    extra.unk1 = 0;
-    extra.unk10 = arg1;
-    extra.unk2 = (func_150ADA20() % 5U) + 2;
-    extra.unk3 = (func_150ADA20() % 5U) + 2;
-    extra.unk4 = ((func_150ADA68() * D_800AB470) + D_800AB474) * extra.unk10;
-    extra.unk8 = ((func_150ADA68() * D_800AB478) + D_800AB47C) * extra.unk10;
-    extra.unk18 = arg0;
-    extra.unkC = 0.0f;
-    main.unk0 = D_8008FD04[(u8)arg0]();
-    main.unk2 = 3;
-    main.unk8 = 0;
-    main.unkC = 0;
-    main.unk10 = 0;
-    main.unk11 = 0;
-    main.unk12 = 0;
-    main.unk13 = 0xFF;
-    main.unk18 = arg1;
-    main.unk14 = arg1;
-    main.unk1C = *(struct17 *)arg6;
-    main.unk40 = 0x0CDC0008;
-    main.unk34 = 1.0f;
-    main.unk38 = 1.0f;
-    main.unk3C = 1.0f;
-    main.unk28 = 0.0f;
-    main.unk2C = 0.0f;
-    main.unk30 = 0.0f;
-    if (arg4 == -1) {
-        main.unk4 = 0x12C;
-        extra.unk14 = 1.0f;
-        main.unk54 = 1;
-        main.unk56 = 0xFF;
+    steam.phaseX = 0;
+    steam.phaseY = 0;
+    steam.size = size;
+    steam.stepX = (func_150ADA20() % 5U) + 2;
+    steam.stepY = (func_150ADA20() % 5U) + 2;
+    steam.amplitudeX = ((func_150ADA68() * 0.2f) + 0.1f) * steam.size;
+    steam.amplitudeY = ((func_150ADA68() * 0.2f) + 0.1f) * steam.size;
+    steam.kind = kind;
+    steam.spawnCredit = 0.0f;
+    desc.unk0 = D_8008FD04[kind]();
+    desc.unk2 = 3;
+    desc.unk8 = 0;
+    desc.unkC = 0;
+    desc.unk10 = 0;
+    desc.unk11 = 0;
+    desc.unk12 = 0;
+    desc.unk13 = 0xFF;
+    desc.scaleY = size;
+    desc.scaleX = size;
+    desc.pos = *pos;
+    desc.flags = 0x0CDC0008;
+    desc.unk34 = 1.0f;
+    desc.unk38 = 1.0f;
+    desc.unk3C = 1.0f;
+    desc.unk28 = 0.0f;
+    desc.unk2C = 0.0f;
+    desc.unk30 = 0.0f;
+    if (lifetime == -1) {
+        desc.unk4 = 300;
+        steam.shrink = 1.0f;
+        desc.unk54 = 1;
+        desc.unk56 = 0xFF;
     } else {
-        main.unk4 = arg4;
-        main.unk40 = 0x0CDC0009;
-        extra.unk14 = arg2;
-        if (arg4 >= 0x100) {
-            main.unk54 = 0xFF;
+        desc.unk4 = lifetime;
+        desc.flags = 0x0CDC0009;
+        steam.shrink = shrink;
+        if (lifetime >= 0x100) {
+            desc.unk54 = 0xFF;
         } else {
-            main.unk54 = arg4;
+            desc.unk54 = lifetime;
         }
-        if (arg4 >= 0x100) {
-            main.unk56 = 1;
+        if (lifetime >= 0x100) {
+            desc.unk56 = 1;
         } else {
-            main.unk56 = 0xFF / arg4;
+            desc.unk56 = 0xFF / lifetime;
         }
     }
-    main.unk44 = arg3;
-    main.unk45 = 0xFF;
-    main.unk1 = 0;
-    main.unk46 = 4;
-    main.unk47 = 5;
-    main.unk48 = 0;
-    main.unk4C = 0xFF;
-    main.unk50 = 0;
+    desc.unk44 = arg3;
+    desc.unk45 = 0xFF;
+    desc.unk1 = 0;
+    desc.unk46 = 4;
+    desc.unk47 = 5;
+    desc.unk48 = 0;
+    desc.unk4C = 0xFF;
+    desc.unk50 = 0;
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
-    temp_v0 = func_150ADA20();
-    ret = func_1513D668((s32)&main, 0, 0xE, 0x13, 0, (rand2 & 1) + (rand1 & 1), temp_v0 & 0xFF, 500.0f, 500.0f, 0, arg5, 0, 0x1C, 0xFF, 0);
-    if (ret != 0) {
-        memcpy((void *)(ret + 0x128), &extra, sizeof(extra));
+    rand3 = func_150ADA20();
+    effect = func_1513D668((s32)&desc, 0, 14, 19, 0, (rand2 & 1) + (rand1 & 1), rand3 & 0xFF, 500.0f, 500.0f, 0,
+                           arg5, 0, sizeof(steam), 0xFF, 0);
+    if (effect != 0) {
+        memcpy(&((SteamEffect *)effect)->steam, &steam, sizeof(steam));
     }
-    return ret;
+    return effect;
 }
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s8 unk2;
-    s8 unk3;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-} Struct151DA368Sub;
 
 void *func_151DB5D0(s32, f32 *, f32 *, f32, f32, f32, f32, s16, u8, s16, s16, u8, u8, s32);
 
-s32 func_151DA368(void *arg0) {
-    Struct151DA368Sub *p;
-    s32 pad;
+/* Steam effect update: wobbles the scale and emits func_151DB5D0 particles around the base. */
+s32 func_151DA368(SteamEffect *effect) {
+    SteamData *steam;
+    s32 pad; // matching: unused stack slot
     f32 pos[3];
     f32 vel[3];
-    f32 sp98;
+    f32 radius;
     f32 dist;
     f32 c;
-    f32 avg;
+    f32 avgScale;
     s16 angle;
 
-    p = (Struct151DA368Sub *)((u8 *)arg0 + 0x128);
-    p->unk0 = p->unk0 + p->unk2 * D_800BE9E4;
-    p->unk1 = p->unk1 + p->unk3 * D_800BE9E4;
-    *(f32 *)((u8 *)arg0 + 0x2C) = func_151423D8(p->unk0 - 0x40) * p->unk4 + p->unk10;
-    *(f32 *)((u8 *)arg0 + 0x30) = func_151423D8(p->unk1 - 0x40) * p->unk8 + p->unk10;
-lbl:
-    p->unkC += (0.150000006f + func_150ADA68() * 0.1000000015f) * D_800BE9A4;
-    avg = (*(f32 *)((u8 *)arg0 + 0x30) + *(f32 *)((u8 *)arg0 + 0x2C)) * 0.5f;
-    if (p->unkC > 1.0f) {
-        sp98 = avg * 500.0f;
+    steam = &effect->steam;
+    steam->phaseX = steam->phaseX + steam->stepX * D_800BE9E4;
+    steam->phaseY = steam->phaseY + steam->stepY * D_800BE9E4;
+    effect->base.desc.scaleX = func_151423D8(steam->phaseX - 0x40) * steam->amplitudeX + steam->size;
+    effect->base.desc.scaleY = func_151423D8(steam->phaseY - 0x40) * steam->amplitudeY + steam->size;
+lbl: // matching: ends the basic block so the scaleY store is not moved into the next call's delay slot
+    steam->spawnCredit += (0.15f + func_150ADA68() * 0.1f) * D_800BE9A4;
+    avgScale = (effect->base.desc.scaleX + effect->base.desc.scaleY) * 0.5f;
+    if (steam->spawnCredit > 1.0f) {
+        radius = avgScale * 500.0f;
         do {
             angle = func_150ADA20() & 0xFF;
-            dist = func_150ADA68() * sp98;
+            dist = func_150ADA68() * radius;
             c = func_151423D8(angle - 0x40);
-            pos[0] = func_151423D8(angle) * dist + *(f32 *)((u8 *)arg0 + 0x34);
-            pos[1] = *(f32 *)((u8 *)arg0 + 0x38) + -3.5f;
-            pos[2] = *(f32 *)((u8 *)arg0 + 0x3C) + c * dist;
+            // matching: indexing the position as an array orders the add's operands like the target
+            pos[0] = func_151423D8(angle) * dist + ((f32 *)&effect->base.desc.pos)[0];
+            pos[1] = ((f32 *)&effect->base.desc.pos)[1] + -3.5f;
+            pos[2] = ((f32 *)&effect->base.desc.pos)[2] + c * dist;
             {
                 s16 life;
 
-            vel[0] = 0.0f;
-            vel[1] = 0.0f;
-            vel[2] = 0.0f;
-            life = (func_150ADA20() % 51U) + 0x96;
-            dist = func_150ADA68();
-            func_151DB5D0(p->unk18, pos, vel, avg * 471.0f, (dist * 154.0f + 10106.0f) * 9.999999747e-05f, 1.0f,
-                          (func_150ADA68() * 25.0f + -50.0f) * 0.001000000047f, life, 0x9B, life, 0xFF / life, 1,
-                          *((u8 *)arg0 + 0xC), *((u8 *)arg0 + 1));
+                vel[0] = 0.0f;
+                vel[1] = 0.0f;
+                vel[2] = 0.0f;
+                life = (func_150ADA20() % 51U) + 150;
+                dist = func_150ADA68();
+                func_151DB5D0(steam->kind, pos, vel, avgScale * 471.0f, (dist * 154.0f + 10106.0f) * 0.0001f, 1.0f,
+                              (func_150ADA68() * 25.0f + -50.0f) * 0.001f, life, 0x9B, life, 0xFF / life, 1,
+                              effect->base.unkC, effect->base.unk1);
             }
-            p->unkC = p->unkC - 1.0f;
-        } while (p->unkC > 1.0f);
+            steam->spawnCredit -= 1.0f;
+        } while
+ (steam->spawnCredit > 1.0f);
     }
     return 1;
 }
-// TODO when we know what arg0 is...
-s32 func_151DA6A8(s32 *arg0) {
-    s32 i;
-    f32 *p;
 
-    if (arg0[0x16] & 1) {
-        p = (f32 *)((u8 *)arg0 + 0x128);
+/* Steam effect update for timed effects: shrinks the size once per elapsed frame. */
+s32 func_151DA6A8(SteamEffect *effect) {
+    s32 i;
+    SteamData *steam;
+
+    if (effect->base.desc.flags & 1) {
+        steam = &effect->steam;
         i = D_800BE9E4;
         while (i--) {
-            p[4] = p[5] * p[4];
+            steam->size = steam->size * steam->shrink;
         }
     }
     return 1;
