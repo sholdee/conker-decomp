@@ -2,80 +2,57 @@
 #include "functions.h"
 #include "variables.h"
 
-
-void func_15103828(void);
-
 void func_15103690(s32 arg0) {
     func_15103828();
 }
 
-struct vec151036B4 {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s32 unk08;
-};
-
-struct conker151036B4 {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ struct vec151036B4 unk08;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
+/* Debris description passed to func_15152190 (same layout as game_DC6B0.c's and game_1355D0.c's
+ * DebrisBurst): a random number of pieces thrown in random directions from origin. */
+typedef struct {
+    /* 0x00 */ s32 count;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ vertex origin;
+    /* 0x14 */ s16 yaw;
+    /* 0x16 */ s16 yawRange;
+    /* 0x18 */ s16 pitch;
+    /* 0x1A */ s16 pitchRange;
+    /* 0x1C */ f32 speed;
+    /* 0x20 */ f32 speedRange;
     /* 0x24 */ f32 unk24;
     /* 0x28 */ f32 unk28;
     /* 0x2C */ s16 unk2C;
     /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-};
+    /* 0x30 */ f32 scale;
+    /* 0x34 */ f32 scaleRange;
+    /* 0x38 */ f32 spin;
+} DebrisBurst;
 
-struct src151036B4 {
-    /* 0x00 */ struct vec151036B4 unk00;
-};
+void func_15152190(DebrisBurst *, s32 *variantIds, f32 *variantScales, s32 variantCount, f32 radius, s32, u8,
+                   s32);
 
-struct word151036B4 {
-    s32 unk00;
-};
+/* Throws a burst of debris (one variant, id 226) from origin. */
+void func_151036B4(vertex *origin, u8 arg1, s32 arg2) {
+    DebrisBurst debris;
+    s32 variantIds[] = { 226 };
+    f32 variantScales[] = { 1.0f };
 
-extern struct word151036B4 D_800A2350;
-extern struct word151036B4 D_800A2354;
-extern f32 D_800A2358;
-extern f32 D_800A235C;
-extern f32 D_800A2360;
-extern f32 D_800A2364;
-extern f32 D_800A2368;
-
-void func_15152190(struct conker151036B4 *a0, struct word151036B4 *a1, struct word151036B4 *a2, s32 a3, f32 a4, s32 a5, s32 a6, s32 a7);
-
-void func_151036B4(struct src151036B4 *arg0, s32 arg1, s32 arg2) {
-    struct conker151036B4 sp34;
-    struct word151036B4 sp30;
-    struct word151036B4 sp2C;
-
-    sp30 = D_800A2350;
-    sp2C = D_800A2354;
-    sp34.unk00 = 8;
-    sp34.unk04 = 4;
-    sp34.unk08 = arg0->unk00;
-    sp34.unk14 = 0;
-    sp34.unk16 = 0xFF;
-    sp34.unk18 = -0x40;
-    sp34.unk1A = 0x5D;
-    sp34.unk1C = 8.0f;
-    sp34.unk20 = 4.0f;
-    sp34.unk24 = D_800A2358;
-    sp34.unk28 = D_800A235C;
-    sp34.unk2C = 0x14;
-    sp34.unk2E = 0xA;
-    sp34.unk30 = D_800A2360;
-    sp34.unk34 = D_800A2364;
-    sp34.unk38 = D_800A2368;
-    func_15152190(&sp34, &sp30, &sp2C, 1, 0.0f, 1, (u8)arg1, arg2);
+    debris.count = 8;
+    debris.countRange = 4;
+    debris.origin = *origin;
+    debris.yaw = 0;
+    debris.yawRange = 0xFF;
+    debris.pitch = -64;
+    debris.pitchRange = 93;
+    debris.speed = 8.0f;
+    debris.speedRange = 4.0f;
+    debris.unk24 = -0.7060000300f;
+    debris.unk28 = 0.3220000267f;
+    debris.unk2C = 20;
+    debris.unk2E = 10;
+    debris.scale = 0.2510000169f;
+    debris.scaleRange = 0.1990000159f;
+    debris.spin = 30.69600105f;
+    func_15152190(&debris, variantIds, variantScales, 1, 0.0f, 1, arg1, arg2);
 }
 
 s32 func_151037DC(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
