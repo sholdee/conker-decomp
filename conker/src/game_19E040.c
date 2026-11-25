@@ -60,7 +60,7 @@ f32 func_150489B0(u8);
 void *func_1518C900(s32);
 void func_15168BE4(ModelFxTemplate *, u8, s32);
 void func_15170B90(EffectActor *, s32, s32, s32, u8, s32);
-void func_151717FC(EffectActor *, f32, f32, f32, f32, f32, s32, s32, s32, s32, f32, s32, s32);
+void func_151717FC(EffectActor *, f32, f32, f32, f32, f32, s32, s32, s32, s32, f32, u8, s32);
 void func_151718F0(f32, f32, f32, f32, s32, f32, s32, s32, s32, s32);
 void func_151700D8(f32 (*)[3], f32, f32, s32, f32, s32, s32, s32, s32, s32);
 void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
@@ -272,24 +272,18 @@ void func_15171200(s32 count, s32 modelId, f32 x, f32 y, f32 z, f32 speed, f32 m
 }
 
 /* Spawns the scene-specific square ring of particles under the actor, chosen by its unk72. */
-void func_15171600(EffectActor *actor, s32 arg1, s32 list) {
-    u8 owner;
-
+void func_15171600(EffectActor *actor, u8 owner, s32 list) {
     switch (actor->unk72) {
     case 0xEB:
-        owner = arg1;
         func_151717FC(actor, 400.0f, 500.0f, 0.0f, -1270.0f, 0.0f, 2, 5, 20, 20, 1.0f, owner, list);
         break;
     case 0xF6:
-        owner = arg1;
         func_151717FC(actor, 200.0f, 400.0f, -1800.0f, -1000.0f, -1200.0f, 2, 5, 4, 10, 1.0f, owner, list);
         break;
     case 0xF8:
-        owner = arg1;
         func_151717FC(actor, 100.0f, 160.0f, -2500.0f, -650.0f, 0.0f, 2, 5, 4, 4, 0.5f, owner, list);
         break;
     case 0xF9:
-        owner = arg1;
         func_151717FC(actor, 200.0f, 100.0f, 100.0f, -300.0f, 0.0f, 1, 5, 4, 4, 1.0f, owner, list);
         break;
     }
@@ -300,7 +294,7 @@ void func_15171600(EffectActor *actor, s32 arg1, s32 list) {
  * position plus (offsetX, offsetY, offsetZ).
  */
 void func_151717FC(EffectActor *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 offsetY, f32 offsetZ, s32 type,
-                   s32 style, s32 countA, s32 countB, f32 scale, s32 owner, s32 list) {
+                   s32 style, s32 countA, s32 countB, f32 scale, u8 owner, s32 list) {
     f32 corners[4][3];
     f32 centerX;
     f32 centerY;
@@ -321,7 +315,7 @@ void func_151717FC(EffectActor *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 of
     corners[3][0] = halfX + centerX;
     corners[3][1] = centerY;
     corners[3][2] = centerZ - halfZ;
-    func_151700D8(corners, centerX, centerZ, style, scale, type, countA, countB, (u8)owner, list);
+    func_151700D8(corners, centerX, centerZ, style, scale, type, countA, countB, owner, list);
 }
 
 f32 func_15048A40(u8);
@@ -379,22 +373,23 @@ void func_151718F0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, f32 arg5, s
     }
 }
 
-extern void func_150AEEB0(void *);
-extern void func_150BD740(void *, u8, s32);
-extern void func_150CDBB0(void *, u8, s32);
+void func_150AEEB0(struct127 *);
+void func_150BD740(struct127 *, u8, s32);
+void func_150CDBB0(struct127 *, u8, s32);
 
-void func_15171BF4(void *arg0, u8 arg1) {
-    switch (((u8 *)arg0)[4]) {
+/* Effect hook for objects, by object id. */
+void func_15171BF4(struct127 *obj, u8 owner) {
+    switch (obj->id) {
     case 0x13:
     case 0x23:
-        func_150AEEB0(arg0);
-        func_10010154(0x69, arg0, 0x7D00, 0xC8, 0x7D0);
+        func_150AEEB0(obj);
+        func_10010154(0x69, obj, 32000, 200, 2000);
         break;
     case 0x1E:
-        func_150BD740(arg0, arg1, 1);
+        func_150BD740(obj, owner, 1);
         break;
     case 0x54:
-        func_150CDBB0(arg0, arg1, 1);
+        func_150CDBB0(obj, owner, 1);
         break;
     }
 }
