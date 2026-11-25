@@ -3,16 +3,11 @@
 #include "variables.h"
 
 
-struct Vec1519EA78 {
+/* First argument of func_15152190 (as Arg15108120 in game_1355D0.c). */
+typedef struct {
     /* 0x00 */ s32 unk00;
     /* 0x04 */ s32 unk04;
-    /* 0x08 */ s32 unk08;
-};
-
-struct Conker1519EA78 {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ struct Vec1519EA78 unk08;
+    /* 0x08 */ struct17 pos;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -26,100 +21,94 @@ struct Conker1519EA78 {
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;
     /* 0x38 */ f32 unk38;
-};
+} Arg15152190;
 
-struct Src1519EA78 {
-    /* 0x00 */ struct Vec1519EA78 unk00;
-};
+void func_15152190(Arg15152190 *, s32 *, f32 *, s32, f32, s32, s32, s32);
 
-extern f32 D_800A8CC0;
-extern f32 D_800A8CC4;
-extern f32 D_800A8CC8;
-extern f32 D_800A8CCC;
-extern f32 D_800A8CD0;
+/* Owner of a func_1519E970 timer (EvNodeData in game_50D80.c): unk30 holds the running timer. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x30];
+    /* 0x30 */ struct EvTimer *timer;
+} EvTimerOwner;
 
-void func_15152190(struct Conker1519EA78 *arg0, s32 *arg1, f32 *arg2, s32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7);
+/* Effect created by func_1519E970 (0x2C bytes), counted down by func_1519EA04. */
+typedef struct EvTimer {
+    /* 0x00 */ u8 pad0[0x10]; // effect header, see func_15167A68
+    /* 0x10 */ s32 flags;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ f32 *unk18;
+    /* 0x1C */ f32 *unk1C;
+    /* 0x20 */ s16 timeLeft;
+    /* 0x22 */ u8 pad22[2];
+    /* 0x24 */ EvTimerOwner *owner;
+    /* 0x28 */ u8 keepOwnerLink; /* 0: clear owner->timer on expiry */
+    /* 0x29 */ u8 pad29[3];
+} EvTimer; // size 0x2C
 
-struct Obj1519E970 {
-    char pad0[0x10];
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s16 unk20;
-    char pad22[0x24 - 0x22];
-    s32 unk24;
-    u8  unk28;
-};
+extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
-extern struct Obj1519E970 *func_15167A68(s32, s32, s32, s32, s32, s32);
+/* Starts a timer effect that expires after `duration` frames of D_800BE9E4. */
+EvTimer *func_1519E970(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 arg5,
+                       s32 arg6) {
+    EvTimer *timer = func_15167A68(0x26, arg6, sizeof(EvTimer), 1, arg5, 1);
 
-struct Obj1519E970 *func_1519E970(s16 a0, s32 a1, u8 a2, s32 a3, s32 a4, u8 a5, s32 a6) {
-    struct Obj1519E970 *ret = func_15167A68(0x26, a6, 0x2C, 1, a5, 1);
-    if (ret == 0) {
+    if (timer == NULL) {
         return NULL;
     }
-    ret->unk18 = a3;
-    ret->unk1C = a4;
-    ret->unk20 = a0;
-    ret->unk28 = a2;
-    ret->unk24 = a1;
-    ret->unk10 = 1;
-    ret->unk14 = 0;
-    return ret;
+    timer->unk18 = arg3;
+    timer->unk1C = arg4;
+    timer->timeLeft = duration;
+    timer->keepOwnerLink = keepOwnerLink;
+    timer->owner = owner;
+    timer->flags = 1;
+    timer->unk14 = 0;
+    return timer;
 }
 
-struct Local1519EA04 {
-    char pad0[0x10];
-    s32 unk10;
-    char pad14[0x20 - 0x14];
-    s16 unk20;
-    char pad22[0x24 - 0x22];
-    s32 *unk24;
-    u8 unk28;
-};
+/* Per-frame update of a func_1519E970 timer: frees it (unlinking its owner) once its time runs out. */
+void func_1519EA04(EvTimer *timer) {
+    if (timer->flags & 1) {
+        s32 expired = FALSE;
 
-void func_1519EA04(struct Local1519EA04 *arg0) {
-    if (arg0->unk10 & 1) {
-        s32 flag = 0;
-        arg0->unk20 -= D_800BE9E4;
-        if (arg0->unk20 < 0) {
-            flag = 1;
+        timer->timeLeft -= D_800BE9E4;
+        if (timer->timeLeft < 0) {
+            expired = TRUE;
         }
-        if (flag != 0) {
-            if (arg0->unk28 == 0) {
-                s32 *p = arg0->unk24;
-                p[0x30 / 4] = 0;
+        if (expired) {
+            if (timer->keepOwnerLink == 0) {
+                EvTimerOwner *owner = timer->owner;
+                owner->timer = NULL;
             }
-            func_1516972C((struct102 *)arg0);
+            func_1516972C((struct102 *)timer);
         }
     }
 }
 
-void func_1519EA78(struct Src1519EA78 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 arg4) {
-    struct Conker1519EA78 sp34;
-    s32 sp30;
-    f32 sp2C;
+/* Spawns a func_15152190 effect at pos (cutscene event; the caller passes an id < 0xE9 and a scale). */
+void func_1519EA78(struct17 *pos, u16 id, f32 scale, u8 arg3, s32 arg4) {
+    Arg15152190 def;
+    s32 idArg;
+    f32 scaleArg;
 
-    sp34.unk00 = 0xA;
-    sp34.unk04 = 7;
-    sp34.unk08 = arg0->unk00;
-    sp34.unk14 = 0;
-    sp34.unk16 = 0xFF;
-    sp34.unk18 = -0x35;
-    sp34.unk1A = 0x18;
-    sp34.unk1C = 10.0f;
-    sp34.unk20 = 8.0f;
-    sp34.unk24 = D_800A8CC0;
-    sp34.unk28 = D_800A8CC4;
-    sp34.unk2C = 0x32;
-    sp34.unk2E = 0x14;
-    sp34.unk30 = D_800A8CC8;
-    sp34.unk34 = D_800A8CCC;
-    sp34.unk38 = D_800A8CD0;
-    sp30 = arg1;
-    sp2C = arg2;
-    func_15152190(&sp34, &sp30, &sp2C, 1, 0.0f, 0, arg3, arg4);
+    def.unk00 = 10;
+    def.unk04 = 7;
+    def.pos = *pos;
+    def.unk14 = 0;
+    def.unk16 = 0xFF;
+    def.unk18 = -0x35;
+    def.unk1A = 0x18;
+    def.unk1C = 10.0f;
+    def.unk20 = 8.0f;
+    def.unk24 = -1.32400012f;
+    def.unk28 = 0.7440000176f;
+    def.unk2C = 50;
+    def.unk2E = 20;
+    def.unk30 = 0.6000000238f;
+    def.unk34 = 0.8000000119f;
+    def.unk38 = 26.18200111f;
+    idArg = id;
+    scaleArg = scale;
+    func_15152190(&def, &idArg, &scaleArg, 1, 0.0f, 0, arg3, arg4);
 }
 
 void *func_1513264C(void *, s32, s32, s32, s32, u8, s32);
