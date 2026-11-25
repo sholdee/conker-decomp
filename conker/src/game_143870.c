@@ -177,7 +177,7 @@ s32 func_15116888(s32 x, s32 z, s32 *unused, struct127 *other) {
     s32 bearing;
     s32 angle;
     f32 result;
-    s32 pad; // matching: the original frame has 4 more bytes of locals
+    f32 cosine;
     struct17 delta;
 
     otherX = (s32)other->x_position;
@@ -186,11 +186,11 @@ s32 func_15116888(s32 x, s32 z, s32 *unused, struct127 *other) {
     delta.unk8 = otherZ - z;
 
     bearing = func_150490A8(&delta);
-    angle = other->unk76 >> 8;
-    angle = 0x40 - angle;
-    angle = angle - bearing;
-    result = func_15048A40(angle);
-    result = other->xz_velocity * result;
+    angle = other->unk76;
+    angle = 0x40 - (angle >> 8);
+    angle -= bearing;
+    cosine = func_15048A40(angle);
+    result = other->xz_velocity * cosine;
     return result;
 }
 
