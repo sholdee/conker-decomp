@@ -23,7 +23,7 @@ extern f32 D_800A04F4;
 extern f32 D_800A04F8;
 extern f32 D_800A04FC;
 
-void func_15143794(s32, s32, f32, f32 *);
+void func_15143794(s32 heading, s32 pitch, f32 speed, f32 *out);
 struct260 *func_15130374(void *, u8, s32, u8, s32);
 s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern void func_1503E5F8(f32 (*)[4], f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
@@ -434,101 +434,85 @@ Gfx *func_150C8DB8(Gfx *gdl, RadialEffect *effect, s32 arg2) {
     return gdl;
 }
 
+/* Spawn packet for func_15130374 particles; the spawned object holds these fields at +0x10. */
 typedef struct {
-    u8 pad0[1];
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x13];
-    f32 unk20;
-} Struct150C99B4;
+    s32 unk00;
+    s32 unk04;
+    s16 unk08;
+    s16 unk0A;
+    s32 unk0C;
+    s32 unk10;
+    u8 color0[4];     /* 0x14: RGBA */
+    u8 color1[4];     /* 0x18: RGBA */
+    u8 unk1C;
+    u8 unk1D;
+    s16 unk1E;
+    s16 unk20;
+    s16 unk22;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    Vec3f pos;        /* 0x30 */
+    f32 unk3C[3];
+    f32 velocity[3];  /* 0x48: damped per tick by func_150CAC28 */
+    f32 unk54;
+    s32 unk58;
+    u8 pad5C[4];
+    u8 unk60;
+    u8 unk61;
+    s8 unk62;
+    s8 unk63;
+    u8 pad64[0xC];
+} Particle; /* size 0x70 */
 
-void func_150C99B4(Struct150C99B4 *arg0, struct17 *arg1, s32 arg2, s32 arg3) {
-    struct {
-        u8 pad30[2];
-        s16 sp32;
-        u8 pad34[4];
-        struct {
-            s32 unk00;
-            s32 unk04;
-            s16 unk08;
-            s16 unk0A;
-            s32 unk0C;
-            s32 unk10;
-            u8 unk14;
-            u8 unk15;
-            u8 unk16;
-            u8 unk17;
-            u8 unk18;
-            u8 unk19;
-            u8 unk1A;
-            u8 unk1B;
-            u8 unk1C;
-            u8 unk1D;
-            s16 unk1E;
-            s16 unk20;
-            s16 unk22;
-            f32 unk24;
-            f32 unk28;
-            f32 unk2C;
-            struct17 unk30;
-            f32 unk3C;
-            f32 unk40;
-            f32 unk44;
-            struct17 unk48;
-            f32 unk54;
-            s32 unk58;
-            u8 pad5C[4];
-            u8 unk60;
-            u8 unk61;
-            s8 unk62;
-            s8 unk63;
-        } sp38;
-        u8 pad9C[0xC];
-    } stack;
-    f32 temp_f12;
-    s32 temp;
+/* Ring emit callback 0: spawns a dark particle at pos, moving along heading. */
+void func_150C99B4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32 sine) {
+    Particle packet;
+    s32 pad; // matching: unused stack slot
+    s16 pitch;
 
-    stack.sp38.unk1D = 0x26;
-    stack.sp38.unk08 = 0xC01;
-    stack.sp38.unk00 = 0x200005;
-    stack.sp38.unk04 = 0;
-    stack.sp38.unk0A = (func_150ADA20() % 0x51U) + 0x19;
-    stack.sp38.unk0C = 0;
-    stack.sp38.unk10 = 0;
-    stack.sp38.unk60 = 5;
-    stack.sp38.unk61 = 5;
-    stack.sp38.unk14 = 0;
-    stack.sp38.unk15 = 0;
-    stack.sp38.unk16 = 0;
-    stack.sp38.unk17 = 0xFF;
-    stack.sp38.unk18 = 0;
-    stack.sp38.unk19 = 0;
-    stack.sp38.unk1A = 0;
-    stack.sp38.unk1B = (func_150ADA20() % 0x9CU) + 0x64;
-    stack.sp38.unk1C = 0xFF;
+    f32 speed;
+    s32 flag40;
+    s32 flag80;
 
-    stack.sp38.unk28 = stack.sp38.unk2C = (func_150ADA68() * 500.0f) + 500.0f;
-    stack.sp38.unk30 = *arg1;
-    stack.sp38.unk3C = 0.0f;
-    stack.sp38.unk40 = 0.0f;
-    stack.sp38.unk44 = 0.0f;
+    packet.unk1D = 0x26;
+    packet.unk08 = 0xC01;
+    packet.unk00 = 0x200005;
+    packet.unk04 = 0;
+    packet.unk0A = (func_150ADA20() % 81U) + 25;
+    packet.unk0C = 0;
+    packet.unk10 = 0;
+    packet.unk60 = 5;
+    packet.unk61 = 5;
+    packet.color0[0] = 0;
+    packet.color0[1] = 0;
+    packet.color0[2] = 0;
+    packet.color0[3] = 0xFF;
+    packet.color1[0] = 0;
+    packet.color1[1] = 0;
+    packet.color1[2] = 0;
+    packet.color1[3] = (func_150ADA20() % 156U) + 100;
+    packet.unk1C = 0xFF;
+    packet.unk28 = packet.unk2C = (func_150ADA68() * 500.0f) + 500.0f;
+    packet.pos = *pos;
+    packet.unk3C[0] = 0.0f;
+    packet.unk3C[1] = 0.0f;
+    packet.unk3C[2] = 0.0f;
+    packet.unk54 = ((func_150ADA68() * 550.0f) + -1416.0f) * 0.001000000047f;
+    packet.unk1E = 20;
+    packet.unk20 = 12;
+    packet.unk22 = 0;
+    packet.unk24 = 1.0f;
+    flag40 = (func_150ADA20() & 1) ? 0x40 : 0;
+    flag80 = (func_150ADA20() & 1) ? 0x80 : 0;
+    packet.unk58 = 7 | flag80 | flag40 | 0x200;
+    packet.unk62 = -1;
+    packet.unk63 = -1;
+    pitch = (func_150ADA20() % 11U) - 18;
+    speed = func_150ADA68() * (effect->def.speed * 0.2430000156f) + effect->def.speed * 0.9610000253f;
 
-    stack.sp38.unk54 = ((func_150ADA68() * D_800A0570) + -1416.0f) * D_800A0574;
-    stack.sp38.unk1E = 0x14;
-    stack.sp38.unk20 = 0xC;
-    stack.sp38.unk22 = 0;
-    stack.sp38.unk24 = 1.0f;
-
-    temp = (func_150ADA20() & 1) ? 0x40 : 0;
-    stack.sp38.unk58 = ((((func_150ADA20() & 1) ? 0x80 : 0) | 7) | temp) | 0x200;
-    stack.sp38.unk62 = -1;
-    stack.sp38.unk63 = -1;
-    stack.sp32 = (func_150ADA20() % 0xBU) - 0x12;
-
-    temp_f12 = (func_150ADA68() * (arg0->unk20 * D_800A0578)) + (arg0->unk20 * D_800A057C);
-    func_15143794((u8)arg2, stack.sp32, temp_f12, &stack.sp38.unk48.unk0);
-    func_15130374(&stack.sp38, 1, 0, arg0->unkC, arg0->unk1);
+    func_15143794(heading, pitch, speed, packet.velocity);
+    func_15130374(&packet, 1, 0, effect->unkC, effect->unk1);
 }
 
 extern s32 func_1505D024(struct127 *, s32, u16, s32);
@@ -571,7 +555,7 @@ void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
 
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 
-void func_150C9DC4(Struct150C99B4 *arg0, struct17 *arg1, s32 arg2, s32 arg3) {
+void func_150C9DC4(RadialEffect *arg0, struct17 *arg1, s32 arg2, s32 arg3) {
     struct {
         f32 unk00;
         f32 unk04;
@@ -639,7 +623,7 @@ void func_150C9DC4(Struct150C99B4 *arg0, struct17 *arg1, s32 arg2, s32 arg3) {
 
     ((s32 *)&sp34)[-5] = func_150ADA20();
     func_15143794((u8)arg2, (s16)((((s32 *)&sp34)[-5] % 26U) - 45),
-                  (func_150ADA68() * 81.0f + 60.0f) * arg0->unk20 * 0.009999999776f,
+                  (func_150ADA68() * 81.0f + 60.0f) * arg0->def.speed * 0.009999999776f,
                   &sp34.unk34);
 
     sp34.unk40 = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
