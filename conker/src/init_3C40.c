@@ -198,67 +198,70 @@ s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 arg4) {
     osSetIntMask(intMask);
     return (s32)blk + 0xC;
 }
-void func_10004074(void *arg0) {
+/* Frees the block whose payload is ptr, merging it with free neighbours. */
+void func_10004074(void *ptr) {
     AllocatorFreeBlock *block;
     AllocatorFreeBlock *neighbor;
     AllocatorFreeBlock *cursor;
     s32 merged;
-    volatile s32 mask;
+    volatile OSIntMask mask; // matching: IDO keeps mask in a register otherwise; the target spills it to the stack
 
-    if (arg0 != 0) {
-        cursor = (AllocatorFreeBlock *)((AllocatorBlock *)arg0 - 1);
+    if (ptr != NULL) {
+        cursor = (AllocatorFreeBlock *)((AllocatorBlock *)ptr - 1);
         block = cursor;
-        merged = 0;
+        merged = FALSE;
         mask = osSetIntMask(1);
         neighbor = (AllocatorFreeBlock *)cursor->header.prev;
+        // matching: clears only the tag byte (sb); a masked u32 store emits lw/and/sw
         ((u8 *)&cursor->header.taggedSize)[0] = 0;
-        if ((neighbor != 0) && ((neighbor->header.taggedSize >> 24) == 0)) {
+        if (neighbor != NULL && (neighbor->header.taggedSize >> 24) == 0) {
             neighbor->header.next = cursor->header.next;
-            neighbor->header.taggedSize += cursor->header.taggedSize + 0xC;
-            if (neighbor->header.next != 0) {
+            neighbor->header.taggedSize += cursor->header.taggedSize + sizeof(AllocatorBlock);
+            if (neighbor->header.next != NULL) {
                 neighbor->header.next->prev = &neighbor->header;
             }
             block = neighbor;
-            merged = 1;
+            merged = TRUE;
         }
         neighbor = (AllocatorFreeBlock *)block->header.next;
-        if ((neighbor != 0) && ((neighbor->header.taggedSize >> 24) == 0)) {
+        if (neighbor != NULL && (neighbor->header.taggedSize >> 24) == 0) {
             block->header.next = neighbor->header.next;
-            block->header.taggedSize += neighbor->header.taggedSize + 0xC;
-            if (block->header.next != 0) {
+            block->header.taggedSize += neighbor->header.taggedSize + sizeof(AllocatorBlock);
+            if (block->header.next != NULL) {
                 block->header.next->prev = &block->header;
             }
             block->nextFree = neighbor->nextFree;
-            if (block->nextFree != 0) {
+            if (block->nextFree != NULL) {
                 block->nextFree->prevFree = block;
             }
             cursor = neighbor->prevFree;
-            if (cursor == 0) {
+            if (cursor == NULL) {
                 D_800380B8 = (struct54 *)block;
-                block->prevFree = 0;
+                block->prevFree = NULL;
             } else if (cursor != block) {
                 block->prevFree = cursor;
-                if (block->prevFree != 0) {
+                if (block->prevFree != NULL) {
                     block->prevFree->nextFree = block;
                 }
             }
-            merged = 1;
+            merged = TRUE;
         }
-        if (merged == 0) {
+        if (!merged) {
+            // Insert into the address-ordered free list.
             cursor = (AllocatorFreeBlock *)D_800380B8;
-            if (cursor == 0) {
-                block->nextFree = 0;
-                block->prevFree = 0;
+            if (cursor == NULL) {
+                block->nextFree = NULL;
+                block->prevFree = NULL;
                 D_800380B8 = (struct54 *)block;
             } else if ((u32)block < (u32)cursor) {
                 block->nextFree = cursor;
-                block->prevFree = 0;
+                block->prevFree = NULL;
                 cursor->prevFree = block;
                 D_800380B8 = (struct54 *)block;
             } else {
                 for (;;) {
-                    if (cursor->nextFree == 0) {
-                        block->nextFree = 0;
+                    if (cursor->nextFree == NULL) {
+                        block->nextFree = NULL;
                         block->prevFree = cursor;
                         cursor->nextFree = block;
                         break;
@@ -274,7 +277,7 @@ void func_10004074(void *arg0) {
                 }
             }
         }
-        if (block->nextFree == 0) {
+        if (block->nextFree == NULL) {
             D_800380BC = (s32 *)block;
         }
         if ((u32)D_8002AC30 < block->header.taggedSize) {
