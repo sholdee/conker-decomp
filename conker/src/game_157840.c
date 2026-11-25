@@ -283,41 +283,26 @@ void func_1512A390(Obj1512A390 *arg0) {
     }
 }
 
+/* Resets every player's z-buffer scan parameters from the defaults, narrowed for split screen and some maps,
+ * and clears all scan state. */
 void func_1512ABF8(void) {
-    f32 temp_f2;
-    f32 temp_f0;
-    s32 temp_a1;
-    s32 temp_a2;
-    s32 temp_t1;
-    s32 temp_t2;
     u8 i;
     u8 j;
-    register ZScanParams *src;
-    ZScanParams *temp_v0;
 
-    temp_f2 = 0.75f;
-    temp_f0 = 0.5f;
-    src = D_80089590;
-    temp_t2 = 0x1E;
-    temp_t1 = 0x1B;
-
-    for (temp_a1 = D_80082FA0, temp_a2 = D_800BE9F0, i = 0; i < 4; i++) {
-        j = 0;
-        do {
-            temp_v0 = &D_800DC200[i][j];
-            *temp_v0 = src[j];
-
-            if ((temp_a1 > 0) && (temp_a1 < 4)) {
-                temp_v0->halfWidth = temp_v0->halfWidth * temp_f0;
-                temp_v0->unk2 = temp_v0->unk2 * temp_f0;
+    for (i = 0; i < 4; i++) {
+        j = 0; // matching: a for loop schedules this init differently
+        while (j < 4) {
+            D_800DC200[i][j] = D_80089590[j];
+            if ((D_80082FA0 > 0) && (D_80082FA0 < 4)) {
+                D_800DC200[i][j].halfWidth *= 0.5f;
+                D_800DC200[i][j].unk2 *= 0.5f;
             }
-
-            if ((temp_t1 == temp_a2) || (temp_t2 == temp_a2)) {
-                temp_v0->halfWidth = temp_v0->halfWidth * temp_f2;
-                temp_v0->unk2 = temp_v0->unk2 * temp_f2;
+            if ((D_800BE9F0 == 0x1B) || (D_800BE9F0 == 0x1E)) {
+                D_800DC200[i][j].halfWidth *= 0.75f;
+                D_800DC200[i][j].unk2 *= 0.75f;
             }
             j++;
-        } while (j < 4);
+        }
     }
 
     bzero(D_800DC0C0, sizeof(D_800DC0C0));
