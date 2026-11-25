@@ -58,16 +58,11 @@ typedef void *(*BankFetchProc)(u32 *slot, s32 mode);
 typedef struct MusicTrack MusicTrack;
 
 /* matching */
-void func_10001050(void);
-void func_100010F8(s32 arg0);
 void func_10001444(void);
 void func_100014A0(void);
 s32  func_10002070(s32 arg0, s32 arg1, s32 arg2);
 void func_1000349C(s32 arg0);
-s32  func_1000390C(void);
 void func_10003930(void);
-void func_100039B0(void);
-void func_100039C0(void);
 void func_10004250(void);
 void func_10004308(void);
 void func_1000440C(void);
@@ -874,7 +869,6 @@ s32  func_16001B8C(u8 *arg0, u8 *arg1, u32 arg2);
 
 /* non-matching */
 
-void func_10001194(s32 arg0);
 void func_10001420(void);
 void func_100014C4(s32 arg0);
 void func_10001550(void *arg0, u8 arg1);
@@ -886,11 +880,8 @@ void func_10001550(void *arg0, u8 arg1);
 void func_100030A0(OSPri priority, OSMesgQueue *mesgQueue, OSMesg *arg2, s32 arg3);
 //func_100034E0
 //func_10003658
-// void func_100038C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-// void func_100038E0(void);
 void func_10003920(void);
 // void func_10003BD0(void);
-//func_10003ACC
 s32 func_10003C6C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 //func_10004074
 void func_100043B4(s32 *arg0, u32 arg1);

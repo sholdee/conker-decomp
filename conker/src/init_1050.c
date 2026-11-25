@@ -34,7 +34,6 @@ void *allocate_memory(s32 size, s32, s32, s32);
 s32 func_10006240(void *src, void *dst, u32);
 void func_10004074(void *);
 void func_10005BE0(void);
-void func_15007830(void);
 void func_10003BD0(void);
 
 /**

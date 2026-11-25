@@ -71,7 +71,6 @@ void func_151BF340(s32, s32);
 void func_151D8DE8(void);
 void func_151E562C(void);
 s8 func_151E5FAC(void);
-void func_10003ACC(s32, s32, s32);
 void func_150000B0(void);
 void func_15000AD0(s32);
 void func_150031EC(s32);
