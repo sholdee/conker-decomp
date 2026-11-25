@@ -66,7 +66,7 @@ void func_1512DD50(Camera *camera) {
     f32 y;
     f32 scale;
     f32 dy;
-    struct17 span;
+    vertex span;
     f32 dx;
     f32 dz;
 
@@ -76,7 +76,7 @@ void func_1512DD50(Camera *camera) {
     y = cmd->y;
     z = cmd->z;
     scale = cmd->halfLength;
-    // matching: scale/dx are reused (horizontal part, then x) to get IDO's register split
+    // matching: scale/dx reuse (horizontal part, then x part) gives IDO's register split
     dx = cmd->unk24 * scale;
     dy = cmd->unk28 * scale;
     scale = dx;
@@ -85,15 +85,15 @@ void func_1512DD50(Camera *camera) {
     rail->start.x = x - dx;
     rail->start.y = y - dy;
     rail->start.z = z - dz;
-    span.unk0 = 2.0f * dx;
-    span.unk4 = 2.0f * dy;
-    span.unk8 = 2.0f * dz;
+    span.x = 2.0f * dx;
+    span.y = 2.0f * dy;
+    span.z = 2.0f * dz;
 
-    scale = 1.0f / func_150AD930(&span.unk0);
+    scale = 1.0f / func_150AD930(&span.x);
     rail->invLength = scale;
-    rail->dir.x = scale * span.unk0;
-    rail->dir.y = scale * span.unk4;
-    rail->dir.z = scale * span.unk8;
+    rail->dir.x = scale * span.x;
+    rail->dir.y = scale * span.y;
+    rail->dir.z = scale * span.z;
     rail->offset = cmd->offset;
     rail->heightOffset = cmd->heightOffset;
     rail->offsetMode = cmd->offsetMode;
