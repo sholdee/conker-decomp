@@ -32,8 +32,8 @@ s32 func_150AD960(s32, s32, s32, s32);
  * vertical plane through (planeX, planeZ) at `angle`. `srcIsFixed`: the sources are fixed point
  * (Mtx); `dstToFixed`: convert the results to fixed point.
  */
-void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, f32 (*srcMtx)[4][4],
-                   f32 (*dstMtx)[4][4], s32 count, f32 planeX, f32 planeY, f32 planeZ, f32 unused,
+void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx,
+                   MtxF *dstMtx, s32 count, f32 planeX, f32 planeY, f32 planeZ, f32 unused,
                    f32 angle, f32 objX, f32 objY, f32 objZ, f32 fadeStart, f32 fadeEnd, f32 maxAlpha,
                    s32 srcIsFixed, s32 dstToFixed) {
     MtxF flip;

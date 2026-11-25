@@ -18,7 +18,7 @@ void func_15012370(void) {
         half = 0.5f;
         do {
             func_151EF954(
-                ((f32 (*)[4][4])D_800DCC10)[i],
+                ((MtxF *)D_800DCC10)[i],
                 -(temp_f0 = D_800BE628[i].width * half),
                 temp_f0,
                 -(temp_f2 = D_800BE628[i].height * half),

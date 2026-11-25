@@ -2145,7 +2145,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                                 sel = c[func_150ADA20() % 6];
                                 break;
                         }
-                        func_15143134(sel, out, &((f32 (*)[4][4]) obj->unk1D4)[bones[event->unk5]]);
+                        func_15143134(sel, out, &((MtxF *) obj->unk1D4)[bones[event->unk5]]);
                         func_151C329C(out, sceneTag, 1);
                     }
                     break;
@@ -2232,7 +2232,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         const f32 offs[8][3] = { { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { 0.0f, -14.0f, 18.0f }, { -5.0f, 25.0f, -7.0f }, { -11.0f, 28.0f, -5.0f }, { -4.0f, 30.0f, -4.0f }, { 3.0f, 30.0f, -8.0f } };
                         const u8 bones[8] = { 7, 8, 9, 10, 13, 14, 15, 16 };
 
-                        func_15143134(offs[event->unk5], out, &((f32 (*)[4][4]) obj->unk1D4)[bones[event->unk5]]);
+                        func_15143134(offs[event->unk5], out, &((MtxF *) obj->unk1D4)[bones[event->unk5]]);
                         func_15131EE4(out, 6.990000248f, sceneTag, 0);
                     }
                     break;

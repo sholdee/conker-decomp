@@ -385,7 +385,7 @@ u8 func_15160B74(struct225 *effect) {
     if (actor->unk1D4 != NULL && (actor->unk74 & 0xF) != 0xF) {
         f32 position[3];
 
-        func_15143134(&attach->offset.x, position, ((f32 (*)[4][4])actor->unk1D4)[attach->bone]);
+        func_15143134(&attach->offset.x, position, ((MtxF *)actor->unk1D4)[attach->bone]);
         effect->unk14->unkE = position[0];
         effect->unk14->unk10 = position[1];
         effect->unk14->unk12 = position[2];
@@ -494,7 +494,7 @@ s32 func_15160E30(struct225 *effect) {
         in[1] = &beam->end.x;
         out[0] = start;
         out[1] = dir;
-        func_15145EA4(in, out, ((f32 (*)[4][4])actor->unk1D4)[beam->bone], 2);
+        func_15145EA4(in, out, ((MtxF *)actor->unk1D4)[beam->bone], 2);
         {
             f32 length;
 

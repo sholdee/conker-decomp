@@ -1024,7 +1024,7 @@ s32 arg2;
     }
     src = &D_800A1C48;
     dst = &pos;
-    mtx = ((f32 (*)[4][4])obj->unk1D4)[D_80088B50];
+    mtx = ((MtxF *)obj->unk1D4)[D_80088B50];
     func_15145EA4(&src, &dst, mtx, 1);
     one = 1.0f; // matching: IDO folds a literal "* 1.0f" away; the original multiplies by a variable
     motion[1] = func_150ADA68() * one + 2.0f;
@@ -1052,7 +1052,7 @@ s32 arg2;
     if (gun != NULL) {
         if (func_150FF6E0(points, &position, &hit, &normal, &unk30, obj, gun) != 0) {
             func_151D3F14(&position, arg1, arg2);
-            func_151D4408(&hit, &normal, ((f32 (*)[4][4])obj->unk1D4)[((u8 *)gun)[2]], obj, 1.0f, arg1, arg2);
+            func_151D4408(&hit, &normal, ((MtxF *)obj->unk1D4)[((u8 *)gun)[2]], obj, 1.0f, arg1, arg2);
             func_150FF474(&position, points, arg1, arg2);
         }
     }

@@ -831,7 +831,7 @@ s32 func_15133A50(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight) {
  * (as is when D_800C3E90 is set, else converted to fixed point). Returns -1 if the owner is gone. */
 s32 func_15133A94(Mtx *mtx, Particle *particle) {
     Actor *owner;
-    f32 (*ownerMtxs)[4][4];
+    MtxF *ownerMtxs;
     MtxF mf;
     s32 pad; // matching: unused stack slot
 
@@ -840,7 +840,7 @@ s32 func_15133A94(Mtx *mtx, Particle *particle) {
         owner->unique_id != particle->ownerId) {
         return -1;
     }
-    ownerMtxs = (f32 (*)[4][4])owner->unk1D4;
+    ownerMtxs = (MtxF *)owner->unk1D4;
     if (ownerMtxs == NULL) {
         return 0;
     }

@@ -142,8 +142,8 @@ typedef struct GameObj {
     /* 0x1C8 */ u8 lod; // current level of detail
     /* 0x1C9 */ u8 lodRequest; // requested LOD + 1, 0xFF = reset to 0
     /* 0x1CA */ u8 pad1CA[0xA];
-    /* 0x1D4 */ f32 (*bones)[4][4]; // this frame's bone matrices
-    /* 0x1D8 */ f32 (*prevBones)[4][4];
+    /* 0x1D4 */ MtxF *bones; // this frame's bone matrices
+    /* 0x1D8 */ MtxF *prevBones;
     /* 0x1DC */ u8 pad1DC[0x1];
     /* 0x1DD */ u8 unk1DD[3];
     /* 0x1E0 */ u8 unk1E0[3];
@@ -1255,7 +1255,7 @@ void func_1502DF38(s32 index, s32 rootOnly) {
     s32 j;
     s32 maxAlpha;
     s32 alpha;
-    f32 (*bone)[4][4];
+    MtxF *bone;
     f32 scale;
     void *dst;
     s32 parent;
@@ -1776,7 +1776,7 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
 void func_1502F264(s32 index) {
     GameObj *obj;
     GameObj *parent;
-    f32 (*bone)[4][4];
+    MtxF *bone;
     s32 i;
 
     obj = &D_800CC2D0[index];
@@ -1857,7 +1857,7 @@ void func_1502F490(GameObj *platform, f32 *x, f32 *y, f32 *z, s32 tri) {
     f32 v[2][3][3];
     f32 e1[2][3];
     f32 e2[2][3];
-    f32 (*bones)[4][4];
+    MtxF *bones;
     f32 s;
     f32 t;
 

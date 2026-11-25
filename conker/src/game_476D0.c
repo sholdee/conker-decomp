@@ -7,7 +7,7 @@
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
 
 #define VIEWPORTS ((Vp *)D_800BE62C)
-#define VIEW_MATRICES ((f32 (*)[4][4])D_800D9D10)
+#define VIEW_MATRICES ((MtxF *)D_800D9D10)
 
 /* variables.h declares D_800BE638 as s32; it starts the per-layout view widths (D_800BE650 has the heights). */
 #define VIEW_WIDTHS (&D_800BE638)

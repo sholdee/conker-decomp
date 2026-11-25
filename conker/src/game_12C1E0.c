@@ -84,7 +84,7 @@ void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
         if (valid) {
             func_151D3F14(&position, ((u8 *)&arg1)[3], arg2);
             /* byte 2 of an attachment is the owner bone it follows */
-            func_151D4408(&hit, &normal, ((f32 (*)[4][4])obj->unk1D4)[((u8 *)gun)[2]], obj, 1.0f,
+            func_151D4408(&hit, &normal, ((MtxF *)obj->unk1D4)[((u8 *)gun)[2]], obj, 1.0f,
                           ((u8 *)&arg1)[3], arg2);
             func_150FF474(&position, points, ((u8 *)&arg1)[3], arg2);
         }
@@ -160,7 +160,7 @@ void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
 
         if (valid) {
             func_151D3F14(&position, arg1, arg2);
-            func_151D4408(&hit, &normal, ((f32 (*)[4][4])obj->unk1D4)[((u8 *)gun)[2]], obj, 1.0f,
+            func_151D4408(&hit, &normal, ((MtxF *)obj->unk1D4)[((u8 *)gun)[2]], obj, 1.0f,
                           arg1, arg2);
             func_150FF474(&position, points, arg1, arg2);
         }
@@ -420,7 +420,7 @@ void func_150FFBDC(Actor *obj, s32 arg1, Vec3f *out) {
 
     src = &D_800A2130;
     dst = out;
-    func_15145EA4(&src, &dst, ((f32 (*)[4][4])obj->unk1D4)[D_80088BB0], 1);
+    func_15145EA4(&src, &dst, ((MtxF *)obj->unk1D4)[D_80088BB0], 1);
 }
 
 typedef struct {

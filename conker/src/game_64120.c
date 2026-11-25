@@ -46,7 +46,7 @@ typedef struct CamData {
 } CamData;
 
 /* An object's unk1D4 points at its array of 4x4 bone matrices. */
-#define OBJ_BONES(obj) ((f32 (*)[4][4])(obj)->unk1D4)
+#define OBJ_BONES(obj) ((MtxF *)(obj)->unk1D4)
 
 /* Allocates an object's camera-aim state and marks every slot as having no target. */
 void func_15036C70(Actor *obj) {
@@ -1547,7 +1547,7 @@ void func_1503A08C(Actor *obj) {
             if (func_1503D774(obj->id, 0) == 0) {
                 def = (ObjTypeDef *)D_800D1C90[obj->id];
                 bone = (f32 (*)[4])obj->unk1D4;
-                bone = ((f32 (*)[4][4])bone)[def->unk26]; // matching: two steps; one OBJ_BONES() index mismatches
+                bone = ((MtxF *)bone)[def->unk26]; // matching: two steps; one OBJ_BONES() index mismatches
                 scale = obj->y_scale;
                 width = def->unk3A * scale;
                 if (width != 0) {
@@ -1910,7 +1910,7 @@ void func_1503A830(Actor *obj) {
             if (obj->unk278 != -1) { // always true for the u16; matching: removing it changes the code
                 targetBone = (f32 (*)[4])obj->unk1D4;
                 if (targetBone != NULL) {
-                    targetBone = ((f32 (*)[4][4])targetBone)[obj->unk278];
+                    targetBone = ((MtxF *)targetBone)[obj->unk278];
                     D_800C3FE8[0] = targetBone[3][0];
                     D_800C3FE8[1] = targetBone[3][1];
                     D_800C3FE8[2] = targetBone[3][2];

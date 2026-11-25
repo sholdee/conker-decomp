@@ -37,7 +37,7 @@ typedef struct {
     u8 pad3C[0x38];
     u8 unk74;
     u8 pad75[0x15F];
-    f32 (*boneMtx)[4][4];
+    MtxF *boneMtx;
     u8 pad1D8[0x144];
     BeamOwnerAim *aim;
 } BeamOwner;
@@ -289,7 +289,7 @@ s8 func_15101378(Beam *beam) {
     s32 hitType;
     s32 pad; // matching: stack slot needed for the frame size
     BeamData *data;
-    f32 (*bones)[4][4];
+    MtxF *bones;
 
     result = 1;
     owner = beam->data.owner;
