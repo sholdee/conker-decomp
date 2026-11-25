@@ -3,9 +3,9 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151D9014(void *a0, void *a1, s32 a2, f32 a3, s32 sp10, s32 sp14,
-                   f32 sp18, s32 sp1C, f32 sp20, f32 sp24, s32 sp28, s32 sp2C,
-                   s32 sp30, s32 sp34, s32 sp38, s32 sp3C);
+void func_151D9014(f32 *pos, f32 *vel, s32 arg2, f32 arg3, s32 arg4, s32 arg5,
+                   f32 arg6, s32 arg7, f32 arg8, f32 arg9, s32 arg10, s32 arg11,
+                   s32 arg12, s32 arg13, s32 arg14, s32 arg15);
 void func_151B9BF0(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s32 arg4, s32 arg5,
                    s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 arg11,
                    s32 arg12, s32 arg13, s32 arg14, s32 arg15);
@@ -102,12 +102,12 @@ typedef struct {
     /* 0x28 */ f32 unk28;
     /* 0x2C */ u8 unk2C;
     /* 0x2D */ s8 unk2D;
-    /* 0x2E */ u8 unk2E[2];
+    /* 0x2E */ u8 pad2E[2];
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;
     /* 0x38 */ s8 unk38;
     /* 0x39 */ u8 unk39;
-    /* 0x3A */ u8 unk3A[2];
+    /* 0x3A */ u8 pad3A[2];
     /* 0x3C */ f32 unk3C;
     /* 0x40 */ s8 unk40;
     /* 0x41 */ u8 pad41[3];
@@ -257,99 +257,6 @@ void func_150C2290(u8 arg0) {
     params.unk82 = 0x15;
     func_15151A38(&params, arg0, 1);
 }
-// TODO: figure out this struct!
-// void func_150C2290(s32 arg0) {
-//     s16 sp9A;
-//     s16 sp98;
-//     s8 sp95;
-//     s8 sp94;
-//     ?32 sp90;
-//     ?32 sp8C;
-//     ?32 sp88;
-//     ?32 sp84;
-//     ?32 sp80;
-//     ?32 sp7C;
-//     ?32 sp78;
-//     ?32 sp74;
-//     ?32 sp70;
-//     s8 sp6E;
-//     s8 sp6D;
-//     s8 sp6C;
-//     ?32 sp68;
-//     ?32 sp64;
-//     ?32 sp60;
-//     ?32 sp5C;
-//     ?32 sp58;
-//     ?32 sp54;
-//     s8 sp52;
-//     s8 sp51;
-//     s8 sp50;
-//     s16 sp4E;
-//     s16 sp4C;
-//     s16 sp4A;
-//     s16 sp48;
-//     s16 sp46;
-//     s16 sp44;
-//     s16 sp42;
-//     s16 sp40;
-//     s16 sp3E;
-//     s16 sp3C;
-//     f32 sp38;
-//     f32 sp34;
-//     f32 sp30;
-//     f32 sp2C;
-//     f32 sp28;
-//     f32 sp24;
-//     f32 sp20;
-//     f32 sp1C;
-//     f32 sp18;
-//
-//     sp18 = *(void *)0x800A0258;
-//     sp1C = 40.0f;
-//     sp3E = 3;
-//     sp40 = -0x29;
-//     sp44 = -0x16;
-//     sp42 = 0x15;
-//     sp46 = 0x16;
-//     sp48 = 7;
-//     sp4E = 0x15;
-//     sp50 = 0xB;
-//     sp20 = *(void *)0x800A025C;
-//     sp3C = 2;
-//     sp4C = 0x30;
-//     sp52 = 0x28;
-//     sp54 = 1;
-//     sp58 = 4;
-//     sp6C = 0xFF;
-//     sp6D = 0xFF;
-//     sp70 = 3;
-//     sp4A = 0;
-//     sp51 = 1;
-//     sp5C = 0;
-//     sp60 = 0;
-//     sp64 = 0;
-//     sp68 = 0;
-//     sp6E = 0;
-//     sp74 = 0xFF;
-//     sp78 = 0;
-//     sp7C = 0x220005;
-//     sp80 = 0x1D0600;
-//     sp84 = (?32) (u8)1;
-//     sp88 = 0x3B;
-//     sp8C = 0x80;
-//     sp90 = 0x20;
-//     sp94 = 0;
-//     sp95 = 7;
-//     sp98 = 0xC;
-//     sp9A = 0x15;
-//     sp34 = 100.0f;
-//     sp38 = 57.5f;
-//     sp24 = *(void *)0x800A0260;
-//     sp28 = 39.0f;
-//     sp2C = *(void *)0x800A0264;
-//     sp30 = 1.0f;
-//     func_15151A38(&sp18, arg0 & 0xFF, 1);
-// }
 
 typedef struct {
     /* 0x000 */ u8 pad0[0x1C];
@@ -387,7 +294,7 @@ s32 func_150C251C(Particle_EF410 *particle) {
         alpha = 0xFF;
     }
     sub->unk1B = alpha;
-    if (sub->unk1B < 0) {
+    if (sub->unk1B < 0) { // never true for a u8, but the compiled code has this compare
         return 0;
     }
     return 1;
@@ -446,7 +353,7 @@ s32 func_150C2558(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 }
 
 
-s32 func_150C2700(s32 a0, s32 a1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+s32 func_150C2700(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     Struct150C2700 params;
 
     params.unk8.unk0 = x;
@@ -971,7 +878,7 @@ void func_150C3994(struct127 *obj) {
     if (obj->unk83 >= 0xB) {
         obj->unkF8 &= ~0x8000;
     }
-    obj->unk40 = (f32)(obj->unk7A + 0x4000) * 0.005493164f;
+    obj->unk40 = (f32)(obj->unk7A + 0x4000) * 0.005493164f; // 360 / 65536: binary angle to degrees
     func_15059140(obj);
     obj->unkB8 += obj->unk148;
     obj->unk148 *= 0.96f;
@@ -982,8 +889,8 @@ void func_150C3994(struct127 *obj) {
     }
 }
 
-s32 func_150C3D48(s32 arg0) {
-    return arg0 + 0xEDCBA988;
+s32 func_150C3D48(s32 value) {
+    return value + 0xEDCBA988;
 }
 
 void func_150C3D5C(struct127 *obj) {
