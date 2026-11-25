@@ -563,31 +563,6 @@ extern f32 D_80098D90[]; /* sinf: [1]..[4] odd-power polynomial coefficients */
 
 extern const u16 D_8009919C[6];
 
-extern f32 D_80099440; // 0.10000000149011612f
-extern f32 D_80099444;
-extern f32 D_80099448;
-extern f32 D_8009944C;
-extern f32 D_80099468;
-extern f32 D_8009946C;
-extern f32 D_80099470;
-extern f32 D_80099474;
-extern f32 D_80099478;
-extern f32 D_8009947C;
-extern f32 D_80099480;
-extern f32 D_80099484;
-extern f32 D_800994A4;
-extern f32 D_800994A8;
-extern f32 D_800994AC;
-extern f32 D_800994B0;
-extern f32 D_800994B4;
-extern f32 D_800994B8;
-extern f32 D_800994BC;
-extern f32 D_800994D4; // 0.6000000238418579f
-extern f32 D_800994D8; // 10430.3779296875f
-extern f32 D_8009950C;
-extern f32 D_80099510;
-extern f32 D_80099514;
-extern f32 D_80099520;
 extern u8 D_80099A3C[][10]; // turn-angle thresholds per row (D_80099A3E is [0][2])
 extern u8 D_80099A3E;
 extern u8  D_80099A43;
@@ -623,11 +598,6 @@ extern f32 D_8009A0F8;
 extern f32 D_8009A0FC;
 extern f32 D_8009A100;
 // code_75400.c
-extern f32 D_8009A13C; // 1.399999976158142
-extern f32 D_8009A140;
-extern f32 D_8009A144;
-extern f32 D_8009A148;
-extern f32 D_8009A1E4;
 
 extern f32 D_8009A220[];
 extern f32 D_8009A420[];
@@ -659,9 +629,6 @@ extern f32 D_800A0310;
 extern f32 D_800A0314;
 extern Vec3f D_800A1B80;
 extern Vec3f D_800A1B8C;
-extern f32 D_800A1B98;
-extern f32 D_800A1B9C;
-extern f32 D_800A1BA0;
 extern f32 D_800A1FB0;
 extern f32 D_800A1FBC;
 extern f32 D_800A2148;
@@ -669,12 +636,9 @@ extern f32 D_800A2154;
 extern u8  D_800A2CD0[][3];
 
 extern s32 D_800A3F14[];
-extern u8 D_800A3FB4[]; // "power"
-extern u8 D_800A3FBC[]; // "../Effects/Blood/blood.c"
 extern s32 D_800A4AA0; //?
 extern s32 D_800A5168[4]; // object list indices (game_16DC80)
 extern s32 D_800A5178[3]; // effect-object kinds (game_169510)
-extern f32 D_800A45B4;
 extern f32 D_800A5624;
 extern f32 D_800A5628;
 extern f32 D_800A5644;
@@ -691,23 +655,10 @@ extern s32 D_800A5770[];
 
 // in game_18D770.c
 extern s32 D_800A6060[3]; /* { 0x36, 0x4C, 0x5B }: the model effect types */
-extern u8  D_800A6690[5];  // "scale"
-extern u8  D_800A6698[24]; // "../Effects/Light/light.c"
 extern const f32 D_800A66B4[3];  // { 0.0f, -415.0f, 0.0f }
 extern const f32 D_800A66C0[9];  // { 70.0f, 38.0f, 70.0f, 55.0f, 50.0f, 80.0f, 140.0f, 70.0f, 34.0f };
 extern const s32 D_800A66E4[10]; // { 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108 }
 extern const Vec3f D_800A6A0C;
-extern f32 D_800A6AD4;     // 0.005000000353902578f
-extern f32 D_800A6AD8;     // 6.2831854820251465f
-extern f32 D_800A6ADC;     // 0.10209999978542328f
-extern f32 D_800A6AE0;     // 0.24889999628067017f
-extern f32 D_800A6AE4;     // 0.07999999821186066f
-extern f32 D_800A6AE8;     // 6.2831854820251465f
-extern f32 D_800A6AEC;     // 0.07660000026226044f
-extern f32 D_800A6AF0;
-extern f32 D_800A6AF4;
-extern f32 D_800A6AF8;
-extern f32 D_800A6AFC;
 extern const Vec3f D_800A670C[]; // { {128.0f, 59.5f, 59.5f}, {187.0f, 59.5f, 59.5f}, {128.0f, 17.5f, 0.0f} }
 extern const Vec3f D_800A6730[];
 extern const f32 D_800A6754[];
@@ -733,11 +684,6 @@ extern const f32 D_800A6964[14];
 extern const f32 D_800A699C[14];
 extern const f32 D_800A69D4[14];
 
-extern f32 D_800A6B00; // 6.2831854820251465f
-extern f32 D_800A6B04; // 3.1415927410125732f
-extern f32 D_800A6B08;
-extern f32 D_800A6B0C;
-extern f32 D_800A6B10;
 
 extern VtxMorphGroup D_800A7230[2]; // vertex morph groups
 extern Vec3f D_800AAA90; // bone-attachment offset (zero point)
@@ -749,18 +695,6 @@ extern const u8 D_800AB310[13]; // texture id per effect kind
 extern const u8 D_800AB3F4[13]; // particle texture id per effect kind
 extern const u8 D_800AB404[13]; // flag per effect kind
 extern const Color24 D_800AB414[13]; // effect colours (RGB per colour index / effect kind)
-extern f32 D_800AB464;
-extern f32 D_800AB468;
-extern f32 D_800AB46C; // 0.0003000000142492354f
-extern f32 D_800AB4C0;
-extern f32 D_800AB4C4;
-extern f32 D_800AB4C8;
-extern f32 D_800AB4CC;
-extern f32 D_800AB4E4;
-extern f32 D_800AB4E8;
-extern f32 D_800AB4EC;
-extern f32 D_800AB4F0;
-extern f32 D_800AB4F4;
 
 extern Vec3f D_800A5480; // zero vector
 extern f32 D_800A548C[];
