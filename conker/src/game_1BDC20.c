@@ -1,22 +1,24 @@
 #include <ultra64.h>
 #define func_15169260 func_15169260_s32
 #define func_1513D524 func_1513D524_void_proto
+#define func_15169850 func_15169850_s32
 #include "functions.h"
 #undef func_15169260
 #undef func_1513D524
+#undef func_15169850
 #include "variables.h"
 
 void *memcpy(void *, const void *, u32);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-void func_15169260(void *, s32, s32, u8);
+void func_15169260(s32 *types, s32 count, struct ActorRef *ref, u8 msg);
+void func_15169850(struct ActorRef *ref, u8 msg, struct127 **actor, u8 *actorId, struct102 *self);
 extern void func_151D5D60();
 extern void func_1513F680();
 extern void func_15143134(void *, void *, void *);
 extern void *func_1513D524(void *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern void func_15191B8C(s32, u8);
 extern u8 func_151D8E20(void);
 
 typedef struct {
@@ -111,7 +113,7 @@ typedef struct {
 extern DropKind D_800A9D40[];
 
 /* Actor reference sent with object messages (func_15191B8C). */
-typedef struct {
+typedef struct ActorRef {
     struct127 *actor;
     u8 id;
 } ActorRef;
@@ -162,6 +164,8 @@ typedef struct {
     /* 0x30 */ DripSlot slotStorage[DRIP_SLOT_COUNT];
 } DripEmitter; /* size 0x300 */
 
+void func_15191B8C(ActorRef *ref, u8 msg);
+
 /* Destroys the emitter already on link->actor, then creates one with extraSize bytes of extra data. */
 DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
     DripEmitter *emitter;
@@ -169,7 +173,7 @@ DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
 
     ref.actor = link->actor;
     ref.id = link->actor->unique_id;
-    func_15191B8C((s32)&ref, 0xE);
+    func_15191B8C(&ref, 0xE);
     emitter = func_15167A68(0x20, list, extraSize + sizeof(DripEmitter), 1, owner, 1);
     if (emitter == NULL) {
         return NULL;
@@ -724,104 +728,73 @@ void func_151918BC(DripRetryTask *task) {
     }
 }
 
-void func_15191980(struct102 *arg0, s32 arg1, u8 arg2)
-{
-  s32 *arg1p;
-
-  arg1p = (s32 *) &arg1;
-  if (arg2 == 0xD)
-  {
-    if ((*((s32 *) (((u8 *) arg0) + 0x10)) == *((s32 *) arg1)) || ((*((u8 *) (((u8 *) arg0) + 0x14))) == *((u8 *) ((*arg1p) + 4))))
-    {
-      u8 *base;
-      u8 old;
-      u8 *flagsPtr;
-
-      old = *((u8 *) (((u8 *) arg0) + 0x18));
-      flagsPtr = (u8 *) (((u8 *) arg0) + 0x18);
-      base = (u8 *) arg0;
-      *flagsPtr = *((u8 *) (((u8 *) arg0) + 0x18)) | 1;
-      *((s16 *) (base + 0x16)) = 0x64;
-      ;
+/* Message handler of the emitter: 0xD starts its timer, 0xC / 0xE / 0x50 / 0x4E destroy it. */
+/* Message handler of the emitter: 0xD starts its timer, 0xC / 0xE / 0x50 / 0x4E destroy it. */
+void func_15191980(DripEmitter *emitter, ActorRef *ref, u8 msg) {
+    if (msg == 0xD) {
+        // matching: each test is its own if so IDO reloads ref for the second one (|| loads it once)
+        if (ref->actor == emitter->link.actor) {
+            goto hit2;
+        }
+        if (ref->id != emitter->link.actorId) {
+            goto skip;
+        }
+    hit2:
+        emitter->link.flags |= 1;
+        emitter->link.timer = 100;
+    skip:;
+    } else if (msg == 0xC || msg == 0x50 || msg == 0xE) {
+        if (ref->actor == emitter->link.actor) {
+            goto hit;
+        }
+        if (ref->id == emitter->link.actorId) {
+        hit:
+            func_1516972C((struct102 *)emitter);
+        }
+    } else if (msg == 0x4E) {
+        func_1516972C((struct102 *)emitter);
+    } else {
+        func_15169850(ref, msg, &emitter->link.actor, &emitter->link.actorId, (struct102 *)emitter);
     }
-  }
-  else
-    if (((arg2 == 0xC) || (arg2 == 0x50)) || (arg2 == 0xE))
-  {
-    if ((*((s32 *) (((u8 *) arg0) + 0x10)) == *((s32 *) arg1)) || ((*((u8 *) (((u8 *) arg0) + 0x14))) == *((u8 *) ((*arg1p) + 4))))
-    {
-      func_1516972C(arg0);
-    }
-  }
-  else
-    if (arg2 == 0x4E)
-  {
-    func_1516972C(arg0);
-  }
-  else
-  {
-    func_15169850(arg1, arg2, (s32) arg0 + 0x10, (s32) arg0 + 0x14, (s32) arg0);
-  }
 }
 
-struct Struct1518F49C {
-    s32 unk0;
-    u8 unk4;
-};
+/* Message handler of the retry task, as func_15191980. */
+void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
+    ActorLink *link;
 
-void func_1516972C(struct102 *arg0);
-void func_15169850(s32, u8, s32, s32, s32);
-void func_15191A84(struct102 *arg0, s32 arg1, u8 arg2)
-{
-  s32 *arg1p;
-  struct Struct1518F49C *p;
-  u8 *base;
-  u8 old;
-  u8 *flagsPtr;
-  p = (struct Struct1518F49C *) (((u8 *) arg0) + 0x28);
-  arg1p = (s32 *) (&arg1);
-  if (((arg2 == 0xC) || (arg2 == 0xE)) || (arg2 == 0x50))
-  {
-    if ((((struct Struct1518F49C *) arg1)->unk0 == p->unk0) || ((*((u8 *) ((*arg1p) + 4))) == p->unk4))
-    {
-      func_1516972C(arg0);
+    link = &task->link;
+    if (msg == 0xC || msg == 0xE || msg == 0x50) {
+        // matching: separate ifs, as in func_15191980
+        if (ref->actor == link->actor) {
+            goto hit;
+        }
+        if (ref->id == link->actorId) {
+        hit:
+            func_1516972C((struct102 *)task);
+        }
+    } else if (msg == 0x4E) {
+        func_1516972C((struct102 *)task);
+    } else if (msg == 0xD) {
+        if (ref->actor == link->actor) {
+            goto hit2;
+        }
+        if (ref->id != link->actorId) {
+            goto skip;
+        }
+    hit2:
+        task->header.flags |= 1;
+        task->header.timer = 100;
+    skip:;
+    } else {
+        func_15169850(ref, msg, &link->actor, &link->actorId, (struct102 *)task);
     }
-  }
-  else
-    if (arg2 == 0x4E)
-  {
-    func_1516972C(arg0);
-  }
-  else
-    if (arg2 == 0xD)
-  {
-    if ((((struct Struct1518F49C *) arg1)->unk0 == p->unk0) || ((*((u8 *) ((*((s32 *) (&arg1))) + 4))) == p->unk4))
-    {
-      old = *((u8 *) (((u8 *) arg0) + 0xD));
-      flagsPtr = (u8 *) (((u8 *) arg0) + 0xD);
-      base = (u8 *) arg0;
-      *flagsPtr = (*((u8 *) (((u8 *) arg0) + 0xD))) | 1;
-      *((s16 *) (base + 0xE)) = 0x64;
-      dummy_label_15191A84_1:
-      ;
-
-      ;
-      ;
-    }
-  }
-  else
-  {
-    func_15169850(arg1, arg2, (s32) p, (s32) (&p->unk4), (s32) arg0);
-  }
 }
 
 
-extern s32 D_800A8010;
+/* Sends msg about ref's actor through func_151494E0 and to every object of type 0x20. */
+void func_15191B8C(ActorRef *ref, u8 msg) {
+    s32 types[1] = { 0x20 };
 
-void func_15191B8C(s32 arg0, u8 arg1) {
-    s32 sp1C;
-
-    sp1C = D_800A8010;
-    func_151494E0(arg0, arg1);
-    func_15169260(&sp1C, 1, arg0, arg1);
+    func_151494E0((s32)ref, msg);
+    func_15169260(types, 1, ref, msg);
 }
