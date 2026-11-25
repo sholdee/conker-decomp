@@ -1,4 +1,6 @@
 #include "n_synthInternals.h"
+#include <ultra64.h>
+#include "structs.h"
 
 /* Round a sample count up to a whole number of FIXED_SAMPLE frames. */
 #define ROUND_UP_FRAME(n) ((((n) + FIXED_SAMPLE - 1) / FIXED_SAMPLE) * FIXED_SAMPLE)
@@ -241,18 +243,6 @@ s32 n_alEnvmixerParam(N_PVoice *filter, s32 paramID, void *param) {
     }
     return 0;
 }
-
-/*
- * Shadow of ALWaveTable: Rare uses the two bytes the union's alignment leaves
- * free after base/len/type/flags as a "wave is in use" marker.
- */
-typedef struct {
-    /* 0x00 */ u8 *base;
-    /* 0x04 */ s32 len;
-    /* 0x08 */ u8 type;
-    /* 0x09 */ u8 flags;
-    /* 0x0A */ u8 inUse;
-} WaveTable;
 
 Acmd *func_10022040(N_PVoice *voice, s16 *outp, s32 arg2, Acmd *p);
 s16 _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel);

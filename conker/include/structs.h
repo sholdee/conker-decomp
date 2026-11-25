@@ -27,13 +27,15 @@ union ActorMsg;
   uw -> unsigned word (u16)
 */
 
-/* ALWaveTable as Conker's bank loader (func_10012CFC) sees it: the ADPCM wave info, then a word it clears. */
+/* ALWaveTable as Conker's bank loader (func_10012CFC) and _pullSubFrame (func_10020ABC) see it: the ADPCM
+ * wave info, then a word the loader clears. */
 typedef struct WaveTable {
     /* 0x00 */ u8 *base;
     /* 0x04 */ s32 len;
     /* 0x08 */ u8 type;    // AL_ADPCM_WAVE / AL_RAW16_WAVE
     /* 0x09 */ u8 flags;   // 1 once relocated
-    /* 0x0A */ u8 padA[0x2];
+    /* 0x0A */ u8 inUse;   // Rare's "wave is in use" marker, in the byte ALWaveTable's union alignment leaves free
+    /* 0x0B */ u8 padB;
     /* 0x0C */ void *loop; // ALADPCMloop or ALRawLoop
     /* 0x10 */ ALADPCMBook *book;
     /* 0x14 */ s32 unk14;
