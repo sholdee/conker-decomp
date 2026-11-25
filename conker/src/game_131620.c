@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-// Screen-flash effect spawned between two objects (see func_15104170 callers in game_1C1150.c).
+// Screen fade-to-black effect spawned for a pair of objects (caller: game_1C1150.c).
 typedef struct {
     u8         pad0[0x10];
     struct127 *owner;  // 0x10
@@ -12,13 +12,13 @@ typedef struct {
     u8         state;  // 0x1A
     u8         alpha;  // 0x1B
     u8         mode;   // 0x1C: 0 = trigger on owner's animation frame, 1 = trigger after timer
-} FlashEffect;
+} FadeEffect;
 
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
-/* Spawns a flash effect for owner/source; mode picks how it triggers. */
+/* Spawns a fade effect for owner/source; mode picks how it triggers. */
 void func_15104170(s32 mode, struct127 *owner, struct127 *source) {
-    FlashEffect *effect;
+    FadeEffect *effect;
 
     effect = func_15167A68(100, 0, 0x20, 0, 0xFF, 1);
     if (effect != NULL) {
@@ -36,8 +36,8 @@ void func_1000E2F4(s32 arg0);
 void func_151254F4(struct108 *camera, s32 arg1);
 void func_151D66F0(s32 arg0, s32 arg1);
 
-/* Flash effect update: wait for trigger, fade in, hold, fade out and free. */
-void func_151041E4(FlashEffect *effect) {
+/* Fade effect update: wait for the trigger, fade in, hold for 180 frames, fade out and free itself. */
+void func_151041E4(FadeEffect *effect) {
     s32 triggered;
     s32 mode;
     struct197 *anim;
@@ -124,22 +124,23 @@ void func_151041E4(FlashEffect *effect) {
     }
 }
 
-s32 func_1517F08C(s32, s32, s32, s32, s32, s32);
+Gfx *func_1517F08C(Gfx *gfx, s32 alpha, s32 r, s32 g, s32 b, s32 view);
 
-s32 func_1510448C(s32 arg0, s32 arg1, s32 arg2) {
-    s32 *p1 = &arg1;
-    s32 *p2 = &arg2;
-    s32 v0;
-    if ((s16)*p2 != 0 || (v0 = *(u8 *)(*p1 + 0x1B)) == 0) {
-        return arg0;
+/* Fade effect draw hook: dims view 0 to black in proportion to the effect's alpha. */
+Gfx *func_1510448C(Gfx *gfx, FadeEffect *effect, s16 view) {
+    FadeEffect *fade = effect; // matching: the param copy makes IDO home effect to its stack slot
+
+    if (view != 0 || fade->alpha == 0) {
+        return gfx;
     }
-    return func_1517F08C(arg0, ((v0 * 0x3F) >> 8), 0, 0, 0, *((s16 *)&arg2 + 1));
+    return func_1517F08C(gfx, (fade->alpha * 63) >> 8, 0, 0, 0, view);
 }
 
 extern struct126 *D_800CC5EC;
 
+/* Returns D_800CC5EC->matrix_physics, or 0 when D_800CC5EC is unset. */
 u8 func_151044F4(void) {
-    if (D_800CC5EC != 0) {
+    if (D_800CC5EC != NULL) {
         return D_800CC5EC->matrix_physics;
     }
     return 0;
