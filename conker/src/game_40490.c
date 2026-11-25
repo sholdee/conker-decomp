@@ -304,7 +304,7 @@ typedef struct Game40490BeamPacket {
 
 /** Spawns a beam effect of twice the object's sizeY, pointing along its rotation. */
 s32 func_15013778(TriggerZone *obj) {
-    struct260 *effect;
+    TimedEffect *effect;
     Game40490BeamPacket packet;
     MtxF matrix;
 
@@ -356,7 +356,7 @@ s32 func_1501396C(TriggerZone *obj) {
 s32 func_150139AC(TriggerZone *obj, s32 index) {
     Struct150139ACLocal data;
     Struct150139ACEntry *entry;
-    struct260 *effect;
+    TimedEffect *effect;
 
     index = obj->unk18;
     obj->flags |= 4;
@@ -574,7 +574,7 @@ s32 func_15014094(TriggerZone *obj) {
         s8 unk2C;
         u8 pad2D[7];
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     obj->flags |= 4;
     data.unk0 = obj;
@@ -617,7 +617,7 @@ s32 func_15014220(TriggerZone *obj) {
         TriggerZone *unk4;
         u8 unk8;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     obj->flags |= 4;
     data.unk8 = 1;
@@ -653,7 +653,7 @@ s32 func_150142EC(TriggerZone *obj) {
         f32 unk10;
         f32 unk14;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
     f32 a;
     f32 b;
     f32 c;
@@ -765,7 +765,7 @@ typedef struct Game40490PlanePacket {
 /** Spawns an effect over the object's rotated rectangle (sizeX by sizeZ, sizeY high). */
 s32 func_1501474C(TriggerZone *obj) {
     Game40490PlanePacket packet;
-    struct260 *effect;
+    TimedEffect *effect;
     Game40490PlanePoint corners[4];
     f32 s;
     f32 c;
@@ -810,7 +810,7 @@ s32 func_1501474C(TriggerZone *obj) {
     return 1;
 }
 extern u8 D_800A0938[][3];
-struct102 *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+EffectHeader *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 typedef struct Game4049014B60Packet {
     f32 pos[3];
@@ -818,7 +818,7 @@ typedef struct Game4049014B60Packet {
     f32 unk18;
     f32 unk1C;
     f32 unk20;
-    struct102 *effects[6];
+    EffectHeader *effects[6];
     f32 unk3C;
     void *owner;
     u8 active;
@@ -829,7 +829,7 @@ typedef struct Game4049014B60Packet {
 s32 func_15014B60(TriggerZone *obj) {
     Game4049014B60Packet packet;
     s32 i;
-    struct260 *effect;
+    TimedEffect *effect;
     Vec3i pos;
     LightEffectHeader header;
     u32 count;
@@ -889,7 +889,7 @@ s32 func_15014F6C(TriggerZone *obj) {
         u8 unk50;
         u8 unk51;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
     s32 flag;
 
     obj->flags |= 4;
@@ -936,7 +936,7 @@ s32 func_15015104(TriggerZone *obj) {
         u8 padD[3];
         s32 unk10;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
     s32 bit1;
     s32 bit2;
     u32 value;
@@ -978,7 +978,7 @@ s32 func_150151D4(TriggerZone *obj) {
         s32 unk40;
         s32 unk44;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     obj->flags |= 4;
     obj->disabled = 1;
@@ -1036,7 +1036,7 @@ void func_15015354(TriggerZone *obj) {
         s32 unk6C;
         s32 unk70;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
     f32 z;
     f32 y;
     f32 x;
@@ -1106,7 +1106,7 @@ s32 func_15015644(TriggerZone *obj) {
         s32 unk8;
         s8 unkC;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     obj->flags |= 4;
     obj->disabled = 1;

@@ -64,13 +64,13 @@ void func_150C0A48(Emitter *emitter);
 /* Emitter destructors: free the live particles, then the emitter. */
 void func_150C09F0(Emitter *emitter) {
     func_150C0A48(emitter);
-    func_15169804((struct102 *)emitter);
+    func_15169804((EffectHeader *)emitter);
 }
 
 
 void func_150C0A1C(Emitter *emitter) {
     func_150C0A48(emitter);
-    func_15169824((struct102 *)emitter);
+    func_15169824((EffectHeader *)emitter);
 }
 
 /* Frees every live particle of the emitter. */
@@ -78,7 +78,7 @@ void func_150C0A48(Emitter *emitter) {
     s16 i;
 
     for (i = emitter->activeHead; i != -1; i = emitter->slots[i].next) {
-        func_1516972C((struct102 *)emitter->slots[i].particle);
+        func_1516972C((EffectHeader *)emitter->slots[i].particle);
     }
 }
 
@@ -247,7 +247,7 @@ void func_150C0C38(Emitter *emitter) {
         }
     }
     if (kill) {
-        func_1516972C((struct102 *)emitter);
+        func_1516972C((EffectHeader *)emitter);
     }
 }
 

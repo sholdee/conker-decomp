@@ -1068,7 +1068,7 @@ typedef struct {
 
 /* Spawns a spark emitter task that follows `actor`. */
 void func_151AB930(Actor *actor) {
-    struct260 *task;
+    TimedEffect *task;
     EmitterPayload payload;
 
     payload.actor = actor;
@@ -1157,7 +1157,7 @@ void func_151ABD54(EmitterTask *task, ActorMsg *msg, u8 msgId) {
 
     if (msgId == 0) {
         if ((msg->ref.actor == payload->actor) || (msg->ref.uniqueId == payload->actorId)) {
-            func_1516972C((struct102 *)task);
+            func_1516972C((EffectHeader *)task);
         }
     } else if (msgId == 0x2D) {
         if (payload->actor == msg->swap.actorA) {

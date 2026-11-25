@@ -775,7 +775,7 @@ void func_151A4A38(BoneEmitterTask *task) {
     if ((emitter->owner->interaction_state == 0) || (emitter->owner->interaction_state == 8)
         || (emitter->owner->unique_id != emitter->ownerId)) {
         task->header.state = -1;
-        task->header.unkD |= 1;
+        task->header.flags |= 1;
         return;
     }
 
@@ -870,7 +870,7 @@ void func_151A4D88(BoneEmitterTask *task, ActorMsg *msg, u8 type) {
 
     if (type == 0) {
         if ((msg->ref.actor == emitter->owner) || (msg->ref.uniqueId == emitter->ownerId)) {
-            func_1516972C((struct102 *)task);
+            func_1516972C((EffectHeader *)task);
         }
     } else if (type == 0x2D) {
         if (emitter->owner == msg->swap.actorA) {
@@ -933,7 +933,7 @@ void func_151A4ECC(TrailRetryTask *task) {
     }
     if (done) {
         task->header.state = -1;
-        task->header.unkD |= 1;
+        task->header.flags |= 1;
     }
 }
 
@@ -943,7 +943,7 @@ void func_151A4F7C(TrailRetryTask *task, ActorMsg *msg, u8 type) {
 
     if (type == 0) {
         if (msg->ref.actor == trail->owner || msg->ref.uniqueId == trail->ownerId) {
-            func_1516972C((struct102 *)task);
+            func_1516972C((EffectHeader *)task);
         }
     }
 }

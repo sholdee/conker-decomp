@@ -243,7 +243,7 @@ void func_1515B5F4(s16 player) {
 void func_1515B62C(SlidingSprite *sprite, s16 *payload, u8 type) {
     if (type == MSG_REMOVE_PLAYER_SPRITES) {
         if (sprite->data.player == payload[0]) {
-            func_1516972C((struct102 *)sprite);
+            func_1516972C((EffectHeader *)sprite);
         }
     }
 }

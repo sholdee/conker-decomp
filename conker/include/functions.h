@@ -714,7 +714,7 @@ void func_150FCA00(Camera *arg0);
 void func_15100330(s32 arg0);
 void func_15103800(void);
 void func_15103828(void);
-void func_1510550C(struct102 *arg0, s32 arg1, u8 arg2);
+void func_1510550C(EffectHeader *arg0, s32 arg1, u8 arg2);
 typedef struct BoltArcObj BoltArcObj; /* game_131F30.c */
 typedef struct SparkObj SparkObj;     /* game_131F30.c */
 void func_15105548(BoltArcObj *obj, s32 *arg1, u8 msg);
@@ -740,7 +740,8 @@ void func_15128680(Camera *arg0);
 void func_1512868C(Camera *arg0);
 void func_15128774(Camera *arg0, Actor *arg1);
 void func_1512D380(s32 arg0);
-s32  func_1513416C(struct102 *arg0);
+struct DefParticleHead;
+s32  func_1513416C(struct DefParticleHead *particle);
 
 struct QuadSprite *func_1513C4EC(void *def, void *colors, u8 arg2, u8 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF);
 struct QuadSprite *func_1513C5B0(void *arg0, void *arg1, u8 arg2, u8 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, u8 argC, s32 argD);
@@ -790,15 +791,15 @@ f32  func_15145A0C(f32 arg0, f32 arg1, f32 arg2);
 void func_15145A50(Actor *arg0);
 void func_15146508(Actor *arg0, Actor *arg1);
 void func_151467A4(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 *arg7);
-struct260 *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags, u8 callbackSet, s32 dataSize, u8 arg7, s32 arg8);
-struct260 *func_151491F4(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
-void func_15149318(struct260 *arg0);
-void func_1514933C(struct260 *arg0);
-void func_15149368(struct260 *arg0);
-void func_15149394(struct260 *arg0);
-void func_151493E4(struct260 *arg0);
-void func_15149434(struct260 *arg0, s32 arg1, u8 arg2);
-s32  func_15149490(s32 arg0, struct260 *arg1, s16 arg2);
+TimedEffect *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags, u8 callbackSet, s32 dataSize, u8 owner, s32 list);
+TimedEffect *func_151491F4(s16 timer, s8 expireCallback, s8 tickCallback, u8 flags, u8 callbackSet, s32 dataSize, u8 owner, s32 list);
+void func_15149318(TimedEffect *arg0);
+void func_1514933C(TimedEffect *arg0);
+void func_15149368(TimedEffect *arg0);
+void func_15149394(TimedEffect *arg0);
+void func_151493E4(TimedEffect *arg0);
+void func_15149434(TimedEffect *arg0, s32 arg1, u8 arg2);
+s32  func_15149490(s32 arg0, TimedEffect *arg1, s16 arg2);
 void func_151494E0(s32 arg0, u8 arg1);
 void func_15149514(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj);
 /* Actor attachment lists (Actor.attachments, game_179F30): `handle` is the attached effect or object. */
@@ -807,10 +808,10 @@ s32  func_1514ECE0(Attachment *list, s16 type, Attachment **out);
 s32  func_1514ED3C(Attachment *list, void *handle, Attachment **out);
 void func_1514EDF0(void *handle, Actor *owner);
 void func_15165F70(void);
-void func_1516972C(struct102 *arg0);
-void func_1516979C(struct102 *arg0);
-void func_15169804(struct102 *arg0);
-void func_15169824(struct102 *arg0);
+void func_1516972C(EffectHeader *arg0);
+void func_1516979C(EffectHeader *arg0);
+void func_15169804(EffectHeader *arg0);
+void func_15169824(EffectHeader *arg0);
 void func_1519EF70(Actor *arg0, s32 arg1, s32 arg2);
 
 void func_151DB004(struct ParticleDesc *desc);
@@ -1123,5 +1124,5 @@ void func_151EF954(MtxF arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, 
 s32 func_151F3C4C(s32 arg0, void *dst, s32 len, s32 offset);
 void func_151FA130(void);
 void func_1019EA88(void);
-void func_15168B10(s32 arg0, s32 arg1);
+void func_15168B10(EffectHeader *obj, s32 type);
 #endif

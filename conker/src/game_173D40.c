@@ -25,7 +25,7 @@ extern u8 (*D_8008FD1C)(void);
 extern u8 (*D_8008FD30)(void);
 void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3);
 void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
-struct260 *func_15130374(void *, u8, s32, u8, s32);
+TimedEffect *func_15130374(void *, u8, s32, u8, s32);
 
 /* Get the position of one of the actor's bones (0x13 for side 1, 0x17 for side 2; any other side
    fails with 0).  With a `hit` buffer, also look for the ground below that point and return
@@ -224,7 +224,7 @@ void func_15147040(s32 actor, s32 side, s32 strength) {
 s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw,
                   s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     ParticleDesc desc;
-    struct260 *particle;
+    TimedEffect *particle;
     f32 extra;
     f32 speed;
     u32 random;

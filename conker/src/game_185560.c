@@ -86,7 +86,7 @@ void func_15158224(EffectActor *actor) {
         }
     }
     if (expired) {
-        func_1516972C((struct102 *)actor);
+        func_1516972C((EffectHeader *)actor);
     }
 }
 
@@ -246,12 +246,12 @@ void func_15158A20(EffectActor *actor) {
 
 void func_15158AA4(EffectActor *actor) {
     func_15158A20(actor);
-    func_15169804((struct102 *)actor);
+    func_15169804((EffectHeader *)actor);
 }
 
 void func_15158AD0(EffectActor *actor) {
     func_15158A20(actor);
-    func_15169824((struct102 *)actor);
+    func_15169824((EffectHeader *)actor);
 }
 
 /* Update callback: once the lifetime drops below data.fade.duration, fades alpha out with it. */
@@ -349,7 +349,7 @@ CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
     watcher->unk10 = 1;
     watcher->unk14 = 0;
     if (func_15159370(chr, &watcher->mode) == 0) {
-        func_1516979C((struct102 *)watcher);
+        func_1516979C((EffectHeader *)watcher);
         return NULL;
     }
     watcher->unk50 = 0;
@@ -358,12 +358,12 @@ CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
 
 void func_15158CD4(CharacterWatcher *watcher) {
     func_1514EDF0(watcher, watcher->character);
-    func_15169804((struct102 *)watcher);
+    func_15169804((EffectHeader *)watcher);
 }
 
 void func_15158D00(CharacterWatcher *watcher) {
     func_1514EDF0(watcher, watcher->character);
-    func_15169824((struct102 *)watcher);
+    func_15169824((EffectHeader *)watcher);
 }
 
 s32 func_15159084(Actor *chr, u8 mode);

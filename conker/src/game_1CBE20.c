@@ -60,7 +60,7 @@ void func_1519EA04(EvTimer *timer) {
                 EvTimerOwner *owner = timer->owner;
                 owner->timer = NULL;
             }
-            func_1516972C((struct102 *)timer);
+            func_1516972C((EffectHeader *)timer);
         }
     }
 }

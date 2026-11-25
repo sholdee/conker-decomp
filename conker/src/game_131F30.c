@@ -261,7 +261,7 @@ void func_151050B0(BoltArcObj *obj) {
 }
 
 /* Message handler: on 0x4B, calls func_1516972C on the object. */
-void func_1510550C(struct102 *obj, s32 arg1, u8 msg) {
+void func_1510550C(EffectHeader *obj, s32 arg1, u8 msg) {
     if (msg == 0x4B) {
         func_1516972C(obj);
     }

@@ -120,7 +120,7 @@ void func_151B3184(HoltenRopeEffect *effect) {
         }
     }
     if (finished) {
-        func_1516972C((struct102 *)effect);
+        func_1516972C((EffectHeader *)effect);
     }
 }
 
@@ -801,10 +801,10 @@ void func_151B4C1C(HoltenRopeEffect *effect) {
 
 void func_151B4C6C(HoltenRopeEffect *effect) {
     func_151B4C1C(effect);
-    func_15169824((struct102 *)effect);
+    func_15169824((EffectHeader *)effect);
 }
 
 void func_151B4C98(HoltenRopeEffect *effect) {
     func_151B4C1C(effect);
-    func_15169824((struct102 *)effect);
+    func_15169824((EffectHeader *)effect);
 }

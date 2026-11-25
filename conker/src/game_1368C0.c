@@ -4,7 +4,7 @@
 #include "effects.h"
 
 /*
- * Object-attached particle emitters: effects 0x1A, 0x1B and 0x1C (struct260s with their own data
+ * Object-attached particle emitters: effects 0x1A, 0x1B and 0x1C (TimedEffects with their own data
  * at 0x28), the per-frame updates that emit their particles, and their spawn callbacks.
  */
 
@@ -91,7 +91,7 @@ extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f
  * Creates effect 0x1A on `object`, lasting `duration` frames (negative: 300), emitting
  * particles at `spawnRate` through D_80088C64[emitFunc]. `extraSize` more data bytes are reserved.
  */
-struct260 *func_15109410(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
+TimedEffect *func_15109410(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
                          u8 owner, s32 kind) {
     Effect1368C0 *effect;
     ObjectEmitterData data;
@@ -122,7 +122,7 @@ struct260 *func_15109410(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, 
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
-    return (struct260 *)effect;
+    return (TimedEffect *)effect;
 }
 
 /*
@@ -354,7 +354,7 @@ void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
  * Creates effect 0x1B for `arg0`, lasting `duration` frames (negative: 300), emitting particles at
  * `spawnRate` through D_80088C64[emitFunc]. `extraSize` more data bytes are reserved.
  */
-struct260 *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
+TimedEffect *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
                          u8 owner, s32 kind) {
     Effect1368C0 *effect;
     MatrixEmitterData data;
@@ -384,7 +384,7 @@ struct260 *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f32
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
-    return (struct260 *)effect;
+    return (TimedEffect *)effect;
 }
 
 /*
@@ -445,7 +445,7 @@ void func_15109FB8(Effect1368C0 *effect) {
 }
 
 /* Creates effect 0x1C on `object`, lasting `duration` frames. */
-struct260 *func_1510A344(Actor *object, s32 duration, u8 owner, s32 kind) {
+TimedEffect *func_1510A344(Actor *object, s32 duration, u8 owner, s32 kind) {
     Effect1368C0 *effect;
     PairEmitterData data;
 
@@ -463,7 +463,7 @@ struct260 *func_1510A344(Actor *object, s32 duration, u8 owner, s32 kind) {
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
-    return (struct260 *)effect;
+    return (TimedEffect *)effect;
 }
 
 /*

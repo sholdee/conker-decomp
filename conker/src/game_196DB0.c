@@ -82,7 +82,7 @@ void func_15169988(Game196DB0Sprite *sprite) {
     if (lifetime != 0) {
         lifetime -= D_800BE9E4;
         if (lifetime <= 0) {
-            func_1516972C((struct102 *)sprite);
+            func_1516972C((EffectHeader *)sprite);
             return;
         }
         sprite->params.lifetime = lifetime;

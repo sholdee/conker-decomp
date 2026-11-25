@@ -229,7 +229,7 @@ void func_151303EC(Particle *p) {
         if (p->desc.deathFunc != -1) {
             D_80089800[p->desc.deathFunc](p);
         }
-        func_1516972C((struct102 *)p);
+        func_1516972C((EffectHeader *)p);
     }
 }
 
@@ -531,11 +531,11 @@ s32 func_1513170C(Particle *p, Vec3f *prevPos) {
 }
 
 void func_1513173C(Particle *p) {
-    func_15169804((struct102 *)p);
+    func_15169804((EffectHeader *)p);
 }
 
 void func_1513175C(Particle *p) {
-    func_15169824((struct102 *)p);
+    func_15169824((EffectHeader *)p);
 }
 
 extern void (*D_80089814[])(Particle *);

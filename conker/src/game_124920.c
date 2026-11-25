@@ -892,17 +892,17 @@ void func_150F9720(u8 index) {
     func_151494E0((s32)&msg, 0x42);
 }
 
-void func_150F9788(struct260 *arg0) {
+void func_150F9788(TimedEffect *arg0) {
 }
 
-void func_150F9788(struct260 *);
+void func_150F9788(TimedEffect *);
 
-void func_150F9794(struct260 *arg0) {
+void func_150F9794(TimedEffect *arg0) {
     func_150F9788(arg0);
     func_1514933C(arg0);
 }
 
-void func_150F97C0(struct260 *arg0) {
+void func_150F97C0(TimedEffect *arg0) {
     func_150F9788(arg0);
     func_15149368(arg0);
 }

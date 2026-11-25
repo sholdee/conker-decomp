@@ -180,7 +180,7 @@ void func_150E3514(HomingEffect *effect) {
         func_10010F88(0x2D7, 0x5DC0, 0, 0, 0, effect->origin.x, effect->origin.y, effect->origin.z, 0x3E8, 0x1770);
     }
 
-    func_1516972C((struct102 *)effect);
+    func_1516972C((EffectHeader *)effect);
 }
 
 /* Destroys the effect with the given handle, or every effect for handle 0. */

@@ -84,7 +84,7 @@ void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32
         effect->mode = mode;
         if (effect->mode != 0) {
             if (owner == NULL) {
-                func_1516979C((struct102 *)effect);
+                func_1516979C((EffectHeader *)effect);
                 return;
             }
             effect->onTime = onTime;
@@ -172,7 +172,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
     dist = 0.0f;
     effect->lifetime -= D_800BE9E4;
     if (effect->lifetime < 0 || (effect->owner != NULL && effect->ownerTag != -1 && effect->owner->unk84.uh != effect->ownerTag)) {
-        func_1516972C((struct102 *)effect);
+        func_1516972C((EffectHeader *)effect);
         return;
     }
     if (effect->mode != 0) {
@@ -263,7 +263,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
                     func_150E1AB0(0, effect->x, effect->y, effect->z, effect->target_x, effect->target_y, effect->target_z, speed, stopDist, 15.0f, 820.0f, 75, texture, 0, 0, 0, effect->owner, 0, 0, 0, impact, effect->unkFE, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                 }
             } else {
-                func_1516972C((struct102 *)effect);
+                func_1516972C((EffectHeader *)effect);
                 return;
             }
         }
@@ -317,7 +317,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
                 if (effect->impactEffect != 0) {
                     func_150E4550(effect->target_x, effect->target_y, effect->target_z, 1, effect->impactEffect, 0, 0xFF);
                 }
-                func_1516972C((struct102 *)effect);
+                func_1516972C((EffectHeader *)effect);
                 return;
             }
             if (len < effect->length) {

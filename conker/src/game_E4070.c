@@ -127,7 +127,7 @@ void func_150B6BC0(s32 unused) {
 }
 
 // matching: defined in-file so as1 shares one lui across the unrolled stores in func_150B6C90
-static struct102 *D_800D9898[10];
+static EffectHeader *D_800D9898[10];
 struct Obj151A4FD0 *func_151A4FD0(s32 a0, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 a6, s32 a7);
 
 /* Recreates the func_151A4FD0 effect and clears every sprite slot (without freeing the sprites). */
@@ -137,7 +137,7 @@ void func_150B6C90(void) {
     if (D_800D9894 != NULL) {
         func_1516972C(D_800D9894);
     }
-    D_800D9894 = (struct102 *)func_151A4FD0(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
+    D_800D9894 = (EffectHeader *)func_151A4FD0(0, 0, 0xFF, 0, 0, D_800BE9E8, 0, 0);
     D_800D9890 = 3;
     for (i = 0; i < 10; i++) {
         D_800D9898[i] = NULL;
@@ -368,7 +368,7 @@ extern u8 D_800918DC;
 extern u8 D_800918E8;
 extern u8 D_800918F4;
 extern u8 D_80091900;
-struct102 *func_15169968(SpriteDesc *desc);
+EffectHeader *func_15169968(SpriteDesc *desc);
 
 /* Replaces sprite slot 0 with a D_800918DC sprite at (60, 60) that grows in (update routine 6). */
 void func_150B7484(void) {

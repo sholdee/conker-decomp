@@ -62,7 +62,7 @@ void func_15147740(EffectObj *obj) {
     }
 
     if (obj->updateKind >= 15) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
         return;
     }
     if (obj->updateKind != 0 && !dead) {
@@ -72,7 +72,7 @@ void func_15147740(EffectObj *obj) {
     }
 
     if (obj->updateKind2 >= 18) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
         return;
     }
     if (obj->updateKind2 != 0 && !dead) {
@@ -84,7 +84,7 @@ void func_15147740(EffectObj *obj) {
     if (obj->header.flags & 0x10) {
         kind = obj->header.unk14;
         if (kind < -1 || kind >= 8) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C((EffectHeader *)obj);
             return;
         }
         if (kind != -1 && !dead) {
@@ -95,7 +95,7 @@ void func_15147740(EffectObj *obj) {
     }
 
     if (dead) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
     }
 }
 
@@ -111,14 +111,14 @@ extern void func_1514795C(EffectObj *);
 void func_151478F4(EffectObj *obj) {
     func_151478D0(obj);
     func_1514795C(obj);
-    func_15169804((struct102 *)obj);
+    func_15169804((EffectHeader *)obj);
 }
 
 /* Frees the object's buffers, then hands it to func_15169824. */
 void func_15147928(EffectObj *obj) {
     func_151478D0(obj);
     func_1514795C(obj);
-    func_15169824((struct102 *)obj);
+    func_15169824((EffectHeader *)obj);
 }
 
 /* Frees the buffers func_15147A80 allocated. */
@@ -237,7 +237,7 @@ void *func_15147C4C(void *gfx, EffectObj *obj, s16 arg2) {
     }
     gfx = func_151462C8(gfx, &obj->unk34, 0, NULL, 0, arg2, obj->unk54, 2, unk18);
     if (obj->drawKind >= 19) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
         return gfx;
     }
     if (obj->drawKind != 0) {

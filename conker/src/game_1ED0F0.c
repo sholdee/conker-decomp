@@ -533,10 +533,10 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             }
         } else {
             if (state.trail != NULL) {
-                func_1516972C((struct102 *)state.trail);
+                func_1516972C((EffectHeader *)state.trail);
             }
             if (state.follow != NULL) {
-                func_1516972C((struct102 *)state.follow);
+                func_1516972C((EffectHeader *)state.follow);
             }
         }
         if (shooter->unk1D4 != NULL && (shooter->unk74 & 0xF) != 0xF) {
@@ -671,10 +671,10 @@ void func_151C1570(Bullet *bullet) {
 
     state = &bullet->state;
     if (state->trail != NULL) {
-        func_1516972C((struct102 *)state->trail);
+        func_1516972C((EffectHeader *)state->trail);
     }
     if (state->follow != NULL) {
-        func_1516972C((struct102 *)state->follow);
+        func_1516972C((EffectHeader *)state->follow);
     }
     if (state->unk88 != NULL) {
         // matching: the pointer temp gets its own stack slot, which the frame size needs

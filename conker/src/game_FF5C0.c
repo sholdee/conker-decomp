@@ -88,12 +88,12 @@ void func_150D22D4(StrobeEffect *effect);
 /* Strobe free handler. */
 void func_150D227C(StrobeEffect *effect) {
     func_150D22D4(effect);
-    func_1514933C((struct260 *)effect);
+    func_1514933C((TimedEffect *)effect);
 }
 
 void func_150D22A8(StrobeEffect *effect) {
     func_150D22D4(effect);
-    func_15149368((struct260 *)effect);
+    func_15149368((TimedEffect *)effect);
 }
 
 /* Unregisters a strobe from the live count. */

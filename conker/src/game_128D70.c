@@ -12,7 +12,7 @@ typedef struct {
     /* 0x0C */ u8 side;
     /* 0x0D */ u8 unkD;
     /* 0x0E */ u8 padE[2];
-    /* 0x10 */ struct260 *unk10;
+    /* 0x10 */ TimedEffect *unk10;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s8 unk16; // owner camera's unk23D, or -1
     /* 0x17 */ u8 pad17;
@@ -58,7 +58,7 @@ typedef struct {
     /* 0x34 */ f32 unk34;
 } EmitterEffect; // size 0x38
 
-extern struct260 *func_15164780(EmitterEffect *, s32, u8, s32);
+extern TimedEffect *func_15164780(EmitterEffect *, s32, u8, s32);
 
 
 /* First argument of func_151602C0. */
@@ -429,10 +429,10 @@ void func_150FC818(EmitterObj *obj, ActorMsg *msg, u8 msgType) {
         msgObj = msg->ref.actor;
         owner = state->owner;
         if ((owner == msgObj) || (state->ownerUniqueId == msg->ref.uniqueId)) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C((EffectHeader *)obj);
         } else if (state->other != NULL) {
             if ((msgObj == state->other) || (state->otherUniqueId == msg->ref.uniqueId)) {
-                func_1516972C((struct102 *)obj);
+                func_1516972C((EffectHeader *)obj);
             }
         }
     } else if (msgType == 0x2D) {

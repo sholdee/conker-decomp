@@ -105,7 +105,7 @@ void func_1518BBF4(Actor *actor) {
                 emitter->params.owner = actor;
                 // the owner test always passes: every emitter is destroyed
                 if (actor != NULL || emitter->params.ownerId == actor->unique_id) {
-                    func_1516972C((struct102 *)emitter);
+                    func_1516972C((EffectHeader *)emitter);
                 }
             }
             {
@@ -473,7 +473,7 @@ void func_1518C850(TrailEmitter *emitter, s32 data, u8 type) {
     } else if (type == 0) {
         actor = msg->ref.actor;
         if (actor == emitter->params.owner || msg->ref.uniqueId == emitter->params.ownerId) {
-            func_1516972C((struct102 *)emitter);
+            func_1516972C((EffectHeader *)emitter);
         }
     }
 }

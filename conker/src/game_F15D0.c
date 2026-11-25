@@ -32,7 +32,7 @@ typedef struct {
     /* 0x18 */ s32 unk18;
 } EffectData; /* size 0x1C */
 
-/* Effect object (struct260 is a shorter view of its head). */
+/* Effect object (TimedEffect is a shorter view of its head). */
 typedef struct {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;
@@ -268,20 +268,20 @@ void func_150C44A4(Effect *effect) {
 void func_150C4AD8(Effect *effect) {
     // matching: the s32 read keeps IDO from merging the test and the argument into one load
     if (*(s32 *)&effect->data.particle != 0) {
-        func_1516972C((struct102 *)effect->data.particle);
+        func_1516972C((EffectHeader *)effect->data.particle);
     }
 }
 
 /* Frees the effect's particle, then calls func_1514933C on the effect. */
 void func_150C4B08(Effect *effect) {
     func_150C4AD8(effect);
-    func_1514933C((struct260 *)effect);
+    func_1514933C((TimedEffect *)effect);
 }
 
 /* Frees the effect's particle, then calls func_15149368 on the effect. */
 void func_150C4B34(Effect *effect) {
     func_150C4AD8(effect);
-    func_15149368((struct260 *)effect);
+    func_15149368((TimedEffect *)effect);
 }
 
 /* Event handler: events 0x55/0x56 clear/set flag 2 (pausing the effect), others go to func_15149514. */

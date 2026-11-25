@@ -30,8 +30,7 @@ typedef struct {
 } FF0E0State;
 
 typedef struct {
-    struct260 base;
-    u8 pad24[4];
+    TimedEffect base;
     FF0E0State state;
 } FF0E0Object;
 
@@ -117,7 +116,7 @@ void func_150D1F6C(FF0E0Object *obj, s32 arg, u8 msg) {
     } else if (msg == 0x4E) {
         obj->state.angularVelocity = D_800A5480;
     } else if (msg == 0x4F) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
     }
 }
 
@@ -131,7 +130,7 @@ void func_150D2054(FF0E0Object *obj) {
     for (i = 0; i < 6; i++) {
         child = state->children[i];
         if (child != NULL) {
-            func_1516972C((struct102 *)child);
+            func_1516972C((EffectHeader *)child);
         }
     }
 }

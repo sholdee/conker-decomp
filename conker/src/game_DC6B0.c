@@ -367,7 +367,7 @@ void func_150AFDB0(void) {
     for (node = D_800DCE94; node != NULL; node = D_800DD198[D_800DD190]) {
         D_800DD198[D_800DD190] = node->next;
         if (node->unk3F == D_800C3E78) {
-            func_1516972C((struct102 *)node);
+            func_1516972C((EffectHeader *)node);
         }
     }
     D_800DD190--;
@@ -423,7 +423,7 @@ void func_150B003C(s32 arg0) {
 /* A projectile created by func_1513264C. */
 typedef struct {
     u8 pad0[0x170];
-    struct102 *trail; /* ribbon effect (func_151B7328) following the projectile */
+    EffectHeader *trail; /* ribbon effect (func_151B7328) following the projectile */
 } GameDC6B0Projectile;
 
 /* Arguments the projectile's ribbon trail keeps (func_151B7328 selector 1). */
@@ -434,7 +434,7 @@ typedef struct GameDC6B0TrailArgs {
 
 GameDC6B0Projectile *func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
 void func_15145974(Vec3f *v, f32 *heading, f32 *elevation);
-struct102 *func_151B7328(void *args, s32 selector, s32 argsSize, s32, s32);
+EffectHeader *func_151B7328(void *args, s32 selector, s32 argsSize, s32, s32);
 s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength);
 
 /* Fires a projectile from `from` towards `to` at speed 80, with a ribbon trail. Does nothing if
@@ -446,7 +446,7 @@ void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
     f32 invLength;
     GameDC6B0Projectile *projectile;
     GameDC6B0TrailArgs trailArgs;
-    struct102 **trail;
+    EffectHeader **trail;
 
     trailArgs.unk4 = 0;
     dir.x = to->x - from->x;
@@ -496,7 +496,7 @@ void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
 
 /* Releases the projectile's ribbon trail, if any. */
 void func_150B02C0(GameDC6B0Projectile *projectile) {
-    struct102 **trail = &projectile->trail;
+    EffectHeader **trail = &projectile->trail;
 
     if (*trail != NULL) {
         func_1516972C(*trail);

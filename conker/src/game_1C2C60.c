@@ -1599,9 +1599,8 @@ s32 func_151987CC(CharacterFlamethrowerActor *actor) {
 
 /* An object in the D_800DCE50 lists (only the fields used here). */
 typedef struct ListedObject {
-    /* 0x00 */ u8 pad0[0x8];
-    /* 0x08 */ struct ListedObject *next;
-    /* 0x0C */ u8 padC[0x91 - 0xC];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x91 - 0x10];
     /* 0x91 */ u8 unk91;
     /* 0x92 */ s16 unk92;
     /* 0x94 */ s32 unk94;
@@ -1663,7 +1662,7 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
             j = actor->head;
             D_800DD190++;
             while (node != NULL) {
-                D_800DD198[D_800DD190] = node->next;
+                D_800DD198[D_800DD190] = node->header.next;
                 nx = node->pos.x;
                 ny = node->pos.y;
                 nz = node->pos.z;
@@ -1679,7 +1678,7 @@ s32 func_1519897C(CharacterFlamethrowerActor *actor) {
                     dz = pos.z - nz;
                     if (dx * dx + dy * dy + dz * dz < r * r + 900.0f) {
                         func_15183ACC(5);
-                        func_15168B10((s32)node, 0x18);
+                        func_15168B10(&node->header, 0x18);
                         node->unkED = 5;
                         node->unk94 = (s32)D_800DDE80[5].unk8;
                         node->unk92 = 9;
@@ -2186,7 +2185,7 @@ void func_1519986C(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
 
     if (kind == 0 || kind == 2 || kind == 0x26) {
         if (msg->ref.actor == ref->actor || msg->ref.uniqueId == ref->uniqueId) {
-            func_1516972C((struct102 *)actor);
+            func_1516972C((EffectHeader *)actor);
         }
     } else if (kind == 0x2D) {
         if (ref->actor == msg->swap.actorA) {
@@ -2230,7 +2229,7 @@ void func_15199980(CharacterFlamethrowerActor *actor) {
     }
     light = flame->light;
     if (light != NULL) {
-        func_1516972C((struct102 *)light);
+        func_1516972C((EffectHeader *)light);
     }
 }
 

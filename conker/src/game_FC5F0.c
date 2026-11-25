@@ -77,7 +77,7 @@ void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
     if (type == 0) {
         actorA = msg->ref.actor; // matching: loaded before the state field, via a named local
         if ((actorA == state->actor) || (msg->ref.uniqueId == state->actorId)) {
-            func_1516972C((struct102 *)emitter);
+            func_1516972C((EffectHeader *)emitter);
         }
     } else if (type == 0x2D) {
         if (state->actor == msg->swap.actorA) {

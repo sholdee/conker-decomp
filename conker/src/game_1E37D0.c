@@ -575,7 +575,7 @@ EffectObject *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 
         ((s32 *)state)[1] = (s32)((s32 *)state + 4);
         memcpy((void *)((s32 *)state)[1], args, argsSize);
         if (D_8008FB90[selector](obj, &obj->pos) == 0) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C((EffectHeader *)obj);
             return NULL;
         }
         {
@@ -972,7 +972,7 @@ void func_151B8318(EffectObject *obj, TrailTargetRef *msg, u8 msgType) {
         TrailTarget *target = msg->target;
 
         if (target == ref->target || msg->targetUnk3B == ref->targetUnk3B) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C((EffectHeader *)obj);
         }
     }
 }

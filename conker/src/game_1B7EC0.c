@@ -48,7 +48,7 @@ void func_1518AA10(Queue *arg) {
             if (node->releaseFunc != 0) {
                 D_8008D5C0[node->releaseFunc](node->value);
             }
-            func_1516972C((struct102 *)node);
+            func_1516972C((EffectHeader *)node);
             queue->count--;
         } else if (queue->flags & 1) {
             queue->timer -= D_800BE9E4;
@@ -135,7 +135,7 @@ s32 func_1518ABD0(Queue *queue, s32 value, u8 releaseFunc) {
         if (node->releaseFunc != 0) {
             D_8008D5C0[node->releaseFunc](node->value);
         }
-        func_1516972C((struct102 *)node);
+        func_1516972C((EffectHeader *)node);
     }
 
     return 1;

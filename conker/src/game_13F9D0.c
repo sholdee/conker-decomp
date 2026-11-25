@@ -467,7 +467,7 @@ void func_15113C88(void) {
                 obj->shadow = func_1510D970(1, obj, 0, 1, 0);
             }
         } else if (obj->shadow != NULL) {
-            func_1516972C((struct102 *)obj->shadow); // functions.h types the handle struct102 *
+            func_1516972C((EffectHeader *)obj->shadow); // functions.h types the handle EffectHeader *
             obj->shadow = NULL;
         }
     }
@@ -734,7 +734,7 @@ void func_15114B94(u32 index) {
 
     if (index < D_800DBEF0) {
         if (D_800DBEF4[index].shadow != NULL) {
-            func_1516972C((struct102 *)D_800DBEF4[index].shadow);
+            func_1516972C((EffectHeader *)D_800DBEF4[index].shadow);
             D_800DBEF4[index].shadow = NULL;
         }
         D_800DBEF4[index].state |= 8;

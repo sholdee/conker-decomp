@@ -126,7 +126,7 @@ void func_151563B8(StreakParticle *arg0) {
         }
     }
     if (expired) {
-        func_1516972C((struct102 *)particle);
+        func_1516972C((EffectHeader *)particle);
     }
 }
 
@@ -483,10 +483,10 @@ void func_15156F94(StreakParticle *particle) {
 
 void func_15156FB8(StreakParticle *particle) {
     func_15156F94(particle);
-    func_15169804((struct102 *)particle);
+    func_15169804((EffectHeader *)particle);
 }
 
 void func_15156FE4(StreakParticle *particle) {
     func_15156F94(particle);
-    func_15169824((struct102 *)particle);
+    func_15169824((EffectHeader *)particle);
 }

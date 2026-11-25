@@ -307,7 +307,7 @@ typedef struct {
 void func_151A18DC(EffectSpawner *spawner) {
     s32 pad; // matching: unused stack slot
     EffectData151A18DC data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     data.unk0 = spawner->unk28;
     data.unkC = spawner->unk34;
@@ -462,7 +462,7 @@ typedef struct {
 void func_151A1EE8(EffectSpawner *spawner) {
     s32 pad; // matching: unused stack slot
     EffectData151A1EE8 data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     data.unk0 = spawner->unk28;
     data.unkC = spawner->unk34;

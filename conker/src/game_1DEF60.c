@@ -161,7 +161,7 @@ void func_151B1FAC(Task151B1AB0 *task, ActorMsg *msg, u8 kind) {
         Actor *owner = msg->ref.actor;
 
         if (owner == data->owner || msg->ref.uniqueId == data->ownerUnk3B) {
-            func_1516972C((struct102 *)task);
+            func_1516972C((EffectHeader *)task);
         }
     }
 }

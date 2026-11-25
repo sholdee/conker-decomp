@@ -611,38 +611,31 @@ typedef struct {
     u8 unk2;
 } struct100;
 
-typedef struct {
-    u8  unk0;
-    u8  unk1;   // used
-    u8  unk2;
-    u8  unk3;
-    u8  unk4;
-    u8  unk5;
-    u8  unk6;
-    u8  unk7;
-    s32 unk8;
-    s16 unkC;
-    u8  unkE;
-    u8  unkF;
-    s16 unk10;
-    u8  unk12;  // used
-    u8  unk13;
-    u8  unk14;
-    u8  pad15[0x3];
-    u8  unk18;  // used
-    u8  unk19;  // used
-    u8  pad1A[0x2];
-    s16 unk1C;
-    u8  pad1E[0xA];
-    u8  unk28;
-    u8  unk29[0x3];
-    s32 unk2C;
-    s32 unk30;
-    u8  pad34[0x6];
-    u8  unk3A;
-    u8  pad3B[0x2];
-    u8  unk3D;
-} struct102;
+/* Common head of every object in the object lists D_800DCE50[list][type] (game_1944C0.c): effects, particles,
+ * sprites, timed effects. func_15167A68 allocates one and links it in (func_15168A4C); func_1516972C destroys it
+ * (the type's destroy hook, by default a move to type 1) and func_1516979C frees it. */
+typedef struct EffectHeader {
+    /* 0x00 */ u8 type;     /* index into D_8008B4A8 (ObjType); 1 = pending free */
+    /* 0x01 */ u8 kind;     /* the object list (0 or 1) it is linked into */
+    /* 0x02 */ u8 pad2[2];
+    /* 0x04 */ struct EffectHeader *prev;
+    /* 0x08 */ struct EffectHeader *next;
+    /* 0x0C */ u8 owner;    /* events 0xF / 0x10 naming this id destroy the object (func_1516968C) */
+    /* 0x0D */ u8 flags;    /* TimedEffect: bit 0 = state counts down, bit 1 = allocated as type 95 (else 35) */
+    /* 0x0E */ s16 state;   /* -1 frees the object; a TimedEffect's timer (it expires below 0) */
+} EffectHeader; /* size 0x10 */
+
+/* Timed effect object (type 35, or 95 with flag 2), allocated by func_15149130 with dataSize bytes of
+ * per-effect data after it; game_1765E0.c runs its callbacks. */
+typedef struct TimedEffect {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ s8 expireCallback; /* D_8008A4C0 index, run once the timer goes negative; -1 = none */
+    /* 0x11 */ s8 tickCallback;   /* D_8008A4E8 index, run every frame; -1 = none */
+    /* 0x12 */ s8 drawCallback;   /* D_8008A670 index; -1 = none */
+    /* 0x13 */ u8 callbackSet;    /* index into D_8008A688 / D_8008A7B0 / D_8008A8D8 (74 sets) */
+    /* 0x14 */ Vtx *buffers[4];   /* per-view vertex buffers (func_151D5D60), released by func_151D5E30 */
+    /* 0x24 */ u8 pad24[4];
+} TimedEffect; /* size 0x28; the effect's data follows */
 
 /* Music settings of a level (LevelHeader.music), applied by func_150000B0: up to two songs, each with
  * two parameters (func_1000E40C / func_1000E46C). */
@@ -825,18 +818,18 @@ typedef struct {
 
 /* Object type descriptor, D_8008B4A8[type] (game_1944C0). */
 typedef struct ObjType {
-    /* 0x00 */ void (*unk0)(struct102 *);
-    /* 0x04 */ void (*unk4)(struct102 *);
-    /* 0x08 */ Gfx *(*draw)(Gfx *gfx, struct102 *obj, s16 arg2);
-    /* 0x0C */ void (*unkC)(struct102 *);
+    /* 0x00 */ void (*unk0)(EffectHeader *);
+    /* 0x04 */ void (*unk4)(EffectHeader *);
+    /* 0x08 */ Gfx *(*draw)(Gfx *gfx, EffectHeader *obj, s16 arg2);
+    /* 0x0C */ void (*unkC)(EffectHeader *);
     /* 0x10 */ Gfx *drawBeginDL;
     /* 0x14 */ Gfx *(*drawBegin)(Gfx *gfx, s32 type, s32 list, s16 arg3);
     /* 0x18 */ void (*unk18)(void);
-    /* 0x1C */ void (*handleEvent)(struct102 *obj, s32 event, u8 eventType);
+    /* 0x1C */ void (*handleEvent)(EffectHeader *obj, s32 event, u8 eventType);
     /* 0x20 */ Gfx *(*drawEnd)(Gfx *gfx, s32 type, s16 arg2);
     /* 0x24 */ Gfx *drawEndDL;
-    /* 0x28 */ void (*destroy)(struct102 *);
-    /* 0x2C */ void (*free)(struct102 *);
+    /* 0x28 */ void (*destroy)(EffectHeader *);
+    /* 0x2C */ void (*free)(EffectHeader *);
     /* 0x30 */ s8 drawMode;
     /* 0x31 */ u8 pad31[3];
 } ObjType; // size 0x34
@@ -1785,7 +1778,7 @@ struct Actor {
     /* 0x2CB */ s8  unk2CB;
     /* 0x2CC */ s32 unk2CC;
     /* 0x2D0 */ AnimInstance *unk2D0;
-    /* 0x2D4 */ struct102 *unk2D4;
+    /* 0x2D4 */ EffectHeader *unk2D4;
     /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for func_15071FDC, set by script command 0x22;
                                  // [0]/[1] are also a fade timer/rate (func_150DFDD0, game_F15D0)
     /* 0x2E4 */ s32 unk2E4;     // per-type state; game_EB340 saves 2E4/2E8 as commands 0xE/0x68
@@ -4008,17 +4001,6 @@ typedef struct RenderView {
     /* 0x100 */ Mtx projectionMtx[2]; // indexed by the framebuffer index D_800BE9C0
 } RenderView; // size 0x180
 
-typedef struct {
-    u8  pad0[0xD];
-    u8  unkD;
-    s16 unkE;
-    s8  unk10;
-    s8  unk11;
-    s8  unk12;
-    u8  unk13;
-    s32 unk14; // union here?
-    u8  pad18[0xC];
-} struct260; // size at least 0x24
 
 /* A thread that receives the scheduler's retrace message; func_100051C8 links it into D_8003B234. */
 typedef struct SchedulerClient {

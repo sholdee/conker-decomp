@@ -46,8 +46,7 @@ typedef struct {
 } RopeTieData;
 
 typedef struct {
-    /* 0x00 */ struct260 base;
-    /* 0x24 */ u8 pad24[4];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ RopeTieData tie;
 } RopeTie;
 
@@ -73,8 +72,7 @@ typedef struct {
 } RopeLineData;
 
 struct RopeLine {
-    /* 0x00 */ struct260 base;
-    /* 0x24 */ u8 pad24[4];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ RopeLineData line;
 };
 
@@ -127,7 +125,7 @@ void func_151B2100(RopeTie *self) {
     tie = &self->tie;
     if ((obj0->interaction_state == 0) || (obj0->id == 0xFF) || (obj0->unique_id != tie->obj0Id) ||
         (obj1->interaction_state == 0) || (obj1->id == 0xFF) || (obj1->unique_id != tie->obj1Id)) {
-        self->base.unkE = -1;
+        self->base.header.state = -1;
         return;
     }
 
@@ -394,7 +392,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         dead = 1;
     }
     if ((dead == 0) && (line->anchor.target->unk1D4 != NULL)) {
-        func_151D5D60(&self->base.unk14, view, 4 * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(self->base.buffers, view, 4 * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx == NULL) {
             return gfx;
         }
@@ -459,7 +457,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         gSP1Triangle(gfx++, 0, 2, 3, 0);
     }
     if (dead != 0) {
-        self->base.unkE = -1;
+        self->base.header.state = -1;
     }
     return gfx;
 }

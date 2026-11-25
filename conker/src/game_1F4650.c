@@ -759,7 +759,7 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     }
     func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->spawn.pos.x, obj->spawn.pos.y, obj->spawn.pos.z, 2000, 2200);
     func_1000FA64(0x2F6, obj->spawn.rot.x, obj->spawn.rot.y, obj->spawn.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
-    func_1516972C((struct102 *)obj);
+    func_1516972C((EffectHeader *)obj);
 }
 
 
@@ -930,7 +930,7 @@ void func_151C94D4(SightBeamObject *obj) {
 
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
-        func_1516972C((struct102 *)state->midEffect);
+        func_1516972C((EffectHeader *)state->midEffect);
         func_1000FD38(func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
@@ -978,7 +978,7 @@ void func_151C95D8(SightBeamObject *obj) {
 
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
-        func_1516972C((struct102 *)state->midEffect);
+        func_1516972C((EffectHeader *)state->midEffect);
         func_1000FD38(func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
@@ -1479,7 +1479,7 @@ void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (sprite->payload.player == *(Camera **)msg) {
-            func_1516972C((struct102 *)sprite);
+            func_1516972C((EffectHeader *)sprite);
         // matching: an empty labelled statement keeps IDO from merging this branch's exit
         label:
             ;
@@ -1487,7 +1487,7 @@ void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->camera == sprite->payload.player) {
-            func_1516972C((struct102 *)sprite);
+            func_1516972C((EffectHeader *)sprite);
         }
     }
     handler = D_8008FC10[sprite->payload.kind];
@@ -1746,12 +1746,12 @@ void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (obj->lens.player == *(Camera **)msg) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C((EffectHeader *)obj);
         }
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->camera == obj->lens.player) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C((EffectHeader *)obj);
         }
     }
 }
@@ -1915,12 +1915,12 @@ void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (effect->player == *(Camera **)msg) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->camera == effect->player) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     }
 }

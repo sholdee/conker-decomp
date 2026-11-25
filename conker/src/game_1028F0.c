@@ -3,7 +3,7 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Effect (a struct260 with per-effect data at 0x28) that follows an object. */
+/* Effect (a TimedEffect with per-effect data at 0x28) that follows an object. */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
@@ -185,7 +185,7 @@ void func_150D596C(FollowEffect *effect, ActorMsg *msg, u8 type) {
     if (type == 0 || type == 0x2F || type == 3) {
         object = msg->ref.actor;
         if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     } else if (type == 0x2D) {
         if (data->owner == msg->swap.actorA) {
@@ -199,12 +199,12 @@ void func_150D596C(FollowEffect *effect, ActorMsg *msg, u8 type) {
 }
 
 /* FollowEffect callback; forwards to func_1514933C. */
-void func_150D5A2C(struct260 *effect) {
+void func_150D5A2C(TimedEffect *effect) {
     func_1514933C(effect);
 }
 
 /* FollowEffect callback; forwards to func_15149368. */
-void func_150D5A4C(struct260 *effect) {
+void func_150D5A4C(TimedEffect *effect) {
     func_15149368(effect);
 }
 
@@ -708,7 +708,7 @@ void func_150D6E60(Particle *particle, ActorMsg *msg, u8 type) {
     } else if (type == 0) {
         object = msg->ref.actor;
         if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
-            func_1516972C((struct102 *)particle);
+            func_1516972C((EffectHeader *)particle);
         }
     }
 }
@@ -761,7 +761,7 @@ void func_150D7068(Particle *particle, ActorMsg *msg, u8 type) {
     } else if (type == 0) {
         object = msg->ref.actor;
         if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
-            func_1516972C((struct102 *)particle);
+            func_1516972C((EffectHeader *)particle);
         }
     }
 }

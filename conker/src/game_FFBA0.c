@@ -62,7 +62,7 @@ void func_150D26F0(EffectObject *obj) {
 /* Spawns a spark emitter object with a random spin, rate and color. */
 void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1) {
     SparkEmitter emitter;
-    struct260 *object;
+    TimedEffect *object;
 
     emitter.record = record;
     emitter.angle = func_150ADA68() * 2.0f * 3.1415927f;

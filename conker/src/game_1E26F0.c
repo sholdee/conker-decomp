@@ -235,7 +235,7 @@ void func_151B5A9C(BeamEffect *effect, void *msg, u8 type) {
         Actor *actor = gone->actor;
 
         if (actor == data->first || actor == data->second || gone->uniqueId == data->firstId || gone->uniqueId == data->secondId) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     }
 }

@@ -116,7 +116,7 @@ void func_15157248(Effect *fx) {
     func_151571C4(fx);
     func_1518CA04(fx->params.model);
     func_1503F7B8(fx->model);
-    func_15169804((struct102 *)fx);
+    func_15169804((EffectHeader *)fx);
 }
 
 /* As func_15157248, but releases the object through func_15169824. */
@@ -124,7 +124,7 @@ void func_1515728C(Effect *fx) {
     func_151571C4(fx);
     func_1518CA04(fx->params.model);
     func_1503F7B8(fx->model);
-    func_15169824((struct102 *)fx);
+    func_15169824((EffectHeader *)fx);
 }
 
 /*
@@ -171,7 +171,7 @@ void func_151572D0(Effect *fx) {
         }
     }
     if (dead) {
-        func_1516972C((struct102 *)fx);
+        func_1516972C((EffectHeader *)fx);
     }
 }
 

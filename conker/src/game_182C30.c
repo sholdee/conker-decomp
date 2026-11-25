@@ -198,7 +198,7 @@ void func_15155EF8(PlayerMarker *arg0) {
     if (marker->light != NULL) {
         func_1515F10C(marker->light);
     }
-    func_15169804((struct102 *)marker);
+    func_15169804((EffectHeader *)marker);
     func_1518CA04(0xA6);
 }
 
@@ -248,7 +248,7 @@ void func_15156028(PlayerMarker *marker, Actor **actors, u8 eventType) {
         s32 player = actors[0] - D_800CC2D0;
 
         if ((player >= 0) && (player < 25) && (player == marker->playerId)) {
-            func_1516972C((struct102 *)marker);
+            func_1516972C((EffectHeader *)marker);
         }
     } else if (eventType == 0x2D) {
         s32 from = actors[0] - D_800CC2D0;

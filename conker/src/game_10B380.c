@@ -50,34 +50,40 @@ typedef struct {
     /* 0x98 */ EffectSpawnState *state;
 } EffectSpawnSource;
 
-/* Trap trigger callback: spawns a type 100 object whose kind follows the trap's tag (0xFB-0xFE). */
+/* Timed effect spawned by a trap trigger (func_150DDED0). */
+typedef struct TrapEffect {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ u8 kind;      /* func_150DBD70 selector */
+} TrapEffect;
+
+/* Trap trigger callback: spawns a timed effect (timer 100) whose kind follows the trap's tag (0xFB-0xFE). */
 void func_150DDED0(TrapTrigger *trap) {
-    struct102 *obj = (struct102 *)func_151491F4(100, 2, -1, 1, 0, 1, 0xFF, 0);
+    TrapEffect *obj = (TrapEffect *)func_151491F4(100, 2, -1, 1, 0, 1, 0xFF, 0);
 
     if (obj != NULL) {
         switch (trap->tag) {
         case 0xFB:
-            obj->unk28 = 1;
+            obj->kind = 1;
             break;
         case 0xFC:
-            obj->unk28 = 2;
+            obj->kind = 2;
             break;
         case 0xFD:
-            obj->unk28 = 4;
+            obj->kind = 4;
             break;
         case 0xFE:
-            obj->unk28 = 3;
+            obj->kind = 3;
             break;
         default:
-            func_1516972C(obj);
+            func_1516972C(&obj->base.header);
             break;
         }
     }
 }
 
 /* Runs func_150DBD70 for the object's kind. */
-s32 func_150DDF88(struct102 *obj) {
-    return func_150DBD70(obj->unk28);
+s32 func_150DDF88(TrapEffect *obj) {
+    return func_150DBD70(obj->kind);
 }
 
 /* Spawns a sprite (texture 0x1D or 0x1E, random size 10-80) at the source's current point, at height y. */

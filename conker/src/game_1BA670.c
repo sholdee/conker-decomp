@@ -185,7 +185,7 @@ Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8
             while (emitter != NULL) {
                 D_800DD198[D_800DD190] = emitter->next;
                 if (owner == emitter->params.owner || emitter->params.ownerId == owner->unique_id) {
-                    func_1516972C((struct102 *)emitter);
+                    func_1516972C((EffectHeader *)emitter);
                 }
                 emitter = D_800DD198[D_800DD190];
             }
@@ -619,7 +619,7 @@ void func_1518E308(Emitter *emitter) {
     emitter->accum = 0.0f;
     for (i = 0; i < 100; i++, slot++) {
         if (slot->particle != NULL) {
-            func_1516972C((struct102 *)slot->particle);
+            func_1516972C((EffectHeader *)slot->particle);
         }
     }
     bzero(emitter->slots, sizeof(emitter->slots));

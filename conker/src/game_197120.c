@@ -89,14 +89,14 @@ void func_15169C70(Debris *debris) {
                           debris->z, 30.0f, 40, 0.0030517578125f, 0, 10, debris->owner,
                           debris->list);
             func_1518CA04(debris->sound);
-            func_1516972C((struct102 *)debris);
+            func_1516972C((EffectHeader *)debris);
             return;
         }
         if (debris->kind == 4) {
             func_15171200(3, 0xB, debris->x, debris->y, debris->z, debris->velY * debris->bounce,
                           0.5f, 0.6999999881f, 40.0f, 2, 60, -0.5f, debris->owner, debris->list);
             func_1518CA04(debris->sound);
-            func_1516972C((struct102 *)debris);
+            func_1516972C((EffectHeader *)debris);
             return;
         }
         if (debris->kind == 3) {
@@ -105,7 +105,7 @@ void func_15169C70(Debris *debris) {
             func_151709B4(debris->x, debris->y + 10.0f, debris->z, 4, debris->velY * 200.0f,
                           debris->owner, debris->list);
             func_1518CA04(debris->sound);
-            func_1516972C((struct102 *)debris);
+            func_1516972C((EffectHeader *)debris);
             return;
         }
         if (debris->kind == 6) {
@@ -122,7 +122,7 @@ void func_15169C70(Debris *debris) {
         }
         if (debris->kind == 8) {
             func_1518CA04(debris->sound);
-            func_1516972C((struct102 *)debris);
+            func_1516972C((EffectHeader *)debris);
             return;
         }
         debris->velX *= debris->friction;
@@ -162,7 +162,7 @@ void func_15169C70(Debris *debris) {
             alpha -= D_800BE9E4 * 4;
             if (alpha <= 0) {
                 func_1518CA04(debris->sound);
-                func_1516972C((struct102 *)debris);
+                func_1516972C((EffectHeader *)debris);
                 return;
             }
             debris->alpha = alpha;

@@ -197,7 +197,7 @@ void func_150F4CFC(EffectObj *obj, s32 arg1, u8 event) {
         obj->unk71 = 0;
         spiral->flags |= SPIRAL_FADE_NEAR | SPIRAL_MUTED;
     } else if (event == 0x4F) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
     }
 }
 

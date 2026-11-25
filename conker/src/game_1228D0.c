@@ -37,7 +37,7 @@ typedef struct {
 extern u8 D_80091930;
 extern u8 D_8009193C;
 extern u8 D_80091948;
-struct102 *func_15169968(struct_7484 *);
+EffectHeader *func_15169968(struct_7484 *);
 
 /* Shows a sprite (picked by `style`) that fades in over `fadeIn` frames, holds for
  * `hold` frames and fades out over `fadeOut` frames. */
@@ -299,7 +299,7 @@ typedef struct {
 /* Spawns a spark effect (func_150F5C98) on `owner`. */
 void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     SparkData data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     data.owner = owner;
     data.ownerId = owner->unique_id;
@@ -536,23 +536,23 @@ void func_150F631C(BeamEffect *effect) {
     BeamData *data = &effect->data;
 
     if (data->beam != NULL) {
-        func_1516972C((struct102 *)data->beam);
+        func_1516972C((EffectHeader *)data->beam);
     }
     if (data->flash != NULL) {
-        func_1516972C((struct102 *)data->flash);
+        func_1516972C((EffectHeader *)data->flash);
     }
 }
 
 /* Beam effect destructors: free the beam and flash, then the effect. */
 void func_150F6368(BeamEffect *effect) {
     func_150F631C(effect);
-    func_1514933C((struct260 *)effect);
+    func_1514933C((TimedEffect *)effect);
 }
 
 
 void func_150F6394(BeamEffect *effect) {
     func_150F631C(effect);
-    func_15149368((struct260 *)effect);
+    func_15149368((TimedEffect *)effect);
 }
 
 /* Effect callback for the beam effect: hands func_15169850 the owner reference. */

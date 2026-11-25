@@ -119,10 +119,10 @@ void func_1515BAE0(TexturedQuad *quad) {
         func = quad->destroyFunc;
         if (func != -1) {
             if (D_8008B07C[func](quad) != 0) {
-                func_1516972C((struct102 *)quad);
+                func_1516972C((EffectHeader *)quad);
             }
         } else {
-            func_1516972C((struct102 *)quad);
+            func_1516972C((EffectHeader *)quad);
         }
     }
 }
@@ -191,13 +191,13 @@ ActorTracker *func_1515BE50(ActorTrackerDesc *desc, s32 extraSize, u8 owner, s32
 /* Destroy handler: detaches the tracker from its actor, then destroys it. */
 void func_1515BF50(ActorTracker *tracker) {
     func_1514EDF0(tracker, tracker->desc.actor);
-    func_15169804((struct102 *)tracker);
+    func_15169804((EffectHeader *)tracker);
 }
 
 /* Free handler: detaches the tracker from its actor, then frees it. */
 void func_1515BF7C(ActorTracker *tracker) {
     func_1514EDF0(tracker, tracker->desc.actor);
-    func_15169824((struct102 *)tracker);
+    func_15169824((EffectHeader *)tracker);
 }
 
 /*
@@ -229,7 +229,7 @@ void func_1515BFA8(ActorTracker *tracker) {
         tracker->motion.z = (tracker->prevPos.z - tracker->pos.z) * D_800BE9A8;
     }
     if (dead) {
-        func_1516972C((struct102 *)tracker);
+        func_1516972C((EffectHeader *)tracker);
     }
 }
 

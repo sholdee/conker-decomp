@@ -47,7 +47,7 @@ void func_151A5070(struct Obj151A4FD0 *effect) {
     if (timer != 0) {
         timer -= D_800BE9E4;
         if (timer <= 0) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
             return;
         }
         effect->timer = timer;

@@ -119,7 +119,7 @@ void func_15166204(QuadEffect *effect) {
     effect->size = effect->size + effect->growthRate * D_800BE9E4;
     life -= D_800BE9E4;
     if (life <= 0) {
-        func_1516972C((struct102 *)effect);
+        func_1516972C((EffectHeader *)effect);
         return;
     }
     effect->life = life;

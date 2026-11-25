@@ -147,13 +147,13 @@ void func_15191400(DripEmitter *emitter);
 /* Type 0x20 handler: releases the drops, then func_15169804. */
 void func_15190840(DripEmitter *emitter) {
     func_15191400(emitter);
-    func_15169804((struct102 *)emitter);
+    func_15169804((EffectHeader *)emitter);
 }
 
 /* Type 0x20 handler: releases the drops, then func_15169824. */
 void func_1519086C(DripEmitter *emitter) {
     func_15191400(emitter);
-    func_15169824((struct102 *)emitter);
+    func_15169824((EffectHeader *)emitter);
 }
 
 /* A point on an actor's bone where a drop hangs. */
@@ -348,7 +348,7 @@ void func_15190898(DripEmitter *emitter) {
         }
     }
     if (done) {
-        func_1516972C((struct102 *)emitter);
+        func_1516972C((EffectHeader *)emitter);
     }
 }
 
@@ -573,7 +573,7 @@ void func_151918BC(DripRetryTask *task) {
         func_15190770(link, 0, task->header.owner, task->header.list);
     }
     if (done) {
-        func_1516972C((struct102 *)task);
+        func_1516972C((EffectHeader *)task);
     }
 }
 
@@ -598,10 +598,10 @@ void func_15191980(DripEmitter *emitter, ActorRef *ref, u8 msg) {
         }
         if (ref->uniqueId == emitter->link.actorId) {
         hit:
-            func_1516972C((struct102 *)emitter);
+            func_1516972C((EffectHeader *)emitter);
         }
     } else if (msg == 0x4E) {
-        func_1516972C((struct102 *)emitter);
+        func_1516972C((EffectHeader *)emitter);
     } else {
         func_15169850((s32)ref, msg, &emitter->link.actor, &emitter->link.actorId, emitter);
     }
@@ -619,10 +619,10 @@ void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
         }
         if (ref->uniqueId == link->actorId) {
         hit:
-            func_1516972C((struct102 *)task);
+            func_1516972C((EffectHeader *)task);
         }
     } else if (msg == 0x4E) {
-        func_1516972C((struct102 *)task);
+        func_1516972C((EffectHeader *)task);
     } else if (msg == 0xD) {
         if (ref->actor == link->actor) {
             goto hit2;

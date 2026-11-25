@@ -190,7 +190,7 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
         if (particle != NULL) {
             memcpy(&particle->growth, &growth, sizeof(growth));
             if (func_1518ABD0(D_800D98E0, particle, 2) == 0) {
-                func_1516972C((struct102 *)particle);
+                func_1516972C((EffectHeader *)particle);
             }
         }
         roll = (func_150ADA20() & 0xF) + 10;

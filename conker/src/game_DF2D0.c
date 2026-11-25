@@ -36,7 +36,7 @@ void func_150B1E20(Camera *camera) {
 /* Spawns an emitter effect (func_150B1F90) at `pos` with a random duration of 69-201. */
 void func_150B1EE0(EffectHeader *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
     EmitterData data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     data.pos = *pos;
     data.accum = 0.0f;

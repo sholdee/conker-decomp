@@ -286,7 +286,7 @@ void func_151B9CB0(ParticleEmitter *emitter) {
     timer = emitter->timer;
     timer -= D_800BE9E4;
     if (timer < 0) {
-        func_1516972C((struct102 *)emitter);
+        func_1516972C((EffectHeader *)emitter);
     } else {
         emitter->timer = timer;
     }

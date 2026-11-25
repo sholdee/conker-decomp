@@ -434,7 +434,7 @@ void func_150EF910(Beam *beam, BeamMsg *msg, u8 type) {
         actorId = link->actorId;
         msgActorId = msg->ref.uniqueId;
         if (actor == msgActor || actorId == msgActorId) {
-            func_1516972C((struct102 *)beam);
+            func_1516972C((EffectHeader *)beam);
         }
     } else if (type == 0x2D) {
         if (link->actor == msg->swap.actorA) {
@@ -458,7 +458,7 @@ void func_150EF910(Beam *beam, BeamMsg *msg, u8 type) {
     } else if (type == 0x43) {
         if (link->actor == msg->ref.actor || link->actorId == msg->ref.uniqueId) {
             if (link->slot == msg->ref.slot) {
-                func_1516972C((struct102 *)beam);
+                func_1516972C((EffectHeader *)beam);
             }
         }
     }
@@ -721,12 +721,12 @@ void func_150F0318(BeamEmitter *emitter);
 
 void func_150F02C0(BeamEmitter *emitter) {
     func_150F0318(emitter);
-    func_1514933C((struct260 *)emitter);
+    func_1514933C((TimedEffect *)emitter);
 }
 
 void func_150F02EC(BeamEmitter *emitter) {
     func_150F0318(emitter);
-    func_15149368((struct260 *)emitter);
+    func_15149368((TimedEffect *)emitter);
 }
 
 /* Clears the beam's reference to this emitter. */
@@ -867,7 +867,7 @@ void func_150F07E4(Spark *spark, s32 data, u8 type) {
     if (type == 0) {
         msgActor = msg->ref.actor;
         if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
-            func_1516972C((struct102 *)spark);
+            func_1516972C((EffectHeader *)spark);
         }
     } else if (type == 0x2D) {
         if (link->actor == msg->swap.actorA) {
@@ -888,7 +888,7 @@ void func_150F088C(Glow *glow, ActorMsg *msg, u8 type) {
     if (type == 0) {
         msgActor = msg->ref.actor;
         if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
-            func_1516972C((struct102 *)glow);
+            func_1516972C((EffectHeader *)glow);
         }
     } else if (type == 0x2D) {
         if (link->actor == msg->swap.actorA) {
@@ -1117,7 +1117,7 @@ void func_150F1020(Particle *particle, s32 data, u8 type) {
     } else if (type == 0 || type == 0x43) {
         msgActor = msg->ref.actor;
         if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
-            func_1516972C((struct102 *)particle);
+            func_1516972C((EffectHeader *)particle);
         }
     }
 }
@@ -1265,7 +1265,7 @@ void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
         msgActor = ((ActorMsg *)data)->ref.actor;
         link = &(*self)->link;
         if ((msgActor == link->actor) || (link->actorId == (*msg)->ref.uniqueId)) {
-            func_1516972C((struct102 *)*self);
+            func_1516972C((EffectHeader *)*self);
         }
     } else {
         link = &(*self)->link;
@@ -1286,7 +1286,7 @@ void func_150F1684(ActorBound *self, ActorMsg *msg, u8 type) {
     if (type == 0x43) {
         msgActor = msg->ref.actor;
         if ((ref->actor == msgActor) || (msg->ref.uniqueId == ref->uniqueId)) {
-            func_1516972C((struct102 *)self);
+            func_1516972C((EffectHeader *)self);
         }
     }
 }

@@ -199,7 +199,7 @@ void func_150F7310(BeamObj *obj, ActorRef *msg, u8 msgId) {
         beam = &(*objp)->beam;
         // matching: the punned read of msg makes IDO load it a second time for the id compare
         if (msg->actor == beam->owner || beam->ownerId == ((ActorRef *)*(s32 *)&msg)->uniqueId) {
-            func_1516972C((struct102 *)*objp);
+            func_1516972C((EffectHeader *)*objp);
         }
     } else {
         beam = &(*objp)->beam;
@@ -216,7 +216,7 @@ void func_150F739C(BeamObj *obj) {
     beam = &obj->beam;
     for (i = 0; i < 2; i++) {
         if (beam->ends[i] != NULL) {
-            func_1516972C((struct102 *)beam->ends[i]);
+            func_1516972C((EffectHeader *)beam->ends[i]);
         }
     }
     func_1514EDF0(obj, beam->owner);
@@ -225,11 +225,11 @@ void func_150F739C(BeamObj *obj) {
 /* Beam callback: tears the beam down (func_150F739C), then hands it to func_1514933C. */
 void func_150F740C(BeamObj *obj) {
     func_150F739C(obj);
-    func_1514933C((struct260 *)obj);
+    func_1514933C((TimedEffect *)obj);
 }
 
 /* Beam callback: tears the beam down (func_150F739C), then hands it to func_15149368. */
 void func_150F7438(BeamObj *obj) {
     func_150F739C(obj);
-    func_15149368((struct260 *)obj);
+    func_15149368((TimedEffect *)obj);
 }

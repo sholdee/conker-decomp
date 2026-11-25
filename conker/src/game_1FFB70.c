@@ -78,7 +78,7 @@ void func_151D275C(ScreenOverlay *overlay) {
     }
 
     if (overlay->timer > 300 || overlay->timer < 0) {
-        func_1516972C((struct102 *)overlay);
+        func_1516972C((EffectHeader *)overlay);
     }
 }
 

@@ -103,7 +103,7 @@ void func_15166B50(void *self) {
             func_15167D84(&spawn, 0, 0, -1, obj->unkC, obj->unk1);
         }
     } else if (obj->timer == 0) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
     }
 }
 

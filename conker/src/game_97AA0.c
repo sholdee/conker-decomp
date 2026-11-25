@@ -142,7 +142,7 @@ typedef struct {
 
 /* Spawns an effect that carries the object and the two words at arg as its data. */
 void func_1506AA48(Actor *obj, Pair1506AA48 *arg) {
-    struct260 *effect;
+    TimedEffect *effect;
     struct {
         ActorRef ref;
         Pair1506AA48 value;

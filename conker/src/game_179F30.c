@@ -60,7 +60,7 @@ void func_150C0AC0(Struct1514F5CCArg *desc, s32 arg1, s32 arg2);
 void func_150C4120(Actor *obj, s32 arg1, s32 arg2, s32 arg3);
 void *func_150C5370(void *desc, s32 payloadSize);
 void *func_15155780(s32 slot, s32 arg1);
-struct102 *func_15155FD4(s32 slot);
+EffectHeader *func_15155FD4(s32 slot);
 void *func_15158BD0(Actor *obj, s32 arg1, s32 payloadSize);
 void func_1515F10C(void *);
 void *func_15160A58(Actor *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -452,7 +452,7 @@ s32 func_1514D15C(Actor *obj) {
     s32 found;
     s32 slot;
     s32 handler;
-    struct102 *queued;
+    EffectHeader *queued;
 
     uniqueSlot = -1;
     globalSlot = -1;
@@ -514,7 +514,7 @@ s32 func_1514D310(Actor *owner) {
         if (D_8008ABE8[node->type]->destroyHandler != -1) {
             D_8008AB58[D_8008ABE8[node->type]->destroyHandler]((s32)node->handle);
         }
-        func_1516972C((struct102 *)node);
+        func_1516972C((EffectHeader *)node);
         node = next;
     }
     return 1;
@@ -1149,7 +1149,7 @@ void func_1514E7C8(Actor *obj) {
 void func_1514E824(s32 handle) {
 }
 
-void func_1514E830(struct102 *handle) {
+void func_1514E830(EffectHeader *handle) {
     func_1516972C(handle);
 }
 
@@ -1345,7 +1345,7 @@ Attachment *func_1514EC1C(void *handle, Actor *owner, s16 type) {
         } else if (D_8008ABE8[type]->destroyHandler != -1) {
             D_8008AB58[D_8008ABE8[type]->destroyHandler]((s32)handle);
         } else {
-            func_1516972C((struct102 *)handle);
+            func_1516972C((EffectHeader *)handle);
         }
     }
     return result;
@@ -1412,7 +1412,7 @@ void *func_1514ED8C(Attachment *node, Actor *owner) {
         node->prev->next = node->next;
     }
     handle = node->handle;
-    func_1516972C((struct102 *)node);
+    func_1516972C((EffectHeader *)node);
     return handle;
 }
 
@@ -1577,7 +1577,7 @@ void func_1514F3CC(Actor *obj) {
         u8 uniqueId;
         f32 unk8;
     } payload;
-    struct260 *spawned;
+    TimedEffect *spawned;
 
     payload.obj = obj;
     payload.uniqueId = obj->unique_id;

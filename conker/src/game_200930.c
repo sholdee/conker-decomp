@@ -465,7 +465,7 @@ void func_151D469C(obj, posFunc, arg2, arg3, arg4)
     s32 arg4;
 {
     ObjEmitter emitter;
-    struct260 *effect;
+    TimedEffect *effect;
 
     emitter.obj = obj;
     emitter.uniqueId = obj->unique_id;
@@ -619,7 +619,7 @@ void func_151D4C38(EmitterEffect *effect, ActorRef *handle, u8 msg) {
     emitter = &effect->emitter;
     if (msg == 0x3C) {
         if ((handle->actor == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     } else if (msg == 4) {
         if ((handle->actor == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {

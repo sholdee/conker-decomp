@@ -163,7 +163,7 @@ void func_1517A1EC(Particle *particle) {
     particle->timer = timer;
     if (particle->alpha == 0 ||
         (particle->viewFlags && (particle->viewFlags >> 4) == (particle->viewFlags & 0xF))) {
-        func_1516972C((struct102 *)particle);
+        func_1516972C((EffectHeader *)particle);
     }
 }
 
@@ -288,7 +288,7 @@ void func_1517A84C(Particle *particle) {
             particle->timer = timer;
             particle->alpha = (timer << 8) / 60;
         } else {
-            func_1516972C((struct102 *)particle);
+            func_1516972C((EffectHeader *)particle);
         }
     }
 }

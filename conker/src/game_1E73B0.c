@@ -134,7 +134,7 @@ s32 func_151BA084(Obj151BA084 *effect, s16 viewport) {
     ref = EFFECT_EXTRA(effect);
     owner = ref->actor;
     if (owner->interaction_state == 0 || owner->unique_id != ref->uniqueId) {
-        func_1516972C((struct102 *)effect);
+        func_1516972C((EffectHeader *)effect);
     }
     model = (u8 *)owner->unk1D4;
     if (model == NULL) {
@@ -202,13 +202,13 @@ label: // matching: unused label keeps the viewMtx stores ahead of the argument 
 }
 
 /* Message handler: removes the effect with its owner, and follows the owner when two objects swap. */
-void func_151BA468(struct260 *effect, ActorMsg *msg, u8 msgType) {
+void func_151BA468(TimedEffect *effect, ActorMsg *msg, u8 msgType) {
     ActorRef *ref = EFFECT_EXTRA(effect);
     Actor *owner = ref->actor;
 
     if (msgType == 0) {
         if ((owner == msg->ref.actor) || (msg->ref.uniqueId == owner->unique_id)) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     } else if (msgType == 0x2D) {
         if (ref->actor == msg->swap.actorA) {

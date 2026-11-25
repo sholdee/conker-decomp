@@ -134,7 +134,7 @@ void func_1516489C(CamWobble *wobble) {
         finished = 1;
     }
     if (finished) {
-        func_1516972C((struct102 *)wobble);
+        func_1516972C((EffectHeader *)wobble);
     }
 }
 

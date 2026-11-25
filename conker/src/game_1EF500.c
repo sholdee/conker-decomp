@@ -240,7 +240,7 @@ Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin
             failed = TRUE;
         }
         if (failed) {
-            func_1516972C((struct102 *)result);
+            func_1516972C((EffectHeader *)result);
             return NULL;
         }
     }
@@ -1059,7 +1059,7 @@ typedef struct {
 void func_151C4644(Game1EF500TimedOwner *owner) {
     Game1EF500TimedEmitter *emitter;
     Game1EF500TimedParticle data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     emitter = &owner->emitter;
     emitter->timer -= D_800BE9E4;

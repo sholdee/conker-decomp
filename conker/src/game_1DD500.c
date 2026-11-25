@@ -273,7 +273,7 @@ typedef struct Game1DD500Emitter {
     /* 0x94 */ u8 profileFlag;
 } Game1DD500Emitter; // size 0x98
 
-/* Effect task: a struct260 header followed by the effect's data. */
+/* Effect task: a TimedEffect header followed by the effect's data. */
 typedef struct Game1DD500Task {
     /* 0x00 */ u8 unk0;
     /* 0x01 */ u8 unk1;
@@ -660,7 +660,7 @@ void func_151B1918(Game1DD500Task *task) {
         Game1DD500Slot *slot = &emitter->slots[i];
 
         if (slot->particle != NULL) {
-            func_1516972C((struct102 *)slot->particle);
+            func_1516972C((EffectHeader *)slot->particle);
         }
         slot->particle = NULL;
         slot->timer = 0;
@@ -678,7 +678,7 @@ void func_151B19A4(Game1DD500Task *task, void *msg, u8 type) {
 
     if (type == 0 || type == 0x13) {
         if (owner == actorMsg->actor || actorMsg->uniqueId == emitter->ownerId) {
-            func_1516972C((struct102 *)task);
+            func_1516972C((EffectHeader *)task);
         }
     } else if (type == 0x2D) {
         if (emitter->owner == swap->actorA) {
@@ -694,11 +694,11 @@ void func_151B19A4(Game1DD500Task *task, void *msg, u8 type) {
 /* Task handler: frees the attached particles, then passes the task on to func_1514933C. */
 void func_151B1A58(Game1DD500Task *task) {
     func_151B1918(task);
-    func_1514933C((struct260 *)task);
+    func_1514933C((TimedEffect *)task);
 }
 
 /* Task handler: frees the attached particles, then passes the task on to func_15149368. */
 void func_151B1A84(Game1DD500Task *task) {
     func_151B1918(task);
-    func_15149368((struct260 *)task);
+    func_15149368((TimedEffect *)task);
 }

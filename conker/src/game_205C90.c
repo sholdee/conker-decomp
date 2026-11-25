@@ -140,7 +140,7 @@ void func_151D8A24(RumbleObj *obj) {
     }
 
     if (expired) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
     }
 }
 
@@ -158,13 +158,13 @@ void func_151D8B24(RumbleObj *obj) {
 /* Destroy hook: stops the rumble, then the default destroy (func_15169804). */
 void func_151D8B88(RumbleObj *obj) {
     func_151D8B24(obj);
-    func_15169804((struct102 *)obj);
+    func_15169804((EffectHeader *)obj);
 }
 
 /* Free hook: stops the rumble, then the default free (func_15169824). */
 void func_151D8BB4(RumbleObj *obj) {
     func_151D8B24(obj);
-    func_15169824((struct102 *)obj);
+    func_15169824((EffectHeader *)obj);
 }
 
 void func_151D8C00(RumbleObj *obj, RumbleFalloff *falloff);
@@ -201,9 +201,9 @@ void func_151D8C00(RumbleObj *obj, RumbleFalloff *falloff) {
 /* Message handler: messages 0x58 and 0x47 release the object. */
 void func_151D8D5C(RumbleObj *obj, s32 data, u8 message) {
     if (message == 0x58) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
     } else if (message == 0x47) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
     }
 }
 

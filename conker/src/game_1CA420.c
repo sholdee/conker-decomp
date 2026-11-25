@@ -740,7 +740,7 @@ void func_1519E570(TrailTask *task, TrailEvent *event, u8 eventId) {
 
     if (eventId == 0) {
         if ((event->object.actor == data->owner) || (event->object.uniqueId == data->ownerId)) {
-            func_1516972C((struct102 *)task);
+            func_1516972C((EffectHeader *)task);
         }
     } else if (eventId == 0x2D) {
         if (data->owner == event->swap.actorA) {
@@ -753,7 +753,7 @@ void func_1519E570(TrailTask *task, TrailEvent *event, u8 eventId) {
     }
 }
 
-void func_1519E61C(struct102 *task, TrailEvent *event, u8 eventId) {
+void func_1519E61C(EffectHeader *task, TrailEvent *event, u8 eventId) {
     if (eventId == 0 || eventId == 9) {
         func_1516972C(task);
     }
@@ -822,7 +822,7 @@ void func_1519E818(TrailTask *task, TrailEvent *event, u8 eventId) {
 
     if (eventId == 0) {
         if ((event->object.actor == data->owner) || (event->object.uniqueId == data->ownerId)) {
-            func_1516972C((struct102 *)task);
+            func_1516972C((EffectHeader *)task);
             D_800E0920 = NULL;
         // matching: an unused label ends the basic block here, as in the ROM
         skip:;
@@ -841,20 +841,20 @@ void func_1519E818(TrailTask *task, TrailEvent *event, u8 eventId) {
 /* Trail task teardown (two variants): detaches it from its owner's attachments first. */
 void func_1519E8CC(TrailTask *task) {
     func_1514EDF0(task, task->data.owner);
-    func_1514933C((struct260 *)task);
+    func_1514933C((TimedEffect *)task);
 }
 
 void func_1519E8F8(TrailTask *task) {
     func_1514EDF0(task, task->data.owner);
-    func_15149368((struct260 *)task);
+    func_15149368((TimedEffect *)task);
 }
 
-void func_1519E924(struct260 *task) {
+void func_1519E924(TimedEffect *task) {
     D_800E0920 = NULL;
     func_1514933C(task);
 }
 
-void func_1519E948(struct260 *task) {
+void func_1519E948(TimedEffect *task) {
     D_800E0920 = NULL;
     func_15149368(task);
 }

@@ -55,7 +55,7 @@ Vtx *func_151BE4B8(BurstSpark *spark, s16 viewport) {
     BeamScale scale;
 
     if (owner->unique_id != data->ownerId || owner->interaction_state == 0) {
-        func_1516972C((struct102 *)spark);
+        func_1516972C((EffectHeader *)spark);
         return NULL;
     }
     if (!(data->flags & 1)) {
@@ -90,7 +90,7 @@ void func_151BE558(OwnedParticle *particle, ActorMsg *msg, u8 msgId) {
         Actor *actor = msg->ref.actor;
 
         if (actor == owner->actor || msg->ref.uniqueId == owner->uniqueId) {
-            func_1516972C((struct102 *)particle);
+            func_1516972C((EffectHeader *)particle);
         }
     }
 }

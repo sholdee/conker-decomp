@@ -25,7 +25,7 @@ void func_151BC5A4(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
 
     if (msgId == 0) {
         if (actor == msg->ref.actor || owner->uniqueId == msg->ref.uniqueId) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     } else if (msgId == 0x2D) {
         if (owner->actor == msg->swap.actorA) {
@@ -911,7 +911,7 @@ void func_151BE0AC(s32 effect, s32 msg, u8 msgId) {
         owner = args[0] + 0x28; /* &((BurstEffect *)effect)->data.owner */
         if (((ActorRef *)msg)->actor == ((ActorRef *)owner)->actor ||
             ((ActorRef *)owner)->uniqueId == ((ActorRef *)args[1])->uniqueId) {
-            func_1516972C((struct102 *)args[0]);
+            func_1516972C((EffectHeader *)args[0]);
         }
     } else {
         owner = args[0] + 0x28;
@@ -924,25 +924,25 @@ void func_151BE138(BurstEffect *effect) {
     BurstData *data = &effect->data;
 
     if (data->sparks[0] != NULL) {
-        func_1516972C((struct102 *)data->sparks[0]);
+        func_1516972C((EffectHeader *)data->sparks[0]);
     }
     if (data->sparks[1] != NULL) {
-        func_1516972C((struct102 *)data->sparks[1]);
+        func_1516972C((EffectHeader *)data->sparks[1]);
     }
     if (data->glows[0] != NULL) {
-        func_1516972C((struct102 *)data->glows[0]);
+        func_1516972C((EffectHeader *)data->glows[0]);
     }
     if (data->glows[1] != NULL) {
-        func_1516972C((struct102 *)data->glows[1]);
+        func_1516972C((EffectHeader *)data->glows[1]);
     }
 }
 
 void func_151BE1B8(BurstEffect *effect) {
     func_151BE138(effect);
-    func_1514933C((struct260 *)effect);
+    func_1514933C((TimedEffect *)effect);
 }
 
 void func_151BE1E4(BurstEffect *effect) {
     func_151BE138(effect);
-    func_15149368((struct260 *)effect);
+    func_15149368((TimedEffect *)effect);
 }

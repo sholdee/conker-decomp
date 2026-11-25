@@ -162,7 +162,7 @@ void func_151A7A90(Bolt *bolt) {
     }
 
     if (done) {
-        func_1516972C((struct102 *)bolt);
+        func_1516972C((EffectHeader *)bolt);
     }
 }
 
@@ -348,7 +348,7 @@ void func_151A8584(Bolt *bolt) {
         D_8008F94C[self->def.type](bolt);
     }
     func_151A8560(bolt);
-    func_15169804((struct102 *)bolt);
+    func_15169804((EffectHeader *)bolt);
 }
 
 extern void (*D_8008F958[])(Bolt *);
@@ -361,7 +361,7 @@ void func_151A85D4(Bolt *bolt) {
         D_8008F958[self->def.type](bolt);
     }
     func_151A8560(bolt);
-    func_15169824((struct102 *)bolt);
+    func_15169824((EffectHeader *)bolt);
 }
 
 /*
@@ -539,7 +539,7 @@ void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
     if (msgType == 0) {
         actor = msg->ref.actor;
         if ((actor == link->owner) || (link->ownerId == msg->ref.uniqueId)) {
-            func_1516972C((struct102 *)bolt);
+            func_1516972C((EffectHeader *)bolt);
         }
     } else if (msgType == 0x2D) {
         if (link->owner == msg->swap.actorA) {

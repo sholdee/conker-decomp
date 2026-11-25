@@ -45,8 +45,7 @@ typedef struct BoltChain {
 } BoltChain; /* size 0x44 */
 
 typedef struct BoltChainObj {
-    /* 0x00 */ struct260 base;
-    /* 0x24 */ u8 pad24[4];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoltChain chain;
     /* 0x6C */ u8 pad6C[4];
     /* 0x70 */ Vec3f points[1];    /* chain.count points */
@@ -162,14 +161,14 @@ void func_1510608C(BoltObj *bolt) {
     if (bolt->desc.updateKind != -1) {
         update = D_80088C10[bolt->desc.updateKind];
         if (update != NULL && !update(bolt, &moved)) {
-            func_1516972C((struct102 *)bolt);
+            func_1516972C((EffectHeader *)bolt);
         }
     }
 
     if (bolt->desc.flags & 1) {
         bolt->desc.life -= D_800BE9E4;
         if (bolt->desc.life < 0) {
-            func_1516972C((struct102 *)bolt);
+            func_1516972C((EffectHeader *)bolt);
         }
     }
 
@@ -475,11 +474,11 @@ void func_15106E78(BoltObj *bolt) {
     }
     flare = bolt->flares[0];
     if (flare != NULL) {
-        func_1516972C((struct102 *)flare);
+        func_1516972C((EffectHeader *)flare);
     }
     flare = bolt->flares[1];
     if (flare != NULL) {
-        func_1516972C((struct102 *)flare);
+        func_1516972C((EffectHeader *)flare);
     }
     func_151D5E30(bolt->vtxBuf);
 }
@@ -487,14 +486,14 @@ void func_15106E78(BoltObj *bolt) {
 /* Destroys the bolt's resources, then hands it to func_15169804. */
 void func_15106EF8(BoltObj *bolt) {
     func_15106E78(bolt);
-    func_15169804((struct102 *)bolt);
+    func_15169804((EffectHeader *)bolt);
 }
 
 
 /* Destroys the bolt's resources, then hands it to func_15169824. */
 void func_15106F24(BoltObj *bolt) {
     func_15106E78(bolt);
-    func_15169824((struct102 *)bolt);
+    func_15169824((EffectHeader *)bolt);
 }
 
 extern void (*D_80088C28[])(BoltObj *bolt, s32 arg1, u8 arg2);
@@ -569,8 +568,8 @@ void func_151072BC(BoltChainObj *obj) {
     chain = &obj->chain;
     if (chain->link == NULL) {
         if (chain->index >= chain->count - 1) {
-            obj->base.unkE = -1;
-            obj->base.unkD |= 1;
+            obj->base.header.state = -1;
+            obj->base.header.flags |= 1;
             return;
         }
         owner = obj;
@@ -602,7 +601,7 @@ void func_151072BC(BoltChainObj *obj) {
         desc.color.alpha = func_150ADA20() % (config->alphaRange + 1) + config->alphaBase;
         desc.kind = 1;
         desc.segments = func_150ADA20() % (config->segmentsRange + 1) + config->segmentsBase;
-        chain->link = func_15105CE0(&desc, sizeof(owner), obj->base.pad0[0xC], obj->base.pad0[1]);
+        chain->link = func_15105CE0(&desc, sizeof(owner), obj->base.header.owner, obj->base.header.kind);
         if (chain->link != NULL) {
             memcpy(chain->link->userData, &owner, sizeof(owner));
         }
@@ -621,7 +620,7 @@ void func_15107604(BoltObj *bolt) {
 void func_1510761C(BoltChainObj *obj) {
     // matching: volatile makes IDO load the link twice, as the original does
     if (*(BoltObj *volatile *)&obj->chain.link != NULL) {
-        func_1516972C(*(struct102 *volatile *)&obj->chain.link);
+        func_1516972C(*(EffectHeader *volatile *)&obj->chain.link);
     }
 }
 

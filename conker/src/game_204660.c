@@ -4,7 +4,7 @@
 #include "effects.h"
 
 /*
- * Bone trails: an emitter object (a struct260 made by func_151D71B0) follows a point on an actor's
+ * Bone trails: an emitter object (a TimedEffect made by func_151D71B0) follows a point on an actor's
  * bone and drags a trail object (made by func_15147A80) behind it. The trail keeps a ring buffer of
  * points that it renders as a textured ribbon.
  */
@@ -53,8 +53,8 @@ void func_151D77C8(TrailEmitter *emitter);
 void func_151D7830(TrailEmitter *emitter);
 
 /* Creates an emitter of the given anchor type with `extraSize` more bytes of data after the TrailAnchor. */
-struct260 *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 extraSize, u8 arg5, s32 arg6) {
-    struct260 *emitter;
+TimedEffect *func_151D71B0(s16 arg0, u8 arg1, u8 anchorType, f32 maxStep, s32 extraSize, u8 arg5, s32 arg6) {
+    TimedEffect *emitter;
     TrailAnchor anchor;
 
     anchor.trail = NULL;
@@ -122,12 +122,12 @@ void func_151D7404(TrailEmitter *emitter) {
     func_151D77C8(emitter);
 }
 
-void func_151D7424(struct260 *emitter) {
+void func_151D7424(TimedEffect *emitter) {
     func_151D7404(emitter);
     func_1514933C(emitter);
 }
 
-void func_151D7450(struct260 *emitter) {
+void func_151D7450(TimedEffect *emitter) {
     func_151D7404(emitter);
     func_15149368(emitter);
 }
@@ -144,7 +144,7 @@ void func_151D747C(Actor *actor) {
 /* Attaches a trail to `bone` of `actor`; `condition` picks an extra D_8008FCA8 check (-1 for none). */
 void func_151D74B0(Actor *actor, u8 bone, s8 condition, u8 arg3, s32 arg4) {
     TrailBoneLink link;
-    struct260 *emitter;
+    TimedEffect *emitter;
 
     link.actor = actor;
     link.actorId = actor->unique_id;
@@ -166,7 +166,7 @@ void func_151D7538(TrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
     if (msgType == 0x3D) {
         link = &(*pEmitter)->link;
         if ((msg->actor == link->actor) || (((TrailBoneLink *)*(s32 *)&msg)->actorId == link->actorId)) {
-            func_1516972C((struct102 *)*pEmitter);
+            func_1516972C((EffectHeader *)*pEmitter);
         }
     } else {
         link = &(*pEmitter)->link;

@@ -237,7 +237,7 @@ void func_1516D678(Particle *particle) {
         if (link != NULL) {
             link->status = 0;
         }
-        func_1516972C((struct102 *)particle);
+        func_1516972C((EffectHeader *)particle);
     } else {
         /* y is 8.8 fixed point with its fraction in yFraction */
         value = particle->y;
@@ -650,7 +650,7 @@ void func_1516DB90(Emitter *arg0) {
         if (i > 0) {
             emitter->timer = i;
         } else {
-            func_1516972C((struct102 *)emitter);
+            func_1516972C((EffectHeader *)emitter);
         }
     }
 }

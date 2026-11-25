@@ -26,7 +26,7 @@ typedef struct {
 
 /* Starts a spark emitter effect at the actor's position; the spark variant depends on the actor's unk184. */
 void func_151A0A10(Actor *actor, s16 duration, u8 owner, s32 arg3) {
-    struct260 *effect;
+    TimedEffect *effect;
     SparkEmitter emitter;
 
     if (actor != NULL) {

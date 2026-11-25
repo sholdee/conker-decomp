@@ -205,7 +205,7 @@ void func_150CE694(MosaicEffect *effect, ActorMsg *msg, u8 type) {
     } else if (type == 0) {
         object = msg->ref.actor;
         if (object == mosaic->owner || msg->ref.uniqueId == mosaic->ownerId) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     }
 }

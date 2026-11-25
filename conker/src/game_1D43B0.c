@@ -177,7 +177,7 @@ s32 func_151A73EC(Particle *particle) {
 
     if (particle->lifetime < 32) {
         if (data->trail != NULL) {
-            func_1516972C((struct102 *)data->trail);
+            func_1516972C((EffectHeader *)data->trail);
             data->trail = NULL;
         }
     }
@@ -198,7 +198,7 @@ s32 func_151A743C(Particle *particle, f32 x, f32 y, f32 z, f32 floorY) {
     data = &particle->debris;
     particle->pos.y = particle->radius + floorY;
     if (data->trail != NULL) {
-        func_1516972C((struct102 *)data->trail);
+        func_1516972C((EffectHeader *)data->trail);
         data->trail = NULL;
     }
     if (data->stopSpeed < particle->vel.y) {
@@ -336,7 +336,7 @@ void func_151A7908(Particle *particle) {
     DebrisData *data = &particle->debris;
 
     if (data->trail != NULL) {
-        func_1516972C((struct102 *)data->trail);
+        func_1516972C((EffectHeader *)data->trail);
         data->trail = NULL;
     }
 }

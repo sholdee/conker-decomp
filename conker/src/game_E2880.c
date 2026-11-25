@@ -14,7 +14,7 @@ typedef struct {
     /* 0x0C */ f32 unkCAccum;  /* fractional count of func_15107B78 particles still to spawn */
 } SparkEffectData; /* size 0x10 */
 
-/* A struct260 effect, as created by func_15149130, carrying SparkEffectData at 0x28. */
+/* A TimedEffect effect, as created by func_15149130, carrying SparkEffectData at 0x28. */
 typedef struct {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;
@@ -95,12 +95,12 @@ void func_150B57C4(SparkEffect *effect) {
 
 void func_150B57E8(SparkEffect *effect) {
     func_150B57C4(effect);
-    func_1514933C((struct260 *)effect);
+    func_1514933C((TimedEffect *)effect);
 }
 
 void func_150B5814(SparkEffect *effect) {
     func_150B57C4(effect);
-    func_15149368((struct260 *)effect);
+    func_15149368((TimedEffect *)effect);
 }
 
 /* Event handler of a spark effect: event 0 destroys it when it concerns its owner, event 0x2D swaps
@@ -112,7 +112,7 @@ void func_150B5840(SparkEffect *effect, ActorMsg *event, u8 eventId) {
     if (eventId == 0) {
         obj = event->ref.actor; // matching: loading the pointer first puts it in v1 ahead of data->owner
         if ((obj == data->owner) || (event->ref.uniqueId == data->ownerId)) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     } else if (eventId == 0x2D) {
         if (data->owner == event->swap.actorA) {

@@ -50,16 +50,23 @@ typedef struct {
     /* 0x08 */ u8 unk8;
 } Link151419D0;
 
+/* An object carrying a Link151419D0 at 0x28. */
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ Link151419D0 link;
+} LinkedObject151419D0;
+
 
 /* Message handler: message 0 destroys the object if it refers to it; 0x2D re-links it. */
-void func_151419D0(struct102 *obj, Msg151419D0 *msg, u8 msgType) {
-    Link151419D0 *link = (Link151419D0 *)&obj->unk28;
+void func_151419D0(LinkedObject151419D0 *obj, Msg151419D0 *msg, u8 msgType) {
+    Link151419D0 *link = &obj->link;
     s32 first;
 
     if (msgType == 0) {
         first = msg->unk0;
         if ((first == link->unk4) || (msg->unk4.b == link->unk8)) {
-            func_1516972C(obj);
+            func_1516972C(&obj->header);
         }
     } else if (msgType == 0x2D) {
         if (link->unk4 == msg->unk0) {

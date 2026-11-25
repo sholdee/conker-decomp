@@ -731,7 +731,7 @@ void func_150D49C0(TrailActor *actor, ActorMsg *msg, u8 id) {
     if (id == 0 || id == 0x2E || id == 3) {
         obj = msg->ref.actor;
         if (obj == state->owner || msg->ref.uniqueId == state->ownerId) {
-            func_1516972C((struct102 *)actor);
+            func_1516972C((EffectHeader *)actor);
         }
     } else if (id == 0x2D) {
         if (state->owner == msg->swap.actorA) {
@@ -805,10 +805,10 @@ void func_150D4C2C(TrailActor *actor) {
     func_1000FD38(func_150D5124, state, 0x5B4);
     func_1000FD38(func_150D5124, state, 0x5BC);
     if (state->effects[0] != NULL) {
-        func_1516972C((struct102 *)state->effects[0]);
+        func_1516972C((EffectHeader *)state->effects[0]);
     }
     if (state->effects[1] != NULL) {
-        func_1516972C((struct102 *)state->effects[1]);
+        func_1516972C((EffectHeader *)state->effects[1]);
     }
 }
 

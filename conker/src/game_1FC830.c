@@ -10,7 +10,7 @@ extern f32 func_15144AA8(s32);
 extern Vec3f *func_15144B34(s32);
 extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
 f32 func_15143E64(Vec3f *);
-struct260 *func_151CEAAC(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
+TimedEffect *func_151CEAAC(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
 
 /* One point of a ribbon trail. */
 typedef struct {
@@ -609,7 +609,7 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
         Actor *obj = gone->actor;
 
         if (obj == ref->actor || gone->uniqueId == ref->uniqueId) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     } else if (type == 0x2D) {
         ActorSwapMsg *swap = msg;
@@ -634,7 +634,7 @@ extern void func_1514F808(ConeBasis *, f32, Vec3f *);
 /* Partial view of the particle func_15130280 creates. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ struct260 *effect; /* effect that travels with the particle */
+    /* 0xA8 */ TimedEffect *effect; /* effect that travels with the particle */
 } CarrierParticle;
 
 extern CarrierParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
@@ -776,7 +776,7 @@ void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
 void func_151D0ED8(CarrierParticle *particle) {
     if (particle->effect != NULL) {
         // matching: a volatile read makes IDO reload the pointer for the call, as the original does
-        func_1516972C(*(struct102 *volatile *)&particle->effect);
+        func_1516972C(*(EffectHeader *volatile *)&particle->effect);
     }
 }
 
@@ -931,12 +931,12 @@ void func_151D1368(TrackerEffect *effect) {
 
 void func_151D1388(TrackerEffect *effect) {
     func_151D1368(effect);
-    func_1514933C((struct260 *)effect);
+    func_1514933C((TimedEffect *)effect);
 }
 
 void func_151D13B4(TrackerEffect *effect) {
     func_151D1368(effect);
-    func_15149368((struct260 *)effect);
+    func_15149368((TimedEffect *)effect);
 }
 
 /* Lets go of the tracker's trail, which then fades out on its own. */

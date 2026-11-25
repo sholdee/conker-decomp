@@ -128,7 +128,7 @@ void func_150C8A68(RadialEffect *effect) {
     }
     if (expired) {
 
-        func_1516972C((struct102 *)effect);
+        func_1516972C((EffectHeader *)effect);
     }
 }
 

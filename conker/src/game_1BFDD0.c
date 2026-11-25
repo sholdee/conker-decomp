@@ -5,7 +5,7 @@
 
 /*
  * Two object-attached particle emitters (effects 0x23 and the caller-chosen type of func_15192D48):
- * their spawners, per-frame updates and message handlers. Each effect is a struct260 whose data at
+ * their spawners, per-frame updates and message handlers. Each effect is a TimedEffect whose data at
  * 0x28 is an ObjectEmitterData.
  */
 
@@ -245,7 +245,7 @@ void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     } else if (msgType == 0) {
         removed = removal->actor;
         if (removed == data->object || removal->uniqueId == data->objectId) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     }
 }
@@ -270,7 +270,7 @@ void func_151932E0(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     } else if (msgType == 0) {
         removed = removal->actor;
         if (removed == data->object || removal->uniqueId == data->objectId) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     }
 }

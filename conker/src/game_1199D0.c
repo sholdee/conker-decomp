@@ -40,7 +40,7 @@ typedef struct {
     /* 0x09 */ u8 rate;
 } FogFlashData;
 
-/* An effect (a struct260 with per-effect data at 0x28), as created by func_15149130. */
+/* An effect (a TimedEffect with per-effect data at 0x28), as created by func_15149130. */
 typedef struct {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 kind;

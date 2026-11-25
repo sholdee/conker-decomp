@@ -300,11 +300,11 @@ void func_1519F400(TrailOwner *owner) {
     }
     if (sides[0].spawner != NULL) {
         func_151A0928(sides[0].spawner);
-        func_1516972C((struct102 *)sides[0].spawner);
+        func_1516972C((EffectHeader *)sides[0].spawner);
     }
     if (sides[1].spawner != NULL) {
         func_151A0928(sides[1].spawner);
-        func_1516972C((struct102 *)sides[1].spawner);
+        func_1516972C((EffectHeader *)sides[1].spawner);
     }
 }
 
@@ -906,7 +906,7 @@ void func_151A09B4(TrailSpawner *spawner, ActorRef *event, u8 type) {
     if (type == 0) {
         if (actor == event->actor || event->uniqueId == actor->unique_id) {
             func_151A0928(spawner);
-            func_1516972C((struct102 *)spawner);
+            func_1516972C((EffectHeader *)spawner);
         }
     }
 }

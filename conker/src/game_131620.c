@@ -112,7 +112,7 @@ void func_151041E4(FadeEffect *effect) {
         alpha = effect->alpha;
         alpha -= D_800BEA08 * 10;
         if (alpha <= 0) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
             func_151D66F0(0, 0);
         } else {
             func_151D66F0((alpha * 210) >> 8, 2);

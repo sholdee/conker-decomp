@@ -33,7 +33,7 @@ typedef struct {
     /* 0x39 */ u8  unk39;
 } struct_7484;
 
-struct102 *func_15169968(struct_7484 *);
+EffectHeader *func_15169968(struct_7484 *);
 
 /* Shows a sprite that fades in over `fadeIn` frames, holds for `hold` frames and
  * fades out over `fadeOut` frames. */

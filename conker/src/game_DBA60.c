@@ -296,7 +296,7 @@ void func_150AEDF8(AttachedEffect *effect, ActorMsg *msg, u8 type) {
         Actor *obj = msg->ref.actor;
 
         if (obj == link->owner || msg->ref.uniqueId == link->ownerId) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     }
 }

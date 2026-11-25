@@ -100,8 +100,8 @@ void func_150E0D90(Camera *camera) {
 }
 
 /* Spawns the emitter effect for prop D_800A0FE0[index] (index 0 or 1); returns it, or NULL. */
-struct260 *func_150E1060(u8 index, u8 owner, s32 kind) {
-    struct260 *effect;
+TimedEffect *func_150E1060(u8 index, u8 owner, s32 kind) {
+    TimedEffect *effect;
     Emitter emitter;
 
     if (index < 0) { // matching: always false for a u8, but removing it changes the code
@@ -132,7 +132,7 @@ struct260 *func_150E1060(u8 index, u8 owner, s32 kind) {
 /* Two points per emitter index, in the prop's space (start and end of the emission direction). */
 extern Vec3f D_800A0FE4[];
 extern Vec3f D_800A0FFC[];
-extern struct260 *func_15130374(ParticleDesc68 *, u8, s32, u8, s32);
+extern TimedEffect *func_15130374(ParticleDesc68 *, u8, s32, u8, s32);
 extern void func_15145CD0(WorldObject *, Vec3f **, f32 **, s32);
 
 /* Emitter effect update: accumulates a random rate and, while the emitter's lookup has one of the
@@ -150,7 +150,7 @@ void func_150E114C(EmitterEffect *effect) {
     s32 flip80;
     s32 flip40;
     f32 speed;
-    struct260 *particle;
+    TimedEffect *particle;
 
     emitter = &effect->emitter;
     emitter->accum += (204.0f + (func_150ADA68() * 159.0f)) * 0.001f * D_800BE9A4;

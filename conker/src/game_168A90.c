@@ -144,7 +144,7 @@ void func_1513B798(DynModel *obj) {
         }
     }
     if (done) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
     }
 }
 
@@ -177,12 +177,12 @@ s32 func_1513B968(DynModel *obj, s16 viewport) {
 
 void func_1513B9A8(DynModel *obj) {
     func_100043B4((s32 *)obj->asset, 4);
-    func_15169804((struct102 *)obj);
+    func_15169804((EffectHeader *)obj);
 }
 
 void func_1513B9DC(DynModel *obj) {
     func_100043B4((s32 *)obj->asset, 4);
-    func_15169824((struct102 *)obj);
+    func_15169824((EffectHeader *)obj);
 }
 
 void func_1513BA10(DynModel *obj) {
@@ -239,7 +239,7 @@ DynModel *func_1513BAE8(void) {
     obj = func_1513B5E0(&desc, 1, sizeof(TexWarpState), 0xFF, 1);
     if (obj != NULL) {
         if (obj->buffersSize != 0x1180) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C((EffectHeader *)obj);
         } else {
             memcpy(obj->buffers + obj->buffersSize, &state, sizeof(TexWarpState));
         }

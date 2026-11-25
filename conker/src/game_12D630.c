@@ -30,7 +30,7 @@ void func_15100180(Actor *owner) {
 /* Spawns the owner effect (func_15149130) on `owner`. */
 void func_151001B4(Actor *owner) {
     OwnerEffectData data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     data.owner = owner;
     data.ownerId = owner->unique_id;
@@ -51,7 +51,7 @@ void func_15100230(OwnerEffect *effect, ActorRef *msg, u8 msgId) {
     if (msgId == 0x48) {
         // matching: the punned read of msg makes IDO load it a second time for the id compare
         if (msg->actor == data->owner || data->ownerId == ((ActorRef *)*(s32 *)&msg)->uniqueId) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     } else {
         func_15149514((s32)msg, msgId, &data->owner, &data->ownerId, effect);

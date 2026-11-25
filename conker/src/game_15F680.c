@@ -154,7 +154,7 @@ void func_151321D0(Particle *particle) {
         if (particle->destroyFn != 0) {
             D_8008997C[particle->destroyFn](particle);
         }
-        func_1516972C((struct102 *)particle);
+        func_1516972C((EffectHeader *)particle);
     }
 }
 
@@ -219,12 +219,12 @@ void func_15132444(Particle *particle) {
 
 void func_15132570(Particle *particle) {
     func_15132444(particle);
-    func_15169804((struct102 *)particle);
+    func_15169804((EffectHeader *)particle);
 }
 
 void func_1513259C(Particle *particle) {
     func_15132444(particle);
-    func_15169824((struct102 *)particle);
+    func_15169824((EffectHeader *)particle);
 }
 
 /* Free the buffers func_1513264C allocated into unk154[0..D_80082FA0] and unk164. */
@@ -387,7 +387,7 @@ void func_15132A88(Particle *particle) {
 
     result = D_8008998C[particle->matrixFn](&particle->mtx[D_800BE9C0], particle);
     if (result == -1) {
-        func_1516972C((struct102 *)particle);
+        func_1516972C((EffectHeader *)particle);
         return;
     }
 
@@ -844,7 +844,7 @@ void func_15133DE8(Particle *particle, ActorRef *data, u8 event) {
     if (event == 0) {
         obj = data->actor;
         if (obj == particle->owner || particle->ownerId == data->uniqueId) {
-            func_1516972C((struct102 *)particle);
+            func_1516972C((EffectHeader *)particle);
         }
     }
 }

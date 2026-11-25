@@ -4,7 +4,7 @@
 #include "effects.h"
 
 void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
-struct260 *func_15130374(void *, u8, s32, u8, s32);
+TimedEffect *func_15130374(void *, u8, s32, u8, s32);
 s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 
 /* One entry of the D_800A0640 table: where on the owner's skeleton func_150CBF80 spawns, and its random ranges. */
@@ -237,7 +237,7 @@ s32 func_150CC638(GrowParticle *p) {
 s32 func_150CC6B8(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 arg14) {
-    struct260 *particle;
+    TimedEffect *particle;
     ParticleDesc spawn;
     f32 size;
     f32 decay;

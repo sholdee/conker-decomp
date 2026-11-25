@@ -33,7 +33,7 @@ void func_15190400(BoundEffect *effect, ActorRef *msg, u8 type) {
         actorId = effect->ref.uniqueId;
         msgActorId = msg->uniqueId;
         if (actor == msgActor || actorId == msgActorId) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C((EffectHeader *)effect);
         }
     }
 }

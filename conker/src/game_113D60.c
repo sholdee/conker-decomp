@@ -509,8 +509,8 @@ extern f32 func_15142B44(f32);
 
 /* Creates a burst effect (updated by func_150E7C9C) whose `count` points lie on a random
  * curve across the screen. */
-struct260 *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
-    struct260 *obj;
+TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
+    TimedEffect *obj;
     Game113D60BurstHead head;
     Game113D60Event event;
     Vec2f control[4];
@@ -697,7 +697,7 @@ typedef struct {
 /* Creates effect 0x28 at `position`, lasting `duration` frames (-1: 300). */
 void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind) {
     Game113D60PointData data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     data.position = *position;
     data.unkC = 0.0f;
@@ -812,7 +812,7 @@ s32 func_150E8824(Game113D60Particle *particle, s32 arg1) {
 
 /* Creates the timer effect (0x35) that func_150E88C0 updates. */
 void func_150E8854(void) {
-    struct260 *effect;
+    TimedEffect *effect;
     f32 timer;
 
     timer = 10.0f;
@@ -878,7 +878,7 @@ typedef struct {
 
 /* Creates effect 0x33 for 30-70 frames. */
 void func_150E8A80(void) {
-    struct260 *effect;
+    TimedEffect *effect;
     Game113D60Data8A80 data;
 
     data.unk0 = 1.199999957e-07f;
@@ -943,7 +943,7 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
             dy = data.position.y - center->y;
             dz = data.position.z - center->z;
             if (dx * dx + dy * dy + dz * dz < 3240000.0f) {
-                struct260 *child;
+                TimedEffect *child;
 
                 data.unk0C = 0.3171199858f;
                 data.unk10 = 1.046509981f;
@@ -973,12 +973,12 @@ typedef struct {
     /* 0x28 */ Game113D60PointSpawner spawner;
 } Game113D60PointSpawnerEffect;
 
-struct260 *func_15130374(ParticleDesc64 *, u8, s32, u8, s32);
+TimedEffect *func_15130374(ParticleDesc64 *, u8, s32, u8, s32);
 
 /* Spawns func_15130374 particles within 20 units of the spawner's position. */
 void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
     Game113D60PointSpawner *spawner;
-    struct260 *particle;
+    TimedEffect *particle;
     s32 flip80;
     s32 flip40;
     ParticleDesc64 arg;
@@ -1063,7 +1063,7 @@ typedef struct {
 
 /* Creates effect 0x36 for 5-30 frames. */
 void func_150E90DC(void) {
-    struct260 *effect;
+    TimedEffect *effect;
     Game113D60Data90DC data;
 
     data.unk0 = 2.000000023e-07f;
@@ -1116,7 +1116,7 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
             dy = data.position.y - center->y;
             dz = data.position.z - center->z;
             if (dx * dx + dy * dy + dz * dz < 1960000.0f) {
-                struct260 *child;
+                TimedEffect *child;
 
                 data.unk0C = 0.1932400018f;
                 data.unk10 = 0.3140099943f;

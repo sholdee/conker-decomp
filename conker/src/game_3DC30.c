@@ -11,7 +11,7 @@ void func_15010780(void) {
 
 void func_15010880(void) {
     struct177 tmp;
-    struct260 *temp_v0;
+    TimedEffect *temp_v0;
     s32 base;
 
     func_15177410(0x10, 0xE9, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98, 36.0f, 0x4D, 0xF, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F);

@@ -436,7 +436,7 @@ f32 func_15144A74(Vec3f *, Vec3f *);
 void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, s32 argA) {
     SpriteDef desc;
-    struct260 *effect;
+    TimedEffect *effect;
     Vec3f outA;
     Vec3f outB;
     Vec3f normal;

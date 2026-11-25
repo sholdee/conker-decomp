@@ -82,7 +82,7 @@ void func_15154C90(ScreenSprite *sprite) {
         }
     }
     if (finished) {
-        func_1516972C((struct102 *)sprite);
+        func_1516972C((EffectHeader *)sprite);
     }
 }
 

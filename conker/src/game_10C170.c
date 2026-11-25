@@ -130,7 +130,7 @@ void func_150DECC0(Vec3f *pos, u8 owner, s32 kind) {
     debris.spinBase = -5.0f;
     func_151A6F00(&debris, 0, *(u8 *)&owner, kind);
     {
-        struct260 *effect;
+        TimedEffect *effect;
         Vec3f effectPos;
 
         effectPos = *pos;

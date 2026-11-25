@@ -106,13 +106,13 @@ void func_150BDF0C(EB340Obj *obj) {
 void func_150BE150(EB340Obj *obj, void **msg, u8 event) {
     if (event == 0x21) {
         if (obj->spawn.owner == msg[0]) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C((EffectHeader *)obj);
         }
     } else if (event == 0) {
         Actor *sender = msg[0];
 
         if (sender->camera == obj->spawn.owner) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C((EffectHeader *)obj);
         }
     }
 }

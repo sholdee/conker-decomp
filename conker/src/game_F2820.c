@@ -68,12 +68,12 @@ StripObj *func_150C5370(StripDesc *desc, s32 payloadSize) {
 
 /** Destroy handler: hands the strip to func_15169804. */
 void func_150C5430(StripObj *strip) {
-    func_15169804((struct102 *)strip);
+    func_15169804((EffectHeader *)strip);
 }
 
 /** Free handler: hands the strip to func_15169824. */
 void func_150C5450(StripObj *strip) {
-    func_15169824((struct102 *)strip);
+    func_15169824((EffectHeader *)strip);
 }
 
 extern void (*D_800887B8[])(StripObj *);
@@ -149,7 +149,7 @@ void func_150C5568(StripObj *strip) {
             }
         }
         if (remove) {
-            func_1516972C((struct102 *)strip);
+            func_1516972C((EffectHeader *)strip);
         }
     }
 }
@@ -323,7 +323,7 @@ void func_150C5D0C(StripObj *strip, ActorMsg *data, u8 msg) {
 
     if (msg == 0) {
         if (data->ref.actor == target->obj || data->ref.uniqueId == target->uniqueId) {
-            func_1516972C((struct102 *)strip);
+            func_1516972C((EffectHeader *)strip);
         }
     } else if (msg == 0x2D) {
         if (target->obj == data->swap.actorA) {

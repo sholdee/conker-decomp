@@ -349,7 +349,7 @@ void func_150B6110(BoltRingEffect *effect) {
 }
 
 /** Message handler: on message 0x4A, releases the effect object via func_1516972C. */
-void func_150B6450(struct102 *effect, s32 arg1, u8 msg) {
+void func_150B6450(EffectHeader *effect, s32 arg1, u8 msg) {
     if (msg == 0x4A) {
         func_1516972C(effect);
     }

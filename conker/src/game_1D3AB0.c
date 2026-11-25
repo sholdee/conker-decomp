@@ -9,7 +9,7 @@ typedef struct EmitterState {
     /* 0x04 */ f32 angle;
     /* 0x08 */ f32 angleSpeed;
     /* 0x0C */ u8 padC[4];
-    /* 0x10 */ struct102 *unk10; /* released by func_151A6AB8 */
+    /* 0x10 */ EffectHeader *unk10; /* released by func_151A6AB8 */
     /* 0x14 */ u8 phase;
     /* 0x15 */ u8 phaseSpeed;
     /* 0x16 */ u8 alpha;      /* oscillates in [129, 255] with phase */

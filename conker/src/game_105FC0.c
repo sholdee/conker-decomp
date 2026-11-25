@@ -760,7 +760,7 @@ void func_150DA50C(Trail *trail, TrailMessage *msg, u8 type) {
     } else if (type == 0) {
         owner = msg->owner;
         if ((owner == data->owner) || (data->ownerId == msg->x4.ownerId)) {
-            func_1516972C((struct102 *)trail);
+            func_1516972C((EffectHeader *)trail);
         }
     } else if (type == 0x2D) {
         if (data->owner == msg->owner) {

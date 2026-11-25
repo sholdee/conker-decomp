@@ -200,7 +200,7 @@ void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2) {
         u8 selfTag = self->key.unk4;
         u8 otherTag = other->unk4;
         if (selfId == otherId || selfTag == otherTag) {
-            func_1516972C((struct102 *)self);
+            func_1516972C((EffectHeader *)self);
         }
     }
 }
@@ -386,7 +386,7 @@ void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
 
     sprite = particle->sprite;
     if (particle->parent == NULL) {
-        func_1516972C((struct102 *)sprite);
+        func_1516972C((EffectHeader *)sprite);
         return;
     }
     parent = particle->parent;

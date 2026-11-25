@@ -272,17 +272,17 @@ void func_150FA1B8(BurstEffect *effect) {
     }
 }
 
-/* Event handler: events 0x4C-0x4F set effect->unk11; 0x4C and 0x4F also call func_1515D4D4 (all 0 / all 0xFF). */
-void func_150FA468(struct260 *effect, s32 arg1, u8 event) {
+/* Event handler: events 0x4C-0x4F set the tick callback (30 or none); 0x4C and 0x4F also call func_1515D4D4 (all 0 / all 0xFF). */
+void func_150FA468(TimedEffect *effect, s32 arg1, u8 event) {
     if (event == 0x4C) {
-        effect->unk11 = -1;
+        effect->tickCallback = -1;
         func_1515D4D4(0, 0, 0, 0xFF);
     } else if (event == 0x4D) {
-        effect->unk11 = 30;
+        effect->tickCallback = 30;
     } else if (event == 0x4E) {
-        effect->unk11 = -1;
+        effect->tickCallback = -1;
     } else if (event == 0x4F) {
-        effect->unk11 = -1;
+        effect->tickCallback = -1;
         func_1515D4D4(0xFF, 0xFF, 0xFF, 0xFF);
     }
 }
@@ -496,7 +496,7 @@ void func_150FAAEC(EmitterEffect *effect) {
 }
 
 /* Event handler: events 0x4E and 0x4F call func_1516972C on the object. */
-void func_150FACE4(struct102 *obj, s32 arg1, u8 event) {
+void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event) {
     if ((event == 0x4E) || (event == 0x4F)) {
         func_1516972C(obj);
     }

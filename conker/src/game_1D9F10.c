@@ -97,7 +97,7 @@ RopeRider *func_151ACA60(Actor *obj, f32 radius, s32 extraSize) {
         return NULL;
     }
     if (func_151ACB38(obj, &rider->unk18) == 0) {
-        func_1516979C((struct102 *)rider);
+        func_1516979C((EffectHeader *)rider);
         return NULL;
     }
     rider->owner = obj;

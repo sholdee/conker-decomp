@@ -59,13 +59,13 @@ void func_1518E4A0(Emitter *emitter) {
 /* Destroy handler of an emitter process. */
 void func_1518E4CC(Emitter *emitter) {
     func_1518E4A0(emitter);
-    func_15169804((struct102 *)emitter);
+    func_15169804((EffectHeader *)emitter);
 }
 
 /* Free handler of an emitter process. */
 void func_1518E4F8(Emitter *emitter) {
     func_1518E4A0(emitter);
-    func_15169824((struct102 *)emitter);
+    func_15169824((EffectHeader *)emitter);
 }
 
 /* Particle spawn callback: texture 0x13 or 0x14 at random, opaque black. */

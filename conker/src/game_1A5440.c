@@ -499,11 +499,11 @@ void func_15178DA4(Swarm *swarm) {
     while (member != NULL) {
         next = member->next;
         if (swarm == member->s.swarm) {
-            func_1516972C((struct102 *)member);
+            func_1516972C((EffectHeader *)member);
         }
         member = next;
     }
-    func_15169824((struct102 *)swarm);
+    func_15169824((EffectHeader *)swarm);
 }
 
 /* Destroys the swarm with the given tag. */

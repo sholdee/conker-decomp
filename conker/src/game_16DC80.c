@@ -417,7 +417,7 @@ void func_151416E8(GlowObj *obj, u8 *msg, u8 msgType) {
             if (*msg == (*params).shape.type) {
                 switch (msgType) {
                     case 0x22:
-                        func_1516972C((struct102 *)obj);
+                        func_1516972C((EffectHeader *)obj);
                         break;
                     case 0x24:
                         params->shape.handler = -1;

@@ -14,7 +14,7 @@ typedef struct {
     /* 0x8 */ f32 spawnAccum;
 } EffectE7970Data; // size 0xC
 
-/* Effect slot as returned by func_15149130 (a struct260); the effect data lives at 0x28. */
+/* Effect slot as returned by func_15149130 (a TimedEffect); the effect data lives at 0x28. */
 typedef struct {
     /* 0x00 */ u8 unk0;
     /* 0x01 */ u8 unk1;
@@ -29,7 +29,7 @@ typedef struct {
 /* Spawns an effect attached to `owner`. */
 void func_150BA4C0(Actor *owner, u8 arg1, s32 arg2) {
     EffectE7970Data data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     data.owner = owner;
     data.ownerId = owner->unique_id;
