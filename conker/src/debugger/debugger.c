@@ -614,62 +614,43 @@ void func_160012B0(s32 position, u8 *text) {
     }
 }
 
-// convert rgb to rgba16
-void func_16001338(u8 arg0, u8 arg1, u8 arg2) {
-    D_1600388C = ((arg0 & 0xF8) << 8) | ((arg1 & 0xF8) << 3) | ((arg2 & 0xF8) >> 2) | 1;
+/* Set the text colour (D_1600388C) as an opaque RGBA5551 pixel. */
+void func_16001338(u8 red, u8 green, u8 blue) {
+    D_1600388C = ((red & 0xF8) << 8) | ((green & 0xF8) << 3) | ((blue & 0xF8) >> 2) | 1;
 }
 
-extern u16 D_1600388C;
-extern s32 D_160038A8;
-void func_16001390(s16 arg0, s16 arg1, register s16 arg2, s16 arg3)
-{
-  s32 count;
-  u16 *ptr;
-  if (arg2 < arg0)
-  {
-    return;
-  }
-  if (arg3 < arg1)
-  {
-    return;
-  }
-  if (arg0 < 0)
-  {
-    return;
-  }
-  if (arg1 < 0)
-  {
-    return;
-  }
-  arg2++;
-  arg3++;
-  ptr = (u16 *) func_1600160C(0);
-  ptr += arg0 + (arg1 * D_160038A8);
-  arg2 -= arg0;
-  arg3 -= arg1;
-  if (arg3 > 0)
-  {
-    do
-    {
-      count = arg2;
-      if (arg2 > 0)
-      {
-        do
-        {
-          *(ptr++) = D_1600388C;
-          count--;
-        }
-        while (count != 0);
-      }
-      arg3--;
-      ptr += D_160038A8 - arg2;
+/* Fill the pixel rectangle (left, top)..(right, bottom), inclusive, with the text colour. */
+void func_16001390(s16 left, s16 top, s16 right, s16 bottom) {
+    u16 *pixel;
+    s32 count;
+
+    if ((right < left) || (bottom < top)) {
+        return;
     }
-    while (arg3 > 0);
-  }
+    if ((left < 0) || (top < 0)) {
+        return;
+    }
+    right++;
+    bottom++;
+    pixel = (u16 *)func_1600160C(0);
+    pixel += left + top * D_160038A8;
+    right -= left;
+    bottom -= top;
+    while (bottom > 0) {
+        for (count = right; count > 0; count--) {
+            *pixel++ = D_1600388C;
+        }
+        bottom--;
+        pixel += D_160038A8 - right;
+    }
 }
 
 extern const u8 D_16003CE0[];
 
+/*
+ * Draw one 8x8 glyph of the font (D_16003CE0, from ' ' up) at destination in the text colour
+ * on the background pixel 1; returns the position of the next character.
+ */
 u8 *func_160014F0(u8 *destination, u8 character) {
     u16 *pixel;
     u16 color;
@@ -678,65 +659,65 @@ u8 *func_160014F0(u8 *destination, u8 character) {
     u32 row;
     const u8 *glyph;
     s32 code;
-    u16 value;
+    u16 pixelValue;
 
     pixel = (u16 *)destination;
     color = D_1600388C;
-    column = character;
-    bits = column;
-    code = bits;
-    if (code < 0x20) {
-        code = 0x20;
+    column = character; // matching: routing the char through column puts both in the same register
+    code = column;
+    if (code < ' ') {
+        code = ' ';
     }
-    row = 0, glyph = D_16003CE0 + ((code - 0x20) << 3);
+    row = 0, glyph = D_16003CE0 + ((code - ' ') << 3); // matching: own line steers as1's scheduling
     for (; row < 8; row++, glyph++) {
         for (column = 0, bits = *glyph; column < 8; column++) {
-            value = (bits & 0x80) ? color : 1;
+            pixelValue = (bits & 0x80) ? color : 1;
             bits <<= 1;
-            *pixel++ = value;
+            *pixel++ = pixelValue;
         }
         pixel += D_160038A8 - 8;
     }
-    return destination + 0x10;
+    return destination + 16;
 }
 
-// splat into framebuffer
+/*
+ * Framebuffer address of a text position (row * 32 + column) in the current framebuffer
+ * (D_8002AAE8[D_16003888]), whose width in pixels is D_160038A8. Text rows are 8 scanlines
+ * apart when the width is 292 and 10 otherwise; the text area starts 2 scanlines and
+ * 8 pixels in.
+ */
 u8 *func_1600160C(s32 position) {
     s32 row = position & 0xFFE0;
     s32 offset = row;
 
-    if (D_160038A8 != 0x124) {
+    if (D_160038A8 != 292) {
         offset = (row >> 2) + row;
     }
     offset = (offset >> 2) * (D_160038A8 << 1);
-    offset += (position & 0x1F) << 4;
-    offset += D_160038A8 << 2;
-    offset += 0x10;
+    offset += (position & 0x1F) * 16;
+    offset += D_160038A8 * 4;
+    offset += 16;
     return (u8 *)D_8002AAE8[D_16003888] + offset;
 }
 
-// contains delay slot
+/* Clear the current framebuffer to pixel value 1 (215 scanlines at width 292, 264 otherwise). */
 void func_16001678(void) {
-    u32 *ptr;
+    u32 *cursor = (u32 *)D_8002AAE8[D_16003888];
+    s32 lines;
     u32 *end;
-    s32 height;
-    s32 width;
 
-    ptr = (u32 *) D_8002AAE8[D_16003888];
-    height = D_160038A8;
-    if (height == 0x124) {
-        width = 0xD7;
+    if (D_160038A8 == 292) {
+        lines = 215;
     } else {
-        width = 0x108;
+        lines = 264;
     }
-
-    end = ptr + ((height >> 1) * width);
-    while (ptr < end) {
-        ptr += 4;
-        ptr[-4] = 0x10001;
-        ptr[-3] = 0x10001;
-        ptr[-2] = 0x10001;
-        ptr[-1] = 0x10001;
+    end = (D_160038A8 >> 1) * lines + cursor;
+    while (cursor < end) {
+        cursor[0] = 0x10001;
+        cursor[1] = 0x10001;
+        cursor[2] = 0x10001;
+        cursor[3] = 0x10001;
+        cursor += 4;
     }
 }
 
