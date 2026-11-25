@@ -1228,11 +1228,12 @@ s32 func_100114D0(s32 x, s32 y, s32 z, s32 volume, s32 farDistance, s32 nearDist
 s32 func_1000A750(s32, s32, s32, s32, f32, s32, s32, s32, s32, s32,
                   s32 *, s32 *, s32 *);
 
+// Updates records[start..end) (and below *count): re-evaluates each sound's volume, pan and
 void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
     SoundRecord *record;
     u32 flags;
     s32 pan;
-    s32 temporary;
+    s32 rate;
     u32 volume;
     s32 active;
     s32 distance;
@@ -1247,14 +1248,15 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
     s32 index;
     s32 offset;
     s32 *panOut;
-    s32 fxmix;
     f32 ratio;
     f32 unclampedRatio;
     f32 pitchDelta;
 
+    // matching: a guarded do-while over a byte offset, with gotos for `continue`; the
+    // for-loop form sets up the offset before the guard and loses it from s8
     index = start;
     if ((index < *count) && (index < end)) {
-        offset = index * sizeof(*records);
+        offset = index * sizeof(SoundRecord);
         do {
         record = (SoundRecord *)((u8 *)records + offset);
         flags = record->flags;
@@ -1267,6 +1269,7 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
         }
         handle = record->handle;
         if ((flags & 1) && (handle != 0) && (func_1000F3D0(handle) == 0)) {
+            // the voice ended on its own
             handle = 0;
             flags &= ~1;
             if (!(flags & 8)) {
@@ -1281,8 +1284,8 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
         }
         if ((flags & 2) || (handle == 0)) {
             if (flags & 0x100) {
-                pan = 0x40;
-                panOut = 0;
+                pan = 64;
+                panOut = NULL;
             } else {
                 panOut = &pan;
             }
@@ -1305,9 +1308,10 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
             cents = record->cents;
             mix = record->mix;
             sound = record->sound;
-            if ((flags & 0x10) && (record->callback != 0)) {
+            if ((flags & 0x10) && (record->callback != NULL)) {
                 record->flags = flags;
-                if (((SoundRecordCallback)record->callback)((void *)(offset + (u32)records),
+                // matching: the record address recomputed as integer offset + records
+                if (record->callback((SoundRecord *)(offset + (u32)records),
                         &active, &volume, &pan, &cents, &mix, &sound) != 0) {
                     func_1000FE88(records, index, count);
                     goto next_record;
@@ -1317,7 +1321,7 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
             }
             if (sound != 0) {
                 if (volume != 0) {
-                    f32 alCents2Ratio(s32);
+                    s32 fxmix;
 
                     fxmix = (pan & 0x80) | mix;
                     pan &= 0x7F;
@@ -1332,15 +1336,15 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
                     if (handle == 0) {
                         if (flags & 0xC00) {
                             if ((flags & 0xC00) == 0x400) {
-                                temporary = 0;
+                                rate = 0;
                             } else {
-                                temporary = 1;
+                                rate = 1;
                             }
                         } else {
-                            temporary = D_80041FD9;
+                            rate = D_80041FD9;
                         }
-                        handle = func_10010BE8(0, sound, (u16)volume,
-                                             (u8)pan, cents, fxmix, temporary);
+                        handle = func_10010BE8(0, sound, volume,
+                                             pan, cents, fxmix, rate);
                         if (handle != 0) {
                             flags |= 1;
                             record->sound = sound;
@@ -1356,11 +1360,12 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
                             func_1000F85C(handle, 0x100, fxmix);
                         }
                         if (flags & 4) {
-                            temporary = ((u16)record->lastDistance - distance) * D_800BE9E4 / 3;
-                            if (temporary >= 0x16F) {
+                            // doppler: shift the pitch by how fast the distance changes
+                            rate = ((u16)record->lastDistance - distance) * D_800BE9E4 / 3;
+                            if (rate >= 367) {
                                 ratio = 2.0f;
                             } else {
-                                unclampedRatio = D_8002C400 / (f32)(0x16F - temporary);
+                                unclampedRatio = D_8002C400 / (f32)(367 - rate);
                                 ratio = unclampedRatio;
                                 if (unclampedRatio > 2.0f) {
                                     ratio = 2.0f;
@@ -1372,7 +1377,7 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
                             pitchDelta = pitch.value - record->pitch;
                             pitch.value = record->pitch + pitchDelta * D_8002C404;
                         }
-                        start = pitch.bits;
+                        start = pitch.bits; // matching: the f32 bits go through the dead param
                         if (pitch.value != record->pitch) {
                             func_1000F85C(handle, 0x11, start);
                         }
@@ -1383,6 +1388,7 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
                     record->mix = mix;
                     record->pitch = pitch.value;
                 } else if (flags & 8) {
+                    // silent but persistent: drop the voice, keep the record
                     if (handle != 0) {
                         func_100111C8(handle);
                     }
@@ -1398,7 +1404,7 @@ void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {
         record->flags = flags;
 next_record:
         index++;
-        offset += sizeof(*records);
+        offset += sizeof(SoundRecord);
         } while ((index < *count) && (index < end));
     }
 }
