@@ -83,15 +83,25 @@ Gfx *func_1510CDB8(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot) {
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
-s32 func_1510CE60(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s16 **arg4) {
+#define GFX_OPCODE(gfx) (*(s8 *)(gfx))
+
+/*
+ * Resolves the texture references in a display list: each G_SETTIMG whose image address is a texture
+ * index (segment 0) is replaced with the loaded texture's address via func_1510D0EC, offset to its
+ * palette and given a segment when the flag bits in the address ask for it. With strict set, only
+ * commands whose address has no flag bits are touched. When usedOut is non-NULL it receives a newly
+ * allocated list (count, then the indices) of the distinct textures referenced.
+ * Returns whether every texture loaded.
+ */
+s32 func_1510CE60(Gfx *dl, s32 strict, s32 countUse, s32 keepLevel, s16 **usedOut) {
     s32 seg;
     s32 i;
-    s32 out;
+    s32 texSize;
     s32 flags;
-    s32 w1;
+    s32 dram;
     s32 failed;
-    s32 addr;
-    s32 v;
+    s32 texAddr;
+    s32 value; // matching: one local for both the bit mask and the texture index
     s32 count;
     s16 *list;
     s32 bit;
@@ -99,63 +109,64 @@ s32 func_1510CE60(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s16 **arg4) {
     Gfx *gfx;
     u8 used[971];
 
+    // matching: these dead statements lower the register priority of dl/usedOut so IDO keeps them on the stack
     if (1) {}
     if (1) {}
-    if (&arg4 == NULL) {}
+    if (&usedOut == NULL) {}
     failed = 0;
-    if (arg4 != NULL) {
+    if (usedOut != NULL) {
         for (i = 0; i < 971; i++) {
             used[i] = 0;
         }
         count = 0;
     }
-    for (i = 0; *(s8 *)&arg0[i] != (s8)G_ENDDL; i++) {
-        gfx = &arg0[i];
-        if (*(s8 *)&arg0[i] == (s8)G_SETTIMG) {
-            w1 = gfx->words.w1;
-            if ((arg1 == 0 || !(w1 & 0xFF000000)) && (u32)(w1 & 0xFF000000) < 0x06000000) {
-                flags = w1 >> 22;
-                seg = w1 & 0x0F000000;
-                w1 &= 0xF03FFFFF;
+    for (i = 0; GFX_OPCODE(&dl[i]) != (s8)G_ENDDL; i++) {
+        gfx = &dl[i];
+        if (GFX_OPCODE(&dl[i]) == (s8)G_SETTIMG) {
+            dram = gfx->words.w1;
+            if ((strict == 0 || !(dram & 0xFF000000)) && (u32)(dram & 0xFF000000) < 0x06000000) {
+                flags = dram >> 22;
+                seg = dram & 0x0F000000;
+                dram &= 0xF03FFFFF;
                 if (seg == 0) {
-                    addr = func_1510D0EC(w1, &out, arg3, arg2);
-                    gfx->words.w1 = addr;
-                    if (arg4 != NULL) {
-                        v = 1 << (w1 & 7);
-                        if (!(used[w1 >> 3] & v)) {
-                            used[w1 >> 3] |= v;
+                    texAddr = func_1510D0EC(dram, &texSize, keepLevel, countUse);
+                    gfx->words.w1 = texAddr;
+                    if (usedOut != NULL) {
+                        value = 1 << (dram & 7);
+                        if (!(used[dram >> 3] & value)) {
+                            used[dram >> 3] |= value;
                             count++;
                         }
                     }
                 } else {
                     flags = 0;
                 }
-                if (addr == 0x80000000) {
-                    failed = 1;
+                if (texAddr == 0x80000000) {
+                    failed = TRUE;
                 }
                 if (flags != 0) {
                     if (flags & 1) {
-                        gfx->words.w1 += out - 0x200;
+                        gfx->words.w1 += texSize - 0x200;
                     } else if (flags & 2) {
-                        gfx->words.w1 += out - 0x20;
+                        gfx->words.w1 += texSize - 0x20;
                     }
                     gfx->words.w1 |= (flags & 0x3C) << 22;
                 }
             }
         }
     }
-    if (arg4 != NULL) {
+    if (usedOut != NULL) {
         list = allocate_memory((count + 1) << 1, 1, 0, 2);
-        *arg4 = list;
+        *usedOut = list;
         if (list != NULL) {
             *list++ = count;
             bit = 1;
             i = 0;
-            v = 0;
+            value = 0;
             j = 0;
             while (i != count) {
                 if (used[j] & bit) {
-                    list[i] = v;
+                    list[i] = value;
                     i++;
                 }
                 if (bit != 0x80) {
@@ -164,7 +175,7 @@ s32 func_1510CE60(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s16 **arg4) {
                     bit = 1;
                     j++;
                 }
-                v++;
+                value++;
             }
         }
     }
