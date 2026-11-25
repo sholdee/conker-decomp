@@ -173,11 +173,11 @@ typedef struct {
     /* 0x28 */ f32 sizeAmplitude;
 } PuffState;
 
-/* An object spawned by func_1513D2F0. */
+/* A puff a projectile leaves along its path (spawned by func_1513D2F0). */
 typedef struct {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ PuffState state;
-} PuffObj;
+} TrailPuff;
 
 void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
                    s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
@@ -197,7 +197,7 @@ s8 func_150F78B4(EffectObj *obj) {
     u8 pad[0xC]; // matching: stack space (the old local view of RayHit was 0x70 bytes)
     RayHit hit;
     f32 puffs;
-    PuffObj *puff;
+    TrailPuff *puff;
 
     alive = TRUE;
     state = &obj->state.projectile;
@@ -291,7 +291,7 @@ s8 func_150F78B4(EffectObj *obj) {
 }
 
 /* Per-frame update of a puff: fades it out over its lifetime and pulses its size. Returns 0 once expired. */
-s32 func_150F7E20(PuffObj *obj) {
+s32 func_150F7E20(TrailPuff *obj) {
     f32 size;
     PuffState *state;
 
@@ -309,7 +309,7 @@ s32 func_150F7E20(PuffObj *obj) {
 }
 
 /* Quad spanned by the puff's two axes (vertex function). */
-void func_150F7F58(PuffObj *obj, s16 arg1) {
+void func_150F7F58(TrailPuff *obj, s16 arg1) {
     func_15140410(obj, &obj->state.axisU, &obj->state.axisV, arg1);
 }
 
@@ -412,7 +412,7 @@ s32 func_150F81BC(EffectObj *obj) {
         follow->trailAge += D_800BE9A4;
         if (func_15145128(&delta, &dir, &dist, &unused) != 0) {
             Vec3f step;
-            PuffObj *puff;
+            TrailPuff *puff;
             ParticleDef54 spawn;
             PuffState puffState;
 

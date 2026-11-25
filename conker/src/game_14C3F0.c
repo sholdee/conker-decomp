@@ -28,9 +28,9 @@ typedef union {
         s32 state;
         s32 timer;
     } bob;
-} PropWork;
+} Work14C3F0;
 
-#define WORK(prop) ((PropWork *)&(prop)->touch)
+#define WORK(prop) ((Work14C3F0 *)&(prop)->touch)
 
 extern void *allocate_memory(s32, s32, s32, s32);
 extern WorldObject *func_151149AC(u8 id); /* the prop whose id is `id`, or NULL */
