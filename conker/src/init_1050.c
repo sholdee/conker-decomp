@@ -19,7 +19,7 @@ void func_10001050(void) {
 void func_100010F8(s32 arg) {
     func_10004470(); // create message queues
     osCreateThread(&D_80031AE0, 3, (void *)func_10001194, (void *)arg, &D_800318B0, 10);
-    if ((D_8002AC5C == 0) && (D_80000310 == 0x17D9)) {
+    if ((D_8002AC5C == 0) && (D_80000310 == 6105)) { // osCicId: CIC-NUS-6105
         osStartThread(&D_80031AE0);
     }
     osSetThreadPri(&D_800318B0, OS_PRIORITY_IDLE);
