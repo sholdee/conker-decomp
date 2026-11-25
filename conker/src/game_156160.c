@@ -74,7 +74,7 @@ void func_15128CB0(Camera *cam) {
     cam->cmdState.unk0 = 0;
     if (cam->LastMagsZone != 0 && func_1512D6B0(cam)) {
         if (func_1509BE40(1, cam->LastMagsZone, 6, 0x9000) && cam->LastMagsZoneConsider) {
-            func_1512D560(cam, 1, &D_800D3098[cam->LastMagsZone & 0xFFF]);
+            func_1512D560(cam, 1, &zones[cam->LastMagsZone & 0xFFF]);
             cam->cmd.id = cam->LastMagsZone & 0xFFF;
         } else {
             cam->LastMagsZone = 0;

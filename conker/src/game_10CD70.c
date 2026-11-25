@@ -21,11 +21,11 @@ typedef struct {
 
 extern Game10CD70Indices D_80088984;
 
-/* Returns whether the D_800D3098 record selected by D_80088984[index] is active. */
+/* Returns whether the zones record selected by D_80088984[index] is active. */
 s32 func_150DF8C0(s32 index) {
     Game10CD70Indices indices = D_80088984;
 
-    if (D_800D3098[indices.values[index]].inactive != 0) {
+    if (zones[indices.values[index]].inactive != 0) {
         return 1;
     }
     return 0;

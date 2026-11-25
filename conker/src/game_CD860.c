@@ -39,7 +39,7 @@ s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
     case 5:
         // matching: `== 0` would compile to sltiu; the inverted test keeps the branchy form
         mode = (msg->params[0] == 999) ? 2 : (msg->params[0] != 0) ? 0 : 1;
-        func_151C970C(mode, &D_800D3098[slot]);
+        func_151C970C(mode, &zones[slot]);
         break;
     }
     return 0;
@@ -54,7 +54,7 @@ void func_150A3330(s32, s32 *, s32 *, s32 *, s32 *);
 
 /* Answers query `query` about record `slot`; `msg` carries the query's parameters.
  * Queries 6 and 13 take an id whose bits 12-15 select its kind: 0x2000 is an object in
- * movement_obj (looked up by func_1505EEF4), 0x9000 a D_800D3098 record. */
+ * movement_obj (looked up by func_1505EEF4), 0x9000 a zones record. */
 s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
     switch (query) {
     case 6:
@@ -120,7 +120,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             s32 lo;
 
             // matching: the no-op cast changes IDO's register numbering
-            rec = (TriggerZone *)D_800D3098 + slot; // matching: the (no-op) cast orders the addu
+            rec = (TriggerZone *)zones + slot; // matching: the (no-op) cast orders the addu
             hi = rec->x;
             lo = rec->z;
             return (hi << 16) | (lo & 0xFFFF);
@@ -141,7 +141,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             return 0;
         }
     case 7:
-        return D_800D3098[slot].inactive;
+        return zones[slot].inactive;
     case 13:
         {
             s32 pad; // matching: unused stack slot; removing it shifts the frame layout
@@ -162,7 +162,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             return result;
         }
     case 14:
-        return D_800D3098[slot].y;
+        return zones[slot].y;
     case 15:
         if (func_150A2CA4(slot) == -1) {
             return 0;
@@ -195,18 +195,18 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
 
             which = msg->params[0];
             if (which == 0) {
-                return D_800D3098[slot].subTypeData;
+                return zones[slot].subTypeData;
             } else if (which == 1) {
-                return D_800D3098[slot].data1;
+                return zones[slot].data1;
             } else if (which == 2) {
-                return D_800D3098[slot].data2;
+                return zones[slot].data2;
             } else if (which == 3) {
-                return D_800D3098[slot].data3;
+                return zones[slot].data3;
             }
             break;
         }
     case 18:
-        return D_800D3098[slot].yaw;
+        return zones[slot].yaw;
     }
     return 0;
 }

@@ -1464,7 +1464,7 @@ void func_15079228(void) {
     u16 angle;
 
     // matching: the (no-op) load through the variable's address orders the address computation as the original
-    gate = &(*(TriggerZone **)&D_800D3098)[D_800D154C->unk251];
+    gate = &(*(TriggerZone **)&zones)[D_800D154C->unk251];
     obj = D_800D154C;
     x = gate->x;
     z = gate->z;

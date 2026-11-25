@@ -1020,7 +1020,7 @@ s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *
     s32 i;
     s32 extent;
 
-    if (D_800DBEF0 == 0) {
+    if (gWorldObjectCount == 0) {
         return count;
     }
 
@@ -1033,7 +1033,7 @@ s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *
     D_800DF0F4 = z + range;
 
     found = 0;
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         entry = &db_Object_array[i];
         if (entry->inactive != 0) {
             continue;

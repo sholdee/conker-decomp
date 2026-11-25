@@ -395,7 +395,7 @@ extern void func_1510A930(s32, s32, s32);
 extern void func_1510B458(s32, f32, f32);
 extern void func_15147D64(ActorRef *, s32);
 extern void func_1515F170(s32, u8);
-extern void func_151616D0(u8, u8, s32);
+extern void light_sendEvent(u8, u8, s32);
 extern void func_151645C4(u8);
 extern void func_15169040(s32, u8);
 extern s32 func_1516A7B0(s32, s32, s32, s32, void *, s32);
@@ -708,7 +708,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_151645C4(event->unk5);
                     break;
                 case 5:
-                    func_151616D0(0x28, 0x17, 0);
+                    light_sendEvent(0x28, 0x17, 0);
                     break;
                 case 6:
                     func_151CD35C(event->unk5);
@@ -724,7 +724,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 0x12, 0x13, 0x14, 0x15 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(2, &D_800D3098[ids[i]]);
+                        func_151C970C(2, &zones[ids[i]]);
                     }
                     break;
                 }
@@ -2023,7 +2023,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 6, 7, 8, 9 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(1, &D_800D3098[ids[i]]);
+                        func_151C970C(1, &zones[ids[i]]);
                     }
                     break;
                 }

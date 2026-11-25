@@ -46,7 +46,7 @@ LightEffect *func_15161408(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_15161494(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_15161540(PointLight *light, u8 arg1, s32 arg2);
 LightEffect *func_151615F8(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg4, s32 arg5);
-void func_151616D0(u8 arg0, u8 event, s32 arg2);
+void light_sendEvent(u8 arg0, u8 event, s32 arg2);
 void func_15161714(LightEffect *effect);
 void func_15161740(LightEffect *effect);
 void func_1516176C(LightEffect *effect);
@@ -694,7 +694,7 @@ LightEffect *func_151615F8(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg
 }
 
 /* Sends event `event` to every light effect (of type lightType, for the addressed events). */
-void func_151616D0(u8 lightType, u8 event, s32 arg2) {
+void light_sendEvent(u8 lightType, u8 event, s32 arg2) {
     LightEventMsg message;
 
     message.lightType = lightType;

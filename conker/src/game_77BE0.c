@@ -176,7 +176,7 @@ void func_1504A730(void) {
             if ((movement_obj)[j].unk137 != 0) {
                 if (D_800CBDA0[j] != 0) {
                     db_Object_array[D_800CBDA0[j] - 1].object_status |= 0x84;
-                    D_800DBF94[D_800CBDA0[j] - 1] |= 1 << j;
+                    gWorldObjectContacts[D_800CBDA0[j] - 1] |= 1 << j;
                 }
                 (movement_obj)[j].mv->unk56 = 5;
             } else if ((movement_obj)[j].mv->unk56 != 0) {

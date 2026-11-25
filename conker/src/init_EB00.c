@@ -43,7 +43,7 @@ typedef struct {
 
 extern SoundQueueEntry D_80041F10[16];
 extern SoundSpatialRecord D_80041F68[];
-extern SoundRecord D_80041FE0[];
+extern SoundRecord dynamicSounds[];
 extern SoundVariant D_8002C240[][5];
 extern f32 D_8002C400;
 extern f32 D_8002C404;
@@ -496,9 +496,9 @@ u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance,
     }
 
     if (callback != NULL) {
-        D_80041FE0[index].flags = flags | 0x12;
+        dynamicSounds[index].flags = flags | 0x12;
     } else {
-        D_80041FE0[index].flags = (flags & 0x108) | 2;
+        dynamicSounds[index].flags = (flags & 0x108) | 2;
     }
 
     if (flags & 0x40) {
@@ -508,28 +508,28 @@ u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance,
         }
     }
 
-    D_80041FE0[index].sound_id = 0;
-    D_80041FE0[index].mix = 0;
-    D_80041FE0[index].pan = 0;
-    D_80041FE0[index].sample = sound;
-    D_80041FE0[index].x = x;
-    D_80041FE0[index].y = y;
-    D_80041FE0[index].z = z;
-    D_80041FE0[index].distance_max = farDistance;
-    D_80041FE0[index].distance_loudest = nearDistance;
-    D_80041FE0[index].max_volume = volume;
-    D_80041FE0[index].callback_ptr = callback;
-    D_80041FE0[index].callback_param1.ptr = owner;
-    D_80041FE0[index].callback_param2.val = key;
-    D_80041FE0[index].pitch = alCents2Ratio(cents);
-    D_80041FE0[index].current_volume = 0;
-    D_80041FE0[index].distance_current = 0;
-    D_80041FE0[index].pitch_shift_cent = cents;
+    dynamicSounds[index].sound_id = 0;
+    dynamicSounds[index].mix = 0;
+    dynamicSounds[index].pan = 0;
+    dynamicSounds[index].sample = sound;
+    dynamicSounds[index].x = x;
+    dynamicSounds[index].y = y;
+    dynamicSounds[index].z = z;
+    dynamicSounds[index].distance_max = farDistance;
+    dynamicSounds[index].distance_loudest = nearDistance;
+    dynamicSounds[index].max_volume = volume;
+    dynamicSounds[index].callback_ptr = callback;
+    dynamicSounds[index].callback_param1.ptr = owner;
+    dynamicSounds[index].callback_param2.val = key;
+    dynamicSounds[index].pitch = alCents2Ratio(cents);
+    dynamicSounds[index].current_volume = 0;
+    dynamicSounds[index].distance_current = 0;
+    dynamicSounds[index].pitch_shift_cent = cents;
     count = D_80042760;
-    func_10011624(D_80041FE0, &D_80042760, index, index + 1);
+    func_10011624(dynamicSounds, &D_80042760, index, index + 1);
     if (count == D_80042760) {
-        D_80041FE0[index].flags |= 0x1000;
-        return D_80041FE0[index].sound_id;
+        dynamicSounds[index].flags |= 0x1000;
+        return dynamicSounds[index].sound_id;
     }
     return 0;
 }
@@ -548,14 +548,14 @@ void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, u16 farDistance) {
     posY = y;
     posZ = z;
     for (i = 0; i < D_80042760; i++) {
-        record = &D_80041FE0[i];
+        record = &dynamicSounds[i];
         if ((soundId == record->sample) && (posX == record->x) && (posY == record->y) &&
             (posZ == record->z) && ((record->distance_max & 0x7FFF) == farDistance)) {
             handle = record->sound_id;
             if (handle != 0) {
                 func_100111C8(handle);
             }
-            D_80041FE0[i].flags |= 0x80; // matching: indexed again, not through record
+            dynamicSounds[i].flags |= 0x80; // matching: indexed again, not through record
         }
     }
 }
@@ -564,12 +564,12 @@ void func_1000FD38(SoundRecordCallback callback, void *owner, s32 key) {
     s32 i;
 
     for (i = 0; i < D_80042760; i++) {
-        if ((callback == D_80041FE0[i].callback_ptr) && (owner == D_80041FE0[i].callback_param1.ptr) &&
-            (key == D_80041FE0[i].callback_param2.val)) {
-            if (D_80041FE0[i].sound_id != 0) {
-                func_100111C8(D_80041FE0[i].sound_id);
+        if ((callback == dynamicSounds[i].callback_ptr) && (owner == dynamicSounds[i].callback_param1.ptr) &&
+            (key == dynamicSounds[i].callback_param2.val)) {
+            if (dynamicSounds[i].sound_id != 0) {
+                func_100111C8(dynamicSounds[i].sound_id);
             }
-            D_80041FE0[i].flags |= 0x80;
+            dynamicSounds[i].flags |= 0x80;
         }
     }
 }
@@ -578,11 +578,11 @@ void func_1000FDF4(u16 handle) {
     s32 handleId = handle;
 
     for (i = 0; i < D_80042760; i++) {
-        if ((u32)D_80041FE0[i].sound_id == (u32)handleId) { // matching: unsigned compare of the widened handle
-            if (D_80041FE0[i].sound_id != 0) {
-                func_100111C8(D_80041FE0[i].sound_id);
+        if ((u32)dynamicSounds[i].sound_id == (u32)handleId) { // matching: unsigned compare of the widened handle
+            if (dynamicSounds[i].sound_id != 0) {
+                func_100111C8(dynamicSounds[i].sound_id);
             }
-            D_80041FE0[i].flags |= 0x80;
+            dynamicSounds[i].flags |= 0x80;
         }
     }
 }
@@ -604,8 +604,8 @@ s32 func_1000FEF0(u16 handle, void *owner, s32 key) {
         return -1;
     }
     for (i = 0; i < D_80042760; i++) {
-        if ((handle == D_80041FE0[i].sound_id) && (owner == D_80041FE0[i].callback_param1.ptr) &&
-            (key == D_80041FE0[i].callback_param2.val) && !(D_80041FE0[i].flags & 0x80)) {
+        if ((handle == dynamicSounds[i].sound_id) && (owner == dynamicSounds[i].callback_param1.ptr) &&
+            (key == dynamicSounds[i].callback_param2.val) && !(dynamicSounds[i].flags & 0x80)) {
             return i;
         }
     }
@@ -616,17 +616,17 @@ s32 func_1000FF90(SoundRecordCallback callback, void *owner, s32 key) {
     s32 i;
 
     for (i = 0; i < D_80042760; i++) {
-        if ((callback == D_80041FE0[i].callback_ptr) &&
-            ((owner == D_80041FE0[i].callback_param1.ptr) || (owner == (void *)-1)) &&
-            ((key == D_80041FE0[i].callback_param2.val) || (key == -1)) &&
-            !(D_80041FE0[i].flags & 0x80)) {
+        if ((callback == dynamicSounds[i].callback_ptr) &&
+            ((owner == dynamicSounds[i].callback_param1.ptr) || (owner == (void *)-1)) &&
+            ((key == dynamicSounds[i].callback_param2.val) || (key == -1)) &&
+            !(dynamicSounds[i].flags & 0x80)) {
             return i;
         }
     }
     return -1;
 }
 void func_1001001C(SoundRecordCallback callback, void *owner, s32 key, s32 volume, s32 cents) {
-    SoundRecord *record = D_80041FE0;
+    SoundRecord *record = dynamicSounds;
     s32 i;
 
     for (i = 0; i < D_80042760; i++, record++) {
@@ -641,11 +641,11 @@ void func_100100E0(SoundRecordCallback callback, void *owner, s32 key,
     s32 i;
 
     for (i = 0; i < D_80042760; i++) {
-        if ((callback == D_80041FE0[i].callback_ptr) && (owner == D_80041FE0[i].callback_param1.ptr) &&
-            (key == D_80041FE0[i].callback_param2.val)) {
-            D_80041FE0[i].callback_ptr = newCallback;
-            D_80041FE0[i].callback_param1.ptr = newOwner;
-            D_80041FE0[i].callback_param2.val = newKey;
+        if ((callback == dynamicSounds[i].callback_ptr) && (owner == dynamicSounds[i].callback_param1.ptr) &&
+            (key == dynamicSounds[i].callback_param2.val)) {
+            dynamicSounds[i].callback_ptr = newCallback;
+            dynamicSounds[i].callback_param1.ptr = newOwner;
+            dynamicSounds[i].callback_param2.val = newKey;
         }
     }
 }
@@ -817,7 +817,7 @@ void func_1001091C(Actor *obj, u32 volume) {
             index = func_1000FF90((SoundRecordCallback)func_1000EE70, obj,
                                   obj->unique_id | 0x10000);
             if (index != -1) {
-                D_80041FE0[index].max_volume = volume;
+                dynamicSounds[index].max_volume = volume;
             } else {
                 obj->unk8E = 0;
             }
@@ -864,7 +864,7 @@ void func_10010AA8(Actor *obj) {
             if (func_1000F44C(obj->unk8C)) {
                 func_100111C8(obj->unk8C);
             }
-            record = &D_80041FE0[index];
+            record = &dynamicSounds[index];
             record->flags |= 0x80;
         }
         index = func_1000FEF0(obj->unk8E, obj, obj->unique_id);
@@ -872,7 +872,7 @@ void func_10010AA8(Actor *obj) {
             if (func_1000F44C(obj->unk8E)) {
                 func_100111C8(obj->unk8E);
             }
-            record = &D_80041FE0[index];
+            record = &dynamicSounds[index];
             record->flags |= 0x80;
         }
     }
@@ -1332,10 +1332,10 @@ void func_10011BB8(void) {
             D_80041F68[i].field18 = camera->TrueCameraAngle;
         }
         func_10011310();
-        func_10011624(D_80041FE0, &D_80042760, 0, D_80042760);
+        func_10011624(dynamicSounds, &D_80042760, 0, D_80042760);
         for (i = 0, kept = 0; i < D_80042760; i++) {
-            D_80041FE0[kept] = D_80041FE0[i];
-            if (!(D_80041FE0[kept].flags & 0x80)) {
+            dynamicSounds[kept] = dynamicSounds[i];
+            if (!(dynamicSounds[kept].flags & 0x80)) {
                 kept++;
             }
         }

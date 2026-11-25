@@ -573,8 +573,8 @@ glabel func_150AB1F0
     /* D8EF0 150ABA40 912A004F */  lbu        $t2, 0x4F($t1)
     /* D8EF4 150ABA44 354A0080 */  ori        $t2, $t2, 0x80
     /* D8EF8 150ABA48 A12A004F */  sb         $t2, 0x4F($t1)
-    /* D8EFC 150ABA4C 3C0B800E */  lui        $t3, %hi(D_800DBF94)
-    /* D8F00 150ABA50 8D6BBF94 */  lw         $t3, %lo(D_800DBF94)($t3)
+    /* D8EFC 150ABA4C 3C0B800E */  lui        $t3, %hi(gWorldObjectContacts)
+    /* D8F00 150ABA50 8D6BBF94 */  lw         $t3, %lo(gWorldObjectContacts)($t3)
     /* D8F04 150ABA54 00086080 */  sll        $t4, $t0, 2
     /* D8F08 150ABA58 016C5821 */  addu       $t3, $t3, $t4
     /* D8F0C 150ABA5C 8D6C0000 */  lw         $t4, 0x0($t3)

@@ -6,7 +6,7 @@
 
 
 void func_151A9390(s32 arg0, s32 arg1, TriggerZone *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
-extern s32 (*D_80082E30[])(TriggerZone *);
+extern s32 (*gZoneSpawnHandlers[])(TriggerZone *);
 extern void (*D_80082F28[])(TriggerZone *, f32);
 extern void func_1510F800(s32);
 s32 func_151BE850(Vec3f *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6);
@@ -84,14 +84,14 @@ void func_15013000(void) {
 
     D_800DCDC4 = NULL;
     D_800DCD90 = 0.0f;
-    // matching: the label ends the block, so IDO cannot hoist the D_800D3094 load above the stores
+    // matching: the label ends the block, so IDO cannot hoist the gZoneCount load above the stores
 start:
-    for (i = 0; i < D_800D3094; i++) {
-        u8 type = ZONE_TYPE(&D_800D3098[i]);
-        s32 (*handler)(TriggerZone *) = D_80082E30[type];
+    for (i = 0; i < gZoneCount; i++) {
+        u8 type = ZONE_TYPE(&zones[i]);
+        s32 (*handler)(TriggerZone *) = gZoneSpawnHandlers[type];
 
         if (handler != NULL) {
-            handler(&D_800D3098[i]);
+            handler(&zones[i]);
         }
     }
 }

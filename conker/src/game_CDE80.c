@@ -5,7 +5,7 @@
 
 
 void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, s32 farDistance); /* stops a positional sound */
-s32 func_150A1DA0(Actor *actor, TriggerZone *zone, s32 withMargin);
+s32 zone_isOutside(Actor *actor, TriggerZone *zone, s32 withMargin);
 void func_150A23E4(TriggerZone *zone);
 
 /* Per-frame update of the zone state that does not depend on an actor (ticks is unused). */
@@ -13,73 +13,73 @@ void func_150A09D0(s32 ticks) {
     u32 countdown;
     s32 i;
 
-    for (i = 0; i < D_800D3094; i++) {
-        switch (ZONE_TYPE(&D_800D3098[i])) {
+    for (i = 0; i < gZoneCount; i++) {
+        switch (ZONE_TYPE(&zones[i])) {
         case ZONE_TYPE_SOUND: /* sound zone: data3 is 1 while occupied (func_150A23E4 sets it each time); a zone left
                    unoccupied for a whole update gets its looping sound stopped */
-            if (D_800D3098[i].data3 == 1) {
-                D_800D3098[i].data3 ^= 3;
-            } else if (D_800D3098[i].data3 == 2) {
-                func_1000FC18(D_800D3098[i].data2 >> 16,
-                              D_800D3098[i].x,
-                              D_800D3098[i].y,
-                              D_800D3098[i].z,
-                              D_800D3098[i].data1);
-                D_800D3098[i].data3 = 0;
+            if (zones[i].data3 == 1) {
+                zones[i].data3 ^= 3;
+            } else if (zones[i].data3 == 2) {
+                func_1000FC18(zones[i].data2 >> 16,
+                              zones[i].x,
+                              zones[i].y,
+                              zones[i].z,
+                              zones[i].data1);
+                zones[i].data3 = 0;
             }
             if (D_800C35EA[0] == 1) {
-                if (func_150A1DA0(movement_obj, &D_800D3098[i], 0) == 0) {
-                    func_150A23E4(&D_800D3098[i]);
+                if (zone_isOutside(movement_obj, &zones[i], 0) == 0) {
+                    func_150A23E4(&zones[i]);
                 }
             }
             break;
         case ZONE_TYPE_TUNE_CHANNEL: /* music-channel zone (func_1000E46C sets channel volumes) */
-            if (ZONE_AREA_TYPE(&D_800D3098[i]) == ZONE_AREA_GATE) {
-                D_800D3098[i].data3 = 0;
+            if (ZONE_AREA_TYPE(&zones[i]) == ZONE_AREA_GATE) {
+                zones[i].data3 = 0;
             } else {
-                if (D_800D3098[i].data3 == 1) {
-                    D_800D3098[i].data3 = 2;
-                } else if (D_800D3098[i].data3 == 2) {
-                    if (func_1000E46C(D_800D3098[i].subTypeData, 0, D_800D3098[i].data1, 0)) {
-                        if (func_1000E46C(D_800D3098[i].subTypeData, 100, D_800D3098[i].data2, 0)) {
-                            D_800D3098[i].data3 = 0;
+                if (zones[i].data3 == 1) {
+                    zones[i].data3 = 2;
+                } else if (zones[i].data3 == 2) {
+                    if (func_1000E46C(zones[i].subTypeData, 0, zones[i].data1, 0)) {
+                        if (func_1000E46C(zones[i].subTypeData, 100, zones[i].data2, 0)) {
+                            zones[i].data3 = 0;
                         }
                     }
                 }
             }
             break;
         case ZONE_TYPE_MINI_SHAPE:
-            if (D_800D3098[i].subTypeData != 9) {
+            if (zones[i].subTypeData != 9) {
                 /* count down the respawn delay of the object func_150A24C0 spawned */
-                countdown = D_800D3098[i].data2 & 0xFF;
+                countdown = zones[i].data2 & 0xFF;
                 if (countdown != 0) {
-                    if (!D_800D3098[i].inactive) {
+                    if (!zones[i].inactive) {
                         countdown--;
                     } else {
                         countdown = 0;
                     }
-                    D_800D3098[i].data2 = (D_800D3098[i].data2 & ~0xFF) | countdown;
+                    zones[i].data2 = (zones[i].data2 & ~0xFF) | countdown;
                     if (countdown == 0) {
-                        countdown = D_800D3098[i].data2;
+                        countdown = zones[i].data2;
                         D_800DDF5C[(countdown >> 8) & 0xFF] = 0;
-                        D_800D3098[i].data2 &= 0xFFFF0000;
+                        zones[i].data2 &= 0xFFFF0000;
                     }
                 }
             }
             /* fallthrough */
         case ZONE_TYPE_CAMERA:
-            if (D_800D3098[i].subTypeData == 12) {
-                if (!D_800D3098[i].inactive) {
+            if (zones[i].subTypeData == 12) {
+                if (!zones[i].inactive) {
                     s32 j;
 
                     for (j = 0; j <= D_80082FA0; j++) {
                         Camera *cam = &camera_global_Cameras[j];
 
-                        cam->unk93C.x = D_800D3098[i].x;
-                        cam->unk93C.y = D_800D3098[i].y;
-                        cam->unk93C.z = D_800D3098[i].z;
-                        cam->unk938 = D_800D3098[i].xSize;
-                        cam->unk949 = D_800D3098[i].data1;
+                        cam->unk93C.x = zones[i].x;
+                        cam->unk93C.y = zones[i].y;
+                        cam->unk93C.z = zones[i].z;
+                        cam->unk938 = zones[i].xSize;
+                        cam->unk949 = zones[i].data1;
                         cam->unk948 = 1;
                     }
                 }
@@ -90,7 +90,7 @@ void func_150A09D0(s32 ticks) {
 }
 
 /* Caches the sine and cosine of the zone's rotation angles. */
-void func_150A0D14(TriggerZone *zone) {
+void zone_cacheAngles(TriggerZone *zone) {
     f32 angle;
 
     angle = zone->pitch * 0.01745329238f; /* degrees to radians */
@@ -112,24 +112,24 @@ void func_150A0D8C(void) {
     s16 dy;
     f32 fade;
 
-    for (i = 0; i < D_800D3094; i++) {
-        if (!D_800D3098[i].inactive && ZONE_TYPE(&D_800D3098[i]) == ZONE_TYPE_REFLECTION) {
+    for (i = 0; i < gZoneCount; i++) {
+        if (!zones[i].inactive && ZONE_TYPE(&zones[i]) == ZONE_TYPE_REFLECTION) {
             for (j = 0; j < 25; j++) {
                 obj = &movement_obj[j];
                 if (obj->type == 0) continue;
                 if (obj->drawtype != 0 && obj->drawtype != 1) continue;
-                if (func_150A1DA0(obj, &D_800D3098[i], 1) != 0) continue;
+                if (zone_isOutside(obj, &zones[i], 1) != 0) continue;
 
-                dy = obj->ypos - D_800D3098[i].y;
-                if (D_800D3098[i].subTypeData == 0) {
-                    if (math_distance3D((s16)(obj->xpos - D_800D3098[i].x), dy,
-                                      (s16)(obj->zpos - D_800D3098[i].z)) < D_800D3098[i].xSize) {
-                        fade = D_800D3098[i].xSize * 0.2f;
+                dy = obj->ypos - zones[i].y;
+                if (zones[i].subTypeData == 0) {
+                    if (math_distance3D((s16)(obj->xpos - zones[i].x), dy,
+                                      (s16)(obj->zpos - zones[i].z)) < zones[i].xSize) {
+                        fade = zones[i].xSize * 0.2f;
                         if (fade > 100.0f) {
                             fade = 100.0f;
                         }
-                        func_15035808(2, j, D_800D3098[i].x, D_800D3098[i].y, D_800D3098[i].z, 0.0f,
-                                      D_800D3098[i].yaw, D_800D3098[i].xSize - fade, D_800D3098[i].xSize,
+                        func_15035808(2, j, zones[i].x, zones[i].y, zones[i].z, 0.0f,
+                                      zones[i].yaw, zones[i].xSize - fade, zones[i].xSize,
                                       255.0f);
                     }
                 } else {
@@ -162,7 +162,7 @@ void func_150A104C(Camera *cam, TriggerZone **zoneList, s32 count) {
     while (count != 0) {
         if (!zoneList) { // matching: this empty test steers IDO's callee-saved register order (mask in s3)
         }
-        if (*zoneList != NULL && func_150A1DA0(&probe, *zoneList, 0) == 0) {
+        if (*zoneList != NULL && zone_isOutside(&probe, *zoneList, 0) == 0) {
             if (ZONE_TYPE(*zoneList) == ZONE_TYPE_CHAR_FLAGS) {
                 switch ((*zoneList)->subTypeData) {
                 case 2:
@@ -262,12 +262,12 @@ void func_150A11C4(Actor *actor) {
     /* Keep only the candidates whose box contains the actor, narrowed by each box's overlap set. */
     word = mask;
     bits = *word;
-    for (i = 0, base = 0; i < D_800D3094; i++) {
+    for (i = 0, base = 0; i < gZoneCount; i++) {
         if (bits == 0) {
             base += 64;
             i = base;
             bits = *++word;
-            if (i >= D_800D3094) {
+            if (i >= gZoneCount) {
                 continue;
             }
         }
@@ -302,11 +302,11 @@ void func_150A11C4(Actor *actor) {
         prev = NULL;
     }
     bits = *word;
-    for (i = 0; i < D_800D3094; i++) {
+    for (i = 0; i < gZoneCount; i++) {
         if (bits == 0) {
             base += 64;
             i = base;
-            if (i >= D_800D3094) {
+            if (i >= gZoneCount) {
                 continue;
             }
             bits = *++word;
@@ -317,16 +317,16 @@ void func_150A11C4(Actor *actor) {
             }
         }
         if (bits & 1) {
-            if (func_150A1DA0(actor, &D_800D3098[i], 0) == 0) {
-                switch (ZONE_TYPE(&D_800D3098[i])) {
+            if (zone_isOutside(actor, &zones[i], 0) == 0) {
+                switch (ZONE_TYPE(&zones[i])) {
                 case ZONE_TYPE_CAMERA:
-                    if (cam != NULL && D_800D3098[i].subTypeData != 12) {
-                        func_1512D560(cam, 1, &D_800D3098[i]);
+                    if (cam != NULL && zones[i].subTypeData != 12) {
+                        func_1512D560(cam, 1, &zones[i]);
                         cam->cmd.id = i;
                     }
                     break;
                 case ZONE_TYPE_CHAR_FLAGS:
-                    switch (D_800D3098[i].subTypeData) {
+                    switch (zones[i].subTypeData) {
                     case 0:
                         actor->noshove &= ~4;
                         break;
@@ -334,7 +334,7 @@ void func_150A11C4(Actor *actor) {
                         actor->noshove &= ~2;
                         break;
                     case 2:
-                        actor->unk120 = D_800D3098[i].y + D_800D3098[i].ySize;
+                        actor->unk120 = zones[i].y + zones[i].ySize;
                         break;
                     case 3:
                         actor->noshove |= 2;
@@ -351,9 +351,9 @@ void func_150A11C4(Actor *actor) {
                         if (actor->mv->ladder == 0 && actor->stunned == 0 && actor->energy != 0 &&
                             actor->norun == 0 &&
                             (actor->mv->weapon_status == 0 || D_800BE9F0 == 6) && actor->stickspeed > 8.0f) {
-                            height = D_800D3098[i].y + D_800D3098[i].ySize;
+                            height = zones[i].y + zones[i].ySize;
                             flag = 0;
-                            angle = (u32)(D_800D3098[i].yaw * 182.0444489f);
+                            angle = (u32)(zones[i].yaw * 182.0444489f);
                             angle -= actor->mv->press_angle;
                             if (height < actor->ypos + 250.0f && actor->shad == 0.0f) {
                                 angle -= 0x8000;
@@ -364,7 +364,7 @@ void func_150A11C4(Actor *actor) {
                                 actor->mv->unk96 = 0;
                                 actor->nojump = 18;
                                 actor->mv->ladder = i + 1;
-                                if (D_800D3098[i].data1 != 0) {
+                                if (zones[i].data1 != 0) {
                                     actor->mv->ladder |= 0x80;
                                 }
                             }
@@ -378,7 +378,7 @@ void func_150A11C4(Actor *actor) {
                         actor->mvmt_control |= 0x100000;
                         break;
                     case 8:
-                        if (D_800D3098[i].data1 != 0) {
+                        if (zones[i].data1 != 0) {
                             D_800DF0E1 |= 1 << idx;
                         } else {
                             D_800DF0E0 |= 1 << idx;
@@ -390,34 +390,34 @@ void func_150A11C4(Actor *actor) {
                     }
                     break;
                 case ZONE_TYPE_SOUND:
-                    func_150A23E4(&D_800D3098[i]);
+                    func_150A23E4(&zones[i]);
                     break;
                 case ZONE_TYPE_TUNE_CHANNEL:
-                    if (D_800D3098[i].data3 == 0) {
-                        if (func_1000E46C(D_800D3098[i].subTypeData, 100, D_800D3098[i].data1, 0)) {
-                            if (func_1000E46C(D_800D3098[i].subTypeData, 0, D_800D3098[i].data2, 0)) {
-                                D_800D3098[i].data3 = 1;
+                    if (zones[i].data3 == 0) {
+                        if (func_1000E46C(zones[i].subTypeData, 100, zones[i].data1, 0)) {
+                            if (func_1000E46C(zones[i].subTypeData, 0, zones[i].data2, 0)) {
+                                zones[i].data3 = 1;
                             }
                         }
                     } else {
-                        D_800D3098[i].data3 = 1;
+                        zones[i].data3 = 1;
                     }
                     break;
                 case ZONE_TYPE_TUNE:
                     if (unk127 != 0xFF && !(prevBits & 1)) {
-                        func_1000D96C(D_800D3098[i].subTypeData, D_800D3098[i].data1, D_800D3098[i].data2 & 0xFF);
-                        if (D_800D3098[i].subTypeData) {
-                            func_1000E46C(D_800D3098[i].subTypeData, 0, D_800D3098[i].data3 & 0xFFFF, 0);
+                        func_1000D96C(zones[i].subTypeData, zones[i].data1, zones[i].data2 & 0xFF);
+                        if (zones[i].subTypeData) {
+                            func_1000E46C(zones[i].subTypeData, 0, zones[i].data3 & 0xFFFF, 0);
                         }
                     }
                     break;
                 case ZONE_TYPE_AUDIO_CONTROL:
-                    if (D_800D3098[i].subTypeData == 0) {
-                        D_80041FD8 = D_800D3098[i].data1;
+                    if (zones[i].subTypeData == 0) {
+                        D_80041FD8 = zones[i].data1;
                     }
                     break;
                 case ZONE_TYPE_MINI_SHAPE:
-                    func_150A24C0(&D_800D3098[i], unk127);
+                    func_150A24C0(&zones[i], unk127);
                     break;
                 case ZONE_TYPE_WARP: {
                     u32 raw;
@@ -427,8 +427,8 @@ void func_150A11C4(Actor *actor) {
                     osPiRawReadIo(func_150A1040(0xB0000054), &raw);
                     __osPiRelAccess();
                     if (func_150A1040(raw) == 0x1090C2B && D_800C35EA[0] == 0 && actor->energy != 0) {
-                        func_15172E7C(actor, D_800D3098[i].subTypeData, D_800D3098[i].data1);
-                        if (D_800BE9F0 != D_800D3098[i].subTypeData) {
+                        func_15172E7C(actor, zones[i].subTypeData, zones[i].data1);
+                        if (D_800BE9F0 != zones[i].subTypeData) {
                             actor->imune = 0xFF;
                             actor->unk1CC = actor->ypos;
                         }
@@ -436,24 +436,24 @@ void func_150A11C4(Actor *actor) {
                 }
                     break;
                 case ZONE_TYPE_CONTEXT:
-                    func_15080500(actor, &D_800D3098[i], 1, D_800D3098[i].subTypeData, D_800D3098[i].data1);
+                    func_15080500(actor, &zones[i], 1, zones[i].subTypeData, zones[i].data1);
                     break;
                 case ZONE_TYPE_EFFECT:
-                    func_150A25D4(&D_800D3098[i], actor, unk127, prevBits);
+                    func_150A25D4(&zones[i], actor, unk127, prevBits);
                     break;
                 case ZONE_TYPE_NEUTRAL:
-                    if (D_800D3098[i].subTypeData == 5) {
-                        func_151AE06C(actor, &D_800D3098[i]);
+                    if (zones[i].subTypeData == 5) {
+                        func_151AE06C(actor, &zones[i]);
                     }
                     break;
                 case ZONE_TYPE_CUTSCENE:
                     if (unk127 != 0xFF && !(prevBits & 1) && D_800E0B94 == 0 && actor->energy != 0 &&
                         D_800C35EA[0] == 0) {
-                        if (D_800D3098[i].subTypeData == 0) {
-                            D_800D3098[i].inactive = 1;
+                        if (zones[i].subTypeData == 0) {
+                            zones[i].inactive = 1;
                         }
-                        func_1501D348(D_800BE9F0, D_800D3098[i].data1, 0, 0, 0);
-                        D_800D3098[i].data2++;
+                        func_1501D348(D_800BE9F0, zones[i].data1, 0, 0, 0);
+                        zones[i].data2++;
                     }
                     break;
                 }
@@ -474,7 +474,7 @@ s32 func_150AD960(s32, s32, s32, s32);
  * zone by the actor's unkE4.  Shapes: 0 cylinder (optionally rotated), 1 sphere, 2 rotated box,
  * 3 rotated gate crossed by the move from the old to the current position.
  */
-s32 func_150A1DA0(Actor *actor, TriggerZone *zone, s32 withMargin) {
+s32 zone_isOutside(Actor *actor, TriggerZone *zone, s32 withMargin) {
     s16 dx;
     s16 dy;
     s16 dz;
@@ -732,10 +732,10 @@ void func_150A278C(Actor *actor) {
     if (actor->attach_char != 0) {
         return;
     }
-    for (i = 0; i < D_800D3094; i++) {
-        if (ZONE_TYPE(&D_800D3098[i]) == ZONE_TYPE_WARP) {
-            if (func_150A1DA0(actor, &D_800D3098[i], 0) == 0) {
-                func_15172E7C(actor, D_800D3098[i].subTypeData, D_800D3098[i].data1);
+    for (i = 0; i < gZoneCount; i++) {
+        if (ZONE_TYPE(&zones[i]) == ZONE_TYPE_WARP) {
+            if (zone_isOutside(actor, &zones[i], 0) == 0) {
+                func_15172E7C(actor, zones[i].subTypeData, zones[i].data1);
             }
         }
     }
@@ -746,8 +746,8 @@ void func_150A2864(u32 id, s32 disabled) {
     s32 i;
 
     id &= 0xFFF;
-    if (id < D_800D3094) {
-        D_800D3098[id].inactive = disabled;
+    if (id < gZoneCount) {
+        zones[id].inactive = disabled;
     }
     if (disabled == 1) {
         for (i = 0; i < 16; i++) {
@@ -759,21 +759,21 @@ void func_150A2864(u32 id, s32 disabled) {
 /* Sets zone id's data1 and subTypeData (-1 leaves one unchanged) and clears its data2. */
 void func_150A2940(s32 id, s32 data1, s32 subTypeData) {
     id &= 0xFFF;
-    if (id < D_800D3094) {
+    if (id < gZoneCount) {
         if (data1 != -1) {
-            D_800D3098[id].data1 = data1;
+            zones[id].data1 = data1;
         }
         if (subTypeData != -1) {
-            D_800D3098[id].subTypeData = subTypeData;
+            zones[id].subTypeData = subTypeData;
         }
-        D_800D3098[id].data2 = 0;
+        zones[id].data2 = 0;
     }
 }
 
 /* Returns 0 if actor `actor` is inside zone id, else 1 (cached occupancy bits when they are current). */
 s32 func_150A29C8(u32 actor, u32 id) {
     id &= 0xFFF;
-    if (D_800D3094 < id) {
+    if (gZoneCount < id) {
         return 1;
     }
     if (actor < 16 && (D_800D2340 & (1 << actor))) {
@@ -782,7 +782,7 @@ s32 func_150A29C8(u32 actor, u32 id) {
         }
         return 1;
     }
-    return func_150A1DA0(&movement_obj[actor], &D_800D3098[id], 1);
+    return zone_isOutside(&movement_obj[actor], &zones[id], 1);
 }
 
 /* Returns the first of the count zone ids in ids[] that contains actor `actor`, or -1. */
@@ -794,7 +794,7 @@ s32 func_150A2AEC(u32 actor, s32 count, s32 *ids) {
         for (i = 0; i < count; i++) {
             id = ids[i];
             id &= 0xFFF;
-            if (id < D_800D3094) {
+            if (id < gZoneCount) {
                 if ((D_800D30F0[actor][id >> 6] >> (id & 0x3F)) & 1) {
                     return id;
                 }
@@ -804,8 +804,8 @@ s32 func_150A2AEC(u32 actor, s32 count, s32 *ids) {
         for (i = 0; i < count; i++) {
             id = ids[i];
             id &= 0xFFF;
-            if (id < D_800D3094) {
-                if (func_150A1DA0(&movement_obj[actor], &D_800D3098[id], 1) == 0) {
+            if (id < gZoneCount) {
+                if (zone_isOutside(&movement_obj[actor], &zones[id], 1) == 0) {
                     return id;
                 }
             }
@@ -819,7 +819,7 @@ s32 func_150A2CA4(u32 id) {
     s32 i;
 
     id &= 0xFFF;
-    if (D_800D3094 < id) {
+    if (gZoneCount < id) {
         return -1;
     }
     for (i = 0; i != 16; i++) {
@@ -839,7 +839,7 @@ s32 func_150A2D84(s32 camIndex, s32 id) {
 
     cam = &camera_global_Cameras[camIndex];
     id &= 0xFFF;
-    if (D_800D3094 < id) {
+    if (gZoneCount < id) {
         return 1;
     }
     probe.xpos = cam->eye.x;
@@ -849,7 +849,7 @@ s32 func_150A2D84(s32 camIndex, s32 id) {
     probe.old_xpos = cam->prevEye.x;
     probe.old_ypos = cam->prevEye.y;
     probe.old_zpos = cam->prevEye.z;
-    return func_150A1DA0(&probe, &D_800D3098[id], 0);
+    return zone_isOutside(&probe, &zones[id], 0);
 }
 
 /* Returns 1 if the point is behind (or on) the zone's rotated plane, else 0.
@@ -884,11 +884,11 @@ s32 func_150A2E4C(TriggerZone *zone, f32 x, f32 y, f32 z) {
 /* Returns whether actor `actor` is behind gate zone id (0 for a zone that is not a gate, 1 for bad ids). */
 s32 func_150A2EE4(s32 actor, s32 id) {
     id &= 0xFFF;
-    if (D_800D3094 < id) {
+    if (gZoneCount < id) {
         return 1;
     }
-    if (ZONE_AREA_TYPE(&D_800D3098[id]) == ZONE_AREA_GATE) {
-        return func_150A2E4C(&D_800D3098[id], movement_obj[actor].xpos, movement_obj[actor].ypos,
+    if (ZONE_AREA_TYPE(&zones[id]) == ZONE_AREA_GATE) {
+        return func_150A2E4C(&zones[id], movement_obj[actor].xpos, movement_obj[actor].ypos,
                              movement_obj[actor].zpos);
     }
     return 0;
@@ -900,11 +900,11 @@ s32 func_150A2FA4(s32 camIndex, s32 id) {
 
     cam = &camera_global_Cameras[camIndex];
     id &= 0xFFF;
-    if (D_800D3094 < id) {
+    if (gZoneCount < id) {
         return 1;
     }
-    if (ZONE_AREA_TYPE(&D_800D3098[id]) == ZONE_AREA_GATE) {
-        return func_150A2E4C(&D_800D3098[id], cam->eye.x, cam->eye.y, cam->eye.z);
+    if (ZONE_AREA_TYPE(&zones[id]) == ZONE_AREA_GATE) {
+        return func_150A2E4C(&zones[id], cam->eye.x, cam->eye.y, cam->eye.z);
     }
     return 0;
 }
@@ -923,11 +923,11 @@ s32 func_150A3058(s32 subtype, s16 x, s16 y, s16 z) {
     probe.zpos = z;
     probe.old_zpos = z;
 
-    for (i = 0; i < D_800D3094; i++) {
-        if (!D_800D3098[i].inactive) {
-            if (ZONE_TYPE(&D_800D3098[i]) == ZONE_TYPE_NEUTRAL) {
-                if (D_800D3098[i].subTypeData == subtype) {
-                    if (func_150A1DA0(&probe, &D_800D3098[i], 0) == 0) {
+    for (i = 0; i < gZoneCount; i++) {
+        if (!zones[i].inactive) {
+            if (ZONE_TYPE(&zones[i]) == ZONE_TYPE_NEUTRAL) {
+                if (zones[i].subTypeData == subtype) {
+                    if (zone_isOutside(&probe, &zones[i], 0) == 0) {
                         return 1;
                     }
                 }
@@ -938,7 +938,7 @@ s32 func_150A3058(s32 subtype, s16 x, s16 y, s16 z) {
 }
 
 /* Returns the first enabled zone of the given type and subtype that contains the point, or NULL. */
-TriggerZone *func_150A3194(s32 type, s32 subtype, s32 x, s32 y, s32 z) {
+TriggerZone *zone_findAt(s32 type, s32 subtype, s32 x, s32 y, s32 z) {
     s32 i;
     Actor probe;
 
@@ -950,12 +950,12 @@ TriggerZone *func_150A3194(s32 type, s32 subtype, s32 x, s32 y, s32 z) {
     probe.zpos = z;
     probe.old_zpos = z;
 
-    for (i = 0; i < D_800D3094; i++) {
-        if (!D_800D3098[i].inactive) {
-            if (type == ZONE_TYPE(&D_800D3098[i])) {
-                if (subtype == D_800D3098[i].subTypeData) {
-                    if (func_150A1DA0(&probe, &D_800D3098[i], 0) == 0) {
-                        return &D_800D3098[i];
+    for (i = 0; i < gZoneCount; i++) {
+        if (!zones[i].inactive) {
+            if (type == ZONE_TYPE(&zones[i])) {
+                if (subtype == zones[i].subTypeData) {
+                    if (zone_isOutside(&probe, &zones[i], 0) == 0) {
+                        return &zones[i];
                     }
                 }
             }
@@ -976,7 +976,7 @@ s32 func_150A32B4(TriggerZone *zone, s32 x, s32 y, s32 z) {
     probe.old_ypos = y;
     probe.zpos = z;
     probe.old_zpos = z;
-    if (func_150A1DA0(&probe, zone, 0) == 0) {
+    if (zone_isOutside(&probe, zone, 0) == 0) {
         return 1;
     }
     return 0;
@@ -984,31 +984,31 @@ s32 func_150A32B4(TriggerZone *zone, s32 x, s32 y, s32 z) {
 
 /* Reads zone id's subTypeData and parameters. */
 void func_150A3330(s32 id, s32 *subTypeData, s32 *data1, s32 *data2, s32 *data3) {
-    *subTypeData = D_800D3098[id].subTypeData;
-    *data1 = D_800D3098[id].data1;
-    *data2 = D_800D3098[id].data2;
-    *data3 = D_800D3098[id].data3;
+    *subTypeData = zones[id].subTypeData;
+    *data1 = zones[id].data1;
+    *data2 = zones[id].data2;
+    *data3 = zones[id].data3;
 }
 
 /* Writes the zone id fields selected by mask (1: subTypeData, 2: data1, 4: data2, 8: data3). */
 void func_150A3398(s32 id, u16 mask, s32 subTypeData, s32 data1, s32 data2, s32 data3) {
     if (mask & 1) {
-        D_800D3098[id].subTypeData = subTypeData;
+        zones[id].subTypeData = subTypeData;
     }
     if (mask & 2) {
-        D_800D3098[id].data1 = data1;
+        zones[id].data1 = data1;
     }
     if (mask & 4) {
-        D_800D3098[id].data2 = data2;
+        zones[id].data2 = data2;
     }
     if (mask & 8) {
-        D_800D3098[id].data3 = data3;
+        zones[id].data3 = data3;
     }
 }
 
 /* Moves zone id to (x, y, z). */
 void func_150A3444(s32 id, s16 x, s16 y, s16 z) {
-    D_800D3098[id].x = x;
-    D_800D3098[id].y = y;
-    D_800D3098[id].z = z;
+    zones[id].x = x;
+    zones[id].y = y;
+    zones[id].z = z;
 }

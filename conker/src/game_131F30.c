@@ -34,7 +34,7 @@ void func_15104A80(WorldObject *prop) {
         Actor *candidate;
 
         i = prop - db_Object_array;
-        mask = D_800DBF94[i];
+        mask = gWorldObjectContacts[i];
         if (mask != 0) {
             for (i = 0; i < 25 && player == NULL; i++) {
                 candidate = &movement_obj[i];

@@ -18,11 +18,11 @@ void func_15010880(void) {
     func_15177410(0x10, 0xE9, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98, 36.0f, 0x4D, 0xF, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F);
     D_800E0934 = (s32) func_150DE32C;
 dummy_label_15010880:
-    base = (s32)D_800D3098;
+    base = (s32)zones;
 
     tmp.timer = 0;
-    tmp.source = base + 0xEA0; // &D_800D3098[72]
-    tmp.target = base + 0xED4; // &D_800D3098[73]
+    tmp.source = base + 0xEA0; // &zones[72]
+    tmp.target = base + 0xED4; // &zones[73]
 
     temp_v0 = func_15149130(0x12C, -1, 0x5E, -1, 0, 0,  0xC, 0xFF, 1);
     if (temp_v0 != NULL) {
@@ -41,8 +41,8 @@ dummy_label_15010880:
 //     D_800E0934 = func_150DE32C;
     
 //     tmp.unk0 = 0;
-//     tmp.unk4 = *((s32*) &D_800D3098) + 0xEA0;
-//     tmp.unk8 = *((s32*) &D_800D3098) + 0xED4;
+//     tmp.unk4 = *((s32*) &zones) + 0xEA0;
+//     tmp.unk8 = *((s32*) &zones) + 0xED4;
 
 //     temp_v0 = func_15149130(300, -1, 94, -1, 0, 0, 12, 255, 1);
 //     if (temp_v0 != NULL) {

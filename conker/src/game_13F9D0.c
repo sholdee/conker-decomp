@@ -156,7 +156,7 @@ void func_15112A80(s32 player) {
         recp = (s32)&D_800BE628[view];
         if (func_150859AC(view, 0) != 0) {
             D_800DBEE8[view] = 0;
-            for (i = 0; i < D_800DBEF0;) {
+            for (i = 0; i < gWorldObjectCount;) {
                 groupSize = db_Object_array[i].state >> 4;
                 end = i + groupSize;
                 mask = 0;
@@ -245,7 +245,7 @@ void func_15112A80(s32 player) {
 void func_15113180(void) {
     s32 i;
 
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         db_Object_array[i].viewFlags &= ~0x40;
         if (((db_Object_array[i].viewFlags & 0xF) != 0 || (db_Object_array[i].state & 4) == 4) && db_Object_array[i].moveProc != NULL) {
             db_Object_array[i].viewFlags |= 0x40;
@@ -438,7 +438,7 @@ void func_15113C88(void) {
     s32 show;
     WorldObject *obj;
 
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         hidden = FALSE;
         obj = i + db_Object_array; // matching: &db_Object_array[i] swaps the addu operands
         for (j = 0; j < D_80082FA0; j++) {
@@ -485,7 +485,7 @@ void func_15113E54(s32 arg0) {
     moveY = 0;
     moveZ = 0;
     leaderFloorTri = 0;
-    count = D_800DBEF0 - D_800DBF98;
+    count = gWorldObjectCount - D_800DBF98;
     for (i = 0; i < count; i++) {
         obj = i + db_Object_array; // matching: operand order of the addu
         if ((obj->viewFlags & 0x40) == 0x40 && obj->inactive == 0) {
@@ -526,7 +526,7 @@ s32 func_15114050(WorldObject *obj, s32 actor) {
         if (actor == -1) {
             return TRUE;
         }
-        if (D_800DBF94[obj - db_Object_array] & (1 << actor)) {
+        if (gWorldObjectContacts[obj - db_Object_array] & (1 << actor)) {
             return TRUE;
         }
     }
@@ -540,7 +540,7 @@ s32 func_151140C4(WorldObject *obj) {
     i = 0;
     if (obj->object_status & 0x80) {
         for (; i != 32; i++) {
-            if (D_800DBF94[obj - db_Object_array] & (1 << i)) {
+            if (gWorldObjectContacts[obj - db_Object_array] & (1 << i)) {
                 return i;
             }
         }
@@ -555,11 +555,11 @@ void func_15114188(void) {
     s32 i;
     s32 j;
 
-    for (i = 0; i < D_800DBEF0; i++) {
-        if (D_800DBF94[i] != 0) {
-            for (j = 0; j < 25 && D_800DBF94[i] != 0; j++) {
-                if (D_800DBF94[i] & (1 << j)) {
-                    D_800DBF94[i] ^= 1 << j;
+    for (i = 0; i < gWorldObjectCount; i++) {
+        if (gWorldObjectContacts[i] != 0) {
+            for (j = 0; j < 25 && gWorldObjectContacts[i] != 0; j++) {
+                if (gWorldObjectContacts[i] & (1 << j)) {
+                    gWorldObjectContacts[i] ^= 1 << j;
                     if (db_Object_array[i].onContact != NULL && (db_Object_array[i].contactNonPlayers != 0 || movement_obj[j].playernumber != 0xFF)) {
                         db_Object_array[i].onContact(i + db_Object_array, &movement_obj[j]); // matching: addu operand order
                     }
@@ -637,7 +637,7 @@ extern f32 D_800A2F60;
 
 /* Carries an actor standing on object objIndex: moves it with the object and turns it by the object's yaw spin. */
 void func_1511473C(Actor *actor, s32 objIndex) {
-    if (actor == NULL || objIndex >= D_800DBEF0) {
+    if (actor == NULL || objIndex >= gWorldObjectCount) {
         return;
     }
     func_15114348(objIndex, &actor->xpos, &actor->ypos, &actor->zpos);
@@ -675,7 +675,7 @@ WorldObject *func_151149AC(u8 id) {
     if (id == 0) {
         return NULL;
     }
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         if (db_Object_array[i].unique_id == id) {
             return i + db_Object_array;
         }
@@ -688,7 +688,7 @@ void func_15114A1C(void) {
     s32 i;
     s32 handle;
 
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         if ((db_Object_array[i].state & 1) != 1) {
             // matching: the dead copies (handle, j) and empty ifs steer uopt's register choices (see notes)
             handle = D_800DBEF8[i];
@@ -723,7 +723,7 @@ void func_15114A1C(void) {
 void func_15114B94(u32 index) {
     u32 ungrouped;
 
-    if (index < D_800DBEF0) {
+    if (index < gWorldObjectCount) {
         if (db_Object_array[index].shadow != NULL) {
             func_1516972C((EffectHeader *)db_Object_array[index].shadow);
             db_Object_array[index].shadow = NULL;
@@ -731,15 +731,15 @@ void func_15114B94(u32 index) {
         db_Object_array[index].state |= 8;
         db_Object_array[index].inactive = 1;
     }
-    index = D_800DBEF0 - 1;
-    ungrouped = D_800DBEF0 - D_800DBF98;
-    while (D_800DBEF0 != 0 && (db_Object_array[index].state & 8)) {
+    index = gWorldObjectCount - 1;
+    ungrouped = gWorldObjectCount - D_800DBF98;
+    while (gWorldObjectCount != 0 && (db_Object_array[index].state & 8)) {
         if (index >= ungrouped && D_800DBF98 != 0) {
             D_800DBF98--;
         } else {
             ungrouped--;
         }
-        D_800DBEF0--;
+        gWorldObjectCount--;
         index--;
     }
 }

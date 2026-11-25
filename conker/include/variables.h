@@ -308,7 +308,7 @@ extern MsgRing D_800427A0;
 extern u8   D_800427B0[64]; // D_800427A0's buffer
 extern u16  D_800427F4;
 extern SoundSlot D_800425E0[];
-extern struct OscState *D_80042800; /* free oscillator states */
+extern struct OscState *gFreeOscStates; /* free oscillator states */
 extern s32  D_80042804;
 extern u16 *D_800428B8;
 extern u8   D_800428C0;
@@ -1018,7 +1018,7 @@ extern u8 D_800C35E8[2]; // per scene: changes with each run of the scene
 extern u8  D_800C35EA[2]; // per cutscene scene slot (0/1): cutscene state, 1 = playing
 extern SeqTrackInfo *D_800C35F0[]; // per scene: what each track drives
 extern u8 D_800C35F8;
-extern CamShot D_800C3600; // scripted camera shot
+extern CamShot gCamShot; // scripted camera shot
 extern u8  D_800C3638;
 extern u8 D_800C363A[]; /* track count */
 extern s32 D_800C3640[]; /* end time */
@@ -1099,8 +1099,8 @@ extern u16 D_800C5EF8[];
 extern VtxTri *D_800C6070[187]; // per model id: triangles
 extern TexCoord *D_800C6360[187]; // per model id: saved texture coordinates (func_1503D804)
 
-extern AimPoint *D_800C6650; // aim points (D_800C6654 of them)
-extern s32 D_800C6654;
+extern AimPoint *gAimPoints; // aim points (gAimPointCount of them)
+extern s32 gAimPointCount;
 extern ObjPartsState D_800C6660[];
 extern u8  D_800C67F0;
 extern u8  D_800C67F1;
@@ -1330,14 +1330,14 @@ extern u8 *D_800D2E4C; // 0x1B-byte bit array of per-id flags (saved with the ga
 
 extern u8  D_800D2F3C;
 extern u16 *D_800D2F40;
-extern IdRecordList D_800D2F48;
+extern IdRecordList gTaskWorkingSet;
 extern f32 D_800D2DB0;
 extern s32 D_800D2DB4;
 
 extern s32 D_800D2F58;
-extern u32 D_800D3094; // number of TriggerZones in D_800D3098
-extern TriggerZone *D_800D3098; // level placement / marker table (0x34-byte records)
-extern ZoneBounds *D_800D309C; // bounds of each trigger zone (D_800D3098)
+extern u32 gZoneCount; // number of TriggerZones in zones
+extern TriggerZone *zones; // level placement / marker table (0x34-byte records)
+extern ZoneBounds *D_800D309C; // bounds of each trigger zone (zones)
 extern u64 D_800D30A0[3]; /* TriggerZones that are always tested */
 extern u64 D_800D30B8[3]; /* default candidate TriggerZones */
 extern u16 D_800D30D0[16]; /* per actor: 1 + index of the last zone box it was found in, 0 for none */
@@ -1385,7 +1385,7 @@ extern TriggerZone *D_800D9AA0[3];
 extern u16 D_800D9AB0[4];
 extern Vec3f D_800D9AC0[];
 extern u8 D_800D9AF0;
-extern ViewClip D_800D9AF8[];
+extern ViewClip gViewClips[];
 
 extern u8  D_800D9B18;
 extern f32 D_800D9B1C;
@@ -1463,8 +1463,8 @@ extern u8 D_800DBEAB;
 extern u8 D_800DBEAC;
 extern Mtx *D_800DBEB0; // sky projection matrices, 2 per view
 extern u16 D_800DBEE8[]; // per view: entries in D_80089240
-extern s32 D_800DBEF0; // number of db_Object_array entries
-extern WorldObject *db_Object_array; // original name (Oct 2000 debugger); D_800DBEF0 entries
+extern s32 gWorldObjectCount; // number of db_Object_array entries
+extern WorldObject *db_Object_array; // original name (Oct 2000 debugger); gWorldObjectCount entries
 extern s32 *D_800DBEF8; // per object: handle released with func_10004074
 extern u8 *D_800DBEFC; // per object: frames to keep the handle once hidden
 extern u8  D_800DBF00;
@@ -1472,7 +1472,7 @@ extern MtxF D_800DBF08[]; // per-frame
 extern u8  D_800DBF88;
 extern s32 D_800DBF8C;
 extern s32 D_800DBF90;
-extern s32 * D_800DBF94; // per object: bit N set when actor movement_obj[N] touches it
+extern s32 * gWorldObjectContacts; // per object: bit N set when actor movement_obj[N] touches it
 extern s32 D_800DBF98; // grouped objects, kept at the end of db_Object_array
 extern Camera *camera_global_Cameras;
 extern u8  D_800DBFF4[4]; // per-player camera hold timers; *(s32 *)D_800DBFF4 tests all four at once

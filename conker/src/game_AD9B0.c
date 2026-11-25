@@ -40,7 +40,7 @@ void func_15080500(Actor *obj, TriggerZone *zone, s32 slot, s32 textId) {
             }
         } else if (!(obj->mv->context_b & 0x80)) {
             obj->mv->context_b = textId;
-            obj->mv->cont_zone_ind = zone - D_800D3098;
+            obj->mv->cont_zone_ind = zone - zones;
         }
     }
 }

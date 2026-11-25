@@ -15,7 +15,7 @@ extern void func_1510D874(WorldObject *, s32, s32, s32, s32);
 void func_150DE320(s32 arg0) {
 }
 
-/* For each of eight D_800D3098 records that func_150A32B4 accepts, sets the moving state of the
+/* For each of eight zones records that func_150A32B4 accepts, sets the moving state of the
  * matching func_151149AC object, or (for records without one) calls func_150A2864(id, 1). */
 void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
@@ -24,7 +24,7 @@ void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
     u8 propIds[8] = { 0xF6, 0xF3, 0xF0, 0xED, 0, 0, 0, 0 };
 
     for (i = 0; i < 8; i++) {
-        if (func_150A32B4(&D_800D3098[ids[i]], arg0, arg1, arg2) != 0) {
+        if (func_150A32B4(&zones[ids[i]], arg0, arg1, arg2) != 0) {
             if (propIds[i] != 0) {
                 prop = func_151149AC(propIds[i]);
                 prop->task_flag = (prop->task_flag & ~TASK_FLAG_STATE) | TASK_FLAG_ON;
@@ -255,7 +255,7 @@ s32 func_150DEB58(Particle *particle, s16 arg1) {
 /* An s32 table entry read through its low byte (the symbols point at byte 3 of each word). */
 static const s32 D_800A0D08[8] = { 0x17, 0x18, 0x1A, 0x19, 0x1B, 0x1C, 0x1E, 0x1D };
 static const s32 D_800A0D28[8] = { 2, 3, 5, 4, 6, 7, 9, 8 };
-extern void func_151616D0(u8, u8, s32);
+extern void light_sendEvent(u8, u8, s32);
 extern void func_151417C4(u8, s32);
 void func_150DEC28(u8 index, s32 arg1);
 
@@ -268,10 +268,10 @@ void func_150DEBE0(s32 arg0) {
     }
 }
 
-/* Passes entry `index` of the D_800A0D08 and D_800A0D28 tables to func_151616D0 and func_151417C4. */
+/* Passes entry `index` of the D_800A0D08 and D_800A0D28 tables to light_sendEvent and func_151417C4. */
 void func_150DEC28(u8 index, s32 arg1) {
     s32 i = index; // matching: without this copy IDO spills the scaled index to another slot
 
-    func_151616D0(D_800A0D08[i], 0x22, 0);
+    light_sendEvent(D_800A0D08[i], 0x22, 0);
     func_151417C4(D_800A0D28[i], 0x22);
 }

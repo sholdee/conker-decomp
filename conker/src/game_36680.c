@@ -40,7 +40,7 @@ void func_150091D0(void) {
 void func_150092DC(void) {
     u32 i;
 
-    for (i = 0; i < D_800D3094; i++) {
+    for (i = 0; i < gZoneCount; i++) {
         func_15009334(i);
     }
 }
@@ -69,31 +69,31 @@ void func_15009334(s32 index) {
     ZoneLink *link;
     s32 type;
 
-    type = ZONE_TYPE(&D_800D3098[index]);
+    type = ZONE_TYPE(&zones[index]);
     switch (type) {
         case ZONE_TYPE_LIGHT_SETUP:
         case ZONE_TYPE_LIGHT_CONTROL:
         case ZONE_TYPE_LIGHT_DIRECTIONAL:
-            red = D_800D3098[index].data1 & 0xFF;
-            green = (D_800D3098[index].data1 >> 8) & 0xFF;
-            blue = (D_800D3098[index].data1 >> 16) & 0xFF;
-            D_800D3098[index].flags |= 4;
+            red = zones[index].data1 & 0xFF;
+            green = (zones[index].data1 >> 8) & 0xFF;
+            blue = (zones[index].data1 >> 16) & 0xFF;
+            zones[index].flags |= 4;
             switch (type) {
                 case ZONE_TYPE_LIGHT_CONTROL:
                     func_1515D4D4(red, green, blue, 0);
-                    if (D_800D3098[index].data3 != 0) {
-                        func_1500AB5C(D_800D3098[index].data3);
+                    if (zones[index].data3 != 0) {
+                        func_1500AB5C(zones[index].data3);
                     }
                     break;
                 case ZONE_TYPE_LIGHT_SETUP:
-                    x = D_800D3098[index].x;
-                    y = D_800D3098[index].y;
-                    z = D_800D3098[index].z;
-                    settings = (D_800D3098[index].data2 >> 8) & 0xFF;
-                    strength = (D_800D3098[index].data1 >> 24) & 0x7F;
-                    enabled = (D_800D3098[index].data1 >> 31) & 1;
-                    callback = D_800D3098[index].data3 & 0xFFFF;
-                    duration = (D_800D3098[index].data3 >> 16) & 0xFFFF;
+                    x = zones[index].x;
+                    y = zones[index].y;
+                    z = zones[index].z;
+                    settings = (zones[index].data2 >> 8) & 0xFF;
+                    strength = (zones[index].data1 >> 24) & 0x7F;
+                    enabled = (zones[index].data1 >> 31) & 1;
+                    callback = zones[index].data3 & 0xFFFF;
+                    duration = (zones[index].data3 >> 16) & 0xFFFF;
                     light = func_1515D5AC(x, y, z, settings, red, green, blue, strength, enabled, duration);
                     if (light != 0 && callback != 0) {
                         func_1500A94C(light, callback);
@@ -103,24 +103,24 @@ void func_15009334(s32 index) {
                     D_800DCD24[0] = red;
                     D_800DCD24[1] = green;
                     D_800DCD24[2] = blue;
-                    D_800DCD28[0] = D_800D3098[index].data2 & 0xFF;
-                    D_800DCD28[1] = (D_800D3098[index].data2 >> 8) & 0xFF;
-                    D_800DCD28[2] = (D_800D3098[index].data2 >> 16) & 0xFF;
-                    D_800DCD3C = (D_800D3098[index].data2 >> 24) & 0xFF;
-                    D_800DCD3D = (D_800D3098[index].data1 >> 24) & 0xFF;
+                    D_800DCD28[0] = zones[index].data2 & 0xFF;
+                    D_800DCD28[1] = (zones[index].data2 >> 8) & 0xFF;
+                    D_800DCD28[2] = (zones[index].data2 >> 16) & 0xFF;
+                    D_800DCD3C = (zones[index].data2 >> 24) & 0xFF;
+                    D_800DCD3D = (zones[index].data1 >> 24) & 0xFF;
                     break;
             }
             break;
         case ZONE_TYPE_LIGHT_AMBIENT_LOCAL:
             link = allocate_memory(sizeof(ZoneLink), 1, 0, 0);
-            link->zone = &D_800D3098[index];
+            link->zone = &zones[index];
             link->next = D_800DCD80;
             D_800DCD80 = link;
         unused_label: // matching: an unused label keeps IDO from threading this break to the epilogue
             break;
         case ZONE_TYPE_LIGHT_DIRECTIONAL_LOCAL:
             link = allocate_memory(sizeof(ZoneLink), 1, 0, 0);
-            link->zone = &D_800D3098[index];
+            link->zone = &zones[index];
             link->next = D_800DCD84;
             D_800DCD84 = link;
             break;

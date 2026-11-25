@@ -53,7 +53,7 @@ WorldObject *func_151149AC(s32);
 void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(Actor *, s32);
 
-/* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its D_800DBF94 bit 0 set, runs
+/* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its gWorldObjectContacts bit 0 set, runs
  * movement_obj[0] through func_15136C3C .. func_1507CD64(6) once; then offsets the four D_800BE4F0 entries
  * by object 0xE's taskint[0]. */
 void func_150F2A60(s32 arg0) {
@@ -69,7 +69,7 @@ void func_150F2A60(s32 arg0) {
             for (i = 0; i < 2; i = (i + 1) | 0) {
                 entry = func_151149AC((0xFA - i) & 0xFF);
                 entryIndex = entry - db_Object_array;
-                if (D_800DBF94[entryIndex] & 1) {
+                if (gWorldObjectContacts[entryIndex] & 1) {
                     if (D_800CC40C != 0) {
                         func_15060F28(&movement_obj[D_800CC40C - 100], 0);
                     }

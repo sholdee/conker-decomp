@@ -348,7 +348,7 @@ struct WORD {
 };
 
 /* Oscillator state of the sequence players' tremolo / vibrato (init_128D0.c: func_10012E04 init,
- * func_10012F94 update, func_100131D8 stop), the libultra demo's oscData; free ones are linked from D_80042800. */
+ * func_10012F94 update, func_100131D8 stop), the libultra demo's oscData; free ones are linked from gFreeOscStates. */
 struct OscState {
     /* 0x00 */ struct OscState *next;
     /* 0x04 */ u8  type;      // 1 = tremolo sine, 128 = vibrato sine
@@ -1287,7 +1287,7 @@ struct Actor {
 }; // size 0x32C => 812 bytes game_object
 
 /*
- * A world object: one 0xA0-byte entry of the level's object array db_Object_array (D_800DBEF0 entries),
+ * A world object: one 0xA0-byte entry of the level's object array db_Object_array (gWorldObjectCount entries),
  * built by func_150039E0 (game_30E90.c) from the level's placement lists. Owner type 1 for effects and trails.
  * original: db_Object_struct (rom_debug_struct.c)
  */
@@ -1826,13 +1826,13 @@ struct Camera {
     /* 0x99C */ f32 sideOffsetTarget;
 }; // size 0x9A0
 
-/* An aim point (D_800C6650[D_800C6654]): a sphere that objects can aim at, built by func_15004FE0 from an
+/* An aim point (gAimPoints[gAimPointCount]): a sphere that objects can aim at, built by aim_loadPoints from an
  * AimPointDef asset. minX/maxX cache the x extent for a quick reject. */
 typedef struct AimPoint {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
     /* 0x04 */ s16 z;
-    /* 0x06 */ s16 flags;    /* 2: removed (func_1503DDD0) */
+    /* 0x06 */ s16 flags;    /* 2: removed (aim_removePoint) */
     /* 0x08 */ u32 radiusSq;
     /* 0x0C */ s16 unkC;
     /* 0x0E */ s16 maxX;     /* x + radius */
@@ -1904,7 +1904,7 @@ typedef struct ParticleTexFile {
 } ParticleTexFile; // size 0x10
 
 /* A camera message payload (func_1512D560 types 7, 8 and 10, applied by func_15128CB0 in game_156160.c);
- * D_800C3600 is the shared one that cutscenes and TriggerZones fill in. */
+ * gCamShot is the shared one that cutscenes and TriggerZones fill in. */
 typedef struct CamShot {
     /* 0x00 */ s32 mode;     /* type 7: 0 or 2 = look at at.focus; otherwise aim by at.angles */
     /* 0x04 */ s32 unk4;     /* index into D_800C35EA (cutscene scene) */
@@ -1926,7 +1926,7 @@ typedef struct CamShot {
 } CamShot; // size 0x38 (D_800C3638 follows)
 
 /* Zone types: TriggerZone.kind >> 2. Original names (Oct 2000 debugger table); the US spawn table
- * D_80082E30 has the same 26 entries, and the users agree (0 camera, 2 sound, 7 music channel, 8 warp,
+ * gZoneSpawnHandlers has the same 26 entries, and the users agree (0 camera, 2 sound, 7 music channel, 8 warp,
  * 17 glow particles, 24 local directional light). */
 enum ZoneType {
     ZONE_TYPE_CAMERA,                  /* 0x00 */
@@ -1959,7 +1959,7 @@ enum ZoneType {
 };
 
 /* Zone area types (original "zone area type"): TriggerZone.kind & 3. Names are ours, from the
- * containment test func_150A1DA0. */
+ * containment test zone_isOutside. */
 enum ZoneAreaType {
     ZONE_AREA_CYLINDER, /* xSize radius, ySize height above the base; tilted by pitch/yaw */
     ZONE_AREA_SPHERE,   /* xSize radius */
@@ -1970,7 +1970,7 @@ enum ZoneAreaType {
 #define ZONE_TYPE(zone)      ((zone)->kind >> 2)
 #define ZONE_AREA_TYPE(zone) ((zone)->kind & 3)
 
-/* A level placement record (TriggerZones proper, gates, markers, light points): D_800D3098
+/* A level placement record (TriggerZones proper, gates, markers, light points): zones
  * points at the table. original: struct zone (rom_debug_struct.c) */
 typedef struct TriggerZone {
     /* 0x00 */ s16 x;
@@ -2220,7 +2220,7 @@ typedef struct IgnoreList {
     /* 0x04 */ Actor *objs[3];
 } IgnoreList; // size 0x10
 
-/* Near/far planes func_1510B458 recorded for a view (D_800D9AF8[view]); near -1.0f marks none. */
+/* Near/far planes func_1510B458 recorded for a view (gViewClips[view]); near -1.0f marks none. */
 typedef struct ViewClip {
     /* 0x0 */ f32 near;
     /* 0x4 */ f32 far;
@@ -2512,7 +2512,7 @@ typedef struct SeqTrackState {
     /* 0x40 */ f32 unk40;
 } SeqTrackState; // size 0x44
 
-/* Payload of the light effect events sent by func_151616D0 (handled by func_151604A0). */
+/* Payload of the light effect events sent by light_sendEvent (handled by func_151604A0). */
 typedef struct LightEventMsg {
     /* 0x0 */ s8  lightType; /* events 0x17-0x22 only reach effects whose lightType matches */
     /* 0x1 */ u8  pad1[0x3];
@@ -2541,7 +2541,7 @@ enum TaskEntry {
     TASK_ENTRY_DONE   /* DoneOffset, once the task's done flag (D_800D2E4C bit) is set */
 };
 
-/* A loaded task (script and its BSS in one allocation), kept in the doubly linked list D_800D2F48
+/* A loaded task (script and its BSS in one allocation), kept in the doubly linked list gTaskWorkingSet
  * (the task working set) sorted by task id (game_C8950). The offsets are from the record's start.
  * original: Task WorkingSet (rom_debug_struct.c) */
 typedef struct IdRecord {

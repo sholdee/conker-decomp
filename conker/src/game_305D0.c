@@ -191,7 +191,7 @@ void func_15003668(s32 unused) {
     func_150026E8(1);
 
     func_150026C4(2);
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         if ((db_Object_array[i].object_status & 0x60) != 0x20) {
             func_15002724(db_Object_array[i].displayList);
         }
@@ -200,7 +200,7 @@ void func_15003668(s32 unused) {
 
     D_800D2C68 = 1;
     D_800D2C28[1] = 0;
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         if ((db_Object_array[i].object_status & 0x60) != 0x20) {
             // matching: storing D_800DBE38 rather than firstTri keeps firstTri at two references (regalloc)
             firstTri = D_800DBE38;

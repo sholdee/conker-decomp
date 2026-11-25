@@ -1392,12 +1392,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->mv->gpoint = 0x12;
                 anim = 0x2F;
                 if (D_800BE9F0 == 0x31) {
-                    arg0->mv->swing_xvel = D_800D3098[12].x;
-                    arg0->mv->swing_zvel = D_800D3098[12].z;
+                    arg0->mv->swing_xvel = zones[12].x;
+                    arg0->mv->swing_zvel = zones[12].z;
                     func_150DBD70(5);
                 } else {
-                    arg0->mv->swing_xvel = D_800D3098[2].x;
-                    arg0->mv->swing_zvel = D_800D3098[2].z;
+                    arg0->mv->swing_xvel = zones[2].x;
+                    arg0->mv->swing_zvel = zones[2].z;
                     func_150DBD70(0);
                 }
                 arg0->angle = 0xC000;
@@ -2508,8 +2508,8 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
 
             ok = 1;
             if (arg0->mv->cont_zone_ind != 0) {
-                angle = func_15048A70(D_800D3098[arg0->mv->cont_zone_ind].yaw, arg0->theta);
-                if ((D_800D3098[arg0->mv->cont_zone_ind].data1 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
+                angle = func_15048A70(zones[arg0->mv->cont_zone_ind].yaw, arg0->theta);
+                if ((zones[arg0->mv->cont_zone_ind].data1 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
                     ok = 0;
                 }
             }
@@ -2518,7 +2518,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->count5 = 0xFF;
                 arg0->mv->rt_context_b = 0x17;
                 anim = 0x8E;
-                arg0->angle = (u32)(D_800D3098[arg0->mv->cont_zone_ind].yaw * 182.0444489f) - 0x4000;
+                arg0->angle = (u32)(zones[arg0->mv->cont_zone_ind].yaw * 182.0444489f) - 0x4000;
             }
         }
         break;

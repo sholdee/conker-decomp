@@ -236,7 +236,7 @@ void func_150006E0(void) {
 
     D_800D9AF0 = 0;
     for (i = 0; i <= D_80082FA0; i++) {
-        D_800D9AF8[i].near = -1.0f;
+        gViewClips[i].near = -1.0f;
     }
     D_800D9B18 = 0;
 }
@@ -289,7 +289,7 @@ void func_150006E0(void) {
 //
 //     D_800D9AF0 = 0;
 //     for (i = 0; i <= D_80082FA0; i++) {
-//         D_800D9AF8[i].near = -1.0f;
+//         gViewClips[i].near = -1.0f;
 //     }
 //     D_800D9B18 = 0;
 // }

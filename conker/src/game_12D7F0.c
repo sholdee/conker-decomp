@@ -3,7 +3,7 @@
 #include "variables.h"
 
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
-extern void func_151616D0(u8, u8, s32);
+extern void light_sendEvent(u8, u8, s32);
 
 typedef struct {
     u8 unk0[5];
@@ -12,7 +12,7 @@ typedef struct {
 extern Struct15100340 D_80088BC0;
 
 /* When arg0 is 0: advances D_800DD405, then randomly toggles each of the five D_800BE500 flags,
- * passing the matching D_80088BC0 id to func_151616D0 on each toggle. */
+ * passing the matching D_80088BC0 id to light_sendEvent on each toggle. */
 void func_15100340(s32 arg0) {
     s32 pad; // matching: unused stack slot, sets the frame size
     Struct15100340 ids = D_80088BC0;
@@ -27,10 +27,10 @@ void func_15100340(s32 arg0) {
             chance = (*flag != 0) ? 70 : 35;
             if (func_150ADA20() % 1000U < chance) {
                 if ((*flag ^= 1) != 0) {
-                    func_151616D0(ids.unk0[i], 0x18, 0);
+                    light_sendEvent(ids.unk0[i], 0x18, 0);
                 } else {
-                    func_151616D0(ids.unk0[i], 0x1C, 0);
-                    func_151616D0(ids.unk0[i], 0x17, 0);
+                    light_sendEvent(ids.unk0[i], 0x1C, 0);
+                    light_sendEvent(ids.unk0[i], 0x17, 0);
                 }
             }
         }

@@ -101,19 +101,19 @@ void func_150039E0(s32 levelId, s32 arg1) {
     D_800BE2A0 = D_800BE2A2 = D_800BE2A4 = 0;
     i = func_1502B7F0(&spawns, 2, 0xB, levelId);
     D_800DBF00 = i / sizeof(ObjectSpawn);
-    D_800DBEF0 = D_800DBF00;
+    gWorldObjectCount = D_800DBF00;
     D_800DBF98 = func_1502B7F0(&groupedSpawns, 3, 0xC, levelId, 2) / sizeof(ObjectSpawn);
-    D_800DBEF0 += D_800DBF98;
-    db_Object_array = allocate_memory(D_800DBEF0 * sizeof(WorldObject), 1, 2, 0);
+    gWorldObjectCount += D_800DBF98;
+    db_Object_array = allocate_memory(gWorldObjectCount * sizeof(WorldObject), 1, 2, 0);
     if (db_Object_array == NULL) {
-        D_800DBEF0 = 0;
+        gWorldObjectCount = 0;
         D_800DBF98 = 0;
         D_800DBF00 = 0;
         return;
     }
     // base[i] is object i's spawn: the first list, then the grouped list
     base = spawns;
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         if (i == D_800DBF00) {
             base = &groupedSpawns[-i]; // so that base[i] is groupedSpawns[0]
         }
@@ -289,7 +289,7 @@ void func_150039E0(s32 levelId, s32 arg1) {
             func_15004CE0((DlCommand *)obj->displayList, (u32)model);
         }
     }
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         obj = &db_Object_array[i];
         if (obj->srcVertices == NULL) {
             continue;
@@ -311,18 +311,18 @@ void func_150039E0(s32 levelId, s32 arg1) {
             }
         }
     }
-    D_800DBEE0 = allocate_memory(D_800DBEF0 * 0x40, 1, 2, 0);
-    D_800DBEE4 = allocate_memory(D_800DBEF0 * 0x40, 1, 2, 0);
-    D_800DBEF8 = allocate_memory(D_800DBEF0 * sizeof(s32), 1, 0, 0);
-    D_800DBEFC = allocate_memory(D_800DBEF0, 1, 0, 0);
+    D_800DBEE0 = allocate_memory(gWorldObjectCount * 0x40, 1, 2, 0);
+    D_800DBEE4 = allocate_memory(gWorldObjectCount * 0x40, 1, 2, 0);
+    D_800DBEF8 = allocate_memory(gWorldObjectCount * sizeof(s32), 1, 0, 0);
+    D_800DBEFC = allocate_memory(gWorldObjectCount, 1, 0, 0);
     for (i = 0; i < 4; i++) {
-        D_800DBED0[i] = allocate_memory(D_800DBEF0 * 4, 1, 0, 0);
+        D_800DBED0[i] = allocate_memory(gWorldObjectCount * 4, 1, 0, 0);
     }
-    D_800DBF94 = allocate_memory(D_800DBEF0 * sizeof(s32), 1, 0, 0);
-    for (i = 0; i < D_800DBEF0; i++) {
-        D_800DBF94[i] = 0;
+    gWorldObjectContacts = allocate_memory(gWorldObjectCount * sizeof(s32), 1, 0, 0);
+    for (i = 0; i < gWorldObjectCount; i++) {
+        gWorldObjectContacts[i] = 0;
     }
-    for (i = D_800DBF00; i < D_800DBEF0; i++) {
+    for (i = D_800DBF00; i < gWorldObjectCount; i++) {
         if (db_Object_array[i].unique_id == 0) {
             db_Object_array[i].unique_id = func_15004BF0(FALSE);
         }
@@ -373,7 +373,7 @@ void func_150045C4(s32 arg0) {
     func_15004A4C();
     guMtxIdentF(D_800DBF08[0]);
     guMtxIdentF(D_800DBF48);
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         obj = &db_Object_array[i];
         if (obj->moveProc == NULL || obj->moveProc == func_15116058 || obj->moveProc == func_15116110) {
             obj->attach = 3;
@@ -403,7 +403,7 @@ void func_150045C4(s32 arg0) {
             func_150A44F0(1, D_800D37E0, 1);
         }
     }
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         obj = &db_Object_array[i];
         if (obj->inactive == 1) {
             continue;
@@ -455,7 +455,7 @@ void func_150049A4(DlCommand *dl, s32 offset, s32 matrixOffset) {
 void func_15004A4C(void) {
     s32 i;
 
-    for (i = 0; i < D_800DBEF0; i++) {
+    for (i = 0; i < gWorldObjectCount; i++) {
         D_800DBEF8[i] = 0;
         D_800DBEFC[i] = 0;
     }
@@ -530,7 +530,7 @@ s32 func_15004BF0(s32 fromTop) {
     // matching: the parameter doubles as the start value so that IDO keeps it in a0
     if (fromTop == 0) {
         id = 1;
-        for (i = fromTop = D_800DBF00; i < D_800DBEF0; i++) {
+        for (i = fromTop = D_800DBF00; i < gWorldObjectCount; i++) {
             if (id == db_Object_array[i].unique_id) {
                 id++;
                 i = fromTop - 1; // rescan with the next id
@@ -543,7 +543,7 @@ s32 func_15004BF0(s32 fromTop) {
     } else {
         fromTop = 0xFF - D_800DBF00;
         id = fromTop;
-        for (i = 0; i < D_800DBEF0; i++) {
+        for (i = 0; i < gWorldObjectCount; i++) {
             if (id == db_Object_array[i].unique_id) {
                 id--;
                 i = -1; // rescan with the next id

@@ -15,7 +15,7 @@ extern void func_151C329C(f32 *pos, u8 arg1, s32 arg2);
 extern void func_151DC260(f32 *pos, CollisionHit *ground, s32 type, u8 arg3, s32 arg4);
 extern void func_151DC484(f32 *pos, CollisionHit *ground, s32 type, u8 arg3, s32 arg4);
 extern s32 func_150A11C4;
-extern s32 func_150A1DA0;
+extern s32 zone_isOutside;
 
 // Spawns one of several effects at the point D_800CC2C0, picked by obj's id.
 void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
@@ -35,7 +35,7 @@ void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
         s32 pad; // matching: IDO needs the extra stack slot
 
         addr = (u32)&func_150A11C4;
-        end = (u32)&func_150A1DA0;
+        end = (u32)&zone_isOutside;
         sum = 0;
         for (; addr < end; addr += 4) {
             sum ^= *(u32 *)addr;

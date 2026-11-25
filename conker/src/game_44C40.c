@@ -16,10 +16,10 @@ void func_15017790(void) {
     D_800D2E44 = 0;
 }
 
-/* Resets the per-id record list (D_800D2F48) and related state. */
+/* Resets the per-id record list (gTaskWorkingSet) and related state. */
 void func_150177F8(void) {
     func_1509BA04(1);
-    bzero(&D_800D2F48, 0xC);
+    bzero(&gTaskWorkingSet, 0xC);
     func_150A00F0();
     D_800D2DB0 = 999.0f;
     D_800D2E41 = 10;
@@ -53,20 +53,20 @@ void func_15017930(s32 arg0) {
     u32 count;
     s32 type;
 
-    D_800D3094 = func_1502B7F0((void **)&D_800D3098, 3, 0xC, arg0, 5);
-    count = D_800D3094 / sizeof(TriggerZone);
-    D_800D3094 = count;
-    func_15017B20(D_800D3098, count);
+    gZoneCount = func_1502B7F0((void **)&zones, 3, 0xC, arg0, 5);
+    count = gZoneCount / sizeof(TriggerZone);
+    gZoneCount = count;
+    func_15017B20(zones, count);
     D_800D3274 = 0;
     D_800D3270 = NULL;
-    for (i = 0; i < D_800D3094; i++) {
-        if (ZONE_TYPE(&D_800D3098[i]) == ZONE_TYPE_CHAR_FLAGS &&
-            (D_800D3098[i].subTypeData == 2 || D_800D3098[i].subTypeData == 0 || D_800D3098[i].subTypeData == 6)) {
+    for (i = 0; i < gZoneCount; i++) {
+        if (ZONE_TYPE(&zones[i]) == ZONE_TYPE_CHAR_FLAGS &&
+            (zones[i].subTypeData == 2 || zones[i].subTypeData == 0 || zones[i].subTypeData == 6)) {
             D_800D3274++;
         }
-        type = ZONE_TYPE(&D_800D3098[i]);
+        type = ZONE_TYPE(&zones[i]);
         if (type == ZONE_TYPE_SOUND || type == ZONE_TYPE_TUNE_CHANNEL) {
-            D_800D3098[i].data3 = 0;
+            zones[i].data3 = 0;
         }
     }
     if (D_800D3274 != 0) {
@@ -74,10 +74,10 @@ void func_15017930(s32 arg0) {
         if (D_800D3270 != NULL) {
             TriggerZone **out = D_800D3270;
 
-            for (i = 0; i < D_800D3094; i++) {
-                if (ZONE_TYPE(&D_800D3098[i]) == ZONE_TYPE_CHAR_FLAGS &&
-                    (D_800D3098[i].subTypeData == 2 || D_800D3098[i].subTypeData == 0 || D_800D3098[i].subTypeData == 6)) {
-                    *out++ = &D_800D3098[i];
+            for (i = 0; i < gZoneCount; i++) {
+                if (ZONE_TYPE(&zones[i]) == ZONE_TYPE_CHAR_FLAGS &&
+                    (zones[i].subTypeData == 2 || zones[i].subTypeData == 0 || zones[i].subTypeData == 6)) {
+                    *out++ = &zones[i];
                 }
             }
         }
@@ -86,7 +86,7 @@ void func_15017930(s32 arg0) {
     bzero(D_800D30D0, sizeof(D_800D30D0));
 }
 
-extern void func_150A0D14(TriggerZone *obj);
+extern void zone_cacheAngles(TriggerZone *obj);
 void func_15017FA4(TriggerZone *obj, ZoneBounds *bounds);
 
 /* Whether the ranges [a0, a1) and [b0, b1) overlap. */
@@ -109,7 +109,7 @@ void func_15017B20(TriggerZone *objects, s32 count) {
 
     D_800D309C = allocate_memory(count * sizeof(ZoneBounds), 1, 1, 0);
     for (i = 0; i < count; i++) {
-        func_150A0D14(&objects[i]);
+        zone_cacheAngles(&objects[i]);
         func_15017FA4(&objects[i], &D_800D309C[i]);
     }
     bzero(D_800D30A0, sizeof(D_800D30A0));

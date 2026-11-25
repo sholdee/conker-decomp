@@ -4,7 +4,7 @@
 #include "variables.h"
 
 
-s32 func_15004FE0(s32 levelId);
+s32 aim_loadPoints(s32 levelId);
 void func_1500AC14(void);
 void func_1500BEC0(void);
 void func_1500E5C0(void);
@@ -41,7 +41,7 @@ void func_1500E470(s32 levelId) {
 
     func_151EF640(64);
     func_151732E0(levelId);
-    func_15004FE0(levelId);
+    aim_loadPoints(levelId);
     func_150127B0();
 
     func_1519582C();

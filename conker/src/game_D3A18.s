@@ -11,8 +11,8 @@
 glabel func_150A6568
     /* D3A18 150A6568 00001025 */  or         $v0, $zero, $zero
     /* D3A1C 150A656C ACC00000 */  sw         $zero, 0x0($a2)
-    /* D3A20 150A6570 3C0E800E */  lui        $t6, %hi(D_800DBEF0)
-    /* D3A24 150A6574 8DCEBEF0 */  lw         $t6, %lo(D_800DBEF0)($t6)
+    /* D3A20 150A6570 3C0E800E */  lui        $t6, %hi(gWorldObjectCount)
+    /* D3A24 150A6574 8DCEBEF0 */  lw         $t6, %lo(gWorldObjectCount)($t6)
     /* D3A28 150A6578 11C0FFD1 */  beqz       $t6, .L150A64C0
     /* D3A2C 150A657C 00000000 */   nop
     /* D3A30 150A6580 44900000 */  mtc1       $s0, $f0

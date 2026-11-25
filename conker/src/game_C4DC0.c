@@ -113,7 +113,7 @@ extern s32 func_15086098(f32, f32, f32, s32, s32, s8 *, s8 *);
 extern void func_15086364(s32, s8, s8, s8 *, s8 *);
 extern f32 func_15086D94(f32, f32, f32, f32, f32);
 extern s32 func_150A2AEC(u32, s32, s32 *);
-extern TriggerZone *func_150A3194(s32, s32, s32, s32, s32);
+extern TriggerZone *zone_findAt(s32, s32, s32, s32, s32);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 extern f32 func_15144BC8(f32);
 extern s8 func_151E564C(void);
@@ -1311,11 +1311,11 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
     case 0xCC: {
         TriggerZone *p;
-        p = func_150A3194(3, 11, obj->xpos, obj->ypos, obj->zpos);
+        p = zone_findAt(3, 11, obj->xpos, obj->ypos, obj->zpos);
         if (p == NULL) {
             return -1;
         }
-        ret = p - D_800D3098;
+        ret = p - zones;
         return ret;
     }
     case 0xCF: {

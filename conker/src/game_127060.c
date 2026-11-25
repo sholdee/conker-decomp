@@ -424,14 +424,14 @@ typedef struct {
     /* 0x28 */ EmitterData data;
 } EmitterEffect;
 
-/* Starts the (single) emitter effect between D_800D3098 records 35 and 34. */
+/* Starts the (single) emitter effect between zones records 35 and 34. */
 void func_150FAA40(u8 owner, s32 kind) {
     EmitterData data;
     EmitterEffect *effect;
 
     if (D_80088B60 == 0) {
-        data.from = (s32)&D_800D3098[35];
-        data.to = (s32)&D_800D3098[34];
+        data.from = (s32)&zones[35];
+        data.to = (s32)&zones[34];
         data.pending = 0.0f;
 
         effect = (EmitterEffect *)func_15149130(300, -1, 0x57, -1, 0, 0x46, sizeof(data), owner, kind);
@@ -482,11 +482,11 @@ void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event) {
 
 extern void func_1515F170(s32 arg0, u8 arg1);
 
-/* Calls func_1515F170 for 8 and 0xB, then func_151494E0 with D_800D3098 record 25 (0x30) and 0x4D. */
+/* Calls func_1515F170 for 8 and 0xB, then func_151494E0 with zones record 25 (0x30) and 0x4D. */
 void func_150FAD28(void) {
     func_1515F170(8, 0);
     func_1515F170(0xB, 1);
-    func_151494E0((s32)&D_800D3098[25], 0x30);
+    func_151494E0((s32)&zones[25], 0x30);
     func_151494E0(0, 0x4D);
 }
 
@@ -494,7 +494,7 @@ void func_150FAD28(void) {
 void func_150FAD78(void) {
     func_1515F170(8, 1);
     func_1515F170(7, 0);
-    func_151494E0((s32)&D_800D3098[25], 0x31);
+    func_151494E0((s32)&zones[25], 0x31);
     func_151494E0(0, 0x4C);
 }
 

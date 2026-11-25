@@ -916,7 +916,7 @@ void func_15143874(s32 angle, f32 length, f32 *x, f32 *z) {
 void func_15143D18(s32 *start, s32 *end, s32 lo, s32 hi);
 
 /*
- * Searches D_800D3098[start..end) for a record equal to `key` in the fields selected by `fields`.
+ * Searches zones[start..end) for a record equal to `key` in the fields selected by `fields`.
  * With bit 0x1000 every selected field must match, otherwise any one of them; the last hit wins.
  */
 TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
@@ -929,12 +929,12 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
     if (key == NULL) {
         return NULL;
     }
-    func_15143D18(&start, &end, 0, D_800D3094);
+    func_15143D18(&start, &end, 0, gZoneCount);
     for (i = start; i < end; i++) {
         checked = 0;
         matched = 0;
         if (fields & 1) {
-            if ((key->x == D_800D3098[i].x) && (key->y == D_800D3098[i].y) && (key->z == D_800D3098[i].z)) {
+            if ((key->x == zones[i].x) && (key->y == zones[i].y) && (key->z == zones[i].z)) {
                 checked |= 1;
                 matched |= 1;
             }
@@ -942,7 +942,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 1;
         }
         if (fields & 0x2) {
-            if ((key->xSize == D_800D3098[i].xSize) && (key->ySize == D_800D3098[i].ySize) && (key->zSize == D_800D3098[i].zSize)) {
+            if ((key->xSize == zones[i].xSize) && (key->ySize == zones[i].ySize) && (key->zSize == zones[i].zSize)) {
                 checked |= 0x2;
                 matched |= 0x2;
             }
@@ -950,7 +950,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x2;
         }
         if (fields & 0x4) {
-            if (key->pitch == D_800D3098[i].pitch) {
+            if (key->pitch == zones[i].pitch) {
                 checked |= 0x4;
                 matched |= 0x4;
             }
@@ -958,7 +958,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x4;
         }
         if (fields & 0x8) {
-            if (key->yaw == D_800D3098[i].yaw) {
+            if (key->yaw == zones[i].yaw) {
                 checked |= 0x8;
                 matched |= 0x8;
             }
@@ -966,7 +966,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x8;
         }
         if (fields & 0x10) {
-            if (key->inactive == D_800D3098[i].inactive) {
+            if (key->inactive == zones[i].inactive) {
                 checked |= 0x10;
                 matched |= 0x10;
             }
@@ -974,7 +974,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x10;
         }
         if (fields & 0x20) {
-            if (key->kind == ZONE_TYPE(&D_800D3098[i])) {
+            if (key->kind == ZONE_TYPE(&zones[i])) {
                 checked |= 0x20;
                 matched |= 0x20;
             }
@@ -982,7 +982,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x20;
         }
         if (fields & 0x40) {
-            if (key->flags == D_800D3098[i].flags) {
+            if (key->flags == zones[i].flags) {
                 checked |= 0x40;
                 matched |= 0x40;
             }
@@ -990,7 +990,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x40;
         }
         if (fields & 0x80) {
-            if (key->subTypeData == D_800D3098[i].subTypeData) {
+            if (key->subTypeData == zones[i].subTypeData) {
                 checked |= 0x80;
                 matched |= 0x80;
             }
@@ -998,7 +998,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x80;
         }
         if (fields & 0x100) {
-            if (key->data1 == D_800D3098[i].data1) {
+            if (key->data1 == zones[i].data1) {
                 checked |= 0x100;
                 matched |= 0x100;
             }
@@ -1006,7 +1006,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x100;
         }
         if (fields & 0x200) {
-            if (key->data2 == D_800D3098[i].data2) {
+            if (key->data2 == zones[i].data2) {
                 checked |= 0x200;
                 matched |= 0x200;
             }
@@ -1014,7 +1014,7 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
             checked |= 0x200;
         }
         if (fields & 0x400) {
-            if (key->data3 == D_800D3098[i].data3) {
+            if (key->data3 == zones[i].data3) {
                 checked |= 0x400;
                 matched |= 0x400;
             }
@@ -1023,11 +1023,11 @@ TriggerZone *func_151438D8(s32 start, s32 end, u16 fields, TriggerZone *key) {
         }
         if (fields & 0x1000) {
             if (checked == 0x7FF) {
-                result = &D_800D3098[i];
+                result = &zones[i];
             }
         } else {
             if (matched != 0) {
-                result = &D_800D3098[i];
+                result = &zones[i];
             }
         }
     }

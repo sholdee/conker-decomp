@@ -68,7 +68,7 @@ void func_15043F6C(MtxF mtx, f32 rotX, f32 rotY, f32 rotZ, f32 scaleX, f32 scale
 
 /* Reads the translation of a fixed-point matrix: the integer halves of row 3 (s16 12..14), plus their
  * fractions (s16 28..30). */
-void func_15043FF0(Vec3f *out, Mtx *mtx) {
+void math_mtxGetTranslation(Vec3f *out, Mtx *mtx) {
     out->x = ((s16 *)mtx)[12];
     out->y = ((s16 *)mtx)[13];
     out->z = ((s16 *)mtx)[14];

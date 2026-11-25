@@ -14,7 +14,7 @@ extern void func_150E2DB4(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 
                           f32 startZ, f32 endX, f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8);
 extern void func_15179008(s32);
 
-/* If object idA (else idB) has bit 0 of its D_800DBF94 flag word set, calls func_1505D024 on
+/* If object idA (else idB) has bit 0 of its gWorldObjectContacts flag word set, calls func_1505D024 on
  * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while D_800CC3D4[0] is set. */
 void func_150AF200(s32 idA, s32 idB) {
     WorldObject *obj;
@@ -26,14 +26,14 @@ void func_150AF200(s32 idA, s32 idB) {
 
     obj = func_151149AC(idA);
     index = obj - db_Object_array;
-    if (D_800DBF94[index] & 1) {
+    if (gWorldObjectContacts[index] & 1) {
         func_1505D024(&movement_obj[0], 0x3F, 0x6E00, -1);
         return;
     }
 
     obj = func_151149AC(idB);
     index = obj - db_Object_array;
-    if (D_800DBF94[index] & 1) {
+    if (gWorldObjectContacts[index] & 1) {
         func_1505D024(&movement_obj[0], 0x3F, 0xEE00, -1);
     }
 }

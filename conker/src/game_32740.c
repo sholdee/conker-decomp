@@ -177,8 +177,8 @@ void func_15005818(Camera *view, Actor *actor, Vec3f *eye) {
     view->SpecialFlags |= 4;
     if (D_800BE9F0 != 0x21 && D_800C35EA[0] != 1) {
         func_1512D560(view, 5, NULL);
-        D_800C3600.yaw = view->CameraAngle;
-        func_1512D560(view, 8, &D_800C3600);
+        gCamShot.yaw = view->CameraAngle;
+        func_1512D560(view, 8, &gCamShot);
         func_1512D560(view, 6, NULL);
     }
 }

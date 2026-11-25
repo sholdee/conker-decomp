@@ -1168,7 +1168,7 @@ void func_15125924(Camera *camera) {
     }
 }
 
-/* Zone 0x2A: hands the camera to a scripted shot (D_800C3600) behind and beside the player. */
+/* Zone 0x2A: hands the camera to a scripted shot (gCamShot) behind and beside the player. */
 void func_15125A6C(Camera *camera) {
     f32 sideCos;
     f32 sideSin;
@@ -1189,8 +1189,8 @@ void func_15125A6C(Camera *camera) {
             camera->DoingSpecialContextCase = 1;
         }
         D_800DBFF4[0] = 3;
-        D_800C3600.mode = 1;
-        D_800C3600.unk4 = 0;
+        gCamShot.mode = 1;
+        gCamShot.unk4 = 0;
         radius = 138.0f;
         sideRadius = 46.0f;
         height = 96.0f;
@@ -1199,18 +1199,18 @@ void func_15125A6C(Camera *camera) {
         trig = sinf(angle);
         sideAngle = (yaw - 90.0f) * D_800A3554;
         sideSin = sinf(sideAngle);
-        // matching: the position fields go through their own symbols (D_800C3600.eye.x.. moves code)
+        // matching: the position fields go through their own symbols (gCamShot.eye.x.. moves code)
         D_800C3614 = (sideSin * sideRadius) + (camera->CharPtr->xpos + (radius * trig));
         D_800C3618 = camera->CharPtr->ypos + height;
         trig = cosf(angle);
         sideCos = cosf(sideAngle);
         D_800C361C = (sideCos * sideRadius) + (camera->CharPtr->zpos + (radius * trig));
-        D_800C3600.at.angles.sway = 0.0f;
+        gCamShot.at.angles.sway = 0.0f;
         D_800C3624 = -180.0f;
-        D_800C3600.unk8 = 0.0f;
-        D_800C3600.at.angles.yaw = yaw - 180.0f;
+        gCamShot.unk8 = 0.0f;
+        gCamShot.at.angles.yaw = yaw - 180.0f;
         D_800C365C[0] = 0;
-        func_1512D560(camera, 7, (s32)&D_800C3600);
+        func_1512D560(camera, 7, (s32)&gCamShot);
         return;
     }
     if (camera->DoingSpecialContextCase != 0) {

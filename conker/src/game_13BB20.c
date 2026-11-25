@@ -406,7 +406,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
         object->propNum = D_800DBE60;
         if (D_800DBE60 != 0 && (y - *outFloorY) < 10.0f) {
             db_Object_array[D_800DBE60 - 1].object_status |= 0x84;
-            D_800DBF94[D_800DBE60 - 1] |= 1 << (object - movement_obj);
+            gWorldObjectContacts[D_800DBE60 - 1] |= 1 << (object - movement_obj);
         }
         if (objectNum != 0 && (y - *outFloorY) < 10.0f) {
             object->stand_on_char = objectNum;

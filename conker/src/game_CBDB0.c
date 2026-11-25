@@ -402,13 +402,13 @@ void func_1509F47C(first, last, volume, objId, nearDistance, farDistance)
     func_15114D24(obj, func_1000F568(first, (u8)(last - first + 1)), volume, nearDistance, farDistance, 0);
 }
 
-/* Plays a random sound from first..last at point `index` of the D_800D3098 table, whose halfword at
+/* Plays a random sound from first..last at point `index` of the zones table, whose halfword at
  * 0x6 is the far distance (nearDistance is kept below it). */
 s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance) {
     TriggerZone *point;
     s32 farDistance;
 
-    point = &D_800D3098[index];
+    point = &zones[index];
     farDistance = point->xSize;
     if (nearDistance >= farDistance) {
         nearDistance = farDistance - 1;

@@ -23,7 +23,7 @@ typedef struct {
     u16 rate;
 } VolumeRamp;
 
-/* One music sequence instance, from the pool D_800419A8.
+/* One music sequence instance, from the pool tuneArray.
  * original: struct tune (rom_debug_struct.c); all field names but eventTypes, eventMasks, channelVolumes
  * and VolumeRamp.rate are Rare's. */
 struct MusicTrack {
@@ -59,7 +59,7 @@ extern s32 D_80041880[3];
 extern s32 D_80041890[3];             /* last marker position */
 extern s32 D_800418A0[3];             /* distance between the last two marker positions */
 extern u8 D_80041970[3][16];          /* per-event toggle */
-extern MusicTrack D_800419A8[12];     /* track pool */
+extern MusicTrack tuneArray[12];     /* track pool */
 
 void func_1000D96C(s32 newId, s32 oldId, s32 transition);
 void func_1000DEC4(void);
@@ -125,22 +125,22 @@ MusicTrack *func_1000B2F4(s32 id) {
     s32 i;
 
     for (i = 0; i < 12; i++) {
-        if (D_800419A8[i].seq_number == -1) {
-            bzero(&D_800419A8[i], sizeof(MusicTrack));
-            D_800419A8[i].player = -1;
+        if (tuneArray[i].seq_number == -1) {
+            bzero(&tuneArray[i], sizeof(MusicTrack));
+            tuneArray[i].player = -1;
             if (id < 150) {
-                D_800419A8[i].fullVolume = D_8002B074[id].volume;
+                tuneArray[i].fullVolume = D_8002B074[id].volume;
             } else {
-                D_800419A8[i].fullVolume = 26000;
+                tuneArray[i].fullVolume = 26000;
             }
-            D_800419A8[i].currentVolume = D_800419A8[i].fullVolume;
-            D_800419A8[i].vol0.intended = D_800419A8[i].vol0.current = D_800419A8[i].vol1.current =
-                D_800419A8[i].vol1.intended = D_800419A8[i].vol2.current = D_800419A8[i].vol2.intended = 0x8000;
-            D_800419A8[i].seq_number = id;
-            D_800419A8[i].eventTypes = D_8002B9D4;
-            D_800419A8[i].eventMasks = D_8002B9F4;
-            D_800419A8[i].syncTune = &D_800419A8[i];
-            return &D_800419A8[i];
+            tuneArray[i].currentVolume = tuneArray[i].fullVolume;
+            tuneArray[i].vol0.intended = tuneArray[i].vol0.current = tuneArray[i].vol1.current =
+                tuneArray[i].vol1.intended = tuneArray[i].vol2.current = tuneArray[i].vol2.intended = 0x8000;
+            tuneArray[i].seq_number = id;
+            tuneArray[i].eventTypes = D_8002B9D4;
+            tuneArray[i].eventMasks = D_8002B9F4;
+            tuneArray[i].syncTune = &tuneArray[i];
+            return &tuneArray[i];
         }
     }
     return NULL;
@@ -211,9 +211,9 @@ s32 func_1000B548(s32 *ids) {
     s32 i;
 
     for (i = 0; i < 12; i++) {
-        if (D_800419A8[i].seq_number != -1 && D_800419A8[i].player != -1) {
+        if (tuneArray[i].seq_number != -1 && tuneArray[i].player != -1) {
             if (count < 3) {
-                *ids++ = D_800419A8[i].seq_number;
+                *ids++ = tuneArray[i].seq_number;
                 count++;
             }
         }
@@ -1330,17 +1330,17 @@ void func_1000DEC4(void) {
     s32 channel;
 
     for (i = 0; i < 12; i++) {
-        channel = D_800419A8[i].player;
+        channel = tuneArray[i].player;
         if (invalid == channel) {
-            if (D_800419A8[i].seq_number != invalid) {
-                D_800419A8[i].seq_number = invalid;
+            if (tuneArray[i].seq_number != invalid) {
+                tuneArray[i].seq_number = invalid;
             }
         } else if (func_1000853C(channel) == 0) {
-            D_800417B0[D_800419A8[i].player] = NULL;
-            D_800419A8[i].player = invalid;
-            D_800419A8[i].seq_number = invalid;
+            D_800417B0[tuneArray[i].player] = NULL;
+            tuneArray[i].player = invalid;
+            tuneArray[i].seq_number = invalid;
         }
-        D_800419A8[i].waitingTune = NULL;
+        tuneArray[i].waitingTune = NULL;
     }
 }
 
@@ -1434,7 +1434,7 @@ void func_1000E17C(void) {
     MusicTrack *track;
 
     for (i = 0; i < 12; i++) {
-        track = &D_800419A8[i];
+        track = &tuneArray[i];
         if (track->seq_number > 0) {
             if ((1 == MUSIC_KIND(track) || 3 == MUSIC_KIND(track)) && track->player == -1) {
                 track->seq_number = -1;
@@ -1442,7 +1442,7 @@ void func_1000E17C(void) {
         }
     }
     for (i = 0; i < 12; i++) {
-        track = &D_800419A8[i];
+        track = &tuneArray[i];
         if (track->seq_number > 0) {
             if (track->waitingTune != NULL && track->waitingTune->seq_number == -1) {
                 track->waitingTune = NULL;
@@ -1453,7 +1453,7 @@ void func_1000E17C(void) {
         }
     }
     for (i = 0; i < 12; i++) {
-        track = &D_800419A8[i];
+        track = &tuneArray[i];
         if (track->seq_number > 0) {
             if ((1 == MUSIC_KIND(track) || 3 == MUSIC_KIND(track)) && track->player != -1) {
                 func_1000DE1C(track->seq_number, 4);
@@ -1702,10 +1702,10 @@ void func_1000E934(void) {
         D_80041890[i] = 0;
         D_80041880[i] = 0;
     }
-    bzero(D_800419A8, sizeof(D_800419A8));
+    bzero(tuneArray, sizeof(tuneArray));
     D_800419A0 = 0;
     for (k = 0; k < 12; k++) {
-        D_800419A8[k].seq_number = -1;
+        tuneArray[k].seq_number = -1;
     }
 }
 

@@ -372,8 +372,8 @@ glabel func_150AC9C0
   .L150ACECC:
     /* DA37C 150ACECC 0D443E00 */  jal        func_1510F800
     /* DA380 150ACED0 24040002 */   addiu     $a0, $zero, 0x2
-    /* DA384 150ACED4 3C0B800E */  lui        $t3, %hi(D_800DBEF0)
-    /* DA388 150ACED8 8D6BBEF0 */  lw         $t3, %lo(D_800DBEF0)($t3)
+    /* DA384 150ACED4 3C0B800E */  lui        $t3, %hi(gWorldObjectCount)
+    /* DA388 150ACED8 8D6BBEF0 */  lw         $t3, %lo(gWorldObjectCount)($t3)
     /* DA38C 150ACEDC 240800A0 */  addiu      $t0, $zero, 0xA0
     /* DA390 150ACEE0 01680018 */  mult       $t3, $t0
     /* DA394 150ACEE4 3C0A800E */  lui        $t2, %hi(db_Object_array)

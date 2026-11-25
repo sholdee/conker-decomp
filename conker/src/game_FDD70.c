@@ -81,7 +81,7 @@ void func_150D0E90(s32 arg0) {
         for (i = 0; i < 3; i++) {
             prop = func_151149AC(0xFA - i);
             propIndex = prop - db_Object_array;
-            if (D_800DBF94[propIndex] & 1) {
+            if (gWorldObjectContacts[propIndex] & 1) {
                 func_151951E0(movement_obj);
                 func_10010154(0x627, movement_obj, 0x7FFF, 200, 700);
             }
@@ -89,7 +89,7 @@ void func_150D0E90(s32 arg0) {
 
         prop = func_151149AC(0xFB);
         propIndex = prop - db_Object_array;
-        if (D_800DBF94[propIndex] & 1) {
+        if (gWorldObjectContacts[propIndex] & 1) {
             func_10010154(0x627, movement_obj, 0x7FFF, 200, 700);
             func_15136C3C(movement_obj, 1, 1, 1, 1, 0, 0xFF, 1);
             func_15145A50(movement_obj);

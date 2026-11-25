@@ -14,7 +14,7 @@ typedef struct SoundRecord SoundRecord;
 typedef s32 (*SoundRecordCallback)(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix,
                                    u16 *sound);
 
-/* A positional sound being tracked by func_10011624 (D_80041FE0, up to 32).
+/* A positional sound being tracked by func_10011624 (dynamicSounds, up to 32).
  * original: struct AlSSound (rom_debug_struct.c); field names are Rare's labels with spaces as underscores,
  * except mix and the members of the two callback parameter unions. */
 struct SoundRecord {
@@ -389,7 +389,7 @@ void func_15043A00(MsgRing *ring, u8 *buffer, s32 capacity);
 void func_15043D90(Mtx *m, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 void func_15043E68(Mtx *m, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 void func_15043EC8(MtxF mtx, f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32 arg6);
-void func_15043FF0(Vec3f *out, Mtx *mtx);
+void math_mtxGetTranslation(Vec3f *out, Mtx *mtx);
 void func_150442C0(MtxF arg0, f32 x, f32 y, f32 z);
 void func_15047F00(MtxF mtx, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 void func_15048134(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);

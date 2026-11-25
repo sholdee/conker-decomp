@@ -142,9 +142,9 @@ s32 func_10012E04(s32 *arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5) {
     if (arg5 == 0) {
         return 0;
     }
-    if (D_80042800 != 0) {
-        sp2C = D_80042800;
-        D_80042800 = D_80042800->next;
+    if (gFreeOscStates != 0) {
+        sp2C = gFreeOscStates;
+        gFreeOscStates = gFreeOscStates->next;
         sp2C->type = arg2;
         *arg0 = sp2C;
         ret = arg5 << 0xE;
@@ -207,8 +207,8 @@ s32 func_10012F94(OscState *arg0, f32 *arg1) {
 }
 
 void func_100131D8(s32 *arg0) {
-    *arg0 = (s32*)D_80042800;
-    D_80042800 = arg0;
+    *arg0 = (s32*)gFreeOscStates;
+    gFreeOscStates = arg0;
 }
 
 /* initOsc setup: allocates `arg1` oscillator states into the free list and installs the oscillator callbacks. */
@@ -217,8 +217,8 @@ void func_100131FC(ALSeqpConfig *config, s32 arg1) {
     s32 i;
 
     D_80042804 = alHeapDBAlloc(0, 0, config->heap, arg1, sizeof(OscState));
-    D_80042800 = (s32) D_80042804;
-    D_80042800 = (s32) D_80042804; // ???
+    gFreeOscStates = (s32) D_80042804;
+    gFreeOscStates = (s32) D_80042804; // ???
     sp24 = D_80042804;
 
     for (i = 0; i < (arg1 - 1); i++) {

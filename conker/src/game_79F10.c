@@ -997,7 +997,7 @@ void func_1504CB98(Actor *actor) {
         if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode != 0x100)) {
             climbIndex = (actor->mv->ladder & ~0x80) - 1;
             climbSpeed = D_800CC284->stick_y;
-            climbSpot = &D_800D3098[climbIndex];
+            climbSpot = &zones[climbIndex];
             if ((actor->inwater != 0) && (actor->ypos < actor->unk118)) {
                 actor->mv->unk96 = 8;
             }
@@ -1271,7 +1271,7 @@ void func_1504CB98(Actor *actor) {
                 if ((actor->CameraPtr != NULL) && (actor->CameraPtr->Mode != 0x100)) {
                     climbInput = D_800CC284->stick_y;
                     climbIndex = (actor->mv->ladder & ~0x80) - 1;
-                    climb = &D_800D3098[climbIndex];
+                    climb = &zones[climbIndex];
                     if (actor->mv->unk96 != 0) {
                         climbInput = 60.0f;
                     }

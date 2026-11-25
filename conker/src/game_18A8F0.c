@@ -501,7 +501,7 @@ void func_1515E888(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg
     color[2] = v;
 }
 
-s32 func_150A1DA0(Actor *obj, TriggerZone *zone, s32);
+s32 zone_isOutside(Actor *obj, TriggerZone *zone, s32);
 
 /* First zone in the list whose type matches `mask` (0 = any) and that contains (x, y, z). */
 TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node) {
@@ -519,7 +519,7 @@ TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node) {
     for (; node != NULL; node = node->next) {
         zone = node->zone;
         if (zone->inactive == 0 && (mask == 0 || ((zone->data1 >> 24) & mask)) &&
-            (ZONE_TYPE(zone) == ZONE_TYPE_LIGHT_DIRECTIONAL_LOCAL || !(zone->data1 >> 31)) && func_150A1DA0(&probe, zone, 0) == 0) {
+            (ZONE_TYPE(zone) == ZONE_TYPE_LIGHT_DIRECTIONAL_LOCAL || !(zone->data1 >> 31)) && zone_isOutside(&probe, zone, 0) == 0) {
             return node->zone;
         }
     }

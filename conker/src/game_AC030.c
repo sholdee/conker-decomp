@@ -732,7 +732,7 @@ typedef struct {
 
 extern s32 func_15037698(s32 objIndex, s32 refBone, s32 bone, f32 x, f32 y, f32 z, f32 *out, f32 range,
                          s32 noCheck, s32 axisMode);
-extern s32 func_150A3194(s32 type, s32 subtype, s32 x, s32 y, s32 z);
+extern s32 zone_findAt(s32 type, s32 subtype, s32 x, s32 y, s32 z);
 extern ObjTypeList D_80086C50;
 
 /*
@@ -752,9 +752,9 @@ s32 func_1507FFD8(Actor *actor) {
     f32 pad[3]; // matching: unused stack space (frame size)
     s32 type;
 
-    inZone = func_150A3194(4, 5, actor->xpos, actor->ypos, actor->zpos);
+    inZone = zone_findAt(4, 5, actor->xpos, actor->ypos, actor->zpos);
     if (!inZone) {
-        inZone = func_150A3194(4, 11, actor->xpos, actor->ypos, actor->zpos);
+        inZone = zone_findAt(4, 11, actor->xpos, actor->ypos, actor->zpos);
     }
     if (inZone) {
         types = D_80086C50;

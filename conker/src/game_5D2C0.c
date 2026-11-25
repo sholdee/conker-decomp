@@ -909,7 +909,7 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
 }
 
 void func_15100180(Actor *);
-void func_151616D0(u8, u8, ActorRef *);
+void light_sendEvent(u8, u8, ActorRef *);
 void func_15147D64(ActorRef *, s32);
 void func_151BD7F4(Actor *);
 void func_151D4668(Actor *);
@@ -950,7 +950,7 @@ void func_15031C14(ModelAttachment *att) {
         case 0x49:
             ref49.actor = owner;
             ref49.uniqueId = owner->unique_id;
-            func_151616D0(0x10, 0x29, &ref49);
+            light_sendEvent(0x10, 0x29, &ref49);
             break;
         case 0x5D:
             ref5D.actor = owner;

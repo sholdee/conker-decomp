@@ -235,7 +235,7 @@ void func_150E4928(WorldObject *obj) {
     height = -10000.0f;
     i = obj - db_Object_array;
     tries = 5;
-    if (i < D_800DBEF0 && i >= 0) {
+    if (i < gWorldObjectCount && i >= 0) {
         idx = i;
         found = 0;
         func_1510F800(2);

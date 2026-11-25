@@ -677,7 +677,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
                 target.y = held->ypos;
                 target.z = held->zpos;
             } else {
-                func_15043FF0(&target, model);
+                math_mtxGetTranslation(&target, model);
             }
             if (func_15037698(objIndex, refBone, bone, target.x, target.y, target.z, out, range, 0, axisMode)) {
                 return;
@@ -702,14 +702,14 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         f32 dy;
         f32 dz;
 
-        if (D_80084400 >= D_800C6654) {
+        if (D_80084400 >= gAimPointCount) {
             D_80084400 = 0;
         }
-        if (D_800C6654 != 0) {
+        if (gAimPointCount != 0) {
             idx = D_80084400;
             bestIdx = -1;
             do {
-                point = &((AimPoint *)D_800C6650)[idx]; // matching: the no-op cast keeps the addu operand order
+                point = &((AimPoint *)gAimPoints)[idx]; // matching: the no-op cast keeps the addu operand order
                 if (objX < point->maxX && point->minX < objX && (u16)point->flags == 0) {
                     radiusSq = point->radiusSq;
                     px = point->x;
@@ -728,7 +728,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
                     }
                 }
                 idx++;
-                if (idx == D_800C6654) {
+                if (idx == gAimPointCount) {
                     idx = 0;
                 }
             } while (idx != D_80084400);
@@ -745,7 +745,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
                 node = (AimNode *)D_800DCE50[list][type];
                 while (node != NULL) {
                     if (type == 25 || type == 72) {
-                        extern s32 D_800C6654; // matching: this redeclaration shifts IDO's scheduling of the loop
+                        extern s32 gAimPointCount; // matching: this redeclaration shifts IDO's scheduling of the loop
                         if (node->unk66 == 0) {
                             maxDist = 250000.0f;
                             usable = 1;
@@ -791,8 +791,8 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         return;
     }
     if (foundKind == 2) {
-        if (D_800C6650[bestIdx].unk12 != 0) {
-            func_1507E9E8(obj, D_800C6650[bestIdx].unk12 - 1);
+        if (gAimPoints[bestIdx].unk12 != 0) {
+            func_1507E9E8(obj, gAimPoints[bestIdx].unk12 - 1);
         }
     } else if (foundKind == 3) {
         // matching: the empty branch keeps the shared epilogue branch IDO emits
@@ -1865,7 +1865,7 @@ void func_1503A830(Actor *obj) {
                     model = holderData->partMtx[D_800BE9C0];
                     if (model != NULL) {
                         model += 2; // the third part matrix
-                        func_15043FF0((Vec3f *)D_800C3FE8, model);
+                        math_mtxGetTranslation((Vec3f *)D_800C3FE8, model);
                         noHolderTarget = 0;
                     }
                 }

@@ -133,13 +133,13 @@ f32 func_15086BD0(s32 a, s32 b) {
 void func_15086C68(void) {
 }
 
-extern void func_150A3194(s32, s32, s32, s32, s32);
+extern void zone_findAt(s32, s32, s32, s32, s32);
 
-/* Calls func_150A3194(3, 11, ...) at path node `index`. */
+/* Calls zone_findAt(3, 11, ...) at path node `index`. */
 void func_15086C70(s32 index) {
     s16 z = D_800D2350[index].z;
 
-    func_150A3194(3, 11, D_800D2350[index].x, D_800D2350[index].y, z);
+    zone_findAt(3, 11, D_800D2350[index].x, D_800D2350[index].y, z);
 }
 
 /* Writes the position of path node `index` to *x, *y, *z; returns 0 if out of range. */
@@ -3489,7 +3489,7 @@ void func_1508EDBC(s32 index) {
     }
 }
 
-void func_1503DDD0(s32);
+void aim_removePoint(s32);
 void func_15114B94(u32);
 
 /* Fires every entry of the link group containing (type, id), then clears the group. */
@@ -3510,7 +3510,7 @@ void func_1508EE0C(u16 type, u16 id) {
                         func_15114B94(operand);
                         break;
                     case 3:
-                        func_1503DDD0(operand);
+                        aim_removePoint(operand);
                         break;
                     }
                 }

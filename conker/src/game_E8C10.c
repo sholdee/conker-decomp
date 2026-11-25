@@ -658,14 +658,14 @@ s32 func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
 Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 
-/* Burst of particles and spawned particles from two random anchors (entries 0x4C/0x4D of D_800D3098). */
+/* Burst of particles and spawned particles from two random anchors (entries 0x4C/0x4D of zones). */
 void func_150BD070(u8 arg0, s32 arg1) {
     TriggerZone *anchors[2];
     const u8 idx[2] = {0x4C, 0x4D};
     s16 count;
 
-    anchors[0] = D_800D3098 + idx[0];
-    anchors[1] = D_800D3098 + idx[1];
+    anchors[0] = zones + idx[0];
+    anchors[1] = zones + idx[1];
     {
         ParticleSpawn particle;
         s32 rnd;

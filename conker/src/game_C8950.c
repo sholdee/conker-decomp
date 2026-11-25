@@ -80,8 +80,8 @@ IdRecord *func_1509B704(s16 id) {
     IdRecord *node;
     s32 i;
 
-    node = D_800D2F48.head;
-    for (i = 0; i < D_800D2F48.count; i++) {
+    node = gTaskWorkingSet.head;
+    for (i = 0; i < gTaskWorkingSet.count; i++) {
         if (id == TASK_ID(node)) {
             return node;
         }
@@ -95,25 +95,25 @@ void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 
 /* Unlinks `node` from the task working set and frees it. */
 void func_1509B764(IdRecord *node) {
-    if (D_800D2F48.count == 1) {
-        D_800D2F48.head = NULL;
-        D_800D2F48.tail = NULL;
+    if (gTaskWorkingSet.count == 1) {
+        gTaskWorkingSet.head = NULL;
+        gTaskWorkingSet.tail = NULL;
     } else {
-        if (node == D_800D2F48.head) {
-            D_800D2F48.head = node->NextTaskPtr;
+        if (node == gTaskWorkingSet.head) {
+            gTaskWorkingSet.head = node->NextTaskPtr;
             node->NextTaskPtr->PrevTaskPtr = NULL;
         } else {
             node->PrevTaskPtr->NextTaskPtr = node->NextTaskPtr;
         }
-        if (node == D_800D2F48.tail) {
-            D_800D2F48.tail = node->PrevTaskPtr;
+        if (node == gTaskWorkingSet.tail) {
+            gTaskWorkingSet.tail = node->PrevTaskPtr;
             node->PrevTaskPtr->NextTaskPtr = NULL;
         } else {
             node->NextTaskPtr->PrevTaskPtr = node->PrevTaskPtr;
         }
     }
     func_10004074(node);
-    D_800D2F48.count--;
+    gTaskWorkingSet.count--;
 }
 
 /* Inserts `node` into the task working set, keeping it sorted by task id. */
@@ -123,43 +123,43 @@ void func_1509B810(IdRecord *node) {
     s32 id;
     s32 i;
 
-    cur = D_800D2F48.tail;
+    cur = gTaskWorkingSet.tail;
     id = TASK_ID(node);
-    if (D_800D2F48.count == 0) {
-        D_800D2F48.head = node;
-        D_800D2F48.tail = node;
+    if (gTaskWorkingSet.count == 0) {
+        gTaskWorkingSet.head = node;
+        gTaskWorkingSet.tail = node;
         node->NextTaskPtr = NULL;
         node->PrevTaskPtr = NULL;
-        D_800D2F48.count += 1;
+        gTaskWorkingSet.count += 1;
         return;
     }
 
-    for (i = 0; i < D_800D2F48.count; i++) {
+    for (i = 0; i < gTaskWorkingSet.count; i++) {
         if (TASK_ID(cur) < id) {
-            if (cur == D_800D2F48.tail) {
+            if (cur == gTaskWorkingSet.tail) {
                 node->PrevTaskPtr = cur;
                 node->NextTaskPtr = NULL;
                 cur->NextTaskPtr = node;
-                D_800D2F48.tail = node;
-                D_800D2F48.count += 1;
+                gTaskWorkingSet.tail = node;
+                gTaskWorkingSet.count += 1;
                 return;
             }
             node->PrevTaskPtr = cur;
             node->NextTaskPtr = cur->NextTaskPtr;
             cur->NextTaskPtr->PrevTaskPtr = node;
             cur->NextTaskPtr = node;
-            D_800D2F48.count += 1;
+            gTaskWorkingSet.count += 1;
             return;
         }
         cur = cur->PrevTaskPtr;
     }
 
-    head = D_800D2F48.head;
-    D_800D2F48.head = node;
+    head = gTaskWorkingSet.head;
+    gTaskWorkingSet.head = node;
     node->PrevTaskPtr = NULL;
     node->NextTaskPtr = head;
     head->PrevTaskPtr = node;
-    D_800D2F48.count += 1;
+    gTaskWorkingSet.count += 1;
 }
 
 void *func_1502B5C8(s32 *size, s32 arg1, s32 arg2, s32 arg3);
@@ -209,8 +209,8 @@ void func_1509BA04(s32 unloadAll) {
     s32 count;
     s32 i;
 
-    count = D_800D2F48.count;
-    node = D_800D2F48.head;
+    count = gTaskWorkingSet.count;
+    node = gTaskWorkingSet.head;
     if (D_800D2E69 != 0) {
         func_1509C228();
         D_800D2E69 = 0;
@@ -249,13 +249,13 @@ void func_1509BBA0(s32 mode) {
     u16 id;
     s32 key;
 
-    node = D_800D2F48.head;
+    node = gTaskWorkingSet.head;
     func_15096D08();
     if (!D_800BE616 && D_800BE9F0 != 50 && !func_1509BE40(0, 0x2000, 0x93) && mode == TASK_ENTRY_RUN) {
         return;
     }
     func_1509C228();
-    for (i = 0; i < D_800D2F48.count; i++) {
+    for (i = 0; i < gTaskWorkingSet.count; i++) {
         id = node->TaskID & TASK_ID_MASK;
         D_800D2E48 = id;
         key = node->TaskID;

@@ -4,12 +4,12 @@
 
 
 /* Removes aim point `arg0`, then drops removed points from the end of the table. */
-void func_1503DDD0(s32 arg0) {
-    if (arg0 >= 0 && (u32)arg0 < (u32)D_800C6654) {
-        D_800C6650[arg0].flags = 2;
-        arg0 = D_800C6654 - 1;
-        while (D_800C6654 != 0 && ((u16)D_800C6650[arg0].flags & 2)) {
-            D_800C6654--;
+void aim_removePoint(s32 arg0) {
+    if (arg0 >= 0 && (u32)arg0 < (u32)gAimPointCount) {
+        gAimPoints[arg0].flags = 2;
+        arg0 = gAimPointCount - 1;
+        while (gAimPointCount != 0 && ((u16)gAimPoints[arg0].flags & 2)) {
+            gAimPointCount--;
             arg0--;
         }
     }
