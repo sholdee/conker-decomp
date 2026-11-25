@@ -43,7 +43,7 @@ typedef struct {
     u16 retraceCount;
     void *framep;
 } DebuggerViContext;
-extern DebuggerViContext *D_8002BDE0;
+extern DebuggerViContext *__osViCurr;
 
 /* COP0 TLB snapshot taken by func_16003650: EntryLo0, EntryLo1, EntryHi and PageMask of each entry. */
 extern u32 D_160038AC[32];
@@ -455,7 +455,7 @@ s32 func_16000B14(OSThread *thread) {
     if ((((u32)D_8003C8E0 >> 24) & 0xFF) == 0xC) {
         thread = &D_80031AE0;
     }
-    framebuffer = D_8002BDE0->framep;
+    framebuffer = __osViCurr->framep;
     if (framebuffer == (u32 *)D_8002AAE8[1]) {
         *(s8 *)&D_16003888 = 1; // matching: an s8 store lets IDO reuse the 1 already in a register
     }

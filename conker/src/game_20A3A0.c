@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern OSTimer D_80042A58;
+extern OSTimer __osEepromTimer;
 extern OSMesgQueue __osEepromTimerQ;
 extern OSMesgQueue *D_800E0A20;
 extern u8 D_800E0A24;
@@ -19,7 +19,7 @@ void func_151DCEF0(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
     D_800E0A24 = arg1;
     D_800E0A28 = arg2;
     D_800E0A2C = arg3;
-    osSetTimer(&D_80042A58, 12000ULL * D_8002BD10 / 1000000ULL, 0, &__osEepromTimerQ, &D_80042A90);
+    osSetTimer(&__osEepromTimer, 12000ULL * osClockRate / 1000000ULL, 0, &__osEepromTimerQ, &__osEepromTimerMsg);
 }
 
 s32 func_151DCFD8(s32 arg0) {
@@ -48,7 +48,7 @@ s32 func_151DCFD8(s32 arg0) {
         D_800E0A2C -= 8;
         D_800E0A24++;
         D_800E0A28 += 8;
-        osSetTimer(&D_80042A58, 12000ULL * D_8002BD10 / 1000000ULL, 0, &__osEepromTimerQ, &D_80042A90);
+        osSetTimer(&__osEepromTimer, 12000ULL * osClockRate / 1000000ULL, 0, &__osEepromTimerQ, &__osEepromTimerMsg);
         return 1;
     }
     return 0;

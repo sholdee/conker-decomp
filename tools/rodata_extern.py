@@ -172,9 +172,17 @@ DATA_SECTIONS = (".data", ".bss", ".sdata", ".sbss")
 
 
 def owns_section(yaml_path, obj, kind):
-    """True if the yaml links this object's own section `kind` (e.g. a `.data, <name>` subsegment)."""
-    return re.search(rf"\[0x[0-9A-Fa-f]+,\s*\.?{re.escape(kind.lstrip('.'))},\s*{re.escape(obj_name(obj))}\s*\]",
-                     Path(yaml_path).read_text()) is not None
+    """True if the yaml links this object's own section `kind`: a list-form subsegment
+    `[0xROM, .data, <name>]`, or a dict-form one `{start: ..., type: .bss, vram: ..., name: <name>}`
+    (the form bss needs, since its vram cannot be derived from a ROM offset)."""
+    text = Path(yaml_path).read_text()
+    k, n = re.escape(kind.lstrip(".")), re.escape(obj_name(obj))
+    if re.search(rf"\[0x[0-9A-Fa-f]+,\s*\.?{k},\s*{n}\s*\]", text):
+        return True
+    for d in re.findall(r"\{[^{}]*\}", text):
+        if re.search(rf"\btype:\s*\.{k}\b", d) and re.search(rf"\bname:\s*{n}\s*(?:[,}}]|$)", d):
+            return True
+    return False
 
 
 def main():
@@ -187,6 +195,10 @@ def main():
     trim_text_padding(obj, yaml_path)
     if owns_rodata(yaml_path, obj):
         trim_text_padding(obj, yaml_path, ".rodata", b".rodata")
+    if owns_section(yaml_path, obj, ".data"):
+        trim_text_padding(obj, yaml_path, ".data", b".data")
+    if owns_section(yaml_path, obj, ".bss"):
+        trim_bss_padding(obj, yaml_path)
     elf = ElfFile(Path(obj).read_bytes())
     text = elf.find_section(".text")
     if text is None:
@@ -241,6 +253,42 @@ def trim_text_padding(obj, yaml_path, typ_wanted="c", section=b".text"):
                 continue
             off, size = struct.unpack(">II", data[sh(i) + 16:sh(i) + 24])
             if size > seglen and size - seglen < 16 and not any(data[off + seglen:off + size]):
+                f.seek(sh(i) + 20)
+                f.write(struct.pack(">I", seglen))
+            return
+
+
+def trim_bss_padding(obj, yaml_path):
+    """Like trim_text_padding for an owned .bss: bss has no ROM bytes, so the slice length comes from
+    the vram of the next bss entry in the yaml (dict form: {start, type: .bss|bss, vram, name})."""
+    name = obj_name(obj)
+    ents = []
+    for d in re.findall(r"\{[^{}]*\}", Path(yaml_path).read_text()):
+        t = re.search(r"\btype:\s*(\.?bss)\b", d)
+        v = re.search(r"\bvram:\s*(0x[0-9A-Fa-f]+)", d)
+        n = re.search(r"\bname:\s*([\w/]+)", d)
+        if t and v:
+            ents.append((int(v.group(1), 16), t.group(1), n.group(1) if n else None))
+    ents.sort()
+    seglen = None
+    for (v, t, n), (v2, _, _) in zip(ents, ents[1:]):
+        if t == ".bss" and n == name:
+            seglen = v2 - v
+            break
+    if not seglen or seglen % 16 == 0:
+        return
+    with open(obj, "r+b") as f:
+        data = f.read()
+        shoff, = struct.unpack(">I", data[32:36])
+        shentsize, shnum, shstrndx = struct.unpack(">HHH", data[46:52])
+        sh = lambda i: shoff + i * shentsize
+        stroff = struct.unpack(">I", data[sh(shstrndx) + 16:sh(shstrndx) + 20])[0]
+        for i in range(shnum):
+            nameoff, = struct.unpack(">I", data[sh(i):sh(i) + 4])
+            if data[stroff + nameoff:data.index(b"\0", stroff + nameoff)] != b".bss":
+                continue
+            size, = struct.unpack(">I", data[sh(i) + 20:sh(i) + 24])
+            if size > seglen and size - seglen < 16:
                 f.seek(sh(i) + 20)
                 f.write(struct.pack(">I", seglen))
             return

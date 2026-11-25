@@ -13,8 +13,8 @@ void func_15152190(DebrisBurst *, s32 *variantIds, f32 *variantScales, s32 varia
 /* Throws a burst of debris (one variant, id 226) from origin. */
 void func_151036B4(Vec3f *origin, u8 arg1, s32 arg2) {
     DebrisBurst debris;
-    s32 variantIds[] = { 226 };
-    f32 variantScales[] = { 1.0f };
+    const s32 variantIds[] = { 226 };
+    const f32 variantScales[] = { 1.0f };
 
     debris.countBase = 8;
     debris.countRange = 4;

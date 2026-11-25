@@ -147,8 +147,19 @@ void func_15089BB0(void) {
 
 void *func_1509B570(s32);
 void func_1508BC20(void);
-extern f32 D_800872B0[], D_800872F8[];
-extern s8 D_800872F0[];
+/* Per-difficulty bot tuning (indexed by D_800E0BD0): this file's .data, in the original order. */
+f32 D_800872B0[5] = { 1.5f, 1.2f, 0.8f, 0.4f, 0.15f };
+s16 D_800872C4[5] = { -1, -1, 600, 240, 0 }; // aim time limit, -1 = none
+s8 D_800872D0[5] = { 80, 70, 60, 60, 45 };
+s8 D_800872D8[5] = { 10, 20, 30, 60, 45 };
+s8 D_800872E0[5] = { 120, 80, 40, 10, 0 };
+s8 D_800872E8[5] = { 10, 20, 50, 80, 100 }; // percent chance
+s8 D_800872F0[5] = { 30, 25, 20, 15, 15 };
+f32 D_800872F8[5] = { 0.05f, 0.1f, 0.125f, 0.25f, 1.0f }; // aim rate
+f32 D_8008730C[5] = { 0.0f, 0.025f, 0.05f, 0.075f, 0.0f }; // not referenced by any code
+s16 D_80087320[5][3] = { // [level][range] attack timer limit
+    { 900, 300, 80 }, { 600, 300, 80 }, { 420, 300, 80 }, { 360, 240, 60 }, { 300, 180, 60 },
+};
 
 /* Loads the multiplayer game resource D_800D2E48 and resets its per-player state. */
 s32 func_15089BC0(void) {
@@ -391,10 +402,6 @@ s32 func_1508A1BC(void) {
     return 0;
 }
 
-extern s8 D_800872D0[];
-extern s16 D_800872C4[];
-extern s8 D_800872E0[];
-extern s8 D_800872E8[];
 void func_15042D94(s32, s32, s32, char *, ...);
 s32 func_1508CAD8(s32, s32, s32, s32, s32, s32);
 void func_1508EC5C(s32, s32);
@@ -1265,7 +1272,6 @@ s32 func_1508CA88(void) {
 }
 
 
-extern s8 D_800872D8[];
 void func_150DA5EC(Actor *, f32);
 
 
@@ -1566,7 +1572,6 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
     return result;
 }
 
-extern s16 D_80087320[][3];
 void func_1508EB90(s32 arg0, s32 arg1, s32 arg2);
 
 /*
@@ -1699,7 +1704,7 @@ s32 func_15033E28(Actor *, ModelAttachment **);
  * a spawn node, and handing a touched pickup to its player (0x8AE adds 3 grenades, up to 6).
  */
 void func_1508DC24(void) {
-    static s8 D_80087340;
+    static s8 D_80087340 = 0;
     MpGame *base;
     s32 i;
     Actor *obj; // matching: unused stack slot in the original frame

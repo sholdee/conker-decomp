@@ -3,6 +3,9 @@
 #include "effects.h"
 #include "variables.h"
 
+/* Screen fade colours for func_1517EE40, picked by sequence events (black, white). */
+Color24 D_80084110[2] = { { 0, 0, 0 }, { 0xFF, 0xFF, 0xFF } };
+
 /* An event queued for dispatch by func_150241B4, kept sorted by time. */
 typedef struct SeqQueueEntry {
     /* 0x0 */ SeqEvent *event;
@@ -369,7 +372,7 @@ void func_150242F8(s32 mode, s32 scene) {
 #define FF32(p, o) (*(f32 *) ((u8 *) (p) + (o)))
 #define FPTR(p, o) (*(void **) ((u8 *) (p) + (o)))
 
-extern s8 D_800E0BF4;
+extern u8 D_800D9890; // game_E4070.c
 extern s32 D_80090214[];
 
 extern void func_1501C730(s32, s32, s32, s32, s32);
@@ -425,11 +428,11 @@ extern void func_151E53E8(s32);
 
 /*
  * First cutscene event handler: subtitles (types 7, 0xE-0x10, 0x12; shown only
- * when D_800E0BF4 is set and D_800BEAAB selects that type), event types 1, 3, 4,
+ * when D_800E0BE0[20] is set and D_800BEAAB selects that type), event types 1, 3, 4,
  * 9, 0xC and 0xD, and most type-5 commands. Returns 1 when the event was handled.
  */
 s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, Actor *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
-    if (D_800E0BF4 != 0 && (event->type == 7 || event->type == 0xE || event->type == 0xF || event->type == 0x10 || event->type == 0x12)) {
+    if (D_800E0BE0[20] != 0 && (event->type == 7 || event->type == 0xE || event->type == 0xF || event->type == 0x10 || event->type == 0x12)) {
         s32 opening;
         SeqSubtitle *sub;
         u8 *text;
@@ -1168,11 +1171,6 @@ typedef struct {
 } Ev15190770;
 
 extern s32 D_8008CA50;
-typedef struct {
-    u8 c[3][6];
-} EvColors;
-
-extern EvColors D_80084148;
 
 extern void func_151F2BA8(void);
 extern void func_151F2BE8(void);
@@ -1928,7 +1926,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                                     f32 *p1;
                                     f32 *p2;
 
-                                    p1 = &D_800AAA90.x;
+                                    p1 = (f32 *)&D_800AAA90.x;
                                     p2 = vec;
                                     if (func_1514654C(obj, attachment, 0, &p1, &p2, 1) != 0) {
                                         func_151C5588(obj, vec, 0x46, sceneTag, 1);

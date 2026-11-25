@@ -22,10 +22,42 @@ typedef struct {
     /* 0x28 */ MtxF matrices[2];
 } HudModel;
 
-extern Gfx D_80090028;
+Gfx *func_151EB06C(Gfx *gfx);
+Gfx *func_151EB930(Gfx *gfx);
+Gfx *func_151EB96C(Gfx *gfx);
+Gfx *func_151EBB50(Gfx *gfx);
+Gfx *func_151EC178(Gfx *gfx);
+Gfx *func_151EC1F0(Gfx *gfx);
+Gfx *func_151EC3E8(Gfx *gfx);
+Gfx *func_151ED09C(Gfx *gfx);
+
+/* Per-mode (D_800E0B94) overlay drawers, called by func_151E8620. */
+Gfx *(*D_8008FFC0[13])(Gfx *) = {
+    func_151EB06C, NULL, NULL, func_151EC3E8, NULL, NULL, func_151EB930,
+    NULL, NULL, NULL, NULL, func_151EBB50, NULL,
+};
+
+/* Per-mode (D_800E0B94) HUD drawers, called by func_151E84B0. */
+Gfx *(*D_8008FFF4[13])(Gfx *) = {
+    NULL, func_151EC178, func_151EC1F0, NULL, func_151ED09C, NULL, NULL,
+    NULL, func_151EB96C, NULL, NULL, NULL, NULL,
+};
+
+/* Render state for the HUD sprites: textured, white environment color. */
+Gfx D_80090028[] = {
+    gsSPTexture(0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON),
+    gsDPPipeSync(),
+    gsDPSetEnvColor(0xFF, 0xFF, 0xFF, 0xFF),
+    gsDPSetCombine(0x12D225, 0xFFA7FFFF),
+    gsDPSetOtherMode(0x002C3F, 0x504244),
+    gsSPEndDisplayList(),
+};
+
+HudModel *D_80090058 = NULL;
+HudModel *D_8009005C = NULL;
+HudSprite D_80090060 = { (void *)0x7BC, 0x100, 32, 32, G_IM_FMT_RGBA, G_IM_SIZ_32b };
 extern HudSprite D_80091804;
 extern HudSprite D_80091810;
-extern Gfx *(*D_8008FFF4[])(Gfx *);
 extern u8 D_7FB;
 extern u8 D_887;
 extern u8 D_800E0C85;
@@ -81,8 +113,6 @@ Gfx *func_151E84B0(Gfx *gfx) {
     return gfx;
 }
 
-extern Gfx *(*D_8008FFC0[])(Gfx *);
-extern HudModel *D_80090058;
 extern s16 D_800E0C78;
 
 /* Draws the per-mode overlay; if it overran the display list buffer, discards what it wrote. */
@@ -139,8 +169,8 @@ static const u8 D_800ABA90[4][4] = {
 extern u8 D_D10;
 extern u8 D_D14;
 extern u8 D_D16;
-extern u8 D_8009006C[];
-extern u8 D_80090070[];
+u8 D_8009006C[4] = { 1, 8, 15, 21 };
+u8 D_80090070[3] = { 0, 8, 16 };
 extern s32 func_15086D48(s32, s32);
 extern void func_15086CBC(s32, f32 *, f32 *, f32 *);
 Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh);
@@ -176,7 +206,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
 
     flags = 0;
     D_8008FDBC &= ~0x10;
-    gSPDisplayList(gfx++, &D_80090028);
+    gSPDisplayList(gfx++, D_80090028);
     gDPSetCombine(gfx++, 0x12FE25, 0xFFFFF3F9);
     if (D_80082FA0 == 0) {
         y = 0x320;
@@ -758,7 +788,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
         }
     }
     if (D_8008FDC0 & 0x6340) {
-        gSPDisplayList(gfx++, &D_80090028);
+        gSPDisplayList(gfx++, D_80090028);
         gDPSetCombine(gfx++, 0x12FE25, 0xFFFFF3F9);
         gfx = func_151E9D18(gfx, 0x320, refreshScores);
     }
@@ -774,8 +804,12 @@ typedef struct {
     /* 0x00 */ s32 v[7];
 } PlaceValueTable;
 
-extern void *D_80090074[];
-extern PlaceValueTable D_8009009C;
+/* Texture ids of the digits 0-9. */
+void *D_80090074[10] = {
+    (void *)0x8B2, (void *)0x890, (void *)0x8AB, (void *)0x8A8, (void *)0x882,
+    (void *)0x881, (void *)0x8A2, (void *)0x8A1, (void *)0x880, (void *)0x88F,
+};
+PlaceValueTable D_8009009C = { { 1, 10, 100, 1000, 10000, 100000, 1000000 } };
 
 /* Draws a number of up to seven digits, one 32x32 digit texture per place, without leading zeros. */
 Gfx *func_151EADFC(Gfx *gfx, s32 x, s32 y, s32 value) {
@@ -832,7 +866,6 @@ extern u8 D_80E;
 extern u8 D_82F;
 extern u8 D_830;
 extern u8 D_891;
-extern HudModel *D_8009005C;
 typedef struct {
     /* 0x00 */ u8 pad0[0x64];
     /* 0x64 */ s32 unk64;
@@ -907,7 +940,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
     if (D_8008FDCC >= 0x100) {
         D_8008FDCC = 0xFF;
     }
-    gSPDisplayList(gfx++, &D_80090028);
+    gSPDisplayList(gfx++, D_80090028);
     gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_8008FDCC);
     D_80090060.texId = &D_891;
     {
@@ -980,7 +1013,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
             if (D_8009005C != NULL && show) {
                 gfx = func_151EDBDC(gfx, D_8009005C, 70.0f, 80.0f, 0.3000000119f);
             }
-            gSPDisplayList(gfx++, &D_80090028);
+            gSPDisplayList(gfx++, D_80090028);
             gDPSetOtherMode(gfx++, 0x002C3F, 0x504244);
             if (show) {
                 s32 count;
@@ -1101,7 +1134,7 @@ Gfx *func_151EBB50(Gfx *gfx) {
     if (D_80000300 == 0) {
         return gfx;
     }
-    gSPDisplayList(gfx++, &D_80090028);
+    gSPDisplayList(gfx++, D_80090028);
     if (D_800E0A90 < 0xF0) {
         alpha = 0xFF - ((D_800E0A90 - 0xB4) << 3);
         if (alpha < 0) {
@@ -1217,7 +1250,7 @@ Gfx *func_151EC1F0(Gfx *gfx) {
         return gfx;
     }
 
-    gSPDisplayList(gfx++, &D_80090028);
+    gSPDisplayList(gfx++, D_80090028);
     temp = D_800E0A90; // matching: temp is reused for 0x1AC below
     alpha = temp;
     if (alpha >= 0x12D) {
@@ -1261,14 +1294,14 @@ Gfx *func_151EC1F0(Gfx *gfx) {
 }
 
 
-extern void *D_800900BC[];
 Gfx *func_151EC648(Gfx *);
 Gfx *func_151EE184(Gfx *);
 Gfx *func_151EEBE8(Gfx *gfx, s32 index);
 
 /* Draws the fading image picked by D_8008FDD4->unk2C (or the func_151EC648 / func_151EE184 screens). */
 Gfx *func_151EC3E8(Gfx *gfx) {
-    static u8 D_800900D4;
+    static void *D_800900BC[6] = { (void *)0x88C, (void *)0x7F3, (void *)0x7CA, (void *)0x7E1, (void *)0x7DE, (void *)0x7DB };
+    static u8 D_800900D4 = 0;
     s32 alpha;
 
     if (D_800C35EA[0] == 1) {
@@ -1280,7 +1313,7 @@ Gfx *func_151EC3E8(Gfx *gfx) {
         alpha = 0xFF;
     }
     D_800900D4 = alpha;
-    gSPDisplayList(gfx++, &D_80090028);
+    gSPDisplayList(gfx++, D_80090028);
     if (D_8008FDD4->menu == 1) {
         return func_151EC648(gfx);
     }
@@ -1322,8 +1355,6 @@ Gfx *func_151EC3E8(Gfx *gfx) {
 
 extern f32 sinf(f32);
 extern f32 cosf(f32);
-extern u8 *D_800900D8[];
-extern u8 *D_800900FC[];
 extern u8 D_800E0C88[];
 extern u8 D_87B;
 extern u8 D_88C;
@@ -1332,7 +1363,11 @@ void func_151E7F60(s32, s32);
 
 /* Draws the multi-page screen selected by D_8008FDD4: page images, a rotating list, or per-slot panels. */
 Gfx *func_151EC648(Gfx *gfx) {
+    static u8 *D_800900D8[8] = {
+        (u8 *)0x831, (u8 *)0x884, (u8 *)0x8A4, (u8 *)0x80B, (u8 *)0x7BC, (u8 *)0x7B9, (u8 *)0x822, (u8 *)0x808,
+    };
     static s8 D_800900F8 = 0;
+    static u8 *D_800900FC[5] = { (u8 *)0x7C0, (u8 *)0x7C6, (u8 *)0x7CF, (u8 *)0x825, (u8 *)0x81C };
     s32 fadeAlpha;
     s32 alpha;
     s32 pad; // matching: stack slot
@@ -1564,7 +1599,7 @@ extern HudSprite D_80091828;
 Gfx *func_151ED09C(Gfx *gfx) {
     s32 alpha;
 
-    gSPDisplayList(gfx++, &D_80090028);
+    gSPDisplayList(gfx++, D_80090028);
     alpha = D_800E0A90 << 2;
     if (alpha >= 0x100) {
         alpha = 0xFF;
@@ -1779,8 +1814,15 @@ void func_151EDB58(HudModel *model) {
     }
 }
 
-extern Gfx D_80090110;
-extern Gfx D_80090128;
+Gfx D_80090110[] = {
+    gsDPPipeSync(),
+    gsSPTexture(0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON),
+    gsSPEndDisplayList(),
+};
+Gfx D_80090128[] = {
+    gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_OFF),
+    gsSPEndDisplayList(),
+};
 extern u8 D_507;
 extern u8 D_508;
 extern void func_1503F4B0(HudModelAnim *);
@@ -1810,7 +1852,7 @@ Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
 
     gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &D_800E0C38, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPDisplayList(gfx++, &D_80090110);
+    gSPDisplayList(gfx++, D_80090110);
     gDPSetCombine(gfx++, 0x12FE25, 0xFFFFFBFD);
     gSPLoadGeometryMode(gfx++, 0);
     gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
@@ -1841,7 +1883,7 @@ Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {
     for (i = 0; i < model->displayListCount; i++) {
         gSPDisplayList(gfx++, model->displayLists[i]);
     }
-    gSPDisplayList(gfx++, &D_80090128);
+    gSPDisplayList(gfx++, D_80090128);
     return gfx;
 }
 
@@ -1851,7 +1893,8 @@ typedef struct {
     s32 unk8;
 } Struct151EDF4C;
 
-extern Struct151EDF4C *D_80090138;
+Struct151EDF4C *D_80090138 = NULL;
+HudSprite D_8009013C = { NULL, 0x100, 64, 22, G_IM_FMT_RGBA, G_IM_SIZ_16b };
 extern u8 *D_800E0C7C;
 extern s8 D_800E0C80;
 extern s8 D_800E0C81;

@@ -91,11 +91,7 @@ extern s16  D_8002BA30;
 
 extern s16  D_8002BC10[];
 extern s16  D_8002BD0E[];
-extern u64  D_8002BD10; // osClockRate
-extern s32  D_8002BD14; // low word of osClockRate (D_8002BD10)
-extern s32  D_8002BD18;
-extern s32  D_8002BD20; // init ok?
-extern s32  D_8002BD60;
+extern u32  __osShutdown;
 
 /* DATA section from D_8002C080 to D_8002D4B0 */
 
@@ -174,6 +170,7 @@ extern u8  D_8003A584;
 extern OSTimer D_8003A588; /* audio start timer */
 extern OSScMsg D_8003A5C8; /* pre-NMI message */
 
+/* scheduler state, defined in init_50A0.c */
 extern OSMesgQueue D_8003B1E8;
 extern OSMesgQueue D_8003B200;
 extern OSMesgQueue D_8003B218;
@@ -185,18 +182,10 @@ extern u8 D_8003B239;
 extern u8 D_8003B23A;
 extern OSScMsg D_8003B240; /* retrace message */
 
-// extern s32 *D_8003B264;
 extern OSThread    D_8003B6A0;
-extern OSMesg      D_8003B660;
-extern OSMesg      D_8003B670;
-extern OSMesg      D_8003B680;
 
 extern OSMesgQueue D_8003B9D0;
-extern OSMesg      D_8003B9E8;
 extern OSThread    D_8003B9F0;
-
-extern u64  D_8003BC20;
-extern u32  D_8003BC24;
 
 extern u8   D_8003BC30[][64];
 extern u8   D_8003BD30[][64];
@@ -291,13 +280,10 @@ extern u8   D_800428C2;
 extern u8   D_800428C4[];
 extern u8   D_800428C6[];
 extern u8   D_800428C8[];
-extern s32  D_800428E0;
-extern s32 *D_800428F8;
 
 // BSS ENDS AT D_80043B40
 
-extern u32 D_80042A4C; // __osContPifRam.pifstatus
-extern OSMesg D_80042A90;
+extern OSMesg __osEepromTimerMsg;
 extern s32  D_80043B40[]; // 0xFE0-byte block past BSS end (TLB slot table in 45B80)
 extern u8   D_80044B20[];             // audio heap memory, 0x3E000 bytes
 
@@ -604,8 +590,8 @@ extern const f32 D_800A6820[24];
 
 
 extern VtxMorphGroup D_800A7230[2]; // vertex morph groups
-extern Vec3f D_800AAA90; // bone-attachment offset (zero point)
-extern Vec3f D_800AAA9C;
+extern const Vec3f D_800AAA90; // bone-attachment offset (defined in game_1F2730.c)
+extern const Vec3f D_800AAA9C;
 extern u16 D_800AB140[];
 extern IdList1 D_800AB168; // effect-object kinds (game_1FFF60)
 // game_2062D0.c
@@ -926,7 +912,6 @@ extern s32 D_800CC288;
 extern s32 D_800CC28C;
 extern s32 D_800CC290;
 extern TexAnimState D_800CC298;
-extern u8  D_800CC2A2;
 
 extern u8 D_800CC2B1;
 extern s16 D_800CC2B2;
@@ -1122,11 +1107,9 @@ extern u16 D_800D3830[]; // second grid-query triangle index buffer
 extern s32 D_800D3840;
 extern s32 D_800D3858;
 
-extern EffectHeader *D_800D9894;
 extern EffectHeader *D_800D98D0[4];
 extern s32 D_800D98E0;
 extern u8  D_800D987C;
-extern u8  D_800D9890;
 
 extern u8 D_800D98F0;
 extern u8 D_800D9900;
@@ -1459,9 +1442,7 @@ extern u8 D_800E0BD1;
 extern s8 D_800E0BD3;
 extern u8 **D_800E0BD8; // text strings of the current language ([8 + n]: player names)
 extern u8 D_800E0BDC;
-extern s8 D_800E0BE3;
-extern s8 D_800E0BE7;
-extern s8 D_800E0BE9;
+extern s8 D_800E0BE0[]; /* multiplayer settings record (game_20AE20.c) */
 extern s8 D_800E0C00[]; /* team of each D_8008FE44 entry */
 extern s16 D_800E0C10[];
 extern s32 D_800E0C18[];

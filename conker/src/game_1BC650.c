@@ -172,8 +172,12 @@ s32 func_1518F384(EffectSprite *sprite) {
     return 1;
 }
 
+// { 0x21 }: the template of func_1518F45C's local. It lies in the front-end .rodata of the unit that
+// began at game_1BA670 (before game_1BA670's literals), so this file cannot own it.
+extern const Desc15169260 D_800A74D4;
+
 void func_1518F45C(s32 arg0, u8 arg1) {
-    Desc15169260 desc = { 0x21 };
+    Desc15169260 desc = D_800A74D4;
 
     func_15169260(&desc, 1, arg0, arg1);
 }

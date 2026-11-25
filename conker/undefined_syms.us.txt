@@ -15,34 +15,23 @@ D_80095A30 = 0x80095A30;
 
 
 /* libultra symbols referenced by name from ultralib source (addresses from the asm) */
-osClockRate = 0x8002BD10;
 osTvType = 0x80000300;
-osViModeMpalLan1 = 0x8002BE80;
-osViModeNtscLan1 = 0x8002BED0;
-osViModePalLan1 = 0x8002BE30;
-__OSGlobalIntMask = 0x8002BD1C;
-__osHwIntTable = 0x8002AC70;
-__osPiDevMgr = 0x8002AB50;
-__osPiTable = 0x8002AB6C;
-osDiskExist = 0x8002BD20;
 osRomBase = 0x80000308;
 
 
 /* entry points of the game's private libultra copies (their C definitions are weak) */
 
 /* local labels referenced across the hasm/C split boundaries */
-.L10007760 = 0x10007760;
-.L150A43D8 = 0x150A43D8;
-.L150AE0AC = 0x150AE0AC;  /* func_150AE280 (inline asm in game_DB730.c) branches into func_150ADAF0 */
-.L150A64C0 = 0x150A64C0;  /* func_150A6568 branches into func_150A6360 */
-__osPfsPifRam = 0x800429D0;
-__osDiskHandle = 0x80043B34;
-__osEventStateTab = 0x80042910;
-__osRunQueue = 0x8002BDF8;
-__osViNext = 0x8002BDE4;
-__osViCurr = 0x8002BDE0;
-__osThreadTail = 0x8002BDF0;
-__osBaseCounter = 0x800429B8;
-__osCurrentTime = 0x800429B0;
-__osTimerList = 0x8002BD70;
-__osViIntrCount = 0x800429BC;
+
+/* second names of game_79F10.c's D_800CC280 and D_800CC2BC (see the comment there) */
+D_800cc280 = D_800CC280;
+D_800cc2bc = D_800CC2BC;
+
+
+/* Section ends and the regions that follow them: aliases of linker symbols, so they move with the
+   sections (a plain alias stays section-relative; base + offset is absolute but outside every section) */
+D_151FA130 = game_TEXT_END;          /* end of the game code (init_1050 maps the game segment up to it) */
+D_80043B40 = init_data_BSS_END;      /* the 0xFE0-byte TLB slot table right after the init bss */
+D_80044B20 = init_data_BSS_END + 0xFE0; /* the 0x3E000-byte buffer after it, up to the game data */
+D_800E9D00 = game_data_BSS_END;      /* flag word just past the game bss (the game setup clears up to it) */
+D_800E9D10 = game_data_BSS_END + 0x10; /* start of the RAM that init_1050 clears up to 0x80400000 */

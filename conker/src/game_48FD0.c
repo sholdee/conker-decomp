@@ -15,10 +15,10 @@ extern OSTimer D_800BE6E0;
 void func_1501C0F0(u8 player, f32 onTime, f32 offTime);
 
 /* After each controller read (func_1501BBB8 sets D_80084064), arms a one-shot timer of
-   25 * osClockRate / 1000000 ticks (D_8002BD10 is osClockRate) that posts message 6 to D_8003B218. */
+   25 * osClockRate / 1000000 ticks that posts message 6 to D_8003B218. */
 void func_1501BB20(void) {
     if (D_80084064) {
-        osSetTimer(&D_800BE6E0, 25ULL * D_8002BD10 / 1000000ULL, 0, &D_8003B218, (OSMesg)6);
+        osSetTimer(&D_800BE6E0, 25ULL * osClockRate / 1000000ULL, 0, &D_8003B218, (OSMesg)6);
         D_80084064 = 0;
     }
 }

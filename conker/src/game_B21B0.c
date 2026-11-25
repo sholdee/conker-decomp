@@ -61,7 +61,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
         remember = FALSE;
         D_800D18A8 = 0;
     }
-    if (D_800BE616 && D_8008FDD4->selection == 0 && D_800E0BE3 != 0) {
+    if (D_800BE616 && D_8008FDD4->selection == 0 && D_800E0BE0[3] != 0) {
         remember = FALSE;
     }
     if (playerIndex != 0xFF) {
@@ -118,7 +118,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
                     }
                 }
             }
-            if (D_8008FDD4->selection != 0 || D_800E0BE3 == 0) {
+            if (D_8008FDD4->selection != 0 || D_800E0BE0[3] == 0) {
                 spawnIndex = candidates[best];
             }
             state = movement_obj[playerIndex].mv;

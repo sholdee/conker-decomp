@@ -1033,7 +1033,7 @@ s32 func_15088A08(Racer *racer, f32 step) {
     }
 
     if (dir != 0) {
-        lim = D_800E0BE7;
+        lim = D_800E0BE0[7];
         idx = racer->actorIndex;
         racer->nodesPassed += dir;
         racer->lap = racer->nodesPassed / racer->lapLength;

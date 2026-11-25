@@ -230,7 +230,7 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
                       &vecC.x, &vecC.y, &vecC.z);
         {
             ParticleSpawn78 piece;
-            const s32 models[7] = { 0x6F, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75 };
+            s32 models[7] = { 0x6F, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75 };
 
             piece.radius = 1.0f;
             piece.elasticity = 0.6490000486f;
@@ -420,7 +420,11 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     f32 midX;
     f32 midY;
     f32 midZ;
-    f32 side[3];
+    /* Scalars, not an array: as uopt live ranges they interfere with the 1/6 constant, which stops
+     * its register piece before the loop header (an array left a dead reload and an extra literal). */
+    f32 sideZ;
+    f32 sideY;
+    f32 sideX;
     f32 taper;
     Vec3f from;
     Vec3f to;
@@ -473,14 +477,12 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     offsetY = diff.z * midX - midZ * diff.x;
     offsetZ = diff.x * midY - midX * diff.y;
     if (offsetX * offsetX + offsetY * offsetY + offsetZ * offsetZ == 0.0f) {
-        side[0] = 0.0f;
-        side[1] = 0.0f;
-        side[2] = 0.0f;
+        sideZ = sideY = sideX = 0.0f;
     } else {
         amp = (35.0f * data->scale) / sqrtf(offsetX * offsetX + offsetY * offsetY + offsetZ * offsetZ);
-        side[0] = offsetX * amp;
-        side[1] = offsetY * amp;
-        side[2] = offsetZ * amp;
+        sideX = offsetX * amp;
+        sideY = offsetY * amp;
+        sideZ = offsetZ * amp;
     }
     stepX = diff.x * 0.1666666716f;
     stepY = diff.y * 0.1666666716f;
@@ -495,10 +497,10 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     // matching: one source line; as1 orders the hoisted loop constants against the copy by line number
     pos = from; progress = 0.0f; ang = 0.0f; tex = 0.0f; i = 0; do {
         taper = 1.0f - sinf(ang) * amp;
-        offsetX = side[0] * taper;
+        offsetX = sideX * taper;
         vtx->v.ob[0] = (s32)(offsetX + pos.x);
-        vtx->v.ob[1] = (s32)(side[1] * taper + pos.y);
-        vtx->v.ob[2] = (s32)(side[2] * taper + pos.z);
+        vtx->v.ob[1] = (s32)(sideY * taper + pos.y);
+        vtx->v.ob[2] = (s32)(sideZ * taper + pos.z);
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
@@ -507,8 +509,8 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
         vtx->v.tc[1] = (s32)tex;
         vtx++;
         vtx->v.ob[0] = (s32)(pos.x - offsetX);
-        vtx->v.ob[1] = (s32)(pos.y - side[1] * taper);
-        vtx->v.ob[2] = (s32)(pos.z - side[2] * taper);
+        vtx->v.ob[1] = (s32)(pos.y - sideY * taper);
+        vtx->v.ob[2] = (s32)(pos.z - sideZ * taper);
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;
         vtx->v.cn[2] = 0xFF;
@@ -517,11 +519,11 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
         vtx->v.tc[1] = (s32)tex;
         vtx++;
         taper = 1.0f - sinf(ang + 0.5235987902f) * amp;
-        offsetX = side[0] * taper;
+        offsetX = sideX * taper;
         vtx->v.ob[0] = (s32)(pos.x + stepX - offsetX);
-        offsetY = side[1] * taper;
+        offsetY = sideY * taper;
         vtx->v.ob[1] = (s32)(pos.y + stepY - offsetY);
-        offsetZ = side[2] * taper;
+        offsetZ = sideZ * taper;
         vtx->v.ob[2] = (s32)(pos.z + stepZ - offsetZ);
         vtx->v.cn[0] = 0xFF;
         vtx->v.cn[1] = 0xFF;

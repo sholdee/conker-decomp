@@ -194,59 +194,9 @@ s32 func_15160600(LightEffect *effect) {
     return 1;
 }
 
-/*
- * Light effect parameter tables, indexed by effect kind (declared in variables.h; game_1BC650.c reads the
- * jitter colour tables D_800A6760/67C0/6820 too).
- */
+/* Light effect parameter tables, indexed by effect kind; the rest follow func_151618BC. */
 static const f32 D_800A66B4[3] = { 0.0f, -415.0f, 0.0f };
 static const f32 D_800A66C0[9] = { 70.0f, 38.0f, 70.0f, 55.0f, 50.0f, 80.0f, 140.0f, 70.0f, 34.0f };
-static const s32 D_800A66E4[10] = { 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108 };
-static const Vec3f D_800A670C[3] = { { 128.0f, 59.5f, 59.5f }, { 187.0f, 59.5f, 59.5f }, { 128.0f, 17.5f, 0.0f } };
-static const Vec3f D_800A6730[3] = { { 128.0f, 128.0f, 128.0f }, { 68.0f, 59.5f, 59.5f }, { 127.0f, 17.5f, 0.0f } };
-static const f32 D_800A6754[3] = { 0.0f, 0.1273f, 0.1273f };
-const f32 D_800A6760[24] = {
-    0.0f, 1.0f, 3.0f, 20.0f, 10.0f, 10.0f, 35.0f, 2.0f,
-    0.0f, 1.0f, 5.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, 30.0f, 30.0f, 10.0f, 3.0f, 0.0f, 0.0f, 0.0f,
-};
-const f32 D_800A67C0[24] = {
-    0.0f, 12.0f, 10.0f, 30.0f, 25.0f, 18.0f, 55.0f, 25.0f,
-    14.0f, 8.0f, 30.0f, 70.0f, 10.0f, 15.0f, 80.0f, 18.0f,
-    8.0f, 110.0f, 90.0f, 30.0f, 10.0f, 25.0f, 30.0f, 35.0f,
-};
-const f32 D_800A6820[24] = {
-    0.0f, 20.0f, 18.0f, 65.0f, 48.0f, 30.0f, 100.0f, 62.0f,
-    60.0f, 19.0f, 60.0f, 255.0f, 50.0f, 40.0f, 255.0f, 44.0f,
-    15.0f, 210.0f, 170.0f, 100.0f, 18.0f, 45.0f, 60.0f, 70.0f,
-};
-static const f32 D_800A6880[5] = { 0.0f, 50.0f, 50.0f, 50.0f, 50.0f };
-static const f32 D_800A6894[5] = { 0.0f, 15.0f, 15.0f, 15.0f, 15.0f };
-static const f32 D_800A68A8[5] = { 0.0f, 0.0f, 15.5f, 31.0f, 46.5f };
-static const f32 D_800A68BC[5] = { 10.0f, 12.0f, 12.0f, 12.0f, 12.0f };
-static const f32 D_800A68D0[5] = { 10.0f, 25.0f, 25.0f, 25.0f, 25.0f };
-static const f32 D_800A68E4[5] = { 10.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-static const f32 D_800A68F8[3] = { 1.0f, 0.165333f, 0.165333f };
-static const f32 D_800A6904[3] = { 1.0f, 102.0f, 102.0f };
-static const f32 D_800A6910[3] = { 0.0f, 105.0f, 105.0f };
-static const s32 D_800A691C[3] = { 5, 1, 1 };
-static const s32 D_800A6928[3] = { 0, 4, 4 };
-static const f32 D_800A6934[3] = { 1.0f, 6.0f, 6.0f };
-static const f32 D_800A6940[3] = { 0.0f, 9.0f, 9.0f };
-static const f32 D_800A694C[3] = { 255.0f, 155.0f, 255.0f };
-static const f32 D_800A6958[3] = { 0.0f, 100.0f, 0.0f };
-static const f32 D_800A6964[14] = {
-    127.0f, 25.0f, 40.0f, 80.0f, 85.0f, 90.0f, 60.0f, 87.0f,
-    21.0f, 35.0f, 40.0f, 120.0f, 25.0f, 17.5f,
-};
-static const f32 D_800A699C[14] = {
-    126.0f, 24.0f, 40.0f, 40.0f, 55.0f, 60.0f, 30.0f, 43.0f,
-    20.0f, 35.0f, 30.0f, 50.0f, 15.0f, 12.5f,
-};
-static const f32 D_800A69D4[14] = {
-    0.1021f, 0.1021f, 0.1021f, 0.1021f, 0.1021f, 0.1021f, 0.2021f, 0.1021f,
-    0.1021f, 0.39999998f, 0.1021f, 0.1021f, 0.1021f, 0.19999999f,
-};
-static const Vec3f D_800A6A0C = { 0.0f, 35.0f, 73.0f };
 
 s32 func_1516065C(LightEffect *effect) {
     func_15163CF8(&effect->data.pulse, effect);
@@ -749,10 +699,61 @@ void func_15161860(LightEffect *effect) {
 
 /* Plays one of ten random sounds at `position`. */
 void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, Vec3f *position, s16 arg5, s16 arg6) {
-    s32 sounds[10] = { 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108 };
+    const s32 sounds[10] = { 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108 };
 
     func_10010F88(sounds[func_150ADA20() % 10U], arg0, arg1, arg2, arg3, position->x, position->y, position->z, arg5, arg6);
 }
+
+/*
+ * More light effect tables. They follow func_151618BC because its sound list goes before them in the
+ * .rodata (game_1BC650.c reads the jitter colour tables D_800A6760/67C0/6820 too).
+ */
+static const Vec3f D_800A670C[3] = { { 128.0f, 59.5f, 59.5f }, { 187.0f, 59.5f, 59.5f }, { 128.0f, 17.5f, 0.0f } };
+static const Vec3f D_800A6730[3] = { { 128.0f, 128.0f, 128.0f }, { 68.0f, 59.5f, 59.5f }, { 127.0f, 17.5f, 0.0f } };
+static const f32 D_800A6754[3] = { 0.0f, 0.1273f, 0.1273f };
+const f32 D_800A6760[24] = {
+    0.0f, 1.0f, 3.0f, 20.0f, 10.0f, 10.0f, 35.0f, 2.0f,
+    0.0f, 1.0f, 5.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 30.0f, 30.0f, 10.0f, 3.0f, 0.0f, 0.0f, 0.0f,
+};
+const f32 D_800A67C0[24] = {
+    0.0f, 12.0f, 10.0f, 30.0f, 25.0f, 18.0f, 55.0f, 25.0f,
+    14.0f, 8.0f, 30.0f, 70.0f, 10.0f, 15.0f, 80.0f, 18.0f,
+    8.0f, 110.0f, 90.0f, 30.0f, 10.0f, 25.0f, 30.0f, 35.0f,
+};
+const f32 D_800A6820[24] = {
+    0.0f, 20.0f, 18.0f, 65.0f, 48.0f, 30.0f, 100.0f, 62.0f,
+    60.0f, 19.0f, 60.0f, 255.0f, 50.0f, 40.0f, 255.0f, 44.0f,
+    15.0f, 210.0f, 170.0f, 100.0f, 18.0f, 45.0f, 60.0f, 70.0f,
+};
+static const f32 D_800A6880[5] = { 0.0f, 50.0f, 50.0f, 50.0f, 50.0f };
+static const f32 D_800A6894[5] = { 0.0f, 15.0f, 15.0f, 15.0f, 15.0f };
+static const f32 D_800A68A8[5] = { 0.0f, 0.0f, 15.5f, 31.0f, 46.5f };
+static const f32 D_800A68BC[5] = { 10.0f, 12.0f, 12.0f, 12.0f, 12.0f };
+static const f32 D_800A68D0[5] = { 10.0f, 25.0f, 25.0f, 25.0f, 25.0f };
+static const f32 D_800A68E4[5] = { 10.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+static const f32 D_800A68F8[3] = { 1.0f, 0.165333f, 0.165333f };
+static const f32 D_800A6904[3] = { 1.0f, 102.0f, 102.0f };
+static const f32 D_800A6910[3] = { 0.0f, 105.0f, 105.0f };
+static const s32 D_800A691C[3] = { 5, 1, 1 };
+static const s32 D_800A6928[3] = { 0, 4, 4 };
+static const f32 D_800A6934[3] = { 1.0f, 6.0f, 6.0f };
+static const f32 D_800A6940[3] = { 0.0f, 9.0f, 9.0f };
+static const f32 D_800A694C[3] = { 255.0f, 155.0f, 255.0f };
+static const f32 D_800A6958[3] = { 0.0f, 100.0f, 0.0f };
+static const f32 D_800A6964[14] = {
+    127.0f, 25.0f, 40.0f, 80.0f, 85.0f, 90.0f, 60.0f, 87.0f,
+    21.0f, 35.0f, 40.0f, 120.0f, 25.0f, 17.5f,
+};
+static const f32 D_800A699C[14] = {
+    126.0f, 24.0f, 40.0f, 40.0f, 55.0f, 60.0f, 30.0f, 43.0f,
+    20.0f, 35.0f, 30.0f, 50.0f, 15.0f, 12.5f,
+};
+static const f32 D_800A69D4[14] = {
+    0.1021f, 0.1021f, 0.1021f, 0.1021f, 0.1021f, 0.1021f, 0.2021f, 0.1021f,
+    0.1021f, 0.39999998f, 0.1021f, 0.1021f, 0.1021f, 0.19999999f,
+};
+static const Vec3f D_800A6A0C = { 0.0f, 35.0f, 73.0f };
 
 /* Creates a light driven by entry `index` of D_800C3958 (see func_15161A68). */
 LightEffect *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3) {

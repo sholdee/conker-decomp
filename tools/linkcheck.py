@@ -9,7 +9,7 @@
    data, rodata or bss) pins that address. It would not move with its section. The goal is zero.
    Absolute symbols outside every section (hardware registers, fixed RAM regions, ROM offsets) are
    counted separately; they are part of the memory map, not of any object.
-Exit status 1 if a name is at the wrong address.
+Exit status 1 if a name is at the wrong address or any address is pinned.
 """
 import re, struct, subprocess, sys
 from pathlib import Path
@@ -46,18 +46,27 @@ LINKER_MADE = re.compile(r"_(ROM_START|ROM_END|VRAM|VRAM_END|DATA_START|DATA_END
 
 
 def referenced(conker):
-    """Every symbol some input object leaves undefined (that is, references)."""
-    objs = " ".join(str(p.relative_to(conker)) for p in (conker / "build").rglob("*.o"))
-    cmd = f"mips-linux-gnu-nm -u {objs}"
+    """Every symbol that a relocation in a LINKED object refers to. Objects come from the linker
+    script, so stale objects left in build/ are ignored. Relocations, not `nm -u`, because IDO -g3
+    writes every declared extern into each object's symbol table even when nothing uses it."""
+    ld = (conker / "conker.ld").read_text()
+    objs = sorted(set(re.findall(r"(build/\S+?\.o)\(", ld)))
+    objs = [o for o in objs if (conker / o).exists()]
+    cmd = "mips-linux-gnu-objdump -r " + " ".join(objs)
     try:
         out = subprocess.run(cmd, shell=True, cwd=conker, capture_output=True, text=True)
     except FileNotFoundError:
         out = None
-    if out is None or out.returncode not in (0, 1) or not out.stdout:
+    if out is None or out.returncode or not out.stdout:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         import mw
         out = mw.run(cmd, conker, timeout=1800)
-    return {l.split()[-1] for l in out.stdout.splitlines() if l.strip().startswith("U ")}
+    names = set()
+    for line in out.stdout.splitlines():
+        m = re.match(r"^[0-9a-f]{8}\s+R_MIPS_\w+\s+([^\s+]+)", line)
+        if m:
+            names.add(m.group(1))
+    return names
 
 
 def main():
@@ -90,6 +99,25 @@ def main():
                 pinned.setdefault(sec, []).append(name)
             else:
                 fixed += 1
+    # 4. Raw pointers: a data word in a linked asm data file that equals a symbol's start address is a
+    #    pointer written as a number, so it would not move with its target (the relocation check above
+    #    cannot see it). Register the target in symbol_addrs.us.txt so splat writes it by name.
+    starts = {}
+    for name, value, ndx in syms:
+        if ndx not in ("ABS", "UND") and not name.startswith("$") and inside(value):
+            starts.setdefault(value, name)
+    raw = []
+    for f in sorted(set(re.findall(r"build/(asm/data/[\w.]+\.s)\.o", (conker / "conker.ld").read_text()))):
+        if not (conker / f).exists():
+            continue
+        for m in re.finditer(r"\.word\s+0x([0-9A-Fa-f]{8})\b", (conker / f).read_text()):
+            v = int(m.group(1), 16)
+            if v in starts:
+                raw.append(f"{f}: .word 0x{v:08X} is the address of {starts[v]}")
+    for r in raw[:20]:
+        print("RAW POINTER:", r)
+    print(f"raw pointers in linked data: {len(raw)}")
+    wrong += raw
     # 3. ROM layout: the code's fixed ROM offsets must equal where the outer link put the segments
     #    (the game segment has a reserved size, so this holds unless a reservation overflows)
     layout = {"game_us_rzip_ROM_START": "game_us_rzip_ROM_START", "debugger_us_ROM_START": "debugger_us_ROM_START",
@@ -114,7 +142,9 @@ def main():
             print("    " + " ".join(names))
     print(f"referenced absolute symbols outside every section (memory map): {fixed}")
     print(f"address-named symbols at the wrong address: {len(wrong)}")
-    sys.exit(1 if wrong else 0)
+    if total:
+        print("NOT FULLY LINKED: the pinned addresses above must be reached through their sections")
+    sys.exit(1 if wrong or total else 0)
 
 
 if __name__ == "__main__":

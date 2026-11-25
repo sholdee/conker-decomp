@@ -655,6 +655,7 @@ glabel func_150A3FC4
     /* D187C 150A43CC 00000000 */  nop
     /* D1880 150A43D0 03E00008 */  jr         $ra
     /* D1884 150A43D4 00000000 */   nop
+  .globl .L150A43D8  /* another hand-written file branches here */
   .L150A43D8:
     /* D1888 150A43D8 03E00008 */  jr         $ra
     /* D188C 150A43DC 00000000 */   nop

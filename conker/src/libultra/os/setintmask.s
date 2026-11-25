@@ -12,8 +12,8 @@
 glabel osSetIntMask
     /* 24880 10024880 400C6000 */  mfc0       $t4, $12 /* handwritten instruction */
     /* 24884 10024884 3182FF01 */  andi       $v0, $t4, 0xFF01
-    /* 24888 10024888 3C088003 */  lui        $t0, %hi(D_8002BD1C)
-    /* 2488C 1002488C 2508BD1C */  addiu      $t0, $t0, %lo(D_8002BD1C)
+    /* 24888 10024888 3C088003 */  lui        $t0, %hi(__OSGlobalIntMask)
+    /* 2488C 1002488C 2508BD1C */  addiu      $t0, $t0, %lo(__OSGlobalIntMask)
     /* 24890 10024890 8D0B0000 */  lw         $t3, 0x0($t0)
     /* 24894 10024894 2401FFFF */  addiu      $at, $zero, -0x1
     /* 24898 10024898 01614026 */  xor        $t0, $t3, $at

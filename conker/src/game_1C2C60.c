@@ -556,8 +556,37 @@ typedef struct CharacterFlamethrowerJet {
     /* 0x8F */ u8 tailFadeStep;
 } CharacterFlamethrowerJet;
 
-extern void (*D_8008F898[])(void *);
-extern void (*D_8008F88C[])(void *);
+f32 func_151979F8(CharacterFlamethrowerActor *actor);
+f32 func_15197A0C(CharacterFlamethrowerActor *actor);
+f32 func_15197A68(CharacterFlamethrowerActor *actor);
+void func_151993E4(CharacterFlamethrowerActor *actor);
+s32 func_15198570(CharacterFlamethrowerActor *actor);
+s32 func_1519897C(CharacterFlamethrowerActor *actor);
+s32 func_151987CC(CharacterFlamethrowerActor *actor);
+void func_1519944C(CharacterFlamethrowerActor *actor);
+void func_15198C60(void);
+void func_15198C90(CharacterFlamethrowerActor *actor);
+void func_15198D40(CharacterFlamethrowerActor *actor);
+void func_15198D7C(CharacterFlamethrowerActor *actor);
+
+/* Jet callback tables, indexed by the CharacterFlamethrowerJet *Fn fields (-1 = none). */
+f32 (*D_8008F870[])(void *, s32) = {
+    (f32 (*)(void *, s32))func_151979F8,
+    (f32 (*)(void *, s32))func_15197A0C,
+    (f32 (*)(void *, s32))func_15197A68,
+};
+void (*D_8008F87C[])(void *) = { (void (*)(void *))func_151993E4 };
+s32 (*D_8008F880[])(void *) = {
+    (s32 (*)(void *))func_15198570,
+    (s32 (*)(void *))func_1519897C,
+    (s32 (*)(void *))func_151987CC,
+};
+void (*D_8008F88C[])(void *) = { (void (*)(void *))func_1519944C };
+s16 (*D_8008F890[])(void) = { (s16 (*)(void))func_15198C60 };
+void (*D_8008F894[])(void *) = { (void (*)(void *))func_15198C90 };
+void (*D_8008F898[])(void *) = { (void (*)(void *))func_15198D40 };
+void (*D_8008F89C[])(void *) = { (void (*)(void *))func_15198D7C };
+
 void func_151478F4(void *);
 void func_15147928(void *);
 
@@ -635,9 +664,6 @@ const CharacterFlamethrowerJetTemplate D_800A87A0[] = {
     { 600, 0.0f, 2.14f, 255, 20, 9, { 12.0f, -44.0f, 136.0f }, { 12.0f, -54.0f, 175.0f }, 0, 12, 200, 0, 4.0f, 9.0f, -1, 2, -1, 0, 0, 0, 0, 2, 1, 100, 0.8f, 1, 0.15f, 1, 0.2f, 6, 42, 6, 42 },
 };
 
-extern s16 (*D_8008F890[])(void);
-extern f32 (*D_8008F870[])(void *, s32);
-extern void (*D_8008F87C[])(void *);
 void func_15143134(Vec3f *in, Vec3f *out, s32 matrix);
 void *func_15147A80(void *spawn, s32 stateSize, s32 pointSize, s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -727,9 +753,6 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     return actor;
 }
 
-extern void (*D_8008F894[])(void *);
-extern void (*D_8008F89C[])(void *);
-extern s32 (*D_8008F880[])(void *);
 void func_15198110(CharacterFlamethrowerActor *actor, s32 index);
 
 /* Per-frame jet update: moves, fades and retires its particles, then runs its update callbacks. */
@@ -2090,8 +2113,28 @@ typedef struct CharacterFlamethrowerSetup {
 void func_15145EA4(Vec3f **in, Vec3f **out, s32 matrix, s32 count);
 LightEffect *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
                          s32 arg7);
-extern void (*D_8008F8A4[])(void *);
-extern s16 (*D_8008F8B8[])(void);
+void func_1519BEB8(CharacterFlamethrowerActor *actor);
+s32 func_1519C948(CharacterFlamethrowerActor *actor);
+s32 func_1519C970(CharacterFlamethrowerActor *actor);
+s32 func_1519C998(CharacterFlamethrowerActor *actor);
+void func_1519BF20(CharacterFlamethrowerActor *actor);
+void func_1519BF8C(void);
+void func_1519BFBC(CharacterFlamethrowerActor *actor);
+void func_1519C06C(CharacterFlamethrowerActor *actor);
+s32 func_1519C910(CharacterFlamethrowerActor *actor);
+
+/* Flame callback tables, indexed by the FlameSeed *Fn fields (-1 = none). */
+void (*D_8008F8A4[])(void *) = { (void (*)(void *))func_1519BEB8 };
+void (*D_8008F8A8[])(void *) = {
+    (void (*)(void *))func_1519C948,
+    (void (*)(void *))func_1519C970,
+    (void (*)(void *))func_1519C998,
+};
+void (*D_8008F8B4[])(void *) = { (void (*)(void *))func_1519BF20 };
+s16 (*D_8008F8B8[])(void) = { (s16 (*)(void))func_1519BF8C };
+void (*D_8008F8BC[])(void *) = { (void (*)(void *))func_1519BFBC };
+void (*D_8008F8C0[])(void *) = { (void (*)(void *))func_1519C06C };
+s32 (*D_8008F8C4[])(void *) = { (s32 (*)(void *))func_1519C910 };
 
 /* Spawns a flame effect with `extraSize` extra state bytes; setup->flags & 1 also attaches a light. */
 CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSetup *setup, u8 arg2, s32 arg3) {
@@ -2214,8 +2257,6 @@ void func_15199954(CharacterFlamethrowerActor *actor) {
     func_15147928(actor);
 }
 
-extern void (*D_8008F8C0[])(void *);
-extern void (*D_8008F8B4[])(void *);
 
 /* Runs a flame's destroy callbacks and removes its light. */
 void func_15199980(CharacterFlamethrowerActor *actor) {
@@ -2235,8 +2276,6 @@ void func_15199980(CharacterFlamethrowerActor *actor) {
     }
 }
 
-extern s32 (*D_8008F8C4[])(void *);
-extern void (*D_8008F8BC[])(void *);
 
 void func_1519BE1C(Vec3f *pos, Vec3f *vel, f32 gravity, f32 dt);
 
@@ -2576,7 +2615,6 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
-extern void (*D_8008F8A8[])(void *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 f32 func_15143E64(Vec3f *);
 f32 func_15144528(f32, f32, f32);

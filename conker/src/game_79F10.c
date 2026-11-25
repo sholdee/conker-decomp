@@ -6,6 +6,24 @@
 #include "functions.h"
 #undef func_150ADA20
 u8 func_150ADA20(void);
+
+/* This file's .bss (0x800CC280-0x800CC2BF). IDO lays out a unit's variables in the order of their first
+   declaration, so they are defined here, in address order, before variables.h declares them. */
+s32 D_800CC280;
+OSContPad *D_800CC284; // the current player's controller input
+s32 D_800CC288;
+s32 D_800CC28C;
+s32 D_800CC290;
+s32 D_800CC294; // not referenced by any code
+TexAnimState D_800CC298;
+u8 D_800CC2B0;
+u8 D_800CC2B1;
+s16 D_800CC2B2;
+f32 D_800CC2B4;
+u8 D_800CC2B8;
+u16 D_800CC2BA; // frame step of the actor being updated
+s32 D_800CC2BC;
+
 #include "variables.h"
 
 void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
@@ -91,10 +109,10 @@ void func_15121490(Actor *, OSContPad *);
 void func_151279A0(Actor *, OSContPad *);
 void func_151AE264(Actor *);
 
-// matching: same addresses as D_800CC280/D_800CC2BC (rodata_extern places a D_<addr> static there), but as
-// separate symbols IDO neither shares their %hi nor reuses loads across them; a few uses need that.
-static s32 D_800cc280;
-static s32 D_800cc2bc;
+// matching: second names for D_800CC280/D_800CC2BC (aliases in undefined_syms.us.txt). As separate
+// symbols IDO neither shares their %hi nor reuses loads across them; a few uses need that.
+extern s32 D_800cc280;
+extern s32 D_800cc2bc;
 // matching: a declaration-only block scope (no storage). IDO opens a lexical block for it, which changes
 // register allocation/scheduling of the surrounding statements; no storage-free idiomatic form matches.
 #define BLK typedef s32 blk_t

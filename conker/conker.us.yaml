@@ -221,6 +221,21 @@ segments:
     bss_size: 0x16690
     subsegments:
       - [0x290D0, data] # could be larger/smaller
+      - [0x2AB40, .data, libultra/io/aisetnextbuf]
+      - [0x2AB50, .data, libultra/io/pimgr]
+      - [0x2AB70, .data, libultra/io/vimgr]
+      - [0x2AB90, data]
+      - [0x2BD10, .data, libultra/os/initialize]
+      - [0x2BD30, .data, libultra/libc/xlitob]
+      - [0x2BD60, .data, libultra/os/piacs]
+      - [0x2BD70, .data, libultra/os/timerintr]
+      - [0x2BD80, .data, libultra/io/vi]
+      - [0x2BDF0, .data, libultra/os/thread]
+      - [0x2BE10, .data, libultra/io/controller]
+      - [0x2BE20, .data, libultra/io/siacs]
+      - [0x2BE30, .data, libultra/io/vimodepallan1]
+      - [0x2BE80, .data, libultra/io/vimodempallan1]
+      - [0x2BED0, .data, libultra/io/vimodentsclan1]
 
       - [0x2BF20, .rodata, init_1420]
       - [0x2BF7C, rodata]
@@ -261,6 +276,21 @@ segments:
       - [0x2C960, rodata]
       # init bss: func_10001050 clears 0x8002D4B0..0x80043B40 (bss_size)
       - {start: 0x2D4B0, type: bss, vram: 0x8002D4B0}
+      - {start: 0x2D4B0, type: .bss, vram: 0x80036DD0, name: libultra/io/vimgr}
+      - {start: 0x2D4B0, type: bss, vram: 0x80037E40, name: bss_80037E40}
+      - {start: 0x2D4B0, type: .bss, vram: 0x8003B1E8, name: init_50A0}
+      - {start: 0x2D4B0, type: bss, vram: 0x8003BC28, name: bss_8003BC28}
+      # libultra objects that link their own .bss. A list-form bss entry has no ROM: splat takes its vram
+      # from the first field as if it were a ROM offset, and in init_data vram = 0x80000000 + offset.
+      - [0x428E0, .bss, libultra/os/initialize]
+      - [0x428F0, .bss, libultra/os/piacs]
+      - [0x42910, .bss, libultra/os/seteventmesg]
+      - [0x42990, .bss, libultra/os/timerintr]
+      - [0x429D0, .bss, libultra/io/pfsisplug]
+      - [0x42A10, .bss, libultra/io/controller]
+      - [0x42AA0, .bss, libultra/io/siacs]
+      - [0x42AC0, .bss, libultra/io/leointerrupt]
+      - [0x43AC0, .bss, libultra/io/leodiskinit]
 
   - name:  game
     type:  code
@@ -933,10 +963,6 @@ segments:
       - [0x20A910, c, game_20A910]
       - [0x20A990, c, game_20A990]
       - [0x20AE20, c, game_20AE20]
-      - [0x20B050, c, game_20B050]
-      - [0x20B0D0, c, game_20B0D0]
-      - [0x20BDA0, c, game_20BDA0]
-      - [0x20F9A0, c, game_20F9A0]
       - [0x215960, c, game_215960]
       - [0x21C4F0, c, game_21C4F0]
       - [0x21C540, c, game_21C540]
@@ -973,11 +999,21 @@ segments:
     subalign: 4
     subsegments:
       - [0x2275E0, data]
+      - [0x2278F0, .data, game_40490]
+      - [0x227960, data]
+      - [0x227A50, .data, game_45B80]
+      - [0x227A60, data]
+      - [0x228BD0, .data, game_50D80]
+      - [0x228C20, data]
+      - [0x228EA0, .data, game_64120]
+      - [0x228ED0, data]
+      - [0x228F40, .data, game_6CEA0]
+      - [0x228F70, data]
       - [0x22A980, rodata]
       - [0x22AA90, rodata]
       - [0x22AAB0, rodata]
       - [0x22AAC0, rodata]
-      - [0x22ABC0, rodata]
+      - {start: 0x22ABC0, type: .data, name: game_90840, linker_section_order: .rodata}
       - [0x22ABD0, rodata]
       - [0x22AC10, rodata]
       - [0x22B1F0, rodata]
@@ -988,9 +1024,8 @@ segments:
       - [0x22BD20, rodata]
       - [0x22BD40, rodata]
       - [0x22BD50, rodata]
-      - [0x22BD70, rodata]
-      - [0x22BD90, rodata]
-      - [0x22BDE0, rodata]
+      - {start: 0x22BD70, type: .data, name: game_B7060, linker_section_order: .rodata}
+      - [0x22BE10, rodata]
       - [0x22BE40, rodata]
       - [0x22BE50, rodata]
       - [0x22BE70, rodata]
@@ -1020,7 +1055,7 @@ segments:
       - [0x22D3D0, rodata]
       - [0x22D3F0, rodata]
       - [0x22D400, rodata]
-      - [0x22D410, rodata]
+      - {start: 0x22D410, type: .data, name: game_10B7D0, linker_section_order: .rodata}
       - [0x22D420, rodata]
       - [0x22D440, rodata]
       - [0x22D450, rodata]
@@ -1047,6 +1082,7 @@ segments:
       - [0x22DB80, rodata]
       - [0x22DBE0, rodata]
       - [0x22DBF0, rodata]
+      - {start: 0x22DCC0, type: .data, name: game_13F9D0, linker_section_order: .rodata}
       - [0x22DD00, rodata]
       - [0x22DD20, rodata]
       - [0x22DDE0, rodata]
@@ -1102,7 +1138,7 @@ segments:
       - [0x22FF90, rodata]
       - [0x231650, rodata]
       - [0x231660, rodata]
-      - [0x2316E0, rodata]
+      - {start: 0x2316E0, type: .data, name: game_19E040, linker_section_order: .rodata}
       - [0x2316F0, rodata]
       - [0x231730, rodata]
       - [0x231850, rodata]
@@ -1138,7 +1174,7 @@ segments:
       - [0x234300, rodata]
       - [0x234310, rodata]
       - [0x234320, rodata]
-      - [0x234330, rodata]
+      - {start: 0x234330, type: .data, name: game_1C2C60, linker_section_order: .rodata}
       - [0x234390, rodata]
       - [0x2343A0, rodata]
       - [0x2343C0, rodata]
@@ -1147,6 +1183,7 @@ segments:
       - [0x234400, rodata]
       - [0x234520, rodata]
       - [0x234530, rodata]
+      - {start: 0x234590, type: .data, name: game_1DEF60, linker_section_order: .rodata}
       - [0x2345B0, rodata]
       - [0x234600, rodata]
       - [0x234630, rodata]
@@ -1162,12 +1199,12 @@ segments:
       - [0x234760, rodata]
       - [0x234780, rodata]
       - [0x234790, rodata]
-      - [0x234830, rodata]
-      - [0x234900, rodata]
-      - [0x234A70, rodata]
+      - {start: 0x234830, type: .data, name: game_20AE20, linker_section_order: .rodata}
+      - {start: 0x234A80, type: .data, name: game_215960, linker_section_order: .rodata}
       - [0x234C10, rodata]
       - [0x234CB0, rodata]
-      - [0x236430, rodata]
+      - {start: 0x236430, type: .data, name: game_21CAC0, linker_section_order: .rodata}
+      - [0x236440, rodata]
       - [0x2364F0, .rodata, game_2D4B0]
       - [0x236504, rodata]
       - [0x236510, .rodata, game_2DF70]
@@ -1212,8 +1249,7 @@ segments:
       - [0x23B020, rodata]
       - [0x23B030, .rodata, game_3F820]
       - [0x23B034, rodata]
-      - [0x23B040, rodata]
-      - [0x23B094, .rodata, game_40490]
+      - [0x23B040, .rodata, game_40490]
       - [0x23B178, rodata]
       - [0x23B180, .rodata, game_433F0]
       - [0x23B218, rodata]
@@ -1729,8 +1765,7 @@ segments:
       - [0x246D4C, .rodata, game_12F400]
       - [0x246E00, .rodata, game_12FDD0]
       - [0x246E04, rodata]
-      - [0x246E10, rodata]
-      - [0x246E18, .rodata, game_130B40]
+      - [0x246E10, .rodata, game_130B40]
       - [0x246E2C, rodata]
       - [0x246E30, .rodata, game_131A90]
       - [0x246E34, rodata]
@@ -1917,8 +1952,7 @@ segments:
       - [0x24C620, .rodata, game_1BB950]
       - [0x24C628, .rodata, game_1BC650]
       - [0x24CAC8, rodata]
-      - [0x24CAD0, rodata]
-      - [0x24CAD4, .rodata, game_1BDC20]
+      - [0x24CAD0, .rodata, game_1BDC20]
       - [0x24CAE4, rodata]
       - [0x24CAF0, rodata]
       - [0x24CBA8, .rodata, game_1BF090]
@@ -1998,20 +2032,23 @@ segments:
       - [0x24F034, rodata]
       - [0x24F040, .rodata, game_1E6B40]
       - [0x24F050, rodata]
+      - {start: 0x24F268, type: .data, name: game_1EB6C0, linker_section_order: .rodata}
       - [0x24F278, .rodata, game_1E73B0]
       - [0x24F2F4, .rodata, game_1E9820]
       - [0x24F308, .rodata, game_1E9A30]
       - [0x24F35C, .rodata, game_1EB6C0]
-      - [0x24F370, rodata]
+      - {start: 0x24F370, type: .data, name: game_1EBD00, linker_section_order: .rodata}
+      - {start: 0x24F374, type: .data, name: game_1EC390, linker_section_order: .rodata}
       - [0x24F39C, .rodata, game_1EBD00]
       - [0x24F3A0, .rodata, game_1EBFD0]
       - [0x24F3A4, .rodata, game_1EC390]
       - [0x24F3F0, .rodata, game_1ED0F0]
       - [0x24F488, rodata]
-      - [0x24F490, rodata]
+      - {start: 0x24F490, type: .data, name: game_1EF500, linker_section_order: .rodata}
+      - [0x24F4F0, rodata]
       - [0x24F4F4, .rodata, game_1EF500]
       - [0x24F548, rodata]
-      - [0x24F550, rodata]
+      - [0x24F550, .rodata, game_1F2730]
       - [0x24F5C0, rodata]
       - [0x24F6B8, .rodata, game_1F3780]
       - [0x24F6E4, rodata]
@@ -2019,12 +2056,14 @@ segments:
       - [0x24F740, .rodata, game_1F7050]
       - [0x24F99C, rodata]
       - [0x24F9A0, rodata]
+      - {start: 0x24FA00, type: .data, name: game_1FC830, linker_section_order: .rodata}
+      - [0x24FA1C, rodata]
       - [0x24FA74, .rodata, game_1FA770]
       - [0x24FAB0, .rodata, game_1FBB80]
       - [0x24FAC8, .rodata, game_1FBED0]
       - [0x24FACC, .rodata, game_1FC0C0]
       - [0x24FAD4, .rodata, game_1FC5D0]
-      - [0x24FAE0, rodata]
+      - [0x24FAE0, .rodata, game_1FC830]
       - [0x24FB68, .rodata, game_1FEA80]
       - [0x24FB70, rodata]
       - [0x24FBD8, .rodata, game_1FF760]
@@ -2044,8 +2083,7 @@ segments:
       - [0x250018, .rodata, game_20A290]
       - [0x250028, rodata]
       - [0x250030, rodata]
-      - [0x250420, .rodata, game_20BDA0]
-      - [0x2504A4, .rodata, game_20F9A0]
+      - [0x250420, .rodata, game_20AE20]
       - [0x250550, .rodata, game_215960]
       - [0x2505D0, rodata]
       - [0x2505E0, rodata]
@@ -2060,6 +2098,28 @@ segments:
 
       # BSS ?
       - {start: 0x255880, type: bss, vram: 0x800B0DC0}
+      - {start: 0x255880, type: .bss, vram: 0x800BE3D8, name: game_33990}
+      - {start: 0x255880, type: bss, vram: 0x800BE3E8, name: bss_800BE3E8}
+      - {start: 0x255880, type: .bss, vram: 0x800BE5E8, name: game_45B80}
+      - {start: 0x255880, type: bss, vram: 0x800BE618, name: bss_800BE618}
+      - {start: 0x255880, type: .bss, vram: 0x800C3620, name: game_49D30}
+      - {start: 0x255880, type: bss, vram: 0x800C3630, name: bss_800C3630}
+      - {start: 0x255880, type: .bss, vram: 0x800C3FD0, name: game_64120}
+      - {start: 0x255880, type: bss, vram: 0x800C4000, name: bss_800C4000}
+      - {start: 0x255880, type: .bss, vram: 0x800CBD50, name: game_6EA90}
+      - {start: 0x255880, type: bss, vram: 0x800CBD60, name: bss_800CBD60}
+      - {start: 0x255880, type: .bss, vram: 0x800CC280, name: game_79F10}
+      - {start: 0x255880, type: bss, vram: 0x800CC2C0, name: bss_800CC2C0}
+      - {start: 0x255880, type: .bss, vram: 0x800D2F60, name: game_C8950}
+      - {start: 0x255880, type: bss, vram: 0x800D2FA0, name: bss_800D2FA0}
+      - {start: 0x255880, type: .bss, vram: 0x800D3010, name: game_CD5A0}
+      - {start: 0x255880, type: bss, vram: 0x800D3090, name: bss_800D3090}
+      - {start: 0x255880, type: .bss, vram: 0x800D9890, name: game_E4070}
+      - {start: 0x255880, type: bss, vram: 0x800D98C0, name: bss_800D98C0}
+      - {start: 0x255880, type: .bss, vram: 0x800E0BA0, name: game_20AE20}
+      - {start: 0x255880, type: bss, vram: 0x800E0C00, name: bss_800E0C00}
+      - {start: 0x255880, type: .bss, vram: 0x800E0D20, name: libultra/io/siacs2}
+      - {start: 0x255880, type: bss, vram: 0x800E0D30, name: bss_800E0D30}
 
   - name:  debugger
     type:  code

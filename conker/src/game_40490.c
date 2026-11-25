@@ -6,7 +6,44 @@
 
 
 void func_151A9390(s32 arg0, s32 arg1, TriggerZone *arg2, s32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8);
-extern s32 (*gZoneSpawnHandlers[])(TriggerZone *);
+s32 func_150130B4(TriggerZone *obj);
+s32 func_1501370C(TriggerZone *obj);
+s32 func_1501396C(TriggerZone *obj);
+s32 func_15014144(TriggerZone *obj);
+s32 func_150142EC(TriggerZone *obj);
+s32 func_150144B8(TriggerZone *obj);
+s32 func_1501474C(TriggerZone *obj);
+s32 func_15014B60(TriggerZone *obj);
+s32 func_15014F6C(TriggerZone *obj);
+/* Spawn handler of each zone type (TriggerZone.kind >> 2, see enum ZoneType); NULL spawns nothing. */
+s32 (*gZoneSpawnHandlers[26])(TriggerZone *) = {
+    /*  0 */ NULL,
+    /*  1 */ NULL,
+    /*  2 */ NULL,
+    /*  3 */ func_1501396C,
+    /*  4 */ NULL,
+    /*  5 */ NULL,
+    /*  6 */ NULL,
+    /*  7 */ NULL,
+    /*  8 */ NULL,
+    /*  9 */ NULL,
+    /* 10 */ NULL,
+    /* 11 */ NULL,
+    /* 12 */ func_1501370C,
+    /* 13 */ NULL,
+    /* 14 */ NULL,
+    /* 15 */ NULL,
+    /* 16 */ NULL,
+    /* 17 */ func_150130B4,
+    /* 18 */ func_15014144,
+    /* 19 */ func_150142EC,
+    /* 20 */ func_150144B8,
+    /* 21 */ func_1501474C,
+    /* 22 */ func_15014B60,
+    /* 23 */ func_15014F6C,
+    /* 24 */ NULL,
+    /* 25 */ NULL,
+};
 extern void (*D_80082F28[])(TriggerZone *, f32);
 extern void func_1510F800(s32);
 s32 func_151BE850(Vec3f *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6);
@@ -106,9 +143,9 @@ typedef struct {
     f32 unk14;
 } Payload18_150130B4;
 
-extern s32 D_8009658C[];
-extern s32 D_800965A0[];
-extern s32 D_800965B0[];
+extern const s32 D_8009658C[];
+extern const s32 D_800965A0[];
+extern const s32 D_800965B4[];
 void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s32, s32);
 extern WorldObject *func_151149AC(u8);
 
@@ -204,7 +241,7 @@ ground:
     case 4: {
         void *unused; // matching: the dead store of the result steers as1's scheduling
 
-        emit.type = D_800965B0[kind];
+        emit.type = D_800965B4[kind - 1];
         unused = func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     }
@@ -214,14 +251,14 @@ ground:
     case 12: {
         void *unused; // matching: as above
 
-        emit.type = D_800965A0[kind];
+        emit.type = D_800965B4[kind - 5];
         unused = func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
         return 1;
     }
     case 5:
     case 6:
     case 7: {
-        s32 ids[3] = { 12, 13, 14 };
+        const s32 ids[3] = { 12, 13, 14 };
 
         emit.type = ids[kind - 5];
         func_151407D0(&emit, 0x60, &spawn, 0, 0, 0, 0, -1, 0xFF, 1);
@@ -264,6 +301,12 @@ ground:
     }
     return 1;
 }
+
+/* Particle texture and render modes per glow kind (TriggerZone.data1 >> 24), and the emitter type for
+ * spawn kinds 1-4 and 9-12. */
+const s32 D_8009658C[5] = { 3, 0x15, 0x68, 0x69, 0x7E };
+const s32 D_800965A0[5] = { 0x3400, 0x3400, 0x2200, 0x3400, 0x3400 };
+const s32 D_800965B4[8] = { 2, 3, 4, 5, 6, 7, 8, 9 };
 
 /** Runs the object's handler from D_80082EA0, chosen by unk17. */
 s32 func_1501370C(TriggerZone *obj) {

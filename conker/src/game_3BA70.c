@@ -10,6 +10,8 @@ void func_15008E10(s32);
 void func_15189900(SprayDesc *, u8);
 
 extern u8 *D_80088870;
+extern u8 D_800D9890; // game_E4070.c
+extern EffectHeader *D_800D9894; // game_E4070.c
 
 
 /* Resets this module's state: runs three sub-resets, then clears its flags, tables and pointers. */
