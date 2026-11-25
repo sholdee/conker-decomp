@@ -134,13 +134,13 @@ void func_151BE644(BurstSpark *spark) {
 /* Teardown of a burst spark: clears its slot in the burst, then runs the particle teardown func_1513CA6C. */
 void func_151BE674(BurstSpark *spark) {
     func_151BE644(spark);
-    func_1513CA6C((struct210 *)spark);
+    func_1513CA6C(&spark->head);
 }
 
 /* Teardown of a burst spark: clears its slot in the burst, then runs the particle teardown func_1513CAA0. */
 void func_151BE6A0(BurstSpark *spark) {
     func_151BE644(spark);
-    func_1513CAA0((struct210 *)spark);
+    func_1513CAA0(&spark->head);
 }
 
 /* Per-frame update of a burst glow: switches it to a random texture every 3-10 frames and eases its scale. */
@@ -177,11 +177,11 @@ void func_151BE7C8(BurstGlow *glow) {
 /* Teardown of a burst glow: clears its slot in the burst, then runs the particle teardown func_151411A4. */
 void func_151BE7F8(BurstGlow *glow) {
     func_151BE7C8(glow);
-    func_151411A4((struct210 *)glow);
+    func_151411A4(&glow->head);
 }
 
 /* Teardown of a burst glow: clears its slot in the burst, then runs the particle teardown func_151411C4. */
 void func_151BE824(BurstGlow *glow) {
     func_151BE7C8(glow);
-    func_151411C4((struct210 *)glow);
+    func_151411C4(&glow->head);
 }

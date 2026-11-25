@@ -165,8 +165,8 @@ void func_150F7470(Vec3f *pos, Vec3f *aim, s32 arg2, Vec3f *target, u8 targetIsD
 
 /* Per-object state of a puff spawned by func_1513D2F0 (updated by func_150F7E20). */
 typedef struct {
-    /* 0x00 */ Vec3f unk0;
-    /* 0x0C */ Vec3f unkC;
+    /* 0x00 */ Vec3f axisU; /* quad axes for func_15140410 (vertex function func_150F7F58) */
+    /* 0x0C */ Vec3f axisV;
     /* 0x18 */ f32 timeLeft;
     /* 0x1C */ f32 phase;
     /* 0x20 */ f32 phaseSpeed;
@@ -259,8 +259,8 @@ s8 func_150F78B4(EffectObj *obj) {
         if (puffs > 1.0f) {
             PuffState puffState;
 
-            puffState.unk0 = state->unk74;
-            puffState.unkC = state->unk80;
+            puffState.axisU = state->unk74;
+            puffState.axisV = state->unk80;
             puffState.sizeBase = 8.318000793f;
             puffState.sizeAmplitude = 8.318000793f;
             spawn.texture = 0x7A;
@@ -328,9 +328,9 @@ s32 func_150F7E20(PuffObj *obj) {
     return 1;
 }
 
-/* Forwards `obj`'s unk110 and unk11C to func_15140410. */
-void func_150F7F58(struct210 *obj, s16 arg1) {
-    func_15140410(obj, &obj->unk110, &obj->unk11C, arg1);
+/* Quad spanned by the puff's two axes (vertex function). */
+void func_150F7F58(PuffObj *obj, s16 arg1) {
+    func_15140410(obj, &obj->state.axisU, &obj->state.axisV, arg1);
 }
 
 void func_151541B8(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6);
@@ -444,7 +444,7 @@ s32 func_150F81BC(EffectObj *obj) {
                 f32 ageStep;
 
                 ageStep = follow->trailAge / puffs;
-                func_15146078(&delta, &puffState.unk0, &puffState.unkC);
+                func_15146078(&delta, &puffState.axisU, &puffState.axisV);
                 puffState.phaseSpeed = 0.4630000293f;
                 puffState.sizeBase = 8.241000175f;
                 puffState.sizeAmplitude = 3.888999939f;

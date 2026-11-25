@@ -16,18 +16,18 @@ typedef struct ListObj {
 
 extern ListObj *D_800DCE50[2][104];
 
-extern void func_151A6AB8(struct210 *);
+extern void func_151A6AB8(struct DefParticleHead *);
 extern void func_1505D024(Actor *, s32, u16, s32);
 ListObj *func_151A6BD8(s32 owner);
 
-void func_151A6B10(struct210 *arg0) {
-    func_151A6AB8(arg0);
-    func_1513CA6C(arg0);
+void func_151A6B10(struct DefParticleHead *obj) {
+    func_151A6AB8(obj);
+    func_1513CA6C(obj);
 }
 
-void func_151A6B3C(struct210 *arg0) {
-    func_151A6AB8(arg0);
-    func_1513CAA0(arg0);
+void func_151A6B3C(struct DefParticleHead *obj) {
+    func_151A6AB8(obj);
+    func_1513CAA0(obj);
 }
 
 /* Sends message 0x60034 to `target` with its facing angle and the index of the actor owned by `owner`

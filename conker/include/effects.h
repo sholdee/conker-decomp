@@ -2127,4 +2127,29 @@ typedef struct BillboardSpawn38 {
     /* 0x34 */ u8 pad34[0x4];
 } BillboardSpawn38;
 
+/* Model instance attached to a sprite or particle, drawn through func_151462C8. */
+typedef struct ModelLink {
+    /* 0x00 */ s32 model;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ s32 handles[4];     /* one per viewport, 0..D_80082FA0 */
+    /* 0x18 */ s32 sharedHandle;
+    /* 0x1C */ s32 unk1C;
+} ModelLink; /* size 0x20 */
+
+/* Textured quad sprite (with optional model) made by func_1513C350 (game_169510.c); func_1513C4EC and the
+ * other spawners return it, and callers keep their own data after it (extraSize). */
+typedef struct QuadSprite {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ s32 active;         /* bit 0: alive */
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ SpriteDef def;
+    /* 0x40 */ Vtx vtx[4];
+    /* 0x80 */ u8 updateFn;        /* D_80089C70 index, 0 = none */
+    /* 0x81 */ u8 expireFn;        /* D_80089CA8 index, 0 = none */
+    /* 0x82 */ u8 pad82[2];
+    /* 0x84 */ ModelLink link;
+    /* 0xA4 */ Vec3f pos;
+} QuadSprite; /* size 0xB0 */
+
 #endif

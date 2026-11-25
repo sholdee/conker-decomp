@@ -584,24 +584,24 @@ void func_150F6400(Beam *beam) {
 /* Beam destructors: unlink the beam from its effect, then free it. */
 void func_150F6420(Beam *beam) {
     func_150F6400(beam);
-    func_1513CA6C((struct210 *)beam);
+    func_1513CA6C(&beam->head);
 }
 
 void func_150F644C(Beam *beam) {
     func_150F6400(beam);
-    func_1513CAA0((struct210 *)beam);
+    func_1513CAA0(&beam->head);
 }
 
-void func_150F6478(struct210 *obj) {
+void func_150F6478(DefParticleHead *obj) {
 }
 
-void func_150F6484(struct210 *obj) {
+void func_150F6484(DefParticleHead *obj) {
     func_150F6478(obj);
     func_151411A4(obj);
 }
 
 
-void func_150F64B0(struct210 *obj) {
+void func_150F64B0(DefParticleHead *obj) {
     func_150F6478(obj);
     func_151411C4(obj);
 }

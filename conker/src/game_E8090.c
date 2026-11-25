@@ -19,7 +19,7 @@ void func_15165F80(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s32 arg6, s32 arg7, s32 arg8, f32 arg9, s32 argA, s32 argB);
 void func_1504715C(Ground_150BABE0 *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, Ground_150BABE0 *);
-s32 func_1518ABD0(s32, struct210 *, u8);
+s32 func_1518ABD0(s32, QuadSprite *, u8);
 
 /*
  * Spawns the effects for one of obj's joints (side 0: joint 0x11, side 1: joint 0x1A): a sound,
@@ -33,7 +33,7 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
     Ground_150BABE0 ground;
     Vec3f probe;
     SpriteDef desc;
-    struct210 *decal;
+    QuadSprite *decal;
     f32 size;
 
     /* the current camera's unk380 angle, degrees -> 256-step angle */

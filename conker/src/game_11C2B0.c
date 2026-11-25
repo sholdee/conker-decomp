@@ -395,7 +395,7 @@ void func_150EF7B0(Beam *beam) {
     if (part != NULL) {
         func_1516972C(part);
     }
-    func_1513CA6C((struct210 *)beam);
+    func_1513CA6C(&beam->head);
 }
 
 /* Like func_150EF7B0, through the func_1516979C / func_1513CAA0 variants. */
@@ -422,7 +422,7 @@ void func_150EF860(Beam *beam) {
     if (part != NULL) {
         func_1516979C(part);
     }
-    func_1513CAA0((struct210 *)beam);
+    func_1513CAA0(&beam->head);
 }
 
 /* Message handler of a beam: releases it when its actor goes away (types 0 and 0x43)
@@ -747,13 +747,13 @@ void func_150F0380(Glow *glow);
 
 void func_150F0328(Glow *glow) {
     func_150F0380(glow);
-    func_151411A4((struct210 *)glow);
+    func_151411A4(&glow->head);
 }
 
 
 void func_150F0354(Glow *glow) {
     func_150F0380(glow);
-    func_151411C4((struct210 *)glow);
+    func_151411C4(&glow->head);
 }
 
 /* Clears the beam's reference to this glow. */

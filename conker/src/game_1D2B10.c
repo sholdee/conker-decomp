@@ -223,7 +223,7 @@ void func_151A5D2C(u16 soundHandle) {
  * Spawns an effect via func_1513C650 at pos, scaled by size on both axes, living duration + 20 frames.
  * Returns NULL if duration <= 0, so the duration == -1 cases below are unreachable (the original has them).
  */
-struct210 *func_151A5D58(f32 size, u8 arg1, s32 arg2, f32 *pos, s16 duration, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
+QuadSprite *func_151A5D58(f32 size, u8 arg1, s32 arg2, f32 *pos, s16 duration, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
     SpriteDef2C params;
 
     if (duration <= 0) {

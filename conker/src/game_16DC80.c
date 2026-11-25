@@ -269,11 +269,11 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
     return NULL;
 }
 
-void func_151411A4(struct210 *arg0) {
+void func_151411A4(DefParticleHead *arg0) {
     func_1513CA6C(arg0);
 }
 
-void func_151411C4(struct210 *arg0) {
+void func_151411C4(DefParticleHead *arg0) {
     func_1513CAA0(arg0);
 }
 

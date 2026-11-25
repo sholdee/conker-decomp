@@ -467,11 +467,11 @@ void func_150FDC2C(Actor150FD514 *actor) {
 /* Releases the ext resources, then hands the particle to func_1513CA6C. */
 void func_150FDCAC(Actor150FD514 *actor) {
     func_150FDC2C(actor);
-    func_1513CA6C((struct210 *)actor);
+    func_1513CA6C(&actor->head);
 }
 
 /* Releases the ext resources, then hands the particle to func_1513CAA0. */
 void func_150FDCD8(Actor150FD514 *actor) {
     func_150FDC2C(actor);
-    func_1513CAA0((struct210 *)actor);
+    func_1513CAA0(&actor->head);
 }

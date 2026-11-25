@@ -3,10 +3,12 @@
 #include "variables.h"
 
 extern void func_151D5D60(Vtx **bufs, s32 index, s32 size, Vtx **out, u8 *isNew);
-void func_1513173C(struct210 *);
-void func_1513175C(struct210 *);
-void func_151617C4(struct210 *arg0);
-void func_151617E4(struct210 *arg0);
+struct DescParticleHead;
+
+void func_1513173C(struct DescParticleHead *particle);
+void func_1513175C(struct DescParticleHead *particle);
+void func_151617C4(struct225 *effect);
+void func_151617E4(struct225 *effect);
 
 typedef struct Beam Beam;
 
@@ -169,7 +171,7 @@ void func_15101090(Beam *beam) {
     if (data->endFx != NULL) {
         func_1516972C((struct102 *)data->endFx);
     }
-    func_1513CA6C((struct210 *)beam);
+    func_1513CA6C((struct DefParticleHead *)beam);
 }
 
 /* Counterpart of func_15101090 for the beam's child objects and func_1513CAA0. */
@@ -191,7 +193,7 @@ void func_15101148(Beam *beam) {
     if (data->endFx != NULL) {
         func_1516979C((struct102 *)data->endFx);
     }
-    func_1513CAA0((struct210 *)beam);
+    func_1513CAA0((struct DefParticleHead *)beam);
 }
 
 /* The functions below detach a child object from its beam before handing it on. */
@@ -200,70 +202,70 @@ void func_151011E8(BeamHitFx *fx) {
     BeamData *data = &fx->data.beam->data;
 
     data->hitFx = NULL;
-    func_1513CA6C((struct210 *)fx);
+    func_1513CA6C((struct DefParticleHead *)fx);
 }
 
 void func_15101210(BeamHitFx *fx) {
     BeamData *data = &fx->data.beam->data;
 
     data->hitFx = NULL;
-    func_1513CAA0((struct210 *)fx);
+    func_1513CAA0((struct DefParticleHead *)fx);
 }
 
 void func_15101238(BeamEndPoint *endPoint) {
     BeamData *data = &endPoint->beam->data;
 
     data->endPoint = NULL;
-    func_151617C4((struct210 *)endPoint);
+    func_151617C4((struct225 *)endPoint);
 }
 
 void func_15101260(BeamEndPoint *endPoint) {
     BeamData *data = &endPoint->beam->data;
 
     data->endPoint = NULL;
-    func_151617E4((struct210 *)endPoint);
+    func_151617E4((struct225 *)endPoint);
 }
 
 void func_15101288(BeamStartFx *fx) {
     BeamData *data = &fx->link.beam->data;
 
     data->startFx = NULL;
-    func_1513173C((struct210 *)fx);
+    func_1513173C((struct DescParticleHead *)fx);
 }
 
 void func_151012B0(BeamStartFx *fx) {
     BeamData *data = &fx->link.beam->data;
 
     data->startFx = NULL;
-    func_1513175C((struct210 *)fx);
+    func_1513175C((struct DescParticleHead *)fx);
 }
 
 void func_151012D8(BeamLine *line) {
     BeamData *data = &line->link.beam->data;
 
     data->line = NULL;
-    func_151411A4((struct210 *)line);
+    func_151411A4((struct DefParticleHead *)line);
 }
 
 void func_15101300(BeamLine *line) {
     BeamData *data = &line->link.beam->data;
 
     data->line = NULL;
-    func_151411C4((struct210 *)line);
+    func_151411C4((struct DefParticleHead *)line);
 }
 
 void func_15101328(BeamEndFx *fx) {
     BeamData *data = &fx->link.beam->data;
 
     data->endFx = NULL;
-    func_1513173C((struct210 *)fx);
+    func_1513173C((struct DescParticleHead *)fx);
 }
 
 void func_15101350(BeamEndFx *fx) {
     BeamData *data = &fx->link.beam->data;
 
     data->endFx = NULL;
-    func_1513175C((struct210 *)fx);
+    func_1513175C((struct DescParticleHead *)fx);
 }
 
 extern void func_15143134(Vec3f *src, Vec3f *dst, f32 (*mtx)[4]);

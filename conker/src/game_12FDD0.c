@@ -26,9 +26,9 @@ void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 ar
 
 /* Spawns a func_1513C650 effect of the given size on a surface (none for some materials on maps 0x36 and 0x26);
  * a duration of -1 means a fixed 300 frames without the timed flag. */
-struct210 *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
+QuadSprite *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
                          s32 surfaceFlags, u8 arg8, s32 arg9) {
-    struct210 *result;
+    QuadSprite *result;
     SpriteDef arg;
     s32 argB;
     s32 argC;

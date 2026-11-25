@@ -15,6 +15,9 @@ struct Rope;
 struct BoneChain;
 typedef struct struct216 struct216;
 typedef struct struct256 struct256;
+/* Effect objects (include/effects.h), named here for the prototypes in functions.h. */
+struct DefParticleHead;
+struct QuadSprite;
 
 /*
   union convention
@@ -3301,60 +3304,6 @@ typedef struct {
     u8  pad2C[0x3];
     u8  unk2F;
 } struct209;
-
-typedef struct {
-    s32 unk0;
-    u8  pad4[0xC];
-    s32 unk10;
-    s32 unk14;
-    union {
-        struct UBYTES4 b;
-        struct WORD    i;
-    } unk18;
-    u8  unk1C[0x2];
-    u8  unk1E;
-    u8  unk1F;
-    u8  pad20[0xC];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    s32 unk3C;
-    s16 unk40;
-    s16 unk42;
-    s16 unk44;
-    u8  pad46[0xA];
-    s16 unk50;
-    s16 unk52;
-    s16 unk54;
-    s16 pad56;
-    s32 unk58;
-    u8  pad5C[0x4];
-    s16 unk60;
-    s16 unk62;
-    s16 unk64;
-    u8  pad66[0xA];
-    s16 unk70;
-    s16 unk72;
-    s16 unk74;
-    u8  pad76[0xA];
-    u8  unk80;
-    u8  unk81;
-    u8  pad82[0x2];
-    s32 unk84;
-    u32 pad88;
-    s32 unk8C[4];
-    s32 unk9C;
-    s32 unkA0;
-    s32 unkA4[4];
-    s32 unkB4;
-    u8  padB8[0x48];
-    s32 unk100;
-    u8  pad104[0xC];
-    s32 unk110;
-    u8  pad114[0x8];
-    s32 unk11C;
-} struct210;
 
 typedef struct {
     f32 unk0;
