@@ -232,7 +232,7 @@ extern void func_1504715C(Ground *, struct127 *);
  * its timer runs out; when the actor has no bone matrices it hands its link to a retry task instead.
  */
 void func_15190898(DripEmitter *emitter) {
-    DripEmitter *self;
+    DripEmitter *self; // matching: stack copy of emitter, read back by the spawn loop test
     volatile u8 done; // matching: done is re-read from its stack slot after every store
     EmitterKind *kind;
     DripSlot *slot;
@@ -251,32 +251,29 @@ void func_15190898(DripEmitter *emitter) {
     DripMotion motion;
     s16 timer;
     u8 hasTimer;
-    s32 pad;
 
     self = emitter;
     done = 0;
     if (emitter->link.flags & 1) {
-        emitter->link.timer = emitter->link.timer - D_800BE9E4;
+        emitter->link.timer -= D_800BE9E4;
         if (emitter->link.timer < 0) {
             done = 1;
         }
     }
-    if (done == 0 && (emitter->link.actor->interaction_state == 0 || emitter->link.actor->unique_id != emitter->link.actorId)) {
+    if (!done && (emitter->link.actor->interaction_state == 0 || emitter->link.actor->unique_id != emitter->link.actorId)) {
         done = 1;
     }
-    if (done == 0) {
+    if (!done) {
         if (emitter->link.actor->unk1D4 != NULL) {
             kind = &D_8008FA70[emitter->link.kind];
             head = NULL;
             tail = NULL;
             freeCount = 0;
-            i = 0;
-            slot = emitter->slots;
-            for (; i < kind->numMounts; i++, slot++) {
+            for (i = 0, slot = emitter->slots; i < kind->numMounts; i++, slot++) {
                 if (slot->drop != NULL) {
                     slot->drop->def.rot = slot->drop->def.pos;
-                    func_15143134(kind->mounts + i, &slot->drop->def.pos, (Mtx *)emitter->link.actor->unk1D4 + kind->mounts[i].bone);
-                    slot->timer = slot->timer - D_800BE9E4;
+                    func_15143134(&kind->mounts[i], &slot->drop->def.pos, (Mtx *)emitter->link.actor->unk1D4 + kind->mounts[i].bone);
+                    slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
                         Particle *falling = slot->drop;
                         DripMotion *fall = &slot->drop->motion;
@@ -292,15 +289,15 @@ void func_15190898(DripEmitter *emitter) {
                         slot->drop->def.lifetime = func_150ADA20() % (u32)(dropKind->lifeRange + 1) + dropKind->lifeMin;
                         slot->drop->def.flags |= 1;
                         slot->drop = NULL;
-                        emitter->dropCount = emitter->dropCount - 1;
+                        emitter->dropCount--;
                     } else {
                         isFree = 0;
                     }
                 } else {
                     isFree = 1;
                 }
-                if (isFree != 0) {
-                    freeCount += 1;
+                if (isFree) {
+                    freeCount++;
                     if (tail == NULL) {
                         tail = slot;
                     }
@@ -309,7 +306,7 @@ void func_15190898(DripEmitter *emitter) {
                 }
             }
             if (freeCount != 0) {
-                emitter->spawnAccum = emitter->spawnAccum + kind->rate * D_800BE9A4;
+                emitter->spawnAccum += kind->rate * D_800BE9A4;
                 if (emitter->spawnAccum > 1.0f) {
                     DropKind *newKind;
 
@@ -360,7 +357,7 @@ void func_15190898(DripEmitter *emitter) {
                         motion.wobble = newKind->wobble;
                         motion.phaseSpeed[0] = func_150ADA20() % 5U + 4;
                         motion.phaseSpeed[1] = func_150ADA20() % 5U + 4;
-                        func_15143134(kind->mounts + index, &def.pos, (Mtx *)emitter->link.actor->unk1D4 + kind->mounts[index].bone);
+                        func_15143134(&kind->mounts[index], &def.pos, (Mtx *)emitter->link.actor->unk1D4 + kind->mounts[index].bone);
                         def.rot = def.pos;
                         if (emitter->link.actor->unk118 < def.pos.y - motion.baseSize.height - motion.wobble.height) {
                             drop = func_1513D524(&def, 12, 0, 0, 13, ((func_150ADA20() % 1) ? 1 : 0) | (D_800AB404[emitter->kind] ? 0 : 2), sizeof(DripMotion), 0xFF, 0);
@@ -368,17 +365,19 @@ void func_15190898(DripEmitter *emitter) {
                             if (drop != NULL) {
                                 memcpy(&drop->motion, &motion, sizeof(motion));
                                 head->timer = func_150ADA20() % (u32)(kind->holdRange + 1) + kind->holdMin;
-                                freeCount -= 1;
+                                freeCount--;
                                 head = head->next;
                                 tail->next = head;
-                                emitter->dropCount = emitter->dropCount + 1;
+                                emitter->dropCount++;
                             }
                         }
-                        emitter->spawnAccum = emitter->spawnAccum - 1.0f;
+                        emitter->spawnAccum -= 1.0f;
                     } while (emitter->spawnAccum > 1.0f && freeCount != 0 && self->dropCount < kind->maxDrops);
                 }
             }
         } else {
+            DripRetryTask *task;
+
             done = 1;
             if (emitter->link.flags & 1) {
                 hasTimer = 1;
@@ -387,13 +386,13 @@ void func_15190898(DripEmitter *emitter) {
                 hasTimer = 0;
                 timer = 300;
             }
-            drop = (Particle *)func_151491F4(timer, -1, 13, hasTimer, 8, sizeof(ActorLink), 0xFF, 0);
-            if (drop != NULL) {
-                memcpy(&((DripRetryTask *)drop)->link, &emitter->link, sizeof(ActorLink));
+            task = (DripRetryTask *)func_151491F4(timer, -1, 13, hasTimer, 8, sizeof(ActorLink), 0xFF, 0);
+            if (task != NULL) {
+                memcpy(&task->link, &emitter->link, sizeof(ActorLink));
             }
         }
     }
-    if (done != 0) {
+    if (done) {
         func_1516972C((struct102 *)emitter);
     }
 }
