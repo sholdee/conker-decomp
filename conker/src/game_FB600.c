@@ -80,8 +80,8 @@ s32 func_15144CEC(f32 *pos, f32 *screen, f32 *arg2, f32 *arg3, f32 *scale, s32 a
 s32 func_150CE200(MosaicEffect *effect) {
     MosaicData *mosaic = &effect->data;
     f32 pos[3];
-    f32 sp3C;
-    f32 sp38;
+    f32 projectedZ;
+    f32 projectedW;
     f32 scale;
 
     if (mosaic->owner->interaction_state == 0) {
@@ -94,7 +94,7 @@ s32 func_150CE200(MosaicEffect *effect) {
         mosaic->flags &= ~1;
     } else {
         func_15143134(D_800A07F0, pos, (Mtx *)mosaic->owner->unk1D4 + 52);
-        if (func_15144CEC(pos, mosaic->center, &sp3C, &sp38, &scale, D_80082FA4)) {
+        if (func_15144CEC(pos, mosaic->center, &projectedZ, &projectedW, &scale, D_80082FA4)) {
             f32 dx;
             f32 dy;
 
