@@ -142,7 +142,7 @@ typedef struct {
     /* 0x3C */ u8 pad3C[0xC];
     /* 0x48 */ vertex velocity;
     /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags; /* 0x40, 0x80: random flips */
+    /* 0x58 */ u32 flags; /* 0x40 and 0x80 are set at random */
     /* 0x5C */ u8 pad5C[4];
     /* 0x60 */ u8 unk60;
     /* 0x61 */ u8 unk61;
@@ -241,7 +241,7 @@ s32 func_150BAFEC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 /* Per-frame update of a func_150BAFEC particle: damps its horizontal velocity once per elapsed frame. */
 s32 func_150BB260(Particle_150BAFEC *particle, s32 arg1) {
     s32 i;
-    f32 *damping; // matching: IDO keeps the field address in a register only through a pointer
+    f32 *damping; // matching: reading particle->damping directly changes the loop code
 
     damping = &particle->damping;
     for (i = D_800BE9E4; i != 0; i--) {
