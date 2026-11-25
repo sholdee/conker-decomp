@@ -1757,29 +1757,6 @@ void func_15020878(s32 track, s32 segment, s32 scene) {
 }
 
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    u8 padC[4];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8 pad16[0x16];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    u8 pad38[0x16];
-    u8 unk4E;
-    u8 pad4F[0x1F];
-    u8 unk6E;
-    u8 unk6F;
-    u8 pad70[2];
-    u8 unk72;
-    u8 pad73[0x17];
-    u8 unk8A;
-} SeqActor; // WorldObject with the fields this file uses (include/structs.h still pads them)
-
 SeqVec3f D_800C3620;
 extern void func_15128CB0(Camera *);
 extern void func_1517D5FC(s16, s16, s16, s32, s32, s32);
@@ -1799,7 +1776,7 @@ void func_15020EC4(s32 scene) {
     s32 pass;
     Camera *player;
     SeqTrackState *state;
-    SeqActor *actor;
+    WorldObject *actor;
     f32 tilt3C;
     f32 tilt40;
 
@@ -1887,16 +1864,16 @@ void func_15020EC4(s32 scene) {
                         MSG.unk30 = tilt3C;
                         MSG.unk34 = tilt40;
                     } else if (ENT(scene, track)->unk2 == 3) {
-                        SeqActor *actor3;
+                        WorldObject *actor3;
 
-                        actor3 = (SeqActor *)func_151149AC(ENT(scene, track)->unk3);
+                        actor3 = func_151149AC(ENT(scene, track)->unk3);
                         if (actor3 == NULL) {
                             continue;
                         }
                         MSG.unk0 = 0;
-                        D_800C3620.x = actor3->unk10;
-                        D_800C3620.y = (actor3->unk12 + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
-                        D_800C3620.z = actor3->unk14;
+                        D_800C3620.x = actor3->x;
+                        D_800C3620.y = (actor3->y + ENT(scene, track)->yOffset) + (state = ELEM(scene, track))->yOffset;
+                        D_800C3620.z = actor3->z;
                         MSG.unk2C = -state->unk14;
                         MSG.unk30 = tilt3C;
                         MSG.unk34 = tilt40;
@@ -1913,34 +1890,34 @@ void func_15020EC4(s32 scene) {
                         func_1512D560(player, 7, &MSG);
                     }
                 } else if (ENT(scene, track)->type == 3) {
-                    actor = (SeqActor *)func_151149AC(ENT(scene, track)->unk2);
+                    actor = func_151149AC(ENT(scene, track)->unk2);
                     if (actor == NULL) {
                         continue;
                     }
-                    actor->unk4E = 0;
-                    actor->unk6F &= ~0x80;
-                    actor->unk6F = actor->unk6F; // matching: forces the byte reload
-                    actor->unk10 = ELEM(scene, track)->x;
-                    actor->unk12 = ELEM(scene, track)->y + ELEM(scene, track)->yOffset;
-                    actor->unk14 = ELEM(scene, track)->z;
-                    actor->unk0 = ELEM(scene, track)->unkC;
-                    actor->unk4 = ELEM(scene, track)->unk10;
-                    actor->unk8 = ELEM(scene, track)->unk14;
+                    actor->attach = 0;
+                    actor->viewFlags &= ~0x80;
+                    actor->viewFlags = actor->viewFlags; // matching: forces the byte reload
+                    actor->x = ELEM(scene, track)->x;
+                    actor->y = ELEM(scene, track)->y + ELEM(scene, track)->yOffset;
+                    actor->z = ELEM(scene, track)->z;
+                    actor->rotX = ELEM(scene, track)->unkC;
+                    actor->rotY = ELEM(scene, track)->unk10;
+                    actor->rotZ = ELEM(scene, track)->unk14;
                     if (ELEM(scene, track)->unk18 != -9999.0f) {
-                        actor->unk2C = ELEM(scene, track)->unk18 * 0.01f;
+                        actor->scaleX = ELEM(scene, track)->unk18 * 0.01f;
                     }
                     if (ELEM(scene, track)->unk1C != -9999.0f) {
-                        actor->unk30 = ELEM(scene, track)->unk1C * 0.01f;
+                        actor->scaleY = ELEM(scene, track)->unk1C * 0.01f;
                     }
                     if (ELEM(scene, track)->unk20 != -9999.0f) {
-                        actor->unk34 = ELEM(scene, track)->unk20 * 0.01f;
+                        actor->scaleZ = ELEM(scene, track)->unk20 * 0.01f;
                     }
                     if ((s32)ELEM(scene, track)->unk34 >= 0x100) {
-                        actor->unk8A = 0xFF;
+                        actor->alpha = 0xFF;
                     } else if ((s32)ELEM(scene, track)->unk34 < 0) {
-                        actor->unk8A = 0;
+                        actor->alpha = 0;
                     } else {
-                        actor->unk8A = (s32)ELEM(scene, track)->unk34;
+                        actor->alpha = (s32)ELEM(scene, track)->unk34;
                     }
                 } else if (ENT(scene, track)->type == 2) {
                     struct127 *obj2;
@@ -2329,20 +2306,20 @@ void func_15022640(s32 id, s32 scene) {
     *countPtr = count + 1;
 }
 
-/* If the actor bound to the scene's track `track` has unk6E set, record its unk72 id
+/* If the actor bound to the scene's track `track` is inactive, record its id
    (func_15022640) and clear the flag. */
 void func_150226BC(s32 track, s32 scene) {
-    SeqActor *actor;
+    WorldObject *actor;
     SeqTrackInfo *info;
 
     if (D_800C35C8[scene][track] != 0) {
         info = &D_800C35F0[scene][track];
         if (info->type == 3) {
-            actor = (SeqActor *)func_151149AC(info->unk2);
+            actor = func_151149AC(info->unk2);
             if (actor != NULL) {
-                if (actor->unk6E == 1) {
-                    func_15022640(actor->unk72, scene);
-                    actor->unk6E = 0;
+                if (actor->inactive == 1) {
+                    func_15022640(actor->id, scene);
+                    actor->inactive = 0;
                 }
             }
         }
@@ -2359,14 +2336,14 @@ void func_15022754(s32 scene) {
     }
 }
 
-/* Set unk6E again on every actor recorded in the scene's D_800C3550 list. */
+/* Set inactive again on every actor recorded in the scene's D_800C3550 list. */
 void func_150227BC(s32 scene) {
     s32 i;
     u8 *count;
 
     count = &D_800C354A[scene];
     for (i = 0; i < *count; i++) {
-        ((SeqActor *)func_151149AC(D_800C3550[scene][i]))->unk6E = 1;
+        func_151149AC(D_800C3550[scene][i])->inactive = 1;
     }
 }
 
@@ -2460,8 +2437,7 @@ s32 func_15022B08(s32 actorIndex, s32 scene) {
 
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35C8[scene][i] != 0) {
-            // matching: byte arithmetic on the actor array (0x72 is padding in WorldObject; indexing schedules differently)
-            if (D_800C35F0[scene][i].unk2 == ((u8 *)D_800DBEF4 + actorIndex * 0xA0)[0x72]) {
+            if (D_800C35F0[scene][i].unk2 == D_800DBEF4[actorIndex].id) {
                 return 1;
             }
         }
