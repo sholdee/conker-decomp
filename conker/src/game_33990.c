@@ -1,6 +1,16 @@
 #include <ultra64.h>
 
 #include "functions.h"
+
+/* This file's .bss, defined before variables.h declares the globals: IDO lays out .bss in the order
+ * it first sees each name. */
+static s8 D_800BE3D8[4]; /* save slot loaded from each EEPROM save file, -1 if none */
+s16 D_800BE3DC;
+u8 D_800BE3DE;
+s8 D_800BE3DF;
+u8 D_800BE3E0;
+u32 D_800BE3E4; // saved clock (seconds)
+
 #include "variables.h"
 
 /*
@@ -29,7 +39,6 @@ enum EepromRequest {
 extern u8 D_800BE2F0[0x70];
 extern u8 D_800BE35A[];
 extern s8 D_800E0BE0[0x1C];
-static s8 D_800BE3D8[4]; /* save slot loaded from each EEPROM save file, -1 if none */
 
 /* EEPROM access (game_20A3A0.c, game_20A850.c) */
 extern void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* read; matching: declared void (returns s32) */
