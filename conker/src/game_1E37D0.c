@@ -3,17 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Spawn header that func_15147A80 copies to EffectObject+0x10. */
-typedef struct EffectSpawn {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 lifetime;
-    /* 0x0E */ u16 flags;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 capacity; /* number of points in the ring buffer */
-    /* 0x16 */ u8 pad16[2];
-} EffectSpawn;
-
 /* Effect object created by func_15147A80: a ring buffer of points plus a kind-specific state block. */
 typedef struct EffectObject {
     /* 0x00 */ u8 pad0[0x10];
@@ -78,21 +67,21 @@ typedef struct TrailPoint {
 } TrailPoint;
 
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern EffectObject *func_15147A80(EffectSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern EffectObject *func_15147A80(EffectTemplate18 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a trail effect that follows target. */
 void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2) {
     s32 top_dummy; // matching: stack pad
-    EffectSpawn spawn;
+    EffectTemplate18 spawn;
     s32 pad_dummy; // matching: stack pad
     TrailState state;
     EffectObject *obj;
 
-    spawn.capacity = 10;
+    spawn.itemCount = 10;
     spawn.pos.x = target->pos.x;
     spawn.pos.y = target->pos.y;
     spawn.pos.z = target->pos.z;
-    spawn.lifetime = 300;
+    spawn.life = 300;
     spawn.flags = 6;
     state.target = target;
     state.targetUnk3B = target->unk3B;
@@ -102,7 +91,7 @@ void func_151B6320(TrailTarget *target, u8 arg1, s32 arg2) {
     state.texS = -16384.0f;
     state.targetTexS = -16384.0f;
     state.distance = 0.0f;
-    spawn.unk10 = 13;
+    spawn.kind = 13;
 
     obj = func_15147A80(&spawn, 0x30, sizeof(TrailPoint), 11, 11, 11, 0, 0, 0, arg1, arg2);
     if (obj != NULL) {
@@ -565,7 +554,7 @@ extern s32 (*D_8008FB90[])(EffectObject *, Vec3f *);
  * (argsSize bytes) and a linked particle. Returns NULL if nothing was spawned. */
 EffectObject *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg4) {
     EffectObject *obj;
-    EffectSpawn spawn;
+    EffectTemplate18 spawn;
     s32 pad; // matching: stack pad
     RibbonState init;
     RibbonState *state;
@@ -574,11 +563,11 @@ EffectObject *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 
     init.linked = NULL;
     init.args = NULL;
     init.selector = selector;
-    spawn.capacity = 20;
+    spawn.itemCount = 20;
     spawn.pos = D_800A5480;
-    spawn.lifetime = 300;
+    spawn.life = 300;
     spawn.flags = 20;
-    spawn.unk10 = 16;
+    spawn.kind = 16;
     spawn.unk14 = 2;
     obj = func_15147A80(&spawn, argsSize + 0x10, sizeof(RibbonPoint), 0, 14, 14, 0, 0, 0, arg3, arg4);
     if (obj != NULL) {

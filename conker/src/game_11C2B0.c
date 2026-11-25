@@ -516,15 +516,6 @@ s32 func_150EFA4C(Spark *spark) {
 }
 
 typedef struct {
-    Vec3f pos;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    s8 unk14;
-    u8 unk15;
-} Spawn150EFB80;
-
-typedef struct {
     f32 unk0;
     f32 vel[3];
     f32 unk10;
@@ -554,7 +545,7 @@ typedef struct {
 } Part150EFB80;
 
 extern void func_15143794(s16, s16, f32, f32 *);
-extern void func_1515C2F0(Spawn150EFB80 *, s32, Part150EFB80 *, s32, s32, s32);
+extern void func_1515C2F0(EffectTemplate18 *, s32, Part150EFB80 *, s32, s32, s32);
 
 /* Per-frame update of a beam's emitter: spawns about 0.36-0.66 particles per frame at the beam's end. */
 void func_150EFB80(BeamEmitter *emitter) {
@@ -562,7 +553,7 @@ void func_150EFB80(BeamEmitter *emitter) {
     Beam *beam;
     u32 yaw;
     u32 pitch;
-    Spawn150EFB80 spawn;
+    EffectTemplate18 spawn;
     Part150EFB80 part;
     f32 pad; // matching: unused stack slot
 
@@ -572,8 +563,8 @@ void func_150EFB80(BeamEmitter *emitter) {
         beam = link->beam;
         if (beam->link.flags & 1) {
             spawn.pos = beam->end;
-            spawn.unkE = 5;
-            spawn.unk10 = 10;
+            spawn.flags = 5;
+            spawn.kind = 10;
             part.unk14 = 4;
             part.unk15 = 2;
             part.unk16 = 3;
@@ -597,8 +588,8 @@ void func_150EFB80(BeamEmitter *emitter) {
             part.unk38 = -1;
             part.unk39 = 0;
             do {
-                spawn.unk15 = func_150ADA20() % 3U + 3;
-                spawn.unkC = (func_150ADA20() & 0xF) + 40;
+                spawn.itemCount = func_150ADA20() % 3U + 3;
+                spawn.life = (func_150ADA20() & 0xF) + 40;
                 part.unk0 = func_150ADA68() * 10.0f + 22.0f;
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();

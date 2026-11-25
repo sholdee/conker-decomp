@@ -114,16 +114,6 @@ typedef struct {
 } FxSprayParams; // size 0x30
 
 typedef struct {
-    /* 0x00 */ f32 pos[3];
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 pad16[2];
-} FxSpraySpawn;
-
-typedef struct {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 vel[3];
     /* 0x10 */ f32 unk10;
@@ -138,7 +128,7 @@ typedef struct {
 extern FxSprayParams D_800A9068[];
 extern u8 D_800AB3F4[];
 extern u8 D_800AB404[];
-s32 func_15147DA0(FxSpraySpawn *, FxSprayPart *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *,
+s32 func_15147DA0(EffectTemplate18 *, FxSprayPart *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *,
                   FxSurfaceHit *, s32, s32);
 
 /* Spawn callback: launches one spray particle at (x, y, z) heading along `yaw`, with random
@@ -146,7 +136,7 @@ s32 func_15147DA0(FxSpraySpawn *, FxSprayPart *, s32, s32, s32, s32, s32, s32, s
 s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s32 yaw, s32 arg9,
                   s32 argA, s32 type, s32 argC, FxSpawnPayload *payload, u8 argE) {
     FxSprayParams *params;
-    FxSpraySpawn spawn;
+    EffectTemplate18 spawn;
     FxSprayPart part;
     f32 roll;
     TrailRender style;
@@ -177,12 +167,12 @@ s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
         style.unk18 = 32;
         style.primMode = 0;
         style.envMode = 9;
-        spawn.unk10 = 1;
-        spawn.unkE = 1;
-        spawn.pos[1] = y;
+        spawn.kind = 1;
+        spawn.flags = 1;
+        spawn.pos.y = y;
         part.unk14 = y;
-        spawn.pos[0] = x;
-        spawn.pos[2] = z;
+        spawn.pos.x = x;
+        spawn.pos.z = z;
         part.unk19 = D_800AB3F4[payload->kind];
         part.unk1A = 255;
         colorFlag = D_800AB404[payload->kind] ? 0x20 : 0;
@@ -211,9 +201,9 @@ s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     part.vel[1] = vertical;
     part.vel[2] = horizontal * sinYaw;
     random = func_150ADA20();
-    spawn.unk15 = random % (params->unk14 + 1) + params->unk10;
+    spawn.itemCount = random % (params->unk14 + 1) + params->unk10;
     random = func_150ADA20();
-    spawn.unkC = random % (params->unk1A + 1) + params->unk18;
+    spawn.life = random % (params->unk1A + 1) + params->unk18;
     part.unk0 = func_150ADA68() * params->unk20 + params->unk1C;
     part.unk10 = func_150ADA68() * params->unk28 + params->unk24;
     func_15147DA0(&spawn, &part, 0, 1, 8, 0, firstFlag, secondFlag, 0, 0, 0, &style, payload->hit, argE, payload->unk4);

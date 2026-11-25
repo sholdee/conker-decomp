@@ -1782,17 +1782,6 @@ typedef struct JetScatterPreset {
     s16 unk22;
 } JetScatterPreset;
 
-/* Spawn description, motion and style for func_15147DA0. */
-typedef struct {
-    Vec3f pos;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    s8 unk14;
-    u8 unk15;
-    u8 pad16[2];
-} ScatterSpawn;
-
 typedef struct {
     f32 unk0;
     Vec3f vel;
@@ -1807,14 +1796,14 @@ typedef struct {
 } ScatterMotion;
 
 extern JetScatterPreset D_800A8728[];
-extern s32 func_15147DA0(ScatterSpawn *, ScatterMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
+extern s32 func_15147DA0(EffectTemplate18 *, ScatterMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 
 /* Spawns scatterAccum particles (func_15147DA0) flying from the actor towards random points around `end`. */
 void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     TrailRender style;
     CharacterFlamethrowerJet *jet;
     JetScatterPreset *preset;
-    ScatterSpawn spawn;
+    EffectTemplate18 spawn;
     ScatterMotion motion;
     f32 px;
     f32 py;
@@ -1830,7 +1819,7 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
 
     jet = actor->state;
     preset = &D_800A8728[jet->scatterPreset];
-    spawn.unkE = 1;
+    spawn.flags = 1;
     motion.unk19 = 0xA;
     motion.unk1A = 0xFF;
     motion.unk18 = 0x28;
@@ -1857,8 +1846,8 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
         px = end->x + (rad * cosB * sinA);
         py = end->y - (rad * sinB);
         pz = end->z + (rad * cosB * cosA);
-        spawn.unk15 = (func_150ADA20() % (u32)(preset->unk22 + 1)) + preset->unk20;
-        spawn.unkC = (func_150ADA20() % (u32)(preset->unk1E + 1)) + preset->unk1C;
+        spawn.itemCount = (func_150ADA20() % (u32)(preset->unk22 + 1)) + preset->unk20;
+        spawn.life = (func_150ADA20() % (u32)(preset->unk1E + 1)) + preset->unk1C;
         motion.unk0 = (func_150ADA68() * preset->unk10) + preset->unkC;
         motion.unk10 = (func_150ADA68() * preset->unk18) + preset->unk14;
         motion.vel.x = (px - actor->pos.x) * speed;
@@ -2511,7 +2500,7 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
         flame->scatterAccum += (flame->scatter.rate + func_150ADA68() * flame->scatter.rateRange) * D_800BE9A4;
         if (flame->scatterAccum > 1.0f) {
             s32 pad; // matching: unused stack slot (also pad2 below)
-            ScatterSpawn spawn;
+            EffectTemplate18 spawn;
             ScatterMotion motion;
             TrailRender style;
             Vec3f delta;
@@ -2530,8 +2519,8 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
             style.unk18 = 0x20;
             style.primMode = 0;
             style.envMode = 7;
-            spawn.unkE = 0x15;
-            spawn.unk10 = 1;
+            spawn.flags = 0x15;
+            spawn.kind = 1;
             spawn.unk14 = -1;
             motion.unk18 = 0x68;
             motion.unk19 = 0xA;
@@ -2543,8 +2532,8 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
                 { // matching: a block with a declaration in it steers IDO's scheduling here
                     typedef s32 T15199C34a;
 
-                    spawn.unk15 = (func_150ADA20() % (u32)(flame->scatter.unk18 + 1)) + flame->scatter.unk14;
-                    spawn.unkC = (func_150ADA20() % (u32)(flame->scatter.unk1E + 1)) + flame->scatter.unk1C;
+                    spawn.itemCount = (func_150ADA20() % (u32)(flame->scatter.unk18 + 1)) + flame->scatter.unk14;
+                    spawn.life = (func_150ADA20() % (u32)(flame->scatter.unk1E + 1)) + flame->scatter.unk1C;
                     motion.unk0 = func_150ADA68() * flame->scatter.unk24 + flame->scatter.unk20;
                 }
                 spawn.pos = pos0;

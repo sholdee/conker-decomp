@@ -39,17 +39,6 @@ void func_150AE5B0(Camera *arg0) {
 }
 
 
-/* Spawn parameters for func_15147DA0. */
-typedef struct {
-    /* 0x00 */ f32 pos[3];
-    /* 0x0C */ s16 lifetime;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 pad16[2];
-} Spawn150AE790;
-
 /* Motion parameters for func_15147DA0. */
 typedef struct {
     /* 0x00 */ f32 size;
@@ -83,14 +72,14 @@ typedef struct {
 } AttachedEffect;
 
 extern s32 D_8008CB14;
-extern s32 func_15147DA0(Spawn150AE790 *, Motion150AE790 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
+extern s32 func_15147DA0(EffectTemplate18 *, Motion150AE790 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 /* Bursts 12-20 particles plus one emission from the owner's bone, when the owner is still the same actor. */
 void func_150AE790(AttachedEffect *effect) {
     OwnerLink *link;
     Actor *owner;
-    Spawn150AE790 spawn;
+    EffectTemplate18 spawn;
     Motion150AE790 motion;
     s32 pad; // matching: unused stack slot
     TrailRender style;
@@ -118,9 +107,9 @@ void func_150AE790(AttachedEffect *effect) {
     }
     bones = owner->unk1D4;
     if (bones != NULL && link->owner->unique_id == link->ownerId) {
-        func_15142314(link->owner->unk1D4, link->bone, spawn.pos);
-        spawn.unk10 = 1;
-        spawn.unkE = 1;
+        func_15142314(link->owner->unk1D4, link->bone, &spawn.pos);
+        spawn.kind = 1;
+        spawn.flags = 1;
         motion.unk19 = 0;
         motion.unk1A = 0xFF - (((u32)link->owner->unk184 >> 5) & 3) * 64;
         motion.unk14 = link->owner->floorY;
@@ -144,8 +133,8 @@ void func_150AE790(AttachedEffect *effect) {
             sinPitch = func_151423D8(pitch);
             cosPitch = func_151423D8(pitch - 0x40);
             speed = func_150ADA68() * 0.5f + 18.79999924f;
-            spawn.unk15 = 4;
-            spawn.lifetime = (func_150ADA20() & 0xF) + 35;
+            spawn.itemCount = 4;
+            spawn.life = (func_150ADA20() & 0xF) + 35;
             motion.size = func_150ADA68() * 2.299999952f + 2.900000095f;
             motion.scale = func_150ADA68() * 0.1000000015f + 0.6999999881f;
             horizontal = speed * sinPitch;
@@ -180,9 +169,9 @@ void func_150AE790(AttachedEffect *effect) {
         emission.accelY = 0;
         emission.velY = 0;
         emission.anim = D_8008CB14;
-        emission.x = spawn.pos[0];
-        emission.y = spawn.pos[1];
-        emission.z = spawn.pos[2];
+        emission.x = spawn.pos.x;
+        emission.y = spawn.pos.y;
+        emission.z = spawn.pos.z;
         emission.callback = 0xB;
         emission.flags = 0;
         emission.unk2B = 0;
