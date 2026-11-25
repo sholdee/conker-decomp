@@ -25,8 +25,8 @@ typedef struct {
 /* Per-object parts state; D_800C6660 viewed as an array of these (size 0x10). */
 typedef struct {
     /* 0x00 */ ObjPart *parts;
-    /* 0x04 */ s32 partMaskLo;   /* bit i: part i takes part, parts 0..31 */
-    /* 0x08 */ s32 partMaskHi;   /* parts 32..63 */
+    /* 0x04 */ s32 partMaskLo;   /* bit i selects part i, parts 0..31 */
+    /* 0x08 */ s32 partMaskHi;   /* parts 32..63 (shift count taken mod 32) */
     /* 0x0C */ s16 timer;
     /* 0x0E */ u8 kind;          /* index into the D_80084430.. per-kind tables */
     /* 0x0F */ u8 state;         /* PARTS_STATE_* */
@@ -51,12 +51,6 @@ typedef struct {
 extern PartMasks *D_8008446C[];
 extern s8 *D_80084454[];
 extern u8 D_80098914[];   /* part count per kind */
-extern struct106 D_800C666C[];
-extern u8 D_800C666E[];
-struct e1f4_s { s32 f; s8 pad[12]; };
-extern struct e1f4_s D_800C6664[];
-extern struct e1f4_s D_800C6668[];
-struct func_1503DE70_s { s32 unk0; s32 unk4; };
 
 extern s32 func_1503EF4C(s32 kind, s32 variant, s32 objIndex);
 extern void func_1503E260(s32 objIndex);
@@ -67,78 +61,6 @@ extern void func_150A7A48(f32 arg0[4][4], f32 arg1[4][4], f32 arg2[4][4]);
 extern void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                           f32 *scaleX, f32 *scaleY, f32 *scaleZ);
 extern void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi);
-
-struct func_1503E3C4_s {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    u8 pad54[0x10];
-    u8 unk64;
-    u8 pad65[0x3];
-};
-
-struct func_1503E3C4_mtx {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-};
-
-typedef struct {
-    u8 pad_0[0x4C];
-    f32 field_0x4C;
-    u8 pad_0x50[0x18];
-} Game6B320EffectEntry;
-
-typedef struct {
-    u8 pad_0[0x1EC];
-    f32 field_0x1EC;
-} Game6B320EffectData;
-
-typedef struct {
-    Game6B320EffectData *field_0x00;
-    s32 field_0x04;
-    s32 field_0x08;
-    s16 field_0x0C;
-    u8 field_0x0E;
-    u8 field_0x0F;
-} Game6B320EffectState;
-
-typedef struct {
-    s32 field_0x00;
-    u8 pad_0x04[0x328];
-} Game6B320ObjectStatusEntry;
-
 
 /* Start breaking `obj` into parts; variant -1 selects every part, otherwise D_8008446C[kind][variant]. */
 void func_1503DE70(struct127 *obj, s32 kind, s32 variant) {
@@ -240,7 +162,7 @@ s32 func_1503E1F4(s32 partIndex, s32 objIndex) {
 }
 
 extern u8 *D_80084460[];
-void func_10004074(s32);
+void func_10004074(s32); // matching: s32 param; declaring it void * changes func_1503E260
 
 /* Stop an object's parts effect: apply the per-part flag bits, free the parts and clear the busy flag. */
 void func_1503E260(s32 objIndex) {
@@ -603,60 +525,50 @@ void func_1503F0D8(ObjPart *part, s32 objIndex) {
     func_1503EB78(part, 2.06f, 3.0f, TRUE);
 }
 
-extern Game6B320ObjectStatusEntry D_800CC364[];
+/* Start for kind 1: 140-tick timer; sets the object's unk94 to 6 and kicks part 4 upwards. */
+void func_1503F108(s32 objIndex) {
+    ObjPartsState *ps = &sPartsStates[objIndex];
 
-void func_1503F108(s32 arg0) {
-    Game6B320EffectState *p = (Game6B320EffectState *)&D_800C6660[arg0];
-
-    p->field_0x0C = 0x8C;
-    D_800CC364[arg0].field_0x00 = 6;
-    p->field_0x00->field_0x1EC = 10.0f;
+    ps->timer = 140;
+    D_800CC2D0[objIndex].unk94 = 6;
+    ps->parts[4].vel[1] = 10.0f;
 }
 
-void func_1503F16C(s32 arg0) {
-    struct106 *p;
-
-    p = &D_800C666C[arg0];
-    (*(s16 *)p) = 0x12C;
-    if (func_1503EF4C(2, 0, arg0)) {
-        D_800CC2D0[arg0].unk94 |= 0x40;
-        D_800CC2D0[arg0].unk94 &= ~0x200;
+/* Start for kind 2: 300-tick timer; updates unk94 flags for the selected variants 0..2. */
+void func_1503F16C(s32 objIndex) {
+    sPartsStates[objIndex].timer = 300;
+    if (func_1503EF4C(2, 0, objIndex)) {
+        D_800CC2D0[objIndex].unk94 |= 0x40;
+        D_800CC2D0[objIndex].unk94 &= ~0x200;
     }
-    if (func_1503EF4C(2, 1, arg0)) {
-        D_800CC2D0[arg0].unk94 |= 0x80;
-        D_800CC2D0[arg0].unk94 &= ~0x100;
+    if (func_1503EF4C(2, 1, objIndex)) {
+        D_800CC2D0[objIndex].unk94 |= 0x80;
+        D_800CC2D0[objIndex].unk94 &= ~0x100;
     }
-    if (func_1503EF4C(2, 2, arg0)) {
-        D_800CC2D0[arg0].unk94 &= ~0x400;
+    if (func_1503EF4C(2, 2, objIndex)) {
+        D_800CC2D0[objIndex].unk94 &= ~0x400;
     }
 }
 
-struct func_1503F2B0_s {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s16 unkC;
-    s8 padE[2];
-};
+/* Update for kind 2: bounce the parts; when the timer runs out stop the effect and set unk94 flags. */
+void func_1503F2B0(s32 objIndex) {
+    ObjPartsState *ps;
 
-void func_1503F2B0(s32 arg0) {
-    struct func_1503F2B0_s *p;
-
-    func_1503ECA0(arg0);
-    p = (struct func_1503F2B0_s *)&D_800C6660[arg0];
-    p->unkC -= D_800BE9E4;
-    if (p->unkC > 0) {
+    func_1503ECA0(objIndex);
+    ps = &sPartsStates[objIndex];
+    ps->timer -= D_800BE9E4;
+    if (ps->timer > 0) {
         return;
     }
-    func_1503E260(arg0);
-    if (func_1503EF4C(2, 0, arg0)) {
-        D_800CC2D0[arg0].unk94 |= 8;
+    func_1503E260(objIndex);
+    if (func_1503EF4C(2, 0, objIndex)) {
+        D_800CC2D0[objIndex].unk94 |= 8;
     }
-    if (func_1503EF4C(2, 1, arg0)) {
-        D_800CC2D0[arg0].unk94 |= 4;
+    if (func_1503EF4C(2, 1, objIndex)) {
+        D_800CC2D0[objIndex].unk94 |= 4;
     }
-    if (func_1503EF4C(2, 2, arg0)) {
-        D_800CC2D0[arg0].unk94 |= 2;
+    if (func_1503EF4C(2, 2, objIndex)) {
+        D_800CC2D0[objIndex].unk94 |= 2;
     }
 }
 
