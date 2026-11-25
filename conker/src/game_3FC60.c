@@ -36,14 +36,6 @@ extern u16 *D_800BE524;
 extern u8 D_800BE564;
 
 typedef struct {
-    u8 pad0[0x16];
-    u16 unk16;
-    u8 pad18[0x10];
-    struct_func_15012C84 *unk28;
-    u8 pad2C[0x74];
-} struct_func_150127B0_a; /* size 0xA0 */
-
-typedef struct {
     s32 unk0;
     u16 *unk4;
     s32 unk8;
@@ -67,7 +59,7 @@ void func_150127B0(void) {
         }
         if (D_800B0DF0->pad1C[5] & 2) {
             for (i = 0; i < D_800DBEF0; i++) {
-                total += ((struct_func_150127B0_a *)D_800DBEF4)[i].unk16;
+                total += D_800DBEF4[i].numVertices;
             }
         }
         if ((D_800BE510 = allocate_memory(total * 3, 1, 0, 0)) == NULL) {
@@ -89,9 +81,9 @@ void func_150127B0(void) {
         if (D_800B0DF0->pad1C[5] & 2) {
             D_800BE524 = allocate_memory(D_800DBEF0 * 2, 1, 0, 0);
             for (i = 0; i < D_800DBEF0; i++) {
-                if (((struct_func_150127B0_a *)D_800DBEF4)[i].unk16 != 0) {
+                if (D_800DBEF4[i].numVertices != 0) {
                     D_800BE524[i] = D_800BE528;
-                    func_15012C84(((struct_func_150127B0_a *)D_800DBEF4)[i].unk28, ((struct_func_150127B0_a *)D_800DBEF4)[i].unk16);
+                    func_15012C84((struct_func_15012C84 *)D_800DBEF4[i].srcVertices, D_800DBEF4[i].numVertices);
                 } else {
                     D_800BE524[i] = 0xFFFF;
                 }
@@ -109,7 +101,7 @@ void func_150127B0(void) {
                         if (i < 4) {
                             src = D_800B0E10[i];
                         } else {
-                            src = ((struct_func_150127B0_a *)D_800DBEF4)[i - 4].unk28;
+                            src = (struct_func_15012C84 *)D_800DBEF4[i - 4].srcVertices;
                         }
                         for (k = 0; k < b[j].unk8; k++) {
                             D_800BE520[i][j][k * 3 + 0] = src[b[j].unk4[k]].unkC;
