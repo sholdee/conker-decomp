@@ -28,6 +28,11 @@ typedef struct {
     f32 targetScale;
 } ParticleTail;
 
+typedef struct {
+    u8 pad0[0x48];
+    f32 scale;          // eased toward ParticleTail.targetScale (func_150D4CC4)
+} ParticleUnk110;
+
 /* A particle object returned by func_151407D0. */
 typedef struct {
     u8 pad0[0x18];
@@ -37,8 +42,8 @@ typedef struct {
     struct17 end;
     u8 pad4C[0xC];
     s32 flags;
-    u8 pad5C[0x158 - 0x5C];
-    f32 scale;          // eased toward tail.targetScale (func_150D4CC4)
+    u8 pad5C[0x110 - 0x5C];
+    ParticleUnk110 unk110;
     u8 pad15C[0x170 - 0x15C];
     ParticleTail tail;
 } Particle;
@@ -825,93 +830,74 @@ s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, struct126 *a
     return 2;
 }
 
-extern void func_150D4C2C(void *);
-extern void func_151478F4(void *);
-extern void func_15147928(void *);
+void func_150D4C2C(TrailActor *actor);
+extern void func_151478F4(TrailActor *);
+extern void func_15147928(TrailActor *);
 
-void func_150D4BD4(void *arg0) {
-    func_150D4C2C(arg0);
-    func_151478F4(arg0);
+void func_150D4BD4(TrailActor *actor) {
+    func_150D4C2C(actor);
+    func_151478F4(actor);
 }
 
-void func_150D4C00(void *arg0) {
-    func_150D4C2C(arg0);
-    func_15147928(arg0);
+void func_150D4C00(TrailActor *actor) {
+    func_150D4C2C(actor);
+    func_15147928(actor);
 }
 
 extern void func_1000FD38(void *, void *, s32);
-typedef struct {
-    struct127 *unk0;
-    u8 pad4;
-    u8 unk5;
-} Src150D5124;
 
+/* Sound slot passed to func_150D5124 by the sound system. */
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
+    s16 sound;
+    s16 x;
+    s16 y;
+    s16 z;
     u8 pad8[4];
-    s32 unkC;
+    s32 volume;
     u8 pad10[8];
-    Src150D5124 *unk18;
-    s32 unk1C;
-    s16 unk20;
+    TrailState *state;  // user data given to func_1000FA64
+    s32 soundId;
+    s16 pitch;
     u8 pad22[2];
     u16 unk24;
-} Snd150D5124;
+} TrailSound;
 
-s32 func_150D5124(Snd150D5124 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 *arg4,
-                  s32 arg5, u16 *arg6);
-extern s8 D_8008FD8C;
+s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
+                  s32 arg5, u16 *playing);
 
-void func_150D4C2C(void *arg0) {
-    struct102 **s0;
+/* Stops the trail's three sounds and destroys its particle emitters. */
+void func_150D4C2C(TrailActor *actor) {
+    TrailState *state;
 
-    s0 = *(struct102 ***)((u8 *)arg0 + 0x98);
+    state = actor->state;
     if (D_8008FD8C < 5) {
-        func_1000FD38(func_150D5124, s0, 0x5B3);
+        func_1000FD38(func_150D5124, state, 0x5B3);
     }
-    func_1000FD38(func_150D5124, s0, 0x5B4);
-    func_1000FD38(func_150D5124, s0, 0x5BC);
-    if (s0[3] != 0) {
-        func_1516972C(s0[3]);
+    func_1000FD38(func_150D5124, state, 0x5B4);
+    func_1000FD38(func_150D5124, state, 0x5BC);
+    if (state->effects[0] != NULL) {
+        func_1516972C((struct102 *)state->effects[0]);
     }
-    if (s0[4] != 0) {
-        func_1516972C(s0[4]);
+    if (state->effects[1] != NULL) {
+        func_1516972C((struct102 *)state->effects[1]);
     }
 }
 
-struct Bar150D4CC4 {
-    char pad48[0x48];
-    f32 unk48;
-};
+/* Update for the second emitter's particles: re-rolls the sprite every few frames and eases the scale. */
+s32 func_150D4CC4(Particle *particle) {
+    ParticleUnk110 *sub = &particle->unk110;
 
-struct Obj150D4CC4 {
-    char pad18[0x18];
-    u8 unk18;
-    char pad19[0x170 - 0x19];
-    s16 unk170;
-    char pad172[0x2];
-    f32 unk174;
-};
-
-extern s32 D_800A09C0[];
-extern f32 D_800A0A14;
-
-s32 func_150D4CC4(struct Obj150D4CC4 *arg0) {
-    struct Bar150D4CC4 *v1 = (struct Bar150D4CC4 *)((char *)arg0 + 0x110);
-
-    arg0->unk170 -= D_800BE9E4;
-    if (arg0->unk170 < 0) {
-        arg0->unk18 = D_800A09C0[func_150ADA20() & 3];
-        arg0->unk170 = (func_150ADA20() & 7) + 3;
+    particle->tail.timer -= D_800BE9E4;
+    if (particle->tail.timer < 0) {
+        particle->kind = D_800A09C0[func_150ADA20() & 3];
+        particle->tail.timer = (func_150ADA20() & 7) + 3;
     }
 
-    v1->unk48 = v1->unk48 + (arg0->unk174 - v1->unk48) * D_800A0A14;
+    sub->scale = sub->scale + (particle->tail.targetScale - sub->scale) * 0.6500000358f;
     return 1;
 }
 
+/* Spark description passed to func_15130280. */
 typedef struct {
     s32 unk0;
     s32 unk4;
@@ -928,18 +914,18 @@ typedef struct {
     u8 unk1A;
     u8 unk1B;
     u8 unk1C;
-    u8 unk1D;
+    u8 kind;
     s16 unk1E;
     s16 unk20;
     s16 unk22;
     f32 unk24;
     f32 unk28;
     f32 unk2C;
-    struct17 unk30;
+    struct17 pos;
     struct17 unk3C;
-    struct17 unk48;
+    struct17 vel;
     f32 unk54;
-    u32 unk58;
+    u32 flags;
     s32 unk5C;
     u8 unk60;
     u8 unk61;
@@ -952,15 +938,16 @@ typedef struct {
     s16 unk68;
     u8 pad6A[2];
     f32 unk6C;
-} Func150D4D58Spawn;
+} SparkSpawn; // size 0x70
 
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+extern void *func_15130280(SparkSpawn *, u8, s32, s32, u8, s32);
 extern void func_15143794(s16, s16, f32, f32 *);
 
-void func_150D4D58(struct17 *arg0, struct17 *arg1, f32 arg2, u8 arg3, s32 arg4) {
-    Func150D4D58Spawn spawn;
+/* Throws 10-20 sparks from `pos`, fanned around the owner's facing `angle` (degrees) and against `vel`. */
+void func_150D4D58(struct17 *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4) {
+    SparkSpawn spawn;
     s32 count;
-    s16 angle;
+    s16 yaw;
     f32 scale;
     s32 r1;
     s32 r2;
@@ -979,12 +966,12 @@ void func_150D4D58(struct17 *arg0, struct17 *arg1, f32 arg2, u8 arg3, s32 arg4) 
     spawn.unk19 = 0xFF;
     spawn.unk1A = 0xFF;
     spawn.unk1C = 0xFF;
-    spawn.unk30 = *arg0;
+    spawn.pos = *pos;
     spawn.unk3C = *(struct17 *)&D_800A5480;
-    spawn.unk1E = 0xA;
-    spawn.unk20 = 0x19;
+    spawn.unk1E = 10;
+    spawn.unk20 = 25;
     spawn.unk22 = 1;
-    spawn.unk58 = 0x4C207;
+    spawn.flags = 0x4C207;
     spawn.unk60 = 0;
     spawn.unk61 = 7;
     spawn.unk62 = -1;
@@ -993,26 +980,27 @@ void func_150D4D58(struct17 *arg0, struct17 *arg1, f32 arg2, u8 arg3, s32 arg4) 
     spawn.unk65 = 0;
     spawn.unk5C = 0;
     spawn.unk66 = 0xFF;
-    angle = (s16)(arg2 * 182.0444489f);
-    angle >>= 8;
-    angle += 0x40;
+    yaw = (s16)(angle * 182.0444489f);
+    yaw >>= 8;
+    yaw += 0x40;
     spawn.unk24 = 1.0f;
     do {
         scale = func_150ADA68() * 0.2230000049f + 0.8050000668f;
-        spawn.unk1D = *(D_800A09C0 + (func_150ADA20() & 3));
+        // matching: indexing D_800A09C0[...] costs IDO an extra stack slot
+        spawn.kind = *(D_800A09C0 + (func_150ADA20() & 3));
         spawn.unkA = func_150ADA20() % 18U + 27;
         spawn.unk1B = func_150ADA20() % 156U + 100;
         spawn.unk28 = spawn.unk2C = func_150ADA68() * 233.0f + 199.0f;
         r1 = func_150ADA20();
         r2 = func_150ADA20();
-        func_15143794(r1 % 130U + angle, r2 % 81U - 64, func_150ADA68() * 10.0f + 5.0f, &spawn.unk48.unk0);
-        spawn.unk48.unk0 -= arg1->unk0 * scale;
-        spawn.unk48.unk8 -= arg1->unk8 * scale;
+        func_15143794(r1 % 130U + yaw, r2 % 81U - 64, func_150ADA68() * 10.0f + 5.0f, &spawn.vel.unk0);
+        spawn.vel.unk0 -= vel->unk0 * scale;
+        spawn.vel.unk8 -= vel->unk8 * scale;
         spawn.unk54 = func_150ADA68() * 0.6460000277f + -0.7940000296f;
-        spawn.unk58 &= ~0xC0;
+        spawn.flags &= ~0xC0;
         r1 = (func_150ADA20() & 1) ? 0x80 : 0;
         r2 = (func_150ADA20() & 1) ? 0x40 : 0;
-        spawn.unk58 |= r2 | r1;
+        spawn.flags |= r2 | r1;
         func_15130280(&spawn, 1, 0, 0, arg3, arg4);
         count--;
     } while (count > 0);
@@ -1020,9 +1008,13 @@ void func_150D4D58(struct17 *arg0, struct17 *arg1, f32 arg2, u8 arg3, s32 arg4) 
 
 extern void func_100111C8(u16);
 
-s32 func_150D5124(Snd150D5124 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 *arg4,
-                  s32 arg5, u16 *arg6) {
-    Src150D5124 *src;
+/*
+ * Sound callback for the trail's three loops (0x5B3, 0x5B4, 0x5BC): moves volume and pitch toward
+ * targets picked from the trail mode, follows the owner's position and stops when silenced.
+ */
+s32 func_150D5124(TrailSound *snd, s32 arg1, u32 *arg2, s32 arg3, s32 *pitchOut,
+                  s32 arg5, u16 *playing) {
+    TrailState *state;
     s32 volume;
     s32 pitch;
     s32 targetVolume;
@@ -1030,26 +1022,26 @@ s32 func_150D5124(Snd150D5124 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 *arg4,
 
     targetVolume = 0;
     targetPitch = 0;
-    src = arg0->unk18;
-    volume = arg0->unkC;
-    pitch = *arg4;
+    state = snd->state;
+    volume = snd->volume;
+    pitch = *pitchOut;
 
-    if (arg0->unk1C == 0x5B3) {
-        if (src->unk0 != 0) {
-            targetVolume = src->unk0->unk28 * 25.0f;
+    if (snd->soundId == 0x5B3) {
+        if (state->owner != NULL) {
+            targetVolume = state->owner->unk28 * 25.0f;
             if (targetVolume > 5000) {
                 targetVolume = 5000;
             } else if (targetVolume < 500) {
                 targetVolume = 0;
             }
-            targetPitch += src->unk0->unk28 * 5.0f;
+            targetPitch += state->owner->unk28 * 5.0f;
             if (targetPitch > 1000) {
                 targetPitch = 1000;
             }
         }
-        if (src->unk5 == 2) {
+        if (state->mode == 2) {
             targetVolume += 7000;
-        } else if (src->unk5 == 1) {
+        } else if (state->mode == 1) {
             targetPitch = 400;
             targetVolume += 7000;
         } else {
@@ -1058,19 +1050,19 @@ s32 func_150D5124(Snd150D5124 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 *arg4,
                 volume = targetVolume;
             }
         }
-    } else if (arg0->unk1C == 0x5BC) {
+    } else if (snd->soundId == 0x5BC) {
         targetVolume = 24000;
-        if (src->unk5 == 0) {
+        if (state->mode == 0) {
             volume = targetVolume;
         } else {
             targetVolume = 400;
         }
-    } else if (arg0->unk1C == 0x5B4) {
-        if (src->unk5 == 0) {
+    } else if (snd->soundId == 0x5B4) {
+        if (state->mode == 0) {
             targetVolume = 16000;
             targetPitch = 400;
             volume = targetVolume;
-        } else if ((src->unk5 == 1) || (D_8008FD8C >= 5)) {
+        } else if (state->mode == 1 || D_8008FD8C >= 5) {
             targetVolume = 12000;
         } else {
             targetPitch = 400;
@@ -1106,29 +1098,29 @@ s32 func_150D5124(Snd150D5124 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 *arg4,
 
     if (volume < 500) {
         volume = 0;
-    } else if (*arg6 == 0) {
-        arg0->unk0 = arg0->unk1C;
-        *arg6 = arg0->unk1C;
+    } else if (*playing == 0) {
+        snd->sound = snd->soundId;
+        *playing = snd->soundId;
     }
 
-    arg0->unk2 = src->unk0->x_position;
-    arg0->unk4 = src->unk0->y_position;
-    arg0->unk6 = src->unk0->z_position;
+    snd->x = state->owner->x_position;
+    snd->y = state->owner->y_position;
+    snd->z = state->owner->z_position;
 
     if (D_800C35EA == 1) {
-        arg0->unkC = volume >> 1;
+        snd->volume = volume >> 1;
         *arg2 = *arg2 >> 1;
     } else {
-        arg0->unkC = volume;
+        snd->volume = volume;
     }
-    *arg4 = arg0->unk20 = pitch;
+    *pitchOut = snd->pitch = pitch;
 
     if (*arg2 == 0) {
-        if (arg0->unk24 != 0) {
-            func_100111C8(arg0->unk24);
-            arg0->unk24 = 0;
+        if (snd->unk24 != 0) {
+            func_100111C8(snd->unk24);
+            snd->unk24 = 0;
         }
-        *arg6 = 0;
+        *playing = 0;
     }
     return 0;
 }
