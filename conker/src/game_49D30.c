@@ -1951,7 +1951,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                         obj->xz_velocity = 0.0f;
                     }
                     if (obj->unk31C != NULL) {
-                        *(f32 *)obj->unk31C = obj->xz_velocity * 2.0f;
+                        obj->unk31C->unk0 = obj->xz_velocity * 2.0f;
                     }
                     obj->unk54 = 0.0f;
                     obj->unkCC = 0;
@@ -2646,7 +2646,7 @@ SeqSubtitle *func_150234A4(s32 track, s32 replaceOpen) {
    swimming, and clear its movement locks. */
 s32 func_150235DC(s32 scene) {
     Actor *obj;
-    void *unk31C;
+    ActorCtl *ctl;
     s8 zero;
 
     D_800CC2D0[0].unk25C &= ~0x200;
@@ -2654,10 +2654,10 @@ s32 func_150235DC(s32 scene) {
         obj = func_15083E90(1);
         if (obj != NULL) {
             D_800C3E78 = obj - D_800CC2D0;
-            unk31C = obj->unk31C;
+            ctl = obj->unk31C;
             obj->xz_velocity = 0.0f;
-            if (unk31C != NULL) {
-                *(f32 *)unk31C = 0.0f;
+            if (ctl != NULL) {
+                ctl->unk0 = 0.0f;
             }
             obj->unk54 = 0.0f;
             obj->unkCC = 0;

@@ -1467,8 +1467,8 @@ void func_1511DF6C(WorldObject *obj) {
             dist = ((f32)obj->x - character->x_position) * ((f32)obj->x - character->x_position) + ((f32)obj->z - character->z_position) * ((f32)obj->z - character->z_position);
             data = (u8 *)character->unk31C;
             radius = 100.0f;
-            scale = (f32)(*(s8 *)(data + 0x1AF) & 0xFF) * 0.015625f;
-            if (data[0x84] != 0) {
+            scale = (f32)(((ActorCtl *)data)->unk1AF & 0xFF) * 0.015625f;
+            if (((ActorCtl *)data)->unk84 != 0) {
                 scale *= 1.399999976f;
             }
             radius *= scale;

@@ -552,10 +552,10 @@ u8 arg2;
             if (spawned != NULL && arg2 != 0) {
                 memcpy(spawned + 0x90, &info, sizeof(info));
                 {
-                    u8 *ext = (u8 *)other->unk31C; // unk31C is longer than ActorCtl declares
+                    ActorCtl *ext = other->unk31C;
 
                     if (ext != NULL) {
-                        ext[0x1AC] = 1;
+                        ext->unk1AC = 1;
                     }
                 }
             }
