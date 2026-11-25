@@ -83,56 +83,45 @@ extern TrailHandler D_8008B080[];
 extern TrailHandler D_8008B084[];
 
 /* Moves every point by the trail's velocity under gravity, runs the unk38 handler and tracks the tail position. */
-s32 func_1515C388(Trail *trail)
-{
-  TrailData *data;
-  s32 callbackFailed;
-  TrailPoint *points;
-  vertex start;
-  s32 i;
-  TrailHandler cb;
-  data = trail->data;
-  callbackFailed = 0;
-  points = trail->points;
-  if (trail->count)
-  {
-    start = points[trail->tail].pos;
-    i = trail->tail;
-    while (i != trail->head)
-    {
-      points[i].pos.x += data->vel.x * D_800BE9A4;
-      points[i].pos.y += (points[i].velY * D_800BE9A4) + (((data->gravity * D_800BE9A4) * D_800BE9A4) * 0.5f);
-      points[i].pos.z += data->vel.z * D_800BE9A4;
-      points[i].velY += data->gravity * D_800BE9A4;
-      i++;
-      if (i == trail->header.capacity)
-      {
-        i = 0;
-      }
-    }
+s32 func_1515C388(Trail *trail) {
+    TrailData *data;
+    u8 failed;
+    TrailPoint *points;
+    vertex oldest; // matching: copied but never read (the target keeps the copy)
+    s32 i;
+    TrailHandler unused; // matching: unused local; without it IDO allocates registers differently
 
-  }
-  if (data->unk38 != (-1))
-  {
-    {
-    callbackFailed = (D_8008B080[data->unk38](trail, data) == 0) & 0xFF;
+    data = trail->data;
+    failed = FALSE;
+    points = trail->points;
+    if (trail->count) {
+        oldest = points[trail->tail].pos;
+        i = trail->tail;
+        while (i != trail->head) {
+            points[i].pos.x += data->vel.x * D_800BE9A4;
+            points[i].pos.y += points[i].velY * D_800BE9A4 + data->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f;
+            points[i].pos.z += data->vel.z * D_800BE9A4;
+            points[i].velY += data->gravity * D_800BE9A4;
+            i++;
+            if (i == trail->header.capacity) {
+                i = 0;
+            }
+        }
     }
-  }
-  if (trail->count > 0)
-  {
-    trail->tailPos = points[trail->tail].pos;
-  }
-  else
-  {
-    trail->tailPos.x = 0.0f;
-    trail->tailPos.y = 0.0f;
-    trail->tailPos.z = 0.0f;
-  }
-  if (callbackFailed != 0)
-  {
-    return 0;
-  }
-  return 1;
+    if (data->unk38 != -1) {
+        failed = D_8008B080[data->unk38](trail, data) == 0;
+    }
+    if (trail->count > 0) {
+        trail->tailPos = points[trail->tail].pos;
+    } else {
+        trail->tailPos.x = 0.0f;
+        trail->tailPos.y = 0.0f;
+        trail->tailPos.z = 0.0f;
+    }
+    if (failed) {
+        return 0;
+    }
+    return 1;
 }
 
 /* Runs the unk39 handler, then fades the alpha and shrinks the width as the trail's life runs out. */
