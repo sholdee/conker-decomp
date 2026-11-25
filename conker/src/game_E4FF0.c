@@ -267,9 +267,9 @@ void func_150B82D0(Vec3f *center, f32 *height, f32 *radius, f32 *yScale, u8 arg4
 typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 extra;
-} SpawnedParticle;
+} FloatDataParticle;
 
-extern SpawnedParticle *func_15130374(ParticleDesc *spawn, u8 arg1, s32 dataSize, u8 arg3, s32 arg4);
+extern FloatDataParticle *func_15130374(ParticleDesc *spawn, u8 arg1, s32 dataSize, u8 arg3, s32 arg4);
 
 /* Spawns one particle at `center`, sized from `radius` and `height`. */
 void func_150B85C0(Vec3f *center, f32 *height, f32 *radius, u8 arg3, s32 arg4) {
@@ -322,7 +322,7 @@ void *memcpy(void *, const void *, u32);
 s32 func_150B879C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle, s32 arg9,
                   s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     f32 extra;
-    SpawnedParticle *particle;
+    FloatDataParticle *particle;
     ParticleDesc spawn;
 
     spawn.texture = 0x29;
