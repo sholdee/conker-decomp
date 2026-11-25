@@ -410,20 +410,10 @@ void func_15120158(Camera *camera) {
                     camera->eye = camera->prevEye;
                     if (aim->stickLock & 1) {
                         pad = camera->contPad;
-                        stickX = pad->stick_x;
-                        if (stickX > 0) {
-                            pad->stick_x = 0;
-                        } else {
-                            pad->stick_x = stickX;
-                        }
+                        pad->stick_x = (pad->stick_x > 0) ? 0 : pad->stick_x;
                     } else if (aim->stickLock & 2) {
                         pad = camera->contPad;
-                        stickX = pad->stick_x;
-                        if (stickX < 0) {
-                            pad->stick_x = 0;
-                        } else {
-                            pad->stick_x = stickX;
-                        }
+                        pad->stick_x = (pad->stick_x < 0) ? 0 : pad->stick_x;
                     }
                 }
             }
@@ -433,12 +423,12 @@ void func_15120158(Camera *camera) {
                 aim->targetYaw = camera->player->unk40;
             } else if (zone != 0xF) {
                 if (camera->status & 2) {
-                    aim->targetYaw = (((f32)(u32)camera->player->unk7A - (f32)camera->playerExt->unk12 * 0.349999994f) + 49152.0f) * BAM2DEG;
+                    aim->targetYaw = (((f32)camera->player->unk7A - (f32)camera->playerExt->unk12 * 0.349999994f) + 49152.0f) * BAM2DEG;
                 } else {
                     if (zone == 0x34) {
-                        aim->targetYaw = aim->targetYaw - (f32)camera->contPad->stick_x * rate * (f32)D_800BE9E4;
+                        aim->targetYaw -= (f32)camera->contPad->stick_x * rate * (f32)D_800BE9E4;
                     }
-                    aim->targetYaw = aim->targetYaw - (f32)camera->contPad->stick_x * rate * (f32)D_800BE9E4;
+                    aim->targetYaw -= (f32)camera->contPad->stick_x * rate * (f32)D_800BE9E4;
                 }
             }
             if ((zone != 3) && (zone != 0x1A) && !inMap42Zone1A && (zone != 0xF)) {
@@ -574,12 +564,6 @@ void func_15120158(Camera *camera) {
 
 /* While R is held in a facing zone, publishes the player's aim ray (eye, target, direction) to the
    player extension block. */
-extern f32 D_800A3408;
-extern f32 D_800A340C;
-extern f32 D_800A3410;
-extern f32 D_800A3414;
-extern f32 D_800A3418;
-
 void func_15121490(struct127 *player, OSContPad *pad) {
     CamPlayerExt *ext;
     s32 zone;
@@ -592,10 +576,9 @@ void func_15121490(struct127 *player, OSContPad *pad) {
     player->unk31C->unk198 = 0;
     if (pad->button & R_TRIG) {
         zone = player->unk31C->unk78;
-        if ((zone == 9) || (zone == 0x38) || (zone == 0x39) || (zone == 0x37) ||
-            (zone == 0x3B) || (zone == 0x15) || (zone == 0x26) || (zone == 0x3A)) {
+        if (IS_FACING_ZONE(zone)) {
             ext = (CamPlayerExt *)player->unk31C;
-            angle = (player->unk40 - 90.0f) * D_800A3408;
+            angle = (player->unk40 - 90.0f) * DEG2RAD;
             target.x = player->x_position;
             target.y = player->y_position + ((f32)ext->unk114 * 0.75f);
             target.z = player->z_position;
@@ -608,11 +591,11 @@ void func_15121490(struct127 *player, OSContPad *pad) {
             ext->aimTarget = target;
             ext->aimActive = 1;
             dir.x = 1.0f;
-            temp = dir.x * cosf(ext->aimPitch * D_800A340C);
-            dir.y = dir.x * sinf(ext->aimPitch * D_800A3410);
+            temp = dir.x * cosf(ext->aimPitch * -DEG2RAD);
+            dir.y = dir.x * sinf(ext->aimPitch * -DEG2RAD);
             dir.x = temp;
-            temp = dir.x * cosf(ext->aimYaw * D_800A3414);
-            dir.z = dir.x * sinf(ext->aimYaw * D_800A3418);
+            temp = dir.x * cosf(ext->aimYaw * -DEG2RAD);
+            dir.z = dir.x * sinf(ext->aimYaw * -DEG2RAD);
             dir.x = temp;
             ext->aimDir = dir;
         }
