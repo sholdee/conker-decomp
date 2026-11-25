@@ -1,154 +1,122 @@
-# Conker's Bad Fur Day Decompilation
+# Conker's Bad Fur Day decompilation
 
-![Conker's Bad Fur Day (US) Progress](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fconker.deco.mp%2Flatest.json&color=critical&label=Conker's%20Bad%20Fur%20Day%20(US)&query=$.progress[0].sections[3].percent&suffix=%25) ![all Functions](https://img.shields.io/badge/funcs-1365%2F5916-blue) ![Build Status](https://github.com/mkst/conker/workflows/build/badge.svg)
+A decompilation of the CPU code of *Conker's Bad Fur Day* (Nintendo 64, US release). The build
+reproduces the original US ROM byte for byte.
 
-| Progress                                                                                                                                           | Functions                                                |
-|----------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
-| ![init Progress](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fconker.deco.mp%2Flatest.json&color=yellow&label=init&query=$.progress[0].sections[0].percent&suffix=%25)      | ![init Functions](https://img.shields.io/badge/funcs-231%2F536-blue)      |
-| ![game Progress](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fconker.deco.mp%2Flatest.json&color=critical&label=game&query=$.progress[0].sections[1].percent&suffix=%25)     | ![game Functions](https://img.shields.io/badge/funcs-1114%2F5338-blue) |
-| ![debugger Progress](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fconker.deco.mp%2Flatest.json&color=orange&label=debugger&query=$.progress[0].sections[2].percent&suffix=%25) | ![debugger Functions](https://img.shields.io/badge/funcs-20%2F42-blue) |
+You need your own copy of the game to build it. This repository contains no ROM and no game assets.
 
-A WIP decompilation of Conker's Bad Fur Day.
+## Status (US only)
 
-Note: To use this repository, you must already have a copy of the game.
+- **US code: 100% accounted for.** 97.17% of the US CPU code (2,187,188 of 2,250,992 bytes, in the
+  init, game and debugger segments) is C that compiles to byte-identical code with IDO 5.3. The
+  remaining 2.8% is hand-written assembly with a recorded proof that it was never C. That is 141
+  functions proven by rules, plus 8 functions (592 bytes) in a "search tier" that no rule covers. The
+  project accepted those 8 as hand-written because about 10,000 compiler and flag combinations never
+  reproduced them from C. [ACCOUNTING.md](ACCOUNTING.md) has the per-segment table, the proof rules and
+  the search-tier caveat.
+- **Data: not decompiled yet.** The game's `.data`, `.rodata` and `.bss` are assembled byte-identically
+  from the original ROM data and are not yet decompiled into C. That is the next milestone, after
+  symbol naming. Most functions and globals still have address names (`func_XXXXXXXX`, `D_XXXXXXXX`).
+- **Assets are out of scope.** Models, textures, audio, animations, scripts and text are packed into
+  the ROM as the original binaries. For asset extraction and documented asset formats, see
+  [DevOldSchool/conkers-bfd-decomp](https://github.com/DevOldSchool/conkers-bfd-decomp).
+- **Other versions.** Splat configurations for the EU, debug and ECTS ROMs exist (`*.eu.yaml`,
+  `*.debug.yaml`, `*.ects.yaml`), but those versions are not decompiled and their builds are not
+  verified.
 
-# Building
+## Building
 
-Place the **US** Conker's Bad Fur Day ROM in the root of this repository, name it `baserom.us.z64`.
+You need:
 
-**Preamble**
-
-The assumption is that you will be using [Docker](https://www.docker.com/products/docker-desktop) for the building process.
-If this is not the case, see the [Dockerfile](Dockerfile) for the prerequisites; the steps below work perfectly well in **Ubuntu 20.04** running via WSL on Windows.
-
-See the [Quickstart](https://github.com/mkst/conker/wiki/Quickstart) for more information.
-
-**Clone repository**
+- an x86-64 Linux host, or a Linux VM (the IDO compiler in `ido/` and `tools/gzip` are prebuilt
+  x86-64 Linux binaries);
+- [Podman](https://podman.io/) or Docker. The toolchain image (Ubuntu 24.04, MIPS binutils, Python
+  packages pinned in `tools/toolchain/constraints.txt`) is defined in
+  [tools/toolchain/Containerfile](tools/toolchain/Containerfile);
+- a US ROM of the game in big-endian `.z64` format, with sha1 `4cbadd3c4e0729dec46af64ad018050eada4f47a`.
 
 ```sh
-git clone https://github.com/mkst/conker.git --recursive
+git clone --recursive https://github.com/sholdee/conker.git
 cd conker
+cp /path/to/your/rom.z64 baserom.us.z64
+sha1sum baserom.us.z64          # must print 4cbadd3c4e0729dec46af64ad018050eada4f47a
+
+podman build -t conker -f tools/toolchain/Containerfile .
+podman run --rm --userns=keep-id --security-opt label=disable -v "$PWD":/conker -w /conker conker \
+  bash -c 'python3 tools/toolchain/patch_splat.py && make extract && make -C conker extract &&
+           make -C conker -j"$(nproc)" && make -C conker replace && make -j"$(nproc)"'
 ```
 
-**Build Docker image (optional)**
+With Docker, use `docker build` with the same arguments. For `docker run`, pass
+`--user "$(id -u):$(id -g)"` in place of `--userns=keep-id --security-opt label=disable`.
 
-```sh
-docker build . -t conker
-```
+What the steps do:
 
-**Spin up the image interactively (optional)**
+| Step | Result |
+|------|--------|
+| `tools/toolchain/patch_splat.py` | Patches the splat submodule for spimdisasm 1.42. It is idempotent; run it again after any `git submodule update` |
+| `make extract` | Checks the ROM's sha1, splits the ROM into `assets/`, decompresses the game code segment and joins the code segments into `conker/conker.us.bin` |
+| `make -C conker extract` | Checks `conker/conker.us.bin` and splits it with splat into `conker/asm/` (the data, and the assembly the build includes) |
+| `make -C conker` | Compiles the C (IDO 5.3 via asm-processor), assembles the `.s` files and data, links, and checks `conker/build/conker.us.bin` |
+| `make -C conker replace` | Recompresses the game segment and puts the rebuilt code back into the ROM layout |
+| `make` | Links the ROM and checks it |
 
-```sh
-docker run --rm -ti -v $(pwd):/conker conker bash
-```
-
-**Sanity check ROM checksum**
-
-```sh
-make check
-```
-
-**Extract ROM**
-
-```sh
-make extract
-```
-
-**Decompress code (optional)**
-
-```sh
-make -C conker extract
-```
-
-**Compile code (optional)**
-
-```sh
-make -C conker --jobs
-```
-
-**Replace compiled code (optional)**
-
-```sh
-make -C conker replace
-```
-
-**Compile ROM**
-
-```sh
-make --jobs
-```
-
-If everything matches, you will be greeted with an `OK`:
+A successful build ends with:
 
 ```
-build/conker.us.z64: OK
+build/conker.us.bin: OK      # conker/build/conker.us.bin, sha1 842e3d348e3c8ae0039e2ab367ad492f9b5266d8
+build/conker.us.z64: OK      # the rebuilt ROM, sha1 4cbadd3c4e0729dec46af64ad018050eada4f47a
 ```
 
-# Progress
+After you edit a source file, run the last three steps again (`make -C conker`, `make -C conker replace`,
+`make`). Everything the build writes (`assets/`, `rzip/`, `build/`, `conker/asm/`, `conker/build/`) is
+gitignored and must never be committed.
 
-This project is in its infancy; there are multiple tasks being worked on:
+To diff a function with [asm-differ](https://github.com/simonlindholm/asm-differ), save a copy of a
+matching build first: `mkdir -p conker/expected && cp -r conker/build conker/expected/`. Then run
+`python3 ../tools/asm-differ/diff.py -mwo FUNC` from `conker/`, inside the container.
 
-  - Converting disassembly into (byte-perfect) C code
-  - Extracting assets from the ROM and being able to successfully re-pack them
-  - Identify and document all asset types used in the ROM
-  - Tooling to support the above tasks
+## Layout
 
-## Open issues
+| Path | Contents |
+|------|----------|
+| `conker/src/` | The code: C files and the hand-written `.s` files, one per original object where known (`init_*`, `game_*`, `debugger_*`, `libultra/`) |
+| `conker/include/` | Project headers (`structs.h`, `functions.h`, `variables.h`, `effects.h`) and the SDK 2.0L headers |
+| `conker/lib/ultralib/` | ultralib headers for the libultra files built from ultralib source (`conker/ultralib.mk`) |
+| `conker/conker.us.yaml` | splat configuration of the code segments; `conker.us.yaml` at the top splits the ROM |
+| `conker/symbol_addrs.us.txt`, `conker/undefined_*.us.txt` | Symbols |
+| `tools/` | Build tools (rarezip compression, splat extensions, `rodata_extern.py`) and contributor tooling |
+| `ido/ido5.3_recomp/` | The IDO 5.3 compiler, statically recompiled for Linux |
 
-  - Identifying and documenting Conker asset (model/texture/sound) format
+### Contributor tooling
 
-## ROM layout
+The matching and cleanup work was done mostly by AI agent fleets, using the runbooks in
+[AGENTS.md](AGENTS.md) and `tools/*.md` and the workspace tools `tools/mw.py` (matching) and
+`tools/cw.py` (cleanup). Each change is built in a private workspace and lands only if the whole ROM
+still matches. `tools/accounting.py` checks the code accounting in ACCOUNTING.md. These tools expect a
+long-lived container (`tools/toolchain/run.sh`) and the maintainer's paths (`~/conker`, `~/conker-ws`).
+The repo root follows the script's location, and `CONKER_WS`, `CONKER_CONTAINER` and `CONKER_REPO`
+override the rest. You do not need any of them to build.
 
-The layout of the ROM is still a work-in-progress. There are a number of sections within the ROM that are compressed with [gzip](https://tools.ietf.org/html/rfc1952) but have the standard header/trailer stripped and, instead, replaced with a 4-byte header containing the uncompressed data length. These sections are dubbed `rzip`.
+## Licence
 
-Overview of US ROM shown below:
-```
-[header]  0000 0000 > 0000 0040 ; suggests libultra 2.0G
-[ boot ]  0000 0040 > 0000 1000 ;
-[ code ]  0000 1000 > 0004 2C50 ; init + libultra .text
-[ ???? ]  0002 90D0 > ???? ???? ;
-[ data ]  0002 C750 > 0002 C7A0 ; init + libultra .data
-[ ???? ]  0002 C7A0 > 0004 2C50 ; μcode
-[ rzip ]  0004 2C50 > 0018 6B50 ; game .text (compressed)
-[ rzip ]  0018 8328 > 0019 C7D8 ; game .data (compressed)
-[ code ]  0019 EA88 > 001A 2190 ; debugger .text
-[ data ]  001A 2190 > 001A 37E0 ; debugger .data
-[ rzip ]  001A 37E0 > 00AB 1950 ; compressed section (textures?)
-[ offs ]  00AB 1950 > 00AB 1A40 ; table of asset offsets
-[ rzip ]  00AB 1A40 > 03F8 B800 ; assets 00 thru assets 1C
-[ ffff ]  03F8 B800 > 0400 0000 ; 0xff padding
-```
+The project's own code is released under the [MIT licence](LICENSE). Material from other projects keeps
+its own terms. [THIRD_PARTY.md](THIRD_PARTY.md) lists it with the required notices, including the
+original mkst/conker code, the Nintendo SDK headers and sources, and the bundled tools. *Conker's Bad
+Fur Day* is the property of its owners, and this project is not affiliated with them.
 
-### Compressed section(s)
+## Credits
 
-There are a number of compressed sections within the ROM. The decompression/compression method is understood and generates matching results.
-
-## Building ROM
-
-Due to the compressed code sections, all code segments within the ROM are cut from the ROM and combined together, creating a sub-project inside the `conker/` directory.
-
-See the [README](conker/README.md) for more information.
-
-# Tools
-
-## Custom tools
-
- - `rarezip/rareunzip`; python script to compress/decompress the compression format used in the ROM.
-
-NOTE: `gzip` is used for compression rather than `zlib`; use the binary in `tools/` in order to get matching compression.
-
-## Existing tools
-
-This repo makes use of the following open-source tools without which, there would be no decomp:
-
- - [asm-differ](https://github.com/simonlindholm/asm-differ); compare assembly against the original ROM
- - [asm-processor](https://github.com/simonlindholm/asm-processor); allow `GLOBAL_ASM` wrappers to include assembly within the c files
- - [n64splat](https://github.com/ethteck/n64splat); split up the rom & much more...
- - [ido-static-recomp](https://github.com/Emill/ido-static-recomp); IDO compiler
- - [gzip](https://github.com/mkst/gzip); gzip; specifically with the pre-1.5 `memzero` behaviour
-
-# Contributing
-
-The [wiki](https://github.com/mkst/conker/wiki) will eventually contain discoveries as they are made.
-
-In the meantime, if you wish to contribute in any way, get stuck in and raise a PR or find me on Discord `mkst#4741`.
+- [mkst/conker](https://github.com/mkst/conker) by Mark Street and contributors: the original project
+  this repository grew from. It worked out the ROM layout, the compressed sections and the build, and
+  matched the first functions.
+- [DevOldSchool/conkers-bfd-decomp](https://github.com/DevOldSchool/conkers-bfd-decomp): an independent
+  decompilation of the game. Its translation-unit boundaries and many struct, field and function names
+  were adopted here by address. It is also the place to go for assets.
+- [ultralib](https://github.com/decompals/ultralib) (decompiled libultra),
+  [splat](https://github.com/ethteck/splat) and [spimdisasm](https://github.com/Decompollaborate/spimdisasm),
+  [asm-processor](https://github.com/simonlindholm/asm-processor),
+  [asm-differ](https://github.com/simonlindholm/asm-differ), [m2c](https://github.com/matt-kempster/m2c),
+  [decomp-permuter](https://github.com/simonlindholm/decomp-permuter),
+  [ido-static-recomp](https://github.com/decompals/ido-static-recomp), and
+  [gzip](https://github.com/mkst/gzip) patched for pre-1.5 compression output.
