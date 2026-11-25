@@ -364,6 +364,25 @@ void func_150C2290(u8 arg0) {
 //     func_15151A38(&sp18, arg0 & 0xFF, 1);
 // }
 
+typedef struct {
+    /* 0x000 */ u8 pad0[0x1C];
+    /* 0x01C */ s16 unk1C;
+    /* 0x01E */ u8 pad1E[0xE];
+    /* 0x02C */ f32 unk2C;
+    /* 0x030 */ f32 unk30;
+    /* 0x034 */ u8 pad34[4];
+    /* 0x038 */ f32 unk38;
+    /* 0x03C */ u8 pad3C[0x10];
+    /* 0x04C */ f32 unk4C;
+    /* 0x050 */ f32 unk50;
+    /* 0x054 */ u8 pad54[0x44];
+    /* 0x098 */ struct133 *unk98;
+    /* 0x09C */ u8 pad9C[0xB4];
+    /* 0x150 */ f32 unk150;
+    /* 0x154 */ u8 pad154[0xC];
+    /* 0x160 */ f32 unk160;
+} Particle_EF410;
+
 void func_1514C470(f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, u8);
 extern f32 D_800A0268;
 extern f32 D_800A026C;
@@ -400,17 +419,15 @@ void func_150C2424(u8 arg0) {
         arg0
     );
 }
-s32 func_150C251C(void *arg0) {
-    void *temp_v0 = *(void **)((s32)arg0 + 0x98);
-    s32 temp_v1 = *(s16 *)((s32)arg0 + 0x1C) << 3;
-    s32 temp_t7;
+s32 func_150C251C(Particle_EF410 *particle) {
+    struct133 *sub = particle->unk98;
+    s32 alpha = particle->unk1C << 3;
 
-    if (temp_v1 >= 0x100) {
-        temp_v1 = 0xFF;
+    if (alpha >= 0x100) {
+        alpha = 0xFF;
     }
-    temp_t7 = temp_v1 & 0xFF;
-    *(u8 *)((s32)temp_v0 + 0x1B) = temp_v1;
-    if (temp_t7 < 0) {
+    sub->unk1B = alpha;
+    if (sub->unk1B < 0) {
         return 0;
     }
     return 1;
@@ -651,7 +668,7 @@ void func_150C29F0(Struct150C29F0 *arg0) {
     arg0->unkE = (func_150ADA20() % 51U) + 25;
 }
 void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
-s32 func_15144B34(s32);
+struct17 *func_15144B34(s32);
 void *memcpy(void *, const void *, u32);
 
 void func_150C2C00(Struct150C29F0 *arg0)
@@ -727,103 +744,57 @@ void func_150C2C00(Struct150C29F0 *arg0)
     }
   }
 }
-s32 func_150C2FCC(f32 *arg0) {
-    arg0[11] -= arg0[11] * arg0[84];
-    arg0[12] -= arg0[12] * arg0[84];
-    arg0[14] += (arg0[20] * D_800BE9A4) + (((0.5f * arg0[19]) * D_800BE9A4) * D_800BE9A4);
-    arg0[20] += arg0[19] * D_800BE9A4;
-    if ((arg0[11] < 10.0f) || (arg0[12] < 10.0f)) {
+s32 func_150C2FCC(Particle_EF410 *particle) {
+    particle->unk2C -= particle->unk2C * particle->unk150;
+    particle->unk30 -= particle->unk30 * particle->unk150;
+    particle->unk38 += (particle->unk50 * D_800BE9A4) + (0.5f * particle->unk4C * D_800BE9A4 * D_800BE9A4);
+    particle->unk50 += particle->unk4C * D_800BE9A4;
+    if ((particle->unk2C < 10.0f) || (particle->unk30 < 10.0f)) {
         return 0;
     }
     return 1;
 }
-s32 func_15144B34(s32);
+s32 func_150C308C(Particle_EF410 *particle) {
+    u8 triggered;
+    f32 value; // matching: one local for the squared distance and then the angle (IDO puts both in $f12)
+    struct17 *pos;
 
-s32 func_150C308C(void *arg0) {
-    u8 flag;
-    f32 tmp1;
-    u8 sp1F;
-    f32 x;
-    f32 z;
-    f32 magnitude;
-    u8 *vector;
-
-    flag = 0;
-    if (*(s16 *)((u8 *)arg0 + 0x1C) >= 6) {
-        sp1F = 0;
-        vector = (u8 *)func_15144B34(D_80082FA4);
-        x = *(f32 *)vector;
-        tmp1 = *(f32 *)(vector + 8);
-        z = (magnitude = tmp1);
-        tmp1 = x;
-        magnitude = tmp1 * tmp1 + magnitude * z;
-        if (magnitude < D_800A0310) {
-            flag = 1;
+    triggered = FALSE;
+    if (particle->unk1C >= 6) {
+        pos = func_15144B34(D_80082FA4);
+        value = pos->unk0 * pos->unk0 + pos->unk8 * pos->unk8;
+        if (value < D_800A0310) {
+            triggered = TRUE;
         } else {
-            flag = sp1F;
-            magnitude = *(f32 *)vector;
-            if (D_800A0314 <
-                func_15144C8C(func_150484A0(magnitude,
-                                           *(f32 *)(vector + 8)),
-                              *(f32 *)((u8 *)arg0 + 0x160))) {
-                flag = 1;
+            value = func_150484A0(pos->unk0, pos->unk8);
+            if (D_800A0314 < func_15144C8C(value, particle->unk160)) {
+                triggered = TRUE;
             }
         }
     }
-    if (flag != 0) {
-        *(s16 *)((u8 *)arg0 + 0x1C) = 5;
+    if (triggered) {
+        particle->unk1C = 5;
     }
     return 1;
 }
-// ? func_150C308C(void *arg0) {
-//     u8 sp1F;
-//     f32 temp_f0;
-//     f32 temp_f2;
-//     u8 temp_a1;
-//     void *temp_v0;
-//     u8 phi_a1;
-//
-//     phi_a1 = (u8)0U;
-//     if ((s32) arg0->unk1C >= 6) {
-//         sp1F = 0;
-//         temp_v0 = func_15144B34(D_80082FA4, (u8)0U);
-//         temp_f0 = temp_v0->unk0;
-//         temp_f2 = temp_v0->unk8;
-//         temp_a1 = sp1F;
-//         if (((temp_f0 * temp_f0) + (temp_f2 * temp_f2)) < D_800A0310) {
-// block_4:
-//             phi_a1 = (u8)1U;
-//         } else {
-//             sp1F = temp_a1;
-//             phi_a1 = temp_a1;
-//             if (D_800A0314 < func_15144C8C(func_150484A0(temp_v0->unk0, temp_v0->unk8, temp_a1), arg0->unk160)) {
-//                 goto block_4;
-//             }
-//         }
-//     }
-//     if (phi_a1 != 0) {
-//         arg0->unk1C = (u16)5;
-//     }
-//     return 1;
-// }
 
-Gfx *func_150C3160(Gfx *arg0, void *arg1) {
-    s32 temp_v0;
-    s32 temp_v1;
-    s32 temp_a0;
-    f32 temp_f0;
+Gfx *func_150C3160(Gfx *gdl, struct127 *obj) {
+    s32 total;
+    s32 uls;
+    s32 ult;
+    f32 progress;
 
-    temp_v0 = *(s32 *)((s32)arg1 + 0x2E8);
-    temp_f0 = (temp_v0 != 0) ? ((f32)*(s32 *)((s32)arg1 + 0x2E4) / (f32)temp_v0) : 1.0f;
-    temp_f0 = 1.0f - temp_f0;
-    temp_v1 = (s32)((500.0f * temp_f0) + 2.0f);
-    temp_a0 = 2 - *(s32 *)((s32)arg1 + 0x2EC);
-    *(s32 *)((s32)arg1 + 0x2EC) = temp_v1 / 3;
-    while (temp_a0 < 0) {
-        temp_a0 += 0x40;
+    total = obj->unk2E8;
+    progress = (total != 0) ? ((f32)obj->unk2E4 / (f32)total) : 1.0f;
+    progress = 1.0f - progress;
+    uls = (s32)((500.0f * progress) + 2.0f);
+    ult = 2 - obj->unk2EC;
+    obj->unk2EC = uls / 3;
+    while (ult < 0) {
+        ult += 64;
     }
-    gDPSetTileSize(arg0++, 4, temp_v1, temp_a0, 0x1FE, 0x03E);
-    return arg0;
+    gDPSetTileSize(gdl++, 4, uls, ult, 0x1FE, 0x03E);
+    return gdl;
 }
 typedef struct {
     struct127 *unk0;
