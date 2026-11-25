@@ -137,7 +137,6 @@ typedef struct ContPad {
 
 extern s16 D_800CC2B2;
 extern f32 D_800CC2B4;
-s16 func_15063390(struct127 *arg0);
 void func_15143134(void *, f32 *, s32);
 void func_1506AC8C(struct127 *, s32, void *);
 
@@ -205,8 +204,6 @@ void func_15063628(struct127 *arg0, f32 arg1) {
     func_150636A4(arg0);
 }
 
-extern struct127 D_800CC2D0[26];
-
 /* Tells the object in unkB0 (if any) that this object is targeting it. */
 void func_150636A4(struct127 *arg0) {
     struct127 *target;
@@ -221,7 +218,6 @@ void func_150636A4(struct127 *arg0) {
         }
     }
 }
-
 
 void func_15063FA0(struct127 *, s32);
 void func_151D57F8(struct127 *, s32);
@@ -1154,8 +1150,7 @@ s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg
     return anim;
 }
 
-
-
+/* An entry of the point table MARKERS points to: a position and a facing in degrees. */
 typedef struct {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
@@ -1165,7 +1160,7 @@ typedef struct {
     /* 0x14 */ u8 pad14[4];
     /* 0x18 */ s32 unk18;
     /* 0x1C */ u8 pad1C[0x18];
-} Gate15065A5C;
+} MarkerPoint;
 
 extern u16 D_800996A0[][4];
 extern u16 D_800996C0[];
@@ -1196,11 +1191,14 @@ void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_151D4D58(void *arg0);
 s32 func_151F2CDC(void);
 
-/* variables.h types D_800D3098 as a struct178 array, but its first word is this table's pointer. */
-#define GATES (*(Gate15065A5C **)&D_800D3098)
+/* variables.h types D_800D3098 as a struct178 array, but its first word points to the MarkerPoint table. */
+#define MARKERS (*(MarkerPoint **)&D_800D3098)
 /* Bytes of struct127 that structs.h still declares only as padding. */
 #define OBJ_U8(o, off) (((u8 *)(o))[off])
 
+/* Per-frame handler for the object's held item / special action `act`: starts, steps and ends
+ * it from the held and pressed buttons. Returns the animation started (0 or 999 for none), or
+ * 1000 when the action consumed the input. */
 s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s32 arg4, s32 act, s32 arg6, s32 arg7, s32 arg8) {
     s32 anim;
     f32 speed;
@@ -1542,12 +1540,12 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 CTL(arg0)->unk30 = 0x12;
                 anim = 0x2F;
                 if (D_800BE9F0 == 0x31) {
-                    CTL(arg0)->unk28 = GATES[12].x;
-                    CTL(arg0)->unk2C = GATES[12].z;
+                    CTL(arg0)->unk28 = MARKERS[12].x;
+                    CTL(arg0)->unk2C = MARKERS[12].z;
                     func_150DBD70(5);
                 } else {
-                    CTL(arg0)->unk28 = GATES[2].x;
-                    CTL(arg0)->unk2C = GATES[2].z;
+                    CTL(arg0)->unk28 = MARKERS[2].x;
+                    CTL(arg0)->unk2C = MARKERS[2].z;
                     func_150DBD70(0);
                 }
                 arg0->unk76 = 0xC000;
@@ -2658,8 +2656,8 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
 
             ok = 1;
             if (CTL(arg0)->unk7A != 0) {
-                angle = func_15048A70(GATES[CTL(arg0)->unk7A].unk10, arg0->unk40);
-                if ((GATES[CTL(arg0)->unk7A].unk18 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
+                angle = func_15048A70(MARKERS[CTL(arg0)->unk7A].unk10, arg0->unk40);
+                if ((MARKERS[CTL(arg0)->unk7A].unk18 != 0) && ((angle < -90.0f) || (angle > 90.0f))) {
                     ok = 0;
                 }
             }
@@ -2668,7 +2666,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
                 arg0->unk83 = 0xFF;
                 CTL(arg0)->action = 0x17;
                 anim = 0x8E;
-                arg0->unk76 = (u32)(GATES[CTL(arg0)->unk7A].unk10 * 182.0444489f) - 0x4000;
+                arg0->unk76 = (u32)(MARKERS[CTL(arg0)->unk7A].unk10 * 182.0444489f) - 0x4000;
             }
         }
         break;
