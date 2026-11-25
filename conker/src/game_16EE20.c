@@ -68,10 +68,12 @@ typedef struct {
     /* 0x08 */ u8 ownerId;     /* owner->unique_id */
 } EffectInfo;
 
+/* Timed effect that runs handler D_8008A0B4[info.handler] on its owner while it lasts (func_15141E38); listed
+ * on the owner as ATTACH_TIMED_EFFECT. */
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ EffectInfo info;
-} AttachedEffect;
+} TimedHandlerEffect;
 
 /* List tag of the attached timed effects. */
 #define ATTACH_TIMED_EFFECT 0x1A
@@ -107,7 +109,7 @@ void func_15141A7C(Actor *actor, s32 arg1) {
         node = actor->attachments;
         if (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0) {
             do {
-                AttachedEffect *effect;
+                TimedHandlerEffect *effect;
                 effect = node->handle;
                 if (D_8008A0B4[effect->info.handler].handler != NULL) {
                     // matching: the u32 view makes IDO reload the index instead of reusing it
@@ -223,7 +225,7 @@ void func_15141E38(Actor *actor, s32 handler) {
     node = actor->attachments;
     if (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0) {
         do {
-            AttachedEffect *effect;
+            TimedHandlerEffect *effect;
             effect = node->handle;
             if (handler == effect->info.handler) {
                 found = node;
@@ -233,12 +235,12 @@ void func_15141E38(Actor *actor, s32 handler) {
         } while (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0);
     }
     if (found == NULL) {
-        AttachedEffect *effect;
+        TimedHandlerEffect *effect;
         EffectInfo info;
         info.handler = handler;
         info.owner = actor;
         info.ownerId = actor->unique_id;
-        effect = (AttachedEffect *)func_15149130(D_8008A0B4[handler].duration, -1, -1, -1, 1, 50, 0xC, 0xFF, 1);
+        effect = (TimedHandlerEffect *)func_15149130(D_8008A0B4[handler].duration, -1, -1, -1, 1, 50, 0xC, 0xFF, 1);
         if (effect != NULL) {
             memcpy(&effect->info, &info, sizeof(info));
             func_1514EC1C(effect, actor, ATTACH_TIMED_EFFECT);

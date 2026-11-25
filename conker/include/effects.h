@@ -3331,4 +3331,11 @@ typedef struct RenderModePair {
     /* 0x4 */ s32 cycle2;
 } RenderModePair; /* size 0x8 */
 
+/* Extra data of a pulsing particle: its size wobbles around baseSize as phase runs (to 4 pi in game_1E30A0.c,
+ * cycling through 2 pi in game_1E34C0.c). */
+typedef struct {
+    /* 0x0 */ f32 phase;
+    /* 0x4 */ f32 baseSize;
+} Pulse; /* size 0x8 */
+
 #endif

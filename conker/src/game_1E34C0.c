@@ -3,12 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Extra data of a pulsing particle: its size wobbles around baseSize as phase cycles through 2 pi. */
-typedef struct {
-    /* 0x0 */ f32 phase;
-    /* 0x4 */ f32 baseSize;
-} Pulse;
-
 /* Head of a pooled physics particle (full layout in game_15F680.c), carrying a Pulse as its extra data. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x18];
