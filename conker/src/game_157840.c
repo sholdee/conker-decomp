@@ -81,7 +81,7 @@ void func_1512A390(Camera *arg0) {
     func_151236D0(arg0);
     if (!(arg0->flags & 0x10) && (arg0->player->unk102 == 0) && (D_800C3671 == 0) && (arg0->unk92C == 0) &&
         (arg0->player->ceilingY < arg0->unk35C)) {
-        func_15128774(arg0, (Actor *)arg0->player);
+        func_15128774(arg0, arg0->player);
     }
     if (-10000.0f == arg0->unk35C) {
         if (D_800BE616 != 0) {

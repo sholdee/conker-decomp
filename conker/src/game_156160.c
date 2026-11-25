@@ -13,12 +13,6 @@ struct Entry151298C0 {
 
 extern struct Entry151298C0 D_800DC028[];
 
-/* Camera.player (Actor): 0x84 read as a plain u16 (Actor declares a union there). */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x84];
-    /* 0x084 */ u16 unk84;
-} Obj15128CB0;
-
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
@@ -175,7 +169,7 @@ void func_15128CB0(Camera *cam) {
                         cam->contPad->button |= 0x10;
                         angle = cam->aim.targetYaw;
                     } else if (D_80089524[cam->playerIndex] != 0) {
-                        if ((cam->zone == 12 && ((Obj15128CB0 *)cam->player)->unk84 != 0x76) || cam->zone == 27 || (cam->contPad->button & 0x10)) {
+                        if ((cam->zone == 12 && cam->player->unk84.uh != 0x76) || cam->zone == 27 || (cam->contPad->button & 0x10)) {
                             cam->buttonsPressed |= 0x10;
                             cam->contPad->button |= 0x10;
                             cam->playerExt->aimState = D_80089524[cam->playerIndex];
