@@ -80,25 +80,25 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                    s32 *outFlags, s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, struct127 *object,
                    f32 minY, f32 maxY, s32 noFallback);
 
-/* Floor query with an explicit height window for the type-2 collision groups. */
-void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outGroupFloorY, s32 *outFlags,
+/* Floor query (see func_1510E950) with an explicit height window for the prop probe. */
+void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,
                    s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, struct127 *obj, f32 minY, f32 maxY) {
-    func_1510E950(outTri, outVerts, NULL, outFloorY, outGroupFloorY, outFlags, outType, x, y, z, refY, group, obj,
+    func_1510E950(outTri, outVerts, NULL, outFloorY, outPropFloorY, outFlags, outType, x, y, z, refY, group, obj,
                   minY, maxY, 0);
 }
 
-/* Floor query with the default height window. */
-void func_1510E82C(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outGroupFloorY, s32 *outFlags,
+/* Floor query (see func_1510E950) with the default height window. */
+void func_1510E82C(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,
                    s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, struct127 *obj) {
-    func_1510E950(outTri, outVerts, NULL, outFloorY, outGroupFloorY, outFlags, outType, x, y, z, refY, group, obj,
+    func_1510E950(outTri, outVerts, NULL, outFloorY, outPropFloorY, outFlags, outType, x, y, z, refY, group, obj,
                   -10000.0f, 20000.0f, 0);
 }
 
-/* Floor query with the default height window; noFallback disables the upward-facing fallback triangle. */
-void func_1510E8BC(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outGroupFloorY, s32 *outFlags,
+/* Floor query (see func_1510E950) with the default height window and a noFallback choice. */
+void func_1510E8BC(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,
                    s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, struct127 *obj, f32 unused12,
                    f32 unused13, s32 noFallback) {
-    func_1510E950(outTri, outVerts, NULL, outFloorY, outGroupFloorY, outFlags, outType, x, y, z, refY, group, obj,
+    func_1510E950(outTri, outVerts, NULL, outFloorY, outPropFloorY, outFlags, outType, x, y, z, refY, group, obj,
                   -10000.0f, 20000.0f, noFallback);
 }
 
@@ -159,7 +159,7 @@ extern s32 *D_800DBF94;
  * Finds the floor under (x, y, z) across every enabled probe type (world mesh, props, objects):
  * the highest upward-facing triangle within reach of y (or of refY when y is below it).
  * Outputs: the floor height, its triangle and vertices, its material flags and probe type; for
- * props, the highest prop surface (and its vertices) below maxY; and the lowest downward-facing
+ * props, the highest prop surface (and its vertices) below the ceiling; and the lowest downward-facing
  * ceiling above the floor. With an object, also records what it stands on and the ceiling height.
  * Unless noFallback is set, the first upward-facing hit is used when none is within reach.
  */
@@ -201,7 +201,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
     s32 triAddr;
     volatile f32 reach; // matching: IDO reloads it from the stack on every hit
 
-#define obj ((ObjFloorView *)object)
+#define obj ((ObjFloorView *)object) // matching: a local pointer copy changes the frame
     noFloor = -10000.0f;
     total = 0;
     floorTri = 0;
@@ -486,14 +486,14 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
 }
 
 
-/* Returns the height of the highest type-2 group surface at (x, z) found from height y, or -10000. */
+/* Returns the height of the first prop surface found at (x, z) from height y, or -10000. */
 f32 func_1510F648(f32 x, f32 y, f32 z) {
     f32 height;
     s32 groups;
     s32 iy;
 
     func_1510F800(2);
-    iy = (s32)y;
+    iy = (s32)y; // matching: converting y before the call keeps the original order
     func_150A64C8((s32)x, (s32)z, &groups, iy);
     func_150A44F0(groups, &D_800D3830, 0);
     if (func_150A43E0((s32)x, (s32)z, groups, &D_800D3830)) {
