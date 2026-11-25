@@ -97,6 +97,8 @@ typedef struct {
     PathPoint pts[1];
 } PathData;
 
+/* Raw field access for bytes of struct127 / struct126 that structs.h declares only as padding or with
+ * another width (the shared headers are not edited in this pass). */
 #define FLD(p, off, T) (*(T *)((u8 *)(p) + (off)))
 
 extern s32 D_800BE3E4;
@@ -134,17 +136,17 @@ extern void func_151D6BFC(struct127 *, s32, s32);
 extern f32 sinf(f32);
 extern f32 cosf(f32);
 
-s32 func_15097A8C(s32 arg0, s32 arg1, ScriptCmd *cmd) {
+s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     struct127 *obj;
     s32 i;
     s32 node;
     s32 pad3;
 
-    obj = func_1505EEF4(arg0);
+    obj = func_1505EEF4(objId);
     if (obj == NULL) {
         return 0;
     }
-    switch (arg1) {
+    switch (opcode) {
     case 1:
         if (cmd->a[0] != 0) {
             obj->unk25C |= cmd->a[1];
@@ -349,7 +351,11 @@ s32 func_15097A8C(s32 arg0, s32 arg1, ScriptCmd *cmd) {
         obj->unk48 = cmd->a[0] * 1.52587890625e-05f;
         break;
     case 0x17:
-        cmd->a[0] ? func_1518BA90(obj, 0xFF, 0) : func_1518BBF4(obj);
+        if (cmd->a[0] != 0) {
+            func_1518BA90(obj, 0xFF, 0);
+        } else {
+            func_1518BBF4(obj);
+        }
         break;
     case 0x72:
         if (obj->unk31C != NULL) {
@@ -372,7 +378,7 @@ s32 func_15097A8C(s32 arg0, s32 arg1, ScriptCmd *cmd) {
         FLD(obj, 0x20A, u8) = cmd->a[0];
         break;
     case 0x1B:
-        if (1 == cmd->a[0]) {
+        if (cmd->a[0] == 1) {
             obj->unk9C |= cmd->a[1];
         } else {
             obj->unk9C &= ~cmd->a[1];
@@ -418,7 +424,7 @@ s32 func_15097A8C(s32 arg0, s32 arg1, ScriptCmd *cmd) {
         obj->disable_run = cmd->a[0];
         break;
     case 0x21:
-        func_15085710(arg0, cmd->a[0], cmd->a[1]);
+        func_15085710(objId, cmd->a[0], cmd->a[1]);
         break;
     case 0x22: {
         s32 j;
@@ -435,7 +441,7 @@ s32 func_15097A8C(s32 arg0, s32 arg1, ScriptCmd *cmd) {
 
         for (j = 0; j < D_800D3840 - 2; j++) {
             if (cmd->a[j] != 0x7FFFFFFF) {
-                FLD(obj, 0x2E4 + j * 4, s32) = cmd->a[j];
+                (&obj->unk2E4)[j] = cmd->a[j];
             }
         }
         break;
@@ -460,10 +466,10 @@ s32 func_15097A8C(s32 arg0, s32 arg1, ScriptCmd *cmd) {
         }
         break;
     case 0x26:
-        func_15080620(arg0, 0, cmd->a[0], 0);
+        func_15080620(objId, 0, cmd->a[0], 0);
         break;
     case 0x27:
-        func_15080620(arg0, 1, cmd->a[0], 0);
+        func_15080620(objId, 1, cmd->a[0], 0);
         if (D_800D3840 == 3 && cmd->a[0] == 0) {
             obj->unk31C->unk78 = 0;
         }
@@ -537,10 +543,10 @@ s32 func_15097A8C(s32 arg0, s32 arg1, ScriptCmd *cmd) {
         s32 z;
         f32 y;
 
-        x = FLD(D_800DBFF0, 0x2F8, f32);
-        z = FLD(D_800DBFF0, 0x300, f32);
-        x = x - sinf(FLD(D_800DBFF0, 0x3A0, f32)) * 1800.0f;
-        z = z - cosf(FLD(D_800DBFF0, 0x3A0, f32)) * 1800.0f;
+        x = D_800DBFF0->unk2F8;
+        z = D_800DBFF0->unk300;
+        x = x - sinf(D_800DBFF0->unk3A0) * 1800.0f;
+        z = z - cosf(D_800DBFF0->unk3A0) * 1800.0f;
         x += func_150ADA20() % 800U - 400;
         z += func_150ADA20() % 800U - 400;
         if (x < cmd->a[0]) {
@@ -553,7 +559,7 @@ s32 func_15097A8C(s32 arg0, s32 arg1, ScriptCmd *cmd) {
         } else if (z > cmd->a[3]) {
             z = cmd->a[3] + (cmd->a[3] - z);
         }
-        y = FLD(D_800DBFF0, 0x2FC, f32);
+        y = D_800DBFF0->unk2FC;
         func_1510E7A4(0, 0, &y, 0, 0, 0, x, y, z, y, 0, 0, -10000.0f, 20000.0f);
         obj->x_position = x;
         obj->y_position = cmd->a[4] + y;
@@ -605,7 +611,7 @@ s32 func_15097A8C(s32 arg0, s32 arg1, ScriptCmd *cmd) {
     case 0x3D:
         if (cmd->a[0] == 0) {
             obj->unk94 = ~(cmd->a[1] | 1);
-        } else if (1 == cmd->a[0]) {
+        } else if (cmd->a[0] == 1) {
             obj->unk94 &= ~cmd->a[1];
         } else {
             obj->unk94 |= cmd->a[1];
@@ -784,7 +790,7 @@ s32 func_15097A8C(s32 arg0, s32 arg1, ScriptCmd *cmd) {
         }
         break;
     case 0x6B:
-        if (1 == cmd->a[0]) {
+        if (cmd->a[0] == 1) {
             obj->unk101 |= cmd->a[1];
         } else {
             obj->unk101 &= ~cmd->a[1];
@@ -1024,12 +1030,6 @@ extern C4DC0_2350 *D_800D2350;
 extern s8 D_800E0AC0[];
 extern u8 D_800E0BB8[];
 
-#define F_U8(p, o) (*(u8 *)((u8 *)(p) + (o)))
-#define F_S8(p, o) (*(s8 *)((u8 *)(p) + (o)))
-#define F_S16(p, o) (*(s16 *)((u8 *)(p) + (o)))
-#define F_U16(p, o) (*(u16 *)((u8 *)(p) + (o)))
-#define F_S32(p, o) (*(s32 *)((u8 *)(p) + (o)))
-
 typedef struct {
     s16 x;
     s16 y;
@@ -1171,11 +1171,11 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0xA7:
         return func_15085420(obj) | 0xD000;
     case 0xA9:
-        return F_U8(obj->unk31C, 0x77);
+        return FLD(obj->unk31C, 0x77, u8);
     case 0xAA:
-        return F_U8(obj->unk31C, 0x78);
+        return obj->unk31C->unk78;
     case 0xAB:
-        return F_U8(obj->unk31C, 0x79);
+        return FLD(obj->unk31C, 0x79, u8);
     case 0xAC: {
         ret = func_150A2AEC(obj - D_800CC2D0, D_800D3840 - 2, &arg2[2]);
         if (ret != -1) {
@@ -1188,10 +1188,10 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0xAE:
         return obj->xz_velocity;
     case 0xAF:
-        if (F_U8(obj->unk31C, 0x16) != 0) {
+        if (obj->unk31C->unk16 != 0) {
             return 2;
         }
-        if (F_S16(obj->unk31C, 0x8) != 0) {
+        if (FLD(obj->unk31C, 0x8, s16) != 0) {
             return 1;
         }
         return 0;
@@ -1246,9 +1246,9 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0xBF:
         return (f32)(s32)obj->unk28 * 65536.0f;
     case 0xC0:
-        return F_U8(obj->unk31C, 0x1B);
+        return FLD(obj->unk31C, 0x1B, u8);
     case 0xC1:
-        return F_U8(obj->unk31C, 0x4E);
+        return obj->unk31C->unk4E;
     case 0xC2:
         return obj->unique_id;
     case 0xC3:
@@ -1289,7 +1289,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
             x -= obj->x_position;
             y -= obj->y_position;
             z -= obj->z_position;
-            dist = F_S16(obj, 0x216) + (s32)sqrtf(x * x + y * y + z * z);
+            dist = FLD(obj, 0x216, s16) + (s32)sqrtf(x * x + y * y + z * z);
             if (obj->unk20F != obj->unk211) {
                 if (func_15086CBC(obj->unk211, &x, &y, &z) != 0) {
                     x -= obj->x_position;
@@ -1510,13 +1510,13 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0xDA:
         return obj->unk180;
     case 0xDC:
-        if (F_S8(obj->unk31C, 0x195) != 0) {
-            return F_S8(obj->unk31C, 0x196) | 0x80;
+        if (FLD(obj->unk31C, 0x195, s8) != 0) {
+            return FLD(obj->unk31C, 0x196, s8) | 0x80;
         }
         return 0;
     case 0xDD:
         if (obj->unk31C != NULL) {
-            return F_S8(obj->unk31C, 0x23);
+            return FLD(obj->unk31C, 0x23, s8);
         }
         return 0;
     case 0xDE:
@@ -1530,7 +1530,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     }
     case 0xDF:
         if (obj->unk31C != NULL) {
-            return F_S8(obj->unk31C, 0x1AE);
+            return FLD(obj->unk31C, 0x1AE, s8);
         }
         return 0;
     case 0xE0:
@@ -1603,7 +1603,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0xE8:
         return obj->unk84.uh;
     case 0xE9:
-        return F_U8(obj->unk31C, 0x51);
+        return FLD(obj->unk31C, 0x51, u8);
     case 0xEA: {
         struct126 *p;
         s32 a;
@@ -1650,7 +1650,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         return (ret << 16) | (iz & 0xFFFF);
     }
     case 0xEC:
-        return F_U8(obj->unk31C, 0x95);
+        return FLD(obj->unk31C, 0x95, u8);
     case 0xED:
         return D_800BE710[arg0];
     case 0xEE: {
@@ -1666,7 +1666,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0xEF:
         return obj->interaction_state;
     case 0xF0:
-        return D_800E0AC0[F_U8(obj, 0x128)];
+        return D_800E0AC0[FLD(obj, 0x128, u8)];
     case 0xF1:
         return (obj->unk74 & 0xF) == 0xF;
     case 0xF2:
