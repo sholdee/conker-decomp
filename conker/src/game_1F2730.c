@@ -214,36 +214,34 @@ void func_151C577C(vertex *arg0, vertex *arg1, vertex *arg2, u8 doForward, u8 do
         func_151DC034(&unkPos, f2 * 24.0f + 168.0f, randA % 101U + 155, (func_150ADA20() & 7) + 15, 1, arg6, arg7);
         if (doRing) {
             ringCount = func_150ADA20() % 3U + 5;
-            if (ringCount != 0) {
-                do {
-                    f = (func_150ADA68() * 33.0f + 60.0f) * 0.1f;
-                    func_15143874(func_150ADA20() & 0xFF, f, &cosv, &sinv);
-                    vel.x = basisB[0] * sinv + basisA[0] * cosv;
-                    vel.y = basisB[1] * sinv + basisA[1] * cosv;
-                    vel.z = basisB[2] * sinv + basisA[2] * cosv;
-                    f = func_150ADA68();
-                    randC = func_150ADA20();
-                    randA = func_150ADA20();
-                    f2 = func_150ADA68();
-                    func_151DA6F8(&unkPos, &vel, f * 0.162f + 0.193f, randC % 9U + 18, randA % 156U + 100, f2 * 4.0f + 4.0f, 3, func_150ADA20() & 0, 1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, arg6, arg7);
-                    ringCount--;
-                } while (ringCount != 0);
+            while (ringCount != 0) {
+                f = (func_150ADA68() * 33.0f + 60.0f) * 0.1f;
+                func_15143874(func_150ADA20() & 0xFF, f, &cosv, &sinv);
+                vel.x = basisB[0] * sinv + basisA[0] * cosv;
+                vel.y = basisB[1] * sinv + basisA[1] * cosv;
+                vel.z = basisB[2] * sinv + basisA[2] * cosv;
+                f = func_150ADA68();
+                randC = func_150ADA20();
+                randA = func_150ADA20();
+                f2 = func_150ADA68();
+                func_151DA6F8(&unkPos, &vel, f * 0.162f + 0.193f, randC % 9U + 18, randA % 156U + 100,
+                              f2 * 4.0f + 4.0f, 3, func_150ADA20() % 1U, 1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, arg6,
+                              arg7);
+                ringCount--;
             }
         }
         if (doForward) {
-            count = func_150ADA20() % 6U + 5;
-            if (count != 0) {
-                do {
-                    f = (func_150ADA68() * 150.0f + 200.0f) * 0.1f;
-                    vel2.x = dir[0] * f;
-                    vel2.y = dir[1] * f;
-                    vel2.z = dir[2] * f;
-                    f = func_150ADA68();
-                    randA = func_150ADA20();
-                    randB = func_150ADA20();
-                    func_151D9014(&origin, &vel2, 1, f * 0.682000041f + -0.4120000303f, randA % 11U + 5, randB % 156U + 100, func_150ADA68() * 60.0f + 80.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6, arg7);
-                    count--;
-                } while (count != 0);
+            for (count = func_150ADA20() % 6U + 5; count != 0; count--) {
+                f = (func_150ADA68() * 150.0f + 200.0f) * 0.1f;
+                vel2.x = dir[0] * f;
+                vel2.y = dir[1] * f;
+                vel2.z = dir[2] * f;
+                f = func_150ADA68();
+                randA = func_150ADA20();
+                randB = func_150ADA20();
+                func_151D9014(&origin, &vel2, 1, f * 0.682000041f + -0.4120000303f, randA % 11U + 5,
+                              randB % 156U + 100, func_150ADA68() * 60.0f + 80.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6,
+                              arg7);
             }
         }
         if (doScatter) {
@@ -286,6 +284,7 @@ void func_151C577C(vertex *arg0, vertex *arg1, vertex *arg2, u8 doForward, u8 do
                 spawn.flags &= ~0xC0;
                 spawn.unk54 = (f + -197.0f) * 0.001f;
                 bit80 = (func_150ADA20() & 1) ? 0x80 : 0;
+                // matching: reusing randB for the 0x40 bit; a separate local changes the frame
                 randB = (func_150ADA20() & 1) ? 0x40 : 0;
                 spawn.flags |= randB | bit80;
                 spawn.unk1B = func_150ADA20() % 66U + 190;
