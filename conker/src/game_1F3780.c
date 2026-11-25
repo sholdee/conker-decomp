@@ -319,102 +319,102 @@ void func_151C6D70(struct127 *arg0, u8 arg1, struct17 *arg2, s16 arg3, u8 arg4,
                   (s32)arg2, 0xFF, 0, arg3, arg4, arg5);
 }
 
-struct blk12_C6EA0 { s32 a; s32 b; s32 c; };
-
+/* Spawn descriptor for func_1513264C (0x7C bytes); same layout as EffectSpawn in game_124920.c. */
 typedef struct {
-    u8 pad_0[0x3B];
-    u8 field_0x3B;
-} ActorIdByteFields;
+    /* 0x00 */ f32 unk00;
+    /* 0x04 */ f32 unk04;
+    /* 0x08 */ f32 unk08;
+    /* 0x0C */ f32 unk0C;
+    /* 0x10 */ struct17 unk10;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ struct17 pos;
+    /* 0x34 */ struct17 vel;
+    /* 0x40 */ struct17 unk40;
+    /* 0x4C */ f32 unk4C;
+    /* 0x50 */ s32 unk50;
+    /* 0x54 */ s16 unk54;
+    /* 0x56 */ s16 unk56;
+    /* 0x58 */ u8 unk58;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ u8 unk63;
+    /* 0x64 */ u8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 unk67;
+    /* 0x68 */ u8 unk68;
+    /* 0x69 */ s8 unk69;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ struct127 *owner;
+    /* 0x70 */ u8 ownerId; /* owner->unique_id */
+    /* 0x71 */ u8 pad71;
+    /* 0x72 */ s16 unk72;
+    /* 0x74 */ s16 unk74;
+    /* 0x76 */ u8 pad76[2];
+    /* 0x78 */ s32 sound;
+} EffectSpawn;
 
+/* An object spawned by func_1513264C (only the field used here). */
 typedef struct {
-    u8 pad_0[0x170];
-    u8 field_0x170;
-} CreatedObjectFlagFields;
+    /* 0x000 */ u8 pad0[0x170];
+    /* 0x170 */ u8 unk170; /* start of the per-type state block */
+} SpawnedEffect;
 
-s32 func_1513264C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
+SpawnedEffect *func_1513264C(EffectSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 
-void func_151C6EA0(ActorIdByteFields *arg0, u8 arg1, s32 arg2) {
+/* Spawns an effect object owned by `owner` and initialises its one-byte state block. */
+void func_151C6EA0(struct127 *owner, u8 arg1, s32 arg2) {
+    EffectSpawn spawn;
     struct {
-        f32 unk00;
-        f32 unk04;
-        f32 unk08;
-        f32 unk0C;
-        struct blk12_C6EA0 unk10;
-        f32 unk1C;
-        f32 unk20;
-        f32 unk24;
-        struct blk12_C6EA0 unk28;
-        struct blk12_C6EA0 unk34;
-        struct blk12_C6EA0 unk40;
-        f32 unk4C;
-        s32 unk50;
-        s16 unk54;
-        s16 unk56;
-        u8 unk58;
-        u8 pad59[3];
-        s32 unk5C;
-        u8 unk60;
-        u8 unk61;
-        u8 unk62;
-        u8 unk63;
-        u8 unk64;
-        u8 unk65;
-        u8 unk66;
-        u8 unk67;
-        u8 unk68;
-        s8 unk69;
-        u8 unk6A;
-        u8 pad6B;
-        s32 unk6C;
-        u8 unk70;
-        u8 pad71;
-        s16 unk72;
-        s16 unk74;
-        u8 pad76[2];
-        s32 unk78;
-    } sp34;
-    struct { u8 b; u8 pad[3]; } sp30;
-    struct blk12_C6EA0 *src = (struct blk12_C6EA0 *)&D_800A5480;
-    CreatedObjectFlagFields *temp_v0;
+        u8 unk0;
+    } state;
+    struct17 *origin = (struct17 *)&D_800A5480;
+    SpawnedEffect *effect;
 
-    sp30.b = 0;
-    sp34.unk00 = 1.0f;
-    sp34.unk04 = 1.0f;
-    sp34.unk0C = 1.0f;
-    sp34.unk08 = 1.0f;
-    sp34.unk10 = *src;
-    sp34.unk1C = 1.0f;
-    sp34.unk20 = 1.0f;
-    sp34.unk24 = 1.0f;
-    sp34.unk28 = *src;
-    sp34.unk34 = *src;
-    sp34.unk40 = *src;
-    sp34.unk50 = 0x11900;
-    sp34.unk54 = 0x12C;
-    sp34.unk56 = 0xF;
-    sp34.unk58 = 0;
-    sp34.unk5C = 0;
-    sp34.unk60 = 0x64;
-    sp34.unk61 = 0x17;
-    sp34.unk62 = 0;
-    sp34.unk63 = 0;
-    sp34.unk64 = 0;
-    sp34.unk65 = 0;
-    sp34.unk66 = 0;
-    sp34.unk67 = 0;
-    sp34.unk68 = 0x5;
-    sp34.unk69 = -1;
-    sp34.unk6A = 1;
-    sp34.unk4C = 0.0f;
-    sp34.unk6C = (s32)arg0;
-    sp34.unk70 = arg0->field_0x3B;
-    sp34.unk72 = 1;
-    sp34.unk74 = 0xFF;
-    sp34.unk78 = 0;
+    state.unk0 = 0;
+    spawn.unk00 = 1.0f;
+    spawn.unk04 = 1.0f;
+    spawn.unk0C = 1.0f;
+    spawn.unk08 = 1.0f;
+    spawn.unk10 = *origin;
+    spawn.unk1C = 1.0f;
+    spawn.unk20 = 1.0f;
+    spawn.unk24 = 1.0f;
+    spawn.pos = *origin;
+    spawn.vel = *origin;
+    spawn.unk40 = *origin;
+    spawn.unk50 = 0x11900;
+    spawn.unk54 = 300;
+    spawn.unk56 = 15;
+    spawn.unk58 = 0;
+    spawn.unk5C = 0;
+    spawn.unk60 = 100;
+    spawn.unk61 = 23;
+    spawn.unk62 = 0;
+    spawn.unk63 = 0;
+    spawn.unk64 = 0;
+    spawn.unk65 = 0;
+    spawn.unk66 = 0;
+    spawn.unk67 = 0;
+    spawn.unk68 = 5;
+    spawn.unk69 = -1;
+    spawn.unk6A = 1;
+    spawn.unk4C = 0.0f;
+    spawn.owner = owner;
+    spawn.ownerId = owner->unique_id;
+    spawn.unk72 = 1;
+    spawn.unk74 = 0xFF;
+    spawn.sound = 0;
 
-    temp_v0 = (CreatedObjectFlagFields *)func_1513264C((s32)&sp34, 3, 0xFF, 0, 1, arg1, arg2);
-    if (temp_v0 != 0) {
-        memcpy(&temp_v0->field_0x170, &sp30.b, 1);
+    effect = func_1513264C(&spawn, 3, 0xFF, 0, 1, arg1, arg2);
+    if (effect != NULL) {
+        memcpy(&effect->unk170, &state, sizeof(state));
     }
 }
 
@@ -427,30 +427,31 @@ typedef struct {
     struct127 *unk7C;
 } Func151C7038Arg;
 
+/* Mirrors the owner object's state (type 0xE9 only): flag 0x20000 and its animation speed scaled to 0-255. */
 s32 func_151C7038(Func151C7038Arg *arg0) {
-    struct127 *obj;
+    struct127 *owner;
     f32 speed;
 
-    obj = arg0->unk7C;
-    if (*(u16 *)((u8 *)obj + 0x84) != 0xE9) {
+    owner = arg0->unk7C;
+    if (owner->unk84.uh != 0xE9) {
         return 0;
     }
-    if (func_15142A5C(obj) != 0) {
+    if (func_15142A5C(owner) != 0) {
         arg0->unk60 |= 0x20000;
     } else {
         arg0->unk60 &= ~0x20000;
     }
-    speed = obj->animation_speed * 35.0f;
+    speed = owner->animation_speed * 35.0f;
     if (speed > 255.0f) {
-        speed = 255;
+        speed = 255; // matching: 255.0f schedules the clamp differently
     } else if (speed < 0.0f) {
         speed = 0.0f;
     }
     {
-        u8 val;
+        // matching: the -g3 block scope keeps the float->u8 conversion after the clamp
+        u8 clamped = speed;
 
-        val = speed;
-        arg0->unk70 = val;
+        arg0->unk70 = clamped;
     }
     return 1;
 }
