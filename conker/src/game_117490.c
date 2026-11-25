@@ -326,86 +326,62 @@ void func_150EA8E0(s32 arg0) {
     func_150E5AE0();
 }
 
-/* A D_800DBEF4 entry (WorldObject) with the fields used here, which include/structs.h leaves unnamed. */
-typedef struct {
-    /* 0x00 */ Vec3f angle; /* degrees, kept in [0, 360) */
-    /* 0x0C */ u8  padC[0x4];
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ u8  pad16[0x26];
-    /* 0x3C */ s32 gravity;
-    /* 0x40 */ u8  pad40[0x1A];
-    /* 0x5A */ s16 velocityX;
-    /* 0x5C */ s16 velocityY;
-    /* 0x5E */ s16 velocityZ;
-    /* 0x60 */ Vec3f angularVelocity;
-    /* 0x6C */ u8  pad6C[0x2];
-    /* 0x6E */ u8  expired;
-    /* 0x6F */ u8  pad6F[0x3];
-    /* 0x72 */ u8  unk72;
-    /* 0x73 */ u8  flags;
-    /* 0x74 */ u8  pad74[0x8];
-    /* 0x7C */ s32 yFixed; /* y in 1/8 units */
-    /* 0x80 */ u8  pad80[0xA];
-    /* 0x8A */ u8  timer;
-    /* 0x8B */ u8  pad8B[0x15];
-} struct_EA944; // size 0xA0
-
-/* Sets flag bits 0 and 1 on D_800DBEF4 entry `index` if its unk72 is 0xE0. */
+/* Sets behaviorState bits 0 and 1 on D_800DBEF4 entry `index` if its id is 0xE0. */
 void func_150EA904(s32 arg0, s32 index) {
-    struct_EA944 *entry = (struct_EA944 *)D_800DBEF4 + index;
+    // matching: the no-op cast makes IDO load the array base before scaling index
+    WorldObject *entry = (WorldObject *)D_800DBEF4 + index;
 
-    if (entry->unk72 == 0xE0) {
-        entry->flags = (entry->flags & 0xFF) | 3; // matching: the no-op mask costs IDO one extra temp register
+    if (entry->id == 0xE0) {
+        entry->behaviorState = (entry->behaviorState & 0xFF) | 3; // matching: the no-op mask costs IDO one extra temp register
     }
 }
 
-/* While both flag bits are set: spins and moves the entry, applies gravity, and counts its timer down. */
-void func_150EA944(struct_EA944 *entry) {
+/* While behaviorState bits 0-1 are set: spins and moves the entry, applies gravity (param, y kept in 1/8
+ * units in work.words[0]) and fades its alpha out, then marks it inactive. */
+void func_150EA944(WorldObject *entry) {
     f32 frames;
     f32 angle;
     s32 timer;
 
-    if ((entry->flags & 3) == 3) {
+    if ((entry->behaviorState & 3) == 3) {
         frames = D_800BE9E4;
 
-        entry->angle.x += entry->angularVelocity.x * frames;
-        angle = entry->angle.x;
+        entry->rotX += entry->spinX * frames;
+        angle = entry->rotX;
         if (angle < 0.0f) {
-            entry->angle.x = angle + 360.0f;
+            entry->rotX = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            entry->angle.x = angle - 360.0f;
+            entry->rotX = angle - 360.0f;
         }
 
-        entry->angle.y += entry->angularVelocity.y * frames;
-        angle = entry->angle.y;
+        entry->rotY += entry->spinY * frames;
+        angle = entry->rotY;
         if (angle < 0.0f) {
-            entry->angle.y = angle + 360.0f;
+            entry->rotY = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            entry->angle.y = angle - 360.0f;
+            entry->rotY = angle - 360.0f;
         }
 
-        entry->angle.z += entry->angularVelocity.z * frames;
-        angle = entry->angle.z;
+        entry->rotZ += entry->spinZ * frames;
+        angle = entry->rotZ;
         if (angle < 0.0f) {
-            entry->angle.z = angle + 360.0f;
+            entry->rotZ = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            entry->angle.z = angle - 360.0f;
+            entry->rotZ = angle - 360.0f;
         }
 
-        timer = entry->timer;
-        entry->velocityY -= entry->gravity * D_800BE9E4;
-        entry->x += entry->velocityX * D_800BE9E4;
-        entry->yFixed += entry->velocityY * D_800BE9E4;
-        entry->y = entry->yFixed >> 3;
-        entry->z += entry->velocityZ * D_800BE9E4;
+        timer = entry->alpha;
+        entry->moveY -= entry->param.word * D_800BE9E4;
+        entry->x += entry->moveX * D_800BE9E4;
+        entry->work.words[0] += entry->moveY * D_800BE9E4;
+        entry->y = entry->work.words[0] >> 3;
+        entry->z += entry->moveZ * D_800BE9E4;
 
         timer -= D_800BE9E4 * 4;
         if (timer > 0) {
-            entry->timer = timer;
+            entry->alpha = timer;
         } else {
-            entry->expired = 1;
+            entry->inactive = 1;
         }
     }
 }

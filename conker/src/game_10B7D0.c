@@ -21,35 +21,13 @@ typedef struct {
 /* variables.h declares D_800A5480 as one f32; it is a vector (copied whole into ParticleDef.rot). */
 extern Vec3f D_800A5480;
 
-/* An object with a rotation and a position (func_150DE458's argument; func_151149AC returns one). */
-typedef struct {
-    /* 0x00 */ f32 rotation[3]; // degrees, wrapped into [0, 360)
-    /* 0x0C */ u8  padC[0x4];
-    /* 0x10 */ s16 position[3];
-    /* 0x16 */ u8  pad16[0x26];
-    /* 0x3C */ s32 gravity;
-    /* 0x40 */ u8  pad40[0x14];
-    /* 0x54 */ u16 kind; // bit 15 is a flag
-    /* 0x56 */ u8  pad56[0x4];
-    /* 0x5A */ s16 velocity[3];
-    /* 0x60 */ f32 spin[3]; // degrees per frame added to rotation
-    /* 0x6C */ u8  pad6C[0x2];
-    /* 0x6E */ u8  dead;
-    /* 0x6F */ u8  pad6F[0x4];
-    /* 0x73 */ u8  state; // low two bits == 3 while moving
-    /* 0x74 */ u8  pad74[0x8];
-    /* 0x7C */ s32 assetSet; // row of D_80090204
-    /* 0x80 */ u8  pad80[0xA];
-    /* 0x8A */ u8  timer; // frames left before dead is set
-} Prop;
-
 extern f32 func_15048A40(u8 angle);
 extern s32 func_150A32B4(struct178 *, s32, s32, s32);
-extern Prop *func_151149AC(u8);
+extern WorldObject *func_151149AC(u8);
 extern void func_150A2864(s32, s32);
 extern s32 D_80090204[][2];
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
-extern void func_1510D874(Prop *, s32, s32, s32, s32);
+extern void func_1510D874(WorldObject *, s32, s32, s32, s32);
 
 void func_150DE320(s32 arg0) {
 }
@@ -58,7 +36,7 @@ void func_150DE320(s32 arg0) {
  * matching func_151149AC object, or (for records without one) calls func_150A2864(id, 1). */
 void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
-    Prop *prop;
+    WorldObject *prop;
     const u8 ids[8] = { 0x18, 0x19, 0x1A, 0x1B, 0x0D, 0x30, 0x31, 0x32 };
     const u8 propIds[8] = { 0xF6, 0xF3, 0xF0, 0xED, 0, 0, 0, 0 };
 
@@ -66,7 +44,7 @@ void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
         if (func_150A32B4(&D_800D3098[ids[i]], arg0, arg1, arg2) != 0) {
             if (propIds[i] != 0) {
                 prop = func_151149AC(propIds[i]);
-                prop->state = (prop->state & ~3) | 3;
+                prop->behaviorState = (prop->behaviorState & ~3) | 3;
             } else {
                 func_150A2864(ids[i], 1);
             }
@@ -75,9 +53,9 @@ void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 /* Per-frame update: while moving, spins the rotation (wrapping each angle), applies gravity and
- * velocity to the position and counts the timer down to dead; kind 0xC props also get two
- * D_80090204 assets passed to func_1510D874. */
-void func_150DE458(Prop *prop) {
+ * velocity (moveX..moveZ, gravity in param) to the position and counts alpha down as a lifetime
+ * until inactive; kind 0xC props also get two assets of D_80090204 row work.words[0] passed to func_1510D874. */
+void func_150DE458(WorldObject *prop) {
     s32 pad[4]; // matching: unused frame space above size
     s32 size;
     f32 frames;
@@ -88,51 +66,51 @@ void func_150DE458(Prop *prop) {
     s32 slot;
     s32 nextSlot;
 
-    if ((prop->state & 3) == 3) {
+    if ((prop->behaviorState & 3) == 3) {
         frames = D_800BE9E4;
 
-        prop->rotation[0] += prop->spin[0] * frames;
-        angle = prop->rotation[0];
+        prop->rotX += prop->spinX * frames;
+        angle = prop->rotX;
         if (angle < 0.0f) {
-            prop->rotation[0] = angle + 360.0f;
+            prop->rotX = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            prop->rotation[0] = angle - 360.0f;
+            prop->rotX = angle - 360.0f;
         }
 
-        prop->rotation[1] += prop->spin[1] * frames;
-        angle = prop->rotation[1];
+        prop->rotY += prop->spinY * frames;
+        angle = prop->rotY;
         if (angle < 0.0f) {
-            prop->rotation[1] = angle + 360.0f;
+            prop->rotY = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            prop->rotation[1] = angle - 360.0f;
+            prop->rotY = angle - 360.0f;
         }
 
-        prop->rotation[2] += prop->spin[2] * frames;
-        angle = prop->rotation[2];
+        prop->rotZ += prop->spinZ * frames;
+        angle = prop->rotZ;
         if (angle < 0.0f) {
-            prop->rotation[2] = angle + 360.0f;
+            prop->rotZ = angle + 360.0f;
         } else if (angle >= 360.0f) {
-            prop->rotation[2] = angle - 360.0f;
+            prop->rotZ = angle - 360.0f;
         }
 
-        timer = prop->timer;
-        prop->velocity[1] -= prop->gravity * D_800BE9E4;
-        prop->position[0] += prop->velocity[0] * D_800BE9E4;
-        prop->position[1] += prop->velocity[1] * D_800BE9E4;
-        prop->position[2] += prop->velocity[2] * D_800BE9E4;
+        timer = prop->alpha;
+        prop->moveY -= prop->param.word * D_800BE9E4;
+        prop->x += prop->moveX * D_800BE9E4;
+        prop->y += prop->moveY * D_800BE9E4;
+        prop->z += prop->moveZ * D_800BE9E4;
 
         timer -= D_800BE9E4;
         if (timer > 0) {
-            prop->timer = timer;
+            prop->alpha = timer;
         } else {
-            prop->dead = 1;
+            prop->inactive = 1;
         }
     }
 
-    if ((prop->kind & ~0x8000) == 0xC) {
+    if ((prop->modelId & ~0x8000) == 0xC) {
         // matching: a for (i = 0; i < 2; i++) form (slots i * 2 + 4, i * 2 + 5) grows the frame by 8;
         // the original steps the asset pointer and both slot numbers separately
-        asset = D_80090204[prop->assetSet];
+        asset = D_80090204[prop->work.words[0]];
         slot = 4;
         nextSlot = 5;
         do {
@@ -145,24 +123,15 @@ void func_150DE458(Prop *prop) {
     }
 }
 
-/* An object func_150DE6D8 sways; its rotation and position are laid out as in Prop. */
-typedef struct {
-    /* 0x00 */ f32 rotation[3];
-    /* 0x0C */ u8  padC[0x4];
-    /* 0x10 */ s16 position[3];
-    /* 0x16 */ u8  pad16[0x66];
-    /* 0x7C */ s32 phase[3]; // wave phases, in 1/8 steps of func_15048A40's angle
-} SwayingProp;
-
-/* Sways the object: position[1] bobs around 1130 and rotation[0] / rotation[2] rock, each driven by
- * func_15048A40 of its own phase; the phases advance 12, 16 and 24 per frame. */
-void func_150DE6D8(SwayingProp *prop) {
-    prop->position[1] = func_15048A40(prop->phase[0] >> 3) * 10.19999981f + 1130.0f;
-    prop->rotation[0] = func_15048A40(prop->phase[1] >> 3) * 1.100000024f;
-    prop->rotation[2] = func_15048A40(prop->phase[2] >> 3) * 1.100000024f;
-    prop->phase[0] += D_800BE9E4 * 12;
-    prop->phase[1] += D_800BE9E4 * 16;
-    prop->phase[2] += D_800BE9E4 * 24;
+/* Sways the object: y bobs around 1130 and rotX / rotZ rock, each driven by func_15048A40 of its own
+ * phase (work.words[0..2], in 1/8 steps of its angle); the phases advance 12, 16 and 24 per frame. */
+void func_150DE6D8(WorldObject *prop) {
+    prop->y = func_15048A40(prop->work.words[0] >> 3) * 10.19999981f + 1130.0f;
+    prop->rotX = func_15048A40(prop->work.words[1] >> 3) * 1.100000024f;
+    prop->rotZ = func_15048A40(prop->work.words[2] >> 3) * 1.100000024f;
+    prop->work.words[0] += D_800BE9E4 * 12;
+    prop->work.words[1] += D_800BE9E4 * 16;
+    prop->work.words[2] += D_800BE9E4 * 24;
 }
 
 /* Spawn template of a particle, copied to Particle.def (same layout as ParticleDef in game_169510.c). */

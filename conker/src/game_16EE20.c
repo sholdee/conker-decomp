@@ -2133,7 +2133,7 @@ s32 func_15145AD8(struct17 *start, struct17 *dir, struct127 *actor, struct17 *hi
     return 1;
 }
 
-/* Whether entry `index` of D_800DBEF4 has flag 0x80 in unk6F (true for a negative index). */
+/* Whether entry `index` of D_800DBEF4 has viewFlags bit 0x80 (hidden) (true for a negative index). */
 u8 func_15145C90(s32 index) {
     if (index < 0) {
         return 1;
