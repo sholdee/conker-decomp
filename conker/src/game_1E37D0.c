@@ -50,7 +50,7 @@ typedef struct TrailTarget {
     /* 0x3C */ f32 unk3C;
 } TrailTarget;
 
-/* A TrailTarget and its unk3B byte: argument of a ring effect (selector 0) and of message 0. */
+/* A TrailTarget and its unk3B byte: argument of a ribbon effect (selector 0) and of message 0. */
 typedef struct TrailTargetRef {
     /* 0x00 */ TrailTarget *target;
     /* 0x04 */ u8 targetUnk3B;
@@ -262,7 +262,7 @@ s32 func_151B65D4(EffectObject *obj) {
 }
 
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+Gfx *func_15142E24(Gfx *gfx, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
@@ -275,6 +275,8 @@ extern struct {
     s32 unk4;
 } D_800A4AC8[];
 
+/* Draws the trail as a camera-facing strip 20 units wide, from the newest point to the oldest.
+ * While flags & 2 is set the strip starts at the effect position itself. */
 Gfx *func_151B6928(EffectObject *obj, Gfx *gfx, s16 view) {
     Vtx *vtx;
     TrailPoint *points;
@@ -301,12 +303,12 @@ Gfx *func_151B6928(EffectObject *obj, Gfx *gfx, s16 view) {
     f32 scale;
 
     if (obj->count >= 2) {
-        func_151D5D60(obj->buffers, view, (obj->capacity + 5) * 2 * sizeof(Vtx), (void **)&vtx, 0);
+        func_151D5D60(obj->buffers, view, (obj->capacity + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
             points = obj->points;
             camera = func_15144B34(view);
             flag = 1;
-            gfx = func_15142E24(gfx, (s32)D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
+            gfx = func_15142E24(gfx, D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
             gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
             gfx = func_1513F4E4(gfx, 0x4E, &flag);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
@@ -578,51 +580,51 @@ void func_151B7144(TrailTarget *target, u8 arg1, s32 arg2) {
     func_15130280(&spawn, 1, 0, 0, arg1, arg2);
 }
 
-/* Particle a ring effect drags along (see func_151B77F4). */
+/* Particle a ribbon effect drags along (see func_151B77F4). */
 typedef struct LinkedParticle {
     /* 0x00 */ u8 pad0[0x40];
     /* 0x40 */ Vec3f pos;
 } LinkedParticle;
 
-/* State block of a ring effect (func_151B7328). A copy of its arguments follows at +0x10. */
-typedef struct RingState {
+/* State block of a ribbon effect (func_151B7328). A copy of its arguments follows at +0x10. */
+typedef struct RibbonState {
     /* 0x00 */ LinkedParticle *linked;
     /* 0x04 */ void *args;
     /* 0x08 */ u8 selector; /* index into D_8008FB90 and D_8008FB98 */
     /* 0x09 */ u8 pad9[3];
-} RingState;
+} RibbonState;
 
-/* One point of a ring effect. */
-typedef struct RingPoint {
+/* One point of a ribbon effect. */
+typedef struct RibbonPoint {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ f32 distance; /* distance to the previous point */
     /* 0x10 */ u8 alpha;
     /* 0x11 */ u8 pad11[3];
-} RingPoint;
+} RibbonPoint;
 
 /* Returns 0 when the effect's source is gone, else stores the source position in pos. */
 extern s32 (*D_8008FB90[])(EffectObject *, Vec3f *);
 
-/* Spawns a ring effect that follows the position given by D_8008FB90[selector], with a copy of args
+/* Spawns a ribbon effect that follows the position given by D_8008FB90[selector], with a copy of args
  * (argsSize bytes) and a linked particle. Returns NULL if nothing was spawned. */
 EffectObject *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 arg4) {
     EffectObject *obj;
     EffectSpawn spawn;
     s32 pad; // matching: stack pad
-    RingState init;
-    RingState *state;
+    RibbonState init;
+    RibbonState *state;
     ParticleSpawn particle;
 
     init.linked = NULL;
     init.args = NULL;
     init.selector = selector;
     spawn.capacity = 20;
-    spawn.pos = *(Vec3f *)&D_800A5480;
+    spawn.pos = *(Vec3f *)&D_800A5480; /* D_800A5480 holds a Vec3f; variables.h declares it as f32 */
     spawn.lifetime = 300;
     spawn.flags = 20;
     spawn.unk10 = 16;
     spawn.unk14 = 2;
-    obj = func_15147A80(&spawn, argsSize + 0x10, sizeof(RingPoint), 0, 14, 14, 0, 0, 0, arg3, arg4);
+    obj = func_15147A80(&spawn, argsSize + 0x10, sizeof(RibbonPoint), 0, 14, 14, 0, 0, 0, arg3, arg4);
     if (obj != NULL) {
         state = obj->state;
         memcpy(state, &init, sizeof(init));
@@ -687,7 +689,7 @@ EffectObject *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 
     return obj;
 }
 
-/* Object a ring effect orbits (func_151B76CC). */
+/* Object a ribbon effect orbits (func_151B76CC). */
 typedef struct RotatedTarget {
     /* 0x00 */ u8 pad0[0x18];
     /* 0x18 */ f32 scaleXZ;
@@ -699,7 +701,7 @@ typedef struct RotatedTarget {
 
 /* D_8008FB90 callback: reads the followed TrailTarget's position; fails once the target is gone. */
 s32 func_151B7678(EffectObject *obj, Vec3f *pos) {
-    RingState *state;
+    RibbonState *state;
     TrailTargetRef *ref;
     TrailTarget *target;
 
@@ -718,7 +720,7 @@ s32 func_151B7678(EffectObject *obj, Vec3f *pos) {
 
 /* D_8008FB90 callback: places pos 250 units along the target's local -z axis. */
 s32 func_151B76CC(EffectObject *obj, Vec3f *pos) {
-    RingState *state;
+    RibbonState *state;
     RotatedTarget **ref;
     RotatedTarget *target;
     f32 mtx[4][4];
@@ -745,8 +747,8 @@ s32 func_151B76CC(EffectObject *obj, Vec3f *pos) {
 
 /* Moves the ribbon to its source position (D_8008FB90[selector]) and appends a point there. Returns 0 once the source is gone. */
 s32 func_151B77F4(EffectObject *obj) {
-    RingState *state;
-    RingPoint *points;
+    RibbonState *state;
+    RibbonPoint *points;
     Vec3f previous;
     Vec3f delta;
     f32 distance;
@@ -766,7 +768,7 @@ s32 func_151B77F4(EffectObject *obj) {
         delta.z = obj->pos.z - previous.z;
         distance = func_15143E64(&delta);
         {
-            RingPoint *point = &points[obj->head];
+            RibbonPoint *point = &points[obj->head];
 
             point->pos = obj->pos;
             point->distance = distance;
@@ -790,14 +792,14 @@ s32 func_151B77F4(EffectObject *obj) {
 
 /* Trims the ribbon to at most 1198 units of length, then fades its points from the head (opaque) to the tail. */
 s32 func_151B7998(EffectObject *obj) {
-    RingPoint *points;
+    RibbonPoint *points;
     f32 total;
     f32 scale;
     s32 i;
     s32 prev;
     f32 t;
-    RingPoint *cur;
-    RingPoint *next;
+    RibbonPoint *cur;
+    RibbonPoint *next;
     f32 dx;
     f32 dy;
     f32 dz;
@@ -879,7 +881,7 @@ Gfx *func_151B7C38(EffectObject *obj, Gfx *gfx, s16 view) {
     s32 index;
     s32 previous;
     Vec3f *camera;
-    RingPoint *points;
+    RibbonPoint *points;
     Vec3f toCamera;
     Vec3f delta;
     Vec3f normal;
@@ -899,7 +901,7 @@ Gfx *func_151B7C38(EffectObject *obj, Gfx *gfx, s16 view) {
     }
     camera = func_15144B34(view);
     flag = 1;
-    gfx = func_15142E24(gfx, (s32)D_80091100, 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
+    gfx = func_15142E24(gfx, D_80091100, 0, 0, 0, 0, 0x78, 0, 0, &flag, 3);
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x56, &flag);
     gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &flag);
@@ -1006,12 +1008,12 @@ Gfx *func_151B7C38(EffectObject *obj, Gfx *gfx, s16 view) {
     return gfx;
 }
 
-/* Message handlers of ribbon effects, indexed by RingState.selector; entries may be NULL. */
+/* Message handlers of ribbon effects, indexed by RibbonState.selector; entries may be NULL. */
 extern void (*D_8008FB98[])(EffectObject *, void *, u8);
 
 /* Message handler of a ribbon: forwards the message to D_8008FB98[selector], if there is one. */
 void func_151B82CC(EffectObject *obj, void *msg, u8 msgType) {
-    RingState *state = obj->state;
+    RibbonState *state = obj->state;
     void (*handler)(EffectObject *, void *, u8) = D_8008FB98[state->selector];
 
     if (handler != NULL) {
@@ -1021,7 +1023,7 @@ void func_151B82CC(EffectObject *obj, void *msg, u8 msgType) {
 
 /* D_8008FB98 handler of a ribbon that follows a TrailTarget: message 0 naming the target destroys the ribbon. */
 void func_151B8318(EffectObject *obj, TrailTargetRef *msg, u8 msgType) {
-    RingState *state = obj->state;
+    RibbonState *state = obj->state;
     TrailTargetRef *ref = state->args;
 
     if (msgType == 0) {
