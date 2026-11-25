@@ -200,11 +200,11 @@ Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus) {
  *
  * `val` is declared `int`, not `s32` (`long` here): the conversion this forces in
  * `val * n_syn->outputRate` puts the operands of the multu in the original order. */
-s32 func_1001ED6C(Fx *fx, s32 paramID, s32 *param) {
-    Fx *f = fx;
+s32 func_1001ED6C(void *filter, s32 paramID, void *param) {
+    Fx *f = filter;
     s32 sel = paramID & 7;
     s32 s = paramID >> 3;
-    int val = *param;
+    int val = *(s32 *)param;
     f32 depth;
 
     if (s >= f->section_count) {
