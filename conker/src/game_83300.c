@@ -479,11 +479,16 @@ void func_15056A00(struct127 *actor, u8 turn, u8 row) {
         actor->unk138 = 0;
     }
 }
+/* Per actor-type info, D_800D1C90[id] (only the fields used here). */
 typedef struct ActorInfo15056B08 {
-    u8 pad0[0x17];
-    u8 viewAngle; /* width of the spotting cone, in 1/256 turns */
-    u8 unk18;
-    u8 unk19;
+    /* 0x00 */ u8 pad0[0x14];
+    /* 0x14 */ s16 headHeight;
+    /* 0x16 */ u8 pad16;
+    /* 0x17 */ u8 viewAngle; /* width of the spotting cone, in 1/256 turns */
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 pad1A[0xD];
+    /* 0x27 */ u8 headBone;
 } ActorInfo15056B08;
 
 struct216 *func_1507BB28(s32, s32);
@@ -4574,73 +4579,66 @@ s32 func_15060BA4(struct127 *actor, s32 amount) {
 }
 extern u8 D_800C3E90;
 
-void func_15060BE0(struct127 *arg0) {
-    f32 pad0;
+/* Stores the actor's head position (s16 at 0x1BC): headHeight along its head bone's up axis, or its origin. */
+void func_15060BE0(struct127 *actor) {
+    f32 pad0; // matching: pad0..pad3 reproduce the stack layout
     f32 pad1;
     f32 pad2;
     f32 pad3;
-    f32 sp4;
-    f32 temp_f0;
-    f32 temp_f12;
-    f32 temp_f14;
-    f32 temp_f16;
-    f32 temp_f2;
-    f32 var_f0;
-    f32 var_f18;
-    f32 var_f2;
-    s32 var_v0;
-    struct124 *temp_v0;
-    u8 *temp_a2;
+    f32 offZ;
+    f32 len;
+    f32 upX;
+    f32 upY;
+    f32 upZ;
+    f32 height;
+    f32 offY;
+    f32 scale;
+    f32 offX;
+    s32 done;
+    ActorInfo15056B08 *info;
+    f32 (*bone)[4];
 
-    var_v0 = 0;
-    if (arg0->id != 0xFF) {
-        if ((arg0->unk1D4 != 0) && (D_800C3E90 == 0)) {
-            temp_v0 = (struct124 *)D_800D1C90[arg0->id];
-            temp_a2 = (u8 *)arg0->unk1D4;
-            temp_a2 += *(u8 *)((u8 *)temp_v0 + 0x27) << 6;
-            temp_f2 = (f32) *(s16 *)((u8 *)temp_v0 + 0x14) * arg0->y_scale;
-            if (temp_f2) {
-                temp_f12 = *(f32 *)(temp_a2 + 0x10);
-                temp_f14 = *(f32 *)(temp_a2 + 0x14);
-                temp_f16 = *(f32 *)(temp_a2 + 0x18);
-                temp_f0 = sqrtf((temp_f12 * temp_f12) + (temp_f14 * temp_f14) + (temp_f16 * temp_f16));
-                var_f18 = temp_f0;
-                if (temp_f0) {
-                    var_f18 = temp_f2 / temp_f0;
+    done = FALSE;
+    if (actor->id != 0xFF) {
+        if ((actor->unk1D4 != 0) && (D_800C3E90 == 0)) {
+            info = (ActorInfo15056B08 *)D_800D1C90[actor->id];
+            bone = (f32 (*)[4])((u8 *)actor->unk1D4 + (info->headBone << 6)); /* 4x4 float matrices */
+            height = (f32)info->headHeight * actor->y_scale;
+            if (height) {
+                upX = bone[1][0];
+                upY = bone[1][1];
+                upZ = bone[1][2];
+                len = sqrtf((upX * upX) + (upY * upY) + (upZ * upZ));
+                scale = len;
+                if (len) {
+                    scale = height / len;
                 }
-                var_f2 = temp_f12 * var_f18;
-                var_f0 = temp_f14 * var_f18;
-                sp4 = temp_f16 * var_f18;
+                offX = upX * scale;
+                offY = upY * scale;
+                offZ = upZ * scale;
             } else {
-                var_f0 = (sp4 = 0.0f);
-                var_f2 = var_f0;
+                offY = (offZ = 0.0f);
+                offX = offY;
             }
-            var_v0 = 1;
-            *(s16 *)((u8 *)arg0 + 0x1BC) = (s16) (s32) (*(f32 *)(temp_a2 + 0x30) + var_f2);
-            *(s16 *)((u8 *)arg0 + 0x1BE) = (s16) (s32) (*(f32 *)(temp_a2 + 0x34) + var_f0);
-            *(s16 *)((u8 *)arg0 + 0x1C0) = (s16) (s32) (*(f32 *)(temp_a2 + 0x38) + sp4);
+            done = TRUE;
+            ((s16 *)&actor->pad1BC)[0] = (s16)(s32)(bone[3][0] + offX);
+            ((s16 *)&actor->pad1BC)[1] = (s16)(s32)(bone[3][1] + offY);
+            ((s16 *)&actor->pad1BC)[2] = (s16)(s32)(bone[3][2] + offZ);
         }
     }
-    if (var_v0 == 0) {
-        *(s16 *)((u8 *)arg0 + 0x1BC) = (s16) (s32) arg0->x_position;
-        *(s16 *)((u8 *)arg0 + 0x1BE) = (s16) (s32) arg0->y_position;
-        *(s16 *)((u8 *)arg0 + 0x1C0) = (s16) (s32) arg0->z_position;
+    if (done == FALSE) {
+        ((s16 *)&actor->pad1BC)[0] = (s16)(s32)actor->x_position;
+        ((s16 *)&actor->pad1BC)[1] = (s16)(s32)actor->y_position;
+        ((s16 *)&actor->pad1BC)[2] = (s16)(s32)actor->z_position;
     }
 }
-typedef struct Game83300ActorLink {
-    s32 active;
-    u8 pad4[0x61];
-    u8 owner_index;
-    u8 pad66[0x2C6];
-} Game83300ActorLink;
-
-void func_15060D54(Game83300ActorLink *arg0) {
+/* Detaches every actor carried by (unk65 pointing at) this one. */
+void func_15060D54(struct127 *actor) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
-        if ((((Game83300ActorLink *)&D_800CC2D0)[i].active != 0) &&
-            ((arg0 - (Game83300ActorLink *)&D_800CC2D0) + 1 == ((Game83300ActorLink *)&D_800CC2D0)[i].owner_index)) {
-            ((Game83300ActorLink *)&D_800CC2D0)[i].owner_index = 0;
+        if ((D_800CC2D0[i].interaction_state != 0) && ((actor - D_800CC2D0) + 1 == D_800CC2D0[i].unk65)) {
+            D_800CC2D0[i].unk65 = 0;
         }
     }
 }
@@ -4706,7 +4704,7 @@ void func_15060F28(struct127 *arg0, s32 arg1) {
     }
     func_10010AA8(arg0);
     func_150303E4(arg0);
-    func_15060D54((Game83300ActorLink *)arg0);
+    func_15060D54(arg0);
     func_15188AD0(arg0);
     if (arg0->unk31C != NULL) func_10004074((void *)(s32)arg0->unk31C);
     func_1505F188(arg0);
