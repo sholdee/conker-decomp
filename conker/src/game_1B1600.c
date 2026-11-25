@@ -19,16 +19,17 @@ typedef struct ClipVtx {
 extern ClipVtx *(*D_8008D498[])(ClipVtx *, ClipVtx *, ClipVtx *);
 extern s32 (*D_8008D4C0[])(ClipVtx *);
 
-extern f32 D_800D3688;
-extern s32 D_800DE01C;
-extern s32 D_800DE020;
-extern s32 D_800DE024;
-extern s32 D_800DE030;
-extern s32 D_800DE034;
-extern s32 D_800DE038;
-extern f32 D_800DE03C;
-extern u8 D_800DE040;
-extern u8 D_800DE041;
+extern f32 D_800D3688;  /* shadow near plane (light-space z) */
+/* Shadow settings, set per level by func_151872B0. */
+extern s32 D_800DE01C;  /* vertex budget cap */
+extern s32 D_800DE020;  /* below this budget D_800DE028 eases back up */
+extern s32 D_800DE024;  /* vertex budget floor */
+extern s32 D_800DE030;  /* shadow viewport depth scale, in 1/1024 */
+extern s32 D_800DE034;  /* nonzero: skip the light nodes and always use the default light direction */
+extern s32 D_800DE038;  /* max lights (shadows) per object */
+extern f32 D_800DE03C;  /* light distance scale */
+extern u8 D_800DE040;   /* nonzero: keep the light at least 30 degrees above the object */
+extern u8 D_800DE041;   /* nonzero: only faces flagged in the D_800D3668 table receive shadows */
 
 extern s32 func_1502DB20(s32);
 extern u8 D_800C3E90;
@@ -776,7 +777,7 @@ s32 func_1518652C(s32 x, s32 z, s32 radius, ShadowVtx *out, f32 *mtx, ShadowVtx 
     return 0;
 }
 
-s32 func_151873E4(s32 arg0, s32 arg1, s32 arg2, ShadowVtx *arg3, f32 *arg4, ShadowVtx *arg5, s32 arg6);
+s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *end, s32 count);
 
 extern s32 D_8008D3E0;
 typedef struct { u8 pad0[0x40]; Vp vp[20]; } S180_15186794;
@@ -964,29 +965,30 @@ Gfx *func_15186794(Gfx *gfx, s32 arg1) {
     return gfx;
 }
 
-void func_151872B0(s32 arg0) {
-    D_800DE01C = 0x258;
-    D_800DE020 = 0xB4;
-    D_800DE024 = 0x5A;
-    D_800DE030 = 0x3F8;
+/* Per-level shadow settings: vertex budget, viewport depth scale, light selection and face filtering. */
+void func_151872B0(s32 level) {
+    D_800DE01C = 600;
+    D_800DE020 = 180;
+    D_800DE024 = 90;
+    D_800DE030 = 1016;
     D_800DE034 = 0;
     D_800DE038 = 1;
     D_800DE03C = 1.0f;
     D_800DE040 = 1;
     D_800DE041 = 1;
 
-    switch (arg0) {
+    switch (level) {
     case 0x21:
-        D_800DE01C = 0x12C0;
+        D_800DE01C = 4800;
         D_800DE020 = D_800DE01C - 1;
         D_800DE024 = D_800DE01C - 2;
-        D_800DE030 = 0x3F2;
+        D_800DE030 = 1010;
         D_800DE034 = 1;
         D_800DE038 = 4;
         D_800DE040 = 0;
         break;
     case 0x22:
-        D_800DE01C = 0x960;
+        D_800DE01C = 2400;
         D_800DE020 = D_800DE01C - 1;
         D_800DE024 = D_800DE01C - 2;
         D_800DE038 = 4;
@@ -996,19 +998,20 @@ void func_151872B0(s32 arg0) {
         D_800DE041 = 0;
         break;
     case 0x29:
-        D_800DE01C = 0x4B0;
-        D_800DE020 = 0x258;
-        D_800DE024 = 0x12C;
+        D_800DE01C = 1200;
+        D_800DE020 = 600;
+        D_800DE024 = 300;
         break;
     }
 }
 
 
+/* The fields of a D_800DBEF4 entry (struct131) read here. */
 typedef struct {
     u8  pad0[0x10];
-    s16 unk10;
+    s16 x;
     u8  pad12[0x2];
-    s16 unk14;
+    s16 z;
     u8  pad16[0x39];
     u8  unk4F;
     u16 unk50;
@@ -1018,35 +1021,33 @@ typedef struct {
     u8  pad6F[0x31];
 } unkfunc_151873E4; /* size 0xA0 */
 
-extern void func_1510F800(s32);
 extern void func_150A44F0(s32, s16 *, s32);
 extern ShadowVtx *func_150A5E44(s16 *, ShadowVtx *, f32 *, ShadowVtx *);
 
-extern s32 D_800D3690;
 extern s16 D_800D37E0[];
 extern s32 D_800DF0E4;
-extern s32 D_800DF0E8;
-extern s32 D_800DF0EC;
-extern s32 D_800DF0F0;
-extern s32 D_800DF0F4;
 
-s32 func_151873E4(s32 arg0, s32 arg1, s32 arg2, ShadowVtx *arg3, f32 *arg4, ShadowVtx *arg5, s32 arg6) {
+/*
+ * Appends to out[count..] the shadow-receiving geometry of every D_800DBEF4 entry whose bounds overlap
+ * the square of half-size `range` around (x, z). Returns the new vertex count.
+ */
+s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *end, s32 count) {
     unkfunc_151873E4 *entry;
     s32 found;
     s32 i;
-    s32 radius;
+    s32 extent;
 
     if (D_800DBEF0 == 0) {
-        return arg6;
+        return count;
     }
 
     func_1510F800(2);
 
-    arg3 += arg6;
-    D_800DF0E8 = arg0 - arg2;
-    D_800DF0EC = arg0 + arg2;
-    D_800DF0F0 = arg1 - arg2;
-    D_800DF0F4 = arg1 + arg2;
+    out += count;
+    D_800DF0E8 = x - range;
+    D_800DF0EC = x + range;
+    D_800DF0F0 = z - range;
+    D_800DF0F4 = z + range;
 
     found = 0;
     for (i = 0; i < D_800DBEF0; i++) {
@@ -1057,17 +1058,17 @@ s32 func_151873E4(s32 arg0, s32 arg1, s32 arg2, ShadowVtx *arg3, f32 *arg4, Shad
         if (entry->unk4F & 0x60) {
             continue;
         }
-        radius = (entry->unk52 < entry->unk50) ? entry->unk50 : entry->unk52;
-        if (D_800DF0EC < entry->unk10 - radius) {
+        extent = (entry->unk52 < entry->unk50) ? entry->unk50 : entry->unk52;
+        if (D_800DF0EC < entry->x - extent) {
             continue;
         }
-        if (entry->unk10 + radius < D_800DF0E8) {
+        if (entry->x + extent < D_800DF0E8) {
             continue;
         }
-        if (D_800DF0F4 < entry->unk14 - radius) {
+        if (D_800DF0F4 < entry->z - extent) {
             continue;
         }
-        if (entry->unk14 + radius < D_800DF0F0) {
+        if (entry->z + extent < D_800DF0F0) {
             continue;
         }
         D_800D37E0[found] = i;
@@ -1078,59 +1079,7 @@ s32 func_151873E4(s32 arg0, s32 arg1, s32 arg2, ShadowVtx *arg3, f32 *arg4, Shad
         func_150A44F0(found, D_800D37E0, 0);
         D_800D3690 = D_800DBE3C;
         D_800DF0E4 = found;
-        arg6 += func_150A5E44(D_800D37E0, arg3, arg4, arg5) - arg3;
+        count += func_150A5E44(D_800D37E0, out, mtx, end) - out;
     }
-    return arg6;
+    return count;
 }
-
-typedef struct {
-    u8 pad0[0x80];
-    f32 unk80;
-    f32 unk84;
-    f32 unk88;
-    f32 unk8C;
-    f32 unk90;
-    s16 unk94;
-    s16 unk96;
-    u8 unk98;
-    u8 pad99[7];
-} Particle151875E0;
-
-typedef struct {
-    u8 pad0[0x90];
-    f32 unk90;
-    f32 unk94;
-    f32 unk98;
-    f32 unk9C;
-    f32 unkA0;
-    Particle151875E0 *unkA4;
-    s16 unkA8;
-    s16 unkAA;
-} Obj151875E0;
-
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern void *allocate_memory(s32, s32, s32, s32);
-void func_151875E0(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
-
-typedef struct {
-    u8  pad0[0x8C];
-    f32 unk8C;
-    f32 unk90;
-    s16 unk94;
-    s16 unk96;
-    u8  pad98[0x8];
-} Elem_15187978; /* size 0xA0 */
-
-typedef struct {
-    u8  pad0[0xA4];
-    Elem_15187978 *unkA4;
-    s16 unkA8;
-    s16 unkAA;
-} Obj_15187978;
-
-extern s32 func_10004074(void *);
-void func_15187978(Obj_15187978 *arg0);
-
-extern void func_151EFE00(f32 *);
-void func_15187D6C(f32 *arg0, f32 arg1, f32 arg2, f32 arg3);
-
