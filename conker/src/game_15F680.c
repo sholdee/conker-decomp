@@ -1,5 +1,6 @@
 #include <ultra64.h>
-#define func_15169260 func_15169260_s32
+/* functions.h declares func_15169260's first parameter as s32; it is a pointer to a list of object kinds. */
+#define func_15169260 func_15169260_s32_decl_in_functions_h
 #include "functions.h"
 #undef func_15169260
 /* variables.h declares the D_800DC460/D_800DC464 list head/tail as s32 and D_800DC468 as u16;
@@ -9,6 +10,8 @@
 #define D_800DC464 D_800DC464_s32_decl_in_variables_h
 #define D_800DC468 D_800DC468_u16_decl_in_variables_h
 #include "variables.h"
+
+#define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
 #undef D_800DC460
 #undef D_800DC464
 #undef D_800DC468
@@ -161,16 +164,7 @@ typedef s32 (*ParticleWallHitFn)(Particle *particle, CollisionProbe *probe, f32 
 extern ParticleFloorHitFn D_80089934[];
 extern ParticleFloorType3Fn D_80089970[];
 extern ParticleWallHitFn D_80089974[];
-extern f32 D_800A386C;
-extern f32 D_800A3870;
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Data15133E3C;
-
-extern Data15133E3C D_800A3860;
-void func_15169260(Data15133E3C *, s32, s32, u8);
 
 typedef s32 (*ParticleUpdateFn)(Particle *);
 typedef void (*ParticleDestroyFn)(Particle *);
@@ -418,7 +412,7 @@ Particle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, ParticleFloor 
     particle->unk150 = 0;
     particle->unk14C = arg1;
     particle->unk168 = arg2;
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < ARRAY_COUNT(particle->unk154); i++) {
         particle->unk154[i] = 0;
     }
     particle->unk164 = 0;
@@ -610,7 +604,7 @@ s32 func_15132DDC(Particle *particle) {
             if (particle->floor.unk1C & 2) {
                 probe.floorHeight = particle->floor.height;
             } else {
-                probe.floorHeight = D_800A386C;
+                probe.floorHeight = -10000.0f;
             }
             probe.unkF8 = 0;
 
@@ -625,7 +619,7 @@ s32 func_15132DDC(Particle *particle) {
                         particle->invSpeed = 1.0f / speed;
                         particle->squashAngle = func_150484A0(probe.pos.x - particle->pos.x,
                                                               probe.pos.z - particle->pos.z) *
-                                                D_800A3870;
+                                                40.74366379f; // 256 / (2 * pi): radians to a byte angle
                     }
                 }
 
@@ -941,11 +935,13 @@ void func_15133DE8(Particle *particle, ParticleEventRemove *data, u8 event) {
     }
 }
 
-void func_15133E3C(s32 arg0, u8 arg1) {
-    Data15133E3C data;
+/* Call func_15169260 for both particle object kinds (0x19 and 0x48, see func_1513264C). */
+void func_15169260(const s32 *kinds, s32 count, s32 arg2, u8 arg3);
 
-    data = D_800A3860;
-    func_15169260(&data, 2, arg0, arg1);
+void func_15133E3C(s32 arg0, u8 arg1) {
+    const s32 kinds[2] = { 0x19, 0x48 };
+
+    func_15169260(kinds, ARRAY_COUNT(kinds), arg0, arg1);
 }
 
 /* A texture to bind to a segment: D_80090B60 index, segment number, and func_1510D0EC's third argument. */
