@@ -160,7 +160,7 @@ void func_151D7538(TrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
     if (msgType == 0x3D) {
         link = &(*pEmitter)->link;
         if ((msg->actor == link->actor) || (((TrailBoneLink *)*(s32 *)&msg)->actorId == link->actorId)) {
-            func_1516972C((EffectHeader *)*pEmitter);
+            func_1516972C(&(*pEmitter)->base.header);
         }
     } else {
         link = &(*pEmitter)->link;

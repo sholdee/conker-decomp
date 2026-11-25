@@ -1250,7 +1250,7 @@ void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
         msgActor = ((ActorMsg *)data)->ref.actor;
         link = &(*self)->link;
         if ((msgActor == link->actor) || (link->actorId == (*msg)->ref.uniqueId)) {
-            func_1516972C((EffectHeader *)*self);
+            func_1516972C(&(*self)->base.header);
         }
     } else {
         link = &(*self)->link;

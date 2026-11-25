@@ -67,7 +67,8 @@ typedef struct {
 } EmitterLink;
 
 typedef struct Emitter {
-    /* 0x00 */ u8 pad0[0x58];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x48];
     /* 0x58 */ EmitterLink link;
 } Emitter;
 
@@ -103,8 +104,6 @@ u8 func_151D8E20(void);
 Emitter *func_1513418C(BloodDripDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
 RiseParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize);
 void func_1513F6C0(FlickerSprite *sprite, u8 updateFn, u8 expireFn);
-void func_151346EC(EffectHeader *effect);
-void func_1513470C(EffectHeader *effect);
 
 FlickerSprite *func_150C6D90(Watcher *watcher);
 Emitter *func_150C68C4(Actor *character, Watcher *watcher);
@@ -296,7 +295,7 @@ void func_150C6D40(Emitter *emitter) {
     WatcherEffects *effects = &emitter->link.owner->effects;
 
     effects->emitter = NULL;
-    func_151346EC((EffectHeader *)emitter);
+    func_151346EC(&emitter->header);
 }
 
 /* Emitter teardown (D_80089AD4[3]): detaches the emitter from its watcher. */
@@ -304,7 +303,7 @@ void func_150C6D68(Emitter *emitter) {
     WatcherEffects *effects = &emitter->link.owner->effects;
 
     effects->emitter = NULL;
-    func_1513470C((EffectHeader *)emitter);
+    func_1513470C(&emitter->header);
 }
 
 /*

@@ -36,7 +36,8 @@ typedef struct {
 } GameF3270Link; // size 0xC
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x58];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x48];
     /* 0x58 */ GameF3270Link link;
 } GameF3270LinkedObject;
 
@@ -48,11 +49,8 @@ typedef struct {
 } GameF3270Children;
 
 typedef struct GameF3270Emitter {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0xB];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ Actor *actor;
     /* 0x1C */ u8 pad1C[0x18];
     /* 0x34 */ f32 surfaceY; // written by the surface probe
@@ -282,7 +280,7 @@ void func_150C6410(GameF3270LinkedObject *obj) {
     GameF3270Children *children = &obj->link.owner->children;
 
     children->linked = NULL;
-    func_151346EC(obj);
+    func_151346EC(&obj->header);
 }
 
 /* Linked-object destructor: detaches it from its emitter. */
@@ -290,7 +288,7 @@ void func_150C6438(GameF3270LinkedObject *obj) {
     GameF3270Children *children = &obj->link.owner->children;
 
     children->linked = NULL;
-    func_1513470C(obj);
+    func_1513470C(&obj->header);
 }
 
 extern Vec3f D_800887D0;
@@ -362,7 +360,7 @@ GameF3270Particle *func_150C6460(GameF3270Emitter *emitter) {
             // matching: the explicit & 0xFF on rand0 (a (u8) cast emits no andi)
             particle = (GameF3270Particle *)func_1513C73C(
                 (s32)&desc, 8, 2, (s32)emitter->unk38, probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
-                (rand2 & 1) * 2 + (rand1 & 1), 32, emitter->unkC, emitter->unk1);
+                (rand2 & 1) * 2 + (rand1 & 1), 32, emitter->header.owner, emitter->header.kind);
             if (particle != NULL) {
                 memcpy(&particle->wobble, &wobble, sizeof(wobble));
             }

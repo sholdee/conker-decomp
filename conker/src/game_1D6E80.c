@@ -76,7 +76,8 @@ typedef struct {
 } LoopSoundFxPayload;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x58];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x48];
     /* 0x58 */ LoopSoundFxPayload payload;
 } LoopSoundFx;
 
@@ -570,8 +571,6 @@ f32 func_151AAA4C(PulseFx *fx) {
 }
 
 LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task);
-extern void func_151346EC(LoopSoundFx *fx);
-extern void func_1513470C(LoopSoundFx *fx);
 
 /* Refreshes the task's pulse and loop-sound effects, spawning whichever is missing. */
 void func_151AAABC(ActorTask *task) {
@@ -974,7 +973,7 @@ void func_151AB788(LoopSoundFx *fx) {
         func_100111C8(sound->soundHandle);
     }
     ownerFx->sound = NULL;
-    func_151346EC(fx);
+    func_151346EC(&fx->header);
 }
 
 /* LoopSoundFx destructor (variant 2): stops the sound and detaches from the owner task. */
@@ -986,7 +985,7 @@ void func_151AB7D8(LoopSoundFx *fx) {
         func_100111C8(sound->soundHandle);
     }
     ownerFx->sound = NULL;
-    func_1513470C(fx);
+    func_1513470C(&fx->header);
 }
 
 /* func_15141DA4(actor, 0, 4). */
