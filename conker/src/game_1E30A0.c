@@ -73,6 +73,7 @@ Particle *func_151B5BF0(vertex *pos, vertex *vel, f32 size, vertex *rot, vertex 
     Particle *particle;
     ParticleSpawn spawn;
     Pulse pulse;
+    s32 fadeTime;
 
     pulse.baseSize = size;
     pulse.phase = 0.0f;
@@ -87,10 +88,11 @@ Particle *func_151B5BF0(vertex *pos, vertex *vel, f32 size, vertex *rot, vertex 
     spawn.pos = *pos;
     spawn.gravity = gravity;
     spawn.flags = 0xB908;
+    fadeTime = 0x100 >> fadeShift;
     if (lifetime == -1) {
         spawn.lifetime = 300;
     } else {
-        spawn.lifetime = lifetime + (0x100 >> fadeShift);
+        spawn.lifetime = lifetime + fadeTime;
         spawn.flags = 0xB988;
     }
     if (vel != NULL) {
@@ -102,7 +104,6 @@ Particle *func_151B5BF0(vertex *pos, vertex *vel, f32 size, vertex *rot, vertex 
         spawn.vel.z = 0.0f;
     }
     {
-        u32 *pad; // matching: unused local reserves a stack slot (frame size)
         u32 *end;
         u32 *p;
         s32 sum;
@@ -144,8 +145,8 @@ Particle *func_151B5BF0(vertex *pos, vertex *vel, f32 size, vertex *rot, vertex 
     spawn.unk6A = 0;
     spawn.owner = 0;
     spawn.ownerId = 0;
-    spawn.fadeStart = 0x100 >> fadeShift;
-    spawn.fadeRate = 255 / (0x100 >> fadeShift);
+    spawn.fadeStart = fadeTime;
+    spawn.fadeRate = 255 / fadeTime;
     particle = func_15132A4C(&spawn, 3, 255, sizeof(Pulse), arg12, arg13);
     if (particle != NULL) {
         memcpy(&particle->pulse, &pulse, sizeof(Pulse));
@@ -169,9 +170,9 @@ void func_151B5E94(Particle *particle) {
         func_10010F88(0x502, 0x5DC0, 0, 0, -1, particle->pos.x, particle->pos.y, particle->pos.z, 100, 500);
     }
     if (pulse->phase < 12.56637096f) {
-        f32 s = sinf(pulse->phase);
+        f32 wave = sinf(pulse->phase);
 
-        size = pulse->baseSize + s * (0.05000000075f * pulse->baseSize);
+        size = pulse->baseSize + wave * (0.05000000075f * pulse->baseSize);
         particle->sizeY = size;
         particle->sizeXZ = size;
     } else {
