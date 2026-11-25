@@ -572,7 +572,6 @@ void func_1511172C(s32 sky) {
     }
 }
 
-extern void *allocate_memory(s32, s32, s32, s32);
 
 /* One star of the star-field sky: a point on a sphere of radius 256, stored as the high halves of f32s. */
 typedef struct Star {

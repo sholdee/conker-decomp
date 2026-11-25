@@ -10,7 +10,6 @@
  * D_800DF7C8[1] lists type-1 trails (world object owners, one matrix).
  */
 
-extern void *allocate_memory();
 extern s32 func_1502DB20(s32);
 void func_15188A58(BoneTrail *trail, BoneTrail **list);
 

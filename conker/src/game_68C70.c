@@ -13,7 +13,6 @@ typedef struct BoneChain {
     /* 0x4E */ u8 blendTimer;   /* frames left blending back from the animated pose */
 } BoneChain;
 
-extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 
 /* Allocates and initialises the bone chain state of an object. */
 void func_1503B7C0(Actor *obj) {

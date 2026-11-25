@@ -194,7 +194,6 @@ u16 func_10011EB8(s32 arg0, u16 *arg1, s32 arg2);
 s32 func_1510F8CC(s32);
 extern Actor *func_1505EEB0(s32 state, s32 *arg1);
 extern u8 func_1505DADC(Actor *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4);
-extern void *allocate_memory(s32, s32, s32, s32);
 extern void func_1506AC8C(Actor *, s32, s32);
 extern Actor *func_1505ED34(void);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);

@@ -37,7 +37,6 @@ typedef struct GfxBytes {
 /* Per-model tables, indexed by model id (0..186). */
 extern void *D_800C5048[];
 
-extern void *allocate_memory(s32 size, s32, s32, s32);
 extern s32 func_150028BC(s32 id);
 extern s32 func_15084044(Actor *obj, s32 model);
 

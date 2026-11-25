@@ -73,7 +73,6 @@ Gfx *func_1510CDB8(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot) {
     return gfx;
 }
 
-extern void *allocate_memory(s32, s32, s32, s32);
 
 #define GFX_OPCODE(gfx) (*(s8 *)(gfx))
 

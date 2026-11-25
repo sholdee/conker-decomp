@@ -60,7 +60,6 @@ void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi) {
     D_800C6660[objIndex].state = PARTS_STATE_START;
 }
 
-extern void *allocate_memory(s32, s32, s32, s32);
 extern void (*D_80084430[])(ObjPart *part, s32 objIndex);  /* per-part init, per kind */
 extern void (*D_8008443C[])(s32 objIndex);                 /* start, per kind */
 extern void (*D_80084448[])(s32 objIndex);                 /* update, per kind */

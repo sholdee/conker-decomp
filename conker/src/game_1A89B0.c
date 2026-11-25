@@ -202,7 +202,6 @@ extern Game1A89B0AnimRef D_8008CF00[][8];
 /* Per sprite type (15 types) unless noted: */
 extern u32 D_800DDC40[15]; /* distance to the nearest sprite this frame */
 extern Game1A89B0TexSize D_800DDB80[];
-extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 math_distance3D(s32, s32, s32);
 extern void func_15170500(s32, s32, s32, s32, s32, s32, s32);
 

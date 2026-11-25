@@ -9,7 +9,6 @@ extern u8 D_800DF9B3[];
 extern u16 D_800BE528;
 
 
-extern void *allocate_memory(s32, s32, s32, s32);
 extern void func_15012ED8(u32 *);
 extern u8 D_800BE530[];
 extern s16 D_800BE550[];

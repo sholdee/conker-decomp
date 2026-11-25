@@ -56,7 +56,6 @@ void func_150C4D20(WorldObject *pendulum) {
     }
 }
 
-extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_1511A410(Gfx *dl, s32 *second);
 // texture indices 0x2C1 and 0x1C0, linked as absolute symbols
 extern u8 D_2C1;

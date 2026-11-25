@@ -4,7 +4,6 @@
 
 void *memcpy(void *, const void *, u32);
 
-extern void *allocate_memory(s32, s32, s32, s32);
 
 LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 

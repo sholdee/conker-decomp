@@ -35,7 +35,6 @@ void func_15003120(s32 index, s32 base, s32 list) {
 
 extern s32 D_800B0E20[];
 
-extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 extern s32 func_150049A4(Gfx *dl, s32 arg1, s32 arg2);
 
 /* Loads level `levelId`'s models, rebases them and sets up the first four as the level's display lists. */

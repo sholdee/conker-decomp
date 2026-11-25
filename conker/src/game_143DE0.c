@@ -24,7 +24,6 @@ typedef struct RomFile {
 extern VertexAnim D_80089320[];
 extern RomFile D_8002AAD0[];
 
-extern void *allocate_memory(s32, s32, s32, s32);
 void func_151169B4(WorldObject *obj);
 void func_15116BAC(WorldObject *obj);
 

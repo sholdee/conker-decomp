@@ -15,7 +15,6 @@ s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z);
 s32 func_15086D48(s32 id);
 f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz);
 
-extern void *allocate_memory(s32, s32, s32, s32);
 u8 func_150888A8(u8, u8, s8);
 void func_15088824(Racer *racer);
 

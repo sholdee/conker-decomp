@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-extern void *allocate_memory(s32, s32, s32, s32);
 
 /* Clears the per-id record flag bits (D_800D2E4C) and state tables. */
 void func_15017790(void) {

@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-extern void *allocate_memory(s32, s32, s32, s32);
 
 void func_1500FE30(void) {
     s32 i;

@@ -3757,7 +3757,6 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
     }
 }
 
-extern void *allocate_memory(s32, s32, s32, s32);
 
 /*
  * Loads text bank (bank - 1) of language D_800E0BEA and indexes its NUL-separated strings into D_800E0BD8;

@@ -22,11 +22,9 @@ void func_10003930(void);
 /* init_3BD0.c */
 void func_10003BD0(void);
 
-/* init_3C40.c
- * allocate_memory(s32 size, s32 tag, s32 align, s32 mode) is not declared here: func_150039E0 (game_30E90.c)
- * matches only with a u32 tag, and func_150028BC, func_15017930 and func_151EE184 only with an s32 tag. The
- * files that call it declare it themselves. */
-s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode);
+/* init_3C40.c */
+void *allocate_memory(s32 size, s32 tag, s32 align, s32 mode);
+void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode);
 void func_10004074(void *ptr);
 void func_10004250(void);
 void func_10004308(void);

@@ -151,7 +151,6 @@ extern u32 D_80040F94;
 extern OSIoMesg D_80041330[MAX_BANK_DMAS];
 
 Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 maxSamples);
-void *allocate_memory(s32, s32, s32, s32);
 s32 func_100095A0(AudioInfo *info, AudioInfo *lastInfo);
 void func_100099BC(void);
 void func_1000A03C(void);

@@ -13,7 +13,7 @@
  */
 
 /* Allocates size bytes from the front of the heap; see func_10003C6C. */
-s32 allocate_memory(s32 size, s32 tag, s32 align, s32 mode) {
+void *allocate_memory(s32 size, s32 tag, s32 align, s32 mode) {
     return func_10003C6C(size, tag, align, FALSE, mode);
 }
 
@@ -32,7 +32,7 @@ extern AllocAlignTable D_8002AC40;
  * largest free block is under 0x7800 bytes; mode 0 treats running out of memory
  * as fatal. Returns the payload address, or 0.
  */
-s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
+void *func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
     AllocatorBlock *block;
     AllocatorFreeBlock *freeBlock;
     u32 pad; // matching: unused stack slot in the original frame
@@ -65,7 +65,7 @@ s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
     alignOffset = offsets.values[align];
     alignMask = masks.values[align];
     if (mode == 1 && D_8002AC30 < 0x7800) {
-        return 0;
+        return NULL;
     }
 
     intMask = osSetIntMask(1);
@@ -82,7 +82,7 @@ s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
                 D_8003C8E0 = 0x0C000042;
                 func_150AD770();
             }
-            return 0;
+            return NULL;
         }
         block = (AllocatorBlock *)((u32)((u8 *)freeBlock + alignOffset + sizeof(AllocatorBlock)) & alignMask);
         freeSize = freeBlock->header.taggedSize;
@@ -206,7 +206,7 @@ s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 fromEnd, s32 mode) {
         func_1000440C();
     }
     osSetIntMask(intMask);
-    return (s32)(block + 1);
+    return block + 1;
 }
 
 /* Frees the block whose payload is ptr, merging it with free neighbours. */

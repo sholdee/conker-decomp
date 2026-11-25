@@ -60,7 +60,6 @@ typedef struct {
 extern EffectTexture D_80090B60[];
 extern s32 D_800A9270[];           // the two object lists ropes are allocated in
 
-extern void *allocate_memory(s32, s32, s32, s32);
 f32 func_150489B0(u8);
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
 Gfx *func_15094FE8(Gfx *, EffectTexture *, s32, s32, s32, s32, s32, s32, s32, s32, s32);

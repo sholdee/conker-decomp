@@ -90,7 +90,6 @@ IdRecord *func_1509B704(s16 id) {
     return NULL;
 }
 
-void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 
 /* Unlinks `node` from the task working set and frees it. */
 void func_1509B764(IdRecord *node) {

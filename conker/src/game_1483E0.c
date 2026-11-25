@@ -9,7 +9,6 @@
  */
 
 extern f32 func_150489B0(u8);
-extern void *allocate_memory(s32, s32, s32, s32);
 extern void func_15188010(s32, f32 *);
 extern s32 func_15022B08(s32, s32);
 extern void func_1511F990(void *, s32);

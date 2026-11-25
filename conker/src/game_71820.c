@@ -19,7 +19,6 @@ extern void (*D_80085E8C[])(void);
 extern f32 sqrtf(f32);
 extern s32 D_800CBD9C;
 extern s32 func_15145C90(s32);
-extern void *allocate_memory(s32, s32, s32, s32);
 TriggerNode *func_15044964(s32 size, s32 check, s32 lifetime, s32 delay, s32 action, s32 x, s32 y, s32 z);
 
 #pragma function sqrtf

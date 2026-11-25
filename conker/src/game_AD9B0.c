@@ -10,7 +10,6 @@
 
 extern TriggerZone *D_800D199C;   /* zone to disable once the text box closes */
 
-void *allocate_memory(s32, s32, s32, s32);
 TextBox *func_1516A7B0(s32, s32, s32, void (*)(s32, s32, s32), TextBoxConfig *, s32);
 void func_1516D2E0(TextBox *);
 void func_151F2D6C(s32, s32);

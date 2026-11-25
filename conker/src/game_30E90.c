@@ -1,6 +1,10 @@
 #include <ultra64.h>
 
+// matching: func_150039E0 matches only with a u32 tag: the hoisted 1 it passes is shared with the 1U compare
+#define allocate_memory allocate_memory_functions_h
 #include "functions.h"
+#undef allocate_memory
+void *allocate_memory(s32 size, u32 tag, s32 align, s32 mode);
 #include "variables.h"
 
 /* Defaults for objects of the second (grouped) list, indexed by model id (D_800A26C0). */
@@ -28,7 +32,6 @@ extern GroupedObjectDefaults D_800A26C0[];
 extern void *D_800DBED0[4];
 extern void *D_800DBEE0;
 extern void *D_800DBEE4;
-void *allocate_memory(s32, u32, s32, s32);
 extern u16 D_800BE2A0;
 extern u16 D_800BE2A2;
 extern u16 D_800BE2A4;

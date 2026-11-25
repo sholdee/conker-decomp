@@ -47,7 +47,6 @@ void func_150092DC(void) {
     }
 }
 
-extern void *allocate_memory(s32, s32, s32, s32);
 s32 func_1515D5AC(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /**

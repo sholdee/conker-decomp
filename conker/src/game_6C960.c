@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 void func_1502D824(AnimInstance *anim, void *obj, u8 *buf);
 void func_1505E0C4(void *actor, u16 *animEntry, AnimInstance *state, s32 arg3, s32 restart, s32 anim, s32 bank,
                    f32 speed, f32 blendFrames, f32 arg9, f32 arg10, s32 flag8000);

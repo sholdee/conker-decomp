@@ -1669,7 +1669,6 @@ Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 r
     return gfx;
 }
 
-extern void *allocate_memory(s32, s32, s32, s32);
 
 /*
  * Loads a HUD model and makes patched copies of its display lists (SetOtherMode rewritten,

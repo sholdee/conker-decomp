@@ -148,7 +148,6 @@ s32 func_1510BF60(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip) {
 }
 
 extern UvWobble *D_800D9E60[];
-extern void *allocate_memory(s32, s32, s32, s32);
 
 /* Registers a UV wobble for mesh 0 vertices drawn with texture `tex` and mesh 1 ones drawn with D_800917B8. */
 UvWobble *func_1510C4AC(s32 tex, s32 disabled, s32 rate, s32 amplitude) {

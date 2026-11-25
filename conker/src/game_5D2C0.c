@@ -6,7 +6,6 @@ extern s32 D_800902BC[];
 void func_1000FD38(void *, void *, s32);
 extern void func_150A7A48(MtxF a, MtxF b, MtxF out);
 extern void func_1503E5F8();
-extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 
 
 void func_15168E54(Gfx *, AttachModelHeader *);
