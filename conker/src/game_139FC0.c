@@ -5,13 +5,6 @@
 extern u8 D_1A37E0[];
 extern u8 D_800D9F68[];
 
-#define WGFX1510CDB8(pkt, a, b)     \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
-
 extern u16 D_800D9E70[4][3];
 extern u8 D_800D9E88[4][3];
 extern u8 D_800D9E98[4][3];
@@ -21,24 +14,25 @@ extern u8 D_800D9EB8[4][3];
 
 extern f32 func_150489B0(u8);
 
-void func_1510CB10(s32 arg0) {
+/* Steps slot's prim/env tint channels toward their targets and adds a sine pulse. */
+void func_1510CB10(s32 slot) {
     f32 wave;
     s32 step;
     s32 target;
     s32 diff;
-    s32 flash;
+    s32 override;
     s32 cur;
     s32 amount;
     s32 i;
 
-    if (D_800DBFF0[arg0].unk5F0 & 1) {
-        flash = D_800D9EB8[arg0][0];
+    if (D_800DBFF0[slot].unk5F0 & 1) {
+        override = D_800D9EB8[slot][0];
         step = D_800BE9E4 * 2;
 
         for (i = 0; i < 3; i++) {
-            cur = D_800D9EA8[arg0][i];
-            if (flash) {
-                target = D_800D9EB8[arg0][i];
+            cur = D_800D9EA8[slot][i];
+            if (override) {
+                target = D_800D9EB8[slot][i];
             } else {
                 target = D_800D9EB4[i];
             }
@@ -53,38 +47,37 @@ void func_1510CB10(s32 arg0) {
                 } else {
                     cur += step;
                 }
-                D_800D9EA8[arg0][i] = cur;
+                D_800D9EA8[slot][i] = cur;
             }
 
-            wave = (u32)D_800D9E98[arg0][i] * func_150489B0(D_800D9E70[arg0][i] >> 4);
-            amount = (s32)wave + cur - 0x7F;
+            wave = D_800D9E98[slot][i] * func_150489B0(D_800D9E70[slot][i] >> 4);
+            amount = (s32)wave + cur - 127;
             if (amount >= 0) {
-                D_800D9B68[arg0][i] += amount;
+                D_800D9B68[slot][i] += amount;
             } else {
-                D_800D9B78[arg0][i] -= amount;
+                D_800D9B78[slot][i] -= amount;
             }
 
-            if (D_800D9B68[arg0][i] >= 0x80) {
-                D_800D9B68[arg0][i] = 0x7F;
+            if (D_800D9B68[slot][i] >= 128) {
+                D_800D9B68[slot][i] = 127;
             }
-            if (D_800D9B78[arg0][i] >= 0x80) {
-                D_800D9B78[arg0][i] = 0x7F;
+            if (D_800D9B78[slot][i] >= 128) {
+                D_800D9B78[slot][i] = 127;
             }
 
-            D_800D9E70[arg0][i] += D_800D9E88[arg0][i];
-            D_800D9E70[arg0][i] &= 0xFFF;
+            D_800D9E70[slot][i] += D_800D9E88[slot][i];
+            D_800D9E70[slot][i] &= 0xFFF;
         }
 
-        D_800D9EB8[arg0][0] = 0;
+        D_800D9EB8[slot][0] = 0;
     }
 }
 
-Gfx *func_1510CDB8(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    gDPSetPrimColor(arg0++, 0xF2, 0, D_800D9B68[arg3][0], D_800D9B68[arg3][1], D_800D9B68[arg3][2], arg1);
-
-    gDPSetEnvColor(arg0++, D_800D9B78[arg3][0], D_800D9B78[arg3][1], D_800D9B78[arg3][2], arg2);
-
-    return arg0;
+/* Emits the prim and env colors for slot's current tint. */
+Gfx *func_1510CDB8(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot) {
+    gDPSetPrimColor(gfx++, 0xF2, 0, D_800D9B68[slot][0], D_800D9B68[slot][1], D_800D9B68[slot][2], primAlpha);
+    gDPSetEnvColor(gfx++, D_800D9B78[slot][0], D_800D9B78[slot][1], D_800D9B78[slot][2], envAlpha);
+    return gfx;
 }
 
 extern void *allocate_memory(s32, s32, s32, s32);
