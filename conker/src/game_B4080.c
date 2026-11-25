@@ -77,7 +77,11 @@ typedef struct MpZone {
     /* 0xA */ s16 padA;
 } MpZone;
 
-/* Multiplayer game state (D_800D23B0), loaded from resources 0xB7..0xBE. Arrays are per player or per slot. */
+/*
+ * Multiplayer game state (D_800D23B0), loaded from resources 0xB7..0xBE. Arrays are per player or
+ * per slot. Some functions null-test arrays (grenades, unk55C, attacker, ...) as if they were
+ * pointers; the tests are always true but are kept, in the exact form that matches.
+ */
 typedef struct MpGame {
     /* 0x0000 */ s32 unk0;
     /* 0x0004 */ s32 unk4;
@@ -1904,7 +1908,7 @@ s32 func_1508A6FC(void) {
             }
             attackers[i] = D_800E0BB8[i];
             D_800E0BB8[i] &= 0x7F;
-            if ((D_800D23B0->grenades) != 0) {
+            if (D_800D23B0->grenades != NULL) {
                 D_800D23B0->grenades[i] = obj->unk31C->grenade_count;
             }
             arr39C[i] = func_150859AC(i, 4);
@@ -1973,7 +1977,7 @@ s32 func_1508A6FC(void) {
                 if ((attackTimers[i] >= 0) && (old < 0)) {
                     bit = 1;
                 }
-                if ((D_800872C4[D_800E0BD0] != (-1)) && (aimTimes[i] >= D_800872C4[D_800E0BD0])) {
+                if (D_800872C4[D_800E0BD0] != -1 && aimTimes[i] >= D_800872C4[D_800E0BD0]) {
                     reset = 1;
                 }
                 D_800D23B0->side[i] += (D_800D23B0->sideGoal[i] - D_800D23B0->side[i]) >> 2;
@@ -1984,7 +1988,7 @@ s32 func_1508A6FC(void) {
                 if (attackTimers[i] == 0) {
                     D_800D23B0->sideGoal[i] = 0;
                     D_800D23B0->dropGoal[i] = 0;
-                    if (D_800872E8[D_800E0BD0] < ((s32) (func_150ADA68() * 100.0f))) {
+                    if (D_800872E8[D_800E0BD0] < (s32)(func_150ADA68() * 100.0f)) {
                         if (func_150ADA68() > 0.5f) {
                             D_800D23B0->sideGoal[i] = -50;
                         } else {
@@ -2022,7 +2026,7 @@ s32 func_1508A6FC(void) {
     } else {
         D_800D23B0->ticks = 1.0f;
     }
-    if ((D_800D23B0->unk55C) != 0) {
+    if (D_800D23B0->unk55C != NULL) {
         func_1508B3F8();
     }
     if (D_800D23B0->gameType == 0xB9) {
