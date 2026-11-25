@@ -250,22 +250,29 @@ void func_15056258(struct127 *actor) {
         actor->y_position += heightFactor * delta * 0.002997000003f;
     }
 }
-typedef struct Game83300AnimRate {
+/* One step of an actor's reaction sequence. */
+typedef struct {
     u16 anim;
-    u8 rate;
-    u8 pad;
-} Game83300AnimRate;
-typedef struct Game83300AnimSet {
-    u8 pad0[0xA];
-    Game83300AnimRate e[3];
+    u8 speed; /* percent */
+    u8 flags; /* bit 0: copied to unk10B; & 0xFE: stun time / 100 */
+} Game83300AnimSub;
+
+/* An actor type's reaction (0x18 bytes); ((s32 *)D_800D1588[id])[-2] points to the table. */
+typedef struct {
+    u8 kind; /* matched by func_1505E7CC */
+    u8 pad1[3];
+    s32 sound;
+    u8 unk8;
+    u8 pad9;
+    Game83300AnimSub sub[3];
     u8 pad16[2];
-} Game83300AnimSet;
+} Game83300AnimEntry;
 void func_150649A0(s32, s32);
 
 /* Moves the actor toward its host D_800CC2D0[unk13D - 100] and picks the carried animation. */
 void func_150562FC(struct127 *actor) {
     s32 *animTable;
-    Game83300AnimSet *anims;
+    Game83300AnimEntry *anims;
     s16 *hostData;
     u32 animIdx;
     f32 heightOffset;
@@ -347,10 +354,10 @@ void func_150562FC(struct127 *actor) {
     }
     animIdx = func_1505E7CC(animKind, actor);
     animTable = (s32 *)D_800D1588[actor->id];
-    anims = (Game83300AnimSet *)animTable[-2];
+    anims = (Game83300AnimEntry *)animTable[-2];
     if ((D_800CC2D0[hostIdx].interaction_state == 1) && (D_800CC2D0[hostIdx].in_water != 0)) {
         actor->unk5C = 4;
-        attached = 1; if (anims[animIdx].e[1].anim != 0) { // matching: same line (as1 tie-break)
+        attached = 1; if (anims[animIdx].sub[1].anim != 0) { // matching: same line (as1 tie-break)
             variant = 1;
         }
     }
@@ -405,10 +412,10 @@ void func_150562FC(struct127 *actor) {
     {
         f32 rate;
 
-        rate = (u32)anims[animIdx].e[variant].rate;
+        rate = (u32)anims[animIdx].sub[variant].speed;
     split: // matching: block boundary moves the u32->f32 convert's register (f16 instead of f0)
         rate = rate / 100.0f;
-        func_1505E650(actor, anims[animIdx].e[variant].anim, rate, animArg, 0.0, 0, 0);
+        func_1505E650(actor, anims[animIdx].sub[variant].anim, rate, animArg, 0.0, 0, 0);
     }
     if (attached != 0) {
         actor->unk65 = hostIdx + 1;
@@ -1439,7 +1446,7 @@ void func_15059444(struct127 *actor) {
 
 /* Attaches the actor to D_800CC2D0[hostIdx] (grabbed/carried) and starts both actors' animations. */
 void func_1505959C(struct127 *actor, s32 hostIdx) {
-    struct252 *anims;
+    Game83300AnimEntry *anims;
     s32 *animTable;
     s32 variant;
 
@@ -1477,11 +1484,11 @@ void func_1505959C(struct127 *actor, s32 hostIdx) {
     func_1505E874(D_800C3E78, actor);
     animTable = (s32 *)D_800D1588[actor->id];
     if (animTable != NULL) {
-        anims = (struct252 *)animTable[-2];
-        if ((anims != NULL) && (anims[actor->unk106].unk15 & 2)) {
+        anims = (Game83300AnimEntry *)animTable[-2];
+        if ((anims != NULL) && (anims[actor->unk106].sub[2].flags & 2)) {
             actor->unk7A = D_800CC2D0[hostIdx].unk7A;
         }
-        if ((anims == NULL) || !(anims[actor->unk106].unk15 & 1)) {
+        if ((anims == NULL) || !(anims[actor->unk106].sub[2].flags & 1)) {
             actor->unk13E = (actor->unk7A - D_800CC2D0[hostIdx].unk7A) >> 8;
         } else {
             actor->unk13E = 0;
@@ -3593,59 +3600,46 @@ void func_1505E650(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
         }
     }
 }
-u32 func_1505E7CC(s32 arg0, struct127 *arg1) {
-    s32 idx;
-    s32 *ptr;
+/* Index of the actor type's reaction entry of the given kind (0 if there is none). */
+u32 func_1505E7CC(s32 kind, struct127 *actor) {
+    s32 id;
+    s32 *animTable;
     u32 count;
-    u8 *base;
-    u8 *entry;
+    Game83300AnimEntry *table;
+    Game83300AnimEntry *entry;
     u32 i;
 
-    idx = arg1->id;
-    if (idx == 0xFF) {
+    id = actor->id;
+    if (id == 0xFF) {
         return 0;
     }
-    ptr = (s32 *)D_800D1588[idx];
-    if (ptr == NULL) {
+    animTable = (s32 *)D_800D1588[id];
+    if (animTable == NULL) {
         return 0;
     }
-    count = ptr[-1];
+    count = animTable[-1];
     if (count == 0) {
         return 0;
     }
-    count = count / 0x18;
-    base = (u8 *)ptr[-2];
-    if (base == NULL) {
+    count = count / sizeof(Game83300AnimEntry);
+    table = (Game83300AnimEntry *)animTable[-2];
+    if (table == NULL) {
         return 0;
     }
     if (count != 0) {
+        /* matching: a pointer-stepped do-while; a for loop gets unrolled by IDO */
         i = 0;
-        entry = base;
+        entry = table;
         do {
-            if (arg0 == entry[0]) {
+            if (kind == entry->kind) {
                 return i;
             }
             i++;
-            entry += 0x18;
+            entry++;
         } while (i < count);
     }
     return 0;
 }
-typedef struct {
-    u16 unk0;
-    u8 unk2;
-    u8 unk3;
-} Game83300AnimSub;
-
-typedef struct {
-    u8 unk0;
-    u8 pad1[3];
-    s32 unk4;
-    u8 unk8;
-    u8 pad9;
-    Game83300AnimSub sub[3];
-    u8 pad16[2];
-} Game83300AnimEntry; /* size 0x18 */
 
 s32 func_1506E46C(struct127 *arg0, s32 *arg1, s32 arg2);
 void func_15060A30(s32 arg0, struct127 *arg1);
@@ -3653,78 +3647,81 @@ void func_15060B04(s32 arg0, struct127 *arg1, s32 arg2);
 void func_1507CD64(struct127 *arg0, s32 arg1);
 void func_1517F488(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 
-void func_1505E874(s32 arg0, struct127 *arg1) {
+/*
+ * Advances the actor's reaction sequence (entry unk106, step unk105): plays the next step's animation
+ * and stun time, starts the death animation when it ends with no health left, or ends the reaction.
+ */
+void func_1505E874(s32 sourceIdx, struct127 *actor) {
     s32 *ptr;
     Game83300AnimEntry *table;
-    f32 scale;
-    f32 speed;
+    f32 animSpeed;
+    f32 blend;
     s32 i;
     u16 anim;
-    u16 pad58;
+    u16 pad; // matching: stack slot
 
-
-    speed = 6.0f;
-    if (arg1->id == 0xFF) {
+    blend = 6.0f;
+    if (actor->id == 0xFF) {
         return;
     }
-    anim = arg1->unk106;
-    ptr = (s32 *)D_800D1588[arg1->id];
+    anim = actor->unk106;
+    ptr = (s32 *)D_800D1588[actor->id];
     table = (Game83300AnimEntry *)ptr[-2];
     if (table == NULL) {
         return;
     }
-    if (arg1->unk105 == 0) {
-        arg1->unk10F = table[anim].unk8;
-        arg1->disable_jump = 0;
-        if (arg1->unk31C != NULL) {
-            *((u8 *)arg1->unk31C + 0x26) = 0;
+    if (actor->unk105 == 0) {
+        actor->unk10F = table[anim].unk8;
+        actor->disable_jump = 0;
+        if (actor->unk31C != NULL) {
+            actor->unk31C->unk26 = 0;
         }
-        if ((arg1->id == 0x5E) && (arg1->unk13D != 0)) {
-            speed = 0.0f;
+        if ((actor->id == 0x5E) && (actor->unk13D != 0)) {
+            blend = 0.0f;
         }
-        if (table[anim].unk4 != 0) {
+        if (table[anim].sound != 0) {
             s32 sound;
-            sound = table[anim].unk4;
-            if (func_1506E46C(arg1, &sound, 1) != 0) {
+            sound = table[anim].sound;
+            if (func_1506E46C(actor, &sound, 1) != 0) {
                 if (sound != 0x33) {
-                    func_15060A30(sound, arg1);
+                    func_15060A30(sound, actor);
                 } else {
-                    func_15060B04(sound, arg1, 0x5DC0);
+                    func_15060B04(sound, actor, 0x5DC0);
                 }
             }
         }
     }
-    arg1->unkF4 &= 0xFFF3FEB1;
-    if (arg1->unk105 < 3) {
-        u8 rate;
-        rate = table[anim].sub[arg1->unk105].unk3 & 0xFE;
-        arg1->unk10B &= ~1;
-        arg1->unk10B |= table[anim].sub[arg1->unk105].unk3 & 1;
-        if ((arg1->unk127 != 0xFF) && (arg1->unk105 == 0) && (arg1->unk31C != NULL) &&
-            (arg1->camera != NULL) && (*((u8 *)arg1->unk31C + 0x197) != 0)) {
-            func_1517F488(0xFF, 0, 0, 0xB4, 0x14, arg1->camera->unk23D);
+    actor->unkF4 &= 0xFFF3FEB1;
+    if (actor->unk105 < 3) {
+        u8 stunTime;
+        stunTime = table[anim].sub[actor->unk105].flags & 0xFE;
+        actor->unk10B &= ~1;
+        actor->unk10B |= table[anim].sub[actor->unk105].flags & 1;
+        if ((actor->unk127 != 0xFF) && (actor->unk105 == 0) && (actor->unk31C != NULL) &&
+            (actor->camera != NULL) && (*((u8 *)actor->unk31C + 0x197) != 0)) {
+            func_1517F488(0xFF, 0, 0, 0xB4, 0x14, actor->camera->unk23D);
         }
-        if ((arg1->unk127 != 0xFF) && (arg1->health == 0)) {
-            i = arg1->unk105;
-            while (table[anim].sub[i].unk0 != 0) {
+        if ((actor->unk127 != 0xFF) && (actor->health == 0)) {
+            i = actor->unk105;
+            while (table[anim].sub[i].anim != 0) {
                 i++;
             }
             if (i < 2) {
                 i = 2;
             }
-            if (i == arg1->unk105 + 1) {
+            if (i == actor->unk105 + 1) {
                 s32 type;
-                s32 var_a1;
-                type = table[anim].unk0;
-                if (arg1->id == 0x9A) {
-                    var_a1 = 0xE;
-                } else if (arg1->id == 0x53) {
-                    var_a1 = 0xA;
-                } else if (arg1->in_water != 0) {
-                    var_a1 = 4;
-                } else if ((((arg1->unk184 & 0x1F) == 0xE) || ((arg1->unk184 & 0x1F) == 0x13)) &&
+                s32 deathKind;
+                type = table[anim].kind;
+                if (actor->id == 0x9A) {
+                    deathKind = 0xE;
+                } else if (actor->id == 0x53) {
+                    deathKind = 0xA;
+                } else if (actor->in_water != 0) {
+                    deathKind = 4;
+                } else if ((((actor->unk184 & 0x1F) == 0xE) || ((actor->unk184 & 0x1F) == 0x13)) &&
                            (D_800BE9F0 != 0x34)) {
-                    var_a1 = 0xD;
+                    deathKind = 0xD;
                 } else {
                     switch (type) {
                         case 0x20:
@@ -3734,78 +3731,78 @@ void func_1505E874(s32 arg0, struct127 *arg1) {
                         case 0x33:
                         case 0x34:
                         case 0x48:
-                            var_a1 = 0;
+                            deathKind = 0;
                             break;
                         case 0x2D:
                         case 0x2E:
                         case 0x2F:
-                            var_a1 = 7;
+                            deathKind = 7;
                             break;
                         case 0x2C:
-                            var_a1 = 8;
+                            deathKind = 8;
                             break;
                         case 0x42:
-                            var_a1 = 0xC;
+                            deathKind = 0xC;
                             break;
                         case 0x43:
-                            var_a1 = 0xB;
+                            deathKind = 0xB;
                             break;
                         case 0xE:
                         case 0xF:
-                            var_a1 = 0x10;
+                            deathKind = 0x10;
                             break;
                         case 0x10:
-                            *((u8 *)arg1->unk31C + 0x1AC) = 1;
+                            *((u8 *)actor->unk31C + 0x1AC) = 1;
                             D_800D1580 = 0xFF010434;
-                            var_a1 = 0;
+                            deathKind = 0;
                             func_1506E5FC();
                             D_800D1580 = 0xFF070169;
                             func_1506E8D8();
                             break;
                         default:
-                            var_a1 = 1;
+                            deathKind = 1;
                             break;
                     }
                 }
-                func_1507CD64(arg1, var_a1);
-                arg1->unk105 = 3;
+                func_1507CD64(actor, deathKind);
+                actor->unk105 = 3;
                 return;
             }
         }
-        if (rate == 0xC8) {
-            arg1->unkF4 |= 8;
-            arg1->unk10B |= 1;
+        if (stunTime == 0xC8) {
+            actor->unkF4 |= 8;
+            actor->unk10B |= 1;
         }
-        arg1->unk10C = rate * 100;
-        scale = (u32)table[anim].sub[arg1->unk105].unk2;
-        scale = scale / 100.0f;
-        anim = table[anim].sub[arg1->unk105].unk0;
+        actor->unk10C = stunTime * 100;
+        animSpeed = (u32)table[anim].sub[actor->unk105].speed;
+        animSpeed = animSpeed / 100.0f;
+        anim = table[anim].sub[actor->unk105].anim;
         if (anim != 0) {
-            arg1->unk105++;
+            actor->unk105++;
         }
         {
             s32 pad;
 
-            if (scale == 0.0f) {
-                scale = 1.0f;
+            if (animSpeed == 0.0f) {
+                animSpeed = 1.0f;
             }
         }
     } else {
-        arg1->unk10C = 20000;
-        scale = 1.0f;
+        actor->unk10C = 20000;
+        animSpeed = 1.0f;
         anim = 0;
     }
     if (anim == 0) {
-        arg1->unkF4 &= ~8;
-        arg1->stunned = 0;
-        arg1->unk10B = 0;
-        arg1->unk10F = 0;
-        if (arg1->interaction_state == 1) {
-            *((u8 *)arg1->unk31C + 0x58) = 0;
-            arg1->unkF8 &= 0xFEFFFDFF;
+        actor->unkF4 &= ~8;
+        actor->stunned = 0;
+        actor->unk10B = 0;
+        actor->unk10F = 0;
+        if (actor->interaction_state == 1) {
+            actor->unk31C->unk58 = 0;
+            actor->unkF8 &= 0xFEFFFDFF;
         }
     } else {
-        func_1505E650(arg1, anim, scale, speed, 0.0f, 0.0f, 0);
+        func_1505E650(actor, anim, animSpeed, blend, 0.0f, 0.0f, 0);
     }
 }
 struct127 *func_1505ED34(void) {
