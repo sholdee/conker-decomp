@@ -8,15 +8,16 @@
 
 #include "macros.h"
 
-typedef struct func_15002560_node {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-} func_15002560_node;
+// Quadtree node, built into the D_800B0DDC buffer. Links are byte offsets from the node itself.
+typedef struct QuadNode {
+    /* 0x0 */ s16 minY;
+    /* 0x2 */ s16 maxY;
+    /* 0x4 */ s16 next;     // next sibling (0: none)
+    /* 0x6 */ u16 halfSize;
+    /* 0x8 */ s16 x;        // centre
+    /* 0xA */ s16 z;
+    /* 0xC */ s16 child;    // first of four children (0: leaf; its triangle stream follows the node)
+} QuadNode;
 
 // One entry of the triangle table D_800DBE3C: the triangle's three vertices.
 typedef struct MeshTri {
@@ -40,7 +41,7 @@ typedef struct YRange {
 
 extern YRange *D_800DBE44;
 
-void func_15002560(u16 *arg0, u16 *arg1);
+void func_15002560(QuadNode *node, QuadNode *parentNext);
 void func_15002008(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u16 *arg4);
 s32 func_15049260(Face32 arg0);
 
@@ -435,29 +436,34 @@ void func_15001460(Gfx *dl) {
     D_800DBE38 = count;
 }
 
+/** Resets the triangle counters and allocates this map's triangle-data arena (D_800B0DC0..D_800B0DC8). */
 void func_15001970(void) {
-    s32 pad;
-    s32 tmp;
+    s32 pad; // matching: unused stack slot keeps the original frame size
+    s32 size;
 
     D_800B0DE4 = 0;
     D_800DBE63 = 0;
-    *D_800DBE18 = 0;
-    *D_800DBE1C = 0;
+    D_800DBE18[0] = 0;
+    D_800DBE1C[0] = 0;
     D_800DBE20 = 0;
-    tmp = D_80091C04[D_800BE9F0];
+    size = D_80091C04[D_800BE9F0];
     D_800DBE24 = 0;
-    D_800B0DC0 = allocate_memory(tmp, 1, 0, 0);
-    D_800B0DC8 = tmp + D_800B0DC0;
+    D_800B0DC0 = allocate_memory(size, 1, 0, 0);
+    D_800B0DC8 = size + D_800B0DC0;
     D_800B0DC4 = D_800B0DC0;
 }
 
 void __osPiGetAccess(void);
 void __osPiRelAccess(void);
 
+/**
+ * Allocates the quadtree buffer for the current map (D_800B0DDC) and resets the node counters.
+ * The buffer is doubled when the cartridge word at ROM offset 0xD24 is not the expected one.
+ */
 void func_15001A08(void) {
     s32 size;
     u32 stat;
-    s32 id;
+    s32 romWord;
 
     size = D_80091AF0[D_800BE9F0];
 
@@ -466,10 +472,10 @@ void func_15001A08(void) {
     while (stat & (PI_STATUS_IO_BUSY | PI_STATUS_DMA_BUSY)) {
         stat = IO_READ(PI_STATUS_REG);
     }
-    id = IO_READ(D_80000308 | 0xB0000D24);
+    romWord = IO_READ(D_80000308 | 0xB0000D24);
     __osPiRelAccess();
 
-    if (id != 0x98CCE31A) {
+    if (romWord != 0x98CCE31A) {
         size <<= 1;
     }
 
@@ -486,147 +492,161 @@ void func_15001A08(void) {
 void func_15001B08(void) {
 }
 
-u16* func_15001B10(void) {
-    u16 *temp_v0;
+/** Appends a new quadtree node (with no child or sibling) to the 4-byte-aligned end of the buffer. */
+u16 *func_15001B10(void) {
+    QuadNode *node;
 
     D_800B0DE0 = ALIGN4(D_800B0DE0);
-    D_800B0DCC += 1;
+    D_800B0DCC++;
 
-    temp_v0 = (u16*)D_800B0DE0;
-    temp_v0[6] = 0;
-    temp_v0[2] = 0;
+    node = (QuadNode *)D_800B0DE0;
+    node->child = 0;
+    node->next = 0;
 
-    D_800B0DE0 += 14;
-    return temp_v0;
+    D_800B0DE0 += sizeof(QuadNode);
+    return (u16 *)node;
 }
 
-void func_15001B5C(u8 arg0) {
-    *D_800B0DE0++ = arg0;
+/** Appends one byte to the quadtree buffer. */
+void func_15001B5C(u8 value) {
+    *D_800B0DE0++ = value;
 }
 
-void func_15001B8C(u16 arg0) {
-   D_800B0DE0[0] = (arg0 >> 8);
-   D_800B0DE0[1] = arg0 & 0xFF;
-   D_800B0DE0 += 2;
+/** Appends a big-endian halfword to the quadtree buffer. */
+void func_15001B8C(u16 value) {
+    D_800B0DE0[0] = value >> 8;
+    D_800B0DE0[1] = value & 0xFF;
+    D_800B0DE0 += 2;
 }
 
-void func_15001BC8(s32 arg0, s16 *arg1, s16 *arg2) {
-    u16 *tmp;
-    s16 *sp20;
+/**
+ * Builds the quadtree of map `map` over its D_800DBE4C triangles and stores the root in
+ * D_800DBE08[map]. Optionally returns the total node count and the leaf count.
+ */
+void func_15001BC8(s32 map, s16 *nodeCount, s16 *leafCount) {
+    u16 *root;
+    s16 *triList;
     s32 i;
 
-    func_1510F800(arg0);
+    func_1510F800(map);
     D_800B0DD8 = 10;
     D_800B0DD4 = 512;
-    sp20 = allocate_memory((D_800DBE4C + 1) << 1, 1, 0, 0);
+    triList = allocate_memory((D_800DBE4C + 1) << 1, 1, 0, 0);
 
-    *sp20 = D_800DBE4C;
+    triList[0] = D_800DBE4C;
     for (i = 0; i < D_800DBE4C; i++) {
-        sp20[i + 1] = i;
+        triList[i + 1] = i;
     }
 
-    tmp = func_15001DE0(0, 0, 32768, 32768, 0, sp20);
-    D_800DBE08[arg0] = tmp;
-    func_15002560(tmp, 0);
-    func_10004074(sp20);
+    root = func_15001DE0(0, 0, 0x8000, 0x8000, 0, triList);
+    D_800DBE08[map] = root;
+    func_15002560((QuadNode *)root, NULL);
+    func_10004074(triList);
 
     // regalloc fix:
     if (1) { }
 
-    if (arg1 != 0) {
-        *arg1 = D_800B0DCC;
+    if (nodeCount != NULL) {
+        *nodeCount = D_800B0DCC;
     }
-    if (arg2 != 0) {
-        *arg2 = D_800B0DD0;
+    if (leafCount != NULL) {
+        *leafCount = D_800B0DD0;
     }
 }
 
-void func_15001CEC(s32 arg0) {
-    u16 *temp_v0;
-    s16 *sp20;
+/** Gives map `map` a single-leaf quadtree that covers the whole map and holds all its triangles. */
+void func_15001CEC(s32 map) {
+    QuadNode *root;
+    s16 *triList;
     s32 i;
 
-    func_1510F800(arg0);
-    temp_v0 = func_15001B10();
+    func_1510F800(map);
+    root = (QuadNode *)func_15001B10();
 
-    D_800DBE08[arg0] = temp_v0;
+    D_800DBE08[map] = (u16 *)root;
 
-    *((s16*)temp_v0 + 0) = 32768;
-    temp_v0[1] = 32767;
-    temp_v0[2] = 0;
-    temp_v0[3] = -32768;
-    temp_v0[4] = 0;
-    temp_v0[5] = 0;
-    temp_v0[6] = 0;
+    root->minY = -0x8000;
+    root->maxY = 0x7FFF;
+    root->next = 0;
+    root->halfSize = 0x8000;
+    root->x = 0;
+    root->z = 0;
+    root->child = 0;
 
-    sp20 = allocate_memory((D_800DBE4C + 1) << 1, 1, 0, 0);
+    triList = allocate_memory((D_800DBE4C + 1) << 1, 1, 0, 0);
 
-    *sp20 = D_800DBE4C;
+    triList[0] = D_800DBE4C;
     for (i = 0; i < D_800DBE4C; i++) {
-        sp20[i + 1] = i;
+        triList[i + 1] = i;
     }
 
-    func_15002008(-0x8000, 0x8000, -0x8000, 0x8000, sp20);
-    func_10004074(sp20);
+    func_15002008(-0x8000, 0x8000, -0x8000, 0x8000, triList);
+    func_10004074(triList);
 }
 
-u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    u16 *temp_v0;
-    u16 *temp_v0_2;
-    u16 *temp_v0_3;
-    u16 *temp_v0_4;
+/**
+ * Recursively builds the quadtree node centred on (x, z) with half-extents (halfX, halfZ) from the
+ * triangles in `triList` (a count followed by triangle indices). A node becomes a leaf, followed in
+ * the buffer by its triangle stream, when it overlaps fewer than D_800B0DD8 triangles or is narrower
+ * than D_800B0DD4; otherwise it gets four children, chained through their `next` offsets.
+ */
+u16 *func_15001DE0(s32 x, s32 z, s32 halfX, s32 halfZ, s32 arg4, s32 triList) {
+    QuadNode *node;
+    QuadNode *child0;
+    QuadNode *child1;
+    QuadNode *child2;
 
-    s32 sp7C;
-    s32 sp78;
+    s32 minY;
+    s32 maxY;
 
-    s32 tmp0;
-    s32 tmp1;
+    s32 minTris;
+    s32 minSize;
 
-    s32 sp44;
-    s32 sp48;
-    s32 sp4C;
-    s32 sp50;
-    s32 sp54;
-    s32 sp58;
+    s32 pad; // matching: unused stack slot keeps the original frame layout
+    s32 maxZ;
+    s32 minZ;
+    s32 maxX;
+    s32 minX;
+    u16 *subList;
 
-    tmp0 = D_800B0DD8;
-    tmp1 = D_800B0DD4;
+    minTris = D_800B0DD8;
+    minSize = D_800B0DD4;
 
-    sp54 = arg0 - arg2;
-    sp50 = arg0 + arg2;
-    sp4C = arg1 - arg3;
-    sp48 = arg1 + arg3;
+    minX = x - halfX;
+    maxX = x + halfX;
+    minZ = z - halfZ;
+    maxZ = z + halfZ;
 
-    if ((func_15002248(sp54, sp50, sp4C, sp48, &sp7C, &sp78, arg5, &sp58) < tmp0) || (arg2 < tmp1)) {
-        temp_v0 = func_15001B10();
-        D_800B0DD0 = (D_800B0DD0 + 1);
-        temp_v0[0] = sp7C;
-        temp_v0[1] = sp78;
-        temp_v0[3] = arg2;
-        temp_v0[4] = arg0;
-        temp_v0[5] = arg1;
-        temp_v0[2] = 0;
-        temp_v0[6] = 0;
-        func_15002008(sp54, sp50, sp4C, sp48, sp58);
+    if ((func_15002248(minX, maxX, minZ, maxZ, &minY, &maxY, triList, &subList) < minTris) || (halfX < minSize)) {
+        node = (QuadNode *)func_15001B10();
+        D_800B0DD0++;
+        node->minY = minY;
+        node->maxY = maxY;
+        node->halfSize = halfX;
+        node->x = x;
+        node->z = z;
+        node->next = 0;
+        node->child = 0;
+        func_15002008(minX, maxX, minZ, maxZ, subList);
     } else {
-        temp_v0 = func_15001B10();
-        temp_v0[0] = sp7C;
-        temp_v0[1] = sp78;
-        temp_v0[3] = arg2;
-        temp_v0[4] = arg0;
-        temp_v0[5] = arg1;
-        temp_v0[2] = 0;
+        node = (QuadNode *)func_15001B10();
+        node->minY = minY;
+        node->maxY = maxY;
+        node->halfSize = halfX;
+        node->x = x;
+        node->z = z;
+        node->next = 0;
 
-        temp_v0_2 = func_15001DE0(arg0 - (arg2 >> 1), arg1 - (arg3 >> 1), arg2 >> 1, arg3 >> 1, 0, sp58);
-        temp_v0[6] = (s32)temp_v0_2 - (s32)temp_v0;
-        temp_v0_3 = func_15001DE0(arg0 - (arg2 >> 1), (arg3 >> 1) + arg1, arg2 >> 1, arg3 >> 1, 0, sp58);
-        temp_v0_2[2] = (s32)temp_v0_3 - (s32)temp_v0_2;
-        temp_v0_4 = func_15001DE0((arg2 >> 1) + arg0, arg1 - (arg3 >> 1), arg2 >> 1, arg3 >> 1, 0, sp58);
-        temp_v0_3[2] = (s32)temp_v0_4 - (s32)temp_v0_3;
-        temp_v0_4[2] = (s32)func_15001DE0((arg2 >> 1) + arg0, (arg3 >> 1) + arg1, arg2 >> 1, arg3 >> 1, 0, sp58) - (s32)temp_v0_4;
+        child0 = (QuadNode *)func_15001DE0(x - (halfX >> 1), z - (halfZ >> 1), halfX >> 1, halfZ >> 1, 0, subList);
+        node->child = (u8 *)child0 - (u8 *)node;
+        child1 = (QuadNode *)func_15001DE0(x - (halfX >> 1), (halfZ >> 1) + z, halfX >> 1, halfZ >> 1, 0, subList);
+        child0->next = (u8 *)child1 - (u8 *)child0;
+        child2 = (QuadNode *)func_15001DE0((halfX >> 1) + x, z - (halfZ >> 1), halfX >> 1, halfZ >> 1, 0, subList);
+        child1->next = (u8 *)child2 - (u8 *)child1;
+        child2->next = (u8 *)func_15001DE0((halfX >> 1) + x, (halfZ >> 1) + z, halfX >> 1, halfZ >> 1, 0, subList) - (u8 *)child2;
     }
-    func_10004074(sp58);
-    return temp_v0;
+    func_10004074(subList);
+    return (u16 *)node;
 }
 
 void func_15002008(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u16 *arg4) {
@@ -746,35 +766,39 @@ int func_15002248(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 *arg4, s32 *arg5, 
     return count;
 }
 
-void func_15002560(u16 *arg0, u16 *arg1) {
-    s32 temp_v0;
-    func_15002560_node *temp_s0;
-    func_15002560_node *var_s1;
+/**
+ * Threads the quadtree for traversal: every node without a sibling gets its `next` link pointed
+ * at `parentNext`, the node that follows its parent (none at the root).
+ */
+void func_15002560(QuadNode *node, QuadNode *parentNext) {
+    s32 offset;
+    QuadNode *next;
+    QuadNode *child;
 
-loop:
-    if (arg0 != 0) {
-        if (((func_15002560_node *)arg0)->unk4 == 0) {
-            if (arg1 != 0) {
-                temp_v0 = (s32)arg1 - (s32)arg0;
-            } else {
-                temp_v0 = 0;
-            }
-            ((func_15002560_node *)arg0)->unk4 = temp_v0;
-        }
-        temp_v0 = ((func_15002560_node *)arg0)->unkC;
-        if (temp_v0 == 0) {
+    for (;;) {
+        if (node == NULL) {
             return;
         }
-        var_s1 = (func_15002560_node *)((u8 *)arg0 + temp_v0);
-        if (var_s1->unk4 != 0) {
-            do {
-                temp_s0 = (func_15002560_node *)((u8 *)var_s1 + var_s1->unk4);
-                func_15002560((u16 *)var_s1, (u16 *)temp_s0);
-                var_s1 = temp_s0;
-            } while (temp_s0->unk4 != 0);
+        if (node->next == 0) {
+            if (parentNext != NULL) {
+                offset = (u8 *)parentNext - (u8 *)node;
+            } else {
+                offset = 0;
+            }
+            node->next = offset;
         }
-        arg0 = (u16 *)var_s1;
-        goto loop;
+        offset = node->child;
+        if (offset == 0) {
+            return;
+        }
+        child = (QuadNode *)((u8 *)node + offset);
+        while (child->next != 0) {
+            next = (QuadNode *)((u8 *)child + child->next);
+            func_15002560(child, next);
+            child = next;
+        }
+        // the last child inherits this node's parentNext
+        node = child;
     }
 }
 
