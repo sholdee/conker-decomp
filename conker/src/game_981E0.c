@@ -20,7 +20,7 @@ extern s32 D_800D187C;
 extern void *func_150335C8(Actor *arg0, Actor *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void func_15166118(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 extern void func_151942E8();
-void func_151C0698(Actor *arg0, Actor *arg1, void *arg2, u8 arg3, s32 arg4, s32 arg5);
+void func_151C0698(Actor *arg0, Actor *arg1, IgnoreList *arg2, u8 arg3, s32 arg4, s32 arg5);
 
 /* Parameter block for func_151994B8 (CharacterFlamethrowerSetup in game_1C2C60.c). */
 typedef struct Func151994B8Desc {
@@ -2281,13 +2281,13 @@ void func_15070114(s32 cmd) {
 }
 
 void func_15070144(s32 cmd) {
-    struct198 info;
+    IgnoreList info;
     s32 mode;
 
-    info.unk0 = 1;
-    info.unk8 = 0;
-    info.unkC = 0;
-    info.unk4 = D_800D154C;
+    info.count = 1;
+    info.objs[1] = NULL;
+    info.objs[2] = NULL;
+    info.objs[0] = D_800D154C;
 
     if (D_800BE9F0 == 0x2B) {
         mode = 3;
@@ -2322,13 +2322,6 @@ void func_15070224(s32 cmd) {
     func_151602C0(&header, &header2, (func_150ADA20() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
 }
 
-/* struct198 with its object fields typed. */
-typedef struct {
-    s32 unk0;
-    Actor *unk4;
-    Actor *unk8;
-    Actor *unkC;
-} struct198Objs;
 
 /* Objects 0x77 / 0x28: fires (func_151C0698, else func_1506CE6C), then spawns effect func_15102B38 at bone 4. */
 void func_15070300(s32 cmd) {
@@ -2337,7 +2330,7 @@ void func_15070300(s32 cmd) {
     u8 mode;
     Actor *other;
     u8 idx;
-    struct198Objs info;
+    IgnoreList info;
     Vec3w localPos;
     Vec3w vec74;
     f32 randoms[2];
@@ -2390,10 +2383,10 @@ void func_15070300(s32 cmd) {
         D_800D1580 = 5;
     }
     if (flag) {
-        info.unk0 = 3;
-        info.unk4 = obj;
-        info.unk8 = other;
-        info.unkC = D_800D154C;
+        info.count = 3;
+        info.objs[0] = obj;
+        info.objs[1] = other;
+        info.objs[2] = D_800D154C;
         func_151C0698(obj, other, &info, mode, 0xFF, 1);
     } else {
         func_1506CE6C();

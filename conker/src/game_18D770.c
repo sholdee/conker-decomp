@@ -693,12 +693,12 @@ LightEffect *func_151615F8(PointLight *light, u8 sound, u8 kind, u8 type, u8 arg
     return effect;
 }
 
-/* Sends event `event` to every light effect. */
-void func_151616D0(u8 arg0, u8 event, s32 arg2) {
-    struct234 message;
+/* Sends event `event` to every light effect (of type lightType, for the addressed events). */
+void func_151616D0(u8 lightType, u8 event, s32 arg2) {
+    LightEventMsg message;
 
-    message.unk0 = arg0;
-    message.unk4 = arg2;
+    message.lightType = lightType;
+    message.arg = arg2;
 
     func_1516944C(53, &message, event);
 }

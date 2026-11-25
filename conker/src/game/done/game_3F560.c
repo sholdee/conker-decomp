@@ -5,22 +5,23 @@
 #include "effects.h"
 
 
+/* Starts a global colour cycle (timed effect 30, func_151621B8) around grey 50. */
 void func_150120B0(s32 arg0) {
     TimedEffect *effect;
-    struct184 tmp;
+    LightColourPulse tmp;
 
-    tmp.unk0 = 50.0f;
-    tmp.unk4 = 50.0f;
-    tmp.unk8 = 50.0f;
-    tmp.unkC = 50.0f;
-    tmp.unk10 = 50.0f;
-    tmp.unk14 = 50.0f;
-    tmp.unk18 = 0.0f;
-    tmp.unk1C = D_80096540;
+    tmp.base.x = 50.0f;
+    tmp.base.y = 50.0f;
+    tmp.base.z = 50.0f;
+    tmp.amplitude.x = 50.0f;
+    tmp.amplitude.y = 50.0f;
+    tmp.amplitude.z = 50.0f;
+    tmp.phase = 0.0f;
+    tmp.speed = D_80096540;
 
     effect = func_15149130(300, -1, 30, -1, 0, 65, 32, 255, 1);
     if (effect != NULL) {
-        memcpy(effect + 1, &tmp, 32);
+        memcpy(effect + 1, &tmp, sizeof(tmp));
     }
 }
 

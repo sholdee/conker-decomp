@@ -243,11 +243,6 @@ void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList) {
     func_150E83AC(pos, func_150ADA20() % 62 + 120, fxOwner, fxList);
 }
 
-/* Objects the bullet trace ignores (see func_151C1940). */
-typedef struct {
-    /* 0x00 */ s32 count;
-    /* 0x04 */ Actor *objs[3];
-} IgnoreList;
 
 typedef struct {
     /* 0x00 */ EffectHeader header;

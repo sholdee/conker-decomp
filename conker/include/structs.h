@@ -2158,17 +2158,6 @@ typedef struct RopeSpawn {
     /* 0x21 */ u8 pad21[3];
 } RopeSpawn; /* size 0x24 */
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-} struct184; // size 0x20, 32 bytes
-
 /* The streaming music player's voice (D_800E0D80; set up by game_43620, run by
  * libultra/audio/game_21FC90). It carries its own copy of the libaudio envmixer parameter block
  * at the offsets N_PVoice uses for em_state onwards (pan at 0x0C, volume at 0x0E, cvolL/cvolR,
@@ -2225,19 +2214,11 @@ typedef struct SpawnPoint {
     /* 0x17 */ u8  pad17;
 } SpawnPoint; // size 0x18
 
-typedef struct {
-    Actor *unk0;
-    Actor *unk4;
-    u8 unk8;
-    u8 unk9;
-} struct193;
-
-typedef struct {
-    s32 unk0;
-    Actor *unk4;
-    s32 unk8;
-    s32 unkC;
-} struct198;
+/* Objects a bullet trace ignores (func_151C0698 / func_151C1940, game_1ED0F0.c). */
+typedef struct IgnoreList {
+    /* 0x00 */ s32 count;
+    /* 0x04 */ Actor *objs[3];
+} IgnoreList; // size 0x10
 
 typedef struct {
     u8  pad0[0x4];
@@ -2541,11 +2522,12 @@ typedef struct SeqTrackState {
     /* 0x40 */ f32 unk40;
 } SeqTrackState; // size 0x44
 
-typedef struct {
-    s8  unk0;
-    u8  pad1[0x3];
-    s32 unk4;
-} struct234; // size 0x8;
+/* Payload of the light effect events sent by func_151616D0 (handled by func_151604A0). */
+typedef struct LightEventMsg {
+    /* 0x0 */ s8  lightType; /* events 0x17-0x22 only reach effects whose lightType matches */
+    /* 0x1 */ u8  pad1[0x3];
+    /* 0x4 */ s32 arg;
+} LightEventMsg; // size 0x8
 
 /* IdRecord.TaskID: bits 9-0 are the task id, bits 15-10 flags. The four original flag names are from
  * the Oct 2000 debugger table; neither PURGE nor SUSPEND set means RUN_BETWEEN_SECTIONS. */

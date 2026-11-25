@@ -2233,14 +2233,14 @@ u8 func_151464B8(s16 *flags) {
     return ret;
 }
 
-/* Broadcasts message 45 (see func_151419D0) linking actors a and b. */
+/* Broadcasts message 45 (0x2D, an actor swap; see func_151419D0) for actors a and b. */
 void func_15146508(Actor *a, Actor *b) {
-    struct193 msg;
+    ActorSwapMsg msg;
 
-    msg.unk0 = a;
-    msg.unk4 = b;
-    msg.unk8 = a->unique_id;
-    msg.unk9 = b->unique_id;
+    msg.actorA = a;
+    msg.actorB = b;
+    msg.idA = a->unique_id;
+    msg.idB = b->unique_id;
     func_15169040(&msg, 45, a, b);
 }
 
