@@ -15,11 +15,15 @@ void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 #define D_800D2460 D_800D2460_hdr
 #define D_800D2890 D_800D2890_hdr
 #define D_800D2590 D_800D2590_hdr
+#define D_800D2454 D_800D2454_hdr
+#define D_800D23D0 D_800D23D0_hdr
 #include "variables.h"
 #undef D_800D24C8
 #undef D_800D2460
 #undef D_800D2890
 #undef D_800D2590
+#undef D_800D2454
+#undef D_800D23D0
 extern s32 func_150ADA20(void);
 void func_1508F9F4(void);
 void func_1508F0D4(void);
@@ -27,12 +31,14 @@ void func_1508F7BC(void);
 extern u8 D_800CC49A;
 extern f32 D_800D2890[3];
 extern Mtx D_800D2590[6][2];
+extern u16 D_800D2454;
+extern Mtx D_800D23D0;
 
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15042D94(s32, s32, u8, s32 *, ...);
 extern u8 D_D16[];
 
-/* One rising bubble sprite of the underwater HUD effect. */
+/* One rising bubble sprite (drawn by func_15090630). */
 typedef struct Bubble {
     s16 x;
     s16 y;
@@ -58,14 +64,14 @@ void func_1508F060(void) {
     D_800D24C0 = 0;
 }
 
-/* Per-frame update of the platform, the bubbles and the water surface. */
+/* Per-frame update of the block stack, the bubbles and the water surface. */
 void func_1508F0A4(void) {
     func_1508F0D4();
     func_1508F9F4();
     func_1509093C();
 }
 
-/* Moves the falling debris particles and slides the platform towards its target height. */
+/* Moves the debris particles, adds/removes blocks to follow D_800CC49A and moves the stack. */
 void func_1508F0D4(void) {
     s32 timer;
     s32 i;
@@ -182,7 +188,7 @@ void func_1508F0D4(void) {
     }
 }
 
-/* Removes one block from the platform and spawns a debris particle at its old position. */
+/* Removes the top block and spawns a debris particle at its position. */
 void func_1508F7BC(void) {
     f32 mtx[4][4];
     f32 unused;
@@ -206,14 +212,14 @@ void func_1508F7BC(void) {
     node->unkB4 = 120;
 }
 
-/* Adds one block back to the platform; it grows in from zero scale. */
+/* Adds a block on top; it grows in from zero scale. */
 void func_1508F9C4(void) {
     D_800D2410[D_800D2456++] = 0.0f;
 }
 
 extern f32 func_15048A40(u8 arg0);
 
-/* Spawns and animates the bubbles while the player's air is running out underwater. */
+/* Spawns and animates the bubbles while player 1 has been underwater for a while. */
 void func_1508F9F4(void) {
     s32 i;
     s32 v;
@@ -328,71 +334,87 @@ void func_1508F9F4(void) {
         }
     }
 }
-typedef struct GameBC510Command {
-    u32 w0;
-    u32 w1;
-} GameBC510Command;
-GameBC510Command *func_150900F0(GameBC510Command *, s32);
-GameBC510Command *func_150918EC(GameBC510Command *);
-GameBC510Command *func_150938BC(GameBC510Command *);
-GameBC510Command *func_15093B58(GameBC510Command *, s32, s16 *, s32, u8);
-GameBC510Command *func_15090630(GameBC510Command *);
-GameBC510Command *func_150911F4(GameBC510Command *);
-void *func_15094F40(void *);
-void *func_15096934(void *);
+Gfx *func_150900F0(Gfx *, s32);
+Gfx *func_150918EC(Gfx *);
+Gfx *func_150938BC(Gfx *);
+Gfx *func_15093B58(Gfx *, s32, s16 *, s32, u8);
+Gfx *func_15090630(Gfx *);
+Gfx *func_150911F4(Gfx *);
+Gfx *func_15094F40(Gfx *);
+Gfx *func_15096934(Gfx *);
 void func_1518CA04(s32);
 extern f32 D_8008FE1C;
 extern s32 D_800BEBA4;
-extern GameBC510Command *D_800BE9C8[];
+extern Gfx *D_800BE9C8[];
 
-GameBC510Command *func_1508FD38(register GameBC510Command *arg0) {
-    GameBC510Command *original;
-    s32 index;
+/* Builds this level's overlay display list: blocks, water, bubbles and HUD. Returns the
+ * original pointer (drops everything) if the frame's display list buffer would overflow. */
+Gfx *func_1508FD38(register Gfx *gfx) {
+    Gfx *start;
+    s32 i;
     s32 step;
     s32 overflow;
     s16 rows[33];
 
-    original = arg0;
-    if (D_800BE9F0 == 0x1D) return arg0;
-    { GameBC510Command *packet0 = arg0++; packet0->w0 = 0xDB0E0000; packet0->w1 = *(u16 *)&D_800D2454; }
-    { GameBC510Command *packet1 = arg0++; packet1->w0 = 0xDA380007; packet1->w1 = (u32)&D_800D23D0; }
-    if (D_800BE616 != 0) {
-        arg0 = func_150918EC(arg0);
-        overflow = D_800BEBA4 < arg0 - *(D_800BE9C8 + D_800BE9C0) ? 1 : 0;
-        if (overflow != 0) return original;
-        return arg0;
+    start = gfx;
+    if (D_800BE9F0 == 0x1D) {
+        return gfx;
     }
-    if (D_800D2458 != 0) arg0 = func_150938BC(arg0);
-    if (D_800C35EA == 1) return arg0;
+    gSPPerspNormalize(gfx++, D_800D2454);
+    gSPMatrix(gfx++, &D_800D23D0, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    if (D_800BE616 != 0) {
+        gfx = func_150918EC(gfx);
+        // matching: the 0/1 flag variable; testing the comparison directly changes the code
+        overflow = D_800BEBA4 < gfx - D_800BE9C8[D_800BE9C0] ? 1 : 0;
+        if (overflow != 0) {
+            return start;
+        }
+        return gfx;
+    }
+    if (D_800D2458 != 0) {
+        gfx = func_150938BC(gfx);
+    }
+    if (D_800C35EA == 1) {
+        return gfx;
+    }
     if (D_8008CD00 != 0) {
         step = 0x400;
         if (D_8008FE1C != 1.0f) {
             step = (s32)((f32)step / D_8008FE1C);
-            for (index = 0; index < 33; index++) *(rows + index) = (s32)((f32)index * D_8008FE1C);
+            for (i = 0; i < 33; i++) {
+                rows[i] = (s32)((f32)i * D_8008FE1C);
+            }
         } else {
-            for (index = 0; index < 33; index++) *(rows + index) = index;
+            // matching: one line; the loop body's line number steers as1's unrolled store order
+            for (i = 0; i < 33; i++) rows[i] = i;
         }
-        arg0 = func_15093B58(arg0, step, rows, 0x2C30, 1);
+        gfx = func_15093B58(gfx, step, rows, 0x2C30, 1);
     }
-    if (D_800D2428[0] != (f32)D_8009DCB4[0]) arg0 = func_150900F0(arg0, 0);
-    else if (D_800D2588 != 0) {
+    if (D_800D2428[0] != (f32)D_8009DCB4[0]) {
+        gfx = func_150900F0(gfx, 0);
+    } else if (D_800D2588 != 0) {
         func_1518CA04(0xB8);
         D_800D2588 = 0;
     }
-    arg0 = func_150911F4(arg0);
-    arg0 = func_15094F40(arg0);
-    arg0 = func_15090630(arg0);
-    arg0 = func_15096934(arg0);
-    overflow = D_800BEBA4 < arg0 - *(D_800BE9C8 + D_800BE9C0) ? 1 : 0;
-    if (overflow != 0) return original;
-    return arg0;
+    gfx = func_150911F4(gfx);
+    gfx = func_15094F40(gfx);
+    gfx = func_15090630(gfx);
+    gfx = func_15096934(gfx);
+    overflow = D_800BEBA4 < gfx - D_800BE9C8[D_800BE9C0] ? 1 : 0;
+    if (overflow != 0) {
+        return start;
+    }
+    return gfx;
 }
 extern s16 D_8008FDCC;
 extern s16 D_8009DC90[][3];
 extern u8 D_800CC49A;
 void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
 
-GameBC510Command *func_150900F0(GameBC510Command *arg0, s32 arg1) {
+/* Draws the stacked blocks and the debris particles. With `fixed` set, instead draws D_800CC49A
+ * blocks at full scale at a fixed spot near D_8009DCB4[3..5], after patching the block display
+ * list's combiner and other-mode commands. */
+Gfx *func_150900F0(Gfx *gfx, s32 fixed) {
     s32 i;
     s32 count;
     f32 x;
@@ -401,31 +423,31 @@ GameBC510Command *func_150900F0(GameBC510Command *arg0, s32 arg1) {
     f32 scale;
     f32 mtx[4][4];
     f32 base[4][4];
-    struct256 *p;
-    u32 *dl;
+    struct256 *node;
+    Gfx *dl;
 
     if (D_800D2588 == 0) {
         D_800D2588 = func_1518C900(0xB8);
     }
-    { GameBC510Command *c = arg0++; c->w0 = 0xD9F1FDFE; c->w1 = 0; }
-    { GameBC510Command *c = arg0++; c->w0 = 0xD7000002; c->w1 = 0xFFFFFFFF; }
-    { GameBC510Command *c = arg0++; c->w0 = 0xD9FFFFFF; c->w1 = 0x400; }
-    { GameBC510Command *c = arg0++; c->w0 = 0xE7000000; c->w1 = 0; }
-    { GameBC510Command *c = arg0++; c->w0 = 0xFA000000; c->w1 = 0xFF; }
-    if (arg1 == 0) {
-        { GameBC510Command *c = arg0++; c->w0 = 0xEF08AC0F; c->w1 = 0x55204C; }
-        { GameBC510Command *c = arg0++; c->w0 = 0xFC127E24; c->w1 = 0xFFFFF9FC; }
-        { GameBC510Command *c = arg0++; c->w0 = 0xFB000000; c->w1 = 0; }
+    gSPClearGeometryMode(gfx++, G_ZBUFFER | G_CULL_FRONT | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR);
+    gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+    gSPSetGeometryMode(gfx++, G_CULL_BACK);
+    gDPPipeSync(gfx++);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
+    if (fixed == 0) {
+        gDPSetOtherMode(gfx++, 0x08AC0F, 0x55204C);
+        gDPSetCombine(gfx++, 0x127E24, 0xFFFFF9FC);
+        gDPSetEnvColor(gfx++, 0, 0, 0, 0);
     } else {
-        { GameBC510Command *c = arg0++; c->w0 = 0xDB0E0000; c->w1 = *(u16 *)&D_800D2454; }
-        { GameBC510Command *c = arg0++; c->w0 = 0xDA380007; c->w1 = (u32)&D_800D23D0; }
-        { GameBC510Command *c = arg0++; c->w0 = 0xEF08AC0F; c->w1 = 0x5041CC; }
-        { GameBC510Command *c = arg0++; c->w0 = 0xFC12D225; c->w1 = 0xFFA7FFFF; }
-        { GameBC510Command *c = arg0++; c->w0 = 0xFB000000; c->w1 = (D_8008FDCC & 0xFF) | 0xFFFFFF00; }
+        gSPPerspNormalize(gfx++, D_800D2454);
+        gSPMatrix(gfx++, &D_800D23D0, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+        gDPSetOtherMode(gfx++, 0x08AC0F, 0x5041CC);
+        gDPSetCombine(gfx++, 0x12D225, 0xFFA7FFFF);
+        gDPSetEnvColor(gfx++, 255, 255, 255, D_8008FDCC);
     }
     count = D_800D2456;
-    dl = (u32 *)D_800D2588;
-    if (arg1 != 0) {
+    dl = (Gfx *)D_800D2588;
+    if (fixed != 0) {
         x = (f32)D_8009DCB4[3] - 54.0f;
         y = (f32)D_8009DCB4[4] - 52.0f;
         z = (f32)D_8009DCB4[5] - 344.7000122f;
@@ -433,20 +455,20 @@ GameBC510Command *func_150900F0(GameBC510Command *arg0, s32 arg1) {
         func_150A8050(base, 50.0f, -20.0f, -20.0f);
         scale = 1.0f;
         {
-            u32 *q = dl;
-            u32 cmd;
+            Gfx *cmd = dl;
+            u32 op;
             do {
-                cmd = (u8)(q[0] >> 24);
-                switch (cmd) {
-                case 0xFC:
-                    q[0] = 0;
+                op = (u8)(cmd->words.w0 >> 24);
+                switch (op) {
+                case G_SETCOMBINE:
+                    cmd->words.w0 = 0;
                     break;
-                case 0xEF:
-                    q[1] = 0x5041C8;
+                case G_RDPSETOTHERMODE:
+                    cmd->words.w1 = 0x5041C8;
                     break;
                 }
-                q += 2;
-            } while (cmd != 0xDF);
+                cmd++;
+            } while (op != G_ENDDL);
         }
     } else {
         x = D_800D2428[0];
@@ -456,7 +478,7 @@ GameBC510Command *func_150900F0(GameBC510Command *arg0, s32 arg1) {
     }
     func_15043EC8(base, 1.0f, 1.0f, 1.0f, x, y, z);
     for (i = 0; i < count; i++) {
-        if (arg1 == 0) {
+        if (fixed == 0) {
             scale = D_800D2410[i];
         }
         func_150A7CB0(mtx, scale, scale, scale);
@@ -464,18 +486,19 @@ GameBC510Command *func_150900F0(GameBC510Command *arg0, s32 arg1) {
         mtx[3][1] = D_8009DC90[i][1];
         mtx[3][2] = D_8009DC90[i][2];
         func_150A7A48(mtx, base, mtx);
-        guMtxF2L(mtx, (Mtx *)(&((Mtx (*)[2])&D_800D2590)[i][D_800BE9C0]));
-        { GameBC510Command *c = arg0++; c->w0 = 0xDA380003; c->w1 = (u32)(&((Mtx (*)[2])&D_800D2590)[i][D_800BE9C0]); }
-        { GameBC510Command *c = arg0++; c->w0 = 0xDE000000; c->w1 = (u32)dl; }
+        guMtxF2L(mtx, &D_800D2590[i][D_800BE9C0]);
+        gSPMatrix(gfx++, &D_800D2590[i][D_800BE9C0], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPDisplayList(gfx++, dl);
     }
-    if (arg1 == 0) {
-        for (p = D_800D245C; p != NULL; p = p->unk80) {
-            func_15043E68((Mtx *)((u8 *)p + (D_800BE9C0 << 6)), p->unk9C, p->unkA0, p->unkA4, p->unk84, p->unk88, p->unk8C);
-            { GameBC510Command *c = arg0++; c->w0 = 0xDA380003; c->w1 = (u32)((u8 *)p + (D_800BE9C0 << 6)); }
-            { GameBC510Command *c = arg0++; c->w0 = 0xDE000000; c->w1 = (u32)dl; }
+    if (fixed == 0) {
+        for (node = D_800D245C; node != NULL; node = node->unk80) {
+            func_15043E68((Mtx *)node->pad0 + D_800BE9C0, node->unk9C, node->unkA0, node->unkA4, node->unk84,
+                          node->unk88, node->unk8C);
+            gSPMatrix(gfx++, (Mtx *)node->pad0 + D_800BE9C0, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+            gSPDisplayList(gfx++, dl);
         }
     }
-    return arg0;
+    return gfx;
 }
 typedef struct BC510Entry {
     s16 x;
@@ -511,11 +534,11 @@ typedef struct BC510Tex {
 extern f32 func_15048A40(u8 arg0);
 extern BC510Tex D_800903D4;
 extern BC510Tex D_80091840;
-GameBC510Command *func_15094F70(GameBC510Command *, BC510Tex *, s32, BC510Sprite *, s32, s32, s32, s32, s32);
-GameBC510Command *func_15095A48(GameBC510Command *, BC510Sprite *, f32, f32);
+Gfx *func_15094F70(Gfx *, BC510Tex *, s32, BC510Sprite *, s32, s32, s32, s32, s32);
+Gfx *func_15095A48(Gfx *, BC510Sprite *, f32, f32);
 
 #define ENT ((BC510Entry *)D_800D2460)
-GameBC510Command *func_15090630(GameBC510Command *gfx) {
+Gfx *func_15090630(Gfx *gfx) {
     s32 i;
     BC510Sprite sprite;
     s32 first;
@@ -529,9 +552,9 @@ GameBC510Command *func_15090630(GameBC510Command *gfx) {
 
     sprite.alpha = 0xFF;
     sprite.flip = 0;
-    { GameBC510Command *c = gfx++; c->w0 = 0xE7000000; c->w1 = 0; }
-    { GameBC510Command *c = gfx++; c->w0 = 0xFCFFB5FF; c->w1 = 0xFFFCFE38; }
-    { GameBC510Command *c = gfx++; c->w0 = 0xEF102C0F; c->w1 = 0x0C184244; }
+    { Gfx *c = gfx++; c->words.w0 = 0xE7000000; c->words.w1 = 0; }
+    { Gfx *c = gfx++; c->words.w0 = 0xFCFFB5FF; c->words.w1 = 0xFFFCFE38; }
+    { Gfx *c = gfx++; c->words.w0 = 0xEF102C0F; c->words.w1 = 0x0C184244; }
     first = 1;
     i = 0;
     do {
@@ -850,7 +873,7 @@ extern u8 D_80084160[];
 extern u8 D_80084190[];
 #define STAGE (*(BC510Stage *)&D_800D24C8)
 
-GameBC510Command *func_150911F4(GameBC510Command *gfx) {
+Gfx *func_150911F4(Gfx *gfx) {
     s32 sp90[6];
     f32 y;
     f32 x;
@@ -859,47 +882,47 @@ GameBC510Command *func_150911F4(GameBC510Command *gfx) {
     if (STAGE.alpha == 0) {
         return gfx;
     }
-    { GameBC510Command *c = gfx++; c->w0 = 0xDE000000; c->w1 = (u32)D_80084160; }
-    { GameBC510Command *c = gfx++; c->w0 = 0xD9FFFFFF; c->w1 = 0x400; }
-    { GameBC510Command *c = gfx++; c->w0 = 0xD9F1FDFE; c->w1 = 0; }
-    { GameBC510Command *c = gfx++; c->w0 = 0xD9BDFFFF; c->w1 = 0; }
+    { Gfx *c = gfx++; c->words.w0 = 0xDE000000; c->words.w1 = (u32)D_80084160; }
+    { Gfx *c = gfx++; c->words.w0 = 0xD9FFFFFF; c->words.w1 = 0x400; }
+    { Gfx *c = gfx++; c->words.w0 = 0xD9F1FDFE; c->words.w1 = 0; }
+    { Gfx *c = gfx++; c->words.w0 = 0xD9BDFFFF; c->words.w1 = 0; }
     if (STAGE.alpha < 0xFF) {
-        GameBC510Command *c = gfx++; c->w0 = 0xDB060020; c->w1 = (u32)D_80083440;
+        Gfx *c = gfx++; c->words.w0 = 0xDB060020; c->words.w1 = (u32)D_80083440;
     } else {
-        GameBC510Command *c = gfx++; c->w0 = 0xDB060020; c->w1 = (u32)D_800835C0;
+        Gfx *c = gfx++; c->words.w0 = 0xDB060020; c->words.w1 = (u32)D_800835C0;
     }
     y = -11.0f; y += STAGE.unkA8;
     x = -1.0f - STAGE.unkA0;
     func_15043D90(&STAGE.mtx[D_800BE9C0], x, y, 0.0f,
                   4.050000191f, 4.050000191f, 4.050000191f, 667.0f, 152.0f, -1668.0f);
-    { GameBC510Command *c = gfx++; c->w0 = 0xDA380003; c->w1 = (u32)&STAGE.mtx[D_800BE9C0]; }
-    { GameBC510Command *c = gfx++; c->w0 = 0xF8000000; c->w1 = 0xFF; }
-    { GameBC510Command *c = gfx++; c->w0 = 0xFA00F200; c->w1 = 0; }
-    { GameBC510Command *c = gfx++; c->w0 = 0xFB000000; c->w1 = (STAGE.alpha & 0xFF); }
-    { GameBC510Command *c = gfx++; c->w0 = 0xDB06000C; c->w1 = (u32)&STAGE.mtx[D_800BE9C0]; }
-    { GameBC510Command *c = gfx++; c->w0 = 0xDB060004; c->w1 = STAGE.seg1[D_800BE9C0]; }
+    { Gfx *c = gfx++; c->words.w0 = 0xDA380003; c->words.w1 = (u32)&STAGE.mtx[D_800BE9C0]; }
+    { Gfx *c = gfx++; c->words.w0 = 0xF8000000; c->words.w1 = 0xFF; }
+    { Gfx *c = gfx++; c->words.w0 = 0xFA00F200; c->words.w1 = 0; }
+    { Gfx *c = gfx++; c->words.w0 = 0xFB000000; c->words.w1 = (STAGE.alpha & 0xFF); }
+    { Gfx *c = gfx++; c->words.w0 = 0xDB06000C; c->words.w1 = (u32)&STAGE.mtx[D_800BE9C0]; }
+    { Gfx *c = gfx++; c->words.w0 = 0xDB060004; c->words.w1 = STAGE.seg1[D_800BE9C0]; }
     if (STAGE.tex[0]) {
-        GameBC510Command *c;
+        Gfx *c;
         t = func_1510D0EC(STAGE.tex[0], (s32)sp90, 3, 0);
-        c = gfx++; c->w0 = 0xDB060018; c->w1 = t;
+        c = gfx++; c->words.w0 = 0xDB060018; c->words.w1 = t;
     }
     if (STAGE.tex[1]) {
-        GameBC510Command *c;
+        Gfx *c;
         t = func_1510D0EC(STAGE.tex[1], (s32)sp90, 3, 0);
-        c = gfx++; c->w0 = 0xDB06001C; c->w1 = t;
+        c = gfx++; c->words.w0 = 0xDB06001C; c->words.w1 = t;
     }
     if (STAGE.tex[2]) {
-        GameBC510Command *c;
+        Gfx *c;
         t = func_1510D0EC(STAGE.tex[2], (s32)sp90, 3, 0);
-        c = gfx++; c->w0 = 0xDB060028; c->w1 = t;
+        c = gfx++; c->words.w0 = 0xDB060028; c->words.w1 = t;
     }
     if (STAGE.tex[3]) {
-        GameBC510Command *c;
+        Gfx *c;
         t = func_1510D0EC(STAGE.tex[3], (s32)sp90, 3, 0);
-        c = gfx++; c->w0 = 0xDB06002C; c->w1 = t;
+        c = gfx++; c->words.w0 = 0xDB06002C; c->words.w1 = t;
     }
-    { GameBC510Command *c = gfx++; c->w0 = 0xDE000000; c->w1 = STAGE.dl; }
-    { GameBC510Command *c = gfx++; c->w0 = 0xDE000000; c->w1 = (u32)D_80084190; }
+    { Gfx *c = gfx++; c->words.w0 = 0xDE000000; c->words.w1 = STAGE.dl; }
+    { Gfx *c = gfx++; c->words.w0 = 0xDE000000; c->words.w1 = (u32)D_80084190; }
     return gfx;
 }
 
@@ -1011,7 +1034,7 @@ extern u8 D_D13[];
 extern u8 D_D14[];
 void func_150916B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
-GameBC510Command *func_150918EC(GameBC510Command *gfx) {
+Gfx *func_150918EC(Gfx *gfx) {
     s32 i;
     s32 j;
     s32 x;
@@ -1194,7 +1217,7 @@ GameBC510Command *func_150918EC(GameBC510Command *gfx) {
                         j = 0;
                         if (!loaded) {
                             loaded = 1;
-                            gfx = (GameBC510Command *)func_15091534((Gfx *)gfx, NULL, &ok);
+                            gfx = (Gfx *)func_15091534((Gfx *)gfx, NULL, &ok);
                         }
                         x = (right - rows[25]) * 4;
                         t = D_800873B4[lap / 3] << 5;
@@ -1217,7 +1240,7 @@ GameBC510Command *func_150918EC(GameBC510Command *gfx) {
                 }
                 if (D_8008FDC0 & 0x10) {
                     if (!loaded) {
-                        gfx = (GameBC510Command *)func_15091534((Gfx *)gfx, NULL, &ok);
+                        gfx = (Gfx *)func_15091534((Gfx *)gfx, NULL, &ok);
                     }
                     s = func_150859AC(i, 4);
                     x = rows[22] + y3;
@@ -1295,7 +1318,7 @@ GameBC510Command *func_150918EC(GameBC510Command *gfx) {
                 if (lap >= 0) {
                     if (!loaded) {
                         loaded = 1;
-                        gfx = (GameBC510Command *)func_15091534((Gfx *)gfx, (struct257 *)1, &ok);
+                        gfx = (Gfx *)func_15091534((Gfx *)gfx, (struct257 *)1, &ok);
                     }
                     x = right - rows[25];
                     y2 = (lap % 3) * 25;
@@ -1491,7 +1514,7 @@ extern s32 D_800D2450;
 extern u8 D_11AD[];
 void func_150A7D00(s32, f32, f32, f32);
 
-GameBC510Command *func_150938BC(GameBC510Command *arg0) {
+Gfx *func_150938BC(Gfx *arg0) {
     s32 x = 120;
     s32 y = 129;
     s32 z = -303;
@@ -1525,7 +1548,7 @@ extern u8 D_800AB62C[][3];
 extern u16 D_800E0BCC;
 u8 func_15085DA8(f32 arg0);
 
-GameBC510Command *func_15093B58(GameBC510Command *gfx, s32 step, s16 *rows, s32 mode, u8 big) {
+Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *rows, s32 mode, u8 big) {
     f32 scale;
     f32 zoom;
     f32 sinv;
