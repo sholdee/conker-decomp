@@ -1317,16 +1317,90 @@ typedef struct {
     /* 0x70 */ f32 bubbleX;
 } TextBox;
 
-typedef struct {
-    u8  pad0[0x4];
-    u16 unk4;
-    u8  pad6[0x2];
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    u8  pad14[0x4];
-    f32 unk18;
-} struct197;
+/* Animation playback state (Actor.unk2D0, ModelAttachment.anim). Most fields come in pairs: the
+ * current animation and the previous one, kept for blending. Actors allocate only the first 0x3E0
+ * bytes (game_AEB40); animated models (game_6C960, used by ModelAttachment) also use the fields
+ * past that (size 0x3F8).
+ * File-local views of the same object: AnimPlaybackState (83300), ObjAnim (58F80). */
+typedef struct AnimInstance {
+    /* 0x000 */ void (*callback)(void); // called once when playback reaches the last frame
+    /* 0x004 */ u16 anim;           // current animation; bit 15: hold on the last frame
+    /* 0x006 */ u16 prevAnim;
+    /* 0x008 */ f32 frame;
+    /* 0x00C */ f32 prevFrame;
+    /* 0x010 */ f32 speed;
+    /* 0x014 */ f32 prevSpeed;
+    /* 0x018 */ f32 numFrames;      // playback end
+    /* 0x01C */ f32 prevNumFrames;
+    /* 0x020 */ f32 start;          // playback start (loop point)
+    /* 0x024 */ f32 prevStart;
+    /* 0x028 */ s32 animId;         // changes whenever a new animation is started
+    /* 0x02C */ u8  pad2C[0xC];
+    /* 0x038 */ s8  unk38;
+    /* 0x039 */ s8  unk39;
+    /* 0x03A */ s16 unk3A;          // blend step
+    /* 0x03C */ s16 unk3C;          // blend countdown
+    /* 0x03E */ u8  pad3E[0x45 - 0x3E];
+    /* 0x045 */ u8  unk45;          // byte 5 of the animation's data header
+    /* 0x046 */ u8  pad46[0x215 - 0x46];
+    /* 0x215 */ u8  unk215;         // byte 5 of the previous animation's data header
+    /* 0x216 */ u8  pad216[0x3E0 - 0x216];
+    /* 0x3E0 */ f32 (*matrices[2])[4]; // model transform, one per frame buffer; set by the owner
+    /* 0x3E8 */ Mtx *partMtx[2];    // numParts matrices, one array per frame buffer
+    /* 0x3F0 */ s32 unk3F0;
+    /* 0x3F4 */ u8  numParts;
+    /* 0x3F5 */ u8  bank;           // animation bank passed to func_1505E0C4
+    /* 0x3F6 */ u8  unk3F6;         // set once the part matrices have been built
+} AnimInstance; // size 0x3F8
+
+/* Position/rotation offset of a ModelAttachment from its owner's joint. */
+typedef struct AttachmentOffset {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 rotX;
+    /* 0x10 */ f32 rotY;
+    /* 0x14 */ f32 rotZ;
+} AttachmentOffset;
+
+/* A model attached to a game object; doubly linked list headed by D_800C3EE0 (game_5D2C0). */
+typedef struct ModelAttachment {
+    /* 0x00 */ u8 ownerId;            // unique_id of the owning Actor
+    /* 0x01 */ u8 model;              // model id; also selects the per-model hooks
+    /* 0x02 */ u8 bone;               // owner joint matrix the model follows
+    /* 0x03 */ u8 alpha;
+    /* 0x04 */ u8 flags;
+    /* 0x05 */ u8 updated;            // set by the update pass; not drawn before that
+    /* 0x06 */ u8 setId;              // attachment set id (see func_15083568)
+    /* 0x07 */ u8 handler;            // index into the D_800841C0 per-frame callbacks
+    /* 0x08 */ u8 ownsVtx;            // vtx[] are private copies that must be freed
+    /* 0x09 */ u8 loaded;
+    /* 0x0A */ u16 ownerStates[3];    // if set, kept only while owner->unk84 is one of these
+    /* 0x10 */ u8 pad10[3];
+    /* 0x13 */ u8 hiddenDLists;       // bit i set: display list i is not drawn
+    /* 0x14 */ u8 numDLists;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ s8 unk17;              // -1, or the animation set passed to func_1503F62C
+    /* 0x18 */ u16 seg6Id;            // resolved by func_1510D0EC into segment 6
+    /* 0x1A */ u16 seg7Id;            // resolved by func_1510D0EC into segment 7
+    /* 0x1C */ u16 timer;             // frames left to live; 0xFFFF = forever
+    /* 0x1E */ u16 parentSet;         // nonzero: follows a matrix of another attachment set
+    /* 0x20 */ u16 parentMtx;
+    /* 0x22 */ s16 rotZ;
+    /* 0x24 */ Gfx **dlists;
+    /* 0x28 */ void *vtx[2];          // segment 1 data, one per frame buffer
+    /* 0x30 */ s32 unk30;
+    /* 0x34 */ Mtx *mtx;              // two matrices, one per frame buffer
+    /* 0x38 */ s32 unk38;             // per-model hook state (F4890 flash: frames left)
+    /* 0x3C */ s32 unk3C;             // per-model hook state (F4890 flash: brightness 0..255)
+    /* 0x40 */ f32 scale;
+    /* 0x44 */ AttachmentOffset *offset;
+    /* 0x48 */ AnimInstance *anim;
+    /* 0x4C */ void *reflMtx[2];      // mirrored matrices, one per frame buffer (game_623D0)
+    /* 0x54 */ struct ModelAttachment *next;
+    /* 0x58 */ struct ModelAttachment *prev;
+} ModelAttachment; // size 0x5C
 
 /* Node of the attachment list an actor keeps at 0x2F4 (game_179F30.c: func_1514EC1C attaches,
  * func_1514ECE0 finds by type, func_1514ED3C finds by handle). */
@@ -1704,7 +1778,7 @@ struct Actor {
     /* 0x2CA */ s8  unk2CA;
     /* 0x2CB */ s8  unk2CB;
     /* 0x2CC */ s32 unk2CC;
-    /* 0x2D0 */ struct197 *unk2D0;
+    /* 0x2D0 */ AnimInstance *unk2D0;
     /* 0x2D4 */ struct102 *unk2D4;
     /* 0x2D8 */ f32 unk2D8[3];   // launch velocity (y, gravity, xz) for func_15071FDC, set by script command 0x22;
                                  // [0]/[1] are also a fade timer/rate (func_150DFDD0, game_F15D0)

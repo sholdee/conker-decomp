@@ -67,77 +67,8 @@ s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4,
     return 0;
 }
 
-/* Position and rotation offset from the attachment's bone (func_15030D54). */
-typedef struct AttachmentOffset {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ f32 rotX;
-    /* 0x10 */ f32 rotY;
-    /* 0x14 */ f32 rotZ;
-} AttachmentOffset;
 
-/* Animated-model instance driven by func_1503F5B8 (struct197 is a prefix of it). */
-typedef struct AnimInstance {
-    /* 0x000 */ u8 pad0[0x4];
-    /* 0x004 */ u16 anim;        // current animation; bit 15 is a flag
-    /* 0x006 */ u8 pad6[0x2];
-    /* 0x008 */ f32 frame;
-    /* 0x00C */ u8 padC[0xC];
-    /* 0x018 */ f32 numFrames;
-    /* 0x01C */ u8 pad1C[0x1D];
-    /* 0x039 */ s8 unk39;
-    /* 0x03A */ s16 unk3A;
-    /* 0x03C */ s16 unk3C;
-    /* 0x03E */ u8 pad3E[0x215 - 0x3E];
-    /* 0x215 */ u8 unk215;
-    /* 0x216 */ u8 pad216[0x3E0 - 0x216];
-    /* 0x3E0 */ u8 *unk3E0[2];   // per-frame matrices (indexed by D_800BE9C0)
-    /* 0x3E8 */ u8 *unk3E8[2];
-    /* 0x3F0 */ u8 pad3F0[6];
-    /* 0x3F6 */ u8 unk3F6;
-} AnimInstance;
 
-/* A model attached to a bone of a game object. Allocated by func_15030AF4 and kept in the
- * doubly linked list headed by D_800C3EE0. */
-typedef struct ModelAttachment {
-    /* 0x00 */ u8 ownerId;            // unique_id of the owning Actor
-    /* 0x01 */ u8 model;              // model id; also selects the per-model hooks
-    /* 0x02 */ u8 bone;               // owner joint matrix the model follows
-    /* 0x03 */ u8 alpha;
-    /* 0x04 */ u8 flags;
-    /* 0x05 */ u8 updated;            // set by the update pass; not drawn before that
-    /* 0x06 */ u8 setId;              // attachment set id (see func_15083568)
-    /* 0x07 */ u8 handler;            // index into the D_800841C0 per-frame callbacks
-    /* 0x08 */ u8 ownsVtx;            // vtx[] are private copies that must be freed
-    /* 0x09 */ u8 loaded;
-    /* 0x0A */ u16 ownerStates[3];    // if set, kept only while owner->unk84 is one of these
-    /* 0x10 */ u8 pad10[3];
-    /* 0x13 */ u8 hiddenDLists;       // bit i set: display list i is not drawn
-    /* 0x14 */ u8 numDLists;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ s8 unk17;              // -1, or the animation set passed to func_1503F62C
-    /* 0x18 */ u16 seg6Id;            // resolved by func_1510D0EC into segment 6
-    /* 0x1A */ u16 seg7Id;            // resolved by func_1510D0EC into segment 7
-    /* 0x1C */ u16 timer;             // frames left to live; 0xFFFF = forever
-    /* 0x1E */ u16 parentSet;         // nonzero: follows a matrix of another attachment set
-    /* 0x20 */ u16 parentMtx;
-    /* 0x22 */ s16 rotZ;
-    /* 0x24 */ Gfx **dlists;
-    /* 0x28 */ void *vtx[2];          // segment 1 data, one per frame buffer
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ Mtx *mtx;              // two matrices, one per frame buffer
-    /* 0x38 */ s32 unk38;             // per-model hook state
-    /* 0x3C */ s32 unk3C;             // per-model hook state
-    /* 0x40 */ f32 scale;
-    /* 0x44 */ AttachmentOffset *offset;
-    /* 0x48 */ AnimInstance *anim;
-    /* 0x4C */ void *unk4C;
-    /* 0x50 */ void *unk50;
-    /* 0x54 */ struct ModelAttachment *next;
-    /* 0x58 */ struct ModelAttachment *prev;
-} ModelAttachment; // size 0x5C
 
 void func_15031C14(ModelAttachment *att);
 void func_1503F5B8(AnimInstance *anim, s32 arg1, s32 animId, f32 arg3, f32 arg4, s32 arg5);
@@ -220,23 +151,23 @@ void func_15030158(ModelAttachment *att, s32 immediate) {
 
         func_10004074(offset);
     }
-    if (att->unk4C != NULL) {
+    if (att->reflMtx[0] != NULL) {
         if (immediate) {
-            func_10004074(att->unk4C);
+            func_10004074(att->reflMtx[0]);
         } else {
-            func_100043B4(att->unk4C, 4);
+            func_100043B4(att->reflMtx[0], 4);
         }
     }
-    if (att->unk50 != NULL) {
+    if (att->reflMtx[1] != NULL) {
         if (immediate) {
-            func_10004074(att->unk50);
+            func_10004074(att->reflMtx[1]);
         } else {
-            func_100043B4(att->unk50, 4);
+            func_100043B4(att->reflMtx[1], 4);
         }
     }
 
-    if (att == (ModelAttachment *)D_800C3EE0) {
-        D_800C3EE0 = (s32)att->next;
+    if (att == D_800C3EE0) {
+        D_800C3EE0 = att->next;
     }
     if (att->prev != NULL) {
         att->prev->next = att->next;
@@ -263,7 +194,7 @@ s32 func_15030310(Actor *owner, s32 setId, s32 index) {
         return 0;
     }
     removed = 0;
-    att = (ModelAttachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
         ModelAttachment *next = att->next;
 
@@ -295,7 +226,7 @@ s32 func_150303E4(Actor *owner) {
         return 0;
     }
 
-    att = (ModelAttachment *)D_800C3EE0;
+    att = D_800C3EE0;
     removed = 0;
     while (att != NULL) {
         next = att->next;
@@ -347,7 +278,7 @@ void func_15030468(void) {
         if (pass == 1 && !hasFollowers) {
             break;
         }
-        att = (ModelAttachment *)D_800C3EE0;
+        att = D_800C3EE0;
         while (att != NULL) {
             next = att->next;
             ret = 0;
@@ -473,9 +404,9 @@ void func_15030468(void) {
             }
             if (att->anim != NULL) {
                 if (att->mtx != NULL) {
-                    att->anim->unk3E0[D_800BE9C0] = (u8 *)mtx;
+                    att->anim->matrices[D_800BE9C0] = (f32 (*)[4])mtx;
                 } else {
-                    att->anim->unk3E0[D_800BE9C0] = (u8 *)boneMtx;
+                    att->anim->matrices[D_800BE9C0] = (f32 (*)[4])boneMtx;
                 }
                 func_1503F4B0(att->anim);
             }
@@ -523,7 +454,7 @@ ModelAttachment *func_15030AF4(Actor *owner, s32 model, s32 bone, s32 flags, s32
         return NULL;
     }
     if (!(flags & 8)) {
-        att = (ModelAttachment *)D_800C3EE0;
+        att = D_800C3EE0;
         if (att != NULL) {
             do {
                 next = att->next;
@@ -539,12 +470,12 @@ ModelAttachment *func_15030AF4(Actor *owner, s32 model, s32 bone, s32 flags, s32
         return NULL;
     }
     err = 0;
-    if ((ModelAttachment *)D_800C3EE0 != NULL) {
-        ((ModelAttachment *)D_800C3EE0)->prev = att;
+    if (D_800C3EE0 != NULL) {
+        D_800C3EE0->prev = att;
     }
-    att->next = (ModelAttachment *)D_800C3EE0;
+    att->next = D_800C3EE0;
     att->prev = NULL;
-    D_800C3EE0 = (s32)att;
+    D_800C3EE0 = att;
     att->ownerId = owner->unique_id;
     att->model = model;
     att->bone = bone;
@@ -574,8 +505,8 @@ ModelAttachment *func_15030AF4(Actor *owner, s32 model, s32 bone, s32 flags, s32
     att->parentSet = parentSet;
     att->parentMtx = parentMtx;
     att->hiddenDLists = 0;
-    att->unk4C = NULL;
-    att->unk50 = NULL;
+    att->reflMtx[0] = NULL;
+    att->reflMtx[1] = NULL;
     att->updated = 0;
     att->rotZ = 0;
     if ((unk16 == 4) || (flags & 4)) {
@@ -629,7 +560,7 @@ Gfx *func_15030E08(Gfx *gdl, s32 view, s32 pass) {
     Actor *owner;
     s32 alpha;
 
-    att = (ModelAttachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
         next = att->next;
         if (att->alpha == 0) {
@@ -672,7 +603,7 @@ Gfx *func_15030F94(Gfx *gdl, Actor *owner, s32 view, s32 arg3) {
     if ((owner == NULL) || (owner->unk1D4 == NULL) || (owner->unique_id == 0)) {
         return gdl;
     }
-    att = (ModelAttachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
         next = att->next;
         if ((att->ownerId != owner->unique_id) || (att->alpha == 0)) {
@@ -694,8 +625,8 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
         if (att->anim->unk3F6 == 0) {
             return 0;
         }
-        *mtx = (Mtx *)att->anim->unk3E8[D_800BE9C0];
-        *boneMtx = (Mtx *)att->anim->unk3E0[D_800BE9C0];
+        *mtx = att->anim->partMtx[D_800BE9C0];
+        *boneMtx = (Mtx *)att->anim->matrices[D_800BE9C0];
     } else if (att->mtx != NULL) {
         *mtx = &att->mtx[D_800BE9C0];
         *boneMtx = (Mtx *)owner->unk1D4 + att->bone;
@@ -888,7 +819,7 @@ ActorCtl *func_1503195C(Actor *owner, s32 setId, s32 index) {
         return NULL;
     }
 
-    att = (ModelAttachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
         next = att->next;
         if ((ownerId == att->ownerId) && (setId == att->setId)) {
@@ -912,7 +843,7 @@ ModelAttachment *func_150319CC(s32 setId, Actor *owner) {
     u8 ownerId;
 
     if (owner != NULL) {
-        att = (ModelAttachment *)D_800C3EE0;
+        att = D_800C3EE0;
         if (att != NULL) {
             ownerId = owner->unique_id;
             do {
@@ -924,7 +855,7 @@ ModelAttachment *func_150319CC(s32 setId, Actor *owner) {
             } while (att != NULL);
         }
     }
-    att = (ModelAttachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
         next = att->next;
         if (att->setId == setId) {
@@ -1103,7 +1034,7 @@ s32 func_15031E2C(ModelAttachment *att, Actor *owner) {
 /* Hook: sets the tile t of the first display list's 4th G_SETTILESIZE from the owner's
  * animation frame (0..120 maps to 27..2). */
 s32 func_15031E7C(ModelAttachment *att, Actor *owner) {
-    struct197 *anim;
+    AnimInstance *anim;
     Gfx *gfx;
     s32 count;
     s32 i;
@@ -1123,8 +1054,8 @@ s32 func_15031E7C(ModelAttachment *att, Actor *owner) {
         t = 1.0f;
     } else if (owner->unk84.uh == 0x56) {
         t = 0.0f;
-    } else if ((0.0f <= anim->unk8) && (anim->unk8 <= 120.0f)) {
-        t = anim->unk8 * 0.008333333768f;
+    } else if ((0.0f <= anim->frame) && (anim->frame <= 120.0f)) {
+        t = anim->frame * 0.008333333768f;
         t = 1.0f - t;
     } else {
         t = 0.0f;
@@ -1163,7 +1094,7 @@ s32 func_15031FC8(ModelAttachment *att, Actor *owner) {
     s32 pad; // matching: stack padding
     s32 syncAll;
 
-    ownerAnim = (AnimInstance *)owner->unk2D0;
+    ownerAnim = owner->unk2D0;
     animId = -1;
     anim = att->anim;
     if (anim == NULL) {
@@ -2380,7 +2311,7 @@ static AttachmentHook const D_800841D4_entry[] = { func_15031FC8 };
 
 /* Hook: plays the owner's unk2E4 animation on the attachment and keeps it in step with the owner's frame. */
 s32 func_150331B8(ModelAttachment *att, Actor *owner) {
-    struct197 *ownerAnim;
+    AnimInstance *ownerAnim;
     AnimInstance *anim;
 
     ownerAnim = owner->unk2D0;
@@ -2392,7 +2323,7 @@ s32 func_150331B8(ModelAttachment *att, Actor *owner) {
         func_1503F5B8(anim, 0, owner->unk2E4 & 0xFF, 1.0f, 0.0f, 1);
     }
     if (ownerAnim != NULL) {
-        att->anim->frame = ownerAnim->unk8;
+        att->anim->frame = ownerAnim->frame;
         anim = att->anim;
         if (anim->numFrames <= anim->frame) {
             anim->frame = anim->numFrames - 1.0f;
@@ -2803,7 +2734,7 @@ s32 func_15033E28(Actor *owner, ModelAttachment **out) {
     ModelAttachment *next;
     s32 count;
 
-    head = (ModelAttachment *)D_800C3EE0;
+    head = D_800C3EE0;
     count = 0;
     if (head == NULL) {
         return 0;
@@ -2826,7 +2757,7 @@ ModelAttachment *func_15033E84(Actor *owner) {
     ModelAttachment *next;
     u8 ownerId;
 
-    att = (ModelAttachment *)D_800C3EE0;
+    att = D_800C3EE0;
     if (att != NULL) {
         ownerId = owner->unique_id;
         do {
@@ -2848,7 +2779,7 @@ void func_15033EC4(s32 a, s32 b) {
     s32 ownerId;
 
     idA = a; // matching: IDO keeps the copy in a2
-    att = (ModelAttachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
         next = att->next;
         ownerId = att->ownerId;

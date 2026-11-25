@@ -600,7 +600,7 @@ void func_1507F640(void) {
 
 /* Applies the side effects of the actor's current idle frame flags, on their rising/falling edges. */
 void func_1507FC2C(Actor *actor) {
-    struct197 *sound;
+    AnimInstance *sound;
     f32 level;
     s32 flags;
     s32 prev;
@@ -624,7 +624,7 @@ void func_1507FC2C(Actor *actor) {
         level = D_800418B0[D_800419A0][0];
         if (level >= 0.0f) {
             sound = actor->unk2D0;
-            sound->unk8 = (sound->unk18 * (32768.0f - level)) / 32768.0f;
+            sound->frame = (sound->numFrames * (32768.0f - level)) / 32768.0f;
         }
     }
 

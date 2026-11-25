@@ -613,17 +613,17 @@ void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
  * below dstIndex's unk18. */
 void func_150649A0(s32 srcIndex, s32 dstIndex) {
     Actor *objects;
-    struct197 *dst;
-    struct197 *src;
+    AnimInstance *dst;
+    AnimInstance *src;
 
     objects = D_800CC2D0;
     dst = objects[dstIndex].unk2D0;
     src = objects[srcIndex].unk2D0;
 
     if (dst != NULL && src != NULL) {
-        dst->unk8 = src->unk8;
-        if (dst->unk18 <= dst->unk8) {
-            dst->unk8 = dst->unk18 - 1.0f;
+        dst->frame = src->frame;
+        if (dst->numFrames <= dst->frame) {
+            dst->frame = dst->numFrames - 1.0f;
         }
     }
 }
@@ -1794,7 +1794,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         break;
     case 0xB:
         if (arg0->unk84.uh == 0x68) {
-            if ((arg0->unk2D0->unk8 < 68.0f) && (arg0->unk222 != 0)) {
+            if ((arg0->unk2D0->frame < 68.0f) && (arg0->unk222 != 0)) {
                 D_800CC2B2 = (arg0->unk7A - func_15063390(arg0)) - 0x2000;
             }
             anim = 999;

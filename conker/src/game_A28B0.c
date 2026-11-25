@@ -1284,12 +1284,12 @@ void func_15078544(void) {
 
 /* Jumps to arg0 when the target's unk2D0->unk8 is below (arg2 == 0) or above (arg2 == 1) arg1. */
 void func_1507879C(void) {
-    struct197 *data;
+    AnimInstance *data;
     f32 value;
     s32 compare;
 
     data = D_800CC2D0[D_800D154C->unk222].unk2D0;
-    value = data->unk8;
+    value = data->frame;
     compare = D_800D1892;
     if (((compare == 0) && (value < (f32)(u32)D_800D1891)) ||
         ((compare == 1) && ((f32)(u32)D_800D1891 < value))) {
@@ -1323,13 +1323,13 @@ void func_15078900(void) {
 
 /* Copies unk8 and unkC of the target's unk2D0 data into the object's own. */
 void func_15078A08(void) {
-    struct197 *dst;
-    struct197 *src;
+    AnimInstance *dst;
+    AnimInstance *src;
 
     dst = D_800D154C->unk2D0;
     src = D_800CC2D0[D_800D154C->unk222].unk2D0;
-    dst->unk8 = src->unk8;
-    dst->unkC = src->unkC;
+    dst->frame = src->frame;
+    dst->prevFrame = src->prevFrame;
 }
 
 /*

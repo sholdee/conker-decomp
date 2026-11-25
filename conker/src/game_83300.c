@@ -950,7 +950,7 @@ void func_15056B08(Actor *actor) {
 }
 /* Plays the actor's movement animation (unk244) at a rate derived from its speed, or at `idleRate`. */
 void func_1505841C(Actor *actor, f32 idleRate) {
-    struct197 *anim;
+    AnimInstance *anim;
     f32 speed;
     f32 fade;
     f32 rate;
@@ -984,7 +984,7 @@ void func_1505841C(Actor *actor, f32 idleRate) {
         fade = D_800418B0[D_800419A0][0];
         if (fade >= 0.0f) {
             anim = actor->unk2D0;
-            anim->unk8 = (anim->unk18 * (32768.0f - fade)) / 32768.0f;
+            anim->frame = (anim->numFrames * (32768.0f - fade)) / 32768.0f;
         }
     }
 }

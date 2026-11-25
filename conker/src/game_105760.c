@@ -27,7 +27,7 @@ typedef struct {
 /* While the actor runs action 13 with anim->unk8 in 23..40, scrolls the texture of the first
  * G_SETTILESIZE command in the display list horizontally. */
 s32 func_150D82BC(DLCallbackState *state, Actor *actor) {
-    struct197 *anim = actor->unk2D0;
+    AnimInstance *anim = actor->unk2D0;
     Gfx *list;
     s32 i;
     s32 uls;
@@ -39,9 +39,9 @@ s32 func_150D82BC(DLCallbackState *state, Actor *actor) {
     }
     state->unk18 = D_80090298[6];
     if (actor->unk84.uh == 13) {
-        if (23.0f <= anim->unk8 && anim->unk8 <= 40.0f) {
+        if (23.0f <= anim->frame && anim->frame <= 40.0f) {
             state->unk18 = D_80090298[7];
-            t = anim->unk8 - 23.0f;
+            t = anim->frame - 23.0f;
             t *= 1.0f / 17.0f;
             list = *state->displayList;
             for (i = 0; GFX_OPCODE(&list[i]) != (s8)G_SETTILESIZE; i++) {
@@ -69,7 +69,7 @@ s32 func_150D83D8(DLCallbackState *state, Actor *actor) {
         case 0:
             state->progress = 50;
             state->unk18 = D_80090298[27];
-            if (actor->unk84.uh == 0x18D && 46.0f <= actor->unk2D0->unk8) {
+            if (actor->unk84.uh == 0x18D && 46.0f <= actor->unk2D0->frame) {
                 state->phase = 1;
                 state->unk18 = D_80090298[28];
             }
@@ -82,7 +82,7 @@ s32 func_150D83D8(DLCallbackState *state, Actor *actor) {
             }
             break;
         case 2:
-            if (actor->unk84.uh == 0x18E && 34.0f <= actor->unk2D0->unk8) {
+            if (actor->unk84.uh == 0x18E && 34.0f <= actor->unk2D0->frame) {
                 state->phase = 3;
             }
             break;

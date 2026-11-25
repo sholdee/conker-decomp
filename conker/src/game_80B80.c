@@ -486,7 +486,7 @@ void func_150548E4(Actor *obj) {
 
 void func_15054A0C(Actor *obj) {
     if (obj->unk2D0 != NULL) {
-        if ((obj->unk2D0->unk18 - 1.0f) <= obj->unk2D0->unk8) {
+        if ((obj->unk2D0->numFrames - 1.0f) <= obj->unk2D0->frame) {
             func_15060F28(obj, 0);
         }
     }
@@ -499,9 +499,9 @@ void func_15054A5C(Actor *obj, Actor *other) {
 }
 
 void func_15054A94(Actor *obj) {
-    struct197 *anim;
+    AnimInstance *anim;
     Actor *other;
-    struct197 *otherAnim;
+    AnimInstance *otherAnim;
     s32 motion;
     s32 attach;
     s32 action;
@@ -525,13 +525,13 @@ void func_15054A94(Actor *obj) {
             func_15060F28(obj, 0);
             return;
         }
-        if (obj->unk84.uh == 0 && anim->unk8 == 0.0f) {
+        if (obj->unk84.uh == 0 && anim->frame == 0.0f) {
             func_15188810(obj, 100, 0);
         }
         if (obj->unk84.uh == 0 && other->unk84.uh == 0x4B) {
             func_1505E650(obj, 1, 1.0f, 3.0f, 0.0f, 0.0f, 0);
         }
-        if (obj->unk84.uh == 1 && anim->unk18 - 1.0f <= anim->unk8) {
+        if (obj->unk84.uh == 1 && anim->numFrames - 1.0f <= anim->frame) {
             func_15060F28(obj, 0);
         }
         return;
@@ -573,11 +573,11 @@ void func_15054A94(Actor *obj) {
     if (hold == other->unk84.uh) {
         motion = 2;
         if (obj->unk2E4 == 0) {
-            if (otherAnim->unk8 >= 6.0f && otherAnim->unk8 < 11.0f) {
+            if (otherAnim->frame >= 6.0f && otherAnim->frame < 11.0f) {
                 obj->unk2E4 = 1;
                 func_15083568(obj, action, 1.0f, 0);
             }
-        } else if (otherAnim->unk8 >= 11.0f) {
+        } else if (otherAnim->frame >= 11.0f) {
             obj->unk2E4 = 0;
             func_150836CC(obj, action);
         }
@@ -612,8 +612,7 @@ void func_15054A94(Actor *obj) {
             }
         }
     }
-    // 0x3C is past the end of struct197 as declared in structs.h
-    if (other->unk84.uh == 0x10A && *(s16 *)((u8 *)otherAnim + 0x3C) <= 0 && ready &&
+    if (other->unk84.uh == 0x10A && otherAnim->unk3C <= 0 && ready &&
         (state->buttons & 0x2000)) {
         if (obj->unk2E8 == 0) {
             func_151026BC(other, -1, 3, 1, 0xFF, 1);

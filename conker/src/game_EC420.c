@@ -267,7 +267,7 @@ typedef struct {
  * and sets obj[1].rotZ to a sine of the object's animation progress. */
 void func_150BF760(WorldObject *obj) {
     Actor *actor;
-    struct197 *anim;
+    AnimInstance *anim;
     s32 mode;
     s32 slot;
     f32 progress = 0.0f;
@@ -281,7 +281,7 @@ void func_150BF760(WorldObject *obj) {
         mode = obj->behaviorState & 3;
         if (actor != NULL) {
             anim = actor->unk2D0;
-            progress = anim->unk8 / (anim->unk18 - 2.0f);
+            progress = anim->frame / (anim->numFrames - 2.0f);
         }
         obj[1].rotZ = 0.0f;
         if (mode == 2) {

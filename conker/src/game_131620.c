@@ -40,13 +40,13 @@ void func_151D66F0(s32 arg0, s32 arg1);
 void func_151041E4(FadeEffect *effect) {
     s32 triggered;
     s32 mode;
-    struct197 *anim;
+    AnimInstance *anim;
     f32 frame;
 
     switch (effect->state) {
     case 0:
         anim = effect->owner->unk2D0;
-        frame = anim->unk8;
+        frame = anim->frame;
         mode = effect->mode;
         triggered = FALSE;
         if (mode == 0) {

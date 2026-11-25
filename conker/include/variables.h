@@ -905,7 +905,7 @@ extern u8  D_800C3E78;
 extern u16 D_800C3E7C;
 extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
 extern s32 D_800C3E84;
-extern s32 D_800C3EE0;
+extern ModelAttachment *D_800C3EE0; // head of the model attachment list
 extern Vtx *D_800C3FC0[]; // per actor: a 5-vertex quad buffer; [0] is the template D_80084300
 extern s32 D_800C3FC4;
 extern s64 D_800C3A60[];

@@ -207,14 +207,6 @@ void func_150DFDA4(Actor *actor) {
     bone[3][2] = actor->z_position;
 }
 
-/* Partial view of a model attachment (ModelAttachment in game_5D2C0.c). */
-typedef struct ModelAttachment {
-    /* 0x00 */ u8 pad0[0x13];
-    /* 0x13 */ u8 hiddenDLists; // bit i set: display list i is not drawn
-    /* 0x14 */ u8 pad14[0x10];
-    /* 0x24 */ GfxCmd **dlists;
-} ModelAttachment;
-
 /* Model attachment hook 12 (D_800841C0[12]). While the owner's fade is active (unk2EC), counts
  * its timer (unk2D8[0]) down, returning 1 once it expires, and rewrites the G_SETTILESIZE of the
  * attachment's display list: uls follows the fade, ult steps back by a third of the old uls. */
@@ -238,7 +230,7 @@ s32 func_150DFDD0(ModelAttachment *att, Actor *owner) {
         att->hiddenDLists = 0;
     }
 
-    dl = *att->dlists;
+    dl = (GfxCmd *)*att->dlists;
     if (dl != NULL) {
         j = 0;
         while (GFX_CMD(dl, j)->w0.opcode != (s8)G_SETTILESIZE) {

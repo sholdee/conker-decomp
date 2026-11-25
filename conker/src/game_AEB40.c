@@ -1554,13 +1554,13 @@ void func_15084A18(void) {
 }
 
 void func_15084C30(Actor *obj) {
-    struct197 *anim;
+    AnimInstance *anim;
     f32 phase;
 
     if (obj->id == 0x94) {
         anim = obj->unk2D0;
-        phase = func_150ADA20() % (s32)anim->unk18;
-        anim->unk8 = phase;
+        phase = func_150ADA20() % (s32)anim->numFrames;
+        anim->frame = phase;
     }
 }
 

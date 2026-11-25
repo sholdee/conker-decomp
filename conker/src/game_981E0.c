@@ -231,12 +231,6 @@ typedef struct TimedEvent {
     s32 parameter;
 } TimedEvent;
 
-/* struct197 (Actor.unk2D0) with the state token it lacks. */
-typedef struct struct197Hidden {
-    /* 0x00 */ u8 pad0[0x28];
-    /* 0x28 */ s32 token;
-} struct197Hidden;
-
 typedef void EventHandler(void);
 extern EventHandler *D_800863FC[];
 extern u8 D_80099A30[];
@@ -265,7 +259,7 @@ f32 func_1506AD30(Actor *obj, f32 time, u8 filtered) {
         if (obj->events[obj->unk138].time < 900.0f) {
             D_800D1580 = obj->events[obj->unk138].parameter;
             D_800D1874 = *(f32 *)&D_800D1580;
-            token = ((struct197Hidden *)obj->unk2D0)->token;
+            token = obj->unk2D0->animId;
             if (D_800C35EA[0] == 0 || D_800C365E != 0) {
                 id = obj->events[obj->unk138].id;
                 if (filtered) {
@@ -283,8 +277,8 @@ f32 func_1506AD30(Actor *obj, f32 time, u8 filtered) {
                     D_800863FC[id]();
                 }
             }
-            if (token != ((struct197Hidden *)obj->unk2D0)->token) {
-                time = obj->unk2D0->unk8;
+            if (token != obj->unk2D0->animId) {
+                time = obj->unk2D0->frame;
             } else {
                 obj->unk138++;
             }
@@ -448,7 +442,7 @@ void func_1506B5CC(void) {
 void func_1506B5E4(void) {
     func_1506160C(D_800D154C, 2, 7, 8, 0);
     D_800D154C->animation_speed = 0.0f;
-    D_800D154C->unk2D0->unk10 = 0.0f;
+    D_800D154C->unk2D0->speed = 0.0f;
 }
 
 /* Picks a random entry (0..count-1) of D_80099ABC / D_80099AB4 for the object's unk31C->unkE. */
@@ -1268,7 +1262,7 @@ void func_1506D584(void) {
         hi = D_800D1580 >> 24;
         lo = (D_800D1580 >> 16) & 0xFF;
         value = D_800D1580 & 0xFFFF;
-        divisor = obj->unk2D0->unk10;
+        divisor = obj->unk2D0->speed;
         if (divisor == 0.0f) {
             divisor = 0.01f;
         }
@@ -1838,7 +1832,7 @@ void func_1506EC50(void) {
 }
 
 void func_1506ECD0(void) {
-    D_800D154C->unk2D0->unk4 |= 0x8000;
+    D_800D154C->unk2D0->anim |= 0x8000;
 }
 
 void func_1506ECF0(void) {
@@ -3210,7 +3204,7 @@ void func_15072740(void) {
 
 void func_150727AC(void) {
     D_800D154C->animation_speed = D_800D1580 * 0.1f;
-    D_800D154C->unk2D0->unk10 = D_800D154C->animation_speed;
+    D_800D154C->unk2D0->speed = D_800D154C->animation_speed;
 }
 
 void func_150727F0(void) {
@@ -3391,14 +3385,14 @@ void func_15072E7C(void) {
 }
 
 void func_15072E98(void) {
-    D_800D154C->unk2D0->unk10 *= D_800D1874;
+    D_800D154C->unk2D0->speed *= D_800D1874;
 }
 
 void func_15072EC0(void) {
-    struct197 *anim;
+    AnimInstance *anim;
 
     anim = D_800D154C->unk2D0;
-    if (anim->unk10 < D_800D1874) {
+    if (anim->speed < D_800D1874) {
         D_800D154C->unk10C = 0;
     }
 }

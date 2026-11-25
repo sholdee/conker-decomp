@@ -187,33 +187,6 @@ s32 func_15035714(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     return 0;
 }
 
-/* Model animation state (layout as in game_5D2C0.c; only the field used here). */
-typedef struct AnimInstance {
-    /* 0x000 */ u8 pad0[0x3F4];
-    /* 0x3F4 */ u8 numMtx;
-} AnimInstance;
-
-/* A model attached to a game object, from the list headed by D_800C3EE0 (layout as in
- * game_5D2C0.c; only the fields used here). */
-typedef struct ModelAttachment {
-    /* 0x00 */ u8 ownerId;        // unique_id of the owning Actor
-    /* 0x01 */ u8 pad1[2];
-    /* 0x03 */ u8 alpha;
-    /* 0x04 */ u8 pad4[2];
-    /* 0x06 */ u8 setId;
-    /* 0x07 */ u8 pad7[0xC];
-    /* 0x13 */ u8 hiddenDLists;   // bit i set: display list i is not drawn
-    /* 0x14 */ u8 numDLists;
-    /* 0x15 */ u8 pad15[0xF];
-    /* 0x24 */ Gfx **dlists;
-    /* 0x28 */ u8 pad28[0xC];
-    /* 0x34 */ Mtx *mtx;
-    /* 0x38 */ u8 pad38[0x10];
-    /* 0x48 */ AnimInstance *anim;
-    /* 0x4C */ u32 reflMtx[2];    // mirrored matrices, one per frame buffer
-    /* 0x54 */ struct ModelAttachment *next;
-} ModelAttachment;
-
 extern u16 D_800C3E7A; // bone matrices used this frame
 extern u32 D_800C3E88; // bone-matrix pool cursor
 extern u32 D_800C3E8C; // bone-matrix pool start
@@ -311,7 +284,7 @@ visible:;
     D_800C3E88 += (numBones << 3) << 3; // matching: numBones * sizeof(Mtx) schedules differently
     D_800C3E7A += numBones;
 
-    att = (ModelAttachment *)D_800C3EE0;
+    att = D_800C3EE0;
     while (att != NULL) {
         next = att->next;
         if (D_800CC2D0[objIndex].unique_id != att->ownerId || att->alpha == 0) {
@@ -335,12 +308,12 @@ visible:;
         }
         numMtx = 1;
         if (att->anim != NULL) {
-            numMtx = att->anim->numMtx;
+            numMtx = att->anim->numParts;
         }
-        if (att->reflMtx[D_800BE9C0] == 0) {
-            att->reflMtx[D_800BE9C0] = (u32)allocate_memory(numMtx * sizeof(Mtx), 1, 2, 0);
+        if (att->reflMtx[D_800BE9C0] == NULL) {
+            att->reflMtx[D_800BE9C0] = allocate_memory(numMtx * sizeof(Mtx), 1, 2, 0);
         }
-        entry->mtx = att->reflMtx[D_800BE9C0];
+        entry->mtx = (u32)att->reflMtx[D_800BE9C0];
         mtx = entry->mtx;
         attAlpha = ((s32)maxAlpha * att->alpha) >> 8;
         if (att->mtx == NULL && att->anim == NULL) {

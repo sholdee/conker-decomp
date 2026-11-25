@@ -18,7 +18,7 @@ typedef struct {
  * Returns 1 when it spawned one.
  */
 s32 func_150C8730(Hook150C8730 *hook, Actor *actor) {
-    struct197 *anim;
+    AnimInstance *anim;
     s32 state;
     Actor *obj;
     u8 frame;
@@ -42,7 +42,7 @@ s32 func_150C8730(Hook150C8730 *hook, Actor *actor) {
     }
 
     state = actor->unk84.uh;
-    if ((state == 0x14 && 10.0f < anim->unk8) || state == 0x23) {
+    if ((state == 0x14 && 10.0f < anim->frame) || state == 0x23) {
         frame = D_800BE9C0;
         mtx = hook->mtx;
         mtx += frame == 0; // matching: &hook->mtx[frame == 0] allocates t-registers instead of v0/a1

@@ -30,7 +30,7 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
     vtx = D_800C3FC0[index];
     actor = &D_800CC2D0[index];
     state = actor->unk84.uh;
-    frame = actor->unk2D0->unk8;
+    frame = actor->unk2D0->frame;
     if (state == 0x3E || state == 0x41 || (state == 0x138 && frame >= 36.0f) ||
         ((state == 0x3D || state == 0xD9) && frame > 21.0f)) {
         func_150A7960(pinMtx, -7.0f, -17.0f, -7.0f, &x, &y, &z);

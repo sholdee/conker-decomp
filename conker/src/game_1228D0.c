@@ -167,7 +167,7 @@ typedef struct {
 /* Picks the hook's texture (an entry of D_80090274) from the actor's animation frame while
  * the actor is in state 0xAE. */
 s32 func_150F56B0(DrawHook *hook, Actor *actor) {
-    struct197 *anim;
+    AnimInstance *anim;
     s32 frame;
     f32 two; // matching: IDO materializes 2.0f once only when it is a variable
     f32 t;
@@ -179,41 +179,41 @@ s32 func_150F56B0(DrawHook *hook, Actor *actor) {
     frame = 6;
     two = 2.0f;
     if (actor->unk84.uh == 0xAE) {
-        if ((anim->unk8 >= 36.0f) && (anim->unk8 <= 51.0f)) {
-            t = anim->unk8 - 36.0f;
+        if ((anim->frame >= 36.0f) && (anim->frame <= 51.0f)) {
+            t = anim->frame - 36.0f;
             t *= 0.0625f;
             t = 1.0f - t;
             frame = (s32)(6.0f * t);
-        } else if ((anim->unk8 > 51.0f) && (anim->unk8 <= 54.0f)) {
+        } else if ((anim->frame > 51.0f) && (anim->frame <= 54.0f)) {
             frame = 0;
-        } else if ((anim->unk8 > 54.0f) && (anim->unk8 <= 60.0f)) {
-            t = anim->unk8 - 54.0f;
+        } else if ((anim->frame > 54.0f) && (anim->frame <= 60.0f)) {
+            t = anim->frame - 54.0f;
             t *= 0.1428571492f;
             frame = (s32)(6.0f * t);
-        } else if ((anim->unk8 > 60.0f) && (anim->unk8 <= 65.0f)) {
-            t = anim->unk8 - 60.0f;
+        } else if ((anim->frame > 60.0f) && (anim->frame <= 65.0f)) {
+            t = anim->frame - 60.0f;
             t *= 0.1666666716f;
             frame = (s32)(two * t) + 7;
-        } else if ((anim->unk8 > 65.0f) && (anim->unk8 <= 67.0f)) {
-            t = anim->unk8 - 65.0f;
+        } else if ((anim->frame > 65.0f) && (anim->frame <= 67.0f)) {
+            t = anim->frame - 65.0f;
             t *= 0.3333333433f;
             t = 1.0f - t;
             frame = (s32)(two * t) + 7;
-        } else if ((anim->unk8 > 67.0f) && (anim->unk8 <= 70.0f)) {
-            t = anim->unk8 - 67.0f;
+        } else if ((anim->frame > 67.0f) && (anim->frame <= 70.0f)) {
+            t = anim->frame - 67.0f;
             t *= 0.25f;
             t = 1.0f - t;
             frame = (s32)(two * t) + 4;
-        } else if ((anim->unk8 > 70.0f) && (anim->unk8 <= 74.0f)) {
-            t = anim->unk8 - 70.0f;
+        } else if ((anim->frame > 70.0f) && (anim->frame <= 74.0f)) {
+            t = anim->frame - 70.0f;
             t *= 0.200000003f;
             frame = (s32)(two * t) + 4;
-        } else if ((anim->unk8 > 74.0f) && (anim->unk8 <= 119.0f)) {
-            t = anim->unk8 - 74.0f;
+        } else if ((anim->frame > 74.0f) && (anim->frame <= 119.0f)) {
+            t = anim->frame - 74.0f;
             t *= 0.02173913084f;
             frame = (s32)(two * t) + 7;
-        } else if ((anim->unk8 > 119.0f) && (anim->unk8 <= 150.0f)) {
-            t = anim->unk8 - 119.0f;
+        } else if ((anim->frame > 119.0f) && (anim->frame <= 150.0f)) {
+            t = anim->frame - 119.0f;
             t *= 0.03125f;
             t = 1.0f - t;
             frame = (s32)(two * t) + 7;
@@ -226,7 +226,7 @@ s32 func_150F56B0(DrawHook *hook, Actor *actor) {
 /* While the actor is in state 5, slides the hook's texture over animation frames 69-84 by
  * patching the upper-left t of the first G_SETTILESIZE in its display list. */
 s32 func_150F5A54(DrawHook *hook, Actor *actor) {
-    struct197 *anim;
+    AnimInstance *anim;
     Gfx *gfx;
     s32 count;
     s32 notStarted;
@@ -260,13 +260,13 @@ s32 func_150F5A54(DrawHook *hook, Actor *actor) {
     }
 
     if (actor->unk84.uh == 5) {
-        if (anim->unk8 < 69.0f) {
+        if (anim->frame < 69.0f) {
             level = 1.0f;
-        } else if (84.0f < anim->unk8) {
+        } else if (84.0f < anim->frame) {
             level = 0.0f;
             hook->fadeState = 2;
         } else {
-            level = (anim->unk8 - 69.0f) / 15;
+            level = (anim->frame - 69.0f) / 15;
             level = 1.0f - level;
         }
     }
