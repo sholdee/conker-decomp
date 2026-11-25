@@ -95,26 +95,11 @@ void func_151B863C(BulletParticle *particle, s16 viewport) {
     func_1513FA70(particle, viewport);
 }
 
-/* Spawn parameters of a BloodTrail effect (see game_161520.c). */
-typedef struct {
-    /* 0x00 */ f32 *x;
-    /* 0x04 */ f32 *y;
-    /* 0x08 */ f32 *z;
-    /* 0x0C */ f32 radius;
-    /* 0x10 */ f32 rate;
-    /* 0x14 */ s16 lifetime;
-    /* 0x16 */ u8 flags;
-    /* 0x17 */ u8 emitter;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ s8 callback;
-    /* 0x1A */ u8 pad1A[6]; // matching: frame slot is 0x20 bytes; the callee copies 0x1C
-} BloodTrailDesc;
-
-extern void func_15134908(BloodTrailDesc *, s32, u8, s32);
+extern void func_15134908(BloodTrailDesc20 *, s32, u8, s32);
 
 /* Starts a BloodTrail effect (emitter 3) that tracks the bullet's position. */
 void func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
-    BloodTrailDesc desc;
+    BloodTrailDesc20 desc;
 
     desc.radius = 10.0f;
     desc.x = &bullet->pos.x;

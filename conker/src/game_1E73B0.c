@@ -845,20 +845,6 @@ void func_151BC074(Actor *obj) {
 
 extern f32 D_800DCA24;
 
-typedef struct {
-    /* 0x00 */ f32 *x;
-    /* 0x04 */ f32 *y;
-    /* 0x08 */ f32 *z;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 pad1A[2];
-} Desc15134908;
-
 /* Objects returned by func_15134908 and func_15163414 hold the owner reference at these offsets. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x40];
@@ -886,7 +872,7 @@ typedef struct {
     /* 0x98 */ Data15147A80 *data;
 } Fx15147A80;
 
-Fx15134908 *func_15134908(Desc15134908 *, s32, u8, s32);
+Fx15134908 *func_15134908(BloodTrailDesc *, s32, u8, s32);
 Fx15147A80 *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 Fx15163414 *func_15163414(Header *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
 
@@ -898,19 +884,19 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
     Fx15134908 *fx1;
 
     if ((D_80082FA0 < 2) && (D_8008FD8C < 5)) {
-        Desc15134908 desc;
+        BloodTrailDesc desc;
         EffectOwnerRef ref;
 
-        desc.unkC = 15.0f;
+        desc.radius = 15.0f;
         desc.x = &obj->x_position;
         desc.y = &obj->y_position;
         desc.z = &obj->z_position;
-        desc.unk14 = 300;
-        desc.unk10 = 0.3033999801f * D_800DCA24;
-        desc.unk16 = 4;
-        desc.unk17 = 4;
+        desc.lifetime = 300;
+        desc.rate = 0.3033999801f * D_800DCA24;
+        desc.flags = 4;
+        desc.emitter = 4;
         desc.unk18 = 1;
-        desc.unk19 = 0;
+        desc.callback = 0;
         ref.owner = obj;
         ref.ownerId = obj->unique_id;
         fx1 = func_15134908(&desc, 8, arg1, arg2);

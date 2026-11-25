@@ -400,21 +400,6 @@ void func_151347CC(void *arg0, BloodActorMsg *msg, u8 message) {
 void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 }
 
-/* Spawn parameters of a BloodTrail; copied verbatim into the effect. */
-typedef struct {
-    f32 *x;
-    f32 *y;
-    f32 *z;
-    f32 radius;
-    f32 rate;
-    s16 lifetime;
-    u8 flags;
-    u8 emitter;
-    u8 field28;
-    s8 callback;
-    u8 pad2A[2];
-} BloodTrailDesc;
-
 /* Blood trailing behind a moving point given by three coordinate pointers. */
 typedef struct {
     u8 pad0[0x10];
@@ -1345,7 +1330,7 @@ void func_15136A50(f32 *x, f32 *y, f32 *z, s16 lifetime, s32 arg4, s32 arg5) {
     desc.lifetime = lifetime;
     desc.flags = BLOOD_TRAIL_LIFETIME | BLOOD_TRAIL_CALLBACK;
     desc.emitter = 5;
-    desc.field28 = 2;
+    desc.unk18 = 2;
     desc.callback = -1;
     func_15134908(&desc, 0, arg4, arg5);
 }

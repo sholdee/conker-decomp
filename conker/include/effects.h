@@ -1693,6 +1693,49 @@ typedef struct EffectTemplate20 {
     /* 0x1C */ u8 pad1C[4];
 } EffectTemplate20;
 
+/* func_15134908 (game_161520.c): spawn parameters of a blood trail; copied verbatim into the effect. */
+typedef struct BloodTrailDesc {
+    /* 0x00 */ f32 *x;              /* followed point */
+    /* 0x04 */ f32 *y;
+    /* 0x08 */ f32 *z;
+    /* 0x0C */ f32 radius;
+    /* 0x10 */ f32 rate;
+    /* 0x14 */ s16 lifetime;
+    /* 0x16 */ u8 flags;
+    /* 0x17 */ u8 emitter;          /* D_80089AFC index */
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ s8 callback;
+    /* 0x1A */ u8 pad1A[2];
+} BloodTrailDesc; /* size 0x1C */
+
+/* matching: the first 0x18 bytes of BloodTrailDesc; a full BloodTrailDesc on the stack changes the frame. */
+typedef struct BloodTrailDesc18 {
+    /* 0x00 */ f32 *x;
+    /* 0x04 */ f32 *y;
+    /* 0x08 */ f32 *z;
+    /* 0x0C */ f32 radius;
+    /* 0x10 */ f32 rate;
+    /* 0x14 */ s16 lifetime;
+    /* 0x16 */ u8 flags;
+    /* 0x17 */ u8 emitter;
+} BloodTrailDesc18;
+
+/* matching: BloodTrailDesc plus 4 bytes; the stack frame needs the larger size. */
+typedef struct BloodTrailDesc20 {
+    /* 0x00 */ f32 *x;
+    /* 0x04 */ f32 *y;
+    /* 0x08 */ f32 *z;
+    /* 0x0C */ f32 radius;
+    /* 0x10 */ f32 rate;
+    /* 0x14 */ s16 lifetime;
+    /* 0x16 */ u8 flags;
+    /* 0x17 */ u8 emitter;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ s8 callback;
+    /* 0x1A */ u8 pad1A[2];
+    /* 0x1C */ u8 pad1C[4];
+} BloodTrailDesc20;
+
 /* func_151580B0 (game_185560.c): template of an effect actor (object type 0x37 / 0x55), copied to the actor
  * at +0x10. Like EffectParams, but the actor draws one display list from D_8008AFB8. */
 typedef struct EffectActorTemplate {

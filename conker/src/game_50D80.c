@@ -1220,16 +1220,6 @@ typedef struct {
     /* 0x1E */ u8 pad1E[6];
 } EvFloor;
 
-typedef struct {
-    f32 *unk0;
-    f32 *unk4;
-    f32 *unk8;
-    f32 unkC;
-    f32 unk10;
-    s16 unk14;
-    s8 unk16;
-    s8 unk17;
-} Ev15134908;
 
 typedef struct {
     s32 unk0;
@@ -1322,7 +1312,7 @@ extern void func_151D8868(Ev151D8868 *, s32, u8, s32);
 extern void func_151B5240(s16, u8, s32);
 extern void func_15192D48(Actor *, s16, u8, s32);
 extern void func_151B09BC(Actor *, s32, s16, u8, s32);
-extern void func_15134908(Ev15134908 *, s32, u8, s32);
+extern void func_15134908(BloodTrailDesc18 *, s32, u8, s32);
 extern void func_150E9FE0(Actor *, s16, u8, s32);
 extern void func_150EA500(Actor *, s16, u8, s32);
 extern void func_151356D4(f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -1875,16 +1865,16 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 endTime = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene);
                 {
                     f32 *p = pos; // matching: IDO needs the pointer copied to a local here
-                    Ev15134908 sp;
+                    BloodTrailDesc18 sp;
 
-                    sp.unk4 = p + 1;
-                    sp.unk8 = p + 2;
-                    sp.unk0 = p;
-                    sp.unkC = 2.0f;
-                    sp.unk10 = 1.0f;
-                    sp.unk14 = endTime - eventTime;
-                    sp.unk16 = 1;
-                    sp.unk17 = 2;
+                    sp.y = p + 1;
+                    sp.z = p + 2;
+                    sp.x = p;
+                    sp.radius = 2.0f;
+                    sp.rate = 1.0f;
+                    sp.lifetime = endTime - eventTime;
+                    sp.flags = 1;
+                    sp.emitter = 2;
                     func_15134908(&sp, 0, sceneTag, 0);
                 }
             }

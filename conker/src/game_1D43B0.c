@@ -3,18 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Spawn parameters of a BloodTrail effect (see game_161520.c). */
-typedef struct {
-    /* 0x00 */ f32 *x;
-    /* 0x04 */ f32 *y;
-    /* 0x08 */ f32 *z;
-    /* 0x0C */ f32 radius;
-    /* 0x10 */ f32 rate;
-    /* 0x14 */ s16 lifetime;
-    /* 0x16 */ u8 flags;
-    /* 0x17 */ u8 emitter;     /* D_80089AFC index */
-} BloodTrailDesc; // matching: the callee copies 0x1C bytes (two more fields), but this frame holds only 0x18
-
 /* A BloodTrail effect; the effect header's bytes 1 and 0xC are passed on to the drops it emits. */
 typedef struct {
     /* 0x00 */ u8 unk0;
@@ -55,7 +43,7 @@ typedef struct {
 } Particle;
 
 extern Particle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
-extern BloodTrail *func_15134908(BloodTrailDesc *, s32, u8, s32);
+extern BloodTrail *func_15134908(BloodTrailDesc18 *, s32, u8, s32);
 
 /*
  * Spawns emitter->count debris particles at random points within emitter->radius of emitter->pos,
@@ -160,7 +148,7 @@ void func_151A6F00(DebrisEmitter *emitter, u8 mode, u8 arg2, s32 arg3) {
         spawn.rotVel.z = func_150ADA68() * emitter->spinRange + emitter->spinBase;
         particle = func_15132A4C(&spawn, 0, 0, sizeof(DebrisData), arg2, arg3);
         if (particle != NULL) {
-            BloodTrailDesc trailDesc;
+            BloodTrailDesc18 trailDesc;
             DebrisData *data;
             BloodTrail *trail;
             data = &particle->debris;

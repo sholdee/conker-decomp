@@ -311,34 +311,21 @@ s32 func_150C2700(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     return 1;
 }
 
-typedef struct {
-    /* 0x00 */ f32 *x;
-    /* 0x04 */ f32 *y;
-    /* 0x08 */ f32 *z;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ s16 delay;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ s8 unk19;
-} Struct150C2804;
-
-extern void func_15134908(Struct150C2804 *, s32, u8, s32);
+extern void func_15134908(BloodTrailDesc *, s32, u8, s32);
 
 void func_150C2804(f32 *x, f32 *y, f32 *z, s16 delay, s32 arg4, s32 arg5) {
-    Struct150C2804 params;
+    BloodTrailDesc params;
 
-    params.unk0C = 10.3f;
+    params.radius = 10.3f;
     params.x = x;
     params.y = y;
     params.z = z;
-    params.unk10 = 0.5009f;
-    params.delay = delay;
-    params.unk16 = 5;
-    params.unk17 = 6;
+    params.rate = 0.5009f;
+    params.lifetime = delay;
+    params.flags = 5;
+    params.emitter = 6;
     params.unk18 = 3;
-    params.unk19 = -1;
+    params.callback = -1;
     func_15134908(&params, 0, arg4, arg5);
 }
 typedef struct {
