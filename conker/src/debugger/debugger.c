@@ -3,77 +3,99 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Extra bits func_16000B14 ORs into the held-button mask for the analog stick. */
+#define STICK_LEFT  0x10000
+#define STICK_RIGHT 0x20000
+#define STICK_UP    0x40000
+#define STICK_DOWN  0x80000
+
+/* Result bits of a screen's input handler (see func_16000B14's loops). */
+#define DEBUGGER_REDRAW 1 /* draw the current screen again */
+#define DEBUGGER_CLEAR  2 /* clear the framebuffer before drawing */
+#define DEBUGGER_EXIT   4 /* leave the debugger */
+
+/* Screens (D_16003AF4) indexing the draw (D_16003AF8) and input (D_16003B08) tables. */
+#define SCREEN_PRESS_BUTTON 0
+#define SCREEN_MAIN_MENU    1
+#define SCREEN_REGISTERS    2
+#define SCREEN_STACK        3
+
+/* Two-character register name, a space and a terminator, filled in from D_160037F0. */
 typedef struct {
-    s32 unk0;
-} func_160006CC_sp3C;
+    u8 text[4];
+} DebuggerLabel;
 
-extern u8 D_160037F0;
-extern func_160006CC_sp3C D_16003B48;
+extern u8 D_160037F0[];
+extern DebuggerLabel D_16003B48;
 
-void func_160006CC(struct118 *arg0);
-void func_16000590(struct118 *thread);
+void func_160006CC(OSThread *thread);
+void func_16000590(OSThread *thread);
 void func_16001044(s32 position, s32 mode, u32 value);
 
+/* SCREEN_PRESS_BUTTON: draw "PRESS BUTTON". */
 void func_16000000(void) {
-    func_160012B0(278, &D_160046AC);
+    func_160012B0(278, D_160046AC);
 }
 
+/* SCREEN_PRESS_BUTTON input: A or B opens the main menu. */
 s32 func_16000028(void) {
-    if (D_16003890 & 0xC000) {
-        D_16003AF4 = 1;
-        return 3;
+    if (D_16003890 & (A_BUTTON | B_BUTTON)) {
+        D_16003AF4 = SCREEN_MAIN_MENU;
+        return DEBUGGER_REDRAW | DEBUGGER_CLEAR;
     }
     return 0;
 }
 
+/* SCREEN_MAIN_MENU: draw the menu with the selected entry (D_16003B1C) in red, then the build info. */
 void func_16000058(void) {
     s32 i;
-    s32 phi_s2;
+    s32 position;
 
     func_16001338(255, 255, 255);
-    func_160012B0(44, &D_160046D0); // "MAIN MENU"
-    phi_s2 = 108;
-    for(i = 0; i < 2; i++) {
+    func_160012B0(44, D_160046D0); // "MAIN MENU"
+    position = 108;
+    for (i = 0; i < 2; i++) {
         if (D_16003B1C == i) {
-            func_16001338(255, 0, 0);     // red
+            func_16001338(255, 0, 0);
         } else {
-            func_16001338(255, 255, 255); // white
+            func_16001338(255, 255, 255);
         }
-        func_160012B0(phi_s2, D_16003B20[i]);
-        phi_s2 += 32;
+        func_160012B0(position, (u8 *)D_16003B20[i]); // "REGISTERS", "STACK"
+        position += 32;
     }
     if (D_16003B1C == 2) {
-        func_16001338(255, 0, 0);     // red
+        func_16001338(255, 0, 0);
     } else {
-        func_16001338(255, 255, 255); // white
+        func_16001338(255, 255, 255);
     }
     if (D_16003AF0 != 0) {
-        if ((D_1600389C->unk120 == 32) && (D_160038A4 == 0)) {
-            func_160012B0(phi_s2, &D_160046DC);
+        if ((D_1600389C->unk120 == EXC_SYSCALL) && (D_160038A4 == 0)) {
+            func_160012B0(position, D_160046DC); // "CONTINUE"
         } else if (D_16003AF0 != 0) {
-            func_160012B0(phi_s2, &D_160046E8);
+            func_160012B0(position, D_160046E8); // "HOSTDEBUG"
         }
     } else {
-        func_160012B0(phi_s2, &D_160046F4); // "RETRY CODE"
+        func_160012B0(position, D_160046F4); // "RETRY CODE"
     }
     func_16001338(255, 255, 255);
-    func_160012B0(611, &D_16004700); // "Version"
+    func_160012B0(611, D_16004700); // "Version"
     func_16001044(619, 1, 163);
-    func_160012B0(643, &D_16004708); // "Built"
-    func_160012B0(651, &D_16004710); // "Dec 19 2000"
-    func_160012B0(663, &D_1600471C); // "09:57:42"
+    func_160012B0(643, D_16004708); // "Built"
+    func_160012B0(651, D_16004710); // "Dec 19 2000"
+    func_160012B0(663, D_1600471C); // "09:57:42"
 }
 
+/* SCREEN_MAIN_MENU input: stick up/down moves the selection, A picks it. */
 s32 func_16000224(void) {
-    s32 res = 0;
+    s32 result = 0;
 
-    if (D_16003890 & 0x40000) { // D_JPAD is 0x0400
-        D_16003B1C -= 1;
-        res = 1;
+    if (D_16003890 & STICK_UP) {
+        D_16003B1C--;
+        result = DEBUGGER_REDRAW;
     }
-    if (D_16003890 & 0x80000) { // U_JPAD is 0x0800
-        D_16003B1C += 1;
-        res = 1;
+    if (D_16003890 & STICK_DOWN) {
+        D_16003B1C++;
+        result = DEBUGGER_REDRAW;
     }
     if (D_16003B1C >= 3) {
         D_16003B1C = 0;
@@ -82,21 +104,21 @@ s32 func_16000224(void) {
         D_16003B1C = 2;
     }
     if (D_16003890 & A_BUTTON) {
-        switch(D_16003B1C) {
+        switch (D_16003B1C) {
             case 0:
-                res = 3;
-                D_16003AF4 = 2;
+                result = DEBUGGER_REDRAW | DEBUGGER_CLEAR;
+                D_16003AF4 = SCREEN_REGISTERS;
                 break;
             case 1:
-                res = 3;
-                D_16003AF4 = 3;
+                result = DEBUGGER_REDRAW | DEBUGGER_CLEAR;
+                D_16003AF4 = SCREEN_STACK;
                 break;
             case 2:
-                res = 4;
+                result = DEBUGGER_EXIT;
                 break;
         }
     }
-    return res;
+    return result;
 }
 
 void func_16000304(void) {
@@ -105,71 +127,73 @@ void func_16000304(void) {
 void func_1600030C(void) {
 }
 
+/* SCREEN_REGISTERS: page 0 shows the CPU registers, pages 1 and 2 the FPU registers. */
 void func_16000314(void) {
-    switch(D_16003B28) {
+    switch (D_16003B28) {
         case 0:
             func_16000424(D_1600389C);
-            func_160006CC(D_1600389C);
+            func_160006CC((OSThread *)D_1600389C);
             break;
         case 1:
         case 2:
-            func_16000590(D_1600389C);
+            func_16000590((OSThread *)D_1600389C);
             break;
     }
 }
 
+/* SCREEN_REGISTERS input: C buttons flip through the pages, B returns to the main menu. */
 s32 func_16000384(void) {
-    s32 res = 0;
+    s32 result = 0;
 
     if (D_16003890 & (R_CBUTTONS | D_CBUTTONS)) {
-        D_16003B28 += 1;
+        D_16003B28++;
         if (D_16003B28 >= 3) {
             D_16003B28 = 0;
         }
-        return 3;
+        return DEBUGGER_REDRAW | DEBUGGER_CLEAR;
     }
     if (D_16003890 & (L_CBUTTONS | U_CBUTTONS)) {
-        D_16003B28 -= 1;
+        D_16003B28--;
         if (D_16003B28 < 0) {
             D_16003B28 = 2;
         }
-        return 3;
+        return DEBUGGER_REDRAW | DEBUGGER_CLEAR;
     }
     if (D_16003890 & B_BUTTON) {
-        D_16003AF4 = 1;
-        res = 3;
+        D_16003AF4 = SCREEN_MAIN_MENU;
+        result = DEBUGGER_REDRAW | DEBUGGER_CLEAR;
     }
-    return res;
+    return result;
 }
 
+/* Register page 0, top half: pc, cause (with its exception name), sr, badvaddr and thread id. */
 void func_16000424(struct118 *arg0) {
-    // TODO is this a RGB struct?
-    u32 tmp0;
-    u32 tmp1;
-    s32 pad;
+    u32 cause;
+    u32 exception;
+    OSThread *thread = (OSThread *)arg0;
 
     func_16001338(255, 255, 255);
-    func_160012B0(35, &D_16004728);     // "Pc"
-    func_16001044(43, 0, arg0->unk11C);
-    func_160012B0(67, &D_1600472C);     // "Cause"
-    func_16001044(75, 0, arg0->unk120);
+    func_160012B0(35, D_16004728); // "Pc"
+    func_16001044(43, 0, thread->context.pc);
+    func_160012B0(67, D_1600472C); // "Cause"
+    func_16001044(75, 0, thread->context.cause);
     func_16001338(128, 128, 255);
-    tmp0 = arg0->unk120;
-    tmp1 = (tmp0 >> 2) & 0xF;
+    cause = thread->context.cause;
+    exception = (cause >> 2) & 0xF;
 
-    func_160012B0(107, D_16003848[tmp1]);
-    if (tmp1 == 11) {
-        func_16001044(111, 1, (tmp0 >> 28) & 3);
+    func_160012B0(107, (u8 *)D_16003848[exception]);
+    if (exception == 11) { // coprocessor unusable: show which one
+        func_16001044(111, 1, (cause >> 28) & 3);
     }
     func_16001338(255, 255, 255);
-    func_160012B0(131, &D_16004734);      // "Sr"
-    func_16001044(139, 0, arg0->unk118);
-    func_160012B0(163, &D_16004738);      // "Badvadr"
-    func_16001044(171, 0, arg0->unk124);
-    func_160012B0(195, &D_16004740);      // "Thread"
-    func_16001044(203, 1, arg0->unk14);
+    func_160012B0(131, D_16004734); // "Sr"
+    func_16001044(139, 0, thread->context.sr);
+    func_160012B0(163, D_16004738); // "Badvadr"
+    func_16001044(171, 0, thread->context.badvaddr);
+    func_160012B0(195, D_16004740); // "Thread"
+    func_16001044(203, 1, thread->id);
     if (D_160038A4 != 0) {
-        func_160012B0(52, &D_16004748);   // "Lockup_Now"
+        func_160012B0(52, D_16004748); // "Lockup_Now"
     }
 }
 
@@ -177,69 +201,65 @@ extern u8 *D_16003B30[6];
 extern u8 D_160047A4[];
 extern u8 D_160047AC[];
 
-void func_16000590(struct118 *thread) {
+/* Register pages 1 and 2: the FPCSR with its raised exception causes, then 16 FPU registers. */
+void func_16000590(OSThread *thread) {
     s32 position;
     s32 i;
-    s32 base;
+    s32 word;
     u32 bits;
     u32 page = 0;
     u32 *words = (u32 *)thread;
 
-    bits = words[0x12C / 4];
-    func_160012B0(3, D_160047A4);
-    func_16001044(0xA, 0, bits);
-    bits >>= 12;
-    position = 0x2C;
+    bits = thread->context.fpcsr;
+    func_160012B0(3, D_160047A4); // "Fpcsr:"
+    func_16001044(10, 0, bits);
+    bits >>= 12; // cause bits: inexact, underflow, overflow, div by zero, invalid, unimplemented
+    position = 44;
     for (i = 0; i < 6; i++, bits >>= 1) {
         if (bits & 1) {
             func_160012B0(position, D_16003B30[i]);
-            position += 0x20;
+            position += 32;
         }
     }
     i = 0;
-    position = 0xC3;
+    position = 195;
     if (D_16003B28 == 1) {
-        base = 0x4C;
+        word = 0x4C; // context.fp0
     } else {
-        base = 0x6C;
-        page = 0x10;
+        word = 0x6C; // 16 registers past context.fp0
+        page = 16;
     }
     do {
-        func_160012B0(position, D_160047AC);
+        func_160012B0(position, D_160047AC); // "fp"
         func_16001044(position + 2, 1, i + page);
-        func_16001044(position + 5, 2, words[base + 1]);
-        base += 2;
-        position += 0x20;
+        func_16001044(position + 5, 2, words[word + 1]); // f_even, the register's low word
+        word += 2;
+        position += 32;
         i++;
     } while (i < 16);
 }
 
-void func_160006CC(struct118 *arg0) {
-    func_160006CC_sp3C sp3C;
-    u8 *var_s3;
-    u8 *var_s1;
-    s32 temp_s0;
-    u8 var_v0;
-    u8 temp_v0;
+/*
+ * Register page 0, bottom half: each D_160037F0 entry is a two-character name followed by
+ * the u32 index of the register's (u64) slot in the OSThread; a zero name ends the table.
+ */
+void func_160006CC(OSThread *thread) {
+    DebuggerLabel label = D_16003B48;
+    s32 position = 291;
+    u8 *entry = D_160037F0;
+    s32 index;
 
-    var_s3 = (u8 *)&sp3C;
-    temp_s0 = 0x123;
-    sp3C = D_16003B48;
-    var_s1 = &D_160037F0;
-    func_16001338(0xC0, 0xC0, 0xFF);
-    var_v0 = *(volatile u8 *)&D_160037F0;
-
+    func_16001338(192, 192, 255);
     do {
-        var_s3[0] = var_v0;
-        var_s3[1] = var_s1[1];
-        func_160012B0(temp_s0, var_s3);
-        temp_s0 += 3;
-        temp_v0 = var_s1[2];
-        func_16001044(temp_s0, 0, ((s32 *)arg0)[temp_v0 + 1]);
-        var_v0 = var_s1[3];
-        temp_s0 += 0xD;
-        var_s1 += 3;
-    } while (var_v0 != 0);
+        label.text[0] = entry[0];
+        label.text[1] = entry[1];
+        func_160012B0(position, label.text);
+        position += 3;
+        index = entry[2];
+        func_16001044(position, 0, ((u32 *)thread)[index + 1]); // low word
+        position += 13;
+        entry += 3;
+    } while (entry[0] != 0);
 }
 void func_160012B0(s32 arg0, u8 *arg1);
 void func_16001338(u8 arg0, u8 arg1, u8 arg2);
