@@ -3161,155 +3161,150 @@ void func_1505D5D0(struct127 *arg0, struct127 *arg1, f32 arg2, f32 arg3, f32 arg
         func_1505D408(arg0, arg1, dx, dy, dz, distSq, sumRadius, arg7);
     }
 }
-void func_1505D6F0(struct127 *arg0, s32 arg1)
-{
-  f32 dx;
-  f32 dy;
-  f32 dz;
-  f32 distSq;
-  f32 sumRadius;
-  f32 radius;
-  f32 objRadius;
-  f32 height;
-  f32 x;
-  f32 y;
-  f32 z;
-  s32 i;
-  s32 count;
-  struct127 *obj;
-  struct126 *temp;
-  D_800CC268 = 0;
-  D_800CC26C = 0;
-  D_800CC26D = 0;
-  count = 25;
-  if (((((((arg0->interaction_state != 1) || ((D_800CC2D0[arg1].unk31C->unk4E == 0) && (D_800CC2D0[arg1].unk31C->unk27 == 0))) && (arg0->unk13D < 100)) && (arg0->unkE4 != 0)) && (arg0->unk65 == 0)) && (!(arg0->unkF8 & 0x01000000))) && (!(arg0->unkF8 & 0x4000)))
-  {
-    radius = arg0->unkE4;
-    height = arg0->unkEC;
-    x = arg0->x_position;
-    y = arg0->y_position + ((s16) arg0->unkE8);
-    z = arg0->z_position;
-    if (arg0->unkF8 & 0x02000000)
-    {
-      count = 1;
-    }
-    for (i = 0; i < count; i++)
-    {
-      obj = &D_800CC2D0[i];
-      if (obj->interaction_state == 0)
-      {
-        continue;
-      }
-      if (obj->unkE4 < 2)
-      {
-        continue;
-      }
-      if ((obj->unkF8 & 0x02000000) && (arg0->unk127 == 0xFF))
-      {
-        continue;
-      }
-      if (obj->unkF8 & 0x01000000)
-      {
-        continue;
-      }
-      if (i == arg1)
-      {
-        continue;
-      }
-      if (obj->unk65 == (arg1 + 1))
-      {
-        continue;
-      }
-      if (obj->unk13D >= 100)
-      {
-        continue;
-      }
-      if (obj->unk2FA == 0)
-      {
-        continue;
-      }
-      objRadius = obj->unkE4;
-      sumRadius = radius + objRadius;
-      dx = x - obj->x_position;
-      dz = z - obj->z_position;
-      dy = y - (obj->y_position + ((s16) obj->unkE8));
-      dy *= (height + obj->unkEC) * 0.5f;
-      if (((((D_800BE616 != 0) && ((((dx * dx) + (dy * dy)) + (dz * dz)) < 30000.0f)) && (arg0->interaction_state == 1)) && (obj->interaction_state == 1)) && ((*(((u8 *) obj) + 0x128)) != (*(((u8 *) arg0) + 0x128))))
-      {
-        temp = arg0->unk31C;
-        if ((temp->unk78 == 0) && (obj->unk31C->unk78 != 0))
-        {
-          temp->chased = 20;
-        }
-      }
-      distSq = ((dx * dx) + (dy * dy)) + (dz * dz);
-      if (distSq < (sumRadius * sumRadius))
-      {
-        func_1505D408(arg0, obj, dx, dy, dz, distSq, sumRadius, i);
-      }
-      if (obj->id == 0x34)
-      {
-        if (obj->unk251 == 2)
-        {
-          func_1505D5D0(arg0, obj, x, y, z, height, radius, i, 120.0f, 250.0f, 120.0f, -130.0f, 0.0f);
-        }
-        else
-        {
-          func_1505D5D0(arg0, obj, x, y, z, height, radius, i, 130.0f, 140.0f, 250.0f, -50.0f, 0.0f);
-        }
-      }
-    }
+/* Resolves collisions between the actor's body cylinder (unkE4/unkE8/unkEC) and every other actor's. */
+void func_1505D6F0(struct127 *actor, s32 selfIdx) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 distSq;
+    f32 sumRadius;
+    f32 radius;
+    f32 otherRadius;
+    f32 height;
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 i;
+    s32 count;
+    struct127 *other;
+    struct126 *movement;
 
-  }
+    D_800CC268 = 0;
+    D_800CC26C = 0;
+    D_800CC26D = 0;
+    count = 25;
+    if (((actor->interaction_state != 1) ||
+         ((D_800CC2D0[selfIdx].unk31C->unk4E == 0) && (D_800CC2D0[selfIdx].unk31C->unk27 == 0))) &&
+        (actor->unk13D < 100) && (actor->unkE4 != 0) && (actor->unk65 == 0) && !(actor->unkF8 & 0x01000000) &&
+        !(actor->unkF8 & 0x4000)) {
+        radius = actor->unkE4;
+        height = actor->unkEC;
+        x = actor->x_position;
+        y = actor->y_position + (s16)actor->unkE8;
+        z = actor->z_position;
+        if (actor->unkF8 & 0x02000000) {
+            count = 1;
+        }
+        for (i = 0; i < count; i++) {
+            other = &D_800CC2D0[i];
+            if (other->interaction_state == 0) {
+                continue;
+            }
+            if (other->unkE4 < 2) {
+                continue;
+            }
+            if ((other->unkF8 & 0x02000000) && (actor->unk127 == 0xFF)) {
+                continue;
+            }
+            if (other->unkF8 & 0x01000000) {
+                continue;
+            }
+            if (i == selfIdx) {
+                continue;
+            }
+            if (other->unk65 == (selfIdx + 1)) {
+                continue;
+            }
+            if (other->unk13D >= 100) {
+                continue;
+            }
+            if (other->unk2FA == 0) {
+                continue;
+            }
+            otherRadius = other->unkE4;
+            sumRadius = radius + otherRadius;
+            dx = x - other->x_position;
+            dz = z - other->z_position;
+            dy = y - (other->y_position + (s16)other->unkE8);
+            dy *= (height + other->unkEC) * 0.5f;
+            if ((D_800BE616 != 0) && (((dx * dx) + (dy * dy) + (dz * dz)) < 30000.0f) &&
+                (actor->interaction_state == 1) && (other->interaction_state == 1) &&
+                (*(u8 *)&other->pad128 != *(u8 *)&actor->pad128)) {
+                movement = actor->unk31C;
+                if ((movement->unk78 == 0) && (other->unk31C->unk78 != 0)) {
+                    movement->chased = 20;
+                }
+            }
+            distSq = (dx * dx) + (dy * dy) + (dz * dz);
+            if (distSq < (sumRadius * sumRadius)) {
+                func_1505D408(actor, other, dx, dy, dz, distSq, sumRadius, i);
+            }
+            if (other->id == 0x34) {
+                if (other->unk251 == 2) {
+                    func_1505D5D0(actor, other, x, y, z, height, radius, i, 120.0f, 250.0f, 120.0f, -130.0f, 0.0f);
+                } else {
+                    func_1505D5D0(actor, other, x, y, z, height, radius, i, 130.0f, 140.0f, 250.0f, -50.0f, 0.0f);
+                }
+            }
+        }
+    }
 }
 f32 func_1505DF10(struct127 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
 
-u8 func_1505DADC(struct127 *arg0, u16 *arg1, u8 arg2, u8 arg3, u8 arg4)
-{
-  u8 bestStunned;
-  u8 i;
-  u16 angle;
-  struct127 *obj;
-  f32 best;
-  f32 dist;
-  f32 distXZ;
-  f32 dy;
-  s32 sp00[2];
-  s32 spBC[5];
-  f32 spB8;
-  f32 spB4;
-  f32 spB0;
-  f32 hitDist;
-  u8 bestIdx;
-  best = 10000000.0f;
-  bestStunned = 0;
-  bestIdx = 0xFF;
-  if (arg3 == 0xFE)
-  {
-    best = 40000.0f;
-  }
-  for (i = 0; i < 25; i++)
-  {
-    obj = &D_800CC2D0[i];
-    if ((((((obj->interaction_state != 0) && (obj->health != 0)) && (i != ((u8) (arg0 - D_800CC2D0)))) && (obj->unkF8 & 0x40)) && (i != arg3)) && (obj->unk2FA != 0))
-    {
-      dist = func_1505DF10(arg0, i, &angle, &distXZ, &dy, 0);
-      if ((((dist < best) || ((obj->stunned == 0) && (bestStunned != 0))) && (((u8) ((((s32) (angle - arg0->unk7A)) >> 8) + arg4)) < (arg4 * 2))) && (((u8) ((((u8) (func_1505A630(sqrtf(distXZ), -dy, 0) >> 8)) - arg2) + 0x10)) < 0x20))
-      {
-        if ((func_150AC9C0(arg0->x_position, arg0->y_position + 80.0f, arg0->z_position, D_800CC2D0[i].x_position - arg0->x_position, D_800CC2D0[i].y_position - arg0->y_position, D_800CC2D0[i].z_position - arg0->z_position, sp00, spBC, &spB8, &spB4, &spB0, &hitDist, 0, 0, 0.0f) == 0) || (!((hitDist = hitDist * hitDist) < dist)))
-        {
-          bestStunned = obj->stunned;
-          bestIdx = i;
-          best = dist;
-          *arg1 = angle;
-        }
-      }
- goto dummy_label_512857; dummy_label_512857: ;
-    }
-  }
+/*
+ * Picks the nearest visible living actor inside a cone around the actor's facing (halfCone wide,
+ * pitch +-0x10 around `pitch`), skipping skipIdx. Returns its index (0xFF if none), angle in *outAngle.
+ */
+u8 func_1505DADC(struct127 *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone) {
+    u8 bestStunned;
+    u8 i;
+    u16 angle;
+    struct127 *other;
+    f32 best;
+    f32 dist;
+    f32 distXZ;
+    f32 dy;
+    s32 hitA[2];
+    s32 hitB[5];
+    f32 hitX;
+    f32 hitY;
+    f32 hitZ;
+    f32 hitDist;
+    u8 bestIdx;
 
-  return bestIdx;
+    best = 10000000.0f;
+    bestStunned = 0;
+    bestIdx = 0xFF;
+    if (skipIdx == 0xFE) {
+        best = 40000.0f;
+    }
+    for (i = 0; i < 25; i++) {
+        other = &D_800CC2D0[i];
+        if ((other->interaction_state != 0) && (other->health != 0) && (i != (u8)(actor - D_800CC2D0)) &&
+            (other->unkF8 & 0x40) && (i != skipIdx) && (other->unk2FA != 0)) {
+            dist = func_1505DF10(actor, i, &angle, &distXZ, &dy, 0);
+            if (((dist < best) || ((other->stunned == 0) && (bestStunned != 0))) &&
+                ((u8)(((s32)(angle - actor->unk7A) >> 8) + halfCone) < (halfCone * 2)) &&
+                ((u8)(((u8)(func_1505A630(sqrtf(distXZ), -dy, 0) >> 8) - pitch) + 0x10) < 0x20)) {
+                if ((func_150AC9C0(actor->x_position, actor->y_position + 80.0f, actor->z_position,
+                                   D_800CC2D0[i].x_position - actor->x_position,
+                                   D_800CC2D0[i].y_position - actor->y_position,
+                                   D_800CC2D0[i].z_position - actor->z_position, hitA, hitB, &hitX, &hitY, &hitZ,
+                                   &hitDist, 0, 0, 0.0f) == 0) ||
+                    !((hitDist = hitDist * hitDist) < dist)) {
+                    bestStunned = other->stunned;
+                    bestIdx = i;
+                    best = dist;
+                    *outAngle = angle;
+                }
+            }
+        split: // matching: label splits the basic block like the original
+            ;
+        }
+    }
+
+    return bestIdx;
 }
 f32 func_1505DF10(struct127 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
 
