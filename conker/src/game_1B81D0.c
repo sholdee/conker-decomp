@@ -103,9 +103,9 @@ extern void func_151429E0(u8, u8 *, u8 *, u8 *);
 extern s32 func_15046C80(vertex *, s32, f32, ParticleFloor *);
 
 /*
- * Update callback of a falling droplet: once it drops below its floor height, spawns 4-7 splash
- * droplets and a coloured ring effect there (colour 1 for model 4, else 0) and returns 0.
- * Returns 1 while the droplet is still above the floor.
+ * Particle callback: once the particle is below its floor height, spawns 4-7 splash droplets and
+ * a func_1518CA80 effect there (colour 1 for model 4, else 0) and returns 0. Returns 1 while the
+ * particle is still above its floor.
  */
 s32 func_1518AD20(Particle *particle) {
     f32 *floorY; // matching: IDO keeps &particle->floorY live in a register only via this pointer
@@ -113,7 +113,7 @@ s32 func_1518AD20(Particle *particle) {
     floorY = &particle->floorY;
     if (particle->pos.y < particle->floorY) {
         ParticleSpawn spawn;
-        ParticleEffect ring;
+        ParticleEffect effect;
         s16 count;
         f32 size;
         u8 yaw;
@@ -195,28 +195,28 @@ s32 func_1518AD20(Particle *particle) {
                 colour = 0;
                 break;
         }
-        ring.pos.x = particle->pos.x;
-        ring.pos.y = *floorY;
-        ring.pos.z = particle->pos.z;
-        ring.unk18 = ring.unk16 = particle->radius * 200.0f;
-        ring.unk1C = ring.unk1A = ((func_150ADA68() * 10.0f) + 20.0f) * particle->radius;
-        ring.unk1E = 0;
-        ring.unk20 = 0;
-        ring.unk22 = (func_150ADA20() % 201U) + 300;
-        ring.unk24 = 0;
-        ring.unk26 = 600;
-        func_151429E0(colour, &ring.color1[0], &ring.color1[1], &ring.color1[2]);
-        func_151429E0(colour, &ring.color2[0], &ring.color2[1], &ring.color2[2]);
-        ring.intensity = 0xFF;
+        effect.pos.x = particle->pos.x;
+        effect.pos.y = *floorY;
+        effect.pos.z = particle->pos.z;
+        effect.unk18 = effect.unk16 = particle->radius * 200.0f;
+        effect.unk1C = effect.unk1A = ((func_150ADA68() * 10.0f) + 20.0f) * particle->radius;
+        effect.unk1E = 0;
+        effect.unk20 = 0;
+        effect.unk22 = (func_150ADA20() % 201U) + 300;
+        effect.unk24 = 0;
+        effect.unk26 = 600;
+        func_151429E0(colour, &effect.color1[0], &effect.color1[1], &effect.color1[2]);
+        func_151429E0(colour, &effect.color2[0], &effect.color2[1], &effect.color2[2]);
+        effect.intensity = 0xFF;
         scaled = particle->radius * 511.0f;
         if (scaled > 255.0f) {
-            ring.unk2F = 0xFF;
+            effect.unk2F = 0xFF;
         } else {
-            ring.unk2F = scaled;
+            effect.unk2F = scaled;
         }
-        ring.unk30 = 10;
-        ring.unk31 = 0;
-        func_1518CA80(&ring, 1);
+        effect.unk30 = 10;
+        effect.unk31 = 0;
+        func_1518CA80(&effect, 1);
         return 0;
     }
     return 1;
@@ -273,9 +273,9 @@ void func_1518B264(vertex *pos, f32 radius, f32 size, s32 count, u8 arg4) {
 }
 
 /*
- * Spawns count droplets of the given model at random points within radius of pos, each dropped
- * onto the floor below it (when there is one) together with 1-4 smaller droplets above that point.
- * Every droplet remembers the floor height (see func_1518AD20). arg5 is unused.
+ * Spawns up to count droplets of the given model at random points within radius of pos. A droplet
+ * is spawned only where func_15046C80 finds a floor below the point, together with 1-4 smaller ones
+ * above it; every droplet remembers that floor height (see func_1518AD20). arg5 is unused.
  */
 void func_1518B2A8(vertex *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
     ParticleSpawn spawn;
