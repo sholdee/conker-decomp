@@ -95,7 +95,7 @@ typedef struct Particle {
     /* 0x08C */ struct ParticleNode *node;
     /* 0x090 */ Mtx mtx[2];
     /* 0x110 */ ParticleFloor floor;
-    /* 0x134 */ f32 squashOrigin[3];
+    /* 0x134 */ vertex squashOrigin;
     /* 0x140 */ f32 speed;
     /* 0x144 */ f32 invSpeed;
     /* 0x148 */ u8 hitFlags;
@@ -393,9 +393,9 @@ Particle *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, ParticleFloor 
     particle->node = node;
     memcpy(&particle->radius, spawn, sizeof(ParticleSpawn));
     particle->squashPhase = 0;
-    particle->squashOrigin[0] = 0.0f;
-    particle->squashOrigin[1] = 0.0f;
-    particle->squashOrigin[2] = 0.0f;
+    particle->squashOrigin.x = 0.0f;
+    particle->squashOrigin.y = 0.0f;
+    particle->squashOrigin.z = 0.0f;
     particle->speed = sqrtf(spawn->vel.x * spawn->vel.x + spawn->vel.y * spawn->vel.y +
                             spawn->vel.z * spawn->vel.z);
     particle->hitFlags = 0;
@@ -478,8 +478,8 @@ Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 alpha, u8 *state)
 Gfx *func_151462C8(Gfx *gfx, s32 *arg1, u8 arg2, struct127 *owner, u8 ownerId, s16 arg5, f32 *pos, u8 arg7,
                    s32 arg8);
 
-/* Draw a particle whose matrix func_15132A88 built this frame: segment 8, render state, optional extra
- * commands from drawFn, then the matrix and the model's display list. */
+/* Draw a particle whose matrix func_15132A88 built this frame: segment 8, render and geometry mode (lit when
+ * flag 0x800), optional extra commands from drawFn, then the matrix and the model's display list. */
 Gfx *func_15132B80(Gfx *gfx, Particle *arg1, s16 arg2) {
     Particle *particle;
     u8 state;
@@ -575,7 +575,7 @@ s32 func_15132DDC(Particle *particle) {
                 }
 
                 if (particle->flags & 0x10) {
-                    memcpy(particle->squashOrigin, &particle->pos, sizeof(vertex));
+                    memcpy(&particle->squashOrigin, &particle->pos, sizeof(vertex));
                 }
             }
 
@@ -631,7 +631,7 @@ s32 func_15132DDC(Particle *particle) {
                 }
 
                 if (particle->flags & 0x10) {
-                    memcpy(particle->squashOrigin, &particle->pos, sizeof(vertex));
+                    memcpy(&particle->squashOrigin, &particle->pos, sizeof(vertex));
                 }
             }
         }
@@ -664,7 +664,7 @@ s32 func_151332DC(Particle *particle) {
             particle->scale.x *= 1.0f + amplitude;
             particle->scale.y *= 1.0f - amplitude;
             particle->scale.z *= 1.0f + amplitude;
-            particle->pos.y = particle->squashOrigin[1] - amplitude * particle->radius;
+            particle->pos.y = particle->squashOrigin.y - amplitude * particle->radius;
         }
         if (particle->hitFlags & 0x10) {
             cosine = func_151423D8(particle->squashAngle - 0x40);
@@ -672,14 +672,14 @@ s32 func_151332DC(Particle *particle) {
             particle->scale.x *= 1.0f - amplitude;
             particle->scale.y *= 1.0f + amplitude;
             particle->scale.z *= 1.0f - amplitude;
-            particle->pos.x = particle->squashOrigin[0] - (amplitude * particle->radius) * sine;
-            particle->pos.z = particle->squashOrigin[2] + (amplitude * particle->radius) * cosine;
+            particle->pos.x = particle->squashOrigin.x - (amplitude * particle->radius) * sine;
+            particle->pos.z = particle->squashOrigin.z + (amplitude * particle->radius) * cosine;
         // matching: an (unused) label on the early return keeps as1 from filling its delay slot
         early_return:
             return 1;
         }
     } else {
-        memcpy(&particle->pos, particle->squashOrigin, sizeof(vertex));
+        memcpy(&particle->pos, &particle->squashOrigin, sizeof(vertex));
         particle->squashPhase = 0;
         particle->hitFlags &= ~0x18;
     }
@@ -718,7 +718,6 @@ void func_151B9660(Particle *particle);
 /* Event handler: follow an owner swap (0x2D), forget a removed owner (0), then pass the event on to the
  * variant's handler in D_800899F8. */
 void func_15133588(Particle *particle, void *data, u8 event) {
-    s32 pad[2]; // matching: unused stack slots
     s32 variant;
     ParticleEventFn handler;
     struct127 *obj;
@@ -727,19 +726,21 @@ void func_15133588(Particle *particle, void *data, u8 event) {
         func_151B9660(particle);
     }
     if (event == 0x2D) {
-        obj = ((ParticleEventSwap *)data)->a;
+        ParticleEventSwap *swap = data;
+
+        obj = swap->a;
         if (obj == particle->owner) {
-            particle->owner = ((ParticleEventSwap *)data)->b;
-            particle->ownerId = ((ParticleEventSwap *)data)->bId;
-        } else if (particle->owner == ((ParticleEventSwap *)data)->b) {
+            particle->owner = swap->b;
+            particle->ownerId = swap->bId;
+        } else if (particle->owner == swap->b) {
             particle->owner = obj;
-            particle->ownerId = ((ParticleEventSwap *)data)->aId;
-        // matching: an (unused) label here keeps as1 from filling this branch's delay slot
-        swapped:;
+            particle->ownerId = swap->aId;
         }
     } else if (event == 0) {
-        obj = ((ParticleEventRemove *)data)->obj;
-        if (obj == particle->owner || ((ParticleEventRemove *)data)->id == particle->ownerId) {
+        ParticleEventRemove *removed = data;
+
+        obj = removed->obj;
+        if (obj == particle->owner || removed->id == particle->ownerId) {
             particle->owner = NULL;
             particle->ownerId = 0;
         }
@@ -750,7 +751,6 @@ void func_15133588(Particle *particle, void *data, u8 event) {
         handler(particle, data, event);
     }
 }
-
 
 /* Load model `model` (D_800A3880 table, bank 9) into the node and prepare it; returns FALSE if the load fails. */
 s32 func_151336A8(s32 model, ParticleNode *node, Particle *particle) {
