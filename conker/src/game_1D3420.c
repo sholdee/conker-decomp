@@ -237,40 +237,40 @@ Game1D2B10QuadVertex *func_151A6350(Game1D2B10QuadOwner *owner, s16 index) {
         return NULL;
     }
     {
-    s16 tMax = 0x7C0;
-    sStart = owner->unk114;
-    sEnd = owner->unk114 + owner->unk11C;
-    dz = D_800DD1D8[index] * owner->width;
-    dx = D_800DD1E8[index] * owner->width;
-    vertices->x = owner->x + dx;
-    vertices->y = owner->y;
-    vertices->z = owner->z - dz;
-    vertices->s = sStart;
-    vertices->t = tMax;
-    vertices->a = owner->alpha;
-    vertices->flag = 0;
-    vertices++;
-    vertices->x = owner->x - dx;
-    vertices->y = owner->y;
-    vertices->z = owner->z + dz;
-    // matching: the comma joins below shift ugen's tree slots onto the heap state func_151A6068 leaves
-    vertices->s = sStart, vertices->t = 0;
-    vertices->a = owner->alpha;
-    vertices->flag = 0;
-    vertices++;
-    vertices->x = owner->x - dx;
-    vertices->y = owner->y + owner->height;
-    vertices->z = owner->z + dz;
-    vertices->s = sEnd;
-    vertices->t = 0, vertices->a = 0, vertices->flag = 0;
-    vertices++;
-    vertices->x = owner->x + dx;
-    vertices->y = owner->y + owner->height;
-    vertices->z = owner->z - dz;
-    vertices->s = sEnd;
-    vertices->t = tMax;
-    vertices->a = 0;
-    vertices->flag = 0;
+        s16 tMax = 0x7C0;
+        sStart = owner->unk114;
+        sEnd = owner->unk114 + owner->unk11C;
+        dz = D_800DD1D8[index] * owner->width;
+        dx = D_800DD1E8[index] * owner->width;
+        vertices->x = owner->x + dx;
+        vertices->y = owner->y;
+        vertices->z = owner->z - dz;
+        vertices->s = sStart;
+        vertices->t = tMax;
+        vertices->a = owner->alpha;
+        vertices->flag = 0;
+        vertices++;
+        vertices->x = owner->x - dx;
+        vertices->y = owner->y;
+        vertices->z = owner->z + dz;
+        // matching: the comma joins below shift ugen's tree slots onto the heap state func_151A6068 leaves
+        vertices->s = sStart, vertices->t = 0;
+        vertices->a = owner->alpha;
+        vertices->flag = 0;
+        vertices++;
+        vertices->x = owner->x - dx;
+        vertices->y = owner->y + owner->height;
+        vertices->z = owner->z + dz;
+        vertices->s = sEnd;
+        vertices->t = 0, vertices->a = 0, vertices->flag = 0;
+        vertices++;
+        vertices->x = owner->x + dx;
+        vertices->y = owner->y + owner->height;
+        vertices->z = owner->z - dz;
+        vertices->s = sEnd;
+        vertices->t = tMax;
+        vertices->a = 0;
+        vertices->flag = 0;
     }
     return result;
 }
