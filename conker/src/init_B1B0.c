@@ -1184,6 +1184,7 @@ void func_1000D96C(s32 newId, s32 oldId, s32 transition) {
             if (oldId == 0) {
                 return;
             }
+            // matching: IDO shares this tail with the next branch only through the goto
             goto lookup_outgoing;
         } else if (track->pauseState != 0 || track->crossfade.target == 0) {
             track->crossfade.target = 0x8000;
@@ -1203,11 +1204,14 @@ lookup_outgoing:
         outgoing = func_1000B1B0(oldId);
     }
     if (outgoing != NULL) {
+        // matching: the redundant NULL check and the dead `if` keep IDO's branch layout
         if (outgoing != NULL && outgoing->next != NULL) {
             if (newId != 0) {
                 return;
             }
-        } else if (transition == 4 || transition == 6) {
+            return;
+        }
+        if (transition == 4 || transition == 6) {
             if (newId != 0) {
                 incoming = func_1000B2F4(newId);
             }
@@ -1265,15 +1269,9 @@ lookup_outgoing:
                     func_1000B3D4(incoming, outgoing);
                 }
             }
-        } else {
-            goto simple_transition;
+            return;
         }
-        return;
-    } else {
-        goto fallback_lookup;
-    }
-fallback_lookup:
-    if (oldId != 0) {
+    } else if (oldId != 0) {
         outgoing = func_1000B1FC(oldId);
         if (outgoing != NULL) {
             if (newId != 0) {
@@ -1297,7 +1295,6 @@ fallback_lookup:
             return;
         }
     }
-simple_transition:
     if (newId != 0 || outgoing != NULL) {
         incoming = func_1000B2F4(newId);
     }
