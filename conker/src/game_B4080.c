@@ -2,6 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
+// matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
+#define VIEWS ((RenderView *)D_800BE628)
+
 /* A node of the level's path graph (loaded by func_15085B70), 0x10 bytes. */
 typedef struct PathNode {
     /* 0x0 */ s16 x;
@@ -1803,21 +1806,6 @@ void func_1508EBF8(s32, s32);
 s32 func_1508DAEC(s32, s32);
 void func_1508B3F8(void);
 
-/* 0x180-byte per-player viewport records at D_800BE628 (HudView in game_BC510.c). */
-typedef struct HudView {
-    /* 0x00 */ u8 pad0[0x24];
-    /* 0x24 */ f32 top;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 left;
-    /* 0x30 */ f32 right;
-    /* 0x34 */ u8 pad34[0x6C - 0x34];
-    /* 0x6C */ f32 unk6C;
-    /* 0x70 */ f32 unk70;
-    /* 0x74 */ u8 pad74[0x180 - 0x74];
-} HudView;
-
-#define HUD_VIEWS ((HudView *)D_800BE628)
-
 /* Per-frame update of every player's multiplayer state; returns a mask of players that respawned. */
 s32 func_1508A6FC(void) {
     s32 i;
@@ -1854,7 +1842,7 @@ s32 func_1508A6FC(void) {
     s32 j;
     s32 pad2; // matching: unused stack slot in the original frame
     s32 flags;
-    HudView *vp;
+    RenderView *vp;
 
     result = 0;
     i = 0;
@@ -2033,11 +2021,11 @@ s32 func_1508A6FC(void) {
         func_1508B3F8();
     }
     if (D_800D23B0->gameType == 0xB9) {
-        half = (s32)(HUD_VIEWS[0].right - HUD_VIEWS[0].left) >> 1;
+        half = (s32)(VIEWS[0].right - VIEWS[0].left) >> 1;
         func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
         for (j = 0; j <= D_80082FA0; j++) {
             if (OBJ_TEAM(&D_800CC2D0[j]) == 0) {
-                vp = &HUD_VIEWS[j];
+                vp = &VIEWS[j];
                 func_15042D94(vp->left + half, vp->top + 6.0f, 1, "%d", countdowns[j] / 60);
             }
         }
@@ -2737,7 +2725,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
     doInner = 1;
     result = 0;
     obj = &D_800CC2D0[player];
-    ratio = HUD_VIEWS[0].unk70 / HUD_VIEWS[0].unk6C;
+    ratio = VIEWS[0].fovY / VIEWS[0].fovX;
     if (target != -1) {
         cam = obj->camera;
         if (cam != NULL) {

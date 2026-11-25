@@ -7,6 +7,9 @@
 #undef func_15169260
 #include "variables.h"
 
+// matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
+#define VIEWS ((RenderView *)D_800BE628)
+
 /*
  * Glow sprites: camera-facing quads whose size and alpha follow how directly they face the viewer, faded
  * out when the z-buffer shows them hidden.
@@ -112,22 +115,15 @@ typedef struct {
     /* 0x40 */ s32 flags;
 } GlowSpawn;
 
-/* Per-view record (0x180 bytes) of the table D_800BE628 points to. */
+/* matching: the depth terms of a RenderView's viewports[0], read as scalars (the Vp_t array access allocates
+ * FP registers differently in func_151408A4). */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x24];
-    /* 0x024 */ f32 minY;
-    /* 0x028 */ f32 maxY;
-    /* 0x02C */ f32 minX;
-    /* 0x030 */ f32 maxX;
-    /* 0x034 */ u8 pad34[0xC];
-    /* 0x040 */ u8 pad40[4];   /* 0x040: a Vp_t per frame buffer (D_800BE9C0), 0x10 apart */
-    /* 0x044 */ s16 vpScaleZ;  /* first Vp_t's vscale[2] */
+    /* 0x000 */ u8 pad0[0x44];
+    /* 0x044 */ s16 vpScaleZ; /* viewports[0].vp.vscale[2] */
     /* 0x046 */ u8 pad46[6];
-    /* 0x04C */ s16 vpTransZ;  /* first Vp_t's vtrans[2] */
-    /* 0x04E */ u8 pad4E[0x132];
-} GlowView;
+    /* 0x04C */ s16 vpTransZ; /* viewports[0].vp.vtrans[2] */
+} GlowViewDepth;
 
-#define VIEWS ((GlowView *)D_800BE628)
 #define ZBUFFER ((u16 *)D_800BE9C4)
 
 /* z-buffer decompression table, indexed by the exponent (top 3 bits). */
@@ -224,7 +220,7 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
     params->screenX[view] = -1;
     if (obj->flags & 2) {
         onScreen = func_15144CEC(obj->pos, screen, &projZ, &depth, &invDepth, view);
-        if (onScreen == 0 || screen[0] < VIEWS[view].minX || VIEWS[view].maxX < screen[0] || screen[1] < VIEWS[view].minY || VIEWS[view].maxY < screen[1]) {
+        if (onScreen == 0 || screen[0] < VIEWS[view].left || VIEWS[view].right < screen[0] || screen[1] < VIEWS[view].top || VIEWS[view].bottom < screen[1]) {
             return NULL;
         }
         camPos = func_15144B34(view);
@@ -234,7 +230,7 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
         f32 scale;
         s32 visible;
         s32 zbufDepth;
-        GlowView *vp;
+        GlowViewDepth *vp;
         s32 pad2; // matching: unused local keeps the stack layout
         s16 glowDepth;
         u16 zraw;
@@ -290,7 +286,7 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
                         params->screenX[view] = screen[0];
                         params->screenY[view] = screen[1];
                         // matching: indexing a Vp_t[2] member directly allocates FP registers differently
-                        vp = (GlowView *)((u8 *)D_800BE628 + view * sizeof(GlowView) + D_800BE9C0 * sizeof(Vp_t));
+                        vp = (GlowViewDepth *)((u8 *)D_800BE628 + view * sizeof(RenderView) + D_800BE9C0 * sizeof(Vp_t));
                         glowDepth = (vp->vpTransZ + projZ * invDepth * vp->vpScaleZ) * 32.0f;
                     } else {
                         params->screenX[view] = -1;

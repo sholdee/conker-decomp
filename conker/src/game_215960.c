@@ -969,15 +969,6 @@ Gfx *func_151EDBDC(Gfx *, HudModel *, f32, f32, f32);
 Gfx *func_151EA15C(Gfx *, s32, s32, s32);
 Gfx *func_151EADFC(Gfx *, s32, s32, s32);
 
-/* Per-player view, size 0x180; D_800BE628 points at an array of these. Only the fields used here. */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 width;
-    /* 0x08 */ f32 height;
-} HudView;
-
-#define VIEWS ((HudView *)D_800BE628)
-
 /* Draws the single-player HUD (counters and models) after preloading its textures; fades it in. */
 Gfx *func_151EB06C(Gfx *gfx) {
     s32 show;
@@ -1089,8 +1080,8 @@ Gfx *func_151EB06C(Gfx *gfx) {
             gSPSetGeometryMode(gfx++, 0x220404);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
             gfx = func_150900F0(gfx, 1);
-            halfWidth = VIEWS[0].width * 0.5f;
-            func_151EF954((f32 (*)[4])&D_800E0C38, -halfWidth, halfWidth, -(VIEWS[0].height * 0.5f), VIEWS[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
+            halfWidth = D_800BE628[0].width * 0.5f;
+            func_151EF954((f32 (*)[4])&D_800E0C38, -halfWidth, halfWidth, -(D_800BE628[0].height * 0.5f), D_800BE628[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
             D_800E0C30 = D_8008FDCC;
             if (D_80090058 != NULL) {
                 i = 10;

@@ -32,16 +32,6 @@ extern u16 D_800D2454;
 extern Mtx D_800D23D0;
 extern Mtx *D_800D244C;
 
-/* Per-player screen viewport (split screen), bounds in screen pixels. */
-typedef struct HudView {
-    u8 pad0[0x24];
-    f32 top;
-    f32 bottom;
-    f32 left;
-    f32 right;
-    u8 pad34[0x180 - 0x34];
-} HudView;
-
 
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15042D94(s32, s32, u8, s32 *, ...);

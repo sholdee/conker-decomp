@@ -669,20 +669,6 @@ lbl: // matching: unused label; with the block below it sets IDO's register prio
     return gfx;
 }
 
-/* What D_800BE628 points to. */
-typedef struct {
-    /* 0x00 */ u8 pad0[4];
-    /* 0x04 */ f32 width;
-    /* 0x08 */ f32 height;
-    /* 0x0C */ u8 padC[0x18];
-    /* 0x24 */ f32 minY;
-    /* 0x28 */ f32 maxY;
-    /* 0x2C */ f32 minX;
-    /* 0x30 */ f32 maxX;
-} TextBoxView;
-
-#define VIEW ((TextBoxView *)D_800BE628)
-
 void func_1501A764(s16, f32 x, f32 y, f32 z, f32 *screenX, f32 *screenY, f32 *screenZ);
 void func_1516D0CC(TextBox *box, f32 *x, f32 *y, f32 *angle);
 
@@ -701,10 +687,10 @@ void func_1516CC58(TextBox *box) {
     config = box->config;
     if (config->flags & TEXTBOX_SCREEN_POS) {
         scale = *config->screenXPercent * 0.01f;
-        box->anchorX = VIEW->width * scale;
+        box->anchorX = D_800BE628->width * scale;
         scale = *config->screenYPercent * 0.01f;
         scale = 1.0f - scale;
-        box->anchorY = VIEW->height * scale;
+        box->anchorY = D_800BE628->height * scale;
         angle = *config->anglePercent * 0.01f;
         angle = (angle < 0.0f) ? 0.0f : ((angle > 1.0f) ? 1.0f : angle);
         angle = 70.0f * angle + 55.0f;
@@ -769,15 +755,15 @@ void func_1516D0CC(TextBox *box, f32 *x, f32 *y, f32 *angle) {
     left = bodyX - halfW;
     right = halfW + bodyX;
     if (box != NULL) {
-        if (top < VIEW->minY) {
-            *y = VIEW->minY + h;
-        } else if (VIEW->maxY < anchorY) {
-            *y = VIEW->maxY;
+        if (top < D_800BE628->top) {
+            *y = D_800BE628->top + h;
+        } else if (D_800BE628->bottom < anchorY) {
+            *y = D_800BE628->bottom;
         }
-        if (left < VIEW->minX) {
-            *x -= left - VIEW->minX;
-        } else if (VIEW->maxX < right) {
-            *x += VIEW->maxX - right;
+        if (left < D_800BE628->left) {
+            *x -= left - D_800BE628->left;
+        } else if (D_800BE628->right < right) {
+            *x += D_800BE628->right - right;
         }
         *x = (s32)*x;
         *y = (s32)*y;

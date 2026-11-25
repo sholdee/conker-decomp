@@ -1697,17 +1697,6 @@ f32 func_15144C8C(f32 a, f32 b) {
     return diff;
 }
 
-/* Per-viewport record (0x180 bytes) of the table D_800BE628 points to. */
-typedef struct {
-    /* 0x000 */ char pad0[0xC];
-    /* 0x00C */ f32 unkC;  /* half width? */
-    /* 0x010 */ f32 unk10; /* half height? */
-    /* 0x014 */ char pad14[0x20];
-    /* 0x034 */ f32 unk34; /* screen centre x */
-    /* 0x038 */ f32 unk38; /* screen centre y */
-    /* 0x03C */ char pad3C[0x144];
-} Viewport15144CEC;
-
 void func_150A7A00(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6, f32 *arg7);
 
 /*
@@ -1741,10 +1730,10 @@ s32 func_15144CEC(f32 *pos, f32 *screen, f32 *outA, f32 *outDepth, f32 *outInvDe
     } else {
         return 0;
     }
-    x = ((Viewport15144CEC *)D_800BE628)[viewport].unkC;
-    y = ((Viewport15144CEC *)D_800BE628)[viewport].unk10;
-    screen[0] = ((Viewport15144CEC *)D_800BE628)[viewport].unk34 + (screen[0] * (x + 5.0f)) * *outInvDepth;
-    screen[1] = ((Viewport15144CEC *)D_800BE628)[viewport].unk38 - (screen[1] * (y + 5.0f)) * *outInvDepth;
+    x = D_800BE628[viewport].halfWidth;
+    y = D_800BE628[viewport].halfHeight;
+    screen[0] = D_800BE628[viewport].centerX + (screen[0] * (x + 5.0f)) * *outInvDepth;
+    screen[1] = D_800BE628[viewport].centerY - (screen[1] * (y + 5.0f)) * *outInvDepth;
     return 1;
 }
 

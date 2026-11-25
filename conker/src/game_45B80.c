@@ -464,19 +464,6 @@ void func_15019414(void) {
     }
 }
 
-/*
- * Per-player view record, 0x180 bytes each; D_800BE628 points at one per player plus a final
- * full-screen one (index D_80082FA0 + 1). vp[] and proj[] are double-buffered by D_800BE9C0.
- */
-typedef struct PlayerView {
-    /* 0x000 */ u8 unk0[0x40];
-    /* 0x040 */ Vp vp[2];
-    /* 0x060 */ u8 unk60[0xA0];
-    /* 0x100 */ Mtx proj[2];
-} PlayerView; // size 0x180
-
-#define VIEWS ((PlayerView *)D_800BE628)
-
 extern s16 D_80084480;
 extern Mtx D_80089470;
 Gfx *func_1510FEA0(Gfx *gfx, s32 arg1);
@@ -484,7 +471,7 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1);
 /* Sets up player's viewport and draws the first pass of their scene. */
 Gfx *func_15019464(Gfx *gfx, s16 player) {
     func_1510B958(player);
-    gSPViewport(gfx++, &VIEWS[player].vp[D_800BE9C0]);
+    gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
     gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
     if (D_800BEAC0 != 0) {
         return gfx;
@@ -516,7 +503,7 @@ Gfx *func_150195A0(Gfx *gfx, s16 player) {
     if (D_80082FA0 > 0) {
         gfx = (Gfx *)func_1515D6D0((s32)func_1510B7B4(gfx, player), player);
         func_1510B958(player);
-        gSPViewport(gfx++, &VIEWS[player].vp[D_800BE9C0]);
+        gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
         gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
     }
     gfx = func_151135C4(gfx, 1, player);
@@ -564,9 +551,9 @@ Gfx *func_150198FC(Gfx *gfx) {
     }
     if (D_80082FA0 != 0) {
         D_80082FA4 = D_80082FA0 + 1;
-        gSPViewport(gfx++, &(D_80082FA4 + VIEWS)->vp[0]); // matching: index + base operand order
+        gSPViewport(gfx++, &(D_80082FA4 + D_800BE628)->viewports[0]); // matching: index + base operand order
     } else {
-        gSPViewport(gfx++, &VIEWS[0].vp[0]);
+        gSPViewport(gfx++, &D_800BE628[0].viewports[0]);
     }
     gfx = (Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0);
     if (D_800BEAC0 != 0) {
@@ -605,7 +592,7 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player);
 
 /* Draws player's late pass (group 4 display lists) into their viewport. */
 Gfx *func_15019BB8(Gfx *gfx, s32 player) {
-    gSPViewport(gfx++, &VIEWS[player].vp[D_800BE9C0]);
+    gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
     gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
     gfx = func_1517F4D8(gfx, player);
     gfx = func_1517F3A0(gfx, player);
@@ -622,16 +609,16 @@ Gfx *func_15019BB8(Gfx *gfx, s32 player) {
 
 /* Loads player's viewport and projection, then draws group 5 display lists. */
 Gfx *func_15019CC8(Gfx *gfx, s32 player) {
-    gSPViewport(gfx++, &VIEWS[player].vp[D_800BE9C0]);
+    gSPViewport(gfx++, &D_800BE628[player].viewports[D_800BE9C0]);
     gfx = (Gfx *)func_1501A490((s32)gfx, player, 0, 0, 0, 0);
     gSPMatrix(gfx++, &D_80089470, G_MTX_LOAD);
-    gSPMatrix(gfx++, &VIEWS[player].proj[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
+    gSPMatrix(gfx++, &D_800BE628[player].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
     if (D_800BE9F0 == 0x1D) {
         gfx = func_1502BAD0(gfx, 6, player);
     }
     gfx = func_151674F8(gfx, 5, 0, 0);
     gfx = func_151674F8(gfx, 5, 0, 1);
-    gSPMatrix(gfx++, &VIEWS[player].proj[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
+    gSPMatrix(gfx++, &D_800BE628[player].projectionMtx[D_800BE9C0], G_MTX_PROJECTION | G_MTX_LOAD);
     gSPMatrix(gfx++, FRAME_MTX(D_800BE9C0, player), G_MTX_PROJECTION);
     return gfx;
 }
@@ -642,9 +629,9 @@ Gfx *func_151E8620(Gfx *gfx);
 Gfx *func_15019E60(Gfx *gfx) {
     if (D_80082FA0 != 0) {
         D_80082FA4 = D_80082FA0 + 1;
-        gSPViewport(gfx++, &(D_80082FA4 + VIEWS)->vp[0]); // matching: index + base operand order
+        gSPViewport(gfx++, &(D_80082FA4 + D_800BE628)->viewports[0]); // matching: index + base operand order
     } else {
-        gSPViewport(gfx++, &VIEWS[0].vp[0]);
+        gSPViewport(gfx++, &D_800BE628[0].viewports[0]);
     }
     return func_15043384(func_151E8620((Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0)));
 }

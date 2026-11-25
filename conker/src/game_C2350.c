@@ -2,28 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Per-view screen record, 0x180 bytes each, in the array that D_800BE628 points to. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0xC];
-    /* 0x00C */ f32 halfWidth;
-    /* 0x010 */ f32 halfHeight;
-    /* 0x014 */ f32 unk14; // sprite x scale (func_15095B08, unscaled sprites)
-    /* 0x018 */ f32 unk18;
-    /* 0x01C */ f32 unk1C; // sprite x scale (func_15095B08, perspective sprites)
-    /* 0x020 */ f32 unk20;
-    /* 0x024 */ f32 top;
-    /* 0x028 */ f32 bottom;
-    /* 0x02C */ f32 left;
-    /* 0x030 */ f32 right;
-    /* 0x034 */ f32 centerX;
-    /* 0x038 */ f32 centerY;
-    /* 0x03C */ u8 pad3C[4];
-    /* 0x040 */ Vp viewport[2]; // one per frame buffer (D_800BE9C0)
-    /* 0x060 */ u8 pad60[0xA0];
-    /* 0x100 */ Mtx mtx[2];     // one per frame buffer
-} View; // size 0x180
-
-#define gViews ((View *)D_800BE628)
+// matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
+#define VIEWS ((RenderView *)D_800BE628)
 
 /* A texture as the sprite and tile loaders take it (D_800D2C90 is the shared one). */
 typedef struct {
@@ -72,7 +52,7 @@ void func_15094EA0(s32 view) {
     f32 viewMtx[4][4];
 
     guMtxL2F(projection, &((Mtx **)&D_800DC2A0)[D_800BE9C0][view]);
-    guMtxL2F(viewMtx, &gViews[view].mtx[D_800BE9C0]);
+    guMtxL2F(viewMtx, &VIEWS[view].projectionMtx[D_800BE9C0]);
     func_150A7A48(projection, viewMtx, D_800D2CA8[view]);
 }
 
@@ -213,7 +193,7 @@ s32 func_1509563C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *out
     f32 invW;
     f32 screenX;
     f32 screenY;
-    View *view;
+    RenderView *view;
 
     func_150A7A00(D_800D2CA8[D_80082FA4], x, y, z, outX, outY, outZ, outW);
     w = *outW;
@@ -221,7 +201,7 @@ s32 func_1509563C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *out
         return FALSE;
     }
     invW = 1.0f / w;
-    view = &gViews[D_80082FA4];
+    view = &VIEWS[D_80082FA4];
     screenX = *outX;
     screenY = *outY;
     screenX = (view->halfWidth + 5.0f) * screenX * invW;
@@ -249,8 +229,8 @@ Gfx *func_15095760(Gfx *gfx, SpriteParams *sprite) {
     }
     gDPPipeSync(gfx++);
     gDPSetPrimDepth(gfx++,
-        (s32)(((clipZ / clipW) * gViews[D_80082FA4].viewport[D_800BE9C0].vp.vscale[2]
-            + gViews[D_80082FA4].viewport[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
+        (s32)(((clipZ / clipW) * VIEWS[D_80082FA4].viewports[D_800BE9C0].vp.vscale[2]
+            + VIEWS[D_80082FA4].viewports[D_800BE9C0].vp.vtrans[2]) * 32.0f), 0);
     return func_15095A90(gfx, sprite, screenX, screenY, clipW, TRUE, 0, 0, 0);
 }
 
@@ -300,7 +280,7 @@ extern f32 D_800D2C88; // height
 
 /* Computes `sprite`'s screen rectangle centred on (x, y) at depth z, and whether it is on screen. */
 void func_15095B08(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32 *visible) {
-    View *view;
+    RenderView *view;
     Texture *tex;
     f32 scaleX;
     f32 scaleY;
@@ -317,13 +297,13 @@ void func_15095B08(SpriteParams *sprite, f32 x, f32 y, f32 z, s32 projected, s32
     scaleX *= D_800380A0;
     scaleY *= D_800380A4;
     if (projected) { // matching: the view address is computed in each branch
-        view = &gViews[D_80082FA4];
+        view = &VIEWS[D_80082FA4];
         scaleX *= view->unk1C;
         scaleY *= view->unk20;
     } else {
-        view = &gViews[D_80082FA4];
-        scaleX *= view->unk14;
-        scaleY *= view->unk18;
+        view = &VIEWS[D_80082FA4];
+        scaleX *= view->scaleX;
+        scaleY *= view->scaleY;
     }
     tex = sprite->tex;
     invZ = 1.0f / z;
