@@ -65,14 +65,15 @@ typedef struct Struct150E5558 {
 } Struct150E5558;
 
 
-typedef struct Struct150E42F8D99F0
-{
-  s16 unk0;
-  s16 unk2;
-  s16 unk4;
+/* Integer world position chosen by func_150E41C0 as the centre of func_150E42F8's scatter. */
+typedef struct Struct150E42F8D99F0 {
+    s16 x;
+    s16 y;
+    s16 z;
 } Struct150E42F8D99F0;
 extern Struct150E42F8D99F0 D_800D99F0;
 
+/* Stores the point 500 units ahead of D_800DBFF0 (along its pitch 0x398 and yaw 0x3A0) in D_800D99F0. */
 void func_150E41C0(void) {
     s32 x;
     s32 y;
@@ -99,93 +100,73 @@ void func_150E41C0(void) {
     x += dx * c + dz * s;
     z += dz * c - dx * s;
     y += dy;
-    D_800D99F0.unk0 = x;
-    D_800D99F0.unk2 = y;
-    D_800D99F0.unk4 = z;
+    D_800D99F0.x = x;
+    D_800D99F0.y = y;
+    D_800D99F0.z = z;
 }
 
-u8 func_150ADA20(void);
-extern s32 D_800DBE3C;
-extern s32 D_800DBE4C;
-extern s32 D_800DBE5C;
-extern f32 D_800A1060;
 extern s32 func_1510F8CC(s32);
 extern s32 func_1510F8D8(s32, s32, s32, s32 *);
-extern void func_150E4550(f32, f32, f32, s32, s32, s32, s32);
-void func_150E42F8(s32 arg0)
-{
-  s32 temp_s0;
-  s32 temp_s1;
-  s32 temp_s2;
-  s32 sp70;
-  s32 temp_v0;
-  s32 sp68;
-  s32 idx;
-  s32 i;
-  f32 temp_f20;
-  s32 sp58;
-  sp58 = 0;
-  i = 0;
-  sp70 = D_800D99F0.unk0;
-  sp68 = D_800D99F0.unk4;
-  if (arg0 > 0)
-  {
- temp_f20 = D_800A1060; do {
-      temp_s0 = (func_150ADA20() % 0x1F4) + sp70;
-      temp_s1 = (func_150ADA20() % 0x1F4) + sp68;
-      temp_s2 = temp_s1;
-      temp_s1 = func_1510F8D8(temp_s0, 0x2710, temp_s2, &sp58);
-      if ((temp_f20 != ((f32) temp_s1)) && (sp58 != 0))
-      {
-        idx = (sp58 - D_800DBE3C) / 12;
-        if ((idx >= 0) && (idx < D_800DBE4C))
-        {
-          temp_v0 = func_1510F8CC(((s32 *) D_800DBE5C)[idx]);
-          if (temp_v0 != 0)
-          {
-            func_150E4550((f32) temp_s0, (f32) temp_s1, (f32) temp_s2, 0, temp_v0, sp58, 0xFF);
-          }
+extern void func_150E4550(f32, f32, f32, s32, s32, s16 **, s32);
+
+/* Drops `count` random ground hits within 500 units of D_800D99F0 and spawns each surface's effect. */
+void func_150E42F8(s32 count) {
+    s32 x;
+    s32 y;
+    s32 z;
+    s32 centerX;
+    s32 material;
+    s32 centerZ;
+    s32 idx;
+    s32 i;
+    f32 noHit;
+    s32 surface;
+
+    surface = 0;
+    noHit = -10000.0f;
+    centerX = D_800D99F0.x;
+    centerZ = D_800D99F0.z;
+    for (i = 0; i < count; i++) {
+        y = 10000;
+        x = func_150ADA20() % 500 + centerX;
+        z = func_150ADA20() % 500 + centerZ;
+        y = func_1510F8D8(x, y, z, &surface);
+        if (noHit != y && surface != 0) {
+            idx = (surface - D_800DBE3C) / 12;
+            if (idx >= 0 && idx < D_800DBE4C) {
+                material = func_1510F8CC(((s32 *)D_800DBE5C)[idx]);
+                if (material != 0) {
+                    func_150E4550(x, y, z, 0, material, (s16 **)surface, 0xFF);
+                }
+            }
         }
-      }
-      i++;
     }
-    while (i != arg0);
-  }
 }
 
-extern void func_150E42F8(s32);
-
-
-extern void func_150E41C0(void);
-extern void func_150E42F8(s32);
-
-void func_150E4514(s32 arg0) {
+/* Scatters one ground effect per 30 units of `amount` in front of D_800DBFF0. */
+void func_150E4514(s32 amount) {
     func_150E41C0();
-    func_150E42F8(arg0 / 0x1E);
+    func_150E42F8(amount / 30);
 }
 
+/* Per-material impact effects, indexed by the material id from func_1510F8CC. */
 typedef struct Struct800A1070 {
-    /* 0x00 */ u16 unk0;
-    /* 0x02 */ u16 unk2;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
+    /* 0x00 */ u16 objectType;   // object spawned through func_15168800 (0 = none)
+    /* 0x02 */ u16 particleType; // particle burst type (0 = none)
+    /* 0x04 */ u8 chance;        // percent chance of the func_151C329C effect
+    /* 0x05 */ u8 debrisType;    // func_150E4E04 debris kind (0 = none)
+    /* 0x06 */ u8 minCount;      // particle count = minCount + 1 + rand % countRange
+    /* 0x07 */ u8 countRange;
 } Struct800A1070;
-
-typedef struct Struct800A1110 {
-    /* 0x00 */ u16 unk0;
-    /* 0x02 */ u16 unk2;
-} Struct800A1110;
 
 typedef struct Struct150E4550 {
     /* 0x00 */ u8 pad0[0x84];
     /* 0x84 */ u16 unk84;
     /* 0x86 */ u16 unk86;
     /* 0x88 */ u8 pad88[4];
-    /* 0x8C */ s16 unk8C;
-    /* 0x8E */ s16 unk8E;
-    /* 0x90 */ s16 unk90;
+    /* 0x8C */ s16 x;
+    /* 0x8E */ s16 y;
+    /* 0x90 */ s16 z;
     /* 0x92 */ s16 unk92;
     /* 0x94 */ s16 unk94;
     /* 0x96 */ u8 pad96[2];
@@ -199,78 +180,95 @@ typedef struct Struct150E4550 {
     /* 0xA5 */ u8 padA5[3];
 } Struct150E4550;
 
+/* 0x1C-byte impact slots; func_150E4550/func_150E4E04 take an index into this (0xFF = none). */
+typedef struct {
+    u8 unk0[3];
+    u8 unk3;
+    u8 pad4[0xC];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+} Struct800D9960;
+
+extern Struct800D9960 D_800D9960[];
 extern Struct800A1070 D_800A1070[];
 extern f32 D_800A111C[];
 extern u16 D_800A1110[][2];
-extern u8 D_800D9963[];
 void func_150E4E04(f32, f32, f32, s32, s32, s16 **, s32);
 extern void func_15171D4C(f32, f32, f32, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_15171F04(f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_151C329C(void *, s32, s32);
+extern void func_15171F04(f32, f32, f32, s16 **, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_151C329C(f32 *, s32, s32);
 extern void func_1516865C(void *, s32, s32, s32, s32);
 extern void func_15168800(void *, s32, s32);
 
-void func_150E4550(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+/*
+ * Spawns the impact effects of `material` at (x, y, z): a particle burst, debris (func_150E4E04),
+ * a random func_151C329C effect and an object. `size` indexes D_800A111C/D_800A1110, `tri` is the
+ * hit triangle (three vertex pointers) or NULL, and `slot` indexes D_800D9960 (0xFF = none).
+ * Bit 0x8000 of `material` is forwarded to func_150E4E04.
+ */
+void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 slot) {
     Struct800A1070 *entry;
-    s32 size;
+    s32 lifetime;
     s32 flag;
-    s32 amount;
-    Struct150E4550 sp60;
+    s32 count;
+    Struct150E4550 obj;
 
-    size = 0x78;
+    lifetime = 120;
     flag = 0;
-    if (arg4 & 0x8000) {
-        arg4 ^= 0x8000;
+    if (material & 0x8000) {
+        material ^= 0x8000;
         flag = 0x8000;
     }
-    entry = &D_800A1070[arg4];
-    if (entry->unk2 != 0) {
-        amount = (func_151EF610() % entry->unk7) + entry->unk6 + 1;
-        if (arg3 != 1) {
-            size = 0x1E;
+    entry = &D_800A1070[material];
+    if (entry->particleType != 0) {
+        count = func_151EF610() % entry->countRange + entry->minCount + 1;
+        if (size != 1) {
+            lifetime = 30;
         }
-        amount = D_800A111C[arg3] * (f32)amount;
-        if (entry->unk2 == 0x13) {
-            func_15171D4C(arg0, arg1, arg2, 0x1E, 0, 0x13, 0.0f, 0, amount, 0xF, 0x55, 0, 0xFF, 0);
-        } else if (arg5 != 0) {
-            func_15171F04(arg0, arg1, arg2, arg5, size, 0xB5AD, entry->unk2, amount, 0, 0, 0, 0xFF, 0);
+        count = D_800A111C[size] * count;
+        if (entry->particleType == 0x13) {
+            func_15171D4C(x, y, z, 30, 0, 0x13, 0.0f, 0, count, 0xF, 0x55, 0, 0xFF, 0);
+        } else if (tri != NULL) {
+            func_15171F04(x, y, z, tri, lifetime, 0xB5AD, entry->particleType, count, 0, 0, 0, 0xFF, 0);
         } else {
-            func_15171D4C(arg0, arg1, arg2, (s16)size, 0xB5AD, entry->unk2, 0.0f, 0, amount, 0, 0, 0, 0xFF, 0);
+            func_15171D4C(x, y, z, (s16)lifetime, 0xB5AD, entry->particleType, 0.0f, 0, count, 0, 0, 0, 0xFF, 0);
         }
     }
-    if (entry->unk5 != 0) {
-        func_150E4E04(arg0, arg1, arg2, entry->unk5 | flag, arg3, (s16 **)arg5, arg6);
+    if (entry->debrisType != 0) {
+        func_150E4E04(x, y, z, entry->debrisType | flag, size, tri, slot);
     }
-    if (arg3 != 0 && (func_151EF610() % 100) < entry->unk4) {
+    if (size != 0 && func_151EF610() % 100 < entry->chance) {
         {
             f32 pos[3];
-            s32 pad;
-            pos[0] = arg0;
-            pos[1] = arg1 + 20.0f;
-            pos[2] = arg2;
+            s32 pad; // matching: keeps pos at its original stack offset
+
+            pos[0] = x;
+            pos[1] = y + 20.0f;
+            pos[2] = z;
             func_151C329C(pos, 0xFF, 1);
         }
-        if (arg6 != 0xFF) {
-            D_800D9963[arg6 * 0x1C] = 100;
+        if (slot != 0xFF) {
+            D_800D9960[slot].unk3 = 100;
         }
-    } else if (arg6 != 0xFF) {
-        D_800D9963[arg6 * 0x1C] = 0;
+    } else if (slot != 0xFF) {
+        D_800D9960[slot].unk3 = 0;
     }
-    if (entry->unk0 != 0) {
-        bzero(&sp60, sizeof(sp60));
-        sp60.unk8C = arg0;
-        sp60.unk8E = arg1;
-        sp60.unk90 = arg2;
-        sp60.unkA2 = 0xD;
-        sp60.unkA0 = entry->unk0;
-        sp60.unk84 = D_800A1110[arg3][0];
-        sp60.unk86 = D_800A1110[arg3][1];
-        sp60.unk98 = 0x2A00;
-        sp60.unk92 = 1;
-        sp60.unk94 = 1;
-        sp60.unkA4 = 0xFF;
-        func_1516865C(&sp60, 0xB4, 0xB4, 0xB4, 0xFF);
-        func_15168800(&sp60, 0xFF, 0);
+    if (entry->objectType != 0) {
+        bzero(&obj, sizeof(obj));
+        obj.x = x;
+        obj.y = y;
+        obj.z = z;
+        obj.unkA2 = 0xD;
+        obj.unkA0 = entry->objectType;
+        obj.unk84 = D_800A1110[size][0];
+        obj.unk86 = D_800A1110[size][1];
+        obj.unk98 = 0x2A00;
+        obj.unk92 = 1;
+        obj.unk94 = 1;
+        obj.unkA4 = 0xFF;
+        func_1516865C(&obj, 0xB4, 0xB4, 0xB4, 0xFF);
+        func_15168800(&obj, 0xFF, 0);
     }
 }
 
@@ -378,7 +376,7 @@ void func_150E4928(Struct150E4928 *arg0) {
                 }
                 tri = (s32 *)verts;
             }
-            func_150E4550(x, height, z, 1, func_1510F8CC(type), (s32)tri, 0);
+            func_150E4550(x, height, z, 1, func_1510F8CC(type), (s16 **)tri, 0);
         }
     }
 }
@@ -458,17 +456,6 @@ typedef struct {
     s16 unk36;
 } Spawn150E4E04;
 
-typedef struct {
-    u8 unk0[3];
-    u8 unk3;
-    u8 pad4[0xC];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-} Struct800D9960;
-
-extern Struct800D9960 D_800D9960[];
-extern u16 D_800A1110[][2];
 extern s32 D_8009187C;
 extern s32 D_800918A0;
 extern s32 D_800918AC;
