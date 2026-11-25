@@ -381,8 +381,8 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
             cfg.render.unk10 = 0x3B;
             cfg.render.unk14 = 0x80;
             cfg.render.unk18 = 0x20;
-            cfg.render.envMode = 0;
-            cfg.render.primMode = 7;
+            cfg.render.primMode = 0;
+            cfg.render.envMode = 7;
             cfg.unk80 = 10;
             cfg.unk82 = 25;
             func_15151A38(&cfg, arg1, arg2);

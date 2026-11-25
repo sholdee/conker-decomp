@@ -205,8 +205,8 @@ void func_15189A00(SprayEmitter *emitter) {
         render.unk10 = 0x22;
         render.unk14 = 0x80;
         render.unk18 = 0x20;
-        render.envMode = 0;
-        render.primMode = 7;
+        render.primMode = 0;
+        render.envMode = 7;
         do {
             spawn.pointCount = (func_150ADA20() % (u32)(emitter->desc.pointCountRange + 1)) + emitter->desc.pointCount;
             {

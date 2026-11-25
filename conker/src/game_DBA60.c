@@ -134,8 +134,8 @@ void func_150AE790(AttachedEffect *effect) {
         style.unk10 = 0x10;
         style.unk14 = 0x80;
         style.unk18 = 0x20;
-        style.envMode = 0;
-        style.primMode = 9;
+        style.primMode = 0;
+        style.envMode = 9;
         for (; count != 0; count--) {
             yaw = func_150ADA20() & 0xFF;
             pitch = func_150ADA20() % 51U;

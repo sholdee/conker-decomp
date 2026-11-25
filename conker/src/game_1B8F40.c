@@ -255,8 +255,8 @@ void func_1518BD60(TrailEmitter *emitter) {
                 render.unk10 = 0x10;
                 render.unk14 = 0x80;
                 render.unk18 = 0x20;
-                render.envMode = 0;
-                render.primMode = 9;
+                render.primMode = 0;
+                render.envMode = 9;
                 spawn.pointCount = func_150ADA20() % (u32)(emitter->params.pointRange + 1) + 3;
                 spawn.unk10 = 1;
                 spawn.unkE = 1;

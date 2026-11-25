@@ -175,8 +175,8 @@ s32 func_151AC078(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
         style.unk10 = 16;
         style.unk14 = 128;
         style.unk18 = 32;
-        style.envMode = 0;
-        style.primMode = 9;
+        style.primMode = 0;
+        style.envMode = 9;
         spawn.unk10 = 1;
         spawn.unkE = 1;
         spawn.pos[1] = y;

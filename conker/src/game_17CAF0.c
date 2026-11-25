@@ -1218,8 +1218,8 @@ void func_15152F70(SimplePuffSpray *config, u8 arg1) {
     params.unk10 = 0x10;
     params.unk14 = 0x80;
     params.unk18 = 0x20;
-    params.envMode = 0;
-    params.primMode = 9;
+    params.primMode = 0;
+    params.envMode = 9;
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
     while (count != 0) {
         yaw = (func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase;

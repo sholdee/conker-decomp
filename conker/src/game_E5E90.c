@@ -162,8 +162,8 @@ s32 func_150B89E0(PhysicsParticle *particle, f32 x, f32 y, f32 z, f32 floorHeigh
                 burst.render.unk10 = 0x3B;
                 burst.render.unk14 = 0x80;
                 burst.render.unk18 = 0x20;
-                burst.render.envMode = 0;
-                burst.render.primMode = 7;
+                burst.render.primMode = 0;
+                burst.render.envMode = 7;
                 burst.unk80 = 10;
                 burst.unk82 = 25;
                 burst.unk84 = particle->floor.unk18;
@@ -313,8 +313,8 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
                     burst.render.unk10 = 0x3B;
                     burst.render.unk14 = 0x80;
                     burst.render.unk18 = 0x20;
-                    burst.render.envMode = 0;
-                    burst.render.primMode = 7;
+                    burst.render.primMode = 0;
+                    burst.render.envMode = 7;
                     burst.unk9C = 10;
                     burst.unk9E = 25;
                     burst.unkA0 = particle->floor.unk18;

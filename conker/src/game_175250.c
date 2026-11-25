@@ -223,8 +223,8 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
                 gfx = func_150950D4(gfx, &D_800915A4, 0, 0, 0, 0, 2, 0x100, 0x100, (params->motion.flags & 0x80) ? 0x3E : 3);
                 D_800DD1B0 = tex;
             }
-            func_151441A4(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.unk1B, params->motion.unk1A, params->render.envMode);
-            func_151442FC(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.unk1B, params->motion.unk1A, params->render.primMode);
+            func_151441A4(&envR, &envG, &envB, &envA, 0, 0, 0, 0, 0, 0, 0, params->motion.unk1B, params->motion.unk1A, params->render.primMode);
+            func_151442FC(&primR, &primG, &primB, &primA, 0, 0, 0, 0, 0, 0, 0, params->motion.unk1B, params->motion.unk1A, params->render.envMode);
             gfx = func_15142B7C(gfx, params->render.setGeometryMode, params->render.clearGeometryMode);
             gfx = func_15142C10(gfx, primR, primG, primB, primA, &update);
             gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &update);
@@ -587,8 +587,8 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
     render.unk10 = 0x10;
     render.unk14 = 0x80;
     render.unk18 = 0x20;
-    render.envMode = 0;
-    render.primMode = 9;
+    render.primMode = 0;
+    render.envMode = 9;
     func_15147DA0(&spawn, (TrailMotion *)&motion, 0, 1, 0, 0, 0, 0, 0, 0, 0, &render, 0, arg11, 1);
 }
 

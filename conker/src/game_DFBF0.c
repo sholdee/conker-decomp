@@ -616,8 +616,8 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
     style.unk10 = 16;
     style.unk14 = 128;
     style.unk18 = 32;
-    style.envMode = 0;
-    style.primMode = 9;
+    style.primMode = 0;
+    style.envMode = 9;
     pos.kind = 1;
     pos.flags = 1;
     motion.unk19 = state->unk19;

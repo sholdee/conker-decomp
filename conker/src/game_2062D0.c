@@ -790,8 +790,8 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
         style.unk10 = 0x46;
         style.unk14 = 0x80;
         style.unk18 = 0x20;
-        style.envMode = 0;
-        style.primMode = 0xC;
+        style.primMode = 0;
+        style.envMode = 0xC;
         if (argA != 0) {
             c = 2;
             d = 0xFF;

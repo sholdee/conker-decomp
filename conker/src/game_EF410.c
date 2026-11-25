@@ -85,8 +85,8 @@ void func_150C1F60(u8 arg0) {
     params.render.unk10 = 0x3B;
     params.render.unk14 = 0x80;
     params.render.unk18 = 0x20;
-    params.render.envMode = 0;
-    params.render.primMode = 7;
+    params.render.primMode = 0;
+    params.render.envMode = 7;
     params.unk80 = 0xC;
     params.unk82 = 0x15;
     func_15151A38(&params, arg0, 1);
@@ -178,8 +178,8 @@ void func_150C2290(u8 arg0) {
     params.render.unk10 = 0x3B;
     params.render.unk14 = 0x80;
     params.render.unk18 = 0x20;
-    params.render.envMode = 0;
-    params.render.primMode = 7;
+    params.render.primMode = 0;
+    params.render.envMode = 7;
     params.unk80 = 0xC;
     params.unk82 = 0x15;
     func_15151A38(&params, arg0, 1);
@@ -271,8 +271,8 @@ s32 func_150C2558(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
     params.render.unk10 = 0x3B;
     params.render.unk14 = 0x80;
     params.render.unk18 = 0x20;
-    params.render.envMode = 0;
-    params.render.primMode = 7;
+    params.render.primMode = 0;
+    params.render.envMode = 7;
     params.unk80 = 0xC;
     params.unk82 = 0x15;
     func_15151A38(&params, argE, 1);

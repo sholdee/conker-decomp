@@ -1843,8 +1843,8 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     style.unk10 = 0x10;
     style.unk14 = 0x80;
     style.unk18 = 0x20;
-    style.envMode = 0;
-    style.primMode = 9;
+    style.primMode = 0;
+    style.envMode = 9;
     do {
         speed = (func_150ADA68() * preset->unk8) + preset->unk4;
         a = func_150ADA20() & 0xFF;
@@ -2528,8 +2528,8 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
             style.unk0 = 0;
             style.unk14 = 0x80;
             style.unk18 = 0x20;
-            style.envMode = 0;
-            style.primMode = 7;
+            style.primMode = 0;
+            style.envMode = 7;
             spawn.unkE = 0x15;
             spawn.unk10 = 1;
             spawn.unk14 = -1;

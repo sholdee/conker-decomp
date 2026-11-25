@@ -114,8 +114,8 @@ void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
             params.render.unk10 = 59;
             params.render.unk14 = 0x80;
             params.render.unk18 = 32;
-            params.render.envMode = 0;
-            params.render.primMode = 7;
+            params.render.primMode = 0;
+            params.render.envMode = 7;
             params.unk80 = 12;
             params.unk82 = 21;
             func_15151A38(&params, arg1, arg2);

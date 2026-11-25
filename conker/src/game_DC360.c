@@ -68,8 +68,8 @@ void func_150AEEB0(Actor *obj, u8 owner) {
         render.unk10 = 0x10;
         render.unk14 = 0x80;
         render.unk18 = 0x20;
-        render.envMode = 0;
-        render.primMode = 9;
+        render.primMode = 0;
+        render.envMode = 9;
         spawn.kind = 1;
         spawn.flags = 1;
         motion.texture = 8;

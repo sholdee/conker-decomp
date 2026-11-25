@@ -79,8 +79,8 @@ s32 func_150C16C0(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
     render.unk10 = 0x10;
     render.unk14 = 0x80;
     render.unk18 = 0x20;
-    render.envMode = 0;
-    render.primMode = 9;
+    render.primMode = 0;
+    render.envMode = 9;
     spawn.unk10 = 1;
     spawn.unkE = 1;
     motion.texture = 10;

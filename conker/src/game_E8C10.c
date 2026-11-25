@@ -859,8 +859,8 @@ s32 func_150BD954(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     render.unk10 = 0x10;
     render.unk14 = 0x80;
     render.unk18 = 0x20;
-    render.envMode = 0;
-    render.primMode = 9;
+    render.primMode = 0;
+    render.envMode = 9;
     spawn.unk10 = 1;
     spawn.unkE = 1;
     spawn.pos.x = x;

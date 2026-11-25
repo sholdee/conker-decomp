@@ -563,8 +563,8 @@ void func_150B5088(Trail *trail) {
     style.unk10 = 16;
     style.unk14 = 128;
     style.unk18 = 32;
-    style.envMode = 0;
-    style.primMode = 9;
+    style.primMode = 0;
+    style.envMode = 9;
     spawn.flags = 1;
     particle.unk19 = 6;
     particle.shade = state->shade;

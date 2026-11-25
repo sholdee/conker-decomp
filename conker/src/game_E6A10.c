@@ -262,8 +262,8 @@ s32 func_150B963C(PhysicsParticle *particle) {
                 burst.render.unk10 = 0x3B;
                 burst.render.unk14 = 0x80;
                 burst.render.unk18 = 0x20;
-                burst.render.envMode = 0;
-                burst.render.primMode = 7;
+                burst.render.primMode = 0;
+                burst.render.envMode = 7;
                 burst.unk80 = 10;
                 burst.unk82 = 25;
                 burst.unk84 = particle->floor.unk18;
