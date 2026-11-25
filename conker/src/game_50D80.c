@@ -6,12 +6,14 @@
 #undef func_1514D3B0
 #undef func_15048A40
 #undef func_150ADA20
-/* variables.h declares these arrays as scalars; they are redeclared below with their real types. */
+/* variables.h declares these with the wrong types; they are redeclared below with the types this file uses. */
 #define D_800C3958 D_800C3958_hdr
 #define D_800C3654 D_800C3654_hdr
+#define D_800D3098 D_800D3098_hdr
 #include "variables.h"
 #undef D_800C3958
 #undef D_800C3654
+#undef D_800D3098
 
 /* One 8-byte cutscene script event. Each track starts with a 4-event header whose value is the start time. */
 typedef struct {
@@ -54,16 +56,18 @@ typedef struct {
 
 extern SeqTrackState *D_800C3958[];
 extern u8 D_800C3654[];
+extern struct178 *D_800D3098;
 
+/* What a cutscene track is bound to: 2 = an object (func_15083E90), 3 = an actor (func_151149AC). */
 typedef struct {
-    u16 unk0;
-    u8 unk2;
-    u8 pad3[5];
-} Elem1502A8A0;
+    /* 0x0 */ u16 targetType;
+    /* 0x2 */ u8 targetId;
+    /* 0x3 */ u8 pad3[5];
+} SeqTrackInfo;
 
 extern SeqQueueEntry *D_800C3D50;
 extern u8 D_800C35E8[];
-extern Elem1502A8A0 *D_800C35F0[];
+extern SeqTrackInfo *D_800C35F0[];
 
 extern struct131 *func_151149AC(s32);
 extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, struct127 *, struct131 *, f32 *, s32);
@@ -436,12 +440,12 @@ typedef struct {
     u8 id;
 } ObjRef1502460C;
 
-#define FU8(ev, o) (*(u8 *) ((u8 *) (ev) + (o)))
-#define FS8(ev, o) (*(s8 *) ((u8 *) (ev) + (o)))
-#define FS16(ev, o) (*(s16 *) ((u8 *) (ev) + (o)))
-#define FS32(ev, o) (*(s32 *) ((u8 *) (ev) + (o)))
-#define FF32(ev, o) (*(f32 *) ((u8 *) (ev) + (o)))
-#define FPTR(ev, o) (*(void **) ((u8 *) (ev) + (o)))
+/* Field access by offset, for fields that include/structs.h still declares as padding. */
+#define FU8(p, o) (*(u8 *) ((u8 *) (p) + (o)))
+#define FS16(p, o) (*(s16 *) ((u8 *) (p) + (o)))
+#define FS32(p, o) (*(s32 *) ((u8 *) (p) + (o)))
+#define FF32(p, o) (*(f32 *) ((u8 *) (p) + (o)))
+#define FPTR(p, o) (*(void **) ((u8 *) (p) + (o)))
 
 extern s8 D_800E0BF4;
 extern u8 **D_800C35E0[];
@@ -520,7 +524,7 @@ extern s32 func_1519D030(void *, s32, s32, s32, s32, s32);
 extern s32 func_151A4FD0(s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151A9390(s32, s32, s32, f32 *, f32, f32, s32, s32, s32);
 extern void func_151BE850(f32 *, f32, s32, s32, s32, s32, s32);
-extern void func_151C970C(s32, s32);
+extern void func_151C970C(s32, struct178 *);
 extern void func_151C9DE8(void *, u8, s8, u8, s32);
 extern void func_151C9ED4(struct108 *);
 extern void func_151CD35C(s32);
@@ -652,7 +656,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         if (event->value >= D_800C363A[scene]) {
             return 1;
         }
-        if (D_800C35F0[scene][event->value].unk0 == 1 && D_800C35F8 != event->value) {
+        if (D_800C35F0[scene][event->value].targetType == 1 && D_800C35F8 != event->value) {
             D_800C35F8 = event->value;
             D_800DBFF4[0] = 4;
             D_800DBFF0->unk5F0 |= 4;
@@ -672,7 +676,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         if (v == 0) {
             v = 0xFF;
         }
-        FU8(obj, 0x1C9) = v;
+        obj->unk1C9 = v;
     } else if (event->type == 5) {
         if (event->value == 0x3B) {
             if (event->unk4 == 0) {
@@ -733,9 +737,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (obj == NULL) {
                 return 1;
             }
-            FU8(obj, 0x1FF) = !event->unk4;
-            if (FU8(obj, 0x1FF) != 0) {
-                FU8(obj, 0x1FF) += event->unk5;
+            obj->unk1FF = !event->unk4;
+            if (obj->unk1FF != 0) {
+                obj->unk1FF += event->unk5;
             }
             if (event->unk4 == 0) {
                 FU8(obj, 0x201) = event->unk6;
@@ -753,7 +757,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x18) {
         } else if (event->value == 0x1D) {
-            if (D_800C35F0[scene][track].unk0 == 3 && actor != NULL) {
+            if (D_800C35F0[scene][track].targetType == 3 && actor != NULL) {
                 if (event->unk4 == 0) {
                     FU8(actor, 0x6E) = 1;
                 } else {
@@ -764,7 +768,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             D_800C35C2 = event->unk4 + 1;
             D_800C35C3 = D_800BE9F0;
         } else if (event->value == 3) {
-            struct131 *target = func_151149AC(FU8(event, 7));
+            struct131 *target = func_151149AC((u8) event->unk6);
 
             if (target == NULL) {
                 return 1;
@@ -779,7 +783,8 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             f32 point[3];
             f32 point2[3];
 
-            switch (FU8(event, 4)) {
+            // matching: the switch reads the field as an unsigned byte
+            switch (*(u8 *) &event->unk4) {
                 case 0:
                     point[0] = D_800C3958[scene][track].x;
                     point[1] = D_800C3958[scene][track].y;
@@ -824,7 +829,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 0x12, 0x13, 0x14, 0x15 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(2, (s32) &(*(struct178 **) &D_800D3098)[ids[i]]);
+                        func_151C970C(2, &D_800D3098[ids[i]]);
                     }
                     break;
                 }
@@ -987,7 +992,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             if (obj != NULL) {
                 if (event->unk4 == 0) {
-                    r = func_15083FB0(FU8(event, 7));
+                    r = func_15083FB0((u8) event->unk6);
                     if (r != -1) {
                         obj->unk101 |= 4;
                         obj->unk65 = r + 1;
@@ -1035,7 +1040,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x49) {
             if (obj != NULL && event->unk4 < 3) {
-                ((s32 *) ((u8 *) obj + 0x2E4))[event->unk4] = event->unk6;
+                (&obj->unk2E4)[event->unk4] = event->unk6;
             }
         } else if (event->value == 0x4B) {
             if (obj != NULL) {
@@ -1067,9 +1072,9 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x71) {
             D_800CC2D0->unkCC = 0;
-            FU8(D_800CC2D0->unk31C, 0x4E) = 0;
+            D_800CC2D0->unk31C->unk4E = 0;
             D_800CC2D0->unk65 = 0;
-            FU8(D_800CC2D0->unk31C, 0x27) = 0;
+            D_800CC2D0->unk31C->unk27 = 0;
             D_800CC2D0->unkF8 &= ~0x01000000;
             if (obj != NULL) {
                 obj->unk13C = 0;
@@ -1164,7 +1169,7 @@ v = event->unk6 != 0 ? event->unk6 : 4;
                     D_800CC2D0->xz_velocity = 0.0f;
                     FS16(D_800CC2D0->unk31C, 0x18) = 0;
                     func_1505959C(obj, 0);
-                    *(u32 *) &obj->unk5C = 9;
+                    *(u32 *) &obj->unk5C = 9; // matching: an unsigned store
                     obj->unk65 = 1;
                     obj->unk101 |= 4;
                 } else if (event->unk4 == 4) {
@@ -1173,7 +1178,7 @@ v = event->unk6 != 0 ? event->unk6 : 4;
                     D_800D154C = obj;
                     func_15073F1C();
                 } else if (event->unk4 == 6) {
-                    FU8(obj->unk31C, 0x4E) = 0;
+                    obj->unk31C->unk4E = 0;
                 }
             }
         } else if (event->value == 0x6A) {
@@ -1591,7 +1596,8 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
             delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                switch (*(u16 *)&event->unk6) {
+                // matching: the switch reads the field as an unsigned halfword
+                switch (*(u16 *) &event->unk6) {
                     case 0:
                         func_1516E778(pos, delay, event->unk5, sceneTag, 0);
                         break;
@@ -1765,10 +1771,10 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         if (obj != NULL && delay > 0) {
                             f32 t;
 
-                            *(s32 *)((u8 *)obj + 0x2EC) = 1;
+                            obj->unk2EC = 1;
                             t = (f32)delay * 0.5f;
-                            *(f32 *)((u8 *)obj + 0x2D8) = t;
-                            *(f32 *)((u8 *)obj + 0x2DC) = 1.0f / t;
+                            FF32(obj, 0x2D8) = t;
+                            FF32(obj, 0x2DC) = 1.0f / t;
                             func_150C4120(obj, delay, sceneTag, 1);
                         }
                         break;
@@ -1979,7 +1985,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 if (t == 0) {
                     kind = 0xD;
                 }
-                node = *(EvNode **)((u8 *)obj + 0x2F4);
+                node = FPTR(obj, 0x2F4);
                 while (node != NULL) {
                     if (node->unk1C == kind || func_1514D4B8(D_8008ABE8[kind]->unk4, node->unk1C) != 0) {
                         node->unk10->unk30 = func_1519E970(delay, node->unk10, 0, &D_800C3958[scene][track].unk30, &D_800C3958[scene][track].unk20, sceneTag, 0);
@@ -2015,7 +2021,8 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
             func_15136404(obj, 90.0f, sceneTag, 1);
         } else if (event->value == 0x5F) {
-            switch (*(u8 *)&event->unk4) {
+            // matching: the switch reads the field as an unsigned byte
+            switch (*(u8 *) &event->unk4) {
                 case 0:
                     if (obj != NULL) {
                         f32 pos[3];
@@ -2147,7 +2154,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     const s32 ids[4] = { 6, 7, 8, 9 };
 
                     for (i = 0; i < 4; i++) {
-                        func_151C970C(1, &(*(struct178 **)&D_800D3098)[ids[i]]);
+                        func_151C970C(1, &D_800D3098[ids[i]]);
                     }
                     break;
                 }
@@ -2193,7 +2200,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 }
                 case 16:
-                    func_150F16DC(obj, event->unk5, ((u8 *)event)[7], sceneTag, 1);
+                    func_150F16DC(obj, event->unk5, (u8) event->unk6, sceneTag, 1);
                     break;
                 case 17: {
                     s32 unused;
@@ -2616,8 +2623,8 @@ extern s8 D_800C3C8A;
 extern u16 D_800C3C8E;
 
 /*
- * Third cutscene event handler: sounds (types 6 and 10), music (8), object
- * animations (2) and a few type-5 commands. `skipping` is set when the scene is
+ * Third cutscene event handler: sounds (types 6 and 10), func_1000xxxx audio
+ * commands (8), object animations (2) and a few type-5 commands. `skipping` is set when the scene is
  * being skipped (D_800C3C88 == 2). Returns 1 when the event was handled.
  */
 s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, struct131 *actor, f32 *pos, s32 sceneTag, s32 skipping) {
@@ -2889,11 +2896,15 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
     return 1;
 }
 
+/*
+ * Dispatches one cutscene event: resolves the track's object/actor and position,
+ * then offers the event to each handler until one accepts it.
+ */
 void func_1502A8A0(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene) {
     struct127 *obj;
     struct131 *actor;
     f32 *pos;
-    Elem1502A8A0 *info;
+    SeqTrackInfo *info;
     s32 sceneTag;
 
     obj = NULL;
@@ -2901,14 +2912,14 @@ void func_1502A8A0(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 sce
     pos = NULL;
     sceneTag = D_800C35E8[scene];
     info = &D_800C35F0[scene][track];
-    if (info->unk0 == 2) {
-        obj = func_15083E90(info->unk2);
+    if (info->targetType == 2) {
+        obj = func_15083E90(info->targetId);
         if (obj == NULL) {
             return;
         }
         pos = &obj->x_position;
-    } else if (info->unk0 == 3) {
-        actor = func_151149AC(info->unk2);
+    } else if (info->targetType == 3) {
+        actor = func_151149AC(info->targetId);
         if (actor == NULL) {
             return;
         }
