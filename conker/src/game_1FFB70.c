@@ -59,33 +59,33 @@ void func_151D2718(s16 id) {
     }
 }
 
-void func_151D275C(ScreenOverlay *arg0) {
-    s32 temp_v0;
-    s32 temp_t5;
+/* Per-frame update: advances the timer, derives the fade alpha and scrolls the texture. */
+void func_151D275C(ScreenOverlay *overlay) {
+    s32 speed;
 
-    temp_t5 = 0x80;
-    arg0->timer += (u32)D_800BE9E4 * (temp_v0 = arg0->speed);
+    // matching: assigning speed inside the expression schedules its lb before the timer's lh
+    overlay->timer += D_800BE9E4 * (speed = overlay->speed);
 
-    if ((temp_v0 > 0) && (arg0->timer >= 0xED)) {
-        arg0->alpha = (0x128 - arg0->timer) << 2;
-        if (arg0->alpha < 0) {
-            arg0->alpha = 0;
+    if (speed > 0 && overlay->timer >= 237) {
+        overlay->alpha = (296 - overlay->timer) << 2;
+        if (overlay->alpha < 0) {
+            overlay->alpha = 0;
         }
     } else {
-        arg0->alpha = (*(volatile s16 *)&arg0->timer) * 2;
+        overlay->alpha = overlay->timer * 2;
     }
 
-    if (arg0->alpha >= 0x80) {
-        arg0->alpha = temp_t5;
+    if (overlay->alpha >= 128) {
+        overlay->alpha = 128;
     }
 
-    arg0->scroll++;
-    if (arg0->scroll >= 0x100) {
-        arg0->scroll -= 0x100;
+    overlay->scroll++;
+    if (overlay->scroll >= 256) {
+        overlay->scroll -= 256;
     }
 
-    if ((arg0->timer >= 0x12D) || (arg0->timer < 0)) {
-        func_1516972C((struct102 *)arg0);
+    if (overlay->timer > 300 || overlay->timer < 0) {
+        func_1516972C((struct102 *)overlay);
     }
 }
 
