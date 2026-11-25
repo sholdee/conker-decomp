@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include <libc/stddef.h>
 
 /* Spawn descriptor for a DynModel; copied verbatim into DynModel.desc. */
 typedef struct {
@@ -53,7 +54,7 @@ typedef struct {
     /* 0xF8 */ u8 buffers[1];
 } DynModel;
 
-/* User data of the water-like model spawned by func_1513BAE8. */
+/* User data of the model spawned by func_1513BAE8. */
 typedef struct {
     /* 0x00 */ f32 scrollS;
     /* 0x04 */ f32 scrollT;
@@ -80,8 +81,6 @@ extern s32 (*D_80089C28[])(DynModel *, s16);
 extern struct17 D_800A49C0[9];
 extern VtxRange D_800A4A2C[9];
 
-DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4);
-
 /* Loads the descriptor's model and allocates a DynModel holding copies of its vertices. */
 DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4) {
     DynModel *obj;
@@ -97,14 +96,14 @@ DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, 
     {
         s32 type;
 
-        vtxSize = ((s32)asset->displayList - (s32)asset) - 0x28;
+        vtxSize = (u8 *)asset->displayList - (u8 *)asset->vertices;
         buffersSize = vtxSize * 2 * (D_80082FA0 + 1);
         if (arg1) {
             type = 0x54;
         } else {
             type = 0x38;
         }
-        obj = func_15167A68(type, arg4, userDataSize + buffersSize + 0xF8, 2, arg3, 1);
+        obj = func_15167A68(type, arg4, userDataSize + buffersSize + offsetof(DynModel, buffers), 2, arg3, 1);
         if (obj == NULL) {
             return NULL;
         }
@@ -116,6 +115,7 @@ DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, 
         obj->vertices[1][i] = (Vtx *)(buffer + vtxSize);
         memcpy(buffer, asset->vertices, vtxSize);
         memcpy(obj->vertices[1][i], asset->vertices, vtxSize);
+        // matching: the unsigned (size_t) step lets IDO reuse vtxSize * 2 from above
         buffer += vtxSize * 2 * sizeof(u8);
     }
     obj->displayList = asset->displayList;
@@ -247,7 +247,7 @@ DynModel *func_1513BAE8(void) {
     return obj;
 }
 
-/* Draw callback: recomputes the texture coordinates of each vertex group around its center. */
+/* Draw callback: recomputes each vertex group's texture coordinates relative to the viewport position. */
 s32 func_1513BBFC(DynModel *obj, s16 viewport) {
     TexWarpState *state;
     f32 scaleS;
@@ -255,7 +255,7 @@ s32 func_1513BBFC(DynModel *obj, s16 viewport) {
     f32 offsetS;
     f32 offsetT;
     s32 k;
-    struct17 *camera;
+    struct17 *viewPos;
     f32 dirX;
     f32 dirZ;
     s32 j;
@@ -264,15 +264,15 @@ s32 func_1513BBFC(DynModel *obj, s16 viewport) {
     state = (TexWarpState *)(obj->buffers + obj->buffersSize);
     scaleS = sinf(state->scalePhaseS) * 1.210000038f + 2.854000092f;
     scaleT = sinf(state->scalePhaseT) * 1.994000077f + 8.328000069f;
-    camera = func_15144B34(viewport);
+    viewPos = func_15144B34(viewport);
     offsetS = state->scrollS - (s32)(state->scrollS * (1.0f / 1024.0f)) * 1024.0f;
     offsetT = state->scrollT - (s32)(state->scrollT * (1.0f / 1024.0f)) * 1024.0f;
     for (k = 0; k < 9; k++) {
         f32 dx;
         f32 dz;
 
-        dx = D_800A49C0[k].unk0 - camera->unk0;
-        dz = D_800A49C0[k].unk8 - camera->unk8;
+        dx = D_800A49C0[k].unk0 - viewPos->unk0;
+        dz = D_800A49C0[k].unk8 - viewPos->unk8;
         if (dx != 0.0f || dz != 0.0f) {
             f32 invLen;
 
@@ -311,12 +311,12 @@ s32 func_1513BEB0(DynModel *obj) {
     TexWarpState *state;
 
     state = (TexWarpState *)(obj->buffers + obj->buffersSize);
-    state->scrollTPhase = state->scrollTPhase + 0.03700000048f * D_800BE9A4;
+    state->scrollTPhase += 0.03700000048f * D_800BE9A4;
     state->scrollTPhase = func_15144B68(state->scrollTPhase);
-    state->scrollS = state->scrollS + 1.899999976f * D_800BE9A4;
+    state->scrollS += 1.899999976f * D_800BE9A4;
     state->scrollT = sinf(state->scrollTPhase) * 77.30000305f;
-    state->scalePhaseS = state->scalePhaseS + 0.01900000125f * D_800BE9A4;
-    state->scalePhaseT = state->scalePhaseT + 0.01000000071f * D_800BE9A4;
+    state->scalePhaseS += 0.01900000125f * D_800BE9A4;
+    state->scalePhaseT += 0.01000000071f * D_800BE9A4;
     state->scalePhaseS = func_15144B68(state->scalePhaseS);
     state->scalePhaseT = func_15144B68(state->scalePhaseT);
 
