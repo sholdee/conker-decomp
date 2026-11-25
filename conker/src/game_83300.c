@@ -414,16 +414,16 @@ s32 func_1505693C(Actor *actor, s32 targetIdx) {
     return FALSE;
 }
 
-/* D_80099A3C is really u8[][10] (variables.h declares s16[]). Neither caller reads a return value. */
+/* Neither caller reads a return value. */
 void func_15056A00(Actor *actor, u8 turn, u8 row) {
     u8 col;
     u16 angle;
     u8 *entry;
 
     col = 0;
-    if (((u8 (*)[10])D_80099A3C)[row][7] < turn) {
+    if (D_80099A3C[row][7] < turn) {
         col = 5;
-    } else if (((u8 (*)[10])D_80099A3C)[row][2] < turn) {
+    } else if (D_80099A3C[row][2] < turn) {
         col = 2;
     }
     angle = actor->unk76;
@@ -432,7 +432,7 @@ void func_15056A00(Actor *actor, u8 turn, u8 row) {
     } else {
         col += 4;
     }
-    entry = &((u8 (*)[10])D_80099A3C)[row][col];
+    entry = &D_80099A3C[row][col];
     if (*entry != 0xFF) {
         actor->unk218--;
         actor->unk21C = 20000;
@@ -839,7 +839,7 @@ void func_15056B08(Actor *actor) {
         if (state != 0xD) {
             if (((u8)actor->unk24F != 0) && ((state != 0) || (arriveDist < targetDist))) {
                 k = (u8)actor->unk24F - 1;
-                if (((u8(*)[10])D_80099A3C)[k][0] < turnDiff) {
+                if (D_80099A3C[k][0] < turnDiff) {
                     actor->unk76 = prevMoveAngle;
                     func_15056A00(actor, turnDiff, k);
                 }

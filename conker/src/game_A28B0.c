@@ -14,9 +14,7 @@ s32 func_1514D3B0(Actor *owner, s16 type, u8 msg, u8 arg);
 void func_1506160C(Actor *actor, s32 cmd, u8 value, u8 step, s32 player);
 #undef func_150ADA20
 u8 func_150ADA20(void);
-#define D_80099A3C D_80099A3C_hdr
 #include "variables.h"
-#undef D_80099A3C
 
 /*
  * Object script interpreter commands.
@@ -30,13 +28,6 @@ u8 func_150ADA20(void);
  * D_800CC2D0[unk222], its current waypoint is unk21E of its path D_800D2104[unk13F].
  */
 
-
-typedef struct {
-    u8 unk0;
-    u8 unk1[9];
-} Row56A00;
-
-extern Row56A00 D_80099A3C[]; // header declares it as s16[]
 
 s32 func_1505D024(Actor *arg0, s32 arg1, u16 arg2, s32 arg3);
 void func_1504715C(f32 *arg0, Actor *arg1);
@@ -1127,7 +1118,7 @@ void func_15077F64(void) {
     if (turn & 0x80) {
         turn = -turn;
     }
-    if (D_80099A3C[index].unk0 < turn) {
+    if (D_80099A3C[index][0] < turn) {
         D_800D154C->unk250 = D_800D1891;
         func_15056A00(D_800D154C, turn, index);
     }

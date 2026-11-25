@@ -591,11 +591,11 @@ extern f32 D_8009950C;
 extern f32 D_80099510;
 extern f32 D_80099514;
 extern f32 D_80099520;
-extern s16 D_80099A3C[];
-extern s16 D_80099A3E;
+extern u8 D_80099A3C[][10]; // turn-angle thresholds per row (D_80099A3E is [0][2])
+extern u8 D_80099A3E;
 extern u8  D_80099A43;
-extern s16 D_80099AB4[];
-extern s16 D_80099ABC[];
+extern u8 D_80099AB4[];
+extern u8 D_80099ABC[];
 
 extern f32 D_80099C1C;
 extern f32 D_80099C34;

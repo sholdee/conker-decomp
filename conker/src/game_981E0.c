@@ -9,21 +9,8 @@ s32 func_10010154(u16 sound, void *obj, u32 volume, s16 nearDistance, u16 farDis
 #undef func_10010630
 // matching: callers here were compiled with an unsigned volume (arg2); the definition takes s32.
 void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
-#define D_80099A3C D_80099A3C_s16_hdr
-#define D_80099A3E D_80099A3E_s16_hdr
-#define D_80099AB4 D_80099AB4_s16_hdr
-#define D_80099ABC D_80099ABC_s16_hdr
 #include "variables.h"
 #include "effects.h"
-#undef D_80099A3C
-#undef D_80099A3E
-#undef D_80099AB4
-#undef D_80099ABC
-/* variables.h types these as s16; they are byte tables (lbu). */
-extern u8 D_80099A3C[];
-extern u8 D_80099A3E;
-extern u8 D_80099AB4[];
-extern u8 D_80099ABC[];
 
 /* The object func_1503195C returns (only the word at 0x3C is read here). */
 typedef struct {
@@ -402,7 +389,7 @@ void func_1506B3B8(void) {
         absDiff = -absDiff;
     }
     absDiff32 = absDiff;
-    if (absDiff < D_80099A3C[sel]) { // matching: indexed by sel (still 0); [0] schedules differently
+    if (absDiff < D_80099A3C[0][sel]) { // matching: indexed by sel (still 0); [0][0] schedules differently
         sel = 1;
     } else {
         if (D_80099A43 < absDiff32) {
@@ -417,7 +404,7 @@ void func_1506B3B8(void) {
         }
     }
     D_800D154C->unk138 = 0;
-    D_800D154C->unk244 = D_80099A3C[sel];
+    D_800D154C->unk244 = D_80099A3C[0][sel];
     D_800D154C->unk21C = 20000;
 }
 
