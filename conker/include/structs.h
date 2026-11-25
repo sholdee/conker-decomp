@@ -982,7 +982,7 @@ typedef struct {
     /* 0x056 */ u8  unk56;
     /* 0x057 */ u8  unk57;
     /* 0x058 */ IdleState idle;
-    /* 0x068 */ s16 unk68;
+    /* 0x068 */ u16 unk68;
     /* 0x06A */ u8  pad6A;
     /* 0x06B */ u8  unk6B;      // grab state
     /* 0x06C */ s16 holdX;      // held position (s16 world units)

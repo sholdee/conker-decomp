@@ -1530,7 +1530,7 @@ void func_150597FC(Actor *actor) {
                 ((actor->id != 0xA8) || (player->team != 0))) {
                 player->unk13C = D_800C3E78 + 100;
                 player->xz_velocity = 0.0f;
-                *(s16 *)((u8 *)movement + 0x18) = 0; /* inside ActorCtl.pad17 */
+                movement->unk18 = 0;
                 func_1505959C(actor, i);
             }
         }
@@ -1657,8 +1657,8 @@ void func_15059C84(Actor *actor) {
         return;
     }
     if (actor->unk127 != 0xFF) {
-        if (*(s16 *)((u8 *)actor->unk31C + 0x46) > 0) {
-            angle += *(u16 *)((u8 *)actor->unk31C + 0x10);
+        if (actor->unk31C->unk46 > 0) {
+            angle += *(u16 *)&actor->unk31C->unk10; // matching: read unsigned here (lhu); stored signed elsewhere
             actor->unk7A = angle;
         }
     }
@@ -1673,7 +1673,7 @@ void func_15059C84(Actor *actor) {
     } else {
         actor->unk7E = 0;
     }
-    if ((actor->in_water != 0 && (actor->unk31C == NULL || *((u8 *)actor->unk31C + 0x21) == 0)) ||
+    if ((actor->in_water != 0 && (actor->unk31C == NULL || actor->unk31C->unk21 == 0)) ||
         (actor->unk22C & 8)) {
         x = actor->unkB8;
         if (x > 90.0f) {
@@ -1699,7 +1699,7 @@ void func_15059C84(Actor *actor) {
     if (actor->in_water == 10) {
         y = 0.0f;
     }
-    if ((actor->interaction_state != 1 || *((u8 *)actor->unk31C + 0x4F) == 0) && actor->unk28 <= 0.0f &&
+    if ((actor->interaction_state != 1 || actor->unk31C->unk4F == 0) && actor->unk28 <= 0.0f &&
         actor->in_water == 0 && !(actor->unk22C & 8)) {
         /* project the step onto the floor triangle */
         for (i = 0; i < 3; i++) {
@@ -2521,7 +2521,7 @@ void func_1505B9C4(Actor *attacker, Actor *victim, Entry1505C1E4 *base, Entry150
     attacker->pad108 = slot | 0x80;
     if (reaction != 0x27) {
         if ((base[index].unk24 & 0x40) && (victim->interaction_state == 1)) {
-            *(s16 *)((u8 *)D_800CC2D0[slot].unk31C + 0x46) = 8000;
+            D_800CC2D0[slot].unk31C->unk46 = 8000;
         } else {
             v = victim->unk23B;
             if (v != 0) {
@@ -2941,7 +2941,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
                 }
                 rx = victim->x_position;
                 if (victim->unk31C != NULL) {
-                    height = *(s16 *)((u8 *)victim->unk31C + 0x114) * 0.5f;
+                    height = victim->unk31C->unk114 * 0.5f;
                 } else {
                     height = 20.0f;
                 }
@@ -3710,7 +3710,7 @@ void func_1505E874(s32 sourceIdx, Actor *actor) {
         actor->unk10B &= ~1;
         actor->unk10B |= table[anim].sub[actor->unk105].flags & 1;
         if ((actor->unk127 != 0xFF) && (actor->unk105 == 0) && (actor->unk31C != NULL) &&
-            (actor->camera != NULL) && (*((u8 *)actor->unk31C + 0x197) != 0)) {
+            (actor->camera != NULL) && (actor->unk31C->aimState != 0)) {
             func_1517F488(0xFF, 0, 0, 0xB4, 0x14, actor->camera->playerIndex);
         }
         if ((actor->unk127 != 0xFF) && (actor->health == 0)) {
@@ -3764,7 +3764,7 @@ void func_1505E874(s32 sourceIdx, Actor *actor) {
                             deathKind = 0x10;
                             break;
                         case 0x10:
-                            *((u8 *)actor->unk31C + 0x1AC) = 1;
+                            actor->unk31C->unk1AC = 1;
                             D_800D1580 = 0xFF010434;
                             deathKind = 0;
                             func_1506E5FC();
@@ -3976,7 +3976,6 @@ void func_151C6EA0(Actor *arg0, s32 arg1, s32 arg2);
 void func_1506160C(Actor *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_1506045C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4);
 /* ActorCtl bytes that the shared header leaves as padding */
-#define MOVEMENT_FIELD(off, T) (*(T *)((u8 *)actor->unk31C + (off)))
 /* Player controls for jumping, swimming and the hover (anim 0xE9), from the controller pad. */
 void func_1505F298(Actor *actor, OSContPad *pad) {
     s32 anim;
@@ -4005,13 +4004,13 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
         actor->target_speed = 0.0f;
         return;
     }
-    if ((MOVEMENT_FIELD(0x46, s16) > 0) || (actor->unk31C->unk36 >= 0x64) || (actor->unk31C->unk6B != 0)) {
+    if ((actor->unk31C->unk46 > 0) || (actor->unk31C->unk36 >= 0x64) || (actor->unk31C->unk6B != 0)) {
         return;
     }
     height = actor->unk28;
     if (actor->unk31C->unk4E == 2) {
         height = actor->unk28 - 150.0f;
-    } else if (MOVEMENT_FIELD(0x4F, u8) == 2) {
+    } else if (actor->unk31C->unk4F == 2) {
         height = 0.0f;
     } else if (actor->y_velocity > 0.0f) {
         height += 50.0f;
@@ -4021,20 +4020,20 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
     } else {
         buttons = pad->button;
     }
-    if ((actor->in_water != 0) && (MOVEMENT_FIELD(0x95, u8) == 0) && (actor->unk84.uh != 0x262)) {
+    if ((actor->in_water != 0) && (actor->unk31C->unk95 == 0) && (actor->unk84.uh != 0x262)) {
         if (actor->in_water == 1) {
             rate = 2.0f;
             anim = 0;
-            if ((D_800CC288 & 0x8000) && ((D_800BE9F0 != 0x29) || (MOVEMENT_FIELD(0x8, s16) <= 0)) &&
+            if ((D_800CC288 & 0x8000) && ((D_800BE9F0 != 0x29) || (actor->unk31C->unk8 <= 0)) &&
                 (((actor->unk118 - 60.0f) - 30.0f) < actor->y_position)) {
                 func_15052408(actor);
                 actor->unk31C->unk31 = 0;
                 rate = 0.0f;
-                if ((MOVEMENT_FIELD(0x7B, u8) != 7) && (MOVEMENT_FIELD(0x7B, u8) != 8)) {
+                if ((actor->unk31C->unk7B != 7) && (actor->unk31C->unk7B != 8)) {
                     actor->unk31C->unk31 = 1;
                 }
                 actor->unk76 = actor->unk7A = actor->unk78 = actor->unk31C->unk4C;
-                if ((MOVEMENT_FIELD(0x68, u16) != 0) && ((actor->unk76 - MOVEMENT_FIELD(0x68, u16) + 0x4000) & 0x8000)) {
+                if ((actor->unk31C->unk68 != 0) && ((actor->unk76 - actor->unk31C->unk68 + 0x4000) & 0x8000)) {
                     actor->xz_velocity = 0.0f;
                     actor->disable_run = 0xFF;
                 }
@@ -4047,12 +4046,12 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
             }
             actor->target_speed = 0.0f;
             if ((D_800CC288 & 0x4000) && !(pad->button & 0x10)) {
-                if (MOVEMENT_FIELD(0x22, s8) < 0x69) {
-                    MOVEMENT_FIELD(0x22, s8) = 0xF;
+                if (actor->unk31C->unk22 < 0x69) {
+                    actor->unk31C->unk22 = 0xF;
                 }
             }
-            if (((actor->xz_velocity > 2.0f) && (MOVEMENT_FIELD(0x21, u8) != 0)) ||
-                ((MOVEMENT_FIELD(0x21, u8) == 0) && ((MOVEMENT_FIELD(0x22, s8) > 0) || (!(pad->button & 0x10) && (pad->button & 0x4000))))) {
+            if (((actor->xz_velocity > 2.0f) && (actor->unk31C->unk21 != 0)) ||
+                ((actor->unk31C->unk21 == 0) && ((actor->unk31C->unk22 > 0) || (!(pad->button & 0x10) && (pad->button & 0x4000))))) {
                 if (anim != 0x32) {
                     rate = 9.0f;
                     actor->unk83 = 0;
@@ -4095,7 +4094,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
     }
     if (actor->unk137 == 1) {
         anim = 0;
-        if (MOVEMENT_FIELD(0x53, u8) == 0) {
+        if (actor->unk31C->unk53 == 0) {
             if (pad->stick_y >= 0x33) {
                 speed = 2.200000048f;
                 actor->unk31C->unk54 = 0xC;
@@ -4145,7 +4144,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
                 if (flag != 0) {
                     func_1506160C(actor, 1, 0xFF, 0, 0);
                 }
-                if (MOVEMENT_FIELD(0x17, u8) != 0) {
+                if (actor->unk31C->unk17 != 0) {
                     animArg4 = 0.0f;
                     anim = 0x279;
                     speed = 1.25f;
@@ -4153,20 +4152,20 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
                     actor->disable_jump = 0xA;
                     actor->disable_run = 0xFF;
                     actor->unk83 = 0xFF;
-                } else if (MOVEMENT_FIELD(0x8, s16) != 0) {
+                } else if (actor->unk31C->unk8 != 0) {
                     actor->unk83 = 0xFF;
                     actor->disable_run = 0xFF;
                     jumped = 0;
                     func_1505E650(actor, 0x43, 1.299999952f, 2.0f, 0.0f, 0.0f, 0);
                 } else {
-                    if (MOVEMENT_FIELD(0x1A, u8) != 0) {
+                    if (actor->unk31C->unk1A != 0) {
                         anim = 0x32;
                         animArg4 = 0.0f;
                         actor->disable_run = 0xFF;
                         actor->unk81 = 1;
                         actor->y_velocity = 47.0f;
                         actor->gravity = 6.0f;
-                    } else if (!(buttons & 0x2000) || (MOVEMENT_FIELD(0x7B, u8) == 7) || (MOVEMENT_FIELD(0x7B, u8) == 8)) {
+                    } else if (!(buttons & 0x2000) || (actor->unk31C->unk7B == 7) || (actor->unk31C->unk7B == 8)) {
                         if (actor->disable_run != 0) {
                             actor->disable_run = 0;
                             actor->unk7A = actor->unk76 = actor->unk31C->unk4C;
@@ -4184,7 +4183,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
                                 speed = 1.399999976f;
                             }
                         }
-                        if ((MOVEMENT_FIELD(0x7B, u8) == 7) || (MOVEMENT_FIELD(0x7B, u8) == 8)) {
+                        if ((actor->unk31C->unk7B == 7) || (actor->unk31C->unk7B == 8)) {
                             actor->unk31C->unk31 = 0;
                         }
                         if (actor->unk31C->unk4E == 1) {
@@ -4289,7 +4288,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
     {
     s32 pad;
     rate = 2.0f;
-    if (((MOVEMENT_FIELD(0x98, u8) != 0) || (MOVEMENT_FIELD(0x95, u8) != 0)) && (actor->disable_jump == 0) && (D_800CC288 & 0x8000)) {
+    if (((actor->unk31C->ropeId != 0) || (actor->unk31C->unk95 != 0)) && (actor->disable_jump == 0) && (D_800CC288 & 0x8000)) {
         actor->unk76 = actor->unk7A = actor->unk31C->unk4C;
         actor->unk31C->unk31 = 1;
         actor->unk80 = 0xA;
@@ -4307,15 +4306,15 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
         if (actor->unk44 < 4.0f) {
             actor->unk76 = actor->unk7A = actor->unk76 + 0x8000;
         }
-        MOVEMENT_FIELD(0x95, u8) = 0;
+        actor->unk31C->unk95 = 0;
         actor->unk31C->unk97 = 0;
-        if (MOVEMENT_FIELD(0x98, u8) != 0) {
+        if (actor->unk31C->ropeId != 0) {
             func_151AE264(actor);
         }
         actor->unk31C->unk54 = 0;
     } else if ((D_800CC288 & 0x8000) && (actor->unk31C->unk4E == 0)) {
         if ((actor->unk84.uh != 0x3B) && (actor->unk84.uh != 0x3C) && (actor->unk137 == 0) && (actor->unk13C == 0) &&
-            (MOVEMENT_FIELD(0x95, u8) == 0) && (actor->unk31C->unk31 == 0) && (height > 55.0f)) {
+            (actor->unk31C->unk95 == 0) && (actor->unk31C->unk31 == 0) && (height > 55.0f)) {
             if ((actor->unk118 != -10000.0f) && ((actor->unk118 - actor->unk180) > 100.0f)) {
                 actor->gravity = 6.0f;
                 actor->unk81 = 1;
@@ -4359,7 +4358,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
                 }
                 anim = 0xE9;
                 speed = actor->animation_speed;
-                MOVEMENT_FIELD(0x3C, u8) = 6;
+                actor->unk31C->unk3C = 6;
                 if ((!(pad->button & 0x8000) && (actor->unk31C->unk31 >= 0x13)) || (actor->unk31C->unk31 >= 0x3E)) {
                     actor->disable_run = 0xFF;
                     actor->unk100 = 0x55;
@@ -4390,7 +4389,6 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
         actor->gravity = 6.199999809f;
     }
 }
-#undef MOVEMENT_FIELD
 /* Runs the player's current action/item (unk31C->unk75, overridden by context) for this frame's input. */
 void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 nested) {
     s32 stunned;
@@ -4409,18 +4407,18 @@ void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 neste
     stunned = 0;
     expired = 0;
 
-    if ((*(u16 *)((u8 *)actor->unk31C + 0x72) != 0) && (nested == 0)) {
-        if (D_800BE9E4 < *(u16 *)((u8 *)actor->unk31C + 0x72)) {
-            *(u16 *)((u8 *)actor->unk31C + 0x72) -= D_800BE9E4;
+    if ((actor->unk31C->unk72 != 0) && (nested == 0)) {
+        if (D_800BE9E4 < actor->unk31C->unk72) {
+            actor->unk31C->unk72 -= D_800BE9E4;
         } else {
             expired = 1;
-            *(u16 *)((u8 *)actor->unk31C + 0x72) = 0;
+            actor->unk31C->unk72 = 0;
         }
     }
 
     state = actor->unk31C->unk75 & ~0x80;
-    if ((((u8 *)actor->unk31C)[0x7C] != 0) && (state == 0)) {
-        state = ((u8 *)actor->unk31C)[0x7C];
+    if ((actor->unk31C->unk7C != 0) && (state == 0)) {
+        state = actor->unk31C->unk7C;
     }
 
     if ((D_800BE9F0 != 0x29) && (D_800BE9F0 != 0x2E) && (actor->unk31C->unk78 == 0) &&
@@ -4462,7 +4460,7 @@ void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 neste
         }
     }
 
-    if (((u8 *)actor->unk31C)[0x17] != 0) {
+    if (actor->unk31C->unk17 != 0) {
         state = 0x3C;
     }
 
@@ -4484,7 +4482,7 @@ void func_1506045C(Actor *actor, s32 buttons, s32 pressed, f32 height, s32 neste
         result = func_15065A5C(actor, buttons, pressed, height, nested, state, stunned, expired, held);
     }
 
-    if ((((u8 *)actor->unk31C)[0x7B] != 0) || (pressed & 0x4000)) {
+    if ((actor->unk31C->unk7B != 0) || (pressed & 0x4000)) {
         func_150642AC(actor, pressed, height, held, result);
     }
 }
@@ -4726,8 +4724,8 @@ void func_15060F28(Actor *actor, s32 mode) {
     if (*(void **)((u8 *)actor + 0x324) != NULL) {
         func_10004074(*(void **)((u8 *)actor + 0x324));
     }
-    if ((actor->unk31C != NULL) && (*(void **)((u8 *)actor->unk31C + 0x11C) != NULL)) {
-        func_10004074(*(void **)((u8 *)actor->unk31C + 0x11C));
+    if ((actor->unk31C != NULL) && (actor->unk31C->boneChain != NULL)) {
+        func_10004074(actor->unk31C->boneChain);
     }
     func_10010AA8(actor);
     func_150303E4(actor);
@@ -4793,7 +4791,7 @@ void func_150611E8(Actor *actor, s32 pathIdx) {
         }
         angle = func_1505A630(pts[closest + 1].x - pts[closest].x, pts[closest].z - pts[closest + 1].z, 0);
         if (actor->unk31C != NULL && speed > 20.0f) {
-            *(s16 *)((u8 *)actor->unk31C + 0x68) = angle | 1;
+            actor->unk31C->unk68 = angle | 1;
         }
         func_150593C4(actor, angle, speed, scale);
     }
@@ -5553,7 +5551,7 @@ void func_15063168(Actor *actor) {
         if (movement == NULL) {
             continue;
         }
-        if (((u8 *)movement)[0x1AC] != 0) {
+        if (movement->unk1AC != 0) {
             continue;
         }
         func_15194FF4(actor, &D_800CC2D0[i], 1);
