@@ -517,90 +517,75 @@ Gfx *func_1515E544(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte
     return gfx;
 }
 
-struct Light1515E888 {
-    u8 pad0[5];
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 pad8[6];
-    s16 x;
-    s16 y;
-    s16 z;
-    u8 pad14[0x1B];
-    u8 radius;
-};
+extern u8 D_800D9E21;                // light count byte func_1515D914 stored for player 0
+extern PointLight *D_800D9E28[];     // the lights it picked
 
-extern u8 D_800D9E21;
-extern struct Light1515E888 *D_800D9E28[];
+/*
+ * Lit colour at (x, y, z): the zone ambient colour (func_1515E278) plus the contribution of
+ * each point light picked for this frame, falling off with squared distance.
+ */
+void func_1515E888(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg6, s32 flags) {
+    f32 distSq;
+    f32 range;
+    f32 pos[3];
+    f32 sum[3];
+    s32 i;
+    f32 *lightPos;
+    s32 count;
+    PointLight *light;
+    PointLight **lights;
+    f32 f;
+    s32 v;
 
-void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7)
-{
-  f32 sq;
-  f32 dist;
-  f32 pos[3];
-  f32 color[3];
-  s32 i;
-  f32 *new_var;
-  s32 n;
-  struct Light1515E888 *light;
-  struct Light1515E888 **p;
-  f32 f;
-  s32 v;
-  func_1515E278(arg1, arg2, arg3, arg4, arg5, (u32)arg6, (s32)arg7);
-  color[0] = arg5[0];
-  color[1] = arg5[1];
-  color[2] = arg5[2];
-  v = D_800D9E21 & 0x7F;
-  n = v - 1;
-  i = 0;
-  if (n > 0)
-  {
-    p = D_800D9E28;
-    new_var = pos;
-    loop:
-    light = *p;
-
-    if (light != 0)
-    {
-      pos[0] = light->x;
-      pos[1] = light->y;
-      pos[2] = light->z;
-      dist = light->radius * 2048.0f;
-      sq = (((new_var[0] - arg1) * (new_var[0] - arg1)) + ((new_var[1] - arg2) * (new_var[1] - arg2))) + ((new_var[2] - arg3) * (new_var[2] - arg3));
-      f = dist / sq;
-      if (f > 1.0f)
-      {
-        f = 1.0f;
-      }
-      color[0] += f * light->r;
-      color[1] += f * light->g;
-      color[2] += f * light->b;
+    func_1515E278(x, y, z, mask, color, arg6, flags);
+    sum[0] = color[0];
+    sum[1] = color[1];
+    sum[2] = color[2];
+    v = D_800D9E21 & 0x7F;
+    count = v - 1;
+    i = 0;
+    if (count > 0) {
+        lights = D_800D9E28;
+        lightPos = pos; // matching: distances read pos through this alias
+        for (;;) { // matching: a do-while allocates color differently
+            light = *lights;
+            if (light != NULL) {
+                pos[0] = light->x;
+                pos[1] = light->y;
+                pos[2] = light->z;
+                range = light->radius * 2048.0f;
+                distSq = (lightPos[0] - x) * (lightPos[0] - x) + (lightPos[1] - y) * (lightPos[1] - y) +
+                     (lightPos[2] - z) * (lightPos[2] - z);
+                f = range / distSq;
+                if (f > 1.0f) {
+                    f = 1.0f;
+                }
+                sum[0] += f * light->color[0];
+                sum[1] += f * light->color[1];
+                sum[2] += f * light->color[2];
+            }
+            i++;
+            lights++;
+            if (i == count) {
+                break;
+            }
+        }
     }
-    i++;
-    p++;
-    if (i != n)
-    {
-      goto loop;
+    v = sum[0];
+    if (v > 255) {
+        v = 255;
     }
-  }
-  v = color[0];
-  if (v >= 0x100)
-  {
-    v = 0xFF;
-  }
-  arg5[0] = v;
-  v = color[1];
-  if (v >= 0x100)
-  {
-    v = 0xFF;
-  }
-  arg5[1] = v;
-  v = color[2];
-  if (v >= 0x100)
-  {
-    v = 0xFF;
-  }
-  arg5[2] = v;
+    color[0] = v;
+    v = sum[1];
+    if (v > 255) {
+        v = 255;
+    }
+    color[1] = v;
+    v = sum[2];
+    if (v > 255) {
+        v = 255;
+    }
+    color[2] = v;
 }
 
 s32 func_150A1DA0(struct127 *obj, LightZone *zone, s32);
