@@ -1534,86 +1534,88 @@ void func_150597FC(struct127 *actor) {
     }
 }
 
-u8 func_150599C8(struct127 *arg0, u8 arg1, u16 arg2) {
-    s16 temp_a3;
-    s16 temp_t6;
-    s16 temp_t8;
-    s32 temp_v0;
-    s32 temp_lo;
+/* Turns the facing angle (unk7A) toward targetAngle, limited per frame; returns the remaining gap >> 8. */
+u8 func_150599C8(struct127 *actor, u8 turnRate, u16 targetAngle) {
+    s16 delta;
+    s16 maxDelta;
+    s16 minDelta;
+    s32 step;
+    s32 range;
     s16 signedDelta;
 
-    temp_v0 = (s32) (((arg1 << 8) + arg0->unk1E8) * D_800CC264) / 0x64;
-    temp_a3 = arg2 - arg0->unk7A;
-    if (arg0->unk1EA != 0) {
-        temp_lo = (s32) (arg0->unk1EA * D_800CC264) / 0x64;
-        temp_t6 = arg0->unk1EC + temp_lo;
-        temp_t8 = arg0->unk1EC - temp_lo;
-        if (temp_t6 < temp_a3) {
-            temp_a3 = temp_t6;
+    step = (((turnRate << 8) + actor->unk1E8) * D_800CC264) / 100;
+    delta = targetAngle - actor->unk7A;
+    if (actor->unk1EA != 0) {
+        range = (actor->unk1EA * D_800CC264) / 100;
+        maxDelta = actor->unk1EC + range;
+        minDelta = actor->unk1EC - range;
+        if (maxDelta < delta) {
+            delta = maxDelta;
         }
-        if (temp_a3 < temp_t8) {
-            temp_a3 = temp_t8;
+        if (delta < minDelta) {
+            delta = minDelta;
         }
     }
 
-    signedDelta = temp_a3;
-    if (temp_a3 < 0) {
-        temp_a3 = temp_a3 ^ 0xFFFF;
+    signedDelta = delta;
+    if (delta < 0) {
+        delta ^= 0xFFFF;
     }
-    if (temp_a3 < temp_v0) {
-        temp_v0 = temp_a3;
+    if (delta < step) {
+        step = delta;
     }
-    if ((arg0->unkF4 & 1) == 0) {
-        if (arg0->unk80 != 0) {
+    if ((actor->unkF4 & 1) == 0) {
+        if (actor->unk80 != 0) {
             if (signedDelta < 0) {
-                arg0->unk7A -= temp_v0;
+                actor->unk7A -= step;
             } else {
-                arg0->unk7A += temp_v0;
+                actor->unk7A += step;
             }
         }
     }
-    return temp_a3 >> 8;
+    return delta >> 8;
 }
 
-u8 func_15059B54(struct127 *arg0, u16 arg1) {
-    s16 temp_t8;
-    s16 temp_t8_2;
-    s16 temp_t2;
-    s32 temp_lo;
+/* Turns the moving angle (unk76) toward unk78 by at most maxStep; returns the gap before turning >> 8. */
+u8 func_15059B54(struct127 *actor, u16 maxStep) {
+    s16 delta;
+    s16 maxDelta;
+    s16 minDelta;
+    s32 range;
     s16 absDiff;
     s16 signedDelta;
 
-    temp_t8 = arg0->unk78 - arg0->unk76;
-    absDiff = temp_t8;
+    delta = actor->unk78 - actor->unk76;
+    absDiff = delta;
     if (absDiff < 0) {
-        absDiff = absDiff ^ 0xFFFF;
+        absDiff ^= 0xFFFF;
     }
-    if (arg0->unk1EA != 0) {
-        temp_lo = (s32) (arg0->unk1EA * D_800CC264) / 0x64;
-        temp_t8_2 = arg0->unk1EC + temp_lo;
-        temp_t2 = arg0->unk1EC - temp_lo;
-        if (temp_t8_2 < temp_t8) {
-            temp_t8 = temp_t8_2;
+    if (actor->unk1EA != 0) {
+        range = (actor->unk1EA * D_800CC264) / 100;
+        maxDelta = actor->unk1EC + range;
+        minDelta = actor->unk1EC - range;
+        if (maxDelta < delta) {
+            delta = maxDelta;
         }
-        if (temp_t8 < temp_t2) {
-            temp_t8 = temp_t2;
+        if (delta < minDelta) {
+            delta = minDelta;
         }
     }
 
-    signedDelta = temp_t8;
-    if (temp_t8 < 0) {
-        temp_t8 = temp_t8 ^ 0xFFFF;
+    signedDelta = delta;
+    if (delta < 0) {
+        delta ^= 0xFFFF;
     }
-    if (temp_t8 < arg1) {
-        arg1 = temp_t8;
+    if (delta < maxStep) {
+        maxStep = delta;
     }
-    if ((arg0->unkF4 & 1) == 0) {
+    if ((actor->unkF4 & 1) == 0) {
         if (signedDelta < 0) {
-            arg0->unk76 -= arg1;
-            arg0->unk1EC = -arg1;
+            actor->unk76 -= maxStep;
+            actor->unk1EC = -maxStep;
         } else {
-            arg0->unk76 += arg1;
-            arg0->unk1EC = arg1;
+            actor->unk76 += maxStep;
+            actor->unk1EC = maxStep;
         }
     }
     return absDiff >> 8;
