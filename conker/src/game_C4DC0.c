@@ -1,12 +1,7 @@
 #include <ultra64.h>
-// matching: functions.h declares func_15083E90 as taking s32; the callers here need a u8 parameter,
-// so hide that declaration
-#define func_15083E90 func_15083E90_s32_decl_in_functions_h
 #include "functions.h"
-#undef func_15083E90
 #include "variables.h"
 
-Actor *func_15083E90(u8);
 
 /* One 0x30-byte spawn slot of the D_800D20FC table (struct258 in structs.h is not the real layout). */
 typedef struct {

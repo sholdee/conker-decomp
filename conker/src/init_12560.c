@@ -68,8 +68,8 @@ void func_1001263C(s32 id, s32 volume, s32 pan) {
 }
 
 /* Pop the next logged message into `dst` (at most `dstSize` bytes). */
-void func_100126E8(s32 dst, s32 dstSize) {
-    func_15043CA4(&D_800427A0, dst, dstSize);
+s32 func_100126E8(u8 *dst, s32 dstSize) {
+    return func_15043CA4(&D_800427A0, dst, dstSize);
 }
 
 /*

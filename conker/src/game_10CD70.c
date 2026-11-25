@@ -63,7 +63,7 @@ void func_150DF920(s32 arg0) {
     id = 6;
     slot = 3;
     for (i = 0; i < 2; i++) {
-        obj = func_15083E90((u8)id); // takes a u8; functions.h says s32
+        obj = func_15083E90(id);
         id = 7;
         if (obj != NULL) {
             func_150A2864(slot, 0);

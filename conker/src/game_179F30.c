@@ -1,8 +1,6 @@
 #include <ultra64.h>
 // functions.h declares these two with other signatures; this file uses its own prototypes
-#define func_15083568 func_15083568_orig
 #include "functions.h"
-#undef func_15083568
 #include "variables.h"
 #include "effects.h"
 
@@ -118,7 +116,6 @@ void func_1514F194(Actor *obj);
 
 /* Elsewhere. */
 void func_1501175C(Actor *obj, u8 arg1, s32 arg2);
-struct St1514DE94 *func_15083568(Actor *obj, s32 arg1, f32 arg2, s32 arg3);
 s32 func_15083FB0(u8 uniqueId);
 void func_150C0AC0(Struct1514F5CCArg *desc, s32 arg1, s32 arg2);
 void func_150C4120(Actor *obj, s32 arg1, s32 arg2, s32 arg3);

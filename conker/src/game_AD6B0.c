@@ -1,8 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_100126E8 as void; it returns its callee's result, which is used here.
-#define func_100126E8 func_100126E8_void_proto
 #include "functions.h"
-#undef func_100126E8
 #include "variables.h"
 
 /*
@@ -12,7 +9,6 @@
  * them: 0x72 u16 expressionTimer (0xFFFE = frozen), 0x134 u8 unk134, 0x135 u8 morphDuration.
  */
 
-extern s32 func_100126E8(u8 *buf, s32 size);
 extern void func_15080430(Actor *actor, s32 expression, s32 morphDuration);
 extern s32 func_1507E968(Actor *actor);
 extern void func_1507E500(Actor *actor, s32 expression, s32 morphDuration);

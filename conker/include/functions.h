@@ -113,7 +113,7 @@ void func_10012560(s32 arg0);
 void func_10012588(s32 arg0);
 void func_100125CC(s32 arg0);
 void func_1001263C(s32 arg0, s32 arg1, s32 arg2);
-void func_100126E8(s32 arg0, s32 arg1);
+s32  func_100126E8(u8 *dst, s32 dstSize);
 s32  func_10012718(u16 arg0, Actor *arg1, s32 arg2, s16 arg3, u16 arg4);
 s32  func_100127D0(void);
 void func_10012A28(struct121 *arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -393,6 +393,7 @@ f32  func_15048720(f32 arg0, f32 arg1, f32 arg2);
 void func_15048758(f32 *arg0);
 f32  func_150487E0(f32 arg0);
 f32  func_15048864(f32 arg0);
+s32  func_15043CA4(struct105 *ring, u8 *dst, s32 dstSize);
 f32  func_15048A40(u8 arg0);
 void func_15142314(struct255 *bones, s32 bone, Vec3f *out);
 f32  func_15048A70(f32 arg0, f32 arg1);
@@ -971,7 +972,6 @@ s32 func_1000EE70(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
 //func_1000F568
 //func_1000F6B8
 void func_1000F85C(u16 handle, s16 param, s32 value);
-void func_1000F91C(u16 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
 u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance, s16 nearDistance, SoundRecordCallback callback, void *owner, s32 key, s32 flags, s32 cents);
 //func_1000FC18
 //func_1000FD38
@@ -997,7 +997,6 @@ s32  func_100114D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 //func_10011EB8
 //func_10012020
 //func_1001263C
-//func_100126E8
 // void func_10017870(u8 arg0);
 void func_100186DC(void *arg0, void *arg1);
 void func_10018790(void *arg0, s32 arg1, u32 arg2, u32 arg3);
@@ -1078,9 +1077,9 @@ u8 *func_1506C460(f32, f32, f32, f32, s32, s32, f32, f32, s32, s32, s32);
 Actor *func_15072208(Actor *, s32);
 void func_1507BAD0(void);
 s32  func_15081574(s32, f32, f32, s32, s32, s32);
-void func_15083568(Actor*, s32, f32, s32);
+Actor *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3);
 s32  func_15083E0C(u8);
-Actor *func_15083E90(s32);
+Actor *func_15083E90(u8 id);
 void func_15085710(s16, s16, s32);
 s32  func_150859AC(s16 arg0, s16 arg1);
 void func_1508B20C(f32, f32, f32, f32);

@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_15083568 as void; it returns the new Attachment (declared below). */
-#define func_15083568 func_15083568_orig
 #include "functions.h"
-#undef func_15083568
 #include "variables.h"
 
 extern u8 D_800BEA0C;
@@ -143,7 +140,6 @@ typedef struct Attachment {
 } Attachment; // size 0x5C
 
 void func_15031C14(Attachment *att);
-Attachment *func_15083568(Actor *obj, s32 setId, f32 arg2, s32 arg3);
 void func_1503F5B8(AnimInstance *anim, s32 arg1, s32 animId, f32 arg3, f32 arg4, s32 arg5);
 void func_1503F7B8(AnimInstance *anim);
 s32 func_1503F62C(s32 model, s32 animSet, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg5, AnimInstance **anim);

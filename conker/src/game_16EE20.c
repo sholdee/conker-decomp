@@ -1,8 +1,10 @@
 #include <ultra64.h>
 
-#define func_15083E90 func_15083E90_s32_proto
+// matching: one call below passes no argument (the id is still in a0), so this file keeps an unprototyped view
+#define func_15083E90 func_15083E90_functions_h
 #include "functions.h"
 #undef func_15083E90
+Actor *func_15083E90();
 #define D_800D3098 D_800D3098_struct178_view
 #include "variables.h"
 #undef D_800D3098
@@ -36,7 +38,6 @@ extern f32 D_800DCA08;
 extern f32 D_800DCA0C;
 extern f32 D_800DCA10;
 
-Actor *func_15083E90();
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 Gfx *func_15094FE8(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_1514306C(s32 *, s32, s32, u8);

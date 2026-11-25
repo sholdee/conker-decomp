@@ -1,15 +1,12 @@
 #include <ultra64.h>
-/* functions.h declares these with prototypes that do not fit how this file calls them. */
-#define func_15083568 func_15083568_void_proto
+// matching: this file calls func_100109D0/func_10010A3C (void (Actor *)) through unprototyped views
 #define func_100109D0 func_100109D0_hdr
 #define func_10010A3C func_10010A3C_hdr
 #include "functions.h"
-#undef func_15083568
 #undef func_100109D0
 s32 func_100109D0();
 #undef func_10010A3C
 s32 func_10010A3C();
-Actor *func_15083568(Actor *, s32, f32, s32);
 #include "variables.h"
 
 /* Controller state that D_800CC284 points to. */
