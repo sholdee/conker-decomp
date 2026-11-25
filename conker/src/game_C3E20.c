@@ -333,57 +333,64 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
 }
 
 
-extern void *func_1505EEF4(s32);
+struct127 *func_1505EEF4(s32);
 
-s32 func_1509759C(s32 arg0, s32 arg1, s32 *arg2) {
-    struct108 *obj;
-    s32 ret;
-    struct17 dir;
-    struct17 diff;
+/*
+ * Answers script query `query` about actor `actorIndex` (arguments in args[2..]); fixed-point results
+ * are 16.16.
+ */
+s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
+    struct108 *actor;
+    s32 side;
+    struct17 facing;
+    struct17 toTarget;
     f32 angle;
-    u8 *ent;
-    C3E20Pose *pos;
+    struct127 *target;
+    C3E20Pose *pose;
     f32 dx;
     f32 dz;
 
-    obj = &D_800DBFF0[arg0];
-    if (D_80082FA0 < arg0) {
+    actor = &D_800DBFF0[actorIndex];
+    if (actorIndex > D_80082FA0) {
         return 0;
     }
-    switch (arg1) {
-    case 0x1F:
-        return obj->unk390 * 65536.0f;
-    case 0x1E:
-        return obj->unk37C * 65536.0f;
-    case 0x1D:
-        return D_800D2DC0[arg2[2]].state;
-    case 0x20:
-        pos = (C3E20Pose *)D_800DC020;
-        pos = &pos[arg2[2] & 0xFFF];
-        dx = obj->unk2F8 - pos->x;
-        dz = obj->unk300 - pos->z;
+    switch (query) {
+    case 31:
+        return actor->unk390 * 65536.0f;
+    case 30:
+        return actor->unk37C * 65536.0f;
+    case 29:
+        return D_800D2DC0[args[2]].state;
+    case 32:
+        // Horizontal distance from the actor to a pose.
+        pose = (C3E20Pose *)D_800DC020;
+        pose = &pose[args[2] & 0xFFF];
+        dx = actor->unk2F8 - pose->x;
+        dz = actor->unk300 - pose->z;
         return sqrtf(dx * dx + dz * dz);
-    case 0x21:
-        ent = func_1505EEF4(arg2[2] & 0xFFF);
-        if (ent == NULL) {
+    case 33:
+        // Which side of the actor's facing direction a path object is on: -1 or 1 (-1 if not found).
+        target = func_1505EEF4(args[2] & 0xFFF);
+        if (target == NULL) {
             return -1;
         }
-        angle = obj->unk39C + 1.570796371f;
-        dir.unk0 = sinf(angle);
-        dir.unk4 = 0.0f;
-        dir.unk8 = cosf(angle);
-        func_15048F90((struct17 *)&obj->unk2F8, (struct17 *)(ent + 0x14), &diff);
-        diff.unk4 = 0.0f;
-        if (func_150AD900((f32 *)&dir, (f32 *)&diff) >= 0.0f) {
-            ret = -1;
+        angle = actor->unk39C + 1.570796371f;
+        facing.unk0 = sinf(angle);
+        facing.unk4 = 0.0f;
+        facing.unk8 = cosf(angle);
+        func_15048F90((struct17 *)&actor->unk2F8, (struct17 *)&target->x_position, &toTarget);
+        toTarget.unk4 = 0.0f;
+        if (func_150AD900((f32 *)&facing, (f32 *)&toTarget) >= 0.0f) {
+            side = -1;
         } else {
-            ret = 1;
+            side = 1;
         }
-        return ret;
+        return side;
     default:
-        goto block_default;
+        // matching: a plain `return 0` lets as1 fill the jump-table range check's delay slot
+        goto unknown_query;
     }
-block_default:
+unknown_query:
     return 0;
 }
 
