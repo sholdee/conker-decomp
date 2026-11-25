@@ -26,14 +26,14 @@ typedef struct {
     struct127 *owner;
 } RibbonInfo;
 
-/* Actor that draws a ribbon through a ring buffer of points. */
+/* Trail actor (func_15147A80, see game_105FC0.c) drawn as a ribbon through its ring buffer of points. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x25];
     /* 0x25 */ u8 capacity;
     /* 0x26 */ u8 pad26[6];
-    /* 0x2C */ s8 numPoints;
-    /* 0x2D */ s8 head; /* oldest point */
-    /* 0x2E */ s8 tail; /* one past the newest point */
+    /* 0x2C */ s8 count;
+    /* 0x2D */ s8 tail; /* oldest point */
+    /* 0x2E */ s8 head; /* next point to write */
     /* 0x2F */ u8 pad2F[0x55];
     /* 0x84 */ u8 vtxBuffer[0x10];
     /* 0x94 */ RibbonPoint *points;
@@ -55,7 +55,7 @@ Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 /* Draws the ribbon from its newest point back to its oldest, one quad per segment. */
-Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 arg2) {
+Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 cameraIdx) {
     RibbonInfo *info;
     TrailVec3 nextPos;
     TrailVec3 curPos;
@@ -73,7 +73,7 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 arg2) {
     TrailVec2 curOffset;
     Vtx *vtx;
 
-    if (ribbon->numPoints < 2) {
+    if (ribbon->count < 2) {
         return gfx;
     }
     info = ribbon->info;
@@ -81,11 +81,11 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 arg2) {
     if (info->owner != NULL && info->owner->unk1D4 == NULL) {
         return gfx;
     }
-    func_151D5D60(ribbon->vtxBuffer, arg2, (ribbon->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+    func_151D5D60(ribbon->vtxBuffer, cameraIdx, (ribbon->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
     update = 1;
     gfx = func_15142B7C(func_15142C10(gfx, 0xED, 0xD2, 0x85, 0xC8, &update), 0x200005, 0x1F0600);
     gfx = func_15142FBC(func_1513F4E4(gfx, 0x54, &update), D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].cycle1 | D_800A4AC8[1].cycle2, &update);
-    cur = ribbon->tail - 1;
+    cur = ribbon->head - 1;
     if (cur < 0) {
         cur = ribbon->capacity - 1;
     }
@@ -131,7 +131,7 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 arg2) {
         if (next < 0) {
             next = ribbon->capacity - 1;
         }
-        if (cur != ribbon->head) {
+        if (cur != ribbon->tail) {
             curPos = points[cur].pos;
             // matching: dead recompute of curWidth/curX/curZ (DCE'd) steers the address base IDO keeps
             curWidth = points[cur].width;
@@ -144,7 +144,7 @@ Gfx *func_151CF380(RibbonActor *ribbon, Gfx *gfx, s16 arg2) {
             nextOffset = points[next].offset;
             curOffset = points[cur].offset;
         }
-    } while (cur != ribbon->head);
+    } while (cur != ribbon->tail);
     return gfx;
 }
 
@@ -206,7 +206,7 @@ typedef struct {
 
 /* With probability 0.222, spawns an effect on the ground at a random point up to 2000 units from
  * the camera of the object's player, within 40 degrees either side of the camera's yaw. */
-void func_151CF898(struct127 *arg0, f32 probeY, f32 arg2) {
+void func_151CF898(struct127 *obj, f32 probeY, f32 arg2) {
     struct108 *player;
     struct17 spawnPos;
     struct17 *camPos;
@@ -216,7 +216,7 @@ void func_151CF898(struct127 *arg0, f32 probeY, f32 arg2) {
     GroundEffectData data;
     GroundEffect *effect;
 
-    player = arg0->camera;
+    player = obj->camera;
     if (player != NULL) {
         if (func_150ADA68() < 0.2220000178f) {
             camPos = func_15144B34(player->unk23D);
@@ -362,18 +362,18 @@ void func_1504715C(FloorInfo *, struct127 *);
 
 /* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
  * spin, plus three more effects at 200 units above it. */
-void func_151CFA4C(struct127 *arg0, u8 arg1, s32 arg2) {
+void func_151CFA4C(struct127 *obj, u8 arg1, s32 arg2) {
     struct17 vecB;
     struct17 pos;
     struct17 vecA;
     struct17 vecC;
     u8 i;
 
-    pos.unk0 = arg0->x_position;
-    pos.unk4 = arg0->y_position + 200.0f;
-    pos.unk8 = arg0->z_position;
-    if (arg0->unk1D4) {
-        func_1503F404((s32)arg0->unk1D4, &vecA.unk0, &vecA.unk4, &vecA.unk8, &vecB.unk0, &vecB.unk4, &vecB.unk8,
+    pos.unk0 = obj->x_position;
+    pos.unk4 = obj->y_position + 200.0f;
+    pos.unk8 = obj->z_position;
+    if (obj->unk1D4) {
+        func_1503F404((s32)obj->unk1D4, &vecA.unk0, &vecA.unk4, &vecA.unk8, &vecB.unk0, &vecB.unk4, &vecB.unk8,
                       &vecC.unk0, &vecC.unk4, &vecC.unk8);
         {
             ParticleSpawn piece;
@@ -381,7 +381,7 @@ void func_151CFA4C(struct127 *arg0, u8 arg1, s32 arg2) {
 
             piece.radius = 1.0f;
             piece.elasticity = 0.6490000486f;
-            piece.sizeXZ = piece.sizeY = (arg0->xz_scale + arg0->y_scale) * 0.5f;
+            piece.sizeXZ = piece.sizeY = (obj->xz_scale + obj->y_scale) * 0.5f;
             piece.rot = vecB;
             piece.scale.unk0 = 1.0f;
             piece.scale.unk4 = 0.0f;
@@ -396,8 +396,8 @@ void func_151CFA4C(struct127 *arg0, u8 arg1, s32 arg2) {
             piece.destroyFn = 0;
             piece.squashFn = 0;
             piece.unk6A = 1;
-            piece.owner = arg0;
-            piece.ownerId = arg0->unique_id;
+            piece.owner = obj;
+            piece.ownerId = obj->unique_id;
             piece.fadeStart = 12;
             piece.fadeRate = 21;
             piece.flags = 0x39E9;
@@ -409,7 +409,7 @@ void func_151CFA4C(struct127 *arg0, u8 arg1, s32 arg2) {
                 u32 pitch;
 
                 piece.model = models[i];
-                func_15143134(&D_800AAEEC[i], &piece.pos, (Mtx *)arg0->unk1D4);
+                func_15143134(&D_800AAEEC[i], &piece.pos, (Mtx *)obj->unk1D4);
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794(yaw & 0xFF, (pitch % 25U) - 64, (func_150ADA68() * 11.44999981f) + 16.93000031f, &piece.vel);
@@ -490,7 +490,7 @@ void func_151CFA4C(struct127 *arg0, u8 arg1, s32 arg2) {
             s8 flag;
             s32 pad; // matching: unused stack slot in the original frame
 
-            func_1504715C(&floor, arg0);
+            func_1504715C(&floor, obj);
             flag = 2;
             func_151A9834(&pos, pos.unk4 - 2000.0f, 200.0f, &floor, (func_150ADA20() & 3) + 7, 0, &flag, arg1, arg2);
         }
@@ -575,7 +575,7 @@ Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
 
 /* Draws the strip effect: six camera-facing quads joining two of the owner's model points, pinched
  * in the middle when the points are far apart. */
-Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 arg2) {
+Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     StripEffectData *data;
     Vtx *vtx;
     struct127 *owner;
@@ -613,14 +613,14 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 arg2) {
     if (owner->unk1D4 == NULL) {
         return gfx;
     }
-    func_151D5D60(effect->vtxBuffer, arg2, 0x1C0, (void **)&vtx, NULL);
+    func_151D5D60(effect->vtxBuffer, cameraIdx, 0x1C0, (void **)&vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
     update = 1;
     func_15143134(&D_800AAF5C[data->variant], &from, (Mtx *)owner->unk1D4 + 2);
     func_15143134(&D_800AAF74, &to, (Mtx *)owner->unk1D4 + D_800AAF80[data->variant]);
-    camPos = func_15144B34(arg2);
+    camPos = func_15144B34(cameraIdx);
     gfx = func_15142B7C(gfx, 0x200005, 0x60600);
     gfx = func_15142E24(gfx, (s32)D_80091154, 0, 0, 0, 0, 0x7F, 0, 0, &update, 3);
     gfx = func_1513F4E4(gfx, 0x3B, &update);
@@ -872,13 +872,13 @@ extern CarrierParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Emits two particle bursts along the line between two of the object's model points, and sometimes
  * 5-10 more particles that each carry a func_151CEAAC effect. */
-void func_151D09A8(struct127 *arg0, u8 arg1, s32 arg2) {
+void func_151D09A8(struct127 *obj, u8 arg1, s32 arg2) {
     struct17 pos;
     struct17 dir;
     FloorInfo floor;
     EmitShape shape;
 
-    if (arg0->unk1D4 != NULL) {
+    if (obj->unk1D4 != NULL) {
         {
             f32 *srcs[2];
             struct17 *dsts[2];
@@ -887,12 +887,12 @@ void func_151D09A8(struct127 *arg0, u8 arg1, s32 arg2) {
             srcs[1] = D_800AAF90;
             dsts[0] = &pos;
             dsts[1] = &dir;
-            func_15145EA4(srcs, dsts, (Mtx *)arg0->unk1D4 + 2, 2);
+            func_15145EA4(srcs, dsts, (Mtx *)obj->unk1D4 + 2, 2);
             dir.unk0 -= pos.unk0;
             dir.unk4 -= pos.unk4;
             dir.unk8 -= pos.unk8;
         }
-        func_1504715C(&floor, arg0);
+        func_1504715C(&floor, obj);
         shape.unk0 = 0;
         shape.dir = dir;
         /* D_800A5480 (an f32 in variables.h) starts a zero vector. */
