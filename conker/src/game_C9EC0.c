@@ -43,7 +43,7 @@ s32 func_1509CA78(s32 index) {
 
 /* Finds the resource whose id is `id`; returns RESOURCE_COUNT if none. */
 s32 func_1509CA98(s32 id) {
-    s32 i = 0;
+    s32 i = 0; // matching: initialising here schedules the i = 0 move before the loop setup
 
     for (; i < RESOURCE_COUNT; i++) {
         if (D_80087430[i].name != NULL && id == (D_80087430[i].packedId & 0x1FFFFFFF) + 1) {
@@ -226,7 +226,7 @@ void func_1509D054(void) {
  * Returns 1 if every dependency of loaded resource `index` is loaded. Also reports its first
  * dependency (0xBF if missing) and the first halfword of its unk0 list (0 if missing).
  */
-s32 func_1509D08C(s32 arg0, s32 index, s32 *firstDepOut, s32 *unk0Out) {
+s32 func_1509D08C(s32 unused, s32 index, s32 *firstDepOut, s32 *unk0Out) {
     ResourceSlot *table;
     ResourceSlot *slot;
     LoadedResource *resource;
@@ -311,7 +311,7 @@ typedef struct FloorHit {
     /* 0x1D */ u8 unk1D;
     /* 0x20 */ s32 unk20;
     /* 0x24 */ s32 pad24[2];
-} FloorHit; // size = 0x2C
+} FloorHit; // size = 0x2C; the real size is unknown, 0x2C fits the caller's stack frame
 
 /* Object id arguments carry flags above the low 12 bits. */
 #define CMD_OBJECT_ID(arg) ((arg).w & 0xFFF)
@@ -351,8 +351,6 @@ extern void func_151D26C0(s16);
 extern void func_15163A60(s32, s32, s32);
 extern void func_150D5A6C(struct127 *, s32, s32);
 extern u8 D_8009F0D0;
-extern u8 D_800D9920;
-extern struct127 D_800CC2D0[26];
 
 /* Starts script command `cmdId` with arguments `cmd`; returns a handle for commands 4-6. */
 s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
