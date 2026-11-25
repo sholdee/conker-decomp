@@ -54,7 +54,7 @@ typedef struct {
     /* 0x70 */ u8 unk70;
     /* 0x72 */ s16 unk72;
     /* 0x74 */ s16 unk74;
-} Particle; /* size 0x78 */
+} Particle15132A4C; /* size 0x78 */
 
 void func_15008340(s32 region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 void func_1510F800(s32);
@@ -73,7 +73,7 @@ void func_1500C2F0(s32 region, f32 density) {
     count = func_1514462C(region) * density * 1.999999995e-06f;
     if (count > 1.0f) {
         f32 inv65535;
-        Particle part;
+        Particle15132A4C part;
         f32 top;
         f32 bottom;
 
@@ -136,7 +136,7 @@ void func_1500C2F0(s32 region, f32 density) {
                 part.scaleX = part.scaleY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             }
             func_1510F800(0);
-            part.unk5C = func_1510FD20(part.posX, part.posZ);
+            part.unk5C = func_1510FD20((s32)part.posX, (s32)part.posZ);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -294,7 +294,7 @@ void func_1500C8D0(s32 region, f32 density) {
             part.phase = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
             part.phaseSpeed = RANDOM_U16() * inv65535 * 0.01300000027f + 0.005000000354f;
             func_1510F800(0);
-            part.unk5C = func_1510FD20(part.posX, part.posZ);
+            part.unk5C = func_1510FD20((s32)part.posX, (s32)part.posZ);
             obj = func_15130280(&part, 2, 0, 28, 255, 1);
             if (obj != NULL) {
                 memcpy((u8 *)obj + 0xA8, &extra, sizeof(extra));
@@ -303,26 +303,25 @@ void func_1500C8D0(s32 region, f32 density) {
         } while (count > 1.0f);
     }
 }
+
+/* Particle descriptor passed to func_1513D2F0. */
 typedef struct {
     /* 0x00 */ u8 unk00;
     /* 0x01 */ u8 unk01;
     /* 0x02 */ s16 unk02;
     /* 0x04 */ s16 unk04;
-    u8 pad06[2];
     /* 0x08 */ s32 unk08;
     /* 0x0C */ s32 unk0C;
     /* 0x10 */ u8 unk10;
     /* 0x11 */ u8 unk11;
     /* 0x12 */ u8 unk12;
     /* 0x13 */ u8 unk13;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
+    /* 0x14 */ f32 sizeX;
+    /* 0x18 */ f32 sizeY;
+    /* 0x1C */ f32 posX;
+    /* 0x20 */ f32 posY;
+    /* 0x24 */ f32 posZ;
+    /* 0x28 */ f32 rot[3]; /* degrees */
     /* 0x34 */ f32 unk34;
     /* 0x38 */ f32 unk38;
     /* 0x3C */ f32 unk3C;
@@ -332,94 +331,93 @@ typedef struct {
     /* 0x46 */ u8 unk46;
     /* 0x47 */ u8 unk47;
     /* 0x48 */ s32 unk48;
-} Spawn_1500CE4C; /* size 0x4C */
+} Particle1513D2F0; /* size 0x4C */
 
+/* Extra data copied to offset 0x110 of the object func_1513D2F0 returns. */
 typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
+    /* 0x00 */ f32 centerY;
+    /* 0x04 */ f32 amplitude; /* max distance from centerY that stays inside the region */
+    /* 0x08 */ f32 phase; /* radians */
+    /* 0x0C */ f32 phaseSpeed;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
-} Extra_1500CE4C; /* size 0x1C */
+} Particle1513D2F0Extra; /* size 0x1C */
+
+// The real prototype: functions.h has an s32 second parameter, and passing (s32)&D_800A4AA0 changes codegen.
 void *func_1513D2F0(void *, void *, u8, u8, u8, u8, u8, s32, s32, s32, u8, s32);
 
-void func_1500CE4C(s32 arg0, f32 arg1) {
-    f32 phi_f26;
-    s32 pad;
+/* Spawns func_1514462C(region) * density * 2e-7 func_1513D2F0 particles using D_800A4AA0. */
+void func_1500CE4C(s32 region, f32 density) {
+    f32 count;
+    s32 pad; // matching: stack slot
 
-    phi_f26 = func_1514462C(arg0) * arg1 * 2.000000023e-07f;
-    if (phi_f26 > 1.0f) {
-        f32 temp_f22;
-        f32 phi_f20;
-        f32 temp_f2;
-        Spawn_1500CE4C spawn;
-        Extra_1500CE4C extra;
-        f32 sp98;
-        f32 sp94;
-        f32 temp_f0;
-        void *ret;
-        s32 pad2;
+    count = func_1514462C(region) * density * 2.000000023e-07f;
+    if (count > 1.0f) {
+        f32 inv65535;
+        f32 range; // matching: reused for the distance to the nearer bound
+        f32 y;
+        Particle1513D2F0 part;
+        Particle1513D2F0Extra extra;
+        f32 top;
+        f32 bottom;
+        f32 temp;
+        void *obj;
+        s32 pad2; // matching: stack slots
         s32 pad3;
 
-        spawn.unk00 = 0x57;
-        spawn.unk01 = 0;
-        spawn.unk02 = 0x3B03;
-        spawn.unk04 = 0x12C;
-        spawn.unk08 = 0;
-        spawn.unk0C = 0;
-        spawn.unk13 = 0xFF;
-        spawn.unk34 = 0.0f;
-        spawn.unk38 = 0.0f;
-        spawn.unk3C = 0.0f;
-        spawn.unk40 = 0x037C0000;
-        spawn.unk45 = 0xFF;
-        spawn.unk46 = 0;
-        spawn.unk47 = 6;
+        part.unk00 = 0x57;
+        part.unk01 = 0;
+        part.unk02 = 0x3B03;
+        part.unk04 = 300;
+        part.unk08 = 0;
+        part.unk0C = 0;
+        part.unk13 = 0xFF;
+        part.unk34 = 0.0f;
+        part.unk38 = 0.0f;
+        part.unk3C = 0.0f;
+        part.unk40 = 0x037C0000;
+        part.unk45 = 0xFF;
+        part.unk46 = 0;
+        part.unk47 = 6;
         extra.unk14 = 0.0f;
-        spawn.unk10 = 0xFF;
-        spawn.unk11 = 0xFF;
-        spawn.unk12 = 0xFF;
-        temp_f22 = 1.525902189e-05f;
+        part.unk10 = 0xFF;
+        part.unk11 = 0xFF;
+        part.unk12 = 0xFF;
+        inv65535 = 1.525902189e-05f;
         do {
-
-            temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 12.0f) + 10.0f;
-            spawn.unk14 = temp_f0;
-            spawn.unk18 = temp_f0;
-            func_15008340(arg0, &spawn.unk1C, &spawn.unk24, &sp98, &sp94);
-            phi_f20 = sp98 - sp94;
-            temp_f2 = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22) * (phi_f20 * 0.5f)) + (sp94 + (phi_f20 * 0.25f));
-            extra.unk00 = temp_f2;
+            temp = RANDOM_U16() * inv65535 * 12.0f + 10.0f;
+            part.sizeX = temp;
+            part.sizeY = temp;
+            func_15008340(region, &part.posX, &part.posZ, &top, &bottom);
+            range = top - bottom;
+            y = RANDOM_U16() * inv65535 * (range * 0.5f) + (bottom + range * 0.25f);
+            extra.centerY = y;
             {
-            f32 temp_f12;
-            temp_f12 = fabsf(temp_f2 - sp98);
-            spawn.unk20 = temp_f2;
-            temp_f0 = fabsf(temp_f2 - sp94);
-            if (temp_f0 < temp_f12) {
-                phi_f20 = temp_f0;
-            } else {
-                phi_f20 = temp_f12;
+                f32 above;
+
+                above = fabsf(y - top);
+                part.posY = y;
+                temp = fabsf(y - bottom);
+                range = (temp < above) ? temp : above;
+                extra.amplitude = (RANDOM_U16() * inv65535 * 0.75f + 0.25f) * range;
             }
-            extra.unk04 = ((((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.75f) + 0.25f) * phi_f20;
-            }
-            temp_f0 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22);
-            extra.unk08 = (temp_f0 + temp_f0) * 3.141592741f;
-            extra.unk0C = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 0.01300000027f) + 0.005000000354f;
-            extra.unk10 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22);
-            extra.unk18 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22);
-            spawn.unk28 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
-            spawn.unk2C = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
-            spawn.unk30 = (((u32)(osGetCount() * func_150ADA20()) & 0xFFFF) * temp_f22 * 360.0f);
-            spawn.unk44 = (osGetCount() * func_150ADA20()) % 156U + 100;
+            extra.phase = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
+            extra.phaseSpeed = RANDOM_U16() * inv65535 * 0.01300000027f + 0.005000000354f;
+            extra.unk10 = RANDOM_U16() * inv65535;
+            extra.unk18 = RANDOM_U16() * inv65535;
+            part.rot[0] = RANDOM_U16() * inv65535 * 360.0f;
+            part.rot[1] = RANDOM_U16() * inv65535 * 360.0f;
+            part.rot[2] = RANDOM_U16() * inv65535 * 360.0f;
+            part.unk44 = RANDOM() % 156 + 100;
             func_1510F800(0);
-            spawn.unk48 = func_1510FD20(spawn.unk1C, spawn.unk24);
-            ret = func_1513D2F0(&spawn, &D_800A4AA0, 0x23, 0, 0, 0x1E, 0, 3, 0xFF, 0x1C, 0xFF, 1);
-            if (ret != NULL) {
-                memcpy((u8 *)ret + 0x110, &extra, sizeof(extra));
+            part.unk48 = func_1510FD20((s32)part.posX, (s32)part.posZ);
+            obj = func_1513D2F0(&part, &D_800A4AA0, 0x23, 0, 0, 0x1E, 0, 3, 0xFF, 0x1C, 0xFF, 1);
+            if (obj != NULL) {
+                memcpy((u8 *)obj + 0x110, &extra, sizeof(extra));
             }
-            phi_f26 -= 1.0f;
-        } while (phi_f26 > 1.0f);
+            count -= 1.0f;
+        } while (count > 1.0f);
     }
 }
 
@@ -431,7 +429,7 @@ void func_1500D3AC(s32 region, f32 density) {
     count = func_1514462C(region) * density * 2.000000023e-07f;
     if (count > 1.0f) {
         f32 inv65535;
-        Particle part;
+        Particle15132A4C part;
         f32 top;
         f32 bottom;
         f32 range; // matching: reused for the distance to the nearer bound
@@ -486,7 +484,7 @@ void func_1500D3AC(s32 region, f32 density) {
             part.unk48 = RANDOM_U16() * inv65535 * 1.600000024f;
             part.scaleX = part.scaleY = RANDOM_U16() * inv65535 * 0.25f + 1.0f;
             func_1510F800(0);
-            part.unk5C = func_1510FD20(part.posX, part.posZ);
+            part.unk5C = func_1510FD20((s32)part.posX, (s32)part.posZ);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -501,7 +499,7 @@ void func_1500D8C8(s32 region, f32 density) {
     count = func_1514462C(region) * density * 1.999999995e-06f;
     if (count > 1.0f) {
         f32 inv65535;
-        Particle part;
+        Particle15132A4C part;
         f32 top;
         f32 bottom;
 
@@ -563,7 +561,7 @@ void func_1500D8C8(s32 region, f32 density) {
                 part.scaleY *= 0.349999994f;
             }
             func_1510F800(0);
-            part.unk5C = func_1510FD20(part.posX, part.posZ);
+            part.unk5C = func_1510FD20((s32)part.posX, (s32)part.posZ);
             func_15132A4C(&part, 3, 0xFF, 0, 0xFF, 1);
             count -= 1.0f;
         } while (count > 1.0f);
@@ -651,7 +649,7 @@ void func_1500DE88(s32 region, f32 density) {
             part.phase = RANDOM_U16() * inv65535 * 2.0f * 3.141592741f;
             part.phaseSpeed = RANDOM_U16() * inv65535 * 0.01000000071f + 0.002000000095f;
             func_1510F800(0);
-            part.unk5C = func_1510FD20(part.posX, part.posZ);
+            part.unk5C = func_1510FD20((s32)part.posX, (s32)part.posZ);
             obj = func_15130280(&part, 2, 0, 28, 255, 1);
             if (obj != NULL) {
                 memcpy((u8 *)obj + 0xA8, &extra, sizeof(extra));
