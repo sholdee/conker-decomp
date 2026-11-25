@@ -305,9 +305,9 @@ typedef struct Actor {
 
 typedef struct {
     /* 0x0 */ u16 buttons;
-    /* 0x2 */ s8 stick_x;
-    /* 0x3 */ s8 stick_y;
-    /* 0x4 */ u16 unk4;
+    /* 2 */ s8 stick_x;
+    /* 3 */ s8 stick_y;
+    /* 4 */ u16 unk4;
 } ContPad;
 
 #define D_800CC284 (*(ContPad **)&D_800CC284)
@@ -352,8 +352,6 @@ void func_15121490(Actor *, ContPad *);
 void func_151279A0(Actor *, ContPad *);
 void func_151AE264(Actor *);
 
-#define D_800CC280_ALT (((s32 *)&D_800CC27C)[1])
-#define D_800CC2BC_ALT D_800CC2BC
 static s32 D_800cc280; static s32 D_800cc2bc;
 #define BLK typedef s32 blk_t
 typedef struct {
@@ -558,15 +556,15 @@ void func_1504CB98(Actor *arg0) {
     sp1B4 = 0.0f;
     sp198 = 0;
     sp197 = 0;
-    D_800CC28C = (s32) D_800BE710[D_800C3E78];
-    D_800CC290 = (s32) D_800CC284->buttons;
+    D_800CC28C = D_800BE710[D_800C3E78];
+    D_800CC290 = D_800CC284->buttons;
     D_800CC2B1 = 0;
     D_800CC2B2 = 0;
     D_800CC2B4 = 4.0f;
     sp1BE = arg0->unk76;
     sp17C = 0;
     sp180 = *D_800CC284;
-    D_800CC2BC_ALT = 1;
+    D_800CC2BC = 1;
     arg0->unk31C->unk1B3 = 0;
     if (arg0->unk31C->unk84 != 0) {
         if (arg0->stunned == 0) {
@@ -576,8 +574,8 @@ void func_1504CB98(Actor *arg0) {
         D_800CC284->stick_x = arg0->unk31C->unk85;
         D_800CC284->stick_y = arg0->unk31C->unk86;
         D_800CC284->buttons = arg0->unk31C->unk8A;
-        D_800CC288 = (s32) arg0->unk31C->unk8C;
-        sp188 = (s32) arg0->unk31C->unk8A;
+        D_800CC288 = arg0->unk31C->unk8C;
+        sp188 = arg0->unk31C->unk8A;
         if (arg0->camera == NULL) {
             func_151279A0(arg0, D_800CC284);
             func_15121490(arg0, D_800CC284);
@@ -585,16 +583,16 @@ void func_1504CB98(Actor *arg0) {
         func_1504C854((struct127 *) arg0);
     } else {
         arg0->unk31C->unk8A = D_800CC284->buttons;
-        D_800CC288 = (s32) D_800BE710[D_800C3E78];
-        sp188 = (s32) arg0->unk31C->unk8A;
+        D_800CC288 = D_800BE710[D_800C3E78];
+        sp188 = arg0->unk31C->unk8A;
     }
-    if ((D_80082FA0 >= (s32) D_800C3E78) && ((&D_800DDE3C)[D_800C3E78] != 0) && ((&D_800DDDC8)[D_800C3E78] > 0.75f) && (D_800E0B94 != 2)) {
+    if ((D_80082FA0 >= D_800C3E78) && ((&D_800DDE3C)[D_800C3E78] != 0) && ((&D_800DDDC8)[D_800C3E78] > 0.75f) && (D_800E0B94 != 2)) {
         D_800CC284->stick_x = 0;
         D_800CC284->stick_y = 0;
         D_800CC284->buttons = 0;
         D_800CC288 = 0;
         sp17C = 1;
-        D_800CC2BC_ALT |= 2;
+        D_800CC2BC |= 2;
     }
     if ((arg0->stunned != 0) && (arg0->health != 0) && ((((arg0->unk31C->unk26 & 1) != 0) && (D_800CC288 & 0x8000)) || ((arg0->unk31C->unk26 & 2) && (func_1505A5CC((struct49 *) D_800CC284) > 15.0f)))) {
         arg0->unk10C = 0;
@@ -602,7 +600,7 @@ void func_1504CB98(Actor *arg0) {
         func_150585F0((struct127 *) arg0, 0.05f);
     }
     if (D_800BE616 != 0) {
-        if ((s32) D_800BE9A0 < (s32) arg0->unk31C->unk1B1) {
+        if (D_800BE9A0 < arg0->unk31C->unk1B1) {
             arg0->unk31C->unk1B1 -= D_800BE9A0;
             if (arg0->unkA4 != 4) {
                 func_1502EA0C(arg0, 0xFF, 0xFF, 0xFF, 0xBF, 4);
@@ -619,13 +617,13 @@ void func_1504CB98(Actor *arg0) {
             }
         }
     }
-    arg0->unk31C->unk38 = (s32) D_800CC284->buttons;
+    arg0->unk31C->unk38 = D_800CC284->buttons;
     if (D_800C3638 != 0) {
         D_800CC284->stick_x = 0;
         D_800CC284->stick_y = 0;
         D_800CC284->buttons = 0;
         D_800CC288 = 0;
-        D_800CC2BC_ALT |= 4;
+        D_800CC2BC |= 4;
     }
     func_1507FEA0(arg0);
     func_1504BB88((struct127 *) arg0);
@@ -654,14 +652,14 @@ void func_1504CB98(Actor *arg0) {
     }
     if (arg0->unk31C->unk78 != 0x1B) {
         if (((arg0->unk31C->unk198 == 0) || (arg0->unk31C->unk78 == 3)) && (arg0->unk31C->unk78 != 0x12) && (arg0->unk31C->unk78 != 2) && (arg0->unk31C->unk78 != 0x13) && (arg0->unk31C->unk78 != 0xA) && (arg0->unk31C->unk78 != 0x34)) {
-            sp174 = (s32) arg0->unk31C->unk78;
-            D_800CC2BC_ALT |= 0x10;
-            sp1BC = func_1505A630((f32) D_800CC284->stick_x, (f32) D_800CC284->stick_y, 0);
+            sp174 = arg0->unk31C->unk78;
+            D_800CC2BC |= 0x10;
+            sp1BC = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0);
             sp1B4 = func_1505A5CC((struct49 *) D_800CC284);
             t4E = arg0->unk31C->unk4E;
             if (t4E == 2) {
                 temp_v0_17 = D_800CC284->stick_x * D_800CC264;
-                tfA = (f32) D_800CC284->stick_y;
+                tfA = D_800CC284->stick_y;
                 tfA *= 0.6f;
                 if (tfA > 45.0f) {
                     tfA = 45.0f;
@@ -671,11 +669,11 @@ void func_1504CB98(Actor *arg0) {
                 }
                 if (arg0->unk31C->unk50 > 0) {
                     arg0->unk31C->unk50 = arg0->unk31C->unk50 - D_800BE9A0;
-                    temp_v0_17 = (s16) (temp_v0_17 / 3);
+                    temp_v0_17 = (temp_v0_17 / 3);
                     arg0->disable_jump = 6;
                     tfA -= 60.0f;
                 } else if ((arg0->unk28 > 100.0f) || (arg0->unk83 != 0)) {
-                    temp_v0_17 = (s16) (temp_v0_17 / 2);
+                    temp_v0_17 = (temp_v0_17 / 2);
                 }
                 sp1B4 = 135.0f + tfA;
                 arg0->unk239 = 0x29;
@@ -727,14 +725,14 @@ void func_1504CB98(Actor *arg0) {
                     tf1 -= 360.0f;
                 }
                 tf1 *= 0.91022223f;
-                sp197 = (s8) (s32) tf1;
+                sp197 = tf1;
                 if ((D_800BE616 != 0) && ((t3_id = arg0->id, (t3_id == 0x3B)) || (t3_id == 0x80)) && ((sp174 == 0x18) || (sp174 == 0x41) || (sp174 == 0x23) || (sp174 == 0x24)) && (D_800CC284->buttons & 0x2000) && ((arg0->unk31C->unk109 == 3) || (arg0->unk31C->unk109 == 2))) {
                     sp158 = 0;
-                    if ((s32) arg0->unk31C->unkAF < 0x3C) {
+                    if (arg0->unk31C->unkAF < 0x3C) {
                         sp158 = 0x30;
                     }
                     if (func_10010894((struct127 *) arg0) == 0) {
-                            if (sp158 >= (u32) (func_150ADA20() & 0x5F)) {
+                            if (sp158 >= (func_150ADA20() & 0x5F)) {
                             if (arg0->id == 0x80) {
                                 if ((sp174 == 0x23) && !(func_150ADA20() & 7)) {
                                     func_15060A30(0x586, arg0);
@@ -756,7 +754,7 @@ void func_1504CB98(Actor *arg0) {
                     arg0->unk31C->unkAF = 0x78;
                 }
                 if (arg0->unk31C->unkAF != 0) {
-                    if (D_800BE9E4 < (s32) arg0->unk31C->unkAF) {
+                    if (D_800BE9E4 < arg0->unk31C->unkAF) {
                         arg0->unk31C->unkAF = arg0->unk31C->unkAF - D_800BE9E4;
                     } else {
                         arg0->unk31C->unkAF = 0;
@@ -782,7 +780,7 @@ void func_1504CB98(Actor *arg0) {
                     arg0->unk31C->unk46 -= 0x190;
                 }
                 if (arg0->disable_run == 0) {
-                    ang = (f32) ((D_800CC250 * 0xC) & 0xFF) * 0.024543693f;
+                    ang = ((D_800CC250 * 0xC) & 0xFF) * 0.024543693f;
                     if (sp1B4 < 5.0f) {
                         sp1BC = arg0->unk76 - D_800CC280;
                     }
@@ -790,14 +788,14 @@ void func_1504CB98(Actor *arg0) {
                     arg0->unk31C->unk3C = 4;
                     tf1 = func_150AD78C(ang) * 10240.0f;
                     arg0->unk31C->unkB += 0x10;
-                    arg0->unk31C->unk10 = (s16) (s32) tf1;
+                    arg0->unk31C->unk10 = tf1;
                 }
             } else {}
             if ((arg0->unk84 == 0xBF) || (arg0->unk84 == 0xC1)) {
-                sp197 = (s8) ((s8) D_800CC284->stick_y / 2);
+                sp197 = (D_800CC284->stick_y / 2);
             }
             if (arg0->unk31C->unk78 == 0x38) {
-                sp197 -= (s32) arg0->unk31C->unk1A2 >> 8;
+                sp197 -= arg0->unk31C->unk1A2 >> 8;
             }
             { BLK; }
         } else {
@@ -806,7 +804,7 @@ void func_1504CB98(Actor *arg0) {
             D_800cc2bc |= 0x20;
             if ((arg0->unk31C->unk78 == 2) || (arg0->unk31C->unk78 == 0x12) || (arg0->unk31C->unk78 == 0x13) || (arg0->unk31C->unk78 == 0x10) || (arg0->unk31C->unk78 == 0xA) || (arg0->unk31C->unk78 == 0x34) || ((D_800CC284->buttons & 0x10) && (arg0->unk31C->unk78 == 0x16)) || (arg0->unk31C->unk78 == 9) || (arg0->unk31C->unk78 == 0x38) || (arg0->unk31C->unk78 == 0x39) || (arg0->unk31C->unk78 == 0x37) || (arg0->unk31C->unk78 == 0x3B) || (arg0->unk31C->unk78 == 0x15) || (arg0->unk31C->unk78 == 0x26) || (arg0->unk31C->unk78 == 0x3A)) {
                 if ((arg0->unk31C->unk78 == 0x10) || (arg0->unk31C->unk78 == 0x14) || (arg0->unk31C->unk78 == 0x3F)) {
-                    sp197 = (s8) ((s8) D_800CC284->stick_y / 2);
+                    sp197 = (D_800CC284->stick_y / 2);
                 }
                 if ((arg0->unk31C->unk78 == 0xC) || (arg0->unk31C->unk78 == 0x16) || (arg0->unk31C->unk78 == 0x15) || (arg0->unk31C->unk78 == 0x38) || (arg0->unk31C->unk78 == 0x39) || (arg0->unk31C->unk78 == 0x37) || (arg0->unk31C->unk78 == 0x3B) || (arg0->unk31C->unk78 == 0x12) || (arg0->unk31C->unk78 == 9)) {
                     tf3 = arg0->unk31C->unk170;
@@ -816,7 +814,7 @@ void func_1504CB98(Actor *arg0) {
                     tf3 *= 0.91022223f;
                     *(u8 *)&sp197 = (s32) tf3;
                     if (arg0->unk31C->unk78 == 0x38) {
-                        sp197 -= (s32) arg0->unk31C->unk1A2 >> 8;
+                        sp197 -= arg0->unk31C->unk1A2 >> 8;
                     }
                 }
                 if ((arg0->unk31C->unk78 != 9) && (arg0->unk31C->unk78 != 0x38) && (arg0->unk31C->unk78 != 0x39) && (arg0->unk31C->unk78 != 0x37) && (arg0->unk31C->unk78 != 0x3B) && (arg0->unk31C->unk78 != 0x15) && (arg0->unk31C->unk78 != 0x26) && (arg0->unk31C->unk78 != 0x3A)) {
@@ -824,12 +822,12 @@ void func_1504CB98(Actor *arg0) {
                     arg0->unk76 = arg0->unk7A;
                 }
             } else if ((arg0->unk31C->unk78 != 0x14) && (arg0->unk31C->unk78 != 0x3F)) {
-                D_800CC2BC_ALT |= 0x100;
+                D_800CC2BC |= 0x100;
                 D_800CC284->buttons &= ~0x2000;
                 D_800CC288 &= ~0x2000;
             }
             if (arg0->unk31C->unk78 != 9) {
-                D_800CC2BC_ALT |= 0x200;
+                D_800CC2BC |= 0x200;
                 D_800CC284->buttons &= ~0x8000;
                 D_800CC288 &= ~0x8000;
             }
@@ -849,7 +847,7 @@ void func_1504CB98(Actor *arg0) {
             tlk = D_8009917C[va_w3];
             arg0->unk31C->unk52 = 2;
             if (tlk != 0xFFFF) {
-                if ((arg0->unkAA == 0) || ((s32) arg0->unkAA >= 0x42)) {
+                if ((arg0->unkAA == 0) || (arg0->unkAA >= 0x42)) {
                     arg0->unkAA = 0x41;
                 }
                 if (arg0->xz_velocity > 12.0f) {
@@ -858,7 +856,7 @@ void func_1504CB98(Actor *arg0) {
                 if (arg0->unk76 != arg0->unk7A) {
                     arg0->unk31C->unk3C = 0;
                 }
-                arg0->unk7A = arg0->unk7A - ((s32) (D_800CC284->stick_x * D_800CC264) >> 4);
+                arg0->unk7A = arg0->unk7A - ((D_800CC284->stick_x * D_800CC264) >> 4);
                 sp1BC = ((arg0->unk7A + tlk) - arg0->unk31C->unk12) - D_800CC280;
                 sp1B4 = 34.0f;
                 if (arg0->unk31C->unk197 != 0) {
@@ -899,10 +897,10 @@ void func_1504CB98(Actor *arg0) {
     arg0->unk11C = arg0->unk118;
     if (arg0->unk31C->unk84 == 0) {
         arg0->unk31C->unk8A = D_800CC284->buttons;
-        arg0->unk31C->unk8C = (u16) D_800CC288;
+        arg0->unk31C->unk8C = D_800CC288;
     }
     if ((arg0->unk84 == 0) && (arg0->animation_speed == 0.0f)) {
-        func_1505E650((struct127 *) arg0, 0x24U, 1.0f, 1.0f, 0.0f, 0.0f, 0);
+        func_1505E650((struct127 *) arg0, 0x24, 1.0f, 1.0f, 0.0f, 0.0f, 0);
     }
     if (D_800CC284->stick_y == 0) {
         arg0->unk31C->unk53 = 0;
@@ -920,7 +918,7 @@ void func_1504CB98(Actor *arg0) {
             sp1BC = arg0->unk78;
             sp1B4 = arg0->unk44;
         }
-        if (sp1B4 > 0.0f) { BLK;
+        if (sp1B4 > 0.0f) {
             vc34 = 0; va_w4 = 0; vb34 = 0; arg0->unk31C->unk4C = sp1BC + D_800cc280;
             if (arg0->unk31C->unk32 & 2) {
                 vc34 = arg0->unk31C->unk34;
@@ -982,12 +980,12 @@ void func_1504CB98(Actor *arg0) {
         D_800CC27E = sp1BC;
         arg0->unk44 = sp1B4;
         if (arg0->unkAA != 0) {
-            sp1B4 *= (f32)(u32)arg0->unkAA * 0.01f;
+            sp1B4 *= arg0->unkAA * 0.01f;
         }
-        if ((s32) arg0->unk13C >= 0x64) {
+        if (arg0->unk13C >= 0x64) {
             sp1B4 *= 0.8f;
         }
-        if ((arg0->disable_run != 0) || ((s32) arg0->unk81 >= 0x79)) {
+        if ((arg0->disable_run != 0) || (arg0->unk81 >= 0x79)) {
             sp1B4 = 0.0f;
         }
         func_1504BC38((struct127 *) arg0);
@@ -995,7 +993,7 @@ void func_1504CB98(Actor *arg0) {
         var_f14 = 0.0f;
         if ((arg0->in_water != 0) && (arg0->unk31C->unk21 == 0)) {
             if ((arg0->stunned == 0) && (arg0->unk84 != 0x262)) {
-                var_f14 = (f32) ((s8) D_800CC284->stick_x / 2);
+                var_f14 = (D_800CC284->stick_x / 2);
             }
         } else {
             if ((arg0->unk31C->unk78 == 2) || (arg0->unk31C->unk78 == 0x13) || (arg0->unk31C->unk78 == 0xA) || (arg0->unk31C->unk78 == 0x34)) {
@@ -1006,9 +1004,9 @@ void func_1504CB98(Actor *arg0) {
                     } else {
                         tf5 = -tf5;
                     }
-                    { BLK; var_f14 = (f32) (s8) (s32) tf5; }
+                    { BLK; var_f14 = (s8) tf5; }
                 } else {
-                    var_f14 = (f32) ((s8) D_800CC284->stick_y / 2);
+                    var_f14 = (D_800CC284->stick_y / 2);
                 }
             } else {
                 if (arg0->disable_run != 0xFF) {
@@ -1017,7 +1015,7 @@ void func_1504CB98(Actor *arg0) {
                         var_f14 = arg0->unk44 * 0.3f;
                     } else {
                         var_f14 = arg0->unk44 * 1.75f;
-                        tf6 = fabsf((f32) temp_v0_17 * 0.00390625f * 5.0f);
+                        tf6 = fabsf(temp_v0_17 * 0.00390625f * 5.0f);
                         if (tf6 > 50.0f) {
                             tf6 = 50.0f;
                         }
@@ -1084,17 +1082,17 @@ void func_1504CB98(Actor *arg0) {
                 if (arg0->xz_velocity < 5.0f) {
                     var_v1_3 = 0x19;
                 } else {
-                    var_v1_3 = (s8) ((s32) ((64.0f - arg0->xz_velocity) * 0.25f));
-                    if ((s32) arg0->unk31C->unk31 >= 3) {
+                    var_v1_3 = (((64.0f - arg0->xz_velocity) * 0.25f));
+                    if (arg0->unk31C->unk31 >= 3) {
                         var_v1_3 += 1;
-                    } else if ((s32) arg0->unk81 > 0) {
-                        var_v1_3 = (s8) (s32) ((51.0f - arg0->xz_velocity) / 13.0f);
+                    } else if (arg0->unk81 > 0) {
+                        var_v1_3 = ((51.0f - arg0->xz_velocity) / 13.0f);
                         if (arg0->y_velocity < -10.0f) {
                             var_v1_3 = 0;
                         }
                     } else {}
                 }
-                sp1BA = ((s32) (sp1BC - arg0->unk76) >> 8); sg = sp1BA & 0x80;
+                sp1BA = ((sp1BC - arg0->unk76) >> 8); sg = sp1BA & 0x80;
                 var_a0 = sp1BA;
                 if (sp1BA >= 0x80) {
                     sp1BA = -sp1BA; var_a0 = sp1BA;
@@ -1114,7 +1112,7 @@ void func_1504CB98(Actor *arg0) {
                             if (arg0->xz_velocity > 3.0f) {
                                 var_v1_3 = 0xC;
                                 arg0->xz_velocity = 0.0f;
-                                if ((s32) arg0->unk83 >= 5) {
+                                if (arg0->unk83 >= 5) {
                                     if ((arg0->unk31C->unk11A != 1) && (arg0->unk31C->unk11A != 3)) {
                                         arg0->unk83 = 4;
                                     }
@@ -1129,17 +1127,17 @@ void func_1504CB98(Actor *arg0) {
                         }
                     }
                 }
-                var_v1_3 = (s8) ((s32) (var_v1_3 * D_800CC264) / 100);
-                if ((s32) arg0->unk13C >= 0x64) {
-                    var_v1_3 = (s8) ((s32) (var_v1_3 * 2) / 3);
+                var_v1_3 = ((var_v1_3 * D_800CC264) / 100);
+                if (arg0->unk13C >= 0x64) {
+                    var_v1_3 = ((var_v1_3 * 2) / 3);
                 } else if (arg0->unk110 != 0) {
                     var_v1_3 = 2;
                 }
                 if (arg0->in_water != 0) {
-                    var_v1_3 = (s8) (var_v1_3 / 4);
+                    var_v1_3 = (var_v1_3 / 4);
                 }
                 if (arg0->unk31C->unk3C != 0) {
-                    var_v1_3 = (s8) ((s32) (arg0->unk31C->unk3C * D_800CC264) / 100);
+                    var_v1_3 = ((arg0->unk31C->unk3C * D_800CC264) / 100);
                 }
                 if (var_a0 < var_v1_3) {
                     var_v1_3 = var_a0;
@@ -1165,7 +1163,7 @@ void func_1504CB98(Actor *arg0) {
         sp1BA = 0;
         if (arg0->unk31C->matrix_physics != 0) {
             sp1BC = 0x4000;
-            { BLK; sp1B9 = 0x14; }
+            sp1B9 = 0x14;
         } else if ((arg0->unk31C->unk17 != 0) && (arg0->unk13C == 0)) {
             sp124 = func_15083E90(6);
             if (sp124 != NULL) {
@@ -1242,7 +1240,7 @@ void func_1504CB98(Actor *arg0) {
                 arg0->gravity = 0.0f;
                 arg0->unkF8 |= 0x01008000;
             }
-            if (!(arg0->unk10B & 1) && (arg0->xz_velocity < 2.0f) && ((s32) arg0->stunned < 0xD2) && (arg0->unk28 < 10.0f) && (arg0->y_velocity < 0.5f)) {
+            if (!(arg0->unk10B & 1) && (arg0->xz_velocity < 2.0f) && (arg0->stunned < 0xD2) && (arg0->unk28 < 10.0f) && (arg0->y_velocity < 0.5f)) {
                 arg0->stunned = 1;
                 arg0->unk10C = 1;
                 arg0->unk105 = 3;
@@ -1254,7 +1252,7 @@ void func_1504CB98(Actor *arg0) {
                     if (tf8 < 10.0f) {
                         tf8 = 10.0f;
                     }
-                    arg0->unk76 += (s32) (D_800CC264 * 0x1400) / 100;
+                    arg0->unk76 += (D_800CC264 * 0x1400) / 100;
                     arg0->y_velocity = (tf8 * 0.06f) + 6.0f;
                     arg0->xz_velocity = 3.0f;
                     func_1505A184(arg0->unk76, tf8, 0.0f, &sp118, &sp114, &sp110);
@@ -1280,7 +1278,7 @@ void func_1504CB98(Actor *arg0) {
                 if (sp1B4 > 5.0f) {
                     sp1BC += D_800CC280;
                     arg0->unk80 = 1;
-                    func_150599C8(arg0, 6U, sp1BC);
+                    func_150599C8(arg0, 6, sp1BC);
                     func_1505A184(sp1BC, sp1B4, 0.0f, &sp10C, &sp108, &sp104);
                     arg0->unk16C = arg0->unk16C + ((sp10C - arg0->unk16C) * 0.1000000015f);
                     arg0->unk170 = arg0->unk170 + ((sp108 - arg0->unk170) * 0.1000000015f);
@@ -1291,7 +1289,7 @@ void func_1504CB98(Actor *arg0) {
     }
     if ((arg0->unk31C->unk98 != 0) && (arg0->stunned == 0)) {
         spF6 = D_800CC284->stick_x;
-        var_f12 = (f32) D_800CC284->stick_y;
+        var_f12 = D_800CC284->stick_y;
         arg0->unk31C->unk31 = 0;
         arg0->unk54 = 0.0f;
         arg0->disable_run = 0xFF;
@@ -1330,7 +1328,7 @@ void func_1504CB98(Actor *arg0) {
         }
         arg0->unk1CC = arg0->y_position;
         arg0->unk31C->unk54 = 8;
-        temp_a0_3 = arg0->unk76 + ((s32) (spF6 * D_800CC264) / 5);
+        temp_a0_3 = arg0->unk76 + ((spF6 * D_800CC264) / 5);
         arg0->unk78 = temp_a0_3;
         arg0->unk7A = temp_a0_3;
         arg0->unk76 = temp_a0_3;
@@ -1339,7 +1337,7 @@ void func_1504CB98(Actor *arg0) {
     if ((arg0->unk31C->unk95 != 0) && (arg0->stunned == 0)) {
         if ((arg0->camera != NULL) && (arg0->camera->unk2C != 0x100)) {
             idx = (arg0->unk31C->unk95 & ~0x80) - 1;
-            tf9 = (f32) D_800CC284->stick_y;
+            tf9 = D_800CC284->stick_y;
             temp_a0_4 = &D_800D3098[idx];
             if ((arg0->in_water != 0) && (arg0->y_position < arg0->unk118)) {
                 arg0->unk31C->unk96 = 8;
@@ -1348,8 +1346,8 @@ void func_1504CB98(Actor *arg0) {
                 arg0->unk31C->unk96 = arg0->unk31C->unk96 - 1;
                 tf9 = 60.0f;
             }
-            arg0->unk31C->unk28 = (f32) temp_a0_4->unk0;
-            arg0->unk31C->unk2C = (f32) temp_a0_4->unk4;
+            arg0->unk31C->unk28 = temp_a0_4->unk0;
+            arg0->unk31C->unk2C = temp_a0_4->unk4;
             arg0->unk31C->unk30 = 0xA;
             arg0->unk31C->unk31 = 0;
             arg0->xz_velocity = 0.0f;
@@ -1404,7 +1402,7 @@ void func_1504CB98(Actor *arg0) {
                     if (tf10 > 30.0f) {
                         spD8 = 30.0f;
                     }
-                    spD8 = (2.0f * (f32) (&((Actor *)D_800CC2D0)[D_800CC26C])->unkE4) - spD8;
+                    spD8 = (2.0f * (&((Actor *)D_800CC2D0)[D_800CC26C])->unkE4) - spD8;
                     arg0->unk54 *= 0.6f;
                     arg0->xz_velocity = ((Actor *)D_800CC2D0)[D_800CC26C].unk44;
                     if (((&((Actor *)D_800CC2D0)[D_800CC26C])->unk44) < ((&((Actor *)D_800CC2D0)[D_800CC26C])->xz_velocity)) {
@@ -1412,7 +1410,7 @@ void func_1504CB98(Actor *arg0) {
                     } else {
                         spD4 = ((&((Actor *)D_800CC2D0)[D_800CC26C])->unk44);
                     }
-                    arg0->unk31C->unk3C = (u8) (u32) ((32.0f - spD4) * 0.125f);
+                    arg0->unk31C->unk3C = ((32.0f - spD4) * 0.125f);
                     if ((&((Actor *)D_800CC2D0)[D_800CC26C])->id == 0x34) {
                         if ((&((Actor *)D_800CC2D0)[D_800CC26C])->unk251 != 1) {
                             spCB = 0;
@@ -1432,7 +1430,7 @@ void func_1504CB98(Actor *arg0) {
                         func_1506E8D8();
                     }
                     if ((&((Actor *)D_800CC2D0)[D_800CC26C])->unk224 != 0) {
-                        spC4 = (f32) (&((Actor *)D_800CC2D0)[D_800CC26C])->unk224 * 0.01f;
+                        spC4 = (&((Actor *)D_800CC2D0)[D_800CC26C])->unk224 * 0.01f;
                     }
                     if (spCB != 0) {
                         spC0 = 0.5f;
@@ -1463,7 +1461,7 @@ void func_1504CB98(Actor *arg0) {
     if ((D_800BE616 != 0) && (D_800CC268 != 0) && (arg0->unk31C->unk1AC != 0)) {
         func_15063168(arg0);
     }
-    arg0->unk40 = (f32) (arg0->unk7A + 0x4000) * 0.005493164f;
+    arg0->unk40 = (arg0->unk7A + 0x4000) * 0.005493164f;
     func_1502178C((struct127 *) arg0, 0, -1);
     sp190 = arg0->x_position;
     sp18C = arg0->z_position;
@@ -1476,8 +1474,8 @@ void func_1504CB98(Actor *arg0) {
         }
         if ((-10000.0f != arg0->unk118) || ((arg0->unkF8 & 2) == 0) || ((func_150A3FC4(arg0->x_position, arg0->z_position, arg0->unk188, &arg0->unk18C, &spBC) == 0))) {
             func_1510E8BC(&arg0->unk188, (&arg0->unk18C), &spBC, &arg0->unk118, &arg0->unk184, arg0->unk1A2, arg0->x_position, arg0->y_position, arg0->z_position, sp178, 0, arg0, -10000.0f, arg0->y_position, arg0->unkF8 & 0x04000000);
-            if (arg0->unk118 < ((f32) arg0->unk120)) {
-                arg0->unk118 = ((f32) arg0->unk120);
+            if (arg0->unk118 < (arg0->unk120)) {
+                arg0->unk118 = (arg0->unk120);
             }
         }
         if (arg0->y_position < spBC) {
@@ -1503,8 +1501,8 @@ void func_1504CB98(Actor *arg0) {
             arg0->unkF4 |= 0x10000;
             if ((tf1 != arg0->unk118) || (spBC != tf1) || !(arg0->unkF8 & 2) || (func_150A3FC4(arg0->x_position, arg0->z_position, arg0->unk188, (&arg0->unk18C), &spBC) == 0)) {
                 func_1510E8BC(&arg0->unk188, (&arg0->unk18C), &spBC, &arg0->unk118, &arg0->unk184, arg0->unk1A2, arg0->x_position, arg0->y_position, arg0->z_position, sp178, 0, arg0, tf1, arg0->y_position, arg0->unkF8 & 0x04000000);
-                if (arg0->unk118 < ((f32) arg0->unk120)) {
-                    arg0->unk118 = ((f32) arg0->unk120);
+                if (arg0->unk118 < (arg0->unk120)) {
+                    arg0->unk118 = (arg0->unk120);
                 }
             }
             temp_a0_3 = func_1505A630(arg0->x_position - sp190, sp18C - arg0->z_position, 0);
@@ -1526,7 +1524,7 @@ void func_1504CB98(Actor *arg0) {
                         } else if (arg0->health != 0) {
                             if (D_800BE616 == 0) {
                                 D_800D1580 = -0xFDFE2A;
-                                { BLK; func_1506E9D8(); }
+                                func_1506E9D8();
                             }
                             arg0->health -= 1;
                         }
@@ -1554,7 +1552,7 @@ void func_1504CB98(Actor *arg0) {
                         if ((arg0->unk31C->unk4E == 0) && (arg0->unk31C->unk11A == 0)) {
                             sp198 = 0x7A;
                             if ((arg0->unk81 == 0) && (arg0->unk83 == 0)) {
-                                arg0->unk40 = (f32) (temp_a0_3 - 0x4000) * 0.005493164f;
+                                arg0->unk40 = (temp_a0_3 - 0x4000) * 0.005493164f;
                             }
                         }
                     }
@@ -1586,7 +1584,7 @@ void func_1504CB98(Actor *arg0) {
             }
             arg0->unkCC = 0x1E;
             arg0->unkCE = arg0->unkCC;
-            if ((D_800BE9E4 < (s32) arg0->unk31C->unk12C) && (arg0->health != 0)) {
+            if ((D_800BE9E4 < arg0->unk31C->unk12C) && (arg0->health != 0)) {
                 arg0->unk31C->unk12C = arg0->unk31C->unk12C - D_800BE9E4;
                 arg0->xz_velocity = 254.0f;
             } else {
@@ -1608,13 +1606,13 @@ void func_1504CB98(Actor *arg0) {
             arg0->unkB8 = 0.0f;
             if (arg0->stunned == 0) {
                 if ((arg0->camera != NULL) && (arg0->camera->unk2C != 0x100)) {
-                    vf14b = (f32) D_800CC284->stick_y;
+                    vf14b = D_800CC284->stick_y;
                     idx = (arg0->unk31C->unk95 & ~0x80) - 1;
                     pE2 = &D_800D3098[idx];
                     if (arg0->unk31C->unk96 != 0) {
                         vf14b = 60.0f;
                     }
-                    tf13 = (f32) (pE2->unk2 + pE2->unk8);
+                    tf13 = (pE2->unk2 + pE2->unk8);
                     vf12c = (vf14b * 0.025f);
                     arg0->unk1CC = arg0->y_position;
                     if (arg0->unk31C->unk97 != 0) {
@@ -1653,7 +1651,7 @@ void func_1504CB98(Actor *arg0) {
                                 arg0->y_velocity = 0.0f;
                                 arg0->y_position = tf13;
                             }
-                        } else if (arg0->y_position < (f32) pE2->unk2) {
+                        } else if (arg0->y_position < pE2->unk2) {
                             arg0->disable_run = 0;
                             arg0->unk31C->unk95 = 0;
                             arg0->gravity = 4.0f;
@@ -1682,7 +1680,7 @@ void func_1504CB98(Actor *arg0) {
     }
     if ((arg0->unk180 < -9000.0f) && (arg0->y_velocity < -120.0f)) {
         arg0->unk31C->unk36 += D_800BE9A0;
-        if ((s32) arg0->unk31C->unk36 >= 0x24) {
+        if (arg0->unk31C->unk36 >= 0x24) {
             func_1506D538();
         }
     } else {
@@ -1693,11 +1691,11 @@ void func_1504CB98(Actor *arg0) {
         if ((arg0->unk28 > 5.0f) && (arg0->unk137 == 0) && (arg0->disable_run == 0) && (arg0->unk31C->unk78 == 0) && (arg0->unk31C->unk17 == 0) && (arg0->stunned == 0) && (arg0->unk31C->unk46 == 0) && (arg0->in_water == 0) && (arg0->unk13C == 0) && (-10000.0f != arg0->unk180) && (arg0->health != 0) && (arg0->unk31C->unk8 == 0) && (arg0->unk31C->unk4E == 0) && (arg0->unk110 == 0) && ((arg0->unk1CC - arg0->y_position) < 450.0f)) {
             anim = 0;
             if (D_800CBDF4 != -32768.0f) {
-                sp92 = (s16) (s32) (((arg0->unk40 + D_800CBD94) - 90.0f) / 1.40625f);
+                sp92 = (((arg0->unk40 + D_800CBD94) - 90.0f) / 1.40625f);
                 sp88 = D_800CBDF4;
                 anim = 1;
             } else if ((D_800CBDF8 != -32768.0f) && (arg0->xz_velocity < 10.0f)) {
-                sp92 = (s16) (s32) ((arg0->unk40 + D_800CBD98 + 90.0f) / 1.40625f);
+                sp92 = ((arg0->unk40 + D_800CBD98 + 90.0f) / 1.40625f);
                 sp88 = D_800CBDF8;
                 anim = 2;
             }
@@ -1716,7 +1714,7 @@ void func_1504CB98(Actor *arg0) {
                 arg0->y_velocity = 0.0f;
                 arg0->gravity = 0.0f;
                 arg0->unk1CC = arg0->y_position;
-                func_1505E650((struct127 *) arg0, 0x42U, 1.0f, 1.0f, 0.0f, 0.0f, 0);
+                func_1505E650((struct127 *) arg0, 0x42, 1.0f, 1.0f, 0.0f, 0.0f, 0);
                 arg0->unk31C->unk44 = 0xC;
             }
         }
@@ -1781,12 +1779,12 @@ void func_1504CB98(Actor *arg0) {
     if (arg0->unkD0 != 0) {
         func_1505C7D8((struct127 *) arg0, D_800C3E78);
     }
-    if ((s32) arg0->unk7F >= 9) {
+    if (arg0->unk7F >= 9) {
         arg0->unk80 = 1;
     }
     if (arg0->unk83 != 0) {
         if (arg0->unk83 != 0xFF) {
-            if ((s32) D_800BE9A0 >= (s32) arg0->unk83) {
+            if (D_800BE9A0 >= arg0->unk83) {
                 arg0->unk83 = 0;
             } else {
                 arg0->unk83 = arg0->unk83 - D_800BE9A0;
@@ -1832,7 +1830,7 @@ void func_1504CB98(Actor *arg0) {
                     { BLK; }
                 }
                 arg0->unk31C->unk31 = 0;
-                func_1505E650((struct127 *) arg0, 0xCFU, 1.0f, 2.0f, 0.0f, 0.0f, 0);
+                func_1505E650((struct127 *) arg0, 0xCF, 1.0f, 2.0f, 0.0f, 0.0f, 0);
                 arg0->unk83 = 0xC8;
             }
         }
@@ -1844,7 +1842,7 @@ void func_1504CB98(Actor *arg0) {
     if ((arg0->unk31C->unk84 != 0) || (sp17C != 0)) {
         *D_800CC284 = sp180;
     }
-    arg0->unk31C->unk88 = (s16) sp188;
+    arg0->unk31C->unk88 = sp188;
 }
 
 /* Tilts the actor toward the slope of the ground under it (pitch/roll and the unk164/unk168 lean). */
