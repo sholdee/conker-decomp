@@ -193,7 +193,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
     if (effect->mode != 0) {
         if (effect->attachDelay == 0) {
             if (effect->owner != NULL && effect->owner->unk1D4 != NULL && effect->owner->unique_id == effect->ownerId && (aim = effect->owner->unk127) != 0xFF) {
-                bone = ((MtxF *)effect->owner->unk1D4)[effect->bone][0];
+                bone = effect->owner->unk1D4[effect->bone][0];
                 func_150A7960(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
                 func_150A7960(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);
                 effect->attachDelay = 3;
@@ -205,7 +205,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
         if (effect->timer < -effect->offTime) {
             effect->timer = effect->onTime;
             if (effect->owner != NULL && effect->owner->unk1D4 != NULL && effect->owner->unique_id == effect->ownerId) {
-                bone = ((MtxF *)effect->owner->unk1D4)[effect->bone][0];
+                bone = effect->owner->unk1D4[effect->bone][0];
                 func_150A7960(bone, effect->startOffset[0], effect->startOffset[1], effect->startOffset[2], &effect->x, &effect->y, &effect->z);
                 aim = effect->owner->unk127;
                 func_150A7960(bone, effect->endOffset[0], effect->endOffset[1], effect->endOffset[2], &effect->target_x, &effect->target_y, &effect->target_z);

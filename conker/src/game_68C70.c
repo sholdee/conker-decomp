@@ -172,7 +172,7 @@ void func_1503B9BC(s32 objIndex) {
     // matching: the loop start below goes through a variable, so IDO unrolls it for any start
     prev = 24;
     /* the chain is anchored at bone 0's position */
-    bone = ((MtxF *)obj->unk1D4)[0];
+    bone = obj->unk1D4[0];
     D_800C4008[0] = bone[3][0];
     D_800C4008[1] = bone[3][1];
     D_800C4008[2] = bone[3][2];
@@ -185,7 +185,7 @@ void func_1503B9BC(s32 objIndex) {
         }
         return;
     }
-    bone = ((MtxF *)obj->unk1D4)[24];
+    bone = obj->unk1D4[24];
     chain->pos[0][0] = bone[3][0];
     chain->pos[0][1] = bone[3][1];
     chain->pos[0][2] = bone[3][2];
@@ -456,7 +456,7 @@ void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain) {
         pos = &chain->pos[joint];
         // matching: a byte offset; indexing bones[24 + i] swaps the registers of i and the offset
         dst = (f32 (*)[4])((u8 *)obj->unk1D4 + boneOffset);
-        bones = (MtxF *)obj->unk1D4;
+        bones = obj->unk1D4;
         if (i == 0) {
             parent = rootMtx;
         } else {

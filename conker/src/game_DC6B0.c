@@ -393,7 +393,7 @@ void func_150AFE64(s32 altBone) {
             bone = 2;
         }
 
-        mtx = ((MtxF *)D_800D154C->unk1D4)[bone];
+        mtx = D_800D154C->unk1D4[bone];
         startX = 0.0f;
         startY = 0.0f;
         startZ = -20.0f;

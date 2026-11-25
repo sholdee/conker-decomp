@@ -87,7 +87,7 @@ void func_15034728(Actor *obj) {
 
     if (obj->unk1D4 != NULL && obj->unk9C != 0) {
         lastBone = func_1502DB20(obj->id) - 1;
-        bones = (MtxF *)obj->unk1D4;
+        bones = obj->unk1D4;
         bone = 31;
         if (lastBone < 31) {
             bone = lastBone;

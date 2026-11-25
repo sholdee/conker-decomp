@@ -302,7 +302,7 @@ s32 func_150D88E0(Vec3f *out, Actor *actor, u8 point) {
             break;
     }
     y = 0.0f;
-    func_150A7960(((MtxF *)actor->unk1D4)[bone], x, y, z, &x, &y, &z);
+    func_150A7960(actor->unk1D4[bone], x, y, z, &x, &y, &z);
     out->x = x;
     out->y = y;
     out->z = z;

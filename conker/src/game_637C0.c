@@ -20,7 +20,7 @@ void func_15036310(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn) {
 
     actor = &D_800CC2D0[actorIndex];
     if (actor->unk1D4 != NULL) {
-        mtx = ((MtxF *)actor->unk1D4)[bone];
+        mtx = actor->unk1D4[bone];
         position[0] = mtx[3][0];
         position[1] = mtx[3][1];
         position[2] = mtx[3][2];

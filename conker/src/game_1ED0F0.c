@@ -632,7 +632,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
                 in[1] = &b;
                 out[0] = &outA;
                 out[1] = &outB;
-                func_15145EA4(in, out, &((MtxF *)shooter->unk1D4)[9], 2);
+                func_15145EA4(in, out, &shooter->unk1D4[9], 2);
                 func_15102B38(shooter, 9, &a, &c, scale, func_150ADA20() % 3 + 8,
                               func_150ADA20() % 56 + 200, func_150ADA68() * 204.0f + 601.0f,
                               &outA, 0xFF, 0, -1, fxOwner, fxList);
@@ -825,7 +825,7 @@ void func_151C1798(Actor *obj, Vec3f *pos) {
         index = 0;
         break;
     }
-    func_15143134(&D_800AA958[index], pos, &((MtxF *)obj->unk1D4)[D_800AA954[index]]);
+    func_15143134(&D_800AA958[index], pos, &obj->unk1D4[D_800AA954[index]]);
 }
 
 /* Event handler: event 0x2D hands the bullet's ownership between the two objects in pair. */

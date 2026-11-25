@@ -770,7 +770,7 @@ void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z) {
         in[0] = 0.0f;
         in[1] = obj->y_scale * 30.0f;
         in[2] = 0.0f;
-        bone = (MtxF *)obj->unk1D4;
+        bone = obj->unk1D4;
         if (obj->interaction_state == 1) {
             bone += 12;
         } else if (obj->interaction_state == 0x1E) {

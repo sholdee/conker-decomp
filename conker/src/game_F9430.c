@@ -110,7 +110,7 @@ void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
     func_1504715C(&ground, owner);
     def = &D_800A0640[index];
     /* Actor.unk1D4 (typed struct255 * in structs.h) is the owner's bone matrix array */
-    func_15143134(def->offset, pos, &((MtxF *)owner->unk1D4)[def->bone]);
+    func_15143134(def->offset, pos, &owner->unk1D4[def->bone]);
     {
         f32 ray[3];
 

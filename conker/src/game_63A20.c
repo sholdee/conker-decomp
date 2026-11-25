@@ -109,7 +109,7 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
         VTX_BUFFERS[index][i].v.cn[1] = color->v.cn[1];
         VTX_BUFFERS[index][i].v.cn[2] = color->v.cn[2];
     }
-    bones = (MtxF *)D_800CC2D0[index].unk1D4;
+    bones = D_800CC2D0[index].unk1D4;
     if (bones == NULL) {
         return gfx;
     }

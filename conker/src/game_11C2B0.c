@@ -1495,7 +1495,7 @@ void func_150F1A00(Actor *actor) {
     rec = D_800CC298_REC;
     rec->pulse += rate * D_800BE9E4;
     scale = (((cosf(rec->pulse * 9.587380191e-05f) + 1.0f) * 0.5f) * 0.3500000238f) + 0.8999999762f;
-    mtx = ((MtxF *)actor->unk1D4)[62];
+    mtx = actor->unk1D4[62];
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
             mtx[i][j] *= scale;

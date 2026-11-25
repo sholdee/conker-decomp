@@ -119,8 +119,8 @@ Gfx *func_151B5328(Gfx *gdl, BeamEffect *effect, s16 viewIdx) {
         failed = 1;
     }
     if (!failed && data->first->unk1D4 != NULL && data->second->unk1D4 != NULL) {
-        func_15143134(D_800AA400, &start, &((MtxF *)data->first->unk1D4)[D_8008FB80]);
-        func_15143134(D_800AA40C, &end, &((MtxF *)data->second->unk1D4)[D_8008FB84]);
+        func_15143134(D_800AA400, &start, &data->first->unk1D4[D_8008FB80]);
+        func_15143134(D_800AA40C, &end, &data->second->unk1D4[D_8008FB84]);
         flag = 1;
         vtx = data->vertices[D_800BE9C0];
         eye = &D_800DBFF0[viewIdx].eye;

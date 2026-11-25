@@ -837,7 +837,7 @@ s32 func_15133A94(Mtx *mtx, Particle *particle) {
         owner->unique_id != particle->ownerId) {
         return -1;
     }
-    ownerMtxs = (MtxF *)owner->unk1D4;
+    ownerMtxs = owner->unk1D4;
     if (ownerMtxs == NULL) {
         return 0;
     }

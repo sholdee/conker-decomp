@@ -52,7 +52,7 @@ s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
     }
     count = func_1502DB20(id);
     for (i = 0; i < count; i++) {
-        bones = (MtxF *)obj->unk1D4;
+        bones = obj->unk1D4;
         dx = bones[i][3][0];
         dy = bones[i][3][1];
         dz = bones[i][3][2];

@@ -88,7 +88,7 @@ s32 func_1518A094(Emitter *emitter) {
             f32 (*mtx)[4];
             Vec3f *out;
 
-            mtx = ((MtxF *)attach->target->unk1D4)[attach->bone];
+            mtx = attach->target->unk1D4[attach->bone];
             out = &emitter->p0;
             func_150A7960(mtx, attach->p0.x, attach->p0.y, attach->p0.z, &out->x, &out->y, &out->z);
             out = &emitter->p1;

@@ -200,7 +200,7 @@ void func_150DFCA8(SwingObject *obj) {
 
 /* Moves bone 1 of the actor to its x/z position at a fixed height of 2706. */
 void func_150DFDA4(Actor *actor) {
-    f32 (*bone)[4] = ((MtxF *)actor->unk1D4)[1];
+    f32 (*bone)[4] = actor->unk1D4[1];
 
     bone[3][0] = actor->x_position;
     bone[3][1] = 2706.0f;

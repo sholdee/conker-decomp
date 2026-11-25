@@ -94,7 +94,7 @@ s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 a
     spheres = D_80086C60[type];
     count = D_8009CBCC[type];
     i = 0;
-    bones = (MtxF *)obj->unk1D4;
+    bones = obj->unk1D4;
     if (count > 0) {
         // matching: p = spheres in its own block; a plain assignment changes IDO's s-register allocation
         do { p = spheres; } while (0);
@@ -193,7 +193,7 @@ s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, V
             if ((1 << p->bone) & obj->unk9C) {
                 /* bone masked off in obj->unk9C */
             } else {
-                bones = (MtxF *)obj->unk1D4;
+                bones = obj->unk1D4;
                 local.x = p->x;
                 local.y = p->y;
                 local.z = p->z;

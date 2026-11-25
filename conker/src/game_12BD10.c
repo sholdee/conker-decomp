@@ -35,7 +35,7 @@ void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
         Vec3f *sources[3];
         Vec3f *destinations[3];
 
-        mtx = ((MtxF *)actor->unk1D4)[D_80088BA0];
+        mtx = actor->unk1D4[D_80088BA0];
         sources[0] = &D_800A2000;
         sources[1] = &D_800A2018;
         sources[2] = &D_800A2024;
@@ -84,7 +84,7 @@ void func_150FEBC8(Actor *actor, s32 arg1, Vec3f *out) {
     Vec3f *src;
     Vec3f *dst;
 
-    mtx = ((MtxF *)actor->unk1D4)[D_80088BA0];
+    mtx = actor->unk1D4[D_80088BA0];
     src = &D_800A2000;
     dst = out;
     func_15145EA4(&src, &dst, mtx, 1);

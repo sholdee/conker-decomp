@@ -113,7 +113,7 @@ void func_151D2C40(BoneFollower *follower) {
         return;
     }
 
-    func_15143134(&follower->offset, &position, &((MtxF *)actor->unk1D4)[follower->bone]);
+    func_15143134(&follower->offset, &position, &actor->unk1D4[follower->bone]);
 
     if (follower->flags & 1) {
         follower->timer -= D_800BE9E4;
