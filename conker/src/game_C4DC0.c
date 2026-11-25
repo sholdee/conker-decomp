@@ -92,6 +92,7 @@ typedef struct {
     s16 pad;
 } PathPoint;
 
+/* D_800D2104[i]: the path (list of points) owned by script object i; D_800D2108[i] is its point count. */
 typedef struct {
     u8 pad0[8];
     PathPoint pts[1];
@@ -1030,14 +1031,8 @@ extern C4DC0_2350 *D_800D2350;
 extern s8 D_800E0AC0[];
 extern u8 D_800E0BB8[];
 
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 pad;
-} C4DC0_point;
 
-s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
+s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     struct127 *obj;
     struct127 *other;
     s32 ret;
@@ -1046,17 +1041,17 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     f32 dx;
     f32 dz;
 
-    if (arg1 == 0xB7) {
-        return func_15083E0C(arg0);
+    if (opcode == 0xB7) {
+        return func_15083E0C(objId);
     }
-    obj = func_1505EEF4(arg0);
-    if (arg1 == 0xB0) {
+    obj = func_1505EEF4(objId);
+    if (opcode == 0xB0) {
         if (obj == NULL) {
             return 1;
         }
         return 0;
     }
-    if (arg1 == 0xB1) {
+    if (opcode == 0xB1) {
         if (obj == NULL) {
             return 1;
         }
@@ -1068,9 +1063,9 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     if (obj == NULL) {
         return 0;
     }
-    switch (arg1) {
+    switch (opcode) {
     case 0xA5:
-        return func_150859AC(arg0, ((s16 *)arg2)[5]);
+        return func_150859AC(objId, ((s16 *)&cmd->a[0])[1]);
     case 0x91:
         return obj->unk232;
     case 0x92:
@@ -1088,7 +1083,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         }
         break;
     case 0x95:
-        if (obj->unk13C != 0 && func_15084000(arg2[2] & 0xFFFF0FFF) + 100 == obj->unk13C) {
+        if (obj->unk13C != 0 && func_15084000(cmd->a[0] & 0xFFFF0FFF) + 100 == obj->unk13C) {
             return 1;
         }
         break;
@@ -1104,10 +1099,10 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0x98:
         return (s16)(s32)obj->y_position;
     case 0x99: {
-        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
         dx = obj->x_position - other->x_position;
         dz = obj->z_position - other->z_position;
-        if (dx * dx + dz * dz < (f32)(arg2[3] * arg2[3])) {
+        if (dx * dx + dz * dz < (f32)(cmd->a[1] * cmd->a[1])) {
             return 1;
         }
         return 0;
@@ -1115,7 +1110,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0x9A: {
         s32 pdx;
         s32 pdz;
-        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
         if (other == NULL) {
             return 32000;
         }
@@ -1126,22 +1121,22 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0x9B: {
         f32 dx;
         f32 dz;
-        dz = obj->z_position - (f32)arg2[3];
-        dx = obj->x_position - (f32)arg2[2];
+        dz = obj->z_position - (f32)cmd->a[1];
+        dx = obj->x_position - (f32)cmd->a[0];
         return sqrtf(dz * dz + dx * dx);
     }
     case 0x9C:
-        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
         return (f32)(func_1505A630(other->x_position - obj->x_position, obj->z_position - other->z_position, 0) + 0x4000) * 0.0054931640625f * 65536.0f;
     case 0x9D:
-        return (f32)(u32)(u16)(func_1505A630((f32)arg2[2] - obj->x_position, obj->z_position - (f32)arg2[3], 0) - 0x4000) * 0.0054931640625f * 65536.0f;
+        return (f32)(u32)(u16)(func_1505A630((f32)cmd->a[0] - obj->x_position, obj->z_position - (f32)cmd->a[1], 0) - 0x4000) * 0.0054931640625f * 65536.0f;
     case 0x9E: {
         s32 r;
         s32 dx;
         s32 dz;
-        r = arg2[4];
-        dx = (s32)obj->x_position - arg2[2];
-        dz = (s32)obj->z_position - arg2[3];
+        r = cmd->a[2];
+        dx = (s32)obj->x_position - cmd->a[0];
+        dz = (s32)obj->z_position - cmd->a[1];
         if (dx * dx + dz * dz < r * r) {
             return 1;
         }
@@ -1177,7 +1172,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0xAB:
         return FLD(obj->unk31C, 0x79, u8);
     case 0xAC: {
-        ret = func_150A2AEC(obj - D_800CC2D0, D_800D3840 - 2, &arg2[2]);
+        ret = func_150A2AEC(obj - D_800CC2D0, D_800D3840 - 2, cmd->a);
         if (ret != -1) {
             return ret | 0x4000;
         }
@@ -1196,7 +1191,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         }
         return 0;
     case 0xB2:
-        return (&obj->unk2E4)[arg2[2]];
+        return (&obj->unk2E4)[cmd->a[0]];
     case 0xB4:
         return obj->pad10A;
     case 0xB5: {
@@ -1220,12 +1215,12 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0xB9: {
         s32 x;
         s32 z;
-        x = ((C4DC0_point **)D_800D2104)[obj->unk13F][arg2[2]].x;
-        z = ((C4DC0_point **)D_800D2104)[obj->unk13F][arg2[2]].z;
+        x = ((PathPoint **)D_800D2104)[obj->unk13F][cmd->a[0]].x;
+        z = ((PathPoint **)D_800D2104)[obj->unk13F][cmd->a[0]].z;
         return (x << 16) | (z & 0xFFFF);
     }
     case 0xBA:
-        return ((C4DC0_point **)D_800D2104)[obj->unk13F][arg2[2]].y;
+        return ((PathPoint **)D_800D2104)[obj->unk13F][cmd->a[0]].y;
     case 0xBB:
         if (obj->unk65 != 0) {
             return D_800CC2D0[obj->unk65 - 1].unk13F;
@@ -1238,7 +1233,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0xBD: {
         s32 pdx;
         s32 pdz;
-        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
         dx = obj->x_position - other->x_position;
         dz = obj->z_position - other->z_position;
         return sqrtf(dx * dx + dz * dz);
@@ -1263,7 +1258,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         }
         return obj->unk25C & 0x800;
     case 0xDB:
-        if (arg2[2] == 1) {
+        if (cmd->a[0] == 1) {
             if (obj->unk20F == 0xFF) {
                 return 0xFF;
             }
@@ -1315,7 +1310,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         D_8008729C = obj->unk212[1];
         ret = func_15086098(obj->x_position, obj->y_position, obj->z_position, 0, 0, &b, &b);
         obj->unk212[1] = ret;
-        if (0xFF != ret) {
+        if (ret != 0xFF) {
             return D_800D2350[ret].unk7;
         }
         return 0xFF;
@@ -1329,7 +1324,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         f32 hz;
         f32 hd;
         f32 dist;
-        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
         if (other == NULL) {
             return 0;
         }
@@ -1366,10 +1361,10 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         s8 n2;
         s8 arr[18];
         n2 = 0;
-        ret = arg2[2];
+        ret = cmd->a[0];
         n = 0;
         for (i = 0; i < ret; i++) {
-            arr[n] = func_15086D48(arg2[3 + i]);
+            arr[n] = func_15086D48(cmd->a[1 + i]);
             if ((u8)arr[n] != 0xFF) {
                 n++;
             }
@@ -1393,7 +1388,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         f32 x;
         f32 y;
         f32 z;
-        id = func_15086D48(arg2[2]);
+        id = func_15086D48(cmd->a[0]);
         if (func_15086CBC(id, &x, &y, &z) != 0) {
             x -= obj->x_position;
             z -= obj->z_position;
@@ -1410,7 +1405,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         f32 a;
         f32 b;
         f32 c;
-        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
         temp = func_1505A630(other->x_position - obj->x_position, obj->z_position - other->z_position, 0) + 0x4000;
         a = (f32)temp * 0.0054931640625f;
         b = obj->unk40;
@@ -1419,7 +1414,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         if (c > 180.0f) {
             c = -360.0f + c;
         }
-        if (arg2[3] == 1 && c < 0.0f) {
+        if (cmd->a[1] == 1 && c < 0.0f) {
             c = -c;
         }
         return c;
@@ -1428,7 +1423,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         f32 dx;
         f32 dz;
         f32 c;
-        other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+        other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
         dx = other->x_position - obj->x_position;
         dz = other->z_position - obj->z_position;
         c = (u32)func_1505A630(sqrtf(dx * dx + dz * dz), other->y_position - obj->y_position, 0) * 0.0054931640625f;
@@ -1436,7 +1431,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         if (c > 180.0f) {
             c = -360.0f + c;
         }
-        if (arg2[3] == 1 && c < 0.0f) {
+        if (cmd->a[1] == 1 && c < 0.0f) {
             c = -c;
         }
         return c;
@@ -1496,7 +1491,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0xD6:
         return func_151E565C();
     case 0xD7:
-        if ((obj->unk1CC - obj->y_position) > 600.0f && -10000.0f == obj->unk118) {
+        if ((obj->unk1CC - obj->y_position) > 600.0f && obj->unk118 == -10000.0f) {
             return 1;
         }
         return 0;
@@ -1551,7 +1546,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         if (obj->pad275 != 0) {
             p = &D_800CC2D0[obj->pad275 - 1];
             obj->pad275 = 0;
-            if (p->id == arg2[2]) {
+            if (p->id == cmd->a[0]) {
                 return 1;
             }
             return 0;
@@ -1560,7 +1555,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     }
     case 0xE7: {
         u8 idx;
-        C4DC0_point *pts;
+        PathPoint *pts;
         s32 n;
         s32 best;
         s32 x;
@@ -1571,20 +1566,20 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         s32 dx;
         s32 dz;
         idx = obj->unk13F;
-        pts = ((C4DC0_point **)D_800D2104)[idx];
+        pts = ((PathPoint **)D_800D2104)[idx];
         n = D_800D2108[idx];
         best = -1;
         if (pts != NULL && n != 0) {
-            other = func_1505EEF4(arg2[2] & 0xFFFF0FFF);
+            other = func_1505EEF4(cmd->a[0] & 0xFFFF0FFF);
             x = other->x_position;
             z = other->z_position;
             maxd = 100000000;
             mind = -1;
             if (D_800D3840 >= 4) {
-                ret = arg2[3];
+                ret = cmd->a[1];
                 mind = ret * ret;
                 if (D_800D3840 >= 5) {
-                    ret = arg2[4];
+                    ret = cmd->a[2];
                     maxd = ret * ret;
                 }
             }
@@ -1608,8 +1603,8 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         struct126 *p;
         s32 a;
         s32 b;
-        a = arg2[2];
-        b = arg2[3];
+        a = cmd->a[0];
+        b = cmd->a[1];
         p = func_1503195C(obj, a, b);
         if (p != NULL) {
             return p->unk38;
@@ -1623,7 +1618,7 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         s32 pad3;
         s32 pad4;
         s32 pad5;
-        f32 *pp;
+        f32 *pp; // matching: dead address-of stores keep dz/dy/dx/dist in stack slots
         f32 dz;
         f32 dy;
         f32 dx;
@@ -1632,9 +1627,9 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
         pp = &dy;
         pp = &dx;
         pp = &dist;
-        ix = arg2[2];
-        iz = arg2[3];
-        r = arg2[4];
+        ix = cmd->a[0];
+        iz = cmd->a[1];
+        r = cmd->a[2];
         dx = obj->x_position - (f32)ix;
         dy = 0.0f;
         dz = obj->z_position - (f32)iz;
@@ -1652,13 +1647,13 @@ s32 func_15099C14(s32 arg0, s32 arg1, s32 *arg2) {
     case 0xEC:
         return FLD(obj->unk31C, 0x95, u8);
     case 0xED:
-        return D_800BE710[arg0];
+        return D_800BE710[objId];
     case 0xEE: {
         s16 t;
         f32 x;
         f32 y;
         f32 z;
-        func_1505A184(obj->unk7A + 0x8000, arg2[2], 0.0f, &x, &z, &y);
+        func_1505A184(obj->unk7A + 0x8000, cmd->a[0], 0.0f, &x, &z, &y);
         t = (s16)(s32)obj->x_position + x;
         iz = ((s16)((s16)(s32)obj->z_position + z));
         return (t << 16) | (iz & 0xFFFF);
