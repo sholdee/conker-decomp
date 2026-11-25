@@ -16,7 +16,7 @@ void func_1502AAF0(void) {
 void func_1502AAF8(s32 arg0) {
 }
 
-/* One 8-byte entry of the ROM asset table at D_AB1950. */
+/* One 8-byte entry of the ROM asset table at assets_offsets_table_ROM_START. */
 typedef struct {
     s32 offset; /* added to the table base to reach the next level */
     s32 info;   /* bits 0-27: size (0 = missing), bits 28-30: compression (1 = compressed),
@@ -116,7 +116,7 @@ RomTableEntry *func_1502AF04(u8 *table, u8 *buf, s32 index, s32 count) {
     return entries;
 }
 
-extern u8 D_AB1950[]; /* root ROM table */
+extern u8 assets_offsets_table_ROM_START[]; /* root ROM table */
 
 /*
  * Follows `depth` table indices (the variadic arguments) down from the root ROM table. Returns the
@@ -129,7 +129,7 @@ u8 *func_1502B020(s32 *size, s32 depth, ...) {
     s32 info;
 
     info = 1;
-    addr = D_AB1950;
+    addr = assets_offsets_table_ROM_START;
     va_start(args, depth);
 
     for (; depth != 0; depth--) {
@@ -163,7 +163,7 @@ RomTableEntry *func_1502B110(u8 *table, s32 count, u8 *buf, u32 depth, ...) {
     info = 1;
     entries = NULL;
     if (table == NULL) {
-        table = D_AB1950;
+        table = assets_offsets_table_ROM_START;
     }
 
     va_start(args, depth);
@@ -297,7 +297,7 @@ void *func_1502B5C8(u32 *size, s32 depth, ...) {
     }
 
     *found = 1;
-    addr = D_AB1950;
+    addr = assets_offsets_table_ROM_START;
     va_start(args, depth);
 
     for (; depth != 0; depth--) {
@@ -335,7 +335,7 @@ RomTableEntry *func_1502B6BC(u32 *size, s32 count, s32 *countOut, s32 depth, ...
     }
 
     *found = 1;
-    addr = D_AB1950;
+    addr = assets_offsets_table_ROM_START;
     va_start(args, depth);
 
     for (; depth != 0; depth--) {
@@ -374,7 +374,7 @@ u32 func_1502B7F0(void **data, s32 depth, ...) {
     s32 info;
 
     size = 1;
-    addr = D_AB1950;
+    addr = assets_offsets_table_ROM_START;
     va_start(args, depth);
 
     for (; depth != 0; depth--) {
@@ -406,7 +406,7 @@ s32 func_1502B8E0(void *dst, u32 maxSize, s32 depth, ...) {
     s32 info;
 
     size = 1;
-    addr = D_AB1950;
+    addr = assets_offsets_table_ROM_START;
     va_start(args, depth);
 
     for (; depth != 0; depth--) {
@@ -438,7 +438,7 @@ s32 func_1502B9B4(s32 depth, ...) {
     s32 *header;
 
     size = 1;
-    addr = D_AB1950;
+    addr = assets_offsets_table_ROM_START;
     va_start(args, depth);
 
     for (; depth != 0; depth--) {

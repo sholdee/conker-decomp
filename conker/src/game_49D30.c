@@ -150,7 +150,7 @@ void func_1501C880(s32 unused, s32 swapBuffers) {
     D_800BEAA8++;
 }
 
-/* ROM offsets (relative to D_2D4B0) of one RSP microcode's text and data. */
+/* ROM offsets (relative to ucode_ROM_START) of one RSP microcode's text and data. */
 typedef struct {
     s32 textStart;
     s32 textEnd;
@@ -158,7 +158,7 @@ typedef struct {
     s32 dataEnd;
 } UcodeRomEntry;
 
-extern u8 D_2D4B0[];
+extern u8 ucode_ROM_START[];
 extern s8 D_80084070;
 extern s8 D_80084074;
 extern UcodeRomEntry D_80084078[];
@@ -182,15 +182,15 @@ void func_1501CC3C(void) {
         ucode += 2;
     }
     if ((ucode != D_80084070) || (altOffset != D_80084074)) {
-        func_10004514(D_80084078[ucode].textStart + (s32)D_2D4B0, D_800C1060, D_80084078[ucode].textEnd - D_80084078[ucode].textStart, 1);
+        func_10004514(D_80084078[ucode].textStart + (s32)ucode_ROM_START, D_800C1060, D_80084078[ucode].textEnd - D_80084078[ucode].textStart, 1);
         D_800BEB9C = (u64 *)((D_80084078[ucode].textEnd - D_80084078[ucode].textStart) + (u8 *)D_800C1060);
-        func_10004514(D_80084078[ucode].dataStart + (s32)D_2D4B0, D_800BEB9C, D_80084078[ucode].dataEnd - D_80084078[ucode].dataStart, 1);
+        func_10004514(D_80084078[ucode].dataStart + (s32)ucode_ROM_START, D_800BEB9C, D_80084078[ucode].dataEnd - D_80084078[ucode].dataStart, 1);
         D_80084070 = ucode;
         D_80084074 = altOffset;
         alt = D_80084078 + (ucode + altOffset);
-        func_10004514(alt->textStart + (s32)D_2D4B0, D_800BEBB0, alt->textEnd - alt->textStart, 1);
+        func_10004514(alt->textStart + (s32)ucode_ROM_START, D_800BEBB0, alt->textEnd - alt->textStart, 1);
         D_800BEAD0 = (u64 *)((alt->textEnd - alt->textStart) + (u8 *)D_800BEBB0);
-        func_10004514(alt->dataStart + (s32)D_2D4B0, D_800BEAD0, alt->dataEnd - alt->dataStart, 1);
+        func_10004514(alt->dataStart + (s32)ucode_ROM_START, D_800BEAD0, alt->dataEnd - alt->dataStart, 1);
     }
 }
 

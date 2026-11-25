@@ -105,8 +105,8 @@ glabel func_10007DAC
     /* 7F14 10007F14 0C0093C4 */  jal        osWritebackDCacheAll
     /* 7F18 10007F18 00000000 */   nop
     /* 7F1C 10007F1C 24040000 */  addiu      $a0, $zero, 0x0
-    /* 7F20 10007F20 3C05001A */  lui        $a1, %hi(D_19EA88)
-    /* 7F24 10007F24 24A5EA88 */  addiu      $a1, $a1, %lo(D_19EA88)
+    /* 7F20 10007F20 3C05001A */  lui        $a1, %hi(debugger_us_ROM_START)
+    /* 7F24 10007F24 24A5EA88 */  addiu      $a1, $a1, %lo(debugger_us_ROM_START)
     /* 7F28 10007F28 02203025 */  or         $a2, $s1, $zero
     /* 7F2C 10007F2C 3C018000 */  lui        $at, (0x80000000 >> 16)
     /* 7F30 10007F30 00C13025 */  or         $a2, $a2, $at

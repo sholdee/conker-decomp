@@ -28,8 +28,8 @@ void func_100010F8(s32 arg) {
 }
 
 extern u8 D_151FA130; // end of the chunk0 code segment (starts at func_15000000)
-extern u8 D_19EA88;
-extern u8 D_42450;
+extern u8 debugger_us_ROM_START;
+extern u8 game_us_rzip_ROM_START;
 void *allocate_memory(s32 size, s32, s32, s32);
 s32 func_10006240(void *src, void *dst, u32);
 void func_10004074(void *);
@@ -69,10 +69,10 @@ void func_10001194(s32 arg) {
     D_8002AAE8[1] = func_10003C6C(framebufferSize, 0xFF, 3, 1, 0);
     osCreateViManager(OS_PRIORITY_VIMGR);
 
-    romBase = (s32)&D_42450;
+    romBase = (s32)&game_us_rzip_ROM_START;
     func_10004514(romBase, D_80082B20, 16, 1);
     compressedRomAddr = (s32)D_80082B20[0] + romBase; // the segment header, not yet a list pointer
-    size = (u32)&D_19EA88 - compressedRomAddr;
+    size = (u32)&debugger_us_ROM_START - compressedRomAddr;
     compressed = allocate_memory(size, 1, 2, 0);
     func_10004514(compressedRomAddr, compressed, size, 1);
     func_10006240(compressed, D_80082B20, D_8003809C);
