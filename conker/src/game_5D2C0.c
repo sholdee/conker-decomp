@@ -25,7 +25,6 @@ extern void func_150A7A48(f32 arg0[4][4], f32 arg1[4][4], f32 arg2[4][4]);
 extern void func_1503E5F8();
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 extern void func_10004074(void *arg0);
-void func_15031C14(void *arg0);
 void func_1503F7B8(void *arg0);
 void func_1518CA04(s32 arg0);
 s32 func_1503F62C(s32 arg0, s32 arg1, void *arg2, void *arg3, void *arg4, void *arg5, void *arg6);
@@ -216,6 +215,8 @@ typedef struct Attachment {
     /* 0x54 */ struct Attachment *next;
     /* 0x58 */ struct Attachment *prev;
 } Attachment; // size 0x5C
+
+void func_15031C14(Attachment *att);
 
 typedef struct Func15030158Arg0 {
     u8 unk0;
@@ -654,136 +655,97 @@ void func_15030468(void) {
     }
 }
 
-typedef struct S15030AF4 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    u8 unk4;
-    u8 unk5;
-    u8 unk6;
-    u8 unk7;
-    u8 unk8;
-    u8 unk9;
-    u16 unkA;
-    u16 unkC;
-    u16 unkE;
-    u8 pad10[3];
-    u8 unk13;
-    u8 pad14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    s16 unk18;
-    s16 unk1A;
-    u16 unk1C;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    s32 unk30;
-    void *unk34;
-    s32 unk38;
-    s32 unk3C;
-    f32 unk40;
-    s32 unk44;
-    s32 unk48;
-    s32 unk4C;
-    s32 unk50;
-    struct S15030AF4 *unk54;
-    struct S15030AF4 *unk58;
-} S15030AF4;
+void func_15031A50(Attachment *att, struct127 *owner);
 
-void func_15031A50(u8 *arg0, u8 *arg1);
-
-S15030AF4 *func_15030AF4(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, u16 *arg9, s32 argA, s32 argB, s32 argC) {
-    S15030AF4 *var;
-    S15030AF4 *next;
+/* Attaches `model` to bone `bone` of `owner` as part of set `setId`. Returns NULL on failure, or
+ * (unless flags & 8) when that model of that set is already attached. */
+Attachment *func_15030AF4(struct127 *owner, s32 model, s32 bone, s32 flags, s32 arg4, s32 arg5, s32 lifetime,
+                          s32 setId, s32 handler, u16 *ownerStates, s32 arg10, s32 parentSet, s32 parentMtx) {
+    Attachment *att;
+    Attachment *next;
     s32 err;
 
-    if (arg0->unique_id == 0) {
-        return 0;
+    if (owner->unique_id == 0) {
+        return NULL;
     }
-    if (!(arg3 & 8)) {
-        var = (S15030AF4 *)D_800C3EE0;
-        if (var != 0) {
+    if (!(flags & 8)) {
+        att = (Attachment *)D_800C3EE0;
+        if (att != NULL) {
             do {
-                next = var->unk54;
-                if ((var->unk0 == arg0->unique_id) && (var->unk6 == arg7) && (var->unk1 == arg1)) {
-                    return 0;
+                next = att->next;
+                if ((att->ownerId == owner->unique_id) && (att->setId == setId) && (att->model == model)) {
+                    return NULL;
                 }
-                var = next;
-            } while (next != 0);
+                att = next;
+            } while (next != NULL);
         }
     }
-    var = allocate_memory(0x5C, 1, 0, 2);
-    if (var == 0) {
-        return 0;
+    att = allocate_memory(sizeof(Attachment), 1, 0, 2);
+    if (att == NULL) {
+        return NULL;
     }
     err = 0;
-    if ((S15030AF4 *)D_800C3EE0 != 0) {
-        ((S15030AF4 *)D_800C3EE0)->unk58 = var;
+    if ((Attachment *)D_800C3EE0 != NULL) {
+        ((Attachment *)D_800C3EE0)->prev = att;
     }
-    var->unk54 = (S15030AF4 *)D_800C3EE0;
-    var->unk58 = 0;
-    D_800C3EE0 = (s32)var;
-    var->unk0 = arg0->unique_id;
-    var->unk1 = arg1;
-    var->unk2 = arg2;
-    var->unk24 = 0;
-    var->unk28 = 0;
-    var->unk2C = 0;
-    var->unk30 = 0;
-    var->unk3 = 0xFF;
-    var->unk44 = 0;
-    var->unk4 = arg3;
-    var->unk6 = arg7;
-    var->unk40 = 1.0f;
-    var->unk7 = arg8;
-    var->unk38 = 0;
-    var->unk3C = 0;
-    var->unk8 = 0;
-    var->unk9 = 0;
-    var->unk18 = 0;
-    var->unk1A = 0;
-    var->unkA = arg9[0];
-    var->unkC = arg9[1];
-    var->unkE = arg9[2];
-    var->unk17 = argA;
-    var->unk48 = 0;
-    var->unk15 = arg4;
-    var->unk16 = arg5;
-    var->unk1E = argB;
-    var->unk20 = argC;
-    var->unk13 = 0;
-    var->unk4C = 0;
-    var->unk50 = 0;
-    var->unk5 = 0;
-    var->unk22 = 0;
-    if ((arg5 == 4) || (arg3 & 4)) {
-        var->unk34 = allocate_memory(0x80, 1, 2, 2);
-        if (var->unk34 == 0) {
+    att->next = (Attachment *)D_800C3EE0;
+    att->prev = NULL;
+    D_800C3EE0 = (s32)att;
+    att->ownerId = owner->unique_id;
+    att->model = model;
+    att->bone = bone;
+    att->dlists = NULL;
+    att->vtx[0] = NULL;
+    att->vtx[1] = NULL;
+    att->unk30 = 0;
+    att->alpha = 0xFF;
+    att->offset = NULL;
+    att->flags = flags;
+    att->setId = setId;
+    att->scale = 1.0f;
+    att->handler = handler;
+    att->unk38 = 0;
+    att->unk3C = 0;
+    att->ownsVtx = 0;
+    att->loaded = 0;
+    att->seg6Id = 0;
+    att->seg7Id = 0;
+    att->ownerStates[0] = ownerStates[0];
+    att->ownerStates[1] = ownerStates[1];
+    att->ownerStates[2] = ownerStates[2];
+    att->unk17 = arg10;
+    att->anim = NULL;
+    att->unk15 = arg4;
+    att->unk16 = arg5;
+    att->parentSet = parentSet;
+    att->parentMtx = parentMtx;
+    att->hiddenDLists = 0;
+    att->unk4C = NULL;
+    att->unk50 = NULL;
+    att->updated = 0;
+    att->rotZ = 0;
+    if ((arg5 == 4) || (flags & 4)) {
+        att->mtx = allocate_memory(2 * sizeof(Mtx), 1, 2, 2);
+        if (att->mtx == NULL) {
             err = 1;
         }
     } else {
-        var->unk34 = 0;
+        att->mtx = NULL;
     }
-    if (arg6 == 0) {
-        var->unk1C = 0xFFFF;
+    if (lifetime == 0) {
+        att->timer = 0xFFFF;
     } else {
-        var->unk1C = arg6;
+        att->timer = lifetime;
     }
     if (!err) {
-        err |= func_1502FFD8((Attachment *)var, arg0);
+        err |= func_1502FFD8(att, owner);
     }
     if (err) {
-        func_15030158((Func15030158Arg0 *)var, 1);
-        return 0;
+        func_15030158(att, 1);
+        return NULL;
     }
-    func_15031A50((u8 *)var, (u8 *)arg0);
-    return var;
+    func_15031A50(att, owner);
+    return att;
 }
 
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
@@ -1151,151 +1113,155 @@ void func_151D74B0(void *, u8, s8, u8, s32);
 extern s32 D_80090228;
 extern s32 D_8009022C;
 
-void func_15031A50(u8 *arg0, u8 *arg1) {
-    s32 type = arg0[1];
-    u8 *node;
+/* Applies a model's side effects to its owner when it is attached (undone by func_15031C14). */
+void func_15031A50(Attachment *att, struct127 *owner) {
+    s32 model = att->model;
+    struct126 *unk;
 
-    switch (type) {
+    switch (model) {
     case 0x37:
-        func_151001B4(arg1);
+        func_151001B4(owner);
         break;
     case 0x5A:
-        node = *(u8 **)(arg1 + 0x31C);
-        if (node != 0) {
-            *(u16 *)(node + 0x1A6) += 0xAA;
+        unk = owner->unk31C;
+        if (unk != NULL) {
+            *(u16 *)((u8 *)unk + 0x1A6) += 0xAA; // not covered by struct126 yet
         }
         break;
     case 0x90:
-        *(u32 *)(arg1 + 0x9C) |= 0x70;
+        owner->unk9C |= 0x70;
         break;
     case 0x8F:
-        *(u32 *)(arg1 + 0x9C) |= 0xE00;
+        owner->unk9C |= 0xE00;
         break;
     case 0x49:
-        func_15163BE8(arg1, 0xFF, 1);
+        func_15163BE8(owner, 0xFF, 1);
         break;
     case 0x5D:
-        func_150D3360(arg1, 0xFF, 1);
-        func_150D5440(arg1, 0xFF, 1);
+        func_150D3360(owner, 0xFF, 1);
+        func_150D5440(owner, 0xFF, 1);
         break;
     case 0x3D:
-        func_151BD828(arg1, 0xFF, 1);
+        func_151BD828(owner, 0xFF, 1);
         break;
     case 0x1D:
-        func_151D74B0(arg1, 0, 2, 0xFF, 1);
+        func_151D74B0(owner, 0, 2, 0xFF, 1);
         break;
     case 0x5E:
     case 0x85:
-        *(u32 *)(arg1 + 0x9C) |= 0x6000;
+        owner->unk9C |= 0x6000;
         break;
     case 0x8D:
-        if (func_150859AC(0, 6) < 0x64) {
-            *(s16 *)(arg0 + 0x18) = D_80090228;
+        if (func_150859AC(0, 6) < 100) {
+            att->seg6Id = D_80090228;
         } else {
-            *(s16 *)(arg0 + 0x18) = D_8009022C;
+            att->seg6Id = D_8009022C;
         }
         break;
     case 0x82:
-        func_151D74B0(arg1, 6, -1, 0xFF, 1);
+        func_151D74B0(owner, 6, -1, 0xFF, 1);
         break;
     }
 }
 
-struct S15031C14 {
-    s32 unk0;
-    u8 unk4;
-};
-void func_15100180(void *);
-void func_151616D0(u8, u8, void *);
-void func_15147D64(void *, s32);
-void func_151BD7F4(void *);
-void func_151D4668(void *);
-void func_151D747C(void *);
-void func_151027E8(void *);
+/* An object pointer plus the unique_id it had, passed to event handlers. */
+typedef struct ObjectRef {
+    struct127 *obj;
+    u8 uniqueId;
+} ObjectRef;
 
-void func_15031C14(void *arg0) {
-    u8 *obj;
-    struct S15031C14 sp2C;
-    struct S15031C14 sp24;
-    u8 *node;
-    struct S15031C14 * volatile p;
+void func_15100180(struct127 *);
+void func_151616D0(u8, u8, ObjectRef *);
+void func_15147D64(ObjectRef *, s32);
+void func_151BD7F4(struct127 *);
+void func_151D4668(struct127 *);
+void func_151D747C(struct127 *);
+void func_151027E8(struct127 *);
 
-    obj = (u8 *)func_15083E90(*(u8 *)arg0);
-    if (obj != 0) {
-        switch (((u8 *)arg0)[1]) {
+/* Undoes func_15031A50's side effects on the owner when an attachment is removed. */
+void func_15031C14(Attachment *att) {
+    struct127 *owner;
+    ObjectRef ref49;
+    ObjectRef ref5D;
+    struct126 *unk;
+    ObjectRef *volatile ref; // matching: IDO spills the pointer across the call only when volatile
+
+    owner = func_15083E90(att->ownerId);
+    if (owner != NULL) {
+        switch (att->model) {
         case 0x5A:
-            node = *(u8 **)(obj + 0x31C);
-            if (node != 0) {
-                *(u16 *)(node + 0x1A6) -= 0xAA;
+            unk = owner->unk31C;
+            if (unk != NULL) {
+                *(u16 *)((u8 *)unk + 0x1A6) -= 0xAA; // not covered by struct126 yet
             }
             break;
         case 0x90:
-            *(u32 *)(obj + 0x9C) &= ~0x70;
+            owner->unk9C &= ~0x70;
             break;
         case 0x8F:
-            *(u32 *)(obj + 0x9C) &= ~0xE00;
+            owner->unk9C &= ~0xE00;
             break;
         case 0x37:
         case 0x4B:
         case 0x4C:
-            func_1000FD38(func_15033BDC, arg0, (s32)obj);
-            if (((u8 *)arg0)[1] == 0x37) {
-                func_15100180(obj);
+            func_1000FD38(func_15033BDC, att, (s32)owner);
+            if (att->model == 0x37) {
+                func_15100180(owner);
             }
             break;
         case 0x49:
-            sp2C.unk0 = (s32)obj;
-            sp2C.unk4 = obj[0x3B];
-            func_151616D0(0x10, 0x29, &sp2C);
+            ref49.obj = owner;
+            ref49.uniqueId = owner->unique_id;
+            func_151616D0(0x10, 0x29, &ref49);
             break;
         case 0x5D:
-            sp24.unk0 = (s32)obj;
-            sp24.unk4 = obj[0x3B];
-            func_15147D64(p = &sp24, 0x2E);
-            func_151494E0((s32)p, 0x2F);
+            ref5D.obj = owner;
+            ref5D.uniqueId = owner->unique_id;
+            func_15147D64(ref = &ref5D, 0x2E);
+            func_151494E0((s32)ref, 0x2F);
             break;
         case 0x3D:
-            func_151BD7F4(obj);
+            func_151BD7F4(owner);
             break;
         case 0x1A:
         case 0x1B:
         case 0x5F:
         case 0x65:
         case 0x66:
-            func_151D4668(obj);
+            func_151D4668(owner);
             break;
         case 0x1D:
         case 0x82:
-            func_151D747C(obj);
+            func_151D747C(owner);
             break;
         case 0x5E:
         case 0x85:
-            *(u32 *)(obj + 0x9C) &= ~0x6000;
+            owner->unk9C &= ~0x6000;
             break;
         }
-        switch (((u8 *)arg0)[6]) {
+        switch (att->setId) {
         case 0x16:
         case 0x63:
         case 0x89:
-            func_151027E8(obj);
-            func_151D4668(obj);
+            func_151027E8(owner);
+            func_151D4668(owner);
             break;
         }
     }
 }
 
-s32 func_15031E2C(void *arg0, s32 arg1) {
-    s32 idx;
+/* Hook: cycles seg6Id back and forth through the three D_800902BC entries, one step per call. */
+s32 func_15031E2C(Attachment *att, struct127 *owner) {
+    s32 step;
 
-    idx = *(s32 *)((u8 *)arg0 + 0x38);
-
-    if (idx >= 3) {
-        idx = 5 - idx;
+    step = att->unk38;
+    if (step >= 3) {
+        step = 5 - step;
     }
-    *(s16 *)((u8 *)arg0 + 0x18) = D_800902BC[idx];
-    *(s32 *)((u8 *)arg0 + 0x38) = *(s32 *)((u8 *)arg0 + 0x38) + 1;
-    if (*(s32 *)((u8 *)arg0 + 0x38) >= 6) {
-        *(s32 *)((u8 *)arg0 + 0x38) = 0;
+    att->seg6Id = D_800902BC[step];
+    att->unk38++;
+    if (att->unk38 >= 6) {
+        att->unk38 = 0;
     }
     return 0;
 }
@@ -2861,10 +2827,13 @@ void *func_150335C8(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32 ar
     return 0;
 }
 
-s32 func_1503378C(u8 *arg0, s16 *arg1) {
-    u16 temp = (u16)arg1[0x42];
-    if (arg0[1] == 0x11) {
-        if ((temp == 0x3E) || (temp == 0x3D) || (temp == 0x41) || (temp == 0xD9) || (temp == 0x138) || (temp == 0x139)) {
+/* Hook: model 0x11 is removed unless its owner is in one of a few states. */
+s32 func_1503378C(Attachment *att, struct127 *owner) {
+    u16 state = owner->unk84.uh;
+
+    if (att->model == 0x11) {
+        if ((state == 0x3E) || (state == 0x3D) || (state == 0x41) || (state == 0xD9) || (state == 0x138) ||
+            (state == 0x139)) {
             return 0;
         }
     }
@@ -2873,63 +2842,65 @@ s32 func_1503378C(u8 *arg0, s16 *arg1) {
 
 extern s32 D_800902FC[];
 
-s32 func_150337E4(void *arg0, s32 arg1) {
-    s32 *p = (s32 *)arg0;
-    p[0xE] += D_800BE9E4;
-    if (p[0xE] >= 0x10) {
-        p[0xE] = 0;
-        p[0xF] ^= 1;
+/* Hook: toggles seg6Id between the two D_800902FC entries every 16 ticks. */
+s32 func_150337E4(Attachment *att, struct127 *owner) {
+    att->unk38 += D_800BE9E4;
+    if (att->unk38 >= 16) {
+        att->unk38 = 0;
+        att->unk3C ^= 1;
     }
-    *(s16 *)((u8 *)arg0 + 0x18) = D_800902FC[p[0xF]];
+    att->seg6Id = D_800902FC[att->unk3C];
     return 0;
 }
 
-void func_151026BC(void *, s32, s32, s32, s32, s32);
-void func_151027E8(void *);
+void func_151026BC(struct127 *, s32, s32, s32, s32, s32);
 
-s32 func_15033838(u8 *arg0, u8 *arg1) {
-    s32 var_a2;
-    s32 var_v1;
-    u8 *temp_v0_3;
+/* Hook: starts func_151026BC effect `kind` while the owner is in the set's trigger state (and
+ * unk31C allows it), and stops it with func_151027E8 when that no longer holds. */
+s32 func_15033838(Attachment *att, struct127 *owner) {
+    s32 kind;
+    s32 triggered;
+    struct126 *unk;
 
-    var_v1 = 0;
-    if (arg0[6] == 0x16) {
-        var_a2 = 4;
-        if (*(u16 *)(arg1 + 0x84) == 0x165) {
-            var_v1 = 1;
+    triggered = 0;
+    if (att->setId == 0x16) {
+        kind = 4;
+        if (owner->unk84.uh == 0x165) {
+            triggered = 1;
         }
-    } else if (arg0[6] == 0x89) {
-        var_a2 = 6;
-        switch (*(u16 *)(arg1 + 0x84)) {
+    } else if (att->setId == 0x89) {
+        kind = 6;
+        switch (owner->unk84.uh) {
         case 0x221:
         case 0x223:
         case 0x31B:
-            if ((*(u8 **)(arg1 + 0x31C))[0x198] == 2) {
-                var_v1 = 1;
+            if (owner->unk31C->unk198 == 2) {
+                triggered = 1;
             }
             break;
         }
     } else {
-        var_a2 = 5;
-        if (*(u16 *)(arg1 + 0x84) == 0x157) {
-            var_v1 = 1;
+        kind = 5;
+        if (owner->unk84.uh == 0x157) {
+            triggered = 1;
         }
     }
-    if (*(s32 *)(arg0 + 0x38) == 0) {
-        if (var_v1 != 0) {
-            temp_v0_3 = *(u8 **)(arg1 + 0x31C);
-            if ((temp_v0_3[0x197] != 0) || (var_a2 == 6)) {
-                if ((*(u16 *)(temp_v0_3 + 0x8A) & 0x2000) == 0x2000) {
-                    if (*(u16 *)(temp_v0_3 + 0x19E) == 0) {
-                        *(s32 *)(arg0 + 0x38) = 1;
-                        func_151026BC(arg1, -1, var_a2, 1, 0xFF, 1);
+    if (att->unk38 == 0) {
+        if (triggered) {
+            unk = owner->unk31C;
+            if ((unk->pad196[1] != 0) || (kind == 6)) {
+                if (((u16)unk->unk8A & 0x2000) == 0x2000) {
+                    if (unk->unk19E == 0) {
+                        att->unk38 = 1;
+                        func_151026BC(owner, -1, kind, 1, 0xFF, 1);
                     }
                 }
             }
         }
-    } else if ((var_v1 == 0) || (temp_v0_3 = *(u8 **)(arg1 + 0x31C), ((*(u16 *)(temp_v0_3 + 0x8A) & 0x2000) == 0)) || ((temp_v0_3[0x197] == 0) && (var_a2 != 6))) {
-        *(s32 *)(arg0 + 0x38) = 0;
-        func_151027E8(arg1);
+    } else if (!triggered || (unk = owner->unk31C, ((u16)unk->unk8A & 0x2000) == 0) ||
+               ((unk->pad196[1] == 0) && (kind != 6))) {
+        att->unk38 = 0;
+        func_151027E8(owner);
     }
     return 0;
 }
@@ -3045,14 +3016,14 @@ s32 func_15033BDC(Game5D2C0SoundInstance *arg0, s32 arg1, s32 *arg2, s32 arg3, s
     return 1;
 }
 
-s32 func_15033E00(s32 arg0, u8 *arg1) {
-    if (arg1[5] == 3) {
+/* Hook: removes the attachment once its owner's unk5 becomes 3. */
+s32 func_15033E00(Attachment *att, struct127 *owner) {
+    if (owner->unk5 == 3) {
         return 1;
     }
     return 0;
 }
 
-/* Stores every attachment of `owner` into `out` and returns how many there are. */
 s32 func_15033E28(struct127 *owner, Attachment **out) {
     Attachment *head;
     Attachment *att;
@@ -3117,17 +3088,18 @@ void func_15033EC4(s32 a, s32 b) {
     }
 }
 
-s32 func_15033F0C(s32 arg0, u8 *arg1) {
-    u8 *temp;
+/* Hook: removes the attachment (clearing unk31C->unk11A) unless unk31C->unk78 is 9 or unk11A is 3. */
+s32 func_15033F0C(Attachment *att, struct127 *owner) {
+    struct126 *unk;
 
     if (D_800C35EA == 1) {
         return 0;
     }
-    temp = *(u8 **)(arg1 + 0x31C);
-    if (temp != 0) {
-        if (temp[0x78] != 9) {
-            if (temp[0x11A] != 3) {
-                temp[0x11A] = 0;
+    unk = owner->unk31C;
+    if (unk != NULL) {
+        if (unk->unk78 != 9) {
+            if (unk->unk11A != 3) {
+                unk->unk11A = 0;
                 return 1;
             }
         }
@@ -3135,17 +3107,18 @@ s32 func_15033F0C(s32 arg0, u8 *arg1) {
     return 0;
 }
 
-s32 func_15033F70(s32 arg0, u8 *arg1) {
-    u8 *temp;
+/* Hook: like func_15033F0C, but keeps the attachment while unk31C->unk78 is 0xC or 0x16. */
+s32 func_15033F70(Attachment *att, struct127 *owner) {
+    struct126 *unk;
 
     if (D_800C35EA == 1) {
         return 0;
     }
-    temp = *(u8 **)(arg1 + 0x31C);
-    if (temp != 0) {
-        if ((temp[0x78] != 0xC) && (temp[0x78] != 0x16)) {
-            if (temp[0x11A] != 3) {
-                temp[0x11A] = 0;
+    unk = owner->unk31C;
+    if (unk != NULL) {
+        if ((unk->unk78 != 0xC) && (unk->unk78 != 0x16)) {
+            if (unk->unk11A != 3) {
+                unk->unk11A = 0;
                 return 1;
             }
         }
