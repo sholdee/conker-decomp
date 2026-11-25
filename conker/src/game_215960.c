@@ -1,9 +1,13 @@
 #include <ultra64.h>
 #define func_1510CE60 func_1510CE60_header // matching: this file keeps its own declarations of these
 #define func_1510D0EC func_1510D0EC_header
+#define func_15086D48 func_15086D48_header
 #include "functions.h"
 #undef func_1510CE60
 #undef func_1510D0EC
+#undef func_15086D48
+// matching: this file passes func_15086D48 a second argument, which it ignores
+s32 func_15086D48(s32, s32);
 #include "variables.h"
 
 /* Per-mode (D_800E0B94) overlay drawers, called by func_151E8620. */
@@ -140,8 +144,6 @@ extern u8 D_D14;
 extern u8 D_D16;
 u8 D_8009006C[4] = { 1, 8, 15, 21 };
 u8 D_80090070[3] = { 0, 8, 16 };
-extern s32 func_15086D48(s32, s32);
-extern void func_15086CBC(s32, f32 *, f32 *, f32 *);
 
 /* Draws the multiplayer score HUD: team scores, target and team icons, and arrows. */
 Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {

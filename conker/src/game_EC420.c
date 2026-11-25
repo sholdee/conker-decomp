@@ -293,7 +293,6 @@ typedef struct {
 
 #define WORK(obj) ((PlatformWork *)&(obj)->touch)
 
-extern void func_1508EE0C(s32, s32);
 extern void func_15164F0C(u8, u8, void *, u8, s32);
 
 /* Platform update. State 0 rests at the home height, 2 shakes then sinks by `travel`, 3 stays down

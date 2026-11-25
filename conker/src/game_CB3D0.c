@@ -1,5 +1,9 @@
 #include <ultra64.h>
+#define func_1508DC24 func_1508DC24_header
 #include "functions.h"
+#undef func_1508DC24
+// matching: func_1508DC24 returns nothing, but this file returns what it leaves in v0
+s32 func_1508DC24(void);
 #include "variables.h"
 
 struct CB3D0_arg1 {
@@ -32,28 +36,6 @@ struct CB3D0_arg2 {
     s32 unk4;
     s32 params[4];
 };
-
-extern s32 func_15089BC0(void);
-extern s32 func_1508A1BC(void);
-extern s32 func_1508A6FC(void);
-extern s32 func_1508BF14(void);
-extern s32 func_1508C194(s32);
-extern s32 func_1508CAD8(s32, s32, s32, s32, s32, s32);
-extern s32 func_1508DA1C(void);
-extern s32 func_1508DC24(void);
-extern s32 func_1508DAEC(s32, s32);
-extern s32 func_1508B9BC(void);
-extern s32 func_1508D850(s32);
-extern s32 func_1508E89C(s32, s32);
-extern s32 func_15086D48(s32);
-extern void func_15086CBC(s32, f32 *, f32 *, f32 *);
-extern void func_150870D0(s32, s32, s32);
-extern void func_15087350(s32, s32, f32);
-extern void func_15087DCC(s32, s32);
-extern void func_15087FEC(s32, s32);
-extern void func_15087FC4(s32, s32);
-extern s32 func_150880F8(s32, s32);
-extern void func_1508B1D4(s32);
 
 // Runs command `cmd` with up to four integer params; most commands forward to a helper.
 s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
@@ -160,18 +142,6 @@ s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
 }
 
 
-extern s32 func_1508CA88(void);
-extern s32 func_1508C9CC(void);
-extern s32 func_1508C5B8(s32 arg0, s32 arg1);
-extern s32 func_15089F9C(s32 arg0);
-extern s32 func_1508E6D0(s32 arg0);
-extern s32 func_150881CC(s32 arg0);
-extern s32 func_15088218(s32 arg0);
-extern s32 func_15088270(s32 arg0);
-extern s32 func_150882B0(s32 arg0);
-extern s32 func_150882E4(s32 arg0, s32 arg1);
-extern s32 func_150887F8(void);
-extern s32 func_1508B194(s32 arg0);
 extern s8 D_800E0BE0[];
 
 // Answers query `cmd` with up to four integer params and returns the result as an s32.

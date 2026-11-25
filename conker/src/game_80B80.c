@@ -6,13 +6,9 @@
 void func_15188810(void *, s32, s32);
 void func_150836CC(Actor *, s32);
 
-s32 func_1508855C(Actor *arg0);
-void func_15087350(s32, s32, f32);
-Actor *func_150883B0(s32, s32, f32 *, s32 *);
 s32 func_15104634(f32, f32, f32, f32 *);
 void func_15081690(Actor *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, void *arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
 s32 func_15081E78(Actor *, void *, s32);
-void func_15088780(Actor *);
 
 void func_150536D0(Actor *obj) {
     obj->type = 13;

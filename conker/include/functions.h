@@ -361,7 +361,6 @@ s32  func_15081574(s32, f32, f32, s32, s32, s32);
 void *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3);
 s32  func_15083E0C(u8);
 Actor *func_15083E90(u8 id);
-void func_1508B20C(f32, f32, f32, f32);
 void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
 void func_150A8050(MtxF mtx, f32 arg1, f32 arg2, f32 arg3);
 void func_150A9B0C(MtxF mtx, f32, f32, f32, f32, f32, f32);

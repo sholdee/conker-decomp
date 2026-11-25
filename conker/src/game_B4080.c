@@ -9,7 +9,6 @@ extern s8 D_800D239A;
 extern s8 D_800D2398;
 extern s8 D_800D2399;
 extern MpGame *D_800D23B0;
-s32 func_1508802C(Racer *racer, Actor *obj, s32 mode);
 extern f32 sqrtf(f32);
 
 #pragma intrinsic(sqrtf)
@@ -35,10 +34,10 @@ void func_15086C68(void) {
 }
 
 /* Calls zone_findAt(3, 11, ...) at path node `index`. */
-void func_15086C70(s32 index) {
+TriggerZone *func_15086C70(s32 index) {
     s16 z = D_800D2350[index].z;
 
-    zone_findAt(3, 11, D_800D2350[index].x, D_800D2350[index].y, z);
+    return zone_findAt(3, 11, D_800D2350[index].x, D_800D2350[index].y, z);
 }
 
 /* Writes the position of path node `index` to *x, *y, *z; returns 0 if out of range. */
@@ -129,8 +128,6 @@ f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
 }
 
 extern s32 D_800D2394;
-u8 func_150888A8(u8, u8, s8);
-void func_15088824(Racer *racer);
 
 /*
  * Allocates the racers (numRacers racing plus numSpare free slots) and places them on the
@@ -212,8 +209,6 @@ void func_150870D0(s32 startId, s32 numRacers, s32 numSpare) {
 
 extern f32 D_800CC310;
 extern s8 D_800D2390;
-void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
-s32 func_15088A08(Racer *racer, f32 step);
 
 /*
  * Per-frame update of racer `index`: steers it along the path to follow its actor, tracks its
@@ -410,9 +405,6 @@ void func_15087350(s32 index, s32 started, f32 lookahead) {
         }
     }
 }
-
-void func_150891E8(Racer *racer, Actor *obj);
-void func_150896EC(Racer *racer, Actor *obj, s32 leave);
 
 /* Runs the race cameras of every racer whose actor has a camera. */
 void func_15087CC0(void) {
@@ -791,12 +783,11 @@ s32 func_1508868C(Actor *obj) {
 }
 
 /* Releases the spare racer slot of the calling actor. */
-void func_15088780(void) {
-    s32 func_1508855C(); /* called without its actor argument: a0 passes through */
+void func_15088780(Actor *obj) {
     s32 index;
 
     if (D_800872A0 != NULL) {
-        index = func_1508855C();
+        index = func_1508855C(obj);
         D_800872A0[index].actorIndex = 0;
         D_800D2394 &= ~(1 << (index - D_800D2398));
     }
@@ -1315,39 +1306,9 @@ void func_150896EC(Racer *racer, Actor *obj, s32 leave) {
     func_1512D560(obj->CameraPtr, 7, p);
 }
 
-void func_1508BC20(void);
-s32 func_1508A1BC(void);
-
-s32 func_1508CAD8(s32, s32, s32, s32, s32, s32);
-void func_1508EC5C(s32, s32);
-void func_1508EBF8(s32, s32);
-s32 func_1508DAEC(s32, s32);
-void func_1508B3F8(void);
-void func_1508B20C(f32 x, f32 y, f32 z, f32 r);
-
-void func_1508B3F8(void);
-
-s32 func_1508C5B8(s32, s32);
-s32 func_1508A1BC(void);
-s32 func_1508B9BC(void);
-void func_1508BC20(void);
-
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *,
                   f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
-s32 func_1508C5B8(s32 player, s32 checks);
 
 
-s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, s32 dropOffset);
 
-void func_1508EB90(s32 arg0, s32 arg1, s32 arg2);
-s32 func_1508DAEC(s32 player, s32 mode);
-
-
-s32 func_1508E780(s32 arg0);
-s32 func_1508E780(s32 type);
-
-s32 func_1508E89C(s32 player, s32 source);
-void func_1508EB90(s32 player, s32 id, s32 param);
-void func_1508EBF8(s32 player, s32 param);
-void func_1508EC5C(s32 player, s32 param);
 

@@ -135,10 +135,6 @@ Gfx *func_150D765C(Gfx *gdl) {
 }
 
 
-s32 func_1508855C(Actor *obj);
-void func_150885EC(s32 src, s32 dst);
-s32 func_1508868C(Actor *obj);
-
 /* Performs action `action` for obj: 0x30/0x31 play sound 0x628 and set unk12C to 120; 0x32/0x33 fire a
  * kind-0xD projectile (0x33 with unk83 60 instead of 30, and the projectile takes over a copy of obj's racer
  * slot). Each spends one use of unk1AE, and nothing happens once those run out. */

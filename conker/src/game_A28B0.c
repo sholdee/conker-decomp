@@ -812,8 +812,6 @@ void func_150774B4(void) {
     }
 }
 
-s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z);
-
 /* the s16 at 0x216 overlaps Actor's s32 unk214 */
 #define UNK216(p) (*(s16 *)((u8 *)(p) + 0x216))
 

@@ -75,7 +75,6 @@ extern f32 D_800CBD98;
 extern f32 D_800CBDFC;
 extern u16 D_800CC27E;
 void func_15044380(f32, f32, f32, Actor *, s32, s32);
-void func_15087E54(u8, Actor *);
 s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
 void func_1510E8BC(void **, s16 (*)[3], f32 *, f32 *, u32 *, s16 *, f32, f32, f32, f32, s32, Actor *, f32, f32, s32);
 void func_15121490(Actor *, OSContPad *);
@@ -1581,7 +1580,6 @@ void func_150511E8(Actor *actor) {
     func_1505A250(-slopeX, -slopeZ, leanRate, &actor->ob_slopex, &actor->ob_slopey);
 }
 
-void func_15087EF0(s32, void *);
 
 /* Ground/water tilt for a player-like actor: slides on steep slopes, then eases roll (unkC4) and pitch (unkB8). */
 void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {

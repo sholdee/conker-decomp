@@ -3852,8 +3852,6 @@ f32 D_8008FF90[8] = { 0.012f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f };
 u8 D_8008FFB0[2][6] = { { 1, 0xFF, 4, 6, 8, 3 }, { 0xFF, 0xFF, 0xFF, 0xFF, 9, 5 } };
 extern Snd151E6C1C D_800AB908[];
 extern Snd151E6C1C D_800AB920[];
-extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
-extern s32 func_15086D48(s32);
 
 #define UNK2AC_F32 (*(f32 *)&obj->focus.z) // an f32; structs.h declares Camera.unk2AC as s32
 

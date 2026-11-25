@@ -14,7 +14,6 @@ typedef struct {
 
 #define WORK(obj) ((PickupWork *)&(obj)->touch)
 
-extern void func_1508EE0C(u16, u16);
 
 /* Animates the pickup and lets any nearby player collect it; afterwards it fades back in or is removed. */
 void func_15119FC0(WorldObject *obj) {

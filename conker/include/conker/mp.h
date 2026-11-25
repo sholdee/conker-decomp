@@ -106,4 +106,97 @@ typedef struct MpGame {
     /* 0x24DC */ s32 unk24DC[9];
 } MpGame;
 
+/* Flood fill over the path graph from a point, collecting the nodes just outside a radius. */
+typedef struct PathSearch {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 z;
+    /* 0x08 */ f32 radiusSq;
+    /* 0x0C */ f32 dist[8];
+    /* 0x2C */ s16 count;
+    /* 0x2E */ u8 ids[8];
+    /* 0x36 */ u8 visited[0x20]; /* bitset of visited node ids */
+} PathSearch;
+
+/* game_B4080.c */
+f32 func_15086BD0(s32 a, s32 b);
+void func_15086C68(void);
+TriggerZone *func_15086C70(s32 index);
+s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z);
+s32 func_15086D48(s32 id);
+f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz);
+void func_150870D0(s32 startId, s32 numRacers, s32 numSpare);
+void func_15087350(s32 index, s32 started, f32 lookahead);
+void func_15087CC0(void);
+void func_15087DCC(s32 index, s32 route);
+void func_15087E54(s32 index, Actor *obj);
+void func_15087EF0(s32 index, Actor *obj);
+void func_15087FC4(s32 index, s32 actorIndex);
+void func_15087FEC(s32 index, s32 lateral);
+s32 func_1508802C(Racer *racer, Actor *obj, s32 mode);
+s32 func_150880F8(s32 index, s32 mode);
+s32 func_150881CC(s32 index);
+s32 func_15088218(s32 index);
+s32 func_15088270(s32 index);
+s32 func_150882B0(s32 index);
+s32 func_150882E4(s32 index, s32 offset);
+Actor *func_150883B0(s32 index, s32 dir, f32 *lateral, s32 *route);
+s32 func_1508855C(Actor *obj);
+void func_150885EC(s32 src, s32 dst);
+s32 func_1508868C(Actor *obj);
+void func_15088780(Actor *obj);
+s32 func_150887F8(void);
+void func_15088824(Racer *racer);
+u8 func_150888A8(u8 prev, u8 cur, s8 route);
+s32 func_15088A08(Racer *racer, f32 step);
+void func_15088D58(Actor *obj);
+void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
+u8 func_1508907C(u8 node, u8 type, u8 exclude, u8 param);
+void func_150891E8(Racer *racer, Actor *obj);
+void func_150896EC(Racer *racer, Actor *obj, s32 leave);
+
+/* game_B7060.c */
+void func_15089BB0(void);
+s32 func_15089BC0(void);
+s32 func_15089F9C(s32 player);
+s32 func_1508A1BC(void);
+s32 func_1508A6FC(void);
+s32 func_1508B194(s32 player);
+void func_1508B1D4(s32 player);
+void func_1508B20C(f32 x, f32 y, f32 z, f32 r);
+void func_1508B2A8(u8 id, PathSearch *s);
+void func_1508B3F8(void);
+s32 func_1508B9BC(void);
+void func_1508BC20(void);
+s32 func_1508BF14(void);
+s32 func_1508C194(s32 player);
+void func_1508C1A4(s32 a, s32 b);
+s32 func_1508C5B8(s32 player, s32 checks);
+s32 func_1508C9CC(void);
+s32 func_1508CA88(void);
+s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffset, s32 dropOffset);
+s32 func_1508D850(s32 player);
+s32 func_1508DA1C(void);
+s32 func_1508DAEC(s32 player, s32 mode);
+void func_1508DC24(void);
+void func_1508E6C8(void);
+s32 func_1508E6D0(s32 type);
+s32 func_1508E780(s32 type);
+s32 func_1508E89C(s32 player, s32 source);
+void func_1508EB90(s32 player, s32 id, s32 param);
+void func_1508EBF8(s32 player, s32 param);
+void func_1508EC5C(s32 player, s32 param);
+s32 func_1508ECC0(u16 type, u16 id, u16 kind);
+void func_1508EDBC(s32 index);
+void func_1508EE0C(u16 type, u16 id);
+extern f32 D_800872B0[5];
+extern s16 D_800872C4[5]; /* aim time limit, -1 = none */
+extern s8 D_800872D0[5];
+extern s8 D_800872D8[5];
+extern s8 D_800872E0[5];
+extern s8 D_800872E8[5]; /* percent chance */
+extern s8 D_800872F0[5];
+extern f32 D_800872F8[5]; /* aim rate */
+extern f32 D_8008730C[5]; /* not referenced by any code */
+extern s16 D_80087320[5][3]; /* [level][range] attack timer limit */
+
 #endif

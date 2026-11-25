@@ -47,9 +47,6 @@ struct SwingMotion {
     /* 0x1E */ u8 pad1E[6];
 }; /* size 0x24 */
 
-extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
-extern s32 func_15086D48(s32);
-
 /*
  * Carries character work.swing.character along a semicircular arc from where it stands (state 1)
  * to the position returned for object 0x28, then marks the prop finished. While it swings

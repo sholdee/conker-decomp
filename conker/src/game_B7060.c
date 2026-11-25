@@ -6,41 +6,19 @@
 #define VIEWS ((RenderView *)D_800BE628)
 
 extern MpGame *D_800D23B0;
-s32 func_1508802C(Racer *racer, Actor *obj, s32 mode);
 extern f32 sqrtf(f32);
 
 #pragma intrinsic(sqrtf)
 
-s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z);
-s32 func_15086D48(s32 id);
-f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz);
-
-u8 func_150888A8(u8, u8, s8);
-void func_15088824(Racer *racer);
-
-void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
-s32 func_15088A08(Racer *racer, f32 step);
-
-void func_150891E8(Racer *racer, Actor *obj);
-void func_150896EC(Racer *racer, Actor *obj, s32 leave);
-s32 func_1508802C(Racer *racer, Actor *obj, s32 mode);
 
 
-void func_15088824(Racer *racer);
-u8 func_150888A8(u8 prev, u8 cur, s8 route);
-s32 func_15088A08(Racer *racer, f32 step);
 
-void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
-
-void func_150891E8(Racer *racer, Actor *obj);
-void func_150896EC(Racer *racer, Actor *obj, s32 leave);
 
 void func_15089BB0(void) {
     D_800D23B0 = NULL;
 }
 
 void *func_1509B570(s32);
-void func_1508BC20(void);
 /* Per-difficulty bot tuning (indexed by D_800E0BD0): this file's .data, in the original order. */
 f32 D_800872B0[5] = { 1.5f, 1.2f, 0.8f, 0.4f, 0.15f };
 s16 D_800872C4[5] = { -1, -1, 600, 240, 0 }; // aim time limit, -1 = none
@@ -296,12 +274,6 @@ s32 func_1508A1BC(void) {
     return 0;
 }
 
-s32 func_1508CAD8(s32, s32, s32, s32, s32, s32);
-void func_1508EC5C(s32, s32);
-void func_1508EBF8(s32, s32);
-s32 func_1508DAEC(s32, s32);
-void func_1508B3F8(void);
-
 /* Per-frame update of every player's multiplayer state; returns a mask of players that respawned. */
 s32 func_1508A6FC(void) {
     s32 i;
@@ -530,7 +502,6 @@ s32 func_1508A6FC(void) {
     return result;
 }
 
-
 /* Returns player's score record value (0 for a non-human player). */
 s32 func_1508B194(s32 player) {
     if (player >= D_8008FD90) {
@@ -559,17 +530,6 @@ void func_1508B20C(f32 x, f32 y, f32 z, f32 r) {
         D_800D23B0->zoneList[n].radiusSq = r * r;
     }
 }
-
-/* Flood fill over the path graph from a point, collecting the nodes just outside a radius. */
-typedef struct PathSearch {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 z;
-    /* 0x08 */ f32 radiusSq;
-    /* 0x0C */ f32 dist[8];
-    /* 0x2C */ s16 count;
-    /* 0x2E */ u8 ids[8];
-    /* 0x36 */ u8 visited[0x20]; /* bitset of visited node ids */
-} PathSearch;
 
 /*
  * Flood-fills the path graph from node `id`, marking visited nodes; nodes farther than
@@ -693,9 +653,6 @@ void func_1508B3F8(void) {
     }
     D_800D23B0->numZones = 0;
 }
-
-s32 func_1508C5B8(s32, s32);
-s32 func_1508A1BC(void);
 
 /*
  * Picks the best opponent for player unk4: the active player with the lowest path cost to it,
@@ -1163,10 +1120,7 @@ s32 func_1508CA88(void) {
     return temp;
 }
 
-
 void func_150DA5EC(Actor *, f32);
-
-
 
 /*
  * Steers bot `player` toward player `target`: eases the smoothed aim point (aimX/aimY/aimZ)
@@ -1464,8 +1418,6 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
     return result;
 }
 
-void func_1508EB90(s32 arg0, s32 arg1, s32 arg2);
-
 /*
  * Copies player's target to its state (unk129). Once its attackTimer passes the limit for
  * this level and distance it is reset, with func_1508EB90(player, 0x61, 0x2000) if the target
@@ -1580,7 +1532,6 @@ s32 func_1508DAEC(s32 player, s32 mode) {
 }
 
 
-s32 func_1508E780(s32 arg0);
 
 
 /*
@@ -2058,7 +2009,6 @@ void func_1508EC5C(s32 player, s32 param) {
     func_1509BFB0(1, temp | 0x2000, 0x61, param);
 }
 
-
 /* Finds the entry of kind `kind` linked to (type, id); returns its id or -1. */
 s32 func_1508ECC0(u16 type, u16 id, u16 kind) {
     u32 i;
@@ -2090,7 +2040,6 @@ void func_1508EDBC(s32 index) {
         D_800D23C0[index].unk0 = 0;
     }
 }
-
 
 /* Fires every entry of the link group containing (type, id), then clears the group. */
 void func_1508EE0C(u16 type, u16 id) {

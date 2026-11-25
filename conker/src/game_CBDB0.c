@@ -14,9 +14,6 @@ typedef union {
 /* Script-set scratch words of an object (its WorldObject.touch), each a float or a raw value. */
 #define WORK(obj) ((FloatOrWord *)&(obj)->touch)
 
-extern s32 func_15086D48(s32);
-extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
-
 /* Script "set" handler for the object with id `id`: applies operation `op` with operands cmd[2..]. */
 s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
     WorldObject *obj;
