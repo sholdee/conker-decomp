@@ -1123,7 +1123,7 @@ extern u16 D_800C5EF8[];
 extern VtxTri *D_800C6070[187]; // per model id: triangles
 extern TexCoord *D_800C6360[187]; // per model id: saved texture coordinates (func_1503D804)
 
-extern struct160 *D_800C6650; // aim points (D_800C6654 of them)
+extern AimPoint *D_800C6650; // aim points (D_800C6654 of them)
 extern s32 D_800C6654;
 extern ObjPartsState D_800C6660[];
 extern u8  D_800C67F0;

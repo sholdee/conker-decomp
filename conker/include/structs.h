@@ -2080,26 +2080,29 @@ struct Camera {
     /* 0x99C */ f32 sideOffsetTarget;
 }; // size 0x9A0
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    u32 unk8;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-} struct160; // size 0x14
+/* An aim point (D_800C6650[D_800C6654]): a sphere that objects can aim at, built by func_15004FE0 from an
+ * AimPointDef asset. minX/maxX cache the x extent for a quick reject. */
+typedef struct AimPoint {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 flags;    /* 2: removed (func_1503DDD0) */
+    /* 0x08 */ u32 radiusSq;
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ s16 maxX;     /* x + radius */
+    /* 0x10 */ s16 minX;     /* x - radius */
+    /* 0x12 */ s16 unk12;
+} AimPoint; // size 0x14
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-} struct161; // size 0x18
+/* One aim point as stored in its level asset (converted to AimPoint on load). */
+typedef struct AimPointDef {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 z;
+    /* 0x0C */ f32 radius;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+} AimPointDef; // size 0x18
 
 typedef struct {
     u8  pad0[0x8];

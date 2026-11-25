@@ -620,7 +620,7 @@ void func_1507E9E8(Actor *, s32);
 /*
  * Picks the point object objIndex should aim bone `bone` at, writing it to out (or -99999 when there is none):
  * its camera's target, a fixed target mode, the held object for anim 0x81, the nearest other object,
- * the nearest struct160 aim point, or the nearest node from the D_800DCE50 lists, each within +-range degrees.
+ * the nearest AimPoint, or the nearest node from the D_800DCE50 lists, each within +-range degrees.
  */
 void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32 preferId, s32 axisMode) {
     Actor *obj;
@@ -628,7 +628,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
     s32 foundKind;
     s16 objX;
     u32 idx;
-    struct160 *point;
+    AimPoint *point;
     f32 radiusSq;
     f32 px;
     f32 py;
@@ -709,12 +709,12 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
             idx = D_80084400;
             bestIdx = -1;
             do {
-                point = &((struct160 *)D_800C6650)[idx]; // matching: the no-op cast keeps the addu operand order
-                if (objX < point->unkE && point->unk10 < objX && (u16)point->unk6 == 0) {
-                    radiusSq = point->unk8;
-                    px = point->unk0;
-                    py = point->unk2;
-                    pz = point->unk4;
+                point = &((AimPoint *)D_800C6650)[idx]; // matching: the no-op cast keeps the addu operand order
+                if (objX < point->maxX && point->minX < objX && (u16)point->flags == 0) {
+                    radiusSq = point->radiusSq;
+                    px = point->x;
+                    py = point->y;
+                    pz = point->z;
                     dz = obj->z_position - pz;
                     dy = obj->y_position - py;
                     dz *= dz;
