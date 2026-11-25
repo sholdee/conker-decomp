@@ -131,12 +131,13 @@ s8 func_15147EB8(Trail *trail) {
     TrailParams *params;
     s8 done;
     TrailPoint *points;
-    s16 val;
-    s32 prod;
+    s16 unk1C;
+    s32 fade;
     s32 ret;
 
     params = trail->params;
     done = 0;
+    /* The two update handlers are called without arguments. */
     if (params->state != 0) {
         if (D_8008A3E0[params->state]() == 0) {
             done = 1;
@@ -148,18 +149,18 @@ s8 func_15147EB8(Trail *trail) {
         }
     }
     if ((params->motion.flags & 0x40) && !done) {
-        val = trail->unk1C;
-        if (val < params->motion.unk1C) {
-            prod = val * params->motion.unk1E;
-            if (prod < params->motion.unk1B) {
-                params->motion.unk1B = prod;
+        unk1C = trail->unk1C;
+        if (unk1C < params->motion.unk1C) {
+            fade = unk1C * params->motion.unk1E;
+            if (fade < params->motion.unk1B) {
+                params->motion.unk1B = fade;
             }
         }
     }
     ret = !done;
     if (done) {
         if (params->finishFn != 0) {
-            done = D_8008A42C[params->finishFn](trail);
+            done = D_8008A42C[params->finishFn](trail); // matching: dead store of the result
         }
     }
     points = trail->points;
@@ -198,21 +199,21 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
     TrailParams *params;
     Vtx *vtx;
     u8 update;
-    Vec3f b;
-    Vec3f a;
+    Vec3f next;
+    Vec3f cur;
     s32 i;
     s32 j;
     Vec3f *cam;
     TrailPoint *points;
-    f32 dx;
-    f32 dy;
-    f32 dz;
-    f32 ex;
-    f32 ey;
-    f32 ez;
-    f32 cx;
-    f32 cy;
-    f32 cz;
+    f32 toCamX;
+    f32 toCamY;
+    f32 toCamZ;
+    f32 segX;
+    f32 segY;
+    f32 segZ;
+    f32 sideX;
+    f32 sideY;
+    f32 sideZ;
     f32 len;
     s16 envR;
     s16 envG;
@@ -258,32 +259,32 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
             if (j < 0) {
                 j = trail->capacity - 1;
             }
-            a = points[i].pos;
-            b = points[j].pos;
-            ex = a.x - b.x;
-            ey = a.y - b.y;
-            ez = a.z - b.z;
-            dx = a.x - cam->x;
-            dy = a.y - cam->y;
-            dz = a.z - cam->z;
-            cx = (ey * dz) - (dy * ez);
-            cy = (ez * dx) - (dz * ex);
-            cz = (ex * dy) - (dx * ey);
-            len = sqrtf((cx * cx) + (cy * cy) + (cz * cz));
+            cur = points[i].pos;
+            next = points[j].pos;
+            segX = cur.x - next.x;
+            segY = cur.y - next.y;
+            segZ = cur.z - next.z;
+            toCamX = cur.x - cam->x;
+            toCamY = cur.y - cam->y;
+            toCamZ = cur.z - cam->z;
+            sideX = (segY * toCamZ) - (toCamY * segZ);
+            sideY = (segZ * toCamX) - (toCamZ * segX);
+            sideZ = (segX * toCamY) - (toCamX * segY);
+            len = sqrtf((sideX * sideX) + (sideY * sideY) + (sideZ * sideZ));
             if (len == 0.0f) {
-                cx = 0.0f;
-                cy = 0.0f;
-                cz = 0.0f;
+                sideX = 0.0f;
+                sideY = 0.0f;
+                sideZ = 0.0f;
             } else {
                 f32 scale;
                 scale = params->motion.halfWidth / len;
-                cx = cx * scale;
-                cy = cy * scale;
-                cz = cz * scale;
+                sideX *= scale;
+                sideY *= scale;
+                sideZ *= scale;
             }
-            vtx->v.ob[0] = a.x + cx;
-            vtx->v.ob[1] = a.y + cy;
-            vtx->v.ob[2] = a.z + cz;
+            vtx->v.ob[0] = cur.x + sideX;
+            vtx->v.ob[1] = cur.y + sideY;
+            vtx->v.ob[2] = cur.z + sideZ;
             vtx->v.tc[1] = points[i].phase + 0x4000;
             vtx->v.tc[0] = 0x43C0;
             vtx->v.cn[0] = 0xFF;
@@ -292,9 +293,9 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
             vtx->v.cn[3] = 0xFF;
             vtx->v.flag = 0;
             vtx++;
-            vtx->v.ob[0] = a.x - cx;
-            vtx->v.ob[1] = a.y - cy;
-            vtx->v.ob[2] = a.z - cz;
+            vtx->v.ob[0] = cur.x - sideX;
+            vtx->v.ob[1] = cur.y - sideY;
+            vtx->v.ob[2] = cur.z - sideZ;
             vtx->v.tc[1] = points[i].phase + 0x4000;
             vtx->v.tc[0] = 0x4000;
             vtx->v.cn[0] = 0xFF;
@@ -304,30 +305,30 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
             vtx->v.flag = 0;
             vtx++;
             do {
-                ex = a.x - b.x;
-                ey = a.y - b.y;
-                ez = a.z - b.z;
-                dx = b.x - cam->x;
-                dy = b.y - cam->y;
-                dz = b.z - cam->z;
-                cx = (ey * dz) - (dy * ez);
-                cy = (ez * dx) - (dz * ex);
-                cz = (ex * dy) - (dx * ey);
-                len = sqrtf((cx * cx) + (cy * cy) + (cz * cz));
+                segX = cur.x - next.x;
+                segY = cur.y - next.y;
+                segZ = cur.z - next.z;
+                toCamX = next.x - cam->x;
+                toCamY = next.y - cam->y;
+                toCamZ = next.z - cam->z;
+                sideX = (segY * toCamZ) - (toCamY * segZ);
+                sideY = (segZ * toCamX) - (toCamZ * segX);
+                sideZ = (segX * toCamY) - (toCamX * segY);
+                len = sqrtf((sideX * sideX) + (sideY * sideY) + (sideZ * sideZ));
                 if (len == 0.0f) {
-                    cx = 0.0f;
-                    cy = 0.0f;
-                    cz = 0.0f;
+                    sideX = 0.0f;
+                    sideY = 0.0f;
+                    sideZ = 0.0f;
                 } else {
                     f32 scale;
                     scale = params->motion.halfWidth / len;
-                    cx = cx * scale;
-                    cy = cy * scale;
-                    cz = cz * scale;
+                    sideX *= scale;
+                    sideY *= scale;
+                    sideZ *= scale;
                 }
-                vtx->v.ob[0] = b.x + cx;
-                vtx->v.ob[1] = b.y + cy;
-                vtx->v.ob[2] = b.z + cz;
+                vtx->v.ob[0] = next.x + sideX;
+                vtx->v.ob[1] = next.y + sideY;
+                vtx->v.ob[2] = next.z + sideZ;
                 vtx->v.tc[1] = points[j].phase + 0x4000;
                 vtx->v.tc[0] = 0x43C0;
                 vtx->v.cn[0] = 0xFF;
@@ -336,9 +337,9 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
                 vtx->v.cn[3] = 0xFF;
                 vtx->v.flag = 0;
                 vtx++;
-                vtx->v.ob[0] = b.x - cx;
-                vtx->v.ob[1] = b.y - cy;
-                vtx->v.ob[2] = b.z - cz;
+                vtx->v.ob[0] = next.x - sideX;
+                vtx->v.ob[1] = next.y - sideY;
+                vtx->v.ob[2] = next.z - sideZ;
                 vtx->v.tc[1] = points[j].phase + 0x4000;
                 vtx->v.tc[0] = 0x4000;
                 vtx->v.cn[0] = 0xFF;
@@ -355,8 +356,8 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
                 if (j < 0) {
                     j = trail->capacity - 1;
                 }
-                a = points[i].pos;
-                b = points[j].pos;
+                cur = points[i].pos;
+                next = points[j].pos;
             } while (i != trail->start);
         }
     }
@@ -454,33 +455,33 @@ s32 func_15046C80(f32 *, u16, f32, TrailCollision *);
 s32 func_15148BA4(Trail *trail) {
     s32 index;
     TrailParams *params;
-    s32 points;
+    TrailPoint *points;
     Vec3f oldPosition;
     Vec3f position;
     u8 callback;
 
     params = trail->params;
-    points = (s32)trail->points;
+    points = trail->points;
     index = trail->end;
     if (params->motion.flags & 7) {
-        oldPosition = *(Vec3f *)((u32)points + trail->start * 0x14);
+        oldPosition = points[trail->start].pos;
     }
     do {
         index--;
         if (index < 0) {
             index = trail->capacity - 1;
         }
-        ((TrailPoint *)((u32)points + index * 0x14))->velocityY -= params->motion.gravity * D_800BE9A4;
-        ((TrailPoint *)((u32)points + index * 0x14))->pos.x += params->motion.velocity.x * D_800BE9A4;
-        ((TrailPoint *)((u32)points + index * 0x14))->pos.y += ((TrailPoint *)((u32)points + index * 0x14))->velocityY * D_800BE9A4;
-        ((TrailPoint *)((u32)points + index * 0x14))->pos.z += params->motion.velocity.z * D_800BE9A4;
+        points[index].velocityY -= params->motion.gravity * D_800BE9A4;
+        points[index].pos.x += params->motion.velocity.x * D_800BE9A4;
+        points[index].pos.y += points[index].velocityY * D_800BE9A4;
+        points[index].pos.z += params->motion.velocity.z * D_800BE9A4;
     } while (index != trail->start);
     if (params->motion.flags & 0x17) {
-        if (((TrailPoint *)((u32)points + trail->start * 0x14))->pos.y < oldPosition.y) {
-            position.x = ((TrailPoint *)((u32)points + trail->start * 0x14))->pos.x;
+        if (points[trail->start].pos.y < oldPosition.y) {
+            position.x = points[trail->start].pos.x;
             position.y = oldPosition.y;
-            position.z = ((TrailPoint *)((u32)points + trail->start * 0x14))->pos.z;
-            if (func_15046C80(&position.x, 0, ((TrailPoint *)((u32)points + trail->start * 0x14))->pos.y,
+            position.z = points[trail->start].pos.z;
+            if (func_15046C80(&position.x, 0, points[trail->start].pos.y,
                               &trail->collision) != 0) {
                 if (trail->collision.kind == 3) {
                     callback = params->hitKind3Fn;
@@ -508,40 +509,33 @@ s32 func_15148BA4(Trail *trail) {
 /* Drops the newest point and respaces the remaining points' phases; fails below three points. */
 s32 func_15148DE0(Trail *trail) {
     s32 idx;
-    s32 step;
-    s32 step2;
-    s8 count;
-    s32 phase;
-    TrailMotion *motion;
+    u16 step;
+    u16 phase;
+    TrailParams *params;
     TrailPoint *points;
 
-    count = trail->count;
-    if (count >= 3) {
-        trail->count = count - 1;
+    if (trail->count >= 3) {
+        trail->count--;
         points = trail->points;
-        motion = &trail->params->motion;
+        params = trail->params;
         idx = trail->start;
-        step = (0x1000 / trail->count) & 0xFFFF;
-        phase = (motion->flags & 0x20) ? 0x1000 : 0;
-        trail->end = trail->end - 1;
+        step = 0x1000 / trail->count;
+        phase = (params->motion.flags & 0x20) ? 0x1000 : 0;
+        trail->end--;
         if (trail->end < 0) {
             trail->end = trail->capacity - 1;
         }
-        if (idx != trail->end) {
-            step2 = step;
-            step = 0x14;
-            do {
-                ((TrailPoint *)((u8 *)points + (idx * step)))->phase = phase;
-                if (motion->flags & 0x20) {
-                    phase = (phase - step2) & 0xFFFF;
-                } else {
-                    phase = (phase + step2) & 0xFFFF;
-                }
-                idx++;
-                if (idx == trail->capacity) {
-                    idx = 0;
-                }
-            } while (idx != trail->end);
+        while (idx != trail->end) {
+            points[idx].phase = phase;
+            if (params->motion.flags & 0x20) {
+                phase -= step;
+            } else {
+                phase += step;
+            }
+            idx++;
+            if (idx == trail->capacity) {
+                idx = 0;
+            }
         }
         return 1;
     }
@@ -627,6 +621,7 @@ s32 func_151490C8(Trail *trail) {
         alpha = 0xFF;
     }
     params->motion.unk1B = alpha;
+    // matching: an always-false test of the stored byte (andi 0xFF; bgez)
     if ((alpha & 0xFF) < 0) {
         return 0;
     }
