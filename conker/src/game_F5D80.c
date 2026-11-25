@@ -4,7 +4,6 @@
 #include "effects.h"
 
 void func_15143794(s32 heading, s32 pitch, f32 speed, f32 *out);
-s32 func_1510D0EC(s32, s32 *, s32, s32);
 
 typedef struct {
     f32 x; /* sin of the segment angle */

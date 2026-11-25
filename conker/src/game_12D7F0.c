@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern void light_sendEvent(u8, u8, s32);
 
 typedef struct {

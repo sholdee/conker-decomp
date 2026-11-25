@@ -6,7 +6,6 @@
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
 
 void func_10004074(void *data);
-void func_1510D694(s32 arg0);
 Gfx *func_1501A680(Gfx *gfx);
 Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry);
 Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 b);
@@ -332,7 +331,6 @@ typedef struct SkyTile {
 } SkyTile;
 
 s32 func_150A6210(MtxF mtx, f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
-extern s32 func_1510D0EC(s32, s32, s32, s32);
 extern u8 D_1673[];
 
 /* Draws one sky face, with texture set texSet (tiles from firstTex on): a width x height grid of tileW x tileH

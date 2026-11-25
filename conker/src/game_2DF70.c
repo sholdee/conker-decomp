@@ -32,7 +32,6 @@ void func_15000AC0(void) {
     D_800D9E64 = 0;
 }
 
-extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15111858(void);
 
 /**

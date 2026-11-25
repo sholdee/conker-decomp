@@ -80,7 +80,6 @@ void func_15095060(TextureDesc *desc, s32 frame, SpriteParams *sprite) {
     D_800D2C90.frames = desc->frames;
 }
 
-extern s32 func_1510D0EC(s32, s32, s32, s32);
 // Per-G_IM_SIZ tables, as libultra's G_IM_SIZ_*_INCR, _SHIFT, line-bits and _LOAD_BLOCK.
 
 /* Loads frame `frame` of `tex` (and its palette) into tmem, as tile `tile` placed at (s, t). */

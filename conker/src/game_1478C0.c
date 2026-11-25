@@ -47,8 +47,6 @@ typedef struct {
 } TexAnim;
 
 extern TexAnim D_80089324[24];
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
-extern void func_1510D874(void *, s32, s32, s32, s32);
 
 /**
  * Advances the texture animation that matches obj's kind in the current world and loads the

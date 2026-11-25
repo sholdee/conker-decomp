@@ -217,7 +217,6 @@ onFloor: // matching: an unused label splits the block, so the call setup stays 
 }
 
 extern void func_150A7D00(Mtx *, f32 x, f32 y, f32 z); /* translation matrix */
-extern s32 func_1510D0EC(s32, s32, s32, s32);
 extern s32 func_1506196C(u8 *arg0, s32 arg1);
 extern s32 D_80091770[];
 

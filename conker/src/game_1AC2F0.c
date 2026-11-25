@@ -388,7 +388,6 @@ Gfx *func_1517FB9C(Gfx *gfx, s32 size, s32 texSize, f32 dx, f32 dy, s32 view) {
 }
 
 extern Gfx D_8008D018[];
-extern s32 func_1510D0EC(s32, s32 *, s32, s32); // texture address of a texture id
 
 /* Draws the iris wipe of `view`: black around a round hole, with optional sight marks and overlay. */
 Gfx *func_15180580(Gfx *gfx, s32 view) {

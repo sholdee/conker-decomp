@@ -104,7 +104,6 @@ void func_150D7630(s32 arg0) {
 }
 
 extern TextureFrameTables D_80088900; /* = { D_80090230, D_80090244 } */
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
 /* Binds six animated textures to segments 2-7, texture i showing frame (clock + 13 * i) % 5;
  * the last two come from the second frame table. */

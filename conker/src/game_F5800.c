@@ -85,7 +85,6 @@ void func_150C851C(s32 scale) {
 }
 
 extern TextureFrameTables D_80088810; /* = { D_80090230, D_80090244 } */
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
 /* Binds record i's current frame (pos >> 8, clamped to 0-4) from its table to segment i + 1. */
 Gfx *func_150C8600(Gfx *gdl) {

@@ -650,7 +650,6 @@ Gfx *func_1517D690(Gfx *gfx, s32 texture) {
 }
 
 extern s32 D_800DDD24;
-Gfx *func_1510CDB8(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3);
 
 /*
  * Draws the queued billboards (func_1517D690), then every sprite built by func_1517BBAC whose second

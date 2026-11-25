@@ -352,8 +352,6 @@ Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
     return gfx;
 }
 
-Gfx *func_1510CDB8(Gfx *gfx, s32, s32 alpha, s32 view);
-Gfx *func_1510D8C0(Gfx *gfx, WorldObject *obj);
 Gfx *func_150CF5E8(Gfx *gfx);
 Gfx *func_150A50C0(Gfx *dl, Gfx *gfx, MtxF mtx, s32, s32, s32);
 extern u8 D_80083D40[];

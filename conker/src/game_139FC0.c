@@ -74,7 +74,6 @@ Gfx *func_1510CDB8(Gfx *gfx, s32 primAlpha, s32 envAlpha, s32 slot) {
 }
 
 extern void *allocate_memory(s32, s32, s32, s32);
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
 #define GFX_OPCODE(gfx) (*(s8 *)(gfx))
 
@@ -189,7 +188,6 @@ extern s32 D_800DBDBC;
 
 extern void func_10006240(u8 *, Entry1510D404 *, u32);
 extern s32 func_10004074(s16 *);
-s32 func_1510D374(s32 index);
 
 /*
  * Returns the address of texture `index`, loading it on first use: its compressed bytes (size from

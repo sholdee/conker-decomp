@@ -12,8 +12,6 @@ extern Gfx *D_800B0E08;
 
 void func_150A7A48(MtxF a, MtxF b, MtxF out);
 void func_1501B22C(s32 view);
-void func_1510CB10(s32 view);
-Gfx *func_1510CDB8(Gfx *gfx, s32 arg1, s32 arg2, s32 view);
 Gfx *func_151733D8(Gfx *gfx, s32 arg1);
 Gfx *func_150C8600(Gfx *gfx);
 Gfx *func_15100464(Gfx *gfx);

@@ -116,7 +116,6 @@ void func_1502E474(void);
 void func_15189118(s32);
 void func_15084A18(void);
 void func_15125628(void);
-void func_1510D404(void);
 void func_15114A1C(void);
 void func_1517CFC4(void);
 void func_1501C880(s32, s32);
@@ -337,7 +336,6 @@ void func_1501905C(void) {
     func_10012020();
 }
 
-void func_1510D864(void);
 void func_1509BA04(s32);
 void func_1509BBA0(s32);
 void func_1501E400(s32);

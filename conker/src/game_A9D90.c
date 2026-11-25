@@ -566,7 +566,6 @@ void func_1507DB44(Actor *obj, s32 arg1) {
 void func_1507DB64(void) {
 }
 
-s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern Gfx D_80086B80[];
 extern u8 D_D0F;
 

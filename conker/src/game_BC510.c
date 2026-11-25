@@ -8,7 +8,6 @@ void func_1508F0D4(void);
 void func_1508F7BC(void);
 
 
-extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15042D94(s32, s32, u8, s32 *, ...);
 extern u8 D_D16[];
 

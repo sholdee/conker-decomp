@@ -1,5 +1,9 @@
 #include <ultra64.h>
+#define func_1510CE60 func_1510CE60_header // matching: this file keeps its own declarations of these
+#define func_1510D0EC func_1510D0EC_header
 #include "functions.h"
+#undef func_1510CE60
+#undef func_1510D0EC
 #include "variables.h"
 
 /* Animation state of a HUD model, created by func_1503F62C; only the fields used here. */
@@ -872,7 +876,6 @@ typedef struct {
 } Struct1509B570;
 s32 func_151E564C(void);
 Gfx *func_151E89A0(Gfx *, s32, s32);
-void func_1510D694(s32);
 s32 func_1509BE40(s32, s32, s32);
 Struct1509B570 *func_1509B570(s32);
 Gfx *func_150900F0(Gfx *, s32);
@@ -1902,7 +1905,7 @@ extern s8 D_800E0C82;
 extern s8 D_800E0C83;
 extern s8 D_800E0C84;
 s32 *func_1502B6BC(s32, s32, s32, s32, s32, s32);
-s32 func_1510CE60(Gfx *, s32, u32, s32, s32 *);
+s32 func_1510CE60(Gfx *, s32, u32, s32, s32 *); // matching: a u32 countUse (the definition's s32 changes func_151EDF4C)
 
 /*
  * Loads the 30 display lists 0x1C5..0x1E2 and patches them: vertex addresses relocated with the

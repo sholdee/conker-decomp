@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_1510D7AC func_1510D7AC_header // matching: this file keeps its own declaration of func_1510D7AC
 #include "functions.h"
+#undef func_1510D7AC
 #include "variables.h"
 
 /*
@@ -41,8 +43,6 @@ extern void *func_1502B5C8(u32 *size, s32 depth, ...);
 extern void *func_1502B6BC(u32 *size, s32 count, s32 *countOut, s32 depth, ...);
 extern s32 func_150028BC(s32 id);
 extern s32 func_15084044(Actor *obj, s32 model);
-extern s32 func_1510CE60(Gfx *dl, s32, s32, s32, s16 **);
-extern s32 func_1510D0EC(s32 id, s32 *, s32, s32);
 
 void func_1503D368(s8 *dl, s32 base);
 void func_1503D438(s32 *offsetSlot, s32 base);
@@ -456,8 +456,8 @@ s32 func_1503DC3C(s32 id) {
     return ret;
 }
 
-/* Real definition (game_13ABD0) takes s32; golden's `or a0,a1` copy in the jal delay slot
-   is reproduced by the callee being declared with an unsigned parameter here. */
+// matching: the definition (game_13ABD0.c) takes s32; the `or a0,a1` copy in the jal delay slot
+// comes from declaring the callee with an unsigned parameter here.
 extern void func_1510D7AC(u32 id);
 
 /* Releases model id's loaded textures. */

@@ -4,7 +4,6 @@
 
 /* Per-texture use counts; D_800BC448 holds each texture's lifetime (see game_139FC0.c). */
 
-void func_1510D608(s32 index, s32 lifetime);
 extern s32 func_10004074(s16 *);
 
 /*

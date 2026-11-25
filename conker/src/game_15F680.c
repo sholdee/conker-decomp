@@ -9,7 +9,6 @@ s32 func_151464B8(s16 *arg0);
 extern s32 D_800A3880[];
 extern s32 D_800DC640[];
 s32 *func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5);
-s32 func_1510CE60(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 *arg4);
 void func_15168E54(s32 arg0, s32 arg1);
 
 s32 func_15046C80(f32 *pos, s32 arg1, f32 bottom, CollisionHit *floor);
@@ -109,7 +108,6 @@ void func_151323F8(ModelParticle *particle) {
     D_800899D4[variant](particle);
 }
 
-void func_1510D630(s32);
 void func_151325C8(ModelParticle *particle);
 
 /* Release a particle's model reference: drop the per-model count, and once no particle uses the model
@@ -819,7 +817,6 @@ Gfx *func_15133EB8(Gfx *gfx, ModelParticle *particle, s16 arg2) {
 }
 
 extern EffectTexture D_80090B60[];
-extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
 /* Bind texture D_80090B60[index] to `segment` (and its palette, at the end of the data, to segment + 1). */
 Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3) {

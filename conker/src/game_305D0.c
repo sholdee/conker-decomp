@@ -38,8 +38,6 @@ extern s32 D_800B0E20[];
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 extern LevelModelEntry *func_1502B6BC(s32 *loaded, s32 arg1, s32 *count, s32 arg3, s32 arg4, s32 arg5);
 extern s32 func_150049A4(Gfx *dl, s32 arg1, s32 arg2);
-extern s32 func_1510CE60(Gfx *dl, s32 strict, s32 countUse, s32 keepLevel, s32 *usedOut);
-extern s32 func_1510D0EC(s32 id, s32 *size, s32 arg2, s32 arg3);
 
 /* Loads level `levelId`'s models, rebases them and sets up the first four as the level's display lists. */
 void func_150031EC(s32 levelId) {

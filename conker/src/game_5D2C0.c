@@ -14,7 +14,6 @@ void func_1518CA04(s32 model);
 
 
 AttachModelHeader *func_1502B6BC(s32, s32, s32, s32, s32, s32);
-void func_1510CE60(Gfx *, s32, s32, s32, s16 **);
 void func_15168E54(Gfx *, AttachModelHeader *);
 
 /* Loads (or reuses) attachment model `model` and returns its display lists and vertex data. */
@@ -642,7 +641,6 @@ extern void func_1502D54C(s32, s32 *);
 extern void func_1502D630(Actor *, s32 *, s32, s32);
 extern void func_1502CC34(Actor *, s32, s32, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *);
 extern void func_150832AC(Actor *);
-extern s32 func_1510D0EC(void *, s32 *, s32, s32);
 extern Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, void *, void *, s32, void *, s32, void *);
 extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
 extern Gfx *func_15035D6C(Gfx *, ModelAttachment *, s32, s32, s32);
