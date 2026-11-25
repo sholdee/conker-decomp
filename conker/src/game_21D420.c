@@ -5,9 +5,6 @@
 #include "functions.h"
 #include "variables.h"
 
-// _Printf: the libultra formatter core (init_2070.c).
-extern s32 func_100020D0(u8 *(*prout)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args);
-
 /** sprintf output callback (libultra proutSprintf): append `count` bytes to `dst`, return the new end. */
 u8 *func_151EFF70(u8 *dst, u8 *src, u32 count) {
     return (u8 *)memcpy(dst, src, count) + count;

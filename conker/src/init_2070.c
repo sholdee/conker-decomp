@@ -23,7 +23,6 @@ extern u8 D_8002BF80[];
 extern u8 D_8002BF84[];
 extern u32 D_8002BF8C[];
 char *strchr(const char *str, s32 ch);
-void func_10002718(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
 
 #define ATOI(dst, src)                         \
     for (dst = 0; *src >= '0' && *src <= '9'; ++src) {  \
@@ -32,7 +31,7 @@ void func_10002718(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac
     }
 #define PUT(s, n)                              \
     if (0 < (n)) {                                      \
-        if ((arg = (u8 *)(*pfn)(arg, s, n)) != NULL)    \
+        if ((arg = (*pfn)(arg, s, n)) != NULL)    \
             x.nchar += (n);                             \
         else                                            \
             return x.nchar;                             \
@@ -46,7 +45,7 @@ void func_10002718(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac
         }                                                       \
     }
 
-int func_100020D0(s32 (*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
+int func_100020D0(u8 *(*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
     _Pft x;
 
     x.nchar = 0;

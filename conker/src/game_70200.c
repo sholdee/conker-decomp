@@ -34,7 +34,6 @@ typedef struct Game70200TextNode {
 #define TEXT_FLAG_SHADOW 0x80
 
 void *allocate_memory(s32, s32, s32, s32);
-s32 func_151EFF94(u8 *, const u8 *, ...);
 extern u8 D_80085CC0[]; /* "%s%s", deliberately unterminated: runs on into the spec buffer below */
 extern u8 D_80085CC4[]; /* conversion spec being parsed, e.g. "%2d" */
 extern Game70200TextNode *D_800CBD64; /* head */

@@ -70,9 +70,6 @@ void func_100014C4(s32 arg0) {
 /* 10^(2^i): scales the value by powers of ten one exponent bit at a time. */
 static const double sPowersOfTen[] = { 1e1, 1e2, 1e4, 1e8, 1e16, 1e32, 1e64, 1e128, 1e256 };
 
-s16 func_100019F0(s16 *pex, _Pft *px);
-void func_10001AA8(_Pft *px, unsigned char code, unsigned char *p, short nsig, short xexp);
-
 /* _Ldtob (libultra xldtob.c). Unlike the SDK, this copy builds its 0.0/1.0 constants as
  * float locals converted to double at runtime (golden: mtc1/cvt.d.s, with 0.0 kept in a
  * double stack slot) -- IDO folds every literal spelling. The -g3 frame also holds one
