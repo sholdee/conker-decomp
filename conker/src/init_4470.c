@@ -4,9 +4,11 @@
 #include "variables.h"
 
 
+/* Starts the PI manager and creates the DMA message queues. */
 void func_10004470(void) {
-    int i;
-    osCreatePiManager(150, &D_800388B0, &D_800380E0, 0xC8);
+    s32 i;
+
+    osCreatePiManager(OS_PRIORITY_PIMGR, &D_800388B0, &D_800380E0, 200);
 
     for (i = 0; i < 3; i++)
     {
@@ -18,50 +20,55 @@ void func_10004470(void) {
     D_8003A571 = 0;
 }
 
-void func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3) {
-    OSMesgQueue *msgQueue;
-    OSIoMesg tmpIoMsg;
+/*
+ * Reads size bytes of cartridge ROM at devAddr into dramAddr. A blocking read waits on the calling
+ * thread's queue; a non-blocking one takes the next slot of the 300-entry D_80038950 ring
+ * (D_8003A570 = next slot, D_8003A571 = reads in flight) and is collected by func_10004674.
+ */
+void func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 blocking) {
+    OSMesgQueue *queue;
+    OSIoMesg localIoMsg;
     OSIoMesg *ioMsg;
-    s32 sp3c;
+    s32 threadIndex;
 
-    sp3c = __osRunningThread->id - 3;
-    if ((size < 0xC8U) && (sp3c == 0)) {
+    threadIndex = __osRunningThread->id - 3;
+    if (size < 200 && threadIndex == 0) {
         func_1000480C(devAddr, dramAddr, size);
         return;
     }
-    if ((sp3c >= 4) || ( sp3c < 0)) {
-        sp3c = 0;
+    if (threadIndex >= 4 || threadIndex < 0) {
+        threadIndex = 0;
     }
-    if (arg3 == 0) {
-        if (D_8003A571 != 300) { // messages waiting?
-            ioMsg = &D_80038950[D_8003A570];
-            msgQueue = &gMessageQueue0;
-            if (D_8003A570 == 299) { // number of message queues used?
-                D_8003A570 = 0;
-            } else {
-                D_8003A570 += 1U;
-            }
-            D_8003A571 += 1U;
-        } else {
+    if (!blocking) {
+        if (D_8003A571 == 300) {
             return;
         }
+        ioMsg = &D_80038950[D_8003A570];
+        queue = &gMessageQueue0;
+        if (D_8003A570 == 299) {
+            D_8003A570 = 0;
+        } else {
+            D_8003A570 += 1;
+        }
+        D_8003A571 += 1;
     } else {
-        ioMsg = &tmpIoMsg;
-        msgQueue = &gMessageQueue[sp3c];
+        ioMsg = &localIoMsg;
+        queue = &gMessageQueue[threadIndex];
     }
     osInvalDCache(dramAddr, size);
-    osPiStartDma(ioMsg, 0, 0, devAddr, dramAddr, size, msgQueue);
+    osPiStartDma(ioMsg, OS_MESG_PRI_NORMAL, OS_READ, devAddr, dramAddr, size, queue);
 
-    if (arg3 != 0) {
-        osRecvMesg(msgQueue, 0, OS_MESG_BLOCK);
+    if (blocking) {
+        osRecvMesg(queue, NULL, OS_MESG_BLOCK);
     }
 }
 
+/* Waits for every non-blocking read started by func_10004514. */
 void func_10004674(void) {
-    int i;
-    for (i = 0; i < D_8003A571; i++)
-    {
-        osRecvMesg(&gMessageQueue0, 0, OS_MESG_BLOCK);
+    s32 i;
+
+    for (i = 0; i < D_8003A571; i++) {
+        osRecvMesg(&gMessageQueue0, NULL, OS_MESG_BLOCK);
     }
 
     D_8003A571 = 0;
@@ -70,7 +77,7 @@ void func_10004674(void) {
 void func_100046E4(s32 devAddr, void *dramAddr, u32 size) {
     s32 ioMsg[4];
     OSMesg recvMsg;
-    OSMesgQueue *msgQueue;
+    OSMesgQueue *queue;
     s32 threadId;
     u32 sent;
     u32 transferSize;
@@ -83,11 +90,11 @@ void func_100046E4(s32 devAddr, void *dramAddr, u32 size) {
 
     osInvalDCache(dramAddr, size);
     if (size != 0) {
-        msgQueue = &gMessageQueue[threadId];
+        queue = &gMessageQueue[threadId];
         do {
             transferSize = ((size - sent) < 0x14000U) ? (size - sent) : 0x14000;
-            osPiStartDma((OSIoMesg *)((u8 *)ioMsg - 8), 0, 0, devAddr, dramAddr, transferSize, msgQueue);
-            osRecvMesg(msgQueue, (OSMesg *)((u8 *)&recvMsg - 8), OS_MESG_BLOCK);
+            osPiStartDma((OSIoMesg *)((u8 *)ioMsg - 8), 0, 0, devAddr, dramAddr, transferSize, queue);
+            osRecvMesg(queue, (OSMesg *)((u8 *)&recvMsg - 8), OS_MESG_BLOCK);
             sent += transferSize;
             devAddr += transferSize;
             dramAddr = (void *)((u8 *)dramAddr + transferSize);
