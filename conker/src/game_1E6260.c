@@ -347,64 +347,66 @@ s32 func_151B9310(Mtx *dest, Particle *particle) {
     return 1;
 }
 
-void func_150A7960(void *, f32, f32, f32, f32 *, f32 *, f32 *);
-extern f32 D_800AA568;
+void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
-typedef struct Game1E67C0State {
-    u8 *source;
-    u8 *target;
-    f32 rate;
-} Game1E67C0State;
+/* Beam particle made by func_151407D0 (same layout as Particle in game_100810.c). */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x34];
+    /* 0x34 */ vertex pos;
+    /* 0x40 */ vertex end;
+} Beam;
 
-s32 func_151B9408(u8 *actor) {
+/* Data of the swinging-light effect, stored at struct225.unk18 by func_151B8DB0. */
+typedef struct {
+    /* 0x0 */ Particle *lamp;
+    /* 0x4 */ Beam *beam;      // NULL if func_151407D0 failed
+    /* 0x8 */ f32 invScale;    // 1 / D_800AA528[kind]
+} SwingingLight;
+
+/* Light effect update (D_8008B0F0 slot 7): moves the light to a point 150 units below the swinging lamp
+ * and aims the beam from the lamp along the swing. */
+s32 func_151B9408(struct225 *effect) {
     f32 extend;
-    u8 *source;
-    struct {
-        f32 matrix[16];
-        f32 x, y, z;
-    } work;
+    Particle *lamp;
+    vertex point;
+    f32 mtx[4][4];
     f32 reach;
     f32 rate;
-    register f32 dx, dy, dz;
-    Game1E67C0State *state;
-    u8 *target;
+    f32 dx, dy, dz; // unit direction from the lamp down to the light point
+    SwingingLight *state;
 
-    state = (Game1E67C0State *)(actor + 0x18);
-    source = state->source;
-    func_150A8050((f32 (*)[4])work.matrix, 0.0f, 0.0f, *(f32 *)(source + 0x170));
-    work.matrix[12] = *(f32 *)(source + 0x38);
-    work.matrix[13] = *(f32 *)(source + 0x3C);
-    work.matrix[14] = *(f32 *)(source + 0x40);
-    work.matrix[0] *= *(f32 *)(source + 0x18);
-    work.matrix[1] *= *(f32 *)(source + 0x18);
-    work.matrix[2] *= *(f32 *)(source + 0x18);
-    work.matrix[4] *= *(f32 *)(source + 0x1C);
-    work.matrix[5] *= *(f32 *)(source + 0x1C);
-    work.matrix[6] *= *(f32 *)(source + 0x1C);
-    work.matrix[8] *= *(f32 *)(source + 0x18);
-    work.matrix[9] *= *(f32 *)(source + 0x18);
-    work.matrix[10] *= *(f32 *)(source + 0x18);
-    func_150A7960(work.matrix, 0.0f, -150.0f, 0.0f, &work.x, &work.y, &work.z);
-    *(s16 *)(*(u8 **)(actor + 0x14) + 0xE) = (s16)(s32)work.x;
-    *(s16 *)(*(u8 **)(actor + 0x14) + 0x10) = (s16)(s32)work.y;
-    *(s16 *)(*(u8 **)(actor + 0x14) + 0x12) = (s16)(s32)work.z;
-    target = state->target;
-    if (target != 0) {
+    state = (SwingingLight *)&effect->unk18;
+    lamp = state->lamp;
+    func_150A8050(mtx, 0.0f, 0.0f, lamp->swing.out);
+    mtx[3][0] = lamp->pos.x;
+    mtx[3][1] = lamp->pos.y;
+    mtx[3][2] = lamp->pos.z;
+    mtx[0][0] *= lamp->sizeXZ;
+    mtx[0][1] *= lamp->sizeXZ;
+    mtx[0][2] *= lamp->sizeXZ;
+    mtx[1][0] *= lamp->sizeY;
+    mtx[1][1] *= lamp->sizeY;
+    mtx[1][2] *= lamp->sizeY;
+    mtx[2][0] *= lamp->sizeXZ;
+    mtx[2][1] *= lamp->sizeXZ;
+    mtx[2][2] *= lamp->sizeXZ;
+    func_150A7960(mtx, 0.0f, -150.0f, 0.0f, &point.x, &point.y, &point.z);
+    effect->unk14->unkE = point.x;
+    effect->unk14->unk10 = point.y;
+    effect->unk14->unk12 = point.z;
+    if (state->beam != NULL) {
         extend = 500.0f;
-        reach = *(f32 *)(source + 0x1C) * 65.0f;
-        rate = state->rate * D_800AA568;
-        dx = -(work.x - *(f32 *)(source + 0x38)) * rate;
-        dy = -(work.y - *(f32 *)(source + 0x3C)) * rate;
-        dz = -(work.z - *(f32 *)(source + 0x40)) * rate;
-        *(f32 *)(target + 0x34) = (f32)(*(f32 *)(source + 0x38) + dx * reach);
-        *(f32 *)(state->target + 0x38) = (f32)(*(f32 *)(source + 0x3C) + dy * reach);
-        *(f32 *)(state->target + 0x3C) = (f32)(*(f32 *)(source + 0x40) + dz * reach);
-        target = state->target;
-        *(f32 *)(target + 0x40) = (f32)(*(f32 *)(target + 0x34) + dx * extend);
-        target = state->target;
-        *(f32 *)(target + 0x44) = (f32)(*(f32 *)(target + 0x38) + dy * extend);
-        target = state->target;
-        *(f32 *)(target + 0x48) = (f32)(*(f32 *)(target + 0x3C) + dz * extend);
+        reach = lamp->sizeY * 65.0f;
+        rate = state->invScale * (-1.0f / 150.0f);
+        dx = -(point.x - lamp->pos.x) * rate;
+        dy = -(point.y - lamp->pos.y) * rate;
+        dz = -(point.z - lamp->pos.z) * rate;
+        state->beam->pos.x = lamp->pos.x + dx * reach;
+        state->beam->pos.y = lamp->pos.y + dy * reach;
+        state->beam->pos.z = lamp->pos.z + dz * reach;
+        state->beam->end.x = state->beam->pos.x + dx * extend;
+        state->beam->end.y = state->beam->pos.y + dy * extend;
+        state->beam->end.z = state->beam->pos.z + dz * extend;
     }
     return 1;
 }
