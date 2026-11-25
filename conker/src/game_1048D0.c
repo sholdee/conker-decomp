@@ -191,8 +191,6 @@ extern void func_1505327C(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 extern void func_1505A3A8(f32 arg0, Actor *arg1, f32 arg2, f32 arg3, u8 arg4);
 extern void func_1505C7D8(Actor *arg0, u8 arg1);
 extern s32 func_150535F4(Actor *arg0);
-extern void func_1001091C(Actor *arg0, s32 arg1);
-extern void func_10010FFC(s32 a, s32 b, s32 c, s32 d, s32 e, Actor *f);
 
 /*
  * Per-frame update for an object that can be carried by a player (unk13C set, unk124 = player index).

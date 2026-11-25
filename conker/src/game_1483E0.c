@@ -689,7 +689,6 @@ void func_1511C548(WorldObject *obj) {
 
 
 extern void func_15170F4C(WorldObject *, u8, s32);
-extern s32 func_1000EC24();
 
 /* The three sound ids func_1511C638 picks from: { 0x2B6, 0x2BD, 0x2BE }. The original local
  * initializer lies in the rodata of the larger original compilation unit (before game_142560's
@@ -1230,7 +1229,6 @@ struct Owner1511DF6C {
     s32 unk1FE4;
 };
 
-extern void func_10010558(u16, void *, s32, s32, s32, s32);
 extern void *func_1509B570(s32);
 extern void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
 

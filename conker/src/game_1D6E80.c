@@ -7,7 +7,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern s32 func_10010FFC(s32, s32, s32, s32, s32, Actor *);
 extern u8 func_151D8E20(void);
 
 struct ActorTask;

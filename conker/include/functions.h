@@ -8,47 +8,6 @@
 extern f32 fabsf(f32);
 #pragma intrinsic (fabsf)
 
-/* Positional sound records (init_EB00.c). A record callback runs each update with the values about to be
- * applied and may change them; returning nonzero stops the record. */
-typedef struct SoundRecord SoundRecord;
-typedef s32 (*SoundRecordCallback)(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix,
-                                   u16 *sound);
-
-/* A positional sound being tracked by func_10011624 (dynamicSounds, up to 32).
- * original: struct AlSSound (rom_debug_struct.c); field names are Rare's labels with spaces as underscores,
- * except mix and the members of the two callback parameter unions. */
-struct SoundRecord {
-    /* 0x00 */ u16 sample;
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u16 distance_max;
-    /* 0x0A */ s16 distance_loudest;
-    /* 0x0C */ s32 max_volume;
-    /* 0x10 */ u32 flags; /* see init_EB00.c */
-    /* 0x14 */ SoundRecordCallback callback_ptr;
-    /* 0x18 */ union {
-        void *ptr;
-        Actor *owner;   /* the object the sound follows (func_1000EE70, func_1000EFB4) */
-        s32 timer;      /* countdown (func_1000EB00, func_1000EBC4) */
-        s32 delay;      /* low half: countdown; high half: the sound held back meanwhile */
-        u16 half[2];
-    } callback_param1;
-    /* 0x1C */ union {
-        s32 val;        /* func_1000EE70: the owner's unique_id in the low byte */
-        Actor *obj;     /* the object the delayed sound plays on (func_1000ECCC, game_130CB0.c) */
-        u16 *ids;       /* func_1000EFB4: 0-terminated list of the owner's animation ids (Actor.unk84) */
-    } callback_param2;
-    /* 0x20 */ s16 pitch_shift_cent;
-    /* 0x22 */ u8 pan;     /* last pan sent to the voice; bit 7 is the fx-mix bit */
-    /* 0x23 */ u8 mix;
-    /* 0x24 */ u16 sound_id; /* voice handle */
-    /* 0x26 */ s16 current_volume;
-    /* 0x28 */ s16 distance_current;
-    /* 0x2A */ u8 pad2A[2];
-    /* 0x2C */ f32 pitch;
-}; /* size 0x30 */
-
 /* Sound bank loader (init_8F90.c): a bank fetch proc takes an owner slot (a ROM reference, or a record
  * once loading has started) and returns the bank's data, loading it on demand. */
 typedef struct BankRecord BankRecord;
@@ -84,27 +43,6 @@ ALDMAproc func_10009980(void *state);
 void func_10009B2C(BankRecord *record);
 void func_10009B4C(BankRecord *record);
 void func_10009B90(BankRecord *record);
-s32 func_1000EB00(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
-s32 func_1000EBC4(SoundRecord *record, s32 *active, u32 *volume, s32 *pan);
-s32 func_1000EF40(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
-void func_1000F248(s32 arg0);
-s32  func_1000F3D0(u16 arg0);
-s32  func_1000F44C(u16 arg0);
-void func_1000F91C(u16 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
-void func_1000F9D4(u16 arg0, s16 arg1, s16 arg2, s16 arg3);
-void func_10010720(u16 arg0, Actor *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5) ;
-s32  func_100107F8(Actor *arg0);
-s32  func_10010894(Actor *arg0);
-void func_100109D0(Actor *arg0);
-void func_10010A3C(Actor *arg0);
-void func_10010AA8(Actor *arg0);
-u16 func_10010F30(s32 sound, u16 volume, u8 pan, s16 cents, u8 mix);
-void func_100111C8(u16 arg0);
-void func_1001123C(u16 arg0);
-s32  func_100112BC(s32 arg0, s32 arg1);
-s32  func_1001147C(u16 arg0);
-void func_10011E88(s32 arg0);
-void func_10011E94(s32 arg0);
 void func_10011FA0(s32 *arg0);
 void func_10011FB0(s32 arg0);
 void func_10011FDC(s32 arg0);
@@ -339,8 +277,6 @@ void func_150CEF10(Camera *arg0);
 void func_150EC4B0(Camera *arg0);
 void func_150FCA00(Camera *arg0);
 
-void func_15103800(void);
-void func_15103828(void);
 void func_1510550C(EffectHeader *arg0, s32 arg1, u8 arg2);
 typedef struct BoltArcObj BoltArcObj; /* game_131F30.c */
 typedef struct SparkObj SparkObj;     /* game_131F30.c */
@@ -427,43 +363,6 @@ void *func_10009CBC(u32 *slot, s32 mode);
 BankFetchProc func_10009FFC(void);
 //func_1000A03C
 //func_1000A348
-//func_1000A420
-//func_1000A750
-//func_1000B060
-//func_1000EC24
-//func_1000ECCC
-s32 func_1000EDA0(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
-s32 func_1000EE70(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents, s32 *mix, u16 *sound);
-//func_1000EFB4
-//func_1000F1A8
-//func_1000F44C
-//func_1000F4D8
-//func_1000F568
-//func_1000F6B8
-void func_1000F85C(u16 handle, s16 param, s32 value);
-u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance, s16 nearDistance, SoundRecordCallback callback, void *owner, s32 key, s32 flags, s32 cents);
-//func_1000FC18
-//func_1000FD38
-//func_1000FDF4
-//func_1000FE88
-//func_1000FEF0
-s32 func_1000FF90(SoundRecordCallback callback, void *owner, s32 key);
-//func_1001001C
-//func_100100E0
-s32 func_10010154(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance);
-s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farDistance);
-//func_10010558
-void func_10010630(u16 arg0, Actor *arg1, s32 arg2, s16 arg3, u16 arg4);
-//func_1001091C
-u16 func_10010BE8(u16 handle, s32 sound, u16 volume, u8 pan, s16 cents, u8 mix, u8 bus);
-//func_10010E78
-u16 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16 y, s16 z, s16 nearDistance, s16 farDistance);
-//func_10010FFC
-//func_10011310
-s32  func_100114D0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 *arg6, s32 *arg7, s32 *arg8);
-//func_10011624
-//func_10011BB8
-//func_10011EB8
 //func_10012020
 // void func_10017870(u8 arg0);
 //func_1001AAE0

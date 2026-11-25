@@ -733,9 +733,6 @@ s32 func_15114CC4(ObjSound *sound, s32 arg1, s32 *follow, s32 arg3) {
     return 1;
 }
 
-s32 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5,
-                  s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
-
 /*
  * Plays sound `sfx` at obj, keeping the handle in obj->sound. sfx -1 stops it. flags: 1 keep it if already
  * playing, 2 restart (positioned once), 4 one-shot, 8 don't stop or forget the current sound;
@@ -787,7 +784,7 @@ void func_15114D24(WorldObject *obj, s32 sfx, s32 arg2, s16 arg3, s16 arg4, s32 
 
 /* Starts a sound through func_1001001C with func_15114CC4 as its callback. */
 void func_15114F04(s32 arg0, s32 arg1, s32 arg2) {
-    func_1001001C(func_15114CC4, arg0, 0, arg1, arg2);
+    func_1001001C((SoundRecordCallback)func_15114CC4, (void *)arg0, 0, arg1, arg2);
 }
 
 extern s32 D_800DBF9C;

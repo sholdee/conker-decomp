@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern s32 func_1000EC24();
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
 
 /* Spawns the effect at each of the three D_800D9AA0 spots, starts three positioned sounds,

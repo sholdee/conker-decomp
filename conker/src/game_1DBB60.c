@@ -5,7 +5,6 @@
 
 extern s32 func_15045800(f32 *pos, s32 arg1, f32 minY, CollisionHit *hit);
 extern s32 func_151ABE40(f32 *pos, CollisionHit *hit, s32 kind, s32 arg3, s32 arg4);
-void func_10010FFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, Actor *arg5);
 
 /* ActorTask callback (see game_1D6E80.c; only the task's CharacterWatcher is read here): ground effect 5
  * under the task's actor, with sound 0x5208. */

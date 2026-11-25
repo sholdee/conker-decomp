@@ -79,7 +79,6 @@ typedef struct BoltRainObj {
     /* 0x28 */ BoltRainState state;
 } BoltRainObj;
 
-s32 func_1000FD38();
 extern s32 func_15046C80(f32 *pos, s32, f32 y, CollisionHit *hit);
 extern void func_15105CE0(BoltDesc *desc, s32 extraSize, s32, s32);
 
@@ -153,7 +152,7 @@ void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
     if (msg == 0x38 && state->region->inactive == 1) {
         state->timer = 300;
         // matching: the (s32) copy keeps IDO from sharing one register for region across the call
-        func_1000FD38(func_1000EF40, (s32)state->region, 0);
+        func_1000FD38(func_1000EF40, (void *)(s32)state->region, 0);
         func_1000FA64(0x236, state->region->x, state->region->y, state->region->z, 0x4000, 1500, 1000,
                       func_1000EF40, state->region, 0, 8, 0);
     }

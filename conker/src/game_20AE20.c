@@ -141,7 +141,6 @@ s32 func_151DDB94(s32 value) {
 
 void func_1501C730(s32, s32, s32, s32, s32);
 void func_151E557C(void);
-void func_1000F1A8(void);
 
 /* Requests a switch to map 0x1D (func_1501C730 mode 6) and resets this mode's state flags. */
 void func_151DDBA0(void) {
@@ -3545,9 +3544,6 @@ s8 func_151E5FAC(void) {
     }
     return D_8008FD90;
 }
-
-s32 func_1000F568(s32 arg0, s32 arg1);
-void func_10010558(u16 arg0, Actor *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5);
 
 /*
  * Records a hit by source (or the player owning it) on victim: per-player hit/kill tallies in D_8008FDD4,

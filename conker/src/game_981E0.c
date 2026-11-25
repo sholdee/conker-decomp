@@ -11,7 +11,6 @@ s32 func_10010154(u16 sound, void *obj, u32 volume, s16 nearDistance, u16 farDis
 void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 #include "variables.h"
 
-s32 func_1000F568(s32 arg0, s32 arg1);
 extern s32 D_800D187C;
 extern void func_151942E8();
 void func_151C0698(Actor *arg0, Actor *arg1, IgnoreList *arg2, u8 arg3, s32 arg4, s32 arg5);
@@ -187,7 +186,6 @@ typedef struct {
 } GroundPoint; // size 0x30
 extern void func_150E1570(Actor *, f32, f32, f32, f32, f32, f32, s32, s32);
 
-u16 func_10011EB8(s32 arg0, u16 *arg1, s32 arg2);
 s32 func_1510F8CC(s32);
 extern Actor *func_1505EEB0(s32 state, s32 *arg1);
 extern u8 func_1505DADC(Actor *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4);
@@ -213,7 +211,6 @@ void func_151DC260(f32 *, void *, s32, s32, s32);
 extern void func_1505F188(Actor *arg0);
 extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 s32 func_1505D024(void *, s32, u16, s32);
-extern void func_100100E0(void *, void *, void *, void *, void *, s32);
 extern void func_150F16DC(Actor *, u8, u8, s32, s32);
 void func_15194408(Actor *arg0, Actor *arg1);
 
@@ -711,7 +708,7 @@ void func_1506BF5C(void) {
             sound = func_10011EB8(8, NULL, sound);
             type = 8;
         } else {
-            sound = func_10011EB8(type, &volume, sound);
+            sound = func_10011EB8(type, (s16 *)&volume, sound);
         }
         if (sound == 0) {
             break;
@@ -3818,7 +3815,7 @@ void func_15073FA0(void) {
                 }
                 if (slot != 0) {
                     obj->unk8E = ((ModelAttachment *)slot)->unk3C;
-                    func_100100E0(func_15033BDC, (void *)slot, D_800D154C, func_1000EE70, obj, obj->unique_id);
+                    func_100100E0((SoundRecordCallback)func_15033BDC, (void *)slot, (s32)D_800D154C, func_1000EE70, obj, obj->unique_id);
                 }
                 player = D_800D154C;
             }

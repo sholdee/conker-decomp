@@ -572,8 +572,6 @@ s32 func_151C1180(Bullet *bullet) {
     return TRUE;
 }
 
-void func_1000FD38(s32 (*)(), Bullet *, s32);
-
 /* Releases a bullet's effects and its sound callback. */
 void func_151C1570(Bullet *bullet) {
     BulletState *state;
@@ -594,7 +592,7 @@ void func_151C1570(Bullet *bullet) {
     if (state->unk8C != NULL) {
         func_1516972C(state->unk8C);
     }
-    func_1000FD38(func_151C110C, bullet, 0);
+    func_1000FD38((SoundRecordCallback)func_151C110C, bullet, 0);
 }
 
 void func_151C15FC(Bullet *bullet) {

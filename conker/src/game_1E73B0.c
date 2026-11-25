@@ -401,7 +401,6 @@ void func_151BB044(Actor *obj) {
     func_1000FA64(0x4A7, obj->xpos, obj->ypos, obj->zpos, 0x2000, 0x320, 0xC8,
                   (SoundRecordCallback)func_151BB0E0, obj, 0, 8, 0);
 }
-s32 func_1000F568(s32, s32);
 
 /* A playing positional sound, as seen by its update callback. */
 typedef struct {

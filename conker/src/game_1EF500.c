@@ -4,7 +4,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern s32 func_1000B060(f32, f32, u32);
 extern s32 func_1510F8CC(s32);
 extern f32 D_800AAA30; /* 0.1f; ROM 0x24F4F0, just before this file's .rodata slice */
 
@@ -94,7 +93,6 @@ typedef struct {
 } FlybySound;
 
 extern FlybySound D_8008FBE8[];
-extern s32 func_1000A420(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s32 *, s32);
 void func_151C436C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps);
 u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);

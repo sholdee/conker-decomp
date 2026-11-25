@@ -97,12 +97,10 @@ s32 func_151A6600(ZoneEmitter *obj) {
     return 1;
 }
 
-extern void func_1000FD38(void *, void *, s32, void *);
-
 /* Shuts the emitter down: marks its region off, calls func_1000FD38 with func_1000EF40 on it, and frees unk10. */
 void func_151A6AB8(ZoneEmitter *obj) {
     obj->state.region->inactive = 1;
-    func_1000FD38(func_1000EF40, obj->state.region, 0, obj);
+    func_1000FD38(func_1000EF40, obj->state.region, 0);
     if (obj->state.unk10 != NULL) {
         func_1516972C(obj->state.unk10);
     }

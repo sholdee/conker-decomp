@@ -3,9 +3,11 @@
 // matching: the shared headers declare these with parameter types that would change the code here
 // (extra narrowing in callers) or the variable type; hide those declarations and declare them below.
 #define func_1000F91C func_1000F91C_hdr
+#define func_10010E78 func_10010E78_hdr
 #define func_1506AD30 func_1506AD30_hdr
 #include "functions.h"
 #undef func_1000F91C
+#undef func_10010E78
 #undef func_1506AD30
 void func_1000F91C(u16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
 f32 func_1506AD30(Actor *, f32, s32, s32); /* one call passes a fourth argument */
@@ -3852,7 +3854,6 @@ void func_1505F188(Actor *actor) {
     actor->floorTri.v[2].y = 0;
     actor->floorTri.v[2].z = 0;
 }
-void func_1000EFB4();
 void func_151C6EA0(Actor *arg0, s32 arg1, s32 arg2);
 void func_1506045C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4);
 /* Player controls for jumping, swimming and the hover (anim 0xE9), from the controller pad. */

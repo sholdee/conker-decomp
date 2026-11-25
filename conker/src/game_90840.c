@@ -4,9 +4,7 @@
 #define func_10010A3C func_10010A3C_hdr
 #include "functions.h"
 #undef func_100109D0
-s32 func_100109D0();
 #undef func_10010A3C
-s32 func_10010A3C();
 #include "variables.h"
 
 void func_1506AC8C(Actor *, s32, void *);
@@ -93,7 +91,6 @@ void func_150636A4(Actor *arg0) {
 void func_15063FA0(Actor *, s32);
 void func_151D57F8(Actor *, s32);
 s32 func_15081E78(Actor *, Actor **, s32);
-void func_10010558(u16, void *, s32, s32, s32, s32);
 void func_150FFCC8(void *, void *, void *, void *, void *);
 void func_150FFD84(f32 *, f32 *, s32, s32);
 void func_1512D2E4(void *, s32);
@@ -1024,10 +1021,6 @@ extern u16 D_800996C0[];
 extern u16 D_800996C8[];
 extern u16 D_800996D0[];
 extern WorldObject *D_800CC5EC;
-extern void func_1000EC24();
-extern void func_1000EFB4();
-s32 func_1000F568(s32 arg0, s32 arg1);
-void func_1000FD38(void *, void *, s32);
 ObjScriptCmd *func_1507BB28(s32, s32);
 void func_150D8B88(Actor *);
 void func_151D4668(void *);
@@ -1725,7 +1718,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             D_800D1580 = 0x53;
                             func_15071D38();
                         }
-                        func_1000FD38(func_151037DC, arg0, arg0->unique_id);
+                        func_1000FD38((SoundRecordCallback)func_151037DC, arg0, arg0->unique_id);
                         func_1000FA64((func_150ADA20() & 1) + 0x2F3, arg0->xpos, arg0->ypos, arg0->zpos, 0x7D00, 0x5DC, 0x1F4, func_151037DC, arg0, (void *)arg0->unique_id, 0, 0);
                         if (arg0->CameraPtr != NULL) {
                             func_10010558((func_150ADA20() % 3U) + 0x2EB, arg0, 0x7D00, 0x64, 0x78, 0x1E);

@@ -49,18 +49,9 @@ extern f32 D_8002C400;
 extern f32 D_8002C404;
 
 u16 func_10010F30(s32, s32, s32, s32, s32); // promoted view of the old-style definition below
-u16 func_10010E78(u16 handle, s32 sound, u16 volume, s16 cents, s32 mix, s32 arg5,
-                  s32 x, s32 y, s32 z, s32 nearDistance, s32 farDistance);
-void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end);
 s32 func_1510F8CC(s32 arg0);
-s32 func_1000F568(s32 base, s32 count);
 void func_10017780(u8 arg0, u16 arg1);
 SndState *func_10017438(s32, s16, u16, u8, f32, u8, u8, SndState **);
-s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 field18, s32 dx0, s32 dy0, s32 dz0,
-                  s32 farDistance, s32 nearDistance, s32 *pan, s32 *volume, s32 *distance);
-
-s32 func_1000ECCC(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
-                  s32 *cents, s32 *mix, u16 *sound);
 
 // Random ambient chirp: every 128-255 ticks, play one of sounds 0x6C-0x6E.
 s32 func_1000EB00(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
@@ -1122,9 +1113,6 @@ s32 func_100114D0(s32 x, s32 y, s32 z, s32 volume, s32 farDistance, s32 nearDist
     *volumeOut = ((u32)scale * volume) >> 15;
     return active;
 }
-
-s32 func_1000A750(s32, s32, s32, s32, f32, s32, s32, s32, s32, s32,
-                  s32 *, s32 *, s32 *);
 
 // Updates records[start..end) (and below *count): re-evaluates each sound's volume, pan and
 void func_10011624(SoundRecord *records, s32 *count, s32 start, s32 end) {

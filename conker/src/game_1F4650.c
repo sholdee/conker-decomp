@@ -4,7 +4,6 @@
 #undef func_150E7FEC
 #include "variables.h"
 
-extern void func_1000FD38(void *, void *, s32);
 
 extern void func_1504715C(CollisionHit *, Actor *);
 extern s32 func_151ABE40(f32 *, CollisionHit *, s32, u8, s32);
@@ -534,7 +533,6 @@ extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32
 extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15164F0C(s32, u8, s32, u8, s32);
 extern void func_1505D024(s32, s32, s32, s32);
-extern void func_1000EC24();
 
 /* Breaks the beam: debris and sparks at both ends, sounds, and (if `actor` tripped it) a reaction. */
 void func_151C899C(Actor *actor, SightBeamObject *obj) {
@@ -763,7 +761,7 @@ void func_151C94D4(SightBeamObject *obj) {
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
         func_1516972C((EffectHeader *)state->midEffect);
-        func_1000FD38(func_151C87AC, state, 0);
+        func_1000FD38((SoundRecordCallback)func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
     part = ((SightBeamObject *)state)->state.endEffect0;
@@ -811,7 +809,7 @@ void func_151C95D8(SightBeamObject *obj) {
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
         func_1516972C((EffectHeader *)state->midEffect);
-        func_1000FD38(func_151C87AC, state, 0);
+        func_1000FD38((SoundRecordCallback)func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
     part = ((SightBeamObject *)state)->state.endEffect0;

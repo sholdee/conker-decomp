@@ -771,18 +771,16 @@ void func_150D4C00(CharacterTrail *actor) {
     func_15147928(actor);
 }
 
-extern void func_1000FD38(void *, void *, s32);
-
 /* Stops the trail's three sounds and destroys its particle emitters. */
 void func_150D4C2C(CharacterTrail *actor) {
     CharacterTrailState *state;
 
     state = actor->state;
     if (D_8008FD8C < 5) {
-        func_1000FD38(func_150D5124, state, 0x5B3);
+        func_1000FD38((SoundRecordCallback)func_150D5124, state, 0x5B3);
     }
-    func_1000FD38(func_150D5124, state, 0x5B4);
-    func_1000FD38(func_150D5124, state, 0x5BC);
+    func_1000FD38((SoundRecordCallback)func_150D5124, state, 0x5B4);
+    func_1000FD38((SoundRecordCallback)func_150D5124, state, 0x5BC);
     if (state->effects[0] != NULL) {
         func_1516972C(&state->effects[0]->head.header);
     }

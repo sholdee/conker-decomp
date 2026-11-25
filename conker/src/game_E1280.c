@@ -86,7 +86,6 @@ void func_150B3DD0(void) {
     func_151494E0((s32)msg, 0x18);
 }
 
-extern void func_1000FC18(s32, s16, s16, s16, s32);
 
 void func_150B3E74(ScatterTrail *trail) {
     func_1000FC18(0x221, trail->head.tmpl.pos.x, trail->head.tmpl.pos.y, trail->head.tmpl.pos.z, 4000);

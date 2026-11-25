@@ -147,7 +147,6 @@ f32 func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
 void func_15056B08(Actor *arg0);
 void func_150562FC(Actor *arg0);
 u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
-void func_1001091C(Actor *arg0, s32 arg1);
 
 void func_150C3574(Actor *obj) {
     f32 accel;

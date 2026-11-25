@@ -10,8 +10,6 @@ void func_15080500(Actor *, TriggerZone *, s32, s32, s32);
 
 
 
-void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, s32 farDistance); /* stops a positional sound */
-
 /* Per-frame update of the zone state that does not depend on an actor (ticks is unused). */
 void func_150A09D0(s32 ticks) {
     u32 countdown;

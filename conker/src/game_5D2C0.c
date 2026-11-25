@@ -3,7 +3,6 @@
 #include "variables.h"
 
 extern s32 D_800902BC[];
-void func_1000FD38(void *, void *, s32);
 extern void func_150A7A48(MtxF a, MtxF b, MtxF out);
 
 
@@ -916,7 +915,7 @@ void func_15031C14(ModelAttachment *att) {
         case 0x37:
         case 0x4B:
         case 0x4C:
-            func_1000FD38(func_15033BDC, att, (s32)owner);
+            func_1000FD38((SoundRecordCallback)func_15033BDC, att, (s32)owner);
             if (att->model == 0x37) {
                 func_15100180(owner);
             }
@@ -2566,7 +2565,7 @@ s32 func_150339C8(ModelAttachment *att, Actor *owner) {
     if (D_800C35EA[0] != 1) {
         if (D_800BEA0C != 0) {
             if (att->unk3C != 0) {
-                func_1000FD38(func_15033BDC, att, (s32)owner);
+                func_1000FD38((SoundRecordCallback)func_15033BDC, att, (s32)owner);
             }
             att->unk3C = 0;
         } else if (att->unk3C == 0) {
@@ -2607,8 +2606,6 @@ struct AttachmentSound {
     /* 0x20 */ u8 pad20[0x4];
     /* 0x24 */ u16 unk24;
 };
-
-void func_10010FFC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, Actor *arg5);
 
 /* Sound callback: tracks the owner's position and plays the model's follow-up sounds. Returns 1
  * when the sound should stop. */
