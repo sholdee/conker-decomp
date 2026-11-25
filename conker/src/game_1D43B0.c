@@ -300,7 +300,7 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, BloodTrail *trai
 typedef struct {
     /* 0x00 */ u8 link[0x10];
     /* 0x10 */ void *anim;
-    /* 0x14 */ s32 unk14;       /* PARTICLE_CUSTOM_MODE: bits 0-7 render mode, bits 16-31 combine mode */
+    /* 0x14 */ s32 unk14;       /* BILLBOARD_CUSTOM_MODE: bits 0-7 render mode, bits 16-31 combine mode */
     /* 0x18 */ s32 unk18;
     /* 0x1C */ s16 frame;
     /* 0x1E */ s16 frameStep;
@@ -335,10 +335,6 @@ typedef struct {
     /* 0x49 */ u8 pad49[7];
 } SpriteParticle; // the spawner's extra data follows at 0x50
 
-#define PARTICLE_ENV_COLOR   0x1
-#define PARTICLE_CUSTOM_MODE 0x100
-#define PARTICLE_2CYCLE      0x200
-
 /* Extra data of the particles run by callbacks 0x14 and 0x15. The *Start fields are values of life. */
 typedef struct {
     /* 0x0 */ s16 tintStart;    /* from here the env colour follows life (callback 0x15) */
@@ -364,7 +360,7 @@ void func_151A77C0(SpriteParticle *particle) {
     }
     if (particle->life < data->tintStart) {
         particle->callback = 0x15;
-        particle->flags |= PARTICLE_ENV_COLOR | PARTICLE_2CYCLE;
+        particle->flags |= BILLBOARD_ENV_COLOR | BILLBOARD_2CYCLE;
         particle->envR = particle->envG = particle->envB = particle->life * data->tintStep;
         particle->unk14 = 0xC000F;
     }

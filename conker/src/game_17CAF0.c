@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 
 struct Vec3F { f32 x; f32 y; f32 z; };
@@ -1729,28 +1730,12 @@ typedef struct {
     u8 color, alpha;
 } Game153298Config;
 
-typedef struct {
-    s32 flags;
-    u8 pad04[8];
-    s16 unk0C, unk0E;
-    s16 x, y, z, velocityX, velocityZ;
-    u8 pad1A[2];
-    s8 fractionX, fractionY, fractionZ, mode;
-    s16 velocityY, size, unk24, unk26, life;
-    s8 fade;
-    u8 pad2B;
-    Color8 color;
-    s8 unk30, unk31, unk32;
-    u8 pad33;
-    s16 kind;
-} Game153298Packet;
-
 extern void *func_15167D84(void *, s32, s32, s8, u8, s32);
 
 /* Spawns a random number of particles (func_15167D84) at config->position, each moving at a random
  * yaw and pitch. Positions are integer units plus a 1/256 fraction. */
 void func_15153298(Game153298Config *config, u8 arg1, s32 arg2) {
-    Game153298Packet packet;
+    BillboardTemplate packet;
     f32 speed;
     f32 sinPitch;
     f32 cosYaw;
@@ -1764,21 +1749,21 @@ void func_15153298(Game153298Config *config, u8 arg1, s32 arg2) {
     packet.x = (s32)config->position.x;
     packet.y = (s32)config->position.y;
     packet.z = (s32)config->position.z;
-    packet.fractionX = (u16)(s32)(config->position.x * 256.0f);
-    packet.fractionY = (u16)(s32)(config->position.y * 256.0f);
-    packet.fractionZ = (u16)(s32)(config->position.z * 256.0f);
-    packet.color.red = config->color;
-    packet.color.green = config->color;
-    packet.color.blue = config->color;
-    packet.unk30 = 0;
-    packet.unk31 = 0;
-    packet.unk32 = 0;
-    packet.color.alpha = config->alpha;
-    packet.mode = config->mode;
-    packet.kind = config->kind;
-    packet.unk0C = 0;
-    packet.unk0E = config->unk2E;
-    packet.flags = config->flags;
+    packet.subX = (u16)(s32)(config->position.x * 256.0f);
+    packet.subZ = (u16)(s32)(config->position.y * 256.0f);
+    packet.subY = (u16)(s32)(config->position.z * 256.0f);
+    packet.primR = config->color;
+    packet.primG = config->color;
+    packet.primB = config->color;
+    packet.envR = 0;
+    packet.envG = 0;
+    packet.envB = 0;
+    packet.primA = config->alpha;
+    packet.callback = config->mode;
+    packet.flags = config->kind;
+    packet.frame = 0;
+    packet.frameStep = config->unk2E;
+    packet.anim = config->flags;
     count = func_150ADA20() % (u32)(config->countRange + 1) + config->countBase;
     while (count != 0) {
         yaw = func_150ADA20() % (u32)(config->yawRange + 1) + config->yawBase;
@@ -1790,13 +1775,13 @@ void func_15153298(Game153298Config *config, u8 arg1, s32 arg2) {
         speed = func_150ADA68() * config->speedRange + config->speedBase;
         packet.life = func_150ADA20() % (u32)(config->lifeRange + 1) + config->lifeBase;
         horizontal = speed * cosPitch;
-        packet.velocityX = (s32)(horizontal * sinYaw);
-        packet.velocityY = (s32)(-speed * sinPitch);
-        packet.velocityZ = (s32)(horizontal * cosYaw);
-        packet.size = func_150ADA20() % (u32)(config->sizeRange + 1) + config->sizeBase;
-        packet.fade = func_150ADA20() % (u32)(config->fadeRange + 1) + config->fadeBase;
-        packet.unk24 = func_150ADA20() % (u32)(config->unk32 + 1) + config->unk30;
-        packet.unk26 = func_150ADA20() % (u32)(config->unk36 + 1) + config->unk34;
+        packet.velX = (s32)(horizontal * sinYaw);
+        packet.velY = (s32)(-speed * sinPitch);
+        packet.velZ = (s32)(horizontal * cosYaw);
+        packet.accelY = func_150ADA20() % (u32)(config->sizeRange + 1) + config->sizeBase;
+        packet.fadeStep = func_150ADA20() % (u32)(config->fadeRange + 1) + config->fadeBase;
+        packet.width = func_150ADA20() % (u32)(config->unk32 + 1) + config->unk30;
+        packet.height = func_150ADA20() % (u32)(config->unk36 + 1) + config->unk34;
         func_15167D84(&packet, 0, 0, -1, arg1, arg2);
         count--;
     }

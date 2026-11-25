@@ -3,6 +3,7 @@
 #define D_800D1550 D_800D1550_hdr
 #define D_800D2104 D_800D2104_hdr
 #include "variables.h"
+#include "effects.h"
 #undef D_800D1550
 #undef D_800D2104
 
@@ -232,39 +233,6 @@ void func_150B17DC(Actor *obj) {
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.0054931640625f;
 }
 
-/* Particle spawn request copied by func_15167D84 (field names as in game_10A350.c's Game10A350Emission). */
-typedef struct {
-    /* 0x00 */ s32 texture;
-    /* 0x04 */ s32 surface;
-    /* 0x08 */ u8 pad08[4];
-    /* 0x0C */ s16 frame;
-    /* 0x0E */ s16 frame_rate;
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ s16 velocity_x;
-    /* 0x18 */ s16 velocity_z;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ s8 fraction_x;
-    /* 0x1D */ s8 fraction_y;
-    /* 0x1E */ s8 fraction_z;
-    /* 0x1F */ s8 callback;
-    /* 0x20 */ s16 velocity_y;
-    /* 0x22 */ s16 acceleration;
-    /* 0x24 */ s16 width;
-    /* 0x26 */ s16 height;
-    /* 0x28 */ s16 lifetime;
-    /* 0x2A */ s8 fade;
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ u8 red;
-    /* 0x2D */ u8 green;
-    /* 0x2E */ u8 blue;
-    /* 0x2F */ u8 alpha;
-    /* 0x30 */ u8 pad30[4];
-    /* 0x34 */ s16 flags;
-    /* 0x36 */ u8 pad36[2];
-} ParticleSpawn;
-
 /*
  * Keeps the object stunned with fixed state flags, eases unkB8 toward 0 (or -20 when unk13D is set, unk21C >= 9
  * and D_800B86A4's row clear or D_800CC250 bit 2 set), and
@@ -276,7 +244,7 @@ void func_150B19E0(Actor *obj) {
     f32 speed;
     f32 sine;
     f32 cosine;
-    ParticleSpawn particle;
+    BillboardTemplate particle;
     u32 random; // reused for both random draws
     u8 angle;
 
@@ -316,31 +284,31 @@ void func_150B19E0(Actor *obj) {
         sine = func_150489B0(angle);
         cosine = func_15048A40(angle);
         particle.frame = 0;
-        particle.frame_rate = 0;
-        particle.texture = D_8008CAE0;
+        particle.frameStep = 0;
+        particle.anim = D_8008CAE0;
         particle.x = obj->x_position + sine * radius;
         particle.y = obj->y_position;
         particle.z = obj->z_position + cosine * radius;
         func_1510F800(0);
-        particle.surface = func_1510F8D8(particle.x, particle.y, particle.z, 0);
+        particle.unk4 = func_1510F8D8(particle.x, particle.y, particle.z, 0);
         angle = D_800CC2D0[0].unk76 >> 8;
         speed = D_800CC2D0[0].xz_velocity * 64.0f;
-        particle.velocity_x = func_150489B0(angle) * speed;
-        particle.velocity_z = func_15048A40(angle) * -speed;
+        particle.velX = func_150489B0(angle) * speed;
+        particle.velZ = func_15048A40(angle) * -speed;
         particle.unk1A = -30;
         particle.callback = 7;
-        particle.velocity_y = 0;
-        particle.acceleration = -80;
+        particle.velY = 0;
+        particle.accelY = -80;
         random = (u8)func_150ADA20();
         particle.unk2B = random;
         particle.width = (s32)(random << 12) / 5100 + 204;
         particle.height = (s32)(random << 12) / 12750 + 81;
-        particle.lifetime = 400;
-        particle.fade = 0;
-        particle.red = 0xFF;
-        particle.green = 0xFF;
-        particle.blue = 0;
-        particle.alpha = 0xFF;
+        particle.life = 400;
+        particle.fadeStep = 0;
+        particle.primR = 0xFF;
+        particle.primG = 0xFF;
+        particle.primB = 0;
+        particle.primA = 0xFF;
         particle.flags = 0;
         func_15167D84(&particle, 0, 0, -1, 0xFF, 0);
     }

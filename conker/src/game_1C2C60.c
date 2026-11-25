@@ -1924,36 +1924,6 @@ typedef struct {
     s16 size_range;
 } JetSpritePreset;
 
-typedef struct {
-    void *texture;
-    char pad4[8];
-    s16 frame;
-    s16 frame_rate;
-    s16 position[3];
-    s16 velocity_x;
-    s16 velocity_z;
-    char pad1A[2];
-    u8 fraction_x;
-    u8 fraction_y;
-    u8 fraction_z;
-    s8 callback;
-    s16 velocity_y;
-    s16 acceleration;
-    s16 width;
-    s16 height;
-    s16 lifetime;
-    s8 fade;
-    char pad2B;
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-    u8 environment[3];
-    char pad33;
-    u16 flags;
-    char pad36[2];
-} SpriteEmission;
-
 void *func_15167D84(void *, s32, s32, s8, u8, s32);
 extern u8 D_80090514[];
 extern JetSpritePreset D_800A8770[];
@@ -1961,7 +1931,7 @@ extern JetSpritePreset D_800A8770[];
 /* Emits spriteAccum sprites (func_15167D84) flying from the actor towards random points around `end`. */
 void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
     f32 speed;
-    SpriteEmission packet;
+    BillboardTemplate packet;
     f32 cosine1;
     f32 sine1;
     f32 cosine2;
@@ -1977,25 +1947,25 @@ void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
 
     jet = actor->state;
     preset = &D_800A8770[jet->spritePreset];
-    packet.position[0] = actor->pos.x;
-    packet.position[1] = actor->pos.y;
-    packet.position[2] = actor->pos.z;
-    packet.fraction_x = 0;
-    packet.fraction_z = 0;
-    packet.fraction_y = 0;
-    packet.red = 0xFF;
-    packet.green = 0xFF;
-    packet.blue = 0xFF;
-    packet.environment[0] = 0;
-    packet.environment[1] = 0;
-    packet.environment[2] = 0;
-    packet.alpha = 0xFF;
+    packet.x = actor->pos.x;
+    packet.y = actor->pos.y;
+    packet.z = actor->pos.z;
+    packet.subX = 0;
+    packet.subY = 0;
+    packet.subZ = 0;
+    packet.primR = 0xFF;
+    packet.primG = 0xFF;
+    packet.primB = 0xFF;
+    packet.envR = 0;
+    packet.envG = 0;
+    packet.envB = 0;
+    packet.primA = 0xFF;
     packet.callback = -1;
     packet.flags = 0x12;
     packet.frame = 0;
-    packet.frame_rate = 0;
-    packet.texture = D_80090514;
-    packet.lifetime = 300;
+    packet.frameStep = 0;
+    packet.anim = D_80090514;
+    packet.life = 300;
     do {
         speed = func_150ADA68() * preset->speed_range + preset->speed;
         rnd = func_150ADA20();
@@ -2009,11 +1979,11 @@ void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
         x = end->x + preset->radius * sine2 * cosine1;
         y = end->y - preset->radius * cosine2;
         z = end->z + preset->radius * sine2 * sine1;
-        packet.velocity_x = (x - actor->pos.x) * speed;
-        packet.velocity_y = (y - actor->pos.y) * speed;
-        packet.velocity_z = (z - actor->pos.z) * speed;
-        packet.acceleration = func_150ADA20() % (u32)(preset->acceleration_range + 1) + preset->acceleration;
-        packet.fade = func_150ADA20() % (u32)(preset->fade_range + 1) + preset->fade;
+        packet.velX = (x - actor->pos.x) * speed;
+        packet.velY = (y - actor->pos.y) * speed;
+        packet.velZ = (z - actor->pos.z) * speed;
+        packet.accelY = func_150ADA20() % (u32)(preset->acceleration_range + 1) + preset->acceleration;
+        packet.fadeStep = func_150ADA20() % (u32)(preset->fade_range + 1) + preset->fade;
         packet.width = packet.height = func_150ADA20() % (u32)(preset->size_range + 1) + preset->size;
         func_15167D84(&packet, 0, 0, -1, actor->unkC, actor->unk1);
         jet->spriteAccum -= 1.0f;

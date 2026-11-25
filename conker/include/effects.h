@@ -374,4 +374,64 @@ typedef struct ScreenSpriteInfo {
     /* 0x54 */ f32 offsetT;
 } ScreenSpriteInfo; /* size 0x58 */
 
+/* Sprite animation of a billboard particle (game_1944C0.c): `frames` is one segmented texture address
+ * (< 0x10000000) or a table of `frameCount` texture addresses. */
+typedef struct SpriteAnim {
+    /* 0x0 */ s32 *frames;
+    /* 0x4 */ u8 frameCount;
+    /* 0x5 */ u8 pad5;
+    /* 0x6 */ u16 width;
+    /* 0x8 */ u16 height;
+    /* 0xA */ u8 unkA;       /* 5: two-texture (two-cycle) animation */
+} SpriteAnim;
+
+/* BillboardTemplate.flags (billboard particles, game_1944C0.c) */
+#define BILLBOARD_ENV_COLOR     0x1    /* use envR/G/B instead of the per-texture default */
+#define BILLBOARD_PINGPONG      0x2    /* reverse the animation at either end instead of wrapping */
+#define BILLBOARD_FLIP_S        0x4
+#define BILLBOARD_FLIP_T        0x8
+#define BILLBOARD_DIE_AT_END    0x20
+#define BILLBOARD_DIE_AT_START  0x40
+#define BILLBOARD_LOOPED        0x80   /* set once the animation has passed its last frame */
+#define BILLBOARD_CUSTOM_MODE   0x100  /* render/combine modes come from unk4 */
+#define BILLBOARD_2CYCLE        0x200
+
+/* Spawn template of a billboard particle (type 5 / 0x42): func_15167D84 (game_1944C0.c) copies it to
+ * the particle at +0x10. */
+typedef struct BillboardTemplate {
+    /* 0x00 */ SpriteAnim *anim;
+    /* 0x04 */ s32 unk4;       /* BILLBOARD_CUSTOM_MODE: bits 0-7 render mode, bits 16-31 combine mode;
+                                  else free for the particle's callback */
+    /* 0x08 */ s32 unk8;       /* low byte: angle offset in 1/256ths of a turn */
+    /* 0x0C */ s16 frame;      /* 8.8 fixed point index into anim->frames */
+    /* 0x0E */ s16 frameStep;
+    /* 0x10 */ s16 x;
+    /* 0x12 */ s16 y;
+    /* 0x14 */ s16 z;
+    /* 0x16 */ s16 velX;
+    /* 0x18 */ s16 velZ;
+    /* 0x1A */ s16 unk1A;      /* free for the particle's callback */
+    /* 0x1C */ u8 subX;        /* fractional (1/256) parts of x, z, y */
+    /* 0x1D */ u8 subZ;
+    /* 0x1E */ u8 subY;
+    /* 0x1F */ s8 callback;    /* index into D_8008C9C8, -1 = none */
+    /* 0x20 */ s16 velY;
+    /* 0x22 */ s16 accelY;
+    /* 0x24 */ s16 width;      /* < 0: scaled by the viewing angle */
+    /* 0x26 */ s16 height;     /* < 0: scaled by the viewing angle */
+    /* 0x28 */ s16 life;       /* 0x7FFF = forever */
+    /* 0x2A */ s8 fadeStep;
+    /* 0x2B */ u8 unk2B;
+    /* 0x2C */ u8 primR;
+    /* 0x2D */ u8 primG;
+    /* 0x2E */ u8 primB;
+    /* 0x2F */ u8 primA;
+    /* 0x30 */ u8 envR;
+    /* 0x31 */ u8 envG;
+    /* 0x32 */ u8 envB;
+    /* 0x33 */ u8 pad33;
+    /* 0x34 */ u16 flags;      /* BILLBOARD_* */
+    /* 0x36 */ u8 pad36[2];
+} BillboardTemplate; /* size 0x38 */
+
 #endif

@@ -6,46 +6,8 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 
-
-/*
- * Spawn template of a billboard particle: func_15167D84 copies these 0x38 bytes to Particle.anim
- * onwards (layout as Particle in game_1944C0.c, minus its 0x10-byte object link).
- */
-typedef struct {
-    /* 0x00 */ void *anim;
-    /* 0x04 */ s32 floorAndMinSize; /* this file: low half floor height, high half minimum size */
-    /* 0x08 */ s32 kind;            /* this file: 0-3, see func_151B9964 */
-    /* 0x0C */ s16 frame;
-    /* 0x0E */ s16 frameStep;
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ s16 velX;
-    /* 0x18 */ s16 velZ;
-    /* 0x1A */ s16 size;            /* this file: base size of a pulsing (kind 1) particle */
-    /* 0x1C */ u8 subX;
-    /* 0x1D */ u8 subZ;
-    /* 0x1E */ u8 subY;
-    /* 0x1F */ s8 callback;         /* index into D_8008C9C8, -1 = none */
-    /* 0x20 */ s16 velY;
-    /* 0x22 */ s16 accelY;
-    /* 0x24 */ s16 width;
-    /* 0x26 */ s16 height;
-    /* 0x28 */ s16 life;
-    /* 0x2A */ s8 fadeStep;
-    /* 0x2B */ u8 phase;            /* this file: pulse phase, 1/256ths of a turn */
-    /* 0x2C */ u8 primR;
-    /* 0x2D */ u8 primG;
-    /* 0x2E */ u8 primB;
-    /* 0x2F */ u8 primA;
-    /* 0x30 */ u8 envR;
-    /* 0x31 */ u8 envG;
-    /* 0x32 */ u8 envB;
-    /* 0x33 */ u8 pad33;
-    /* 0x34 */ u16 flags;
-    /* 0x36 */ u8 pad36[2];
-} ParticleTemplate; /* size 0x38 */
 
 extern void *D_8008CA4C[];
 void *func_15167D84(void *, s32, s32, s32, s32, s32);
@@ -61,7 +23,7 @@ void *func_15167D84(void *, s32, s32, s32, s32, s32);
 void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32 angle, s16 angleSpread,
                    s16 velY, s16 velYRange, s16 speed, s16 speedRange, s16 radius, s16 minSize, s16 size,
                    u8 owner, s32 list) {
-    ParticleTemplate template;
+    BillboardTemplate template;
     s32 floorY;
     s16 *pad1; // matching: pad1-3 are unused stack slots of the target's frame
     f32 outSpeed;
@@ -108,8 +70,8 @@ void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32
         break;
     }
     template.anim = D_8008CA4C[animIndex];
-    template.floorAndMinSize = (minSize << 16) | (floorY & 0xFFFF);
-    template.kind = kind;
+    template.unk4 = (minSize << 16) | (floorY & 0xFFFF);
+    template.unk8 = kind;
     template.frame = 0;
     template.frameStep = 0x100;
     template.x = x;
@@ -117,7 +79,7 @@ void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32
     template.z = z;
     template.velX = outSpeed * sine;
     template.velZ = outSpeed * cosine;
-    template.size = size;
+    template.unk1A = size;
     template.callback = 0; /* func_151B9964 */
     template.velY = upSpeed;
     template.accelY = -160;
@@ -125,7 +87,7 @@ void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32
     template.height = size;
     template.life = 400;
     template.fadeStep = 0;
-    template.phase = func_150ADA20();
+    template.unk2B = func_150ADA20();
     template.primA = 0xFF;
     template.flags = 0;
     template.primR = r;

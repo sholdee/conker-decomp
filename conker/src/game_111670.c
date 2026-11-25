@@ -348,39 +348,6 @@ typedef struct {
 /* Computes the plane of a triangle; the (unnormalised) normal lands in D_800CC210..D_800CC218. */
 extern void func_15049350(Tri150E5810);
 
-/* Particle spawn request for func_15167D84. */
-typedef struct {
-    /* 0x00 */ void *data;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s16 unk0C;
-    /* 0x0E */ s16 unk0E;
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ s16 velX;
-    /* 0x18 */ s16 velZ;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E;
-    /* 0x1F */ s8 unk1F;
-    /* 0x20 */ s16 velY;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ u8 unk2A;
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ u8 r;
-    /* 0x2D */ u8 g;
-    /* 0x2E */ u8 b;
-    /* 0x2F */ u8 a;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-} Spawn150E4E04;
-
 extern u8 D_8009187C[];
 extern u8 D_800918A0[];
 extern u8 D_800918AC[];
@@ -411,7 +378,7 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
     f32 len;
     f32 baseSpeed;
     MtxF mtx;
-    Spawn150E4E04 spawn;
+    BillboardTemplate spawn;
     f32 speed;
     u8 angle;
     f32 vx;
@@ -463,40 +430,40 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
         spawn.x = x;
         spawn.y = y;
         spawn.z = z;
-        spawn.r = 180;
-        spawn.g = 180;
-        spawn.b = 180;
-        spawn.a = 255;
-        spawn.unk1F = -1;
-        spawn.unk34 = 0;
-        spawn.unk0C = 0;
-        spawn.unk0E = 0;
+        spawn.primR = 180;
+        spawn.primG = 180;
+        spawn.primB = 180;
+        spawn.primA = 255;
+        spawn.callback = -1;
+        spawn.flags = 0;
+        spawn.frame = 0;
+        spawn.frameStep = 0;
         minScale = D_800A1110[size][1] * 95.0f / 256.0f;
         rangeScale = D_800A1110[size][1] * 130.0f / 256.0f;
         if (kind == 0x11) {
-            spawn.data = D_8009187C;
+            spawn.anim = D_8009187C;
         } else if (kind == 0xA) {
-            spawn.data = D_800918A0;
+            spawn.anim = D_800918A0;
         } else if (kind == 4 || kind == 9) {
-            spawn.data = D_800918A0;
+            spawn.anim = D_800918A0;
         } else if (kind == 8) {
-            spawn.data = D_80090520;
+            spawn.anim = D_80090520;
             minScale = 180.0f;
             rangeScale = 200.0f;
         } else {
-            spawn.data = D_800918AC;
+            spawn.anim = D_800918AC;
         }
         if (size == 2) {
             big = 1;
-            spawn.unk22 = -373;
+            spawn.accelY = -373;
             count = 12;
             baseSpeed *= 0.5f * (func_151EF610() % 3 + 1);
         } else if (size == 0) {
-            spawn.unk22 = -218;
+            spawn.accelY = -218;
             count = 12;
             baseSpeed *= 0.5f;
         } else {
-            spawn.unk22 = -218;
+            spawn.accelY = -218;
         }
         while (count-- && ok) {
             speed = func_150ADA68() * 957.0f + baseSpeed;
@@ -515,14 +482,14 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
             vx = 0.3149999976f * dirX;
             vy = dirY;
             vz = 0.3149999976f * dirZ;
-            spawn.unk28 = func_151EF610() % 2 + 386;
+            spawn.life = func_151EF610() % 2 + 386;
             spawn.velX = speed * vx;
             spawn.velY = speed * vy;
             spawn.velZ = speed * vz;
             func_151EF610();
-            spawn.unk2A = 10;
-            spawn.unk24 = func_150ADA68() * rangeScale + minScale;
-            spawn.unk26 = func_150ADA68() * rangeScale + minScale;
+            spawn.fadeStep = 10;
+            spawn.width = func_150ADA68() * rangeScale + minScale;
+            spawn.height = func_150ADA68() * rangeScale + minScale;
             if (!func_15167D84(&spawn, 0, 0, -1, 0xFF, 0)) {
                 ok = 0;
             }

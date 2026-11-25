@@ -1,39 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void *func_15167D84(void *, s32, s32, s8, u8, s32);
-
-/* Particle spawn request passed to func_15167D84. */
-typedef struct Game10A350Emission {
-    s32 texture;
-    char pad4[8];
-    s16 frame;
-    s16 frame_rate;
-    s16 position[3];
-    s16 velocity_x;
-    s16 velocity_z;
-    char pad1A[2];
-    u8 fraction_x;
-    u8 fraction_y;
-    u8 fraction_z;
-    s8 callback;
-    s16 velocity_y;
-    s16 acceleration;
-    s16 width;
-    s16 height;
-    s16 lifetime;
-    s8 fade;
-    char pad2B;
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-    u8 environment[3];
-    char pad33;
-    u16 flags;
-    char pad36[2];
-} Game10A350Emission;
 
 /* One point of the trail ring buffer. */
 typedef struct Game10A350Record {
@@ -150,7 +120,7 @@ s32 func_150DCEA0(Game10A350Actor *actor) {
     if (state->count > 0.99999f) {
         inverse = 1.0f / state->count;
         {
-            Game10A350Emission packet;
+            BillboardTemplate packet;
             f32 stepX;
             f32 stepZ;
             f32 sinYaw;
@@ -172,24 +142,24 @@ s32 func_150DCEA0(Game10A350Actor *actor) {
                 do {
                     state->spawnCount += state->spawnRate;
                     if (state->spawnCount > 1.0f) {
-                        packet.fraction_x = 0;
-                        packet.fraction_z = 0;
-                        packet.fraction_y = 0;
-                        packet.red = 0xFF;
-                        packet.green = 0xFF;
-                        packet.blue = 0xFF;
-                        packet.environment[0] = 0;
-                        packet.environment[1] = 0;
-                        packet.environment[2] = 0;
-                        packet.alpha = 0xFF;
+                        packet.subX = 0;
+                        packet.subY = 0;
+                        packet.subZ = 0;
+                        packet.primR = 0xFF;
+                        packet.primG = 0xFF;
+                        packet.primB = 0xFF;
+                        packet.envR = 0;
+                        packet.envG = 0;
+                        packet.envB = 0;
+                        packet.primA = 0xFF;
                         packet.callback = state->callback;
                         packet.flags = 0x12;
                         packet.frame = 0;
                         spawned = TRUE;
-                        packet.frame_rate = state->frameRate;
-                        packet.texture = state->texture;
-                        packet.position[1] = actor->pos.y;
-                        packet.lifetime = state->lifetime;
+                        packet.frameStep = state->frameRate;
+                        packet.anim = state->texture;
+                        packet.y = actor->pos.y;
+                        packet.life = state->lifetime;
                         do {
                             speed = func_150ADA68() * state->speedRange + state->speedBase;
                             yaw = func_150ADA20();
@@ -198,13 +168,13 @@ s32 func_150DCEA0(Game10A350Actor *actor) {
                             pitch = (func_150ADA20() % (u32)(state->pitchRange + 1)) + state->pitchBase;
                             sinPitch = func_151423D8(pitch);
                             cosPitch = func_151423D8((u8)(pitch - 0x40));
-                            packet.position[0] = actor->pos.x + state->radius * cosYaw;
-                            packet.position[2] = actor->pos.z + state->radius * sinYaw;
-                            packet.velocity_x = speed * sinPitch * cosYaw;
-                            packet.velocity_y = -speed * cosPitch;
-                            packet.velocity_z = speed * sinPitch * sinYaw;
-                            packet.acceleration = func_150ADA68() * state->accelRange + state->accelBase;
-                            packet.fade = (func_150ADA20() % (u32)(state->fadeRange + 1)) + state->fadeBase;
+                            packet.x = actor->pos.x + state->radius * cosYaw;
+                            packet.z = actor->pos.z + state->radius * sinYaw;
+                            packet.velX = speed * sinPitch * cosYaw;
+                            packet.velY = -speed * cosPitch;
+                            packet.velZ = speed * sinPitch * sinYaw;
+                            packet.accelY = func_150ADA68() * state->accelRange + state->accelBase;
+                            packet.fadeStep = (func_150ADA20() % (u32)(state->fadeRange + 1)) + state->fadeBase;
                             packet.width = packet.height = func_150ADA68() * state->sizeRange + state->sizeBase;
                             if (func_15167D84(&packet, 0, 0, -1, actor->unk0C, actor->unk01) == NULL) {
                                 spawned = FALSE;

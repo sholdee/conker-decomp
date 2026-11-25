@@ -65,52 +65,6 @@ void func_151A11CC(f32 arg0, f32 arg1, f32 arg2, f32 arg3,
                   s32 arg24, s32 arg25, s32 arg26, s32 arg27) {
 }
 
-/* Sprite animation (as in game_1944C0.c): one texture, or a table of frameCount textures. */
-typedef struct {
-    /* 0x0 */ s32 *frames;
-    /* 0x4 */ u8 frameCount;
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ u16 unk6;
-    /* 0x8 */ u16 unk8;
-    /* 0xA */ u8 unkA;
-} SpriteAnim;
-
-/* 0x38-byte particle template; func_15167D84 copies it to Particle.anim onwards. */
-typedef struct {
-    /* 0x00 */ SpriteAnim *anim;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s16 frame;
-    /* 0x0E */ s16 frameStep;
-    /* 0x10 */ s16 x;
-    /* 0x12 */ s16 y;
-    /* 0x14 */ s16 z;
-    /* 0x16 */ s16 velX;
-    /* 0x18 */ s16 velZ;
-    /* 0x1A */ u8 pad1A[2];
-    /* 0x1C */ u8 subX;
-    /* 0x1D */ u8 subZ;
-    /* 0x1E */ u8 subY;
-    /* 0x1F */ s8 callback;
-    /* 0x20 */ s16 velY;
-    /* 0x22 */ s16 accelY;
-    /* 0x24 */ s16 width;
-    /* 0x26 */ s16 height;
-    /* 0x28 */ s16 life;
-    /* 0x2A */ s8 fadeStep;
-    /* 0x2B */ u8 pad2B;
-    /* 0x2C */ u8 primR;
-    /* 0x2D */ u8 primG;
-    /* 0x2E */ u8 primB;
-    /* 0x2F */ u8 primA;
-    /* 0x30 */ u8 envR;
-    /* 0x31 */ u8 envG;
-    /* 0x32 */ u8 envB;
-    /* 0x33 */ u8 pad33;
-    /* 0x34 */ u16 flags;
-    /* 0x36 */ u8 pad36[2];
-} ParticleTemplate;
-
 /* Particle object (layout as in game_1944C0.c); the spawner's extra data follows it at 0x50. */
 typedef struct {
     /* 0x00 */ u8 link[0x10];
@@ -149,11 +103,6 @@ typedef struct {
     /* 0x48 */ s8 onDeath;
     /* 0x49 */ u8 pad49[7];
 } Particle;
-
-#define PARTICLE_ENV_COLOR   0x1
-#define PARTICLE_FLIP_S      0x4
-#define PARTICLE_FLIP_T      0x8
-#define PARTICLE_CUSTOM_MODE 0x100
 
 /* Emitter settings at 0x28 of the emitter objects below. */
 typedef struct {
@@ -205,12 +154,12 @@ typedef struct {
 } DriftParticleData;
 
 extern SpriteAnim D_80090B60[];
-Particle *func_15167D84(ParticleTemplate *, s32, s32, s8, u8, s32);
+Particle *func_15167D84(BillboardTemplate *, s32, s32, s8, u8, s32);
 
 /* Spawns particles at random points in a sphere around the emitter; each drifts back to the centre. */
 void func_151A11E4(Emitter *emitter) {
     EmitterParams *params;
-    ParticleTemplate packet;
+    BillboardTemplate packet;
     DriftParticleData data;
     u8 angle1;
     u8 angle2;
@@ -264,10 +213,10 @@ void func_151A11E4(Emitter *emitter) {
             ty = params->y - dist * cos2;
             tz = params->z + horiz * sin1;
             if (func_150ADA20() & 1) {
-                packet.flags |= PARTICLE_FLIP_S;
+                packet.flags |= BILLBOARD_FLIP_S;
             }
             if (func_150ADA20() & 1) {
-                packet.flags |= PARTICLE_FLIP_T;
+                packet.flags |= BILLBOARD_FLIP_T;
             }
             packet.frameStep = func_150ADA20() % (u32)(params->frameStepRange + 1) + params->frameStep;
             size = func_150ADA20() % (u32)(params->sizeRange + 1) + params->size;
@@ -431,7 +380,7 @@ typedef struct {
 /* Spawns particles at random points in a sphere around the emitter; they stay where they are. */
 void func_151A1998(Emitter *emitter) {
     EmitterParams *params;
-    ParticleTemplate packet;
+    BillboardTemplate packet;
     PuffParticleData data;
     f32 cos1;
     f32 sin1;
@@ -480,10 +429,10 @@ void func_151A1998(Emitter *emitter) {
             y = params->y - dist * cos2;
             z = params->z + dist * sin2 * sin1;
             if (func_150ADA20() & 1) {
-                packet.flags |= PARTICLE_FLIP_S;
+                packet.flags |= BILLBOARD_FLIP_S;
             }
             if (func_150ADA20() & 1) {
-                packet.flags |= PARTICLE_FLIP_T;
+                packet.flags |= BILLBOARD_FLIP_T;
             }
             packet.frameStep = func_150ADA20() % (u32)(params->frameStepRange + 1) + params->frameStep;
             size = func_150ADA20() % (u32)(params->sizeRange + 1) + params->size;
@@ -595,7 +544,7 @@ typedef struct {
 /* Spawns particles at random points in a sphere around the emitter; they grow, tint and accelerate. */
 void func_151A1FB4(Emitter *emitter) {
     EmitterParams *params;
-    ParticleTemplate packet;
+    BillboardTemplate packet;
     SmokeParticleData data;
     u8 angle1;
     u8 angle2;
@@ -644,10 +593,10 @@ void func_151A1FB4(Emitter *emitter) {
             y = params->y - dist * cos2;
             z = params->z + dist * sin2 * sin1;
             if (func_150ADA20() & 1) {
-                packet.flags |= PARTICLE_FLIP_S;
+                packet.flags |= BILLBOARD_FLIP_S;
             }
             if (func_150ADA20() & 1) {
-                packet.flags |= PARTICLE_FLIP_T;
+                packet.flags |= BILLBOARD_FLIP_T;
             }
             packet.frameStep = func_150ADA20() % (u32)(params->frameStepRange + 1) + params->frameStep;
             size = func_150ADA20() % (u32)(params->sizeRange + 1) + params->size;
@@ -703,7 +652,7 @@ void func_151A24A8(Particle *particle) {
     }
     if (particle->life < data->tintStart) {
         particle->callback = 0x13;
-        particle->flags |= PARTICLE_ENV_COLOR | PARTICLE_CUSTOM_MODE;
+        particle->flags |= BILLBOARD_ENV_COLOR | BILLBOARD_CUSTOM_MODE;
         particle->envR = particle->envG = particle->envB = particle->life * data->tintStep;
         particle->unk14 = 0x520003;
     }

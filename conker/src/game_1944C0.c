@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * Object type descriptors: D_8008B4A8[type], 0x34 bytes each (struct115 in structs.h only names unk0/unk18).
@@ -88,19 +89,6 @@ typedef struct {
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 
-/*
- * Sprite animation: `frames` is a single (segmented, < 0x10000000) texture address or a pointer to a table of
- * `frameCount` texture addresses.
- */
-typedef struct {
-    /* 0x0 */ s32 *frames;
-    /* 0x4 */ u8 frameCount;
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ u16 unk6;
-    /* 0x8 */ u16 unk8;
-    /* 0xA */ u8 unkA;
-} SpriteAnim;
-
 /* Type 3 object (0x28 bytes): a fading, animated billboard sprite. */
 typedef struct {
     /* 0x00 */ ObjLink link;
@@ -130,52 +118,10 @@ typedef struct {
     /* 0xD */ u8 flip;         /* bit 0: flip s, bit 1: flip t */
 } SpriteParams;
 
-/* Particle flags (Particle.flags). */
-#define PARTICLE_ENV_COLOR      0x1    /* use envR/G/B instead of the per-texture default */
-#define PARTICLE_PINGPONG       0x2    /* reverse the animation at either end instead of wrapping */
-#define PARTICLE_FLIP_S         0x4
-#define PARTICLE_FLIP_T         0x8
-#define PARTICLE_DIE_AT_END     0x20
-#define PARTICLE_DIE_AT_START   0x40
-#define PARTICLE_LOOPED         0x80   /* set once the animation has passed its last frame */
-#define PARTICLE_CUSTOM_MODE    0x100  /* render/combine modes come from unk14 */
-#define PARTICLE_2CYCLE         0x200
-
 /* Type 5 / 0x42 object: a moving, animated billboard particle (created by func_15167D84). */
 typedef struct {
     /* 0x00 */ ObjLink link;
-    /* 0x10 */ SpriteAnim *anim;
-    /* 0x14 */ s32 unk14;       /* PARTICLE_CUSTOM_MODE: bits 0-7 render mode, bits 16-31 combine mode */
-    /* 0x18 */ s32 unk18;       /* low byte: angle offset in 1/256ths of a turn */
-    /* 0x1C */ s16 frame;       /* 8.8 fixed point index into anim->frames */
-    /* 0x1E */ s16 frameStep;
-    /* 0x20 */ s16 x;
-    /* 0x22 */ s16 y;
-    /* 0x24 */ s16 z;
-    /* 0x26 */ s16 velX;
-    /* 0x28 */ s16 velZ;
-    /* 0x2A */ u8 pad2A[2];
-    /* 0x2C */ u8 subX;         /* fractional (1/256) parts of x, z, y */
-    /* 0x2D */ u8 subZ;
-    /* 0x2E */ u8 subY;
-    /* 0x2F */ s8 callback;     /* index into D_8008C9C8, -1 = none */
-    /* 0x30 */ s16 velY;
-    /* 0x32 */ s16 accelY;
-    /* 0x34 */ s16 width;       /* < 0: scaled by the viewing angle */
-    /* 0x36 */ s16 height;      /* < 0: scaled by the viewing angle */
-    /* 0x38 */ s16 life;        /* 0x7FFF = forever */
-    /* 0x3A */ s8 fadeStep;
-    /* 0x3B */ u8 pad3B;
-    /* 0x3C */ u8 primR;
-    /* 0x3D */ u8 primG;
-    /* 0x3E */ u8 primB;
-    /* 0x3F */ u8 primA;
-    /* 0x40 */ u8 envR;
-    /* 0x41 */ u8 envG;
-    /* 0x42 */ u8 envB;
-    /* 0x43 */ u8 pad43;
-    /* 0x44 */ u16 flags;
-    /* 0x46 */ u8 pad46[2];
+    /* 0x10 */ BillboardTemplate tmpl;
     /* 0x48 */ s8 onDeath;      /* index into D_8008CA20, -1 = none */
 } Particle;
 
@@ -556,7 +502,7 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
 }
 /* Spawns a particle (type 0x42 when `altType` is set, else 5) from the 0x38-byte template at `src`. */
 Particle *func_15167D84(src, altType, extra, onDeath, owner, list)
-    Particle *src;
+    BillboardTemplate *src;
     s32 altType;
     s32 extra;
     s8 onDeath;
@@ -569,7 +515,7 @@ Particle *func_15167D84(src, altType, extra, onDeath, owner, list)
     if (particle == NULL) {
         return particle;
     }
-    bcopy(src, &particle->anim, 0x38);
+    bcopy(src, &particle->tmpl, sizeof(BillboardTemplate));
     particle->onDeath = onDeath;
     return particle;
 }
@@ -580,89 +526,89 @@ void func_15167E0C(Particle *p) {
     s32 limit;
 
     finished = 0;
-    if (p->life != 0x7FFF) {
-        p->life -= D_800BE9E4;
-        if (p->life < 0) {
-            p->life = 0;
+    if (p->tmpl.life != 0x7FFF) {
+        p->tmpl.life -= D_800BE9E4;
+        if (p->tmpl.life < 0) {
+            p->tmpl.life = 0;
             finished = 1;
         }
     }
 
-    if (p->fadeStep > 0) {
-        if (p->fadeStep < p->primA) {
-            p->primA -= p->fadeStep;
+    if (p->tmpl.fadeStep > 0) {
+        if (p->tmpl.fadeStep < p->tmpl.primA) {
+            p->tmpl.primA -= p->tmpl.fadeStep;
         } else {
-            p->life = 0;
+            p->tmpl.life = 0;
             finished = 1;
         }
     }
 
-    if (p->callback != -1) {
-        func = D_8008C9C8[p->callback];
+    if (p->tmpl.callback != -1) {
+        func = D_8008C9C8[p->tmpl.callback];
         if (func != NULL) {
             func((struct102 *)p);
         }
     }
 
-    if (p->life != 0) {
+    if (p->tmpl.life != 0) {
         s32 posY;
         s32 posX;
         s32 posZ;
         s32 delta;
 
-        p->velY += p->accelY;
+        p->tmpl.velY += p->tmpl.accelY;
 
         // matching: 24.8 fixed point moves written step by step (incl. the redundant (u8)) for IDO's temp registers
-        posY = p->y;
-        posY = (posY << 8) | p->subY;
-        delta = p->velY * D_800BE9E4;
+        posY = p->tmpl.y;
+        posY = (posY << 8) | p->tmpl.subY;
+        delta = p->tmpl.velY * D_800BE9E4;
         posY += delta;
-        p->y = posY >> 8;
+        p->tmpl.y = posY >> 8;
         posY = (u8)posY;
-        p->subY = posY;
-        posX = p->x;
-        posX = (posX << 8) | p->subX;
-        delta = p->velX * D_800BE9E4;
+        p->tmpl.subY = posY;
+        posX = p->tmpl.x;
+        posX = (posX << 8) | p->tmpl.subX;
+        delta = p->tmpl.velX * D_800BE9E4;
         posX += delta;
-        p->x = posX >> 8;
+        p->tmpl.x = posX >> 8;
         posX = (u8)posX;
-        p->subX = posX;
-        posZ = p->z;
-        posZ = (posZ << 8) | p->subZ;
-        delta = p->velZ * D_800BE9E4;
+        p->tmpl.subX = posX;
+        posZ = p->tmpl.z;
+        posZ = (posZ << 8) | p->tmpl.subZ;
+        delta = p->tmpl.velZ * D_800BE9E4;
         posZ += delta;
-        p->z = posZ >> 8;
+        p->tmpl.z = posZ >> 8;
         posZ = (u8)posZ;
-        p->subZ = posZ;
-        if (p->frameStep != 0) {
-            limit = (p->anim->frameCount << 8) - 1;
-            p->frame += p->frameStep * D_800BE9E4;
-            if (limit < p->frame) {
-                if (p->flags & PARTICLE_DIE_AT_END) {
-                    p->life = 0;
+        p->tmpl.subZ = posZ;
+        if (p->tmpl.frameStep != 0) {
+            limit = (p->tmpl.anim->frameCount << 8) - 1;
+            p->tmpl.frame += p->tmpl.frameStep * D_800BE9E4;
+            if (limit < p->tmpl.frame) {
+                if (p->tmpl.flags & BILLBOARD_DIE_AT_END) {
+                    p->tmpl.life = 0;
                     finished = 1;
                 } else {
-                    p->flags |= PARTICLE_LOOPED;
-                    if (p->flags & PARTICLE_PINGPONG) {
-                        p->frame = limit - (p->frame % limit);
-                        p->frameStep = -p->frameStep;
+                    p->tmpl.flags |= BILLBOARD_LOOPED;
+                    if (p->tmpl.flags & BILLBOARD_PINGPONG) {
+                        p->tmpl.frame = limit - (p->tmpl.frame % limit);
+                        p->tmpl.frameStep = -p->tmpl.frameStep;
                     } else {
                         do {
-                            p->frame -= limit;
-                        } while (limit < p->frame);
+                            p->tmpl.frame -= limit;
+                        } while (limit < p->tmpl.frame);
                     }
                 }
-            } else if (p->frame < 0) {
-                if (p->flags & PARTICLE_DIE_AT_START) {
-                    p->life = 0;
+            } else if (p->tmpl.frame < 0) {
+                if (p->tmpl.flags & BILLBOARD_DIE_AT_START) {
+                    p->tmpl.life = 0;
                     finished = 1;
-                } else if (p->flags & PARTICLE_PINGPONG) {
-                    p->frame = -p->frame % limit;
-                    p->frameStep = -p->frameStep;
+                } else if (p->tmpl.flags & BILLBOARD_PINGPONG) {
+                    p->tmpl.frame = -p->tmpl.frame % limit;
+                    p->tmpl.frameStep = -p->tmpl.frameStep;
                 } else {
                     do {
-                        p->frame += limit;
-                    } while (p->frame < 0);
+                        p->tmpl.frame += limit;
+                    } while (p->tmpl.frame < 0);
                 }
             }
         }
@@ -700,37 +646,37 @@ s32 func_15168118(Gfx *gfx, Particle *p, s16 viewIndex) {
     SpriteAnim *white;
 
     params.flip = 0;
-    if (p->flags & PARTICLE_FLIP_S) {
+    if (p->tmpl.flags & BILLBOARD_FLIP_S) {
         params.flip = 1;
     }
-    if (p->flags & PARTICLE_FLIP_T) {
+    if (p->tmpl.flags & BILLBOARD_FLIP_T) {
         params.flip |= 2;
     }
     // matching: two empty tests of the same condition steer IDO's scheduling of the texture load
-    if ((u32)p->anim->frames < 0x10000000) {
+    if ((u32)p->tmpl.anim->frames < 0x10000000) {
     }
-    if ((u32)p->anim->frames < 0x10000000) {
+    if ((u32)p->tmpl.anim->frames < 0x10000000) {
     }
     update = 1;
     {
         s32 texture;
 
-        anim = p->anim;
+        anim = p->tmpl.anim;
         if ((u32)anim->frames < 0x10000000) {
             texture = (s32)anim->frames;
         } else {
-            texture = anim->frames[p->frame >> 8];
+            texture = anim->frames[p->tmpl.frame >> 8];
         }
-        gfx = func_15142E24(gfx, (s32)anim, p->frame << 8, 2, 0x100, 0x100, texture, 5, (s32)&params, &update, 3);
+        gfx = func_15142E24(gfx, (s32)anim, p->tmpl.frame << 8, 2, 0x100, 0x100, texture, 5, (s32)&params, &update, 3);
     }
     view = viewIndex;
-    params.x = p->x;
-    params.y = p->y;
-    params.z = p->z;
-    size = p->width;
+    params.x = p->tmpl.x;
+    params.y = p->tmpl.y;
+    params.z = p->tmpl.z;
+    size = p->tmpl.width;
     if (size < 0) {
         /* 0.0111 = 1/90: fold the view angle into 0..90 degrees */
-        angle = fabsf(D_800DBFF0[view].unk380 + (p->unk18 & 0xFF) * 1.40625f);
+        angle = fabsf(D_800DBFF0[view].unk380 + (p->tmpl.unk8 & 0xFF) * 1.40625f);
         while (angle >= 360.0f) {
             angle -= 360.0f;
         }
@@ -746,32 +692,32 @@ s32 func_15168118(Gfx *gfx, Particle *p, s16 viewIndex) {
         }
     }
     params.unk6 = size;
-    size = p->height;
+    size = p->tmpl.height;
     if (size < 0) {
-        view = (p->width < 0) ? 0 : p->width;
+        view = (p->tmpl.width < 0) ? 0 : p->tmpl.width;
         size = fabsf(D_800DBFF0[viewIndex].pitch) * (view + size) * 0.01111111138f - size;
     }
     params.unk8 = size;
-    if (p->flags & PARTICLE_CUSTOM_MODE) {
+    if (p->tmpl.flags & BILLBOARD_CUSTOM_MODE) {
         u8 renderMode;
         u8 combineMode;
         s32 pad3[2]; // matching: stack layout of the target frame
 
-        renderMode = p->unk14 & 0xFF;
-        combineMode = (p->unk14 & 0xFFFF0000) >> 16;
+        renderMode = p->tmpl.unk4 & 0xFF;
+        combineMode = (p->tmpl.unk4 & 0xFFFF0000) >> 16;
         gfx = func_15142B7C(gfx, 5, 0);
         gfx = func_1513F4E4(gfx, combineMode, &update);
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | ((p->flags & PARTICLE_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | ((p->tmpl.flags & BILLBOARD_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, &update);
-    } else if (p->anim->unkA != 5) {
+    } else if (p->tmpl.anim->unkA != 5) {
         gfx = func_1513F4E4(gfx, 0xD, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
-    } else if (p->anim->unkA == 3) {
+    } else if (p->tmpl.anim->unkA == 3) {
         gfx = func_1513F4E4(gfx, 0xE, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
-    } else if (p->flags & 0x10) {
+    } else if (p->tmpl.flags & 0x10) {
         gfx = func_1513F4E4(gfx, 0xD, &update);
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[0x12].unk0 | D_800A4AC8[0x12].unk4 | 4, &update);
@@ -780,18 +726,18 @@ s32 func_15168118(Gfx *gfx, Particle *p, s16 viewIndex) {
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_2CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[0x11].unk0 | D_800A4AC8[0x11].unk4 | 4, &update);
     }
-    c0 = p->primG;
-    c1 = p->primB;
-    c2 = p->primA;
-    gfx = func_15142CF0(gfx, 1, 0, p->primR, c0, c1, c2, &update);
-    if (p->flags & PARTICLE_ENV_COLOR) {
-        c0 = p->envR;
-        c1 = p->envG;
-        c2 = p->envB;
+    c0 = p->tmpl.primG;
+    c1 = p->tmpl.primB;
+    c2 = p->tmpl.primA;
+    gfx = func_15142CF0(gfx, 1, 0, p->tmpl.primR, c0, c1, c2, &update);
+    if (p->tmpl.flags & BILLBOARD_ENV_COLOR) {
+        c0 = p->tmpl.envR;
+        c1 = p->tmpl.envG;
+        c2 = p->tmpl.envB;
     } else {
-        anim = p->anim;
+        anim = p->tmpl.anim;
         white = &D_8009053C;
-        if (p->anim == &D_800907FC) {
+        if (p->tmpl.anim == &D_800907FC) {
             c0 = 0x80;
             c1 = 0x80;
             c2 = 0xFF;
@@ -839,9 +785,9 @@ void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a) {
     s32 i;
 
     tA = 0x2000;
-    tB = (D_8008CA4C[q->animIndex]->unk8 + 0x100) << 5;
+    tB = (D_8008CA4C[q->animIndex]->height + 0x100) << 5;
     sA = 0x2000;
-    sB = (D_8008CA4C[q->animIndex]->unk6 + 0x100) << 5;
+    sB = (D_8008CA4C[q->animIndex]->width + 0x100) << 5;
     for (i = 0; i < 2; i++) {
         q->vtx[i * 4 + 1].v.flag = 0;
         q->vtx[i * 4 + 1].v.cn[0] = r;
@@ -866,11 +812,11 @@ void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a) {
     }
     if (q->flags & 0x80) {
         tB = 0x2000;
-        tA = (D_8008CA4C[q->animIndex]->unk8 + 0x100) << 5;
+        tA = (D_8008CA4C[q->animIndex]->height + 0x100) << 5;
     }
     if (q->flags & 0x100) {
         sB = 0x2000;
-        sA = (D_8008CA4C[q->animIndex]->unk6 + 0x100) << 5;
+        sA = (D_8008CA4C[q->animIndex]->width + 0x100) << 5;
     }
     q->vtx[1].v.tc[0] = q->vtx[5].v.tc[0] = q->vtx[2].v.tc[0] = q->vtx[6].v.tc[0] = sA;
     q->vtx[2].v.tc[1] = q->vtx[6].v.tc[1] = q->vtx[3].v.tc[1] = q->vtx[7].v.tc[1] = tA;
@@ -994,14 +940,14 @@ void func_15168B10(s32 obj, s32 type) {
 }
 
 /*
- * Particle callback: unk14 holds a fade rate (high half) and a delay (low half). Keeps the particle alive
+ * Particle callback: tmpl.unk4 holds a fade rate (high half) and a delay (low half). Keeps the particle alive
  * (life = 30) while the delay counts down, then fades primA by the rate each call and lets it die.
  * Readable equivalent:
- *     word = p->unk14;
+ *     word = p->tmpl.unk4;
  *     if (word & 0xFFFF) {
- *         p->unk14 &= 0xFFFF0000; p->life = 30; p->unk14 |= (u16)((word & 0xFFFF) - 1); return;
+ *         p->tmpl.unk4 &= 0xFFFF0000; p->tmpl.life = 30; p->tmpl.unk4 |= (u16)((word & 0xFFFF) - 1); return;
  *     }
- *     if ((u16)(word >> 16) < p->primA) { p->primA -= (u16)(word >> 16); p->life = 30; } else { p->life = 0; }
+ *     if ((u16)(word >> 16) < p->tmpl.primA) { p->tmpl.primA -= (u16)(word >> 16); p->tmpl.life = 30; } else { p->tmpl.life = 0; }
  */
 // matching: permuter output; every readable form tried allocates `word` and the delay in other registers
 
@@ -1025,7 +971,7 @@ void func_15168B44(void *arg0)
   s32 keep;
   a = arg0;
   hi = 0x1E;
-  v1 = a->unk14;
+  v1 = a->tmpl.unk4;
   new_var2 = v1;
   t6 = ((u16) new_var2) ^ 0;
   new_var = t6 - (1 & 0xFFFFFFFFu);
@@ -1047,8 +993,8 @@ void func_15168B44(void *arg0)
     hi--;
     t9 = (v1 & 0xFFFF0000) | new_var;
     v1 = 0;
-    a->unk14 = t9;
-    a->life = hi;
+    a->tmpl.unk4 = t9;
+    a->tmpl.life = hi;
     if (keep)
     {
       ;
@@ -1057,23 +1003,23 @@ void func_15168B44(void *arg0)
     return;
   }
   hi = (u16) (v1 >> 16);
-  v1 = a->primA;
+  v1 = a->tmpl.primA;
   if (0)
   {
   }
   a2 = v1;
   if (hi < a2)
   {
-    a->primA = a2 - hi;
+    a->tmpl.primA = a2 - hi;
     if (1)
     {
     }
-    a->life = 0x1E;
+    a->tmpl.life = 0x1E;
   }
   else
   {
     a2 = 0;
-    a->life = (a2, 0);
+    a->tmpl.life = (a2, 0);
   }
 }
 /* Type 0x10 update: runs the object's callback, if any. */

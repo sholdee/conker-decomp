@@ -142,37 +142,6 @@ typedef struct {
     /* 0x98 */ StreamState *state;
 } StreamActor;
 
-/* Particle spawn request passed to func_15167D84. */
-typedef struct {
-    u8 *texture;
-    char pad4[8];
-    s16 frame;
-    s16 frame_rate;
-    s16 position[3];
-    s16 velocity_x;
-    s16 velocity_z;
-    char pad1A[2];
-    u8 fraction_x;
-    u8 fraction_y;
-    u8 fraction_z;
-    s8 callback;
-    s16 velocity_y;
-    s16 acceleration;
-    s16 width;
-    s16 height;
-    s16 lifetime;
-    s8 fade;
-    char pad2B;
-    u8 red;
-    u8 green;
-    u8 blue;
-    u8 alpha;
-    u8 environment[3];
-    char pad33;
-    u16 flags;
-    char pad36[2];
-} Emission;
-
 /* Spawn template of a flat sprite (see func_1513C5B0). */
 typedef struct {
     s32 flags;
@@ -199,7 +168,7 @@ extern u8 D_800903C8[];
 extern u8 D_80090414[];
 void *memcpy(void *, const void *, u32);
 StreamActor *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void *func_15167D84(Emission *, s32, s32, s8, u8, s32);
+void *func_15167D84(BillboardTemplate *, s32, s32, s8, u8, s32);
 void func_151DA6F8(f32 *pos, f32 *vel, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -518,7 +487,7 @@ s32 func_150DC558(StreamActor *actor) {
                 }
             }
             {
-                Emission packet;
+                BillboardTemplate packet;
                 f32 speed;
                 u8 angle;
                 u8 angle2;
@@ -531,24 +500,24 @@ s32 func_150DC558(StreamActor *actor) {
 
                 state->dropCount += state->dropRate;
                 if (state->dropCount > 1.0f) {
-                    packet.fraction_x = 0;
-                    packet.fraction_z = 0;
-                    packet.fraction_y = 0;
-                    packet.red = 0xFF;
-                    packet.green = 0xFF;
-                    packet.blue = 0xFF;
-                    packet.environment[0] = 0;
-                    packet.environment[1] = 0;
-                    packet.environment[2] = 0;
-                    packet.alpha = 0xFF;
+                    packet.subX = 0;
+                    packet.subY = 0;
+                    packet.subZ = 0;
+                    packet.primR = 0xFF;
+                    packet.primG = 0xFF;
+                    packet.primB = 0xFF;
+                    packet.envR = 0;
+                    packet.envG = 0;
+                    packet.envB = 0;
+                    packet.primA = 0xFF;
                     packet.callback = state->dropCallback;
                     packet.flags = 0x12;
                     packet.frame = 0;
                     ok = 1;
-                    packet.frame_rate = state->dropFrameRate;
-                    packet.texture = state->dropTexture;
-                    packet.position[1] = state->floor;
-                    packet.lifetime = state->dropLifetime;
+                    packet.frameStep = state->dropFrameRate;
+                    packet.anim = state->dropTexture;
+                    packet.y = state->floor;
+                    packet.life = state->dropLifetime;
                     do {
                         speed = func_150ADA68() * state->dropSpeedRange + state->dropSpeedBase;
                         angle = func_150ADA20();
@@ -558,13 +527,13 @@ s32 func_150DC558(StreamActor *actor) {
                         sine2 = func_151423D8(angle2);
                         cosine2 = func_151423D8((u8)(angle2 - 0x40));
                         radius = func_150ADA68() * state->dropRadius;
-                        packet.position[0] = rec->pos.x + radius * cosine1;
-                        packet.position[2] = rec->pos.z + radius * sine1;
-                        packet.velocity_x = speed * sine2 * cosine1;
-                        packet.velocity_y = -speed * cosine2;
-                        packet.velocity_z = speed * sine2 * sine1;
-                        packet.acceleration = (func_150ADA20() % (state->dropAccelRange + 1)) + state->dropAccelBase;
-                        packet.fade = (func_150ADA20() % (state->dropFadeRange + 1)) + state->dropFadeBase;
+                        packet.x = rec->pos.x + radius * cosine1;
+                        packet.z = rec->pos.z + radius * sine1;
+                        packet.velX = speed * sine2 * cosine1;
+                        packet.velY = -speed * cosine2;
+                        packet.velZ = speed * sine2 * sine1;
+                        packet.accelY = (func_150ADA20() % (state->dropAccelRange + 1)) + state->dropAccelBase;
+                        packet.fadeStep = (func_150ADA20() % (state->dropFadeRange + 1)) + state->dropFadeBase;
                         packet.width = packet.height = func_150ADA68() * state->dropSizeRange + state->dropSizeBase;
                         if (func_15167D84(&packet, 0, 0, -1, actor->unk0C, actor->unk01) == NULL) {
                             ok = 0;

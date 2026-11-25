@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Updates flag bits in unk84 (0x4, 0x4000, 0x10000, 0x1000000) from func_1509BE40 queries; the first two
    checks are skipped when D_800D2E4C->unk4 bit 0x80 / unk1 bit 4 are set. */
@@ -78,36 +79,6 @@ typedef struct {
     u8 pad1E[2];
 } Style150AE790;
 
-/* Emission request for func_15167D84 (field names as in game_109220.c's Game150DC558Emission). */
-typedef struct {
-    /* 0x00 */ s32 texture;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s16 frame;
-    /* 0x0E */ s16 frame_rate;
-    /* 0x10 */ s16 position[3];
-    /* 0x16 */ s16 velocity_x;
-    /* 0x18 */ s16 velocity_z;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ u8 fraction_x;
-    /* 0x1D */ u8 fraction_y;
-    /* 0x1E */ u8 fraction_z;
-    /* 0x1F */ s8 callback;
-    /* 0x20 */ s16 velocity_y;
-    /* 0x22 */ s16 acceleration;
-    /* 0x24 */ s16 width;
-    /* 0x26 */ s16 height;
-    /* 0x28 */ s16 lifetime;
-    /* 0x2A */ s8 fade;
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ u8 red;
-    /* 0x2D */ u8 green;
-    /* 0x2E */ u8 blue;
-    /* 0x2F */ u8 alpha;
-    /* 0x30 */ s8 environment[3];
-    /* 0x34 */ s16 flags;
-} Emission150AE790;
-
 /* Link from an effect to the actor it is attached to. */
 typedef struct {
     /* 0x00 */ Actor *owner;
@@ -143,7 +114,7 @@ void func_150AE790(AttachedEffect *effect) {
     f32 horizontal;
     f32 sinPitch;
     f32 cosPitch;
-    Emission150AE790 emission;
+    BillboardTemplate emission;
     s32 count;
     u8 yaw;
     u8 pitch;
@@ -201,35 +172,35 @@ void func_150AE790(AttachedEffect *effect) {
         duration = func_150ADA68() + 2.5f;
         distance = func_150ADA68() * 200.0f + 600.0f;
         emission.unk1A = distance;
-        emission.unk04 = distance / duration;
+        emission.unk4 = distance / duration;
         emission.height = 0;
         emission.width = 0;
-        emission.red = 0xFF;
-        emission.environment[0] = 0;
-        emission.environment[1] = 0;
-        emission.environment[2] = 0;
-        emission.green = 0xFF;
-        emission.blue = 0xFF;
-        emission.lifetime = 100;
-        emission.alpha = 0xFF;
-        emission.fade = 0;
+        emission.primR = 0xFF;
+        emission.envR = 0;
+        emission.envG = 0;
+        emission.envB = 0;
+        emission.primG = 0xFF;
+        emission.primB = 0xFF;
+        emission.life = 100;
+        emission.primA = 0xFF;
+        emission.fadeStep = 0;
         emission.frame = 0;
-        emission.frame_rate = 0;
-        emission.fraction_x = 0;
-        emission.fraction_z = 0;
-        emission.fraction_y = 0;
-        emission.velocity_x = 0;
-        emission.velocity_z = 0;
-        emission.acceleration = 0;
-        emission.velocity_y = 0;
-        emission.texture = D_8008CB14;
-        emission.position[0] = spawn.pos[0];
-        emission.position[1] = spawn.pos[1];
-        emission.position[2] = spawn.pos[2];
+        emission.frameStep = 0;
+        emission.subX = 0;
+        emission.subY = 0;
+        emission.subZ = 0;
+        emission.velX = 0;
+        emission.velZ = 0;
+        emission.accelY = 0;
+        emission.velY = 0;
+        emission.anim = D_8008CB14;
+        emission.x = spawn.pos[0];
+        emission.y = spawn.pos[1];
+        emission.z = spawn.pos[2];
         emission.callback = 0xB;
         emission.flags = 0;
         emission.unk2B = 0;
-        emission.unk08 = 0;
+        emission.unk8 = 0;
         func_15167D84(&emission, 0, 0, -1, effect->unkC, effect->unk1);
     }
 }
