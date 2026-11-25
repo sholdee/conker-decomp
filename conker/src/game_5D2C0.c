@@ -397,254 +397,203 @@ s32 func_150303E4(struct127 *owner) {
     return removed;
 }
 
-typedef struct S15031070Sub {
-    u8 pad0[0x3E0];
-    u8 *unk3E0[2];
-    u8 *unk3E8[2];
-    u8 pad3F0[6];
-    u8 unk3F6;
-} S15031070Sub;
-
-typedef struct S15031070 {
-    u8 pad0[2];
-    u8 unk2;
-    u8 pad3[0x1B];
-    u16 unk1E;
-    u16 unk20;
-    u8 pad22[0x12];
-    u8 *unk34;
-    u8 pad38[0x10];
-    S15031070Sub *unk48;
-} S15031070;
-
-typedef struct S15030468Sub {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-} S15030468Sub;
-
-typedef struct S15030468 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    u8 unk4;
-    u8 unk5;
-    u8 unk6;
-    u8 unk7;
-    u8 unk8;
-    u8 unk9;
-    u16 unkA[3];
-    u8 pad10[6];
-    u8 unk16;
-    u8 unk17;
-    s16 unk18;
-    s16 unk1A;
-    u16 unk1C;
-    u16 unk1E;
-    u16 unk20;
-    s16 unk22;
-    u8 pad24[0x10];
-    u8 *unk34;
-    u8 pad38[8];
-    f32 unk40;
-    S15030468Sub *unk44;
-    S15031070Sub *unk48;
-    u8 pad4C[8];
-    struct S15030468 *unk54;
-} S15030468;
-
-typedef s32 (*S15030468Func)(S15030468 *, struct127 *);
-extern S15030468Func D_800841C0[];
+/* Per-model hooks, indexed by Attachment.handler; a nonzero return removes the attachment. */
+typedef s32 (*AttachmentHook)(Attachment *att, struct127 *owner);
+extern AttachmentHook D_800841C0[];
 s32 func_15031070(Attachment *att, struct127 *owner, Mtx **mtx, Mtx **boneMtx);
-void func_1503F4B0(S15031070Sub *);
+void func_1503F4B0(AnimInstance *anim);
 
+/* Per-frame update of every attachment: runs its hook, builds its matrix for this frame and removes
+ * it when its owner is gone or it has expired. Attachments that follow another attachment's
+ * matrix are updated in a second pass, after the ones they follow. */
 void func_15030468(void) {
-    S15030468 *var;
-    S15030468 *next;
-    struct127 *obj;
-    u16 t;
+    Attachment *att;
+    Attachment *next;
+    struct127 *owner;
+    u16 timer;
     s32 ret;
     s32 i;
     s32 j;
-    f32 tmp[4][4];
-    f32 m[4][4];
-    f32 res[4][4];
-    f32 (*mf)[4];
+    f32 normMtx[4][4];
+    f32 offsetMtx[4][4];
+    f32 resultMtx[4][4];
+    f32 (*boneMtx)[4];
     Mtx *mtx;
-    s32 kill;
-    f32 mfbuf[4][4];
+    s32 remove;
+    f32 boneBuf[4][4];
     s32 pass;
-    s32 flag;
+    s32 hasFollowers;
     f32 inv;
-    u8 *sp198;
-    u8 *sp194;
-    f32 m2[4][4];
-    f32 res2[4][4];
-    f32 m3[4][4];
-    f32 res3[4][4];
+    Mtx *parentMtx;
+    Mtx *parentBoneMtx;
+    f32 rotMtx[4][4];
+    f32 rotResultMtx[4][4];
+    f32 rotMtx2[4][4];
+    f32 rotResultMtx2[4][4];
 
-    flag = 0;
+    hasFollowers = FALSE;
     for (pass = 0; pass < 2; pass++) {
-        if (pass == 1 && flag == 0) {
+        if (pass == 1 && !hasFollowers) {
             break;
         }
-        var = (S15030468 *)D_800C3EE0;
-        while (var != NULL) {
-            next = var->unk54;
+        att = (Attachment *)D_800C3EE0;
+        while (att != NULL) {
+            next = att->next;
             ret = 0;
             if (pass == 0) {
-                if (var->unk1E != 0) {
-                    flag = 1;
-                    var = next;
+                if (att->parentSet != 0) {
+                    hasFollowers = TRUE;
+                    att = next;
                     continue;
                 }
-            } else if (var->unk1E == 0) {
-                var = next;
+            } else if (att->parentSet == 0) {
+                att = next;
                 continue;
             }
-            obj = func_15083E90(var->unk0);
-            var->unk5 = 1;
-            if (obj == NULL) {
-                func_15030158((Func15030158Arg0 *)var, 0);
-                var = next;
+            owner = func_15083E90(att->ownerId);
+            att->updated = TRUE;
+            if (owner == NULL) {
+                func_15030158(att, 0);
+                att = next;
                 continue;
             }
-            if (var->unk7 != 0) {
-                ret = D_800841C0[var->unk7](var, obj);
+            if (att->handler != 0) {
+                ret = D_800841C0[att->handler](att, owner);
             }
             if (ret != 0) {
-                func_15030158((Func15030158Arg0 *)var, 0);
-                var = next;
+                func_15030158(att, 0);
+                att = next;
                 continue;
             }
-            if (var->unk34 != NULL || var->unk48 != NULL) {
-                if (obj->unk1D4 != NULL) {
-                    i = var->unk1E;
-                    if (var->unk1E != 0) {
-                        ret = (s32)func_1503195C(obj, i, 0);
+            if (att->mtx != NULL || att->anim != NULL) {
+                if (owner->unk1D4 != NULL) {
+                    i = att->parentSet;
+                    if (att->parentSet != 0) {
+                        ret = (s32)func_1503195C(owner, i, 0); // matching: the parent pointer reuses ret
                         if (ret == 0) {
-                            func_15030158((Func15030158Arg0 *)var, 0);
-                            var = next;
+                            func_15030158(att, 0);
+                            att = next;
                             continue;
                         }
-                        if (func_15031070((Attachment *)ret, obj, (Mtx **)&sp198, (Mtx **)&sp194) == 0) {
-                            func_15030158((Func15030158Arg0 *)var, 0);
-                            var = next;
+                        if (func_15031070((Attachment *)ret, owner, &parentMtx, &parentBoneMtx) == 0) {
+                            func_15030158(att, 0);
+                            att = next;
                             continue;
                         }
-                        mf = mfbuf;
-                        if (((S15031070 *)ret)->unk48 != NULL) {
-                            sp198 += var->unk20 << 6;
-                            guMtxL2F(mf, (Mtx *)sp198);
-                            mtx = (Mtx *)mf;
+                        boneMtx = boneBuf;
+                        if (((Attachment *)ret)->anim != NULL) {
+                            parentMtx += att->parentMtx;
+                            guMtxL2F(boneMtx, parentMtx);
+                            mtx = (Mtx *)boneMtx; // matching: dead store (overwritten or unused below)
                         } else {
-                            guMtxL2F(mf, (Mtx *)sp198);
+                            guMtxL2F(boneMtx, parentMtx);
                         }
                     } else {
-                        mf = (f32 (*)[4])((u8 *)obj->unk1D4 + (var->unk2 << 6));
+                        boneMtx = (f32 (*)[4])((u8 *)owner->unk1D4 + (att->bone << 6));
                     }
-                    if (var->unk34 != NULL) {
-                        mtx = (Mtx *)var->unk34;
-                        mtx += D_800BE9C0;
-                        if (var->unk44 != NULL) {
+                    if (att->mtx != NULL) {
+                        mtx = att->mtx;
+                        mtx += D_800BE9C0; // matching: not &att->mtx[D_800BE9C0], which IDO allocates differently
+                        if (att->offset != NULL) {
+                            /* bone rotation without its scale, then the offset */
                             for (i = 0; i < 3; i++) {
-                                inv = 1.0f / sqrtf(mf[i][0] * mf[i][0] + mf[i][1] * mf[i][1] + mf[i][2] * mf[i][2]);
+                                inv = 1.0f / sqrtf(boneMtx[i][0] * boneMtx[i][0] + boneMtx[i][1] * boneMtx[i][1] +
+                                                   boneMtx[i][2] * boneMtx[i][2]);
                                 for (j = 0; j < 3; j++) {
-                                    tmp[i][j] = mf[i][j] * inv;
+                                    normMtx[i][j] = boneMtx[i][j] * inv;
                                 }
-                                tmp[i][3] = 0.0f;
-                                tmp[3][i] = mf[3][i];
+                                normMtx[i][3] = 0.0f;
+                                normMtx[3][i] = boneMtx[3][i];
                             }
-                            tmp[3][3] = 1.0f;
-                            func_150A9B0C(m, var->unk44->unkC, var->unk44->unk10, var->unk44->unk14, var->unk40, var->unk40, var->unk40);
-                            m[3][0] = var->unk44->unk0;
-                            m[3][1] = var->unk44->unk4;
-                            m[3][2] = var->unk44->unk8;
-                            m[0][3] = 0.0f;
-                            m[1][3] = 0.0f;
-                            m[2][3] = 0.0f;
-                            m[3][3] = 1.0f;
-                            func_150A7A48(m, tmp, res);
-                            guMtxF2L(res, mtx);
-                        } else if (var->unk16 == 4) {
+                            normMtx[3][3] = 1.0f;
+                            func_150A9B0C(offsetMtx, att->offset->rotX, att->offset->rotY, att->offset->rotZ,
+                                          att->scale, att->scale, att->scale);
+                            offsetMtx[3][0] = att->offset->x;
+                            offsetMtx[3][1] = att->offset->y;
+                            offsetMtx[3][2] = att->offset->z;
+                            offsetMtx[0][3] = 0.0f;
+                            offsetMtx[1][3] = 0.0f;
+                            offsetMtx[2][3] = 0.0f;
+                            offsetMtx[3][3] = 1.0f;
+                            func_150A7A48(offsetMtx, normMtx, resultMtx);
+                            guMtxF2L(resultMtx, mtx);
+                        } else if (att->unk16 == 4) {
+                            /* bone matrix rescaled to att->scale */
                             for (i = 0; i < 3; i++) {
-                                inv = sqrtf(mf[i][0] * mf[i][0] + mf[i][1] * mf[i][1] + mf[i][2] * mf[i][2]);
-                                if (i == 1) {
-                                    inv = var->unk40 / inv;
+                                inv = sqrtf(boneMtx[i][0] * boneMtx[i][0] + boneMtx[i][1] * boneMtx[i][1] +
+                                            boneMtx[i][2] * boneMtx[i][2]);
+                                if (i == 1) { // matching: both arms are the same, but IDO emits the test
+                                    inv = att->scale / inv;
                                 } else {
-                                    inv = var->unk40 / inv;
+                                    inv = att->scale / inv;
                                 }
                                 for (j = 0; j < 3; j++) {
-                                    tmp[i][j] = mf[i][j] * inv;
+                                    normMtx[i][j] = boneMtx[i][j] * inv;
                                 }
-                                tmp[i][3] = 0.0f;
-                                tmp[3][i] = mf[3][i];
+                                normMtx[i][3] = 0.0f;
+                                normMtx[3][i] = boneMtx[3][i];
                             }
-                            tmp[3][3] = 1.0f;
-                            if (var->unk22 != 0) {
-                                func_150A8050(m2, 0.0f, 0.0f, var->unk22 * 0.0054931640625f);
-                                func_150A7A48(m2, tmp, res2);
-                                guMtxF2L(res2, mtx);
+                            normMtx[3][3] = 1.0f;
+                            if (att->rotZ != 0) {
+                                func_150A8050(rotMtx, 0.0f, 0.0f, att->rotZ * (360.0f / 65536.0f));
+                                func_150A7A48(rotMtx, normMtx, rotResultMtx);
+                                guMtxF2L(rotResultMtx, mtx);
                             } else {
-                                guMtxF2L(tmp, mtx);
+                                guMtxF2L(normMtx, mtx);
                             }
                         } else {
-                            mf[0][3] = 0.0f;
-                            mf[1][3] = 0.0f;
-                            mf[2][3] = 0.0f;
-                            mf[3][3] = 1.0f;
-                            if (var->unk22 != 0) {
-                                func_150A8050(m3, 0.0f, 0.0f, var->unk22 * 0.0054931640625f);
-                                func_150A7A48(m3, mf, res3);
-                                guMtxF2L(res3, mtx);
+                            boneMtx[0][3] = 0.0f;
+                            boneMtx[1][3] = 0.0f;
+                            boneMtx[2][3] = 0.0f;
+                            boneMtx[3][3] = 1.0f;
+                            if (att->rotZ != 0) {
+                                func_150A8050(rotMtx2, 0.0f, 0.0f, att->rotZ * (360.0f / 65536.0f));
+                                func_150A7A48(rotMtx2, boneMtx, rotResultMtx2);
+                                guMtxF2L(rotResultMtx2, mtx);
                             } else {
-                                guMtxF2L(mf, mtx);
+                                guMtxF2L(boneMtx, mtx);
                             }
                         }
                     }
                 } else {
-                    mf = NULL;
+                    boneMtx = NULL;
                     mtx = NULL;
                 }
             }
-            if (var->unk48 != NULL) {
-                if (var->unk34 != NULL) {
-                    var->unk48->unk3E0[D_800BE9C0] = (u8 *)mtx;
+            if (att->anim != NULL) {
+                if (att->mtx != NULL) {
+                    att->anim->unk3E0[D_800BE9C0] = (u8 *)mtx;
                 } else {
-                    var->unk48->unk3E0[D_800BE9C0] = (u8 *)mf;
+                    att->anim->unk3E0[D_800BE9C0] = (u8 *)boneMtx;
                 }
-                func_1503F4B0(var->unk48);
+                func_1503F4B0(att->anim);
             }
-            if (var->unkA[0] != 0) {
-                kill = 1;
+            if (att->ownerStates[0] != 0) {
+                remove = TRUE;
                 for (i = 0; i < 3; i++) {
-                    if (var->unkA[i] != 0 && obj->unk84.uh == var->unkA[i]) {
-                        kill = 0;
+                    if (att->ownerStates[i] != 0 && owner->unk84.uh == att->ownerStates[i]) {
+                        remove = FALSE;
                         break;
                     }
                 }
-                if (kill) {
-                    func_15030158((Func15030158Arg0 *)var, 0);
-                    var = next;
+                if (remove) {
+                    func_15030158(att, 0);
+                    att = next;
                     continue;
                 }
             }
-            if ((t = var->unk1C) != 0xFFFF) {
-                if (t != 0) {
-                    if (t > D_800BE9E4) {
-                        var->unk1C = t - D_800BE9E4;
+            if ((timer = att->timer) != 0xFFFF) {
+                if (timer != 0) {
+                    if (timer > D_800BE9E4) {
+                        att->timer = timer - D_800BE9E4;
                     } else {
-                        var->unk1C = 0;
+                        att->timer = 0;
                     }
                 } else {
-                    func_15030158((Func15030158Arg0 *)var, 0);
+                    func_15030158(att, 0);
                 }
             }
-            var = next;
+            att = next;
         }
     }
 }
