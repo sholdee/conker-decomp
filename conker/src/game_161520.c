@@ -11,7 +11,8 @@ u32 func_150ADA20(void);
 
 extern void func_15153F18(void *, void *, s32, u8, s32);
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern void func_15143134(void *, s32, s32);
+/* Transforms the point `in` by a 4x4 matrix into `out`. */
+extern void func_15143134(void *in, void *out, void *matrix);
 extern s32 func_15145128(struct17 *, struct17 *, f32 *, f32 *);
 extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
 extern void func_151BC5A4(struct260 *, s32, u8);
@@ -215,7 +216,7 @@ BloodDrip *func_1513418C(void *desc, s32 arg1, u8 arg2, s32 arg3) {
             return NULL;
         }
         if ((owner->unk1D4 != 0) && ((owner->unk74 & 0xF) != 0xF)) {
-            func_15143134(drip->offset, (s32)&drip->previous, (s32)BONE_MATRIX(owner, drip->bone));
+            func_15143134(drip->offset, &drip->previous, BONE_MATRIX(owner, drip->bone));
         } else {
             drip->flags = flags | BLOOD_DRIP_NO_PREVIOUS;
         }
@@ -280,7 +281,7 @@ void func_151342BC(BloodDrip *drip) {
         } else {
             return;
         }
-        func_15143134(drip->offset, (s32)position, target);
+        func_15143134(drip->offset, position, (void *)target);
     }
     deltaX = source[0] - position[0];
     deltaY = source[1] - position[1];
@@ -1972,7 +1973,7 @@ s32 func_151380B4(struct127 *actor, s32 kind, f32 *out) {
     if ((actor->unk74 & 0xF) == 0xF) {
         return 0;
     }
-    func_15143134(&D_800A3FD8[kind].offset, (s32)out, bones + 12 * 0x40);
+    func_15143134(&D_800A3FD8[kind].offset, out, (void *)(bones + 12 * 0x40));
     return 1;
 }
 
@@ -2503,7 +2504,7 @@ void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 a
         for (j = 0, bit = 1; j < 4; j++, bit <<= 1) {
             if (!(D_800A4160[index] & bit)) {
                 packet.model = D_800A4178[j];
-                func_15143134(&D_800A4188[j].x, (s32)&packet.position.x, (s32)BONE_MATRIX(actor, 12));
+                func_15143134(&D_800A4188[j], &packet.position, BONE_MATRIX(actor, 12));
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
@@ -2544,7 +2545,7 @@ void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 a
         spray.unk68 = 2;
         spray.unk63 = 11;
         spray.model = 0x48;
-        func_15143134(&D_800A41B8.x, (s32)&spray.position.x, (s32)BONE_MATRIX(actor, 12));
+        func_15143134(&D_800A41B8, &spray.position, BONE_MATRIX(actor, 12));
         yaw = func_150ADA20();
         pitch = func_150ADA20();
         func_15143794((u8)yaw, (s16)(pitch % 16U - 60), func_150ADA68() * 7.1499996f + 10.889999f,
@@ -2713,7 +2714,7 @@ void func_15139768(struct127 *actor, f32 *origin, f32 scale, void *hit, u8 arg4,
         for (j = 0, mask2 = 1; j < 4; j++, mask2 <<= 1) {
             if (!(D_800A41C4[idx] & mask2)) {
                 spawn2.model = D_800A41D8[j];
-                func_15143134(&D_800A41E8[j], (s32)&spawn2.position, (s32)BONE_MATRIX(actor, 12));
+                func_15143134(&D_800A41E8[j], &spawn2.position, BONE_MATRIX(actor, 12));
                 func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 35U - 84), func_150ADA68() * 6.119999886f + 3.0f, &spawn2.velocity.x);
                 spawn2.spin.x = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.spin.z = func_150ADA68() * 30.7460022f + -15.3730011f;
@@ -2839,7 +2840,7 @@ void func_15139D74(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
         for (j = 0, bit = 1; j < 3; j++, bit <<= 1) {
             if (!(D_800A4218[index] & bit)) {
                 packet.model = D_800A4228[j];
-                func_15143134(&D_800A4234[j].x, (s32)&packet.position.x, (s32)BONE_MATRIX(actor, 12));
+                func_15143134(&D_800A4234[j], &packet.position, BONE_MATRIX(actor, 12));
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
@@ -3139,7 +3140,7 @@ void func_1513A6E0(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
         for (i = 0, mask2 = 1; i < 4; i++, mask2 <<= 1) {
             if (!(D_800A4278[idx] & mask2)) {
                 spawn2.model = D_800A4290[i];
-                func_15143134(&D_800A42A0[i], (s32)&spawn2.position, (s32)BONE_MATRIX(actor, 12));
+                func_15143134(&D_800A42A0[i], &spawn2.position, BONE_MATRIX(actor, 12));
                 r1 = func_150ADA20();
                 r2 = func_150ADA20();
                 func_15143794(r1 & 0xFF, r2 % 35U - 84, func_150ADA68() * 6.119999886f + 3.0f, &spawn2.velocity.x);
@@ -3267,7 +3268,7 @@ void func_1513ABB8(struct127 *actor, f32 *origin, u8 variant, void *hit, u8 arg4
         for (j = 0, bit = 1; j < 2; j++, bit <<= 1) {
             if (!(D_800A42D0[index] & bit)) {
                 packet.model = D_800A42E4[variant][j];
-                func_15143134(&D_800A42F4[variant][j].x, (s32)&packet.position.x, (s32)BONE_MATRIX(actor, 12));
+                func_15143134(&D_800A42F4[variant][j], &packet.position, BONE_MATRIX(actor, 12));
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
                 func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
@@ -3407,7 +3408,7 @@ void func_1513B0F8(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
             u32 random;
 
             drop.model = D_800A4330[i];
-            func_15143134(D_800A4338[i], (s32)&drop.position.x, (s32)BONE_MATRIX(actor, 12));
+            func_15143134(D_800A4338[i], &drop.position, BONE_MATRIX(actor, 12));
             yaw = func_150ADA20();
             pitch = func_150ADA20();
             func_15143794((u8)yaw, (pitch % 35U) - 0x54, (func_150ADA68() * 6.12f) + 3.0f, &drop.velocity.x);
