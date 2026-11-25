@@ -751,8 +751,8 @@ typedef struct {
     s16 unk68, unk6A, unk6C, unk6E, unk70, unk72;
     s8 unk74;
 } SightBurst;
-typedef struct { s8 a, b; s16 c; s8 d; } S60_899C;
-typedef struct { s8 a; s16 b; s8 c, d, e; } S58_899C;
+typedef struct { s8 a, b; s16 c; s8 d; } Params151602C0;
+typedef struct { s8 a; s16 b; s8 c, d, e; } Params151D8868;
 extern u8 *D_800AAC30[];
 extern void func_1514FBFC(void *, u8, s32);
 extern void func_151602C0(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -767,8 +767,8 @@ void func_151C899C(SightActor *actor, SightBeamObject *obj) {
     SightBeamState *state;
     SightBurst burst;
     s32 pos[3];
-    S60_899C s60;
-    S58_899C s58;
+    Params151602C0 params602C0;
+    Params151D8868 params8868;
 
     state = &obj->state;
     burst.unk20 = 491.0f;
@@ -806,25 +806,25 @@ void func_151C899C(SightActor *actor, SightBeamObject *obj) {
     pos[0] = obj->spawn.start.x;
     pos[1] = obj->spawn.start.y;
     pos[2] = obj->spawn.start.z;
-    s60.a = 3;
-    s60.b = -1;
-    s60.c = func_150ADA20() % 9U + 17;
-    s60.d = 0;
-    func_151602C0(&s60, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
+    params602C0.a = 3;
+    params602C0.b = -1;
+    params602C0.c = func_150ADA20() % 9U + 17;
+    params602C0.d = 0;
+    func_151602C0(&params602C0, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
     pos[0] = obj->spawn.end.x;
     pos[1] = obj->spawn.end.y;
     pos[2] = obj->spawn.end.z;
-    func_151602C0(&s60, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
+    func_151602C0(&params602C0, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->spawn.start, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
     func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->spawn.end, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
     if (actor != NULL) {
         func_15164F0C(2, actor->player->unk23D, 0, obj->unkC, obj->unk1);
-        s58.a = 1;
-        s58.b = 40;
-        s58.d = 1;
-        s58.c = 8;
-        s58.e = -1;
-        func_151D8868(&s58, 0, 0xFF, 0);
+        params8868.a = 1;
+        params8868.b = 40;
+        params8868.d = 1;
+        params8868.c = 8;
+        params8868.e = -1;
+        func_151D8868(&params8868, 0, 0xFF, 0);
     }
     if (actor != NULL) {
         func_1505D024((s32)actor, D_800AAC30[state->unk94], 0, -1);
