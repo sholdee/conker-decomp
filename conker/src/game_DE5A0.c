@@ -115,74 +115,79 @@ void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
 /* D_800D20FC is a table of 0x30-byte spawn records. */
 typedef struct {
     char pad_0[0x8];
-    s16  field_0x8;
+    s16  y;
     char pad_A[0x26];
 } SpawnRecord;
 
-void func_150B1484(struct127 *arg0) {
+/*
+ * Moves the object vertically toward a target height: its spawn record's y + 210 by default, or (unk223 == 14)
+ * straight at its target object D_800CC2D0[unk222]. A nonzero unk224 overrides the height: 10000 means its
+ * current path waypoint, anything else is unk224 * 8 (plus unk180 for most ids). Stunned objects only recover.
+ */
+void func_150B1484(struct127 *obj) {
     s16 prevAngle;
 
-    prevAngle = arg0->unk76;
-    arg0->unk80 = 0xA;
-    if (arg0->stunned == 0) {
+    prevAngle = obj->unk76;
+    obj->unk80 = 10;
+    if (obj->stunned == 0) {
         f32 targetY;
 
-        targetY = (f32)((SpawnRecord *)D_800D20FC)[arg0->unk13F].field_0x8 + 210.0f;
-        if (!(arg0->unk22C & 8)) {
-            if (arg0->unk223 != 3) {
-                arg0->unkB8 = arg0->y_velocity * -0.5f;
+        targetY = (f32)((SpawnRecord *)D_800D20FC)[obj->unk13F].y + 210.0f;
+        if (!(obj->unk22C & 8)) {
+            if (obj->unk223 != 3) {
+                obj->unkB8 = obj->y_velocity * -0.5f;
             } else {
-                arg0->unkB8 = 0.0f;
+                obj->unkB8 = 0.0f;
             }
         }
-        if (arg0->unk223 == 0xE) {
+        if (obj->unk223 == 14) {
             f32 time;
 
-            time = func_1505A6F8(&D_800CC2D0[arg0->unk222], arg0) / arg0->xz_velocity;
-            arg0->y_velocity = ((*(f32 *)((u8 *)D_800CC2E8 + (arg0->unk222 * sizeof(struct127))) + (f32)(s16)arg0->unk224) - arg0->y_position) / time;
-            arg0->gravity = 0.0f;
+            time = func_1505A6F8(&D_800CC2D0[obj->unk222], obj) / obj->xz_velocity;
+            obj->y_velocity = (D_800CC2D0[obj->unk222].y_position + (s16)obj->unk224 - obj->y_position) / time;
+            obj->gravity = 0.0f;
         } else {
-            s16 offsetY;
+            s16 heightCode;
 
-            if (arg0->unk223 == 1) {
-                targetY = D_800CC2E8[0] + 210.0f;
+            if (obj->unk223 == 1) {
+                targetY = D_800CC2D0[0].y_position + 210.0f;
             }
-            offsetY = (s16)arg0->unk224;
-            if (offsetY != 0) {
-                if (offsetY == 10000) {
-                    targetY = D_800D2104[arg0->unk13F]->points[arg0->unk21E].y;
-                } else if ((arg0->id == 0x50) || (arg0->id == 5) || (arg0->id == 0xAD) || (arg0->id == 0xAE) || (arg0->id == 0xAF)) {
-                    targetY = (f32)(offsetY * 8);
+            heightCode = (s16)obj->unk224;
+            if (heightCode != 0) {
+                if (heightCode == 10000) {
+                    targetY = D_800D2104[obj->unk13F]->points[obj->unk21E].y;
+                } else if ((obj->id == 0x50) || (obj->id == 5) || (obj->id == 0xAD) || (obj->id == 0xAE) || (obj->id == 0xAF)) {
+                    targetY = heightCode * 8;
                 } else {
-                    targetY = (f32)(offsetY * 8) + arg0->unk180;
+                    targetY = heightCode * 8 + obj->unk180;
                 }
             }
-            if (!(arg0->unk100 & 0x40)) {
+            if (!(obj->unk100 & 0x40)) {
                 f32 gravity;
                 f32 maxSpeed;
 
-                if (arg0->id == 0x44) {
-                    targetY = D_800D2104[arg0->unk13F]->points[arg0->unk21E].y;
+                if (obj->id == 0x44) {
+                    targetY = D_800D2104[obj->unk13F]->points[obj->unk21E].y;
                     gravity = 3.0f;
                     maxSpeed = 12.0f;
                 } else {
                     gravity = 5.0f;
                     maxSpeed = 35.0f;
                 }
-                func_15058EA4(arg0, targetY, gravity, targetY, -gravity, maxSpeed, -maxSpeed);
+                func_15058EA4(obj, targetY, gravity, targetY, -gravity, maxSpeed, -maxSpeed);
             }
         }
-        func_15056B08(arg0);
+        func_15056B08(obj);
     } else {
-        func_150585F0(arg0, 0.05000000074505806f);
+        func_150585F0(obj, 0.05f);
     }
-    arg0->unk40 = (s16)(arg0->unk7A + 0x4000) * 0.0054931640625f;
-    func_15059140(arg0);
-    if ((arg0->id == 5) || (arg0->id == 0xAD) || (arg0->id == 0xAE) || (arg0->id == 0xAF) || (arg0->id == 0x44)) {
-        func_15052760(arg0, prevAngle);
+    obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.0054931640625f;
+    func_15059140(obj);
+    if ((obj->id == 5) || (obj->id == 0xAD) || (obj->id == 0xAE) || (obj->id == 0xAF) || (obj->id == 0x44)) {
+        func_15052760(obj, prevAngle);
     }
-    if (func_150535F4(arg0) == 0) {
-        func_1502178C(arg0, 0, -1);
+    if (func_150535F4(obj) == 0) {
+        func_1502178C(obj, 0, -1);
     }
 }
 
