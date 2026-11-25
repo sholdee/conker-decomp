@@ -2081,34 +2081,35 @@ void func_1507A984(void) {
     }
 }
 
-// requires jump table
-typedef struct { s16 x, y, z, w; } E;
+/* Sets an angle: arg2 selects the operation, (arg0:arg1) is the operand. */
 void func_1507AA48(void) {
-    u16 val;
-    E *tbl;
-    s32 ang;
+    u16 value;
+    Path *path;
+    s32 angle;
 
-    val = (D_800D1890 << 8) | D_800D1891;
+    value = (D_800D1890 << 8) | D_800D1891;
     switch (D_800D1892) {
     case 0:
-        D_800D154C->unk78 = D_800D154C->unk76 + val;
+        D_800D154C->unk78 = D_800D154C->unk76 + value;
         break;
     case 1:
-        D_800D154C->unk78 = D_800D154C->unk76 - val;
+        D_800D154C->unk78 = D_800D154C->unk76 - value;
         break;
     case 2:
-        D_800D154C->unk78 = val;
+        D_800D154C->unk78 = value;
         break;
     case 3:
+        // matching: the do-while wrapper changes how IDO schedules case 4 below
         do {
             D_800D154C->unk76 = D_800D154C->unk78;
             D_800D154C->unk7A = D_800D154C->unk78;
         } while (0);
         break;
     case 4:
-        tbl = (E *)D_800D2104[D_800D154C->unk13F];
-        ang = (u16)(func_150484A0(tbl[D_800D1891 + 1].x - tbl[D_800D1890 + 1].x, tbl[D_800D1891 + 1].z - tbl[D_800D1890 + 1].z) * 10430.37793f) + (D_800D1893 << 8);
-        D_800D154C->unk78 = ang + 0x4000;
+        // direction from waypoint arg0 to waypoint arg1, plus arg3 / 256 turns
+        path = D_800D2104[D_800D154C->unk13F];
+        angle = (u16)(func_150484A0(path->points[D_800D1891].x - path->points[D_800D1890].x, path->points[D_800D1891].z - path->points[D_800D1890].z) * 10430.37793f) + (D_800D1893 << 8);
+        D_800D154C->unk78 = angle + 0x4000;
         break;
     case 5:
         D_800D154C->unk78 = func_150ADA20();
@@ -2117,7 +2118,7 @@ void func_1507AA48(void) {
         D_800D154C->unk78 = D_800D154C->unk76;
         break;
     case 7:
-        D_800D154C->unk76 = D_800CC2D0[D_800D154C->unk222].unk7A + val;
+        D_800D154C->unk76 = D_800CC2D0[D_800D154C->unk222].unk7A + value;
         break;
     case 8:
         D_800D154C->unk76 = D_800D154C->unk7A;
@@ -2154,25 +2155,26 @@ void func_1507ADAC(void) {
     D_800D154C->unkF4 &= ~func_1507A3E8();
 }
 
+/* Splits (angle between unk78 and the facing unk7A) / arg0 into unk1E6 (high byte) and unk1E8 (low byte). */
 void func_1507ADE0(void) {
-    s32 res;
-    s32 temp_lo;
-    s32 b = D_800D154C->unk7A;
-    s32 a = D_800D154C->unk78;
+    s32 diff;
+    s32 step;
+    s32 facing = D_800D154C->unk7A;
+    s32 target = D_800D154C->unk78;
 
-    res = a - b;
-    if (res < 0) {
-        res = -res;
+    diff = target - facing;
+    if (diff < 0) {
+        diff = -diff;
     }
-    if (res >= 32769) {
-        res = res + 0xFFFF0000;
+    if (diff > 0x8000) {
+        diff -= 0x10000;
     }
-    if (res < 0) {
-        res = -res;
+    if (diff < 0) {
+        diff = -diff;
     }
-    temp_lo = res / (s32)D_800D1890;
-    D_800D154C->unk1E6 = temp_lo >> 8;
-    D_800D154C->unk1E8 = temp_lo & 0xFF;
+    step = diff / (s32)D_800D1890;
+    D_800D154C->unk1E6 = step >> 8;
+    D_800D154C->unk1E8 = step & 0xFF;
 }
 
 void func_1507AE78(void) {
@@ -2202,27 +2204,29 @@ void func_1507B040(void) {
     D_800D154C->unk76 = D_800D154C->unk7A;
 }
 
+/* Acts on the object returned by func_15072208: arg0 0 calls func_1506160C, 1 sets and 2 restarts script arg1. */
 void func_1507B058(void) {
-    struct127 *sp24 = D_800D154C;
-    s32 sp20 = D_800C3E78;
+    struct127 *savedObj = D_800D154C;
+    s32 savedIndex = D_800C3E78;
 
     D_800D154C = func_15072208(D_800D154C, 0);
     D_800C3E78 = ((s32)D_800D154C - (s32)&D_800CC2D0) / 0x32C;
 
-    if (D_800D154C != 0) {
+    if (D_800D154C != NULL) {
         switch (D_800D1890) {
-            case 0:
-                func_1506160C(D_800D154C, 1, D_800D1891, 0, 0);
-                break;
-            case 1:
-                D_800D154C->unk232 = D_800D1891;
-            case 2:
-                D_800D154C->unk218 = func_1507BB28(0, D_800D1891);
-                D_800D154C->unk21C = 0;
+        case 0:
+            func_1506160C(D_800D154C, 1, D_800D1891, 0, 0);
+            break;
+        case 1:
+            D_800D154C->unk232 = D_800D1891;
+            /* fallthrough */
+        case 2:
+            D_800D154C->unk218 = func_1507BB28(0, D_800D1891);
+            D_800D154C->unk21C = 0;
         }
     }
-    D_800C3E78 = sp20;
-    D_800D154C = sp24;
+    D_800C3E78 = savedIndex;
+    D_800D154C = savedObj;
 }
 
 void func_1507B15C(void) {
@@ -2230,13 +2234,14 @@ void func_1507B15C(void) {
 }
 
 void func_1507B178(void) {
-    s16 tmp  = (D_800D1891 << 8) | D_800D1890;
+    s16 value = (D_800D1891 << 8) | D_800D1890;
+
     if (D_800D1893 == 2) {
-        D_800D154C->unkE8 = (s16) (tmp * D_800D154C->y_scale);
+        D_800D154C->unkE8 = (s16)(value * D_800D154C->y_scale);
     } else if (D_800D1893 == 1) {
-        func_15062B50(D_800D154C, tmp);
+        func_15062B50(D_800D154C, value);
     } else {
-        func_15062B1C(D_800D154C, tmp);
+        func_15062B1C(D_800D154C, value);
     }
 }
 
@@ -2264,42 +2269,42 @@ void func_1507B2CC(void) {
 void func_1507B318(void) {
     D_800D1580 = func_1507A3E8();
     if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
-        func_1506BA4C(300, 0xBB8);
+        func_1506BA4C(300, 3000);
     }
 }
 
 void func_1507B364(void) {
     D_800D1580 = func_1507A3E8();
     if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
-        func_1506BAD8(0x2BC, 0xFA0);
+        func_1506BAD8(700, 4000);
     }
 }
 
 void func_1507B3B0(void) {
     D_800D1580 = func_1507A3E8();
     if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
-        func_1506BA4C(0x2BC, 0xFA0);
+        func_1506BA4C(700, 4000);
     }
 }
 
 void func_1507B3FC(void) {
     D_800D1580 = func_1507A3E8();
     if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
-        func_1506BAD8(0xBB8, 0x1F40);
+        func_1506BAD8(3000, 8000);
     }
 }
 
 void func_1507B448(void) {
     D_800D1580 = func_1507A3E8();
     if (func_1506E46C(D_800D154C, &D_800D1580, 1) != 0) {
-        func_1506BAD8(0xBE, 0x514);
+        func_1506BAD8(190, 1300);
     }
 }
 
 void func_1507B494(void) {
     D_800D1580 = func_1507A3E8();
     if (func_1506E46C(D_800D154C, &D_800D1580, 0) != 0) {
-        func_1506BA4C(0xBE, 0x514);
+        func_1506BA4C(190, 1300);
     }
 }
 
@@ -2322,6 +2327,7 @@ void func_1507B578(void) {
     D_800D154C->unk114 = D_800D1891;
 }
 
+/* Jumps to arg0 when unk31C->unk75 is (arg2 == 0) or is not (arg2 == 1) arg1. */
 void func_1507B5C4(void) {
     if (D_800D154C->unk31C->unk75 == D_800D1891) {
         D_800D1892 ^= 1;
@@ -2341,25 +2347,28 @@ void func_1507B630(void) {
             D_800D154C->unk31C->unk8F = 0;
         }
     } else {
-        D_800D154C->unk218 -= 1;
+        // repeat this command
+        D_800D154C->unk218--;
     }
     D_800D154C->unk21C = 100;
 }
 
 void func_1507B6E0(void) {
     if ((D_800D154C->disable_run != 0) || (D_800D154C->unk28 > 5.0f)) {
-        D_800D154C->unk218 -= 1;
-        D_800D154C->unk21C = 0x64;
+        // repeat this command
+        D_800D154C->unk218--;
+        D_800D154C->unk21C = 100;
     }
 }
 
 void func_1507B734(void) {
-    u16 tmp = ((D_800D1890 << 8) | D_800D1891);
+    u16 value = (D_800D1890 << 8) | D_800D1891;
+
     if (D_800D1893 != 0) {
-        D_800D154C->unk31C->unk8C = tmp;
+        D_800D154C->unk31C->unk8C = value;
         D_800D154C->unk31C->unk8F = D_800D1892;
     } else {
-        D_800D154C->unk31C->unk8A = tmp;
+        D_800D154C->unk31C->unk8A = value;
         D_800D154C->unk31C->unk8E = D_800D1892;
     }
 }
@@ -2369,9 +2378,11 @@ void func_1507B7BC(void) {
     D_800D154C->unk223 = 17;
 }
 
+/* Jumps to arg0 when the target is (arg1 == 0) or is not (arg1 == 1) stunned or dead. */
 void func_1507B7E8(void) {
-    struct127 *tmp = &D_800CC2D0[D_800D154C->unk222];
-    if ((tmp->stunned != 0) || (tmp->health == 0)) {
+    struct127 *target = &D_800CC2D0[D_800D154C->unk222];
+
+    if ((target->stunned != 0) || (target->health == 0)) {
         D_800D1891 ^= 1;
     }
     if (D_800D1891 != 0) {
@@ -2379,27 +2390,27 @@ void func_1507B7E8(void) {
     }
 }
 
-u8 func_1507B884(void) {
-    s32 tmp0;
-    s32 tmp1;
-    u8 temp_v0;
-    void (*func)(s32);
+/* Calls handler arg0 of D_80086150, preserving the current object. */
+void func_1507B884(void) {
+    s32 savedObj;
+    s32 savedIndex;
+    u8 index;
+    void (*handler)(s32);
 
-    temp_v0 = D_800D1890;
-    func = D_80086150[temp_v0];
-    if (func != 0) {
-        tmp0 = D_800D154C;
-        tmp1 = D_800C3E78;
-        func(temp_v0);
-        D_800D154C = tmp0;
-        D_800C3E78 = tmp1;
+    index = D_800D1890;
+    handler = D_80086150[index];
+    if (handler != NULL) {
+        savedObj = (s32)D_800D154C;
+        savedIndex = D_800C3E78;
+        handler(index);
+        D_800D154C = (struct127 *)savedObj;
+        D_800C3E78 = savedIndex;
     }
 }
 
 void func_1507B8F4(void) {
-
     if (D_800BE616 != 0) {
-        if ((D_800D1891 != 0) || ((D_800D154C->unk31C != 0) && (D_800D154C->unk31C->unk84 != 0))) {
+        if ((D_800D1891 != 0) || ((D_800D154C->unk31C != NULL) && (D_800D154C->unk31C->unk84 != 0))) {
             func_15075400(D_800D1890);
         }
     }
@@ -2409,44 +2420,32 @@ void func_1507B958(void) {
     D_800D154C->unkB0 = D_800D1890;
 }
 
+/*
+ * Jumps to arg0 when unk6 of the path record arg3 past the current waypoint (of the linked object,
+ * if any) is (arg2 == 0) or is not (arg2 == 1) arg1.
+ */
 void func_1507B974(void) {
-    struct127 *actor;
+    struct127 *obj;
 
-    actor = D_800D154C;
+    obj = D_800D154C;
     if (D_800D154C->unk65 != 0) {
-        actor = &D_800CC2D0[D_800D154C->unk65 - 1];
+        obj = &D_800CC2D0[D_800D154C->unk65 - 1];
     }
-    if (D_800D1891 == *(u16 *)((u8 *)D_800D2104[actor->unk13F] + (actor->unk21E * 8) + (D_800D1893 << 3) + 6)) {
+    if (D_800D1891 == *(u16 *)((u8 *)D_800D2104[obj->unk13F] + (obj->unk21E * 8) + (D_800D1893 << 3) + 6)) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
         func_15075400(D_800D1890);
     }
 }
-// NON-MATCHING: dont think D_800D2104 is correct
-// void func_1507B974(void) {
-//     struct127 *actor;
-//     struct169 *foo;
-//
-//     actor = D_800D154C;
-//     if (D_800D154C->unk65 != 0) {
-//         actor = &D_800CC2D0[D_800D154C->unk65 - 1];
-//     }
-//     foo = &D_800D2104[actor->unk13F + actor->unk21E + D_800D1893];
-//     if (D_800D1891 == foo->unk0) {
-//         D_800D1892 ^= 1;
-//     }
-//     if (D_800D1892 != 0) {
-//         func_15075400(D_800D1890);
-//     }
-// }
 
 void func_1507BA48(void) {
-    u16 tmp = ((D_800D1892 << 8) | D_800D1893);
+    u16 id = (D_800D1892 << 8) | D_800D1893;
+
     if (D_800D1890 != 0) {
-        tmp += func_150ADA20() % (u32) D_800D1890;
+        id += func_150ADA20() % (u32)D_800D1890;
     }
-    func_15060A9C(tmp, D_800D154C);
+    func_15060A9C(id, D_800D154C);
 }
 
 void func_1507BAD0(void) {
