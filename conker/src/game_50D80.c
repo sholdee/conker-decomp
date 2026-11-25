@@ -539,7 +539,6 @@ extern void func_151E53E8(s32);
  * 9, 0xC and 0xD, and most type-5 commands. Returns 1 when the event was handled.
  */
 s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, struct131 *actor, f32 *pos, s32 sceneTag) {
-
     if (D_800E0BF4 != 0 && (event->type == 7 || event->type == 0xE || event->type == 0xF || event->type == 0x10 || event->type == 0x12)) {
         s32 opening;
         SeqSubtitle *sub;
@@ -1268,12 +1267,13 @@ typedef struct {
     s16 unk4;
 } Ev8008ABE8;
 
+/* Result of a func_15046C80 ground probe. */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    u8 pad8[0x15];
-    u8 unk1D;
-    u8 pad1E[6];
+    /* 0x00 */ f32 y; /* height of the ground that was hit */
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ u8 pad8[0x15];
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 pad1E[6];
 } EvFloor;
 
 typedef struct {
@@ -1440,12 +1440,16 @@ extern void func_1518B6B0(f32, f32, f32, u8, s32);
 extern void func_1516ED68(s32, s32, u8, s32);
 extern void func_150C2804(f32 *, f32 *, f32 *, s16, s32, s32);
 
+/*
+ * Second cutscene event handler: types 0xB (func_1001263C / func_151F2xxx) and
+ * 0x11 (records the event index in D_800C3960), and the effect-spawning type-5
+ * commands. Returns 1 when the event was handled.
+ */
 s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, struct131 *actor, f32 *pos, s32 sceneTag) {
-
     if (event->type == 0xB) {
         s32 vol;
         s32 vol2;
-        s32 delay;
+        s32 duration;
         SeqEvent *found;
 
         if (event->unk4 == 0) {
@@ -1456,14 +1460,14 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
             func_1001263C(event->value, vol, 0x40);
         } else if (event->unk4 == 1) {
-            delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 2, 0, 0, scene) - eventTime;
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 2, 0, 0, scene) - eventTime;
             if (event->unk6 == 0) {
                 vol2 = 0x10000;
             } else {
                 vol2 = (event->unk6 << 16) / 255;
             }
-            delay = (delay * 0x5604) / 60;
-            func_151F2D6C(vol2, delay);
+            duration = (duration * 0x5604) / 60;
+            func_151F2D6C(vol2, duration);
         } else if (event->unk4 == 3) {
             func_151F2BA8();
         } else if (event->unk4 == 4) {
@@ -1479,9 +1483,9 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         }
     } else if (event->type == 5) {
         if (event->value == 0x11) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
-            s32 dur;
+            s32 param;
             s32 idx;
             s32 c0;
             s32 c1;
@@ -1493,14 +1497,14 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             s32 u;
             u8 colors[3][6] = { { 0xFF, 0xFF, 0xFF, 0x00, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xFF, 0x00, 0xAB, 0xFF }, { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } };
 
-            delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
                 if (event->unk6 == 0) {
-                    dur = 0x1000;
+                    param = 0x1000;
                 } else if (event->unk6 > 200) {
-                    dur = event->unk6;
+                    param = event->unk6;
                 } else {
-                    dur = 200;
+                    param = 200;
                 }
                 if (event->unk5 >= 3) {
                     idx = 0;
@@ -1513,29 +1517,29 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 c3 = colors[idx][3];
                 c4 = colors[idx][4];
                 c5 = colors[idx][5];
-                t = dur >> 3;
-                u = ((dur * 40) / 4096) & 0xFF;
+                t = param >> 3;
+                u = ((param * 40) / 4096) & 0xFF;
                 func_1516D99C((s32)pos >> 16, (s32)pos & 0xFFFF, 0, 0x1B, 0,
                               c0, c1, c2, c3, c4, c5,
                               0, 1, 6, 0, 0, 0, 0, 0, t >> 8, t & 0xFF, 0, 0, 0xA, 0, 0, 0, 0, 0, 0, 0,
-                              delay, u, u, 0xFF, 0xE, 8, 8, 0x25, 0, 0xFF, 8, 0, 0,
+                              duration, u, u, 0xFF, 0xE, 8, 8, 0x25, 0, 0xFF, 8, 0, 0,
                               scene, 0, 0, sceneTag, 0);
             }
         } else if (event->value == 0xA) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
-            delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_151B9BF0(3, 3, 0, 0, 0, 0x320, 0x4B0, 0x190, 0xC8, 0x66, 0x1C7, 2, delay, pos, sceneTag, 0);
+                func_151B9BF0(3, 3, 0, 0, 0, 0x320, 0x4B0, 0x190, 0xC8, 0x66, 0x1C7, 2, duration, pos, sceneTag, 0);
             }
         } else if (event->value == 0xB) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
-            delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_151B9BF0(0x2F, 1, 0, 0, 0, 0x7D0, 0x3E8, 0x190, 0xC8, 0x400, 0x400, 6, delay, pos, sceneTag, 0);
+                func_151B9BF0(0x2F, 1, 0, 0, 0, 0x7D0, 0x3E8, 0x190, 0xC8, 0x400, 0x400, 6, duration, pos, sceneTag, 0);
             }
         } else if (event->value == 0xC) {
             Ev15167AD8 sp;
@@ -1552,17 +1556,17 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             sp.unk14 = 0;
             func_15167AD8(&sp, sceneTag, 1);
         } else if (event->value == 0x19) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
             s32 count;
 
-            delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
                 count = event->unk5;
                 if (count == 0) {
                     count = 0xC;
                 }
-                func_15177F90(count, pos, 0xFF, pos[0], pos[1], pos[2], 0, delay, sceneTag, 0, event->unk6);
+                func_15177F90(count, pos, 0xFF, pos[0], pos[1], pos[2], 0, duration, sceneTag, 0, event->unk6);
             }
         } else if (event->value == 0x1A) {
             if (event->unk4 != 0 && event->unk4 == 1) {
@@ -1597,28 +1601,28 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
             func_150E2DB4(obj, obj->unique_id, anim, -1, 0.0f, 0.0f, 156.0f, 0.0f, 0.0f, 636.0f, 3, 0xA, 0xF0, 0);
         } else if (event->value == 0x1B) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
-            delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
                 // matching: the switch reads the field as an unsigned halfword
                 switch (*(u16 *) &event->unk6) {
                     case 0:
-                        func_1516E778(pos, delay, event->unk5, sceneTag, 0);
+                        func_1516E778(pos, duration, event->unk5, sceneTag, 0);
                         break;
                     case 1:
-                        func_150BEF7C(delay);
+                        func_150BEF7C(duration);
                         break;
                     case 2: {
                         f32 x;
                         f32 y;
                         f32 z;
                         s32 angle;
-                        s32 pad[3];
+                        s32 pad[3]; // matching: stack padding
                         f32 s;
                         f32 c;
-                        s32 pad2;
+                        s32 pad2; // matching: stack padding
 
                         x = obj->x_position;
                         y = obj->y_position;
@@ -1626,15 +1630,15 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         angle = obj->unk7A >> 8;
                         s = func_15048A40(angle);
                         c = func_150489B0(angle);
-                        func_1516F548(x + 20.0f, y + 475.0f, z, delay, 14.0f * s, 0xB00, 14.0f * c, 0xC8, 0x32, 0xA, 6, 7, 0xBE, 0xBE, 0xBE, sceneTag, 0);
-                        func_1516F548(x - 24.0f, y + 476.0f, z, delay, -23.0f * s, 0x800, -23.0f * c, 0xC8, 0x32, 0xA, 6, 7, 0xBE, 0xBE, 0xBE, sceneTag, 0);
+                        func_1516F548(x + 20.0f, y + 475.0f, z, duration, 14.0f * s, 0xB00, 14.0f * c, 0xC8, 0x32, 0xA, 6, 7, 0xBE, 0xBE, 0xBE, sceneTag, 0);
+                        func_1516F548(x - 24.0f, y + 476.0f, z, duration, -23.0f * s, 0x800, -23.0f * c, 0xC8, 0x32, 0xA, 6, 7, 0xBE, 0xBE, 0xBE, sceneTag, 0);
                         break;
                     }
                     case 3:
-                        func_151DC8BC(pos, delay, 1, 1, sceneTag, 0);
+                        func_151DC8BC(pos, duration, 1, 1, sceneTag, 0);
                         break;
                     case 4:
-                        func_151DC8BC(pos, delay, 0, 0, sceneTag, 0);
+                        func_151DC8BC(pos, duration, 0, 0, sceneTag, 0);
                         break;
                 }
             }
@@ -1654,25 +1658,25 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         } else if (event->value == 7) {
             func_150B2494(obj, 9, -1);
         } else if (event->value == 0x21) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
             if (event->unk4 == 0) {
-                delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_15136A50(pos, pos + 1, pos + 2, delay, sceneTag, 0);
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+                func_15136A50(pos, pos + 1, pos + 2, duration, sceneTag, 0);
             }
         } else if (event->value == 0x60) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
             if (event->unk4 == 0) {
-                delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_150CE150(obj, delay, sceneTag, 0);
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+                func_150CE150(obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x65) {
             s8 val[4];
-            s32 pad;
-            s32 delay;
+            s32 pad; // matching: stack padding
+            s32 duration;
             SeqEvent *found;
 
             if (event->unk4 == 2) {
@@ -1689,28 +1693,28 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 }
             }
             if (event->unk4 == 0) {
-                delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 1, 1, event->unk5, scene) - eventTime;
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 1, 1, event->unk5, scene) - eventTime;
                 switch (event->unk5) {
                     case 1:
-                        func_15109410(obj, delay, -1, 0, 0.000709999993f, 0, sceneTag, 1);
+                        func_15109410(obj, duration, -1, 0, 0.000709999993f, 0, sceneTag, 1);
                         break;
                     case 2:
-                        func_15109410(obj, delay, -1, 1, 0.00612499984f, 0, sceneTag, 1);
+                        func_15109410(obj, duration, -1, 1, 0.00612499984f, 0, sceneTag, 1);
                         break;
                     case 3:
-                        func_15109ED4(actor, delay, -1, 0, 0.00612499984f, 0, sceneTag, 1);
+                        func_15109ED4(actor, duration, -1, 0, 0.00612499984f, 0, sceneTag, 1);
                         break;
                     case 4:
-                        func_15109ED4(actor, delay, -1, 1, 0.00612499984f, 0, sceneTag, 1);
+                        func_15109ED4(actor, duration, -1, 1, 0.00612499984f, 0, sceneTag, 1);
                         break;
                     case 5:
-                        func_1510A344(obj, delay, sceneTag, 1);
+                        func_1510A344(obj, duration, sceneTag, 1);
                         break;
                     case 6:
-                        func_151619A0(track, delay, sceneTag, 1);
+                        func_151619A0(track, duration, sceneTag, 1);
                         break;
                     case 7:
-                        func_15108FFC(track, delay, sceneTag);
+                        func_15108FFC(track, duration, sceneTag);
                         break;
                     case 8: {
                         f32 p[3];
@@ -1718,7 +1722,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         p[0] = D_800C3958[scene][track].x;
                         p[1] = D_800C3958[scene][track].y;
                         p[2] = D_800C3958[scene][track].z;
-                        func_151A9390(5, 1, 0, p, -10000.0f, 100.0f, delay, sceneTag, 1);
+                        func_151A9390(5, 1, 0, p, -10000.0f, 100.0f, duration, sceneTag, 1);
                         break;
                     }
                     case 9: {
@@ -1726,7 +1730,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
 
                         sp.unk0 = obj;
                         sp.unk4 = obj->unique_id;
-                        sp.unk6 = delay;
+                        sp.unk6 = duration;
                         sp.unk8 = 1;
                         sp.unk9 = 0;
                         switch (obj->id) {
@@ -1745,23 +1749,23 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         break;
                     }
                     case 10:
-                        func_150F802C(&D_800C3958[scene][track], delay, sceneTag, 1);
+                        func_150F802C(&D_800C3958[scene][track], duration, sceneTag, 1);
                         break;
                     case 11: {
                         s16 data[2];
                         void *p;
 
-                        func_150AF738((s16)delay, sceneTag, 1);
+                        func_150AF738((s16)duration, sceneTag, 1);
                         data[0] = 0;
                         data[1] = 0;
-                        p = func_15149130((s16)delay, -1, 0x4B, -1, 1, 0, (struct37 *)4, sceneTag, 1);
+                        p = func_15149130((s16)duration, -1, 0x4B, -1, 1, 0, (struct37 *)4, sceneTag, 1);
                         if (p != NULL) {
                             memcpy((u8 *)p + 0x28, data, 4);
                         }
                         break;
                     }
                     case 12:
-                        func_150F5C08(obj, delay, sceneTag, 1);
+                        func_150F5C08(obj, duration, sceneTag, 1);
                         break;
                     case 13: {
                         u16 id;
@@ -1770,39 +1774,39 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         if (id >= 0xE9) {
                             id = 0;
                         }
-                        func_1519EB8C(&D_800C3958[scene][track], id, delay, sceneTag, 1);
+                        func_1519EB8C(&D_800C3958[scene][track], id, duration, sceneTag, 1);
                         break;
                     }
                     case 15:
-                        if (obj != NULL && delay > 0) {
-                            f32 t;
+                        if (obj != NULL && duration > 0) {
+                            f32 half;
 
                             obj->unk2EC = 1;
-                            t = (f32)delay * 0.5f;
-                            FF32(obj, 0x2D8) = t;
-                            FF32(obj, 0x2DC) = 1.0f / t;
-                            func_150C4120(obj, delay, sceneTag, 1);
+                            half = (f32)duration * 0.5f;
+                            FF32(obj, 0x2D8) = half;
+                            FF32(obj, 0x2DC) = 1.0f / half;
+                            func_150C4120(obj, duration, sceneTag, 1);
                         }
                         break;
                     case 16:
-                        if (obj != NULL && delay > 0) {
-                            func_150F6890(obj, delay, sceneTag, 1);
+                        if (obj != NULL && duration > 0) {
+                            func_150F6890(obj, duration, sceneTag, 1);
                         }
                         break;
                     case 17:
-                        func_150D0134(event->unk6, D_800C35E0[scene][event->unk6], delay, sceneTag, 1);
+                        func_150D0134(event->unk6, D_800C35E0[scene][event->unk6], duration, sceneTag, 1);
                         break;
                     case 18:
-                        func_150D02B4(event->unk6, D_800C35E0[scene][event->unk6], delay, sceneTag, 1);
+                        func_150D02B4(event->unk6, D_800C35E0[scene][event->unk6], duration, sceneTag, 1);
                         break;
                     case 19:
-                        func_150CF680(delay, sceneTag, 1);
+                        func_150CF680(duration, sceneTag, 1);
                         break;
                     case 20:
-                        func_151925C4(obj, delay, sceneTag, 1);
+                        func_151925C4(obj, duration, sceneTag, 1);
                         break;
                     case 21:
-                        func_150D04C4(event->unk6, D_800C35E0[scene][event->unk6], delay, sceneTag, 1);
+                        func_150D04C4(event->unk6, D_800C35E0[scene][event->unk6], duration, sceneTag, 1);
                         break;
                     case 22: {
                         u16 id;
@@ -1811,11 +1815,11 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         if (id >= 0xCF) {
                             id = 0;
                         }
-                        func_1519ED84(&D_800C3958[scene][track], id, delay, sceneTag, 1);
+                        func_1519ED84(&D_800C3958[scene][track], id, duration, sceneTag, 1);
                         break;
                     }
                     case 23:
-                        func_150FAE18(delay, sceneTag, 1);
+                        func_150FAE18(duration, sceneTag, 1);
                         break;
                     case 24: {
                         f32 point[3];
@@ -1832,7 +1836,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         if (func_15046C80(probe, 0, point[1] - 1000.0f, &floor) != 0) {
                             if (floor.unk1D != 3) {
                                 hit = 1;
-                                point[1] = floor.unk0;
+                                point[1] = floor.y;
                             } else {
                                 hit = 0;
                             }
@@ -1840,7 +1844,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                             hit = 0;
                         }
                         if (hit) {
-                            func_15136698((func_150ADA68() * 0.02000000142f) + 0.09000000358f, (func_150ADA68() * 0.0004399999743f) + 0.0008799999487f, (func_150ADA20() % 101) + 0x9B, 0xFF, delay, &floor.unk4, point, !event->unk6, 1, sceneTag, 1);
+                            func_15136698((func_150ADA68() * 0.02000000142f) + 0.09000000358f, (func_150ADA68() * 0.0004399999743f) + 0.0008799999487f, (func_150ADA20() % 101) + 0x9B, 0xFF, duration, &floor.unk4, point, !event->unk6, 1, sceneTag, 1);
                         }
                         break;
                     }
@@ -1854,14 +1858,14 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         to[0] = D_800C3958[scene][track].x;
                         to[1] = D_800C3958[scene][track].y;
                         to[2] = D_800C3958[scene][track].z;
-                        func_150E3340(from, to, &D_800C3958[scene][track], delay);
+                        func_150E3340(from, to, &D_800C3958[scene][track], duration);
                         break;
                     }
                     case 26: {
                         Ev151D8868 sp;
 
                         sp.unk0 = 1;
-                        sp.unk2 = delay;
+                        sp.unk2 = duration;
                         sp.unk4 = 8;
                         sp.unk5 = 1;
                         sp.unk6 = -1;
@@ -1871,54 +1875,54 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 }
             }
         } else if (event->value == 0x5B) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
             if (event->unk4 == 0) {
-                delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_151B5240((event->unk4 != 0) ? 5000 : delay, sceneTag, 0);
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+                func_151B5240((event->unk4 != 0) ? 5000 : duration, sceneTag, 0);
             }
         } else if (event->value == 0x5D) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
             if (event->unk4 == 0) {
-                delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_15192D48(obj, delay, sceneTag, 0);
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+                func_15192D48(obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x5E) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
             if (event->unk5 == 1) {
                 func_151B09BC(obj, 0, 1000, sceneTag, 0);
             } else if (event->unk4 == 0) {
-                delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_151B09BC(obj, 0, delay, sceneTag, 0);
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+                func_151B09BC(obj, 0, duration, sceneTag, 0);
             }
         } else if (event->value == 0x4C) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
             u8 *list;
             s32 count;
 
             if (event->unk4 == 0) {
-                delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
                 if (obj->id == 0x49 || obj->id == 0x58) {
                     list = func_1519003C(obj, &count);
                     if (list != NULL && event->unk6 < count) {
-                        func_1518F51C(obj, list[event->unk6], delay, -1, -1, -1, 0, 0, sceneTag, 1);
+                        func_1518F51C(obj, list[event->unk6], duration, -1, -1, -1, 0, 0, sceneTag, 1);
                     }
                 } else {
-                    func_1518D1C0(obj, event->unk5, delay, 0, sceneTag, 1, "Cutscene 2");
+                    func_1518D1C0(obj, event->unk5, duration, 0, sceneTag, 1, "Cutscene 2");
                 }
             }
         } else if (event->value == 0x53) {
             if (event->unk4 == 0) {
-                s32 t;
+                s32 endTime;
                 SeqEvent *found;
 
-                t = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene);
+                endTime = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene);
                 {
                     f32 *p = pos; // matching: IDO needs the pointer copied to a local here
                     Ev15134908 sp;
@@ -1928,64 +1932,64 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     sp.unk0 = p;
                     sp.unkC = 2.0f;
                     sp.unk10 = 1.0f;
-                    sp.unk14 = t - eventTime;
+                    sp.unk14 = endTime - eventTime;
                     sp.unk16 = 1;
                     sp.unk17 = 2;
                     func_15134908(&sp, 0, sceneTag, 0);
                 }
             }
         } else if (event->value == 0x50) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
             if (event->unk4 == 0) {
-                delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_150E9FE0(obj, delay, sceneTag, 0);
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+                func_150E9FE0(obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x51) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
             if (event->unk4 == 0) {
-                delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_150EA500(obj, delay, sceneTag, 0);
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+                func_150EA500(obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x48) {
             f32 offset[2];
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
             if (event->unk4 == 0) {
-                delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 1, event->unk5, scene) - eventTime;
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 1, event->unk5, scene) - eventTime;
                 offset[0] = (func_150ADA68() * 200.0f) + -100.0f;
                 offset[1] = (func_150ADA68() * 300.0f) + -150.0f;
-                func_151356D4(offset, (func_150ADA68() * 20.0f) + 10.0f, ((func_150ADA68() * 65.0f) + 35.0f) * 0.001000000047f, ((func_150ADA68() * 160.0f) + 200.0f) * 0.001000000047f, (func_150ADA20() % 101) + 100, 0xFF, (func_150ADA20() % 3) + 4, delay, 4, 0x40, sceneTag, 1);
+                func_151356D4(offset, (func_150ADA68() * 20.0f) + 10.0f, ((func_150ADA68() * 65.0f) + 35.0f) * 0.001000000047f, ((func_150ADA68() * 160.0f) + 200.0f) * 0.001000000047f, (func_150ADA20() % 101) + 100, 0xFF, (func_150ADA20() % 3) + 4, duration, 4, 0x40, sceneTag, 1);
             }
         } else if (event->value == 0xF) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
-            delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_150C7020(obj, (s16)delay, sceneTag, 1);
+                func_150C7020(obj, (s16)duration, sceneTag, 1);
             }
         } else if (event->value == 0x3E || event->value == 0x3F) {
         } else if (event->value == 0x32) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
-            delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_150DB518(pos, &D_800C3958[scene][track].unk10, &D_800C3958[scene][track].unk18, &D_800C3958[scene][track].unk1C, &D_800C3958[scene][track].unk20, delay, sceneTag, 0);
+                func_150DB518(pos, &D_800C3958[scene][track].unk10, &D_800C3958[scene][track].unk18, &D_800C3958[scene][track].unk1C, &D_800C3958[scene][track].unk20, duration, sceneTag, 0);
             }
         } else if (event->value == 0x34) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
             u8 t;
             u8 kind;
             EvNode *node;
 
-            delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
                 t = (event->unk5 <= 0) ? event->unk5 : 0;
                 if (t == 0) {
@@ -1994,32 +1998,32 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 node = FPTR(obj, 0x2F4);
                 while (node != NULL) {
                     if (node->unk1C == kind || func_1514D4B8(D_8008ABE8[kind]->unk4, node->unk1C) != 0) {
-                        node->unk10->unk30 = func_1519E970(delay, node->unk10, 0, &D_800C3958[scene][track].unk30, &D_800C3958[scene][track].unk20, sceneTag, 0);
+                        node->unk10->unk30 = func_1519E970(duration, node->unk10, 0, &D_800C3958[scene][track].unk30, &D_800C3958[scene][track].unk20, sceneTag, 0);
                     }
                     node = node->unk14;
                 }
             }
         } else if (event->value == 0x23) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
             if (obj == NULL) {
                 return 1;
             }
-            delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_1516F2F8(obj - D_800CC2D0, delay, delay, 0, sceneTag, 0);
+                func_1516F2F8(obj - D_800CC2D0, duration, duration, 0, sceneTag, 0);
             }
         } else if (event->value == 0x22) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
             if (obj == NULL) {
                 return 1;
             }
-            delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_1516F1C0(obj - D_800CC2D0, delay, sceneTag, 0);
+                func_1516F1C0(obj - D_800CC2D0, duration, sceneTag, 0);
             }
         } else if (event->value == 0x52) {
             if (obj == NULL) {
@@ -2041,7 +2045,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         pos[2] = obj->z_position;
                         if (func_15046C80(pos, 0, obj->y_position - 300.0f, &floor) != 0) {
                             out[0] = pos[0];
-                            out[1] = floor.unk0;
+                            out[1] = floor.y;
                             out[2] = pos[2];
                             func_150CA930(out);
                         }
@@ -2209,7 +2213,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_150F16DC(obj, event->unk5, (u8) event->unk6, sceneTag, 1);
                     break;
                 case 17: {
-                    s32 unused;
+                    s32 unused; // matching: stack padding
                     Ev151D8868 sp;
 
                     sp.unk0 = 1;
@@ -2562,29 +2566,29 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             func_1518B6B0(pos[0], pos[1], pos[2], sceneTag, 0);
         } else if (event->value == 0x2C) {
             SeqEvent *found;
-            s32 pad[7];
+            s32 pad[7]; // matching: stack padding
 
             func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene);
             if (event->unk4 == 0) { // matching: empty, but it still shapes the code
             }
         } else if (event->value == 0x2F) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
             if (obj == NULL) {
                 return 1;
             }
             if (event->unk4 == 0) {
-                delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_1516ED68(obj - D_800CC2D0, delay, sceneTag, 0);
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+                func_1516ED68(obj - D_800CC2D0, duration, sceneTag, 0);
             }
         } else if (event->value == 0x39) {
-            s32 delay;
+            s32 duration;
             SeqEvent *found;
 
             if (event->unk4 == 0) {
-                delay = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_150C2804(pos, pos + 1, pos + 2, delay, sceneTag, 0);
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+                func_150C2804(pos, pos + 1, pos + 2, duration, sceneTag, 0);
             }
         } else if (event->value == 0x3A) {
             f32 p[3];
