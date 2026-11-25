@@ -1,4 +1,5 @@
 #include <ultra64.h>
+/* functions.h declares func_1502B7F0 with five parameters; this file calls it with three. */
 #define func_1502B7F0 func_1502B7F0_5
 #include "functions.h"
 #undef func_1502B7F0
@@ -1408,7 +1409,7 @@ extern s8 D_8008FEF8;
 extern void *D_800900BC[];
 Gfx *func_151EC648(Gfx *);
 Gfx *func_151EE184(Gfx *);
-Gfx *func_151EEBE8(Gfx *, s32);
+Gfx *func_151EEBE8(Gfx *gfx, s32 index);
 
 /* Draws the fading image picked by D_8008FDD4->unk2C (or the func_151EC648 / func_151EE184 screens). */
 Gfx *func_151EC3E8(Gfx *gfx) {
@@ -2085,33 +2086,38 @@ extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 extern void func_150A7D00(void *, f32, f32, f32);
 extern struct216 *func_1507BB28(s32, s32);
 
+/*
+ * Text entry on a 3D letter grid (cursor D_800E0C81 row, D_800E0C80 column, text in D_800E0C7C):
+ * moves the cursor, types letters, and on enter matches the text against the code strings
+ * 0x90..0xA2 (sets a D_800E9D00 flag) and the word strings 0xA3..0xC7, then plays a response.
+ */
 Gfx *func_151EE184(Gfx *gfx) {
     s32 sfx;
-    s32 changed;
-    s32 ncols;
+    s32 cursorMoved;
+    s32 rowLength;
     s32 i;
-    s32 key;
+    s32 selectedKey;
     struct127 *obj;
     Mtx *mtx;
     s32 j;
-    u32 mask;
+    u32 matchMask;
     u16 perspNorm;
     s32 temp;
     s32 cheatType;
-    u8 c;
+    u8 typed;
     s32 width;
     s32 height;
-    s32 unused;
-    u8 *p;
-    u8 *q;
+    s32 unused; /* third output of func_150428D4 */
+    u8 *str;
+    u8 *word;
 
     sfx = 0;
     if (D_80090138 == NULL) {
         return gfx;
     }
-    changed = 0;
+    cursorMoved = 0;
     if (D_8008FDD4->unk20 & 1) {
-        changed = 1;
+        cursorMoved = 1;
         D_800E0C81--;
     }
     if (D_8008FDD4->unk20 & 2) {
@@ -2119,7 +2125,7 @@ Gfx *func_151EE184(Gfx *gfx) {
         if (D_800E0C81 == 4 && D_800E0C80 >= 5) {
             D_800E0C80 = 4;
         }
-        changed = 1;
+        cursorMoved = 1;
     }
     if (D_800E0C81 < 0) {
         D_800E0C81 = 5;
@@ -2129,31 +2135,31 @@ Gfx *func_151EE184(Gfx *gfx) {
     }
     if (D_8008FDD4->unk20 & 8) {
         D_800E0C80++;
-        changed = 1;
+        cursorMoved = 1;
     }
     if (D_8008FDD4->unk20 & 4) {
         D_800E0C80--;
-        changed = 1;
+        cursorMoved = 1;
     }
     if (D_800E0C81 == 4) {
-        ncols = 5;
+        rowLength = 5;
     } else if (D_800E0C81 == 5) {
-        ncols = 1;
+        rowLength = 1;
     } else {
-        ncols = 6;
+        rowLength = 6;
     }
     if (D_800E0C80 < 0) {
-        D_800E0C80 = ncols - 1;
+        D_800E0C80 = rowLength - 1;
     }
-    if (D_800E0C80 >= ncols) {
+    if (D_800E0C80 >= rowLength) {
         D_800E0C80 = 0;
     }
-    if (changed) {
+    if (cursorMoved) {
         func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
     }
-    key = D_800E0C81 * 6 + D_800E0C80;
+    selectedKey = D_800E0C81 * 6 + D_800E0C80;
     if (D_800E0C81 == 5) {
-        key--;
+        selectedKey--;
     }
     mtx = allocate_memory(0x80, 4, 2, 0);
     if (D_800BE748[0] & 0x8000) {
@@ -2168,7 +2174,7 @@ Gfx *func_151EE184(Gfx *gfx) {
         D_800E0C82 = 12;
     }
     if (D_8008FDD4->unk20 & 0x10) {
-        i = key + 'A';
+        i = selectedKey + 'A';
 
         func_10010F30(0x500, 0x7D00, 0x40, 0, 0);
         if (D_800E0C81 == 5) {
@@ -2183,27 +2189,27 @@ Gfx *func_151EE184(Gfx *gfx) {
             } else if (D_800E0C80 == 1) {
                 i = '.';
             } else if (D_800E0C80 == 4) {
-                mask = 0xFFC3FFFE;
+                matchMask = 0xFFC3FFFE;
                 for (i = 0x90; i < 0xA3; i++) {
-                    p = ((u8 **)D_800E0BD8)[i];
+                    str = D_800E0BD8[i];
                     temp = i - 0x90;
                     if (temp < D_800E0C83) {
-                        c = D_800E0C7C[temp];
+                        typed = D_800E0C7C[temp];
                     } else {
-                        c = ' ';
+                        typed = ' ';
                     }
                     for (j = 0; j < 32; j++) {
-                        if (c != p[j]) {
-                            mask &= ~(1 << j);
+                        if (typed != str[j]) {
+                            matchMask &= ~(1 << j);
                         }
                     }
                 }
                 j = -1;
                 for (i = 0; i < 33; i++) {
-                    if (mask & 1) {
+                    if (matchMask & 1) {
                         j = i;
                     }
-                    mask >>= 1;
+                    matchMask >>= 1;
                 }
                 if (j >= 0) {
                     temp = 1 << j;
@@ -2215,28 +2221,28 @@ Gfx *func_151EE184(Gfx *gfx) {
                     }
                     cheatType = 0x10;
                     sfx = (func_150ADA20() & 1) + 0xC3;
-                lbl1:;
+                lbl1:; // matching: as lbl2 below
                 } else {
                     cheatType = 0x11;
                     for (i = 0xA3; i < 0xC8 && sfx == 0; i++) {
-                        p = D_800E0C7C;
-                        while (p != NULL && (q = ((u8 **)D_800E0BD8)[i]) != NULL) {
+                        str = D_800E0C7C;
+                        while (str != NULL && (word = D_800E0BD8[i]) != NULL) {
                             j = 0;
-                            while (q[j] == *p && *p != 0 && q[j] != 0) {
-                                p++;
+                            while (word[j] == *str && *str != 0 && word[j] != 0) {
+                                str++;
                                 j++;
                             }
-                            if (q[j] == 0 && (*p == ' ' || *p == 0)) {
-                                p = NULL;
+                            if (word[j] == 0 && (*str == ' ' || *str == 0)) {
+                                str = NULL;
                                 sfx = (func_150ADA20() & 1) + 0xC1;
-                            } else if (*p == ' ') {
-                                p++;
+                            } else if (*str == ' ') {
+                                str++;
                             } else {
-                                while (*p && *p != ' ') {
-                                    p++;
+                                while (*str && *str != ' ') {
+                                    str++;
                                 }
-                                if (*p == 0) {
-                                    p = NULL;
+                                if (*str == 0) {
+                                    str = NULL;
                                 }
                             }
                         }
@@ -2257,7 +2263,7 @@ Gfx *func_151EE184(Gfx *gfx) {
                         }
                     } else {
                         D_800E0C84 = 0;
-                    lbl2:;
+                    lbl2:; // matching: an empty label here ends a basic block for IDO's scheduler
                     }
                 }
                 for (i = 0; D_800E0C7C[i] != 0; i++) {
@@ -2300,14 +2306,14 @@ Gfx *func_151EE184(Gfx *gfx) {
     gSPMatrix(gfx++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     for (i = 0; i < 30; i++) {
         gDPPipeSync(gfx++);
-        if (i == key) {
+        if (i == selectedKey) {
             gDPSetEnvColor(gfx++, 0xFF, 0x00, 0xFF, D_800E0A95);
             gSPMatrix(gfx++, mtx + 1, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
         } else {
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, D_800E0A95);
         }
         gSPDisplayList(gfx++, D_80090138[i].dl);
-        if (i == key) {
+        if (i == selectedKey) {
             gSPMatrix(gfx++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
         }
     }
@@ -2326,7 +2332,8 @@ Gfx *func_151EE184(Gfx *gfx) {
     return gfx;
 }
 
-Gfx *func_151EEBE8(Gfx *gfx, s32 arg1) {
+/* Draws a framed panel showing image `index` of table 0x1D (the texture id is cached in D_8009013C). */
+Gfx *func_151EEBE8(Gfx *gfx, s32 index) {
     s32 image;
 
     gDPPipeSync(gfx++);
@@ -2359,24 +2366,19 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 arg1) {
         gfx = func_151E86E4(gfx, 0x180, 0xBC, 0x1D0, 0xFC, 0, 0x200, 0x200, 0x400, 0x400);
     }
 
-    {
-        s32 sp48;
+    if (D_800E0C85 != index + 1) {
+        u16 *table;
+        u32 size;
 
-        {
-            u32 count;
-
-            if (D_800E0C85 != (arg1 + 1)) {
-                sp48 = 0;
-                count = func_1502B7F0(&sp48, 1, 0x1D);
-                if ((u32)arg1 < (u32)(count >> 1)) {
-                    D_8009013C.texId = (void *)((u16 *)sp48)[arg1];
-                } else {
-                    D_8009013C.texId = NULL;
-                }
-                func_10004074((void *)sp48);
-                D_800E0C85 = arg1 + 1;
-            }
+        table = NULL;
+        size = func_1502B7F0((s32 *)&table, 1, 0x1D);
+        if ((u32)index < size >> 1) {
+            D_8009013C.texId = (void *)table[index];
+        } else {
+            D_8009013C.texId = NULL;
         }
+        func_10004074(table);
+        D_800E0C85 = index + 1;
     }
 
     if (D_8009013C.texId != NULL) {
@@ -2386,6 +2388,7 @@ Gfx *func_151EEBE8(Gfx *gfx, s32 arg1) {
     return gfx;
 }
 
+/* Clears the code flags set by func_151EE184. */
 void func_151EEFF0(void) {
     D_800E9D00 = 0;
 }
