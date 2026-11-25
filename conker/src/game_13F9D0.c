@@ -471,7 +471,7 @@ Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance,
     return gfx;
 }
 
-extern struct102 *func_1510D970(s32, void *, s32, s32, s32);
+extern Shadow *func_1510D970(s32, void *, s32, s32, s32);
 
 /* Creates or frees each object's shadow depending on whether the object is shown (in every active view). */
 void func_15113C88(void) {
@@ -503,7 +503,7 @@ void func_15113C88(void) {
                 obj->shadow = func_1510D970(1, obj, 0, 1, 0);
             }
         } else if (obj->shadow != NULL) {
-            func_1516972C(obj->shadow);
+            func_1516972C((struct102 *)obj->shadow); // functions.h types the handle struct102 *
             obj->shadow = NULL;
         }
     }
@@ -784,7 +784,7 @@ void func_15114B94(u32 index) {
 
     if (index < D_800DBEF0) {
         if (D_800DBEF4[index].shadow != NULL) {
-            func_1516972C(D_800DBEF4[index].shadow);
+            func_1516972C((struct102 *)D_800DBEF4[index].shadow);
             D_800DBEF4[index].shadow = NULL;
         }
         D_800DBEF4[index].state |= 8;

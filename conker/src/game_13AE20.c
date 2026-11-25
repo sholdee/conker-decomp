@@ -11,7 +11,7 @@ typedef struct {
 } Point3s; /* size = 0x6 */
 
 /* A blob shadow: a textured quad laid on the floor under its owner, tilted to the floor slope. */
-typedef struct {
+struct Shadow {
     /* 0x000 */ u8 pad0[0x10];
     /* 0x010 */ Mtx mtx[2];        /* translation, double-buffered by D_800BE9C0 */
     /* 0x090 */ Vtx vtx[2][4];     /* quad corners, double-buffered by D_800BE9C0 */
@@ -26,7 +26,7 @@ typedef struct {
     /* 0x124 */ u8 flags;
     /* 0x125 */ u8 pad125[3];
     /* 0x128 */ Point3s floorTri[3]; /* cached floor triangle, only allocated when created with flag 1 */
-} Shadow; /* size = 0x128 or 0x13A */
+}; /* size = 0x128 or 0x13A */
 
 /* Allocates a shadow for owner and sets up its two quads' texture coordinates. */
 Shadow *func_1510D970(s32 ownerType, u8 *owner, s32 texture, s32 createFlags, s32 flags) {
@@ -92,25 +92,6 @@ typedef struct {
     /* 0x18C */ Point3s floorTri[3];
 } GameObj;
 
-/* This file's view of the 0xA0-byte objects at D_800DBEF4 (cf. Game13F9D0Obj in game_13F9D0.c), owner type 1. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ Point3s pos;
-    /* 0x16 */ u8 pad16[0x16];
-    /* 0x2C */ f32 scaleX;
-    /* 0x30 */ u8 pad30[0x1D];
-    /* 0x4D */ u8 unk4D;
-    /* 0x4E */ u8 pad4E[0x20];
-    /* 0x6E */ u8 unk6E;
-    /* 0x6F */ u8 pad6F[2];
-    /* 0x71 */ u8 unk71;
-    /* 0x72 */ u8 pad72[0x18];
-    /* 0x8A */ u8 alpha;
-    /* 0x8B */ u8 viewAlpha[5];
-    /* 0x90 */ u8 pad90[4];
-    /* 0x94 */ Shadow *shadow;
-} Game13F9D0Obj;
-
 extern f32 func_150489B0(u8 angle); /* cos */
 extern s32 func_150A3FC4(f32, f32, s32, Point3s *, f32 *);
 s32 func_1510E388(Point3s **triPtrs, Point3s *tri, f32 *slopeX, f32 *slopeZ);
@@ -143,7 +124,7 @@ void func_1510DA84(Shadow *shadow) {
     f32 sinYaw;
     f32 cosYaw;
     s32 pad6; // matching: stack slot pad
-    Game13F9D0Obj *prop;
+    WorldObject *prop;
 
     shadow->visible = FALSE;
     switch (shadow->ownerType) {
@@ -162,19 +143,19 @@ void func_1510DA84(Shadow *shadow) {
             angle = (obj->unk7A >> 8) + 0x20;
             break;
         case 1:
-            prop = (Game13F9D0Obj *)shadow->owner;
-            if (prop->unk6E == 1) {
+            prop = (WorldObject *)shadow->owner;
+            if (prop->inactive == 1) {
                 return;
             }
             tri = prop->shadow->floorTri;
-            if (func_150A3FC4(prop->pos.x, prop->pos.z, 0, tri, &floorY) == 0) {
-                func_1510E7A4(0, tri, &floorY, 0, 0, 0, prop->pos.x, prop->pos.y, prop->pos.z, prop->pos.y,
-                              prop->unk71 + 1, 0, -10000.0f, prop->pos.y);
+            if (func_150A3FC4(prop->x, prop->z, 0, tri, &floorY) == 0) {
+                func_1510E7A4(0, tri, &floorY, 0, 0, 0, prop->x, prop->y, prop->z, prop->y,
+                              prop->index + 1, 0, -10000.0f, prop->y);
             }
             triPtrs = NULL;
-            x = prop->pos.x;
-            ownerY = prop->pos.y;
-            z = prop->pos.z;
+            x = prop->x;
+            ownerY = prop->y;
+            z = prop->z;
             scale = (f32)(prop->unk4D * 4) * prop->scaleX;
             angle = 0;
             break;
@@ -295,7 +276,7 @@ Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
                 ownerAlpha = func_1506196C(shadow->owner, view);
                 break;
             case 1: {
-                Game13F9D0Obj *prop = (Game13F9D0Obj *)shadow->owner;
+                WorldObject *prop = (WorldObject *)shadow->owner;
 
                 ownerAlpha = (prop->alpha * prop->viewAlpha[view] + 0xFF) >> 8;
                 break;

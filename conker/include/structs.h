@@ -1508,6 +1508,8 @@ struct Actor {
  * A world object: one 0xA0-byte entry of the level's object array D_800DBEF4 (D_800DBEF0 entries),
  * built by func_150039E0 (game_30E90.c) from the level's placement lists. Owner type 1 for effects and trails.
  */
+typedef struct Shadow Shadow; // blob shadow under an object, see game_13AE20.c
+
 typedef struct WorldObject WorldObject;
 struct WorldObject {
     /* 0x00 */ f32 rotX; // degrees
@@ -1583,7 +1585,7 @@ struct WorldObject {
     /* 0x90 */ u16 drawDistance;     // 0: default (D_800D9B1C), 1: 40000
     /* 0x92 */ u8 unk92;
     /* 0x93 */ u8 pad93;
-    /* 0x94 */ struct102 *shadow;    // created and freed by func_15113C88
+    /* 0x94 */ Shadow *shadow;       // created and freed by func_15113C88
     /* 0x98 */ s32 unk98;            // with unk9C, passed by address to func_1503F800
     /* 0x9C */ s32 unk9C;
 }; // size 0xA0
