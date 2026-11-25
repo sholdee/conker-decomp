@@ -4,6 +4,7 @@
 #include "functions.h"
 #undef func_1513D524
 #include "variables.h"
+#include "effects.h"
 
 extern void func_1510F800(s32);
 extern void *func_1513D524(void *spawn, u8, u8, u8, u8, u8, s32 extraSize, u8, s32);
@@ -37,29 +38,6 @@ typedef struct {
     /* 0x40 */ f32 shrinkRate;
     /* 0x44 */ f32 growRate;
 } ParticleEmitter;
-
-/* Spawn parameters passed to func_1513D524. */
-typedef struct {
-    /* 0x00 */ u8 kind;
-    /* 0x01 */ u8 pad1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 life;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 color[4];
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ struct17 pos;
-    /* 0x28 */ struct17 unk28;
-    /* 0x34 */ struct17 unk34;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 pad46[2];
-    /* 0x48 */ s32 unk48;              // func_1510FD20(x, z) when flag 0x01000000 is set
-    /* 0x4C */ s32 pad4C[3];
-} ParticleSpawn;
 
 /*
  * Per-particle motion state, stored at +0x110 of the spawned object. Each channel (A, B, C)
@@ -123,16 +101,16 @@ typedef struct {
 /* Spawns a particle described by `emitter`, with randomly flickering size and channel C. */
 Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 kind, u8 arg4, s32 arg5) {
     Particle *particle;
-    ParticleSpawn spawn;
+    ParticleDef spawn;
     ParticleMotion motion;
     s32 flip;
 
     spawn.flags = emitter->flags | 0x40000000;
-    spawn.pos = emitter->pos;
+    spawn.pos = *(vertex *)&emitter->pos; // TODO(vectors): struct17/vertex mix
     if (arg2) {
         spawn.flags |= 0x01000000;
         func_1510F800(0);
-        spawn.unk48 = func_1510FD20(spawn.pos.unk0, spawn.pos.unk8);
+        spawn.unk48 = func_1510FD20(spawn.pos.x, spawn.pos.z);
     } else {
         spawn.flags &= ~0x01000000;
         spawn.unk48 = 0;
@@ -140,35 +118,35 @@ Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 kind, u8 
 
     switch (kind) {
     case 1:
-        spawn.kind = 0x13;
+        spawn.texture = 0x13;
         break;
     case 2:
-        spawn.kind = 0x71;
+        spawn.texture = 0x71;
         break;
     case 0:
     default:
         if (func_150ADA20() & 1) {
-            spawn.kind = 0x13;
+            spawn.texture = 0x13;
         } else {
-            spawn.kind = 0x14;
+            spawn.texture = 0x14;
         }
         break;
     }
 
-    spawn.unk2 = 0x301;
-    spawn.life = emitter->life;
-    spawn.color[0] = emitter->color[0];
-    spawn.color[1] = emitter->color[1];
-    spawn.color[2] = emitter->color[2];
-    spawn.color[3] = emitter->color[3];
+    spawn.renderModes = 0x301;
+    spawn.lifetime = emitter->life;
+    spawn.rgba[0] = emitter->color[0];
+    spawn.rgba[1] = emitter->color[1];
+    spawn.rgba[2] = emitter->color[2];
+    spawn.rgba[3] = emitter->color[3];
     spawn.unk44 = emitter->unk2C;
     spawn.unk45 = emitter->unk2D;
-    spawn.unk28.unk0 = 0.0f;
-    spawn.unk28.unk4 = 0.0f;
-    spawn.unk28.unk8 = 0.0f;
-    spawn.unk34.unk0 = emitter->scale;
-    spawn.unk34.unk4 = 0.0f;
-    spawn.unk34.unk8 = 1.0f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
+    spawn.scale.x = emitter->scale;
+    spawn.scale.y = 0.0f;
+    spawn.scale.z = 1.0f;
 
     motion.maxA = emitter->maxA;
     motion.minA = emitter->minA;
@@ -191,10 +169,10 @@ Particle *func_15149550(ParticleEmitter *emitter, u8 arg1, u8 arg2, u8 kind, u8 
     motion.rateC = 0.231f;
     motion.shrinkRate = emitter->shrinkRate;
     motion.growRate = emitter->growRate;
-    spawn.unk8 = 0;
-    spawn.unkC = (motion.maxC + motion.minC) >> 1;
-    spawn.unk14 = 0.0f;
-    spawn.unk18 = 0.0f;
+    spawn.frame = 0;
+    spawn.frameSpeed = (motion.maxC + motion.minC) >> 1;
+    spawn.width = 0.0f;
+    spawn.height = 0.0f;
     motion.effect = emitter->effect;
     motion.maxHeight = emitter->maxHeight;
 

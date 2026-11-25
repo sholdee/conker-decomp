@@ -6,12 +6,7 @@
 #undef func_15083568
 #undef func_1514D3B0
 #include "variables.h"
-
-typedef struct Vec3f {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
+#include "effects.h"
 
 /* One node of an object's attachment list: something spawned for the object (an effect, a
  * sound, a sub-object) together with the attachment type that knows how to message or free it. */
@@ -42,51 +37,14 @@ typedef struct AttachmentType {
 /* Tells a spawned emitter how to follow its owner: two points (p0, p1) given in the space of
  * bone `bone` of `target`, which func_1518A094 transforms every frame. */
 typedef struct EmitterAttach {
-    /* 0x00 */ Vec3f p0;
-    /* 0x0C */ Vec3f p1;
+    /* 0x00 */ vertex p0;
+    /* 0x0C */ vertex p1;
     /* 0x18 */ struct127 *target;
     /* 0x1C */ u8 bone;
     /* 0x1D */ u8 targetId;             // the target's unique_id
     /* 0x1E */ s8 handler;              // index into D_8008D5A0, or -1
     /* 0x1F */ u8 pad1F;
 } EmitterAttach;
-
-/* Object spawn parameters, passed on to func_1513D524 by func_151407D0. */
-typedef struct SpawnParams {
-    /* 0x00 */ u8 unk00;
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ u16 unk02;
-    /* 0x04 */ s16 unk04;
-    /* 0x06 */ u8 pad06[2];
-    /* 0x08 */ s32 unk08;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ u8 unk10;                 // unk10..unk13 hold RGBA-like values
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ u8 unk4C;
-    /* 0x4D */ u8 pad4D[3];
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-} SpawnParams;
 
 /* Emitter parameters; func_151407D0 copies them into the spawned object at +0x110. */
 typedef struct EmitterParams {
@@ -151,15 +109,15 @@ extern s32 (*D_8008AB64[])(s32, s32, s32);
 extern AttachmentType *D_8008ABE8[];
 
 /* Emitter offsets. */
-extern Vec3f D_800A58A0;
-extern Vec3f D_800A58AC;
-extern Vec3f D_800A58B8;
-extern Vec3f D_800A58C4;
-extern Vec3f D_800A5934;
-extern Vec3f D_800A5940;
-extern Vec3f D_800A594C;
-extern Vec3f D_800A5958;
-extern Vec3f D_800A5964;
+extern vertex D_800A58A0;
+extern vertex D_800A58AC;
+extern vertex D_800A58B8;
+extern vertex D_800A58C4;
+extern vertex D_800A5934;
+extern vertex D_800A5940;
+extern vertex D_800A594C;
+extern vertex D_800A5958;
+extern vertex D_800A5964;
 
 /* This file. */
 s32 func_1514CA80(struct127 *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
@@ -181,7 +139,7 @@ void func_1515F10C(void *);
 s32 func_15160A58(struct127 *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15160CDC(struct127 *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
-s32 func_15189FF0(SpawnParams *spawn, EmitterParams *emitter, EmitterAttach *attach, s32, s32, s32, s32);
+s32 func_15189FF0(ParticleDef *spawn, EmitterParams *emitter, EmitterAttach *attach, s32, s32, s32, s32);
 s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_1518D1C0(struct127 *obj, s32, s32, s32, s32, s32, char *name);
 void func_1518E308(void *);
@@ -687,8 +645,8 @@ typedef struct Struct1514D564Payload {
 
 /* func_150C5370 copies the first 0x24 bytes and caches the distance between p0 and p1. */
 typedef struct Struct1514D564Desc {
-    /* 0x00 */ Vec3f p0;
-    /* 0x0C */ Vec3f p1;
+    /* 0x00 */ vertex p0;
+    /* 0x0C */ vertex p1;
     /* 0x18 */ s8 unk18;
     u8 pad19[3];
     f32 unk1C;
@@ -727,26 +685,26 @@ void func_1514D564(struct127 *obj) {
 /** Attaches two emitters to `obj` (bones 0x2B and 5, types 9 and 10) plus a func_15160A58 effect. */
 void func_1514D64C(struct127 *obj) {
     EmitterParams emitter;
-    SpawnParams spawn;
+    ParticleDef spawn;
     EmitterAttach attach;
 
-    spawn.unk00 = 3;
-    spawn.unk08 = 0;
-    spawn.unk0C = 0;
-    spawn.unk40 = 0x12012;
-    spawn.unk04 = 0;
+    spawn.texture = 3;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.flags = 0x12012;
+    spawn.lifetime = 0;
     spawn.unk45 = 0xFF;
-    spawn.unk10 = 0xFF;
-    spawn.unk11 = 0;
-    spawn.unk12 = 0;
-    spawn.unk13 = 0xFF;
-    spawn.unk02 = 0x401;
-    spawn.unk1C = 0.0f;
-    spawn.unk20 = 0.0f;
-    spawn.unk24 = 0.0f;
-    spawn.unk28 = 0.0f;
-    spawn.unk2C = 0.0f;
-    spawn.unk30 = 0.0f;
+    spawn.rgba[0] = 0xFF;
+    spawn.rgba[1] = 0;
+    spawn.rgba[2] = 0;
+    spawn.rgba[3] = 0xFF;
+    spawn.renderModes = 0x401;
+    spawn.pos.x = 0.0f;
+    spawn.pos.y = 0.0f;
+    spawn.pos.z = 0.0f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
 
     emitter.unk00 = 28.0f;
     emitter.unk04 = 28.0f;
@@ -777,17 +735,17 @@ void func_1514D64C(struct127 *obj) {
 
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 0, 0, 0), obj, 9);
 
-    spawn.unk00 = 3;
-    spawn.unk08 = 0;
-    spawn.unk0C = 0;
-    spawn.unk40 = 0x12012;
-    spawn.unk04 = 0;
+    spawn.texture = 3;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.flags = 0x12012;
+    spawn.lifetime = 0;
     spawn.unk45 = 0xFF;
-    spawn.unk10 = 0xFF;
-    spawn.unk11 = 0;
-    spawn.unk12 = 0;
-    spawn.unk13 = 0xFF;
-    spawn.unk02 = 0x401;
+    spawn.rgba[0] = 0xFF;
+    spawn.rgba[1] = 0;
+    spawn.rgba[2] = 0;
+    spawn.rgba[3] = 0xFF;
+    spawn.renderModes = 0x401;
 
     emitter.unk00 = 30.0f;
     emitter.unk04 = 30.0f;
@@ -795,12 +753,12 @@ void func_1514D64C(struct127 *obj) {
     emitter.unk10 = 0.8000000119f;
     emitter.unk14 = 0.8000000119f;
 
-    spawn.unk1C = 0.0f;
-    spawn.unk20 = 0.0f;
-    spawn.unk24 = 0.0f;
-    spawn.unk28 = 0.0f;
-    spawn.unk2C = 0.0f;
-    spawn.unk30 = 0.0f;
+    spawn.pos.x = 0.0f;
+    spawn.pos.y = 0.0f;
+    spawn.pos.z = 0.0f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
 
     emitter.unk18 = 0.6000000238f;
     emitter.unk1C = 0.6000000238f;
@@ -1039,26 +997,26 @@ void func_1514DFD0(struct127 *obj) {
 
 void func_1514E00C(struct127 *obj) {
     EmitterParams emitter;
-    SpawnParams spawn;
+    ParticleDef spawn;
     EmitterAttach attach;
 
-    spawn.unk00 = 3;
-    spawn.unk08 = 0;
-    spawn.unk0C = 0;
-    spawn.unk40 = 0x12002;
-    spawn.unk04 = 0;
+    spawn.texture = 3;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.flags = 0x12002;
+    spawn.lifetime = 0;
     spawn.unk45 = 0xFF;
-    spawn.unk10 = 0xFF;
-    spawn.unk11 = 0x8E;
-    spawn.unk12 = 0x19;
-    spawn.unk13 = 0xFF;
-    spawn.unk02 = 0x401;
-    spawn.unk1C = 0.0f;
-    spawn.unk20 = 0.0f;
-    spawn.unk24 = 0.0f;
-    spawn.unk28 = 0.0f;
-    spawn.unk2C = 0.0f;
-    spawn.unk30 = 0.0f;
+    spawn.rgba[0] = 0xFF;
+    spawn.rgba[1] = 0x8E;
+    spawn.rgba[2] = 0x19;
+    spawn.rgba[3] = 0xFF;
+    spawn.renderModes = 0x401;
+    spawn.pos.x = 0.0f;
+    spawn.pos.y = 0.0f;
+    spawn.pos.z = 0.0f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
 
     emitter.unk00 = 20.0f;
     emitter.unk04 = 20.0f;
@@ -1093,26 +1051,26 @@ void func_1514E00C(struct127 *obj) {
 
 void func_1514E194(struct127 *obj) {
     EmitterParams emitter;
-    SpawnParams spawn;
+    ParticleDef spawn;
     EmitterAttach attach;
 
-    spawn.unk00 = 3;
-    spawn.unk08 = 0;
-    spawn.unk0C = 0;
-    spawn.unk40 = 0x12002;
-    spawn.unk04 = 0;
+    spawn.texture = 3;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.flags = 0x12002;
+    spawn.lifetime = 0;
     spawn.unk45 = 0xFF;
-    spawn.unk10 = 0xFF;
-    spawn.unk11 = 0x8E;
-    spawn.unk12 = 0x19;
-    spawn.unk13 = 0xFF;
-    spawn.unk02 = 0x401;
-    spawn.unk1C = 0.0f;
-    spawn.unk20 = 0.0f;
-    spawn.unk24 = 0.0f;
-    spawn.unk28 = 0.0f;
-    spawn.unk2C = 0.0f;
-    spawn.unk30 = 0.0f;
+    spawn.rgba[0] = 0xFF;
+    spawn.rgba[1] = 0x8E;
+    spawn.rgba[2] = 0x19;
+    spawn.rgba[3] = 0xFF;
+    spawn.renderModes = 0x401;
+    spawn.pos.x = 0.0f;
+    spawn.pos.y = 0.0f;
+    spawn.pos.z = 0.0f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
 
     emitter.unk00 = 16.0f;
     emitter.unk04 = 16.0f;
@@ -1147,26 +1105,26 @@ void func_1514E194(struct127 *obj) {
 
 void func_1514E31C(struct127 *obj) {
     EmitterParams emitter;
-    SpawnParams spawn;
+    ParticleDef spawn;
     EmitterAttach attach;
 
-    spawn.unk00 = 3;
-    spawn.unk08 = 0;
-    spawn.unk0C = 0;
-    spawn.unk40 = 0x2012;
-    spawn.unk04 = 0;
+    spawn.texture = 3;
+    spawn.frame = 0;
+    spawn.frameSpeed = 0;
+    spawn.flags = 0x2012;
+    spawn.lifetime = 0;
     spawn.unk45 = 0xFF;
-    spawn.unk10 = 0xFF;
-    spawn.unk11 = 0xE6;
-    spawn.unk12 = 0;
-    spawn.unk13 = 0xFF;
-    spawn.unk02 = 0x401;
-    spawn.unk1C = 0.0f;
-    spawn.unk20 = 0.0f;
-    spawn.unk24 = 0.0f;
-    spawn.unk28 = 0.0f;
-    spawn.unk2C = 0.0f;
-    spawn.unk30 = 0.0f;
+    spawn.rgba[0] = 0xFF;
+    spawn.rgba[1] = 0xE6;
+    spawn.rgba[2] = 0;
+    spawn.rgba[3] = 0xFF;
+    spawn.renderModes = 0x401;
+    spawn.pos.x = 0.0f;
+    spawn.pos.y = 0.0f;
+    spawn.pos.z = 0.0f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
 
     emitter.unk00 = 45.0f;
     emitter.unk0C = 45.0f;
@@ -1198,7 +1156,7 @@ void func_1514E31C(struct127 *obj) {
     func_1514EC1C(func_15189FF0(&spawn, &emitter, &attach, 2, 3, 0, 0), obj, 7);
 
     {
-        Vec3f offset;
+        vertex offset;
 
         offset.x = 0.0f;
         offset.y = 0.0f;
@@ -1580,41 +1538,41 @@ void func_1514EECC(struct127 *obj) {
     handle = func_15160A58(obj, 1, &D_800A5934, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
     func_1514EC1C(handle, obj, 0x19);
     {
-        SpawnParams spawn;
+        ParticleDef spawn;
         EmitterParams emitter;
         EmitterAttach attach;
 
-        spawn.unk00 = 0x69;
-        spawn.unk40 = 0x04ED200A;
-        spawn.unk04 = 300;
-        spawn.unk08 = 0;
-        spawn.unk0C = 0;
+        spawn.texture = 0x69;
+        spawn.flags = 0x04ED200A;
+        spawn.lifetime = 300;
+        spawn.frame = 0;
+        spawn.frameSpeed = 0;
         spawn.unk45 = 0xFF;
-        spawn.unk10 = 0xFF;
-        spawn.unk11 = 0;
-        spawn.unk12 = 0;
-        spawn.unk13 = 0xFF;
-        spawn.unk02 = 0x4403;
-        spawn.unk1C = 0.0f;
-        spawn.unk20 = 0.0f;
-        spawn.unk24 = 0.0f;
-        spawn.unk28 = 0.0f;
-        spawn.unk2C = 0.0f;
-        spawn.unk30 = 0.0f;
-        spawn.unk01 = 3;
-        spawn.unk18 = 100.0f;
-        spawn.unk14 = 100.0f;
-        spawn.unk34 = 1.0f;
-        spawn.unk38 = 1.0f;
-        spawn.unk3C = 1.0f;
+        spawn.rgba[0] = 0xFF;
+        spawn.rgba[1] = 0;
+        spawn.rgba[2] = 0;
+        spawn.rgba[3] = 0xFF;
+        spawn.renderModes = 0x4403;
+        spawn.pos.x = 0.0f;
+        spawn.pos.y = 0.0f;
+        spawn.pos.z = 0.0f;
+        spawn.rot.x = 0.0f;
+        spawn.rot.y = 0.0f;
+        spawn.rot.z = 0.0f;
+        spawn.type = 3;
+        spawn.height = 100.0f;
+        spawn.width = 100.0f;
+        spawn.scale.x = 1.0f;
+        spawn.scale.y = 1.0f;
+        spawn.scale.z = 1.0f;
         spawn.unk44 = 0xFF;
         spawn.unk46 = 0;
         spawn.unk47 = 6;
         spawn.unk48 = 0;
-        spawn.unk4C = 0xFF;
+        spawn.viewportMask = 0xFF;
         spawn.unk50 = 0;
-        spawn.unk54 = 1;
-        spawn.unk56 = 0xFF;
+        spawn.fadeStart = 1;
+        spawn.fadeRate = 0xFF;
 
         emitter.unk04 = 95.0f;
         emitter.unk00 = 95.0f;
@@ -1679,8 +1637,8 @@ void func_1514F194(struct127 *obj) {
 }
 
 void func_1514F308(struct127 *obj) {
-    Vec3f pointA = { 52.0f, 0.0f, 80.0f };
-    Vec3f pointB = { 52.0f, 0.0f, 353.0f };
+    vertex pointA = { 52.0f, 0.0f, 80.0f };
+    vertex pointB = { 52.0f, 0.0f, 353.0f };
 
     func_15160CDC(obj, 5, &pointA, &pointB, 0.02350199968f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);

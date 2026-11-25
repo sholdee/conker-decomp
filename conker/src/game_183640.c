@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
@@ -273,47 +274,6 @@ typedef struct {
     /* 0x46 */ u8 kind;
 } StreakBurstDesc;
 
-typedef struct {
-    f32 width;
-    f32 height;
-} ParticleSize;
-
-/* Spawn parameters of a particle (func_15130374); same layout as ParticleDesc in game_15D730.c. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 renderMode;
-    /* 0x0A */ s16 timer;
-    /* 0x0C */ s32 frame;
-    /* 0x10 */ s32 frameRate;
-    /* 0x14 */ u8 r;
-    /* 0x15 */ u8 g;
-    /* 0x16 */ u8 b;
-    /* 0x17 */ u8 a;
-    /* 0x18 */ u8 r2;
-    /* 0x19 */ u8 g2;
-    /* 0x1A */ u8 b2;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 brightness;
-    /* 0x1D */ u8 texture;
-    /* 0x1E */ s16 fadeStart;
-    /* 0x20 */ s16 fadeRate;
-    /* 0x22 */ s16 scaleStart;
-    /* 0x24 */ f32 scaleRate;
-    /* 0x28 */ ParticleSize size;
-    /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex offset;
-    /* 0x48 */ vertex vel;
-    /* 0x54 */ f32 gravity;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ void *viewMask;
-    /* 0x60 */ u8 primColorMode;
-    /* 0x61 */ u8 envColorMode;
-    /* 0x62 */ s8 updateFunc;
-    /* 0x63 */ s8 deathFunc;
-    /* 0x64 */ u8 pad64[0xC];
-} ParticleSpawnDesc;
-
 /* A streak burst plus one particle at the same point (func_151568F8). */
 typedef struct {
     /* 0x00 */ vertex pos;
@@ -373,7 +333,7 @@ typedef struct {
 } StreakBurstEffectDesc;
 
 extern void func_151539B4(StreakBurstDesc *, u8);
-extern void func_15130374(ParticleSpawnDesc *, u8, s32, u8, s32);
+extern void func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
 /* Spawns the streak burst and the particle described by desc. */
 void func_151568F8(desc, owner)
@@ -381,7 +341,7 @@ void func_151568F8(desc, owner)
     u8 owner;
 {
     StreakBurstDesc burst;
-    ParticleSpawnDesc particle;
+    ParticleDesc particle;
 
     burst.countBase = desc->countBase;
     burst.countRange = desc->countRange;
@@ -441,7 +401,7 @@ void func_151568F8(desc, owner)
     particle.scaleStart = desc->particleScaleStart;
     particle.scaleRate = desc->particleScaleRate;
     particle.timer = desc->particleTimer;
-    particle.size = desc->particleSize;
+    *(ParticleSize *)&particle.width = desc->particleSize; // matching: width and height are copied as one struct
     particle.vel.x = 0.0f;
     particle.vel.y = 0.0f;
     particle.vel.z = 0.0f;

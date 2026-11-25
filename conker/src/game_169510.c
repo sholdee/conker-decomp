@@ -2,10 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
+#include "effects.h"
 
 /* D_80090B60[]: one entry per texture. */
 typedef struct {
@@ -60,49 +57,21 @@ typedef struct {
     u8 expireFn;        /* D_80089CA8 index, 0 = none */
     u8 pad82[2];
     ModelLink link;
-    Vec3f pos;
+    vertex pos;
 } SpriteFx;
-
-/* Spawn template of a particle, copied to Particle.def. */
-typedef struct {
-    u8 texture;         /* D_80090B60 index, 0xFF = untextured */
-    u8 type;            /* selects the D_80089F64 handler */
-    u16 renderModes;    /* low byte: D_800A4AC8 index, high byte: combiner index */
-    s16 lifetime;
-    u8 pad6[2];
-    s32 frame;          /* 16.16 animation frame */
-    s32 frameSpeed;
-    u8 rgba[4];
-    f32 width;
-    f32 height;
-    Vec3f pos;
-    Vec3f rot;          /* a point instead for func_1513F114 (bend target) and beams (end point) */
-    Vec3f scale;
-    s32 flags;
-    u8 unk44;           /* faded out with the lifetime (flag 0x8000000) */
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s16 *unk48;
-    u8 viewportMask;
-    u8 pad4D[3];
-    s32 unk50;
-    s16 fadeStart;      /* lifetime below which unk44 / rgba[3] fade */
-    s16 fadeRate;
-} ParticleDef; /* size 0x58 */
 
 /* Per-behaviour state that follows a particle. */
 typedef union {
     struct {
-        Vec3f u;
-        Vec3f v;
+        vertex u;
+        vertex v;
     } axes;             /* func_1513D6FC, func_1513F4B0 */
     struct {
         f32 unk0;
         f32 unk4;
-        Vec3f vel;
-        Vec3f rotVel;
-        Vec3f scaleVel;
+        vertex vel;
+        vertex rotVel;
+        vertex scaleVel;
         f32 gravity;
     } drift;            /* func_1513E6E8 */
     struct {
@@ -110,10 +79,10 @@ typedef union {
         f32 rate;
     } grow;             /* func_1513F6E8 */
     struct {
-        Vec3f vel;
+        vertex vel;
         f32 gravity;
         f32 drag;
-        Vec3f rotVel;
+        vertex rotVel;
     } ballistic;        /* func_1513F728 */
 } ParticleMotion;
 
@@ -293,7 +262,7 @@ struct210 *func_1513C350(struct210 *def, s32 colors, u8 updateFn, u8 expireFn, u
         sprite->link.sharedHandle = func_1515D440();
     }
     if (pos) {
-        sprite->pos = *(Vec3f *)pos;
+        sprite->pos = *(vertex *)pos;
     }
     return (struct210 *)sprite;
 }
@@ -501,7 +470,7 @@ Gfx *func_15142E24(Gfx *gfx, TextureInfo *tex, s32 frame, s32 arg3, s32 arg4, s3
 Gfx *func_15142FBC(Gfx *gfx, s32 modeHi, s32 modeLo, u8 *needSync);
 void func_151441A4(s16 *r, s16 *g, s16 *b, s16 *a, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 mode);
 void func_151442FC(s16 *r, s16 *g, s16 *b, s16 *a, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 mode);
-Gfx *func_151462C8(Gfx *gfx, ModelLink *link, s32, s32, s32, s16 viewport, Vec3f *pos, s32, s32);
+Gfx *func_151462C8(Gfx *gfx, ModelLink *link, s32, s32, s32, s16 viewport, vertex *pos, s32, s32);
 Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync);
 
 /* Draws a sprite's quad (and attached model) for one viewport. */
@@ -759,8 +728,8 @@ void func_1513D668(s32 def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn,
 }
 
 s32 func_1510E388(s32, s32, f32 *, f32 *);
-s32 func_15144E80(s32, Vec3f *, Vec3f *, Vec3f *);
-s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
+s32 func_15144E80(s32, vertex *, vertex *, vertex *);
+s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
 
 /*
  * Computes the two half-axes of a particle quad rotated by angle. With onSlope the quad lies on the
@@ -780,13 +749,13 @@ s32 func_1513D6FC(struct211 *axes, s16 angle, f32 width, f32 height, s32 arg4, s
     f32 p2;
     f32 q2;
     f32 r2;
-    Vec3f v;
+    vertex v;
     f32 k2;
     f32 cosB;
     f32 sinB;
-    Vec3f basisU;
-    Vec3f basisV;
-    Vec3f basisN;
+    vertex basisU;
+    vertex basisV;
+    vertex basisN;
     f32 len;
     f32 unused2;
     f32 w;
@@ -1108,8 +1077,8 @@ s32 func_1513E2AC(s32 sprite, s32 arg1, s32 surface, f32 x, f32 y, f32 z, f32 wi
     f32 vx;
     f32 vy;
     f32 vz;
-    Vec3f basisU;
-    Vec3f basisV;
+    vertex basisU;
+    vertex basisV;
     f32 widthSin;
     f32 widthCos;
     f32 heightCos;
@@ -1517,7 +1486,7 @@ Vtx *func_1513F114(Particle *particle, s16 viewport) {
     return result;
 }
 
-Vtx *func_15140410(Particle *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport);
+Vtx *func_15140410(Particle *particle, vertex *axisU, vertex *axisV, s16 viewport);
 
 /* Quad spanned by the two axes in motion.axes (vertex function 12). */
 void func_1513F4B0(struct210 *particle, s16 viewport) {
@@ -1583,7 +1552,7 @@ s32 func_1513F6E8(Particle *particle) {
  */
 s32 func_1513F728(Particle *particle) {
     ParticleMotion *motion;
-    Vec3f oldVel;
+    vertex oldVel;
     s32 i;
 
     motion = PARTICLE_MOTION(particle);
@@ -1618,8 +1587,8 @@ typedef struct {
     f32 length;
 } BeamScale;
 
-extern Vec3f *func_15144B34(s32 viewport);
-extern void func_150AD8B0(Vec3f *a, Vec3f *b, Vec3f *out);
+extern vertex *func_15144B34(s32 viewport);
+extern void func_150AD8B0(vertex *a, vertex *b, vertex *out);
 
 Vtx *func_1513FAB4(Particle *particle, u8 reversed, BeamScale *scale, s16 viewport);
 
@@ -1646,12 +1615,12 @@ void func_1513FA70(Particle *particle, s16 viewport) {
 Vtx *func_1513FAB4(Particle *particle, u8 reversed, BeamScale *scale, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
-    Vec3f *camera;
-    Vec3f delta;
-    Vec3f end;
-    Vec3f middle;
-    Vec3f view;
-    Vec3f side;
+    vertex *camera;
+    vertex delta;
+    vertex end;
+    vertex middle;
+    vertex view;
+    vertex side;
     f32 lengthSquared;
     f32 length;
     f32 width;
@@ -1869,7 +1838,7 @@ void func_151403DC(s32 arg0, u8 arg1) {
 }
 
 /* Quad centred on def.pos with half-axes axisU * width and axisV * height. */
-Vtx *func_15140410(Particle *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport) {
+Vtx *func_15140410(Particle *particle, vertex *axisU, vertex *axisV, s16 viewport) {
     Vtx *vertices;
     Vtx *result;
     f32 ux, uy, uz, vx, vy, vz;

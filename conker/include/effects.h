@@ -113,6 +113,12 @@ typedef struct ParticleSpawn {
     /* 0x78 */ s32 sound;
 } ParticleSpawn; /* size 0x7C */
 
+/* A particle's width and height, copied as one struct by some callers. */
+typedef struct ParticleSize {
+    /* 0x0 */ f32 width;
+    /* 0x4 */ f32 height;
+} ParticleSize;
+
 /* Spawn template of a particle, func_1513D2F0 / func_1513D4B8 / func_1513D524 / func_1513D594
  * (game_169510.c) copy it to Particle.def. */
 typedef struct ParticleDef {

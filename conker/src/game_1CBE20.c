@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 #include "libc/string.h"
 
 /* Per-track state of a running cutscene (as in game_50D80.c); the effects below follow one. */
@@ -133,50 +134,6 @@ void func_1519EA78(struct17 *pos, u16 id, f32 scale, u8 arg3, s32 arg4) {
     func_15152190(&def, &idArg, &scaleArg, 1, 0.0f, 0, arg3, arg4);
 }
 
-/* Spawn descriptor for func_1513264C (0x7C bytes, as in game_124920.c); EffectObj holds the same fields
- * 0x10.. at +0x10. */
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ struct17 pos;
-    /* 0x34 */ struct17 vel;
-    /* 0x40 */ struct17 unk40;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ s8 unk69;
-    /* 0x6A */ u8 unk6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct127 *owner;
-    /* 0x70 */ u8 ownerId; /* owner->unique_id */
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8 pad76[2];
-    /* 0x78 */ s32 sound;
-} EffectSpawn;
-
 /* An object spawned by func_1513264C (EffectObj in game_124920.c), here following a cutscene track. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x18];
@@ -197,46 +154,46 @@ EffectObj *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8
 void func_1519EB8C(SeqTrackState *track, u16 id, s16 duration, u8 arg3, s32 arg4) {
     struct {
         SeqTrackState *track;
-        EffectSpawn spawn;
+        ParticleSpawn spawn;
     } packet;
     EffectObj *obj;
 
     packet.track = track;
-    packet.spawn.unk00 = 1.0f;
-    packet.spawn.unk04 = 1.0f;
-    packet.spawn.unk08 = track->unk18 * 0.1f;
-    packet.spawn.unk0C = track->unk1C * 0.1f;
-    packet.spawn.unk10 = track->unkC;
-    packet.spawn.unk14 = track->unk10;
-    packet.spawn.unk18 = track->unk14;
-    packet.spawn.unk1C = 1.0f;
-    packet.spawn.unk20 = 1.0f;
-    packet.spawn.unk24 = 1.0f;
-    packet.spawn.pos.unk0 = track->x;
-    packet.spawn.pos.unk4 = track->y;
-    packet.spawn.pos.unk8 = track->z;
-    packet.spawn.vel = *(struct17 *)&D_800A5480;
-    packet.spawn.unk40 = *(struct17 *)&D_800A5480;
-    packet.spawn.unk4C = 0.0f;
-    packet.spawn.unk50 = 0x980;
-    packet.spawn.unk54 = duration;
-    packet.spawn.unk56 = id;
-    packet.spawn.unk58 = 0;
+    packet.spawn.radius = 1.0f;
+    packet.spawn.elasticity = 1.0f;
+    packet.spawn.sizeXZ = track->unk18 * 0.1f;
+    packet.spawn.sizeY = track->unk1C * 0.1f;
+    packet.spawn.rot.x = track->unkC;
+    packet.spawn.rot.y = track->unk10;
+    packet.spawn.rot.z = track->unk14;
+    packet.spawn.scale.x = 1.0f;
+    packet.spawn.scale.y = 1.0f;
+    packet.spawn.scale.z = 1.0f;
+    packet.spawn.pos.x = track->x;
+    packet.spawn.pos.y = track->y;
+    packet.spawn.pos.z = track->z;
+    packet.spawn.vel = *(vertex *)&D_800A5480;
+    packet.spawn.rotVel = *(vertex *)&D_800A5480;
+    packet.spawn.gravity = 0.0f;
+    packet.spawn.flags = 0x980;
+    packet.spawn.lifetime = duration;
+    packet.spawn.model = id;
+    packet.spawn.variant = 0;
     packet.spawn.unk5C = 0;
-    packet.spawn.unk60 = 0xFF;
-    packet.spawn.unk61 = 0x15;
-    packet.spawn.unk62 = 0;
-    packet.spawn.unk63 = 0;
-    packet.spawn.unk64 = 0;
-    packet.spawn.unk65 = 0;
-    packet.spawn.unk66 = 0;
-    packet.spawn.unk67 = 0;
-    packet.spawn.unk68 = 2;
+    packet.spawn.alpha = 0xFF;
+    packet.spawn.updateFn = 0x15;
+    packet.spawn.update2Fn = 0;
+    packet.spawn.floorHitFn = 0;
+    packet.spawn.floorType3Fn = 0;
+    packet.spawn.wallHitFn = 0;
+    packet.spawn.destroyFn = 0;
+    packet.spawn.squashFn = 0;
+    packet.spawn.matrixFn = 2;
     packet.spawn.unk6A = 0;
     packet.spawn.owner = NULL;
     packet.spawn.ownerId = 0;
-    packet.spawn.unk72 = 1;
-    packet.spawn.unk74 = 0xFF;
+    packet.spawn.fadeStart = 1;
+    packet.spawn.fadeRate = 0xFF;
     packet.spawn.sound = 0;
     obj = func_1513264C(&packet.spawn, 3, 0xFF, 0, 4, arg3, arg4);
     if (obj != NULL) {
@@ -258,38 +215,6 @@ s32 func_1519ED24(EffectObj *obj) {
     obj->pos.unk8 = track->z;
     return 1;
 }
-
-typedef struct {
-    f32 width;
-    f32 height;
-} ParticleSize;
-
-/* Spawn template of a func_1513D2F0 particle (ParticleDef in game_12FDD0.c). */
-typedef struct {
-    /* 0x00 */ u8 texture;
-    /* 0x01 */ u8 type;
-    /* 0x02 */ u16 renderModes;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 frame;
-    /* 0x0C */ s32 frameSpeed;
-    /* 0x10 */ u8 rgba[4];
-    /* 0x14 */ ParticleSize size;
-    /* 0x1C */ struct17 pos;
-    /* 0x28 */ struct17 rot;
-    /* 0x34 */ struct17 scale;
-    /* 0x40 */ s32 flags;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 unk46;
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ s16 *unk48;
-    /* 0x4C */ u8 viewportMask;
-    /* 0x4D */ u8 pad4D[3];
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 fadeStart;
-    /* 0x56 */ s16 fadeRate;
-} ParticleDef; /* size 0x58 */
 
 /* A particle spawned by func_1513D2F0 (Particle in game_12FDD0.c), here following a cutscene track. */
 typedef struct {
@@ -316,17 +241,17 @@ void func_1519ED84(SeqTrackState *track, s32 texture, s16 lifetime, u8 arg3, s32
     def.rgba[1] = 0xFF;
     def.rgba[2] = 0xFF;
     def.rgba[3] = 0xFF;
-    def.size.width = track->unk18 * 10.0f;
-    def.size.height = track->unk1C * 10.0f;
-    def.pos.unk0 = track->x;
-    def.pos.unk4 = track->y;
-    def.pos.unk8 = track->z;
-    def.rot.unk0 = track->unkC;
-    def.rot.unk4 = track->unk10;
-    def.rot.unk8 = track->unk14;
-    def.scale.unk0 = 1.0f;
-    def.scale.unk4 = 1.0f;
-    def.scale.unk8 = 1.0f;
+    def.width = track->unk18 * 10.0f;
+    def.height = track->unk1C * 10.0f;
+    def.pos.x = track->x;
+    def.pos.y = track->y;
+    def.pos.z = track->z;
+    def.rot.x = track->unkC;
+    def.rot.y = track->unk10;
+    def.rot.z = track->unk14;
+    def.scale.x = 1.0f;
+    def.scale.y = 1.0f;
+    def.scale.z = 1.0f;
     def.flags = 0x45C0081;
     def.unk44 = 0xFF;
     def.unk45 = 0xFF;
@@ -348,13 +273,13 @@ void func_1519ED84(SeqTrackState *track, s32 texture, s16 lifetime, u8 arg3, s32
 s32 func_1519EF04(Particle *particle) {
     SeqTrackState *track = particle->track;
 
-    particle->def.size.width = track->unk18 * 10.0f;
-    particle->def.size.height = track->unk1C * 10.0f;
-    particle->def.rot.unk0 = track->unkC;
-    particle->def.rot.unk4 = track->unk10;
-    particle->def.rot.unk8 = track->unk14;
-    particle->def.pos.unk0 = track->x;
-    particle->def.pos.unk4 = track->y;
-    particle->def.pos.unk8 = track->z;
+    particle->def.width = track->unk18 * 10.0f;
+    particle->def.height = track->unk1C * 10.0f;
+    particle->def.rot.x = track->unkC;
+    particle->def.rot.y = track->unk10;
+    particle->def.rot.z = track->unk14;
+    particle->def.pos.x = track->x;
+    particle->def.pos.y = track->y;
+    particle->def.pos.z = track->z;
     return 1;
 }

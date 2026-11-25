@@ -4,10 +4,7 @@
 #include "functions.h"
 #undef func_1513D524
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
+#include "effects.h"
 
 /* Settings an emitter is created with; copied verbatim into Emitter.params. */
 typedef struct EmitterParams {
@@ -63,7 +60,7 @@ typedef struct {
     /* 0x28 */ u8 pad28[4];
     /* 0x2C */ s16 unk2C;
     /* 0x2E */ u8 pad2E[2];
-    /* 0x30 */ Vec3f vel;
+    /* 0x30 */ vertex vel;
     /* 0x3C */ f32 unk3C;
     /* 0x40 */ f32 unk40;
     /* 0x44 */ f32 unk44;
@@ -78,41 +75,17 @@ typedef struct {
     /* 0x000 */ u8 pad0[0x1C];
     /* 0x01C */ s16 lifetime;
     /* 0x01E */ u8 pad1E[0x16];
-    /* 0x034 */ Vec3f pos;
-    /* 0x040 */ Vec3f prevPos;
+    /* 0x034 */ vertex pos;
+    /* 0x040 */ vertex prevPos;
     /* 0x04C */ u8 pad4C[0xC];
     /* 0x058 */ s32 flags;
     /* 0x05C */ u8 pad5C[0xB4];
     /* 0x110 */ ParticleData data;
 } Particle;
 
-/* Arguments for func_1513D524, partly filled by a D_8008D620 callback. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 pad1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ u8 pad4[4];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 unk44;
-    /* 0x45 */ u8 unk45;
-    /* 0x46 */ u8 pad46[0x12];
-} ParticleSpawn; /* 0x58 */
-
 /* An emission point attached to one of the owner's bones. */
 typedef struct {
-    /* 0x0 */ Vec3f pos;
+    /* 0x0 */ vertex pos;
     /* 0xC */ s16 bone;
 } EmitterPoint; /* 0x10 */
 
@@ -160,7 +133,7 @@ typedef struct {
 typedef struct EmitterSlot {
     /* 0x00 */ Particle *particle;
     /* 0x04 */ s32 timer;
-    /* 0x08 */ Vec3f offset;
+    /* 0x08 */ vertex offset;
     /* 0x14 */ struct EmitterSlot *next; // ring of free slots while emitting
 } EmitterSlot; /* 0x18 */
 
@@ -179,7 +152,7 @@ typedef struct Emitter {
     /* 0x2E */ u8 pad2E[2];
     /* 0x30 */ EmitterScaleSource *scaleSrc;
     /* 0x34 */ f32 scale;
-    /* 0x38 */ Vec3f pos;
+    /* 0x38 */ vertex pos;
     /* 0x44 */ u8 pad44[4];
     /* 0x48 */ EmitterSlot slots[100];
 } Emitter;
@@ -192,7 +165,7 @@ extern s32 (*D_8008D628[])(Emitter *);
 
 void *memcpy(void *, const void *, u32);
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern Particle *func_1513D524(ParticleSpawn *, u8, u8, u8, u8, u8, s32, u8, s32);
+extern Particle *func_1513D524(ParticleDef *, u8, u8, u8, u8, u8, s32, u8, s32);
 extern void func_1513F680();
 extern void func_15143134(void *, void *, void *);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
@@ -492,7 +465,7 @@ void func_1518D6E0(Emitter *emitter) {
             if (numFree != 0) {
                 self->accum += info->rate;
                 if (self->accum > 1.0f) {
-                    ParticleSpawn spawn;
+                    ParticleDef spawn;
                     ParticleData data;
                     ParticleTemplate *tmpl;
                     u8 ok;
@@ -501,11 +474,11 @@ void func_1518D6E0(Emitter *emitter) {
                     tmpl = info->tmpl;
                     ok = 1;
                     prevFree->next = freeSlot;
-                    spawn.unk8 = 0;
+                    spawn.frame = 0;
                     data.unk20 = tmpl->unk14;
                     data.unk24 = tmpl->unk18;
                     data.unk2C = 0;
-                    spawn.unkC = (tmpl->unk14 + tmpl->unk18) * 0.5f;
+                    spawn.frameSpeed = (tmpl->unk14 + tmpl->unk18) * 0.5f;
                     data.unk3C = tmpl->unk1C;
                     data.unk40 = tmpl->unk20;
                     data.unk44 = tmpl->unk24;
@@ -516,17 +489,17 @@ void func_1518D6E0(Emitter *emitter) {
                     data.unk0 = tmpl->unk0 * self->scale;
                     data.unk4 = tmpl->unk4 * self->scale;
                     data.unk1C = 0;
-                    data.unk8 = spawn.unk14 = reset ? (data.unk0 + data.unk4) * 0.5f : 0.0f;
+                    data.unk8 = spawn.width = reset ? (data.unk0 + data.unk4) * 0.5f : 0.0f;
                     data.unkC = tmpl->unk8 * self->scale;
                     data.unk10 = tmpl->unkC * self->scale;
                     data.unk14 = tmpl->unk10 * self->scale;
                     data.unk1E = 0;
-                    data.unk18 = spawn.unk18 = reset ? (data.unkC + data.unk10) * 0.5f : 0.0f;
+                    data.unk18 = spawn.height = reset ? (data.unkC + data.unk10) * 0.5f : 0.0f;
                     data.tmpl = tmpl;
-                    spawn.unk34 = 1.0f;
-                    spawn.unk38 = 0.0f;
-                    spawn.unk3C = 1.0f;
-                    spawn.unk40 = 0x40000000;
+                    spawn.scale.x = 1.0f;
+                    spawn.scale.y = 0.0f;
+                    spawn.scale.z = 1.0f;
+                    spawn.flags = 0x40000000;
                     spawn.unk44 = 0xFF;
                     spawn.unk45 = 0xFF;
                     while (ok && numFree != 0 && !(self->accum < 1.0f) && self->count < info->maxCount) {
@@ -537,8 +510,8 @@ void func_1518D6E0(Emitter *emitter) {
                             prevFree = freeSlot;
                             freeSlot = freeSlot->next;
                         }
-                        D_8008D620[tmpl->spawnCb](&spawn.unk0, &spawnFlag, &spawn.unk10, &spawn.unk11,
-                                                  &spawn.unk12, &spawn.unk13, &spawn.unk2);
+                        D_8008D620[tmpl->spawnCb](&spawn.texture, &spawnFlag, &spawn.rgba[0], &spawn.rgba[1],
+                                                  &spawn.rgba[2], &spawn.rgba[3], &spawn.renderModes);
                         freeSlot->particle = func_1513D524(&spawn, tmpl->unk38, tmpl->unk39, 0, tmpl->unk3A,
                                                            spawnFlag, sizeof(ParticleData), 0xFF, 0);
                         if (freeSlot->particle != NULL) {

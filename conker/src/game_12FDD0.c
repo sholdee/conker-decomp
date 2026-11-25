@@ -4,11 +4,6 @@
 #include "effects.h"
 #include "libc/string.h"
 
-typedef struct {
-    f32 width;
-    f32 height;
-} ParticleSize;
-
 /* Per-particle data of a beam attached to an actor's bone, stored at Particle.beam. */
 typedef struct {
     /* 0x00 */ struct127 *target;

@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Ground contact found by func_15046C80 below a probe point (as ParticleFloor in game_15F680.c). */
 typedef struct {
@@ -243,73 +244,42 @@ void func_15147040(s32 actor, s32 side, s32 strength) {
     }
 }
 
-/* Particle descriptor for func_15130374 (as Struct15130374Arg in game_113D60.c). */
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 unk0A;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 color0[4];
-    /* 0x18 */ u8 color1[4];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ vertex position;
-    /* 0x3C */ u8 pad3C[0xC];
-    /* 0x48 */ vertex direction;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ u8 pad64[0xC];
-} Struct15130374Arg;
-
 /* Spawn one func_15130374 particle at (x, y, z), flying off at a random pitch along `yaw`. */
 s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw,
                   s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
-    Struct15130374Arg desc;
+    ParticleDesc desc;
     struct260 *particle;
     f32 extra;
     f32 speed;
     u32 random;
 
-    desc.unk1D = 0x29;
-    desc.unk08 = 0xE03;
-    desc.unk00 = 0x200005;
-    desc.unk04 = 0;
-    desc.unk0A = (func_150ADA20() & 0xF) + 20;
-    desc.unk0C = 0;
-    desc.unk10 = 0;
-    desc.color1[0] = 0xB0;
-    desc.color1[1] = 0xA0;
-    desc.color1[2] = 0x2A;
-    desc.color0[0] = 0x40;
-    desc.color0[1] = 0xB;
-    desc.color0[2] = 0x6A;
-    desc.color0[3] = 0xFF;
-    desc.color1[3] = (func_150ADA20() % 101U) + 100;
-    desc.unk1C = 0xFF;
-    desc.unk60 = 3;
-    desc.unk61 = 3;
+    desc.texture = 0x29;
+    desc.renderMode = 0xE03;
+    desc.unk0 = 0x200005;
+    desc.unk4 = 0;
+    desc.timer = (func_150ADA20() & 0xF) + 20;
+    desc.frame = 0;
+    desc.frameRate = 0;
+    desc.r2 = 0xB0;
+    desc.g2 = 0xA0;
+    desc.b2 = 0x2A;
+    desc.r = 0x40;
+    desc.g = 0xB;
+    desc.b = 0x6A;
+    desc.a = 0xFF;
+    desc.alpha = (func_150ADA20() % 101U) + 100;
+    desc.brightness = 0xFF;
+    desc.primColorMode = 3;
+    desc.envColorMode = 3;
 
-    desc.unk28 = desc.unk2C = func_150ADA68() * 95.0f + 101.0f;
-    desc.position.x = x;
-    desc.position.y = y;
-    desc.position.z = z;
+    desc.width = desc.height = func_150ADA68() * 95.0f + 101.0f;
+    desc.pos.x = x;
+    desc.pos.y = y;
+    desc.pos.z = z;
     random = func_150ADA20();
     speed = func_150ADA68();
-    func_15143794(yaw, (random % 11U) - 11, (speed * 396.0f + 202.0f) * 0.01f, &desc.direction.x);
-    desc.unk54 = 0.0f;
+    func_15143794(yaw, (random % 11U) - 11, (speed * 396.0f + 202.0f) * 0.01f, &desc.vel.x);
+    desc.gravity = 0.0f;
     desc.flags = 0xE05;
 
     if (func_150ADA20() & 1) {
@@ -320,13 +290,13 @@ s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
         desc.flags |= 0x80;
     }
 
-    desc.unk62 = 10;
-    desc.unk24 = 1.02f;
+    desc.updateFunc = 10;
+    desc.scaleRate = 1.02f;
     extra = 0.94000006f;
-    desc.unk63 = -1;
-    desc.unk1E = 20;
-    desc.unk20 = 12;
-    desc.unk22 = 27;
+    desc.deathFunc = -1;
+    desc.fadeStart = 20;
+    desc.fadeRate = 12;
+    desc.scaleStart = 27;
 
     particle = func_15130374(&desc, 1, 4, argE, 1);
     if (particle != NULL) {

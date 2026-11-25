@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern void func_151D5D60(u8 **buffers, s16 index, s32 size, void **out, u8 *isNew);
 
@@ -335,40 +336,6 @@ void func_1514B034(struct17 *pos, u8 arg1, s32 arg2) {
     }
 }
 
-/* Particle descriptor passed to func_1513D2F0 and func_1513D668. */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 life;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    struct17 unk1C;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 flags;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    s32 pad4C;
-    s32 pad50;
-    s16 unk54;
-    s16 unk56;
-} Struct1514B8E4Desc;
-
 typedef struct {
     s32 unk0;
     s32 unk4;
@@ -581,37 +548,37 @@ void func_1514B364(struct17 *position, Struct1514B364Hit *ground, u8 arg2, s32 a
     func_1514B034(&pos, arg2, arg3);
 
     {
-        Struct1514B8E4Desc desc;
+        ParticleDef desc;
         s32 randA;
         s32 randC;
         s32 randB;
         s32 sum;
 
-        desc.unk0 = 56;
-        desc.unk2 = 1;
-        desc.life = 50;
-        desc.unk8 = 0;
-        desc.unkC = 0x6666;
-        desc.unk13 = 0xFF;
-        desc.unk14 = 1.0f;
-        desc.unk18 = 1.0f;
-        desc.unk1C.unk0 = pos.unk0;
-        desc.unk1C.unk4 = pos.unk4 + 10.0f;
-        desc.unk1C.unk8 = pos.unk8;
-        desc.unk28 = 0.0f;
-        desc.unk2C = 0.0f;
-        desc.unk30 = 0.0f;
-        desc.unk34 = 0.2f;
-        desc.unk38 = 1.0f;
-        desc.unk3C = 1.0f;
+        desc.texture = 56;
+        desc.renderModes = 1;
+        desc.lifetime = 50;
+        desc.frame = 0;
+        desc.frameSpeed = 0x6666;
+        desc.rgba[3] = 0xFF;
+        desc.width = 1.0f;
+        desc.height = 1.0f;
+        desc.pos.x = pos.unk0;
+        desc.pos.y = pos.unk4 + 10.0f;
+        desc.pos.z = pos.unk8;
+        desc.rot.x = 0.0f;
+        desc.rot.y = 0.0f;
+        desc.rot.z = 0.0f;
+        desc.scale.x = 0.2f;
+        desc.scale.y = 1.0f;
+        desc.scale.z = 1.0f;
         desc.flags = 0x400C0001;
         desc.unk44 = func_150ADA20() % 101U + 100;
         desc.unk45 = 0xFF;
         desc.unk46 = 0;
         desc.unk47 = 6;
-        desc.unk10 = func_150ADA20() % 51U + 180;
-        desc.unk11 = func_150ADA20() % 101U;
-        desc.unk12 = func_150ADA20() % 1U;
+        desc.rgba[0] = func_150ADA20() % 51U + 180;
+        desc.rgba[1] = func_150ADA20() % 101U;
+        desc.rgba[2] = func_150ADA20() % 1U;
         randA = func_150ADA20();
         randB = func_150ADA20();
         randC = func_150ADA20();
@@ -681,11 +648,11 @@ typedef struct {
  * Spawns a particle at `pos` through func_1513D2F0 and stores its initial func_1514BC08 state.
  * A `life` of -1 means 300 frames without the timed-life flag.
  */
-void *func_1514B8E4(struct17 *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, struct17 *arg4,
+void *func_1514B8E4(vertex *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, struct17 *arg4,
                     f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags,
                     s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11) {
     void *particle;
-    Struct1514B8E4Desc desc;
+    ParticleDef desc;
     Wobble1514BC08 state;
     s32 flag;
 
@@ -700,7 +667,7 @@ void *func_1514B8E4(struct17 *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3,
     state.timer2C = 0.0f;
     state.timer30 = 0.0f;
     state.timer24 = 0.0f;
-    desc.unkC = 15935;
+    desc.frameSpeed = 15935;
     state.value24 = 15935.0f;
     state.target24 = 15935.0f;
     state.unk48 = arg6;
@@ -710,40 +677,40 @@ void *func_1514B8E4(struct17 *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3,
     state.base2C = scale->unk0 * 15.045272f;
     state.range2C = scale->unk0 * 5.8676558f;
     state.target2C = scale->unk0 * 12.111444f;
-    desc.unk14 = 0.0f;
+    desc.width = 0.0f;
     state.base30 = scale->unk4 * 0.396174f;
     state.range30A = scale->unk4 * 0.1042563f;
     state.range30B = scale->unk4 * 0.5197371f;
     state.target30 = scale->unk4 * 0.34404588f;
-    desc.unk18 = 0.0f;
-    desc.unk0 = argB;
-    desc.unk1 = 0;
-    desc.unk2 = 0x2203;
+    desc.height = 0.0f;
+    desc.texture = argB;
+    desc.type = 0;
+    desc.renderModes = 0x2203;
     if (life == -1) {
-        desc.life = 300;
+        desc.lifetime = 300;
     } else {
-        desc.life = life;
+        desc.lifetime = life;
     }
-    desc.unk8 = 0;
-    desc.unk10 = 0xFF;
-    desc.unk11 = 0xFF;
-    desc.unk12 = 0xFF;
-    desc.unk13 = 0xFF;
-    desc.unk1C = *pos;
-    desc.unk28 = pos->unk0;
-    desc.unk2C = pos->unk4 + 100.0f;
-    desc.unk30 = pos->unk8;
-    desc.unk34 = 1.0f;
-    desc.unk38 = 1.0f;
-    desc.unk3C = 1.0f;
+    desc.frame = 0;
+    desc.rgba[0] = 0xFF;
+    desc.rgba[1] = 0xFF;
+    desc.rgba[2] = 0xFF;
+    desc.rgba[3] = 0xFF;
+    desc.pos = *pos;
+    desc.rot.x = pos->x;
+    desc.rot.y = pos->y + 100.0f;
+    desc.rot.z = pos->z;
+    desc.scale.x = 1.0f;
+    desc.scale.y = 1.0f;
+    desc.scale.z = 1.0f;
     desc.flags = ((life == -1) ? 0 : 1) | 0x40000 | 0x80000 | 0x200000 | 0x400000 | ((flags & 1) ? 0x800000 : 0) | ((flags & 2) ? 0x2000000 : 0) | 0x40000000;
     desc.unk44 = arg3;
     desc.unk45 = 0xFF;
     desc.unk46 = 0;
     desc.unk47 = 7;
     desc.unk48 = 0;
-    desc.unk54 = argD;
-    desc.unk56 = argE;
+    desc.fadeStart = argD;
+    desc.fadeRate = argE;
     if (func_150ADA20() & 1) {
         flag = 1;
     } else {

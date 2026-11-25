@@ -7,6 +7,7 @@
 #undef func_1513D524
 #undef func_15169850
 #include "variables.h"
+#include "effects.h"
 
 void *memcpy(void *, const void *, u32);
 f32 sqrtf(f32);
@@ -21,40 +22,8 @@ void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5)
 u8 func_151D8E20(void);
 
 typedef struct {
-    f32 x, y, z;
-} Vec3f;
-
-typedef struct {
     f32 width, height;
 } Size2f;
-
-/* Spawn template of a particle (as in game_169510.c), copied to Particle.def. */
-typedef struct {
-    u8 texture;
-    u8 type;
-    u16 renderModes;
-    s16 lifetime;
-    u8 pad6[2];
-    s32 frame;
-    s32 frameSpeed;
-    u8 rgba[4];
-    f32 width;
-    f32 height;
-    Vec3f pos;
-    Vec3f rot;
-    Vec3f scale;
-    s32 flags;
-    u8 unk44;           /* alpha, faded out with the lifetime */
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s16 *unk48;
-    u8 viewportMask;
-    u8 pad4D[3];
-    s32 unk50;
-    s16 fadeStart;
-    s16 fadeRate;
-} ParticleDef; /* size 0x58 */
 
 /* Ground probe state filled by func_1504715C and updated by func_15046C80. */
 typedef struct {
@@ -67,7 +36,7 @@ typedef struct {
 
 /* Motion state of a drop that hangs on an actor's bone, then falls and splashes. */
 typedef struct {
-    /* 0x00 */ Vec3f vel;
+    /* 0x00 */ vertex vel;
     /* 0x0C */ f32 gravity;
     /* 0x10 */ f32 drag;
     /* 0x14 */ s16 fadeStart;       /* lifetime below which the alpha fades */
@@ -205,7 +174,7 @@ void func_1519086C(DripEmitter *emitter) {
 
 /* A point on an actor's bone where a drop hangs. */
 typedef struct {
-    /* 0x0 */ Vec3f offset;
+    /* 0x0 */ vertex offset;
     /* 0xC */ u8 bone;
 } BoneMount; /* size 0x10 */
 
@@ -224,7 +193,7 @@ extern EmitterKind D_8008FA70[];
 extern u8 D_800AB310[];
 extern u8 D_800AB404[];
 void func_1504715C(Ground *ground, struct127 *actor);
-void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
+void func_15143134(vertex *offset, vertex *out, Mtx *mtx);
 void func_1513F680(Particle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn);
 
 /*
@@ -519,9 +488,9 @@ void func_15191400(DripEmitter *emitter) {
     bzero(emitter->slots, DRIP_SLOT_COUNT * sizeof(DripSlot));
 }
 
-s32 func_1514672C(Vec3f *pos);
-s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, Ground *ground);
-void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
+s32 func_1514672C(vertex *pos);
+s32 func_15046C80(vertex *pos, s32 arg1, f32 minY, Ground *ground);
+void func_151DAB58(u8, f32, u8, vertex *, s32, u8, u8);
 
 /* Update of a falling drop: moves it under drag and gravity; on reaching the ground it splashes and dies. */
 s8 func_15191520(Particle *drop) {
@@ -555,7 +524,7 @@ s8 func_15191520(Particle *drop) {
     drop->def.rot.y = drop->def.pos.y + (drop->def.rot.y - drop->def.pos.y) * motion->trail;
     drop->def.rot.z = drop->def.pos.z + (drop->def.rot.z - drop->def.pos.z) * motion->trail;
     {
-        Vec3f probe;
+        vertex probe;
 
         probe.x = drop->def.pos.x;
         probe.y = oldY - drop->def.height;
