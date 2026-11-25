@@ -88,11 +88,11 @@ void func_1511650C(Game143870Object *obj, s32 arg1, s32 sound, f32 pitchScale) {
     } else {
         push = func_15116888(obj->x, obj->z, &obj->unk7C, D_800CC2D0) >> 3;
     }
-    if ((arg1 & 1) && (push < 0)) {
+    if ((arg1 & 1) && push < 0) {
         push = 0;
     }
     value = obj->params.half.hi;
-    value += push;
+    value += push; // matching: a separate += keeps the lh in the beql delay slots
     if (push != 0) {
         obj->unk80 = 0;
     }
@@ -129,7 +129,7 @@ void func_1511650C(Game143870Object *obj, s32 arg1, s32 sound, f32 pitchScale) {
                 }
             }
         }
-    } else if (timer > 0) {
+    } else if (timer > 0) { // matching: the redundant test is in the original (blezl)
         if (value > 0) {
             value += 1;
             obj->unk80 = timer - D_800BE9E4;
@@ -144,28 +144,26 @@ void func_1511650C(Game143870Object *obj, s32 arg1, s32 sound, f32 pitchScale) {
             }
         }
     }
-    value <<= 16;
+    value <<= 16; // matching: shifting in place schedules the params reload before the sll
     obj->params.word = (obj->params.word & 0xFFFF) | value;
     func_1511515C(obj);
     if (sound != 0) {
-        f32 one = 1.0f;
+        f32 maxAmount = 1.0f; // matching: loads 1.0f before the sound test
         speed = obj->speed;
         amount = fabsf(speed) * 0.1f;
-        if (amount > 1.0f) {
-            amount = 1.0f;
+        if (amount > maxAmount) {
+            amount = maxAmount;
         }
         volume = (12767.0f * amount) + 20000.0f;
         handle = obj->sound;
         amount = (amount * pitchScale) - 500.0f;
         if (handle == 0) {
-            if (0.01f < speed) {
+            if (speed > 0.01f) {
                 obj->sound = func_10010F88(sound, volume, amount, 0, -1, obj->x, obj->y, obj->z, 1000, 6000);
             }
+        } else if (speed > 0.01f) {
+            func_1000F91C(handle, volume, amount, 0, -1, obj->x, obj->y, obj->z, 200, 2000);
         } else {
-            if (0.01f < speed) {
-                func_1000F91C(handle, volume, amount, 0, -1, obj->x, obj->y, obj->z, 200, 2000);
-                return;
-            }
             func_100111C8(handle);
             obj->sound = 0;
         }
