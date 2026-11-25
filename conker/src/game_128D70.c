@@ -345,7 +345,7 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
     }
 }
 
-extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 
 /* Per-frame update of an emitter: destroys it once its owner is gone or changed, otherwise fires
  * func_150FB8C0 from alternating sides whenever the spawn timer runs out. */

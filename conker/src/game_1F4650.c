@@ -662,7 +662,7 @@ extern void func_1514FBFC(SurfaceJetSpray *, u8, s32);
 extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15164F0C(s32, u8, s32, u8, s32);
-extern void func_151D8868(void *, s32, s32, s32);
+extern void func_151D8868(RumbleParams *, s32, s32, s32);
 extern void func_1505D024(s32, u8 *, s32, s32);
 extern void func_1000EC24();
 

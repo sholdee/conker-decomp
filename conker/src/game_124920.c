@@ -644,7 +644,7 @@ void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
 }
 
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
 extern void func_151C329C(Vec3f *pos, s32, s32);
 extern void func_15143794(s16, s16, f32, Vec3f *out);
@@ -653,7 +653,7 @@ void func_151DB5D0(s32, Vec3f *pos, Vec3f *vel, f32, f32, f32, f32, s32, s32, s3
 
 /*
  * While any object 0x98 in state 0x1EB is active: steps through the parts on a timer (with a sound and a
- * camera event per step), and emits effects on an arc of radius unk48 around (unk40, unk44).
+ * rumble per step), and emits effects on an arc of radius unk48 around (unk40, unk44).
  */
 void func_150F892C(StageObj *obj) {
     s32 count;

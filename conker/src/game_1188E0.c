@@ -236,7 +236,7 @@ void func_150EB8C4(void) {
 void *func_151D8868(RumbleParams *event, s32 arg1, u8 owner, s32 kind);
 
 /*
- * Effect burst at a gate cylinder: a func_150E83AC effect lasting 300-400 frames, a camera event
+ * Effect burst at a gate cylinder: a func_150E83AC effect lasting 300-400 frames, a rumble
  * (type 1, 15-35 long), func_15164F0C, and the func_151D3FF4/func_151D5514/func_151541B8 trio at
  * the cylinder's base and again half its height up.
  */
