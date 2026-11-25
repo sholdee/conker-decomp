@@ -99,19 +99,9 @@ s16 *func_150D8590(s16 *cmd, s32 arg1) {
     return cmd + 2;
 }
 
-/* Ground probe result filled by func_15046C80 (size 0x24). */
-typedef struct {
-    f32 height;
-    s16 points[9];
-    s32 unk18;
-    u8 flags;
-    u8 unk1D;
-    s32 unk20;
-} GroundHit;
-
-void func_1504715C(GroundHit *, Actor *);
-s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
-void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_1504715C(CollisionHit *, Actor *);
+s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
+void func_150E7FEC(f32, s32, CollisionTri *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150E83AC(Vec3f *, s16, u8, s32);
 void func_15153634(SpriteBurst *, u8, u8, s32);
 
@@ -125,7 +115,7 @@ void func_150D85AC(Actor *actor) {
     pos.z = actor->z_position;
     {
         Vec3f probe;
-        GroundHit ground;
+        CollisionHit ground;
 
         probe.x = pos.x;
         probe.y = pos.y + 100.0f;
@@ -145,7 +135,7 @@ void func_150D85AC(Actor *actor) {
                     randomScale = func_150ADA68();
                     random.value = func_150ADA20();
                     func_150E7FEC(randomScale * 109.0f + 140.0f, (u8)((random.value % 86U) + 170),
-                                  ground.points, &pos, (func_150ADA20() % 251U) + 500, 0, 1, 0, 0, 0, 255, 0);
+                                  &ground.tri, &pos, (func_150ADA20() % 251U) + 500, 0, 1, 0, 0, 0, 255, 0);
                 }
                 func_150E83AC(&pos, (func_150ADA20() % 62U) + 120, 255, 1);
             }

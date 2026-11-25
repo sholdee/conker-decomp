@@ -119,17 +119,7 @@ void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     }
 }
 
-/* Ground probe result filled by func_1504715C (same layout as GroundHit in game_105760.c). */
-typedef struct {
-    f32 height;
-    s16 points[9];
-    s32 unk18;
-    u8 flags;
-    u8 unk1D;
-    s32 unk20;
-} GroundHit; /* size 0x24 */
-
-extern void func_1504715C(GroundHit *, Actor *);
+extern void func_1504715C(CollisionHit *, Actor *);
 extern s32 func_1514654C(Actor *, ModelAttachment *, s32, Vec3f **, Vec3f **, s32);
 extern void func_15143134(Vec3f *, Vec3f *, Mtx *);
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
@@ -151,7 +141,7 @@ void func_150C44A4(Effect *effect) {
     f32 progress;
     s32 i;
     f32 t;
-    GroundHit ground;
+    CollisionHit ground;
     Vec3f *offsetPtr;
     Vec3f *posPtr;
     ModelAttachment *attachment;

@@ -97,21 +97,11 @@ void func_150BA8F0(EffectE7970 *effect, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
-/* Ground probe result filled by func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ s16 points[9];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 unk1D;
-    /* 0x20 */ s32 unk20;
-} GroundHit; // size 0x24
-
-void func_1504715C(GroundHit *hit, Actor *obj);
-s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, GroundHit *hit);
+void func_1504715C(CollisionHit *hit, Actor *obj);
+s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *hit);
 
 /* Copies obj's position into pos (using unk180 as the height when set); with a hit buffer, also probes the ground below. */
-s32 func_150BA930(Vec3f *pos, Actor *obj, GroundHit *hit, s32 arg3) {
+s32 func_150BA930(Vec3f *pos, Actor *obj, CollisionHit *hit, s32 arg3) {
     Vec3f probe;
 
     pos->x = obj->x_position;
@@ -139,7 +129,7 @@ s32 func_150BAA00(s32 arg0, s32 arg1) {
 /* Spawns effects at obj; when the ground probe hits, also a burst aimed by D_800DBFF0[D_80082FA4].unk380 (degrees). */
 void func_150BAA14(Actor *obj, s32 arg1, s32 arg2) {
     Vec3f pos;
-    GroundHit hit;
+    CollisionHit hit;
     s32 angle;
     u8 onGround;
     s16 pad; // matching: unused slot moves IDO's spill of func_150ADA68()'s result to sp38

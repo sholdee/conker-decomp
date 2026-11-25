@@ -17,16 +17,6 @@ typedef struct {
     /* 0x15 */ u8 flags; // bits 0-1: region shape
 } EmitterRegion;
 
-/* Ground probe result filled by func_15046C80 (as game_105760.c's GroundHit). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ s16 points[9];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 unk1D;
-    /* 0x20 */ s32 unk20;
-} GroundHit;
-
 /* Particle emitter state, embedded at offset 0x28 of the effect object. */
 typedef struct {
     /* 0x00 */ EmitterRegion *region;
@@ -50,12 +40,12 @@ typedef struct {
     /* 0x41 */ u8 unk2CBase;
     /* 0x42 */ u8 unk2CRange;
     /* 0x43 */ u8 pad43[5];
-    /* 0x48 */ GroundHit ground;
+    /* 0x48 */ CollisionHit ground;
     /* 0x6C */ s32 unk6C;
 } ParticleEmitter;
 
 extern s32 func_151464B8(s32);
-extern s32 func_15046C80(f32 *, s32, f32, GroundHit *);
+extern s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 extern void func_15149550(ParticleEmitterDesc *, s32, s32, s32, s32, s32);
 
 /*

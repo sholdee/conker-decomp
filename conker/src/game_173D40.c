@@ -3,20 +3,9 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Ground contact found by func_15046C80 below a probe point (as ParticleFloor in game_15F680.c). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 surface[0x14];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 type;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 unk20;
-} GroundHit; // size 0x24
-
-void func_1504715C(GroundHit *hit, Actor *actor);
-s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, GroundHit *hit);
-void func_15141F78(u8, GroundHit *, f32, u8, Vec3f *, u8);
+void func_1504715C(CollisionHit *hit, Actor *actor);
+s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, CollisionHit *hit);
+void func_15141F78(u8, CollisionHit *, f32, u8, Vec3f *, u8);
 void func_15142180(u8, Vec3f *, s32, f32, f32);
 u8 func_151D8E20(void);
 void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
@@ -30,7 +19,7 @@ TimedEffect *func_15130374(void *, u8, s32, u8, s32);
 /* Get the position of one of the actor's bones (0x13 for side 1, 0x17 for side 2; any other side
    fails with 0).  With a `hit` buffer, also look for the ground below that point and return
    func_15046C80's result. */
-s32 func_15146890(Vec3f *pos, Actor *actor, GroundHit *hit, u8 side) {
+s32 func_15146890(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     Vec3f probe;
     s32 bone;
 
@@ -142,14 +131,14 @@ void func_15146BD8(s32 actor, s32 side, s32 strength) {
    there when strength is at least 115. */
 void func_15146BF8(s32 actor, s32 side, s32 strength, s32 alt) {
     Vec3f pos;
-    GroundHit hit;
+    CollisionHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
             func_15141F78((u8)alt != 0 ? 0xC : 0xB, &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
-                func_15142180(2, &pos, hit.unk18, 1.0f, 1.0f);
+                func_15142180(2, &pos, hit.material, 1.0f, 1.0f);
             }
         }
     }
@@ -158,7 +147,7 @@ void func_15146BF8(s32 actor, s32 side, s32 strength, s32 alt) {
 /* Effect 0xA at the ground below the actor's bone on `side`. */
 void func_15146D60(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
-    GroundHit hit;
+    CollisionHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
@@ -172,7 +161,7 @@ void func_15146D60(s32 actor, s32 side, s32 strength) {
    least 71), and a randomly sized func_151D9B8C or func_151DAB58 particle at ground height. */
 void func_15146E84(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
-    GroundHit hit;
+    CollisionHit hit;
     u8 kind;
     Vec3f spot;
     s32 pad; // matching: an unused stack slot sits between spot and random
@@ -183,7 +172,7 @@ void func_15146E84(s32 actor, s32 side, s32 strength) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
             kind = func_151D8E20();
             if (strength >= 71) {
-                func_15142180(kind, &pos, hit.unk18, 1.0f, 1.0f);
+                func_15142180(kind, &pos, hit.material, 1.0f, 1.0f);
             }
 
             spot.x = pos.x;
@@ -193,7 +182,7 @@ void func_15146E84(s32 actor, s32 side, s32 strength) {
             if (func_150ADA20() & 1) {
                 size = func_150ADA68();
                 random = func_150ADA20();
-                func_151D9B8C(kind, size * 10.0f + 10.0f, (random % 101U) + 100, (s32)hit.surface,
+                func_151D9B8C(kind, size * 10.0f + 10.0f, (random % 101U) + 100, (s32)&hit.tri,
                               &spot, (func_150ADA20() % 41U) + 80, 1, 1, 0, 0xFF, 1);
             } else {
                 size = func_150ADA68();
@@ -285,12 +274,12 @@ s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
    effect D_8008FD04() there. */
 void func_15147318(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
-    GroundHit hit;
+    CollisionHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
             if (strength >= 115) {
-                func_15142180(0, &pos, hit.unk18, 1.0f, 1.0f);
+                func_15142180(0, &pos, hit.material, 1.0f, 1.0f);
             }
             func_15141F78(D_8008FD04(), &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
@@ -302,14 +291,14 @@ void func_15147318(s32 actor, s32 side, s32 strength) {
    strength is at least 115. */
 void func_15147478(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
-    GroundHit hit;
+    CollisionHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
             func_15141F78(D_8008FD1C(), &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
-                func_15142180(6, &pos, hit.unk18, 1.0f, 1.0f);
+                func_15142180(6, &pos, hit.material, 1.0f, 1.0f);
             }
         }
     }
@@ -319,14 +308,14 @@ void func_15147478(s32 actor, s32 side, s32 strength) {
    strength is at least 115. */
 void func_151475D8(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
-    GroundHit hit;
+    CollisionHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
         if (func_15146890(&pos, (Actor *)actor, &hit, side) != 0) {
             func_15141F78(D_8008FD30(), &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
             if (strength >= 115) {
-                func_15142180(0xB, &pos, hit.unk18, 1.0f, 1.0f);
+                func_15142180(0xB, &pos, hit.material, 1.0f, 1.0f);
             }
         }
     }

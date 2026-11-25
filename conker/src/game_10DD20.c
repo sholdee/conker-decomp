@@ -3,20 +3,10 @@
 #include "variables.h"
 
 
-/* Ground probe result filled by func_15046C80 (as game_105760.c's GroundHit). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ s16 points[9];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 unk1D;
-    /* 0x20 */ s32 unk20;
-} GroundHit; /* 0x24 */
-
-void func_1504715C(GroundHit *, Actor *);
-s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
+void func_1504715C(CollisionHit *, Actor *);
+s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 void func_151D3FF4(Vec3f *, u8, s32);
-void func_150E7FEC(f32, u8, s16 *, Vec3f *, s32, s32, s32, s32, s32, s32, u8, s32);
+void func_150E7FEC(f32, u8, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_150E83AC(Vec3f *, s16, u8, s32);
 void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 void func_151D5514(Vec3f *, u8, s32);
@@ -43,7 +33,7 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
     hitGround = FALSE;
     {
         Vec3f top;
-        GroundHit hit;
+        CollisionHit hit;
 
         top.x = origin.x;
         top.y = origin.y + 100.0f;
@@ -54,7 +44,7 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
             hitGround = TRUE;
             impact.y = hit.height;
             impact.z = top.z;
-            func_150E7FEC(func_150ADA68() * 125.0f + 204.0f, func_150ADA20() % 101U + 155, hit.points, &impact,
+            func_150E7FEC(func_150ADA68() * 125.0f + 204.0f, func_150ADA20() % 101U + 155, &hit.tri, &impact,
                           func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
         }
     }

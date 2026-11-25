@@ -1443,6 +1443,18 @@ typedef struct CollisionTri {
     /* 0x00 */ Vec3s v[3];
 } CollisionTri; // size 0x12
 
+/* Result of a floor/ceiling probe: func_15046C80 (probe down from a point) / func_1504715C (an actor's floor). */
+typedef struct CollisionHit {
+    /* 0x00 */ f32 height;            // y of the surface hit
+    /* 0x04 */ CollisionTri tri;      // the triangle hit
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ s32 material;
+    /* 0x1C */ u8 flags;              // 1: solid (level mesh, or object surface with viewFlags 0x80), 2: height within the probe's limit, 4: tri is valid
+    /* 0x1D */ u8 source;             // collision set that produced the hit: 1 level mesh, 2-4 object surface sets (3: particles splash)
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ struct WorldObject *surface; // object surface hit (source 2-4), else NULL
+} CollisionHit; // size 0x24
+
 /* Per-actor vertex morph state (Actor.morph): blends from keyframe `prev` to keyframe `cur`. */
 typedef struct VtxMorphState {
     /* 0x0 */ f32 blend; // 0.0f (prev) .. 1.0f (cur)

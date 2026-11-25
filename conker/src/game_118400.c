@@ -2,26 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Ground contact found by func_15046C80 below a probe point (as in game_173D40.c). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 surface[0x14];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 type;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 unk20;
-} GroundHit; // size 0x24
-
-void func_1504715C(GroundHit *hit, Actor *actor);
-s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, GroundHit *hit);
-void func_15141F78(u8, GroundHit *, f32, u8, Vec3f *, u8);
+void func_1504715C(CollisionHit *hit, Actor *actor);
+s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, CollisionHit *hit);
+void func_15141F78(u8, CollisionHit *, f32, u8, Vec3f *, u8);
 s32 func_151420F8(Actor *actor);
 
 /* Get the position of one of the actor's bones (0x21 for side 1, 0x1D for side 2; any other side
    fails with 0).  With a `hit` buffer, also look for the ground below that point and return
    func_15046C80's result.  (Same as func_15146890 with different bones.) */
-s32 func_150EAF50(Vec3f *pos, Actor *actor, GroundHit *hit, u8 side) {
+s32 func_150EAF50(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     Vec3f probe;
     s32 bone;
 
@@ -67,7 +56,7 @@ s32 func_150EB030(s32 kind, Actor *actor) {
 // loads of it that the original makes (as func_15146D60 in game_173D40.c).
 void func_150EB090(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
-    GroundHit hit;
+    CollisionHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
         if (func_150EAF50(&pos, (Actor *)actor, &hit, side) != 0) {
