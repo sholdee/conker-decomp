@@ -152,9 +152,6 @@ Gfx *func_150DFBD0(Gfx *gdl) {
     return gdl;
 }
 
-/* matching: 0.55f, kept in rodata; a literal folds the negation into a -0.55f constant */
-extern f32 D_800A0FA4;
-
 /* The object func_150DFCA8 animates (a handler in the 0x80088xxx object table). */
 typedef struct {
     /* 0x00 */ u8 pad0[0x4];
@@ -170,6 +167,7 @@ typedef struct {
 void func_150DFCA8(SwingObject *obj) {
     f32 pos;
     f32 target;
+    f32 maxSpeed = 0.55f; // matching: -0.55f as a literal folds; IDO negates the variable at run time
 
     // matching: the step shares target's register
     target = obj->speed * D_800BE9E4;
@@ -178,8 +176,7 @@ void func_150DFCA8(SwingObject *obj) {
     if (pos < 11.0f) {
         obj->targetSpeed = target = 0.55f;
     } else if (obj->pos > 55.0f) {
-        pos = D_800A0FA4; // matching: the negated constant goes through pos's register
-        obj->targetSpeed = target = -pos;
+        obj->targetSpeed = target = -maxSpeed;
     } else {
         target = obj->targetSpeed;
     }
@@ -389,17 +386,15 @@ void func_150E03F8(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-/* matching: 3850.0f; as a literal IDO folds 1 / (3850 - 2570) to a constant */
-extern f32 D_800A0FD4;
-
 /* Sets alpha from the distance to camera_global_Cameras's unk2F8 point: opaque within 2570, fading out
- * linearly to transparent at 3850 (D_800A0FD4). */
+ * linearly to transparent at 3850. */
 void func_150E05F8(WorldObject *obj) {
     f32 dx;
     f32 dy;
     f32 dz;
     f32 dist;
     s32 alpha;
+    f32 far = 3850.0f; // matching: with the literal inline, IDO folds 1 / (3850 - 2570) to a constant
 
     dz = camera_global_Cameras->eye.z - obj->z;
     dx = camera_global_Cameras->eye.x - obj->x;
@@ -407,17 +402,18 @@ void func_150E05F8(WorldObject *obj) {
     dist = sqrtf(dz * dz + (dx * dx + dy * dy));
     if (dist <= 2570.0f) {
         alpha = 255;
-    } else if (dist >= D_800A0FD4) {
+    } else if (dist >= far) {
         alpha = 0;
     } else {
-        alpha = 255 - (dist - 2570.0f) * (1 / (D_800A0FD4 - 2570.0f)) * 255.0f;
+        alpha = 255 - (dist - 2570.0f) * (1 / (far - 2570.0f)) * 255.0f;
     }
     obj->alpha = alpha;
 }
 
 extern u8 D_80088988;
-extern f32 D_800A0F70[][3];
-extern f32 D_800A0F88[][3];
+/* Effect start and end points (bone space) of the two slots. */
+static const f32 D_800A0F70[2][3] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
+static const f32 D_800A0F88[2][3] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
 extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
 extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, Vec3f *, s32, s32, s32, u8,
                           s32);
