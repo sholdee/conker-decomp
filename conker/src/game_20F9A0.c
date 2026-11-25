@@ -58,7 +58,7 @@ struct Struct151E4314 {
 };
 
 extern ModeEntry D_800AB68C[];
-/* D_8008FD94 and D_800E0C20 are s8 and D_800BE3DF is signed, but variables.h declares them otherwise: hence casts. */
+/* variables.h types D_8008FD94/D_800E0C20 (s8), D_800BE3DF (signed) and D_800BE9F4 (a u16 value) wrongly: hence casts. */
 extern struct Struct151E4314 D_800AB7A4[];
 extern s8 D_800E0C00[];
 extern s8 D_800E0BEB;
@@ -110,7 +110,8 @@ extern u8 D_800E0B99;
 extern s8 D_800E0BB1;
 extern u8 D_800E0BD1;
 
-static s8 D_800E0BE0[0x17];
+static struct127 *D_800E0BA0[4]; /* characters spawned by func_151E7F60 */
+static s8 D_800E0BE0[23]; /* option values (see func_151E3344) */
 extern s8 D_8008FE54[];
 extern s8 D_8008FE6C[];
 extern s8 D_8008FE84[];
@@ -139,7 +140,6 @@ void func_151E327C(void);
 extern s8 D_8008FE44[];
 extern u8 D_800E0B8C;
 extern s8 D_800E0B90[];
-extern struct127 *D_800E0BA0[];
 void func_151E7F60(s32 arg0, s32 arg1);
 
 void func_151E4314(void);
@@ -990,7 +990,7 @@ void func_151E43DC(void) {
         func_1501D348(D_800AB7BC[idx].unk0, param, 0, 0, 0);
         D_8008FD80 = 0;
     } else {
-        if (D_8008FDD4->unk42 != 0xB && D_8008FDD4->unk42 != 0xC) {
+        if (D_8008FDD4->unk42 != 11 && D_8008FDD4->unk42 != 12) {
             func_151E530C();
         }
         if (D_8008FD80 == 2 || D_8008FD80 == 3 || D_8008FD80 == 4) {
@@ -1000,24 +1000,24 @@ void func_151E43DC(void) {
             }
             D_800E0BDC = 0xFF - D_8008FDCC;
             func_1504332C(0xFF, 0xFF, 0, D_8008FDCC);
-            func_15042D94(0x94, 0x14, 0x81, D_800AB8CC, 0x4B);
+            func_15042D94(148, 20, 0x81, D_800AB8CC, 0x4B);
             func_15042E3C(D_800AB8D0);
             func_1504332C(0xFF, 0xFF, 0xFF, (u8)D_8008FDCC);
-            func_150432FC(0x94, 0x32);
+            func_150432FC(148, 50);
             if (D_8008FD80 == 4) {
                 D_800DBFF0->unk2C = 0x80000;
             }
             if (D_800AB68C[D_8008FDD4->unk42].unk5 < 0) {
-                if (D_8008FDD4->unk42 == 0xB || D_8008FDD4->unk42 == 0xC) {
+                if (D_8008FDD4->unk42 == 11 || D_8008FDD4->unk42 == 12) {
                     y = 0x48;
                     for (i = 0; i < D_8008FD88; i++) {
                         if (D_8008FE44[i] >= 0) {
                             count = D_800E0AC0[i];
-                            func_15042D94(0x58, y, 0x81, D_800AB8D4, D_800E0BD8[count + 0x5D]);
+                            func_15042D94(88, y, 0x81, D_800AB8D4, D_800E0BD8[count + 0x5D]);
                             func_150916B4(0x8A, y, D_800E0C18[i], 0x80);
                             func_150916B4(0xBC, y, D_800E0C10[i], 0x80);
-                            func_15042D94(0xA8, y, 0x80, D_800AB8E0);
-                            func_15042D94(0xD6, y, 0x80, D_800AB8E4);
+                            func_15042D94(168, y, 0x80, D_800AB8E0);
+                            func_15042D94(214, y, 0x80, D_800AB8E4);
                             y += 0x12;
                         }
                     }
@@ -1037,16 +1037,16 @@ void func_151E43DC(void) {
                 }
                 n = n >= 2;
                 if (n) {
-                    func_15042D94(0x94, 0x32, 0x81, D_800AB8E8, 0x58);
+                    func_15042D94(148, 50, 0x81, D_800AB8E8, 0x58);
                 } else if (count == 1) {
-                    func_15042D94(0x76, 0x32, 0x81, D_800AB8EC, 0x52);
+                    func_15042D94(118, 50, 0x81, D_800AB8EC, 0x52);
                     count = (D_800E0AC0[D_800E0C00[0]] == 1) ? 0x56 : 0x57;
-                    func_15042D94(0xB2, 0x32, 0x81, D_800AB8F0, count);
+                    func_15042D94(178, 50, 0x81, D_800AB8F0, count);
                 } else {
                     for (i = 0; i < 4; i++) {
                         if (D_800E0AC0[i] == 1) {
-                            func_15042D94(0x71 - ((D_800E0BC8[i] == 4) ? -0xC : 0), 0x32, 0x81, D_800AB8F4, D_800E0BC8[i] + 0x4C);
-                            func_15042D94(((D_800E0BC8[i] == 4) ? 0x15 : 0) + 0xB7, 0x32, 0x81, D_800AB8F8, 0x56);
+                            func_15042D94(113 - ((D_800E0BC8[i] == 4) ? -12 : 0), 50, 0x81, D_800AB8F4, D_800E0BC8[i] + 0x4C);
+                            func_15042D94(((D_800E0BC8[i] == 4) ? 21 : 0) + 183, 50, 0x81, D_800AB8F8, 0x56);
                             i = 4; // matching: ends the loop; `break` schedules differently
                         }
                     }
@@ -1058,9 +1058,9 @@ void func_151E43DC(void) {
                 func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
             }
             D_8008FF3C = cur;
-            func_15042D94(0x53, 0xB4, 1, D_800AB8FC, (D_8008FE2C == 0) + 0x21);
-            func_15042D94(0xD5, 0xB4, 1, D_800AB900, (D_8008FE2C == 1) + 0xE);
-            func_15042D94(0x94, 0xB4, 1, D_800AB904, 0x1A);
+            func_15042D94(83, 180, 1, D_800AB8FC, (D_8008FE2C == 0) + 0x21);
+            func_15042D94(213, 180, 1, D_800AB900, (D_8008FE2C == 1) + 0xE);
+            func_15042D94(148, 180, 1, D_800AB904, 0x1A);
             if ((D_800E0B9A & 0x8000) || D_800E0A90 > 2400) {
                 if (D_800C35EA == 1 && func_151F2CDC() == 1) {
                     func_151F2D6C(0, 0x2DE0);
@@ -1153,7 +1153,7 @@ void func_151E4BD8(void) {
 
 /* Switches the menu to state 10. */
 void func_151E4DC4(void) {
-    D_800E0B94 = 0xA;
+    D_800E0B94 = 10;
 }
 
 /* Switches to state 4 when input bits 0x8020 are set. */
@@ -1265,7 +1265,7 @@ void func_151E50C8(void) {
         }
     }
     func_15017790();
-    D_800E0B94 = 0xB;
+    D_800E0B94 = 11;
     D_800D2E40 = 0;
     func_1501C730(6, 0x25, 0, 0, 1);
     D_800E0B95 = D_800E0B94;
@@ -1333,7 +1333,7 @@ void func_151E530C(void) {
 }
 
 /* End of a match: if D_800BE616 is set, records each player's unk1AA and schedules the results transition; else state 4. */
-void func_151E53E8(s32 arg0) {
+void func_151E53E8(s32 flag) {
     s32 i;
 
     D_800E0A90 = 0;
@@ -1353,9 +1353,9 @@ void func_151E53E8(s32 arg0) {
             D_8008FDD4->unk66[i].unk6 = D_800CC2D0[i].unk31C->unk1AA;
         }
         D_8008FDC0 &= 0xE35F;
-        D_800E0A86 = arg0;
+        D_800E0A86 = flag;
         if (D_800AB68C[D_8008FDD4->unk42].unk7 == -2) {
-            if (arg0 == 0) {
+            if (flag == 0) {
                 func_151E4BD8();
                 return;
             }
@@ -1522,7 +1522,7 @@ s32 func_151E565C(void) {
     }
     k = 0; // matching: k is 0 here; teamStats[i + k] below shares CSE temps like the target
     for (i = 0; i < D_8008FD8C; i++) {
-        team = *(u8 *)&D_800CC2D0[i].pad128 /* team; 1st byte of an unnamed field */;
+        team = *(u8 *)&D_800CC2D0[i].pad128; // team: first byte of an unnamed struct127 field
         teamStats[team] += D_8008FDD4->unk46[i];
         teamStats[team + 4] += func_150859AC(i, 3) * 6 + func_150859AC(i, 4);
         teamStats[team + 8] = func_150859AC(team, 6);
@@ -1552,7 +1552,7 @@ s32 func_151E565C(void) {
             }
         }
     }
-    func_150432FC(0x14, 0x14);
+    func_150432FC(20, 20);
     for (i = 0; i < D_800E0BB0; i++) {
         if (D_800E0AB0[i] != -1) {
             D_800E0AC0[i] = D_800E0AB0[i];
@@ -1606,18 +1606,18 @@ s32 func_151E565C(void) {
 
 extern u8 D_800BE616;
 
-/* Returns the team of player arg0 during a match (0 if none), else arg0 itself. */
-s32 func_151E5F64(s32 arg0) {
-    s32 ret;
+/* Returns the team of player during a match (0 if none), else player itself. */
+s32 func_151E5F64(s32 player) {
+    s32 team;
 
     if ((D_800BE616 != 0) || (D_800E0B94 != 0)) {
-        ret = D_800E0C00[arg0];
-        if (ret < 0) {
-            ret = 0;
+        team = D_800E0C00[player];
+        if (team < 0) {
+            team = 0;
         }
-        return ret;
+        return team;
     }
-    return arg0;
+    return player;
 }
 
 /* Returns D_8008FD8C when D_800E0BEB is set and it is below 5, else D_8008FD90. */
@@ -1730,7 +1730,7 @@ void func_151E5FF4(struct127 *source, struct127 *victim, s32 cause) {
                         variants = 3;
                         sound = 0x571;
                     }
-                } else if (*((u8 *)victim->unk31C + 0x1AC) != 0) {
+                } else if (*((u8 *)victim->unk31C + 0x1AC) != 0) { // past the end of structs.h's struct126
                     if ((cause != 0x21) && ((victim->health <= 0) || ((func_150ADA20() & 3) == 3))) {
                         variants = 4;
                         sound = 0x582;
@@ -2475,7 +2475,6 @@ void func_151E7F60(s32 slotIdx, s32 charIdx) {
 extern s8 D_8008FD84[];
 /* Clears the spawned character slots. */
 void func_151E81EC(void) {
-    static struct127 *D_800E0BA0[4];
     s32 i;
     for (i = 0; i < 4; i++) {
         D_800E0BA0[i] = NULL;
