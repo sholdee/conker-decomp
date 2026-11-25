@@ -135,79 +135,11 @@ typedef struct FlareSpawn {
     /* 0x6C */ f32 unk6C;
 } FlareSpawn;
 
-struct Vec15107A20 { f32 x; f32 y; f32 z; };
-struct Vec15106F98 { f32 x; f32 y; f32 z; };
-struct S15106F98Points { struct Vec15106F98 unk0[4]; };
-struct S15106F98Payload {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    struct Vec15106F98 *unkC;
-    struct S15106F98Points unk10;
-    u8 unk40;
-    u8 pad41[3];
-};
-
-struct S15107C1CWord {
-    s32 unk0;
-};
-
-struct S15107C1CWords3 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
-
-struct S15107C1CBytes4 {
-    u8 bytes[4];
-};
-
-struct S15107C1CPayload {
-    struct127 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    struct S15107C1CWords3 unk8;
-    u8 unk14;
-    u8 pad15[3];
-};
-
-struct S15107C1CTrace {
-    u8 pad0[8];
-    struct Vec15107A20 unk8;
-    u8 pad14[0x59 - 0x14];
-    u8 unk59;
-    u8 pad5A[0x64 - 0x5A];
-};
-
-struct S15107C1CInit {
-    s16 unk0;
-    s8 unk2;
-    u8 pad3;
-    struct Vec15107A20 unk4;
-    struct Vec15107A20 unk10;
-    struct Vec15107A20 unk1C;
-    struct Vec15107A20 unk28;
-    s8 unk34;
-    u8 pad35[3];
-    s32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    s16 unk44;
-    s16 unk46;
-    struct S15107C1CWord unk48;
-    s8 unk4C;
-    u8 pad4D[3];
-};
-
-struct S15107C1CCreated {
-    u8 pad0[0x60];
-    void *unk60;
-};
-
 void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread);
-void func_15107A20(struct127 *arg0, s32 arg1, s32 arg2, struct Vec15107A20 *arg3, struct Vec15107A20 *arg4);
-void func_15107AE0(struct Vec15107A20 *arg0, struct Vec15107A20 *arg1, struct Vec15107A20 *arg2, struct Vec15107A20 *arg3);
-void func_15107F54(s32 *arg0, u8 arg1, void *arg2, s32 arg3);
+void func_15107A20(struct127 *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
+void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2);
+void func_15107F54(struct127 *actor, u8 bone, Vec3f *localPos, Vec3f *out);
+void func_15143794(s32 yaw, s32 pitch, f32 length, Vec3f *out);
 void func_15081690(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, void *arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
 BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
 void func_15106214(BoltObj *bolt);
@@ -697,8 +629,6 @@ void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread) {
     func_151070F8(obj, mid, hi, spread);
 }
 
-void func_15143794(s32, s32, f32, f32 *);
-
 /* Chain update: once the current link is gone, spawns a bolt from points[index] to points[index + 1]; ends the chain after the last. */
 void func_151072BC(BoltChainObj *obj) {
     BoltChain *chain;
@@ -726,13 +656,13 @@ void func_151072BC(BoltChainObj *obj) {
         desc.ctrl[3] = chain->points[chain->index + 1];
         func_15143794((s16)(func_150ADA20() & 0xFF),
             (s16)(func_150ADA20() % (u32)(config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40),
-            func_150ADA68() * config->bendRange + config->bendBase, &offset.x);
+            func_150ADA68() * config->bendRange + config->bendBase, &offset);
         desc.ctrl[1].x = desc.ctrl[0].x + offset.x;
         desc.ctrl[1].y = desc.ctrl[0].y + offset.y;
         desc.ctrl[1].z = desc.ctrl[0].z + offset.z;
         func_15143794((s16)(func_150ADA20() & 0xFF),
             (s16)(func_150ADA20() % (u32)(config->bendSpread + 1) - (config->bendSpread >> 1) - 0x40),
-            func_150ADA68() * config->bendRange + config->bendBase, &offset.x);
+            func_150ADA68() * config->bendRange + config->bendBase, &offset);
         desc.ctrl[2].x = desc.ctrl[3].x + offset.x;
         desc.ctrl[2].y = desc.ctrl[3].y + offset.y;
         desc.ctrl[2].z = desc.ctrl[3].z + offset.z;
@@ -785,266 +715,274 @@ void func_151076A4(BoltChainObj *obj, s32 arg1, u8 arg2) {
     }
 }
 
-struct S15107700Payload {
-    struct127 *unk0;
-    u8 unk4;
-    u8 pad5;
-    s16 unk6;
-    s16 unk8;
-    u8 padA[2];
-};
+/* User data of a kind-2 bolt: starts on the owner actor's bounds, in direction yaw/pitch. */
+typedef struct BoltAnchor {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;         /* owner's unique_id when spawned */
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ s16 yaw;
+    /* 0x08 */ s16 pitch;
+    /* 0x0A */ u8 padA[2];
+} BoltAnchor;
 
-struct S15107C1CCreated *func_15107700(struct127 *arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, f32 arg5, f32 arg6, s16 arg7, s16 arg8, u8 *arg9, u8 argA, s32 argB) {
-    struct S15107700Payload payload;
-    struct S15107C1CCreated *created;
-    struct S15107C1CInit init;
-    struct S15107C1CTrace trace;
-    struct Vec15107A20 vec;
-    s32 flag;
-    if (arg0->unk1D4 == NULL) {
+/* User data of a kind-3 bolt: starts at localPos in one of the owner actor's bone matrices. */
+typedef struct BoltBoneAnchor {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;         /* owner's unique_id when spawned */
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ Vec3f localPos;
+    /* 0x14 */ u8 bone;
+    /* 0x15 */ u8 pad15[3];
+} BoltBoneAnchor;
+
+/* Result of the func_15081690 ray cast. */
+typedef struct RayHit {
+    /* 0x00 */ u8 pad0[8];
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ u8 pad14[0x59 - 0x14];
+    /* 0x59 */ u8 hit;
+    /* 0x5A */ u8 pad5A[0x64 - 0x5A];
+} RayHit;
+
+/*
+ * Spawns a kind-2 bolt from a point on the actor's bounds (direction yaw/pitch) to where the ray
+ * from that point away from the actor hits. life -1 means it never runs out.
+ */
+BoltObj *func_15107700(struct127 *actor, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argA, s32 argB) {
+    BoltAnchor anchor;
+    BoltObj *bolt;
+    BoltDesc desc;
+    RayHit hit;
+    Vec3f center;
+    s32 countsDown;
+    if (actor->unk1D4 == NULL) {
         return NULL;
     }
 
-    payload.unk0 = arg0;
-    payload.unk4 = arg0->unique_id;
-    payload.unk6 = arg1;
-    payload.unk8 = arg2;
+    anchor.owner = actor;
+    anchor.ownerId = actor->unique_id;
+    anchor.yaw = yaw;
+    anchor.pitch = pitch;
 
-    if (arg3 == -1) {
-        init.unk0 = 0x12C;
+    if (life == -1) {
+        desc.life = 300;
     } else {
-        init.unk0 = arg3;
+        desc.life = life;
     }
-    if (arg3 == -1) {
-        flag = 0;
+    if (life == -1) {
+        countsDown = 0;
     } else {
-        flag = 1;
+        countsDown = 1;
     }
-    init.unk2 = flag;
-    init.unk34 = 0;
-    init.unk38 = arg4;
-    init.unk3C = arg5;
-    init.unk40 = arg6;
-    init.unk44 = arg7;
-    init.unk46 = arg8;
-    *(struct S15107C1CBytes4 *)&init.unk48 = *(struct S15107C1CBytes4 *)arg9;
-    init.unk4C = 2;
+    desc.flags = countsDown;
+    desc.updateKind = 0;
+    desc.segments = segments;
+    desc.jitter = jitter;
+    desc.width = width;
+    desc.rejitterBase = rejitterBase;
+    desc.rejitterRange = rejitterRange;
+    desc.color = *(ColorRGBA *)color;
+    desc.kind = 2;
 
-    /* block-scoped declaration: its debug scope marker keeps IDO from hoisting &init.unk48 out of this block */
+    // matching: a block with a declaration emits a scope marker that keeps IDO from hoisting &desc.color
     {
-    void func_15107A20(struct127 *arg0, s32 arg1, s32 arg2, struct Vec15107A20 *arg3, struct Vec15107A20 *arg4);
-    func_15107A20(arg0, arg1, arg2, &init.unk4, &vec);
-    func_15081690(arg0, init.unk4.x, init.unk4.y, init.unk4.z, init.unk4.x - vec.x, init.unk4.y - vec.y, init.unk4.z - vec.z, &trace, 0.0f, 0, 1, 1, -1, 0, 0);
+    void func_15107A20(struct127 *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
+    func_15107A20(actor, yaw, pitch, &desc.ctrl[0], &center);
+    func_15081690(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, desc.ctrl[0].x - center.x, desc.ctrl[0].y - center.y, desc.ctrl[0].z - center.z, &hit, 0.0f, 0, 1, 1, -1, 0, 0);
 
     }
-    if (trace.unk59 == 0) {
+    if (hit.hit == 0) {
         return NULL;
     }
-    init.unk28 = trace.unk8;
+    desc.ctrl[3] = hit.pos;
 
-    func_15107AE0(&init.unk4, &init.unk28, &init.unk10, &init.unk1C);
-    created = (struct S15107C1CCreated *)func_15105CE0((BoltDesc *)&init, 0xC, argA, argB);
-    if (created != NULL) {
-        memcpy(created->unk60, &payload, 0xC);
+    func_15107AE0(&desc.ctrl[0], &desc.ctrl[3], &desc.ctrl[1], &desc.ctrl[2]);
+    bolt = func_15105CE0(&desc, sizeof(BoltAnchor), argA, argB);
+    if (bolt != NULL) {
+        memcpy(bolt->userData, &anchor, sizeof(BoltAnchor));
     }
-    return created;
+    return bolt;
 }
 
 
-void func_151078E4(s32 *arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0[0x18], arg0[0x18] + 4, (s32)arg0);
+/* D_80088C28 handler for kind 2. */
+void func_151078E4(BoltObj *bolt, s32 arg1, u8 arg2) {
+    func_15169850(arg1, arg2, (s32)bolt->userData, (s32)bolt->userData + 4, (s32)bolt);
 }
 
-struct S15107924 {
-    struct127 *unk0;
-    u8 unk4;
-    u8 unk5;
-    s16 unk6;
-    s16 unk8;
-};
+/* updateKind 0: keeps a kind-2 bolt's start on its owner; returns 0 once the owner is gone. */
+s32 func_15107924(BoltObj *bolt, u8 *moved) {
+    BoltAnchor *anchor;
+    struct127 *owner;
+    Vec3f oldStart;
 
-s32 func_15107924(struct127 *arg0, u8 *arg1) {
-    struct S15107924 *data;
-    struct127 *obj;
-    struct Vec15107A20 oldPos;
-
-    data = (struct S15107924 *)arg0->unk60;
-    obj = data->unk0;
-    if ((obj->interaction_state == 0) || (obj->unique_id != data->unk4)) {
+    anchor = bolt->userData;
+    owner = anchor->owner;
+    if ((owner->interaction_state == 0) || (owner->unique_id != anchor->ownerId)) {
         return 0;
     }
-    *arg1 = 0;
-    oldPos = *(struct Vec15107A20 *)&arg0->x_position;
-    func_15107A20(obj, data->unk6, data->unk8, (struct Vec15107A20 *)&arg0->x_position, NULL);
-    if ((oldPos.x == arg0->x_position) && (oldPos.y == arg0->y_position) && (oldPos.z == arg0->z_position)) {
+    *moved = FALSE;
+    oldStart = bolt->desc.ctrl[0];
+    func_15107A20(owner, anchor->yaw, anchor->pitch, &bolt->desc.ctrl[0], NULL);
+    if ((oldStart.x == bolt->desc.ctrl[0].x) && (oldStart.y == bolt->desc.ctrl[0].y) && (oldStart.z == bolt->desc.ctrl[0].z)) {
         goto ret1;
     }
-    *arg1 = 1;
-    func_15107AE0((struct Vec15107A20 *)&arg0->x_position, (struct Vec15107A20 *)&arg0->unk38, (struct Vec15107A20 *)&arg0->y_velocity, (struct Vec15107A20 *)&arg0->old_x_position);
+    *moved = TRUE;
+    func_15107AE0(&bolt->desc.ctrl[0], &bolt->desc.ctrl[3], &bolt->desc.ctrl[1], &bolt->desc.ctrl[2]);
 ret1:
     return 1;
 }
 
-void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
-void func_15143794(s32, s32, f32, f32 *);
+void func_1515C244(struct127 *actor, Vec3f *center, f32 *radius, f32 *arg3);
 
-void func_15107A20(struct127 *arg0, s32 arg1, s32 arg2, struct Vec15107A20 *arg3, struct Vec15107A20 *arg4) {
-    struct Vec15107A20 sp2C;
-    f32 sp28;
-    f32 sp24;
+/* The point on the actor's bounds in direction yaw/pitch (vertically scaled by unkF0); optionally the bounds centre. */
+void func_15107A20(struct127 *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut) {
+    Vec3f center;
+    f32 radius;
+    f32 unused;
 
-    func_1515C244(arg0, &sp2C.x, &sp28, &sp24);
-    func_15143794((s16)arg1, (s16)arg2, sp28, &arg3->x);
-    arg3->y *= arg0->unkF0;
-    arg3->x += sp2C.x;
-    arg3->y += sp2C.y;
-    arg3->z += sp2C.z;
-    if (arg4 != NULL) {
-        *arg4 = sp2C;
+    func_1515C244(actor, &center, &radius, &unused);
+    func_15143794((s16)yaw, (s16)pitch, radius, out);
+    out->y *= actor->unkF0;
+    out->x += center.x;
+    out->y += center.y;
+    out->z += center.z;
+    if (centerOut != NULL) {
+        *centerOut = center;
     }
 }
 
-void func_15107AE0(struct Vec15107A20 *arg0, struct Vec15107A20 *arg1, struct Vec15107A20 *arg2, struct Vec15107A20 *arg3) {
-    f32 *start = (f32 *)arg0;
-    f32 *end = (f32 *)arg1;
-    f32 *first = (f32 *)arg2;
-    f32 *second = (f32 *)arg3;
+/* Inner control points of a straight bolt: one third and two thirds of the way from start to end. */
+void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2) {
     f32 dx;
     f32 dy;
     f32 dz;
 
-    dx = end[0] - start[0];
-    dy = end[1] - start[1];
-    dz = end[2] - start[2];
-    first[0] = start[0] + dx * 0.333f;
-    first[1] = start[1] + dy * 0.333f;
-    first[2] = start[2] + dz * 0.333f;
-    second[0] = start[0] + dx * 0.6667f;
-    second[1] = start[1] + dy * 0.6667f;
-    second[2] = start[2] + dz * 0.6667f;
+    dx = end->x - start->x;
+    dy = end->y - start->y;
+    dz = end->z - start->z;
+    ctrl1->x = start->x + dx * 0.333f;
+    ctrl1->y = start->y + dy * 0.333f;
+    ctrl1->z = start->z + dz * 0.333f;
+    ctrl2->x = start->x + dx * 0.6667f;
+    ctrl2->y = start->y + dy * 0.6667f;
+    ctrl2->z = start->z + dz * 0.6667f;
 }
 
-extern void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
-extern void func_15143794(s32, s32, f32, f32 *);
 extern void func_151C329C(void *, s32, s32);
 
-void func_15107B78(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    struct { f32 x; f32 y; f32 z; } sp2C;
-    struct { f32 x; f32 y; f32 z; } sp20;
-    f32 sp1C;
-    f32 sp18;
+/* Calls func_151C329C at the point on the actor's bounds in direction yaw/pitch. */
+void func_15107B78(struct127 *actor, s32 yaw, s32 pitch, s32 arg3, s32 arg4) {
+    Vec3f pos;
+    Vec3f center;
+    f32 radius;
+    f32 unused;
 
-    if (arg0->unk1D4 != NULL) {
-        func_1515C244(arg0, &sp20.x, &sp1C, &sp18);
-        func_15143794((s16)arg1, (s16)arg2, sp1C, &sp2C.x);
-        sp2C.y *= arg0->unkF0;
-        sp2C.x += sp20.x;
-        sp2C.y += sp20.y;
-        sp2C.z += sp20.z;
-        func_151C329C(&sp2C, (u8)arg3, arg4);
+    if (actor->unk1D4 != NULL) {
+        func_1515C244(actor, &center, &radius, &unused);
+        func_15143794((s16)yaw, (s16)pitch, radius, &pos);
+        pos.y *= actor->unkF0;
+        pos.x += center.x;
+        pos.y += center.y;
+        pos.z += center.z;
+        func_151C329C(&pos, (u8)arg3, arg4);
     }
 }
 
-struct S15107C1CCreated *func_15107C1C(struct127 *arg0, u8 arg1, void *arg2, s16 arg3, s16 arg4, s16 arg5, s32 arg6, f32 arg7, f32 arg8, s16 arg9, s16 argA, u8 *argB, u8 argC, s32 argD) {
-    struct S15107C1CPayload payload;
-    struct S15107C1CCreated *created;
-    struct S15107C1CInit init;
-    struct S15107C1CTrace trace;
-    struct Vec15107A20 vec;
-    s32 flag;
-    if (arg0->unk1D4 == NULL) {
+/*
+ * Spawns a kind-3 bolt from localPos in the actor's bone matrix along direction yaw/pitch, up to 300
+ * units or to what the ray hits. life -1 means it never runs out.
+ */
+BoltObj *func_15107C1C(struct127 *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
+    BoltBoneAnchor anchor;
+    BoltObj *bolt;
+    BoltDesc desc;
+    RayHit hit;
+    Vec3f dir;
+    s32 countsDown;
+    if (actor->unk1D4 == NULL) {
         return NULL;
     }
 
-    payload.unk0 = arg0;
-    payload.unk4 = arg0->unique_id;
-    payload.unk8 = *(struct S15107C1CWords3 *)arg2;
-    payload.unk14 = arg1;
+    anchor.owner = actor;
+    anchor.ownerId = actor->unique_id;
+    anchor.localPos = *localPos;
+    anchor.bone = bone;
 
-    if (arg5 == -1) {
-        init.unk0 = 0x12C;
+    if (life == -1) {
+        desc.life = 300;
     } else {
-        init.unk0 = arg5;
+        desc.life = life;
     }
-    if (arg5 == -1) {
-        flag = 0;
+    if (life == -1) {
+        countsDown = 0;
     } else {
-        flag = 1;
+        countsDown = 1;
     }
-    init.unk2 = flag;
-    init.unk34 = 1;
-    init.unk38 = arg6;
-    init.unk3C = arg7;
-    init.unk40 = arg8;
-    init.unk44 = arg9;
-    init.unk46 = argA;
-    *(struct S15107C1CBytes4 *)&init.unk48 = *(struct S15107C1CBytes4 *)argB;
-    init.unk4C = 3;
+    desc.flags = countsDown;
+    desc.updateKind = 1;
+    desc.segments = segments;
+    desc.jitter = jitter;
+    desc.width = width;
+    desc.rejitterBase = rejitterBase;
+    desc.rejitterRange = rejitterRange;
+    desc.color = *(ColorRGBA *)color;
+    desc.kind = 3;
 
-    func_15107F54((s32 *)arg0, arg1, arg2, (s32)&init.unk4);
-    func_15143794(arg3, arg4, 1.0f, &vec.x);
-    func_15081690(arg0, init.unk4.x, init.unk4.y, init.unk4.z, vec.x, vec.y, vec.z, &trace, 300.0f, 0, 1, 1, -1, 0, 0);
+    func_15107F54(actor, bone, localPos, &desc.ctrl[0]);
+    func_15143794(yaw, pitch, 1.0f, &dir);
+    func_15081690(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, dir.x, dir.y, dir.z, &hit, 300.0f, 0, 1, 1, -1, 0, 0);
 
-    if (trace.unk59 == 0) {
-        init.unk28.x = init.unk4.x;
-        init.unk28.x += vec.x * 300.0f;
-        init.unk28.y = init.unk4.y;
-        init.unk28.y += vec.y * 300.0f;
-        init.unk28.z = init.unk4.z;
-        init.unk28.z += vec.z * 300.0f;
+    if (hit.hit == 0) {
+        desc.ctrl[3].x = desc.ctrl[0].x + dir.x * 300.0f;
+        desc.ctrl[3].y = desc.ctrl[0].y + dir.y * 300.0f;
+        desc.ctrl[3].z = desc.ctrl[0].z + dir.z * 300.0f;
     } else {
-        init.unk28 = trace.unk8;
+        desc.ctrl[3] = hit.pos;
     }
 
-    func_15107AE0(&init.unk4, &init.unk28, &init.unk10, &init.unk1C);
-    created = (struct S15107C1CCreated *)func_15105CE0((BoltDesc *)&init, 0x18, argC, argD);
-    if (created != NULL) {
-        memcpy(created->unk60, &payload, 0x18);
+    func_15107AE0(&desc.ctrl[0], &desc.ctrl[3], &desc.ctrl[1], &desc.ctrl[2]);
+    bolt = func_15105CE0(&desc, sizeof(BoltBoneAnchor), argC, argD);
+    if (bolt != NULL) {
+        memcpy(bolt->userData, &anchor, sizeof(BoltBoneAnchor));
     }
-    return created;
+    return bolt;
 }
 
-struct S15107E48 {
-    struct127 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    u8 unk8[0xC];
-    u8 unk14;
-};
+/* updateKind 1: keeps a kind-3 bolt's start on its owner's bone; returns 0 once the owner is gone. */
+s32 func_15107E48(BoltObj *bolt, u8 *moved) {
+    BoltBoneAnchor *anchor;
+    struct127 *owner;
+    Vec3f oldStart;
 
-s32 func_15107E48(struct127 *arg0, u8 *arg1) {
-    struct S15107E48 *data;
-    struct127 *obj;
-    struct Vec15107A20 oldPos;
-
-    data = (struct S15107E48 *)arg0->unk60;
-    obj = data->unk0;
-    if ((obj->interaction_state == 0) || (obj->unique_id != data->unk4)) {
+    anchor = bolt->userData;
+    owner = anchor->owner;
+    if ((owner->interaction_state == 0) || (owner->unique_id != anchor->ownerId)) {
         return 0;
     }
-    if (obj->unk1D4 == NULL) {
+    if (owner->unk1D4 == NULL) {
         return 0;
     }
-    *arg1 = 0;
-    oldPos = *(struct Vec15107A20 *)&arg0->x_position;
-    func_15107F54((s32 *)obj, data->unk14, data->unk8, (s32)(struct Vec15107A20 *)&arg0->x_position);
-    if ((oldPos.x == arg0->x_position) && (oldPos.y == arg0->y_position) && (oldPos.z == arg0->z_position)) {
+    *moved = FALSE;
+    oldStart = bolt->desc.ctrl[0];
+    func_15107F54(owner, anchor->bone, &anchor->localPos, &bolt->desc.ctrl[0]);
+    if ((oldStart.x == bolt->desc.ctrl[0].x) && (oldStart.y == bolt->desc.ctrl[0].y) && (oldStart.z == bolt->desc.ctrl[0].z)) {
         goto ret1;
     }
-    *arg1 = 1;
-    func_15107AE0((struct Vec15107A20 *)&arg0->x_position, (struct Vec15107A20 *)&arg0->unk38, (struct Vec15107A20 *)&arg0->y_velocity, (struct Vec15107A20 *)&arg0->old_x_position);
+    *moved = TRUE;
+    func_15107AE0(&bolt->desc.ctrl[0], &bolt->desc.ctrl[3], &bolt->desc.ctrl[1], &bolt->desc.ctrl[2]);
 ret1:
     return 1;
 }
 
-void func_15143134(void *, s32, s32);
+void func_15143134(Vec3f *in, Vec3f *out, s32 mtx);
 
-void func_15107F54(s32 *arg0, u8 arg1, void *arg2, s32 arg3) {
-    func_15143134(arg2, arg3, arg0[0x1D4 / 4] + (arg1 << 6));
+/* Transforms localPos by the actor's bone matrix (64 bytes each, at unk1D4). */
+void func_15107F54(struct127 *actor, u8 bone, Vec3f *localPos, Vec3f *out) {
+    func_15143134(localPos, out, (s32)actor->unk1D4 + (bone << 6));
 }
 
-void func_15169850(s32, u8, s32, s32, s32);
-
-void func_15107F98(s32 *arg0, s32 arg1, u8 arg2) {
-    func_15169850(arg1, arg2, arg0[0x18], arg0[0x18] + 4, (s32)arg0);
+/* D_80088C28 handler for kind 3. */
+void func_15107F98(BoltObj *bolt, s32 arg1, u8 arg2) {
+    func_15169850(arg1, arg2, (s32)bolt->userData, (s32)bolt->userData + 4, (s32)bolt);
 }
