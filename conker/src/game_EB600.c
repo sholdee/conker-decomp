@@ -103,7 +103,7 @@ void func_150BE2E8(WorldObject *mover) {
 }
 
 /* Writes object `id`'s two commands (0x68 = taskint[1], 0xE = taskint[0]) and returns the next slot. */
-EB340Command *func_150BE438(EB340Command *cmd, s32 id) {
+GameCommand *func_150BE438(GameCommand *cmd, s32 id) {
     cmd[0].opcode = 0x68;
     cmd[0].value = movement_obj[id].taskint[1];
     cmd[1].opcode = 0xE;

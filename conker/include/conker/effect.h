@@ -169,12 +169,6 @@ typedef struct {
 
 #define PATH_MOVER_WORK(obj) ((PathMoverWork *)&(obj)->touch)
 
-/* Two-halfword command, as in game_61490.c's GameCommand. */
-typedef struct {
-    /* 0x00 */ s16 opcode;
-    /* 0x02 */ s16 value;
-} EB340Command;
-
 /* game_193430.c */
 /* Effect kind 4 (0xA8 bytes from func_15167A68): one textured quad, double-buffered by D_800BE9C0. */
 typedef struct {
