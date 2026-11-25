@@ -240,7 +240,6 @@ typedef struct {
 } MtxF;
 
 extern MtxF D_8008AE18;
-extern f32 D_800A6070;
 
 /* Draw callback: scales the fixed matrix D_8008AE18 by data.size and translates to the actor's position. */
 s32 func_15158920(Mtx *mtx, EffectActor *actor) {
@@ -249,7 +248,7 @@ s32 func_15158920(Mtx *mtx, EffectActor *actor) {
     MtxF mf;
 
     mf = D_8008AE18;
-    scale = actor->data.size * D_800A6070;
+    scale = actor->data.size * 0.003921568859f;
     mf.m[3][0] = actor->position.x;
     mf.m[3][1] = actor->position.y;
     mf.m[3][2] = actor->position.z;
@@ -1007,8 +1006,16 @@ Particle *func_15159890(Vec3f *pos, Vec3f *velocity, s32 arg2, s32 arg3) {
     return particle;
 }
 
+/* Common object header bytes that spawn functions pass along. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+} ObjectHeader;
+
 /* Spawns one stationary rising particle at (x, y, z). */
-void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, u8 *arg6) {
+void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, ObjectHeader *obj) {
     Vec3f pos;
     Vec3f velocity;
 
@@ -1018,7 +1025,7 @@ void func_15159BB0(f32 x, f32 y, f32 z, s32 arg3, s32 arg4, s32 arg5, u8 *arg6) 
     velocity.y = 0.0f;
     velocity.z = 0.0f;
     pos.z = z;
-    func_15159890(&pos, &velocity, arg6[0xC], arg6[0x1]);
+    func_15159890(&pos, &velocity, obj->unkC, obj->unk1);
 }
 
 /* Emitter data at 0x28 of the func_15159C08 emitter. */
@@ -1396,7 +1403,8 @@ typedef struct {
 Spawner *func_151A8B20(struct183 *info, s16 arg1, s32 dataSize, u8 arg3, s32 arg4);
 
 /* Creates a spawner object for src from template D_800A636C[src->variant] (variant 0 only). */
-void func_1515A974(SpawnerSource *volatile src, s32 arg1) { // matching: volatile makes IDO reload src from its stack slot
+// matching: volatile makes IDO reload src from its stack slot
+void func_1515A974(SpawnerSource *volatile src, s32 arg1) {
     struct183 info;
     s32 pad[2]; // matching: 8 unused frame bytes between data and info
     SpawnerData data;
@@ -1454,8 +1462,9 @@ void func_1515AA84(Spawner *spawner, Vec3f *pos, f32 ceiling, s32 arg3) {
     emitter.position = *pos;
     emitter.ceiling = ceiling;
     emitter.settings = data->settings;
-    obj = (RiseEmitterObject *)func_15149130((u32)func_150ADA20() % (data->types.range + 1) + data->types.base, -1, 0x3F, -1, 1, 0,
-                        (struct37 *)sizeof(RiseEmitter), spawner->unkC, spawner->unk1);
+    obj = (RiseEmitterObject *)func_15149130((u32)func_150ADA20() % (data->types.range + 1) + data->types.base,
+                                             -1, 0x3F, -1, 1, 0, (struct37 *)sizeof(RiseEmitter), spawner->unkC,
+                                             spawner->unk1);
     if (obj != NULL) {
         memcpy(&obj->emitter, &emitter, sizeof(RiseEmitter));
     }
