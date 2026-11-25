@@ -298,7 +298,7 @@ typedef struct {
     /* 0x40 */ u8  unk40;
     /* 0x41 */ u8  unk41;
     /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ struct17 position;
+    /* 0x44 */ vertex position;
     /* 0x50 */ s32 unk50;
     /* 0x54 */ s16 unk54;
     /* 0x56 */ s16 unk56;
@@ -306,7 +306,7 @@ typedef struct {
 
 /* The block copied to the panel's +0x120. */
 typedef struct {
-    /* 0x00 */ struct17 unk0;
+    /* 0x00 */ vertex unk0;
     /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
 } PanelExtra;
@@ -451,14 +451,14 @@ void func_151BF340(u8 owner, s32 kind) {
             panelConfig.unk41 = 1;
             panelConfig.unk54 = 1;
             panelConfig.unk56 = 0xFF;
-            panelConfig.position.unk0 = 300.0f;
+            panelConfig.position.x = 300.0f;
             if (D_800D2458) {
-                panelConfig.position.unk4 = 32.0f;
+                panelConfig.position.y = 32.0f;
             } else {
-                panelConfig.position.unk4 = 79.0f;
+                panelConfig.position.y = 79.0f;
             }
-            panelConfig.position.unk8 = 0.0f;
-            panelExtra.unk0 = *(struct17 *)&D_800A5480;
+            panelConfig.position.z = 0.0f;
+            panelExtra.unk0 = *(vertex *)&D_800A5480; /* variables.h declares D_800A5480 as a single f32 */
             panelExtra.unkC = 0.3010000288f;
             panelExtra.unk10 = 0.3010000288f;
             display->panel = func_15157010(&panelConfig, 0, 1.0f, 0, 0, 0x14, owner, kind);
@@ -520,81 +520,90 @@ void func_151BF340(u8 owner, s32 kind) {
     }
 }
 
-typedef struct Game1EC390Animation {
-    void *primary;
-    void *secondary[2];
-    f32 timer;
-    f32 amount;
-    u8 flags;
-} Game1EC390Animation;
-
 s32 func_1517EF00(s32);
 s32 func_15181CC8(s32);
-extern f32 D_800AA918, D_800AA91C, D_800AA920;
-extern f32 D_800AA924, D_800AA928, D_800AA92C;
 
-void func_151BF81C(void *arg0) {
-    f32 amount;
-    Game1EC390Animation *animation;
+/* Update of func_151BF340's counter. It waits until D_800C35EA != 1, func_15181CC8(0) != 0, func_1517EF00(0) == 0
+ * and D_800BE9B4 == 0; then, as its 110-unit timer runs down by D_800BE9A4, it slides in over the first 20.57
+ * units, holds, slides out over the last 20.57 and ends the effect. */
+void func_151BF81C(CounterEffect *effect) {
+    f32 slide;
+    CounterDisplay *display;
 
-    if (D_800BEAC1 != 0 || (animation = (Game1EC390Animation *)((u8 *)arg0 + 0x28), D_800BEAC0 != 0)) {
-        *(s16 *)((u8 *)arg0 + 0xE) = -1;
-        *((u8 *)arg0 + 0xD) |= 1;
+    display = &effect->display;
+    if (D_800BEAC1 != 0 || D_800BEAC0 != 0) {
+        effect->header.unkE = -1;
+        effect->header.unkD |= 1;
         return;
     }
-    if (!(animation->flags & 1)) {
-        if (D_800C35EA == 1) return;
-        if (func_15181CC8(0) == 0) return;
-        if (func_1517EF00(0) != 0 || D_800BE9B4 != 0) return;
-        animation->flags |= 1;
+    if (!(display->flags & 1)) {
+        if (D_800C35EA == 1) {
+            return;
+        }
+        if (func_15181CC8(0) == 0) {
+            return;
+        }
+        if (func_1517EF00(0) != 0 || D_800BE9B4 != 0) {
+            return;
+        }
+        display->flags |= 1;
     }
-    if (animation->timer < D_800AA918) {
-        amount = sinf(animation->timer * D_800AA91C * D_800AA920);
-    } else if (D_800AA924 < animation->timer) {
-        amount = sinf((110.0f - animation->timer) * D_800AA928 * D_800AA92C);
+    if (display->timer < 20.5700016f) {
+        slide = sinf(display->timer * 0.04861448333f * 1.905000091f);
+    } else if (display->timer > 89.42999268f) {
+        slide = sinf((110.0f - display->timer) * 0.04861448333f * 1.905000091f);
     } else {
-        amount = animation->amount;
+        slide = display->plateau;
     }
-    if (animation->primary != NULL) {
-        *(f32 *)((u8 *)animation->primary + 0x54) = amount * -85.0f + 150.0f;
-        if (D_800D2458 != 0) *(f32 *)((u8 *)animation->primary + 0x58) = 32.0f;
-        else *(f32 *)((u8 *)animation->primary + 0x58) = 79.0f;
+    if (display->panel != NULL) {
+        display->panel->x = slide * -85.0f + 150.0f;
+        if (D_800D2458 != 0) {
+            display->panel->y = 32.0f;
+        } else {
+            display->panel->y = 79.0f;
+        }
     }
-    if (animation->secondary[0] != NULL) {
-        *(f32 *)((u8 *)animation->secondary[0] + 0x10) = ((amount * -85.0f + 150.0f) / 1.0f + 48.0f) - 12.0f;
-        if (D_800D2458 != 0) *(f32 *)((u8 *)animation->secondary[0] + 0x14) = -15.0f;
-        else *(f32 *)((u8 *)animation->secondary[0] + 0x14) = -62.0f;
+    if (display->digits[0] != NULL) {
+        // matching: the no-op / 1.0f is needed; without it IDO emits shorter code
+        display->digits[0]->x = ((slide * -85.0f + 150.0f) / 1.0f + 48.0f) - 12.0f;
+        if (D_800D2458 != 0) {
+            display->digits[0]->y = -15.0f;
+        } else {
+            display->digits[0]->y = -62.0f;
+        }
     }
-    if (animation->secondary[1] != NULL) {
-        *(f32 *)((u8 *)animation->secondary[1] + 0x10) = ((amount * -85.0f + 150.0f) / 1.0f + 48.0f) + 12.0f;
-        if (D_800D2458 != 0) *(f32 *)((u8 *)animation->secondary[1] + 0x14) = -15.0f;
-        else *(f32 *)((u8 *)animation->secondary[1] + 0x14) = -62.0f;
+    if (display->digits[1] != NULL) {
+        display->digits[1]->x = ((slide * -85.0f + 150.0f) / 1.0f + 48.0f) + 12.0f;
+        if (D_800D2458 != 0) {
+            display->digits[1]->y = -15.0f;
+        } else {
+            display->digits[1]->y = -62.0f;
+        }
     }
-    animation->timer -= D_800BE9A4;
-    if (animation->timer < 0.0f) {
-        *(s16 *)((u8 *)arg0 + 0xE) = -1;
-        *((u8 *)arg0 + 0xD) |= 1;
+    display->timer -= D_800BE9A4;
+    if (display->timer < 0.0f) {
+        effect->header.unkE = -1;
+        effect->header.unkD |= 1;
     }
 }
 
+/* Frees the counter's panel and digits. */
+void func_151BFB2C(CounterEffect *effect) {
+    u8 i;
+    CounterDisplay *display = &effect->display;
 
-void func_151BFB2C(struct260 *arg0) {
-    s32 i;
-    s32 v;
-    s32 *p = (s32 *)((u8 *)arg0 + 0x28);
-
-    if (p[0] != 0) {
-        func_1516972C((struct102 *)p[0]);
+    if (display->panel != NULL) {
+        func_1516972C((struct102 *)display->panel);
     }
-    for (i = 0; i < 2; i = (u8)(i + 1)) {
-        v = p[i + 1];
-        if (v != 0) {
-            func_1516972C((struct102 *)v);
+    for (i = 0; i < 2; i++) {
+        if (display->digits[i] != NULL) {
+            func_1516972C((struct102 *)display->digits[i]);
         }
     }
 }
 
-void func_151BFBA4(struct260 *arg0) {
-    func_151BFB2C(arg0);
-    func_1514933C(arg0);
+/* Destructor of func_151BF340's counter effect. */
+void func_151BFBA4(CounterEffect *effect) {
+    func_151BFB2C(effect);
+    func_1514933C(&effect->header);
 }
