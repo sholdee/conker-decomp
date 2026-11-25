@@ -2400,7 +2400,7 @@ void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 a
         u8 i;
         u8 mask;
 
-        tag[0] = 0xC;
+        tag[0] = 12;
         burst.radius = 1.0f;
         burst.bounce = 1.0f;
         burst.width = burst.height = (actor->xz_scale + actor->y_scale) * 0.5f;
@@ -2424,7 +2424,7 @@ void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 a
         burst.unk54 = 100;
         burst.unk58 = 5;
         burst.unk5C = 0;
-        burst.unk60 = 0xFF;
+        burst.unk60 = 255;
         burst.unk61 = 0;
         burst.unk62 = 0;
         burst.unk63 = 0;
@@ -2436,8 +2436,8 @@ void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 a
         burst.unk6A = 1;
         burst.owner = actor;
         burst.ownerId = actor->unique_id;
-        burst.unk72 = 0xC;
-        burst.unk74 = 0x15;
+        burst.unk72 = 12;
+        burst.unk74 = 21;
         for (i = 0, mask = 1; i < 4; i++, mask <<= 1) {
             if (!(D_800A4160[index] & mask)) {
                 continue;
@@ -2479,7 +2479,7 @@ void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 a
         packet.spin.y = 0.0f;
         packet.unk58 = 0;
         packet.unk5C = 0;
-        packet.unk60 = 0xFF;
+        packet.unk60 = 255;
         packet.unk62 = 0;
         packet.unk64 = 0;
         packet.unk65 = 0;
@@ -2488,10 +2488,10 @@ void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 a
         packet.unk6A = 1;
         packet.owner = actor;
         packet.ownerId = actor->unique_id;
-        packet.unk72 = 0xC;
-        packet.unk74 = 0x15;
+        packet.unk72 = 12;
+        packet.unk74 = 21;
         packet.flags = 0x1039E9;
-        packet.unk61 = 0xD;
+        packet.unk61 = 13;
         packet.unk68 = 2;
         packet.unk63 = 9;
         for (j = 0, bit = 1; j < 4; j++, bit <<= 1) {
@@ -2500,7 +2500,7 @@ void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 a
                 func_15143134(&D_800A4188[j].x, (s32)&packet.position.x, (s32)BONE_MATRIX(actor, 12));
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
-                func_15143794((u8)yaw, (s16)(pitch % 35U - 0x54), func_150ADA68() * 6.12f + 3.0f,
+                func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
                               &packet.velocity.x);
                 packet.spin.x = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.spin.z = func_150ADA68() * 30.746002f + -15.373001f;
@@ -2522,7 +2522,7 @@ void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 a
         spray.spin.y = 0.0f;
         spray.unk58 = 0;
         spray.unk5C = 0;
-        spray.unk60 = 0xFF;
+        spray.unk60 = 255;
         spray.unk62 = 0;
         spray.unk64 = 0;
         spray.unk65 = 0;
@@ -2531,17 +2531,17 @@ void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 a
         spray.unk6A = 1;
         spray.owner = actor;
         spray.ownerId = actor->unique_id;
-        spray.unk72 = 0xC;
-        spray.unk74 = 0x15;
+        spray.unk72 = 12;
+        spray.unk74 = 21;
         spray.flags = 0x1039E9;
-        spray.unk61 = 0xD;
+        spray.unk61 = 13;
         spray.unk68 = 2;
-        spray.unk63 = 0xB;
+        spray.unk63 = 11;
         spray.model = 0x48;
         func_15143134(&D_800A41B8.x, (s32)&spray.position.x, (s32)BONE_MATRIX(actor, 12));
         yaw = func_150ADA20();
         pitch = func_150ADA20();
-        func_15143794((u8)yaw, (s16)(pitch % 16U - 0x3C), func_150ADA68() * 7.1499996f + 10.889999f,
+        func_15143794((u8)yaw, (s16)(pitch % 16U - 60), func_150ADA68() * 7.1499996f + 10.889999f,
                       &spray.velocity.x);
         spray.spin.x = func_150ADA68() * 48.158f + -24.079f;
         spray.spin.z = func_150ADA68() * 48.158f + -24.079f;
@@ -2611,8 +2611,8 @@ void func_15139768(struct127 *actor, f32 *origin, f32 scale, void *hit, u8 arg4,
     idx = func_150ADA20() & 3;
     {
         BloodChunkDesc spawn;
-        u8 kind[4];
-        kind[0] = 0xC;
+        u8 tag[4];
+        tag[0] = 12;
         spawn.radius = 1.0f;
         spawn.bounce = 1.0f;
         spawn.width = spawn.height = (actor->xz_scale + actor->y_scale) * 0.5f * scale;
@@ -2630,10 +2630,10 @@ void func_15139768(struct127 *actor, f32 *origin, f32 scale, void *hit, u8 arg4,
         spawn.spin.z = 0.0f;
         spawn.unk4C = 0.0f;
         spawn.flags = 0x101900;
-        spawn.unk54 = 0x64;
+        spawn.unk54 = 100;
         spawn.unk58 = 5;
         spawn.unk5C = 0;
-        spawn.unk60 = 0xFF;
+        spawn.unk60 = 255;
         spawn.unk61 = 0;
         spawn.unk62 = 0;
         spawn.unk63 = 0;
@@ -2648,15 +2648,15 @@ void func_15139768(struct127 *actor, f32 *origin, f32 scale, void *hit, u8 arg4,
         spawn.type = 1.0f;
         spawn.unk24 = 1.0f;
         spawn.ownerId = actor->unique_id;
-        spawn.unk72 = 0xC;
-        spawn.unk74 = 0x15;
+        spawn.unk72 = 12;
+        spawn.unk74 = 21;
         for (i = 0, mask = 1; i < 4; i++, mask <<= 1) {
             if (D_800A41C4[idx] & mask) {
                 s32 ret;
                 spawn.model = D_800A41C8[i];
                 ret = func_15132A4C(&spawn, 3, 0xFF, 1, arg4, arg5);
                 if (ret != 0) {
-                    memcpy((void *)(ret + 0x170), kind, 1);
+                    memcpy((void *)(ret + 0x170), tag, 1);
                 }
             }
         }
@@ -2672,11 +2672,11 @@ void func_15139768(struct127 *actor, f32 *origin, f32 scale, void *hit, u8 arg4,
         for (count = (func_150ADA20() & 3) + 5; count > 0; count--) {
             func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 71U - 60), func_150ADA68() * 6.0f + 6.0f, &dir.x);
             func_151C5F44((s32)origin, &dir.x, func_150ADA68() * 0.1170000061f + -0.1970000118f, 0.9508649707f,
-                          func_150ADA20() % 66U + 0xBE, func_150ADA20() % 45U + 0x2C, func_150ADA68() * 20.0f + 50.0f,
+                          func_150ADA20() % 66U + 190, func_150ADA20() % 45U + 44, func_150ADA68() * 20.0f + 50.0f,
                           0, (s32)hit, arg4, arg5);
         }
         {
-            s32 q;
+            s32 q; // matching: unused stack slot
             func_1503F404((s32)BONE_MATRIX(actor, 12), &a.x, &a.y, &a.z, &v.x, &v.y, &v.z, &b.x, &b.y, &b.z);
         }
         spawn2.radius = 1.0f;
@@ -2686,7 +2686,7 @@ void func_15139768(struct127 *actor, f32 *origin, f32 scale, void *hit, u8 arg4,
         spawn2.spin.y = 0.0f;
         spawn2.unk58 = 0;
         spawn2.unk5C = 0;
-        spawn2.unk60 = 0xFF;
+        spawn2.unk60 = 255;
         spawn2.unk62 = 0;
         spawn2.unk64 = 0;
         spawn2.unk65 = 0;
@@ -2698,21 +2698,21 @@ void func_15139768(struct127 *actor, f32 *origin, f32 scale, void *hit, u8 arg4,
         spawn2.type = 1.0f;
         spawn2.unk24 = 1.0f;
         spawn2.ownerId = actor->unique_id;
-        spawn2.unk72 = 0xC;
-        spawn2.unk74 = 0x15;
+        spawn2.unk72 = 12;
+        spawn2.unk74 = 21;
         spawn2.flags = 0x1039E9;
-        spawn2.unk61 = 0xD;
+        spawn2.unk61 = 13;
         spawn2.unk68 = 2;
         spawn2.unk63 = 9;
         for (j = 0, mask2 = 1; j < 4; j++, mask2 <<= 1) {
             if (!(D_800A41C4[idx] & mask2)) {
                 spawn2.model = D_800A41D8[j];
                 func_15143134(&D_800A41E8[j], (s32)&spawn2.position, (s32)BONE_MATRIX(actor, 12));
-                func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 35U - 0x54), func_150ADA68() * 6.119999886f + 3.0f, &spawn2.velocity.x);
+                func_15143794((s16)(func_150ADA20() & 0xFF), (s16)(func_150ADA20() % 35U - 84), func_150ADA68() * 6.119999886f + 3.0f, &spawn2.velocity.x);
                 spawn2.spin.x = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.spin.z = func_150ADA68() * 30.7460022f + -15.3730011f;
                 spawn2.unk4C = func_150ADA68() * 0.2080000043f + -0.7080000043f;
-                spawn2.unk54 = func_150ADA20() % 101U + 0x3C;
+                spawn2.unk54 = func_150ADA20() % 101U + 60;
                 func_1513264C(&spawn2, 3, 0xFF, (s32)hit, 0, arg4, arg5);
             }
         }
@@ -2737,7 +2737,7 @@ void func_15139D74(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
         u8 i;
         u8 mask;
 
-        tag[0] = 0xC;
+        tag[0] = 12;
         burst.radius = 1.0f;
         burst.bounce = 1.0f;
         burst.width = burst.height = (actor->xz_scale + actor->y_scale) * 0.5f;
@@ -2758,10 +2758,10 @@ void func_15139D74(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
         burst.spin.z = 0.0f;
         burst.unk4C = 0.0f;
         burst.flags = 0x101900;
-        burst.unk54 = 0x190;
+        burst.unk54 = 400;
         burst.unk58 = 5;
         burst.unk5C = 0;
-        burst.unk60 = 0xFF;
+        burst.unk60 = 255;
         burst.unk61 = 0;
         burst.unk62 = 0;
         burst.unk63 = 0;
@@ -2773,8 +2773,8 @@ void func_15139D74(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
         burst.unk6A = 1;
         burst.owner = actor;
         burst.ownerId = actor->unique_id;
-        burst.unk72 = 0xC;
-        burst.unk74 = 0x15;
+        burst.unk72 = 12;
+        burst.unk74 = 21;
         for (i = 0, mask = 1; i < 3; i++, mask <<= 1) {
             if (!(D_800A4218[index] & mask)) {
                 continue;
@@ -2815,7 +2815,7 @@ void func_15139D74(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
         packet.spin.y = 0.0f;
         packet.unk58 = 0;
         packet.unk5C = 0;
-        packet.unk60 = 0xFF;
+        packet.unk60 = 255;
         packet.unk62 = 0;
         packet.unk64 = 0;
         packet.unk65 = 0;
@@ -2824,10 +2824,10 @@ void func_15139D74(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
         packet.unk6A = 1;
         packet.owner = actor;
         packet.ownerId = actor->unique_id;
-        packet.unk72 = 0xC;
-        packet.unk74 = 0x15;
+        packet.unk72 = 12;
+        packet.unk74 = 21;
         packet.flags = 0x1039E9;
-        packet.unk61 = 0xD;
+        packet.unk61 = 13;
         packet.unk68 = 2;
         packet.unk63 = 9;
         for (j = 0, bit = 1; j < 3; j++, bit <<= 1) {
@@ -2836,7 +2836,7 @@ void func_15139D74(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
                 func_15143134(&D_800A4234[j].x, (s32)&packet.position.x, (s32)BONE_MATRIX(actor, 12));
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
-                func_15143794((u8)yaw, (s16)(pitch % 35U - 0x54), func_150ADA68() * 6.12f + 3.0f,
+                func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
                               &packet.velocity.x);
                 packet.spin.x = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.spin.z = func_150ADA68() * 30.746002f + -15.373001f;
@@ -3071,7 +3071,7 @@ void func_1513A6E0(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
     BloodChunkDesc spawn;
     u8 extra[4];
     s32 pad1;
-    extra[0] = 0xC;
+    extra[0] = 12;
     spawn.radius = 1.0f;
     spawn.bounce = 1.0f;
     spawn.width = spawn.height = (actor->xz_scale + actor->y_scale) * 0.5f;
@@ -3092,10 +3092,10 @@ void func_1513A6E0(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
     spawn.spin.z = 0.0f;
     spawn.unk4C = 0.0f;
     spawn.flags = 0x101900;
-    spawn.unk54 = 0x64;
+    spawn.unk54 = 100;
     spawn.unk58 = 5;
     spawn.unk5C = 0;
-    spawn.unk60 = 0xFF;
+    spawn.unk60 = 255;
     spawn.unk61 = 0;
     spawn.unk62 = 0;
     spawn.unk63 = 0;
@@ -3107,8 +3107,8 @@ void func_1513A6E0(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
     spawn.unk6A = 1;
     spawn.owner = actor;
     spawn.ownerId = actor->unique_id;
-    spawn.unk72 = 0xC;
-    spawn.unk74 = 0x15;
+    spawn.unk72 = 12;
+    spawn.unk74 = 21;
     for (i = 0, mask = 1; i < 4; i++, mask <<= 1) {
         if (D_800A4278[idx] & mask) {
             s32 ret;
@@ -3142,7 +3142,7 @@ void func_1513A6E0(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
         spawn2.spin.y = 0.0f;
         spawn2.unk58 = 0;
         spawn2.unk5C = 0;
-        spawn2.unk60 = 0xFF;
+        spawn2.unk60 = 255;
         spawn2.unk62 = 0;
         spawn2.unk64 = 0;
         spawn2.unk65 = 0;
@@ -3151,10 +3151,10 @@ void func_1513A6E0(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
         spawn2.unk6A = 1;
         spawn2.owner = actor;
         spawn2.ownerId = actor->unique_id;
-        spawn2.unk72 = 0xC;
-        spawn2.unk74 = 0x15;
+        spawn2.unk72 = 12;
+        spawn2.unk74 = 21;
         spawn2.flags = 0x1039E9;
-        spawn2.unk61 = 0xD;
+        spawn2.unk61 = 13;
         spawn2.unk68 = 2;
         spawn2.unk63 = 9;
         for (i = 0, mask2 = 1; i < 4; i++, mask2 <<= 1) {
@@ -3192,7 +3192,7 @@ void func_1513ABB8(struct127 *actor, f32 *origin, u8 variant, void *hit, u8 arg4
         u8 i;
         u8 mask;
 
-        tag[0] = 0xC;
+        tag[0] = 12;
         burst.radius = 1.0f;
         burst.bounce = 1.0f;
         burst.width = burst.height = (actor->xz_scale + actor->y_scale) * 0.5f;
@@ -3213,10 +3213,10 @@ void func_1513ABB8(struct127 *actor, f32 *origin, u8 variant, void *hit, u8 arg4
         burst.spin.z = 0.0f;
         burst.unk4C = 0.0f;
         burst.flags = 0x101900;
-        burst.unk54 = 0x64;
+        burst.unk54 = 100;
         burst.unk58 = 5;
         burst.unk5C = 0;
-        burst.unk60 = 0xFF;
+        burst.unk60 = 255;
         burst.unk61 = 0;
         burst.unk62 = 0;
         burst.unk63 = 0;
@@ -3228,8 +3228,8 @@ void func_1513ABB8(struct127 *actor, f32 *origin, u8 variant, void *hit, u8 arg4
         burst.unk6A = 1;
         burst.owner = actor;
         burst.ownerId = actor->unique_id;
-        burst.unk72 = 0xC;
-        burst.unk74 = 0x15;
+        burst.unk72 = 12;
+        burst.unk74 = 21;
         for (i = 0, mask = 1; i < 2; i++, mask <<= 1) {
             if (!(D_800A42D0[index] & mask)) {
                 continue;
@@ -3270,7 +3270,7 @@ void func_1513ABB8(struct127 *actor, f32 *origin, u8 variant, void *hit, u8 arg4
         packet.spin.y = 0.0f;
         packet.unk58 = 0;
         packet.unk5C = 0;
-        packet.unk60 = 0xFF;
+        packet.unk60 = 255;
         packet.unk62 = 0;
         packet.unk64 = 0;
         packet.unk65 = 0;
@@ -3279,10 +3279,10 @@ void func_1513ABB8(struct127 *actor, f32 *origin, u8 variant, void *hit, u8 arg4
         packet.unk6A = 1;
         packet.owner = actor;
         packet.ownerId = actor->unique_id;
-        packet.unk72 = 0xC;
-        packet.unk74 = 0x15;
+        packet.unk72 = 12;
+        packet.unk74 = 21;
         packet.flags = 0x1039E9;
-        packet.unk61 = 0xD;
+        packet.unk61 = 13;
         packet.unk68 = 2;
         packet.unk63 = 9;
         for (j = 0, bit = 1; j < 2; j++, bit <<= 1) {
@@ -3291,7 +3291,7 @@ void func_1513ABB8(struct127 *actor, f32 *origin, u8 variant, void *hit, u8 arg4
                 func_15143134(&D_800A42F4[variant][j].x, (s32)&packet.position.x, (s32)BONE_MATRIX(actor, 12));
                 yaw = func_150ADA20();
                 pitch = func_150ADA20();
-                func_15143794((u8)yaw, (s16)(pitch % 35U - 0x54), func_150ADA68() * 6.12f + 3.0f,
+                func_15143794((u8)yaw, (s16)(pitch % 35U - 84), func_150ADA68() * 6.12f + 3.0f,
                               &packet.velocity.x);
                 packet.spin.x = func_150ADA68() * 30.746002f + -15.373001f;
                 packet.spin.z = func_150ADA68() * 30.746002f + -15.373001f;
@@ -3363,7 +3363,7 @@ void func_1513B0F8(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
     spawn.unk54 = 100;
     spawn.unk58 = 5;
     spawn.unk5C = 0;
-    spawn.unk60 = 0xFF;
+    spawn.unk60 = 255;
     spawn.unk61 = 0;
     spawn.unk62 = 0;
     spawn.unk63 = 0;
@@ -3375,8 +3375,8 @@ void func_1513B0F8(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
     spawn.unk6A = 1;
     spawn.owner = actor;
     spawn.ownerId = actor->unique_id;
-    spawn.unk72 = 0xC;
-    spawn.unk74 = 0x15;
+    spawn.unk72 = 12;
+    spawn.unk74 = 21;
     for (i = 0, mask = 1; i < 2; i++, mask <<= 1) {
         if (D_800A4324[index] & mask) {
             void *particle;
@@ -3407,7 +3407,7 @@ void func_1513B0F8(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
     drop.spin.y = 0.0f;
     drop.unk58 = 0;
     drop.unk5C = 0;
-    drop.unk60 = 0xFF;
+    drop.unk60 = 255;
     drop.unk62 = 0;
     drop.unk64 = 0;
     drop.unk65 = 0;
@@ -3416,10 +3416,10 @@ void func_1513B0F8(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) 
     drop.unk6A = 1;
     drop.owner = actor;
     drop.ownerId = actor->unique_id;
-    drop.unk72 = 0xC;
-    drop.unk74 = 0x15;
+    drop.unk72 = 12;
+    drop.unk74 = 21;
     drop.flags = 0x1039E9;
-    drop.unk61 = 0xD;
+    drop.unk61 = 13;
     drop.unk68 = 2;
     drop.unk63 = 9;
     for (i = 0, bit = 1; i < 2; i++, bit <<= 1) {
