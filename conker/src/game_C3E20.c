@@ -2,105 +2,107 @@
 #include "functions.h"
 #include "variables.h"
 
-
-extern u8 D_800D2DC0[];
-extern s32 D_800D2E30[];
-
-void func_15096970(void) {
-    bzero(D_800D2DC0, 0x6C);
-    D_800D2DB4 = 0;
-}
-
-s32 func_150969A0(s32 arg0) {
-    s32 i;
-
-    for (i = 0; i < arg0; i++) {
-        if (D_800D2DC0[i * 0x24] != 0) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
+/* A scripted actor move: actor `actor` is sent to pose `poseIndex` for `timer` frames. */
 typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 unk2;
+    /* 0x00 */ u8 state; // 0 = idle, 1 = start pending, 2 = running
+    /* 0x01 */ u8 actor; // index into D_800DBFF0
+    /* 0x02 */ u8 poseIndex; // index into the D_800DC020 pose table
     /* 0x03 */ u8 pad3;
-    /* 0x04 */ s16 unk4;
+    /* 0x04 */ s16 timer;
     /* 0x06 */ u8 pad6[6];
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ f32 unk10;
+    /* 0x0C */ s32 flags;
+    /* 0x10 */ f32 scale; // copied to D_800D2E30 while running
     /* 0x14 */ u8 pad14[0xC];
-    /* 0x20 */ f32 unk20;
-} Struct_D_800D2DC0;
+    /* 0x20 */ f32 unk20; // actor->unk37C at setup, written to actor->pad3A4 when done
+} C3E20Command; // size 0x24
 
 typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
     /* 0x06 */ u8 pad6[6];
     /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
-} Struct_D_800DC020;
+} C3E20Pose; // size 0x18
 
+extern C3E20Command D_800D2DC0[3];
+extern s32 D_800D2E30[];
 extern f32 D_800D2DB8;
+
 void func_1512D560(struct108 *, s32, struct168 *);
+
+/* Clears all command slots. */
+void func_15096970(void) {
+    bzero(D_800D2DC0, sizeof(D_800D2DC0));
+    D_800D2DB4 = 0;
+}
+
+/* Returns TRUE if any of the first `count` command slots is active. */
+s32 func_150969A0(s32 count) {
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        if (D_800D2DC0[i].state != 0) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
 
 s32 func_15096A68(s32 arg0) {
     u8 idx;
-    Struct_D_800DC020 *pos;
+    C3E20Pose *pos;
     struct108 *obj;
     struct108 *obj2;
 
-    switch (((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk0) {
+    switch (D_800D2DC0[arg0].state) {
     case 1:
-        idx = ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk1;
+        idx = D_800D2DC0[arg0].actor;
         obj = &D_800DBFF0[idx];
-        pos = *(Struct_D_800DC020 **)&D_800DC020;
-        pos = &pos[((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk2 & 0xFF];
+        pos = *(C3E20Pose **)&D_800DC020;
+        pos = &pos[D_800D2DC0[arg0].poseIndex & 0xFF];
         D_800D2DB8 = obj->unk2C0;
         D_800D2DB4 = 1;
         D_800DBFF4[idx] = 3;
         ((struct168 *)&D_800C3600)->unk0 = 1;
         ((struct168 *)&D_800C3600)->unk4 = 0;
-        ((struct168 *)&D_800C3600)->unk14 = pos->unk0;
-        ((struct168 *)&D_800C3600)->unk18 = pos->unk2;
-        ((struct168 *)&D_800C3600)->unk1C = pos->unk4;
+        ((struct168 *)&D_800C3600)->unk14 = pos->x;
+        ((struct168 *)&D_800C3600)->unk18 = pos->y;
+        ((struct168 *)&D_800C3600)->unk1C = pos->z;
         ((struct168 *)&D_800C3600)->unk20 = pos->unk14;
         ((struct168 *)&D_800C3600)->unk24 = pos->unkC;
         ((struct168 *)&D_800C3600)->unk28 = pos->unk10;
         ((struct168 *)&D_800C3600)->unk8 = 0.0f;
         func_1512D560(obj, 5, 0);
         func_1512D560(obj, 7, (struct168 *)&D_800C3600);
-        if (!(((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unkC & 1)) {
+        if (!(D_800D2DC0[arg0].flags & 1)) {
             obj->unk3D0->unk7 = 0;
             obj->unk3D0->unk25C |= 0x200;
         }
-        D_800D2E30[arg0] = ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk10;
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk0 = 2;
+        D_800D2E30[arg0] = D_800D2DC0[arg0].scale;
+        D_800D2DC0[arg0].state = 2;
     lbl1:
         break;
     case 2:
-        obj2 = &D_800DBFF0[((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk1];
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk4 -= D_800BE9A0;
+        obj2 = &D_800DBFF0[D_800D2DC0[arg0].actor];
+        D_800D2DC0[arg0].timer -= D_800BE9A0;
         if (obj2->unk3D0->health == 0) {
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk4 = 0;
+            D_800D2DC0[arg0].timer = 0;
         }
-        if (((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk4 <= 0) {
-            obj2->pad3A4 = ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk20;
-            if (!(((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unkC & 2)) {
+        if (D_800D2DC0[arg0].timer <= 0) {
+            obj2->pad3A4 = D_800D2DC0[arg0].unk20;
+            if (!(D_800D2DC0[arg0].flags & 2)) {
                 func_1512D560(obj2, 6, 0);
             }
             D_800D2DB4 = 0;
-            if (!(((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unkC & 1)) {
+            if (!(D_800D2DC0[arg0].flags & 1)) {
                 obj2->unk3D0->unk25C &= ~0x200;
                 obj2->unk3D0->unk7 = 0xFF;
             }
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk4 = 0;
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg0].unk0 = 0;
+            D_800D2DC0[arg0].timer = 0;
+            D_800D2DC0[arg0].state = 0;
             obj2->unk2C0 = D_800D2DB8;
             return 0;
         }
@@ -109,25 +111,13 @@ s32 func_15096A68(s32 arg0) {
     return 1;
 }
 
-extern u8 D_800C35EA;
-extern s32 func_15096A68(s32);
-
+/* Runs the active command slots until one of them is still busy. */
 void func_15096D08(void) {
     s32 i;
-    u8 *p;
 
-    i = 0;
     if (D_800C35EA != 1) {
-        p = D_800D2DC0;
-        while (1) {
-            if (*p != 0) {
-                if (func_15096A68(i) != 0) {
-                    break;
-                }
-            }
-            i++;
-            p += 0x24;
-            if (i == 3) {
+        for (i = 0; i < 3; i++) {
+            if (D_800D2DC0[i].state != 0 && func_15096A68(i) != 0) {
                 break;
             }
         }
@@ -152,20 +142,20 @@ s32 func_15096D78(s32 arg0, s32 arg1, s32 *arg2) {
     }
     switch (arg1) {
     case 12:
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk20 = obj->unk37C;
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk1 = arg0;
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk2 = arg2[3];
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk4 = arg2[4];
-        ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk0 = 1;
+        D_800D2DC0[arg2[2]].unk20 = obj->unk37C;
+        D_800D2DC0[arg2[2]].actor = arg0;
+        D_800D2DC0[arg2[2]].poseIndex = arg2[3];
+        D_800D2DC0[arg2[2]].timer = arg2[4];
+        D_800D2DC0[arg2[2]].state = 1;
         if (D_800D3840 >= 6) {
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unkC = arg2[5];
+            D_800D2DC0[arg2[2]].flags = arg2[5];
         } else {
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unkC = 0;
+            D_800D2DC0[arg2[2]].flags = 0;
         }
         if (D_800D3840 >= 7) {
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk10 = arg2[6] * 1.52587890625e-05f;
+            D_800D2DC0[arg2[2]].scale = arg2[6] * 1.52587890625e-05f;
         } else {
-            ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk10 = 1.0f;
+            D_800D2DC0[arg2[2]].scale = 1.0f;
         }
         if (!func_150969A0(arg2[2])) {
             func_15096A68(arg2[2]);
@@ -200,16 +190,16 @@ s32 func_15096D78(s32 arg0, s32 arg1, s32 *arg2) {
         return 1;
     case 10:
       {
-        Struct_D_800DC020 *pos;
-        pos = *(Struct_D_800DC020 **)&D_800DC020;
+        C3E20Pose *pos;
+        pos = *(C3E20Pose **)&D_800DC020;
         pos = &pos[arg2[2] & 0xFFF];
         D_800D2DB4 = 1;
         D_800DBFF4[arg0] = 3;
         ((struct168 *)&D_800C3600)->unk0 = 1;
         ((struct168 *)&D_800C3600)->unk4 = 0;
-        ((struct168 *)&D_800C3600)->unk14 = pos->unk0;
-        ((struct168 *)&D_800C3600)->unk18 = pos->unk2;
-        ((struct168 *)&D_800C3600)->unk1C = pos->unk4;
+        ((struct168 *)&D_800C3600)->unk14 = pos->x;
+        ((struct168 *)&D_800C3600)->unk18 = pos->y;
+        ((struct168 *)&D_800C3600)->unk1C = pos->z;
         ((struct168 *)&D_800C3600)->unk20 = pos->unk14;
         ((struct168 *)&D_800C3600)->unk24 = pos->unkC;
         ((struct168 *)&D_800C3600)->unk28 = pos->unk10;
@@ -288,12 +278,12 @@ s32 func_15096D78(s32 arg0, s32 arg1, s32 *arg2) {
         break;
     case 21:
       {
-        Struct_D_800DC020 *pos;
-        pos = *(Struct_D_800DC020 **)&D_800DC020;
+        C3E20Pose *pos;
+        pos = *(C3E20Pose **)&D_800DC020;
         pos = &pos[arg2[2] & 0xFFF];
-        pos->unk0 = arg2[3];
-        pos->unk2 = arg2[4];
-        pos->unk4 = arg2[5];
+        pos->x = arg2[3];
+        pos->y = arg2[4];
+        pos->z = arg2[5];
       }
         break;
     case 22:
@@ -340,7 +330,7 @@ s32 func_1509759C(s32 arg0, s32 arg1, s32 *arg2) {
     struct17 diff;
     f32 angle;
     u8 *ent;
-    Struct_D_800DC020 *pos;
+    C3E20Pose *pos;
     f32 dx;
     f32 dz;
 
@@ -354,12 +344,12 @@ s32 func_1509759C(s32 arg0, s32 arg1, s32 *arg2) {
     case 0x1E:
         return obj->unk37C * 65536.0f;
     case 0x1D:
-        return ((Struct_D_800D2DC0 *)D_800D2DC0)[arg2[2]].unk0;
+        return D_800D2DC0[arg2[2]].state;
     case 0x20:
-        pos = *(Struct_D_800DC020 **)&D_800DC020;
+        pos = *(C3E20Pose **)&D_800DC020;
         pos = &pos[arg2[2] & 0xFFF];
-        dx = obj->unk2F8 - pos->unk0;
-        dz = obj->unk300 - pos->unk4;
+        dx = obj->unk2F8 - pos->x;
+        dz = obj->unk300 - pos->z;
         return sqrtf(dx * dx + dz * dz);
     case 0x21:
         ent = func_1505EEF4(arg2[2] & 0xFFF);
