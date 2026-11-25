@@ -2,7 +2,6 @@
 
 #include "functions.h"
 #include "variables.h"
-#include <stddef.h>
 
 typedef struct {
     f32 x, y, z;
@@ -143,8 +142,9 @@ typedef struct Particle {
     u8 padBC[4];
     Vtx vtxTemplate[4];
     Vtx *vtxBuffers[4]; /* per viewport, refreshed from vtxTemplate */
-    ParticleMotion motion;
-} Particle;
+} Particle; /* size 0x110; its ParticleMotion follows it */
+
+#define PARTICLE_MOTION(particle) ((ParticleMotion *)((particle) + 1))
 
 /* Source of the four vertex colours given to func_151400D0. */
 typedef struct {
@@ -686,7 +686,7 @@ void *func_1513D2F0(void *def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expire
     } else {
         kind = 0x1C;
     }
-    particle = func_15167A68(kind, argB, motionSize + offsetof(Particle, motion), 1, argA,
+    particle = func_15167A68(kind, argB, motionSize + sizeof(Particle), 1, argA,
                              (flags & 0x80000000U) ? 2 : 1);
     if (particle == NULL) {
         return NULL;
@@ -744,9 +744,9 @@ s32 func_1513D594(s32 def, s32 colors, u8 updateFn1, u8 updateFn2, u8 expireFn, 
         colors = (s32)&D_800A4AA0;
     }
     particle = func_1513D2F0(def, colors, updateFn1, updateFn2, expireFn, 12, flip, model, argC,
-                             motionSize + sizeof(particle->motion.axes), argF, arg10);
+                             motionSize + sizeof(PARTICLE_MOTION(particle)->axes), argF, arg10);
     if ((particle != NULL) &&
-        (func_1513D6FC((struct211 *)&particle->motion.axes, angle, width, height, arg9, argA, argD) == 0)) {
+        (func_1513D6FC((struct211 *)&PARTICLE_MOTION(particle)->axes, angle, width, height, arg9, argA, argD) == 0)) {
         func_1516972C(particle);
         return 0;
     }
@@ -1212,7 +1212,7 @@ s32 func_1513E2AC(s32 sprite, s32 arg1, s32 surface, f32 x, f32 y, f32 z, f32 wi
 s32 func_1513E6E8(Particle *particle) {
     ParticleMotion *motion;
 
-    motion = &particle->motion;
+    motion = PARTICLE_MOTION(particle);
     if (particle->def.flags & 0x20) {
         motion->drift.vel.y += motion->drift.gravity * D_800BE9A4;
     }
@@ -1471,7 +1471,7 @@ Vtx *func_1513F114(Particle *particle, s16 viewport) {
     } else {
         return NULL;
     }
-    {
+    { // matching: this -g3 block scope steers the scheduler
         sinDir = D_800DD1D8[viewport];
         cosDir = D_800DD1E8[viewport];
         bottom = -(particle->def.scale.y * particle->def.height);
@@ -1527,41 +1527,51 @@ void func_1513F4B0(struct210 *particle, s16 viewport) {
 
 s16 func_15143044(u8, s32);
 
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2) {
-    extern s16 D_800DD1BE;
-    extern u8 D_800A4BA8[];
-    s32 v0;
-    u8 *p;
+/*
+ * Combiner modes: each 16-byte entry holds the a, b, c, d inputs of cycle 0 colour, cycle 0 alpha,
+ * cycle 1 colour and cycle 1 alpha, in that order.
+ */
+extern u8 D_800A4BA8[][16];
+extern s16 D_800DD1BE;
 
-    v0 = func_15143044(arg1, 0);
-    if (v0 != D_800DD1BE) {
-        if (*arg2 == 1) {
-            gDPPipeSync(gdl++);
-            *arg2 = 0;
+/* Sets the colour combiner to mode combiner unless it is already current. */
+Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync) {
+    s32 key;
+    u8 *mode;
+
+    key = func_15143044(combiner, 0);
+    if (key != D_800DD1BE) {
+        if (*needSync == TRUE) {
+            gDPPipeSync(gfx++);
+            *needSync = FALSE;
         }
-        p = &D_800A4BA8[arg1 * 16];
-        gDPSetCombine(gdl++,
-            GCCc0w0(p[0], p[2], p[4], p[6]) | GCCc1w0(p[8], p[10]),
-            GCCc0w1(p[1], p[3], p[5], p[7]) | GCCc1w1(p[9], p[12], p[14], p[11], p[13], p[15]));
-        D_800DD1BE = v0;
+        mode = D_800A4BA8[combiner];
+        gDPSetCombine(gfx++,
+                      GCCc0w0(mode[0], mode[2], mode[4], mode[6]) | GCCc1w0(mode[8], mode[10]),
+                      GCCc0w1(mode[1], mode[3], mode[5], mode[7]) |
+                          GCCc1w1(mode[9], mode[12], mode[14], mode[11], mode[13], mode[15]));
+        D_800DD1BE = key;
     }
-    return gdl;
-}
-void func_1513F680(struct171 *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4) {
-    arg0->unk70 = arg1;
-    arg0->unk71 = arg2;
-    arg0->unk72 = arg3;
-    arg0->unk73 = arg4;
+    return gfx;
 }
 
-void func_1513F6C0(struct171 *arg0, u8 arg1, u8 arg2) {
-    *(u8 *)((u8 *)arg0 + 0x80) = arg1;
-    *(u8 *)((u8 *)arg0 + 0x81) = arg2;
+/* Sets a particle's update, expiry and vertex function indices. */
+void func_1513F680(Particle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn) {
+    particle->updateFn1 = updateFn1;
+    particle->updateFn2 = updateFn2;
+    particle->expireFn = expireFn;
+    particle->vertexFn = vertexFn;
+}
+
+/* Sets a sprite's update and expiry function indices. */
+void func_1513F6C0(SpriteFx *sprite, u8 updateFn, u8 expireFn) {
+    sprite->updateFn = updateFn;
+    sprite->expireFn = expireFn;
 }
 
 /* Grows a particle's width and height by motion.grow.rate times the frame time. */
 s32 func_1513F6E8(Particle *particle) {
-    f32 rate = particle->motion.grow.rate;
+    f32 rate = PARTICLE_MOTION(particle)->grow.rate;
 
     particle->def.width += rate * D_800BE9A4;
     particle->def.height += rate * D_800BE9A4;
@@ -1577,7 +1587,7 @@ s32 func_1513F728(Particle *particle) {
     Vec3f oldVel;
     s32 i;
 
-    motion = &particle->motion;
+    motion = PARTICLE_MOTION(particle);
     oldVel = motion->ballistic.vel;
     for (i = D_800BE9E4; i != 0; i--) {
         motion->ballistic.vel.x *= motion->ballistic.drag;
@@ -1904,48 +1914,41 @@ Vtx *func_15140410(Particle *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport)
     return result;
 }
 
-/* Sort-list node (0x110 bytes); func_151406AC insertion-sorts one D_800DCE50 bucket by key. */
-typedef struct Node151406AC {
-    u8 pad0[4];
-    struct Node151406AC *prev;
-    struct Node151406AC *next;
-    u8 padC[0xC];
-    u8 unk18;
-    u8 pad19[7];
-    s32 unk20;
-    u8 pad24[0xEC];
-} Node151406AC;
+/* Particle draw lists, D_800DCE50[group][list]. */
+extern Particle *D_800DCE50[][104];
 
-extern u8 D_800DCE50[];
+/* Sort key: texture, then animation frame, so that particles sharing a texture load draw together. */
+#define PARTICLE_SORT_KEY(p) (((p)->def.texture << 8) + ((p)->def.frame >> 16))
 
-s32 func_151406AC(s32 arg0, s32 arg1, s32 arg2, s16 arg3) {
-    Node151406AC head;
-    Node151406AC **slot;
-    Node151406AC *cur;
-    Node151406AC *prev;
-    Node151406AC *next;
-    Node151406AC *node;
+/* List callback: insertion-sorts draw list D_800DCE50[group][list] by PARTICLE_SORT_KEY. */
+s32 func_151406AC(s32 arg0, s32 list, s32 group, s16 phase) {
+    Particle head;
+    Particle **slot;
+    Particle *cur;
+    Particle *prev;
+    Particle *next;
+    Particle *node;
     s32 key;
     s32 nodeKey;
 
-    if (arg3 != 0) {
+    if (phase != 0) {
         return arg0;
     }
-    slot = &((Node151406AC *(*)[104])D_800DCE50)[arg2][arg1];
+    slot = &D_800DCE50[group][list];
     node = *slot;
-    head.unk18 = 0;
-    head.unk20 = 0;
+    head.def.texture = 0;
+    head.def.frame = 0;
     head.next = node;
     /* BUG (original game): dereferences the list head before the NULL check below
-       (and again after the sort); an empty bucket writes to address 4. */
+       (and again after the sort); an empty list writes to address 4. */
     node->prev = &head;
     if (node != NULL) {
         for (cur = node->next; cur != NULL; cur = next) {
             prev = cur->prev;
             next = cur->next;
-            key = (cur->unk18 << 8) + (cur->unk20 >> 16);
+            key = PARTICLE_SORT_KEY(cur);
             for (node = prev; node != NULL; node = node->prev) {
-                nodeKey = (node->unk18 << 8) + (node->unk20 >> 16);
+                nodeKey = PARTICLE_SORT_KEY(node);
                 if (key < nodeKey) {
                     continue;
                 }
