@@ -83,10 +83,12 @@ void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 si
         z -= 10.0f * cosf(angle);
         if (spread != 0) {
             rand = func_150ADA20();
-            x += (f32)(rand % spread);
+            x += rand % spread;
+            // matching: `+ rand * 0` keeps rand live across the 2nd call (spilled to its stack slot)
             rand = func_150ADA20() + rand * 0;
-            z += (f32)(rand % spread);
+            z += rand % spread;
         }
+        // matching: a use after the merge gives rand a stack home, stored after each call
         if (rand) {}
         if (growthRange != 0) {
             growth += func_150ADA20() % (u32)growthRange;
@@ -96,9 +98,9 @@ void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 si
         template.fadeRate = fadeRate;
         template.frame = 0;
         template.frameStep = 0x100;
-        template.x = (s32)x;
-        template.y = (s32)y;
-        template.z = (s32)z;
+        template.x = x;
+        template.y = y;
+        template.z = z;
         template.velX = 0;
         template.velZ = 0;
         template.size = 0;
