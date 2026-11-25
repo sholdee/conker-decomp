@@ -1408,7 +1408,7 @@ typedef struct ModelAttachment {
 /* Node of the attachment list an actor keeps at 0x2F4 (game_179F30.c: func_1514EC1C attaches,
  * func_1514ECE0 finds by type, func_1514ED3C finds by handle). */
 typedef struct Attachment {
-    /* 0x00 */ u8 pad0[0x10];               // allocator header
+    /* 0x00 */ EffectHeader header;         // object-list node (func_15167A68)
     /* 0x10 */ void *handle;                // the attached thing; what it is depends on `type`
     /* 0x14 */ struct Attachment *next;
     /* 0x18 */ struct Attachment *prev;

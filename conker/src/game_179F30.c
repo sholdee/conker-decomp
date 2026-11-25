@@ -503,7 +503,7 @@ s32 func_1514D310(Actor *owner) {
         if (D_8008ABE8[node->type]->destroyHandler != -1) {
             D_8008AB58[D_8008ABE8[node->type]->destroyHandler]((s32)node->handle);
         }
-        func_1516972C((EffectHeader *)node);
+        func_1516972C(&node->header);
         node = next;
     }
     return 1;
@@ -1401,7 +1401,7 @@ void *func_1514ED8C(Attachment *node, Actor *owner) {
         node->prev->next = node->next;
     }
     handle = node->handle;
-    func_1516972C((EffectHeader *)node);
+    func_1516972C(&node->header);
     return handle;
 }
 
