@@ -42,8 +42,6 @@ extern s32  D_800E0DF8;
 extern u8   D_800E0E19;
 
 extern s32  _getRate(f32 ivol, f32 tvol, s32 count, u16 *ratel);
-extern s32  func_151F85C4(s32 arg0, s32 arg1, s32 arg2);
-extern s32  func_151F86B0(s32 arg0, s32 *arg1, s32 *arg2);
 
 /*
  * Local shadow of N_ALSynth.  n_libaudio.h calls 0x24..0x2B `u8 pad24[8]` and puts the one

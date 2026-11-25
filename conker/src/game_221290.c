@@ -14,9 +14,7 @@
  * element; scfsi[1] would run into part23Length, huffVal[1] starts at huffSign,
  * nonZero[1] is zeroTail[0], and xr[1] is xrSb.  Only gr 0 of a mono stream is
  * safe from the overlaps. */
-typedef struct Mp3Decoder Mp3Decoder;
 
-typedef s32 (*Mp3ReadFn)(s32 handle, void *dst, s32 size, s32 seekPos);
 typedef s32 (*Mp3DecodeFn)(Mp3Decoder *dec);
 
 typedef struct {
@@ -161,11 +159,6 @@ s32 func_151F8994(void *, s32 *, s32, s32, s32, s32, s16 **, u8 **);
 s32 func_151F8B4C(void *, s32 *, s32, s32, s32, s16 **, u8 **);
 s32 func_151F8CF0(f32 *, s32, f32 *, f32 *, f32 *);
 s32 func_151F9BF0(f32 *, s32, f32 *, f32 *);
-s32 func_151F4F38(Mp3Decoder *, s32, s32);
-s32 func_151F6FD0(Mp3Decoder *);
-s32 func_151F78B4(Mp3Decoder *);
-s32 func_151F7F60(Mp3Decoder *);
-s32 func_151F8088(Mp3Decoder *, s32);
 
 /* Builds the decoder's tables: the four IMDCT windows, the relocated Huffman
  * table pointers, x^(4/3) for the 8192 quantised magnitudes (Newton iteration
