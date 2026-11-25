@@ -326,21 +326,30 @@ void func_150FB8C0(O_150FB8C0 *arg0, u8 arg1, f32 arg2, u8 arg3, u8 arg4, s32 ar
     }
 }
 
+
 void func_151C3B0C(void *, f32, f32, f32, f32, s32, s32, s32);
 
-void func_150FC368(void *arg0) {
-    u8 var_v0;
-    void *temp_v0;
-    void *temp_v1;
-    void *temp_v1_2;
+typedef struct {
+    /* 0x000 */ u8 pad0[0x1A0];
+    /* 0x1A0 */ struct127 *owner;
+    /* 0x1A4 */ u8 ownerUniqueId;
+} Particle_150FC368;
 
-    temp_v0 = *(void **)((u8 *)arg0 + 0x1A0);
-    if ((temp_v0 == 0) || (*(s32 *)((u8 *)temp_v0 + 0) == 0) || (*(u8 *)((u8 *)temp_v0 + 4) == 0xFF) || (*(u8 *)((u8 *)arg0 + 0x1A4) != *(u8 *)((u8 *)temp_v0 + 0x3B)) || (temp_v1 = *(void **)((u8 *)temp_v0 + 0x31C), (temp_v1 == 0)) || (*(u8 *)((u8 *)temp_v1 + 0x84) != 0) || (*(u8 *)((u8 *)temp_v0 + 0x127) == 0xFF) || (temp_v1_2 = *(void **)((u8 *)temp_v0 + 0x318), (temp_v1_2 == 0))) {
-        var_v0 = 0xFF;
+/* Calls func_151C3B0C for a particle. The last argument is a mask of every camera except the owner's,
+ * or 0xFF when the owner is gone, has no camera or fails one of the other checks. */
+void func_150FC368(Particle_150FC368 *particle) {
+    u8 cameraMask;
+    struct127 *owner;
+
+    owner = particle->owner;
+    if ((owner == NULL) || (owner->interaction_state == 0) || (owner->id == 0xFF) ||
+        (owner->unique_id != particle->ownerUniqueId) || (owner->unk31C == NULL) ||
+        (owner->unk31C->unk84 != 0) || (owner->unk127 == 0xFF) || (owner->camera == NULL)) {
+        cameraMask = 0xFF;
     } else {
-        var_v0 = ~(1U << *(u8 *)((u8 *)temp_v1_2 + 0x23D)) & 0xFF;
+        cameraMask = ~(1U << owner->camera->unk23D) & 0xFF;
     }
-    func_151C3B0C(arg0, 1.0f, 1.0f, 0.6f, 0.0f, 0xFF, 0xFF, var_v0);
+    func_151C3B0C(particle, 1.0f, 1.0f, 0.6f, 0.0f, 0xFF, 0xFF, cameraMask);
 }
 
 /* Spawns an emitter object that follows `owner` (see func_150FC614); when `other` has a camera, also
