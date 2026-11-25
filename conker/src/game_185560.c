@@ -201,6 +201,8 @@ typedef struct {
 
 extern MtxFBox D_8008AE18;
 
+extern f32 D_800A6070; /* 1.0f / 255: rodata of the original unit that ends at func_15158BD0 */
+
 /* Draw callback: scales the fixed matrix D_8008AE18 by data.size and translates to the actor's position. */
 s32 func_15158920(Mtx *mtx, EffectActor *actor) {
     f32 scale;
@@ -208,7 +210,7 @@ s32 func_15158920(Mtx *mtx, EffectActor *actor) {
     MtxFBox mf;
 
     mf = D_8008AE18;
-    scale = actor->data.size * 0.003921568859f;
+    scale = actor->data.size * D_800A6070;
     mf.m[3][0] = actor->tmpl.position.x;
     mf.m[3][1] = actor->tmpl.position.y;
     mf.m[3][2] = actor->tmpl.position.z;
@@ -360,7 +362,96 @@ typedef struct {
 
 extern void (*D_8008AFD0[])(CharacterWatcher *);
 extern s8 *D_8008B02C[];
-extern StateRule D_800A6200[];
+/* Vertices of the effect display lists (D_8008AE60.., drawn through D_8008AFB8). */
+const Vtx D_800A6080[5] = {
+    { { { 0, -127, -255 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0x00, 0xFF } } },
+    { { { 0, 25, 0 }, 0, { 0, 0 }, { 0xC8, 0xC8, 0x00, 0xFF } } },
+    { { { -22, -12, 0 }, 0, { 0, 0 }, { 0xA0, 0x50, 0x14, 0xFF } } },
+    { { { 22, -12, 0 }, 0, { 0, 0 }, { 0x64, 0x82, 0x12, 0xFF } } },
+    { { { 0, 51, 255 }, 0, { 0, 0 }, { 0x80, 0x40, 0x00, 0xFF } } },
+};
+const Vtx D_800A60D0[4] = {
+    { { { 0, 25, -255 }, 0, { 0, 0 }, { 0xC8, 0xAA, 0x14, 0xFF } } },
+    { { { -22, -12, -255 }, 0, { 0, 0 }, { 0x80, 0x20, 0x08, 0xFF } } },
+    { { { 22, -12, -255 }, 0, { 0, 0 }, { 0x64, 0x64, 0x00, 0xFF } } },
+    { { { 0, 0, 255 }, 0, { 0, 0 }, { 0x80, 0x40, 0x00, 0xFF } } },
+};
+const Vtx D_800A6110[6] = {
+    { { { 0, 255, 0 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
+    { { { 255, 0, 0 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
+    { { { 0, -255, 0 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
+    { { { -255, 0, 0 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
+    { { { 0, 0, 255 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
+    { { { 0, 0, -255 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x40 } } },
+};
+const Vtx D_800A6170[5] = {
+    { { { 0, -127, -255 }, 0, { 0, 0 }, { 0xFC, 0x52, 0x05, 0xFF } } },
+    { { { 0, 25, 0 }, 0, { 0, 0 }, { 0xFE, 0x8D, 0x30, 0xFF } } },
+    { { { -22, -12, 0 }, 0, { 0, 0 }, { 0xF0, 0x62, 0x1C, 0xFF } } },
+    { { { 22, -12, 0 }, 0, { 0, 0 }, { 0xF9, 0x5B, 0x14, 0xFF } } },
+    { { { 0, 51, 255 }, 0, { 0, 0 }, { 0x85, 0x29, 0x00, 0xFF } } },
+};
+const Vtx D_800A61C0[4] = {
+    { { { 0, 25, -255 }, 0, { 0, 0 }, { 0xF8, 0x58, 0x14, 0xFF } } },
+    { { { -22, -12, -255 }, 0, { 0, 0 }, { 0xC6, 0x3E, 0x03, 0xFF } } },
+    { { { 22, -12, -255 }, 0, { 0, 0 }, { 0xFE, 0x8F, 0x3D, 0xFF } } },
+    { { { 0, 0, 255 }, 0, { 0, 0 }, { 0xFC, 0x52, 0x05, 0xFF } } },
+};
+
+/* Transition rules of func_15158D2C, one per action slot of D_8008B02C. */
+const StateRule D_800A6200[28] = {
+    { 0x21FFA, 0x3FFC9 },
+    { 0x3FFFF, 0x3FFC9 },
+    { 0x21FFA, 0x3FFD1 },
+    { 0x3FFFF, 0x3FFD1 },
+    { 0x5FFA, 0x3FFC9 },
+    { 0x5FFA, 0x3FFD1 },
+    { 0x11FFA, 0x3FFC9 },
+    { 0x11FFA, 0x3FFD1 },
+    { 0x3FFC9, 0x3FFFA },
+    { 0x3FFD1, 0x3FFFA },
+    { 0x3FF7F, 0x3FEB9 },
+    { 0x3FEB9, 0x3FF7F },
+    { 0x3FFFF, 0x20DC9 },
+    { 0x3FFFF, 0x20289 },
+    { 0x3FFFF, 0x3E291 },
+    { 0x3FFFF, 0x8C91 },
+    { 0x3FFFF, 0x3E5C9 },
+    { 0x3FFFF, 0x3E491 },
+    { 0x3FFFF, 0x3E451 },
+    { 0x3FFFF, 0x3FE51 },
+    { 0x3FFFF, 0x3E851 },
+    { 0x3FFFF, 0x3E251 },
+    { 0x3ECB9, 0x3E2B9 },
+    { 0x3E2B9, 0x3ECB9 },
+    { 0x3FFFF, 0x3E2B9 },
+    { 0x2BEB9, 0x3FE51 },
+    { 0x3FFF9, 0x3FFFA },
+    { 0x3FFD1, 0x3FFEF },
+};
+
+/* Per-mode action tables (D_8008B02C): an index into D_8008AFD0 per StateRule, -1 = none. */
+const s8 D_800A62E0[28] = {
+    0, 8, 1, -1, 2, 3, 4, 5, 6, 7, 9, 10, -1, -1,
+    -1, -1, -1, -1, -1, 13, -1, -1, 11, 12, 14, 15, 16, 21,
+};
+const s8 D_800A62FC[28] = {
+    22, -1, 22, -1, 22, 22, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+};
+const s8 D_800A6318[28] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+};
+const s8 D_800A6334[28] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, 18, -1, -1, -1, -1, 17, -1, -1, -1,
+};
+const s8 D_800A6350[28] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+};
+
 
 /* Update: recomputes the character's state and fires every rule matching the old -> new transition. */
 void func_15158D2C(CharacterWatcher *watcher) {
@@ -1222,7 +1313,10 @@ typedef struct {
     /* 0x08 */ SpawnerData data;
 } SpawnerTemplate;
 
-extern SpawnerTemplate D_800A636C[];
+const SpawnerTemplate D_800A636C[1] = {
+    { 3.7e-07f, 1.12e-06f,
+      { { 20, 90 }, { 0.15f, 0.37f, 60.0f, 88.0f, 0.079f, 0.12900001f, 7.0f, 0.14285715f, 0x3C, 0x8C, { 0xA3, 0xD8, 0x00 } } } },
+};
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x1F];
