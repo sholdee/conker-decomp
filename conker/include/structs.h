@@ -4254,4 +4254,25 @@ typedef struct {
     /* 0x2 */ u16 partVtxCounts[3];
 } VtxMorphGroup; /* size 0x8 */
 
+/* One point of a 40-point spring chain; neighbours pull each other level. */
+typedef struct {
+    /* 0x0 */ f32 accel;
+    /* 0x4 */ f32 vel;
+    /* 0x8 */ f32 pos; /* height, in 1/16 world units */
+} WaveSample; /* size 0xC */
+
+/* Static per-chain parameters (D_8008D050); D_800DDE60[chain] holds the chain's 40 WaveSamples. */
+typedef struct {
+    /* 0x00 */ f32 force;    /* constant added to every sample's acceleration */
+    /* 0x04 */ f32 damping;  /* velocity multiplier per step */
+    /* 0x08 */ f32 scale;    /* sample index = scale * 40 * chain-local distance */
+    /* 0x0C */ s16 minZ;     /* chain-local z extent (negative) */
+    /* 0x0E */ s16 width;    /* chain-local x extent */
+    /* 0x10 */ s16 angle;    /* yaw of the chain */
+    /* 0x12 */ s16 objIndex; /* index into D_800DBEF4 for the chain's origin */
+    /* 0x14 */ s16 initialPos;
+    /* 0x16 */ s8  push;     /* displacement an actor applies to the sample under it */
+    /* 0x17 */ u8  soundTimer;
+} WavePreset; /* size 0x18 */
+
 #endif

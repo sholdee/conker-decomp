@@ -2,29 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* One point of a 40-point spring chain; neighbours pull each other level. */
-typedef struct {
-    f32 accel;
-    f32 vel;
-    f32 pos; /* height, in 1/16 world units */
-} WaveSample; /* size 0xC */
-
-/* Static per-chain parameters (D_8008D050). */
-typedef struct {
-    f32 force;    /* constant added to every sample's acceleration */
-    f32 damping;  /* velocity multiplier per step */
-    f32 scale;    /* sample index = scale * 40 * chain-local distance */
-    s16 minZ;     /* chain-local z extent (negative) */
-    s16 width;    /* chain-local x extent */
-    s16 angle;    /* yaw of the chain */
-    s16 objIndex; /* index into D_800DBEF4 for the chain's origin */
-    s16 initialPos;
-    s8  push;     /* displacement an actor applies to the sample under it */
-    u8  soundTimer;
-} WavePreset; /* size 0x18 */
-
-extern WavePreset D_8008D050[];
-extern WaveSample *D_800DDE60[];
 
 s32 func_15182FDC(Actor *actor, s32 sample, s32 chain);
 
