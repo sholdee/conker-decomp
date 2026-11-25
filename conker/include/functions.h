@@ -241,7 +241,6 @@ void func_15008230(void);
 void func_15008248(s32 arg0);
 void func_150082CC(void);
 void func_15008A10(void);
-void func_15008DD0(void);
 void func_15008E00(void);
 void func_15009150(s32 arg0);
 void func_150095D8(s32 arg0, s32 arg1);

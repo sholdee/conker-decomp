@@ -3,13 +3,10 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void func_1503F62C(s32, s32, void *, void *, void *, void *, void *);
-extern void func_1503F5B8(ModelInstance *, s32, s32, f32, f32, s32);
 extern s32 func_1515D480(s32);
 extern s32 func_1515D440(void);
 extern s32 (*D_8008AD90[])(ModelEffect *);
 extern s32 (*D_8008ADA0[])(ModelEffect *);
-extern void func_1503F4B0(ModelInstance *);
 
 /*
  * Spawns a model effect from `params`, with `extraSize` bytes of extension at 0x120. The object type
@@ -70,7 +67,6 @@ void func_151571C4(ModelEffect *fx) {
 }
 
 extern void func_1518CA04(s32);
-extern void func_1503F7B8(ModelInstance *);
 
 /* Destroy handler: frees the attachments and model instance, then the object (func_15169804). */
 void func_15157248(ModelEffect *fx) {

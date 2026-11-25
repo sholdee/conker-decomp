@@ -1723,8 +1723,6 @@ Gfx *func_151ED430(Gfx *gfx, HudSprite *sprite, s32 x, s32 y, s32 columns, s32 r
 }
 
 extern void *allocate_memory(s32, s32, s32, s32);
-extern s32 func_1503F62C(s32, s32, void *, void *, void *, void *, void *);
-extern void func_1503F5B8(HudModelAnim *, s32, s32, f32, f32, s32);
 
 /*
  * Loads a HUD model and makes patched copies of its display lists (SetOtherMode rewritten,
@@ -1801,8 +1799,6 @@ HudModel *func_151ED90C(s32 loadArg0, s32 loadArg1, s32 animArg0, f32 animArg1) 
 }
 
 
-extern void func_1503F7B8(HudModelAnim *);
-
 /* Frees a HUD model and its display list copies. */
 void func_151EDB58(HudModel *model) {
     s32 i;
@@ -1827,7 +1823,6 @@ Gfx D_80090128[] = {
 };
 extern u8 D_507;
 extern u8 D_508;
-extern void func_1503F4B0(HudModelAnim *);
 
 /* Draws a HUD model at (x, y) with the given scale; the D_80090058 model also blinks. */
 Gfx *func_151EDBDC(Gfx *gfx, HudModel *model, f32 x, f32 y, f32 scale) {

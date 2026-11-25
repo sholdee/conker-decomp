@@ -87,8 +87,6 @@ s32 func_150229E4(Actor *);
 void func_15030468(void);
 Gfx *func_15030E08(Gfx *gdl, s32 player, s32 arg2);
 Gfx *func_15030F94(Gfx *, Actor *, s32, s32);
-void func_15033FE0(s16 *, s32);
-void func_150345E4(s32);
 Gfx *func_150368C4(Gfx *gdl, s32 index, s32 player);
 void func_1503A08C(Actor *);
 void func_1503A830(Actor *);
@@ -101,7 +99,6 @@ void func_1505DFDC(Actor *);
 // matching: the command goes in as s32 (functions.h has u8)
 void func_1506160C(Actor *obj, s32 arg1, u8 arg2, u8 arg3, s32 player);
 s32 func_1506196C(Actor *, s32);
-void func_1507C22C(s32);
 void func_150837D4(s32, s32, s32);
 s32 func_150838EC(Actor *, s32, s32, f32);
 s32 func_150849A0(Actor *);
@@ -115,7 +112,6 @@ void func_150A7A00(MtxF mtx, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 void func_150A81D0(s32 *, MtxF mtx, ObjAnim *, s32, s32, s16 *, u8 *, s32);
 void func_150A9984(s32, s32);
 Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, u8 *, s32, void *);
-void func_1517AD00(s32, s32, s32);
 void func_151EFE88(void *);
 
 /* Emits the display list of every object drawn in one render pass (mode) for one player. */
@@ -963,7 +959,7 @@ load:
                     remap = remapBuf;
                 }
             }
-            func_15033FE0(cmd, index);
+            func_15033FE0((GameCommand *)cmd, index);
             func_1502D824(NULL, obj, frameBuf);
             {
                 s16 scale;

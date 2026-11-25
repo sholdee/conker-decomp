@@ -59,7 +59,6 @@ typedef struct {
 
 void func_15059C84(Actor *arg0);
 void func_1505A770(Actor *arg0);
-void func_1507C324(Actor *arg0, Actor *arg1);
 void func_1506AC8C(Actor *arg0, s32 arg1, void *arg2);
 
 void func_150C3230(Actor *obj) {

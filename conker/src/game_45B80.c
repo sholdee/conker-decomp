@@ -109,7 +109,6 @@ Gfx *func_15019BB8(Gfx *, s32);
 Gfx *func_15019E60(Gfx *);
 Gfx *func_15019CC8(Gfx *, s32);
 Gfx *func_151E84B0(Gfx *);
-void func_150347E8(void);
 void func_1502E474(void);
 void func_15189118(s32);
 void func_15084A18(void);

@@ -55,9 +55,6 @@ s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4,
 
 
 void func_15031C14(ModelAttachment *att);
-void func_1503F5B8(AnimInstance *anim, s32 arg1, s32 animId, f32 arg3, f32 arg4, s32 arg5);
-void func_1503F7B8(AnimInstance *anim);
-s32 func_1503F62C(s32 model, s32 animSet, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg5, AnimInstance **anim);
 
 /* Loads the attachment's model, making private per-frame vertex copies when the owner needs them. */
 s32 func_1502FFD8(ModelAttachment *att, Actor *owner) {
@@ -227,7 +224,6 @@ s32 func_150303E4(Actor *owner) {
 typedef s32 (*AttachmentHook)(ModelAttachment *att, Actor *owner);
 extern AttachmentHook D_800841C0[];
 s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx);
-void func_1503F4B0(AnimInstance *anim);
 
 /* Per-frame update of every attachment: runs its hook, builds its matrix for this frame and removes
  * it when its owner is gone or it has expired. Attachments that follow another attachment's

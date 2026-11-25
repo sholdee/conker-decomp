@@ -31,7 +31,6 @@ typedef struct {
 extern u16 *D_800C35C8[];
 s32 func_1501D2C4(s32 map, s32 cutscene);
 extern u8 D_800C35AA;
-extern void func_1507F640(void);
 extern void func_1508F060(void);
 extern void func_150242F8(s32, s32);
 void func_1501EC38(s32 scene);
@@ -2532,7 +2531,6 @@ s32 func_150235DC(s32 scene) {
 }
 
 extern void func_1504A730(void);
-extern void func_1507FEA0(Actor *);
 extern void func_15061B4C(void);
 void func_15022998(s32 *obj);
 /* Per-frame update of the cutscene's objects (unless D_800C3654[0] hands it to func_1504A730): run

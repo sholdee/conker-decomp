@@ -73,7 +73,6 @@ extern f32 D_80098754[5]; /* per-joint lift weights for animations 0x1B and 0x18
 extern f32 D_80098768[5]; /* per-joint lift weights for objects 0x80 and 0xB0 */
 extern f32 D_800C4008[3]; /* chain anchor position */
 
-void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain);
 extern f32 sqrtf(f32);
 extern f32 sinf(f32);
 extern f32 cosf(f32);

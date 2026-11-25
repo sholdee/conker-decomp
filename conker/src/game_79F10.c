@@ -102,7 +102,6 @@ void func_1505D6F0(Actor *, u8);
 void func_1505F298(Actor *, OSContPad *);
 void func_1506045C(Actor *, u16, s32, f32, s32);
 void func_15063168(Actor *);
-void func_1507FEA0(Actor *);
 void func_15087E54(u8, Actor *);
 s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
 void func_150D5A6C(Actor *, s32, s32);

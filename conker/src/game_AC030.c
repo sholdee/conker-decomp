@@ -6,7 +6,6 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
 
 /*
  * Idle animations: while an actor stands still it plays short "sequences" (lists of frames
@@ -31,10 +30,6 @@ extern u8 *D_80086BA0[];      // sequences: 0-terminated lists of D_8009B8B0 ind
 extern IdleFrame D_8009B8B0[];
 extern s32 D_800D18C4;
 
-void func_1507EEB8(u8 seq, u8 *recent);
-s32 func_1507FFD8(Actor *actor);
-s32 func_1507F4C0(s32 phase);
-void func_1507FF94(Actor *actor);
 s32 func_1515942C(Actor *, s32, s32, s32, s32, s32);
 void func_1507CD64(Actor *actor, s32 arg1);
 void func_1000D96C(s32 arg0, s32 arg1, s32 arg2);
