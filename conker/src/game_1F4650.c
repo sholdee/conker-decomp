@@ -382,7 +382,7 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
         pos[2] = start->z + spawn.unk34.z * 0.5f;
         hdr.unk0 = 2;
         hdr.unk1 = 2;
-        hdr.unk2 = 0x12C;
+        hdr.unk2 = 300;
         hdr.unk4 = 0;
         state.midEffect = func_1516284C(&hdr, pos, red, green, blue, 0xFF, 0, 0, 0x10, arg16, arg17);
     } else {
@@ -391,7 +391,7 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
     spawn.kind = 0x59;
     spawn.mode = 6;
     spawn.flags = 0x5A03;
-    spawn.lifetime = 0x12C;
+    spawn.lifetime = 300;
     spawn.callback0 = 0;
     spawn.callback1 = 0;
     spawn.red = red;
@@ -1062,8 +1062,8 @@ void func_151C9198(SightEmitter **emitters, vertex *pos, SightTriangle *triangle
 
 /* Frees the beam's effects and emitters, then removes the beam object with func_1513CA6C. */
 void func_151C94D4(SightBeamObject *obj) {
-    // matching: one register first holds the object, then its state (as IDO allocated it)
-    register SightBeamState *state;
+    // matching: one variable first holds the object, then its state (as IDO allocated it)
+    SightBeamState *state;
     void *part;
 
     state = &obj->state;
@@ -1110,8 +1110,8 @@ void func_151C94D4(SightBeamObject *obj) {
 
 /* Same as func_151C94D4, but finishes with func_1513CAA0. */
 void func_151C95D8(SightBeamObject *obj) {
-    // matching: one register first holds the object, then its state (as IDO allocated it)
-    register SightBeamState *state;
+    // matching: one variable first holds the object, then its state (as IDO allocated it)
+    SightBeamState *state;
     void *part;
 
     state = &obj->state;
@@ -2069,9 +2069,9 @@ void func_151CB918(SightSprite *sprite, SightPanelMsg *msg, u8 msgId) {
 
 /* Side panel update: height follows the sight value, optional bounce, fade-in. */
 s32 func_151CB970(SightSprite *sprite) {
-    register SightSpritePayload *payload;
+    SightSpritePayload *payload;
     f32 value;
-    f32 range; // matching: kept as a named local
+    f32 range;
     f32 offset;
     f32 baseY;
     u8 alpha;
@@ -2127,7 +2127,7 @@ void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
 
 /* Moves the sprite around a circle of radius 55 as the sight value changes. */
 s32 func_151CBBE0(SightSprite *sprite) {
-    register SightSpritePayload *payload;
+    SightSpritePayload *payload;
     f32 scaled;
     f32 value;
 
@@ -2292,8 +2292,8 @@ typedef struct {
 /* Cross-bar update: shifts the bar sideways (texture 0x9A) or vertically by the aim angles. */
 s32 func_151CC77C(SightSprite *sprite) {
     // matching: the angle pointers are taken (in registers) before the NULL check
-    register f32 *pitchp;
-    register f32 *yawp;
+    f32 *pitchp;
+    f32 *yawp;
     struct {
         f32 yaw;
         f32 pitch;
