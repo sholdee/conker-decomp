@@ -118,55 +118,55 @@ void func_150C4120(struct127 *owner, s16 duration, u8 arg2, s32 arg3) {
     if (effect != NULL) {
         state = &effect->data;
         memcpy(state, &data, sizeof(EffectData));
-        {
-        const s32 textures[4] = { 0x60, 0x61, 0x62, 0x63 };
+        { // matching: textures must be scoped after the memcpy
+            const s32 textures[4] = { 0x60, 0x61, 0x62, 0x63 };
 
-        pulse.phase[0] = func_150ADA20();
-        pulse.phase[1] = func_150ADA20();
-        pulse.baseSize = spawn.width = spawn.height = 700.0f;
-        pulse.phaseStep[0] = (s8)(func_150ADA20() % 6U) + 5; // matching: the (s8) steers t-register allocation
-        pulse.phaseStep[1] = func_150ADA20() % 6U + 5;
-        pulse.amplitude[0] = (func_150ADA68() * 0.25f + 0.200000003f) * pulse.baseSize;
-        pulse.amplitude[1] = (func_150ADA68() * 0.25f + 0.200000003f) * pulse.baseSize;
-        spawn.texture = *(textures + (func_150ADA20() & 3)); // matching: textures[i] reserves an extra temp
-        spawn.renderMode = 0x2203;
-        spawn.unk0 = 0x200005;
-        spawn.unk4 = 0;
-        spawn.frame = 0;
-        spawn.frameRate = 0;
-        spawn.r = 0;
-        spawn.g = 0;
-        spawn.b = 0;
-        spawn.a = 0xFF;
-        spawn.r2 = 0;
-        spawn.g2 = 0;
-        spawn.b2 = 0;
-        spawn.alpha = 0xFF;
-        spawn.brightness = 0xFF;
-        spawn.pos = *(Vec3f *)&D_800A5480;
-        spawn.offset = *(Vec3f *)&D_800A5480;
-        spawn.vel = *(Vec3f *)&D_800A5480;
-        spawn.scaleStart = 1;
-        spawn.gravity = 0.0f;
-        spawn.scaleRate = 1.0f;
-        spawn.flags = ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x8000 | 0x4000;
-        spawn.timer = 300;
-        spawn.maxSize = 10000.0f;
-        spawn.fadeStart = 1;
-        spawn.fadeRate = 0xFF;
-        spawn.primColorMode = 6;
-        spawn.envColorMode = 8;
-        spawn.drawFunc = -1;
-        spawn.updateFunc = 0x26;
-        spawn.deathFunc = -1;
-        spawn.handlerSet = 0;
-        spawn.viewMask = NULL;
-        spawn.views = 0xFF;
-        spawn.minSize = 0;
-        state->particle = func_15130280(&spawn, 1, 0, sizeof(ParticlePulse), arg2, arg3);
-        if (state->particle != NULL) {
-            memcpy(&state->particle->pulse, &pulse, sizeof(ParticlePulse));
-        }
+            pulse.phase[0] = func_150ADA20();
+            pulse.phase[1] = func_150ADA20();
+            pulse.baseSize = spawn.width = spawn.height = 700.0f;
+            pulse.phaseStep[0] = (s8)(func_150ADA20() % 6U) + 5; // matching: the (s8) steers t-register allocation
+            pulse.phaseStep[1] = func_150ADA20() % 6U + 5;
+            pulse.amplitude[0] = (func_150ADA68() * 0.25f + 0.200000003f) * pulse.baseSize;
+            pulse.amplitude[1] = (func_150ADA68() * 0.25f + 0.200000003f) * pulse.baseSize;
+            spawn.texture = *(textures + (func_150ADA20() & 3)); // matching: textures[i] reserves an extra temp
+            spawn.renderMode = 0x2203;
+            spawn.unk0 = 0x200005;
+            spawn.unk4 = 0;
+            spawn.frame = 0;
+            spawn.frameRate = 0;
+            spawn.r = 0;
+            spawn.g = 0;
+            spawn.b = 0;
+            spawn.a = 0xFF;
+            spawn.r2 = 0;
+            spawn.g2 = 0;
+            spawn.b2 = 0;
+            spawn.alpha = 0xFF;
+            spawn.brightness = 0xFF;
+            spawn.pos = *(Vec3f *)&D_800A5480;
+            spawn.offset = *(Vec3f *)&D_800A5480;
+            spawn.vel = *(Vec3f *)&D_800A5480;
+            spawn.scaleStart = 1;
+            spawn.gravity = 0.0f;
+            spawn.scaleRate = 1.0f;
+            spawn.flags = ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x8000 | 0x4000;
+            spawn.timer = 300;
+            spawn.maxSize = 10000.0f;
+            spawn.fadeStart = 1;
+            spawn.fadeRate = 0xFF;
+            spawn.primColorMode = 6;
+            spawn.envColorMode = 8;
+            spawn.drawFunc = -1;
+            spawn.updateFunc = 0x26;
+            spawn.deathFunc = -1;
+            spawn.handlerSet = 0;
+            spawn.viewMask = NULL;
+            spawn.views = 0xFF;
+            spawn.minSize = 0;
+            state->particle = func_15130280(&spawn, 1, 0, sizeof(ParticlePulse), arg2, arg3);
+            if (state->particle != NULL) {
+                memcpy(&state->particle->pulse, &pulse, sizeof(ParticlePulse));
+            }
         }
     }
 }
