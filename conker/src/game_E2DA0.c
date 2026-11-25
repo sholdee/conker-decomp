@@ -7,25 +7,7 @@
 u32 func_150ADA20(void);
 #include "variables.h"
 
-extern s32 D_8009FC3C[][3];
-extern f32 D_8009FC60[];
-extern f32 D_8009FC6C[];
-extern f32 D_8009FC78[];
-extern s16 D_8009FC84[];
-extern s16 D_8009FC8E[][2];
-extern f32 D_8009FCCC;
-extern f32 D_8009FCD0;
-extern f32 D_8009FCD4;
-extern f32 D_8009FCD8;
-extern f32 D_8009FCDC;
-extern f32 D_8009FCE0;
-extern f32 D_8009FCE4;
-f32 func_151423D8(u8);
-void func_15143794(s32, s32, f32, f32 *);
-void func_150B3F5C(void *, void *, s16);
-/** Spawns a func_15152B38 effect at pos, plus the func_150B5E34 and func_150B6000 particles. */
 void func_150B5A3C(vertex *pos, u8 arg1, s32 arg2);
-/** Spawns one func_15130280 particle at pos with some randomized fields and flags. */
 void func_150B5E34(vertex *pos, u8 arg1, s32 arg2);
 void func_150B6000(vertex *pos, u8 arg1, s32 arg2);
 void func_150B60E0(struct127 *obj, vertex *out);
@@ -511,118 +493,137 @@ void func_150B6450(struct102 *effect, s32 arg1, u8 msg) {
     }
 }
 
+/*
+ * Trail settings passed to func_150B3F5C: the first 0x40 bytes of TrailState (game_E1280.c),
+ * whose remaining fields are emitter state that the spawner fills in.
+ */
 typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    u8 unk10;
-    u8 pad11[3];
-    f32 unk14;
-    f32 unk18;
-    u8 unk1C;
-    u8 pad1D[3];
-    f32 unk20;
-    u8 unk24;
-    u8 pad25;
-    s16 unk26;
-    f32 unk28;
-    f32 unk2C;
-    u8 unk30;
-    u8 unk31;
-    u8 unk32;
-    u8 unk33;
-    u8 unk34;
-    u8 unk35;
-    s16 unk36;
-    u8 unk38;
-    u8 pad39[3];
-    f32 unk3C;
-} Stack150B648C;
+    /* 0x00 */ vertex baseVel;
+    /* 0x0C */ f32 gravity;
+    /* 0x10 */ u8 phaseJitter;
+    /* 0x11 */ u8 pad11[3];
+    /* 0x14 */ f32 speedBase;
+    /* 0x18 */ f32 speedSwing;
+    /* 0x1C */ u8 flags;
+    /* 0x1D */ u8 pad1D[3];
+    /* 0x20 */ f32 emitRate;
+    /* 0x24 */ u8 shade;
+    /* 0x25 */ u8 pad25;
+    /* 0x26 */ s16 alpha;
+    /* 0x28 */ f32 widthGrowth;
+    /* 0x2C */ f32 width;
+    /* 0x30 */ u8 texStep;
+    /* 0x31 */ u8 texStepJitter;
+    /* 0x32 */ u8 fadeTailCount;
+    /* 0x33 */ u8 fadeTailStep;
+    /* 0x34 */ u8 fadeHeadCount;
+    /* 0x35 */ u8 fadeHeadStep;
+    /* 0x36 */ s16 life;
+    /* 0x38 */ u8 burstPreset;
+    /* 0x39 */ u8 pad39[3];
+    /* 0x3C */ f32 burstRate;
+} TrailParams; /* size 0x40 */
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3F150B648C;
+extern void *func_150B3F5C(TrailParams *params, vertex *pos, s16 capacity);
+extern void func_15143794(s16 yaw, s16 pitch, f32 length, vertex *out);
 
-void func_150B648C(u8 arg0) {
-    Stack150B648C sp30;
-    Vec3F150B648C sp24;
+/* Per-variant trail settings used by func_150B648C. */
+extern vertex D_8009FC3C[];   /* emitter position (variants 1 and 2) */
+extern f32 D_8009FC60[];      /* gravity */
+extern f32 D_8009FC6C[];      /* widthGrowth */
+extern f32 D_8009FC78[];      /* width */
+extern s16 D_8009FC84[];      /* life */
+extern s16 D_8009FC8E[][2];   /* capacity */
 
-    if (arg0 == 0) {
-        sp30.unk00 = func_151423D8(0xAA) * 10.0f;
-        sp30.unk04 = 3.0f;
-        sp30.unk08 = func_151423D8(0xEA) * 10.0f;
-        sp24.x = D_8009FCCC - (func_151423D8(0xAA) * 150.0f);
-        sp24.y = D_8009FCD0;
-        sp24.z = D_8009FCD4 - (func_151423D8(0xEA) * 150.0f);
-    } else if (arg0 == 1) {
-        func_15143794(-0x45, 0x1C, 9.349999f, &sp30.unk00);
-        sp24 = *(Vec3F150B648C *)D_8009FC3C[arg0];
+/** Spawns trail variant 0, 1 or 2 (variant 0 at a position from func_151423D8). */
+void func_150B648C(u8 variant) {
+    TrailParams params;
+    vertex pos;
+
+    if (variant == 0) {
+        params.baseVel.x = func_151423D8(0xAA) * 10.0f;
+        params.baseVel.y = 3.0f;
+        params.baseVel.z = func_151423D8(0xEA) * 10.0f;
+        pos.x = 1005.0f - (func_151423D8(0xAA) * 150.0f);
+        pos.y = 351.0f;
+        pos.z = -1706.0f - (func_151423D8(0xEA) * 150.0f);
+    } else if (variant == 1) {
+        func_15143794(-69, 28, 9.349999f, &params.baseVel);
+        pos = D_8009FC3C[variant];
     } else {
-        func_15143794(0x18, 0xF, 9.349999f, &sp30.unk00);
-        sp24 = *(Vec3F150B648C *)D_8009FC3C[arg0];
+        func_15143794(24, 15, 9.349999f, &params.baseVel);
+        pos = D_8009FC3C[variant];
     }
 
-    sp30.unk10 = 4;
-    sp30.unk1C = 6;
-    sp30.unk0C = D_8009FC60[arg0];
-    sp30.unk24 = 0x80;
-    sp30.unk26 = 0xFF;
-    sp30.unk30 = 2;
-    sp30.unk31 = 5;
-    sp30.unk32 = 5;
-    sp30.unk33 = 0x33;
-    sp30.unk34 = 3;
-    sp30.unk35 = 0x55;
-    sp30.unk38 = 0;
-    sp30.unk14 = D_8009FCD8;
-    sp30.unk18 = D_8009FCDC;
-    sp30.unk20 = D_8009FCE0;
-    sp30.unk28 = D_8009FC6C[arg0];
-    sp30.unk2C = D_8009FC78[arg0];
-    sp30.unk36 = D_8009FC84[arg0];
-    sp30.unk3C = D_8009FCE4;
-    func_150B3F5C(&sp30, &sp24, D_8009FC8E[arg0][0]);
+    params.phaseJitter = 4;
+    params.flags = 6; /* fade tail | fade head */
+    params.gravity = D_8009FC60[variant];
+    params.shade = 0x80;
+    params.alpha = 0xFF;
+    params.texStep = 2;
+    params.texStepJitter = 5;
+    params.fadeTailCount = 5;
+    params.fadeTailStep = 0x33;
+    params.fadeHeadCount = 3;
+    params.fadeHeadStep = 0x55;
+    params.burstPreset = 0;
+    params.speedBase = 3.3f;
+    params.speedSwing = 0.7f;
+    params.emitRate = 0.4f;
+    params.widthGrowth = D_8009FC6C[variant];
+    params.width = D_8009FC78[variant];
+    params.life = D_8009FC84[variant];
+    params.burstRate = 0.3f;
+    func_150B3F5C(&params, &pos, D_8009FC8E[variant][0]);
 }
 
-struct inner150B66DC {
-    u8 pad[0x68];
-    u8 unk68;
-};
-struct sub150B66DC {
-    u8 pad0[0x14];
-    u8 *unk14;
-    struct inner150B66DC *unk18;
-};
+typedef struct {
+    /* 0x00 */ u8 pad0[0x68];
+    /* 0x68 */ u8 mode;
+} Input150B66DC;
 
-s32 func_150B66DC(struct sub150B66DC *arg0) {
-    struct inner150B66DC *p = arg0->unk18;
-    switch (p->unk68 - 0xF) {
-    case 0:
-        arg0->unk14[9] = 1;
+typedef struct {
+    /* 0x00 */ u8 pad0[9];
+    /* 0x09 */ u8 unk9;
+    /* 0x0A */ u8 padA[0x25];
+    /* 0x2F */ u8 unk2F;
+} Output150B66DC;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x14];
+    /* 0x14 */ Output150B66DC *out;
+    /* 0x18 */ Input150B66DC *in;
+} Arg150B66DC;
+
+/** Sets out->unk9 for mode 15; otherwise clears it and sets out->unk2F (20 for mode 16, else 40). */
+s32 func_150B66DC(Arg150B66DC *arg0) {
+    Input150B66DC *in = arg0->in;
+
+    switch (in->mode - 15) { // matching: `switch (in->mode)` with case 15-17 labels mismatches
+    case 0: /* mode 15 */
+        arg0->out->unk9 = 1;
         break;
-    case 1:
-        arg0->unk14[9] = 0;
-        arg0->unk14[0x2F] = 0x14;
+    case 1: /* mode 16 */
+        arg0->out->unk9 = 0;
+        arg0->out->unk2F = 20;
         break;
-    case 2:
+    case 2: /* mode 17 */
     default:
-        arg0->unk14[9] = 0;
-        arg0->unk14[0x2F] = 0x28;
+        arg0->out->unk9 = 0;
+        arg0->out->unk2F = 40;
         break;
     }
     return 1;
 }
 
-extern void func_15182670(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_15182670(u8 r, u8 g, u8 b, u8 alpha, s32 duration, u8 view, u8 owner, s32 kind);
 
-void func_150B6754(u8 arg0, s32 arg1) {
-    u32 temp1;
-    u32 temp0;
+/** Flashes view 0 light blue (0xCC, 0xCC, 0xFF) at a random alpha 200-255 for 15-25 frames. */
+void func_150B6754(u8 owner, s32 kind) {
+    u32 rand2;
+    u32 rand1;
 
-    temp0 = func_150ADA20();
-    temp1 = func_150ADA20();
-    func_15182670(0xCC, 0xCC, 0xFF, (u8)(temp0 % 0x38 + 0xC8), temp1 % 0xB + 0xF, 0, arg0, arg1);
+    rand1 = func_150ADA20();
+    rand2 = func_150ADA20();
+    func_15182670(0xCC, 0xCC, 0xFF, rand1 % 56 + 200, rand2 % 11 + 15, 0, owner, kind);
 }
