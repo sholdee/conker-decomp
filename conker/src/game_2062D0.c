@@ -1,5 +1,6 @@
 #include <ultra64.h>
 
+// functions.h declares these three with other return types; this file uses the s32 versions below.
 #define func_150ADA20 func_150ADA20_orig
 #define func_1513D668 func_1513D668_void_proto
 #define func_151DA08C func_151DA08C_void_proto
@@ -20,23 +21,8 @@ s32 func_15131918(struct17 *vel, f32 scale);
 
 extern u8 (*D_8008FCD0[])(void);
 extern u8 (*D_8008FD04[])(void);
-extern u8 D_800AB330[];
-extern u8 D_800AB414[];
-extern f32 D_800AB44C;
-extern f32 D_800AB450;
-extern f32 D_800AB454;
-extern f32 D_800AB458;
-extern f32 D_800AB45C;
-extern f32 D_800AB460;
-extern f32 D_800AB470;
-extern f32 D_800AB474;
-extern f32 D_800AB478;
-extern f32 D_800AB47C;
-extern f32 D_800AB4A0;
-extern f32 D_800AB4A4;
-extern f32 D_800AB4A8;
-extern f32 D_800AB4AC;
-
+extern u8 D_800AB330[]; /* per effect kind flag */
+extern u8 D_800AB414[]; /* RGB per effect kind */
 
 /* Effect descriptor consumed by func_1513D668 and func_1513D2F0 (copied to EffectBase.desc). */
 typedef struct {
@@ -184,7 +170,7 @@ typedef struct {
     s16 unkA;
     s32 unkC;
     s32 unk10;
-    u8 unk14;
+    u8 unk14; /* unk14-16 and unk18-1A: RGB triples (see the D_8008FD38 colour setters) */
     u8 unk15;
     u8 unk16;
     u8 unk17;
@@ -277,7 +263,8 @@ u8 func_151D9534(Particle *particle, struct17 *arg1);
 
 /* Spawns a wobbling sprite particle of effect kind `kind`; lifetime -99 means it never times out. */
 Particle *func_151D9014(struct17 *pos, struct17 *vel, u8 kind, f32 gravity, s16 lifetime, u8 arg5, f32 size, s32 arg7,
-                        f32 arg8, f32 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF) {
+                        f32 burstScale, f32 altBurstScale, u8 argA, s32 argB, s32 wobbles, s32 bounces, u8 argE,
+                        s32 argF) {
     Particle *particle;
     ParticleDesc desc;
     ParticleWobble wobble;
@@ -336,10 +323,10 @@ Particle *func_151D9014(struct17 *pos, struct17 *vel, u8 kind, f32 gravity, s16 
     wobble.stepY = (func_150ADA20() % 6U) + 5;
     wobble.amplitudeX = ((func_150ADA68() * 0.25f) + 0.2f) * wobble.size;
     wobble.amplitudeY = ((func_150ADA68() * 0.25f) + 0.2f) * wobble.size;
-    wobble.burstScale = arg8;
+    wobble.burstScale = burstScale;
     wobble.kind = kind;
-    wobble.altBurstScale = arg9;
-    wobble.flags = ((u8)argC ? 0 : WOBBLE_FLAG_FIXED_SIZE) | ((u8)argD ? WOBBLE_FLAG_BOUNCE : 0);
+    wobble.altBurstScale = altBurstScale;
+    wobble.flags = ((u8)wobbles ? 0 : WOBBLE_FLAG_FIXED_SIZE) | ((u8)bounces ? WOBBLE_FLAG_BOUNCE : 0);
     particle = func_15130280(&desc, 1, argB, sizeof(wobble), argE, argF);
     if (particle != NULL) {
         memcpy(&particle->data.wobble, &wobble, sizeof(wobble));
@@ -557,8 +544,8 @@ void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, struct17 *pos, s16 life
                    u8 arg9, s32 argA) {
     EmitterDesc desc;
     struct260 *effect;
-    struct17 spA0;
-    struct17 sp94;
+    struct17 outA;
+    struct17 outB;
     struct17 normal;
     struct17 down;
 
@@ -589,7 +576,7 @@ void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, struct17 *pos, s16 life
     if (func_1513C650((s32)&desc, 0, 0, arg3, pos->unk0, pos->unk4, pos->unk8, size, size,
                       func_150ADA20() & 0xFF, (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2),
                       arg7 ? 3 : 0, arg7 ? 0xFF : 0, 0, arg9, argA) != NULL &&
-        arg8 && func_15144E80(arg3, &spA0, &sp94, &normal)) {
+        arg8 && func_15144E80(arg3, &outA, &outB, &normal)) {
         down = *(struct17 *)&D_800AB3E8;
         func_15145128(&normal, &normal, NULL, NULL);
         if (func_15144A74(&normal, &down) < -0.5f) {
