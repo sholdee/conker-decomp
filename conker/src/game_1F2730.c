@@ -5,110 +5,115 @@
 struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
 
 void func_15145740(struct127 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4);
-s32 func_1514654C(struct127 *, struct126 *, s32, void *, void *, s32);
+s32 func_1514654C(struct127 *, struct126 *, s32, vertex **, f32 **, s32);
 s32 func_151C229C(f32 *arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
-void func_151C5588(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
-void func_151C56A4(f32 *arg0, u8 arg1, s32 arg2);
-extern s32 D_800AAA90;
-extern f32 D_800AAAA8[];
+void func_151C5588(struct127 *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4);
+void func_151C56A4(f32 *pos, u8 arg1, s32 arg2);
 
-void func_151C5280(struct127 *arg0, u8 arg1, s32 arg2) {
-    f32 pos[3];
+/* Model-space points (model part 0x46) that func_151C5280 transforms to world space. */
+extern vertex D_800AAA90;
+extern vertex D_800AAAA8;
+
+/* Spawns a func_151C229C effect along a segment in front of `obj`; with a model (unk1D4), from model
+ * part 0x46 plus extra func_151C56A4 / func_151C5588 effects at its start. */
+void func_151C5280(struct127 *obj, u8 arg1, s32 arg2) {
+    f32 start[3];
     f32 end[3];
     f32 dir[3];
     f32 unkB0[3];
-    struct126 *temp;
-    f32 *tbl[2];
-    f32 *out[2];
-    s32 var_v1;
-    s32 var_v0;
-    s32 rand;
-    f32 rand1;
-    f32 rand0;
+    struct126 *part;
+    vertex *modelPoints[2];
+    f32 *worldPoints[2];
+    s32 arg16;
+    s32 arg23;
+    s32 randInt;
+    f32 randB;
+    f32 randA;
 
-    if (arg0 != NULL) {
-        func_15145740(arg0, dir, unkB0, NULL, 0.0f);
-        dir[0] *= 0.001000000047f;
-        dir[1] *= 0.001000000047f;
-        dir[2] *= 0.001000000047f;
-        if (arg0->unk1D4 != 0) {
-            tbl[0] = (f32 *)&D_800AAA90;
-            tbl[1] = D_800AAAA8;
-            out[0] = pos;
-            out[1] = end;
-            temp = func_1503195C(arg0, 0x46, 0);
-            if (temp == NULL) {
+    if (obj != NULL) {
+        func_15145740(obj, dir, unkB0, NULL, 0.0f);
+        dir[0] *= 0.001f;
+        dir[1] *= 0.001f;
+        dir[2] *= 0.001f;
+        if (obj->unk1D4 != NULL) {
+            modelPoints[0] = &D_800AAA90;
+            modelPoints[1] = &D_800AAAA8;
+            worldPoints[0] = start;
+            worldPoints[1] = end;
+            part = func_1503195C(obj, 0x46, 0);
+            if (part == NULL) {
                 return;
             }
-            if (func_1514654C(arg0, temp, 0, tbl, out, 2) == 0) {
+            if (func_1514654C(obj, part, 0, modelPoints, worldPoints, 2) == 0) {
                 return;
             }
-            func_151C56A4(pos, arg1, arg2);
+            func_151C56A4(start, arg1, arg2);
             if (func_150ADA20() & 1) {
-                func_151C5588((s32)arg0, (s32)pos, 0x46, arg1, arg2);
+                func_151C5588(obj, start, 0x46, arg1, arg2);
             }
         } else {
-            pos[0] = arg0->x_position;
-            pos[1] = arg0->y_position + 106.0f;
-            pos[2] = arg0->z_position;
-            end[0] = pos[0] + (dir[0] * -82.0f);
-            end[1] = pos[1] + (dir[1] * -82.0f);
-            end[2] = pos[2] + (dir[2] * -82.0f);
-            pos[0] -= dir[0] * -120.0f;
-            pos[1] -= dir[1] * -120.0f;
-            pos[2] -= dir[2] * -120.0f;
+            start[0] = obj->x_position;
+            start[1] = obj->y_position + 106.0f;
+            start[2] = obj->z_position;
+            end[0] = start[0] + (dir[0] * -82.0f);
+            end[1] = start[1] + (dir[1] * -82.0f);
+            end[2] = start[2] + (dir[2] * -82.0f);
+            start[0] -= dir[0] * -120.0f;
+            start[1] -= dir[1] * -120.0f;
+            start[2] -= dir[2] * -120.0f;
         }
-        rand0 = func_150ADA68();
-        rand1 = func_150ADA68();
-        rand = func_150ADA20();
-        if (arg0->unk1D4 != 0) {
-            var_v1 = 0xFF;
+        randA = func_150ADA68();
+        randB = func_150ADA68();
+        randInt = func_150ADA20();
+        if (obj->unk1D4 != NULL) {
+            arg16 = 255;
         } else {
-            var_v1 = 0x80;
+            arg16 = 128;
         }
         if (D_800BE616 != 0) {
-            var_v0 = -1;
+            arg23 = -1;
         } else {
-            var_v0 = 2;
+            arg23 = 2;
         }
-        func_151C229C(pos, 0, end, dir, 1, 0, 300.0f, 0.003333333414f, (rand0 * 10.0f) + 25.0f,
-                      (rand1 * 150.0f) + 400.0f, 80.0f, (rand % 56U) + 200, arg0, 1, 1, 0, var_v1, 0, 1, 0,
-                      0x1A, 0.0f, 0xFF, var_v0, 0, arg1, arg2);
+        func_151C229C(start, 0, end, dir, 1, 0, 300.0f, 1.0f / 300.0f, (randA * 10.0f) + 25.0f,
+                      (randB * 150.0f) + 400.0f, 80.0f, (randInt % 56U) + 200, obj, 1, 1, 0, arg16, 0, 1, 0,
+                      0x1A, 0.0f, 0xFF, arg23, 0, arg1, arg2);
     }
 }
 
-extern void func_15102B38(s32, u8, s32, s32, f32 *, s32, s32, f32, s32, s32, s32, s32, u8, s32);
-extern f32 D_800AAABC, D_800AAAC0, D_800AAAC4, D_800AAAC8;
-extern s32 D_800AAA90, D_800AAA9C;
+extern void func_15102B38(struct127 *, u8, vertex *, vertex *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
+extern vertex D_800AAA9C;
 
-void func_151C5588(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
-    f32 sp50[2];
-    union { volatile s32 w; f64 d; } sp48;
-    s32 sp44;
+/* Spawns a randomly sized and rotated func_15102B38 effect at `pos` on `obj`. */
+void func_151C5588(struct127 *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4) {
+    f32 scale[2];
+    f32 angle;
+    s32 rand[2]; /* rand[1] is drawn but never used */
 
-    sp50[1] = (func_150ADA68() * D_800AAABC + 604.0f) * D_800AAAC0;
-    sp50[0] = (func_150ADA68() * 59.0f + 141.0f) * D_800AAAC4;
-    sp44 = func_150ADA20();
-    sp48.w = func_150ADA20();
-    func_15102B38(arg0, 0, (s32)&D_800AAA90, (s32)&D_800AAA9C, sp50,
-                  (sp44 & 3) + 6, 0xFF, func_150ADA68() * 270.0f + D_800AAAC8,
-                  arg1, 0xFF, 0, arg2, arg3, arg4);
+    scale[1] = (func_150ADA68() * 1001.0f + 604.0f) * 0.01f;
+    scale[0] = (func_150ADA68() * 59.0f + 141.0f) * 0.1f;
+    rand[0] = func_150ADA20();
+    rand[1] = func_150ADA20();
+    angle = func_150ADA68();
+    func_15102B38(obj, 0, &D_800AAA90, &D_800AAA9C, scale, (rand[0] & 3) + 6, 0xFF,
+                  angle * 270.0f + 359.0f, pos, 0xFF, 0, arg2, arg3, arg4);
 }
 
-void func_151C56A4(f32 *arg0, u8 arg1, s32 arg2) {
+/* Spawns a func_151602C0 effect at `pos`, converted to integer coordinates. */
+void func_151C56A4(f32 *pos, u8 arg1, s32 arg2) {
     Header header;
-    Header2 header2;
+    Header2 intPos;
 
     header.unk0 = 3;
     header.unk1 = -1;
     header.unk2 = (func_150ADA20() % 3U) + 3;
     header.unk4 = 0;
 
-    header2.unk0 = (s32) arg0[0];
-    header2.unk4 = (s32) arg0[1];
-    header2.unk8 = (s32) arg0[2];
+    intPos.unk0 = pos[0];
+    intPos.unk4 = pos[1];
+    intPos.unk8 = pos[2];
 
-    func_151602C0(&header, &header2, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
+    func_151602C0(&header, &intPos, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
 }
 
 extern s32 func_15137C64(f32 *, f32 *, f32 *, f32 *, f32 *, s32, s32, s32);
