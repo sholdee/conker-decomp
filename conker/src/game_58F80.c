@@ -1232,7 +1232,7 @@ load:
                 obj->unk1F4 = f0 - obj->unk1F8;
                 obj->unk1F8 = f0;
                 if (obj->unk1FC & 2) {
-                    obj->unk1FC &= 0xFFFC;
+                    obj->unk1FC &= ~3;
                     obj->unk1F4 = obj->xz_velocity;
                 } else {
                     obj->unk1FC |= 1;
@@ -1334,7 +1334,8 @@ void func_1502DF38(s32 index, s32 rootOnly) {
             f32 len;
 
             for (i = 0; i < 3; i++) {
-                len = sqrtf((*bone)[i][0] * (*bone)[i][0] + (*bone)[i][1] * (*bone)[i][1] + (*bone)[i][2] * (*bone)[i][2]);
+                len = sqrtf((*bone)[i][0] * (*bone)[i][0] + (*bone)[i][1] * (*bone)[i][1] +
+                            (*bone)[i][2] * (*bone)[i][2]);
                 if (i == 1) {
                     scale = obj->y_scale / len;
                 } else {
@@ -1416,7 +1417,7 @@ void func_1502E4C4(s32 index) {
     obj = &D_800CC2D0[index];
     id = obj->id;
     if (obj->unk5 == 7) {
-        obj->unk74 &= 0xFFF0;
+        obj->unk74 &= ~0xF;
         return;
     }
     oldMask = obj->unk74;
@@ -1756,7 +1757,7 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
 
                 overrideTex[0] = override[0];
                 overrideTex[1] = override[1];
-                if (override != NULL) { // matching: redundant re-test is in the original
+                if (override != NULL) { // matching: dropping this redundant re-test changes the code
                     if (overrideTex[i] != ((ModelTexSlots *)D_800D1C90[id])->texture[i][2]) {
                         if (obj->unk6C[i] == 0) {
                             texIndex[i] = overrideTex[i];
@@ -1903,8 +1904,8 @@ void func_1502F490(GameObj *platform, f32 *x, f32 *y, f32 *z, s32 tri) {
         }
         for (j = 0; j < 3; j++) {
             // matching: byte-offset form; bones[bone[j]] swaps the addu operands
-            func_150A7960((f32 (*)[4])((u8 *)bones + (bone[j] << 6)), vtx[j]->v.ob[0], vtx[j]->v.ob[1], vtx[j]->v.ob[2], &v[i][j][0], &v[i][j][1],
-                          &v[i][j][2]);
+            func_150A7960((f32 (*)[4])((u8 *)bones + (bone[j] << 6)), vtx[j]->v.ob[0], vtx[j]->v.ob[1],
+                          vtx[j]->v.ob[2], &v[i][j][0], &v[i][j][1], &v[i][j][2]);
         }
     }
     for (i = 0; i < 2; i++) {
