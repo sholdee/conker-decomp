@@ -311,7 +311,7 @@ void func_15112A80(s32 player) {
                     for (i = start; i <= end; i++) {
                         OBJECTS[i].viewFlags |= 1 << view;
                         (*D_80089240[view])[*count].index = i;
-                        (*D_80089240[view])[*count].distance = *(s32 *)((u8 *)dist + (i - start) * 4);
+                        (*D_80089240[view])[*count].distance = *(s32 *)((u8 *)dist + (i - start) * 4); // matching: as above
                         (*count)++;
                     }
                 }
