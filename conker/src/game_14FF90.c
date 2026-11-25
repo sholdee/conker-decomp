@@ -412,8 +412,8 @@ void func_151236D0(Camera *camera) {
         func_1515BA10(camera->CNumber);
     }
 }
-/* Saves the mode state in stack slot `slot` and switches to newMode. Returns 0 if the slot is taken. */
-s32 func_15123934(Camera *camera, s32 newMode, s32 newUnkDC, s32 newUnk134, s32 slot) {
+/* Saves the mode state in cache slot `slot` and switches to newMode. Returns 0 if the slot is taken. */
+s32 func_15123934(Camera *camera, s32 newMode, s32 newMotion, s32 newTightness, CameraMode slot) {
     if (camera->FCache[slot] == 0) {
         camera->savedModeIndex[slot] = camera->ModeIndex;
         camera->MCache[slot] = camera->Mode;
@@ -423,8 +423,8 @@ s32 func_15123934(Camera *camera, s32 newMode, s32 newUnkDC, s32 newUnk134, s32 
         camera->savedDistIndex[slot] = camera->DistIndex;
         camera->savedDistMask[slot] = camera->DistMask;
         camera->Mode = newMode;
-        camera->Motion = newUnkDC;
-        camera->Tightness = newUnk134;
+        camera->Motion = newMotion;
+        camera->Tightness = newTightness;
         camera->FCache[slot] = 1;
         func_15125394(camera);
         return 1;
@@ -433,7 +433,7 @@ s32 func_15123934(Camera *camera, s32 newMode, s32 newUnkDC, s32 newUnk134, s32 
 }
 
 /* Restores the mode state saved in `slot` by func_15123934. Returns 0 if the slot is empty. */
-s32 func_151239CC(Camera *camera, s32 slot) {
+s32 func_151239CC(Camera *camera, CameraMode slot) {
     if (camera->FCache[slot] != 0) {
         camera->ModeIndex = camera->savedModeIndex[slot];
         camera->Mode = camera->MCache[slot];
