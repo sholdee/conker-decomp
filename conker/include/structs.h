@@ -440,7 +440,7 @@ typedef struct {
     /* 0x00C */ u8  pissed_stumble;
     /* 0x00D */ u8  pssd_is_pissing;
     /* 0x00E */ u16 pissed_walk;
-    /* 0x010 */ s16 pissed_angle;
+    /* 0x010 */ s16 pissed_angle;   // original viewer reads it lhu; s16 matches the float->int stores
     /* 0x012 */ s16 pssd_waist_tilt;
     /* 0x014 */ u16 pssd_waist_wobble;
     /* 0x016 */ u8  pissed_hangover;
@@ -513,14 +513,14 @@ typedef struct {
     /* 0x087 */ u8  pad87;
     /* 0x088 */ u16 prevButtons;  // buttons of the previous frame
     /* 0x08A */ u16 buttons;
-    /* 0x08C */ u16 unk8C;
-    /* 0x08E */ s8  unk8E;
-    /* 0x08F */ s8  unk8F;
+    /* 0x08C */ u16 pressedButtons;  // bot/scripted newly pressed buttons (copied to D_800CC288)
+    /* 0x08E */ s8  buttonsTimer;    // frames until a bot's scripted `buttons` are released
+    /* 0x08F */ s8  pressedButtonsTimer; // frames until pressedButtons is cleared
     /* 0x090 */ f32 unk90;
     /* 0x094 */ u8  unk94;
     /* 0x095 */ u8  ladder;
     /* 0x096 */ u8  unk96;
-    /* 0x097 */ u8  unk97;
+    /* 0x097 */ u8  ladderFromTop;   // the ladder was grabbed from its top (game_CDE80.c)
     /* 0x098 */ u8  rope;            // rope index (func_151AE590), 0 = none
     /* 0x099 */ u8  pad99[3];
     /* 0x09C */ struct Rope *ropePtr;     // rope being ridden, or NULL
@@ -551,10 +551,10 @@ typedef struct {
     /* 0x11C */ struct BoneChain *boneChain;
     /* 0x120 */ u8  death_State;
     /* 0x121 */ u8  unk121;
-    /* 0x122 */ u8  unk122;
+    /* 0x122 */ u8  respawnReady; // multiplayer: the dead player may respawn now (A pressed, a bot after 181 ticks, ...)
     /* 0x123 */ u8  unk123;
-    /* 0x124 */ s16 unk124;
-    /* 0x126 */ s16 unk126;
+    /* 0x124 */ s16 deathTimer;      // countdown for death_State 2 and 7 (game_A9D90.c)
+    /* 0x126 */ s16 deathTime;       // ticks since death_State left 0
     /* 0x128 */ u8  unk128;
     /* 0x129 */ s8  unk129;
     /* 0x12A */ s8  unk12A;
@@ -587,8 +587,8 @@ typedef struct {
     /* 0x19C */ u16 GrenadeTimer;
     /* 0x19E */ u16 ReloadTimer;
     /* 0x1A0 */ u16 unk1A0;
-    /* 0x1A2 */ u16 unk1A2;
-    /* 0x1A4 */ u16 unk1A4;
+    /* 0x1A2 */ u16 gunRecoil;       // >> 8 = recoil pitch kick (Camera.LastGunRecoil, walk lean)
+    /* 0x1A4 */ u16 gunRecoilVel;    // added to gunRecoil each tick while firing
     /* 0x1A6 */ u16 unk1A6;
     /* 0x1A8 */ u8  unk1A8;
     /* 0x1A9 */ u8  unk1A9;
@@ -601,10 +601,10 @@ typedef struct {
     /* 0x1B1 */ u8  unk1B1;
     /* 0x1B2 */ u8  unk1B2;
     /* 0x1B3 */ u8  unk1B3;
-    /* 0x1B4 */ u8  unk1B4;
+    /* 0x1B4 */ u8  deferredActions; // requests run, then cleared, by the per-frame loop in game_90840.c: 1 func_15063628, 2 fire (by rt_context_b), 4/8 func_151D57F8(0/1)
     /* 0x1B5 */ u8  pad1B5[3];
-    /* 0x1B8 */ f32 unk1B8;
-    /* 0x1BC */ f32 unk1BC;
+    /* 0x1B8 */ f32 gunPitch;        // tracked vehicle gun elevation, degrees (game_11A680.c)
+    /* 0x1BC */ f32 gunYaw;          // tracked vehicle gun heading, degrees in [0, 360)
 } ActorCtl; // size 0x1C0
 
 /* One 0x30-byte entry of the level's spawn table D_800D20FC; Actor.spawn points at the one it came from. */

@@ -309,12 +309,12 @@ void func_15120158(Camera *camera) {
             if (zone == 0x38) {
                 // matching: sinPitch doubles as the pitch adjustment; a separate local changes the frame
                 if (camera->PadPtr->button & Z_TRIG) {
-                    sinPitch = camera->LastGunRecoil - (f32)(camera->CharPtr->mv->unk1A2 >> 8) * 1.098632812f;
+                    sinPitch = camera->LastGunRecoil - (f32)(camera->CharPtr->mv->gunRecoil >> 8) * 1.098632812f;
                 } else {
                     sinPitch = 0.0f;
                 }
                 aim->targetPitch += sinPitch;
-                camera->LastGunRecoil = (f32)(camera->CharPtr->mv->unk1A2 >> 8) * 1.098632812f;
+                camera->LastGunRecoil = (f32)(camera->CharPtr->mv->gunRecoil >> 8) * 1.098632812f;
             }
             func_15048758(&aim->targetYaw);
             if (zone == 0x34) {

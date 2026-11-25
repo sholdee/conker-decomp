@@ -1313,7 +1313,7 @@ void func_1506D898(void) {
     D_800D154C->unk100 &= 0xFFDF;
     D_800D154C->count5 = 0;
     D_800D154C->norun = 0;
-    D_800D154C->mv->unk97 = 0;
+    D_800D154C->mv->ladderFromTop = 0;
     D_800D154C->mv->camjolt = 12;
 }
 

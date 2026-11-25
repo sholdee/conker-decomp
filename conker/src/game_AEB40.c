@@ -644,7 +644,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     if ((idx < D_8008FD8C) || (type == 0x98) || (type == 0x28)) {
         obj->mv = allocate_memory(sizeof(ActorCtl), 1, 0, 0);
         bzero(obj->mv, sizeof(ActorCtl));
-        obj->mv->unk1B8 = 5.0f;
+        obj->mv->gunPitch = 5.0f;
     }
     obj->unique_id = spawn->unique_id;
     obj->unk1D0 = 2;

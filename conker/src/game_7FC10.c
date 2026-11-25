@@ -135,7 +135,7 @@ void func_150528C8(Actor *obj) {
             } else {
                 obj->mv->unk12C = 0;
             }
-            if ((obj->mv->unk8C & 0x2000) && (obj->energy != 0)) {
+            if ((obj->mv->pressedButtons & 0x2000) && (obj->energy != 0)) {
                 func_150D7790((u8 *)obj, obj->mv->context_b & 0x7F);
             }
         }

@@ -4206,7 +4206,7 @@ void func_1505F298(Actor *actor, OSContPad *pad) {
             actor->angle = actor->langle = actor->angle + 0x8000;
         }
         actor->mv->ladder = 0;
-        actor->mv->unk97 = 0;
+        actor->mv->ladderFromTop = 0;
         if (actor->mv->rope != 0) {
             func_151AE264(actor);
         }

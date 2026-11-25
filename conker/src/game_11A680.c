@@ -110,7 +110,7 @@ f32 func_150ED298(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, 
     return result;
 }
 
-/* Lets `obj` see the controlling player's camera (bit in unk2FC) while that player holds R with unk197 set. */
+/* Lets `obj` see the controlling player's camera (bit in unk2FC) while that player holds R with SniperState set. */
 void func_150ED578(Actor *obj) {
     ActorCtl *state;
     s32 player;
@@ -170,7 +170,7 @@ extern s32 func_151452C4(f32 *origin, f32 *dir, f32 *center, f32 radius, f32 *hi
  * - The controlling player (movement_obj[unk127] when D_800BE616 is set, else object 0) drives it: stick X steers,
  *   stick Y sets the throttle, A boosts while the player's state allows it, R stops it.
  * - The two treads are scrolled from the forward speed and the turn rate (func_150ED638).
- * - The gun angles (STATE aimYaw/aimPitch) either lead STATE->target, or turn with C-left/C-right while
+ * - The gun angles (mv->gunYaw/gunPitch) either lead STATE->target, or turn with C-left/C-right while
  *   the pitch homes in on the best object ahead, or follow the line of sight of camera camSlot - 1.
  *   They end up in taskint[0] as two s16 angles (x50).
  */
@@ -433,13 +433,13 @@ void func_150ED748(Actor *obj) {
                 dirZ = cosf(bearing) * cosf(obj->vtilt * 0.01745329238f);
                 angle = func_150484A0(dirX * 1000.0f, dirZ * 1000.0f);
                 aimOffset = obj->mv->unk12A * 400.0f;
-                obj->mv->unk1BC -= func_150ED1D0(angle * 57.29577637f + obj->mv->unk12A * 10.0f, obj->mv->unk1BC) * 0.125f;
-                obj->mv->unk1B8 += func_150ED298(obj, obj->mv->unk1B8 - obj->vtilt, target->xpos, target->ypos, target->zpos, aimOffset) * 0.001000000047f;
+                obj->mv->gunYaw -= func_150ED1D0(angle * 57.29577637f + obj->mv->unk12A * 10.0f, obj->mv->gunYaw) * 0.125f;
+                obj->mv->gunPitch += func_150ED298(obj, obj->mv->gunPitch - obj->vtilt, target->xpos, target->ypos, target->zpos, aimOffset) * 0.001000000047f;
                 target->xpos -= leadX;
                 target->zpos -= leadZ;
             } else {
-                obj->mv->unk1BC *= 0.8999999762f;
-                obj->mv->unk1B8 *= 0.8999999762f;
+                obj->mv->gunYaw *= 0.8999999762f;
+                obj->mv->gunPitch *= 0.8999999762f;
             }
         } else if (controlled && health) {
             typedef s32 scope; // matching: as above
@@ -453,10 +453,10 @@ void func_150ED748(Actor *obj) {
             } else {
                 pad = &D_800BE748[viewer[0]];
                 if (pad->button & R_CBUTTONS) {
-                    obj->mv->unk1BC += yawStep;
+                    obj->mv->gunYaw += yawStep;
                 }
                 if (pad->button & L_CBUTTONS) {
-                    obj->mv->unk1BC -= yawStep;
+                    obj->mv->gunYaw -= yawStep;
                 }
             }
             if (movement_obj[player].mv->SniperState != 0) {
@@ -473,7 +473,7 @@ void func_150ED748(Actor *obj) {
                         if ((D_800BE616 == 0) && !(other->noshove & 0x40)) {
                             continue;
                         }
-                        offset = func_150ED1D0(func_150ED234(obj, other), obj->mv->unk1BC);
+                        offset = func_150ED1D0(func_150ED234(obj, other), obj->mv->gunYaw);
                         score = offset;
                         if (offset < 0.0f) {
                             score = -offset;
@@ -515,9 +515,9 @@ void func_150ED748(Actor *obj) {
                     if (deltaZ < -limit) {
                         deltaZ = -limit;
                     }
-                    obj->mv->unk1B8 += deltaZ;
+                    obj->mv->gunPitch += deltaZ;
                 } else {
-                    obj->mv->unk1B8 *= 0.8999999762f;
+                    obj->mv->gunPitch *= 0.8999999762f;
                 }
             } else {
                 camera = &camera_global_Cameras[camSlot - 1];
@@ -542,8 +542,8 @@ void func_150ED748(Actor *obj) {
                     while (angle2 < -180.0f) {
                         angle2 += 360.0f;
                     }
-                    obj->mv->unk1B8 = angle;
-                    obj->mv->unk1BC = angle2;
+                    obj->mv->gunPitch = angle;
+                    obj->mv->gunYaw = angle2;
                 } else {
                     /* Aim at what the camera's look ray hits: level geometry or another object. */
                     dir[0] = camera->target.x - camera->eye.x;
@@ -578,27 +578,27 @@ void func_150ED748(Actor *obj) {
                         hitX = dir[0] * dist + camera->eye.x;
                         hitY = dir[1] * dist + camera->eye.y;
                         hitZ = dir[2] * dist + camera->eye.z;
-                        obj->mv->unk1B8 += func_150ED298(obj, 0.0f, hitX, hitY, hitZ, 0.0f) * 0.001000000047f;
+                        obj->mv->gunPitch += func_150ED298(obj, 0.0f, hitX, hitY, hitZ, 0.0f) * 0.001000000047f;
                     } else {
-                        obj->mv->unk1B8 *= 0.8999999762f;
+                        obj->mv->gunPitch *= 0.8999999762f;
                     }
                 }
             }
         }
-        if (obj->mv->unk1B8 < -20.0f) {
-            obj->mv->unk1B8 = -20.0f;
+        if (obj->mv->gunPitch < -20.0f) {
+            obj->mv->gunPitch = -20.0f;
         }
-        if (obj->mv->unk1B8 > 80.0f) {
-            obj->mv->unk1B8 = 80.0f;
+        if (obj->mv->gunPitch > 80.0f) {
+            obj->mv->gunPitch = 80.0f;
         }
-        if (obj->mv->unk1BC > 360.0f) {
-            obj->mv->unk1BC -= 360.0f;
+        if (obj->mv->gunYaw > 360.0f) {
+            obj->mv->gunYaw -= 360.0f;
         }
-        if (obj->mv->unk1BC < 0.0f) {
-            obj->mv->unk1BC += 360.0f;
+        if (obj->mv->gunYaw < 0.0f) {
+            obj->mv->gunYaw += 360.0f;
         }
-        ((s16 *)&obj->taskint[0])[0] = obj->mv->unk1BC * 50.0f;
-        ((s16 *)&obj->taskint[0])[1] = -(s16)(obj->mv->unk1B8 * 50.0f);
+        ((s16 *)&obj->taskint[0])[0] = obj->mv->gunYaw * 50.0f;
+        ((s16 *)&obj->taskint[0])[1] = -(s16)(obj->mv->gunPitch * 50.0f);
     }
 }
 

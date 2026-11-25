@@ -347,8 +347,8 @@ void func_150A11C4(Actor *actor) {
                         s32 flag;
                         f32 height;
 
-                        /* unk95 is read as u8 here (s8 in structs.h); yaw * 65536/360 is a binary angle */
-                        if (*(u8 *)&actor->mv->ladder == 0 && actor->stunned == 0 && actor->energy != 0 &&
+                        /* yaw * 65536/360 is a binary angle */
+                        if (actor->mv->ladder == 0 && actor->stunned == 0 && actor->energy != 0 &&
                             actor->norun == 0 &&
                             (actor->mv->weapon_status == 0 || D_800BE9F0 == 6) && actor->stickspeed > 8.0f) {
                             height = D_800D3098[i].y + D_800D3098[i].ySize;
@@ -360,7 +360,7 @@ void func_150A11C4(Actor *actor) {
                                 flag = 1;
                             }
                             if (angle > 0x2000 && angle < 0x6000) {
-                                actor->mv->unk97 = flag;
+                                actor->mv->ladderFromTop = flag;
                                 actor->mv->unk96 = 0;
                                 actor->nojump = 18;
                                 actor->mv->ladder = i + 1;

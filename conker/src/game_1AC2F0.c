@@ -626,7 +626,7 @@ void func_151814FC(void) {
                 if (D_800A7270[D_80082FA0] <= D_800DDDC8[i]) {
                     D_800DDDC8[i] = D_800A7270[D_80082FA0];
                     player->mv->death_State = 7;
-                    player->mv->unk124 = 30;
+                    player->mv->deathTimer = 30;
                     D_800DDDD8[i] = 0.0f;
                 }
             } else if (player->mv->death_State == 8) {

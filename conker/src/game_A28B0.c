@@ -2313,8 +2313,8 @@ void func_1507B630(void) {
             D_800D1890 ^= 1;
         }
         if (D_800D1890 != 0) {
-            D_800D154C->mv->unk8C |= 0x4000;
-            D_800D154C->mv->unk8F = 0;
+            D_800D154C->mv->pressedButtons |= 0x4000;
+            D_800D154C->mv->pressedButtonsTimer = 0;
         }
     } else {
         // repeat this command
@@ -2335,11 +2335,11 @@ void func_1507B734(void) {
     u16 value = (D_800D1890 << 8) | D_800D1891;
 
     if (D_800D1893 != 0) {
-        D_800D154C->mv->unk8C = value;
-        D_800D154C->mv->unk8F = D_800D1892;
+        D_800D154C->mv->pressedButtons = value;
+        D_800D154C->mv->pressedButtonsTimer = D_800D1892;
     } else {
         D_800D154C->mv->buttons = value;
-        D_800D154C->mv->unk8E = D_800D1892;
+        D_800D154C->mv->buttonsTimer = D_800D1892;
     }
 }
 

@@ -20,7 +20,7 @@ void func_1517F814(s32, f32, f32, f32, s32);
 /* Puts obj into state 2 with the given timer. */
 void func_1507C8E0(Actor *obj, s32 timer) {
     obj->mv->death_State = 2;
-    obj->mv->unk124 = timer;
+    obj->mv->deathTimer = timer;
 }
 
 /* Per-frame update of every active player's state machine. */
@@ -38,7 +38,7 @@ void func_1507C8FC(void) {
                 continue;
             }
             if (player->mv->death_State == 0) {
-                player->mv->unk126 = 0;
+                player->mv->deathTime = 0;
                 continue;
             }
             if (player->mv->death_State == 1) {
@@ -47,7 +47,7 @@ void func_1507C8FC(void) {
             if (i <= D_80082FA0) {
                 if (D_800BE616 != 0 && (D_800D18A2 & (1 << i))) {
                     player->mv->death_State = 2;
-                    player->mv->unk124 = 60;
+                    player->mv->deathTimer = 60;
                 }
                 if (player->mv->death_State == 11) {
                     func_1517EE40(0, 0, 0, 15, 1, i);
@@ -61,30 +61,30 @@ void func_1507C8FC(void) {
                     continue;
                 }
                 if (player->mv->death_State == 2) {
-                    if (player->mv->unk124 > 0) {
-                        player->mv->unk124 -= D_800BE9E4;
+                    if (player->mv->deathTimer > 0) {
+                        player->mv->deathTimer -= D_800BE9E4;
                     } else {
                         func_1507CD0C(player);
                     }
                 } else if (player->mv->death_State == 7) {
-                    if (player->mv->unk124 > 0) {
-                        player->mv->unk124 -= D_800BE9E4;
+                    if (player->mv->deathTimer > 0) {
+                        player->mv->deathTimer -= D_800BE9E4;
                     } else {
                         player->mv->death_State = 8;
                         func_1506160C(player, 2, 0, 60, 0);
                     }
                 }
-                player->mv->unk126 += D_800BE9E4;
+                player->mv->deathTime += D_800BE9E4;
                 if ((D_800BE710[i] & 0x8000) || (D_800BE616 != 0 && player->mv->bot == 0) ||
-                    func_150859AC(i, 3) < 2 || (player->mv->bot == 1 && player->mv->unk126 >= 181)) {
-                    player->mv->unk122 = TRUE;
+                    func_150859AC(i, 3) < 2 || (player->mv->bot == 1 && player->mv->deathTime >= 181)) {
+                    player->mv->respawnReady = TRUE;
                 }
                 if (D_8008FDBC & 0x80) {
-                    player->mv->unk122 = FALSE;
+                    player->mv->respawnReady = FALSE;
                 }
                 func_1507E1D0(player, &x, &y, &z);
                 func_1517F814(0, x, y, z, i);
-                if (player->mv->unk122 && player->mv->death_State == 5) {
+                if (player->mv->respawnReady && player->mv->death_State == 5) {
                     player->mv->death_State = 6;
                 }
                 if (player->mv->death_State == 9) {
@@ -94,17 +94,17 @@ void func_1507C8FC(void) {
                 func_1507D4F8(i);
                 continue;
             } else if (player->mv->death_State == 2) {
-                if (player->mv->unk124 > 0) {
-                    player->mv->unk124 -= D_800BE9E4;
+                if (player->mv->deathTimer > 0) {
+                    player->mv->deathTimer -= D_800BE9E4;
                 } else {
                     player->mv->death_State = 7;
                 }
             } else {
-                player->mv->unk126 += D_800BE9E4;
-                if (player->unk7 == 0xFF && player->mv->unk126 >= 161) {
+                player->mv->deathTime += D_800BE9E4;
+                if (player->unk7 == 0xFF && player->mv->deathTime >= 161) {
                     func_1506160C(player, 2, 0, 60, 0);
                 }
-                if (player->mv->unk126 >= 181 && player->mv->death_State != 10) {
+                if (player->mv->deathTime >= 181 && player->mv->death_State != 10) {
                     func_1507D4F8(i);
                 }
             }
@@ -345,8 +345,8 @@ void func_1507D1D8(Actor *obj) {
     }
     D_800D18A8 = 0;
     obj->mv->death_State = 0;
-    obj->mv->unk122 = FALSE;
-    obj->mv->unk124 = 0;
+    obj->mv->respawnReady = FALSE;
+    obj->mv->deathTimer = 0;
     obj->mv->shotsfired = saved1AA;
     obj->energy = D_8008726C;
     obj->unk22C |= 0x100;

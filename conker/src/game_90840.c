@@ -114,23 +114,23 @@ void func_150636F0(void) {
     D_800CC2B0 = 0;
     actor = movement_obj;
     for (index = 0; index < 25; index++, actor++) {
-        if ((actor->type != 0) && (actor->mv != NULL) && (actor->mv->unk1B4 != 0)) {
+        if ((actor->type != 0) && (actor->mv != NULL) && (actor->mv->deferredActions != 0)) {
             dc_glbl_CharNum = index;
             D_800D154C = actor;
             ctl = actor->mv;
-            if (ctl->unk1B4 & 1) {
+            if (ctl->deferredActions & 1) {
                 func_15063628(actor, 0.0f);
                 ctl = actor->mv;
             }
-            if (ctl->unk1B4 & 4) {
+            if (ctl->deferredActions & 4) {
                 func_151D57F8(actor, 0);
                 ctl = actor->mv;
             }
-            if (ctl->unk1B4 & 8) {
+            if (ctl->deferredActions & 8) {
                 func_151D57F8(actor, 1);
                 ctl = actor->mv;
             }
-            if (ctl->unk1B4 & 2) {
+            if (ctl->deferredActions & 2) {
                 action = ctl->rt_context_b & ~0x80;
                 switch (action) {
                 case 0x18:
@@ -187,7 +187,7 @@ void func_150636F0(void) {
                 }
                 ctl = actor->mv;
             }
-            ctl->unk1B4 = 0;
+            ctl->deferredActions = 0;
         }
     }
 }
@@ -1262,7 +1262,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     if (pressedButtons & Z_TRIG) {
                         if (arg0->mv->context_exclude_time == 0) {
                             arg0->count5 = 0xF;
-                            arg0->mv->unk1B4 |= 3;
+                            arg0->mv->deferredActions |= 3;
                             D_800CC2B0 = 1;
                             anim = animHit;
                             animParam = 6.0f;
@@ -1685,19 +1685,19 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                                 func_1000FA64(sound, arg0->xpos, arg0->ypos, arg0->zpos, 0x7FFF, 0x3E8, 0x1F4, func_1000EFB4, arg0, (s32)D_800996C8, 0, 0);
                             }
                         }
-                        arg0->mv->unk1A4 += D_800BE9E4 * 0xA;
-                        if (arg0->mv->unk1A2 > 0xAF) {
-                            arg0->mv->unk1A2 = 0xAF;
+                        arg0->mv->gunRecoilVel += D_800BE9E4 * 0xA;
+                        if (arg0->mv->gunRecoil > 0xAF) {
+                            arg0->mv->gunRecoil = 0xAF;
                         }
-                        arg0->mv->unk1A2 += arg0->mv->unk1A4 * D_800BE9E4;
-                        if (arg0->mv->unk1A2 > 0x1E00) {
-                            arg0->mv->unk1A2 = 0x1E00;
+                        arg0->mv->gunRecoil += arg0->mv->gunRecoilVel * D_800BE9E4;
+                        if (arg0->mv->gunRecoil > 0x1E00) {
+                            arg0->mv->gunRecoil = 0x1E00;
                         }
                     } else {
                         speed = 1.399999976f;
                         anim = func_15063E84(arg0, 0x1DE, 1, 0, pressedButtons);
-                        arg0->mv->unk1A2 = 0;
-                        arg0->mv->unk1A4 = 0;
+                        arg0->mv->gunRecoil = 0;
+                        arg0->mv->gunRecoilVel = 0;
                     }
                     if (endEffect != 0) {
                         func_151D469C(arg0, 5, 0x78, 0xFF, 1);
@@ -2006,12 +2006,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     arg0->norun = 0;
                     arg0->count5 = 0xA;
                     if ((D_800CC284->button & Z_TRIG) || (arg0->mv->prevButtons & Z_TRIG)) {
-                        arg0->mv->unk1B4 |= 1;
+                        arg0->mv->deferredActions |= 1;
                         D_800CC2B0 = 1;
                     }
                     if (animStart != arg0->animseq.uh) {
                         if (!(D_800CC284->button & Z_TRIG) && (arg0->mv->prevButtons & Z_TRIG) && (arg0->mv->ReloadTimer == 0)) {
-                            arg0->mv->unk1B4 |= 2;
+                            arg0->mv->deferredActions |= 2;
                             D_800CC2B0 = 1;
                             blend = 0.0f;
                             arg0->norun = 0xFF;
@@ -2233,12 +2233,12 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->norun = 0;
                 arg0->count5 = 0xA;
                 if ((arg0->mv->ReloadTimer == 0) && ((D_800CC284->button & Z_TRIG) || (arg0->mv->prevButtons & Z_TRIG))) {
-                    arg0->mv->unk1B4 |= 1;
+                    arg0->mv->deferredActions |= 1;
                     D_800CC2B0 = 1;
                 }
                 if (arg0->animseq.uh != 0x152) {
                     if (!(D_800CC284->button & Z_TRIG) && (arg0->mv->prevButtons & Z_TRIG) && (arg0->animseq.uh == 0x157) && (arg0->mv->ReloadTimer == 0)) {
-                        arg0->mv->unk1B4 |= 2;
+                        arg0->mv->deferredActions |= 2;
                         D_800CC2B0 = 1;
                         blend = 0.0f;
                         arg0->norun = 0xFF;
@@ -2317,10 +2317,10 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                     func_15063A38(arg0, heldButtons, Z_TRIG | R_TRIG);
                     if ((arg0->mv->ReloadTimer == 0) && ((D_800CC290 & Z_TRIG) || (arg0->mv->prevButtons & Z_TRIG))) {
                         if (arg0->mv->AimState == 2) {
-                            arg0->mv->unk1B4 |= 4;
+                            arg0->mv->deferredActions |= 4;
                             D_800CC2B0 = 1;
                         } else {
-                            arg0->mv->unk1B4 |= 1;
+                            arg0->mv->deferredActions |= 1;
                             D_800CC2B0 = 1;
                         }
                     }
@@ -2344,7 +2344,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                                 } else {
                                     anim = 0x237;
                                 }
-                                arg0->mv->unk1B4 |= 2;
+                                arg0->mv->deferredActions |= 2;
                                 D_800CC2B0 = 1;
                             } else {
                                 if (func_150ADA20() & 3) {
@@ -2396,10 +2396,10 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->nojump = 0x14;
                 if ((D_800CC284->button & Z_TRIG) || (arg0->mv->prevButtons & Z_TRIG)) {
                     if (arg0->mv->AimState == 2) {
-                        arg0->mv->unk1B4 |= 8;
+                        arg0->mv->deferredActions |= 8;
                         D_800CC2B0 = 1;
                     } else {
-                        arg0->mv->unk1B4 |= 1;
+                        arg0->mv->deferredActions |= 1;
                         D_800CC2B0 = 1;
                     }
                 }
@@ -2446,7 +2446,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                 arg0->norun = 0;
                 arg0->count5 = 0xA;
                 if ((arg0->mv->ReloadTimer == 0) && ((D_800CC284->button & Z_TRIG) || (arg0->mv->prevButtons & Z_TRIG))) {
-                    arg0->mv->unk1B4 |= 1;
+                    arg0->mv->deferredActions |= 1;
                     D_800CC2B0 = 1;
                 }
                 if (arg0->animseq.uh != 0x163) {
@@ -2459,7 +2459,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             arg0->mv->shotCount = 0;
                         }
                     } else if (!(D_800CC284->button & Z_TRIG) && (arg0->mv->prevButtons & Z_TRIG) && (arg0->animseq.uh == 0x165) && (arg0->mv->ReloadTimer == 0)) {
-                        arg0->mv->unk1B4 |= 2;
+                        arg0->mv->deferredActions |= 2;
                         D_800CC2B0 = 1;
                         blend = 0.0f;
                         arg0->norun = 0xFF;

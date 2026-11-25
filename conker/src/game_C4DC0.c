@@ -223,14 +223,14 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             if (v == -1) {
                 v = 0x8000;
             }
-            obj->mv->unk8C = v;
-            obj->mv->unk8F = 0;
+            obj->mv->pressedButtons = v;
+            obj->mv->pressedButtonsTimer = 0;
             switch (cmd->a[0]) {
             case -1:
             case 4:
             case 0x2000:
                 obj->mv->buttons = v;
-                obj->mv->unk8E = 2;
+                obj->mv->buttonsTimer = 2;
                 break;
             }
         }

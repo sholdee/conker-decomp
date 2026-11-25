@@ -227,7 +227,7 @@ void func_1504CB98(Actor *actor) {
         D_800CC284->stick_x = actor->mv->stick_x;
         D_800CC284->stick_y = actor->mv->stick_y;
         D_800CC284->button = actor->mv->buttons;
-        D_800CC288 = actor->mv->unk8C;
+        D_800CC288 = actor->mv->pressedButtons;
         buttons = actor->mv->buttons;
         if (actor->CameraPtr == NULL) {
             func_151279A0(actor, D_800CC284);
@@ -448,7 +448,7 @@ void func_1504CB98(Actor *actor) {
                 lean = (D_800CC284->stick_y / 2);
             }
             if (actor->mv->rt_context_b == 0x38) {
-                lean -= actor->mv->unk1A2 >> 8;
+                lean -= actor->mv->gunRecoil >> 8;
             }
             { BLK; }
         } else {
@@ -467,7 +467,7 @@ void func_1504CB98(Actor *actor) {
                     tilt *= 0.91022223f;
                     lean = tilt;
                     if (actor->mv->rt_context_b == 0x38) {
-                        lean -= actor->mv->unk1A2 >> 8;
+                        lean -= actor->mv->gunRecoil >> 8;
                     }
                 }
                 if ((actor->mv->rt_context_b != 9) && (actor->mv->rt_context_b != 0x38) && (actor->mv->rt_context_b != 0x39) && (actor->mv->rt_context_b != 0x37) && (actor->mv->rt_context_b != 0x3B) && (actor->mv->rt_context_b != 0x15) && (actor->mv->rt_context_b != 0x26) && (actor->mv->rt_context_b != 0x3A)) {
@@ -550,7 +550,7 @@ void func_1504CB98(Actor *actor) {
     actor->unk11C = actor->unk118;
     if (actor->mv->bot == 0) {
         actor->mv->buttons = D_800CC284->button;
-        actor->mv->unk8C = D_800CC288;
+        actor->mv->pressedButtons = D_800CC288;
     }
     if ((actor->animseq.uh == 0) && (actor->animsp == 0.0f)) {
         func_1505E650(actor, 0x24, 1.0f, 1.0f, 0.0f, 0.0f, 0);
@@ -1017,7 +1017,7 @@ void func_1504CB98(Actor *actor) {
             actor->count2 = 1;
             actor->angle = (s32) (climbSpot->yaw * 182.04445f) - 0x4000;
             actor->yspd = climbSpeed * 0.14f;
-            if (actor->mv->unk97 != 0) {
+            if (actor->mv->ladderFromTop != 0) {
                 actor->yspd = 0.0f;
             }
             actor->unk1CC = actor->ypos;
@@ -1253,7 +1253,7 @@ void func_1504CB98(Actor *actor) {
             } else {
                 actor->mv->unk12C = 0;
             }
-            if ((actor->mv->unk8C & 0x2000) && (actor->energy != 0)) {
+            if ((actor->mv->pressedButtons & 0x2000) && (actor->energy != 0)) {
                 func_150D7790(actor, actor->mv->context_b & 0x7F);
             }
         }
@@ -1278,7 +1278,7 @@ void func_1504CB98(Actor *actor) {
                     climbTop = (climb->y + climb->ySize);
                     animSpeed = (climbInput * 0.025f);
                     actor->unk1CC = actor->ypos;
-                    if (actor->mv->unk97 != 0) {
+                    if (actor->mv->ladderFromTop != 0) {
                         actor->count5 = 0xFF;
                         actor->norun = 0xC;
                         animSpeed = 1.0f;
@@ -1329,7 +1329,7 @@ void func_1504CB98(Actor *actor) {
                 }
             }
             if (actor->shad == 0.0f) {
-                if (actor->mv->unk97 == 0) {
+                if (actor->mv->ladderFromTop == 0) {
                     actor->mv->ladder = 0;
                     actor->norun = 6;
                     actor->ygrav = 4.0f;

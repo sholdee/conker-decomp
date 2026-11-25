@@ -778,16 +778,16 @@ void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
 }
 
 void func_1504C854(Actor *obj) {
-    D_800CC288 = obj->mv->unk8C;
-    if (obj->mv->unk8E > 0) {
-        obj->mv->unk8E -= D_800BE9A0;
+    D_800CC288 = obj->mv->pressedButtons;
+    if (obj->mv->buttonsTimer > 0) {
+        obj->mv->buttonsTimer -= D_800BE9A0;
     } else {
         obj->mv->buttons = 0;
     }
-    if (obj->mv->unk8F > 0) {
-        obj->mv->unk8F -= D_800BE9A0;
+    if (obj->mv->pressedButtonsTimer > 0) {
+        obj->mv->pressedButtonsTimer -= D_800BE9A0;
     } else {
-        obj->mv->unk8C = 0;
+        obj->mv->pressedButtons = 0;
     }
 }
 
