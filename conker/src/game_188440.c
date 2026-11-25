@@ -103,168 +103,143 @@ void func_1515AF90(s16 player) {
     }
 }
 
+/* Sprite-particle descriptor passed to func_151303BC (ParticleDesc in game_117490.c). */
 typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-} Vec1515B21C;
-
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 unk0A;
-    /* 0x0C */ s32 unk0C;
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 texture;
+    /* 0x0A */ s16 lifetime;
+    /* 0x0C */ s32 unkC;
     /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
+    /* 0x14 */ u8 unk14[7];
+    /* 0x1B */ u8 alpha;
     /* 0x1C */ u8 unk1C;
     /* 0x1D */ u8 unk1D;
     /* 0x1E */ s16 unk1E;
     /* 0x20 */ s16 unk20;
     /* 0x22 */ s16 unk22;
     /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ Vec1515B21C unk30;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ Vec1515B21C unk48;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ Vec3f position;
+    /* 0x3C */ Vec3f unk3C;
+    /* 0x48 */ Vec3f velocity;
     /* 0x54 */ f32 unk54;
     /* 0x58 */ s32 unk58;
-    /* 0x5C */ u8 pad5C[0x4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ u8 pad64[0x8];
-} Params1515B21C;
+    /* 0x5C */ u8 pad5C[4];
+    /* 0x60 */ s8 unk60[4];
+    /* 0x64 */ u8 pad64[8];
+} ParticleDesc;
 
+/* Extra data copied into a func_151303BC particle at +0xA8 (ParticleExtra in game_117490.c). */
 typedef struct {
-    f32 unk0;
-    u8 unk4;
-    u8 unk5;
-    s8 unk6;
-    s8 unk7;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-} Extra1515B21C;
-
-typedef struct {
-    /* 0x00 */ Vec1515B21C pos;
-    /* 0x0C */ f32 unkC;
+    /* 0x00 */ f32 size;
+    /* 0x04 */ u8 unk4[4];
+    /* 0x08 */ f32 unk8[2];
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 unk14;
-} Sub1515B21C;
+    /* 0x18 */ u8 unk18[4];
+    /* 0x1C */ f32 unk1C[2];
+    /* 0x24 */ f32 unk24;
+} ParticleExtra;
+
+/* Emitter state stored in an effect object at +0x28. */
+typedef struct {
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ f32 rate;        // particles per unit of D_800BE9A4
+    /* 0x10 */ f32 accumulator; // pending particles; one is spawned per whole unit
+    /* 0x14 */ f32 unk14;
+} ParticleEmitter;
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x28];
-    /* 0x28 */ Sub1515B21C sub;
-    /* 0x40 */ u8 pad40[0x4];
-} Arg1515B21C;
+    /* 0x28 */ ParticleEmitter emitter;
+    /* 0x40 */ u8 pad40[4];
+} EmitterObject;
 
 extern f32 D_800BE9A4;
-void *func_151303BC(Params1515B21C *, s32, s32);
+void *func_151303BC(ParticleDesc *, s32, s32);
 
-void func_1515B21C(Arg1515B21C *arg0) {
-    Sub1515B21C *sub;
-    void *temp_v0;
-    Params1515B21C params;
-    Extra1515B21C extra;
-    f32 zero;
+/* Effect update: accumulates rate * D_800BE9A4 and spawns one func_151303BC particle per whole unit. */
+void func_1515B21C(EmitterObject *obj) {
+    ParticleEmitter *emitter;
+    void *particle;
+    ParticleDesc desc;
+    ParticleExtra extra;
 
-    arg0->sub.unk10 += arg0->sub.unkC * D_800BE9A4;
-    sub = &arg0->sub;
-    if (arg0->sub.unk10 > 1.0f) {
-        zero = 0.0f;
-        {
-        f32 temp_f2;
+    emitter = &obj->emitter;
+    emitter->accumulator += emitter->rate * D_800BE9A4;
+    if (emitter->accumulator > 1.0f) {
+        f32 size;
 
-        params.unk1D = 0x2F;
-        params.unk08 = 0xC01;
-        params.unk00 = 0x200005;
-        params.unk04 = 0;
-        params.unk1A = 0;
-        params.unk19 = 0;
-        params.unk18 = 0;
-        params.unk17 = 0;
-        params.unk16 = 0;
-        params.unk15 = 0;
-        params.unk14 = 0;
-        params.unk10 = 0;
-        params.unk0C = 0;
-        params.unk1C = 0xFF;
-        params.unk22 = 0;
-        params.unk24 = zero;
-        params.unk58 = 0x3207;
-        params.unk60 = 5;
-        params.unk61 = 5;
-        params.unk62 = 4;
-        params.unk63 = -1;
-        params.unk30 = sub->pos;
-        params.unk3C = zero;
-        params.unk40 = zero;
-        params.unk44 = zero;
-        params.unk1E = 0x32;
-        params.unk20 = 5;
-        extra.unk4 = 0;
-        extra.unk5 = 0;
-        extra.unk18 = 0;
-        extra.unk19 = 0;
-        params.unk48.x = zero;
-        params.unk48.z = zero;
+        desc.unk1D = 47;
+        desc.texture = 0xC01;
+        desc.flags = 0x200005;
+        desc.unk4 = 0;
+        desc.unk14[6] = 0;
+        desc.unk14[5] = 0;
+        desc.unk14[4] = 0;
+        desc.unk14[3] = 0;
+        desc.unk14[2] = 0;
+        desc.unk14[1] = 0;
+        desc.unk14[0] = 0;
+        desc.unk10 = 0;
+        desc.unkC = 0;
+        desc.unk1C = 255;
+        desc.unk22 = 0;
+        desc.unk24 = 0.0f;
+        desc.unk58 = 0x3207;
+        desc.unk60[0] = 5;
+        desc.unk60[1] = 5;
+        desc.unk60[2] = 4;
+        desc.unk60[3] = -1;
+        desc.position = emitter->position;
+        desc.unk3C.x = 0.0f;
+        desc.unk3C.y = 0.0f;
+        desc.unk3C.z = 0.0f;
+        desc.unk1E = 50;
+        desc.unk20 = 5;
+        extra.unk4[0] = 0;
+        extra.unk4[1] = 0;
+        extra.unk18[0] = 0;
+        extra.unk18[1] = 0;
+        desc.velocity.x = 0.0f;
+        desc.velocity.z = 0.0f;
         extra.unk10 = 1.200000048f;
         extra.unk14 = 0.8333333135f;
-        extra.unk24 = sub->unk14;
+        extra.unk24 = emitter->unk14;
 
         if (func_150ADA20() & 1) {
-            params.unk58 |= 0x40;
+            desc.unk58 |= 0x40;
         }
         if (func_150ADA20() & 1) {
-            params.unk58 |= 0x80;
+            desc.unk58 |= 0x80;
         }
 
         do {
-            params.unk48.y = func_150ADA68() * 12.0f * 0.1000000015f;
-            params.unk0A = (func_150ADA20() % 152U) + 0x96;
-            params.unk1B = (func_150ADA20() % 151U) + 0x37;
-            temp_f2 = (func_150ADA68() * 200.0f) + 100.0f;
-            params.unk28 = temp_f2;
-            extra.unk0 = temp_f2;
-            params.unk2C = temp_f2;
-            extra.unk6 = (func_150ADA20() % 5U) + 4;
-            extra.unk7 = (func_150ADA20() % 5U) + 4;
-            extra.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk0;
-            extra.unkC = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.unk0;
-            extra.unk1A = (func_150ADA20() & 3) + 2;
-            extra.unk1B = (func_150ADA20() & 3) + 2;
-            extra.unk1C = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.unk0;
-            extra.unk20 = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.unk0;
-            params.unk54 = ((func_150ADA68() * 1005.0f) + 600.0f) * 0.001000000047f;
+            desc.velocity.y = func_150ADA68() * 12.0f * 0.1000000015f;
+            desc.lifetime = (func_150ADA20() % 152U) + 150;
+            desc.alpha = (func_150ADA20() % 151U) + 55;
+            size = (func_150ADA68() * 200.0f) + 100.0f;
+            desc.width = size;
+            extra.size = size;
+            desc.height = size;
+            extra.unk4[2] = (func_150ADA20() % 5U) + 4;
+            extra.unk4[3] = (func_150ADA20() % 5U) + 4;
+            extra.unk8[0] = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.size;
+            extra.unk8[1] = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.size;
+            extra.unk18[2] = (func_150ADA20() & 3) + 2;
+            extra.unk18[3] = (func_150ADA20() & 3) + 2;
+            extra.unk1C[0] = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.size;
+            extra.unk1C[1] = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.size;
+            desc.unk54 = ((func_150ADA68() * 1005.0f) + 600.0f) * 0.001000000047f;
 
-            temp_v0 = func_151303BC(&params, 2, 0x28);
-            if (temp_v0 != NULL) {
-                memcpy((u8 *)temp_v0 + 0xA8, &extra, 0x28);
+            particle = func_151303BC(&desc, 2, 0x28);
+            if (particle != NULL) {
+                memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
             }
-            sub->unk10 -= 1.0f;
-        } while (sub->unk10 > 1.0f);
-        }
+            emitter->accumulator -= 1.0f;
+        } while (emitter->accumulator > 1.0f);
     }
 }
 
