@@ -1250,7 +1250,7 @@ void func_15169040(s32 event, u8 eventType) {
     func_15169070(0, OBJ_TYPE_COUNT, event, eventType);
 }
 void func_15143D18(s32 *, s32 *, s32, s32);
-void func_1516968C(struct102 *arg0, u8 *arg1, u8 arg2);
+void func_1516968C(ObjLink *obj, u8 *event, u8 eventType);
 
 /* Sends an event to every object of types [first, last) (clamped by func_15143D18). */
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
@@ -1266,7 +1266,7 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
                 D_800DD190++;
                 while (node != NULL) {
                     OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C(node, (u8 *)event, eventType);
+                    func_1516968C((ObjLink *)node, (u8 *)event, eventType);
                     OBJ_TYPES[type].handleEvent(node, event, eventType);
                     node = OBJ_ITER_NEXT[D_800DD190];
                 }
@@ -1276,7 +1276,7 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
                 D_800DD190++;
                 while (node != NULL) {
                     OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C(node, (u8 *)event, eventType);
+                    func_1516968C((ObjLink *)node, (u8 *)event, eventType);
                     node = OBJ_ITER_NEXT[D_800DD190];
                 }
                 D_800DD190--;
@@ -1299,7 +1299,7 @@ void func_15169260(s32 types, s32 count, s32 event, u8 eventType) {
                 D_800DD190++;
                 while (node != NULL) {
                     OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C(node, (u8 *)event, eventType);
+                    func_1516968C((ObjLink *)node, (u8 *)event, eventType);
                     OBJ_TYPES[*type].handleEvent(node, event, eventType);
                     node = OBJ_ITER_NEXT[D_800DD190];
                 }
@@ -1309,7 +1309,7 @@ void func_15169260(s32 types, s32 count, s32 event, u8 eventType) {
                 D_800DD190++;
                 while (node != NULL) {
                     OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C(node, (u8 *)event, eventType);
+                    func_1516968C((ObjLink *)node, (u8 *)event, eventType);
                     node = OBJ_ITER_NEXT[D_800DD190];
                 }
                 D_800DD190--;
@@ -1333,7 +1333,7 @@ void func_1516944C(s32 type, s32 event, u8 eventType) {
             D_800DD190++;
             while (node != NULL) {
                 OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                func_1516968C(node, (u8 *)event, eventType);
+                func_1516968C((ObjLink *)node, (u8 *)event, eventType);
                 OBJ_TYPES[type].handleEvent(node, event, eventType);
                 node = OBJ_ITER_NEXT[D_800DD190];
             }
@@ -1343,102 +1343,128 @@ void func_1516944C(s32 type, s32 event, u8 eventType) {
             D_800DD190++;
             while (node != NULL) {
                 OBJ_ITER_NEXT[D_800DD190] = (struct102 *)node->unk8;
-                func_1516968C(node, (u8 *)event, eventType);
+                func_1516968C((ObjLink *)node, (u8 *)event, eventType);
                 node = OBJ_ITER_NEXT[D_800DD190];
             }
             D_800DD190--;
         }
     }
 }
-void func_151695F0(struct127 *arg0, u8 arg1) {
-    struct {
-        s32 unk0;
-        u8 unk4;
-    } sp18;
+/* Event payload naming an actor (event types 0 and others). */
+typedef struct {
+    /* 0x0 */ struct127 *actor;
+    /* 0x4 */ u8 id;             /* the actor's unique_id */
+} ActorEvent;
 
-    sp18.unk0 = (s32)arg0;
-    sp18.unk4 = arg0->unique_id;
-    func_15169040((s32)&sp18, arg1);
+/* Event type 0x2D payload: ownership moves from one actor to another. */
+typedef struct {
+    /* 0x0 */ struct127 *from;
+    /* 0x4 */ struct127 *to;
+    /* 0x8 */ u8 fromId;
+    /* 0x9 */ u8 toId;
+} ActorSwapEvent;
+
+/* Sends an actor event about `actor` to every object. */
+void func_151695F0(struct127 *actor, u8 eventType) {
+    ActorEvent event;
+
+    event.actor = actor;
+    event.id = actor->unique_id;
+    func_15169040((s32)&event, eventType);
 }
-void func_1516962C(s32 arg0, struct127 *arg1, u8 arg2) {
-    struct {
-        s32 unk0;
-        u8 unk4;
-    } sp18;
-    sp18.unk0 = (s32)arg1;
-    sp18.unk4 = arg1->unique_id;
-    func_1516944C(arg0, (s32)&sp18, arg2);
+
+/* Sends an actor event about `actor` to every object of one type. */
+void func_1516962C(s32 type, struct127 *actor, u8 eventType) {
+    ActorEvent event;
+    event.actor = actor;
+    event.id = actor->unique_id;
+    func_1516944C(type, (s32)&event, eventType);
 }
+
 s32 func_15169668(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     D_800D2DAB = 1;
     return arg0;
 }
-void func_1516968C(struct102 *arg0, u8 *arg1, u8 arg2) {
-    if (arg2 == 0xF || arg2 == 0x10) {
-        if (arg1[0] == ((u8 *)arg0)[0xC]) {
-            func_1516972C(arg0);
+
+/* Default event handling: event types 0xF and 0x10 destroy objects owned by event[0]. */
+void func_1516968C(ObjLink *obj, u8 *event, u8 eventType) {
+    if (eventType == 0xF || eventType == 0x10) {
+        // matching: obj->owner read as a byte array; the struct field form swaps the two loads
+        if (event[0] == ((u8 *)obj)[0xC]) {
+            func_1516972C((struct102 *)obj);
         }
     }
 }
 
-void func_151696DC(struct102 *arg0) {
-    s8 i;
+/* Repairs saved iteration cursors that point at `obj` (it is about to leave its list). */
+void func_151696DC(struct102 *obj) {
+    s8 depth;
 
-    for (i = 0; i < D_800DD190; i++) {
-        if ((s32)arg0 == ((s32 *)D_800DD198)[i]) {
-            ((s32 *)D_800DD198)[i] = arg0->unk8;
+    for (depth = 0; depth < D_800DD190; depth++) {
+        if (obj == OBJ_ITER_NEXT[depth]) {
+            OBJ_ITER_NEXT[depth] = (struct102 *)obj->unk8;
         }
     }
 }
 
-void func_1516972C(struct102 *arg0) {
-    void (*func)(struct102 *arg0);
-    func_151696DC(arg0);
+/* Destroys an object of type 2 or above: its type's destroy hook, or by default func_15169804. */
+void func_1516972C(struct102 *obj) {
+    void (*destroy)(struct102 *obj);
 
-    if (arg0->unk0 >= 2) {
-        func = D_8008B4D0[arg0->unk0].unk0;
-        if (func != NULL) {
-            func(arg0);
+    func_151696DC(obj);
+
+    if (obj->unk0 >= 2) {
+        destroy = OBJ_TYPES[obj->unk0].destroy;
+        if (destroy != NULL) {
+            destroy(obj);
             return;
         }
-        func_15169804(arg0);
+        func_15169804(obj);
     }
 }
 
-void func_1516979C(struct102 *arg0) {
-    void (*func)(struct102 *arg0);
+/* Frees an object: its type's free hook, or by default func_15169824. */
+void func_1516979C(struct102 *obj) {
+    void (*free)(struct102 *obj);
 
-    func_151696DC(arg0);
-    func = D_8008B4D4[arg0->unk0].unk0;
-    if (func != NULL) {
-        func(arg0);
+    func_151696DC(obj);
+    free = OBJ_TYPES[obj->unk0].free;
+    if (free != NULL) {
+        free(obj);
         return;
     }
-    func_15169824(arg0);
+    func_15169824(obj);
 }
 
-void func_15169804(struct102 *arg0) {
-    func_15168B10(arg0, 1);
+/* Default destroy: moves the object to type 1 (pending free). */
+void func_15169804(struct102 *obj) {
+    func_15168B10((s32)obj, 1);
 }
 
-void func_15169824(struct102 *arg0) {
-    func_15168A9C(arg0);
-    func_10004074(arg0);
+/* Default free: unlinks the object and releases its memory. */
+void func_15169824(struct102 *obj) {
+    func_15168A9C((ObjLink *)obj);
+    func_10004074(obj);
 }
 
-void func_15169850(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    if (arg1 == 0) {
-        if (*(s32 *)arg0 == *(s32 *)arg2 || *(u8 *)(arg0 + 4) == *(u8 *)arg3) {
-            func_1516972C((struct102 *)arg4);
+/*
+ * Shared actor-event handler for objects that remember an owner (`owner`, `ownerId`): event type 0 destroys
+ * `obj` if the event names its owner; type 0x2D hands ownership over to the other actor of the swap.
+ */
+void func_15169850(s32 event, u8 eventType, s32 owner, s32 ownerId, s32 obj) {
+    if (eventType == 0) {
+        if (((ActorEvent *)event)->actor == *(struct127 **)owner || ((ActorEvent *)event)->id == *(u8 *)ownerId) {
+            func_1516972C((struct102 *)obj);
         }
-    } else if (arg1 == 0x2D) {
-        s32 v = *(s32 *)arg0;
-        if (v == *(s32 *)arg2) {
-            *(s32 *)arg2 = *(s32 *)(arg0 + 4);
-            *(u8 *)arg3 = *(u8 *)(arg0 + 9);
-        } else if (*(s32 *)(arg0 + 4) == *(s32 *)arg2) {
-            *(s32 *)arg2 = v;
-            *(u8 *)arg3 = *(u8 *)(arg0 + 8);
+    } else if (eventType == 0x2D) {
+        struct127 *from = ((ActorSwapEvent *)event)->from;
+
+        if (from == *(struct127 **)owner) {
+            *(struct127 **)owner = ((ActorSwapEvent *)event)->to;
+            *(u8 *)ownerId = ((ActorSwapEvent *)event)->toId;
+        } else if (((ActorSwapEvent *)event)->to == *(struct127 **)owner) {
+            *(struct127 **)owner = from;
+            *(u8 *)ownerId = ((ActorSwapEvent *)event)->fromId;
         }
     }
 }
