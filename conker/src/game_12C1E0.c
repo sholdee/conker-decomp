@@ -2,213 +2,226 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A2110;
-struct126 *func_150FF288(struct127 *arg0);
-void func_150FF2AC(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3);
-void func_151D5148(struct127 *arg0);
-void func_150FF2D4(u8 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, s32 *, s32 *, struct17 *, struct127 *, struct126 *);
+/* Local point of the gun's muzzle in its attachment's space. */
+extern struct17 D_800A2050;
+
+struct126 *func_150FF288(struct127 *obj);
+void func_150FF2AC(struct127 *obj, struct17 *direction, struct17 *axis0, struct17 *axis1);
+void func_150FF2D4(u8 *valid, struct17 *points, struct17 *position, struct17 *hit, struct17 *normal,
+                   struct17 *direction, struct17 *axis0, struct17 *axis1, struct17 *output0, struct17 *output1,
+                   s32 *value0, s32 *value1, struct17 *endpoint, struct127 *obj, struct126 *gun);
+void func_150FF474(struct17 *position, struct17 *points, u8 arg2, s32 arg3);
+void func_151D5148(struct127 *obj);
 s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
-void func_151D3F14(struct17 *arg0, u8 arg1, s32 arg2);
+void func_150F7470(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, struct127 *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+void func_151D3F14(struct17 *position, u8 arg1, s32 arg2);
 void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, s32, s32);
-void func_150FF474(struct17 *, struct17 *, u8, s32);
+void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
+s32 func_1514654C(struct127 *obj, struct126 *attachment, s32 arg2, struct17 **src, struct17 **dst, s32 count);
+void func_15145740(struct127 *obj, struct17 *direction, struct17 *axis0, struct17 *axis1, f32 arg4);
 
-typedef u8 Func150FED30Entry[0x40];
+/* Fires a shot from the gun attachment (set 0x82) of `obj`, with muzzle effects when it has bones. */
+void func_150FED30(struct127 *obj, s32 arg1, s32 arg2) {
+    struct17 position;
+    struct17 endpoint;
+    struct17 direction;
+    struct17 axis0;
+    struct17 axis1;
+    struct17 hit;
+    struct17 normal;
+    struct17 output0;
+    struct17 output1;
+    struct17 points[6];
+    s32 value0;
+    s32 value1;
+    struct126 *gun;
+    u8 valid;
+    s32 randomWord;
+    s32 kind;
+    s32 directionSign;
+    f32 random1;
+    f32 random0;
 
-void func_150FED30(struct127 *arg0, s32 arg1, s32 arg2) {
-    struct17 sp14C;
-    struct17 sp140;
-    struct17 sp134;
-    struct17 sp128;
-    struct17 sp11C;
-    struct17 sp110;
-    struct17 sp104;
-    struct17 spF8;
-    struct17 spEC;
-    struct17 spA4[6];
-    s32 spA0;
-    s32 sp9C;
-    struct126 *temp;
-    u8 sp97;
-    s32 rand;
-    s32 mode;
-    s32 variant;
-    f32 rand1;
-    f32 rand0;
+    gun = func_150FF288(obj);
+    if (gun != NULL) {
+        func_151D5148(obj);
+        func_150FF2AC(obj, &direction, &axis0, &axis1);
 
-    temp = func_150FF288(arg0);
-    if (temp != 0) {
-        func_151D5148(arg0);
-        func_150FF2AC(arg0, &sp134, &sp128, &sp11C);
-
-        if ((arg0->unk1D4 != 0) && ((arg0->unk74 & 0xF) != 0xF)) {
-            sp97 = 1;
+        if ((obj->unk1D4 != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
+            valid = TRUE;
         } else {
-            sp97 = 0;
+            valid = FALSE;
         }
 
-        func_150FF2D4(&sp97, spA4, &sp14C, &sp110, &sp104, &sp134, &sp128, &sp11C, &spF8, &spEC, &spA0, &sp9C, &sp140, arg0, temp);
+        func_150FF2D4(&valid, points, &position, &hit, &normal, &direction, &axis0, &axis1, &output0, &output1,
+                      &value0, &value1, &endpoint, obj, gun);
 
-        rand0 = func_150ADA68();
-        rand1 = func_150ADA68();
-        rand = func_150ADA20();
+        random0 = func_150ADA68();
+        random1 = func_150ADA68();
+        randomWord = func_150ADA20();
 
         if (D_800BE616 != 0) {
-            mode = 0x35;
+            kind = 0x35;
         } else {
-            mode = 0x1A;
+            kind = 0x1A;
         }
 
-        if (arg0->id == 0x98) {
-            variant = 1;
+        if (obj->id == 0x98) {
+            directionSign = 1;
         } else {
-            variant = -1;
+            directionSign = -1;
         }
 
-        func_151C229C(&sp140, &sp134, spA0, sp9C, 1, 0, 300.0f, D_800A2110,
-                      (rand0 * 10.0f) + 25.0f, (rand1 * 200.0f) + 600.0f,
-                      50.0f, (rand % 0x9CU) + 0x64, arg0, 0x63, 1, 1, 1,
-                      0, 1, 0, mode, 0.0f, 0xFF, variant, 0,
+        // matching: arg1 is read with lbu from its arg slot (a u8 param or cast caches it)
+        func_151C229C(&endpoint, &direction, value0, value1, 1, 0, 300.0f, 0.003333333414f,
+                      (random0 * 10.0f) + 25.0f, (random1 * 200.0f) + 600.0f,
+                      50.0f, (randomWord % 156U) + 100, obj, 99, 1, 1, 1,
+                      0, 1, 0, kind, 0.0f, 0xFF, directionSign, 0,
                       ((u8 *)&arg1)[3], arg2);
 
-        if (sp97 != 0) {
-            func_151D3F14(&sp14C, ((u8 *)&arg1)[3], arg2);
-            func_151D4408(&sp110, &sp104, (*(Func150FED30Entry **)&arg0->unk1D4)[*((u8 *)temp + 2)], arg0, 1.0f, ((u8 *)&arg1)[3], arg2);
-            func_150FF474(&sp14C, spA4, ((u8 *)&arg1)[3], arg2);
+        if (valid) {
+            func_151D3F14(&position, ((u8 *)&arg1)[3], arg2);
+            /* byte 2 of an attachment is the owner bone it follows */
+            func_151D4408(&hit, &normal, ((f32 (*)[4][4])obj->unk1D4)[((u8 *)gun)[2]], obj, 1.0f,
+                          ((u8 *)&arg1)[3], arg2);
+            func_150FF474(&position, points, ((u8 *)&arg1)[3], arg2);
         }
     }
 }
 
-extern s32 func_1514654C(struct127 *, struct126 *, s32, void *, void *, s32);
-extern f32 D_800A2050;
-extern f32 D_800A2114;
-extern f32 D_800A2118;
-struct126 *func_150FF288(struct127 *arg0);
-void func_150FF2AC(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3);
-void func_151D5148(struct127 *arg0);
-void func_150FF2D4(u8 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, s32 *, s32 *, struct17 *, struct127 *, struct126 *);
-void func_150F7470(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, struct127 *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_151D3F14(struct17 *arg0, u8 arg1, s32 arg2);
-void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, s32, s32);
-void func_150FF474(struct17 *, struct17 *, u8, s32);
-extern void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
+/* Writes the world position of attachment set `setId` of `obj` to `out` (`obj`'s own position for -1). */
+void func_150FEFD0(struct127 *obj, s16 setId, struct17 *out) {
+    struct17 *src;
+    struct17 *dst;
+    struct126 *attachment;
 
-typedef u8 Func150FF084Entry[0x40];
-
-void func_150FEFD0(struct127 *arg0, s16 arg1, struct17 *arg2) {
-    f32 *p1;
-    struct17 *p2;
-    struct126 *temp;
-
-    if (arg1 == -1) {
-        arg2->unk0 = arg0->x_position;
-        arg2->unk4 = arg0->y_position;
-        arg2->unk8 = arg0->z_position;
+    if (setId == -1) {
+        out->unk0 = obj->x_position;
+        out->unk4 = obj->y_position;
+        out->unk8 = obj->z_position;
     } else {
-        temp = func_1503195C(arg0, arg1, 0);
-        if (temp == 0) {
-            arg2->unk0 = arg0->x_position;
-            arg2->unk4 = arg0->y_position;
-            arg2->unk8 = arg0->z_position;
+        attachment = func_1503195C(obj, setId, 0);
+        if (attachment == NULL) {
+            out->unk0 = obj->x_position;
+            out->unk4 = obj->y_position;
+            out->unk8 = obj->z_position;
         } else {
-            p1 = &D_800A2050;
-            p2 = arg2;
-            func_1514654C(arg0, temp, 0, &p1, &p2, 1);
+            src = &D_800A2050;
+            dst = out;
+            func_1514654C(obj, attachment, 0, &src, &dst, 1);
         }
     }
 }
 
-void func_150FF084(struct127 *arg0, s32 arg1, s32 arg2) {
-    struct17 sp124;
-    struct17 sp118;
-    struct17 sp10C;
-    struct17 sp100;
-    struct17 spF4;
-    struct17 spE8;
-    struct17 spDC;
-    struct17 spD0;
-    struct17 spC4;
-    struct17 sp7C[6];
-    s32 sp78;
-    s32 sp74;
-    struct126 *temp;
-    u8 sp6F;
-    s32 rand;
-    s32 sp64;
+/* Like func_150FED30, but spawns its shot through func_150F7470. */
+void func_150FF084(struct127 *obj, s32 arg1, s32 arg2) {
+    struct17 position;
+    struct17 endpoint;
+    struct17 direction;
+    struct17 axis0;
+    struct17 axis1;
+    struct17 hit;
+    struct17 normal;
+    struct17 output0;
+    struct17 output1;
+    struct17 points[6];
+    s32 value0;
+    s32 value1;
+    struct126 *gun;
+    u8 valid;
+    s32 randomWord;
+    s32 hasValue1;
 
-    temp = func_150FF288(arg0);
-    if (temp != 0) {
-        func_151D5148(arg0);
-        func_150FF2AC(arg0, &sp10C, &sp100, &spF4);
+    gun = func_150FF288(obj);
+    if (gun != NULL) {
+        func_151D5148(obj);
+        func_150FF2AC(obj, &direction, &axis0, &axis1);
 
-        if (arg0->unk1D4 != 0) {
-            sp6F = 1;
+        if (obj->unk1D4 != NULL) {
+            valid = TRUE;
         } else {
-            sp6F = 0;
+            valid = FALSE;
         }
 
-        func_150FF2D4(&sp6F, sp7C, &sp124, &spE8, &spDC, &sp10C, &sp100, &spF4, &spD0, &spC4, &sp78, &sp74, &sp118, arg0, temp);
+        func_150FF2D4(&valid, points, &position, &hit, &normal, &direction, &axis0, &axis1, &output0, &output1,
+                      &value0, &value1, &endpoint, obj, gun);
 
-        if (sp74 == 0) {
-            sp64 = 0;
+        if (value1 == 0) {
+            hasValue1 = FALSE;
         } else {
-            sp64 = 1;
+            hasValue1 = TRUE;
         }
 
-        rand = func_150ADA20();
-        func_150F7470(&sp124, &sp10C, sp78, sp74, sp64, 0, D_800A2114, D_800A2118, 300.0f, arg0, 1, 1, 1, 0, 0x1A, 1, (rand % 5U) + 0x327, 0, ((u8 *)&arg1)[3], arg2);
+        randomWord = func_150ADA20();
+        // matching: arg1 is read with lbu from its arg slot (a u8 param or cast caches it)
+        func_150F7470(&position, &direction, value0, value1, hasValue1, 0, 54.00000381f, 0.01851851679f, 300.0f,
+                      obj, 1, 1, 1, 0, 0x1A, 1, (randomWord % 5U) + 807, 0, ((u8 *)&arg1)[3], arg2);
 
-        if (sp6F != 0) {
-            func_151D3F14(&sp124, ((u8 *)&arg1)[3], arg2);
-            func_151D4408(&spE8, &spDC, (*(Func150FF084Entry **)&arg0->unk1D4)[*((u8 *)temp + 2)], arg0, 1.0f, ((u8 *)&arg1)[3], arg2);
-            func_150FF474(&sp124, sp7C, ((u8 *)&arg1)[3], arg2);
+        if (valid) {
+            func_151D3F14(&position, ((u8 *)&arg1)[3], arg2);
+            func_151D4408(&hit, &normal, ((f32 (*)[4][4])obj->unk1D4)[((u8 *)gun)[2]], obj, 1.0f,
+                          ((u8 *)&arg1)[3], arg2);
+            func_150FF474(&position, points, ((u8 *)&arg1)[3], arg2);
         }
     }
 }
 
-struct126 *func_150FF288(struct127 *arg0) {
-    return func_1503195C(arg0, 0x82, 0);
+/* Returns `obj`'s gun attachment (set 0x82), or NULL. */
+struct126 *func_150FF288(struct127 *obj) {
+    return func_1503195C(obj, 0x82, 0);
 }
 
-extern f32 D_800A211C;
-void func_15145740(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4);
-
-void func_150FF2AC(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3) {
-    func_15145740(arg0, arg1, arg2, arg3, D_800A211C);
+void func_150FF2AC(struct127 *obj, struct17 *direction, struct17 *axis0, struct17 *axis1) {
+    func_15145740(obj, direction, axis0, axis1, 0.8110000491f);
 }
 
-u8 func_150FF6E0(struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct127 *, struct126 *);
-void func_151D5174(struct127 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, s32 *, s32 *, struct17 *);
+u8 func_150FF6E0(struct17 *points, struct17 *position, struct17 *hit, struct17 *normal, struct17 *endpoint,
+                 struct127 *obj, struct126 *gun);
+void func_151D5174(struct127 *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1,
+                   struct17 *output0, struct17 *output1, s32 *value0, s32 *value1, struct17 *endpoint);
 
-void func_150FF2D4(u8 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, struct17 *arg5, struct17 *arg6, struct17 *arg7, struct17 *arg8, struct17 *arg9, s32 *argA, s32 *argB, struct17 *argC, struct127 *argD, struct126 *argE) {
-    if (*arg0 != 0) {
-        *arg0 = func_150FF6E0(arg1, arg2, arg3, arg4, argC, argD, argE);
+/*
+ * Finds where a shot starts. With `*valid` set, the points come from the gun's bone (func_150FF6E0),
+ * which can fail and clear `*valid`; otherwise the start is beside `obj`, to the right of `direction`.
+ */
+void func_150FF2D4(u8 *valid, struct17 *points, struct17 *position, struct17 *hit, struct17 *normal,
+                   struct17 *direction, struct17 *axis0, struct17 *axis1, struct17 *output0, struct17 *output1,
+                   s32 *value0, s32 *value1, struct17 *endpoint, struct127 *obj, struct126 *gun) {
+    if (*valid) {
+        *valid = func_150FF6E0(points, position, hit, normal, endpoint, obj, gun);
     }
-    if (*arg0 == 0) {
-        f32 temp_f14;
-        f32 var_f16;
-        f32 var_f18;
-        temp_f14 = arg5->unk0;
-        if ((0.0000999999974738f < fabsf(temp_f14)) || (0.0000999999974738f < fabsf(arg5->unk8))) {
-            f32 temp_f2;
-            f32 temp_f12;
-            temp_f2 = arg5->unk8;
-            temp_f12 = 1.0f / sqrtf((temp_f14 * temp_f14) + (temp_f2 * temp_f2));
-            var_f16 = temp_f2 * temp_f12;
-            var_f18 = -temp_f14 * temp_f12;
+    if (!*valid) {
+        f32 sideZ;
+        f32 sideX;
+        f32 dirX;
+
+        dirX = direction->unk0;
+        if ((0.0000999999974738f < fabsf(dirX)) || (0.0000999999974738f < fabsf(direction->unk8))) {
+            f32 dirZ;
+            f32 invLength;
+
+            dirZ = direction->unk8;
+            invLength = 1.0f / sqrtf((dirX * dirX) + (dirZ * dirZ));
+            sideZ = dirZ * invLength;
+            sideX = -dirX * invLength;
         } else {
-            var_f16 = 1.0f;
-            var_f18 = 0.0f;
+            sideZ = 1.0f;
+            sideX = 0.0f;
         }
-        arg2->unk0 = argD->x_position + (34.0f * var_f18);
-        arg2->unk4 = argD->y_position + 49.0f;
-        arg2->unk8 = argD->z_position + (34.0f * var_f16);
-        *argC = *arg2;
+        position->unk0 = obj->x_position + (34.0f * sideX);
+        position->unk4 = obj->y_position + 49.0f;
+        position->unk8 = obj->z_position + (34.0f * sideZ);
+        *endpoint = *position;
     }
-    func_151D5174(argD, arg2, arg5, arg6, arg7, arg8, arg9, argA, argB, argC);
+    func_151D5174(obj, position, direction, axis0, axis1, output0, output1, value0, value1, endpoint);
 }
 
-void func_150FF474(struct17 *arg0, struct17 *arg1, u8 arg2, s32 arg3) {
-    struct packet {
+/* Spawns six muzzle-flash particles at `position`, one per entry of `points`. */
+void func_150FF474(struct17 *position, struct17 *points, u8 arg2, s32 arg3) {
+    u8 i;
+    s32 variant;
+    s32 pad; // matching: unused stack slot
+    struct {
         u8 unk0;
         u8 unk1;
         s16 unk2;
@@ -216,100 +229,98 @@ void func_150FF474(struct17 *arg0, struct17 *arg1, u8 arg2, s32 arg3) {
         u8 pad6[2];
         s32 unk8;
         s32 unkC;
-        u8 unk10;
-        u8 unk11;
-        u8 unk12;
-        u8 unk13;
+        u8 color[4];
         f32 unk14;
         f32 unk18;
-        struct17 unk1C;
+        struct17 position;
         struct17 unk28;
         f32 unk34;
         f32 unk38;
         f32 unk3C;
-        s32 unk40;
+        s32 flags;
         u8 unk44;
         u8 unk45;
         u8 unk46;
         u8 unk47;
         s32 unk48;
         u8 unk4C;
-    };
-    u8 i;
-    s32 temp;
-    s32 x;
-    struct packet sp84;
+    } spawn;
 
-    sp84.unk0 = 0x5F;
-    sp84.unk1 = 5;
-    sp84.unk2 = 0x2203;
-    sp84.unk8 = 0;
-    sp84.unkC = 0;
-    sp84.unk10 = 0xFF;
-    sp84.unk11 = 0xFF;
-    sp84.unk12 = 0xFF;
-    sp84.unk13 = 0xFF;
-    sp84.unk1C = *arg0;
-    sp84.unk34 = 0.0f;
-    sp84.unk38 = 0.0f;
-    sp84.unk3C = 0.0f;
-    sp84.unk40 = 0x40CC0009;
-    sp84.unk45 = 0xFF;
-    sp84.unk46 = 0;
-    sp84.unk47 = 7;
-    sp84.unk4C = 0xFF;
-    sp84.unk48 = 0;
-    sp84.unk4 = (func_150ADA20() & 3) + 3;
+    spawn.unk0 = 0x5F;
+    spawn.unk1 = 5;
+    spawn.unk2 = 0x2203;
+    spawn.unk8 = 0;
+    spawn.unkC = 0;
+    spawn.color[0] = 0xFF;
+    spawn.color[1] = 0xFF;
+    spawn.color[2] = 0xFF;
+    spawn.color[3] = 0xFF;
+    spawn.position = *position;
+    spawn.unk34 = 0.0f;
+    spawn.unk38 = 0.0f;
+    spawn.unk3C = 0.0f;
+    spawn.flags = 0x40CC0009;
+    spawn.unk45 = 0xFF;
+    spawn.unk46 = 0;
+    spawn.unk47 = 7;
+    spawn.unk4C = 0xFF;
+    spawn.unk48 = 0;
+    spawn.unk4 = (func_150ADA20() & 3) + 3;
     for (i = 0; i < 6; i++) {
-        sp84.unk14 = (func_150ADA68() * 11.10000038f) + 5.0f;
-        sp84.unk18 = (func_150ADA68() * 0.9990000725f) + 2.48300004f;
-        sp84.unk28 = arg1[i];
-        sp84.unk44 = (func_150ADA20() % 0x9CU) + 0x64;
-        temp = (func_150ADA20() & 1) ? 2 : 0;
-        func_1513D2F0(&sp84, (s32)&D_800A4AA0, 0, 0, 0, 0x1B, temp + 1, 0, 0, 0, arg2, arg3);
+        spawn.unk14 = (func_150ADA68() * 11.10000038f) + 5.0f;
+        spawn.unk18 = (func_150ADA68() * 0.9990000725f) + 2.48300004f;
+        spawn.unk28 = points[i];
+        spawn.unk44 = (func_150ADA20() % 156U) + 100;
+        variant = (func_150ADA20() & 1) ? 2 : 0;
+        func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0, 0, 0, 0x1B, variant + 1, 0, 0, 0, arg2, arg3);
     }
 }
 
-s32 func_150FF6B4(struct127 *arg0, s32 arg1, s32 arg2) {
-    if (arg0->id == 0x98) {
-        return 0;
+s32 func_150FF6B4(struct127 *obj, s32 arg1, s32 arg2) {
+    if (obj->id == 0x98) {
+        return FALSE;
     }
-    return 1;
+    return TRUE;
 }
 
+/* Muzzle-relative points in the gun's attachment space. */
 extern struct17 D_800A205C;
 extern struct17 D_800A2068;
 extern struct17 D_800A2074;
-extern struct17 D_800A2080[2][6];
-extern s32 func_1514654C(struct127 *, struct126 *, s32, void *, void *, s32);
+extern struct17 D_800A2080[2][6]; /* two random sets of flash points */
 
-u8 func_150FF6E0(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, struct17 *arg4, struct127 *arg5, struct126 *arg6) {
+/*
+ * Transforms the gun's muzzle points by its bone into world space. `normal` ends up relative to `hit`.
+ * Returns FALSE if the transform fails.
+ */
+u8 func_150FF6E0(struct17 *points, struct17 *position, struct17 *hit, struct17 *normal, struct17 *endpoint,
+                 struct127 *obj, struct126 *gun) {
     u8 i;
     struct17 *src[10];
     struct17 *dst[10];
-    u8 r;
+    u8 set;
 
-    r = func_150ADA20() & 1;
-    src[0] = (struct17 *)&D_800A2050;
+    set = func_150ADA20() & 1;
+    src[0] = &D_800A2050;
     src[1] = &D_800A2068;
     src[2] = &D_800A2074;
     src[3] = &D_800A205C;
     for (i = 0; i < 6; i++) {
-        src[i + 4] = &D_800A2080[r][i];
-        dst[i + 4] = &arg0[i];
+        src[i + 4] = &D_800A2080[set][i];
+        dst[i + 4] = &points[i];
     }
-    dst[0] = arg1;
-    dst[1] = arg2;
-    dst[2] = arg3;
-    dst[3] = arg4;
-    if (func_1514654C(arg5, arg6, 0, src, dst, 10)) {
-        arg3->unk0 -= arg2->unk0;
-        arg3->unk4 -= arg2->unk4;
-        arg3->unk8 -= arg2->unk8;
+    dst[0] = position;
+    dst[1] = hit;
+    dst[2] = normal;
+    dst[3] = endpoint;
+    if (func_1514654C(obj, gun, 0, src, dst, 10)) {
+        normal->unk0 -= hit->unk0;
+        normal->unk4 -= hit->unk4;
+        normal->unk8 -= hit->unk8;
     } else {
-        return 0;
+        return FALSE;
     }
-    return 1;
+    return TRUE;
 }
 
 void func_150FFCC8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
