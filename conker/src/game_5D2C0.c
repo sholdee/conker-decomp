@@ -758,94 +758,73 @@ void func_15030D54(Attachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY, f32
     }
 }
 
-struct S15030F94 {
-    u8 unk0;
-    u8 pad1[2];
-    u8 unk3;
-    u8 unk4;
-    u8 unk5;
-    u8 pad6[0xD];
-    u8 unk13;
-    u8 unk14;
-    u8 pad15[3];
-    u16 unk18;
-    u16 unk1A;
-    u8 pad1C[8];
-    Gfx **unk24;
-    Gfx *unk28[2];
-    u8 pad30[0x24];
-    struct S15030F94 *unk54;
-};
+s32 func_1506196C(struct127 *obj, s32 view);
+Gfx *func_150311C4(Gfx *gdl, Attachment *att, struct127 *owner, s32 view, s32 arg4);
 
-s32 func_1506196C(struct127 *, s32);
-Gfx *func_150311C4(Gfx *, struct S15030F94 *, struct127 *, s32, s32);
+/* Draws the attachments of every object visible in viewport `view`. `pass` 0 draws the opaque
+ * ones, 1 the translucent ones, 2 those of objects whose unk5 is 7. */
+Gfx *func_15030E08(Gfx *gdl, s32 view, s32 pass) {
+    Attachment *att;
+    Attachment *next;
+    struct127 *owner;
+    s32 alpha;
 
-s32 func_15030E08(s32 arg0, s32 arg1, s32 arg2) {
-    struct S15030F94 *var;
-    struct S15030F94 *next;
-    struct127 *obj;
-    s32 v;
-
-    var = (struct S15030F94 *)D_800C3EE0;
-    while (var != NULL) {
-        next = var->unk54;
-        if (var->unk3 == 0) {
-            var = next;
+    att = (Attachment *)D_800C3EE0;
+    while (att != NULL) {
+        next = att->next;
+        if (att->alpha == 0) {
+            att = next;
             continue;
         }
-        obj = func_15083E90(var->unk0);
-        if ((obj == NULL) || (obj->unk1D4 == NULL) || ((obj->unk74 & (1 << arg1)) == (1 << arg1))) {
-            var = next;
+        owner = func_15083E90(att->ownerId);
+        if ((owner == NULL) || (owner->unk1D4 == NULL) || ((owner->unk74 & (1 << view)) == (1 << view))) {
+            att = next;
             continue;
         }
-        if (arg2 == 2) {
-            if (obj->unk5 != 7) {
-                var = next;
+        if (pass == 2) {
+            if (owner->unk5 != 7) {
+                att = next;
                 continue;
             }
         } else {
-            v = func_1506196C(obj, arg1);
-            if (arg2 == 1) {
-                if (!(var->unk4 & 2) && (v == 0xFF) && (obj->unk5 != 1)) {
-                    var = next;
+            alpha = func_1506196C(owner, view);
+            if (pass == 1) {
+                if (!(att->flags & 2) && (alpha == 0xFF) && (owner->unk5 != 1)) {
+                    att = next;
                     continue;
                 }
-            } else if ((var->unk4 & 2) || (v < 0xFF) || (obj->unk5 == 1)) {
-                var = next;
+            } else if ((att->flags & 2) || (alpha < 0xFF) || (owner->unk5 == 1)) {
+                att = next;
                 continue;
             }
         }
-        arg0 = (s32)func_150311C4((Gfx *)arg0, var, obj, arg1, 0);
-        var = next;
+        gdl = func_150311C4(gdl, att, owner, view, 0);
+        att = next;
     }
-    return arg0;
-
+    return gdl;
 }
 
+/* Draws the visible attachments of `owner` in viewport `view`. */
+Gfx *func_15030F94(Gfx *gdl, struct127 *owner, s32 view, s32 arg3) {
+    Attachment *att;
+    Attachment *next;
 
-s32 func_15030F94(s32 arg0, struct127 *arg1, s32 arg2, s32 arg3) {
-    struct S15030F94 *var;
-
-    if ((arg1 == NULL) || (arg1->unk1D4 == NULL) || (arg1->unique_id == 0)) {
-        return arg0;
+    if ((owner == NULL) || (owner->unk1D4 == NULL) || (owner->unique_id == 0)) {
+        return gdl;
     }
-    var = (struct S15030F94 *)D_800C3EE0;
-    while (var != NULL) {
-        struct S15030F94 *next = var->unk54;
-
-        if ((var->unk0 != arg1->unique_id) || (var->unk3 == 0)) {
-            var = next;
+    att = (Attachment *)D_800C3EE0;
+    while (att != NULL) {
+        next = att->next;
+        if ((att->ownerId != owner->unique_id) || (att->alpha == 0)) {
+            att = next;
             continue;
         }
-        arg0 = (s32)func_150311C4((Gfx *)arg0, var, arg1, arg2, arg3);
-        var = next;
+        gdl = func_150311C4(gdl, att, owner, view, arg3);
+        att = next;
     }
-    return arg0;
+    return gdl;
 }
 
-
-/* Finds the matrix to draw `att` with this frame (*mtx) and the bone matrix it follows (*boneMtx).
- * Returns 0 when none is available yet. */
 s32 func_15031070(Attachment *att, struct127 *owner, Mtx **mtx, Mtx **boneMtx) {
     Attachment *parent;
 
@@ -892,140 +871,145 @@ extern void func_150832AC(struct127 *);
 extern s32 func_1510D0EC(void *, s32 *, s32, s32);
 extern Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, void *, void *, s32, void *, s32, void *);
 extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
-extern Gfx *func_15035D6C(Gfx *, struct S15030F94 *, s32, s32, s32);
+extern Gfx *func_15035D6C(Gfx *, Attachment *, s32, s32, s32);
 
+/* struct127 / struct104 fields that their shared declarations don't cover yet. */
 #define OBJ_U8(o, off) (*(u8 *)((u8 *)(o) + (off)))
 #define OBJ_S32(o, off) (*(s32 *)((u8 *)(o) + (off)))
+#define D_800B0DF0_unk3E (*(s16 *)((u8 *)D_800B0DF0 + 0x3E))
 
-Gfx *func_150311C4(Gfx *gdl, struct S15030F94 *arg1, struct127 *arg2, s32 arg3, s32 arg4) {
-    u8 *sp114;
-    u8 *sp110;
-    s32 sp104[3];
-    s32 sp100;
-    s32 spFC;
-    s32 spF8;
-    s32 spF4;
-    s32 spF0;
-    s32 spEC;
-    s32 spE8;
-    s32 spE4;
-    s32 spE0;
-    s32 spDC;
-    s32 spD8;
-    s32 spD4;
-    s32 spD0;
-    s32 spBC[5];
-    u16 t;
-    Gfx *orig;
+/* Draws one attachment of `owner` in viewport `view` with the owner's lighting, fog and alpha.
+ * `arg4` nonzero draws it through func_15035D6C instead of its own display lists. Returns the
+ * original `gdl` if the display list would overflow. */
+Gfx *func_150311C4(Gfx *gdl, Attachment *att, struct127 *owner, s32 view, s32 arg4) {
+    Mtx *mtx;
+    Mtx *boneMtx;
+    s32 segScratch[3];
+    s32 fogOverride;
+    s32 pad;
+    s32 primR;
+    s32 primG;
+    s32 primB;
+    s32 envR;
+    s32 envG;
+    s32 envB;
+    s32 fogR;
+    s32 fogG;
+    s32 fogB;
+    s32 fogA;
+    s32 alpha;
+    s32 light[5];
+    u16 segId;
+    Gfx *start;
     s32 v;
-    s32 doit;
-    s32 called;
+    s32 lit;
+    s32 i;
 
-    orig = gdl;
-    if (arg1->unk5 == 0) {
+    start = gdl;
+    if (!att->updated) {
         return gdl;
     }
     gDPPipeSync(gdl++);
-    spD0 = arg1->unk3;
-    v = func_1506196C(arg2, arg3);
+    alpha = att->alpha;
+    v = func_1506196C(owner, view);
     if (v != 0xFF) {
-        spD0 = (s32)((u32)v * spD0) >> 8;
+        alpha = (s32)((u32)v * alpha) >> 8;
     }
-    if (spD0 < 0xFF) {
+    if (alpha < 0xFF) {
         gSPSegment(gdl++, 8, D_80082FC0);
     } else {
         gSPSegment(gdl++, 8, D_80083140);
     }
-    if (func_15031070((Attachment *)arg1, arg2, (Mtx **)&sp114, (Mtx **)&sp110) == 0) {
+    if (func_15031070(att, owner, &mtx, &boneMtx) == 0) {
         return gdl;
     }
-    func_1502D54C(arg2 - D_800CC2D0, spBC);
-    if (((s16 *)D_800B0DF0)[0x3E / 2] != 0) {
-        func_1502D630(&D_800CC2D0[arg2 - D_800CC2D0], spBC, arg3, arg2 - D_800CC2D0);
+    func_1502D54C(owner - D_800CC2D0, light);
+    if (D_800B0DF0_unk3E != 0) {
+        func_1502D630(&D_800CC2D0[owner - D_800CC2D0], light, view, owner - D_800CC2D0);
     } else {
-        spBC[3] = 0xFF;
+        light[3] = 0xFF;
     }
-    func_1502CC34(arg2, arg3, spD0, spBC, &spF8, &spF4, &spF0, &spEC, &spE8, &spE4, &spE0, &spDC, &spD8, &spD4);
-    doit = 1;
-    sp100 = ((s16 *)D_800B0DF0)[0x3E / 2];
-    if ((OBJ_U8(arg2, 0x66) & 0xC) == 0xC) {
-        gSPSetGeometryMode(gdl++, 0x20000);
+    func_1502CC34(owner, view, alpha, light, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
+                  &fogA);
+    lit = TRUE;
+    fogOverride = D_800B0DF0_unk3E;
+    if ((owner->pad66 & 0xC) == 0xC) {
+        gSPSetGeometryMode(gdl++, G_LIGHTING);
         gSPClearGeometryMode(gdl++, 0x400000);
-    } else if (((OBJ_U8(arg2, 0x66) & 0xC) != 8) && !(arg1->unk4 & 1)) {
-        gSPClearGeometryMode(gdl++, 0x420000);
-        doit = 0;
+    } else if (((owner->pad66 & 0xC) != 8) && !(att->flags & 1)) {
+        gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
+        lit = FALSE;
     } else if (D_800DCD7C != 0) {
-        gSPSetGeometryMode(gdl++, 0x420000);
+        gSPSetGeometryMode(gdl++, G_LIGHTING | 0x400000);
     } else {
-        gSPClearGeometryMode(gdl++, 0x420000);
-        doit = 0;
+        gSPClearGeometryMode(gdl++, G_LIGHTING | 0x400000);
+        lit = FALSE;
     }
-    if (doit != 0) {
-        if (OBJ_S32(arg2, arg3 * 4 + 0x304) == 0) {
-            func_150832AC(arg2);
-            called = 1;
+    if (lit) {
+        if (OBJ_S32(owner, 0x304 + view * 4) == 0) {
+            func_150832AC(owner);
+            i = TRUE;
         } else {
-            called = 0;
+            i = FALSE;
         }
-        if (OBJ_S32(arg2, arg3 * 4 + 0x304) != 0) {
-            if ((OBJ_U8(arg2, 0x2FD) != 0) || (called != 0)) {
+        if (OBJ_S32(owner, 0x304 + view * 4) != 0) {
+            if ((OBJ_U8(owner, 0x2FD) != 0) || i) {
                 v = 0xA;
             } else {
                 v = 2;
             }
-            if ((arg2->unk5 != 5) && (OBJ_U8(arg2, 0x302) != 0) && (OBJ_U8(arg2, 0x66) & 0xC) && (called == 0)) {
-                gdl = func_1515E544(gdl, OBJ_S32(arg2, arg3 * 4 + 0x304), OBJ_U8(arg2, 0x301), OBJ_U8(arg2, 0x302),
-                                    (u8 *)OBJ_S32(arg2, 0x314) + D_800BE9C0 * 8);
+            if ((owner->unk5 != 5) && (OBJ_U8(owner, 0x302) != 0) && (owner->pad66 & 0xC) && !i) {
+                gdl = func_1515E544(gdl, OBJ_S32(owner, 0x304 + view * 4), OBJ_U8(owner, 0x301), OBJ_U8(owner, 0x302),
+                                    (u8 *)OBJ_S32(owner, 0x314) + D_800BE9C0 * 8);
             } else {
-                gdl = func_1515D914(gdl, arg3, (s32)arg2->x_position, (s32)arg2->y_position, (s32)arg2->z_position,
-                                    OBJ_S32(arg2, 0x184), OBJ_S32(arg2, arg3 * 4 + 0x304), OBJ_U8(arg2, 0x301),
-                                    (u8 *)OBJ_S32(arg2, 0x314) + D_800BE9C0 * 8, (u8 *)arg2 + 0x302, 2,
-                                    (u8 *)arg2 + 0x1DD, v, D_800D9E28);
+                gdl = func_1515D914(gdl, view, (s32)owner->x_position, (s32)owner->y_position, (s32)owner->z_position,
+                                    owner->unk184, OBJ_S32(owner, 0x304 + view * 4), OBJ_U8(owner, 0x301),
+                                    (u8 *)OBJ_S32(owner, 0x314) + D_800BE9C0 * 8, (u8 *)owner + 0x302, 2,
+                                    (u8 *)owner + 0x1DD, v, D_800D9E28);
             }
         }
     }
-    if (sp100 == 0) {
-        gDPSetFogColor(gdl++, spE0, spDC, spD8, spD4);
+    if (fogOverride == 0) {
+        gDPSetFogColor(gdl++, fogR, fogG, fogB, fogA);
     } else {
-        gDPSetFogColor(gdl++, D_800DD2E4[0], D_800DD2E4[1], D_800DD2E4[2], spD4);
+        gDPSetFogColor(gdl++, D_800DD2E4[0], D_800DD2E4[1], D_800DD2E4[2], fogA);
     }
-    gDPSetFogColor(gdl++, spE0, spDC, spD8, spD4);
-    gDPSetPrimColor(gdl++, 0xF2, 0, spF8, spF4, spF0, 0);
-    gDPSetEnvColor(gdl++, spEC, spE8, spE4, spD0);
-    gSPSegment(gdl++, 3, sp114);
-    gSPSegment(gdl++, 1, arg1->unk28[D_800BE9C0]);
-    t = arg1->unk18;
-    if (t != 0) {
-        v = func_1510D0EC(t, sp104, 0x3E, 0);
+    gDPSetFogColor(gdl++, fogR, fogG, fogB, fogA);
+    gDPSetPrimColor(gdl++, 0xF2, 0, primR, primG, primB, 0);
+    gDPSetEnvColor(gdl++, envR, envG, envB, alpha);
+    gSPSegment(gdl++, 3, mtx);
+    gSPSegment(gdl++, 1, att->vtx[D_800BE9C0]);
+    segId = att->seg6Id;
+    if (segId != 0) {
+        v = func_1510D0EC((void *)segId, segScratch, 0x3E, 0);
         gSPSegment(gdl++, 6, v);
     }
-    if (arg1->unk1A != 0) {
-        v = func_1510D0EC(arg1->unk1A, sp104, 0x3E, 0);
+    if (att->seg7Id != 0) {
+        v = func_1510D0EC((void *)att->seg7Id, segScratch, 0x3E, 0);
         gSPSegment(gdl++, 7, v);
     }
     if (arg4 == 0) {
-        gSPSetGeometryMode(gdl++, 0x400);
-        for (called = 0; called < arg1->unk14; called++) {
-            if (!(arg1->unk13 & (1 << called))) {
-                gSPDisplayList(gdl++, arg1->unk24[called]);
+        gSPSetGeometryMode(gdl++, G_CULL_BACK);
+        for (i = 0; i < att->numDLists; i++) {
+            if (!(att->hiddenDLists & (1 << i))) {
+                gSPDisplayList(gdl++, att->dlists[i]);
             }
         }
     } else {
-        gSPSetGeometryMode(gdl++, 0x200);
-        gdl = func_15035D6C(gdl, arg1, spEC, spE8, spE4);
+        gSPSetGeometryMode(gdl++, G_CULL_FRONT);
+        gdl = func_15035D6C(gdl, att, envR, envG, envB);
     }
     if (D_800BEBA4 < (gdl - D_800BE9C8[D_800BE9C0])) {
-        v = 1;
+        v = TRUE;
     } else {
-        v = 0;
+        v = FALSE;
     }
-    if (v != 0) {
-        return orig;
+    if (v) {
+        return start;
     }
     return gdl;
 }
 
-/* Sets the alpha of attachment number `index` of set `setId` on `owner`. */
 void func_1503192C(struct127 *owner, s32 setId, s32 alpha, s32 index) {
     Attachment *att;
 
