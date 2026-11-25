@@ -8,11 +8,6 @@ void func_151D9B8C(u8, f32, u8, void *, struct17 *, s16, u8, u8, u8, u8, s32);
 u32 func_150ADA20(void);
 #include "variables.h"
 
-extern f32 D_800A4830;
-extern f32 D_800A4834;
-extern f32 D_800A4838;
-extern f32 D_800A483C;
-extern f32 D_800A4840;
 extern void func_15153F18(void *, void *, s32, u8, s32);
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_15143134(void *, s32, s32);
@@ -2015,17 +2010,11 @@ void func_15138120(struct127 *actor, s32 kind, u8 arg2) {
 }
 
 typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s32 unk08;
-} Vec151382E0;
-
-typedef struct {
     s16 unk00;
     s16 unk02;
     s16 unk04;
     s16 unk06;
-    Vec151382E0 unk08;
+    Vec3f position;
     f32 unk14;
     f32 unk18;
     f32 unk1C;
@@ -2047,41 +2036,42 @@ typedef struct {
     s32 unk48;
 } LocalDef151382E0;
 
-void func_151382E0(Vec151382E0 *arg0, s32 arg1, void *arg2, u8 arg3, s32 arg4) {
-    LocalDef151382E0 tmp;
-    s32 temp_v0;
+/* Spawns a func_15153F18 blood burst at position for profile `kind` (none for type 2). */
+void func_151382E0(Vec3f *position, s32 kind, void *arg2, u8 arg3, s32 arg4) {
+    LocalDef151382E0 burst;
+    s32 type;
 
-    temp_v0 = D_800A3FD8[arg1].unkE;
-    if (temp_v0 != 2) {
-        tmp.unk08 = *arg0;
-        tmp.unk14 = D_800A4830;
-        tmp.unk18 = D_800A4834;
-        tmp.unk1C = D_800A4838;
-        tmp.unk20 = D_800A483C;
-        tmp.unk24 = 4.0f;
-        tmp.unk28 = 9.0f;
-        tmp.unk2C = 0x12;
-        tmp.unk2E = 7;
-        tmp.unk02 = 0xFF;
-        tmp.unk00 = 0;
-        tmp.unk04 = -0x3F;
-        tmp.unk06 = 0x4E;
-        tmp.unk30 = 3;
-        tmp.unk32 = 3;
-        tmp.unk34 = 0x14;
-        tmp.unk36 = 0x1E;
-        tmp.unk38 = 0x9B;
-        tmp.unk3A = 0x64;
-        tmp.unk44 = 0x10;
-        tmp.unk46 = 0xF;
-        tmp.unk48 = 0;
-        tmp.unk40 = D_800A4840;
-        if (temp_v0 == 1) {
-            tmp.unk3C = 1;
+    type = D_800A3FD8[kind].unkE;
+    if (type != 2) {
+        burst.position = *position;
+        burst.unk14 = 1.9799999f;
+        burst.unk18 = 2.00999999f;
+        burst.unk1C = 0.202000007f;
+        burst.unk20 = 0.6460000277f;
+        burst.unk24 = 4.0f;
+        burst.unk28 = 9.0f;
+        burst.unk2C = 18;
+        burst.unk2E = 7;
+        burst.unk02 = 255;
+        burst.unk00 = 0;
+        burst.unk04 = -63;
+        burst.unk06 = 78;
+        burst.unk30 = 3;
+        burst.unk32 = 3;
+        burst.unk34 = 20;
+        burst.unk36 = 30;
+        burst.unk38 = 155;
+        burst.unk3A = 100;
+        burst.unk44 = 16;
+        burst.unk46 = 15;
+        burst.unk48 = 0;
+        burst.unk40 = 0.3000000119f;
+        if (type == 1) {
+            burst.unk3C = 1;
         } else {
-            tmp.unk3C = 0;
+            burst.unk3C = 0;
         }
-        func_15153F18(&tmp, &tmp.unk08, (s32)arg2, arg3, arg4);
+        func_15153F18(&burst, &burst.position, (s32)arg2, arg3, arg4);
     }
 }
 
