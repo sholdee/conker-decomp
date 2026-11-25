@@ -17,7 +17,7 @@ void func_15052EF0(Actor *obj) {
 Actor *func_15052F58(s32 index, s32 arg1) {
     Actor *obj;
 
-    obj = &D_800CC2D0[index];
+    obj = &movement_obj[index];
     obj->unk13C = 0;
     obj->unk218 = NULL;
     obj->unk232 = arg1;
@@ -46,7 +46,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
             anim = info[6];
         }
     }
-    obj = &D_800CC2D0[arg0->unk124];
+    obj = &movement_obj[arg0->unk124];
     if (force || ((obj->y_position < arg0->y_position + height * arg0->y_scale) && (obj->y_velocity < 0.0f))) {
         arg0->unk13C = arg0->unk124 + 100;
         if (arg9 != 0) {
@@ -87,7 +87,7 @@ void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 ar
         // matching: an empty label here makes IDO fill the branch delay slot as the original
         end_hold:;
         } else {
-            obj->unk65 = D_800C3E78 + 1;
+            obj->unk65 = dc_glbl_CharNum + 1;
             obj->unk5C = arg2;
             obj->unk101 |= arg3;
             obj->disable_run = 0;
@@ -116,7 +116,7 @@ void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxInd
     Vec3f pos;
     Actor *obj;
 
-    obj = &D_800CC2D0[arg0->unk124];
+    obj = &movement_obj[arg0->unk124];
     if ((obj->disable_run == 0) && (obj->stunned == 0)) {
         if ((obj->unk31C != NULL) && (obj->unk31C->unk6B != 0)) {
             return;
@@ -130,17 +130,17 @@ void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxInd
         arg0->unk232 = arg3;
         arg0->unk218 = NULL;
         func_1505E650(obj, 50, 1.3f, 4.0f, 0.0f, 0.0f, 0);
-        D_800CC2D0[arg0->unk124].unk31C->unk30 = 70;
+        movement_obj[arg0->unk124].unk31C->unk30 = 70;
         // unk28/unk2C are declared s32 in ActorCtl but hold floats
-        *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk28 = arg0->x_position;
-        *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk2C = arg0->z_position;
+        *(f32 *)&movement_obj[arg0->unk124].unk31C->unk28 = arg0->x_position;
+        *(f32 *)&movement_obj[arg0->unk124].unk31C->unk2C = arg0->z_position;
         if ((arg0->unk1D4 != NULL) && (mtxIndex != -1)) {
         // matching: an unused label keeps IDO from sinking the index shift below the -1 test
         joint:
             func_15043FF0(&pos, &((struct113 *)arg0->unk1D4)[mtxIndex]);
-            *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk28 = pos.x;
-            *(f32 *)&D_800CC2D0[arg0->unk124].unk31C->unk2C = pos.z;
+            *(f32 *)&movement_obj[arg0->unk124].unk31C->unk28 = pos.x;
+            *(f32 *)&movement_obj[arg0->unk124].unk31C->unk2C = pos.z;
         }
-        D_800CC2D0[arg0->unk124].unk31C->unk27 = 1;
+        movement_obj[arg0->unk124].unk31C->unk27 = 1;
     }
 }

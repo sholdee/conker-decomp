@@ -90,7 +90,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
         f32 objPos[3];
         Vec3f diff;
 
-        obj = D_800CC2D0;
+        obj = movement_obj;
         do {
             if (func_151BEE94(obj) != 0) {
                 f32 dist;
@@ -129,7 +129,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                 }
             }
             obj++;
-        } while (obj != (Actor *)&D_800D1548); /* end of D_800CC2D0[26] */
+        } while (obj != (Actor *)&D_800D1548); /* end of movement_obj[26] */
     }
     return untouched;
 }

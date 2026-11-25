@@ -269,3 +269,7 @@ func_16000B14 = 0x16000B14; // type:func
 D_1600487C = 0x1600487C; // type:label
 func_150A9C40                   = 0x150A9C40; // type:func
 math_distance3D = 0x150AD9A0; // type:func
+movement_obj = 0x800CC2D0;
+db_Object_array = 0x800DBEF4;
+camera_global_Cameras = 0x800DBFF0;
+dc_glbl_CharNum = 0x800C3E78;

@@ -94,7 +94,7 @@ void func_150E0BE0(Actor *obj) {
     } else {
         if (obj->unk83 > 60) {
             D_800D1580 = 0xFF020133;
-            D_800D154C = D_800CC2D0;
+            D_800D154C = movement_obj;
             func_1506E8D8();
             D_800D154C = obj;
         }

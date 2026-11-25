@@ -173,7 +173,7 @@ void func_150D7790(Actor *obj, s32 action) {
     projectile = (Actor *)func_1506C460(obj->unk40, 310.0f, 0.0f, 0.0f, variant * 30 + 30, 0xD, 0.0f, 1.0f,
                                             0, 1, variant == 0);
     if (projectile != NULL) {
-        projectile->unk124 = D_800C3E78 + 1;
+        projectile->unk124 = dc_glbl_CharNum + 1;
     }
     if (projectile != NULL && variant != 0) {
         projectile->unk221 = -1;
@@ -239,7 +239,7 @@ void func_150D7928(Actor *obj) {
     if (obj->bodyRadius != 0) {
         obj->unk90 = obj->bodyRadius;
     }
-    if (obj->unk13C != 0 && (player = &D_800CC2D0[playerIndex])->unk31C->unk4E != 0) {
+    if (obj->unk13C != 0 && (player = &movement_obj[playerIndex])->unk31C->unk4E != 0) {
         n = player->unk7A;
         obj->bodyRadius = 0;
         obj->floorY = player->floorY;
@@ -276,18 +276,18 @@ void func_150D7928(Actor *obj) {
         obj->unk76 = angle;
         obj->xz_velocity = player->xz_velocity;
         if (obj->unkD0 != 0) {
-            func_1505C7D8(obj, D_800C3E78);
+            func_1505C7D8(obj, dc_glbl_CharNum);
         }
     } else {
         obj->unk21C = obj->unk7A;
         if (obj->unk13C != 0) {
-            if (D_800CC2D0[playerIndex].stunned != 0) {
+            if (movement_obj[playerIndex].stunned != 0) {
                 obj->target_speed = 15.0f;
                 obj->y_velocity = 80.0f;
             }
             obj->unk13C = 0;
         }
-        playerIndex = D_800C3E78;
+        playerIndex = dc_glbl_CharNum;
         obj->unk65 = 0;
         // matching: unk90 (u16) is read as s16 (lh); a value cast still loads with lhu
         obj->bodyRadius = obj->unk90;
@@ -306,13 +306,13 @@ void func_150D7928(Actor *obj) {
             }
         } else {
             for (n = 0; n != 2; n++) {
-                if (D_800CC2D0[n].interaction_state == 1) {
-                    if (D_800CC2D0[n].unk31C->unk78 == 0 && D_800CC2D0[n].unk31C->unk11A == 0 && (D_800CC268 & (1 << n)) &&
-                        D_800CC2D0[n].y_velocity < 0.0f) {
+                if (movement_obj[n].interaction_state == 1) {
+                    if (movement_obj[n].unk31C->unk78 == 0 && movement_obj[n].unk31C->unk11A == 0 && (D_800CC268 & (1 << n)) &&
+                        movement_obj[n].y_velocity < 0.0f) {
                         obj->unk124 = n;
                         offset = 39.0f;
                         if (id == 0x48) {
-                            D_800CC2D0[n].stunned = 0;
+                            movement_obj[n].stunned = 0;
                             offset = 0.0f;
                         }
                         func_1505327C(obj, offset, 3.0f, 4, -1);
@@ -330,7 +330,7 @@ void func_150D7928(Actor *obj) {
             obj->unkF8 |= 0x10000;
             func_15058EA4(obj, height + 10.0f, 1.2f, height, -1.1f, 4.0f, -4.0f);
             if (obj->unk13C != 0) {
-                D_800CC2D0[obj->unk124].unkCC = 30;
+                movement_obj[obj->unk124].unkCC = 30;
             }
             obj->unkC4 = -obj->y_velocity;
             obj->unk40 = obj->unk7A * (360.0f / 65536.0f);
@@ -350,13 +350,13 @@ void func_150D7928(Actor *obj) {
                 timer = obj->unk102 = 0;
             }
         }
-        if (timer > 10 && ((player = &D_800CC2D0[playerIndex])->unk28 == 0.0f || obj->in_water != 0 ||
+        if (timer > 10 && ((player = &movement_obj[playerIndex])->unk28 == 0.0f || obj->in_water != 0 ||
                             (obj->unk124 != 0 && player->unk31C->unk4F == 2))) {
             if (obj->unk13C != 0) {
-                D_800CC2D0[obj->unk124].unkCC = 0;
-                D_800CC2D0[obj->unk124].unk31C->unk4E = 0;
-                D_800CC2D0[obj->unk124].in_water = 0;
-                D_800CC2D0[obj->unk124].gravity = 4.0f;
+                movement_obj[obj->unk124].unkCC = 0;
+                movement_obj[obj->unk124].unk31C->unk4E = 0;
+                movement_obj[obj->unk124].in_water = 0;
+                movement_obj[obj->unk124].gravity = 4.0f;
             }
             func_100109D0(obj);
             func_10010FFC(0, 0x51, 0x6D60, 0, 0, obj);
@@ -382,7 +382,7 @@ void func_150D7928(Actor *obj) {
         if (obj->unk13C != 0) {
             scratch = (s16)(fabsf(obj->unkC4 * 0.7f) + 44.0f);
             obj->unkC8 = scratch;
-            D_800CC2D0[obj->unk124].unkCC = (s16)(scratch + 44) * obj->y_scale;
+            movement_obj[obj->unk124].unkCC = (s16)(scratch + 44) * obj->y_scale;
         } else {
             obj->unkC8 = 44.0f;
         }

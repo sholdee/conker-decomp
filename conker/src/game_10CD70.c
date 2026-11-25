@@ -403,7 +403,7 @@ f32 sqrtf(f32);
 /* matching: 3850.0f; as a literal IDO folds 1 / (3850 - 2570) to a constant */
 extern f32 D_800A0FD4;
 
-/* Sets alpha from the distance to D_800DBFF0's unk2F8 point: opaque within 2570, fading out
+/* Sets alpha from the distance to camera_global_Cameras's unk2F8 point: opaque within 2570, fading out
  * linearly to transparent at 3850 (D_800A0FD4). */
 void func_150E05F8(WorldObject *obj) {
     f32 dx;
@@ -412,9 +412,9 @@ void func_150E05F8(WorldObject *obj) {
     f32 dist;
     s32 alpha;
 
-    dz = D_800DBFF0->eye.z - obj->z;
-    dx = D_800DBFF0->eye.x - obj->x;
-    dy = D_800DBFF0->eye.y - obj->y;
+    dz = camera_global_Cameras->eye.z - obj->z;
+    dx = camera_global_Cameras->eye.x - obj->x;
+    dy = camera_global_Cameras->eye.y - obj->y;
     dist = sqrtf(dz * dz + (dx * dx + dy * dy));
     if (dist <= 2570.0f) {
         alpha = 255;

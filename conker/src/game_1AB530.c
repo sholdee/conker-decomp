@@ -299,8 +299,8 @@ s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
     f32 cy;
     f32 scale;
 
-    // matching: IDO adds base + offset in this order only for explicit byte arithmetic, not &D_800DBFF0[i]
-    player = (Camera *)((u8 *)D_800DBFF0 + D_80082FA4 * sizeof(Camera));
+    // matching: IDO adds base + offset in this order only for explicit byte arithmetic, not &camera_global_Cameras[i]
+    player = (Camera *)((u8 *)camera_global_Cameras + D_80082FA4 * sizeof(Camera));
     pitch = -player->pitch;
     yaw = -player->unk380;
     roll = player->swayAmount;
@@ -351,9 +351,9 @@ s32 func_1517EC1C(LensFlare *flare, s32 *outZbufDepth) {
     if (func_1509563C(flare->pos[0], flare->pos[1], flare->pos[2], &flare->screenX, &flare->screenY, &clip.f.z,
                       &clip.f.w, 4000.0f) == 1) {
         if (flare->flags & FLARE_DIRECTED) {
-            dx = flare->pos[0] - D_800DBFF0->eye.x;
-            dy = flare->pos[1] - D_800DBFF0->eye.y;
-            dz = flare->pos[2] - D_800DBFF0->eye.z;
+            dx = flare->pos[0] - camera_global_Cameras->eye.x;
+            dy = flare->pos[1] - camera_global_Cameras->eye.y;
+            dz = flare->pos[2] - camera_global_Cameras->eye.z;
 
             // matching: the facing cosine reuses dx's register
             dx = (dx * flare->dir[0] + dy * flare->dir[1] + dz * flare->dir[2]) /

@@ -208,9 +208,9 @@ Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLig
         pos[2] = z;
     } else {
         // sample 1000 units along the camera's view direction instead
-        dir[0] = D_800DBFF0[player].target.x - D_800DBFF0[player].eye.x;
-        dir[1] = D_800DBFF0[player].target.y - D_800DBFF0[player].eye.y;
-        dir[2] = D_800DBFF0[player].target.z - D_800DBFF0[player].eye.z;
+        dir[0] = camera_global_Cameras[player].target.x - camera_global_Cameras[player].eye.x;
+        dir[1] = camera_global_Cameras[player].target.y - camera_global_Cameras[player].eye.y;
+        dir[2] = camera_global_Cameras[player].target.z - camera_global_Cameras[player].eye.z;
         scale = sqrtf(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
         if (scale != 0.0f) {
             scale = 1000.0f / scale;
@@ -838,7 +838,7 @@ void func_1515FBC4(Actor *obj, TriggerZone *zone) {
         target = link->unk98;
     }
     if (target != NULL) {
-        targetIndex = target - D_800CC2D0;
+        targetIndex = target - movement_obj;
     } else {
         targetIndex = -1;
     }

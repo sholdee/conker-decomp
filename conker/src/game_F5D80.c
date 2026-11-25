@@ -101,7 +101,7 @@ void func_150C8A68(RadialEffect *effect) {
         if (effect->def.emitCallback != -1) {
             effect->pending += effect->def.emitRate * D_800BE9A4 * (6.283185482f * effect->radius);
             while (effect->pending > 1.0f) {
-                bias = D_800DBFF0[D_80082FA4].unk380 * 0.7111111283f;
+                bias = camera_global_Cameras[D_80082FA4].unk380 * 0.7111111283f;
                 angle = (func_150ADA20() % 81U) + bias - 40;
                 cosine = func_151423D8(angle - 64);
                 sine = func_151423D8(angle);
@@ -400,7 +400,7 @@ void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
     f32 behind;
 
     for (i = 0; i < 25; i++) {
-        actor = &D_800CC2D0[i];
+        actor = &movement_obj[i];
         if ((actor->interaction_state != 0) && (actor->unk28 < 20.0f) && (actor->immune == 0) &&
             ((actor->id == 0x53) || (actor->interaction_state == 1))) {
             dx = actor->x_position - effect->def.pos.x;
@@ -415,7 +415,7 @@ void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
                     actor->disable_run = 10;
                     actor->unk218 = NULL;
                     actor->unk232 = 0x13;
-                    if (D_800CC2D0[actor->unk124].unk65 != 0) {
+                    if (movement_obj[actor->unk124].unk65 != 0) {
                         actor->unk232 = 0x14;
                     }
                 } else {
@@ -539,7 +539,7 @@ void func_150CA150(Actor *actor) {
     onGround = 0;
     if (actor != NULL) {
         func_1504715C(&floorInfo, actor);
-        func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
+        func_1512D748(&camera_global_Cameras[D_800BE9E8], 7, 1);
         pos.x = actor->x_position;
         pos.y = actor->y_position + 100.0f;
         pos.z = actor->z_position;

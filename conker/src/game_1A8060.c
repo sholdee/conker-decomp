@@ -51,9 +51,9 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     s16 (*to)[3];
     Vtx *vtxBase;
 
-    id = D_800CC2D0[actorIndex].id;
-    kind = func_150849A0(&D_800CC2D0[actorIndex]);
-    set = D_800CC2D0[actorIndex].lod;
+    id = movement_obj[actorIndex].id;
+    kind = func_150849A0(&movement_obj[actorIndex]);
+    set = movement_obj[actorIndex].lod;
     config = NULL;
     for (i = 0; i < 2; i++) {
         if (kind == D_800A7230[i].kind) {
@@ -65,11 +65,11 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     if (config == NULL) {
         return -1;
     }
-    morph = D_800CC2D0[actorIndex].morph;
+    morph = movement_obj[actorIndex].morph;
     if (set != 0) {
         set = 0;
         id = kind;
-        if (D_800CC2D0[actorIndex].modelData[set][D_800BE9C0] == NULL || D_800D19A0[id] == NULL) {
+        if (movement_obj[actorIndex].modelData[set][D_800BE9C0] == NULL || D_800D19A0[id] == NULL) {
             if (frame == morph->cur) {
                 if (D_800BEAC0 == 0) {
                     morph->blend += morph->rate * D_800BE9E4;
@@ -95,7 +95,7 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     if (D_800D19A0[id] == NULL) {
         return -1;
     }
-    if (D_800CC2D0[actorIndex].modelData[set][D_800BE9C0] == NULL) {
+    if (movement_obj[actorIndex].modelData[set][D_800BE9C0] == NULL) {
         return -1;
     }
     if (frame == morph->cur && morph->hold == 0) {
@@ -146,7 +146,7 @@ s32 func_1517AD00(s32 frame, s32 duration, s32 actorIndex) {
     if (morph->blend > 1.0f) {
         morph->blend = 1.0f;
     }
-    vtxBase = (Vtx *)D_800CC2D0[actorIndex].modelData[set][D_800BE9C0];
+    vtxBase = (Vtx *)movement_obj[actorIndex].modelData[set][D_800BE9C0];
     for (part = 0; part < D_800C4310[config->kind]; part++) {
         if (D_800DD460[group][part][morph->cur].positions == NULL) {
             D_800DD460[group][part][morph->cur].positions =

@@ -187,7 +187,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     nearTarget = 0;
     team = -1;
     for (i = 0; i < D_8008FD8C; i++) {
-        obj = &D_800CC2D0[i];
+        obj = &movement_obj[i];
         sub = obj->unk31C;
         kind = sub->unk75 & 0x7F;
         if ((obj->unk13C != 0) || (sub->unk128 & 0x20)) {
@@ -532,7 +532,7 @@ Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
                 if (amount < 0) {
                     amount = 0;
                 }
-                if (D_800CC2D0[i].team == 0) {
+                if (movement_obj[i].team == 0) {
                     team0Total += amount;
                 } else {
                     team1Total += amount;
@@ -723,7 +723,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             gfx = func_151E86E4(gfx, (xbase + 8) << 2, (y - 2) << 2, (xbase + 0x18) << 2, (y + 0xE) << 2, 0,
                                 (icon & 1) << 9, (icon >> 1) << 9, 0x400, 0x400);
             if (live != 0) {
-                total = D_800CC2D0[i].unk31C->unk1AA;
+                total = movement_obj[i].unk31C->unk1AA;
             } else {
                 total = D_8008FDD4->stats[i].unk6;
             }
@@ -2124,7 +2124,7 @@ Gfx *func_151EE184(Gfx *gfx) {
                 if (obj != NULL) {
                     obj->unk232 = cheatType;
                     D_800D154C = obj;
-                    D_800C3E78 = D_800D154C - D_800CC2D0;
+                    dc_glbl_CharNum = D_800D154C - movement_obj;
                     obj->unk218 = func_1507BB28(0, obj->unk232);
                     obj->unk21C = 0;
                 }

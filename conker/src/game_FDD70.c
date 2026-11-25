@@ -64,8 +64,8 @@ void func_150D08C0(Camera *camera) {
     func_1509BFB0(1, 0x30F8, 0x12, (u8)D_800888C8);
 }
 
-/* Steps four scroll counters by D_800BE9E4; then, unless D_800CC2D0[0]'s unk31C->unk120 is set, kills
- * D_800CC2D0[0] once per prop 0xFA-0xF8 it stands on, and if it stands on prop 0xFB plays sound 0x627 and
+/* Steps four scroll counters by D_800BE9E4; then, unless movement_obj[0]'s unk31C->unk120 is set, kills
+ * movement_obj[0] once per prop 0xFA-0xF8 it stands on, and if it stands on prop 0xFB plays sound 0x627 and
  * runs it through func_15136C3C .. func_1507CD64(6). */
 void func_150D0E90(s32 arg0) {
     WorldObject *prop;
@@ -77,23 +77,23 @@ void func_150D0E90(s32 arg0) {
     D_80088898 += D_800BE9E4 * -8;
     D_8008889C += D_800BE9E4 * 92;
 
-    if (D_800CC2D0->unk31C->unk120 == 0) {
+    if (movement_obj->unk31C->unk120 == 0) {
         for (i = 0; i < 3; i++) {
             prop = func_151149AC(0xFA - i);
-            propIndex = prop - D_800DBEF4;
+            propIndex = prop - db_Object_array;
             if (D_800DBF94[propIndex] & 1) {
-                func_151951E0(D_800CC2D0);
-                func_10010154(0x627, D_800CC2D0, 0x7FFF, 200, 700);
+                func_151951E0(movement_obj);
+                func_10010154(0x627, movement_obj, 0x7FFF, 200, 700);
             }
         }
 
         prop = func_151149AC(0xFB);
-        propIndex = prop - D_800DBEF4;
+        propIndex = prop - db_Object_array;
         if (D_800DBF94[propIndex] & 1) {
-            func_10010154(0x627, D_800CC2D0, 0x7FFF, 200, 700);
-            func_15136C3C(D_800CC2D0, 1, 1, 1, 1, 0, 0xFF, 1);
-            func_15145A50(D_800CC2D0);
-            func_1507CD64(D_800CC2D0, 6);
+            func_10010154(0x627, movement_obj, 0x7FFF, 200, 700);
+            func_15136C3C(movement_obj, 1, 1, 1, 1, 0, 0xFF, 1);
+            func_15145A50(movement_obj);
+            func_1507CD64(movement_obj, 6);
         }
     }
 }

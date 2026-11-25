@@ -23,9 +23,9 @@ u8 func_150ADA20(void);
  * is five bytes: an opcode (< 247, an index into D_80086730) and four argument bytes, which the
  * interpreter copies to D_800D1890..D_800D1893 before calling the handler. Bytes >= 247 are
  * one-byte jump labels.
- * The handlers below act on the current object, D_800D154C (index D_800C3E78 in D_800CC2D0);
+ * The handlers below act on the current object, D_800D154C (index dc_glbl_CharNum in movement_obj);
  * their comments call the four argument bytes arg0..arg3. An object's "target" is the object
- * D_800CC2D0[unk222], its current waypoint is unk21E of its path D_800D2104[unk13F].
+ * movement_obj[unk222], its current waypoint is unk21E of its path D_800D2104[unk13F].
  */
 
 
@@ -462,7 +462,7 @@ void func_15076500(void) {
 /* Sets `immune` to arg0 on the object's target (arg1 != 0) or on the object itself. */
 void func_1507652C(void) {
     if (D_800D1891 != 0) {
-        D_800CC2D0[D_800D154C->unk124].immune = D_800D1890;
+        movement_obj[D_800D154C->unk124].immune = D_800D1890;
     } else {
         D_800D154C->immune = D_800D1890;
     }
@@ -533,11 +533,11 @@ void func_150767F4(void) {
     Actor *target;
     u16 angle;
 
-    target = &D_800CC2D0[D_800D154C->unk222];
+    target = &movement_obj[D_800D154C->unk222];
     // matching: the (s32) cast before narrowing to u16 is needed
     angle = (s32)func_1505A630(target->x_position - D_800D154C->x_position,
                                D_800D154C->z_position - target->z_position, 0);
-    if ((((angle >> 8) - (D_800CC2D0[D_800D154C->unk222].unk7A >> 8) + D_800D1891) & 0xFF) < D_800D1891 * 2) {
+    if ((((angle >> 8) - (movement_obj[D_800D154C->unk222].unk7A >> 8) + D_800D1891) & 0xFF) < D_800D1891 * 2) {
         func_15075400(D_800D1890);
     }
 }
@@ -562,10 +562,10 @@ void func_150768DC(void) {
 
     nearest = D_800D1890 * 8;
     D_800D154C->unkA8 = 0;
-    self = D_800D154C - D_800CC2D0;
+    self = D_800D154C - movement_obj;
 
     for (i = 0; i < 25; i++) {
-        obj = &D_800CC2D0[i];
+        obj = &movement_obj[i];
         if ((obj->interaction_state != 0) && (obj->health != 0) && (obj->unkF8 & 0x20) && (i != self)) {
             if ((D_800D1891 != 0) || (obj->id != D_800D154C->id)) {
                 if (fabsf(D_800D154C->y_position - obj->y_position) > 50.0f) {
@@ -592,7 +592,7 @@ void func_150768DC(void) {
         script = D_800D1892;
         if (script != 0) {
             foundIndex = D_800D154C->unkA8;
-            found = &D_800CC2D0[foundIndex & 0x7F];
+            found = &movement_obj[foundIndex & 0x7F];
             found->unk218 = NULL;
             found->unk232 = script;
             found->unk222 = self;
@@ -610,13 +610,13 @@ void func_15076B78(void) {
 
 /* Targets the last object below this one (all 25 if arg1) of type arg0 that is alive, and starts mode 9. */
 void func_15076B94(void) {
-    s32 i = D_800D154C - D_800CC2D0;
+    s32 i = D_800D154C - movement_obj;
 
     if (D_800D1891) {
         i = 25;
     }
     while (i != 0) {
-        if ((D_800D1890 == D_800CC2D0[i - 1].id) && (D_800CC2D0[i - 1].health != 0)) {
+        if ((D_800D1890 == movement_obj[i - 1].id) && (movement_obj[i - 1].health != 0)) {
             func_15075548();
             D_800D154C->unk223 = 9;
             D_800D154C->unk222 = i - 1;
@@ -711,7 +711,7 @@ void func_15076FA8(void) {
 
 /* Jumps to arg3 when the target's speed is below arg2. */
 void func_150770E4(void) {
-    if (D_800CC2D0[D_800D154C->unk222].xz_velocity < D_800D1892) {
+    if (movement_obj[D_800D154C->unk222].xz_velocity < D_800D1892) {
         func_15075400(D_800D1893);
     }
 }
@@ -969,8 +969,8 @@ void func_150779D4(void) {
     if (D_800D1892 != 0) {
         index = D_800D154C->unk222;
     }
-    if (D_800C3E78 != index) {
-        obj = &D_800CC2D0[index];
+    if (dc_glbl_CharNum != index) {
+        obj = &movement_obj[index];
         if ((obj->interaction_state != 1) || (obj->unk65 == 0)) {
             // matching: the assignment inside the test makes IDO keep the bound in $f2
             if (func_1505A6F8(D_800D154C, obj) < (range = D_800D1893 << 3)) {
@@ -1037,7 +1037,7 @@ void func_15077C38(void) {
     D_800D154C->unk222 = 0;
 
     for (i = 0; i < 25; i++) {
-        obj = &D_800CC2D0[i];
+        obj = &movement_obj[i];
         if (((obj->interaction_state != 0) && (obj->health != 0)) &&
             ((obj->immune == 0) || (obj->immune == 0xFF)) &&
             ((obj->unk65 == 0) || (D_800D1892 != 0)) &&
@@ -1118,8 +1118,8 @@ void func_15078074(void) {
     range = 8 * D_800D1893;
 
     for (i = 0; i < 25; i++) {
-        obj = &D_800CC2D0[i];
-        if ((obj->interaction_state != 0) && (D_800C3E78 != i)) {
+        obj = &movement_obj[i];
+        if ((obj->interaction_state != 0) && (dc_glbl_CharNum != i)) {
             if (func_1505A6F8(D_800D154C, obj) < range) {
                 func_15075400(D_800D1890);
                 return;
@@ -1132,7 +1132,7 @@ void func_15078074(void) {
 void func_1507813C(void) {
     s32 index = D_800D154C->unk222;
 
-    if (D_800CC2D0[index].interaction_state == 0) {
+    if (movement_obj[index].interaction_state == 0) {
         func_15075400(D_800D1890);
     }
 }
@@ -1196,13 +1196,13 @@ void func_1507839C(void) {
     f32 threshold;
 
     if (D_800D1892 == 0) {
-        target = &D_800CC2D0[D_800D154C->unk222];
+        target = &movement_obj[D_800D154C->unk222];
         dist = func_1505A6F8(D_800D154C, target);
     } else if (D_800D1892 == 1) {
-        target = &D_800CC2D0[D_800D154C->unk222];
+        target = &movement_obj[D_800D154C->unk222];
         dist = func_1505A72C(D_800D154C, target);
     } else {
-        dist = fabsf(D_800D154C->y_position - D_800CC2D0[D_800D154C->unk222].y_position);
+        dist = fabsf(D_800D154C->y_position - movement_obj[D_800D154C->unk222].y_position);
     }
 
     threshold = D_800D1893 * 8;
@@ -1243,13 +1243,13 @@ void func_15078544(void) {
 
     mode = D_800D1890 >> 6;
     D_800D1890 &= 0x3F;
-    x = D_800CC2D0[D_800D154C->unk222].x_position;
-    z = D_800CC2D0[D_800D154C->unk222].z_position;
-    y = D_800CC2D0[D_800D154C->unk222].y_position;
+    x = movement_obj[D_800D154C->unk222].x_position;
+    z = movement_obj[D_800D154C->unk222].z_position;
+    y = movement_obj[D_800D154C->unk222].y_position;
     offsetX = ((((s8)D_800D1891 << 4) | (D_800D1893 >> 4)) * 8);
     offsetZ = ((((s8)D_800D1892 << 4) | (D_800D1893 & 0xF)) * 8);
     if (mode == 0) {
-        facing = ((D_800CC2D0[D_800D154C->unk222].unk7A >> 8) & 0xFF) - 0x40;
+        facing = ((movement_obj[D_800D154C->unk222].unk7A >> 8) & 0xFF) - 0x40;
         sine = func_15048A40(facing);
         cosine = func_150489B0(facing);
     } else if (mode == 1) {
@@ -1273,7 +1273,7 @@ void func_1507879C(void) {
     f32 value;
     s32 compare;
 
-    data = D_800CC2D0[D_800D154C->unk222].unk2D0;
+    data = movement_obj[D_800D154C->unk222].unk2D0;
     value = data->frame;
     compare = D_800D1892;
     if (((compare == 0) && (value < (f32)(u32)D_800D1891)) ||
@@ -1300,8 +1300,8 @@ void func_15078900(void) {
         if (D_800D154C->unk222 == 0) {
             func_15075400(D_800D1890);
         }
-    } else if (((D_800D1892 == 0) && (D_800D1891 == D_800CC2D0[D_800D154C->unk222].unk251)) ||
-               ((D_800D1892 == 1) && (D_800D1891 != D_800CC2D0[D_800D154C->unk222].unk251))) {
+    } else if (((D_800D1892 == 0) && (D_800D1891 == movement_obj[D_800D154C->unk222].unk251)) ||
+               ((D_800D1892 == 1) && (D_800D1891 != movement_obj[D_800D154C->unk222].unk251))) {
         func_15075400(D_800D1890);
     }
 }
@@ -1312,7 +1312,7 @@ void func_15078A08(void) {
     AnimInstance *src;
 
     dst = D_800D154C->unk2D0;
-    src = D_800CC2D0[D_800D154C->unk222].unk2D0;
+    src = movement_obj[D_800D154C->unk222].unk2D0;
     dst->frame = src->frame;
     dst->prevFrame = src->prevFrame;
 }
@@ -1329,72 +1329,72 @@ s32 func_15078A60(s32 index) {
 
     switch (D_800D1892) {
     case 0:
-        value = D_800CC2D0[index].xz_velocity;
+        value = movement_obj[index].xz_velocity;
         break;
     case 1:
-        value = D_800CC2D0[index].unk2E4;
+        value = movement_obj[index].unk2E4;
         break;
     case 2:
-        value = D_800CC2D0[index].unk2E8;
+        value = movement_obj[index].unk2E8;
         break;
     case 3:
-        value = D_800CC2D0[index].unk2EC;
+        value = movement_obj[index].unk2EC;
         break;
     case 4:
-        value = D_800CC2D0[index].y_position;
+        value = movement_obj[index].y_position;
         break;
     case 5:
-        value = D_800CC2D0[index].unk44;
+        value = movement_obj[index].unk44;
         break;
     case 6:
         // angle between the object's facing and the direction to it from the current object
-        facing = D_800CC2D0[index].unk7A >> 8;
+        facing = movement_obj[index].unk7A >> 8;
         facing -= 0x40;
-        diff = (u8)(func_150484A0(D_800CC2D0[index].x_position - D_800D154C->x_position,
-                                  D_800CC2D0[index].z_position - D_800D154C->z_position) * 40.74366379f) - facing;
+        diff = (u8)(func_150484A0(movement_obj[index].x_position - D_800D154C->x_position,
+                                  movement_obj[index].z_position - D_800D154C->z_position) * 40.74366379f) - facing;
         value = (u8)diff;
         if (value > 0x80) {
             value = 0x100 - value;
         }
         break;
     case 7:
-        value = D_800CC2D0[index].unk13C;
+        value = movement_obj[index].unk13C;
         break;
     case 8:
-        value = D_800CC2D0[index].stunned;
+        value = movement_obj[index].stunned;
         break;
     case 9:
         value = 0;
-        if ((D_800CC2D0[index].unk31C->unk8 != 0) && (D_800CC2D0[index].unk31C->unk16 != 0)) {
+        if ((movement_obj[index].unk31C->unk8 != 0) && (movement_obj[index].unk31C->unk16 != 0)) {
             value = 2;
         }
         break;
     case 10:
-        value = D_800CC2D0[index].unk28;
+        value = movement_obj[index].unk28;
         break;
     case 11:
-        value = D_800CC2D0[0].unk31C->unk78;
+        value = movement_obj[0].unk31C->unk78;
         break;
     case 12:
-        value = D_800CC2D0[0].unk31C->matrix_physics;
+        value = movement_obj[0].unk31C->matrix_physics;
         break;
     case 13:
-        value = D_800CC2D0[0].unk102;
+        value = movement_obj[0].unk102;
         break;
     case 14:
         value = D_800BE9EC;
         break;
     case 15:
-        value = D_800CC2D0[D_800D154C->unk222].id;
+        value = movement_obj[D_800D154C->unk222].id;
         break;
     case 16:
-        value = D_800CC2D0[index].health;
+        value = movement_obj[index].health;
         break;
     case 17:
-        value = D_800CC2D0[D_800D154C->unk222].unk232;
+        value = movement_obj[D_800D154C->unk222].unk232;
         break;
     case 18:
-        value = D_800CC2D0[index].disable_run;
+        value = movement_obj[index].disable_run;
         break;
     }
     // matching: one line, as -g3 line numbers steer the scheduling of this test
@@ -1415,13 +1415,13 @@ void func_1507903C(void) {
 }
 
 void func_15079090(void) {
-    if (func_15078A60(D_800C3E78) != 0) {
+    if (func_15078A60(dc_glbl_CharNum) != 0) {
         func_15075400(D_800D1890);
     }
 }
 
 void func_150790C4(void) {
-    if (func_15078A60(D_800C3E78) != 0) {
+    if (func_15078A60(dc_glbl_CharNum) != 0) {
         D_800D154C->unk218 = func_1507BB28(0, D_800D1890);
         D_800D154C->unk218--;
     }
@@ -1436,11 +1436,11 @@ void func_1507911C(void) {
     limit = (D_800D1891 << 8) | D_800D1892;
     index = D_800D1893 & 1;
     if (index != 0) {
-        index = D_800C3E78;
+        index = dc_glbl_CharNum;
     }
-    coord = D_800CC2D0[index].y_position;
+    coord = movement_obj[index].y_position;
     if (D_800D1893 & 2) {
-        coord = D_800CC2D0[index].x_position;
+        coord = movement_obj[index].x_position;
     }
     if (coord < limit) {
         func_15075400(D_800D1890);
@@ -1491,7 +1491,7 @@ void func_15079334(void) {
     Actor *found;
 
     if (D_800D154C->unkA8 != 0) {
-        found = &D_800CC2D0[D_800D154C->unkA8 & 0x7F];
+        found = &movement_obj[D_800D154C->unkA8 & 0x7F];
         found->unk218 = NULL;
         found->unk232 = D_800D1890;
     }
@@ -1516,8 +1516,8 @@ void func_150793D8(void) {
     s16 x;
     s16 z;
 
-    x = (s16)(s32)D_800CC2D0[0].x_position;
-    z = (s16)(s32)D_800CC2D0[0].z_position;
+    x = (s16)(s32)movement_obj[0].x_position;
+    z = (s16)(s32)movement_obj[0].z_position;
     if ((x < -1180) || (x > 1180) || (z < -1180) || (z > 1180)) {
         x = 0;
         z = 0;
@@ -1549,11 +1549,11 @@ void func_15079570(void) {
     f32 dist;
     f32 time;
 
-    dist = func_1505A6F8(D_800D154C, &D_800CC2D0[D_800D154C->unk222]);
+    dist = func_1505A6F8(D_800D154C, &movement_obj[D_800D154C->unk222]);
     D_800D154C->unk44 = D_800D154C->xz_velocity;
     time = 2.0f * (dist / D_800D154C->unk44);
     D_800D154C->y_velocity = (D_800D154C->gravity * time) * 0.5f;
-    D_800D154C->y_velocity += 2.0f * ((D_800CC2D0[D_800D154C->unk222].y_position - D_800D154C->y_position) / time);
+    D_800D154C->y_velocity += 2.0f * ((movement_obj[D_800D154C->unk222].y_position - D_800D154C->y_position) / time);
 }
 
 /* Restarts the object with unique id arg0 on script arg1. */
@@ -1563,7 +1563,7 @@ void func_1507965C(void) {
 
     index = func_15083FB0(D_800D1890);
     if (index != -1) {
-        obj = &D_800CC2D0[index];
+        obj = &movement_obj[index];
         obj->unk232 = D_800D1891;
         obj->unk218 = NULL;
         obj->unk23A = 0;
@@ -1576,9 +1576,9 @@ void func_150796CC(void) {
 
     if (D_800D1892 != 0) {
         if (index != -1) {
-            D_800CC2D0[index].immune = D_800D1891;
+            movement_obj[index].immune = D_800D1891;
         }
-    } else if ((index != -1) && (D_800CC2D0[index].stunned != 0)) {
+    } else if ((index != -1) && (movement_obj[index].stunned != 0)) {
         func_15075400(D_800D1891);
     }
 }
@@ -1601,7 +1601,7 @@ void func_15079790(void) {
 
 /* Starts a move with object 0's speed plus (s8)arg2, clamped to [arg1, 250]. */
 void func_15079880(void) {
-    s32 speed = D_800CC2D0[0].xz_velocity + (s8)D_800D1892;
+    s32 speed = movement_obj[0].xz_velocity + (s8)D_800D1892;
 
     if (speed < D_800D1891) {
         speed = D_800D1891;
@@ -1656,7 +1656,7 @@ u16 func_15079A98(s32 arg0) {
     Actor *obj;
 
     path = D_800D2104[D_800D154C->unk13F];
-    obj = &D_800CC2D0[arg0];
+    obj = &movement_obj[arg0];
     return func_1505A630(path[0].x - obj->x_position, obj->z_position - path[0].z, 0);
 }
 
@@ -1681,7 +1681,7 @@ select_object: // matching: unused label, splits the block for the scheduler
     switch (D_800D1891) {
     case 1:
     current:
-        index = D_800C3E78;
+        index = dc_glbl_CharNum;
         break;
     default:
         index = func_15083FB0((u8)(D_800D1891 - 2));
@@ -1692,13 +1692,13 @@ select_object: // matching: unused label, splits the block for the scheduler
     }
     switch (D_800D1892) {
     case 1:
-        counter = &D_800CC2D0[index].unk2E4;
+        counter = &movement_obj[index].unk2E4;
         break;
     case 2:
-        counter = &D_800CC2D0[index].unk2E8;
+        counter = &movement_obj[index].unk2E8;
         break;
     case 3:
-        counter = &D_800CC2D0[index].unk2EC;
+        counter = &movement_obj[index].unk2EC;
         break;
     case 4:
     case 5: {
@@ -1707,27 +1707,27 @@ select_object: // matching: unused label, splits the block for the scheduler
 
         // restart the object on script arg0, running as the current object meanwhile
         savedObj = D_800D154C;
-        savedIndex = D_800C3E78;
-        D_800D154C = &D_800CC2D0[index];
-        D_800C3E78 = index;
+        savedIndex = dc_glbl_CharNum;
+        D_800D154C = &movement_obj[index];
+        dc_glbl_CharNum = index;
         if (D_800D154C->unk232 != D_800D1890) {
             D_800D154C->unk232 = D_800D1890;
             D_800D154C->unk218 = func_1507BB28(0, D_800D154C->unk232);
             D_800D154C->unk21C = 0;
         }
-        D_800C3E78 = savedIndex;
+        dc_glbl_CharNum = savedIndex;
         D_800D154C = savedObj;
         return;
     }
     case 6:
-        D_800CC2D0[index].unkC8 = D_800D1890;
+        movement_obj[index].unkC8 = D_800D1890;
         return;
     case 7:
-        D_800CC2D0[index].unkB8 = 0.0f;
+        movement_obj[index].unkB8 = 0.0f;
         return;
     case 8:
         angle = func_15079A98(D_800D154C->unk222);
-        if ((func_15079A98(D_800C3E78) - angle) & 0x8000) {
+        if ((func_15079A98(dc_glbl_CharNum) - angle) & 0x8000) {
             D_800D154C->unk221 = D_800D1890;
         }
         return;
@@ -1796,19 +1796,19 @@ void func_15079F6C(void) {
 void func_15079FBC(void) {
     s16 speed;
 
-    if ((D_800CC2D0[0].unk65 == 0) || (D_800CC2D0[0].unk44 < 5.0f)) {
+    if ((movement_obj[0].unk65 == 0) || (movement_obj[0].unk44 < 5.0f)) {
         D_800D154C->unk232 = D_800D1891;
         D_800D154C->unk218 = func_1507BB28(0, D_800D154C->unk232);
         D_800D154C->unk218--;
         return;
     }
 
-    D_800D154C->unk78 = D_800CC2D0[0].unk31C->unk4C;
+    D_800D154C->unk78 = movement_obj[0].unk31C->unk4C;
 
-    if (D_800CC2D0[0].unk31C->chased) {
-        speed = D_800CC2D0[0].unk44;
+    if (movement_obj[0].unk31C->chased) {
+        speed = movement_obj[0].unk44;
     } else {
-        speed = D_800CC2D0[0].unk44 * 0.7f;
+        speed = movement_obj[0].unk44 * 0.7f;
     }
     if (speed < 17) {
         D_800D1893 += 1;
@@ -1829,7 +1829,7 @@ s32 func_1507A100(void) {
 
 /* Sets the speed to object 0's speed plus (s8)arg2, clamped to [arg1, arg0]. */
 void func_1507A164(void) {
-    s32 speed = D_800CC2D0[0].xz_velocity + (s8)D_800D1892;
+    s32 speed = movement_obj[0].xz_velocity + (s8)D_800D1892;
 
     if (speed < D_800D1891) {
         speed = D_800D1891;
@@ -1866,7 +1866,7 @@ void func_1507A2F8(void) {
 
     count = 0;
     for (i = 0; i < 25; i++) {
-        if ((D_800CC2D0[i].interaction_state != 0) && (D_800CC2D0[i].id == D_800D1890)) {
+        if ((movement_obj[i].interaction_state != 0) && (movement_obj[i].id == D_800D1890)) {
             candidates[count] = i;
             count++;
         }
@@ -1962,8 +1962,8 @@ void func_1507A620(void) {
     if (D_800D1891 != 0) {
         angle = D_800D154C->unk78 >> 8;
     } else {
-        angle = (D_800D154C->unk7A - func_1505A630(D_800CC2D0[index].x_position - D_800D154C->x_position,
-                                                   D_800D154C->z_position - D_800CC2D0[index].z_position, 0)) >> 8;
+        angle = (D_800D154C->unk7A - func_1505A630(movement_obj[index].x_position - D_800D154C->x_position,
+                                                   D_800D154C->z_position - movement_obj[index].z_position, 0)) >> 8;
     }
     if ((u8)(angle - D_800D1892) < (u8)(D_800D1893 - D_800D1892)) {
         func_15075400(D_800D1890);
@@ -2015,14 +2015,14 @@ void func_1507A878(void) {
 }
 
 void func_1507A8A8(void) {
-    if ((D_800CC2D0[0].unk65 != 0) || (D_800BE616 != 0)) {
+    if ((movement_obj[0].unk65 != 0) || (D_800BE616 != 0)) {
         func_15075400(D_800D1890);
     }
 }
 
 /* Jumps to arg0 when the target is (arg2 == 0) or is not (arg2 == 1) of type arg1. */
 void func_1507A8EC(void) {
-    if (D_800D1891 == D_800CC2D0[D_800D154C->unk222].id) {
+    if (D_800D1891 == movement_obj[D_800D154C->unk222].id) {
         D_800D1892 ^= 1;
     }
     if (D_800D1892 != 0) {
@@ -2043,7 +2043,7 @@ void func_1507A984(void) {
             if (D_800D1893 != 0) {
                 D_800D154C->unk101 |= 0x40;
             }
-            D_800D154C->unk65 = (linked - D_800CC2D0) + 1;
+            D_800D154C->unk65 = (linked - movement_obj) + 1;
             D_800D154C->unk5C = D_800D1891;
         }
     } else {
@@ -2088,7 +2088,7 @@ void func_1507AA48(void) {
         D_800D154C->unk78 = D_800D154C->unk76;
         break;
     case 7:
-        D_800D154C->unk76 = D_800CC2D0[D_800D154C->unk222].unk7A + value;
+        D_800D154C->unk76 = movement_obj[D_800D154C->unk222].unk7A + value;
         break;
     case 8:
         D_800D154C->unk76 = D_800D154C->unk7A;
@@ -2177,10 +2177,10 @@ void func_1507B040(void) {
 /* Acts on the object returned by func_15072208: arg0 0 calls func_1506160C, 1 sets and 2 restarts script arg1. */
 void func_1507B058(void) {
     Actor *savedObj = D_800D154C;
-    s32 savedIndex = D_800C3E78;
+    s32 savedIndex = dc_glbl_CharNum;
 
     D_800D154C = func_15072208(D_800D154C, 0);
-    D_800C3E78 = D_800D154C - D_800CC2D0;
+    dc_glbl_CharNum = D_800D154C - movement_obj;
 
     if (D_800D154C != NULL) {
         switch (D_800D1890) {
@@ -2195,7 +2195,7 @@ void func_1507B058(void) {
             D_800D154C->unk21C = 0;
         }
     }
-    D_800C3E78 = savedIndex;
+    dc_glbl_CharNum = savedIndex;
     D_800D154C = savedObj;
 }
 
@@ -2350,7 +2350,7 @@ void func_1507B7BC(void) {
 
 /* Jumps to arg0 when the target is (arg1 == 0) or is not (arg1 == 1) stunned or dead. */
 void func_1507B7E8(void) {
-    Actor *target = &D_800CC2D0[D_800D154C->unk222];
+    Actor *target = &movement_obj[D_800D154C->unk222];
 
     if ((target->stunned != 0) || (target->health == 0)) {
         D_800D1891 ^= 1;
@@ -2371,10 +2371,10 @@ void func_1507B884(void) {
     handler = D_80086150[index];
     if (handler != NULL) {
         savedObj = D_800D154C;
-        savedIndex = D_800C3E78;
+        savedIndex = dc_glbl_CharNum;
         handler(index);
         D_800D154C = savedObj;
-        D_800C3E78 = savedIndex;
+        dc_glbl_CharNum = savedIndex;
     }
 }
 
@@ -2399,7 +2399,7 @@ void func_1507B974(void) {
 
     obj = D_800D154C;
     if (D_800D154C->unk65 != 0) {
-        obj = &D_800CC2D0[D_800D154C->unk65 - 1];
+        obj = &movement_obj[D_800D154C->unk65 - 1];
     }
     if (D_800D1891 == D_800D2104[obj->unk13F][obj->unk21E + D_800D1893].param) {
         D_800D1892 ^= 1;

@@ -209,7 +209,7 @@ void func_1504CB98(Actor *actor) {
     moveSpeed = 0.0f;
     pushAnim = 0;
     lean = 0;
-    D_800CC28C = D_800BE710[D_800C3E78];
+    D_800CC28C = D_800BE710[dc_glbl_CharNum];
     D_800CC290 = D_800CC284->button;
     D_800CC2B1 = 0;
     D_800CC2B2 = 0;
@@ -236,10 +236,10 @@ void func_1504CB98(Actor *actor) {
         func_1504C854(actor);
     } else {
         actor->unk31C->buttons = D_800CC284->button;
-        D_800CC288 = D_800BE710[D_800C3E78];
+        D_800CC288 = D_800BE710[dc_glbl_CharNum];
         buttons = actor->unk31C->buttons;
     }
-    if ((D_80082FA0 >= D_800C3E78) && (D_800DDE3C[D_800C3E78] != 0) && (D_800DDDC8[D_800C3E78] > 0.75f) && (D_800E0B94 != 2)) {
+    if ((D_80082FA0 >= dc_glbl_CharNum) && (D_800DDE3C[dc_glbl_CharNum] != 0) && (D_800DDDC8[dc_glbl_CharNum] > 0.75f) && (D_800E0B94 != 2)) {
         D_800CC284->stick_x = 0;
         D_800CC284->stick_y = 0;
         D_800CC284->button = 0;
@@ -336,7 +336,7 @@ void func_1504CB98(Actor *actor) {
                     } else {
                         moveSpeed = 0.0f;
                     }
-                    func_15087E54(D_800C3E78, actor);
+                    func_15087E54(dc_glbl_CharNum, actor);
                     moveAngle = actor->unk76 - D_800CC280;
                 }
                 physics = actor->unk31C->unk4E;
@@ -686,7 +686,7 @@ void func_1504CB98(Actor *actor) {
                         }
                     }
                 }
-                if (((actor->unk13C != 0) && (D_800CC2D0[D_800D154C->unk13C - 100].id != 0x57)) || (actor->unk31C->unk198 != 0) || (D_800CC284->button & 0x2000)) {
+                if (((actor->unk13C != 0) && (movement_obj[D_800D154C->unk13C - 100].id != 0x57)) || (actor->unk31C->unk198 != 0) || (D_800CC284->button & 0x2000)) {
                     steer = 0.0f;
                 }
             }
@@ -1033,23 +1033,23 @@ void func_1504CB98(Actor *actor) {
         }
         func_1502178C(actor, 0, -1);
         func_1505A770(actor);
-        func_1505D6F0(actor, D_800C3E78);
+        func_1505D6F0(actor, dc_glbl_CharNum);
         if ((D_800CC26C != 0) && (actor->unk31C->unk8 <= 0) && (actor->unk13C == 0)) {
-            heading = func_1505A630(D_800CC2D0[D_800CC26C].x_position - actor->x_position, actor->z_position - D_800CC2D0[D_800CC26C].z_position, 0);
+            heading = func_1505A630(movement_obj[D_800CC26C].x_position - actor->x_position, actor->z_position - movement_obj[D_800CC26C].z_position, 0);
             
             if ((actor->unk28 == 0.0f) && (moveSpeed > 15.0f) && (((D_800CC27E - heading) - 0x4000) & 0x8000)) { BLK;
                 follow = 0.1f;
                 carry = 1;
-                if (D_800CC2D0[D_800CC26C].id == 0x61) {
+                if (movement_obj[D_800CC26C].id == 0x61) {
                     if (actor->unk84.uh == 0x7A) {
-                        otherFacing = D_800CC2D0[D_800CC26C].unk7A;
+                        otherFacing = movement_obj[D_800CC26C].unk7A;
                         diff = actor->unk76 - otherFacing;
                         quadrant = (diff + 0x2000) & 0xC000;
                         if (quadrant & 0x4000) {
-                            D_800CC2D0[D_800CC26C].unk218 = NULL;
-                            D_800CC2D0[D_800CC26C].unk232 = 2;
-                            D_800CC2D0[D_800CC26C].unk76 = otherFacing + quadrant;
-                            actor->unk76 = D_800CC2D0[D_800CC26C].unk76;
+                            movement_obj[D_800CC26C].unk218 = NULL;
+                            movement_obj[D_800CC26C].unk232 = 2;
+                            movement_obj[D_800CC26C].unk76 = otherFacing + quadrant;
+                            actor->unk76 = movement_obj[D_800CC26C].unk76;
                             actor->unk31C->unk3C = 1;
                             { BLK; actor->unk54 *= 0.4f; }
                         }
@@ -1057,22 +1057,22 @@ void func_1504CB98(Actor *actor) {
                 } else {
                     pushScale = 0.3f;
                     pushAccel = 0.5f;
-                    heightDiff = fabsf(actor->y_position - D_800CC2D0[D_800CC26C].y_position);
+                    heightDiff = fabsf(actor->y_position - movement_obj[D_800CC26C].y_position);
                     nudgeX = heightDiff;
                     if (heightDiff > 30.0f) {
                         nudgeX = 30.0f;
                     }
-                    nudgeX = (2.0f * D_800CC2D0[D_800CC26C].bodyRadius) - nudgeX;
+                    nudgeX = (2.0f * movement_obj[D_800CC26C].bodyRadius) - nudgeX;
                     actor->unk54 *= 0.6f;
-                    actor->xz_velocity = D_800CC2D0[D_800CC26C].unk44;
-                    if (D_800CC2D0[D_800CC26C].unk44 < D_800CC2D0[D_800CC26C].xz_velocity) {
-                        nudgeZ = D_800CC2D0[D_800CC26C].xz_velocity;
+                    actor->xz_velocity = movement_obj[D_800CC26C].unk44;
+                    if (movement_obj[D_800CC26C].unk44 < movement_obj[D_800CC26C].xz_velocity) {
+                        nudgeZ = movement_obj[D_800CC26C].xz_velocity;
                     } else {
-                        nudgeZ = D_800CC2D0[D_800CC26C].unk44;
+                        nudgeZ = movement_obj[D_800CC26C].unk44;
                     }
                     actor->unk31C->unk3C = ((32.0f - nudgeZ) * 0.125f);
-                    if (D_800CC2D0[D_800CC26C].id == 0x34) {
-                        if (D_800CC2D0[D_800CC26C].unk251 != 1) {
+                    if (movement_obj[D_800CC26C].id == 0x34) {
+                        if (movement_obj[D_800CC26C].unk251 != 1) {
                             carry = 0;
                         }
                         pushAnim = 0x23;
@@ -1084,35 +1084,35 @@ void func_1504CB98(Actor *actor) {
                     } else {
                         pushAnim = 0x18;
                     }
-                    if ((pushAnim != actor->unk84.uh) && (D_800CC2D0[D_800CC26C].id != 0x17)) {
+                    if ((pushAnim != actor->unk84.uh) && (movement_obj[D_800CC26C].id != 0x17)) {
                         D_800D1580 = 0xFF08012B;
                         pushAccel = 0.5f;
                         func_1506E8D8();
                     }
-                    if (D_800CC2D0[D_800CC26C].unk224 != 0) {
-                        pushScale = D_800CC2D0[D_800CC26C].unk224 * 0.01f;
+                    if (movement_obj[D_800CC26C].unk224 != 0) {
+                        pushScale = movement_obj[D_800CC26C].unk224 * 0.01f;
                     }
                     if (carry != 0) {
                         pushAccel = 0.5f;
                         func_1505A184(actor->unk76, nudgeX, 0.0f, &nudgeX, &nudgeZ, &nudgeY);
-                        actor->x_position += ((((D_800CC2D0[D_800CC26C].x_position - nudgeX) + D_800CC2D0[D_800CC26C].unkBC) - actor->x_position) * follow);
-                        actor->z_position += ((((D_800CC2D0[D_800CC26C].z_position - nudgeZ) + D_800CC2D0[D_800CC26C].unk148) - actor->z_position) * follow);
-                        D_800CC2D0[D_800CC26C].unk76 = actor->unk76;
+                        actor->x_position += ((((movement_obj[D_800CC26C].x_position - nudgeX) + movement_obj[D_800CC26C].unkBC) - actor->x_position) * follow);
+                        actor->z_position += ((((movement_obj[D_800CC26C].z_position - nudgeZ) + movement_obj[D_800CC26C].unk148) - actor->z_position) * follow);
+                        movement_obj[D_800CC26C].unk76 = actor->unk76;
                     }
-                    D_800CC2D0[D_800CC26C].unk87 = 1;
+                    movement_obj[D_800CC26C].unk87 = 1;
                     nudgeX = actor->unk44 * pushScale;
-                    if (D_800CC2D0[D_800CC26C].id == 0x25) {
+                    if (movement_obj[D_800CC26C].id == 0x25) {
                         nudgeX = actor->unk44 * 0.6f;
                         actor->xz_velocity += 2.0f;
                         pushAccel = 1.0f;
                         actor->unk31C->unk3C += 3;
                     }
-                    if (D_800CC2D0[D_800CC26C].id != 0x34) {
-                        if (D_800CC2D0[D_800CC26C].xz_velocity < nudgeX) {
-                            D_800CC2D0[D_800CC26C].xz_velocity += (pushAccel * D_800BE9A4);
+                    if (movement_obj[D_800CC26C].id != 0x34) {
+                        if (movement_obj[D_800CC26C].xz_velocity < nudgeX) {
+                            movement_obj[D_800CC26C].xz_velocity += (pushAccel * D_800BE9A4);
                         }
                     } else {
-                        actor->xz_velocity = D_800CC2D0[D_800CC26C].xz_velocity;
+                        actor->xz_velocity = movement_obj[D_800CC26C].xz_velocity;
                     }
                 }
             }
@@ -1440,7 +1440,7 @@ void func_1504CB98(Actor *actor) {
         func_1507CD64(actor, 3);
     }
     if (actor->unkD0 != 0) {
-        func_1505C7D8(actor, D_800C3E78);
+        func_1505C7D8(actor, dc_glbl_CharNum);
     }
     if (actor->unk7F >= 9) {
         actor->unk80 = 1;
@@ -1640,7 +1640,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
             if ((((roll * roll) + (pitch * pitch)) > 1.39999998f) && ((roll * roll) + (pitch * pitch) < 1000.0f)) {
                 actor->disable_jump = 6;
                 if ((height < 80.0f) && (actor->disable_run == 0)) {
-                    func_15087EF0(D_800C3E78, actor);
+                    func_15087EF0(dc_glbl_CharNum, actor);
                 }
             }
             if (height >= 0.0f) {
@@ -1660,7 +1660,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
             D_800CC27C = 1;
             bumped = 1;
         }
-        kind = (actor->objectNum != 0) ? D_800CC2D0[actor->objectNum - 1].id : -1;
+        kind = (actor->objectNum != 0) ? movement_obj[actor->objectNum - 1].id : -1;
         if (D_800CC27C == 0) {
             normalX = 0.0f;
             normalZ = 0.0f;

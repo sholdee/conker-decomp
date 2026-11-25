@@ -22,7 +22,7 @@ void func_1512E4B0(Camera *camera) {
         index = 1;
     }
 
-    obj = &D_800CC2D0[index];
+    obj = &movement_obj[index];
     camera->target.x = obj->x_position;
     camera->target.y = obj->y_position + 150.0f;
     camera->target.z = obj->z_position;

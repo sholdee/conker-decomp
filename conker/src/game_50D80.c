@@ -554,7 +554,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         if (D_800C35F0[scene][event->value].type == 1 && D_800C35F8 != event->value) {
             D_800C35F8 = event->value;
             D_800DBFF4[0] = 4;
-            D_800DBFF0->status |= 4;
+            camera_global_Cameras->status |= 4;
         }
     } else if (event->type == 9) {
         if (obj == NULL) {
@@ -729,10 +729,10 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 }
                 case 10:
-                    func_151C9DE8(D_800DBFF0, 0, track, sceneTag, 1);
+                    func_151C9DE8(camera_global_Cameras, 0, track, sceneTag, 1);
                     break;
                 case 11:
-                    func_151C9ED4(D_800DBFF0);
+                    func_151C9ED4(camera_global_Cameras);
                     break;
                 case 12:
                     func_150E0300();
@@ -954,7 +954,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         } else if (event->value == 0x59) {
             D_800C3C8B = 1;
         } else if (event->value == 0x5A) {
-            D_800C3E78 = obj - D_800CC2D0;
+            dc_glbl_CharNum = obj - movement_obj;
             if (obj->id == 0x53) {
                 obj->unk124 = 0;
                 func_15052F9C(obj, 156.0f, 1, 4, 0, 10, 0xFF, 0, 1, 0);
@@ -966,11 +966,11 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 func_15052F9C(obj, 156.0f, 0x19, 4, 0, 0xF, 0xFF, 0, 1, 0);
             }
         } else if (event->value == 0x71) {
-            D_800CC2D0->unkCC = 0;
-            D_800CC2D0->unk31C->unk4E = 0;
-            D_800CC2D0->unk65 = 0;
-            D_800CC2D0->unk31C->unk27 = 0;
-            D_800CC2D0->unkF8 &= ~0x01000000;
+            movement_obj->unkCC = 0;
+            movement_obj->unk31C->unk4E = 0;
+            movement_obj->unk65 = 0;
+            movement_obj->unk31C->unk27 = 0;
+            movement_obj->unkF8 &= ~0x01000000;
             if (obj != NULL) {
                 obj->unk13C = 0;
             }
@@ -1059,16 +1059,16 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_150836CC(obj, 0x11);
                     obj->unkA9 = 0;
                 } else if (event->unk4 == 3) {
-                    D_800C3E78 = obj - D_800CC2D0;
-                    D_800CC2D0->unk13C = D_800C3E78 + 100;
-                    D_800CC2D0->xz_velocity = 0.0f;
-                    FS16(D_800CC2D0->unk31C, 0x18) = 0;
+                    dc_glbl_CharNum = obj - movement_obj;
+                    movement_obj->unk13C = dc_glbl_CharNum + 100;
+                    movement_obj->xz_velocity = 0.0f;
+                    FS16(movement_obj->unk31C, 0x18) = 0;
                     func_1505959C(obj, 0);
                     *(u32 *) &obj->unk5C = 9; // matching: an unsigned store
                     obj->unk65 = 1;
                     obj->unk101 |= 4;
                 } else if (event->unk4 == 4) {
-                    FU8(D_800CC2D0->unk31C, 0x17) = 1;
+                    FU8(movement_obj->unk31C, 0x17) = 1;
                 } else if (event->unk4 == 5) {
                     D_800D154C = obj;
                     func_15073F1C();
@@ -1114,7 +1114,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         } else if (event->value == 0x7E) {
             if (obj != NULL) {
-                D_800D18D0 = obj - D_800CC2D0;
+                D_800D18D0 = obj - movement_obj;
             }
         } else if (event->value == 0x7F) {
             D_800DBEAC = 1;
@@ -1871,7 +1871,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_1516F2F8(obj - D_800CC2D0, duration, duration, 0, sceneTag, 0);
+                func_1516F2F8(obj - movement_obj, duration, duration, 0, sceneTag, 0);
             }
         } else if (event->value == 0x22) {
             s32 duration;
@@ -1882,7 +1882,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
             duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
             if (event->unk4 == 0) {
-                func_1516F1C0(obj - D_800CC2D0, duration, sceneTag, 0);
+                func_1516F1C0(obj - movement_obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x52) {
             if (obj == NULL) {
@@ -2031,7 +2031,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_15107B78(obj, func_150ADA20() & 0xFF, (func_150ADA20() & 0x7F) - 0x40, sceneTag, 1);
                     break;
                 case 13:
-                    func_151CC290(D_800DBFF0);
+                    func_151CC290(camera_global_Cameras);
                     break;
                 case 14: {
                     f32 p[3];
@@ -2413,7 +2413,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
             if (event->unk4 == 0) {
                 duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                func_1516ED68(obj - D_800CC2D0, duration, sceneTag, 0);
+                func_1516ED68(obj - movement_obj, duration, sceneTag, 0);
             }
         } else if (event->value == 0x39) {
             s32 duration;
@@ -2720,7 +2720,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (event->unk4 == 0) {
                 func_151557FC(0, func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime, 0.0f);
             } else if (skipping != 0) {
-                D_800C3E78 = 0;
+                dc_glbl_CharNum = 0;
                 func_15155F90();
             }
         }

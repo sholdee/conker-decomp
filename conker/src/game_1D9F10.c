@@ -53,7 +53,7 @@ typedef struct {
     /* 0x1C */ Actor *owner;
     /* 0x20 */ u8 ownerId;             // owner->unique_id
     /* 0x21 */ u8 pad21[3];
-    /* 0x24 */ s32 ownerIndex;         // owner - D_800CC2D0
+    /* 0x24 */ s32 ownerIndex;         // owner - movement_obj
     /* 0x28 */ f32 radius;             // horizontal offset of the owner from the rope
 } RopeRider;
 
@@ -89,7 +89,7 @@ RopeRider *func_151ACA60(Actor *obj, f32 radius, s32 extraSize) {
     }
     rider->owner = obj;
     rider->ownerId = obj->unique_id;
-    rider->ownerIndex = obj - D_800CC2D0;
+    rider->ownerIndex = obj - movement_obj;
     rider->radius = radius;
     rider->unk10 = 1;
     rider->unk14 = 0;

@@ -446,7 +446,7 @@ s32 func_1514D15C(Actor *obj) {
     uniqueSlot = -1;
     globalSlot = -1;
     idSlot = -1;
-    slot = obj - D_800CC2D0;
+    slot = obj - movement_obj;
     if (obj->attachments != NULL) {
         return 0;
     }

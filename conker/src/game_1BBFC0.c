@@ -70,7 +70,7 @@ Vtx *func_1518EB10(Game1BBFC0Beam *beam, s16 cam) {
     tip.x = beam->start.x + dx * progress;
     tip.y = beam->start.y + dy * progress;
     tip.z = beam->start.z + dz * progress;
-    eye = &D_800DBFF0[cam].eye;
+    eye = &camera_global_Cameras[cam].eye;
     dx = tip.x - beam->start.x;
     dy = tip.y - beam->start.y;
     dz = tip.z - beam->start.z;

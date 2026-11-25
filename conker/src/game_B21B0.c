@@ -56,10 +56,10 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
     }
     if (playerIndex != 0xFF) {
         if (spawnIndex == -1) {
-            spawnIndex = D_800CC2D0[playerIndex].unk31C->spawnIndex;
+            spawnIndex = movement_obj[playerIndex].unk31C->spawnIndex;
         }
         if (remember) {
-            D_800CC2D0[playerIndex].unk31C->spawnIndex = 0;
+            movement_obj[playerIndex].unk31C->spawnIndex = 0;
         }
     }
     spawnIndex &= 0xFFF;
@@ -70,8 +70,8 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
         if (D_800BE616 && D_800D18A8) {
             u8 candidates[32];
 
-            team = D_800CC2D0[playerIndex].team;
-            state = D_800CC2D0[playerIndex].unk31C;
+            team = movement_obj[playerIndex].team;
+            state = movement_obj[playerIndex].unk31C;
             count = 0;
             best = 0;
             if (team == 0) {
@@ -91,9 +91,9 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
                 if (lastSpawn != candidates[i]) {
                     nearestDistSq = 100000000.0f;
                     for (mask = 0; mask < D_8008FD8C; mask++) {
-                        if (team != D_800CC2D0[mask].team) {
-                            dx = D_800CC2D0[mask].x_position - D_800D212C[candidates[i]].pos[0];
-                            dz = D_800CC2D0[mask].z_position - D_800D212C[candidates[i]].pos[2];
+                        if (team != movement_obj[mask].team) {
+                            dx = movement_obj[mask].x_position - D_800D212C[candidates[i]].pos[0];
+                            dz = movement_obj[mask].z_position - D_800D212C[candidates[i]].pos[2];
                             dx = dx * dx + dz * dz;
                             if (dx < nearestDistSq) {
                                 nearestDistSq = dx;
@@ -111,7 +111,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
             if (D_8008FDD4->selection != 0 || D_800E0BE3 == 0) {
                 spawnIndex = candidates[best];
             }
-            state = D_800CC2D0[playerIndex].unk31C;
+            state = movement_obj[playerIndex].unk31C;
             state->lastSpawnIndex = spawnIndex;
             useLink = FALSE;
         }
@@ -151,7 +151,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
             outPos[2] += cosf(angle) * offset;
         }
         if (playerIndex != 0xFF && remember) {
-            D_800CC2D0[playerIndex].unk31C->spawnIndex = spawnIndex;
+            movement_obj[playerIndex].unk31C->spawnIndex = spawnIndex;
         }
         return 0;
     }
@@ -189,12 +189,12 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
 
     func_15084D70(obj->unk127, spawnIndex, D_800D18A8, pos, unk8, &unk6, &facing, &unk14, &unk15, unused, NULL);
     savedObject = D_800D154C;
-    savedIndex = D_800C3E78;
+    savedIndex = dc_glbl_CharNum;
     D_800D154C = obj;
-    D_800C3E78 = obj - D_800CC2D0;
+    dc_glbl_CharNum = obj - movement_obj;
     func_1506AD30(obj, 800.0f, 1);
     D_800D154C = savedObject;
-    D_800C3E78 = savedIndex;
+    dc_glbl_CharNum = savedIndex;
     obj->x_position = pos[0];
     obj->y_position = pos[1];
     obj->z_position = pos[2];
@@ -222,7 +222,7 @@ void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     if (obj->unk127 != 0xFF) {
         obj->unk31C->unk23 = unk15;
         if (D_800BE616 && D_800D18A8) {
-            func_1505D6F0(obj, obj - D_800CC2D0);
+            func_1505D6F0(obj, obj - movement_obj);
         }
         if (obj->unk31C->unk78 == 0 && obj->unk31C->unk19B != 4 && obj->unk31C->unk19B != 7) {
             obj->unk83 = 0;
@@ -359,7 +359,7 @@ void func_15085ABC(s16 players) {
     }
     for (i = 0; i < 4; i++) {
         if ((1 << i) & players) {
-            func_15085710(i, 5, D_800CC2D0[i].health);
+            func_15085710(i, 5, movement_obj[i].health);
         }
     }
 }

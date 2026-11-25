@@ -1381,7 +1381,7 @@ void func_10011BB8(void) {
 
     if ((D_80041F60 == 0) && (D_80041F61 == 0)) {
         for (i = 0; i <= D_80082FA0; i++) {
-            Camera *camera = &D_800DBFF0[i];
+            Camera *camera = &camera_global_Cameras[i];
 
             if ((D_80082FA0 != 0) || (camera->mode & 0x80000)) {
                 D_80041F68[i].x0 = camera->eye.x;

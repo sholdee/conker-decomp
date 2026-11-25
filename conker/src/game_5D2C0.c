@@ -693,9 +693,9 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
     if (func_15031070(att, owner, &mtx, &boneMtx) == 0) {
         return gdl;
     }
-    func_1502D54C(owner - D_800CC2D0, light);
+    func_1502D54C(owner - movement_obj, light);
     if (D_800B0DF0->unk3E != 0) {
-        func_1502D630(&D_800CC2D0[owner - D_800CC2D0], light, view, owner - D_800CC2D0);
+        func_1502D630(&movement_obj[owner - movement_obj], light, view, owner - movement_obj);
     } else {
         light[3] = 0xFF;
     }

@@ -382,7 +382,7 @@ Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
         func_151D5D60(effect->unk84, view, (effect->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
             state = effect->state;
-            camPos = &D_800DBFF0[view].eye.x;
+            camPos = &camera_global_Cameras[view].eye.x;
             points = effect->points;
             stateFlag = 1;
         fence:; // matching: a label here is a uopt barrier before the fade loops

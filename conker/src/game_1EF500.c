@@ -62,7 +62,7 @@ typedef struct Game1EF500TrailExt {
     /* 0x9D */ u8 pad9D;
     /* 0x9E */ u16 sound;
     /* 0xA0 */ u8 soundEnabled;
-    /* 0xA1 */ u8 listener; /* index into D_800DBFF0 of the player the sound follows */
+    /* 0xA1 */ u8 listener; /* index into camera_global_Cameras of the player the sound follows */
     /* 0xA2 */ u8 padA2[2];
     /* 0xA4 */ s32 fieldA4;
     /* 0xA8 */ s8 fieldA8;
@@ -263,7 +263,7 @@ s8 func_151C2734(Game1EF500Trail *trail) {
         if (ext->sound == 0) {
             sfxIndex = func_150ADA20() & 7;
             for (i = 0; i <= D_80082FA0; i++) {
-                player = &D_800DBFF0[i];
+                player = &camera_global_Cameras[i];
                 dx = player->eye.x - trail->head.def.pos.x;
                 dy = player->eye.y - trail->head.def.pos.y;
                 dz = player->eye.z - trail->head.def.pos.z;
@@ -284,7 +284,7 @@ s8 func_151C2734(Game1EF500Trail *trail) {
                 player = NULL;
             }
         } else if (func_1000F3D0(ext->sound)) {
-            player = &D_800DBFF0[ext->listener];
+            player = &camera_global_Cameras[ext->listener];
         } else {
             ext->soundEnabled = FALSE;
         }
@@ -974,7 +974,7 @@ s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
         if (callback != NULL && (ext->flags & TRAIL_HIT_CALLBACK)) {
             target = ext->path.surface;
             if (target != NULL) {
-                callback(&ext->path.pos, target - D_800DBEF4);
+                callback(&ext->path.pos, target - db_Object_array);
             }
         }
         if (ext->flags & TRAIL_EXPIRE_HANDLER) {

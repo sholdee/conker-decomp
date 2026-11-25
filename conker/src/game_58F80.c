@@ -130,7 +130,7 @@ Gfx *func_1502BAD0(Gfx *gdl, s32 mode, s16 player) {
     s32 state;
 
     gSPDisplayList(gdl++, D_80084160);
-    obj = D_800CC2D0;
+    obj = movement_obj;
     for (i = 0; i != 25; i++, obj++) {
         D_8003C8E0 = (i & 0xFFFFFF) | 0x01000000;
         state = obj->interaction_state;
@@ -253,20 +253,20 @@ void func_1502BEE4(void) {
     D_800C3E90 = 0;
     D_800C3E74 = 0;
     for (i = 0; i < 25; i++) {
-        if (D_800CC2D0[i].objectNum != 0) {
-            D_800C3E74 |= 1 << (D_800CC2D0[i].objectNum - 1);
+        if (movement_obj[i].objectNum != 0) {
+            D_800C3E74 |= 1 << (movement_obj[i].objectNum - 1);
         }
     }
     bzero(depth, 25);
     for (i = 0; i < 25; i++) {
-        obj = &D_800CC2D0[i];
+        obj = &movement_obj[i];
         state = obj->interaction_state;
         if (state != 0) {
             if (obj->unk65 != 0) {
                 parent = obj;
                 depth[i] = 0;
                 while (parent->unk65 != 0) {
-                    parent = &D_800CC2D0[parent->unk65 - 1];
+                    parent = &movement_obj[parent->unk65 - 1];
                     depth[i]++;
                 }
                 if (maxDepth < depth[i]) {
@@ -287,13 +287,13 @@ void func_1502BEE4(void) {
             }
         }
         for (i = 0; i < count; i++) {
-            func_1502BD84(&D_800CC2D0[order[i]], order[i]);
+            func_1502BD84(&movement_obj[order[i]], order[i]);
         }
     }
     func_1502F3C8();
     for (i = 0; i < 25; i++) {
-        if (D_800CC2D0[i].interaction_state != 0) {
-            func_1502F948(&D_800CC2D0[i]);
+        if (movement_obj[i].interaction_state != 0) {
+            func_1502F948(&movement_obj[i]);
         }
     }
     func_15030468();
@@ -315,7 +315,7 @@ void func_1502C1A4(void) {
     EffectHeader *effect;
 
     // matching: -g3 line numbers; the init shares the loop's first line (preheader schedule)
-    obj = D_800CC2D0; do {
+    obj = movement_obj; do {
         state = obj->interaction_state;
         if (state != 0) {
             id = obj->id;
@@ -352,7 +352,7 @@ void func_1502C1A4(void) {
             }
         }
         obj++;
-        // matching: the end is its own symbol (D_800D121C == &D_800CC2D0[25]), not CSE'd with the start
+        // matching: the end is its own symbol (D_800D121C == &movement_obj[25]), not CSE'd with the start
     } while (obj != &D_800D121C);
 }
 
@@ -364,7 +364,7 @@ void func_1502C380(void) {
 
 /* Texture index of a sprite object (out-of-range values fall back to 11). */
 s32 func_1502C3BC(s32 index) {
-    s32 tex = D_800CC2D0[index].unk136;
+    s32 tex = movement_obj[index].unk136;
 
     if (tex >= 70) {
         tex = 11;
@@ -387,14 +387,14 @@ Gfx *func_1502C408(Gfx *gdl, s32 index) {
     if (D_800BEAC0 != 0) {
         return gdl;
     }
-    alpha = D_800CC2D0[index].unk7;
-    size = D_800CC2D0[index].unk122;
-    scroll = D_800CC2D0[index].unk60;
+    alpha = movement_obj[index].unk7;
+    size = movement_obj[index].unk122;
+    scroll = movement_obj[index].unk60;
     if (alpha == 0) {
         return gdl;
     }
     h = w = size * 19;
-    if (D_800CC2D0[index].interaction_state == 3) {
+    if (movement_obj[index].interaction_state == 3) {
         h = w = size * 15;
     }
     tex = func_1502C3BC(index);
@@ -407,9 +407,9 @@ Gfx *func_1502C408(Gfx *gdl, s32 index) {
     sprite.alpha = alpha;
     sprite.w = w;
     sprite.h = h;
-    sprite.x = D_800CC2D0[index].x_position;
-    sprite.y = D_800CC2D0[index].y_position + (f32)(size / 2);
-    sprite.z = D_800CC2D0[index].z_position;
+    sprite.x = movement_obj[index].x_position;
+    sprite.y = movement_obj[index].y_position + (f32)(size / 2);
+    sprite.z = movement_obj[index].z_position;
     gdl = func_15095760(gdl, &sprite);
     gSPDisplayList(gdl++, D_80087408);
     return gdl;
@@ -422,9 +422,9 @@ void func_1502C608(s32 index) {
     s16 speed;
 
     if (D_800BEAC0 == 0) {
-        scroll = D_800CC2D0[index].unk60;
-        speed = D_800CC2D0[index].unk62;
-        if (D_800CC2D0[index].unk7 != 0) {
+        scroll = movement_obj[index].unk60;
+        speed = movement_obj[index].unk62;
+        if (movement_obj[index].unk7 != 0) {
             period = D_8008CA4C[func_1502C3BC(index)][4] << 8;
             scroll += speed;
             if (scroll >= period) {
@@ -432,7 +432,7 @@ void func_1502C608(s32 index) {
             } else if (scroll < 0) {
                 scroll += period;
             }
-            D_800CC2D0[index].unk60 = scroll;
+            movement_obj[index].unk60 = scroll;
         }
     }
 }
@@ -449,8 +449,8 @@ void func_1502C6E8(s32 index, s16 player, s32 mode) {
     f32 diff;
     f32 distSq;
 
-    cam = &D_800DBFF0[player];
-    obj = &D_800CC2D0[index];
+    cam = &camera_global_Cameras[player];
+    obj = &movement_obj[index];
     if (obj->lodRequest != 0) {
         return;
     }
@@ -528,10 +528,10 @@ Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap) {
     Actor *obj;
 
     start = gdl;
-    if (D_800C3638 != 0 && D_800C3656[0] == 0 && func_150229E4(&D_800CC2D0[index]) == 0) {
+    if (D_800C3638 != 0 && D_800C3656[0] == 0 && func_150229E4(&movement_obj[index]) == 0) {
         return gdl;
     }
-    obj = &D_800CC2D0[index];
+    obj = &movement_obj[index];
     if ((obj->unk74 & (1 << player)) == (1 << player)) {
         return gdl;
     }
@@ -624,7 +624,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
     s32 fogA;
     s32 pad; // matching: unused stack slot
 
-    obj = &D_800CC2D0[index];
+    obj = &movement_obj[index];
     id = obj->id;
     if (mode == 3 || mode == 4 || mode == 5) {
         id = func_150849CC(obj, &lod);
@@ -743,7 +743,7 @@ Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 
 void func_1502D54C(s32 index, s32 *colour) {
     Actor *obj;
 
-    obj = &D_800CC2D0[index];
+    obj = &movement_obj[index];
     if ((obj->unk66 & 0xC) == 4) {
         colour[0] = (obj->unk1E0[0] + obj->unk1DD[0]) / 2;
         colour[1] = (obj->unk1E0[1] + obj->unk1DD[1]) / 2;
@@ -922,7 +922,7 @@ void func_1502DB84(MtxF mtx, s32 index) {
     u8 remapBuf[0x44];
     SpawnRecord *unk144;
 
-    obj = &D_800CC2D0[index];
+    obj = &movement_obj[index];
     id = obj->id;
     remap = NULL;
     if (D_800D19A0[id] == NULL) {
@@ -1027,7 +1027,7 @@ void func_1502DF38(s32 index, s32 rootOnly) {
     void *dst;
     s32 parent;
 
-    obj = &D_800CC2D0[index];
+    obj = &movement_obj[index];
     if (obj->xz_scale == 0.0f) {
         obj->xz_scale = 0.1000000015f;
         obj->unk154 = 0.1000000015f;
@@ -1068,10 +1068,10 @@ void func_1502DF38(s32 index, s32 rootOnly) {
             return;
         }
     }
-    D_800C3E78 = index;
+    dc_glbl_CharNum = index;
     if (obj->unk65 && !(obj->unk101 & 0x10)) {
         parent = obj->unk65 - 1;
-        bone = D_800CC2D0[parent].unk1D4;
+        bone = movement_obj[parent].unk1D4;
         if (bone == NULL) {
             return;
         }
@@ -1112,8 +1112,8 @@ void func_1502DF38(s32 index, s32 rootOnly) {
     } else {
         func_150A9B0C(mtx, obj->unkB8, obj->unk40, obj->unkC4, obj->xz_scale, obj->y_scale, obj->xz_scale);
         if (obj->unk101 & 0x10) {
-            other = &D_800CC2D0[obj->unk65 - 1];
-            bone = D_800CC2D0[obj->unk65 - 1].unk1D4;
+            other = &movement_obj[obj->unk65 - 1];
+            bone = movement_obj[obj->unk65 - 1].unk1D4;
             if (bone == NULL) {
                 mtx[3][0] = 0;
                 mtx[3][1] = 0;
@@ -1174,7 +1174,7 @@ void func_1502E4C4(s32 index) {
     s32 event;
 
     mask = 1;
-    obj = &D_800CC2D0[index];
+    obj = &movement_obj[index];
     id = obj->id;
     if (obj->unk5 == 7) {
         obj->unk74 &= ~0xF;
@@ -1195,7 +1195,7 @@ void func_1502E4C4(s32 index) {
         return;
     }
     if (obj->unk65 != 0) {
-        obj->unk74 = D_800CC2D0[obj->unk65 - 1].unk74;
+        obj->unk74 = movement_obj[obj->unk65 - 1].unk74;
         return;
     }
     width = (u32)D_800D1C90[id]->bodyRadius * obj->xz_scale;
@@ -1224,7 +1224,7 @@ void func_1502E4C4(s32 index) {
         view = (s32)&D_800BE628[i];
         tbl = &D_800D9C10[i];
         inside = FALSE;
-        if (D_800DBFF0[i].playerExt->aimState != 0) {
+        if (camera_global_Cameras[i].playerExt->aimState != 0) {
             playerRange = 100000;
         } else {
             playerRange = range;
@@ -1454,7 +1454,7 @@ s32 func_1502EE8C(s32 index, s32 slot) {
     s32 value;
     s32 result;
 
-    value = D_800CC2D0[index].eyeClosed[slot];
+    value = movement_obj[index].eyeClosed[slot];
     if (value >= 2) {
         if (value >= 4) {
             result = 2;
@@ -1473,23 +1473,23 @@ void func_1502EEF4(s32 index) {
     u8 state;
 
     for (i = 0; i < 2; i++) {
-        if (D_800CC2D0[index].eyeCode[i] >= 10) {
+        if (movement_obj[index].eyeCode[i] >= 10) {
             continue;
         }
         state = func_1502EE8C(index, i);
         if (state == 0) {
-            if (D_800CC2D0[index].eyeCode[i] > 0) {
-                D_800CC2D0[index].eyeCode[i]--;
+            if (movement_obj[index].eyeCode[i] > 0) {
+                movement_obj[index].eyeCode[i]--;
             }
         } else if (state == 1) {
-            if (D_800CC2D0[index].eyeCode[i] < 2) {
-                D_800CC2D0[index].eyeCode[i]++;
+            if (movement_obj[index].eyeCode[i] < 2) {
+                movement_obj[index].eyeCode[i]++;
             }
         } else {
-            D_800CC2D0[index].eyeCode[i] = 1;
+            movement_obj[index].eyeCode[i] = 1;
         }
     }
-    func_1507E3C0(&D_800CC2D0[index]);
+    func_1507E3C0(&movement_obj[index]);
 }
 
 /* Binds the object's swappable textures to segments 6, 7 (unk6C slots), 10 and 11. */
@@ -1501,7 +1501,7 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
     s32 i;
     ObjTexture *tex;
 
-    obj = &D_800CC2D0[index];
+    obj = &movement_obj[index];
     id = obj->id;
     override = NULL;
     for (i = 0; i < 2; i++) {
@@ -1546,11 +1546,11 @@ void func_1502F264(s32 index) {
     MtxF *bone;
     s32 i;
 
-    obj = &D_800CC2D0[index];
+    obj = &movement_obj[index];
     if (obj->unk65 == 0) {
         return;
     }
-    parent = &D_800CC2D0[obj->unk65 - 1];
+    parent = &movement_obj[obj->unk65 - 1];
     if ((obj->unk101 & 2) == 2) {
         return;
     }
@@ -1592,19 +1592,19 @@ void func_1502F3C8(void) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
-        if (D_800CC2D0[i].interaction_state == 0) {
+        if (movement_obj[i].interaction_state == 0) {
             continue;
         }
-        if (D_800CC2D0[i].objectNum == 0) {
+        if (movement_obj[i].objectNum == 0) {
             continue;
         }
-        D_800CC2D0[i].y_position = D_800CC2D0[i].floorY;
-        func_1502F490(&D_800CC2D0[D_800CC2D0[i].objectNum - 1], &D_800CC2D0[i].x_position, &D_800CC2D0[i].y_position,
-                      &D_800CC2D0[i].z_position, D_800CC2D0[i].floorTriIndex);
-        if (D_800CC2D0[i].y_position < D_800CC2D0[i].floorY) {
-            D_800CC2D0[i].y_position = D_800CC2D0[i].floorY;
+        movement_obj[i].y_position = movement_obj[i].floorY;
+        func_1502F490(&movement_obj[movement_obj[i].objectNum - 1], &movement_obj[i].x_position, &movement_obj[i].y_position,
+                      &movement_obj[i].z_position, movement_obj[i].floorTriIndex);
+        if (movement_obj[i].y_position < movement_obj[i].floorY) {
+            movement_obj[i].y_position = movement_obj[i].floorY;
         } else {
-            D_800CC2D0[i].floorY = D_800CC2D0[i].y_position;
+            movement_obj[i].floorY = movement_obj[i].y_position;
         }
     }
 }
@@ -1732,9 +1732,9 @@ Gfx *func_1502F9FC(Gfx *gdl, s32 index) {
     s32 lrt;
     s32 tile;
 
-    id = D_800CC2D0[index].id;
+    id = movement_obj[index].id;
     if (id == 0x89 || id == 0xBA) {
-        return func_150C3160(gdl, &D_800CC2D0[index]);
+        return func_150C3160(gdl, &movement_obj[index]);
     }
     if (id == 0) {
         texIndex = 14;
@@ -1750,8 +1750,8 @@ Gfx *func_1502F9FC(Gfx *gdl, s32 index) {
     if (D_800C5338[id] != NULL) {
         for (i = 0; i < 2; i++) {
             tex = &D_800C5338[id][texIndex];
-            uls = (u16)(D_800CC2D0[index].unk27A[i] + 2);
-            ult = (u16)(D_800CC2D0[index].unk27E[i] + 2);
+            uls = (u16)(movement_obj[index].unk27A[i] + 2);
+            ult = (u16)(movement_obj[index].unk27E[i] + 2);
             lrs = (u16)(tex->width * 4 - 2);
             lrt = (u16)(tex->height * 4 - 2);
             tile = 5 - i;
@@ -1782,7 +1782,7 @@ void func_1502FBE8(Actor *obj) {
         }
     }
     model = obj->modelIds[lod];
-    func_150837D4(obj - D_800CC2D0, model, 0);
+    func_150837D4(obj - movement_obj, model, 0);
     obj->lod = lod;
     if (D_800C35EA[0] == 1) {
         D_800C3638 = 0;

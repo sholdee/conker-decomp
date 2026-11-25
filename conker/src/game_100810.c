@@ -357,7 +357,7 @@ s32 func_150D3A68(TrailActor *actor) {
                     state->mode = 2;
                 }
             } else {
-                player = (u8)(owner - D_800CC2D0);
+                player = (u8)(owner - movement_obj);
                 if (player >= 4) {
                     state->mode = 1;
                 } else {
@@ -433,7 +433,7 @@ s32 func_150D3FD4(TrailActor *actor) {
         } else {
             speed = 0.0f;
         }
-    } else if (D_800DBFF0->status & 4) {
+    } else if (camera_global_Cameras->status & 4) {
         speed = 0.0f;
     } else {
         speed = 128.0f;

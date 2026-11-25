@@ -102,7 +102,7 @@ s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 a
             r = p->radius * obj->xz_scale + radius;
             if (!(r * r < dx * dx + dy * dy + dz * dz)) {
                 if (obj->immune == 0) {
-                    func_1505D1C4(obj->x_position, obj->y_position, obj->z_position, arg5, self - D_800CC2D0, 0, 0, 0);
+                    func_1505D1C4(obj->x_position, obj->y_position, obj->z_position, arg5, self - movement_obj, 0, 0, 0);
                 }
                 return p->bone + 1;
             }
@@ -236,7 +236,7 @@ s32 func_15081574(s32 self, f32 dist, f32 radius, s32 outTarget, s32 arg4, s32 m
 
     *(Actor **)outTarget = NULL;
     for (i = 0; i < 25; i++) {
-        obj = &D_800CC2D0[i];
+        obj = &movement_obj[i];
         if (obj->interaction_state == 0 || obj->unk1D4 == NULL || model != obj->id) {
             continue;
         }

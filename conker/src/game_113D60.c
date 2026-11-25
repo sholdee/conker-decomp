@@ -499,7 +499,7 @@ TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
         return NULL;
     }
 
-    func_1512D748(&D_800DBFF0[D_800BE9E8], 0, 1);
+    func_1512D748(&camera_global_Cameras[D_800BE9E8], 0, 1);
 
     event.flags = 1;
     event.duration = (func_150ADA20() % 11) + 30;

@@ -143,7 +143,7 @@ s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
 
 /*
  * Looks up the object whose id is the low 12 bits of `ref` and passes its position, with the
- * player's (D_800DBFF0) angle turned by 180 degrees, to func_150221E8 if `alt` else func_15022190.
+ * player's (camera_global_Cameras) angle turned by 180 degrees, to func_150221E8 if `alt` else func_15022190.
  */
 void func_1509C8FC(s32 ref, s32 alt) {
     Actor *obj;
@@ -152,7 +152,7 @@ void func_1509C8FC(s32 ref, s32 alt) {
 
     obj = func_1505EEF4(ref & 0xFFF);
     if (obj != NULL) {
-        player = D_800DBFF0;
+        player = camera_global_Cameras;
         if (player->mode & 0x100) {
             // Camera (include/structs.h) has no field at 0x760; it lies inside pad73E.
             angle = *(f32 *)((u8 *)player + 0x760);

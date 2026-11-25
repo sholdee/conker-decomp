@@ -25,8 +25,8 @@ glabel func_150A6860
     /* D3D44 150A6894 31E88000 */  andi       $t0, $t7, 0x8000
     /* D3D48 150A6898 1100000A */  beqz       $t0, .L150A68C4
     /* D3D4C 150A689C 00808025 */   or        $s0, $a0, $zero
-    /* D3D50 150A68A0 3C08800E */  lui        $t0, %hi(D_800DBFF0)
-    /* D3D54 150A68A4 2508BFF0 */  addiu      $t0, $t0, %lo(D_800DBFF0)
+    /* D3D50 150A68A0 3C08800E */  lui        $t0, %hi(camera_global_Cameras)
+    /* D3D54 150A68A4 2508BFF0 */  addiu      $t0, $t0, %lo(camera_global_Cameras)
     /* D3D58 150A68A8 240909A0 */  addiu      $t1, $zero, 0x9A0
     /* D3D5C 150A68AC 01260018 */  mult       $t1, $a2
     /* D3D60 150A68B0 00004812 */  mflo       $t1

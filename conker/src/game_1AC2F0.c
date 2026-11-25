@@ -588,7 +588,7 @@ void func_151814FC(void) {
     for (i = 0; i <= D_80082FA0; i++) {
         if (D_800DDE20[i] != 0) {
 
-            player = &D_800CC2D0[i];
+            player = &movement_obj[i];
             D_800DDDC8[i] += D_800DDDD8[i] * D_800BE9E4;
             if (player->unk31C == NULL) {
                 D_800DDDC8[i] = 1.0f;
@@ -648,7 +648,7 @@ void func_151814FC(void) {
             f32 step;
             s32 sign;
 
-            actor = &D_800CC2D0[i];
+            actor = &movement_obj[i];
             D_800DDDC8[i] += D_800DDDD8[i] * D_800BE9E4;
             if (actor->unk1D4 != NULL) {
                 MtxF *model;

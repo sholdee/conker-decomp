@@ -42,7 +42,7 @@ typedef struct {
     /* 0x110 */ ParticleState state;
 } Particle;
 
-// matching: D_800CC5EC is D_800CC2D0[0].unk31C; func_150F2A60 tests it through the array and reads through
+// matching: D_800CC5EC is movement_obj[0].unk31C; func_150F2A60 tests it through the array and reads through
 // this alias so IDO reloads it (as the original does) instead of reusing the first load
 extern struct {
     u8 pad0[0x120];
@@ -54,8 +54,8 @@ void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(Actor *, s32);
 void func_15196318(s32, s32, s32);
 
-/* While D_800CC2D0[0] has unk31C: if entry 0xFA or 0xF9 of D_800DBEF4 has its D_800DBF94 bit 0 set, runs
- * D_800CC2D0[0] through func_15136C3C .. func_1507CD64(6) once; then offsets the four D_800BE4F0 entries
+/* While movement_obj[0] has unk31C: if entry 0xFA or 0xF9 of db_Object_array has its D_800DBF94 bit 0 set, runs
+ * movement_obj[0] through func_15136C3C .. func_1507CD64(6) once; then offsets the four D_800BE4F0 entries
  * by object 0xE's unk2E4. */
 void func_150F2A60(s32 arg0) {
     s32 i;
@@ -64,21 +64,21 @@ void func_150F2A60(s32 arg0) {
     WorldObject *entry;
     s32 entryIndex;
 
-    if (D_800CC2D0->unk31C != NULL) {
+    if (movement_obj->unk31C != NULL) {
         if (D_800CC5EC->unk120 == 0) {
             // matching: `| 0` hides the induction variable, so IDO keeps `slti` instead of testing i != 2
             for (i = 0; i < 2; i = (i + 1) | 0) {
                 entry = func_151149AC((0xFA - i) & 0xFF);
-                entryIndex = entry - D_800DBEF4;
+                entryIndex = entry - db_Object_array;
                 if (D_800DBF94[entryIndex] & 1) {
                     if (D_800CC40C != 0) {
-                        func_15060F28(&D_800CC2D0[D_800CC40C - 100], 0);
+                        func_15060F28(&movement_obj[D_800CC40C - 100], 0);
                     }
                     D_800CC49A = 0;
-                    func_15136C3C(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);
-                    func_10010630(0x627, D_800CC2D0, 0x6D60, 500, 1000);
-                    func_15145A50(D_800CC2D0);
-                    func_1507CD64(D_800CC2D0, 6);
+                    func_15136C3C(movement_obj, 0, 0, 1, 1, 0, 0xFF, 1);
+                    func_10010630(0x627, movement_obj, 0x6D60, 500, 1000);
+                    func_15145A50(movement_obj);
+                    func_1507CD64(movement_obj, 6);
                     break;
                 }
             }
@@ -142,7 +142,7 @@ void func_150F2D14(Emitter *emitter) {
     }
     state->prevUnk222 = target->unk222;
     if (target->unk222 != 0) {
-        func_1502EA98(&D_800CC2D0[target->unk222], 0xFF, 0, 0, 0x50, 0, 0xF);
+        func_1502EA98(&movement_obj[target->unk222], 0xFF, 0, 0, 0x50, 0, 0xF);
     }
     if (target->unk1D4 != NULL && state->count > 0) {
         state->timer += 0.148f * D_800BE9A4;
@@ -252,19 +252,19 @@ void func_150F337C(Particle *particle, s16 viewport) {
     func_15140410(particle, &particle->state.axisU, &particle->state.axisV, viewport);
 }
 
-/* Sets bit 0 of obj->flags unless D_800DBFF0->eye.z is below -2000. */
+/* Sets bit 0 of obj->flags unless camera_global_Cameras->eye.z is below -2000. */
 void func_150F33B0(WorldObject *obj) {
-    if (D_800DBFF0->eye.z < -2000.0f) {
+    if (camera_global_Cameras->eye.z < -2000.0f) {
         obj->flags &= ~1;
         return;
     }
     obj->flags = (obj->flags & ~1) | 1; // matching: a bitfield-style insert; a plain |= 1 allocates other temps
 }
 
-/* While D_800DBFF0[player].eye.z is below -2100, mirrors (unk2FC > 840) into bit `player` of *D_800D9A40. */
+/* While camera_global_Cameras[player].eye.z is below -2100, mirrors (unk2FC > 840) into bit `player` of *D_800D9A40. */
 void func_150F33F8(s32 player) {
-    if (D_800DBFF0[player].eye.z < -2100.0f) {
-        if (D_800DBFF0[player].eye.y > 840.0f) {
+    if (camera_global_Cameras[player].eye.z < -2100.0f) {
+        if (camera_global_Cameras[player].eye.y > 840.0f) {
             *D_800D9A40 |= 1 << player;
             return;
         }
@@ -319,7 +319,7 @@ void func_150F34F4(Actor *actor) {
     actor->unk222 = 0;
     D_800CC288 = D_800BE710[0];
     D_800CC284 = D_800BE728[0];
-    if ((D_800C3E78 <= D_80082FA0) && (D_800DDE3C[D_800C3E78] != 0) && (D_800DDDC8[D_800C3E78] > 0.75f) && (D_800E0B94 != 2)) {
+    if ((dc_glbl_CharNum <= D_80082FA0) && (D_800DDE3C[dc_glbl_CharNum] != 0) && (D_800DDDC8[dc_glbl_CharNum] > 0.75f) && (D_800E0B94 != 2)) {
         D_800CC284->stick_x = 0;
         D_800CC284->stick_y = 0;
         D_800CC284->button = 0;
@@ -338,7 +338,7 @@ void func_150F34F4(Actor *actor) {
             Actor *rider;
 
             idx = actor->unk13C - 100;
-            rider = &D_800CC2D0[idx];
+            rider = &movement_obj[idx];
             rider->unk13D = 0;
             rider->xz_velocity = actor->xz_velocity;
             rider->unk232 = 0x21;
@@ -373,7 +373,7 @@ void func_150F34F4(Actor *actor) {
             if (actor->unk28 > 30.0f) {
                 D_800D1580 = 0xFF010074;
                 func_1506E8D8();
-                func_1505959C(&D_800CC2D0[D_800CC26D - 100], D_800C3E78);
+                func_1505959C(&movement_obj[D_800CC26D - 100], dc_glbl_CharNum);
                 actor->unk13C = D_800CC26D;
                 actor->unk102 = 1;
             }
@@ -402,10 +402,10 @@ void func_150F34F4(Actor *actor) {
     } else {
         minDist = 1000.0f;
         for (i = 0; i < 25; i++) {
-            if ((D_800CC2D0[i].interaction_state != 0) && (D_800CC2D0[i].health != 0) &&
-                (D_800CC2D0[i].unk28 == 0.0f) && (D_800CC2D0[i].unk232 != 0x21) &&
-                ((D_800CC2D0[i].id == 0x9C) || (D_800CC2D0[i].id == 0x9D))) {
-                dist = func_1505A6F8(D_800D154C, &D_800CC2D0[i]);
+            if ((movement_obj[i].interaction_state != 0) && (movement_obj[i].health != 0) &&
+                (movement_obj[i].unk28 == 0.0f) && (movement_obj[i].unk232 != 0x21) &&
+                ((movement_obj[i].id == 0x9C) || (movement_obj[i].id == 0x9D))) {
+                dist = func_1505A6F8(D_800D154C, &movement_obj[i]);
                 if (dist < minDist) {
                     actor->unk222 = i;
                     minDist = dist;
@@ -508,10 +508,10 @@ void func_150F34F4(Actor *actor) {
         floorLevel = 50.0f;
     }
     if (!(D_800CC284->button & R_TRIG)) {
-        if ((D_800CC26D != 0) && (actor->unk13C == 0) && (D_800CC2D0[D_800CC26D - 100].unk28 == 0.0f)) {
-            actor->y_position = D_800CC2D0[D_800CC26D - 100].y_position + 70.0f;
+        if ((D_800CC26D != 0) && (actor->unk13C == 0) && (movement_obj[D_800CC26D - 100].unk28 == 0.0f)) {
+            actor->y_position = movement_obj[D_800CC26D - 100].y_position + 70.0f;
             actor->y_velocity = 20.0f;
-            func_1505959C(&D_800CC2D0[D_800CC26D - 100], D_800C3E78);
+            func_1505959C(&movement_obj[D_800CC26D - 100], dc_glbl_CharNum);
             actor->unk13C = D_800CC26D;
             D_800D1580 = 0xFF010074;
             func_1506E8D8();
@@ -522,7 +522,7 @@ void func_150F34F4(Actor *actor) {
 
                 actor->unk25C &= ~2;
                 idx = actor->unk13C - 100;
-                rider = &D_800CC2D0[idx];
+                rider = &movement_obj[idx];
                 rider->unk13D = 0;
                 rider->xz_velocity = actor->xz_velocity;
                 rider->unk232 = 0x21;
@@ -538,7 +538,7 @@ void func_150F34F4(Actor *actor) {
             count = 0;
             if (D_800BE9F0 == 0x3C) {
                 // matching: init on the do's line keeps as1's order for the two address loads
-                obj = &D_800CC2D0[1]; do {
+                obj = &movement_obj[1]; do {
                     if ((obj->interaction_state != 0) && (obj->id == 0x25)) {
                         count++;
                     }

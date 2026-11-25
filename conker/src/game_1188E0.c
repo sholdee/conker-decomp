@@ -102,7 +102,7 @@ void func_150EB614(WorldObject *obj) {
     }
     if ((obj->behaviorState & 3) != 2) {
         if (obj->flags & 4) {
-            if (D_800CC2D0->unk31C->unk57 != 0) {
+            if (movement_obj->unk31C->unk57 != 0) {
                 obj->behaviorState &= ~3;
                 obj->behaviorState |= 2;
                 obj->param.word = 0;
@@ -110,9 +110,9 @@ void func_150EB614(WorldObject *obj) {
                 WORK(obj)->bounce.acceleration = 0.3000000119f;
                 WORK(obj)->bounce.velocity = 0.0f;
             }
-            dz = obj->z - D_800CC2D0->z_position;
-            dx = obj->x - D_800CC2D0->x_position;
-            dy = obj->y - D_800CC2D0->y_position;
+            dz = obj->z - movement_obj->z_position;
+            dx = obj->x - movement_obj->x_position;
+            dy = obj->y - movement_obj->y_position;
             distance = sqrtf(dz * dz + (dx * dx + dy * dy));
             if (distance > 740.0f) {
                 distance = 740.0f;

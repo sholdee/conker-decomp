@@ -262,10 +262,10 @@ void func_150EA8E0(s32 arg0) {
     func_150E5AE0();
 }
 
-/* Sets behaviorState bits 0 and 1 on D_800DBEF4 entry `index` if its id is 0xE0. */
+/* Sets behaviorState bits 0 and 1 on db_Object_array entry `index` if its id is 0xE0. */
 void func_150EA904(s32 arg0, s32 index) {
     // matching: the no-op cast makes IDO load the array base before scaling index
-    WorldObject *entry = (WorldObject *)D_800DBEF4 + index;
+    WorldObject *entry = (WorldObject *)db_Object_array + index;
 
     if (entry->id == 0xE0) {
         entry->behaviorState = (entry->behaviorState & 0xFF) | 3; // matching: the no-op mask costs IDO one extra temp register

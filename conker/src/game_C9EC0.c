@@ -488,7 +488,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             break;
         case 6:
             ret = func_150E3414(cmd->args[0].w, cmd->args[1].w, cmd->args[2].w, cmd->args[3].w, cmd->args[4].w,
-                                cmd->args[5].w, D_800CC2D0, cmd->args[6].w, cmd->args[7].w);
+                                cmd->args[5].w, movement_obj, cmd->args[6].w, cmd->args[7].w);
             if (ret != 0) {
                 ret = (ret << 6) | 0xE000 | 4;
             }

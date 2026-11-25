@@ -42,7 +42,7 @@ void func_1507BDB0(AnimInstance *anim, f32 rate, Actor *obj, s32 mode) {
     if (obj != NULL) {
         hold |= obj->unkF4 & 0xE;
         obj->unk1FC &= ~4;
-        D_800C3E78 = obj - D_800CC2D0;
+        dc_glbl_CharNum = obj - movement_obj;
         D_800D154C = obj;
     }
 
@@ -140,7 +140,7 @@ void func_1507C22C(s32 onlyType4) {
     AnimInstance *anim;
 
     for (i = 0; i < 25; i++) {
-        obj = &D_800CC2D0[i];
+        obj = &movement_obj[i];
         if (obj->interaction_state == 0) continue;
         if (obj->unk25C & 0x200) continue;
         if (onlyType4 && (obj->unk5 != 4)) continue;

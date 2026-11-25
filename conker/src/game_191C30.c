@@ -48,7 +48,7 @@ CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3) {
     CamWobble *wobble;
     Camera *player;
 
-    player = &D_800DBFF0[def->playerIndex];
+    player = &camera_global_Cameras[def->playerIndex];
     if (player->player != NULL && player->player->unk31C != NULL && player->player->unk31C->unk198 != 0) {
         return NULL;
     }

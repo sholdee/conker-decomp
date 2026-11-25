@@ -15,7 +15,7 @@ extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 /* Integer world position chosen by func_150E41C0 as the centre of func_150E42F8's scatter. */
 extern Vec3s D_800D99F0;
 
-/* Stores the point 500 units ahead of D_800DBFF0 (along its pitch 0x398 and yaw 0x3A0) in D_800D99F0. */
+/* Stores the point 500 units ahead of camera_global_Cameras (along its pitch 0x398 and yaw 0x3A0) in D_800D99F0. */
 void func_150E41C0(void) {
     s32 x;
     s32 y;
@@ -27,16 +27,16 @@ void func_150E41C0(void) {
     f32 c;
     f32 dx;
 
-    x = D_800DBFF0->eye.x;
-    y = D_800DBFF0->eye.y;
-    z = D_800DBFF0->eye.z;
-    angle = D_800DBFF0->pitchRad;
+    x = camera_global_Cameras->eye.x;
+    y = camera_global_Cameras->eye.y;
+    z = camera_global_Cameras->eye.z;
+    angle = camera_global_Cameras->pitchRad;
     s = sinf(angle);
     c = cosf(angle);
     dx = 0.0f;
     dy = 500.0f * s;
     dz = -500.0f * c;
-    angle = D_800DBFF0->unk3A0;
+    angle = camera_global_Cameras->unk3A0;
     s = sinf(angle);
     c = cosf(angle);
     x += dx * c + dz * s;
@@ -85,7 +85,7 @@ void func_150E42F8(s32 count) {
     }
 }
 
-/* Scatters one ground effect per 30 units of `amount` in front of D_800DBFF0. */
+/* Scatters one ground effect per 30 units of `amount` in front of camera_global_Cameras. */
 void func_150E4514(s32 amount) {
     func_150E41C0();
     func_150E42F8(amount / 30);
@@ -233,7 +233,7 @@ void func_150E4928(WorldObject *obj) {
     MtxF mtx;
 
     height = -10000.0f;
-    i = obj - D_800DBEF4;
+    i = obj - db_Object_array;
     tries = 5;
     if (i < D_800DBEF0 && i >= 0) {
         idx = i;

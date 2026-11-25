@@ -50,7 +50,7 @@ void func_1516AA70(TextBox *box) {
     s32 skip;
     s32 advancePage;
 
-    player = D_800DBFF0;
+    player = camera_global_Cameras;
     skip = box->config->flags & TEXTBOX_SKIP_ANIM;
     if (box->config->unk2B != 0 && D_800C35EA[0] != 1) {
         box->config->numPages = 0;
@@ -625,7 +625,7 @@ void func_1516CC58(TextBox *box) {
         if (box->placed == 0) {
             box->baseX = screenX;
             box->baseY = screenY;
-            box->yaw = D_800CC2D0[box->config->objIndex].unk40 - D_800DBFF0->yaw - 180.0f;
+            box->yaw = movement_obj[box->config->objIndex].unk40 - camera_global_Cameras->yaw - 180.0f;
             box->placed = 1;
         }
         angle = box->yaw;

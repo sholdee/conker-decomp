@@ -184,7 +184,7 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
         return func_15114050(obj, func_15084000(cmd[2] & 0xFFFF0FFF));
     case 21:
         for (i = 0; i < 25; i++) {
-            if (D_800CC2D0[i].interaction_state == cmd[2] && func_15114050(obj, i)) {
+            if (movement_obj[i].interaction_state == cmd[2] && func_15114050(obj, i)) {
                 return 1;
             }
         }

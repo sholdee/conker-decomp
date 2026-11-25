@@ -234,7 +234,7 @@ void func_1507EFD0(void) {
         func_1507EB80(candidates, &count, seq);
     } else if (D_800D154C->health < 2) {
         func_1507EB80(candidates, &count, 0);
-    } else if (func_1515942C(&D_800CC2D0[D_800C3E78], 0, 0, -1, -1, -1) != 0) {
+    } else if (func_1515942C(&movement_obj[dc_glbl_CharNum], 0, 0, -1, -1, -1) != 0) {
         func_1507EB80(candidates, &count, 0);
     } else if (idle->timer >= func_1507F4C0(idle->phase)) {
         func_1507EEF4();
@@ -351,7 +351,7 @@ void func_1507F54C(Actor *actor) {
 
     slot = actor->unk13C;
     if (slot >= 100) {
-        switch (D_800CC2D0[slot - 100].id) {
+        switch (movement_obj[slot - 100].id) {
         case 0x57:
             anim = 0x115;
             break;
@@ -398,7 +398,7 @@ void func_1507F640(void) {
     if (D_800D154C->unk5 == 4) {
         return;
     }
-    if (D_800C3E78 >= D_8008FD8C) {
+    if (dc_glbl_CharNum >= D_8008FD8C) {
         return;
     }
     idle = &D_800D154C->unk31C->idle;
@@ -769,7 +769,7 @@ s32 func_1507FFD8(Actor *actor) {
                          (y - actor->y_position) * (y - actor->y_position) +
                          (z - actor->z_position) * (z - actor->z_position);
                 if (distSq < 1000000.0f &&
-                    func_15037698(actor - D_800CC2D0, 0, 0, x, y, z, out, 90.0f, 0, 0) != 0) {
+                    func_15037698(actor - movement_obj, 0, 0, x, y, z, out, 90.0f, 0, 0) != 0) {
                     return TRUE;
                 }
                 obj = obj->next;

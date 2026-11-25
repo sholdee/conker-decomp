@@ -29,7 +29,7 @@ GameCommand *func_150B58F0(GameCommand *cmd, s32 objIndex) {
         return cmd;
     }
     cmd->opcode = 0x1A;
-    cmd->value = D_800CC2D0[objIndex].unk7A;
+    cmd->value = movement_obj[objIndex].unk7A;
     return cmd + 1;
 }
 

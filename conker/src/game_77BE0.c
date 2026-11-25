@@ -25,20 +25,20 @@ void func_1504A730(void) {
     D_800BE9EC = 0;
     D_800D1548 += 1;
     D_800CC250 += D_800BE9A0;
-    D_800C3E78 = 0;
+    dc_glbl_CharNum = 0;
     D_800CC2BC = 0;
     func_1508295C(D_800BE9F0, 0, 0);
     D_800CC2B8 ^= 1;
 
     for (i = 0; i != 25; i++) {
-        obj = &D_800CC2D0[i];
+        obj = &movement_obj[i];
         if (obj->interaction_state == 0) {
             continue;
         }
         obj->objectNum = 0;
         obj->unk300 = 0;
         obj->unkF4 &= 0xFFEE5FFF;
-        D_800C3E78 = i;
+        dc_glbl_CharNum = i;
         if (obj->y_position <= (f32)obj->unk38) {
             if (obj->unk127 == 0xFF) {
                 func_15060F28(obj, 0);
@@ -142,22 +142,22 @@ void func_1504A730(void) {
     }
 
     for (j = 0; j < D_8008FD8C; j++) {
-        if ((D_800CC2D0)[j].interaction_state != 0 && (D_800CC2D0)[j].unk31C != NULL) {
-            if ((D_800CC2D0)[j].unk137 != 0) {
+        if ((movement_obj)[j].interaction_state != 0 && (movement_obj)[j].unk31C != NULL) {
+            if ((movement_obj)[j].unk137 != 0) {
                 if (D_800CBDA0[j] != 0) {
-                    D_800DBEF4[D_800CBDA0[j] - 1].flags |= 0x84;
+                    db_Object_array[D_800CBDA0[j] - 1].flags |= 0x84;
                     D_800DBF94[D_800CBDA0[j] - 1] |= 1 << j;
                 }
-                (D_800CC2D0)[j].unk31C->unk56 = 5;
-            } else if ((D_800CC2D0)[j].unk31C->unk56 != 0) {
-                (D_800CC2D0)[j].unk31C->unk56--;
+                (movement_obj)[j].unk31C->unk56 = 5;
+            } else if ((movement_obj)[j].unk31C->unk56 != 0) {
+                (movement_obj)[j].unk31C->unk56--;
             }
         }
     }
     func_15061B4C();
     func_15080C64();
-    D_800D154C = D_800CC2D0;
-    D_800C3E78 = 0;
+    D_800D154C = movement_obj;
+    dc_glbl_CharNum = 0;
     D_800D35DC = 0;
 }
 
@@ -170,11 +170,11 @@ void func_1504ADD0(void) {
 
     if (D_800C35EA[0] != 1) {
         for (i = 0; i < 25; i++) {
-            obj = &D_800CC2D0[i];
+            obj = &movement_obj[i];
             if (obj->interaction_state == 0) {
                 continue;
             }
-            D_800C3E78 = i;
+            dc_glbl_CharNum = i;
             D_800D154C = obj;
             if (i < D_8008FD8C) {
                 if (i < 4) {
@@ -218,20 +218,20 @@ void func_1504AF10(Actor *obj, s32 force, s32 release) {
         index = obj->unk92 & 0xFFF;
         if (type == 3) {
             if (release) {
-                D_800DBEF4[index].attach = 0;
+                db_Object_array[index].attach = 0;
                 obj->unk92 = 0;
                 return;
             }
-            D_800DBEF4[index].attach = (obj - D_800CC2D0) + 100;
+            db_Object_array[index].attach = (obj - movement_obj) + 100;
             if (force) {
-                D_800DBEF4[index].attach = 0;
+                db_Object_array[index].attach = 0;
                 return;
             }
-            D_800DBEF4[index].flags &= ~0x60;
-            D_800DBEF4[index].flags |= 0x20;
-            D_800DBEF4[index].x = obj->x_position;
-            D_800DBEF4[index].y = obj->y_position + obj->unk90;
-            D_800DBEF4[index].z = obj->z_position;
+            db_Object_array[index].flags &= ~0x60;
+            db_Object_array[index].flags |= 0x20;
+            db_Object_array[index].x = obj->x_position;
+            db_Object_array[index].y = obj->y_position + obj->unk90;
+            db_Object_array[index].z = obj->z_position;
         }
     }
 }
@@ -463,7 +463,7 @@ void func_1504BAF0(Actor *obj) {
 
     index = obj->unk13C - 100;
     if (index >= 0) {
-        other = &D_800CC2D0[index];
+        other = &movement_obj[index];
         if (other->unk13D >= 100 && (other->id == 168 || other->id == 169)) {
             D_800D1580 = 3;
             func_1507490C();

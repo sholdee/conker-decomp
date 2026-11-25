@@ -103,7 +103,7 @@ void func_15122AE0(void) {
     dt = D_800BEA08 * (1.0f / 60.0f);
 
     for (i = 0; i <= D_80082FA0; i++) {
-        camera = &D_800DBFF0[i];
+        camera = &camera_global_Cameras[i];
         if (func_150859AC(i, 0) || (i == 0)) {
             camera->dt = dt;
             if ((D_800BEAC0 == 0) || (D_800C35EA[0] != 0) || (D_800D2DB4 != 0)) {
@@ -696,11 +696,11 @@ void func_15123A54(Camera *camera) {
     }
 }
 
-/* Keeps object `index` of D_800CC2D0 in frame together with the player (0 clears it). */
+/* Keeps object `index` of movement_obj in frame together with the player (0 clears it). */
 void func_15124770(Camera *camera, s32 index) {
     if (index != 0) {
         camera->pairIndex = index;
-        camera->pairObj = &D_800CC2D0[index];
+        camera->pairObj = &movement_obj[index];
     } else {
         camera->pairIndex = 0;
         camera->pairObj = NULL;
@@ -1034,7 +1034,7 @@ void func_151254F4(Camera *camera, s32 index) {
     func_151239CC(camera, 1);
     camera->playerExt->unk198 = 0;
     camera->aimState = 0;
-    camera->player = &D_800CC2D0[index];
+    camera->player = &movement_obj[index];
     camera->followRate = 0.0f;
 }
 
@@ -1447,7 +1447,7 @@ s32 func_15126378(Camera *camera) {
         ext->aimReset = 1;
     }
     // matching: [linked] - 1 rather than [linked - 1]
-    viewer = (camera->player->unk65 != 0) ? &D_800CC2D0[camera->player->unk65] - 1 : camera->player;
+    viewer = (camera->player->unk65 != 0) ? &movement_obj[camera->player->unk65] - 1 : camera->player;
     valid = (ext->unk11A == 2) || (zone == 0x1B) || (zone == 0x1F) || (zone == 0x29);
     if (((zone == 0x23) || (zone == 0x24) || (zone == 0x16) || (zone == 0x18) || (zone == 0x41) ||
          (zone == 0xC) || (zone == 0x14) || (zone == 0x3F) || (zone == 0x1B) || (zone == 0x1F) ||
@@ -1862,7 +1862,7 @@ void func_15127EB8(Camera *camera) {
     player = camera->player;
     linked = player->unk65;
     // matching: [linked] - 1 rather than [linked - 1] (the latter changes the code)
-    target = (linked != 0) ? &D_800CC2D0[linked] - 1 : player;
+    target = (linked != 0) ? &movement_obj[linked] - 1 : player;
 
     target->unk2FC &= ~(1 << camera->playerIndex);
     target->unk74 &= ~(1 << camera->playerIndex);
@@ -2090,7 +2090,7 @@ void func_1512868C(Camera *camera) {
     camera->preset = 3;
     func_15124B18(camera);
     index = camera->playerIndex;
-    camera->player = player = &D_800CC2D0[index];
+    camera->player = player = &movement_obj[index];
     camera->controller = camera->unk3CC = index;
     camera->playerExt = player->unk31C;
     camera->liftTarget = 0.0f;

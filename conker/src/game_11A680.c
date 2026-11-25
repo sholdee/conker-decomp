@@ -121,7 +121,7 @@ void func_150ED578(Actor *obj) {
     if ((state != NULL) && (state->unk84 == 0)) {
         player = D_800BE616 ? obj->unk127 : obj->unk124;
         if (D_800BE728[player]->button & R_TRIG) {
-            owner = &D_800CC2D0[player];
+            owner = &movement_obj[player];
             if (owner->unk31C->aimState != 0) {
                 camera = owner->camera;
                 if (camera != NULL) {
@@ -167,7 +167,7 @@ extern s32 func_151452C4(f32 *origin, f32 *dir, f32 *center, f32 radius, f32 *hi
 
 /*
  * Per-frame update of a player-driven tracked vehicle with an aimable gun.
- * - The controlling player (D_800CC2D0[unk127] when D_800BE616 is set, else object 0) drives it: stick X steers,
+ * - The controlling player (movement_obj[unk127] when D_800BE616 is set, else object 0) drives it: stick X steers,
  *   stick Y sets the throttle, A boosts while the player's state allows it, R stops it.
  * - The two treads are scrolled from the forward speed and the turn rate (func_150ED638).
  * - The gun angles (STATE aimYaw/aimPitch) either lead STATE->target, or turn with C-left/C-right while
@@ -262,18 +262,18 @@ void func_150ED748(Actor *obj) {
     } else {
         player = obj->unk127;
         if (obj->unk127 != 0xFF) {
-            if (D_800CC2D0[obj->unk127].unk31C->unk84 == 0) {
+            if (movement_obj[obj->unk127].unk31C->unk84 == 0) {
                 controlled = 1;
             }
-            driver = &D_800CC2D0[player];
+            driver = &movement_obj[player];
             if (driver->health != 0) {
                 if (driver->unk31C->unk128 & 0x80) {
                     if (driver->unk31C->unk12C != 0) {
                         obj->immune = 0xFF;
-                        if (D_800BE9E4 < D_800CC2D0[player].unk31C->unk12C) {
-                            D_800CC2D0[player].unk31C->unk12C -= D_800BE9E4;
+                        if (D_800BE9E4 < movement_obj[player].unk31C->unk12C) {
+                            movement_obj[player].unk31C->unk12C -= D_800BE9E4;
                         } else {
-                            D_800CC2D0[player].unk31C->unk12C = 0;
+                            movement_obj[player].unk31C->unk12C = 0;
                             func_1508DAEC(player, 0);
                             obj->immune = 0;
                         }
@@ -289,22 +289,22 @@ void func_150ED748(Actor *obj) {
         s32 unused3; // matching: an unused block local here steers IDO's register allocation
         throttleScale = 0.0f;
         lockFlags = 0;
-        health = D_800CC2D0[player].health;
+        health = movement_obj[player].health;
         if (health != 0) {
             steer = D_800BE748[player].stick_x;
             obj->unk247 = 50;
             obj->unk248 = 50;
             throttleScale = 0.6399999857f;
-            stateFlags = D_800CC2D0[player].unk31C->unk128;
-            if ((stateFlags & 1) && (D_800BE728[player]->button & A_BUTTON) && (D_800CC2D0[player].unk31C->unk12C != 0)) {
+            stateFlags = movement_obj[player].unk31C->unk128;
+            if ((stateFlags & 1) && (D_800BE728[player]->button & A_BUTTON) && (movement_obj[player].unk31C->unk12C != 0)) {
                 obj->unk247 = 28;
                 obj->unk248 = 28;
                 D_800BE748[player].stick_y = 80;
                 throttleScale += throttleScale;
-                if (D_800BE9E4 < D_800CC2D0[player].unk31C->unk12C) {
-                    D_800CC2D0[player].unk31C->unk12C -= D_800BE9E4;
+                if (D_800BE9E4 < movement_obj[player].unk31C->unk12C) {
+                    movement_obj[player].unk31C->unk12C -= D_800BE9E4;
                 } else {
-                    D_800CC2D0[player].unk31C->unk12C = 0;
+                    movement_obj[player].unk31C->unk12C = 0;
                     func_1508DAEC(player, 0);
                 }
             }
@@ -313,7 +313,7 @@ void func_150ED748(Actor *obj) {
             if (turnRate < 10) {
                 turnRate = 10;
             }
-            if ((D_800BE728[player]->button & R_TRIG) && ((D_800CC2D0[player].unk31C->unk128 & 2) || (D_800BE616 == 0))) {
+            if ((D_800BE728[player]->button & R_TRIG) && ((movement_obj[player].unk31C->unk128 & 2) || (D_800BE616 == 0))) {
                 throttleScale = 0.0f;
                 lockFlags = 0x1F;
                 steer = 0;
@@ -347,9 +347,9 @@ void func_150ED748(Actor *obj) {
             obj->disable_run--;
         }
         obj->unk44 = D_800BE748[player].stick_y * throttleScale;
-        D_800CC2D0[player].unk31C->unk75 = lockFlags;
-        D_800CC2D0[player].unk31C->unk78 = lockFlags;
-    } else if (D_800C3E78 < D_8008FD8C) {
+        movement_obj[player].unk31C->unk75 = lockFlags;
+        movement_obj[player].unk31C->unk78 = lockFlags;
+    } else if (dc_glbl_CharNum < D_8008FD8C) {
         func_1504C854(obj);
         if ((player < 4) && (D_800BE728[player]->button & Z_TRIG)) {
             D_800CC288 = Z_TRIG;
@@ -360,14 +360,14 @@ void func_150ED748(Actor *obj) {
     }
     obj->unk247 = 50;
     obj->unk248 = 50;
-    if ((D_800BE616 == 0) || (D_800C3E78 >= D_8008FD8C) || (obj->unk31C->unk120 == 0)) {
+    if ((D_800BE616 == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->unk31C->unk120 == 0)) {
         func_15052590(obj);
     }
     if (obj->interaction_state != 0) {
         if (obj->unk232 == 13) {
             func_15052F9C(obj, 180.0f, 5, 0x44, 1, 0x10, 0xFF, 0, 0, 0);
         } else if ((D_800BE616 == 0) && (D_800CC268 & 1)) {
-            subject = &D_800CC2D0[obj->unk124];
+            subject = &movement_obj[obj->unk124];
             if ((subject->unk65 == 0) && (subject->unk31C->unk78 == 0) && (obj->unk25C & 0x400)) {
                 if ((subject->unk44 > 15.0f) && (subject->y_velocity > 10.0f)) {
                     func_1505327C(obj, 68.0f, 4.0f, 13, 5);
@@ -414,11 +414,11 @@ void func_150ED748(Actor *obj) {
             obj->eyeCode[1] = 19;
         }
         /* Gun aim. */
-        if (D_800CC2D0[viewer[0]].unk31C->unk84 != 0) {
+        if (movement_obj[viewer[0]].unk31C->unk84 != 0) {
             if (obj->unk31C->unk129 >= 0) {
                 /* Lead the target: move it along its heading by speed * distance / 200 while aiming. */
                 f32 dirZ;
-                target = &D_800CC2D0[obj->unk31C->unk129];
+                target = &movement_obj[obj->unk31C->unk129];
                 offset = target->x_position - obj->x_position;
                 score = target->z_position - obj->z_position;
                 lead = sqrtf(offset * offset + score * score) / 200.0f;
@@ -459,7 +459,7 @@ void func_150ED748(Actor *obj) {
                     obj->unk31C->unk1BC -= yawStep;
                 }
             }
-            if (D_800CC2D0[player].unk31C->aimState != 0) {
+            if (movement_obj[player].unk31C->aimState != 0) {
                 camSlot = viewer[0] + 1;
             }
             if (D_800BE616 == 0) {
@@ -469,7 +469,7 @@ void func_150ED748(Actor *obj) {
                 /* Pick the object closest to the gun's yaw (within 35 degrees), weighted by distance. */
                 for (i = 0; i < objCount; i++) {
                     if (i != viewer[0]) {
-                        other = &D_800CC2D0[i];
+                        other = &movement_obj[i];
                         if ((D_800BE616 == 0) && !(other->unkF8 & 0x40)) {
                             continue;
                         }
@@ -501,7 +501,7 @@ void func_150ED748(Actor *obj) {
                 }
                 if (bestIdx != -1) {
                     typedef s32 scope; // matching: as above
-                    subject = &D_800CC2D0[bestIdx];
+                    subject = &movement_obj[bestIdx];
                     if (D_800BE616 != 0) {
                         limit = subject->y_position + 40.0f;
                     } else {
@@ -520,7 +520,7 @@ void func_150ED748(Actor *obj) {
                     obj->unk31C->unk1B8 *= 0.8999999762f;
                 }
             } else {
-                camera = &D_800DBFF0[camSlot - 1];
+                camera = &camera_global_Cameras[camSlot - 1];
                 subject = camera->playerExt;
                 if (camera->playerExt->aimState != 0) {
                     /* Copy the camera subject's angles. */
@@ -559,11 +559,11 @@ void func_150ED748(Actor *obj) {
                         hit = 1;
                     }
                     for (j = 0; j < D_8008FD8C; j++) {
-                        if (obj->team != D_800CC2D0[j].team) {
-                            hitX = D_800CC2D0[j].x_position - camera->eye.x;
-                            hitZ = D_800CC2D0[j].z_position - camera->eye.z;
+                        if (obj->team != movement_obj[j].team) {
+                            hitX = movement_obj[j].x_position - camera->eye.x;
+                            hitZ = movement_obj[j].z_position - camera->eye.z;
                             if (sqrtf(hitX * hitX + hitZ * hitZ) + 200.0f < dist) {
-                                if (func_151452C4(&camera->eye.x, dir, &D_800CC2D0[j].x_position, 150.0f, nearPoint, farPoint, &tNear, &tFar) && (tNear < dist)) {
+                                if (func_151452C4(&camera->eye.x, dir, &movement_obj[j].x_position, 150.0f, nearPoint, farPoint, &tNear, &tFar) && (tNear < dist)) {
                                     dist = tNear;
                                     hit = 2;
                                 }
@@ -621,7 +621,7 @@ void func_150EEC84(Actor *obj) {
         func_151254F4(camera, index);
         obj->unk31C->unk78 = 0x29;
         D_800BE748[index].button &= ~R_TRIG;
-        player = &D_800CC2D0[index];
+        player = &movement_obj[index];
         player->unk2FC |= 1 << camera->playerIndex;
         if (player->unk10A != 0) {
             func_1517F488(0xFF, 0, 0, 180, 20, camera->playerIndex);

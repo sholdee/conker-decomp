@@ -24,12 +24,12 @@ typedef struct ThrowPacket {
 s16 func_15063390(Actor *arg0) {
     Actor *other;
 
-    other = &D_800CC2D0[arg0->unk222];
+    other = &movement_obj[arg0->unk222];
     return func_1505A630(other->x_position - arg0->x_position, arg0->z_position - other->z_position, 0);
 }
 
 void func_15063404(Actor *arg0) {
-    Actor *self = &D_800CC2D0[arg0 - D_800CC2D0];
+    Actor *self = &movement_obj[arg0 - movement_obj];
 
     self->unk31C->unk78 = 9;
     func_15083568(arg0, 0x1D, 1.0f, 0);
@@ -45,8 +45,8 @@ void func_15063404(Actor *arg0) {
 void func_150836CC(Actor *arg0, s32 arg1);
 
 void func_150634E4(Actor *arg0) {
-    D_800CC2D0[arg0 - D_800CC2D0].unk31C->unk78 = 0;
-    D_800CC2D0[arg0 - D_800CC2D0].unk31C->unk11A = 0;
+    movement_obj[arg0 - movement_obj].unk31C->unk78 = 0;
+    movement_obj[arg0 - movement_obj].unk31C->unk11A = 0;
     func_150836CC(arg0, 0x1D);
     func_150836CC(arg0, 0x1E);
     arg0->disable_jump = 0;
@@ -55,8 +55,8 @@ void func_150634E4(Actor *arg0) {
 }
 
 void func_15063570(Actor *arg0) {
-    D_800CC2D0[arg0 - D_800CC2D0].unk31C->unk78 = 0x3B;
-    D_800CC2D0[arg0 - D_800CC2D0].unk31C->unk11A = 2;
+    movement_obj[arg0 - movement_obj].unk31C->unk78 = 0x3B;
+    movement_obj[arg0 - movement_obj].unk31C->unk11A = 2;
     func_15083568(arg0, 0x89, 1.0f, 0);
     arg0->disable_jump = 20;
     arg0->disable_run = 0;
@@ -86,7 +86,7 @@ void func_150636A4(Actor *arg0) {
         targetCtl = target->unk31C;  // matching: the null test uses this copy; the stores reload unk31C
         if (targetCtl != NULL) {
             target->unk31C->unk195 = 30;
-            target->unk31C->unk196 = arg0 - D_800CC2D0;
+            target->unk31C->unk196 = arg0 - movement_obj;
         }
     }
 }
@@ -112,10 +112,10 @@ void func_150636F0(void) {
     Camera *camera;
 
     D_800CC2B0 = 0;
-    actor = D_800CC2D0;
+    actor = movement_obj;
     for (index = 0; index < 25; index++, actor++) {
         if ((actor->interaction_state != 0) && (actor->unk31C != NULL) && (actor->unk31C->unk1B4 != 0)) {
-            D_800C3E78 = index;
+            dc_glbl_CharNum = index;
             D_800D154C = actor;
             ctl = actor->unk31C;
             if (ctl->unk1B4 & 1) {
@@ -252,7 +252,7 @@ void func_15063B64(Actor *arg0) {
             packet.position[2] = arg0->z_position;
         }
 
-        packet.throwerId = (arg0 - D_800CC2D0) + 1;
+        packet.throwerId = (arg0 - movement_obj) + 1;
         packet.thrower = arg0;
         func_1506AC8C(arg0, 0xB, &packet);
         func_150836CC(arg0, packet.anim);
@@ -266,14 +266,14 @@ void func_15063B64(Actor *arg0) {
 
 /* Returns the active object with id `id` that is linked (unk65) to arg0, or NULL.
  * (asm-differ shows relocation-addend diffs here: the .s names interior symbols of
- * D_800CC2D0[], C spells them base+offset; the linked bytes are identical.) */
+ * movement_obj[], C spells them base+offset; the linked bytes are identical.) */
 Actor *func_15063C60(Actor *arg0, s32 id) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
-        if ((D_800CC2D0[i].interaction_state != 0) && (id == D_800CC2D0[i].id) &&
-            (((arg0 - D_800CC2D0) + 1) == D_800CC2D0[i].unk65)) {
-            return &D_800CC2D0[i];
+        if ((movement_obj[i].interaction_state != 0) && (id == movement_obj[i].id) &&
+            (((arg0 - movement_obj) + 1) == movement_obj[i].unk65)) {
+            return &movement_obj[i];
         }
     }
     return NULL;
@@ -613,7 +613,7 @@ void func_150649A0(s32 srcIndex, s32 dstIndex) {
     AnimInstance *dst;
     AnimInstance *src;
 
-    objects = D_800CC2D0;
+    objects = movement_obj;
     dst = objects[dstIndex].unk2D0;
     src = objects[srcIndex].unk2D0;
 
@@ -632,7 +632,7 @@ void func_15064A14(Actor *arg0) {
     s32 anim;
     s32 variant;
 
-    partner = &D_800CC2D0[arg0->unk65 - 1];
+    partner = &movement_obj[arg0->unk65 - 1];
     anim = 0xF;
     if (partner->id == 0xC) {
         anim = 0x5A;
@@ -659,7 +659,7 @@ void func_15064A14(Actor *arg0) {
         }
     }
     func_1505E650(arg0, anim, 1.0f, 6.0f, 0.0f, 0.0f, 0);
-    func_150649A0(arg0->unk65 - 1, D_800C3E78);
+    func_150649A0(arg0->unk65 - 1, dc_glbl_CharNum);
 }
 
 /* Picks the object's movement animation from its action and speed, plays it, and returns it
@@ -688,7 +688,7 @@ s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
             speed = 1.0f;
             anim = func_1504C078();
         } else {
-            switch (D_800CC2D0[D_800D154C->unk13C - 100].id) {
+            switch (movement_obj[D_800D154C->unk13C - 100].id) {
             case 0x8C:
                 arg0->unkAA = 0x5A;
                 anim = 0x1A6;
@@ -1458,7 +1458,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         {
             Actor *obj;
 
-            obj = &D_800CC2D0[arg0->unk65 - 1];
+            obj = &movement_obj[arg0->unk65 - 1];
             arg0->disable_jump = 0x14;
             if (pressedButtons & (A_BUTTON | B_BUTTON)) {
                 if ((obj->unk84.uh == 0) || (obj->unk22E != 0) || (obj->unk84.uh == 0xC) || (obj->unk84.uh == 0xD)) {
@@ -2548,7 +2548,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             }
             arg0->disable_run = 0xFF;
             arg0->unk83 = 0xFF;
-        } else if ((arg0->unk84.uh != 0x12C) && (D_800BE710[D_800C3E78] & 0x8000) && (!(D_800D1958.flags & 0x20) || (func_151F2CDC() == 0))) {
+        } else if ((arg0->unk84.uh != 0x12C) && (D_800BE710[dc_glbl_CharNum] & 0x8000) && (!(D_800D1958.flags & 0x20) || (func_151F2CDC() == 0))) {
             anim = 0x142;
         }
         break;
@@ -2606,7 +2606,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
             s32 animSpecial;
             s32 next;
 
-            obj = &D_800CC2D0[arg0->unk65 - 1];
+            obj = &movement_obj[arg0->unk65 - 1];
             arg0->unk31C->unk78 = 0x1B;
             arg0->disable_jump = 0x14;
             if ((D_800BE616 == 0) || (arg0->unk65 != 0)) {
@@ -2787,7 +2787,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                             func_15062BDC(obj, 1.0f, 1.0f);
                             obj->unk2E4 = 0xF0;
                             obj->unk2E8 = 0xF0;
-                            obj->unk124 = D_800C3E78 + 1;
+                            obj->unk124 = dc_glbl_CharNum + 1;
                             obj->unkF8 = 0x401807;
                             func_1505E650(obj, 2, 0.0f, 0.0f, 0.0f, 0.0f, 0);
                             func_1514F568(obj);

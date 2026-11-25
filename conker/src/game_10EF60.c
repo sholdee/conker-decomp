@@ -304,7 +304,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
             vz *= len;
         }
         if (effect->unkFE == 1) {
-            i = effect->owner != NULL ? effect->owner - D_800CC2D0 : 0;
+            i = effect->owner != NULL ? effect->owner - movement_obj : 0;
             func_150E1570(effect->owner, effect->x, effect->y, effect->z, effect->x + vx, effect->y + vy, effect->z + vz, i, 0);
         }
         effect->x += vx;
@@ -358,9 +358,9 @@ Gfx *func_150E28DC(Gfx *gfx, Game10EF60Effect *effect, s16 view) {
         points[1].x = effect->x + effect->length * effect->dx;
         points[1].y = effect->y + effect->length * effect->dy;
         points[1].z = effect->z + effect->length * effect->dz;
-        camera[0] = D_800DBFF0[view].eye.x;
-        camera[1] = D_800DBFF0[view].eye.y;
-        camera[2] = D_800DBFF0[view].eye.z;
+        camera[0] = camera_global_Cameras[view].eye.x;
+        camera[1] = camera_global_Cameras[view].eye.y;
+        camera[2] = camera_global_Cameras[view].eye.z;
         halfWidth = effect->halfWidth;
         for (i = 0; i < 2; i++) {
             distances[i] = (points[i].x - camera[0]) * (points[i].x - camera[0]) + (points[i].y - camera[1]) * (points[i].y - camera[1]) + (points[i].z - camera[2]) * (points[i].z - camera[2]);

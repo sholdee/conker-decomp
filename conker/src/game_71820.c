@@ -111,7 +111,7 @@ void func_15044660(Actor *obj, f32 x, f32 y, f32 z) {
         D_800CBDD8 = height;
     } else {
         height += fabsf(y - obj->y_position);
-        index = obj - D_800CC2D0;
+        index = obj - movement_obj;
     }
     if (obj->unk5 == 5) {
         D_800CBDDC = 0.0f;
@@ -258,12 +258,12 @@ s32 func_15044B78(TriggerVolume *volume) {
     s32 playerWidth;
     s32 playerDepth;
 
-    playerHalfHeight = D_800CC2D0[0].unk31C->height >> 1;
-    playerWidth = D_800CC2D0[0].unk31C->width;
-    playerDepth = D_800CC2D0[0].unk31C->depth;
-    dx = D_800CC2D0[0].x_position - volume->node.x;
-    dy = (D_800CC2D0[0].y_position - volume->node.y) + playerHalfHeight;
-    dz = D_800CC2D0[0].z_position - volume->node.z;
+    playerHalfHeight = movement_obj[0].unk31C->height >> 1;
+    playerWidth = movement_obj[0].unk31C->width;
+    playerDepth = movement_obj[0].unk31C->depth;
+    dx = movement_obj[0].x_position - volume->node.x;
+    dy = (movement_obj[0].y_position - volume->node.y) + playerHalfHeight;
+    dz = movement_obj[0].z_position - volume->node.z;
     sinA = func_15048A40(volume->angle);
     cosA = func_150489B0(volume->angle);
     dzRot = dz * cosA + dx * sinA;
@@ -303,33 +303,33 @@ s32 func_1505D024(Actor *obj, s32 type, u16 angle, s32 arg3);
 /* Trigger actions 1-4: hit the player with a func_1505D024 type unless stunned or immune. */
 
 void func_15044DA0(void) {
-    if (D_800CC2D0[0].stunned || D_800CC2D0[0].immune) {
+    if (movement_obj[0].stunned || movement_obj[0].immune) {
         return;
     }
-    func_1505D024(&D_800CC2D0[0], 5, D_800CC2D0[0].unk7A, -1);
+    func_1505D024(&movement_obj[0], 5, movement_obj[0].unk7A, -1);
 }
 
 void func_15044DE8(void) {
-    if (D_800CC2D0[0].stunned || D_800CC2D0[0].immune) {
+    if (movement_obj[0].stunned || movement_obj[0].immune) {
         return;
     }
     if (D_800C35EA[0] != 1) {
-        func_1505D024(&D_800CC2D0[0], 4, D_800CC2D0[0].unk7A, -1);
+        func_1505D024(&movement_obj[0], 4, movement_obj[0].unk7A, -1);
     }
 }
 
 void func_15044E40(void) {
-    if (D_800CC2D0[0].stunned || D_800CC2D0[0].immune) {
+    if (movement_obj[0].stunned || movement_obj[0].immune) {
         return;
     }
-    func_1505D024(&D_800CC2D0[0], 0x40, D_800CC2D0[0].unk7A, -1);
+    func_1505D024(&movement_obj[0], 0x40, movement_obj[0].unk7A, -1);
 }
 
 void func_15044E88(void) {
-    if (D_800CC2D0[0].stunned || D_800CC2D0[0].immune) {
+    if (movement_obj[0].stunned || movement_obj[0].immune) {
         return;
     }
-    func_1505D024(&D_800CC2D0[0], 1, D_800CC2D0[0].unk7A, -1);
+    func_1505D024(&movement_obj[0], 1, movement_obj[0].unk7A, -1);
 }
 
 /* One candidate triangle returned by the func_150A3A70/func_150A4FA0/func_150A43E0 grid queries. */
@@ -643,7 +643,7 @@ s32 func_15045880(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
             hit->tri.v[j].z = point[2];
         }
         surface = candidate->unkC;
-        hit->surface = &D_800DBEF4[surface];
+        hit->surface = &db_Object_array[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
             s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
@@ -655,7 +655,7 @@ s32 func_15045880(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
         {
             CollisionHit *alias; // matching: this alias and re-reading candidate->unkC make IDO reload both
 
-            if ((D_800DBEF4[surface = candidate->unkC].viewFlags & 0x80) == 0x80) {
+            if ((db_Object_array[surface = candidate->unkC].viewFlags & 0x80) == 0x80) {
                 alias = hit;
                 alias->flags |= 1;
             }
@@ -707,7 +707,7 @@ s32 func_15045AE4(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
             hit->tri.v[j].z = point[2];
         }
         surface = candidate->unkC;
-        hit->surface = &D_800DBEF4[surface];
+        hit->surface = &db_Object_array[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
             s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
@@ -719,7 +719,7 @@ s32 func_15045AE4(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         {
             CollisionHit *alias; // matching: this alias and re-reading candidate->unkC make IDO reload both
 
-            if ((D_800DBEF4[surface = candidate->unkC].viewFlags & 0x80) == 0x80) {
+            if ((db_Object_array[surface = candidate->unkC].viewFlags & 0x80) == 0x80) {
                 alias = hit;
                 alias->flags |= 1;
             }
@@ -771,7 +771,7 @@ s32 func_15045D48(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
             hit->tri.v[j].z = point[2];
         }
         surface = candidate->unkC;
-        hit->surface = &D_800DBEF4[surface];
+        hit->surface = &db_Object_array[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
             s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
@@ -830,7 +830,7 @@ s32 func_15045F8C(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
             hit->tri.v[j].z = point[2];
         }
         surface = candidate->unkC;
-        hit->surface = &D_800DBEF4[surface];
+        hit->surface = &db_Object_array[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
             s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
@@ -1185,7 +1185,7 @@ void func_1504715C(CollisionHit *hit, Actor *obj) {
     if (obj->propNum != 0) {
         surface = obj->propNum - 1;
         hit->source = 2;
-        hit->surface = &D_800DBEF4[surface];
+        hit->surface = &db_Object_array[surface];
         if (func_15145C90(surface) != 0) {
             flag = 1;
         } else {

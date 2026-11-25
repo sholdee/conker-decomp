@@ -594,9 +594,9 @@ void func_1501DE18(s32 scene) {
     func_15020EC4(0);
 
     // matching: the object count lives in its own register
-    for (obj = D_800CC2D0, i = 0, count = 25; i != count; i++, obj++) {
+    for (obj = movement_obj, i = 0, count = 25; i != count; i++, obj++) {
         if (obj->interaction_state) {
-            D_800C3E78 = i;
+            dc_glbl_CharNum = i;
             if (func_150229E4(obj)) {
                 func_1502178C(obj, scene, -1);
             }
@@ -619,7 +619,7 @@ void func_1501DF04(s32 scene) {
     if (func_100127D0() != 0) {
         func_151F2BA8();
     }
-    obj = func_15072208(D_800CC2D0, 0);
+    obj = func_15072208(movement_obj, 0);
     if (obj != NULL) {
         func_15060F28(obj, 0);
     }
@@ -635,7 +635,7 @@ void func_1501DF04(s32 scene) {
         }
     }
     // matching: the fade call and the loop setup share a source line (-g3 line numbers steer scheduling)
-    if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) { func_1517EE40(0, 0, 0, 0x1E, 0, 0); } { Actor *obj = D_800CC2D0; Actor *end = &D_800D121C; do {
+    if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) { func_1517EE40(0, 0, 0, 0x1E, 0, 0); } { Actor *obj = movement_obj; Actor *end = &D_800D121C; do {
         if (obj->interaction_state != 0) {
             obj->fogMode = 0;
         }
@@ -853,7 +853,7 @@ s32 func_150235DC(s32 scene);
 void func_1501E81C(s32 skipped, s32 scene) {
     Camera *player;
 
-    player = D_800DBFF0;
+    player = camera_global_Cameras;
     if (D_800C35EA[scene] != 0) {
         {
             u8 cutscene[1];
@@ -920,7 +920,7 @@ void func_1501EA18(s32 scene) {
     Actor *obj;
     s32 i;
 
-    player = D_800DBFF0;
+    player = camera_global_Cameras;
     D_800C3600.unk0 = 1;
     D_800C3600.unk4 = scene;
     D_800C3600.unk14 = player->eye.x;
@@ -953,10 +953,10 @@ void func_1501EA18(s32 scene) {
     }
     func_150227BC(scene);
     for (i = 0; i != 25; i++) {
-        if (D_800CC2D0[i].interaction_state != 0 && func_150229E4(&D_800CC2D0[i]) != 0) {
-            D_800CC2D0[i].fogMode = 0;
-            D_800CC2D0[i].unkB8 = 0.0f;
-            D_800CC2D0[i].unkC4 = 0.0f;
+        if (movement_obj[i].interaction_state != 0 && func_150229E4(&movement_obj[i]) != 0) {
+            movement_obj[i].fogMode = 0;
+            movement_obj[i].unkB8 = 0.0f;
+            movement_obj[i].unkC4 = 0.0f;
         }
     }
     if (D_800C35C2 == 0) {
@@ -1599,7 +1599,7 @@ void func_15020EC4(s32 scene) {
                     continue;
                 }
                 if (ENT(scene, track)->type == 1) {
-                    player = D_800DBFF0;
+                    player = camera_global_Cameras;
                     if (track != D_800C35F8) {
                         continue;
                     }
@@ -1794,7 +1794,7 @@ void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
                     obj->unk54 = 0.0f;
                     obj->unkCC = 0;
                     rescaled = 0;
-                    D_800D35DC = (target - D_800CC2D0) + 1;
+                    D_800D35DC = (target - movement_obj) + 1;
                     func_1510E7A4(&obj->unk188, obj->floorTri.v, &floorY, &obj->unk118, &obj->unk184, &obj->floorType,
                                   obj->x_position, obj->y_position, obj->z_position, obj->y_position, 0, obj,
                                   -10000.0f, target->y_position);
@@ -1863,7 +1863,7 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
             continue;
         }
         if (D_800C35F0[scene][track].type != 2 ||
-            D_800CC2D0[objIndex].unique_id != D_800C35F0[scene][track].targetId) {
+            movement_obj[objIndex].unique_id != D_800C35F0[scene][track].targetId) {
             continue;
         }
         active = D_800C3960[scene][track];
@@ -1888,7 +1888,7 @@ s32 func_15021DB8(f32 *outX, f32 *outY, f32 *outZ, f32 *target, s32 objIndex, s3
                 *outZ = D_800C3958[scene][track].unk2C;
                 return 1;
             }
-            player = D_800DBFF0;
+            player = camera_global_Cameras;
             target[0] = player->eye.x;
             target[1] = player->eye.y + (f32)event->unk6;
             target[2] = player->eye.z;
@@ -1913,7 +1913,7 @@ s32 func_15022024(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
     }
     for (track = 0; track < D_800C363A[scene]; track++) {
         if (D_800C35C8[scene][track] != 0) {
-            if (D_800C35F0[scene][track].type == 2 && D_800CC2D0[objIndex].unique_id == D_800C35F0[scene][track].targetId) {
+            if (D_800C35F0[scene][track].type == 2 && movement_obj[objIndex].unique_id == D_800C35F0[scene][track].targetId) {
                 outA[1] = 0.0f;
                 outB[1] = 0.0f;
                 outA[0] = 0.0f;
@@ -2044,7 +2044,7 @@ void func_15022398(s32 track, s32 scene) {
                         obj = func_1505EEF4(slot);
                         if (obj != NULL) {
                             func_1505E650(obj, 0, 0.0f, 0.0f, 0.0f, 0.0f, 1);
-                            func_1502225C(obj - D_800CC2D0, scene);
+                            func_1502225C(obj - movement_obj, scene);
                         }
                     }
                 }
@@ -2166,7 +2166,7 @@ void func_150228E4(s32 scene) {
     countPtr = &D_800C3510[scene];
     count = *countPtr;
     for (i = 0; i < count; i++) {
-        obj = &D_800CC2D0[D_800C3518[scene][i]];
+        obj = &movement_obj[D_800C3518[scene][i]];
         if (obj->interaction_state != 0) {
             func_15060F28(obj, 0);
             count = *countPtr;
@@ -2206,7 +2206,7 @@ s32 func_150229E4(Actor *obj) {
     }
     parent = obj->unk65;
     if (parent != 0) {
-        id = D_800CC2D0[parent - 1].unique_id;
+        id = movement_obj[parent - 1].unique_id;
     } else {
         id = obj->unique_id;
     }
@@ -2224,13 +2224,13 @@ s32 func_150229E4(Actor *obj) {
     return 0;
 }
 
-/* Whether actor `actorIndex` (D_800DBEF4[actorIndex].unk72) is bound to a track of the scene. */
+/* Whether actor `actorIndex` (db_Object_array[actorIndex].unk72) is bound to a track of the scene. */
 s32 func_15022B08(s32 actorIndex, s32 scene) {
     s32 i;
 
     for (i = 0; i < D_800C363A[scene]; i++) {
         if (D_800C35C8[scene][i] != 0) {
-            if (D_800C35F0[scene][i].targetId == D_800DBEF4[actorIndex].id) {
+            if (D_800C35F0[scene][i].targetId == db_Object_array[actorIndex].id) {
                 return 1;
             }
         }
@@ -2487,11 +2487,11 @@ s32 func_150235DC(s32 scene) {
     ActorCtl *ctl;
     s8 zero;
 
-    D_800CC2D0[0].unk25C &= ~0x200;
+    movement_obj[0].unk25C &= ~0x200;
     if (D_800C35AA == 0) {
         obj = func_15083E90(1);
         if (obj != NULL) {
-            D_800C3E78 = obj - D_800CC2D0;
+            dc_glbl_CharNum = obj - movement_obj;
             ctl = obj->unk31C;
             obj->xz_velocity = 0.0f;
             if (ctl != NULL) {
@@ -2555,7 +2555,7 @@ void func_1502378C(void) {
     s32 one;
     Actor *obj;
 
-    obj = D_800CC2D0;
+    obj = movement_obj;
     i = 0;
     if (D_800C3654[0] != 0) {
         func_1504A730();
@@ -2565,7 +2565,7 @@ void func_1502378C(void) {
     // do-while steer IDO's scheduling of them
     for (one = 1, limit = 25; i != (limit ^ 0); obj++) {
         if (obj->interaction_state != 0) {
-            D_800C3E78 = i;
+            dc_glbl_CharNum = i;
             func_15022998((s32 *)obj);
             func_1507E73C(obj);
             bound = func_150229E4(obj);

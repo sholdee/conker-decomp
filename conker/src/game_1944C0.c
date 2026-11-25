@@ -166,11 +166,11 @@ void func_15167310(void) {
     f32 angle;
 
     for (player = 0; player < D_80082FA0 + 1; player++) {
-        angle = D_800DBFF0[player].unk3A0;
+        angle = camera_global_Cameras[player].unk3A0;
         D_800DD1D8[player] = sinf(angle);
         D_800DD1E8[player] = cosf(angle);
     }
-    angle = D_800DBFF0->unk3A0;
+    angle = camera_global_Cameras->unk3A0;
     D_800DD1D0[0] = sinf(angle);
     D_800DD1D0[1] = cosf(angle);
     {
@@ -598,7 +598,7 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
     size = p->tmpl.width;
     if (size < 0) {
         /* 0.0111 = 1/90: fold the view angle into 0..90 degrees */
-        angle = fabsf(D_800DBFF0[view].unk380 + (p->tmpl.unk8 & 0xFF) * 1.40625f);
+        angle = fabsf(camera_global_Cameras[view].unk380 + (p->tmpl.unk8 & 0xFF) * 1.40625f);
         while (angle >= 360.0f) {
             angle -= 360.0f;
         }
@@ -617,7 +617,7 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
     size = p->tmpl.height;
     if (size < 0) {
         view = (p->tmpl.width < 0) ? 0 : p->tmpl.width;
-        size = fabsf(D_800DBFF0[viewIndex].pitch) * (view + size) * 0.01111111138f - size;
+        size = fabsf(camera_global_Cameras[viewIndex].pitch) * (view + size) * 0.01111111138f - size;
     }
     params.unk8 = size;
     if (p->tmpl.flags & BILLBOARD_CUSTOM_MODE) {

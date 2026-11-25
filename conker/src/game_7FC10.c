@@ -72,12 +72,12 @@ void func_150528C8(Actor *obj) {
     heightMode = 0;
     // matching: the u32 compare (a no-op on a u8) steers IDO's register allocation
     if ((obj->id == 0x4F) && ((u32)obj->unk65 != 0) && (obj->unk1D4 != NULL)) {
-        obj->y_position = D_800CC2D0[obj->unk65].y_position + (D_800CC2D0[obj->unk65 - 1].y_scale * 284.0f);
+        obj->y_position = movement_obj[obj->unk65].y_position + (movement_obj[obj->unk65 - 1].y_scale * 284.0f);
     }
     obj->unkF8 |= 0x10000;
     obj->unk80 = 10;
     if (obj->id == 10) {
-        targetY = D_800CC2D0[obj->unk222].y_position + 80.0f;
+        targetY = movement_obj[obj->unk222].y_position + 80.0f;
     } else {
         targetY = D_800D2104[obj->unk13F][obj->unk21E + 1].y;
     }
@@ -85,7 +85,7 @@ void func_150528C8(Actor *obj) {
         targetY = (s16)obj->unk224;
     }
     if ((obj->unk223 == 14) || (obj->unk223 == 3)) {
-        targetY = D_800CC2D0[obj->unk222].y_position - 40.0f;
+        targetY = movement_obj[obj->unk222].y_position - 40.0f;
     }
     if ((obj->id == 0x4F) || (obj->id == 0x83)) {
         if (obj->unk251 == 1) {
@@ -94,13 +94,13 @@ void func_150528C8(Actor *obj) {
             obj->unkB8 = pitch * -0.005493164f;
         } else {
             heightMode = 1;
-            if (D_800CC2D0[obj->unk124 - 1].unk127 == 0xFF) {
+            if (movement_obj[obj->unk124 - 1].unk127 == 0xFF) {
                 obj->unkB8 *= 0.200000003f;
             }
         }
     }
     if (obj->id == 8) {
-        targetY = D_800CC2D0[obj->unk222].y_position - 40.0f;
+        targetY = movement_obj[obj->unk222].y_position - 40.0f;
         if ((s16)obj->unk224 != 0) {
             targetY = (s16)obj->unk224;
         }
@@ -168,7 +168,7 @@ void func_150528C8(Actor *obj) {
     if (obj->id == 0x9E) {
         obj->unk2E4 = 0;
     }
-    if (((D_800BE616 != 0) && (D_800C3E78 < D_8008FD90)) || (func_150535F4(obj) == 0)) {
+    if (((D_800BE616 != 0) && (dc_glbl_CharNum < D_8008FD90)) || (func_150535F4(obj) == 0)) {
         func_1502178C(obj, 0, -1);
     }
 }

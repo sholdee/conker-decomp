@@ -645,7 +645,7 @@ void func_150F892C(StageObj *obj) {
     {
         Actor *other;
 
-        other = D_800CC2D0;
+        other = movement_obj;
         for (i = 0; i < 25; i++, other++) {
             if (other->id == 0x98 && other->unk84.uh == 0x1EB && other->unk222 == 0) {
                 count++;

@@ -21,7 +21,7 @@ void func_150B3AB0(Actor *obj, u8 arg1) {
     RumbleParams event;
 
     if ((obj != NULL) && (obj->unk1D4 != NULL)) {
-        func_1512D748(&D_800DBFF0[D_800BE9E8], 6, 1);
+        func_1512D748(&camera_global_Cameras[D_800BE9E8], 6, 1);
         yaw = (obj->unk7A >> 8) + 0x40;
         func_15143134(&D_8009FBC0, &pos, (Mtx *)obj->unk1D4 + 25);
         // matching: *(u8 *)&arg1 re-reads arg1 from its stack slot at each use (plain or K&R arg1 stays in a register)

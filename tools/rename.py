@@ -156,7 +156,7 @@ def main():
             mw.run("make -B -j16 2>&1", M, timeout=3600)
             print("\n".join(errs) or r.stdout[-2000:])
             sys.exit("RENAME-FAIL: ROM mismatch or build error; everything restored")
-        rels = [str(p.relative_to(REPO)) for p in changed]
+        rels = [str(p.relative_to(REPO)) for p in changed if p.name not in AUTO]  # the auto files are gitignored
         mw.git("add", *rels)
         msg = f"rename: {len(pairs)} symbols" + (f" ({a.message})" if a.message else "")
         body = "\n".join(f"{o} -> {n}" for o, n in pairs)

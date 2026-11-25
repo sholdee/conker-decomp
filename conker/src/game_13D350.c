@@ -88,30 +88,30 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     if (D_800C35EA[0] == 1 && D_800C3681 != 0) {
         return gfx;
     }
-    pitch = 360.0f - (D_800DBFF0[D_80082FA4].pitch + D_800DCDE0[D_80082FA4].rot.x);
+    pitch = 360.0f - (camera_global_Cameras[D_80082FA4].pitch + D_800DCDE0[D_80082FA4].rot.x);
     while (pitch < -180.0f) {
         pitch += 360.0f;
     }
     while (pitch >= 180.0f) {
         pitch -= 360.0f;
     }
-    yaw = 360.0f - (D_800DBFF0[D_80082FA4].unk380 + D_800DCDE0[D_80082FA4].rot.y);
+    yaw = 360.0f - (camera_global_Cameras[D_80082FA4].unk380 + D_800DCDE0[D_80082FA4].rot.y);
     while (yaw < 0.0f) {
         yaw += 360.0f;
     }
     while (yaw >= 360.0f) {
         yaw -= 360.0f;
     }
-    roll = D_800DBFF0[D_80082FA4].swayAmount + D_800DCDE0[D_80082FA4].rot.z;
+    roll = camera_global_Cameras[D_80082FA4].swayAmount + D_800DCDE0[D_80082FA4].rot.z;
     while (roll < -180.0f) {
         roll += 360.0f;
     }
     while (roll >= 180.0f) {
         roll -= 360.0f;
     }
-    x = D_800DBFF0[D_80082FA4].eye.x;
-    y = D_800DBFF0[D_80082FA4].eye.y;
-    z = D_800DBFF0[D_80082FA4].eye.z;
+    x = camera_global_Cameras[D_80082FA4].eye.x;
+    y = camera_global_Cameras[D_80082FA4].eye.y;
+    z = camera_global_Cameras[D_80082FA4].eye.z;
     if (D_800C3682 != 0) {
         view = &RENDER_VIEWS[D_80082FA4];
         return func_15110544(gfx, view->left, view->top, view->right - 1.0f, view->bottom, 0x16, 0x1C, 0x1B);
@@ -184,7 +184,7 @@ Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 
 Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
     // unk78 is the high byte of Actor's u16 unk78
     if (D_800BE9F0 == 0x1B || D_800BE9F0 == 0x1E ||
-        (D_800BE9F0 == 0x31 && D_800DBFF0->playerExt->unk78 == 3)) {
+        (D_800BE9F0 == 0x31 && camera_global_Cameras->playerExt->unk78 == 3)) {
         gfx = func_15110544(gfx, 2, 0, D_800BE620 - 2, D_800BE624,
                             D_800DBEA8[0], D_800DBEA8[1], D_800DBEA8[2]);
     }

@@ -859,7 +859,7 @@ void func_151BDD8C(BurstEffect *effect) {
             }
         }
     }
-    player = owner - D_800CC2D0;
+    player = owner - movement_obj;
     if (player < 4) {
         for (k = 0; k < 2; k++) {
             if (data->sparks[k] != NULL) {

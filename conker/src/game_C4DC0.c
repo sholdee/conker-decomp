@@ -71,8 +71,8 @@ typedef struct {
 
 /* Raw field access for bytes of Actor that structs.h declares only as padding or with
  * another width (the shared headers are not edited in this pass). */
-/* Index of an object in the D_800CC2D0 object table. */
-#define OBJ_INDEX(o) ((o) - D_800CC2D0)
+/* Index of an object in the movement_obj object table. */
+#define OBJ_INDEX(o) ((o) - movement_obj)
 
 
 extern void func_1503DE70(Actor *, s32, s32);
@@ -211,7 +211,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0x14:
         obj->unk232 = cmd->a[0];
         D_800D154C = obj;
-        D_800C3E78 = OBJ_INDEX(D_800D154C);
+        dc_glbl_CharNum = OBJ_INDEX(D_800D154C);
         obj->unk218 = func_1507BB28(0, obj->unk232);
         obj->unk21C = 0;
         break;
@@ -302,7 +302,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk25C &= ~0x800;
         obj->unk232 = cmd->a[1];
         D_800D154C = obj;
-        D_800C3E78 = OBJ_INDEX(D_800D154C);
+        dc_glbl_CharNum = OBJ_INDEX(D_800D154C);
         obj->unk218 = func_1507BB28(0, obj->unk232);
         obj->unk21C = 0;
         break;
@@ -529,10 +529,10 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         s32 z;
         f32 y;
 
-        x = D_800DBFF0->eye.x;
-        z = D_800DBFF0->eye.z;
-        x = x - sinf(D_800DBFF0->unk3A0) * 1800.0f;
-        z = z - cosf(D_800DBFF0->unk3A0) * 1800.0f;
+        x = camera_global_Cameras->eye.x;
+        z = camera_global_Cameras->eye.z;
+        x = x - sinf(camera_global_Cameras->unk3A0) * 1800.0f;
+        z = z - cosf(camera_global_Cameras->unk3A0) * 1800.0f;
         x += func_150ADA20() % 800U - 400;
         z += func_150ADA20() % 800U - 400;
         if (x < cmd->a[0]) {
@@ -545,7 +545,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         } else if (z > cmd->a[3]) {
             z = cmd->a[3] + (cmd->a[3] - z);
         }
-        y = D_800DBFF0->eye.y;
+        y = camera_global_Cameras->eye.y;
         func_1510E7A4(0, 0, &y, 0, 0, 0, x, y, z, y, 0, 0, -10000.0f, 20000.0f);
         obj->x_position = x;
         obj->y_position = cmd->a[4] + y;
@@ -554,7 +554,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x35:
         D_800D154C = obj;
-        D_800C3E78 = OBJ_INDEX(D_800D154C);
+        dc_glbl_CharNum = OBJ_INDEX(D_800D154C);
         obj->unk218 = func_1507BB28(0, cmd->a[0]);
         obj->unk21C = 0;
         break;
@@ -981,9 +981,9 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x8D:
         for (i = 0; i < 25; i++) {
-            if (D_800CC2D0[i].interaction_state != 0 && OBJ_INDEX(obj) + 1 == D_800CC2D0[i].unk124 &&
-                D_800CC2D0[i].unk5 == 5) {
-                func_15060F28(&D_800CC2D0[i], 0);
+            if (movement_obj[i].interaction_state != 0 && OBJ_INDEX(obj) + 1 == movement_obj[i].unk124 &&
+                movement_obj[i].unk5 == 5) {
+                func_15060F28(&movement_obj[i], 0);
             }
         }
         break;
@@ -1164,7 +1164,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         u8 v;
         v = obj->unk10A;
         if (v & 0x80) {
-            return D_800CC2D0[v & ~0x80].interaction_state;
+            return movement_obj[v & ~0x80].interaction_state;
         }
         return 0xFFFF;
     }
@@ -1189,7 +1189,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return D_800D2104[obj->unk13F][cmd->a[0]].y;
     case 0xBB:
         if (obj->unk65 != 0) {
-            return D_800CC2D0[obj->unk65 - 1].unk13F;
+            return movement_obj[obj->unk65 - 1].unk13F;
         }
         return -1;
     case 0xBC:
@@ -1510,7 +1510,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         u8 v;
         Actor *p;
         if (obj->unk275 != 0) {
-            p = &D_800CC2D0[obj->unk275 - 1];
+            p = &movement_obj[obj->unk275 - 1];
             obj->unk275 = 0;
             if (p->id == cmd->a[0]) {
                 return 1;
@@ -1634,7 +1634,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return (obj->unk74 & 0xF) == 0xF;
     case 0xF2:
         if (obj->unk13C != 0) {
-            return D_800CC2D0[obj->unk13C].unk13F | 0x2000;
+            return movement_obj[obj->unk13C].unk13F | 0x2000;
         }
         return 0;
     case 0xF3:

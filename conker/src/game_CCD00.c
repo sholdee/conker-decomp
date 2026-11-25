@@ -111,7 +111,7 @@ s32 func_1509F850(s32 id, s32 cmd, CommandArgs *args) {
         break;
     case 8:
         if (D_800D3840 == 4) {
-            func_15172E7C(D_800CC2D0, args->unk8 & 0xFFF, args->unkC & 0xFFF);
+            func_15172E7C(movement_obj, args->unk8 & 0xFFF, args->unkC & 0xFFF);
             return 0;
         }
         break;

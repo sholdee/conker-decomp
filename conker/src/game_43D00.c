@@ -215,8 +215,8 @@ players: // matching: unused label splits the basic block; IDO schedules the loo
             if (D_800BE9F0 == 0x33 || D_800BE9F0 == 0x32) {
                 D_800D20FC[i].objFlags |= 0x4000000;
             }
-            obj = D_800CC2D0;
-            obj += i | 0; // matching: `| 0` keeps IDO from strength-reducing &D_800CC2D0[i] into a loop pointer
+            obj = movement_obj;
+            obj += i | 0; // matching: `| 0` keeps IDO from strength-reducing &movement_obj[i] into a loop pointer
             D_800D20FC[i].x = obj->x_position;
             D_800D20FC[i].y = obj->y_position;
             D_800D20FC[i].z = obj->z_position;

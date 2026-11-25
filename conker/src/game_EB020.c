@@ -36,7 +36,7 @@ void func_150BDB70(Actor *self) {
     self->unk2FC = 0;
     self->unk2E4 -= self->unk2E4 >> 3;
     if (1) {} // matching: splits the block here; without it IDO swaps the owner/state registers
-    owner = D_800CC2D0;
+    owner = movement_obj;
     if (D_800BE616 != 0) {
         self->unk66 &= ~0x20;
     }
@@ -75,7 +75,7 @@ void func_150BDB70(Actor *self) {
             if (i >= 25) {
                 return;
             }
-            other = &D_800CC2D0[i];
+            other = &movement_obj[i];
             if (other->unk127 != 0xFF && other->unk65 == 0 && other->unk31C->unk19B == 0 &&
                 other->unk31C->aimState == 0 && other->unk13C == 0) {
                 self->unk124 = i;

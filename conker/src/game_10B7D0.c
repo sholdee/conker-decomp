@@ -249,10 +249,10 @@ s32 func_150DEACC(Particle *particle) {
     return 1;
 }
 
-/* Calls func_15140410 with the particle's side / forward axes, unless D_800DBFF0[D_80082FA0].pitch is
+/* Calls func_15140410 with the particle's side / forward axes, unless camera_global_Cameras[D_80082FA0].pitch is
  * below 5. */
 s32 func_150DEB58(Particle *particle, s16 arg1) {
-    if (D_800DBFF0[D_80082FA0].pitch < 5.0f) {
+    if (camera_global_Cameras[D_80082FA0].pitch < 5.0f) {
         return 0;
     }
     return func_15140410(particle, &particle->travel.side, &particle->travel.forward, arg1);

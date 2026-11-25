@@ -76,7 +76,7 @@ void func_15004AAC(WorldObject *obj, ObjectSpawn *spawn);
 s32 func_15004BF0(s32 fromTop);
 void func_15004CE0(DlCommand *dl, u32 base);
 
-/* Creates the level's objects (D_800DBEF4) from its two placement lists and allocates per-object buffers. */
+/* Creates the level's objects (db_Object_array) from its two placement lists and allocates per-object buffers. */
 void func_150039E0(s32 level, s32 arg1) {
     s32 i;
     s32 found;
@@ -104,8 +104,8 @@ void func_150039E0(s32 level, s32 arg1) {
     D_800DBEF0 = D_800DBF00;
     D_800DBF98 = func_1502B7F0(&groupedSpawns, 3, 0xC, level, 2) / sizeof(ObjectSpawn);
     D_800DBEF0 += D_800DBF98;
-    D_800DBEF4 = allocate_memory(D_800DBEF0 * sizeof(WorldObject), 1, 2, 0);
-    if (D_800DBEF4 == NULL) {
+    db_Object_array = allocate_memory(D_800DBEF0 * sizeof(WorldObject), 1, 2, 0);
+    if (db_Object_array == NULL) {
         D_800DBEF0 = 0;
         D_800DBF98 = 0;
         D_800DBF00 = 0;
@@ -119,7 +119,7 @@ void func_150039E0(s32 level, s32 arg1) {
         }
         found = 0;
         isBehavior22 = FALSE;
-        obj = &D_800DBEF4[i];
+        obj = &db_Object_array[i];
         obj->x = base[i].x;
         obj->y = base[i].y;
         obj->z = base[i].z;
@@ -171,7 +171,7 @@ void func_150039E0(s32 level, s32 arg1) {
             id = base[i].modelId;
             for (j = D_800DBF00; j < i; j++) {
                 if (base[j].displayList == base[i].displayList && base[j].modelId == base[i].modelId
-                    && D_800DBEF4[j].displayList != NULL) {
+                    && db_Object_array[j].displayList != NULL) {
                     found = j + 1;
                     break;
                 }
@@ -181,11 +181,11 @@ void func_150039E0(s32 level, s32 arg1) {
                 obj->model = model;
             }
             if (found) {
-                obj->srcVertices = D_800DBEF4[found - 1].srcVertices;
-                obj->displayList = D_800DBEF4[found - 1].displayList;
-                obj->unk9C = D_800DBEF4[found - 1].unk9C;
-                obj->numVertices = D_800DBEF4[found - 1].numVertices;
-                obj->materials = D_800DBEF4[found - 1].materials;
+                obj->srcVertices = db_Object_array[found - 1].srcVertices;
+                obj->displayList = db_Object_array[found - 1].displayList;
+                obj->unk9C = db_Object_array[found - 1].unk9C;
+                obj->numVertices = db_Object_array[found - 1].numVertices;
+                obj->materials = db_Object_array[found - 1].materials;
             } else {
                 obj->srcVertices = model->vertices;
                 obj->displayList = model->displayList;
@@ -237,7 +237,7 @@ void func_150039E0(s32 level, s32 arg1) {
             if ((s32)obj->displayList == 1 || (s32)obj->displayList == 2) {
                 for (j = 0; j < i; j++) {
                     if (base[j].displayList == base[i].displayList && base[j].modelId == base[i].modelId
-                        && D_800DBEF4[j].displayList != NULL) {
+                        && db_Object_array[j].displayList != NULL) {
                         found = j + 1;
                         break;
                     }
@@ -250,10 +250,10 @@ void func_150039E0(s32 level, s32 arg1) {
                     obj->materials = levelModel->materials;
                     obj->unk9C = levelModel->unk8;
                 } else {
-                    obj->numVertices = D_800DBEF4[found - 1].numVertices;
-                    obj->srcVertices = D_800DBEF4[found - 1].srcVertices;
-                    obj->materials = D_800DBEF4[found - 1].materials;
-                    obj->unk9C = D_800DBEF4[found - 1].unk9C;
+                    obj->numVertices = db_Object_array[found - 1].numVertices;
+                    obj->srcVertices = db_Object_array[found - 1].srcVertices;
+                    obj->materials = db_Object_array[found - 1].materials;
+                    obj->unk9C = db_Object_array[found - 1].unk9C;
                 }
                 if ((s32)obj->displayList == 2) {
                     obj->viewFlags = 0;
@@ -263,7 +263,7 @@ void func_150039E0(s32 level, s32 arg1) {
                 if (!found) {
                     obj->displayList = levelModel->displayList;
                 } else {
-                    obj->displayList = D_800DBEF4[found - 1].displayList;
+                    obj->displayList = db_Object_array[found - 1].displayList;
                 }
                 obj->effectFlags = base[i].effectFlags;
                 obj->model = NULL;
@@ -290,7 +290,7 @@ void func_150039E0(s32 level, s32 arg1) {
         }
     }
     for (i = 0; i < D_800DBEF0; i++) {
-        obj = &D_800DBEF4[i];
+        obj = &db_Object_array[i];
         if (obj->srcVertices == NULL) {
             continue;
         }
@@ -323,8 +323,8 @@ void func_150039E0(s32 level, s32 arg1) {
         D_800DBF94[i] = 0;
     }
     for (i = D_800DBF00; i < D_800DBEF0; i++) {
-        if (D_800DBEF4[i].id == 0) {
-            D_800DBEF4[i].id = func_15004BF0(FALSE);
+        if (db_Object_array[i].id == 0) {
+            db_Object_array[i].id = func_15004BF0(FALSE);
         }
     }
 }
@@ -332,8 +332,8 @@ void func_150039E0(s32 level, s32 arg1) {
 /* Saves the display list and source vertices of object D_800DBF88, unless it is 0xFF (none). */
 void func_15004574(void) {
     if (D_800DBF88 != 0xFF) {
-        D_800DBF8C = (s32)D_800DBEF4[D_800DBF88].displayList;
-        D_800DBF90 = (s32)D_800DBEF4[D_800DBF88].srcVertices;
+        D_800DBF8C = (s32)db_Object_array[D_800DBF88].displayList;
+        D_800DBF90 = (s32)db_Object_array[D_800DBF88].srcVertices;
     }
 }
 
@@ -374,7 +374,7 @@ void func_150045C4(s32 arg0) {
     guMtxIdentF(D_800DBF08[0]);
     guMtxIdentF(D_800DBF48);
     for (i = 0; i < D_800DBEF0; i++) {
-        obj = &D_800DBEF4[i];
+        obj = &db_Object_array[i];
         if (obj->update == NULL || obj->update == func_15116058 || obj->update == func_15116110) {
             obj->attach = 3;
         }
@@ -404,7 +404,7 @@ void func_150045C4(s32 arg0) {
         }
     }
     for (i = 0; i < D_800DBEF0; i++) {
-        obj = &D_800DBEF4[i];
+        obj = &db_Object_array[i];
         if (obj->inactive == 1) {
             continue;
         }
@@ -531,7 +531,7 @@ s32 func_15004BF0(s32 fromTop) {
     if (fromTop == 0) {
         id = 1;
         for (i = fromTop = D_800DBF00; i < D_800DBEF0; i++) {
-            if (id == D_800DBEF4[i].id) {
+            if (id == db_Object_array[i].id) {
                 id++;
                 i = fromTop - 1; // rescan with the next id
             }
@@ -544,7 +544,7 @@ s32 func_15004BF0(s32 fromTop) {
         fromTop = 0xFF - D_800DBF00;
         id = fromTop;
         for (i = 0; i < D_800DBEF0; i++) {
-            if (id == D_800DBEF4[i].id) {
+            if (id == db_Object_array[i].id) {
                 id--;
                 i = -1; // rescan with the next id
             }

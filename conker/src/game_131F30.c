@@ -21,7 +21,7 @@ typedef struct {
     Actor *player;
 } Msg35;
 
-/* Arrival callback of a level prop (D_800DBEF4 entry): finds the first active player in the prop's
+/* Arrival callback of a level prop (db_Object_array entry): finds the first active player in the prop's
  * player mask and sends message 0x35 with a 9-entry list chosen by the prop's id (0xF7-0xF9),
  * or message 0x38 for 0xF6. */
 void func_15104A80(WorldObject *prop) {
@@ -33,11 +33,11 @@ void func_15104A80(WorldObject *prop) {
         s32 i;
         Actor *candidate;
 
-        i = prop - D_800DBEF4;
+        i = prop - db_Object_array;
         mask = D_800DBF94[i];
         if (mask != 0) {
             for (i = 0; i < 25 && player == NULL; i++) {
-                candidate = &D_800CC2D0[i];
+                candidate = &movement_obj[i];
                 if (candidate->interaction_state != 0 && (mask & (1U << i))) {
                     player = candidate;
                 }

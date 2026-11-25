@@ -191,7 +191,7 @@ Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
         u8 renderMode;
         u8 unk13;
 
-        eye = &D_800DBFF0[view].eye.x;
+        eye = &camera_global_Cameras[view].eye.x;
         needSync = TRUE;
         {
             HoltenRopePoint *points;

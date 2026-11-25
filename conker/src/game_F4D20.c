@@ -35,7 +35,7 @@ extern s32 func_15116110(WorldObject *obj);
  * bit 3 of byte 0xA of the 27-byte flag record at D_800D2E4C is set. */
 void func_150C7870(WorldObject *obj) {
     if (!(D_800D2E4C[0xA] & 8)) {
-        if (!(D_800DBEF4[0].behaviorState & 4)) {
+        if (!(db_Object_array[0].behaviorState & 4)) {
             func_1511650C(obj, 1, 0x353, 1000.0f);
         } else {
             func_1511650C(obj, 1, 0x43, 400.0f);
@@ -48,7 +48,7 @@ void func_150C78E0(WorldObject *obj) {
     WorldObject *obj3;
 
     if (!(obj->behaviorState & 4)) {
-        obj3 = &D_800DBEF4[3];
+        obj3 = &db_Object_array[3];
         obj->param.word = -(obj3->param.word & 0xFFFF0000) & 0xFFFF0000;
         func_151150BC(obj);
     }
@@ -58,7 +58,7 @@ void func_150C78E0(WorldObject *obj) {
 void func_150C7930(WorldObject *obj) {
     WorldObject *obj3;
 
-    obj3 = &D_800DBEF4[3];
+    obj3 = &db_Object_array[3];
     obj->param.word = obj3->param.word & 0xFFFF0000;
     func_151150BC(obj);
 }
@@ -71,7 +71,7 @@ void func_150C7968(WorldObject *obj) {
 
     func_15116110(obj);
     if (!(obj->behaviorState & 4)) {
-        obj3 = &D_800DBEF4[3];
+        obj3 = &db_Object_array[3];
         link = WORK(obj)->link;
         speed = obj3->param.half.hi >> 4;
         if (link != NULL) {
@@ -98,9 +98,9 @@ void func_150C79BC(s32 view) {
     s32 radius;
     u8 angle;
 
-    dx = (s32)D_800DBFF0[view].eye.x + 2418;
-    dy = (s32)D_800DBFF0[view].eye.y - 2500;
-    dz = (s32)D_800DBFF0[view].eye.z - 1775;
+    dx = (s32)camera_global_Cameras[view].eye.x + 2418;
+    dy = (s32)camera_global_Cameras[view].eye.y - 2500;
+    dz = (s32)camera_global_Cameras[view].eye.z - 1775;
     if (dy > -200 && dx * dx + dz * dz < 1200 * 1200) {
         if (D_800887F4 == 0) {
             func_1000D96C(0x5F, 0xF, 6);
@@ -112,7 +112,7 @@ void func_150C79BC(s32 view) {
         func_1000D96C(0x10, 0, 3);
         D_800887F4 = 0;
     }
-    dy = (s32)D_800DBFF0[view].eye.y - 1583;
+    dy = (s32)camera_global_Cameras[view].eye.y - 1583;
     if (dy < 0 && dx * dx + dz * dz < 900 * 900 && (func_150ADA20() & 0xFFFF) < 0x2000) {
         radius = func_150ADA20() % 900U;
         angle = func_150ADA20();

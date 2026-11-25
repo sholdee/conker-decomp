@@ -51,15 +51,15 @@ void func_15080620(s32 objIndex, s32 slot, s32 textId, s32 arg3) {
         textId |= 0x80;
     }
     if (slot == 0) {
-        D_800CC2D0[objIndex].unk31C->unk74 = textId;
+        movement_obj[objIndex].unk31C->unk74 = textId;
     } else {
-        D_800CC2D0[objIndex].unk31C->unk75 = textId;
+        movement_obj[objIndex].unk31C->unk75 = textId;
     }
 }
 
 /* Clears both of an object's text slots unless a script locked them. */
 void func_150806A8(s32 objIndex) {
-    Actor *obj = &D_800CC2D0[objIndex];
+    Actor *obj = &movement_obj[objIndex];
 
     if (obj->unk31C->unk74 != 0 && !(obj->unk31C->unk74 & 0x80)) {
         obj->unk31C->unk74 = 0;

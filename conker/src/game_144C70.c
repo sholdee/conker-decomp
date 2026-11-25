@@ -414,7 +414,7 @@ void func_15117F3C(WorldObject *prop) {
     target = NULL;
     if (motion != PROP_ARRIVED && motion != PROP_RETURNING) {
         for (i = 0; i < D_8008FD8C; i++) {
-            obj = &D_800CC2D0[i];
+            obj = &movement_obj[i];
             if (obj->unk65) {
                 continue;
             }
@@ -446,7 +446,7 @@ void func_15117F3C(WorldObject *prop) {
     }
     if (target == NULL && motion == PROP_MOVING) {
         for (i = 0; i < D_8008FD8C; i++) {
-            obj = &D_800CC2D0[i];
+            obj = &movement_obj[i];
             if (obj->unk31C->unk6B != 0) {
                 target = obj;
                 break;
@@ -700,7 +700,7 @@ void func_151189AC(WorldObject *prop, s32 arg1) {
     }
     WORK(prop)->swing.speed = speed;
     if (D_800BE9B4 != 0 || angle != prop->rotY) {
-        if (D_800C35EA[0] == 1 && func_15022B08(prop - D_800DBEF4, 0) != 0) {
+        if (D_800C35EA[0] == 1 && func_15022B08(prop - db_Object_array, 0) != 0) {
             angle = prop->rotY;
         } else {
             prop->rotY = angle;

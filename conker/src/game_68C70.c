@@ -51,7 +51,7 @@ void func_1503B840(Actor *obj) {
 
 /* Returns whether object objIndex simulates its bone chain (0 while the animation poses it). */
 s32 func_1503B95C(s32 objIndex, BoneChain *chain) {
-    s32 flags = D_800CC2D0[objIndex].unk2FB;
+    s32 flags = movement_obj[objIndex].unk2FB;
 
     if (flags & 2) {
         chain->blendTimer = 0;
@@ -125,7 +125,7 @@ void func_1503B9BC(s32 objIndex) {
     f32 (*bone)[4];
 
     dirX = dirY = dirZ = 0.0f; // matching: dead store, steers IDO's FP register order
-    obj = &D_800CC2D0[objIndex];
+    obj = &movement_obj[objIndex];
     facingCamera = 0;
     if (obj->unk31C == NULL) {
         return;
@@ -257,7 +257,7 @@ void func_1503B9BC(s32 objIndex) {
     }
     sinYaw = sinf(yaw);
     cosYaw = cosf(yaw);
-    anim = D_800CC2D0[objIndex].unk84.uh; // matching: reloaded via the array, not obj
+    anim = movement_obj[objIndex].unk84.uh; // matching: reloaded via the array, not obj
     if (anim == 0x24 || anim == 0x22 || anim == 0xD1) {
         D_800C4008[1] = chain->pos[0][1];
         if (obj->unkB8 > 0.0f) {
@@ -443,7 +443,7 @@ void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain) {
     f32 (*pos)[3];
     f32 (*bone)[4];
 
-    obj = &D_800CC2D0[objIndex];
+    obj = &movement_obj[objIndex];
     func_150A9B0C(rootMtx, obj->unkB8, obj->unk40, obj->unkC4, 1.0f, 1.0f, 1.0f);
     joint = 0;
     boneOffset = 24 * sizeof(MtxF);

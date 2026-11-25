@@ -966,7 +966,7 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     if (actor->head.count >= 2) {
         func_151D5D60(actor->buffers, view, (actor->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
-            eye = &D_800DBFF0[view].eye;
+            eye = &camera_global_Cameras[view].eye;
             jet = actor->state;
             points = actor->points;
             flag = 1;
@@ -1268,7 +1268,7 @@ void *func_15197C10(SceneParticle *beam, s16 view) {
     tip.x = beam->head.def.pos.x + dx * progress;
     tip.y = beam->head.def.pos.y + dy * progress;
     tip.z = beam->head.def.pos.z + dz * progress;
-    eye = &D_800DBFF0[view].eye;
+    eye = &camera_global_Cameras[view].eye;
     dx = tip.x - beam->head.def.pos.x;
     dy = tip.y - beam->head.def.pos.y;
     dz = tip.z - beam->head.def.pos.z;
@@ -1495,7 +1495,7 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
 
     jet = actor->state;
     points = actor->points;
-    obj = &D_800CC2D0[0];
+    obj = &movement_obj[0];
     i = actor->head.end;
     while (i != actor->head.start) {
         i--;
@@ -1511,7 +1511,7 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
         dy *= (1.0f + r / h) * 0.5f;
         d = dx * dx + dy * dy + dz * dz;
         if (d < r * r) {
-            func_1505D024(obj, 0x60006, obj->unk7A, jet->owner - D_800CC2D0);
+            func_1505D024(obj, 0x60006, obj->unk7A, jet->owner - movement_obj);
             func_1518D1C0(obj, 0xB, 0, 1, actor->head.header.owner, actor->head.header.kind, "Characterflamethrower");
             while (i != actor->head.start) {
                 actor->head.start = actor->head.start + 1;
@@ -1545,7 +1545,7 @@ s32 func_151987CC(CharacterFlamethrowerActor *actor) {
     jet = actor->state;
     points = actor->points;
     for (j = 0; j < 25; j++) {
-        obj = &D_800CC2D0[j];
+        obj = &movement_obj[j];
         if (obj->interaction_state == 0 || obj->unk65 != 0 || jet->owner->unique_id == obj->unique_id) {
             continue;
         }
@@ -3569,7 +3569,7 @@ void func_1519CDB0(CharacterFlamethrowerActor *actor, f32 fraction, s32 kind) {
                 func_1505D1C4(point->pos.x + ((previous->x - point->pos.x) * factor),
                     point->pos.y + ((previous->y - point->pos.y) * factor),
                     (interpolated_z = point->pos.z + ((previous->z - point->pos.z) * factor)), kind,
-                    owner - D_800CC2D0,
+                    owner - movement_obj,
                     owner->unk76, 0, 0);
                 next += spacing;
             }

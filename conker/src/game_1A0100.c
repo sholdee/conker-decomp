@@ -52,7 +52,7 @@ void func_15172D80(s32 player) {
     if (D_800DD2B0[player] == -1) {
         return;
     }
-    if (D_800CC2D0[player].health == 0) {
+    if (movement_obj[player].health == 0) {
         D_800DD2B0[player] = -1;
         func_1517EE40(0, 0, 0, 50, 0, player);
     }
@@ -61,7 +61,7 @@ void func_15172D80(s32 player) {
             func_1501C730(1, D_800DD2B0[player], 0, 0, 0);
         } else {
             func_15172CA8(player);
-            func_15172D28(&D_800CC2D0[player], D_800DD2C0[player]);
+            func_15172D28(&movement_obj[player], D_800DD2C0[player]);
         }
     }
 }

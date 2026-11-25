@@ -30,7 +30,7 @@ void func_150A09D0(s32 ticks) {
                 D_800D3098[i].unk20 = 0;
             }
             if (D_800C35EA[0] == 1) {
-                if (func_150A1DA0(D_800CC2D0, &D_800D3098[i], 0) == 0) {
+                if (func_150A1DA0(movement_obj, &D_800D3098[i], 0) == 0) {
                     func_150A23E4(&D_800D3098[i]);
                 }
             }
@@ -75,7 +75,7 @@ void func_150A09D0(s32 ticks) {
                     s32 j;
 
                     for (j = 0; j <= D_80082FA0; j++) {
-                        Camera *cam = &D_800DBFF0[j];
+                        Camera *cam = &camera_global_Cameras[j];
 
                         cam->unk93C.x = D_800D3098[i].x;
                         cam->unk93C.y = D_800D3098[i].y;
@@ -117,7 +117,7 @@ void func_150A0D8C(void) {
     for (i = 0; i < D_800D3094; i++) {
         if (!D_800D3098[i].disabled && ZONE_TYPE(&D_800D3098[i]) == 6) {
             for (j = 0; j < 25; j++) {
-                obj = &D_800CC2D0[j];
+                obj = &movement_obj[j];
                 if (obj->interaction_state == 0) continue;
                 if (obj->unk5 != 0 && obj->unk5 != 1) continue;
                 if (func_150A1DA0(obj, &D_800D3098[i], 1) != 0) continue;
@@ -241,7 +241,7 @@ void func_150A11C4(Actor *actor) {
     func_150829D8(actor);
     actor->unk120 = -10000;
     D_800D3278 = 0;
-    idx = actor - D_800CC2D0;
+    idx = actor - movement_obj;
     found = 0;
     if (idx < 16) {
         if (D_800D30D0[idx] > 0) {
@@ -784,7 +784,7 @@ s32 func_150A29C8(u32 actor, u32 id) {
         }
         return 1;
     }
-    return func_150A1DA0(&D_800CC2D0[actor], &D_800D3098[id], 1);
+    return func_150A1DA0(&movement_obj[actor], &D_800D3098[id], 1);
 }
 
 /* Returns the first of the count zone ids in ids[] that contains actor `actor`, or -1. */
@@ -807,7 +807,7 @@ s32 func_150A2AEC(u32 actor, s32 count, s32 *ids) {
             id = ids[i];
             id &= 0xFFF;
             if (id < D_800D3094) {
-                if (func_150A1DA0(&D_800CC2D0[actor], &D_800D3098[id], 1) == 0) {
+                if (func_150A1DA0(&movement_obj[actor], &D_800D3098[id], 1) == 0) {
                     return id;
                 }
             }
@@ -839,7 +839,7 @@ s32 func_150A2D84(s32 camIndex, s32 id) {
     Camera *cam;
     Actor probe;
 
-    cam = &D_800DBFF0[camIndex];
+    cam = &camera_global_Cameras[camIndex];
     id &= 0xFFF;
     if (D_800D3094 < id) {
         return 1;
@@ -890,8 +890,8 @@ s32 func_150A2EE4(s32 actor, s32 id) {
         return 1;
     }
     if (ZONE_SHAPE(&D_800D3098[id]) == 3) {
-        return func_150A2E4C(&D_800D3098[id], D_800CC2D0[actor].x_position, D_800CC2D0[actor].y_position,
-                             D_800CC2D0[actor].z_position);
+        return func_150A2E4C(&D_800D3098[id], movement_obj[actor].x_position, movement_obj[actor].y_position,
+                             movement_obj[actor].z_position);
     }
     return 0;
 }
@@ -900,7 +900,7 @@ s32 func_150A2EE4(s32 actor, s32 id) {
 s32 func_150A2FA4(s32 camIndex, s32 id) {
     Camera *cam;
 
-    cam = &D_800DBFF0[camIndex];
+    cam = &camera_global_Cameras[camIndex];
     id &= 0xFFF;
     if (D_800D3094 < id) {
         return 1;

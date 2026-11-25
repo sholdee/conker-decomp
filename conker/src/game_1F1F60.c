@@ -90,7 +90,7 @@ s32 func_151C4B0C(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 
         if (hit->surface == NULL) {
             index = -1;
         } else {
-            index = hit->surface - D_800DBEF4;
+            index = hit->surface - db_Object_array;
         }
         if (hit->hitType == 0) {
             found = FALSE;
@@ -136,7 +136,7 @@ s32 func_151C4B0C(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 
             if (index == -1) {
                 hit->surface = NULL;
             } else {
-                hit->surface = D_800DBEF4 + index;
+                hit->surface = db_Object_array + index;
             }
         } else {
             *flags &= ~clearMask;

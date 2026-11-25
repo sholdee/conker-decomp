@@ -362,7 +362,7 @@ void func_15087350(s32 index, s32 started, f32 lookahead) {
     iter = 0;
     if (D_800872A0 != NULL) {
         racer = &D_800872A0[index];
-        obj = &D_800CC2D0[racer->actorIndex];
+        obj = &movement_obj[racer->actorIndex];
         posX = obj->x_position;
         posZ = obj->z_position;
         D_800D2390 = 0;
@@ -532,7 +532,7 @@ void func_15087CC0(void) {
     }
     for (i = 0; i < D_800D2398; i++) {
         racer = &D_800872A0[i];
-        obj = &D_800CC2D0[racer->actorIndex];
+        obj = &movement_obj[racer->actorIndex];
         if (obj->camera != NULL) {
             if (racer->state >= 2) {
                 func_150891E8(racer, obj);
@@ -638,7 +638,7 @@ s32 func_1508802C(Racer *racer, Actor *obj, s32 mode) {
         return 1;
     }
 
-    if ((D_800D18A0 & (1 << (obj - D_800CC2D0))) != 0) {
+    if ((D_800D18A0 & (1 << (obj - movement_obj))) != 0) {
         return 1;
     }
 
@@ -646,7 +646,7 @@ s32 func_1508802C(Racer *racer, Actor *obj, s32 mode) {
     obj->interaction_state = 12;
     obj->unk232 = mode;
     D_800D154C = obj;
-    D_800C3E78 = racer->actorIndex;
+    dc_glbl_CharNum = racer->actorIndex;
     obj->unk218 = func_1507BB28(0, mode);
     obj->unk21C = 0;
     obj->immune = 0xFF;
@@ -666,7 +666,7 @@ s32 func_150880F8(s32 index, s32 mode) {
     }
 
     racer = &D_800872A0[index];
-    obj = &D_800CC2D0[racer->actorIndex];
+    obj = &movement_obj[racer->actorIndex];
     if (racer->state == 0) {
         ret = func_1508802C(racer, obj, mode);
     } else if (racer->state == 1) {
@@ -789,25 +789,25 @@ Actor *func_150883B0(s32 index, s32 dir, f32 *lateral, s32 *route) {
         sign = 1.0f;
     }
     dir = racer->route;
-    x = D_800CC2D0[racer->actorIndex].x_position;
-    z = D_800CC2D0[racer->actorIndex].z_position;
+    x = movement_obj[racer->actorIndex].x_position;
+    z = movement_obj[racer->actorIndex].z_position;
     dx = racer->dirX * sign;
     dz = racer->dirZ * sign;
-    self = D_800CC2D0[racer->actorIndex].unk124 - 1;
+    self = movement_obj[racer->actorIndex].unk124 - 1;
     base = -((dx * x) + (dz * z));
     ret = NULL;
     best = D_8009DA00;
     for (i = 0; i < D_800D2398; i++) {
         racer = &D_800872A0[i];
         if (self != racer->actorIndex && (dir == 0 || dir == racer->route)) {
-            x = D_800CC2D0[racer->actorIndex].x_position;
-            z = D_800CC2D0[racer->actorIndex].z_position;
+            x = movement_obj[racer->actorIndex].x_position;
+            z = movement_obj[racer->actorIndex].z_position;
             d = (dx * x) + (dz * z) + base;
             if (d > 0.0f && d < best) {
                 best = d;
                 *lateral = racer->lateral;
                 *route = racer->route;
-                ret = &D_800CC2D0[racer->actorIndex];
+                ret = &movement_obj[racer->actorIndex];
             }
         }
     }
@@ -822,7 +822,7 @@ s32 func_1508855C(Actor *obj) {
     s32 limit;
     Racer *racer;
 
-    actorIndex = obj - D_800CC2D0;
+    actorIndex = obj - movement_obj;
     racers = D_800872A0;
     if (racers == NULL) {
         return -1;
@@ -888,7 +888,7 @@ s32 func_1508868C(Actor *obj) {
                 i += D_800D2398;
                 func_15088824(&racers[i]);
                 D_800872A0[i].state = 1;
-                D_800872A0[i].actorIndex = obj - D_800CC2D0;
+                D_800872A0[i].actorIndex = obj - movement_obj;
                 return i;
             }
             i++;
@@ -1534,9 +1534,9 @@ s32 func_15089F9C(s32 player) {
         bit = 1 << i;
         if (states[i] != 3 && (mask & bit) &&
             (D_800D23B0->unk16C0[player] & (bit << 16))) {
-            other = &D_800CC2D0[i];
+            other = &movement_obj[i];
             if (other != NULL) {
-                self = &D_800CC2D0[player];
+                self = &movement_obj[player];
                 dx = self->x_position - other->x_position;
                 dz = self->z_position - other->z_position;
                 dist = sqrtf((dx * dx) + (dz * dz));
@@ -1612,8 +1612,8 @@ s32 func_1508A1BC(void) {
     myMask = D_800D23B0->unk16C0[cur];
     for (i = 0; i < count; i++) {
         if (active[i] > 0 && myTeam != teams[i]) {
-            other = &D_800CC2D0[i];
-            self = &D_800CC2D0[cur];
+            other = &movement_obj[i];
+            self = &movement_obj[cur];
             if (other != NULL) {
                 dx = self->x_position - other->x_position;
                 dist = sqrtf((dx * dx) + ((self->z_position - other->z_position) * (self->z_position - other->z_position)));
@@ -1755,7 +1755,7 @@ s32 func_1508A6FC(void) {
             seenMask |= bit;
         }
         if ((activeMask & bit) || isNew) {
-            obj = &D_800CC2D0[i];
+            obj = &movement_obj[i];
             team = teams[i];
             if (team != 0 && D_800D23B0->gameType == 0xB9) {
                 obj->unk1E4 = 1;
@@ -1834,7 +1834,7 @@ s32 func_1508A6FC(void) {
                         D_800D23B0->aimY[i] = obj->y_position + 40.0f;
                         D_800D23B0->aimZ[i] = (func_150ADA68() * 50.0f) + obj->z_position;
                         if ((arr31C[i] - 2) >= 2) {
-                            tgt = &D_800CC2D0[arr31C[i] - 2];
+                            tgt = &movement_obj[arr31C[i] - 2];
                             D_800D23B0->aimX[i] += (tgt->x_position - obj->x_position) * 0.5f;
                             D_800D23B0->aimZ[i] += (tgt->z_position - obj->z_position) * 0.5f;
                         }
@@ -1905,7 +1905,7 @@ s32 func_1508A6FC(void) {
         half = (s32)(VIEWS[0].right - VIEWS[0].left) >> 1;
         func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
         for (j = 0; j <= D_80082FA0; j++) {
-            if (D_800CC2D0[j].team == 0) {
+            if (movement_obj[j].team == 0) {
                 vp = &VIEWS[j];
                 func_15042D94(vp->left + half, vp->top + 6.0f, 1, "%d", countdowns[j] / 60);
             }
@@ -2029,7 +2029,7 @@ void func_1508B3F8(void) {
         y = zones[i].y;
         z = zones[i].z;
         for (j = D_8008FD90; j < D_8008FD8C; j++) {
-            obj = &D_800CC2D0[j];
+            obj = &movement_obj[j];
             d = obj->y_position - y;
             if (d < 200.0f && d > -100.0f) {
                 dx = obj->x_position - x;
@@ -2155,8 +2155,8 @@ s32 func_1508B9BC(void) {
         Actor *actor;
         Actor *other;
 
-        actor = &D_800CC2D0[current];
-        other = &D_800CC2D0[winner];
+        actor = &movement_obj[current];
+        other = &movement_obj[winner];
         dx = actor->x_position - other->x_position;
         dz = actor->z_position - other->z_position;
         distance = sqrtf(dx * dx + dz * dz);
@@ -2433,8 +2433,8 @@ s32 func_1508C5B8(s32 player, s32 checks) {
     list = D_800D23B0->team;
     if (checks != 0) {
         for (i = 0; i < D_8008FD90; i++) {
-            x0 = D_800CC2D0[i].x_position;
-            x1 = D_800CC2D0[i].x_position;
+            x0 = movement_obj[i].x_position;
+            x1 = movement_obj[i].x_position;
             for (k = 0; k < 3; k++) {
                 idx[k] = -1;
                 dist[k] = 900000000.0f;
@@ -2443,8 +2443,8 @@ s32 func_1508C5B8(s32 player, s32 checks) {
                 if (list[i] != list[k] &&
                     !(D_800D23B0->unk16C0[i] & (0x10001 << k))) {
                     /* BUG (original game): measures player i against itself, not k */
-                    dx = x0 - D_800CC2D0[i].x_position;
-                    dz = x1 - D_800CC2D0[i].z_position;
+                    dx = x0 - movement_obj[i].x_position;
+                    dz = x1 - movement_obj[i].z_position;
                     if (i == D_800D23B0->target[k]) {
                         dx *= 0.5f;
                         dz *= 0.5f;
@@ -2471,7 +2471,7 @@ s32 func_1508C5B8(s32 player, s32 checks) {
         }
     }
     if (checks != 0) {
-        obj = &D_800CC2D0[cur];
+        obj = &movement_obj[cur];
         do {
             team = obj->team;
             m = 0;
@@ -2482,7 +2482,7 @@ s32 func_1508C5B8(s32 player, s32 checks) {
                     if (cur >= D_8008FD8C - 1) {
                         cur = 0;
                     }
-                    obj = &D_800CC2D0[cur];
+                    obj = &movement_obj[cur];
                     team = obj->team;
                     other = cur + 1;
                 }
@@ -2491,7 +2491,7 @@ s32 func_1508C5B8(s32 player, s32 checks) {
                 mask = (1 << cur) | (1 << other);
                 m++;
             } while (m < 64 && ((D_800D18A0 & mask) ||
-                                    team == D_800CC2D0[other].team));
+                                    team == movement_obj[other].team));
             func_1508C1A4(cur, other);
         } while (--checks != 0);
     }
@@ -2519,7 +2519,7 @@ s32 func_1508C9CC(void) {
         if (cur >= D_8008FD8C) {
             cur = 0;
         }
-        obj = &D_800CC2D0[cur];
+        obj = &movement_obj[cur];
         if (obj->interaction_state != 0) {
             state = obj->unk31C;
             if (state != NULL && state->unk84 != 0 && !(D_800D18A0 & (1 << cur))) {
@@ -2592,7 +2592,7 @@ s32 func_1508CAD8(s32 player, s32 target, s32 fire, s32 aimAtPoint, s32 sideOffs
 
     doInner = 1;
     result = 0;
-    obj = &D_800CC2D0[player];
+    obj = &movement_obj[player];
     ratio = VIEWS[0].fovY / VIEWS[0].fovX;
     if (target != -1) {
         cam = obj->camera;
@@ -2875,15 +2875,15 @@ s32 func_1508D850(s32 player) {
     // matching: byte pointers plus a shared byte offset, as IDO keeps player * 4 in one register
     targets = (s8 *)D_800D23B0->target;
     timers = (s8 *)D_800D23B0->attackTimer;
-    obj = &D_800CC2D0[player];
+    obj = &movement_obj[player];
     off = player * 4;
     target = (s32 *)(targets + off);
     obj->unk31C->unk129 = *target;
     if (*target < 0) {
         return 0;
     }
-    dx = D_800CC2D0[*target].x_position - obj->x_position;
-    dz = D_800CC2D0[*target].z_position - obj->z_position;
+    dx = movement_obj[*target].x_position - obj->x_position;
+    dz = movement_obj[*target].z_position - obj->z_position;
     dist = sqrtf((dx * dx) + (dz * dz));
     if (5000.0f < dist) {
         range = 0;
@@ -2949,14 +2949,14 @@ s32 func_1508DAEC(s32 player, s32 mode) {
             return 1;
         }
         game->slot[player] = -1;
-        obj = &D_800CC2D0[player];
+        obj = &movement_obj[player];
         if ((D_800D23B0->slotFlags[slot] & 2) == 0) {
             D_800D23B0->slotOwner[slot] = -1;
             D_800D23B0->slotSpawn[slot] = -1;
             next = D_800D23B0->respawnDelay;
             if (mode == 1) {
                 D_800D23B0->slotDropTimer[slot] = 300;
-                obj = &D_800CC2D0[player];
+                obj = &movement_obj[player];
                 next = 4;
                 D_800D23B0->slotDropX[slot] = obj->x_position;
                 D_800D23B0->slotDropY[slot] = obj->y_position + 50.0f;
@@ -3039,14 +3039,14 @@ void func_1508DC24(void) {
     count = base->numPlayers;
     for (; i < count; i++) {
         kind = base->gameType;
-        if (kind == 0xB9 && D_800CC2D0[i].team != 0) {
+        if (kind == 0xB9 && movement_obj[i].team != 0) {
             continue;
         }
-        prev = D_800CC2D0[i].unk31C->unk75 & 0x7F;
+        prev = movement_obj[i].unk31C->unk75 & 0x7F;
         cur = overrides[i];
-        if (D_800CC2D0[i].unk31C->unk19B >= 5) {
+        if (movement_obj[i].unk31C->unk19B >= 5) {
             cur = 0x3A;
-        } else if (D_800CC2D0[i].unk31C->unk19B > 0) {
+        } else if (movement_obj[i].unk31C->unk19B > 0) {
             cur = 0x26;
         }
         if (cur == 0) {
@@ -3059,7 +3059,7 @@ void func_1508DC24(void) {
             cur = 0;
         }
         if (kind == 0xB8) {
-            prev = D_800CC2D0[i].unk31C->unk128 & ~0x20;
+            prev = movement_obj[i].unk31C->unk128 & ~0x20;
         }
         if (cur != prev) {
             setId = func_1508E780(prev);
@@ -3069,7 +3069,7 @@ void func_1508DC24(void) {
                 if (setId == 0x1D) {
                     func_1508EB90(i, 0x4C, 0x1E);
                 }
-                D_800CC2D0[i].unk31C->unk11A = 0;
+                movement_obj[i].unk31C->unk11A = 0;
             }
             setId = func_1508E780(cur);
             if (setId > 0x1000) {
@@ -3079,22 +3079,22 @@ void func_1508DC24(void) {
 
             if (D_800D23B0->gameType == 0xB8) {
                 if (prev == 0x80) {
-                    func_1502EA50(&D_800CC2D0[i]);
-                    D_800CC2D0[i].immune = 0;
+                    func_1502EA50(&movement_obj[i]);
+                    movement_obj[i].immune = 0;
                 }
-                D_800CC2D0[i].unk31C->unk128 = cur;
+                movement_obj[i].unk31C->unk128 = cur;
                 if (cur == 1) {
-                    D_800CC2D0[i].unk31C->unk12C = 600;
+                    movement_obj[i].unk31C->unk12C = 600;
                 } else if (cur == 0x80) {
-                    D_800CC2D0[i].unk31C->unk12C = 1800;
-                    func_1502EA0C(&D_800CC2D0[i], 0, 0, 0xFF, 0xBF, 4);
+                    movement_obj[i].unk31C->unk12C = 1800;
+                    func_1502EA0C(&movement_obj[i], 0, 0, 0xFF, 0xBF, 4);
                 } else if (cur == 0x10) {
-                    D_800CC2D0[i].unk31C->unk12C = 3;
+                    movement_obj[i].unk31C->unk12C = 3;
                 }
             } else {
                 func_15080620(i, 1, cur, 0);
                 if (cur == 0 && prev != 3) {
-                    D_800CC2D0[i].unk31C->unk78 = 0;
+                    movement_obj[i].unk31C->unk78 = 0;
                 }
                 if (prev == 0x20) {
                     func_1508EB90(i, 0x45, 4);
@@ -3108,11 +3108,11 @@ void func_1508DC24(void) {
         if (D_80087340 == i && base->gameType != 0xB8) {
             setId = func_1508E780(cur);
             found = 0;
-            numAttached = func_15033E28(&D_800CC2D0[i], attached);
-            if (numAttached == 0 && D_800CC2D0[i].unk31C->unk11A == 2 && setId != 0x55 && setId != 0x2E) {
-                func_15083568(&D_800CC2D0[i], setId, 1.0f, 0);
+            numAttached = func_15033E28(&movement_obj[i], attached);
+            if (numAttached == 0 && movement_obj[i].unk31C->unk11A == 2 && setId != 0x55 && setId != 0x2E) {
+                func_15083568(&movement_obj[i], setId, 1.0f, 0);
                 if (setId == 0x1D) {
-                    func_15083568(&D_800CC2D0[i], 0x1E, 1.0f, 0);
+                    func_15083568(&movement_obj[i], 0x1E, 1.0f, 0);
                 }
             }
             if (numAttached != 0 && cur != 0x20) {
@@ -3125,15 +3125,15 @@ void func_1508DC24(void) {
                             attached[j]->setId != 0x73 && attached[j]->setId != 0x76 &&
                             attached[j]->setId != 0x77 && attached[j]->setId != 0x78 && attached[j]->setId != 7) {
                             func_15030158(attached[j], 0);
-                            D_800CC2D0[i].unk31C->unk11A = 0;
+                            movement_obj[i].unk31C->unk11A = 0;
                         } else if (setId == attached[j]->setId) {
                             found = 1;
                         }
                     }
-                    if (found == 0 && D_800CC2D0[i].unk31C->unk11A == 2 && setId != 0x55 && setId != 0x2E) {
-                        func_15083568(&D_800CC2D0[i], setId, 1.0f, 0);
+                    if (found == 0 && movement_obj[i].unk31C->unk11A == 2 && setId != 0x55 && setId != 0x2E) {
+                        func_15083568(&movement_obj[i], setId, 1.0f, 0);
                         if (setId == 0x1D) {
-                            func_15083568(&D_800CC2D0[i], 0x1E, 1.0f, 0);
+                            func_15083568(&movement_obj[i], 0x1E, 1.0f, 0);
                         }
                     }
                 } else {
@@ -3144,7 +3144,7 @@ void func_1508DC24(void) {
                             attached[j]->setId != 0x73 && attached[j]->setId != 0x76 &&
                             attached[j]->setId != 0x77 && attached[j]->setId != 0x78 && attached[j]->setId != 7) {
                             func_15030158(attached[j], 0);
-                            D_800CC2D0[i].unk31C->unk11A = 0;
+                            movement_obj[i].unk31C->unk11A = 0;
                         }
                     }
                 }
@@ -3152,7 +3152,7 @@ void func_1508DC24(void) {
             if (setId != 0x55) {
                 s32 m;
                 for (m = D_800D23B0->numPlayers; m < 25; m++) {
-                    other = &D_800CC2D0[m];
+                    other = &movement_obj[m];
                     if (other->interaction_state == 0) {
                         continue;
                     }
@@ -3231,9 +3231,9 @@ void func_1508DC24(void) {
             if (j != -1) {
                 pickup->work.words[1] = 0;
                 if (items[i] == 0x8AE) {
-                    D_800CC2D0[j].unk31C->grenade_count += 3;
-                    if (D_800CC2D0[j].unk31C->grenade_count >= 7) {
-                        D_800CC2D0[j].unk31C->grenade_count = 6;
+                    movement_obj[j].unk31C->grenade_count += 3;
+                    if (movement_obj[j].unk31C->grenade_count >= 7) {
+                        movement_obj[j].unk31C->grenade_count = 6;
                     }
                     timers[i] = D_800D23B0->respawnDelay;
                 } else {
@@ -3251,17 +3251,17 @@ void func_1508DC24(void) {
                 }
                 kind = D_800D23B0->gameType;
                 if (kind == 0xB9) {
-                    D_800CC2D0[j].unk31C->unk12C = 600;
+                    movement_obj[j].unk31C->unk12C = 600;
                 }
                 kind = D_800D23B0->gameType;
                 if (kind == 0xB8) {
-                    if (items[i] == (pp = D_800CC2D0[j].unk31C->unk128)) { // matching: the u16 temporary
+                    if (items[i] == (pp = movement_obj[j].unk31C->unk128)) { // matching: the u16 temporary
                         if (items[i] == 1) {
-                            D_800CC2D0[j].unk31C->unk12C = 600;
+                            movement_obj[j].unk31C->unk12C = 600;
                         } else if (items[i] == 0x80) {
-                            D_800CC2D0[j].unk31C->unk12C = 1800;
+                            movement_obj[j].unk31C->unk12C = 1800;
                         } else if (items[i] == 0x10) {
-                            D_800CC2D0[j].unk31C->unk12C = 3;
+                            movement_obj[j].unk31C->unk12C = 3;
                         }
                     }
                 }
@@ -3380,7 +3380,7 @@ s32 func_1508E89C(s32 player, s32 source) {
     u8 slot;
     MpGame *res;
 
-    obj = &D_800CC2D0[player];
+    obj = &movement_obj[player];
     if (D_800D18A4[player] > 50) {
         if (!(D_800D18A2 & (1 << player))) {
             bit0 = 1 << player;
@@ -3411,7 +3411,7 @@ s32 func_1508E89C(s32 player, s32 source) {
             }
             D_800D23B0->unk16C0[player] = D_800D23B0->unk16C0[source];
             savedRot = obj->unk31C->unk1AA;
-            func_15062800(&D_800CC2D0[source], obj);
+            func_15062800(&movement_obj[source], obj);
             if (D_800BE9F0 == 0x3F) {
                 if (obj->unk13C >= 100) {
                     slot = obj->unk13C - 100;
@@ -3420,8 +3420,8 @@ s32 func_1508E89C(s32 player, s32 source) {
                         s32 idx;
                         s32 id;
 
-                        idx = obj - D_800CC2D0;
-                        id = D_800CC2D0[slot].unique_id - 20;
+                        idx = obj - movement_obj;
+                        id = movement_obj[slot].unique_id - 20;
                         res->unk24B8[id] = idx | 0x2000;
                         res->unk24DC[id] = idx;
                     }
@@ -3440,19 +3440,19 @@ s32 func_1508E89C(s32 player, s32 source) {
 
 /* Calls func_1509BFB0(1, actor | 0x2000, id, param) for player's actor (unk13F). */
 void func_1508EB90(s32 player, s32 id, s32 param) {
-    s32 temp = D_800CC2D0[player].unk13F;
+    s32 temp = movement_obj[player].unk13F;
     func_1509BFB0(1, temp | 0x2000, id, param);
 }
 
 /* func_1508EB90(player, 0x14, param). */
 void func_1508EBF8(s32 player, s32 param) {
-    s32 temp = D_800CC2D0[player].unk13F;
+    s32 temp = movement_obj[player].unk13F;
     func_1509BFB0(1, temp | 0x2000, 0x14, param);
 }
 
 /* func_1508EB90(player, 0x61, param). */
 void func_1508EC5C(s32 player, s32 param) {
-    s32 temp = D_800CC2D0[player].unk13F;
+    s32 temp = movement_obj[player].unk13F;
     func_1509BFB0(1, temp | 0x2000, 0x61, param);
 }
 

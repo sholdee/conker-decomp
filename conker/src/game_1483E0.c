@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /*
- * Per-type update routines for world objects (WorldObject, the D_800DBEF4 array). The mode is in the low
+ * Per-type update routines for world objects (WorldObject, the db_Object_array array). The mode is in the low
  * two bits of behaviorState (0 closed, 1 closing, 2 opening, 3 open); per-type state lives in work
  * (Work1483E0, one member per routine).
  */
@@ -130,7 +130,7 @@ void func_1511B07C(WorldObject *obj) {
     moveZ = 0;
     sound = 0;
     if (D_800C35EA[0] == 1) {
-        if (func_15022B08(obj - D_800DBEF4, 0) != 0) {
+        if (func_15022B08(obj - db_Object_array, 0) != 0) {
             return;
         }
     }
@@ -503,7 +503,7 @@ void func_1511BDF4(Game1483E0State *obj) {
 
 /* Turns the object to face the camera (yaw in degrees). */
 void func_1511BE5C(WorldObject *obj) {
-    obj->rotY = func_150484A0((f32)obj->x - D_800DBFF0->eye.x, (f32)obj->z - D_800DBFF0->eye.z) * 57.29577637f;
+    obj->rotY = func_150484A0((f32)obj->x - camera_global_Cameras->eye.x, (f32)obj->z - camera_global_Cameras->eye.z) * 57.29577637f;
 }
 
 extern void func_150DDED0(void *);
@@ -557,7 +557,7 @@ void func_1511BEBC(WorldObject *obj) {
         pos[2] = obj->z;
         if (mode != 3 && mode != 1) {
             for (i = 0; i < D_8008FD8C; i++) {
-                player = &D_800DBFF0[i];
+                player = &camera_global_Cameras[i];
                 if (player->playerExt->unk6B >= 4) {
                     continue;
                 }
@@ -577,7 +577,7 @@ void func_1511BEBC(WorldObject *obj) {
         }
         if (target == NULL && (mode == 2 || mode == 1)) {
             for (i = 0; i < D_8008FD8C; i++) {
-                character = &D_800CC2D0[i];
+                character = &movement_obj[i];
                 if (character->unk31C->unk6B != 0) {
                     target = character;
                     break;
@@ -1423,7 +1423,7 @@ void func_1511DF6C(WorldObject *obj) {
     }
     if (pulse->state < 3 && !skip) {
         for (i = 0; i < D_8008FD8C; i++) {
-            character = &D_800CC2D0[i];
+            character = &movement_obj[i];
             if (character->interaction_state == 0 || character->health <= 0 || character->unk127 == 0xFF) {
                 continue;
             }

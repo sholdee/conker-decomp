@@ -382,8 +382,8 @@ void func_150BFA7C(WorldObject *platform) {
         }
         return;
     }
-    if ((platform->flags & 4) && D_800CC2D0[0].unk31C->unk57 == 1) {
-        func_1518B6B0(D_800CC2D0[0].x_position, D_800CC2D0[0].y_position, D_800CC2D0[0].z_position, 0xFF, 0);
+    if ((platform->flags & 4) && movement_obj[0].unk31C->unk57 == 1) {
+        func_1518B6B0(movement_obj[0].x_position, movement_obj[0].y_position, movement_obj[0].z_position, 0xFF, 0);
         if (state == 0) {
             func_15164F0C(3, D_800BE9EB, NULL, 0xFF, 0);
             fx.flags = 1;
@@ -451,8 +451,8 @@ void func_150BFA7C(WorldObject *platform) {
                 if (kind == 2) {
                     platform->inactive = 1;
                     platform[1].inactive = 1;
-                    func_1508EE0C(2, (u16)(platform - D_800DBEF4));
-                    func_1508EE0C(2, (u16)(&platform[1] - D_800DBEF4));
+                    func_1508EE0C(2, (u16)(platform - db_Object_array));
+                    func_1508EE0C(2, (u16)(&platform[1] - db_Object_array));
                 }
             }
         }

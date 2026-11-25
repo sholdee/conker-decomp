@@ -26,7 +26,7 @@ void func_150B2740(u8 pipe, u8 arg1) {
     Vec3f origin;
     TrailStateParams argsD;
 
-    func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
+    func_1512D748(&camera_global_Cameras[D_800BE9E8], 7, 1);
     argsA.count = (func_150ADA20() & 1) + 3;
     argsA.pos = D_8009F920[pipe].pos;
     argsA.radius = 170.0f;

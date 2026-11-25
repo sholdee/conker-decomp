@@ -86,7 +86,7 @@ void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
 void func_151CF898(Actor *, f32, f32);
 
 void func_150CF530(s32 arg0) {
-    func_151CF898(&D_800CC2D0[0], D_800CC2D0[0].y_position + 300.0f, -10000.0f);
+    func_151CF898(&movement_obj[0], movement_obj[0].y_position + 300.0f, -10000.0f);
 }
 
 /* Texture scroll offsets; >> 7 gives the 10.2 fixed-point tile coordinate. */

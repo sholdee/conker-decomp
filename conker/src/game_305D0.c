@@ -167,7 +167,7 @@ extern void func_1510F800(s32 type);
 
 /*
  * Builds the collision triangle tables of the three maps: map 0 from level display list 0, map 1
- * from display list 3 and map 2 from the D_800DBEF4 objects, recording each object's triangle range.
+ * from display list 3 and map 2 from the db_Object_array objects, recording each object's triangle range.
  */
 void func_15003668(s32 unused) {
     s32 firstTri;
@@ -192,8 +192,8 @@ void func_15003668(s32 unused) {
 
     func_150026C4(2);
     for (i = 0; i < D_800DBEF0; i++) {
-        if ((D_800DBEF4[i].flags & 0x60) != 0x20) {
-            func_15002724(D_800DBEF4[i].displayList);
+        if ((db_Object_array[i].flags & 0x60) != 0x20) {
+            func_15002724(db_Object_array[i].displayList);
         }
     }
     func_15002754();
@@ -201,15 +201,15 @@ void func_15003668(s32 unused) {
     D_800D2C68 = 1;
     D_800D2C28[1] = 0;
     for (i = 0; i < D_800DBEF0; i++) {
-        if ((D_800DBEF4[i].flags & 0x60) != 0x20) {
+        if ((db_Object_array[i].flags & 0x60) != 0x20) {
             // matching: storing D_800DBE38 rather than firstTri keeps firstTri at two references (regalloc)
             firstTri = D_800DBE38;
-            D_800DBEF4[i].firstTri = D_800DBE38;
-            func_15001460(D_800DBEF4[i].displayList);
-            D_800DBEF4[i].numTris = D_800DBE38 - firstTri;
+            db_Object_array[i].firstTri = D_800DBE38;
+            func_15001460(db_Object_array[i].displayList);
+            db_Object_array[i].numTris = D_800DBE38 - firstTri;
         } else {
-            D_800DBEF4[i].firstTri = 0;
-            D_800DBEF4[i].numTris = 0;
+            db_Object_array[i].firstTri = 0;
+            db_Object_array[i].numTris = 0;
         }
     }
     func_150026E8(2);

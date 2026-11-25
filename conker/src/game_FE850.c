@@ -39,7 +39,7 @@ void func_150D1410(s32 arg0) {
 
     temp = func_151149AC(0xF9);
     if (temp != 0) {
-        if (((arg0 - (s32)&D_800CC2D0[0]) / 0x32C) == 0) {
+        if (((arg0 - (s32)&movement_obj[0]) / 0x32C) == 0) {
             temp->inactive = 1;
         } else {
             temp->inactive = 0;

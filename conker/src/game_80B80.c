@@ -133,11 +133,11 @@ void func_150538CC(Actor *obj) {
             obj->unk328 = 1; // 0x328
             if (obj->unk221 == -1) {
                 target = func_150883B0(slot, searchDir, &slotValue, &slotFlag);
-                if ((obj->unk124 != 0) && (target + 1 == &D_800CC2D0[obj->unk124])) {
+                if ((obj->unk124 != 0) && (target + 1 == &movement_obj[obj->unk124])) {
                     target = NULL;
                 }
             } else {
-                target = &D_800CC2D0[obj->unk221];
+                target = &movement_obj[obj->unk221];
             }
             if ((target != NULL) && ((target->unk31C->unk120 != 0) || (target->immune > 0))) {
                 target = NULL;
@@ -162,7 +162,7 @@ void func_150538CC(Actor *obj) {
                 D_800872A0[slot].lateral += (slotValue - D_800872A0[slot].lateral) * 0.125f;
                 D_800872A0[slot].route = slotFlag;
             } else {
-                obj->unk221 = target - D_800CC2D0;
+                obj->unk221 = target - movement_obj;
             }
             dist = sqrtf((dx * dx) + (dy * dy) + (dz * dz));
             if (dist > 1.0f) {
@@ -212,10 +212,10 @@ void func_150538CC(Actor *obj) {
         if (obj->unk102 != 0) {
             obj->unk82 = 40;
         }
-        obj->unk78 = func_1505A630(D_800CC2D0[obj->unk126].x_position - obj->x_position, obj->z_position - D_800CC2D0[obj->unk126].z_position, 0);
+        obj->unk78 = func_1505A630(movement_obj[obj->unk126].x_position - obj->x_position, obj->z_position - movement_obj[obj->unk126].z_position, 0);
         if ((u8)(((s32)(obj->unk78 - obj->unk76) >> 8) + obj->unk82) < (obj->unk82 * 2)) {
-            climb = ((D_800CC2D0[obj->unk126].y_position + (s16)obj->unk224) - obj->y_position) * 0.1800000072f;
-            ownerDist = func_1505A72C(&D_800CC2D0[obj->unk126], obj);
+            climb = ((movement_obj[obj->unk126].y_position + (s16)obj->unk224) - obj->y_position) * 0.1800000072f;
+            ownerDist = func_1505A72C(&movement_obj[obj->unk126], obj);
             func_15059B54(obj, 0x300);
             if ((obj->unk102 != 0) && (ownerDist < (obj->xz_velocity * 16.0f))) {
                 if (climb > 90.0f) {
@@ -314,7 +314,7 @@ void func_150538CC(Actor *obj) {
         if (hit != 0) {
             done = 1;
             if ((hit == 1) && (obj->unk124 > 0)) {
-                owner = &D_800CC2D0[obj->unk124 - 1];
+                owner = &movement_obj[obj->unk124 - 1];
                 if ((owner->unk31C != NULL) && (owner->unk31C->unkAF != 0)) {
                     if (func_10010894(owner) == 0) {
                         func_15060A30((func_150ADA20() % 3U) + 0x53B, owner);
@@ -332,14 +332,14 @@ void func_150538CC(Actor *obj) {
 
                     sfx = func_150ADA20() % 9U;
                     func_15060778((sfx < 2) ? sfx + 0x18 : sfx + 0x29, obj, 30000, 0, 500, 1500, 5);
-                    func_15174690(D_800C3E78, 0, 0x14, 0, 0x199, 4, 0xAA, 0xFF, 0);
+                    func_15174690(dc_glbl_CharNum, 0, 0x14, 0, 0x199, 4, 0xAA, 0xFF, 0);
                 }
             }
         }
         if (obj->unkD0 != 0) {
             s32 hit;
 
-            hit = func_1505C7D8(obj, D_800C3E78);
+            hit = func_1505C7D8(obj, dc_glbl_CharNum);
             if (hit != 0) {
                 D_800CC260 = hit;
                 obj->disable_run = 1;
@@ -362,7 +362,7 @@ void func_150538CC(Actor *obj) {
 
                     attacker = obj->unk108 & 0x7F;
                     if (attacker < 25) {
-                        obj->unk76 = func_1505A630(obj->old_x_position - D_800CC2D0[attacker].x_position, D_800CC2D0[attacker].z_position - obj->old_z_position, 0);
+                        obj->unk76 = func_1505A630(obj->old_x_position - movement_obj[attacker].x_position, movement_obj[attacker].z_position - obj->old_z_position, 0);
                     }
                     obj->y_velocity = 35.0f;
                     obj->gravity = 6.0f;
@@ -371,12 +371,12 @@ void func_150538CC(Actor *obj) {
         }
         if (kind == 15) {
             func_1505A3A8(0.0f, obj, 1.0f, 1.0f, 0);
-            func_1505D6F0(obj, D_800C3E78);
+            func_1505D6F0(obj, dc_glbl_CharNum);
             if ((D_800CC268 >> 1) != 0) {
                 Actor *other;
 
                 other = func_15083E90(6);
-                if (D_800CC268 & (1U << (other - D_800CC2D0))) {
+                if (D_800CC268 & (1U << (other - movement_obj))) {
                     D_800D1580 = 0xFF0100A7;
                     func_1506E6FC();
                     if (other != NULL) {
@@ -452,10 +452,10 @@ void func_150548E4(Actor *obj) {
     s32 sfx;
     s32 i;
 
-    owner = &D_800CC2D0[obj->unk65 - 1];
+    owner = &movement_obj[obj->unk65 - 1];
 
     for (i = 0; i < D_8008FD8C; i++) {
-        if ((D_800CC2D0[i].objectNum == (obj - D_800CC2D0) + 1) && (owner->unk232 == 1)) {
+        if ((movement_obj[i].objectNum == (obj - movement_obj) + 1) && (owner->unk232 == 1)) {
             owner->unk218 = NULL;
             if (func_150ADA20() & 1) {
                 owner->unk232 = 2;
@@ -500,7 +500,7 @@ void func_15054A94(Actor *obj) {
     if (anim == NULL || obj->unk65 == 0) {
         return;
     }
-    other = &D_800CC2D0[obj->unk65 - 1];
+    other = &movement_obj[obj->unk65 - 1];
     otherAnim = other->unk2D0;
     if (otherAnim == NULL) {
         return;
@@ -590,7 +590,7 @@ void func_15054A94(Actor *obj) {
     } else {
         ready = state->aimState;
         if (state->unk84 == 0) {
-            index = other - D_800CC2D0;
+            index = other - movement_obj;
             // D_800BE728[0] points to the per-player controller pads
             if (index < 4 && !(D_800BE728[index]->button & R_TRIG)) {
                 ready = 0;
@@ -618,7 +618,7 @@ void func_15054F74(Actor *obj) {
     s16 z;
 
     if (obj->id == 12) {
-        if ((D_800C3E78 + 1) != D_800CC2D0[obj->unk124].unk65) {
+        if ((dc_glbl_CharNum + 1) != movement_obj[obj->unk124].unk65) {
             if (obj->unk232 == 18) {
                 func_15052F9C(obj, 50.0f, 0, 4, 0, 12, 0, 8, 0, 0);
             } else if (D_800CC268 & 1) {
@@ -634,7 +634,7 @@ void func_15054F74(Actor *obj) {
         z = (s16)obj->z_position + offsetZ;
         obj->unk2EC = (x << 16) | (z & 0xFFFF);
         if (obj->unk84.uh != 15) {
-            angle = func_1505A630(D_800CC2D0[0].x_position - obj->x_position, obj->z_position - D_800CC2D0[0].z_position, 0);
+            angle = func_1505A630(movement_obj[0].x_position - obj->x_position, obj->z_position - movement_obj[0].z_position, 0);
         } else {
             angle = obj->unk7A - 0x800;
         }
@@ -717,7 +717,7 @@ void func_1505528C(Actor *obj) {
     case 0x88:
         obj->unkB8 = -func_150484A0(obj->y_velocity, obj->xz_velocity) * 57.29577637f;
         obj->unkD0 = 16;
-        if (func_1505C7D8(obj, D_800C3E78) != 0) {
+        if (func_1505C7D8(obj, dc_glbl_CharNum) != 0) {
             func_15060F28(obj, 1);
             return;
         }
@@ -812,7 +812,7 @@ void func_1505528C(Actor *obj) {
         Camera *player;
         f32 distSq;
 
-        player = D_800DBFF0;
+        player = camera_global_Cameras;
         distSq = ((player->eye.x - obj->x_position) * (player->eye.x - obj->x_position)) +
                  ((player->eye.y - obj->y_position) * (player->eye.y - obj->y_position)) +
                  ((player->eye.z - obj->z_position) * (player->eye.z - obj->z_position));
@@ -892,7 +892,7 @@ void func_15055C88(Actor *obj) {
 void func_15055D48(Actor *obj) {
     obj->unk31C->unk36 += D_800BE9A0;
     if (obj->unk31C->unk36 >= 141) {
-        D_800D18A0 |= 1 << (obj - D_800CC2D0);
+        D_800D18A0 |= 1 << (obj - movement_obj);
         if (D_800D18A0 != 0) {
             obj->immune = 0xFF;
             obj->stunned = 0xFF;

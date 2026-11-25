@@ -99,8 +99,8 @@ glabel func_150AB1F0
     /* D87F4 150AB344 3C08800D */  lui        $t0, %hi(D_800D37E0)
     /* D87F8 150AB348 950837E0 */  lhu        $t0, %lo(D_800D37E0)($t0)
     /* D87FC 150AB34C AFA80148 */  sw         $t0, 0x148($sp)
-    /* D8800 150AB350 3C09800E */  lui        $t1, %hi(D_800DBEF4)
-    /* D8804 150AB354 8D29BEF4 */  lw         $t1, %lo(D_800DBEF4)($t1)
+    /* D8800 150AB350 3C09800E */  lui        $t1, %hi(db_Object_array)
+    /* D8804 150AB354 8D29BEF4 */  lw         $t1, %lo(db_Object_array)($t1)
     /* D8808 150AB358 240A00A0 */  addiu      $t2, $zero, 0xA0
     /* D880C 150AB35C 01480018 */  mult       $t2, $t0
     /* D8810 150AB360 00005012 */  mflo       $t2
@@ -130,8 +130,8 @@ glabel func_150AB1F0
     /* D8868 150AB3B8 24010003 */  addiu      $at, $zero, 0x3
     /* D886C 150AB3BC 1501000A */  bne        $t0, $at, func_150AB3E8
     /* D8870 150AB3C0 00000000 */   nop
-    /* D8874 150AB3C4 3C08800D */  lui        $t0, %hi(D_800CC2D0)
-    /* D8878 150AB3C8 2508C2D0 */  addiu      $t0, $t0, %lo(D_800CC2D0)
+    /* D8874 150AB3C4 3C08800D */  lui        $t0, %hi(movement_obj)
+    /* D8878 150AB3C8 2508C2D0 */  addiu      $t0, $t0, %lo(movement_obj)
     /* D887C 150AB3CC 25094F4C */  addiu      $t1, $t0, 0x4F4C
     /* D8880 150AB3D0 AFA9014C */  sw         $t1, 0x14C($sp)
     /* D8884 150AB3D4 2508FCD4 */  addiu      $t0, $t0, -0x32C
@@ -389,8 +389,8 @@ glabel func_150AB1F0
     /* D8C38 150AB788 AFA80154 */  sw         $t0, 0x154($sp)
     /* D8C3C 150AB78C 24160000 */  addiu      $s6, $zero, 0x0
   .L150AB790:
-    /* D8C40 150AB790 3C08800D */  lui        $t0, %hi(D_800CC2D0)
-    /* D8C44 150AB794 2508C2D0 */  addiu      $t0, $t0, %lo(D_800CC2D0)
+    /* D8C40 150AB790 3C08800D */  lui        $t0, %hi(movement_obj)
+    /* D8C44 150AB794 2508C2D0 */  addiu      $t0, $t0, %lo(movement_obj)
     /* D8C48 150AB798 01484023 */  subu       $t0, $t2, $t0
     /* D8C4C 150AB79C 8D4C0268 */  lw         $t4, 0x268($t2)
     /* D8C50 150AB7A0 001640C0 */  sll        $t0, $s6, 3
@@ -421,8 +421,8 @@ glabel func_150AB1F0
     /* D8CAC 150AB7FC 240B00A0 */  addiu      $t3, $zero, 0xA0
     /* D8CB0 150AB800 014B0018 */  mult       $t2, $t3
     /* D8CB4 150AB804 8FA8014C */  lw         $t0, 0x14C($sp)
-    /* D8CB8 150AB808 3C09800E */  lui        $t1, %hi(D_800DBEF4)
-    /* D8CBC 150AB80C 8D29BEF4 */  lw         $t1, %lo(D_800DBEF4)($t1)
+    /* D8CB8 150AB808 3C09800E */  lui        $t1, %hi(db_Object_array)
+    /* D8CBC 150AB80C 8D29BEF4 */  lw         $t1, %lo(db_Object_array)($t1)
     /* D8CC0 150AB810 00006812 */  mflo       $t5
     /* D8CC4 150AB814 01A96821 */  addu       $t5, $t5, $t1
     /* D8CC8 150AB818 95AD0056 */  lhu        $t5, 0x56($t5)
@@ -566,8 +566,8 @@ glabel func_150AB1F0
     /* D8ED4 150ABA24 8FA80148 */  lw         $t0, 0x148($sp)
     /* D8ED8 150ABA28 240900A0 */  addiu      $t1, $zero, 0xA0
     /* D8EDC 150ABA2C 01090018 */  mult       $t0, $t1
-    /* D8EE0 150ABA30 3C0A800E */  lui        $t2, %hi(D_800DBEF4)
-    /* D8EE4 150ABA34 8D4ABEF4 */  lw         $t2, %lo(D_800DBEF4)($t2)
+    /* D8EE0 150ABA30 3C0A800E */  lui        $t2, %hi(db_Object_array)
+    /* D8EE4 150ABA34 8D4ABEF4 */  lw         $t2, %lo(db_Object_array)($t2)
     /* D8EE8 150ABA38 00004812 */  mflo       $t1
     /* D8EEC 150ABA3C 012A4821 */  addu       $t1, $t1, $t2
     /* D8EF0 150ABA40 912A004F */  lbu        $t2, 0x4F($t1)
@@ -579,8 +579,8 @@ glabel func_150AB1F0
     /* D8F08 150ABA58 016C5821 */  addu       $t3, $t3, $t4
     /* D8F0C 150ABA5C 8D6C0000 */  lw         $t4, 0x0($t3)
     /* D8F10 150ABA60 8FAD0140 */  lw         $t5, 0x140($sp)
-    /* D8F14 150ABA64 3C0E800D */  lui        $t6, %hi(D_800CC2D0)
-    /* D8F18 150ABA68 25CEC2D0 */  addiu      $t6, $t6, %lo(D_800CC2D0)
+    /* D8F14 150ABA64 3C0E800D */  lui        $t6, %hi(movement_obj)
+    /* D8F18 150ABA68 25CEC2D0 */  addiu      $t6, $t6, %lo(movement_obj)
     /* D8F1C 150ABA6C 01AE6823 */  subu       $t5, $t5, $t6
     /* D8F20 150ABA70 240E032C */  addiu      $t6, $zero, 0x32C
     /* D8F24 150ABA74 01AE001A */  div        $zero, $t5, $t6

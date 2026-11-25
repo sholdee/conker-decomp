@@ -209,7 +209,7 @@ void func_15007B3C(void) {
     func_150006E0(D_800BE9F0);
     func_1510B070(0);
     for (i = 0; i <= D_80082FA0; i++) {
-        func_15125690(&D_800DBFF0[i], 1);
+        func_15125690(&camera_global_Cameras[i], 1);
     }
     func_1500E70C(D_800BE9F0);
     func_150163D0(D_800BE9F0);
@@ -263,8 +263,8 @@ void func_15007B3C(void) {
     func_15017640();
     func_1501CC3C();
     for (i = 0; i < 25; i++) {
-        if ((D_800CC2D0[i].interaction_state != 0) && (D_800CC2D0[i].unk127 != 0xFF)) {
-            func_150A11C4(&D_800CC2D0[i]);
+        if ((movement_obj[i].interaction_state != 0) && (movement_obj[i].unk127 != 0xFF)) {
+            func_150A11C4(&movement_obj[i]);
         }
     }
     if ((D_800D18A8 != 0) && (D_800BE9F0 != 0x22)) {

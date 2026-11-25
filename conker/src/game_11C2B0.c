@@ -337,7 +337,7 @@ s32 func_150EF38C(Beam *beam) {
         if (hit.hitType >= 2) {
             object = hit.obj;
             func_1502EA98(object, 0xFF, 0, 0, 0x90, 0, 1);
-            func_1505D024(object, 0xA0038, 0, actor - D_800CC2D0);
+            func_1505D024(object, 0xA0038, 0, actor - movement_obj);
         }
     } else if (link->flash != NULL) {
         link->flash->sprite->hidden = TRUE;
@@ -1390,7 +1390,7 @@ GameCommand *func_150F1B48(GameCommand *cmd, s32 index) {
     s32 tilt;
     s32 i;
 
-    down = (D_800CC2D0[index].unk84.uh == 0x21) ? 1 : 0;
+    down = (movement_obj[index].unk84.uh == 0x21) ? 1 : 0;
     step = D_800BE9E4 * 0x222;
     if (down) {
         tilt = D_800CC298.tilt - step;
@@ -1517,7 +1517,7 @@ void func_150F20F0(s32 index) {
     s32 out3;
     Actor *actor;
 
-    actor = &D_800CC2D0[index];
+    actor = &movement_obj[index];
     x = actor->x_position;
     z = actor->z_position;
     x *= x;
@@ -1531,8 +1531,8 @@ void func_150F20F0(s32 index) {
             D_800D98F0 = 0;
         }
     } else if (x > 6760000.0f) {
-        // matching: indexes D_800CC2D0 again rather than reading through `actor`
-        func_100114D0(0, (s32)D_800CC2D0[index].y_position, 0, 0x7FFF, 20000, 19000, &pan, &out2, &out3);
+        // matching: indexes movement_obj again rather than reading through `actor`
+        func_100114D0(0, (s32)movement_obj[index].y_position, 0, 0x7FFF, 20000, 19000, &pan, &out2, &out3);
         pan += 0x80;
         D_800D98F0 = (func_150ADA20() & 0x7F) + 0x80;
         func_10010F30((func_150ADA20() % 3U) + 0x6C, 24000, pan, 0, 0);

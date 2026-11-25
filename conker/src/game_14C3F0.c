@@ -11,7 +11,7 @@ typedef union {
     struct {
         SwingMotion *motion;
         s32 state;
-        s32 character; /* index into D_800CC2D0 and D_800DBFF0 */
+        s32 character; /* index into movement_obj and camera_global_Cameras */
     } swing;
     struct {
         s32 started;
@@ -81,12 +81,12 @@ void func_1511EF40(WorldObject *prop) {
     if (motion->timer > 0) {
         motion->timer -= D_800BE9E4;
         if (motion->timer <= 0) {
-            actor = &D_800DBFF0[WORK(prop)->swing.character];
+            actor = &camera_global_Cameras[WORK(prop)->swing.character];
             func_151239CC(actor, 10);
         }
     }
     if (WORK(prop)->swing.state == 1) {
-        character = &D_800CC2D0[WORK(prop)->swing.character];
+        character = &movement_obj[WORK(prop)->swing.character];
         prop->x = character->x_position;
         prop->y = (s16)character->y_position + 100;
         prop->z = character->z_position;
@@ -105,7 +105,7 @@ void func_1511EF40(WorldObject *prop) {
     }
     if (WORK(prop)->swing.state == 2) {
         if (D_80082FA0 >= WORK(prop)->swing.character) {
-            actor = &D_800DBFF0[WORK(prop)->swing.character];
+            actor = &camera_global_Cameras[WORK(prop)->swing.character];
             if (actor->mode != 0x400000) {
                 func_15123934(actor, 0x400000, 0, actor->unk134, 10);
             }

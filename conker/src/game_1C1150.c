@@ -366,8 +366,8 @@ void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
         if (other->unk65 != 0) {
             s32 slot = other->unk65 - 1;
 
-            D_800CC2D0[slot].unk232 = 10;
-            D_800CC2D0[slot].unk218 = NULL;
+            movement_obj[slot].unk232 = 10;
+            movement_obj[slot].unk218 = NULL;
             other->unk65 = 0;
         }
         break;
@@ -499,7 +499,7 @@ u8 arg2;
             info.unk0 = 0x7D;
             info.unk4 = 5;
             if (self->id == 0xFF && self->unk124 != 0) { // an id-0xFF object names its owner by slot + 1
-                info.source = &D_800CC2D0[self->unk124 - 1];
+                info.source = &movement_obj[self->unk124 - 1];
             } else {
                 info.source = self;
             }

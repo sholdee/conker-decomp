@@ -891,7 +891,7 @@ void func_151E43DC(void) {
             func_1504332C(0xFF, 0xFF, 0xFF, (u8)D_8008FDCC);
             func_150432FC(148, 50);
             if (D_8008FD80 == 4) {
-                D_800DBFF0->mode = 0x80000;
+                camera_global_Cameras->mode = 0x80000;
             }
             if (D_800AB68C[D_8008FDD4->selection].unk5 < 0) {
                 if (D_8008FDD4->selection == 11 || D_8008FDD4->selection == 12) {
@@ -1233,7 +1233,7 @@ void func_151E53E8(s32 flag) {
             D_800E0A88 = func_151DDBA0;
         }
         for (i = 0; i < D_8008FD90; i++) {
-            D_8008FDD4->stats[i].unk6 = D_800CC2D0[i].unk31C->unk1AA;
+            D_8008FDD4->stats[i].unk6 = movement_obj[i].unk31C->unk1AA;
         }
         D_8008FDC0 &= 0xE35F;
         D_800E0A86 = flag;
@@ -1374,9 +1374,9 @@ s32 func_151E565C(void) {
                                 if (score < other) {
                                     D_800E0AC0[i]++;
                                 } else if (score == other) {
-                                    if (D_800CC2D0[j].unk31C->unk1AA < D_800CC2D0[i].unk31C->unk1AA) {
+                                    if (movement_obj[j].unk31C->unk1AA < movement_obj[i].unk31C->unk1AA) {
                                         D_800E0AC0[i]++;
-                                    } else if (D_800CC2D0[i].unk31C->unk1AA == D_800CC2D0[j].unk31C->unk1AA) {
+                                    } else if (movement_obj[i].unk31C->unk1AA == movement_obj[j].unk31C->unk1AA) {
                                         if (j < i && D_80082FA0 < j) {
                                             D_800E0AC0[i]++;
                                         }
@@ -1397,11 +1397,11 @@ s32 func_151E565C(void) {
     }
     k = 0; // matching: k is 0 here; teamStats[i + k] below shares CSE temps like the target
     for (i = 0; i < D_8008FD8C; i++) {
-        team = D_800CC2D0[i].team; // team: first byte of an unnamed Actor field
+        team = movement_obj[i].team; // team: first byte of an unnamed Actor field
         teamStats[team] += D_8008FDD4->score[i];
         teamStats[team + 4] += func_150859AC(i, 3) * 6 + func_150859AC(i, 4);
         teamStats[team + 8] = func_150859AC(team, 6);
-        teamStats[team + 12] += D_800CC2D0[i].unk31C->unk1AA;
+        teamStats[team + 12] += movement_obj[i].unk31C->unk1AA;
     }
     statBase = 8;
     team = -1;
@@ -1454,7 +1454,7 @@ s32 func_151E565C(void) {
     j = 0;
     for (i = 0; i < D_8008FD8C; i++) {
         if (D_80087270[i] != 10) {
-            team = D_800CC2D0[i].team;
+            team = movement_obj[i].team;
             if (!(D_800D18A0 & (1 << i))) {
                 liveTeams |= 1 << team;
             }
@@ -1527,15 +1527,15 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
     s32 health;
 
     attacker = source;
-    attackerIdx = source - D_800CC2D0;
+    attackerIdx = source - movement_obj;
     if (attackerIdx >= D_8008FD8C) {
         attackerIdx = source->unk124 - 1;
         if (attackerIdx >= 0) {
-            attacker = &D_800CC2D0[attackerIdx];
+            attacker = &movement_obj[attackerIdx];
         }
     }
     if ((attackerIdx >= 0) && (attackerIdx < D_8008FD8C) && (attackerIdx < D_8008FD8C) /* matching: repeated test */) {
-        victimIdx = victim - D_800CC2D0;
+        victimIdx = victim - movement_obj;
         D_800E0BB8[victimIdx] = attackerIdx | 0x80;
         if (attackerIdx < D_8008FD90) {
             if (D_800E0C00[attackerIdx] != D_800E0C00[victimIdx]) {
@@ -1867,7 +1867,7 @@ void func_151E6C1C(s32 index) {
     f32 ax, ay, az;
     f32 dx, dy, dz;
 
-    obj = &D_800DBFF0[index];
+    obj = &camera_global_Cameras[index];
     if (D_8008FDD4->menu == 0) {
         homeNode = 0;
         nodeCount = 6;
@@ -2297,7 +2297,7 @@ void func_151E7F60(s32 slotIdx, s32 charIdx) {
     }
     objSlot = func_15082A44(spawn, spawnId, 0, 0, 0);
     if (objSlot != 0) {
-        obj = &D_800CC2D0[objSlot - 1];
+        obj = &movement_obj[objSlot - 1];
         D_800E0BA0[slotIdx] = obj;
         obj->unk5 = 7;
         obj->unk2F8 |= 3;

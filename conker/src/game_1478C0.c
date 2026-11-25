@@ -143,7 +143,7 @@ extern void func_151162D4(WorldObject *);
 /* When D_800C35EA is 1 and func_15022B08 accepts this object's index, clears unk7C and unk18;
  * then runs func_151162D4 and advances the texture animation. */
 void func_1511A738(WorldObject *obj) {
-    if (D_800C35EA[0] == 1 && func_15022B08(obj - D_800DBEF4, 0) != 0) {
+    if (D_800C35EA[0] == 1 && func_15022B08(obj - db_Object_array, 0) != 0) {
         WORK(obj)->unk7C = 0;
         obj->yOffset = 0.0f;
     }

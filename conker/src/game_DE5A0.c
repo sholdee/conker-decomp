@@ -37,24 +37,24 @@ void func_150B10F0(Actor *obj) {
     obj->unk178 = obj->z_position;
     obj->immune = 100;
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
-    if (func_1505A6F8(D_800CC2D0, obj) < 1100.0f) {
-        dist = func_1505A6F8(obj, D_800CC2D0);
+    if (func_1505A6F8(movement_obj, obj) < 1100.0f) {
+        dist = func_1505A6F8(obj, movement_obj);
         distCopy = dist;
-        range = obj->y_position - D_800CC2D0[0].y_position; // matching: height above the player reuses `range`
+        range = obj->y_position - movement_obj[0].y_position; // matching: height above the player reuses `range`
         if (range < 0.0f) {
             range = 1000.0f;
         } else {
             range = 1050.0f - range * 0.7f;
         }
-        if (dist < range && D_800CC2D0[0].in_water == 1) {
+        if (dist < range && movement_obj[0].in_water == 1) {
             closeness = 1100.0f - distCopy;
-            angle = func_1505A630(obj->unk174 - D_800CC2D0[0].x_position, D_800CC2D0[0].z_position - obj->unk178, 0);
+            angle = func_1505A630(obj->unk174 - movement_obj[0].x_position, movement_obj[0].z_position - obj->unk178, 0);
             if (850.0f < closeness) {
-                D_800CC2D0[0].y_position -= (closeness - 820.0f) * 0.09f * D_800D1550;
+                movement_obj[0].y_position -= (closeness - 820.0f) * 0.09f * D_800D1550;
             }
             func_1505A184(angle - 0x3000, closeness * 0.045f + 5.0f, 0.0f, &pushX, &pushZ, &unusedOut);
-            D_800CC2D0[0].unk164 = pushX;
-            D_800CC2D0[0].unk168 = pushZ;
+            movement_obj[0].unk164 = pushX;
+            movement_obj[0].unk168 = pushZ;
         }
     }
     func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
@@ -98,7 +98,7 @@ void func_150B12FC(Actor *obj) {
 
 /*
  * Moves the object vertically toward a target height: its spawn record's y + 210 by default, or (unk223 == 14)
- * straight at its target object D_800CC2D0[unk222]. A nonzero unk224 overrides the height: 10000 means its
+ * straight at its target object movement_obj[unk222]. A nonzero unk224 overrides the height: 10000 means its
  * current path waypoint, anything else is unk224 * 8 (plus unk180 for most ids). Stunned objects only recover.
  */
 void func_150B1484(Actor *obj) {
@@ -120,14 +120,14 @@ void func_150B1484(Actor *obj) {
         if (obj->unk223 == 14) {
             f32 time;
 
-            time = func_1505A6F8(&D_800CC2D0[obj->unk222], obj) / obj->xz_velocity;
-            obj->y_velocity = (D_800CC2D0[obj->unk222].y_position + (s16)obj->unk224 - obj->y_position) / time;
+            time = func_1505A6F8(&movement_obj[obj->unk222], obj) / obj->xz_velocity;
+            obj->y_velocity = (movement_obj[obj->unk222].y_position + (s16)obj->unk224 - obj->y_position) / time;
             obj->gravity = 0.0f;
         } else {
             s16 heightCode;
 
             if (obj->unk223 == 1) {
-                targetY = D_800CC2D0[0].y_position + 210.0f;
+                targetY = movement_obj[0].y_position + 210.0f;
             }
             heightCode = (s16)obj->unk224;
             if (heightCode != 0) {
@@ -196,7 +196,7 @@ void func_150B17DC(Actor *obj) {
         other->unkB8 = func_150AD78C(phase) * 6.0f;
         func_1505A770(obj);
         other->y_position = obj->y_position - 170.0f;
-        other->unk13C = D_800C3E78 + 100;
+        other->unk13C = dc_glbl_CharNum + 100;
         func_1505A184(other->unk7A, other->unkB8 * -7.0f, 0.0f, &offsetX, &offsetZ, &unusedOut);
         other->x_position = obj->x_position + offsetX;
         other->z_position = obj->z_position + offsetZ;
@@ -207,7 +207,7 @@ void func_150B17DC(Actor *obj) {
         other->unk16C = 0.0f;
         other->unk170 = 0.0f;
     }
-    obj->unk7A = func_1505A630(D_800CC2D0[0].x_position - obj->x_position, obj->z_position - D_800CC2D0[0].z_position, 0);
+    obj->unk7A = func_1505A630(movement_obj[0].x_position - obj->x_position, obj->z_position - movement_obj[0].z_position, 0);
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.0054931640625f;
 }
 
@@ -269,8 +269,8 @@ void func_150B19E0(Actor *obj) {
         particle.z = obj->z_position + cosine * radius;
         func_1510F800(0);
         particle.unk4 = func_1510F8D8(particle.x, particle.y, particle.z, 0);
-        angle = D_800CC2D0[0].unk76 >> 8;
-        speed = D_800CC2D0[0].xz_velocity * 64.0f;
+        angle = movement_obj[0].unk76 >> 8;
+        speed = movement_obj[0].xz_velocity * 64.0f;
         particle.velX = func_150489B0(angle) * speed;
         particle.velZ = func_15048A40(angle) * -speed;
         particle.unk1A = -30;

@@ -137,11 +137,11 @@ void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX,
     // childSlot[owner] = 1-based slot of an object owned by owner
     bzero(childSlot, sizeof(childSlot));
     for (i = 0; i < 25; i++) {
-        if (D_800CC2D0[i].interaction_state == 0) {
+        if (movement_obj[i].interaction_state == 0) {
             continue;
         }
-        if (D_800CC2D0[i].unk65 != 0) {
-            childSlot[D_800CC2D0[i].unk65 - 1] = i + 1;
+        if (movement_obj[i].unk65 != 0) {
+            childSlot[movement_obj[i].unk65 - 1] = i + 1;
         }
     }
     if (skipWorld == 0 &&
@@ -154,7 +154,7 @@ void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX,
         out->pos.z = hitZ;
         out->far = out->pos;
         if (surfIdx != -1) {
-            out->surface = &D_800DBEF4[surfIdx];
+            out->surface = &db_Object_array[surfIdx];
         } else {
             out->surface = NULL;
         }
@@ -167,7 +167,7 @@ void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX,
             if (skip == i) {
                 continue;
             }
-            obj = &D_800CC2D0[i];
+            obj = &movement_obj[i];
             if (obj->interaction_state == 0) {
                 continue;
             }
@@ -458,7 +458,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
         func_150D7120(&hit->pos, 0xFF, 1);
     }
     if (noHealth == 0) {
-        func_1505D024(obj, sound | 0x80000, (yaw - 90.0f) * 182.04444885f, self - D_800CC2D0);
+        func_1505D024(obj, sound | 0x80000, (yaw - 90.0f) * 182.04444885f, self - movement_obj);
     }
     return 2;
 }
@@ -506,17 +506,17 @@ s32 func_150825C0(s32 spawnIdx, s32 arg1) {
             }
             clear = 1;
             for (j = 0; j < D_8008FD8C; j++) {
-                if (D_800CC2D0[j].interaction_state == 0) {
+                if (movement_obj[j].interaction_state == 0) {
                     continue;
                 }
-                if (D_800CC2D0[j].unk127 == 0xFF) {
+                if (movement_obj[j].unk127 == 0xFF) {
                     continue;
                 }
-                if (D_800D2138.unk208 & (1 << D_800CC2D0[j].unk127)) {
+                if (D_800D2138.unk208 & (1 << movement_obj[j].unk127)) {
                     // matching: squaring in place (d = d * d) reuses the operand's register
-                    dx = D_800CC2D0[j].x_position - D_800D20FC[spawnIdx].x;
+                    dx = movement_obj[j].x_position - D_800D20FC[spawnIdx].x;
                     dx = dx * dx;
-                    dz = D_800CC2D0[j].z_position - D_800D20FC[spawnIdx].z;
+                    dz = movement_obj[j].z_position - D_800D20FC[spawnIdx].z;
                     dz = dz * dz;
                     if (dx + dz <= radiusSq) {
                         clear = 0;
@@ -613,15 +613,15 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     }
     type = spawn->type;
     if (slot != 0) {
-        obj = &D_800CC2D0[slot - 1];
+        obj = &movement_obj[slot - 1];
         func_1505F188(obj);
     } else if ((spawnIdx != -1) && (spawnIdx < D_8008FD8C)) {
-        obj = &D_800CC2D0[spawnIdx];
+        obj = &movement_obj[spawnIdx];
         func_1505F188(obj);
     } else {
         obj = func_1505ED34();
     }
-    idx = obj - D_800CC2D0;
+    idx = obj - movement_obj;
     if (idx == 25) {
         return 0;
     }
@@ -938,7 +938,7 @@ void func_150836CC(Actor *parent, s32 setId) {
         if (parts[i].type == 0) {
             child = func_1505F0AC(parts[i].unk0);
             if (child != NULL) {
-                if (child->unk65 == ((parent - D_800CC2D0) + 1)) {
+                if (child->unk65 == ((parent - movement_obj) + 1)) {
                     func_15060F28(child, 0);
                 }
             }
@@ -948,7 +948,7 @@ void func_150836CC(Actor *parent, s32 setId) {
 
 /* Sets object objIdx's model to modelId (0xFF for none) and loads its per-model state. */
 void func_150837D4(s32 objIdx, s32 modelId, s32 arg2) {
-    Actor *obj = &D_800CC2D0[objIdx];
+    Actor *obj = &movement_obj[objIdx];
     ModelDef *def;
 
     obj->id = modelId;
@@ -1047,14 +1047,14 @@ Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, 
     func_1503D774(modelId, 0);
     func_1503D660(modelId, 0);
     obj = func_1505ED34();
-    obj->unique_id = 0xFF - (obj - D_800CC2D0);
+    obj->unique_id = 0xFF - (obj - movement_obj);
     obj->unkAB = arg3;
     obj->interaction_state = state;
     func_150615DC(obj);
     obj->unk232 = 1;
     obj->health = 1;
     obj->immune = 0xFF;
-    obj->unk65 = (parent - D_800CC2D0) + 1;
+    obj->unk65 = (parent - movement_obj) + 1;
     obj->unk5C = arg1;
     obj->unk123 = 1;
     obj->id = modelId;
@@ -1106,7 +1106,7 @@ Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, 
         D_800C3638 = 0;
     }
     func_150839B8(obj, modelId, NULL);
-    func_150837D4(obj - D_800CC2D0, modelId, 1);
+    func_150837D4(obj - movement_obj, modelId, 1);
     func_150838EC(obj, arg7, animFlag, arg8);
     if (blocked) {
         D_800C3638 = 1;
@@ -1155,8 +1155,8 @@ Actor *func_15083E90(u8 id) {
     if (id == 0) {
         return NULL;
     }
-    // matching: a walking pointer; indexing D_800CC2D0[i] makes IDO unroll the loop differently
-    obj = D_800CC2D0;
+    // matching: a walking pointer; indexing movement_obj[i] makes IDO unroll the loop differently
+    obj = movement_obj;
     for (i = 0; i < 26; i++) {
         if (obj->interaction_state != 0 && obj->unique_id == id) {
             return obj;
@@ -1172,7 +1172,7 @@ s32 func_15083FB0(u8 id) {
 
     obj = func_15083E90(id);
     if (obj != NULL) {
-        return obj - D_800CC2D0;
+        return obj - movement_obj;
     }
     return -1;
 }
@@ -1181,7 +1181,7 @@ s32 func_15084000(void) {
     Actor *obj = func_1505EEF4();
 
     if (obj != NULL) {
-        return obj - D_800CC2D0;
+        return obj - movement_obj;
     }
     return -1;
 }
@@ -1202,7 +1202,7 @@ s32 func_15084044(Actor *obj, s32 model) {
     // an s32 row view, as s32 lvalues; typed field access reallocates registers (see the func_15084044 ledger)
     slot = (u8 *)((s32)obj + model * 8);
     if (obj->unk65 != 0) {
-        spawn = D_800CC2D0[obj->unk65 - 1].spawn;
+        spawn = movement_obj[obj->unk65 - 1].spawn;
     } else {
         spawn = obj->spawn;
     }
@@ -1380,8 +1380,8 @@ void func_15084558(Actor *self) {
                 }
             }
             for (j = 0; j < 25; j++) {
-                if (j != (self - D_800CC2D0)) {
-                    obj = &D_800CC2D0[j];
+                if (j != (self - movement_obj)) {
+                    obj = &movement_obj[j];
                     if (obj->interaction_state != 0 && obj->id != 0xFF && obj->unk5 != 2) {
                         otherCount = obj->modelCount;
                         otherList = obj->modelIds;
@@ -1488,7 +1488,7 @@ void func_15084A18(void) {
         if (*timer == 1) {
             if (D_800D19A0[i] != NULL && D_800C5C08[i] == NULL) {
                 for (m = 0; m < 25; m++) {
-                    obj = &D_800CC2D0[m];
+                    obj = &movement_obj[m];
                     if (obj->interaction_state != 0) {
                         for (j = 0; j < obj->modelCount; j++) {
                             for (k = 0; k < 2; k++) {

@@ -40,9 +40,9 @@ void func_15112520(WorldObject *turret) {
     static s16 D_80089234; // sound timer: 0 idle, -1 start the sound, >0 cooldown frames
 
     cfg = turret->param.data;
-    dx = D_800CC2D0[0].x_position - turret->x;
-    dy = (D_800CC2D0[0].y_position + 65.0f) - turret->y;
-    dz = D_800CC2D0[0].z_position - turret->z;
+    dx = movement_obj[0].x_position - turret->x;
+    dy = (movement_obj[0].y_position + 65.0f) - turret->y;
+    dz = movement_obj[0].z_position - turret->z;
     D_800DBEC0 = dx * dx + dy * dy + dz * dz;
     if (cfg->range * cfg->range < D_800DBEC0) {
         pitch = cfg->basePitch;
@@ -157,12 +157,12 @@ void func_15112A80(s32 player) {
         if (func_150859AC(view, 0) != 0) {
             D_800DBEE8[view] = 0;
             for (i = 0; i < D_800DBEF0;) {
-                groupSize = D_800DBEF4[i].state >> 4;
+                groupSize = db_Object_array[i].state >> 4;
                 end = i + groupSize;
                 mask = 0;
                 start = i;
                 for (; i <= end; i++) {
-                    obj = i + D_800DBEF4; // matching: &D_800DBEF4[i] swaps the addu operands
+                    obj = i + db_Object_array; // matching: &db_Object_array[i] swaps the addu operands
                     obj->viewFlags &= ~(1 << view);
                     // matching: empty then-branch orders uopt's live ranges (see func_15112A80 notes)
                     if (!(obj->inactive != 1 && !(obj->state & 8) && (obj->flags & 1) && obj->alpha != 0 &&
@@ -174,7 +174,7 @@ void func_15112A80(s32 player) {
 
                         mtx = D_800D9C10[view];
                         dp = (s32 *)((u8 *)dist + (i - start) * 4); // matching: &dist[i - start] scales i and start separately
-                        if (D_800DBFF0[view].playerExt->aimState != 0) {
+                        if (camera_global_Cameras[view].playerExt->aimState != 0) {
                             drawDist = D_800D9B1C;
                         } else if (obj->drawDistance == 0) {
                             drawDist = D_800D9B1C;
@@ -230,7 +230,7 @@ void func_15112A80(s32 player) {
                 }
                 if (mask != 0) {
                     for (i = start; i <= end; i++) {
-                        D_800DBEF4[i].viewFlags |= 1 << view;
+                        db_Object_array[i].viewFlags |= 1 << view;
                         (*D_80089240[view])[*count].index = i;
                         (*D_80089240[view])[*count].distance = *(s32 *)((u8 *)dist + (i - start) * 4); // matching: as above
                         (*count)++;
@@ -246,9 +246,9 @@ void func_15113180(void) {
     s32 i;
 
     for (i = 0; i < D_800DBEF0; i++) {
-        D_800DBEF4[i].viewFlags &= ~0x40;
-        if (((D_800DBEF4[i].viewFlags & 0xF) != 0 || (D_800DBEF4[i].state & 4) == 4) && D_800DBEF4[i].update != NULL) {
-            D_800DBEF4[i].viewFlags |= 0x40;
+        db_Object_array[i].viewFlags &= ~0x40;
+        if (((db_Object_array[i].viewFlags & 0xF) != 0 || (db_Object_array[i].state & 4) == 4) && db_Object_array[i].update != NULL) {
+            db_Object_array[i].viewFlags |= 0x40;
         }
     }
 }
@@ -273,7 +273,7 @@ void func_15113218(void) {
             continue;
         }
         for (j = 0; j < D_800DBEE8[view]; j++) {
-                obj = &D_800DBEF4[(*D_80089240[view])[j].index];
+                obj = &db_Object_array[(*D_80089240[view])[j].index];
                 if ((obj->state & 1) == 1) {
                     func_150A7B80(&(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                     continue;
@@ -285,7 +285,7 @@ void func_15113218(void) {
                     func_1511490C(mf, obj);
                     guMtxF2L(mf, &(*D_80089250[D_800BE9C0])[(*D_80089240[view])[j].index]);
                 } else if (obj->attach > 100 && obj->attach < 125) {
-                    actor = &D_800CC2D0[obj->attach - 100];
+                    actor = &movement_obj[obj->attach - 100];
                     if (actor->unk1D4 == NULL) {
                         func_150A7CB0(mf, obj->scaleX, obj->scaleY, obj->scaleZ);
                         mf[3][0] = actor->x_position;
@@ -338,7 +338,7 @@ Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
     gfx = func_1515E544(gfx, *(s32 *)((u8 *)D_800D9E10 + viewOffset), D_800D9E20, D_800D9E21,
                         D_800D9BD0[view][D_800BE9C0]);
     for (i = 0; i < D_800DBEE8[view]; i++) {
-        gfx = func_151137D4(gfx, &D_800DBEF4[(**list)[i].index], &(*D_80089250[D_800BE9C0])[(**list)[i].index], view,
+        gfx = func_151137D4(gfx, &db_Object_array[(**list)[i].index], &(*D_80089250[D_800BE9C0])[(**list)[i].index], view,
                             (**list)[i].distance, pass);
     }
     gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -440,7 +440,7 @@ void func_15113C88(void) {
 
     for (i = 0; i < D_800DBEF0; i++) {
         hidden = FALSE;
-        obj = i + D_800DBEF4; // matching: &D_800DBEF4[i] swaps the addu operands
+        obj = i + db_Object_array; // matching: &db_Object_array[i] swaps the addu operands
         for (j = 0; j < D_80082FA0; j++) {
             if (func_150859AC(j, 0) != 0 && obj->viewAlpha[j] == 0) {
                 hidden = TRUE;
@@ -487,7 +487,7 @@ void func_15113E54(s32 arg0) {
     leaderFloorTri = 0;
     count = D_800DBEF0 - D_800DBF98;
     for (i = 0; i < count; i++) {
-        obj = i + D_800DBEF4; // matching: operand order of the addu
+        obj = i + db_Object_array; // matching: operand order of the addu
         if ((obj->viewFlags & 0x40) == 0x40 && obj->inactive == 0) {
             obj->update(obj);
         }
@@ -498,7 +498,7 @@ void func_15113E54(s32 arg0) {
             for (j = 0; j < D_800D23C0[i].count; j++) {
                 member = D_800D23C0[i].members[j];
                 if ((member >> 12) == 2) {
-                    obj = (member & 0xFFF) + D_800DBEF4; // matching: operand order of the addu
+                    obj = (member & 0xFFF) + db_Object_array; // matching: operand order of the addu
                     if ((obj->viewFlags & 0x40) == 0x40 && obj->inactive == 0) {
                         if (j != 0) {
                             obj->moveX = moveX;
@@ -526,7 +526,7 @@ s32 func_15114050(WorldObject *obj, s32 actor) {
         if (actor == -1) {
             return TRUE;
         }
-        if (D_800DBF94[obj - D_800DBEF4] & (1 << actor)) {
+        if (D_800DBF94[obj - db_Object_array] & (1 << actor)) {
             return TRUE;
         }
     }
@@ -540,7 +540,7 @@ s32 func_151140C4(WorldObject *obj) {
     i = 0;
     if (obj->flags & 0x80) {
         for (; i != 32; i++) {
-            if (D_800DBF94[obj - D_800DBEF4] & (1 << i)) {
+            if (D_800DBF94[obj - db_Object_array] & (1 << i)) {
                 return i;
             }
         }
@@ -560,15 +560,15 @@ void func_15114188(void) {
             for (j = 0; j < 25 && D_800DBF94[i] != 0; j++) {
                 if (D_800DBF94[i] & (1 << j)) {
                     D_800DBF94[i] ^= 1 << j;
-                    if (D_800DBEF4[i].onContact != NULL && (D_800DBEF4[i].unk92 != 0 || D_800CC2D0[j].unk127 != 0xFF)) {
-                        D_800DBEF4[i].onContact(i + D_800DBEF4, &D_800CC2D0[j]); // matching: addu operand order
+                    if (db_Object_array[i].onContact != NULL && (db_Object_array[i].unk92 != 0 || movement_obj[j].unk127 != 0xFF)) {
+                        db_Object_array[i].onContact(i + db_Object_array, &movement_obj[j]); // matching: addu operand order
                     }
-                    if ((D_800DBEF4[i].flags & 4) == 4 && !(D_800DBEF4[i].flags & 8)) {
-                        func_1511473C(&D_800CC2D0[j], i);
+                    if ((db_Object_array[i].flags & 4) == 4 && !(db_Object_array[i].flags & 8)) {
+                        func_1511473C(&movement_obj[j], i);
                     }
                 }
             }
-            D_800DBEF4[i].flags &= ~0x8C;
+            db_Object_array[i].flags &= ~0x8C;
         }
     }
 }
@@ -601,33 +601,33 @@ void func_15114348(s32 objIndex, f32 *x, f32 *y, f32 *z) {
     zaxis[0] = 0.0f;
     zaxis[1] = 0.0f;
     zaxis[2] = 1.0f;
-    dx = *x - D_800DBEF4[objIndex].x;
-    dy = *y - D_800DBEF4[objIndex].y;
-    dz = *z - D_800DBEF4[objIndex].z;
-    if (D_800DBEF4[objIndex].rotX != 0.0f) {
-        guRotateF(m, D_800DBEF4[objIndex].rotX, 1, 0, 0);
+    dx = *x - db_Object_array[objIndex].x;
+    dy = *y - db_Object_array[objIndex].y;
+    dz = *z - db_Object_array[objIndex].z;
+    if (db_Object_array[objIndex].rotX != 0.0f) {
+        guRotateF(m, db_Object_array[objIndex].rotX, 1, 0, 0);
         func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
         func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
     }
-    if (D_800DBEF4[objIndex].rotZ != 0.0f) {
-        guRotateF(m, D_800DBEF4[objIndex].rotZ, zaxis[0], zaxis[1], zaxis[2]);
+    if (db_Object_array[objIndex].rotZ != 0.0f) {
+        guRotateF(m, db_Object_array[objIndex].rotZ, zaxis[0], zaxis[1], zaxis[2]);
         func_150A7960(m, yaxis[0], yaxis[1], yaxis[2], &yaxis[0], &yaxis[1], &yaxis[2]);
         func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
     }
-    if (D_800DBEF4[objIndex].rotY != 0.0f) {
-        guRotateF(m, D_800DBEF4[objIndex].rotY, yaxis[0], yaxis[1], yaxis[2]);
+    if (db_Object_array[objIndex].rotY != 0.0f) {
+        guRotateF(m, db_Object_array[objIndex].rotY, yaxis[0], yaxis[1], yaxis[2]);
         func_150A7960(m, xaxis[0], xaxis[1], xaxis[2], &xaxis[0], &xaxis[1], &xaxis[2]);
         func_150A7960(m, zaxis[0], zaxis[1], zaxis[2], &zaxis[0], &zaxis[1], &zaxis[2]);
     }
-    guRotateF(m, D_800DBEF4[objIndex].spinX, xaxis[0], xaxis[1], xaxis[2]);
-    guRotateF(m2, D_800DBEF4[objIndex].spinZ, zaxis[0], zaxis[1], zaxis[2]);
+    guRotateF(m, db_Object_array[objIndex].spinX, xaxis[0], xaxis[1], xaxis[2]);
+    guRotateF(m2, db_Object_array[objIndex].spinZ, zaxis[0], zaxis[1], zaxis[2]);
     func_150A7A48(m, m2, m);
-    guRotateF(m2, D_800DBEF4[objIndex].spinY, yaxis[0], yaxis[1], yaxis[2]);
+    guRotateF(m2, db_Object_array[objIndex].spinY, yaxis[0], yaxis[1], yaxis[2]);
     func_150A7A48(m, m2, m);
     func_150A7960(m, dx, dy, dz, &rx, &ry, &rz);
-    rx = D_800DBEF4[objIndex].moveX + (rx - dx);
-    ry = D_800DBEF4[objIndex].moveY + (ry - dy);
-    rz = D_800DBEF4[objIndex].moveZ + (rz - dz);
+    rx = db_Object_array[objIndex].moveX + (rx - dx);
+    ry = db_Object_array[objIndex].moveY + (ry - dy);
+    rz = db_Object_array[objIndex].moveZ + (rz - dz);
     *x += rx;
     *y += ry;
     *z += rz;
@@ -641,8 +641,8 @@ void func_1511473C(Actor *actor, s32 objIndex) {
         return;
     }
     func_15114348(objIndex, &actor->x_position, &actor->y_position, &actor->z_position);
-    actor->unk76 += D_800DBEF4[objIndex].spinY * D_800A2F60;
-    if (actor->unk137 != 0 && objIndex + 1 == D_800CBDA0[actor - D_800CC2D0]) {
+    actor->unk76 += db_Object_array[objIndex].spinY * D_800A2F60;
+    if (actor->unk137 != 0 && objIndex + 1 == D_800CBDA0[actor - movement_obj]) {
         actor->unk7A = actor->unk76;
     }
 }
@@ -676,8 +676,8 @@ WorldObject *func_151149AC(u8 id) {
         return NULL;
     }
     for (i = 0; i < D_800DBEF0; i++) {
-        if (D_800DBEF4[i].id == id) {
-            return i + D_800DBEF4;
+        if (db_Object_array[i].id == id) {
+            return i + db_Object_array;
         }
     }
     return NULL;
@@ -689,12 +689,12 @@ void func_15114A1C(void) {
     s32 handle;
 
     for (i = 0; i < D_800DBEF0; i++) {
-        if ((D_800DBEF4[i].state & 1) != 1) {
+        if ((db_Object_array[i].state & 1) != 1) {
             // matching: the dead copies (handle, j) and empty ifs steer uopt's register choices (see notes)
             handle = D_800DBEF8[i];
             if (&D_800DBEF8) {}
             if (D_800DBEF8[i] != 0) {
-                if (D_800DBEF4[i].attach != 3 && !(D_800DBEF4[i].viewFlags & 0x80)) {
+                if (db_Object_array[i].attach != 3 && !(db_Object_array[i].viewFlags & 0x80)) {
                     s32 j;
 
                     j = i;
@@ -713,7 +713,7 @@ void func_15114A1C(void) {
                     D_800DBEF8[j] = 0;
                 }
             }
-        } else if (!(D_800DBEF4[i].viewFlags & 0x80)) {
+        } else if (!(db_Object_array[i].viewFlags & 0x80)) {
             D_800DBEF8[i] = 0;
         }
     }
@@ -724,16 +724,16 @@ void func_15114B94(u32 index) {
     u32 ungrouped;
 
     if (index < D_800DBEF0) {
-        if (D_800DBEF4[index].shadow != NULL) {
-            func_1516972C((EffectHeader *)D_800DBEF4[index].shadow);
-            D_800DBEF4[index].shadow = NULL;
+        if (db_Object_array[index].shadow != NULL) {
+            func_1516972C((EffectHeader *)db_Object_array[index].shadow);
+            db_Object_array[index].shadow = NULL;
         }
-        D_800DBEF4[index].state |= 8;
-        D_800DBEF4[index].inactive = 1;
+        db_Object_array[index].state |= 8;
+        db_Object_array[index].inactive = 1;
     }
     index = D_800DBEF0 - 1;
     ungrouped = D_800DBEF0 - D_800DBF98;
-    while (D_800DBEF0 != 0 && (D_800DBEF4[index].state & 8)) {
+    while (D_800DBEF0 != 0 && (db_Object_array[index].state & 8)) {
         if (index >= ungrouped && D_800DBF98 != 0) {
             D_800DBF98--;
         } else {

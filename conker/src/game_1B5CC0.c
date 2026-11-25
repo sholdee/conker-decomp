@@ -289,7 +289,7 @@ void func_15188F84(BoneTrail *arg) {
     curBase = D_800BE9C0 * numFrames;
     prevBase = (D_800BE9C0 ^ 1) * numFrames;
     for (i = 0; i < D_800DBEE8[view]; i++) {
-        objects = D_800DBEF4;
+        objects = db_Object_array;
         if (trail->owner.worldObj == &objects[(*D_80089240[0])[i].index]) {
             break;
         }
@@ -433,7 +433,7 @@ Gfx *func_151895F4(Gfx *gfx, BoneTrail *trail, s16 player) {
     numBones = func_1502DB20(trail->owner.object->id);
     numFilled = trail->numFilled;
     base = D_800BE9C0 * numBones * numFrames;
-    index = trail->owner.object - D_800CC2D0;
+    index = trail->owner.object - movement_obj;
     if (index < 0 || index >= 25) {
         return gfx;
     }

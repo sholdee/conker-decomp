@@ -22,8 +22,8 @@ void func_15052590(Actor *obj) {
     flags = obj->unk25C;
     if (flags & 0x80) {
         obj->unk25C = flags & ~0x80;
-        func_150AFC68(D_800C3E78, 3, 0x3FC, 6, 0xFF, 0);
-        func_150AFC68(D_800C3E78, 2, 0x3FC, 6, 0xFF, 0);
+        func_150AFC68(dc_glbl_CharNum, 3, 0x3FC, 6, 0xFF, 0);
+        func_150AFC68(dc_glbl_CharNum, 2, 0x3FC, 6, 0xFF, 0);
     }
 
     if ((D_800C35EA[0] != 1) || ((D_800C3654[0] != 0) && (func_150229E4(obj) == 0))) {

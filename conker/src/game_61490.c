@@ -25,7 +25,7 @@ void func_15033FE0(GameCommand *commands, s32 index) {
     s32 first;
     GameCommand *cursor;
 
-    actor = &D_800CC2D0[index];
+    actor = &movement_obj[index];
     cursor = commands;
     if (actor->unk1D4 == NULL) {
         commands->opcode = 0x1000;
@@ -77,7 +77,7 @@ GameCommand *func_150341BC(GameCommand *cmd, s32 index) {
     s32 kind;
     s32 offset;
 
-    actor = &D_800CC2D0[index];
+    actor = &movement_obj[index];
     sub = actor->unk31C;
     if ((sub != NULL) && !(actor->unk2F8 & 0x80)) {
         // pad54 is declared u32 in structs.h but holds an f32 here
@@ -104,17 +104,17 @@ GameCommand *func_150341BC(GameCommand *cmd, s32 index) {
         cmd++;
         cmd[-1].value = actor->unk1D1 * 200;
     }
-    if ((D_800CC2D0[D_800C3E78].unk31C != NULL) && (D_800CC2D0[D_800C3E78].unk31C->unk12 != 0)) {
+    if ((movement_obj[dc_glbl_CharNum].unk31C != NULL) && (movement_obj[dc_glbl_CharNum].unk31C->unk12 != 0)) {
         cmd->opcode = 8;
         cmd++;
-        cmd[-1].value = -D_800CC2D0[D_800C3E78].unk31C->unk12;
+        cmd[-1].value = -movement_obj[dc_glbl_CharNum].unk31C->unk12;
     }
     return cmd;
 }
 
 /* Appends an opcode-6 command scaled from unk1D1, if it is set. */
 GameCommand *func_15034340(GameCommand *cmd, s32 index) {
-    Actor *actor = &D_800CC2D0[index];
+    Actor *actor = &movement_obj[index];
 
     if (actor->unk1D1 != 0) {
         cmd->opcode = 6;
@@ -126,7 +126,7 @@ GameCommand *func_15034340(GameCommand *cmd, s32 index) {
 
 /* Identical to func_15034340. */
 GameCommand *func_150343B0(GameCommand *cmd, s32 index) {
-    Actor *actor = &D_800CC2D0[index];
+    Actor *actor = &movement_obj[index];
 
     if (actor->unk1D1 != 0) {
         cmd->opcode = 6;
@@ -141,7 +141,7 @@ GameCommand *func_15034420(GameCommand *cmd, s32 index) {
     s16 part;
     s16 value;
 
-    value = (f32)D_800CC2D0[index].unk2E4 * (65536.0f / 3600.0f);
+    value = (f32)movement_obj[index].unk2E4 * (65536.0f / 3600.0f);
     part = value >> 4;
     value -= part;
     cmd[0].value = part;

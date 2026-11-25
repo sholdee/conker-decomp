@@ -236,7 +236,7 @@ void func_1512E8E0(Camera *camera) {
 
                 if (func_15123934(camera, 0x400, 0, camera->unk134, 2) != 0) {
                     if (cmd->type == 14) {
-                        func_151254F4(camera, obj - D_800CC2D0);
+                        func_151254F4(camera, obj - movement_obj);
                     }
                     camera->flags &= ~8;
                     camera->unk628 = 0;
@@ -251,9 +251,9 @@ void func_1512E8E0(Camera *camera) {
                     camera->unk384 = camera->yaw;
                 }
                 if (cmd->type == 14) {
-                    camera->unk618.x = D_800CC2D0[camera->playerIndex].x_position;
-                    camera->unk618.y = D_800CC2D0[camera->playerIndex].y_position;
-                    camera->unk618.z = D_800CC2D0[camera->playerIndex].z_position;
+                    camera->unk618.x = movement_obj[camera->playerIndex].x_position;
+                    camera->unk618.y = movement_obj[camera->playerIndex].y_position;
+                    camera->unk618.z = movement_obj[camera->playerIndex].z_position;
                 } else if (camera->snap != 0) {
                     camera->unk618.x = obj->x_position;
                     camera->unk618.y = obj->y_position;

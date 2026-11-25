@@ -325,7 +325,7 @@ s32 func_151420F8(s32 actor) {
     Args151420F8 args;
 
     args = D_800A5200;
-    if (func_150A2AEC((actor - (s32)D_800CC2D0) / (s32)sizeof(Actor), 6, &args, actor) == -1) {
+    if (func_150A2AEC((actor - (s32)movement_obj) / (s32)sizeof(Actor), 6, &args, actor) == -1) {
         return 0;
     }
     return 1;
@@ -1124,7 +1124,7 @@ start:
     i = 0;
     found = 0;
     while (!found && i < count) {
-        if (D_800CC2D0[i].health != 0) {
+        if (movement_obj[i].health != 0) {
             found = 1;
         } else {
             i++;
@@ -1141,7 +1141,7 @@ start:
             }
         }
         if (found2) {
-            func_1512D748(&D_800DBFF0[D_800BE9E8], arg0, 1);
+            func_1512D748(&camera_global_Cameras[D_800BE9E8], arg0, 1);
             spawn.flags = 1;
             spawn.duration = (func_150ADA20() & 0xF) + 0x14;
             spawn.strength = (func_150ADA20() & 3) + 4;
@@ -1486,9 +1486,9 @@ f32 func_15144A74(Vec3f *a, Vec3f *b) {
     return a->x * b->x + a->y * b->y + a->z * b->z;
 }
 
-/* D_800DBFF0[index].unk380 wrapped into [0, 360] degrees. */
+/* camera_global_Cameras[index].unk380 wrapped into [0, 360] degrees. */
 f32 func_15144AA8(s32 index) {
-    f32 v = D_800DBFF0[index].unk380;
+    f32 v = camera_global_Cameras[index].unk380;
     if (360.0f < v) {
         do {
             v -= 360.0f;
@@ -1502,9 +1502,9 @@ f32 func_15144AA8(s32 index) {
     return v;
 }
 
-/* Position (unk2F8) of D_800DBFF0[index]. */
+/* Position (unk2F8) of camera_global_Cameras[index]. */
 Vec3f *func_15144B34(s32 index) {
-    return &D_800DBFF0[index].eye;
+    return &camera_global_Cameras[index].eye;
 }
 
 /* Wraps an angle into [0, 2 pi] radians. */
@@ -1776,7 +1776,7 @@ s32 func_151452C4(Vec3f *origin, Vec3f *dir, Vec3f *center, f32 radius, Vec3f *h
     }
 }
 
-/* Whether point lies within radius of D_800DBFF0[index]'s position (unk2F8). */
+/* Whether point lies within radius of camera_global_Cameras[index]'s position (unk2F8). */
 s32 func_151454BC(u8 index, f32 radius, Vec3f *point) {
     f32 dx;
     f32 dy;
@@ -1990,12 +1990,12 @@ s32 func_15145AD8(Vec3f *start, Vec3f *dir, Actor *actor, Vec3f *hitNear, Vec3f 
     return 1;
 }
 
-/* Whether entry `index` of D_800DBEF4 has viewFlags bit 0x80 (hidden) (true for a negative index). */
+/* Whether entry `index` of db_Object_array has viewFlags bit 0x80 (hidden) (true for a negative index). */
 u8 func_15145C90(s32 index) {
     if (index < 0) {
         return 1;
     } else {
-        return (D_800DBEF4[index].viewFlags & 0x80) == 0x80;
+        return (db_Object_array[index].viewFlags & 0x80) == 0x80;
     }
 }
 

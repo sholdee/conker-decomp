@@ -175,11 +175,11 @@ void func_151B22C8(RopeTie *self) {
     func_15149368(&self->base);
 }
 
-/* Returns 1 when obj1->unk65 holds obj0's 1-based index in D_800CC2D0 and obj1->unk5C is 1, else 2. */
+/* Returns 1 when obj1->unk65 holds obj0's 1-based index in movement_obj and obj1->unk5C is 1, else 2. */
 s32 func_151B22F4(RopeTie *self) {
     Actor *obj0 = self->tie.obj0;
 
-    if (self->tie.obj1->unk65 == (obj0 - D_800CC2D0) + 1) {
+    if (self->tie.obj1->unk65 == (obj0 - movement_obj) + 1) {
         if (self->tie.obj1->unk5C == 1) {
             return 1;
         }
@@ -400,7 +400,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         func_15143134(&line->anchor.offset, &start, boneMtx);
         func_15143134(&line->endOffset, &end, boneMtx);
         update = 1;
-        camera = &D_800DBFF0[view].eye.x;
+        camera = &camera_global_Cameras[view].eye.x;
         gfx = func_15142B7C(gfx, 0x200005, 0x60600);
         gfx = func_15142E24(gfx, (s32)D_80090DE8, 0, 0, 0, 0, 0x36, 0, 0, &update, 3);
         gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &update);

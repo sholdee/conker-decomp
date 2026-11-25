@@ -197,7 +197,7 @@ void func_15143794(s16, s16, f32, f32 *);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 
 /*
- * DDB60Effect update: while the owner lives and player D_800CC2D0[owner->unk124] has unk31C byte 0x4F == 2,
+ * DDB60Effect update: while the owner lives and player movement_obj[owner->unk124] has unk31C byte 0x4F == 2,
  * emits particles around the owner when its speed (at least 1.35 * player->unk44) exceeds 26.
  */
 void func_150B0D20(DDB60Effect *effect) {
@@ -222,9 +222,9 @@ void func_150B0D20(DDB60Effect *effect) {
     }
     idx = owner->unk124;
     emit = 0;
-    if (D_800CC2D0[idx].unk31C->unk4F == 2) {
+    if (movement_obj[idx].unk31C->unk4F == 2) {
         speed = owner->xz_velocity;
-        minSpeed = D_800CC2D0[idx].unk44 * 1.350000024f;
+        minSpeed = movement_obj[idx].unk44 * 1.350000024f;
         if (speed < minSpeed) {
             speed = minSpeed;
         }
@@ -244,7 +244,7 @@ void func_150B0D20(DDB60Effect *effect) {
             right[0] = forward[1];
             right[1] = -forward[0];
             do {
-                func_150B0A60(owner, &D_800CC2D0[idx], forward, right, pos, &angle);
+                func_150B0A60(owner, &movement_obj[idx], forward, right, pos, &angle);
                 func_15143794(angle, (func_150ADA20() % 26) - 41, func_150ADA68() * 3.769999981f + 4.059999943f, vel);
                 vel[0] -= refVel->x * 0.9250000715f;
                 vel[2] -= refVel->z * 0.9250000715f;

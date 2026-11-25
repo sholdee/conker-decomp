@@ -247,7 +247,7 @@ void func_150CE740(Actor *obj) {
         if (obj->unk31C->unk84 != 0) {
             func_1504C854(obj);
         } else {
-            D_800CC288 = D_800BE710[D_800C3E78];
+            D_800CC288 = D_800BE710[dc_glbl_CharNum];
         }
     } else {
         D_800CC288 = D_800BE648[v];
@@ -277,12 +277,12 @@ void func_150CE740(Actor *obj) {
     if ((obj->disable_run == 0) && ((D_800BE616 == 0) || (obj->unk31C->unk84 == 0))) {
         if (D_800BE616 != 0) {
             /* camera yaw in degrees -> 16-bit binary angle (65536 / 360) */
-            D_800CC280 = D_800DBFF0[D_800C3E78].yaw * 182.0444488525390625f;
+            D_800CC280 = camera_global_Cameras[dc_glbl_CharNum].yaw * 182.0444488525390625f;
             heading = func_1505A630(D_800CC284->stick_x, D_800CC284->stick_y, 0) + D_800CC280;
             obj->unk44 = func_1505A5CC(D_800CC284);
         } else {
-            obj->unk44 = D_800CC2D0[obj->unk124].unk44 * 1.75f;
-            heading = D_800CC2D0[obj->unk124].unk31C->unk4C;
+            obj->unk44 = movement_obj[obj->unk124].unk44 * 1.75f;
+            heading = movement_obj[obj->unk124].unk31C->unk4C;
         }
         if (obj->unk223 == 13) {
             obj->unk44 = 0.0f;
@@ -326,14 +326,14 @@ void func_150CE740(Actor *obj) {
         }
     }
 control_done:
-    if ((D_800BE616 == 0) || (D_800C3E78 >= D_8008FD8C) || (obj->unk31C->unk120 == 0)) {
+    if ((D_800BE616 == 0) || (dc_glbl_CharNum >= D_8008FD8C) || (obj->unk31C->unk120 == 0)) {
         func_15052590(obj);
     }
-    if ((D_800CC2D0[0].unk31C->unk27 != 0) && ((obj->unk232 != D_800A0818[isType21]) || (obj->stunned != 0))) {
-        D_800CC2D0[0].unk31C->unk27 = 0;
-        D_800CC2D0[0].disable_run = 0;
-        D_800CC2D0[0].unk83 = 0;
-        D_800CC2D0[0].immune = 0;
+    if ((movement_obj[0].unk31C->unk27 != 0) && ((obj->unk232 != D_800A0818[isType21]) || (obj->stunned != 0))) {
+        movement_obj[0].unk31C->unk27 = 0;
+        movement_obj[0].disable_run = 0;
+        movement_obj[0].unk83 = 0;
+        movement_obj[0].immune = 0;
         obj->unk232 = 0x11;
     }
     if (D_800BE616 == 0) {
@@ -341,7 +341,7 @@ control_done:
         // matching: (&table[i])[n] adds n after i; table[i + n] folds n into the address
         if (obj->unk232 == D_800A0818[isType21]) {
             func_15052F9C(obj, 156.0f, (&D_800A0818[isType21])[4], 4, 0, (&D_800A0818[isType21])[2], 0xFF, 0, 0, 0);
-        } else if ((D_800CC268 & 1) && (D_800CC2D0[obj->unk124].unk65 == 0) && (obj->unk25C & 0x400)) {
+        } else if ((D_800CC268 & 1) && (movement_obj[obj->unk124].unk65 == 0) && (obj->unk25C & 0x400)) {
             obj->unk124 = 0;
             func_1505327C(obj, 50.0f, 3.0f, D_800A0818[isType21], (&D_800A0818[isType21])[4]);
         }

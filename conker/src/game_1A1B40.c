@@ -40,7 +40,7 @@ void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 si
     Actor *obj;
     BillboardTemplate template;
 
-    obj = &D_800CC2D0[objIndex];
+    obj = &movement_obj[objIndex];
     if ((obj->in_water == 0) && (-10000.0f == obj->unk118)) {
         y = obj->y_position + 5.0f;
         angle = obj->unk40 * 0.01745329238f;

@@ -31,7 +31,7 @@ void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
     desc.unk34 = 0x1AD;
     desc.viewportMask = 0xFF;
     {
-        s32 objIndex = owner - D_800CC2D0;
+        s32 objIndex = owner - movement_obj;
 
         if ((objIndex < 2) && (D_800E0BCE[objIndex] != 0)) {
             if (D_8008FD90 == 2) {
@@ -106,7 +106,7 @@ s32 func_151BA084(DynModel *effect, s16 viewport) {
             return 0;
         }
     } else {
-        player = &D_800CC2D0[0];
+        player = &movement_obj[0];
         if (player->camera != NULL && player->unk31C != NULL &&
             player->unk31C->aimState != 0 && viewport == player->camera->playerIndex) {
             return 0;

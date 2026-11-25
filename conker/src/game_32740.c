@@ -25,12 +25,12 @@ void func_15005290(s32 resource, s32 mode) {
     D_800DC020 = (CamPose *)func_1502B5C8(&size, 3, 12, resource, 8);
     D_80089550 = size / 24;
     count = D_80082FA0 + 1;
-    D_800DBFF0 = allocate_memory(count * sizeof(Camera), 1, 1, 0);
+    camera_global_Cameras = allocate_memory(count * sizeof(Camera), 1, 1, 0);
     D_800DC2B0 = allocate_memory(count * sizeof(CamMsgQueue), 1, 0, 0);
     D_800DC2A0[0] = allocate_memory(count * sizeof(Mtx), 1, 1, 0);
     D_800DC2A0[1] = allocate_memory(count * sizeof(Mtx), 1, 1, 0);
     for (i = 0; i <= D_80082FA0; i++) {
-        view = &D_800DBFF0[i];
+        view = &camera_global_Cameras[i];
         D_800BE2B0[i] = (s32)allocate_memory(D_800BE620 * 2, 1, 2, 0);
         func_150054C4(view, i, resource, mode);
         {
@@ -52,7 +52,7 @@ void func_151298C0(Camera *arg0, s32 arg1, Actor *arg2);
 void func_15085430(Actor *, s32, s32);
 
 /**
- * Resets view state `index` and attaches it, as camera, to actor D_800CC2D0[index].
+ * Resets view state `index` and attaches it, as camera, to actor movement_obj[index].
  */
 void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
     u16 i;
@@ -67,7 +67,7 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
         view->savedPreset[i] = 999;
     }
     actorIndex = view->playerIndex;
-    actor = &D_800CC2D0[actorIndex];
+    actor = &movement_obj[actorIndex];
     // the header types unk5D4 and unk2AC as s32, but both hold f32s
     *(f32 *)&view->unk5D4 = ((f32)D_800BE624 * 60.0f) / 216.0f;
     view->unk5D8 = ((f32)D_800BE624 * 40.0f) / 216.0f;
@@ -104,7 +104,7 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
     view->unk238 = -1;
     view->unk3CC = actorIndex;
     view->controller = actorIndex;
-    actor = &D_800CC2D0[actorIndex];
+    actor = &movement_obj[actorIndex];
     view->player = actor;
     view->playerExt = actor->unk31C;
     func_151298C0(view, resource, actor);

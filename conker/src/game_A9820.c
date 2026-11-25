@@ -7,7 +7,7 @@ void func_1507C3E0(Actor *obj, s16 *height, s16 *width, s16 *depth);
 /* Refreshes the cached height/width/depth (ActorCtl height, width, depth) of every object that has one. */
 void func_1507C370(void) {
     s32 i;
-    Actor *obj = D_800CC2D0;
+    Actor *obj = movement_obj;
 
     for (i = 0; i < D_8008FD8C; i++, obj++) {
         ActorCtl *ext = obj->unk31C;
@@ -134,7 +134,7 @@ void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
             width = depth = obj->bodyRadius;
             break;
         }
-        if (obj->unk13C > 100 && D_800CC2D0[obj->unk13C - 100].id == 19) {
+        if (obj->unk13C > 100 && movement_obj[obj->unk13C - 100].id == 19) {
             depth += 120.0f * obj->xz_scale;
             height += 100.0f * obj->y_scale;
         }

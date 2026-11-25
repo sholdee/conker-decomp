@@ -220,9 +220,9 @@ typedef struct {
 /* Writes object `id`'s two commands (0x68 = unk2E8, 0xE = unk2E4) and returns the next slot. */
 EB340Command *func_150BE438(EB340Command *cmd, s32 id) {
     cmd[0].opcode = 0x68;
-    cmd[0].value = D_800CC2D0[id].unk2E8;
+    cmd[0].value = movement_obj[id].unk2E8;
     cmd[1].opcode = 0xE;
-    cmd[1].value = D_800CC2D0[id].unk2E4;
+    cmd[1].value = movement_obj[id].unk2E4;
     return cmd + 2;
 }
 

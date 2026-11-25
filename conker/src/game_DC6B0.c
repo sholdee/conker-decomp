@@ -15,7 +15,7 @@ extern void func_150E2DB4(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 
 extern void func_15179008(s32);
 
 /* If object idA (else idB) has bit 0 of its D_800DBF94 flag word set, calls func_1505D024 on
- * D_800CC2D0[0] with 0x6E00 (else 0xEE00). Does nothing while D_800CC3D4[0] is set. */
+ * movement_obj[0] with 0x6E00 (else 0xEE00). Does nothing while D_800CC3D4[0] is set. */
 void func_150AF200(s32 idA, s32 idB) {
     WorldObject *obj;
     s32 index;
@@ -25,16 +25,16 @@ void func_150AF200(s32 idA, s32 idB) {
     }
 
     obj = func_151149AC(idA);
-    index = obj - D_800DBEF4;
+    index = obj - db_Object_array;
     if (D_800DBF94[index] & 1) {
-        func_1505D024(&D_800CC2D0[0], 0x3F, 0x6E00, -1);
+        func_1505D024(&movement_obj[0], 0x3F, 0x6E00, -1);
         return;
     }
 
     obj = func_151149AC(idB);
-    index = obj - D_800DBEF4;
+    index = obj - db_Object_array;
     if (D_800DBF94[index] & 1) {
-        func_1505D024(&D_800CC2D0[0], 0x3F, 0xEE00, -1);
+        func_1505D024(&movement_obj[0], 0x3F, 0xEE00, -1);
     }
 }
 
@@ -343,7 +343,7 @@ typedef struct Node150AFDB0 {
 
 extern Node150AFDB0 *D_800DCE94;
 
-/* Releases (func_1516972C) every node of the D_800DCE94 list whose unk3F is D_800C3E78. Each
+/* Releases (func_1516972C) every node of the D_800DCE94 list whose unk3F is dc_glbl_CharNum. Each
  * node's successor is saved on the D_800DD198 iteration stack first, so releasing it is safe. */
 void func_150AFDB0(void) {
     Node150AFDB0 *node;
@@ -351,7 +351,7 @@ void func_150AFDB0(void) {
     D_800DD190++;
     for (node = D_800DCE94; node != NULL; node = D_800DD198[D_800DD190]) {
         D_800DD198[D_800DD190] = node->header.next;
-        if (node->unk3F == D_800C3E78) {
+        if (node->unk3F == dc_glbl_CharNum) {
             func_1516972C(&node->header);
         }
     }

@@ -1230,7 +1230,7 @@ typedef struct TextBoxConfig {
     /* 0x00 */ s32 flags;
     /* 0x04 */ s32 text;            /* message table index, or the string itself when supplied */
     /* 0x08 */ u8 numPages;         /* strings in the text, separated by NULs */
-    /* 0x09 */ u8 objIndex;         /* D_800CC2D0 object the box belongs to */
+    /* 0x09 */ u8 objIndex;         /* movement_obj object the box belongs to */
     /* 0x0A */ u8 unkA;
     /* 0x0B */ u8 padB;
     /* 0x0C */ f32 worldX;          /* projected to screen when not TEXTBOX_SCREEN_POS */
@@ -1485,7 +1485,7 @@ typedef struct VtxMorphState {
     /* 0xA */ u8  hold;  // counts down once the blend has reached 1.0f
 } VtxMorphState; // size 0xC
 
-/* The game actor: the 0x32C-byte entries of D_800CC2D0. */
+/* The game actor: the 0x32C-byte entries of movement_obj. */
 struct Actor {
     /* 0x000 */ s32 interaction_state;
     /* 0x004 */ u8  id;
@@ -1631,7 +1631,7 @@ struct Actor {
     /* 0x123 */ u8  unk123;
     /* 0x124 */ u8  unk124;
     /* 0x125 */ u8  immune; // used
-    /* 0x126 */ u8  unk126;  // owner index into D_800CC2D0
+    /* 0x126 */ u8  unk126;  // owner index into movement_obj
     /* 0x127 */ u8  unk127;
     /* 0x128 */ u8  team;
     /* 0x129 */ u8  unk129;
@@ -1676,7 +1676,7 @@ struct Actor {
     /* 0x188 */ void *unk188;     // floor triangle found by the floor probe: its three vertex pointers (Vec3s *[3], game_13AE20)
     /* 0x18C */ CollisionTri floorTri; // the floor triangle under the actor
     /* 0x19E */ u16 floorTriIndex;
-    /* 0x1A0 */ u16 propNum;   // D_800DBEF4 index + 1 of the prop stood on, 0 = none
+    /* 0x1A0 */ u16 propNum;   // db_Object_array index + 1 of the prop stood on, 0 = none
     /* 0x1A2 */ s16 floorType;
     /* 0x1A4 */ ActorAimPoints aim;
     /* 0x1BC */ s16 unk1BC[3];   // a bone position (game_83300)
@@ -1793,8 +1793,8 @@ struct Actor {
     /* 0x268 */ s32 unk268;
     /* 0x26C */ s32 unk26C;
     /* 0x270 */ f32 unk270;
-    /* 0x274 */ u8  objectNum; // D_800CC2D0 index + 1 of the object stood on, 0 = none
-    /* 0x275 */ u8  unk275;  // D_800CC2D0 index + 1
+    /* 0x274 */ u8  objectNum; // movement_obj index + 1 of the object stood on, 0 = none
+    /* 0x275 */ u8  unk275;  // movement_obj index + 1
     /* 0x276 */ u8  unk276;      // head-turn effect kind, 0-6 (func_1503D9B4)
     /* 0x277 */ u8  pad277;
     /* 0x278 */ u16 unk278;      // effect state
@@ -1845,7 +1845,7 @@ struct Actor {
 }; // size 0x32C => 812 bytes game_object
 
 /*
- * A world object: one 0xA0-byte entry of the level's object array D_800DBEF4 (D_800DBEF0 entries),
+ * A world object: one 0xA0-byte entry of the level's object array db_Object_array (D_800DBEF0 entries),
  * built by func_150039E0 (game_30E90.c) from the level's placement lists. Owner type 1 for effects and trails.
  */
 typedef struct Shadow Shadow; // blob shadow under an object, see game_13AE20.c
@@ -1886,7 +1886,7 @@ struct WorldObject {
     /* 0x48 */ u8 pad48[4];
     /* 0x4C */ u8 unk4C;
     /* 0x4D */ u8 unk4D;
-    /* 0x4E */ u8 attach;            // < 3: own transform, 3: none, 101..124: rides actor D_800CC2D0[attach - 100]
+    /* 0x4E */ u8 attach;            // < 3: own transform, 3: none, 101..124: rides actor movement_obj[attach - 100]
     /* 0x4F */ u8 flags;
     /* 0x50 */ u16 unk50;            // bounding radius, see func_15004AAC
     /* 0x52 */ u16 unk52;
@@ -1904,7 +1904,7 @@ struct WorldObject {
     /* 0x6F */ u8 viewFlags;         // bits 0-3: visible in view N, 0x40: update this frame, 0x80: hidden
     /* 0x70 */ u8 state;             // 1: vertices transformed into per-frame copies, 2: drawn by func_150A50C0,
                                      // 8: removed, high nibble: objects following in its group
-    /* 0x71 */ u8 index;             // own index in D_800DBEF4
+    /* 0x71 */ u8 index;             // own index in db_Object_array
     /* 0x72 */ u8 id;                // found by func_151149AC
     /* 0x73 */ u8 behaviorState;     // per-behaviour state bits
     /* 0x74 */ u16 sound;            // handle from func_15114D24
@@ -2213,7 +2213,7 @@ typedef struct CamRail {
     /* 0x38 */ Vec3f eyeGoal;
 } CamRail; // size 0x44
 
-/* One player camera (Actor.camera; array at D_800DBFF0). Mode state 0x000..0x236 is a stack of 21 save slots (func_15123934 / func_151239CC). */
+/* One player camera (Actor.camera; array at camera_global_Cameras). Mode state 0x000..0x236 is a stack of 21 save slots (func_15123934 / func_151239CC). */
 struct Camera {
     /* 0x000 */ u16 modeIndex;                       /* bit index of mode */
     /* 0x002 */ u16 savedModeIndex[21];
@@ -3754,7 +3754,7 @@ typedef struct AllocatorFreeBlock {
 } AllocatorFreeBlock;
 
 /* A group of linked level entries, D_800D23C0[0..D_80087380) (loaded by func_15017578 in game_447B0).
- * Each member is (kind << 12 | index); kind 2 is an object, indexing D_800DBEF4. */
+ * Each member is (kind << 12 | index); kind 2 is an object, indexing db_Object_array. */
 typedef struct ObjGroup {
     /* 0x00 */ s16 unk0;
     /* 0x02 */ u16 count;
@@ -3903,7 +3903,7 @@ typedef struct GroundCandidate {
     /* 0x0 */ s32 height;  // 24.8 fixed point
     /* 0x4 */ s32 *tri;    // collision triangle (a D_800DBE3C entry): three vertex offsets from vtxBase
     /* 0x8 */ s32 vtxBase; // 0 for the static world mesh
-    /* 0xC */ s32 unkC;    // group or object index (D_800DBEF4), depending on the probe type
+    /* 0xC */ s32 unkC;    // group or object index (db_Object_array), depending on the probe type
 } GroundCandidate;
 
 /* One on-screen view (a player's region of the framebuffer). D_800BE628 points at an array of these,
@@ -4177,7 +4177,7 @@ typedef struct Racer {
     /* 0x2B */ u8 nodes[4];       /* spline control nodes */
     /* 0x2F */ s8 route;
     /* 0x30 */ s8 state;
-    /* 0x31 */ s8 actorIndex;     /* index into D_800CC2D0 */
+    /* 0x31 */ s8 actorIndex;     /* index into movement_obj */
     /* 0x32 */ s8 prevTicks;
     /* 0x33 */ s8 ticks;
     /* 0x34 */ f32 camT;
@@ -4235,7 +4235,7 @@ typedef struct {
     /* 0x0C */ s16 minZ;     /* chain-local z extent (negative) */
     /* 0x0E */ s16 width;    /* chain-local x extent */
     /* 0x10 */ s16 angle;    /* yaw of the chain */
-    /* 0x12 */ s16 objIndex; /* index into D_800DBEF4 for the chain's origin */
+    /* 0x12 */ s16 objIndex; /* index into db_Object_array for the chain's origin */
     /* 0x14 */ s16 initialPos;
     /* 0x16 */ s8  push;     /* displacement an actor applies to the sample under it */
     /* 0x17 */ u8  soundTimer;
@@ -4275,7 +4275,7 @@ typedef struct {
 
 /* Per-view list of the objects to draw this frame (D_80089240, built in game_13F9D0.c). */
 typedef struct DrawEntry {
-    /* 0x0 */ u16 index;    // into D_800DBEF4
+    /* 0x0 */ u16 index;    // into db_Object_array
     /* 0x2 */ u16 distance; // from func_150A6360
 } DrawEntry;
 

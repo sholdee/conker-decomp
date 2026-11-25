@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /**
- * Frames the first D_8008FD8C objects of D_800CC2D0: the camera looks at their max X, mean Y (+150) and
+ * Frames the first D_8008FD8C objects of movement_obj: the camera looks at their max X, mean Y (+150) and
  * mid Z, and backs off along +X/+Y by the largest Z spread from the middle (at least 300, plus 100).
  * unk2BC..unk2C4 is the look-at point, unk2F8..unk300 the eye position.
  */
@@ -20,15 +20,15 @@ void func_151219D0(Camera *camera) {
     maxX = -10000.0f;
     sumY = 0.0f;
     for (i = 0; i < D_8008FD8C; i++) {
-        x = D_800CC2D0[i].x_position;
+        x = movement_obj[i].x_position;
         if (x < minX) {
             minX = x;
         }
         if (maxX < x) {
             maxX = x;
         }
-        z = D_800CC2D0[i].z_position;
-        sumY += D_800CC2D0[i].y_position;
+        z = movement_obj[i].z_position;
+        sumY += movement_obj[i].y_position;
         if (z < minZ) {
             minZ = z;
         }
@@ -43,11 +43,11 @@ void func_151219D0(Camera *camera) {
     midZ = (minZ + maxZ) * 0.5f;
     camera->target.z = midZ;
     for (i = 0; i < D_8008FD8C; i++) {
-        dx = (D_800CC2D0[i].x_position - maxX) * 0.5f;
+        dx = (movement_obj[i].x_position - maxX) * 0.5f;
         if (dx < 0.0f) {
             dx = 0.0f;
         }
-        dz = D_800CC2D0[i].z_position - midZ;
+        dz = movement_obj[i].z_position - midZ;
         if (dz < 0.0f) {
             dz = -dz;
         }

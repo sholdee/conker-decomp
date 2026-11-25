@@ -47,10 +47,10 @@ extern void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi);
 /* Start breaking `obj` into parts; variant -1 selects every part, otherwise D_8008446C[kind][variant]. */
 void func_1503DE70(Actor *obj, s32 kind, s32 variant) {
     if (variant != -1) {
-        func_1503DF0C(obj - D_800CC2D0, kind, D_8008446C[kind][variant].lo, D_8008446C[kind][variant].hi);
+        func_1503DF0C(obj - movement_obj, kind, D_8008446C[kind][variant].lo, D_8008446C[kind][variant].hi);
         return;
     }
-    func_1503DF0C(obj - D_800CC2D0, kind, -1, -1);
+    func_1503DF0C(obj - movement_obj, kind, -1, -1);
 }
 
 void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi) {
@@ -82,9 +82,9 @@ void func_1503DF48(s32 objIndex) {
     ps = &D_800C6660[objIndex];
     state = ps->state;
     if (state == PARTS_STATE_START) {
-        D_800CC2D0[objIndex].unk74 |= 0x80;
+        movement_obj[objIndex].unk74 |= 0x80;
         state = PARTS_STATE_SETUP;
-        if (D_800CC2D0[objIndex].unk1D4 == NULL) {
+        if (movement_obj[objIndex].unk1D4 == NULL) {
             return;
         }
     }
@@ -158,7 +158,7 @@ void func_1503E260(s32 objIndex) {
             count = D_80098914[D_800C6660[objIndex].kind];
             for (i = 0; i < count; i++) {
                 if (flagBits[i] != 0xFF && func_1503E1F4(i, objIndex)) {
-                    D_800CC2D0[objIndex].unk94 |= 1 << flagBits[i];
+                    movement_obj[objIndex].unk94 |= 1 << flagBits[i];
                 }
             }
         }
@@ -167,7 +167,7 @@ void func_1503E260(s32 objIndex) {
             func_10004074((s32)D_800C6660[objIndex].parts);
         }
         D_800C6660[objIndex].parts = NULL;
-        D_800CC2D0[objIndex].unk74 &= ~0x80;
+        movement_obj[objIndex].unk74 &= ~0x80;
     }
 }
 
@@ -189,7 +189,7 @@ void func_1503E3C4(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s
     f32 dy;
     f32 dz;
 
-    obj = &D_800CC2D0[objIndex];
+    obj = &movement_obj[objIndex];
     bcopy(OBJ_BONE(obj, partIndex + boneOffset), local, sizeof(local));
     if (noParent) {
         parent = PART_PARENT_NONE;
@@ -300,7 +300,7 @@ void func_1503E82C(s32 objIndex) {
     MtxF m;
     ObjPart *part;
 
-    if (D_800CC2D0[objIndex].unk1D4 != NULL) {
+    if (movement_obj[objIndex].unk1D4 != NULL) {
         count = D_80098914[D_800C6660[objIndex].kind];
         parents = D_80084454[D_800C6660[objIndex].kind];
         for (i = 0; i < count; i++) {
@@ -311,12 +311,12 @@ void func_1503E82C(s32 objIndex) {
             if (!part->active) {
                 continue;
             }
-            bone = OBJ_BONE(&D_800CC2D0[objIndex], i);
+            bone = OBJ_BONE(&movement_obj[objIndex], i);
             parent = D_80084454[D_800C6660[objIndex].kind][i];
             if (parent != PART_PARENT_NONE) {
                 /* bone = scale * rotation * (translation * parent bone) */
                 func_150A7DA0(m, part->pos[0], part->pos[1], part->pos[2]);
-                func_150A7A48(m, OBJ_BONE(&D_800CC2D0[objIndex], parent), m);
+                func_150A7A48(m, OBJ_BONE(&movement_obj[objIndex], parent), m);
                 part = &D_800C6660[objIndex].parts[i];
                 func_150A8050(bone, part->rot[0], part->rot[1], part->rot[2]);
                 func_150A7A48(bone, m, bone);
@@ -456,7 +456,7 @@ void func_1503EEC0(s32 objIndex) {
     timer -= D_800BE9E4;
     ps->timer = timer;
     if (timer <= 0) {
-        func_15060F28(&D_800CC2D0[objIndex], 1);
+        func_15060F28(&movement_obj[objIndex], 1);
     }
 }
 
@@ -511,7 +511,7 @@ void func_1503F108(s32 objIndex) {
     ObjPartsState *ps = &D_800C6660[objIndex];
 
     ps->timer = 140;
-    D_800CC2D0[objIndex].unk94 = 6;
+    movement_obj[objIndex].unk94 = 6;
     ps->parts[4].vel[1] = 10.0f;
 }
 
@@ -519,15 +519,15 @@ void func_1503F108(s32 objIndex) {
 void func_1503F16C(s32 objIndex) {
     D_800C6660[objIndex].timer = 300;
     if (func_1503EF4C(2, 0, objIndex)) {
-        D_800CC2D0[objIndex].unk94 |= 0x40;
-        D_800CC2D0[objIndex].unk94 &= ~0x200;
+        movement_obj[objIndex].unk94 |= 0x40;
+        movement_obj[objIndex].unk94 &= ~0x200;
     }
     if (func_1503EF4C(2, 1, objIndex)) {
-        D_800CC2D0[objIndex].unk94 |= 0x80;
-        D_800CC2D0[objIndex].unk94 &= ~0x100;
+        movement_obj[objIndex].unk94 |= 0x80;
+        movement_obj[objIndex].unk94 &= ~0x100;
     }
     if (func_1503EF4C(2, 2, objIndex)) {
-        D_800CC2D0[objIndex].unk94 &= ~0x400;
+        movement_obj[objIndex].unk94 &= ~0x400;
     }
 }
 
@@ -543,13 +543,13 @@ void func_1503F2B0(s32 objIndex) {
     }
     func_1503E260(objIndex);
     if (func_1503EF4C(2, 0, objIndex)) {
-        D_800CC2D0[objIndex].unk94 |= 8;
+        movement_obj[objIndex].unk94 |= 8;
     }
     if (func_1503EF4C(2, 1, objIndex)) {
-        D_800CC2D0[objIndex].unk94 |= 4;
+        movement_obj[objIndex].unk94 |= 4;
     }
     if (func_1503EF4C(2, 2, objIndex)) {
-        D_800CC2D0[objIndex].unk94 |= 2;
+        movement_obj[objIndex].unk94 |= 2;
     }
 }
 

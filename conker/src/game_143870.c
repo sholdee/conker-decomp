@@ -46,7 +46,7 @@ void func_151163C0(WorldObject *obj) {
     obj->spinX = sway - previousSway;
 }
 /*
- * Updates the object's push value (high half of param) from the pull of D_800CC2D0[0], letting it decay
+ * Updates the object's push value (high half of param) from the pull of movement_obj[0], letting it decay
  * back to zero, then keeps a looping sound whose volume follows the object's speed (spinY).
  */
 void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
@@ -62,7 +62,7 @@ void func_1511650C(WorldObject *obj, s32 arg1, s32 soundId, f32 pitchScale) {
     if (!(obj->flags & 4)) {
         push = 0;
     } else {
-        push = func_15116888(obj->x, obj->z, &WORK(obj)->push.unk7C, D_800CC2D0) >> 3;
+        push = func_15116888(obj->x, obj->z, &WORK(obj)->push.unk7C, movement_obj) >> 3;
     }
     if ((arg1 & 1) && push < 0) {
         push = 0;

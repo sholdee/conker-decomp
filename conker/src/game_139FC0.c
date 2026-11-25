@@ -18,7 +18,7 @@ void func_1510CB10(s32 slot) {
     s32 amount;
     s32 i;
 
-    if (D_800DBFF0[slot].status & 1) {
+    if (camera_global_Cameras[slot].status & 1) {
         override = D_800D9EB8[slot][0];
         step = D_800BE9E4 * 2;
 

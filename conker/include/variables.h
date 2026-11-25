@@ -1091,7 +1091,7 @@ extern u8 D_800C3C9D;
 extern s16 D_800C3C9E;
 extern SeqSubtitle D_800C3CA0[3];
 extern struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
-extern u8  D_800C3E78;
+extern u8  dc_glbl_CharNum;
 extern u16 D_800C3E7A; // bone matrices used this frame
 extern u16 D_800C3E7C;
 extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
@@ -1199,7 +1199,7 @@ extern u8  D_800CC2B0;
 extern u8  D_800CC2B8;
 extern u16 D_800CC2BA; // frame step of the actor being updated
 extern s32 D_800CC2BC;
-extern Actor D_800CC2D0[26]; // objects
+extern Actor movement_obj[26]; // objects
 extern u8  D_800CC2D4[];
 extern f32 D_800CC2E4;
 extern f32 D_800CC2E8[];
@@ -1214,7 +1214,7 @@ extern s8  D_800CC3D7;
 extern u8  D_800CC3F5[] ; // ??
 
 extern u8 D_800CC49A;
-extern u8 D_800CC4B3[][0x32C]; /* byte 0x1E3 of each D_800CC2D0 object */
+extern u8 D_800CC4B3[][0x32C]; /* byte 0x1E3 of each movement_obj object */
 extern Actor  D_800CC5A0[];
 extern u8  D_800CC521[]; // ??
 
@@ -1222,7 +1222,7 @@ extern Actor *D_800CE370;
 
 /* 800D0000 */
 
-extern Actor D_800D121C; // == &D_800CC2D0[25]: dummy attacker for scripted hits; also the end of the 25 live actors
+extern Actor D_800D121C; // == &movement_obj[25]: dummy attacker for scripted hits; also the end of the 25 live actors
 extern f32 D_800D1230;
 extern f32 D_800D1234;
 extern f32 D_800D1238;
@@ -1489,7 +1489,7 @@ extern u8 D_800DBEAC;
 extern Mtx *D_800DBEB0; // sky projection matrices, 2 per view
 extern u16 D_800DBEE8[]; // per view: entries in D_80089240
 extern s32 D_800DBEF0;
-extern WorldObject *D_800DBEF4; // D_800DBEF0 entries
+extern WorldObject *db_Object_array; // D_800DBEF0 entries
 extern s32 *D_800DBEF8; // per object: handle released with func_10004074
 extern u8 *D_800DBEFC; // per object: frames to keep the handle once hidden
 extern u8  D_800DBF00;
@@ -1497,9 +1497,9 @@ extern MtxF D_800DBF08[]; // per-frame
 extern u8  D_800DBF88;
 extern s32 D_800DBF8C;
 extern s32 D_800DBF90;
-extern s32 * D_800DBF94; // per object: bit N set when actor D_800CC2D0[N] touches it
-extern s32 D_800DBF98; // grouped objects, kept at the end of D_800DBEF4
-extern Camera *D_800DBFF0;
+extern s32 * D_800DBF94; // per object: bit N set when actor movement_obj[N] touches it
+extern s32 D_800DBF98; // grouped objects, kept at the end of db_Object_array
+extern Camera *camera_global_Cameras;
 extern u8  D_800DBFF4[4]; // per-player camera hold timers; *(s32 *)D_800DBFF4 tests all four at once
 extern u8  D_800DBFF5;
 extern u8  D_800DBFF6;

@@ -309,7 +309,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                             object->floorTriIndex = WORLD_TRI_INDEX(triAddr);
                         }
                     } else if (object != NULL) {
-                        object->floorTriIndex = (triAddr - (s32)D_800C6070[D_800CC2D0[hit->unkC].id]) / 12;
+                        object->floorTriIndex = (triAddr - (s32)D_800C6070[movement_obj[hit->unkC].id]) / 12;
                     }
                     if (vtxBase == 0 && outTri != NULL) {
                         *outTri = (s32)hit->tri;
@@ -332,10 +332,10 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                     }
                 } else if (type == PROBE_PROP && outFlags != NULL) {
                     D_800DBE60 = D_800D3300[bestHit].unkC + 1;
-                    if (D_800DBEF4[D_800DBE60 - 1].materials != NULL) {
-                        *outFlags = D_800DBEF4[D_800DBE60 - 1].materials[triIndex - D_800DBEF4[D_800DBE60 - 1].firstTri];
+                    if (db_Object_array[D_800DBE60 - 1].materials != NULL) {
+                        *outFlags = db_Object_array[D_800DBE60 - 1].materials[triIndex - db_Object_array[D_800DBE60 - 1].firstTri];
                     } else {
-                        *outFlags = D_800DBEF4[D_800DBE60 - 1].material;
+                        *outFlags = db_Object_array[D_800DBE60 - 1].material;
                     }
                 } else if (outFlags != NULL) {
                     *outFlags = 0;
@@ -368,10 +368,10 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                             } else if (type == PROBE_PROP) {
                                 s32 pad; // matching: IDO reserves a stack slot for this block-scoped unused local
                                 propNum = D_800D3300[i].unkC + 1;
-                                if (D_800DBEF4[propNum - 1].materials != NULL) {
-                                    ceilingFlags = D_800DBEF4[propNum - 1].materials[triIndex - D_800DBEF4[propNum - 1].firstTri];
+                                if (db_Object_array[propNum - 1].materials != NULL) {
+                                    ceilingFlags = db_Object_array[propNum - 1].materials[triIndex - db_Object_array[propNum - 1].firstTri];
                                 } else {
-                                    ceilingFlags = D_800DBEF4[propNum - 1].material;
+                                    ceilingFlags = db_Object_array[propNum - 1].material;
                                 }
                             } else {
                                 ceilingFlags = 0;
@@ -405,8 +405,8 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
     if (object != NULL) {
         object->propNum = D_800DBE60;
         if (D_800DBE60 != 0 && (y - *outFloorY) < 10.0f) {
-            D_800DBEF4[D_800DBE60 - 1].flags |= 0x84;
-            D_800DBF94[D_800DBE60 - 1] |= 1 << (object - D_800CC2D0);
+            db_Object_array[D_800DBE60 - 1].flags |= 0x84;
+            D_800DBF94[D_800DBE60 - 1] |= 1 << (object - movement_obj);
         }
         if (objectNum != 0 && (y - *outFloorY) < 10.0f) {
             object->objectNum = objectNum;
@@ -568,8 +568,8 @@ void func_1510FC34(s32 index) {
     s16 *cameraZone;
 
     D_800DBDC0 = index;
-    // matching: &D_800DBFF0[index] computes the multiply after the base load
-    camera = (Camera *)((u8 *)D_800DBFF0 + index * sizeof(Camera));
+    // matching: &camera_global_Cameras[index] computes the multiply after the base load
+    camera = (Camera *)((u8 *)camera_global_Cameras + index * sizeof(Camera));
     x = camera->eye.x;
     z = camera->eye.z;
     D_800DBDCC = x;

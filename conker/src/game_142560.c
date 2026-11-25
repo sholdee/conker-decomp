@@ -79,7 +79,7 @@ void func_151152A8(WorldObject *obj) {
  * while flag 4 is set, and otherwise jumps to the end of the current phase. After the
  * delay and hold the object wobbles about X and Z, and after 10 more frames it sinks.
  * Once sunk deep enough it is marked as returning, and it resets to its home height
- * when D_800CC2D0[0] is more than 500 units away in XZ.
+ * when movement_obj[0] is more than 500 units away in XZ.
  */
 void func_15115368(WorldObject *obj) {
     s32 start;
@@ -128,8 +128,8 @@ void func_15115368(WorldObject *obj) {
                 f32 dx;
                 f32 dz;
 
-                dx = D_800CC2D0[0].x_position - obj->x;
-                dz = D_800CC2D0[0].z_position - obj->z;
+                dx = movement_obj[0].x_position - obj->x;
+                dz = movement_obj[0].z_position - obj->z;
                 dx = dx * dx;
                 dz = dz * dz;
                 distSq = dx + dz;

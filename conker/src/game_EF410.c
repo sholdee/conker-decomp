@@ -540,9 +540,9 @@ void func_150C3230(Actor *obj) {
 
     obj->unkF8 |= 0x4000000;
     if ((obj->unk222 != 0) && (obj->unk65 == 0)) {
-        obj->old_x_position = D_800CC2D0[obj->unk124 - 1].x_position;
-        obj->old_y_position = D_800CC2D0[obj->unk124 - 1].y_position;
-        obj->old_z_position = D_800CC2D0[obj->unk124 - 1].z_position;
+        obj->old_x_position = movement_obj[obj->unk124 - 1].x_position;
+        obj->old_y_position = movement_obj[obj->unk124 - 1].y_position;
+        obj->old_z_position = movement_obj[obj->unk124 - 1].z_position;
         obj->unk222 = 0;
     }
 
@@ -558,9 +558,9 @@ void func_150C3230(Actor *obj) {
     index = obj->unk65;
     if (index != 0) {
         obj->unk222 = index;
-        if (D_800CC2D0[index - 1].unk84.uh == 0x1F9) {
+        if (movement_obj[index - 1].unk84.uh == 0x1F9) {
             type = 2;
-        } else if (D_800CC2D0[index - 1].unk84.uh == 0x1FB) {
+        } else if (movement_obj[index - 1].unk84.uh == 0x1FB) {
             type = 3;
         } else {
             typedef s32 Type150C3230; // matching: a declaration here gives -g3 a block marker; as1 then fills the delay slot from this branch
@@ -573,12 +573,12 @@ void func_150C3230(Actor *obj) {
     func_1505E650(obj, type, 0.0f, 0.0f, 0.0f, 0.0f, 0);
 
     if (obj->unk65 != 0) {
-        func_1507C324(obj, &D_800CC2D0[obj->unk65 - 1]);
+        func_1507C324(obj, &movement_obj[obj->unk65 - 1]);
     }
 
     if (obj->unk2E4 != 0) {
         if (obj->unk65 != 0) {
-            target = &D_800CC2D0[obj->unk65 - 1];
+            target = &movement_obj[obj->unk65 - 1];
             if (target->interaction_state == 5) {
                 obj->unk65 = 0;
                 obj->unk2E4 = 0;
@@ -600,7 +600,7 @@ void func_150C3230(Actor *obj) {
             eventData.pos[0] = obj->x_position;
             eventData.pos[1] = obj->y_position;
             eventData.pos[2] = obj->z_position;
-            eventData.unk0 = &D_800CC2D0[obj->unk124 - 1];
+            eventData.unk0 = &movement_obj[obj->unk124 - 1];
             eventData.targetIndex = obj->unk65;
             if (target != NULL) {
                 target->immune = target->stunned = 0;
@@ -660,7 +660,7 @@ void func_150C3574(Actor *obj) {
     }
     if (obj->unk87 == 4) {
         D_800D1580 = 0xFF020133;
-        D_800D154C = D_800CC2D0;
+        D_800D154C = movement_obj;
         func_1506E8D8();
         D_800D154C = obj;
         obj->unk164 = obj->unkBC;

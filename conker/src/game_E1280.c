@@ -300,7 +300,7 @@ Gfx *func_150B4710(Trail *trail, Gfx *gfx, s16 camIdx) {
     if (trail->head.count >= 2) {
         func_151D5D60(trail->unk84, camIdx, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
-            cam = &D_800DBFF0[camIdx].eye.x;
+            cam = &camera_global_Cameras[camIdx].eye.x;
             state = trail->state;
             points = trail->points;
             update = 1;

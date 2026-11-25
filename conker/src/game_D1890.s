@@ -46,8 +46,8 @@ glabel func_150A43E0
     /* D1914 150A4464 00000000 */   nop
     /* D1918 150A4468 94FC0000 */  lhu        $gp, 0x0($a3)
     /* D191C 150A446C 24E70002 */  addiu      $a3, $a3, 0x2
-    /* D1920 150A4470 3C11800E */  lui        $s1, %hi(D_800DBEF4)
-    /* D1924 150A4474 8E31BEF4 */  lw         $s1, %lo(D_800DBEF4)($s1)
+    /* D1920 150A4470 3C11800E */  lui        $s1, %hi(db_Object_array)
+    /* D1924 150A4474 8E31BEF4 */  lw         $s1, %lo(db_Object_array)($s1)
     /* D1928 150A4478 241200A0 */  addiu      $s2, $zero, 0xA0
     /* D192C 150A447C 03920018 */  mult       $gp, $s2
     /* D1930 150A4480 00009012 */  mflo       $s2

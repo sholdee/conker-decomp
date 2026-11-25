@@ -50,8 +50,8 @@ glabel func_150A6568
     /* D3AB0 150A6600 00005825 */  or         $t3, $zero, $zero
     /* D3AB4 150A6604 240D00A0 */  addiu      $t5, $zero, 0xA0
     /* D3AB8 150A6608 01AE0018 */  mult       $t5, $t6
-    /* D3ABC 150A660C 3C0C800E */  lui        $t4, %hi(D_800DBEF4)
-    /* D3AC0 150A6610 8D8CBEF4 */  lw         $t4, %lo(D_800DBEF4)($t4)
+    /* D3ABC 150A660C 3C0C800E */  lui        $t4, %hi(db_Object_array)
+    /* D3AC0 150A6610 8D8CBEF4 */  lw         $t4, %lo(db_Object_array)($t4)
     /* D3AC4 150A6614 00007012 */  mflo       $t6
     /* D3AC8 150A6618 00000000 */  nop
     /* D3ACC 150A661C 00000000 */  nop

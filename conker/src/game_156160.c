@@ -128,7 +128,7 @@ void func_15128CB0(Camera *cam) {
                 func_151C9ED4(cam);
                 cam->zoneHookActive = 0;
             }
-            D_800DC010[msg->arg.index] = D_800DBFF0[cam->playerIndex];
+            D_800DC010[msg->arg.index] = camera_global_Cameras[cam->playerIndex];
             func_15123934(cam, 0x40000, 0, 0, 10);
             cam->status |= 4;
             cam->unk3A4 = -1.0f;
@@ -153,7 +153,7 @@ void func_15128CB0(Camera *cam) {
                     cam->transition.state = 0;
                 }
                 if (cam->transition.duration == 0) {
-                    D_800DBFF0[cam->playerIndex] = D_800DC010[msg->arg.index];
+                    camera_global_Cameras[cam->playerIndex] = D_800DC010[msg->arg.index];
                     cam->contPad = D_800BE728[cam->playerIndex];
                     cam->buttonsPressed = D_800BE710[cam->playerIndex];
                     cam->zone = cam->playerExt->unk78;
@@ -193,7 +193,7 @@ void func_15128CB0(Camera *cam) {
                     cam->prevTarget = cam->target;
                     cam->prevEye = cam->eye;
                     func_150A09D0(D_800BE9E4);
-                    func_150A11C4(&D_800CC2D0[cam->playerIndex]);
+                    func_150A11C4(&movement_obj[cam->playerIndex]);
                     func_1512E8E0(cam);
                     func_151287E0(cam, 0, 0);
                     func_151283B8(cam);

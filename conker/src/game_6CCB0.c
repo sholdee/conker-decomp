@@ -52,7 +52,7 @@ void func_1503F964(void) {
             i = 0;
         }
         while (i != start) {
-            if (D_800CC2D0[i].unkF8 & 0x800000) {
+            if (movement_obj[i].unkF8 & 0x800000) {
                 D_800C67F1 = i;
                 return;
             }

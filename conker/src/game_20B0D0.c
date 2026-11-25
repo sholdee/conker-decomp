@@ -255,8 +255,8 @@ void func_151DE6D4(void) {
     s32 timer;
 
     func_151E530C();
-    D_800CC2D0[0].unk25C |= 0x200;
-    D_800CC2D0[0].y_position = 1000.0f;
+    movement_obj[0].unk25C |= 0x200;
+    movement_obj[0].y_position = 1000.0f;
 
     if (D_80000300 == OS_TV_PAL) { /* D_80000300 is osTvType */
         D_800E0A90 = 0;

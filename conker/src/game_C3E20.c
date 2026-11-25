@@ -5,7 +5,7 @@
 /* A scripted actor move: actor `actor` is sent to pose `poseIndex` until `timer` runs out. */
 typedef struct {
     /* 0x00 */ u8 state; // 0 = idle, 1 = start pending, 2 = running
-    /* 0x01 */ u8 actor; // index into D_800DBFF0
+    /* 0x01 */ u8 actor; // index into camera_global_Cameras
     /* 0x02 */ u8 poseIndex; // index into the D_800DC020 pose table
     /* 0x03 */ u8 pad3;
     /* 0x04 */ s16 timer;
@@ -53,7 +53,7 @@ s32 func_15096A68(s32 slot) {
         Camera *actor;
 
         actorIndex = D_800D2DC0[slot].actor;
-        actor = &D_800DBFF0[actorIndex];
+        actor = &camera_global_Cameras[actorIndex];
         pose = D_800DC020;
         // matching: the redundant mask on the u8 index steers IDO's register allocation
         pose = &pose[D_800D2DC0[slot].poseIndex & 0xFF];
@@ -82,7 +82,7 @@ s32 func_15096A68(s32 slot) {
     case 2: {
         Camera *actor;
 
-        actor = &D_800DBFF0[D_800D2DC0[slot].actor];
+        actor = &camera_global_Cameras[D_800D2DC0[slot].actor];
         D_800D2DC0[slot].timer -= D_800BE9A0;
         if (actor->player->health == 0) {
             D_800D2DC0[slot].timer = 0;
@@ -133,7 +133,7 @@ void func_1512A390(Camera *actor);
 s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
     Camera *actor;
 
-    actor = &D_800DBFF0[actorIndex];
+    actor = &camera_global_Cameras[actorIndex];
     if (actorIndex > D_80082FA0) {
         return 0;
     }
@@ -204,13 +204,13 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
         D_800C365C[0] = 0;
         func_1512D560(actor, 5, NULL);
         func_1512D560(actor, 7, &D_800C3600);
-        D_800CC2D0[0].unk25C |= 0x200;
+        movement_obj[0].unk25C |= 0x200;
     }
         break;
     case 11:
         func_1512D560(actor, 6, NULL);
         D_800D2DB4 = 0;
-        D_800CC2D0[0].unk25C &= ~0x200;
+        movement_obj[0].unk25C &= ~0x200;
         break;
     case 14:
         actor->focus.x = args[2];
@@ -335,7 +335,7 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
     f32 dx;
     f32 dz;
 
-    actor = &D_800DBFF0[actorIndex];
+    actor = &camera_global_Cameras[actorIndex];
     if (actorIndex > D_80082FA0) {
         return 0;
     }
@@ -384,7 +384,7 @@ void func_15097798(s32 actorIndex) {
     Camera *actor;
     Vec3f dir;
 
-    actor = &D_800DBFF0[actorIndex];
+    actor = &camera_global_Cameras[actorIndex];
     if (D_800D2DB4 != 0) {
         func_15048F90(&actor->focus, &actor->eye, &dir);
         func_1504917C(&dir, &dir);

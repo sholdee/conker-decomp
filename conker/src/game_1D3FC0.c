@@ -42,7 +42,7 @@ void func_151A6B68(Actor *target, s32 owner) {
         actor = obj->actor;
     }
     if (actor != NULL) {
-        actorIndex = actor - D_800CC2D0;
+        actorIndex = actor - movement_obj;
     } else {
         actorIndex = -1;
     }

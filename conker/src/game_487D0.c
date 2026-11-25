@@ -19,15 +19,15 @@ void func_1501B320(s32 player) {
     f32 yaw;
 
     if (D_800BEAC0 == 0) {
-        if (D_800DBFF0[player].unk698 != 0) {
+        if (camera_global_Cameras[player].unk698 != 0) {
             rate = 0.1000000015f;
         } else if (*(s32 *)D_800DBFF4 != 0) { // any of the four per-player bytes set
             rate = 1.0f;
         } else {
             rate = 0.02999999933f;
         }
-        pitch = D_800DBFF0[player].pitch;
-        yaw = D_800DBFF0[player].unk380;
+        pitch = camera_global_Cameras[player].pitch;
+        yaw = camera_global_Cameras[player].unk380;
         if (pitch < 0.0f) {
             pitch += 360.0f;
         } else if (pitch >= 360.0f) {

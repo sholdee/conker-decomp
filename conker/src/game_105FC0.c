@@ -427,7 +427,7 @@ s32 func_150D942C(Trail *trail) {
                             target->unk232 = 44;
                             target->unk218 = NULL;
                         } else {
-                            ownerIndex = owner - D_800CC2D0;
+                            ownerIndex = owner - movement_obj;
                             func_1505D024(target, 0xE0036, ((u16)(func_150484A0(dir[0], dir[2]) * 10430.37793f) - 0x4000) | 1, ownerIndex);
                         }
                     }

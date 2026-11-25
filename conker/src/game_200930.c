@@ -292,7 +292,7 @@ void func_151D3E6C(Actor *obj, f32 *a, f32 *b, s32 arg3) {
         } else {
             angle = obj->unk76;
         }
-        func_1505D1C4(x, y, z, arg3, obj - D_800CC2D0, angle, 0, 0);
+        func_1505D1C4(x, y, z, arg3, obj - movement_obj, angle, 0, 0);
     }
 }
 
@@ -351,8 +351,8 @@ void func_151D40D4(Vec3f *pos, Vec3f *dir, Actor *obj, Actor *target, s32 arg4, 
         }
         angle = 0;
     }
-    func_1505D1C4(pos->x, pos->y, pos->z, arg5, obj - D_800CC2D0, angle, arg7, (s32)&point);
-    func_1505D1C4(pos->x, pos->y, pos->z, arg6, obj - D_800CC2D0, angle, arg7, (s32)&point);
+    func_1505D1C4(pos->x, pos->y, pos->z, arg5, obj - movement_obj, angle, arg7, (s32)&point);
+    func_1505D1C4(pos->x, pos->y, pos->z, arg6, obj - movement_obj, angle, arg7, (s32)&point);
 }
 
 void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, s32 arg3, s32 arg4) {
@@ -365,7 +365,7 @@ void func_151D42E8(Vec3f *pos, Vec3f *dir, Actor *obj, s32 arg3, s32 arg4) {
     } else {
         angle = 0;
     }
-    func_1505D1C4(pos->x, pos->y, pos->z, arg4, obj - D_800CC2D0, angle, 0, 0);
+    func_1505D1C4(pos->x, pos->y, pos->z, arg4, obj - movement_obj, angle, 0, 0);
 }
 
 /* Unused outputs of func_1503F404's matrix decomposition. */
@@ -700,7 +700,7 @@ void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4D
     if (!alreadyDead) {
         angle = func_150484A0(dir[0], dir[2]) * 10430.37793f;
         func_1505D024(victim, flags | 0x80000, (angle - 0x4000) | 1,
-                      (attacker != NULL) ? (attacker - D_800CC2D0) : -1);
+                      (attacker != NULL) ? (attacker - movement_obj) : -1);
     }
 }
 
@@ -991,7 +991,7 @@ s32 func_151D5B6C(Vec3f *p0, Vec3f *p1, Actor *self, s8 filter, s32 filterArg) {
 
     mask = -1;
     for (i = 0; i < 25; i++) {
-        obj = &D_800CC2D0[i];
+        obj = &movement_obj[i];
         if (obj->interaction_state == 0) continue;
         if (obj->unk5 == 3) continue;
         if (D_800BE9F0 != 0x23 && obj->id == 0xFF) continue;

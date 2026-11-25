@@ -28,7 +28,7 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
     f32 delta;
 
     vtx = D_800C3FC0[index];
-    actor = &D_800CC2D0[index];
+    actor = &movement_obj[index];
     state = actor->unk84.uh;
     frame = actor->unk2D0->frame;
     if (state == 0x3E || state == 0x41 || (state == 0x138 && frame >= 36.0f) ||
@@ -81,10 +81,10 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     Vtx *color;
     s32 i;
 
-    if (D_800CC2D0[index].unk31C->unk75 != 2 && D_800CC2D0[index].unk31C->unk75 != 0x13) {
+    if (movement_obj[index].unk31C->unk75 != 2 && movement_obj[index].unk31C->unk75 != 0x13) {
         return gfx;
     }
-    attachment = func_1503195C(&D_800CC2D0[index], 8, 0);
+    attachment = func_1503195C(&movement_obj[index], 8, 0);
     if (attachment == NULL) {
         return gfx;
     }
@@ -97,17 +97,17 @@ Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
         D_800C3FC0[index][i].v.cn[1] = color->v.cn[1];
         D_800C3FC0[index][i].v.cn[2] = color->v.cn[2];
     }
-    bones = D_800CC2D0[index].unk1D4;
+    bones = movement_obj[index].unk1D4;
     if (bones == NULL) {
         return gfx;
     }
     func_15036570(index, bones[9], bones[4]);
     gSPDisplayList(gfx++, D_80084350);
-    gfx = func_1515E544(gfx, D_800CC2D0[index].unk304[view], D_800CC2D0[index].unk301,
-                        D_800CC2D0[index].unk302, D_800CC2D0[index].unk314[D_800BE9C0]);
-    if ((D_800CC2D0[index].unk66 & 0xC) == 0xC) {
+    gfx = func_1515E544(gfx, movement_obj[index].unk304[view], movement_obj[index].unk301,
+                        movement_obj[index].unk302, movement_obj[index].unk314[D_800BE9C0]);
+    if ((movement_obj[index].unk66 & 0xC) == 0xC) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
-    } else if ((D_800CC2D0[index].unk66 & 0xC) != 8 && !(attachment->flags & 1)) {
+    } else if ((movement_obj[index].unk66 & 0xC) != 8 && !(attachment->flags & 1)) {
         gSPClearGeometryMode(gfx++, G_LIGHTING);
     } else if (D_800DCD7C != 0) {
         gSPSetGeometryMode(gfx++, G_LIGHTING);

@@ -115,7 +115,7 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
     if (func_150CB0E0(pos, actor, &ground, side) == 0) {
         return;
     }
-    func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
+    func_1512D748(&camera_global_Cameras[D_800BE9E8], 7, 1);
     func_151D5404((Vec3f *)pos, 1502.0f, 3000.0f, 1.0f / 3000.0f, 12, 15, 0xFF, 0);
     func_150CCD90(pos[2], &fr, &fg, &fb);
     r = fr;

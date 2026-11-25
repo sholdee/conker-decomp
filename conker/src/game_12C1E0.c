@@ -406,7 +406,7 @@ void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type) {
     u16 angle;
 
     flags = type | 0x60000;
-    index = obj - D_800CC2D0;
+    index = obj - movement_obj;
     angle = obj->unk7A;
     func_1505D1C4(position->x, position->y, position->z, flags, index, angle, 0, origin);
 }

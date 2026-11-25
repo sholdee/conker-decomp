@@ -44,7 +44,7 @@ void func_1506A5F0(Actor *obj, s32 arg1) {
 extern f32 D_800D1560[3];
 extern f32 D_800D1570[3];
 
-/* Bitmask of the objects (D_800CC2D0 indices) hit in the last collision check. */
+/* Bitmask of the objects (movement_obj indices) hit in the last collision check. */
 
 /* Object position saved before the collision move. */
 
@@ -163,7 +163,7 @@ void func_1506AAE0(Actor *obj, s32 arg1) {
     s32 mask;
     Actor *hit;
 
-    for (mask = D_800CC260, hit = D_800CC2D0; mask != 0; mask >>= 1, hit++) {
+    for (mask = D_800CC260, hit = movement_obj; mask != 0; mask >>= 1, hit++) {
         if (mask & 1) {
             func_15137610(hit, D_800D1560, D_800D1570, 0, 0xFF, 1);
         }

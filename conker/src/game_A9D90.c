@@ -32,7 +32,7 @@ void func_1507C8FC(void) {
     Actor *player;
 
     if (D_800BEAC0 == 0) {
-        player = D_800CC2D0;
+        player = movement_obj;
         for (i = 0; i < D_8008FD8C; i++, player++) {
             if (player->unk31C == NULL) {
                 continue;
@@ -115,7 +115,7 @@ void func_1507C8FC(void) {
 
 /* Puts obj into state 3 and, for a local player slot, calls func_15181D70 on it. */
 void func_1507CD0C(Actor *obj) {
-    s32 slot = obj - D_800CC2D0;
+    s32 slot = obj - movement_obj;
 
     obj->unk31C->unk120 = 3;
 
@@ -143,7 +143,7 @@ void func_1507CD64(Actor *obj, s32 cause) {
     if (obj->unk31C == NULL) {
         return;
     }
-    slot = obj - D_800CC2D0;
+    slot = obj - movement_obj;
     if (slot >= D_8008FD8C) {
         return;
     }
@@ -284,7 +284,7 @@ lbl2: // matching: unused label splits the basic block; as1 then hoists the relo
 
 /* Forwards four arguments to func_1509BFB0(3, ...) keyed by object slot's unk13F | 0x2000. */
 void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    s32 value = D_800CC2D0[slot].unk13F;
+    s32 value = movement_obj[slot].unk13F;
 
     func_1509BFB0(3, value | 0x2000, arg1, arg2, arg3, arg4);
 }
@@ -316,7 +316,7 @@ void func_1507D1D8(Actor *obj) {
         player = -1;
     }
     if (D_800BE9F0 == 0x2B) {
-        slot = obj - D_800CC2D0;
+        slot = obj - movement_obj;
         value = func_150859AC(slot, 1);
         if (value >= 0x11 && value < 0x21) {
             choice = (func_150ADA20() & 0xF) + 0x11;
@@ -328,7 +328,7 @@ void func_1507D1D8(Actor *obj) {
             }
         }
     }
-    slot = obj - D_800CC2D0;
+    slot = obj - movement_obj;
     func_15060F28(obj, 0);
     D_800D18A8 = 1;
     func_15082A44(&D_800D20FC[slot], slot, 0, 0, 0);
@@ -336,7 +336,7 @@ void func_1507D1D8(Actor *obj) {
     obj->unk31C->unk1AF = saved1AF;
     obj->unk328 = saved328;
     if (D_80082FA0 >= slot) {
-        func_150054C4(&D_800DBFF0[slot], slot, D_800BE9F2, player);
+        func_150054C4(&camera_global_Cameras[slot], slot, D_800BE9F2, player);
         func_15181DC8(slot);
         func_1517EE40(0, 0, 0, 0, 1, slot);
         func_1517EE40(0, 0, 0, 30, 0, slot);
@@ -378,7 +378,7 @@ void func_1507D4F8(s32 slot) {
 
     if (func_150859AC(slot, 3) != 0) {
         func_15085710(slot, 5, D_8008726C);
-        obj = &D_800CC2D0[slot];
+        obj = &movement_obj[slot];
         obj->unkB2 = 0;
 
         if (D_800BE616 != 0) {
@@ -410,7 +410,7 @@ void func_1507D4F8(s32 slot) {
         D_800D18A0 |= 1 << slot;
     }
 
-    obj = &D_800CC2D0[slot];
+    obj = &movement_obj[slot];
     state = obj->unk31C;
     if (state->unk84 == 0) {
         // matching: the volatile store and load make IDO reload unk31C after the decrement, as the original does
