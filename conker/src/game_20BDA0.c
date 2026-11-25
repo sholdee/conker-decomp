@@ -3,35 +3,7 @@
 #include "variables.h"
 
 extern s8 D_800E0BE0[];
-struct Struct151E5034 {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    /* 0x20 */ u16 input;       /* MENU_* bits pressed this frame on controller 1 */
-    /* 0x22 */ u16 padInput[4]; /* MENU_* bits pressed this frame, per controller */
-    /* 0x2A */ s8 unk2A;
-    /* 0x2B */ s8 unk2B;
-    /* 0x2C */ s8 unk2C;
-    /* 0x2D */ char pad2D;
-    /* 0x2E */ s8 stickX[4];    /* last stick position, per controller */
-    /* 0x32 */ s8 stickY[4];
-    /* 0x36 */ s8 repeatX[4];   /* stick auto-repeat timers */
-    /* 0x3A */ s8 repeatY[4];
-    /* 0x3E */ s8 menu;
-    /* 0x3F */ s8 page;
-    /* 0x40 */ s8 prevPage;
-    /* 0x41 */ s8 cursor;
-    /* 0x42 */ s8 selection;
-    s8 unk43;
-    s8 unk44;
-};
-
-/* Menu input bits (Struct151E5034.input / padInput), built from the pads in func_151DE8F0 */
+/* Menu input bits (MenuState.input / padInput), built from the pads in func_151DE8F0 */
 #define MENU_UP     0x01 /* stick up */
 #define MENU_DOWN   0x02 /* stick down */
 #define MENU_LEFT   0x04 /* stick left */
@@ -41,23 +13,8 @@ struct Struct151E5034 {
 #define MENU_CLEFT  0x40 /* C-left */
 #define MENU_CRIGHT 0x80 /* C-right */
 
-extern char **D_800E0BD8; /* text strings */
 extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
-/* One entry of the menu's game-mode table (D_800AB68C[]) */
-typedef struct {
-    /* 0x0 */ s16 nameText;
-    /* 0x2 */ s8 unk2;
-    /* 0x3 */ s8 unk3;
-    /* 0x4 */ s8 mode;
-    /* 0x5 */ s8 unk5;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ s8 unk7;
-    /* 0x8 */ s8 unk8;
-    /* 0x9 */ s8 unk9;
-} MenuEntry;
-
-extern MenuEntry D_800AB68C[];
 extern char D_800AB850[];
 extern void (*D_800E0A88)(void);
 extern s8 D_800E0A96; /* page to switch to once faded out; -1: none */
@@ -74,7 +31,6 @@ void func_151DD9E4(void);
 
 
 
-extern struct Struct151E5034 *D_8008FDD4;
 
 
 
@@ -327,7 +283,7 @@ void func_151DE8F0(void) {
 }
 
 extern char D_800AB800[];
-struct216 *func_1507BB28(s32, s32);
+ObjScriptCmd *func_1507BB28(s32, s32);
 void func_1000DE1C(s32, s32);
 void func_151E7E9C(void);
 
@@ -1302,8 +1258,7 @@ void func_151E1214(void) {
 /* Per-team x jitter for stacked names; a struct so the initial copy is one word */
 typedef struct { s8 v[4]; } Offs4;
 extern Offs4 D_8008FF34;
-extern u8 D_800AB62C[];
-/* Team layout of a mode (D_800AB710[MenuEntry.unk5]) */
+/* Team layout of a mode (D_800AB710[ModeEntry.unk5]) */
 typedef struct {
     /* 0x0 */ s8 teamCount;
     /* 0x1 */ s8 minSlots;    /* bounds on teamCount * team size, with fewer than 3 players */
@@ -1534,7 +1489,8 @@ void func_151E1744(void) {
     for (i = 0; i < D_800E0BB0; i++) {
         x = teamX[i];
         old = D_800E0BC8[i] * 3;
-        func_1504332C(D_800AB62C[old], D_800AB62C[old + 1], D_800AB62C[old + 2], alpha);
+        // matching: flat byte index into the RGB rows (old is the tripled colour)
+        func_1504332C(D_800AB62C[0][old], D_800AB62C[0][old + 1], D_800AB62C[0][old + 2], alpha);
         func_150432FC(x, 0x50);
         if (D_800E0BC8[i] == 4) {
             func_15042E3C(D_800AB868, 9);
@@ -1594,20 +1550,6 @@ void func_151E2284(void) {
     D_8008FD80 = 0;
 }
 
-typedef struct {
-    s8 unk0;
-    s8 unk1;
-    s8 unk2;
-    u8 unk3;
-    u8 unk4;
-    u8 unk5;
-    u8 unk6;
-    u8 unk7;
-    u8 unk8;
-    u8 unk9;
-} ModeSettings;
-
-extern ModeSettings *D_80082BBC; /* saved settings, one record per mode */
 
 /* Loads the selected mode's saved settings (D_80082BBC[mode]) into the live settings D_800E0BE0[]. */
 void func_151E22BC(void) {

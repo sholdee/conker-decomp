@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* One ring-buffer entry; distance is the segment length to the next-older entry. */
 typedef struct {
@@ -16,15 +17,11 @@ typedef struct {
 } TrailConfig;
 
 typedef struct {
-    u8 pad00[0x25];
-    u8 capacity;
-    u8 pad26[6];
-    s8 count;
-    s8 head;
-    s8 tail;
-    u8 pad2F[0x65];
-    TrailPoint *points;
-    TrailConfig *config;
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ TrailPoint *points;
+    /* 0x98 */ TrailConfig *config;
 } TrailActor;
 
 /*
@@ -37,7 +34,7 @@ s32 func_151CF120(TrailActor *actor) {
     TrailPoint *points;
     s32 count;
 
-    count = actor->count;
+    count = actor->head.count;
     config = actor->config;
     points = actor->points;
     if (count >= 2) {
@@ -48,14 +45,14 @@ s32 func_151CF120(TrailActor *actor) {
         TrailPoint *point;
 
         total = 0.0f;
-        index = actor->tail - 1;
-        if (index < 0) index = actor->capacity - 1;
-        if (index != actor->head) {
+        index = actor->head.end - 1;
+        if (index < 0) index = actor->head.tmpl.itemCount - 1;
+        if (index != actor->head.start) {
             limit = config->limit;
             do {
                 current = index;
                 index--;
-                if (index < 0) index = actor->capacity - 1;
+                if (index < 0) index = actor->head.tmpl.itemCount - 1;
                 point = &points[current];
                 total += point->distance;
                 if (limit < total) {
@@ -79,18 +76,18 @@ s32 func_151CF120(TrailActor *actor) {
                         previous->z = pz - dz * ratio;
                         point->distance *= 1.0f - ratio;
                     }
-                    while (index != actor->head) {
-                        actor->head++;
-                        if (actor->head == actor->capacity) {
-                            actor->head = 0;
+                    while (index != actor->head.start) {
+                        actor->head.start++;
+                        if (actor->head.start == actor->head.tmpl.itemCount) {
+                            actor->head.start = 0;
                         }
-                        actor->count--;
+                        actor->head.count--;
                     }
                     limit = config->limit;
                     total = limit;
                 }
-            } while (index != actor->head);
-            count = actor->count;
+            } while (index != actor->head.start);
+            count = actor->head.count;
         }
     }
     if (count >= 2) {
@@ -99,20 +96,20 @@ s32 func_151CF120(TrailActor *actor) {
         s32 index;
 
         amplitude = 0.0f;
-        index = actor->tail;
+        index = actor->head.end;
         phase = config->phase;
         do {
             TrailPoint *point;
             f32 distance;
 
             index--;
-            if (index < 0) index = actor->capacity - 1;
+            if (index < 0) index = actor->head.tmpl.itemCount - 1;
             point = &points[index];
             point->wave = sinf(phase) * amplitude;
             distance = point->distance;
             amplitude += distance * 0.037499998f;
             phase += distance * 0.0122f;
-        } while (index != actor->head);
+        } while (index != actor->head.start);
     }
     config->phase += -0.70900005f * D_800BE9A4;
     return 1;

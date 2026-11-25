@@ -32,7 +32,7 @@ typedef struct PeriodicTrigger {
 } PeriodicTrigger;
 
 typedef struct PeriodicObject {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ Actor *linked;
     /* 0x14 */ u8 pad14[0x7C];
     /* 0x90 */ PeriodicTrigger trigger;

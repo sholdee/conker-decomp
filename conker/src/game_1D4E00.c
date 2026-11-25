@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void func_1514373C(f32, f32, f32 *, f32 *);
 
@@ -48,7 +49,7 @@ typedef struct {
 } BoltLink; /* size 0x28 */
 
 typedef struct {
-    /* 0x00 */ u8 unk0[0x10];        /* object header */
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ BoltDef def;
     /* 0x60 */ BoltLink *link;       /* user data, stored after the points */
     /* 0x64 */ BoltPoint *points;
@@ -60,7 +61,6 @@ typedef struct {
 
 Bolt *func_151A7950(BoltDef *, s32, u8, s32);
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /*
  * Allocates a bolt for def with extraSize bytes of user data after its points. The local points run
@@ -161,7 +161,7 @@ void func_151A7A90(Bolt *bolt) {
     }
 
     if (done) {
-        func_1516972C((struct102 *)bolt);
+        func_1516972C(&bolt->header);
     }
 }
 
@@ -347,7 +347,7 @@ void func_151A8584(Bolt *bolt) {
         D_8008F94C[self->def.type](bolt);
     }
     func_151A8560(bolt);
-    func_15169804((struct102 *)bolt);
+    func_15169804(&bolt->header);
 }
 
 extern void (*D_8008F958[])(Bolt *);
@@ -360,7 +360,7 @@ void func_151A85D4(Bolt *bolt) {
         D_8008F958[self->def.type](bolt);
     }
     func_151A8560(bolt);
-    func_15169824((struct102 *)bolt);
+    func_15169824(&bolt->header);
 }
 
 /*
@@ -526,38 +526,27 @@ void func_151A8A20(Bolt *bolt, void *msg, u8 msgType) {
     }
 }
 
-/* Message 0x2D: two actors traded places (each with its unique_id). */
-typedef struct {
-    Actor *actorA;
-    union {
-        Actor *actorB;
-        u8 id;              /* message 0: the unique_id of the dying actor */
-    } u4;
-    u8 idA;
-    u8 idB;
-} BoltOwnerMsg;
-
 /*
  * Type 2 message handler (bolts from func_151A8624): message 0 destroys the bolt when its owner goes
  * away; message 0x2D re-attaches it when its owner is swapped for another actor.
  */
 void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
     BoltLink *link = bolt->link;
-    BoltOwnerMsg *msg = arg;
+    ActorMsg *msg = arg;
     Actor *actor;
 
     if (msgType == 0) {
-        actor = msg->actorA;
-        if ((actor == link->owner) || (link->ownerId == msg->u4.id)) {
-            func_1516972C((struct102 *)bolt);
+        actor = msg->ref.actor;
+        if ((actor == link->owner) || (link->ownerId == msg->ref.uniqueId)) {
+            func_1516972C(&bolt->header);
         }
     } else if (msgType == 0x2D) {
-        if (link->owner == msg->actorA) {
-            link->owner = msg->u4.actorB;
-            link->ownerId = msg->idB;
-        } else if (link->owner == msg->u4.actorB) {
-            link->owner = msg->actorA;
-            link->ownerId = msg->idA;
+        if (link->owner == msg->swap.actorA) {
+            link->owner = msg->swap.actorB;
+            link->ownerId = msg->swap.idB;
+        } else if (link->owner == msg->swap.actorB) {
+            link->owner = msg->swap.actorA;
+            link->ownerId = msg->swap.idA;
         }
     }
 }
@@ -572,16 +561,6 @@ typedef struct {
     /* 0x17 */ u8 pad17;
     /* 0x18 */ s32 unk18;
 } LevelObject;
-
-/* Result of a ground probe (func_15046C80). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 unk4[0x14];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 surfaceType;
-    /* 0x20 */ s32 unk20;
-} GroundHit; /* size 0x24 */
 
 /* Spawn parameters of a particle emitter (func_151A8B20). */
 typedef struct {
@@ -605,19 +584,13 @@ typedef struct {
 typedef struct {
     /* 0x00 */ EmitterDef def;
     /* 0x28 */ f32 pending;          /* particles owed; one spawns per whole unit */
-    /* 0x2C */ GroundHit ground;
+    /* 0x2C */ CollisionHit ground;
     /* 0x50 */ s32 zone;             /* func_1510FD20 zone of the centre, with EMITTER_ZONED */
     /* 0x54 */ f32 area;
 } EmitterState; /* size 0x58 */
 
 typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterState state;
     /* 0x80 */ u8 data[1];           /* user data */
 } Emitter;
@@ -637,10 +610,10 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
 
     init.pending = 0.0f;
     init.ground.height = 99999.9f;
-    init.ground.unk18 = 0;
+    init.ground.material = 0;
     init.ground.flags = 0;
-    init.ground.surfaceType = 0;
-    init.ground.unk20 = 0;
+    init.ground.source = 0;
+    init.ground.surface = 0;
 
     emitter = (Emitter *)func_15149130((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (extraSize + sizeof(EmitterState)), arg3, arg4);
     if (emitter != NULL) {
@@ -677,7 +650,7 @@ extern s32 (*D_8008F980[])(Emitter *);
 extern void (*D_8008F970[])(Emitter *, Vec3f *, f32, u8);
 
 s32 func_151464B8(s32);
-s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
+s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 void func_151A8F1C(Emitter *, Vec3f *, f32 *, f32 *);
 void func_151A8F6C(Emitter *, Vec3f *, f32 *, f32 *);
 
@@ -698,7 +671,7 @@ void func_151A8CEC(Emitter *emitter) {
 
     if (state->def.update != -1) {
         if (D_8008F980[state->def.update](emitter) == 0) {
-            emitter->unkE = -1;
+            emitter->base.header.state = -1;
             return;
         }
     }
@@ -891,10 +864,10 @@ void func_151A91AC(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
 
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
-    func_1513C650(&spawn, 1, 0, (s32)emitter->state.ground.unk4, pos->x, pos->y, pos->z,
+    func_1513C650(&spawn, 1, 0, (s32)&emitter->state.ground.tri, pos->x, pos->y, pos->z,
                   size, size, rand1 & 0xFF,
                   (rand2 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
-                  emitter->unkC, emitter->unk1);
+                  emitter->base.header.owner, emitter->base.header.kind);
 }
 
 /* Type 1 message handler: 0x17 switches the emitter on, 0x18 off, when the message carries its id. */
@@ -953,7 +926,7 @@ typedef struct {
 
 extern EmitterPreset D_8008F9AC[];
 
-void *func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
+void *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /*
  * Spawns particle emitter preset `preset` (0-8) on obj, or at pos when given. options:
@@ -1002,13 +975,13 @@ void func_151A9390(u8 options, u8 preset, LevelObject *obj, Vec3f *pos,
     }
 
     if (options & 4) {
-        Header spawn;
+        LightEffectHeader spawn;
         s32 spawnPos[3];
 
-        spawn.unk0 = ((lifetime == -1) ? 0 : 1) | 2;
-        spawn.unk1 = 2;
-        spawn.unk2 = (lifetime == -1) ? 300 : lifetime;
-        spawn.unk4 = D_8008F9AC[preset].unkB;
+        spawn.flags = ((lifetime == -1) ? 0 : 1) | 2;
+        spawn.update = 2;
+        spawn.lifetime = (lifetime == -1) ? 300 : lifetime;
+        spawn.lightType = D_8008F9AC[preset].unkB;
 
         if (pos != NULL) {
             spawnPos[0] = pos->x;
@@ -1069,22 +1042,22 @@ void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
         (s16)(rand1 % (u32)(settings->unk10.range + 1) + settings->unk10.base),
         (rand2 % (u32)(settings->unk18.range + 1) + settings->unk18.base) & 0xFF,
         0, 0.0f, 1.0f, 1.0f, 0x21, 0x23, 2, kind, flags,
-        settings->unk1C, settings->unk1E, 8, emitter->unkC, emitter->unk1);
+        settings->unk1C, settings->unk1E, 8, emitter->base.header.owner, emitter->base.header.kind);
     if (particle != NULL) {
         memcpy(particle + 0x160, &extra, sizeof(extra));
     }
 }
 
-extern void (*D_8008FA60[])(Vec3f *, GroundHit *, s32, u8, s32);
+extern void (*D_8008FA60[])(Vec3f *, CollisionHit *, s32, u8, s32);
 
 /*
  * Calls spawn function D_8008FA60[spawnFunc] at `count` random points within radius of center
  * that have ground above minY (the spawn point is on the ground). hit is the probe result buffer;
  * NULL uses a local one.
  */
-void func_151A9834(Vec3f *center, f32 minY, f32 radius, GroundHit *hit,
+void func_151A9834(Vec3f *center, f32 minY, f32 radius, CollisionHit *hit,
                    s32 count, u8 spawnFunc, s32 arg6, u8 arg7, s32 arg8) {
-    GroundHit localHit;
+    CollisionHit localHit;
     Vec3f probe;
     Vec3f spawnPos;
     f32 angle;
@@ -1093,10 +1066,10 @@ void func_151A9834(Vec3f *center, f32 minY, f32 radius, GroundHit *hit,
     if (hit == NULL) {
         hit = &localHit;
         localHit.height = 99999.9f;
-        localHit.unk18 = 0;
+        localHit.material = 0;
         localHit.flags = 7;
-        localHit.surfaceType = 0;
-        localHit.unk20 = 0;
+        localHit.source = 0;
+        localHit.surface = 0;
     }
 
     probe.y = center->y;

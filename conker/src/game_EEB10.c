@@ -6,17 +6,9 @@
 void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep, s16 count,
                    u8 kind, s32 arg8, f32 arg9, s32 arg10, u8 arg11);
 
-/* A trail object; only the fields used here. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s16 lifetime;
-    /* 0x1E */ u8 pad1E[0x98 - 0x1E];
-    /* 0x98 */ TrailParams *params;
-} Trail;
-
-Trail *func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
-                     s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
-                     TrailRender *render, s32 arg12, u8 arg13, s32 arg14);
+MotionTrail *func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
+                           s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
+                           TrailRender *render, s32 arg12, u8 arg13, s32 arg14);
 
 /* Spawns a ring of 25 kind-2 particles (func_150C16C0) of radius 80 around (x, y, z). */
 void func_150C1660(f32 x, f32 y, f32 z, u8 arg3) {
@@ -81,10 +73,10 @@ s32 func_150C16C0(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
     return 1;
 }
 
-/* Trail fade handler: unk1B follows 8 * lifetime, capped at 0xFF. */
-s32 func_150C1978(Trail *trail) {
+/* MotionTrail fade handler: unk1B follows 8 * lifetime, capped at 0xFF. */
+s32 func_150C1978(MotionTrail *trail) {
     TrailParams *params = trail->params;
-    s32 alpha = trail->lifetime << 3;
+    s32 alpha = trail->head.tmpl.life << 3;
 
     if (alpha >= 0x100) {
         alpha = 0xFF;

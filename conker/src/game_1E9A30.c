@@ -3,28 +3,9 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Weak reference to an actor: valid while actor->unique_id still equals uniqueId. */
 typedef struct {
-    Actor *actor;
-    u8 uniqueId;
-} ActorRef;
-
-/* Message 0x2D payload: two actors exchange identities. */
-typedef struct {
-    Actor *actorA;
-    Actor *actorB;
-    u8 idA;
-    u8 idB;
-} ActorSwapMsg;
-
-/* Payload of the actor messages handled below (0 and 0x3B: an actor, 0x2D: an actor swap). */
-typedef union {
-    ActorRef ref;
-    ActorSwapMsg swap;
-} ActorMsg;
-
-typedef struct {
-    u8 pad0[0x40];
+    EffectHeader header;
+    u8 pad10[0x30];
     ActorRef owner;
 } OwnedEffect40;
 
@@ -45,7 +26,7 @@ void func_151BC5A4(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
 
     if (msgId == 0) {
         if (actor == msg->ref.actor || owner->uniqueId == msg->ref.uniqueId) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C(&effect->header);
         }
     } else if (msgId == 0x2D) {
         if (owner->actor == msg->swap.actorA) {
@@ -79,24 +60,11 @@ typedef struct {
 
 /* Ribbon trail effect: a ring buffer of points from head (oldest) to tail (next write). */
 typedef struct {
-    u8 pad0[0x10];
-    Vec3f pos;          /* 0x10 */
-    u8 pad1C[2];
-    u16 flags;             /* 0x1E */
-    u8 pad20[5];
-    u8 capacity;           /* 0x25 */
-    u8 pad26[6];
-    s8 count;              /* 0x2C */
-    s8 head;               /* 0x2D */
-    s8 tail;               /* 0x2E */
-    u8 pad2F;
-    s8 unk30;
-    u8 pad31[0x23];
-    Vec3f headPos;      /* 0x54 */
-    u8 pad60[0x24];
-    u8 buffers[0x10];      /* 0x84 */
-    TrailPoint *points;    /* 0x94 */
-    TrailData *data;       /* 0x98 */
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 buffers[0x10];
+    /* 0x94 */ TrailPoint *points;
+    /* 0x98 */ TrailData *data;
 } TrailEffect;
 
 /* Ages the trail: drops expired points and fades the last ones. Returns 0 once a finished trail is empty. */
@@ -108,26 +76,26 @@ s32 func_151BC64C(TrailEffect *trail) {
     s32 alpha;
 
     points = trail->points;
-    if (trail->count < 2 && (trail->flags & 8)) {
+    if (trail->head.count < 2 && (trail->head.tmpl.flags & 8)) {
         return 0;
     }
-    i = trail->tail;
-    while (i != trail->head) {
+    i = trail->head.end;
+    while (i != trail->head.start) {
         i--;
         if (i < 0) {
-            i = trail->capacity - 1;
+            i = trail->head.tmpl.itemCount - 1;
         }
         point = &points[i];
         point->lifetime -= D_800BE9E4;
         lifetime = point->lifetime;
         if (lifetime < 0) {
             /* this point and every older one expire */
-            while (i != trail->head) {
-                trail->head++;
-                if (trail->head == trail->capacity) {
-                    trail->head = 0;
+            while (i != trail->head.start) {
+                trail->head.start++;
+                if (trail->head.start == trail->head.tmpl.itemCount) {
+                    trail->head.start = 0;
                 }
-                trail->count--;
+                trail->head.count--;
             }
         } else if (lifetime < 10) {
             alpha = lifetime * 25;
@@ -136,12 +104,12 @@ s32 func_151BC64C(TrailEffect *trail) {
             }
         }
     }
-    if (trail->count > 0) {
-        trail->headPos = points[trail->head].pos;
+    if (trail->head.count > 0) {
+        trail->head.modelPos = points[trail->head.start].pos;
     } else {
-        trail->headPos.x = 0.0f;
-        trail->headPos.y = 0.0f;
-        trail->headPos.z = 0.0f;
+        trail->head.modelPos.x = 0.0f;
+        trail->head.modelPos.y = 0.0f;
+        trail->head.modelPos.z = 0.0f;
     }
     return 1;
 }
@@ -163,15 +131,15 @@ s32 func_151BC794(TrailEffect *trail) {
     points = trail->points;
     owner = data->owner.actor;
     if (owner->interaction_state == 0 || owner->unique_id != data->owner.uniqueId) {
-        trail->flags |= 8;
+        trail->head.tmpl.flags |= 8;
         return 1;
     }
-    trail->pos.x = owner->x_position;
-    trail->pos.y = owner->y_position;
-    trail->pos.z = owner->z_position;
-    delta.x = trail->pos.x - data->lastPos.x;
-    delta.y = trail->pos.y - data->lastPos.y;
-    delta.z = trail->pos.z - data->lastPos.z;
+    trail->head.tmpl.pos.x = owner->x_position;
+    trail->head.tmpl.pos.y = owner->y_position;
+    trail->head.tmpl.pos.z = owner->z_position;
+    delta.x = trail->head.tmpl.pos.x - data->lastPos.x;
+    delta.y = trail->head.tmpl.pos.y - data->lastPos.y;
+    delta.z = trail->head.tmpl.pos.z - data->lastPos.z;
     dist = func_15143E64(&delta);
     data->pending += dist * 0.04870799929f * D_800BE9A4;
     data->texU += dist * 9.708835602f;
@@ -196,7 +164,7 @@ s32 func_151BC794(TrailEffect *trail) {
         dz = delta.z * inv;
         uSpan = data->texU - startU;
         do {
-            point = &points[trail->tail];
+            point = &points[trail->head.end];
             point->pos = pos;
             point->lifetime = 12;
             point->alpha = 100;
@@ -204,18 +172,18 @@ s32 func_151BC794(TrailEffect *trail) {
             while (point->texU > 16384.0f) {
                 point->texU -= 32768.0f;
             }
-            trail->tail++;
-            if (trail->tail == trail->capacity) {
-                trail->tail = 0;
+            trail->head.end++;
+            if (trail->head.end == trail->head.tmpl.itemCount) {
+                trail->head.end = 0;
             }
-            trail->count++;
-            if (trail->tail == trail->head) {
+            trail->head.count++;
+            if (trail->head.end == trail->head.start) {
                 /* ring full: drop the oldest point */
-                trail->head++;
-                if (trail->head == trail->capacity) {
-                    trail->head = 0;
+                trail->head.start++;
+                if (trail->head.start == trail->head.tmpl.itemCount) {
+                    trail->head.start = 0;
                 }
-                trail->count--;
+                trail->head.count--;
             }
             u += uSpan * inv;
             pos.x += dx;
@@ -269,8 +237,8 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
     u8 prevAlpha;
     f32 scale;
 
-    if (trail->count >= 2) {
-        func_151D5D60(trail->buffers, viewport, (trail->capacity + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
+    if (trail->head.count >= 2) {
+        func_151D5D60(trail->buffers, viewport, (trail->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
             points = trail->points;
             camPos = func_15144B34(viewport);
@@ -280,23 +248,23 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
             gfx = func_1513F4E4(gfx, 0x4E, &dirty);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
             gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &dirty);
-            if (trail->flags & 2) {
+            if (trail->head.tmpl.flags & 2) {
                 /* ribbon starts at the live position */
-                i = trail->tail - 1;
+                i = trail->head.end - 1;
                 if (i < 0) {
-                    i = trail->capacity - 1;
+                    i = trail->head.tmpl.itemCount - 1;
                 }
-                cur = trail->pos;
+                cur = trail->head.tmpl.pos;
                 curAlpha = 0x80;
                 curTexU = 0.0f;
             } else {
-                j = trail->tail - 1;
+                j = trail->head.end - 1;
                 if (j < 0) {
-                    j = trail->capacity - 1;
+                    j = trail->head.tmpl.itemCount - 1;
                 }
                 i = j - 1;
                 if (i < 0) {
-                    i = trail->capacity - 1;
+                    i = trail->head.tmpl.itemCount - 1;
                 }
                 cur = points[j].pos;
                 curAlpha = points[j].alpha;
@@ -393,15 +361,15 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
                 gSP1Triangle(gfx++, 1, 3, 2, 0);
                 i--;
                 if (i < 0) {
-                    i = trail->capacity - 1;
+                    i = trail->head.tmpl.itemCount - 1;
                 }
-                if (j != trail->head) {
+                if (j != trail->head.start) {
                     cur = prev;
                     prev = points[i].pos;
                     prevAlpha = points[i].alpha;
                     prevTexU = points[i].texU;
                 }
-            } while (j != trail->head);
+            } while (j != trail->head.start);
         }
     }
     return gfx;
@@ -418,9 +386,9 @@ void func_151BD21C(TrailEffect *trail, ActorMsg *msg, u8 msgId) {
     actor = owner->actor;
     if (msgId == 0) {
         if (actor == msg->ref.actor || msg->ref.uniqueId == owner->uniqueId) {
-            u16 *flags = &trail->flags; // matching: keeps the flags store out of the jr delay slot
+            u16 *flags = &trail->head.tmpl.flags; // matching: keeps the flags store out of the jr delay slot
 
-            trail->unk30 = 0;
+            trail->head.updateKind2 = 0;
             *flags |= 8;
         }
     } else if (msgId == 0x2D) {
@@ -438,8 +406,7 @@ void func_151BD21C(TrailEffect *trail, ActorMsg *msg, u8 msgId) {
 }
 
 typedef struct {
-    EffectHeader header;
-    u8 pad10[0x18];
+    TimedEffect base;
     ActorRef owner;
 } OwnedEffect28;
 
@@ -847,7 +814,7 @@ void func_151BDD8C(BurstEffect *effect) {
     data = &effect->data;
     owner = data->owner;
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
-        effect->header.state = -1;
+        effect->base.header.state = -1;
         return;
     }
     if (owner->unk1D4 != NULL && (owner->unk74 & 0xF) != 0xF) {
@@ -931,7 +898,7 @@ void func_151BE0AC(s32 effect, s32 msg, u8 msgId) {
         owner = args[0] + 0x28; /* &((BurstEffect *)effect)->data.owner */
         if (((ActorRef *)msg)->actor == ((ActorRef *)owner)->actor ||
             ((ActorRef *)owner)->uniqueId == ((ActorRef *)args[1])->uniqueId) {
-            func_1516972C((struct102 *)args[0]);
+            func_1516972C((EffectHeader *)args[0]);
         }
     } else {
         owner = args[0] + 0x28;
@@ -944,25 +911,25 @@ void func_151BE138(BurstEffect *effect) {
     BurstData *data = &effect->data;
 
     if (data->sparks[0] != NULL) {
-        func_1516972C((struct102 *)data->sparks[0]);
+        func_1516972C(&data->sparks[0]->head.header);
     }
     if (data->sparks[1] != NULL) {
-        func_1516972C((struct102 *)data->sparks[1]);
+        func_1516972C(&data->sparks[1]->head.header);
     }
     if (data->glows[0] != NULL) {
-        func_1516972C((struct102 *)data->glows[0]);
+        func_1516972C(&data->glows[0]->head.header);
     }
     if (data->glows[1] != NULL) {
-        func_1516972C((struct102 *)data->glows[1]);
+        func_1516972C(&data->glows[1]->head.header);
     }
 }
 
 void func_151BE1B8(BurstEffect *effect) {
     func_151BE138(effect);
-    func_1514933C((struct260 *)effect);
+    func_1514933C(&effect->base);
 }
 
 void func_151BE1E4(BurstEffect *effect) {
     func_151BE138(effect);
-    func_15149368((struct260 *)effect);
+    func_15149368(&effect->base);
 }

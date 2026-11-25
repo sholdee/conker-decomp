@@ -8,18 +8,6 @@ extern s32 D_800DBDC8;
 extern f32 D_800DBDCC;
 extern f32 D_800DBDD0;
 
-/* Node of the zone tree at D_800DBE48: square regions linked by byte offsets. */
-typedef struct ZoneNode {
-    /* 0x0 */ s16 unk0;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ s16 next;     // byte offset to the next sibling, 0 = last
-    /* 0x6 */ u16 halfSize; // half the region's side length
-    /* 0x8 */ s16 x;        // region centre
-    /* 0xA */ s16 z;
-    /* 0xC */ s16 child;    // byte offset to the first child, 0 = leaf
-} ZoneNode;
-
-extern ZoneNode *D_800DBE48;
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
@@ -93,12 +81,10 @@ void func_1510E8BC(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outProp
 
 extern void func_1510F800();
 extern void func_150A64C8(s16, s16, s32 *, s32);
-extern void func_150A44F0(s32, s32 *, s32);
-extern s32 func_150A43E0(s32, s32, s32, s32 *);
-extern s32 D_800D3830;
+extern void func_150A44F0(s32, u16 *, s32);
+extern s32 func_150A43E0(s32, s32, s32, u16 *);
 extern s32 func_150A4FA0(s32, s32);
 extern s32 func_150A6568(s16, s16, s32 *, u16, s32, s32, s32, s32);
-extern s32 D_800D37E0;
 extern f32 D_800DBE54;
 extern f32 D_800DBE58;
 extern u16 D_800DBE60;
@@ -212,11 +198,11 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                 s16 *propVtx;
 
                 floorProps = func_150A6568((s16)ix, (s16)iz, &allProps, group, ix, iz, (s32)minY, (s32)maxY);
-                func_150A44F0(floorProps, &D_800D37E0, 0);
+                func_150A44F0(floorProps, D_800D37E0, 0);
                 if (outPropFloorY != NULL) {
-                    func_150A44F0(allProps, &D_800D3830, 0);
+                    func_150A44F0(allProps, D_800D3830, 0);
                     bestPropHit = 0;
-                    count = func_150A43E0(ix, iz, allProps, &D_800D3830);
+                    count = func_150A43E0(ix, iz, allProps, D_800D3830);
                     if (count != 0) {
                         bestPropY = noFloor;
                         for (i = 0; i < count; i++) {
@@ -239,7 +225,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                         }
                     }
                 }
-                count = func_150A43E0(ix, iz, floorProps, &D_800D37E0);
+                count = func_150A43E0(ix, iz, floorProps, D_800D37E0);
             } else if (type == PROBE_OBJECT) {
                 count = func_150A4FA0(ix, iz);
             } else {
@@ -440,7 +426,6 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
     D_800DBE58 = ceilingY;
 }
 
-
 /* Returns the height of the first prop surface found at (x, z) from height y, or -10000. */
 f32 func_1510F648(f32 x, f32 y, f32 z) {
     f32 height;
@@ -450,8 +435,8 @@ f32 func_1510F648(f32 x, f32 y, f32 z) {
     func_1510F800(2);
     iy = (s32)y; // matching: converting y before the call keeps the original order
     func_150A64C8((s32)x, (s32)z, &groups, iy);
-    func_150A44F0(groups, &D_800D3830, 0);
-    if (func_150A43E0((s32)x, (s32)z, groups, &D_800D3830)) {
+    func_150A44F0(groups, D_800D3830, 0);
+    if (func_150A43E0((s32)x, (s32)z, groups, D_800D3830)) {
         height = D_800D3300[0].height * 0.00390625f;
     } else {
         height = -10000.0f;

@@ -37,34 +37,17 @@ typedef struct {
 
 /* Trail object created by func_150D8B88. */
 typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
-    Vec3f pos;
-    u16 unk1C;
-    u16 flags;
-    u8 pad20[5];
-    u8 capacity;
-    u8 pad26[6];
-    s8 count;
-    s8 tail;            /* oldest point */
-    s8 head;            /* next point to write */
-    u8 pad2F;
-    u8 unk30;
-    u8 pad31[0x23];
-    Vec3f unk54;
-    u8 pad60[0x24];
-    u8 unk84[0x10];
-    TrailPoint *points;
-    TrailData *data;
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ TrailPoint *points;
+    /* 0x98 */ TrailData *data;
 } Trail;
 
 extern s32 func_151EF610(void);
 extern void func_1000D96C(s32, s32, s32);
 extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_15131828(void *, f32 *, void *, u8 *);
+extern void func_15131828(void *, f32 *, u8 *, u8 *);
 extern void func_15131958(void *, f32, void *);
 
 /* Trail anchor point: 20 units above the actor. */
@@ -150,11 +133,11 @@ void func_150D8D84(Vec3f *pos, Vec3f *vel, f32 dt) {
 }
 
 void func_150D8E1C(Trail *trail) {
-    trail->unk30 = 0;
-    trail->flags &= ~2;
-    trail->flags |= 8;
-    trail->flags |= 1;
-    trail->unk1C = 40;
+    trail->head.updateKind2 = 0;
+    trail->head.tmpl.flags &= ~2;
+    trail->head.tmpl.flags |= 8;
+    trail->head.tmpl.flags |= 1;
+    trail->head.tmpl.life = 40;
 }
 
 /* Moves every live point under gravity and ticks the owner's counter. */
@@ -164,26 +147,26 @@ s32 func_150D8E4C(Trail *trail) {
 
     data = trail->data;
     points = trail->points;
-    if ((trail->count < 2) && (trail->flags & 8)) {
+    if ((trail->head.count < 2) && (trail->head.tmpl.flags & 8)) {
         return 0;
     } else {
-        s32 i = trail->head;
+        s32 i = trail->head.end;
 
-        while (i != trail->tail) {
+        while (i != trail->head.start) {
             i--;
             if (i < 0) {
-                i = trail->capacity - 1;
+                i = trail->head.tmpl.itemCount - 1;
             }
             func_150D8D84(&points[i].pos, &points[i].vel, D_800BE9A4);
         }
     }
 
-    if (trail->count > 0) {
-        trail->unk54 = points[trail->tail].pos;
+    if (trail->head.count > 0) {
+        trail->head.modelPos = points[trail->head.start].pos;
     } else {
-        trail->unk54.x = 0.0f;
-        trail->unk54.y = 0.0f;
-        trail->unk54.z = 0.0f;
+        trail->head.modelPos.x = 0.0f;
+        trail->head.modelPos.y = 0.0f;
+        trail->head.modelPos.z = 0.0f;
     }
 
     data->timer += D_800BE9E4;
@@ -222,7 +205,7 @@ s32 func_150D8FAC(Trail *trail) {
     }
     func_150D8B10(actor, &pos);
     func_150D8B3C(actor, &vel);
-    trail->pos = pos;
+    trail->head.tmpl.pos = pos;
     if (data->flags & 1) {
         flags = actor->unk31C->buttons;
         if (flags & 0x2000) {
@@ -266,7 +249,7 @@ s32 func_150D8FAC(Trail *trail) {
         do {
             TrailPoint *point;
 
-            point = &points[trail->head];
+            point = &points[trail->head.end];
             point->pos = cur;
             point->vel.x = data->speedScale * curVel.x;
             point->vel.y = data->speedScale * curVel.y;
@@ -275,19 +258,19 @@ s32 func_150D8FAC(Trail *trail) {
             point->alpha = 255;
             point->texture = 0.0f;
             func_150D8D84(&point->pos, &point->vel, time);
-            trail->head++;
+            trail->head.end++;
             time -= step;
-            if (trail->head == trail->capacity) {
-                trail->head = 0;
+            if (trail->head.end == trail->head.tmpl.itemCount) {
+                trail->head.end = 0;
             }
-            trail->count++;
-            if (trail->head == trail->tail) {
+            trail->head.count++;
+            if (trail->head.end == trail->head.start) {
                 /* buffer full: drop the oldest point */
-                trail->tail++;
-                if (trail->tail == trail->capacity) {
-                    trail->tail = 0;
+                trail->head.start++;
+                if (trail->head.start == trail->head.tmpl.itemCount) {
+                    trail->head.start = 0;
                 }
-                trail->count--;
+                trail->head.count--;
             }
             cur.x += dpx;
             cur.y += dpy;
@@ -303,18 +286,6 @@ s32 func_150D8FAC(Trail *trail) {
     }
     return 1;
 }
-
-/* Result of the func_15081690 ray cast. */
-typedef struct {
-    Actor *obj;
-    f32 dist;
-    Vec3f pos;
-    u8 pad14[0x30];
-    SurfaceTriangle surface;
-    u8 pad56[3];
-    u8 hit;             /* 0 none, 1 surface, 2+ object */
-    u8 pad5A[0xE];
-} RayHit;
 
 f32 sqrtf(f32);
 
@@ -341,6 +312,7 @@ s32 func_150D942C(Trail *trail) {
     f32 len;
     f32 invLen;
     f32 dir[3];
+    s32 pad2; // matching: stack slot (the old local view of RayHit was 0x68 bytes)
     RayHit hit;
     TrailPoint *points;
     TrailPoint *prev;
@@ -355,19 +327,19 @@ s32 func_150D942C(Trail *trail) {
     f32 texPos;
     f32 fadeLen;
 
-    count = trail->count;
+    count = trail->head.count;
     data = trail->data;
     points = trail->points;
     owner = data->owner;
     if (count >= 2) {
         totalLen = 0.0f;
-        i = trail->head;
-        if (trail->flags & 2) {
-            prev = (TrailPoint *)&trail->pos;
+        i = trail->head.end;
+        if (trail->head.tmpl.flags & 2) {
+            prev = (TrailPoint *)&trail->head.tmpl.pos;
         } else {
             i--;
             if (i < 0) {
-                i = trail->capacity - 1;
+                i = trail->head.tmpl.itemCount - 1;
             }
             prev = &points[i];
         }
@@ -378,7 +350,7 @@ s32 func_150D942C(Trail *trail) {
             invLen = -9999.0f;
             i--;
             if (i < 0) {
-                i = trail->capacity - 1;
+                i = trail->head.tmpl.itemCount - 1;
             }
             cur = &points[i];
             delta[0] = cur->pos.x - prev->pos.x;
@@ -402,12 +374,12 @@ s32 func_150D942C(Trail *trail) {
                     cur->len *= 1.0f - excess;
                 }
                 totalLen = maxLen;
-                while (i != trail->tail) {
-                    trail->tail++;
-                    if (trail->tail == trail->capacity) {
-                        trail->tail = 0;
+                while (i != trail->head.start) {
+                    trail->head.start++;
+                    if (trail->head.start == trail->head.tmpl.itemCount) {
+                        trail->head.start = 0;
                     }
-                    trail->count--;
+                    trail->head.count--;
                 }
             }
 
@@ -419,9 +391,9 @@ s32 func_150D942C(Trail *trail) {
                     dir[2] = delta[2] * invLen;
                 }
                 func_15081690(owner, prev->pos.x, prev->pos.y, prev->pos.z, dir[0], dir[1], dir[2], &hit, cur->len, 0, 0, 1, -1, 0, 0);
-                if (hit.hit != 0) {
+                if (hit.hitType != 0) {
                     func_150DA67C(trail, &hit, dir);
-                    if (hit.hit >= 2) {
+                    if (hit.hitType >= 2) {
                         target = hit.obj;
                         target->unk2EC = 1;
                         if (target->id == 0x3A) {
@@ -464,12 +436,12 @@ s32 func_150D942C(Trail *trail) {
                     totalLen -= cur->len;
                     cur->len = hit.dist;
                     totalLen += cur->len;
-                    while (i != trail->tail) {
-                        trail->tail++;
-                        if (trail->tail == trail->capacity) {
-                            trail->tail = 0;
+                    while (i != trail->head.start) {
+                        trail->head.start++;
+                        if (trail->head.start == trail->head.tmpl.itemCount) {
+                            trail->head.start = 0;
                         }
-                        trail->count--;
+                        trail->head.count--;
                     }
                     if (data->sound != 0) {
                         func_1000F91C(data->sound, 0x7FFF, 0, 0, 0, (s32)cur->pos.x, (s32)cur->pos.y, (s32)cur->pos.z, 500, 5000);
@@ -477,37 +449,37 @@ s32 func_150D942C(Trail *trail) {
                 }
             }
             prev = cur;
-        } while (i != trail->tail);
-        count = trail->count;
+        } while (i != trail->head.start);
+        count = trail->head.count;
     }
     if (count >= 2) {
         data->texScroll += -395.0f * D_800BE9A4;
         data->texScroll = func_15144528(data->texScroll, 16383.0f, -16384.0f);
         texPos = 0.0f;
-        j = trail->head;
+        j = trail->head.end;
         // matching: a do-while or plain break here changes the frame size (-g3)
         for (;;) {
             TrailPoint *cur2;
 
             j--;
             if (j < 0) {
-                j = trail->capacity - 1;
+                j = trail->head.tmpl.itemCount - 1;
             }
             cur2 = &points[j];
             texPos += cur2->len;
             cur2->texture = func_15144528(data->texScroll + texPos * 29.02999878f, 16383.0f, -16384.0f);
-            if (j != trail->tail) {
+            if (j != trail->head.start) {
                 continue;
             }
             break;
         }
-        count = trail->count;
+        count = trail->head.count;
     }
     if (count >= 2) {
         /* fade out the oldest 19.8% of the trail */
         len = 0.0f;
         dx = totalLen * 0.8020000458f;
-        k = trail->head;
+        k = trail->head.end;
         fadeLen = totalLen - dx;
         invFadeLen = 1.0f / fadeLen;
         do {
@@ -515,7 +487,7 @@ s32 func_150D942C(Trail *trail) {
 
             k--;
             if (k < 0) {
-                k = trail->capacity - 1;
+                k = trail->head.tmpl.itemCount - 1;
             }
             cur3 = &points[k];
             len += cur3->len;
@@ -525,7 +497,7 @@ s32 func_150D942C(Trail *trail) {
             } else {
                 cur3->alpha = 155;
             }
-        } while (k != trail->tail);
+        } while (k != trail->head.start);
     }
     return 1;
 }
@@ -557,12 +529,12 @@ Gfx *func_150D9C7C(Trail *trail, Gfx *gfx, s16 view) {
     f32 curTexture;
     Vtx_t *vtx;
 
-    if (trail->count < 2) {
+    if (trail->head.count < 2) {
         return gfx;
     }
     data = trail->data;
     points = trail->points;
-    func_151D5D60(trail->unk84, view, (trail->capacity * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
+    func_151D5D60(trail->unk84, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
@@ -572,21 +544,21 @@ Gfx *func_150D9C7C(Trail *trail, Gfx *gfx, s16 view) {
     gfx = func_15142B7C(gfx, 0x220005, 0x1D0600);
     gfx = func_1513F4E4(gfx, 0x4E, &flag);
     gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &flag);
-    if (trail->flags & 2) {
-        index = trail->head - 1;
+    if (trail->head.tmpl.flags & 2) {
+        index = trail->head.end - 1;
         if (index < 0) {
-            index = trail->capacity - 1;
+            index = trail->head.tmpl.itemCount - 1;
         }
-        cur = trail->pos;
+        cur = trail->head.tmpl.pos;
         curTexture = data->texScroll;
     } else {
-        previous = trail->head - 1;
+        previous = trail->head.end - 1;
         if (previous < 0) {
-            previous = trail->capacity - 1;
+            previous = trail->head.tmpl.itemCount - 1;
         }
         index = previous - 1;
         if (index < 0) {
-            index = trail->capacity - 1;
+            index = trail->head.tmpl.itemCount - 1;
         }
         cur = points[previous].pos;
         curTexture = points[previous].texture;
@@ -695,14 +667,14 @@ Gfx *func_150D9C7C(Trail *trail, Gfx *gfx, s16 view) {
         previous = index;
         index--;
         if (index < 0) {
-            index = trail->capacity - 1;
+            index = trail->head.tmpl.itemCount - 1;
         }
         cur = points[previous].pos;
         next = points[index].pos;
         alpha = points[index].alpha;
         curTexture = points[previous].texture;
         nextTexture = points[index].texture;
-    } while (previous != trail->tail);
+    } while (previous != trail->head.start);
     return gfx;
 }
 
@@ -760,7 +732,7 @@ void func_150DA50C(Trail *trail, TrailMessage *msg, u8 type) {
     } else if (type == 0) {
         owner = msg->owner;
         if ((owner == data->owner) || (data->ownerId == msg->x4.ownerId)) {
-            func_1516972C((struct102 *)trail);
+            func_1516972C(&trail->head.header);
         }
     } else if (type == 0x2D) {
         if (data->owner == msg->owner) {
@@ -785,29 +757,18 @@ void func_150DA5EC(Actor *actor, f32 speedScale) {
     func_15147D64(&msg, 0x44);
 }
 
-/* Per-particle data stored in the sparks spawned by func_150DA67C. */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} SparkData;
-
 typedef struct {
     u8 pad0[0x58];
     u8 unk58[0x50];
-    SparkData spark;
+    WobbleData spark;
 } Spark;
 
 s32 func_150DA628(Spark *particle, s32 arg1) {
-    SparkData *spark;
+    WobbleData *spark;
 
     spark = &particle->spark;
-    func_15131828(particle, &spark->unk4, spark, &spark->unk2);
-    func_15131958(particle->unk58, spark->unkC, spark);
+    func_15131828(particle, spark->amplitude, spark->phase, spark->phaseStep);
+    func_15131958(particle->unk58, spark->drag, spark);
     return 1;
 }
 
@@ -827,15 +788,15 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
 
     data = trail->data;
     target = hit->obj;
-    if (hit->hit != 0) {
-        if (hit->hit >= 2 && (target->id == 0x33 || target->id == 0x3A)) {
+    if (hit->hitType != 0) {
+        if (hit->hitType >= 2 && (target->id == 0x33 || target->id == 0x3A)) {
             data->sparkAccum += (0.1990000159f + func_150ADA68() * 0.1540000141f) * D_800BE9A4;
             if (data->sparkAccum > 1.0f) {
                 ParticleDesc spawn;
-                SparkData sub;
+                WobbleData sub;
                 Spark *spark;
 
-                sub.unkC = 0.9936270118f;
+                sub.drag = 0.9936270118f;
                 spawn.texture = 0x6C;
                 spawn.renderMode = 0x5103;
                 spawn.unk0 = 0x200005;
@@ -867,19 +828,19 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
                 spawn.pos = hit->pos;
                 spawn.vel = D_800A5480;
                 do {
-                    sub.unk0 = func_150ADA20();
-                    sub.unk1 = (s16)func_150ADA20(); // matching: the s16 cast gives IDO's extra move
-                    sub.unk2 = (func_150ADA20() % 5U) + 4;
-                    sub.unk3 = (func_150ADA20() % 5U) + 4;
-                    sub.unk4 = func_150ADA68() * 10.0f;
-                    sub.unk8 = func_150ADA68() * 10.0f;
+                    sub.phase[0] = func_150ADA20();
+                    sub.phase[1] = (s16)func_150ADA20(); // matching: the s16 cast gives IDO's extra move
+                    sub.phaseStep[0] = (func_150ADA20() % 5U) + 4;
+                    sub.phaseStep[1] = (func_150ADA20() % 5U) + 4;
+                    sub.amplitude[0] = func_150ADA68() * 10.0f;
+                    sub.amplitude[1] = func_150ADA68() * 10.0f;
                     spawn.gravity = func_150ADA68() * 0.0910000056f + 0.1010000035f;
                     spawn.flags &= ~0xC0;
                     spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
                     spawn.alpha = (func_150ADA20() % 101U) + 100;
                     spawn.timer = (func_150ADA20() % 11U) + 70;
                     spawn.width = spawn.height = func_150ADA68() * 116.0f + 131.0f;
-                    spark = func_15130280(&spawn, 1, 0, 0x10, trail->unkC, trail->unk1);
+                    spark = func_15130280(&spawn, 1, 0, 0x10, trail->head.header.owner, trail->head.header.kind);
                     if (spark != NULL) {
                         memcpy(&spark->spark, &sub, sizeof(sub));
                     }
@@ -913,7 +874,7 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
                 emit.speedBase = 0.01499999966f;
                 emit.speedRange = 0.00699999975f;
                 emit.unk38 = 0.200000003f;
-                if (hit->hit >= 2) {
+                if (hit->hitType >= 2) {
                     ConeBasis cone;
 
                     cone.flags = 1;
@@ -923,7 +884,7 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
                     cone.axis0 = cone.axis1 = D_800A5480;
                     cone.spread = 300.0f;
                     do {
-                        func_15153CCC(&cone, &emit, &origin, trail->unkC, trail->unk1);
+                        func_15153CCC(&cone, &emit, &origin, trail->head.header.owner, trail->head.header.kind);
                         data->impactAccum -= 1.0f;
                     } while (data->impactAccum > 1.0f);
                 } else {
@@ -932,20 +893,20 @@ void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
                     spray.normal.x = -dir[0];
                     spray.normal.y = -dir[1];
                     spray.normal.z = -dir[2];
-                    spray.triangle = hit->surface;
+                    spray.triangle = hit->tri;
                     spray.spread = 300.0f;
                     do {
-                        func_15153C84(&spray, &emit, &origin, trail->unkC, trail->unk1);
+                        func_15153C84(&spray, &emit, &origin, trail->head.header.owner, trail->head.header.kind);
                         data->impactAccum -= 1.0f;
                     } while (data->impactAccum > 1.0f);
                 }
             }
         }
-        if (hit->hit == 1) {
+        if (hit->hitType == 1) {
             data->surfaceAccum += (0.200000003f + func_150ADA68() * 0.1040000021f) * D_800BE9A4;
             while (data->surfaceAccum > 1.0f) {
-                func_151D9B8C(3, func_150ADA68() * 30.0f + 15.0f, (func_150ADA20() % 101U) + 100, (s32)&hit->surface, &hit->pos,
-                              (func_150ADA20() % 81U) + 60, 1, 1, 1, trail->unkC, trail->unk1);
+                func_151D9B8C(3, func_150ADA68() * 30.0f + 15.0f, (func_150ADA20() % 101U) + 100, (s32)&hit->tri, &hit->pos,
+                              (func_150ADA20() % 81U) + 60, 1, 1, 1, trail->head.header.owner, trail->head.header.kind);
                 data->surfaceAccum -= 1.0f;
             }
         }

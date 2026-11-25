@@ -3,16 +3,6 @@
 #include "effects.h"
 #include "variables.h"
 
-/* One 8-byte cutscene script event. Each track starts with a 4-event header whose value is the start time. */
-typedef struct {
-    /* 0x0 */ s8 type;
-    /* 0x1 */ u8 delta; /* time step to the next event; 0 chains events at the same time */
-    /* 0x2 */ s16 value;
-    /* 0x4 */ s8 unk4;
-    /* 0x5 */ s8 unk5;
-    /* 0x6 */ s16 unk6;
-} SeqEvent;
-
 /* An event queued for dispatch by func_150241B4, kept sorted by time. */
 typedef struct SeqQueueEntry {
     /* 0x0 */ SeqEvent *event;
@@ -21,10 +11,7 @@ typedef struct SeqQueueEntry {
     /* 0xA */ u16 index;
 } SeqQueueEntry;
 
-
-
 /* Cutscene state, indexed by scene (and track). */
-extern SeqEvent *D_800C3688[][30]; /* each track's events */
 
 extern WorldObject *func_151149AC(s32);
 extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
@@ -276,7 +263,6 @@ void func_15024130(s32 count, s32 scene) {
     }
 }
 
-
 /*
  * Inserts an event into the time-sorted dispatch queue. When the queue is full
  * it is flushed (dispatched) first and the new event is dropped.
@@ -306,7 +292,6 @@ void func_150241B4(SeqQueueEntry *queue, s32 *count, SeqEvent *event, s32 track,
     queue[pos].time = time;
     (*count)++;
 }
-
 
 /*
  * Queues and dispatches every event of `scene` whose time falls in
@@ -377,11 +362,6 @@ void func_150242F8(s32 mode, s32 scene) {
     }
 }
 
-typedef struct {
-    Actor *obj;
-    u8 id;
-} ObjRef1502460C;
-
 /* Field access by offset, for WorldObject and ActorCtl fields their shared declarations still leave as padding. */
 #define FU8(p, o) (*(u8 *) ((u8 *) (p) + (o)))
 #define FS16(p, o) (*(s16 *) ((u8 *) (p) + (o)))
@@ -391,7 +371,6 @@ typedef struct {
 
 extern s8 D_800E0BF4;
 extern s32 D_80090214[];
-extern f32 D_800C3678;
 
 extern void func_1501C730(s32, s32, s32, s32, s32);
 extern void func_15023440(SeqSubtitle *, s32);
@@ -414,7 +393,7 @@ extern void func_150FAA40(s32, s32);
 extern void func_150FAD28(void);
 extern void func_1510A930(s32, s32, s32);
 extern void func_1510B458(s32, f32, f32);
-extern void func_15147D64(ObjRef1502460C *, s32);
+extern void func_15147D64(ActorRef *, s32);
 extern void func_1515F170(s32, u8);
 extern void func_151616D0(u8, u8, s32);
 extern void func_151645C4(u8);
@@ -430,7 +409,7 @@ extern void func_1518F45C(s32, u8);
 extern s32 func_1518F51C(void *, u8, s16, s8, s8, s8, u8, s32, s32, s32);
 extern u8 *func_1519003C(Actor *, s32 *);
 extern void func_15190518(void *);
-extern void func_15191B8C(ObjRef1502460C *, u8);
+extern void func_15191B8C(ActorRef *, u8);
 extern void func_151937F4(Actor *, s32, s32);
 extern s32 func_1519D030(void *, s32, s32, s32, s32, s32);
 extern s32 func_151A4FD0(s32, s32, s32, s32, s32, s32, u8, s32);
@@ -532,7 +511,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         }
     } else if (event->type == 0xD) {
-        ActorCtl *s;
+        ModelAttachment *att;
 
         if (obj == NULL) {
             return 1;
@@ -542,12 +521,12 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         } else if (event->unk4 == 1) {
             func_150836CC(obj, event->value + 1);
         } else {
-            s = func_1503195C(obj, event->value + 1, 0);
-            if (s != NULL) {
+            att = func_1503195C(obj, event->value + 1, 0);
+            if (att != NULL) {
                 if (event->unk4 == 2) {
-                    FS16(s, 0x18) = D_80090214[event->unk5];
+                    att->seg6Id = D_80090214[event->unk5];
                 } else if (event->unk4 == 3) {
-                    FS16(s, 0x1A) = D_80090214[event->unk5];
+                    att->seg7Id = D_80090214[event->unk5];
                 }
             }
         }
@@ -795,10 +774,10 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 23:
                     if (obj != NULL) {
-                        ObjRef1502460C ref;
+                        ActorRef ref;
 
-                        ref.obj = obj;
-                        ref.id = obj->unique_id;
+                        ref.actor = obj;
+                        ref.uniqueId = obj->unique_id;
                         func_15191B8C(&ref, 0x50);
                     }
                     break;
@@ -836,10 +815,10 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             if (event->unk4 == 0) {
                 func_1519D030(obj, 0, 300, 0, sceneTag, 0);
             } else if (event->unk4 == 1) {
-                ObjRef1502460C ref;
+                ActorRef ref;
 
-                ref.obj = obj;
-                ref.id = obj->unique_id;
+                ref.actor = obj;
+                ref.uniqueId = obj->unique_id;
                 func_15147D64(&ref, 7);
             }
         } else if (event->value == 0x30) {
@@ -1165,16 +1144,6 @@ typedef struct EvNodeData {
     s32 unk30;
 } EvNodeData;
 
-/* Result of a func_15046C80 ground probe. */
-typedef struct {
-    /* 0x00 */ f32 y; /* height of the ground that was hit */
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ u8 pad8[0x15];
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 pad1E[6];
-} EvFloor;
-
-
 typedef struct {
     s32 unk0;
     s16 unk4;
@@ -1198,16 +1167,7 @@ typedef struct {
     s8 unkA;
 } Ev15190770;
 
-typedef struct {
-    s8 unk0;
-    s16 unk2;
-    s8 unk4;
-    s8 unk5;
-    s8 unk6;
-} Ev151D8868;
-
 extern s32 D_8008CA50;
-extern f32 *D_800AAA90;
 typedef struct {
     u8 c[3][6];
 } EvColors;
@@ -1256,10 +1216,10 @@ extern void func_150CF680(s16, u8, s32);
 extern void func_151925C4(Actor *, s16, u8, s32);
 extern void func_1519ED84(SeqTrackState *, u16, s16, u8, s32);
 extern void func_150FAE18(s16, u8, s32);
-extern s32 func_15046C80(f32 *, s32, f32, EvFloor *);
+extern s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 extern void func_15136698(f32, f32, u8, s32, s32, f32 *, f32 *, s32, s32, s32, s32);
 extern void func_150E3340(f32 *, s32 *, SeqTrackState *, s16);
-extern void func_151D8868(Ev151D8868 *, s32, u8, s32);
+extern void func_151D8868(RumbleParams *, s32, u8, s32);
 extern void func_151B5240(s16, u8, s32);
 extern void func_15192D48(Actor *, s16, u8, s32);
 extern void func_151B09BC(Actor *, s32, s16, u8, s32);
@@ -1274,18 +1234,18 @@ extern s32 func_1519E970(s16, EvNodeData *, s32, f32 *, f32 *, s32, s32);
 extern void func_1516F2F8(s32, s32, s32, s32, s32, s32);
 extern void func_1516F1C0(s32, s32, u8, s32);
 extern void func_15136404(Actor *, f32, u8, s32);
-extern void func_1504715C(EvFloor *, Actor *);
+extern void func_1504715C(CollisionHit *, Actor *);
 extern void func_150CA930(f32 *);
 extern void func_151090DC(void);
 extern void func_150FB324(Actor *, u8, s32);
 extern void func_150F97EC(Actor *, u8, s32);
 extern void func_150F9950(Actor *, u8, s32);
-extern s32 func_1514654C(Actor *, ActorCtl *, s32, f32 **, f32 **, s32);
+extern s32 func_1514654C(Actor *, ModelAttachment *, s32, f32 **, f32 **, s32);
 extern void func_151C5588(Actor *, f32 *, s32, u8, s32);
 extern void func_151C56A4(f32 *, u8, s32);
 extern void func_150E06D8(Actor *, u8, u8, s32);
 extern void func_151CFA4C(Actor *, u8, s32);
-extern void func_151C62D0(Actor *, u8, s32, ActorCtl *, s32, s32, s32);
+extern void func_151C62D0(Actor *, u8, s32, ModelAttachment *, s32, s32, s32);
 extern void func_150BAA14(Actor *, s32, s32);
 extern void func_150E0870(Actor *, u8, s32);
 extern void func_151D5648(f32 *, u8, s32);
@@ -1712,7 +1672,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     case 24: {
                         f32 point[3];
                         f32 probe[3];
-                        EvFloor floor;
+                        CollisionHit floor;
                         s32 hit;
 
                         point[0] = D_800C3958[scene][track].x;
@@ -1722,9 +1682,9 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         probe[1] = point[1] + 100.0f;
                         probe[2] = point[2];
                         if (func_15046C80(probe, 0, point[1] - 1000.0f, &floor) != 0) {
-                            if (floor.unk1D != 3) {
+                            if (floor.source != 3) {
                                 hit = 1;
-                                point[1] = floor.y;
+                                point[1] = floor.height;
                             } else {
                                 hit = 0;
                             }
@@ -1734,7 +1694,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         if (hit) {
                             func_15136698((func_150ADA68() * 0.02000000142f) + 0.09000000358f,
                                           (func_150ADA68() * 0.0004399999743f) + 0.0008799999487f,
-                                          (func_150ADA20() % 101) + 0x9B, 0xFF, duration, &floor.unk4, point,
+                                          (func_150ADA20() % 101) + 0x9B, 0xFF, duration, &floor.tri, point,
                                           !event->unk6, 1, sceneTag, 1);
                         }
                         break;
@@ -1753,13 +1713,13 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         break;
                     }
                     case 26: {
-                        Ev151D8868 sp;
+                        RumbleParams sp;
 
-                        sp.unk0 = 1;
-                        sp.unk2 = duration;
-                        sp.unk4 = 8;
-                        sp.unk5 = 1;
-                        sp.unk6 = -1;
+                        sp.flags = 1;
+                        sp.duration = duration;
+                        sp.strength = 8;
+                        sp.playerMask = 1;
+                        sp.updateKind = -1;
                         func_151D8868(&sp, 0, sceneTag, 1);
                         break;
                     }
@@ -1935,7 +1895,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 case 0:
                     if (obj != NULL) {
                         f32 pos[3];
-                        EvFloor floor;
+                        CollisionHit floor;
                         f32 out[3];
 
                         func_1504715C(&floor, obj);
@@ -1944,7 +1904,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                         pos[2] = obj->z_position;
                         if (func_15046C80(pos, 0, obj->y_position - 300.0f, &floor) != 0) {
                             out[0] = pos[0];
-                            out[1] = floor.y;
+                            out[1] = floor.height;
                             out[2] = pos[2];
                             func_150CA930(out);
                         }
@@ -1954,7 +1914,7 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     func_151090DC();
                     break;
                 case 2: {
-                    ActorCtl *bone;
+                    ModelAttachment *attachment;
                     f32 vec[3];
 
                     if (obj != NULL) {
@@ -1963,14 +1923,14 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                             case 0x74:
                             case 0x75:
                             case 0x7A:
-                                bone = func_1503195C(obj, 0x46, 0);
-                                if (bone != NULL) {
+                                attachment = func_1503195C(obj, 0x46, 0);
+                                if (attachment != NULL) {
                                     f32 *p1;
                                     f32 *p2;
 
-                                    p1 = (f32 *)&D_800AAA90;
+                                    p1 = &D_800AAA90.x;
                                     p2 = vec;
-                                    if (func_1514654C(obj, bone, 0, &p1, &p2, 1) != 0) {
+                                    if (func_1514654C(obj, attachment, 0, &p1, &p2, 1) != 0) {
                                         func_151C5588(obj, vec, 0x46, sceneTag, 1);
                                         func_151C56A4(vec, sceneTag, 1);
                                     }
@@ -2006,13 +1966,13 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 5:
                     if (obj != NULL) {
-                        ActorCtl *bone;
+                        ModelAttachment *attachment;
 
-                        bone = NULL;
+                        attachment = NULL;
                         if (event->unk6 != 0) {
-                            bone = func_1503195C(obj, event->unk5 ? 0xA4 : 0xA5, 0);
+                            attachment = func_1503195C(obj, event->unk5 ? 0xA4 : 0xA5, 0);
                         }
-                        func_151C62D0(obj, event->unk5, 1, bone, event->unk5 ? 0xA4 : 0xA5, sceneTag, 1);
+                        func_151C62D0(obj, event->unk5, 1, attachment, event->unk5 ? 0xA4 : 0xA5, sceneTag, 1);
                     }
                     break;
                 case 6:
@@ -2114,13 +2074,13 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                     break;
                 case 17: {
                     s32 unused; // matching: stack padding
-                    Ev151D8868 sp;
+                    RumbleParams sp;
 
-                    sp.unk0 = 1;
-                    sp.unk2 = 0x32;
-                    sp.unk4 = 8;
-                    sp.unk5 = 1;
-                    sp.unk6 = -1;
+                    sp.flags = 1;
+                    sp.duration = 0x32;
+                    sp.strength = 8;
+                    sp.playerMask = 1;
+                    sp.updateKind = -1;
                     func_151D8868(&sp, 0, sceneTag, 1);
                     break;
                 }
@@ -2494,14 +2454,6 @@ extern void func_15188810(Actor *, s32, s32);
 extern void func_1518894C(WorldObject *, s32, s32);
 extern void func_15188AD0(Actor *);
 extern void func_151D66F0(s32, s32);
-
-typedef struct {
-    u8 r;
-    u8 g;
-    u8 b;
-} SeqColor;
-
-extern SeqColor D_80084110[];
 
 /*
  * Third cutscene event handler: sounds (types 6 and 10), func_1000xxxx audio

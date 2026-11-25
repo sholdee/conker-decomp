@@ -122,17 +122,7 @@ typedef struct Struct150E4550 {
     /* 0xA5 */ u8 padA5[3];
 } Struct150E4550;
 
-/* 0x1C-byte impact slots; func_150E4550/func_150E4E04 take an index into this (0xFF = none). */
-typedef struct {
-    u8 unk0[3];
-    u8 unk3;
-    u8 pad4[0xC];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-} Struct800D9960;
 
-extern Struct800D9960 D_800D9960[];
 extern Struct800A1070 D_800A1070[];
 extern f32 D_800A111C[];
 extern u16 D_800A1110[][2];
@@ -191,10 +181,10 @@ void func_150E4550(f32 x, f32 y, f32 z, s32 size, s32 material, s16 **tri, s32 s
             func_151C329C(pos, 0xFF, 1);
         }
         if (slot != 0xFF) {
-            D_800D9960[slot].unk3 = 100;
+            D_800D9960[slot].ricochetChance = 100;
         }
     } else if (slot != 0xFF) {
-        D_800D9960[slot].unk3 = 0;
+        D_800D9960[slot].ricochetChance = 0;
     }
     if (entry->objectType != 0) {
         bzero(&obj, sizeof(obj));
@@ -414,7 +404,7 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
         dirZ /= len;
         if (slot != 0xFF && fabsf(dirY) < 0.8999999762f) {
             func_150440A0(mtx, 0.0f, 0.0f, 0.0f, dirX, dirY, dirZ, 0.0f, 1.0f, 0.0f);
-            func_150A7960(mtx, 0.0f, 0.0f, 1.0f, &D_800D9960[slot].unk10, &D_800D9960[slot].unk14, &D_800D9960[slot].unk18);
+            func_150A7960(mtx, 0.0f, 0.0f, 1.0f, &D_800D9960[slot].normal[0], &D_800D9960[slot].normal[1], &D_800D9960[slot].normal[2]);
         } else {
             noSurface = 1;
         }
@@ -422,7 +412,7 @@ void func_150E4E04(f32 x, f32 y, f32 z, s32 kind, s32 size, s16 **tri, s32 slot)
         noSurface = 1;
     }
     if (slot != 0xFF && noSurface) {
-        D_800D9960[slot].unk3 = 0;
+        D_800D9960[slot].ricochetChance = 0;
     }
     if (!noFx) {
         spawn.x = x;
@@ -579,7 +569,7 @@ void func_150E5558(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, s32 kind, 
 }
 
 typedef struct Struct150E5810 {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 bounce; // restitution applied on each ground hit
     /* 0x18 */ u8 pad18[0x24];

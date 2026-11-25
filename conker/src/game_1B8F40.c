@@ -3,9 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
-extern EffectHeader *D_800DCE50[2][104];
-
 /* While a list is walked, the next node is saved in D_800DD198[depth] (depth D_800DD190). */
 
 #define OBJ_TYPE_TRAIL_EMITTER 0x1F
@@ -33,7 +30,6 @@ typedef struct {
     /* 0x3C */ f32 prevZ[2];
 } TrailEmitter; /* size 0x44 */
 
-void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list);
 
 /* Returns the actor's trail emitter, creating one if its kind has emitter settings. */
@@ -105,12 +101,12 @@ void func_1518BBF4(Actor *actor) {
                 emitter->params.owner = actor;
                 // the owner test always passes: every emitter is destroyed
                 if (actor != NULL || emitter->params.ownerId == actor->unique_id) {
-                    func_1516972C((struct102 *)emitter);
+                    func_1516972C(&emitter->link);
                 }
             }
             {
                 // matching: a slotless block-scope decl moves the -g3 line so the decrement fills the bnel slot
-                extern s8 D_800DD190;
+                extern s8 D_800DD190; // matching: a declaration here opens a -g3 scope block (scheduling)
 
                 D_800DD190--;
             }
@@ -132,31 +128,6 @@ TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list) {
     return emitter;
 }
 
-/* Trail types (see game_175250.c). */
-
-/* One point of a trail; the points form a ring buffer. */
-typedef struct {
-    Vec3f pos;
-    f32 velocityY;
-    u16 phase; /* texture coordinate along the trail */
-    u8 pad12[2];
-} TrailPoint;
-
-typedef struct {
-    /* 0x00 */ EffectHeader link;
-    /* 0x10 */ Vec3f position;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ u8 pad1E[7];
-    /* 0x25 */ u8 capacity; /* number of points in the ring buffer */
-    /* 0x26 */ u8 pad26[6];
-    /* 0x2C */ s8 count;
-    /* 0x2D */ s8 start;    /* oldest point */
-    /* 0x2E */ s8 end;      /* one past the newest point */
-    /* 0x2F */ u8 pad2F[0x65];
-    /* 0x94 */ TrailPoint *points;
-    /* 0x98 */ TrailParams *params;
-} Trail;
-
 typedef struct {
     TrailEmitter *emitter;
     s8 point; /* which of the owner's two points the trail follows */
@@ -169,15 +140,15 @@ typedef struct {
     /* 0x50 */ Vec3f offsets[1]; /* per trail point, relative to the emit point */
 } EmitterTrailParams;
 
-extern Trail *func_15147DA0(EffectTemplate18 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
-                            s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
-                            TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
+extern MotionTrail *func_15147DA0(EffectTemplate18 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
+                                  s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
+                                  TrailRender *render, s32 arg12, s32 arg13, s32 arg14);
 
-/* Trail emitter update: while the owner is alive, spawns a trail from each point when its timer runs out. */
+/* MotionTrail emitter update: while the owner is alive, spawns a trail from each point when its timer runs out. */
 void func_1518BD60(TrailEmitter *emitter) {
     u8 i;
     s32 point;
-    Trail *trail;
+    MotionTrail *trail;
     EffectTemplate18 spawn;
     TrailMotion motion;
     s32 pad; // matching: stack slot between motion and render
@@ -240,14 +211,14 @@ void func_1518BD60(TrailEmitter *emitter) {
 }
 
 /*
- * Trail update for trails spawned by a TrailEmitter: moves each point by its velocity and gravity
+ * MotionTrail update for trails spawned by a TrailEmitter: moves each point by its velocity and gravity
  * relative to the owner's emit point (rotated by the owner's facing), then either grows the trail by
  * one point or, once full, hands the owner's motion to the trail and lets it go.
  * Returns 0 when the owner is gone.
  */
-s32 func_1518C0B8(Trail *trail) {
+s32 func_1518C0B8(MotionTrail *trail) {
     EmitterTrailParams *params;
-    TrailPoint *points;
+    MotionTrailPoint *points;
     s32 i;
     TrailEmitterLink *link;
     Vec3f *offsets;
@@ -270,7 +241,7 @@ s32 func_1518C0B8(Trail *trail) {
     params = (EmitterTrailParams *)trail->params;
     link = &params->link;
     offsets = params->offsets;
-    i = trail->start;
+    i = trail->head.start;
     if (link->emitter->params.owner == NULL || link->emitter->params.owner->interaction_state == 0 ||
         link->emitter->params.owner->unk1D4 == NULL ||
         link->emitter->params.owner->unique_id != link->emitter->params.ownerId) {
@@ -292,7 +263,7 @@ s32 func_1518C0B8(Trail *trail) {
     } else {
         sinA = cosA = 0.0f;
     }
-    while (i != trail->end) {
+    while (i != trail->head.end) {
         points[i].velocityY -= params->base.motion.gravity * D_800BE9A4;
         offsets[i].x += params->base.motion.velocity.x * D_800BE9A4;
         offsets[i].y += points[i].velocityY;
@@ -301,31 +272,31 @@ s32 func_1518C0B8(Trail *trail) {
         points[i].pos.y = offsets[i].y + pos.y;
         points[i].pos.z = (pos.z + offsets[i].z * sinA) - offsets[i].x * cosA;
         i++;
-        if (i == trail->capacity) {
+        if (i == trail->head.tmpl.itemCount) {
             i = 0;
         }
     }
-    if (trail->count < trail->capacity - 1) {
+    if (trail->head.count < trail->head.tmpl.itemCount - 1) {
         phase = 0;
         phaseStep = 0;
-        if (trail->count != 0) {
-            phaseStep = 0x1000 / trail->count;
+        if (trail->head.count != 0) {
+            phaseStep = 0x1000 / trail->head.count;
         }
-        points[trail->end].pos = pos;
-        points[trail->end].velocityY = 0.0f;
-        offsets[trail->end].x = 0.0f;
-        offsets[trail->end].y = 0.0f;
-        offsets[trail->end].z = 0.0f;
-        trail->count++;
-        trail->end++;
-        if (trail->end == trail->capacity) {
-            trail->end = 0;
+        points[trail->head.end].pos = pos;
+        points[trail->head.end].velocityY = 0.0f;
+        offsets[trail->head.end].x = 0.0f;
+        offsets[trail->head.end].y = 0.0f;
+        offsets[trail->head.end].z = 0.0f;
+        trail->head.count++;
+        trail->head.end++;
+        if (trail->head.end == trail->head.tmpl.itemCount) {
+            trail->head.end = 0;
         }
-        for (i = trail->start; i != trail->end;) {
+        for (i = trail->head.start; i != trail->head.end;) {
             points[i].phase = phase;
             i++;
             phase += phaseStep;
-            if (i == trail->capacity) {
+            if (i == trail->head.tmpl.itemCount) {
                 i = 0;
             }
         }
@@ -346,13 +317,13 @@ s32 func_1518C0B8(Trail *trail) {
     return 1;
 }
 
-/* Trail fade: alpha (motion.alpha) follows 8 * unk1C, capped at 0xFF. */
-s32 func_1518C540(Trail *trail) {
+/* MotionTrail fade: alpha (motion.alpha) follows 8 * unk1C, capped at 0xFF. */
+s32 func_1518C540(MotionTrail *trail) {
     s32 alpha;
     TrailParams *params;
 
     params = trail->params;
-    alpha = trail->unk1C << 3;
+    alpha = trail->head.tmpl.life << 3;
     if (alpha >= 0x100) {
         alpha = 0xFF;
     }
@@ -387,19 +358,19 @@ void func_1516865C(QuadFxData *q, u8 r, u8 g, u8 b, u8 a);
 void *func_15168800(QuadFxData *src, s32 owner, s32 list);
 u8 func_151D8E20(void);
 
-/* Trail hit handler: spawns a QuadFx puff where the trail's oldest point hit at height `hitY`. */
-s32 func_1518C57C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
+/* MotionTrail hit handler: spawns a QuadFx puff where the trail's oldest point hit at height `hitY`. */
+s32 func_1518C57C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
     QuadFxData fx;
     TrailParams *params;
-    TrailPoint *points;
+    MotionTrailPoint *points;
 
     params = trail->params;
     points = trail->points;
     fx.unk80 = 0;
     fx.frameStep = 0x100;
-    fx.x = points[trail->start].pos.x;
+    fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;
-    fx.z = points[trail->start].pos.z;
+    fx.z = points[trail->head.start].pos.z;
     fx.unk94 = func_150ADA20() % 21U + 35;
     fx.unk92 = fx.unk94;
     fx.callback = -1;
@@ -408,24 +379,24 @@ s32 func_1518C57C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY) {
     fx.unkA1 = 0;
     fx.unk96 = hitY;
     func_1516865C(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
-    func_15168800(&fx, trail->link.owner, trail->link.kind);
+    func_15168800(&fx, trail->head.header.owner, trail->head.header.kind);
     params->state = 4;
     return 1;
 }
 
 /* Same as func_1518C57C, plus a func_151D8E20() effect (arg5) at the hit point. */
-s32 func_1518C69C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5) {
+s32 func_1518C69C(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5) {
     QuadFxData fx;
     TrailParams *params;
-    TrailPoint *points;
+    MotionTrailPoint *points;
 
     params = trail->params;
     points = trail->points;
     fx.unk80 = 0;
     fx.frameStep = 0x100;
-    fx.x = points[trail->start].pos.x;
+    fx.x = points[trail->head.start].pos.x;
     fx.y = hitY;
-    fx.z = points[trail->start].pos.z;
+    fx.z = points[trail->head.start].pos.z;
     fx.unk94 = func_150ADA20() % 21U + 35;
     fx.unk92 = fx.unk94;
     fx.callback = -1;
@@ -434,57 +405,46 @@ s32 func_1518C69C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5
     fx.unkA1 = 0;
     fx.unk96 = hitY;
     func_1516865C(&fx, 0xFF, 0xFF, 0xFF, 0xFF);
-    func_15168800(&fx, trail->link.owner, trail->link.kind);
+    func_15168800(&fx, trail->head.header.owner, trail->head.header.kind);
     params->state = 4;
     {
         u8 kind;
         f32 pos[3];
 
-        pos[0] = points[trail->start].pos.x;
+        pos[0] = points[trail->head.start].pos.x;
         pos[1] = hitY;
-        pos[2] = points[trail->start].pos.z;
+        pos[2] = points[trail->head.start].pos.z;
         kind = func_151D8E20();
-        func_151DBCBC(kind, func_150ADA68() * 40.0f + 100.0f, 0xFF, arg5, pos, trail->link.owner, trail->link.kind);
+        func_151DBCBC(kind, func_150ADA68() * 40.0f + 100.0f, 0xFF, arg5, pos, trail->head.header.owner, trail->head.header.kind);
     }
     return 1;
 }
 
-/* Message sent to objects about an actor (see game_105FC0.c's TrailMessage). */
-typedef struct {
-    Actor *actor;
-    union {
-        u8 actorId;        /* type 0 */
-        Actor *other;  /* type 0x2D */
-    } x4;
-    u8 actorId;  /* type 0x2D */
-    u8 otherId;  /* type 0x2D */
-} ActorMessage;
-
 /*
- * Trail emitter message handler: follows its owner through an actor swap (type 0x2D) and is
+ * MotionTrail emitter message handler: follows its owner through an actor swap (type 0x2D) and is
  * destroyed when the owner goes away (type 0).
  */
 void func_1518C850(TrailEmitter *emitter, s32 data, u8 type) {
-    ActorMessage *msg = (ActorMessage *)data;
+    ActorMsg *msg = (ActorMsg *)data;
     Actor *actor;
 
     if (type == 0x2D) {
-        actor = msg->actor;
+        actor = msg->swap.actorA;
         if (actor == emitter->params.owner) {
-            emitter->params.owner = msg->x4.other;
-            emitter->params.ownerId = msg->otherId;
+            emitter->params.owner = msg->swap.actorB;
+            emitter->params.ownerId = msg->swap.idB;
         } else {
-            if (emitter->params.owner == msg->x4.other) {
+            if (emitter->params.owner == msg->swap.actorB) {
                 emitter->params.owner = actor;
-                emitter->params.ownerId = msg->actorId;
+                emitter->params.ownerId = msg->swap.idA;
             }
         // matching: the label ends the block, so IDO emits the else path's own branch to the epilogue
         swapped:;
         }
     } else if (type == 0) {
-        actor = msg->actor;
-        if (actor == emitter->params.owner || msg->x4.actorId == emitter->params.ownerId) {
-            func_1516972C((struct102 *)emitter);
+        actor = msg->ref.actor;
+        if (actor == emitter->params.owner || msg->ref.uniqueId == emitter->params.ownerId) {
+            func_1516972C(&emitter->link);
         }
     }
 }

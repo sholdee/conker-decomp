@@ -3,51 +3,17 @@
 #include "variables.h"
 #include "effects.h"
 
-/* One point of a trail; the points form a ring buffer (0x14 bytes each). */
-typedef struct {
-    Vec3f pos;
-    f32 velocityY;
-    u16 phase; /* texture coordinate along the trail */
-    u8 pad12[2];
-} TrailPoint;
-
-/* Result block filled by func_15046C80. */
-typedef struct {
-    f32 height;
-    u8 data[0x19];
-    u8 kind;
-    u8 pad1E[6];
-} TrailCollision; /* size 0x24 */
-
-typedef struct {
-    u8 pad0[0x10];
-    Vec3f position;
-    s16 unk1C;
-    u8 pad1E[7];
-    u8 capacity; /* 0x25: number of points in the ring buffer */
-    u8 pad26[6];
-    s8 count;    /* 0x2C */
-    s8 start;    /* 0x2D: oldest point */
-    s8 end;      /* 0x2E: one past the newest point */
-    u8 pad2F[0x25];
-    Vec3f unk54;
-    TrailCollision collision; /* 0x60 */
-    u8 buffers[0x10];         /* 0x84 */
-    TrailPoint *points;       /* 0x94 */
-    TrailParams *params;      /* 0x98 */
-} Trail;
-
-extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern MotionTrail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Creates a trail object from a spawn description, motion block and render settings. */
-Trail *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
-                     s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
-                     s32 arg12, u8 arg13, s32 arg14) {
-    Trail *trail;
+MotionTrail *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4, s32 finishFn,
+                           s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10, TrailRender *render,
+                           s32 arg12, u8 arg13, s32 arg14) {
+    MotionTrail *trail;
     TrailParams *params;
 
     spawn->kind = 1;
-    trail = func_15147A80(spawn, extraSize + sizeof(TrailParams), sizeof(TrailPoint), 1, 0, 1, arg9, arg10,
+    trail = func_15147A80(spawn, extraSize + sizeof(TrailParams), sizeof(MotionTrailPoint), 1, 0, 1, arg9, arg10,
                           arg12, arg13, arg14);
     if (trail == NULL) {
         return NULL;
@@ -70,10 +36,10 @@ extern TrailFunc D_8008A3F8[];
 extern TrailFunc D_8008A42C[];
 
 /* Runs the trail's update handlers and fades; returns whether it is still alive. */
-s8 func_15147EB8(Trail *trail) {
+s8 func_15147EB8(MotionTrail *trail) {
     TrailParams *params;
     s8 done;
-    TrailPoint *points;
+    MotionTrailPoint *points;
     s16 unk1C;
     s32 fade;
     s32 ret;
@@ -92,7 +58,7 @@ s8 func_15147EB8(Trail *trail) {
         }
     }
     if ((params->motion.flags & 0x40) && !done) {
-        unk1C = trail->unk1C;
+        unk1C = trail->head.tmpl.life;
         if (unk1C < params->motion.unk1C) {
             fade = unk1C * params->motion.unk1E;
             if (fade < params->motion.alpha) {
@@ -107,12 +73,12 @@ s8 func_15147EB8(Trail *trail) {
         }
     }
     points = trail->points;
-    if (trail->count > 0) {
-        trail->unk54 = points[trail->start].pos;
+    if (trail->head.count > 0) {
+        trail->head.modelPos = points[trail->head.start].pos;
     } else {
-        trail->unk54.x = 0.0f;
-        trail->unk54.y = 0.0f;
-        trail->unk54.z = 0.0f;
+        trail->head.modelPos.x = 0.0f;
+        trail->head.modelPos.y = 0.0f;
+        trail->head.modelPos.z = 0.0f;
     }
     return ret;
 }
@@ -135,7 +101,7 @@ extern struct {
 } D_800A4AC8[];
 
 /* Draws the trail as a camera-facing ribbon of quads, newest point first. */
-Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
+Gfx *func_1514803C(MotionTrail *trail, Gfx *gfx, s16 arg2) {
     TrailParams *params;
     Vtx *vtx;
     u8 update;
@@ -144,7 +110,7 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
     s32 i;
     s32 j;
     Vec3f *cam;
-    TrailPoint *points;
+    MotionTrailPoint *points;
     f32 toCamX;
     f32 toCamY;
     f32 toCamZ;
@@ -166,14 +132,14 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
     s32 tex;
 
     params = trail->params;
-    if (trail->count >= 2) {
-        func_151D5D60(trail->buffers, arg2, (trail->capacity - 1) * 2 * sizeof(Vtx), (void **)&vtx, 0);
+    if (trail->head.count >= 2) {
+        func_151D5D60(trail->buffers, arg2, (trail->head.tmpl.itemCount - 1) * 2 * sizeof(Vtx), (void **)&vtx, 0);
         if (vtx == NULL) {
             return gfx;
         }
         if (vtx != NULL) { // matching: redundant re-test of vtx
             if (D_800BE9C0 != 0) {
-                vtx += (trail->capacity - 1) * 2;
+                vtx += (trail->head.tmpl.itemCount - 1) * 2;
             }
             update = 1;
             cam = func_15144B34(arg2);
@@ -191,13 +157,13 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
             gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &update);
             gfx = func_1513F4E4(gfx, ((u8 *)&params->render.unk10)[3] /* matching: reads the low byte */, &update);
             gfx = func_15142FBC(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, D_800A4AC8[params->render.renderMode].unk0 | D_800A4AC8[params->render.renderMode].unk4, &update);
-            i = trail->end - 1;
+            i = trail->head.end - 1;
             if (i < 0) {
-                i = trail->capacity - 1;
+                i = trail->head.tmpl.itemCount - 1;
             }
             j = i - 1;
             if (j < 0) {
-                j = trail->capacity - 1;
+                j = trail->head.tmpl.itemCount - 1;
             }
             cur = points[i].pos;
             next = points[j].pos;
@@ -294,19 +260,19 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
                 i = j;
                 j--;
                 if (j < 0) {
-                    j = trail->capacity - 1;
+                    j = trail->head.tmpl.itemCount - 1;
                 }
                 cur = points[i].pos;
                 next = points[j].pos;
-            } while (i != trail->start);
+            } while (i != trail->head.start);
         }
     }
     return gfx;
 }
 
 /* Moves every point by the trail's velocity and gravity, then appends the current position. */
-s32 func_151488C4(Trail *trail) {
-    TrailPoint *points;
+s32 func_151488C4(MotionTrail *trail) {
+    MotionTrailPoint *points;
     TrailParams *params;
     s32 phase;
     struct {
@@ -318,32 +284,32 @@ s32 func_151488C4(Trail *trail) {
 
     points = trail->points;
     params = trail->params;
-    index = trail->start;
-    while (index != trail->end) {
+    index = trail->head.start;
+    while (index != trail->head.end) {
         points[index].velocityY -= params->motion.gravity * D_800BE9A4;
         points[index].pos.x += params->motion.velocity.x * D_800BE9A4;
         points[index].pos.y += points[index].velocityY * D_800BE9A4;
         points[index].pos.z += params->motion.velocity.z * D_800BE9A4;
         index++;
-        if (index == trail->capacity) {
+        if (index == trail->head.tmpl.itemCount) {
             index = 0;
         }
     }
-    count = trail->count;
-    if (count < trail->capacity - 1) {
+    count = trail->head.count;
+    if (count < trail->head.tmpl.itemCount - 1) {
         phase = (params->motion.flags & 0x20) ? 0x1000 : 0;
         if (count != 0) {
             interval.step = 0x1000 / count;
         }
-        trail->count = count + 1;
-        points[trail->end].pos = trail->position;
-        points[trail->end].velocityY = params->motion.velocity.y;
-        trail->end++;
-        if (trail->end == trail->capacity) {
-            trail->end = 0;
+        trail->head.count = count + 1;
+        points[trail->head.end].pos = trail->head.tmpl.pos;
+        points[trail->head.end].velocityY = params->motion.velocity.y;
+        trail->head.end++;
+        if (trail->head.end == trail->head.tmpl.itemCount) {
+            trail->head.end = 0;
         }
-        phaseIndex = trail->start;
-        while (phaseIndex != trail->end) {
+        phaseIndex = trail->head.start;
+        while (phaseIndex != trail->head.end) {
             points[phaseIndex].phase = phase;
             if (params->motion.flags & 0x20) {
                 phase = (phase - interval.step) & 0xFFFF;
@@ -352,7 +318,7 @@ s32 func_151488C4(Trail *trail) {
                 phase &= 0xFFFF;
             }
             phaseIndex++;
-            if (phaseIndex == trail->capacity) {
+            if (phaseIndex == trail->head.tmpl.itemCount) {
                 phaseIndex = 0;
             }
         }
@@ -365,70 +331,70 @@ s32 func_151488C4(Trail *trail) {
 }
 
 /* Moves every point by the trail's velocity and gravity, newest to oldest. */
-s32 func_15148AF4(Trail *trail) {
+s32 func_15148AF4(MotionTrail *trail) {
     s32 idx;
-    TrailPoint *points;
+    MotionTrailPoint *points;
     TrailParams *params;
 
     points = trail->points;
     params = trail->params;
-    idx = trail->end;
+    idx = trail->head.end;
     do {
         idx--;
         if (idx < 0) {
-            idx = trail->capacity - 1;
+            idx = trail->head.tmpl.itemCount - 1;
         }
         points[idx].velocityY -= params->motion.gravity * D_800BE9A4;
         points[idx].pos.x += params->motion.velocity.x * D_800BE9A4;
         points[idx].pos.y += points[idx].velocityY * D_800BE9A4;
         points[idx].pos.z += params->motion.velocity.z * D_800BE9A4;
-    } while (idx != trail->start);
+    } while (idx != trail->head.start);
     return 1;
 }
 
-typedef s32 (*TrailHitFunc)(Trail *, f32, f32, f32, f32, void *);
+typedef s32 (*TrailHitFunc)(MotionTrail *, f32, f32, f32, f32, void *);
 extern TrailHitFunc D_8008A430[];
 extern TrailHitFunc D_8008A450[];
-s32 func_15046C80(f32 *, u16, f32, TrailCollision *);
+s32 func_15046C80(f32 *, u16, f32, CollisionHit *);
 
 /* Like func_15148AF4, then tests the oldest point's fall against the ground and runs a hit handler. */
-s32 func_15148BA4(Trail *trail) {
+s32 func_15148BA4(MotionTrail *trail) {
     s32 index;
     TrailParams *params;
-    TrailPoint *points;
+    MotionTrailPoint *points;
     Vec3f oldPosition;
     Vec3f position;
     u8 callback;
 
     params = trail->params;
     points = trail->points;
-    index = trail->end;
+    index = trail->head.end;
     if (params->motion.flags & 7) {
-        oldPosition = points[trail->start].pos;
+        oldPosition = points[trail->head.start].pos;
     }
     do {
         index--;
         if (index < 0) {
-            index = trail->capacity - 1;
+            index = trail->head.tmpl.itemCount - 1;
         }
         points[index].velocityY -= params->motion.gravity * D_800BE9A4;
         points[index].pos.x += params->motion.velocity.x * D_800BE9A4;
         points[index].pos.y += points[index].velocityY * D_800BE9A4;
         points[index].pos.z += params->motion.velocity.z * D_800BE9A4;
-    } while (index != trail->start);
+    } while (index != trail->head.start);
     if (params->motion.flags & 0x17) {
-        if (points[trail->start].pos.y < oldPosition.y) {
-            position.x = points[trail->start].pos.x;
+        if (points[trail->head.start].pos.y < oldPosition.y) {
+            position.x = points[trail->head.start].pos.x;
             position.y = oldPosition.y;
-            position.z = points[trail->start].pos.z;
-            if (func_15046C80(&position.x, 0, points[trail->start].pos.y,
+            position.z = points[trail->head.start].pos.z;
+            if (func_15046C80(&position.x, 0, points[trail->head.start].pos.y,
                               &trail->collision) != 0) {
-                if (trail->collision.kind == 3) {
+                if (trail->collision.source == 3) {
                     callback = params->hitKind3Fn;
                     if (callback != 0 &&
                         D_8008A450[callback](trail, oldPosition.x, oldPosition.y,
                                              oldPosition.z, trail->collision.height,
-                                             trail->collision.data) == 0) {
+                                             &trail->collision.tri) == 0) {
                         return 0;
                     }
                 } else {
@@ -436,7 +402,7 @@ s32 func_15148BA4(Trail *trail) {
                     if (callback != 0 &&
                         D_8008A430[callback](trail, oldPosition.x, oldPosition.y,
                                              oldPosition.z, trail->collision.height,
-                                             trail->collision.data) == 0) {
+                                             &trail->collision.tri) == 0) {
                         return 0;
                     }
                 }
@@ -447,25 +413,25 @@ s32 func_15148BA4(Trail *trail) {
 }
 
 /* Drops the newest point and respaces the remaining points' phases; fails below three points. */
-s32 func_15148DE0(Trail *trail) {
+s32 func_15148DE0(MotionTrail *trail) {
     s32 idx;
     u16 step;
     u16 phase;
     TrailParams *params;
-    TrailPoint *points;
+    MotionTrailPoint *points;
 
-    if (trail->count >= 3) {
-        trail->count--;
+    if (trail->head.count >= 3) {
+        trail->head.count--;
         points = trail->points;
         params = trail->params;
-        idx = trail->start;
-        step = 0x1000 / trail->count;
+        idx = trail->head.start;
+        step = 0x1000 / trail->head.count;
         phase = (params->motion.flags & 0x20) ? 0x1000 : 0;
-        trail->end--;
-        if (trail->end < 0) {
-            trail->end = trail->capacity - 1;
+        trail->head.end--;
+        if (trail->head.end < 0) {
+            trail->head.end = trail->head.tmpl.itemCount - 1;
         }
-        while (idx != trail->end) {
+        while (idx != trail->head.end) {
             points[idx].phase = phase;
             if (params->motion.flags & 0x20) {
                 phase -= step;
@@ -473,7 +439,7 @@ s32 func_15148DE0(Trail *trail) {
                 phase += step;
             }
             idx++;
-            if (idx == trail->capacity) {
+            if (idx == trail->head.tmpl.itemCount) {
                 idx = 0;
             }
         }
@@ -483,7 +449,7 @@ s32 func_15148DE0(Trail *trail) {
 }
 
 /* Handler: switches the trail to state 4. */
-s32 func_15148EF8(Trail *trail, s32 arg1, s32 arg2, s32 arg3) {
+s32 func_15148EF8(MotionTrail *trail, s32 arg1, s32 arg2, s32 arg3) {
     TrailParams *params = trail->params;
 
     params->state = 4;
@@ -545,9 +511,9 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
 }
 
 /* Fades the trail in: alpha = 8 per unit of unk1C, capped at 255. */
-s32 func_151490C8(Trail *trail) {
+s32 func_151490C8(MotionTrail *trail) {
     TrailParams *params = trail->params;
-    s32 alpha = trail->unk1C * 8;
+    s32 alpha = trail->head.tmpl.life * 8;
 
     if (alpha >= 0x100) {
         alpha = 0xFF;

@@ -1,37 +1,18 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Settings an emitter is created with (see game_1BA670.c). */
-typedef struct EmitterParams {
-    /* 0x0 */ Actor *owner;
-    /* 0x4 */ u8 ownerId;
-    /* 0x6 */ s16 lifetime; // counts down when (flags & 1)
-    /* 0x8 */ u8 flags;
-    /* 0x9 */ s8 expireCb;  // index into D_8008D628 run when lifetime runs out, -1: just die
-    /* 0xA */ u8 table;
-} EmitterParams; /* 0xC */
+#include "effects.h"
 
 /* Process of type 0x21 that emits particles around its owner (see game_1BA670.c). */
 typedef struct Emitter {
-    /* 0x00 */ u8 type;
-    /* 0x01 */ u8 list;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[0xB];
-    /* 0x18 */ EmitterParams params;
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
+    /* 0x18 */ ActorEmitterParams params;
 } Emitter;
 
 /* An emitter's particle (see game_1BA670.c and game_1BDC20.c). */
 typedef struct Particle {
-    /* 0x000 */ u8 pad0[0x2C];
-    /* 0x02C */ f32 width;
-    /* 0x030 */ f32 height;
-    /* 0x034 */ Vec3f pos;
-    /* 0x040 */ Vec3f prevPos;
-    /* 0x04C */ u8 pad4C[0x74];
-    /* 0x0C0 */ Vtx vtxTemplate[4];
-    /* 0x100 */ Vtx *vtxBuffers[4];
+    /* 0x00 */ DefParticleHead head;
     /* 0x110 */ u8 pad110[0x50];
     /* 0x160 */ f32 stretch; // tilt per sqrt of sideways speed
 } Particle;
@@ -42,7 +23,6 @@ f32 sqrtf(f32);
 
 f32 func_150489B0(u8 angle);
 void func_151429E0(u8 palette, u8 *r, u8 *g, u8 *b);
-void func_1514EDF0(Emitter *handle, Actor *owner);
 void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
 Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
                        char *name);
@@ -60,13 +40,13 @@ void func_1518E4A0(Emitter *emitter) {
 /* Destroy handler of an emitter process. */
 void func_1518E4CC(Emitter *emitter) {
     func_1518E4A0(emitter);
-    func_15169804((struct102 *)emitter);
+    func_15169804(&emitter->header);
 }
 
 /* Free handler of an emitter process. */
 void func_1518E4F8(Emitter *emitter) {
     func_1518E4A0(emitter);
-    func_15169824((struct102 *)emitter);
+    func_15169824(&emitter->header);
 }
 
 /* Particle spawn callback: texture 0x13 or 0x14 at random, opaque black. */
@@ -105,7 +85,7 @@ void func_1518E5D8(u8 *texture, u8 *flip, u8 *r, u8 *g, u8 *b, u8 *alpha, s16 *r
 
 /* Expire callback: starts a kind 3 emitter on the owner and keeps this one alive for 128 more frames. */
 s32 func_1518E66C(Emitter *emitter) {
-    func_1518D1C0(emitter->params.owner, 3, 0, 0, emitter->owner, emitter->list, D_800A7460);
+    func_1518D1C0(emitter->params.owner, 3, 0, 0, emitter->header.owner, emitter->header.kind, D_800A7460);
     emitter->params.lifetime = 128;
     emitter->params.expireCb = -1;
     return 0;
@@ -113,7 +93,7 @@ s32 func_1518E66C(Emitter *emitter) {
 
 /* Expire callback: starts a kind 4 emitter on the owner and keeps this one alive for 128 more frames. */
 s32 func_1518E6D4(Emitter *emitter) {
-    func_1518D1C0(emitter->params.owner, 4, 0, 0, emitter->owner, emitter->list, D_800A749C);
+    func_1518D1C0(emitter->params.owner, 4, 0, 0, emitter->header.owner, emitter->header.kind, D_800A749C);
     emitter->params.lifetime = 128;
     emitter->params.expireCb = -1;
     return 0;
@@ -139,13 +119,13 @@ Vtx *func_1518E73C(Particle *p, s16 vp) {
     s32 negative;
     u8 fresh;
 
-    func_151D5D60(p->vtxBuffers, vp, 4 * sizeof(Vtx), &vtx, &fresh);
+    func_151D5D60(p->head.vtxBuffers, vp, 4 * sizeof(Vtx), &vtx, &fresh);
     ret = vtx;
     // matching: IDO lays out the branches as in the target only with the NULL return in the else
     if (vtx != NULL) {
         if (fresh) {
-            memcpy(p->vtxBuffers[vp], p->vtxTemplate, sizeof(p->vtxTemplate));
-            memcpy(p->vtxBuffers[vp] + 4, p->vtxTemplate, sizeof(p->vtxTemplate));
+            memcpy(p->head.vtxBuffers[vp], p->head.vtxTemplate, sizeof(p->head.vtxTemplate));
+            memcpy(p->head.vtxBuffers[vp] + 4, p->head.vtxTemplate, sizeof(p->head.vtxTemplate));
         }
     } else {
         return NULL;
@@ -153,7 +133,7 @@ Vtx *func_1518E73C(Particle *p, s16 vp) {
     viewZ = D_800DD1D8[vp];
     viewX = D_800DD1E8[vp];
     negative = -1; // matching: the target loads -1, not 1, as the true value
-    speed = (((p->prevPos.x - p->pos.x) * viewX) - (viewZ * (p->prevPos.z - p->pos.z))) * D_800BE9A8;
+    speed = (((p->head.def.rot.x - p->head.def.pos.x) * viewX) - (viewZ * (p->head.def.rot.z - p->head.def.pos.z))) * D_800BE9A8;
     if (speed < 0.0f) {
         speed = -speed;
         negative = FALSE;
@@ -172,24 +152,24 @@ Vtx *func_1518E73C(Particle *p, s16 vp) {
         sinAngle = func_15048A40(angle256);
         cosAngle = func_150489B0(angle256);
     }
-    halfWidthCos = p->width * cosAngle;
-    halfWidthSin = p->width * sinAngle;
-    heightSin = p->height * sinAngle;
-    heightCos = p->height * cosAngle;
-    vtx[0].v.ob[0] = p->pos.x + halfWidthCos * viewX;
-    vtx[0].v.ob[1] = p->pos.y + halfWidthSin;
-    vtx[0].v.ob[2] = p->pos.z - halfWidthCos * viewZ;
+    halfWidthCos = p->head.def.width * cosAngle;
+    halfWidthSin = p->head.def.width * sinAngle;
+    heightSin = p->head.def.height * sinAngle;
+    heightCos = p->head.def.height * cosAngle;
+    vtx[0].v.ob[0] = p->head.def.pos.x + halfWidthCos * viewX;
+    vtx[0].v.ob[1] = p->head.def.pos.y + halfWidthSin;
+    vtx[0].v.ob[2] = p->head.def.pos.z - halfWidthCos * viewZ;
     t = -halfWidthCos;
-    vtx[1].v.ob[0] = p->pos.x + t * viewX;
-    vtx[1].v.ob[1] = p->pos.y - halfWidthSin;
-    vtx[1].v.ob[2] = p->pos.z - t * viewZ;
+    vtx[1].v.ob[0] = p->head.def.pos.x + t * viewX;
+    vtx[1].v.ob[1] = p->head.def.pos.y - halfWidthSin;
+    vtx[1].v.ob[2] = p->head.def.pos.z - t * viewZ;
     t = -(halfWidthCos + heightSin);
-    vtx[2].v.ob[0] = p->pos.x + t * viewX;
-    vtx[2].v.ob[1] = (p->pos.y + heightCos) - halfWidthSin;
-    vtx[2].v.ob[2] = p->pos.z - t * viewZ;
+    vtx[2].v.ob[0] = p->head.def.pos.x + t * viewX;
+    vtx[2].v.ob[1] = (p->head.def.pos.y + heightCos) - halfWidthSin;
+    vtx[2].v.ob[2] = p->head.def.pos.z - t * viewZ;
     t = halfWidthCos - heightSin;
-    vtx[3].v.ob[0] = p->pos.x + t * viewX;
-    vtx[3].v.ob[1] = p->pos.y + heightCos + halfWidthSin;
-    vtx[3].v.ob[2] = p->pos.z - t * viewZ;
+    vtx[3].v.ob[0] = p->head.def.pos.x + t * viewX;
+    vtx[3].v.ob[1] = p->head.def.pos.y + heightCos + halfWidthSin;
+    vtx[3].v.ob[2] = p->head.def.pos.z - t * viewZ;
     return ret;
 }

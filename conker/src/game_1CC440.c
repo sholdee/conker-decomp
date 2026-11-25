@@ -87,21 +87,7 @@ typedef struct TrailPoint {
 } TrailPoint; /* size 0x24 */
 
 typedef struct Trail {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ Vec3f pos;
-    /* 0x1C */ u8 pad1C[2];
-    /* 0x1E */ u16 flags; /* 2: attached (strip starts at pos), 4: pos has been found */
-    /* 0x20 */ s32 side;
-    /* 0x24 */ u8 pad24;
-    /* 0x25 */ u8 capacity;
-    /* 0x26 */ u8 pad26[6];
-    /* 0x2C */ s8 count;
-    /* 0x2D */ s8 tail;  /* oldest point */
-    /* 0x2E */ s8 head;  /* next free slot */
-    /* 0x2F */ u8 pad2F;
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 pad31[0x23];
-    /* 0x54 */ Vec3f tailPos;
+    /* 0x00 */ EffectObjHead head;
     /* 0x60 */ f32 groundY;
     /* 0x64 */ u8 pad64[0x20];
     /* 0x84 */ u8 unk84[0x10];
@@ -115,10 +101,7 @@ typedef struct TrailLink {
 } TrailLink;
 
 typedef struct TrailSpawner {
-    /* 0x00 */ u8 pad0[0xD];
-    /* 0x0D */ u8 flags;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ TrailLink link;
 } TrailSpawner;
 
@@ -186,10 +169,10 @@ void func_1519F108(Trail *trail) {
 
     if (config->owner != NULL) {
         sides = config->owner->trails.sides;
-        if (trail->side == TRAIL_SIDE_6) {
+        if (trail->head.tmpl.kind == TRAIL_SIDE_6) {
             sides[0].trail = NULL;
         }
-        if (trail->side == TRAIL_SIDE_7) {
+        if (trail->head.tmpl.kind == TRAIL_SIDE_7) {
             sides[1].trail = NULL;
         }
     }
@@ -205,17 +188,16 @@ void func_1519F168(Trail *trail) {
 
     if (config->owner != NULL) {
         sides = config->owner->trails.sides;
-        if (trail->side == TRAIL_SIDE_6) {
+        if (trail->head.tmpl.kind == TRAIL_SIDE_6) {
             sides[0].trail = NULL;
         }
-        if (trail->side == TRAIL_SIDE_7) {
+        if (trail->head.tmpl.kind == TRAIL_SIDE_7) {
             sides[1].trail = NULL;
         }
     }
     func_15147928(trail);
 }
 
-extern u8 D_800AB414[][3]; /* rgb per colour index */
 u8 func_151D8E20(void);
 Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
 
@@ -266,9 +248,9 @@ Trail *func_1519F1C8(owner, side)
         config.emitPos = header.pos;
         header.flags |= 4;
     }
-    config.color[0] = D_800AB414[colorIndex][0];
-    config.color[1] = D_800AB414[colorIndex][1];
-    config.color[2] = D_800AB414[colorIndex][2];
+    config.color[0] = D_800AB414[colorIndex].r;
+    config.color[1] = D_800AB414[colorIndex].g;
+    config.color[2] = D_800AB414[colorIndex].b;
     trail = func_15147A80(&header, sizeof(TrailConfig), sizeof(TrailPoint), 5, 5, 5, 0, 0, owner->unk34, 0xFF, 1);
     if (trail != NULL) {
         memcpy(trail->config, &config, sizeof(TrailConfig));
@@ -301,11 +283,11 @@ void func_1519F400(TrailOwner *owner) {
     }
     if (sides[0].spawner != NULL) {
         func_151A0928(sides[0].spawner);
-        func_1516972C((struct102 *)sides[0].spawner);
+        func_1516972C(&sides[0].spawner->base.header);
     }
     if (sides[1].spawner != NULL) {
         func_151A0928(sides[1].spawner);
-        func_1516972C((struct102 *)sides[1].spawner);
+        func_1516972C(&sides[1].spawner->base.header);
     }
 }
 
@@ -316,16 +298,16 @@ void func_1519F48C(Trail *trail) {
 
     if (config->owner != NULL) {
         sides = config->owner->trails.sides;
-        if (trail->side == TRAIL_SIDE_6) {
+        if (trail->head.tmpl.kind == TRAIL_SIDE_6) {
             sides[0].trail = NULL;
         }
-        if (trail->side == TRAIL_SIDE_7) {
+        if (trail->head.tmpl.kind == TRAIL_SIDE_7) {
             sides[1].trail = NULL;
         }
         config->owner = NULL;
     }
-    trail->unk30 = 0;
-    trail->flags &= ~2;
+    trail->head.updateKind2 = 0;
+    trail->head.tmpl.flags &= ~2;
     config->flags |= 1;
 }
 
@@ -341,15 +323,15 @@ s32 func_1519F4F0(Trail *trail) {
 
     config = trail->config;
     points = trail->points;
-    if (trail->count < 2 && (config->flags & 1)) {
+    if (trail->head.count < 2 && (config->flags & 1)) {
         return 0;
     }
-    index = trail->head;
-    while (index != trail->tail) {
+    index = trail->head.end;
+    while (index != trail->head.start) {
         index--;
         expired = 0;
         if (index < 0) {
-            index = trail->capacity - 1;
+            index = trail->head.tmpl.itemCount - 1;
         }
         point = &points[index];
         point->life -= D_800BE9E4;
@@ -384,25 +366,25 @@ s32 func_1519F4F0(Trail *trail) {
         }
         if (expired) {
             /* drop this point and every older one */
-            while (index != trail->tail) {
-                trail->tail++;
-                if (trail->tail == trail->capacity) {
-                    trail->tail = 0;
+            while (index != trail->head.start) {
+                trail->head.start++;
+                if (trail->head.start == trail->head.tmpl.itemCount) {
+                    trail->head.start = 0;
                 }
-                trail->count--;
+                trail->head.count--;
             }
-            points[trail->tail].alpha = 0;
+            points[trail->head.start].alpha = 0;
         }
     }
     config->texT += config->texTSpeed * D_800BE9E4;
-    if (trail->count > 0) {
-        trail->tailPos.x = points[trail->tail].x;
-        trail->tailPos.y = points[trail->tail].y;
-        trail->tailPos.z = points[trail->tail].z;
+    if (trail->head.count > 0) {
+        trail->head.modelPos.x = points[trail->head.start].x;
+        trail->head.modelPos.y = points[trail->head.start].y;
+        trail->head.modelPos.z = points[trail->head.start].z;
     } else {
-        trail->tailPos.x = 0.0f;
-        trail->tailPos.y = 0.0f;
-        trail->tailPos.z = 0.0f;
+        trail->head.modelPos.x = 0.0f;
+        trail->head.modelPos.y = 0.0f;
+        trail->head.modelPos.z = 0.0f;
     }
     return 1;
 }
@@ -452,25 +434,25 @@ s32 func_1519F7F0(Trail *trail) {
         return 0;
     }
     found = 0;
-    if (!(trail->flags & 4)) {
-        if (func_1519EF90(config, (u8)trail->side, &trail->pos) != 0) {
+    if (!(trail->head.tmpl.flags & 4)) {
+        if (func_1519EF90(config, (u8)trail->head.tmpl.kind, &trail->head.tmpl.pos) != 0) {
             found = 1;
-            config->emitPos = trail->pos;
-            trail->flags |= 4;
+            config->emitPos = trail->head.tmpl.pos;
+            trail->head.tmpl.flags |= 4;
         } else {
             return 1;
         }
     }
-    if (!found && func_1519EF90(config, (u8)trail->side, &trail->pos) == 0) {
+    if (!found && func_1519EF90(config, (u8)trail->head.tmpl.kind, &trail->head.tmpl.pos) == 0) {
         func_1519F48C(trail);
         sides = config->owner->trails.sides;
         link.owner = config->owner;
-        link.side = trail->side;
+        link.side = trail->head.tmpl.kind;
         spawner = (TrailSpawner *)func_151491F4(300, -1, 11, 0, 6, 8, 0xFF, 0);
         if (spawner != NULL) {
             memcpy(&spawner->link, &link, sizeof(TrailLink));
         }
-        if (trail->side == TRAIL_SIDE_6) {
+        if (trail->head.tmpl.kind == TRAIL_SIDE_6) {
             sides[0].spawner = spawner;
         } else {
             sides[1].spawner = spawner;
@@ -479,9 +461,9 @@ s32 func_1519F7F0(Trail *trail) {
     }
     config->actorX = actor->x_position;
     config->actorZ = actor->z_position;
-    dx = trail->pos.x - config->emitPos.x;
-    dy = trail->pos.y - config->emitPos.y;
-    dz = trail->pos.z - config->emitPos.z;
+    dx = trail->head.tmpl.pos.x - config->emitPos.x;
+    dy = trail->head.tmpl.pos.y - config->emitPos.y;
+    dz = trail->head.tmpl.pos.z - config->emitPos.z;
     if (0.0001f < fabsf(dx) || 0.0001f < fabsf(dy) || 0.0001f < fabsf(dz)) {
         dist = sqrtf(dx * dx + dy * dy + dz * dz);
         config->pendingPoints += dist * config->pointsPerUnit;
@@ -495,26 +477,26 @@ s32 func_1519F7F0(Trail *trail) {
         width = config->startWidth + config->widthGrowth * age;
         widthDelta = config->startWidth - width;
         /* points drift outwards, away from the actor */
-        if (trail->side == TRAIL_SIDE_7) {
+        if (trail->head.tmpl.kind == TRAIL_SIDE_7) {
             vel.x = -dz * invDist * config->driftSpeed;
             vel.z = dx * invDist * config->driftSpeed;
         } else {
             vel.x = dz * invDist * config->driftSpeed;
             vel.z = -dx * invDist * config->driftSpeed;
         }
-        i = trail->head - 1;
+        i = trail->head.end - 1;
         if (i < 0) {
-            i = trail->capacity - 1;
+            i = trail->head.tmpl.itemCount - 1;
         }
         stepX = dx * inv;
         stepY = dy * inv;
         stepZ = dz * inv;
         widthStep = widthDelta * inv;
-        if (i != trail->tail && trail->count != 0) {
+        if (i != trail->head.start && trail->head.count != 0) {
             /* blend the previous point's drift towards the new direction */
             j = i - 1;
             if (j < 0) {
-                j = trail->capacity - 1;
+                j = trail->head.tmpl.itemCount - 1;
             }
             // matching: `points + j` rather than points[j] keeps IDO's addu operand order
             (points + j)->vel.x = ((points + j)->vel.x + vel.x) * 0.5f;
@@ -525,7 +507,7 @@ s32 func_1519F7F0(Trail *trail) {
             TrailPoint *point;
 
             ok = 1;
-            point = &points[trail->head];
+            point = &points[trail->head.end];
             point->vel = vel;
             point->x = cur.x;
             point->z = cur.z;
@@ -557,18 +539,18 @@ s32 func_1519F7F0(Trail *trail) {
                 }
             }
             if (ok) {
-                trail->head++;
-                if (trail->head == trail->capacity) {
-                    trail->head = 0;
+                trail->head.end++;
+                if (trail->head.end == trail->head.tmpl.itemCount) {
+                    trail->head.end = 0;
                 }
-                trail->count++;
-                if (trail->head == trail->tail) {
+                trail->head.count++;
+                if (trail->head.end == trail->head.start) {
                     /* full: drop the oldest point */
-                    trail->tail++;
-                    if (trail->tail == trail->capacity) {
-                        trail->tail = 0;
+                    trail->head.start++;
+                    if (trail->head.start == trail->head.tmpl.itemCount) {
+                        trail->head.start = 0;
                     }
-                    trail->count--;
+                    trail->head.count--;
                 }
             }
             cur.x += stepX;
@@ -626,8 +608,8 @@ Gfx *func_1519FE6C(Trail *trail, Gfx *gfx, s16 arg2) {
     f32 nz;
     s32 k;
 
-    if (trail->count >= 2) {
-        func_151D5D60(trail->unk84, arg2, (trail->capacity * 3 + 18) * sizeof(Vtx), &vtx, NULL);
+    if (trail->head.count >= 2) {
+        func_151D5D60(trail->unk84, arg2, (trail->head.tmpl.itemCount * 3 + 18) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             config = trail->config;
             points = trail->points;
@@ -636,25 +618,25 @@ Gfx *func_1519FE6C(Trail *trail, Gfx *gfx, s16 arg2) {
                 /* fade in from the tail */
                 tailFade = 0;
                 tailFadeLeft = config->tailFadeCount;
-                j = trail->tail;
+                j = trail->head.start;
                 do {
                     points[j].fade = tailFade;
                     j++;
                     tailFade += config->tailFadeStep;
-                    if (j == trail->capacity) {
+                    if (j == trail->head.tmpl.itemCount) {
                         j = 0;
                     }
                     tailFadeLeft--;
-                } while (tailFadeLeft != 0 && j != trail->head);
+                } while (tailFadeLeft != 0 && j != trail->head.end);
                 do { } while (0); // matching: empty statement; IDO allocates registers differently without it
             }
             if (config->flags & 4) {
                 /* fade out towards the head */
                 headFade = 0;
                 headFadeLeft = config->headFadeCount;
-                j = trail->head - 1;
+                j = trail->head.end - 1;
                 if (j < 0) {
-                    j = trail->capacity - 1;
+                    j = trail->head.tmpl.itemCount - 1;
                 }
                 do {
                     points[j].fade = (points[j].fade * headFade) >> 8;
@@ -662,9 +644,9 @@ Gfx *func_1519FE6C(Trail *trail, Gfx *gfx, s16 arg2) {
                     headFade += config->headFadeStep;
                     headFadeLeft--;
                     if (j < 0) {
-                        j = trail->capacity - 1;
+                        j = trail->head.tmpl.itemCount - 1;
                     }
-                } while (headFadeLeft != 0 && j != trail->head);
+                } while (headFadeLeft != 0 && j != trail->head.end);
             }
             gfx = func_15142E24(gfx, (s32)D_80090E0C, 0, 0, 0, 0, 0x39, 0, 0, &update, 0x3E);
             gfx = func_15142B7C(gfx, 1, 0x160600);
@@ -672,24 +654,24 @@ Gfx *func_1519FE6C(Trail *trail, Gfx *gfx, s16 arg2) {
             gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0, &update);
             gfx = func_1513F4E4(gfx, 7, &update);
             gfx = func_15142FBC(gfx, G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &update);
-            if (trail->flags & 2) {
+            if (trail->head.tmpl.flags & 2) {
                 /* still attached: start the strip at the live attach point */
-                i = trail->head - 1;
+                i = trail->head.end - 1;
                 if (i < 0) {
-                    i = trail->capacity - 1;
+                    i = trail->head.tmpl.itemCount - 1;
                 }
-                prev = trail->pos;
+                prev = trail->head.tmpl.pos;
                 prevAlpha = (points[i].alpha * points[i].fade) >> 8;
                 prevTexS = points[i].texS;
                 prevWidth = config->startWidth;
             } else {
-                k = trail->head - 1;
+                k = trail->head.end - 1;
                 if (k < 0) {
-                    k = trail->capacity - 1;
+                    k = trail->head.tmpl.itemCount - 1;
                 }
                 i = k - 1;
                 if (i < 0) {
-                    i = trail->capacity - 1;
+                    i = trail->head.tmpl.itemCount - 1;
                 }
                 prev.x = points[k].x;
                 prev.y = points[k].y;
@@ -721,9 +703,9 @@ Gfx *func_1519FE6C(Trail *trail, Gfx *gfx, s16 arg2) {
                 texT[2] = config->texT + config->texTSpan;
             }
             texT[1] = (texT[0] + texT[2]) >> 1;
-            if (trail->side == TRAIL_SIDE_6) {
+            if (trail->head.tmpl.kind == TRAIL_SIDE_6) {
                 edgeA = 0;
-            } else if (trail->side == TRAIL_SIDE_7) {
+            } else if (trail->head.tmpl.kind == TRAIL_SIDE_7) {
                 edgeA = 2;
                 edgeB = 0;
             } else {
@@ -812,9 +794,9 @@ Gfx *func_1519FE6C(Trail *trail, Gfx *gfx, s16 arg2) {
                 }
                 k = i--;
                 if (i < 0) {
-                    i = trail->capacity - 1;
+                    i = trail->head.tmpl.itemCount - 1;
                 }
-                if (k != trail->tail) {
+                if (k != trail->head.start) {
                     prev = cur;
                     cur.x = points[i].x;
                     cur.y = points[i].y;
@@ -831,7 +813,7 @@ Gfx *func_1519FE6C(Trail *trail, Gfx *gfx, s16 arg2) {
                     }
                     curWidth = points[i].width;
                 }
-            } while (k != trail->tail);
+            } while (k != trail->head.start);
         }
     }
     return gfx;
@@ -867,8 +849,8 @@ void func_151A084C(TrailSpawner *spawner) {
     }
     if (done) {
         func_151A0928(spawner);
-        spawner->unkE = -1;
-        spawner->flags |= 1;
+        spawner->base.header.state = -1;
+        spawner->base.header.flags |= 1;
     }
 }
 
@@ -883,13 +865,8 @@ void func_151A0928(TrailSpawner *spawner) {
     }
 }
 
-typedef struct TrailEvent {
-    /* 0x0 */ Actor *actor;
-    /* 0x4 */ u8 actorId;
-} TrailEvent;
-
 /* Event handler for a trail: event 10 about its owner's actor detaches the trail. */
-void func_151A0950(Trail *trail, TrailEvent *event, u8 type) {
+void func_151A0950(Trail *trail, ActorRef *event, u8 type) {
     TrailOwner *owner;
     TrailConfig *config = trail->config;
     Actor *actor;
@@ -898,7 +875,7 @@ void func_151A0950(Trail *trail, TrailEvent *event, u8 type) {
         owner = config->owner;
         if (owner != NULL) {
             actor = owner->actor;
-            if (event->actor == actor || event->actorId == owner->actorId) {
+            if (event->actor == actor || event->uniqueId == owner->actorId) {
                 func_1519F48C(trail);
             }
         }
@@ -906,13 +883,13 @@ void func_151A0950(Trail *trail, TrailEvent *event, u8 type) {
 }
 
 /* Event handler for a spawner: event 0 about its owner's actor deletes the spawner. */
-void func_151A09B4(TrailSpawner *spawner, TrailEvent *event, u8 type) {
+void func_151A09B4(TrailSpawner *spawner, ActorRef *event, u8 type) {
     Actor *actor = spawner->link.owner->actor;
 
     if (type == 0) {
-        if (actor == event->actor || event->actorId == actor->unique_id) {
+        if (actor == event->actor || event->uniqueId == actor->unique_id) {
             func_151A0928(spawner);
-            func_1516972C((struct102 *)spawner);
+            func_1516972C(&spawner->base.header);
         }
     }
 }

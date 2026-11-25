@@ -3,19 +3,9 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Trail types (see game_175250.c). */
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ Vec3f position;
-    /* 0x1C */ s16 unk1C; /* counts down; copied from EffectTemplate.unkC */
-    /* 0x1E */ u8 pad1E[0x7A];
-    /* 0x98 */ TrailParams *params;
-} Trail;
-
-extern Trail *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
-                            s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
-                            TrailRender *render, s32 arg12, u8 arg13, s32 arg14);
+extern MotionTrail *func_15147DA0(EffectTemplate *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
+                                  s32 finishFn, s32 hitFn, s32 hitKind3Fn, s32 arg8, s32 arg9, s32 arg10,
+                                  TrailRender *render, s32 arg12, u8 arg13, s32 arg14);
 
 /* Sprays up to 30 trails from a ring around obj; stops early when a trail can't be created. */
 void func_150AEEB0(Actor *obj, u8 owner) {
@@ -75,10 +65,10 @@ void func_150AEEB0(Actor *obj, u8 owner) {
     }
 }
 
-/* Trail handler (D_8008A3F8[3]): fades the trail out over its last 8 frames. */
-s32 func_150AF1C0(Trail *trail) {
+/* MotionTrail handler (D_8008A3F8[3]): fades the trail out over its last 8 frames. */
+s32 func_150AF1C0(MotionTrail *trail) {
     TrailParams *params = trail->params;
-    s32 alpha = trail->unk1C * 32;
+    s32 alpha = trail->head.tmpl.life * 32;
 
     if (alpha >= 0x100) {
         alpha = 0xFF;

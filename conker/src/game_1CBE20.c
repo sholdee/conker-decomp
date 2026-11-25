@@ -14,7 +14,7 @@ typedef struct {
 
 /* Effect created by func_1519E970 (0x2C bytes), counted down by func_1519EA04. */
 typedef struct EvTimer {
-    /* 0x00 */ u8 pad0[0x10]; // effect header, see func_15167A68
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 flags;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ f32 *unk18;
@@ -26,7 +26,6 @@ typedef struct EvTimer {
     /* 0x29 */ u8 pad29[3];
 } EvTimer; // size 0x2C
 
-extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
 /* Starts a timer effect that expires after `duration` frames of D_800BE9E4. */
 EvTimer *func_1519E970(s16 duration, EvTimerOwner *owner, u8 keepOwnerLink, f32 *arg3, f32 *arg4, u8 arg5,
@@ -60,7 +59,7 @@ void func_1519EA04(EvTimer *timer) {
                 EvTimerOwner *owner = timer->owner;
                 owner->timer = NULL;
             }
-            func_1516972C((struct102 *)timer);
+            func_1516972C(&timer->header);
         }
     }
 }

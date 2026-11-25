@@ -43,28 +43,7 @@ typedef struct {
 
 /* The object func_1513D524 spawns. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
-    /* 0x01C */ s16 timer;
-    /* 0x01E */ u8 pad1E[6];
-    /* 0x024 */ s32 unk24;            // eased by motion channel C
-    /* 0x028 */ u8 pad28[4];
-    /* 0x02C */ f32 width;            // eased by motion channel A
-    /* 0x030 */ f32 height;           // eased by motion channel B
-    /* 0x034 */ Vec3f pos;
-    /* 0x040 */ u8 pad40[0xC];
-    /* 0x04C */ f32 accelY;
-    /* 0x050 */ f32 velY;
-    /* 0x054 */ u8 pad54[4];
-    /* 0x058 */ s32 unk58;
-    /* 0x05C */ u8 pad5C[0x14];
-    /* 0x070 */ u8 unk70;
-    /* 0x071 */ u8 pad71;
-    /* 0x072 */ u8 unk72;
-    /* 0x073 */ u8 unk73;
-    /* 0x074 */ u8 growFlags;
-    /* 0x075 */ u8 pad75[0x4B];
-    /* 0x0C0 */ Vtx quadTemplate[4];
-    /* 0x100 */ Vtx *quadBuffers[4];    // each holds two copies of the quad (double-buffered)
+    /* 0x00 */ DefParticleHead head; /* head.def.scale.x: accelY, head.def.scale.y: velY, head.unk74: growFlags */
     /* 0x110 */ ParticleMotion motion;
 } Particle;
 
@@ -169,7 +148,7 @@ s32 func_15149838(Particle *particle) {
         motion->timerA = func_150ADA20() % (u32)motion->periodA;
         motion->targetA = func_150ADA68() * (motion->maxA - motion->minA) + motion->minA;
     }
-    particle->width += (motion->targetA - particle->width) * motion->rateA;
+    particle->head.def.width += (motion->targetA - particle->head.def.width) * motion->rateA;
 
     motion->timerB -= D_800BE9E4;
     if (motion->timerB < 0) {
@@ -180,19 +159,19 @@ s32 func_15149838(Particle *particle) {
             motion->targetB = func_150ADA68() * (motion->altB - motion->maxB) + motion->maxB;
         }
     }
-    particle->height += (motion->targetB - particle->height) * motion->rateB;
+    particle->head.def.height += (motion->targetB - particle->head.def.height) * motion->rateB;
 
     motion->timerC -= D_800BE9E4;
     if (motion->timerC < 0) {
         motion->timerC = func_150ADA20() % (u32)motion->periodC;
         motion->targetC = func_150ADA20() % (u32)(motion->maxC - motion->minC + 1) + motion->minC;
     }
-    particle->unk24 += (s32)(((f32)motion->targetC - (f32)particle->unk24) * motion->rateC);
+    particle->head.def.frameSpeed += (s32)(((f32)motion->targetC - (f32)particle->head.def.frameSpeed) * motion->rateC);
 
-    if (particle->timer < 5) {
-        func_1513F680(particle, particle->unk70, motion->effect, particle->unk72, particle->unk73);
-        particle->timer = 300;
-        particle->unk58 &= ~1;
+    if (particle->head.def.lifetime < 5) {
+        func_1513F680(particle, particle->head.updateFn1, motion->effect, particle->head.expireFn, particle->head.vertexFn);
+        particle->head.def.lifetime = 300;
+        particle->head.def.flags &= ~1;
     }
     return 1;
 }
@@ -201,42 +180,42 @@ s32 func_15149838(Particle *particle) {
  * particle to effect 0xD. Returns 1 (keep alive). */
 s32 func_15149A94(Particle *particle) {
     ParticleMotion *motion = &particle->motion;
-    s32 flags = particle->growFlags;
+    s32 flags = particle->head.unk74;
     s32 grown = TRUE;
 
     if (!(flags & 2)) {
-        particle->width += (motion->targetA - particle->width) * motion->growRate;
-        if (motion->targetA * 0.95f < particle->width) {
-            flags = particle->growFlags |= 2;
+        particle->head.def.width += (motion->targetA - particle->head.def.width) * motion->growRate;
+        if (motion->targetA * 0.95f < particle->head.def.width) {
+            flags = particle->head.unk74 |= 2;
         } else {
             grown = FALSE;
-            flags = particle->growFlags;
+            flags = particle->head.unk74;
         }
     }
     if (!(flags & 8)) {
-        particle->height += (motion->targetB - particle->height) * motion->growRate;
-        if (motion->targetB * 0.95f < particle->height) {
-            particle->growFlags |= 8;
+        particle->head.def.height += (motion->targetB - particle->head.def.height) * motion->growRate;
+        if (motion->targetB * 0.95f < particle->head.def.height) {
+            particle->head.unk74 |= 8;
         } else {
             grown = FALSE;
         }
     }
     if (grown) {
-        func_1513F680(particle, particle->unk70, 0xD, particle->unk72, particle->unk73);
+        func_1513F680(particle, particle->head.updateFn1, 0xD, particle->head.expireFn, particle->head.vertexFn);
     }
-    if (particle->timer < 5) {
-        func_1513F680(particle, particle->unk70, motion->effect, particle->unk72, particle->unk73);
-        particle->timer = 100;
-        particle->unk58 &= ~1;
+    if (particle->head.def.lifetime < 5) {
+        func_1513F680(particle, particle->head.updateFn1, motion->effect, particle->head.expireFn, particle->head.vertexFn);
+        particle->head.def.lifetime = 100;
+        particle->head.def.flags &= ~1;
     }
     return 1;
 }
 
 /* Shrinks the particle; returns 0 (kill) once either side is below 2 units. */
 s32 func_15149BF4(Particle *particle) {
-    particle->width -= particle->width * particle->motion.shrinkRate;
-    particle->height -= particle->height * particle->motion.shrinkRate;
-    if (particle->width < 2.0f || particle->height < 2.0f) {
+    particle->head.def.width -= particle->head.def.width * particle->motion.shrinkRate;
+    particle->head.def.height -= particle->head.def.height * particle->motion.shrinkRate;
+    if (particle->head.def.width < 2.0f || particle->head.def.height < 2.0f) {
         return 0;
     }
     return 1;
@@ -245,14 +224,14 @@ s32 func_15149BF4(Particle *particle) {
 /* Shrinks the particle while it accelerates upwards; returns 0 (kill) once it rises past
  * maxHeight or either side drops below 4 units. */
 s32 func_15149C58(Particle *particle) {
-    particle->width -= particle->width * particle->motion.shrinkRate;
-    particle->height -= particle->height * particle->motion.shrinkRate;
-    particle->velY += particle->accelY * D_800BE9A4;
-    particle->pos.y += particle->velY * D_800BE9A4;
-    if (particle->motion.maxHeight < particle->pos.y) {
+    particle->head.def.width -= particle->head.def.width * particle->motion.shrinkRate;
+    particle->head.def.height -= particle->head.def.height * particle->motion.shrinkRate;
+    particle->head.def.scale.y += particle->head.def.scale.x * D_800BE9A4;
+    particle->head.def.pos.y += particle->head.def.scale.y * D_800BE9A4;
+    if (particle->motion.maxHeight < particle->head.def.pos.y) {
         return 0;
     }
-    if (particle->width < 4.0f || particle->height < 4.0f) {
+    if (particle->head.def.width < 4.0f || particle->head.def.height < 4.0f) {
         return 0;
     }
     return 1;
@@ -268,26 +247,26 @@ Vtx *func_15149D18(Particle *particle, s16 index) {
     f32 dx;
     u8 fresh;
 
-    func_151D5D60(particle->quadBuffers, index, sizeof(particle->quadTemplate), &vtx, &fresh);
+    func_151D5D60(particle->head.vtxBuffers, index, sizeof(particle->head.vtxTemplate), &vtx, &fresh);
     result = vtx;
     if (vtx != NULL) {
         if (fresh) {
-            memcpy(particle->quadBuffers[index], particle->quadTemplate, sizeof(particle->quadTemplate));
-            memcpy(particle->quadBuffers[index] + 4, particle->quadTemplate, sizeof(particle->quadTemplate));
+            memcpy(particle->head.vtxBuffers[index], particle->head.vtxTemplate, sizeof(particle->head.vtxTemplate));
+            memcpy(particle->head.vtxBuffers[index] + 4, particle->head.vtxTemplate, sizeof(particle->head.vtxTemplate));
         }
     } else {
         return NULL;
     }
 
-    dz = D_800DD1D8[index] * particle->width;
-    dx = D_800DD1E8[index] * particle->width;
+    dz = D_800DD1D8[index] * particle->head.def.width;
+    dx = D_800DD1E8[index] * particle->head.def.width;
 
-    vtx[0].v.ob[0] = vtx[3].v.ob[0] = particle->pos.x + dx;
-    vtx[0].v.ob[1] = vtx[1].v.ob[1] = particle->pos.y;
-    vtx[0].v.ob[2] = vtx[3].v.ob[2] = particle->pos.z - dz;
-    vtx[1].v.ob[0] = vtx[2].v.ob[0] = particle->pos.x - dx;
-    vtx[2].v.ob[1] = vtx[3].v.ob[1] = particle->pos.y + particle->height;
-    vtx[1].v.ob[2] = vtx[2].v.ob[2] = particle->pos.z + dz;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = particle->head.def.pos.x + dx;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = particle->head.def.pos.y;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = particle->head.def.pos.z - dz;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = particle->head.def.pos.x - dx;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = particle->head.def.pos.y + particle->head.def.height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = particle->head.def.pos.z + dz;
 
     return result;
 }
@@ -296,7 +275,7 @@ Vtx *func_15149D18(Particle *particle, s16 index) {
 s32 func_15149EC4(Particle *particle) {
     BillboardSpawn effect;
 
-    effect.pos = particle->pos;
+    effect.pos = particle->head.def.pos;
     effect.width = 0;
     effect.height = 0;
     effect.widthStep = effect.heightStep = (func_150ADA20() % 6U) + 8;

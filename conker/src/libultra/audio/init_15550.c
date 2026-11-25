@@ -56,21 +56,6 @@ typedef struct {
 
 extern u16 *D_800428B8;
 
-/* N_ALUnknownStruct1 with the header's pad34/pad44/pad4F spelled out. */
-typedef struct {
-    /* 0x00 */ u8    pad0[0x34];
-    /* 0x34 */ f32   unk34;
-    /* 0x38 */ void *unk38;
-    /* 0x3C */ u8    pad3C[0x8];
-    /* 0x44 */ s16   unk44;
-    /* 0x46 */ u8    pad46[0x9];
-    /* 0x4F */ u8    unk4F;
-    /* 0x50 */ u8    unk50;
-    /* 0x51 */ u8    unk51;
-    /* 0x52 */ u8    pad52;
-    /* 0x53 */ u8    unk53;
-} struct157;
-
 #ifndef MIN
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #endif
@@ -81,7 +66,8 @@ typedef struct {
 /* The sound-state record.  N_ALUnknownStruct1 in n_libaudio.h models the same object
  * but pads over most of what _n_handleEvent touches; every offset below is proven by a
  * load or store in the ROM.  0x10 really is an N_ALVoice: every n_alSyn* call in here
- * is passed `state + 0x10`, and `state + 0x2C` is that voice's fxBus. */
+ * is passed `state + 0x10`, and `state + 0x2C` is that voice's fxBus.  include/structs.h repeats this
+ * layout (with field names) for game code, which cannot include n_libaudio.h. */
 typedef struct SndState {
     /* 0x00 */ struct SndState *next;
     /* 0x04 */ struct SndState *prev;
@@ -90,7 +76,7 @@ typedef struct SndState {
     /* 0x10 */ N_ALVoice        voice;
     /* 0x30 */ f32              ratio;    /* key-map cents ratio            */
     /* 0x34 */ f32              pitch;    /* pitch requested by the client  */
-    /* 0x38 */ struct157      **owner;
+    /* 0x38 */ struct SndState **owner;
     /* 0x3C */ ALBank          *bank;
     /* 0x40 */ s32              retries;
     /* 0x44 */ s16              unk44;    /* client volume  */
@@ -203,8 +189,8 @@ void     func_1001E2A0(N_ALVoice *v, u8 pan);
 void     func_1001E350(N_ALVoice *v, u8 fxmix);
 void     func_10016E90(N_ALUnknownStruct1 *arg0);
 void     func_10016F00(struct154 *arg0);
-struct157 *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6,
-                         struct157 **arg7);
+SndState *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6,
+                         SndState **arg7);
 
 /* Volume actually sent to the synth: the sound's own sample volume, scaled by the
    envelope segment volume, the client volume and the channel volume. */
@@ -726,9 +712,9 @@ s32 func_100173C4(N_ALUnknownEvent2 *arg0) {
  * register forcers.  The retry loop is the same story: arg1 is reset to 0 on
  * every pass, so the `arg1 != 0 && state != NULL` back-edge can never be
  * taken. */
-struct157 *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, struct157 **arg7) {
-    struct157 *state;
-    struct157 *result;
+SndState *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg5, u8 arg6, SndState **arg7) {
+    SndState *state;
+    SndState *result;
     s16 count;
     s32 delta;
     N_ALEvent event;
@@ -737,14 +723,14 @@ struct157 *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg
     count = 0;
     if (arg1 != 0) {
         do {
-            state = (struct157 *)func_10017100(arg0, arg1 - 1);
+            state = (SndState *)func_10017100(arg0, arg1 - 1);
             if (state != NULL) {
                 D_8002BA2C->target = (s32)state;
                 event.type = 0x4000;
                 event.msg.unknown1.unk0 = (N_ALUnknownStruct1 *)state;
                 state->unk4F = arg3;
                 state->unk44 = arg2;
-                state->unk34 = arg4;
+                state->pitch = arg4;
                 state->unk50 = arg5;
                 state->unk51 = arg6;
                 delta = 0;
@@ -755,7 +741,7 @@ struct157 *func_10017438(s32 arg0, s16 arg1, u16 arg2, u8 arg3, f32 arg4, u8 arg
         } while (arg1 != 0 && state != NULL);
         if (result != NULL) {
             result->unk53 |= 1;
-            result->unk38 = arg7;
+            result->owner = arg7;
             if (count != 0) {
             }
         }
@@ -799,10 +785,10 @@ void func_10017604(u8 arg0) {
 // NON-MATCHING: stack isnt quite right
 // void func_10017604(u8 arg0) {
 //     s32 mask;
-//     struct31 *sp20;
+//     SndState *sp20;
 //     u16 foo;
 //     s16 sp1C;
-//     struct31 *sp18;
+//     SndState *sp18;
 //
 //     mask = osSetIntMask(1);
 //     sp18 = D_8002BA20;
@@ -875,12 +861,12 @@ void func_10017780(u8 arg0, u16 arg1) {
 // NON-MATCHING: far from matching
 // void func_10017780(u8 arg0, u16 arg1) {
 //     s32 sp34;
-//     struct31 *sp30;
+//     SndState *sp30;
 //     s32 sp2C;
-//     struct31 *sp20;
+//     SndState *sp20;
 //     s16 sp1C;
-//     struct31 *temp_t4;
-//     struct31 *temp_t4_2;
+//     SndState *temp_t4;
+//     SndState *temp_t4_2;
 //
 //     sp34 = osSetIntMask(1);
 //     sp30 = D_8002BA20;

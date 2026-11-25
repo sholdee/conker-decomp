@@ -17,7 +17,7 @@ s32 func_150C7670(Obj150C7670 *arg0) {
 
     temp = arg0->unk170->unk14[0x2F];
     {
-        extern f32 D_800A04C0;
+        extern f32 D_800A04C0; // 2.297f; matching: the block-scope extern lets IDO hoist the `return 1` (li v0) to the top
 
         arg0->unk70 = temp * D_800A04C0;
     }

@@ -28,22 +28,7 @@ typedef struct {
 } SpriteMotion;
 
 typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
-    /* 0x01C */ s16 unk1C;
-    /* 0x01E */ u8 pad1E[6];
-    /* 0x024 */ s32 unk24;
-    /* 0x028 */ u8 pad28[4];
-    /* 0x02C */ f32 unk2C;
-    /* 0x030 */ f32 unk30;
-    /* 0x034 */ Vec3f target;
-    /* 0x040 */ u8 pad40[0x18];
-    /* 0x058 */ s32 flags;
-    /* 0x05C */ u8 pad5C[0x10];
-    /* 0x06C */ s16 unk6C;
-    /* 0x06E */ s16 unk6E;
-    /* 0x070 */ u8 unk70;
-    /* 0x071 */ u8 unk71;
-    /* 0x072 */ u8 pad72[0x9E];
+    /* 0x00 */ DefParticleHead head;
     /* 0x110 */ union {
         SpriteWobble wobble;
         SpriteMotion motion;
@@ -102,7 +87,8 @@ typedef struct {
 } ContactKey;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ ContactKey key;
 } ContactObj;
 
@@ -111,15 +97,10 @@ typedef struct {
 } Desc15169260;
 
 typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;
-} ChildOwner;
-
-typedef struct {
     /* 0x00 */ AnchorEmitter *emitter;
-    /* 0x04 */ f32 params[8];
-    /* 0x24 */ ChildOwner owner;
-    /* 0x2C */ Header header;
+    /* 0x04 */ LightJitter jitter;
+    /* 0x24 */ ActorRef owner;
+    /* 0x2C */ LightEffectHeader header;
     /* 0x34 */ s32 pad34;
 } ChildDesc;
 
@@ -130,7 +111,7 @@ void *func_1514B8E4(Vec3f *, SpriteSize *, s16, u8, Vec3f *, f32, f32, f32, u8, 
                     s16, s32, u8, s32);
 void func_1514BE20(EffectSprite *);
 void func_1514BF50(EffectSprite *);
-struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 void func_151D2AB0(s32);
 void func_151D2BA4(EmitterParticleDesc *, Vec3f *, s32, u8, s32);
 AnchorEmitter *func_151D2F00(EmitterDesc *, s32, u8, s32);
@@ -139,7 +120,7 @@ s32 func_1518FDC4(Actor *obj, u8 *kind, u8 variant);
 AnchorEmitter *func_1518F5D0(Actor *owner, AnchorEmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
                        s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9);
 void func_1518F8E0(AnchorEmitter *emitter);
-struct225 *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
+LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
 
 extern AnchorEmitterTemplate *D_8008D630[];
 extern s32 (*D_8008D67C[])(AnchorEmitter *);
@@ -158,19 +139,19 @@ s32 func_1518F1A0(EffectSprite *sprite) {
             state->target1 = func_150ADA68() * (state->peak1 - state->hi1) + state->hi1;
         }
     }
-    sprite->unk30 += (state->target1 - sprite->unk30) * 0.359f;
+    sprite->head.def.height += (state->target1 - sprite->head.def.height) * 0.359f;
     state->timer0 -= D_800BE9E4;
     if (state->timer0 < 0) {
         state->timer0 = func_150ADA20() % 17U;
         state->target0 = func_150ADA68() * (state->hi0 - state->lo0) + state->lo0;
     }
-    sprite->unk2C += (state->target0 - sprite->unk2C) * 0.186f;
+    sprite->head.def.width += (state->target0 - sprite->head.def.width) * 0.186f;
     state->timer2 -= D_800BE9E4;
     if (state->timer2 < 0) {
         state->timer2 = func_150ADA20() % 15U;
         state->target2 = func_150ADA68() * (state->hi2 - state->lo2) + state->lo2;
     }
-    sprite->unk24 += (s32)((state->target2 - sprite->unk24) * 0.231f);
+    sprite->head.def.frameSpeed += (s32)((state->target2 - sprite->head.def.frameSpeed) * 0.231f);
     return 1;
 }
 
@@ -186,8 +167,8 @@ s32 func_1518F384(EffectSprite *sprite) {
         state->target1 = func_150ADA68() * (state->hi1 - state->lo1) + state->lo1;
         state->timer1 = 1;
     }
-    sprite->unk30 += (state->target1 - sprite->unk30) * 0.359f;
-    sprite->unk2C += (state->target0 - sprite->unk2C) * 0.186f;
+    sprite->head.def.height += (state->target1 - sprite->head.def.height) * 0.359f;
+    sprite->head.def.width += (state->target0 - sprite->head.def.width) * 0.186f;
     return 1;
 }
 
@@ -205,7 +186,7 @@ void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2) {
         u8 selfTag = self->key.unk4;
         u8 otherTag = other->unk4;
         if (selfId == otherId || selfTag == otherTag) {
-            func_1516972C((struct102 *)self);
+            func_1516972C(&self->header);
         }
     }
 }
@@ -368,7 +349,7 @@ s32 func_1518FC04(EmitterParticle *particle, Vec3f *target) {
     EffectSprite *sprite;
 
     sprite = particle->sprite;
-    sprite->target = *target;
+    sprite->head.def.pos = *target;
     func_1514BE20(sprite);
     return 1;
 }
@@ -377,7 +358,7 @@ s32 func_1518FC44(EmitterParticle *particle, Vec3f *target) {
     EffectSprite *sprite;
 
     sprite = particle->sprite;
-    sprite->target = *target;
+    sprite->head.def.pos = *target;
     func_1514BF50(sprite);
     return 1;
 }
@@ -391,7 +372,7 @@ void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
 
     sprite = particle->sprite;
     if (particle->parent == NULL) {
-        func_1516972C((struct102 *)sprite);
+        func_1516972C(&sprite->head.header);
         return;
     }
     parent = particle->parent;
@@ -402,16 +383,16 @@ void func_1518FC84(EmitterParticle *particle, Vec3f *dest) {
     motion = &sprite->data.motion;
     motion->unk44 = func_150ADA68() * params->tmpl.unk34Range + params->tmpl.unk30;
     motion->unk48 = params->tmpl.unk38;
-    sprite->unk6C = params->tmpl.unk3C;
-    sprite->unk6E = params->tmpl.unk3E;
-    sprite->unk1C = func_150ADA20() % (u32)(params->tmpl.unk42Range + 1) + params->tmpl.unk40;
+    sprite->head.def.fadeStart = params->tmpl.unk3C;
+    sprite->head.def.fadeRate = params->tmpl.unk3E;
+    sprite->head.def.lifetime = func_150ADA20() % (u32)(params->tmpl.unk42Range + 1) + params->tmpl.unk40;
     if (params->tmpl.flags & 1) {
-        sprite->unk70 = 0x21;
+        sprite->head.updateFn1 = 0x21;
     } else {
-        sprite->unk70 = 0x20;
+        sprite->head.updateFn1 = 0x20;
     }
-    sprite->unk71 = 0x24;
-    sprite->flags |= 0x08000001;
+    sprite->head.updateFn2 = 0x24;
+    sprite->head.def.flags |= 0x08000001;
 }
 
 /* Maps an object id to its emitter kind; only variant 0 exists. Returns 0 for unknown ids. */
@@ -672,46 +653,46 @@ u8 *func_1519003C(Actor *obj, s32 *found) {
 }
 
 /* Creates the child sprite of an emitter, colored from the D_800A67C0/6760/6820 tables. */
-struct225 *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
+LightEffect *func_1519021C(AnchorEmitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
     ChildDesc desc;
-    Header2 pos;
-    struct225 *child;
+    Vec3i pos;
+    LightEffect *child;
 
     if (kind >= 24) {
         return NULL;
     }
 
-    desc.params[0] = D_800A67C0[kind];
-    desc.params[1] = D_800A6760[kind];
-    desc.params[2] = D_800A6820[kind];
-    desc.params[3] = 1.0f;
-    desc.params[5] = 5.0f;
-    desc.params[4] = 0.0f;
-    desc.params[7] = 0.0f;
-    desc.params[6] = 0.2489f;
+    desc.jitter.mid = D_800A67C0[kind];
+    desc.jitter.low = D_800A6760[kind];
+    desc.jitter.high = D_800A6820[kind];
+    desc.jitter.target = 1.0f;
+    desc.jitter.interval = 5.0f;
+    desc.jitter.timer = 0.0f;
+    desc.jitter.level = 0.0f;
+    desc.jitter.smoothing = 0.2489f;
     desc.emitter = emitter;
 
-    desc.header.unk0 = ((duration == -1) ? 0 : 1) | 2;
-    desc.header.unk1 = 0x12;
+    desc.header.flags = ((duration == -1) ? 0 : 1) | 2;
+    desc.header.update = 0x12;
     if (duration == -1) {
-        desc.header.unk2 = 300;
+        desc.header.lifetime = 300;
     } else {
-        desc.header.unk2 = duration;
+        desc.header.lifetime = duration;
     }
-    desc.header.unk4 = 0x25;
+    desc.header.lightType = 0x25;
 
-    desc.owner.owner = owner;
-    desc.owner.ownerId = owner->unique_id;
+    desc.owner.actor = owner;
+    desc.owner.uniqueId = owner->unique_id;
 
-    pos.unk0 = owner->x_position;
-    pos.unk4 = owner->y_position;
-    pos.unk8 = owner->z_position;
+    pos.x = owner->x_position;
+    pos.y = owner->y_position;
+    pos.z = owner->z_position;
 
     child = func_151602C0(&desc.header, &pos, 0, 0xFF, 0xD1, 0, 0xFF, 0, 0x30, arg4, arg5);
     if (child != NULL) {
-        memcpy((u8 *)child + 0x18, &desc.owner, sizeof(desc.owner));
-        memcpy((u8 *)child + 0x20, desc.params, sizeof(desc.params));
-        memcpy((u8 *)child + 0x40, &desc.emitter, sizeof(desc.emitter));
+        memcpy(&child->data.actorJitter.ref, &desc.owner, sizeof(desc.owner));
+        memcpy(&child->data.actorJitter.jitter, &desc.jitter, sizeof(desc.jitter));
+        memcpy(&child->data.actorJitter.user, &desc.emitter, sizeof(desc.emitter));
     }
     return child;
 }

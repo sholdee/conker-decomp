@@ -1,13 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Particle instance; only the fields func_1514BE20 touches (same layout as Particle in game_179400.c). */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x34];
-    /* 0x034 */ Vec3f pos;
-    /* 0x040 */ Vec3f unk40;
-    /* 0x04C */ u8 pad4C[0x110];
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x4C];
     /* 0x15C */ f32 easeFactor;
 } Particle;
 
@@ -27,24 +26,24 @@ void func_1514BE20(void *arg) {
 
     // matching: the void * parameter copied into a typed local hoists &dir's address to entry
     p = arg;
-    above.x = p->pos.x;
-    above.y = p->pos.y + 100.0f;
-    above.z = p->pos.z;
-    eased.x = p->unk40.x + (above.x - p->unk40.x) * p->easeFactor;
-    eased.y = p->unk40.y + (above.y - p->unk40.y) * p->easeFactor;
-    eased.z = p->unk40.z + (above.z - p->unk40.z) * p->easeFactor;
+    above.x = p->head.def.pos.x;
+    above.y = p->head.def.pos.y + 100.0f;
+    above.z = p->head.def.pos.z;
+    eased.x = p->head.def.rot.x + (above.x - p->head.def.rot.x) * p->easeFactor;
+    eased.y = p->head.def.rot.y + (above.y - p->head.def.rot.y) * p->easeFactor;
+    eased.z = p->head.def.rot.z + (above.z - p->head.def.rot.z) * p->easeFactor;
     {
         s32 pad; // matching: stack slot needed for the original frame layout
 
-        dir.x = eased.x - p->pos.x;
-        dir.y = eased.y - p->pos.y;
-        dir.z = eased.z - p->pos.z;
+        dir.x = eased.x - p->head.def.pos.x;
+        dir.y = eased.y - p->head.def.pos.y;
+        dir.z = eased.z - p->head.def.pos.z;
         if (func_15145128(&dir, &dir, &length, &invLength)) {
-            p->unk40.x = p->pos.x + dir.x * 100.0f;
-            p->unk40.y = p->pos.y + dir.y * 100.0f;
-            p->unk40.z = p->pos.z + dir.z * 100.0f;
+            p->head.def.rot.x = p->head.def.pos.x + dir.x * 100.0f;
+            p->head.def.rot.y = p->head.def.pos.y + dir.y * 100.0f;
+            p->head.def.rot.z = p->head.def.pos.z + dir.z * 100.0f;
         } else {
-            p->unk40 = p->pos;
+            p->head.def.rot = p->head.def.pos;
         }
     }
 }

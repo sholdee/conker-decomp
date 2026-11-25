@@ -114,7 +114,7 @@ typedef struct {
     /* 0x20 */ s16 shrinkStep;
 } DriftParticleData;
 
-extern SpriteAnim D_80090B60[];
+extern EffectTexture D_80090B60[];
 BillboardParticle *func_15167D84(BillboardTemplate *, s32, s32, s8, u8, s32);
 
 /* Spawns particles at random points in a sphere around the emitter; each drifts back to the centre. */
@@ -307,7 +307,7 @@ typedef struct {
 void func_151A18DC(EffectSpawner *spawner) {
     s32 pad; // matching: unused stack slot
     EffectData151A18DC data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     data.unk0 = spawner->unk28;
     data.unkC = spawner->unk34;
@@ -462,7 +462,7 @@ typedef struct {
 void func_151A1EE8(EffectSpawner *spawner) {
     s32 pad; // matching: unused stack slot
     EffectData151A1EE8 data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     data.unk0 = spawner->unk28;
     data.unkC = spawner->unk34;

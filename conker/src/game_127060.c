@@ -3,19 +3,9 @@
 #include "variables.h"
 #include "effects.h"
 
-
-/* Event argument of func_151D8868. */
-typedef struct {
-    /* 0x00 */ u8 type;
-    /* 0x02 */ s16 duration;
-    /* 0x04 */ u8 field4;
-    /* 0x05 */ u8 field5;
-    /* 0x06 */ s8 field6;
-} Event151D8868;
-
 extern s32 D_800A1CC0;
 void *func_151407D0(void *, s32, void *, u8, u8, u8, u8, s8, u8, s32);
-void func_151D8868(void *, s32, u8, s32);
+void func_151D8868(RumbleParams *, s32, u8, s32);
 s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns the burst effect on actor: two sparks and two glows that follow its second matrix. */
@@ -163,13 +153,13 @@ void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
         }
     }
     {
-        Event151D8868 event;
+        RumbleParams event;
 
-        event.type = 1;
+        event.flags = 1;
         event.duration = 70;
-        event.field5 = 1;
-        event.field4 = 8;
-        event.field6 = -1;
+        event.playerMask = 1;
+        event.strength = 8;
+        event.updateKind = -1;
         func_151D8868(&event, 0, owner, kind);
         func_15160A58(actor, 1, &D_800A1CC0, 3, 70, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, owner, kind);
     }
@@ -192,7 +182,7 @@ void func_150FA1B8(BurstEffect *effect) {
     actor = effect->data.owner;
     burst = &effect->data;
     if ((actor->interaction_state == 0) || (actor->unique_id != burst->ownerId)) {
-        effect->header.state = -1;
+        effect->base.header.state = -1;
         return;
     }
     if (actor->unk1D4 != NULL) {
@@ -251,7 +241,7 @@ void func_150FA1B8(BurstEffect *effect) {
             if (burst->sparks[i] != NULL) {
                 BurstSparkData *sparkData = &burst->sparks[i]->data;
 
-                if (effect->header.state < 10) {
+                if (effect->base.header.state < 10) {
                     sparkData->beamWidthTarget = 0.0f;
                     sparkData->beamLengthTarget = 0.0f;
                 } else {
@@ -262,7 +252,7 @@ void func_150FA1B8(BurstEffect *effect) {
             if (burst->glows[i] != NULL) {
                 BurstGlowData *glowData = &burst->glows[i]->data;
 
-                if (effect->header.state < 10) {
+                if (effect->base.header.state < 10) {
                     glowData->targetScale = 0.0f;
                 } else {
                     glowData->targetScale = 1.306000113f;
@@ -272,17 +262,17 @@ void func_150FA1B8(BurstEffect *effect) {
     }
 }
 
-/* Event handler: events 0x4C-0x4F set effect->unk11; 0x4C and 0x4F also call func_1515D4D4 (all 0 / all 0xFF). */
-void func_150FA468(struct260 *effect, s32 arg1, u8 event) {
+/* Event handler: events 0x4C-0x4F set the tick callback (30 or none); 0x4C and 0x4F also call func_1515D4D4 (all 0 / all 0xFF). */
+void func_150FA468(TimedEffect *effect, s32 arg1, u8 event) {
     if (event == 0x4C) {
-        effect->unk11 = -1;
+        effect->tickCallback = -1;
         func_1515D4D4(0, 0, 0, 0xFF);
     } else if (event == 0x4D) {
-        effect->unk11 = 30;
+        effect->tickCallback = 30;
     } else if (event == 0x4E) {
-        effect->unk11 = -1;
+        effect->tickCallback = -1;
     } else if (event == 0x4F) {
-        effect->unk11 = -1;
+        effect->tickCallback = -1;
         func_1515D4D4(0xFF, 0xFF, 0xFF, 0xFF);
     }
 }
@@ -295,9 +285,9 @@ typedef struct {
 
 extern Vec3f D_800A1CFC[];
 extern void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
-extern void func_1504715C(void *ground, Actor *actor);
-extern void func_15153F18(AngleRange *, SplashSpray *, void *, u8, s32);
-extern void func_15150178(AngleRange *, DropSpray *, void *, u8, s32);
+extern void func_1504715C(CollisionHit *ground, Actor *actor);
+extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
+extern void func_15150178(AngleRange *, DropSpray *, CollisionHit *, u8, s32);
 extern ImpactParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_151C329C(Vec3f *, u8, s32);
 
@@ -307,11 +297,11 @@ extern void func_151C329C(Vec3f *, u8, s32);
  */
 void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
     Vec3f pos;
-    u8 ground[0x24];
+    CollisionHit ground;
 
     if (actor->unk1D4) {
         func_15143134(&D_800A1CFC[point], &pos, (Mtx *)actor->unk1D4 + 5);
-        func_1504715C(ground, actor);
+        func_1504715C(&ground, actor);
         {
             SplashSpraySpec first;
 
@@ -339,7 +329,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             first.spray.speedBase = 12.0f;
             first.spray.speedRange = 13.90000057f;
             first.spray.unk38 = 1.0f;
-            func_15153F18(&first.angles, &first.spray, ground, owner, kind);
+            func_15153F18(&first.angles, &first.spray, &ground, owner, kind);
         }
         {
             DropSpraySpec second;
@@ -366,7 +356,7 @@ void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
             second.spray.sizeRange = 104.0f;
             second.spray.unk34 = 1.0f;
             second.spray.bounceChance = 0.3f;
-            func_15150178(&second.angles, &second.spray, ground, owner, kind);
+            func_15150178(&second.angles, &second.spray, &ground, owner, kind);
         }
         {
             ParticleDesc spawn;
@@ -430,11 +420,7 @@ typedef struct {
 } EmitterData;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x28 - 0xD];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterData data;
 } EmitterEffect;
 
@@ -458,14 +444,6 @@ void func_150FAA40(u8 owner, s32 kind) {
     }
 }
 
-/* A list of spawn variants: an id and a scale for each. */
-typedef struct {
-    /* 0x00 */ u8 count;
-    /* 0x04 */ s16 *ids;
-    /* 0x08 */ f32 *scales;
-} VariantList;
-
-extern VariantList D_80088B20[];
 void func_1514470C(s32, Vec3f *);
 void func_150F4570(Vec3f *from, Vec3f *to, u8 id, f32 duration, f32 rate, f32 scale, u8 arg6, s32 arg7, u8 owner,
                    s32 kind);
@@ -490,13 +468,13 @@ void func_150FAAEC(EmitterEffect *effect) {
         // matching: the "* 1" is kept; a plain random + 1.0f schedules differently
         func_150F4570(&from, &to, variants->ids[i], duration, 1.0f / duration,
                       variants->scales[i] * (func_150ADA68() * 1 + 1), 1, func_150ADA20() % 3 + 750,
-                      effect->unkC, effect->unk1);
+                      effect->base.header.owner, effect->base.header.kind);
         data->pending -= 1.0f;
     }
 }
 
 /* Event handler: events 0x4E and 0x4F call func_1516972C on the object. */
-void func_150FACE4(struct102 *obj, s32 arg1, u8 event) {
+void func_150FACE4(EffectHeader *obj, s32 arg1, u8 event) {
     if ((event == 0x4E) || (event == 0x4F)) {
         func_1516972C(obj);
     }

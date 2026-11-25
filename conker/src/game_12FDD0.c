@@ -26,9 +26,9 @@ void func_15103254(s16 lifetime, u8 alpha, f32 size, Vec3f *pos, u8 views, u8 ar
 
 /* Spawns a func_1513C650 effect of the given size on a surface (none for some materials on maps 0x36 and 0x26);
  * a duration of -1 means a fixed 300 frames without the timed flag. */
-struct210 *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
+QuadSprite *func_15102920(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6,
                          s32 surfaceFlags, u8 arg8, s32 arg9) {
-    struct210 *result;
+    QuadSprite *result;
     SpriteDef arg;
     s32 argB;
     s32 argC;
@@ -149,7 +149,7 @@ void func_15102D50(Particle *particle, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &particle->beam.target, &particle->beam.targetId, particle);
 }
 
-extern s32 func_1514654C(Actor *, ActorCtl *, s32, void *, void *, s32);
+extern s32 func_1514654C(Actor *, ModelAttachment *, s32, void *, void *, s32);
 extern void func_15145EA4(Vec3f **src, Vec3f **dst, Mtx *matrix, s32 count);
 
 /* Beam update: moves the beam's end points with its target's bone or model node.
@@ -174,7 +174,7 @@ s32 func_15102D90(Particle *particle) {
     dst[0] = &beam->start;
     dst[1] = &beam->end;
     if (beam->node != -1) {
-        ActorCtl *node;
+        ModelAttachment *node;
 
         node = func_1503195C(target, beam->node, 0);
         if (node == NULL) {

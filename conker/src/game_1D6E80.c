@@ -14,17 +14,6 @@ extern u8 func_151D8E20(void);
 
 extern void *func_1513418C(BloodDripDesc *desc, s32 payloadSize, u8 arg2, s32 arg3);
 
-/* Ground probe result filled in by func_15045800 (same layout as game_71820.c's Game71820Hit). */
-typedef struct GroundHit {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ s16 points[9];
-    /* 0x18 */ s32 object;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 active;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 unk20;
-} GroundHit; // size 0x24
-
 struct ActorTask;
 
 /*
@@ -53,30 +42,6 @@ typedef struct {
     /* 0x80 */ PulseFxPayload payload;
 } PulseFx;
 
-/* Payload at +0xB0 of the effect spawned by func_151AADF8: a value eased toward random targets. */
-typedef struct {
-    /* 0x00 */ struct ActorTask *owner;
-    /* 0x04 */ u8 keepAlive;
-    /* 0x05 */ u8 pad5[0x3];
-    /* 0x08 */ f32 minTarget;
-    /* 0x0C */ f32 targetRange;
-    /* 0x10 */ f32 target;
-    /* 0x14 */ s16 timer;
-    /* 0x16 */ s16 minDelay;
-    /* 0x18 */ s16 delayRange;
-    /* 0x1A */ u8 pad1A[0x2];
-    /* 0x1C */ f32 easing;
-} FlickerFxPayload;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ s32 flags;
-    /* 0x1C */ u8 pad1C[0x8];
-    /* 0x24 */ s32 value;
-    /* 0x28 */ u8 pad28[0x88];
-    /* 0xB0 */ FlickerFxPayload payload;
-} FlickerFx;
-
 /* Payload at +0x58 of the effect spawned by func_151AB2C4: holds a looping sound. */
 typedef struct {
     /* 0x00 */ struct ActorTask *owner;
@@ -87,40 +52,32 @@ typedef struct {
 } LoopSoundFxPayload;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x58];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x48];
     /* 0x58 */ LoopSoundFxPayload payload;
 } LoopSoundFx;
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x14];
     /* 0x14 */ PulseFx *pulse;
-    /* 0x18 */ FlickerFx *flicker;
+    /* 0x18 */ FlickerSprite *flicker;
     /* 0x1C */ LoopSoundFx *sound;
 } ActorTaskFx;
 
 /* Callback block attached to an actor; the callbacks below drop effects onto the ground under it. */
 typedef struct ActorTask {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ Actor *actor;
-    /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ GroundHit hit;
+    /* 0x00 */ CharacterWatcher watcher;
     /* 0x58 */ ActorTaskFx fx;
 } ActorTask;
 
-void func_151AA264(Actor *actor, GroundHit *hit);
+void func_151AA264(Actor *actor, CollisionHit *hit);
 void func_151ABE00(Actor *actor);
-extern s32 func_15045800(f32 *pos, s32 arg1, f32 minY, GroundHit *hit);
-extern s32 func_151ABE40(f32 *pos, GroundHit *hit, s32 kind, s32 arg3, s32 arg4);
+extern s32 func_15045800(f32 *pos, s32 arg1, f32 minY, CollisionHit *hit);
+extern s32 func_151ABE40(f32 *pos, CollisionHit *hit, s32 kind, s32 arg3, s32 arg4);
 
 /* Probes the ground under the task's actor and spawns ground effect 3 there. */
 void func_151A99D0(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
@@ -132,20 +89,20 @@ void func_151A99D0(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, &task->hit, 3, task->unkC, task->unk1);
+        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, &task->watcher.hit, 3, task->watcher.header.owner, task->watcher.header.kind);
         }
     }
 }
 
 /* Ground effect 3 under the actor (with sound 0x5208), then func_151ABE00. */
 void func_151A9AA4(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
-        GroundHit *hit;
+        CollisionHit *hit;
 
         pos[0] = actor->x_position;
         if (-9500.0f < actor->unk118) {
@@ -154,10 +111,10 @@ void func_151A9AA4(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        hit = &task->hit;
+        hit = &task->watcher.hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 3, task->unkC, task->unk1);
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -166,11 +123,11 @@ void func_151A9AA4(ActorTask *task) {
 
 /* Ground effect 1 under the actor, with sound 0x5208. */
 void func_151A9BA0(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
-        GroundHit *hit;
+        CollisionHit *hit;
 
         pos[0] = actor->x_position;
         if (-9500.0f < actor->unk118) {
@@ -179,10 +136,10 @@ void func_151A9BA0(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        hit = &task->hit;
+        hit = &task->watcher.hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 1, task->unkC, task->unk1);
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, hit, 1, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -191,7 +148,7 @@ void func_151A9BA0(ActorTask *task) {
 
 /* Unless the actor's unk31C->unk95 is set: ground effect 1 (sound 0x6978), func_151AA264, func_151ABE00. */
 void func_151A9CA0(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
     f32 pos[3];
 
     // matching: structs.h types unk95 as s8, but this read is unsigned (lbu)
@@ -205,22 +162,22 @@ void func_151A9CA0(ActorTask *task) {
         pos[1] = actor->y_position + 150.0f;
     }
     pos[2] = actor->z_position;
-    if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
-        pos[1] = task->hit.height;
-        func_151ABE40(pos, &task->hit, 1, task->unkC, task->unk1);
+    if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
+        pos[1] = task->watcher.hit.height;
+        func_151ABE40(pos, &task->watcher.hit, 1, task->watcher.header.owner, task->watcher.header.kind);
         func_10010FFC(0, 8, 0x6978, 0, 0, actor);
     }
-    func_151AA264(actor, &task->hit);
+    func_151AA264(actor, &task->watcher.hit);
     func_151ABE00(actor);
 }
 
 /* Ground effect 2 under the actor, with sound 0x5208. */
 void func_151A9DC0(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
-        GroundHit *hit;
+        CollisionHit *hit;
 
         pos[0] = actor->x_position;
         if (-9500.0f < actor->unk118) {
@@ -229,10 +186,10 @@ void func_151A9DC0(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        hit = &task->hit;
+        hit = &task->watcher.hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 2, task->unkC, task->unk1);
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
@@ -240,11 +197,11 @@ void func_151A9DC0(ActorTask *task) {
 
 /* Ground effect 2 (sound 0x6978), then func_151AA264 and func_151ABE00. */
 void func_151A9EC0(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
-        GroundHit *hit;
+        CollisionHit *hit;
 
         pos[0] = actor->x_position;
         if (-9500.0f < actor->unk118) {
@@ -253,20 +210,20 @@ void func_151A9EC0(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        hit = &task->hit;
+        hit = &task->watcher.hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 2, task->unkC, task->unk1);
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, hit, 2, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 8, 0x6978, 0, 0, actor);
         }
     }
-    func_151AA264(actor, &task->hit);
+    func_151AA264(actor, &task->watcher.hit);
     func_151ABE00(actor);
 }
 
 /* Ground effect 4 under the actor. */
 void func_151A9FC8(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
@@ -278,16 +235,16 @@ void func_151A9FC8(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, &task->hit, 4, task->unkC, task->unk1);
+        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
         }
     }
 }
 
 /* Ground effect 4 under the actor. */
 void func_151AA09C(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
@@ -299,9 +256,9 @@ void func_151AA09C(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, &task->hit, 4, task->unkC, task->unk1);
+        if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, &task->watcher.hit, 4, task->watcher.header.owner, task->watcher.header.kind);
         }
     }
 }
@@ -311,7 +268,8 @@ void func_151AA170(s32 arg0) {
 }
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ s32 unk18;
     /* 0x1C */ u8 unk1C;
 } Task151AA17C;
@@ -362,7 +320,7 @@ void func_151AA210(Task151AA17C *task) {
 }
 
 /* When the ground hit has flag bit 0 set, spawns a func_1513418C effect on the actor. */
-void func_151AA264(Actor *actor, GroundHit *hit) {
+void func_151AA264(Actor *actor, CollisionHit *hit) {
     BloodDripDesc desc;
 
     if (hit->flags & 1) {
@@ -386,30 +344,27 @@ void func_151AA264(Actor *actor, GroundHit *hit) {
 }
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0xF];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0xC];
     /* 0x1C */ Actor *actor;
 } Task151AA30C;
 
-extern s32 func_1515A920(Actor *actor, s32 *out);
-extern void func_1515A238(f32 *pos, f32 *vel, f32, f32, s32, f32, s32, s32, s32, s32, s32);
+extern s32 func_1515A920(Actor *actor, CollisionHit **out);
+extern void func_1515A238(f32 *pos, f32 *vel, f32, f32, CollisionHit *, f32, s32, s32, s32, s32, s32);
 
 /* Spawns one falling particle at (x, y, z) when that point is not above the task actor's unk118. */
 void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {
     f32 pos[3];
     f32 vel[3];
     Actor *actor;
-    s32 surface;
+    CollisionHit *ground;
 
     actor = task->actor;
     if (actor->unk118 < y) {
         return;
     }
-    if (func_1515A920(actor, &surface) == 0) {
-        surface = 0;
+    if (func_1515A920(actor, &ground) == 0) {
+        ground = NULL;
     }
     vel[0] = 0.0f;
     vel[1] = -((func_150ADA68() * 196.0f + 199.0f) * 0.001000000047f * scale);
@@ -417,9 +372,9 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
     pos[0] = x;
     pos[1] = y;
     pos[2] = z;
-    func_1515A238(pos, vel, (func_150ADA68() * 311.0f + 454.0f) * 0.001000000047f, 0.972683012f, surface,
+    func_1515A238(pos, vel, (func_150ADA68() * 311.0f + 454.0f) * 0.001000000047f, 0.972683012f, ground,
                   func_150ADA68() * 101.0f + 101.0f, func_150ADA20() % 31U + 50, func_150ADA20() % 101U + 100,
-                  1, task->unkC, task->unk1);
+                  1, task->header.owner, task->header.kind);
 }
 
 extern void *func_15134DAC(BloodStripDesc *desc, s32 payloadSize);
@@ -476,26 +431,6 @@ s32 func_151AA5A4(PulseFx *fx) {
     return 1;
 }
 
-/* Payload copied to +0xA8 of a spawned burst. */
-typedef struct {
-    /* 0x00 */ f32 size;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ u8 unk6;
-    /* 0x07 */ u8 unk7;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-} BurstPayload;
-
 typedef struct {
     /* 0x00 */ u8 pad0[0x74];
     /* 0x74 */ f32 unk74;
@@ -507,7 +442,7 @@ void *func_151303BC(ParticleDesc *desc, u8 arg1, s32 payloadSize);
 void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D8 *obj) {
     ParticleDesc burst;
     void *spawned;
-    BurstPayload payload;
+    RiseMotion payload;
 
     burst.texture = 0x2F;
     burst.renderMode = 0xC01;
@@ -535,12 +470,12 @@ void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D
     burst.offset.z = 0.0f;
     burst.fadeStart = 20;
     burst.fadeRate = 12;
-    payload.unk4 = 0;
-    payload.unk5 = 0;
-    payload.unk18 = 0;
-    payload.unk19 = 0;
-    payload.unk10 = 3.5f;
-    payload.unk14 = 0.2857142985f;
+    payload.widthPhase = 0;
+    payload.heightPhase = 0;
+    payload.swayPhaseX = 0;
+    payload.swayPhaseZ = 0;
+    payload.maxRiseSpeed = 3.5f;
+    payload.swayPerSpeed = 0.2857142985f;
 
     burst.vel.x = (to->x - from->x) * obj->unk74;
     burst.vel.y = (to->y - from->y) * obj->unk74;
@@ -559,15 +494,15 @@ void func_151AA6D8(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, Obj151AA6D
 
     burst.timer = (func_150ADA20() % 51U) + 50;
     burst.alpha = (func_150ADA20() % 101U) + 100;
-    payload.size = burst.width = burst.height = (func_150ADA68() * 39.0f) + 31.0f;
-    payload.unk6 = (func_150ADA20() % 5U) + 4;
-    payload.unk7 = (func_150ADA20() % 5U) + 4;
-    payload.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
-    payload.unkC = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
-    payload.unk1A = (func_150ADA20() % 5U) + 4;
-    payload.unk1B = (func_150ADA20() % 5U) + 4;
-    payload.unk1C = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
-    payload.unk20 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
+    payload.baseSize = burst.width = burst.height = (func_150ADA68() * 39.0f) + 31.0f;
+    payload.widthPhaseStep = (func_150ADA20() % 5U) + 4;
+    payload.heightPhaseStep = (func_150ADA20() % 5U) + 4;
+    payload.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.baseSize;
+    payload.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.baseSize;
+    payload.swayPhaseStepX = (func_150ADA20() % 5U) + 4;
+    payload.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
+    payload.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
+    payload.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
     burst.gravity = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001000000047f;
 
     spawned = func_151303BC(&burst, 2, sizeof(payload));
@@ -588,15 +523,13 @@ f32 func_151AAA4C(PulseFx *fx) {
 }
 
 LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task);
-extern void func_151346EC(LoopSoundFx *fx);
-extern void func_1513470C(LoopSoundFx *fx);
 
 /* Refreshes the task's pulse and loop-sound effects, spawning whichever is missing. */
 void func_151AAABC(ActorTask *task) {
     Actor *actor;
     ActorTaskFx *fx;
 
-    actor = task->actor;
+    actor = task->watcher.character;
     fx = &task->fx;
     if (fx->pulse != NULL) {
         PulseFxPayload *pulse;
@@ -648,14 +581,14 @@ s32 func_151AABA0(PulseFx *fx) {
 }
 
 extern u8 D_800A8F70[];
-extern void func_1504715C(GroundHit *hit, Actor *actor);
-extern s32 func_1504697C(Vec3f *pos, s32 arg1, f32 minY, GroundHit *hit);
-extern void func_15153F18(AngleRange *, SplashSpray *, GroundHit *, u8, s32);
+extern void func_1504715C(CollisionHit *hit, Actor *actor);
+extern s32 func_1504697C(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *hit);
+extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 
 /* Finds point D_800A8F70[index] of the actor's unk1D4 (func_15142314) and spawns two effects on the ground below it. */
 void func_151AABC4(Actor *actor, u8 index) {
     Vec3f pos;
-    GroundHit floor;
+    CollisionHit floor;
     f32 y;
     Vec3f probe;
     u8 color;
@@ -673,7 +606,7 @@ void func_151AABC4(Actor *actor, u8 index) {
             hit.x = pos.x;
             hit.y = floor.height;
             hit.z = pos.z;
-            func_151DBCBC(color, 40.0f, 150, (s32)floor.points, &hit, 0xFF, 1);
+            func_151DBCBC(color, 40.0f, 150, (s32)&floor.tri, &hit, 0xFF, 1);
             {
                 SplashSpraySpec c;
 
@@ -735,23 +668,22 @@ s32 func_151AADBC(Obj151AADBC *obj) {
     return 1;
 }
 
-extern u8 D_800AB414[];
 
 /* Keeps the task's flicker effect alive, or spawns it on the ground under the actor. */
 void func_151AADF8(ActorTask *task) {
     Actor *actor;
     ActorTaskFx *fx;
-    FlickerFxPayload *keep;
+    SpriteFlicker *keep;
     f32 pos[3];
     SpriteDef part;
-    FlickerFxPayload payload;
+    SpriteFlicker payload;
     f32 size;
     u8 color;
 
-    actor = task->actor;
+    actor = task->watcher.character;
     fx = &task->fx;
     if (fx->flicker != NULL) {
-        keep = &fx->flicker->payload;
+        keep = &fx->flicker->flicker;
         keep->keepAlive = 1;
     // matching: an unused label before the return makes IDO branch past the epilogue's first load
     refreshed:
@@ -764,11 +696,11 @@ void func_151AADF8(ActorTask *task) {
         pos[1] = actor->y_position + 150.0f;
     }
     pos[2] = actor->z_position;
-    if (func_15045800(pos, 0, pos[1] - 300.0f, &task->hit) != 0) {
+    if (func_15045800(pos, 0, pos[1] - 300.0f, &task->watcher.hit) != 0) {
         color = func_151D8E20();
-        pos[1] = task->hit.height;
+        pos[1] = task->watcher.hit.height;
         size = (func_150ADA68() * 30.0f) + 50.0f;
-        payload.owner = task;
+        payload.owner = &task->watcher;
         payload.keepAlive = 1;
         payload.minDelay = 10;
         payload.delayRange = 10;
@@ -784,29 +716,29 @@ void func_151AADF8(ActorTask *task) {
         part.unk10 = 150;
         part.frame = 0;
         part.unk11 = 0xFF;
-        part.rgba[0] = D_800AB414[color * 3];
-        part.rgba[1] = D_800AB414[color * 3 + 1];
-        part.rgba[2] = D_800AB414[color * 3 + 2];
+        part.rgba[0] = D_800AB414[color].r;
+        part.rgba[1] = D_800AB414[color].g;
+        part.rgba[2] = D_800AB414[color].b;
         part.rgba[3] = 0xFF;
         part.renderModes = 0x440001;
         part.unk16 = 0;
         part.unk17 = 6;
-        fx->flicker = (FlickerFx *)func_1513C73C(&part, 7, 1, (s32)task->hit.points, pos[0], pos[1], pos[2],
+        fx->flicker = (FlickerSprite *)func_1513C73C(&part, 7, 1, (s32)&task->watcher.hit.tri, pos[0], pos[1], pos[2],
                                                  size, size, func_150ADA20() & 0xFF,
                                                  (func_150ADA20() & 1) + ((func_150ADA20() & 1) * 2), 0x20, 0xFF, 1);
         if (fx->flicker != NULL) {
-            memcpy(&fx->flicker->payload, &payload, sizeof(payload));
+            memcpy(&fx->flicker->flicker, &payload, sizeof(payload));
         }
     }
 }
 
 
-/* FlickerFx update: eases fx->value toward a target re-rolled after a random delay. */
-s32 func_151AB090(FlickerFx *fx) {
+/* FlickerSprite update: eases the sprite's animation speed toward a target re-rolled after a random delay. */
+s32 func_151AB090(FlickerSprite *fx) {
     s8 alive = TRUE;
-    FlickerFxPayload *flicker = &fx->payload;
+    SpriteFlicker *flicker = &fx->flicker;
 
-    if (fx->payload.keepAlive == 0) {
+    if (fx->flicker.keepAlive == 0) {
         alive = FALSE;
     }
     flicker->keepAlive = 0;
@@ -815,30 +747,30 @@ s32 func_151AB090(FlickerFx *fx) {
         flicker->timer = (func_150ADA20() % (u32)(flicker->delayRange + 1)) + flicker->minDelay;
         flicker->target = func_150ADA68() * flicker->targetRange + flicker->minTarget;
     }
-    fx->value += (s32)((flicker->target - (f32)fx->value) * flicker->easing);
+    fx->quad.def.frameSpeed += (s32)((flicker->target - (f32)fx->quad.def.frameSpeed) * flicker->easing);
     return alive;
 }
 
-extern s32 func_1513F6C0(FlickerFx *fx, s32 arg1, s32 arg2);
+extern s32 func_1513F6C0(FlickerSprite *fx, s32 arg1, s32 arg2);
 
-/* FlickerFx destructor: detaches from the owner task. */
-s32 func_151AB180(FlickerFx *fx) {
-    ActorTaskFx *ownerFx = &fx->payload.owner->fx;
+/* FlickerSprite destructor: detaches from the owner task. */
+s32 func_151AB180(FlickerSprite *fx) {
+    ActorTaskFx *ownerFx = &((ActorTask *)fx->flicker.owner)->fx;
 
     ownerFx->flicker = NULL;
-    fx->flags |= 2;
-    fx->payload.owner = NULL;
+    fx->quad.def.flags |= 2;
+    fx->flicker.owner = NULL;
     func_1513F6C0(fx, 0, 0);
     return 0;
 }
 
 /* Ground effect 3 (sound 0x5208), then func_151AA264. */
 void func_151AB1C4(ActorTask *task) {
-    Actor *actor = task->actor;
+    Actor *actor = task->watcher.character;
 
     {
         f32 pos[3];
-        GroundHit *hit;
+        CollisionHit *hit;
 
         pos[0] = actor->x_position;
         if (-9500.0f < actor->unk118) {
@@ -847,14 +779,14 @@ void func_151AB1C4(ActorTask *task) {
             pos[1] = actor->y_position + 150.0f;
         }
         pos[2] = actor->z_position;
-        hit = &task->hit;
+        hit = &task->watcher.hit;
         if (func_15045800(pos, 0, pos[1] - 300.0f, hit) != 0) {
-            pos[1] = task->hit.height;
-            func_151ABE40(pos, hit, 3, task->unkC, task->unk1);
+            pos[1] = task->watcher.hit.height;
+            func_151ABE40(pos, hit, 3, task->watcher.header.owner, task->watcher.header.kind);
             func_10010FFC(0, 0x11, 0x5208, 0, 0, actor);
         }
     }
-    func_151AA264(actor, &task->hit);
+    func_151AA264(actor, &task->watcher.hit);
 }
 
 /* Spawns the looping-sound effect owned by `task`. */
@@ -899,7 +831,7 @@ typedef struct {
 void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *obj) {
     ParticleDesc burst;
     void *spawned;
-    BurstPayload payload;
+    RiseMotion payload;
 
     burst.texture = 0x2F;
     burst.renderMode = 0xC01;
@@ -930,13 +862,13 @@ void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *o
     burst.fadeStart = 30;
     burst.fadeRate = 8;
     burst.pos.z = z;
-    payload.unk24 = obj->unk60;
-    payload.unk10 = 4.0f;
-    payload.unk14 = 0.25f;
-    payload.unk4 = 0;
-    payload.unk5 = 0;
-    payload.unk18 = 0;
-    payload.unk19 = 0;
+    payload.ceiling = obj->unk60;
+    payload.maxRiseSpeed = 4.0f;
+    payload.swayPerSpeed = 0.25f;
+    payload.widthPhase = 0;
+    payload.heightPhase = 0;
+    payload.swayPhaseX = 0;
+    payload.swayPhaseZ = 0;
     burst.vel.x = -dx * 0.2f;
     burst.vel.y = 0.0f;
     burst.vel.z = -dz * 0.2f;
@@ -948,15 +880,15 @@ void func_151AB3A4(f32 x, f32 y, f32 z, f32 dx, f32 arg4, f32 dz, Obj151AB3A4 *o
     }
     burst.timer = (func_150ADA20() % 51U) + 106;
     burst.alpha = (func_150ADA20() % 101U) + 100;
-    payload.size = burst.width = burst.height = (func_150ADA68() * 62.0f) + 41.0f;
-    payload.unk6 = (func_150ADA20() % 5U) + 4;
-    payload.unk7 = (func_150ADA20() % 5U) + 4;
-    payload.unk8 = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
-    payload.unkC = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.size;
-    payload.unk1A = (func_150ADA20() % 5U) + 4;
-    payload.unk1B = (func_150ADA20() % 5U) + 4;
-    payload.unk1C = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
-    payload.unk20 = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.size;
+    payload.baseSize = burst.width = burst.height = (func_150ADA68() * 62.0f) + 41.0f;
+    payload.widthPhaseStep = (func_150ADA20() % 5U) + 4;
+    payload.heightPhaseStep = (func_150ADA20() % 5U) + 4;
+    payload.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.baseSize;
+    payload.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * payload.baseSize;
+    payload.swayPhaseStepX = (func_150ADA20() % 5U) + 4;
+    payload.swayPhaseStepZ = (func_150ADA20() % 5U) + 4;
+    payload.swayX = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
+    payload.swayZ = ((func_150ADA68() * 0.1000000015f) + 0.07999999821f) * payload.baseSize;
     burst.gravity = ((func_150ADA68() * 60.0f) + 21.0f) * 0.001000000047f;
     spawned = func_151303BC(&burst, 2, sizeof(payload));
     if (spawned != NULL) {
@@ -993,7 +925,7 @@ void func_151AB788(LoopSoundFx *fx) {
         func_100111C8(sound->soundHandle);
     }
     ownerFx->sound = NULL;
-    func_151346EC(fx);
+    func_151346EC(&fx->header);
 }
 
 /* LoopSoundFx destructor (variant 2): stops the sound and detaches from the owner task. */
@@ -1005,12 +937,12 @@ void func_151AB7D8(LoopSoundFx *fx) {
         func_100111C8(sound->soundHandle);
     }
     ownerFx->sound = NULL;
-    func_1513470C(fx);
+    func_1513470C(&fx->header);
 }
 
 /* func_15141DA4(actor, 0, 4). */
 void func_151AB828(ActorTask *task) {
-    func_15141DA4(task->actor, 0, 4);
+    func_15141DA4(task->watcher.character, 0, 4);
 }
 
 extern void *func_15190770(struct185 *desc, s32 arg1, s32 arg2, s32 arg3);
@@ -1020,7 +952,7 @@ void func_151AB854(ActorTask *task) {
     Actor *actor;
     struct185 desc;
 
-    actor = task->actor;
+    actor = task->watcher.character;
     if ((actor->id == 0) || (actor->id == 1) || (actor->id == 2) || (actor->id == 3) || (actor->id == 4) ||
         (actor->id == 150)) {
         desc.unk0 = actor;
@@ -1036,7 +968,7 @@ void func_151AB854(ActorTask *task) {
         if (actor->unk127 != 0xFF) {
             actor->unk31C->idle.delay = 500;
         }
-        func_15190770(&desc, 0, task->unkC, task->unk1);
+        func_15190770(&desc, 0, task->watcher.header.owner, task->watcher.header.kind);
     }
 }
 
@@ -1057,19 +989,13 @@ typedef struct {
 } EmitterPayload;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterPayload payload;
 } EmitterTask;
 
 /* Spawns a spark emitter task that follows `actor`. */
 void func_151AB930(Actor *actor) {
-    struct260 *task;
+    TimedEffect *task;
     EmitterPayload payload;
 
     payload.actor = actor;
@@ -1085,13 +1011,13 @@ void func_151AB930(Actor *actor) {
     }
 }
 
-extern void func_151D9014(f32 *, f32 *, u8, f32, s32, s32, f32, s32, f32, f32, s32, GroundHit *, s32, s32, u8, u8);
+extern void func_151D9014(f32 *, f32 *, u8, f32, s32, s32, f32, s32, f32, f32, s32, CollisionHit *, s32, s32, u8, u8);
 
 /* Spark emitter update: emits sparks around the actor, or ends the task once the actor is gone. */
 void func_151AB9C8(EmitterTask *task) {
     EmitterPayload *emitter;
     u8 dead;
-    GroundHit floor;
+    CollisionHit floor;
     f32 pos[3];
     f32 vel[3];
     s16 yaw;
@@ -1138,49 +1064,35 @@ void func_151AB9C8(EmitterTask *task) {
                     randB = func_150ADA20();
                     func_151D9014(pos, vel, emitter->color, randT * 0.5f + -1.0f, (u32)randA % 26U + 32,
                                   (u32)randB % 101U + 100, func_150ADA68() * 34.0f + 52.0f, 1, 1.0f, 1.0f, 1, &floor, 1,
-                                  0, task->unkC, task->unk1);
+                                  0, task->base.header.owner, task->base.header.kind);
                 }
                 emitter->accum -= 1.0f;
             } while (emitter->accum > 1.0f);
         }
     }
     if (dead) {
-        task->unkE = -1;
+        task->base.header.state = -1;
     }
 }
-
-/* Message data for func_151ABD54; the layout depends on the message id. */
-typedef union {
-    struct {
-        /* 0x00 */ Actor *actor;
-        /* 0x04 */ u8 actorId;
-    } m0;
-    struct {
-        /* 0x00 */ Actor *actorA;
-        /* 0x04 */ Actor *actorB;
-        /* 0x08 */ u8 idA;
-        /* 0x09 */ u8 idB;
-    } m2D;
-} TaskMsg151ABD54;
 
 /*
  * Message handler for a task whose payload (at +0x28, as in EmitterTask) names an actor:
  * message 0 ends the task when it concerns that actor; message 0x2D swaps actor A and B.
  */
-void func_151ABD54(EmitterTask *task, TaskMsg151ABD54 *msg, u8 msgId) {
+void func_151ABD54(EmitterTask *task, ActorMsg *msg, u8 msgId) {
     EmitterPayload *payload = &task->payload;
 
     if (msgId == 0) {
-        if ((msg->m0.actor == payload->actor) || (msg->m0.actorId == payload->actorId)) {
-            func_1516972C((struct102 *)task);
+        if ((msg->ref.actor == payload->actor) || (msg->ref.uniqueId == payload->actorId)) {
+            func_1516972C(&task->base.header);
         }
     } else if (msgId == 0x2D) {
-        if (payload->actor == msg->m2D.actorA) {
-            payload->actor = msg->m2D.actorB;
-            payload->actorId = msg->m2D.idB;
-        } else if (payload->actor == msg->m2D.actorB) {
-            payload->actor = msg->m2D.actorA;
-            payload->actorId = msg->m2D.idA;
+        if (payload->actor == msg->swap.actorA) {
+            payload->actor = msg->swap.actorB;
+            payload->actorId = msg->swap.idB;
+        } else if (payload->actor == msg->swap.actorB) {
+            payload->actor = msg->swap.actorA;
+            payload->actorId = msg->swap.idA;
         }
     }
 }

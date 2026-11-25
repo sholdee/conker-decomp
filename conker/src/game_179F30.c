@@ -4,12 +4,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* What func_15083568 returns, seen as a raw view (Actor has a u8 at 0x38). */
-struct St1514DE94 {
-    /* 0x00 */ u8 pad0[0x38];
-    /* 0x38 */ s32 unk38;
-};
-
 typedef struct Struct1514F5CCArg {
     /* 0x00 */ s32 unk00;
     /* 0x04 */ f32 unk04;
@@ -21,16 +15,6 @@ typedef struct Struct1514F5CCArg {
     /* 0x16 */ s16 unk16;
     /* 0x18 */ u8 unk18;
 } Struct1514F5CCArg;
-
-typedef struct HudSpriteState {
-    /* 0x0 */ u8 pad0[0x9];
-    /* 0x9 */ u8 unk9;
-} HudSpriteState;
-
-typedef struct HudSpriteHandle {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ HudSpriteState *state;
-} HudSpriteHandle;
 
 /* Spawn-callback tables (see func_1514D15C). */
 extern void (*D_8008AA70[])(Actor *);
@@ -57,7 +41,6 @@ extern Vec3f D_800A5964;
 /* This file. */
 s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
 s32 func_1514D4B8(s16 root, s16 type);
-Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type);
 void func_1514F194(Actor *obj);
 
 /* Elsewhere. */
@@ -65,19 +48,18 @@ void func_1501175C(Actor *obj, u8 arg1, s32 arg2);
 s32 func_15083FB0(u8 uniqueId);
 void func_150C0AC0(Struct1514F5CCArg *desc, s32 arg1, s32 arg2);
 void func_150C4120(Actor *obj, s32 arg1, s32 arg2, s32 arg3);
-s32 func_150C5370(void *desc, s32 payloadSize);
+void *func_150C5370(void *desc, s32 payloadSize);
 void *func_15155780(s32 slot, s32 arg1);
-struct102 *func_15155FD4(s32 slot);
-s32 func_15158BD0(Actor *obj, s32 arg1, s32 payloadSize);
+EffectHeader *func_15155FD4(s32 slot);
+void *func_15158BD0(Actor *obj, s32 arg1, s32 payloadSize);
 void func_1515F10C(void *);
-s32 func_15160A58(Actor *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void *func_15160A58(Actor *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15160CDC(Actor *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void *func_15167A68(s32, s32, s32, s32, s32, s32);
-s32 func_15189FF0(ParticleDef *spawn, GlowShape *emitter, EmitterAttach *attach, s32, s32, s32, s32);
-s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_1518D1C0(Actor *obj, s32, s32, s32, s32, s32, char *name);
+void *func_15189FF0(ParticleDef *spawn, GlowShape *emitter, EmitterAttach *attach, s32, s32, s32, s32);
+void *func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void *func_1518D1C0(Actor *obj, s32, s32, s32, s32, s32, char *name);
 void func_1518E308(void *);
-s32 func_151ACA60(Actor *obj, f32 arg1, s32 arg2);
+void *func_151ACA60(Actor *obj, f32 arg1, s32 arg2);
 void func_151B2060(Actor *obj);
 void func_151B9F00(Actor *obj, s32, s32);
 void func_151BB044(Actor *obj);
@@ -459,7 +441,7 @@ s32 func_1514D15C(Actor *obj) {
     s32 found;
     s32 slot;
     s32 handler;
-    struct102 *queued;
+    EffectHeader *queued;
 
     uniqueSlot = -1;
     globalSlot = -1;
@@ -521,7 +503,7 @@ s32 func_1514D310(Actor *owner) {
         if (D_8008ABE8[node->type]->destroyHandler != -1) {
             D_8008AB58[D_8008ABE8[node->type]->destroyHandler]((s32)node->handle);
         }
-        func_1516972C((struct102 *)node);
+        func_1516972C(&node->header);
         node = next;
     }
     return 1;
@@ -591,7 +573,7 @@ typedef struct Struct1514D564Desc {
 /** Spawns a func_150C5370 object running from a fixed point to `obj` and attaches it (type 0x15). */
 void func_1514D564(Actor *obj) {
     Struct1514D564Desc desc;
-    s32 spawned;   // the object func_150C5370 allocated; the payload goes at +0xC8
+    void *spawned; // the object func_150C5370 allocated; the payload goes at +0xC8
     Struct1514D564Payload payload;
 
     payload.obj = obj;
@@ -610,7 +592,7 @@ void func_1514D564(Actor *obj) {
     desc.unk20 = 1;
     desc.unk1C = 0.3199999928f;
     spawned = func_150C5370(&desc, sizeof(payload));
-    if (spawned != 0) {
+    if (spawned != NULL) {
         memcpy((u8 *)spawned + 0xC8, &payload, sizeof(payload));
         func_1514EC1C(spawned, obj, 0x15);
     }
@@ -734,7 +716,7 @@ void func_1514D978(Actor *obj) {
         s32 unk18;
         s32 unk1C;
     } payload;
-    s32 handle;
+    void *handle;
 
     payload.unk0 = 0;
     payload.unk4 = 0;
@@ -746,14 +728,14 @@ void func_1514D978(Actor *obj) {
     payload.unk10 = 12.0f;
 
     handle = func_15158BD0(obj, 1, sizeof(payload));
-    if (handle != 0) {
+    if (handle != NULL) {
         memcpy((u8 *)handle + 0x58, &payload, sizeof(payload));
         func_1514EC1C(handle, obj, 0x13);
     }
 }
 
 void func_1514D9F4(Actor *obj) {
-    s32 handle;
+    void *handle;
 
     func_1514D978(obj);
     handle = func_151ACA60(obj, 20.0f, 0);
@@ -762,7 +744,7 @@ void func_1514D9F4(Actor *obj) {
 
 /** Attaches a func_15158BD0 object (type 0x13) with a zeroed 0x1C-byte payload. */
 void func_1514DA38(Actor *obj) {
-    s32 handle;
+    void *handle;
     struct {
         s32 unk0;
         s32 unk4;
@@ -780,7 +762,7 @@ void func_1514DA38(Actor *obj) {
     payload.unk8 = 0;
     payload.unkC = 0;
     handle = func_15158BD0(obj, 1, sizeof(payload));
-    if (handle != 0) {
+    if (handle != NULL) {
         memcpy((u8 *)handle + 0x58, &payload, sizeof(payload));
         func_1514EC1C(handle, obj, 0x13);
     }
@@ -788,7 +770,7 @@ void func_1514DA38(Actor *obj) {
 
 /** Sets bit 1 of obj->unk94 and attaches a func_15158BD0 object (type 0x13) with an 8-byte payload. */
 void func_1514DAA4(Actor *obj) {
-    s32 handle;
+    void *handle;
     s32 payload[2];
 
     obj->unk94 |= 2;
@@ -796,9 +778,9 @@ void func_1514DAA4(Actor *obj) {
     payload[1] = 0;
     {
         // matching: an unprototyped call here changes how as1 schedules the argument setup
-        extern s32 func_15158BD0();
+        extern void *func_15158BD0();
 
-        if ((handle = func_15158BD0(obj, 1, sizeof(payload))) != 0) {
+        if ((handle = func_15158BD0(obj, 1, sizeof(payload))) != NULL) {
             memcpy((u8 *)handle + 0x58, payload, sizeof(payload));
             func_1514EC1C(handle, obj, 0x13);
         }
@@ -807,9 +789,9 @@ void func_1514DAA4(Actor *obj) {
 
 /** Attaches a func_15158BD0 object (type 0x13) without payload. */
 void func_1514DB18(Actor *obj) {
-    s32 handle = func_15158BD0(obj, 1, 0);
+    void *handle = func_15158BD0(obj, 1, 0);
 
-    if (handle != 0) {
+    if (handle != NULL) {
         func_1514EC1C(handle, obj, 0x13);
     }
 }
@@ -912,7 +894,7 @@ void func_1514DE88(Actor *obj) {
 }
 
 void func_1514DE94(Actor *obj) {
-    struct St1514DE94 *part;
+    ModelAttachment *part;
 
     func_15160CDC(obj, 12, &D_800A58AC, &D_800A58B8, 0.008333000354f, 2, 300,
                   0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 1, 0xFF, 1);
@@ -1101,7 +1083,7 @@ void func_1514E31C(Actor *obj) {
 
 /** Attaches the "Charactereffect 0" effect (type 0xD) and a func_1515D5F8 object tracking obj's position (type 0x18). */
 void func_1514E508(Actor *obj) {
-    s32 handle;
+    void *handle;
     s32 pos;
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 0");
@@ -1112,7 +1094,7 @@ void func_1514E508(Actor *obj) {
 }
 
 void func_1514E5B8(Actor *obj) {
-    s32 handle;
+    void *handle;
     s32 pos;
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect -1");
@@ -1123,7 +1105,7 @@ void func_1514E5B8(Actor *obj) {
 }
 
 void func_1514E668(Actor *obj) {
-    s32 handle;
+    void *handle;
     s32 pos;
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 1");
@@ -1134,7 +1116,7 @@ void func_1514E668(Actor *obj) {
 }
 
 void func_1514E718(Actor *obj) {
-    s32 handle;
+    void *handle;
     s32 pos;
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect 2");
@@ -1145,7 +1127,7 @@ void func_1514E718(Actor *obj) {
 }
 
 void func_1514E7C8(Actor *obj) {
-    s32 handle;
+    void *handle;
 
     handle = func_1518D1C0(obj, 7, 0, 1, 0xFF, 1, "Charactereffect 3");
     func_1514EC1C(handle, obj, 0xF);
@@ -1156,7 +1138,7 @@ void func_1514E7C8(Actor *obj) {
 void func_1514E824(s32 handle) {
 }
 
-void func_1514E830(struct102 *handle) {
+void func_1514E830(EffectHeader *handle) {
     func_1516972C(handle);
 }
 
@@ -1316,14 +1298,14 @@ s32 func_1514EB8C(s32 handle, s32 msg, s32 arg) {
 }
 
 /** Allocates an unlinked attachment node for `handle` with `extraSize` bytes of payload. */
-Attachment *func_1514EBA4(s32 handle, s16 type, s32 extraSize) {
+Attachment *func_1514EBA4(void *handle, s16 type, s32 extraSize) {
     Attachment *node;
 
     node = func_15167A68(0x24, 1, extraSize + 0x20, 1, 0xFF, 1);
     if (node == NULL) {
         return NULL;
     }
-    node->handle = (void *)handle;
+    node->handle = handle;
     node->next = NULL;
     node->prev = NULL;
     node->type = type;
@@ -1334,12 +1316,12 @@ Attachment *func_1514EBA4(s32 handle, s16 type, s32 extraSize) {
  * Attaches `handle` to `owner` as an attachment of `type` (pushed at the head of its list).
  * If no node can be allocated, the handle is released instead. Returns the node or NULL.
  */
-Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type) {
+Attachment *func_1514EC1C(void *handle, Actor *owner, s16 type) {
     Attachment *result;
     Attachment *node;
 
     result = NULL;
-    if (handle != 0) {
+    if (handle != NULL) {
         node = func_1514EBA4(handle, type, 0);
         result = node;
         if (node != NULL) {
@@ -1350,9 +1332,9 @@ Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type) {
                 node->next->prev = node;
             }
         } else if (D_8008ABE8[type]->destroyHandler != -1) {
-            D_8008AB58[D_8008ABE8[type]->destroyHandler](handle);
+            D_8008AB58[D_8008ABE8[type]->destroyHandler]((s32)handle);
         } else {
-            func_1516972C((struct102 *)handle);
+            func_1516972C((EffectHeader *)handle);
         }
     }
     return result;
@@ -1384,7 +1366,7 @@ s32 func_1514ECE0(Attachment *list, s16 type, Attachment **out) {
 }
 
 /** Finds the first attachment holding `handle` in the list starting at `list`; stores it (or NULL) in *out. */
-s32 func_1514ED3C(Attachment *list, s32 handle, Attachment **out) {
+s32 func_1514ED3C(Attachment *list, void *handle, Attachment **out) {
     s32 found = FALSE;
     Attachment *node = list;
     Attachment *next;
@@ -1392,7 +1374,7 @@ s32 func_1514ED3C(Attachment *list, s32 handle, Attachment **out) {
     if (node != NULL) {
         do {
             next = node->next;
-            if (handle == (s32)node->handle) {
+            if (handle == node->handle) {
                 found = TRUE;
             } else {
                 node = next;
@@ -1406,8 +1388,8 @@ s32 func_1514ED3C(Attachment *list, s32 handle, Attachment **out) {
 }
 
 /** Unlinks `node` from `owner`'s attachment list and frees it. Returns the node's handle. */
-s32 func_1514ED8C(Attachment *node, Actor *owner) {
-    s32 handle;
+void *func_1514ED8C(Attachment *node, Actor *owner) {
+    void *handle;
 
     if (node == owner->attachments) {
         owner->attachments = node->next;
@@ -1418,13 +1400,13 @@ s32 func_1514ED8C(Attachment *node, Actor *owner) {
     if (node->prev != NULL) {
         node->prev->next = node->next;
     }
-    handle = (s32)node->handle;
-    func_1516972C((struct102 *)node);
+    handle = node->handle;
+    func_1516972C(&node->header);
     return handle;
 }
 
 /** Removes (without releasing the handle) every attachment of `owner` that holds `handle`. */
-void func_1514EDF0(s32 handle, Actor *owner) {
+void func_1514EDF0(void *handle, Actor *owner) {
     Attachment *node;
     s32 ret;
     Attachment *match;
@@ -1450,12 +1432,12 @@ struct Struct1514EE70 {
     u16 unk6;
 };
 
-s32 func_1515BE50(struct Struct1514EE70 *, s32, s32, s32);
+void *func_1515BE50(struct Struct1514EE70 *, s32, s32, s32);
 
 /** Attaches a func_1515BE50 object for `obj` (type 0x16). */
 void func_1514EE70(Actor *obj) {
     struct Struct1514EE70 desc;
-    s32 handle;
+    void *handle;
 
     desc.obj = obj;
     desc.uniqueId = obj->unique_id;
@@ -1467,7 +1449,7 @@ void func_1514EE70(Actor *obj) {
 
 
 void func_1514EECC(Actor *obj) {
-    s32 handle;
+    void *handle;
 
     handle = func_15160A58(obj, 1, &D_800A5934, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
     func_1514EC1C(handle, obj, 0x19);
@@ -1538,13 +1520,14 @@ void func_1514F110(Actor *obj) {
     func_1514F194(obj);
 }
 
-s32 func_1514F130(HudSpriteHandle *target, s32 msg, s32 arg) {
+/* Attachment message handler for a light effect (e.g. func_15160A58's): 13 turns the light on, 14 off. */
+s32 func_1514F130(LightEffect *target, s32 msg, s32 arg) {
     switch (msg) {
     case 13:
-        target->state->unk9 = 0;
+        target->light->disabled = 0;
         break;
     case 14:
-        target->state->unk9 = 1;
+        target->light->disabled = 1;
         break;
     default:
         return func_1514E89C((ToggleTarget *)target, msg, arg);
@@ -1553,7 +1536,7 @@ s32 func_1514F130(HudSpriteHandle *target, s32 msg, s32 arg) {
 }
 
 void func_1514F194(Actor *obj) {
-    s32 handle;
+    void *handle;
 
     func_151D0F60(obj, 1, 0xFF, 1);
     func_151D0F60(obj, 2, 0xFF, 1);
@@ -1565,7 +1548,7 @@ void func_1514F194(Actor *obj) {
     func_151B9F00(obj, 0xFF, 1);
     func_15160A58(obj, 1, &D_800A5958, 2, 300, 12, 0xFF, 0xFF, 0xFF, 2, 0, -1, 0, 0, 0xFF, 1);
     handle = func_15160A58(obj, 1, &D_800A5964, 2, 300, 15, 0xFF, 0, 0, 0xFF, 1, -1, 0, 0, 0xFF, 1);
-    if (handle != 0) {
+    if (handle != NULL) {
         func_1514EC1C(handle, obj, 0x19);
     }
 }
@@ -1584,7 +1567,7 @@ void func_1514F3CC(Actor *obj) {
         u8 uniqueId;
         f32 unk8;
     } payload;
-    struct260 *spawned;
+    TimedEffect *spawned;
 
     payload.obj = obj;
     payload.uniqueId = obj->unique_id;
@@ -1598,7 +1581,7 @@ void func_1514F3CC(Actor *obj) {
 }
 
 void func_1514F44C(Actor *obj) {
-    s32 handle;
+    void *handle;
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect frontend fire imp");
     func_1514EC1C(handle, obj, 0xD);

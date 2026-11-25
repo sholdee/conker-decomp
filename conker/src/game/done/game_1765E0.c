@@ -2,77 +2,76 @@
 #include "functions.h"
 #include "variables.h"
 
-void *func_15167A68(s32, s32, s32, s32, s32, s32);
 void func_151D5E30(void *);
 
 
 /* Allocates a timed callback object (0x28 header bytes plus dataSize) and initializes its header. */
-struct260 *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags,
-                         u8 callbackSet, s32 dataSize, u8 arg7, s32 arg8) {
-    struct260 *object;
-    u8 kind;
+TimedEffect *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags,
+                         u8 callbackSet, s32 dataSize, u8 owner, s32 list) {
+    TimedEffect *object;
+    u8 type;
     s32 size;
 
-    size = dataSize + 0x28;
-    kind = (flags & 2) ? 95 : 35;
+    size = dataSize + sizeof(TimedEffect);
+    type = (flags & 2) ? 95 : 35;
 
-    object = func_15167A68(kind, arg8, size, 1, arg7, 1);
+    object = func_15167A68(type, list, size, 1, owner, 1);
     if (object == NULL) {
         return NULL;
     }
-    object->unkE  = timer;
-    object->unk10 = expireCallback;
-    object->unk11 = tickCallback;
-    object->unk12 = drawCallback;
-    object->unkD  = flags;
-    object->unk13 = callbackSet;
-    bzero(&object->unk14, 16);
+    object->header.state = timer;
+    object->expireCallback = expireCallback;
+    object->tickCallback = tickCallback;
+    object->drawCallback = drawCallback;
+    object->header.flags = flags;
+    object->callbackSet = callbackSet;
+    bzero(object->buffers, sizeof(object->buffers));
 
     return object;
 }
 
 /* func_15149130 without a draw callback. */
-struct260 *func_151491F4(s16 timer, s8 expireCallback, s8 tickCallback, u8 flags, u8 callbackSet, s32 dataSize,
-                         u8 arg6, s32 arg7) {
-    return func_15149130(timer, expireCallback, tickCallback, -1, flags, callbackSet, dataSize, arg6, arg7);
+TimedEffect *func_151491F4(s16 timer, s8 expireCallback, s8 tickCallback, u8 flags, u8 callbackSet, s32 dataSize,
+                         u8 owner, s32 list) {
+    return func_15149130(timer, expireCallback, tickCallback, -1, flags, callbackSet, dataSize, owner, list);
 }
 
 /* Per-frame update: counts the timer down (flag 1), runs the tick callback, then the expire callback and
  * removal once the timer goes negative. */
-void func_15149264(struct260 *object) {
-    if (object->unkD & 1) {
-        object->unkE -= D_800BE9E4;
+void func_15149264(TimedEffect *object) {
+    if (object->header.flags & 1) {
+        object->header.state -= D_800BE9E4;
     }
-    if (object->unk11 != -1) {
-        D_8008A4E8[object->unk11](object);
+    if (object->tickCallback != -1) {
+        D_8008A4E8[object->tickCallback](object);
     }
-    if (object->unkE < 0) {
-        if (object->unk10 != -1) {
-            D_8008A4C0[object->unk10](object);
+    if (object->header.state < 0) {
+        if (object->expireCallback != -1) {
+            D_8008A4C0[object->expireCallback](object);
         }
     }
-    if (object->unkE < 0) {
-        func_1516972C(object);
+    if (object->header.state < 0) {
+        func_1516972C(&object->header);
     }
 }
 
-void func_15149318(struct260 *object) {
-    func_151D5E30(&object->unk14);
+void func_15149318(TimedEffect *object) {
+    func_151D5E30(object->buffers);
 }
 
-void func_1514933C(struct260 *object) {
+void func_1514933C(TimedEffect *object) {
     func_15149318(object);
-    func_15169804(object);
+    func_15169804(&object->header);
 }
 
-void func_15149368(struct260 *object) {
+void func_15149368(TimedEffect *object) {
     func_15149318(object);
-    func_15169824(object);
+    func_15169824(&object->header);
 }
 
 /* Dispatches through the object's callback set (out-of-range sets fall back to set 0). */
-void func_15149394(struct260 *object) {
-    s32 set = object->unk13;
+void func_15149394(TimedEffect *object) {
+    s32 set = object->callbackSet;
 
     if (set < 0) {
         set = 0;
@@ -82,8 +81,8 @@ void func_15149394(struct260 *object) {
     D_8008A688[set](object);
 }
 
-void func_151493E4(struct260 *object) {
-    s32 set = object->unk13;
+void func_151493E4(TimedEffect *object) {
+    s32 set = object->callbackSet;
 
     if (set < 0) {
         set = 0;
@@ -93,8 +92,8 @@ void func_151493E4(struct260 *object) {
     D_8008A7B0[set](object);
 }
 
-void func_15149434(struct260 *object, s32 arg1, u8 arg2) {
-    s32 set = object->unk13;
+void func_15149434(TimedEffect *object, s32 arg1, u8 arg2) {
+    s32 set = object->callbackSet;
 
     if (set < 0 || set >= 74) {
         set = 0;
@@ -105,8 +104,8 @@ void func_15149434(struct260 *object, s32 arg1, u8 arg2) {
 }
 
 /* Runs the object's draw callback, if any, which may replace arg0 (returned). */
-s32 func_15149490(s32 arg0, struct260 *object, s16 arg2) {
-    s32 drawCallback = object->unk12;
+s32 func_15149490(s32 arg0, TimedEffect *object, s16 arg2) {
+    s32 drawCallback = object->drawCallback;
 
     if (drawCallback != -1) {
         arg0 = D_8008A670[drawCallback](arg0, object, arg2);

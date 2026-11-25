@@ -2,18 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Node of the zone tree at D_800DBE48 (same layout as game_13BB20.c's ZoneNode). */
-typedef struct ZoneNode {
-    /* 0x0 */ s16 unk0;
-    /* 0x2 */ s16 unk2;     // bitmask tested by func_1503F800
-    /* 0x4 */ s16 next;     // byte offset to the next sibling, 0 = last
-    /* 0x6 */ u16 halfSize; // half the region's side length
-    /* 0x8 */ s16 x;        // region centre
-    /* 0xA */ s16 z;
-    /* 0xC */ s16 child;    // byte offset to the first child, 0 = leaf
-} ZoneNode;
-
-extern ZoneNode *D_800DBE48;
 extern void func_1510F800(s32);
 
 /* Walks the zone tree down through the squares containing (x, z). Returns 0 only when the point lies

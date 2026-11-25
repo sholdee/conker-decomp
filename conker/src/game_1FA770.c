@@ -66,27 +66,11 @@ typedef struct {
 } StreamData;
 
 typedef struct Emitter {
-    u8 pad0[8];
-    struct Emitter *next;
-    u8 padC[4];
-    Vec3f pos;
-    u8 pad1C[2];
-    u16 flags;
-    s32 kind;
-    u8 pad24;
-    u8 capacity;
-    u8 pad26[6];
-    s8 count;
-    s8 tail; /* oldest particle */
-    s8 head; /* next free slot */
-    u8 pad2F;
-    u8 unk30;
-    u8 pad31[0x23];
-    Vec3f prevPos;
-    u8 pad60[0x24];
-    u8 buffers[0x10];
-    StreamParticle *particles;
-    StreamData *data;
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 buffers[0x10];
+    /* 0x94 */ StreamParticle *particles;
+    /* 0x98 */ StreamData *data;
 } Emitter;
 
 /* The spawner task's state: owns at most one emitter for its source. */
@@ -99,11 +83,7 @@ typedef struct {
 } StreamSpawner;
 
 typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
+    TimedEffect base;
     StreamSpawner spawner;
 } StreamTask;
 
@@ -159,7 +139,7 @@ void func_151CD3CC(StreamTask *task, s32 *id, u8 event) {
     if (event == STREAM_EVENT_START) {
         if (spawner->id == *id) {
             if (spawner->emitter == NULL) {
-                spawner->emitter = func_151CD4C0(spawner->source, spawner->textureIndex, spawner->id, task->unkC, task->unk1);
+                spawner->emitter = func_151CD4C0(spawner->source, spawner->textureIndex, spawner->id, task->base.header.owner, task->base.header.kind);
                 spawner->source->unk14 = 0;
             label: ; // matching: the empty block ends the if, so as1 fills the exit branch's delay slot with the ra reload
             }
@@ -244,16 +224,16 @@ s32 func_151CD674(Emitter *emitter) {
 
     data = emitter->data;
     particles = emitter->particles;
-    if (emitter->count < 2 && (emitter->flags & EMITTER_FLAG_STOPPED)) {
+    if (emitter->head.count < 2 && (emitter->head.tmpl.flags & EMITTER_FLAG_STOPPED)) {
         return 0;
     }
     gravity = -0.25500003f;
     halfGravity = -0.12750001f;
-    i = emitter->head;
-    while (i != emitter->tail) {
+    i = emitter->head.end;
+    while (i != emitter->head.start) {
         i--;
         if (i < 0) {
-            i = emitter->capacity - 1;
+            i = emitter->head.tmpl.itemCount - 1;
         }
         particle = &particles[i];
         velocity = particle->velocity;
@@ -263,17 +243,17 @@ s32 func_151CD674(Emitter *emitter) {
         particle->pos.y += travel + halfGravity * dtSquared;
         particle->velocity = (f32)velocity + gravity * D_800BE9A4; // matching: the no-op cast keeps velocity as the first add operand
         if (particle->pos.y < data->floorY) {
-            while (i != emitter->tail) {
-                emitter->tail++;
-                if (emitter->tail == emitter->capacity) {
-                    emitter->tail = 0;
+            while (i != emitter->head.start) {
+                emitter->head.start++;
+                if (emitter->head.start == emitter->head.tmpl.itemCount) {
+                    emitter->head.start = 0;
                 }
-                emitter->count--;
+                emitter->head.count--;
             }
-            particles[emitter->tail].pos.y = data->floorY;
+            particles[emitter->head.start].pos.y = data->floorY;
         }
     }
-    emitter->prevPos = emitter->pos;
+    emitter->head.modelPos = emitter->head.tmpl.pos;
     return 1;
 }
 
@@ -315,8 +295,8 @@ s32 func_151CD7BC(Emitter *emitter) {
         unk20 = data->unk20 + D_800BE9A4;
         unk20Step = -(unk20 * step);
         pos = data->spawnPos;
-        dx = (emitter->pos.x + sinf(data->swayPhaseX) * data->swayAmpX) - data->spawnPos.x;
-        dz = (emitter->pos.z + sinf(data->swayPhaseZ) * data->swayAmpZ) - data->spawnPos.z;
+        dx = (emitter->head.tmpl.pos.x + sinf(data->swayPhaseX) * data->swayAmpX) - data->spawnPos.x;
+        dz = (emitter->head.tmpl.pos.z + sinf(data->swayPhaseZ) * data->swayAmpZ) - data->spawnPos.z;
         dWidth = (data->baseWidth + sinf(data->widthPhase) * data->widthAmp) - data->width;
         dTc = data->tc - data->unk38;
         width = data->width;
@@ -325,9 +305,9 @@ s32 func_151CD7BC(Emitter *emitter) {
         halfGravity = -0.1275000125f;
         velocity = -3.772f;
         while (data->spawnCount > 1.0f) {
-            particle = &particles[emitter->head];
+            particle = &particles[emitter->head.end];
             particle->pos.x = pos.x;
-            particle->pos.y = emitter->pos.y;
+            particle->pos.y = emitter->head.tmpl.pos.y;
             particle->pos.z = pos.z;
             particle->velocity = velocity;
             particle->width = width;
@@ -335,19 +315,19 @@ s32 func_151CD7BC(Emitter *emitter) {
             particle->tc = tc;
             particle->pos.y += velocity * D_800BE9A4 + halfGravity * (D_800BE9A4 * D_800BE9A4);
             particle->velocity = (f32)velocity + gravity * D_800BE9A4; // matching: see func_151CD674
-            emitter->head++;
-            if (emitter->head == emitter->capacity) {
-                emitter->head = 0;
+            emitter->head.end++;
+            if (emitter->head.end == emitter->head.tmpl.itemCount) {
+                emitter->head.end = 0;
             }
             /* The ring is full: drop the oldest particle. */
-            tail = emitter->tail;
-            emitter->count++;
-            if (tail == emitter->head) {
-                emitter->tail = tail + 1;
-                if (emitter->tail == emitter->capacity) {
-                    emitter->tail = 0;
+            tail = emitter->head.start;
+            emitter->head.count++;
+            if (tail == emitter->head.end) {
+                emitter->head.start = tail + 1;
+                if (emitter->head.start == emitter->head.tmpl.itemCount) {
+                    emitter->head.start = 0;
                 }
-                emitter->count--;
+                emitter->head.count--;
             }
             pos.x += dx * step;
             pos.z += dz * step;
@@ -377,14 +357,14 @@ s32 func_151CDB94(Emitter *emitter) {
     f32 fadeInScale;
 
     particles = emitter->particles;
-    if (emitter->count <= 0) {
+    if (emitter->head.count <= 0) {
         return 1;
     }
-    i = emitter->head - 1;
+    i = emitter->head.end - 1;
     if (i < 0) {
-        i = emitter->capacity - 1;
+        i = emitter->head.tmpl.itemCount - 1;
     }
-    oldest = &particles[emitter->tail];
+    oldest = &particles[emitter->head.start];
     particle = &particles[i];
     height = fabsf(particle->pos.y - oldest->pos.y);
     if (height == 0.0f) {
@@ -392,7 +372,7 @@ s32 func_151CDB94(Emitter *emitter) {
     }
     invHeight = 1.0f / height;
     fadeOutScale = invHeight * 10.0f;
-    i = emitter->tail;
+    i = emitter->head.start;
     do {
         particle = &particles[i];
         rise = particle->pos.y - oldest->pos.y;
@@ -404,15 +384,15 @@ s32 func_151CDB94(Emitter *emitter) {
             particle->alpha = (u8)((height - rise) * fadeOutScale * 255.0f);
         }
         i++;
-        if (i >= emitter->capacity) {
+        if (i >= emitter->head.tmpl.itemCount) {
             i = 0;
         }
-    } while (i != emitter->head);
+    } while (i != emitter->head.end);
     return 1;
 }
 
 extern s32 D_800AAEE0[];
-extern u8 D_80090B60[][12];
+extern EffectTexture D_80090B60[];
 extern struct {
     s32 unk0;
     s32 unk4;
@@ -437,13 +417,13 @@ Gfx *func_151CDE20(Emitter *emitter, Gfx *gfx, s16 view) {
     f32 offsetZ;
     f32 offsetX;
 
-    if (emitter->count >= 2) {
-        func_151D5D60(emitter->buffers, view, (emitter->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+    if (emitter->head.count >= 2) {
+        func_151D5D60(emitter->buffers, view, (emitter->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
             data = emitter->data;
             particles = emitter->particles;
             update = 1;
-            gfx = func_15142E24(gfx, (s32)D_80090B60[D_800AAEE0[data->textureIndex]], 0, 0, 0, 0, D_800AAEE0[data->textureIndex], 0,
+            gfx = func_15142E24(gfx, (s32)&D_80090B60[D_800AAEE0[data->textureIndex]], 0, 0, 0, 0, D_800AAEE0[data->textureIndex], 0,
                                 0, &update, 3);
             gfx = func_1513F4E4(gfx, 0x4E, &update);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
@@ -451,19 +431,19 @@ Gfx *func_151CDE20(Emitter *emitter, Gfx *gfx, s16 view) {
                                 D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                                 D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
             /* While emitting, the ribbon starts at the emitter itself. */
-            if (emitter->flags & EMITTER_FLAG_EMITTING) {
-                next = emitter->head - 1;
-                if (next < 0) next = emitter->capacity - 1; // matching: one line, so -g3 line numbers keep as1's order
-                curPos = emitter->pos;
+            if (emitter->head.tmpl.flags & EMITTER_FLAG_EMITTING) {
+                next = emitter->head.end - 1;
+                if (next < 0) next = emitter->head.tmpl.itemCount - 1; // matching: one line, so -g3 line numbers keep as1's order
+                curPos = emitter->head.tmpl.pos;
                 cur = next;
             } else {
-                cur = emitter->head - 1;
+                cur = emitter->head.end - 1;
                 if (cur < 0) {
-                    cur = emitter->capacity - 1;
+                    cur = emitter->head.tmpl.itemCount - 1;
                 }
                 next = cur - 1;
                 if (next < 0) {
-                    next = emitter->capacity - 1;
+                    next = emitter->head.tmpl.itemCount - 1;
                 }
                 curPos = particles[cur].pos;
             }
@@ -531,11 +511,11 @@ Gfx *func_151CDE20(Emitter *emitter, Gfx *gfx, s16 view) {
                 cur = next;
                 next--;
                 if (next < 0) {
-                    next = emitter->capacity - 1;
+                    next = emitter->head.tmpl.itemCount - 1;
                 }
                 curPos = particles[cur].pos;
                 nextPos = particles[next].pos;
-            } while (cur != emitter->tail);
+            } while (cur != emitter->head.start);
         }
     }
     return gfx;
@@ -543,9 +523,9 @@ Gfx *func_151CDE20(Emitter *emitter, Gfx *gfx, s16 view) {
 
 /* Stops a stream emitter: no new particles, the ones in flight keep falling. */
 void func_151CE47C(Emitter *emitter) {
-    emitter->unk30 = 0;
-    emitter->flags &= ~EMITTER_FLAG_EMITTING;
-    emitter->flags |= EMITTER_FLAG_STOPPED;
+    emitter->head.updateKind2 = 0;
+    emitter->head.tmpl.flags &= ~EMITTER_FLAG_EMITTING;
+    emitter->head.tmpl.flags |= EMITTER_FLAG_STOPPED;
 }
 
 extern void func_151478F4(void *);
@@ -586,22 +566,22 @@ void func_151CE51C(void *actor, StreamSource *source) {
     emitter = func_151CE634(source->id);
     if (emitter != NULL) {
         func_1515C1A0(actor, pos, &radius, &height);
-        if (emitter->flags & EMITTER_FLAG_STOPPED) {
+        if (emitter->head.tmpl.flags & EMITTER_FLAG_STOPPED) {
             /* The column has left the emitter: its top is the newest particle. */
             f32 bottom;
             f32 columnTop;
 
             bottom = pos[1] - height;
-            if (emitter->count <= 0) {
+            if (emitter->head.count <= 0) {
                 return;
             }
             {
                 s32 newest;
                 StreamParticle *particles;
 
-                newest = emitter->head - 1;
+                newest = emitter->head.end - 1;
                 if (newest < 0) {
-                    newest = emitter->capacity - 1;
+                    newest = emitter->head.tmpl.itemCount - 1;
                 }
                 particles = emitter->particles;
                 columnTop = particles[newest].pos.y;
@@ -615,14 +595,14 @@ void func_151CE51C(void *actor, StreamSource *source) {
             f32 columnBottom;
 
             top = pos[1] + height;
-            if (emitter->count <= 0) {
+            if (emitter->head.count <= 0) {
                 return;
             }
             {
                 StreamParticle *particles;
 
                 particles = emitter->particles;
-                columnBottom = particles[emitter->tail].pos.y;
+                columnBottom = particles[emitter->head.start].pos.y;
             }
             if (columnBottom <= top) {
                 func_1505D024(actor, 0x60019, 0, -1);
@@ -631,7 +611,6 @@ void func_151CE51C(void *actor, StreamSource *source) {
     }
 }
 
-extern Emitter *D_800DCE50[][0x68];
 
 /* Finds the stream emitter whose data has the given id, or NULL. */
 Emitter *func_151CE634(s32 id) {
@@ -641,16 +620,16 @@ Emitter *func_151CE634(s32 id) {
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            emitter = D_800DCE50[j][D_800A5760[i]];
+            emitter = (Emitter *)D_800DCE50[j][D_800A5760[i]];
             while (emitter != NULL) {
-                if (emitter->kind == STREAM_KIND) {
+                if (emitter->head.tmpl.kind == STREAM_KIND) {
                     StreamData *data = emitter->data;
 
                     if (data->id == id) {
                         return emitter;
                     }
                 }
-                emitter = emitter->next;
+                emitter = (Emitter *)emitter->head.header.next;
             }
         }
     }

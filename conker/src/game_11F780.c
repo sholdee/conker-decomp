@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void func_150F2994(Camera *actor, s32 flag);
 s32 func_1509BE40(s32, s32, s32, s32);
@@ -84,14 +85,6 @@ typedef struct {
     f32 rotZ;
 } SwayBlock;
 
-typedef struct {
-    u8 pad0[0x50];
-    s32 swayOffset; // byte offset of the SwayBlock within data[]
-    u8 pad54[0x24];
-    Mtx mtx[2]; // indexed by D_800BE9C0
-    u8 data[1];
-} SwayModel;
-
 extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
 /* Steps the object's sway and stores the resulting X/Z rotation. */
@@ -106,8 +99,8 @@ s32 func_150F23E0(SwayObject *obj) {
 }
 
 /* Same as func_150F23E0 for the model's embedded SwayBlock. */
-s32 func_150F2480(SwayModel *model) {
-    SwayBlock *block = (SwayBlock *)&model->data[model->swayOffset];
+s32 func_150F2480(DynModel *model) {
+    SwayBlock *block = (SwayBlock *)&model->buffers[model->buffersSize];
 
     block->rotX = block->sway.amplitudeX * sinf(block->sway.phaseX);
     block->rotZ = block->sway.amplitudeZ * sinf(block->sway.phaseZ);
@@ -117,12 +110,11 @@ s32 func_150F2480(SwayModel *model) {
 }
 
 /* Builds the model's matrix for this frame from its SwayBlock rotation and position. */
-s32 func_150F2518(SwayModel *model, s32 arg1) {
+s32 func_150F2518(DynModel *model, s32 arg1) {
     MtxF mtx;
     SwayBlock *block;
 
-    // matching: the integer cast of `model` costs IDO one temp register, which the target shows
-    block = (SwayBlock *)((s32)model + model->swayOffset + 0xF8);
+    block = DYNMODEL_USERDATA(model);
     func_150A8050(mtx, block->rotX, 0.0f, block->rotZ);
     mtx[3][0] = block->pos[0];
     mtx[3][1] = block->pos[1];
@@ -131,23 +123,23 @@ s32 func_150F2518(SwayModel *model, s32 arg1) {
     return 1;
 }
 
-/* Places the point (0, -495, 0) of the linked object's exaggerated sway frame into arg0->unk14. */
-s32 func_150F25A0(struct242 *arg0) {
+/* Places the point (0, -495, 0) of the linked object's exaggerated sway frame into the effect's light. */
+s32 func_150F25A0(LightEffect *effect) {
     SwayObject **link;
     f32 outZ;
     f32 outY;
     f32 outX;
     MtxF mtx;
 
-    link = (SwayObject **)&arg0->unk18;
+    link = (SwayObject **)&effect->data;
     func_150A8050(mtx, (*link)->rotX * 3.0f, 0.0f, (*link)->rotZ * 3.0f);
     mtx[3][0] = (*link)->x;
     mtx[3][1] = (*link)->y;
     mtx[3][2] = (*link)->z;
     func_150A7960(mtx, 0.0f, -495.0f, 0.0f, &outX, &outY, &outZ);
-    arg0->unk14->unkE = outX;
-    arg0->unk14->unk10 = outY;
-    arg0->unk14->unk12 = outZ;
+    effect->light->x = outX;
+    effect->light->y = outY;
+    effect->light->z = outZ;
     return 1;
 }
 

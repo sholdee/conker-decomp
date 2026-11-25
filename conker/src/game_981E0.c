@@ -12,12 +12,6 @@ void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 #include "variables.h"
 #include "effects.h"
 
-/* The object func_1503195C returns (only the word at 0x3C is read here). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x3C];
-    /* 0x3C */ s32 unk3C;
-} Attached1503195C;
-
 void func_15131D4C(s32 arg0, s32 arg1);
 void func_1506BF5C(void);
 s32 func_1000F568(s32 arg0, s32 arg1);
@@ -144,8 +138,8 @@ typedef struct Vec3w {
 
 /* Locals of the effect spawners func_15070D24 / func_15070F60, in stack order. */
 typedef struct EffectLocals {
-    Header2 header2;
-    Header header;
+    Vec3i header2;
+    LightEffectHeader header;
     u8 pad16[2];
     f32 worldPos[3];
     f32 randoms[2];
@@ -172,8 +166,7 @@ extern Actor *func_1505ED34(void);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern s32 func_1515D480(s32);
 extern void *func_1515D440(void);
-extern s32 func_15158BD0(Actor *, s32, s32);
-extern void func_1514EC1C(s32, Actor *, s32);
+extern void *func_15158BD0(Actor *, s32, s32);
 extern void func_15145974(void *, f32 *, f32 *);
 extern Actor *func_1505EEF4(s32 arg0);
 extern void func_151A3390(void *arg0, u8 arg1);
@@ -197,7 +190,7 @@ extern Vec3w D_80099BA0;
 extern Vec3w D_80099BAC;
 extern void func_151D5334(Vec3f*, f32, f32, f32, s32, s32, s32);
 extern void func_150FE860(Actor *arg0, s32 arg1, s32 arg2);
-extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 extern void func_150FF084(Actor *arg0, s32 arg1, s32 arg2);
 extern void func_150FED30(Actor *arg0, s32 arg1, s32 arg2);
 extern u32 D_80099BB8;
@@ -2314,17 +2307,17 @@ void func_150701F4(s32 cmd) {
 }
 
 void func_15070224(s32 cmd) {
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = (func_150ADA20() % 5U) + 4;
-    header.unk4 = 0;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = (func_150ADA20() % 5U) + 4;
+    header.lightType = 0;
 
-    header2.unk0 = D_800D154C->x_position;
-    header2.unk4 = D_800D154C->y_position;
-    header2.unk8 = D_800D154C->z_position;
+    header2.x = D_800D154C->x_position;
+    header2.y = D_800D154C->y_position;
+    header2.z = D_800D154C->z_position;
 
     func_151602C0(&header, &header2, (func_150ADA20() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
 }
@@ -2611,14 +2604,14 @@ void func_15070D24(s32 cmd) {
                   (func_150ADA68() * 2496.0f) + 3496.0f,
                   (s32)fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
 
-    fx.header.unk0 = 3;
-    fx.header.unk1 = -1;
-    fx.header.unk2 = (func_150ADA20() % 6U) + 0xA;
-    fx.header.unk4 = 0;
+    fx.header.flags = 3;
+    fx.header.update = -1;
+    fx.header.lifetime = (func_150ADA20() % 6U) + 0xA;
+    fx.header.lightType = 0;
 
-    fx.header2.unk0 = fx.worldPos[0];
-    fx.header2.unk4 = fx.worldPos[1];
-    fx.header2.unk8 = fx.worldPos[2];
+    fx.header2.x = fx.worldPos[0];
+    fx.header2.y = fx.worldPos[1];
+    fx.header2.z = fx.worldPos[2];
 
     func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
 }
@@ -2648,14 +2641,14 @@ void func_15070F60(cmd)
                   (func_150ADA68() * 4000.0f) + 4000.0f,
                   (s32)fx.worldPos, 0xFF, 0, -1, 0xFF, 0);
 
-    fx.header.unk0 = 3;
-    fx.header.unk1 = -1;
-    fx.header.unk2 = (func_150ADA20() % 5U) + 3;
-    fx.header.unk4 = 0;
+    fx.header.flags = 3;
+    fx.header.update = -1;
+    fx.header.lifetime = (func_150ADA20() % 5U) + 3;
+    fx.header.lightType = 0;
 
-    fx.header2.unk0 = fx.worldPos[0];
-    fx.header2.unk4 = fx.worldPos[1];
-    fx.header2.unk8 = fx.worldPos[2];
+    fx.header2.x = fx.worldPos[0];
+    fx.header2.y = fx.worldPos[1];
+    fx.header2.z = fx.worldPos[2];
 
     func_151602C0(&fx.header, &fx.header2, (func_150ADA20() % 201U) + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 0);
     func_151D5404((Vec3f *)fx.worldPos, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, 0xFF, 0);
@@ -2673,33 +2666,22 @@ void func_15071278(s32 cmd) {
     func_150FC438(D_800D154C, 0, 1, D_800D154C->unk84.ub[1]);
 }
 
-/* Argument block for func_151D8868. */
-typedef struct Struct151D8868Args {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 unk7;
-} Struct151D8868Args;
-
 void func_150712AC(s32 cmd) {
-    Struct151D8868Args args;
+    RumbleParams args;
 
     func_150FE860(D_800D154C, 0xFF, 1);
     if (D_800D154C->camera != NULL) {
-        args.unk0 = 1;
-        args.unk2 = (func_150ADA20() % 7U) + 10;
-        args.unk5 = 1 << D_800D154C->camera->playerIndex;
-        args.unk4 = (func_150ADA20() % 7U) + 2;
-        args.unk6 = -1;
+        args.flags = 1;
+        args.duration = (func_150ADA20() % 7U) + 10;
+        args.playerMask = 1 << D_800D154C->camera->playerIndex;
+        args.strength = (func_150ADA20() % 7U) + 2;
+        args.updateKind = -1;
         func_151D8868(&args, 0, 0xFF, 1);
     }
 }
 
 void func_15071360(s32 cmd) {
-    Struct151D8868Args args;
+    RumbleParams args;
 
     if (func_151044F4() != 0) {
         func_150FF084(D_800D154C, 0xFF, 1);
@@ -2707,11 +2689,11 @@ void func_15071360(s32 cmd) {
         func_150FED30(D_800D154C, 0xFF, 1);
     }
     if (D_800D154C->camera != NULL) {
-        args.unk0 = 1;
-        args.unk2 = (func_150ADA20() % 5U) + 15;
-        args.unk5 = 1 << D_800D154C->camera->playerIndex;
-        args.unk4 = (func_150ADA20() % 4U) + 3;
-        args.unk6 = -1;
+        args.flags = 1;
+        args.duration = (func_150ADA20() % 5U) + 15;
+        args.playerMask = 1 << D_800D154C->camera->playerIndex;
+        args.strength = (func_150ADA20() % 4U) + 3;
+        args.updateKind = -1;
         func_151D8868(&args, 0, 0xFF, 1);
     }
 }
@@ -2792,16 +2774,13 @@ void func_15071764(s32 cmd) {
 }
 
 void func_150717E0(s32 cmd) {
-    struct {
-        Actor *unk0;
-        u8 unk4;
-    } ref;
+    ActorRef ref;
     Actor *obj;
 
     obj = func_15083E90(18);
     if (obj != NULL) {
-        ref.unk0 = obj;
-        ref.unk4 = obj->unique_id;
+        ref.actor = obj;
+        ref.uniqueId = obj->unique_id;
         func_15131D4C((s32)&ref, 0x43);
         func_151494E0((s32)&ref, 0x43);
     }
@@ -2863,16 +2842,16 @@ void func_15071A64(s32 cmd) {
 
 void func_15071B18(s32 cmd) {
     Vec3f point;
-    u8 collision[0x24];
+    CollisionHit collision;
 
     if (D_800D154C->unk1D4 != NULL && (D_800D154C->unk74 & 0xF) != 0xF) {
         func_15143134(D_80099BC8[func_150ADA20() % 3U], &point.x, (s32)((Mtx *)D_800D154C->unk1D4 + 7));
-        func_1504715C(collision, D_800D154C);
+        func_1504715C(&collision, D_800D154C);
         if (func_150ADA20() & 1) {
             if (func_150ADA20() & 1) {
-                func_151DC260(&point.x, collision, 0, 0xFF, 1);
+                func_151DC260(&point.x, &collision, 0, 0xFF, 1);
             } else {
-                func_151DC484(&point.x, (struct199 *)collision, 0, 0xFF, 1);
+                func_151DC484(&point.x, (struct199 *)&collision, 0, 0xFF, 1);
             }
         }
         if (func_150ADA20() & 1) {
@@ -3709,10 +3688,10 @@ void func_15073EA4(void) {
 }
 
 void func_15073F1C(void) {
-    ActorCtl *ext = func_1503195C(D_800D154C, 60, 0);
+    ModelAttachment *att = func_1503195C(D_800D154C, 60, 0);
 
-    if (ext != NULL) {
-        ext->unk38 = 2400;
+    if (att != NULL) {
+        att->unk38 = 2400;
     }
 }
 
@@ -3824,12 +3803,12 @@ void func_15073FA0(void) {
                     obj->y_velocity = 50.0f;
                 }
                 if (player->id == 0x75) {
-                    slot = (s32)func_1503195C(player, 0x64, 0);
+                    slot = (s32)func_1503195C(player, 0x64, 0); // matching: slot is reused for the attachment
                 } else {
                     slot = (s32)func_1503195C(player, 0x2C, 0);
                 }
                 if (slot != 0) {
-                    obj->unk8E = ((Attached1503195C *)slot)->unk3C;
+                    obj->unk8E = ((ModelAttachment *)slot)->unk3C;
                     func_100100E0(func_15033BDC, (void *)slot, D_800D154C, func_1000EE70, obj, obj->unique_id);
                 }
                 player = D_800D154C;

@@ -1,0 +1,87 @@
+# Code accounting (US)
+
+Every byte of the CPU code in Conker's Bad Fur Day (US) is accounted for. It is either C that compiles to
+byte-identical code, or hand-written assembly with a recorded proof that it was never C. No undecompiled
+asm remains: there are no `GLOBAL_ASM` stubs, no inline asm functions, and no `asm` code segments.
+
+To check it, build and run the checker. It exits non-zero if anything is left over, and writes the
+per-function manifest to `tools/accounting.tsv`.
+
+```
+python3 tools/accounting.py
+```
+
+| Segment  | Code bytes | Matched C            | Hand-written asm, rule-proven | Hand-written asm, search tier | Nop padding |
+|----------|-----------:|---------------------:|------------------------------:|------------------------------:|------------:|
+| init     |    164,048 | 151,764 (92.51%)     | 12,208 (46 functions)         | 0                             | 76          |
+| game     |  2,072,880 | 2,021,520 (97.52%)   | 50,704 (94 functions)         | 592 (8 functions)             | 64          |
+| debugger |     14,064 | 13,904 (98.86%)      | 160 (1 function)              | 0                             | 0           |
+| **all**  |  2,250,992 | 2,187,188 (97.17%)   | 63,072 (141 functions)        | 592 (8 functions)             | 140         |
+
+Byte counts are each object's `.text` from the link map. Functions are cut at global symbols only, so a
+jump-table label inside a function stays part of it. Bytes before an object's first symbol count as a
+piece of their own.
+
+## Hand-written asm: proof rules
+
+Hand-written functions are committed as `conker/src/*.s` (yaml `hasm` segments). A function is listed as
+hand-written only with a proof, which `tools/accounting.tsv` records in its `proof` column.
+
+Rules marked * are computed from the instructions by `tools/accounting.py`. Each one was checked against
+the 5,746 functions IDO 5.3 compiles in this game, and none of them shows the pattern. The other rules come
+from `tools/hasm_proofs.tsv`.
+
+| Rule | Meaning | Functions |
+|------|---------|----------:|
+| a    | Source-identical: the SDK's own `.s` (ultralib), assembled by IDO 5.3 (`cc`, with as0 and as1), gives the same bytes | 15 |
+| b*   | An instruction IDO 5.3 `-mips2` cannot emit: cop0, TLB, cache, sync, syscall, 64-bit `d*`, `ld`/`sd`, or trapping `add`/`addi`/`sub` | 79 |
+| c    | Dataflow: reads a register that is not an ABI input and was not written first | 46 |
+| d*   | An opcode-2 `j`, or a branch that leaves the function (IDO uses `b` and never tail-calls) | 56 |
+| e*   | `cvt.w.s`/`cvt.w.d` with no `ctc1` in the function (IDO always sets the rounding mode) | 18 |
+| f*   | Frame layout: a store below `$sp`, or `ra` saved in the argument area or without allocating a frame | 14 |
+| g*   | No return: execution falls into the next function | 4 |
+| h*   | An odd FPR as a single-precision arithmetic operand, or `jal` without saving `ra` | 48 |
+| i*   | 6 or more `mul.s`, every one followed by a `nop` (compiled C reaches at most 67%) | 2 |
+| k*   | Same object as a proven function, which it meets at a non-16-aligned address (IDO pads every C object's `.text` and `.rodata` to 16 at both ends: 771/771 and 357/357 objects) | 5 |
+| s    | Search tier (below) | 8 |
+
+A function can meet several rules. GCC is ruled out as the source of the rule-proven code: GCC's `move`
+assembles to `addu rd,rs,zero`, which appears 9 times in all compiled C and never in these functions.
+
+### Search tier (8 functions, 592 bytes)
+
+These meet none of the rules above. The project owner accepted them as hand-written on this evidence:
+
+1. No compiler reproduces them from C. Sweeps of IDO 5.3, IDO 7.1 and KMC GCC 2.7.2 (the N64 SDK GCC)
+   covered about 10,000 source and flag combinations, with 0 natural matches.
+2. Their assembly, written as an `.s` file, assembles byte-for-byte with IDO's assembler.
+3. They sit inside hand-written asm blocks.
+
+The only exact C match found was a forced one: guMtxIdentF and the scale/translate pair match KMC GCC only
+with pinned FP registers and a contrived statement order. That is not evidence that they were written in C.
+
+| Function | Bytes | What it is, and why it is asm |
+|----------|------:|-------------------------------|
+| guMtxIdentF   | 80 | A second, custom copy of guMtxIdentF; the SDK's C one is separately at 0x151EFE00. It sits in hasm block D2450–D7980, one function per 16-byte unit, in SDK `mgu` order |
+| func_150A7CB0 | 80 | guScaleF-like. Its hasm neighbours use `sd $zero` |
+| func_150A7DA0 | 80 | guTranslateF-like. It follows the hasm func_150A7D00 |
+| func_150A7960 | 160 | guMtxXFMF-like. Proven-asm func_150A7A00 calls it with a hand-set `ra`, and func_150A7A14 then reads the `$f0/$f2/$f4` values it leaves behind |
+| func_150AD8B0 | 80 | Cross product. Every `mul.s` alternates with another instruction, which IDO's reorder mode cannot produce |
+| func_150AD900 | 48 | Dot product accumulating in place in `$f0`. None of 19,200 instruction orders fed to IDO's assembler gives this schedule |
+| func_150AD930 | 48 | Vector length. A plain reorder-mode `.s` assembled by IDO with `-r4300_mul` gives exactly these bytes |
+| func_150AE1B0 | 16 | IDO `-O1` gives these 4 instructions but in `$t6`. This one uses `$t2`, like its asm neighbours in game_DAFA0 |
+
+The sweeps, sources and results are in `~/conker-ws/compilers/` (the coordinator's workspace, outside the
+repo).
+
+## Other ROM contents (not CPU code)
+
+| ROM range | Contents | Status |
+|-----------|----------|--------|
+| 0x0–0x40 | Cartridge header | Data |
+| 0x40–0x1000 | IPL3 boot code (Nintendo, CIC-specific; run by the PIF, not part of the game) | Binary, byte-identical |
+| 0x2D4B0–0x42450 | RSP microcode: Nintendo F3DEX 2.08 family (F3DEX, F3DEXBS, F3DEXBG, F3DEXBGBS, each with a .NoN variant; "Yoshitaka Yasumoto 1999 Nintendo") and their data | Binary. The RSP vector-unit ISA has no C compiler |
+| init/game/debugger `.data`, `.rodata`, `.bss` | Game data | Assembled from `conker/asm/data`, byte-identical; data, not code |
+| 0x1A37E0 onward | Compressed assets | Binary |
+
+This accounting covers the US ROM only (sha1 `4cbadd3c…`). Other regions are not decompiled.

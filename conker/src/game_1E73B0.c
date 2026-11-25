@@ -4,86 +4,43 @@
 #include "effects.h"
 
 s32 func_151BB0E0(); /* sound update callback, defined below */
-void func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+void func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
-/* Floor below a point, from func_1504715C / func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ SurfaceTriangle surf;
-    /* 0x16 */ u8 pad16[0x24 - 0x16];
-} FloorInfo;
-
-void func_1504715C(FloorInfo *, Actor *);
-
-/* Effect objects keep a per-type extra-data block at 0xF8 + extraOffset. */
-typedef struct {
-    u8 pad0[0x50];
-    s32 extraOffset;
-} EffectObject;
-
-#define EFFECT_EXTRA(effect) ((void *)((s32)(effect) + ((EffectObject *)(effect))->extraOffset + 0xF8))  // matching: s32 arithmetic; a u8 * sum schedules func_151BA084 differently
-
-/* Extra data of effects that follow an object: the owner and its unique_id at spawn time. */
-typedef struct {
-    Actor *owner;
-    u8 ownerId;
-} EffectOwnerRef;
+void func_1504715C(CollisionHit *, Actor *);
 
 
-typedef struct {
-    u8 unk0;
-    s8 unk1;
-    u8 unk2;
-    u8 pad3;
-    s16 unk4;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    u8 unk24;
-    u8 unk25;
-    u8 pad26[0xA];
-    s32 unk30;
-    s32 unk34;
-    u8 unk38;
-    u8 unk39;
-} Desc1513B5E0;
 
-void *func_1513B5E0(void *, s32, s32, u8, s32);
+DynModel *func_1513B5E0(DynModelDesc *, s32, s32, u8, s32);
 
 /* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */
 void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
-    void *effect;
-    Desc1513B5E0 desc;
-    EffectOwnerRef ref;
+    DynModel *effect;
+    DynModelDesc desc;
+    ActorRef ref;
 
     if (owner == NULL) {
         return NULL;
     }
-    ref.owner = owner;
-    ref.ownerId = owner->unique_id;
-    desc.unk0 = 2;
-    desc.unk1 = -1;
-    desc.unk2 = 3;
-    desc.unk4 = 300;
+    ref.actor = owner;
+    ref.uniqueId = owner->unique_id;
+    desc.flags = 2;
+    desc.updateFunc = -1;
+    desc.drawFunc = 3;
+    desc.lifetime = 300;
     desc.unk30 = 9;
     desc.unk34 = 0x1AD;
-    desc.unk39 = 0xFF;
+    desc.viewportMask = 0xFF;
     {
         s32 objIndex = owner - D_800CC2D0;
 
         if ((objIndex < 2) && (D_800E0BCE[objIndex] != 0)) {
             if (D_8008FD90 == 2) {
-                desc.unk39 = 0xFD;
+                desc.viewportMask = 0xFD;
             } else if (D_8008FD90 == 4) {
                 if (objIndex == 0) {
-                    desc.unk39 = 0xFB;
+                    desc.viewportMask = 0xFB;
                 } else {
-                    desc.unk39 = 0xF7;
+                    desc.viewportMask = 0xF7;
                 }
             }
         }
@@ -97,20 +54,14 @@ void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
     desc.unk18 = 0x36;
     desc.unk1C = 0x80;
     desc.unk20 = 0x20;
-    desc.unk38 = 2;
+    desc.kind = 2;
     effect = func_1513B5E0(&desc, 1, 8, arg1, arg2);
     if (effect != NULL) {
-        memcpy(EFFECT_EXTRA(effect), &ref, sizeof(ref));
+        memcpy(DYNMODEL_USERDATA(effect), &ref, sizeof(ref));
     }
     return effect;
 }
 
-
-typedef struct {
-    u8 pad0[0x58];
-    Vtx *verts[2][4]; /* [frame][viewport], 20 vertices each */
-    Mtx mtx[2];       /* [frame] */
-} Obj151BA084;
 
 void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 
@@ -119,8 +70,8 @@ void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
  * owner's and sets each vertex's texture coordinates from its projected position in `viewport`.
  * Removes the effect when the owner is gone; returns 0 when it should not be drawn.
  */
-s32 func_151BA084(Obj151BA084 *effect, s16 viewport) {
-    EffectOwnerRef *ref;
+s32 func_151BA084(DynModel *effect, s16 viewport) {
+    ActorRef *ref;
     Actor *owner;
     u8 *model;
     MtxF modelMtx;
@@ -137,10 +88,10 @@ s32 func_151BA084(Obj151BA084 *effect, s16 viewport) {
     f32 world[3];
     f32 proj[3];
 
-    ref = EFFECT_EXTRA(effect);
-    owner = ref->owner;
-    if (owner->interaction_state == 0 || owner->unique_id != ref->ownerId) {
-        func_1516972C((struct102 *)effect);
+    ref = DYNMODEL_USERDATA(effect);
+    owner = ref->actor;
+    if (owner->interaction_state == 0 || owner->unique_id != ref->uniqueId) {
+        func_1516972C(&effect->header);
     }
     model = (u8 *)owner->unk1D4;
     if (model == NULL) {
@@ -191,7 +142,7 @@ label: // matching: unused label keeps the viewMtx stores ahead of the argument 
         s32 pad; // matching: -g3 block marker keeps the origin stores after the tile math
 
         for (i = 0; i < 20; i++) {
-            Vtx_t *vtx = &effect->verts[D_800BE9C0][viewport][i].v;
+            Vtx_t *vtx = &effect->vertices[D_800BE9C0][viewport][i].v;
 
             x = vtx->ob[0];
             y = vtx->ob[1];
@@ -207,36 +158,22 @@ label: // matching: unused label keeps the viewMtx stores ahead of the argument 
     return 1;
 }
 
-/* Messages delivered to effects through their message handler. */
-typedef union {
-    struct {
-        Actor *obj;
-        u8 objId;
-    } removed; /* type 0 */
-    struct {
-        Actor *a;
-        Actor *b;
-        u8 aId;
-        u8 bId;
-    } swap; /* type 0x2D */
-} EffectMsg;
-
 /* Message handler: removes the effect with its owner, and follows the owner when two objects swap. */
-void func_151BA468(struct260 *effect, EffectMsg *msg, u8 msgType) {
-    EffectOwnerRef *ref = EFFECT_EXTRA(effect);
-    Actor *owner = ref->owner;
+void func_151BA468(DynModel *effect, ActorMsg *msg, u8 msgType) {
+    ActorRef *ref = DYNMODEL_USERDATA(effect);
+    Actor *owner = ref->actor;
 
     if (msgType == 0) {
-        if ((owner == msg->removed.obj) || (msg->removed.objId == owner->unique_id)) {
-            func_1516972C((struct102 *)effect);
+        if ((owner == msg->ref.actor) || (msg->ref.uniqueId == owner->unique_id)) {
+            func_1516972C(&effect->header);
         }
     } else if (msgType == 0x2D) {
-        if (ref->owner == msg->swap.a) {
-            ref->owner = msg->swap.b;
-            ref->ownerId = msg->swap.bId;
-        } else if (ref->owner == msg->swap.b) {
-            ref->owner = msg->swap.a;
-            ref->ownerId = msg->swap.aId;
+        if (ref->actor == msg->swap.actorA) {
+            ref->actor = msg->swap.actorB;
+            ref->uniqueId = msg->swap.idB;
+        } else if (ref->actor == msg->swap.actorB) {
+            ref->actor = msg->swap.actorA;
+            ref->uniqueId = msg->swap.idA;
         }
     }
 }
@@ -247,7 +184,7 @@ extern Vec3f D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[],
 extern f32 D_800AA708[];
 void func_1514FCE8(JetSpraySpec *, u8, s32);
 extern void func_1503F404(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern void func_1513264C(ParticleSpawn80 *, s32, s32, FloorInfo *, s32, u8, s32);
+extern void func_1513264C(ParticleSpawn80 *, s32, s32, CollisionHit *, s32, u8, s32);
 extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 
 /*
@@ -256,7 +193,7 @@ extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
  */
 void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     JetSpraySpec burst;
-    FloorInfo floor;
+    CollisionHit floor;
     Vec3f objPos;
     ParticleSpawn80 part;
     f32 outA2, outA1, outA0, outB2, outB1, outB0;
@@ -598,9 +535,9 @@ typedef struct { f32 v[9]; } F32x9;
 extern S32x9 D_800AA718;
 extern F32x9 D_800AA73C;
 void func_15055A2C(s32, f32, f32, f32, s32);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, SurfaceTriangle *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 s32 func_15145C90(s32 hitInfo);
-s32 func_15144E80(SurfaceTriangle *, Vec3f *, Vec3f *, Vec3f *);
+s32 func_15144E80(CollisionTri *, Vec3f *, Vec3f *, Vec3f *);
 void func_1514FBFC(SurfaceJetSpray *, u8, s32);
 void func_15151D6C(SurfaceDebrisBurst *, s32 *, f32 *, s32, u8, s32);
 void func_151C04F8(Vec3f *, u8, s32);
@@ -608,14 +545,14 @@ void func_151C05A4(Vec3f *, u8, s32);
 void func_151C05F0(Vec3f *, u8, s32);
 void func_151C0644(Vec3f *, u8, s32);
 void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2);
-void func_151BBFBC(SurfaceTriangle *surf, Vec3f *pos, s32 arg2, s32 arg3);
+void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3);
 
 /*
  * Impact effect for a shot from `from` towards `to`: effects at the origin, then a ray cast along the
  * shot and, where it hits a surface, impact effects there.
  */
 void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
-    SurfaceTriangle surf;
+    CollisionTri surf;
     Vec3f hit;
     Vec3f delta;
     s32 hitInfo;
@@ -699,7 +636,7 @@ void func_151BB61C(Actor *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
 }
 
 void func_15152190(DebrisBurst *, Vec3f *, Vec3f *, s32, f32, s32, s32, s32);
-s32 func_15046C80(Vec3f *, u16, f32, FloorInfo *);
+s32 func_15046C80(Vec3f *, u16, f32, CollisionHit *);
 extern Vec3f D_8008FBA0;
 extern Vec3f D_8008FBAC;
 
@@ -710,7 +647,7 @@ extern Vec3f D_8008FBAC;
 void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
     Vec3f center;
     JetSpraySpec burst;
-    FloorInfo floor;
+    CollisionHit floor;
     Vec3f probe;
     Vec3f hit;
     Vec3f edgeA;
@@ -765,8 +702,8 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
             hit.x = probe.x;
             hit.y = floor.height;
             hit.z = probe.z;
-            func_151BBFBC(&floor.surf, &hit, arg3, arg4);
-            if (func_15144E80(&floor.surf, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
+            func_151BBFBC(&floor.tri, &hit, arg3, arg4);
+            if (func_15144E80(&floor.tri, &edgeA, &edgeB, &normal) != 0 && normal.y < 0.0f) {
                 func_151C0644(&hit, arg3, arg4);
             }
         }
@@ -798,25 +735,25 @@ void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
 
 /* Spawns a short-lived effect at `pos` with a random size and lifetime. */
 void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = (func_150ADA20() & 0xF) + 5;
-    header.unk4 = 0;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = (func_150ADA20() & 0xF) + 5;
+    header.lightType = 0;
 
-    header2.unk0 = pos->x;
-    header2.unk4 = pos->y;
-    header2.unk8 = pos->z;
+    header2.x = pos->x;
+    header2.y = pos->y;
+    header2.z = pos->z;
 
     func_151602C0(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
-void func_150E7FEC(f32, s32, SurfaceTriangle *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_150E7FEC(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a randomised func_150E7FEC effect on surface `surf` at `pos`. */
-void func_151BBFBC(SurfaceTriangle *surf, Vec3f *pos, s32 arg2, s32 arg3) {
+void func_151BBFBC(CollisionTri *surf, Vec3f *pos, s32 arg2, s32 arg3) {
     s32 pad; // matching: unused stack slot
     u32 rnd1;
     f32 rnd0;
@@ -841,18 +778,12 @@ void func_151BC074(Actor *obj) {
     }
 }
 
-extern f32 D_800DCA24;
 
-/* Objects returned by func_15134908 and func_15163414 hold the owner reference at these offsets. */
+/* Objects returned by func_15134908 hold the owner reference at this offset. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x40];
-    /* 0x40 */ EffectOwnerRef ref;
+    /* 0x40 */ ActorRef ref;
 } Fx15134908;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x28];
-    /* 0x28 */ EffectOwnerRef ref;
-} Fx15163414;
 
 /* Data block of the object returned by func_15147A80. */
 typedef struct {
@@ -872,7 +803,7 @@ typedef struct {
 
 Fx15134908 *func_15134908(BloodTrailDesc *, s32, u8, s32);
 Fx15147A80 *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-Fx15163414 *func_15163414(Header *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
+LightEffect *func_15163414(LightEffectHeader *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*
  * Spawns three effects that follow `obj` (the first only while D_80082FA0 < 2 and D_8008FD8C < 5),
@@ -883,7 +814,7 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
 
     if ((D_80082FA0 < 2) && (D_8008FD8C < 5)) {
         BloodTrailDesc desc;
-        EffectOwnerRef ref;
+        ActorRef ref;
 
         desc.radius = 15.0f;
         desc.x = &obj->x_position;
@@ -895,8 +826,8 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         desc.emitter = 4;
         desc.unk18 = 1;
         desc.callback = 0;
-        ref.owner = obj;
-        ref.ownerId = obj->unique_id;
+        ref.actor = obj;
+        ref.uniqueId = obj->unique_id;
         fx1 = func_15134908(&desc, 8, arg1, arg2);
         if (fx1 != NULL) {
             memcpy(&fx1->ref, &ref, sizeof(ref));
@@ -927,20 +858,20 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         }
     }
     {
-        EffectOwnerRef ref;
-        Fx15163414 *fx3;
-        Header header;
+        ActorRef ref;
+        LightEffect *fx3;
+        LightEffectHeader header;
 
-        ref.owner = obj;
-        ref.ownerId = obj->unique_id;
-        header.unk0 = 2;
-        header.unk1 = 14;
-        header.unk2 = 300;
-        header.unk4 = 31;
+        ref.actor = obj;
+        ref.uniqueId = obj->unique_id;
+        header.flags = 2;
+        header.update = 14;
+        header.lifetime = 300;
+        header.lightType = 31;
         fx3 = func_15163414(&header, &obj->x_position, &obj->y_position, &obj->z_position,
                            0, 0, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 8, arg1, arg2);
         if (fx3 != NULL) {
-            memcpy(&fx3->ref, &ref, sizeof(ref));
+            memcpy(&fx3->data.trackActor.ref, &ref, sizeof(ref));
         }
     }
 }

@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern s32 func_15084D70(s32, s32, s32, s16*, f32*, u8*, u8*, s32*, s32*, s32, s32*);
 extern void func_15022190(s16, s16, s16, f32);
@@ -123,11 +124,6 @@ void func_1507CD0C(Actor *obj) {
     }
 }
 
-typedef struct CD64Msg {
-    Actor *obj;
-    u8 id;
-} CD64Msg;
-
 void func_15169040(void *, s32);
 void func_1504BAF0(Actor *);
 void func_150E7994(s16, f32, u8, s32);
@@ -139,7 +135,7 @@ void func_1507CD64(Actor *obj, s32 cause) {
     u32 r;
     s32 mode;
     s32 slot;
-    CD64Msg msg;
+    ActorRef msg;
     Actor *saved;
     s32 again;
     s32 flag;
@@ -168,8 +164,8 @@ void func_1507CD64(Actor *obj, s32 cause) {
             func_15085710(1, 10, 1);
         }
     }
-    msg.obj = obj;
-    msg.id = obj->unique_id;
+    msg.actor = obj;
+    msg.uniqueId = obj->unique_id;
     func_15169040(&msg, 3);
     D_800D18A9 = 0;
 lbl2: // matching: unused label splits the basic block; as1 then hoists the reload of cause above this store

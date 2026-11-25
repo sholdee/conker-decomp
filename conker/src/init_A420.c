@@ -4,7 +4,7 @@
 #include "variables.h"
 
 s32 func_150AD960(s32, s32, s32, s32);
-s32 func_150AD9A0(s32, s32, s32);
+s32 math_distance3D(s32, s32, s32);
 
 /*
  * Pan and volume of a positional sound. (dx, dz) is the sound's offset from the listener, which sets the pan
@@ -26,7 +26,7 @@ s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 angle, s32 distX, s32 distY, s32 d
         farDistance &= 0x7FFF;
         distance = func_150AD960(distX, distZ, 0, 0);
     } else {
-        distance = func_150AD9A0(distX, distY, distZ);
+        distance = math_distance3D(distX, distY, distZ);
     }
     level = 0x7FFF - ((nearDistance - distance) << 15) / (nearDistance - farDistance);
     if (level > 400) {

@@ -15,31 +15,13 @@ typedef struct {
 } Data151B1AB0;
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
+    TimedEffect base;
     Data151B1AB0 data;
 } Task151B1AB0;
 
-/* Message passed to func_151B1FAC: kind 0x2D swaps two owners, kind 0 names an owner to drop. */
-typedef union {
-    struct {
-        Actor *a;
-        Actor *b;
-        u8 aUnk3B;
-        u8 bUnk3B;
-    } swap;
-    struct {
-        Actor *owner;
-        u8 ownerUnk3B;
-    } remove;
-} Msg151B1FAC;
-
 /* Live particle returned by func_15130374; its extra data starts at 0xA8. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 unkA8;
 } Particle1DEF60;
 
@@ -142,7 +124,7 @@ void func_151B1B34(Task151B1AB0 *task) {
                 if (func_150ADA20() & 1) {
                     spawn.flags |= 0x80;
                 }
-                particle = func_15130374(&spawn, 1, sizeof(extra), task->unkC, task->unk1);
+                particle = func_15130374(&spawn, 1, sizeof(extra), task->base.header.owner, task->base.header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->unkA8, &extra, sizeof(extra));
                 }
@@ -157,25 +139,25 @@ void func_151B1B34(Task151B1AB0 *task) {
 }
 
 /* Message handler for the task: follows an owner swap, or destroys itself when its owner goes away. */
-void func_151B1FAC(Task151B1AB0 *task, Msg151B1FAC *msg, u8 kind) {
+void func_151B1FAC(Task151B1AB0 *task, ActorMsg *msg, u8 kind) {
     Data151B1AB0 *data = &task->data;
 
     if (kind == 0x2D) {
-        if (data->owner == msg->swap.a) {
-            data->owner = msg->swap.b;
-            data->ownerUnk3B = msg->swap.bUnk3B;
-        } else if (data->owner == msg->swap.b) {
+        if (data->owner == msg->swap.actorA) {
+            data->owner = msg->swap.actorB;
+            data->ownerUnk3B = msg->swap.idB;
+        } else if (data->owner == msg->swap.actorB) {
             // matching: the copy keeps IDO from moving the byte store into the branch delay slot
             Data151B1AB0 *dst = data;
 
-            dst->owner = msg->swap.a;
-            dst->ownerUnk3B = msg->swap.aUnk3B;
+            dst->owner = msg->swap.actorA;
+            dst->ownerUnk3B = msg->swap.idA;
         }
     } else if (kind == 0) {
-        Actor *owner = msg->remove.owner;
+        Actor *owner = msg->ref.actor;
 
-        if (owner == data->owner || msg->remove.ownerUnk3B == data->ownerUnk3B) {
-            func_1516972C((struct102 *)task);
+        if (owner == data->owner || msg->ref.uniqueId == data->ownerUnk3B) {
+            func_1516972C(&task->base.header);
         }
     }
 }

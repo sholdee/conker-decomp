@@ -4,7 +4,7 @@
 
 /* User data of this effect kind: an object the effect owns. */
 typedef struct EffectUserData1E5820 {
-    /* 0x00 */ struct102 *child;
+    /* 0x00 */ EffectHeader *child;
 } EffectUserData1E5820;
 
 /* Effect object (see EffectObj in game_174BF0.c); only the user data pointer is used here. */
@@ -19,7 +19,7 @@ extern void func_15147928(Effect1E5820 *);
 /* Destroys the object owned by this effect, if any. */
 void func_151B8370(Effect1E5820 *effect) {
     EffectUserData1E5820 *userData = effect->userData;
-    struct102 *child = userData->child;
+    EffectHeader *child = userData->child;
 
     if (child != NULL) {
         func_1516972C(child);

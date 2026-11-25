@@ -64,55 +64,17 @@ typedef struct {
 
 /* Effect object created by func_15147A80 for a trail. points[] is a ring buffer. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xC];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 pad0D[3];
-    /* 0x10 */ Vec3f headPos;
-    /* 0x1C */ u8 pad1C[2];
-    /* 0x1E */ u16 flags;
-    /* 0x20 */ u8 pad20[5];
-    /* 0x25 */ u8 capacity;
-    /* 0x26 */ u8 pad26[6];
-    /* 0x2C */ s8 count;
-    /* 0x2D */ s8 tail;             /* oldest point */
-    /* 0x2E */ s8 head;             /* slot the next point goes in */
-    /* 0x2F */ u8 pad2F;
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 pad31[0x23];
-    /* 0x54 */ Vec3f tailPos;
+    /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ TrailPoint *points;
     /* 0x98 */ TrailState *state;
 } TrailEffect;
 
-/* Per-particle parameters copied in by func_151A4638: (age limit, factor) pairs. */
-typedef struct {
-    /* 0x0 */ s16 limit2C;          /* below this age, unk2C = age * mul2C */
-    /* 0x2 */ s16 mul2C;
-    /* 0x4 */ s16 limit2B;          /* below this age, unk2B = age * mul2B */
-    /* 0x6 */ s16 mul2B;
-    /* 0x8 */ s16 limitSize;        /* below this age, sizes change by sizeRate per tick */
-    /* 0xA */ s16 sizeRate;
-} ParticleAgeParams;
-
 /* A particle created by func_15130374. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 age;             /* counts down */
-    /* 0x1C */ u8 pad1C[0xF];
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 pad2D[0xB];
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ u8 pad40[0x30];
-    /* 0x70 */ u8 unk70;
-    /* 0x71 */ u8 unk71;
-    /* 0x72 */ u8 unk72;
-    /* 0x73 */ u8 pad73[0x35];
-    /* 0xA8 */ ParticleAgeParams ageParams;
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ AgeFadeParams ageParams;
 } Particle;
 
 /* Emits particles from a point on one of the owner's bones (task data of func_151A499C). */
@@ -128,29 +90,13 @@ typedef struct {
 } BoneEmitter;
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoneEmitter emitter;
 } BoneEmitterTask;
 
-/* Message sent to effects about their owner actor. */
-typedef union {
-    struct {
-        Actor *actor;
-        u8 actorId;
-    } removed;                      /* type 0: the actor (or any actor with this id) is gone */
-    struct {
-        Actor *actorA;
-        Actor *actorB;
-        u8 idA;
-        u8 idB;
-    } swap;                         /* type 0x2D: the two actors trade places */
-} ActorMessage;
-
 /* A func_151491F4 task that retries creating a trail until its owner can carry it. */
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoneTrailParams trail;
 } TrailRetryTask;
 
@@ -251,15 +197,15 @@ s32 func_151A361C(TrailEffect *effect) {
     TrailPoint *point;
     s32 i;
 
-    if (effect->count < 2 && (state->flags & TRAIL_DETACHED)) {
+    if (effect->head.count < 2 && (state->flags & TRAIL_DETACHED)) {
         return 0;
     }
     state->texOffset += state->params.texScroll * D_800BE9E4;
-    i = effect->head;
-    while (i != effect->tail) {
+    i = effect->head.end;
+    while (i != effect->head.start) {
         i--;
         if (i < 0) {
-            i = effect->capacity - 1;
+            i = effect->head.tmpl.itemCount - 1;
         }
         point = &points[i];
         if (point->holdTime > 0) {
@@ -271,22 +217,22 @@ s32 func_151A361C(TrailEffect *effect) {
         point->width += D_800BE9A4 * state->params.widthGrowth;
         if (point->intensity < 0) {
             state->flags &= ~TRAIL_FADE_TAIL;
-            while (i != effect->tail) {
-                effect->tail++;
-                if (effect->tail == effect->capacity) {
-                    effect->tail = 0;
+            while (i != effect->head.start) {
+                effect->head.start++;
+                if (effect->head.start == effect->head.tmpl.itemCount) {
+                    effect->head.start = 0;
                 }
-                effect->count--;
+                effect->head.count--;
             }
-            points[effect->tail].intensity = 0;
+            points[effect->head.start].intensity = 0;
         }
     }
-    if (effect->count > 0) {
-        effect->tailPos = points[effect->tail].pos;
+    if (effect->head.count > 0) {
+        effect->head.modelPos = points[effect->head.start].pos;
     } else {
-        effect->tailPos.x = 0.0f;
-        effect->tailPos.y = 0.0f;
-        effect->tailPos.z = 0.0f;
+        effect->head.modelPos.x = 0.0f;
+        effect->head.modelPos.y = 0.0f;
+        effect->head.modelPos.z = 0.0f;
     }
     return 1;
 }
@@ -312,29 +258,29 @@ s32 func_151A37C0(TrailEffect *effect) {
         return 0;
     }
     started = 0;
-    if (!(effect->flags & TRAIL_EFFECT_STARTED)) {
-        if (func_151A4E34(&state->params, &effect->headPos) != 0) {
+    if (!(effect->head.tmpl.flags & TRAIL_EFFECT_STARTED)) {
+        if (func_151A4E34(&state->params, &effect->head.tmpl.pos) != 0) {
             started = 1;
-            state->lastPos = effect->headPos;
-            effect->flags |= TRAIL_EFFECT_STARTED;
+            state->lastPos = effect->head.tmpl.pos;
+            effect->head.tmpl.flags |= TRAIL_EFFECT_STARTED;
         } else {
             return 1;
         }
     }
-    if (!started && func_151A4E34(&state->params, &effect->headPos) == 0) {
+    if (!started && func_151A4E34(&state->params, &effect->head.tmpl.pos) == 0) {
         func_151A4E9C(effect);
         memcpy(&retry, state, sizeof(BoneTrailParams));
         {
-            TrailRetryTask *task = (TrailRetryTask *)func_151491F4(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->unkC, 0);
+            TrailRetryTask *task = (TrailRetryTask *)func_151491F4(300, -1, 10, 0, 5, sizeof(BoneTrailParams), effect->head.header.owner, 0);
             if (task != NULL) {
                 memcpy(&task->trail, &retry, sizeof(BoneTrailParams));
             }
         }
         return 1;
     }
-    delta.x = effect->headPos.x - state->lastPos.x;
-    delta.y = effect->headPos.y - state->lastPos.y;
-    delta.z = effect->headPos.z - state->lastPos.z;
+    delta.x = effect->head.tmpl.pos.x - state->lastPos.x;
+    delta.y = effect->head.tmpl.pos.y - state->lastPos.y;
+    delta.z = effect->head.tmpl.pos.z - state->lastPos.z;
     if (fabsf(delta.x) > 0.0001f || fabsf(delta.y) > 0.0001f || fabsf(delta.z) > 0.0001f) {
         state->pending += sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z) * state->params.pointsPerUnit;
     }
@@ -361,7 +307,7 @@ s32 func_151A37C0(TrailEffect *effect) {
         widthLeft = state->params.width - width;
         widthStep = widthLeft * invPending;
         do {
-            TrailPoint *point = &points[effect->head];
+            TrailPoint *point = &points[effect->head.end];
             point->pos = pos;
             point->width = width;
             point->intensity = state->params.intensity;
@@ -370,17 +316,17 @@ s32 func_151A37C0(TrailEffect *effect) {
             // matching: reusing "started" for the random value (on one line) sets the frame layout
             started = func_150ADA20(); state->texCoord += state->params.texStep + (u32)started % (u32)(state->params.texStepRandom + 1);
             point->alpha = 0xFF;
-            effect->head++;
-            if (effect->head == effect->capacity) {
-                effect->head = 0;
+            effect->head.end++;
+            if (effect->head.end == effect->head.tmpl.itemCount) {
+                effect->head.end = 0;
             }
-            effect->count++;
-            if (effect->head == effect->tail) {
-                effect->tail++;
-                if (effect->tail == effect->capacity) {
-                    effect->tail = 0;
+            effect->head.count++;
+            if (effect->head.end == effect->head.start) {
+                effect->head.start++;
+                if (effect->head.start == effect->head.tmpl.itemCount) {
+                    effect->head.start = 0;
                 }
-                effect->count--;
+                effect->head.count--;
             }
             width += widthStep;
             pos.x += stepX;
@@ -432,8 +378,8 @@ Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
     TrailPoint *points;
     TrailState *state;
 
-    if (effect->count >= 2) {
-        func_151D5D60(effect->unk84, view, (effect->capacity + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
+    if (effect->head.count >= 2) {
+        func_151D5D60(effect->unk84, view, (effect->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
             state = effect->state;
             camPos = &D_800DBFF0[view].eye.x;
@@ -446,16 +392,16 @@ Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
 
                 fade = 0;
                 remaining = state->params.tailFadeCount;
-                idx = effect->tail;
+                idx = effect->head.start;
                 do {
                     points[idx].alpha = fade;
                     idx++;
                     fade += state->params.tailFadeStep;
-                    if (idx == effect->capacity) {
+                    if (idx == effect->head.tmpl.itemCount) {
                         idx = 0;
                     }
                     remaining--;
-                } while (remaining != 0 && idx != effect->head);
+                } while (remaining != 0 && idx != effect->head.end);
             }
             if (state->flags & TRAIL_FADE_HEAD) {
                 u8 fade;
@@ -463,9 +409,9 @@ Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
 
                 fade = 0;
                 remaining = state->params.headFadeCount;
-                idx = effect->head - 1;
+                idx = effect->head.end - 1;
                 if (idx < 0) {
-                    idx = effect->capacity - 1;
+                    idx = effect->head.tmpl.itemCount - 1;
                 }
                 do {
                     points[idx].alpha = (points[idx].alpha * fade) >> 8;
@@ -473,9 +419,9 @@ Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
                     fade += state->params.headFadeStep;
                     remaining--;
                     if (idx < 0) {
-                        idx = effect->capacity - 1;
+                        idx = effect->head.tmpl.itemCount - 1;
                     }
-                } while (remaining != 0 && idx != effect->head);
+                } while (remaining != 0 && idx != effect->head.end);
             }
             gfx = func_15142E24(gfx, D_80090CD4, 0, 0, 0, 0, 0x1F, 0, 0, &stateFlag, 3);
             gfx = func_15142B7C(gfx, 1, 0x160600);
@@ -483,22 +429,22 @@ Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
             gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &stateFlag);
             gfx = func_1513F4E4(gfx, 6, &stateFlag);
             gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, 0x5049D8, &stateFlag);
-            if (effect->flags & TRAIL_EFFECT_ATTACHED) {
-                nextIdx = effect->head - 1;
+            if (effect->head.tmpl.flags & TRAIL_EFFECT_ATTACHED) {
+                nextIdx = effect->head.end - 1;
                 if (nextIdx < 0) {
-                    nextIdx = effect->capacity - 1;
+                    nextIdx = effect->head.tmpl.itemCount - 1;
                 }
-                cur = effect->headPos;
+                cur = effect->head.tmpl.pos;
                 curTex = points[nextIdx].texCoord + state->texOffset;
                 curAlpha = (points[nextIdx].intensity * points[nextIdx].alpha) >> 8;
             } else {
-                curIdx = effect->head - 1;
+                curIdx = effect->head.end - 1;
                 if (curIdx < 0) {
-                    curIdx = effect->capacity - 1;
+                    curIdx = effect->head.tmpl.itemCount - 1;
                 }
                 nextIdx = curIdx - 1;
                 if (nextIdx < 0) {
-                    nextIdx = effect->capacity - 1;
+                    nextIdx = effect->head.tmpl.itemCount - 1;
                 }
                 cur = points[curIdx].pos;
                 curTex = points[curIdx].texCoord + state->texOffset;
@@ -601,16 +547,16 @@ Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
                 curIdx = nextIdx;
                 nextIdx--;
                 if (nextIdx < 0) {
-                    nextIdx = effect->capacity - 1;
+                    nextIdx = effect->head.tmpl.itemCount - 1;
                 }
-                if (curIdx != effect->tail) {
+                if (curIdx != effect->head.start) {
                     curTex = nextTex;
                     cur = next;
                     next = points[nextIdx].pos;
                     nextTex = points[nextIdx].texCoord + state->texOffset;
                     nextAlpha = (points[nextIdx].intensity * points[nextIdx].alpha) >> 8;
                 }
-            } while (curIdx != effect->tail);
+            } while (curIdx != effect->head.start);
         }
     }
     return gfx;
@@ -707,28 +653,28 @@ void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHead
 /* Particle update for func_151A4638's bursts: fades and resizes by age. */
 s32 func_151A483C(Particle *particle, u8 arg1) {
     s16 age;
-    ParticleAgeParams *params;
+    AgeFadeParams *params;
 
     params = &particle->ageParams;
-    age = particle->age;
-    if (age < params->limit2B) {
-        particle->unk2B = age * params->mul2B;
+    age = particle->head.desc.timer;
+    if (age < params->fadeStart) {
+        particle->head.desc.alpha = age * params->fadeStep;
     }
-    if (age < params->limitSize) {
+    if (age < params->growStart) {
         {
-            f32 sizeStep = params->sizeRate * D_800BE9E4;
+            f32 sizeStep = params->growRate * D_800BE9E4;
 
-            particle->unk38 += sizeStep;
-            particle->unk3C += sizeStep;
+            particle->head.desc.width += sizeStep;
+            particle->head.desc.height += sizeStep;
         }
-        age = particle->age;
+        age = particle->head.desc.timer;
     }
-    if (age < params->limit2C) {
-        particle->unk72 = 1;
-        particle->unk70 = 2;
-        particle->unk71 = 2;
-        particle->unk2C = age * params->mul2C;
-        particle->unk18 = 0x5203;
+    if (age < params->tintStart) {
+        particle->head.desc.updateFunc = 1;
+        particle->head.desc.primColorMode = 2;
+        particle->head.desc.envColorMode = 2;
+        particle->head.desc.brightness = age * params->tintStep;
+        particle->head.desc.renderMode = 0x5203;
     }
     return 1;
 }
@@ -736,23 +682,23 @@ s32 func_151A483C(Particle *particle, u8 arg1) {
 /* Like func_151A483C, but always sets unk2C from the age. */
 s32 func_151A4900(Particle *particle, u8 arg1) {
     s16 age;
-    ParticleAgeParams *params;
+    AgeFadeParams *params;
 
     params = &particle->ageParams;
-    age = particle->age;
-    if (age < params->limit2B) {
-        particle->unk2B = age * params->mul2B;
+    age = particle->head.desc.timer;
+    if (age < params->fadeStart) {
+        particle->head.desc.alpha = age * params->fadeStep;
     }
-    if (age < params->limitSize) {
+    if (age < params->growStart) {
         {
-            f32 sizeStep = params->sizeRate * D_800BE9E4;
+            f32 sizeStep = params->growRate * D_800BE9E4;
 
-            particle->unk38 += sizeStep;
-            particle->unk3C += sizeStep;
+            particle->head.desc.width += sizeStep;
+            particle->head.desc.height += sizeStep;
         }
-        age = particle->age;
+        age = particle->head.desc.timer;
     }
-    particle->unk2C = age * params->mul2C;
+    particle->head.desc.brightness = age * params->tintStep;
     return 1;
 }
 
@@ -788,8 +734,8 @@ void func_151A4A38(BoneEmitterTask *task) {
     emitter = &task->emitter;
     if ((emitter->owner->interaction_state == 0) || (emitter->owner->interaction_state == 8)
         || (emitter->owner->unique_id != emitter->ownerId)) {
-        task->header.state = -1;
-        task->header.unkD |= 1;
+        task->base.header.state = -1;
+        task->base.header.flags |= 1;
         return;
     }
 
@@ -855,16 +801,16 @@ void func_151A4A38(BoneEmitterTask *task) {
         spawn.brightness = 0xFF;
         spawn.updateFunc = -1;
         spawn.deathFunc = -1;
-        func_15153634(&spawn, 0xFF, task->header.owner, task->header.kind);
+        func_15153634(&spawn, 0xFF, task->base.header.owner, task->base.header.kind);
     }
 }
 
 /* Message handler of a trail: detach on owner removal, follow an owner swap. */
-void func_151A4CE0(TrailEffect *effect, ActorMessage *msg, u8 type) {
+void func_151A4CE0(TrailEffect *effect, ActorMsg *msg, u8 type) {
     BoneTrailParams *trail = &effect->state->params;
 
     if (type == 0) {
-        if ((msg->removed.actor == trail->owner) || (msg->removed.actorId == trail->ownerId)) {
+        if ((msg->ref.actor == trail->owner) || (msg->ref.uniqueId == trail->ownerId)) {
             func_151A4E9C(effect);
         }
     } else if (type == 0x2D) {
@@ -879,12 +825,12 @@ void func_151A4CE0(TrailEffect *effect, ActorMessage *msg, u8 type) {
 }
 
 /* Message handler of a BoneEmitterTask: end on owner removal, follow an owner swap. */
-void func_151A4D88(BoneEmitterTask *task, ActorMessage *msg, u8 type) {
+void func_151A4D88(BoneEmitterTask *task, ActorMsg *msg, u8 type) {
     BoneEmitter *emitter = &task->emitter;
 
     if (type == 0) {
-        if ((msg->removed.actor == emitter->owner) || (msg->removed.actorId == emitter->ownerId)) {
-            func_1516972C((struct102 *)task);
+        if ((msg->ref.actor == emitter->owner) || (msg->ref.uniqueId == emitter->ownerId)) {
+            func_1516972C(&task->base.header);
         }
     } else if (type == 0x2D) {
         if (emitter->owner == msg->swap.actorA) {
@@ -919,8 +865,8 @@ s32 func_151A4E34(BoneTrailParams *params, Vec3f *out) {
 void func_151A4E9C(TrailEffect *effect) {
     TrailState *state = effect->state;
 
-    effect->unk30 = 0;
-    effect->flags &= ~TRAIL_EFFECT_ATTACHED;
+    effect->head.updateKind2 = 0;
+    effect->head.tmpl.flags &= ~TRAIL_EFFECT_ATTACHED;
     state->flags |= TRAIL_DETACHED;
     state->flags |= TRAIL_FADE_HEAD;
 }
@@ -942,22 +888,22 @@ void func_151A4ECC(TrailRetryTask *task) {
         done = 1;
     }
     if (!done && trail->owner->unk1D4 != NULL && (trail->owner->unk74 & 0xF) != 0xF) {
-        func_151A3504(trail, task->header.owner);
+        func_151A3504(trail, task->base.header.owner);
         done = 1;
     }
     if (done) {
-        task->header.state = -1;
-        task->header.unkD |= 1;
+        task->base.header.state = -1;
+        task->base.header.flags |= 1;
     }
 }
 
 /* Message handler of a TrailRetryTask: end when the owner is removed. */
-void func_151A4F7C(TrailRetryTask *task, ActorMessage *msg, u8 type) {
+void func_151A4F7C(TrailRetryTask *task, ActorMsg *msg, u8 type) {
     BoneTrailParams *trail = &task->trail;
 
     if (type == 0) {
-        if (msg->removed.actor == trail->owner || msg->removed.actorId == trail->ownerId) {
-            func_1516972C((struct102 *)task);
+        if (msg->ref.actor == trail->owner || msg->ref.uniqueId == trail->ownerId) {
+            func_1516972C(&task->base.header);
         }
     }
 }

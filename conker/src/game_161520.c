@@ -9,12 +9,11 @@ void func_151D9B8C(u8, f32, u8, void *, Vec3f *, s16, u8, u8, u8, u8, s32);
 #include "effects.h"
 
 extern void func_15153F18(AngleRange *, SplashSpray *, s32, u8, s32);
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 /* Transforms the point `in` by a 4x4 matrix into `out`. */
 extern void func_15143134(void *in, void *out, void *matrix);
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
-extern void func_151BC5A4(struct260 *, s32, u8);
+extern void func_151BC5A4(TimedEffect *, s32, u8);
 
 /* Per-model blood settings, indexed by func_15134070's profile index. */
 typedef struct {
@@ -154,11 +153,12 @@ s32 func_15134070(Actor *actor) {
     }
 }
 
-s32 func_1513416C(struct102 *effect) {
-    s16 value = effect->unk1C;
+/* Particle callback: over the last 32 frames, sets rgba[0] from the remaining lifetime. */
+s32 func_1513416C(DefParticleHead *particle) {
+    s16 value = particle->def.lifetime;
 
     if (value < 32) {
-        effect->unk28 = value * 8;
+        particle->def.rgba[0] = value * 8;
     }
     return 1;
 }
@@ -188,7 +188,7 @@ BloodDrip *func_1513418C(BloodDripDesc *desc, s32 arg1, u8 arg2, s32 arg3) {
     if (flags & BLOOD_DRIP_ON_BONE) {
         owner = drip->desc.owner;
         if ((owner->interaction_state == 0) || (owner->unique_id != drip->desc.ownerId)) {
-            func_1516972C((struct102 *)drip);
+            func_1516972C(&drip->header);
             return NULL;
         }
         if ((owner->unk1D4 != 0) && ((owner->unk74 & 0xF) != 0xF)) {
@@ -242,7 +242,7 @@ void func_151342BC(BloodDrip *drip) {
         if (flags & BLOOD_DRIP_ON_BONE) {
             if ((drip->desc.owner->interaction_state == 0) || (drip->desc.owner->interaction_state == 8) ||
                 (drip->desc.owner->unique_id != drip->desc.ownerId)) {
-                func_1516972C((struct102 *)drip);
+                func_1516972C(&drip->header);
                 return;
             }
             bones = (u8 *)drip->desc.owner->unk1D4;
@@ -299,26 +299,27 @@ void func_151342BC(BloodDrip *drip) {
         }
     }
     if (dead) {
-        func_1516972C((struct102 *)drip);
+        func_1516972C(&drip->header);
     }
 }
 
-s32 func_151346D0(s32 arg0, struct102 *effect, s32 arg2) {
-    effect->unk3A &= ~0x10;
+/* BloodDrip draw hook: clears BLOOD_DRIP_STATIC. */
+s32 func_151346D0(s32 arg0, BloodDrip *drip, s32 arg2) {
+    drip->desc.flags &= ~BLOOD_DRIP_STATIC;
     return arg0;
 }
 
-void func_151346EC(struct102 *effect) {
+void func_151346EC(EffectHeader *effect) {
     func_15169804(effect);
 }
 
-void func_1513470C(struct102 *effect) {
+void func_1513470C(EffectHeader *effect) {
     func_15169824(effect);
 }
 
-/* Calls the D_80089AAC handler selected by effect->unk3D (0 when out of range). */
-void func_1513472C(struct102 *effect) {
-    s32 index = effect->unk3D;
+/* Calls the D_80089AAC handler selected by drip->desc.unk2D (0 when out of range). */
+void func_1513472C(BloodDrip *drip) {
+    s32 index = drip->desc.unk2D;
 
     if (index < 0) {
         index = 0;
@@ -329,9 +330,9 @@ void func_1513472C(struct102 *effect) {
     D_80089AAC[index]();
 }
 
-/* Calls the D_80089AD4 handler selected by effect->unk3D (0 when out of range). */
-void func_1513477C(struct102 *effect) {
-    s32 index = effect->unk3D;
+/* Calls the D_80089AD4 handler selected by drip->desc.unk2D (0 when out of range). */
+void func_1513477C(BloodDrip *drip) {
+    s32 index = drip->desc.unk2D;
 
     if (index < 0) {
         index = 0;
@@ -343,7 +344,8 @@ void func_1513477C(struct102 *effect) {
 }
 
 typedef struct {
-    u8 pad0[0x18];
+    EffectHeader header;
+    u8 pad10[0x8];
     u8 ownerId;
     u8 pad19[0x3];
     Actor *owner;
@@ -351,47 +353,33 @@ typedef struct {
     u8 unk3D;
 } SubA_151347CC;
 
-/*
- * Actor message payload. Messages 0, 3 and 0x11 carry an actor and (in the first byte of
- * the second word) its unique id; message 0x2D swaps actorA and actorB.
- */
-typedef struct {
-    Actor *actorA;
-    union {
-        Actor *actorB;
-        u8 actorAId;
-    } u4;
-    u8 swapIdA;
-    u8 swapIdB;
-} BloodActorMsg;
-
 /* Message handler: frees the effect when its owner goes away, follows owner handle swaps. */
-void func_151347CC(void *arg0, BloodActorMsg *msg, u8 message) {
+void func_151347CC(void *arg0, ActorMsg *msg, u8 message) {
     SubA_151347CC *effect = arg0; // matching: copying the parameter keeps IDO's register choice in case 0x2D
     Actor *actorA;
 
     if ((message == 0) || (message == 3)) {
-        if ((msg->actorA == effect->owner) || (msg->u4.actorAId == effect->ownerId)) {
-            func_1516972C((struct102 *)effect);
+        if ((msg->ref.actor == effect->owner) || (msg->ref.uniqueId == effect->ownerId)) {
+            func_1516972C(&effect->header);
         }
     } else if (message == 0x11) {
         if (effect->unk3D == 5) {
-            if ((msg->actorA == effect->owner) || (msg->u4.actorAId == effect->ownerId)) {
-                func_1516972C((struct102 *)effect);
+            if ((msg->ref.actor == effect->owner) || (msg->ref.uniqueId == effect->ownerId)) {
+                func_1516972C(&effect->header);
             }
         }
     } else if (message == 0x16) {
         if ((Actor *)msg == effect->owner) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C(&effect->header);
         }
     } else if (message == 0x2D) {
-        actorA = msg->actorA;
+        actorA = msg->swap.actorA;
         if (effect->owner == actorA) {
-            effect->owner = msg->u4.actorB;
-            effect->ownerId = msg->swapIdB;
-        } else if (effect->owner == msg->u4.actorB) {
+            effect->owner = msg->swap.actorB;
+            effect->ownerId = msg->swap.idB;
+        } else if (effect->owner == msg->swap.actorB) {
             effect->owner = actorA;
-            effect->ownerId = msg->swapIdA;
+            effect->ownerId = msg->swap.idA;
         }
     }
 }
@@ -402,7 +390,7 @@ void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 
 /* Blood trailing behind a moving point given by three coordinate pointers. */
 typedef struct {
-    u8 pad0[0x10];
+    EffectHeader header;
     f32 *x;
     f32 *y;
     f32 *z;
@@ -459,7 +447,7 @@ void func_151349D0(BloodTrail *trail) {
     position[2] = *trail->z;
     if (trail->flags & BLOOD_TRAIL_CALLBACK) {
         if ((trail->callback != -1) && (D_80089B18[trail->callback](trail) == 0)) {
-            func_1516972C((struct102 *)trail);
+            func_1516972C(&trail->header);
             return;
         }
     }
@@ -501,15 +489,21 @@ void func_151349D0(BloodTrail *trail) {
     if (trail->flags & BLOOD_TRAIL_LIFETIME) {
         trail->lifetime -= D_800BE9E4;
         if (trail->lifetime < 0) {
-            func_1516972C((struct102 *)trail);
+            func_1516972C(&trail->header);
         }
     }
 }
 
+/* A timed effect whose first data byte selects func_15134C98's forwarding. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ u8 unk28;
+} Effect15134C98;
+
 /* Message handler: forwards to func_151BC5A4 while the effect's unk28 is 1. */
-void func_15134C98(struct260 *arg0, s32 arg1, u8 arg2) {
-    if (((struct102 *)arg0)->unk28 == 1) {
-        func_151BC5A4(arg0, arg1, arg2);
+void func_15134C98(Effect15134C98 *arg0, s32 arg1, u8 arg2) {
+    if (arg0->unk28 == 1) {
+        func_151BC5A4(&arg0->base, arg1, arg2);
     }
 }
 
@@ -555,7 +549,7 @@ s32 func_15134CEC(Struct15134CEC *particle) {
  * points are transformed and the emit callback runs at steps between the old and new spots.
  */
 typedef struct {
-    u8 pad0[0x10];
+    EffectHeader header;
     s32 active;
     s32 unk14;
     u8 ownerId;
@@ -715,15 +709,15 @@ void func_15134E48(BloodStrip *arg0) {
         }
     }
     if (kill) {
-        func_1516972C((struct102 *)strip);
+        func_1516972C(&strip->header);
     }
 }
 
-void func_151352EC(struct102 *effect) {
+void func_151352EC(EffectHeader *effect) {
     func_15169804(effect);
 }
 
-void func_1513530C(struct102 *effect) {
+void func_1513530C(EffectHeader *effect) {
     func_15169824(effect);
 }
 
@@ -781,23 +775,23 @@ void func_15135424(void *matrix, Vec3f *inA, Vec3f *inB, Vec3f *outA, Vec3f *out
     func_15145EA4(in, out, matrix, 2);
 }
 
-void func_1513555C(BloodStrip *strip, BloodActorMsg *msg, u8 message);
-void func_151355B8(BloodStrip *strip, BloodActorMsg *msg, u8 message);
+void func_1513555C(BloodStrip *strip, ActorMsg *msg, u8 message);
+void func_151355B8(BloodStrip *strip, ActorMsg *msg, u8 message);
 
 /* BloodStrip message handler: follows owner swaps, then dispatches on strip->mode. */
-void func_15135480(BloodStrip *strip, BloodActorMsg *msg, u8 message) {
+void func_15135480(BloodStrip *strip, ActorMsg *msg, u8 message) {
     s32 actorA;
     s32 owner;
 
     if (message == 0x2D) {
-        actorA = (s32)msg->actorA;
+        actorA = (s32)msg->swap.actorA;
         owner = (s32)strip->owner;
         if (actorA == owner) {
-            strip->owner = msg->u4.actorB;
-            strip->ownerId = msg->swapIdB;
-        } else if ((owner | 0) == (s32)msg->u4.actorB) { // matching: `| 0` makes IDO copy owner, fixing operand order
+            strip->owner = msg->swap.actorB;
+            strip->ownerId = msg->swap.idB;
+        } else if ((owner | 0) == (s32)msg->swap.actorB) { // matching: `| 0` makes IDO copy owner, fixing operand order
             strip->owner = (Actor *)actorA;
-            strip->ownerId = msg->swapIdA;
+            strip->ownerId = msg->swap.idA;
         }
     }
     switch (strip->mode) {
@@ -809,8 +803,8 @@ void func_15135480(BloodStrip *strip, BloodActorMsg *msg, u8 message) {
         break;
     default:
         if (message == 0) {
-            if ((s32)msg->actorA == ((owner = (s32)strip->owner) | 0) || strip->ownerId == msg->u4.actorAId) { // matching: as above
-                func_1516972C((struct102 *)strip);
+            if ((s32)msg->ref.actor == ((owner = (s32)strip->owner) | 0) || strip->ownerId == msg->ref.uniqueId) { // matching: as above
+                func_1516972C(&strip->header);
             }
         }
         break;
@@ -818,24 +812,24 @@ void func_15135480(BloodStrip *strip, BloodActorMsg *msg, u8 message) {
 }
 
 /* Mode 2 handler: frees the strip when its owner is removed (messages 0 and 0x12). */
-void func_1513555C(BloodStrip *strip, BloodActorMsg *msg, u8 message) {
+void func_1513555C(BloodStrip *strip, ActorMsg *msg, u8 message) {
     if (message == 0 || message == 0x12) {
-        if (strip->owner == msg->actorA || strip->ownerId == msg->u4.actorAId) {
-            func_1516972C((struct102 *)strip);
+        if (strip->owner == msg->ref.actor || strip->ownerId == msg->ref.uniqueId) {
+            func_1516972C(&strip->header);
         }
     }
 }
 
 /* Mode 1 handler: frees the strip on message 0, stops it on message 3, for its owner. */
-void func_151355B8(BloodStrip *strip, BloodActorMsg *msg, u8 message) {
+void func_151355B8(BloodStrip *strip, ActorMsg *msg, u8 message) {
     switch (message) {
     case 0:
-        if (strip->owner == msg->actorA || strip->ownerId == msg->u4.actorAId) {
-            func_1516972C((struct102 *)strip);
+        if (strip->owner == msg->ref.actor || strip->ownerId == msg->ref.uniqueId) {
+            func_1516972C(&strip->header);
         }
         break;
     case 3:
-        if (strip->owner == msg->actorA || strip->ownerId == msg->u4.actorAId) {
+        if (strip->owner == msg->ref.actor || strip->ownerId == msg->ref.uniqueId) {
             s32 *active = &strip->active;
 
             *active &= ~1;
@@ -1036,18 +1030,7 @@ s32 func_15135BF8(BloodSplat *splat) {
     return alive;
 }
 
-/* Result of a ground probe (func_15046460 / func_15046C80). */
-typedef struct {
-    f32 height;
-    u8 unk4[0x14];
-    s32 unk18;
-    u8 flags;
-    u8 surfaceType;
-    u8 pad1E[2];
-    s32 unk20;
-} GroundHit;
-
-extern s32 func_15046460(Vec3f *, u16, f32, GroundHit *);
+extern s32 func_15046460(Vec3f *, u16, f32, CollisionHit *);
 extern void func_151DB5D0(u8, void *, Vec3f *, f32, f32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151DA6F8(void *, Vec3f *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s32, s32, s32, u8, s32);
 extern void func_151D9014(void *, void *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
@@ -1058,7 +1041,7 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     Vec3f direction;
     f32 fromX;
     Vec3f probe;
-    GroundHit hit;
+    CollisionHit hit;
     u32 flagsCopy;
     Vec3f velocity;
     s32 count;
@@ -1070,10 +1053,10 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     s32 drops;
 
     flagsCopy = arg3; // matching: IDO keeps this u32 copy of arg3 live in a saved register for the last call
-    hit.unk18 = 0;
+    hit.material = 0;
     hit.flags = 0;
-    hit.surfaceType = 0;
-    hit.unk20 = 0;
+    hit.source = 0;
+    hit.surface = 0;
     hit.height = -10000.0f;
     direction.x = to->x - (fromX = from->x);
     direction.y = to->y - from->y;
@@ -1081,7 +1064,7 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
     probe.x = fromX;
     probe.y = 10000.0f;
     probe.z = from->z;
-    if (func_15046460(&probe, 0, from->y, &hit) != 0 && hit.surfaceType == 3) {
+    if (func_15046460(&probe, 0, from->y, &hit) != 0 && hit.source == 3) {
         for (drops = func_150ADA20() % 11U + 10; drops > 0; drops--) {
             speed = (func_150ADA68() * 67.0f + 86.0f) * 0.001000000047f;
             velocity.x = direction.x * speed;
@@ -1131,13 +1114,13 @@ void func_15135DD0(Vec3f *from, Vec3f *to, f32 radius, u8 arg3, s32 arg4) {
 
 extern void func_15143874(s16, f32, f32 *, f32 *);
 void func_1504715C();
-s32 func_15046C80(Vec3f *, u16, f32, GroundHit *);
+s32 func_15046C80(Vec3f *, u16, f32, CollisionHit *);
 
 /* Scatters blood decals on the ground within radius of the actor, more for a larger area. */
 void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
     f32 area;
     f32 count;
-    GroundHit hit;
+    CollisionHit hit;
     Vec3f probe;
     Vec3f pos;
 
@@ -1150,11 +1133,11 @@ void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
             probe.x += actor->x_position;
             probe.z += actor->z_position;
             probe.y = actor->y_position + 500.0f;
-            if (func_15046C80(&probe, 0, actor->y_position - 5000.0f, &hit) != 0 && hit.surfaceType != 3) {
+            if (func_15046C80(&probe, 0, actor->y_position - 5000.0f, &hit) != 0 && hit.source != 3) {
                 pos.x = probe.x;
                 pos.y = hit.height;
                 pos.z = probe.z;
-                func_151D9B8C(0, func_150ADA68() * 20.0f + 10.0f, func_150ADA20() % 101U + 100, hit.unk4, &pos,
+                func_151D9B8C(0, func_150ADA68() * 20.0f + 10.0f, func_150ADA20() % 101U + 100, &hit.tri, &pos,
                               func_150ADA20() % 201U + 400, 1, 1, 0, arg2, arg3);
             }
             count -= 1.0f;
@@ -1228,30 +1211,24 @@ s32 func_15136698(f32 size, f32 arg1, u8 alpha, u8 arg3, s16 lifetime, s32 arg5,
 
 /* The particle func_15136698 spawns; its desc is copied to +0x18 and `extra` to growth. */
 typedef struct {
-    u8 pad0[0x1C];
-    s16 timer;
-    u8 pad1E[0xE];
-    f32 width;
-    f32 height;
-    u8 pad34[0x28];
-    u8 alpha;
-    u8 pad5D[0xCB];
-    f32 growth;
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x18];
+    /* 0x128 */ f32 growth;
 } GrowingBloodParticle;
 
 /* GrowingBloodParticle callback: fades out over the last 32 frames and grows by `growth`. */
 s32 func_151368A8(GrowingBloodParticle *particle) {
-    s32 timer = particle->timer;
+    s32 timer = particle->head.def.lifetime;
     f32 *growth = &particle->growth; // matching: IDO forms this address before the fade test
 
     if (timer < 32) {
         s32 alpha = timer << 3;
-        if (alpha < particle->alpha) {
-            particle->alpha = alpha;
+        if (alpha < particle->head.def.unk44) {
+            particle->head.def.unk44 = alpha;
         }
     }
-    particle->width += *growth * D_800BE9A4;
-    particle->height += *growth * D_800BE9A4;
+    particle->head.def.width += *growth * D_800BE9A4;
+    particle->head.def.height += *growth * D_800BE9A4;
     return 1;
 }
 
@@ -1304,15 +1281,15 @@ void func_15136918(f32 size, u8 arg1, u8 arg2, s16 lifetime, s16 arg4, s32 arg5,
     func_1513C73C(&desc, 0xD, 0, arg5, position[0], position[1], position[2], size, size, arg4, 0, 0, arg7, arg8);
 }
 
-/* Particle callback: fades unk28 out over the last 32 frames. */
-s32 func_15136A1C(struct102 *effect) {
-    s16 timer = effect->unk1C;
+/* Particle callback: fades rgba[0] out over the last 32 frames. */
+s32 func_15136A1C(DefParticleHead *particle) {
+    s16 timer = particle->def.lifetime;
     s32 alpha;
 
     if (timer < 32) {
         alpha = timer << 3;
-        if (alpha < effect->unk28) {
-            effect->unk28 = alpha;
+        if (alpha < particle->def.rgba[0]) {
+            particle->def.rgba[0] = alpha;
         }
     }
     return 1;
@@ -1373,7 +1350,7 @@ void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
 void func_1513A24C(Vec3f *, s32 *, f32 *, s32, f32, u8, u8, u8 *, void *,
                    u8, s32);
 void func_15150D1C(DecalSpray *, u8, s32);
-void func_151A9834(Vec3f *, f32, f32, GroundHit *, s32, u8, s8 *, u8, s32);
+void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, u8, s8 *, u8, s32);
 void func_151C61A0(s32, s32, u8, s32);
 void func_1513A48C(Vec3f *, u8, s32);
 extern f32 D_800A3C30;
@@ -1390,7 +1367,7 @@ void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
     f32 unused0;
     f32 unused1;
     f32 scale;
-    GroundHit hit;
+    CollisionHit hit;
     s32 kind;
     DecalSpray spray;
     s8 heavy;
@@ -1671,7 +1648,7 @@ void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
     f32 unused1;
     f32 scale;
     Vec3f probe;
-    GroundHit hit;
+    CollisionHit hit;
     s32 kind;
     u8 pool;
     Vec3f origin;
@@ -1717,7 +1694,7 @@ void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
                           ((func_150ADA68() * 106.0f) + 75.0f) * 9.999999747e-06f,
                           (func_150ADA20() % 101U) + 155,
                           (func_150ADA20() % 101U) + 100,
-                          (func_150ADA20() % 56U) + 203, (s32)hit.unk4,
+                          (func_150ADA20() % 56U) + 203, (s32)&hit.tri,
                           &probe, 1, 1, arg1, arg2);
             if (func_150ADA20() & 1) {
                 spawn = func_151B5BF0;
@@ -2108,7 +2085,7 @@ void func_15138BC0(Actor *actor, u8 arg1, s32 arg2) {
     s32 kind;
     Vec3f position;
     u8 valid;
-    GroundHit hit;
+    CollisionHit hit;
 
     kind = func_15134070(actor);
     if (kind != BLOOD_PROFILE_NONE) {
@@ -2128,7 +2105,7 @@ void func_15139D74(Actor *, f32 *, void *, u8, s32);
 void func_1513A6E0(Actor *, f32 *, void *, u8, s32);
 void func_1513ABB8(Actor *, f32 *, u8, void *, u8, s32);
 void func_1513B0F8(Actor *, f32 *, void *, u8, s32);
-void func_1513A594(Actor *, Vec3f *, GroundHit *, u8, s32);
+void func_1513A594(Actor *, Vec3f *, CollisionHit *, u8, s32);
 void func_151036B4(void *, u8, s32);
 
 /* Blood for a fatal hit: strip and burst, then the per-profile gore effect. */
@@ -2136,7 +2113,7 @@ void func_15138C80(Actor *actor, u8 arg1, s32 arg2) {
     s32 kind;
     Vec3f position;
     u8 valid;
-    GroundHit hit;
+    CollisionHit hit;
 
     kind = func_15134070(actor);
     if (kind != BLOOD_PROFILE_NONE) {
@@ -2759,7 +2736,7 @@ void func_1513A48C(Vec3f *position, u8 arg1, s32 arg2) {
 }
 
 /* Gore for profile 4 actors: just a splash. */
-void func_1513A594(Actor *actor, Vec3f *origin, GroundHit *hit, u8 arg3, s32 arg4) {
+void func_1513A594(Actor *actor, Vec3f *origin, CollisionHit *hit, u8 arg3, s32 arg4) {
     func_1513A5E0(origin, arg3 & 0xFF, arg4);
     if (actor->unk1D4 != 0) { // matching: dead test, IDO still emits the unk1D4 load
         if (actor) {

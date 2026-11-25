@@ -3,27 +3,13 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Same layout as SpawnRegion in game_131F30.c and game_16EE20.c. */
-typedef struct SpawnRegion {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radiusX;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ s16 radiusZ;
-    /* 0x0C */ u8 padC[4];
-    /* 0x10 */ f32 rotation; /* degrees */
-    /* 0x14 */ u8 unk14;     /* the effects set it to 1 while off */
-    /* 0x15 */ u8 flags;     /* bits 0-1: shape */
-} SpawnRegion;
-
 /* State at 0x110 of the region particle emitter (func_151A6600, func_151A6AB8). */
 typedef struct EmitterState {
-    /* 0x00 */ SpawnRegion *region;
+    /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 angle;
     /* 0x08 */ f32 angleSpeed;
     /* 0x0C */ u8 padC[4];
-    /* 0x10 */ struct102 *unk10; /* released by func_151A6AB8 */
+    /* 0x10 */ EffectHeader *unk10; /* released by func_151A6AB8 */
     /* 0x14 */ u8 phase;
     /* 0x15 */ u8 phaseSpeed;
     /* 0x16 */ u8 alpha;      /* oscillates in [129, 255] with phase */
@@ -97,7 +83,7 @@ s32 func_151A6600(EmitterObj *obj) {
             spawn.drawFunc = -1;
             spawn.handlerSet = 0;
             do {
-                func_15143874((u8)func_150ADA20(), state->region->radiusX * func_150ADA68(), &spawn.pos.x,
+                func_15143874((u8)func_150ADA20(), state->region->radius * func_150ADA68(), &spawn.pos.x,
                               &spawn.pos.z);
                 spawn.pos.x += state->region->x;
                 spawn.pos.y = state->region->y;
@@ -121,7 +107,7 @@ extern void func_1000FD38(void *, void *, s32, void *);
 
 /* Shuts the emitter down: marks its region off, calls func_1000FD38 with func_1000EF40 on it, and frees unk10. */
 void func_151A6AB8(EmitterObj *obj) {
-    obj->state.region->unk14 = 1;
+    obj->state.region->disabled = 1;
     func_1000FD38(func_1000EF40, obj->state.region, 0, obj);
     if (obj->state.unk10 != NULL) {
         func_1516972C(obj->state.unk10);

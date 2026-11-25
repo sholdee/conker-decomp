@@ -12,24 +12,13 @@ extern void func_151429E0(u8, u8 *, u8 *, u8 *);
 extern void func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, u8 owner, s32 arg4);
 extern void func_15156388(StreakParticleDesc *desc, u8 kind, s32 extraSize);
 
-/* Argument of func_151D8868 (same layout as game_12B250.c's Event_150FE288). */
-typedef struct {
-    /* 0x0 */ u8 type;
-    /* 0x1 */ u8 pad1;
-    /* 0x2 */ s16 duration;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 cameraMask;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 pad7;
-} CameraEvent;
-
-extern void func_151D8868(CameraEvent *event, s32 arg1, s32 arg2, s32 arg3);
+extern void func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 
 /* Spawns an effect at bone 25 of obj, plus a camera event (type 1, 12-27 long) and a func_151D3FF4 at the same point. */
 void func_150B3AB0(Actor *obj, u8 arg1) {
     s16 yaw;
     Vec3f pos;
-    CameraEvent event;
+    RumbleParams event;
 
     if ((obj != NULL) && (obj->unk1D4 != NULL)) {
         func_1512D748(&D_800DBFF0[D_800BE9E8], 6, 1);
@@ -39,11 +28,11 @@ void func_150B3AB0(Actor *obj, u8 arg1) {
         func_1514C858(pos.x, pos.y, pos.z, 10.0f, yaw, 0, 0xFF,
                       (func_150ADA20() % 31U) + 40, 8, 0, 0.0f, 0, *(u8 *)&arg1);
 
-        event.type = 1;
+        event.flags = 1;
         event.duration = (func_150ADA20() & 0xF) + 12;
-        event.unk4 = (func_150ADA20() & 3) + 5;
-        event.unk6 = -1;
-        event.cameraMask = 1;
+        event.strength = (func_150ADA20() & 3) + 5;
+        event.updateKind = -1;
+        event.playerMask = 1;
         func_151D8868(&event, 0, *(u8 *)&arg1, 0);
         func_151D3FF4(&pos, *(u8 *)&arg1, 0);
     }

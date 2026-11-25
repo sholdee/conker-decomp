@@ -27,7 +27,6 @@ typedef struct {
     } data;
 } EffectActor;
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern s32 *func_1515D480(s32);
 extern s32 *func_1515D440(void);
 
@@ -86,7 +85,7 @@ void func_15158224(EffectActor *actor) {
         }
     }
     if (expired) {
-        func_1516972C((struct102 *)actor);
+        func_1516972C(&actor->header);
     }
 }
 
@@ -246,12 +245,12 @@ void func_15158A20(EffectActor *actor) {
 
 void func_15158AA4(EffectActor *actor) {
     func_15158A20(actor);
-    func_15169804((struct102 *)actor);
+    func_15169804(&actor->header);
 }
 
 void func_15158AD0(EffectActor *actor) {
     func_15158A20(actor);
-    func_15169824((struct102 *)actor);
+    func_15169824(&actor->header);
 }
 
 /* Update callback: once the lifetime drops below data.fade.duration, fades alpha out with it. */
@@ -267,37 +266,26 @@ s32 func_15158AFC(EffectActor *actor) {
     return 1;
 }
 
-/* Message passed to the effect message handlers; msgId 0x2D swaps owners first <-> second. */
-typedef struct {
-    /* 0x00 */ Actor *first;
-    /* 0x04 */ union {
-        Actor *ptr;
-        u8 uniqueId; /* msgId 0: unique id of `first` */
-    } second;
-    /* 0x08 */ u8 firstId;
-    /* 0x09 */ u8 secondId;
-} EffectMessage;
-
 /* Message handler: follows owner swaps (0x2D) and drops the owner when it goes away (0). */
-void func_15158B3C(EffectActor *actor, EffectMessage *msg, u8 msgId) {
+void func_15158B3C(EffectActor *actor, ActorMsg *msg, u8 msgId) {
     Actor *first;
 
     if (msgId == 0x2D) {
-        first = msg->first;
+        first = msg->swap.actorA;
         if (actor->tmpl.owner == first) {
-            actor->tmpl.owner = msg->second.ptr;
-            actor->tmpl.ownerId = msg->secondId;
+            actor->tmpl.owner = msg->swap.actorB;
+            actor->tmpl.ownerId = msg->swap.idB;
         } else {
-            if (actor->tmpl.owner == msg->second.ptr) {
+            if (actor->tmpl.owner == msg->swap.actorB) {
                 actor->tmpl.owner = first;
-                actor->tmpl.ownerId = msg->firstId;
+                actor->tmpl.ownerId = msg->swap.idA;
             }
         dummy_label_356969: ; // matching: the empty labelled statement splits IDO's basic block
         }
     } else if (msgId == 0) {
-        first = msg->first;
+        first = msg->ref.actor;
         if (actor->tmpl.owner != first) {
-            if (msg->second.uniqueId != actor->tmpl.ownerId) {
+            if (msg->ref.uniqueId != actor->tmpl.ownerId) {
                 return;
             }
         }
@@ -306,32 +294,7 @@ void func_15158B3C(EffectActor *actor, EffectMessage *msg, u8 msgId) {
     }
 }
 
-/*
- * Tracks a character's state (five small fields packed by STATE_BITS) and runs the
- * actions of D_8008B02C[mode] when it changes as described by D_800A6200.
- */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ Actor *character;
-    /* 0x1C */ u8 characterId;
-    /* 0x1D */ u8 mode; /* from func_15159370 */
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ Vec3f lastPosition;
-    /* 0x2C */ u8 state0; /* func_15159084 */
-    /* 0x2D */ u8 state1; /* func_15159120 */
-    /* 0x2E */ u8 state2; /* func_15159184 */
-    /* 0x2F */ u8 moveState; /* func_15159230 */
-    /* 0x30 */ u8 surfaceState; /* func_151592B8 */
-    /* 0x31 */ u8 flags; /* 1: run state-change actions */
-    /* 0x32 */ u8 pad32[2];
-    /* 0x34 */ u8 unk34[0x1C];
-    /* 0x50 */ u8 unk50;
-} CharacterWatcher;
-
 s32 func_15159370(Actor *chr, u8 *mode);
-void func_1514EDF0(CharacterWatcher *watcher, Actor *chr);
 
 /* Creates a watcher for chr; returns NULL when chr is NULL or has no watchable mode. */
 CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
@@ -361,21 +324,21 @@ CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
     watcher->unk10 = 1;
     watcher->unk14 = 0;
     if (func_15159370(chr, &watcher->mode) == 0) {
-        func_1516979C((struct102 *)watcher);
+        func_1516979C(&watcher->header);
         return NULL;
     }
-    watcher->unk50 = 0;
+    watcher->hit.flags = 0;
     return watcher;
 }
 
 void func_15158CD4(CharacterWatcher *watcher) {
     func_1514EDF0(watcher, watcher->character);
-    func_15169804((struct102 *)watcher);
+    func_15169804(&watcher->header);
 }
 
 void func_15158D00(CharacterWatcher *watcher) {
     func_1514EDF0(watcher, watcher->character);
-    func_15169824((struct102 *)watcher);
+    func_15169824(&watcher->header);
 }
 
 s32 func_15159084(Actor *chr, u8 mode);
@@ -460,28 +423,28 @@ void func_15158D2C(CharacterWatcher *watcher) {
 void func_1519F400(void *);
 
 /* Message handler: frees the watcher when its character goes away (0), follows swaps (0x2D). */
-void func_15158FA4(void *self, EffectMessage *msg, u8 msgId) {
+void func_15158FA4(void *self, ActorMsg *msg, u8 msgId) {
     CharacterWatcher *watcher = self;
     Actor *first;
 
     if (msgId == 0) {
-        if ((msg->first == watcher->character) || (msg->second.uniqueId == watcher->characterId)) {
+        if ((msg->ref.actor == watcher->character) || (msg->ref.uniqueId == watcher->characterId)) {
             func_1516972C(self);
         }
     } else if (msgId == 0x2D) {
-        first = msg->first;
+        first = msg->swap.actorA;
         if (watcher->character == first) {
-            watcher->character = msg->second.ptr;
-            watcher->characterId = msg->secondId;
+            watcher->character = msg->swap.actorB;
+            watcher->characterId = msg->swap.idB;
         } else {
-            if (watcher->character == msg->second.ptr) {
+            if (watcher->character == msg->swap.actorB) {
                 watcher->character = first;
-                watcher->characterId = msg->firstId;
+                watcher->characterId = msg->swap.idA;
             }
         dummy_label_15158FA4: ; // matching: the empty labelled statement splits IDO's basic block
         }
     } else if (msgId == 4) {
-        if ((msg->first == watcher->character) || (msg->second.uniqueId == watcher->characterId)) {
+        if ((msg->ref.actor == watcher->character) || (msg->ref.uniqueId == watcher->characterId)) {
             func_1519F400(self);
         }
     }
@@ -625,7 +588,6 @@ s32 func_15159370(Actor *chr, u8 *mode) {
     return ret;
 }
 
-s32 func_1514ECE0(Attachment *, s16, Attachment **);
 
 /*
  * Returns whether chr's watcher state matches the given field values (-1 matches anything).
@@ -682,35 +644,6 @@ u8 func_1515942C(Actor *chr, s16 state0, s16 state1, s16 state2, s16 moveState, 
     return ret;
 }
 
-/* Ground query result written by func_15046C00. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 unk4[0x18];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 surface; /* 3 spawns a splash in the particle callbacks */
-    /* 0x1E */ u8 pad1E[6];
-} GroundHit;
-
-/* Particle data at 0xA8 for the rising-and-swaying particles (func_151596BC, func_15159594). */
-typedef struct {
-    /* 0x00 */ f32 baseSize;
-    /* 0x04 */ u8 widthPhase;
-    /* 0x05 */ u8 heightPhase;
-    /* 0x06 */ s8 widthPhaseStep;
-    /* 0x07 */ s8 heightPhaseStep;
-    /* 0x08 */ f32 widthWobble;
-    /* 0x0C */ f32 heightWobble;
-    /* 0x10 */ f32 maxRiseSpeed;
-    /* 0x14 */ f32 swayPerSpeed;
-    /* 0x18 */ u8 swayPhaseX;
-    /* 0x19 */ u8 swayPhaseZ;
-    /* 0x1A */ u8 swayPhaseStepX;
-    /* 0x1B */ u8 swayPhaseStepZ;
-    /* 0x1C */ f32 swayX;
-    /* 0x20 */ f32 swayZ;
-    /* 0x24 */ f32 ceiling;
-} RiseMotion;
-
 /* Particle data at 0xA8 for particles oscillating along a direction (func_1515A11C). */
 typedef struct {
     /* 0x00 */ f32 baseSize;
@@ -748,23 +681,7 @@ typedef struct {
 
 /* Particle object created by func_151303BC / func_15130280 from a ParticleDesc6C. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1E];
-    /* 0x2B */ u8 alpha;
-    /* 0x2C */ u8 pad2C[0xC];
-    /* 0x38 */ f32 width;
-    /* 0x3C */ f32 height;
-    /* 0x40 */ Vec3f position;
-    /* 0x4C */ Vec3f offset;
-    /* 0x58 */ Vec3f velocity;
-    /* 0x64 */ u8 pad64[4];
-    /* 0x68 */ u32 flags; /* 0x2000: dies above RiseMotion.ceiling */
-    /* 0x6C */ u8 pad6C[0x14];
-    /* 0x80 */ GroundHit ground;
-    /* 0xA4 */ u8 padA4[4];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ union {
         RiseMotion rise;
         OscillateMotion oscillate;
@@ -780,31 +697,31 @@ typedef struct {
 
 s32 func_151596BC(Particle *particle, ParticleUpdateArg *arg1);
 u8 func_151D8E20(void);
-s32 func_15046C00(Vec3f *pos, u16 arg1, f32 maxHeight, GroundHit *hit);
+s32 func_15046C00(Vec3f *pos, u16 arg1, f32 maxHeight, CollisionHit *hit);
 s32 func_1514672C(Vec3f *pos);
 
-/* Update callback: rises and sways; dies on reaching the ground hit above it (splashing on surface 3). */
+/* Update callback: rises and sways; dies on reaching the ground hit above it (splashing when ground.source is 3). */
 u8 func_15159594(Particle *particle, ParticleUpdateArg *arg1) {
     u8 alive;
     s32 found;
 
     alive = 1;
     if (func_151596BC(particle, arg1) != 0) {
-        if (particle->velocity.y > 0.0f) {
+        if (particle->head.desc.vel.y > 0.0f) {
             Vec3f pos;
 
-            pos.x = particle->position.x + particle->offset.x;
+            pos.x = particle->head.desc.pos.x + particle->head.desc.offset.x;
             pos.y = arg1->unk4;
-            pos.z = particle->position.z + particle->offset.z;
+            pos.z = particle->head.desc.pos.z + particle->head.desc.offset.z;
             if (func_1514672C(&pos) == 0) {
                 return 0;
             }
-            found = func_15046C00(&pos, 0, particle->position.y, &particle->ground);
+            found = func_15046C00(&pos, 0, particle->head.desc.pos.y, &particle->head.floor);
             if (found != 0) {
-                pos.y = particle->ground.height;
-                if (particle->ground.surface == 3) {
+                pos.y = particle->head.floor.height;
+                if (particle->head.floor.source == 3) {
                     func_151DBCBC(func_151D8E20(), particle->motion.rise.baseSize * 0.200000003f, 0xFF,
-                                  (s32)particle->ground.unk4, &pos, particle->unkC, particle->unk1);
+                                  (s32)&particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
                 }
                 alive = 0;
             }
@@ -829,24 +746,24 @@ s32 func_151596BC(Particle *particle, ParticleUpdateArg *arg1) {
     rise->heightPhase += rise->heightPhaseStep * D_800BE9E4;
     sin0 = func_151423D8(rise->widthPhase - 0x40);
     sin1 = func_151423D8(rise->heightPhase - 0x40);
-    particle->width = rise->baseSize + (rise->widthWobble * sin0);
-    particle->height = rise->baseSize + (rise->heightWobble * sin1);
+    particle->head.desc.width = rise->baseSize + (rise->widthWobble * sin0);
+    particle->head.desc.height = rise->baseSize + (rise->heightWobble * sin1);
 
-    if (0.0f < particle->velocity.y) {
-        if (rise->maxRiseSpeed < particle->velocity.y) {
-            particle->velocity.y = rise->maxRiseSpeed;
+    if (0.0f < particle->head.desc.vel.y) {
+        if (rise->maxRiseSpeed < particle->head.desc.vel.y) {
+            particle->head.desc.vel.y = rise->maxRiseSpeed;
         }
-        sway = particle->velocity.y * rise->swayPerSpeed;
+        sway = particle->head.desc.vel.y * rise->swayPerSpeed;
         rise->swayPhaseX += rise->swayPhaseStepX * D_800BE9E4;
         rise->swayPhaseZ += rise->swayPhaseStepZ * D_800BE9E4;
         sin0 = func_151423D8(rise->swayPhaseX - 0x40);
         sin1 = func_151423D8(rise->swayPhaseZ - 0x40);
-        particle->offset.x = (rise->swayX * sin0) * sway;
-        particle->offset.z = (rise->swayZ * sin1) * sway;
+        particle->head.desc.offset.x = (rise->swayX * sin0) * sway;
+        particle->head.desc.offset.z = (rise->swayZ * sin1) * sway;
     }
 
-    if (particle->flags & 0x2000) {
-        if (rise->ceiling < (particle->offset.y + particle->position.y)) {
+    if (particle->head.desc.flags & 0x2000) {
+        if (rise->ceiling < (particle->head.desc.offset.y + particle->head.desc.pos.y)) {
             alive = 0;
         }
     }
@@ -956,7 +873,7 @@ typedef struct {
 } DiskEmitter;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x28];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ DiskEmitter emitter;
 } DiskEmitterObject;
 
@@ -1080,29 +997,29 @@ s32 func_1515A11C(Particle *particle, ParticleUpdateArg *arg1) {
     osc->heightPhase += osc->heightPhaseStep * D_800BE9E4;
     sin0 = func_151423D8(osc->widthPhase - 0x40);
     sin1 = func_151423D8(osc->heightPhase - 0x40);
-    particle->width = osc->baseSize + (osc->widthWobble * sin0);
-    particle->height = osc->baseSize + (osc->heightWobble * sin1);
+    particle->head.desc.width = osc->baseSize + (osc->widthWobble * sin0);
+    particle->head.desc.height = osc->baseSize + (osc->heightWobble * sin1);
     if ((osc && osc) && osc) { // matching: these dead tests of osc steer IDO's schedule of the angle update
     }
     osc->angle += osc->angleSpeed * D_800BE9A4;
     osc->angle = func_15144B68(osc->angle);
     sin0 = sinf(osc->angle);
-    particle->offset.x = osc->direction.x * sin0;
-    particle->offset.y = osc->direction.y * sin0;
-    particle->offset.z = osc->direction.z * sin0;
+    particle->head.desc.offset.x = osc->direction.x * sin0;
+    particle->head.desc.offset.y = osc->direction.y * sin0;
+    particle->head.desc.offset.z = osc->direction.z * sin0;
     return 1;
 }
 
-void *func_15130280(ParticleDesc6C *spawn, u8 arg1, GroundHit *ground, s32 motionSize, u8 arg4, s32 arg5);
+void *func_15130280(ParticleDesc6C *spawn, u8 arg1, CollisionHit *ground, s32 motionSize, u8 arg4, s32 arg5);
 
 /* Spawns one drifting particle; with no horizontal velocity it lands on the ground below pos. */
-Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, GroundHit *ground, f32 size,
+Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, CollisionHit *ground, f32 size,
                         s16 lifetime, u8 alpha, u8 arg8, u8 arg9, s32 argA) {
     Particle *particle;
     s32 pad; // matching: 4 unused frame bytes sit above spawn
     ParticleDesc6C spawn;
     DriftMotion drift;
-    GroundHit hit;
+    CollisionHit hit;
     s32 flipY;
     s32 flipX;
 
@@ -1167,7 +1084,7 @@ Particle *func_1515A238(Vec3f *pos, Vec3f *velocity, f32 arg2, f32 damping, Grou
         if (ground != NULL) {
             hit = *ground;
         } else {
-            hit.unk1C = 0;
+            hit.flags = 0;
         }
         if (func_1514672C(pos)) {
             if (func_15046C00(pos, 0, 19500.0f, &hit)) {
@@ -1193,10 +1110,10 @@ s32 func_1515A60C(Particle *particle, ParticleUpdateArg *arg1) {
     s32 i;
 
     drift = &particle->motion.drift;
-    particle->width = (func_151423D8(drift->widthPhase - 0x40) * drift->widthWobble) + drift->baseSize;
-    particle->height = (func_151423D8(drift->heightPhase - 0x40) * drift->heightWobble) + drift->baseSize;
-    particle->offset.x = func_151423D8(drift->swayPhaseX - 0x40) * drift->swayX;
-    particle->offset.z = func_151423D8(drift->swayPhaseZ - 0x40) * drift->swayZ;
+    particle->head.desc.width = (func_151423D8(drift->widthPhase - 0x40) * drift->widthWobble) + drift->baseSize;
+    particle->head.desc.height = (func_151423D8(drift->heightPhase - 0x40) * drift->heightWobble) + drift->baseSize;
+    particle->head.desc.offset.x = func_151423D8(drift->swayPhaseX - 0x40) * drift->swayX;
+    particle->head.desc.offset.z = func_151423D8(drift->swayPhaseZ - 0x40) * drift->swayZ;
 
     drift->widthPhase += drift->widthPhaseStep * D_800BE9E4;
     drift->heightPhase += drift->heightPhaseStep * D_800BE9E4;
@@ -1204,9 +1121,9 @@ s32 func_1515A60C(Particle *particle, ParticleUpdateArg *arg1) {
     drift->swayPhaseZ += drift->swayPhaseStepZ * D_800BE9E4;
 
     for (i = D_800BE9E4; i > 0; i--) {
-        particle->velocity.x *= drift->damping;
-        particle->velocity.y *= drift->damping;
-        particle->velocity.z *= drift->damping;
+        particle->head.desc.vel.x *= drift->damping;
+        particle->head.desc.vel.y *= drift->damping;
+        particle->head.desc.vel.z *= drift->damping;
     }
     return 1;
 }
@@ -1220,37 +1137,37 @@ u8 func_1515A78C(Particle *particle, ParticleUpdateArg *arg1) {
     alive = 1;
     drift = &particle->motion.drift;
     func_1515A60C(particle, arg1);
-    if (particle->velocity.y < 0.0f) {
+    if (particle->head.desc.vel.y < 0.0f) {
         return 1;
     }
-    pos.x = particle->position.x + particle->offset.x;
+    pos.x = particle->head.desc.pos.x + particle->head.desc.offset.x;
     pos.y = arg1->unk4;
-    pos.z = particle->position.z + particle->offset.z;
+    pos.z = particle->head.desc.pos.z + particle->head.desc.offset.z;
     if (drift->groundHeight == GROUND_UNKNOWN) {
         if (func_1514672C(&pos) == 0) {
             return 0;
         }
-        if (func_15046C00(&pos, 0, particle->position.y, &particle->ground) != 0) {
-            pos.y = particle->ground.height;
+        if (func_15046C00(&pos, 0, particle->head.desc.pos.y, &particle->head.floor) != 0) {
+            pos.y = particle->head.floor.height;
             alive = 0;
         }
-    } else if (drift->groundHeight <= particle->position.y) {
+    } else if (drift->groundHeight <= particle->head.desc.pos.y) {
         pos.y = drift->groundHeight;
         alive = 0;
     }
     if (alive == 0) {
         if (func_150ADA68() < 0.200000003f) {
-            if (particle->ground.surface == 3) {
-                func_151DBCBC(func_151D8E20(), drift->baseSize * 0.200000003f, particle->alpha,
-                              (s32)particle->ground.unk4, &pos, particle->unkC, particle->unk1);
+            if (particle->head.floor.source == 3) {
+                func_151DBCBC(func_151D8E20(), drift->baseSize * 0.200000003f, particle->head.desc.alpha,
+                              (s32)&particle->head.floor.tri, &pos, particle->head.header.owner, particle->head.header.kind);
             }
         }
     }
     return alive;
 }
 
-/* Returns the address of chr's watcher unk34 block through *out; 0 if chr has no watcher. */
-s32 func_1515A920(Actor *chr, u8 **out) {
+/* Returns the address of chr's watcher floor hit through *out; 0 if chr has no watcher. */
+s32 func_1515A920(Actor *chr, CollisionHit **out) {
     Attachment *node;
     CharacterWatcher *watcher;
 
@@ -1258,7 +1175,7 @@ s32 func_1515A920(Actor *chr, u8 **out) {
         return 0;
     }
     watcher = node->handle;
-    *out = watcher->unk34;
+    *out = &watcher->hit;
     return 1;
 }
 
@@ -1355,11 +1272,7 @@ typedef struct {
 } RiseEmitter;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x1];
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ RiseEmitter emitter;
 } RiseEmitterObject;
 
@@ -1451,7 +1364,7 @@ void func_1515AB88(RiseEmitterObject *obj) {
             flipX = (func_150ADA20() & 1) ? 0x40 : 0;
             flipY = (func_150ADA20() & 1) ? 0x80 : 0;
             spawn.flags = flipY | 6 | flipX | 0x8000 | 0x4000 | 0x2000 | 0x1000;
-            particle = func_15130280(&spawn, 2, NULL, sizeof(RiseMotion), obj->unkC, obj->unk1);
+            particle = func_15130280(&spawn, 2, NULL, sizeof(RiseMotion), obj->base.header.owner, obj->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->motion, &rise, sizeof(RiseMotion));
             }

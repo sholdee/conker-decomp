@@ -6,17 +6,9 @@
 extern f32 D_800A05E0[];
 extern f32 D_800A05EC[];
 
-/* Ground probe result filled by func_1504715C / func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ f32 unk04[6];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 pad1D[7];
-} GroundHit; /* size 0x24 */
-
 void func_15143134(f32 *, f32 *, Mtx *);
-void func_1504715C(GroundHit *, Actor *);
-s32 func_15046C80(f32 *, s32, f32, GroundHit *);
+void func_1504715C(CollisionHit *, Actor *);
+s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 void func_15143794(s16, s16, f32, f32 *);
 
 /*
@@ -24,7 +16,7 @@ void func_15143794(s16, s16, f32, f32 *);
  * (bone 40 or 47) into `pos`.
  * If `ground` is non-NULL, also probes the ground below that point into it.
  */
-s32 func_150CB0E0(f32 *pos, Actor *actor, GroundHit *ground, u8 side) {
+s32 func_150CB0E0(f32 *pos, Actor *actor, CollisionHit *ground, u8 side) {
     f32 probe[3];
     f32 *offset;
     Mtx *bone;
@@ -69,7 +61,8 @@ typedef struct {
 
 /* The dust particle func_150CB1F4 spawns; updated by func_150CBA30. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0xC];
     /* 0x01C */ s16 timer;
     /* 0x01E */ u8 pad1E[0xE];
     /* 0x02C */ f32 size0;
@@ -104,7 +97,7 @@ s32 func_1518ABD0(s32, DustParticle *, s32);
 /* Spawns a dust puff (tinted by func_150CCD90) on the ground below the actor's bone on `side`. */
 void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
     f32 pos[3];
-    GroundHit ground;
+    CollisionHit ground;
     f32 fr;
     f32 fg;
     f32 fb;
@@ -186,11 +179,11 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
         desc.unk47 = 6;
         angleOffset = (side == 1) ? -8 : 8;
         particle = func_1513D668(&desc, colors, 0, 0x17, 0, 0, (actor->unk7A >> 8) - angleOffset,
-                                 500.0f, 500.0f, 0, ground.unk04, 1, 8, 0xFF, 0);
+                                 500.0f, 500.0f, 0, (s32)&ground.tri, 1, 8, 0xFF, 0);
         if (particle != NULL) {
             memcpy(&particle->growth, &growth, sizeof(growth));
             if (func_1518ABD0(D_800D98E0, particle, 2) == 0) {
-                func_1516972C((struct102 *)particle);
+                func_1516972C(&particle->header);
             }
         }
         roll = (func_150ADA20() & 0xF) + 10;
@@ -205,22 +198,14 @@ void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
     }
 }
 
-/* Particle updated by func_150CB7CC. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s16 timer;
-    /* 0x1E */ u8 pad1E[0xA];
-    /* 0x28 */ u8 alpha;
-} FadeParticle;
-
-/* Fades the particle out over the last 32 frames of its timer. */
-s32 func_150CB7CC(FadeParticle *particle) {
+/* QuadSprite update: fades the sprite (def.unk10) out over the last 32 frames of its lifetime. */
+s32 func_150CB7CC(QuadSprite *sprite) {
     s32 fade;
 
-    if (particle->timer < 32) {
-        fade = particle->timer * 8;
-        if (fade < particle->alpha) {
-            particle->alpha = fade;
+    if (sprite->def.lifetime < 32) {
+        fade = sprite->def.lifetime * 8;
+        if (fade < sprite->def.unk10) {
+            sprite->def.unk10 = fade;
         }
     }
     return 1;
@@ -303,11 +288,7 @@ s32 func_150CBA30(DustParticle *dust) {
 
 /* Particle spawned by func_150CBABC; updated by func_150CBCE0. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ f32 unk60;
-    /* 0x64 */ u8 pad64[0x44];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 damping; // per-frame-step factor applied to unk58 and unk60
 } SparkParticle;
 
@@ -387,15 +368,16 @@ s32 func_150CBCE0(SparkParticle *particle, s32 arg1) {
 
     damping = &particle->damping; // matching: read through a pointer, IDO reloads it after every store
     for (i = D_800BE9E4; i != 0; i--) {
-        particle->unk58 *= *damping;
-        particle->unk60 *= *damping;
+        particle->head.desc.vel.x *= *damping;
+        particle->head.desc.vel.z *= *damping;
     }
     return 1;
 }
 
 /* Particle moved by func_150CBE88. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x20];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x10];
     /* 0x20 */ f32 unk20[3]; // integrated from unk50
     /* 0x2C */ u8 pad2C[0xC];
     /* 0x38 */ f32 pos[3];
@@ -418,7 +400,8 @@ s32 func_150CBE88(BallisticParticle *particle) {
 
 /* Particle handled by func_150CBF5C. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x1C];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0xC];
     /* 0x1C */ s16 timer;
     /* 0x1E */ u8 pad1E[0x3A];
     /* 0x58 */ s32 flags;

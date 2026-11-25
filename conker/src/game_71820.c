@@ -332,18 +332,6 @@ void func_15044E88(void) {
     func_1505D024(&D_800CC2D0[0], 1, D_800CC2D0[0].unk7A, -1);
 }
 
-/* Result of a floor/ceiling probe. */
-typedef struct CollisionHit {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ CollisionTri tri;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 material;
-    /* 0x1C */ u8 flags;           // 2: height within the probe's limit, 4: tri is valid (fast path re-tests it)
-    /* 0x1D */ u8 source;          // which collision set produced the hit (1-4)
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ WorldObject *surface;
-} CollisionHit;
-
 /* One candidate triangle returned by the func_150A3A70/func_150A4FA0/func_150A43E0 grid queries. */
 
 s32 func_150A3A70(s32, s32);
@@ -352,8 +340,6 @@ s32 func_150A43E0(s32, s32, s32, void *);
 void func_150A44F0(s32, void *, s32);
 s32 func_150A6500(s16, s16, s32 *, u16);
 s32 func_150A3FC4(f32, f32, s32, CollisionTri *, f32 *);
-extern u8 D_800D37E0[];
-extern u8 D_800D3830[];
 extern f32 D_800DBE74;
 
 /* Ceiling probe against collision set 0: lowest triangle between pos.y and top. */

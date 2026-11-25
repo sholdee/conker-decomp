@@ -15,7 +15,7 @@ void func_15143134(void *, f32 *, Mtx *);
 void func_15143874(s32, f32, f32 *, f32 *);
 void func_151C329C(void *, s32, s32);
 void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s32, s32);
-struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 s32 func_15160A58(s32, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150F0A24(f32 *);
 
@@ -25,8 +25,8 @@ struct Beam *func_150EEF80(Actor *, u8, u8, s32);
  * at the muzzle. */
 void func_150EEE00(Actor *actor, u8 slot) {
     f32 muzzle[3];
-    Header header;
-    Header2 origin;
+    LightEffectHeader header;
+    Vec3i origin;
     MtxF *bones;
 
     if (D_800A163C[slot] & actor->unk94) {
@@ -37,44 +37,37 @@ void func_150EEE00(Actor *actor, u8 slot) {
     bones = actor->unk1D4;
     if (bones != NULL) {
         func_15143134(D_800A15F0[slot], muzzle, (Mtx *)bones + D_800A1638[slot]);
-        header.unk0 = 3;
-        header.unk1 = -1;
-        header.unk2 = (func_150ADA20() % 3U) + 4;
-        header.unk4 = 0;
-        origin.unk0 = muzzle[0];
-        origin.unk4 = muzzle[1];
-        origin.unk8 = muzzle[2];
+        header.flags = 3;
+        header.update = -1;
+        header.lifetime = (func_150ADA20() % 3U) + 4;
+        header.lightType = 0;
+        origin.x = muzzle[0];
+        origin.y = muzzle[1];
+        origin.z = muzzle[2];
         func_151602C0(&header, &origin, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
         func_150F0A24(muzzle);
     }
 }
 
-/* Message payload: an actor reference (message types 0 and 0x43). */
+/* Message 0x43 payload: an actor reference plus the actor's effect slot. */
 typedef struct {
-    Actor *actor;
-    u8 actorId;
-    u8 slot;
-} ActorRefMsg;
+    /* 0x0 */ Actor *actor;
+    /* 0x4 */ u8 uniqueId;
+    /* 0x5 */ u8 slot;
+} ActorSlotMsg;
 
-/* Message payload for type 0x2D: two actors exchange identities. */
-typedef struct {
-    Actor *actorA;
-    Actor *actorB;
-    u8 idA;
-    u8 idB;
-} ActorSwapMsg;
-
+/* Payload of the messages a beam handles (0 and 0x43: ActorSlotMsg, 0x2D: an actor swap). */
 typedef union {
-    ActorRefMsg ref;
+    ActorSlotMsg ref;
     ActorSwapMsg swap;
-} ActorMsg;
+} BeamMsg;
 
 /* Sends message 0x43 for slot `slot` of `actor`. */
 void func_150EEF40(Actor *actor, u8 slot) {
-    ActorRefMsg msg;
+    ActorSlotMsg msg;
 
     msg.actor = actor;
-    msg.actorId = actor->unique_id;
+    msg.uniqueId = actor->unique_id;
     msg.slot = slot;
     func_151403A8((s32)&msg, 0x43);
 }
@@ -152,16 +145,13 @@ typedef struct {
 
 /* A beam's emitter (created by func_15149130), carrying its EmitterLink at +0x28. */
 typedef struct BeamEmitter {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterLink link;
 } BeamEmitter;
 
 typedef struct Spark {
-    /* 0x00 */ u8 pad0[0x1C];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0xC];
     /* 0x1C */ u8 flags;               /* bit 1: drawn */
     /* 0x1D */ u8 pad1D[0x13];
     /* 0x30 */ Vec3f start;
@@ -285,14 +275,6 @@ Beam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     return beam;
 }
 
-/* Result record of the beam's hit test. */
-typedef struct {
-    void *object;
-    u8 pad4[0x55];
-    u8 count;
-    u8 pad5A[0xA];
-} BeamHit;
-
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
 void func_15081690(void *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
 s32 func_1505D024(void *, s32, s32, s32);
@@ -304,7 +286,7 @@ s32 func_150EF38C(Beam *beam) {
     Actor *actor;
     Actor *target;
     s16 *position;
-    BeamHit hit;
+    RayHit hit;
     f32 angle;
     void *object;
 
@@ -352,8 +334,8 @@ s32 func_150EF38C(Beam *beam) {
         func_15081690(actor, beam->head.def.pos.x, beam->head.def.pos.y, beam->head.def.pos.z,
                       link->direction.x, link->direction.y, link->direction.z,
                       &hit, link->distance, 1, 0, 1, 4, 0, 0);
-        if (hit.count >= 2) {
-            object = hit.object;
+        if (hit.hitType >= 2) {
+            object = hit.obj;
             func_1502EA98(object, 0xFF, 0, 0, 0x90, 0, 1);
             func_1505D024(object, 0xA0038, 0, actor - D_800CC2D0);
         }
@@ -395,7 +377,7 @@ void func_150EF7B0(Beam *beam) {
     if (part != NULL) {
         func_1516972C(part);
     }
-    func_1513CA6C((struct210 *)beam);
+    func_1513CA6C(&beam->head);
 }
 
 /* Like func_150EF7B0, through the func_1516979C / func_1513CAA0 variants. */
@@ -422,12 +404,12 @@ void func_150EF860(Beam *beam) {
     if (part != NULL) {
         func_1516979C(part);
     }
-    func_1513CAA0((struct210 *)beam);
+    func_1513CAA0(&beam->head);
 }
 
 /* Message handler of a beam: releases it when its actor goes away (types 0 and 0x43)
  * and follows its actor and target through an identity swap (type 0x2D). */
-void func_150EF910(Beam *beam, ActorMsg *msg, u8 type) {
+void func_150EF910(Beam *beam, BeamMsg *msg, u8 type) {
     BeamLink *link = &beam->link;
     Actor *actor;
     Actor *msgActor;
@@ -439,9 +421,9 @@ void func_150EF910(Beam *beam, ActorMsg *msg, u8 type) {
         actor = link->actor;
         msgActor = msg->ref.actor;
         actorId = link->actorId;
-        msgActorId = msg->ref.actorId;
+        msgActorId = msg->ref.uniqueId;
         if (actor == msgActor || actorId == msgActorId) {
-            func_1516972C((struct102 *)beam);
+            func_1516972C(&beam->head.header);
         }
     } else if (type == 0x2D) {
         if (link->actor == msg->swap.actorA) {
@@ -463,9 +445,9 @@ void func_150EF910(Beam *beam, ActorMsg *msg, u8 type) {
         swapped:;
         }
     } else if (type == 0x43) {
-        if (link->actor == msg->ref.actor || link->actorId == msg->ref.actorId) {
+        if (link->actor == msg->ref.actor || link->actorId == msg->ref.uniqueId) {
             if (link->slot == msg->ref.slot) {
-                func_1516972C((struct102 *)beam);
+                func_1516972C(&beam->head.header);
             }
         }
     }
@@ -560,7 +542,7 @@ void func_150EFB80(BeamEmitter *emitter) {
                 func_15143794(yaw & 0xFF, pitch % 31U - 55, func_150ADA68() * 15.0f + 25.0f, &part.vel.x);
                 part.gravity = (func_150ADA68() * 740.0f + -1761.0f) * 0.001000000047f;
                 part.color.alpha = func_150ADA20() % 101U + 155;
-                func_1515C2F0(&spawn, 0, &part, 0, emitter->unkC, emitter->unk1);
+                func_1515C2F0(&spawn, 0, &part, 0, emitter->base.header.owner, emitter->base.header.kind);
                 link->accum -= 1.0f;
             } while (link->accum > 1.0f);
         } else {
@@ -686,18 +668,18 @@ s32 func_150F00EC(Glow *glow) {
 /* Spawns the muzzle flash of `beam`, colored (r, g, b, a). */
 Flash *func_150F0198(u8 r, u8 g, u8 b, u8 a, Beam *beam, u8 arg5, s32 arg6) {
     Flash *flash;
-    Header header;
-    Header2 origin;
+    LightEffectHeader header;
+    Vec3i origin;
     Beam *link;
 
     link = beam; // matching: the payload is copied from a stack local, not the arg slot
-    header.unk0 = 2;
-    header.unk1 = -1;
-    header.unk2 = 300;
-    header.unk4 = 0x21;
-    origin.unk0 = 0;
-    origin.unk4 = 0;
-    origin.unk8 = 0;
+    header.flags = 2;
+    header.update = -1;
+    header.lifetime = 300;
+    header.lightType = 0x21;
+    origin.x = 0;
+    origin.y = 0;
+    origin.z = 0;
 
     flash = (Flash *)func_151602C0(&header, &origin, r, g, b, a, 0xFF, 0, 4, arg5, arg6);
     if (flash != NULL) {
@@ -728,12 +710,12 @@ void func_150F0318(BeamEmitter *emitter);
 
 void func_150F02C0(BeamEmitter *emitter) {
     func_150F0318(emitter);
-    func_1514933C((struct260 *)emitter);
+    func_1514933C(&emitter->base);
 }
 
 void func_150F02EC(BeamEmitter *emitter) {
     func_150F0318(emitter);
-    func_15149368((struct260 *)emitter);
+    func_15149368(&emitter->base);
 }
 
 /* Clears the beam's reference to this emitter. */
@@ -747,13 +729,13 @@ void func_150F0380(Glow *glow);
 
 void func_150F0328(Glow *glow) {
     func_150F0380(glow);
-    func_151411A4((struct210 *)glow);
+    func_151411A4(&glow->head);
 }
 
 
 void func_150F0354(Glow *glow) {
     func_150F0380(glow);
-    func_151411C4((struct210 *)glow);
+    func_151411C4(&glow->head);
 }
 
 /* Clears the beam's reference to this glow. */
@@ -807,8 +789,8 @@ s32 func_150F03F8(actor, slot, arg2, arg3)
     Vec3f dir;
     f32 *src[2];
     f32 *dst[2];
-    Header hdr;
-    Header2 origin;
+    LightEffectHeader hdr;
+    Vec3i origin;
     f32 params[2];
     s32 randB;
     f32 rand1;
@@ -845,13 +827,13 @@ s32 func_150F03F8(actor, slot, arg2, arg3)
                             rand1 * 363.0f + 149.0f, 50.0f, 0xFF, actor, 1, 1, 0, 8, 0, 1, 0, 0xA0038, 0.0f,
                             0xFF, -1, 0, arg2, arg3);
     }
-    hdr.unk0 = 3;
-    hdr.unk1 = -1;
-    hdr.unk2 = (func_150ADA20() % 5U) + 4;
-    hdr.unk4 = 0;
-    origin.unk0 = muzzle.x;
-    origin.unk4 = muzzle.y;
-    origin.unk8 = muzzle.z;
+    hdr.flags = 3;
+    hdr.update = -1;
+    hdr.lifetime = (func_150ADA20() % 5U) + 4;
+    hdr.lightType = 0;
+    origin.x = muzzle.x;
+    origin.y = muzzle.y;
+    origin.z = muzzle.z;
     randA = (func_150ADA20() % 51U) + 80;
     func_151602C0(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg2, arg3);
     params[1] = (func_150ADA68() * 1906.0f + 969.0f) * 0.001000000047f;
@@ -873,8 +855,8 @@ void func_150F07E4(Spark *spark, s32 data, u8 type) {
 
     if (type == 0) {
         msgActor = msg->ref.actor;
-        if ((msgActor == link->actor) || (msg->ref.actorId == link->actorId)) {
-            func_1516972C((struct102 *)spark);
+        if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
+            func_1516972C(&spark->header);
         }
     } else if (type == 0x2D) {
         if (link->actor == msg->swap.actorA) {
@@ -894,8 +876,8 @@ void func_150F088C(Glow *glow, ActorMsg *msg, u8 type) {
 
     if (type == 0) {
         msgActor = msg->ref.actor;
-        if ((msgActor == link->actor) || (msg->ref.actorId == link->actorId)) {
-            func_1516972C((struct102 *)glow);
+        if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
+            func_1516972C(&glow->head.header);
         }
     } else if (type == 0x2D) {
         if (link->actor == msg->swap.actorA) {
@@ -993,13 +975,7 @@ typedef struct {
 } TrailParticleLink;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x2B];
-    /* 0x2B */ u8 alpha;
-    /* 0x2C */ u8 pad2C[0xC];
-    /* 0x38 */ f32 width;
-    /* 0x3C */ f32 height;
-    /* 0x40 */ Vec3f pos;
-    /* 0x4C */ u8 pad4C[0x5C];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ union {
         ActorParticleLink actor;
         TrailParticleLink trail;
@@ -1087,18 +1063,18 @@ s32 func_150F0E48(Particle *particle, s32 arg1) {
         return 0;
     }
 
-    particle->pos.x = actor->x_position;
-    particle->pos.y = actor->y_position;
-    particle->pos.z = actor->z_position;
+    particle->head.desc.pos.x = actor->x_position;
+    particle->head.desc.pos.y = actor->y_position;
+    particle->head.desc.pos.z = actor->z_position;
     link->phase[0] += 0.2630000114f * D_800BE9A4;
     link->phase[1] += 0.3030000031f * D_800BE9A4;
     link->phase[2] += 0.25f * D_800BE9A4;
     link->phase[0] = func_15144B68(link->phase[0]);
     link->phase[1] = func_15144B68(link->phase[1]);
     link->phase[2] = func_15144B68(link->phase[2]);
-    particle->width = (sinf(link->phase[0]) * 243.0f) + 780.0f;
-    particle->height = (sinf(link->phase[1]) * 243.0f) + 780.0f;
-    particle->alpha = (sinf(link->phase[2]) * 50.0f) + 200.0f;
+    particle->head.desc.width = (sinf(link->phase[0]) * 243.0f) + 780.0f;
+    particle->head.desc.height = (sinf(link->phase[1]) * 243.0f) + 780.0f;
+    particle->head.desc.alpha = (sinf(link->phase[2]) * 50.0f) + 200.0f;
     return 1;
 }
 
@@ -1123,8 +1099,8 @@ void func_150F1020(Particle *particle, s32 data, u8 type) {
         }
     } else if (type == 0 || type == 0x43) {
         msgActor = msg->ref.actor;
-        if ((msgActor == link->actor) || (msg->ref.actorId == link->actorId)) {
-            func_1516972C((struct102 *)particle);
+        if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
+            func_1516972C(&particle->head.header);
         }
     }
 }
@@ -1138,13 +1114,7 @@ typedef struct {
 } TrailLink; /* 0x18 */
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ TrailLink link;
 } TrailEmitter;
 
@@ -1185,7 +1155,7 @@ void func_150F1170(TrailEmitter *emitter) {
     last = emitter->link.lastPos;
     link = &emitter->link;
     if ((actor->interaction_state == 0) || (actor->unique_id != link->actorId)) {
-        emitter->unkE = -1;
+        emitter->base.header.state = -1;
         return;
     }
     link->lastPos.x = actor->x_position;
@@ -1251,7 +1221,7 @@ void func_150F1170(TrailEmitter *emitter) {
             spawn.alpha = (func_150ADA20() % 71U) + 80;
             spawn.timer = (func_150ADA20() % 31U) + 60;
             spawn.width = spawn.height = func_150ADA68() * 514.0f + 404.0f;
-            particle = func_15130280(&spawn, 1, 0, 0x10, emitter->unkC, emitter->unk1);
+            particle = func_15130280(&spawn, 1, 0, 0x10, emitter->base.header.owner, emitter->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->link.trail, &ext, sizeof(ext));
             }
@@ -1271,8 +1241,8 @@ void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
     if (type == 0x43) {
         msgActor = ((ActorMsg *)data)->ref.actor;
         link = &(*self)->link;
-        if ((msgActor == link->actor) || (link->actorId == (*msg)->ref.actorId)) {
-            func_1516972C((struct102 *)*self);
+        if ((msgActor == link->actor) || (link->actorId == (*msg)->ref.uniqueId)) {
+            func_1516972C(&(*self)->base.header);
         }
     } else {
         link = &(*self)->link;
@@ -1281,12 +1251,8 @@ void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
 }
 
 typedef struct {
-    Actor *actor;
-    u8 actorId;
-} ActorRef;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
     /* 0x18 */ ActorRef ref;
 } ActorBound;
 
@@ -1297,8 +1263,8 @@ void func_150F1684(ActorBound *self, ActorMsg *msg, u8 type) {
 
     if (type == 0x43) {
         msgActor = msg->ref.actor;
-        if ((ref->actor == msgActor) || (msg->ref.actorId == ref->actorId)) {
-            func_1516972C((struct102 *)self);
+        if ((ref->actor == msgActor) || (msg->ref.uniqueId == ref->uniqueId)) {
+            func_1516972C(&self->header);
         }
     }
 }
@@ -1340,8 +1306,8 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
     {
         f32 *src[1];
         f32 *dst[1];
-        Header hdr;
-        Header2 origin;
+        LightEffectHeader hdr;
+        Vec3i origin;
         f32 params[2];
         s32 randB;
         f32 rand0;
@@ -1353,13 +1319,13 @@ void func_150F16DC(actor, slot, variant, arg3, arg4)
         src[0] = D_800A168C[kind][variant][slot];
         dst[0] = &muzzle.x;
         func_15145EA4(src, dst, (Mtx *)actor->unk1D4 + D_800A180C[kind][slot], 1);
-        hdr.unk0 = 3;
-        hdr.unk1 = -1;
-        hdr.unk2 = (func_150ADA20() % 5U) + 4;
-        hdr.unk4 = 0;
-        origin.unk0 = muzzle.x;
-        origin.unk4 = muzzle.y;
-        origin.unk8 = muzzle.z;
+        hdr.flags = 3;
+        hdr.update = -1;
+        hdr.lifetime = (func_150ADA20() % 5U) + 4;
+        hdr.lightType = 0;
+        origin.x = muzzle.x;
+        origin.y = muzzle.y;
+        origin.z = muzzle.z;
         randA = (func_150ADA20() % 51U) + 80;
         func_151602C0(&hdr, &origin, randA, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, arg3, arg4);
         params[1] = (func_150ADA68() * 701.0f + 1925.0f) * 0.001000000047f;

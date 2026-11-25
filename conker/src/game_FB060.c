@@ -7,19 +7,8 @@ extern f32 D_800A07B4; // matching: 401.0f; as a literal IDO allocates the FP te
 
 void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
 
-/* Ground contact found by func_15046C80 below a probe point (as in game_173D40.c). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 surface[0x14];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 type;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 unk20;
-} GroundHit; // size 0x24
-
-void func_1504715C(GroundHit *hit, Actor *actor);
-s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, GroundHit *hit);
+void func_1504715C(CollisionHit *hit, Actor *actor);
+s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, CollisionHit *hit);
 void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
                    f32 arg9, s32 argA, u8 argB);
 
@@ -31,7 +20,7 @@ void func_150CDBB0(Actor *actor, u8 owner, s32 arg2) {
         return;
     }
     {
-        GroundHit hit;
+        CollisionHit hit;
 
         func_1504715C(&hit, actor);
         pos.x = actor->x_position;
@@ -48,7 +37,7 @@ void func_150CDBB0(Actor *actor, u8 owner, s32 arg2) {
 
 /* A particle object (same layout as Particle in game_15D730.c); its kind's own data follows at +0xA8. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ParticleDesc desc;
     /* 0x80 */ u8 pad80[0x28];
     /* 0xA8 */ f32 unkA8;

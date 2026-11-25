@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * Swinging ropes. A rope is a chain of up to 20 nodes hanging from a fixed top node; an
@@ -15,9 +16,7 @@ typedef struct {
 } RopeNode;
 
 typedef struct Rope {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ struct Rope *next;      // next object in the same list
-    /* 0x0C */ u8 padC[4];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 id;                  // start of the 0x24-byte spawn data
     /* 0x11 */ u8 pad11[3];
     /* 0x14 */ f32 x;
@@ -46,7 +45,7 @@ typedef struct Rope {
 
 /* The 0x30-byte link object that moves an owner along its rope (func_151ACA60). */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ u8 unk18;
@@ -58,25 +57,13 @@ typedef struct {
     /* 0x28 */ f32 radius;             // horizontal offset of the owner from the rope
 } RopeRider;
 
-/* D_80090B60[]: one entry per texture. */
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ u8 numFrames;
-    /* 0x05 */ u8 unk5;
-    /* 0x06 */ u16 width;
-    /* 0x08 */ u16 height;
-    /* 0x0A */ u16 unkA;
-} TextureInfo;
-
-extern TextureInfo D_80090B60[];
+extern EffectTexture D_80090B60[];
 extern s32 D_800A9270[];           // the two object lists ropes are allocated in
-extern Rope *D_800DCE50[][104];    // object lists, [group][list]
 
 extern void *allocate_memory(s32, s32, s32, s32);
-void *func_15167A68(s32, s32, s32, s32, s32, s32);
 f32 func_150489B0(u8);
 u16 func_10010E78(u16, s32, u16, s32, s32, s32, s32, s32, s32, s32, s32);
-Gfx *func_15094FE8(Gfx *, TextureInfo *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+Gfx *func_15094FE8(Gfx *, EffectTexture *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 s32 func_151ACB38(Actor *obj, u8 *out);
 s32 func_151AE3A8(RopeRider *rider);
@@ -97,7 +84,7 @@ RopeRider *func_151ACA60(Actor *obj, f32 radius, s32 extraSize) {
         return NULL;
     }
     if (func_151ACB38(obj, &rider->unk18) == 0) {
-        func_1516979C((struct102 *)rider);
+        func_1516979C(&rider->header);
         return NULL;
     }
     rider->owner = obj;
@@ -139,7 +126,7 @@ void func_151ACB94(RopeRider *rider, s32 arg1, u8 arg2) {
 /** Creates a rope from 0x24 bytes of spawn data: 20 nodes hanging from topY down to bottomY. */
 Rope *func_151ACBD4(void *spawn, s32 extraSize) {
     Rope *rope;
-    TextureInfo *tex;
+    EffectTexture *tex;
     s32 i;
     s32 segments;
     s32 buf;
@@ -660,9 +647,9 @@ Rope *func_151AE590(u8 id) {
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            rope = D_800DCE50[j][D_800A9270[i]];
+            rope = (Rope *)D_800DCE50[j][D_800A9270[i]];
             while (rope != NULL) {
-                Rope *next = rope->next;
+                Rope *next = (Rope *)rope->header.next;
 
                 if (rope->id == id) {
                     return rope;

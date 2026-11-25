@@ -11,7 +11,7 @@ void func_15010780(void) {
 
 void func_15010880(void) {
     struct177 tmp;
-    struct260 *temp_v0;
+    TimedEffect *temp_v0;
     s32 base;
 
     func_15177410(0x10, 0xE9, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98, 36.0f, 0x4D, 0xF, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F);
@@ -34,7 +34,7 @@ dummy_label_15010880:
 // NON-MATCHING: ops in wrong order
 // void func_15010880(void) {
 //     struct177 tmp;
-//     struct37 *temp_v0;
+//     TimedEffect *temp_v0;
 
 //     func_15177410(0x10, 0xE9, -437, 0x463, -0xCBF, 90.0f, 15000, 36.0f, 0x4D, 15, 127, 127, 127, 127, 127, 127);
 //     D_800E0934 = func_150DE32C;
@@ -53,14 +53,13 @@ dummy_label_15010880:
 // }
 
 void func_150109D0(void) {
-    struct179 tmp;
+    RopeSpawn tmp;
 
     tmp.unk20 = 0;  
-    //D_80096430 listed as (struct180*), but used as (struct180) here;
-    tmp.unk4 = *((struct180*) &D_80096430); 
+    tmp.ends = D_80096430;
 
-    tmp.unk0 = 1;
-    tmp.unk1C = fabsf(tmp.unk4.unk4 - tmp.unk4.unk10); 
+    tmp.id = 1;
+    tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y); 
     func_151ACBD4(&tmp, 0);
     func_150E8854();
 }

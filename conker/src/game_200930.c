@@ -4,20 +4,15 @@
 #include "effects.h"
 
 extern void (*D_8008FC70[])(Actor *, s16, Vec3f *);
-extern void *func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void *func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 extern s32 allocate_memory(s32, s32, s32, s32);
 
 void func_1503F404(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-void func_15131828(void *, void *, void *, void *);
+void func_15131828(void *, f32 *, u8 *, u8 *);
 void func_15131958(void *, f32, void *);
 void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 
-typedef struct {
-    s16 v[9];
-} Surf151D3480;
-
-extern f32 D_800DCA24;
 extern s32 func_1000EC24();
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, s32, f32);
 u8 func_15145C90(s32);
@@ -38,9 +33,9 @@ typedef struct {
 } ParticleWobble;
 
 /* Spawns the impact effects (sound, sparks, debris, decal) of a hit at pos travelling along dir. */
-void func_151D3480(Vec3f *pos, Vec3f *dir, Surf151D3480 *surface, u8 kind, u8 arg4, s32 arg5) {
+void func_151D3480(Vec3f *pos, Vec3f *dir, CollisionTri *surface, u8 kind, u8 arg4, s32 arg5) {
     Vec3f hitPos;
-    Surf151D3480 hitSurface;
+    CollisionTri hitSurface;
     u8 hit;
     s32 surfaceId;
     u8 solid;
@@ -302,33 +297,33 @@ void func_151D3E6C(Actor *obj, f32 *a, f32 *b, s32 arg3) {
 }
 
 void func_151D3F14(Vec3f *pos, u8 arg1, s32 arg2) {
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = (func_150ADA20() % 3U) + 4;
-    header.unk4 = 0;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = (func_150ADA20() % 3U) + 4;
+    header.lightType = 0;
 
-    header2.unk0 = pos->x;
-    header2.unk4 = pos->y;
-    header2.unk8 = pos->z;
+    header2.x = pos->x;
+    header2.y = pos->y;
+    header2.z = pos->z;
 
     func_151602C0(&header, &header2, (func_150ADA20() % 13U) + 20, 255, 232, 171, 255, 0, 0, arg1, arg2);
 }
 
 void func_151D3FF4(Vec3f *pos, u8 arg1, s32 arg2) {
-    Header header;
-    Header2 header2;
+    LightEffectHeader header;
+    Vec3i header2;
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = (func_150ADA20() % 11U) + 20;
-    header.unk4 = 0;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = (func_150ADA20() % 11U) + 20;
+    header.lightType = 0;
 
-    header2.unk0 = pos->x;
-    header2.unk4 = pos->y;
-    header2.unk8 = pos->z;
+    header2.x = pos->x;
+    header2.y = pos->y;
+    header2.z = pos->z;
 
     func_151602C0(&header, &header2, (func_150ADA20() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
 }
@@ -436,12 +431,6 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     func_15132A4C(&p, 3, 255, 0, arg5, arg6);
 }
 
-/* Identifies an object; uniqueId tells a reused slot apart. */
-typedef struct {
-    Actor *obj;
-    u8 uniqueId;
-} ObjHandle;
-
 /* Effect user data that follows a point on an object, computed by D_8008FC70[posFunc]. */
 typedef struct {
     /* 0x00 */ Actor *obj;
@@ -455,9 +444,9 @@ typedef struct {
 
 /* Sends message 0x3C (handled by func_151D4C38) for obj's attached effects. */
 void func_151D4668(Actor *obj) {
-    ObjHandle handle;
+    ActorRef handle;
 
-    handle.obj = obj;
+    handle.actor = obj;
     handle.uniqueId = obj->unique_id;
     func_151494E0((s32)&handle, 0x3C);
 }
@@ -471,7 +460,7 @@ void func_151D469C(obj, posFunc, arg2, arg3, arg4)
     s32 arg4;
 {
     ObjEmitter emitter;
-    struct260 *effect;
+    TimedEffect *effect;
 
     emitter.obj = obj;
     emitter.uniqueId = obj->unique_id;
@@ -497,25 +486,9 @@ void func_151D469C(obj, posFunc, arg2, arg3, arg4)
     }
 }
 
-/* User data of a puff spawned by func_151D4794 (object + 0xA8). */
-typedef struct {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ u8 unk2;
-    /* 0x3 */ u8 unk3;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ f32 unk8;
-    /* 0xC */ f32 unkC;
-} Extra151D4794;
-
 /* An effect created by func_151D469C; its user data is an ObjEmitter. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ObjEmitter emitter;
 } EmitterEffect;
 
@@ -535,7 +508,7 @@ void func_151D4794(EmitterEffect *effect) {
     emitter = &effect->emitter;
     wasValid = effect->emitter.flags & 1;
     if (obj->interaction_state == 0 || obj->unique_id != emitter->uniqueId) {
-        effect->unkE = -1;
+        effect->base.header.state = -1;
         return;
     }
     if (obj->unk1D4 != NULL && (obj->unk74 & 0xF) != 0xF) {
@@ -552,10 +525,10 @@ void func_151D4794(EmitterEffect *effect) {
         emitter->spawnTimer += (0.200000003f + func_150ADA68() * 0.2090000063f) * D_800BE9A4;
         if (emitter->spawnTimer > 1.0f) {
             ParticleDesc spawn;
-            Extra151D4794 extra;
+            WobbleData extra;
             void *ret;
 
-            extra.unkC = 0.9156860113f;
+            extra.drag = 0.9156860113f;
             spawn.texture = 108;
             spawn.renderMode = 0x5103;
             spawn.unk0 = 0x200005;
@@ -595,19 +568,19 @@ void func_151D4794(EmitterEffect *effect) {
                 spawn.vel.x = diff.x * D_800BE9A8 * 0.2980000079f;
                 spawn.vel.y = diff.y * D_800BE9A8 * 0.2980000079f;
                 spawn.vel.z = diff.z * D_800BE9A8 * 0.2980000079f;
-                extra.unk0 = func_150ADA20() & 0xFF;
-                extra.unk1 = func_150ADA20() & 0xFF;
-                extra.unk2 = func_150ADA20() % 5U + 4;
-                extra.unk3 = func_150ADA20() % 5U + 4;
-                extra.unk4 = func_150ADA68() * 6.0f;
-                extra.unk8 = func_150ADA68() * 6.0f;
+                extra.phase[0] = func_150ADA20() & 0xFF;
+                extra.phase[1] = func_150ADA20() & 0xFF;
+                extra.phaseStep[0] = func_150ADA20() % 5U + 4;
+                extra.phaseStep[1] = func_150ADA20() % 5U + 4;
+                extra.amplitude[0] = func_150ADA68() * 6.0f;
+                extra.amplitude[1] = func_150ADA68() * 6.0f;
                 spawn.gravity = func_150ADA68() * 0.1800000072f + 0.1300000101f;
                 spawn.flags &= ~0xC0;
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
                 spawn.alpha = func_150ADA20() % 61U + 60;
                 spawn.timer = func_150ADA20() % 11U + 70;
                 spawn.width = spawn.height = func_150ADA68() * 40.0f + 40.0f;
-                ret = func_15130280(&spawn, 1, 0, sizeof(extra), effect->unkC, effect->unk1);
+                ret = func_15130280(&spawn, 1, 0, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
                 if (ret != NULL) {
                     memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
                 }
@@ -619,16 +592,16 @@ void func_151D4794(EmitterEffect *effect) {
 
 /* Effect message handler: 0x3C (see func_151D4668) destroys the effect when it belongs to the given
    object; 4 marks its tracked point as invalid. */
-void func_151D4C38(EmitterEffect *effect, ObjHandle *handle, u8 msg) {
+void func_151D4C38(EmitterEffect *effect, ActorRef *handle, u8 msg) {
     ObjEmitter *emitter;
 
     emitter = &effect->emitter;
     if (msg == 0x3C) {
-        if ((handle->obj == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
-            func_1516972C((struct102 *)effect);
+        if ((handle->actor == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
+            func_1516972C(&effect->base.header);
         }
     } else if (msg == 4) {
-        if ((handle->obj == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
+        if ((handle->actor == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
             emitter->flags &= ~1;
         }
     block_151D4C38: // matching: an empty labelled statement keeps the flag store out of the branch delay slot
@@ -638,20 +611,20 @@ void func_151D4C38(EmitterEffect *effect, ObjHandle *handle, u8 msg) {
     }
 }
 
-/* A smoke puff spawned by func_151D4794, with its Extra151D4794 user data. */
+/* A smoke puff spawned by func_151D4794, with its WobbleData user data. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x58];
     /* 0x58 */ u8 unk58[0x50];
-    /* 0xA8 */ Extra151D4794 extra;
+    /* 0xA8 */ WobbleData extra;
 } Puff151D4794;
 
 /* Puff update callback. */
 s32 func_151D4D04(Puff151D4794 *puff, s32 arg1) {
-    Extra151D4794 *extra;
+    WobbleData *extra;
 
     extra = &puff->extra;
-    func_15131828(puff, &extra->unk4, extra, &extra->unk2);
-    func_15131958(puff->unk58, extra->unkC, extra);
+    func_15131828(puff, extra->amplitude, extra->phase, extra->phaseStep);
+    func_15131958(puff->unk58, extra->drag, extra);
     return 1;
 }
 
@@ -809,14 +782,6 @@ void func_151D5334(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s
     }
 }
 
-typedef struct {
-    /* 0x0 */ u8 unk0;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 mask; /* 1 << i */
-    /* 0x6 */ u8 unk6;
-} Header151D5404;
-
 /* User data of the effects func_151D5404 creates. */
 typedef struct {
     /* 0x00 */ Vec3f pos;
@@ -830,7 +795,7 @@ typedef struct {
 /* Creates one func_151D8868 effect for each i in 0..D_80082FA0, with unk2 random in [base, base + range]. */
 void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range, s32 arg6, s32 arg7) {
     Params151D5404 params;
-    Header151D5404 header;
+    RumbleParams header;
     void *effect;
     s32 i;
 
@@ -838,13 +803,13 @@ void func_151D5404(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, s32 base, s32 range
     params.unkC = arg1;
     params.unk10 = arg2;
     params.unk14 = arg3;
-    header.unk0 = 1;
-    header.unk2 = (func_150ADA20() % (u32)((s16)range + 1)) + (s16)base;
-    header.unk4 = 0;
-    header.unk6 = 0;
+    header.flags = 1;
+    header.duration = (func_150ADA20() % (u32)((s16)range + 1)) + (s16)base;
+    header.strength = 0;
+    header.updateKind = 0;
 
     for (i = 0; i < D_80082FA0 + 1; i++) {
-        header.mask = 1 << i;
+        header.playerMask = 1 << i;
         params.index = i;
         effect = func_151D8868(&header, 0x1C, 255, 0);
         if (effect != NULL) {

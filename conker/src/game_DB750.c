@@ -53,17 +53,6 @@ struct Foo150AE36C {
 
 
 
-GLOBAL_ASM(
-glabel func_150AE280
-    lui        $t2, %hi(D_800D3858)
-    lw         $t2, %lo(D_800D3858)($t2)
-    lui        $at, %hi(D_800D3858)
-    sw         $zero, %lo(D_800D3858)($at)
-    b          .L150AE0AC
-     or        $sp, $t2, $zero
-    nop
-    nop
-)
 
 s32 func_150AE2A0(struct Foo150AE280 *arg0) {
     struct Foo150AE280Inner *temp_v0;

@@ -16,24 +16,10 @@ typedef struct EffectObjUnk60 {
     /* 0x20 */ s32 unk20;
 } EffectObjUnk60; /* size 0x24 */
 
-/* An effect object. It is followed in memory by its user data and then its items. */
+/* An effect object (EffectObjHead plus the generic view of its per-handler part). It is followed in memory by
+ * its user data and then its items. */
 typedef struct EffectObj {
-    /* 0x00 */ u8 pad0[0x10];   /* object header */
-    /* 0x10 */ EffectTemplate header;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ u8 unk2D;
-    /* 0x2E */ u8 unk2E;
-    /* 0x2F */ u8 updateKind;   /* index into D_8008A200, 0: none */
-    /* 0x30 */ u8 updateKind2;  /* index into D_8008A23C, 0: none */
-    /* 0x31 */ u8 drawKind;     /* index into D_8008A2A4, 0: none */
-    /* 0x32 */ u8 pad32[2];
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ u8 unk38;
-    /* 0x39 */ u8 pad39[3];
-    /* 0x3C */ s32 unk3C[4];    /* buffers from func_1515D480, one per D_80082FA0 + 1 */
-    /* 0x4C */ s32 unk4C;       /* buffer from func_1515D440 */
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ f32 unk54[3];
+    /* 0x00 */ EffectObjHead head;
     /* 0x60 */ EffectObjUnk60 unk60;
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ u8 *items;
@@ -41,7 +27,6 @@ typedef struct EffectObj {
     /* 0x9C */ u8 pad9C[4];
 } EffectObj; /* size 0xA0 */
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern s32 func_1515D480(s32);
 extern s32 func_1515D440(void);
 extern s32 (*D_8008A200[])(EffectObj *, s8);
@@ -54,37 +39,37 @@ void func_15147740(EffectObj *obj) {
     s8 dead;
 
     dead = FALSE;
-    if (obj->header.flags & 1) {
-        obj->header.life -= D_800BE9E4;
-        if (obj->header.life < 0) {
+    if (obj->head.tmpl.flags & 1) {
+        obj->head.tmpl.life -= D_800BE9E4;
+        if (obj->head.tmpl.life < 0) {
             dead = TRUE;
         }
     }
 
-    if (obj->updateKind >= 15) {
-        func_1516972C((struct102 *)obj);
+    if (obj->head.updateKind >= 15) {
+        func_1516972C(&obj->head.header);
         return;
     }
-    if (obj->updateKind != 0 && !dead) {
-        if (D_8008A200[obj->updateKind](obj, dead) == 0) {
+    if (obj->head.updateKind != 0 && !dead) {
+        if (D_8008A200[obj->head.updateKind](obj, dead) == 0) {
             dead = TRUE;
         }
     }
 
-    if (obj->updateKind2 >= 18) {
-        func_1516972C((struct102 *)obj);
+    if (obj->head.updateKind2 >= 18) {
+        func_1516972C(&obj->head.header);
         return;
     }
-    if (obj->updateKind2 != 0 && !dead) {
-        if (D_8008A23C[obj->updateKind2](obj, dead) == 0) {
+    if (obj->head.updateKind2 != 0 && !dead) {
+        if (D_8008A23C[obj->head.updateKind2](obj, dead) == 0) {
             dead = TRUE;
         }
     }
 
-    if (obj->header.flags & 0x10) {
-        kind = obj->header.unk14;
+    if (obj->head.tmpl.flags & 0x10) {
+        kind = obj->head.tmpl.unk14;
         if (kind < -1 || kind >= 8) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C(&obj->head.header);
             return;
         }
         if (kind != -1 && !dead) {
@@ -95,7 +80,7 @@ void func_15147740(EffectObj *obj) {
     }
 
     if (dead) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C(&obj->head.header);
     }
 }
 
@@ -111,14 +96,14 @@ extern void func_1514795C(EffectObj *);
 void func_151478F4(EffectObj *obj) {
     func_151478D0(obj);
     func_1514795C(obj);
-    func_15169804((struct102 *)obj);
+    func_15169804(&obj->head.header);
 }
 
 /* Frees the object's buffers, then hands it to func_15169824. */
 void func_15147928(EffectObj *obj) {
     func_151478D0(obj);
     func_1514795C(obj);
-    func_15169824((struct102 *)obj);
+    func_15169824(&obj->head.header);
 }
 
 /* Frees the buffers func_15147A80 allocated. */
@@ -126,13 +111,13 @@ void func_1514795C(EffectObj *obj) {
     s32 i;
 
     for (i = 0; i <= D_80082FA0; i++) {
-        if (obj->unk3C[i] != 0) {
-            func_100043B4((s32 *)obj->unk3C[i], 4);
+        if (obj->head.model.handles[i] != 0) {
+            func_100043B4((s32 *)obj->head.model.handles[i], 4);
         }
     }
 
-    if (obj->unk4C != 0) {
-        func_100043B4((s32 *)obj->unk4C, 4);
+    if (obj->head.model.sharedHandle != 0) {
+        func_100043B4((s32 *)obj->head.model.sharedHandle, 4);
     }
 }
 
@@ -140,7 +125,7 @@ extern void (*D_8008A2F0[])(EffectObj *);
 
 /* Runs the D_8008A2F0 handler for header.kind (out-of-range kinds use handler 0). */
 void func_151479E0(EffectObj *obj) {
-    s32 kind = obj->header.kind;
+    s32 kind = obj->head.tmpl.kind;
 
     if (kind < 0) {
         kind = 0;
@@ -154,7 +139,7 @@ extern void (*D_8008A340[])(EffectObj *);
 
 /* Runs the D_8008A340 handler for header.kind (out-of-range kinds use handler 0). */
 void func_15147A30(EffectObj *obj) {
-    s32 kind = obj->header.kind;
+    s32 kind = obj->head.tmpl.kind;
 
     if (kind < 0) {
         kind = 0;
@@ -186,13 +171,13 @@ EffectObj *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32
 
     obj->userData = (u8 *)obj + sizeof(EffectObj);
     obj->items = obj->userData + dataSize;
-    memcpy(&obj->header, header, sizeof(EffectTemplate));
-    obj->unk2C = 0;
-    obj->unk2D = 0;
-    obj->unk2E = 0;
-    obj->updateKind = updateKind;
-    obj->updateKind2 = updateKind2;
-    obj->drawKind = drawKind;
+    memcpy(&obj->head.tmpl, header, sizeof(EffectTemplate));
+    obj->head.count = 0;
+    obj->head.start = 0;
+    obj->head.end = 0;
+    obj->head.updateKind = updateKind;
+    obj->head.updateKind2 = updateKind2;
+    obj->head.drawKind = drawKind;
 
     if (arg8 != NULL) {
         obj->unk60 = *arg8;
@@ -200,25 +185,25 @@ EffectObj *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32
         obj->unk60.unk1C = 0;
     }
 
-    obj->unk34 = arg6;
-    obj->unk50 = arg7;
-    obj->unk38 = 0;
+    obj->head.model.model = arg6;
+    obj->head.model.unk1C = arg7;
+    obj->head.model.unk4 = 0;
 
     for (i = 0; i < 4; i++) {
-        obj->unk3C[i] = 0;
+        obj->head.model.handles[i] = 0;
     }
-    obj->unk4C = 0;
+    obj->head.model.sharedHandle = 0;
 
     if (arg6 != 0) {
         for (i = 0; i <= D_80082FA0; i++) {
-            obj->unk3C[i] = func_1515D480(arg6);
+            obj->head.model.handles[i] = func_1515D480(arg6);
         }
-        obj->unk4C = func_1515D440();
+        obj->head.model.sharedHandle = func_1515D440();
     }
 
-    obj->unk54[0] = 0.0f;
-    obj->unk54[1] = 0.0f;
-    obj->unk54[2] = 0.0f;
+    obj->head.modelPos.x = 0.0f;
+    obj->head.modelPos.y = 0.0f;
+    obj->head.modelPos.z = 0.0f;
     bzero(obj->unk84, sizeof(obj->unk84));
     return obj;
 }
@@ -230,18 +215,18 @@ extern void *(*D_8008A2A4[])(EffectObj *, void *, s16);
 void *func_15147C4C(void *gfx, EffectObj *obj, s16 arg2) {
     void *unk18;
 
-    if (obj->header.flags & 0x20) {
-        unk18 = obj->header.unk18;
+    if (obj->head.tmpl.flags & 0x20) {
+        unk18 = obj->head.tmpl.unk18;
     } else {
         unk18 = NULL;
     }
-    gfx = func_151462C8(gfx, &obj->unk34, 0, NULL, 0, arg2, obj->unk54, 2, unk18);
-    if (obj->drawKind >= 19) {
-        func_1516972C((struct102 *)obj);
+    gfx = func_151462C8(gfx, &obj->head.model, 0, NULL, 0, arg2, &obj->head.modelPos, 2, unk18);
+    if (obj->head.drawKind >= 19) {
+        func_1516972C(&obj->head.header);
         return gfx;
     }
-    if (obj->drawKind != 0) {
-        return D_8008A2A4[obj->drawKind](obj, gfx, arg2);
+    if (obj->head.drawKind != 0) {
+        return D_8008A2A4[obj->head.drawKind](obj, gfx, arg2);
     }
     return gfx;
 }
@@ -250,7 +235,7 @@ extern void (*D_8008A390[])(EffectObj *, s32, u8);
 
 /* Runs the optional D_8008A390 handler for header.kind. */
 void func_15147D1C(EffectObj *obj, s32 arg1, u8 arg2) {
-    void (*handler)(EffectObj *, s32, u8) = D_8008A390[obj->header.kind];
+    void (*handler)(EffectObj *, s32, u8) = D_8008A390[obj->head.tmpl.kind];
 
     if (handler != NULL) {
         handler(obj, arg1, arg2);

@@ -10,8 +10,7 @@ typedef struct {
 } EmitterData;
 
 typedef struct {
-    EffectHeader head;
-    u8 pad10[0x18];
+    TimedEffect base;
     EmitterData data;
 } EmitterEffect;
 
@@ -36,29 +35,17 @@ void func_150B1E20(Camera *camera) {
 /* Spawns an emitter effect (func_150B1F90) at `pos` with a random duration of 69-201. */
 void func_150B1EE0(EffectHeader *spawner, Vec3f *pos, s32 arg2, s32 arg3) {
     EmitterData data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     data.pos = *pos;
     data.accum = 0.0f;
 
-    // the header's struct37 * parameter is really the size of the effect's data
     effect = func_15149130(func_150ADA20() % 133U + 69, -1, 0x49, -1, 1, 0, sizeof(data),
                            spawner->owner, spawner->kind);
     if (effect != NULL) {
         memcpy(&((EmitterEffect *)effect)->data, &data, sizeof(data));
     }
 }
-
-/* Extra data copied to +0xA8 of each spawned particle. */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} ParticleExtra;
 
 extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
@@ -71,10 +58,10 @@ void func_150B1F90(EmitterEffect *effect) {
     data->accum += (0.07859999686f + func_150ADA68() * 0.03460000083f) * D_800BE9A4;
     if (data->accum > 1.0f) {
         ParticleDesc spawn;
-        ParticleExtra extra;
+        WobbleData extra;
         void *particle;
 
-        extra.unkC = 0.9794009924f;
+        extra.drag = 0.9794009924f;
         spawn.texture = 0x6C;
         spawn.renderMode = 0x5103;
         spawn.unk0 = 0x200005;
@@ -84,8 +71,8 @@ void func_150B1F90(EmitterEffect *effect) {
         spawn.primColorMode = 8;
         spawn.envColorMode = 6;
         spawn.updateFunc = 0x16;
-        extra.unk0 = 0;
-        extra.unk1 = 0;
+        extra.phase[0] = 0;
+        extra.phase[1] = 0;
         spawn.unk4 = 0;
         spawn.frame = 0;
         spawn.frameRate = 0;
@@ -110,17 +97,17 @@ void func_150B1F90(EmitterEffect *effect) {
         spawn.vel.y = 0.0f;
         spawn.vel.z = 0.0f;
         do {
-            extra.unk2 = func_150ADA20() % 5U + 4;
-            extra.unk3 = func_150ADA20() % 5U + 4;
-            extra.unk4 = func_150ADA68() * 27.0f;
-            extra.unk8 = func_150ADA68() * 27.0f;
+            extra.phaseStep[0] = func_150ADA20() % 5U + 4;
+            extra.phaseStep[1] = func_150ADA20() % 5U + 4;
+            extra.amplitude[0] = func_150ADA68() * 27.0f;
+            extra.amplitude[1] = func_150ADA68() * 27.0f;
             spawn.gravity = func_150ADA68() * 0.2090000063f + 0.1350000054f;
             spawn.flags &= ~0xC0;
             spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
             spawn.alpha = func_150ADA20() % 101U + 100;
             spawn.timer = func_150ADA20() % 78U + 126;
             spawn.width = spawn.height = func_150ADA68() * 503.0f + 405.0f;
-            particle = func_15130280(&spawn, 1, 0, 0x10, effect->head.owner, effect->head.kind);
+            particle = func_15130280(&spawn, 1, 0, 0x10, effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
             }

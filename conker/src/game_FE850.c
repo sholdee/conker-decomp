@@ -59,7 +59,7 @@ void func_150D146C(s32 arg0) {
 extern f32 D_800A08C0;
 
 typedef struct {
-    u8 pad0[0x28];
+    TimedEffect base;
     /* 0x28 */ f32 unk28;
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;

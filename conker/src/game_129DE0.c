@@ -2,11 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
-/* An effect that holds a struct102 at 0x38 (see func_150FC974). */
+/* An effect that holds a EffectHeader at 0x38 (see func_150FC974). */
 typedef struct {
-    /* 0x00 */ struct260 base;
-    /* 0x24 */ u8 pad24[0x14];
-    /* 0x38 */ struct102 *unk38;
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ u8 pad28[0x10];
+    /* 0x38 */ EffectHeader *unk38;
 } Effect_129DE0;
 
 /* D_80086C90 object filter: rejects objects with id 0x12, 0x23, 0x73 or 0x8A. */
@@ -19,10 +19,10 @@ s32 func_150FC930(Actor *obj, s32 arg1, s32 arg2) {
     return TRUE;
 }
 
-/* Passes the effect's struct102 at 0x38, if any, to func_1516972C. */
+/* Passes the effect's EffectHeader at 0x38, if any, to func_1516972C. */
 void func_150FC974(Effect_129DE0 *effect) {
     // matching: IDO copies the arg to $a1 and reloads unk38 for the call only through a pointer to the field
-    struct102 **slot = &effect->unk38;
+    EffectHeader **slot = &effect->unk38;
 
     if (*slot != NULL) {
         func_1516972C(*slot);

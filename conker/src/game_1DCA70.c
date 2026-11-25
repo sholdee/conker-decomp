@@ -12,24 +12,16 @@ typedef struct {
     /* 0x04 */ f32 growRate;     // size gained per frame
 } SprayGrowth;
 
-/* Ground probe result filled by func_1504715C / func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ f32 unk04[6];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 pad1D[7];
-} GroundHit; /* size 0x24 */
-
 void func_15143134(f32 *, f32 *, Mtx *);
-void func_1504715C(GroundHit *, Actor *);
-s32 func_15046C80(f32 *, s32, f32, GroundHit *);
+void func_1504715C(CollisionHit *, Actor *);
+s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 
 /*
  * Transforms the fixed offset for `side` (1 or 2) by that side's bone matrix of the actor
  * (bone 32 or 25) into `pos`.
  * If `ground` is non-NULL, also probes the ground below that point into it.
  */
-s32 func_151AF5C0(f32 *pos, Actor *actor, GroundHit *ground, u8 side) {
+s32 func_151AF5C0(f32 *pos, Actor *actor, CollisionHit *ground, u8 side) {
     f32 probe[3];
     f32 *offset;
     Mtx *bone;
@@ -77,9 +69,8 @@ typedef struct {
 
 /* The spray particle func_151AF6D4 spawns; updated by func_151AFC08. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ ParticleDef desc; // copy of the spawn descriptor
-    /* 0x070 */ u8 pad70[0xB8];
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x18];
     /* 0x128 */ SprayGrowth growth;
 } SprayParticle;
 
@@ -93,7 +84,7 @@ void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6
  */
 void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
     f32 pos[3];
-    GroundHit ground;
+    CollisionHit ground;
     f32 fr;
     f32 fg;
     f32 fb;
@@ -172,7 +163,7 @@ void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
     desc.unk46 = 0;
     desc.unk47 = 6;
     particle = func_1513D668(&desc, colors, 0, 0x16, 0, 0, (actor->unk7A >> 8) - ((side == 1) ? -10 : 10),
-                             500.0f, 500.0f, 0, ground.unk04, 1, 8, 0xFF, 0);
+                             500.0f, 500.0f, 0, (s32)&ground.tri, 1, 8, 0xFF, 0);
     if (particle != NULL) {
         memcpy(&particle->growth, &growth, sizeof(growth));
     }
@@ -181,22 +172,14 @@ void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
                   0, 0xFF, roll, 16, 0, 0.0f, NULL, 0xFF);
 }
 
-/* Particle updated by func_151AFBD4. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s16 timer;
-    /* 0x1E */ u8 pad1E[0xA];
-    /* 0x28 */ u8 alpha;
-} FadeParticle;
-
-/* Fades the particle out over the last 32 frames of its timer. */
-s32 func_151AFBD4(FadeParticle *particle) {
+/* QuadSprite update: fades the sprite (def.unk10) out over the last 32 frames of its lifetime. */
+s32 func_151AFBD4(QuadSprite *sprite) {
     s32 fade;
 
-    if (particle->timer < 32) {
-        fade = particle->timer * 8;
-        if (fade < particle->alpha) {
-            particle->alpha = fade;
+    if (sprite->def.lifetime < 32) {
+        fade = sprite->def.lifetime * 8;
+        if (fade < sprite->def.unk10) {
+            sprite->def.unk10 = fade;
         }
     }
     return 1;
@@ -214,20 +197,20 @@ s32 func_151AFC08(SprayParticle *spray) {
     ParticleDef *desc;
     SprayGrowth *growth;
 
-    if (spray->desc.flags & 1) {
-        desc = &spray->desc;
+    if (spray->head.def.flags & 1) {
+        desc = &spray->head.def;
         growth = &spray->growth;
-        if (spray->desc.lifetime < 32) {
-            if (spray->desc.lifetime * 8 < spray->desc.unk44) {
+        if (spray->head.def.lifetime < 32) {
+            if (spray->head.def.lifetime * 8 < spray->head.def.unk44) {
                 // matching: a store through a second pointer makes IDO reload life afterwards
-                desc->unk44 = spray->desc.lifetime * 8;
+                desc->unk44 = spray->head.def.lifetime * 8;
             }
         }
-        if (growth->growEndTimer < spray->desc.lifetime) {
+        if (growth->growEndTimer < spray->head.def.lifetime) {
             f32 grow = growth->growRate * D_800BE9A4;
 
-            spray->desc.width = spray->desc.width + grow;
-            spray->desc.height = spray->desc.height + grow;
+            spray->head.def.width = spray->head.def.width + grow;
+            spray->head.def.height = spray->head.def.height + grow;
         }
     }
     return 1;
@@ -235,11 +218,7 @@ s32 func_151AFC08(SprayParticle *spray) {
 
 /* The spark func_151AFC88 spawns; updated by func_151AFEA4. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ f32 unk60;
-    /* 0x64 */ u8 pad64[0x44];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 damping; // per-frame factor applied to unk58 and unk60
 } Spark;
 
@@ -316,8 +295,8 @@ s32 func_151AFEA4(Spark *spark, s32 arg1) {
 
     damping = &spark->damping;
     for (frames = D_800BE9E4; frames != 0; frames--) {
-        spark->unk58 *= *damping;
-        spark->unk60 *= *damping;
+        spark->head.desc.vel.x *= *damping;
+        spark->head.desc.vel.z *= *damping;
     }
     return 1;
 }

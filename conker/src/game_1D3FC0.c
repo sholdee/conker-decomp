@@ -14,20 +14,19 @@ typedef struct ListObj {
     /* 0x38 */ Actor *actor;
 } ListObj;
 
-extern ListObj *D_800DCE50[2][104];
 
-extern void func_151A6AB8(struct210 *);
+extern void func_151A6AB8(struct DefParticleHead *);
 extern void func_1505D024(Actor *, s32, u16, s32);
 ListObj *func_151A6BD8(s32 owner);
 
-void func_151A6B10(struct210 *arg0) {
-    func_151A6AB8(arg0);
-    func_1513CA6C(arg0);
+void func_151A6B10(struct DefParticleHead *obj) {
+    func_151A6AB8(obj);
+    func_1513CA6C(obj);
 }
 
-void func_151A6B3C(struct210 *arg0) {
-    func_151A6AB8(arg0);
-    func_1513CAA0(arg0);
+void func_151A6B3C(struct DefParticleHead *obj) {
+    func_151A6AB8(obj);
+    func_1513CAA0(obj);
 }
 
 /* Sends message 0x60034 to `target` with its facing angle and the index of the actor owned by `owner`
@@ -59,7 +58,7 @@ ListObj *func_151A6BD8(s32 owner) {
 
     for (i = 0; i < 2; i++) {
         for (list = 0; list < 2; list++) {
-            for (obj = D_800DCE50[list][D_800A5770[i]]; obj != NULL; obj = obj->next) {
+            for (obj = (ListObj *)D_800DCE50[list][D_800A5770[i]]; obj != NULL; obj = obj->next) {
                 if (obj->type == 0x2C && owner == obj->owner) {
                     return obj;
                 }

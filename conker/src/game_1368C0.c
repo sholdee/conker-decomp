@@ -4,7 +4,7 @@
 #include "effects.h"
 
 /*
- * Object-attached particle emitters: effects 0x1A, 0x1B and 0x1C (struct260s with their own data
+ * Object-attached particle emitters: effects 0x1A, 0x1B and 0x1C (TimedEffects with their own data
  * at 0x28), the per-frame updates that emit their particles, and their spawn callbacks.
  */
 
@@ -36,24 +36,10 @@ typedef struct {
     /* 0x10 */ f32 spawnRateRandom; /* added to spawnRate scaled by a random [0, 1) */
 } PairEmitterData; /* size 0x14 */
 
-/* Head shared by the data of the effects that follow an object. */
 typedef struct {
-    /* 0x00 */ Actor *object;
-    /* 0x04 */ u8 objectId;
-} TrackedObject;
-
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state; /* -1 ends the effect */
-    /* 0x10 */ u8 pad10[0x13 - 0x10];
-    /* 0x13 */ u8 unk13; /* compared with 0x1A, probably the effect's type */
-    /* 0x14 */ u8 pad14[0x28 - 0x14];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ union {
-        TrackedObject tracked;
+        ActorRef tracked;
         ObjectEmitterData object;
         MatrixEmitterData matrix;
         PairEmitterData pair;
@@ -65,14 +51,6 @@ typedef struct {
     /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ f32 unkA8;
 } Particle1368C0;
-
-/* Payload of message 0x2D: two objects trade places. */
-typedef struct {
-    /* 0x00 */ Actor *from;
-    /* 0x04 */ Actor *to;
-    /* 0x08 */ u8 fromId;
-    /* 0x09 */ u8 toId;
-} ObjectSwapMessage;
 
 /* Emission segments of effect 0x1A: particles start on segment i (D_800A24B0[i] to
  * D_800A24B0[i + 1]), picked with weight D_800A2504[i]; D_800A2504[6] is the weight total. */
@@ -105,7 +83,7 @@ extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f
  * Creates effect 0x1A on `object`, lasting `duration` frames (negative: 300), emitting
  * particles at `spawnRate` through D_80088C64[emitFunc]. `extraSize` more data bytes are reserved.
  */
-struct260 *func_15109410(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
+TimedEffect *func_15109410(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
                          u8 owner, s32 kind) {
     Effect1368C0 *effect;
     ObjectEmitterData data;
@@ -136,7 +114,7 @@ struct260 *func_15109410(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, 
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
-    return (struct260 *)effect;
+    return &effect->base;
 }
 
 /*
@@ -161,7 +139,7 @@ void func_151094FC(Effect1368C0 *effect) {
     data = &effect->data.object;
     object = data->object;
     if (object->interaction_state == 0 || object->unique_id != data->objectId) {
-        effect->state = -1;
+        effect->base.header.state = -1;
         return;
     }
     data->spawnAccum += data->spawnRate * D_800A2504[6] * D_800BE9A4;
@@ -247,7 +225,7 @@ void func_15109848(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     spawn.deathFunc = -1;
     spawn.drawFunc = -1;
     spawn.handlerSet = 4;
-    func_15130374(&spawn, 1, 0, effect->owner, effect->kind);
+    func_15130374(&spawn, 1, 0, effect->base.header.owner, effect->base.header.kind);
 
     emitter.countBase = 1;
     emitter.countRange = 4;
@@ -301,7 +279,7 @@ void func_15109848(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     emitter.unk39 = 0;
     emitter.unk72 = -1;
     emitter.unk73 = -1;
-    func_15152B38(&emitter, effect->owner, effect->kind);
+    func_15152B38(&emitter, effect->base.header.owner, effect->base.header.kind);
 }
 
 /* Particle emitter: a randomly sized and spun piece of debris thrown along `dir` from `point`. */
@@ -312,7 +290,7 @@ void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     s32 pad98;
     ParticleSpawn78 debris;
 
-    object = effect->data.tracked.object;
+    object = effect->data.tracked.actor;
     speed = (func_150ADA68() * 4611.0f + 1581.0f) * 0.001000000047f;
     debris.radius = 1.0f;
     debris.elasticity = 1.0f;
@@ -351,7 +329,7 @@ void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     debris.destroyFn = 0;
     debris.squashFn = 0;
     debris.matrixFn = 2;
-    if (effect->unk13 == 0x1A) { /* emitted by effect 0x1A (func_151094FC) */
+    if (effect->base.callbackSet == 0x1A) { /* emitted by effect 0x1A (func_151094FC) */
         debris.unk6A = 1;
     } else {
         debris.unk6A = 2;
@@ -361,14 +339,14 @@ void func_15109C20(Effect1368C0 *effect, Vec3f *point, Vec3f *start, Vec3f *end,
     debris.fadeStart = 10;
     debris.fadeRate = 25;
 
-    func_15132A4C(&debris, 3, 0xFF, 0, effect->owner, effect->kind);
+    func_15132A4C(&debris, 3, 0xFF, 0, effect->base.header.owner, effect->base.header.kind);
 }
 
 /*
  * Creates effect 0x1B for `arg0`, lasting `duration` frames (negative: 300), emitting particles at
  * `spawnRate` through D_80088C64[emitFunc]. `extraSize` more data bytes are reserved.
  */
-struct260 *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
+TimedEffect *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
                          u8 owner, s32 kind) {
     Effect1368C0 *effect;
     MatrixEmitterData data;
@@ -398,7 +376,7 @@ struct260 *func_15109ED4(void *arg0, s16 duration, s8 tickFunc, s8 emitFunc, f32
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
-    return (struct260 *)effect;
+    return &effect->base;
 }
 
 /*
@@ -459,7 +437,7 @@ void func_15109FB8(Effect1368C0 *effect) {
 }
 
 /* Creates effect 0x1C on `object`, lasting `duration` frames. */
-struct260 *func_1510A344(Actor *object, s32 duration, u8 owner, s32 kind) {
+TimedEffect *func_1510A344(Actor *object, s32 duration, u8 owner, s32 kind) {
     Effect1368C0 *effect;
     PairEmitterData data;
 
@@ -477,7 +455,7 @@ struct260 *func_1510A344(Actor *object, s32 duration, u8 owner, s32 kind) {
     if (effect != NULL) {
         memcpy(&effect->data, &data, sizeof(data));
     }
-    return (struct260 *)effect;
+    return &effect->base;
 }
 
 /*
@@ -499,7 +477,7 @@ void func_1510A40C(Effect1368C0 *effect) {
     data = &effect->data.pair;
     object = data->object;
     if (object->interaction_state == 0 || object->unique_id != data->objectId) {
-        effect->state = -1;
+        effect->base.header.state = -1;
         return;
     }
     data->spawnAccum += (data->spawnRate + func_150ADA68() * data->spawnRateRandom) * D_800BE9A4;
@@ -565,7 +543,7 @@ void func_1510A40C(Effect1368C0 *effect) {
             spawn.vel.x = dirs[side].x * speed;
             spawn.vel.y = dirs[side].y * speed;
             spawn.vel.z = dirs[side].z * speed;
-            particle = func_15130374(&spawn, 1, sizeof(extra), effect->owner, effect->kind);
+            particle = func_15130374(&spawn, 1, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->unkA8, &extra, sizeof(extra));
             }
@@ -579,31 +557,31 @@ void func_1510A40C(Effect1368C0 *effect) {
 }
 
 /* Message handler: on message 0x2D (two objects swapped), moves the effect to the other object. */
-void func_1510A870(Effect1368C0 *effect, ObjectSwapMessage *msg, u8 msgType) {
-    TrackedObject *tracked = &effect->data.tracked;
+void func_1510A870(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
+    ActorRef *tracked = &effect->data.tracked;
 
     if (msgType == 0x2D) {
-        if (tracked->object == msg->from) {
-            tracked->object = msg->to;
-            tracked->objectId = msg->toId;
-        } else if (tracked->object == msg->to) {
-            tracked->object = msg->from;
-            tracked->objectId = msg->fromId;
+        if (tracked->actor == msg->actorA) {
+            tracked->actor = msg->actorB;
+            tracked->uniqueId = msg->idB;
+        } else if (tracked->actor == msg->actorB) {
+            tracked->actor = msg->actorA;
+            tracked->uniqueId = msg->idA;
         }
     }
 }
 
 /* Message handler: the same as func_1510A870. */
-void func_1510A8CC(Effect1368C0 *effect, ObjectSwapMessage *msg, u8 msgType) {
-    TrackedObject *tracked = &effect->data.tracked;
+void func_1510A8CC(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
+    ActorRef *tracked = &effect->data.tracked;
 
     if (msgType == 0x2D) {
-        if (tracked->object == msg->from) {
-            tracked->object = msg->to;
-            tracked->objectId = msg->toId;
-        } else if (tracked->object == msg->to) {
-            tracked->object = msg->from;
-            tracked->objectId = msg->fromId;
+        if (tracked->actor == msg->actorA) {
+            tracked->actor = msg->actorB;
+            tracked->uniqueId = msg->idB;
+        } else if (tracked->actor == msg->actorB) {
+            tracked->actor = msg->actorA;
+            tracked->uniqueId = msg->idA;
         }
     }
 }

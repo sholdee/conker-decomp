@@ -12,9 +12,7 @@ typedef struct {
 
 /* The object func_150BDE90 creates; func_150BDF0C is its per-frame update. */
 typedef struct {
-    /* 0x00 */ u8  pad0[0xC];
-    /* 0x0C */ u8  unkC;
-    /* 0x0D */ u8  padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EB340Spawn spawn;
 } EB340Obj;
 
@@ -93,7 +91,7 @@ void func_150BDF0C(EB340Obj *obj) {
         payload.unkD = 0;
         payload.unkC = 0;
         payload.unk10 = (func_150ADA68() * 4.06400013f) + 2.513000011f;
-        effect = func_1515548C(&emitter, 10, 0, 0, sizeof(emitter), obj->unkC, 0);
+        effect = func_1515548C(&emitter, 10, 0, 0, sizeof(emitter), obj->base.header.owner, 0);
         if (effect != NULL) {
             memcpy((u8 *)effect + 0x70, &payload, sizeof(payload));
         }
@@ -106,13 +104,13 @@ void func_150BDF0C(EB340Obj *obj) {
 void func_150BE150(EB340Obj *obj, void **msg, u8 event) {
     if (event == 0x21) {
         if (obj->spawn.owner == msg[0]) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C(&obj->base.header);
         }
     } else if (event == 0) {
         Actor *sender = msg[0];
 
         if (sender->camera == obj->spawn.owner) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C(&obj->base.header);
         }
     }
 }
@@ -234,10 +232,10 @@ extern s32 D_800A0060[];
 extern f32 D_800A0064[];
 
 void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
-void func_1504715C(void *, Actor *);
-void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
+void func_1504715C(CollisionHit *, Actor *);
+void func_1515080C(DebrisSpray *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, CollisionHit *, f32, s32, s32, u8, s32);
 void func_15152190(DebrisBurst *, s32 *, f32 *, s32, f32, s32, u8, s32);
-void func_15153F18(AngleRange *, SplashSpray *, void *, u8, s32);
+void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 
 /* Spawns the burst of effects at `obj`'s centre: one func_1515080C, one func_15152190
  * and three func_15153F18 particle sets (kinds 0, 2 and 10). */
@@ -246,14 +244,14 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
     f32 radius;
     f32 unk2;
     f32 halfSize;
-    u8 ground[0x24]; // filled by func_1504715C (a ground probe in other files)
+    CollisionHit ground; // the floor under obj
     DebrisSpray primary;
     DebrisBurst secondary;
 
     if (obj != NULL) {
         halfSize = (obj->xz_scale + obj->y_scale) * 0.5f;
         func_1515C244(obj, &pos, &radius, &unk2);
-        func_1504715C(ground, obj);
+        func_1504715C(&ground, obj);
         primary.countBase = 10;
         primary.countRange = 0;
         primary.pos = pos;
@@ -272,7 +270,7 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
         primary.spin = 14.09800053f;
         primary.floorHitChance = 1.0f;
         primary.floorHitFn = 0xB;
-        func_1515080C(&primary, D_800A0010, D_800A0038, 10, 0, 0, 0, 1, -1, ground, 55.0f, 0, 0, arg1, arg2);
+        func_1515080C(&primary, D_800A0010, D_800A0038, 10, 0, 0, 0, 1, -1, &ground, 55.0f, 0, 0, arg1, arg2);
         secondary.countBase = 0x11;
         secondary.countRange = 9;
         secondary.pos = pos;
@@ -317,11 +315,11 @@ void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
             particles.spray.unk40 = 0;
             particles.spray.unk38 = 0.5f;
             particles.spray.kind = 0;
-            func_15153F18(&particles.angles, &particles.spray, ground, arg1, arg2);
+            func_15153F18(&particles.angles, &particles.spray, &ground, arg1, arg2);
             particles.spray.kind = 2;
-            func_15153F18(&particles.angles, &particles.spray, ground, arg1, arg2);
+            func_15153F18(&particles.angles, &particles.spray, &ground, arg1, arg2);
             particles.spray.kind = 10;
-            func_15153F18(&particles.angles, &particles.spray, ground, arg1, arg2);
+            func_15153F18(&particles.angles, &particles.spray, &ground, arg1, arg2);
         }
     }
 }

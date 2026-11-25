@@ -6,8 +6,6 @@
 extern void func_150D6730(Actor *obj, u8 arg1, s32 arg2);
 extern s32 func_15042E3C(char *format, ...);
 extern Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
-extern u32 D_80083740[];
-extern u32 D_800838C0[];
 
 /* Text box data (same layout as TextLines in game_FC5F0.c). */
 typedef struct {
@@ -30,8 +28,7 @@ typedef struct {
 
 /* Text box object created by func_150CFF10 (same layout as TextObj in game_FC5F0.c). */
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ TextLines text;
 } TextObj;
 
@@ -53,16 +50,16 @@ void func_151D6970(Actor *character, void *obj) {
     }
 }
 
-extern void func_1504715C(void *ground, Actor *actor);
-extern void func_15153F18(AngleRange *angles, SplashSpray *spray, void *ground, s32 arg3, s32 arg4);
-extern void func_15150178(AngleRange *angles, DropSpray *spray, void *ground, s32 arg3, s32 arg4);
+extern void func_1504715C(CollisionHit *ground, Actor *actor);
+extern void func_15153F18(AngleRange *angles, SplashSpray *spray, CollisionHit *ground, s32 arg3, s32 arg4);
+extern void func_15150178(AngleRange *angles, DropSpray *spray, CollisionHit *ground, s32 arg3, s32 arg4);
 
 /* Spawns the func_15153F18 and func_15150178 bursts at `pickup`, on the ground under `player`. */
 void func_151D69B4(WorldObject *pickup, Actor *player) {
-    u8 ground[0x24]; // ground probe result (Ground in game_1228D0.c)
+    CollisionHit ground;
     SplashSpraySpec first;
 
-    func_1504715C(ground, player);
+    func_1504715C(&ground, player);
     first.spray.pos.x = pickup->x;
     first.spray.pos.y = pickup->y;
     first.spray.pos.z = pickup->z;
@@ -89,7 +86,7 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
     first.spray.speedBase = 17.0f;
     first.spray.speedRange = 3.5f;
     first.spray.unk38 = 0.400000006f;
-    func_15153F18(&first.angles, &first.spray, ground, 0xFF, 1);
+    func_15153F18(&first.angles, &first.spray, &ground, 0xFF, 1);
     {
         DropSpraySpec second;
 
@@ -117,7 +114,7 @@ void func_151D69B4(WorldObject *pickup, Actor *player) {
         second.spray.gravityRange = 0.8140000105f;
         second.spray.sizeBase = 44.0f;
         second.spray.sizeRange = 88.0f;
-        func_15150178(&second.angles, &second.spray, ground, 0xFF, 1);
+        func_15150178(&second.angles, &second.spray, &ground, 0xFF, 1);
     }
 }
 
@@ -259,7 +256,7 @@ s32 func_151D7000(TextObj *obj) {
         return 0;
     }
 
-    timeLeft = obj->header.state;
+    timeLeft = obj->base.header.state;
     if (timeLeft < style->fadeStart) {
         alpha = timeLeft * style->fadeRate;
         if (alpha < 0) {

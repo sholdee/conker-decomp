@@ -2,20 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Particle spawn region; the low two bits of `flags` pick its shape. */
-typedef struct SpawnRegion {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radiusX; /* circle radius, or the box's half-extent along its local x */
-    /* 0x08 */ s16 height;
-    /* 0x0A */ s16 radiusZ; /* the box's half-extent along its local z */
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ f32 yaw;     /* degrees */
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 flags;
-} SpawnRegion;
-
 f32 sinf(f32);
 f32 cosf(f32);
 
@@ -31,9 +17,9 @@ f32 cosf(f32);
  *   shape 2: box of half-extents radiusX x radiusZ rotated by yaw, y from y to y + height
  *   shape 3: the centre point, y within +-height
  */
-void func_15008340(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
+void func_15008340(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
     // matching: each case's `break` sits after its block (with -g3 its line steers the dispatch scheduling)
-    switch (region->flags & 3) {
+    switch (region->kind & 3) {
     default:
         *x = region->x;
         *z = region->z;
@@ -50,8 +36,8 @@ void func_15008340(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
         angle = region->yaw * DEG_TO_RAD;
         s = sinf(angle);
         c = cosf(angle);
-        dx = RAND_UNIT() * (2.0f * region->radiusX) + -region->radiusX;
-        dz = RAND_UNIT() * (2.0f * region->radiusZ) + -region->radiusZ;
+        dx = RAND_UNIT() * (2.0f * region->radius) + -region->radius;
+        dz = RAND_UNIT() * (2.0f * region->depth) + -region->depth;
         *x = region->x + (dx * c + dz * s);
         *z = region->z + (dz * c - dx * s);
         *top = (f32)region->y + (f32)region->height;
@@ -66,7 +52,7 @@ void func_15008340(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
         angle = RAND_UNIT() * 2.0f * (f32)M_PI;
         s = sinf(angle);
         c = cosf(angle);
-        dist = RAND_UNIT() * region->radiusX;
+        dist = RAND_UNIT() * region->radius;
         *x = region->x + dist * c;
         *z = region->z - dist * s;
         *top = (f32)region->y + (f32)region->height;
@@ -81,11 +67,11 @@ void func_15008340(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
         angle = RAND_UNIT() * 2.0f * (f32)M_PI;
         s = sinf(angle);
         c = cosf(angle);
-        dist = RAND_UNIT() * region->radiusX;
+        dist = RAND_UNIT() * region->radius;
         *x = region->x + dist * c;
         *z = region->z - dist * s;
-        *top = (f32)region->y + (f32)region->radiusX;
-        *bottom = (f32)region->y - (f32)region->radiusX;
+        *top = (f32)region->y + (f32)region->radius;
+        *bottom = (f32)region->y - (f32)region->radius;
     } break;
     }
 }

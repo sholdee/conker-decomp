@@ -217,23 +217,8 @@ void func_1514AD9C(Vec3f *pos, u8 arg1, s32 arg2) {
 
 /* Common particle instance layout used by the update callbacks below. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
-    /* 0x01C */ s16 life;
-    /* 0x01E */ u8 pad1E[0x6];
-    /* 0x024 */ s32 unk24;
-    /* 0x028 */ u8 pad28[0x4];
-    /* 0x02C */ f32 unk2C;
-    /* 0x030 */ f32 unk30;
-    /* 0x034 */ f32 unk34;
-    /* 0x038 */ f32 unk38;
-    /* 0x03C */ u8 pad3C[0x10];
-    /* 0x04C */ f32 unk4C;
-    /* 0x050 */ f32 unk50;
-    /* 0x054 */ u8 pad54[0x8];
-    /* 0x05C */ u8 alpha;
-    /* 0x05D */ u8 pad5D[0x3B];
-    /* 0x098 */ u8 *unk98;
-    /* 0x09C */ u8 pad9C[0xB4];
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x40];
     /* 0x150 */ f32 unk150;
 } Particle177B50;
 
@@ -242,11 +227,11 @@ typedef struct {
  * acceleration unk4C over one frame. Returns 0 once either size drops below 10.
  */
 s32 func_1514AF74(Particle177B50 *p) {
-    p->unk2C -= p->unk2C * p->unk150;
-    p->unk30 -= p->unk30 * p->unk150;
-    p->unk38 += p->unk50 * D_800BE9A4 + 0.5f * p->unk4C * D_800BE9A4 * D_800BE9A4;
-    p->unk50 += p->unk4C * D_800BE9A4;
-    if (p->unk2C < 10.0f || p->unk30 < 10.0f) {
+    p->head.def.width -= p->head.def.width * p->unk150;
+    p->head.def.height -= p->head.def.height * p->unk150;
+    p->head.def.pos.y += p->head.def.scale.y * D_800BE9A4 + 0.5f * p->head.def.scale.x * D_800BE9A4 * D_800BE9A4;
+    p->head.def.scale.y += p->head.def.scale.x * D_800BE9A4;
+    if (p->head.def.width < 10.0f || p->head.def.height < 10.0f) {
         return 0;
     }
     return 1;
@@ -301,24 +286,12 @@ void func_1514B034(Vec3f *pos, u8 arg1, s32 arg2) {
     }
 }
 
-typedef struct {
-    f32 unk00;
-    f32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 unk1C;
-    u8 pad1D[0x7];
-} Struct1514B364Hit;
-
-extern s32 func_15046C80(Vec3f *, s32, f32, Struct1514B364Hit *);
+extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 extern void func_15152B38(TrailBurst *, u8, s32);
 extern void func_15152F70(SimplePuffSpray *, u8);
 
 /* If func_15046C80 finds ground within 200 units of `position`, spawns a cluster of effects there. */
-void func_1514B364(Vec3f *position, Struct1514B364Hit *ground, u8 arg2, s32 arg3) {
+void func_1514B364(Vec3f *position, CollisionHit *ground, u8 arg2, s32 arg3) {
     Vec3f pos;
 
     pos = *position;
@@ -460,33 +433,33 @@ void func_1514B364(Vec3f *position, Struct1514B364Hit *ground, u8 arg2, s32 arg3
         randC = func_150ADA20();
         sum = (randB & 1) + (randA & 1);
         func_1513D668(&desc, 0, 18, 29, 0, sum, (u8)randC,
-                      100.0f, 100.0f, 0, (s32)&ground->unk04, 0, 0, arg2, arg3);
+                      100.0f, 100.0f, 0, (s32)&ground->tri, 0, 0, arg2, arg3);
     }
 }
 
 /* Fades out over the last 16 frames of life: caps the alpha byte at unk98[0x1B] to life * 16. */
 s32 func_1514B844(Particle177B50 *p) {
-    u8 *unk98 = p->unk98;
+    u8 *unk98 = p->head.unk98;
 
-    if (p->life < 16 && p->life * 16 < unk98[0x1B]) {
-        unk98[0x1B] = p->life * 16;
+    if (p->head.def.lifetime < 16 && p->head.def.lifetime * 16 < unk98[0x1B]) {
+        unk98[0x1B] = p->head.def.lifetime * 16;
     }
     return 1;
 }
 
 /* Grows unk2C and unk30 by unk4C, scaled by the frame delta D_800BE9A4. */
 s32 func_1514B87C(Particle177B50 *p) {
-    f32 growth = p->unk4C * D_800BE9A4;
+    f32 growth = p->head.def.scale.x * D_800BE9A4;
 
-    p->unk2C += growth;
-    p->unk30 += growth;
+    p->head.def.width += growth;
+    p->head.def.height += growth;
     return 1;
 }
 
 /* Fades out over the last 16 frames of life: caps alpha at life * 16. */
 s32 func_1514B8B0(Particle177B50 *p) {
-    if (p->life < 16 && p->life * 16 < p->alpha) {
-        p->alpha = p->life * 16;
+    if (p->head.def.lifetime < 16 && p->head.def.lifetime * 16 < p->head.def.unk44) {
+        p->head.def.unk44 = p->head.def.lifetime * 16;
     }
     return 1;
 }
@@ -496,66 +469,44 @@ typedef struct {
     f32 unk4;
 } Struct1514B8E4Size;
 
-/* Particle state at offset 0x110 written by func_1514B8E4 and animated by func_1514BC08. */
-typedef struct {
-    /* 0x00 */ f32 base2C;
-    /* 0x04 */ f32 base30;
-    /* 0x08 */ f32 range2C;
-    /* 0x0C */ f32 range30A;
-    /* 0x10 */ f32 target2C;
-    /* 0x14 */ f32 target30;
-    /* 0x18 */ f32 range30B;
-    /* 0x1C */ f32 timer2C;
-    /* 0x20 */ f32 timer30;
-    /* 0x24 */ f32 base24;
-    /* 0x28 */ f32 range24;
-    /* 0x2C */ f32 target24;
-    /* 0x30 */ f32 timer24;
-    /* 0x34 */ f32 value24;
-    /* 0x38 */ Vec3f unk38;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-} Wobble1514BC08;
-
 /*
  * Spawns a particle at `pos` through func_1513D2F0 and stores its initial func_1514BC08 state.
  * A `life` of -1 means 300 frames without the timed-life flag.
  */
-void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Vec3f *arg4,
-                    f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags,
+void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Vec3f *velocity,
+                    f32 gravity, f32 drag, f32 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB, u8 flags,
                     s16 argD, s16 argE, s32 argF, u8 arg10, s32 arg11) {
     void *particle;
     ParticleDef desc;
-    Wobble1514BC08 state;
+    ParticleJitter state;
     s32 flag;
 
-    if (arg4 != NULL) {
-        state.unk38 = *arg4;
+    if (velocity != NULL) {
+        state.velocity = *velocity;
     } else {
-        state.unk38.x = 0.0f;
-        state.unk38.y = 0.0f;
-        state.unk38.z = 0.0f;
+        state.velocity.x = 0.0f;
+        state.velocity.y = 0.0f;
+        state.velocity.z = 0.0f;
     }
-    state.unk44 = arg5;
-    state.timer2C = 0.0f;
-    state.timer30 = 0.0f;
-    state.timer24 = 0.0f;
+    state.gravity = gravity;
+    state.widthTimer = 0.0f;
+    state.heightTimer = 0.0f;
+    state.speedTimer = 0.0f;
     desc.frameSpeed = 15935;
-    state.value24 = 15935.0f;
-    state.target24 = 15935.0f;
-    state.unk48 = arg6;
+    state.speed = 15935.0f;
+    state.speedTarget = 15935.0f;
+    state.drag = drag;
     state.unk4C = arg7;
-    state.base24 = 6733.0f;
-    state.range24 = 18404.0f;
-    state.base2C = scale->unk0 * 15.045272f;
-    state.range2C = scale->unk0 * 5.8676558f;
-    state.target2C = scale->unk0 * 12.111444f;
+    state.speedBase = 6733.0f;
+    state.speedRange = 18404.0f;
+    state.widthBase = scale->unk0 * 15.045272f;
+    state.widthRange = scale->unk0 * 5.8676558f;
+    state.widthTarget = scale->unk0 * 12.111444f;
     desc.width = 0.0f;
-    state.base30 = scale->unk4 * 0.396174f;
-    state.range30A = scale->unk4 * 0.1042563f;
-    state.range30B = scale->unk4 * 0.5197371f;
-    state.target30 = scale->unk4 * 0.34404588f;
+    state.heightBase = scale->unk4 * 0.396174f;
+    state.heightRangeA = scale->unk4 * 0.1042563f;
+    state.heightRangeB = scale->unk4 * 0.5197371f;
+    state.heightTarget = scale->unk4 * 0.34404588f;
     desc.height = 0.0f;
     desc.texture = argB;
     desc.type = 0;
@@ -598,32 +549,32 @@ void *func_1514B8E4(Vec3f *pos, Struct1514B8E4Size *scale, s16 life, u8 arg3, Ve
 }
 
 /*
- * Eases unk2C, unk30 and unk24 toward random targets, picking a new target for each when its
+ * Eases def.width, def.height and def.frameSpeed toward random targets, picking a new target for each when its
  * countdown timer (decremented by the frame delta) runs out.
  */
-s32 func_1514BC08(Particle177B50 *p, Wobble1514BC08 *w) {
-    w->timer2C -= D_800BE9A4;
-    if (w->timer2C < 0.0f) {
-        w->timer2C = func_150ADA68() * 4.0f;
-        w->target2C = func_150ADA68() * w->range2C + w->base2C;
+s32 func_1514BC08(Particle177B50 *p, ParticleJitter *w) {
+    w->widthTimer -= D_800BE9A4;
+    if (w->widthTimer < 0.0f) {
+        w->widthTimer = func_150ADA68() * 4.0f;
+        w->widthTarget = func_150ADA68() * w->widthRange + w->widthBase;
     }
-    p->unk2C += (w->target2C - p->unk2C) * 0.35f;
-    w->timer30 -= D_800BE9A4;
-    if (w->timer30 < 0.0f) {
-        w->timer30 = func_150ADA68() * 9.0f;
+    p->head.def.width += (w->widthTarget - p->head.def.width) * 0.35f;
+    w->heightTimer -= D_800BE9A4;
+    if (w->heightTimer < 0.0f) {
+        w->heightTimer = func_150ADA68() * 9.0f;
         if (func_150ADA20() & 1) {
-            w->target30 = func_150ADA68() * w->range30A + w->base30;
+            w->heightTarget = func_150ADA68() * w->heightRangeA + w->heightBase;
         } else {
-            w->target30 = func_150ADA68() * w->range30B + w->base30;
+            w->heightTarget = func_150ADA68() * w->heightRangeB + w->heightBase;
         }
     }
-    p->unk30 += (w->target30 - p->unk30) * 0.4f;
-    w->timer24 -= D_800BE9A4;
-    if (w->timer24 < 0.0f) {
-        w->timer24 = func_150ADA68() * 7.0f;
-        w->target24 = func_150ADA68() * w->range24 + w->base24;
+    p->head.def.height += (w->heightTarget - p->head.def.height) * 0.4f;
+    w->speedTimer -= D_800BE9A4;
+    if (w->speedTimer < 0.0f) {
+        w->speedTimer = func_150ADA68() * 7.0f;
+        w->speedTarget = func_150ADA68() * w->speedRange + w->speedBase;
     }
-    w->value24 += (w->target24 - w->value24) * 0.4f;
-    p->unk24 = w->value24;
+    w->speed += (w->speedTarget - w->speed) * 0.4f;
+    p->head.def.frameSpeed = w->speed;
     return 1;
 }

@@ -7,7 +7,7 @@
 typedef struct QueueNode QueueNode;
 
 struct QueueNode {
-    u8 pad0[0x10];        /* object header from func_15167A68 */
+    EffectHeader header;
     s32 value;
     QueueNode *older;     /* towards the tail */
     QueueNode *newer;     /* towards the head */
@@ -15,7 +15,7 @@ struct QueueNode {
 };
 
 typedef struct {
-    u8 pad0[0x10];        /* object header from func_15167A68 */
+    EffectHeader header;
     QueueNode *head;      /* newest node */
     QueueNode *tail;      /* oldest node */
     s32 capacity;
@@ -27,7 +27,6 @@ typedef struct {
 
 extern void (*D_8008D5C0[])(s32);
 
-void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Ticks the queue timer; once it has expired, drops the oldest node each call. */
 void func_1518AA10(Queue *arg) {
@@ -48,7 +47,7 @@ void func_1518AA10(Queue *arg) {
             if (node->releaseFunc != 0) {
                 D_8008D5C0[node->releaseFunc](node->value);
             }
-            func_1516972C((struct102 *)node);
+            func_1516972C(&node->header);
             queue->count--;
         } else if (queue->flags & 1) {
             queue->timer -= D_800BE9E4;
@@ -135,7 +134,7 @@ s32 func_1518ABD0(Queue *queue, s32 value, u8 releaseFunc) {
         if (node->releaseFunc != 0) {
             D_8008D5C0[node->releaseFunc](node->value);
         }
-        func_1516972C((struct102 *)node);
+        func_1516972C(&node->header);
     }
 
     return 1;

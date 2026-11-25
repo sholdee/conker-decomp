@@ -22,22 +22,10 @@ typedef struct {
     /* 0x28 */ MtxF matrices[2];
 } HudModel;
 
-/* A HUD image drawn by func_151ED430: a texture id (split into 4KB chunks of consecutive ids) and its format. */
-typedef struct {
-    /* 0x00 */ void *texId;
-    /* 0x04 */ u16 pad4;
-    /* 0x06 */ u16 width;
-    /* 0x08 */ u16 height;
-    /* 0x0A */ u8 fmt;
-    /* 0x0B */ u8 siz;
-} HudSprite; /* size 0xC */
-
 extern Gfx D_80090028;
-extern HudSprite D_800917F8;
 extern HudSprite D_80091804;
 extern HudSprite D_80091810;
 extern Gfx *(*D_8008FFF4[])(Gfx *);
-extern u8 **D_800E0BD8;
 extern u8 D_7FB;
 extern u8 D_887;
 extern u8 D_800E0C85;
@@ -474,35 +462,6 @@ Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh
 }
 
 
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ char pad4[4];
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ char pad10[0x10];
-    /* 0x20 */ u16 unk20;
-    /* 0x22 */ char pad22[0xA];
-    /* 0x2C */ s8 unk2C;
-    /* 0x2D */ char pad2D[0x11];
-    /* 0x3E */ s8 unk3E;
-    /* 0x3F */ char pad3F[1];
-    /* 0x40 */ s8 unk40;
-    /* 0x41 */ s8 unk41;
-    /* 0x42 */ s8 unk42;
-    /* 0x43 */ char pad43[3];
-    /* 0x46 */ s16 unk46[4];
-    /* 0x4E */ char pad4E[0x18];
-    /* 0x66 */ struct {
-        /* 0x00 */ s16 unk0;
-        /* 0x02 */ s16 unk2;
-        /* 0x04 */ s16 unk4;
-        /* 0x06 */ s16 unk6;
-        /* 0x08 */ s16 unk8;
-        /* 0x0A */ s16 unkA;
-    } rec[4];
-} ScoreState;
-
-extern ScoreState *D_8008FDD4;
 extern u8 D_800ABAA8;
 extern u8 D_800ABAAC;
 extern u8 D_800ABAB0;
@@ -532,8 +491,8 @@ Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
     s32 i;
 
     y = rowY - 0x10;
-    if ((D_8008FDC0 & 0x4000) || (D_8008FDD4->unk42 == 8)) {
-        tex = (D_8008FDD4->unk42 == 8) ? &D_D10 + 2 : &D_D10 + 1;
+    if ((D_8008FDC0 & 0x4000) || (D_8008FDD4->selection == 8)) {
+        tex = (D_8008FDD4->selection == 8) ? &D_D10 + 2 : &D_D10 + 1;
         width = 0x10;
         leftIconS = 0;
         rightIconT = 0x200;
@@ -582,7 +541,7 @@ Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
         } else {
             iconT = 0x200;
             for (i = 0; i < D_8008FD8C; i++) {
-                amount = D_8008FDD4->unk46[i];
+                amount = D_8008FDD4->score[i];
                 if (amount < 0) {
                     amount = 0;
                 }
@@ -627,7 +586,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
     s8 texturesLoaded;
     s8 refreshScores;
 
-    if ((D_8008FDD4->unk42 == 0xB) || (D_8008FDD4->unk42 == 0xC)) {
+    if ((D_8008FDD4->selection == 0xB) || (D_8008FDD4->selection == 0xC)) {
         if (live != 0) {
             return gfx;
         }
@@ -677,7 +636,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
         nameBase = 0x5E;
         refreshScores = 0;
     }
-    if (D_8008FDD4->unk42 == 8) {
+    if (D_8008FDD4->selection == 8) {
         showTeam0 = 0;
     } else {
         showTeam0 = 1;
@@ -716,11 +675,11 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                 }
                 iconY = (y - 0x11) << 2;
                 x += 0x1D4;
-                if (D_8008FDD4->unk42 == 1) {
+                if (D_8008FDD4->selection == 1) {
                     x -= 0x78;
                 }
                 gfx = func_151E86E4(gfx, x + 0x164, iconY, x + 0x1A4, iconY + 0x3C, 0, 0, 0x200, 0x400, 0x400);
-                if (D_8008FDD4->unk42 == 1) {
+                if (D_8008FDD4->selection == 1) {
                     x += 0x78;
                 }
                 gDPPipeSync(gfx++);
@@ -739,7 +698,7 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
                 gfx = func_151E86E4(gfx, x, iconY, x + 0x40, iconBottom, 0, 0x200, 0, 0x400, 0x400);
                 x += 0x74;
                 gfx = func_151E86E4(gfx, x, iconY, x + 0x40, iconBottom, 0, 0, 0, 0x400, 0x400);
-                if (D_8008FDD4->unk42 != 1) {
+                if (D_8008FDD4->selection != 1) {
                     x += 0x4C;
                     gfx = func_151E86E4(gfx, x, iconY, x + 0x80, iconBottom, 0, 0, 0x200, 0x400, 0x400);
                 }
@@ -766,10 +725,10 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             if (live != 0) {
                 total = D_800CC2D0[i].unk31C->unk1AA;
             } else {
-                total = D_8008FDD4->rec[i].unk6;
+                total = D_8008FDD4->stats[i].unk6;
             }
             if (total > 0) {
-                percent = (D_8008FDD4->rec[i].unk0 * 100) / total;
+                percent = (D_8008FDD4->stats[i].unk0 * 100) / total;
             }
             if (percent >= 10000) {
                 percent = 9999;
@@ -790,13 +749,13 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             x += 0x58;
             func_15042D94(x, y, 0x81, &D_800ABAB0, percent);
             x += 0x1A;
-            func_15042D94(x, y, 0x81, &D_800ABAB8, D_8008FDD4->unk46[i]);
+            func_15042D94(x, y, 0x81, &D_800ABAB8, D_8008FDD4->score[i]);
             x += 0x1E;
-            if (D_8008FDD4->unk42 != 1) {
+            if (D_8008FDD4->selection != 1) {
                 if ((D_80087270[i] == 9) || ((i == 0) && (D_8008FD7C == 9))) {
                     func_15042D94(x, y, 0x81, &D_800ABABC);
                 } else {
-                    func_15042D94(x, y, 0x81, &D_800ABAC0, D_8008FDD4->rec[i].unk4);
+                    func_15042D94(x, y, 0x81, &D_800ABAC0, D_8008FDD4->stats[i].unk4);
                 }
                 x += 0x1E;
             }
@@ -865,7 +824,6 @@ Gfx *func_151EADFC(Gfx *gfx, s32 x, s32 y, s32 value) {
 
     return gfx;
 }
-extern HudSprite D_80090060;
 extern u8 D_1647;
 extern u8 D_1648;
 extern u8 D_1653;
@@ -913,7 +871,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
 
     show = (D_800D2E4C[0x19] & 4) || (D_8008FDA8 < 0);
     if (D_800BE616 && !D_800BEAC0 && !D_800BEAC1) {
-        if (!func_151E564C() || D_8008FDD4->unk42 == 1) {
+        if (!func_151E564C() || D_8008FDD4->selection == 1) {
             gfx = func_151E89A0(gfx, 0, 0xFF);
         }
     } else {
@@ -1012,7 +970,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
             gfx = func_150900F0(gfx, 1);
             halfWidth = D_800BE628[0].width * 0.5f;
-            func_151EF954((f32 (*)[4])&D_800E0C38, -halfWidth, halfWidth, -(D_800BE628[0].height * 0.5f), D_800BE628[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
+            func_151EF954(&D_800E0C38, -halfWidth, halfWidth, -(D_800BE628[0].height * 0.5f), D_800BE628[0].height * 0.5f, 1.0f, 20000.0f, 1.0f);
             D_800E0C30 = D_8008FDCC;
             if (D_80090058 != NULL) {
                 i = 10;
@@ -1125,7 +1083,6 @@ Gfx *func_151EB96C(Gfx *gfx) {
     return gfx;
 }
 
-extern HudSprite D_800917EC;
 extern u8 D_85D;
 extern u8 D_89C;
 
@@ -1330,10 +1287,10 @@ Gfx *func_151EC3E8(Gfx *gfx) {
     }
     D_800900D4 = alpha;
     gSPDisplayList(gfx++, &D_80090028);
-    if (D_8008FDD4->unk3E == 1) {
+    if (D_8008FDD4->menu == 1) {
         return func_151EC648(gfx);
     }
-    if (D_8008FDD4->unk3E == 0) {
+    if (D_8008FDD4->menu == 0) {
         if (D_8008FDD4->unk2C == 1 && D_8008FEF8 != 0) {
             gfx = func_151EE184(gfx);
         } else {
@@ -1386,7 +1343,7 @@ Gfx *func_151EC648(Gfx *gfx) {
     s32 alpha;
     s32 pad; // matching: stack slot
     s32 y;
-    ScoreState *state;
+    MenuState *state;
     f32 scale;
     f32 progress;
     u8 **image;
@@ -1434,7 +1391,7 @@ Gfx *func_151EC648(Gfx *gfx) {
         }
         y = 0x6A - (s32)(progress * sc);
     }
-    if (state->unk40 != 3) {
+    if (state->prevPage != 3) {
         if (alpha > 0 && *(image = &D_800900D8[D_800900F8]) != NULL) {
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
             diff = 2;
@@ -1463,7 +1420,7 @@ Gfx *func_151EC648(Gfx *gfx) {
             state = D_8008FDD4;
         }
     }
-    switch (state->unk40) {
+    switch (state->prevPage) {
     case 0:
         D_800E0C88[0] = 0;
         D_800E0C88[1] = 0xFF;
@@ -1477,7 +1434,7 @@ Gfx *func_151EC648(Gfx *gfx) {
             angle = 0.6283185482f;
             angle += 0.6283185482f + 0.6283185482f * D_8008FDE8;
             prev = 0x7E - (s32)(cosf(angle) * 52.0f);
-            j = D_8008FDD4->unk41 - 4;
+            j = D_8008FDD4->cursor - 4;
             if (j < 0) {
                 j += 5;
             }
@@ -1973,7 +1930,7 @@ void func_151EDF4C(void) {
 extern u8 D_800ABAD4;
 extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 extern void func_150A7D00(void *, f32, f32, f32);
-extern struct216 *func_1507BB28(s32, s32);
+extern ObjScriptCmd *func_1507BB28(s32, s32);
 
 /*
  * Text entry on a 3D letter grid (cursor D_800E0C81 row, D_800E0C80 column, text in D_800E0C7C):
@@ -2005,11 +1962,11 @@ Gfx *func_151EE184(Gfx *gfx) {
         return gfx;
     }
     cursorMoved = 0;
-    if (D_8008FDD4->unk20 & 1) {
+    if (D_8008FDD4->input & 1) {
         cursorMoved = 1;
         D_800E0C81--;
     }
-    if (D_8008FDD4->unk20 & 2) {
+    if (D_8008FDD4->input & 2) {
         D_800E0C81++;
         if (D_800E0C81 == 4 && D_800E0C80 >= 5) {
             D_800E0C80 = 4;
@@ -2022,11 +1979,11 @@ Gfx *func_151EE184(Gfx *gfx) {
     if (D_800E0C81 >= 6) {
         D_800E0C81 = 0;
     }
-    if (D_8008FDD4->unk20 & 8) {
+    if (D_8008FDD4->input & 8) {
         D_800E0C80++;
         cursorMoved = 1;
     }
-    if (D_8008FDD4->unk20 & 4) {
+    if (D_8008FDD4->input & 4) {
         D_800E0C80--;
         cursorMoved = 1;
     }
@@ -2062,7 +2019,7 @@ Gfx *func_151EE184(Gfx *gfx) {
     if (D_800E0C82 >= 13) {
         D_800E0C82 = 12;
     }
-    if (D_8008FDD4->unk20 & 0x10) {
+    if (D_8008FDD4->input & 0x10) {
         i = selectedKey + 'A';
 
         func_10010F30(0x500, 0x7D00, 0x40, 0, 0);

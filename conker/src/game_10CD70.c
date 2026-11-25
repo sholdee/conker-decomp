@@ -258,17 +258,11 @@ typedef struct {
 } BoltSource; /* size 0xC */
 
 typedef struct {
-    /* 0x00 */ u8  pad0;
-    /* 0x01 */ u8  unk1;
-    /* 0x02 */ u8  pad2[0xA];
-    /* 0x0C */ u8  unkC;
-    /* 0x0D */ u8  padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8  pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoltSource src;
 } BoltEmitter;
 
-extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
 extern void func_15107B78(Actor *, s32, s32, s32, s32);
 
@@ -278,27 +272,27 @@ extern void func_15107B78(Actor *, s32, s32, s32, s32);
 void func_150DFEFC(BoltEmitter *emitter) {
     BoltSource *src;
     Actor *obj;
-    Header header;
-    Header2 pos;
+    LightEffectHeader header;
+    Vec3i pos;
     s8 count;
 
     obj = emitter->src.obj;
     src = &emitter->src;
     if (obj->interaction_state == 0 || obj->unique_id != src->id) {
-        emitter->unkE = -1;
+        emitter->base.header.state = -1;
         return;
     }
     src->flashTimer -= D_800BE9E4;
     if (src->flashTimer < 0) {
-        pos.unk0 = obj->x_position;
-        pos.unk4 = obj->y_position;
-        pos.unk8 = obj->z_position;
-        header.unk0 = 3;
-        header.unk1 = -1;
-        header.unk2 = func_150ADA20() % 11U + 5;
-        header.unk4 = 0;
+        pos.x = obj->x_position;
+        pos.y = obj->y_position;
+        pos.z = obj->z_position;
+        header.flags = 3;
+        header.update = -1;
+        header.lifetime = func_150ADA20() % 11U + 5;
+        header.lightType = 0;
         func_151602C0(&header, &pos, func_150ADA20() % 121U + 50, 255, 255, 255, 255, 0, 0,
-                      emitter->unkC, emitter->unk1);
+                      emitter->base.header.owner, emitter->base.header.kind);
         src->flashTimer = func_150ADA20() % 81U + 69;
     }
     src->boltTimer -= D_800BE9E4;
@@ -314,7 +308,7 @@ void func_150DFEFC(BoltEmitter *emitter) {
             colour[3] = func_150ADA20() % 61U + 150;
             func_15107700(obj, func_150ADA20() & 0xFF, func_150ADA20() % 129U - 63,
                           func_150ADA20() % 21U + 10, 4, 40.0f, func_150ADA68() * 20.0f + 25.0f, 0, 2,
-                          colour, emitter->unkC, emitter->unk1);
+                          colour, emitter->base.header.owner, emitter->base.header.kind);
             count--;
         } while (count > 0);
         src->boltTimer = func_150ADA20() % 141U + 25;
@@ -322,7 +316,7 @@ void func_150DFEFC(BoltEmitter *emitter) {
     src->timer2 -= D_800BE9E4;
     if (src->timer2 < 0) {
         func_15107B78(obj, (s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() & 0x7F) - 64),
-                      emitter->unkC, emitter->unk1);
+                      emitter->base.header.owner, emitter->base.header.kind);
         src->timer2 = func_150ADA20() % 26U + 15;
     }
 }

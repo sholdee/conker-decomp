@@ -43,23 +43,11 @@ typedef struct SpriteParams {
     /* 0xE */ u8 padE[2];
 } SpriteParams;
 
-/* Entries of the D_800C5338[id] texture tables. */
-typedef struct ObjTexture {
-    /* 0x0 */ s32 addr;
-    /* 0x4 */ s32 unk4;
-    /* 0x8 */ u16 width;
-    /* 0xA */ u16 height;
-} ObjTexture;
-
 extern u8 D_800C3E70;
 extern s32 D_800C3E74;
-extern Gfx **D_800C4488[];
-extern ObjTexture *D_800C5338[];
 extern D_800C666FEntry D_800C666F[];
 extern u8 D_800C3E98[];
 extern u8 D_C3E98[];
-extern u8 D_800D9E28[];
-extern MtxF D_800D2CA8[]; // view matrix per player
 extern u8 D_800832C0[];
 extern u8 *D_8008422C[];
 extern s32 D_80088554;
@@ -130,7 +118,7 @@ void func_150A7A00(MtxF mtx, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
 void func_150A81D0(s32 *, MtxF mtx, ObjAnim *, s32, s32, s16 *, u8 *, s32);
 void func_150A9984(s32, s32);
 Gfx *func_150C3160(Gfx *, Actor *);
-struct102 *func_1510D970(s32, Actor *, s32, s32, s32);
+EffectHeader *func_1510D970(s32, Actor *, s32, s32, s32);
 Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, u8 *, s32, void *);
 void func_1517AD00(s32, s32, s32);
 void func_151EFE88(void *);
@@ -324,7 +312,7 @@ void func_1502C1A4(void) {
     s32 variantFlag;
     s32 id;
     s32 state;
-    struct102 *effect;
+    EffectHeader *effect;
 
     // matching: -g3 line numbers; the init shares the loop's first line (preheader schedule)
     obj = D_800CC2D0; do {

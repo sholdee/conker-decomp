@@ -322,6 +322,28 @@ def rewrite_refs(text, tdata, refs, resolved_of, index):
     text.data = bytes(tdata)
 
 
+_SYMADDR = {}
+
+
+def static_addr(name, yaml_path):
+    """Address of a file-local static: from a D_<ADDR> name, or (after the wave-3 renames) from the
+    symbol_addrs file next to the yaml."""
+    m = re.fullmatch(r"D_([0-9A-Fa-f]{8})(?:\.\w+)?", name or "")
+    if m:
+        return int(m.group(1), 16)
+    if not name:
+        return None
+    if not _SYMADDR:
+        f = Path(yaml_path).resolve().parent / "symbol_addrs.us.txt"
+        for line in f.read_text().splitlines() if f.exists() else []:
+            mm = re.match(r"\s*([A-Za-z_]\w*)\s*=\s*0x([0-9A-Fa-f]+)", line)
+            if mm:
+                _SYMADDR[mm.group(1)] = int(mm.group(2), 16)
+        _SYMADDR.setdefault("", 0)
+    base = re.sub(r"\.\w+$", "", name)
+    return _SYMADDR.get(base)
+
+
 def retarget_data(elf, text, get_rom, yaml_path, obj, notes):
     """Point %hi/%lo references into this object's own .data/.bss (function-local statics,
     file statics) at the original address in the game's data segment. The linker script keeps
@@ -344,9 +366,9 @@ def retarget_data(elf, text, get_rom, yaml_path, obj, notes):
     refs = pair_refs(text, rel_tx, wanted, ins_at)
     if not refs:
         return False
-    named = [(s.st_shndx, s.st_value, max(s.st_size, 1), int(m.group(1), 16))
+    named = [(s.st_shndx, s.st_value, max(s.st_size, 1), a)
              for s in syms if s.st_shndx in idx and s.st_type != STT_SECTION
-             for m in [re.fullmatch(r"D_([0-9A-Fa-f]{8})(?:\.\w+)?", s.name or "")] if m]
+             for a in [static_addr(s.name, yaml_path)] if a is not None]
     rom = get_rom()
     tv = rom.text_vram(obj_name(obj))
     resolved = {}

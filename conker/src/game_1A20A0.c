@@ -6,8 +6,7 @@
 /* A flying swarm member (bat/bird): spawned by func_15174BF0 / func_15174FA4 / func_15175390,
  * updated by func_15175958 and friends, drawn by func_151770C8 / func_15176DF0. */
 typedef struct SwarmActor {
-    /* 0x00 */ u8 type;
-    /* 0x01 */ u8 pad1[0xF];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ Mtx mtx[2];           /* double-buffered by D_800BE9C0 */
     /* 0x90 */ u8 group;             /* index into D_800DDF5C / D_800DDF60 */
     /* 0x91 */ u8 state;
@@ -36,7 +35,6 @@ typedef struct SwarmActor {
 } SwarmActor;
 
 
-void *func_15167A68(s32, s32, s32, s32, u8, u8);
 u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s32 arg3, s32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
                    s32 argA);
@@ -166,7 +164,7 @@ void func_15174FA4(s32 count, s32 group, s32 x, s32 y, s32 z, s32 spread, s32 ar
         actor->modelIndex = 7;
         samples = func_150A3A70(actorX, actorZ);
         if (samples == 0) {
-            func_1516979C((struct102 *)actor);
+            func_1516979C(&actor->header);
         } else {
             lowest = D_800D3300[0].height;
             for (j = 1; j < samples; j++) {
@@ -383,14 +381,14 @@ void func_15175958(SwarmActor *actor) {
     u16 sound;
 
     if (D_800DDE80[actor->modelIndex].resource == NULL || D_800DDF78[actor->modelIndex] == NULL) {
-        func_1516972C((struct102 *)actor);
+        func_1516972C(&actor->header);
         return;
     }
     alpha = actor->alpha;
     if ((actor->modelIndex == 8 || actor->modelIndex == 9) && D_800BE9F0 == 6 && D_800C35EA[0] != 0 && D_800C35E8[0] == 0xF) {
         actor->flags &= ~8;
         if (D_800C35EA[0] == 0 || D_800C35E8[0] != 0xF) {
-            func_1516972C((struct102 *)actor);
+            func_1516972C(&actor->header);
             return;
         }
         /* flag 0x200: spiral down around (-3478, 3858); pitchStep, yawStep and rollStep then
@@ -416,7 +414,7 @@ void func_15175958(SwarmActor *actor) {
         }
     } else {
         if (alpha == 0) {
-            func_1516972C((struct102 *)actor);
+            func_1516972C(&actor->header);
             return;
         }
         alpha -= D_800BE9E4 * 4;
@@ -592,7 +590,7 @@ void func_15175958(SwarmActor *actor) {
         actor->z = actor->rollStep * sinPitch + 3858.0f;
         actor->y -= 100.0f / (actor->rollStep - 60.0f + 4.0f);
         if (actor->y < -3100.0f || D_800C35EA[0] == 0 || D_800C35E8[0] != 0xF) {
-            func_1516972C((struct102 *)actor);
+            func_1516972C(&actor->header);
             return;
         }
     } else {
@@ -612,7 +610,7 @@ void func_15175958(SwarmActor *actor) {
         actor->y += dir[1] * speed;
         actor->z += dir[2] * speed;
     }
-    if (actor->type == 0x13 && D_800DDF60[actor->group] == 0) {
+    if (actor->header.type == 0x13 && D_800DDF60[actor->group] == 0) {
         func_10010F88(0x10, 0x7FFF, func_150ADA20() & 0x7F, 0, 0, actor->x, actor->y, actor->z, 500, 4000);
         D_800DDF60[actor->group] = (func_150ADA20() & 0x3F) + 30;
     }
@@ -620,7 +618,7 @@ void func_15175958(SwarmActor *actor) {
         func_1510AEE0(D_800D9C10[0], actor->x, actor->y, actor->z, D_800D9B20, D_800D9B1C, D_800D35E0, D_800D35E4, NULL, NULL) != 0 &&
         (D_800D2138.unk0 != 1 ||
          func_1510AEE0(D_800D9C10[1], actor->x, actor->y, actor->z, D_800D9B20, D_800D9B1C, D_800D35E0, D_800D35E4, NULL, NULL) != 0)) {
-        func_1516972C((struct102 *)actor);
+        func_1516972C(&actor->header);
     }
 }
 
@@ -698,7 +696,7 @@ void func_1517685C(SwarmActor *actor) {
             return;
         }
     } else {
-        func_1516972C((struct102 *)actor);
+        func_1516972C(&actor->header);
     }
 }
 
@@ -709,7 +707,7 @@ void func_15176B84(SwarmActor *actor) {
     s32 alpha;
 
     if ((D_800DDE80[actor->modelIndex].resource == NULL) || (D_800DDF78[actor->modelIndex] == NULL)) {
-        func_1516972C((struct102 *)actor);
+        func_1516972C(&actor->header);
         return;
     }
 
@@ -726,7 +724,7 @@ void func_15176B84(SwarmActor *actor) {
         }
     } else {
         if (alpha == 0) {
-            func_1516972C((struct102 *)actor);
+            func_1516972C(&actor->header);
             return;
         }
         alpha -= D_800BE9E4 * 4;
@@ -754,7 +752,7 @@ void func_15176B84(SwarmActor *actor) {
             break;
         case 4:
             if (actor->y < actor->groundHeight) {
-                func_1516972C((struct102 *)actor);
+                func_1516972C(&actor->header);
                 return;
             }
             break;

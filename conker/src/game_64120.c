@@ -612,24 +612,9 @@ typedef struct AimNode {
     /* 0xA0 */ f32 unkA0;
 } AimNode;
 
-typedef struct {
-    /* 0x000 */ u8 pad0[0x3E8];
-    /* 0x3E8 */ struct113 *unk3E8[2]; /* indexed by D_800BE9C0 */
-    /* 0x3F0 */ u8 pad3F0[6];
-    /* 0x3F6 */ u8 unk3F6;
-} AimHolderData;
-
-/* What func_150319CC returns (see game_5D2C0.c); only the fields used here. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 pad1[0x47];
-    /* 0x48 */ AimHolderData *unk48;
-} AimHolder;
-
 extern AimNodeTypes D_800843E0;
 extern u8 D_80084404[];
-extern AimNode *D_800DCE50[2][104];
-AimHolder *func_150319CC(s32, Actor *);
+ModelAttachment *func_150319CC(s32, Actor *);
 void func_1507E9E8(Actor *, s32);
 
 /*
@@ -678,21 +663,21 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         return;
     }
     if (objIndex == 0 && obj->unk84.uh == 0x81) {
-        AimHolder *holder;
-        AimHolderData *holderData;
-        struct113 *model;
+        ModelAttachment *holder;
+        AnimInstance *holderData;
+        Mtx *model;
         Vec3f target;
         Actor *held;
 
-        if ((holder = func_150319CC(0x1F, obj)) != NULL && (holderData = holder->unk48) != NULL &&
-            holderData->unk3F6 != 0 && (model = holderData->unk3E8[D_800BE9C0]) != NULL &&
-            (held = func_15083E90(holder->unk0)) != NULL) {
+        if ((holder = func_150319CC(0x1F, obj)) != NULL && (holderData = holder->anim) != NULL &&
+            holderData->unk3F6 != 0 && (model = holderData->partMtx[D_800BE9C0]) != NULL &&
+            (held = func_15083E90(holder->ownerId)) != NULL) {
             if (held->unk5 == 5) {
                 target.x = held->x_position;
                 target.y = held->y_position;
                 target.z = held->z_position;
             } else {
-                func_15043FF0(&target, model);
+                func_15043FF0(&target, (struct113 *)model);
             }
             if (func_15037698(objIndex, refBone, bone, target.x, target.y, target.z, out, range, 0, axisMode)) {
                 return;
@@ -757,7 +742,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
         for (list = 0; list < 2; list++) {
             for (i = 0; i < 8; i++) {
                 type = types.types[i];
-                node = D_800DCE50[list][type];
+                node = (AimNode *)D_800DCE50[list][type];
                 while (node != NULL) {
                     if (type == 25 || type == 72) {
                         extern s32 D_800C6654; // matching: this redeclaration shifts IDO's scheduling of the loop
@@ -1736,8 +1721,8 @@ void func_1503A830(Actor *obj) {
     f32 localY;
     f32 localZ;
     s32 step;
-    AimHolder *holder;
-    AimHolderData *holderData;
+    ModelAttachment *holder;
+    AnimInstance *holderData;
     s32 mirror;
     s32 clamp;
     s32 snap;
@@ -1870,16 +1855,16 @@ void func_1503A830(Actor *obj) {
             yaw[1] = obj->unk286;
             pitch[1] = obj->unk287;
         } else if (obj->unk276 == 2) {
-            u8 *model;
+            Mtx *model;
 
             aim = 1;
-            holder = (AimHolder *)func_1503195C(obj, 0x2B, 0);
+            holder = func_1503195C(obj, 0x2B, 0);
             if (holder != NULL) {
-                holderData = holder->unk48;
+                holderData = holder->anim;
                 if (holderData != NULL) {
-                    model = (u8 *)holderData->unk3E8[D_800BE9C0];
+                    model = holderData->partMtx[D_800BE9C0];
                     if (model != NULL) {
-                        model += 0x80;
+                        model += 2; // the third part matrix
                         func_15043FF0((Vec3f *)D_800C3FE8, (struct113 *)model);
                         noHolderTarget = 0;
                     }

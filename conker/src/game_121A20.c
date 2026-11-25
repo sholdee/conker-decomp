@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-
 /* Flags of SpiralState. */
 #define SPIRAL_FADE_NEAR 1 /* fade out as the camera gets close */
 #define SPIRAL_SOUND 2     /* plays a positional sound */
@@ -25,7 +24,8 @@ typedef struct {
 
 /* An object spawned by func_1513264C with a SpiralState. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x20];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x10];
     /* 0x020 */ Vec3f rot; /* degrees */
     /* 0x02C */ u8 pad2C[0xC];
     /* 0x038 */ Vec3f pos;
@@ -197,7 +197,7 @@ void func_150F4CFC(EffectObj *obj, s32 arg1, u8 event) {
         obj->unk71 = 0;
         spiral->flags |= SPIRAL_FADE_NEAR | SPIRAL_MUTED;
     } else if (event == 0x4F) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C(&obj->header);
     }
 }
 
@@ -212,11 +212,7 @@ typedef struct {
 
 /* The emitter effect object created by func_15149130. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x28 - 0xD];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ CameraEmitterData data;
 } CameraEmitter;
 
@@ -236,14 +232,6 @@ void func_150F4D5C(Camera *camera, s8 condition, u8 variants, u8 owner, s32 kind
     }
 }
 
-/* A list of spawn variants: an id and a scale for each. */
-typedef struct {
-    /* 0x00 */ u8 count;
-    /* 0x04 */ s16 *ids;
-    /* 0x08 */ f32 *scales;
-} VariantList;
-
-extern VariantList D_80088B20[];
 extern s32 (*D_80088B38[])();
 extern void func_15143874(s16 angle, f32 dist, f32 *x, f32 *z);
 
@@ -292,7 +280,7 @@ void func_150F4DEC(CameraEmitter *emitter) {
             speed = func_150ADA68() * 10.0f + 5.0f;
             func_150F4570(&from, &to, variants->ids[i], speed, 1.0f / speed,
                           variants->scales[i] * (func_150ADA68() * 0.07500000298f + 0.07500000298f), FALSE, 0,
-                          emitter->unkC, emitter->unk1);
+                          emitter->base.header.owner, emitter->base.header.kind);
             data->pending -= 1.0f;
         } while (data->pending > 1.0f);
     }

@@ -159,7 +159,8 @@ typedef struct {
 
 /* The object func_15157010 returns: the counter's background panel. */
 typedef struct {
-    /* 0x000 */ u8  pad0[0x54];
+    /* 0x000 */ EffectHeader header;
+    /* 0x010 */ u8 pad10[0x44];
     /* 0x054 */ f32 x;
     /* 0x058 */ f32 y;
     /* 0x05C */ u8  pad5C[0x120 - 0x5C];
@@ -168,7 +169,7 @@ typedef struct {
 
 /* The object func_1515548C returns: one digit of the counter. */
 typedef struct {
-    /* 0x00 */ u8  pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ f32 x;
     /* 0x14 */ f32 y;
 } CounterDigit;
@@ -183,8 +184,7 @@ typedef struct {
 } CounterDisplay;
 
 typedef struct {
-    /* 0x00 */ struct260 header;
-    /* 0x24 */ u8 pad24[4];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ CounterDisplay display;
 } CounterEffect;
 
@@ -337,8 +337,8 @@ void func_151BF81C(CounterEffect *effect) {
 
     display = &effect->display;
     if (D_800BEAC1 != 0 || D_800BEAC0 != 0) {
-        effect->header.unkE = -1;
-        effect->header.unkD |= 1;
+        effect->base.header.state = -1;
+        effect->base.header.flags |= 1;
         return;
     }
     if (!(display->flags & 1)) {
@@ -387,8 +387,8 @@ void func_151BF81C(CounterEffect *effect) {
     }
     display->timer -= D_800BE9A4;
     if (display->timer < 0.0f) {
-        effect->header.unkE = -1;
-        effect->header.unkD |= 1;
+        effect->base.header.state = -1;
+        effect->base.header.flags |= 1;
     }
 }
 
@@ -398,11 +398,11 @@ void func_151BFB2C(CounterEffect *effect) {
     CounterDisplay *display = &effect->display;
 
     if (display->panel != NULL) {
-        func_1516972C((struct102 *)display->panel);
+        func_1516972C(&display->panel->header);
     }
     for (i = 0; i < 2; i++) {
         if (display->digits[i] != NULL) {
-            func_1516972C((struct102 *)display->digits[i]);
+            func_1516972C(&display->digits[i]->header);
         }
     }
 }
@@ -410,5 +410,5 @@ void func_151BFB2C(CounterEffect *effect) {
 /* Destructor of func_151BF340's counter effect. */
 void func_151BFBA4(CounterEffect *effect) {
     func_151BFB2C(effect);
-    func_1514933C(&effect->header);
+    func_1514933C(&effect->base);
 }

@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 extern u8 D_A48[];
 
@@ -12,21 +10,12 @@ extern u8 D_A48[];
  * out again. Several overlays can coexist; each is drawn only for the matching id.
  */
 typedef struct ScreenOverlay {
-    /* 0x00 */ u8 type;
-    /* 0x01 */ u8 list;
-    /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ struct ScreenOverlay *prev;
-    /* 0x08 */ struct ScreenOverlay *next;
-    /* 0x0C */ u8 padC[2];
-    /* 0x0E */ s16 timer;  /* advances by speed each frame; the overlay dies outside [0, 300] */
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ s16 id;
     /* 0x12 */ s16 scroll; /* horizontal texture offset in 1/4 texels, wraps at 256 */
     /* 0x14 */ s16 alpha;  /* 0..128 */
     /* 0x16 */ s8 speed;   /* 1 while running, -2 once stopped (fades back out) */
 } ScreenOverlay;
-
-/* Object lists (see game_1944C0.c): D_800DCE50[list][type] heads a linked list of objects of that type. */
-extern ScreenOverlay *D_800DCE50[2][104];
 
 /* Spawns an overlay for the given id. */
 ScreenOverlay *func_151D26C0(s16 id) {
@@ -35,7 +24,7 @@ ScreenOverlay *func_151D26C0(s16 id) {
     overlay = func_15167A68(0x3C, 1, sizeof(ScreenOverlay), 0, 0xFF, 1);
     overlay->alpha = 0;
     overlay->scroll = 0;
-    overlay->timer = 0;
+    overlay->header.state = 0;
     overlay->speed = 1;
     overlay->id = id;
     return overlay;
@@ -45,7 +34,7 @@ ScreenOverlay *func_151D26C0(s16 id) {
 void func_151D2718(s16 id) {
     ScreenOverlay *overlay;
 
-    for (overlay = D_800DCE50[1][0x3C]; overlay != NULL; overlay = overlay->next) {
+    for (overlay = (ScreenOverlay *)D_800DCE50[1][0x3C]; overlay != NULL; overlay = (ScreenOverlay *)overlay->header.next) {
         if (id == overlay->id) {
             overlay->speed = -2;
         }
@@ -57,15 +46,15 @@ void func_151D275C(ScreenOverlay *overlay) {
     s32 speed;
 
     // matching: assigning speed inside the expression schedules its lb before the timer's lh
-    overlay->timer += D_800BE9E4 * (speed = overlay->speed);
+    overlay->header.state += D_800BE9E4 * (speed = overlay->speed);
 
-    if (speed > 0 && overlay->timer >= 237) {
-        overlay->alpha = (296 - overlay->timer) << 2;
+    if (speed > 0 && overlay->header.state >= 237) {
+        overlay->alpha = (296 - overlay->header.state) << 2;
         if (overlay->alpha < 0) {
             overlay->alpha = 0;
         }
     } else {
-        overlay->alpha = overlay->timer * 2;
+        overlay->alpha = overlay->header.state * 2;
     }
 
     if (overlay->alpha >= 128) {
@@ -77,8 +66,8 @@ void func_151D275C(ScreenOverlay *overlay) {
         overlay->scroll -= 256;
     }
 
-    if (overlay->timer > 300 || overlay->timer < 0) {
-        func_1516972C((struct102 *)overlay);
+    if (overlay->header.state > 300 || overlay->header.state < 0) {
+        func_1516972C(&overlay->header);
     }
 }
 

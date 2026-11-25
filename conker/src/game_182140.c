@@ -4,29 +4,16 @@
 #include "effects.h"
 
 typedef struct ScreenSprite {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ struct ScreenSprite *next;
-    /* 0x0C */ u8 padC[4];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ScreenSpriteInfo info;
     /* 0x68 */ u8 unk68;      /* low nibble: index into D_8008ACC8 */
 } ScreenSprite;
-
-typedef struct {
-    u8 pad0[0x6];
-    u16 width;
-    u16 height;
-    u8 padA[0x2];
-} SpriteTexture;
 
 typedef struct {
     s32 unk0;
     s32 unk4;
 } CombineMode;
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Pair1515572C;
 
 /* The two sprite lists func_151555AC searches. */
 typedef struct {
@@ -35,15 +22,13 @@ typedef struct {
 
 extern s32 (*D_8008ACC8[])(ScreenSprite *);
 extern void (*D_8008AD04[])(ScreenSprite *, s32, u8);
-extern SpriteTexture D_80090B60[];
+extern EffectTexture D_80090B60[];
 extern CombineMode D_800A4AC8[];
 extern SpriteListIds D_800A6030;
-extern Pair1515572C D_800A6038;
-extern ScreenSprite *D_800DCE50[2][0x68];
+extern IdList2 D_800A6038;
 
 extern s32 func_15181CC8(s32);
 extern s32 func_1517EF00(s32);
-extern ScreenSprite *func_15167A68(s32, s32, s32, s32, u8, s32);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
@@ -82,7 +67,7 @@ void func_15154C90(ScreenSprite *sprite) {
         }
     }
     if (finished) {
-        func_1516972C((struct102 *)sprite);
+        func_1516972C(&sprite->header);
     }
 }
 
@@ -246,9 +231,9 @@ s32 func_151555AC(f32 *center, f32 *halfSize, s32 *kinds, s32 kindCount) {
         lists = D_800A6030;
         i &= 0; // matching: `i = 0` here (or a for loop) changes the loop's branch shape
         do {
-            sprite = D_800DCE50[table][lists.id[i]];
+            sprite = (ScreenSprite *)D_800DCE50[table][lists.id[i]];
             while (sprite != NULL) {
-                next = sprite->next;
+                next = (ScreenSprite *)sprite->header.next;
                 k = kindCount;
                 found = 0;
                 while (k > 0 && !found) {
@@ -278,7 +263,7 @@ lbl: // matching: unused label; it splits the block before i++
 }
 
 void func_1515572C(s32 arg0, u8 arg1) {
-    Pair1515572C pair;
+    IdList2 pair;
 
     pair = D_800A6038;
     func_15169260(&pair, 2, arg0, arg1);

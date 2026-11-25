@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Template copied into a new rope (HoltenRopeEffect 0x10-0x47, see game_1E0560.c). */
 typedef struct {
@@ -45,8 +46,7 @@ typedef struct {
 } RopeTieData;
 
 typedef struct {
-    /* 0x00 */ struct260 base;
-    /* 0x24 */ u8 pad24[4];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ RopeTieData tie;
 } RopeTie;
 
@@ -72,8 +72,7 @@ typedef struct {
 } RopeLineData;
 
 struct RopeLine {
-    /* 0x00 */ struct260 base;
-    /* 0x24 */ u8 pad24[4];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ RopeLineData line;
 };
 
@@ -126,7 +125,7 @@ void func_151B2100(RopeTie *self) {
     tie = &self->tie;
     if ((obj0->interaction_state == 0) || (obj0->id == 0xFF) || (obj0->unique_id != tie->obj0Id) ||
         (obj1->interaction_state == 0) || (obj1->id == 0xFF) || (obj1->unique_id != tie->obj1Id)) {
-        self->base.unkE = -1;
+        self->base.header.state = -1;
         return;
     }
 
@@ -393,7 +392,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         dead = 1;
     }
     if ((dead == 0) && (line->anchor.target->unk1D4 != NULL)) {
-        func_151D5D60(&self->base.unk14, view, 4 * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(self->base.buffers, view, 4 * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx == NULL) {
             return gfx;
         }
@@ -458,7 +457,7 @@ Gfx *func_151B2974(Gfx *gfx, RopeLine *self, s16 view) {
         gSP1Triangle(gfx++, 0, 2, 3, 0);
     }
     if (dead != 0) {
-        self->base.unkE = -1;
+        self->base.header.state = -1;
     }
     return gfx;
 }
@@ -468,32 +467,24 @@ void func_151B2EC4(RopeLine *self, s32 arg1, u8 event) {
     func_15169850(arg1, event, &self->line.anchor.target, &self->line.anchor.targetId, self);
 }
 
-/* Event 0x2D payload: two objects that swap places. */
-typedef struct {
-    /* 0x00 */ Actor *a;
-    /* 0x04 */ Actor *b;
-    /* 0x08 */ u8 aId;
-    /* 0x09 */ u8 bId;
-} ObjectSwap;
-
 /* RopeTie event handler: on event 0x2D, swaps obj0/obj1 for the other object of the pair. */
-void func_151B2F04(RopeTie *self, ObjectSwap *swap, u8 event) {
+void func_151B2F04(RopeTie *self, ActorSwapMsg *swap, u8 event) {
     RopeTieData *tie = &self->tie;
 
     if (event == 0x2D) {
-        if (tie->obj0 == swap->a) {
-            tie->obj0 = swap->b;
-            tie->obj0Id = swap->bId;
-        } else if (tie->obj0 == swap->b) {
-            tie->obj0 = swap->a;
-            tie->obj0Id = swap->aId;
+        if (tie->obj0 == swap->actorA) {
+            tie->obj0 = swap->actorB;
+            tie->obj0Id = swap->idB;
+        } else if (tie->obj0 == swap->actorB) {
+            tie->obj0 = swap->actorA;
+            tie->obj0Id = swap->idA;
         }
-        if (tie->obj1 == swap->a) {
-            tie->obj1 = swap->b;
-            tie->obj1Id = swap->bId;
-        } else if (tie->obj1 == swap->b) {
-            tie->obj1 = swap->a;
-            tie->obj1Id = swap->aId;
+        if (tie->obj1 == swap->actorA) {
+            tie->obj1 = swap->actorB;
+            tie->obj1Id = swap->idB;
+        } else if (tie->obj1 == swap->actorB) {
+            tie->obj1 = swap->actorA;
+            tie->obj1Id = swap->idA;
         }
     }
 }

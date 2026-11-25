@@ -11,26 +11,15 @@ extern Vec3f D_800AAB20[];
 extern Vec3f D_800AAB38[];
 extern Vec3f D_800AAB50[];
 
-/* Argument of func_151D8868 (same layout as Game113D60Event in game_113D60.c). */
-typedef struct {
-    /* 0x0 */ s8 type;
-    /* 0x1 */ u8 pad1;
-    /* 0x2 */ s16 duration;
-    /* 0x4 */ s8 unk4;
-    /* 0x5 */ s8 cameraMask; /* 1 << camera->unk23D */
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 pad7;
-} EffectEvent;
-
 s32 func_151C229C(Vec3f *pos, Vec3f *dir, Vec3f *arg2, Vec3f *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7,
                   f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15,
                   s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24,
                   s32 arg25, s32 arg26);
 void func_15145740(Actor *arg0, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, f32 arg4);
-s32 func_1514654C(Actor *, s32, s32, Vec3f **points, Vec3f **results, s32 count);
+s32 func_1514654C(Actor *, ModelAttachment *, s32, Vec3f **points, Vec3f **results, s32 count);
 void func_151D5174(Actor *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f **,
                    Vec3f **, Vec3f *);
-void *func_151D8868(EffectEvent *event, s32 arg1, s32 arg2, s32 arg3);
+void *func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 s32 func_15142A5C(Actor *arg0);
 void func_151D5148(Actor *arg0);
 s32 func_15145EA4(Vec3f **points, Vec3f **results, s32 matrix, s32 count);
@@ -40,7 +29,7 @@ void func_151C6D70(Actor *, u8, Vec3f *, s16, u8, s32);
 
 /* Fires this side's shot from its joint points (or, without a skeleton, from beside the object): posts
  * a func_151D8868 event for its camera, side effects, then func_151C229C along `aim` (from the joints when arg2). */
-s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, s32 arg3, s16 arg4, u8 arg5, s32 arg6) {
+s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s16 arg4, u8 arg5, s32 arg6) {
     Vec3f origin;
     Vec3f aim;
     Vec3f shotPos;
@@ -60,7 +49,7 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, s32 arg3, s16 arg4, u8 arg5, s3
     f32 dx;
     f32 invLen;
     f32 offset;
-    EffectEvent event;
+    RumbleParams event;
     s32 mask;
     u32 i;
 
@@ -93,8 +82,8 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, s32 arg3, s16 arg4, u8 arg5, s3
         points[2] = &D_800AAB50[side];
         points[3] = &D_800AAB68[side];
         points[4] = &D_800AAB20[side];
-        if (arg3 != 0) {
-            if (func_1514654C(arg0, arg3, 0, points, results, arg2 ? 5 : 4) == 0) {
+        if (attachment != NULL) {
+            if (func_1514654C(arg0, attachment, 0, points, results, arg2 ? 5 : 4) == 0) {
                 return 0;
             }
         } else {
@@ -134,12 +123,12 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, s32 arg3, s16 arg4, u8 arg5, s3
     }
     func_151D5174(arg0, &origin, &aim, &sp118, &spE4, &sp130, &sp124, &spF4, &spF0, &shotPos);
     if (arg0->camera != NULL) {
-        event.type = 1;
+        event.flags = 1;
         event.duration = (func_150ADA20() % 11U) + 11;
-        event.cameraMask = 1 << arg0->camera->playerIndex;
+        event.playerMask = 1 << arg0->camera->playerIndex;
         func_150ADA20();
-        event.unk4 = 8;
-        event.unk6 = -1;
+        event.strength = 8;
+        event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 1);
     }
     if ((arg0->unk1D4 != NULL) && ((arg0->unk74 & 0xF) != 0xF)) {
@@ -196,17 +185,16 @@ typedef struct {
 
 /* The object whose shot description func_151C6A28 copies. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ShotDesc shot;
 } ShotHolder;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x28];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ShotHolder holder;
     /* 0x9C */ u8 flags;
 } ShotSource;
 
-s32 func_1514ECE0(Attachment *, s16, Attachment **);
 void func_150F7470(Vec3f *, s32, s32, s32, s32, ShotDesc *, f32, f32, f32, Actor *, s32, s32, s32, s32, s32, s32,
                    s32, s32, u8, s32);
 

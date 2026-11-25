@@ -50,7 +50,7 @@ void func_150D7120(Vec3f *pos, u8 fxOwner, s32 fxList) {
 }
 
 /* Hit effects at pos plus impact particles thrown back along -dir, off surface if there is one. */
-void func_150D728C(SurfaceTriangle *surface, Vec3f *pos, Vec3f *dir, u8 fxOwner, s32 fxList) {
+void func_150D728C(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 fxOwner, s32 fxList) {
     SurfaceJetSpray surfaceFx;
     DirectedJetSpray fx;
 

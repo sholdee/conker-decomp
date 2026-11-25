@@ -12,7 +12,7 @@ typedef struct {
     /* 0x0C */ u8 side;
     /* 0x0D */ u8 unkD;
     /* 0x0E */ u8 padE[2];
-    /* 0x10 */ struct260 *unk10;
+    /* 0x10 */ TimedEffect *unk10;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s8 unk16; // owner camera's unk23D, or -1
     /* 0x17 */ u8 pad17;
@@ -24,13 +24,7 @@ typedef struct {
 
 /* The object spawned by func_150FC438. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterState state;
 } EmitterObj;
 
@@ -58,16 +52,9 @@ typedef struct {
     /* 0x34 */ f32 unk34;
 } EmitterEffect; // size 0x38
 
-extern struct260 *func_15164780(EmitterEffect *, s32, u8, s32);
+extern TimedEffect *func_15164780(EmitterEffect *, s32, u8, s32);
 
 
-/* First argument of func_151602C0. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ s8 unk1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s8 unk4;
-} SparkArg_150FB8C0;
 
 /* First argument of func_1515572C. */
 typedef struct {
@@ -81,7 +68,7 @@ extern f32 D_800A1DD4[][3], D_800A1DEC[][3], D_800A1E04[][3], D_800A1E1C[][3], D
 extern Actor *func_1507515C(Actor *);
 extern void func_15145EA4(f32 **, f32 **, s32, s32);
 extern s32 func_151C229C(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, Actor *, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
-extern s32 func_151602C0(SparkArg_150FB8C0 *, s32 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
 extern void func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, s32, s32);
 extern void func_1515572C(CameraArg_150FB8C0 *, s32);
@@ -111,7 +98,7 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
     Vec3f *linePoint;
     u8 cameraMask;
     s8 variant;
-    SparkArg_150FB8C0 spark;
+    LightEffectHeader spark;
     s32 sparkPos[3];
     f32 trailParams[2];
     u8 trailCameraMask;
@@ -212,10 +199,10 @@ void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, 
                   cameraMask, 0, 0, arg4, arg5);
     if ((obj->unk74 & 0xF) != 0xF) {
         if (!(func_150ADA20() & 7)) {
-            spark.unk0 = 3;
-            spark.unk1 = -1;
-            spark.unk2 = (func_150ADA20() % 5U) + 4;
-            spark.unk4 = 0;
+            spark.flags = LIGHT_EFFECT_TIMED | LIGHT_EFFECT_OWNS_LIGHT;
+            spark.update = -1;
+            spark.lifetime = (func_150ADA20() % 5U) + 4;
+            spark.lightType = 0;
             sparkPos[0] = (s32)origin[0];
             sparkPos[1] = (s32)origin[1];
             sparkPos[2] = (s32)origin[2];
@@ -358,39 +345,29 @@ void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
     }
 }
 
-typedef struct {
-    u8 unk0;
-    u8 pad1;
-    s16 unk2;
-    u8 unk4;
-    u8 unk5;
-    s8 unk6;
-    u8 unk7;
-} Spark_150FC614;
-
-extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 
 /* Per-frame update of an emitter: destroys it once its owner is gone or changed, otherwise fires
  * func_150FB8C0 from alternating sides whenever the spawn timer runs out. */
 void func_150FC614(EmitterObj *obj) {
     EmitterState *state;
     Actor *owner;
-    Spark_150FC614 spark;
+    RumbleParams spark;
 
     state = &obj->state;
     owner = state->owner;
     if ((owner->interaction_state == 0) || (owner->id == 0xFF) || (owner->unique_id != state->ownerUniqueId) || (D_800C35EA[0] == 1)) {
-        obj->unkE = -1;
+        obj->base.header.state = -1;
         return;
     }
     if (owner->unk84.uh != state->unk1D) {
-        obj->unkE = -1;
+        obj->base.header.state = -1;
         return;
     }
 
     state->spawnTimer -= D_800BE9A4;
     while (state->spawnTimer < 0.0f) {
-        func_150FB8C0(owner, state->side, -state->spawnTimer, state->unkD, obj->unkC, obj->unk1);
+        func_150FB8C0(owner, state->side, -state->spawnTimer, state->unkD, obj->base.header.owner, obj->base.header.kind);
         state->side ^= 1;
         if (state->other != NULL) {
             if (state->other->unk31C != NULL) {
@@ -405,65 +382,51 @@ void func_150FC614(EmitterObj *obj) {
     }
     state->unk14 -= D_800BE9E4;
     if (state->unk14 < 0) {
-        spark.unk0 = 1;
+        spark.flags = 1;
         func_150ADA20();
-        spark.unk2 = 30;
-        spark.unk5 = 1 << state->unk16;
-        spark.unk4 = (func_150ADA20() % 6U) + 3;
-        spark.unk6 = -1;
-        func_151D8868(&spark, 0, obj->unkC, obj->unk1);
+        spark.duration = 30;
+        spark.playerMask = 1 << state->unk16;
+        spark.strength = (func_150ADA20() % 6U) + 3;
+        spark.updateKind = -1;
+        func_151D8868(&spark, 0, obj->base.header.owner, obj->base.header.kind);
         func_150ADA20();
         state->unk14 = 250;
     }
 }
 
-/* Message payloads handled by func_150FC818, selected by its msgType argument. */
-typedef union {
-    struct {
-        Actor *obj;
-        u8 uniqueId;
-    } type0;
-    struct {
-        Actor *objA;
-        Actor *objB;
-        u8 uniqueIdA;
-        u8 uniqueIdB;
-    } type2D;
-} EmitterMsg;
-
 /* Message handler: type 0 destroys the emitter when it names the owner or the other object, type 0x2D
  * swaps two objects, retargeting the emitter's owner or other object. */
-void func_150FC818(EmitterObj *obj, EmitterMsg *msg, u8 msgType) {
+void func_150FC818(EmitterObj *obj, ActorMsg *msg, u8 msgType) {
     EmitterState *state = &obj->state;
     Actor *msgObj;
     Actor *msgObjA;
     Actor *owner;
 
     if (msgType == 0) {
-        msgObj = msg->type0.obj;
+        msgObj = msg->ref.actor;
         owner = state->owner;
-        if ((owner == msgObj) || (state->ownerUniqueId == msg->type0.uniqueId)) {
-            func_1516972C((struct102 *)obj);
+        if ((owner == msgObj) || (state->ownerUniqueId == msg->ref.uniqueId)) {
+            func_1516972C(&obj->base.header);
         } else if (state->other != NULL) {
-            if ((msgObj == state->other) || (state->otherUniqueId == msg->type0.uniqueId)) {
-                func_1516972C((struct102 *)obj);
+            if ((msgObj == state->other) || (state->otherUniqueId == msg->ref.uniqueId)) {
+                func_1516972C(&obj->base.header);
             }
         }
     } else if (msgType == 0x2D) {
-        msgObjA = msg->type2D.objA;
+        msgObjA = msg->swap.actorA;
         if (msgObjA == state->owner) {
-            state->owner = msg->type2D.objB;
-            state->ownerUniqueId = msg->type2D.uniqueIdB;
-        } else if (state->owner == msg->type2D.objB) {
+            state->owner = msg->swap.actorB;
+            state->ownerUniqueId = msg->swap.idB;
+        } else if (state->owner == msg->swap.actorB) {
             state->owner = msgObjA;
-            state->ownerUniqueId = msg->type2D.uniqueIdA;
+            state->ownerUniqueId = msg->swap.idA;
         } else if (state->other != NULL) {
             if (msgObjA == state->other) {
-                state->other = msg->type2D.objB;
-                state->otherUniqueId = msg->type2D.uniqueIdB;
-            } else if (state->other == msg->type2D.objB) {
+                state->other = msg->swap.actorB;
+                state->otherUniqueId = msg->swap.idB;
+            } else if (state->other == msg->swap.actorB) {
                 state->other = msgObjA;
-                state->otherUniqueId = msg->type2D.uniqueIdA;
+                state->otherUniqueId = msg->swap.idA;
             }
         }
     }

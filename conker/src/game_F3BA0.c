@@ -10,116 +10,41 @@
  * own update clears it and dies once a frame passes without it.
  */
 
-/* Result of a floor probe (as game_71820.c's CollisionHit). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 unk4[0x20];
-} FloorHit;
-
-struct FlickerSprite;
-struct Emitter;
 
 /* The effects a watcher keeps alive, stored in the watcher's extra data. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ struct FlickerSprite *volatile sprite; // matching: volatile keeps IDO from reusing the NULL test's load
-    /* 0x18 */ struct Emitter *volatile emitter;
+    /* 0x14 */ FlickerSprite *volatile sprite; // matching: volatile keeps IDO from reusing the NULL test's load
+    /* 0x18 */ WatcherEmitter *volatile emitter;
 } WatcherEffects;
 
-/* A character watcher (see game_185560.c's CharacterWatcher) with WatcherEffects as extra data. */
+/* A character watcher with WatcherEffects as extra data. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0xB];
-    /* 0x18 */ Actor *character;
-    /* 0x1C */ u8 pad1C[0x18];
-    /* 0x34 */ FloorHit floor;
+    /* 0x00 */ CharacterWatcher watcher;
     /* 0x58 */ WatcherEffects effects;
 } Watcher;
 
-/* Eases a sprite's animation speed toward a target that is re-picked at random intervals. */
-typedef struct {
-    /* 0x00 */ Watcher *owner;
-    /* 0x04 */ u8 keepAlive;
-    /* 0x08 */ f32 targetMin;
-    /* 0x0C */ f32 targetRange;
-    /* 0x10 */ f32 target;
-    /* 0x14 */ s16 timer;
-    /* 0x16 */ s16 periodMin;
-    /* 0x18 */ s16 periodRange;
-    /* 0x1C */ f32 rate;
-} FlickerState;
-
-typedef struct FlickerSprite {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ SpriteDef def;
-    /* 0x40 */ u8 pad40[0x70];
-    /* 0xB0 */ FlickerState flicker;
-} FlickerSprite;
-
-/* Extra data of the emitter, after its 0x58-byte BloodDrip body (game_161520.c). */
-typedef struct {
-    /* 0x00 */ Watcher *owner;
-    /* 0x04 */ u8 keepAlive;
-    /* 0x08 */ f32 ceiling;    /* height the particles rise to */
-} EmitterLink;
-
-typedef struct Emitter {
-    /* 0x00 */ u8 pad0[0x58];
-    /* 0x58 */ EmitterLink link;
-} Emitter;
-
-/* Per-particle data of the rising particles (as game_185560.c's RiseMotion, update func 4). */
-typedef struct {
-    /* 0x00 */ f32 baseSize;
-    /* 0x04 */ u8 widthPhase;
-    /* 0x05 */ u8 heightPhase;
-    /* 0x06 */ s8 widthPhaseStep;
-    /* 0x07 */ s8 heightPhaseStep;
-    /* 0x08 */ f32 widthWobble;
-    /* 0x0C */ f32 heightWobble;
-    /* 0x10 */ f32 maxRiseSpeed;
-    /* 0x14 */ f32 swayPerSpeed;
-    /* 0x18 */ u8 swayPhaseX;
-    /* 0x19 */ u8 swayPhaseZ;
-    /* 0x1A */ u8 swayPhaseStepX;
-    /* 0x1B */ u8 swayPhaseStepZ;
-    /* 0x1C */ f32 swayX;
-    /* 0x20 */ f32 swayZ;
-    /* 0x24 */ f32 ceiling;
-} RiseMotion;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
-    /* 0xA8 */ RiseMotion motion;
-} RiseParticle;
-
 void *memcpy(void *, const void *, u32);
-s32 func_15045800(f32 *pos, s32 mask, f32 bottom, FloorHit *hit);
+s32 func_15045800(f32 *pos, s32 mask, f32 bottom, CollisionHit *hit);
 void func_15143134(Vec3f *in, Vec3f *out, MtxF *matrix);
 u8 func_151D8E20(void);
-Emitter *func_1513418C(BloodDripDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
+WatcherEmitter *func_1513418C(BloodDripDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
 RiseParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize);
 void func_1513F6C0(FlickerSprite *sprite, u8 updateFn, u8 expireFn);
-void func_151346EC(struct102 *effect);
-void func_1513470C(struct102 *effect);
 
 FlickerSprite *func_150C6D90(Watcher *watcher);
-Emitter *func_150C68C4(Actor *character, Watcher *watcher);
+WatcherEmitter *func_150C68C4(Actor *character, Watcher *watcher);
 
 extern Vec3f D_800887E0;
 /* matching: rodata holds second copies of these constants, which repeated literals would fold into the first */
 extern f32 D_800A0450, D_800A0454; /* 5000.0f */
 extern f32 D_800A0464;             /* 0.15f */
 extern f32 D_800A0470, D_800A0474; /* 0.1f, 0.08f */
-extern u8 D_800AB414[][3];
 
 /* Watcher action: keeps the floor sprite alive, creating it on first use. */
 void func_150C66F0(Watcher *watcher) {
     if (watcher->effects.sprite != NULL) {
-        FlickerState *flicker = &watcher->effects.sprite->flicker;
+        SpriteFlicker *flicker = &watcher->effects.sprite->flicker;
 
         flicker->keepAlive = 1;
     } else {
@@ -133,7 +58,7 @@ void func_150C66F0(Watcher *watcher) {
  */
 s32 func_150C673C(FlickerSprite *sprite) {
     s8 alive;
-    FlickerState *flicker;
+    SpriteFlicker *flicker;
 
     alive = 1;
     flicker = &sprite->flicker;
@@ -143,19 +68,19 @@ s32 func_150C673C(FlickerSprite *sprite) {
     flicker->keepAlive = 0;
     flicker->timer -= D_800BE9E4;
     if (flicker->timer < 0) {
-        flicker->timer = (func_150ADA20() % (u32)(flicker->periodRange + 1)) + flicker->periodMin;
-        flicker->target = func_150ADA68() * flicker->targetRange + flicker->targetMin;
+        flicker->timer = (func_150ADA20() % (u32)(flicker->delayRange + 1)) + flicker->minDelay;
+        flicker->target = func_150ADA68() * flicker->targetRange + flicker->minTarget;
     }
-    sprite->def.frameSpeed += (s32)((flicker->target - (f32)sprite->def.frameSpeed) * flicker->rate);
+    sprite->quad.def.frameSpeed += (s32)((flicker->target - (f32)sprite->quad.def.frameSpeed) * flicker->easing);
     return alive;
 }
 
 /* Sprite expiry: detaches the sprite from its watcher and clears its handlers. */
 s32 func_150C682C(FlickerSprite *sprite) {
-    WatcherEffects *effects = &sprite->flicker.owner->effects;
+    WatcherEffects *effects = &((Watcher *)sprite->flicker.owner)->effects;
 
     effects->sprite = NULL;
-    sprite->def.flags |= 2;
+    sprite->quad.def.flags |= 2;
     sprite->flicker.owner = NULL;
     func_1513F6C0(sprite, 0, 0);
     return 0;
@@ -163,10 +88,10 @@ s32 func_150C682C(FlickerSprite *sprite) {
 
 /* Watcher action: keeps the rising-particle emitter alive, creating it on first use. */
 void func_150C6870(Watcher *watcher) {
-    Actor *character = watcher->character;
+    Actor *character = watcher->watcher.character;
 
     if (watcher->effects.emitter != NULL) {
-        EmitterLink *link = &watcher->effects.emitter->link;
+        WatcherEmitterLink *link = &watcher->effects.emitter->link;
 
         link->keepAlive = 1;
     } else {
@@ -178,21 +103,21 @@ void func_150C6870(Watcher *watcher) {
  * Attaches an emitter to the character; its particles rise to the surface found above the
  * character (or 5000 units up when there is none).
  */
-Emitter *func_150C68C4(Actor *character, Watcher *watcher) {
+WatcherEmitter *func_150C68C4(Actor *character, Watcher *watcher) {
     BloodDripDesc desc;
-    EmitterLink link;
-    Emitter *emitter;
+    WatcherEmitterLink link;
+    WatcherEmitter *emitter;
 
     {
         f32 pos[3];
 
-        link.owner = watcher;
+        link.owner = &watcher->watcher;
         link.keepAlive = 1;
         pos[0] = character->x_position;
         pos[1] = character->y_position + D_800A0450;
         pos[2] = character->z_position;
-        if (func_15045800(pos, 0, character->y_position - 100.0f, &watcher->floor) != 0) {
-            link.ceiling = watcher->floor.height;
+        if (func_15045800(pos, 0, character->y_position - 100.0f, &watcher->watcher.hit) != 0) {
+            link.ceiling = watcher->watcher.hit.height;
         } else {
             link.ceiling = character->y_position + D_800A0454;
         }
@@ -212,15 +137,15 @@ Emitter *func_150C68C4(Actor *character, Watcher *watcher) {
     desc.emitter = 5;
     desc.callback = 2;
     desc.unk2D = 3;
-    emitter = func_1513418C(&desc, sizeof(EmitterLink), 0xFF, 0);
+    emitter = func_1513418C(&desc, sizeof(WatcherEmitterLink), 0xFF, 0);
     if (emitter != NULL) {
-        memcpy(&emitter->link, &link, sizeof(EmitterLink));
+        memcpy(&emitter->link, &link, sizeof(WatcherEmitterLink));
     }
     return emitter;
 }
 
-/* Emitter func 5: spawns one rising particle at (x, y, z), drifting against the emitter's motion. */
-void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Emitter *emitter) {
+/* WatcherEmitter func 5: spawns one rising particle at (x, y, z), drifting against the emitter's motion. */
+void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, WatcherEmitter *emitter) {
     ParticleDesc desc;
     RiseParticle *particle;
     RiseMotion motion;
@@ -281,8 +206,8 @@ void func_150C6A08(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Emitter *emitter
     }
 }
 
-/* Emitter callback 2: returns whether the watcher refreshed keepAlive since the last call. */
-s32 func_150C6D1C(Emitter *emitter) {
+/* WatcherEmitter callback 2: returns whether the watcher refreshed keepAlive since the last call. */
+s32 func_150C6D1C(WatcherEmitter *emitter) {
     s32 alive = 1;
 
     if (!emitter->link.keepAlive) {
@@ -292,20 +217,20 @@ s32 func_150C6D1C(Emitter *emitter) {
     return alive;
 }
 
-/* Emitter teardown (D_80089AAC[3]): detaches the emitter from its watcher. */
-void func_150C6D40(Emitter *emitter) {
-    WatcherEffects *effects = &emitter->link.owner->effects;
+/* WatcherEmitter teardown (D_80089AAC[3]): detaches the emitter from its watcher. */
+void func_150C6D40(WatcherEmitter *emitter) {
+    WatcherEffects *effects = &((Watcher *)emitter->link.owner)->effects;
 
     effects->emitter = NULL;
-    func_151346EC((struct102 *)emitter);
+    func_151346EC(&emitter->header);
 }
 
-/* Emitter teardown (D_80089AD4[3]): detaches the emitter from its watcher. */
-void func_150C6D68(Emitter *emitter) {
-    WatcherEffects *effects = &emitter->link.owner->effects;
+/* WatcherEmitter teardown (D_80089AD4[3]): detaches the emitter from its watcher. */
+void func_150C6D68(WatcherEmitter *emitter) {
+    WatcherEffects *effects = &((Watcher *)emitter->link.owner)->effects;
 
     effects->emitter = NULL;
-    func_1513470C((struct102 *)emitter);
+    func_1513470C(&emitter->header);
 }
 
 /*
@@ -318,7 +243,7 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
     Actor *character;
 
     sprite = NULL;
-    character = watcher->character;
+    character = watcher->watcher.character;
     if (character->unk1D4) {
         Vec3f origin = D_800887E0;
 
@@ -334,9 +259,9 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
         probe.x = pos.x;
         probe.y = pos.y + 200.0f;
         probe.z = pos.z;
-        if (func_15045800(&probe.x, 0, pos.y - 200.0f, &watcher->floor) != 0) {
+        if (func_15045800(&probe.x, 0, pos.y - 200.0f, &watcher->watcher.hit) != 0) {
             SpriteDef def;
-            FlickerState flicker;
+            SpriteFlicker flicker;
             f32 size;
             u8 color;
             s32 rand2;
@@ -344,27 +269,27 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
             s32 rand0;
 
             color = func_151D8E20();
-            probe.y = watcher->floor.height;
+            probe.y = watcher->watcher.hit.height;
             size = func_150ADA68() * 100.0f + 200.0f;
-            flicker.owner = watcher;
+            flicker.owner = &watcher->watcher;
             flicker.keepAlive = 1;
-            flicker.targetMin = 26214.4f;
+            flicker.minTarget = 26214.4f;
             flicker.targetRange = 32768.0f;
             flicker.target = 0.0f;
             flicker.timer = 0;
-            flicker.periodMin = 10;
-            flicker.periodRange = 10;
-            flicker.rate = 0.231f;
-            def.frameSpeed = flicker.targetRange * 0.5f + flicker.targetMin;
+            flicker.minDelay = 10;
+            flicker.delayRange = 10;
+            flicker.easing = 0.231f;
+            def.frameSpeed = flicker.targetRange * 0.5f + flicker.minTarget;
             def.texture = 0x38;
             def.flags = 0x20300;
             def.lifetime = 300;
             def.unk10 = 150;
             def.frame = 0;
             def.unk11 = 0xFF;
-            def.rgba[0] = D_800AB414[color][0];
-            def.rgba[1] = D_800AB414[color][1];
-            def.rgba[2] = D_800AB414[color][2];
+            def.rgba[0] = D_800AB414[color].r;
+            def.rgba[1] = D_800AB414[color].g;
+            def.rgba[2] = D_800AB414[color].b;
             def.rgba[3] = 0xFF;
             def.renderModes = 0x440001;
             def.unk16 = 0;
@@ -373,12 +298,12 @@ FlickerSprite *func_150C6D90(Watcher *watcher) {
             rand1 = func_150ADA20();
             rand2 = func_150ADA20();
             // matching: IDO needs the redundant `& 0xFF` on the u8 argument (the bytes change without it)
-            sprite = (FlickerSprite *)func_1513C73C(&def, 9, 3, (s32)watcher->floor.unk4,
+            sprite = (FlickerSprite *)func_1513C73C(&def, 9, 3, (s32)&watcher->watcher.hit.tri,
                                                     probe.x, probe.y, probe.z, size, size, rand0 & 0xFF,
-                                                    (rand2 & 1) * 2 + (rand1 & 1), 0x20, watcher->unkC,
-                                                    watcher->unk1);
+                                                    (rand2 & 1) * 2 + (rand1 & 1), 0x20, watcher->watcher.header.owner,
+                                                    watcher->watcher.header.kind);
             if (sprite != NULL) {
-                memcpy(&sprite->flicker, &flicker, sizeof(FlickerState));
+                memcpy(&sprite->flicker, &flicker, sizeof(SpriteFlicker));
             }
         }
     }

@@ -2,11 +2,12 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern void bzero(void *, int);
 void func_15012470(void);
 void func_15008E10(s32);
-void func_15189900(struct145 *, u8);
+void func_15189900(SprayDesc *, u8);
 
 extern u8 *D_80088870;
 
@@ -30,7 +31,7 @@ void func_1500E5C0(void) {
     }
     {
         // matching: IDO materializes &D_800D98D0 before the two scalar stores only via a local
-        struct102 **entries = D_800D98D0;
+        EffectHeader **entries = D_800D98D0;
 
         D_800D9890 = 0;
         D_800D9894 = NULL;
@@ -57,7 +58,6 @@ void func_1500E70C(s32 id) {
     }
 }
 
-extern f32 D_800DCA24;
 extern u8 D_800DCA28;
 extern f32 D_800DCA2C;
 
@@ -125,33 +125,32 @@ void func_1500E8C0(void) {
     func_15195AA8(D_800B0E00[0], D_800902E8, 0, -1, 0, 0, 0, -6);
     func_15195AA8(D_800B0E04, D_800902E8, 0, -1, 0, 1, 0, -6);
     {
-        struct145 descriptor;
+        SprayDesc descriptor;
 
-        // struct145 in structs.h types unk28 as s32, but it holds a float
-        *(f32 *)&descriptor.unk28 = 0.2142857164f;
-        descriptor.unk30 = 5.0f;
-        descriptor.unk34 = 6.0f;
-        descriptor.unk20 = 8.0f;
-        descriptor.unk24 = 7.0f;
-        descriptor.unk2C = 0.0f;
-        descriptor.unk48 = 3;
-        descriptor.unk4C = 2;
-        descriptor.unk0 = 0x34;
-        descriptor.unk2 = 0x12;
-        descriptor.unk4 = -0x28;
-        descriptor.unk6 = 0xF;
-        descriptor.unk38 = 155;
-        descriptor.unk3A = 100;
-        descriptor.unk44 = 41;
-        descriptor.unk46 = 41;
-        descriptor.unk10 = 400.0f;
-        descriptor.unk14 = 0.0f;
-        descriptor.unk18 = 0.0f;
-        descriptor.unk3C = 0.6000000238f;
-        descriptor.unk40 = 0.3999999762f;
-        descriptor.unk8 = 800.0f;
-        descriptor.unkC = -3000.0f;
-        descriptor.unk1C = 900.0f - descriptor.unk10;
+        descriptor.rate = 0.2142857164f;
+        descriptor.halfWidth = 5.0f;
+        descriptor.halfWidthRange = 6.0f;
+        descriptor.speed = 8.0f;
+        descriptor.speedRange = 7.0f;
+        descriptor.rateRange = 0.0f;
+        descriptor.pointCount = 3;
+        descriptor.pointCountRange = 2;
+        descriptor.yaw = 0x34;
+        descriptor.yawSpread = 0x12;
+        descriptor.pitch = -0x28;
+        descriptor.pitchRange = 0xF;
+        descriptor.unk1B = 155;
+        descriptor.unk1BRange = 100;
+        descriptor.unkC = 41;
+        descriptor.unkCRange = 41;
+        descriptor.origin.z = 400.0f;
+        descriptor.extent.x = 0.0f;
+        descriptor.extent.y = 0.0f;
+        descriptor.gravity = 0.6000000238f;
+        descriptor.gravityRange = 0.3999999762f;
+        descriptor.origin.x = 800.0f;
+        descriptor.origin.y = -3000.0f;
+        descriptor.extent.z = 900.0f - descriptor.origin.z;
         func_15189900(&descriptor, 1);
     }
     func_1000FA64(1567, (D_800BE9F0 == 6) ? 52 : 7, 0, 0, 12000, 1000, 400, func_1000EF40, 0, 0, 72, 0);

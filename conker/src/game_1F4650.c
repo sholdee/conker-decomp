@@ -14,16 +14,8 @@ extern void func_15160274(s32, s32, s32);
 extern void func_1515572C(s32, s32);
 extern void func_151A561C(s32, s32);
 
-/* Collision query context: set up from an actor by func_1504715C, filled in by func_15046C80. */
-typedef struct {
-    f32 hitY;
-    SurfaceTriangle triangle;
-    u8 pad16[6];
-    u8 surfaceFlags;
-    u8 pad1D[7];
-} SightCollision;
-extern void func_1504715C(SightCollision *, Actor *);
-extern s32 func_151ABE40(f32 *, SightCollision *, s32, u8, s32);
+extern void func_1504715C(CollisionHit *, Actor *);
+extern s32 func_151ABE40(f32 *, CollisionHit *, s32, u8, s32);
 
 /* Placement parameters for a sight beam (laser tripwire) between two surfaces. */
 typedef struct {
@@ -43,7 +35,7 @@ typedef struct {
 } SightBeamParams;
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, void *, s32, f32);
-extern s32 func_151C756C(Vec3f *start, SurfaceTriangle *startTri, Vec3f *end, SurfaceTriangle *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
+extern s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
 
 /* Casts rays both ways from the beam's midpoint and spawns a sight beam between the two surfaces hit. */
 s32 func_151C71A0(SightBeamParams *beam) {
@@ -65,8 +57,8 @@ s32 func_151C71A0(SightBeamParams *beam) {
     MtxF matrix;
     s32 hit1;
     s32 hit2;
-    SurfaceTriangle triangle1;
-    SurfaceTriangle triangle2;
+    CollisionTri triangle1;
+    CollisionTri triangle2;
     f32 point1[3];
     f32 point2[3];
     s32 distance1;
@@ -115,24 +107,13 @@ s32 func_151C71A0(SightBeamParams *beam) {
 }
 
 typedef struct {
-    u8 pad0[9];
-    u8 hidden;
-} SightModel;
-
-typedef struct {
     u8 pad0[0x6F];
     u8 unk6F;
 } SightStatusBlock;
 
-/* An effect object whose model can be hidden. */
 typedef struct {
-    u8 pad0[0x14];
-    SightModel *model;
-    SightStatusBlock *status;
-} SightModelOwner;
-
-typedef struct {
-    u8 pad0[0x58];
+    EffectHeader header;
+    u8 pad10[0x48];
     s32 flags;
     u8 pad5C[0x12C];
     SightStatusBlock *status;
@@ -191,7 +172,7 @@ typedef struct {
     f32 speedS;
     f32 speedT;
     SightBeamParams *source;
-    SightModelOwner *midEffect;
+    LightEffect *midEffect;
     s32 unk30;
     struct SightExtension *endEffect0;
     struct SightExtension *endEffect1;
@@ -199,8 +180,8 @@ typedef struct {
     SightEmitter *emitter1[3];
     f32 phase;
     u8 alternate;
-    SurfaceTriangle triangle0;
-    SurfaceTriangle triangle1;
+    CollisionTri triangle0;
+    CollisionTri triangle1;
     s16 activeTime;
     s16 inactiveTime;
     s16 timer;
@@ -223,26 +204,18 @@ typedef struct {
 
 /* A sight beam object: spawn descriptor copy at +0x18, quad vertex buffers, beam state at +0x110. */
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0xB];
-    ParticleDef spawn;
-    u8 pad70[0x50];
-    u8 vtxTemplate[0x40];
-    u8 *vtxBuffers[4];
-    SightBeamState state;
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ SightBeamState state;
 } SightBeamObject;
 
 extern void func_1510F800(s32);
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern SightModelOwner *func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
+extern LightEffect *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 struct SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
 s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
 
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
-s32 func_151C756C(Vec3f *start, SurfaceTriangle *startTri, Vec3f *end, SurfaceTriangle *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
+s32 func_151C756C(Vec3f *start, CollisionTri *startTri, Vec3f *end, CollisionTri *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
     SightBeamObject *obj;
     ParticleDef spawn;
     SightBeamState state;
@@ -280,7 +253,7 @@ s32 func_151C756C(Vec3f *start, SurfaceTriangle *startTri, Vec3f *end, SurfaceTr
     state.speedT = (func_150ADA68() * 80.0f + 50.0f) * 0.001000000047f;
     {
         // matching: a block-scope declaration gives IDO a scope boundary here
-        extern void func_151C9198(SightEmitter **, Vec3f *, SurfaceTriangle *, Vec3f *, SightZone *, u8, u8, u8, s32);
+        extern void func_151C9198(SightEmitter **, Vec3f *, CollisionTri *, Vec3f *, SightZone *, u8, u8, u8, s32);
 
         spawn.scale.x = end->x - start->x;
         spawn.scale.y = end->y - start->y;
@@ -317,15 +290,15 @@ s32 func_151C756C(Vec3f *start, SurfaceTriangle *startTri, Vec3f *end, SurfaceTr
     state.phase = 0.0f;
     state.source = source;
     if (hasMidEffect) {
-        Header hdr;
+        LightEffectHeader hdr;
 
         pos[0] = start->x + spawn.scale.x * 0.5f;
         pos[1] = start->y + spawn.scale.y * 0.5f;
         pos[2] = start->z + spawn.scale.z * 0.5f;
-        hdr.unk0 = 2;
-        hdr.unk1 = 2;
-        hdr.unk2 = 300;
-        hdr.unk4 = 0;
+        hdr.flags = 2;
+        hdr.update = 2;
+        hdr.lifetime = 300;
+        hdr.lightType = 0;
         state.midEffect = func_1516284C(&hdr, pos, red, green, blue, 0xFF, 0, 0, 0x10, arg16, arg17);
     } else {
         state.midEffect = NULL;
@@ -362,7 +335,7 @@ s32 func_151C756C(Vec3f *start, SurfaceTriangle *startTri, Vec3f *end, SurfaceTr
 
         {
             // matching: a block-scope declaration gives IDO a scope boundary here
-            extern s32 D_800BE9F0;
+            extern s32 D_800BE9F0; // matching: a declaration here opens a -g3 scope block (scheduling)
 
             objState = &obj->state;
             memcpy(objState, &state, sizeof(SightBeamState));
@@ -421,21 +394,21 @@ void *func_151C7E98(SightBeamObject *obj, s16 view) {
             return NULL;
         }
     }
-    func_151D5D60(obj->vtxBuffers, view, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(obj->head.vtxBuffers, view, sizeof(obj->head.vtxTemplate), (void **)&vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
-            memcpy(obj->vtxBuffers[view], obj->vtxTemplate, 0x40);
-            memcpy(obj->vtxBuffers[view] + 0x40, obj->vtxTemplate, 0x40);
+            memcpy(obj->head.vtxBuffers[view], obj->head.vtxTemplate, sizeof(obj->head.vtxTemplate));
+            memcpy(obj->head.vtxBuffers[view] + 4, obj->head.vtxTemplate, sizeof(obj->head.vtxTemplate));
         }
     } else {
         return NULL;
     }
     camera = func_15144B34(view);
-    dir.x = obj->spawn.rot.x - obj->spawn.pos.x;
-    dir.y = obj->spawn.rot.y - obj->spawn.pos.y;
-    dir.z = obj->spawn.rot.z - obj->spawn.pos.z;
-    func_15145548(&obj->spawn.pos, &dir, camera, &closest, 0);
+    dir.x = obj->head.def.rot.x - obj->head.def.pos.x;
+    dir.y = obj->head.def.rot.y - obj->head.def.pos.y;
+    dir.z = obj->head.def.rot.z - obj->head.def.pos.z;
+    func_15145548(&obj->head.def.pos, &dir, camera, &closest, 0);
     dx = closest.x - camera->x;
     dy = closest.y - camera->y;
     dz = closest.z - camera->z;
@@ -448,32 +421,32 @@ void *func_151C7E98(SightBeamObject *obj, s16 view) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = obj->spawn.height / sqrtf(lengthSquared);
+        scale = obj->head.def.height / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
     }
-    vertices->v.ob[0] = obj->spawn.rot.x - nx;
-    vertices->v.ob[1] = obj->spawn.rot.y - ny;
-    vertices->v.ob[2] = obj->spawn.rot.z - nz;
+    vertices->v.ob[0] = obj->head.def.rot.x - nx;
+    vertices->v.ob[1] = obj->head.def.rot.y - ny;
+    vertices->v.ob[2] = obj->head.def.rot.z - nz;
     vertices->v.tc[0] = state->texS;
     vertices->v.flag = 0;
     vertices++;
-    vertices->v.ob[0] = obj->spawn.pos.x - nx;
-    vertices->v.ob[1] = obj->spawn.pos.y - ny;
-    vertices->v.ob[2] = obj->spawn.pos.z - nz;
+    vertices->v.ob[0] = obj->head.def.pos.x - nx;
+    vertices->v.ob[1] = obj->head.def.pos.y - ny;
+    vertices->v.ob[2] = obj->head.def.pos.z - nz;
     vertices->v.tc[0] = state->texT;
     vertices->v.flag = 0;
     vertices++;
-    vertices->v.ob[0] = obj->spawn.pos.x + nx;
-    vertices->v.ob[1] = obj->spawn.pos.y + ny;
-    vertices->v.ob[2] = obj->spawn.pos.z + nz;
+    vertices->v.ob[0] = obj->head.def.pos.x + nx;
+    vertices->v.ob[1] = obj->head.def.pos.y + ny;
+    vertices->v.ob[2] = obj->head.def.pos.z + nz;
     vertices->v.tc[0] = state->texT;
     vertices->v.flag = 0;
     vertices++;
-    vertices->v.ob[0] = obj->spawn.rot.x + nx;
-    vertices->v.ob[1] = obj->spawn.rot.y + ny;
-    vertices->v.ob[2] = obj->spawn.rot.z + nz;
+    vertices->v.ob[0] = obj->head.def.rot.x + nx;
+    vertices->v.ob[1] = obj->head.def.rot.y + ny;
+    vertices->v.ob[2] = obj->head.def.rot.z + nz;
     vertices->v.tc[0] = state->texS;
     vertices->v.flag = 0;
     return result;
@@ -483,7 +456,7 @@ void *func_151C7E98(SightBeamObject *obj, s16 view) {
 s32 func_151C82D0(SightBeamObject *obj) {
     SightBeamState *state = &obj->state;
     s16 period;
-    SightModelOwner *midEffect;
+    LightEffect *midEffect;
     SightBeamParams *beam;
     SightEmitter *emitter0;
     SightEmitter *emitter1;
@@ -511,7 +484,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
         state->texT = func_150AD78C(state->angleT) * state->radiusT + state->centerT;
         midEffect = state->midEffect;
         if (midEffect != NULL) {
-            midEffect->model->hidden = 0;
+            midEffect->light->disabled = 0;
         }
         beam = state->beam;
         if (beam != NULL && (state->flags & 0x10)) {
@@ -520,7 +493,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
     } else {
         midEffect = state->midEffect;
         if (midEffect != NULL) {
-            midEffect->model->hidden = 1;
+            midEffect->light->disabled = 1;
         }
         beam = state->beam;
         if (beam != NULL) {
@@ -554,7 +527,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
         emitter3->flags &= ~0x20000;
     }
     if (state->flags & 8) {
-        obj->spawn.unk44 = func_150AD78C(state->pulseAngle) * 112.5f + 142.5f;
+        obj->head.def.unk44 = func_150AD78C(state->pulseAngle) * 112.5f + 142.5f;
         state->pulseAngle = func_15144B68(state->pulseAngle + state->pulseSpeed * D_800BE9A4);
     }
     return 1;
@@ -658,12 +631,12 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
     center.y = actor->y_position + halfHeight;
     center.z = actor->z_position;
     scale = radius / halfHeight;
-    start.x = obj->spawn.pos.x;
-    start.y = (obj->spawn.pos.y - center.y) * scale + center.y;
-    start.z = obj->spawn.pos.z;
-    endX = obj->spawn.rot.x;
-    endY = (obj->spawn.rot.y - center.y) * scale + center.y;
-    endZ = obj->spawn.rot.z;
+    start.x = obj->head.def.pos.x;
+    start.y = (obj->head.def.pos.y - center.y) * scale + center.y;
+    start.z = obj->head.def.pos.z;
+    endX = obj->head.def.rot.x;
+    endY = (obj->head.def.rot.y - center.y) * scale + center.y;
+    endZ = obj->head.def.rot.z;
     dir.x = endX - start.x;
     dir.y = endY - start.y;
     dir.z = endZ - start.z;
@@ -679,14 +652,12 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
     return 0;
 }
 
-typedef struct { s8 a, b; s16 c; s8 d; } Params151602C0;
-typedef struct { s8 a; s16 b; s8 c, d, e; } Params151D8868;
 extern u8 *D_800AAC30[];
 extern void func_1514FBFC(SurfaceJetSpray *, u8, s32);
-extern void func_151602C0(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15164F0C(s32, u8, s32, u8, s32);
-extern void func_151D8868(void *, s32, s32, s32);
+extern void func_151D8868(RumbleParams *, s32, s32, s32);
 extern void func_1505D024(s32, u8 *, s32, s32);
 extern void func_1000EC24();
 
@@ -695,8 +666,8 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     SightBeamState *state;
     SurfaceJetSpray burst;
     s32 pos[3];
-    Params151602C0 params602C0;
-    Params151D8868 params8868;
+    LightEffectHeader header;
+    RumbleParams params8868;
 
     state = &obj->state;
     burst.source.spread = 491.0f;
@@ -721,45 +692,45 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     burst.spray.drag = 0.6980000138f;
     burst.spray.gravityBase = -0.4450000226f;
     burst.spray.gravityRange = 0.4410000145f;
-    burst.spray.pos = obj->spawn.pos;
-    burst.source.normal = obj->spawn.scale;
+    burst.spray.pos = obj->head.def.pos;
+    burst.source.normal = obj->head.def.scale;
     burst.source.triangle = state->triangle0;
-    func_1514FBFC(&burst, obj->unkC, obj->unk1);
-    burst.spray.pos = obj->spawn.rot;
-    burst.source.normal.x = -obj->spawn.scale.x;
-    burst.source.normal.y = -obj->spawn.scale.y;
-    burst.source.normal.z = -obj->spawn.scale.z;
+    func_1514FBFC(&burst, obj->head.header.owner, obj->head.header.kind);
+    burst.spray.pos = obj->head.def.rot;
+    burst.source.normal.x = -obj->head.def.scale.x;
+    burst.source.normal.y = -obj->head.def.scale.y;
+    burst.source.normal.z = -obj->head.def.scale.z;
     burst.source.triangle = state->triangle1;
-    func_1514FBFC(&burst, obj->unkC, obj->unk1);
-    pos[0] = obj->spawn.pos.x;
-    pos[1] = obj->spawn.pos.y;
-    pos[2] = obj->spawn.pos.z;
-    params602C0.a = 3;
-    params602C0.b = -1;
-    params602C0.c = func_150ADA20() % 9U + 17;
-    params602C0.d = 0;
-    func_151602C0(&params602C0, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
-    pos[0] = obj->spawn.rot.x;
-    pos[1] = obj->spawn.rot.y;
-    pos[2] = obj->spawn.rot.z;
-    func_151602C0(&params602C0, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->unkC, obj->unk1);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->spawn.pos, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->spawn.rot, -1, 1, 1, 0, 0, 0, obj->unkC, 0);
+    func_1514FBFC(&burst, obj->head.header.owner, obj->head.header.kind);
+    pos[0] = obj->head.def.pos.x;
+    pos[1] = obj->head.def.pos.y;
+    pos[2] = obj->head.def.pos.z;
+    header.flags = LIGHT_EFFECT_TIMED | LIGHT_EFFECT_OWNS_LIGHT;
+    header.update = -1;
+    header.lifetime = func_150ADA20() % 9U + 17;
+    header.lightType = 0;
+    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
+    pos[0] = obj->head.def.rot.x;
+    pos[1] = obj->head.def.rot.y;
+    pos[2] = obj->head.def.rot.z;
+    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->head.def.pos, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->head.def.rot, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     if (actor != NULL) {
-        func_15164F0C(2, actor->camera->playerIndex, 0, obj->unkC, obj->unk1);
-        params8868.a = 1;
-        params8868.b = 40;
-        params8868.d = 1;
-        params8868.c = 8;
-        params8868.e = -1;
+        func_15164F0C(2, actor->camera->playerIndex, 0, obj->head.header.owner, obj->head.header.kind);
+        params8868.flags = 1;
+        params8868.duration = 40;
+        params8868.playerMask = 1;
+        params8868.strength = 8;
+        params8868.updateKind = -1;
         func_151D8868(&params8868, 0, 0xFF, 0);
     }
     if (actor != NULL) {
         func_1505D024((s32)actor, D_800AAC30[state->unk94], 0, -1);
     }
-    func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->spawn.pos.x, obj->spawn.pos.y, obj->spawn.pos.z, 2000, 2200);
-    func_1000FA64(0x2F6, obj->spawn.rot.x, obj->spawn.rot.y, obj->spawn.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
-    func_1516972C((struct102 *)obj);
+    func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 2000, 2200);
+    func_1000FA64(0x2F6, obj->head.def.rot.x, obj->head.def.rot.y, obj->head.def.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
+    func_1516972C(&obj->head.header);
 }
 
 
@@ -768,7 +739,8 @@ void *func_151407D0(GlowShape *, s32, ParticleDef *, s32, s32, s32, s32, s32, s3
 
 /* Effect spawned by func_151C8FCC; +0x170 holds the beam object that owns it. */
 typedef struct SightExtension {
-    u8 pad0[0x170];
+    EffectHeader header;
+    u8 pad10[0x160];
     SightBeamObject *owner;
 } SightExtension;
 
@@ -823,12 +795,12 @@ SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, 
     return effect;
 }
 
-extern s32 func_15144E80(SurfaceTriangle *, Vec3f *, Vec3f *, Vec3f *);
+extern s32 func_15144E80(CollisionTri *, Vec3f *, Vec3f *, Vec3f *);
 extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern void func_15133760(void *, void *);
 
 /* Spawns the three parts of a beam emitter on the surface triangle at `pos`. */
-void func_151C9198(SightEmitter **emitters, Vec3f *pos, SurfaceTriangle *triangle, Vec3f *dir, SightZone *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8) {
+void func_151C9198(SightEmitter **emitters, Vec3f *pos, CollisionTri *triangle, Vec3f *dir, SightZone *zone, u8 altColors, u8 zoneMasked, u8 arg7, s32 arg8) {
     Vec3f edge0;
     Vec3f edge1;
     Vec3f normal;
@@ -930,7 +902,7 @@ void func_151C94D4(SightBeamObject *obj) {
 
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
-        func_1516972C((struct102 *)state->midEffect);
+        func_1516972C((EffectHeader *)state->midEffect);
         func_1000FD38(func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
@@ -978,7 +950,7 @@ void func_151C95D8(SightBeamObject *obj) {
 
     state = &obj->state;
     if (obj->state.midEffect != NULL) {
-        func_1516972C((struct102 *)state->midEffect);
+        func_1516972C((EffectHeader *)state->midEffect);
         func_1000FD38(func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
@@ -1056,7 +1028,7 @@ void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
     u8 hit;
     u8 airborne;
     Vec3f query;
-    SightCollision collision;
+    CollisionHit collision;
 
     if (actor == NULL) {
         return;
@@ -1071,13 +1043,13 @@ void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
         query.y = origin.y;
         query.z = origin.z;
         func_1504715C(&collision, actor);
-        if (func_15046C80(&query.x, 0, origin.y - 200.0f, &collision) != 0 && (collision.surfaceFlags & 1)) {
+        if (func_15046C80(&query.x, 0, origin.y - 200.0f, &collision) != 0 && (collision.flags & 1)) {
             impact.x = query.x;
             hit = 1;
-            impact.y = collision.hitY;
+            impact.y = collision.height;
             impact.z = query.z;
             func_150E7FEC(func_150ADA68() * 125.0f + 204.0f, (func_150ADA20() % 101U + 155) & 0xFF,
-                          &collision.triangle, &impact, func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
+                          &collision.tri, &impact, func_150ADA20() % 302U + 500, 0, 1, 0, 0, 0, arg1, 0);
         }
     }
     func_151D5404(&origin, 506.0f, 1013.0f, 0.000987166888f, 15, 20, arg1, arg2);
@@ -1100,7 +1072,7 @@ void func_151C9740(Actor *actor, u8 arg1, s32 arg2) {
 /* Spawns func_151ABE40's effect (type 2) just above the actor's floor height. */
 void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
     f32 pos[3];
-    SightCollision collision;
+    CollisionHit collision;
 
     pos[0] = actor->x_position;
     pos[1] = actor->floorY + 2.0f;
@@ -1109,13 +1081,13 @@ void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
     func_151ABE40(pos, &collision, 2, arg1, arg2);
 }
 
-/* Hides the object's model while its status block's unk6F is set. */
-s32 func_151C9B30(SightModelOwner *obj) {
-    SightStatusBlock *status = obj->status;
+/* Light effect update: turns the light off while its status block's unk6F is set. */
+s32 func_151C9B30(LightEffect *obj) {
+    SightStatusBlock *status = obj->data.object;
     if (status->unk6F == 0) {
-        obj->model->hidden = 0;
+        obj->light->disabled = 0;
     } else {
-        obj->model->hidden = 1;
+        obj->light->disabled = 1;
     }
     return 1;
 }
@@ -1262,7 +1234,7 @@ typedef struct {
 
 /* A spawned sight sprite: the spawn descriptor lives on at +0x10, the payload at +0x70. */
 typedef struct {
-    u8 pad0[0x10];
+    EffectHeader header;
     ScreenSpriteInfo desc;
     u8 pad68[8];
     SightSpritePayload payload;
@@ -1278,7 +1250,8 @@ f32 func_151CC1D4(SightSprite *sprite);
 
 /* Effect spawned by func_151CCE94; +0x20 holds the owning player. */
 typedef struct {
-    u8 pad0[0x20];
+    EffectHeader header;
+    u8 pad10[0x10];
     Camera *player;
 } SightOwnedEffect;
 
@@ -1479,7 +1452,7 @@ void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (sprite->payload.player == *(Camera **)msg) {
-            func_1516972C((struct102 *)sprite);
+            func_1516972C(&sprite->header);
         // matching: an empty labelled statement keeps IDO from merging this branch's exit
         label:
             ;
@@ -1487,7 +1460,7 @@ void func_151CAACC(SightSprite *sprite, void **msg, u8 msgId) {
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->camera == sprite->payload.player) {
-            func_1516972C((struct102 *)sprite);
+            func_1516972C(&sprite->header);
         }
     }
     handler = D_8008FC10[sprite->payload.kind];
@@ -1569,7 +1542,8 @@ typedef struct {
 } SightLens;
 
 typedef struct {
-    u8 pad0[0x18];
+    EffectHeader header;
+    u8 pad10[0x8];
     SightLens lens;
     u8 pad2C[4];
     u16 pixels[24 * 24]; /* 24x24 copy of the framebuffer under the lens */
@@ -1746,12 +1720,12 @@ void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (obj->lens.player == *(Camera **)msg) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C(&obj->header);
         }
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->camera == obj->lens.player) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C(&obj->header);
         }
     }
 }
@@ -1915,12 +1889,12 @@ void func_151CBB6C(SightOwnedEffect *effect, void **msg, u8 msgId) {
 
     if (msgId == 0x21) {
         if (effect->player == *(Camera **)msg) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C(&effect->header);
         }
     } else if (msgId == 0) {
         actor = *msg;
         if (actor->camera == effect->player) {
-            func_1516972C((struct102 *)effect);
+            func_1516972C(&effect->header);
         }
     }
 }

@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
 extern u8 D_80085930[]; // font charset, 95 entries
 
 s32 func_15042C40(u8 ch);
@@ -95,14 +94,6 @@ typedef struct {
     /* 0x0E */ u8 padE[2];
 } GlyphSprite;
 
-/* Metrics of one font glyph, in texels. */
-typedef struct {
-    /* 0x0 */ u8 w;
-    /* 0x1 */ u8 h;
-    /* 0x2 */ u8 x; /* advance before the glyph */
-    /* 0x3 */ u8 y; /* drop below the line top */
-} FontGlyph;
-
 extern u8 D_800CBD50; // control/icon code of the current character, 0xFF if none
 extern u8 D_800CBD57; // current primitive colour r, g, b, a (D_800CBD57-5A)
 extern u8 D_800CBD58;
@@ -112,9 +103,6 @@ static u8 D_800CBD5B; // flashing text on
 extern u8 D_800CBD5C; // flash phase
 extern u8 D_800CBD5D; // waving text on
 extern u8 D_800CBD5E; // wave phase
-extern u8 *D_80085990[]; // per-font glyph bitmaps, 0xE0 bytes each
-extern FontGlyph *D_80085994[]; // per-font glyph metrics
-extern Gfx D_800859A0[];
 extern u8 D_800915DC[];
 extern u8 D_800915EC[];
 extern u8 D_800915FC[];
@@ -422,7 +410,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
 
             if (draw) {
                 { // matching: -g3 block marker keeps as1 from hoisting the 1/4096 mtc1 above it
-                    extern f32 D_800380A4;
+                    extern f32 D_800380A4; // matching: a declaration here opens a -g3 scope block (scheduling)
 
                 gy = 0.0f;
                 w = D_80085994[font][c].w;
@@ -444,7 +432,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                         gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, ((w + 7) >> 3), 0, 3, 0, G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
                         gDPSetTileSize(gfx++, 3, 0, 0, (((w + 7) & 0xFFF8) - 1) << 2, h << 2);
                     }
-                    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, D_80085990[font] + c * 0xE0);
+                    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, D_80085990[font][0] + c * 0xE0); // matching: a byte offset; D_80085990[font][c] changes the frame
                     gDPLoadBlock(gfx++, 1, 0, 0, ((((w + 7) & 0xFFF8) * (h + 1) + 1) >> 1) - 1, 0);
                     yi = y;
                     gSPScisTextureRectangle(gfx++,

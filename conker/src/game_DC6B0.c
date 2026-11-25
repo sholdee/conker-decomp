@@ -52,14 +52,6 @@ void func_150AF2E0(void *arg0, Range150AF2E0 *range) {
     func_151CF898(arg0, range->unk2 + range->unk8, range->unk2);
 }
 
-/* Per-particle data of the wobbling particles func_150AF328 spawns (updated by func_150AF6E4). */
-typedef struct {
-    /* 0x00 */ u8 phase[2];     /* x and z angles of the wobble ellipse */
-    /* 0x02 */ u8 phaseStep[2]; /* added to phase per tick */
-    /* 0x04 */ f32 amplitude[2];
-    /* 0x0C */ f32 drag;        /* velocity scale per tick */
-} WobbleData;
-
 /* A particle created by func_15130280. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x58];
@@ -190,13 +182,7 @@ typedef struct GameDC6B0SmokeTimers {
 } GameDC6B0SmokeTimers;
 
 typedef struct GameDC6B0SmokeSource {
-    u8 pad0;
-    u8 owner;
-    u8 pad2[0xA];
-    u8 group;
-    u8 padD;
-    s16 maxLifetime;
-    u8 pad10[0x18];
+    TimedEffect base;
     GameDC6B0SmokeTimers timers;
 } GameDC6B0SmokeSource;
 
@@ -238,8 +224,8 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         puff.halfWidth = 1.0f;
         puff.halfHeight = 115.0f;
         puff.timer = func_150ADA20() % 71U + 20;
-        if (source->maxLifetime < puff.timer) {
-            puff.timer = source->maxLifetime;
+        if (source->base.header.state < puff.timer) {
+            puff.timer = source->base.header.state;
         }
         puff.flags = 0x21;
         puff.fadeStart = 1;
@@ -264,7 +250,7 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         puff.unk40 = 0;
         puff.unk41 = 0xA;
         puff.viewport = 0;
-        sprite = func_1515548C(&puff, 6, 0, 0, 0x10, source->group, source->owner);
+        sprite = func_1515548C(&puff, 6, 0, 0, 0x10, source->base.header.owner, source->base.header.kind);
         if (sprite != NULL) {
             memcpy(&sprite->motion, &motion, sizeof(motion));
         }
@@ -277,8 +263,8 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         spark.halfWidth = spark.halfHeight = 2.0f * func_150ADA68() + 1.0f;
         spark.texture = func_151D8E6C();
         spark.timer = func_150ADA20() % 7U + 5;
-        if (source->maxLifetime < spark.timer) {
-            spark.timer = source->maxLifetime;
+        if (source->base.header.state < spark.timer) {
+            spark.timer = source->base.header.state;
         }
         spark.flags = 1 | (func_150ADA20() ? 2 : 0) | (func_150ADA20() ? 4 : 0) | 0x20;
         spark.fadeStart = 1;
@@ -303,7 +289,7 @@ void func_150AF7C4(GameDC6B0SmokeSource *source) {
         spark.unk40 = 0;
         spark.unk41 = 7;
         spark.viewport = 0;
-        func_1515548C(&spark, 0, 0, 0, 0, source->group, source->owner);
+        func_1515548C(&spark, 0, 0, 0, 0, source->base.header.owner, source->base.header.kind);
         timers->spark = func_150ADA20() % 11U + 3;
     }
 }
@@ -350,9 +336,8 @@ void func_150AFC68(s32 object, s32 bone, s32 timer, s32 radiusXZ, u8 arg4, s32 a
 }
 
 typedef struct Node150AFDB0 {
-    /* 0x00 */ u8 pad0[0x8];
-    /* 0x08 */ struct Node150AFDB0 *next;
-    /* 0x0C */ u8 padC[0x33];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x2F];
     /* 0x3F */ u8 unk3F;
 } Node150AFDB0;
 
@@ -365,9 +350,9 @@ void func_150AFDB0(void) {
 
     D_800DD190++;
     for (node = D_800DCE94; node != NULL; node = D_800DD198[D_800DD190]) {
-        D_800DD198[D_800DD190] = node->next;
+        D_800DD198[D_800DD190] = node->header.next;
         if (node->unk3F == D_800C3E78) {
-            func_1516972C((struct102 *)node);
+            func_1516972C(&node->header);
         }
     }
     D_800DD190--;
@@ -423,7 +408,7 @@ void func_150B003C(s32 arg0) {
 /* A projectile created by func_1513264C. */
 typedef struct {
     u8 pad0[0x170];
-    struct102 *trail; /* ribbon effect (func_151B7328) following the projectile */
+    EffectHeader *trail; /* ribbon effect (func_151B7328) following the projectile */
 } GameDC6B0Projectile;
 
 /* Arguments the projectile's ribbon trail keeps (func_151B7328 selector 1). */
@@ -434,7 +419,7 @@ typedef struct GameDC6B0TrailArgs {
 
 GameDC6B0Projectile *func_1513264C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
 void func_15145974(Vec3f *v, f32 *heading, f32 *elevation);
-struct102 *func_151B7328(void *args, s32 selector, s32 argsSize, s32, s32);
+EffectHeader *func_151B7328(void *args, s32 selector, s32 argsSize, s32, s32);
 s32 func_15145128(Vec3f *v, Vec3f *out, f32 *length, f32 *invLength);
 
 /* Fires a projectile from `from` towards `to` at speed 80, with a ribbon trail. Does nothing if
@@ -446,7 +431,7 @@ void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
     f32 invLength;
     GameDC6B0Projectile *projectile;
     GameDC6B0TrailArgs trailArgs;
-    struct102 **trail;
+    EffectHeader **trail;
 
     trailArgs.unk4 = 0;
     dir.x = to->x - from->x;
@@ -496,7 +481,7 @@ void func_150B0094(Vec3f *from, Vec3f *to, u8 arg2, s32 arg3) {
 
 /* Releases the projectile's ribbon trail, if any. */
 void func_150B02C0(GameDC6B0Projectile *projectile) {
-    struct102 **trail = &projectile->trail;
+    EffectHeader **trail = &projectile->trail;
 
     if (*trail != NULL) {
         func_1516972C(*trail);

@@ -324,13 +324,6 @@ s32 func_1517EAAC(f32 x, f32 y, f32 z, f32 *outX, f32 *outY) {
 extern f32 sqrtf(f32);
 #pragma intrinsic (sqrtf)
 
-/* N64 z-buffer exponent table: value = (mantissa << shift) + base. */
-typedef struct {
-    u32 shift;
-    u32 base;
-} ZbufFormat;
-
-extern ZbufFormat D_80089630[8];
 s32 func_1509563C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW, f32 maxDist);
 
 // matching: the f64 member gives the clip z/w pair the 8-byte-aligned stack slot IDO used

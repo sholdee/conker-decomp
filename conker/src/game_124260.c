@@ -3,38 +3,23 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Message 0x3E payload: "this actor is gone"; beams owned by it destroy themselves (func_150F7310). */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; /* owner->unique_id */
-} OwnerGoneMsg;
-
 /* Sends message 0x3E (func_151494E0) for `owner`; beams it owns destroy themselves on it. */
 void func_150F6DB0(Actor *owner) {
-    OwnerGoneMsg msg;
+    ActorRef msg;
 
-    msg.owner = owner;
-    msg.ownerId = owner->unique_id;
+    msg.actor = owner;
+    msg.uniqueId = owner->unique_id;
     func_151494E0((s32)&msg, 0x3E);
 }
 
 /* A sprite spawned by func_15130280 that marks one end of the beam. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x40];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x30];
     /* 0x40 */ Vec3f pos;
     /* 0x4C */ u8 pad4C[0x74 - 0x4C];
     /* 0x74 */ s8 mode; /* 3 or -1 (see func_150F706C) */
 } BeamEnd;
-
-/* Result of the func_15081690 ray cast. */
-typedef struct {
-    /* 0x00 */ u8 *hitObj;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ u8 pad14[0x59 - 0x14];
-    /* 0x59 */ u8 hit; /* 0: no hit */
-    /* 0x5A */ u8 pad5A[0x64 - 0x5A];
-} RayHit;
 
 /* Per-object state of a beam (0x78 bytes, copied in by func_150F6DE4). */
 typedef struct {
@@ -47,13 +32,7 @@ typedef struct {
 
 /* A beam object allocated by func_15149130. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE; /* -1: destroy */
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BeamState beam;
 } BeamObj;
 
@@ -71,7 +50,6 @@ BeamObj *func_150F6DE4(Actor *owner) {
         state.ends[i] = NULL;
     }
     state.flags = 0;
-    // functions.h types the 7th argument (the size of the object data) as struct37 *
     obj = (BeamObj *)func_15149130(300, -1, 0x43, -1, 0, 0x37, sizeof(BeamState), 0xFF, 1);
     if (obj != NULL) {
         BeamState *beam;
@@ -117,12 +95,12 @@ BeamObj *func_150F6DE4(Actor *owner) {
             spawn.gravity = 0.0f;
             spawn.scaleRate = 1.0f;
             spawn.maxSize = 20.0f;
-            beam->ends[0] = func_15130280(&spawn, 1, 0, 0, obj->unkC, obj->unk1);
+            beam->ends[0] = func_15130280(&spawn, 1, 0, 0, obj->base.header.owner, obj->base.header.kind);
             spawn.r2 = 0xFF;
             spawn.g2 = 0;
             spawn.b2 = 0;
             spawn.alpha = 0xFF;
-            beam->ends[1] = func_15130280(&spawn, 1, 0, 0, obj->unkC, obj->unk1);
+            beam->ends[1] = func_15130280(&spawn, 1, 0, 0, obj->base.header.owner, obj->base.header.kind);
         }
     }
     return obj;
@@ -145,7 +123,7 @@ void func_150F706C(BeamObj *obj) {
     owner = beam->owner;
 
     if (owner->interaction_state == 0 || owner->unique_id != beam->ownerId) {
-        obj->unkE = -1;
+        obj->base.header.state = -1;
         return;
     }
 
@@ -173,21 +151,21 @@ void func_150F706C(BeamObj *obj) {
     beam->flags |= 1;
 
     if (beam->ends[0] != NULL && beam->ends[1] != NULL) {
-        if (beam->ray.hit == 0) {
+        if (beam->ray.hitType == 0) {
             beam->ends[0]->mode = beam->ends[1]->mode = 3;
         } else {
             hitPos = beam->ray.pos;
             beam->ends[1]->pos = hitPos;
             beam->ends[0]->pos = hitPos;
 
-            if (beam->ray.hit == 1) {
+            if (beam->ray.hitType == 1) {
                 beam->ends[0]->mode = -1;
                 beam->ends[1]->mode = 3;
-            } else if (func_1506196C(beam->ray.hitObj, 0) < 0xFF) {
+            } else if (func_1506196C(beam->ray.obj, 0) < 0xFF) {
                 beam->ends[0]->mode = -1;
                 beam->ends[1]->mode = 3;
             } else {
-                func_1502EA98(beam->ray.hitObj, 0xFF, 0, 0, 0x7F, 0, 0x10);
+                func_1502EA98(beam->ray.obj, 0xFF, 0, 0, 0x7F, 0, 0x10);
                 beam->ends[0]->mode = 3;
                 beam->ends[1]->mode = -1;
             }
@@ -196,7 +174,7 @@ void func_150F706C(BeamObj *obj) {
 }
 
 /* Message handler: destroys the beam when its owner is reported gone (0x3E); other messages go to the default handler. */
-void func_150F7310(BeamObj *obj, OwnerGoneMsg *msg, u8 msgId) {
+void func_150F7310(BeamObj *obj, ActorRef *msg, u8 msgId) {
     // matching: taking &obj keeps it in its arg slot (IDO reloads it instead of saving it in s0)
     BeamObj **objp = &obj;
     BeamState *beam;
@@ -204,8 +182,8 @@ void func_150F7310(BeamObj *obj, OwnerGoneMsg *msg, u8 msgId) {
     if (msgId == 0x3E) {
         beam = &(*objp)->beam;
         // matching: the punned read of msg makes IDO load it a second time for the id compare
-        if (msg->owner == beam->owner || beam->ownerId == ((OwnerGoneMsg *)*(s32 *)&msg)->ownerId) {
-            func_1516972C((struct102 *)*objp);
+        if (msg->actor == beam->owner || beam->ownerId == ((ActorRef *)*(s32 *)&msg)->uniqueId) {
+            func_1516972C(&(*objp)->base.header);
         }
     } else {
         beam = &(*objp)->beam;
@@ -213,7 +191,6 @@ void func_150F7310(BeamObj *obj, OwnerGoneMsg *msg, u8 msgId) {
     }
 }
 
-void func_1514EDF0(BeamObj *handle, Actor *owner);
 
 /* Destroys the beam's end sprites and detaches the beam from its owner. */
 void func_150F739C(BeamObj *obj) {
@@ -223,7 +200,7 @@ void func_150F739C(BeamObj *obj) {
     beam = &obj->beam;
     for (i = 0; i < 2; i++) {
         if (beam->ends[i] != NULL) {
-            func_1516972C((struct102 *)beam->ends[i]);
+            func_1516972C(&beam->ends[i]->header);
         }
     }
     func_1514EDF0(obj, beam->owner);
@@ -232,11 +209,11 @@ void func_150F739C(BeamObj *obj) {
 /* Beam callback: tears the beam down (func_150F739C), then hands it to func_1514933C. */
 void func_150F740C(BeamObj *obj) {
     func_150F739C(obj);
-    func_1514933C((struct260 *)obj);
+    func_1514933C(&obj->base);
 }
 
 /* Beam callback: tears the beam down (func_150F739C), then hands it to func_15149368. */
 void func_150F7438(BeamObj *obj) {
     func_150F739C(obj);
-    func_15149368((struct260 *)obj);
+    func_15149368(&obj->base);
 }

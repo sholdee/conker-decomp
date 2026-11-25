@@ -5,7 +5,7 @@
 
 /*
  * Two object-attached particle emitters (effects 0x23 and the caller-chosen type of func_15192D48):
- * their spawners, per-frame updates and message handlers. Each effect is a struct260 whose data at
+ * their spawners, per-frame updates and message handlers. Each effect is a TimedEffect whose data at
  * 0x28 is an ObjectEmitterData.
  */
 
@@ -17,11 +17,7 @@ typedef struct {
 } ObjectEmitterData; /* size 0xC */
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD[0x28 - 0xD];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ObjectEmitterData data;
 } Effect1BFDD0;
 
@@ -112,7 +108,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
             desc.vel.x = dir->x * speed;
             desc.vel.y = dir->y * speed;
             desc.vel.z = dir->z * speed;
-            particle = func_15130374(&desc, 1, sizeof(f32), effect->owner, effect->kind);
+            particle = func_15130374(&desc, 1, sizeof(f32), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->drag, &drag, sizeof(drag));
             }
@@ -214,7 +210,7 @@ void func_15192DF0(Effect1BFDD0 *effect) {
                 if (func_150ADA20() & 1) {
                     desc.flags |= PARTICLE_FLIP_T;
                 }
-                particle = func_15130374(&desc, 1, sizeof(f32), effect->owner, effect->kind);
+                particle = func_15130374(&desc, 1, sizeof(f32), effect->base.header.owner, effect->base.header.kind);
                 if (particle != NULL) {
                     memcpy(&particle->drag, &drag, sizeof(drag));
                 }
@@ -224,42 +220,28 @@ void func_15192DF0(Effect1BFDD0 *effect) {
     }
 }
 
-/* Payload of message 0x2D: two objects trade places. */
-typedef struct {
-    /* 0x00 */ Actor *from;
-    /* 0x04 */ Actor *to;
-    /* 0x08 */ u8 fromId;
-    /* 0x09 */ u8 toId;
-} ObjectSwapMessage;
-
-/* Payload of message 0: names an object by pointer or by unique id. */
-typedef struct {
-    /* 0x00 */ Actor *object;
-    /* 0x04 */ u8 objectId;
-} ObjectRemovedMessage;
-
 /* Message handler: message 0x2D moves the effect to the other object of a swap; message 0 ends the
  * effect when it names the effect's object. */
 void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     ObjectEmitterData *data = &effect->data;
-    ObjectSwapMessage *swap = msg;
-    ObjectRemovedMessage *removal = msg;
+    ActorSwapMsg *swap = msg;
+    ActorRef *removal = msg;
     Actor *removed;
 
     if (msgType == 0x2D) {
-        if (data->object == swap->from) {
-            data->object = swap->to;
-            data->objectId = swap->toId;
-        } else if (data->object == swap->to) {
+        if (data->object == swap->actorA) {
+            data->object = swap->actorB;
+            data->objectId = swap->idB;
+        } else if (data->object == swap->actorB) {
             ObjectEmitterData *dst = data; // matching: the -g3 scope keeps the store out of the b delay slot
 
-            dst->object = swap->from;
-            dst->objectId = swap->fromId;
+            dst->object = swap->actorA;
+            dst->objectId = swap->idA;
         }
     } else if (msgType == 0) {
-        removed = removal->object;
-        if (removed == data->object || removal->objectId == data->objectId) {
-            func_1516972C((struct102 *)effect);
+        removed = removal->actor;
+        if (removed == data->object || removal->uniqueId == data->objectId) {
+            func_1516972C(&effect->base.header);
         }
     }
 }
@@ -267,24 +249,24 @@ void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
 /* Message handler of func_15192D48's effect: the same as func_15193234. */
 void func_151932E0(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     ObjectEmitterData *data = &effect->data;
-    ObjectSwapMessage *swap = msg;
-    ObjectRemovedMessage *removal = msg;
+    ActorSwapMsg *swap = msg;
+    ActorRef *removal = msg;
     Actor *removed;
 
     if (msgType == 0x2D) {
-        if (data->object == swap->from) {
-            data->object = swap->to;
-            data->objectId = swap->toId;
-        } else if (data->object == swap->to) {
+        if (data->object == swap->actorA) {
+            data->object = swap->actorB;
+            data->objectId = swap->idB;
+        } else if (data->object == swap->actorB) {
             ObjectEmitterData *dst = data; // matching: the -g3 scope keeps the store out of the b delay slot
 
-            dst->object = swap->from;
-            dst->objectId = swap->fromId;
+            dst->object = swap->actorA;
+            dst->objectId = swap->idA;
         }
     } else if (msgType == 0) {
-        removed = removal->object;
-        if (removed == data->object || removal->objectId == data->objectId) {
-            func_1516972C((struct102 *)effect);
+        removed = removal->actor;
+        if (removed == data->object || removal->uniqueId == data->objectId) {
+            func_1516972C(&effect->base.header);
         }
     }
 }

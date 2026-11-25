@@ -3,16 +3,15 @@
 #include "variables.h"
 #include "effects.h"
 
-struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
+LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
 
 void func_15145740(Actor *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4);
-s32 func_1514654C(Actor *, ActorCtl *, s32, Vec3f **, f32 **, s32);
+s32 func_1514654C(Actor *, ModelAttachment *, s32, Vec3f **, f32 **, s32);
 s32 func_151C229C(f32 *arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
 void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4);
 void func_151C56A4(f32 *pos, u8 arg1, s32 arg2);
 
 /* Model-space points that func_1514654C transforms through model part 0x46 into world space. */
-extern Vec3f D_800AAA90;
 extern Vec3f D_800AAAA8;
 
 /* Spawns a func_151C229C effect along a segment at `obj`: offset along func_15145740's `dir` from its
@@ -23,7 +22,7 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
     f32 end[3];
     f32 dir[3];
     f32 unkB0[3];
-    ActorCtl *part;
+    ModelAttachment *part;
     Vec3f *modelPoints[2];
     f32 *worldPoints[2];
     s32 arg16;
@@ -84,7 +83,6 @@ void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
 }
 
 extern void func_15102B38(Actor *, u8, Vec3f *, Vec3f *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
-extern Vec3f D_800AAA9C;
 
 /* Spawns a func_15102B38 effect at `pos` on `obj` with randomized scale and parameters. */
 void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4) {
@@ -103,17 +101,17 @@ void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4) {
 
 /* Spawns a func_151602C0 effect at `pos`, converted to integer coordinates. */
 void func_151C56A4(f32 *pos, u8 arg1, s32 arg2) {
-    Header header;
-    Header2 intPos;
+    LightEffectHeader header;
+    Vec3i intPos;
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = (func_150ADA20() % 3U) + 3;
-    header.unk4 = 0;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = (func_150ADA20() % 3U) + 3;
+    header.lightType = 0;
 
-    intPos.unk0 = pos[0];
-    intPos.unk4 = pos[1];
-    intPos.unk8 = pos[2];
+    intPos.x = pos[0];
+    intPos.y = pos[1];
+    intPos.z = pos[2];
 
     func_151602C0(&header, &intPos, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
 }

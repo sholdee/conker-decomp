@@ -2,34 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* A four-oscillator wobble driven by an attack/decay/sustain/release envelope, one per view (indexed by Camera.unk23D). */
-typedef struct {
-    /* 0x00 */ f32 frequency0;     /* oscillator frequencies in Hz (elapsed is in 30 fps frames) */
-    /* 0x04 */ f32 frequency1;     // matching: an f32[4] array here changes FP regalloc in func_1512D980
-    /* 0x08 */ f32 frequency2;
-    /* 0x0C */ f32 frequency3;
-    /* 0x10 */ f32 attackTime;
-    /* 0x14 */ f32 decayTime;
-    /* 0x18 */ f32 sustainTime;
-    /* 0x1C */ f32 releaseTime;
-    /* 0x20 */ f32 peak;
-    /* 0x24 */ f32 sustainLevel;
-    /* 0x28 */ f32 elapsed;       /* -1.0f when idle */
-    /* 0x2C */ f32 amplitude;
-    /* 0x30 */ f32 attackEnd;
-    /* 0x34 */ f32 decayEnd;
-    /* 0x38 */ f32 sustainEnd;
-    /* 0x3C */ f32 releaseEnd;
-    /* 0x40 */ f32 attackRate;
-    /* 0x44 */ f32 decayRate;
-    /* 0x48 */ f32 sustainRate;
-    /* 0x4C */ f32 releaseRate;
-    /* 0x50 */ s32 stage;         /* 0 = loaded, 1..4 = attack..release, 5 = finished */
-    /* 0x54 */ f32 output[4];
-    /* 0x64 */ s32 mode;          /* nonzero: stage advances as the envelope runs */
-} ViewEnvelope;
-
-extern ViewEnvelope D_800DC2C0[];
 
 /* Stops the view's envelope and zeroes its outputs. */
 void func_1512D6F0(Camera *view) {

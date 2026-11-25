@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *isNew);
 extern s32 func_15144E80(void *, Vec3f *, Vec3f *, Vec3f *);
@@ -8,16 +9,10 @@ extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 
 /* A quad particle (same layout as Particle in game_169510.c), followed by its motion state at 0x110. */
 typedef struct {
-    char pad0[0x2C];
-    f32 width;
-    f32 height;
-    Vec3f pos;
-    char pad40[0x80];
-    Vtx vtxTemplate[4];
-    Vtx *vtxBuffers[4]; /* per viewport, refreshed from vtxTemplate */
-    u8 flags;
-    u8 unk111;
-    u8 unk112[0xC];
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ u8 flags;
+    /* 0x111 */ u8 unk111;
+    /* 0x112 */ u8 unk112[0xC];
 } Struct15101F50;
 
 /* Fills the viewport's vertex buffer with a quad centred on pos, half-axes axisU * width and axisV * height. */
@@ -29,13 +24,13 @@ Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
     Vec3f axisV;
     u8 isNew;
 
-    func_151D5D60(particle->vtxBuffers, viewport, sizeof(particle->vtxTemplate), &vtx, &isNew);
+    func_151D5D60(particle->head.vtxBuffers, viewport, sizeof(particle->head.vtxTemplate), &vtx, &isNew);
     ret = vtx; // matching: the result is returned from its own stack copy, not by reloading vtx
     // matching: an early `if (vtx == NULL) return NULL;` lays out the branches differently
     if (vtx != NULL) {
         if (isNew) {
-            memcpy(particle->vtxBuffers[viewport], particle->vtxTemplate, sizeof(particle->vtxTemplate));
-            memcpy(particle->vtxBuffers[viewport] + 4, particle->vtxTemplate, sizeof(particle->vtxTemplate));
+            memcpy(particle->head.vtxBuffers[viewport], particle->head.vtxTemplate, sizeof(particle->head.vtxTemplate));
+            memcpy(particle->head.vtxBuffers[viewport] + 4, particle->head.vtxTemplate, sizeof(particle->head.vtxTemplate));
         }
     } else {
         return NULL;
@@ -52,28 +47,28 @@ Vtx *func_15101F50(Struct15101F50 *particle, s16 viewport) {
     func_15145128(&axisU, &axisU, NULL, NULL);
     func_15145128(&axisV, &axisV, NULL, NULL);
 
-    axisU.x *= particle->width;
-    axisU.y *= particle->width;
-    axisU.z *= particle->width;
-    axisV.x *= particle->height;
-    axisV.y *= particle->height;
-    axisV.z *= particle->height;
+    axisU.x *= particle->head.def.width;
+    axisU.y *= particle->head.def.width;
+    axisU.z *= particle->head.def.width;
+    axisV.x *= particle->head.def.height;
+    axisV.y *= particle->head.def.height;
+    axisV.z *= particle->head.def.height;
 
-    vtx[0].v.ob[0] = (particle->pos.x - axisU.x) + axisV.x;
-    vtx[0].v.ob[1] = (particle->pos.y - axisU.y) + axisV.y;
-    vtx[0].v.ob[2] = (particle->pos.z - axisU.z) + axisV.z;
+    vtx[0].v.ob[0] = (particle->head.def.pos.x - axisU.x) + axisV.x;
+    vtx[0].v.ob[1] = (particle->head.def.pos.y - axisU.y) + axisV.y;
+    vtx[0].v.ob[2] = (particle->head.def.pos.z - axisU.z) + axisV.z;
     vtx[0].v.flag = 0;
-    vtx[1].v.ob[0] = (particle->pos.x + axisU.x) + axisV.x;
-    vtx[1].v.ob[1] = (particle->pos.y + axisU.y) + axisV.y;
-    vtx[1].v.ob[2] = (particle->pos.z + axisU.z) + axisV.z;
+    vtx[1].v.ob[0] = (particle->head.def.pos.x + axisU.x) + axisV.x;
+    vtx[1].v.ob[1] = (particle->head.def.pos.y + axisU.y) + axisV.y;
+    vtx[1].v.ob[2] = (particle->head.def.pos.z + axisU.z) + axisV.z;
     vtx[1].v.flag = 0;
-    vtx[2].v.ob[0] = (particle->pos.x + axisU.x) - axisV.x;
-    vtx[2].v.ob[1] = (particle->pos.y + axisU.y) - axisV.y;
-    vtx[2].v.ob[2] = (particle->pos.z + axisU.z) - axisV.z;
+    vtx[2].v.ob[0] = (particle->head.def.pos.x + axisU.x) - axisV.x;
+    vtx[2].v.ob[1] = (particle->head.def.pos.y + axisU.y) - axisV.y;
+    vtx[2].v.ob[2] = (particle->head.def.pos.z + axisU.z) - axisV.z;
     vtx[2].v.flag = 0;
-    vtx[3].v.ob[0] = (particle->pos.x - axisU.x) - axisV.x;
-    vtx[3].v.ob[1] = (particle->pos.y - axisU.y) - axisV.y;
-    vtx[3].v.ob[2] = (particle->pos.z - axisU.z) - axisV.z;
+    vtx[3].v.ob[0] = (particle->head.def.pos.x - axisU.x) - axisV.x;
+    vtx[3].v.ob[1] = (particle->head.def.pos.y - axisU.y) - axisV.y;
+    vtx[3].v.ob[2] = (particle->head.def.pos.z - axisU.z) - axisV.z;
     vtx[3].v.flag = 0;
 
     return ret;
@@ -85,7 +80,7 @@ typedef struct {
 } Sub151022AC_2C;
 
 typedef struct {
-    u8 pad0[0x28];
+    TimedEffect base;
     u8 rgba[4];
 } Sub151022AC_24;
 
@@ -202,7 +197,7 @@ typedef struct {
 } Wobble151025F4;
 
 typedef struct {
-    u8 pad0[0xA8];
+    DescParticleHead head;
     Wobble151025F4 wobble;
 } Owner151025F4;
 
@@ -267,18 +262,12 @@ s32 func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
                          20.0f, 20, 4.0f, 0.08f, arg3, arg4, arg5);
 }
 
-/* Message payload: an actor reference. */
-typedef struct {
-    Actor *actor;
-    u8 actorId;
-} ActorRefMsg;
-
 /* Sends message 0x1A for `actor` (stops the effect started by func_151026BC). */
 void func_151027E8(Actor *actor) {
-    ActorRefMsg msg;
+    ActorRef msg;
 
     msg.actor = actor;
-    msg.actorId = actor->unique_id;
+    msg.uniqueId = actor->unique_id;
     func_151403A8((s32)&msg, 0x1A);
 }
 

@@ -298,21 +298,6 @@ typedef struct ScriptCmd {
     /* 0x04 */ CmdArg args[8];
 } ScriptCmd;
 
-/* Result of a floor probe (func_15046C80). */
-typedef struct FloorHit {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ s32 pad8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 pad24[2];
-} FloorHit; // size = 0x2C; the real size is unknown, 0x2C fits the caller's stack frame
-
 /* Object id arguments carry flags above the low 12 bits. */
 #define CMD_OBJECT_ID(arg) ((arg).w & 0xFFF)
 
@@ -327,7 +312,6 @@ extern void func_150FCFD4(Actor *, s32, s32);
 extern void func_150E0300(void);
 extern void func_151557FC(s32, s32, f32);
 extern void *func_150F6DE4(Actor *);
-extern void func_1514EC1C(void *, Actor *, s32);
 extern s32 func_15046C80(f32 *, s32, f32, void *);
 extern void func_151BFE84(void *, void *, void *, s32, s32, s32);
 extern void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
@@ -407,14 +391,15 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             break;
         case 34:
             {
-                FloorHit floor;
+                s32 pad[2]; // matching: unused, keeps the frame size and floor's stack offset
+                CollisionHit floor;
                 f32 pos[3];
 
                 floor.height = -10000.0f;
-                floor.unk18 = 0;
-                floor.unk1C = 0;
-                floor.unk1D = 0;
-                floor.unk20 = 0;
+                floor.material = 0;
+                floor.flags = 0;
+                floor.source = 0;
+                floor.surface = NULL;
                 pos[0] = cmd->args[0].w;
                 pos[1] = 20000.0f;
                 pos[2] = cmd->args[1].w;
@@ -426,7 +411,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
                         dir[0] = 0.0f;
                         dir[2] = 0.0f;
                         dir[1] = -1.0f;
-                        func_151BFE84(&floor.unk4, pos, dir, 1, 0xFF, 1);
+                        func_151BFE84(&floor.tri, pos, dir, 1, 0xFF, 1);
                     }
                 }
             }
@@ -733,7 +718,6 @@ typedef struct Node1509DBBC {
     /* 0x48 */ u8 type;
 } Node1509DBBC;
 
-extern Node1509DBBC *D_800DCE50[][0x68];
 void func_150E36BC(s32 handle, s32 *hi, s32 *result, s32 *lo);
 
 /* Polls script command `cmdId` in `phase`; returns its status or query value. */
@@ -756,7 +740,7 @@ s32 func_1509DBBC(s32 cmdId, s32 phase, s32 arg2) {
                 /* Done once no node of type 2 is left in the watched lists. */
                 for (i = 0; i < 2; i++) {
                     for (j = 0; j < 3; j++) {
-                        node = D_800DCE50[i][D_800A6060[j]];
+                        node = (Node1509DBBC *)D_800DCE50[i][D_800A6060[j]];
                         while (node != NULL) {
                             Node1509DBBC *next;
 

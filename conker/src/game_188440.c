@@ -11,19 +11,7 @@ typedef struct {
     /* 0x14 */ f32 upperFloorY; // highest floor between the camera's eye and y = 19500
 } GroundParticle;
 
-/* Result of a floor probe (CollisionHit in game_71820.c). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ s16 tri[9];
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 material;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 source;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ void *surface;
-} GroundHit;
-
-s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, GroundHit *hit);
+s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, CollisionHit *hit);
 
 /*
  * With a 1-in-16 chance, spawns a particle (func_151491F4) 107-2010 units from the player's camera,
@@ -41,9 +29,9 @@ void func_1515AF90(s16 player) {
         f32 distance;
         f32 cosine;
         f32 sine;
-        GroundHit hit;
+        CollisionHit hit;
         Vec3f probe;
-        GroundHit lowerHit;
+        CollisionHit lowerHit;
         Vec3f lowerProbe;
         f32 bottom;
 
@@ -100,18 +88,6 @@ void func_1515AF90(s16 player) {
     }
 }
 
-/* Extra data copied into a func_151303BC particle at +0xA8 (ParticleExtra in game_117490.c). */
-typedef struct {
-    /* 0x00 */ f32 size;
-    /* 0x04 */ u8 unk4[4];
-    /* 0x08 */ f32 unk8[2];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8 unk18[4];
-    /* 0x1C */ f32 unk1C[2];
-    /* 0x24 */ f32 unk24;
-} ParticleExtra;
-
 /* Emitter state stored in an effect object at +0x28. */
 typedef struct {
     /* 0x00 */ Vec3f position;
@@ -121,7 +97,7 @@ typedef struct {
 } ParticleEmitter;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x28];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ParticleEmitter emitter;
 } EmitterObject;
 
@@ -132,7 +108,7 @@ void func_1515B21C(EmitterObject *obj) {
     ParticleEmitter *emitter;
     void *particle;
     ParticleDesc6C desc;
-    ParticleExtra extra;
+    RiseMotion extra;
 
     emitter = &obj->emitter;
     emitter->accumulator += emitter->rate * D_800BE9A4;
@@ -166,15 +142,15 @@ void func_1515B21C(EmitterObject *obj) {
         desc.offset.z = 0.0f;
         desc.fadeStart = 50;
         desc.fadeRate = 5;
-        extra.unk4[0] = 0;
-        extra.unk4[1] = 0;
-        extra.unk18[0] = 0;
-        extra.unk18[1] = 0;
+        extra.widthPhase = 0;
+        extra.heightPhase = 0;
+        extra.swayPhaseX = 0;
+        extra.swayPhaseZ = 0;
         desc.vel.x = 0.0f;
         desc.vel.z = 0.0f;
-        extra.unk10 = 1.200000048f;
-        extra.unk14 = 0.8333333135f;
-        extra.unk24 = emitter->unk14;
+        extra.maxRiseSpeed = 1.200000048f;
+        extra.swayPerSpeed = 0.8333333135f;
+        extra.ceiling = emitter->unk14;
 
         if (func_150ADA20() & 1) {
             desc.flags |= 0x40;
@@ -189,16 +165,16 @@ void func_1515B21C(EmitterObject *obj) {
             desc.alpha = (func_150ADA20() % 151U) + 55;
             size = (func_150ADA68() * 200.0f) + 100.0f;
             desc.width = size;
-            extra.size = size;
+            extra.baseSize = size;
             desc.height = size;
-            extra.unk4[2] = (func_150ADA20() % 5U) + 4;
-            extra.unk4[3] = (func_150ADA20() % 5U) + 4;
-            extra.unk8[0] = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.size;
-            extra.unk8[1] = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.size;
-            extra.unk18[2] = (func_150ADA20() & 3) + 2;
-            extra.unk18[3] = (func_150ADA20() & 3) + 2;
-            extra.unk1C[0] = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.size;
-            extra.unk1C[1] = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.size;
+            extra.widthPhaseStep = (func_150ADA20() % 5U) + 4;
+            extra.heightPhaseStep = (func_150ADA20() % 5U) + 4;
+            extra.widthWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.baseSize;
+            extra.heightWobble = ((func_150ADA68() * 0.25f) + 0.150000006f) * extra.baseSize;
+            extra.swayPhaseStepX = (func_150ADA20() & 3) + 2;
+            extra.swayPhaseStepZ = (func_150ADA20() & 3) + 2;
+            extra.swayX = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.baseSize;
+            extra.swayZ = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.baseSize;
             desc.gravity = ((func_150ADA68() * 1005.0f) + 600.0f) * 0.001000000047f;
 
             particle = func_151303BC(&desc, 2, 0x28);
@@ -221,7 +197,7 @@ typedef struct {
 } SlidingSpriteData;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ScreenSpriteInfo info;
     /* 0x68 */ u8 pad68[8];
     /* 0x70 */ SlidingSpriteData data;
@@ -243,12 +219,11 @@ void func_1515B5F4(s16 player) {
 void func_1515B62C(SlidingSprite *sprite, s16 *payload, u8 type) {
     if (type == MSG_REMOVE_PLAYER_SPRITES) {
         if (sprite->data.player == payload[0]) {
-            func_1516972C((struct102 *)sprite);
+            func_1516972C(&sprite->header);
         }
     }
 }
 
-extern u8 (*D_8008FD04[])(void);
 extern s32 func_151D8E20(void);
 extern SlidingSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 

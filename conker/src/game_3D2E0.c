@@ -34,10 +34,10 @@ void func_1500FE30(void);
 
 void func_1500FFCC(void) {
     f32 sp44;
-    struct260 *fx;
+    TimedEffect *fx;
 
-    func_15195AA8((Gfx *)D_800B0E00[0], D_800902DC, 1, -1, 0, 0, 0, -4);
-    func_15195AA8((Gfx *)D_800B0E04, D_800902DC, 1, -1, 0, 1, 0, -4);
+    func_15195AA8(D_800B0E00[0], D_800902DC, 1, -1, 0, 0, 0, -4);
+    func_15195AA8(D_800B0E04, D_800902DC, 1, -1, 0, 1, 0, -4);
     func_1500FE30();
     func_1500FF9C();
     sp44 = 0.0f;
@@ -50,7 +50,7 @@ void func_1500FFCC(void) {
             f32 unk0;
             f32 unk4;
         } sp38;
-        struct260 *fx2;
+        TimedEffect *fx2;
 
         sp38.unk0 = 0.0f;
         sp38.unk4 = 0.0f;

@@ -17,16 +17,6 @@ typedef struct {
     /* 0x15 */ u8 flags; // bits 0-1: region shape
 } EmitterRegion;
 
-/* Ground probe result filled by func_15046C80 (as game_105760.c's GroundHit). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ s16 points[9];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 unk1D;
-    /* 0x20 */ s32 unk20;
-} GroundHit;
-
 /* Particle emitter state, embedded at offset 0x28 of the effect object. */
 typedef struct {
     /* 0x00 */ EmitterRegion *region;
@@ -50,12 +40,12 @@ typedef struct {
     /* 0x41 */ u8 unk2CBase;
     /* 0x42 */ u8 unk2CRange;
     /* 0x43 */ u8 pad43[5];
-    /* 0x48 */ GroundHit ground;
+    /* 0x48 */ CollisionHit ground;
     /* 0x6C */ s32 unk6C;
 } ParticleEmitter;
 
 extern s32 func_151464B8(s32);
-extern s32 func_15046C80(f32 *, s32, f32, GroundHit *);
+extern s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 extern void func_15149550(ParticleEmitterDesc *, s32, s32, s32, s32, s32);
 
 /*
@@ -186,14 +176,14 @@ void func_151A5660(u8 *effect) {
 
 void func_151A5D2C(u16 soundHandle);
 
-/* Effect state embedded at offset 0x58 of the struct260 passed to the two functions below. */
+/* Effect state embedded at offset 0x58 of the TimedEffect passed to the two functions below. */
 typedef struct {
     u8 pad0[0x14];
     /* 0x14 */ u16 soundHandle;
 } EffectSoundState;
 
 /* Releases the effect's sound (if any), then hands the effect to func_1514933C. */
-void func_151A5CAC(struct260 *arg0) {
+void func_151A5CAC(TimedEffect *arg0) {
     EffectSoundState *state = (EffectSoundState *)((u8 *)arg0 + 0x58);
 
     // matching: the test reads through arg0 and the call through state, so IDO loads the handle twice
@@ -204,7 +194,7 @@ void func_151A5CAC(struct260 *arg0) {
 }
 
 /* Releases the effect's sound (if any), then hands the effect to func_15149368. */
-void func_151A5CEC(struct260 *arg0) {
+void func_151A5CEC(TimedEffect *arg0) {
     EffectSoundState *state = (EffectSoundState *)((u8 *)arg0 + 0x58);
 
     // matching: the test reads through arg0 and the call through state, so IDO loads the handle twice
@@ -223,7 +213,7 @@ void func_151A5D2C(u16 soundHandle) {
  * Spawns an effect via func_1513C650 at pos, scaled by size on both axes, living duration + 20 frames.
  * Returns NULL if duration <= 0, so the duration == -1 cases below are unreachable (the original has them).
  */
-struct210 *func_151A5D58(f32 size, u8 arg1, s32 arg2, f32 *pos, s16 duration, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
+QuadSprite *func_151A5D58(f32 size, u8 arg1, s32 arg2, f32 *pos, s16 duration, u8 arg5, u8 arg6, u8 arg7, s32 arg8) {
     SpriteDef2C params;
 
     if (duration <= 0) {

@@ -5,7 +5,6 @@
 
 void func_15143794(s32 heading, s32 pitch, f32 speed, f32 *out);
 s32 func_1510D0EC(s32, s32 *, s32, s32);
-extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
 typedef struct {
     f32 x; /* sin of the segment angle */
@@ -13,11 +12,7 @@ typedef struct {
 } RadialDir;
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
+    EffectHeader header;
     RadialEffectDef def; /* 0x10 */
     f32 size;            /* 0x40 */
     f32 radius;          /* 0x44 */
@@ -128,7 +123,7 @@ void func_150C8A68(RadialEffect *effect) {
     }
     if (expired) {
 
-        func_1516972C((struct102 *)effect);
+        func_1516972C(&effect->header);
     }
 }
 
@@ -390,7 +385,7 @@ void func_150C99B4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
     speed = func_150ADA68() * (effect->def.speed * 0.2430000156f) + effect->def.speed * 0.9610000253f;
 
     func_15143794(heading, pitch, speed, &packet.vel.x);
-    func_15130374(&packet, 1, 0, effect->unkC, effect->unk1);
+    func_15130374(&packet, 1, 0, effect->header.owner, effect->header.kind);
 }
 
 extern s32 func_1505D024(Actor *, s32, u16, s32);
@@ -489,7 +484,7 @@ void func_150C9DC4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
     packet.ownerId = 0;
     packet.fadeStart = 0x20;
     packet.fadeRate = 7;
-    func_15132A4C(&packet, 3, 0xFF, 0, effect->unkC, effect->unk1);
+    func_15132A4C(&packet, 3, 0xFF, 0, effect->header.owner, effect->header.kind);
 }
 
 
@@ -534,7 +529,7 @@ void func_150CA150(Actor *actor) {
     Vec3f pos;
     f32 r, g, b;
     u8 red, green, blue;
-    f32 floorInfo[9];
+    CollisionHit floorInfo;
     u8 onGround;
     u32 end;
     u32 addr;
@@ -543,14 +538,14 @@ void func_150CA150(Actor *actor) {
 
     onGround = 0;
     if (actor != NULL) {
-        func_1504715C(floorInfo, actor);
+        func_1504715C(&floorInfo, actor);
         func_1512D748(&D_800DBFF0[D_800BE9E8], 7, 1);
         pos.x = actor->x_position;
         pos.y = actor->y_position + 100.0f;
         pos.z = actor->z_position;
-        if (func_15046C80(&pos, 0, actor->y_position - 300.0f, floorInfo) != 0) {
+        if (func_15046C80(&pos, 0, actor->y_position - 300.0f, &floorInfo) != 0) {
             onGround = 1;
-            pos.y = floorInfo[0];
+            pos.y = floorInfo.height;
         } else {
             pos.y = actor->floorY;
         }
@@ -665,21 +660,14 @@ void func_150CA930(Vec3f *pos) {
                   0, 0xFF, randomArg, 0x13, 0, 0.0f, NULL, 0xFF);
 }
 
-typedef struct {
-    u8 pad0[0x1C];
-    s16 timer;
-    u8 pad1E[0xA];
-    u8 alpha;
-} Struct150CA9D0;
-
 /* Fades the object out over its last 32 ticks by capping alpha at timer * 8. */
-s32 func_150CA9D0(Struct150CA9D0 *arg0) {
+s32 func_150CA9D0(QuadSprite *arg0) {
     s32 maxAlpha;
 
-    if (arg0->timer < 32) {
-        maxAlpha = arg0->timer * 8;
-        if (maxAlpha < arg0->alpha) {
-            arg0->alpha = maxAlpha;
+    if (arg0->def.lifetime < 32) {
+        maxAlpha = arg0->def.lifetime * 8;
+        if (maxAlpha < arg0->def.unk10) {
+            arg0->def.unk10 = maxAlpha;
         }
     }
     return 1;

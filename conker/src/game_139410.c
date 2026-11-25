@@ -165,7 +165,6 @@ typedef struct {
 } UvWobble;
 
 extern UvWobble *D_800D9E60[];
-extern Vtx *D_800B0E10[];
 extern void *allocate_memory(s32, s32, s32, s32);
 
 /* Registers a UV wobble for mesh 0 vertices drawn with texture `tex` and mesh 1 ones drawn with D_800917B8. */
@@ -192,7 +191,7 @@ UvWobble *func_1510C4AC(s32 tex, s32 disabled, s32 rate, s32 amplitude) {
     wob->rate = rate;
     wob->amplitude = amplitude;
 
-    count = func_1510BF60((Gfx *)D_800B0E00[0], tex, &vtx, 0);
+    count = func_1510BF60(D_800B0E00[0], tex, &vtx, 0);
     if (count != 0) {
         wob->primaryCount = count;
         wob->primaryIndex = vtx - D_800B0E10[0];
@@ -203,7 +202,7 @@ UvWobble *func_1510C4AC(s32 tex, s32 disabled, s32 rate, s32 amplitude) {
         }
     }
 
-    count = func_1510BF60((Gfx *)D_800B0E00[1], D_800917B8, &vtx, 0);
+    count = func_1510BF60(D_800B0E00[1], D_800917B8, &vtx, 0);
     if (count != 0) {
         wob->secondaryCount = count;
         wob->secondaryIndex = vtx - D_800B0E10[1];

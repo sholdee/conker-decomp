@@ -18,13 +18,19 @@ typedef struct {
     f32 speedB;
 } ColourWave;
 
+/* A TimedEffect carrying a ColourWave. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ ColourWave wave;
+} ColourWaveEffect;
+
 /* Sets the colour passed to func_1515D4D4 from the object's colour wave and advances each channel's phase. */
-void func_150D2450(struct236 *object) {
+void func_150D2450(ColourWaveEffect *object) {
     ColourWave *wave;
     f32 pad; // matching: unused stack slot; IDO places sine[] after it
     f32 sine[2]; // red and green; the blue sine is used straight away
 
-    wave = (ColourWave *)&object->unk28;
+    wave = &object->wave;
     sine[0] = sinf(wave->phaseR);
     sine[1] = sinf(wave->phaseG);
 

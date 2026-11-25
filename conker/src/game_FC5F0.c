@@ -3,12 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Ground probe result filled by func_1504715C. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 pad4[0x24 - 0x4];
-} Ground;
-
 /* Data of an object that emits particles around an actor while that actor has bones. */
 typedef struct {
     /* 0x00 */ Actor *actor;
@@ -18,16 +12,15 @@ typedef struct {
 } ActorEmitterState;
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ActorEmitterState state;
 } ActorEmitter;
 
-void func_1504715C(Ground *, Actor *);
+void func_1504715C(CollisionHit *, Actor *);
 void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
 void func_1515C244(Actor *, f32 *center, f32 *, f32 *);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
-                   s32, Ground *, s32, s32, s32, s32);
+                   s32, CollisionHit *, s32, s32, s32, s32);
 
 /* Emitter update: removes itself once its actor is gone or replaced, otherwise emits particles
    from a sphere around the actor's center at a random rate. */
@@ -36,7 +29,7 @@ void func_150CF140(ActorEmitter *emitter) {
     Actor *actor;
     f32 center[3];
     f32 radius;
-    Ground ground;
+    CollisionHit ground;
     f32 extentA;
     f32 extentB;
     f32 pos[3];
@@ -46,7 +39,7 @@ void func_150CF140(ActorEmitter *emitter) {
     actor = emitter->state.actor;
     state = &emitter->state;
     if ((actor->interaction_state == 0) || (actor->unique_id != state->actorId)) {
-        emitter->header.state = -1;
+        emitter->base.header.state = -1;
         return;
     }
     if (actor->unk1D4 != NULL) {
@@ -63,23 +56,11 @@ void func_150CF140(ActorEmitter *emitter) {
             func_15143794(yaw, (s16)((func_150ADA20() % 54U) - 56), (func_150ADA68() * 1.4430001f) + 2.2680001f, vel);
             func_151D9014(pos, vel, 5, (func_150ADA68() * 0.286f) + -0.78700006f, (func_150ADA20() % 21U) + 30,
                           (func_150ADA20() % 156U) + 100, (func_150ADA68() * 50.0f) + 48.0f, 1, 1.0f, 1.0f, 0,
-                          &ground, 1, 0, emitter->header.owner, emitter->header.kind);
+                          &ground, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
             state->spawnCredit -= 1.0f;
         }
     }
 }
-
-/* Message payload for func_150CF484: message 0 names an actor that went away, message 0x2D two
-   actors that swapped places. */
-typedef struct {
-    /* 0x00 */ Actor *actorA;
-    /* 0x04 */ union {
-        Actor *actorB;
-        u8 id;
-    } u4;
-    /* 0x08 */ u8 actorAId;
-    /* 0x09 */ u8 actorBId;
-} ActorMsg;
 
 /* Emitter message handler: dies with its actor and follows it through a swap. */
 void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
@@ -87,17 +68,17 @@ void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
     Actor *actorA;
 
     if (type == 0) {
-        actorA = msg->actorA; // matching: loaded before the state field, via a named local
-        if ((actorA == state->actor) || (msg->u4.id == state->actorId)) {
-            func_1516972C((struct102 *)emitter);
+        actorA = msg->ref.actor; // matching: loaded before the state field, via a named local
+        if ((actorA == state->actor) || (msg->ref.uniqueId == state->actorId)) {
+            func_1516972C(&emitter->base.header);
         }
     } else if (type == 0x2D) {
-        if (state->actor == msg->actorA) {
-            state->actor = msg->u4.actorB;
-            state->actorId = msg->actorBId;
-        } else if (state->actor == msg->u4.actorB) {
-            state->actor = msg->actorA;
-            state->actorId = msg->actorAId;
+        if (state->actor == msg->swap.actorA) {
+            state->actor = msg->swap.actorB;
+            state->actorId = msg->swap.idB;
+        } else if (state->actor == msg->swap.actorB) {
+            state->actor = msg->swap.actorA;
+            state->actorId = msg->swap.idA;
         }
     }
 }
@@ -212,7 +193,6 @@ void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
     }
 }
 
-extern s8 (*D_8008FCD0[])(void);
 void func_15143874(s16 angle, f32 distance, f32 *x, f32 *y);
 
 /* Hopping particle update: follows the hop arc and, on landing, kicks up 2 to 5 bouncing
@@ -395,8 +375,7 @@ typedef struct {
 } TextLines;
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ TextLines text;
 } TextObj;
 
@@ -463,7 +442,7 @@ s32 func_150D0034(s32 arg0, TextObj *obj, s32 arg2) {
     TextLines *text = &obj->text;
 
     if ((text->updateFn != -1) && (D_800888A0[text->updateFn](obj) == 0)) {
-        obj->header.state = -1;
+        obj->base.header.state = -1;
         return arg0;
     }
     text->flags &= ~1;

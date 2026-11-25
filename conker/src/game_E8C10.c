@@ -613,7 +613,7 @@ s32 func_150BCBBC(Actor *actor) {
 
 
 struct Obj150BCFB8 {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 bounce;
     /* 0x18 */ u8 pad18[0x3C - 0x18];
@@ -648,7 +648,7 @@ s32 func_150BCFB8(struct Obj150BCFB8 *obj, s32 arg1, s32 arg2, s32 arg3, f32 flo
 
 /* Live particle created by func_15130280. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0xA8];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ u8 data[4]; /* per-particle handler state */
 } Particle;
 

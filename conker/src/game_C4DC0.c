@@ -84,7 +84,7 @@ extern void func_15063254(Actor *, s32, s32, f32);
 extern void func_15063404(Actor *);
 extern void func_150634E4(Actor *);
 extern void func_15063570(Actor *);
-extern struct216 *func_1507BB28(s32, s32);
+extern ObjScriptCmd *func_1507BB28(s32, s32);
 extern void func_1507CD64(Actor *, s32);
 extern void func_1507D1D8(Actor *);
 extern void func_1507D4F8(s32);
@@ -118,13 +118,6 @@ extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f
 extern f32 func_15144BC8(f32);
 extern s8 func_151E564C(void);
 extern s8 func_151E565C(void);
-/* D_800D2350: per-node info, indexed by the node ids func_15086D48 returns. */
-typedef struct {
-    u8 pad0[7];
-    u8 unk7;
-    u8 pad8[8];
-} NodeInfo;
-extern NodeInfo *D_800D2350;
 
 /* Script "set" commands: applies command `opcode` with arguments `cmd->a` to object `objId`.
  * Returns 0 for an unknown command or missing object, 1 otherwise.
@@ -686,7 +679,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     }
     case 0x4D: {
-        ActorCtl *p;
+        ModelAttachment *p;
         s32 v1;
         s32 v2;
 
@@ -1573,7 +1566,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
     case 0xE9:
         return obj->unk31C->unk51;
     case 0xEA: {
-        ActorCtl *p;
+        ModelAttachment *p;
         s32 a;
         s32 b;
         a = cmd->a[0];

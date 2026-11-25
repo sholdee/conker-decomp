@@ -3,23 +3,13 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Ground probe result filled by func_1504715C / func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ s16 points[9];
-    /* 0x18 */ s32 object;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 active;
-    /* 0x20 */ s32 unk20;
-} Ground_150BABE0;
-
 /* matching: the joint owner is passed as s32; a pointer parameter changes register allocation */
 void func_15143E94(s32 arg0, s32 arg1);
 void func_15165F80(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s32 arg6, s32 arg7, s32 arg8, f32 arg9, s32 argA, s32 argB);
-void func_1504715C(Ground_150BABE0 *, Actor *);
-s32 func_15046C80(Vec3f *, s32, f32, Ground_150BABE0 *);
-s32 func_1518ABD0(s32, struct210 *, u8);
+void func_1504715C(CollisionHit *, Actor *);
+s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
+s32 func_1518ABD0(s32, QuadSprite *, u8);
 
 /*
  * Spawns the effects for one of obj's joints (side 0: joint 0x11, side 1: joint 0x1A): a sound,
@@ -30,10 +20,10 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
     Vec3f pos;
     s32 joint;
     s32 yaw;
-    Ground_150BABE0 ground;
+    CollisionHit ground;
     Vec3f probe;
     SpriteDef desc;
-    struct210 *decal;
+    QuadSprite *decal;
     f32 size;
 
     /* the current camera's unk380 angle, degrees -> 256-step angle */
@@ -85,10 +75,10 @@ void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
         desc.viewportMask = 0xFF;
         desc.unk1C = 0;
         desc.renderModes = 0x170002;
-        decal = func_1513C73C(&desc, 0, 0, (s32)ground.points, pos.x, ground.height, pos.z, size, size,
+        decal = func_1513C73C(&desc, 0, 0, (s32)&ground.tri, pos.x, ground.height, pos.z, size, size,
                               func_150ADA20() & 0xFF, (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1), 4, *(u8 *)&arg2, 0);
         if (decal != NULL && func_1518ABD0(D_80088750, decal, 1) == 0) {
-            func_1516972C((struct102 *)decal);
+            func_1516972C(&decal->header);
         }
     }
     func_1514C678(pos.x, pos.y, pos.z, func_150ADA68() * 40.0f + 60.0f, yaw + 60, yaw - 60,

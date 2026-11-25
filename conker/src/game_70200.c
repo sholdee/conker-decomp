@@ -256,20 +256,11 @@ typedef struct Game70200Glyph {
     u8 height;
     u8 scale; /* 128 = 1.0 */
     u8 flags; /* 1: draw the previous entry behind it and pulse the alpha; 2: 16x16 sprite (default 32x32) */
-    s32 image;
+    u8 *image; /* texture id (a symbol address), consecutive ids for animation frames */
 } Game70200Glyph;
 
-typedef struct Game70200Sprite {
-    s32 image;
-    s16 pad4;
-    s16 width;
-    s16 height;
-} Game70200Sprite;
-
-extern Gfx D_800859A0[];
 extern Game70200Glyph D_800859E0[];
 extern s32 D_80085CD0;
-extern Game70200Sprite D_80090060;
 void func_10004074(void *);
 void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 s32 func_1509563C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
@@ -360,7 +351,7 @@ Gfx *func_15043384(Gfx *gfx) {
                     gDPPipeSync(gfx++);
                     gDPSetEnvColor(gfx++, node->red, node->green, node->blue,
                                    node->alpha);
-                    D_80090060.image = D_800859E0[icon - 1].image;
+                    D_80090060.texId = D_800859E0[icon - 1].image;
                     gfx = func_151ED430(gfx, &D_80090060, node->x, node->y, D_800859E0[icon - 1].width,
                                         D_800859E0[icon - 1].height, scale, 0);
                     /* pulse the alpha: scale by (63 + 3 * a 0..63..0 triangle wave) / 256 */
@@ -377,14 +368,14 @@ Gfx *func_15043384(Gfx *gfx) {
                 gDPPipeSync(gfx++);
                 gDPSetEnvColor(gfx++, node->red, node->green, node->blue,
                                node->alpha);
-                D_80090060.image = D_800859E0[icon].image;
+                D_80090060.texId = D_800859E0[icon].image;
                 if (icon == 25) {
                     frame = (D_80085CD0 >> 1) % 10;
                     pulse = frame;
                     if (frame >= 6) {
                         pulse = 10 - frame;
                     }
-                    D_80090060.image = D_800859E0[icon].image + pulse;
+                    D_80090060.texId = D_800859E0[icon].image + pulse;
                 }
                 gfx = func_151ED430(gfx, &D_80090060, node->x, node->y, D_800859E0[icon].width,
                                     D_800859E0[icon].height, scale, 0);
@@ -420,17 +411,17 @@ Gfx *func_15043384(Gfx *gfx) {
 }
 
 /*
- * Ring buffer of length-prefixed messages (struct105):
+ * Ring buffer of length-prefixed messages (MsgRing):
  *   unk0 = buffer, unk4 = capacity, unk8 = read offset, unkC = write offset.
  */
 
 /** Initialise a ring buffer over `buffer` of `capacity` bytes. */
-void func_15043A00(struct105 *ring, s32 buffer, s32 capacity) {
+void func_15043A00(MsgRing *ring, u8 *buffer, s32 capacity) {
     if (ring != NULL) {
-        ring->unk0 = buffer;
-        ring->unk4 = capacity;
-        ring->unkC = 0;
-        ring->unk8 = 0;
+        ring->buffer = buffer;
+        ring->capacity = capacity;
+        ring->writeOffset = 0;
+        ring->readOffset = 0;
     }
 }
 
@@ -496,25 +487,25 @@ s32 func_15043B70(u8 *buffer, s32 capacity, s32 offset, s32 size) {
 }
 
 /** Push a `size`-byte message; returns 1 if it does not fit, 0 otherwise. */
-s32 func_15043BB8(struct105 *ring, u8 *message, s32 size) {
+s32 func_15043BB8(MsgRing *ring, u8 *message, s32 size) {
     s32 writeOffset;
     s32 readOffset;
 
     if (size != 0 && message != NULL) {
         size += 4;
         size = (size + 3) & ~3;
-        writeOffset = ring->unkC;
-        readOffset = ring->unk8;
+        writeOffset = ring->writeOffset;
+        readOffset = ring->readOffset;
         if (writeOffset < readOffset) {
             if (writeOffset + size >= readOffset) {
                 return 1;
             }
-        } else if (writeOffset + size - ring->unk4 >= readOffset) {
+        } else if (writeOffset + size - ring->capacity >= readOffset) {
             return 1;
         }
         size -= 4;
-        writeOffset = func_15043A20((u8 *)ring->unk0, ring->unk4, writeOffset, (u8 *)&size, 4);
-        ring->unkC = func_15043A20((u8 *)ring->unk0, ring->unk4, writeOffset, message, size);
+        writeOffset = func_15043A20(ring->buffer, ring->capacity, writeOffset, (u8 *)&size, 4);
+        ring->writeOffset = func_15043A20(ring->buffer, ring->capacity, writeOffset, message, size);
     }
     return 0;
 }
@@ -523,27 +514,27 @@ s32 func_15043BB8(struct105 *ring, u8 *message, s32 size) {
  * Pop the next message into `dst` (at most `dstSize` bytes; a longer message is truncated and
  * NUL-terminated). Returns the message's stored size, or 0 if the ring is empty.
  */
-s32 func_15043CA4(struct105 *ring, u8 *dst, s32 dstSize) {
+s32 func_15043CA4(MsgRing *ring, u8 *dst, s32 dstSize) {
     s32 size; // matching: the length is compared from a register copy, not reloaded
     s32 messageSize;
     s32 readOffset;
     s32 offset;
 
     messageSize = 0;
-    readOffset = ring->unk8;
-    if (readOffset == ring->unkC) {
+    readOffset = ring->readOffset;
+    if (readOffset == ring->writeOffset) {
         return 0;
     }
-    offset = func_15043AC8((u8 *)ring->unk0, ring->unk4, readOffset, (u8 *)&messageSize, 4);
+    offset = func_15043AC8(ring->buffer, ring->capacity, readOffset, (u8 *)&messageSize, 4);
     size = messageSize;
     if (dstSize < size) {
         dstSize -= 1;
-        offset = func_15043AC8((u8 *)ring->unk0, ring->unk4, offset, dst, dstSize);
+        offset = func_15043AC8(ring->buffer, ring->capacity, offset, dst, dstSize);
         dst[dstSize] = 0;
-        offset = func_15043B70((u8 *)ring->unk0, ring->unk4, offset, messageSize - dstSize);
+        offset = func_15043B70(ring->buffer, ring->capacity, offset, messageSize - dstSize);
     } else if (size != 0) {
-        offset = func_15043AC8((u8 *)ring->unk0, ring->unk4, offset, dst, messageSize);
+        offset = func_15043AC8(ring->buffer, ring->capacity, offset, dst, messageSize);
     }
-    ring->unk8 = offset;
+    ring->readOffset = offset;
     return messageSize;
 }

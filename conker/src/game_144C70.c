@@ -142,7 +142,7 @@ void func_151177C0(WorldObject *prop) {
     PROP_SET_MOTION(prop, motion);
 }
 
-s32 func_150AD9A0(s32 dx, s32 dy, s32 dz);
+s32 math_distance3D(s32 dx, s32 dy, s32 dz);
 
 /*
  * Slides the prop out from its saved home position along its rotated Z axis by the signed
@@ -182,7 +182,7 @@ void func_151179BC(WorldObject *prop) {
         prop->z = homeZ;
         return;
     }
-    current = func_150AD9A0(homeX - prop->x, homeY - prop->y, homeZ - prop->z);
+    current = math_distance3D(homeX - prop->x, homeY - prop->y, homeZ - prop->z);
     if (motion == PROP_ARRIVED) {
         if (distance < 0) {
             offset = -distance;
@@ -586,17 +586,6 @@ void func_1511898C(WorldObject *prop) {
     func_151189AC(prop, 3);
 }
 
-/* Sounds a swinging door plays, indexed by bits 10-15 of its params. */
-typedef struct DoorSounds {
-    /* 0x0 */ s16 open;
-    /* 0x2 */ s16 close;
-    /* 0x4 */ s16 opened;
-    /* 0x6 */ s16 closed;
-    /* 0x8 */ s16 unk8;
-    /* 0xA */ s16 unkA;
-} DoorSounds;
-
-extern DoorSounds D_80089260[];
 
 extern void func_15173C60(s32, s32);
 extern void func_15173C90(s32, s32, s32);

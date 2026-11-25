@@ -243,7 +243,7 @@ void func_15063B64(Actor *arg0) {
         packet.anim = 0x2C;
     }
 
-    if (func_1503195C(arg0, packet.anim, 0) != 0) {
+    if (func_1503195C(arg0, packet.anim, 0) != NULL) {
         if (arg0->unk1D4 != NULL) {
             func_15143134(NULL, packet.position, (s32)arg0->unk1D4 + 0x100);
         } else {
@@ -1032,7 +1032,7 @@ extern void func_151037DC();
 s32 func_1000F568(s32 arg0, s32 arg1);
 void func_1000FD38(void *, void *, s32);
 void func_15073FA0(void);
-struct216 *func_1507BB28(s32, s32);
+ObjScriptCmd *func_1507BB28(s32, s32);
 void func_1507E7E4(void *, u8, u8, u16, s32);
 void func_1507EABC(void *);
 void func_1507EB4C(Actor *, s32);
@@ -1427,7 +1427,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
         break;
     case 0x36:
         if ((pressedButtons & B_BUTTON) && (arg3 <= 0.0f)) {
-            ActorCtl *found;
+            ModelAttachment *found;
 
             found = func_1503195C(arg0, 0x3C, 0);
             if ((found != NULL) && (found->unk38 < 0x12C)) {

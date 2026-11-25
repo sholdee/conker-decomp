@@ -4,40 +4,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* D_80090B60[]: one entry per texture. */
-typedef struct {
-    s32 unk0;
-    u8 numFrames;
-    u8 unk5;
-    u16 width;
-    u16 height;
-    u16 unkA;
-} TextureInfo;
-
-/* Model instance attached to a sprite or particle, drawn through func_151462C8. */
-typedef struct {
-    s32 model;
-    u8 unk4;
-    u8 pad5[3];
-    s32 handles[4];     /* one per viewport, 0..D_80082FA0 */
-    s32 sharedHandle;
-    s32 unk1C;
-} ModelLink; /* size 0x20 */
-
-/* Textured quad effect (with optional model) created by func_1513C350. */
-typedef struct {
-    u8 pad0[0x10];
-    s32 active;         /* bit 0: alive */
-    s32 unk14;
-    SpriteDef def;
-    Vtx vtx[4];
-    u8 updateFn;        /* D_80089C70 index, 0 = none */
-    u8 expireFn;        /* D_80089CA8 index, 0 = none */
-    u8 pad82[2];
-    ModelLink link;
-    Vec3f pos;
-} SpriteFx;
-
 /* Per-behaviour state that follows a particle. */
 typedef union {
     struct {
@@ -99,16 +65,15 @@ typedef struct {
     u16 flag;
 } VtxColor;
 
-extern TextureInfo D_80090B60[];
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern EffectTexture D_80090B60[];
 void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip);
 void func_151400D0(Vtx *vtx, VtxColor *colors);
 
-extern s32 (*D_80089C70[])(SpriteFx *);
-extern s32 (*D_80089CA8[])(SpriteFx *);
+extern s32 (*D_80089C70[])(QuadSprite *);
+extern s32 (*D_80089CA8[])(QuadSprite *);
 
 /* Per-frame update of a sprite: lifetime, fading and texture animation. */
-void func_1513C060(SpriteFx *sprite) {
+void func_1513C060(QuadSprite *sprite) {
     s32 speed;
     s8 expired;
     s32 numFrames;
@@ -154,7 +119,7 @@ void func_1513C060(SpriteFx *sprite) {
     if (!expired) {
         speed = sprite->def.frameSpeed;
         if (speed != 0) {
-            numFrames = D_80090B60[sprite->def.texture].numFrames;
+            numFrames = D_80090B60[sprite->def.texture].frameCount;
             lastFrame = (numFrames << 16) - 1;
             sprite->def.frame += speed * D_800BE9E4;
             if (lastFrame < sprite->def.frame) {
@@ -201,9 +166,9 @@ void func_1513C060(SpriteFx *sprite) {
 }
 
 /* Allocates a sprite from a template; extraSize bytes follow it. */
-struct210 *func_1513C350(void *def, void *colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6,
+QuadSprite *func_1513C350(void *def, void *colors, u8 updateFn, u8 expireFn, u8 flip, s32 model, s32 arg6,
                          struct167 *pos, s32 extraSize, u8 arg9, s32 argA) {
-    SpriteFx *sprite;
+    QuadSprite *sprite;
     u8 kind;
     s32 i;
 
@@ -215,7 +180,7 @@ struct210 *func_1513C350(void *def, void *colors, u8 updateFn, u8 expireFn, u8 f
     } else {
         kind = 0x1B;
     }
-    sprite = func_15167A68(kind, argA, extraSize + sizeof(SpriteFx), 1, arg9, 1);
+    sprite = func_15167A68(kind, argA, extraSize + sizeof(QuadSprite), 1, arg9, 1);
     if (sprite == NULL) {
         return NULL;
     }
@@ -242,13 +207,13 @@ struct210 *func_1513C350(void *def, void *colors, u8 updateFn, u8 expireFn, u8 f
     if (pos) {
         sprite->pos = *(Vec3f *)pos;
     }
-    return (struct210 *)sprite;
+    return sprite;
 }
 
 /* Spawns a flat (xz-plane) sprite at (x, y, z). */
-struct210 *func_1513C4EC(void *def, void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
+QuadSprite *func_1513C4EC(void *def, void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width, f32 length,
                          u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
-    struct210 *sprite;
+    QuadSprite *sprite;
     Vec3f pos;
 
     pos.x = x;
@@ -263,9 +228,9 @@ struct210 *func_1513C4EC(void *def, void *colors, u8 updateFn, u8 expireFn, f32 
 }
 
 /* Spawns a flat (xz-plane) sprite without a model or stored position. */
-struct210 *func_1513C5B0(void *def, void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width,
+QuadSprite *func_1513C5B0(void *def, void *colors, u8 updateFn, u8 expireFn, f32 x, f32 y, f32 z, f32 width,
                          f32 length, u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD) {
-    struct210 *sprite = func_1513C350(def, colors, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
+    QuadSprite *sprite = func_1513C350(def, colors, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
 
     if (sprite == NULL) {
         return NULL;
@@ -275,9 +240,9 @@ struct210 *func_1513C5B0(void *def, void *colors, u8 updateFn, u8 expireFn, f32 
 }
 
 /* Spawns a sprite oriented by func_1513E2AC, with the default colours. */
-struct210 *func_1513C650(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
+QuadSprite *func_1513C650(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
                          u8 angle, u8 flip, s32 model, s32 arg6, s32 extraSize, u8 argE, s32 argF) {
-    struct210 *sprite;
+    QuadSprite *sprite;
     Vec3f pos;
 
     pos.x = x;
@@ -297,9 +262,9 @@ struct210 *func_1513C650(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f
 }
 
 /* As func_1513C650, without a model or stored position. */
-struct210 *func_1513C73C(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
+QuadSprite *func_1513C73C(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f32 y, f32 z, f32 width, f32 height,
                          u8 angle, u8 flip, s32 extraSize, u8 argC, s32 argD) {
-    struct210 *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
+    QuadSprite *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argC, argD);
 
     if (sprite == NULL) {
         return NULL;
@@ -313,9 +278,9 @@ struct210 *func_1513C73C(void *def, u8 updateFn, u8 expireFn, s32 arg3, f32 x, f
 }
 
 /* As func_1513C73C; arg1 is unused and the default colours are used. */
-struct210 *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, s32 arg4, f32 x, f32 y, f32 z, f32 width,
+QuadSprite *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, s32 arg4, f32 x, f32 y, f32 z, f32 width,
                          f32 height, u8 angle, u8 flip, s32 extraSize, u8 argD, s32 argE) {
-    struct210 *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argD, argE);
+    QuadSprite *sprite = func_1513C350(def, 0, updateFn, expireFn, flip, 0, 0, NULL, extraSize, argD, argE);
 
     if (sprite == NULL) {
         return NULL;
@@ -327,33 +292,31 @@ struct210 *func_1513C804(void *def, s32 arg1, u8 updateFn, u8 expireFn, s32 arg4
     return sprite;
 }
 
-void func_1513C8D4(struct210 *sprite) {
+void func_1513C8D4(QuadSprite *sprite) {
     func_1513C92C(sprite);
     func_15169804(sprite);
 }
 
-void func_1513C900(struct210 *sprite) {
+void func_1513C900(QuadSprite *sprite) {
     func_1513C92C(sprite);
     func_15169824(sprite);
 }
 
 /* Releases a sprite's model handles. */
-void func_1513C92C(struct210 *arg0) {
+void func_1513C92C(QuadSprite *sprite) {
     s32 i;
 
-    // matching: a typed local copy of arg0 gets its own saved register
     for (i = 0; i <= D_80082FA0; i++) {
-        if (((SpriteFx *)arg0)->link.handles[i]) {
-            func_100043B4(((SpriteFx *)arg0)->link.handles[i], 4);
+        if (sprite->link.handles[i]) {
+            func_100043B4(sprite->link.handles[i], 4);
         }
     }
-    if (((SpriteFx *)arg0)->link.sharedHandle != 0) {
-        func_100043B4(((SpriteFx *)arg0)->link.sharedHandle, 4);
+    if (sprite->link.sharedHandle != 0) {
+        func_100043B4(sprite->link.sharedHandle, 4);
     }
 }
 
-void func_1513C9B0(struct210 *arg0) {
-    SpriteFx *sprite = (SpriteFx *)arg0;
+void func_1513C9B0(QuadSprite *sprite) {
     s32 index;
 
     if (sprite->def.flags & 0x1000) {
@@ -364,8 +327,7 @@ void func_1513C9B0(struct210 *arg0) {
     D_80089EE8[index]();
 }
 
-void func_1513C9FC(struct210 *arg0) {
-    SpriteFx *sprite = (SpriteFx *)arg0;
+void func_1513C9FC(QuadSprite *sprite) {
     s32 index;
 
     if (sprite->def.flags & 0x1000) {
@@ -377,26 +339,24 @@ void func_1513C9FC(struct210 *arg0) {
 }
 
 /* Frees a particle's per-viewport vertex buffers. */
-void func_1513CA48(struct210 *arg0) {
-    Particle *particle = (Particle *)arg0;
-
+void func_1513CA48(DefParticleHead *particle) {
     func_151D5E30(particle->vtxBuffers);
 }
 
-void func_1513CA6C(struct210 *particle) {
+void func_1513CA6C(DefParticleHead *particle) {
     func_1513CA48(particle);
     func_1513CAD4(particle);
     func_15169804(particle);
 }
 
-void func_1513CAA0(struct210 *particle) {
+void func_1513CAA0(DefParticleHead *particle) {
     func_1513CA48(particle);
     func_1513CAD4(particle);
     func_15169824(particle);
 }
 
 /* Releases a particle's model handles. */
-void func_1513CAD4(struct210 *arg0) {
+void func_1513CAD4(DefParticleHead *arg0) {
     s32 i;
 
     // matching: a typed local copy of arg0 gets its own saved register
@@ -410,8 +370,7 @@ void func_1513CAD4(struct210 *arg0) {
     }
 }
 
-void func_1513CB58(struct210 *arg0) {
-    Particle *particle = (Particle *)arg0;
+void func_1513CB58(DefParticleHead *particle) {
     s32 index;
 
     if (particle->def.flags & 0x400000) {
@@ -422,8 +381,7 @@ void func_1513CB58(struct210 *arg0) {
     D_80089EF8[index]();
 }
 
-void func_1513CBA4(struct210 *arg0) {
-    Particle *particle = (Particle *)arg0;
+void func_1513CBA4(DefParticleHead *particle) {
     s32 index;
 
     if (particle->def.flags & 0x400000) {
@@ -442,7 +400,7 @@ extern RenderModePair D_800A4AC8[];
 Gfx *func_15142B7C(Gfx *gfx, s32 setModes, s32 clearModes);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142E24(Gfx *gfx, TextureInfo *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 texture, u8 arg7, s32 arg8,
+Gfx *func_15142E24(Gfx *gfx, EffectTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 texture, u8 arg7, s32 arg8,
                    u8 *needSync, s32 argA);
 Gfx *func_15142FBC(Gfx *gfx, s32 modeHi, s32 modeLo, u8 *needSync);
 void func_151441A4(s16 *r, s16 *g, s16 *b, s16 *a, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 mode);
@@ -451,7 +409,7 @@ Gfx *func_151462C8(Gfx *gfx, ModelLink *link, s32, s32, s32, s16 viewport, Vec3f
 Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync);
 
 /* Draws a sprite's quad (and attached model) for one viewport. */
-Gfx *func_1513CBF0(Gfx *gfx, SpriteFx *sprite, s16 viewport) {
+Gfx *func_1513CBF0(Gfx *gfx, QuadSprite *sprite, s16 viewport) {
     s32 geometry;
     u8 needSync;
     u8 blendMode;
@@ -574,7 +532,7 @@ void func_1513CFE4(Particle *particle) {
     if (!expired) {
         speed = particle->def.frameSpeed;
         if (speed != 0) {
-            numFrames = D_80090B60[particle->def.texture].numFrames;
+            numFrames = D_80090B60[particle->def.texture].frameCount;
             lastFrame = (numFrames << 16) - 1;
             particle->def.frame += speed * D_800BE9E4;
             if (lastFrame < particle->def.frame) {
@@ -972,8 +930,8 @@ void func_1513E070(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 /* Event handler: drops (0x1A) or retargets (0x2D) the particle's link stored at unk110. */
-void func_1513E084(struct210 *particle, struct212 *event, u8 eventId) {
-    struct212 *link = (struct212 *)&particle->unk110;
+void func_1513E084(DefParticleHead *particle, struct212 *event, u8 eventId) {
+    struct212 *link = (struct212 *)PARTICLE_MOTION((Particle *)particle);
 
     if (eventId == 0x1A) {
         if ((link->unk0 == event->unk0) || (link->unk4.b.unk0 == event->unk4.b.unk0)) {
@@ -994,7 +952,7 @@ void func_1513E134(void) {
 }
 
 /* Lays a sprite's quad flat in the xz plane around (x, y, z), rotated by angle. */
-void func_1513E13C(struct210 *arg0, f32 x, f32 y, f32 z, f32 width, f32 length, u8 angle) {
+void func_1513E13C(QuadSprite *sprite, f32 x, f32 y, f32 z, f32 width, f32 length, u8 angle) {
     // matching: permuter-found shape; the one-element arrays, (&param)[0] reads, unused p0..p3 and the
     // empty if steer IDO's stack and register allocation (each plain form was tried and mismatches)
     f32 sinA;
@@ -1018,23 +976,23 @@ void func_1513E13C(struct210 *arg0, f32 x, f32 y, f32 z, f32 width, f32 length, 
     lengthCos = cosA[0] * (&length)[0];
     if (((!t) && (!t)) && (!t)) {
     }
-    ((SpriteFx *)arg0)->vtx[0].v.ob[0] = frontX - lengthCos;
-    ((SpriteFx *)arg0)->vtx[0].v.ob[1] = y;
+    sprite->vtx[0].v.ob[0] = frontX - lengthCos;
+    sprite->vtx[0].v.ob[1] = y;
     lengthSin = (&length)[0] * sinA;
     u[0] = z + lengthSin;
     widthCos = cosA[0] * (&width)[0];
-    ((SpriteFx *)arg0)->vtx[0].v.ob[2] = u[0] + widthCos;
+    sprite->vtx[0].v.ob[2] = u[0] + widthCos;
     t[0] = x - widthSin;
-    ((SpriteFx *)arg0)->vtx[1].v.ob[0] = t[0] - lengthCos;
-    ((SpriteFx *)arg0)->vtx[1].v.ob[1] = y;
-    ((SpriteFx *)arg0)->vtx[1].v.ob[2] = u[0] - widthCos;
-    ((SpriteFx *)arg0)->vtx[2].v.ob[0] = t[0] + lengthCos;
-    ((SpriteFx *)arg0)->vtx[2].v.ob[1] = y;
+    sprite->vtx[1].v.ob[0] = t[0] - lengthCos;
+    sprite->vtx[1].v.ob[1] = y;
+    sprite->vtx[1].v.ob[2] = u[0] - widthCos;
+    sprite->vtx[2].v.ob[0] = t[0] + lengthCos;
+    sprite->vtx[2].v.ob[1] = y;
     t[0] = z - lengthSin;
-    ((SpriteFx *)arg0)->vtx[2].v.ob[2] = t[0] - widthCos;
-    ((SpriteFx *)arg0)->vtx[3].v.ob[0] = frontX + lengthCos;
-    ((SpriteFx *)arg0)->vtx[3].v.ob[1] = y;
-    ((SpriteFx *)arg0)->vtx[3].v.ob[2] = t[0] + widthCos;
+    sprite->vtx[2].v.ob[2] = t[0] - widthCos;
+    sprite->vtx[3].v.ob[0] = frontX + lengthCos;
+    sprite->vtx[3].v.ob[1] = y;
+    sprite->vtx[3].v.ob[2] = t[0] + widthCos;
 }
 
 void func_1513E2A4(void) {
@@ -1071,7 +1029,7 @@ s32 func_1513E2AC(s32 sprite, s32 arg1, s32 surface, f32 x, f32 y, f32 z, f32 wi
     f32 unused;
     Vtx_t *v;
 
-    vtx = &((SpriteFx *)sprite)->vtx[0].v;
+    vtx = &((QuadSprite *)sprite)->vtx[0].v;
     cosA = func_151423D8(angle - 0x40);
     sinA = func_151423D8(angle);
     if (surface != 0) {
@@ -1466,8 +1424,10 @@ Vtx *func_1513F114(Particle *particle, s16 viewport) {
 Vtx *func_15140410(Particle *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport);
 
 /* Quad spanned by the two axes in motion.axes (vertex function 12). */
-void func_1513F4B0(struct210 *particle, s16 viewport) {
-    func_15140410(particle, &particle->unk110, &particle->unk11C, viewport);
+void func_1513F4B0(DefParticleHead *head, s16 viewport) {
+    Particle *particle = (Particle *)head;
+
+    func_15140410(particle, &PARTICLE_MOTION(particle)->axes.u, &PARTICLE_MOTION(particle)->axes.v, viewport);
 }
 
 s16 func_15143044(u8, s32);
@@ -1508,7 +1468,7 @@ void func_1513F680(Particle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, 
 }
 
 /* Sets a sprite's update and expiry function indices. */
-void func_1513F6C0(SpriteFx *sprite, u8 updateFn, u8 expireFn) {
+void func_1513F6C0(QuadSprite *sprite, u8 updateFn, u8 expireFn) {
     sprite->updateFn = updateFn;
     sprite->expireFn = expireFn;
 }
@@ -1693,7 +1653,7 @@ Vtx *func_1513FAB4(Particle *particle, u8 reversed, BeamScale *scale, s16 viewpo
 
 /* Sets the texture coordinates of a quad to cover the whole texture, mirrored per the flip bits. */
 void func_1513FFF4(Vtx *vtx, u8 texture, u8 flip) {
-    TextureInfo *tex;
+    EffectTexture *tex;
     u16 maxS;
     u16 maxT;
     s32 coord;
@@ -1810,7 +1770,7 @@ void func_151403A8(s32 arg0, u8 arg1) {
 }
 
 void func_151403DC(s32 arg0, u8 arg1) {
-    func_15169260(&D_800A5178, 3, arg0, arg1);
+    func_15169260(D_800A5178, 3, arg0, arg1);
 }
 
 /* Quad centred on def.pos with half-axes axisU * width and axisV * height. */
@@ -1858,9 +1818,6 @@ Vtx *func_15140410(Particle *particle, Vec3f *axisU, Vec3f *axisV, s16 viewport)
     return result;
 }
 
-/* Particle draw lists, D_800DCE50[group][list]. */
-extern Particle *D_800DCE50[][104];
-
 /* Sort key: texture, then animation frame, so that particles sharing a texture load draw together. */
 #define PARTICLE_SORT_KEY(p) (((p)->def.texture << 8) + ((p)->def.frame >> 16))
 
@@ -1878,7 +1835,7 @@ s32 func_151406AC(s32 arg0, s32 list, s32 group, s16 phase) {
     if (phase != 0) {
         return arg0;
     }
-    slot = &D_800DCE50[group][list];
+    slot = (Particle **)&D_800DCE50[group][list];
     node = *slot;
     head.def.texture = 0;
     head.def.frame = 0;

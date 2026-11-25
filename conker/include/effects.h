@@ -3,21 +3,31 @@
 
 /* Particle / effect spawn descriptors shared by the spawn functions and their callers. */
 
-/* Common head of the effect / particle objects (the first 0x10 bytes of each): the link of the object lists
- * D_800DCE50[kind][type] (func_15168A4C in game_1944C0.c pushes an object onto its list). */
-typedef struct EffectHeader {
-    /* 0x00 */ u8 type;
-    /* 0x01 */ u8 kind;    /* also the object list it is linked into */
-    /* 0x02 */ u8 pad2[2];
-    /* 0x04 */ struct EffectHeader *prev;
-    /* 0x08 */ struct EffectHeader *next;
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ s16 state;   /* -1 frees the object */
-} EffectHeader; /* size 0x10 */
+/* EffectHeader (the common object head) is in structs.h. */
 
 struct Actor;
 struct ParticleViewMask;
+
+/* Weak reference to an actor: valid while actor->unique_id still equals uniqueId. Also the payload of the
+ * object messages (func_151403A8) that name an actor, e.g. message 0: the actor went away. */
+typedef struct ActorRef {
+    /* 0x0 */ struct Actor *actor;
+    /* 0x4 */ u8 uniqueId;
+} ActorRef; /* size 0x8 */
+
+/* Object message 0x2D payload: two actors exchange identities. */
+typedef struct ActorSwapMsg {
+    /* 0x0 */ struct Actor *actorA;
+    /* 0x4 */ struct Actor *actorB;
+    /* 0x8 */ u8 idA;
+    /* 0x9 */ u8 idB;
+} ActorSwapMsg; /* size 0xC */
+
+/* Payload of the actor object messages (0 and similar: an actor, 0x2D: an actor swap). */
+typedef union ActorMsg {
+    ActorRef ref;
+    ActorSwapMsg swap;
+} ActorMsg;
 
 /* ParticleDesc.flags (sprite particles, func_15130280) */
 #define PARTICLE_LIFETIME          0x1      /* timer counts down; the particle dies below 0 */
@@ -462,7 +472,9 @@ typedef struct DebrisEmitter {
 typedef struct EffectTemplate {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 life;
-    /* 0x0E */ u16 flags;     /* bit 0: life counts down; 0x10: run unk14's handler; 0x20: pass unk18 to the draw */
+    /* 0x0E */ u16 flags;     /* bit 0: life counts down; 0x10: run unk14's handler; 0x20: pass unk18 to the draw;
+                               * 0x40: allocate as type 0x4D (else 0x22); trails: 2 attached (the strip starts
+                               * at pos), 4 pos is valid, 8 fading */
     /* 0x10 */ s32 kind;      /* index into D_8008A2F0 / D_8008A340 / D_8008A390 */
     /* 0x14 */ s8 unk14;      /* index into D_8008A284, -1: none */
     /* 0x15 */ u8 itemCount;  /* number of items allocated after the user data */
@@ -680,17 +692,6 @@ typedef struct ScreenSpriteInfo5C {
     /* 0x58 */ u8 pad58[0x4];
 } ScreenSpriteInfo5C;
 
-/* Sprite animation of a billboard particle (game_1944C0.c): `frames` is one segmented texture address
- * (< 0x10000000) or a table of `frameCount` texture addresses. */
-typedef struct SpriteAnim {
-    /* 0x0 */ s32 *frames;
-    /* 0x4 */ u8 frameCount;
-    /* 0x5 */ u8 pad5;
-    /* 0x6 */ u16 width;
-    /* 0x8 */ u16 height;
-    /* 0xA */ u8 unkA;       /* 5: two-texture (two-cycle) animation */
-} SpriteAnim;
-
 /* BillboardTemplate.flags (billboard particles, game_1944C0.c) */
 #define BILLBOARD_ENV_COLOR     0x1    /* use envR/G/B instead of the per-texture default */
 #define BILLBOARD_PINGPONG      0x2    /* reverse the animation at either end instead of wrapping */
@@ -702,10 +703,23 @@ typedef struct SpriteAnim {
 #define BILLBOARD_CUSTOM_MODE   0x100  /* render/combine modes come from unk4 */
 #define BILLBOARD_2CYCLE        0x200
 
+/* Entry of the effect texture table D_80090B60 (the `texture` index of the particle / sprite descriptors;
+ * some entries, e.g. D_800907FC, are also referenced directly). `frames` is one segmented texture address
+ * (< 0x10000000) or a table of `frameCount` texture addresses (func_1514306C). */
+typedef struct EffectTexture {
+    /* 0x0 */ s32 *frames;
+    /* 0x4 */ u8 frameCount;
+    /* 0x5 */ u8 unk5;
+    /* 0x6 */ u16 width;
+    /* 0x8 */ u16 height;
+    /* 0xA */ u8 unkA;        /* 5: two-texture (two-cycle) animation; 2: a palette follows the texels */
+    /* 0xB */ u8 paletteSize; /* 1: 0x200 bytes, else 0x20 */
+} EffectTexture; /* size 0xC */
+
 /* Spawn template of a billboard particle (type 5 / 0x42): func_15167D84 (game_1944C0.c) copies it to
  * the particle at +0x10. */
 typedef struct BillboardTemplate {
-    /* 0x00 */ SpriteAnim *anim;
+    /* 0x00 */ EffectTexture *anim;
     /* 0x04 */ s32 unk4;       /* BILLBOARD_CUSTOM_MODE: bits 0-7 render mode, bits 16-31 combine mode;
                                   else free for the particle's callback */
     /* 0x08 */ s32 unk8;       /* low byte: angle offset in 1/256ths of a turn */
@@ -927,16 +941,11 @@ typedef struct ConeBasis {
     /* 0x28 */ f32 spread;
 } ConeBasis; /* size 0x2C */
 
-/* Three s16 vertices of a collision triangle, as stored in a ray-cast result. */
-typedef struct SurfaceTriangle {
-    /* 0x00 */ s16 v[9];
-} SurfaceTriangle; /* size 0x12 */
-
 /* A cone described by a surface triangle (three s16 vertices) and the side its normal faces
  * (func_1514F640); the first argument of func_1514FEFC / func_15153C84. */
 typedef struct TriangleSource {
     /* 0x00 */ Vec3f normal;
-    /* 0x0C */ SurfaceTriangle triangle;
+    /* 0x0C */ CollisionTri triangle;
     /* 0x1E */ u8 pad1E[2];
     /* 0x20 */ f32 spread;
 } TriangleSource; /* size 0x24 */
@@ -1369,7 +1378,7 @@ typedef struct BillboardBurst {
     /* 0x32 */ s16 widthRange;
     /* 0x34 */ s16 heightBase;
     /* 0x36 */ s16 heightRange;
-    /* 0x38 */ SpriteAnim *anim;
+    /* 0x38 */ EffectTexture *anim;
     /* 0x3C */ u8 color;           /* prim r = g = b */
     /* 0x3D */ u8 alpha;
     /* 0x3E */ u8 pad3E[2];
@@ -1457,7 +1466,7 @@ typedef struct SurfaceBurst {
     /* 0x02 */ s16 countRange;
     /* 0x04 */ Vec3f position;
     /* 0x10 */ Vec3f normal;
-    /* 0x1C */ SurfaceTriangle triangle;
+    /* 0x1C */ CollisionTri triangle;
     /* 0x2E */ u8 pad2E[2];
     /* 0x30 */ f32 spread;
     /* 0x34 */ u8 texture;          /* ParticleDef.texture */
@@ -1694,7 +1703,7 @@ typedef struct AnchorEmitterTemplate {
 typedef struct AnchorEmitterParams {
     /* 0x00 */ f32 accum;
     /* 0x04 */ AnchorEmitterTemplate tmpl;
-    /* 0x54 */ struct225 *child;
+    /* 0x54 */ LightEffect *child;
     /* 0x58 */ s8 updateFunc;
     /* 0x59 */ s8 unk59Func;
     /* 0x5A */ u8 unk5A;
@@ -1729,6 +1738,24 @@ typedef struct TrailMotion {
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ s16 unk1E;
 } TrailMotion; /* size 0x20 */
+
+/* Preset of a burst of func_15147DA0 particles thrown out around a point: radius and launch speed, then the
+ * ranges of each particle's TrailMotion and EffectTemplate values (value = base + rand * range, or for the s16
+ * pairs base + rand % (range + 1)). Tables: D_8009FBF0 (trail bursts, game_E1280.c), D_800A8728 (flamethrower
+ * jet scatter, game_1C2C60.c). */
+typedef struct ScatterPreset {
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 speed;
+    /* 0x08 */ f32 speedRange;
+    /* 0x0C */ f32 halfWidth;       /* TrailMotion.halfWidth */
+    /* 0x10 */ f32 halfWidthRange;
+    /* 0x14 */ f32 gravity;         /* TrailMotion.gravity */
+    /* 0x18 */ f32 gravityRange;
+    /* 0x1C */ s16 life;            /* EffectTemplate.life */
+    /* 0x1E */ s16 lifeRange;
+    /* 0x20 */ s16 itemCount;       /* EffectTemplate.itemCount */
+    /* 0x22 */ s16 itemCountRange;
+} ScatterPreset; /* size 0x24 */
 
 /* matching: the first 0x1C bytes of TrailMotion (callers that never set unk1C/unk1E; func_15147DA0 copies
  * past its end); a full TrailMotion on the stack changes the frame. */
@@ -1960,6 +1987,16 @@ typedef struct ModelBurst {
     /* 0x74 */ s16 fadeRate;
 } ModelBurst; /* size 0x78 */
 
+/* Model instance attached to a sprite or particle, drawn through func_151462C8. */
+typedef struct ModelLink {
+    /* 0x00 */ s32 model;
+    /* 0x04 */ u8 unk4;
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ s32 handles[4];     /* one per viewport, 0..D_80082FA0 */
+    /* 0x18 */ s32 sharedHandle;
+    /* 0x1C */ s32 unk1C;
+} ModelLink; /* size 0x20 */
+
 /* A particle object made by func_1513D2F0 / func_151407D0 (game_169510.c's Particle, 0x110 bytes), as seen
  * by callers that keep their own data after it. Its ParticleDef copy is at 0x18. */
 typedef struct DefParticleHead {
@@ -1967,7 +2004,21 @@ typedef struct DefParticleHead {
     /* 0x010 */ s32 active;             /* bit 0: alive */
     /* 0x014 */ s32 unk14;
     /* 0x018 */ ParticleDef def;
-    /* 0x070 */ u8 pad70[0x50];
+    /* 0x070 */ u8 updateFn1;            /* D_80089CB8 index, 0 = none */
+    /* 0x071 */ u8 updateFn2;            /* D_80089D60 index, 0 = none */
+    /* 0x072 */ u8 expireFn;             /* D_80089E10 index, 0 = none */
+    /* 0x073 */ u8 vertexFn;             /* D_80089E1C index */
+    /* 0x074 */ u8 unk74;
+    /* 0x075 */ u8 pad75[3];
+    /* 0x078 */ f32 unk78;
+    /* 0x07C */ u8 pad7C[0x14];
+    /* 0x090 */ s32 unk90;
+    /* 0x094 */ u8 unk94;
+    /* 0x095 */ u8 unk95;
+    /* 0x096 */ u8 pad96[2];
+    /* 0x098 */ s32 unk98;
+    /* 0x09C */ ModelLink link;
+    /* 0x0BC */ u8 padBC[4];
     /* 0x0C0 */ Vtx vtxTemplate[4];
     /* 0x100 */ Vtx *vtxBuffers[4];  /* per viewport, refreshed from vtxTemplate */
 } DefParticleHead; /* size 0x110 */
@@ -1986,8 +2037,7 @@ typedef struct BurstData {
 } BurstData; /* size 0x18 */
 
 typedef struct BurstEffect {
-    /* 0x00 */ EffectHeader header;   /* header.state: age in frames; -1 frees */
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;      /* base.header.state: age in frames; -1 frees */
     /* 0x28 */ BurstData data;
 } BurstEffect; /* size 0x40 */
 
@@ -2052,7 +2102,7 @@ typedef struct BurstGlow {
 typedef struct DescParticleHead {
     /* 0x00 */ EffectHeader header;
     /* 0x10 */ ParticleDesc desc;
-    /* 0x80 */ u8 unk80[0x24];      /* attach data / floor height of the particle types that use them */
+    /* 0x80 */ CollisionHit floor;  /* the spawner's floor template (flags cleared), or the particle's own probe */
     /* 0xA4 */ u8 padA4[4];
 } DescParticleHead; /* size 0xA8 */
 
@@ -2126,5 +2176,444 @@ typedef struct BillboardSpawn38 {
     /* 0x31 */ u8 onExpire;      /* low nibble: index into D_8008D5D0, run when life reaches 0 */
     /* 0x34 */ u8 pad34[0x4];
 } BillboardSpawn38;
+
+/* Textured quad sprite (with optional model) made by func_1513C350 (game_169510.c); func_1513C4EC and the
+ * other spawners return it, and callers keep their own data after it (extraSize). */
+typedef struct QuadSprite {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ s32 active;         /* bit 0: alive */
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ SpriteDef def;
+    /* 0x40 */ Vtx vtx[4];
+    /* 0x80 */ u8 updateFn;        /* D_80089C70 index, 0 = none */
+    /* 0x81 */ u8 expireFn;        /* D_80089CA8 index, 0 = none */
+    /* 0x82 */ u8 pad82[2];
+    /* 0x84 */ ModelLink link;
+    /* 0xA4 */ Vec3f pos;
+} QuadSprite; /* size 0xB0 */
+
+/* Head (first 0x60 bytes) of the object func_15147A80 (game_174BF0.c) makes from an EffectTemplate: trails,
+ * ribbons, sprays and splashes. The rest is per handler, so each user declares its own object as
+ * {EffectObjHead obj; 0x24-byte block at 0x60; u8 unk84[0x10]; items * at 0x94; user data * at 0x98}: the user
+ * data (dataSize bytes) and then the items (tmpl.itemCount of itemSize bytes) follow the object in memory. */
+typedef struct EffectObjHead {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ EffectTemplate tmpl;   /* tmpl.itemCount: size of the items ring buffer */
+    /* 0x2C */ s8 count;              /* items in use */
+    /* 0x2D */ s8 start;              /* oldest item */
+    /* 0x2E */ s8 end;                /* one past the newest item */
+    /* 0x2F */ u8 updateKind;         /* index into D_8008A200, 0: none */
+    /* 0x30 */ u8 updateKind2;        /* index into D_8008A23C, 0: none (trails clear it to stop emitting) */
+    /* 0x31 */ u8 drawKind;           /* index into D_8008A2A4, 0: none */
+    /* 0x32 */ u8 pad32[2];
+    /* 0x34 */ ModelLink model;       /* drawn through func_151462C8 */
+    /* 0x54 */ Vec3f modelPos;        /* func_151462C8's position; trails keep their tail point here */
+} EffectObjHead; /* size 0x60 */
+
+/* Data of the tracker effect (game_1FC830.c): follows one point of its owner and leaves a TrackerTrail behind it. */
+typedef struct TrackerData {
+    /* 0x00 */ Actor *owner;
+    /* 0x04 */ u8 ownerId;        /* owner->unique_id at spawn; a mismatch means the owner died */
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ struct TrackerTrail *trail; /* spawned by func_151D1448 */
+    /* 0x0C */ Vec3f prevPos;
+    /* 0x18 */ Vec3f pos;
+    /* 0x24 */ Vec3f delta;
+    /* 0x30 */ f32 dist;          /* distance moved this frame */
+    /* 0x34 */ u8 pointFn;        /* index into D_8008FC30 */
+} TrackerData;
+
+typedef struct TrackerEffect {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ TrackerData data;
+} TrackerEffect;
+
+/* User data of a TrackerTrail (copied in at spawn by func_151D1448, game_1FC830.c; run by game_1FEA80.c). */
+typedef struct TrackerTrailData {
+    /* 0x00 */ TrackerEffect *owner; /* NULL once the tracker lets go of the trail */
+    /* 0x04 */ f32 texture;       /* running texture coordinate of the newest sample */
+    /* 0x08 */ u8 alpha;
+    /* 0x09 */ u8 pad9[3];
+    /* 0x0C */ f32 maxLength;
+    /* 0x10 */ f32 widthBase;
+    /* 0x14 */ f32 widthScale;
+    /* 0x18 */ f32 alphaScale;
+    /* 0x1C */ f32 ownerScale;    /* the tracker owner's xz_scale */
+} TrackerTrailData; /* size 0x20 */
+
+/* The ribbon trail of a tracker effect (func_15147A80 object, kind 19). */
+typedef struct TrackerTrail {
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ struct TrackerTrailPoint *points; /* game_1FEA80.c */
+    /* 0x98 */ TrackerTrailData *state;
+} TrackerTrail;
+
+/* Head of the data of a particle stream (TimedEffect data at 0x28): every tick it emits `rate` particles from
+ * position, aimed along func_151436B4 angles that wobble as sines (func_151C4820, game_1F1CD0.c;
+ * func_150E6B84, game_113D60.c). */
+typedef struct ParticleStream {
+    /* 0x00 */ f32 angleX;        /* centre direction */
+    /* 0x04 */ f32 angleY;
+    /* 0x08 */ f32 amplitudeX;    /* of the angle wobble */
+    /* 0x0C */ f32 amplitudeY;
+    /* 0x10 */ f32 phaseX;
+    /* 0x14 */ f32 phaseY;
+    /* 0x18 */ f32 speedX;        /* phase advance per tick */
+    /* 0x1C */ f32 speedY;
+    /* 0x20 */ f32 time;
+    /* 0x24 */ f32 rate;          /* particles per tick */
+    /* 0x28 */ f32 remaining;     /* particles owed (emitted while above 1) */
+    /* 0x2C */ Vec3f position;
+} ParticleStream; /* size 0x38 */
+
+/* A stream of func_151C229C projectiles (TimedEffect tick callback 0x2B, func_151C4820, game_1F1CD0.c). */
+typedef struct ProjectileStream {
+    /* 0x00 */ ParticleStream stream;
+    /* 0x38 */ f32 speed;         /* func_151C229C's speed */
+    /* 0x3C */ f32 unk3C;         /* its arg7 */
+    /* 0x40 */ f32 unk40;         /* its arg10 */
+} ProjectileStream; /* size 0x44 */
+
+/* A timed emitter of ProjectileStreams (TimedEffect tick callback 0x2A, func_151C4644, game_1EF500.c; spawned by
+ * func_150144B8, game_40490.c): after a random delay it starts one stream and picks a new delay. */
+typedef struct StreamEmitter {
+    /* 0x00 */ s16 *position;     /* x, y, z (of the spawning TriggerZone) */
+    /* 0x04 */ s32 timer;
+    /* 0x08 */ s32 minDelay;
+    /* 0x0C */ s32 delayRange;
+    /* 0x10 */ s16 minLife;       /* of each stream */
+    /* 0x12 */ s16 lifeRange;
+    /* 0x14 */ f32 rateBase;      /* stream rate: rateBase + rand * rateRange */
+    /* 0x18 */ f32 rateRange;
+    /* 0x1C */ f32 angleX;        /* stream direction */
+    /* 0x20 */ f32 angleY;
+    /* 0x24 */ f32 spread;        /* max wobble amplitude */
+    /* 0x28 */ f32 wobbleSpeed;   /* phase speed of the wobble */
+    /* 0x2C */ f32 speed;         /* copied to ProjectileStream.speed, unk3C, unk40 */
+    /* 0x30 */ f32 unk30;
+    /* 0x34 */ f32 unk34;
+} StreamEmitter; /* size 0x38 */
+
+/* Spray description that func_15189900 (game_1B6DB0.c) copies into a new SprayEmitter (0x50 bytes).
+   Angles are in 256ths of a turn; every "...Range" is the random spread added to the value before it. */
+typedef struct SprayDesc {
+    /* 0x00 */ s16 yaw;
+    /* 0x02 */ s16 yawSpread; /* yaw varies by +-yawSpread */
+    /* 0x04 */ s16 pitch;
+    /* 0x06 */ s16 pitchRange;
+    /* 0x08 */ Vec3f origin;
+    /* 0x14 */ Vec3f extent; /* particles start on the segment origin + t * extent */
+    /* 0x20 */ f32 speed;
+    /* 0x24 */ f32 speedRange;
+    /* 0x28 */ f32 rate; /* particles per frame */
+    /* 0x2C */ f32 rateRange;
+    /* 0x30 */ f32 halfWidth;
+    /* 0x34 */ f32 halfWidthRange;
+    /* 0x38 */ s16 unk1B; /* TrailMotion.alpha */
+    /* 0x3A */ s16 unk1BRange;
+    /* 0x3C */ f32 gravity;
+    /* 0x40 */ f32 gravityRange;
+    /* 0x44 */ s16 unkC; /* EffectTemplate20.unkC */
+    /* 0x46 */ s16 unkCRange;
+    /* 0x48 */ s32 pointCount;
+    /* 0x4C */ s32 pointCountRange;
+} SprayDesc; /* size 0x50 */
+
+/* Per-behavior data of a Sprite2D (Sprite2DParams.data). */
+typedef union Sprite2DData {
+    struct {
+        s32 frame;                /* frame (8.8) to stop scrolling at */
+        s32 y;                    /* y to stop scrolling at */
+        s32 stage;
+    } scroll;                     /* func_150B6E3C (game_E4070.c) */
+    struct {
+        s32 elapsed;
+    } slide;                      /* func_150B709C */
+    struct {
+        s16 endX;
+        s16 endY;
+        s32 duration;
+        s16 startX;
+        s16 startY;
+    } move;                       /* func_150B73F0: from start to end as the timer runs down */
+    struct {
+        s32 fadeInHold;           /* fade-in frames << 16 | hold frames */
+        s32 fadeOutTotal;         /* fade-out frames << 16 | total frames */
+        s32 unk10;
+    } fade;                       /* game_1228D0.c, game_137DE0.c */
+    s32 words[3];                 /* move's points packed as x << 16 | y */
+} Sprite2DData; /* size 0xC */
+
+/* Spawn parameters of a 2D screen sprite (object type 0x5E, func_15169900 / func_15169968, game_196DB0.c),
+ * copied to Sprite2D.params. */
+typedef struct Sprite2DParams {
+    /* 0x00 */ void *texture;     /* drawn with func_1509629C */
+    /* 0x04 */ void *tile1Texture; /* loaded into tile 1 when flags & 1 */
+    /* 0x08 */ Sprite2DData data;
+    /* 0x14 */ s16 timer;         /* frames left; 0 = lives forever */
+    /* 0x16 */ s16 frame;         /* animation frame, 8.8 fixed point */
+    /* 0x18 */ s16 frameSpeed;    /* added to frame every tick */
+    /* 0x1A */ u8 pad1A[2];
+    /* 0x1C */ f32 x;
+    /* 0x20 */ f32 y;
+    /* 0x24 */ s16 sOffset;
+    /* 0x26 */ s16 extraWidth;
+    /* 0x28 */ s16 scaleX;        /* 0x1000 = 1.0 */
+    /* 0x2A */ s16 scaleY;
+    /* 0x2C */ u16 width;
+    /* 0x2E */ u16 height;
+    /* 0x30 */ s8 behavior;       /* index into D_8008CA20, 0 = none */
+    /* 0x31 */ u8 frameCount;
+    /* 0x32 */ u8 red;
+    /* 0x33 */ u8 green;
+    /* 0x34 */ u8 blue;
+    /* 0x35 */ u8 alpha;
+    /* 0x36 */ u8 renderMode;     /* index into D_800A4AC8 */
+    /* 0x37 */ u8 unk37;
+    /* 0x38 */ u8 cycleType;      /* 2 = two-cycle */
+    /* 0x39 */ u8 flags;
+} Sprite2DParams; /* size 0x3C */
+
+typedef struct Sprite2D {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ Sprite2DParams params;
+} Sprite2D; /* size 0x4C */
+
+/* Spawn parameters of a rumble effect object (func_151D8868, kind 0x3F; copied into RumbleObj.params):
+ * a timed rumble on the controllers of the players in a mask. */
+typedef struct RumbleParams {
+    /* 0x0 */ u8 flags;       /* bit 0: duration counts down */
+    /* 0x1 */ u8 unk1;
+    /* 0x2 */ s16 duration;
+    /* 0x4 */ u8 strength;    /* 0 (off) to 8 (full), see func_1501C010 */
+    /* 0x5 */ u8 playerMask;  /* bit i: player i */
+    /* 0x6 */ s8 updateKind;  /* index into D_8008FCC0, -1: none */
+    /* 0x7 */ u8 unk7;
+} RumbleParams; /* size 0x8 */
+
+/* Per-particle data (at 0xA8) of wobbling particles: the offset moves around an x/z ellipse
+ * (func_15131828) and the velocity is scaled by drag per tick (func_15131958). */
+typedef struct WobbleData {
+    /* 0x00 */ u8 phase[2];      /* x and z angles of the wobble ellipse */
+    /* 0x02 */ u8 phaseStep[2];  /* added to phase per tick */
+    /* 0x04 */ f32 amplitude[2]; /* x and z radii */
+    /* 0x0C */ f32 drag;         /* velocity scale per tick */
+} WobbleData; /* size 0x10 */
+
+/* Per-particle data for func_15131D9C: two sizes oscillating around a base size. */
+typedef struct ParticlePulse {
+    /* 0x00 */ u8 phase[2];
+    /* 0x02 */ s8 phaseStep[2];
+    /* 0x04 */ f32 baseSize;
+    /* 0x08 */ f32 amplitude[2];
+} ParticlePulse; /* size 0x10 */
+
+/* Particle data at 0xA8 of the rising-and-swaying particles (update func 4: func_151596BC, func_15159594):
+ * size wobble, rise speed limit, x/z sway, and a ceiling (particle flag 0x2000 kills it above). */
+typedef struct RiseMotion {
+    /* 0x00 */ f32 baseSize;
+    /* 0x04 */ u8 widthPhase;
+    /* 0x05 */ u8 heightPhase;
+    /* 0x06 */ s8 widthPhaseStep;
+    /* 0x07 */ s8 heightPhaseStep;
+    /* 0x08 */ f32 widthWobble;
+    /* 0x0C */ f32 heightWobble;
+    /* 0x10 */ f32 maxRiseSpeed;
+    /* 0x14 */ f32 swayPerSpeed;
+    /* 0x18 */ u8 swayPhaseX;
+    /* 0x19 */ u8 swayPhaseZ;
+    /* 0x1A */ u8 swayPhaseStepX;
+    /* 0x1B */ u8 swayPhaseStepZ;
+    /* 0x1C */ f32 swayX;
+    /* 0x20 */ f32 swayZ;
+    /* 0x24 */ f32 ceiling;
+} RiseMotion; /* size 0x28 */
+
+/* A particle (DescParticleHead) with RiseMotion data. */
+typedef struct RiseParticle {
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ RiseMotion motion;
+} RiseParticle; /* size 0xD0 */
+
+/* Particle data at 0x110 of a DefParticleHead particle animated by func_1514BC08 (written by func_1514B8E4,
+ * game_177B50.c): def.width, def.height and def.frameSpeed each ease toward a random target that is re-picked
+ * when its countdown (in frames) runs out. */
+typedef struct ParticleJitter {
+    /* 0x00 */ f32 widthBase;
+    /* 0x04 */ f32 heightBase;
+    /* 0x08 */ f32 widthRange;
+    /* 0x0C */ f32 heightRangeA;   /* one of the two height ranges is picked at random */
+    /* 0x10 */ f32 widthTarget;
+    /* 0x14 */ f32 heightTarget;
+    /* 0x18 */ f32 heightRangeB;
+    /* 0x1C */ f32 widthTimer;
+    /* 0x20 */ f32 heightTimer;
+    /* 0x24 */ f32 speedBase;
+    /* 0x28 */ f32 speedRange;
+    /* 0x2C */ f32 speedTarget;
+    /* 0x30 */ f32 speedTimer;
+    /* 0x34 */ f32 speed;          /* eased value copied to def.frameSpeed */
+    /* 0x38 */ Vec3f velocity;     /* ballistic motion (see game_179400.c's update) */
+    /* 0x44 */ f32 gravity;
+    /* 0x48 */ f32 drag;           /* velocity scale per tick */
+    /* 0x4C */ f32 unk4C;
+} ParticleJitter; /* size 0x50 */
+
+/* Per-particle data of the age-driven fade (func_151A483C / func_151A4900 for DescParticleHead particles,
+ * game_1D0840.c; billboard callbacks 0x14 / 0x15, game_1D43B0.c). Each *Start is a remaining-life value:
+ * below it the alpha / colour follow the life (life * step) and the size grows by growRate per tick. */
+typedef struct AgeFadeParams {
+    /* 0x0 */ s16 tintStart;   /* then brightness (or the env colour) = life * tintStep */
+    /* 0x2 */ s16 tintStep;
+    /* 0x4 */ s16 fadeStart;   /* then alpha = life * fadeStep */
+    /* 0x6 */ s16 fadeStep;
+    /* 0x8 */ s16 growStart;
+    /* 0xA */ s16 growRate;
+} AgeFadeParams; /* size 0xC */
+
+/* Settings an actor-attached particle emitter (object type 0x21, func_1518E3C4 / func_1518D1C0 in
+ * game_1BA670.c) is created with; copied verbatim into the emitter at +0x18. */
+typedef struct ActorEmitterParams {
+    /* 0x0 */ Actor *owner;
+    /* 0x4 */ u8 ownerId;   /* owner->unique_id at creation; the emitter dies when it changes */
+    /* 0x5 */ u8 pad5;
+    /* 0x6 */ s16 lifetime; /* counts down when (flags & 1) */
+    /* 0x8 */ u8 flags;
+    /* 0x9 */ s8 expireCb;  /* index into D_8008D628 run when lifetime runs out, -1: just die */
+    /* 0xA */ u8 table;     /* index into D_8008D5E0 */
+    /* 0xB */ u8 padB;
+} ActorEmitterParams; /* size 0xC */
+
+/*
+ * Character watcher (object type 0x2E, func_15158BD0 in game_185560.c; attached to the character as
+ * attachment 0x13): tracks a character's state (five small fields packed by game_185560.c's STATE_BITS)
+ * and runs the actions of D_8008B02C[mode] when it changes as described by D_800A6200. The creator's
+ * extra data (e.g. the effects the watcher keeps alive) follows at 0x58.
+ */
+typedef struct CharacterWatcher {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ Actor *character;
+    /* 0x1C */ u8 characterId;
+    /* 0x1D */ u8 mode; /* from func_15159370 */
+    /* 0x1E */ u8 pad1E[2];
+    /* 0x20 */ Vec3f lastPosition;
+    /* 0x2C */ u8 state0; /* func_15159084 */
+    /* 0x2D */ u8 state1; /* func_15159120 */
+    /* 0x2E */ u8 state2; /* func_15159184 */
+    /* 0x2F */ u8 moveState; /* func_15159230 */
+    /* 0x30 */ u8 surfaceState; /* func_151592B8 */
+    /* 0x31 */ u8 flags; /* 1: run state-change actions */
+    /* 0x32 */ u8 pad32[2];
+    /* 0x34 */ CollisionHit hit; /* floor under the character, probed by the watcher's effects */
+} CharacterWatcher; /* size 0x58 */
+
+/* Payload of a FlickerSprite: the sprite's animation speed (def.frameSpeed) eases toward a target that is
+ * re-picked after a random delay. The owning watcher (a CharacterWatcher with its effects after it) sets
+ * keepAlive every frame; the sprite's update clears it and the sprite dies once it is not refreshed, and its
+ * expiry clears the owner's pointer to it (game_F3BA0.c, game_1D6E80.c). */
+typedef struct SpriteFlicker {
+    /* 0x00 */ CharacterWatcher *owner;
+    /* 0x04 */ u8 keepAlive;
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ f32 minTarget;
+    /* 0x0C */ f32 targetRange;
+    /* 0x10 */ f32 target;
+    /* 0x14 */ s16 timer;         /* frames until the target is re-picked */
+    /* 0x16 */ s16 minDelay;
+    /* 0x18 */ s16 delayRange;
+    /* 0x1A */ u8 pad1A[2];
+    /* 0x1C */ f32 easing;        /* fraction of the distance to the target covered per frame */
+} SpriteFlicker; /* size 0x20 */
+
+/* A ground-glow QuadSprite (func_1513C73C) with a SpriteFlicker payload. */
+typedef struct FlickerSprite {
+    /* 0x00 */ QuadSprite quad;
+    /* 0xB0 */ SpriteFlicker flicker;
+} FlickerSprite; /* size 0xD0 */
+
+/* Extra data at 0x58 of a watcher's rising-particle emitter (func_1513418C, game_161520.c). Like
+ * SpriteFlicker, the owning watcher sets keepAlive every frame, the emitter's update clears it and the
+ * emitter dies once it is not refreshed; its destructor clears the owner's pointer to it. */
+typedef struct WatcherEmitterLink {
+    /* 0x00 */ CharacterWatcher *owner;
+    /* 0x04 */ u8 keepAlive;
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ f32 ceiling;       /* height the particles rise to: the surface above the character */
+} WatcherEmitterLink; /* size 0xC */
+
+typedef struct WatcherEmitter {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x48];    /* the blood-drip body (game_161520.c) */
+    /* 0x58 */ WatcherEmitterLink link;
+} WatcherEmitter; /* size 0x64 */
+
+#define DYNMODEL_FLAG_LIFETIME      1
+#define DYNMODEL_FLAG_VIEWPORT_MASK 2
+
+/* Spawn descriptor of a DynModel (func_1513B5E0, game_168A90.c: a model whose vertices are copied into
+ * per-frame, per-viewport buffers); copied verbatim into DynModel.desc. */
+typedef struct DynModelDesc {
+    /* 0x00 */ u8 flags;       // DYNMODEL_FLAG_*
+    /* 0x01 */ s8 updateFunc;  // index into D_80089C18, -1 for none
+    /* 0x02 */ s8 drawFunc;    // index into D_80089C28, -1 for none
+    /* 0x03 */ u8 pad3;
+    /* 0x04 */ s16 lifetime;   // counts down while DYNMODEL_FLAG_LIFETIME is set
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ u8 unk24;
+    /* 0x25 */ u8 unk25;
+    /* 0x26 */ u8 pad26[0xA];
+    /* 0x30 */ s32 unk30;      // model asset, passed to func_1502B6BC
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ u8 kind;        // selects the D_80089C44 / D_80089C54 handlers
+    /* 0x39 */ u8 viewportMask; // viewports drawn in when DYNMODEL_FLAG_VIEWPORT_MASK is set
+    /* 0x3A */ u8 pad3A[2];
+} DynModelDesc; /* size 0x3C */
+
+/*
+ * A model whose vertices are copied into per-frame, per-viewport buffers so they can be modified each frame
+ * (func_1513B5E0, game_168A90.c). The buffers follow the header, then `userDataSize` bytes of user data.
+ */
+typedef struct DynModel {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ DynModelDesc desc;
+    /* 0x4C */ ModelAsset *asset;
+    /* 0x50 */ s32 buffersSize;     /* size of all vertex buffers, i.e. the offset of the user data */
+    /* 0x54 */ Gfx *displayList;
+    /* 0x58 */ Vtx *vertices[2][4]; /* [frame][viewport] */
+    /* 0x78 */ Mtx mtx[2];          /* [frame] */
+    /* 0xF8 */ u8 buffers[1];
+} DynModel;
+
+/* The user data after a DynModel's vertex buffers. matching: s32 arithmetic (a u8 * sum schedules differently) */
+#define DYNMODEL_USERDATA(model) ((void *)((s32)(model) + (model)->buffersSize + 0xF8))
+
+/* One point of a func_15147DA0 trail (game_175250.c); the points form the object's ring buffer. */
+typedef struct MotionTrailPoint {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ f32 velocityY;
+    /* 0x10 */ u16 phase;       /* texture coordinate along the trail */
+    /* 0x12 */ u8 pad12[2];
+} MotionTrailPoint; /* size 0x14 */
+
+/* A trail made by func_15147DA0 (game_175250.c): an EffectObjHead object whose points move by TrailMotion
+ * and collide with the floor. */
+typedef struct MotionTrail {
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ CollisionHit collision;
+    /* 0x84 */ u8 buffers[0x10];
+    /* 0x94 */ MotionTrailPoint *points;
+    /* 0x98 */ TrailParams *params;
+} MotionTrail; /* size 0x9C */
 
 #endif

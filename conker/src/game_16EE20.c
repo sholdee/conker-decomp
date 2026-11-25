@@ -21,18 +21,6 @@ void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 Gfx *func_15094FE8(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_1514306C(s32 *, s32, s32, u8);
 
-void func_15141970(struct37 *arg0) {
-    func_1514EDF0(arg0, arg0->unk2C);
-}
-
-void func_15141990(void *arg0) {
-    func_15141970(arg0);
-}
-
-void func_151419B0(void *arg0) {
-    func_15141970(arg0);
-}
-
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ union {
@@ -46,20 +34,40 @@ typedef struct {
 /* The block at 0x28 of the receiving object. */
 typedef struct {
     /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
+    /* 0x04 */ s32 unk4;   /* the owner actor */
     /* 0x08 */ u8 unk8;
 } Link151419D0;
 
+/* An object carrying a Link151419D0 at 0x28. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ Link151419D0 link;
+} LinkedObject151419D0;
+
+/* Calls func_1514EDF0 with the object and its owner (link.unk4). */
+void func_15141970(LinkedObject151419D0 *obj) {
+    func_1514EDF0(obj, (Actor *)obj->link.unk4);
+}
+
+void func_15141990(void *arg0) {
+    func_15141970(arg0);
+}
+
+void func_151419B0(void *arg0) {
+    func_15141970(arg0);
+}
+
+
 
 /* Message handler: message 0 destroys the object if it refers to it; 0x2D re-links it. */
-void func_151419D0(struct102 *obj, Msg151419D0 *msg, u8 msgType) {
-    Link151419D0 *link = (Link151419D0 *)&obj->unk28;
+void func_151419D0(LinkedObject151419D0 *obj, Msg151419D0 *msg, u8 msgType) {
+    Link151419D0 *link = &obj->link;
     s32 first;
 
     if (msgType == 0) {
         first = msg->unk0;
         if ((first == link->unk4) || (msg->unk4.b == link->unk8)) {
-            func_1516972C(obj);
+            func_1516972C(&obj->base.header);
         }
     } else if (msgType == 0x2D) {
         if (link->unk4 == msg->unk0) {
@@ -80,9 +88,7 @@ typedef struct {
 } EffectInfo;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ s16 duration;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EffectInfo info;
 } AttachedEffect;
 
@@ -96,7 +102,6 @@ s32 func_15141C0C(Actor *actor);
 s32 func_15141CC0(u32 arg0);
 u32 func_1510F8CC(s32);
 void func_15141E38(Actor *actor, s32 handler);
-s32 func_1514ECE0(Attachment *, s16, Attachment **);
 
 /* Runs the actor's model-specific effect selector, then every attached timed effect's handler. */
 void func_15141A7C(Actor *actor, s32 arg1) {
@@ -126,7 +131,7 @@ void func_15141A7C(Actor *actor, s32 arg1) {
                 effect = node->handle;
                 if (D_8008A0B4[effect->info.handler].unk0 != 0) {
                     // matching: the u32 view makes IDO reload the index instead of reusing it
-                    ((EffectHandler)D_8008A0B4[*(u32 *)&effect->info.handler].unk0)(actor, arg1, effect->duration);
+                    ((EffectHandler)D_8008A0B4[*(u32 *)&effect->info.handler].unk0)(actor, arg1, effect->base.header.state);
                 }
                 node = node->next;
             } while (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0);
@@ -226,7 +231,6 @@ void func_15141DA4(void *actor, s32 selector, s32 handler) {
     }
 }
 
-s32 func_1514EC1C(s32, s32, s16);
 void *memcpy(void *, const void *, u32);
 
 /* Restarts the actor's timed effect `handler`, or creates and attaches it if it has none. */
@@ -243,7 +247,7 @@ void func_15141E38(Actor *actor, s32 handler) {
             effect = node->handle;
             if (handler == effect->info.handler) {
                 found = node;
-                effect->duration = D_8008A0B4[handler].unk4;
+                effect->base.header.state = D_8008A0B4[handler].unk4;
             }
             node = node->next;
         } while (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0);
@@ -257,7 +261,7 @@ void func_15141E38(Actor *actor, s32 handler) {
         effect = (AttachedEffect *)func_15149130(D_8008A0B4[handler].unk4, -1, -1, -1, 1, 50, 0xC, 0xFF, 1);
         if (effect != NULL) {
             memcpy(&effect->info, &info, sizeof(info));
-            func_1514EC1C((s32)effect, (s32)actor, ATTACH_TIMED_EFFECT);
+            func_1514EC1C(effect, actor, ATTACH_TIMED_EFFECT);
         }
     }
 }
@@ -700,12 +704,7 @@ s16 func_15143044(u8 arg0, s32 arg1) {
     return 0x7FFF - arg0;
 }
 
-typedef struct {
-    s32 *unk0;
-    s32 unk4;
-    s32 unk8;
-} Entry1514306C;
-extern Entry1514306C D_80090B60[];
+extern EffectTexture D_80090B60[];
 extern s32 D_80091514;
 extern s32 D_800915B0;
 
@@ -739,7 +738,7 @@ s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode) {
             }
             break;
         default:
-            ret = D_80090B60[arg1].unk0[arg2];
+            ret = D_80090B60[arg1].frames[arg2];
             break;
     }
     return ret;
@@ -779,28 +778,9 @@ void func_15143134(Vec3f *offset, f32 *out, Mtx *mtx) {
     D_800DCA00 = 0;
 }
 
-/* A spawn region around (x, y, z): a disc, cylinder, sphere or (rotated) box, by flags & 3. */
-typedef struct SpawnRegion {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radiusX;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ s16 radiusZ;
-    /* 0x0C */ u8 padC[4];
-    /* 0x10 */ f32 rotation; /* degrees */
-    /* 0x14 */ u8 pad14;
-    /* 0x15 */ u8 flags; /* bits 0-1: shape */
-    /* 0x16 */ u8 pad16[0xE];
-    /* 0x24 */ f32 cosineX;
-    /* 0x28 */ f32 sineX;
-    /* 0x2C */ f32 sineZ;
-    /* 0x30 */ f32 cosineZ;
-} SpawnRegion;
-
 /* Picks a random (x, z) in the region's footprint, with the region's top and bottom heights. */
-void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
-    switch (region->flags & 3) {
+void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
+    switch (region->kind & 3) {
     default:
         *x = region->x;
         *z = region->z;
@@ -816,11 +796,11 @@ void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
             f32 offsetX;
             f32 offsetZ;
 
-            angle = region->rotation * (256.0f / 360.0f);
+            angle = region->yaw * (256.0f / 360.0f);
             sine = func_151423D8(angle - 0x40);
             cosine = func_151423D8(angle);
-            offsetX = func_150ADA68() * (2.0f * region->radiusX) + -region->radiusX;
-            offsetZ = func_150ADA68() * (2.0f * region->radiusZ) + -region->radiusZ;
+            offsetX = func_150ADA68() * (2.0f * region->radius) + -region->radius;
+            offsetZ = func_150ADA68() * (2.0f * region->depth) + -region->depth;
             *x = region->x + (offsetX * cosine + offsetZ * sine);
             *z = region->z + (offsetZ * cosine - offsetX * sine);
             *top = region->y + region->height;
@@ -838,7 +818,7 @@ void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
             angle = func_150ADA20() & 0xFF;
             sine = func_151423D8(angle - 0x40);
             cosine = func_151423D8(angle);
-            radius = func_150ADA68() * region->radiusX;
+            radius = func_150ADA68() * region->radius;
             *x = region->x + radius * cosine;
             *z = region->z - radius * sine;
             *top = region->y + region->height;
@@ -856,7 +836,7 @@ void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom) {
             angle = func_150ADA20() & 0xFF;
             sine = func_151423D8(angle - 0x40);
             cosine = func_151423D8(angle);
-            radius = func_150ADA68() * region->radiusX;
+            radius = func_150ADA68() * region->radius;
             *x = region->x + radius * cosine;
             *z = region->z - radius * sine;
             *top = region->y + region->height;
@@ -1123,16 +1103,7 @@ f32 func_15143E64(Vec3f *v) {
 
     return sqrtf(x * x + y * y + z * z);
 }
-typedef struct Func15143E94Spawn {
-    s8 active;
-    u8 pad1;
-    s16 duration;
-    s8 size;
-    s8 enabled;
-    s8 sentinel;
-    u8 pad7;
-} Func15143E94Spawn;
-extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 
 /*
  * If any actor is alive and some i passes func_150A29C8(i, arg1) == 0, plays arg0 through func_1512D748
@@ -1144,7 +1115,7 @@ u8 func_15143E94(s32 arg0, s32 arg1) {
     s8 count;
     u8 found;
     u8 found2;
-    Func15143E94Spawn spawn;
+    RumbleParams spawn;
 
     ret = 0;
 // matching: an unused label here splits the block, changing IDO's scheduling of the setup
@@ -1171,11 +1142,11 @@ start:
         }
         if (found2) {
             func_1512D748(&D_800DBFF0[D_800BE9E8], arg0, 1);
-            spawn.active = 1;
+            spawn.flags = 1;
             spawn.duration = (func_150ADA20() & 0xF) + 0x14;
-            spawn.size = (func_150ADA20() & 3) + 4;
-            spawn.sentinel = -1;
-            spawn.enabled = 1;
+            spawn.strength = (func_150ADA20() & 3) + 4;
+            spawn.updateKind = -1;
+            spawn.playerMask = 1;
             func_151D8868(&spawn, 0, 0xFF, 0);
             ret = 1;
         }
@@ -1382,21 +1353,20 @@ f32 func_15144528(f32 value, f32 hi, f32 lo) {
 }
 
 /* Footprint area of a region: 2rx * 2rz for a box, pi r^2 for the round shapes. */
-f32 func_15144598(TriggerZone *zone) {
-    SpawnRegion *region = (SpawnRegion *)zone;
+f32 func_15144598(TriggerZone *region) {
     f32 area;
     s16 radius;
 
-    switch (region->flags & 3) {
+    switch (region->kind & 3) {
     default:
         area = 1.0f;
         break;
     case 2:
-        area = (f32)(region->radiusX * region->radiusZ) * 4.0f;
+        area = (f32)(region->radius * region->depth) * 4.0f;
         break;
     case 0:
     case 1:
-        radius = region->radiusX;
+        radius = region->radius;
         area = (f32)(radius * radius) * 3.1415927f;
         break;
     }
@@ -1405,22 +1375,22 @@ f32 func_15144598(TriggerZone *zone) {
 
 /* Volume of a region: box rx * h * rz, cylinder pi r^2 h, sphere (pi / 3) r^3. */
 f32 func_1514462C(s32 arg0) {
-    SpawnRegion *region = (SpawnRegion *)arg0;
+    TriggerZone *region = (TriggerZone *)arg0;
     f32 volume;
     f32 radius;
 
-    switch (region->flags & 3) {
+    switch (region->kind & 3) {
     default:
         volume = 1.0f;
         break;
     case 2:
-        volume = (f32)(region->radiusX * region->height * region->radiusZ);
+        volume = (f32)(region->radius * region->height * region->depth);
         break;
     case 0:
-        volume = (f32)(region->radiusX * region->radiusX) * 3.1415927f * (f32)region->height;
+        volume = (f32)(region->radius * region->radius) * 3.1415927f * (f32)region->height;
         break;
     case 1:
-        radius = (f32)region->radiusX;
+        radius = (f32)region->radius;
         volume = ((radius * 1.0471976f) * radius) * radius;
         break;
     }
@@ -1428,24 +1398,24 @@ f32 func_1514462C(s32 arg0) {
 }
 
 /* Picks a random point inside the region into out[3], applying its tilt for boxes and cylinders. */
-void func_1514470C(SpawnRegion *region, f32 *out) {
+void func_1514470C(TriggerZone *region, f32 *out) {
     f32 radiusZ;
     f32 height;
     f32 radiusX;
-    f32 cosineX;
-    f32 sineX;
-    f32 sineZ;
-    f32 cosineZ;
+    f32 sinPitch;
+    f32 cosPitch;
+    f32 sinYaw;
+    f32 cosYaw;
     s32 mode;
 
-    radiusX = region->radiusX;
+    radiusX = region->radius;
     height = region->height;
-    radiusZ = region->radiusZ;
-    cosineX = region->cosineX;
-    sineX = region->sineX;
-    sineZ = region->sineZ;
-    cosineZ = region->cosineZ;
-    mode = region->flags & 3;
+    radiusZ = region->depth;
+    sinPitch = region->sinPitch;
+    cosPitch = region->cosPitch;
+    sinYaw = region->sinYaw;
+    cosYaw = region->cosYaw;
+    mode = region->kind & 3;
     switch (mode) {
     default:
         out[0] = region->x;
@@ -1465,12 +1435,12 @@ void func_1514470C(SpawnRegion *region, f32 *out) {
             y = func_150ADA68() * height;
             z = func_150ADA68() * (2.0f * radiusZ) - radiusZ;
             savedX = x;
-            mixed = y * cosineX + z * sineX;
-            x = x * cosineZ + mixed * sineZ;
-            y = y * sineX - z * cosineX;
+            mixed = y * sinPitch + z * cosPitch;
+            x = x * cosYaw + mixed * sinYaw;
+            y = y * cosPitch - z * sinPitch;
             out[0] = region->x + x;
             out[1] = region->y + y;
-            rotatedZ = mixed * cosineZ - savedX * sineZ;
+            rotatedZ = mixed * cosYaw - savedX * sinYaw;
             out[2] = region->z + rotatedZ;
         }
         return;
@@ -1490,12 +1460,12 @@ void func_1514470C(SpawnRegion *region, f32 *out) {
             y = func_150ADA68() * height;
             z = func_151423D8(angle) * radius;
             savedX = x;
-            mixed = y * cosineX + z * sineX;
-            x = x * cosineZ + mixed * sineZ;
-            y = y * sineX - z * cosineX;
+            mixed = y * sinPitch + z * cosPitch;
+            x = x * cosYaw + mixed * sinYaw;
+            y = y * cosPitch - z * sinPitch;
             out[0] = region->x + x;
             out[1] = region->y + y;
-            out[2] = region->z + (mixed * cosineZ - savedX * sineZ);
+            out[2] = region->z + (mixed * cosYaw - savedX * sinYaw);
         }
         return;
     case 1:
@@ -2275,60 +2245,40 @@ void func_15146508(Actor *a, Actor *b) {
     func_15169040(&msg, 45, a, b);
 }
 
-typedef struct {
-    /* 0x000 */ u8 pad0[0x3E8];
-    /* 0x3E8 */ Mtx *mtx[3]; /* per frame buffer (D_800BE9C0) */
-    /* 0x3F4 */ u8 pad3F4[2];
-    /* 0x3F6 */ u8 ready;
-} AttachModel;
-
-/* Where an attachment point's matrix comes from (see func_1514654C). */
-typedef struct {
-    /* 0x00 */ u8 pad0[2];
-    /* 0x02 */ u8 bone;      /* index into the actor's own matrices (unk1D4) */
-    /* 0x03 */ u8 pad3[0x1B];
-    /* 0x1E */ u16 partId;   /* part looked up with func_1503195C */
-    /* 0x20 */ u16 partBone;
-    /* 0x22 */ u8 pad22[0x12];
-    /* 0x34 */ Mtx *mtx;     /* per frame buffer */
-    /* 0x38 */ u8 pad38[0x10];
-    /* 0x48 */ AttachModel *model;
-} AttachPoint;
-
-s32 func_15031070(ActorCtl *, Actor *, Mtx **, s32 *);
+s32 func_15031070(ModelAttachment *, Actor *, Mtx **, Mtx **);
 void func_15145EA4(f32 **, f32 **, Mtx *, s32);
 
 /*
- * Transforms `count` offsets by the matrix of an attachment point on the actor: a model's matrix,
- * a part's bone, a fixed matrix, or else one of the actor's bones. Returns 0 if it is unavailable.
+ * Transforms `count` offsets by the matrix of a model attachment on the actor: its animation's part
+ * matrix, a parent attachment's matrix, a fixed matrix, or else one of the actor's bones. Returns 0
+ * if it is unavailable.
  */
-s32 func_1514654C(Actor *actor, AttachPoint *point, s32 index, f32 **offsets, f32 **results, s32 count) {
+s32 func_1514654C(Actor *actor, ModelAttachment *point, s32 index, f32 **offsets, f32 **results, s32 count) {
     s32 i;
     Mtx *mtx;
-    ActorCtl *part;
+    ModelAttachment *part;
     Mtx *partMtx;
-    s32 partCount;
+    Mtx *partBoneMtx;
     MtxF mf;
 
     if ((actor == NULL) || (point == NULL) || (actor->unk1D4 == NULL)) {
         return 0;
     }
-    if (point->model != NULL) {
-        if (point->model->ready == 0) {
+    if (point->anim != NULL) {
+        if (point->anim->unk3F6 == 0) {
             return 0;
         }
-        mtx = point->model->mtx[D_800BE9C0] + index;
-    } else if (point->partId) {
-        part = func_1503195C(actor, point->partId, 0);
+        mtx = point->anim->partMtx[D_800BE9C0] + index;
+    } else if (point->parentSet) {
+        part = func_1503195C(actor, point->parentSet, 0);
         if (part == NULL) {
             return 0;
         }
-        if (func_15031070(part, actor, &partMtx, &partCount) == 0) {
+        if (func_15031070(part, actor, &partMtx, &partBoneMtx) == 0) {
             return 0;
         }
-        /* func_1503195C returns a part object, not an ActorCtl (functions.h types it ActorCtl *) */
-        if (*(s32 *)((u8 *)part + 0x48) != 0) {
-            mtx = &partMtx[point->partBone];
+        if (part->anim != NULL) {
+            mtx = &partMtx[point->parentMtx];
         } else {
             mtx = partMtx;
         }

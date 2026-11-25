@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Spawn parameters; func_150C5370 copies them into the object at +0x18. */
 typedef struct StripDesc {
@@ -24,7 +25,7 @@ typedef struct StripTarget {
 
 /* A camera-facing textured strip drawn from p0 to p1 (object type 0x46). */
 typedef struct StripObj {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ Vec3f p0;
@@ -40,7 +41,6 @@ typedef struct StripObj {
     /* 0xC8 */ StripTarget target;
 } StripObj;
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern f32 func_15143E64(Vec3f *);
 
 /** Allocates a strip (0xC8-byte header plus `payloadSize` bytes of payload, its target) and caches its length. */
@@ -67,12 +67,12 @@ StripObj *func_150C5370(StripDesc *desc, s32 payloadSize) {
 
 /** Destroy handler: hands the strip to func_15169804. */
 void func_150C5430(StripObj *strip) {
-    func_15169804((struct102 *)strip);
+    func_15169804(&strip->header);
 }
 
 /** Free handler: hands the strip to func_15169824. */
 void func_150C5450(StripObj *strip) {
-    func_15169824((struct102 *)strip);
+    func_15169824(&strip->header);
 }
 
 extern void (*D_800887B8[])(StripObj *);
@@ -103,7 +103,6 @@ void func_150C54C0(StripObj *strip) {
     D_800887C0[idx](strip);
 }
 
-extern void func_1514EDF0(StripObj *handle, Actor *owner);
 
 /** Detaches the strip from its target character, then destroys it (func_150C5430). */
 void func_150C5510(StripObj *strip) {
@@ -149,7 +148,7 @@ void func_150C5568(StripObj *strip) {
             }
         }
         if (remove) {
-            func_1516972C((struct102 *)strip);
+            func_1516972C(&strip->header);
         }
     }
 }
@@ -303,25 +302,11 @@ void func_150C5C9C(Actor *obj) {
     func_1514D3B0((s32)obj, 0x15, 2, 0);
 }
 
-/* func_150C5D0C's data; which member applies depends on the message. */
-typedef union StripMsgData {
-    struct {
-        Actor *obj;
-        u8 uniqueId;
-    } m0; // message 0
-    struct {
-        Actor *objA;
-        Actor *objB;
-        u8 uniqueIdA;
-        u8 uniqueIdB;
-    } m2D; // message 0x2D
-} StripMsgData;
-
-extern void (*D_800887C8[])(StripObj *, StripMsgData *, u8);
+extern void (*D_800887C8[])(StripObj *, ActorMsg *, u8);
 
 /** Forwards a message to the D_800887C8 handler for unk38, if there is one. */
-void func_150C5CC4(StripObj *strip, StripMsgData *data, u8 msg) {
-    void (*handler)(StripObj *, StripMsgData *, u8) = D_800887C8[strip->unk38];
+void func_150C5CC4(StripObj *strip, ActorMsg *data, u8 msg) {
+    void (*handler)(StripObj *, ActorMsg *, u8) = D_800887C8[strip->unk38];
 
     if (handler != NULL) {
         handler(strip, data, msg);
@@ -332,20 +317,20 @@ void func_150C5CC4(StripObj *strip, StripMsgData *data, u8 msg) {
  * Message 0: removes the strip if it targets data's character (same pointer or same unique id).
  * Message 0x2D: retargets the strip from either of data's two characters (A, B) to the other.
  */
-void func_150C5D0C(StripObj *strip, StripMsgData *data, u8 msg) {
+void func_150C5D0C(StripObj *strip, ActorMsg *data, u8 msg) {
     StripTarget *target = &strip->target;
 
     if (msg == 0) {
-        if (data->m0.obj == target->obj || data->m0.uniqueId == target->uniqueId) {
-            func_1516972C((struct102 *)strip);
+        if (data->ref.actor == target->obj || data->ref.uniqueId == target->uniqueId) {
+            func_1516972C(&strip->header);
         }
     } else if (msg == 0x2D) {
-        if (target->obj == data->m2D.objA) {
-            target->obj = data->m2D.objB;
-            target->uniqueId = data->m2D.uniqueIdB;
-        } else if (target->obj == data->m2D.objB) {
-            target->obj = data->m2D.objA;
-            target->uniqueId = data->m2D.uniqueIdA;
+        if (target->obj == data->swap.actorA) {
+            target->obj = data->swap.actorB;
+            target->uniqueId = data->swap.idB;
+        } else if (target->obj == data->swap.actorB) {
+            target->obj = data->swap.actorA;
+            target->uniqueId = data->swap.idA;
         }
     }
 }

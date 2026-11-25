@@ -147,7 +147,6 @@ typedef struct Emitter {
 
 void func_1516F864(Particle *particle);
 void func_1516F94C(Particle *particle, s32 factor);
-extern void *func_15167A68(s32 type, s32 arg1, s32 size, s32 arg3, s32 arg4, s32 arg5);
 extern ParticleLink *func_150448D0(s32, s32, s32, s32, s32, s32, s32, s16 *, s16 *);
 
 
@@ -237,7 +236,7 @@ void func_1516D678(Particle *particle) {
         if (link != NULL) {
             link->status = 0;
         }
-        func_1516972C((struct102 *)particle);
+        func_1516972C((EffectHeader *)particle);
     } else {
         /* y is 8.8 fixed point with its fraction in yFraction */
         value = particle->y;
@@ -650,7 +649,7 @@ void func_1516DB90(Emitter *arg0) {
         if (i > 0) {
             emitter->timer = i;
         } else {
-            func_1516972C((struct102 *)emitter);
+            func_1516972C((EffectHeader *)emitter);
         }
     }
 }

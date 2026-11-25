@@ -26,7 +26,7 @@ typedef struct {
 
 /* Model effect object (types 0x36 / 0x4C / 0x5B). */
 typedef struct {
-    /* 0x000 */ u8 header[0x10]; /* object link header (func_15167A68) */
+    /* 0x00 */ EffectHeader header;
     /* 0x010 */ EffectParams params;
     /* 0x068 */ ModelInstance *model;
     /* 0x06C */ s32 *displayLists;
@@ -41,7 +41,6 @@ typedef struct {
     /* 0x120 */ EffectExtra extra; /* optional extension (func_15157898) */
 } Effect;
 
-extern Effect *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_1503F62C(s32, s32, void *, void *, void *, void *, void *);
 extern void func_1503F5B8(ModelInstance *, s32, s32, f32, f32, s32);
 extern s32 func_1515D480(s32);
@@ -116,7 +115,7 @@ void func_15157248(Effect *fx) {
     func_151571C4(fx);
     func_1518CA04(fx->params.model);
     func_1503F7B8(fx->model);
-    func_15169804((struct102 *)fx);
+    func_15169804(&fx->header);
 }
 
 /* As func_15157248, but releases the object through func_15169824. */
@@ -124,7 +123,7 @@ void func_1515728C(Effect *fx) {
     func_151571C4(fx);
     func_1518CA04(fx->params.model);
     func_1503F7B8(fx->model);
-    func_15169824((struct102 *)fx);
+    func_15169824(&fx->header);
 }
 
 /*
@@ -171,7 +170,7 @@ void func_151572D0(Effect *fx) {
         }
     }
     if (dead) {
-        func_1516972C((struct102 *)fx);
+        func_1516972C(&fx->header);
     }
 }
 
@@ -183,10 +182,6 @@ typedef struct {
 extern Gfx *(*D_8008ADBC[])(Gfx *, Effect *, s16, u8 *, u8 *);
 extern Gfx *(*D_8008ADCC[])(Gfx *, Effect *, s16, u8 *);
 extern OtherModeL D_800A4AC8[];
-extern u8 D_80083740[];
-extern u8 D_800838C0[];
-extern u8 D_80083A40[];
-extern u8 D_80083BC0[];
 
 Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
@@ -377,7 +372,7 @@ void func_15157DEC(Effect *fx, f32 *xform) {
 /* Pre-draw callback (D_8008ADBC[3]): loads the identity modelview and this view's projection. */
 Gfx *func_15157F80(Gfx *gfx, Effect *fx, s32 view, u8 *needSync, u8 *proceed) {
     gSPMatrix(gfx++, &D_80089470, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(gfx++, &((Mtx *)D_800DCC10)[view], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &D_800DCC10[view], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     *proceed = TRUE;
     return gfx;
 }

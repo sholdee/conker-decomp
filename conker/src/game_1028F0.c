@@ -3,7 +3,7 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Effect (a struct260 with per-effect data at 0x28) that follows an object. */
+/* Effect (a TimedEffect with per-effect data at 0x28) that follows an object. */
 typedef struct {
     /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
@@ -12,13 +12,7 @@ typedef struct {
 } FollowEffectData;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state;
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ FollowEffectData data;
 } FollowEffect;
 
@@ -44,35 +38,12 @@ typedef struct {
 
 /* Live particle, as created by func_15130280 from a ParticleDesc. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x2B];
-    /* 0x2B */ u8 unk2B;
-    /* 0x2C */ u8 pad2C[0x38 - 0x2C];
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ Vec3f anchor;
-    /* 0x4C */ Vec3f offset;
-    /* 0x58 */ Vec3f vel;
-    /* 0x64 */ f32 accelY;
-    /* 0x68 */ u8 pad68[0xA8 - 0x68];
+    /* 0x00 */ DescParticleHead head;
     /* 0xA8 */ union {
         DriftParticleData drift;
         GrowParticleData grow;
     } data;
 } Particle;
-
-/* Payload of the messages the effect and particle handlers receive. */
-typedef union {
-    struct {
-        /* 0x00 */ Actor *object;
-        /* 0x04 */ u8 id;
-    } one;          /* messages 0, 3, 0x2F */
-    struct {
-        /* 0x00 */ Actor *from;
-        /* 0x04 */ Actor *to;
-        /* 0x08 */ u8 fromId;
-        /* 0x09 */ u8 toId;
-    } pair;         /* message 0x2D */
-} ObjectMessage;
 
 extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
@@ -117,7 +88,7 @@ void func_150D54C8(FollowEffect *effect) {
     data = &effect->data;
     if (owner) {} // matching: raises owner's register priority over data
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
-        effect->state = -1;
+        effect->base.header.state = -1;
         return;
     }
     if (owner->unk28 < 8.0f && (owner->unk184 & 0x1F) == 0xE) {
@@ -184,7 +155,7 @@ void func_150D54C8(FollowEffect *effect) {
                 spawn.flags &= ~0xC0;
                 right = (func_150ADA20() & 1) ? 0x80 : 0; // matching: reuses the u8 local for the 0x80 flag
                 spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | right;
-                func_15130280(&spawn, 1, 0, 0, effect->unkC, effect->unk1);
+                func_15130280(&spawn, 1, 0, 0, effect->base.header.owner, effect->base.header.kind);
                 data->spawnAccum -= 1.0f;
             } while (data->spawnAccum > 1.0f);
         }
@@ -192,33 +163,33 @@ void func_150D54C8(FollowEffect *effect) {
 }
 
 /* FollowEffect message handler: dies with its owner and follows it through message 0x2D. */
-void func_150D596C(FollowEffect *effect, ObjectMessage *msg, u8 type) {
+void func_150D596C(FollowEffect *effect, ActorMsg *msg, u8 type) {
     FollowEffectData *data = &effect->data;
     Actor *object;
 
     if (type == 0 || type == 0x2F || type == 3) {
-        object = msg->one.object;
-        if (object == data->owner || msg->one.id == data->ownerId) {
-            func_1516972C((struct102 *)effect);
+        object = msg->ref.actor;
+        if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
+            func_1516972C(&effect->base.header);
         }
     } else if (type == 0x2D) {
-        if (data->owner == msg->pair.from) {
-            data->owner = msg->pair.to;
-            data->ownerId = msg->pair.toId;
-        } else if (data->owner == msg->pair.to) {
-            data->owner = msg->pair.from;
-            data->ownerId = msg->pair.fromId;
+        if (data->owner == msg->swap.actorA) {
+            data->owner = msg->swap.actorB;
+            data->ownerId = msg->swap.idB;
+        } else if (data->owner == msg->swap.actorB) {
+            data->owner = msg->swap.actorA;
+            data->ownerId = msg->swap.idA;
         }
     }
 }
 
 /* FollowEffect callback; forwards to func_1514933C. */
-void func_150D5A2C(struct260 *effect) {
+void func_150D5A2C(TimedEffect *effect) {
     func_1514933C(effect);
 }
 
 /* FollowEffect callback; forwards to func_15149368. */
-void func_150D5A4C(struct260 *effect) {
+void func_150D5A4C(TimedEffect *effect) {
     func_15149368(effect);
 }
 
@@ -680,49 +651,49 @@ s32 func_150D6CC4(Particle *particle, s32 arg1) {
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
         return 0;
     }
-    func_150D6C98(owner, &particle->anchor);
+    func_150D6C98(owner, &particle->head.desc.pos);
     {
-        Vec3f prevVel = particle->vel;
+        Vec3f prevVel = particle->head.desc.vel;
         f32 accelX;
         f32 accelY;
         f32 accelZ;
 
-        particle->vel.y += particle->accelY * D_800BE9A4;
-        func_15131958(&particle->vel, data->drag);
-        accelX = (particle->vel.x - prevVel.x) * D_800BE9A8;
-        accelY = (particle->vel.y - prevVel.y) * D_800BE9A8;
-        accelZ = (particle->vel.z - prevVel.z) * D_800BE9A8;
-        particle->offset.x += prevVel.x * D_800BE9A4 +
+        particle->head.desc.vel.y += particle->head.desc.gravity * D_800BE9A4;
+        func_15131958(&particle->head.desc.vel, data->drag);
+        accelX = (particle->head.desc.vel.x - prevVel.x) * D_800BE9A8;
+        accelY = (particle->head.desc.vel.y - prevVel.y) * D_800BE9A8;
+        accelZ = (particle->head.desc.vel.z - prevVel.z) * D_800BE9A8;
+        particle->head.desc.offset.x += prevVel.x * D_800BE9A4 +
             accelX * D_800BE9A4 * D_800BE9A4 * 0.5f;
-        particle->offset.y += prevVel.y * D_800BE9A4 +
+        particle->head.desc.offset.y += prevVel.y * D_800BE9A4 +
             accelY * D_800BE9A4 * D_800BE9A4 * 0.5f;
-        particle->offset.z += prevVel.z * D_800BE9A4 +
+        particle->head.desc.offset.z += prevVel.z * D_800BE9A4 +
             accelZ * D_800BE9A4 * D_800BE9A4 * 0.5f;
     }
     return 1;
 }
 
 /* Drift particle message handler: dies with its owner and follows it through message 0x2D. */
-void func_150D6E60(Particle *particle, ObjectMessage *msg, u8 type) {
+void func_150D6E60(Particle *particle, ActorMsg *msg, u8 type) {
     DriftParticleData *data = &particle->data.drift;
     Actor *object;
 
     if (type == 0x2D) {
-        if (data->owner == msg->pair.from) {
-            data->owner = msg->pair.to;
-            data->ownerId = msg->pair.toId;
+        if (data->owner == msg->swap.actorA) {
+            data->owner = msg->swap.actorB;
+            data->ownerId = msg->swap.idB;
         } else {
-            if (data->owner == msg->pair.to) {
-                data->owner = msg->pair.from;
-                data->ownerId = msg->pair.fromId;
+            if (data->owner == msg->swap.actorB) {
+                data->owner = msg->swap.actorA;
+                data->ownerId = msg->swap.idA;
             }
         trailing_150D6E60: // matching: a label here keeps IDO from merging this path's exit branch
             ;
         }
     } else if (type == 0) {
-        object = msg->one.object;
-        if (object == data->owner || msg->one.id == data->ownerId) {
-            func_1516972C((struct102 *)particle);
+        object = msg->ref.actor;
+        if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
+            func_1516972C(&particle->head.header);
         }
     }
 }
@@ -740,13 +711,13 @@ s32 func_150D6F0C(Particle *particle, s32 arg1) {
         return 0;
     }
 
-    func_150D6C98(owner, &particle->anchor);
+    func_150D6C98(owner, &particle->head.desc.pos);
 
     size = sqrtf(data->time) * data->growth;
-    particle->unk3C = size;
-    particle->unk38 = size;
+    particle->head.desc.height = size;
+    particle->head.desc.width = size;
 
-    particle->unk2B = data->fadeStart - data->fadeRate * data->time * data->time;
+    particle->head.desc.alpha = data->fadeStart - data->fadeRate * data->time * data->time;
     data->time += D_800BE9A4;
 
     if (data->lifetime < data->time) {
@@ -756,26 +727,26 @@ s32 func_150D6F0C(Particle *particle, s32 arg1) {
 }
 
 /* Grow particle message handler: dies with its owner and follows it through message 0x2D. */
-void func_150D7068(Particle *particle, ObjectMessage *msg, u8 type) {
+void func_150D7068(Particle *particle, ActorMsg *msg, u8 type) {
     GrowParticleData *data = &particle->data.grow;
     Actor *object;
 
     if (type == 0x2D) {
-        if (data->owner == msg->pair.from) {
-            data->owner = msg->pair.to;
-            data->ownerId = msg->pair.toId;
+        if (data->owner == msg->swap.actorA) {
+            data->owner = msg->swap.actorB;
+            data->ownerId = msg->swap.idB;
         } else {
-            if (data->owner == msg->pair.to) {
-                data->owner = msg->pair.from;
-                data->ownerId = msg->pair.fromId;
+            if (data->owner == msg->swap.actorB) {
+                data->owner = msg->swap.actorA;
+                data->ownerId = msg->swap.idA;
             }
         trailing_150D7068: // matching: a label here keeps IDO from merging this path's exit branch
             ;
         }
     } else if (type == 0) {
-        object = msg->one.object;
-        if (object == data->owner || msg->one.id == data->ownerId) {
-            func_1516972C((struct102 *)particle);
+        object = msg->ref.actor;
+        if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
+            func_1516972C(&particle->head.header);
         }
     }
 }

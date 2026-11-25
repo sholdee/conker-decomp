@@ -3,18 +3,9 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Per-particle data of a pulsing particle: two sizes oscillating around a base size
- * (same layout as ParticlePulse in game_15D730.c). */
-typedef struct {
-    u8 phase[2];
-    s8 phaseStep[2];
-    f32 baseSize;
-    f32 amplitude[2];
-} ParticlePulse;
-
 /* Partial view of the particle func_15130280 creates (Particle in game_15D730.c). */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ParticleDesc desc;
     /* 0x80 */ u8 pad80[0xA8 - 0x80];
     /* 0xA8 */ ParticlePulse pulse;
@@ -32,15 +23,9 @@ typedef struct {
     /* 0x18 */ s32 unk18;
 } EffectData; /* size 0x1C */
 
-/* Effect object (struct260 is a shorter view of its head). */
+/* Effect object (TimedEffect is a shorter view of its head). */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state; /* set to -1 to free the effect */
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EffectData data;
 } Effect;
 
@@ -125,18 +110,8 @@ void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     }
 }
 
-/* Ground probe result filled by func_1504715C (same layout as GroundHit in game_105760.c). */
-typedef struct {
-    f32 height;
-    s16 points[9];
-    s32 unk18;
-    u8 flags;
-    u8 unk1D;
-    s32 unk20;
-} GroundHit; /* size 0x24 */
-
-extern void func_1504715C(GroundHit *, Actor *);
-extern s32 func_1514654C(Actor *, ActorCtl *, s32, Vec3f **, Vec3f **, s32);
+extern void func_1504715C(CollisionHit *, Actor *);
+extern s32 func_1514654C(Actor *, ModelAttachment *, s32, Vec3f **, Vec3f **, s32);
 extern void func_15143134(Vec3f *, Vec3f *, Mtx *);
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, Vec3f *out);
 extern s32 func_1515C0F8(Actor *, Vec3f **);
@@ -157,10 +132,10 @@ void func_150C44A4(Effect *effect) {
     f32 progress;
     s32 i;
     f32 t;
-    GroundHit ground;
+    CollisionHit ground;
     Vec3f *offsetPtr;
     Vec3f *posPtr;
-    ActorCtl *bone;
+    ModelAttachment *attachment;
     s32 emit;
     Vec3f *wind;
     Vec3f vel;
@@ -172,7 +147,7 @@ void func_150C44A4(Effect *effect) {
     owner = effect->data.owner;
     data = &effect->data;
     if ((owner->interaction_state == 0) || (owner->unique_id != data->ownerId)) {
-        effect->state = -1;
+        effect->base.header.state = -1;
         return;
     }
     if ((owner->unk1D4 == NULL) || (data->flags & 2)) {
@@ -186,8 +161,8 @@ void func_150C44A4(Effect *effect) {
         data->unk18 = func_10010154(150, owner, 0x36B0, 400, 0x4268);
     }
     if (data->flags & 1) {
-        bone = func_1503195C(owner, data->unk14, 0);
-        if (bone == NULL) {
+        attachment = func_1503195C(owner, data->unk14, 0);
+        if (attachment == NULL) {
             return;
         }
         if (owner->unk2EC != 0) { // fade active: timer unk2D8[0] times rate unk2D8[1]
@@ -205,7 +180,7 @@ void func_150C44A4(Effect *effect) {
         offset.z = D_800A0378[i].z * t;
         offsetPtr = &offset;
         posPtr = &pos;
-        if (func_1514654C(owner, bone, D_800A03A8[i], &offsetPtr, &posPtr, 1) == 0) {
+        if (func_1514654C(owner, attachment, D_800A03A8[i], &offsetPtr, &posPtr, 1) == 0) {
             pos.x = owner->x_position;
             pos.y = owner->y_position + 800.0f;
             pos.z = owner->z_position;
@@ -237,7 +212,7 @@ void func_150C44A4(Effect *effect) {
     if (emit) {
         data->unk8 += (0.1290000081f + func_150ADA68() * 0.1170000061f) * D_800BE9A4;
         while (data->unk8 > 1.0f) {
-            func_151C36D8(&pos, effect->unkC, effect->unk1);
+            func_151C36D8(&pos, effect->base.header.owner, effect->base.header.kind);
             data->unk8 -= 1.0f;
         }
     }
@@ -258,7 +233,7 @@ void func_150C44A4(Effect *effect) {
             randF1 = func_150ADA68();
             func_151D9014(&pos, &vel, 0xC, randF0 * 0.2580000162f + -0.6080000401f, (rand1 % 41U) + 60, (rand0 % 56U) + 200,
                           randF1 * 160.0f + 121.0f, func_150ADA68() < 0.7000000477f, 1.0f, 1.0f, 0, &ground, 1, 1,
-                          effect->unkC, effect->unk1);
+                          effect->base.header.owner, effect->base.header.kind);
             data->unk10 -= 1.0f;
         } while (data->unk10 > 1.0f);
     }
@@ -268,20 +243,20 @@ void func_150C44A4(Effect *effect) {
 void func_150C4AD8(Effect *effect) {
     // matching: the s32 read keeps IDO from merging the test and the argument into one load
     if (*(s32 *)&effect->data.particle != 0) {
-        func_1516972C((struct102 *)effect->data.particle);
+        func_1516972C(&effect->data.particle->header);
     }
 }
 
 /* Frees the effect's particle, then calls func_1514933C on the effect. */
 void func_150C4B08(Effect *effect) {
     func_150C4AD8(effect);
-    func_1514933C((struct260 *)effect);
+    func_1514933C(&effect->base);
 }
 
 /* Frees the effect's particle, then calls func_15149368 on the effect. */
 void func_150C4B34(Effect *effect) {
     func_150C4AD8(effect);
-    func_15149368((struct260 *)effect);
+    func_15149368(&effect->base);
 }
 
 /* Event handler: events 0x55/0x56 clear/set flag 2 (pausing the effect), others go to func_15149514. */

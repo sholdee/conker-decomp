@@ -266,13 +266,6 @@ void func_15188E48(BoneTrail *trail) {
     }
 }
 
-/* Per-view list of the objects to draw this frame (see game_13F9D0.c). */
-typedef struct DrawEntry {
-    u16 index; // into D_800DBEF4
-    u16 distance;
-} DrawEntry;
-
-extern DrawEntry **D_80089240[]; // per view
 
 /*
  * Type-1 update: the one-matrix version of func_15188E48. The newest frame is

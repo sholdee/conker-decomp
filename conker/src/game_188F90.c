@@ -1,16 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Texture table entry (D_80090B60). */
-typedef struct TextureInfo {
-    /* 0x0 */ s32 unk0;
-    /* 0x4 */ u8 frameCount;
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ u16 width;
-    /* 0x8 */ u16 height;
-    /* 0xA */ u16 unkA;
-} TextureInfo;
+#include "effects.h"
 
 typedef struct OtherModeL {
     s32 w0;
@@ -19,7 +10,7 @@ typedef struct OtherModeL {
 
 /* Animated, textured quad (update func_1515BAE0, draw func_1515BBF0). */
 typedef struct TexturedQuad {
-    /* 0x00 */ u8 pad0[0x10];       // object link header
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ u8 texture;          // index into D_80090B60
     /* 0x11 */ u8 flags;            // 1: lifetime counts down, 2: two-cycle mode
     /* 0x12 */ u8 animFlags;        // end-of-animation behaviour, see func_1514401C
@@ -54,9 +45,7 @@ typedef struct ActorTrackerDesc {
 
 /* Object type 0x32: follows an actor's position every frame and keeps its frame-to-frame motion. */
 typedef struct ActorTracker {
-    /* 0x00 */ u8 pad0[0x8];
-    /* 0x08 */ struct ActorTracker *next;
-    /* 0x0C */ u8 padC[0x4];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ ActorTrackerDesc desc;
@@ -69,16 +58,14 @@ typedef struct ActorTracker {
 
 extern s32 (*D_8008B078[])(TexturedQuad *);
 extern s32 (*D_8008B07C[])(TexturedQuad *);
-extern TextureInfo D_80090B60[];
+extern EffectTexture D_80090B60[];
 extern OtherModeL D_800A4AC8[];
-/* Object lists: D_800DCE50[list][type] heads a linked list of objects of that type. */
-extern ActorTracker *D_800DCE50[2][104];
 
 s32 func_1514401C(u8 id, u32 *speed, s32 *pos, u8 flags);
 Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
-Gfx *func_15142E24(Gfx *gfx, TextureInfo *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 texture, u8 arg7, s32 arg8,
+Gfx *func_15142E24(Gfx *gfx, EffectTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 texture, u8 arg7, s32 arg8,
                    u8 *needSync, s32 argA);
 Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
 Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync);
@@ -86,10 +73,7 @@ void func_151441A4(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 
                    u8 a1, u8 level, u8 mode);
 void func_151442FC(s16 *outR, s16 *outG, s16 *outB, s16 *outA, u8 r0, u8 g0, u8 b0, u8 a0, u8 r1, u8 g1, u8 b1,
                    u8 a1, u8 level, u8 mode);
-void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 void *memcpy(void *, const void *, u32);
-void func_1514EDF0(ActorTracker *handle, Actor *owner);
-s32 func_1514ECE0(Attachment *list, s16 type, Attachment **out);
 
 /*
  * Update handler: counts the lifetime down (flag 1), runs the update callback and advances the texture
@@ -121,10 +105,10 @@ void func_1515BAE0(TexturedQuad *quad) {
         func = quad->destroyFunc;
         if (func != -1) {
             if (D_8008B07C[func](quad) != 0) {
-                func_1516972C((struct102 *)quad);
+                func_1516972C(&quad->header);
             }
         } else {
-            func_1516972C((struct102 *)quad);
+            func_1516972C(&quad->header);
         }
     }
 }
@@ -193,13 +177,13 @@ ActorTracker *func_1515BE50(ActorTrackerDesc *desc, s32 extraSize, u8 owner, s32
 /* Destroy handler: detaches the tracker from its actor, then destroys it. */
 void func_1515BF50(ActorTracker *tracker) {
     func_1514EDF0(tracker, tracker->desc.actor);
-    func_15169804((struct102 *)tracker);
+    func_15169804(&tracker->header);
 }
 
 /* Free handler: detaches the tracker from its actor, then frees it. */
 void func_1515BF7C(ActorTracker *tracker) {
     func_1514EDF0(tracker, tracker->desc.actor);
-    func_15169824((struct102 *)tracker);
+    func_15169824(&tracker->header);
 }
 
 /*
@@ -231,7 +215,7 @@ void func_1515BFA8(ActorTracker *tracker) {
         tracker->motion.z = (tracker->prevPos.z - tracker->pos.z) * D_800BE9A8;
     }
     if (dead) {
-        func_1516972C((struct102 *)tracker);
+        func_1516972C(&tracker->header);
     }
 }
 
@@ -262,7 +246,7 @@ void func_1515C158(void) {
     ActorTracker *tracker;
 
     for (list = 0; list < 2; list++) {
-        for (tracker = D_800DCE50[list][0x32]; tracker != NULL; tracker = tracker->next) {
+        for (tracker = (ActorTracker *)D_800DCE50[list][0x32]; tracker != NULL; tracker = (ActorTracker *)tracker->header.next) {
             tracker->unk44 = 0;
             tracker->unk48 = -1;
         }

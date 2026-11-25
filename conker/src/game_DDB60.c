@@ -4,16 +4,11 @@
 #include "effects.h"
 
 
-/* Filled in by func_1504715C for an actor; only passed on to func_15153F18 here. */
-typedef struct {
-    u8 pad[0x24];
-} Floor150B06B0;
-
 extern s32 func_15143E24(Actor *);
-extern void func_1504715C(Floor150B06B0 *, Actor *);
+extern void func_1504715C(CollisionHit *, Actor *);
 extern void func_151C329C(void *, u8, s32);
 extern void func_15152190(DebrisBurst *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
-extern void func_15153F18(AngleRange *, SplashSpray *, Floor150B06B0 *, u8, s32);
+extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 
 extern const s32 D_8009F810[1];
 extern const f32 D_8009F814[1];
@@ -28,7 +23,7 @@ extern const f32 D_8009F81C[1];
 void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
     Vec3f pos;
     s8 angle;
-    Floor150B06B0 floor;
+    CollisionHit floor;
 
     pos.x = actor->x_position;
     pos.y = actor->y_position;
@@ -163,13 +158,7 @@ typedef struct {
 
 /* The effect object spawned by func_150B0C58. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE; // -1 when the owner is gone
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ DDB60EffectData data;
 } DDB60Effect;
 
@@ -228,7 +217,7 @@ void func_150B0D20(DDB60Effect *effect) {
     owner = effect->data.owner;
     data = &effect->data;
     if (owner->interaction_state == 0 || owner->unique_id != data->ownerId) {
-        effect->unkE = -1;
+        effect->base.header.state = -1;
         return;
     }
     idx = owner->unk124;
@@ -262,7 +251,7 @@ void func_150B0D20(DDB60Effect *effect) {
                 func_151D9014(pos, vel, 5, func_150ADA68() * 0.1780000031f + -0.4420000315f,
                               (func_150ADA20() % 21) + 20, (func_150ADA20() % 101) + 155,
                               func_150ADA68() * 50.0f + 80.0f, func_150ADA68() < 0.04400000349f, 1.399999976f,
-                              1.399999976f, 1, 0, 1, 0, effect->unkC, effect->unk1);
+                              1.399999976f, 1, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);
                 data->timer -= 1.0f;
             } while (data->timer > 1.0f);
         }

@@ -8,26 +8,6 @@
  * message handler of a particle that follows an owner actor.
  */
 
-/* Weak reference to an actor: valid while actor->unique_id still equals uniqueId. */
-typedef struct {
-    Actor *actor;
-    u8 uniqueId;
-} ActorRef;
-
-/* Message 0x2D payload: two actors exchange identities. */
-typedef struct {
-    Actor *actorA;
-    Actor *actorB;
-    u8 idA;
-    u8 idB;
-} ActorSwapMsg;
-
-/* Payload of the actor messages handled below (0: an actor, 0x2D: an actor swap). */
-typedef union {
-    ActorRef ref;
-    ActorSwapMsg swap;
-} ActorMsg;
-
 /* Fractions of a beam particle's width and length to draw. */
 typedef struct {
     f32 width;
@@ -75,7 +55,7 @@ Vtx *func_151BE4B8(BurstSpark *spark, s16 viewport) {
     BeamScale scale;
 
     if (owner->unique_id != data->ownerId || owner->interaction_state == 0) {
-        func_1516972C((struct102 *)spark);
+        func_1516972C(&spark->head.header);
         return NULL;
     }
     if (!(data->flags & 1)) {
@@ -88,7 +68,8 @@ Vtx *func_151BE4B8(BurstSpark *spark, s16 viewport) {
 
 /* A func_15130280 particle (game_15D730.c's Particle) whose caller-sized data (at 0xA8) holds its owner at +8. */
 typedef struct {
-    u8 pad0[0xB0];
+    EffectHeader header;
+    u8 pad10[0xA0];
     ActorRef owner;
 } OwnedParticle;
 
@@ -110,7 +91,7 @@ void func_151BE558(OwnedParticle *particle, ActorMsg *msg, u8 msgId) {
         Actor *actor = msg->ref.actor;
 
         if (actor == owner->actor || msg->ref.uniqueId == owner->uniqueId) {
-            func_1516972C((struct102 *)particle);
+            func_1516972C(&particle->header);
         }
     }
 }
@@ -134,13 +115,13 @@ void func_151BE644(BurstSpark *spark) {
 /* Teardown of a burst spark: clears its slot in the burst, then runs the particle teardown func_1513CA6C. */
 void func_151BE674(BurstSpark *spark) {
     func_151BE644(spark);
-    func_1513CA6C((struct210 *)spark);
+    func_1513CA6C(&spark->head);
 }
 
 /* Teardown of a burst spark: clears its slot in the burst, then runs the particle teardown func_1513CAA0. */
 void func_151BE6A0(BurstSpark *spark) {
     func_151BE644(spark);
-    func_1513CAA0((struct210 *)spark);
+    func_1513CAA0(&spark->head);
 }
 
 /* Per-frame update of a burst glow: switches it to a random texture every 3-10 frames and eases its scale. */
@@ -177,11 +158,11 @@ void func_151BE7C8(BurstGlow *glow) {
 /* Teardown of a burst glow: clears its slot in the burst, then runs the particle teardown func_151411A4. */
 void func_151BE7F8(BurstGlow *glow) {
     func_151BE7C8(glow);
-    func_151411A4((struct210 *)glow);
+    func_151411A4(&glow->head);
 }
 
 /* Teardown of a burst glow: clears its slot in the burst, then runs the particle teardown func_151411C4. */
 void func_151BE824(BurstGlow *glow) {
     func_151BE7C8(glow);
-    func_151411C4((struct210 *)glow);
+    func_151411C4(&glow->head);
 }

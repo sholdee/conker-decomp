@@ -20,18 +20,6 @@ typedef struct {
     /* 0x80 */ Oscillator oscillator;
 } OscillatorObject;
 
-/* Extra data func_151303BC's caller copies into the particle at +0xA8. */
-typedef struct {
-    /* 0x00 */ f32 size;
-    /* 0x04 */ u8  unk4[4];
-    /* 0x08 */ f32 unk8[2];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8  unk18[4];
-    /* 0x1C */ f32 unk1C[2];
-    /* 0x24 */ f32 unk24;
-} ParticleExtra;
-
 /* The owner whose +0x74 scales the spawned particle's velocity. */
 typedef struct {
     /* 0x00 */ u8  pad0[0x74];
@@ -90,7 +78,7 @@ s32 func_150EA10C(OscillatorObject *obj) {
 void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA11C_arg5 *arg5) {
     ParticleDesc desc;
     u8 *particle;
-    ParticleExtra extra;
+    RiseMotion extra;
 
     desc.texture = 0x2F;
     desc.renderMode = 0xC01;
@@ -118,12 +106,12 @@ void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA1
     desc.offset.z = 0.0f;
     desc.fadeStart = 20;
     desc.fadeRate = 12;
-    extra.unk4[0] = 0;
-    extra.unk4[1] = 0;
-    extra.unk18[0] = 0;
-    extra.unk18[1] = 0;
-    extra.unk10 = 3.5f;
-    extra.unk14 = 0.2857143f;
+    extra.widthPhase = 0;
+    extra.heightPhase = 0;
+    extra.swayPhaseX = 0;
+    extra.swayPhaseZ = 0;
+    extra.maxRiseSpeed = 3.5f;
+    extra.swayPerSpeed = 0.2857143f;
 
     desc.vel.x = (to->x - from->x) * arg5->unk74;
     desc.vel.y = (to->y - from->y) * arg5->unk74;
@@ -142,15 +130,15 @@ void func_150EA11C(Vec3f *from, Vec3f *to, s32 arg2, s32 arg3, f32 t, struct_EA1
 
     desc.timer = func_150ADA20() % 51U + 50;
     desc.alpha = func_150ADA20() % 101U + 100;
-    extra.size = desc.width = desc.height = func_150ADA68() * 39.0f + 31.0f;
-    extra.unk4[2] = func_150ADA20() % 5U + 4;
-    extra.unk4[3] = func_150ADA20() % 5U + 4;
-    extra.unk8[0] = (func_150ADA68() * 0.25f + 0.15f) * extra.size;
-    extra.unk8[1] = (func_150ADA68() * 0.25f + 0.15f) * extra.size;
-    extra.unk18[2] = func_150ADA20() % 5U + 4;
-    extra.unk18[3] = func_150ADA20() % 5U + 4;
-    extra.unk1C[0] = (func_150ADA68() * 0.1f + 0.08f) * extra.size;
-    extra.unk1C[1] = (func_150ADA68() * 0.1f + 0.08f) * extra.size;
+    extra.baseSize = desc.width = desc.height = func_150ADA68() * 39.0f + 31.0f;
+    extra.widthPhaseStep = func_150ADA20() % 5U + 4;
+    extra.heightPhaseStep = func_150ADA20() % 5U + 4;
+    extra.widthWobble = (func_150ADA68() * 0.25f + 0.15f) * extra.baseSize;
+    extra.heightWobble = (func_150ADA68() * 0.25f + 0.15f) * extra.baseSize;
+    extra.swayPhaseStepX = func_150ADA20() % 5U + 4;
+    extra.swayPhaseStepZ = func_150ADA20() % 5U + 4;
+    extra.swayX = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
+    extra.swayZ = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
     desc.gravity = (func_150ADA68() * 70.0f + 73.0f) * 0.001f;
 
     particle = func_151303BC(&desc, 2, 0x28);
@@ -201,12 +189,12 @@ void *func_150EA500(Actor *owner, s16 lifetime, s32 arg2, s32 arg3) {
 void func_150EA5CC(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
     ParticleDesc desc;
     u8 *particle;
-    ParticleExtra extra;
+    RiseMotion extra;
 
     desc.pos.z = z;
-    extra.unk24 = 1000.0f;
-    extra.unk10 = 4.0f;
-    extra.unk14 = 0.25f;
+    extra.ceiling = 1000.0f;
+    extra.maxRiseSpeed = 4.0f;
+    extra.swayPerSpeed = 0.25f;
     desc.texture = 0x2F;
     desc.renderMode = 0xC01;
     desc.unk0 = 0x200005;
@@ -235,10 +223,10 @@ void func_150EA5CC(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
     desc.offset.z = 0.0f;
     desc.fadeStart = 30;
     desc.fadeRate = 8;
-    extra.unk4[0] = 0;
-    extra.unk4[1] = 0;
-    extra.unk18[0] = 0;
-    extra.unk18[1] = 0;
+    extra.widthPhase = 0;
+    extra.heightPhase = 0;
+    extra.swayPhaseX = 0;
+    extra.swayPhaseZ = 0;
     desc.vel.x = -vx * 0.2f;
     desc.vel.y = 0.0f;
     desc.vel.z = -vz * 0.2f;
@@ -252,15 +240,15 @@ void func_150EA5CC(f32 x, f32 y, f32 z, f32 vx, f32 vy, f32 vz) {
 
     desc.timer = func_150ADA20() % 51U + 106;
     desc.alpha = func_150ADA20() % 101U + 100;
-    extra.size = desc.width = desc.height = func_150ADA68() * 62.0f + 41.0f;
-    extra.unk4[2] = func_150ADA20() % 5U + 4;
-    extra.unk4[3] = func_150ADA20() % 5U + 4;
-    extra.unk8[0] = (func_150ADA68() * 0.25f + 0.15f) * extra.size;
-    extra.unk8[1] = (func_150ADA68() * 0.25f + 0.15f) * extra.size;
-    extra.unk18[2] = func_150ADA20() % 5U + 4;
-    extra.unk18[3] = func_150ADA20() % 5U + 4;
-    extra.unk1C[0] = (func_150ADA68() * 0.1f + 0.08f) * extra.size;
-    extra.unk1C[1] = (func_150ADA68() * 0.1f + 0.08f) * extra.size;
+    extra.baseSize = desc.width = desc.height = func_150ADA68() * 62.0f + 41.0f;
+    extra.widthPhaseStep = func_150ADA20() % 5U + 4;
+    extra.heightPhaseStep = func_150ADA20() % 5U + 4;
+    extra.widthWobble = (func_150ADA68() * 0.25f + 0.15f) * extra.baseSize;
+    extra.heightWobble = (func_150ADA68() * 0.25f + 0.15f) * extra.baseSize;
+    extra.swayPhaseStepX = func_150ADA20() % 5U + 4;
+    extra.swayPhaseStepZ = func_150ADA20() % 5U + 4;
+    extra.swayX = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
+    extra.swayZ = (func_150ADA68() * 0.1f + 0.08f) * extra.baseSize;
     desc.gravity = (func_150ADA68() * 60.0f + 21.0f) * 0.001f;
 
     particle = func_151303BC(&desc, 2, 0x28);
@@ -334,17 +322,6 @@ void func_150EA944(WorldObject *entry) {
     }
 }
 
-/* Ground probe result filled by func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ s16 unk4[9];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  pad1E[2];
-    /* 0x20 */ s32 unk20;
-} GroundHit;
-
 /* A point on the ground plane (world x and z). */
 typedef struct {
     /* 0x00 */ f32 x;
@@ -358,7 +335,7 @@ typedef struct {
     /* 0x10 */ f32 height;      /* used when the ground probe finds nothing */
     /* 0x14 */ f32 probeHeight; /* height the ground probe starts from */
     /* 0x18 */ f32 lifetime;
-    /* 0x1C */ GroundHit ground;
+    /* 0x1C */ CollisionHit ground;
 } GroundFlash; // size 0x40
 
 /* Spawner state: flashes run between a random point on the start line and one on the end line. */
@@ -386,51 +363,45 @@ typedef struct {
     /* 0x28 */ FlashSpawner spawner;
 } struct_EAB10;
 
-/* The object func_151602C0 creates; func_150EAE24 is its per-frame update. */
-typedef struct {
-    /* 0x00 */ u8  pad0[0xE];
-    /* 0x0E */ s16 x;
-    /* 0x10 */ s16 y;
-    /* 0x12 */ s16 z;
-} FlashSprite;
-
+/* The LightEffect func_151602C0 creates, with this file's GroundFlash payload at LightEffect.data;
+ * func_150EAE24 is its per-frame update. */
 typedef struct {
     /* 0x00 */ u8  pad0[0x14];
-    /* 0x14 */ FlashSprite *sprite;
+    /* 0x14 */ PointLight *light;
     /* 0x18 */ GroundFlash flash;
 } FlashObject;
 
-FlashObject *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+FlashObject *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns this frame's share of flashes, each sliding from one line to the other along the ground. */
 void func_150EAB10(struct_EAB10 *actor) {
     s32 pad; // matching: unused stack slots that keep the frame layout
     GroundFlash flash;
-    Header header;
+    LightEffectHeader header;
     s32 padB0; // matching: see pad
     Vec2f end;
     Vec2f start;
     f32 speed;
     f32 length;
     f32 random;
-    Header2 origin;
+    Vec3i origin;
     FlashObject *obj;
     FlashSpawner *spawner;
 
     spawner = &actor->spawner;
     spawner->accumulator += (spawner->rate + func_150ADA68() * spawner->rateRange) * D_800BE9A4;
     if (spawner->accumulator > 1.0f) {
-        flash.ground.unk18 = 0;
-        flash.ground.unk1C = 0;
-        flash.ground.unk1D = 0;
-        flash.ground.unk20 = 0;
+        flash.ground.material = 0;
+        flash.ground.flags = 0;
+        flash.ground.source = 0;
+        flash.ground.surface = 0;
         flash.ground.height = -10000.0f;
         flash.height = spawner->height;
         flash.probeHeight = spawner->probeHeight;
-        header.unk0 = 2;
-        header.unk1 = 19;
-        header.unk2 = 300;
-        header.unk4 = 0;
+        header.flags = 2;
+        header.update = 19;
+        header.lifetime = 300;
+        header.lightType = 0;
         do {
             speed = spawner->speed + spawner->speedRange * func_150ADA68();
             if (speed != 0.0f) {
@@ -457,9 +428,9 @@ void func_150EAB10(struct_EAB10 *actor) {
                     flash.velocity.x *= speed;
                     flash.velocity.z *= speed;
                     flash.lifetime = length / speed;
-                    origin.unk0 = flash.position.x;
-                    origin.unk4 = spawner->height;
-                    origin.unk8 = flash.position.z;
+                    origin.x = flash.position.x;
+                    origin.y = spawner->height;
+                    origin.z = flash.position.z;
                     obj = func_151602C0(&header, &origin, spawner->colour[3], spawner->colour[0],
                                         spawner->colour[1], spawner->colour[2], 0xFF, 0, 0x40, actor->unkC,
                                         actor->unk1);
@@ -473,9 +444,9 @@ void func_150EAB10(struct_EAB10 *actor) {
     }
 }
 
-s32 func_15046C80(f32 *, s32, f32, GroundHit *);
+s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 
-/* Slides the flash along the ground and keeps its sprite on the ground; returns 0 once it expires. */
+/* Slides the flash along the ground and keeps its light on the ground; returns 0 once it expires. */
 s32 func_150EAE24(FlashObject *obj) {
     GroundFlash *flash;
     f32 probe[3];
@@ -485,13 +456,13 @@ s32 func_150EAE24(FlashObject *obj) {
     probe[0] = obj->flash.position.x;
     probe[1] = obj->flash.height;
     probe[2] = obj->flash.position.z;
-    obj->sprite->x = obj->flash.position.x;
-    obj->sprite->z = obj->flash.position.z;
+    obj->light->x = obj->flash.position.x;
+    obj->light->z = obj->flash.position.z;
     flash = &obj->flash;
     if (func_15046C80(probe, 0, obj->flash.probeHeight, &flash->ground) != 0) {
-        obj->sprite->y = flash->ground.height;
+        obj->light->y = flash->ground.height;
     } else {
-        obj->sprite->y = flash->height;
+        obj->light->y = flash->height;
     }
     flash->lifetime -= D_800BE9A4;
     if (flash->lifetime <= 0.0f) {

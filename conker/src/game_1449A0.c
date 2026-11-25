@@ -21,17 +21,6 @@ typedef union MoverWork {
 
 #define WORK(obj) ((MoverWork *)&(obj)->work)
 
-/* One row of D_80089260, selected by param >> 10. */
-typedef struct MoverSounds {
-    /* 0x0 */ s16 start; /* played when the object starts moving */
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ s16 stop;
-    /* 0x6 */ s16 unk6;
-    /* 0x8 */ s16 arrive;
-    /* 0xA */ s16 arriveLead;
-} MoverSounds;
-
-extern MoverSounds D_80089260[];
 
 extern void func_15114D24(WorldObject *obj, s32 sound, s32 arg2, s16 arg3, s16 arg4, s32 flags);
 f32 func_151172D8(WorldObject *obj, f32 angle);
@@ -62,8 +51,8 @@ f32 func_15117518(WorldObject *obj, f32 angle) {
     target = (obj->param.word << 22) >> 22;
     if (angle != target || velocity != 0.0f) {
         soundIndex = obj->param.word >> 10;
-        if (velocity == 0.0f && soundIndex != 0 && D_80089260[soundIndex].start != 0) {
-            func_15114D24(obj, D_80089260[soundIndex].start, 24000, 200, 2500, 0);
+        if (velocity == 0.0f && soundIndex != 0 && D_80089260[soundIndex].open != 0) {
+            func_15114D24(obj, D_80089260[soundIndex].open, 24000, 200, 2500, 0);
         }
         before = func_15048A70(angle, target);
         angle += velocity * D_800BE9E4;

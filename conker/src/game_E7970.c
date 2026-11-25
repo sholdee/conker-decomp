@@ -14,22 +14,16 @@ typedef struct {
     /* 0x8 */ f32 spawnAccum;
 } EffectE7970Data; // size 0xC
 
-/* Effect slot as returned by func_15149130 (a struct260); the effect data lives at 0x28. */
+/* Effect slot as returned by func_15149130 (a TimedEffect); the effect data lives at 0x28. */
 typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EffectE7970Data data;
 } EffectE7970;
 
 /* Spawns an effect attached to `owner`. */
 void func_150BA4C0(Actor *owner, u8 arg1, s32 arg2) {
     EffectE7970Data data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     data.owner = owner;
     data.ownerId = owner->unique_id;
@@ -64,7 +58,7 @@ void func_150BA55C(EffectE7970 *effect) {
     owner = effect->data.owner;
     data = &effect->data;
     if ((owner->interaction_state == 0) || (owner->unique_id != data->ownerId)) {
-        effect->unkE = -1;
+        effect->base.header.state = -1;
         return;
     }
     if (owner->unk1D4 != NULL) {
@@ -92,7 +86,7 @@ void func_150BA55C(EffectE7970 *effect) {
                 growth[2] = (func_150ADA68() * 18.64500046f) + -9.322500229f;
                 func_1518A3C0(spawnPos, angles, ((func_150ADA68() * 0.08000000566f) + 0.1000000015f) * size, velocity, growth,
                               (func_150ADA68() * 0.324000001f) + -0.5630000234f, 0.9448540211f, 7, (func_150ADA20() % 41U) + 60, 0, 0,
-                              effect->unkC, effect->unk1);
+                              effect->base.header.owner, effect->base.header.kind);
                 data->spawnAccum -= 1.0f;
             } while (data->spawnAccum > 1.0f);
         }
@@ -103,21 +97,11 @@ void func_150BA8F0(EffectE7970 *effect, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, &effect->data.owner, &effect->data.ownerId, effect);
 }
 
-/* Ground probe result filled by func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ s16 points[9];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 flags;
-    /* 0x1D */ u8 unk1D;
-    /* 0x20 */ s32 unk20;
-} GroundHit; // size 0x24
-
-void func_1504715C(GroundHit *hit, Actor *obj);
-s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, GroundHit *hit);
+void func_1504715C(CollisionHit *hit, Actor *obj);
+s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *hit);
 
 /* Copies obj's position into pos (using unk180 as the height when set); with a hit buffer, also probes the ground below. */
-s32 func_150BA930(Vec3f *pos, Actor *obj, GroundHit *hit, s32 arg3) {
+s32 func_150BA930(Vec3f *pos, Actor *obj, CollisionHit *hit, s32 arg3) {
     Vec3f probe;
 
     pos->x = obj->x_position;
@@ -145,7 +129,7 @@ s32 func_150BAA00(s32 arg0, s32 arg1) {
 /* Spawns effects at obj; when the ground probe hits, also a burst aimed by D_800DBFF0[D_80082FA4].unk380 (degrees). */
 void func_150BAA14(Actor *obj, s32 arg1, s32 arg2) {
     Vec3f pos;
-    GroundHit hit;
+    CollisionHit hit;
     s32 angle;
     u8 onGround;
     s16 pad; // matching: unused slot moves IDO's spill of func_150ADA68()'s result to sp38

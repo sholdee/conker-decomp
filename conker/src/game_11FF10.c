@@ -19,13 +19,7 @@ typedef struct {
 
 /* The emitter object spawned by func_150F2C8C. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE; // -1 when the target is gone
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ EmitterState state;
 } Emitter;
 
@@ -139,7 +133,7 @@ void func_150F2D14(Emitter *emitter) {
     }
     target = state->target;
     if (target->interaction_state == 0 || target->unique_id != state->targetId) {
-        emitter->unkE = -1;
+        emitter->base.header.state = -1;
         return;
     }
     if (state->prevUnk222 != target->unk222 && target->unk222 != 0) {
@@ -203,7 +197,7 @@ void func_150F2D14(Emitter *emitter) {
                     def.unk50 = 0;
                     def.fadeStart = 1;
                     def.fadeRate = 0xFF;
-                    spawned = func_1513D2F0(&def, &D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, emitter->unkC, emitter->unk1);
+                    spawned = func_1513D2F0(&def, &D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, emitter->base.header.owner, emitter->base.header.kind);
                     if (spawned != NULL) {
                         memcpy(&spawned->state, &particle, sizeof(particle));
                     }

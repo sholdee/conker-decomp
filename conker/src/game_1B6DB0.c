@@ -5,14 +5,6 @@
 
 /* Trail types (see game_175250.c). */
 
-/* One point of a trail; the points form a ring buffer. */
-typedef struct {
-    Vec3f pos;
-    f32 velocityY;
-    u16 phase; /* texture coordinate along the trail */
-    u8 pad12[2];
-} TrailPoint;
-
 /* Params of a trail spawned by a SprayEmitter: the TrailParams, then the floor height. */
 typedef struct {
     /* 0x00 */ TrailParams base;
@@ -20,38 +12,12 @@ typedef struct {
 } SprayTrailParams;
 
 typedef struct {
-    /* 0x00 */ EffectHeader link;
-    /* 0x10 */ u8 pad10[0x1D];
-    /* 0x2D */ s8 start; /* oldest point */
-    /* 0x2E */ u8 pad2E[0x66];
-    /* 0x94 */ TrailPoint *points;
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ MotionTrailPoint *points;
     /* 0x98 */ SprayTrailParams *params;
 } Trail;
-
-/* Spray description that func_15189900 copies into a new SprayEmitter (0x50 bytes).
-   Angles are in 256ths of a turn; every "...Range" is the random spread added to the value before it. */
-typedef struct {
-    /* 0x00 */ s16 yaw;
-    /* 0x02 */ s16 yawSpread; /* yaw varies by +-yawSpread */
-    /* 0x04 */ s16 pitch;
-    /* 0x06 */ s16 pitchRange;
-    /* 0x08 */ Vec3f origin;
-    /* 0x14 */ Vec3f extent; /* particles start on the segment origin + t * extent */
-    /* 0x20 */ f32 speed;
-    /* 0x24 */ f32 speedRange;
-    /* 0x28 */ f32 rate; /* particles per frame */
-    /* 0x2C */ f32 rateRange;
-    /* 0x30 */ f32 halfWidth;
-    /* 0x34 */ f32 halfWidthRange;
-    /* 0x38 */ s16 unk1B; /* TrailMotion.alpha */
-    /* 0x3A */ s16 unk1BRange;
-    /* 0x3C */ f32 gravity;
-    /* 0x40 */ f32 gravityRange;
-    /* 0x44 */ s16 unkC; /* EffectTemplate20.unkC */
-    /* 0x46 */ s16 unkCRange;
-    /* 0x48 */ s32 pointCount;
-    /* 0x4C */ s32 pointCountRange;
-} SprayDesc;
 
 typedef struct {
     /* 0x00 */ EffectHeader link;
@@ -65,7 +31,6 @@ typedef struct {
     /* 0x71 */ u8 pad71[7];
 } SprayEmitter; /* size 0x78 */
 
-extern SprayEmitter *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_1510F800(s32);
 extern s32 func_151464B8(s32);
 extern Trail *func_15147DA0(EffectTemplate20 *spawn, TrailMotion *motion, s32 extraSize, s32 state, s32 arg4,
@@ -207,17 +172,17 @@ void func_15189A00(SprayEmitter *emitter) {
 s32 func_15189EBC(Trail *trail) {
     f64 chance;
     SprayTrailParams *params = trail->params;
-    TrailPoint *points = trail->points;
+    MotionTrailPoint *points = trail->points;
     Vec3f splashPos;
 
-    if (points[trail->start].pos.y < params->floorY) {
+    if (points[trail->head.start].pos.y < params->floorY) {
         chance = func_150ADA68();
         if (chance < 0.8) {
-            splashPos.x = points[trail->start].pos.x;
+            splashPos.x = points[trail->head.start].pos.x;
             splashPos.y = params->floorY;
-            splashPos.z = points[trail->start].pos.z;
+            splashPos.z = points[trail->head.start].pos.z;
             func_151DBCBC(func_151D8E20(), params->base.motion.halfWidth * 6.0f, params->base.motion.alpha, 0,
-                          &splashPos, trail->link.owner, trail->link.kind);
+                          &splashPos, trail->head.header.owner, trail->head.header.kind);
         }
         params->base.state = 4;
         params->floorY = -10000.0f;

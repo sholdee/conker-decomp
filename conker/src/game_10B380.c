@@ -5,12 +5,6 @@
 
 s32 func_150DBD70(u8 kind);
 
-/* Sprite effect created by func_1513C350 (see game_169510.c); only the template is used here. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ SpriteDef def;
-} SpriteFx;
-
 /* Billboard particle (see game_1944C0.c); only the fields used here. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x34];
@@ -39,45 +33,47 @@ typedef struct {
 } EffectSpawnPoint;
 
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk01;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unk0C;
-    /* 0x0D */ u8 padD[0x20];
-    /* 0x2D */ s8 pointIndex;
-    /* 0x2E */ u8 pad2E[0x66];
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ EffectSpawnPoint *points;
     /* 0x98 */ EffectSpawnState *state;
 } EffectSpawnSource;
 
-/* Trap trigger callback: spawns a type 100 object whose kind follows the trap's tag (0xFB-0xFE). */
+/* Timed effect spawned by a trap trigger (func_150DDED0). */
+typedef struct TrapEffect {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ u8 kind;      /* func_150DBD70 selector */
+} TrapEffect;
+
+/* Trap trigger callback: spawns a timed effect (timer 100) whose kind follows the trap's tag (0xFB-0xFE). */
 void func_150DDED0(TrapTrigger *trap) {
-    struct102 *obj = (struct102 *)func_151491F4(100, 2, -1, 1, 0, 1, 0xFF, 0);
+    TrapEffect *obj = (TrapEffect *)func_151491F4(100, 2, -1, 1, 0, 1, 0xFF, 0);
 
     if (obj != NULL) {
         switch (trap->tag) {
         case 0xFB:
-            obj->unk28 = 1;
+            obj->kind = 1;
             break;
         case 0xFC:
-            obj->unk28 = 2;
+            obj->kind = 2;
             break;
         case 0xFD:
-            obj->unk28 = 4;
+            obj->kind = 4;
             break;
         case 0xFE:
-            obj->unk28 = 3;
+            obj->kind = 3;
             break;
         default:
-            func_1516972C(obj);
+            func_1516972C(&obj->base.header);
             break;
         }
     }
 }
 
 /* Runs func_150DBD70 for the object's kind. */
-s32 func_150DDF88(struct102 *obj) {
-    return func_150DBD70(obj->unk28);
+s32 func_150DDF88(TrapEffect *obj) {
+    return func_150DBD70(obj->kind);
 }
 
 /* Spawns a sprite (texture 0x1D or 0x1E, random size 10-80) at the source's current point, at height y. */
@@ -120,8 +116,8 @@ s32 func_150DDFAC(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C(&def, 5, 0, arg5, points[source->pointIndex].x, y, points[source->pointIndex].z, size, size,
-                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->unk0C, source->unk01);
+    func_1513C73C(&def, 5, 0, arg5, points[source->head.start].x, y, points[source->head.start].z, size, size,
+                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);
     return 1;
 }
 
@@ -165,13 +161,13 @@ s32 func_150DE12C(EffectSpawnSource *source, s32 arg1, s32 arg2, s32 arg3, f32 y
     rand1 = func_150ADA20();
     rand2 = func_150ADA20();
 
-    func_1513C73C(&def, 5, 0, arg5, points[source->pointIndex].x, y, points[source->pointIndex].z, size, size,
-                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->unk0C, source->unk01);
+    func_1513C73C(&def, 5, 0, arg5, points[source->head.start].x, y, points[source->head.start].z, size, size,
+                  rand0 & 0xFF, (rand2 & 1) + (rand1 & 1), 0, source->head.header.owner, source->head.header.kind);
     return 1;
 }
 
 /* Sprite update callback 5: fades unk10 out over the sprite's last 32 frames. */
-s32 func_150DE2A4(SpriteFx *sprite) {
+s32 func_150DE2A4(QuadSprite *sprite) {
     s16 lifetime = sprite->def.lifetime;
 
     if (lifetime < 32) {

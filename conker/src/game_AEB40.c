@@ -23,41 +23,15 @@ typedef struct PartSet {
     /* 0x4 */ u8 count;
 } PartSet;
 
-// Result of a ray cast (func_15081690), consumed by func_15081E78.
-typedef struct RayHit {
-    /* 0x00 */ Actor *obj;
-    /* 0x04 */ f32 dist;
-    /* 0x08 */ Vec3f hit;
-    /* 0x14 */ Vec3f centre;
-    /* 0x20 */ Vec3f far;
-    /* 0x2C */ Vec3f origin;
-    /* 0x38 */ Vec3f dir;
-    /* 0x44 */ u8 unk44[0x12];
-    /* 0x56 */ u16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 hitType;      // 0 none, 1 world, 2 object cylinder, 3 object model
-    /* 0x5A */ u8 unk5A;
-    /* 0x5C */ WorldObject *surface;
-    /* 0x60 */ s32 unk60;
-} RayHit;
-
-typedef struct {
-    /* 0x0 */ u32 unk0;
-    /* 0x4 */ s32 unk4;
-    /* 0x8 */ s32 unk8;
-} ModelReloc;
-
 extern f32 D_8009CC3C;  // matching: 20000.0f, but as a literal IDO loads it into a different register
 extern PartSet D_80086CC4[];
 extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
-extern u8 D_800A7230[][8];
-extern ModelReloc *D_800C5338[];
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern s32 func_10004074(void *);
 extern s32 func_1502B020(s32, s32, s32, s32);
 extern void func_150302F0(Actor *obj, s32 setId);
-extern Actor *func_15030AF4(Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
+extern ModelAttachment *func_15030AF4(Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8 *, s32, s32, s32);
 extern void func_150335C8(Actor *, Actor *, s32, s32, s32, s32);
 extern void func_15036C70(Actor *obj);
 extern s32 func_1503D660(s32 modelId, s32 arg1);
@@ -151,7 +125,7 @@ void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX,
     best = -1;
     out->dir = dir;
     out->surface = NULL;
-    out->unk60 = 0;
+    out->material = 0;
     if (maxDist == 0.0f) {
         maxDist = 9999999.0f;
     }
@@ -171,14 +145,14 @@ void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX,
         }
     }
     if (skipWorld == 0 &&
-        func_150AC9C0(originX, originY, originZ, dirX, dirY, dirZ, &surf, out->unk44, &hitX, &hitY, &hitZ, &dist, &surfIdx, &out->unk60, 0.0f) != 0 &&
+        func_150AC9C0(originX, originY, originZ, dirX, dirY, dirZ, &surf, &out->tri, &hitX, &hitY, &hitZ, &dist, &surfIdx, &out->material, 0.0f) != 0 &&
         dist < maxDist) {
         out->dist = dist;
         out->hitType = 1;
-        out->hit.x = hitX;
-        out->hit.y = hitY;
-        out->hit.z = hitZ;
-        out->far = out->hit;
+        out->pos.x = hitX;
+        out->pos.y = hitY;
+        out->pos.z = hitZ;
+        out->far = out->pos;
         if (surfIdx != -1) {
             out->surface = &D_800DBEF4[surfIdx];
         } else {
@@ -215,11 +189,11 @@ void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX,
                     out->dist = dist;
                     out->obj = obj;
                     best = i + 1;
-                    out->unk58 = part;
-                    out->unk56 = bone;
-                    out->hit = near;
+                    out->part = part;
+                    out->bone = bone;
+                    out->pos = near;
                     out->centre = centre;
-                    out->unk5A = index;
+                    out->index = index;
                     out->far = far;
                     out->hitType = 3;
                 }
@@ -232,7 +206,7 @@ void func_15081690(Actor *self, f32 originX, f32 originY, f32 originZ, f32 dirX,
                 out->dist = dist;
                 out->obj = obj;
                 best = i + 1;
-                out->hit = near;
+                out->pos = near;
                 out->far = far;
                 out->hitType = 2;
             }
@@ -348,7 +322,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
             break;
         case 13:
             effect = -1;
-            func_150D728C(hit->unk44, &hit->hit, &hit->dir, 0xFF, 1);
+            func_150D728C(&hit->tri, &hit->pos, &hit->dir, 0xFF, 1);
             break;
         case 5:
             if (D_800BE9F0 == 14) {
@@ -356,19 +330,19 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
                 f32 front[3];
                 f32 back[3];
 
-                front[0] = hit->hit.x + hit->dir.x * 5.0f;
-                front[1] = hit->hit.y + hit->dir.y * 5.0f;
-                front[2] = hit->hit.z + hit->dir.z * 5.0f;
-                back[0] = hit->hit.x - hit->dir.x * 5.0f;
-                back[1] = hit->hit.y - hit->dir.y * 5.0f;
-                back[2] = hit->hit.z - hit->dir.z * 5.0f;
+                front[0] = hit->pos.x + hit->dir.x * 5.0f;
+                front[1] = hit->pos.y + hit->dir.y * 5.0f;
+                front[2] = hit->pos.z + hit->dir.z * 5.0f;
+                back[0] = hit->pos.x - hit->dir.x * 5.0f;
+                back[1] = hit->pos.y - hit->dir.y * 5.0f;
+                back[2] = hit->pos.z - hit->dir.z * 5.0f;
                 func_150EB484(front, back, &vc);
             }
             // fallthrough
         case 9:
         case 10:
             effect = -1;
-            func_15104608(hit->hit.x, hit->hit.y, hit->hit.z, self->unk124);
+            func_15104608(hit->pos.x, hit->pos.y, hit->pos.z, self->unk124);
             func_1506AC8C(self, 2, 0);
             break;
         default:
@@ -376,7 +350,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
             break;
         }
         if (effect != -1) {
-            func_151D3480(&hit->hit, &hit->dir, hit->unk44, effect, 0xFF, 1);
+            func_151D3480(&hit->pos, &hit->dir, &hit->tri, effect, 0xFF, 1);
         }
         return 1;
     }
@@ -405,7 +379,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
     if (hit->hitType == 2) {
         if (obj->id == 0x94) {
             playImpact = 0;
-            func_150B5C38(&hit->hit, 0xFF, 1);
+            func_150B5C38(&hit->pos, 0xFF, 1);
             func_150B6754(0xFF, 1);
         }
     } else if (hit->hitType == 3) {
@@ -416,14 +390,14 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
                 }
             }
         }
-        if (hit->unk58 == 10 && (obj->unk31C == NULL || obj->unk31C->unk1AD == 0) && longShot == 0) {
+        if (hit->part == 10 && (obj->unk31C == NULL || obj->unk31C->unk1AD == 0) && longShot == 0) {
             // matching: unsigned compares keep the constants as immediates
             if ((u32)kind != 2 && (u32)kind != 18 && (u32)kind != 11 && (u32)kind != 12) {
                 func_1507DE4C(obj);
                 if (obj->unk31C != NULL) {
                     obj->unk31C->unk1AD = 1;
                 }
-                if (obj->id == 0x80 && hit->unk5A == 0 && hit->hit.y - 5.5f > hit->centre.y) {
+                if (obj->id == 0x80 && hit->index == 0 && hit->pos.y - 5.5f > hit->centre.y) {
                     func_15060A9C((func_150ADA20() & 7) + 0x2E3, obj);
                 }
                 func_15138C80(obj, 0xFF, 1);
@@ -441,7 +415,7 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
                 obj->health = 1;
             }
         } else if (obj->id == 0x9F || obj->id == 0xA0) {
-            func_15081E0C(obj, hit->unk58, longShot);
+            func_15081E0C(obj, hit->part, longShot);
         }
         switch (kind) {
         case 2:
@@ -463,25 +437,25 @@ s32 func_15081E78(Actor *self, RayHit *hit, s32 kind) {
         if (spawnEffect != 0 && obj->health < 2) {
             Actor source;
 
-            source.x_position = hit->hit.x;
-            source.y_position = hit->hit.y;
-            source.z_position = hit->hit.z;
+            source.x_position = hit->pos.x;
+            source.y_position = hit->pos.y;
+            source.z_position = hit->pos.z;
             source.unkB8 = pitch;
             source.unk40 = yaw + 180.0f;
             source.unkC4 = 0.0f;
             source.xz_scale = obj->xz_scale;
             source.y_scale = obj->y_scale;
-            func_150335C8(&source, obj, spawnEffect, hit->unk56, 1, 0);
-            if (hit->unk58 == 10) {
+            func_150335C8(&source, obj, spawnEffect, hit->bone, 1, 0);
+            if (hit->part == 10) {
                 sound = 0x20;
             }
         }
     }
     if (playImpact) {
-        func_15137610(hit->obj, &hit->hit, &hit->far, &hit->dir, 0xFF, 1);
+        func_15137610(hit->obj, &hit->pos, &hit->far, &hit->dir, 0xFF, 1);
     }
     if (kind == 13) {
-        func_150D7120(&hit->hit, 0xFF, 1);
+        func_150D7120(&hit->pos, 0xFF, 1);
     }
     if (noHealth == 0) {
         func_1505D024(obj, sound | 0x80000, (yaw - 90.0f) * 182.04444885f, self - D_800CC2D0);
@@ -801,7 +775,7 @@ s32 func_15082A44(SpawnRecord *spawn, s32 spawnIdx, s32 arg2, s32 arg3, s32 slot
     model = func_150849A0(obj);
     found = 0;
     for (i = 0; i < 2; i++) {
-        if (model == D_800A7230[i][0]) {
+        if (model == D_800A7230[i].kind) {
             found = 1;
             break;
         }
@@ -927,10 +901,11 @@ void func_15083384(Actor *obj, s32 arg1) {
     }
 }
 
-/* Creates every part of part set setId (1-based) on parent; returns the last part created. */
-Actor *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3) {
+/* Creates every part of part set setId (1-based) on parent; returns the last part created (a child
+ * Actor or a ModelAttachment, depending on its type). */
+void *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3) {
     PartDef *parts;
-    Actor *ret;
+    void *ret;
     s32 i;
 
     setId--;
@@ -1502,7 +1477,7 @@ void func_15084A18(void) {
     Actor *obj;
     s32 j;
     s32 k;
-    ModelReloc *relocs;
+    ObjTexture *textures;
     u8 *timer;
 
     timer = D_800D2040;
@@ -1527,10 +1502,10 @@ void func_15084A18(void) {
                         }
                     }
                 }
-                relocs = D_800C5338[i];
+                textures = D_800C5338[i];
                 for (k = 0; k < D_800C5628[i]; k++) {
-                    if (relocs[k].unk0 >= 0x10000000U) {
-                        func_1510D720(relocs[k].unk4);
+                    if (textures[k].addr >= 0x10000000U) {
+                        func_1510D720(textures[k].id);
                     }
                 }
                 func_10004074(D_800D19A0[i] - 0x38);

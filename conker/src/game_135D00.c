@@ -1,43 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Spawn descriptor for a DynModel; copied verbatim into DynModel.desc (same layout as in game_168A90.c). */
-typedef struct {
-    /* 0x00 */ u8 flags;
-    /* 0x01 */ s8 updateFunc;  // index into D_80089C18, -1 for none
-    /* 0x02 */ s8 drawFunc;    // index into D_80089C28, -1 for none
-    /* 0x03 */ u8 pad3;
-    /* 0x04 */ s16 lifetime;
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ u8 unk24;
-    /* 0x25 */ u8 unk25;
-    /* 0x26 */ u8 pad26[0xA];
-    /* 0x30 */ s32 unk30;      // model asset, passed to func_1502B6BC
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ u8 kind;        // selects the D_80089C44 / D_80089C54 handlers
-    /* 0x39 */ u8 viewportMask;
-    /* 0x3A */ u8 pad3A[2];
-} DynModelDesc; // size 0x3C
-
-/* A model with per-frame, per-viewport vertex buffers, followed by user data (see game_168A90.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ DynModelDesc desc;
-    /* 0x4C */ void *asset;
-    /* 0x50 */ s32 buffersSize;     // size of all vertex buffers, i.e. the offset of the user data
-    /* 0x54 */ Gfx *displayList;
-    /* 0x58 */ Vtx *vertices[2][4]; // [frame][viewport]
-    /* 0x78 */ Mtx mtx[2];          // [frame]
-    /* 0xF8 */ u8 buffers[1];
-} DynModel;
+#include "effects.h"
 
 #define TRACK_NONE 999
 
@@ -56,16 +20,16 @@ typedef struct {
     /* 0x21 */ u8 pad21[3];
 } LampData; // size 0x24
 
-#define LAMP_DATA(model) ((LampData *)((s32)(model) + (model)->buffersSize + 0xF8))
+#define LAMP_DATA(model) ((LampData *)DYNMODEL_USERDATA(model))
 
 DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4);
-struct225 *func_1516037C(Header *header, struct226 *light, s32 size, u8 arg3, s32 arg4);
+LightEffect *func_1516037C(LightEffectHeader *header, PointLight *light, s32 size, u8 arg3, s32 arg4);
 
 /*
  * Spawns the two swinging lamp models (assets 427 and 428). The first gets a light effect that moves
  * `light` with it; the second is drawn by func_15109120 while the light is on.
  */
-void func_15108850(struct226 *light) {
+void func_15108850(PointLight *light) {
     DynModel *model;
 
     {
@@ -102,18 +66,18 @@ void func_15108850(struct226 *light) {
         if (model != NULL) {
             memcpy(LAMP_DATA(model), &lamp, sizeof(LampData));
             {
-                Header header;
+                LightEffectHeader header;
                 DynModel *owner;
-                struct225 *effect;
+                LightEffect *effect;
 
                 owner = model;
-                header.unk0 = 2;
-                header.unk1 = 8;
-                header.unk2 = 300;
-                header.unk4 = 0x13;
+                header.flags = 2;
+                header.update = 8;
+                header.lifetime = 300;
+                header.lightType = 0x13;
                 effect = func_1516037C(&header, light, 4, 0xFF, 1);
                 if (effect != NULL) {
-                    memcpy(&effect->unk18, &owner, sizeof(owner));
+                    memcpy(&effect->data.object, &owner, sizeof(owner));
                 }
             }
         }
@@ -248,10 +212,10 @@ void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *out
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 
 /*
- * Update for the lamp's light effect (owner model stored at effect->unk18): moves the light to where a
+ * Update for the lamp's light effect (owner model stored at effect->data.object): moves the light to where a
  * ray from the lamp down along its swing hits the ground, and switches it with the lamp's light state.
  */
-s32 func_15108E10(struct225 *effect) {
+s32 func_15108E10(LightEffect *effect) {
     s32 pad; // matching: unused stack slot
     DynModel *model;
     LampData *lamp;
@@ -260,7 +224,7 @@ s32 func_15108E10(struct225 *effect) {
     Vec3f pad2; // matching: unused stack slots
     Vec3f hit;
 
-    model = (DynModel *)effect->unk18;
+    model = effect->data.object;
     lamp = LAMP_DATA(model);
     func_150A8050(mtx, lamp->swingX, 0.0f, lamp->swingZ);
     mtx[3][1] = lamp->height;
@@ -282,13 +246,13 @@ s32 func_15108E10(struct225 *effect) {
             hit = end;
         }
     }
-    effect->unk14->unkE = hit.x;
-    effect->unk14->unk10 = hit.y;
-    effect->unk14->unk12 = hit.z;
+    effect->light->x = hit.x;
+    effect->light->y = hit.y;
+    effect->light->z = hit.z;
     if (lamp->lightOn) {
-        effect->unk14->unk9 = 0;
+        effect->light->disabled = 0;
     } else {
-        effect->unk14->unk9 = 1;
+        effect->light->disabled = 1;
     }
     return 1;
 }
@@ -300,18 +264,14 @@ typedef struct {
     u8 sceneTag;
 } LampTrackMsg;
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} MsgTarget;
 
-extern MsgTarget D_80088C50;
-extern MsgTarget D_80088C58;
+extern IdList2 D_80088C50;
+extern IdList2 D_80088C58;
 
 /* Sends message 0x1D: makes the lamps follow `track` for `duration`. */
 void func_15108FFC(s32 track, s32 duration, u8 sceneTag) {
     LampTrackMsg msg;
-    MsgTarget target;
+    IdList2 target;
 
     target = D_80088C50;
     msg.track = track;
@@ -344,7 +304,7 @@ void func_15109064(DynModel *model, LampTrackMsg *msg, u8 event) {
 
 /* Sends message 0x1E: toggles the lamp light. */
 void func_151090DC(void) {
-    MsgTarget target;
+    IdList2 target;
 
     target = D_80088C58;
     func_15169260(&target, 2, 0, 0x1E);

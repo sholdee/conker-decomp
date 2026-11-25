@@ -25,16 +25,6 @@ typedef union MoverWork {
 
 #define WORK(obj) ((MoverWork *)&(obj)->work)
 
-/* One row of D_80089260, selected by param.word >> 10. */
-typedef struct MoverSounds {
-    /* 0x0 */ s16 start; /* played when the object starts moving */
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ s16 stop; /* played when it stops */
-    /* 0x6 */ s16 unk6;
-    /* 0x8 */ s16 arrive; /* played just before it reaches the target; selects func_15116BAC */
-    /* 0xA */ s16 arriveLead; /* how early (in units of the move rate) to play `arrive` */
-} MoverSounds;
-
 /* Animation entry of D_80089320: which ROM file holds the vertex frames, and how many there are. */
 typedef struct VertexAnim {
     u8 file;
@@ -47,7 +37,6 @@ typedef struct RomFile {
     s32 end;
 } RomFile;
 
-extern MoverSounds D_80089260[];
 extern VertexAnim D_80089320[];
 extern RomFile D_8002AAD0[];
 
@@ -92,8 +81,8 @@ void func_151169B4(WorldObject *obj) {
             return;
         }
         step = obj->param.word & ~0xFC00;
-        if (sound != 0 && obj->sound == 0 && D_80089260[sound].start != 0) {
-            func_15114D24(obj, D_80089260[sound].start, 24000, 2000, 4000, 0);
+        if (sound != 0 && obj->sound == 0 && D_80089260[sound].open != 0) {
+            func_15114D24(obj, D_80089260[sound].open, 24000, 2000, 4000, 0);
         }
         step = (step * D_800BE9E4) >> 1;
         pos = &obj->x;
@@ -119,8 +108,8 @@ void func_151169B4(WorldObject *obj) {
     } else {
         obj->moveX = obj->moveY = obj->moveZ = 0;
         if (obj->sound != 0) {
-            if (sound != 0 && D_80089260[sound].stop != 0) {
-                func_15114D24(obj, D_80089260[sound].stop, 24000, 2000, 4000, 4);
+            if (sound != 0 && D_80089260[sound].opened != 0) {
+                func_15114D24(obj, D_80089260[sound].opened, 24000, 2000, 4000, 4);
             }
             obj->sound = 0;
         }
@@ -144,8 +133,8 @@ void func_15116BAC(WorldObject *obj) {
     started = FALSE;
     maxDist = 0;
     rate = obj->param.word & ~0xFC00;
-    if (sound != 0 && obj->sound == 0 && D_80089260[sound].start != 0) {
-        func_15114D24(obj, D_80089260[sound].start, 24000, 2000, 4000, 0);
+    if (sound != 0 && obj->sound == 0 && D_80089260[sound].open != 0) {
+        func_15114D24(obj, D_80089260[sound].open, 24000, 2000, 4000, 0);
         started = TRUE;
     }
     step = (rate * D_800BE9E4) >> 1;
@@ -300,8 +289,8 @@ f32 func_151172D8(WorldObject *obj, f32 angle) {
     velocity = WORK(obj)->swing.velocity;
     target = (obj->param.word << 22) >> 22;
     if (angle != target || velocity != 0.0f) {
-        if (velocity == 0.0f && (obj->param.word >> 10) != 0 && D_80089260[obj->param.word >> 10].start != 0) {
-            func_15114D24(obj, D_80089260[obj->param.word >> 10].start, 24000, 200, 2500, 0);
+        if (velocity == 0.0f && (obj->param.word >> 10) != 0 && D_80089260[obj->param.word >> 10].open != 0) {
+            func_15114D24(obj, D_80089260[obj->param.word >> 10].open, 24000, 200, 2500, 0);
         }
         angle += velocity * D_800BE9E4;
         delta = func_15048A70(angle, target);

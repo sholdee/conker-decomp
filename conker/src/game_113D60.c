@@ -3,51 +3,28 @@
 #include "variables.h"
 #include "effects.h"
 
-typedef struct {
-    /* 0x0 */ s8 type;
-    /* 0x1 */ u8 pad1;
-    /* 0x2 */ s16 duration;
-    /* 0x4 */ s8 unk4;
-    /* 0x5 */ s8 unk5;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 pad7;
-} Game113D60Event; // argument of func_151D8868
-
-/* Wrappers for small id tables in rodata that functions copy onto their stack: the original
- * code used initialized local arrays, whose initializer data the asm rodata provides here. */
+/* A one-byte id table in rodata, copied onto the stack like the IdList ones. */
 typedef struct {
     u8 ids[1];
 } Game113D60Ids1;
 
-typedef struct {
-    s32 ids[2];
-} Game113D60Ids2;
 
-typedef struct {
-    s32 ids[3];
-} Game113D60Ids3;
-
-extern void *func_151D8868(Game113D60Event *event, s32 arg1, s32 arg2, s32 arg3);
+extern void *func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 
 typedef struct Game113D60Emission {
-    /* 0x00 */ f32 x, y, amplitudeX, amplitudeY;
-    /* 0x10 */ f32 phaseX, phaseY, speedX, speedY;
-    /* 0x20 */ f32 time, rate, remaining;
-    /* 0x2C */ Vec3f position;
+    /* 0x00 */ ParticleStream stream;
     /* 0x38 */ f32 scale;
     /* 0x3C */ s16 duration, durationRange;
     /* 0x40 */ u8 color;
 } Game113D60Emission; // size 0x44
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ u8 data[1]; // effect-specific data
 } Game113D60AnyEffect;
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Game113D60Emission emission;
 } Game113D60Effect;
 
@@ -107,17 +84,17 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
                 if (source->motion != -1) {
                     D_80088A34[source->motion](&start, &end, &delta, &emission);
                 } else {
-                    emission.x = 0.0f;
-                    emission.amplitudeX = 0.0f;
-                    emission.phaseX = 0.0f;
-                    emission.y = 0.0f;
-                    emission.amplitudeY = 0.0f;
-                    emission.phaseY = 0.0f;
+                    emission.stream.angleX = 0.0f;
+                    emission.stream.amplitudeX = 0.0f;
+                    emission.stream.phaseX = 0.0f;
+                    emission.stream.angleY = 0.0f;
+                    emission.stream.amplitudeY = 0.0f;
+                    emission.stream.phaseY = 0.0f;
                 }
-                emission.rate = func_150ADA68() * 0.150000006f + 0.200000003f;
-                emission.remaining = 0.0f;
-                emission.position = start;
-                emission.time = 0.0f;
+                emission.stream.rate = func_150ADA68() * 0.150000006f + 0.200000003f;
+                emission.stream.remaining = 0.0f;
+                emission.stream.position = start;
+                emission.stream.time = 0.0f;
                 emission.scale = (func_150ADA68() * 100.0f + 150.0f) * 0.1000000015f;
                 emission.duration = source->duration;
                 emission.durationRange = source->durationRange;
@@ -160,40 +137,40 @@ void func_150E6B84(Game113D60Effect *effect) {
     u32 randomColor;
 
     emission = &effect->emission;
-    effect->emission.remaining += effect->emission.rate * D_800BE9A4;
-    if (effect->emission.remaining > 1.0f) {
-        inverse = 1.0f / emission->remaining;
+    effect->emission.stream.remaining += effect->emission.stream.rate * D_800BE9A4;
+    if (effect->emission.stream.remaining > 1.0f) {
+        inverse = 1.0f / emission->stream.remaining;
         factor = 0.1f;
-        time = emission->time + D_800BE9A4;
+        time = emission->stream.time + D_800BE9A4;
         timeStep = time * inverse;
-        speedX = emission->speedX * D_800BE9A4;
-        speedY = emission->speedY * D_800BE9A4;
-        phaseX = emission->phaseX;
-        phaseY = emission->phaseY;
+        speedX = emission->stream.speedX * D_800BE9A4;
+        speedY = emission->stream.speedY * D_800BE9A4;
+        phaseX = emission->stream.phaseX;
+        phaseY = emission->stream.phaseY;
         phaseStepX = speedX * inverse;
         phaseStepY = speedY * inverse;
         do {
             sineX = sinf(phaseX);
             sineY = sinf(phaseY);
-            func_151436B4(emission->x + sineX * emission->amplitudeX, emission->y + sineY * emission->amplitudeY, 5.0f,
-                          &direction);
+            func_151436B4(emission->stream.angleX + sineX * emission->stream.amplitudeX,
+                          emission->stream.angleY + sineY * emission->stream.amplitudeY, 5.0f, &direction);
             randomX = func_150ADA68();
             randomY = func_150ADA68();
             randomColor = func_150ADA20();
             randomDuration = func_150ADA20();
-            func_150E5FD0(&emission->position, &direction, emission->scale, (randomX * 300.0f + 100.0f) * factor,
-                          (randomY * 700.0f + 300.0f) * factor, effect->header.owner, effect->header.kind,
+            func_150E5FD0(&emission->stream.position, &direction, emission->scale, (randomX * 300.0f + 100.0f) * factor,
+                          (randomY * 700.0f + 300.0f) * factor, effect->base.header.owner, effect->base.header.kind,
                           emission->color, randomColor % 86 + 170,
                           randomDuration % (u32)(emission->durationRange + 1) + emission->duration, -1);
             phaseX += phaseStepX;
             phaseY += phaseStepY;
             time -= timeStep;
-            emission->remaining -= 1.0f;
-        } while (emission->remaining > 1.0f);
+            emission->stream.remaining -= 1.0f;
+        } while (emission->stream.remaining > 1.0f);
         period = 6.283185482f;
-        emission->phaseX = func_15144528(phaseX, period, 0.0f);
-        emission->phaseY = func_15144528(phaseY, period, 0.0f);
-        emission->time = time;
+        emission->stream.phaseX = func_15144528(phaseX, period, 0.0f);
+        emission->stream.phaseY = func_15144528(phaseY, period, 0.0f);
+        emission->stream.time = time;
     }
 }
 
@@ -247,7 +224,6 @@ typedef struct {
     /* 0x38 */ Vec3f unk38;
 } Bone150E6FAC;
 
-s32 func_1514ECE0(Attachment *, s16, Attachment **);
 
 /* End callback: a random point on a ring around node 0x16 of the actor's model, or the actor's
  * position when the model has no such node. */
@@ -288,28 +264,28 @@ void func_150E70EC(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *e
     f32 dx;
     f32 dz;
 
-    emission->x = func_150484A0(delta->x, delta->z);
-    emission->amplitudeX = func_150ADA68() * 0.09000000358f;
-    emission->phaseX = func_150ADA68() * 6.283185482f;
-    emission->speedX = func_150ADA68() * 0.5f;
+    emission->stream.angleX = func_150484A0(delta->x, delta->z);
+    emission->stream.amplitudeX = func_150ADA68() * 0.09000000358f;
+    emission->stream.phaseX = func_150ADA68() * 6.283185482f;
+    emission->stream.speedX = func_150ADA68() * 0.5f;
     dx = delta->x;
     dz = delta->z;
-    emission->y = func_150484A0(sqrtf((dx * dx) + (dz * dz)), delta->y) - 1.570796371f;
-    emission->amplitudeY = func_150ADA68() * 0.0700000003f;
-    emission->phaseY = func_150ADA68() * 6.283185482f;
-    emission->speedY = func_150ADA68() * 0.5f;
+    emission->stream.angleY = func_150484A0(sqrtf((dx * dx) + (dz * dz)), delta->y) - 1.570796371f;
+    emission->stream.amplitudeY = func_150ADA68() * 0.0700000003f;
+    emission->stream.phaseY = func_150ADA68() * 6.283185482f;
+    emission->stream.speedY = func_150ADA68() * 0.5f;
 }
 
 /* Motion callback: aims the emission along `delta` with a fixed tilt and a random wobble. */
 void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission) {
-    emission->x = func_150484A0(delta->x, delta->z);
-    emission->amplitudeX = 0.471238941f;
-    emission->phaseX = func_150ADA68() * 6.283185482f;
-    emission->speedX = func_150ADA68() * 0.200000003f;
-    emission->y = -0.5654867291f;
-    emission->amplitudeY = 0.3141592741f;
-    emission->phaseY = func_150ADA68() * 6.283185482f;
-    emission->speedY = func_150ADA68() * 0.150000006f;
+    emission->stream.angleX = func_150484A0(delta->x, delta->z);
+    emission->stream.amplitudeX = 0.471238941f;
+    emission->stream.phaseX = func_150ADA68() * 6.283185482f;
+    emission->stream.speedX = func_150ADA68() * 0.200000003f;
+    emission->stream.angleY = -0.5654867291f;
+    emission->stream.amplitudeY = 0.3141592741f;
+    emission->stream.phaseY = func_150ADA68() * 6.283185482f;
+    emission->stream.speedY = func_150ADA68() * 0.150000006f;
 }
 
 typedef struct {
@@ -317,10 +293,10 @@ typedef struct {
     /* 0x4 */ f32 y;
 } Vec2f;
 
-extern Game113D60Ids2 D_80088A5C;
+extern IdList2 D_80088A5C;
 extern Game113D60Ids1 D_80088A64;
-extern Game113D60Ids3 D_80088A68;
-extern Game113D60Ids3 D_80088A74;
+extern IdList3 D_80088A68;
+extern IdList3 D_80088A74;
 extern void *func_1515548C(ScreenSpriteInfo5C *, s32, s32 *, s32, s32, u8, s32);
 extern void func_15164F0C(u8, u8, void *, u8, s32);
 void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
@@ -330,9 +306,9 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
 
 /* Occasionally spawns one of the two func_1515548C effects, plus a sound and an event. */
 void func_150E7290(u8 arg0, u8 owner, s32 kind) {
-    Game113D60Ids2 ids;
+    IdList2 ids;
     Vec2f position;
-    Game113D60Event event;
+    RumbleParams event;
     s32 pad; // matching: unused stack slot
     u32 flip4;
     u32 flip2;
@@ -359,11 +335,11 @@ void func_150E7290(u8 arg0, u8 owner, s32 kind) {
         }
         func_10010F30(0x360, 0x7FFF, 0, 0, 0);
         func_15164F0C(1, arg0, NULL, owner, kind);
-        event.type = 1;
+        event.flags = 1;
         event.duration = (func_150ADA20() % 26) + 25;
-        event.unk5 = 1;
-        event.unk4 = (func_150ADA20() % 6) + 3;
-        event.unk6 = -1;
+        event.playerMask = 1;
+        event.strength = (func_150ADA20() % 6) + 3;
+        event.updateKind = -1;
         func_151D8868(&event, 0, 0xFF, 0);
     }
 }
@@ -444,7 +420,7 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
     case 0:
     case 1:
         {
-            Game113D60Ids3 sideIds;
+            IdList3 sideIds;
 
             sideIds = D_80088A68;
             arg.texture = sideIds.ids[func_150ADA20() % 3];
@@ -463,7 +439,7 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
     case 2:
     case 3:
         {
-            Game113D60Ids3 topIds;
+            IdList3 topIds;
 
             topIds = D_80088A74;
             arg.texture = topIds.ids[func_150ADA20() % 3];
@@ -498,8 +474,7 @@ typedef struct {
 } Game113D60Burst;
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Game113D60Burst burst;
 } Game113D60BurstEffect;
 
@@ -510,10 +485,10 @@ extern f32 func_15142B44(f32);
 
 /* Creates a burst effect (updated by func_150E7C9C) whose `count` points lie on a random
  * curve across the screen. */
-struct260 *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
-    struct260 *obj;
+TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
+    TimedEffect *obj;
     Game113D60BurstHead head;
-    Game113D60Event event;
+    RumbleParams event;
     Vec2f control[4];
     f32 *points;
     f32 t;
@@ -526,11 +501,11 @@ struct260 *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind) {
 
     func_1512D748(&D_800DBFF0[D_800BE9E8], 0, 1);
 
-    event.type = 1;
+    event.flags = 1;
     event.duration = (func_150ADA20() % 11) + 30;
-    event.unk4 = 8;
-    event.unk6 = -1;
-    event.unk5 = 1;
+    event.strength = 8;
+    event.updateKind = -1;
+    event.playerMask = 1;
     func_151D8868(&event, 0, 0xFF, 0);
 
     head.rate = rate;
@@ -584,14 +559,14 @@ void func_150E7C9C(Game113D60BurstEffect *effect) {
         flip4 = (func_150ADA20() & 1) ? 4 : 0;
         flip2 = (func_150ADA20() & 1) ? 2 : 0;
         func_150E75A0(&position, (randomSize * 12.0f) + 30.0f, 300, (u8)(flip2 | flip4),
-                      (func_150ADA68() * 25.0f) + 100.0f, 0xFF, 1, 0xFF, NULL, 0, effect->header.owner,
-                      effect->header.kind);
+                      (func_150ADA68() * 25.0f) + 100.0f, 0xFF, 1, 0xFF, NULL, 0, effect->base.header.owner,
+                      effect->base.header.kind);
         func_10010F30(0x360, 0x7FFF, (position.x * 0.4315068424f) + 64.0f, 0, 0);
         burst->head.next++;
         burst->head.accum -= 1.0f;
     }
     if (burst->head.next >= burst->head.count) {
-        effect->header.state = -1;
+        effect->base.header.state = -1;
     }
 }
 
@@ -645,7 +620,7 @@ void func_150E81A8(index, owner, kind)
 {
     Vec3f position;
     JetSpraySpec arg;
-    Game113D60Event event;
+    RumbleParams event;
 
     if (index == 4 || index == 5 || index == 6 || index == 7) {
         position = D_800A1290[index];
@@ -681,11 +656,11 @@ void func_150E81A8(index, owner, kind)
 
         func_1514FCE8(&arg, owner, kind);
 
-        event.type = 1;
+        event.flags = 1;
         event.duration = (func_150ADA20() % 11) + 30;
-        event.unk4 = 8;
-        event.unk6 = -1;
-        event.unk5 = 1;
+        event.strength = 8;
+        event.updateKind = -1;
+        event.playerMask = 1;
         func_151D8868(&event, 0, 0xFF, 0);
     }
 }
@@ -698,7 +673,7 @@ typedef struct {
 /* Creates effect 0x28 at `position`, lasting `duration` frames (-1: 300). */
 void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind) {
     Game113D60PointData data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     data.position = *position;
     data.unkC = 0.0f;
@@ -710,14 +685,12 @@ void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind) {
     }
 }
 
-/* Extra data of the particles func_150E8470 spawns, stored at 0xA8 of each particle. */
+/* Extra data of the particles func_150E8470 spawns, stored at 0xA8 of each particle: effects.h WobbleData
+ * without the drag (the particles are spawned with only these 0xC bytes). */
 typedef struct {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ u8 unk2;
-    /* 0x3 */ u8 unk3;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ f32 unk8;
+    /* 0x0 */ u8 phase[2];
+    /* 0x2 */ u8 phaseStep[2];
+    /* 0x4 */ f32 amplitude[2];
 } Game113D60ParticleExtra;
 
 typedef struct {
@@ -731,8 +704,7 @@ typedef struct {
 } Game113D60Emitter;
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Game113D60Emitter emitter;
 } Game113D60EmitterEffect;
 
@@ -759,8 +731,8 @@ void func_150E8470(Game113D60EmitterEffect *effect) {
         arg.envColorMode = 6;
         arg.updateFunc = 0x19;
         arg.deathFunc = -1;
-        extra.unk0 = 0;
-        extra.unk1 = 0;
+        extra.phase[0] = 0;
+        extra.phase[1] = 0;
         arg.unk4 = 0;
         arg.frame = 0;
         arg.frameRate = 0;
@@ -784,17 +756,17 @@ void func_150E8470(Game113D60EmitterEffect *effect) {
         arg.vel.y = 0.0f;
         arg.vel.z = 0.0f;
         do {
-            extra.unk2 = func_150ADA20() % 5 + 4;
-            extra.unk3 = func_150ADA20() % 5 + 4;
-            extra.unk4 = func_150ADA68() * 13.0f;
-            extra.unk8 = func_150ADA68() * 13.0f;
+            extra.phaseStep[0] = func_150ADA20() % 5 + 4;
+            extra.phaseStep[1] = func_150ADA20() % 5 + 4;
+            extra.amplitude[0] = func_150ADA68() * 13.0f;
+            extra.amplitude[1] = func_150ADA68() * 13.0f;
             arg.gravity = (func_150ADA68() * 40.0f + 68.0f) * 0.001000000047f;
             arg.flags &= ~0xC0;
             arg.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
             arg.alpha = func_150ADA20() % 156 + 100;
             arg.timer = func_150ADA20() % 34 + 141;
             arg.width = arg.height = func_150ADA68() * 71.0f + 80.0f;
-            particle = func_15130280(&arg, 1, 0, sizeof(extra), effect->header.owner, effect->header.kind);
+            particle = func_15130280(&arg, 1, 0, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->extra, &extra, sizeof(extra));
             }
@@ -807,13 +779,13 @@ extern s32 func_15131828(Game113D60Particle *, f32 *, u8 *, u8 *);
 
 /* Update callback of the particles func_150E8470 spawns. */
 s32 func_150E8824(Game113D60Particle *particle, s32 arg1) {
-    func_15131828(particle, &particle->extra.unk4, &particle->extra.unk0, &particle->extra.unk2);
+    func_15131828(particle, particle->extra.amplitude, particle->extra.phase, particle->extra.phaseStep);
     return 1;
 }
 
 /* Creates the timer effect (0x35) that func_150E88C0 updates. */
 void func_150E8854(void) {
-    struct260 *effect;
+    TimedEffect *effect;
     f32 timer;
 
     timer = 10.0f;
@@ -825,8 +797,7 @@ void func_150E8854(void) {
 }
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ f32 timer;
 } Game113D60TimerEffect;
 
@@ -842,24 +813,24 @@ void func_150E88C0(Game113D60TimerEffect *effect) {
     }
 }
 
-extern Game113D60Ids2 D_80088A80;
+extern IdList2 D_80088A80;
 void func_150E8A80(void);
 void func_150E90DC(void);
 
 /* Fires the D_80088A80 pair through func_15169260 plus an event, effects 0x33 and 0x36 when the
  * D_800DCDC4 region list exists, and two sounds. */
 void func_150E8930(void) {
-    Game113D60Ids2 ids;
-    Game113D60Event event;
+    IdList2 ids;
+    RumbleParams event;
 
     ids = D_80088A80;
     func_15169260(&ids, 2, 0, 0x1B);
     func_15164F0C(0, D_800BE9EB, NULL, 0xFF, 1);
-    event.type = 1;
+    event.flags = 1;
     event.duration = (func_150ADA20() % 21) + 20;
-    event.unk5 = 1;
-    event.unk4 = (func_150ADA20() % 6) + 3;
-    event.unk6 = -1;
+    event.playerMask = 1;
+    event.strength = (func_150ADA20() % 6) + 3;
+    event.updateKind = -1;
     func_151D8868(&event, 0, 0xFF, 1);
     if (D_800DCDC4 != NULL) {
         func_150E8A80();
@@ -879,7 +850,7 @@ typedef struct {
 
 /* Creates effect 0x33 for 30-70 frames. */
 void func_150E8A80(void) {
-    struct260 *effect;
+    TimedEffect *effect;
     Game113D60Data8A80 data;
 
     data.unk0 = 1.199999957e-07f;
@@ -900,8 +871,7 @@ typedef struct {
 } Game113D60Spawner;
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Game113D60Spawner spawner;
 } Game113D60RegionSpawnerEffect;
 
@@ -944,13 +914,13 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
             dy = data.position.y - center->y;
             dz = data.position.z - center->z;
             if (dx * dx + dy * dy + dz * dz < 3240000.0f) {
-                struct260 *child;
+                TimedEffect *child;
 
                 data.unk0C = 0.3171199858f;
                 data.unk10 = 1.046509981f;
                 data.unk14 = 0.0f;
                 child = func_15149130((func_150ADA20() % 13) + 5, -1, 0x34, -1, 1, 0, sizeof(data),
-                                      effect->header.owner, effect->header.kind);
+                                      effect->base.header.owner, effect->base.header.kind);
                 if (child != NULL) {
                     memcpy(((Game113D60AnyEffect *)child)->data, dataPtr, sizeof(data));
                 }
@@ -969,17 +939,16 @@ typedef struct {
 } Game113D60PointSpawner;
 
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Game113D60PointSpawner spawner;
 } Game113D60PointSpawnerEffect;
 
-struct260 *func_15130374(ParticleDesc64 *, u8, s32, u8, s32);
+TimedEffect *func_15130374(ParticleDesc64 *, u8, s32, u8, s32);
 
 /* Spawns func_15130374 particles within 20 units of the spawner's position. */
 void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
     Game113D60PointSpawner *spawner;
-    struct260 *particle;
+    TimedEffect *particle;
     s32 flip80;
     s32 flip40;
     ParticleDesc64 arg;
@@ -1046,7 +1015,7 @@ void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
                 arg.pos.y += spawner->position.y;
                 arg.pos.z += spawner->position.z;
                 arg.vel.y = ((func_150ADA68() * 471.0f) + -1242.0f) * 0.009999999776f;
-                particle = func_15130374(&arg, 0, sizeof(extra), effect->header.owner, effect->header.kind);
+                particle = func_15130374(&arg, 0, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
                 if (particle != NULL) {
                     memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
                 }
@@ -1064,7 +1033,7 @@ typedef struct {
 
 /* Creates effect 0x36 for 5-30 frames. */
 void func_150E90DC(void) {
-    struct260 *effect;
+    TimedEffect *effect;
     Game113D60Data90DC data;
 
     data.unk0 = 2.000000023e-07f;
@@ -1117,7 +1086,7 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
             dy = data.position.y - center->y;
             dz = data.position.z - center->z;
             if (dx * dx + dy * dy + dz * dz < 1960000.0f) {
-                struct260 *child;
+                TimedEffect *child;
 
                 data.unk0C = 0.1932400018f;
                 data.unk10 = 0.3140099943f;
@@ -1128,7 +1097,7 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
                 data.unk35 = 0;
                 data.unk38 = 0;
                 child = func_15149130((func_150ADA20() % 13) + 5, -1, 0x37, -1, 1, 0, sizeof(data),
-                                      effect->header.owner, effect->header.kind);
+                                      effect->base.header.owner, effect->base.header.kind);
                 if (child != NULL) {
                     memcpy(((Game113D60AnyEffect *)child)->data, &data, sizeof(data));
                 }
@@ -1146,8 +1115,7 @@ typedef struct {
 } Game113D60DebrisExtra;
 
 typedef struct {
-    /* 0x000 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x028 */ u8 pad28[0x10];
     /* 0x038 */ Vec3f position;
     /* 0x044 */ u8 pad44[0x12C];
@@ -1215,7 +1183,7 @@ void func_150E93DC(Game113D60PointSpawnerEffect *effect) {
                 arg.pos.y += spawner->position.y;
                 arg.pos.z += spawner->position.z;
                 arg.updateFn = 8;
-                debris = func_15132A4C(&arg, 3, 0xFF, sizeof(extra), effect->header.owner, effect->header.kind);
+                debris = func_15132A4C(&arg, 3, 0xFF, sizeof(extra), effect->base.header.owner, effect->base.header.kind);
                 if (debris != NULL) {
                     memcpy(&debris->extra, &extra, sizeof(extra));
                 }
@@ -1260,8 +1228,8 @@ s32 func_150E971C(Game113D60Debris *debris) {
             splash.fadeRate = 12;
 
             func_1513C73C(&splash, 0, 0, (s32)extra->unk8, debris->position.x, extra->floorY + 5.0f,
-                          debris->position.z, size, size, func_150ADA20() & 0xFF, 0, 0, debris->header.owner,
-                          debris->header.kind);
+                          debris->position.z, size, size, func_150ADA20() & 0xFF, 0, 0, debris->base.header.owner,
+                          debris->base.header.kind);
         }
         return 0;
     }

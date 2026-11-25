@@ -3,16 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Settings an emitter is created with; copied verbatim into Emitter.params. */
-typedef struct EmitterParams {
-    /* 0x0 */ Actor *owner;
-    /* 0x4 */ u8 ownerId;   // owner->unique_id at creation; the emitter dies when it changes
-    /* 0x6 */ s16 lifetime; // counts down when (flags & 1)
-    /* 0x8 */ u8 flags;
-    /* 0x9 */ s8 expireCb;  // index into D_8008D628 run when lifetime runs out, -1: just die
-    /* 0xA */ u8 table;     // index into D_8008D5E0
-} EmitterParams; /* 0xC */
-
 /* Particle template, referenced by an EmitterInfo. */
 typedef struct {
     /* 0x00 */ f32 unk0;
@@ -69,14 +59,7 @@ typedef struct {
 } ParticleData; /* 0x58 */
 
 typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
-    /* 0x01C */ s16 lifetime;
-    /* 0x01E */ u8 pad1E[0x16];
-    /* 0x034 */ Vec3f pos;
-    /* 0x040 */ Vec3f prevPos;
-    /* 0x04C */ u8 pad4C[0xC];
-    /* 0x058 */ s32 flags;
-    /* 0x05C */ u8 pad5C[0xB4];
+    /* 0x00 */ DefParticleHead head; /* head.def.rot: the previous position */
     /* 0x110 */ ParticleData data;
 } Particle;
 
@@ -136,12 +119,10 @@ typedef struct EmitterSlot {
 
 /* Process of type 0x21: emits particles around (or from the bones of) its owner. */
 typedef struct Emitter {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ struct Emitter *next;
-    /* 0x0C */ u8 padC[4];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ s32 flags;
     /* 0x14 */ s32 unk14;
-    /* 0x18 */ EmitterParams params;
+    /* 0x18 */ ActorEmitterParams params;
     /* 0x24 */ f32 accum; // fractional particles owed
     /* 0x28 */ s32 count; // live particles
     /* 0x2C */ u8 state;  // 1: hidden, 2: world mode, 4: attached mode, 8: new
@@ -155,23 +136,21 @@ typedef struct Emitter {
 } Emitter;
 
 /* Process lists, by priority and process type. */
-extern Emitter *D_800DCE50[2][104];
 extern EmitterTable *D_8008D5E0[];
 extern void (*D_8008D620[])(u8 *, u8 *, u8 *, u8 *, u8 *, u8 *, s16 *);
 extern s32 (*D_8008D628[])(Emitter *);
 
 void *memcpy(void *, const void *, u32);
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_1513F680();
 extern void func_15143134(void *, void *, void *);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_1518E308(Emitter *emitter);
-Emitter *func_1518E3C4(EmitterParams *params, u8 arg1);
+Emitter *func_1518E3C4(ActorEmitterParams *params, u8 arg1);
 
 /* Creates an emitter of the given kind on owner, optionally killing the owner's existing emitters first. */
 Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
                        void *arg6) {
-    EmitterParams params;
+    ActorEmitterParams params;
     s32 i;
     Emitter *emitter;
 
@@ -181,17 +160,17 @@ Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8
     if (killExisting) {
         for (i = 0; i < 2; i++) {
             D_800DD190++;
-            emitter = D_800DCE50[i][0x21];
+            emitter = (Emitter *)D_800DCE50[i][0x21];
             while (emitter != NULL) {
-                D_800DD198[D_800DD190] = emitter->next;
+                D_800DD198[D_800DD190] = emitter->header.next;
                 if (owner == emitter->params.owner || emitter->params.ownerId == owner->unique_id) {
-                    func_1516972C((struct102 *)emitter);
+                    func_1516972C(&emitter->header);
                 }
                 emitter = D_800DD198[D_800DD190];
             }
             {
                 // matching: the block-scope redeclaration makes IDO rematerialize &D_800DD190
-                extern s8 D_800DD190;
+                extern s8 D_800DD190; // matching: a declaration here opens a -g3 scope block (scheduling)
 
                 D_800DD190--;
             }
@@ -411,13 +390,13 @@ void func_1518D6E0(Emitter *emitter) {
 
                 isFree = 1;
                 if (slot->particle) {
-                    slot->particle->prevPos = slot->particle->pos;
+                    slot->particle->head.def.rot = slot->particle->head.def.pos;
                     if (info->mode == 2 || attach == 2) {
-                        slot->particle->pos.x = self->pos.x + slot->offset.x;
-                        slot->particle->pos.y = self->pos.y + slot->offset.y;
-                        slot->particle->pos.z = self->pos.z + slot->offset.z;
+                        slot->particle->head.def.pos.x = self->pos.x + slot->offset.x;
+                        slot->particle->head.def.pos.y = self->pos.y + slot->offset.y;
+                        slot->particle->head.def.pos.z = self->pos.z + slot->offset.z;
                     } else {
-                        func_15143134(&info->points[k], &slot->particle->pos,
+                        func_15143134(&info->points[k], &slot->particle->head.def.pos,
                                       (Mtx *)self->params.owner->unk1D4 + info->points[k].bone);
                     }
                     slot->timer -= D_800BE9E4;
@@ -425,13 +404,13 @@ void func_1518D6E0(Emitter *emitter) {
                         ParticleData *data;
 
                         data = &slot->particle->data;
-                        data->vel.x = (slot->particle->pos.x - slot->particle->prevPos.x) * D_800BE9A8;
+                        data->vel.x = (slot->particle->head.def.pos.x - slot->particle->head.def.rot.x) * D_800BE9A8;
                         if (data->vel.x > 10.0f) {
                             data->vel.x = 10.0f;
                         } else if (data->vel.x < -10.0f) {
                             data->vel.x = -10.0f;
                         }
-                        data->vel.z = (slot->particle->pos.z - slot->particle->prevPos.z) * D_800BE9A8;
+                        data->vel.z = (slot->particle->head.def.pos.z - slot->particle->head.def.rot.z) * D_800BE9A8;
                         if (data->vel.z > 10.0f) {
                             data->vel.z = 10.0f;
                         } else if (data->vel.z < -10.0f) {
@@ -440,9 +419,9 @@ void func_1518D6E0(Emitter *emitter) {
                         data->vel.y = 0.0f;
                         func_1513F680(slot->particle, data->tmpl->unk3B, data->tmpl->unk3C, data->tmpl->unk3D,
                                       data->tmpl->unk3E);
-                        slot->particle->lifetime =
+                        slot->particle->head.def.lifetime =
                             func_150ADA20() % (data->tmpl->lifeRange + 1) + data->tmpl->lifeMin;
-                        slot->particle->flags |= 1;
+                        slot->particle->head.def.flags |= 1;
                         slot->particle = NULL;
                         self->count--;
                     } else {
@@ -512,7 +491,7 @@ void func_1518D6E0(Emitter *emitter) {
                                                            spawnFlag, sizeof(ParticleData), 0xFF, 0);
                         if (freeSlot->particle != NULL) {
                             memcpy(&freeSlot->particle->data, &data, sizeof(ParticleData));
-                            freeSlot->particle->flags |= 0x40000000;
+                            freeSlot->particle->head.def.flags |= 0x40000000;
                             if (info->mode == 2 || attach == 2) {
                                 switch (info->spread) {
                                 case 1: {
@@ -548,17 +527,17 @@ void func_1518D6E0(Emitter *emitter) {
                                 }
                                     break;
                                 }
-                                freeSlot->particle->pos.x = self->pos.x + freeSlot->offset.x;
-                                freeSlot->particle->pos.y = self->pos.y + freeSlot->offset.y;
-                                freeSlot->particle->pos.z = self->pos.z + freeSlot->offset.z;
+                                freeSlot->particle->head.def.pos.x = self->pos.x + freeSlot->offset.x;
+                                freeSlot->particle->head.def.pos.y = self->pos.y + freeSlot->offset.y;
+                                freeSlot->particle->head.def.pos.z = self->pos.z + freeSlot->offset.z;
                             } else {
                                 s32 idx;
 
                                 idx = freeSlot - self->slots;
-                                func_15143134(&info->points[idx], &freeSlot->particle->pos,
+                                func_15143134(&info->points[idx], &freeSlot->particle->head.def.pos,
                                               (Mtx *)self->params.owner->unk1D4 + info->points[idx].bone);
                             }
-                            freeSlot->particle->prevPos = freeSlot->particle->pos;
+                            freeSlot->particle->head.def.rot = freeSlot->particle->head.def.pos;
                             freeSlot->timer = func_150ADA20() % (info->lifeRange + 1) + info->lifeMin;
                             freeSlot = freeSlot->next;
                             prevFree->next = freeSlot;
@@ -619,7 +598,7 @@ void func_1518E308(Emitter *emitter) {
     emitter->accum = 0.0f;
     for (i = 0; i < 100; i++, slot++) {
         if (slot->particle != NULL) {
-            func_1516972C((struct102 *)slot->particle);
+            func_1516972C(&slot->particle->head.header);
         }
     }
     bzero(emitter->slots, sizeof(emitter->slots));
@@ -634,7 +613,7 @@ void func_1518E37C(Emitter *emitter, u8 table) {
 }
 
 /* Starts an emitter process with the given params. */
-Emitter *func_1518E3C4(EmitterParams *params, u8 arg1) {
+Emitter *func_1518E3C4(ActorEmitterParams *params, u8 arg1) {
     Emitter *emitter;
 
     if (params->owner->id == 150) {
@@ -644,7 +623,7 @@ Emitter *func_1518E3C4(EmitterParams *params, u8 arg1) {
     if (emitter == NULL) {
         return NULL;
     }
-    memcpy(&emitter->params, params, sizeof(EmitterParams));
+    memcpy(&emitter->params, params, sizeof(ActorEmitterParams));
     emitter->count = 0;
     emitter->state = 8;
     emitter->infoMode = 4;

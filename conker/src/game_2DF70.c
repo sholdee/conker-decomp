@@ -896,7 +896,6 @@ s32 func_15002878(void) {
     return highest;
 }
 
-extern s8 **D_800C4488[];
 
 // matching: these stay macros; naming them as locals changes the frame and register allocation
 #define CMD (dl + (j << 3)) // command j of the display list, as bytes
@@ -938,7 +937,7 @@ s32 func_150028BC(s32 map) {
     numLists = 1;
     count = 0;
     for (i = 0; i < numLists; i++) {
-        list = D_800C4488[map][i];
+        list = (s8 *)D_800C4488[map][i]; // the display list read as bytes
         j = 0;
         while (list[j << 3] != (s8)G_ENDDL) {
             if (list[j << 3] == G_VTX) {
@@ -961,7 +960,7 @@ s32 func_150028BC(s32 map) {
     numTris = 0;
     base = (s32)D_800D19A0[map];
     for (i = 0; i < numLists; i++) {
-        dl = D_800C4488[map][i];
+        dl = (s8 *)D_800C4488[map][i];
         j = 0;
         while (*CMD != (s8)G_ENDDL) {
             opcode = *(u8 *)CMD;

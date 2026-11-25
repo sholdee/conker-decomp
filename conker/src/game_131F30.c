@@ -3,20 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Same layout as SpawnRegion in game_16EE20.c. */
-typedef struct SpawnRegion {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radiusX;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ s16 radiusZ;
-    /* 0x0C */ u8 padC[4];
-    /* 0x10 */ f32 rotation; /* degrees */
-    /* 0x14 */ u8 unk14;     /* the effects here set it to 1 while off */
-    /* 0x15 */ u8 flags;     /* bits 0-1: shape */
-} SpawnRegion;
-
 /* A node of the object lists D_800DCE50[list][type] (see game_1944C0.c), as func_15105C24 reads it. */
 typedef struct ListObj {
     /* 0x00 */ u8 pad0[8];
@@ -27,7 +13,6 @@ typedef struct ListObj {
     /* 0x28 */ s32 owner;
 } ListObj;
 
-extern ListObj *D_800DCE50[2][104];
 
 
 typedef struct {
@@ -90,28 +75,26 @@ void func_15104A80(WorldObject *prop) {
 
 /* Rain of lightning bolts falling around a point onto the ground (func_15104C44, func_15104FF8). */
 typedef struct BoltRainState {
-    /* 0x00 */ SpawnRegion *region;
+    /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 pending;      /* bolts owed, accumulated per frame */
     /* 0x08 */ s16 timer;        /* frames left; negative when off */
     /* 0x0A */ u8 padA[2];
     /* 0x0C */ Vec3f pos;
     /* 0x18 */ f32 radius;
     /* 0x1C */ f32 height;       /* bolts start this far above pos */
-    /* 0x20 */ f32 groundY;
-    /* 0x24 */ u8 pad24[0x20];
+    /* 0x20 */ CollisionHit ground; /* where the next bolt lands */
     /* 0x44 */ s16 *unk44;
 } BoltRainState;
 
 typedef struct BoltRainObj {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoltRainState state;
 } BoltRainObj;
 
 s32 func_1000FD38();
 extern s32 func_151464B8(s16 *);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
-extern s32 func_15046C80(f32 *pos, s32, f32 y, f32 *groundY);
+extern s32 func_15046C80(f32 *pos, s32, f32 y, CollisionHit *hit);
 extern void func_15105CE0(BoltDesc *desc, s32 extraSize, s32, s32);
 
 /* While the timer runs, drops lightning bolts from above pos to random ground points within radius. */
@@ -154,13 +137,13 @@ void func_15104C44(BoltRainObj *obj) {
                                   &ground[0], &ground[2]);
                     ground[0] += state->pos.x;
                     ground[2] += state->pos.z;
-                    if (func_15046C80(ground, 0, state->pos.y, &state->groundY) != 0) {
+                    if (func_15046C80(ground, 0, state->pos.y, &state->ground) != 0) {
                         func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX1, &offZ1);
                         func_15143874(func_150ADA20() & 0xFF, func_150ADA68() * 220.0f, &offX2, &offZ2);
                         desc.ctrl[1].x = state->pos.x + offX1;
                         desc.ctrl[1].z = state->pos.z + offZ1;
                         desc.ctrl[3].x = ground[0];
-                        desc.ctrl[3].y = state->groundY;
+                        desc.ctrl[3].y = state->ground.height;
                         desc.ctrl[3].z = ground[2];
                         desc.ctrl[2].x = offX2 + ground[0];
                         desc.ctrl[2].y = desc.ctrl[3].y + 180.0f;
@@ -168,7 +151,7 @@ void func_15104C44(BoltRainObj *obj) {
                         desc.life = func_150ADA20() % 13U + 8;
                         desc.color.alpha = func_150ADA20() % 156U + 100;
                         desc.segments = func_150ADA20() % 3U + 5;
-                        func_15105CE0(&desc, 0, obj->header.owner, obj->header.kind);
+                        func_15105CE0(&desc, 0, obj->base.header.owner, obj->base.header.kind);
                     }
                     state->pending -= 1.0f;
                 } while (state->pending > 1.0f);
@@ -181,7 +164,7 @@ void func_15104C44(BoltRainObj *obj) {
 void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
     BoltRainState *state = &obj->state;
 
-    if (msg == 0x38 && state->region->unk14 == 1) {
+    if (msg == 0x38 && state->region->disabled == 1) {
         state->timer = 300;
         // matching: the (s32) copy keeps IDO from sharing one register for region across the call
         func_1000FD38(func_1000EF40, (s32)state->region, 0);
@@ -192,7 +175,7 @@ void func_15104FF8(BoltRainObj *obj, s32 arg1, u8 msg) {
 
 /* Lightning arcing between the four edges of a quad (func_151050B0, func_15105548). */
 typedef struct BoltArcState {
-    /* 0x00 */ SpawnRegion *region;
+    /* 0x00 */ TriggerZone *region;
     /* 0x04 */ s16 timer;          /* frames left; negative when off */
     /* 0x06 */ u8 pad6[2];
     /* 0x08 */ f32 pending;        /* bolts owed, accumulated per frame */
@@ -203,8 +186,7 @@ typedef struct BoltArcState {
 } BoltArcState;
 
 struct BoltArcObj {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoltArcState state;
 };
 
@@ -222,10 +204,10 @@ void func_151050B0(BoltArcObj *obj) {
 
     state = &obj->state;
     if (state->timer < 0) {
-        state->region->unk14 = 1;
+        state->region->disabled = 1;
         return;
     }
-    state->region->unk14 = 0;
+    state->region->disabled = 0;
     state->timer -= D_800BE9E4;
     if (state->timer < 0) {
         func_151494E0(0, 0x39);
@@ -268,14 +250,14 @@ void func_151050B0(BoltArcObj *obj) {
             end.x = state->edgeStart[edgeB].x + state->edgeDelta[edgeB].x * t;
             end.y = state->edgeStart[edgeB].y + state->edgeDelta[edgeB].y * t;
             end.z = state->edgeStart[edgeB].z + state->edgeDelta[edgeB].z * t;
-            func_15106F98(&start, &end, 3, &config, 0.3250000179f, 2, obj->header.owner, obj->header.kind);
+            func_15106F98(&start, &end, 3, &config, 0.3250000179f, 2, obj->base.header.owner, obj->base.header.kind);
             state->pending -= 1.0f;
         } while (state->pending > 1.0f);
     }
 }
 
 /* Message handler: on 0x4B, calls func_1516972C on the object. */
-void func_1510550C(struct102 *obj, s32 arg1, u8 msg) {
+void func_1510550C(EffectHeader *obj, s32 arg1, u8 msg) {
     if (msg == 0x4B) {
         func_1516972C(obj);
     }
@@ -285,7 +267,7 @@ void func_1510550C(struct102 *obj, s32 arg1, u8 msg) {
 void func_15105548(BoltArcObj *obj, s32 *arg1, u8 msg) {
     BoltArcState *state = &obj->state;
 
-    if (msg == 0x38 && state->region->unk14 == 1) {
+    if (msg == 0x38 && state->region->disabled == 1) {
         state->unk70 = *arg1;
         state->timer = 300;
     }
@@ -297,19 +279,18 @@ typedef struct ImpactHit {
     /* 0x30 */ Vec3f position;
     /* 0x3C */ u8 pad3C[0x24];
     /* 0x60 */ Vec3f velocity;
-    /* 0x6C */ SurfaceTriangle triangle;
+    /* 0x6C */ CollisionTri triangle;
     /* 0x7E */ u8 pad7E[0xA];
     /* 0x88 */ s32 surfaceFlags;   /* bits 0-4: surface type */
 } ImpactHit;
 
 typedef struct ImpactObj {
-    /* 0x000 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x028 */ u8 pad28[0xE8];
     /* 0x110 */ ImpactHit hit;
 } ImpactObj;
 
-void *func_15102920(f32 size, u8 alpha, SurfaceTriangle *triangle, Vec3f *pos, s32 lifetime, s32, s32, s32 surfaceFlags,
+void *func_15102920(f32 size, u8 alpha, CollisionTri *triangle, Vec3f *pos, s32 lifetime, s32, s32, s32 surfaceFlags,
                    s32, s32);
 void func_151C329C(Vec3f *pos, u8, s32);
 
@@ -340,15 +321,15 @@ void func_1510558C(ImpactObj *obj) {
     random = func_150ADA20();
     lifetime = func_150ADA20() % 81U + 50;
     func_15102920(fraction * 25.0f + 15.0f, random % 56U + 200, &hit->triangle, &hit->position,
-                  lifetime, 1, 1, hit->surfaceFlags, obj->header.owner, obj->header.kind);
+                  lifetime, 1, 1, hit->surfaceFlags, obj->base.header.owner, obj->base.header.kind);
     surfaceFlags = hit->surfaceFlags;
     if ((surfaceFlags & 0x1F) == 9) {
         if (func_150ADA68() < 0.400000006f) {
-            func_151C329C(&hit->position, obj->header.owner, obj->header.kind);
+            func_151C329C(&hit->position, obj->base.header.owner, obj->base.header.kind);
         }
     } else {
         if (func_150ADA68() < 0.1000000015f) {
-            func_151C329C(&hit->position, obj->header.owner, obj->header.kind);
+            func_151C329C(&hit->position, obj->base.header.owner, obj->base.header.kind);
         }
         if (func_150ADA68() < 0.400000006f) {
             debris.variantIds = D_800A23A4;
@@ -370,27 +351,26 @@ void func_1510558C(ImpactObj *obj) {
             debris.desc.scaleBase = 0.06000000238f;
             debris.desc.scaleRange = 0.1420000046f;
             debris.desc.spin = 25.77700043f;
-            func_15151D6C(&debris.desc, debris.variantIds.v, debris.variantScales.v, 1, obj->header.owner,
-                          obj->header.kind);
+            func_15151D6C(&debris.desc, debris.variantIds.v, debris.variantScales.v, 1, obj->base.header.owner,
+                          obj->base.header.kind);
         }
     }
 }
 
 /* Sparks thrown up from random points of a spawn region (func_151058B4, func_15105848, func_15105BC8). */
 typedef struct SparkState {
-    /* 0x00 */ SpawnRegion *region;
+    /* 0x00 */ TriggerZone *region;
     /* 0x04 */ f32 rate;
     /* 0x08 */ s16 *unk8;
     /* 0x0C */ u8 flags;           /* bit 0: on (set by message 0x38, cleared by 0x39) */
 } SparkState;
 
 struct SparkObj {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ SparkState state;
 };
 
-extern void func_151432BC(SpawnRegion *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
+extern void func_151432BC(TriggerZone *region, f32 *x, f32 *z, f32 *top, f32 *bottom);
 extern void func_15143794(s16, s16, f32, f32 *);
 extern void func_1515C2F0(EffectTemplate18 *, s32, TrailBurstParams *, s32, s32, s32);
 void func_151058B4(SparkObj *obj);
@@ -456,7 +436,7 @@ void func_151058B4(SparkObj *obj) {
                 angle = func_150ADA20();
                 func_15143794(angle & 0xFF, func_150ADA20() % 22U - 54, func_150ADA68() * 20.0f + 30.0f, &part.vel.x);
                 part.gravity = func_150ADA68() * 1.486000061f + -3.048f;
-                func_1515C2F0(&spawn, 0, &part, 0, obj->header.owner, obj->header.kind);
+                func_1515C2F0(&spawn, 0, &part, 0, obj->base.header.owner, obj->base.header.kind);
                 count -= 1.0f;
             } while (count > 1.0f);
         }
@@ -479,7 +459,7 @@ ListObj *func_15105C24(s32 owner) {
 
     for (i = 0; i < 2; i++) {
         for (list = 0; list < 2; list++) {
-            for (obj = D_800DCE50[list][D_800A5770[i]]; obj != NULL; obj = obj->next) {
+            for (obj = (ListObj *)D_800DCE50[list][D_800A5770[i]]; obj != NULL; obj = obj->next) {
                 if (obj->type == 0x2E && owner == obj->owner) {
                     return obj;
                 }

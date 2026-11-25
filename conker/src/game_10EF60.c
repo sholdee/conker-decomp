@@ -1,10 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* A tracer/beam effect: a textured quad stretched from its position along its direction. */
 typedef struct {
-    u8 pad0[0x10];
+    EffectHeader header;
     Vtx_t quads[2][4]; // double-buffered by D_800BE9C0
     s16 lifetime;
     u8 pad92[2];
@@ -44,14 +45,6 @@ typedef struct {
 
 extern Game10EF60Texture *D_8008CA4C[];
 
-/* Payload of message 0x2D: a pair of objects (see func_150E2FC0). */
-typedef struct {
-    Actor *objA;
-    Actor *objB;
-    u8 idA; // unique_id of objA
-    u8 idB;
-} Game10EF60ObjectSwap;
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
 void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
@@ -90,7 +83,7 @@ void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32
         effect->mode = mode;
         if (effect->mode != 0) {
             if (owner == NULL) {
-                func_1516979C((struct102 *)effect);
+                func_1516979C(&effect->header);
                 return;
             }
             effect->onTime = onTime;
@@ -129,16 +122,7 @@ void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32
     }
 }
 
-/* An aim point a tracer snaps to when its owner's angle and unk1D1 match. */
-typedef struct {
-    s16 unk0;           // compared with the owner's angle
-    s8 unk2;            // compared with owner->unk1D1
-    u8 ricochetChance;  // percent
-    f32 x, y, z;
-    f32 normal[3];
-} Game10EF60Impact;
 
-extern Game10EF60Impact D_800D9960[];
 
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, u32 *, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
@@ -187,7 +171,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
     dist = 0.0f;
     effect->lifetime -= D_800BE9E4;
     if (effect->lifetime < 0 || (effect->owner != NULL && effect->ownerTag != -1 && effect->owner->unk84.uh != effect->ownerTag)) {
-        func_1516972C((struct102 *)effect);
+        func_1516972C(&effect->header);
         return;
     }
     if (effect->mode != 0) {
@@ -278,7 +262,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
                     func_150E1AB0(0, effect->x, effect->y, effect->z, effect->target_x, effect->target_y, effect->target_z, speed, stopDist, 15.0f, 820.0f, 75, texture, 0, 0, 0, effect->owner, 0, 0, 0, impact, effect->unkFE, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                 }
             } else {
-                func_1516972C((struct102 *)effect);
+                func_1516972C(&effect->header);
                 return;
             }
         }
@@ -332,7 +316,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
                 if (effect->impactEffect != 0) {
                     func_150E4550(effect->target_x, effect->target_y, effect->target_z, 1, effect->impactEffect, 0, 0xFF);
                 }
-                func_1516972C((struct102 *)effect);
+                func_1516972C(&effect->header);
                 return;
             }
             if (len < effect->length) {
@@ -460,13 +444,13 @@ s32 func_150E2F90(s32 a0, s32 a1, s16 a2) {
 }
 
 /* Message 0x2D: if the effect's owner is one object of the pair, retarget it to the other. */
-void func_150E2FC0(Game10EF60Effect *effect, Game10EF60ObjectSwap *swap, u8 msg) {
+void func_150E2FC0(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg) {
     if (msg == 0x2D) {
-        if (effect->owner == swap->objA) {
-            effect->owner = swap->objB;
+        if (effect->owner == swap->actorA) {
+            effect->owner = swap->actorB;
             effect->ownerId = swap->idB;
-        } else if (effect->owner == swap->objB) {
-            effect->owner = swap->objA;
+        } else if (effect->owner == swap->actorB) {
+            effect->owner = swap->actorA;
             effect->ownerId = swap->idA;
         }
     }

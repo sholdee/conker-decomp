@@ -432,7 +432,6 @@ Gfx *func_1515E544(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte
     return gfx;
 }
 
-extern PointLight *D_800D9E28[];     // the lights it picked
 
 /*
  * Lit colour at (x, y, z): the zone ambient colour (func_1515E278) plus the contribution of

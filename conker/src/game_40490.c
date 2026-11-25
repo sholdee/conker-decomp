@@ -12,15 +12,6 @@ extern void func_1510F800(s32);
 s32 func_151BE850(Vec3f *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6);
 s32 func_15149550(void *, s32, s32, u8, u8, s32);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-typedef struct {
-    s8 unk0;
-    u8 pad1[3];
-    Vec3f unk4;
-    Vec3f unk10;
-    f32 unk1C;
-    s8 unk20;
-    u8 pad21[3];
-} Struct150156F4Payload;
 
 typedef struct {
     f32 unk0;
@@ -304,7 +295,7 @@ typedef struct Game40490BeamPacket {
 
 /** Spawns a beam effect of twice the object's sizeY, pointing along its rotation. */
 s32 func_15013778(TriggerZone *obj) {
-    struct260 *effect;
+    TimedEffect *effect;
     Game40490BeamPacket packet;
     MtxF matrix;
 
@@ -356,7 +347,7 @@ s32 func_1501396C(TriggerZone *obj) {
 s32 func_150139AC(TriggerZone *obj, s32 index) {
     Struct150139ACLocal data;
     Struct150139ACEntry *entry;
-    struct260 *effect;
+    TimedEffect *effect;
 
     index = obj->unk18;
     obj->flags |= 4;
@@ -574,7 +565,7 @@ s32 func_15014094(TriggerZone *obj) {
         s8 unk2C;
         u8 pad2D[7];
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     obj->flags |= 4;
     data.unk0 = obj;
@@ -617,7 +608,7 @@ s32 func_15014220(TriggerZone *obj) {
         TriggerZone *unk4;
         u8 unk8;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     obj->flags |= 4;
     data.unk8 = 1;
@@ -653,7 +644,7 @@ s32 func_150142EC(TriggerZone *obj) {
         f32 unk10;
         f32 unk14;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
     f32 a;
     f32 b;
     f32 c;
@@ -690,23 +681,12 @@ s32 func_150142EC(TriggerZone *obj) {
     }
     return 1;
 }
-typedef struct Game40490144B8Packet {
-    void *owner;
-    s32 choice;
-    s32 low;
-    s32 range;
-    s16 countX, countY;
-    f32 sizeX, sizeY;
-    f32 angleX, angleY;
-    f32 arc, factor;
-    f32 steps, inverse, height;
-} Game40490144B8Packet;
 
 void func_15145974(void *, f32 *, f32 *);
 
-/** Spawns an effect along the object's rotation, configured by the bytes of unk18 and unk1C. */
+/** Spawns a StreamEmitter aimed along the object's rotation, configured by the bytes of unk18 and unk1C. */
 s32 func_150144B8(TriggerZone *obj) {
-    Game40490144B8Packet packet;
+    StreamEmitter emitter;
     u32 value; // matching: holds the random number, then the effect address; two locals grow the frame
     struct {
         f32 direction[3];
@@ -719,26 +699,26 @@ s32 func_150144B8(TriggerZone *obj) {
     }
     func_150A8050(scratch.matrix, obj->pitch, obj->yaw, 0.0f);
     func_150A7960(scratch.matrix[0], 0.0f, 100.0f, 0.0f, &scratch.direction[0], &scratch.direction[1], &scratch.direction[2]);
-    func_15145974(scratch.direction, &packet.angleX, &packet.angleY);
-    packet.angleX *= 0.017453292f;
-    packet.angleY *= 0.017453292f;
-    packet.low = obj->unk18 & 0xFF;
-    packet.range = (obj->unk18 >> 8) & 0xFF;
+    func_15145974(scratch.direction, &emitter.angleX, &emitter.angleY);
+    emitter.angleX *= 0.017453292f;
+    emitter.angleY *= 0.017453292f;
+    emitter.minDelay = obj->unk18 & 0xFF;
+    emitter.delayRange = (obj->unk18 >> 8) & 0xFF;
     value = func_150ADA20();
-    packet.owner = obj;
-    packet.choice = value % (u32)(packet.range + 1) + packet.low;
-    packet.countX = (obj->unk18 >> 16) & 0xFF;
-    packet.countY = (obj->unk18 >> 24) & 0xFF;
-    packet.sizeX = (f32)(obj->unk1C & 0xFF) * 0.015625f;
-    packet.sizeY = (f32)((obj->unk1C >> 8) & 0xFF) * 0.015625f;
-    packet.steps = (f32)((obj->unk1C >> 24) & 0xFF);
-    packet.inverse = 1.0f / packet.steps;
-    packet.height = (f32)obj->height * packet.inverse;
-    packet.arc = func_150484A0(obj->radius, obj->height);
-    packet.factor = (f32)((obj->unk1C >> 16) & 0xFF) * 0.00390625f * 0.7853982f;
-    value = (u32)func_15149130(300, -1, 0x2A, -1, 0, 0, sizeof(packet), 0xFF, 0);
+    emitter.position = &obj->x;
+    emitter.timer = value % (u32)(emitter.delayRange + 1) + emitter.minDelay;
+    emitter.minLife = (obj->unk18 >> 16) & 0xFF;
+    emitter.lifeRange = (obj->unk18 >> 24) & 0xFF;
+    emitter.rateBase = (f32)(obj->unk1C & 0xFF) * 0.015625f;
+    emitter.rateRange = (f32)((obj->unk1C >> 8) & 0xFF) * 0.015625f;
+    emitter.speed = (f32)((obj->unk1C >> 24) & 0xFF);
+    emitter.unk30 = 1.0f / emitter.speed;
+    emitter.unk34 = (f32)obj->height * emitter.unk30;
+    emitter.spread = func_150484A0(obj->radius, obj->height);
+    emitter.wobbleSpeed = (f32)((obj->unk1C >> 16) & 0xFF) * 0.00390625f * 0.7853982f;
+    value = (u32)func_15149130(300, -1, 0x2A, -1, 0, 0, sizeof(emitter), 0xFF, 0);
     if (value != 0) {
-        memcpy((void *)((u32)value + 0x28U), &packet, sizeof(packet));
+        memcpy((void *)((u32)value + 0x28U), &emitter, sizeof(emitter));
     }
     return 1;
 }
@@ -765,7 +745,7 @@ typedef struct Game40490PlanePacket {
 /** Spawns an effect over the object's rotated rectangle (sizeX by sizeZ, sizeY high). */
 s32 func_1501474C(TriggerZone *obj) {
     Game40490PlanePacket packet;
-    struct260 *effect;
+    TimedEffect *effect;
     Game40490PlanePoint corners[4];
     f32 s;
     f32 c;
@@ -810,7 +790,7 @@ s32 func_1501474C(TriggerZone *obj) {
     return 1;
 }
 extern u8 D_800A0938[][3];
-struct102 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+EffectHeader *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 typedef struct Game4049014B60Packet {
     f32 pos[3];
@@ -818,7 +798,7 @@ typedef struct Game4049014B60Packet {
     f32 unk18;
     f32 unk1C;
     f32 unk20;
-    struct102 *effects[6];
+    EffectHeader *effects[6];
     f32 unk3C;
     void *owner;
     u8 active;
@@ -829,9 +809,9 @@ typedef struct Game4049014B60Packet {
 s32 func_15014B60(TriggerZone *obj) {
     Game4049014B60Packet packet;
     s32 i;
-    struct260 *effect;
-    Header2 pos;
-    Header header;
+    TimedEffect *effect;
+    Vec3i pos;
+    LightEffectHeader header;
     u32 count;
 
     obj->flags |= 4;
@@ -850,17 +830,17 @@ s32 func_15014B60(TriggerZone *obj) {
     packet.unk1C = (f32)((obj->unk18 >> 16) & 0xFFFF) * 0.152587890625f * 0.001000000047f;
     packet.unk20 = (f32)(obj->unk1C & 0xFFFF) * 0.152587890625f * 0.001000000047f;
     packet.unk3C = (f32)((obj->unk1C >> 16) & 0xFFFF) * 0.457763671875f * 9.999999975e-07f;
-    pos.unk0 = obj->x;
-    pos.unk4 = obj->y;
-    pos.unk8 = obj->z;
+    pos.x = obj->x;
+    pos.y = obj->y;
+    pos.z = obj->z;
     for (i = 0; i < 6; i++) {
         s32 r;
         s32 g;
 
-        header.unk0 = 2;
-        header.unk1 = -1;
-        header.unk2 = 300;
-        header.unk4 = 0;
+        header.flags = 2;
+        header.update = -1;
+        header.lifetime = 300;
+        header.lightType = 0;
         r = (D_800BE9F0 == 0x40) ? 0xFF : D_800A0938[i][0];
         g = (D_800BE9F0 == 0x40) ? 0 : D_800A0938[i][1];
         count = (D_800BE9F0 == 0x40) ? 0 : D_800A0938[i][2]; // matching: blue reuses count's register
@@ -889,7 +869,7 @@ s32 func_15014F6C(TriggerZone *obj) {
         u8 unk50;
         u8 unk51;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
     s32 flag;
 
     obj->flags |= 4;
@@ -936,7 +916,7 @@ s32 func_15015104(TriggerZone *obj) {
         u8 padD[3];
         s32 unk10;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
     s32 bit1;
     s32 bit2;
     u32 value;
@@ -978,7 +958,7 @@ s32 func_150151D4(TriggerZone *obj) {
         s32 unk40;
         s32 unk44;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     obj->flags |= 4;
     obj->disabled = 1;
@@ -1036,7 +1016,7 @@ void func_15015354(TriggerZone *obj) {
         s32 unk6C;
         s32 unk70;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
     f32 z;
     f32 y;
     f32 x;
@@ -1106,7 +1086,7 @@ s32 func_15015644(TriggerZone *obj) {
         s32 unk8;
         s8 unkC;
     } data;
-    struct260 *effect;
+    TimedEffect *effect;
 
     obj->flags |= 4;
     obj->disabled = 1;
@@ -1129,7 +1109,7 @@ s32 func_15015644(TriggerZone *obj) {
 s32 func_150156F4(TriggerZone *obj) {
     Vec3f points[2];
     MtxF mtx;
-    Struct150156F4Payload payload;
+    RopeSpawn payload;
 
     if (D_800BE9F0 == 0xB) {
         if (obj->unk18 < 6U) {
@@ -1155,14 +1135,14 @@ s32 func_150156F4(TriggerZone *obj) {
     points[0].x = obj->x;
     points[0].y = obj->y;
     points[0].z = obj->z;
-    payload.unk0 = obj->unk18;
+    payload.id = obj->unk18;
 
-    /* unk4 gets the higher end, unk10 the lower */
-    payload.unk4 = points[points[0].y < points[1].y];
-    payload.unk10 = points[points[1].y < points[0].y];
+    /* the higher end is the top */
+    payload.ends.top = points[points[0].y < points[1].y];
+    payload.ends.bottom = points[points[1].y < points[0].y];
 
     payload.unk20 = 0;
-    payload.unk1C = fabsf(points[1].y - points[0].y);
+    payload.length = fabsf(points[1].y - points[0].y);
     func_151ACBD4(&payload, 0);
 
     return 1;

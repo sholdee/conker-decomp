@@ -1,12 +1,9 @@
 #include <ultra64.h>
 
 #include "functions.h"
+#include "variables.h"
 
-/* libultra code (with Rare additions): declares the few globals it needs itself, like pimgr.c. */
-extern OSThread D_80035910; /* piThread */
-extern u8 D_8003A572;
-extern u8 D_8003A573;
-extern u8 D_8003A575;
+/* libultra code (with Rare additions). */
 
 /* __osDevMgrMain, with Rare's PI-thread interlock added to the DMAREAD case. */
 void func_10002E50(void *arg) {

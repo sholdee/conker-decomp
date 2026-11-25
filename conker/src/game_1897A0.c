@@ -12,13 +12,7 @@ typedef struct TrailPoint {
 
 /* A trail object made by func_15147A80: a ring buffer of points falling under gravity. */
 typedef struct Trail {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ EffectTemplate header;
-    /* 0x2C */ s8 count;
-    /* 0x2D */ s8 tail; /* oldest point */
-    /* 0x2E */ s8 head; /* next point to write */
-    /* 0x2F */ u8 pad2F[0x25];
-    /* 0x54 */ Vec3f tailPos;
+    /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ TrailPoint *points;
@@ -56,16 +50,16 @@ s32 func_1515C388(Trail *trail) {
     data = trail->data;
     failed = FALSE;
     points = trail->points;
-    if (trail->count) {
-        oldest = points[trail->tail].pos;
-        i = trail->tail;
-        while (i != trail->head) {
+    if (trail->head.count) {
+        oldest = points[trail->head.start].pos;
+        i = trail->head.start;
+        while (i != trail->head.end) {
             points[i].pos.x += data->vel.x * D_800BE9A4;
             points[i].pos.y += points[i].velY * D_800BE9A4 + data->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f;
             points[i].pos.z += data->vel.z * D_800BE9A4;
             points[i].velY += data->gravity * D_800BE9A4;
             i++;
-            if (i == trail->header.itemCount) {
+            if (i == trail->head.tmpl.itemCount) {
                 i = 0;
             }
         }
@@ -73,12 +67,12 @@ s32 func_1515C388(Trail *trail) {
     if (data->unk38 != -1) {
         failed = D_8008B080[data->unk38](trail, data) == 0;
     }
-    if (trail->count > 0) {
-        trail->tailPos = points[trail->tail].pos;
+    if (trail->head.count > 0) {
+        trail->head.modelPos = points[trail->head.start].pos;
     } else {
-        trail->tailPos.x = 0.0f;
-        trail->tailPos.y = 0.0f;
-        trail->tailPos.z = 0.0f;
+        trail->head.modelPos.x = 0.0f;
+        trail->head.modelPos.y = 0.0f;
+        trail->head.modelPos.z = 0.0f;
     }
     if (failed) {
         return 0;
@@ -98,14 +92,14 @@ s32 func_1515C534(Trail *trail) {
         failed = D_8008B084[data->unk39](trail, data) == 0;
     }
     if (!failed) {
-        if ((data->flags & TRAIL_BURST_FADE) && trail->header.life < data->fadeStart) {
-            s32 alpha = trail->header.life * data->fadeRate;
+        if ((data->flags & TRAIL_BURST_FADE) && trail->head.tmpl.life < data->fadeStart) {
+            s32 alpha = trail->head.tmpl.life * data->fadeRate;
 
             if (alpha < data->color.alpha) {
                 data->color.alpha = alpha;
             }
         }
-        if ((data->flags & TRAIL_BURST_SHRINK) && trail->header.life < data->shrinkStart && !data->shrinkPaused) {
+        if ((data->flags & TRAIL_BURST_SHRINK) && trail->head.tmpl.life < data->shrinkStart && !data->shrinkPaused) {
             for (frames = D_800BE9E4; frames != 0; frames--) {
                 data->width *= data->shrinkFactor;
             }
@@ -173,8 +167,8 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
     f32 lenSq;
     f32 scale;
 
-    if (trail->count >= 2) {
-        func_151D5D60(trail->unk84, view, (trail->header.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+    if (trail->head.count >= 2) {
+        func_151D5D60(trail->unk84, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             data = trail->data;
             update = 1;
@@ -196,14 +190,14 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
             }
             gfx = func_15142FBC(gfx, cycleMode | G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE,
                                 D_800A4AC8[data->renderMode].unk0 | D_800A4AC8[data->renderMode].unk4, &update);
-            i = trail->head - 1;
-            i = (i < 0) ? trail->header.itemCount - 1 : i;
+            i = trail->head.end - 1;
+            i = (i < 0) ? trail->head.tmpl.itemCount - 1 : i;
             j = i - 1;
-            j = (j < 0) ? trail->header.itemCount - 1 : j;
+            j = (j < 0) ? trail->head.tmpl.itemCount - 1 : j;
             cur = points[i].pos;
             next = points[j].pos;
-            texStep = 0x800 / (trail->count - 1);
-            alphaStep = 0xFF / (trail->count - 1);
+            texStep = 0x800 / (trail->head.count - 1);
+            alphaStep = 0xFF / (trail->head.count - 1);
 
             segX = cur.x - next.x;
             segY = cur.y - next.y;
@@ -301,11 +295,11 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
                 gSP1Triangle(gfx++, 1, 3, 2, 0);
                 j--;
                 if (j < 0) {
-                    j = trail->header.itemCount - 1;
+                    j = trail->head.tmpl.itemCount - 1;
                 }
                 cur = next;
                 next = points[j].pos;
-            } while (i != trail->tail);
+            } while (i != trail->head.start);
         }
     }
     return gfx;
@@ -313,16 +307,16 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
 
 /* Handler: adds a point at the trail's position, or stops the unk39 handler once the buffer is full. */
 s32 func_1515CF9C(Trail *trail, TrailBurstParams *data) {
-    if (trail->count < trail->header.itemCount - 1) {
+    if (trail->head.count < trail->head.tmpl.itemCount - 1) {
         TrailPoint *points;
 
         points = trail->points;
-        trail->count++;
-        points[trail->head].pos = trail->header.pos;
-        points[trail->head].velY = data->vel.y;
-        trail->head++;
-        if (trail->head == trail->header.itemCount) {
-            trail->head = 0;
+        trail->head.count++;
+        points[trail->head.end].pos = trail->head.tmpl.pos;
+        points[trail->head.end].velY = data->vel.y;
+        trail->head.end++;
+        if (trail->head.end == trail->head.tmpl.itemCount) {
+            trail->head.end = 0;
         }
     } else {
         data->unk39 = -1;
@@ -335,13 +329,13 @@ s32 func_1515D030(Trail *trail, TrailBurstParams *data) {
     s8 count;
     s32 result;
 
-    count = trail->count;
+    count = trail->head.count;
     result = TRUE;
     if (count >= 3) {
-        trail->count = count - 1;
-        trail->head--;
-        if (trail->head < 0) {
-            trail->head = trail->header.itemCount - 1;
+        trail->head.count = count - 1;
+        trail->head.end--;
+        if (trail->head.end < 0) {
+            trail->head.end = trail->head.tmpl.itemCount - 1;
         }
     } else {
         result = FALSE;
@@ -377,7 +371,7 @@ typedef struct {
 } LevelEffectData; /* size 0xC */
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x28];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ LevelEffectData data;
 } LevelEffect;
 

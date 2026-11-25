@@ -3,14 +3,13 @@
 #include "variables.h"
 #include "effects.h"
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /*
  * A streak particle: a camera-facing triangle from its tail point to a
  * width-wide edge at its head. Head and tail move with separate velocities.
  */
 typedef struct {
-    /* 0x00 */ u8 header[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ Vec3f headPos;
     /* 0x1C */ Vec3f headVel;
     /* 0x28 */ Vec3f tailPos;
@@ -126,7 +125,7 @@ void func_151563B8(StreakParticle *arg0) {
         }
     }
     if (expired) {
-        func_1516972C((struct102 *)particle);
+        func_1516972C(&particle->header);
     }
 }
 
@@ -367,14 +366,12 @@ typedef struct {
 
 /* An effect that sets off bursts at random points of D_800DCA30 at random intervals. */
 typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ RandomTimer timer;
 } RandomBurstEffect;
 
-extern f32 D_800DCA30[3][10][4];
 void func_15156D24(f32 *pos, u8 owner);
-extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
 /* When the timer runs out, sets off a burst (func_15156D24 and func_151602C0) at a random table point
  * that has no zero coordinate, then restarts the timer at a random interval. */
@@ -382,24 +379,24 @@ void func_15156B54(RandomBurstEffect *effect) {
     RandomTimer *timer;
     u32 row;
     u32 col;
-    Header header;
-    Header2 intPos;
+    LightEffectHeader header;
+    Vec3i intPos;
 
     effect->timer.value -= D_800BE9E4;
     if (effect->timer.value < 0) {
         row = func_150ADA20() % 3U;
         col = func_150ADA20() % 10U;
-        if (D_800DCA30[row][col][0] != 0.0f && D_800DCA30[row][col][1] != 0.0f && D_800DCA30[row][col][2] != 0.0f) {
-            func_15156D24(D_800DCA30[row][col], effect->header.owner);
-            header.unk0 = 3;
-            header.unk1 = -1;
-            header.unk2 = (func_150ADA20() % 11U) + 5;
-            header.unk4 = 0;
-            intPos.unk0 = D_800DCA30[row][col][0];
-            intPos.unk4 = D_800DCA30[row][col][1];
-            intPos.unk8 = D_800DCA30[row][col][2];
+        if (D_800DCA30[row][col].pos.x != 0.0f && D_800DCA30[row][col].pos.y != 0.0f && D_800DCA30[row][col].pos.z != 0.0f) {
+            func_15156D24(&D_800DCA30[row][col].pos.x, effect->base.header.owner);
+            header.flags = 3;
+            header.update = -1;
+            header.lifetime = (func_150ADA20() % 11U) + 5;
+            header.lightType = 0;
+            intPos.x = D_800DCA30[row][col].pos.x;
+            intPos.y = D_800DCA30[row][col].pos.y;
+            intPos.z = D_800DCA30[row][col].pos.z;
             func_151602C0(&header, &intPos, (func_150ADA20() % 156U) + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0,
-                          effect->header.owner, effect->header.kind);
+                          effect->base.header.owner, effect->base.header.kind);
         }
         timer = &effect->timer;
         timer->value = (func_150ADA20() % (u32)(timer->range + 1)) + timer->base;
@@ -484,10 +481,10 @@ void func_15156F94(StreakParticle *particle) {
 
 void func_15156FB8(StreakParticle *particle) {
     func_15156F94(particle);
-    func_15169804((struct102 *)particle);
+    func_15169804(&particle->header);
 }
 
 void func_15156FE4(StreakParticle *particle) {
     func_15156F94(particle);
-    func_15169824((struct102 *)particle);
+    func_15169824(&particle->header);
 }

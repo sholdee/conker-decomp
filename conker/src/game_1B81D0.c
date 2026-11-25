@@ -31,21 +31,10 @@ typedef struct {
     /* 0x170 */ f32 floorY;
 } Particle;
 
-/* Ground probe result written by func_15046C80 (ParticleFloor in game_15F680.c). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 pad4[0x14];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 type;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 unk20;
-} ParticleFloor; // size 0x24
-
 extern Particle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 extern void func_1518CA80(BillboardSpawn *, u8);
 extern void func_151429E0(u8, u8 *, u8 *, u8 *);
-extern s32 func_15046C80(Vec3f *, s32, f32, ParticleFloor *);
+extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 
 /*
  * Particle callback: once the particle is below its floor height, spawns 4-7 splash droplets and
@@ -224,7 +213,7 @@ void func_1518B264(Vec3f *pos, f32 radius, f32 size, s32 count, u8 arg4) {
  */
 void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
     ParticleSpawn spawn;
-    ParticleFloor floor;
+    CollisionHit floor;
     u8 angle;
     f32 dist;
     Particle *droplet;
@@ -236,10 +225,10 @@ void func_1518B2A8(Vec3f *pos, f32 radius, f32 size, s32 count, u16 model, s32 a
 
     if (pos != NULL) {
         spawn.model = model;
-        floor.unk18 = 0;
-        floor.unk1C = 0;
-        floor.type = 0;
-        floor.unk20 = 0;
+        floor.material = 0;
+        floor.flags = 0;
+        floor.source = 0;
+        floor.surface = 0;
         spawn.lifetime = 300;
         spawn.flags = 0x9E8;
         spawn.variant = 0;

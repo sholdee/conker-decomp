@@ -27,11 +27,6 @@ typedef struct {
     /* 0x18 */ ColourFrameBufferData data;
 } ColourFrameBufferEffect;
 
-extern void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, u8 owner, s32 arg5);
-
-/* Object lists: D_800DCE50[list][type] is the head of a linked list of objects of that type. */
-extern ScreenEffect *D_800DCE50[2][104];
-
 extern s32 (*D_8008B0D0[])(ScreenEffect *);
 extern void (*D_8008B0D8[])(ScreenEffect *, s32);
 extern void (*D_8008B0E4[])(ScreenEffect *, s32, u8);
@@ -43,7 +38,7 @@ void func_1515FDA0(s32 arg0) {
     u8 visible;
 
     for (list = 0; list < 2; list++) {
-        effect = D_800DCE50[list][OBJ_TYPE_SCREEN_EFFECT];
+        effect = (ScreenEffect *)D_800DCE50[list][OBJ_TYPE_SCREEN_EFFECT];
         D_800DD190++;
         for (; effect != NULL; effect = D_800DD198[D_800DD190]) {
             D_800DD198[D_800DD190] = effect->next;
@@ -67,7 +62,7 @@ void func_1515FDA0(s32 arg0) {
         }
         {
             // matching: only a block-scope redeclaration (not a plain block or -= 1) schedules the decrement's lui first
-            extern s8 D_800DD190;
+            extern s8 D_800DD190; // matching: a declaration here opens a -g3 scope block (scheduling)
 
             D_800DD190--;
         }
@@ -107,7 +102,7 @@ void func_1515FFEC(ScreenEffect *effect) {
         }
     }
     if (finished) {
-        func_1516972C((struct102 *)effect);
+        func_1516972C((EffectHeader *)effect);
     }
 }
 

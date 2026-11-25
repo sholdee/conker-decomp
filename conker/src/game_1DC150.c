@@ -10,24 +10,16 @@ void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
 
 void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
 
-/* Ground hit filled by func_1504715C / func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 unk4[0x19];
-    /* 0x1D */ u8 surfaceType;
-    /* 0x1E */ u8 pad1E[6];
-} GroundHit;
-
-void func_15153F18(AngleRange *, SplashSpray *, GroundHit *, s32, s32);
-void func_1504715C(GroundHit *, Actor *);
-s32 func_15046C80(f32 *, s32, f32, GroundHit *);
+void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, s32, s32);
+void func_1504715C(CollisionHit *, Actor *);
+s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
 void func_15143874(s16, f32, f32 *, f32 *);
 void func_15136698(f32, f32, u8, u8, s32, void *, f32 *, s32, s32, s32, s32);
 
 /* Spawns a ground burst effect around obj: one func_15153F18 burst, 7-12 scattered
  * func_151D9B8C / func_151DAB58 particles on the ground, and a func_15136698 effect under obj. */
 void func_151AECA0(Actor *obj, u8 arg1, s32 arg2) {
-    GroundHit ground;
+    CollisionHit ground;
     SplashSpraySpec burst;
     s32 count;
     f32 probe[3];
@@ -86,14 +78,14 @@ lbC:
         pos[2] += obj->z_position;
         probe[0] = pos[0];
         probe[2] = pos[2];
-        if (func_15046C80(probe, 0, obj->y_position - 500.0f, &ground) == 0 || ground.surfaceType == 3) {
+        if (func_15046C80(probe, 0, obj->y_position - 500.0f, &ground) == 0 || ground.source == 3) {
             return;
         }
         pos[1] = ground.height;
         pos[1] += 10.0f;
         if (func_150ADA20() & 1) {
             func_151D9B8C(0, (func_150ADA68() * 4.5f) + 15.0f, (func_150ADA68() * 100.0f) + 155.0f,
-                          ground.unk4, pos, 100, 0, 1, 0, arg1, arg2);
+                          &ground.tri, pos, 100, 0, 1, 0, arg1, arg2);
         } else {
             func_151DAB58(0, (func_150ADA68() * 5.900000095f) + 6.099999905f, (func_150ADA68() * 100) + 155, // matching: int 100/155 here, float literals change allocation
                           pos, 1, arg1, arg2);
@@ -107,7 +99,7 @@ lbB:
     centerProbe[0] = center[0];
     centerProbe[1] = center[1] + 100.0f;
     centerProbe[2] = center[2];
-    if (func_15046C80(centerProbe, 0, center[1] - 500.0f, &ground) == 0 || ground.surfaceType == 3) {
+    if (func_15046C80(centerProbe, 0, center[1] - 500.0f, &ground) == 0 || ground.source == 3) {
         return;
     }
     center[1] = ground.height;
@@ -119,6 +111,6 @@ lbB:
     func_15136698(((randF1 * 30.0f) + 90.0f) * 0.001000000047f,
                   ((randF2 * 103.0f) + 103.0f) * 9.999999747e-06f,
                   (randA % 101) + 155, (randB % 101) + 100,
-                  (func_150ADA20() % 56) + 70, ground.unk4, center, 0, 1, arg1, arg2);
+                  (func_150ADA20() % 56) + 70, &ground.tri, center, 0, 1, arg1, arg2);
 lbl:;
 }

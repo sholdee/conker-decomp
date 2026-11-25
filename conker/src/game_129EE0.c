@@ -6,24 +6,13 @@
 extern void func_150FCBC0(u8 arg0);
 extern s32 func_1000EC24();
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-
-/* Parameter block for func_151D8868. */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    u8 unk4;
-    u8 unk5;
-    s8 unk6;
-    u8 unk7;
-} Params151D8868;
+extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 
 /* Spawns the effect at each of the three D_800D9AA0 spots, starts three positioned sounds,
  * then calls func_15164F0C for each of the D_80082FA0 + 1 entries and func_151D8868 once. */
 void func_150FCA30(void) {
     s32 i;
-    Params151D8868 params;
+    RumbleParams params;
 
     func_150FCBC0(0);
     func_150FCBC0(1);
@@ -38,11 +27,11 @@ void func_150FCA30(void) {
         func_15164F0C(4, i, 0, 0xFF, 1);
     }
 
-    params.unk0 = 1;
-    params.unk2 = 100;
-    params.unk5 = 15;
-    params.unk4 = 8;
-    params.unk6 = -1;
+    params.flags = 1;
+    params.duration = 100;
+    params.playerMask = 15;
+    params.strength = 8;
+    params.updateKind = -1;
     func_151D8868(&params, 0, 0xFF, 0);
 }
 
@@ -137,19 +126,6 @@ void func_150FCFB0(s32 arg0) {
     func_15103828();
 }
 
-/* Ground probe result filled by func_1504715C / func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 pad1D[0x7];
-} GroundHit; /* 0x24 */
-
 typedef struct Actor150FD514 Actor150FD514;
 
 /* State that follows the particle (its ParticleMotion slot at 0x110). */
@@ -166,7 +142,7 @@ typedef struct {
     /* 0x24 */ s32 unk24;       /* from func_1516284C, released with func_1516972C */
     /* 0x28 */ Actor150FD514 *groundParticle;
     /* 0x2C */ f32 emitCounter;
-    /* 0x30 */ GroundHit ground;
+    /* 0x30 */ CollisionHit ground;
     /* 0x54 */ u16 soundHandle;
     /* 0x56 */ u16 soundHandle2;
     /* 0x58 */ u8 burstDone;
@@ -180,17 +156,17 @@ struct Actor150FD514 {
 };
 
 extern s32 D_800A1EEC[];
-extern void func_1504715C(GroundHit *, Actor *);
-extern s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
+extern void func_1504715C(CollisionHit *, Actor *);
+extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 extern void func_1505D024(Actor *, s32, u16, s32);
-extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
+extern s32 func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /*
  * Spawns a particle that follows obj, standing on the ground below it when the probe finds ground, with a
  * positioned sound, a func_1516284C effect and (on ground) a second particle lying on the ground.
  */
 void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
-    GroundHit ground;
+    CollisionHit ground;
     Vec3f pos;
     u8 onGround;
     Vec3f probe;
@@ -198,7 +174,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     Ext150FCFD4 ext;
     Actor150FD514 *particle;
     Ext150FCFD4 *dst;
-    Header header;
+    LightEffectHeader header;
     s32 posInt[3];
     ParticleDef groundDef;
     s32 flag;
@@ -268,10 +244,10 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     if (particle != NULL) {
         dst = &particle->ext;
         memcpy(dst, &ext, sizeof(ext));
-        header.unk0 = 2;
-        header.unk1 = 2;
-        header.unk2 = 300;
-        header.unk4 = 6;
+        header.flags = 2;
+        header.update = 2;
+        header.lifetime = 300;
+        header.lightType = 6;
         posInt[0] = pos.x;
         posInt[1] = pos.y;
         posInt[2] = pos.z;
@@ -279,10 +255,10 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
         // matching: this block and its redundant extern declarations are -g3 scope barriers that keep the
         // unk24 store and the onGround test ahead of the ground particle's constants (plain if mismatches)
         {
-            extern s32 D_800A4AA0;
+            extern s32 D_800A4AA0; // matching: a declaration here opens a -g3 scope block (scheduling)
 
             if (onGround) {
-                extern Vec3f D_800A5480;
+                extern Vec3f D_800A5480; // matching: a declaration here opens a -g3 scope block (scheduling)
 
                 groundDef.texture = 3;
                 groundDef.type = 0;
@@ -313,7 +289,7 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
                 groundDef.unk50 = 0;
                 groundDef.fadeStart = 1;
                 groundDef.fadeRate = 0xFF;
-                dst->groundParticle = (Actor150FD514 *)func_1513D594(&groundDef, &D_800A4AA0, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, (s32)&ground.unk04, 0, 0, 0, 0, arg1, arg2);
+                dst->groundParticle = (Actor150FD514 *)func_1513D594(&groundDef, &D_800A4AA0, 0, 0, 0, 0, 0, 50.0f, 50.0f, 0, (s32)&ground.tri, 0, 0, 0, 0, arg1, arg2);
             }
         }
     }
@@ -378,7 +354,7 @@ s32 func_150FD514(Actor150FD514 *particle) {
                 groundPos.x = particle->head.def.pos.x;
                 groundPos.y = ext->ground.height;
                 groundPos.z = particle->head.def.pos.z;
-                func_150E7FEC(func_150ADA68() * 78.0f + 125.0f, (u8)((func_150ADA20() % 76) + 180), &ext->ground.unk04, &groundPos,
+                func_150E7FEC(func_150ADA68() * 78.0f + 125.0f, (u8)((func_150ADA20() % 76) + 180), &ext->ground.tri, &groundPos,
                               (func_150ADA20() % 207) + 302, 0, 1, 0, 0, 0, particle->head.header.owner, 0);
                 func_150E83AC(&groundPos, (func_150ADA20() % 80) + 243, particle->head.header.owner, particle->head.header.kind);
             }
@@ -451,10 +427,10 @@ void func_150FDC2C(Actor150FD514 *actor) {
     Ext150FCFD4 *ext = &actor->ext;
 
     if (ext->unk24 != 0) {
-        func_1516972C((struct102 *)ext->unk24);
+        func_1516972C((EffectHeader *)ext->unk24);
     }
     if (ext->groundParticle != NULL) {
-        func_1516972C((struct102 *)ext->groundParticle);
+        func_1516972C(&ext->groundParticle->head.header);
     }
     if (ext->soundHandle != 0) {
         func_100111C8(ext->soundHandle);
@@ -467,11 +443,11 @@ void func_150FDC2C(Actor150FD514 *actor) {
 /* Releases the ext resources, then hands the particle to func_1513CA6C. */
 void func_150FDCAC(Actor150FD514 *actor) {
     func_150FDC2C(actor);
-    func_1513CA6C((struct210 *)actor);
+    func_1513CA6C(&actor->head);
 }
 
 /* Releases the ext resources, then hands the particle to func_1513CAA0. */
 void func_150FDCD8(Actor150FD514 *actor) {
     func_150FDC2C(actor);
-    func_1513CAA0((struct210 *)actor);
+    func_1513CAA0(&actor->head);
 }

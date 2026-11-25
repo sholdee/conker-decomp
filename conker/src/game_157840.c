@@ -311,13 +311,6 @@ void func_1512B100(Camera *arg0) {
     }
 }
 
-/* N64 z-buffer format table: depth = (base + (mantissa << shift)) per 3-bit exponent. */
-typedef struct {
-    s32 shift;
-    s32 base;
-} ZFormat;
-
-extern ZFormat D_80089630[];
 s32 func_1512B630(Camera *arg0, ZScan *scan, s32 gap, s32 offset, s32 mid, s32 useAltThreshold);
 
 /* Scans the z-buffer row arg0->unk8BC outwards from screenX, left then right, comparing each pixel's depth
@@ -329,7 +322,7 @@ void func_1512B1B8(Camera *arg0, s32 screenX, s32 screenY, s32 depth) {
     s32 mid;
     s16 halfWidth;
     u16 zcode;
-    ZFormat *fmt;
+    ZDecode *fmt;
     ZScanParams *params;
     s16 height;
 

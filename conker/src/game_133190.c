@@ -13,7 +13,8 @@ typedef struct BoltSample {
 } BoltSample; /* size 0x34 */
 
 typedef struct BoltFlare {
-    /* 0x00 */ u8 pad0[0x40];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x30];
     /* 0x40 */ Vec3f pos;
 } BoltFlare;
 
@@ -22,7 +23,7 @@ typedef struct BoltFlare {
  * desc.segments + 2 jittered joint points (func_151061EC) and the per-kind user data.
  */
 typedef struct BoltObj {
-    /* 0x00 */ u8 pad0[0x10];      /* object header */
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ BoltDesc desc;
     /* 0x60 */ void *userData;
     /* 0x64 */ f32 step;           /* Bezier parameter step, 1 / (segments + 1) */
@@ -45,21 +46,11 @@ typedef struct BoltChain {
 } BoltChain; /* size 0x44 */
 
 typedef struct BoltChainObj {
-    /* 0x00 */ struct260 base;
-    /* 0x24 */ u8 pad24[4];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BoltChain chain;
     /* 0x6C */ u8 pad6C[4];
     /* 0x70 */ Vec3f points[1];    /* chain.count points */
 } BoltChainObj;
-
-/* Result of the func_15081690 ray cast. */
-typedef struct RayHit {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ u8 pad14[0x59 - 0x14];
-    /* 0x59 */ u8 hit;
-    /* 0x5A */ u8 pad5A[0x64 - 0x5A];
-} RayHit;
 
 void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread);
 void func_15107A20(Actor *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
@@ -75,7 +66,6 @@ Vec3f *func_151061EC(BoltObj *bolt);
 
 extern s32 (*D_80088C10[])(BoltObj *bolt, u8 *moved);
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 
 /*
@@ -162,14 +152,14 @@ void func_1510608C(BoltObj *bolt) {
     if (bolt->desc.updateKind != -1) {
         update = D_80088C10[bolt->desc.updateKind];
         if (update != NULL && !update(bolt, &moved)) {
-            func_1516972C((struct102 *)bolt);
+            func_1516972C(&bolt->header);
         }
     }
 
     if (bolt->desc.flags & 1) {
         bolt->desc.life -= D_800BE9E4;
         if (bolt->desc.life < 0) {
-            func_1516972C((struct102 *)bolt);
+            func_1516972C(&bolt->header);
         }
     }
 
@@ -475,11 +465,11 @@ void func_15106E78(BoltObj *bolt) {
     }
     flare = bolt->flares[0];
     if (flare != NULL) {
-        func_1516972C((struct102 *)flare);
+        func_1516972C(&flare->header);
     }
     flare = bolt->flares[1];
     if (flare != NULL) {
-        func_1516972C((struct102 *)flare);
+        func_1516972C(&flare->header);
     }
     func_151D5E30(bolt->vtxBuf);
 }
@@ -487,14 +477,14 @@ void func_15106E78(BoltObj *bolt) {
 /* Destroys the bolt's resources, then hands it to func_15169804. */
 void func_15106EF8(BoltObj *bolt) {
     func_15106E78(bolt);
-    func_15169804((struct102 *)bolt);
+    func_15169804(&bolt->header);
 }
 
 
 /* Destroys the bolt's resources, then hands it to func_15169824. */
 void func_15106F24(BoltObj *bolt) {
     func_15106E78(bolt);
-    func_15169824((struct102 *)bolt);
+    func_15169824(&bolt->header);
 }
 
 extern void (*D_80088C28[])(BoltObj *bolt, s32 arg1, u8 arg2);
@@ -569,8 +559,8 @@ void func_151072BC(BoltChainObj *obj) {
     chain = &obj->chain;
     if (chain->link == NULL) {
         if (chain->index >= chain->count - 1) {
-            obj->base.unkE = -1;
-            obj->base.unkD |= 1;
+            obj->base.header.state = -1;
+            obj->base.header.flags |= 1;
             return;
         }
         owner = obj;
@@ -602,7 +592,7 @@ void func_151072BC(BoltChainObj *obj) {
         desc.color.alpha = func_150ADA20() % (config->alphaRange + 1) + config->alphaBase;
         desc.kind = 1;
         desc.segments = func_150ADA20() % (config->segmentsRange + 1) + config->segmentsBase;
-        chain->link = func_15105CE0(&desc, sizeof(owner), obj->base.pad0[0xC], obj->base.pad0[1]);
+        chain->link = func_15105CE0(&desc, sizeof(owner), obj->base.header.owner, obj->base.header.kind);
         if (chain->link != NULL) {
             memcpy(chain->link->userData, &owner, sizeof(owner));
         }
@@ -621,7 +611,7 @@ void func_15107604(BoltObj *bolt) {
 void func_1510761C(BoltChainObj *obj) {
     // matching: volatile makes IDO load the link twice, as the original does
     if (*(BoltObj *volatile *)&obj->chain.link != NULL) {
-        func_1516972C(*(struct102 *volatile *)&obj->chain.link);
+        func_1516972C(*(EffectHeader *volatile *)&obj->chain.link);
     }
 }
 
@@ -710,7 +700,7 @@ BoltObj *func_15107700(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments,
         func_15107A20(actor, yaw, pitch, &desc.ctrl[0], &center);
         func_15081690(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, desc.ctrl[0].x - center.x, desc.ctrl[0].y - center.y, desc.ctrl[0].z - center.z, &hit, 0.0f, 0, 1, 1, -1, 0, 0);
     }
-    if (hit.hit == 0) {
+    if (hit.hitType == 0) {
         return NULL;
     }
     desc.ctrl[3] = hit.pos;
@@ -850,7 +840,7 @@ BoltObj *func_15107C1C(Actor *actor, u8 bone, Vec3f *localPos, s16 yaw, s16 pitc
     func_15143794(yaw, pitch, 1.0f, &dir);
     func_15081690(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, dir.x, dir.y, dir.z, &hit, 300.0f, 0, 1, 1, -1, 0, 0);
 
-    if (hit.hit == 0) {
+    if (hit.hitType == 0) {
         desc.ctrl[3].x = desc.ctrl[0].x + dir.x * 300.0f;
         desc.ctrl[3].y = desc.ctrl[0].y + dir.y * 300.0f;
         desc.ctrl[3].z = desc.ctrl[0].z + dir.z * 300.0f;

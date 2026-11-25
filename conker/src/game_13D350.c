@@ -12,13 +12,6 @@ Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry);
 Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 b);
 
 
-typedef struct Game13D350ViewAngles {
-    u8 pad0[0xC];
-    f32 pitch;
-    f32 yaw;
-    f32 roll;
-} Game13D350ViewAngles;
-
 /* A sky mode's draw routine (D_800891D8 is indexed by D_800B0DF0->unk8): camera position, angles and the sky
  * extent from func_151108C4. */
 typedef Gfx *(*SkyDrawFunc)(Gfx *gfx, f32 x, f32 y, f32 z, f32 pitch, f32 yaw, f32 roll, s32 extent);
@@ -47,7 +40,6 @@ extern u8 D_800D9B80;
 extern u8 D_800D9B81;
 extern u8 D_800D9B82;
 extern u8 D_800D9B83;
-extern Game13D350ViewAngles D_800DCDE0[];
 extern SkyDrawFunc D_800891D8[];
 
 /* Draws the sky for the current view: clears the depth buffer, then (unless the view is covered) wraps the
@@ -96,21 +88,21 @@ Gfx *func_1510FEA0(Gfx *gfx, s32 arg1) {
     if (D_800C35EA[0] == 1 && D_800C3681 != 0) {
         return gfx;
     }
-    pitch = 360.0f - (D_800DBFF0[D_80082FA4].pitch + D_800DCDE0[D_80082FA4].pitch);
+    pitch = 360.0f - (D_800DBFF0[D_80082FA4].pitch + D_800DCDE0[D_80082FA4].rot.x);
     while (pitch < -180.0f) {
         pitch += 360.0f;
     }
     while (pitch >= 180.0f) {
         pitch -= 360.0f;
     }
-    yaw = 360.0f - (D_800DBFF0[D_80082FA4].unk380 + D_800DCDE0[D_80082FA4].yaw);
+    yaw = 360.0f - (D_800DBFF0[D_80082FA4].unk380 + D_800DCDE0[D_80082FA4].rot.y);
     while (yaw < 0.0f) {
         yaw += 360.0f;
     }
     while (yaw >= 360.0f) {
         yaw -= 360.0f;
     }
-    roll = D_800DBFF0[D_80082FA4].swayAmount + D_800DCDE0[D_80082FA4].roll;
+    roll = D_800DBFF0[D_80082FA4].swayAmount + D_800DCDE0[D_80082FA4].rot.z;
     while (roll < -180.0f) {
         roll += 360.0f;
     }

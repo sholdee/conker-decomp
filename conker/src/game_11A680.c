@@ -157,7 +157,7 @@ void func_150ED638(Actor *obj, s32 left, s32 right) {
 }
 
 extern s32 func_1508DAEC(s32 player, s32 mode);
-extern struct216 *func_1507BB28(s32 arg0, s32 scriptId);
+extern ObjScriptCmd *func_1507BB28(s32 arg0, s32 scriptId);
 extern void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7, s32 force, s32 arg9);
 extern void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);

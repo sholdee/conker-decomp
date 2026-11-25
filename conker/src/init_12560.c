@@ -5,7 +5,7 @@
 #define func_15043BB8 func_15043BB8_functions_h
 #include "functions.h"
 #undef func_15043BB8
-void func_15043BB8(struct105 *ring);
+void func_15043BB8(MsgRing *ring);
 #include "variables.h"
 
 /*
@@ -27,7 +27,7 @@ void func_10012560(s32 unused) {
 /* Initialise the stream player from `heap` and hook its messages into the ring. */
 void func_10012588(s32 heap) {
     func_15016170(heap);
-    func_15043A00(&D_800427A0, &D_800427B0, 64);
+    func_15043A00(&D_800427A0, D_800427B0, sizeof(D_800427B0));
     func_151F3C1C(func_10012560);
 }
 

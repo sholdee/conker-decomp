@@ -40,15 +40,9 @@ typedef struct {
     /* 0x09 */ u8 rate;
 } FogFlashData;
 
-/* An effect (a struct260 with per-effect data at 0x28), as created by func_15149130. */
+/* An effect (a TimedEffect with per-effect data at 0x28), as created by func_15149130. */
 typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xC - 0x2];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 state; /* -1 ends the effect */
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ union {
         EmitterData emitter;
         EmittedPoint point;
@@ -73,7 +67,7 @@ void func_150EC520(Effect *effect) {
 
                 func_151432BC(emitter->shape, &point.x, &point.z, &upper, &point.y);
                 spawned = (Effect *)func_15149130(func_150ADA20() % 131U + 80, -1, 0x5A, -1, TRUE, 0,
-                                                  sizeof(point), effect->owner, effect->kind);
+                                                  sizeof(point), effect->base.header.owner, effect->base.header.kind);
                 if (spawned != NULL) {
                     memcpy(&spawned->data, &point, sizeof(point));
                 }
@@ -83,21 +77,10 @@ void func_150EC520(Effect *effect) {
     }
 }
 
-/* Per-particle data of the particles the source effect emits. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 unk2;
-    /* 0x03 */ u8 unk3;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-} SourceParticleData;
-
 /* Live particle, as created by func_15130280 from a ParticleDesc. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ SourceParticleData data;
+    /* 0xA8 */ WobbleData data;
 } Particle;
 
 extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
@@ -110,10 +93,10 @@ void func_150EC6B0(Effect *effect) {
     source->accumulator += (1352.0f + func_150ADA68() * 1698.0f) * 0.0001f * D_800BE9A4;
     if (source->accumulator > 1.0f) {
         ParticleDesc spawn;
-        SourceParticleData data;
+        WobbleData data;
         Particle *particle;
 
-        data.unkC = 0.9704700112f;
+        data.drag = 0.9704700112f;
         spawn.texture = 0x6C;
         spawn.renderMode = 0x5103;
         spawn.unk0 = 0x200005;
@@ -122,8 +105,8 @@ void func_150EC6B0(Effect *effect) {
         spawn.flags = 0x80DE07;
         spawn.primColorMode = 8;
         spawn.envColorMode = 6;
-        data.unk0 = 0;
-        data.unk1 = 0;
+        data.phase[0] = 0;
+        data.phase[1] = 0;
         spawn.unk4 = 0;
         spawn.frame = 0;
         spawn.frameRate = 0;
@@ -149,17 +132,17 @@ void func_150EC6B0(Effect *effect) {
         spawn.vel.y = 0.0f;
         spawn.vel.z = 0.0f;
         do {
-            data.unk2 = func_150ADA20() % 5U + 4;
-            data.unk3 = func_150ADA20() % 5U + 4;
-            data.unk4 = func_150ADA68() * 11.0f;
-            data.unk8 = func_150ADA68() * 11.0f;
+            data.phaseStep[0] = func_150ADA20() % 5U + 4;
+            data.phaseStep[1] = func_150ADA20() % 5U + 4;
+            data.amplitude[0] = func_150ADA68() * 11.0f;
+            data.amplitude[1] = func_150ADA68() * 11.0f;
             spawn.gravity = func_150ADA68() * 0.172f + 0.09800000489f;
             spawn.flags &= ~0xC0;
             spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
             spawn.alpha = func_150ADA20() % 101U + 100;
             spawn.timer = func_150ADA20() % 51U + 80;
             spawn.width = spawn.height = func_150ADA68() * 80.0f + 92.0f;
-            particle = func_15130280(&spawn, 0, 0, 0x10, effect->owner, effect->kind);
+            particle = func_15130280(&spawn, 0, 0, 0x10, effect->base.header.owner, effect->base.header.kind);
             if (particle != NULL) {
                 memcpy(&particle->data, &data, sizeof(data));
             }
@@ -202,7 +185,7 @@ void func_150ECB8C(Effect *effect) {
     Actor *owner = fog->owner;
 
     if ((owner->interaction_state == 0) || (owner->unique_id != fog->ownerId)) {
-        effect->state = -1;
+        effect->base.header.state = -1;
     } else {
         func_1502EA98(owner, fog->r, fog->g, fog->b, fog->a, FALSE, fog->rate);
     }

@@ -18,7 +18,7 @@ void func_15012370(void) {
         half = 0.5f;
         do {
             func_151EF954(
-                ((MtxF *)D_800DCC10)[i],
+                &D_800DCC10[i],
                 -(temp_f0 = D_800BE628[i].width * half),
                 temp_f0,
                 -(temp_f2 = D_800BE628[i].height * half),
@@ -49,21 +49,8 @@ void func_15012470(void) {
     D_80088750 = func_1518AADC(4, 300, 0);
 }
 
-typedef struct Game3F820Point {
-    f32 x, y, z;
-    s32 value;
-} Game3F820Point;
-
-typedef struct Game3F820Spread {
-    u8 pad0[0xC];
-    u8 baseAngle;
-    u8 padD[3];
-} Game3F820Spread;
-
 void *memcpy(void *, const void *, u32);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
-extern Game3F820Spread D_8009F920[3];
-extern Game3F820Point D_800DCA30[3][10];
 
 void func_150124A0(void) {
     s32 row;
@@ -84,7 +71,7 @@ void func_150124A0(void) {
         s32 i;
 
         for (i = 0; i < 10; i++) {
-            yaw = D_8009F920[row].baseAngle + func_150ADA20() % 13U - 0x86;
+            yaw = D_8009F920[row].yaw + func_150ADA20() % 13U - 0x86;
             pitch = (func_150ADA20() & 0xF) - 10;
             yawCos = func_151423D8(yaw - 0x40);
             yawSin = func_151423D8(yaw);
@@ -96,13 +83,13 @@ void func_150124A0(void) {
             dirZ = radius * yawSin;
             if (func_150AC9C0(0.0f, 300.0f, 0.0f, dirX, dirY, dirZ, NULL, NULL,
                               &hit.x, &hit.y, &hit.z, NULL, NULL, NULL, 0.0f) == 0) {
-                D_800DCA30[row][i].x = 0.0f;
-                D_800DCA30[row][i].y = 0.0f;
-                D_800DCA30[row][i].z = 0.0f;
+                D_800DCA30[row][i].pos.x = 0.0f;
+                D_800DCA30[row][i].pos.y = 0.0f;
+                D_800DCA30[row][i].pos.z = 0.0f;
             } else {
-                D_800DCA30[row][i].x = hit.x * 0.97f;
-                D_800DCA30[row][i].y = (hit.y - 300.0f) * 0.97f + 300.0f;
-                D_800DCA30[row][i].z = hit.z * 0.97f;
+                D_800DCA30[row][i].pos.x = hit.x * 0.97f;
+                D_800DCA30[row][i].pos.y = (hit.y - 300.0f) * 0.97f + 300.0f;
+                D_800DCA30[row][i].pos.z = hit.z * 0.97f;
             }
         }
     }

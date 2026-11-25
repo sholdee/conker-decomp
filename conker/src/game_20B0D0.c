@@ -2,43 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-struct Struct151E5034 {
-    f32 unk0;  /* progress of a step between path stops (func_151E6C1C) */
-    f32 unk4;  /* its speed */
-    f32 unk8;  /* progress along the current stop's path */
-    f32 unkC;  /* its speed */
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u16 unk20; /* input bits read by the menus */
-    char pad22[8];
-    s8 unk2A;
-    s8 unk2B; /* current path stop */
-    s8 unk2C; /* displayed stop */
-    s8 unk2D;
-    char pad2E[0x10];
-    s8 unk3E; /* which of the two paths is in use */
-    s8 unk3F;
-    char pad40;
-    s8 unk41;
-    s8 unk42;
-    s8 unk43;
-    s8 unk44;
-    char pad45;
-    s16 unk46[16];
-    struct {
-        s16 unk0;
-        s16 unk2;
-        s16 unk4;
-        s16 unk6;
-        s16 unk8;
-        s16 unkA;
-    } unk66[4];
-};
-
 extern OSIoMesg D_800388E0;
-extern struct Struct151E5034 *D_8008FDD4;
 extern void (*D_800E0A88)(void);
 
 extern s8 D_8008FD98;
@@ -241,7 +205,7 @@ void func_151DDC20(void) {
                     D_800E0A88 = func_151DDBA0;
                     D_8008FD74 = 8;
                     if (D_800BE616 != 0) {
-                        D_8008FDD4->unk3F = 4;
+                        D_8008FDD4->page = 4;
                         if (numOptions == D_8008FE2C) {
                             D_8008FD9C = 1;
                             D_800E0A88 = func_151E2834;
@@ -343,7 +307,7 @@ void func_151DE85C(void) {
     D_8008FD80 = 1;
     D_8008FE28 = 2;
     D_8008FDA4 = 0;
-    D_8008FDD4->unk3E = 0;
+    D_8008FDD4->menu = 0;
     D_8008FDD4->unk2B = 5;
     D_8008FDD4->unk2C = D_8008FDD4->unk2B;
 }

@@ -7,7 +7,7 @@
  * Collision handlers of the pooled physics particles (game_15F680.c's D_80089934 / D_80089974 tables).
  * The types below are local copies of layouts worked out elsewhere (fields this file does not use are
  * padding):
- *   PhysicsParticle, ParticleFloor, CollisionProbe - game_15F680.c
+ *   PhysicsParticle, CollisionHit, CollisionProbe - game_15F680.c
  *   ParticleDef, AxisParticle                      - the particle system of game_169510.c
  *   PuffSpray                                    - func_15151A38's argument (game_17CAF0.c)
  *   SurfacePuffSpray                             - func_15151670's argument (game_17CAF0.c)
@@ -19,14 +19,6 @@ typedef struct {
     /* 0x000 */ u8 pad0[0x128];
     /* 0x128 */ f32 motion[2];
 } AxisParticle;
-
-/* Ground contact written by func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 surface[0x14];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 pad1C[8];
-} ParticleFloor; /* size 0x24 */
 
 /* A pooled physics particle of game_15F680.c. */
 typedef struct {
@@ -57,7 +49,7 @@ typedef struct {
     /* 0x077 */ u8 squashFn;
     /* 0x078 */ u8 matrixFn;
     /* 0x079 */ u8 pad79[0x97];
-    /* 0x110 */ ParticleFloor floor;
+    /* 0x110 */ CollisionHit floor;
     /* 0x134 */ Vec3f squashOrigin;
     /* 0x140 */ f32 speed;
     /* 0x144 */ u8 pad144[8];
@@ -109,7 +101,7 @@ s32 func_150B89E0(PhysicsParticle *particle, f32 x, f32 y, f32 z, f32 floorHeigh
             def.pos.y = floorHeight;
             def.pos.z = z;
             extra[0] = ((func_150ADA68() * 80.0f) + 50.0f) * 1e-05f;
-            def.unk50 = particle->floor.unk18;
+            def.unk50 = particle->floor.material;
             // matching: the spawned particle reuses the surface parameter; a new local takes another stack slot
             surface = (void *)func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
@@ -166,7 +158,7 @@ s32 func_150B89E0(PhysicsParticle *particle, f32 x, f32 y, f32 z, f32 floorHeigh
                 burst.render.envMode = 7;
                 burst.unk80 = 10;
                 burst.unk82 = 25;
-                burst.unk84 = particle->floor.unk18;
+                burst.unk84 = particle->floor.material;
                 func_15151A38(&burst, particle->unkC, particle->unk1);
             }
             func_10010F88(D_80088734[func_150ADA20() & 1], 32000, 0, 0, 0, particle->pos.x, floorHeight + 25.0f,
@@ -203,7 +195,7 @@ typedef struct {
 } CollisionProbe;
 
 s32 func_150A3058(s32, s16, s16, s16);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *, f32 *, f32 *, f32 *, f32 *,
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *,
                   s32 *, void *, f32);
 s32 func_15145C90(s32);
 void func_15151670(SurfacePuffSpray *config, u8 arg1, s32 arg2);
@@ -217,7 +209,7 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
         if (func_150A3058(1, probe->pos.x, probe->pos.y, probe->pos.z) == 0) {
             Vec3f move;
             Vec3f hit;
-            SurfaceTriangle triangle;
+            CollisionTri triangle;
             s32 hitObject;
             ParticleDef def;
             AxisParticle *spawned;
@@ -226,7 +218,7 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
             move.x = particle->pos.x - x;
             move.y = particle->pos.y - y;
             move.z = particle->pos.z - z;
-            if (func_150AC9C0(x, y, z, move.x, move.y, move.z, NULL, triangle.v, &hit.x, &hit.y, &hit.z,
+            if (func_150AC9C0(x, y, z, move.x, move.y, move.z, NULL, &triangle, &hit.x, &hit.y, &hit.z,
                               NULL, &hitObject, NULL, 0.0f) != 0) {
                 // matching: a switch, not an if; the if form swaps the $s0/$s1 homes of particle and probe
                 switch (func_15145C90(hitObject)) {
@@ -259,7 +251,7 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
                     def.scale.y = 0.0f;
                     def.scale.z = 0.0f;
                     extra = (func_150ADA68() * 80.0f + 50.0f) * 1e-05f;
-                    def.unk50 = particle->floor.unk18;
+                    def.unk50 = particle->floor.material;
                     spawned = (AxisParticle *)func_1513D594(&def, &D_800A4AA0, 0x18, 0, 0,
                                                             (func_150ADA20() & 1) * 2 + (func_150ADA20() & 1),
                                                             func_150ADA20() & 0xFF, 500.0f, 500.0f, 0,
@@ -317,7 +309,7 @@ s32 func_150B8F44(PhysicsParticle *particle, CollisionProbe *probe, f32 x, f32 y
                     burst.render.envMode = 7;
                     burst.unk9C = 10;
                     burst.unk9E = 25;
-                    burst.unkA0 = particle->floor.unk18;
+                    burst.unkA0 = particle->floor.material;
                     func_15151670(&burst, particle->unkC, particle->unk1);
                 }
             }

@@ -8,21 +8,11 @@ f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
 void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
-void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 u8 func_151D8E20(void);
 
 typedef struct {
     f32 width, height;
 } Size2f;
-
-/* Ground probe state filled by func_1504715C and updated by func_15046C80. */
-typedef struct {
-    /* 0x00 */ f32 y;
-    /* 0x04 */ u8 unk4[0x18];
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x20 */ s32 unk20;
-} Ground; /* size 0x24 */
 
 /* Motion state of a drop that hangs on an actor's bone, then falls and splashes. */
 typedef struct {
@@ -38,25 +28,13 @@ typedef struct {
     /* 0x23 */ s8 phaseSpeed[2];
     /* 0x28 */ Size2f baseSize;
     /* 0x30 */ Size2f wobble;
-    /* 0x38 */ Ground ground;
+    /* 0x38 */ CollisionHit ground;
     /* 0x5C */ u8 kind;             /* emitter kind, passed to the splash spawners */
     /* 0x5D */ u8 pad5D[3];
 } DripMotion; /* size 0x60 */
 
 typedef struct Particle {
-    /* 0x000 */ u8 type;
-    /* 0x001 */ u8 list;
-    /* 0x002 */ u8 pad2[2];
-    /* 0x004 */ struct Particle *prev;
-    /* 0x008 */ struct Particle *next;
-    /* 0x00C */ u8 owner;
-    /* 0x00D */ u8 padD[3];
-    /* 0x010 */ s32 active;
-    /* 0x014 */ s32 unk14;
-    /* 0x018 */ ParticleDef def;
-    /* 0x070 */ u8 pad70[0x50];
-    /* 0x0C0 */ Vtx vtxTemplate[4];
-    /* 0x100 */ Vtx *vtxBuffers[4];
+    /* 0x00 */ DefParticleHead head;
     /* 0x110 */ DripMotion motion;
 } Particle;
 
@@ -69,12 +47,6 @@ typedef struct {
 } DropKind; /* size 0x14 */
 
 extern DropKind D_800A9D40[];
-
-/* Actor reference sent with object messages (func_15191B8C). */
-typedef struct ActorRef {
-    Actor *actor;
-    u8 id;
-} ActorRef;
 
 /* An emitter's attachment to its actor. */
 typedef struct {
@@ -95,26 +67,15 @@ typedef struct DripSlot {
 
 #define DRIP_SLOT_COUNT 60
 
-/* Leading fields of a func_151491F4 task. */
-typedef struct {
-    /* 0x00 */ u8 type;
-    /* 0x01 */ u8 list;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 flags;            /* bit 0: the timer counts down */
-    /* 0x0E */ s16 timer;
-} TaskHeader;
-
 /* A func_151491F4 task that keeps the link of an emitter that could not be created yet. */
 typedef struct {
-    /* 0x00 */ TaskHeader header;
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ ActorLink link;
 } DripRetryTask;
 
 /* Object type 0x20: hangs drops on the bones of an actor. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ActorLink link;
     /* 0x1C */ f32 spawnAccum;
     /* 0x20 */ s32 dropCount;
@@ -132,7 +93,7 @@ DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
     ActorRef ref;
 
     ref.actor = link->actor;
-    ref.id = link->actor->unique_id;
+    ref.uniqueId = link->actor->unique_id;
     func_15191B8C(&ref, 0xE);
     emitter = func_15167A68(0x20, list, extraSize + sizeof(DripEmitter), 1, owner, 1);
     if (emitter == NULL) {
@@ -153,13 +114,13 @@ void func_15191400(DripEmitter *emitter);
 /* Type 0x20 handler: releases the drops, then func_15169804. */
 void func_15190840(DripEmitter *emitter) {
     func_15191400(emitter);
-    func_15169804((struct102 *)emitter);
+    func_15169804(&emitter->header);
 }
 
 /* Type 0x20 handler: releases the drops, then func_15169824. */
 void func_1519086C(DripEmitter *emitter) {
     func_15191400(emitter);
-    func_15169824((struct102 *)emitter);
+    func_15169824(&emitter->header);
 }
 
 /* A point on an actor's bone where a drop hangs. */
@@ -180,7 +141,7 @@ typedef struct {
 } EmitterKind; /* size 0x18 */
 
 extern EmitterKind D_8008FA70[];
-void func_1504715C(Ground *ground, Actor *actor);
+void func_1504715C(CollisionHit *ground, Actor *actor);
 void func_15143134(Vec3f *offset, Vec3f *out, Mtx *mtx);
 void func_1513F680(Particle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn);
 
@@ -229,23 +190,23 @@ void func_15190898(DripEmitter *emitter) {
             freeCount = 0;
             for (i = 0, slot = emitter->slots; i < kind->numMounts; i++, slot++) {
                 if (slot->drop != NULL) {
-                    slot->drop->def.rot = slot->drop->def.pos;
-                    func_15143134(&kind->mounts[i].offset, &slot->drop->def.pos, (Mtx *)emitter->link.actor->unk1D4 + kind->mounts[i].bone);
+                    slot->drop->head.def.rot = slot->drop->head.def.pos;
+                    func_15143134(&kind->mounts[i].offset, &slot->drop->head.def.pos, (Mtx *)emitter->link.actor->unk1D4 + kind->mounts[i].bone);
                     slot->timer -= D_800BE9E4;
                     if (slot->timer < 0) {
                         Particle *falling = slot->drop;
                         DripMotion *fall = &slot->drop->motion;
 
                         dropKind = &D_800A9D40[fall->dropKind];
-                        dx = (falling->def.pos.x - falling->def.rot.x) * D_800BE9A8;
-                        dz = (falling->def.pos.z - falling->def.rot.z) * D_800BE9A8;
+                        dx = (falling->head.def.pos.x - falling->head.def.rot.x) * D_800BE9A8;
+                        dz = (falling->head.def.pos.z - falling->head.def.rot.z) * D_800BE9A8;
                         fall->vel.y = 0.0f;
                         fall->vel.x = dx;
                         fall->vel.z = dz;
                         func_1513F680(slot->drop, 13, 18, 0, 13);
                         isFree = 1;
-                        slot->drop->def.lifetime = func_150ADA20() % (u32)(dropKind->lifeRange + 1) + dropKind->lifeMin;
-                        slot->drop->def.flags |= 1;
+                        slot->drop->head.def.lifetime = func_150ADA20() % (u32)(dropKind->lifeRange + 1) + dropKind->lifeMin;
+                        slot->drop->head.def.flags |= 1;
                         slot->drop = NULL;
                         emitter->dropCount--;
                     } else {
@@ -354,7 +315,7 @@ void func_15190898(DripEmitter *emitter) {
         }
     }
     if (done) {
-        func_1516972C((struct102 *)emitter);
+        func_1516972C(&emitter->header);
     }
 }
 
@@ -369,8 +330,8 @@ s32 func_15190F9C(Particle *drop) {
     motion->phase[1] += motion->phaseSpeed[1] * D_800BE9E4;
     widthWave = func_151423D8((u8)(motion->phase[0] - 0x40));
     heightWave = func_151423D8((u8)(motion->phase[1] - 0x40));
-    p->def.width += (motion->baseSize.width + motion->wobble.width * widthWave - p->def.width) * 0.5f;
-    p->def.height += (motion->baseSize.height + motion->wobble.height * heightWave - p->def.height) * 0.5f;
+    p->head.def.width += (motion->baseSize.width + motion->wobble.width * widthWave - p->head.def.width) * 0.5f;
+    p->head.def.height += (motion->baseSize.height + motion->wobble.height * heightWave - p->head.def.height) * 0.5f;
     return 1;
 }
 
@@ -393,12 +354,12 @@ Vtx *func_1519108C(Particle *drop, s16 vp) {
     f32 angle;
     u8 fresh;
 
-    func_151D5D60(drop->vtxBuffers, vp, 0x40, &vtx, &fresh);
+    func_151D5D60(drop->head.vtxBuffers, vp, 0x40, &vtx, &fresh);
     ret = vtx;
     if (vtx) {
         if (fresh) {
-            memcpy(drop->vtxBuffers[vp], drop->vtxTemplate, sizeof(drop->vtxTemplate));
-            memcpy(drop->vtxBuffers[vp] + 4, drop->vtxTemplate, sizeof(drop->vtxTemplate));
+            memcpy(drop->head.vtxBuffers[vp], drop->head.vtxTemplate, sizeof(drop->head.vtxTemplate));
+            memcpy(drop->head.vtxBuffers[vp] + 4, drop->head.vtxTemplate, sizeof(drop->head.vtxTemplate));
         }
     } else {
         return NULL;
@@ -407,7 +368,7 @@ Vtx *func_1519108C(Particle *drop, s16 vp) {
     viewX = &D_800DD1E8[vp];
     viewZ = &D_800DD1D8[vp];
     sign = -1.0f;
-    speed = ((*viewX * (drop->def.rot.x - drop->def.pos.x)) - (*viewZ * (drop->def.rot.z - drop->def.pos.z))) * D_800BE9A8;
+    speed = ((*viewX * (drop->head.def.rot.x - drop->head.def.pos.x)) - (*viewZ * (drop->head.def.rot.z - drop->head.def.pos.z))) * D_800BE9A8;
     if (speed < 0.0f) {
         sign = 1.0f;
         speed = -speed;
@@ -421,31 +382,31 @@ Vtx *func_1519108C(Particle *drop, s16 vp) {
     angle = angle * sign;
     sinAngle = sinf(angle);
     angle = cosf(angle);
-    halfWidthCos = drop->def.width * angle;
-    halfWidthSin = drop->def.width * sinAngle;
-    heightCos = drop->def.height * angle;
-    heightSin = drop->def.height * sinAngle;
+    halfWidthCos = drop->head.def.width * angle;
+    halfWidthSin = drop->head.def.width * sinAngle;
+    heightCos = drop->head.def.height * angle;
+    heightSin = drop->head.def.height * sinAngle;
 
-    vtx[0].v.ob[0] = (*viewX * -halfWidthCos) + drop->def.pos.x;
-    vtx[0].v.ob[1] = drop->def.pos.y + halfWidthSin;
-    vtx[0].v.ob[2] = drop->def.pos.z - (*viewZ * -halfWidthCos);
+    vtx[0].v.ob[0] = (*viewX * -halfWidthCos) + drop->head.def.pos.x;
+    vtx[0].v.ob[1] = drop->head.def.pos.y + halfWidthSin;
+    vtx[0].v.ob[2] = drop->head.def.pos.z - (*viewZ * -halfWidthCos);
     vtx[0].v.flag = 0;
 
-    vtx[1].v.ob[0] = (*viewX * halfWidthCos) + drop->def.pos.x;
-    vtx[1].v.ob[1] = drop->def.pos.y - halfWidthSin;
-    vtx[1].v.ob[2] = drop->def.pos.z - (*viewZ * halfWidthCos);
+    vtx[1].v.ob[0] = (*viewX * halfWidthCos) + drop->head.def.pos.x;
+    vtx[1].v.ob[1] = drop->head.def.pos.y - halfWidthSin;
+    vtx[1].v.ob[2] = drop->head.def.pos.z - (*viewZ * halfWidthCos);
     vtx[1].v.flag = 0;
 
     angle = halfWidthCos - heightSin;
-    vtx[2].v.ob[0] = (*viewX * angle) + drop->def.pos.x;
-    vtx[2].v.ob[1] = (drop->def.pos.y - halfWidthSin) - heightCos;
-    vtx[2].v.ob[2] = drop->def.pos.z - (*viewZ * angle);
+    vtx[2].v.ob[0] = (*viewX * angle) + drop->head.def.pos.x;
+    vtx[2].v.ob[1] = (drop->head.def.pos.y - halfWidthSin) - heightCos;
+    vtx[2].v.ob[2] = drop->head.def.pos.z - (*viewZ * angle);
     vtx[2].v.flag = 0;
 
     angle = -(halfWidthCos + heightSin);
-    vtx[3].v.ob[0] = (*viewX * angle) + drop->def.pos.x;
-    vtx[3].v.ob[1] = (drop->def.pos.y + halfWidthSin) - heightCos;
-    vtx[3].v.ob[2] = drop->def.pos.z - (*viewZ * angle);
+    vtx[3].v.ob[0] = (*viewX * angle) + drop->head.def.pos.x;
+    vtx[3].v.ob[1] = (drop->head.def.pos.y + halfWidthSin) - heightCos;
+    vtx[3].v.ob[2] = drop->head.def.pos.z - (*viewZ * angle);
     vtx[3].v.flag = 0;
 
     return ret;
@@ -469,15 +430,15 @@ void func_15191400(DripEmitter *emitter) {
             motion->vel.y = 0.0f;
             motion->vel.z = 0.0f;
             func_1513F680(slot->drop, 13, 18, 0, 13);
-            slot->drop->def.lifetime = func_150ADA20() % (u32)(dropKind->lifeRange + 1) + dropKind->lifeMin;
-            slot->drop->def.flags |= 1;
+            slot->drop->head.def.lifetime = func_150ADA20() % (u32)(dropKind->lifeRange + 1) + dropKind->lifeMin;
+            slot->drop->head.def.flags |= 1;
         }
     }
     bzero(emitter->slots, DRIP_SLOT_COUNT * sizeof(DripSlot));
 }
 
 s32 func_1514672C(Vec3f *pos);
-s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, Ground *ground);
+s32 func_15046C80(Vec3f *pos, s32 arg1, f32 minY, CollisionHit *ground);
 void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
 
 /* Update of a falling drop: moves it under drag and gravity; on reaching the ground it splashes and dies. */
@@ -491,7 +452,7 @@ s8 func_15191520(Particle *drop) {
     f32 oldVz;
     f32 oldVx;
 
-    oldY = drop->def.pos.y;
+    oldY = drop->head.def.pos.y;
     motion = &drop->motion;
     alive = 1;
     oldVx = motion->vel.x;
@@ -502,36 +463,36 @@ s8 func_15191520(Particle *drop) {
     dy = motion->vel.y * D_800BE9A4 + motion->gravity * D_800BE9A4 * D_800BE9A4 * 0.5f;
     dz = (motion->vel.z + oldVz) * 0.5f * D_800BE9A4;
     motion->vel.y += motion->gravity * D_800BE9A4;
-    drop->def.pos.x += dx;
-    drop->def.pos.y += dy;
-    drop->def.pos.z += dz;
-    drop->def.rot.x += dx;
-    drop->def.rot.y += dy;
-    drop->def.rot.z += dz;
-    drop->def.rot.x = drop->def.pos.x + (drop->def.rot.x - drop->def.pos.x) * motion->trail;
-    drop->def.rot.y = drop->def.pos.y + (drop->def.rot.y - drop->def.pos.y) * motion->trail;
-    drop->def.rot.z = drop->def.pos.z + (drop->def.rot.z - drop->def.pos.z) * motion->trail;
+    drop->head.def.pos.x += dx;
+    drop->head.def.pos.y += dy;
+    drop->head.def.pos.z += dz;
+    drop->head.def.rot.x += dx;
+    drop->head.def.rot.y += dy;
+    drop->head.def.rot.z += dz;
+    drop->head.def.rot.x = drop->head.def.pos.x + (drop->head.def.rot.x - drop->head.def.pos.x) * motion->trail;
+    drop->head.def.rot.y = drop->head.def.pos.y + (drop->head.def.rot.y - drop->head.def.pos.y) * motion->trail;
+    drop->head.def.rot.z = drop->head.def.pos.z + (drop->head.def.rot.z - drop->head.def.pos.z) * motion->trail;
     {
         Vec3f probe;
 
-        probe.x = drop->def.pos.x;
-        probe.y = oldY - drop->def.height;
-        probe.z = drop->def.pos.z;
+        probe.x = drop->head.def.pos.x;
+        probe.y = oldY - drop->head.def.height;
+        probe.z = drop->head.def.pos.z;
         if (func_1514672C(&probe) == 0) {
             return 0;
         }
-        if (func_15046C80(&probe, 0, drop->def.pos.y - drop->def.height, &motion->ground) != 0) {
-            probe.y = motion->ground.y;
-            if (motion->ground.unk1D == 3) {
-                func_151DBCBC(motion->kind, drop->def.width * drop->def.height * 0.25f, drop->def.unk44,
-                              (s32)motion->ground.unk4, &probe, drop->owner, drop->list);
+        if (func_15046C80(&probe, 0, drop->head.def.pos.y - drop->head.def.height, &motion->ground) != 0) {
+            probe.y = motion->ground.height;
+            if (motion->ground.source == 3) {
+                func_151DBCBC(motion->kind, drop->head.def.width * drop->head.def.height * 0.25f, drop->head.def.unk44,
+                              (s32)&motion->ground.tri, &probe, drop->head.header.owner, drop->head.header.kind);
             } else if (func_150ADA20() & 1) {
-                func_151D9B8C(motion->kind, drop->def.width * drop->def.height * 0.150000006f, drop->def.unk44,
-                              (s32)motion->ground.unk4, &probe, func_150ADA20() % 41U + 80, 1, 1, 0,
-                              drop->owner, drop->list);
+                func_151D9B8C(motion->kind, drop->head.def.width * drop->head.def.height * 0.150000006f, drop->head.def.unk44,
+                              (s32)&motion->ground.tri, &probe, func_150ADA20() % 41U + 80, 1, 1, 0,
+                              drop->head.header.owner, drop->head.header.kind);
             } else {
-                func_151DAB58(motion->kind, drop->def.width * drop->def.height * 0.05000000075f, drop->def.unk44,
-                              &probe, 1, drop->owner, drop->list);
+                func_151DAB58(motion->kind, drop->head.def.width * drop->head.def.height * 0.05000000075f, drop->head.def.unk44,
+                              &probe, 1, drop->head.header.owner, drop->head.header.kind);
             }
             alive = 0;
         }
@@ -544,11 +505,11 @@ s32 func_1519187C(Particle *drop) {
     s16 lifetime;
     s32 alpha;
 
-    lifetime = drop->def.lifetime;
+    lifetime = drop->head.def.lifetime;
     if (lifetime < drop->motion.fadeStart) {
         alpha = lifetime * drop->motion.fadeRate;
-        if (alpha < drop->def.unk44) {
-            drop->def.unk44 = alpha;
+        if (alpha < drop->head.def.unk44) {
+            drop->head.def.unk44 = alpha;
         }
     }
     return 1;
@@ -569,17 +530,17 @@ void func_151918BC(DripRetryTask *task) {
         done = 1;
     }
     if (!done && actor->unk1D4 != NULL) {
-        if (task->header.flags & 1) {
-            link->timer = task->header.timer;
+        if (task->base.header.flags & 1) {
+            link->timer = task->base.header.state;
             link->flags |= 1;
         } else {
             link->timer = 300;
         }
         done = 1;
-        func_15190770(link, 0, task->header.owner, task->header.list);
+        func_15190770(link, 0, task->base.header.owner, task->base.header.kind);
     }
     if (done) {
-        func_1516972C((struct102 *)task);
+        func_1516972C(&task->base.header);
     }
 }
 
@@ -591,7 +552,7 @@ void func_15191980(DripEmitter *emitter, ActorRef *ref, u8 msg) {
         if (ref->actor == emitter->link.actor) {
             goto hit2;
         }
-        if (ref->id != emitter->link.actorId) {
+        if (ref->uniqueId != emitter->link.actorId) {
             goto skip;
         }
     hit2:
@@ -602,12 +563,12 @@ void func_15191980(DripEmitter *emitter, ActorRef *ref, u8 msg) {
         if (ref->actor == emitter->link.actor) {
             goto hit;
         }
-        if (ref->id == emitter->link.actorId) {
+        if (ref->uniqueId == emitter->link.actorId) {
         hit:
-            func_1516972C((struct102 *)emitter);
+            func_1516972C(&emitter->header);
         }
     } else if (msg == 0x4E) {
-        func_1516972C((struct102 *)emitter);
+        func_1516972C(&emitter->header);
     } else {
         func_15169850((s32)ref, msg, &emitter->link.actor, &emitter->link.actorId, emitter);
     }
@@ -623,22 +584,22 @@ void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
         if (ref->actor == link->actor) {
             goto hit;
         }
-        if (ref->id == link->actorId) {
+        if (ref->uniqueId == link->actorId) {
         hit:
-            func_1516972C((struct102 *)task);
+            func_1516972C(&task->base.header);
         }
     } else if (msg == 0x4E) {
-        func_1516972C((struct102 *)task);
+        func_1516972C(&task->base.header);
     } else if (msg == 0xD) {
         if (ref->actor == link->actor) {
             goto hit2;
         }
-        if (ref->id != link->actorId) {
+        if (ref->uniqueId != link->actorId) {
             goto skip;
         }
     hit2:
-        task->header.flags |= 1;
-        task->header.timer = 100;
+        task->base.header.flags |= 1;
+        task->base.header.state = 100;
     skip:;
     } else {
         func_15169850((s32)ref, msg, &link->actor, &link->actorId, task);

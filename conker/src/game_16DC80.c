@@ -13,9 +13,8 @@
  */
 
 typedef struct GlowObj {
-    /* 0x000 */ u8 pad0[8];
-    /* 0x008 */ struct GlowObj *next;
-    /* 0x00C */ u8 padC[0x1F];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x1B];
     /* 0x02B */ u8 unk2B;
     /* 0x02C */ u8 pad2C[8];
     /* 0x034 */ f32 pos[3];
@@ -39,19 +38,11 @@ typedef struct {
 } GlowViewDepth;
 
 
-/* z-buffer decompression table, indexed by the exponent (top 3 bits). */
-typedef struct {
-    s32 shift;
-    u32 base;
-} ZDecode;
-
-extern ZDecode D_80089630[];
 extern s32 (*D_80089F90[])(GlowObj *, s16);
 extern void (*D_80089F9C[])(GlowObj *);
 extern void (*D_80089FE4[])(GlowObj *);
 typedef void (*GlowMsgFn)(GlowObj *, u8 *, u8);
 extern GlowMsgFn D_8008A02C[];
-extern GlowObj *D_800DCE50[2][104];
 extern Vec3f *func_15144B34(s32);
 extern s32 func_15144CEC(f32 *, f32 *, f32 *, f32 *, f32 *, s32);
 void func_151D5D60(void **, s16, s32, void **, u8 *);
@@ -269,11 +260,11 @@ Vtx *func_151408A4(GlowObj *obj, s16 view) {
     return NULL;
 }
 
-void func_151411A4(struct210 *arg0) {
+void func_151411A4(DefParticleHead *arg0) {
     func_1513CA6C(arg0);
 }
 
-void func_151411C4(struct210 *arg0) {
+void func_151411C4(DefParticleHead *arg0) {
     func_1513CAA0(arg0);
 }
 
@@ -310,7 +301,7 @@ void func_151412BC(void) {
 
     for (p = 0; p < 2; p++) {
         for (i = 0; i < 4; i++) {
-            obj = D_800DCE50[p][D_800A5168[i]];
+            obj = (GlowObj *)D_800DCE50[p][D_800A5168[i]];
             while (obj != NULL) {
                 if (obj->flags & 0x2000) {
                     obj->params.shape.zbufSample[3] = 0;
@@ -329,7 +320,7 @@ void func_151412BC(void) {
                         }
                     }
                 }
-                obj = obj->next;
+                obj = (GlowObj *)obj->header.next;
             }
         }
     }
@@ -424,7 +415,7 @@ void func_151416E8(GlowObj *obj, u8 *msg, u8 msgType) {
             if (*msg == (*params).shape.type) {
                 switch (msgType) {
                     case 0x22:
-                        func_1516972C((struct102 *)obj);
+                        func_1516972C(&obj->header);
                         break;
                     case 0x24:
                         params->shape.handler = -1;
@@ -438,17 +429,13 @@ void func_151416E8(GlowObj *obj, u8 *msg, u8 msgType) {
     }
 }
 
-struct Data_151417C4 {
-    s32 unk0;
-    s32 unk4;
-};
 
 /* Sends func_15169260 the one-byte payload arg0, addressed with the two words of D_8008A074. */
 void func_151417C4(u8 arg0, u8 arg1) {
     u8 payload[1];
-    struct Data_151417C4 data;
+    IdList2 data;
 
-    data = *(struct Data_151417C4 *)D_8008A074;
+    data = D_8008A074;
     payload[0] = arg0;
     func_15169260(&data, 2, (s32)payload, arg1);
 }

@@ -28,19 +28,17 @@ typedef struct {
 } CamWobbleDef; // size 0x38
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10]; // effect header, see func_15167A68
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ CamWobbleDef def;
     /* 0x48 */ f32 phase[6];
     /* 0x60 */ CamWobbleHalves posHalf;
     /* 0x63 */ CamWobbleHalves rotHalf;
 } CamWobble; // size 0x68
 
-extern f32 D_800DCDE0[4][6]; // per-player camera offset (position xyz, rotation xyz), summed from the wobbles
 
 extern s32 (*D_8008B390[])(CamWobble *); // update callbacks, return 0 to stop
 extern f32 (*D_8008B394[])(CamWobble *); // amplitude scale callbacks
 
-extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
 /*
  * Creates a wobble effect from def with extraSize bytes of extra state after it. Returns NULL if the
@@ -80,7 +78,7 @@ void func_15164888(CamWobble *wobble) {
 }
 
 /* Advances wave i (half: its CamWobbleHalves) and adds its displacement to the player's camera offset. */
-#define WOBBLE_WAVE(i, half, prevHalf)                                                            \
+#define WOBBLE_WAVE(i, axis, half, prevHalf)                                                      \
     if (wobble->def.speed[i] != 0.0f) {                                                           \
         wobble->phase[i] = func_15144B68(wobble->def.speed[i] * D_800BE9A4 + wobble->phase[i]);   \
         half.v[(i) % 3] = wobble->phase[i] < 3.1415927f;                                          \
@@ -88,7 +86,7 @@ void func_15164888(CamWobble *wobble) {
             wobble->def.speed[i] = 0.0f;                                                          \
             wobble->phase[i] = 0.0f;                                                              \
         }                                                                                         \
-        D_800DCDE0[wobble->def.playerIndex][i] += sinf(wobble->phase[i]) * wobble->def.amplitude[i] * scale; \
+        D_800DCDE0[wobble->def.playerIndex].axis += sinf(wobble->phase[i]) * wobble->def.amplitude[i] * scale; \
     }
 
 /* Per-frame update of a wobble effect; frees it once every wave has stopped. */
@@ -124,18 +122,18 @@ void func_1516489C(CamWobble *wobble) {
             scale = D_8008B394[wobble->def.scaleFn](wobble);
         }
     }
-    WOBBLE_WAVE(0, wobble->posHalf, prevPosHalf)
-    WOBBLE_WAVE(1, wobble->posHalf, prevPosHalf)
-    WOBBLE_WAVE(2, wobble->posHalf, prevPosHalf)
-    WOBBLE_WAVE(3, wobble->rotHalf, prevRotHalf)
-    WOBBLE_WAVE(4, wobble->rotHalf, prevRotHalf)
-    WOBBLE_WAVE(5, wobble->rotHalf, prevRotHalf)
+    WOBBLE_WAVE(0, pos.x, wobble->posHalf, prevPosHalf)
+    WOBBLE_WAVE(1, pos.y, wobble->posHalf, prevPosHalf)
+    WOBBLE_WAVE(2, pos.z, wobble->posHalf, prevPosHalf)
+    WOBBLE_WAVE(3, rot.x, wobble->rotHalf, prevRotHalf)
+    WOBBLE_WAVE(4, rot.y, wobble->rotHalf, prevRotHalf)
+    WOBBLE_WAVE(5, rot.z, wobble->rotHalf, prevRotHalf)
     if (wobble->def.speed[0] == 0.0f && wobble->def.speed[1] == 0.0f && wobble->def.speed[2] == 0.0f &&
         wobble->def.speed[3] == 0.0f && wobble->def.speed[4] == 0.0f && wobble->def.speed[5] == 0.0f) {
         finished = 1;
     }
     if (finished) {
-        func_1516972C((struct102 *)wobble);
+        func_1516972C(&wobble->header);
     }
 }
 
@@ -180,7 +178,8 @@ typedef struct {
 
 /* A CamWobble made by func_15165628, with its envelope and room for a falloff after it. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x8];
     /* 0x018 */ CamWobbleShape shape; // CamWobble.def.amplitude and .speed
     /* 0x048 */ u8 pad48[0x20];       // rest of the CamWobble
     /* 0x068 */ CamWobbleEnvelope envelope;

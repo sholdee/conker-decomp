@@ -8,8 +8,7 @@
  * func_1517A84C), the draw callback func_1517A3A0 and the begin-draw hook func_1517A958.
  */
 typedef struct Particle {
-    /* 0x00 */ u8 type;      // object type given to func_15167A68
-    /* 0x01 */ u8 pad1[0xF];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ Mtx mtx[2];   // model matrix, double-buffered by D_800BE9C0
     /* 0x90 */ s16 x;
     /* 0x92 */ s16 y;
@@ -46,7 +45,6 @@ extern WaveState D_8008D0B0[];
 extern u8 D_800A7210[7]; /* vertex indices; a static const here would land in discarded .rodata */
 extern f32 D_800A7220;
 
-extern Particle *func_15167A68(s32, s32, s32, s32, s32, s32);
 s32 func_1510AEE0(MtxF mtx, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
 void func_1510E82C(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
 Gfx *func_1510B7B4(Gfx *gfx, s32 player);
@@ -163,7 +161,7 @@ void func_1517A1EC(Particle *particle) {
     particle->timer = timer;
     if (particle->alpha == 0 ||
         (particle->viewFlags && (particle->viewFlags >> 4) == (particle->viewFlags & 0xF))) {
-        func_1516972C((struct102 *)particle);
+        func_1516972C(&particle->header);
     }
 }
 
@@ -179,15 +177,15 @@ extern u8 D_8008CDF0[];
 /* Draw callback: culls the particle against view `view` (types 0xC and 0x59 are never culled), then emits its
  * texture, matrix, primitive alpha and render mode, and the shared particle display list D_8008CDF0. */
 Gfx *func_1517A3A0(Gfx *gfx, Particle *particle, s16 view) {
-    if (particle->type != 0xC && particle->type != 0x59 &&
+    if (particle->header.type != 0xC && particle->header.type != 0x59 &&
         func_1510AEE0(D_800D9C10[view], particle->x, particle->y, particle->z, D_800D9B20, D_800D9B1C,
                       D_800D35E0, D_800D35E4, NULL, NULL) != 0) {
-        if (particle->type == 8 && (particle->viewFlags & (1 << view))) {
+        if (particle->header.type == 8 && (particle->viewFlags & (1 << view))) {
             particle->viewFlags |= 0x10 << view;
         }
         return gfx;
     }
-    if (particle->type != 9) {
+    if (particle->header.type != 9) {
         particle->viewFlags |= 1 << view;
     }
     gfx = func_1517A9A8(gfx, particle->texture);
@@ -205,7 +203,7 @@ Gfx *func_1517A3A0(Gfx *gfx, Particle *particle, s16 view) {
         s32 modeL;
         u8 needSync;
         needSync = 0;
-        modeL = ((particle->type == 8) || (particle->type == 9)) ? 0x5049D8 : 0x504240;
+        modeL = ((particle->header.type == 8) || (particle->header.type == 9)) ? 0x5049D8 : 0x504240;
         gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C |
                                      G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             modeL, &needSync);
@@ -288,7 +286,7 @@ void func_1517A84C(Particle *particle) {
             particle->timer = timer;
             particle->alpha = (timer << 8) / 60;
         } else {
-            func_1516972C((struct102 *)particle);
+            func_1516972C(&particle->header);
         }
     }
 }

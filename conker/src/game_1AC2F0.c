@@ -913,9 +913,7 @@ typedef struct {
 } FlashData;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ s16 timer; // frames left
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ FlashData data;
 } FlashEffect;
 
@@ -954,7 +952,7 @@ void func_15182670(r, g, b, alpha, duration, view, owner, kind)
 
 /* Effect update: the flash alpha falls with the remaining time. */
 void func_15182748(FlashEffect *effect) {
-    effect->data.alpha = effect->data.alphaStep * effect->timer;
+    effect->data.alpha = effect->data.alphaStep * effect->base.header.state;
 }
 
 /* Effect draw: fills the flash's view. */

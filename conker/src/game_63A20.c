@@ -65,14 +65,6 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
     vtx[0].v.ob[2] = z;
 }
 
-/* Partial view of the Attachment struct from game_5D2C0.c (what func_1503195C returns). */
-typedef struct {
-    /* 0x00 */ u8 pad0[4];
-    /* 0x04 */ u8 flags;
-    /* 0x05 */ u8 pad5[0x23];
-    /* 0x28 */ Vtx *vtx[2]; // one per frame buffer
-} AttachmentView;
-
 Gfx *func_1515E544(Gfx *gfx, s32, u8, u8, void *);
 Gfx *func_15094F70(Gfx *gfx, void *, s32, void *, s32, s32, s32, s32, s32);
 extern Gfx D_80084350[];
@@ -85,21 +77,21 @@ extern u8 D_800903BC[];
  */
 Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
     MtxF *bones;
-    AttachmentView *attachment;
+    ModelAttachment *attachment;
     Vtx *color;
     s32 i;
 
     if (D_800CC2D0[index].unk31C->unk75 != 2 && D_800CC2D0[index].unk31C->unk75 != 0x13) {
         return gfx;
     }
-    attachment = (AttachmentView *)func_1503195C(&D_800CC2D0[index], 8, 0);
+    attachment = func_1503195C(&D_800CC2D0[index], 8, 0);
     if (attachment == NULL) {
         return gfx;
     }
     if (index > 0) {
         return gfx;
     }
-    color = &attachment->vtx[D_800BE9C0][48];
+    color = &((Vtx *)attachment->vtx[D_800BE9C0])[48];
     for (i = 0; i < 5; i++) {
         D_800C3FC0[index][i].v.cn[0] = color->v.cn[0];
         D_800C3FC0[index][i].v.cn[1] = color->v.cn[1];

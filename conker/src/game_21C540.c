@@ -37,7 +37,6 @@ extern s32 __osContInitialized;
 extern u8 __osMaxControllers;
 extern u8 __osContLastCmd;
 extern u32 __osContPifRam[16];
-extern u32 D_80042A4C;
 extern OSMesgQueue __osEepromTimerQ;
 
 void __osPackRequestData(u8 cmd);

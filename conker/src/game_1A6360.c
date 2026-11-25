@@ -90,7 +90,7 @@ void func_15178EFC(s32 state) {
             for (i = 0; i < RAIN_MAX_DROPS; i++) {
                 drop = RAIN_DROP(i);
                 if (drop != NULL) {
-                    func_1516972C((struct102 *)drop);
+                    func_1516972C(&drop->link);
                     RAIN_DROP(i) = NULL;
                 }
             }
@@ -363,7 +363,7 @@ void func_151797B0(QuadFx *drop) {
     if ((dropFlags & 2) && wrapped) {
         D_800DD436--;
         RAIN_DROP(drop->data.slot) = NULL;
-        func_1516972C((struct102 *)drop);
+        func_1516972C(&drop->link);
     } else if (dropFlags & 1) {
         if (wrapped) {
             drop->data.dropFlags = dropFlags ^ 1;

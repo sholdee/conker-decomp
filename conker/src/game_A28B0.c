@@ -34,7 +34,7 @@ void func_1504715C(f32 *arg0, Actor *arg1);
 void func_1514B364(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3);
 void func_15197A7C(Actor *arg0);
 u8 func_15056A00(Actor *arg0, u8 arg1, u8 arg2);
-struct216 *func_1507BB28(s32 arg0, s32 arg1);
+ObjScriptCmd *func_1507BB28(s32 arg0, s32 arg1);
 
 /* Jumps the script: skips `target` commands, or for target >= 247 skips forward to label `target`. */
 void func_15075400(s32 target) {
@@ -47,11 +47,11 @@ void func_15075400(s32 target) {
     }
 
     for (i = 0; i < 100; i++) {
-        if (D_800D154C->unk218->unk0 < 247) {
+        if (D_800D154C->unk218->op < 247) {
             D_800D154C->unk218++;
         } else {
-            label = D_800D154C->unk218->unk0;
-            D_800D154C->unk218 = (struct216 *)((u8 *)D_800D154C->unk218 + 1);
+            label = D_800D154C->unk218->op;
+            D_800D154C->unk218 = (ObjScriptCmd *)((u8 *)D_800D154C->unk218 + 1);
             if (target == label) {
                 // the interpreter steps past the current command after this returns
                 D_800D154C->unk218--;
@@ -818,20 +818,6 @@ void func_150774B4(void) {
     }
 }
 
-/* A node of the path-node graph D_800D2350 (same layout as in game_B4080.c). */
-typedef struct PathNode {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ u8 layer;
-    /* 0x7 */ u8 unk7;
-    /* 0x8 */ u8 unk8;
-    /* 0x9 */ u8 links[5]; /* neighbouring nodes, 0xFF = none */
-    /* 0xE */ u8 type;
-    /* 0xF */ u8 param;
-} PathNode;
-
-extern PathNode *D_800D2350;
 s32 func_15086098(f32 x, f32 y, f32 z, s8 arg3, s8 arg4, u8 *arg5, u8 *arg6);
 s32 func_15086364(s32 arg0, s8 arg1, s8 arg2, u8 *arg3, u8 *arg4);
 s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z);
@@ -1717,7 +1703,7 @@ select_object: // matching: unused label, splits the block for the scheduler
     case 4:
     case 5: {
         // matching: the block-scope redeclaration changes how IDO schedules the address of D_800D154C
-        extern Actor *D_800D154C;
+        extern Actor *D_800D154C; // matching: a declaration here opens a -g3 scope block (scheduling)
 
         // restart the object on script arg0, running as the current object meanwhile
         savedObj = D_800D154C;
@@ -2444,15 +2430,15 @@ void func_1507BB20(void) {
 }
 
 typedef struct ScriptEntry {
-    struct216 *script;
+    ObjScriptCmd *script;
     u8 id;
 } ScriptEntry;
 
 extern ScriptEntry D_80086A88[]; // default scripts, ended by a NULL script
-extern struct216 D_8009A120[];    // fallback script
+extern ObjScriptCmd D_8009A120[];    // fallback script
 
 /* Returns script `scriptId` of the current object's type, falling back to the default table. */
-struct216 *func_1507BB28(s32 arg0, s32 scriptId) {
+ObjScriptCmd *func_1507BB28(s32 arg0, s32 scriptId) {
     ActorAnim *typeData;
     ScriptEntry *table;
     s32 i;
@@ -2516,15 +2502,15 @@ void func_1507BC14(Actor *obj) {
     }
 
     while (obj->unk21C == 0) {
-        if (obj->unk218->unk0 >= 247) {
+        if (obj->unk218->op >= 247) {
             // a label: skip its single byte
-            obj->unk218 = (struct216 *)((u8 *)obj->unk218 + 1);
+            obj->unk218 = (ObjScriptCmd *)((u8 *)obj->unk218 + 1);
         } else {
-            D_800D1890 = obj->unk218->unk1;
-            D_800D1891 = obj->unk218->unk2;
-            D_800D1892 = obj->unk218->unk3;
-            D_800D1893 = obj->unk218->unk4;
-            D_80086730[obj->unk218->unk0]();
+            D_800D1890 = obj->unk218->args[0];
+            D_800D1891 = obj->unk218->args[1];
+            D_800D1892 = obj->unk218->args[2];
+            D_800D1893 = obj->unk218->args[3];
+            D_80086730[obj->unk218->op]();
             obj->unk218++;
         }
     }

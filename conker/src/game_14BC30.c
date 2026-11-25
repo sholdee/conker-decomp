@@ -24,15 +24,9 @@ typedef union {
 #define PROP_MOVING 2
 #define PROP_ARRIVED 3
 
-/* One row of D_80089260, selected by the low half of WorldObject.param. */
-typedef struct PropSoundRow {
-    s16 sounds[6]; /* [0] start opening, [1] start closing, [2] opened, [3] closed */
-} PropSoundRow;
-
 #define PROP_SOUND_OPEN 0
 #define PROP_SOUND_CLOSE 1
 
-extern PropSoundRow D_80089260[];
 extern void func_15114D24(WorldObject *prop, s32 sound, s32, s32, s32, s32);
 
 extern f32 sinf(f32);
@@ -68,7 +62,7 @@ void func_1511E780(WorldObject *prop) {
     }
     if (soundSlot != -1) {
         sound = prop->param.word & 0xFFFF; // matching: the row index must share sound's register
-        sound = D_80089260[sound].sounds[soundSlot];
+        sound = (&D_80089260[sound].open)[soundSlot];
         if (sound > 0) {
             func_15114D24(prop, sound, 24000, 200, 2500, 0);
         }

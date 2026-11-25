@@ -50,22 +50,17 @@ extern f32 D_800D1570[3];
 
 extern void (*D_80086110[])(Actor *, s32);
 
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;
-} ObjectRef;
-
 void func_150E0348(Actor *, s32, s32);
 void func_151BB61C(Actor *, f32 *, f32 *, s32, s32);
 void func_151BBA9C(Actor *, f32 *, f32 *, s32, s32);
 void func_151D3480(f32 *, f32 *, s32, s32, s32, s32);
 void func_151BC104(Actor *, s32, s32);
-struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_151B7144(Actor *, s32, s32);
 void func_151B6320(Actor *, s32, s32);
 void func_15137610(Actor *, f32 *, f32 *, s32, s32, s32);
 void func_15103E40(Actor *, Actor *, Vec3f *, u8, u8, u8, u8);
-void func_151B7328(ObjectRef *, s32, s32, s32, s32);
+void func_151B7328(ActorRef *, s32, s32, s32, s32);
 void func_151CEAAC(Actor *, s32, s32, s32, s32);
 
 void func_1506A6FC(Actor *obj, s32 arg1) {
@@ -99,26 +94,26 @@ void func_1506A83C(Actor *obj, s32 arg1) {
 
 /* Spawns a flash 50 units above the object. */
 void func_1506A864(Actor *obj, s32 arg1) {
-    struct225 *flash;
-    Header header;
+    LightEffect *flash;
+    LightEffectHeader header;
     f32 params[4];
-    Header2 pos;
+    Vec3i pos;
 
-    pos.unk0 = obj->x_position;
-    pos.unk4 = obj->y_position + 50.0f;
-    pos.unk8 = obj->z_position;
+    pos.x = obj->x_position;
+    pos.y = obj->y_position + 50.0f;
+    pos.z = obj->z_position;
     params[0] = 0.0f;
     params[2] = 0.0f;
-    header.unk0 = 2;
-    header.unk1 = 15;
-    header.unk2 = 300;
-    header.unk4 = 5;
+    header.flags = 2;
+    header.update = 15;
+    header.lifetime = 300;
+    header.lightType = 5;
     params[1] = 80.0f;
     params[3] = 0.1020999998f;
 
     flash = func_151602C0(&header, &pos, 0, 0xFF, 0xFF, 90, 0xFF, 0, 0x10, 0xFF, 1);
     if (flash != NULL) {
-        memcpy(&flash->unk18, params, sizeof(params));
+        memcpy(&flash->data, params, sizeof(params));
     }
 }
 
@@ -147,17 +142,16 @@ typedef struct {
 
 /* Spawns an effect that carries the object and the two words at arg as its data. */
 void func_1506AA48(Actor *obj, Pair1506AA48 *arg) {
-    struct260 *effect;
+    TimedEffect *effect;
     struct {
-        ObjectRef ref;
+        ActorRef ref;
         Pair1506AA48 value;
     } data;
 
-    data.ref.owner = obj;
-    data.ref.ownerId = obj->unique_id;
+    data.ref.actor = obj;
+    data.ref.uniqueId = obj->unique_id;
     data.value = *arg;
 
-    /* functions.h types the data-size parameter as struct37 * */
     effect = func_15149130(10, 7, 35, -1, 1, 33, sizeof(data), 0xFF, 1);
     if (effect != NULL) {
         memcpy((u8 *)effect + 0x28, &data, sizeof(data));
@@ -191,10 +185,10 @@ void func_1506ABC4(Actor *obj, Arg1506AB7C *arg) {
 }
 
 void func_1506AC0C(Actor *obj, s32 arg1) {
-    ObjectRef ref;
+    ActorRef ref;
 
-    ref.owner = obj;
-    ref.ownerId = obj->unique_id;
+    ref.actor = obj;
+    ref.uniqueId = obj->unique_id;
     func_151B7328(&ref, 0, 8, 0xFF, 1);
 }
 

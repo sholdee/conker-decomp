@@ -1,13 +1,10 @@
 #include <ultra64.h>
 // matching: func_151B8908's spill slot needs func_150ADA20 declared returning s32, not u8
 #include "functions.h"
+#include "variables.h"
 #include "effects.h"
 
 extern u8 D_800AA490;
-extern f32 D_800DCA24;
-extern f32 D_800BE9A4;
-extern f32 D_800BE9A8;
-extern Vec3f D_800A5480;
 
 /* The leading fields of a bullet object (see func_151C0698 in game_1ED0F0.c). */
 typedef struct {

@@ -18,7 +18,7 @@ void func_150104F0(void) {
 
 void func_15010538(Actor *arg0) {
     struct175 tmp;
-    struct37 *temp_v0;
+    TimedEffect *effect;
 
     func_15161E24(arg0, 2, 2, 300, 30, 100, 200, 255, 255, 1);
 // FAKEMATCH but works...
@@ -29,9 +29,9 @@ dummy_label_927029:
     tmp.unk8 = 0;
     tmp.unkA = 0;
 
-    temp_v0 = func_15149130(300, -1, 80, -1, 0, 61, 12, 255, 1);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk28, &tmp, 12); // memcpy
+    effect = func_15149130(300, -1, 80, -1, 0, 61, 12, 255, 1);
+    if (effect != NULL) {
+        memcpy(effect + 1, &tmp, 12);
     }
 }
 

@@ -23,12 +23,6 @@
 #define TEXTBOX_CENTERED        0x20000 /* centre each text line */
 #define TEXTBOX_WHITE_TEXT      0x40000
 
-/* Message table entry (D_800DD254 / D_800DD258). */
-typedef struct {
-    u8 *data;
-    s32 unk4;
-} MessageEntry;
-
 /* TextBox.state */
 #define TEXTBOX_STATE_INIT      0x1
 #define TEXTBOX_STATE_GROW      0x2
@@ -39,8 +33,6 @@ typedef struct {
 #define TEXTBOX_STATE_TEXT_OUT  0x40
 #define TEXTBOX_STATE_SHRINK    0x80
 
-extern MessageEntry *D_800DD254;
-extern MessageEntry *D_800DD258;
 
 extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source);
@@ -62,7 +54,7 @@ void func_1516AA70(TextBox *box) {
     skip = box->config->flags & TEXTBOX_SKIP_ANIM;
     if (box->config->unk2B != 0 && D_800C35EA[0] != 1) {
         box->config->numPages = 0;
-        func_1516972C((struct102 *)box);
+        func_1516972C((EffectHeader *)box);
         return;
     }
     box->x = box->anchorX;
@@ -258,7 +250,7 @@ void func_1516AA70(TextBox *box) {
             D_800CC4B3[box->config->objIndex][0] = 0;
             *(s16 *)((u8 *)player + 0x6CC) = 0; /* Camera has no field here yet */
             box->config->numPages = 0;
-            func_1516972C((struct102 *)box);
+            func_1516972C((EffectHeader *)box);
         }
         break;
     }
@@ -518,7 +510,6 @@ u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source) {
 }
 
 Gfx *func_150417AC(Gfx *, f32, f32, u8 *, u8, u8, u8, u8, f32, f32, s32);
-extern u8 D_800859A0[];
 
 /* Draws the current page of a text box line by line ('\n' separates lines), tinted r/g/b/a.
  * Returns gfx unchanged if the display list would overflow. */
@@ -707,7 +698,7 @@ void func_1516D2D8(void) {
 void func_1516D2E0(TextBox *box) {
     if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
         box->config->numPages = 0;
-        func_1516972C((struct102 *)box);
+        func_1516972C((EffectHeader *)box);
         box->state = 0;
     }
 }

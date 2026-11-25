@@ -5,21 +5,7 @@
 
 /* Effect object created by func_15147A80: a ring buffer of points plus a kind-specific state block. */
 typedef struct EffectObject {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ Vec3f pos;
-    /* 0x1C */ s16 lifetime;
-    /* 0x1E */ u16 flags;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ u8 unk24;
-    /* 0x25 */ u8 capacity;
-    /* 0x26 */ u8 pad26[6];
-    /* 0x2C */ s8 count;
-    /* 0x2D */ s8 tail; /* oldest point */
-    /* 0x2E */ s8 head; /* next point to write */
-    /* 0x2F */ u8 unk2F;
-    /* 0x30 */ s8 unk30;
-    /* 0x31 */ u8 pad31[0x23];
-    /* 0x54 */ Vec3f tailPos;
+    /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 buffers[0x10];
     /* 0x94 */ void *points;
@@ -108,29 +94,29 @@ s32 func_151B6420(EffectObject *obj) {
     f32 d;
 
     points = obj->points;
-    if (obj->count < 2 && (obj->flags & 8)) {
+    if (obj->head.count < 2 && (obj->head.tmpl.flags & 8)) {
         return 0;
     }
-    i = obj->head;
-    while (i != obj->tail) {
+    i = obj->head.end;
+    while (i != obj->head.start) {
         i--;
         if (i < 0) {
-            i = obj->capacity - 1;
+            i = obj->head.tmpl.itemCount - 1;
         }
         (i + points)->life -= D_800BE9A4; // matching: IDO orders the addu operands as written
         if ((i + points)->life < 0.0f) {
-            while (i != obj->tail) {
-                obj->tail++;
-                if (obj->tail == obj->capacity) {
-                    obj->tail = 0;
+            while (i != obj->head.start) {
+                obj->head.start++;
+                if (obj->head.start == obj->head.tmpl.itemCount) {
+                    obj->head.start = 0;
                 }
-                obj->count--;
+                obj->head.count--;
             }
         }
     }
-    if (obj->count > 0) {
-        i = obj->tail;
-        base = points[obj->tail].distance;
+    if (obj->head.count > 0) {
+        i = obj->head.start;
+        base = points[obj->head.start].distance;
         do {
             d = (i + points)->distance - base; // matching: IDO orders the addu operands as written
             alpha = d * 0.4940000176f;
@@ -140,17 +126,17 @@ s32 func_151B6420(EffectObject *obj) {
                 (i + points)->alpha = alpha;
             }
             i++;
-            if (i >= obj->capacity) {
+            if (i >= obj->head.tmpl.itemCount) {
                 i = 0;
             }
-        } while (i != obj->head);
+        } while (i != obj->head.end);
     }
-    if (obj->count > 0) {
-        obj->tailPos = points[obj->tail].pos;
+    if (obj->head.count > 0) {
+        obj->head.modelPos = points[obj->head.start].pos;
     } else {
-        obj->tailPos.x = 0.0f;
-        obj->tailPos.y = 0.0f;
-        obj->tailPos.z = 0.0f;
+        obj->head.modelPos.x = 0.0f;
+        obj->head.modelPos.y = 0.0f;
+        obj->head.modelPos.z = 0.0f;
     }
     return 1;
 }
@@ -171,16 +157,16 @@ s32 func_151B65D4(EffectObject *obj) {
     points = obj->points;
     target = state->target;
     if (target->unk0 == 0 || target->unk3B != state->targetUnk3B || target->unk3C < 15.0f) {
-        obj->unk30 = 0;
-        obj->flags |= 8;
+        obj->head.updateKind2 = 0;
+        obj->head.tmpl.flags |= 8;
         return 1;
     }
-    obj->pos.x = target->pos.x;
-    obj->pos.y = target->pos.y;
-    obj->pos.z = target->pos.z;
-    delta.x = obj->pos.x - state->lastPos.x;
-    delta.y = obj->pos.y - state->lastPos.y;
-    delta.z = obj->pos.z - state->lastPos.z;
+    obj->head.tmpl.pos.x = target->pos.x;
+    obj->head.tmpl.pos.y = target->pos.y;
+    obj->head.tmpl.pos.z = target->pos.z;
+    delta.x = obj->head.tmpl.pos.x - state->lastPos.x;
+    delta.y = obj->head.tmpl.pos.y - state->lastPos.y;
+    delta.z = obj->head.tmpl.pos.z - state->lastPos.z;
     dist = func_15143E64(&delta);
     state->pending += dist * 0.003721999936f * D_800BE9A4;
     state->targetTexS += dist * 4.409547806f;
@@ -210,7 +196,7 @@ s32 func_151B65D4(EffectObject *obj) {
         texRange = state->targetTexS - state->texS;
         texStep = texRange * inv;
         do {
-            point = &points[obj->head];
+            point = &points[obj->head.end];
             point->pos = cur;
             point->alpha = 155;
             point->texS = texS;
@@ -220,17 +206,17 @@ s32 func_151B65D4(EffectObject *obj) {
                 point->texS -= 32768.0f;
             }
             point->distance = distance;
-            obj->head++;
-            if (obj->head == obj->capacity) {
-                obj->head = 0;
+            obj->head.end++;
+            if (obj->head.end == obj->head.tmpl.itemCount) {
+                obj->head.end = 0;
             }
-            obj->count++;
-            if (obj->head == obj->tail) {
-                obj->tail++;
-                if (obj->tail == obj->capacity) {
-                    obj->tail = 0;
+            obj->head.count++;
+            if (obj->head.end == obj->head.start) {
+                obj->head.start++;
+                if (obj->head.start == obj->head.tmpl.itemCount) {
+                    obj->head.start = 0;
                 }
-                obj->count--;
+                obj->head.count--;
             }
             cur.x += stepX;
             cur.y += stepY;
@@ -286,8 +272,8 @@ Gfx *func_151B6928(EffectObject *obj, Gfx *gfx, s16 view) {
     u8 nextAlpha;
     f32 scale;
 
-    if (obj->count >= 2) {
-        func_151D5D60(obj->buffers, view, (obj->capacity + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
+    if (obj->head.count >= 2) {
+        func_151D5D60(obj->buffers, view, (obj->head.tmpl.itemCount + 5) * 2 * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
             points = obj->points;
             camera = func_15144B34(view);
@@ -297,22 +283,22 @@ Gfx *func_151B6928(EffectObject *obj, Gfx *gfx, s16 view) {
             gfx = func_1513F4E4(gfx, 0x4E, &flag);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
             gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &flag);
-            if (obj->flags & 2) {
-                index = obj->head - 1;
+            if (obj->head.tmpl.flags & 2) {
+                index = obj->head.end - 1;
                 if (index < 0) {
-                    index = obj->capacity - 1;
+                    index = obj->head.tmpl.itemCount - 1;
                 }
-                cur = obj->pos;
+                cur = obj->head.tmpl.pos;
                 curAlpha = 0x80;
                 curTexS = 0.0f;
             } else {
-                prev = obj->head - 1;
+                prev = obj->head.end - 1;
                 if (prev < 0) {
-                    prev = obj->capacity - 1;
+                    prev = obj->head.tmpl.itemCount - 1;
                 }
                 index = prev - 1;
                 if (index < 0) {
-                    index = obj->capacity - 1;
+                    index = obj->head.tmpl.itemCount - 1;
                 }
                 cur = points[prev].pos;
                 curAlpha = points[prev].alpha;
@@ -409,15 +395,15 @@ Gfx *func_151B6928(EffectObject *obj, Gfx *gfx, s16 view) {
                 gSP1Triangle(gfx++, 1, 3, 2, 0);
                 index--;
                 if (index < 0) {
-                    index = obj->capacity - 1;
+                    index = obj->head.tmpl.itemCount - 1;
                 }
-                if (prev != obj->tail) {
+                if (prev != obj->head.start) {
                     cur = next;
                     next = points[index].pos;
                     nextAlpha = points[index].alpha;
                     nextTexS = points[index].texS;
                 }
-            } while (prev != obj->tail);
+            } while (prev != obj->head.start);
         }
     }
     return gfx;
@@ -443,9 +429,9 @@ void func_151B70B4(EffectObject *obj, void *msg, u8 msgType) {
     current = state->target;
     if (msgType == 0) {
         if (current == ((TrailTargetRef *)msg)->target) {
-            u16 *flags = &obj->flags; // matching: keeps the store out of the jr delay slot
+            u16 *flags = &obj->head.tmpl.flags; // matching: keeps the store out of the jr delay slot
 
-            obj->unk30 = 0;
+            obj->head.updateKind2 = 0;
             *flags |= 8;
         }
     } else if (msgType == 0x2D) {
@@ -574,8 +560,8 @@ EffectObject *func_151B7328(void *args, u8 selector, s32 argsSize, u8 arg3, s32 
         // matching: state->args = (u8 *)state + 0x10, stored and reloaded as an s32 (IDO allocates differently otherwise)
         ((s32 *)state)[1] = (s32)((s32 *)state + 4);
         memcpy((void *)((s32 *)state)[1], args, argsSize);
-        if (D_8008FB90[selector](obj, &obj->pos) == 0) {
-            func_1516972C((struct102 *)obj);
+        if (D_8008FB90[selector](obj, &obj->head.tmpl.pos) == 0) {
+            func_1516972C(&obj->head.header);
             return NULL;
         }
         {
@@ -699,35 +685,35 @@ s32 func_151B77F4(EffectObject *obj) {
     state = obj->state;
     points = obj->points;
     if (D_800BE9E4 > 0) {
-        previous = obj->pos;
-        if (D_8008FB90[state->selector](obj, &obj->pos) == 0) {
+        previous = obj->head.tmpl.pos;
+        if (D_8008FB90[state->selector](obj, &obj->head.tmpl.pos) == 0) {
             return 0;
         }
         if (state->linked != NULL) {
-            state->linked->pos = obj->pos;
+            state->linked->pos = obj->head.tmpl.pos;
         }
-        delta.x = obj->pos.x - previous.x;
-        delta.y = obj->pos.y - previous.y;
-        delta.z = obj->pos.z - previous.z;
+        delta.x = obj->head.tmpl.pos.x - previous.x;
+        delta.y = obj->head.tmpl.pos.y - previous.y;
+        delta.z = obj->head.tmpl.pos.z - previous.z;
         distance = func_15143E64(&delta);
         {
-            RibbonPoint *point = &points[obj->head];
+            RibbonPoint *point = &points[obj->head.end];
 
-            point->pos = obj->pos;
+            point->pos = obj->head.tmpl.pos;
             point->distance = distance;
             point->alpha = 0xFF;
         }
-        obj->head++;
-        if (obj->head == obj->capacity) {
-            obj->head = 0;
+        obj->head.end++;
+        if (obj->head.end == obj->head.tmpl.itemCount) {
+            obj->head.end = 0;
         }
-        obj->count++;
-        if (obj->head == obj->tail) {
-            obj->tail++;
-            if (obj->tail == obj->capacity) {
-                obj->tail = 0;
+        obj->head.count++;
+        if (obj->head.end == obj->head.start) {
+            obj->head.start++;
+            if (obj->head.start == obj->head.tmpl.itemCount) {
+                obj->head.start = 0;
             }
-            obj->count--;
+            obj->head.count--;
         }
     }
     return 1;
@@ -751,17 +737,17 @@ s32 func_151B7998(EffectObject *obj) {
     s32 j;
 
     points = obj->points;
-    if (obj->count >= 2) {
+    if (obj->head.count >= 2) {
         total = 0.0f;
-        i = obj->head - 1;
+        i = obj->head.end - 1;
         if (i < 0) {
-            i = obj->capacity - 1;
+            i = obj->head.tmpl.itemCount - 1;
         }
-        while (i != obj->tail) {
+        while (i != obj->head.start) {
             prev = i;
             i--;
             if (i < 0) {
-                i = obj->capacity - 1;
+                i = obj->head.tmpl.itemCount - 1;
             }
             cur = &points[prev];
             total += cur->distance;
@@ -779,13 +765,13 @@ s32 func_151B7998(EffectObject *obj) {
                     cur->distance *= 1.0f - t;
                 }
                 total = scale;
-                while (i != obj->tail) {
-                    obj->tail++;
-                    if (obj->tail == obj->capacity) {
+                while (i != obj->head.start) {
+                    obj->head.start++;
+                    if (obj->head.start == obj->head.tmpl.itemCount) {
                     wrap:; // matching: the label splits the basic block, which IDO needs here
-                        obj->tail = 0;
+                        obj->head.start = 0;
                     }
-                    obj->count--;
+                    obj->head.count--;
                 }
             }
         }
@@ -797,20 +783,20 @@ s32 func_151B7998(EffectObject *obj) {
         }
         ; // matching: an empty statement IDO needs for the scheduling
     }
-    if (obj->count >= 2) {
-        j = obj->head;
+    if (obj->head.count >= 2) {
+        j = obj->head.end;
         dist = total;
         alphaScale = 255.0f * scale;
         do {
             j--;
             if (j < 0) {
-                j = obj->capacity - 1;
+                j = obj->head.tmpl.itemCount - 1;
             }
             cur = &points[j];
             cur->alpha = dist * alphaScale;
             dist -= cur->distance;
             next:; // matching: the label splits the basic block, which IDO needs here
-        } while (j != obj->tail);
+        } while (j != obj->head.start);
     }
     return 1;
 }
@@ -833,11 +819,11 @@ Gfx *func_151B7C38(EffectObject *obj, Gfx *gfx, s16 view) {
     u8 nextAlpha;
     Vtx_t *vtx;
 
-    if (obj->count < 2) {
+    if (obj->head.count < 2) {
         return gfx;
     }
     points = obj->points;
-    func_151D5D60(obj->buffers, view, (obj->capacity * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
+    func_151D5D60(obj->buffers, view, (obj->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx_t), (void **)&vtx, NULL);
     if (vtx == NULL) {
         return gfx;
     }
@@ -847,13 +833,13 @@ Gfx *func_151B7C38(EffectObject *obj, Gfx *gfx, s16 view) {
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x56, &flag);
     gfx = func_15142FBC(gfx, D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &flag);
-    previous = obj->head - 1;
+    previous = obj->head.end - 1;
     if (previous < 0) {
-        previous = obj->capacity - 1;
+        previous = obj->head.tmpl.itemCount - 1;
     }
     index = previous - 1;
     if (index < 0) {
-        index = obj->capacity - 1;
+        index = obj->head.tmpl.itemCount - 1;
     }
     cur = points[previous].pos;
     curAlpha = points[previous].alpha;
@@ -939,14 +925,14 @@ Gfx *func_151B7C38(EffectObject *obj, Gfx *gfx, s16 view) {
         previous = index;
         index--;
         if (index < 0) {
-            index = obj->capacity - 1;
+            index = obj->head.tmpl.itemCount - 1;
         }
-        if (previous != obj->tail) {
+        if (previous != obj->head.start) {
             cur = points[previous].pos;
             next = points[index].pos;
             nextAlpha = points[index].alpha;
         }
-    } while (previous != obj->tail);
+    } while (previous != obj->head.start);
     return gfx;
 }
 
@@ -972,7 +958,7 @@ void func_151B8318(EffectObject *obj, TrailTargetRef *msg, u8 msgType) {
         TrailTarget *target = msg->target;
 
         if (target == ref->target || msg->targetUnk3B == ref->targetUnk3B) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C(&obj->head.header);
         }
     }
 }

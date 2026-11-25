@@ -40,23 +40,6 @@ typedef struct {
     /* 0x42 */ u8 pad42[2];
 } ObjectSpawn; // size 0x44
 
-/* Model asset returned by func_1502B6BC: a header, the vertices, then the display list. */
-typedef struct {
-    /* 0x00 */ Gfx *displayList; // also marks the end of the vertices
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 *materials; // per-triangle collision materials
-    /* 0x14 */ u8 pad14[0x14];
-    /* 0x28 */ Vtx vertices[1];
-} ModelAsset;
-
-/* Per-behaviour handlers (D_80088C90). */
-typedef struct {
-    ObjectFunc update;
-    ObjectFunc onContact;
-    s32 unk92;
-} ObjectBehavior;
 
 /* Defaults for objects of the second (grouped) list, indexed by model id (D_800A26C0). */
 typedef struct {
@@ -70,10 +53,6 @@ typedef struct {
     /* 0xA */ u16 effectFlags;
 } GroupedObjectDefaults;
 
-typedef struct {
-    ModelAsset *model;
-    s32 loaded;
-} LevelModelEntry;
 
 /* A display list command, viewed as its opcode, the G_MOVEMEM index byte and the address word. */
 typedef struct {
@@ -83,8 +62,6 @@ typedef struct {
     /* 0x4 */ u32 addr;
 } DlCommand;
 
-extern LevelModelEntry *D_800B0E50;
-extern ObjectBehavior D_80088C90[];
 extern GroupedObjectDefaults D_800A26C0[];
 extern void *D_800DBED0[4];
 extern void *D_800DBEE0;
@@ -166,7 +143,7 @@ void func_150039E0(s32 level, s32 arg1) {
             }
             obj->update = D_80088C90[base[i].behavior.index].update;
             obj->onContact = D_80088C90[base[i].behavior.index].onContact;
-            obj->unk92 = D_80088C90[base[i].behavior.index].unk92;
+            obj->unk92 = D_80088C90[base[i].behavior.index].unk8;
             if (base[i].behavior.index == 22) {
                 isBehavior22 = TRUE;
             }
@@ -364,12 +341,11 @@ void func_15004574(void) {
 void func_150045BC(void) {
 }
 
-extern s16 D_800D37E0;
 extern MtxF D_800DBF48;
 extern void func_151150B0(WorldObject *obj);
 extern void func_15116058(WorldObject *obj);
 extern void func_15116110(WorldObject *obj);
-void func_150A44F0(s32, s16 *, s32);
+void func_150A44F0(s32, u16 *, s32);
 void func_150A7960(MtxF mf, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,
                    s16 *outType, f32 x, f32 y, f32 z, f32 refY, s32 group, void *obj, f32 minY, f32 maxY);
@@ -423,8 +399,8 @@ void func_150045C4(s32 arg0) {
         }
         func_1510F800(2);
         if ((obj->viewFlags & 0x80) == 0x80 && (obj->flags & 0x60) != 0x20) {
-            D_800D37E0 = i;
-            func_150A44F0(1, &D_800D37E0, 1);
+            D_800D37E0[0] = i;
+            func_150A44F0(1, D_800D37E0, 1);
         }
     }
     for (i = 0; i < D_800DBEF0; i++) {

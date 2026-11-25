@@ -28,16 +28,11 @@ typedef struct {
     /* 0x28 */ f32 unk28;
 } Struct3DF10Tail; /* size 0x2C */
 
-typedef struct {
-    u8 pad0[0x50];
-    s32 unk50;
-} Obj3DF10;
-
 extern void func_150E8854(void);
 extern void func_1510F800(s32);
 extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
-extern Obj3DF10 *func_1513B5E0(void *, s32, s32, s32, s32);
-extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+extern DynModel *func_1513B5E0(DynModelDesc *, s32, s32, s32, s32);
+extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 extern u32 osGetCount(void);
 
 extern Vec3f D_80096450[];
@@ -47,26 +42,26 @@ void func_15010A60(void) {
     void *result;
     ParticleSpawn78 part;
     s32 i;
-    u8 desc[0x3C];
+    DynModelDesc desc;
     Struct3DF10Tail tail;
     f32 sp[6];
     f32 rnd;
-    Obj3DF10 *ent;
-    Header header;
-    Header2 header2;
+    DynModel *ent;
+    LightEffectHeader header;
+    Vec3i header2;
     void *payload;
-    struct225 *snd;
+    LightEffect *snd;
     Vec3f pos;
 
     func_150E8854();
 
-    desc[1] = 3;
-    desc[2] = 6;
-    *(s16 *)&desc[4] = 0x12C;
-    *(s32 *)&desc[0x30] = 9;
-    desc[0] = 0;
-    *(s32 *)&desc[0x34] = 0x1AF;
-    desc[0x38] = 0;
+    desc.updateFunc = 3;
+    desc.drawFunc = 6;
+    desc.lifetime = 0x12C;
+    desc.unk30 = 9;
+    desc.flags = 0;
+    desc.unk34 = 0x1AF;
+    desc.kind = 0;
 
     part.flags = 0xD00;
     part.lifetime = 0x12C;
@@ -151,21 +146,21 @@ void func_15010A60(void) {
         }
 
         if (D_80096498[i] != 0) {
-            ent = func_1513B5E0(desc, 0, 0x2C, 0xFF, 1);
+            ent = func_1513B5E0(&desc, 0, 0x2C, 0xFF, 1);
             if (ent != NULL) {
-                memcpy((u8 *)ent + ent->unk50 + 0xF8, &tail, 0x2C);
+                memcpy(DYNMODEL_USERDATA(ent), &tail, sizeof(tail));
             }
-            header2.unk0 = (s32)D_80096450[i].x;
-            header2.unk4 = (s32)D_80096450[i].y;
-            header2.unk8 = (s32)D_80096450[i].z;
+            header2.x = (s32)D_80096450[i].x;
+            header2.y = (s32)D_80096450[i].y;
+            header2.z = (s32)D_80096450[i].z;
             payload = result;
-            header.unk0 = 2;
-            header.unk1 = 0x16;
-            header.unk2 = 0x12C;
-            header.unk4 = 0;
+            header.flags = 2;
+            header.update = 0x16;
+            header.lifetime = 0x12C;
+            header.lightType = 0;
             snd = func_151602C0(&header, &header2, 0xC, 0xFF, 0xFF, 0xFF, 0xFF, 0, 4, 0xFF, 1);
             if (snd != NULL) {
-                memcpy((u8 *)snd + 0x18, &payload, 4);
+                memcpy(&snd->data.object, &payload, sizeof(payload));
             }
         }
     }

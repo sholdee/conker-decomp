@@ -8,16 +8,6 @@ void func_151D9B8C(u8, f32, u8, void *, f32 *, s16, u8, u8, u8, u8, s32);
 #include "variables.h"
 #include "effects.h"
 
-/* Ground probe result filled by func_1504715C / func_15046C80 / func_1504697C. */
-typedef struct Game1DD500Ground {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 surface[0x14];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x20 */ s32 unk20;
-} Game1DD500Ground; // size 0x24
-
 /* One row of the per-actor-type effect profile table. */
 typedef struct Game1DD500Profile {
     /* 0x00 */ u8 pad0[0xE];
@@ -28,10 +18,10 @@ typedef struct Game1DD500Profile {
 void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                    s32, s32, s32, s32, s32, s32, s32, s32);
-void func_1504715C(Game1DD500Ground *, Actor *);
+void func_1504715C(CollisionHit *, Actor *);
 s32 func_15134070(Actor *);
 void func_15143134(Vec3f *, Vec3f *, Mtx *);
-void func_15153F18(AngleRange *, SplashSpray *, Game1DD500Ground *, s32, s32);
+void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, s32, s32);
 extern Game1DD500Profile D_800A3FD8[];
 extern Vec3f D_800AA120;
 
@@ -65,7 +55,7 @@ s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 void func_151B01B8(Actor *actor, Actor *other) {
     SplashSpraySpec impact;
     u8 shade;
-    Game1DD500Ground ground;
+    CollisionHit ground;
     s32 profile;
 
     if (actor != NULL && actor->unk1D4 != NULL && (actor->unk74 & 0xF) != 0xF) {
@@ -109,21 +99,21 @@ void func_151B01B8(Actor *actor, Actor *other) {
 }
 
 void func_15143874(s16 angle, f32 radius, f32 *outX, f32 *outZ);
-s32 func_15046C80(f32 *, s32, f32, Game1DD500Ground *);
-s32 func_1504697C(f32 *, s32, f32, Game1DD500Ground *);
+s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
+s32 func_1504697C(f32 *, s32, f32, CollisionHit *);
 void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
 void func_15136698(f32, f32, u8, u8, s32, void *, f32 *, s32, s32, u8, s32);
 
 /* Big landing burst at actor: an impact effect, 12-17 splats scattered on the ground around it, and a mark under it. */
 void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
     SplashSpraySpec impact;
-    Game1DD500Ground ground;
+    CollisionHit ground;
     s32 count;
-    Game1DD500Ground scatterGround;
+    CollisionHit scatterGround;
     f32 probe[3];
     f32 spot[3];
     f32 center[3];
-    Game1DD500Ground centerGround;
+    CollisionHit centerGround;
 
     if (actor != NULL) {
         func_1504715C(&ground, actor);
@@ -156,10 +146,10 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
         func_15153F18(&impact.angles, &impact.spray, &ground, 0xFF, 1);
 
         count = func_150ADA20() % 6 + 12;
-        scatterGround.unk18 = 0;
-        scatterGround.unk1C = 0;
-        scatterGround.unk1D = 0;
-        scatterGround.unk20 = 0;
+        scatterGround.material = 0;
+        scatterGround.flags = 0;
+        scatterGround.source = 0;
+        scatterGround.surface = 0;
         scatterGround.height = -10000.0f;
         probe[1] = actor->y_position + 100.0f;
         if (count != 0) {
@@ -170,7 +160,7 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
                 spot[2] += actor->z_position;
                 probe[0] = spot[0];
                 probe[2] = spot[2];
-                if (!func_15046C80(probe, 0, actor->y_position - 500.0f, &scatterGround) || scatterGround.unk1D == 3) {
+                if (!func_15046C80(probe, 0, actor->y_position - 500.0f, &scatterGround) || scatterGround.source == 3) {
                     return;
                 }
                 spot[1] = scatterGround.height;
@@ -178,7 +168,7 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
                 // matching: (f32)100 is not CSE'd with the 100.0f above, which would tie up an FP register
                 if (func_150ADA20() & 1) {
                     func_151D9B8C(0, func_150ADA68() * 4.5f + 15.0f, (u32)(func_150ADA68() * (f32)100 + 155.0f),
-                                  scatterGround.surface, spot, 100, 0, 1, 0, arg1, arg2);
+                                  &scatterGround.tri, spot, 100, 0, 1, 0, arg1, arg2);
                 } else {
                     func_151DAB58(0, func_150ADA68() * 5.9f + 6.1f, (u32)(func_150ADA68() * (f32)100 + 155.0f),
                                   spot, 1, arg1, arg2);
@@ -192,10 +182,10 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
         center[0] = actor->x_position;
         center[1] = actor->y_position;
         center[2] = actor->z_position;
-        centerGround.unk20 = 0;
-        centerGround.unk1D = 0;
-        centerGround.unk1C = 0;
-        centerGround.unk18 = 0;
+        centerGround.surface = 0;
+        centerGround.source = 0;
+        centerGround.flags = 0;
+        centerGround.material = 0;
         centerGround.height = -10000.0f;
         {
             f32 above[3];
@@ -203,7 +193,7 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
             above[0] = center[0];
             above[1] = center[1] + 100.0f;
             above[2] = center[2];
-            if (!func_1504697C(above, 0, center[1] - 500.0f, &centerGround) || centerGround.unk1D == 3) {
+            if (!func_1504697C(above, 0, center[1] - 500.0f, &centerGround) || centerGround.source == 3) {
                 return;
             }
         }
@@ -211,7 +201,7 @@ void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
         center[1] += 10.0f;
         func_15136698((func_150ADA68() * 40.0f + 120.0f) * 0.001f, (func_150ADA68() * 123.0f + 123.0f) * 0.00001f,
                       func_150ADA20() % 101 + 155, func_150ADA20() % 101 + 100, func_150ADA20() % 56 + 70,
-                      centerGround.surface, center, 0, 1, arg1, arg2);
+                      &centerGround.tri, center, 0, 1, arg1, arg2);
     }
 }
 
@@ -234,11 +224,8 @@ typedef struct Game1DD500Motion {
 
 /* Particle object created by func_1513D524. */
 typedef struct Game1DD500Particle {
-    /* 0x000 */ u8 unk0;
-    /* 0x001 */ u8 unk1;
-    /* 0x002 */ u8 pad2[0xA];
-    /* 0x00C */ u8 unkC;
-    /* 0x00D */ u8 padD[0xF];
+    /* 0x000 */ EffectHeader header;
+    /* 0x010 */ u8 pad10[0xC];
     /* 0x01C */ s16 life;
     /* 0x01E */ u8 pad1E[0xE];
     /* 0x02C */ f32 width;
@@ -249,7 +236,7 @@ typedef struct Game1DD500Particle {
     /* 0x058 */ s32 flags;
     /* 0x05C */ u8 alpha;
     /* 0x05D */ u8 pad5D[0x1B];
-    /* 0x078 */ Game1DD500Ground ground;
+    /* 0x078 */ CollisionHit ground;
     /* 0x09C */ u8 pad9C[0x24];
     /* 0x0C0 */ Vtx quadTemplate[4];
     /* 0x100 */ Vtx *quads[4];
@@ -273,31 +260,11 @@ typedef struct Game1DD500Emitter {
     /* 0x94 */ u8 profileFlag;
 } Game1DD500Emitter; // size 0x98
 
-/* Effect task: a struct260 header followed by the effect's data. */
+/* Effect task: a TimedEffect header followed by the effect's data. */
 typedef struct Game1DD500Task {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;   /* -1 ends the task */
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Game1DD500Emitter emitter;
 } Game1DD500Task;
-
-/* Message 0x13 (and 0): this actor's effects should end. */
-typedef struct Game1DD500ActorMsg {
-    /* 0x0 */ Actor *actor;
-    /* 0x4 */ u8 uniqueId;
-} Game1DD500ActorMsg;
-
-/* Message 0x2D: two actors swapped identities. */
-typedef struct Game1DD500SwapMsg {
-    /* 0x0 */ Actor *a;
-    /* 0x4 */ Actor *b;
-    /* 0x8 */ u8 uniqueIdA;
-    /* 0x9 */ u8 uniqueIdB;
-} Game1DD500SwapMsg;
 
 void func_151B1918(Game1DD500Task *task);
 
@@ -310,7 +277,7 @@ Game1DD500Task *func_151B09BC(Actor *actor, Actor *other, s16 lifetime, u8 arg3,
     s32 profile;
     s16 life;
     u8 timed;
-    Game1DD500ActorMsg msg;
+    ActorRef msg;
 
     if (actor == NULL) {
         return NULL;
@@ -478,7 +445,7 @@ void func_151B0B88(Game1DD500Task *task) {
                                       JOINT_MTX(emitter->owner, D_800AA12C[index].joint));
                         desc.rot = desc.pos;
                         particle = func_1513D524(&desc, 0x11, 0, 0, 0x10, ((func_150ADA20() % 1) ? 1 : 0) | 2, 0x28,
-                                                 task->unkC, task->unk1);
+                                                 task->base.header.owner, task->base.header.kind);
                         head->particle = particle;
                         if (particle != NULL) {
                             memcpy(&particle->motion, &motion, sizeof(motion));
@@ -497,7 +464,7 @@ void func_151B0B88(Game1DD500Task *task) {
         }
     }
     if (failed) {
-        task->unkE = -1;
+        task->base.header.state = -1;
     }
 }
 
@@ -546,10 +513,10 @@ s32 func_151B118C(Game1DD500Particle *particle) {
             splat[2] = probe[2];
             size = ((motion->baseWidth + motion->swingWidth * 0.5f) + (motion->baseHeight + motion->swingHeight * 0.5f)) * 0.5f;
             if (func_150ADA20() & 1) {
-                func_151D9B8C(motion->unk25, size * 1.7f, particle->alpha, particle->ground.surface, splat, 100, 0, 1, 0,
-                              particle->unkC, particle->unk1);
+                func_151D9B8C(motion->unk25, size * 1.7f, particle->alpha, &particle->ground.tri, splat, 100, 0, 1, 0,
+                              particle->header.owner, particle->header.kind);
             } else {
-                func_151DAB58(motion->unk25, size * 0.68f, particle->alpha, splat, 1, particle->unkC, particle->unk1);
+                func_151DAB58(motion->unk25, size * 0.68f, particle->alpha, splat, 1, particle->header.owner, particle->header.kind);
             }
             alive = FALSE;
         }
@@ -674,7 +641,7 @@ void func_151B1918(Game1DD500Task *task) {
         Game1DD500Slot *slot = &emitter->slots[i];
 
         if (slot->particle != NULL) {
-            func_1516972C((struct102 *)slot->particle);
+            func_1516972C(&slot->particle->header);
         }
         slot->particle = NULL;
         slot->timer = 0;
@@ -686,21 +653,21 @@ void func_151B1918(Game1DD500Task *task) {
  * follows the owner through an identity swap (0x2D). */
 void func_151B19A4(Game1DD500Task *task, void *msg, u8 type) {
     Game1DD500Emitter *emitter = &task->emitter;
-    Game1DD500ActorMsg *actorMsg = msg;
-    Game1DD500SwapMsg *swap = msg;
+    ActorRef *actorMsg = msg;
+    ActorSwapMsg *swap = msg;
     Actor *owner = emitter->owner;
 
     if (type == 0 || type == 0x13) {
         if (owner == actorMsg->actor || actorMsg->uniqueId == emitter->ownerId) {
-            func_1516972C((struct102 *)task);
+            func_1516972C(&task->base.header);
         }
     } else if (type == 0x2D) {
-        if (emitter->owner == swap->a) {
-            emitter->owner = swap->b;
-            emitter->ownerId = swap->uniqueIdB;
-        } else if (emitter->owner == swap->b) {
-            emitter->owner = swap->a;
-            emitter->ownerId = swap->uniqueIdA;
+        if (emitter->owner == swap->actorA) {
+            emitter->owner = swap->actorB;
+            emitter->ownerId = swap->idB;
+        } else if (emitter->owner == swap->actorB) {
+            emitter->owner = swap->actorA;
+            emitter->ownerId = swap->idA;
         }
     }
 }
@@ -708,11 +675,11 @@ void func_151B19A4(Game1DD500Task *task, void *msg, u8 type) {
 /* Task handler: frees the attached particles, then passes the task on to func_1514933C. */
 void func_151B1A58(Game1DD500Task *task) {
     func_151B1918(task);
-    func_1514933C((struct260 *)task);
+    func_1514933C(&task->base);
 }
 
 /* Task handler: frees the attached particles, then passes the task on to func_15149368. */
 void func_151B1A84(Game1DD500Task *task) {
     func_151B1918(task);
-    func_15149368((struct260 *)task);
+    func_15149368(&task->base);
 }

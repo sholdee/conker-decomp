@@ -11,13 +11,6 @@ typedef struct ParticleViewMask {
     s16 views;
 } ParticleViewMask;
 
-typedef struct ParticleAttach {
-    s32 unk0[7];
-    u8 unk1C;
-    u8 pad1D[3];
-    s32 unk20;
-} ParticleAttach; /* size 0x24 */
-
 /* Per-particle data for the floor-collision update funcs (func_151319C4). */
 typedef struct ParticleBounce {
     u8 flags;
@@ -25,14 +18,6 @@ typedef struct ParticleBounce {
     u8 pad2[2];
     f32 restitution;
 } ParticleBounce;
-
-/* Per-particle data for func_15131D9C: two sizes oscillating around a base size. */
-typedef struct ParticlePulse {
-    u8 phase[2];
-    s8 phaseStep[2];
-    f32 baseSize;
-    f32 amplitude[2];
-} ParticlePulse;
 
 /* Per-particle data for func_15131DEC (spawned by func_15131EE4). */
 typedef struct ParticleFlash {
@@ -44,12 +29,9 @@ typedef struct ParticleFlash {
 } ParticleFlash;
 
 typedef struct Particle {
-    /* 0x00 */ u8 pad0[0x10];
+    /* 0x00 */ EffectHeader header;
     /* 0x10 */ ParticleDesc desc;
-    /* 0x80 */ union {
-        ParticleAttach attach;
-        f32 floorY;
-    } unk80;
+    /* 0x80 */ CollisionHit floor;  /* copied from the spawner's template (flags cleared), or the particle's own probe */
     /* 0xA4 */ u8 padA4[4];
     /* 0xA8 */ union {              /* caller-sized, see func_15130280 */
         f32 drag;
@@ -64,16 +46,12 @@ typedef struct Particle {
     } data;
 } Particle;
 
-typedef struct ParticleTypeList {
-    s32 types[3];
-} ParticleTypeList;
 
-extern ParticleTypeList D_800A37F0;
+extern IdList3 D_800A37F0;
 
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Allocates a particle of the given kind with dataSize bytes of per-particle data and copies desc into it. */
-Particle *func_15130280(ParticleDesc *desc, u8 kind, ParticleAttach *attach, s32 dataSize, u8 arg4, s32 arg5) {
+Particle *func_15130280(ParticleDesc *desc, u8 kind, CollisionHit *ground, s32 dataSize, u8 arg4, s32 arg5) {
     Particle *particle;
     s32 type;
 
@@ -99,10 +77,10 @@ Particle *func_15130280(ParticleDesc *desc, u8 kind, ParticleAttach *attach, s32
 
     memcpy(&particle->desc, desc, sizeof(ParticleDesc));
 
-    if (attach != NULL) {
-        particle->unk80.attach = *attach;
+    if (ground != NULL) {
+        particle->floor = *ground;
     } else {
-        particle->unk80.attach.unk1C = 0;
+        particle->floor.flags = 0;
     }
 
     return particle;
@@ -116,16 +94,7 @@ void func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize) {
     func_15130374(desc, kind, dataSize, 0xFF, 0);
 }
 
-typedef struct ParticleTexture {
-    u8 pad0[4];
-    u8 frameCount;
-    u8 pad5;
-    u16 width;
-    u16 height;
-    u8 padA[2];
-} ParticleTexture;
-
-extern ParticleTexture D_80090B60[];
+extern EffectTexture D_80090B60[];
 extern s32 (*D_80089760[])(Particle *, Vec3f *);
 extern void (*D_80089800[])(Particle *);
 
@@ -229,7 +198,7 @@ void func_151303EC(Particle *p) {
         if (p->desc.deathFunc != -1) {
             D_80089800[p->desc.deathFunc](p);
         }
-        func_1516972C((struct102 *)p);
+        func_1516972C(&p->header);
     }
 }
 
@@ -244,7 +213,7 @@ s32 func_15144CEC(Vec3f *, f32 *, f32 *, f32 *, f32 *, s32);
 void func_1513137C(s16 *r, s16 *g, s16 *b, s16 *a, Particle *p);
 void func_1513164C(s16 *primR, s16 *primG, s16 *primB, s16 *primA, s16 *envR, s16 *envG, s16 *envB, s16 *envA, Particle *p);
 void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7);
-Gfx *func_15142E24(Gfx *gfx, ParticleTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *needSync, s32 argA);
+Gfx *func_15142E24(Gfx *gfx, EffectTexture *tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *needSync, s32 argA);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *needSync);
@@ -302,7 +271,7 @@ Gfx *func_15130A9C(Gfx *gfx, Particle *p, s16 viewIdx) {
     }
     if (func_15144CEC(&pos, screen, &depth, &w, &scale, viewIdx)) {
         RenderView *view;
-        ParticleTexture *tex;
+        EffectTexture *tex;
         f32 texW;
         f32 texH;
         f32 height;
@@ -531,11 +500,11 @@ s32 func_1513170C(Particle *p, Vec3f *prevPos) {
 }
 
 void func_1513173C(Particle *p) {
-    func_15169804((struct102 *)p);
+    func_15169804(&p->header);
 }
 
 void func_1513175C(Particle *p) {
-    func_15169824((struct102 *)p);
+    func_15169824(&p->header);
 }
 
 extern void (*D_80089814[])(Particle *);
@@ -616,7 +585,7 @@ s32 func_151319A4(Particle *p, Vec3f *prevPos) {
 }
 
 extern s32 func_1514672C(Vec3f *);
-extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
+extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 extern s32 (*D_80089874[])(Particle *, Vec3f *, f32 *, ParticleBounce *);
 
 /*
@@ -635,11 +604,11 @@ s32 func_151319C4(Particle *p, Vec3f *prevPos, ParticleBounce *bounce) {
         if (func_1514672C(&probe) == 0) {
             return FALSE;
         }
-        if (func_15046C80(&probe, 0, p->desc.pos.y - p->desc.height * 0.06000000238f, &p->unk80.floorY) != 0) {
+        if (func_15046C80(&probe, 0, p->desc.pos.y - p->desc.height * 0.06000000238f, &p->floor) != 0) {
             f32 hit[3];
 
             hit[0] = probe.x;
-            hit[1] = p->unk80.floorY;
+            hit[1] = p->floor.height;
             hit[2] = probe.z;
             alive = D_80089874[bounce->hitFunc](p, prevPos, hit, bounce);
         }
@@ -702,7 +671,7 @@ void func_15131C84(u8 *phase, s8 *phaseStep, f32 base, f32 *amplitude, f32 *outX
 
 /* Calls func_15169260 with the three particle object types (see func_15130280). */
 void func_15131D4C(s32 arg0, u8 arg1) {
-    ParticleTypeList types;
+    IdList3 types;
 
     types = D_800A37F0;
     func_15169260(&types, 3, arg0, arg1);

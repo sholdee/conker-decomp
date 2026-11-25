@@ -2,13 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Entries of the D_800C5338[id] texture tables. */
-typedef struct ObjTexture {
-    /* 0x0 */ s32 addr; // loaded address, or 0x80000000 if the load failed
-    /* 0x4 */ s32 id;   // texture id passed to func_1510D0EC
-    /* 0x8 */ s32 unk8;
-} ObjTexture;
-
 /*
  * A model file, as loaded by func_1503CF20: seven (data, byte size) sections whose offsets
  * func_1502B6BC has already relocated, followed by the model data proper (its vertices first),
@@ -40,8 +33,6 @@ typedef struct GfxBytes {
 } GfxBytes;
 
 /* Per-model tables, indexed by model id (0..186). */
-extern Gfx **D_800C4488[];
-extern ObjTexture *D_800C5338[];
 extern void *D_800C5048[];
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
@@ -437,7 +428,7 @@ s32 func_1503DA9C(Actor *obj, s32 id, s32 model, s32 loadTextures) {
             }
         }
         // textures not loaded yet: the first entry's addr is still an offset
-        if (loadTextures && D_800C5628[id] != 0 && (u32)D_800C5338[id]->addr < 0x10000000) {
+        if (loadTextures && D_800C5628[id] != 0 && D_800C5338[id]->addr < 0x10000000) {
             ret = func_1503DC3C(id);
             for (i = 0; i < D_800C4778[id]; i++) {
                 dl = D_800C4488[id][i];
@@ -476,7 +467,7 @@ void func_1503DD1C(s32 id) {
     for (i = 0; i < D_800C5628[id]; i++) {
         ObjTexture *tex = &D_800C5338[id][i];
 
-        if (tex->addr != (s32)0x80000000 && tex->id != tex->addr) {
+        if (tex->addr != 0x80000000 && tex->id != (s32)tex->addr) { // matching: the cast keeps the original operand order
             func_1510D7AC(tex->id);
         }
     }

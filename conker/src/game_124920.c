@@ -165,8 +165,8 @@ void func_150F7470(Vec3f *pos, Vec3f *aim, s32 arg2, Vec3f *target, u8 targetIsD
 
 /* Per-object state of a puff spawned by func_1513D2F0 (updated by func_150F7E20). */
 typedef struct {
-    /* 0x00 */ Vec3f unk0;
-    /* 0x0C */ Vec3f unkC;
+    /* 0x00 */ Vec3f axisU; /* quad axes for func_15140410 (vertex function func_150F7F58) */
+    /* 0x0C */ Vec3f axisV;
     /* 0x18 */ f32 timeLeft;
     /* 0x1C */ f32 phase;
     /* 0x20 */ f32 phaseSpeed;
@@ -179,26 +179,6 @@ typedef struct {
     /* 0x000 */ DefParticleHead head;
     /* 0x110 */ PuffState state;
 } PuffObj;
-
-/* Result of the func_15081690 ray cast. */
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ Vec3f unk14;
-    /* 0x20 */ Vec3f unk20;
-    /* 0x2C */ Vec3f unk2C;
-    /* 0x38 */ Vec3f unk38;
-    /* 0x44 */ u8 unk44[0x12];
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x59 */ u8 hit;
-    /* 0x5A */ u8 unk5A;
-    /* 0x5B */ u8 pad5B;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60;
-    /* 0x64 */ u8 pad64[0xC];
-} RayHit;
 
 void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
                    s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
@@ -215,6 +195,7 @@ s8 func_150F78B4(EffectObj *obj) {
     s8 alive;
     f32 dt;
     f32 dist;
+    u8 pad[0xC]; // matching: stack space (the old local view of RayHit was 0x70 bytes)
     RayHit hit;
     f32 puffs;
     PuffObj *puff;
@@ -230,8 +211,8 @@ s8 func_150F78B4(EffectObj *obj) {
     if (state->flags & 2) {
         func_15081690(owner, obj->pos.x, obj->pos.y, obj->pos.z, state->dir.x, state->dir.y,
                       state->dir.z, &hit, dist, 1, 0, !(state->flags & 4), state->unkB0, 0, 0);
-        if (hit.hit >= 2) {
-            func_151D4DAC(hit.unk00, owner, &hit.pos, &hit.unk20, &hit, 0x1A, &state->dir, obj->unkC, obj->unk1);
+        if (hit.hitType >= 2) {
+            func_151D4DAC(hit.obj, owner, &hit.pos, &hit.far, &hit, 0x1A, &state->dir, obj->unkC, obj->unk1);
             if (state->flags & 1) {
                 func_150F7F8C(&hit.pos, obj->unkC, obj->unk1);
             }
@@ -259,8 +240,8 @@ s8 func_150F78B4(EffectObj *obj) {
         if (puffs > 1.0f) {
             PuffState puffState;
 
-            puffState.unk0 = state->unk74;
-            puffState.unkC = state->unk80;
+            puffState.axisU = state->unk74;
+            puffState.axisV = state->unk80;
             puffState.sizeBase = 8.318000793f;
             puffState.sizeAmplitude = 8.318000793f;
             spawn.texture = 0x7A;
@@ -328,15 +309,15 @@ s32 func_150F7E20(PuffObj *obj) {
     return 1;
 }
 
-/* Forwards `obj`'s unk110 and unk11C to func_15140410. */
-void func_150F7F58(struct210 *obj, s16 arg1) {
-    func_15140410(obj, &obj->unk110, &obj->unk11C, arg1);
+/* Quad spanned by the puff's two axes (vertex function). */
+void func_150F7F58(PuffObj *obj, s16 arg1) {
+    func_15140410(obj, &obj->state.axisU, &obj->state.axisV, arg1);
 }
 
 void func_151541B8(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6);
 void func_151D3F14(Vec3f *pos, u8, s32);
-ActorCtl *func_150FF288(Actor *);
-s32 func_150FF6E0(Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Actor *, ActorCtl *);
+ModelAttachment *func_150FF288(Actor *);
+s32 func_150FF6E0(Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Actor *, ModelAttachment *);
 void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
 void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
 
@@ -444,7 +425,7 @@ s32 func_150F81BC(EffectObj *obj) {
                 f32 ageStep;
 
                 ageStep = follow->trailAge / puffs;
-                func_15146078(&delta, &puffState.unk0, &puffState.unkC);
+                func_15146078(&delta, &puffState.axisU, &puffState.axisV);
                 puffState.phaseSpeed = 0.4630000293f;
                 puffState.sizeBase = 8.241000175f;
                 puffState.sizeAmplitude = 3.888999939f;
@@ -495,7 +476,7 @@ s32 func_150F81BC(EffectObj *obj) {
     return 1;
 }
 
-extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
+extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 extern void func_15152B38(TrailBurst *, u8, s32);
 
 /* Effects 50 units above `obj`: a func_151602C0 burst and a func_15152B38 emitter. */
@@ -506,16 +487,16 @@ void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
     pos.y = obj->y_position + 50.0f;
     pos.z = obj->z_position;
     {
-        Header header;
-        Header2 header2;
+        LightEffectHeader header;
+        Vec3i header2;
 
-        header.unk0 = 3;
-        header.unk1 = -1;
-        header.unk2 = (func_150ADA20() % 9U) + 5;
-        header.unk4 = 0;
-        header2.unk0 = pos.x;
-        header2.unk4 = pos.y;
-        header2.unk8 = pos.z;
+        header.flags = 3;
+        header.update = -1;
+        header.lifetime = (func_150ADA20() % 9U) + 5;
+        header.lightType = 0;
+        header2.x = pos.x;
+        header2.y = pos.y;
+        header2.z = pos.z;
         func_151602C0(&header, &header2, (func_150ADA20() % 31U) + 90, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
     }
     {
@@ -620,17 +601,6 @@ typedef struct {
     /* 0x28 */ StageState stage;
 } StageObj;
 
-/* Event passed to func_151D8868 (a camera event, as in game_12C1E0.c). */
-typedef struct {
-    u8 unk0;
-    u8 pad1;
-    s16 unk2;
-    u8 unk4;
-    u8 unk5;
-    s8 unk6;
-    u8 pad7;
-} CameraEvent;
-
 void func_150F892C(StageObj *obj);
 
 /* Message handler: 0x42 jumps to the last stage, 0x3F runs func_150F892C. */
@@ -655,7 +625,7 @@ void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
 }
 
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+extern void func_151D8868(RumbleParams *params, s32 arg1, s32 arg2, s32 arg3);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
 extern void func_151C329C(Vec3f *pos, s32, s32);
 extern void func_15143794(s16, s16, f32, Vec3f *out);
@@ -664,7 +634,7 @@ void func_151DB5D0(s32, Vec3f *pos, Vec3f *vel, f32, f32, f32, f32, s32, s32, s3
 
 /*
  * While any object 0x98 in state 0x1EB is active: steps through the parts on a timer (with a sound and a
- * camera event per step), and emits effects on an arc of radius unk48 around (unk40, unk44).
+ * rumble per step), and emits effects on an arc of radius unk48 around (unk40, unk44).
  */
 void func_150F892C(StageObj *obj) {
     s32 count;
@@ -689,30 +659,30 @@ void func_150F892C(StageObj *obj) {
     if (state->stage < 7) {
         state->stageTimer -= D_800BE9E4 * count;
         if (state->stageTimer < 0) {
-            CameraEvent event;
+            RumbleParams event;
             func_10010F88(func_150ADA20() % 3U + 0x2B3, 24000, 0, 0, -1, state->parts[state->stage]->x,
                           state->parts[state->stage]->y, state->parts[state->stage]->z, 500, 1000);
             state->parts[state->stage]->inactive = 1;
             state->stage++;
             state->parts[state->stage]->inactive = 0;
             func_15164F0C(7, 0, 0, obj->unkC, obj->unk1);
-            event.unk0 = 1;
-            event.unk2 = 25;
-            event.unk5 = 1;
-            event.unk4 = 8;
-            event.unk6 = -1;
+            event.flags = 1;
+            event.duration = 25;
+            event.playerMask = 1;
+            event.strength = 8;
+            event.updateKind = -1;
             func_151D8868(&event, 0, obj->unkC, obj->unk1);
             state->stageTimer = func_150ADA20() % 31U + 70;
         }
     }
     state->eventTimer -= D_800BE9E4 * count;
     if (state->eventTimer < 0) {
-        CameraEvent event;
-        event.unk0 = 1;
-        event.unk2 = func_150ADA20() % 21U + 10;
-        event.unk5 = 1;
-        event.unk4 = (func_150ADA20() & 3) + 1;
-        event.unk6 = -1;
+        RumbleParams event;
+        event.flags = 1;
+        event.duration = func_150ADA20() % 21U + 10;
+        event.playerMask = 1;
+        event.strength = (func_150ADA20() & 3) + 1;
+        event.updateKind = -1;
         func_151D8868(&event, 0, obj->unkC, obj->unk1);
         func_10010F88((func_150ADA20() & 3) + 0x6D6, 24000, 0, 0, -1, state->parts[state->stage]->x,
                       state->parts[state->stage]->y, state->parts[state->stage]->z, 500, 1000);
@@ -892,17 +862,17 @@ void func_150F9720(u8 index) {
     func_151494E0((s32)&msg, 0x42);
 }
 
-void func_150F9788(struct260 *arg0) {
+void func_150F9788(TimedEffect *arg0) {
 }
 
-void func_150F9788(struct260 *);
+void func_150F9788(TimedEffect *);
 
-void func_150F9794(struct260 *arg0) {
+void func_150F9794(TimedEffect *arg0) {
     func_150F9788(arg0);
     func_1514933C(arg0);
 }
 
-void func_150F97C0(struct260 *arg0) {
+void func_150F97C0(TimedEffect *arg0) {
     func_150F9788(arg0);
     func_15149368(arg0);
 }
@@ -956,13 +926,13 @@ s32 arg2;
     Vec3f hit;
     Vec3f normal;
     Vec3f unk30;
-    ActorCtl *gun;
+    ModelAttachment *gun;
 
     gun = func_150FF288(obj);
     if (gun != NULL) {
         if (func_150FF6E0(points, &position, &hit, &normal, &unk30, obj, gun) != 0) {
             func_151D3F14(&position, arg1, arg2);
-            func_151D4408(&hit, &normal, obj->unk1D4[((u8 *)gun)[2]], obj, 1.0f, arg1, arg2);
+            func_151D4408(&hit, &normal, obj->unk1D4[gun->bone], obj, 1.0f, arg1, arg2);
             func_150FF474(&position, points, arg1, arg2);
         }
     }

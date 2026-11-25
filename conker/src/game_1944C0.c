@@ -4,20 +4,15 @@
 #include "variables.h"
 #include "effects.h"
 
-#define OBJ_TYPE_COUNT 104
-
-/* Object lists: D_800DCE50[list][type] is the head of a doubly linked list of struct102 nodes. */
-extern struct102 *D_800DCE50[2][OBJ_TYPE_COUNT];
 
 /*
  * While a list is being walked, the next node is saved in D_800DD198[depth] (depth D_800DD190) so that
  * callbacks may destroy the current node; func_151696DC repairs saved entries that point at a dying node.
  */
 
-extern void (*D_8008CA20[])(struct102 *);
-extern void (*D_8008C9C8[])(struct102 *);
+extern void (*D_8008CA20[])(EffectHeader *);
+extern void (*D_8008C9C8[])(EffectHeader *);
 extern void (*D_8008CB64[3])(void);
-
 
 /* Template / payload of a type 0x10 object. */
 typedef struct {
@@ -51,11 +46,10 @@ typedef struct {
 
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
-
 /* Type 3 object (0x28 bytes): a fading, animated billboard sprite. */
 typedef struct {
     /* 0x00 */ EffectHeader link;
-    /* 0x10 */ SpriteAnim *anim;
+    /* 0x10 */ EffectTexture *anim;
     /* 0x14 */ s16 frame;       /* 8.8 fixed point index into anim->frames */
     /* 0x16 */ s16 frameStep;
     /* 0x18 */ s16 x;
@@ -81,7 +75,7 @@ typedef struct {
     /* 0xD */ u8 flip;         /* bit 0: flip s, bit 1: flip t */
 } SpriteParams;
 
-extern SpriteAnim *D_8008CA4C[];
+extern EffectTexture *D_8008CA4C[];
 
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType);
 
@@ -124,7 +118,7 @@ void func_1516706C(void) {
 void func_151670C0(void) {
     s32 list;
     s32 type;
-    struct102 *node;
+    EffectHeader *node;
 
     for (list = 0; list != 2; list++) {
         for (type = 0; type != 101; type++) {
@@ -132,7 +126,7 @@ void func_151670C0(void) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                    D_800DD198[D_800DD190] = node->next;
                     D_8008B4A8[type].unk0(node);
                     node = D_800DD198[D_800DD190];
                 }
@@ -146,7 +140,7 @@ void func_151670C0(void) {
 void func_151671E8(void) {
     s32 list;
     s32 type;
-    struct102 *node;
+    EffectHeader *node;
 
     for (list = 0; list != 2; list++) {
         for (type = 0; type != 101; type++) {
@@ -154,7 +148,7 @@ void func_151671E8(void) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                    D_800DD198[D_800DD190] = node->next;
                     D_8008B4A8[type].unk4(node);
                     node = D_800DD198[D_800DD190];
                 }
@@ -182,7 +176,7 @@ void func_15167310(void) {
     {
         s32 list;
         s32 type;
-        struct102 *node;
+        EffectHeader *node;
 
         for (type = 0; type != OBJ_TYPE_COUNT; type++) {
             for (list = 0; list != 2; list++) {
@@ -190,7 +184,7 @@ void func_15167310(void) {
                     node = D_800DCE50[list][type];
                     D_800DD190++;
                     while (node != NULL) {
-                        D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                        D_800DD198[D_800DD190] = node->next;
                         D_8008B4A8[type].unkC(node);
                         node = D_800DD198[D_800DD190];
                     }
@@ -213,8 +207,8 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
     s32 type;
     s32 first;
     s32 last;
-    struct102 **head;
-    struct102 *node;
+    EffectHeader **head;
+    EffectHeader *node;
     s32 overflowed;
     Gfx *mode0Start;
     Gfx *prev;
@@ -269,7 +263,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                     D_800DD190++;
                     while (node != NULL) {
                         prev = gfx;
-                        D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                        D_800DD198[D_800DD190] = node->next;
                         gfx = D_8008B4A8[type].draw(gfx, node, arg2);
                         full = ((gfx - D_800BE9C8[D_800BE9C0]) > D_800BEBA4) ? TRUE : FALSE;
                         if (full) {
@@ -282,7 +276,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
                 } else {
                     D_800DD190++;
                     while (node != NULL) {
-                        D_800DD198[D_800DD190] = (struct102 *)node->unk8;
+                        D_800DD198[D_800DD190] = node->next;
                         gfx = D_8008B4A8[type].draw(gfx, node, arg2);
                         node = D_800DD198[D_800DD190];
                     }
@@ -337,7 +331,6 @@ void *func_15167A68(type, list, size, arg3, owner, arg5)
     }
     return obj;
 }
-void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5);
 
 /* Spawns a type 3 SpriteFx from the 0x18-byte template at `src` (anim .. fadeStep), fully opaque. */
 void func_15167AD8(SpriteFx *src, u8 owner, s32 list) {
@@ -359,7 +352,7 @@ void func_15167B44(SpriteFx *fx) {
 
     index = fx->callback;
     if (index != 0) {
-        D_8008CA20[index]((struct102 *)fx);
+        D_8008CA20[index](&fx->link);
     }
 
     fade = fx->fadeStep;
@@ -384,7 +377,7 @@ void func_15167B44(SpriteFx *fx) {
 
     fx->frame += fx->frameStep;
     if (fx->frame / 256 >= fx->anim->frameCount) {
-        func_1516972C((struct102 *)fx);
+        func_1516972C(&fx->link);
     }
 }
 typedef struct {
@@ -404,7 +397,7 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     Gfx *gfx;
     SpriteParams params;
     PaddedFlag update; // matching: 12-byte stack object; only the first word (the update flag) is used
-    SpriteAnim *anim;
+    EffectTexture *anim;
     s32 renderMode;
     s16 frame;
 
@@ -451,7 +444,7 @@ BillboardParticle *func_15167D84(src, altType, extra, onDeath, owner, list)
 }
 /* BillboardParticle update: life, fade, motion and animation; runs onDeath and destroys it when finished. */
 void func_15167E0C(BillboardParticle *p) {
-    void (*func)(struct102 *);
+    void (*func)(EffectHeader *);
     u8 finished;
     s32 limit;
 
@@ -476,7 +469,7 @@ void func_15167E0C(BillboardParticle *p) {
     if (p->tmpl.callback != -1) {
         func = D_8008C9C8[p->tmpl.callback];
         if (func != NULL) {
-            func((struct102 *)p);
+            func(&p->link);
         }
     }
 
@@ -548,13 +541,13 @@ void func_15167E0C(BillboardParticle *p) {
 
     if (finished != 0) {
         if (p->onDeath != -1) {
-            D_8008CA20[p->onDeath]((struct102 *)p);
+            D_8008CA20[p->onDeath](&p->link);
         }
-        func_1516972C((struct102 *)p);
+        func_1516972C(&p->link);
     }
 }
-extern SpriteAnim D_800907FC;
-extern SpriteAnim D_8009053C;
+extern EffectTexture D_800907FC;
+extern EffectTexture D_8009053C;
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
@@ -571,8 +564,8 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
     s32 size;
     s32 unused; // matching: an unused local the target allocates
     s32 c0, c1, c2; /* colour components, reused for prim and env */
-    SpriteAnim *anim;
-    SpriteAnim *white;
+    EffectTexture *anim;
+    EffectTexture *white;
 
     params.flip = 0;
     if (p->tmpl.flags & BILLBOARD_FLIP_S) {
@@ -683,7 +676,7 @@ s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
     gfx = func_15142C10(gfx, c0, c1, c2, 0, &update);
     return func_15095760(gfx, &params);
 }
-/* Template / payload of a type 0xE object: a textured quad pair animated through a SpriteAnim. */
+/* Template / payload of a type 0xE object: a textured quad pair animated through a EffectTexture. */
 typedef struct {
     /* 0x00 */ Vtx vtx[8];
     /* 0x80 */ u8 pad80[8];
@@ -778,7 +771,7 @@ void func_15168870(QuadFx *fx) {
     s32 limit;
     u8 frameCount;
     s16 step;
-    void (*func)(struct102 *);
+    void (*func)(EffectHeader *);
 
     step = fx->data.frameStep;
     if (step != 0) {
@@ -817,16 +810,16 @@ void func_15168870(QuadFx *fx) {
     if (frame != -1) {
         func = D_8008C9C8[frame];
         if (func != NULL) {
-            func((struct102 *)fx);
+            func(&fx->link);
         }
     }
 
     if (fx->data.frame == -1) {
-        func_1516972C((struct102 *)fx);
+        func_1516972C(&fx->link);
     }
 }
 /* Moves an object to type 0. */
-void func_15168A2C(s32 obj) {
+void func_15168A2C(EffectHeader *obj) {
     func_15168B10(obj, 0);
 }
 /* Pushes obj onto the front of list D_800DCE50[obj->kind][type] and sets its type. */
@@ -863,9 +856,9 @@ void func_15168A9C(EffectHeader *obj) {
 }
 
 /* Moves obj to the list for another type. */
-void func_15168B10(s32 obj, s32 type) {
-    func_15168A9C((EffectHeader *)obj);
-    func_15168A4C((EffectHeader *)obj, type);
+void func_15168B10(EffectHeader *obj, s32 type) {
+    func_15168A9C(obj);
+    func_15168A4C(obj, type);
 }
 
 /*
@@ -957,7 +950,7 @@ void func_15168BAC(ModelFx *fx) {
 
     index = fx->data.callback;
     if (index != 0) {
-        D_8008CA20[index]((struct102 *)fx);
+        D_8008CA20[index](&fx->link);
     }
 }
 
@@ -1114,7 +1107,7 @@ void func_1516968C(EffectHeader *obj, u8 *event, u8 eventType);
 /* Sends an event to every object of types [first, last) (clamped by func_15143D18). */
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
     s32 type;
-    struct102 *node;
+    EffectHeader *node;
 
     func_15143D18(&first, &last, 2, OBJ_TYPE_COUNT);
     for (type = first; type < last; type++) {
@@ -1124,8 +1117,8 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
+                    D_800DD198[D_800DD190] = node->next;
+                    func_1516968C(node, (u8 *)event, eventType);
                     D_8008B4A8[type].handleEvent(node, event, eventType);
                     node = D_800DD198[D_800DD190];
                 }
@@ -1134,8 +1127,8 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
                 node = D_800DCE50[list][type];
                 D_800DD190++;
                 while (node != NULL) {
-                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
+                    D_800DD198[D_800DD190] = node->next;
+                    func_1516968C(node, (u8 *)event, eventType);
                     node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
@@ -1149,7 +1142,7 @@ void func_15169260(void *types, s32 count, s32 event, u8 eventType) {
     s32 *type;
     s32 i;
     s32 list;
-    struct102 *node;
+    EffectHeader *node;
 
     for (i = 0, type = types; i < count; i++) {
         for (list = 0; list != 2; list++) {
@@ -1157,8 +1150,8 @@ void func_15169260(void *types, s32 count, s32 event, u8 eventType) {
                 node = D_800DCE50[list][*type];
                 D_800DD190++;
                 while (node != NULL) {
-                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
+                    D_800DD198[D_800DD190] = node->next;
+                    func_1516968C(node, (u8 *)event, eventType);
                     D_8008B4A8[*type].handleEvent(node, event, eventType);
                     node = D_800DD198[D_800DD190];
                 }
@@ -1167,8 +1160,8 @@ void func_15169260(void *types, s32 count, s32 event, u8 eventType) {
                 node = D_800DCE50[list][*type];
                 D_800DD190++;
                 while (node != NULL) {
-                    D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
+                    D_800DD198[D_800DD190] = node->next;
+                    func_1516968C(node, (u8 *)event, eventType);
                     node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
@@ -1181,7 +1174,7 @@ void func_15169260(void *types, s32 count, s32 event, u8 eventType) {
 /* Sends an event to every object of one type (clamped to the last type). */
 void func_1516944C(s32 type, s32 event, u8 eventType) {
     s32 list;
-    struct102 *node;
+    EffectHeader *node;
 
     if (type >= OBJ_TYPE_COUNT) {
         type = OBJ_TYPE_COUNT - 1;
@@ -1191,8 +1184,8 @@ void func_1516944C(s32 type, s32 event, u8 eventType) {
             node = D_800DCE50[list][type];
             D_800DD190++;
             while (node != NULL) {
-                D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
+                D_800DD198[D_800DD190] = node->next;
+                func_1516968C(node, (u8 *)event, eventType);
                 D_8008B4A8[type].handleEvent(node, event, eventType);
                 node = D_800DD198[D_800DD190];
             }
@@ -1201,42 +1194,28 @@ void func_1516944C(s32 type, s32 event, u8 eventType) {
             node = D_800DCE50[list][type];
             D_800DD190++;
             while (node != NULL) {
-                D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
+                D_800DD198[D_800DD190] = node->next;
+                func_1516968C(node, (u8 *)event, eventType);
                 node = D_800DD198[D_800DD190];
             }
             D_800DD190--;
         }
     }
 }
-/* Event payload naming an actor (event types 0 and others). */
-typedef struct {
-    /* 0x0 */ Actor *actor;
-    /* 0x4 */ u8 id;             /* the actor's unique_id */
-} ActorEvent;
-
-/* Event type 0x2D payload: ownership moves from one actor to another. */
-typedef struct {
-    /* 0x0 */ Actor *from;
-    /* 0x4 */ Actor *to;
-    /* 0x8 */ u8 fromId;
-    /* 0x9 */ u8 toId;
-} ActorSwapEvent;
-
 /* Sends an actor event about `actor` to every object. */
 void func_151695F0(Actor *actor, u8 eventType) {
-    ActorEvent event;
+    ActorRef event;
 
     event.actor = actor;
-    event.id = actor->unique_id;
+    event.uniqueId = actor->unique_id;
     func_15169040((s32)&event, eventType);
 }
 
 /* Sends an actor event about `actor` to every object of one type. */
 void func_1516962C(s32 type, Actor *actor, u8 eventType) {
-    ActorEvent event;
+    ActorRef event;
     event.actor = actor;
-    event.id = actor->unique_id;
+    event.uniqueId = actor->unique_id;
     func_1516944C(type, (s32)&event, eventType);
 }
 
@@ -1251,30 +1230,30 @@ void func_1516968C(EffectHeader *obj, u8 *event, u8 eventType) {
     if (eventType == 0xF || eventType == 0x10) {
         // matching: obj->owner read as a byte array; the struct field form swaps the two loads
         if (event[0] == ((u8 *)obj)[0xC]) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C(obj);
         }
     }
 }
 
 /* Repairs saved iteration cursors that point at `obj` (it is about to leave its list). */
-void func_151696DC(struct102 *obj) {
+void func_151696DC(EffectHeader *obj) {
     s8 depth;
 
     for (depth = 0; depth < D_800DD190; depth++) {
         if (obj == D_800DD198[depth]) {
-            D_800DD198[depth] = (struct102 *)obj->unk8;
+            D_800DD198[depth] = obj->next;
         }
     }
 }
 
 /* Destroys an object of type 2 or above: its type's destroy hook, or by default func_15169804. */
-void func_1516972C(struct102 *obj) {
-    void (*destroy)(struct102 *obj);
+void func_1516972C(EffectHeader *obj) {
+    void (*destroy)(EffectHeader *obj);
 
     func_151696DC(obj);
 
-    if (obj->unk0 >= 2) {
-        destroy = D_8008B4A8[obj->unk0].destroy;
+    if (obj->type >= 2) {
+        destroy = D_8008B4A8[obj->type].destroy;
         if (destroy != NULL) {
             destroy(obj);
             return;
@@ -1284,11 +1263,11 @@ void func_1516972C(struct102 *obj) {
 }
 
 /* Frees an object: its type's free hook, or by default func_15169824. */
-void func_1516979C(struct102 *obj) {
-    void (*free)(struct102 *obj);
+void func_1516979C(EffectHeader *obj) {
+    void (*free)(EffectHeader *obj);
 
     func_151696DC(obj);
-    free = D_8008B4A8[obj->unk0].free;
+    free = D_8008B4A8[obj->type].free;
     if (free != NULL) {
         free(obj);
         return;
@@ -1297,13 +1276,13 @@ void func_1516979C(struct102 *obj) {
 }
 
 /* Default destroy: moves the object to type 1 (pending free). */
-void func_15169804(struct102 *obj) {
-    func_15168B10((s32)obj, 1);
+void func_15169804(EffectHeader *obj) {
+    func_15168B10(obj, 1);
 }
 
 /* Default free: unlinks the object and releases its memory. */
-void func_15169824(struct102 *obj) {
-    func_15168A9C((EffectHeader *)obj);
+void func_15169824(EffectHeader *obj) {
+    func_15168A9C(obj);
     func_10004074(obj);
 }
 
@@ -1313,18 +1292,18 @@ void func_15169824(struct102 *obj) {
  */
 void func_15169850(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj) {
     if (eventType == 0) {
-        if (((ActorEvent *)event)->actor == *owner || ((ActorEvent *)event)->id == *ownerId) {
+        if (((ActorRef *)event)->actor == *owner || ((ActorRef *)event)->uniqueId == *ownerId) {
             func_1516972C(obj);
         }
     } else if (eventType == 0x2D) {
-        Actor *from = ((ActorSwapEvent *)event)->from;
+        Actor *actorA = ((ActorSwapMsg *)event)->actorA;
 
-        if (from == *owner) {
-            *owner = ((ActorSwapEvent *)event)->to;
-            *ownerId = ((ActorSwapEvent *)event)->toId;
-        } else if (((ActorSwapEvent *)event)->to == *owner) {
-            *owner = from;
-            *ownerId = ((ActorSwapEvent *)event)->fromId;
+        if (actorA == *owner) {
+            *owner = ((ActorSwapMsg *)event)->actorB;
+            *ownerId = ((ActorSwapMsg *)event)->idB;
+        } else if (((ActorSwapMsg *)event)->actorB == *owner) {
+            *owner = actorA;
+            *ownerId = ((ActorSwapMsg *)event)->idA;
         }
     }
 }

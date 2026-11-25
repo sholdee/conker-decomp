@@ -76,7 +76,6 @@ void func_151236D0(Camera *);
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32, f32, f32);
 s32 func_150A3FC4(f32, f32, s32, s32 *, f32 *);
 void func_1512C150(Camera *);
-extern s32 D_800C3678;
 extern Vec3f D_80089544;
 
 /*
@@ -208,7 +207,7 @@ void func_15128CB0(Camera *cam) {
                 } else {
                     cam->contPad = D_800BE728[cam->playerIndex];
                     cam->buttonsPressed = D_800BE710[cam->playerIndex];
-                    func_15127FEC(cam, D_800C367C, D_800C3678);
+                    func_15127FEC(cam, D_800C367C, *(s32 *)&D_800C3678); // matching: the f32 is passed as raw bits (callee ignores it)
                     cam->snap = 0;
                 }
             }

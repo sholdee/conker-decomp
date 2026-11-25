@@ -3,12 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Event payload naming an actor, as in game_1944C0.c. */
-typedef struct {
-    /* 0x0 */ Actor *actor;
-    /* 0x4 */ u8 id; /* the actor's unique_id */
-} ActorEvent;
-
 /* Object handled by func_15190454 (game_1BD8B0.c). */
 typedef struct Game1BD8B0Object Game1BD8B0Object;
 
@@ -28,7 +22,7 @@ void func_151904BC(AnchorEmitter *emitter) {
     AnchorEmitterParams *params = &emitter->params;
 
     if (params->child != NULL) {
-        func_1516972C((struct102 *)params->child);
+        func_1516972C((EffectHeader *)params->child);
     }
     func_1000FD38(func_1518E298, emitter, (s32)emitter->owner);
     func_151D2B4C(params->tmpl.anchorSet);
@@ -36,9 +30,9 @@ void func_151904BC(AnchorEmitter *emitter) {
 
 /* Sends event 0x2A about `actor` to every object of type 0x3E. */
 void func_15190518(Actor *actor) {
-    ActorEvent event;
+    ActorRef event;
 
     event.actor = actor;
-    event.id = actor->unique_id;
+    event.uniqueId = actor->unique_id;
     func_1516944C(0x3E, (s32)&event, 0x2A);
 }

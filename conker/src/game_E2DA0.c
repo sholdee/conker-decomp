@@ -10,13 +10,7 @@ void func_150B60E0(Actor *obj, Vec3f *out);
 
 /* Effect instance whose per-type data (from 0x28) tracks a game object. */
 typedef struct ObjBurstEffect {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 timer; /* frames left (as in FlashEffect, game_1AC2F0.c) */
-    /* 0x10 */ u8 pad10[0x18];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ Actor *obj;
     /* 0x2C */ u8 objUniqueId;
 } ObjBurstEffect;
@@ -48,7 +42,7 @@ void func_150B5950(ObjBurstEffect *effect) {
     obj = effect->obj;
     posp = &pos; // matching: IDO keeps &pos in a saved register only via a named pointer
     if ((obj->interaction_state == 0) || (obj->unique_id != effect->objUniqueId)) {
-        effect->timer = -1;
+        effect->base.header.state = -1;
         return;
     }
 
@@ -57,12 +51,12 @@ void func_150B5950(ObjBurstEffect *effect) {
             pos.x = obj->x_position;
             pos.y = obj->y_position;
             pos.z = obj->z_position;
-            func_150B5A3C(posp, effect->owner, effect->kind);
+            func_150B5A3C(posp, effect->base.header.owner, effect->base.header.kind);
         }
 
         if (func_150ADA68() < 0.10824f) {
             func_150B60E0(obj, posp);
-            func_150B5A3C(posp, effect->owner, effect->kind);
+            func_150B5A3C(posp, effect->base.header.owner, effect->base.header.kind);
         }
     }
 }
@@ -240,21 +234,21 @@ void func_150B5E34(Vec3f *pos, u8 owner, s32 kind) {
     func_15130280(&spawn, 1, 0, 0, owner, kind);
 }
 
-extern s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+extern s32 func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /** Spawns a func_151602C0 effect at pos (as integer coordinates) with randomized parameters. */
 void func_150B6000(Vec3f *pos, u8 owner, s32 kind) {
-    Header header;
-    Header2 ipos;
+    LightEffectHeader header;
+    Vec3i ipos;
 
-    header.unk0 = 3;
-    header.unk1 = -1;
-    header.unk2 = func_150ADA20() % 9U + 3;
-    header.unk4 = 0;
+    header.flags = 3;
+    header.update = -1;
+    header.lifetime = func_150ADA20() % 9U + 3;
+    header.lightType = 0;
 
-    ipos.unk0 = pos->x;
-    ipos.unk4 = pos->y;
-    ipos.unk8 = pos->z;
+    ipos.x = pos->x;
+    ipos.y = pos->y;
+    ipos.z = pos->z;
 
     func_151602C0(&header, &ipos, func_150ADA20() % 201U + 55, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, owner, kind);
 }
@@ -267,19 +261,8 @@ void func_150B60E0(Actor *obj, Vec3f *out) {
     func_15143134(&D_8009FC30, out, (u8 *)obj->unk1D4 + 0x140);
 }
 
-/* Emitter of the bolt-ring effect: cylinder centre (x, y, z), radius and height, and its state. */
 typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ s16 radius;
-    /* 0x08 */ s16 height;
-    /* 0x0A */ u8 padA[0xA];
-    /* 0x14 */ u8 state;
-} BoltEmitter;
-
-typedef struct {
-    /* 0x00 */ BoltEmitter *emitter;
+    /* 0x00 */ TriggerZone *emitter;
     /* 0x04 */ f32 spawnAccum;
     /* 0x08 */ u8 emitterState;
 } BoltRingData;
@@ -303,14 +286,14 @@ extern void func_15106F98(Vec3f *start, Vec3f *end, s32 depth, BoltChainConfig *
  */
 void func_150B6110(BoltRingEffect *effect) {
     BoltRingData *data;
-    BoltEmitter *emitter;
+    TriggerZone *emitter;
     u8 prevState;
     u8 angle;
 
     emitter = effect->data.emitter;
     prevState = effect->data.emitterState;
-    effect->data.emitterState = emitter->state;
-    if (emitter->state == 1) {
+    effect->data.emitterState = emitter->disabled;
+    if (emitter->disabled == 1) {
         if (effect->data.emitterState != prevState) {
             func_151494E0(0, 0x4A);
         }
@@ -360,7 +343,7 @@ void func_150B6110(BoltRingEffect *effect) {
 }
 
 /** Message handler: on message 0x4A, releases the effect object via func_1516972C. */
-void func_150B6450(struct102 *effect, s32 arg1, u8 msg) {
+void func_150B6450(EffectHeader *effect, s32 arg1, u8 msg) {
     if (msg == 0x4A) {
         func_1516972C(effect);
     }

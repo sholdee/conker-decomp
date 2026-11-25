@@ -6,25 +6,13 @@
 #include "effects.h"
 
 s32 func_1514672C(Vec3f *arg0);
-s32 func_15046C80(Vec3f *point, s32 arg1, f32 startY, f32 *floorY);
+s32 func_15046C80(Vec3f *point, s32 arg1, f32 startY, CollisionHit *hit);
 void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s32 arg6);
 void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6);
 s32 func_15131918(Vec3f *vel, f32 scale);
 
-extern u8 (*D_8008FCD0[])(void);
-extern u8 (*D_8008FD04[])(void);
 extern u8 D_800AB330[]; /* per effect kind flag */
-extern u8 D_800AB414[]; /* RGB per effect kind */
 
-/* Start of a live effect created from an ParticleDef. */
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0xB];
-    ParticleDef desc;
-} EffectBase; /* 0x70 */
 
 /* Data of a func_151DA08C effect: wobbles its scale and keeps spawning func_151DB5D0 particles. */
 typedef struct {
@@ -42,9 +30,9 @@ typedef struct {
 } SteamData; /* 0x1C */
 
 typedef struct {
-    EffectBase base;
-    u8 pad70[0xB8];
-    SteamData steam;
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x18];
+    /* 0x128 */ SteamData steam;
 } SteamEffect;
 
 
@@ -156,18 +144,8 @@ typedef struct {
 
 /* A live sprite particle as returned by func_15130280. */
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[3];
-    ParticleDesc desc;
-    f32 floorY;
-    Vec3f unk84;
-    u8 pad90[0xD];
-    u8 unk9D;
-    u8 pad9E[0xA];
-    union {
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ union {
         ParticleWobble wobble;
         ParticleSpin spin;
     } data;
@@ -276,8 +254,8 @@ s32 func_151D9450(Particle *particle, Vec3f *arg1) {
     }
     wobble->phaseX = wobble->phaseX + wobble->stepX * D_800BE9E4;
     wobble->phaseY = wobble->phaseY + wobble->stepY * D_800BE9E4;
-    particle->desc.width = wobble->amplitudeX * func_151423D8((u8)(wobble->phaseX - 0x40)) + wobble->size;
-    particle->desc.height = wobble->amplitudeY * func_151423D8((u8)(wobble->phaseY - 0x40)) + wobble->size;
+    particle->head.desc.width = wobble->amplitudeX * func_151423D8((u8)(wobble->phaseX - 0x40)) + wobble->size;
+    particle->head.desc.height = wobble->amplitudeY * func_151423D8((u8)(wobble->phaseY - 0x40)) + wobble->size;
     return 1;
 }
 
@@ -292,41 +270,41 @@ u8 func_151D9534(Particle *particle, Vec3f *arg1) {
     f32 avgScale;
 
     alive = 1;
-    if (particle->desc.pos.y < arg1->y) {
-        point.x = particle->desc.pos.x;
+    if (particle->head.desc.pos.y < arg1->y) {
+        point.x = particle->head.desc.pos.x;
         point.y = arg1->y;
-        point.z = particle->desc.pos.z;
+        point.z = particle->head.desc.pos.z;
         if (func_1514672C(&point) == 0) {
             return 0;
         }
         if (func_15046C80(&point, 0,
- particle->desc.pos.y, &particle->floorY) != 0) {
-            point.y = particle->floorY + 2.0f;
+ particle->head.desc.pos.y, &particle->head.floor) != 0) {
+            point.y = particle->head.floor.height + 2.0f;
             if (particle->data.wobble.flags & WOBBLE_FLAG_BOUNCE) {
-                particle->desc.pos.y = (particle->desc.height * 0.060000002f) + point.y;
-                particle->desc.vel.x *= 0.39900002f;
-                particle->desc.vel.y *= -0.39900002f;
-                particle->desc.vel.z *= 0.39900002f;
-                if (fabsf(particle->desc.vel.y) < 0.326f) {
-                    particle->desc.vel.x = 0.0f;
-                    particle->desc.flags &= ~6;
-                    particle->desc.vel.y = 0.0f;
-                    particle->desc.vel.z = 0.0f;
-                    particle->desc.gravity = 0.0f;
+                particle->head.desc.pos.y = (particle->head.desc.height * 0.060000002f) + point.y;
+                particle->head.desc.vel.x *= 0.39900002f;
+                particle->head.desc.vel.y *= -0.39900002f;
+                particle->head.desc.vel.z *= 0.39900002f;
+                if (fabsf(particle->head.desc.vel.y) < 0.326f) {
+                    particle->head.desc.vel.x = 0.0f;
+                    particle->head.desc.flags &= ~6;
+                    particle->head.desc.vel.y = 0.0f;
+                    particle->head.desc.vel.z = 0.0f;
+                    particle->head.desc.gravity = 0.0f;
                 }
             } else {
                 alive = 0;
                 wobble = &particle->data.wobble;
-                avgScale = (particle->desc.width + particle->desc.height) * 0.5f;
-                if (particle->unk9D == 3) {
-                    func_151D9FC0(wobble->kind, wobble->altBurstScale * avgScale, particle->desc.alpha,
-                                  (s32)&particle->unk84, &point, particle->unkC, particle->unk1);
+                avgScale = (particle->head.desc.width + particle->head.desc.height) * 0.5f;
+                if (particle->head.floor.source == 3) {
+                    func_151D9FC0(wobble->kind, wobble->altBurstScale * avgScale, particle->head.desc.alpha,
+                                  (s32)&particle->head.floor.tri, &point, particle->head.header.owner, particle->head.header.kind);
                 } else if (func_150ADA20() & 1) {
-                    func_151D9B8C(wobble->kind, (avgScale * 0.09f) * wobble->burstScale, particle->desc.alpha,
-                                  (s32)&particle->unk84, &point, 100, 0, 1, 0, particle->unkC, particle->unk1);
+                    func_151D9B8C(wobble->kind, (avgScale * 0.09f) * wobble->burstScale, particle->head.desc.alpha,
+                                  (s32)&particle->head.floor.tri, &point, 100, 0, 1, 0, particle->head.header.owner, particle->head.header.kind);
                 } else {
-                    func_151DAB58(wobble->kind, (avgScale * 0.025f) * wobble->burstScale, particle->desc.alpha, &point,
-                                  1, particle->unkC, particle->unk1);
+                    func_151DAB58(wobble->kind, (avgScale * 0.025f) * wobble->burstScale, particle->head.desc.alpha, &point,
+                                  1, particle->head.header.owner, particle->head.header.kind);
                 }
             }
         }
@@ -418,11 +396,7 @@ typedef struct {
 } DripData; /* 0x18 */
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
+    TimedEffect base;
     DripData drip;
 } DripEffect;
 
@@ -437,7 +411,7 @@ f32 func_15144A74(Vec3f *, Vec3f *);
 void func_151D9B8C(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, s16 lifetime, u8 arg6, u8 arg7, u8 arg8,
                    u8 arg9, s32 argA) {
     SpriteDef desc;
-    struct260 *effect;
+    TimedEffect *effect;
     Vec3f outA;
     Vec3f outB;
     Vec3f normal;
@@ -504,7 +478,7 @@ void func_151D9EB0(DripEffect *effect) {
         rand = func_150ADA68();
         lifeRand = func_150ADA20();
         func_151D9014(&drip->pos, &D_800A5480, drip->kind, rand * 0.157f + -0.657f, (lifeRand % 41U) + 35,
-                      drip->unk14, drip->size, 0, 1.0f, 1.0f, drip->unk15, 0, 1, 0, effect->unkC, effect->unk1);
+                      drip->unk14, drip->size, 0, 1.0f, 1.0f, drip->unk15, 0, 1, 0, effect->base.header.owner, effect->base.header.kind);
         drip->timer = (func_150ADA20() % 111U) + 30;
     }
 }
@@ -610,11 +584,11 @@ s32 func_151DA368(SteamEffect *effect) {
     steam = &effect->steam;
     steam->phaseX = steam->phaseX + steam->stepX * D_800BE9E4;
     steam->phaseY = steam->phaseY + steam->stepY * D_800BE9E4;
-    effect->base.desc.width = func_151423D8(steam->phaseX - 0x40) * steam->amplitudeX + steam->size;
-    effect->base.desc.height = func_151423D8(steam->phaseY - 0x40) * steam->amplitudeY + steam->size;
+    effect->head.def.width = func_151423D8(steam->phaseX - 0x40) * steam->amplitudeX + steam->size;
+    effect->head.def.height = func_151423D8(steam->phaseY - 0x40) * steam->amplitudeY + steam->size;
 lbl: // matching: ends the basic block so the scaleY store is not moved into the next call's delay slot
     steam->spawnCredit += (0.15f + func_150ADA68() * 0.1f) * D_800BE9A4;
-    avgScale = (effect->base.desc.width + effect->base.desc.height) * 0.5f;
+    avgScale = (effect->head.def.width + effect->head.def.height) * 0.5f;
     if (steam->spawnCredit > 1.0f) {
         radius = avgScale * 500.0f;
         do {
@@ -622,9 +596,9 @@ lbl: // matching: ends the basic block so the scaleY store is not moved into the
             dist = func_150ADA68() * radius;
             c = func_151423D8(angle - 0x40);
             // matching: indexing the position as an array orders the add's operands like the target
-            pos[0] = func_151423D8(angle) * dist + ((f32 *)&effect->base.desc.pos)[0];
-            pos[1] = ((f32 *)&effect->base.desc.pos)[1] + -3.5f;
-            pos[2] = ((f32 *)&effect->base.desc.pos)[2] + c * dist;
+            pos[0] = func_151423D8(angle) * dist + ((f32 *)&effect->head.def.pos)[0];
+            pos[1] = ((f32 *)&effect->head.def.pos)[1] + -3.5f;
+            pos[2] = ((f32 *)&effect->head.def.pos)[2] + c * dist;
             {
                 s16 life;
 
@@ -635,7 +609,7 @@ lbl: // matching: ends the basic block so the scaleY store is not moved into the
                 dist = func_150ADA68();
                 func_151DB5D0(steam->kind, pos, vel, avgScale * 471.0f, (dist * 154.0f + 10106.0f) * 0.0001f, 1.0f,
                               (func_150ADA68() * 25.0f + -50.0f) * 0.001f, life, 0x9B, life, 0xFF / life, 1,
-                              effect->base.unkC, effect->base.unk1);
+                              effect->head.header.owner, effect->head.header.kind);
             }
             steam->spawnCredit -= 1.0f;
         } while
@@ -649,7 +623,7 @@ s32 func_151DA6A8(SteamEffect *effect) {
     s32 i;
     SteamData *steam;
 
-    if (effect->base.desc.flags & 1) {
+    if (effect->head.def.flags & 1) {
         steam = &effect->steam;
         i = D_800BE9E4;
         while (i--) {
@@ -682,15 +656,11 @@ typedef struct {
 } SplashNode; /* 0x14 */
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x20];
-    s8 node;
-    u8 pad2E[0x66];
-    SplashNode *nodes;
-    SplashState *state;
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ SplashNode *nodes;
+    /* 0x98 */ SplashState *state;
 } Splash;
 
 extern Splash *func_15147DA0(EffectTemplate *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
@@ -777,15 +747,15 @@ s32 func_151DA938(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
     Vec3f point;
     SplashBurst *burst = &state->burst;
 
-    point.x = nodes[splash->node].pos.x;
+    point.x = nodes[splash->head.start].pos.x;
     point.y = floorY + 2.0f;
-    point.z = nodes[splash->node].pos.z;
+    point.z = nodes[splash->head.start].pos.z;
     if (func_150ADA20() & 1) {
         func_151D9B8C(burst->kind, (state->motion.halfWidth * 3.0f) * burst->burstScale, state->motion.alpha, arg5,
-                      &point, 100, 0, 1, 0, splash->unkC, splash->unk1);
+                      &point, 100, 0, 1, 0, splash->head.header.owner, splash->head.header.kind);
     } else {
         func_151DAB58(burst->kind, (state->motion.halfWidth * 1.1f) * burst->burstScale, state->motion.alpha, &point, 1,
-                      splash->unkC, splash->unk1);
+                      splash->head.header.owner, splash->head.header.kind);
     }
     state->unk20 = 4;
     return 1;
@@ -797,11 +767,11 @@ s32 func_151DAA88(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
     SplashNode *nodes = splash->nodes;
     Vec3f point;
 
-    point.x = nodes[splash->node].pos.x;
+    point.x = nodes[splash->head.start].pos.x;
     point.y = floorY;
-    point.z = nodes[splash->node].pos.z;
+    point.z = nodes[splash->head.start].pos.z;
     func_151D9FC0(state->burst.kind, state->motion.halfWidth * 11.0f * state->burst.altBurstScale, state->motion.alpha,
-                  arg5, &point, splash->unkC, splash->unk1);
+                  arg5, &point, splash->head.header.owner, splash->head.header.kind);
     state->unk20 = 4;
     return 1;
 }
@@ -817,9 +787,8 @@ typedef struct {
 } SquashData; /* 0xC */
 
 typedef struct {
-    EffectBase base;
-    u8 pad70[0xA0];
-    SquashData squash;
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ SquashData squash;
 } SquashEffect;
 
 /* Spawns a squash-and-stretch effect of kind `kind` at `pos`. */
@@ -888,17 +857,14 @@ s32 func_151DADA0(SquashEffect *effect) {
     squash = &effect->squash;
     squash->phase = squash->phase + squash->step * D_800BE9E4;
     wave = func_151423D8((u8)(squash->phase - 0x40));
-    effect->base.desc.scale.x = squash->amplitudeX * wave + 1.0f;
-    effect->base.desc.scale.y = 1.3f - squash->amplitudeY * wave;
+    effect->head.def.scale.x = squash->amplitudeX * wave + 1.0f;
+    effect->head.def.scale.y = 1.3f - squash->amplitudeY * wave;
     return 1;
 }
 
 /* An effect drawn as a camera-facing quad, with a double-buffered vertex block per view. */
 typedef struct {
-    EffectBase base;
-    u8 pad70[0x50];
-    Vtx quad[4];
-    Vtx *buffers[1]; /* one per view */
+    /* 0x000 */ DefParticleHead head;
 } QuadEffect;
 
 void func_151D5D60(Vtx **buffers, s16 view, s32 size, Vtx **vtx, u8 *fresh);
@@ -914,19 +880,19 @@ Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
     f32 dx;
     u8 fresh;
 
-    func_151D5D60(effect->buffers, view, sizeof(effect->quad), &vtx, &fresh);
+    func_151D5D60(effect->head.vtxBuffers, view, sizeof(effect->head.vtxTemplate), &vtx, &fresh);
     ret = vtx;
     if (vtx) {
         if (fresh) {
-            memcpy(effect->buffers[view], effect->quad, sizeof(effect->quad));
-            memcpy(effect->buffers[view] + 4, effect->quad, sizeof(effect->quad));
+            memcpy(effect->head.vtxBuffers[view], effect->head.vtxTemplate, sizeof(effect->head.vtxTemplate));
+            memcpy(effect->head.vtxBuffers[view] + 4, effect->head.vtxTemplate, sizeof(effect->head.vtxTemplate));
         }
     } else {
         return NULL;
     }
 
-    halfWidth = effect->base.desc.width * effect->base.desc.scale.x;
-    height = effect->base.desc.height * effect->base.desc.scale.y;
+    halfWidth = effect->head.def.width * effect->head.def.scale.x;
+    height = effect->head.def.height * effect->head.def.scale.y;
     dz = D_800DD1D8[view] * halfWidth;
     dx = D_800DD1E8[view] * halfWidth;
 
@@ -934,130 +900,130 @@ Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
     vtx[1].v.flag = 0;
     vtx[2].v.flag = 0;
     vtx[3].v.flag = 0;
-    vtx[0].v.ob[0] = vtx[3].v.ob[0] = effect->base.desc.pos.x + dx;
-    vtx[0].v.ob[1] = vtx[1].v.ob[1] = effect->base.desc.pos.y;
-    vtx[0].v.ob[2] = vtx[3].v.ob[2] = effect->base.desc.pos.z - dz;
-    vtx[1].v.ob[0] = vtx[2].v.ob[0] = effect->base.desc.pos.x - dx;
-    vtx[2].v.ob[1] = vtx[3].v.ob[1] = effect->base.desc.pos.y + height;
-    vtx[1].v.ob[2] = vtx[2].v.ob[2] = effect->base.desc.pos.z + dz;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = effect->head.def.pos.x + dx;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = effect->head.def.pos.y;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = effect->head.def.pos.z - dz;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = effect->head.def.pos.x - dx;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = effect->head.def.pos.y + height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = effect->head.def.pos.z + dz;
 
     return ret;
 }
 
-/* Colour setter for effect kind 0 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB004(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 56U) + 80;
-    arg0->unk15 = 0;
-    arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 46U) + 180;
-    arg0->unk19 = 0;
-    arg0->unk1A = 0;
+/* Colour setter for effect kind 0 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB004(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 56U) + 80;
+    desc->g = 0;
+    desc->b = 0;
+    desc->r2 = (func_150ADA20() % 46U) + 180;
+    desc->g2 = 0;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kinds 1 and 11 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB068(struct218 *arg0) {
-    arg0->unk14 = arg0->unk15 = (func_150ADA20() % 56U) + 100;
-    arg0->unk16 = 0;
-    arg0->unk18 = arg0->unk19 = (func_150ADA20() % 46U) + 180;
-    arg0->unk1A = 0;
+/* Colour setter for effect kinds 1 and 11 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB068(ParticleDesc *desc) {
+    desc->r = desc->g = (func_150ADA20() % 56U) + 100;
+    desc->b = 0;
+    desc->r2 = desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kind 2 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB0CC(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 56U) + 80;
-    arg0->unk15 = (func_150ADA20() % 56U) + 80;
-    arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 46U) + 180;
-    arg0->unk19 = (func_150ADA20() % 46U) + 180;
-    arg0->unk1A = 0;
+/* Colour setter for effect kind 2 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB0CC(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 56U) + 80;
+    desc->g = (func_150ADA20() % 56U) + 80;
+    desc->b = 0;
+    desc->r2 = (func_150ADA20() % 46U) + 180;
+    desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kind 3 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB15C(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 56U) + 80;
-    arg0->unk15 = (func_150ADA20() % 56U) + 80;
-    arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 46U) + 180;
-    arg0->unk19 = (func_150ADA20() % 46U) + 180;
-    arg0->unk1A = 0;
+/* Colour setter for effect kind 3 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB15C(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 56U) + 80;
+    desc->g = (func_150ADA20() % 56U) + 80;
+    desc->b = 0;
+    desc->r2 = (func_150ADA20() % 46U) + 180;
+    desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kind 4 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB1EC(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 56U) + 80;
-    arg0->unk15 = (func_150ADA20() % 56U) + 80;
-    arg0->unk16 = 0;
-    arg0->unk18 = (func_150ADA20() % 46U) + 180;
-    arg0->unk19 = (func_150ADA20() % 46U) + 180;
-    arg0->unk1A = 0;
+/* Colour setter for effect kind 4 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB1EC(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 56U) + 80;
+    desc->g = (func_150ADA20() % 56U) + 80;
+    desc->b = 0;
+    desc->r2 = (func_150ADA20() % 46U) + 180;
+    desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kind 5 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB27C(struct218 *arg0) {
-    arg0->unk14 = 255;
-    arg0->unk15 = 255;
-    arg0->unk16 = 255;
-    arg0->unk18 = 180;
-    arg0->unk19 = 200;
-    arg0->unk1A = 200;
+/* Colour setter for effect kind 5 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB27C(ParticleDesc *desc) {
+    desc->r = 255;
+    desc->g = 255;
+    desc->b = 255;
+    desc->r2 = 180;
+    desc->g2 = 200;
+    desc->b2 = 200;
 }
 
-/* Colour setter for effect kind 6 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB2A8(struct218 *arg0) {
-    arg0->unk14 = 0;
-    arg0->unk15 = 200;
-    arg0->unk16 = 0;
-    arg0->unk18 = 0;
-    arg0->unk19 = 200;
-    arg0->unk1A = 0;
+/* Colour setter for effect kind 6 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB2A8(ParticleDesc *desc) {
+    desc->r = 0;
+    desc->g = 200;
+    desc->b = 0;
+    desc->r2 = 0;
+    desc->g2 = 200;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kind 7 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB2CC(struct218 *arg0) {
-    arg0->unk14 = 0;
-    arg0->unk15 = (func_150ADA20() % 56U) + 80;
-    arg0->unk16 = 0;
-    arg0->unk18 = 0;
-    arg0->unk19 = (func_150ADA20() % 46U) + 180;
-    arg0->unk1A = 0;
+/* Colour setter for effect kind 7 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB2CC(ParticleDesc *desc) {
+    desc->r = 0;
+    desc->g = (func_150ADA20() % 56U) + 80;
+    desc->b = 0;
+    desc->r2 = 0;
+    desc->g2 = (func_150ADA20() % 46U) + 180;
+    desc->b2 = 0;
 }
 
-/* Colour setter for effect kind 8 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB330(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 21U) + 95;
-    arg0->unk15 = (func_150ADA20() % 21U) + 95;
-    arg0->unk16 = (func_150ADA20() % 11U) + 45;
-    arg0->unk18 = (func_150ADA20() & 0xF) + 58;
-    arg0->unk19 = (func_150ADA20() & 0xF) + 60;
-    arg0->unk1A = (func_150ADA20() % 11U) + 25;
+/* Colour setter for effect kind 8 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB330(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 21U) + 95;
+    desc->g = (func_150ADA20() % 21U) + 95;
+    desc->b = (func_150ADA20() % 11U) + 45;
+    desc->r2 = (func_150ADA20() & 0xF) + 58;
+    desc->g2 = (func_150ADA20() & 0xF) + 60;
+    desc->b2 = (func_150ADA20() % 11U) + 25;
 }
 
-/* Colour setter for effect kind 9 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB3D8(struct218 *arg0) {
-    arg0->unk14 = 0;
-    arg0->unk15 = arg0->unk16 = (func_150ADA20() % 56U) + 80;
-    arg0->unk18 = 0;
-    arg0->unk19 = arg0->unk1A = (func_150ADA20() % 46U) + 180;
+/* Colour setter for effect kind 9 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB3D8(ParticleDesc *desc) {
+    desc->r = 0;
+    desc->g = desc->b = (func_150ADA20() % 56U) + 80;
+    desc->r2 = 0;
+    desc->g2 = desc->b2 = (func_150ADA20() % 46U) + 180;
 }
 
-/* Colour setter for effect kind 10 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB43C(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 56U) + 80;
-    arg0->unk15 = 0;
-    arg0->unk16 = (func_150ADA20() % 56U) + 80;
-    arg0->unk18 = (func_150ADA20() % 46U) + 180;
-    arg0->unk19 = 0;
-    arg0->unk1A = (func_150ADA20() % 46U) + 180;
+/* Colour setter for effect kind 10 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB43C(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 56U) + 80;
+    desc->g = 0;
+    desc->b = (func_150ADA20() % 56U) + 80;
+    desc->r2 = (func_150ADA20() % 46U) + 180;
+    desc->g2 = 0;
+    desc->b2 = (func_150ADA20() % 46U) + 180;
 }
 
-/* Colour setter for effect kind 12 (D_8008FD38): fills the RGB triples unk14-16 and unk18-1A. */
-void func_151DB4CC(struct218 *arg0) {
-    arg0->unk14 = (func_150ADA20() % 56U) + 200;
-    arg0->unk15 = (func_150ADA20() % 56U) + 200;
-    arg0->unk16 = (func_150ADA20() % 56U) + 200;
-    arg0->unk18 = (func_150ADA20() % 56U) + 200;
-    arg0->unk19 = (func_150ADA20() % 56U) + 200;
-    arg0->unk1A = (func_150ADA20() % 56U) + 200;
+/* Colour setter for effect kind 12 (D_8008FD38): fills the colours rgb and rgb2. */
+void func_151DB4CC(ParticleDesc *desc) {
+    desc->r = (func_150ADA20() % 56U) + 200;
+    desc->g = (func_150ADA20() % 56U) + 200;
+    desc->b = (func_150ADA20() % 56U) + 200;
+    desc->r2 = (func_150ADA20() % 56U) + 200;
+    desc->g2 = (func_150ADA20() % 56U) + 200;
+    desc->b2 = (func_150ADA20() % 56U) + 200;
 }
 
 extern void (*D_8008FD38[])(ParticleDesc *);
@@ -1140,7 +1106,7 @@ s32 func_151DB97C(Particle *particle, s32 arg1) {
 
     spin = &particle->data.spin;
     if (spin->flags & SPIN_FLAG_DRAG) {
-        func_15131918(&particle->desc.vel, spin->drag);
+        func_15131918(&particle->head.desc.vel, spin->drag);
     }
     if (spin->flags & SPIN_FLAG_SPIN) {
         spin->angleX = spin->angleX + (spin->stepX * D_800BE9E4);
@@ -1153,9 +1119,9 @@ s32 func_151DB97C(Particle *particle, s32 arg1) {
             f32 waveZ;
 
             waveZ = func_151423D8((u8)(spin->angleZ - 0x40));
-            particle->desc.offset.x = spin->amplitude.x * waveX;
-            particle->desc.offset.y = spin->amplitude.y * waveY;
-            particle->desc.offset.z = spin->amplitude.z * waveZ;
+            particle->head.desc.offset.x = spin->amplitude.x * waveX;
+            particle->head.desc.offset.y = spin->amplitude.y * waveY;
+            particle->head.desc.offset.z = spin->amplitude.z * waveZ;
         }
     }
     return 1;
@@ -1235,9 +1201,9 @@ void func_151DBCBC(u8 kind, f32 size, s16 arg2, s32 arg3, void *pos, u8 arg5, s3
     desc.frame = 0;
     desc.unk10 = arg2;
     desc.unk11 = 0xFF;
-    desc.rgba[0] = D_800AB414[kind * 3];
-    desc.rgba[1] = D_800AB414[kind * 3 + 1];
-    desc.rgba[2] = D_800AB414[kind * 3 + 2];
+    desc.rgba[0] = D_800AB414[kind].r;
+    desc.rgba[1] = D_800AB414[kind].g;
+    desc.rgba[2] = D_800AB414[kind].b;
     desc.rgba[3] = 0xFF;
     desc.renderModes = 0x440001;
     desc.unk7 = 0;
@@ -1267,11 +1233,11 @@ void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, Vec3f *pos, s32 ar
     desc.lifetime = lifetime;
     desc.frame = 0;
     desc.frameSpeed = 0x4000;
-    desc.rgba[0] = D_800AB414[kind * 3];
+    desc.rgba[0] = D_800AB414[kind].r;
     desc.width = 1.0f;
     desc.height = 1.0f;
-    desc.rgba[1] = D_800AB414[kind * 3 + 1];
-    desc.rgba[2] = D_800AB414[kind * 3 + 2];
+    desc.rgba[1] = D_800AB414[kind].g;
+    desc.rgba[2] = D_800AB414[kind].b;
     desc.rgba[3] = 0xFF;
 
     desc.pos = *pos;

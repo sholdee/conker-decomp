@@ -48,11 +48,7 @@ typedef struct {
 
 /* Effect object attached to an actor (created by func_150AEB9C). */
 typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 padD[0x1B];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ OwnerLink link;
 } AttachedEffect;
 
@@ -126,7 +122,7 @@ void func_150AE790(AttachedEffect *effect) {
             motion.velocity.x = horizontal * cosYaw;
             motion.velocity.y = -speed * cosPitch;
             motion.velocity.z = horizontal * sinYaw;
-            func_15147DA0(&spawn, &motion, 0, 1, 2, 0, 0, 0, 0, 0, 0, &style, 0, effect->unkC, effect->unk1);
+            func_15147DA0(&spawn, &motion, 0, 1, 2, 0, 0, 0, 0, 0, 0, &style, 0, effect->base.header.owner, effect->base.header.kind);
         }
 
         duration = func_150ADA68() + 2.5f;
@@ -161,7 +157,7 @@ void func_150AE790(AttachedEffect *effect) {
         emission.flags = 0;
         emission.unk2B = 0;
         emission.unk8 = 0;
-        func_15167D84(&emission, 0, 0, -1, effect->unkC, effect->unk1);
+        func_15167D84(&emission, 0, 0, -1, effect->base.header.owner, effect->base.header.kind);
     }
 }
 /* One effect to attach: the object to spawn and the bone it follows. */
@@ -178,7 +174,6 @@ typedef struct {
 
 extern EffectDefList D_800886E0[];
 extern u32 D_15001B08[];
-extern void *D_800DCE50[2][104];
 void func_15001A08(void);
 
 /* Spawns the effects in D_800886E0[0] and attaches each to `actor`. Also checksums the code from
@@ -277,40 +272,26 @@ s32 func_150AEDD8(struct202 *arg0) {
     return 1;
 }
 
-/* Message payloads seen by func_150AEDF8. */
-typedef union {
-    struct {
-        Actor *obj;
-        u8 id;
-    } removed; /* message 0 */
-    struct {
-        Actor *a;
-        Actor *b;
-        u8 idA;
-        u8 idB;
-    } swap; /* message 0x2D */
-} OwnerMsg;
-
 /* Message handler for an AttachedEffect: on 0x2D, re-links the effect from one actor of a pair to the
    other; on 0, destroys the effect if the given actor (or id) is its owner. */
-void func_150AEDF8(AttachedEffect *effect, OwnerMsg *msg, u8 type) {
+void func_150AEDF8(AttachedEffect *effect, ActorMsg *msg, u8 type) {
     OwnerLink *link = &effect->link;
 
     if (type == 0x2D) {
-        if (link->owner == msg->swap.a) {
-            link->owner = msg->swap.b;
+        if (link->owner == msg->swap.actorA) {
+            link->owner = msg->swap.actorB;
             link->ownerId = msg->swap.idB;
-        } else if (link->owner == msg->swap.b) {
+        } else if (link->owner == msg->swap.actorB) {
             OwnerLink *dst = link; // matching: a block-local alias keeps the ownerId store out of the branch delay slot
 
-            dst->owner = msg->swap.a;
+            dst->owner = msg->swap.actorA;
             dst->ownerId = msg->swap.idA;
         }
     } else if (type == 0) {
-        Actor *obj = msg->removed.obj;
+        Actor *obj = msg->ref.actor;
 
-        if (obj == link->owner || msg->removed.id == link->ownerId) {
-            func_1516972C((struct102 *)effect);
+        if (obj == link->owner || msg->ref.uniqueId == link->ownerId) {
+            func_1516972C(&effect->base.header);
         }
     }
 }

@@ -128,13 +128,6 @@ void func_15112520(WorldObject *turret) {
     }
 }
 
-/* Per-view list of the objects to draw this frame. */
-typedef struct DrawEntry {
-    u16 index;    // into D_800DBEF4
-    u16 distance; // from func_150A6360
-} DrawEntry;
-
-extern DrawEntry **D_80089240[]; // per view
 
 extern s32 func_15022B08(s32, s32);
 extern s32 func_1503F800(void *, s16, s16, s32, s32);
@@ -467,12 +460,11 @@ void func_15113C88(void) {
                 obj->shadow = func_1510D970(1, obj, 0, 1, 0);
             }
         } else if (obj->shadow != NULL) {
-            func_1516972C((struct102 *)obj->shadow); // functions.h types the handle struct102 *
+            func_1516972C((EffectHeader *)obj->shadow); // functions.h types the handle EffectHeader *
             obj->shadow = NULL;
         }
     }
 }
-
 
 /* A group of objects that move together; the first member leads. */
 
@@ -527,7 +519,6 @@ void func_15113E54(s32 arg0) {
         }
     }
 }
-
 
 /* Whether actor `actor` (any actor if -1) touches obj; only objects with flags bit 0x80 track contacts. */
 s32 func_15114050(WorldObject *obj, s32 actor) {
@@ -734,7 +725,7 @@ void func_15114B94(u32 index) {
 
     if (index < D_800DBEF0) {
         if (D_800DBEF4[index].shadow != NULL) {
-            func_1516972C((struct102 *)D_800DBEF4[index].shadow);
+            func_1516972C((EffectHeader *)D_800DBEF4[index].shadow);
             D_800DBEF4[index].shadow = NULL;
         }
         D_800DBEF4[index].state |= 8;

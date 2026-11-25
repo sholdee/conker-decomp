@@ -392,22 +392,22 @@ void func_1515080C(DebrisSpray *config, s32 *variantIds, f32 *variantScales, s32
         }
     }
 }
-extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
+extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 extern s32 func_15145C90(s32);
 
 /* Casts a random number of rays from config->origin and spawns a decal (func_151D9B8C) on each
  * suitable surface hit closer than config->maxDistance. */
 void func_15150D1C(DecalSpray *config, u8 arg1, s32 arg2) {
-    s16 *hitTriangle;
+    CollisionTri *hitTriangle;
     Vec3f direction;
-    s16 triangle[9];
+    CollisionTri triangle;
     Vec3f hit;
     f32 distance;
     s32 surface;
     s32 count;
 
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
-    hitTriangle = triangle; // matching: IDO keeps the buffer address in a saved register only via a variable
+    hitTriangle = &triangle; // matching: IDO keeps the buffer address in a saved register only via a variable
     while (count != 0) {
         func_15143794((s16)((func_150ADA20() % (u32)(config->angles.yawRange + 1)) + config->angles.yawBase),
                       (s16)((func_150ADA20() % (u32)(config->angles.pitchRange + 1)) + config->angles.pitchBase),

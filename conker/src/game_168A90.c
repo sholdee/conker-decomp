@@ -2,57 +2,8 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 #include <libc/stddef.h>
-
-/* Spawn descriptor for a DynModel; copied verbatim into DynModel.desc. */
-typedef struct {
-    /* 0x00 */ u8 flags;       // DYNMODEL_FLAG_*
-    /* 0x01 */ s8 updateFunc;  // index into D_80089C18, -1 for none
-    /* 0x02 */ s8 drawFunc;    // index into D_80089C28, -1 for none
-    /* 0x03 */ u8 pad3;
-    /* 0x04 */ s16 lifetime;   // counts down while DYNMODEL_FLAG_LIFETIME is set
-    /* 0x06 */ u8 pad6[2];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ u8 unk24;
-    /* 0x25 */ u8 unk25;
-    /* 0x26 */ u8 pad26[0xA];
-    /* 0x30 */ s32 unk30;      // model asset, passed to func_1502B6BC
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ u8 kind;        // selects the D_80089C44 / D_80089C54 handlers
-    /* 0x39 */ u8 viewportMask; // viewports drawn in when DYNMODEL_FLAG_VIEWPORT_MASK is set
-    /* 0x3A */ u8 pad3A[2];
-} DynModelDesc; // size 0x3C
-
-#define DYNMODEL_FLAG_LIFETIME      1
-#define DYNMODEL_FLAG_VIEWPORT_MASK 2
-
-/* Model asset returned by func_1502B6BC: a header, the vertices, then the display list. */
-typedef struct {
-    /* 0x00 */ Gfx *displayList; // also marks the end of the vertices
-    /* 0x04 */ u8 pad4[0x24];
-    /* 0x28 */ Vtx vertices[1];
-} DynModelAsset;
-
-/*
- * A model whose vertices are copied into per-frame, per-viewport buffers so they can be
- * modified each frame. The buffers follow the header, then `userDataSize` bytes of user data.
- */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ DynModelDesc desc;
-    /* 0x4C */ DynModelAsset *asset;
-    /* 0x50 */ s32 buffersSize;  // size of all vertex buffers, i.e. the offset of the user data
-    /* 0x54 */ Gfx *displayList;
-    /* 0x58 */ Vtx *vertices[2][4]; // [frame][viewport]
-    /* 0x78 */ Mtx mtx[2];          // [frame]
-    /* 0xF8 */ u8 buffers[1];
-} DynModel;
 
 /* User data of the model spawned by func_1513BAE8. */
 typedef struct {
@@ -69,8 +20,7 @@ typedef struct {
 } VtxRange;
 
 extern f32 sinf(f32);
-extern DynModelAsset *func_1502B6BC(void *, s32, void *, s32, s32, s32);
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern ModelAsset *func_1502B6BC(void *, s32, void *, s32, s32, s32);
 extern void func_1510CE60(Gfx *, s32, s32, s32, s32);
 extern void func_15109064(DynModel *, s32, u8);
 extern void func_151BA468(DynModel *, s32, u8);
@@ -84,7 +34,7 @@ extern VtxRange D_800A4A2C[9];
 /* Loads the descriptor's model and allocates a DynModel holding copies of its vertices. */
 DynModel *func_1513B5E0(DynModelDesc *desc, u8 arg1, s32 userDataSize, u8 arg3, s32 arg4) {
     DynModel *obj;
-    DynModelAsset *asset;
+    ModelAsset *asset;
     s32 buffersSize;
     s32 vtxSize;
     u8 *buffer;
@@ -144,7 +94,7 @@ void func_1513B798(DynModel *obj) {
         }
     }
     if (done) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C(&obj->header);
     }
 }
 
@@ -177,12 +127,12 @@ s32 func_1513B968(DynModel *obj, s16 viewport) {
 
 void func_1513B9A8(DynModel *obj) {
     func_100043B4((s32 *)obj->asset, 4);
-    func_15169804((struct102 *)obj);
+    func_15169804(&obj->header);
 }
 
 void func_1513B9DC(DynModel *obj) {
     func_100043B4((s32 *)obj->asset, 4);
-    func_15169824((struct102 *)obj);
+    func_15169824(&obj->header);
 }
 
 void func_1513BA10(DynModel *obj) {
@@ -239,7 +189,7 @@ DynModel *func_1513BAE8(void) {
     obj = func_1513B5E0(&desc, 1, sizeof(TexWarpState), 0xFF, 1);
     if (obj != NULL) {
         if (obj->buffersSize != 0x1180) {
-            func_1516972C((struct102 *)obj);
+            func_1516972C(&obj->header);
         } else {
             memcpy(obj->buffers + obj->buffersSize, &state, sizeof(TexWarpState));
         }

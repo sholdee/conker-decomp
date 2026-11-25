@@ -18,7 +18,7 @@ typedef struct {
 } StrobeData; /* size 0x18 */
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x28];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ StrobeData data;
 } StrobeEffect;
 
@@ -88,12 +88,12 @@ void func_150D22D4(StrobeEffect *effect);
 /* Strobe free handler. */
 void func_150D227C(StrobeEffect *effect) {
     func_150D22D4(effect);
-    func_1514933C((struct260 *)effect);
+    func_1514933C(&effect->base);
 }
 
 void func_150D22A8(StrobeEffect *effect) {
     func_150D22D4(effect);
-    func_15149368((struct260 *)effect);
+    func_15149368(&effect->base);
 }
 
 /* Unregisters a strobe from the live count. */

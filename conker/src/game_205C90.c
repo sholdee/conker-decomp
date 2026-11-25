@@ -1,19 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Rumble effect objects: a timed rumble on the controllers of the players in a mask. */
-
-/* Spawn parameters of a rumble, copied into RumbleObj.params. */
-typedef struct {
-    /* 0x0 */ u8 flags;       /* bit 0: duration counts down */
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ s16 duration;
-    /* 0x4 */ u8 strength;    /* 0 (off) to 8 (full), see func_1501C010 */
-    /* 0x5 */ u8 playerMask;  /* bit i: player i */
-    /* 0x6 */ s8 updateKind;  /* index into D_8008FCC0, -1: none */
-    /* 0x7 */ u8 unk7;
-} RumbleParams;
 
 /* Distance falloff data of a RumbleFalloffObj. */
 typedef struct {
@@ -65,7 +55,6 @@ s32 func_151D87E0(u8 playerMask) {
 
 s32 func_15181CC8(s32 view);
 s32 func_1517EF00(s32 view);
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Spawns a rumble object (kind 0x3F) with `dataSize` bytes of extra data and starts the rumble.
  * Returns NULL while D_800E0B94 or any of D_800BEAC0..3 is set, when no player in the mask has
@@ -140,7 +129,7 @@ void func_151D8A24(RumbleObj *obj) {
     }
 
     if (expired) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
     }
 }
 
@@ -158,13 +147,13 @@ void func_151D8B24(RumbleObj *obj) {
 /* Destroy hook: stops the rumble, then the default destroy (func_15169804). */
 void func_151D8B88(RumbleObj *obj) {
     func_151D8B24(obj);
-    func_15169804((struct102 *)obj);
+    func_15169804((EffectHeader *)obj);
 }
 
 /* Free hook: stops the rumble, then the default free (func_15169824). */
 void func_151D8BB4(RumbleObj *obj) {
     func_151D8B24(obj);
-    func_15169824((struct102 *)obj);
+    func_15169824((EffectHeader *)obj);
 }
 
 void func_151D8C00(RumbleObj *obj, RumbleFalloff *falloff);
@@ -201,9 +190,9 @@ void func_151D8C00(RumbleObj *obj, RumbleFalloff *falloff) {
 /* Message handler: messages 0x58 and 0x47 release the object. */
 void func_151D8D5C(RumbleObj *obj, s32 data, u8 message) {
     if (message == 0x58) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
     } else if (message == 0x47) {
-        func_1516972C((struct102 *)obj);
+        func_1516972C((EffectHeader *)obj);
     }
 }
 

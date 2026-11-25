@@ -37,29 +37,10 @@ void func_151C4AB0(GameObj151C4AB0 *obj, GameStruct151C4AB0a *pair, u8 event) {
     }
 }
 
-/* Result of a ray cast (func_15081690 / func_150AC9C0). */
-typedef struct Game1F1F60Hit {
-    /* 0x00 */ void *actor;
-    /* 0x04 */ f32 dist;
-    /* 0x08 */ Vec3f hit;
-    /* 0x14 */ Vec3f normal;
-    /* 0x20 */ Vec3f point;
-    /* 0x2C */ Vec3f start;
-    /* 0x38 */ Vec3f end; /* the ray direction */
-    /* 0x44 */ s16 surface[9];
-    /* 0x56 */ s16 field_56;
-    /* 0x58 */ s8 field_58;
-    /* 0x59 */ u8 type;
-    /* 0x5A */ s8 field_5A;
-    /* 0x5B */ u8 pad5B;
-    /* 0x5C */ WorldObject *field_5C;
-    /* 0x60 */ s32 field_60;
-} Game1F1F60Hit; /* 0x64 */
-
-void func_15081690(void *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Game1F1F60Hit *hit, f32 maxDist, s32,
+void func_15081690(void *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32,
                    s32, s32, s32, s32, s32);
 s32 func_15145128(f32 *in, f32 *out, f32 *length, f32 *);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
+s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
 void func_151C2050(Actor *arg0, f32 *arg1, f32 *arg2, s32 arg3, f32 arg4);
 
 /*
@@ -68,26 +49,26 @@ void func_151C2050(Actor *arg0, f32 *arg1, f32 *arg2, s32 arg3, f32 arg4);
  * Stores the travel distance times `distScale` in *remaining; on a miss it clears `clearMask` from *flags
  * and stores `defaultRemaining` instead. Returns 0 if the ray could not be set up.
  */
-s32 func_151C4B0C(Game1F1F60Hit *knownHit, Game1F1F60Hit *hit, Vec3f *origin, Vec3f *dir, f32 *remaining,
+s32 func_151C4B0C(RayHit *knownHit, RayHit *hit, Vec3f *origin, Vec3f *dir, f32 *remaining,
                   f32 distScale, u8 castRay, Vec3f *altOrigin, Vec3f *altDir, u8 *flags, u8 clearMask,
                   f32 defaultRemaining, void *owner, s8 arg13, u8 collide, u8 arg15, s32 arg16, u8 recast) {
-    Game1F1F60Hit recastHit;
+    RayHit recastHit;
 
     if (knownHit != NULL) {
         *hit = *knownHit;
-        if (origin->x != hit->start.x || origin->y != hit->start.y || origin->z != hit->start.z) {
-            hit->end.x = hit->hit.x - origin->x;
-            hit->end.y = hit->hit.y - origin->y;
-            hit->end.z = hit->hit.z - origin->z;
-            hit->start = *origin;
-            if (func_15145128(&hit->end.x, &hit->end.x, &hit->dist, NULL) == 0) {
+        if (origin->x != hit->origin.x || origin->y != hit->origin.y || origin->z != hit->origin.z) {
+            hit->dir.x = hit->pos.x - origin->x;
+            hit->dir.y = hit->pos.y - origin->y;
+            hit->dir.z = hit->pos.z - origin->z;
+            hit->origin = *origin;
+            if (func_15145128(&hit->dir.x, &hit->dir.x, &hit->dist, NULL) == 0) {
                 return 0;
             }
         }
-        if (recast && (hit->type == 2 || hit->type == 3)) {
-            func_15081690(owner, hit->start.x, hit->start.y, hit->start.z, hit->end.x, hit->end.y, hit->end.z,
+        if (recast && (hit->hitType == 2 || hit->hitType == 3)) {
+            func_15081690(owner, hit->origin.x, hit->origin.y, hit->origin.z, hit->dir.x, hit->dir.y, hit->dir.z,
                           &recastHit, 0.0f, 0, 1, 1, -1, 0, arg16);
-            if (recastHit.type != 0) {
+            if (recastHit.hitType != 0) {
                 *hit = recastHit;
             }
         }
@@ -98,64 +79,64 @@ s32 func_151C4B0C(Game1F1F60Hit *knownHit, Game1F1F60Hit *hit, Vec3f *origin, Ve
 
         index = -1; // matching: IDO emits this store although every path below overwrites it
         if (altOrigin != NULL && altDir != NULL) {
-            hit->start = *altOrigin;
-            hit->end = *altDir;
+            hit->origin = *altOrigin;
+            hit->dir = *altDir;
         } else {
-            hit->start = *origin;
-            hit->end = *dir;
+            hit->origin = *origin;
+            hit->dir = *dir;
         }
-        func_15081690(owner, hit->start.x, hit->start.y, hit->start.z, hit->end.x, hit->end.y, hit->end.z, hit,
+        func_15081690(owner, hit->origin.x, hit->origin.y, hit->origin.z, hit->dir.x, hit->dir.y, hit->dir.z, hit,
                       0.0f, 0, collide ? 0 : 1, (arg15 && collide) ? 0 : 1, arg13, 0, arg16);
-        if (hit->field_5C == NULL) {
+        if (hit->surface == NULL) {
             index = -1;
         } else {
-            index = hit->field_5C - D_800DBEF4;
+            index = hit->surface - D_800DBEF4;
         }
-        if (hit->type == 0) {
+        if (hit->hitType == 0) {
             found = FALSE;
-        } else if (hit->type == 1) {
+        } else if (hit->hitType == 1) {
             found = TRUE;
         } else if (altOrigin != NULL && altDir != NULL) {
             f32 dist;
-            Game1F1F60Hit saved;
+            RayHit saved;
 
             saved = *hit; // matching: unused copy, but the 0x64-byte stack slot and copy are in the target
-            hit->start = *origin;
-            hit->end.x = hit->hit.x - origin->x;
-            hit->end.y = hit->hit.y - origin->y;
-            hit->end.z = hit->hit.z - origin->z;
-            if (func_15145128(&hit->end.x, &hit->end.x, &hit->dist, NULL) == 0) {
+            hit->origin = *origin;
+            hit->dir.x = hit->pos.x - origin->x;
+            hit->dir.y = hit->pos.y - origin->y;
+            hit->dir.z = hit->pos.z - origin->z;
+            if (func_15145128(&hit->dir.x, &hit->dir.x, &hit->dist, NULL) == 0) {
                 return 0;
             }
             dist = hit->dist;
-            found = func_150AC9C0(hit->hit.x, hit->hit.y, hit->hit.z, hit->end.x, hit->end.y, hit->end.z, NULL,
-                                  hit->surface, &hit->hit.x, &hit->hit.y, &hit->hit.z, &hit->dist, &index,
-                                  &hit->field_60, 0.0f);
+            found = func_150AC9C0(hit->pos.x, hit->pos.y, hit->pos.z, hit->dir.x, hit->dir.y, hit->dir.z, NULL,
+                                  &hit->tri, &hit->pos.x, &hit->pos.y, &hit->pos.z, &hit->dist, &index,
+                                  &hit->material, 0.0f);
             if (found) {
                 hit->dist += dist;
-                hit->start = *origin;
+                hit->origin = *origin;
             }
         } else {
-            found = func_150AC9C0(origin->x, origin->y, origin->z, hit->end.x, hit->end.y, hit->end.z, NULL,
-                                  hit->surface, &hit->hit.x, &hit->hit.y, &hit->hit.z, &hit->dist, &index,
-                                  &hit->field_60, 0.0f);
+            found = func_150AC9C0(origin->x, origin->y, origin->z, hit->dir.x, hit->dir.y, hit->dir.z, NULL,
+                                  &hit->tri, &hit->pos.x, &hit->pos.y, &hit->pos.z, &hit->dist, &index,
+                                  &hit->material, 0.0f);
         }
         if (found) {
             *remaining = hit->dist * distScale;
-            if (origin->x != hit->start.x || origin->y != hit->start.y || origin->z != hit->start.z) {
-                hit->end.x = hit->hit.x - origin->x;
-                hit->end.y = hit->hit.y - origin->y;
-                hit->end.z = hit->hit.z - origin->z;
-                hit->start = *origin;
-                if (func_15145128(&hit->end.x, &hit->end.x, &hit->dist, NULL) == 0) {
+            if (origin->x != hit->origin.x || origin->y != hit->origin.y || origin->z != hit->origin.z) {
+                hit->dir.x = hit->pos.x - origin->x;
+                hit->dir.y = hit->pos.y - origin->y;
+                hit->dir.z = hit->pos.z - origin->z;
+                hit->origin = *origin;
+                if (func_15145128(&hit->dir.x, &hit->dir.x, &hit->dist, NULL) == 0) {
                     return 0;
                 }
             }
-            func_151C2050(owner, &hit->hit.x, &hit->end.x, hit->field_60, hit->dist);
+            func_151C2050(owner, &hit->pos.x, &hit->dir.x, hit->material, hit->dist);
             if (index == -1) {
-                hit->field_5C = NULL;
+                hit->surface = NULL;
             } else {
-                hit->field_5C = D_800DBEF4 + index;
+                hit->surface = D_800DBEF4 + index;
             }
         } else {
             *flags &= ~clearMask;
@@ -167,11 +148,11 @@ s32 func_151C4B0C(Game1F1F60Hit *knownHit, Game1F1F60Hit *hit, Vec3f *origin, Ve
     } else {
         *flags &= ~clearMask;
         *remaining = defaultRemaining;
-        hit->start = *origin;
+        hit->origin = *origin;
         if (dir != NULL) {
-            hit->end = *dir;
+            hit->dir = *dir;
         } else if (altDir != NULL) {
-            hit->end = *altDir;
+            hit->dir = *altDir;
         } else {
             return 0;
         }

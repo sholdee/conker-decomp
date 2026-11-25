@@ -26,15 +26,15 @@ void func_1516D99C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                    s32 arg37, s32 arg38, s32 arg39, s32 arg40, s32 arg41,
                    s32 arg42, s32 arg43, s32 arg44, s32 arg45, s32 arg46,
                    s32 arg47, s32 arg48);
-struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3,
+LightEffect *func_151602C0(LightEffectHeader *header, Vec3i *header2, s32 arg2, s32 arg3,
                          s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 offset,
                          s32 arg9, s32 argA);
 extern s32 func_10004074[];
 
 // matching: one struct pins the stack layout of these locals (checksum at sp+0xFC)
 typedef struct {
-    Header2 pos;
-    Header header;
+    Vec3i pos;
+    LightEffectHeader header;
     u8 pad12[0xA];
     s32 checksum;
 } Struct150C3D5CLocals;
@@ -186,19 +186,8 @@ void func_150C2290(u8 arg0) {
 }
 
 typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
-    /* 0x01C */ s16 unk1C;
-    /* 0x01E */ u8 pad1E[0xE];
-    /* 0x02C */ f32 unk2C;
-    /* 0x030 */ f32 unk30;
-    /* 0x034 */ u8 pad34[4];
-    /* 0x038 */ f32 unk38;
-    /* 0x03C */ u8 pad3C[0x10];
-    /* 0x04C */ f32 unk4C;
-    /* 0x050 */ f32 unk50;
-    /* 0x054 */ u8 pad54[0x44];
-    /* 0x098 */ struct133 *unk98;
-    /* 0x09C */ u8 pad9C[0xB4];
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x40];
     /* 0x150 */ f32 unk150;
     /* 0x154 */ u8 pad154[0xC];
     /* 0x160 */ f32 unk160;
@@ -214,8 +203,8 @@ void func_150C2424(u8 arg0) {
 }
 
 s32 func_150C251C(Particle_EF410 *particle) {
-    struct133 *sub = particle->unk98;
-    s32 alpha = particle->unk1C << 3;
+    struct133 *sub = particle->head.unk98;
+    s32 alpha = particle->head.def.lifetime << 3;
 
     if (alpha >= 0x100) {
         alpha = 0xFF;
@@ -336,13 +325,7 @@ typedef struct {
 } PosSub;
 
 typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    u8 pad10[0x18];
+    TimedEffect base;
     PosSub unk28;
 } Struct150C29F0;
 
@@ -369,7 +352,7 @@ void func_150C2898(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, Struct150C
     func_151D9014(pos, vel, 6, rand0 * 0.27f + -0.31f,
                     (rand1 & 0xF) + 25, (rand2 % 101) + 155,
                     rand3 * 119.0f + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0,
-                    emitter->unkC, emitter->unk1);
+                    emitter->base.header.owner, emitter->base.header.kind);
 }
 
 Particle_EF410 *func_15149550(ParticleEmitterDesc *arg0, u8 arg1, u8 arg2, s32 arg3, u8 arg4, s32 arg5);
@@ -416,8 +399,8 @@ void func_150C29F0(Struct150C29F0 *emitter) {
     particle.maxB = 57.969f * scaleB;
     particle.minB = 42.714f * scaleB;
     particle.altB = 118.763f * scaleB;
-    func_15149550(&particle, 0xA, 1, 0, emitter->unkC, emitter->unk1);
-    emitter->unkE = (func_150ADA20() % 51U) + 25;
+    func_15149550(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
+    emitter->base.header.state = (func_150ADA20() % 51U) + 25;
 }
 void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 Vec3f *func_15144B34(s32);
@@ -470,7 +453,7 @@ void func_150C2C00(Struct150C29F0 *emitter) {
                         particle.life = (func_150ADA20() % 151U) + 50;
                         particle.scale = (func_150ADA68() * 500.0f) * 0.001f;
                         particle.unk2C = (func_150ADA20() % 156U) + 100;
-                        created = func_15149550(&particle, 0xA, 1, 0, emitter->unkC, emitter->unk1);
+                        created = func_15149550(&particle, 0xA, 1, 0, emitter->base.header.owner, emitter->base.header.kind);
                         if (created != NULL) {
                             memcpy(&created->unk160, &angle, sizeof(angle));
                         }
@@ -486,11 +469,11 @@ void func_150C2C00(Struct150C29F0 *emitter) {
     }
 }
 s32 func_150C2FCC(Particle_EF410 *particle) {
-    particle->unk2C -= particle->unk2C * particle->unk150;
-    particle->unk30 -= particle->unk30 * particle->unk150;
-    particle->unk38 += (particle->unk50 * D_800BE9A4) + (0.5f * particle->unk4C * D_800BE9A4 * D_800BE9A4);
-    particle->unk50 += particle->unk4C * D_800BE9A4;
-    if ((particle->unk2C < 10.0f) || (particle->unk30 < 10.0f)) {
+    particle->head.def.width -= particle->head.def.width * particle->unk150;
+    particle->head.def.height -= particle->head.def.height * particle->unk150;
+    particle->head.def.pos.y += (particle->head.def.scale.y * D_800BE9A4) + (0.5f * particle->head.def.scale.x * D_800BE9A4 * D_800BE9A4);
+    particle->head.def.scale.y += particle->head.def.scale.x * D_800BE9A4;
+    if ((particle->head.def.width < 10.0f) || (particle->head.def.height < 10.0f)) {
         return 0;
     }
     return 1;
@@ -501,7 +484,7 @@ s32 func_150C308C(Particle_EF410 *particle) {
     Vec3f *pos;
 
     triggered = FALSE;
-    if (particle->unk1C >= 6) {
+    if (particle->head.def.lifetime >= 6) {
         pos = func_15144B34(D_80082FA4);
         value = pos->x * pos->x + pos->z * pos->z;
         if (value < 2500000.0f) {
@@ -514,7 +497,7 @@ s32 func_150C308C(Particle_EF410 *particle) {
         }
     }
     if (triggered) {
-        particle->unk1C = 5;
+        particle->head.def.lifetime = 5;
     }
     return 1;
 }
@@ -806,13 +789,13 @@ void func_150C3D5C(Actor *obj) {
                   0x51, 0x51, 0xA, 1, 0, 0xFF, 0xA, 0x578, 0x190, 1, 1, 0, 1,
                   0, 0, 0, 0, 0, 0xFF, 0);
 
-    locals.header.unk0 = 3;
-    locals.header.unk1 = -1;
-    locals.header.unk2 = (func_150ADA20() % 11U) + 0xA;
-    locals.header.unk4 = 0;
-    locals.pos.unk0 = (s32)obj->x_position;
-    locals.pos.unk4 = (s32)obj->y_position;
-    locals.pos.unk8 = (s32)obj->z_position;
+    locals.header.flags = 3;
+    locals.header.update = -1;
+    locals.header.lifetime = (func_150ADA20() % 11U) + 0xA;
+    locals.header.lightType = 0;
+    locals.pos.x = (s32)obj->x_position;
+    locals.pos.y = (s32)obj->y_position;
+    locals.pos.z = (s32)obj->z_position;
     func_151602C0(&locals.header, &locals.pos, (func_150ADA20() % 52U) + 0x28,
                   0xFF, 0xFF, 0x5A, 0xFF, 0, 0, 0xFF, 1);
 }

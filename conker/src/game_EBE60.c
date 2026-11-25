@@ -2,26 +2,15 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Ground contact found by func_15046C80 below a probe point (as in game_173D40.c). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 surface[0x14];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 type;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 unk20;
-} GroundHit; // size 0x24
-
-void func_1504715C(GroundHit *hit, Actor *actor);
-s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, GroundHit *hit);
-void func_15141F78(u8, GroundHit *, f32, u8, Vec3f *, u8);
+void func_1504715C(CollisionHit *hit, Actor *actor);
+s32 func_15046C80(Vec3f *probe, s32 arg1, f32 bottom, CollisionHit *hit);
+void func_15141F78(u8, CollisionHit *, f32, u8, Vec3f *, u8);
 void func_15142180(u8, Vec3f *, s32, f32, f32);
 s32 func_1509BE40(s32, s32, s32, s32);
 
 /* Get the position of one of the actor's bones (picked by `side`, 0x10 by default).  With a `hit`
    buffer, also look for the ground below that point and return func_15046C80's result. */
-s32 func_150BE9B0(Vec3f *pos, Actor *actor, GroundHit *hit, u8 side) {
+s32 func_150BE9B0(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     Vec3f probe;
     s32 bone;
 
@@ -65,21 +54,21 @@ s32 func_150BEAA8(s32 arg0, s32 arg1) {
 // matching: s32 actor (cast at each use) makes IDO reload it from the arg slot for each cast
 void func_150BEACC(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
-    GroundHit hit;
+    CollisionHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
         if (func_150BE9B0(&pos, (Actor *)actor, &hit, side) != 0) {
             func_15141F78(0xB, &hit, strength * (1.0f / 85.0f) * 3.177f,
                           (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
             if (strength >= 76) {
-                func_15142180(2, &pos, hit.unk18, 3.232f, 2.436f);
+                func_15142180(2, &pos, hit.material, 3.232f, 2.436f);
             }
         }
     }
 }
 
 /* Same as func_150BE9B0 with bones 0x19 and 0x16 for sides 4 and 5. */
-s32 func_150BEC30(Vec3f *pos, Actor *actor, GroundHit *hit, u8 side) {
+s32 func_150BEC30(Vec3f *pos, Actor *actor, CollisionHit *hit, u8 side) {
     Vec3f probe;
     s32 bone;
 
@@ -122,14 +111,14 @@ s32 func_150BED28(s32 arg0, s32 arg1) {
 // matching: s32 actor (cast at each use) makes IDO reload it from the arg slot for each cast
 void func_150BED4C(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
-    GroundHit hit;
+    CollisionHit hit;
 
     if (((Actor *)actor)->unk1D4 != NULL) {
         if (func_150BEC30(&pos, (Actor *)actor, &hit, side) != 0) {
             func_15141F78(0xB, &hit, strength * (1.0f / 85.0f) * 2,
                           (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
             if (strength >= 76) {
-                func_15142180(2, &pos, hit.unk18, 3.232f, 2.436f);
+                func_15142180(2, &pos, hit.material, 3.232f, 2.436f);
             }
         }
     }

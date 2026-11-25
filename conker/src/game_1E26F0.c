@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Effect data of the wavy beam drawn between two actors' bones (func_151B5328). */
 typedef struct {
@@ -20,25 +21,9 @@ typedef struct {
 } BeamData; // size 0x5A8
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ s16 state;               // -1 kills the effect
-    /* 0x10 */ u8 pad10[0x28 - 0x10];
+    /* 0x00 */ TimedEffect base;
     /* 0x28 */ BeamData data;
 } BeamEffect;
-
-/* Message 0x2D: actors a and b swapped slots. */
-typedef struct {
-    Actor *a;
-    Actor *b;
-    u8 aId;
-    u8 bId;
-} ActorSwap;
-
-/* Message 0: an actor went away. */
-typedef struct {
-    Actor *actor;
-    u8 id;
-} ActorGone;
 
 /* Spawns a beam effect between actors 0x17 and 0x16. */
 BeamEffect *func_151B5240(s16 duration, u8 arg1, s32 arg2) {
@@ -216,7 +201,7 @@ Gfx *func_151B5328(Gfx *gdl, BeamEffect *effect, s16 viewIdx) {
         }
     }
     if (failed) {
-        effect->state = -1;
+        effect->base.header.state = -1;
     }
     return gdl;
 }
@@ -226,29 +211,29 @@ void func_151B5A9C(BeamEffect *effect, void *msg, u8 type) {
     BeamData *data = &effect->data;
 
     if (type == 0x2D) {
-        ActorSwap *swap = msg;
+        ActorSwapMsg *swap = msg;
 
-        if (data->first == swap->a) {
-            data->first = swap->b;
-            data->firstId = swap->bId;
-        } else if (data->first == swap->b) {
-            data->first = swap->a;
-            data->firstId = swap->aId;
+        if (data->first == swap->actorA) {
+            data->first = swap->actorB;
+            data->firstId = swap->idB;
+        } else if (data->first == swap->actorB) {
+            data->first = swap->actorA;
+            data->firstId = swap->idA;
         }
 
-        if (data->second == swap->a) {
-            data->second = swap->b;
-            data->secondId = swap->bId;
-        } else if (data->second == swap->b) {
-            data->second = swap->a;
-            data->secondId = swap->aId;
+        if (data->second == swap->actorA) {
+            data->second = swap->actorB;
+            data->secondId = swap->idB;
+        } else if (data->second == swap->actorB) {
+            data->second = swap->actorA;
+            data->secondId = swap->idA;
         }
     } else if (type == 0) {
-        ActorGone *gone = msg;
+        ActorRef *gone = msg;
         Actor *actor = gone->actor;
 
-        if (actor == data->first || actor == data->second || gone->id == data->firstId || gone->id == data->secondId) {
-            func_1516972C((struct102 *)effect);
+        if (actor == data->first || actor == data->second || gone->uniqueId == data->firstId || gone->uniqueId == data->secondId) {
+            func_1516972C(&effect->base.header);
         }
     }
 }

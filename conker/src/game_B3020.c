@@ -2,19 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* A node of the level's path graph (loaded by func_15085B70), 0x10 bytes. */
-typedef struct PathNode {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ u8 layer; /* height band, see func_15085DA8 */
-    /* 0x7 */ u8 unk7;
-    /* 0x8 */ u8 unk8;
-    /* 0x9 */ u8 links[5]; /* neighbouring nodes, 0xFF = none */
-    /* 0xE */ u8 type;
-    /* 0xF */ u8 param;
-} PathNode;
-
 /* Path graph resource: a node count and an unknown halfword, then the nodes. */
 typedef struct PathGraph {
     /* 0x0 */ s16 count;
@@ -23,7 +10,6 @@ typedef struct PathGraph {
 } PathGraph;
 
 extern s16 D_80087294;
-extern PathNode *D_800D2350; /* nodes */
 PathGraph *func_1502B5C8(s32 *, s32, s32, s32);
 s32 func_15085BE8(void);
 

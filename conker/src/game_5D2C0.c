@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern s32 D_800902BC[];
 void func_1000FD38(void *, void *, s32);
@@ -11,25 +12,14 @@ extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 extern void func_10004074(void *ptr);
 void func_1518CA04(s32 model);
 
-/* File header of an attachment model, as returned by func_1502B6BC. */
-typedef struct ModelHeader {
-    /* 0x00 */ Gfx **dlists;    // display list table (entries are relocated on first load)
-    /* 0x04 */ u32 dlistsSize;  // size of the table in bytes
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ u32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ u8 data[1];      // vertex data, up to the display list table
-} ModelHeader;
 
-extern ModelHeader *D_800E0148[];  // per-model loaded headers
-ModelHeader *func_1502B6BC(s32, s32, s32, s32, s32, s32);
+AttachModelHeader *func_1502B6BC(s32, s32, s32, s32, s32, s32);
 void func_1510CE60(Gfx *, s32, s32, s32, s16 **);
-void func_15168E54(Gfx *, ModelHeader *);
+void func_15168E54(Gfx *, AttachModelHeader *);
 
 /* Loads (or reuses) attachment model `model` and returns its display lists and vertex data. */
 s32 func_1502FE10(s32 model, Gfx ***dlists, u8 *numDLists, u8 **data, s32 *arg4, s32 *arg5, s32 *arg6) {
-    ModelHeader *header;
+    AttachModelHeader *header;
     s32 i;
 
     if (D_800DF7D0[model] == 0) {
@@ -628,7 +618,7 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
         *mtx = &att->mtx[D_800BE9C0];
         *boneMtx = (Mtx *)owner->unk1D4 + att->bone;
     } else if (att->parentSet) {
-        parent = (ModelAttachment *)func_1503195C(owner, att->parentSet, 0);
+        parent = func_1503195C(owner, att->parentSet, 0);
         if (parent == NULL) {
             return 0;
         }
@@ -648,7 +638,6 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
     return 1;
 }
 
-extern u8 D_800D9E28[];
 extern void func_1502D54C(s32, s32 *);
 extern void func_1502D630(Actor *, s32 *, s32, s32);
 extern void func_1502CC34(Actor *, s32, s32, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *);
@@ -795,14 +784,14 @@ Gfx *func_150311C4(Gfx *gdl, ModelAttachment *att, Actor *owner, s32 view, s32 a
 void func_1503192C(Actor *owner, s32 setId, s32 alpha, s32 index) {
     ModelAttachment *att;
 
-    att = (ModelAttachment *)func_1503195C(owner, setId, index);
+    att = func_1503195C(owner, setId, index);
     if (att != NULL) {
         att->alpha = alpha;
     }
 }
 
 /* Returns attachment number `index` of set `setId` on `owner`, or NULL. */
-ActorCtl *func_1503195C(Actor *owner, s32 setId, s32 index) {
+ModelAttachment *func_1503195C(Actor *owner, s32 setId, s32 index) {
     s32 ownerId;
     ModelAttachment *att;
     ModelAttachment *next;
@@ -820,7 +809,7 @@ ActorCtl *func_1503195C(Actor *owner, s32 setId, s32 index) {
                 index--;
                 att = next;
             } else {
-                return (ActorCtl *)att;
+                return att;
             }
         } else {
             att = next;
@@ -919,15 +908,9 @@ void func_15031A50(ModelAttachment *att, Actor *owner) {
     }
 }
 
-/* An object pointer plus the unique_id it had, passed to event handlers. */
-typedef struct ObjectRef {
-    Actor *obj;
-    u8 uniqueId;
-} ObjectRef;
-
 void func_15100180(Actor *);
-void func_151616D0(u8, u8, ObjectRef *);
-void func_15147D64(ObjectRef *, s32);
+void func_151616D0(u8, u8, ActorRef *);
+void func_15147D64(ActorRef *, s32);
 void func_151BD7F4(Actor *);
 void func_151D4668(Actor *);
 void func_151D747C(Actor *);
@@ -936,10 +919,10 @@ void func_151027E8(Actor *);
 /* Undoes func_15031A50's side effects on the owner when an attachment is removed. */
 void func_15031C14(ModelAttachment *att) {
     Actor *owner;
-    ObjectRef ref49;
-    ObjectRef ref5D;
+    ActorRef ref49;
+    ActorRef ref5D;
     ActorCtl *unk;
-    ObjectRef *volatile ref; // matching: IDO spills the pointer across the call only when volatile
+    ActorRef *volatile ref; // matching: IDO spills the pointer across the call only when volatile
 
     owner = func_15083E90(att->ownerId);
     if (owner != NULL) {
@@ -965,12 +948,12 @@ void func_15031C14(ModelAttachment *att) {
             }
             break;
         case 0x49:
-            ref49.obj = owner;
+            ref49.actor = owner;
             ref49.uniqueId = owner->unique_id;
             func_151616D0(0x10, 0x29, &ref49);
             break;
         case 0x5D:
-            ref5D.obj = owner;
+            ref5D.actor = owner;
             ref5D.uniqueId = owner->unique_id;
             func_15147D64(ref = &ref5D, 0x2E);
             func_151494E0((s32)ref, 0x2F);
