@@ -20,27 +20,29 @@ extern void func_1512ABF8(void);
 extern void func_1512D238(void);
 void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3);
 
-void func_15005290(s32 arg0, s32 arg1) {
-    struct108 *obj;
+/**
+ * Loads the resource's data and allocates and initialises the D_80082FA0 + 1 view (struct108) states.
+ */
+void func_15005290(s32 resource, s32 mode) {
+    struct108 *view;
     u32 size;
     s32 count;
     u32 i;
-    s16 id;
 
-    D_800DC020 = func_1502B5C8(&size, 3, 12, arg0, 8);
+    D_800DC020 = func_1502B5C8(&size, 3, 12, resource, 8);
     D_80089550 = size / 24;
     count = D_80082FA0 + 1;
     D_800DBFF0 = allocate_memory(count * sizeof(struct108), 1, 1, 0);
     D_800DC2B0 = (s32)allocate_memory(count * 0xB0, 1, 0, 0);
-    ((s32 *)&D_800DC2A0)[0] = (s32)allocate_memory(count << 6, 1, 1, 0);
-    ((s32 *)&D_800DC2A0)[1] = (s32)allocate_memory(count << 6, 1, 1, 0);
-    id = arg0;
+    // matching: header declares D_800DC2A0 as a pointer, but it is an array of two pointers
+    ((s32 *)&D_800DC2A0)[0] = (s32)allocate_memory(count * 64, 1, 1, 0);
+    ((s32 *)&D_800DC2A0)[1] = (s32)allocate_memory(count * 64, 1, 1, 0);
     for (i = 0; i <= D_80082FA0; i++) {
-        obj = &D_800DBFF0[i];
+        view = &D_800DBFF0[i];
         D_800BE2B0[i] = (s32)allocate_memory(D_800BE620 * 2, 1, 2, 0);
-        func_150054C4(obj, i, id, arg1);
+        func_150054C4(view, i, resource, mode);
         {
-            extern u8 D_800DBFF4[];
+            s32 pad; // matching: -g3 block marker keeps this store after the call
 
             D_800DBFF4[i] = 0;
         }
@@ -50,34 +52,6 @@ void func_15005290(s32 arg0, s32 arg1) {
     D_800894B0 = 0;
     D_800DC010 = (s32)allocate_memory(D_80082FA0 * sizeof(struct108) + sizeof(struct108), 1, 2, 0);
 }
-// NON-MATCHING: first half ok, second half needs work
-// void func_15005290(s32 arg0, s32 arg1) {
-//     s32 pad0;
-//     s32 sp68;
-//     s32 pad1;
-//     s32 temp_s0;
-//     s32 i;
-//
-//     D_800DC020 = func_1502B5C8(&sp68, 3, 12, arg0, 8);
-//     D_80089550 = (sp68 / 24U);
-//     temp_s0 = D_80082FA0 + 1;
-//     D_800DBFF0 = allocate_memory(temp_s0 * 0x9A0, 1, 1, 0);
-//     D_800DC2B0 = allocate_memory(temp_s0 * 0xB0, 1, 0, 0);
-//     D_800DC2A0->unk0 = allocate_memory(temp_s0 << 6, 1, 1, 0);
-//     D_800DC2A0->unk4 = allocate_memory(temp_s0 << 6, 1, 1, 0);
-//
-//     i = 0;
-//     do {
-//         D_800BE2B0[i] = allocate_memory(D_800BE620 * 2, 1, 2, 0);
-//         func_150054C4(&D_800DBFF0[i], i, arg0, arg1);
-//         D_800DBFF4[i] = 0;
-//     } while (D_80082FA0 >= i++) ;
-//
-//     func_1512ABF8();
-//     func_1512D238();
-//     D_800894B0 = 0;
-//     D_800DC010 = allocate_memory((D_80082FA0 * 0x9A0) + 0x9A0, 1, 2, 0);
-// }
 
 void func_1512D66C(u8 *arg0);
 void func_1512D6F0(u8 *arg0);
