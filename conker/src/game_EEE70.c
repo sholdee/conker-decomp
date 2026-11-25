@@ -22,7 +22,7 @@ s32 func_150C19C0(vertex *pos, struct127 *actor, u8 side) {
 }
 
 s32 func_150C1A2C(s32 arg0, s32 arg1) {
-    return 0x7;
+    return 7;
 }
 
 /* Spawn template for func_15132A4C (layout as ParticleSpawn in game_1D43B0.c). */
@@ -82,68 +82,70 @@ void func_150C1A40(struct127 *actor, s32 side, s32 arg2) {
     f32 radius;
     u8 angle;
     f32 speed;
-    f32 cos;
-    f32 sin;
+    f32 cosine;
+    f32 sine;
     Particle *particle;
     u32 count;
     u8 startAngle;
 
-    if (actor->unk1D4 != NULL) {
-        scale = (actor->xz_scale + actor->y_scale) * 0.5f;
-        func_150C19C0(&pos, actor, side);
-        startAngle = (actor->unk76 >> 8) + 0x40;
-        radius = scale * 70.0f;
-        func_1514C2F0(pos.x, actor->unk180, pos.z, radius, startAngle,
-                      (side == 1) ? 16 : -16, 8, 0, 0, radius * 4.04f, 0, 255);
-        func_15165F80(-1, (s32)pos.x, (s32)((s32)actor->unk180 + 2.0f), (s32)pos.z, 8, 21, 0, 255, 0);
-        spawn.model = 5;
-        spawn.flags = 0x29E9;
-        spawn.variant = 0;
-        spawn.unk5C = NULL;
-        spawn.alpha = 255;
-        spawn.updateFn = 1;
-        spawn.update2Fn = 0;
-        spawn.floorHitFn = 0;
-        spawn.floorType3Fn = 0;
-        spawn.wallHitFn = 0;
-        spawn.destroyFn = 0;
-        spawn.squashFn = 0;
-        spawn.matrixFn = 0;
-        spawn.unk6A = 1;
-        spawn.owner = actor;
-        spawn.scale.x = 1.0f;
-        spawn.scale.y = 1.0f;
-        spawn.scale.z = 1.0f;
-        spawn.elasticity = 0.4f;
-        spawn.rotVel.z = 0.0f;
-        spawn.gravity = -0.9f;
-        spawn.ownerId = actor->unique_id;
-        spawn.fadeStart = 16;
-        spawn.fadeRate = 15;
-        count = (func_150ADA20() & 7) + 5;
-        while (count--) {
-            // matching: masking the already-u8 random byte keeps IDO's andi/move pair
-            angle = func_150ADA20() & 0xFF;
-            speed = (0.1f + func_150ADA68() * 0.9f) * 9.0f * scale;
-            cos = func_151423D8(angle - 0x40);
-            sin = func_151423D8(angle);
-            spawn.lifetime = (func_150ADA20() & 15) + 30;
-            spawn.pos.x = radius * cos + pos.x;
-            spawn.pos.y = actor->unk180 + 2.0f;
-            spawn.pos.z = radius * sin + pos.z;
-            spawn.vel.x = speed * cos;
-            spawn.vel.y = speed + speed;
-            spawn.vel.z = speed * sin;
-            spawn.sizeY = spawn.sizeXZ = spawn.radius = (0.1f + func_150ADA68() * 0.9f) * scale * 1.5f;
-            spawn.rot.x = func_150ADA68() * 360.0f;
-            spawn.rot.y = func_150ADA68() * 360.0f;
-            spawn.rot.z = func_150ADA68() * 360.0f;
-            spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
-            spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
-            particle = func_15132A4C(&spawn, 3, 255, sizeof(f32), 255, 0);
-            if (particle != NULL) {
-                particle->unk170 = actor->unk180;
-            }
+    if (actor->unk1D4 == NULL) {
+        return;
+    }
+
+    scale = (actor->xz_scale + actor->y_scale) * 0.5f;
+    func_150C19C0(&pos, actor, side);
+    startAngle = (actor->unk76 >> 8) + 0x40;
+    radius = scale * 70.0f;
+    func_1514C2F0(pos.x, actor->unk180, pos.z, radius, startAngle,
+                  (side == 1) ? 16 : -16, 8, 0, 0, radius * 4.04f, 0, 255);
+    func_15165F80(-1, (s32)pos.x, (s32)((s32)actor->unk180 + 2.0f), (s32)pos.z, 8, 21, 0, 255, 0);
+    spawn.model = 5;
+    spawn.flags = 0x29E9;
+    spawn.variant = 0;
+    spawn.unk5C = NULL;
+    spawn.alpha = 255;
+    spawn.updateFn = 1;
+    spawn.update2Fn = 0;
+    spawn.floorHitFn = 0;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 0;
+    spawn.unk6A = 1;
+    spawn.owner = actor;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
+    spawn.elasticity = 0.4f;
+    spawn.rotVel.z = 0.0f;
+    spawn.gravity = -0.9f;
+    spawn.ownerId = actor->unique_id;
+    spawn.fadeStart = 16;
+    spawn.fadeRate = 15;
+    count = (func_150ADA20() & 7) + 5;
+    while (count--) {
+        // matching: masking the already-u8 random byte keeps IDO's andi/move pair
+        angle = func_150ADA20() & 0xFF;
+        speed = (0.1f + func_150ADA68() * 0.9f) * 9.0f * scale;
+        cosine = func_151423D8(angle - 0x40);
+        sine = func_151423D8(angle);
+        spawn.lifetime = (func_150ADA20() & 15) + 30;
+        spawn.pos.x = radius * cosine + pos.x;
+        spawn.pos.y = actor->unk180 + 2.0f;
+        spawn.pos.z = radius * sine + pos.z;
+        spawn.vel.x = speed * cosine;
+        spawn.vel.y = 2.0f * speed;
+        spawn.vel.z = speed * sine;
+        spawn.sizeY = spawn.sizeXZ = spawn.radius = (0.1f + func_150ADA68() * 0.9f) * scale * 1.5f;
+        spawn.rot.x = func_150ADA68() * 360.0f;
+        spawn.rot.y = func_150ADA68() * 360.0f;
+        spawn.rot.z = func_150ADA68() * 360.0f;
+        spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
+        spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
+        particle = func_15132A4C(&spawn, 3, 255, sizeof(f32), 255, 0);
+        if (particle != NULL) {
+            particle->unk170 = actor->unk180;
         }
     }
 }
