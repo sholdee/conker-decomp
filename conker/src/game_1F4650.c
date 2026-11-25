@@ -204,13 +204,8 @@ typedef struct {
 
 /* A sight beam object: spawn descriptor copy at +0x18, quad vertex buffers, beam state at +0x110. */
 typedef struct {
-    EffectHeader header;
-    u8 pad10[0x8];
-    ParticleDef spawn;
-    u8 pad70[0x50];
-    u8 vtxTemplate[0x40];
-    u8 *vtxBuffers[4];
-    SightBeamState state;
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ SightBeamState state;
 } SightBeamObject;
 
 extern void func_1510F800(s32);
@@ -399,21 +394,21 @@ void *func_151C7E98(SightBeamObject *obj, s16 view) {
             return NULL;
         }
     }
-    func_151D5D60(obj->vtxBuffers, view, 0x40, (void **)&vertices, &fresh);
+    func_151D5D60(obj->head.vtxBuffers, view, sizeof(obj->head.vtxTemplate), (void **)&vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh) {
-            memcpy(obj->vtxBuffers[view], obj->vtxTemplate, 0x40);
-            memcpy(obj->vtxBuffers[view] + 0x40, obj->vtxTemplate, 0x40);
+            memcpy(obj->head.vtxBuffers[view], obj->head.vtxTemplate, sizeof(obj->head.vtxTemplate));
+            memcpy(obj->head.vtxBuffers[view] + 4, obj->head.vtxTemplate, sizeof(obj->head.vtxTemplate));
         }
     } else {
         return NULL;
     }
     camera = func_15144B34(view);
-    dir.x = obj->spawn.rot.x - obj->spawn.pos.x;
-    dir.y = obj->spawn.rot.y - obj->spawn.pos.y;
-    dir.z = obj->spawn.rot.z - obj->spawn.pos.z;
-    func_15145548(&obj->spawn.pos, &dir, camera, &closest, 0);
+    dir.x = obj->head.def.rot.x - obj->head.def.pos.x;
+    dir.y = obj->head.def.rot.y - obj->head.def.pos.y;
+    dir.z = obj->head.def.rot.z - obj->head.def.pos.z;
+    func_15145548(&obj->head.def.pos, &dir, camera, &closest, 0);
     dx = closest.x - camera->x;
     dy = closest.y - camera->y;
     dz = closest.z - camera->z;
@@ -426,32 +421,32 @@ void *func_151C7E98(SightBeamObject *obj, s16 view) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = obj->spawn.height / sqrtf(lengthSquared);
+        scale = obj->head.def.height / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
     }
-    vertices->v.ob[0] = obj->spawn.rot.x - nx;
-    vertices->v.ob[1] = obj->spawn.rot.y - ny;
-    vertices->v.ob[2] = obj->spawn.rot.z - nz;
+    vertices->v.ob[0] = obj->head.def.rot.x - nx;
+    vertices->v.ob[1] = obj->head.def.rot.y - ny;
+    vertices->v.ob[2] = obj->head.def.rot.z - nz;
     vertices->v.tc[0] = state->texS;
     vertices->v.flag = 0;
     vertices++;
-    vertices->v.ob[0] = obj->spawn.pos.x - nx;
-    vertices->v.ob[1] = obj->spawn.pos.y - ny;
-    vertices->v.ob[2] = obj->spawn.pos.z - nz;
+    vertices->v.ob[0] = obj->head.def.pos.x - nx;
+    vertices->v.ob[1] = obj->head.def.pos.y - ny;
+    vertices->v.ob[2] = obj->head.def.pos.z - nz;
     vertices->v.tc[0] = state->texT;
     vertices->v.flag = 0;
     vertices++;
-    vertices->v.ob[0] = obj->spawn.pos.x + nx;
-    vertices->v.ob[1] = obj->spawn.pos.y + ny;
-    vertices->v.ob[2] = obj->spawn.pos.z + nz;
+    vertices->v.ob[0] = obj->head.def.pos.x + nx;
+    vertices->v.ob[1] = obj->head.def.pos.y + ny;
+    vertices->v.ob[2] = obj->head.def.pos.z + nz;
     vertices->v.tc[0] = state->texT;
     vertices->v.flag = 0;
     vertices++;
-    vertices->v.ob[0] = obj->spawn.rot.x + nx;
-    vertices->v.ob[1] = obj->spawn.rot.y + ny;
-    vertices->v.ob[2] = obj->spawn.rot.z + nz;
+    vertices->v.ob[0] = obj->head.def.rot.x + nx;
+    vertices->v.ob[1] = obj->head.def.rot.y + ny;
+    vertices->v.ob[2] = obj->head.def.rot.z + nz;
     vertices->v.tc[0] = state->texS;
     vertices->v.flag = 0;
     return result;
@@ -532,7 +527,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
         emitter3->flags &= ~0x20000;
     }
     if (state->flags & 8) {
-        obj->spawn.unk44 = func_150AD78C(state->pulseAngle) * 112.5f + 142.5f;
+        obj->head.def.unk44 = func_150AD78C(state->pulseAngle) * 112.5f + 142.5f;
         state->pulseAngle = func_15144B68(state->pulseAngle + state->pulseSpeed * D_800BE9A4);
     }
     return 1;
@@ -636,12 +631,12 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
     center.y = actor->y_position + halfHeight;
     center.z = actor->z_position;
     scale = radius / halfHeight;
-    start.x = obj->spawn.pos.x;
-    start.y = (obj->spawn.pos.y - center.y) * scale + center.y;
-    start.z = obj->spawn.pos.z;
-    endX = obj->spawn.rot.x;
-    endY = (obj->spawn.rot.y - center.y) * scale + center.y;
-    endZ = obj->spawn.rot.z;
+    start.x = obj->head.def.pos.x;
+    start.y = (obj->head.def.pos.y - center.y) * scale + center.y;
+    start.z = obj->head.def.pos.z;
+    endX = obj->head.def.rot.x;
+    endY = (obj->head.def.rot.y - center.y) * scale + center.y;
+    endZ = obj->head.def.rot.z;
     dir.x = endX - start.x;
     dir.y = endY - start.y;
     dir.z = endZ - start.z;
@@ -697,32 +692,32 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     burst.spray.drag = 0.6980000138f;
     burst.spray.gravityBase = -0.4450000226f;
     burst.spray.gravityRange = 0.4410000145f;
-    burst.spray.pos = obj->spawn.pos;
-    burst.source.normal = obj->spawn.scale;
+    burst.spray.pos = obj->head.def.pos;
+    burst.source.normal = obj->head.def.scale;
     burst.source.triangle = state->triangle0;
-    func_1514FBFC(&burst, obj->header.owner, obj->header.kind);
-    burst.spray.pos = obj->spawn.rot;
-    burst.source.normal.x = -obj->spawn.scale.x;
-    burst.source.normal.y = -obj->spawn.scale.y;
-    burst.source.normal.z = -obj->spawn.scale.z;
+    func_1514FBFC(&burst, obj->head.header.owner, obj->head.header.kind);
+    burst.spray.pos = obj->head.def.rot;
+    burst.source.normal.x = -obj->head.def.scale.x;
+    burst.source.normal.y = -obj->head.def.scale.y;
+    burst.source.normal.z = -obj->head.def.scale.z;
     burst.source.triangle = state->triangle1;
-    func_1514FBFC(&burst, obj->header.owner, obj->header.kind);
-    pos[0] = obj->spawn.pos.x;
-    pos[1] = obj->spawn.pos.y;
-    pos[2] = obj->spawn.pos.z;
+    func_1514FBFC(&burst, obj->head.header.owner, obj->head.header.kind);
+    pos[0] = obj->head.def.pos.x;
+    pos[1] = obj->head.def.pos.y;
+    pos[2] = obj->head.def.pos.z;
     header.flags = LIGHT_EFFECT_TIMED | LIGHT_EFFECT_OWNS_LIGHT;
     header.update = -1;
     header.lifetime = func_150ADA20() % 9U + 17;
     header.lightType = 0;
-    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->header.owner, obj->header.kind);
-    pos[0] = obj->spawn.rot.x;
-    pos[1] = obj->spawn.rot.y;
-    pos[2] = obj->spawn.rot.z;
-    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->header.owner, obj->header.kind);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->spawn.pos, -1, 1, 1, 0, 0, 0, obj->header.owner, 0);
-    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->spawn.rot, -1, 1, 1, 0, 0, 0, obj->header.owner, 0);
+    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
+    pos[0] = obj->head.def.rot.x;
+    pos[1] = obj->head.def.rot.y;
+    pos[2] = obj->head.def.rot.z;
+    func_151602C0(&header, pos, func_150ADA20() % 9U + 5, 0xFF, 0x59, 0, 0xFF, 0, 0, obj->head.header.owner, obj->head.header.kind);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle0, &obj->head.def.pos, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
+    func_150E7FEC(func_150ADA68() * 101.0f + 55.0f, (u8)(func_150ADA20() % 66U + 190), &state->triangle1, &obj->head.def.rot, -1, 1, 1, 0, 0, 0, obj->head.header.owner, 0);
     if (actor != NULL) {
-        func_15164F0C(2, actor->camera->playerIndex, 0, obj->header.owner, obj->header.kind);
+        func_15164F0C(2, actor->camera->playerIndex, 0, obj->head.header.owner, obj->head.header.kind);
         params8868.flags = 1;
         params8868.duration = 40;
         params8868.playerMask = 1;
@@ -733,9 +728,9 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
     if (actor != NULL) {
         func_1505D024((s32)actor, D_800AAC30[state->unk94], 0, -1);
     }
-    func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->spawn.pos.x, obj->spawn.pos.y, obj->spawn.pos.z, 2000, 2200);
-    func_1000FA64(0x2F6, obj->spawn.rot.x, obj->spawn.rot.y, obj->spawn.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
-    func_1516972C(&obj->header);
+    func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 2000, 2200);
+    func_1000FA64(0x2F6, obj->head.def.rot.x, obj->head.def.rot.y, obj->head.def.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);
+    func_1516972C(&obj->head.header);
 }
 
 
