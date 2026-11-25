@@ -1,120 +1,122 @@
 #include <ultra64.h>
+/* include/functions.h types func_15149130's seventh parameter as a struct37 pointer, but every caller
+ * passes the byte size of the effect's extra data; the header declaration is renamed out of the way
+ * (same approach as game_113D60.c). */
+#define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
+#undef func_15149130
 #include "variables.h"
 
+void *func_15167A68(s32, s32, s32, s32, s32, s32);
+void func_151D5E30(void *);
 
-struct260 *func_15149130(s16 arg0, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, struct37 *arg6, u8 arg7, s32 arg8) {
-    struct260 *temp_v0;
-    u8 phi_v0;
-    s32 sp24;
-    // fakematch? an alternative is to mark sp24 as volatile
-    s32 *tmp;
+struct260 *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags,
+                         u8 callbackSet, s32 dataSize, u8 arg7, s32 arg8);
 
-    sp24 = &arg6->unk28;
-    tmp = &sp24;
+/* Allocates a timed callback object (0x28 header bytes plus dataSize) and initializes its header. */
+struct260 *func_15149130(s16 timer, s8 expireCallback, s8 tickCallback, s8 drawCallback, u8 flags,
+                         u8 callbackSet, s32 dataSize, u8 arg7, s32 arg8) {
+    struct260 *object;
+    u8 kind;
+    s32 size;
 
-    if ((arg4 & 2) != 0) {
-        phi_v0 = 95;
-    } else {
-        phi_v0 = 35;
-    }
+    size = dataSize + 0x28;
+    kind = (flags & 2) ? 95 : 35;
 
-    temp_v0 = func_15167A68(phi_v0, arg8, *tmp, 1, arg7, 1);
-    if (temp_v0 == 0) {
+    object = func_15167A68(kind, arg8, size, 1, arg7, 1);
+    if (object == NULL) {
         return NULL;
     }
-    temp_v0->unkE  = arg0;
-    temp_v0->unk10 = arg1;
-    temp_v0->unk11 = arg2;
-    temp_v0->unk12 = arg3;
-    temp_v0->unkD  = arg4;
-    temp_v0->unk13 = arg5;
+    object->unkE  = timer;
+    object->unk10 = expireCallback;
+    object->unk11 = tickCallback;
+    object->unk12 = drawCallback;
+    object->unkD  = flags;
+    object->unk13 = callbackSet;
+    bzero(&object->unk14, 16);
 
-    // what are we zero-ing out?
-    bzero(&temp_v0->unk14, 16);
-
-    return temp_v0;
+    return object;
 }
 
-struct260 *func_151491F4(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7) {
-    return func_15149130(arg0, arg1, arg2, -1, arg3, arg4, arg5, arg6, arg7);
+/* func_15149130 without a draw callback. */
+struct260 *func_151491F4(s16 timer, s8 expireCallback, s8 tickCallback, u8 flags, u8 callbackSet, s32 dataSize,
+                         u8 arg6, s32 arg7) {
+    return func_15149130(timer, expireCallback, tickCallback, -1, flags, callbackSet, dataSize, arg6, arg7);
 }
 
-void func_15149264(struct260 *arg0) {
-
-    if ((arg0->unkD & 1) != 0) {
-        arg0->unkE -= D_800BE9E4;
+/* Per-frame update: counts the timer down (flag 1), runs the tick callback, then the expire callback and
+ * removal once the timer goes negative. */
+void func_15149264(struct260 *object) {
+    if (object->unkD & 1) {
+        object->unkE -= D_800BE9E4;
     }
-    if (arg0->unk11 != -1) {
-        D_8008A4E8[arg0->unk11](arg0);
+    if (object->unk11 != -1) {
+        D_8008A4E8[object->unk11](object);
     }
-
-    if (arg0->unkE < 0) {
-        if (arg0->unk10 != -1) {
-            D_8008A4C0[arg0->unk10](arg0);
+    if (object->unkE < 0) {
+        if (object->unk10 != -1) {
+            D_8008A4C0[object->unk10](object);
         }
     }
-    if (arg0->unkE < 0) {
-         func_1516972C(arg0);
+    if (object->unkE < 0) {
+        func_1516972C(object);
     }
 }
 
-void func_15149318(struct260 *arg0) {
-    func_151D5E30(&arg0->unk14);
+void func_15149318(struct260 *object) {
+    func_151D5E30(&object->unk14);
 }
 
-void func_1514933C(struct260 *arg0) {
-    func_15149318(arg0);
-    func_15169804(arg0);
+void func_1514933C(struct260 *object) {
+    func_15149318(object);
+    func_15169804(object);
 }
 
-void func_15149368(struct260 *arg0) {
-    func_15149318(arg0);
-    func_15169824(arg0);
+void func_15149368(struct260 *object) {
+    func_15149318(object);
+    func_15169824(object);
 }
 
-void func_15149394(struct260 *arg0) {
-    s32 idx = arg0->unk13;
+/* Dispatches through the object's callback set (out-of-range sets fall back to set 0). */
+void func_15149394(struct260 *object) {
+    s32 set = object->unk13;
 
-    if (idx < 0) {
-        idx = 0U;
-    } else {
-        if (idx >= 74) {
-            idx = 0U;
-        }
+    if (set < 0) {
+        set = 0;
+    } else if (set >= 74) {
+        set = 0;
     }
-    D_8008A688[idx](arg0);
+    D_8008A688[set](object);
 }
 
-void func_151493E4(struct260 *arg0) {
-    s32 idx = arg0->unk13;
+void func_151493E4(struct260 *object) {
+    s32 set = object->unk13;
 
-    if (idx < 0) {
-        idx = 0U;
-    } else {
-        if (idx >= 74) {
-            idx = 0U;
-        }
+    if (set < 0) {
+        set = 0;
+    } else if (set >= 74) {
+        set = 0;
     }
-    D_8008A7B0[idx](arg0);
+    D_8008A7B0[set](object);
 }
 
-void func_15149434(struct260 *arg0, s32 arg1, u8 arg2) {
-    s32 idx = arg0->unk13;
+void func_15149434(struct260 *object, s32 arg1, u8 arg2) {
+    s32 set = object->unk13;
 
-    if ((idx < 0) || (idx >= 74)) {
-        idx = 0U;
+    if (set < 0 || set >= 74) {
+        set = 0;
     }
-
-    if (D_8008A8D8[idx] != 0) {
-        D_8008A8D8[idx](arg0, arg1, arg2);
+    if (D_8008A8D8[set] != NULL) {
+        D_8008A8D8[set](object, arg1, arg2);
     }
 }
 
-s32 func_15149490(s32 arg0, struct260 *arg1, s16 arg2) {
-    s32 idx = arg1->unk12;
-    if (idx != -1) {
-        arg0 = D_8008A670[idx](arg0, arg1, arg2);
+/* Runs the object's draw callback, if any, which may replace arg0 (returned). */
+s32 func_15149490(s32 arg0, struct260 *object, s16 arg2) {
+    s32 drawCallback = object->unk12;
+
+    if (drawCallback != -1) {
+        arg0 = D_8008A670[drawCallback](arg0, object, arg2);
     }
     return arg0;
 }
