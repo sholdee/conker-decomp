@@ -9,7 +9,7 @@
    data, rodata or bss) pins that address. It would not move with its section. The goal is zero.
    Absolute symbols outside every section (hardware registers, fixed RAM regions, ROM offsets) are
    counted separately; they are part of the memory map, not of any object.
-Exit status 1 if a name is at the wrong address.
+Exit status 1 if a name is at the wrong address or any address is pinned.
 """
 import re, struct, subprocess, sys
 from pathlib import Path
@@ -123,7 +123,9 @@ def main():
             print("    " + " ".join(names))
     print(f"referenced absolute symbols outside every section (memory map): {fixed}")
     print(f"address-named symbols at the wrong address: {len(wrong)}")
-    sys.exit(1 if wrong else 0)
+    if total:
+        print("NOT FULLY LINKED: the pinned addresses above must be reached through their sections")
+    sys.exit(1 if wrong or total else 0)
 
 
 if __name__ == "__main__":

@@ -41,6 +41,10 @@ for p in list((M / "src").rglob("*.s")) + [q for q in linked if q.exists()]:
     defs |= set(re.findall(r"^\s*(?:glabel|dlabel|jlabel) (\w+)", p.read_text(errors="replace"), re.M))
 for p in (M / "src").rglob("*.c"):  # C function definitions
     defs |= set(re.findall(r"^[A-Za-z_][\w \*]*?\b(\w+)\s*\([^;{]*\)\s*\{", p.read_text(errors="replace"), re.M))
+# hand-written definitions (aliases like `D_X = game_TEXT_END;`) win over splat's absolute guesses
+for hand in ("undefined_syms.us.txt", "undefined_funcs.us.txt"):
+    if (M / hand).exists():
+        defs |= set(re.findall(r"^\s*(\.?\w+)\s*=", (M / hand).read_text(), re.M))
 for name in ("undefined_funcs_auto.txt", "undefined_syms_auto.txt"):
     f = M / name
     if not f.exists():
