@@ -172,6 +172,11 @@ void func_15009334(s32 index) {
 struct225 *func_1516037C();
 struct225 *func_1516387C();
 
+/*
+ * Light callbacks, the D_80082BFC table run by func_1500A94C: each attaches an effect to `light`.
+ * `id` is the callback's own index in the table; some use it to pick an entry of a small local table.
+ */
+
 void func_150095D8(s32 light, s32 id) {
     func_1516127C(light, 255, 1);
 }
@@ -488,6 +493,7 @@ typedef struct Game36680LightAttachment {
     f32 z;
 } Game36680LightAttachment;
 
+/** Attaches the light to the level object picked by `id` (and by whether D_800BE9F0 is 6). */
 void func_1500A6D8(s32 light, s32 id) {
     struct220 header;
     Game36680LightAttachment attachment;
@@ -516,6 +522,7 @@ extern u8 D_80082BF4[6];
 
 extern Game36680AttachmentObject *func_151149AC(u8);
 
+/** Attaches the light to the object func_151149AC returns for `id`, starting at its position. */
 void func_1500A7E8(s32 light, s32 id) {
     struct220 header;
     Game36680LightAttachment attachment;
