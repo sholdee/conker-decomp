@@ -1120,56 +1120,53 @@ s32 func_151DADA0(SquashEffect *effect) {
     return 1;
 }
 
+/* An effect drawn as a camera-facing quad, with a double-buffered vertex block per view. */
 typedef struct {
-    char pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    char pad40[0xC];
-    f32 unk4C;
-    f32 unk50;
-    char pad54[0x6C];
-    char unkC0[0x40];
-    s16 *unk100[1];
-} Struct151DAE28;
+    EffectBase base;
+    u8 pad70[0x50];
+    Vtx quad[4];
+    Vtx *buffers[1]; /* one per view */
+} QuadEffect;
 
-s16 *func_151DAE28(Struct151DAE28 *arg0, s16 arg1) {
-    s16 *var_v0;
-    s16 *ret;
-    f32 temp_f0;
-    f32 temp_f14;
-    f32 temp_f2;
-    f32 temp_f12;
-    u8 sp37;
+void func_151D5D60(Vtx **buffers, s16 view, s32 size, Vtx **vtx, u8 *fresh);
 
-    func_151D5D60(arg0->unk100, arg1, 0x40, &var_v0, &sp37);
-    ret = var_v0;
-    if (var_v0) {
-        if (sp37) {
-            memcpy(arg0->unk100[arg1], arg0->unkC0, 0x40);
-            memcpy(arg0->unk100[arg1] + 0x20, arg0->unkC0, 0x40);
+/* Builds this frame's quad vertices
+ for view `view`; returns them, or NULL when no buffer is free. */
+Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
+    Vtx *vtx;
+    Vtx *ret;
+    f32 halfWidth;
+    f32 height;
+    f32 dz;
+    f32 dx;
+    u8 fresh;
+
+    func_151D5D60(effect->buffers, view, sizeof(effect->quad), &vtx, &fresh);
+    ret = vtx;
+    if (vtx) {
+        if (fresh) {
+            memcpy(effect->buffers[view], effect->quad, sizeof(effect->quad));
+            memcpy(effect->buffers[view] + 4, effect->quad, sizeof(effect->quad));
         }
     } else {
-        return 0;
+        return NULL;
     }
 
-    temp_f0 = arg0->unk2C * arg0->unk4C;
-    temp_f14 = arg0->unk30 * arg0->unk50;
-    temp_f2 = D_800DD1D8[arg1] * temp_f0;
-    temp_f12 = D_800DD1E8[arg1] * temp_f0;
+    halfWidth = effect->base.desc.scaleX * effect->base.desc.unk34;
+    height = effect->base.desc.scaleY * effect->base.desc.unk38;
+    dz = D_800DD1D8[view] * halfWidth;
+    dx = D_800DD1E8[view] * halfWidth;
 
-    var_v0[3] = 0;
-    var_v0[0xB] = 0;
-    var_v0[0x13] = 0;
-    var_v0[0x1B] = 0;
-    var_v0[0] = var_v0[0x18] = arg0->unk34 + temp_f12;
-    var_v0[1] = var_v0[9] = arg0->unk38;
-    var_v0[2] = var_v0[0x1A] = arg0->unk3C - temp_f2;
-    var_v0[8] = var_v0[0x10] = arg0->unk34 - temp_f12;
-    var_v0[0x11] = var_v0[0x19] = arg0->unk38 + temp_f14;
-    var_v0[0xA] = var_v0[0x12] = arg0->unk3C + temp_f2;
+    vtx[0].v.flag = 0;
+    vtx[1].v.flag = 0;
+    vtx[2].v.flag = 0;
+    vtx[3].v.flag = 0;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = effect->base.desc.pos.unk0 + dx;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = effect->base.desc.pos.unk4;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = effect->base.desc.pos.unk8 - dz;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = effect->base.desc.pos.unk0 - dx;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = effect->base.desc.pos.unk4 + height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = effect->base.desc.pos.unk8 + dz;
 
     return ret;
 }
