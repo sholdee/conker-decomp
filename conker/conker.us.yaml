@@ -256,6 +256,7 @@ segments:
       - [0x2C820, rodata]
       - [0x2C830, rodata]
       - [0x2C850, rodata]
+      - [0x2C8D0, .rodata, libultra/gu/sinf_init]
       - [0x2C920, rodata]
       - [0x2C960, rodata]
       # init bss: func_10001050 clears 0x8002D4B0..0x80043B40 (bss_size)
