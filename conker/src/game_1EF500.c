@@ -1,4 +1,5 @@
 #include <ultra64.h>
+// matching: callers here use the full s32 return of these, unlike their functions.h prototypes
 #define func_150ADA20 func_150ADA20_u8_proto
 #define func_10010F30 func_10010F30_void
 #include "functions.h"
@@ -6,53 +7,56 @@
 #undef func_10010F30
 #include "variables.h"
 
-typedef void (*GameFunc151C455CDispatch)(s32);
-typedef void (*GameFunc151C455CCallback)(struct17 *, s32);
+typedef struct {
+    f32 x, y, z;
+} Vec3f;
 
-extern GameFunc151C455CDispatch D_8008FBD0[];
 extern s32 func_150ADA20(void);
 extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_1000B060(f32, f32, u32);
 extern void func_1000E7A0(u32, s32);
 extern s32 func_1510F8CC(s32);
-extern f32 D_800AAA30;
-extern f32 D_800AAA34;
+extern f32 D_800AAA30; /* 0.1f */
 extern f32 D_800AAA7C;
 extern f32 D_800AAA80;
 extern f32 D_800AAA84;
 
+/* The view of D_800B0DF0 used here; struct104 has no field at 0x2C. */
 typedef struct {
     u8 pad0[0x2C];
     s16 unk2C;
 } GameStruct151C2050State;
 
-void func_151C2050(struct127 *arg0, f32 *arg1, f32 *arg2, s32 arg3, f32 arg4) {
-    s32 sp4C;
-    s32 sp48;
+/* Queues a positional sound event (func_1000E7A0 kind 8) for sound arg3 in a few specific levels. */
+void func_151C2050(struct127 *arg0, Vec3f *pos, Vec3f *dir, s32 arg3, f32 distance) {
+    s32 pan;
+    s32 volume;
     struct108 *camera;
-    s32 sp40;
-    s16 temp_v0;
-    f32 sp34;
-    f32 temp_f0;
+    s32 direction;
+    s16 level;
+    f32 volumeLevel; // matching: separate spill slot for the value kept across func_1000B060
+    f32 intensity;
 
-    if (arg0 != 0) {
-        if ((D_800BE616 != 0) || ((camera = arg0->camera) == 0)) {
-            temp_v0 = ((GameStruct151C2050State *)D_800B0DF0)->unk2C;
-            if ((temp_v0 == 0x24) || (temp_v0 == 0x13) || (temp_v0 == 0x4D) || (temp_v0 == 0x85) || (temp_v0 == 0x93)) {
-                func_100114D0((s32)arg1[0], (s32)arg1[1], (s32)arg1[2], 0x7FFF, 0x3E8, 0x64, &sp4C, &sp48, 0);
-                if ((u32)sp48 >= 0x1001U) {
-                    sp48 = (u32)sp48 >> 7;
-                    func_1000E7A0(8, (func_1510F8CC(arg3) + 1) | (sp48 << 8) | (sp4C << 16));
+    if (arg0 != NULL) {
+        if (D_800BE616 || (camera = arg0->camera) == NULL) {
+            level = ((GameStruct151C2050State *)D_800B0DF0)->unk2C;
+            if (level == 0x24 || level == 0x13 || level == 0x4D || level == 0x85 || level == 0x93) {
+                func_100114D0((s32)pos->x, (s32)pos->y, (s32)pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
+                if ((u32)volume > 0x1000) {
+                    volume = (u32)volume >> 7;
+                    func_1000E7A0(8, (func_1510F8CC(arg3) + 1) | (volume << 8) | (pan << 16));
                 }
             }
         } else {
-            temp_v0 = ((GameStruct151C2050State *)D_800B0DF0)->unk2C;
-            if ((temp_v0 == 0x24) || (temp_v0 == 0x13)) {
-                temp_f0 = 255.0f - (arg4 * D_800AAA30);
-                if (temp_f0 > 16.0f) {
-                    sp34 = temp_f0;
-                    sp40 = func_1000B060(arg2[0], arg2[2], (u32)(camera->unk3A0 * D_800AAA34));
-                    func_1000E7A0(8, (func_1510F8CC(arg3) + 1) | ((s32)sp34 << 8) | (sp40 << 16));
+            level = ((GameStruct151C2050State *)D_800B0DF0)->unk2C;
+            if (level == 0x24 || level == 0x13) {
+                // matching: the 0.1f literal (vs this rodata load) shifts the stack frame
+                intensity = 255.0f - distance * D_800AAA30;
+                if (intensity > 16.0f) {
+                    volumeLevel = intensity;
+                    /* 40.74 = 256 / 2pi: radians to a 256-step angle */
+                    direction = func_1000B060(dir->x, dir->z, (u32)(camera->unk3A0 * 40.74366379f));
+                    func_1000E7A0(8, (func_1510F8CC(arg3) + 1) | ((s32)volumeLevel << 8) | (direction << 16));
                 }
             }
         }
@@ -60,122 +64,83 @@ void func_151C2050(struct127 *arg0, f32 *arg1, f32 *arg2, s32 arg3, f32 arg4) {
 }
 
 
-typedef struct {
-    u8 unk0;
-    u8 pad1[0x5F];
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    u8 pad6C[0x20];
-    f32 unk8C;
-    s32 unk90;
-    u8 pad94[4];
-    f32 unk98;
-    u8 pad9C[0xC];
-    s8 unkA8;
-    u8 padA9[3];
-    s32 unkAC;
-} Mover151C43E0;
+/* Result of a ray cast (func_15081690) or of a projectile's path setup (func_151C4B0C). */
+typedef struct Game1F1F60Hit {
+    /* 0x00 */ void *actor;
+    /* 0x04 */ f32 dist;
+    /* 0x08 */ Vec3f hit;
+    /* 0x14 */ Vec3f normal;
+    /* 0x20 */ Vec3f point;
+    /* 0x2C */ Vec3f start;
+    /* 0x38 */ Vec3f end; /* the ray direction */
+    /* 0x44 */ s16 surface[9];
+    /* 0x56 */ s16 field_56;
+    /* 0x58 */ s8 field_58;
+    /* 0x59 */ u8 type;
+    /* 0x5A */ s8 field_5A;
+    /* 0x5B */ u8 pad5B;
+    /* 0x5C */ struct131 *field_5C;
+    /* 0x60 */ s32 field_60;
+} Game1F1F60Hit; /* 0x64 */
 
-typedef struct {
-    u8 pad0[0x34];
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-} GameStruct151C4510a;
-
-typedef struct {
-    u8 pad0[0x4];
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-} GameStruct151C4510b;
-
-typedef struct {
-    u8 unk0;
-    u8 pad1[0x83];
-    struct131 *unk84;
-    u8 pad88[0x4];
-    f32 unk8C;
-    u8 pad90[0xC];
-    s8 unk9C;
-} GameStruct151C455C;
-
-typedef struct {
-    u16 unk0;
-    u16 unk2;
-} GameStruct151C2734Sfx;
-
-typedef struct {
-    u8 pad0[0x60];
-    f32 unk60;
-    f32 unk64;
-    f32 unk68;
-    u8 pad6C[0x20];
-    f32 unk8C;
-    u8 pad90[0x8];
-    f32 unk98;
-    u8 pad9C[0x2];
-    u16 unk9E;
-    u8 unkA0;
-    u8 unkA1;
-} GameStruct151C2734Sub;
-
-typedef struct {
-    u8 pad0[0x34];
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    u8 pad40[0xD0];
-    GameStruct151C2734Sub unk110;
-} GameStruct151C2734;
-
-extern GameStruct151C2734Sfx D_8008FBE8[];
-extern s32 func_1000A420(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 *, s32 *, s32);
-void func_151C436C(s32 a0, f32 *a1, s32 a2);
-u8 func_151C43E0(struct108 *arg0, Mover151C43E0 *arg1, f32 arg2);
-void func_151C4510(GameStruct151C4510a *a0, GameStruct151C4510b *a1, f32 a2);
-s32 func_151C455C(s32 arg0, GameStruct151C455C *arg1, f32 arg2);
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_151C4B0C;
-
-struct Game1F1F60Hit;
-void *memcpy(void *, const void *, u32);
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-s32 func_151D5B6C(s32 arg0, s32 arg1, struct127 *arg2, s8 arg3, s32 arg4);
-s32 func_151C4B0C(struct Game1F1F60Hit *arg0, struct Game1F1F60Hit *arg1, Vec3f_151C4B0C *arg2, Vec3f_151C4B0C *arg3, f32 *arg4, f32 arg5,
-                  u8 arg6, Vec3f_151C4B0C *arg7, Vec3f_151C4B0C *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13,
-                  u8 arg14, u8 arg15, s32 arg16, u8 arg17);
-
+/* Projectile state, stored at offset 0x110 of the object func_151C229C spawns. */
 typedef struct Game1EF500TrailExt {
-    u8 flags;
-    u8 pad1[3];
-    f32 velocity[3];
-    f32 accel[3];
-    f32 drift[3];
-    u8 path[0x38];
-    f32 direction[3];
-    u8 pad6C[0x20];
-    u8 extra[4];
-    u8 *owner;
-    u8 ownerId;
-    u8 pad95[3];
-    f32 scale;
-    s8 field9C;
-    u8 pad9D;
-    s16 field9E;
-    u8 chance;
-    u8 fieldA1;
-    u8 padA2[2];
-    s32 fieldA4;
-    s8 fieldA8;
-    u8 padA9[3];
-    s32 handle;
-} Game1EF500TrailExt;
+    /* 0x00 */ u8 flags;
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ Vec3f velocity;
+    /* 0x10 */ Vec3f accel; /* eases toward drift each frame; also the length of the drawn tail */
+    /* 0x1C */ Vec3f drift;
+    /* 0x28 */ Game1F1F60Hit path;
+    /* 0x8C */ f32 remaining; /* distance left before the projectile expires */
+    /* 0x90 */ u8 *owner;
+    /* 0x94 */ u8 ownerId;
+    /* 0x95 */ u8 pad95[3];
+    /* 0x98 */ f32 scale;
+    /* 0x9C */ s8 expireHandler; /* index into D_8008FBD0, -1 for none */
+    /* 0x9D */ u8 pad9D;
+    /* 0x9E */ u16 sound;
+    /* 0xA0 */ u8 soundEnabled;
+    /* 0xA1 */ u8 listener; /* index into D_800DBFF0 of the player the sound follows */
+    /* 0xA2 */ u8 padA2[2];
+    /* 0xA4 */ s32 fieldA4;
+    /* 0xA8 */ s8 fieldA8;
+    /* 0xA9 */ u8 padA9[3];
+    /* 0xAC */ s32 handle;
+} Game1EF500TrailExt; /* 0xB0 */
+
+/* TrailExt flags */
+#define TRAIL_HIT_CALLBACK 1    /* call D_800E0940 on expiry */
+#define TRAIL_EXPIRE_HANDLER 2  /* call D_8008FBD0[expireHandler] on expiry */
+#define TRAIL_COLLIDE 4
+#define TRAIL_FLAG_8 8
+
+/* The projectile object (allocated by func_1513D2F0). */
+typedef struct {
+    /* 0x000 */ u8 pad0;
+    /* 0x001 */ u8 unk1;
+    /* 0x002 */ u8 pad2[0xA];
+    /* 0x00C */ u8 unkC;
+    /* 0x00D */ u8 padD[0x1F];
+    /* 0x02C */ f32 width;
+    /* 0x030 */ u8 pad30[4];
+    /* 0x034 */ Vec3f position;
+    /* 0x040 */ u8 pad40[0x1C];
+    /* 0x05C */ u8 alpha;
+    /* 0x05D */ u8 pad5D[0x63];
+    /* 0x0C0 */ u8 vertexTemplate[0x40];
+    /* 0x100 */ u8 *buffers[4];
+    /* 0x110 */ Game1EF500TrailExt trail;
+} Game1EF500Trail;
+
+typedef void (*GameFunc151C455CDispatch)(Game1EF500Trail *);
+typedef void (*GameFunc151C455CCallback)(Vec3f *, s32);
+
+extern GameFunc151C455CDispatch D_8008FBD0[];
+
+typedef struct {
+    u16 sound;
+    u16 range;
+} GameStruct151C2734Sfx;
 
 typedef struct Game1EF500TrailSpawn {
     u8 field00;
@@ -191,7 +156,7 @@ typedef struct Game1EF500TrailSpawn {
     u8 field13;
     f32 field14;
     f32 field18;
-    Vec3f_151C4B0C position;
+    Vec3f position;
     f32 field28[6];
     s32 flags;
     u8 field44;
@@ -203,78 +168,97 @@ typedef struct Game1EF500TrailSpawn {
     u8 pad4D[0xB];
 } Game1EF500TrailSpawn;
 
-void *func_151C229C(Vec3f_151C4B0C *arg0, Vec3f_151C4B0C *arg1, s32 arg2, Vec3f_151C4B0C *arg3, u8 arg4, s32 arg5,
-                    f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, u8 arg11, u8 *arg12,
-                    u8 arg13, u8 arg14, u8 arg15, u8 arg16, u8 arg17, u8 arg18, s8 arg19,
-                    s32 arg20, f32 arg21, u8 arg22, s8 arg23, s32 arg24, u8 arg25, s32 arg26) {
-    void *result;
+extern GameStruct151C2734Sfx D_8008FBE8[];
+extern s32 func_1000A420(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 *, s32 *, s32);
+void func_151C436C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps);
+u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
+void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
+s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
+void *memcpy(void *, const void *, u32);
+s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
+s32 func_151D5B6C(Vec3f *, Vec3f *, u8 *, s8, s32);
+s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4, f32 arg5,
+                  u8 arg6, Vec3f *arg7, Vec3f *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13,
+                  u8 arg14, u8 arg15, s32 arg16, u8 arg17);
+
+/*
+ * Spawns a projectile at origin heading along direction (or from altOrigin along altDirection),
+ * sets up its path and runs its first update of dt. Returns NULL if it could not be placed or
+ * if that first update already ended it.
+ */
+Game1EF500Trail *func_151C229C(Vec3f *origin, Vec3f *direction, Vec3f *altOrigin, Vec3f *altDirection,
+                               u8 altNormalized, Game1F1F60Hit *knownHit, f32 speed, f32 arg7, f32 arg8,
+                               f32 driftSpeed, f32 arg10, u8 arg11, u8 *owner, u8 arg13, u8 collide, u8 arg15,
+                               u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 arg20,
+                               f32 dt, u8 arg22, s8 arg23, s32 extraSize, u8 arg25, s32 arg26) {
+    Game1EF500Trail *result;
     Game1EF500TrailSpawn spawn;
     Game1EF500TrailExt ext;
-    Vec3f_151C4B0C sourceDir;
+    Vec3f sourceDir;
     u8 useSource;
-    Vec3f_151C4B0C targetDir;
+    Vec3f targetDir;
     u8 useTarget;
-    s32 unused; /* extra named home in the original frame */
-    void *from;
-    Vec3f_151C4B0C *dir;
+    s32 unused; // matching: unused stack slot in the original frame
+    Vec3f *from;
+    Vec3f *dir;
 
-    useSource = 0;
-    useTarget = arg4 && arg3 != NULL;
+    useSource = FALSE;
+    useTarget = altNormalized && altDirection != NULL;
     if (useTarget) {
-        targetDir = *arg3;
+        targetDir = *altDirection;
     }
-    ext.flags = (arg17 ? 1 : 0) | (arg18 ? 2 : 0) | (arg14 ? 4 : 0) | (arg15 ? 8 : 0);
+    ext.flags = (hitCallback ? TRAIL_HIT_CALLBACK : 0) | (expireHandler ? TRAIL_EXPIRE_HANDLER : 0) |
+                (collide ? TRAIL_COLLIDE : 0) | (arg15 ? TRAIL_FLAG_8 : 0);
     ext.handle = 0;
     ext.fieldA8 = arg23;
-    ext.field9C = arg19;
+    ext.expireHandler = handlerIndex;
     ext.fieldA4 = arg20;
-    ext.chance = (func_150ADA20() & 0xFFU) < arg16 ? 1 : 0;
-    ext.field9E = 0;
-    ext.fieldA1 = 0;
-    if (arg2 != 0 && arg3 != NULL) {
+    ext.soundEnabled = (func_150ADA20() & 0xFFU) < soundChance ? TRUE : FALSE;
+    ext.sound = 0;
+    ext.listener = 0;
+    if (altOrigin != NULL && altDirection != NULL) {
         if (!useTarget) {
-            if (func_15145128(&arg3->x, &targetDir.x, NULL, NULL) != 0) {
-                useTarget = 1;
+            if (func_15145128(&altDirection->x, &targetDir.x, NULL, NULL) != 0) {
+                useTarget = TRUE;
             } else {
                 return NULL;
             }
         }
-        from = (void *)arg2;
+        from = altOrigin;
         dir = &targetDir;
     } else {
-        if (arg1 != NULL) {
-            if (func_15145128(&arg1->x, &sourceDir.x, NULL, NULL) != 0) {
-                useSource = 1;
+        if (direction != NULL) {
+            if (func_15145128(&direction->x, &sourceDir.x, NULL, NULL) != 0) {
+                useSource = TRUE;
             } else {
                 return NULL;
             }
         }
-        from = arg0;
+        from = origin;
         dir = &sourceDir;
     }
-    ext.handle = arg14 ? func_151D5B6C((s32)from, (s32)dir, (struct127 *)arg12, arg23, 0) : -1;
-    if (func_151C4B0C((struct Game1F1F60Hit *)arg5, (struct Game1F1F60Hit *)ext.path, arg0,
-                      useSource ? &sourceDir : NULL, (f32 *)ext.extra, arg7, arg13, (Vec3f_151C4B0C *)arg2,
-                      useTarget ? &targetDir : NULL, &ext.flags, 3, arg10, arg12, arg23, arg14, arg15,
+    ext.handle = collide ? func_151D5B6C(from, dir, owner, arg23, 0) : -1;
+    if (func_151C4B0C(knownHit, &ext.path, origin, useSource ? &sourceDir : NULL, &ext.remaining, arg7, arg13,
+                      altOrigin, useTarget ? &targetDir : NULL, &ext.flags, 3, arg10, owner, arg23, collide, arg15,
                       ext.handle, 0) == 0) {
         return NULL;
     }
-    ext.velocity[0] = ext.direction[0] * arg6;
-    ext.velocity[1] = ext.direction[1] * arg6;
-    ext.velocity[2] = ext.direction[2] * arg6;
-    ext.accel[0] = 0.0f;
-    ext.accel[1] = 0.0f;
-    ext.accel[2] = 0.0f;
-    ext.drift[0] = ext.direction[0] * arg9;
-    ext.drift[1] = ext.direction[1] * arg9;
-    ext.drift[2] = ext.direction[2] * arg9;
-    ext.owner = arg12;
-    ext.ownerId = (arg12 != NULL) ? arg12[0x3B] : 0x63;
+    ext.velocity.x = ext.path.end.x * speed;
+    ext.velocity.y = ext.path.end.y * speed;
+    ext.velocity.z = ext.path.end.z * speed;
+    ext.accel.x = 0.0f;
+    ext.accel.y = 0.0f;
+    ext.accel.z = 0.0f;
+    ext.drift.x = ext.path.end.x * driftSpeed;
+    ext.drift.y = ext.path.end.y * driftSpeed;
+    ext.drift.z = ext.path.end.z * driftSpeed;
+    ext.owner = owner;
+    ext.ownerId = (owner != NULL) ? owner[0x3B] : 99;
     spawn.field00 = 0x41;
-    ext.scale = arg6;
+    ext.scale = speed;
     spawn.field01 = 4;
     spawn.field02 = 0x4503;
-    spawn.field04 = 0x12C;
+    spawn.field04 = 300;
     spawn.field08 = 0;
     spawn.field0C = 0;
     spawn.field10 = 0;
@@ -283,9 +267,9 @@ void *func_151C229C(Vec3f_151C4B0C *arg0, Vec3f_151C4B0C *arg1, s32 arg2, Vec3f_
     spawn.field13 = 0xFF;
     spawn.field44 = arg11;
     spawn.field45 = 0xFF;
-    spawn.field18 = arg9;
+    spawn.field18 = driftSpeed;
     spawn.field14 = arg8;
-    spawn.position = *arg0;
+    spawn.position = *origin;
     spawn.field28[0] = 0.0f;
     spawn.field28[1] = 0.0f;
     spawn.field28[2] = 0.0f;
@@ -296,96 +280,103 @@ void *func_151C229C(Vec3f_151C4B0C *arg0, Vec3f_151C4B0C *arg1, s32 arg2, Vec3f_
     spawn.field46 = 0;
     spawn.field47 = 0;
     spawn.field4C = arg22;
-    result = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x16, 0, 0, 0x14, 0, 0, 0, arg24 + 0xB0, arg25, arg26);
+    result = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x16, 0, 0, 0x14, 0, 0, 0, extraSize + sizeof(ext), arg25, arg26);
     if (result != NULL) {
         u8 failed;
 
-        failed = 0;
-        memcpy((u8 *)result + 0x110, &ext, 0xB0);
-        func_151C436C((s32)result, (f32 *)((u8 *)result + 0x110), (s32)arg21);
-        if (func_151C43E0(result, (Mover151C43E0 *)((u8 *)result + 0x110), arg21) == 0) {
-            failed = 1;
+        failed = FALSE;
+        memcpy(&result->trail, &ext, sizeof(ext));
+        func_151C436C(result, &result->trail, dt);
+        if (func_151C43E0(result, &result->trail, dt) == 0) {
+            failed = TRUE;
         }
-        func_151C4510(result, (GameStruct151C4510b *)((u8 *)result + 0x110), arg21);
-        if (func_151C455C((s32)result, (GameStruct151C455C *)((u8 *)result + 0x110), arg21) == 0) {
-            failed = 1;
+        func_151C4510(result, &result->trail, dt);
+        if (func_151C455C(result, &result->trail, dt) == 0) {
+            failed = TRUE;
         }
         if (failed) {
-            func_1516972C(result);
+            func_1516972C((struct102 *)result);
             return NULL;
         }
     }
     return result;
 }
 
-s8 func_151C2734(GameStruct151C2734 *arg0) {
-    s8 ret;
-    GameStruct151C2734Sub *sub;
-    struct108 *found;
+/*
+ * Per-frame update of a projectile: moves it, checks collisions and expiry, and plays a fly-by
+ * sound once it passes close in front of a player. Returns 0 once the projectile is finished.
+ */
+s8 func_151C2734(Game1EF500Trail *trail) {
+    s8 alive;
+    Game1EF500TrailExt *ext;
+    struct108 *player;
     s32 sound;
-    s32 r;
+    s32 sfxIndex;
     s32 i;
     f32 dx;
     f32 dy;
     f32 dz;
     f32 dot;
     f32 dist;
-    s32 vol;
+    s32 volume;
     s32 pan;
 
-    sub = &arg0->unk110;
-    ret = 1;
-    func_151C436C((s32)arg0, (f32 *)sub, D_800BE9E4);
-    if (func_151C43E0((struct108 *)arg0, (Mover151C43E0 *)sub, D_800BE9A4) == 0) {
-        ret = 0;
+    ext = &trail->trail;
+    alive = TRUE;
+    func_151C436C(trail, ext, D_800BE9E4);
+    if (func_151C43E0(trail, ext, D_800BE9A4) == 0) {
+        alive = FALSE;
     }
-    func_151C4510((GameStruct151C4510a *)arg0, (GameStruct151C4510b *)sub, D_800BE9A4);
-    if (func_151C455C((s32)arg0, (GameStruct151C455C *)sub, D_800BE9A4) == 0) {
-        ret = 0;
+    func_151C4510(trail, ext, D_800BE9A4);
+    if (func_151C455C(trail, ext, D_800BE9A4) == 0) {
+        alive = FALSE;
     }
-    if (sub->unkA0 != 0 && ret == 1) {
+    if (ext->soundEnabled && alive == TRUE) {
         sound = 0;
-        found = NULL;
-        if (sub->unk9E == 0) {
-            r = func_150ADA20() & 7;
+        player = NULL;
+        if (ext->sound == 0) {
+            sfxIndex = func_150ADA20() & 7;
             for (i = 0; i <= D_80082FA0; i++) {
-                found = &D_800DBFF0[i];
-                dx = found->unk2F8 - arg0->unk34;
-                dy = found->unk2FC - arg0->unk38;
-                dz = found->unk300 - arg0->unk3C;
-                dot = sub->unk60 * dx + dy * sub->unk64 + dz * sub->unk68;
-                if (dot < (u32)D_8008FBE8[r].unk2 * sub->unk98 && (D_8008FBE8[r].unk2 - 10) * sub->unk98 < dot) {
+                player = &D_800DBFF0[i];
+                dx = player->unk2F8 - trail->position.x;
+                dy = player->unk2FC - trail->position.y;
+                dz = player->unk300 - trail->position.z;
+                /* distance of the player ahead along the flight direction */
+                dot = ext->path.end.x * dx + dy * ext->path.end.y + dz * ext->path.end.z;
+                if (dot < (u32)D_8008FBE8[sfxIndex].range * ext->scale &&
+                    (D_8008FBE8[sfxIndex].range - 10) * ext->scale < dot) {
                     dist = sqrtf(dx * dx + dy * dy + dz * dz);
-                    if (dist != 0.0f && dist < sub->unk8C * sub->unk98) {
+                    if (dist != 0.0f && dist < ext->remaining * ext->scale) {
                         dot /= dist;
                         if (0.8999999762f < dot) {
-                            sound = D_8008FBE8[r].unk0;
-                            sub->unkA1 = i;
+                            sound = D_8008FBE8[sfxIndex].sound;
+                            ext->listener = i;
                             break;
                         }
                     }
                 }
-                found = NULL;
+                player = NULL;
             }
-        } else if (func_1000F3D0(sub->unk9E)) {
-            found = &D_800DBFF0[sub->unkA1];
+        } else if (func_1000F3D0(ext->sound)) {
+            player = &D_800DBFF0[ext->listener];
         } else {
-            sub->unkA0 = 0;
+            ext->soundEnabled = FALSE;
         }
-        if (found != NULL) {
-            vol = 0x40;
-            func_1000A420(arg0->unk34 - found->unk2F8, arg0->unk38 - found->unk2FC, arg0->unk3C - found->unk300,
-                          *(s32 *)&found->unk380, arg0->unk34 - found->unk2F8, arg0->unk38 - found->unk2FC,
-                          arg0->unk3C - found->unk300, 10000, 9999, &vol, &pan, 0);
+        if (player != NULL) {
+            volume = 0x40;
+            func_1000A420(trail->position.x - player->unk2F8, trail->position.y - player->unk2FC,
+                          trail->position.z - player->unk300, *(s32 *)&player->unk380,
+                          trail->position.x - player->unk2F8, trail->position.y - player->unk2FC,
+                          trail->position.z - player->unk300, 10000, 9999, &volume, &pan, 0);
             if (sound != 0) {
-                sub->unk9E = func_10010F30(sound, 0x6590, vol & 0x7F, 0, vol & 0x80);
+                ext->sound = func_10010F30(sound, 0x6590, volume & 0x7F, 0, volume & 0x80);
             } else {
-                func_1000F85C(sub->unk9E, 4, vol & 0x7F);
-                func_1000F85C(sub->unk9E, 0x100, vol & 0x80);
+                func_1000F85C(ext->sound, 4, volume & 0x7F);
+                func_1000F85C(ext->sound, 0x100, volume & 0x80);
             }
         }
     }
-    return ret;
+    return alive;
 }
 
 typedef struct {
@@ -536,11 +527,13 @@ s32 func_151C2E94(GameStruct151C2E94 *a0, GameStruct151C2E94 *a1) {
     return 1;
 }
 
-s32 func_151D4DAC(s32, s32, s32, s32, s32, s32, void *, s32, s32);
+s32 func_151D4DAC(void *, u8 *, Vec3f *, Vec3f *, Game1F1F60Hit *, s32, Vec3f *, u8, u8);
 
-s32 func_151C2EF0(s32 a0, s32 a1, struct108 *a2, s32 a3, s32 arg4, s32 arg5) {
-    return func_151D4DAC(a0, a1, a3, arg4, arg5, *(s32 *)((u8 *)a2 + 0x1B4),
-                         (u8 *)a2 + 0x170, *((u8 *)a2 + 0xC), *((u8 *)a2 + 0x1));
+/* Impact handler: the projectile hit actor (at hitPos) during its ray cast. */
+s32 func_151C2EF0(void *actor, u8 *owner, Game1EF500Trail *trail, Vec3f *hitPos, Vec3f *hitPoint,
+                  Game1F1F60Hit *hit) {
+    return func_151D4DAC(actor, owner, hitPos, hitPoint, hit, trail->trail.fieldA4, &trail->trail.path.end,
+                         trail->unkC, trail->unk1);
 }
 
 extern f32 D_800AAA3C;
@@ -1326,7 +1319,8 @@ void func_151C3B0C(GameObj151C3B0C *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4
     }
 }
 
-void func_151C436C(s32 a0, f32 *a1, s32 a2) {
+/* Eases the projectile's accel toward its drift, once per elapsed step. */
+void func_151C436C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps) {
     f32 x;
     f32 tx;
     f32 y;
@@ -1335,113 +1329,93 @@ void func_151C436C(s32 a0, f32 *a1, s32 a2) {
     f32 tz;
     f32 factor;
 
-    if (a2 > 0) {
-        x = a1[4];
-        tx = a1[7];
-        y = a1[5];
-        ty = a1[8];
-        z = a1[6];
-        tz = a1[9];
+    if (steps > 0) {
+        x = ext->accel.x;
+        tx = ext->drift.x;
+        y = ext->accel.y;
+        ty = ext->drift.y;
+        z = ext->accel.z;
+        tz = ext->drift.z;
         factor = D_800AAA7C;
         do {
-            a1[4] += (tx - a1[4]) * factor;
-            a1[5] += (ty - a1[5]) * factor;
-            a1[6] += (tz - a1[6]) * factor;
-            a2--;
-        } while (a2 > 0);
+            ext->accel.x += (tx - ext->accel.x) * factor;
+            ext->accel.y += (ty - ext->accel.y) * factor;
+            ext->accel.z += (tz - ext->accel.z) * factor;
+            steps--;
+        } while (steps > 0);
     }
 }
 
-typedef struct {
-    s32 unk00;
-    f32 unk04;
-    struct17 unk08;
-    struct17 unk14;
-    struct17 unk20;
-    struct17 unk2C;
-    struct17 unk38;
-    u8 unk44[0x12];
-    s16 unk56;
-    u8 unk58;
-    u8 unk59;
-    u8 unk5A;
-    u8 pad5B;
-    s32 unk5C;
-    s32 unk60;
-    u8 pad64[0xC];
-} Ray151C43E0;
+void func_15081690(void *, f32, f32, f32, f32, f32, f32, Game1F1F60Hit *, f32, s32, s32, s32, s32, s32, s32);
 
-
-typedef struct {
-    u8 pad0[0x34];
-    struct17 pos;
-} Pos151C43E0;
-
-void func_15081690(s32, f32, f32, f32, f32, f32, f32, Ray151C43E0 *, f32, s32, s32, s32, s32, s32, s32);
-
-u8 func_151C43E0(struct108 *arg0, Mover151C43E0 *arg1, f32 arg2) {
+/*
+ * Casts a ray along the projectile's flight over the distance it moves this frame; on a hit,
+ * runs the impact handler and returns 0.
+ */
+u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     u8 result;
-    s32 obj;
-    f32 scale;
-    Ray151C43E0 ray;
+    u8 *owner;
+    f32 length;
+    s32 pad[3]; // matching: unused stack space in the original frame
+    Game1F1F60Hit ray;
     s32 solid;
 
-    obj = arg1->unk90;
-    result = 1;
-    if (arg1->unk0 & 4) {
-        if (arg1->unk8C < arg2) {
-            scale = arg1->unk98 * arg1->unk8C;
+    owner = ext->owner;
+    result = TRUE;
+    if (ext->flags & TRAIL_COLLIDE) {
+        if (ext->remaining < dt) {
+            length = ext->scale * ext->remaining;
         } else {
-            scale = arg1->unk98 * arg2;
+            length = ext->scale * dt;
         }
-        if (scale != 0.0f) {
-            struct17 *from = &((Pos151C43E0 *)arg0)->pos;
+        if (length != 0.0f) {
+            Vec3f *from = &trail->position;
 
-            solid = !(arg1->unk0 & 8);
-            func_15081690(obj, from->unk0, from->unk4, from->unk8, arg1->unk60, arg1->unk64, arg1->unk68, &ray, scale, 1, 0,
-                          solid, arg1->unkA8, 0, arg1->unkAC);
-            if (ray.unk59 >= 2) {
-                func_151C2EF0(ray.unk00, obj, arg0, (s32)&ray.unk08, (s32)&ray.unk20, (s32)&ray);
-                result = 0;
+            solid = !(ext->flags & TRAIL_FLAG_8);
+            func_15081690(owner, from->x, from->y, from->z, ext->path.end.x, ext->path.end.y, ext->path.end.z,
+                          &ray, length, 1, 0, solid, ext->fieldA8, 0, ext->handle);
+            if (ray.type >= 2) {
+                func_151C2EF0(ray.actor, owner, trail, &ray.hit, &ray.point, &ray);
+                result = FALSE;
             }
         }
     }
     return result;
 }
 
-
-void func_151C4510(GameStruct151C4510a *a0, GameStruct151C4510b *a1, f32 a2) {
-    a0->unk34 += a1->unk4 * a2;
-    a0->unk38 += a1->unk8 * a2;
-    a0->unk3C += a1->unkC * a2;
+/* Moves the projectile by velocity * dt. */
+void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
+    trail->position.x += ext->velocity.x * dt;
+    trail->position.y += ext->velocity.y * dt;
+    trail->position.z += ext->velocity.z * dt;
 }
 
-
-s32 func_151C455C(s32 arg0, GameStruct151C455C *arg1, f32 arg2) {
-    s32 ret;
+/* Counts down the projectile's remaining distance; when it runs out, fires its expiry callbacks and returns 0. */
+s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
+    s32 alive;
     GameFunc151C455CCallback callback;
-    struct131 *temp_v1;
-    s8 index;
+    struct131 *target;
+    s8 handler;
 
-    arg1->unk8C -= arg2;
-    ret = 1;
-    if (arg1->unk8C <= 0.0f) {
+    ext->remaining -= dt;
+    alive = TRUE;
+    if (ext->remaining <= 0.0f) {
         callback = (GameFunc151C455CCallback)D_800E0940;
-        if ((callback != 0) && (arg1->unk0 & 1)) {
-            temp_v1 = arg1->unk84;
-            if (temp_v1 != 0) {
-                callback((struct17 *)((u8 *)arg1 + 0x30), temp_v1 - D_800DBEF4);
+        if (callback != NULL && (ext->flags & TRAIL_HIT_CALLBACK)) {
+            target = ext->path.field_5C;
+            if (target != NULL) {
+                callback(&ext->path.hit, target - D_800DBEF4);
             }
         }
-        if (arg1->unk0 & 2) {
-            index = arg1->unk9C;
-            if (index != -1) {
-                D_8008FBD0[index](arg0);
+        if (ext->flags & TRAIL_EXPIRE_HANDLER) {
+            handler = ext->expireHandler;
+            if (handler != -1) {
+                D_8008FBD0[handler](trail);
             }
         }
-        ret = 0;
+        alive = FALSE;
     }
-    return ret;
+    return alive;
 }
 
 typedef struct {
@@ -1532,62 +1506,3 @@ void func_151C4644(GameStruct151C4644 *arg0) {
         sub->unk4 = (func_150ADA20() % (u32)(sub->unkC + 1)) + sub->unk8;
     }
 }
-
-typedef struct Game1F1CD0Emission {
-    f32 x, y;
-    f32 amplitudeX, amplitudeY;
-    f32 phaseX, phaseY;
-    f32 speedX, speedY;
-    f32 time, rate;
-    f32 remaining;
-    Vec3f_151C4B0C position;
-    f32 scaleX, scaleY, parameter;
-} Game1F1CD0Emission;
-typedef struct Game1F1CD0Actor {
-    u8 pad0;
-    u8 kind;
-    u8 pad2[0xA];
-    u8 owner;
-    u8 padD[0x1B];
-    Game1F1CD0Emission emission;
-} Game1F1CD0Actor;
-
-void func_151436B4(f32, f32, f32, f32 *);
-void func_151C4820(Game1F1CD0Actor *arg0);
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 unk9;
-} GameStruct151C4AB0a;
-
-typedef struct {
-    u8 pad0[0x90];
-    s32 unk90;
-    u8 unk94;
-} GameStruct151C4AB0b;
-void func_151C4AB0(void *a0, GameStruct151C4AB0a *a1, u8 a2);
-
-
-typedef struct Game1F1F60Hit {
-    void *actor;
-    f32 dist;
-    Vec3f_151C4B0C hit;
-    Vec3f_151C4B0C normal;
-    Vec3f_151C4B0C point;
-    Vec3f_151C4B0C start;
-    Vec3f_151C4B0C end;
-    s16 surface[9];
-    s16 field_56;
-    s8 field_58;
-    u8 type;
-    s8 field_5A;
-    u8 pad5B;
-    u8 *field_5C;
-    s32 field_60;
-} Game1F1F60Hit;
-
-s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
-s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, Vec3f_151C4B0C *arg2, Vec3f_151C4B0C *arg3, f32 *arg4, f32 arg5, u8 arg6, Vec3f_151C4B0C *arg7, Vec3f_151C4B0C *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13, u8 arg14, u8 arg15, s32 arg16, u8 arg17);
