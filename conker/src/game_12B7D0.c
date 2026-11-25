@@ -118,11 +118,11 @@ void func_150FE604(struct127 *obj, struct17 *position, u8 arg2, s32 arg3) {
     }
 }
 
-void func_151D3E04(s32 arg0, s32 arg1, struct17 *point, u8 bone, f32 arg4);
+void func_151D3E04(struct127 *obj, struct17 *out, struct17 *localPos, u8 bone, f32 yOffset);
 
-/* Calls func_151D3E04 for `arg0` / `arg2` with bone point D_800A1FC8 on bone D_80088B94. */
-void func_150FE794(s32 arg0, s32 arg1, s32 arg2) {
-    func_151D3E04(arg0, arg2, &D_800A1FC8, D_80088B94, 0.0f);
+/* Handler: writes the world position of `obj`'s bone point D_800A1FC8 to `out`. */
+void func_150FE794(struct127 *obj, s32 arg1, struct17 *out) {
+    func_151D3E04(obj, out, &D_800A1FC8, D_80088B94, 0.0f);
 }
 
 typedef struct {
