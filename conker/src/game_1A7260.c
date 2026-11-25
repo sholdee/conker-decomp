@@ -192,16 +192,13 @@ extern u8 D_8008CDF0[];
 /* Draw callback: culls the particle against view `view` (types 0xC and 0x59 are never culled), then emits its
  * texture, matrix, primitive alpha and render mode, and the shared particle display list D_8008CDF0. */
 Gfx *func_1517A3A0(Gfx *gfx, Particle *particle, s16 view) {
-    if ((particle->type != 0xC) && (particle->type != 0x59)) {
-        if (func_1510AEE0(D_800D9C10[view], particle->x, particle->y, particle->z, D_800D9B20, D_800D9B1C,
-                          D_800D35E0, D_800D35E4, NULL, NULL) != 0) {
-            if (particle->type == 8) {
-                if (particle->viewFlags & (1 << view)) {
-                    particle->viewFlags |= 0x10 << view;
-                }
-            }
-            return gfx;
+    if (particle->type != 0xC && particle->type != 0x59 &&
+        func_1510AEE0(D_800D9C10[view], particle->x, particle->y, particle->z, D_800D9B20, D_800D9B1C,
+                      D_800D35E0, D_800D35E4, NULL, NULL) != 0) {
+        if (particle->type == 8 && (particle->viewFlags & (1 << view))) {
+            particle->viewFlags |= 0x10 << view;
         }
+        return gfx;
     }
     if (particle->type != 9) {
         particle->viewFlags |= 1 << view;
