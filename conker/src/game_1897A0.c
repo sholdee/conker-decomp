@@ -127,37 +127,29 @@ s32 func_1515C388(Trail *trail) {
 /* Runs the unk39 handler, then fades the alpha and shrinks the width as the trail's life runs out. */
 s32 func_1515C534(Trail *trail) {
     TrailData *data;
-    s32 callbackFailed;
-    u32 count;
+    u8 failed;
+    u32 frames;
 
     data = trail->data;
-    callbackFailed = 0;
+    failed = FALSE;
     if (data->unk39 != -1) {
-        callbackFailed = (D_8008B084[data->unk39](trail, data) == 0) & 0xFF;
+        failed = D_8008B084[data->unk39](trail, data) == 0;
     }
-    if (callbackFailed == 0) {
-        if (data->flags & 4) {
-            s16 life = trail->header.life;
-            s32 alpha;
+    if (!failed) {
+        if ((data->flags & 4) && trail->header.life < data->fadeStart) {
+            s32 alpha = trail->header.life * data->fadeRate;
 
-            if (life < data->fadeStart) {
-                alpha = life * data->fadeRate;
-                if (alpha < data->color[3]) {
-                    data->color[3] = alpha;
-                }
+            if (alpha < data->color[3]) {
+                data->color[3] = alpha;
             }
         }
-        if ((data->flags & 8) && trail->header.life < data->shrinkStart && data->shrinkPaused == 0) {
-            count = D_800BE9E4;
-            if (count != 0) {
-                do {
-                    data->width *= data->shrinkFactor;
-                    count--;
-                } while (count != 0);
+        if ((data->flags & 8) && trail->header.life < data->shrinkStart && !data->shrinkPaused) {
+            for (frames = D_800BE9E4; frames != 0; frames--) {
+                data->width *= data->shrinkFactor;
             }
         }
     }
-    if (callbackFailed != 0) {
+    if (failed) {
         return 0;
     }
     return 1;
@@ -170,10 +162,11 @@ extern struct {
 } D_800A4AC8[];
 extern s32 D_800D2C9C;
 
-extern void func_151D5D60(void *, s16, s32, Vtx **, s32);
+extern void func_151D5D60(void *, s16, s32, Vtx **, u8 *);
 extern void func_151441A4(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_151442FC(s16 *, s16 *, s16 *, s16 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+extern Gfx *func_15142E24(Gfx *gfx, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
+                          u8 *update, s32 argA);
 extern Gfx *func_1513F4E4(Gfx *, s32, u8 *);
 extern Gfx *func_15142B7C(Gfx *gfx, s32 setGeometryMode, s32 clearGeometryMode);
 extern Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *update);
@@ -191,7 +184,7 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
     TrailPoint *points;
     f32 *cam;
     s32 j;
-    f32 scale2;
+    f32 headScale;
     s32 texStep;
     s32 alphaStep;
     s32 tex;
@@ -215,7 +208,7 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
     f32 scale;
 
     if (trail->count >= 2) {
-        func_151D5D60(trail->unk84, view, (trail->header.capacity * 2 + 10) * sizeof(Vtx), &vtx, 0);
+        func_151D5D60(trail->unk84, view, (trail->header.capacity * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             data = trail->data;
             update = 1;
@@ -225,17 +218,17 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
                           data->color[0], data->color[1], data->color[2], data->color[3], data->colorLevel, data->primMode);
             func_151442FC(&envR, &envG, &envB, &envA, data->color2[0], data->color2[1], data->color2[2], data->color2[3],
                           data->color[0], data->color[1], data->color[2], data->color[3], data->colorLevel, data->envMode);
-            gfx = func_15142E24(gfx, (s32)D_80090E78, 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
+            gfx = func_15142E24(gfx, D_80090E78, 0, 0, 0, 0, 0x42, 0, 0, &update, 0x3E);
             gfx = func_1513F4E4(gfx, data->unk21, &update);
             gfx = func_15142B7C(gfx, data->setGeometryMode, data->clearGeometryMode);
             gfx = func_15142CF0(gfx, 0, 0, primR, primG, primB, primA, &update);
             gfx = func_15142C10(gfx, envR, envG, envB, envA, &update);
             if (data->flags & 1) {
-                cycleMode = 0x100000;
+                cycleMode = G_CYC_2CYCLE;
             } else {
-                cycleMode = 0;
+                cycleMode = G_CYC_1CYCLE;
             }
-            gfx = func_15142FBC(gfx, cycleMode | 0x80000 | D_800D2C9C | 0x2000 | 0xC00 | 0x80 | 0x20,
+            gfx = func_15142FBC(gfx, cycleMode | G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE,
                                 D_800A4AC8[data->renderMode].unk0 | D_800A4AC8[data->renderMode].unk4, &update);
             i = trail->head - 1;
             i = (i < 0) ? trail->header.capacity - 1 : i;
@@ -261,10 +254,10 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
                 sideY = 0.0f;
                 sideZ = 0.0f;
             } else {
-                scale2 = data->width / sqrtf(lenSq);
-                sideX = sideX * scale2;
-                sideY = sideY * scale2;
-                sideZ = sideZ * scale2;
+                headScale = data->width / sqrtf(lenSq);
+                sideX *= headScale;
+                sideY *= headScale;
+                sideZ *= headScale;
             }
             vtx->v.ob[0] = cur.x + sideX;
             vtx->v.ob[1] = cur.y + sideY;
@@ -308,9 +301,9 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
                     sideZ = 0.0f;
                 } else {
                     scale = data->width / sqrtf(lenSq);
-                    sideX = sideX * scale;
-                    sideY = sideY * scale;
-                    sideZ = sideZ * scale;
+                    sideX *= scale;
+                    sideY *= scale;
+                    sideZ *= scale;
                 }
                 alpha = (data->color[3] * alphaScale) >> 8;
                 alphaScale += alphaStep;
@@ -329,7 +322,6 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
                 vtx->v.ob[1] = next.y - sideY;
                 vtx->v.ob[2] = next.z - sideZ;
                 vtx->v.tc[0] = tex;
-                tex += texStep;
                 vtx->v.tc[1] = 0;
                 vtx->v.cn[0] = 0xFF;
                 vtx->v.cn[1] = 0xFF;
@@ -337,6 +329,7 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
                 vtx->v.cn[3] = alpha;
                 vtx->v.flag = 0;
                 vtx++;
+                tex += texStep;
                 gSPVertex(gfx++, vtx - 4, 4, 0);
                 gSP1Triangle(gfx++, 0, 1, 2, 0);
                 gSP1Triangle(gfx++, 1, 3, 2, 0);
