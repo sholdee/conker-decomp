@@ -41,7 +41,7 @@ struct127 *func_15083E90();
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_15142314(Mtx *, s32, f32 *);
 Gfx *func_15094FE8(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_1514306C(s32, s32, s32, u8);
+s32 func_1514306C(s32 *, s32, s32, u8);
 
 void func_15141970(struct37 *arg0) {
     func_1514EDF0(arg0, arg0->unk2C);
@@ -676,95 +676,108 @@ f32 func_15142B04(f32 t) {
 f32 func_15142B44(f32 t) {
     return ((t + 1.0f) * (t - 1.0f) * t) * (1.0f / 6.0f);
 }
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2) {
-    if (~D_800DD200 & arg2) {
-        gSPClearGeometryMode(gfx++, arg2);
-        D_800DD200 |= arg2;
+/* Emits geometry-mode changes, skipping bits already in the cached state. */
+Gfx *func_15142B7C(Gfx *gfx, s32 setBits, s32 clearBits) {
+    if (~D_800DD200 & clearBits) {
+        gSPClearGeometryMode(gfx++, clearBits);
+        D_800DD200 |= clearBits;
     }
 
-    if (~D_800DD1FC & arg1) {
-        gSPSetGeometryMode(gfx++, arg1);
-        D_800DD1FC |= arg1;
+    if (~D_800DD1FC & setBits) {
+        gSPSetGeometryMode(gfx++, setBits);
+        D_800DD1FC |= setBits;
     }
 
     return gfx;
 }
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5) {
-    if ((arg1 != (&D_800DD1C8)[0]) || (arg2 != D_800DD1CA) || (arg3 != D_800DD1CC) ||
-        (arg4 != D_800DD1CE)) {
-        if (*arg5 == 1) {
+
+/* Sets the env colour unless it is already current; emits a pipe sync first if *needSync is 1. */
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
+    if ((r != D_800DD1C8) || (g != D_800DD1CA) || (b != D_800DD1CC) || (a != D_800DD1CE)) {
+        if (*needSync == 1) {
             gDPPipeSync(gfx++);
-            *arg5 = 0;
+            *needSync = 0;
         }
 
-        gDPSetEnvColor(gfx++, arg1, arg2, arg3, arg4);
+        gDPSetEnvColor(gfx++, r, g, b, a);
 
-        (&D_800DD1C8)[0] = arg1;
-        D_800DD1CA = arg2;
-        D_800DD1CC = arg3;
-        D_800DD1CE = arg4;
+        D_800DD1C8 = r;
+        D_800DD1CA = g;
+        D_800DD1CC = b;
+        D_800DD1CE = a;
     }
 
     return gfx;
 }
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7) {
-    if ((arg1 != (&D_800DD204)[0]) || (arg2 != D_800DD206) || (arg3 != D_800DD1C0) ||
-        (arg4 != D_800DD1C2) || (arg5 != D_800DD1C4) || (arg6 != D_800DD1C6)) {
-        if (*arg7 == 1) {
+
+/* Sets the prim colour unless it is already current; emits a pipe sync first if *needSync is 1. */
+Gfx *func_15142CF0(Gfx *gfx, s32 minLevel, s32 lodFrac, s32 r, s32 g, s32 b, s32 a, u8 *needSync) {
+    if ((minLevel != D_800DD204) || (lodFrac != D_800DD206) || (r != D_800DD1C0) ||
+        (g != D_800DD1C2) || (b != D_800DD1C4) || (a != D_800DD1C6)) {
+        if (*needSync == 1) {
             gDPPipeSync(gfx++);
-            *arg7 = 0;
+            *needSync = 0;
         }
 
-        gDPSetPrimColor(gfx++, arg1, arg2, arg3, arg4, arg5, arg6);
+        gDPSetPrimColor(gfx++, minLevel, lodFrac, r, g, b, a);
 
-        (&D_800DD204)[0] = arg1;
-        D_800DD206 = arg2;
-        D_800DD1C0 = arg3;
-        D_800DD1C2 = arg4;
-        D_800DD1C4 = arg5;
-        D_800DD1C6 = arg6;
+        D_800DD204 = minLevel;
+        D_800DD206 = lodFrac;
+        D_800DD1C0 = r;
+        D_800DD1C2 = g;
+        D_800DD1C4 = b;
+        D_800DD1C6 = a;
     }
 
     return gfx;
 }
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA) {
-    s32 temp_v0;
 
-    temp_v0 = func_1514306C(arg1, arg6, arg2 >> 16, arg7);
-    if ((temp_v0 != D_800DD1B0) || (arg3 != D_800DD208) || (arg4 != D_800DD20C) || (arg5 != D_800DD210) || (arg8 != D_800DD214)) {
-        if (*arg9 == 1) {
-            *arg9 = 0;
+/* Loads a texture through func_15094FE8 unless the same one is already loaded (cached state). */
+Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8,
+                   u8 *needSync, s32 argA) {
+    s32 texture;
+
+    texture = func_1514306C(arg1, arg6, arg2 >> 16, arg7);
+    if ((texture != D_800DD1B0) || (arg3 != D_800DD208) || (arg4 != D_800DD20C) || (arg5 != D_800DD210) ||
+        (arg8 != D_800DD214)) {
+        if (*needSync == 1) {
+            *needSync = 0;
         }
-        if ((D_800BE9F0 == 0x18) || (D_800BE9F0 == 0x13) || (D_800BE9F0 == 6) || (D_800BE9F0 == 0x3B) || (D_800BE9F0 == 2) || (D_800BE616 != 0)) {
+        if ((D_800BE9F0 == 0x18) || (D_800BE9F0 == 0x13) || (D_800BE9F0 == 6) || (D_800BE9F0 == 0x3B) ||
+            (D_800BE9F0 == 2) || (D_800BE616 != 0)) {
             argA = 3;
         }
-        arg0 = func_15094FE8(arg0, arg1, arg2 >> 8, arg8, 0, 0, 0, arg3, arg4, arg5, argA);
-        D_800DD1B0 = temp_v0;
+        gfx = func_15094FE8(gfx, arg1, arg2 >> 8, arg8, 0, 0, 0, arg3, arg4, arg5, argA);
+        D_800DD1B0 = texture;
         D_800DD208 = arg3;
         D_800DD20C = arg4;
         D_800DD210 = arg5;
-        D_800DD214 = D_800DD214;
+        D_800DD214 = D_800DD214; /* sic: arg8 is never cached */
     }
-    return arg0;
+    return gfx;
 }
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3) {
-    if ((arg1 != D_800DD218) || (arg2 != D_800DD21C)) {
-        if (*arg3 == 1) {
+
+/* Sets the other-mode words unless already current; emits a pipe sync first if *needSync is 1. */
+Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync) {
+    if ((modeH != D_800DD218) || (modeL != D_800DD21C)) {
+        if (*needSync == 1) {
             gDPPipeSync(gfx++);
-            *arg3 = 0;
+            *needSync = 0;
         }
 
-        gDPSetOtherMode(gfx++, arg1 | 0xF, arg2);
+        gDPSetOtherMode(gfx++, modeH | 0xF, modeL);
 
-        D_800DD218 = arg1;
-        D_800DD21C = arg2;
+        D_800DD218 = modeH;
+        D_800DD21C = modeL;
     }
 
     return gfx;
 }
+
 s16 func_15143044(u8 arg0, s32 arg1) {
     return 0x7FFF - arg0;
 }
+
 typedef struct {
     s32 *unk0;
     s32 unk4;
@@ -775,10 +788,11 @@ extern s32 D_80091564[];
 extern s32 D_80091514;
 extern s32 D_800915B0;
 
-s32 func_1514306C(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
+/* Resolves the texture word for func_15142E24 according to `mode`. */
+s32 func_1514306C(s32 *arg0, s32 arg1, s32 arg2, u8 mode) {
     s32 ret;
 
-    switch (arg3) {
+    switch (mode) {
         case 4:
             ret = D_800915B0;
             break;
@@ -795,9 +809,10 @@ s32 func_1514306C(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
             ret = arg1;
             break;
         case 6:
-            arg1 = *(s32 *)arg0;
-            if ((u32)*(s32 *)arg0 >= 0x10000000) {
-                ret = ((s32 *)*(s32 *)arg0)[arg2];
+            /* *arg0 is either a pointer (KSEG addresses) to a table, or the value itself */
+            arg1 = *arg0;
+            if ((u32)*arg0 >= 0x10000000) {
+                ret = ((s32 *)*arg0)[arg2];
             } else {
                 ret = arg1;
             }
@@ -808,225 +823,191 @@ s32 func_1514306C(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
     }
     return ret;
 }
-void func_15143134(struct17 *arg0, f32 *arg1, Mtx *arg2) {
-    f32 sp38[4][4];
+/*
+ * Transforms `offset` by mtx into out (just mtx's translation when offset is NULL or zero).
+ * D_800DCA00 records the progress through the function (a debug breadcrumb).
+ */
+void func_15143134(struct17 *offset, f32 *out, Mtx *mtx) {
+    f32 mf[4][4];
 
     D_800DCA00 = 1;
-    if ((arg0 != NULL) && ((arg0->unk0 != 0.0f) || (arg0->unk4 != 0.0f) || (arg0->unk8 != 0.0f))) {
+    if ((offset != NULL) && ((offset->unk0 != 0.0f) || (offset->unk4 != 0.0f) || (offset->unk8 != 0.0f))) {
         D_800DCA00 = 2;
-        D_800DCA08 = arg0->unk0;
-        D_800DCA0C = arg0->unk4;
-        D_800DCA10 = arg0->unk8;
+        D_800DCA08 = offset->unk0;
+        D_800DCA0C = offset->unk4;
+        D_800DCA10 = offset->unk8;
         if (D_800C3E90) {
             D_800DCA00 = 3;
-            D_800DCA04 = arg2;
-            guMtxL2F(sp38, arg2);
-            func_150A7960(sp38[0], arg0->unk0, arg0->unk4, arg0->unk8, arg1, arg1 + 1, arg1 + 2);
+            D_800DCA04 = mtx;
+            guMtxL2F(mf, mtx);
+            func_150A7960(mf[0], offset->unk0, offset->unk4, offset->unk8, out, out + 1, out + 2);
             D_800DCA00 = 4;
-        state4_done:
-            ;
+        // matching: an (unused) label here changes how IDO lays out the branch to the final store
+        state4_done:;
         } else {
             D_800DCA00 = 5;
-            D_800DCA04 = arg2;
-            func_150A7960((f32 *)arg2, arg0->unk0, arg0->unk4, arg0->unk8, arg1, arg1 + 1, arg1 + 2);
+            D_800DCA04 = mtx;
+            func_150A7960((f32 *)mtx, offset->unk0, offset->unk4, offset->unk8, out, out + 1, out + 2);
             D_800DCA00 = 6;
         }
     } else {
         D_800DCA00 = 7;
-        func_15142314(arg2, 0, arg1);
+        func_15142314(mtx, 0, out);
         D_800DCA00 = 8;
     }
     D_800DCA00 = 0;
 }
 
+/* A spawn volume: a cylinder or box around (x, y, z). */
 typedef struct Game16EE20Emitter {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 radiusX;
-    s16 height;
-    s16 radiusZ;
-    u8 padC[4];
-    f32 rotation;
-    u8 pad14;
-    u8 flags;
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 radiusX;
+    /* 0x08 */ s16 height;
+    /* 0x0A */ s16 radiusZ;
+    /* 0x0C */ u8 padC[4];
+    /* 0x10 */ f32 rotation;
+    /* 0x14 */ u8 pad14;
+    /* 0x15 */ u8 flags; /* bits 0-1: shape */
 } Game16EE20Emitter;
 
-
-void func_151432BC(Game16EE20Emitter *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
-    switch (arg0->flags & 3) {
+/* Picks a random point in the emitter's volume: (x, z) and the top and bottom heights. */
+void func_151432BC(Game16EE20Emitter *emitter, f32 *x, f32 *z, f32 *top, f32 *bottom) {
+    switch (emitter->flags & 3) {
     default:
-        *arg1 = arg0->x;
-        *arg2 = arg0->z;
-        *arg3 = arg0->y + arg0->height;
-        *arg4 = arg0->y - arg0->height;
+        *x = emitter->x;
+        *z = emitter->z;
+        *top = emitter->y + emitter->height;
+        *bottom = emitter->y - emitter->height;
         return;
     case 2:
+        /* rotated box */
         {
             u8 angle;
-            f32 cosine;
             f32 sine;
+            f32 cosine;
             f32 offsetX;
             f32 offsetZ;
 
-            angle = arg0->rotation * D_800A5644;
-            cosine = func_151423D8(angle - 0x40);
-            sine = func_151423D8(angle);
-            offsetX = func_150ADA68() * (2.0f * arg0->radiusX) + -arg0->radiusX;
-            offsetZ = func_150ADA68() * (2.0f * arg0->radiusZ) + -arg0->radiusZ;
-            *arg1 = arg0->x + (offsetX * sine + offsetZ * cosine);
-            *arg2 = arg0->z + (offsetZ * sine - offsetX * cosine);
-            *arg3 = arg0->y + arg0->height;
-            *arg4 = arg0->y;
+            angle = emitter->rotation * (256.0f / 360.0f);
+            sine = func_151423D8(angle - 0x40);
+            cosine = func_151423D8(angle);
+            offsetX = func_150ADA68() * (2.0f * emitter->radiusX) + -emitter->radiusX;
+            offsetZ = func_150ADA68() * (2.0f * emitter->radiusZ) + -emitter->radiusZ;
+            *x = emitter->x + (offsetX * cosine + offsetZ * sine);
+            *z = emitter->z + (offsetZ * cosine - offsetX * sine);
+            *top = emitter->y + emitter->height;
+            *bottom = emitter->y;
         }
         return;
     case 0:
+        /* disc, from the base up */
         {
             u8 angle;
-            f32 cosine;
             f32 sine;
+            f32 cosine;
             f32 radius;
 
             angle = func_150ADA20() & 0xFF;
-            cosine = func_151423D8(angle - 0x40);
-            sine = func_151423D8(angle);
-            radius = func_150ADA68() * arg0->radiusX;
-            *arg1 = arg0->x + radius * sine;
-            *arg2 = arg0->z - radius * cosine;
-            *arg3 = arg0->y + arg0->height;
-            *arg4 = arg0->y;
+            sine = func_151423D8(angle - 0x40);
+            cosine = func_151423D8(angle);
+            radius = func_150ADA68() * emitter->radiusX;
+            *x = emitter->x + radius * cosine;
+            *z = emitter->z - radius * sine;
+            *top = emitter->y + emitter->height;
+            *bottom = emitter->y;
         }
         return;
     case 1:
+        /* disc, centred vertically */
         {
             u8 angle;
-            f32 cosine;
             f32 sine;
+            f32 cosine;
             f32 radius;
 
             angle = func_150ADA20() & 0xFF;
-            cosine = func_151423D8(angle - 0x40);
-            sine = func_151423D8(angle);
-            radius = func_150ADA68() * arg0->radiusX;
-            *arg1 = arg0->x + radius * sine;
-            *arg2 = arg0->z - radius * cosine;
-            *arg3 = arg0->y + arg0->height;
-            *arg4 = arg0->y - arg0->height;
+            sine = func_151423D8(angle - 0x40);
+            cosine = func_151423D8(angle);
+            radius = func_150ADA68() * emitter->radiusX;
+            *x = emitter->x + radius * cosine;
+            *z = emitter->z - radius * sine;
+            *top = emitter->y + emitter->height;
+            *bottom = emitter->y - emitter->height;
         }
         return;
     }
 }
 
-// void func_151432BC(struct208 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4) {
-//     struct209 tmp;
-//     f32 temp_f2;
-//     f32 temp_f6;
-//     f32 temp_ret;
-//     s32 temp_t6;
-//     u8 temp_a0;
-//
-//     temp_t6 = (arg0->unk15) & 3;
-//     if (temp_t6 == 0) {
-//         tmp.unk1B = func_150ADA20();
-//         tmp.unk14 = func_151423D8((tmp.unk1B - 64) & 0xFF);
-//         tmp.unk10 = func_151423D8(tmp.unk1B);
-//         temp_ret = func_150ADA68();
-//         temp_f2 = temp_ret * arg0->unk6;
-//         *arg1 = (arg0->unk0 + (temp_f2 * tmp.unk10));
-//         *arg2 = (arg0->unk4 - (temp_f2 * tmp.unk14));
-//         *arg3 = (arg0->unk2 + arg0->unk8);
-//         *arg4 = arg0->unk2;
-//     } else if (temp_t6 != 1) {
-//         if (temp_t6 == 2) {
-//             tmp.unk2F = (u32) (arg0->unk10 * D_800A5644); // 0.7111111283302307
-//             tmp.unk28 = func_151423D8((tmp.unk2F - 64));
-//             tmp.unk24 = func_151423D8(tmp.unk2F);
-//             tmp.unk20 = (func_150ADA68() * (2.0f * (f32) arg0->unk6)) + (f32) -(s32) arg0->unk6;
-//             temp_f2 = (func_150ADA68() * (2.0f * (f32) arg0->unkA)) + (f32) -(s32) arg0->unkA;
-//             temp_f6 = temp_f2 * tmp.unk24;
-//             *arg1 = (arg0->unk0 + ((tmp.unk20 * tmp.unk24) + (temp_f2 * tmp.unk28)));
-//             *arg2 = (arg0->unk4 + (temp_f6 - (tmp.unk20 * tmp.unk28)));
-//             *arg3 = (arg0->unk2 + arg0->unk8);
-//             *arg4 = arg0->unk2;
-//         } else {
-//             *arg1 = arg0->unk0;
-//             *arg2 = arg0->unk4;
-//             *arg3 = (arg0->unk2 + arg0->unk8);
-//             *arg4 = (arg0->unk2 - arg0->unk8);
-//         }
-//     } else {
-//         tmp.unkB = func_150ADA20();
-//         tmp.unk4 = func_151423D8((tmp.unkB - 64));
-//         tmp.unk0 = func_151423D8(tmp.unkB);
-//         temp_ret = func_150ADA68();
-//         temp_f2 = temp_ret * (f32) arg0->unk6;
-//         *arg1 = (arg0->unk0 + (temp_f2 * tmp.unk0));
-//         *arg2 = (arg0->unk4 - (temp_f2 * tmp.unk4));
-//         *arg3 = (arg0->unk2 + arg0->unk8);
-//         *arg4 = (arg0->unk2 - arg0->unk8);
-//     }
-// }
+/* Direction (yaw, pitch in radians) scaled by length, into out[3]. */
+void func_151436B4(f32 yaw, f32 pitch, f32 length, f32 *out) {
+    f32 cosYaw;
+    f32 sinYaw;
+    f32 cosPitch;
+    f32 sinPitch;
+    f32 horizontal;
 
-
-void func_151436B4(f32 arg0, f32 arg1, f32 arg2, f32 *arg3) {
-    f32 cos0;
-    f32 sin0;
-    f32 cos1;
-    f32 sin1;
-    f32 temp;
-
-    cos0 = cosf(arg0);
-    sin0 = sinf(arg0);
-    cos1 = cosf(arg1);
-    sin1 = sinf(arg1);
-    temp = arg2 * cos1;
-    arg3[0] = temp * sin0;
-    arg3[1] = -arg2 * sin1;
-    arg3[2] = temp * cos0;
+    cosYaw = cosf(yaw);
+    sinYaw = sinf(yaw);
+    cosPitch = cosf(pitch);
+    sinPitch = sinf(pitch);
+    horizontal = length * cosPitch;
+    out[0] = horizontal * sinYaw;
+    out[1] = -length * sinPitch;
+    out[2] = horizontal * cosYaw;
 }
-void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3) {
+
+/* Planar direction (angle in radians) scaled by length. */
+void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z) {
     f32 c;
     f32 s;
 
-    c = cosf(arg0);
-    s = sinf(arg0);
-    *arg2 = arg1 * s;
-    *arg3 = arg1 * c;
+    c = cosf(angle);
+    s = sinf(angle);
+    *x = length * s;
+    *z = length * c;
 }
-void func_15143794(s32 arg0, s32 arg1, f32 arg2, f32 *arg3) {
-    f32 cos0;
-    f32 sin0;
-    f32 cos1;
-    f32 sin1;
-    u8 idx0;
-    u8 idx1;
-    f32 temp;
 
-    cos0 = func_151423D8((u8) arg0);
-    idx0 = (s16) arg0 - 0x40;
-    sin0 = func_151423D8(idx0);
-    cos1 = func_151423D8((u8) arg1);
-    idx1 = (s16) arg1 - 0x40;
-    sin1 = func_151423D8(idx1);
-    temp = arg2 * cos1;
-    arg3[0] = temp * sin0;
-    arg3[1] = -arg2 * sin1;
-    arg3[2] = temp * cos0;
-}
-void func_15143834(s16 arg0, s16 arg1, f32 arg2, f32 *arg3) {
-    func_15143794(arg0, arg1, arg2, arg3);
-}
-void func_15143874(s32 arg0, f32 arg1, f32 *arg2, f32 *arg3) {
-    f32 temp;
-    f32 temp2;
-    u8 idx;
+/* Binary-angle (256 per turn) version of func_151436B4. */
+void func_15143794(s32 yaw, s32 pitch, f32 length, f32 *out) {
+    f32 cosYaw;
+    f32 sinYaw;
+    f32 cosPitch;
+    f32 sinPitch;
+    u8 quarterYaw;
+    u8 quarterPitch;
+    f32 horizontal;
 
-    temp = func_151423D8((u8) arg0);
-    idx = (s16) arg0 - 0x40;
-    temp2 = func_151423D8(idx);
-    *arg2 = arg1 * temp2;
-    *arg3 = arg1 * temp;
+    cosYaw = func_151423D8((u8)yaw);
+    quarterYaw = (s16)yaw - 0x40;
+    sinYaw = func_151423D8(quarterYaw);
+    cosPitch = func_151423D8((u8)pitch);
+    quarterPitch = (s16)pitch - 0x40;
+    sinPitch = func_151423D8(quarterPitch);
+    horizontal = length * cosPitch;
+    out[0] = horizontal * sinYaw;
+    out[1] = -length * sinPitch;
+    out[2] = horizontal * cosYaw;
 }
+
+void func_15143834(s16 yaw, s16 pitch, f32 length, f32 *out) {
+    func_15143794(yaw, pitch, length, out);
+}
+
+/* Binary-angle version of func_1514373C. */
+void func_15143874(s32 angle, f32 length, f32 *x, f32 *z) {
+    f32 c;
+    f32 s;
+    u8 quarter;
+
+    c = func_151423D8((u8)angle);
+    quarter = (s16)angle - 0x40;
+    s = func_151423D8(quarter);
+    *x = length * s;
+    *z = length * c;
+}
+
 /* File-local shadow of struct178: the shared header types 0x06..0x33 as one u8 blob,
    which cannot express the s16/f32/u8/s32 members this search compares. */
 typedef struct {
