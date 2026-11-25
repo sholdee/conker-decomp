@@ -2,74 +2,107 @@
 #include "functions.h"
 #include "variables.h"
 
+#define OBJTYPE_TEXTBOX 0x51
+
+/* TextBoxConfig.flags */
+#define TEXTBOX_BUBBLES         0x2     /* body drawn with D_8009056C plus three fading D_8009058C circles */
+#define TEXTBOX_INPUT           0x10    /* A/B buttons advance or close the box */
+#define TEXTBOX_INPUT_CHECK     0x20    /* ... but only while func_151F2CDC() returns 0 */
+#define TEXTBOX_NO_B_SKIP       0x40    /* B does not skip to the end */
+#define TEXTBOX_B_RESTARTS      0x80    /* B on the last page restarts from the first */
+#define TEXTBOX_CLOSE           0x100   /* request: close after the current page */
+#define TEXTBOX_HOLD            0x200   /* keep the current page open */
+#define TEXTBOX_SKIP_ANIM       0x400   /* skip every timed transition */
+#define TEXTBOX_CB_CLOSED       0x1000  /* set while the callback runs: box closed */
+#define TEXTBOX_CB_PAGE_ENDED   0x2000  /* set while the callback runs: a page was left */
+#define TEXTBOX_CB_PAGE_SHOWN   0x4000  /* set while the callback runs: a page is fully shown */
+#define TEXTBOX_SCREEN_POS      0x8000  /* positioned by screen percentages instead of a world point */
+#define TEXTBOX_CLAMP           0x10000 /* keep a screen-positioned box inside the view bounds */
+
+/* Message table entry (D_800DD254 / D_800DD258). */
 typedef struct {
-    u8 *unk0;
+    u8 *data;
     s32 unk4;
-} struct_game_197C20_0;
+} MessageEntry;
 
+/* Text box setup: a message-table entry, or one supplied by the caller (see func_1516A7B0). */
+typedef struct TextBoxConfig {
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s32 text;            /* message table index, or the string itself when supplied */
+    /* 0x08 */ u8 numPages;         /* strings in the text, separated by NULs */
+    /* 0x09 */ u8 objIndex;         /* D_800CC2D0 object the box belongs to */
+    /* 0x0A */ u8 unkA;
+    /* 0x0B */ u8 padB;
+    /* 0x0C */ f32 worldX;          /* projected to screen when not TEXTBOX_SCREEN_POS */
+    /* 0x10 */ f32 worldY;
+    /* 0x14 */ f32 worldZ;
+    /* 0x18 */ f32 *screenXPercent; /* TEXTBOX_SCREEN_POS placement */
+    /* 0x1C */ f32 *screenYPercent;
+    /* 0x20 */ f32 *anglePercent;
+    /* 0x24 */ u8 pad24[2];
+    /* 0x26 */ u16 duration;
+    /* 0x28 */ u8 r;
+    /* 0x29 */ u8 g;
+    /* 0x2A */ u8 b;
+    /* 0x2B */ u8 unk2B;            /* box is removed unless D_800C35EA == 1 */
+    /* 0x2C */ void (*callback)(struct TextBoxConfig *config, s32 page, s32 state);
+} TextBoxConfig;
+
+/* Object type OBJTYPE_TEXTBOX, 0x74 bytes. */
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-} struct_game_197C20_1;
+    /* 0x00 */ u8 type;
+    /* 0x01 */ u8 pad1[0xC];
+    /* 0x0D */ u8 source;           /* 0: D_800DD254 text, 1: D_800DD258 text, 2: caller string */
+    /* 0x0E */ u8 visible;
+    /* 0x0F */ u8 unkF;
+    /* 0x10 */ TextBoxConfig *config;
+    /* 0x14 */ u8 unk14;            /* set for caller-supplied configs; disables button input */
+    /* 0x15 */ u8 state;            /* TEXTBOX_STATE_* */
+    /* 0x16 */ s16 timer;
+    /* 0x18 */ s16 fadeTimer;
+    /* 0x1A */ u8 textAlpha;
+    /* 0x1B */ u8 bubbleAlpha[3];
+    /* 0x1E */ u8 bubbleIndex;
+    /* 0x1F */ u8 placed;           /* screen position taken from the world point */
+    /* 0x20 */ s8 page;
+    /* 0x21 */ u8 pad21[3];
+    /* 0x24 */ u8 *text;            /* current page */
+    /* 0x28 */ f32 scale;
+    /* 0x2C */ f32 scaleSpeed;
+    /* 0x30 */ f32 halfTextWidth;
+    /* 0x34 */ f32 halfTextHeight;
+    /* 0x38 */ f32 width;
+    /* 0x3C */ f32 height;
+    /* 0x40 */ f32 x;               /* anchor (tip of the tail) */
+    /* 0x44 */ f32 y;
+    /* 0x48 */ f32 bodyX;           /* scaled body position */
+    /* 0x4C */ f32 bodyY;
+    /* 0x50 */ f32 centerX;         /* unscaled body position: the text origin */
+    /* 0x54 */ f32 centerY;
+    /* 0x58 */ f32 angle;           /* direction from the anchor to the body, radians */
+    /* 0x5C */ f32 anchorX;
+    /* 0x60 */ f32 anchorY;
+    /* 0x64 */ f32 baseX;
+    /* 0x68 */ f32 baseY;
+    /* 0x6C */ f32 yaw;             /* object heading relative to the camera, degrees */
+    /* 0x70 */ f32 bubbleX;
+} TextBox;
 
-typedef struct {
-    s32 field_0x0;
-    char pad_0[0x4];
-    u8 field_0x8;
-} struct_game_197C20_2;
+/* TextBox.state */
+#define TEXTBOX_STATE_INIT      0x1
+#define TEXTBOX_STATE_GROW      0x2
+#define TEXTBOX_STATE_SETTLE    0x4
+#define TEXTBOX_STATE_BUBBLES   0x8
+#define TEXTBOX_STATE_TEXT_IN   0x10
+#define TEXTBOX_STATE_SHOW      0x20
+#define TEXTBOX_STATE_TEXT_OUT  0x40
+#define TEXTBOX_STATE_SHRINK    0x80
 
-typedef struct {
-    u8 field_0x0;
-    char pad_0[0xF];
-    struct_game_197C20_2 *field_0x10;
-    char pad_1[0x1];
-    u8 field_0x15;
-    char pad_2[0xA];
-    u8 field_0x20;
-} struct_game_197C20_3;
+extern MessageEntry *D_800DD254;
+extern MessageEntry *D_800DD258;
 
-extern struct_game_197C20_0 *D_800DD254;
-extern struct_game_197C20_0 *D_800DD258;
-s32 func_1516A770(u8 *arg0);
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    u8 unk8;
-    u8 unk9;
-    u8 unkA;
-    char padB[0x26 - 0xB];
-    u16 unk26;
-    char pad28[4];
-    s32 unk2C;
-} Struct1516A7B0_Data;
-
-typedef struct {
-    char pad0[0xD];
-    u8 unkD;
-    u8 unkE;
-    u8 unkF;
-    Struct1516A7B0_Data *unk10;
-    u8 unk14;
-    u8 unk15;
-    u16 unk16;
-    u16 unk18;
-    u8 unk1A;
-    char pad1B[4];
-    u8 unk1F;
-    u8 unk20;
-    char pad21[3];
-    u8 *unk24;
-    f32 unk28;
-    char pad2C[0xC];
-    f32 unk38;
-    f32 unk3C;
-} Struct1516A7B0;
-
-extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
-u8 *func_1516C878(struct_game_197C20_1 *arg0, s32 arg1, s16 arg2);
-Struct1516A7B0 *func_1516A7B0(u32 arg0, s32 arg1, s32 arg2, s32 arg3, Struct1516A7B0_Data *arg4, s32 arg5);
+u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source);
 
 typedef struct {
     s32 unk0;
@@ -223,7 +256,7 @@ void func_1516AA70(Struct1516AA70 *arg0) {
         if (arg0->unk16 == 0) {
             arg0->unk20++;
             if (arg0->unk20 < arg0->unk10->unk8) {
-                arg0->unk24 = func_1516C878((struct_game_197C20_1 *)arg0->unk10, arg0->unk20, arg0->unkD);
+                arg0->unk24 = func_1516C878((TextBoxConfig *)arg0->unk10, arg0->unk20, arg0->unkD);
                 arg0->unk18 = 10;
                 arg0->unk15 = 0x10;
                 arg0->unk10->unk0 |= 0x2000;
@@ -581,48 +614,35 @@ Gfx *func_1516B6BC(Gfx *gfx, Obj_1516B6BC *obj, s32 arg2) {
     return func_1516C934(gfx, obj, 0, 0, 0, (obj->unk1A * scale) >> 8);
 }
 
-u8 *func_1516C878(struct_game_197C20_1 *arg0, s32 arg1, s16 arg2) {
-    u8 *temp_v1;
-    u8 *sp0;
-    s32 temp_v0;
-    s32 temp_a0;
+/* Returns the start of page `index` of a config's text: pages are separated by runs of NULs. */
+u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source) {
+    u8 *str;
+    u8 *uninit;
+    s32 i;
 
-    switch (arg2) {
+    switch (source) {
     case 0:
-        temp_v1 = D_800DD254[arg0->unk4].unk0;
+        str = D_800DD254[config->text].data;
         break;
     case 1:
-        temp_v1 = D_800DD258[arg0->unk4].unk0;
+        str = D_800DD258[config->text].data;
         break;
     case 2:
-        temp_v1 = (u8 *)arg0->unk4;
+        str = (u8 *)config->text;
         break;
     default:
-        temp_v1 = sp0;
+        str = uninit; // matching: the original reads an uninitialised stack local here
         break;
     }
-
-    temp_v0 = 0;
-    if (arg1 > 0) {
-        temp_a0 = temp_v1[0];
-        do {
-            temp_v0++;
-            if (temp_a0 != 0) {
-                do {
-                    temp_a0 = temp_v1[1];
-                    temp_v1++;
-                } while (temp_a0 != 0);
-            }
-            if (temp_a0 == 0) {
-                do {
-                    temp_a0 = temp_v1[1];
-                    temp_v1++;
-                } while (temp_a0 == 0);
-            }
-        } while (temp_v0 != arg1);
+    for (i = 0; i < index; i++) {
+        while (*str != 0) {
+            str++;
+        }
+        while (*str == 0) {
+            str++;
+        }
     }
-
-    return temp_v1;
+    return str;
 }
 
 typedef struct {
@@ -887,38 +907,39 @@ void func_1516D0CC(Struct1516CC58 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
 void func_1516D2D8(void) {
 }
 
-void func_1516D2E0(struct_game_197C20_3 *arg0) {
-    if ((arg0 != 0) && (arg0->field_0x0 == 0x51)) {
-        arg0->field_0x10->field_0x8 = 0;
-        func_1516972C((struct102 *)arg0);
-        arg0->field_0x15 = 0;
+/* Removes a text box object immediately. */
+void func_1516D2E0(TextBox *box) {
+    if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
+        box->config->numPages = 0;
+        func_1516972C((struct102 *)box);
+        box->state = 0;
     }
 }
 
-void func_1516D328(struct_game_197C20_3 *arg0) {
-    if ((arg0 != 0) && (arg0->field_0x0 == 0x51)) {
-        arg0->field_0x10->field_0x0 |= 0x100;
-        arg0->field_0x10->field_0x0 &= ~0x400;
-        arg0->field_0x20 = arg0->field_0x10->field_0x8;
+/* Asks a text box to close, skipping its remaining pages. */
+void func_1516D328(TextBox *box) {
+    if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
+        box->config->flags |= TEXTBOX_CLOSE;
+        box->config->flags &= ~TEXTBOX_SKIP_ANIM;
+        box->page = box->config->numPages;
     }
 }
 
-u8 *func_1516D378(struct_game_197C20_3 *arg0) {
-    if ((arg0 != 0) && (arg0->field_0x0 == 0x51)) {
-        arg0->field_0x10->field_0x0 |= 0x100;
-        arg0->field_0x10->field_0x0 &= ~0x400;
-        return (u8 *)arg0;
+/* Asks a text box to close after its current page; returns it, or NULL if it isn't one. */
+TextBox *func_1516D378(TextBox *box) {
+    if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
+        box->config->flags |= TEXTBOX_CLOSE;
+        box->config->flags &= ~TEXTBOX_SKIP_ANIM;
+        return box;
     }
-    return 0;
+    return NULL;
 }
 
-s32 func_1516D3C4(u8 *arg0) {
-    s32 *temp;
-
-    if ((arg0 != 0) && (*arg0 == 0x51)) {
-        temp = *(s32 **)(arg0 + 0x10);
-        *temp |= 0x500;
-        return (s32)arg0;
+/* Asks a text box to close at once; returns it, or NULL if it isn't one. */
+TextBox *func_1516D3C4(TextBox *box) {
+    if (box != NULL && box->type == OBJTYPE_TEXTBOX) {
+        box->config->flags |= TEXTBOX_CLOSE | TEXTBOX_SKIP_ANIM;
+        return box;
     }
-    return 0;
+    return NULL;
 }
