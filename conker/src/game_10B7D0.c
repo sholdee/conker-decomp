@@ -145,7 +145,7 @@ void func_150DE458(Prop *prop) {
     }
 }
 
-/* An object func_150DE6D8 sways: its rotation and position lead the same way as Prop's. */
+/* An object func_150DE6D8 sways; its rotation and position are laid out as in Prop. */
 typedef struct {
     /* 0x00 */ f32 rotation[3];
     /* 0x0C */ u8  padC[0x4];
@@ -336,12 +336,19 @@ s32 func_150DEB58(Particle *particle, s16 arg1) {
     return func_15140410(particle, &particle->travel.side, &particle->travel.forward, arg1);
 }
 
-extern void func_150DEC28(u8, s32);
-extern u8 D_800A0D0B[];
-extern u8 D_800A0D2B[];
+/* An s32 table entry read through its low byte (the symbols point at byte 3 of each word). */
+typedef struct {
+    u8 value;
+    u8 pad1[3];
+} LowByte;
+
+extern LowByte D_800A0D0B[];
+extern LowByte D_800A0D2B[];
 extern void func_151616D0(u8, u8, s32);
 extern void func_151417C4(u8, s32);
+void func_150DEC28(u8 index, s32 arg1);
 
+/* Runs func_150DEC28 on entries 0-3. */
 void func_150DEBE0(s32 arg0) {
     u8 i;
 
@@ -350,9 +357,10 @@ void func_150DEBE0(s32 arg0) {
     }
 }
 
-void func_150DEC28(u8 arg0, s32 arg1) {
-    s32 idx = arg0 * 4;
+/* Passes entry `index` of the D_800A0D0B and D_800A0D2B byte tables to func_151616D0 and func_151417C4. */
+void func_150DEC28(u8 index, s32 arg1) {
+    s32 i = index; // matching: without this copy IDO spills the scaled index to another slot
 
-    func_151616D0(D_800A0D0B[idx], 0x22, 0);
-    func_151417C4(D_800A0D2B[idx], 0x22);
+    func_151616D0(D_800A0D0B[i].value, 0x22, 0);
+    func_151417C4(D_800A0D2B[i].value, 0x22);
 }
