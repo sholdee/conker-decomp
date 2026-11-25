@@ -21,143 +21,109 @@ extern f32 D_80099070;
 extern f32 D_80099074;
 
 
-void func_15048B10(s32 arg0, s32 arg1) {
-    struct191 tmp;
+void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
+                   f32 *scaleX, f32 *scaleY, f32 *scaleZ);
+void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 out[4][4]);
 
-    func_1503E5F8(arg0, &tmp.unk194, &tmp.unk190, &tmp.unk18C, &tmp.unk17C, &tmp.unk178, &tmp.unk174, &tmp.unk188, &tmp.unk184, &tmp.unk180);
-    guMtxIdentF(&tmp.unk80);
-    tmp.unkA4 = -tmp.unk194;
-    tmp.unkA8 = -tmp.unk190;
-    tmp.unkAC = -tmp.unk18C;
+/* Builds the inverse of the rigid part (translation and rotation, no scale) of a transform. */
+void func_15048B10(s32 mtx, s32 out) {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 scaleX;
+    f32 scaleY;
+    f32 scaleZ;
+    f32 rotX;
+    f32 rotY;
+    f32 rotZ;
+    f32 rotXMtx[4][4];
+    f32 rotYMtx[4][4];
+    f32 rotZMtx[4][4];
+    f32 translate[4][4];
+    f32 tmp1[4][4];
+    f32 tmp2[4][4];
 
-    func_150A8050(&tmp.unk134, -tmp.unk17C,           0,           0);
-    func_150A8050(&tmp.unkF4,            0, -tmp.unk178,           0);
-    func_150A8050(&tmp.unkB4,            0,           0, -tmp.unk174);
+    func_1503E5F8((f32 (*)[4])mtx, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
+    guMtxIdentF(translate);
+    translate[3][0] = -x;
+    translate[3][1] = -y;
+    translate[3][2] = -z;
 
-    func_150A7A48(&tmp.unk80,  &tmp.unkB4, &tmp.unk40);
-    func_150A7A48(&tmp.unk40,  &tmp.unkF4, &tmp.unk0);
-    func_150A7A48(&tmp.unk0,  &tmp.unk134, arg1);
+    func_150A8050(rotXMtx, -rotX, 0.0f, 0.0f);
+    func_150A8050(rotYMtx, 0.0f, -rotY, 0.0f);
+    func_150A8050(rotZMtx, 0.0f, 0.0f, -rotZ);
+
+    func_150A7A48(translate, rotZMtx, tmp1);
+    func_150A7A48(tmp1, rotYMtx, tmp2);
+    func_150A7A48(tmp2, rotXMtx, (f32 (*)[4])out);
 }
 
-f32 func_15048C30(f32 arg0) {
-    f32 temp_f0;
-    f32 temp_f12;
-    f32 temp_f14;
-    f32 temp_f16;
-    f32 temp_f18;
-    f32 temp_f2;
-    f32 temp_f2_3;
-    s32 temp_t6;
-    s32 temp_v0;
+/* asinf: rational approximation, with range reduction for |x| >= 0.5 */
+f32 func_15048C30(f32 x) {
+    f32 root;
+    f32 num;
+    f32 den;
+    f32 reduced;
+    f32 sq;
+    f32 absX;
+    f32 result;
+    s32 bits;
+    s32 exponent;
 
-    temp_v0 = *(s32*)&arg0;
-    temp_t6 = (temp_v0 >> 0x17) & 0xFF;
-    if (temp_t6 < 0x7E) {
-        if (temp_t6 >= 0x63) {
-            temp_f2 = arg0 * arg0;
-            temp_f12 = (((((((D_80099020[5] * temp_f2) + D_80099020[4]) * temp_f2) + D_80099020[3]) * temp_f2) + D_80099020[2]) * temp_f2) + D_80099020[1];
-            temp_f14 = ((((((temp_f2 + D_80099038[3]) * temp_f2) + D_80099038[2]) * temp_f2) + D_80099038[1]) * temp_f2) + D_80099038[0];
-            return ((temp_f2 * temp_f12 * arg0) / temp_f14) + arg0;
+    bits = *(s32 *)&x;
+    exponent = (bits >> 23) & 0xFF;
+    if (exponent < 126) {
+        /* |x| < 0.5; tiny values return x itself */
+        if (exponent >= 99) {
+            sq = x * x;
+            num = (((((((D_80099020[5] * sq) + D_80099020[4]) * sq) + D_80099020[3]) * sq) + D_80099020[2]) * sq) + D_80099020[1];
+            den = ((((((sq + D_80099038[3]) * sq) + D_80099038[2]) * sq) + D_80099038[1]) * sq) + D_80099038[0];
+            return ((sq * num * x) / den) + x;
         }
-        return arg0;
+        return x;
     }
-    if (temp_t6 < 0x7F) {
-        temp_f2 = fabsf(arg0);
-        if (temp_f2 < D_80085FE8) {
-            temp_f2 = arg0 * arg0;
-            temp_f16 = (temp_f2 + temp_f2) - D_80085FD0;
-            temp_f18 = temp_f16 * temp_f16;
-            temp_f12 = (((((((D_80099020[5] * temp_f18) + D_80099020[4]) * temp_f18) + D_80099020[3]) * temp_f18) + D_80099020[2]) * temp_f18) + D_80099020[1];
-            temp_f14 = ((((((temp_f18 + D_80099038[3]) * temp_f18) + D_80099038[2]) * temp_f18) + D_80099038[1]) * temp_f18) + D_80099038[0];
-            if (temp_v0 > 0) {
-                temp_f0 = ((temp_f18 * temp_f12 * temp_f16) / temp_f14) + temp_f16;
-                return (0.5f * temp_f0) + D_80085FD8;
+    if (exponent < 127) {
+        /* 0.5 <= |x| < 1 */
+        absX = fabsf(x);
+        if (absX < D_80085FE8) {
+            /* asin(x) = +-pi/4 + asin(2x^2 - 1) / 2 */
+            sq = x * x;
+            reduced = (sq + sq) - D_80085FD0;
+            sq = reduced * reduced;
+            num = (((((((D_80099020[5] * sq) + D_80099020[4]) * sq) + D_80099020[3]) * sq) + D_80099020[2]) * sq) + D_80099020[1];
+            den = ((((((sq + D_80099038[3]) * sq) + D_80099038[2]) * sq) + D_80099038[1]) * sq) + D_80099038[0];
+            if (bits > 0) {
+                result = ((sq * num * reduced) / den) + reduced;
+                return (0.5f * result) + D_80085FD8;
             } else {
-                temp_f0 = ((temp_f18 * temp_f12 * temp_f16) / temp_f14) + temp_f16;
-                return D_80085FE0 - (0.5f * temp_f0);
+                result = ((sq * num * reduced) / den) + reduced;
+                return D_80085FE0 - (0.5f * result);
             }
         }
-        temp_f16 = (D_80085FD0 - temp_f2) * 0.5f;
-        temp_f0 = sqrtf(temp_f16);
-        temp_f12 = (((D_8009904C[3] * temp_f16) + D_8009904C[2]) * temp_f16) + D_8009904C[1];
-        temp_f14 = ((((temp_f16 + D_8009905C[2]) * temp_f16) + D_8009905C[1]) * temp_f16) + D_8009905C[0];
-        temp_f18 = ((temp_f16 * temp_f12 * temp_f0) / temp_f14) + temp_f0;
-        if (temp_v0 > 0) {
-            return D_80085FDC - (temp_f18 + temp_f18);
+        /* asin(x) = +-(pi/2 - 2 asin(sqrt((1 - |x|) / 2))) */
+        reduced = (D_80085FD0 - absX) * 0.5f;
+        root = sqrtf(reduced);
+        num = (((D_8009904C[3] * reduced) + D_8009904C[2]) * reduced) + D_8009904C[1];
+        den = ((((reduced + D_8009905C[2]) * reduced) + D_8009905C[1]) * reduced) + D_8009905C[0];
+        result = ((reduced * num * root) / den) + root;
+        if (bits > 0) {
+            return D_80085FDC - (result + result);
         } else {
-            return temp_f18 + temp_f18 + D_80085FE4;
+            return result + result + D_80085FE4;
         }
     }
-    if (arg0 != arg0) {
+    if (x != x) {
+        /* NaN */
         return 0.0f;
     }
-    if (arg0 == D_80085FD0) {
+    if (x == D_80085FD0) {
         return D_80085FDC;
     }
-    if (arg0 == D_80085FD4) {
+    if (x == D_80085FD4) {
         return D_80085FE4;
     }
     return 0.0f;
 }
-// NON-MATCHING: regs and ordering needs fixing
-// f32 func_15048C30(f32 arg0) {
-//     f32 temp_f0;
-//     f32 temp_f12;
-//     f32 temp_f14;
-//     f32 temp_f16;
-//     f32 temp_f18;
-//     f32 temp_f2;
-//     f32 temp_f2_3;
-//
-//     s32 temp_t6;
-//     s32 temp_v0;
-//
-//     temp_v0 = *(s32*)&arg0;
-//     temp_t6 = (temp_v0 >> 0x17) & 0xFF;
-//     if (temp_t6 < 0x7E) {
-//         if (temp_t6 >= 0x63) {
-//             temp_f2 = arg0 * arg0;
-//             return (
-//               (temp_f2 * (D_80099020[1] + (((((((D_80099020[5] * temp_f2) + D_80099020[4]) * temp_f2) + D_80099020[3]) * temp_f2) + D_80099020[2]) * temp_f2)) * arg0)
-//              / (D_80099038[0] + ((((((temp_f2 + D_80099038[3]) * temp_f2) + D_80099038[2]) * temp_f2) + D_80099038[1]) * temp_f2))) + arg0;
-//         } else {
-//             return arg0;
-//         }
-//     }
-//     if (temp_t6 < 0x7F) {
-//         temp_f2 = fabsf(arg0);
-//         if (temp_f2 < D_80085FE8) {
-//             temp_f2_3 = arg0 * arg0;
-//             temp_f16 = (temp_f2_3 + temp_f2_3) - D_80085FD0;
-//             temp_f18 = temp_f16 * temp_f16;
-//             temp_f12 = D_80099020[1] + (temp_f18 * (D_80099020[2] + (temp_f18 * (D_80099020[3] + (temp_f18 * (D_80099020[4] + (temp_f18 * D_80099020[5])))))));
-//             temp_f14 = D_80099038[0] + (temp_f18 * (D_80099038[1] + (temp_f18 * (D_80099038[2] + (temp_f18 * (D_80099038[3] + temp_f18))))));
-//             if (temp_v0 > 0) {
-//                 return (0.5f * (((temp_f18 * temp_f12 * temp_f16) / temp_f14) + temp_f16)) + D_80085FD8;
-//             } else {
-//                 return D_80085FE0 - (0.5f * (((temp_f18 * temp_f12 * temp_f16) / temp_f14) + temp_f16));
-//             }
-//         }
-//         temp_f16 = (D_80085FD0 - temp_f2) * 0.5f;
-//         temp_f0 = sqrtf(temp_f16);
-//         temp_f18 = ((temp_f16 * (D_8009904C[1] + (((D_8009904C[3] * temp_f16) + D_8009904C[2]) * temp_f16)) * temp_f0) / (D_8009905C[0] + ((((temp_f16 + D_8009905C[2]) * temp_f16) + D_8009905C[1]) * temp_f16))) + temp_f0;
-//         if (temp_v0 > 0) {
-//             return D_80085FDC - (temp_f18 + temp_f18);
-//         } else {
-//             return temp_f18 + temp_f18 + D_80085FE4;
-//         }
-//     }
-//     if (arg0 != arg0) { // NaN check
-//         return 0.0f;
-//     }
-//     if (arg0 == D_80085FD0) {
-//         return D_80085FDC;
-//     }
-//     if (arg0 == D_80085FD4) {
-//         return D_80085FE4;
-//     }
-//     return 0.0f;
-// }
 
 void func_15048F20(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
     arg2->unk0 = arg0->unk0 + arg1->unk0;
