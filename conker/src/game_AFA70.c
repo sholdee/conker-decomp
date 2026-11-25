@@ -32,7 +32,6 @@ extern PartSet D_80086CC4[];
 extern Actor *func_1505ED34(void);
 extern Actor *func_1505EEF4(void);
 extern void func_1505F188(Actor *obj);
-extern s32 func_15084D00(Actor *);
 extern s32 func_150A6360(void *arg0, MtxF arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
 extern void *func_1515D440(void);
 extern s32 func_1515D480(s32);

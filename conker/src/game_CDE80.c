@@ -197,7 +197,6 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
 s32 __osPiGetAccess(void);
 void __osPiRelAccess(void);
 s32 osPiRawReadIo(u32, u32 *);
-void func_15172E7C(Actor *actor, s32 arg1, s32 arg2);
 
 /* Finds the TriggerZones that contain the actor (narrowed through the zone bounding boxes) and applies them. */
 void func_150A11C4(Actor *actor) {

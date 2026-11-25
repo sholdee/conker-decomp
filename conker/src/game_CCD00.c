@@ -31,7 +31,6 @@ IdRecord *func_1509B704(s16 id);
 void func_150AE280(void);
 void func_1509B5AC(s32 id, s32 reload);
 void func_1501C730(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-void func_15172E7C(void *arg0, s32 arg1, s32 arg2);
 void func_151E53E8(s32 arg0);
 void func_151E8214(void);
 void func_151E4DC4(void);

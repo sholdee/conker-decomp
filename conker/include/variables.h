@@ -846,24 +846,11 @@ extern f32 D_800CC270; // attacker position saved at the hit (x, z, y)
 extern f32 D_800CC274;
 extern f32 D_800CC278;
 extern u8  D_800CC27C;
-extern s32 D_800CC280;
-extern OSContPad *D_800CC284; // the current player's controller input
-extern s32 D_800CC288;
-extern s32 D_800CC28C;
-extern s32 D_800CC290;
-extern TexAnimState D_800CC298;
 
-extern u8 D_800CC2B1;
-extern s16 D_800CC2B2;
-extern f32 D_800CC2B4;
 extern f32 D_800CC2C0;
 extern f32 D_800CC2C4;
 extern f32 D_800CC2C8;
 
-extern u8  D_800CC2B0;
-extern u8  D_800CC2B8;
-extern u16 D_800CC2BA; // frame step of the actor being updated
-extern s32 D_800CC2BC;
 extern Actor movement_obj[26]; // objects
 extern u8  D_800CC2D4[];
 extern f32 D_800CC2E4;

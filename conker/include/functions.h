@@ -282,8 +282,6 @@ void func_15012780(void);
 s32  func_150150A4(void);
 s32  func_15015300(TriggerZone *obj);
 void func_15016370(void);
-void func_15017300(s16 arg0, s16 arg1);
-void func_150175E0(void);
 void func_1501C860(void);
 void func_1501C870(void);
 
@@ -510,7 +508,6 @@ Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus);
 void func_1001C224(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 
 u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
-void func_1501748C(s16 arg0);
 
 f32  func_15047C00(f32 arg0);
 f32  func_15047D60(f32 arg0);
@@ -533,8 +530,6 @@ s32  func_15081574(s32, f32, f32, s32, s32, s32);
 void *func_15083568(Actor *parent, s32 setId, f32 arg2, s32 arg3);
 s32  func_15083E0C(u8);
 Actor *func_15083E90(u8 id);
-void func_15085710(s16, s16, s32);
-s32  func_150859AC(s16 arg0, s16 arg1);
 void func_1508B20C(f32, f32, f32, f32);
 void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
 void func_150A8050(MtxF mtx, f32 arg1, f32 arg2, f32 arg3);

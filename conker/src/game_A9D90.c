@@ -4,7 +4,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern s32 func_15084D70(s32, s32, s32, s16*, f32*, u8*, u8*, s32*, s32*, s32, s32*);
 extern void func_15022190(s16, s16, s16, f32);
 extern void func_1501D348(s32, s32, s32, s32, s32);
 extern void func_1501C730(s32, s32, s32, s32, s32);
@@ -287,7 +286,6 @@ void func_1507D158(s32 slot, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 }
 
 void func_150054C4(Camera *, u32, s32, s32);
-void func_15085430(Actor *, s32, s32);
 void func_15082A44(SpawnRecord *, s32, s32, s32, s32);
 void func_15088D58(Actor *);
 

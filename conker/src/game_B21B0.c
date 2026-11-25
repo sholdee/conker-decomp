@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* The 7 model-id rows of D_80087240 (a pointer table in .data); the first id of a row stands for the row. */
 const u8 D_8009D920[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x3B, 0x75, 0x80, 0x82, 0x88, 0x90,

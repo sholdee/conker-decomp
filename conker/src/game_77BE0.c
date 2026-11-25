@@ -263,7 +263,6 @@ void func_1504AF10(Actor *obj, s32 force, s32 release) {
 }
 
 void func_1510F820(void *, void *, f32 *, f32 *, f32 *, f32 *, f32 *);
-f32 func_1505210C(Actor *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4);
 void func_15060A30(s32, void *);
 void func_1507CD64(void *, s32);
 

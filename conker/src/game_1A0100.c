@@ -13,7 +13,6 @@ extern s8 D_800DD2B0[]; // per player: level of the pending warp, -1 when none
 
 
 void func_1501C730(s32, s32, s32, s32, s32);
-void func_15085430(Actor *obj, s32 spawnIndex, s32 unused);
 
 /* Clears every pending warp and spawn point, then sets player 0's spawn point to `spawn0`. */
 void func_15172C50(s32 spawn0) {

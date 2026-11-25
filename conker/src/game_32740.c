@@ -47,7 +47,6 @@ void func_1512D66C(Camera *arg0);
 void func_1512D6F0(Camera *arg0);
 void func_15125924(Camera *arg0);
 void func_151298C0(Camera *arg0, s32 arg1, Actor *arg2);
-void func_15085430(Actor *, s32, s32);
 
 /**
  * Resets view state `index` and attaches it, as camera, to actor movement_obj[index].

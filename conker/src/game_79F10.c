@@ -35,7 +35,6 @@ void func_15056B08(Actor *arg0);
 void func_150585F0(Actor *arg0, f32 arg1);
 
 void func_1510F820(void *, void *, f32 *, f32 *, f32 *, f32 *, f32 *);
-f32 func_1505210C(Actor *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4);
 void func_1505A250(f32, f32, f32, f32 *, f32 *);
 void func_15060A30(s32, void *);
 void func_1507CD64(void *, s32);
@@ -115,7 +114,6 @@ extern s32 D_800cc2bc;
 // matching: a declaration-only block scope (no storage). IDO opens a lexical block for it, which changes
 // register allocation/scheduling of the surrounding statements; no storage-free idiomatic form matches.
 #define BLK typedef s32 blk_t
-void func_15051558(Actor *actor, f32 x, f32 z, u16 facing);
 void func_1505A770(Actor *arg0);
 void func_15052260(Actor *arg0);
 void func_1505250C(Actor *arg0, s32 arg1);
