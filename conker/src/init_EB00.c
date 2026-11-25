@@ -42,8 +42,8 @@
 
 typedef struct SoundRecord SoundRecord;
 
-// Called every update for a record with flag 0x10; may adjust the out-params
-// (each an s32 slot unless noted). Returns nonzero to stop the record.
+// Called each update for a record with flag 0x10, with the values func_10011624 is about to
+// apply; it may change them. Returning nonzero stops the record.
 typedef s32 (*SoundRecordCallback)(SoundRecord *record, s32 *active, u32 *volume, s32 *pan,
                                    s32 *cents, s32 *mix, u16 *sound);
 
@@ -56,7 +56,7 @@ struct SoundRecord {
     /* 0x08 */ u16 farDistance;
     /* 0x0A */ s16 nearDistance;
     /* 0x0C */ s32 volume;
-    /* 0x10 */ u32 flags;
+    /* 0x10 */ u32 flags; // see below
     /* 0x14 */ SoundRecordCallback callback;
     /* 0x18 */ void *owner;
     /* 0x1C */ s32 key;
@@ -70,15 +70,23 @@ struct SoundRecord {
     /* 0x2C */ f32 pitch;
 }; // size 0x30
 
-// Per-player listener (D_80041F68), refreshed from the cameras each frame.
+// SoundRecord.flags, as func_10011624 reads them:
+//   0x0001 a voice is playing (handle valid)    0x0002 re-evaluate even while playing
+//   0x0004 doppler pitch shift                  0x0008 keep the record while silent
+//   0x0010 run the callback                     0x0040 position from y only (func_1000A750)
+//   0x0080 finished, removed by func_10011BB8   0x0100 centered (no pan)
+//   0x0200 mirror the pan                       0x0C00 bus override (0x400: bus 0, else 1)
+//   0x1000 skip the next update (set when the record was just started)
+
+// Per-player listener (D_80041F68), refreshed from the cameras by func_10011BB8.
 typedef struct {
-    s32 x0;
+    s32 x0;      // camera +0x2A4 (one listener, flag 0x80000 clear) or +0x2F8; deltas to func_1000A420
     s32 y4;
     s32 z8;
-    s32 xC;
+    s32 xC;      // camera +0x2F8; the nearest listener is chosen by distance to this
     s32 y10;
     s32 z14;
-    f32 field18;
+    f32 field18; // camera +0x380
 } SoundSpatialRecord;
 
 // Deferred voice stop, queued by func_100112BC.
