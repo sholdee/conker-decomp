@@ -83,7 +83,7 @@ typedef struct {
     /* 0x29 */ u8 unk29;
     /* 0x2A */ u8 unk2A;
     /* 0x2B */ u8 unk2B;
-    /* 0x2C */ s32 unk2C;
+    /* 0x2C */ void (*callback)(s32, s32, s32); /* filled in by func_1516A7B0 */
 } TextBoxDesc;
 
 /* Text box returned by func_1516A7B0 (Struct1516A7B0 in game_197C20.c). */
@@ -194,9 +194,9 @@ void func_15080784(void) {
     }
 }
 
-/* Text-box callback: voices the next sound effect at each space. */
-void func_150807F4(s32 arg0, s32 arg1, s32 c) {
-    if (c == ' ') {
+/* Text-box callback (TextBoxDesc.callback): voices the next sound effect on event 0x20. */
+void func_150807F4(s32 arg0, s32 arg1, s32 event) {
+    if (event == 0x20) {
         func_15080784();
     }
 }
@@ -207,6 +207,7 @@ void func_15080828(s32 arg0) {
     char *text;
     s32 withHeader;
 
+    // matching: nested ifs (two FALSE stores); `arg0 == 0 && ...` reshapes the branches
     if (arg0 == 0) {
         if (!(D_800D2E68 & 0x10)) {
             withHeader = TRUE;
@@ -229,7 +230,7 @@ void func_15080828(s32 arg0) {
             u32 headerSoundCount;
 
             D_800D1948 = func_1502B6BC(0, 0, 0, 3, 0x1A, D_800BEAAB, 0x43);
-            if (D_800D1944 == NULL) {
+            if (D_800D1944 == NULL) { /* sic: tests the text, not the header just loaded */
                 return;
             }
             headerLen = strlen(D_800D1948->text) + 1;
