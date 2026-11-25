@@ -51,7 +51,11 @@ typedef struct struct126Hidden {
     /* 0x000 */ f32 unk0;
     /* 0x004 */ u8 pad4[0x24 - 0x4];
     /* 0x024 */ s16 unk24;
-    /* 0x026 */ u8 pad26[0xDC - 0x26];
+    /* 0x026 */ u8 pad26[0xA8 - 0x26];
+    /* 0x0A8 */ f32 unkA8;
+    /* 0x0AC */ u8 unkAC;
+    /* 0x0AD */ s8 unkAD;
+    /* 0x0AE */ u8 padAE[0xDC - 0xAE];
     /* 0x0DC */ f32 unkDC[3];
     /* 0x0E8 */ u8 unkE8[0x12C - 0xE8];
     /* 0x12C */ u16 unk12C;
@@ -3620,66 +3624,66 @@ u8 *func_15073118(u8 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, 
 s32 func_15037698(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
 u8 *func_15073118(u8 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
 
+/* Fires projectiles from the current object; D_800D1580 picks the volley (0: aimed at the camera target). */
 void func_1507342C(void) {
-    u8 *obj;
+    struct127 *obj;
     s32 rot;
     f32 y;
     f32 x;
-    f32 unk84[7];
+    f32 pad[7]; // matching: unused stack space
 
     if (D_800D1580 == 0) {
         f32 dist;
-        u8 *target;
+        struct108 *target;
         s32 hit;
         f32 dx;
         f32 dy;
         f32 dz;
         f32 angle;
-        f32 unk48;
+        f32 yaw;
 
         hit = 0;
-        target = *(u8 **)((u8 *)D_800D154C + 0x318);
-        if (func_15037698(((u8 *)D_800D154C - (u8 *)&D_800CC2D0) / 0x32C, 0x17, 0x17,
-                          *(f32 *)(target + 0x2F8), *(f32 *)(target + 0x2FC), *(f32 *)(target + 0x300),
+        target = D_800D154C->camera;
+        if (func_15037698(D_800D154C - D_800CC2D0, 23, 23, target->unk2F8, target->unk2FC, target->unk300,
                           &dist, 30.0f, 0, 0) != 0 &&
             (u32)func_150ADA20() % 1000 < 200) {
             hit = 1;
         }
-        obj = func_15073118((u8 *)D_800D154C, 0x17, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
-        *(s32 *)(obj + 0xF8) |= 0x01000000;
+        obj = (struct127 *)func_15073118((u8 *)D_800D154C, 23, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
+        obj->unkF8 |= 0x01000000;
         if (hit != 0) {
-            dx = *(f32 *)(target + 0x2F8) - *(f32 *)(obj + 0x14);
-            dy = *(f32 *)(target + 0x2FC) - *(f32 *)(obj + 0x18);
-            dz = *(f32 *)(target + 0x300) - *(f32 *)(obj + 0x1C);
+            dx = target->unk2F8 - obj->x_position;
+            dy = target->unk2FC - obj->y_position;
+            dz = target->unk300 - obj->z_position;
             angle = func_150484A0(dx, dz) * 57.295776f;
-            unk48 = angle;
+            yaw = angle;
             if (angle > 180.0f) {
-                unk48 = angle - 360.0f;
+                yaw = angle - 360.0f;
             }
-            angle = *(f32 *)(obj + 0x3C) * dy / sqrtf(dx * dx + dz * dz);
-            *(f32 *)(obj + 0x20) = angle;
-            *(f32 *)(obj + 0x24) = 0.0f;
-            *(s32 *)(obj + 0x2E4) = 1;
-            rot = (s16)(unk48 * 182.04445f) - 0x4000;
-            *(s16 *)(obj + 0x7A) = rot;
-            *(s16 *)(obj + 0x76) = rot;
+            angle = obj->xz_velocity * dy / sqrtf(dx * dx + dz * dz);
+            obj->y_velocity = angle;
+            obj->gravity = 0.0f;
+            obj->unk2E4 = 1;
+            rot = (s16)(yaw * 182.04445f) - 0x4000;
+            obj->unk7A = rot;
+            obj->unk76 = rot;
         } else {
-            *(s32 *)(obj + 0x2E4) = 0;
+            obj->unk2E4 = 0;
         }
     } else if (D_800D1580 == 1) {
         f32 t;
         f32 spread;
 
-        spread = *(s32 *)((u8 *)D_800D154C + 0x2E4) * 0.01f;
+        spread = D_800D154C->unk2E4 * 0.01f;
         t = (s32)((u32)func_150ADA20() % 40 - 20) * spread;
         y = 58.4f + t;
         t = (s32)((u32)func_150ADA20() % 40 - 20) * spread;
         x = 42.8f + t;
-        func_15073118((u8 *)D_800D154C, 0xE, 0x42, 0.0f, 0.0f, 16.0f, (s32)((u32)func_150ADA20() % 40 - 20) * spread, x, y, 2.9f, 100);
+        func_15073118((u8 *)D_800D154C, 14, 0x42, 0.0f, 0.0f, 16.0f, (s32)((u32)func_150ADA20() % 40 - 20) * spread, x, y, 2.9f, 100);
     } else if (D_800D1580 == 2) {
-        obj = func_15073118((u8 *)D_800D154C, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
-        *(f32 *)(obj + 0xB8) = 180.0f;
-        *(s32 *)(obj + 0xF8) |= 0x01000000;
+        obj = (struct127 *)func_15073118((u8 *)D_800D154C, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
+        obj->unkB8 = 180.0f;
+        obj->unkF8 |= 0x01000000;
     } else if (D_800D1580 == 3) {
         f32 t;
 
@@ -3687,29 +3691,30 @@ void func_1507342C(void) {
         y = 58.4f + t;
         t = (s32)((u32)func_150ADA20() % 40 - 20) * 10.0f;
         x = 42.8f + t;
-        func_15073118((u8 *)D_800D154C, 0xE, 0x88, 0.0f, 0.0f, 16.0f, (s32)((u32)func_150ADA20() % 40 - 20) * 10.0f, x, y, 2.9f, 100);
+        func_15073118((u8 *)D_800D154C, 14, 0x88, 0.0f, 0.0f, 16.0f, (s32)((u32)func_150ADA20() % 40 - 20) * 10.0f, x, y, 2.9f, 100);
     }
 }
 
+/* Releases the object held in unk13C (object index + 100). */
 void func_150738E8(void) {
-    u8 temp_v0 = (u8)(D_800D154C->unk13C - 100);
+    u8 index = D_800D154C->unk13C - 100;
 
     if (D_800D154C->unk13C != 0) {
-        D_800D154C->unk13C = 0U;
-        D_800CC2D0[temp_v0].unkF8 = 0x8200;
-        D_800CC2D0[temp_v0].unk13D = 0;
-        D_800CC2D0[temp_v0].unk76 = D_800D154C->unk7A;
-        D_800CC2D0[temp_v0].unk65 = 0;
-        D_800CC2D0[temp_v0].unk232 = 6;
-        D_800CC2D0[temp_v0].unk218 = 0;
-        D_800CC2D0[temp_v0].stunned = 0;
-        D_800CC2D0[temp_v0].unk7A = 0xE000;
-        func_1505E650(D_800D154C, 0x97, 1.0f, 5.0f, 0.0f, 0.0f, 0);
+        D_800D154C->unk13C = 0;
+        D_800CC2D0[index].unkF8 = 0x8200;
+        D_800CC2D0[index].unk13D = 0;
+        D_800CC2D0[index].unk76 = D_800D154C->unk7A;
+        D_800CC2D0[index].unk65 = 0;
+        D_800CC2D0[index].unk232 = 6;
+        D_800CC2D0[index].unk218 = NULL;
+        D_800CC2D0[index].stunned = 0;
+        D_800CC2D0[index].unk7A = 0xE000;
+        func_1505E650(D_800D154C, 151, 1.0f, 5.0f, 0.0f, 0.0f, 0);
     }
 }
 
 void func_150739A4(void) {
-    D_800D154C->unk64 = (s8) D_800D1580;
+    D_800D154C->unk64 = D_800D1580;
 }
 
 void func_150739C0(void) {
@@ -3723,68 +3728,47 @@ void func_150739C0(void) {
 }
 
 void func_15073A28(void) {
-    D_800D154C->unk44 = (f32) D_800D1580;
+    D_800D154C->unk44 = D_800D1580;
 }
 
-typedef struct Game981E0ActorRecord {
-    u8 pad0[0x65];
-    u8 field_65;
-    u8 pad66[0x10];
-    s16 field_76;
-    u8 pad78[0xAD];
-    u8 field_125;
-    u8 pad126[0xA6];
-    f32 field_1CC;
-    u8 pad1D0[0x48];
-    s32 field_218;
-    u8 pad21C[0x16];
-    u8 field_232;
-    u8 pad233[0x41];
-    u8 field_274;
-    u8 pad275[0xB7];
-} Game981E0ActorRecord;
 s32 func_1505D024(void *, s32, u16, s32);
 
+/* Applies func_1505D024 (D_800D1580 & 0xFF00FF) to object unk124; bit 30 sets its unk1CC to our height. */
 void func_15073A50(void) {
-    u8 *parent;
+    struct127 *parent;
     s32 flags;
     s32 index;
 
-    parent = (u8 *)D_800D154C;
-    index = parent[0x124];
-    if (((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_65 != 0) {
+    parent = D_800D154C;
+    index = parent->unk124;
+    if (D_800CC2D0[index].unk65 != 0) {
         flags = D_800D1580;
-        parent[0x13C] = 0;
-        ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_125 = 0;
-        func_1505D024((Game981E0ActorRecord *)&D_800CC2D0 + index, D_800D1580 & 0xFF00FF, 0, D_800C3E78);
-        ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_1CC = 100000.0f;
+        parent->unk13C = 0;
+        D_800CC2D0[index].immune = 0;
+        func_1505D024(&D_800CC2D0[index], D_800D1580 & 0xFF00FF, 0, D_800C3E78);
+        D_800CC2D0[index].unk1CC = 100000.0f;
         if (flags & 0x40000000) {
-            ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_1CC = *(f32 *)((u8 *)D_800D154C + 0x18);
+            D_800CC2D0[index].unk1CC = D_800D154C->y_position;
         }
-        ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_125 = 0x14;
-        ((Game981E0ActorRecord *)&D_800CC2D0 + index)->field_76 = *(u16 *)((u8 *)D_800D154C + 0x7A) + flags;
+        D_800CC2D0[index].immune = 20;
+        D_800CC2D0[index].unk76 = D_800D154C->unk7A + flags;
     }
 }
 
+/* Unpacks D_800D1580 into unk31C's unkA8 (low half, as f32), unkAC and unkAD (top bytes). */
 void func_15073B38(void) {
-    struct func_15073B38_inner {
-        u8 padA8[0xA8];
-        f32 unkA8;
-        u8 unkAC;
-        s8 unkAD;
-    };
-    s32 *temp_v0;
-    struct127 **temp_v1;
-    f32 temp_f0;
-    f32 temp_f2;
+    s32 *param;
+    struct127 **objp;
+    f32 low;
+    f32 mid;
 
-    temp_v0 = &D_800D1580;
-    temp_v1 = &D_800D154C;
-    temp_f0 = (f32)(*temp_v0 & 0xFFFF);
-    ((struct func_15073B38_inner *)(*temp_v1)->unk31C)->unkA8 = temp_f0;
-    temp_f2 = (f32)((*temp_v0 >> 16) & 0xFF);
-    ((struct func_15073B38_inner *)(*temp_v1)->unk31C)->unkAC = (u32)temp_f2;
-    ((struct func_15073B38_inner *)(*temp_v1)->unk31C)->unkAD = (*temp_v0 >> 24) & 0xFF;
+    param = &D_800D1580; // matching: both globals are accessed through pointer locals
+    objp = &D_800D154C;
+    low = *param & 0xFFFF;
+    HIDDEN126((*objp)->unk31C)->unkA8 = low;
+    mid = (*param >> 16) & 0xFF;
+    HIDDEN126((*objp)->unk31C)->unkAC = (u32)mid;
+    HIDDEN126((*objp)->unk31C)->unkAD = (*param >> 24) & 0xFF;
 }
 
 void func_15073C28(void) {
@@ -3796,43 +3780,43 @@ void func_15073C48(void) {
 }
 
 void func_15073C50(void) {
-    D_800D154C->unk224 = (s32)(*(f32 *)((u8 *)D_800CC2E8 + (D_800D154C->unk222 * 0x32C)) + (f32)D_800D1580);
+    D_800D154C->unk224 = (s32)(D_800CC2D0[D_800D154C->unk222].y_position + D_800D1580);
 }
 
 void func_15073CB8(void) {
-    struct127 *tmp = func_1505F0AC(0x53);
-    if ((tmp != 0) && ((u16)tmp->unk244 == 0x1F)) {
-        tmp->unk21C = (u16)0;
+    struct127 *obj = func_1505F0AC(0x53);
+
+    if (obj != NULL && (u16)obj->unk244 == 0x1F) {
+        obj->unk21C = 0;
     }
 }
 
 void func_15073CF4(void) {
-    func_15062B1C(D_800D154C, (f32) D_800D1580);
+    func_15062B1C(D_800D154C, D_800D1580);
 }
 
-
 void func_15073D34(void) {
-    func_15062B50(D_800D154C, (f32) D_800D1580);
+    func_15062B50(D_800D154C, D_800D1580);
 }
 
 void func_15073D74(void) {
-    struct127 *temp_v0;
+    struct127 *obj;
 
-    temp_v0 = func_15083E90(D_800D1583);
-    if (temp_v0 != 0) {
-        temp_v0->unk65 = (u8)0;
+    obj = func_15083E90(D_800D1583);
+    if (obj != NULL) {
+        obj->unk65 = 0;
     }
 }
 
 void func_15073DA4(void) {
-    s32 tmp;
+    s32 kind;
 
     if (D_800D1580 != 0) {
-        tmp = 18;
+        kind = 18;
     } else {
-        tmp = 2;
+        kind = 2;
     }
-    func_1506C460(D_800D154C->unk40, 150.0f, 0, 0, 100, tmp, 60.0f, 0.5f, 0, 0, 1);
+    func_1506C460(D_800D154C->unk40, 150.0f, 0, 0, 100, kind, 60.0f, 0.5f, 0, 0, 1);
 }
 
 void func_15073E2C(void) {
@@ -3844,9 +3828,10 @@ void func_15073EA4(void) {
 }
 
 void func_15073F1C(void) {
-    struct126 *temp_v0 = func_1503195C(D_800D154C, 0x3C, 0);
-    if (temp_v0 != NULL) {
-        temp_v0->unk38 = 0x960;
+    struct126 *ext = func_1503195C(D_800D154C, 60, 0);
+
+    if (ext != NULL) {
+        ext->unk38 = 2400;
     }
 }
 
@@ -3854,7 +3839,7 @@ void func_15073F54(void) {
 }
 
 void func_15073F5C(void) {
-    D_800D154C->unk2CB = (s8) D_800D1580;
+    D_800D154C->unk2CB = D_800D1580;
 }
 
 void func_15073F78(void) {
