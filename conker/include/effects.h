@@ -3286,4 +3286,11 @@ typedef struct QuadFx {
     /* 0x10 */ QuadFxData data;
 } QuadFx; /* size 0xB8 */
 
+/* An entry of the render-mode table D_800A4AC8: the blender words of the two cycles, OR'd together for
+ * func_15142FBC. */
+typedef struct RenderModePair {
+    /* 0x0 */ s32 cycle1;
+    /* 0x4 */ s32 cycle2;
+} RenderModePair; /* size 0x8 */
+
 #endif

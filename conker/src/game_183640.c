@@ -129,11 +129,6 @@ void func_151563B8(StreakParticle *arg0) {
     }
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} RenderModePair;
-
 Gfx *func_15142B7C(Gfx *gfx, s32 setModes, s32 clearModes);
 Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
 Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *needSync);
@@ -185,7 +180,7 @@ Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
     gfx = func_15142C10(gfx, 0, 0, 0, particle->alpha, &needSync);
     gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &needSync);
     gfx = func_1513F4E4(gfx, combiner, &needSync);
-    gfx = func_15142FBC(gfx, 0x82CA0, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &needSync);
+    gfx = func_15142FBC(gfx, 0x82CA0, D_800A4AC8[mode].cycle1 | D_800A4AC8[mode].cycle2, &needSync);
     axis.x = p->headPos.x - p->tailPos.x;
     axis.y = p->headPos.y - p->tailPos.y;
     axis.z = p->headPos.z - p->tailPos.z;
