@@ -37,7 +37,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO = Path(os.environ.get("CONKER_REPO", Path.home() / "conker"))
+# Repo root: this script's checkout (resolve() follows the tools/ symlinks in workspaces).
+REPO = Path(os.environ.get("CONKER_REPO", Path(__file__).resolve().parent.parent))
 MAIN = REPO / "conker"
 WS_ROOT = Path(os.environ.get("CONKER_WS", Path.home() / "conker-ws"))
 CONTAINER = os.environ.get("CONKER_CONTAINER", "conker-tc")

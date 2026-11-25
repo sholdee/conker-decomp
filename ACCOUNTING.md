@@ -13,12 +13,13 @@ python3 tools/accounting.py
 
 | Segment  | Code bytes | Matched C            | Hand-written asm, rule-proven | Hand-written asm, search tier | Nop padding |
 |----------|-----------:|---------------------:|------------------------------:|------------------------------:|------------:|
-| init     |    164,048 | 151,764 (92.51%)     | 12,208 (46 functions)         | 0                             | 76          |
-| game     |  2,072,880 | 2,021,520 (97.52%)   | 50,704 (94 functions)         | 592 (8 functions)             | 64          |
+| init     |    164,048 | 151,764 (92.51%)     | 12,208 (66 functions)         | 0                             | 76          |
+| game     |  2,072,880 | 2,021,520 (97.52%)   | 50,704 (214 functions)         | 592 (8 functions)             | 64          |
 | debugger |     14,064 | 13,904 (98.86%)      | 160 (1 function)              | 0                             | 0           |
-| **all**  |  2,250,992 | 2,187,188 (97.17%)   | 63,072 (141 functions)        | 592 (8 functions)             | 140         |
+| **all**  |  2,250,992 | 2,187,188 (97.17%)   | 63,072 (281 functions)        | 592 (8 functions)             | 140         |
 
-Byte counts are each object's `.text` from the link map. Functions are cut at global symbols only, so a
+Byte counts are each object's `.text` from the link map. A function is every `glabel` in a hand-written `.s` file (`tools/filter_auto_syms.py` keeps
+splat's auto-symbol files from shadowing them) and every C function. Functions are cut at global symbols only, so a
 jump-table label inside a function stays part of it. Bytes before an object's first symbol count as a
 piece of their own.
 
@@ -34,15 +35,15 @@ from `tools/hasm_proofs.tsv`.
 | Rule | Meaning | Functions |
 |------|---------|----------:|
 | a    | Source-identical: the SDK's own `.s` (ultralib), assembled by IDO 5.3 (`cc`, with as0 and as1), gives the same bytes | 15 |
-| b*   | An instruction IDO 5.3 `-mips2` cannot emit: cop0, TLB, cache, sync, syscall, 64-bit `d*`, `ld`/`sd`, or trapping `add`/`addi`/`sub` | 79 |
-| c    | Dataflow: reads a register that is not an ABI input and was not written first | 46 |
-| d*   | An opcode-2 `j`, or a branch that leaves the function (IDO uses `b` and never tail-calls) | 56 |
-| e*   | `cvt.w.s`/`cvt.w.d` with no `ctc1` in the function (IDO always sets the rounding mode) | 18 |
+| b*   | An instruction IDO 5.3 `-mips2` cannot emit: cop0, TLB, cache, sync, syscall, 64-bit `d*`, `ld`/`sd`, trapping `add`/`addi`/`sub`, or the kernel registers `$k0`/`$k1` | 106 |
+| c    | Dataflow: reads a register that is not an ABI input and was not written first | 47 |
+| d*   | An opcode-2 `j`, or a branch that leaves the function (IDO uses `b` and never tail-calls) | 149 |
+| e*   | `cvt.w.s`/`cvt.w.d` with no `ctc1` in the function (IDO always sets the rounding mode) | 20 |
 | f*   | Frame layout: a store below `$sp`, or `ra` saved in the argument area or without allocating a frame | 14 |
-| g*   | No return: execution falls into the next function | 4 |
-| h*   | An odd FPR as a single-precision arithmetic operand, or `jal` without saving `ra` | 48 |
+| g*   | No return: execution falls into the next function | 45 |
+| h*   | An odd FPR as a single-precision arithmetic operand, or `jal` without saving `ra` | 94 |
 | i*   | 6 or more `mul.s`, every one followed by a `nop` (compiled C reaches at most 67%) | 2 |
-| k*   | Same object as a proven function, which it meets at a non-16-aligned address (IDO pads every C object's `.text` and `.rodata` to 16 at both ends: 771/771 and 357/357 objects) | 5 |
+| k*   | Same object as a proven function, which it meets at a non-16-aligned address (IDO pads every C object's `.text` and `.rodata` to 16 at both ends: 771/771 and 357/357 objects) | 21 |
 | s    | Search tier (below) | 8 |
 
 A function can meet several rules. GCC is ruled out as the source of the rule-proven code: GCC's `move`
@@ -71,8 +72,7 @@ with pinned FP registers and a contrived statement order. That is not evidence t
 | func_150AD930 | 48 | Vector length. A plain reorder-mode `.s` assembled by IDO with `-r4300_mul` gives exactly these bytes |
 | func_150AE1B0 | 16 | IDO `-O1` gives these 4 instructions but in `$t6`. This one uses `$t2`, like its asm neighbours in game_DAFA0 |
 
-The sweeps, sources and results are in `~/conker-ws/compilers/` (the coordinator's workspace, outside the
-repo).
+The sweep scripts and raw results are not part of the repository; the matrix above describes what was tried.
 
 ## Other ROM contents (not CPU code)
 

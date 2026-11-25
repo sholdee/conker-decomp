@@ -59,22 +59,41 @@ osMotorStart	0x100056A0	320	init	c		build/src/init_5570.c.o
 _MakeMotorData	0x100057E0	360	init	c		build/src/init_57E0.c.o
 osMotorInit	0x10005948	360	init	c		build/src/init_57E0.c.o
 func_10005AB0	0x10005AB0	84	init	hasm	b	build/src/init_5AB0.s.o
-func_10005B04	0x10005B04	220	init	hasm	b,d	build/src/init_5AB0.s.o
+func_10005B04	0x10005B04	56	init	hasm	b,g	build/src/init_5AB0.s.o
+func_10005B3C	0x10005B3C	164	init	hasm	d,h	build/src/init_5AB0.s.o
 func_10005BE0	0x10005BE0	76	init	hasm	k	build/src/init_5BE0.s.o
-func_10005C2C	0x10005C2C	1484	init	hasm	b,d,f	build/src/init_5C2C.s.o
+func_10005C2C	0x10005C2C	244	init	hasm	b,d	build/src/init_5C2C.s.o
+func_10005D20	0x10005D20	976	init	hasm	b,d,f	build/src/init_5C2C.s.o
+func_100060F0	0x100060F0	72	init	hasm	b	build/src/init_5C2C.s.o
+func_10006138	0x10006138	192	init	hasm	b,d	build/src/init_5C2C.s.o
 func_100061F8	0x100061F8	72	init	hasm	b,c	build/src/init_5C2C.s.o
 func_10006240	0x10006240	28	init	hasm	f	build/src/init_6240.s.o
-func_1000625C	0x1000625C	208	init	hasm	d	build/src/init_625C.s.o
+func_1000625C	0x1000625C	148	init	hasm	d,g	build/src/init_625C.s.o
+func_100062F0	0x100062F0	60	init	hasm	d	build/src/init_625C.s.o
 func_1000632C	0x1000632C	84	init	hasm	f	build/src/init_632C.s.o
-func_10006380	0x10006380	164	init	hasm	c,d,f	build/src/init_6380.s.o
-func_10006424	0x10006424	1028	init	hasm	c,d,f	build/src/init_6380.s.o
+func_10006380	0x10006380	152	init	hasm	c,d,f	build/src/init_6380.s.o
+func_10006418	0x10006418	12	init	hasm	k	build/src/init_6380.s.o
+func_10006424	0x10006424	812	init	hasm	c,d,f	build/src/init_6380.s.o
+func_10006750	0x10006750	204	init	hasm	d,h	build/src/init_6380.s.o
+func_1000681C	0x1000681C	12	init	hasm	k	build/src/init_6380.s.o
 func_10006828	0x10006828	260	init	hasm	c	build/src/init_6380.s.o
 func_1000692C	0x1000692C	64	init	hasm	f	build/src/init_692C.s.o
-func_1000696C	0x1000696C	1172	init	hasm	b,c,d	build/src/init_696C.s.o
-func_10006E00	0x10006E00	668	init	hasm	c,d	build/src/init_696C.s.o
+func_1000696C	0x1000696C	724	init	hasm	b,c,d	build/src/init_696C.s.o
+func_10006C40	0x10006C40	120	init	hasm	d	build/src/init_696C.s.o
+func_10006CB8	0x10006CB8	4	init	hasm	g	build/src/init_696C.s.o
+func_10006CBC	0x10006CBC	140	init	hasm	d	build/src/init_696C.s.o
+func_10006D48	0x10006D48	44	init	hasm	d,g	build/src/init_696C.s.o
+func_10006D74	0x10006D74	72	init	hasm	d	build/src/init_696C.s.o
+func_10006DBC	0x10006DBC	68	init	hasm	d	build/src/init_696C.s.o
+func_10006E00	0x10006E00	44	init	hasm	c,g	build/src/init_696C.s.o
+func_10006E2C	0x10006E2C	4	init	hasm	g	build/src/init_696C.s.o
+func_10006E30	0x10006E30	620	init	hasm	d	build/src/init_696C.s.o
 func_1000709C	0x1000709C	308	init	hasm	k	build/src/init_709C.s.o
-func_100071D0	0x100071D0	1512	init	hasm	b,d,h	build/src/init_71D0.s.o
-func_100077B8	0x100077B8	544	init	hasm	b,d	build/src/init_71D0.s.o
+func_100071D0	0x100071D0	16	init	hasm	b	build/src/init_71D0.s.o
+D_100071E0	0x100071E0	1436	init	hasm	b,d,h	build/src/init_71D0.s.o
+func_1000777C	0x1000777C	60	init	hasm	b,d,h	build/src/init_71D0.s.o
+func_100077B8	0x100077B8	252	init	hasm	b,d,h	build/src/init_71D0.s.o
+func_100078B4	0x100078B4	292	init	hasm	b,d	build/src/init_71D0.s.o
 func_100079D8	0x100079D8	76	init	hasm	a	build/src/init_71D0.s.o
 func_10007A24	0x10007A24	20	init	hasm	a	build/src/init_71D0.s.o
 func_10007A38	0x10007A38	448	init	hasm	b,g,h	build/src/init_71D0.s.o
@@ -83,7 +102,8 @@ func_10007C74	0x10007C74	80	init	hasm	b,c,h	build/src/init_71D0.s.o
 func_10007CC4	0x10007CC4	100	init	hasm	b,c,h	build/src/init_71D0.s.o
 func_10007D28	0x10007D28	120	init	hasm	c	build/src/init_71D0.s.o
 func_10007DA0	0x10007DA0	12	init	hasm	b	build/src/init_7DA0.s.o
-func_10007DAC	0x10007DAC	884	init	hasm	b,d	build/src/init_7DAC.s.o
+func_10007DAC	0x10007DAC	452	init	hasm	b,d	build/src/init_7DAC.s.o
+func_10007F70	0x10007F70	432	init	hasm	b,d,h	build/src/init_7DAC.s.o
 osMapTLBRdb	0x10008120	96	init	hasm	b,c	build/src/libultra/os/maptlbrdb.s.o
 func_10008180	0x10008180	856	init	c		build/src/init_8180.c.o
 func_100084D8	0x100084D8	100	init	c		build/src/init_8180.c.o
@@ -884,8 +904,14 @@ func_15017868	0x15017868	200	game	c		build/src/game_44C40.c.o
 func_15017930	0x15017930	496	game	c		build/src/game_44C40.c.o
 func_15017B20	0x15017B20	1156	game	c		build/src/game_44C40.c.o
 func_15017FA4	0x15017FA4	1068	game	c		build/src/game_44C40.c.o
-func_150183D0	0x150183D0	304	game	hasm	d	build/src/game_45880.s.o
-func_15018500	0x15018500	464	game	hasm	d,h	build/src/game_45880.s.o
+func_150183D0	0x150183D0	160	game	hasm	g	build/src/game_45880.s.o
+func_15018470	0x15018470	72	game	hasm	d	build/src/game_45880.s.o
+func_150184B8	0x150184B8	72	game	hasm	d	build/src/game_45880.s.o
+func_15018500	0x15018500	212	game	hasm	d,h	build/src/game_45880.s.o
+func_150185D4	0x150185D4	104	game	hasm	d	build/src/game_45880.s.o
+func_1501863C	0x1501863C	100	game	hasm	d	build/src/game_45880.s.o
+func_150186A0	0x150186A0	16	game	hasm	d	build/src/game_45880.s.o
+func_150186B0	0x150186B0	32	game	hasm	d	build/src/game_45880.s.o
 func_150186D0	0x150186D0	188	game	c		build/src/game_45B80.c.o
 func_1501878C	0x1501878C	1648	game	c		build/src/game_45B80.c.o
 func_15018DFC	0x15018DFC	140	game	c		build/src/game_45B80.c.o
@@ -1270,7 +1296,8 @@ func_150432BC	0x150432BC	16	game	c		build/src/game_70200.c.o
 func_150432CC	0x150432CC	48	game	c		build/src/game_70200.c.o
 func_150432FC	0x150432FC	48	game	c		build/src/game_70200.c.o
 func_1504332C	0x1504332C	88	game	c		build/src/game_70200.c.o
-func_15043384	0x15043384	1692	game	c		build/src/game_70200.c.o
+func_15043384	0x15043384	1660	game	c		build/src/game_70200.c.o
+func_15043A00	0x15043A00	32	game	c		build/src/game_70200.c.o
 func_15043A20	0x15043A20	168	game	c		build/src/game_70200.c.o
 func_15043AC8	0x15043AC8	168	game	c		build/src/game_70200.c.o
 func_15043B70	0x15043B70	72	game	c		build/src/game_70200.c.o
@@ -2441,35 +2468,83 @@ func_150A3398	0x150A3398	172	game	c		build/src/game_CDE80.c.o
 func_150A3444	0x150A3444	108	game	c		build/src/game_CDE80.c.o
 func_150A34B0	0x150A34B0	84	game	c		build/src/game_D0960.c.o
 func_150A3504	0x150A3504	1388	game	c		build/src/game_D0960.c.o
-func_150A3A70	0x150A3A70	1364	game	hasm	b,d	build/src/game_D0F20.s.o
-func_150A3FC4	0x150A3FC4	1052	game	hasm	b,d,e,h	build/src/game_D0F20.s.o
-func_150A43E0	0x150A43E0	272	game	hasm	d	build/src/game_D1890.s.o
-func_150A44F0	0x150A44F0	1556	game	hasm	b,d,e,h	build/src/game_D19A0.s.o
-func_150A4B04	0x150A4B04	1180	game	hasm	d,e,h	build/src/game_D1FB4.s.o
-func_150A4FA0	0x150A4FA0	288	game	hasm	c,d	build/src/game_D2450.s.o
+func_150A3A70	0x150A3A70	176	game	hasm	d,g	build/src/game_D0F20.s.o
+func_150A3B20	0x150A3B20	104	game	hasm	d	build/src/game_D0F20.s.o
+D_150A3B88	0x150A3B88	308	game	hasm	d	build/src/game_D0F20.s.o
+func_150A3CBC	0x150A3CBC	672	game	hasm	b	build/src/game_D0F20.s.o
+func_150A3F5C	0x150A3F5C	104	game	hasm	k	build/src/game_D0F20.s.o
+func_150A3FC4	0x150A3FC4	228	game	hasm	b,d,e	build/src/game_D0F20.s.o
+func_150A40A8	0x150A40A8	116	game	hasm	d	build/src/game_D0F20.s.o
+func_150A411C	0x150A411C	708	game	hasm	b,h	build/src/game_D0F20.s.o
+func_150A43E0	0x150A43E0	252	game	hasm	d,g	build/src/game_D1890.s.o
+D_150A44DC	0x150A44DC	20	game	hasm	d	build/src/game_D1890.s.o
+func_150A44F0	0x150A44F0	384	game	hasm	d	build/src/game_D19A0.s.o
+func_150A4670	0x150A4670	376	game	hasm	d,h	build/src/game_D19A0.s.o
+func_150A47E8	0x150A47E8	20	game	hasm	g	build/src/game_D19A0.s.o
+func_150A47FC	0x150A47FC	156	game	hasm	e,g,h	build/src/game_D19A0.s.o
+func_150A4898	0x150A4898	348	game	hasm	b,d,h	build/src/game_D19A0.s.o
+func_150A49F4	0x150A49F4	256	game	hasm	k	build/src/game_D19A0.s.o
+D_150A4AF4	0x150A4AF4	16	game	hasm	d	build/src/game_D19A0.s.o
+func_150A4B04	0x150A4B04	1008	game	hasm	d,e,h	build/src/game_D1FB4.s.o
+func_150A4EF4	0x150A4EF4	104	game	hasm	k	build/src/game_D1FB4.s.o
+func_150A4F5C	0x150A4F5C	68	game	hasm	d,h	build/src/game_D1FB4.s.o
+func_150A4FA0	0x150A4FA0	208	game	hasm	c,d,g	build/src/game_D2450.s.o
+D_150A5070	0x150A5070	80	game	hasm	d	build/src/game_D2450.s.o
 func_150A50C0	0x150A50C0	156	game	hasm	d	build/src/game_D2570.s.o
-func_150A515C	0x150A515C	540	game	hasm	b,c,d	build/src/game_D260C.s.o
-func_150A5378	0x150A5378	912	game	hasm	b,d,h	build/src/game_D260C.s.o
-func_150A5708	0x150A5708	288	game	hasm	b,c,d,h	build/src/game_D260C.s.o
+func_150A515C	0x150A515C	24	game	hasm	b,c,g	build/src/game_D260C.s.o
+func_150A5174	0x150A5174	36	game	hasm	d,g	build/src/game_D260C.s.o
+func_150A5198	0x150A5198	348	game	hasm	b,d	build/src/game_D260C.s.o
+func_150A52F4	0x150A52F4	132	game	hasm	d	build/src/game_D260C.s.o
+func_150A5378	0x150A5378	260	game	hasm	b,g,h	build/src/game_D260C.s.o
+func_150A547C	0x150A547C	320	game	hasm	d,h	build/src/game_D260C.s.o
+func_150A55BC	0x150A55BC	84	game	hasm	d	build/src/game_D260C.s.o
+func_150A5610	0x150A5610	248	game	hasm	b,d	build/src/game_D260C.s.o
+func_150A5708	0x150A5708	136	game	hasm	c,d,h	build/src/game_D260C.s.o
+func_150A5790	0x150A5790	8	game	hasm	b,g	build/src/game_D260C.s.o
+func_150A5798	0x150A5798	4	game	hasm	b,g	build/src/game_D260C.s.o
+func_150A579C	0x150A579C	140	game	hasm	b,d	build/src/game_D260C.s.o
 func_150A5828	0x150A5828	656	game	hasm	b,c,d,h	build/src/game_D260C.s.o
 func_150A5AB8	0x150A5AB8	216	game	hasm	c,h	build/src/game_D260C.s.o
-func_150A5B90	0x150A5B90	692	game	hasm	b,d,f,h	build/src/game_D3040.s.o
+func_150A5B90	0x150A5B90	248	game	hasm	b,g	build/src/game_D3040.s.o
+func_150A5C88	0x150A5C88	444	game	hasm	b,d,h	build/src/game_D3040.s.o
 func_150A5E44	0x150A5E44	324	game	hasm	b,d	build/src/game_D3040.s.o
-func_150A5F88	0x150A5F88	436	game	hasm	b,d,h	build/src/game_D3040.s.o
+func_150A5F88	0x150A5F88	28	game	hasm	d	build/src/game_D3040.s.o
+func_150A5FA4	0x150A5FA4	288	game	hasm	b,d,g,h	build/src/game_D3040.s.o
+func_150A60C4	0x150A60C4	120	game	hasm	k	build/src/game_D3040.s.o
 func_150A613C	0x150A613C	212	game	hasm	c,h	build/src/game_D3040.s.o
 func_150A6210	0x150A6210	324	game	hasm	c,d,e,h	build/src/game_D36C0.s.o
 func_150A6354	0x150A6354	12	game	hasm	c	build/src/game_D36C0.s.o
-func_150A6360	0x150A6360	416	game	hasm	d,e,h	build/src/game_D3810.s.o
+func_150A6360	0x150A6360	344	game	hasm	d,e,h	build/src/game_D3810.s.o
+func_150A64B8	0x150A64B8	16	game	hasm	k	build/src/game_D3810.s.o
+func_150A64C8	0x150A64C8	56	game	hasm	k	build/src/game_D3810.s.o
 func_150A6500	0x150A6500	56	game	hasm	k	build/src/game_D39B0.s.o
 func_150A6538	0x150A6538	48	game	hasm	k	build/src/game_D39B0.s.o
-func_150A6568	0x150A6568	504	game	hasm	d	build/src/game_D3A18.s.o
-func_150A6760	0x150A6760	256	game	hasm	d	build/src/game_D3A18.s.o
-func_150A6860	0x150A6860	1856	game	hasm	b,d,e,h	build/src/game_D3D10.s.o
-func_150A6FA0	0x150A6FA0	288	game	hasm	b,d,e	build/src/game_D4450.s.o
-func_150A70C0	0x150A70C0	264	game	hasm	b,d,e,f,h	build/src/game_D4450.s.o
-func_150A71C8	0x150A71C8	408	game	hasm	b,d,e,h	build/src/game_D4450.s.o
-func_150A7360	0x150A7360	444	game	hasm	b,d,e	build/src/game_D4450.s.o
-func_150A751C	0x150A751C	468	game	hasm	b,d,e,h	build/src/game_D4450.s.o
+func_150A6568	0x150A6568	404	game	hasm	d	build/src/game_D3A18.s.o
+func_150A66FC	0x150A66FC	100	game	hasm	d	build/src/game_D3A18.s.o
+func_150A6760	0x150A6760	112	game	hasm	d,g	build/src/game_D3A18.s.o
+func_150A67D0	0x150A67D0	144	game	hasm	d	build/src/game_D3A18.s.o
+func_150A6860	0x150A6860	508	game	hasm	d,h	build/src/game_D3D10.s.o
+func_150A6A5C	0x150A6A5C	992	game	hasm	b,d,e,h	build/src/game_D3D10.s.o
+func_150A6E3C	0x150A6E3C	240	game	hasm	d	build/src/game_D3D10.s.o
+func_150A6F2C	0x150A6F2C	116	game	hasm	k	build/src/game_D3D10.s.o
+func_150A6FA0	0x150A6FA0	200	game	hasm	b,d	build/src/game_D4450.s.o
+func_150A7068	0x150A7068	24	game	hasm	d,e	build/src/game_D4450.s.o
+func_150A7080	0x150A7080	64	game	hasm	b,d	build/src/game_D4450.s.o
+func_150A70C0	0x150A70C0	188	game	hasm	b,d,f	build/src/game_D4450.s.o
+func_150A717C	0x150A717C	76	game	hasm	b,d,e,h	build/src/game_D4450.s.o
+func_150A71C8	0x150A71C8	236	game	hasm	b,d	build/src/game_D4450.s.o
+func_150A72B4	0x150A72B4	172	game	hasm	b,d,e,h	build/src/game_D4450.s.o
+func_150A7360	0x150A7360	252	game	hasm	b,d	build/src/game_D4450.s.o
+func_150A745C	0x150A745C	112	game	hasm	b,d,e	build/src/game_D4450.s.o
+func_150A74CC	0x150A74CC	80	game	hasm	b,d	build/src/game_D4450.s.o
+func_150A751C	0x150A751C	160	game	hasm	b,d	build/src/game_D4450.s.o
+D_150A75BC	0x150A75BC	52	game	hasm	b,d,e	build/src/game_D4450.s.o
+D_150A75F0	0x150A75F0	28	game	hasm	d,e,h	build/src/game_D4450.s.o
+D_150A760C	0x150A760C	24	game	hasm	b,d,h	build/src/game_D4450.s.o
+D_150A7624	0x150A7624	24	game	hasm	d,h	build/src/game_D4450.s.o
+D_150A763C	0x150A763C	24	game	hasm	b,d,h	build/src/game_D4450.s.o
+D_150A7654	0x150A7654	72	game	hasm	d,e,h	build/src/game_D4450.s.o
+func_150A769C	0x150A769C	84	game	hasm	b,d	build/src/game_D4450.s.o
 func_150A76F0	0x150A76F0	128	game	hasm	b,c	build/src/game_D4450.s.o
 func_150A7770	0x150A7770	32	game	hasm	b	build/src/game_D4C20.s.o
 guMtxF2L	0x150A7790	464	game	hasm	e	build/src/libultra/gu/guMtxF2L.s.o
@@ -2486,14 +2561,37 @@ func_150A7DA0	0x150A7DA0	80	game	hasm	s	build/src/game_D5250.s.o
 func_150A7DF0	0x150A7DF0	608	game	hasm	f	build/src/game_D52A0.s.o
 func_150A8050	0x150A8050	336	game	hasm	f	build/src/game_D5500.s.o
 func_150A81A0	0x150A81A0	48	game	hasm	b	build/src/game_D5650.s.o
-func_150A81D0	0x150A81D0	1864	game	hasm	d,f,h	build/src/game_D5680.s.o
-func_150A8918	0x150A8918	232	game	hasm	c,d,h	build/src/game_D5DC8.s.o
+func_150A81D0	0x150A81D0	580	game	hasm	d,f,h	build/src/game_D5680.s.o
+func_150A8414	0x150A8414	264	game	hasm	d,h	build/src/game_D5680.s.o
+func_150A851C	0x150A851C	28	game	hasm	d,g	build/src/game_D5680.s.o
+func_150A8538	0x150A8538	232	game	hasm	d	build/src/game_D5680.s.o
+func_150A8620	0x150A8620	488	game	hasm	d,g,h	build/src/game_D5680.s.o
+func_150A8808	0x150A8808	272	game	hasm	d,h	build/src/game_D5680.s.o
+func_150A8918	0x150A8918	60	game	hasm	c,d	build/src/game_D5DC8.s.o
+func_150A8954	0x150A8954	60	game	hasm	d	build/src/game_D5DC8.s.o
+func_150A8990	0x150A8990	76	game	hasm	d,h	build/src/game_D5DC8.s.o
+func_150A89DC	0x150A89DC	36	game	hasm	h	build/src/game_D5DC8.s.o
 func_150A8A00	0x150A8A00	24	game	hasm	d	build/src/game_D5DC8.s.o
-func_150A8A18	0x150A8A18	2756	game	hasm	b,c,d,e,h	build/src/game_D5DC8.s.o
-func_150A94DC	0x150A94DC	1192	game	hasm	c,d,h	build/src/game_D5DC8.s.o
+func_150A8A18	0x150A8A18	232	game	hasm	c,d,e,g,h	build/src/game_D5DC8.s.o
+func_150A8B00	0x150A8B00	236	game	hasm	b,d	build/src/game_D5DC8.s.o
+func_150A8BEC	0x150A8BEC	472	game	hasm	b,d,h	build/src/game_D5DC8.s.o
+func_150A8DC4	0x150A8DC4	32	game	hasm	g	build/src/game_D5DC8.s.o
+func_150A8DE4	0x150A8DE4	216	game	hasm	b,d,g	build/src/game_D5DC8.s.o
+func_150A8EBC	0x150A8EBC	4	game	hasm	g	build/src/game_D5DC8.s.o
+func_150A8EC0	0x150A8EC0	596	game	hasm	b,d,h	build/src/game_D5DC8.s.o
+func_150A9114	0x150A9114	132	game	hasm	d,h	build/src/game_D5DC8.s.o
+func_150A9198	0x150A9198	128	game	hasm	d,h	build/src/game_D5DC8.s.o
+func_150A9218	0x150A9218	144	game	hasm	d,h	build/src/game_D5DC8.s.o
+func_150A92A8	0x150A92A8	344	game	hasm	d,h	build/src/game_D5DC8.s.o
+func_150A9400	0x150A9400	220	game	hasm	d,h	build/src/game_D5DC8.s.o
+func_150A94DC	0x150A94DC	144	game	hasm	c,d,h	build/src/game_D5DC8.s.o
+func_150A956C	0x150A956C	368	game	hasm	d,g,h	build/src/game_D5DC8.s.o
+func_150A96DC	0x150A96DC	680	game	hasm	d	build/src/game_D5DC8.s.o
 func_150A9984	0x150A9984	392	game	hasm	e,h	build/src/game_D6E34.s.o
-func_150A9B0C	0x150A9B0C	308	game	hasm	h	build/src/game_D6FBC.s.o
-func_150A9C40	0x150A9C40	2192	game	hasm	b,h	build/src/game_D70F0.s.o
+func_150A9B0C	0x150A9B0C	304	game	hasm	h	build/src/game_D6FBC.s.o
+D_150A9C3C	0x150A9C3C	4	game	hasm	g	build/src/game_D6FBC.s.o
+func_150A9C40	0x150A9C40	2096	game	hasm	b,g	build/src/game_D70F0.s.o
+func_150AA470	0x150AA470	96	game	hasm	h	build/src/game_D70F0.s.o
 func_150AA4D0	0x150AA4D0	216	game	hasm	c,h	build/src/game_D7980.s.o
 func_150AA5A8	0x150AA5A8	156	game	hasm	c,h	build/src/game_D7980.s.o
 func_150AA644	0x150AA644	52	game	hasm	c,h	build/src/game_D7980.s.o
@@ -2501,24 +2599,67 @@ func_150AA678	0x150AA678	256	game	hasm	c,h	build/src/game_D7980.s.o
 func_150AA778	0x150AA778	156	game	hasm	c,h	build/src/game_D7980.s.o
 func_150AA814	0x150AA814	396	game	hasm	b,h	build/src/game_D7CC4.s.o
 func_150AA9A0	0x150AA9A0	128	game	hasm	c,h	build/src/game_D7E50.s.o
-func_150AAA20	0x150AAA20	888	game	hasm	c,d,h	build/src/game_D7E50.s.o
-func_150AAD98	0x150AAD98	1112	game	hasm	d,h	build/src/game_D8248.s.o
-func_150AB1F0	0x150AB1F0	2864	game	hasm	b,d,e,h	build/src/game_D86A0.s.o
-func_150ABD20	0x150ABD20	1188	game	hasm	b,c,d,h	build/src/game_D86A0.s.o
-func_150AC1C4	0x150AC1C4	384	game	hasm	b,c,d,e,h	build/src/game_D86A0.s.o
-func_150AC344	0x150AC344	160	game	hasm	c,d,h	build/src/game_D86A0.s.o
+func_150AAA20	0x150AAA20	868	game	hasm	c,d,h	build/src/game_D7E50.s.o
+func_150AAD84	0x150AAD84	20	game	hasm	k	build/src/game_D7E50.s.o
+func_150AAD98	0x150AAD98	1032	game	hasm	d,h	build/src/game_D8248.s.o
+func_150AB1A0	0x150AB1A0	80	game	hasm	c	build/src/game_D8248.s.o
+func_150AB1F0	0x150AB1F0	56	game	hasm	g	build/src/game_D86A0.s.o
+func_150AB228	0x150AB228	448	game	hasm	b,d,e,f,h	build/src/game_D86A0.s.o
+func_150AB3E8	0x150AB3E8	36	game	hasm	k	build/src/game_D86A0.s.o
+D_150AB40C	0x150AB40C	156	game	hasm	d,h	build/src/game_D86A0.s.o
+D_150AB4A8	0x150AB4A8	152	game	hasm	g,h	build/src/game_D86A0.s.o
+func_150AB540	0x150AB540	136	game	hasm	g,h	build/src/game_D86A0.s.o
+D_150AB5C8	0x150AB5C8	68	game	hasm	k	build/src/game_D86A0.s.o
+D_150AB60C	0x150AB60C	56	game	hasm	g,h	build/src/game_D86A0.s.o
+func_150AB644	0x150AB644	108	game	hasm	d	build/src/game_D86A0.s.o
+func_150AB6B0	0x150AB6B0	64	game	hasm	b,d,g	build/src/game_D86A0.s.o
+func_150AB6F0	0x150AB6F0	456	game	hasm	d	build/src/game_D86A0.s.o
+func_150AB8B8	0x150AB8B8	36	game	hasm	d,g	build/src/game_D86A0.s.o
+func_150AB8DC	0x150AB8DC	172	game	hasm	d	build/src/game_D86A0.s.o
+D_150AB988	0x150AB988	288	game	hasm	d,h	build/src/game_D86A0.s.o
+func_150ABAA8	0x150ABAA8	632	game	hasm	d,h	build/src/game_D86A0.s.o
+func_150ABD20	0x150ABD20	192	game	hasm	c,d,h	build/src/game_D86A0.s.o
+func_150ABDE0	0x150ABDE0	176	game	hasm	d,h	build/src/game_D86A0.s.o
+func_150ABE90	0x150ABE90	92	game	hasm	b,h	build/src/game_D86A0.s.o
+func_150ABEEC	0x150ABEEC	116	game	hasm	d	build/src/game_D86A0.s.o
+func_150ABF60	0x150ABF60	596	game	hasm	d,h	build/src/game_D86A0.s.o
+func_150AC1B4	0x150AC1B4	16	game	hasm	g	build/src/game_D86A0.s.o
+func_150AC1C4	0x150AC1C4	116	game	hasm	c,d,e,h	build/src/game_D86A0.s.o
+func_150AC238	0x150AC238	32	game	hasm	d,h	build/src/game_D86A0.s.o
+func_150AC258	0x150AC258	72	game	hasm	b,d,h	build/src/game_D86A0.s.o
+func_150AC2A0	0x150AC2A0	12	game	hasm	k	build/src/game_D86A0.s.o
+D_150AC2AC	0x150AC2AC	44	game	hasm	d,g	build/src/game_D86A0.s.o
+func_150AC2D8	0x150AC2D8	108	game	hasm	k	build/src/game_D86A0.s.o
+func_150AC344	0x150AC344	12	game	hasm	c,g	build/src/game_D86A0.s.o
+func_150AC350	0x150AC350	148	game	hasm	d,h	build/src/game_D86A0.s.o
 func_150AC3E4	0x150AC3E4	156	game	hasm	d	build/src/game_D9894.s.o
-func_150AC480	0x150AC480	1328	game	hasm	d,h	build/src/game_D9894.s.o
+func_150AC480	0x150AC480	380	game	hasm	d,h	build/src/game_D9894.s.o
+func_150AC5FC	0x150AC5FC	152	game	hasm	d,h	build/src/game_D9894.s.o
+func_150AC694	0x150AC694	164	game	hasm	d,h	build/src/game_D9894.s.o
+func_150AC738	0x150AC738	556	game	hasm	d,h	build/src/game_D9894.s.o
+func_150AC964	0x150AC964	76	game	hasm	d	build/src/game_D9894.s.o
 D_150AC9B0	0x150AC9B0	16	game	hasm	d	build/src/game_D9894.s.o
-func_150AC9C0	0x150AC9C0	2468	game	hasm	b,d,h	build/src/game_D9E70.s.o
-func_150AD364	0x150AD364	1036	game	hasm	c,d,h	build/src/game_D9E70.s.o
+func_150AC9C0	0x150AC9C0	360	game	hasm	d,h	build/src/game_D9E70.s.o
+func_150ACB28	0x150ACB28	40	game	hasm	g,h	build/src/game_D9E70.s.o
+func_150ACB50	0x150ACB50	136	game	hasm	d,h	build/src/game_D9E70.s.o
+func_150ACBD8	0x150ACBD8	32	game	hasm	d,g	build/src/game_D9E70.s.o
+func_150ACBF8	0x150ACBF8	528	game	hasm	d,h	build/src/game_D9E70.s.o
+func_150ACE08	0x150ACE08	188	game	hasm	d,h	build/src/game_D9E70.s.o
+func_150ACEC4	0x150ACEC4	928	game	hasm	b,d,h	build/src/game_D9E70.s.o
+func_150AD264	0x150AD264	144	game	hasm	d	build/src/game_D9E70.s.o
+func_150AD2F4	0x150AD2F4	112	game	hasm	k	build/src/game_D9E70.s.o
+func_150AD364	0x150AD364	900	game	hasm	c,d,h	build/src/game_D9E70.s.o
+func_150AD6E8	0x150AD6E8	104	game	hasm	d,g,h	build/src/game_D9E70.s.o
+func_150AD750	0x150AD750	32	game	hasm	d	build/src/game_D9E70.s.o
 func_150AD770	0x150AD770	16	game	hasm	b,g	build/src/game_DAC20.s.o
 func_150AD780	0x150AD780	12	game	hasm	g	build/src/game_DAC30.s.o
-func_150AD78C	0x150AD78C	292	game	hasm	d,e	build/src/game_DAC3C.s.o
+func_150AD78C	0x150AD78C	272	game	hasm	d,e	build/src/game_DAC3C.s.o
+func_150AD89C	0x150AD89C	20	game	hasm	k	build/src/game_DAC3C.s.o
 func_150AD8B0	0x150AD8B0	80	game	hasm	s	build/src/game_DAD60.s.o
 func_150AD900	0x150AD900	48	game	hasm	s	build/src/game_DADB0.s.o
 func_150AD930	0x150AD930	48	game	hasm	s	build/src/game_DADB0.s.o
-func_150AD960	0x150AD960	64	game	hasm	b,d	build/src/game_DAE10.s.o
+func_150AD960	0x150AD960	48	game	hasm	b,d	build/src/game_DAE10.s.o
+func_150AD990	0x150AD990	16	game	hasm	b	build/src/game_DAE10.s.o
 math_distance3D	0x150AD9A0	128	game	hasm	b	build/src/game_DAE50.s.o
 func_150ADA20	0x150ADA20	72	game	hasm	b	build/src/game_DAE50.s.o
 func_150ADA68	0x150ADA68	100	game	hasm	b	build/src/game_DAE50.s.o
@@ -5833,15 +5974,17 @@ contramread2.c+0x0	0x151F2080	944	game	c		build/src/libultra/io/contramread2.c.o
 contramwrite2.c+0x0	0x151F2430	944	game	c		build/src/libultra/io/contramwrite2.c.o
 func_151F27E0	0x151F27E0	176	game	c		build/src/libultra/io/crc2.c.o
 func_151F2890	0x151F2890	208	game	c		build/src/libultra/io/crc2.c.o
-game_21FC90.c+0x0	0x151F2960	584	game	c		build/src/libultra/audio/game_21FC90.c.o
+func_151F2960	0x151F2960	584	game	c		build/src/libultra/audio/game_21FC90.c.o
 func_151F2BA8	0x151F2BA8	64	game	c		build/src/libultra/audio/game_21FC90.c.o
 func_151F2BE8	0x151F2BE8	100	game	c		build/src/libultra/audio/game_21FC90.c.o
 func_151F2C4C	0x151F2C4C	144	game	c		build/src/libultra/audio/game_21FC90.c.o
 func_151F2CDC	0x151F2CDC	144	game	c		build/src/libultra/audio/game_21FC90.c.o
-func_151F2D6C	0x151F2D6C	224	game	c		build/src/libultra/audio/game_21FC90.c.o
+func_151F2D6C	0x151F2D6C	144	game	c		build/src/libultra/audio/game_21FC90.c.o
+func_151F2DFC	0x151F2DFC	80	game	c		build/src/libultra/audio/game_21FC90.c.o
 func_151F2E4C	0x151F2E4C	60	game	c		build/src/libultra/audio/game_21FC90.c.o
 func_151F2E88	0x151F2E88	2908	game	c		build/src/libultra/audio/game_21FC90.c.o
-func_151F39E4	0x151F39E4	592	game	c		build/src/libultra/audio/game_21FC90.c.o
+func_151F39E4	0x151F39E4	568	game	c		build/src/libultra/audio/game_21FC90.c.o
+func_151F3C1C	0x151F3C1C	24	game	c		build/src/libultra/audio/game_21FC90.c.o
 func_151F3C34	0x151F3C34	24	game	c		build/src/libultra/audio/game_21FC90.c.o
 func_151F3C4C	0x151F3C4C	300	game	c		build/src/libultra/audio/game_21FC90.c.o
 func_151F3D78	0x151F3D78	104	game	c		build/src/libultra/audio/game_21FC90.c.o

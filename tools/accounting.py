@@ -12,7 +12,7 @@ asm segment outside src/, or a hasm function with no proof.
 Proof rules (see AGENTS.md "Hand-written asm"). The rules marked * are computed from the instructions here;
 every computed rule was checked to occur 0 times in the 5,746 functions compiled by IDO 5.3.
   a  source-identical      the SDK's own .s, assembled by IDO 5.3, gives the same bytes (tools/hasm_proofs.tsv)
-  b* unemittable           cop0/TLB/cache/sync/syscall/eret, 64-bit ops, trapping add/addi/sub
+  b* unemittable           cop0/TLB/cache/sync/syscall/eret, 64-bit ops, trapping add/addi/sub, $k0/$k1
   c  uninit-read           dataflow: reads a register that is no ABI input and not written first (hasm_proofs.tsv)
   d* j-or-branch-out       opcode-2 `j`, or a branch that leaves the function
   e* bare-cvt.w            cvt.w.s/cvt.w.d with no ctc1 in the function
@@ -90,8 +90,8 @@ def functions():
 
 def computed_rules(start, ins):
     r, ops, end = set(), [i[1] for i in ins], start + 4 * len(ins)
-    if set(ops) & HARD:
-        r.add("b")
+    if set(ops) & HARD or any(re.search(r"\$?\bk[01]\b", a) for _, _, a in ins):
+        r.add("b")  # includes $k0/$k1, which IDO never allocates
     if "j" in ops:
         r.add("d")
     if any(o in ("cvt.w.s", "cvt.w.d") for o in ops) and "ctc1" not in ops:
