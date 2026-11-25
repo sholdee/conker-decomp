@@ -3,137 +3,126 @@
 #include "variables.h"
 
 
+// Screen-flash effect spawned between two objects (see func_15104170 callers in game_1C1150.c).
 typedef struct {
-    u8  pad0[0x10];
-    s32 unk10;
-    s32 unk14;
-    s16 unk18;
-    u8  unk1A;
-    u8  unk1B;
-    u8  unk1C;
-} struct_15104170;
+    u8         pad0[0x10];
+    struct127 *owner;  // 0x10
+    struct127 *source; // 0x14
+    u16        timer;  // 0x18
+    u8         state;  // 0x1A
+    u8         alpha;  // 0x1B
+    u8         mode;   // 0x1C: 0 = trigger on owner's animation frame, 1 = trigger after timer
+} FlashEffect;
 
-s32 func_15167A68(s32, s32, s32, s32, s32, s32);
+void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
-struct_15104170 *func_15104170(s32 arg0, s32 arg1, s32 arg2) {
-    struct_15104170 *ret;
+/* Spawns a flash effect for owner/source; mode picks how it triggers. */
+void func_15104170(s32 mode, struct127 *owner, struct127 *source) {
+    FlashEffect *effect;
 
-    ret = (struct_15104170 *)func_15167A68(0x64, 0, 0x20, 0, 0xFF, 1);
-    if (ret != 0) {
-        ret->unk18 = 0xF;
-        ret->unk1A = 0;
-        ret->unk1B = 0;
-        ret->unk10 = arg1;
-        ret->unk14 = arg2;
-        ret->unk1C = arg0;
+    effect = func_15167A68(100, 0, 0x20, 0, 0xFF, 1);
+    if (effect != NULL) {
+        effect->timer = 15;
+        effect->state = 0;
+        effect->alpha = 0;
+        effect->owner = owner;
+        effect->source = source;
+        effect->mode = mode;
     }
 }
 
-typedef struct {
-    u8  pad0[0x10];
-    u8 *unk10;
-    u8 *unk14;
-    u16 unk18;
-    u8  unk1A;
-    u8  unk1B;
-    u8  unk1C;
-} struct_151041E4;
-
 extern u8 D_800BEA0C;
 void func_1000E2F4(s32 arg0);
-void func_151254F4(void *arg0, s32 arg1);
+void func_151254F4(struct108 *camera, s32 arg1);
 void func_151D66F0(s32 arg0, s32 arg1);
 
-void func_151041E4(struct_151041E4 *arg0) {
-    s32 var_a0;
-    s32 kind;
-    u8 *p2D0;
-    f32 y;
+/* Flash effect update: wait for trigger, fade in, hold, fade out and free. */
+void func_151041E4(FlashEffect *effect) {
+    s32 triggered;
+    s32 mode;
+    struct197 *anim;
+    f32 frame;
 
-    switch (arg0->unk1A) {
+    switch (effect->state) {
     case 0:
-        p2D0 = *(u8 **)(arg0->unk10 + 0x2D0);
-        y = *(f32 *)(p2D0 + 8);
-        kind = arg0->unk1C;
-        var_a0 = 0;
-        if (kind == 0) {
-            if (y >= 19.0f) {
-                var_a0 = 1;
+        anim = effect->owner->unk2D0;
+        frame = anim->unk8;
+        mode = effect->mode;
+        triggered = FALSE;
+        if (mode == 0) {
+            if (frame >= 19.0f) {
+                triggered = TRUE;
             }
-        } else if (kind == 1) {
-            if (D_800BE9E4 < arg0->unk18) {
-                arg0->unk18 -= D_800BE9E4;
+        } else if (mode == 1) {
+            if (D_800BE9E4 < effect->timer) {
+                effect->timer -= D_800BE9E4;
             } else {
-                var_a0 = 1;
+                triggered = TRUE;
             }
         }
-        if (var_a0) {
-            u8 *sp34;
-            u8 *sp30;
+        if (triggered) {
+            struct127 *source;
+            struct127 *owner;
 
-            sp34 = arg0->unk14;
-            sp30 = arg0->unk10;
-            arg0->unk1A = 1;
+            source = effect->source;
+            owner = effect->owner;
+            effect->state = 1;
             D_800BEA0C = 1;
             func_100176C4();
             func_10010F30(0x5B2, 0x7FFF, 0, 0, 0);
-            func_10010F30(0x5B2, 0x7FFF, 0x7F, -0x64, 0);
+            func_10010F30(0x5B2, 0x7FFF, 127, -100, 0);
             func_10010F30(0x5B2, 0x7FFF, 0, 0, 0);
-            func_10010F30(0x5B2, 0x7FFF, 0x7F, -0x64, 0);
-            func_151D66F0(0xD2, 2);
-            func_151254F4(*(u8 **)(sp30 + 0x318), sp34[0x13F]);
-            *(f32 *)(*(u8 **)(sp30 + 0x318) + 0x674) = 0.0f;
-        lbl0: ;
+            func_10010F30(0x5B2, 0x7FFF, 127, -100, 0);
+            func_151D66F0(210, 2);
+            func_151254F4(owner->camera, source->unk13F);
+            owner->camera->unk674 = 0.0f;
         }
         break;
     case 1: {
-        s32 v;
+        s32 alpha;
 
-        v = arg0->unk1B;
-        v += D_800BEA08 * 10;
-        if (v >= 0xFF) {
-            arg0->unk1B = 0xFF;
-            arg0->unk1A = 2;
-            arg0->unk18 = 0xB4;
+        alpha = effect->alpha;
+        alpha += D_800BEA08 * 10;
+        if (alpha >= 255) {
+            effect->alpha = 255;
+            effect->state = 2;
+            effect->timer = 180;
         } else {
-            arg0->unk1B = v;
-        lbl1: ;
+            effect->alpha = alpha;
         }
     }
         break;
     case 2: {
-        u8 *sp28;
+        struct127 *owner;
 
-        if (D_800BEA08 < arg0->unk18) {
-            arg0->unk18 -= D_800BEA08;
+        if (D_800BEA08 < effect->timer) {
+            effect->timer -= D_800BEA08;
         } else {
-            sp28 = arg0->unk10;
+            owner = effect->owner;
             D_800BEA0C = 0;
             func_1000E2F4(0);
-            func_151254F4(*(u8 **)(sp28 + 0x318), sp28[0x13F]);
-            *(f32 *)(*(u8 **)(sp28 + 0x318) + 0x674) = 0.0f;
-            arg0->unk1A = 3;
-        lbl2: ;
+            func_151254F4(owner->camera, owner->unk13F);
+            owner->camera->unk674 = 0.0f;
+            effect->state = 3;
         }
     }
         break;
     case 3: {
-        s32 sp24;
+        s32 alpha;
 
-        sp24 = arg0->unk1B;
-        sp24 -= D_800BEA08 * 10;
-        if (sp24 <= 0) {
-            func_1516972C((struct102 *)arg0);
+        alpha = effect->alpha;
+        alpha -= D_800BEA08 * 10;
+        if (alpha <= 0) {
+            func_1516972C((struct102 *)effect);
             func_151D66F0(0, 0);
         } else {
-            func_151D66F0((sp24 * 0xD2) >> 8, 2);
-            arg0->unk1B = sp24;
+            func_151D66F0((alpha * 210) >> 8, 2);
+            effect->alpha = alpha;
         }
     }
         break;
     }
 }
-
 
 s32 func_1517F08C(s32, s32, s32, s32, s32, s32);
 
