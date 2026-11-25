@@ -198,6 +198,15 @@ extern void func_15052590(struct127 *obj);
 /* Ray (origin, normalized dir) vs sphere (center, radius); 0 on a miss or when the near hit is behind. */
 extern s32 func_151452C4(f32 *origin, f32 *dir, f32 *center, f32 radius, f32 *hitNear, f32 *hitFar, f32 *tNear, f32 *tFar);
 
+/*
+ * Per-frame update of a player-driven tracked vehicle with an aimable gun.
+ * - The controlling player (D_800CC2D0[unk127], or object 0 in single player) drives it: stick X steers,
+ *   stick Y sets the throttle, A boosts while the player's state allows it, R stops it.
+ * - The two treads are scrolled from the forward speed and the turn rate (func_150ED638).
+ * - The gun angles (STATE aimYaw/aimPitch) either lead STATE->target, or turn with C-left/C-right while
+ *   the pitch homes in on the best object ahead, or follow the line of sight of camera camSlot - 1.
+ *   They end up in unk2E4 as two s16 angles (x50).
+ */
 void func_150ED748(struct127 *obj) {
     s32 viewer[1]; // matching: an array keeps the viewer index in memory; a scalar is register-allocated
     f32 velocity;
@@ -308,6 +317,7 @@ void func_150ED748(struct127 *obj) {
             }
         }
     }
+    /* Driver input. */
     if (controlled) {
         s32 unused3; // matching: an unused block local here steers IDO's register allocation
         throttleScale = 0.0f;
@@ -436,8 +446,10 @@ void func_150ED748(struct127 *obj) {
             ((u8 *)&obj->pad6C)[0] = reversing + 10;
             ((u8 *)&obj->pad6C)[1] = 19;
         }
+        /* Gun aim. */
         if (D_800CC2D0[viewer[0]].unk31C->unk84 != 0) {
             if (STATE(obj)->target >= 0) {
+                /* Lead the target: move it along its heading by speed * distance / 200 while aiming. */
                 f32 dirZ;
                 target = &D_800CC2D0[STATE(obj)->target];
                 offset = target->x_position - obj->x_position;
@@ -487,6 +499,7 @@ void func_150ED748(struct127 *obj) {
                 objCount = 25;
             }
             if (camSlot == 0) {
+                /* Pick the object closest to the gun's yaw (within 35 degrees), weighted by distance. */
                 for (i = 0; i < objCount; i++) {
                     if (i != viewer[0]) {
                         other = &D_800CC2D0[i];
@@ -543,6 +556,7 @@ void func_150ED748(struct127 *obj) {
                 camera = &D_800DBFF0[camSlot - 1];
                 subject = camera->unk3D4;
                 if (camera->unk3D4->unk197 != 0) {
+                    /* Copy the camera subject's angles. */
                     typedef s32 scope; // matching: as above
                     angle = -subject->unk170;
                     angle -= obj->unkB8;
@@ -564,6 +578,7 @@ void func_150ED748(struct127 *obj) {
                     STATE(obj)->aimPitch = angle;
                     STATE(obj)->aimYaw = angle2;
                 } else {
+                    /* Aim at what the camera's look ray hits: level geometry or another object. */
                     dir[0] = camera->unk2BC - camera->unk2F8;
                     dir[1] = camera->unk2C0 - camera->unk2FC;
                     dir[2] = camera->unk2C4 - camera->unk300;
