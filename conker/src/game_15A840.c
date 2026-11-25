@@ -2,7 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Camera block at Camera + 0x69C (Camera only pads this range). */
+/* Camera.orbitCounter / Camera.orbitSpeed seen from Camera + 0x69C.
+   matching: the original reaches them through one base pointer; plain camera->orbitSpeed is 0x10 bytes shorter. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x24];
     /* 0x24 */ s32 counter;
@@ -11,9 +12,9 @@ typedef struct {
 
 void func_1508EF80(struct17 *point, struct17 *pivot, f32 degrees, struct17 *out);
 
-/* Manual camera orbit. While input bit 0 or 1 is held (and bit 21 of unk84 is clear), orbitSpeed
-   accelerates by 0.5 per frame in that direction, clamped to +-10, and the eye (unk2F8) orbits around
-   unk2A4 by orbitSpeed / 2.5 degrees per frame. On release orbitSpeed decays by 20% per frame. */
+/* Manual camera orbit. While input bit 0 or 1 is held (and bit 21 of flags is clear), orbitSpeed
+   accelerates by 0.5 per frame in that direction, clamped to +-10, and the eye orbits around
+   the focus by orbitSpeed / 2.5 degrees per frame. On release orbitSpeed decays by 20% per frame. */
 void func_1512D390(Camera *camera) {
     CamOrbitState *orbit;
     f32 speed;

@@ -528,13 +528,6 @@ struct TrapCharacter {
     u8 pad320[0xC];
 };
 
-/* The 0x9A0-byte player (Camera) as func_1511BEBC sees it. */
-struct TrapPlayer {
-    u8 pad0[0x3D0];
-    struct TrapCharacter *character;
-    struct CharacterTrap *trap;
-    u8 pad3D8[0x9A0 - 0x3D8];
-};
 
 extern void func_150DDED0(void *);
 
@@ -544,7 +537,7 @@ void func_1511BEBC(WorldObject *obj) {
     s16 restY;
     struct TrapCharacter *target;
     struct TrapCharacter *character;
-    struct TrapPlayer *player;
+    Camera *player;
     s32 i;
     s32 mode;
     s32 flag8;
@@ -587,11 +580,11 @@ void func_1511BEBC(WorldObject *obj) {
         pos[2] = obj->z;
         if (mode != 3 && mode != 1) {
             for (i = 0; i < D_8008FD8C; i++) {
-                player = &((struct TrapPlayer *)D_800DBFF0)[i];
-                if (player->trap->state >= 4) {
+                player = &D_800DBFF0[i];
+                if (player->playerExt->unk6B >= 4) {
                     continue;
                 }
-                character = player->character;
+                character = (struct TrapCharacter *)player->player;
                 if (character->y + 40.0f < pos[1]) {
                     dy = (character->y + (f32)character->height) - pos[1];
                     dz = character->z - pos[2];

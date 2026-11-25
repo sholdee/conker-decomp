@@ -4,12 +4,10 @@
 #include "functions.h"
 #undef func_151422C0
 #undef func_15195AA8
-#define D_800DBFF0 D_800DBFF0_hdr
 #define D_800DD198 D_800DD198_hdr
 #define D_800E0900 D_800E0900_hdr
 #include "variables.h"
 #include "effects.h"
-#undef D_800DBFF0
 #undef D_800DD198
 #undef D_800E0900
 
@@ -954,17 +952,9 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     return 1;
 }
 
-/* Per-view camera (D_800DBFF0[view]). */
-typedef struct ViewCamera {
-    u8 pad0[0x2F8];
-    vertex position;
-    u8 pad304[0x69C];
-} ViewCamera;
-
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
-extern ViewCamera *D_800DBFF0;
 
 typedef struct {
     s32 id;
@@ -1016,7 +1006,7 @@ Gfx *func_15197148(CharacterFlamethrowerActor *actor, Gfx *gfx, s16 view) {
     if (actor->count >= 2) {
         func_151D5D60(actor->buffers, view, (actor->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
-            eye = &D_800DBFF0[view].position;
+            eye = &D_800DBFF0[view].eye;
             jet = actor->state;
             points = actor->points;
             flag = 1;
@@ -1335,7 +1325,7 @@ void *func_15197C10(SceneParticle *beam, s16 view) {
     tip.x = beam->start.x + dx * progress;
     tip.y = beam->start.y + dy * progress;
     tip.z = beam->start.z + dz * progress;
-    eye = &D_800DBFF0[view].position;
+    eye = &D_800DBFF0[view].eye;
     dx = tip.x - beam->start.x;
     dy = tip.y - beam->start.y;
     dz = tip.z - beam->start.z;
