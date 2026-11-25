@@ -1,103 +1,129 @@
 #include <ultra64.h>
+/* matching: this file calls func_150ADA20 as returning u32 (functions.h says u8); a u8 return
+ * spills the random values as bytes. */
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
+/* functions.h declares func_15149130 with a struct37 * where this file passes the data size. */
+#define func_15149130 func_15149130_struct37_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
+#undef func_15149130
 u32 func_150ADA20(void);
 #include "variables.h"
 
-
+/* Direction spread of a burst: func_15143794 takes a random angle from each range (see game_2062D0.c). */
 typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ f32 unk8[3];
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ u8 unk2C;
-    /* 0x2D */ s8 unk2D;
-    /* 0x2E */ u8 unk2E[2];
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
+    s16 angle1;
+    s16 angle1Range;
+    s16 angle2;
+    s16 angle2Range;
+} BurstAngles;
+
+/* Parameters for func_15150178, which throws count + rand(countRange) func_151D9014 particles
+ * (same layout as DropBurstSpec in game_2062D0.c). */
+typedef struct {
+    /* 0x00 */ BurstAngles angles;
+    /* 0x08 */ struct17 pos;
+    /* 0x14 */ s16 count;
+    /* 0x16 */ s16 countRange;
+    /* 0x18 */ f32 speed;
+    /* 0x1C */ f32 speedRange;
+    /* 0x20 */ s16 lifetime;
+    /* 0x22 */ s16 lifetimeRange;
+    /* 0x24 */ f32 gravity;
+    /* 0x28 */ f32 gravityRange;
+    /* 0x2C */ u8 unk2C; /* particle arg5 */
+    /* 0x2D */ u8 unk2CRange;
+    /* 0x2E */ u8 pad2E[2];
+    /* 0x30 */ f32 size;
+    /* 0x34 */ f32 sizeRange;
     /* 0x38 */ s8 unk38;
-    /* 0x39 */ u8 unk39;
-    /* 0x3A */ u8 unk3A[2];
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s8 unk40;
+    /* 0x39 */ u8 kind;
+    /* 0x3A */ u8 pad3A[2];
+    /* 0x3C */ f32 unk3CChance; /* probability of particle arg7 */
+    /* 0x40 */ s8 wobble;
     /* 0x41 */ u8 pad41[3];
-    /* 0x44 */ f32 unk44;
-} Struct151DC6A0;
+    /* 0x44 */ f32 bounceChance;
+} DropBurstSpec; /* 0x48 */
 
-typedef struct {
-    f32 v[3];
-} Vec3Copy_151DC6A0;
+void func_15103254(s16 lifetime, u8 alpha, f32 size, struct17 *pos, u8 views, u8 arg5, s32 arg6);
+void func_15150178(DropBurstSpec *spec, struct17 *pos, s32 arg2, u8 owner, s32 kind);
+void func_151D3F14(struct17 *pos, u8 owner, s32 kind);
+void func_15182670(u8 r, u8 g, u8 b, u8 alpha, s32 duration, s32 view, u8 owner, s32 kind);
 
-void func_15103254(s16, u8, f32, struct127 *, s32, u8, s32);
-void func_15150178(Struct151DC6A0 *arg0, f32 *arg1, s32 arg2, u8 arg3, s32 arg4);
-void func_151D3F14(struct127 *, u8, s32);
-void func_15182670(u8, u8, u8, u8, s32, s32, u8, s32);
-
-void func_151DC6A0(struct127 *arg0, u8 arg1, s32 arg2) {
-    func_15103254(func_150ADA20() % 5 + 12, func_150ADA20() % 56 + 200, func_150ADA68() * 600.0f + 1700.0f, arg0, 0xFF, arg1, arg2);
+/* Spawns a flash particle, a burst of 12-18 drops, the func_151D3F14 effect and a white screen
+ * flash at `pos`. */
+void func_151DC6A0(struct17 *pos, u8 owner, s32 kind) {
+    func_15103254(func_150ADA20() % 5U + 12, func_150ADA20() % 56U + 200, func_150ADA68() * 600.0f + 1700.0f,
+                  pos, 0xFF, owner, kind);
     {
-    Struct151DC6A0 sp38;
-    *(Vec3Copy_151DC6A0 *)sp38.unk8 = *(Vec3Copy_151DC6A0 *)arg0;
-    sp38.unk14 = 0xC;
-    sp38.unk16 = 7;
-    sp38.unk0 = 0;
-    sp38.unk2 = 0xFF;
-    sp38.unk4 = -0x40;
-    sp38.unk6 = 0x3C;
-    sp38.unk20 = 0x24;
-    sp38.unk22 = 0x3C;
-    sp38.unk2C = 0xC8;
-    sp38.unk2D = 0x37;
-    sp38.unk38 = 0;
-    sp38.unk39 = 0xC;
-    sp38.unk40 = 1;
-    sp38.unk18 = 8.0f;
-    sp38.unk1C = 10.0f;
-    sp38.unk24 = -1.097000003f;
-    sp38.unk28 = 0.3700000048f;
-    sp38.unk30 = 280.0f;
-    sp38.unk34 = 390.0f;
-    sp38.unk3C = 0.6000000238f;
-    sp38.unk44 = 1.0f;
-    func_15150178(&sp38, sp38.unk8, 0, arg1, arg2);
+        DropBurstSpec drops;
+
+        drops.pos = *pos;
+        drops.count = 12;
+        drops.countRange = 7;
+        drops.angles.angle1 = 0;
+        drops.angles.angle1Range = 0xFF;
+        drops.angles.angle2 = -64;
+        drops.angles.angle2Range = 60;
+        drops.lifetime = 36;
+        drops.lifetimeRange = 60;
+        drops.unk2C = 200;
+        drops.unk2CRange = 55;
+        drops.unk38 = 0;
+        drops.kind = 12;
+        drops.wobble = 1;
+        drops.speed = 8.0f;
+        drops.speedRange = 10.0f;
+        drops.gravity = -1.097f;
+        drops.gravityRange = 0.37f;
+        drops.size = 280.0f;
+        drops.sizeRange = 390.0f;
+        drops.unk3CChance = 0.6f;
+        drops.bounceChance = 1.0f;
+        func_15150178(&drops, &drops.pos, 0, owner, kind);
     }
-    func_151D3F14(arg0, arg1, arg2);
-    func_15182670(0xFF, 0xFF, 0xFF, func_150ADA20() % 51 + 150, func_150ADA20() % 5 + 8, 0, arg1, arg2);
+    func_151D3F14(pos, owner, kind);
+    func_15182670(0xFF, 0xFF, 0xFF, func_150ADA20() % 51U + 150, func_150ADA20() % 5U + 8, 0, owner, kind);
 }
 
-void func_151DC6A0(struct127 *arg0, u8 arg1, s32 arg2);
 
-struct dc8bc_a { s32 unk0[3]; };
+/* Data of the effect spawned by func_151DC8BC and updated by func_151DC97C. */
+typedef struct {
+    /* 0x00 */ struct17 pos;
+    /* 0x0C */ f32 accum;        /* particles still to emit; func_151DC97C emits one per whole unit */
+    /* 0x10 */ u8 randomColors;  /* nonzero: each particle takes one of three random colour pairs */
+    /* 0x11 */ u8 pad11[3];
+} EmitterData; /* 0x14 */
 
-void func_151DC8BC(struct127 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
-    struct {
-        struct dc8bc_a unk0;
-        f32 unkC;
-        u8 unk10;
-    } sp34;
-    struct260 *temp_v0;
+/* Effect created by func_15149130 (only the fields used here). */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;          /* passed to func_15130280 as its 6th argument */
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;          /* passed to func_15130280 as its 5th argument */
+    /* 0x0D */ u8 padD[0x1B];
+    /* 0x28 */ EmitterData data;
+} Emitter;
 
-    if (arg2 != 0) {
-        func_151DC6A0(arg0, arg4, arg5);
+void *func_15149130(s16 duration, s8 arg1, s8 arg2, s8 arg3, u8 arg4, u8 arg5, s32 dataSize, u8 owner, s32 kind);
+
+/* Spawns an emitter effect at `pos` that lasts `duration` frames and is updated by func_151DC97C
+ * (D_8008A4E8[0x5B]), preceded by a func_151DC6A0 burst when `burst` is set. */
+void func_151DC8BC(struct17 *pos, s32 duration, u8 burst, u8 randomColors, u8 owner, s32 kind) {
+    EmitterData data;
+    Emitter *emitter;
+
+    if (burst) {
+        func_151DC6A0(pos, owner, kind);
     }
 
-    sp34.unk0 = *(struct dc8bc_a *)arg0;
-    sp34.unkC = 0.0f;
-    sp34.unk10 = arg3;
+    data.pos = *pos;
+    data.accum = 0.0f;
+    data.randomColors = randomColors;
 
-    temp_v0 = func_15149130((s16)arg1, -1, 0x5B, -1, 1, 0, (struct37 *)0x14, arg4, arg5);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp34, 0x14);
+    emitter = func_15149130(duration, -1, 0x5B, -1, 1, 0, sizeof(data), owner, kind);
+    if (emitter != NULL) {
+        memcpy(&emitter->data, &data, sizeof(data));
     }
 }
 
