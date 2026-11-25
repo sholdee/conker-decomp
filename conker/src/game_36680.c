@@ -6,9 +6,15 @@
 void func_1515D4D4();
 #define D_800D3098 D_800D3098_header
 #define D_800DCD30 D_800DCD30_header
+#define D_800BE4A0 D_800BE4A0_header
+#define D_800DDA90 D_800DDA90_header
+#define D_800B0DF0 D_800B0DF0_header
 #include "variables.h"
 #undef D_800D3098
 #undef D_800DCD30
+#undef D_800BE4A0
+#undef D_800DDA90
+#undef D_800B0DF0
 
 extern u8 D_800DCD30[4][3];
 
@@ -588,14 +594,6 @@ void func_1500AB5C(s32 action) {
     }
 }
 
-void func_1500ABA0(s32 arg0) {
-    bzero(&D_800BE4A0, 60);
-    func_1502B8E0(&D_800BE4A0, 60, 3, 12, arg0, 10);
-    bzero(&D_800DDA90, 240);
-    bzero(&D_800DD478, 1560);
-}
-
-// GOTO hell
 typedef struct Game36680ResourceInfo {
     u8 flags;
     u8 frames;
@@ -604,159 +602,181 @@ typedef struct Game36680ResourceInfo {
     s16 y;
     u8 width;
     u8 pad9;
-} Game36680ResourceInfo;
+} Game36680ResourceInfo; // size 0xA
 
-struct s1500AC14_a {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    u8 unkC;
-};
+/** Resource picked for one of the 15 particle slots. */
+typedef struct Game36680ResourceChoice {
+    u16 id; // 0xFF: none
+    u16 flags;
+} Game36680ResourceChoice;
+
+/** Texture file of one particle slot (loaded later by game_1A89B0). */
+typedef struct Game36680ResourceFile {
+    s32 devAddr;
+    s32 size;
+    s32 buf;
+    u8 loaded;
+    u8 padD[3];
+} Game36680ResourceFile; // size 0x10
+
+extern Game36680ResourceChoice D_800BE4A0[15];
+extern Game36680ResourceFile D_800DDA90[15];
+extern Game36680ResourceInfo D_80095CE0[];
+extern u16 D_800BE478[15];
+extern s16 D_800DDB80[15][2];
 extern s32 func_1502B020(s32 *, s32, s32, s32);
-extern s16 D_800DDB80[][2];
-extern u8 D_80095CE0[];
-extern u16 D_800BE478[];
 
-#define P ((struct s1500AC14_a *)&D_800DDA90)
-#define INFO(id) (&((Game36680ResourceInfo *)D_80095CE0)[id])
+/** Clears the particle slot tables and picks this level's resources. */
+void func_1500ABA0(s32 arg0) {
+    bzero(D_800BE4A0, sizeof(D_800BE4A0));
+    func_1502B8E0(D_800BE4A0, sizeof(D_800BE4A0), 3, 12, arg0, 10);
+    bzero(D_800DDA90, sizeof(D_800DDA90));
+    bzero(&D_800DD478, 1560);
+}
+
+/** Looks up the texture file of every used particle slot and computes its texture extents. */
 void func_1500AC14(void) {
     s32 i;
     s32 id;
     s32 size;
-    u32 len;
+    u32 length;
 
     for (i = 0; i != 15; i++) {
-        P[i].unk0 = 0;
-        P[i].unk8 = 0;
-        P[i].unk4 = 0;
-        P[i].unkC = 0;
-        id = ((u16 (*)[2])&D_800BE4A0)[i][0];
-        if (id != 0xFF && (D_800BE478[i] != 0 || ((u16 (*)[2])&D_800BE4A0)[i][0] == 0x3B)) {
-            P[i].unk0 = func_1502B020(&size, 2, 0, id);
-            P[i].unk4 = (size + 0xF) & ~0xF;
-            len = INFO(id)->length;
-            if (size == 0 || len == 0) {
-                len = 0;
-                P[i].unk0 = 0;
+        D_800DDA90[i].devAddr = 0;
+        D_800DDA90[i].buf = 0;
+        D_800DDA90[i].size = 0;
+        D_800DDA90[i].loaded = 0;
+        id = D_800BE4A0[i].id;
+        if (id != 0xFF && (D_800BE478[i] != 0 || D_800BE4A0[i].id == 0x3B)) {
+            D_800DDA90[i].devAddr = func_1502B020(&size, 2, 0, id);
+            D_800DDA90[i].size = (size + 15) & ~15;
+            length = D_80095CE0[id].length;
+            if (size == 0 || length == 0) {
+                length = 0;
+                D_800DDA90[i].devAddr = 0;
             }
-            D_800DDB80[i][0] = (INFO(id)->width << 5) - 1;
-            D_800DDB80[i][1] = (((len / INFO(id)->width) << 6) / 5) - 1;
+            D_800DDB80[i][0] = (D_80095CE0[id].width << 5) - 1;
+            D_800DDB80[i][1] = (((length / D_80095CE0[id].width) << 6) / 5) - 1;
         }
     }
 }
 
-extern u8 D_80095CE0[];
-extern u16 D_800BE478[];
 extern u8 D_80095CC4[];
-extern s16 D_800BE438[][2];
+extern s16 D_800BE438[15][2];
 extern u8 D_800DDBC0[];
 extern u8 D_800DDBE0[];
 extern u8 D_800DDBF0[];
 extern u8 D_800DDC20[][2];
 extern u8 D_800DDC80[];
 
-void func_1500AD84(s32 arg0, s32 arg1, s32 arg2) {
+/** Sets up particle slot `slot` for resource `id` (0xFF: unused). */
+void func_1500AD84(s32 slot, s32 id, s32 flags) {
     Game36680ResourceInfo *info;
-    u8 *cursor;
-    s32 flags;
+    u8 *frames;
+    s32 infoFlags;
 
-    if (arg1 != 255) {
-        cursor = &D_800DDBD0[arg0];
-        info = &((Game36680ResourceInfo *)D_80095CE0)[arg1];
-        *cursor = info->frames;
-        flags = info->flags;
-        if (flags & 0x10) {
-            *cursor -= 1;
-            D_800DDBE0[arg0] = *cursor;
+    if (id != 255) {
+        frames = &D_800DDBD0[slot];
+        info = &D_80095CE0[id];
+        *frames = info->frames;
+        infoFlags = info->flags;
+        if (infoFlags & 0x10) {
+            *frames -= 1;
+            D_800DDBE0[slot] = *frames;
         } else {
-            D_800DDBE0[arg0] = 0;
+            D_800DDBE0[slot] = 0;
         }
+        if (infoFlags & 0x80) {
+            D_800DDBF0[slot] = 2;
+        } else {
+            D_800DDBF0[slot] = 1;
+        }
+        D_800BE438[slot][0] = info->x;
+        D_800BE438[slot][1] = info->y;
+        D_800DDBC0[slot] = id;
+        D_800DDC80[slot] = flags & 0xFF7F;
         if (flags & 0x80) {
-            D_800DDBF0[arg0] = 2;
-        } else {
-            D_800DDBF0[arg0] = 1;
+            D_800DDC00 |= 1 << slot;
         }
-        cursor = (u8 *)D_800BE438[arg0];
-        ((s16 *)cursor)[0] = info->x;
-        ((s16 *)cursor)[1] = info->y;
-        D_800DDBC0[arg0] = arg1;
-        D_800DDC80[arg0] = arg2 & 0xFF7F;
-        if (arg2 & 0x80) {
-            D_800DDC00 |= 1 << arg0;
+        if (infoFlags & 1) {
+            D_800DDC04 |= 1 << slot;
         }
-        if (flags & 1) {
-            D_800DDC04 |= 1 << arg0;
-        }
-        if (flags & 8) {
-            D_800DDC08 |= 1 << arg0;
+        if (infoFlags & 8) {
+            D_800DDC08 |= 1 << slot;
         }
     } else {
-        D_800DDBD0[arg0] = 0;
+        D_800DDBD0[slot] = 0;
     }
-    arg1 = D_80095CC4[arg0];
-    D_800BE478[arg0] = 0;
-    cursor = D_800DDC20[arg0];
-    cursor[0] = arg1;
-    cursor[1] = arg1;
+    D_800BE478[slot] = 0;
+    D_800DDC20[slot][0] = D_80095CC4[slot];
+    D_800DDC20[slot][1] = D_80095CC4[slot];
 }
-struct Struct800DDD18
-{
-  s16 unk0;
-  s16 unk2;
-  s16 unk4;
-  u8  unk6;
-  u8  unk7;
-  u8  unk8;
-  u8  unk9;
-  u8  unkA;
-  u8  unkB;
-  u8  unkC;
-  u8  unkD;
-};
-extern struct Struct800DDD18 *D_800DDD18;
-extern u8 D_800DDBC0[];
-extern u8 D_80095CE0[];
-extern s16 D_800BE438[][2];
+
+/** One particle placed on a level triangle; D_800DDD18 holds D_800B0DF0->maxParticles of them. */
+typedef struct Game36680Particle {
+    s16 x;
+    s16 y;
+    s16 z;
+    u8 unk6; // (subtype << 5) | slot
+    u8 animIndex; // slot * 4 + phase into D_800DDC90, 60: not animated
+    u8 resource;
+    u8 unk9;
+    u8 kind;
+    u8 unkB;
+    u8 scaleX;
+    u8 scaleY;
+} Game36680Particle; // size 0xE
+
+typedef struct Game36680LevelHeader {
+    u8 pad0[0x18];
+    u16 maxParticles;
+} Game36680LevelHeader;
+
+extern Game36680LevelHeader *D_800B0DF0;
+extern Game36680Particle *D_800DDD18;
 extern s32 func_151EF610(void);
 
-s32 func_1500AF08(s32 arg0, s32 arg1, s32 arg2, s16 arg3, s16 arg4, s16 arg5, s32 arg6, u8 arg7, s32 arg8) {
+/** Fills particle `index` for particle slot `slot`; returns the next free index. */
+s32 func_1500AF08(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jitter, u8 kind, s32 parity) {
     s16 scale;
 
-    if (arg0 >= (u32)(*(u16 *)((u8 *)D_800B0DF0 + 0x18) - 1)) {
-        return *(u16 *)((u8 *)D_800B0DF0 + 0x18) - 1;
+    if (index >= (u32)(D_800B0DF0->maxParticles - 1)) {
+        return D_800B0DF0->maxParticles - 1;
     }
 
-    D_800DDD18[arg0].unk0 = arg3;
-    D_800DDD18[arg0].unk2 = arg4;
-    D_800DDD18[arg0].unk4 = arg5;
+    D_800DDD18[index].x = x;
+    D_800DDD18[index].y = y;
+    D_800DDD18[index].z = z;
 
-    if (D_800DDBD0[arg1] >= 2) {
-        if ((1 << arg1) & D_800DDC00) {
-            D_800DDD18[arg0].unk7 = (arg1 << 2) + (arg8 & 1);
+    if (D_800DDBD0[slot] >= 2) {
+        if ((1 << slot) & D_800DDC00) {
+            D_800DDD18[index].animIndex = (slot << 2) + (parity & 1);
         } else {
-            D_800DDD18[arg0].unk7 = (arg0 & 3) + (arg1 << 2);
+            D_800DDD18[index].animIndex = (index & 3) + (slot << 2);
         }
     } else {
-        D_800DDD18[arg0].unk7 = 60;
+        D_800DDD18[index].animIndex = 60;
     }
 
-    D_800DDD18[arg0].unk6 = (arg2 << 5) | arg1;
-    D_800DDD18[arg0].unkA = arg7;
-    D_800DDD18[arg0].unk8 = D_800DDBC0[arg1];
+    D_800DDD18[index].unk6 = (subtype << 5) | slot;
+    D_800DDD18[index].kind = kind;
+    D_800DDD18[index].resource = D_800DDBC0[slot];
 
-    if (arg6 != 0) {
-        scale = (func_151EF610() % arg6 + arg6) - arg6 + 0x100;
-        D_800DDD18[arg0].unkC = (D_800BE438[arg1][0] * scale) >> 10;
-        if (D_80095CE0[D_800DDBC0[arg1] * 10] & 4) {
-            scale = func_151EF610() % arg6 * 4 + scale;
+    if (jitter != 0) {
+        // matching: the "+ jitter - jitter" pair is needed for the original instruction sequence
+        scale = (func_151EF610() % jitter + jitter) - jitter + 0x100;
+        D_800DDD18[index].scaleX = (D_800BE438[slot][0] * scale) >> 10;
+        if (D_80095CE0[D_800DDBC0[slot]].flags & 4) {
+            scale = func_151EF610() % jitter * 4 + scale;
         }
-        D_800DDD18[arg0].unkD = (D_800BE438[arg1][1] * scale) >> 10;
+        D_800DDD18[index].scaleY = (D_800BE438[slot][1] * scale) >> 10;
     } else {
-        D_800DDD18[arg0].unkC = D_800BE438[arg1][0] >> 2;
-        D_800DDD18[arg0].unkD = D_800BE438[arg1][1] >> 2;
+        D_800DDD18[index].scaleX = D_800BE438[slot][0] >> 2;
+        D_800DDD18[index].scaleY = D_800BE438[slot][1] >> 2;
     }
-    return arg0 + 1;
+    return index + 1;
 }
+
 s32 func_1500B1F4(s16 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5) {
     s32 i;
     s32 count;
