@@ -2,7 +2,11 @@
 // matching: func_150ADA20 returns a u32 random number, but this file was built against a u8-returning
 // prototype (callers use the low byte without masking it), so it keeps that view.
 #define func_150ADA20 func_150ADA20_functions_h
+// matching: func_150A7CB0 takes three floats (in a1-a3); this file passes their raw bits through an integer view
+#define func_150A7CB0 func_150A7CB0_functions_h
 #include "functions.h"
+#undef func_150A7CB0
+void func_150A7CB0(MtxF mtx, s32 xBits, s32 yBits, s32 zBits);
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
@@ -344,7 +348,6 @@ void func_1503E82C(s32 objIndex) {
                 func_150A8050(bone, part->rot[0], part->rot[1], part->rot[2]);
                 func_150A7A48(bone, m, bone);
                 part = &sPartsStates[objIndex].parts[i];
-                // functions.h declares func_150A7CB0 with s32 params; it takes the float bits
                 func_150A7CB0(m, *(s32 *)&part->scale[0], *(s32 *)&part->scale[1], *(s32 *)&part->scale[2]);
                 func_150A7A48(m, bone, bone);
             } else {

@@ -1,10 +1,7 @@
 #include <ultra64.h>
 
-#define func_150A7CB0 func_150A7CB0_hdr
 #include "functions.h"
-#undef func_150A7CB0
 void func_1509093C(void);
-void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
 #define D_800D24C8 D_800D24C8_hdr
 #define D_800D2460 D_800D2460_hdr
 #define D_800D2890 D_800D2890_hdr

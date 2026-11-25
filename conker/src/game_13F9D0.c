@@ -1,10 +1,7 @@
 #include <ultra64.h>
-#define func_150A7CB0 func_150A7CB0__proto
 #include "functions.h"
-#undef func_150A7CB0
 #include "variables.h"
 
-void func_150A7CB0(MtxF mtx, f32 scaleX, f32 scaleY, f32 scaleZ); // functions.h types the scales s32
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
 void func_10004074();
 

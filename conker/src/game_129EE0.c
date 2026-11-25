@@ -1,9 +1,5 @@
 #include <ultra64.h>
-// functions.h declares func_1513EDE4 with the wrong return type (it returns its Vtx *), so its
-// declaration is renamed away and redeclared below.
-#define func_1513EDE4 func_1513EDE4_orig
 #include "functions.h"
-#undef func_1513EDE4
 #include "variables.h"
 #include "effects.h"
 
@@ -218,7 +214,6 @@ struct Actor150FD514 {
     /* 0x110 */ Ext150FCFD4 ext;
 };
 
-extern Vtx *func_1513EDE4(Actor150FD514 *particle, s16 viewport);
 extern s32 D_800A1EEC[];
 extern void func_1504715C(GroundHit *, Actor *);
 extern s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);

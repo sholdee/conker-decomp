@@ -1,9 +1,6 @@
 #include <ultra64.h>
 
-/* functions.h declares func_150A7CB0 with s32 params; this file passes floats */
-#define func_150A7CB0 func_150A7CB0_s32
 #include "functions.h"
-#undef func_150A7CB0
 #include "variables.h"
 
 #define OBJ_TYPE(obj) ((obj)->kind >> 2)
@@ -202,7 +199,6 @@ void func_15017B20(TriggerZone *objects, s32 count) {
 void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 void func_150A7A48(MtxF a, MtxF b, MtxF c);
 void func_150A7DA0(MtxF mtx, f32, f32, f32);
-void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
 
 /*
  * Computes obj's axis-aligned bounds: the extremes (and the origin) of the unit cube's corners transformed by the

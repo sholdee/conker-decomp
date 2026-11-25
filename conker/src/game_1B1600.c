@@ -1,9 +1,5 @@
 #include <ultra64.h>
-/* functions.h declares func_150A7CB0 with s32 arguments; it takes floats. */
-#define func_150A7CB0 func_150A7CB0_hdr
 #include "functions.h"
-#undef func_150A7CB0
-void func_150A7CB0(MtxF mtx, f32 x, f32 y, f32 z);
 #include "variables.h"
 
 /* A shadow-polygon vertex while it is clipped in light space. */

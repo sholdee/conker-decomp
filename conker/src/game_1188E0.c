@@ -1,8 +1,5 @@
 #include <ultra64.h>
-/* functions.h gives func_150EB430 two parameters; it takes three. */
-#define func_150EB430 func_150EB430_header
 #include "functions.h"
-#undef func_150EB430
 /* variables.h types this as TriggerZone[73]; see the declaration below. */
 #include "variables.h"
 #include "effects.h"

@@ -1340,12 +1340,12 @@ Vtx *func_1513EAD8(particle, reversed, viewport)
 
 Vtx *func_1513EAD8(Particle *particle, s32 reversed, s32 viewport);
 
-void func_1513EDB4(s32 particle, s16 viewport) {
-    func_1513EAD8(particle, FALSE, viewport);
+Vtx *func_1513EDB4(void *particle, s16 viewport) {
+    return func_1513EAD8(particle, FALSE, viewport);
 }
 
-void func_1513EDE4(s32 particle, s16 viewport) {
-    func_1513EAD8(particle, TRUE, viewport);
+Vtx *func_1513EDE4(void *particle, s16 viewport) {
+    return func_1513EAD8(particle, TRUE, viewport);
 }
 
 /* Quad of width x height, rotated by def.rot and placed at def.pos (unrolled form of func_15140190). */
