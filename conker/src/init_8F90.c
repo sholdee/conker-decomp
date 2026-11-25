@@ -287,8 +287,8 @@ void func_10008F90(SynDriverConfig *config, OSPri priority, AudioMgrConfig *amCo
     D_80040F84 = 0;
 
     {
-        FxParams params;
-        params = D_8002AE54;
+        FxParams params = D_8002AE54;
+
         config->params[0] = params.values[0];
         config->params[1] = params.values[1];
         n_alInit(&D_8003E640, config);
@@ -459,7 +459,6 @@ s32 func_100097CC(s32 addr, s32 len, void *state) {
     s32 delta;
     DMABuffer *dmaPtr;
     DMABuffer *lastDmaPtr;
-    DMABuffer *firstUsed;
     s32 buffEnd;
 
     dmaPtr = D_80040F78.firstUsed;
@@ -485,18 +484,16 @@ s32 func_100097CC(s32 addr, s32 len, void *state) {
     LIST_UNLINK(DMABuffer, dmaPtr);
     if (lastDmaPtr != NULL) {
         LIST_LINK(DMABuffer, dmaPtr, lastDmaPtr);
+    } else if (D_80040F78.firstUsed != NULL) {
+        lastDmaPtr = D_80040F78.firstUsed;
+        D_80040F78.firstUsed = dmaPtr;
+        dmaPtr->next = lastDmaPtr;
+        dmaPtr->prev = NULL;
+        lastDmaPtr->prev = dmaPtr;
     } else {
-        firstUsed = D_80040F78.firstUsed;
-        if (firstUsed != NULL) {
-            D_80040F78.firstUsed = dmaPtr;
-            dmaPtr->next = firstUsed;
-            dmaPtr->prev = NULL;
-            firstUsed->prev = dmaPtr;
-        } else {
-            D_80040F78.firstUsed = dmaPtr;
-            dmaPtr->next = NULL;
-            dmaPtr->prev = NULL;
-        }
+        D_80040F78.firstUsed = dmaPtr;
+        dmaPtr->next = NULL;
+        dmaPtr->prev = NULL;
     }
     foundBuffer = dmaPtr->ptr;
     delta = addr & 1;
