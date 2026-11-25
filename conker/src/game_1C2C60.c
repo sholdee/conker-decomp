@@ -589,7 +589,52 @@ void func_151963B4(CharacterFlamethrowerActor *actor) {
     func_15147928(actor);
 }
 
-extern CharacterFlamethrowerJetTemplate D_800A87A0[];
+/* Preset in D_800A8710 for the child particles a jet point spawns (func_15198110). */
+typedef struct JetChildPreset {
+    /* 0x0 */ f32 sizeScale;
+    /* 0x4 */ f32 unk4;
+    /* 0x8 */ s16 lifeMin;
+    /* 0xA */ s16 lifeRange;
+} JetChildPreset;
+
+/* Sprite preset in D_800A8770 (func_151990AC). */
+typedef struct {
+    f32 radius;
+    f32 speed;
+    f32 speed_range;
+    s16 acceleration;
+    s16 acceleration_range;
+    s16 fade;
+    s16 fade_range;
+    s16 size;
+    s16 size_range;
+} JetSpritePreset;
+
+const JetChildPreset D_800A8710[] = {
+    { 1.0f, 1.0f, 9, 12 },
+    { 0.656f, 1.3f, 5, 12 },
+};
+
+const ScatterPreset D_800A8728[] = {
+    { 20.0f, 0.114f, 0.506f, 5.0f, 12.0f, 0.0f, 0.47f, 55, 10, 3, 7 },
+    { 20.0f, 0.5f, 0.8f, 5.0f, 5.0f, 1.0f, 1.0f, 17, 10, 3, 2 },
+};
+
+const JetSpritePreset D_800A8770[] = {
+    { 45.19f, 40.0f, 25.0f, -314, 186, 8, 11, 385, 386 },
+    { 40.0f, 30.0f, 20.0f, -100, 70, 10, 20, 200, 150 },
+};
+
+const CharacterFlamethrowerJetTemplate D_800A87A0[] = {
+    { 600, 1.141f, 1.04f, 255, 20, 12, { 0.0f, 0.0f, 80.0f }, { 0.0f, -2.0f, 102.0f }, 0, 30, 155, 20, 4.8f, 17.0f, -1, 0, -1, -1, -1, -1, 0, 2, 0, 127, 0.726f, 0, 0.226f, 0, 0.135f, 6, 42, 6, 42 },
+    { 30, 0.1f, 0.49f, 255, 24, 0, { 0.0f, 40.0f, 8.0f }, { 0.0f, 40.0f, 10.0f }, 2, 192, 255, 8, 1.2f, 0.9f, -1, -1, -1, -1, -1, -1, -1, 3, 0, 127, 0.726f, 0, 0.226f, 0, 0.135f, 6, 42, 6, 42 },
+    { 30, 0.1f, 0.49f, 255, 24, 0, { 0.0f, 40.0f, 8.0f }, { 0.0f, 40.0f, 10.0f }, 2, 192, 255, 8, 1.2f, 0.9f, -1, -1, -1, -1, -1, -1, -1, 3, 0, 127, 0.726f, 0, 0.226f, 0, 0.135f, 6, 42, 6, 42 },
+    { 600, 1.141f, 1.04f, 255, 20, 13, { 22.0f, 22.0f, 165.0f }, { 22.0f, 22.0f, 180.0f }, 0, 40, 255, 19, 4.8f, 17.0f, 0, -1, 0, 0, 0, 0, -1, 2, 0, 127, 0.726f, 0, 0.226f, 0, 0.135f, 6, 42, 6, 42 },
+    { 600, 0.0f, 2.14f, 255, 20, 9, { -4.734001f, -111.957596f, 33.473396f }, { -8.837997f, -159.75f, 33.473396f }, 0, 12, 200, 0, 4.0f, 9.0f, -1, -1, -1, -1, -1, -1, 0, 2, 1, 100, 0.8f, 1, 0.15f, 1, 0.2f, 6, 42, 6, 42 },
+    { 600, 0.0f, 2.14f, 255, 20, 9, { -4.734001f, -111.957596f, 33.473396f }, { -8.837997f, -159.75f, 33.473396f }, 0, 12, 200, 0, 4.0f, 9.0f, -1, 1, -1, -1, -1, -1, 0, 2, 1, 100, 0.8f, 1, 0.15f, 1, 0.2f, 6, 42, 6, 42 },
+    { 600, 0.0f, 2.14f, 255, 20, 9, { 12.0f, -44.0f, 136.0f }, { 12.0f, -54.0f, 175.0f }, 0, 12, 200, 0, 4.0f, 9.0f, -1, 2, -1, 0, 0, 0, 0, 2, 1, 100, 0.8f, 1, 0.15f, 1, 0.2f, 6, 42, 6, 42 },
+};
+
 extern s16 (*D_8008F890[])(void);
 extern f32 (*D_8008F870[])(void *, s32);
 extern void (*D_8008F87C[])(void *);
@@ -1352,15 +1397,6 @@ void func_15198054(CharacterFlamethrowerActor *actor, ActorMsg *msg, u8 kind) {
     }
 }
 
-/* Preset in D_800A8710 for the child particles a jet point spawns (func_15198110). */
-typedef struct JetChildPreset {
-    /* 0x0 */ f32 sizeScale;
-    /* 0x4 */ f32 unk4;
-    /* 0x8 */ s16 lifeMin;
-    /* 0xA */ s16 lifeRange;
-} JetChildPreset;
-
-extern JetChildPreset D_800A8710[];
 
 /*
  * Called when jet point `index` fades below childLife: spawns line particles (moved and faded by
@@ -1716,7 +1752,6 @@ void func_15198D40(CharacterFlamethrowerActor *actor) {
 void func_15198D7C(CharacterFlamethrowerActor *actor) {
 }
 
-extern ScatterPreset D_800A8728[];
 extern s32 func_15147DA0(EffectTemplate18 *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32, TrailRender *, s32, s32, s32);
 
 /* Spawns scatterAccum particles (func_15147DA0) flying from the actor towards random points around `end`. */
@@ -1779,20 +1814,8 @@ void func_15198D88(CharacterFlamethrowerActor *actor, Vec3f *end) {
     } while (jet->scatterAccum > 1.0f);
 }
 
-typedef struct {
-    f32 radius;
-    f32 speed;
-    f32 speed_range;
-    s16 acceleration;
-    s16 acceleration_range;
-    s16 fade;
-    s16 fade_range;
-    s16 size;
-    s16 size_range;
-} JetSpritePreset;
 
 void *func_15167D84(void *, s32, s32, s8, u8, s32);
-extern JetSpritePreset D_800A8770[];
 
 /* Emits spriteAccum sprites (func_15167D84) flying from the actor towards random points around `end`. */
 void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
@@ -1868,7 +1891,7 @@ void func_151993B4(CharacterFlamethrowerActor *actor) {
 }
 
 /* unique_ids of the 6 characters that have a flamethrower zone (D_800E0900). */
-extern u8 D_800A8A9C[];
+const u8 D_800A8A9C[] = { 6, 7, 8, 9, 10, 11 };
 
 /* Jet init callback (D_8008F87C): clears the owner's flamethrower zone's `inactive` flag. */
 void func_151993E4(CharacterFlamethrowerActor *actor) {
