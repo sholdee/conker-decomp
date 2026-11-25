@@ -115,21 +115,9 @@ s32 func_151C71A0(SightBeamParams *beam) {
 }
 
 typedef struct {
-    u8 pad0[9];
-    u8 hidden;
-} SightModel;
-
-typedef struct {
     u8 pad0[0x6F];
     u8 unk6F;
 } SightStatusBlock;
-
-/* An effect object whose model can be hidden. */
-typedef struct {
-    u8 pad0[0x14];
-    SightModel *model;
-    SightStatusBlock *status;
-} SightModelOwner;
 
 typedef struct {
     u8 pad0[0x58];
@@ -191,7 +179,7 @@ typedef struct {
     f32 speedS;
     f32 speedT;
     SightBeamParams *source;
-    SightModelOwner *midEffect;
+    LightEffect *midEffect;
     s32 unk30;
     struct SightExtension *endEffect0;
     struct SightExtension *endEffect1;
@@ -237,7 +225,7 @@ typedef struct {
 
 extern void func_1510F800(s32);
 extern s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
-extern SightModelOwner *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
+extern LightEffect *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 struct SightExtension *func_151C8FCC(SightBeamObject *owner, Vec3f *start, Vec3f *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
 s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
 
@@ -483,7 +471,7 @@ void *func_151C7E98(SightBeamObject *obj, s16 view) {
 s32 func_151C82D0(SightBeamObject *obj) {
     SightBeamState *state = &obj->state;
     s16 period;
-    SightModelOwner *midEffect;
+    LightEffect *midEffect;
     SightBeamParams *beam;
     SightEmitter *emitter0;
     SightEmitter *emitter1;
@@ -511,7 +499,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
         state->texT = func_150AD78C(state->angleT) * state->radiusT + state->centerT;
         midEffect = state->midEffect;
         if (midEffect != NULL) {
-            midEffect->model->hidden = 0;
+            midEffect->light->disabled = 0;
         }
         beam = state->beam;
         if (beam != NULL && (state->flags & 0x10)) {
@@ -520,7 +508,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
     } else {
         midEffect = state->midEffect;
         if (midEffect != NULL) {
-            midEffect->model->hidden = 1;
+            midEffect->light->disabled = 1;
         }
         beam = state->beam;
         if (beam != NULL) {
@@ -1109,13 +1097,13 @@ void func_151C9AC0(Actor *actor, u8 arg1, s32 arg2) {
     func_151ABE40(pos, &collision, 2, arg1, arg2);
 }
 
-/* Hides the object's model while its status block's unk6F is set. */
-s32 func_151C9B30(SightModelOwner *obj) {
-    SightStatusBlock *status = obj->status;
+/* Light effect update: turns the light off while its status block's unk6F is set. */
+s32 func_151C9B30(LightEffect *obj) {
+    SightStatusBlock *status = obj->data.object;
     if (status->unk6F == 0) {
-        obj->model->hidden = 0;
+        obj->light->disabled = 0;
     } else {
-        obj->model->hidden = 1;
+        obj->light->disabled = 1;
     }
     return 1;
 }

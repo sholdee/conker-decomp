@@ -386,17 +386,11 @@ typedef struct {
     /* 0x28 */ FlashSpawner spawner;
 } struct_EAB10;
 
-/* The object func_151602C0 creates; func_150EAE24 is its per-frame update. */
-typedef struct {
-    /* 0x00 */ u8  pad0[0xE];
-    /* 0x0E */ s16 x;
-    /* 0x10 */ s16 y;
-    /* 0x12 */ s16 z;
-} FlashSprite;
-
+/* The LightEffect func_151602C0 creates, with this file's GroundFlash payload at LightEffect.data;
+ * func_150EAE24 is its per-frame update. */
 typedef struct {
     /* 0x00 */ u8  pad0[0x14];
-    /* 0x14 */ FlashSprite *sprite;
+    /* 0x14 */ PointLight *light;
     /* 0x18 */ GroundFlash flash;
 } FlashObject;
 
@@ -475,7 +469,7 @@ void func_150EAB10(struct_EAB10 *actor) {
 
 s32 func_15046C80(f32 *, s32, f32, GroundHit *);
 
-/* Slides the flash along the ground and keeps its sprite on the ground; returns 0 once it expires. */
+/* Slides the flash along the ground and keeps its light on the ground; returns 0 once it expires. */
 s32 func_150EAE24(FlashObject *obj) {
     GroundFlash *flash;
     f32 probe[3];
@@ -485,13 +479,13 @@ s32 func_150EAE24(FlashObject *obj) {
     probe[0] = obj->flash.position.x;
     probe[1] = obj->flash.height;
     probe[2] = obj->flash.position.z;
-    obj->sprite->x = obj->flash.position.x;
-    obj->sprite->z = obj->flash.position.z;
+    obj->light->x = obj->flash.position.x;
+    obj->light->z = obj->flash.position.z;
     flash = &obj->flash;
     if (func_15046C80(probe, 0, obj->flash.probeHeight, &flash->ground) != 0) {
-        obj->sprite->y = flash->ground.height;
+        obj->light->y = flash->ground.height;
     } else {
-        obj->sprite->y = flash->height;
+        obj->light->y = flash->height;
     }
     flash->lifetime -= D_800BE9A4;
     if (flash->lifetime <= 0.0f) {

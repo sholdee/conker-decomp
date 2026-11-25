@@ -214,7 +214,7 @@ void func_151C0360(SurfaceTriangle *surface, Vec3f *pos, u8 fxOwner, s32 fxList)
                   duration % 205 + 299, 1, 1, 0, 0, 0, fxOwner, 0);
 }
 
-s32 func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 void func_151C0418(Vec3f *pos, u8 fxOwner, s32 fxList) {
     LightEffectHeader header;
@@ -284,11 +284,6 @@ typedef struct {
 } IgnoreList;
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ s16 *unk14; /* [7..9]: position */
-} TrailFx;
-
-typedef struct {
     /* 0x00 */ u8 pad0[0x40];
     /* 0x40 */ Vec3f pos;
 } FollowFx;
@@ -305,7 +300,7 @@ typedef struct {
     /* 0x068 */ f32 speed;
     /* 0x06C */ Actor *owner;
     /* 0x070 */ IgnoreList ignore;
-    /* 0x080 */ TrailFx *trail;
+    /* 0x080 */ LightEffect *trail;
     /* 0x084 */ FollowFx *follow;
     /* 0x088 */ Bullet88 *unk88;
     /* 0x08C */ void *unk8C;
@@ -519,7 +514,7 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             header2.x = pos.x;
             header2.y = pos.y;
             header2.z = pos.z;
-            bulletState->trail = (TrailFx *)func_151602C0(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
+            bulletState->trail = func_151602C0(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
             bulletState->follow = func_151B8908(obj);
             bulletState->sound = func_1000FA64(func_150ADA20() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
                                                (SoundRecordCallback)func_151C110C, obj, 0, 4, 0);
@@ -597,7 +592,7 @@ s32 func_151C1180(Bullet *bullet) {
     Vec3f delta;
     Vec3f hitPos;
     RayHit hit;
-    TrailFx *trail;
+    LightEffect *trail;
 
     state = &bullet->state;
     if (state->lifetime < D_800BE9A4) {
@@ -651,11 +646,11 @@ s32 func_151C1180(Bullet *bullet) {
     }
     trail = state->trail;
     if (trail != NULL) {
-        trail->unk14[7] = bullet->pos.x;
+        trail->light->x = bullet->pos.x;
         if ((bullet->fxList && bullet->fxList) && bullet->fxList) { // matching: no-op that steers register choice for trail
         }
-        trail->unk14[8] = bullet->pos.y;
-        trail->unk14[9] = bullet->pos.z;
+        trail->light->y = bullet->pos.y;
+        trail->light->z = bullet->pos.z;
     }
     if (state->follow != NULL) {
         state->follow->pos = bullet->pos;
