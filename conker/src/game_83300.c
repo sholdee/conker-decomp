@@ -4922,28 +4922,32 @@ s32 func_1506196C(struct127 *actor, s32 player) {
 }
 
 s32 func_150623F4(struct127 *arg0);
+/*
+ * Per-frame fade and visibility update of all actors: unk2FA bit 0 is set when func_150623F4 says the
+ * actor is visible, or when one of its linked actors (keys in bytes 0x20B..0x20E) is.
+ */
 void func_150619A8(void) {
     s32 i;
     s32 count;
     u8 list[25];
     s32 j;
-    struct127 *obj;
+    struct127 *actor;
     struct127 *other;
     s32 idx;
 
     count = 0;
     for (i = 0; i < 25; i++) {
-        obj = &D_800CC2D0[i];
-        if (obj->interaction_state != 0) {
-            if (obj->pad2FC[1] != 0) {
-                obj->pad2FC[1]--;
+        actor = &D_800CC2D0[i];
+        if (actor->interaction_state != 0) {
+            if (actor->pad2FC[1] != 0) {
+                actor->pad2FC[1]--;
             }
-            func_150617BC((u8 *)obj);
-            if (func_150623F4(obj) != 0) {
-                obj->unk2FA |= 1;
+            func_150617BC(actor);
+            if (func_150623F4(actor) != 0) {
+                actor->unk2FA |= 1;
             } else {
-                obj->unk2FA &= ~1;
-                if (((u8 *)obj)[0x20B] != 0 || ((u8 *)obj)[0x20C] != 0 || ((u8 *)obj)[0x20D] != 0 || ((u8 *)obj)[0x20E] != 0) {
+                actor->unk2FA &= ~1;
+                if (((u8 *)actor)[0x20B] != 0 || ((u8 *)actor)[0x20C] != 0 || ((u8 *)actor)[0x20D] != 0 || ((u8 *)actor)[0x20E] != 0) {
                     list[count] = i;
                     count++;
                 }
@@ -4953,12 +4957,12 @@ void func_150619A8(void) {
     if (count != 0) {
         for (i = 0; i < count; i++) {
             idx = list[i];
-            obj = &D_800CC2D0[idx];
+            actor = &D_800CC2D0[idx];
             for (j = 0; j < 4; j++) {
-                if (((u8 *)obj)[0x20B + j] != 0) {
-                    other = func_15083E90(((u8 *)obj)[0x20B + j]);
+                if (((u8 *)actor)[0x20B + j] != 0) {
+                    other = func_15083E90(((u8 *)actor)[0x20B + j]);
                     if (other != NULL && (other->unk2FA & 1)) {
-                        obj->unk2FA |= 1;
+                        actor->unk2FA |= 1;
                         break;
                     }
                 }
@@ -4982,11 +4986,12 @@ void func_150F1CB0(struct127 *arg0);
 extern s32 *D_800C4020[];
 extern s32 D_8009942C[];
 
-#define ANIM D_800CC298
+/* struct127 bytes 0x68..0x6D (padding in the shared header) */
 #define OBJB(o, off) (((u8 *)(o))[off])
 
+/* Per-frame texture/morph animations of actor types that have them (once per type for most). */
 void func_15061B4C(void) {
-    struct127 *unused;
+    struct127 *unused; // matching: stack slot
     s32 id;
     s32 i;
     u8 done[10];
@@ -5011,30 +5016,30 @@ void func_15061B4C(void) {
             done[1] = 1;
         } else if ((id == 0x24) && (done[2] == 0)) {
             if ((func_150ADA20() % 1000U) < 300) {
-                ANIM.unk8 = (func_150ADA20() % 5U) - 2;
+                D_800CC298.unk8 = (func_150ADA20() % 5U) - 2;
             }
-            func_15062D10(id, 4, -4, ANIM.unk8, 0, 0);
+            func_15062D10(id, 4, -4, D_800CC298.unk8, 0, 0);
             if (D_800C4020[id] != NULL) {
-                func_15062E24(id, D_800C4020[id][0], 0x37, 0, ANIM.unk4, 2, 1);
-                func_15062E24(id, D_800C4020[id][1], 0x27, 0x37, ANIM.unk0, 1, 0);
+                func_15062E24(id, D_800C4020[id][0], 0x37, 0, D_800CC298.unk4, 2, 1);
+                func_15062E24(id, D_800C4020[id][1], 0x27, 0x37, D_800CC298.unk0, 1, 0);
             }
-            ANIM.unk0 += -4.0f * D_800BE9E4;
-            if (ANIM.unk0 <= 0.0f) {
-                ANIM.unk0 += 360.0f;
+            D_800CC298.unk0 += -4.0f * D_800BE9E4;
+            if (D_800CC298.unk0 <= 0.0f) {
+                D_800CC298.unk0 += 360.0f;
             }
-            ANIM.unk4 += -0.5f * D_800BE9E4;
-            if (ANIM.unk4 <= 0.0f) {
-                ANIM.unk4 += 360.0f;
+            D_800CC298.unk4 += -0.5f * D_800BE9E4;
+            if (D_800CC298.unk4 <= 0.0f) {
+                D_800CC298.unk4 += 360.0f;
             }
             done[2] = 1;
         } else if ((id == 0x2C) && (done[3] == 0)) {
-            if (ANIM.unk9 >= 0x29) {
-                ANIM.unkA = -1;
-            } else if (ANIM.unk9 <= 0) {
-                ANIM.unkA = 1;
+            if (D_800CC298.unk9 >= 0x29) {
+                D_800CC298.unkA = -1;
+            } else if (D_800CC298.unk9 <= 0) {
+                D_800CC298.unkA = 1;
             }
-            ANIM.unk9 += ANIM.unkA;
-            func_15062D10(id, 0xAA, ANIM.unk9, 0, 0, 1);
+            D_800CC298.unk9 += D_800CC298.unkA;
+            func_15062D10(id, 0xAA, D_800CC298.unk9, 0, 0, 1);
             done[3] = 1;
         } else if ((id == 0x3A) && (done[4] == 0)) {
             f32 weights[4];
@@ -5044,8 +5049,8 @@ void func_15061B4C(void) {
 
             if (D_800CC2D0[i].unk1D4 != NULL) {
                 for (j = 0; j < 4; j++) {
-                    weights[j] = (func_150489B0(ANIM.unkB[j]) + 1.0f) * 0.5f;
-                    ANIM.unkB[j] += step.b[j];
+                    weights[j] = (func_150489B0(D_800CC298.unkB[j]) + 1.0f) * 0.5f;
+                    D_800CC298.unkB[j] += step.b[j];
                 }
                 func_1501B660(&D_800CC2D0[i], weights, 1);
                 done[4] = 1;
@@ -5060,8 +5065,8 @@ void func_15061B4C(void) {
                 func_15062D10(id, 0x175, -2, 0, 0, 0);
                 func_15062D10(id, 0x177, -1, 0, 0, 0);
             }
-            if (ANIM.unkF >= 4) {
-                ANIM.unkF = 0;
+            if (D_800CC298.unkF >= 4) {
+                D_800CC298.unkF = 0;
                 if (OBJB(&D_800CC2D0[i], 0x69) == 5) {
                     OBJB(&D_800CC2D0[i], 0x69) = 0;
                 } else {
@@ -5074,7 +5079,7 @@ void func_15061B4C(void) {
                 }
                 OBJB(&D_800CC2D0[i], 0x68) += 0xF;
             } else {
-                ANIM.unkF += D_800BE9E4;
+                D_800CC298.unkF += D_800BE9E4;
             }
         } else if (id == 0x45) {
             s32 val = OBJB(&D_800CC2D0[i], 0x6D);
@@ -5102,17 +5107,17 @@ void func_15061B4C(void) {
             f32 scale;
 
             if (D_800CC2D0[i].unk2EC != 0) {
-                if (ANIM.unk10 < 0xEB) {
-                    ANIM.unk10 += 0x14;
+                if (D_800CC298.unk10 < 0xEB) {
+                    D_800CC298.unk10 += 0x14;
                 } else {
-                    ANIM.unk10 = 0xFF;
+                    D_800CC298.unk10 = 0xFF;
                 }
-            } else if (ANIM.unk10 >= 0x15) {
-                ANIM.unk10 -= 0x14;
+            } else if (D_800CC298.unk10 >= 0x15) {
+                D_800CC298.unk10 -= 0x14;
             } else {
-                ANIM.unk10 = 0;
+                D_800CC298.unk10 = 0;
             }
-            scale = (u32)ANIM.unk10 * 0.003921568859f;
+            scale = (u32)D_800CC298.unk10 * 0.003921568859f;
             func_1501B660(&D_800CC2D0[i], &scale, 0);
         } else if (id == 0x8A) {
             s32 delta;
