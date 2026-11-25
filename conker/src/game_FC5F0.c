@@ -1,10 +1,145 @@
 #include <ultra64.h>
+// matching: functions.h declares func_150ADA20 as returning u8, but the callers here use its full s32 result
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
 s32 func_150ADA20(void);
 #include "variables.h"
 
+/* Header shared by the objects func_15149130 creates; each object type's own data starts at 0x28. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xC - 0x2];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE; // set to -1 to remove the object
+    /* 0x10 */ u8 pad10[0x28 - 0x10];
+} ObjHeader;
+
+/* Ground probe result filled by func_1504715C. */
+typedef struct {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ u8 pad4[0x24 - 0x4];
+} Ground;
+
+/* Data of an object that emits particles around an actor while that actor has bones. */
+typedef struct {
+    /* 0x00 */ struct127 *actor;
+    /* 0x04 */ u8 actorId; // the actor's unique_id when the emitter was attached
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ f32 spawnCredit; // one particle is emitted per whole unit
+} ActorEmitterState;
+
+typedef struct {
+    /* 0x00 */ ObjHeader header;
+    /* 0x28 */ ActorEmitterState state;
+} ActorEmitter;
+
+void func_1504715C(Ground *, struct127 *);
+void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
+void func_1515C244(struct127 *, f32 *center, f32 *, f32 *);
+void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
+                   s32, Ground *, s32, s32, s32, s32);
+
+/* Emitter update: removes itself once its actor is gone or replaced, otherwise emits particles
+   from a sphere around the actor's center at a random rate. */
+void func_150CF140(ActorEmitter *emitter) {
+    ActorEmitterState *state;
+    struct127 *actor;
+    f32 center[3];
+    f32 radius;
+    Ground ground;
+    f32 extentA;
+    f32 extentB;
+    f32 pos[3];
+    f32 vel[3];
+    u8 yaw;
+
+    actor = emitter->state.actor;
+    state = &emitter->state;
+    if ((actor->interaction_state == 0) || (actor->unique_id != state->actorId)) {
+        emitter->header.unkE = -1;
+        return;
+    }
+    if (actor->unk1D4 != NULL) {
+        state->spawnCredit += (0.06f + (func_150ADA68() * 0.0704f)) * D_800BE9A4;
+        func_1515C244(actor, center, &extentA, &extentB);
+        radius = (extentA + extentB) * 0.5f;
+        func_1504715C(&ground, actor);
+        while (state->spawnCredit > 1.0f) {
+            yaw = func_150ADA20() & 0xFF;
+            func_15143794(yaw, (s16)((func_150ADA20() % 76U) - 64), radius, pos);
+            pos[0] += center[0];
+            pos[1] += center[1];
+            pos[2] += center[2];
+            func_15143794(yaw, (s16)((func_150ADA20() % 54U) - 56), (func_150ADA68() * 1.4430001f) + 2.2680001f, vel);
+            func_151D9014(pos, vel, 5, (func_150ADA68() * 0.286f) + -0.78700006f, (func_150ADA20() % 21U) + 30,
+                          (func_150ADA20() % 156U) + 100, (func_150ADA68() * 50.0f) + 48.0f, 1, 1.0f, 1.0f, 0,
+                          &ground, 1, 0, emitter->header.unkC, emitter->header.unk1);
+            state->spawnCredit -= 1.0f;
+        }
+    }
+}
+
+/* Message payload for func_150CF484: message 0 names an actor that went away, message 0x2D two
+   actors that swapped places. */
+typedef struct {
+    /* 0x00 */ struct127 *actorA;
+    /* 0x04 */ union {
+        struct127 *actorB;
+        u8 id;
+    } u4;
+    /* 0x08 */ u8 actorAId;
+    /* 0x09 */ u8 actorBId;
+} ActorMsg;
+
+/* Emitter message handler: dies with its actor and follows it through a swap. */
+void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
+    ActorEmitterState *state = &emitter->state;
+    struct127 *actorA;
+
+    if (type == 0) {
+        actorA = msg->actorA;
+        if ((actorA == state->actor) || (msg->u4.id == state->actorId)) {
+            func_1516972C((struct102 *)emitter);
+        }
+    } else if (type == 0x2D) {
+        if (state->actor == msg->actorA) {
+            state->actor = msg->u4.actorB;
+            state->actorId = msg->actorBId;
+        } else if (state->actor == msg->u4.actorB) {
+            state->actor = msg->actorA;
+            state->actorId = msg->actorAId;
+        }
+    }
+}
+
+void func_151CF898(struct127 *, f32, f32);
+
+void func_150CF530(s32 arg0) {
+    func_151CF898(&D_800CC2D0[0], D_800CC2D0[0].y_position + 300.0f, -10000.0f);
+}
+
+/* Texture scroll offsets (10.2 fixed point, in units of 1/32 texel). */
+extern s32 D_80088890;
+extern s32 D_80088894;
+extern s32 D_80088898;
+extern s32 D_8008889C;
+
+/* Advances the texture scroll offsets by the frames elapsed. */
+void func_150CF578(s32 arg0) {
+    D_80088890 += D_800BE9E4 * 26;
+    D_80088894 -= D_800BE9E4 * 28;
+    D_80088898 -= D_800BE9E4 * 28;
+}
+
+/* Sets the scrolled tile sizes of tiles 0 and 1. */
+Gfx *func_150CF5E8(Gfx *gfx) {
+    gDPSetTileSize(gfx++, 0, D_80088890 >> 7, D_80088894 >> 7, 0x47E, 0x47E);
+    gDPSetTileSize(gfx++, 1, D_80088898 >> 7, D_8008889C >> 7, 0x47E, 0x47E);
+    return gfx;
+}
 extern s32 (*D_800888A0[])(struct260 *);
 
 struct struct_150D032C_prefix {
@@ -14,146 +149,6 @@ struct struct_150D032C_prefix {
 extern struct struct_150D032C_prefix D_800A0880;
 extern f32 D_800A0888;
 void func_15042D94(s32, s32, s32, u8 *);
-
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x3B - 4];
-    u8 unk3B;
-    u8 pad3C[0x1D4 - 0x3C];
-    s32 unk1D4;
-} Obj150CF140;
-
-typedef struct {
-    Obj150CF140 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    f32 unk8;
-} Sub150CF140;
-
-typedef struct {
-    u8 pad0[1];
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    u8 pad10[0x18];
-    Sub150CF140 unk28;
-} Arg150CF140;
-
-typedef struct {
-    f32 value;
-    u8 pad[0x20];
-} Floor150CF140;
-
-void func_1504715C(Floor150CF140 *, Obj150CF140 *);
-void func_15143794(s16, s16, f32, f32 *);
-void func_1515C244(Obj150CF140 *, f32 *, f32 *, f32 *);
-void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
-                   s32, Floor150CF140 *, s32, s32, s32, s32);
-
-void func_150CF140(Arg150CF140 *arg0) {
-    Sub150CF140 *sub;
-    Obj150CF140 *obj;
-    f32 pos[3];
-    f32 radius;
-    Floor150CF140 floor;
-    f32 lo;
-    f32 hi;
-    f32 sp74[3];
-    f32 sp80[3];
-    u8 angle;
-
-    obj = arg0->unk28.unk0;
-    sub = &arg0->unk28;
-    if ((obj->unk0 == 0) || (obj->unk3B != sub->unk4)) {
-        arg0->unkE = -1;
-        return;
-    }
-    if (obj->unk1D4 != 0) {
-        sub->unk8 += (0.05999999866f + (func_150ADA68() * 0.07039999962f)) * D_800BE9A4;
-        func_1515C244(obj, pos, &lo, &hi);
-        radius = (lo + hi) * 0.5f;
-        func_1504715C(&floor, obj);
-        while (sub->unk8 > 1.0f) {
-            angle = func_150ADA20() & 0xFF;
-            func_15143794(angle, (s16)((func_150ADA20() % 76U) - 0x40), radius, sp74);
-            sp74[0] += pos[0];
-            sp74[1] += pos[1];
-            sp74[2] += pos[2];
-            func_15143794(angle, (s16)((func_150ADA20() % 54U) - 0x38), (func_150ADA68() * 1.443000078f) + 2.268000126f, sp80);
-            func_151D9014(sp74, sp80, 5, (func_150ADA68() * 0.2860000134f) + -0.7870000601f, (func_150ADA20() % 21U) + 0x1E, (func_150ADA20() % 156U) + 0x64, (func_150ADA68() * 50.0f) + 48.0f, 1, 1.0f, 1.0f, 0, &floor, 1, 0, arg0->unkC, arg0->unk1);
-            sub->unk8 -= 1.0f;
-        }
-    }
-}
-
-typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA_150CF484;
-
-typedef struct {
-    s32 unk0;
-    union {
-        s32 w4;
-        u8  b4;
-    } u4;
-    u8  unk8;
-    u8  unk9;
-} ArgB_150CF484;
-
-void func_150CF484(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_150CF484 *temp_v0 = (SubA_150CF484 *)((u8 *)arg0 + 0x28);
-    ArgB_150CF484 *b = (ArgB_150CF484 *)arg1;
-    s32 b0;
-
-    if (arg2 == 0) {
-        b0 = b->unk0;
-        if ((b0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
-        }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
-        }
-    }
-}
-
-extern void func_151CF898(struct127 *, f32, f32);
-
-void func_150CF530(s32 arg0) {
-    func_151CF898(&D_800CC2D0[0], D_800CC2D0[0].y_position + 300.0f, -10000.0f);
-}
-
-extern s8 *D_80088890;
-extern s8 *D_80088894;
-extern s8 *D_80088898;
-extern s8 *D_8008889C;
-
-void func_150CF578(s32 arg0) {
-    D_80088890 += D_800BE9E4 * 26;
-    D_80088894 -= D_800BE9E4 * 28;
-    D_80088898 -= D_800BE9E4 * 28;
-}
-
-#define WGFX150CF5E8(pkt, a, b)     \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
-
-Gfx *func_150CF5E8(Gfx *arg0) {
-    WGFX150CF5E8(arg0++, (0xF2000000 | ((((s32)D_80088890 >> 7) & 0xFFF) << 12) | (((s32)D_80088894 >> 7) & 0xFFF)), 0x0047E47E);
-    WGFX150CF5E8(arg0++, (0xF2000000 | ((((s32)D_80088898 >> 7) & 0xFFF) << 12) | (((s32)D_8008889C >> 7) & 0xFFF)), 0x0147E47E);
-    return arg0;
-}
-
 typedef struct {
     /* 0x00 */ f32 unk0;
     /* 0x04 */ f32 unk4;
