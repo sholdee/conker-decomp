@@ -28,7 +28,7 @@ typedef struct {
     /* 0x6 */ s16 unk6;
 } SeqEvent;
 
-/* A path keyframe: a point the track's actor moves through (D_800C3868[slot][track][key]). */
+/* A path keyframe: a point the track's actor moves through (D_800C3868[scene][track][key]). */
 typedef struct {
     /* 0x0 */ s16 x;
     /* 0x2 */ s16 y;
@@ -36,7 +36,7 @@ typedef struct {
     /* 0x6 */ u16 linear;  // nonzero: straight segment to the next key, else Catmull-Rom curve
 } SeqPathKey; // size 0x8
 
-/* A channel keyframe: a timed value for one animated property (D_800C3778[slot][track][key]). */
+/* A channel keyframe: a timed value for one animated property (D_800C3778[scene][track][key]). */
 typedef struct {
     /* 0x0 */ f32 value;
     /* 0x4 */ u8 interp;
@@ -44,7 +44,7 @@ typedef struct {
     /* 0x6 */ s16 time;
 } SeqChannelKey; // size 0x8
 
-/* What a track drives (D_800C35F0[slot][track]); type 2 tracks name an actor id in unk2. */
+/* What a track drives (D_800C35F0[scene][track]); type 2 tracks name an actor id in unk2. */
 typedef struct {
     /* 0x0 */ u16 type;
     /* 0x2 */ u8 unk2;
@@ -53,7 +53,7 @@ typedef struct {
     /* 0x6 */ s16 unk6;
 } SeqTrackInfo; // size 0x8
 
-/* Arc-length data for a track's path (D_800C3A50[slot][track]), plus the cubic of the cached segment. */
+/* Arc-length data for a track's path (D_800C3A50[scene][track]), plus the cubic of the cached segment. */
 typedef struct {
     /* 0x00 */ f32 length;          // total length of the path
     /* 0x04 */ f32 *keyDistance;    // distance along the path at each SeqPathKey
@@ -171,7 +171,7 @@ extern SeqCameraMsg D_800C3600;
 extern SeqTrackPath *D_800C3A50[];
 extern SeqPathKey *D_800C3868[][30];
 extern SeqSubtitle D_800C3D48; /* == &D_800C3CA0[3] */
-s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 slot, s32 *segmentOut);
+s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut);
 void func_1501FFE8(f32 *out, SeqPathKey *keys, s32 key, s32 numKeys);
 extern void func_1516D2E0(s32);
 extern void func_1516D328(s32);
@@ -536,7 +536,7 @@ typedef struct {
 
 extern void *allocate_memory(s32, s32, s32, s32);
 extern void func_1501C730(s32, s32, s32, s32, s32);
-void func_15020388(s32 track, s32 slot);
+void func_15020388(s32 track, s32 scene);
 void func_15022BA4(s32 scene);
 extern void func_150238D0(void);
 void func_15022234(s32 scene);
@@ -1166,8 +1166,8 @@ void func_1501EA18(s32 scene) {
 }
 
 extern f32 func_150497E0(f32 *, s32, f32);
-void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 slot);
-void func_1501FE68(s32 track, f32 percent, f32 *heading, s32 slot);
+void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 scene);
+void func_1501FE68(s32 track, f32 percent, f32 *heading, s32 scene);
 
 /* Evaluate every track of the scene at the current time D_800C35B0: start from the track's path
    start and type defaults, then interpolate each of its 15 channels between the keys around the
@@ -1414,12 +1414,12 @@ typedef struct {
     f32 y;
     f32 z;
 } SeqVec3f;
-void func_15020878(s32 track, s32 segment, s32 slot);
+void func_15020878(s32 track, s32 segment, s32 scene);
 
 /* Find the path segment containing distance `dist` along track `track` and write two points to
    `out`: the ends of the arc-length sample on a curved segment, or the interpolated point twice on
    a linear one. Returns the arc-length sample index. */
-s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 slot, s32 *segmentOut) {
+s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut) {
     s32 key;
     s32 lo;
     s32 hi;
@@ -1432,9 +1432,9 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 slot, s32 *segmentOut) {
     f32 t;
 
     lo = 0;
-    hi = D_800C35C8[slot][track] - 1;
+    hi = D_800C35C8[scene][track] - 1;
     if (hi >= 0) {
-        distances = D_800C3A50[slot][track].keyDistance;
+        distances = D_800C3A50[scene][track].keyDistance;
         do {
             key = (lo + hi) / 2;
             if (dist < distances[key]) {
@@ -1448,15 +1448,15 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 slot, s32 *segmentOut) {
         } while (hi >= lo);
     }
     *segmentOut = key;
-    if (key != D_800C3A50[slot][track].segment) {
-        func_15020878(track, key, slot);
+    if (key != D_800C3A50[scene][track].segment) {
+        func_15020878(track, key, scene);
     }
-    linear = D_800C3868[slot][track][key].linear;
-    func_1501FFE8((f32 *)points, D_800C3868[slot][track], key, D_800C35C8[slot][track]);
+    linear = D_800C3868[scene][track][key].linear;
+    func_1501FFE8((f32 *)points, D_800C3868[scene][track], key, D_800C35C8[scene][track]);
     if (linear == 0) {
         hi = 100;
         lo = 0;
-        distances = D_800C3A50[slot][track].arcLength;
+        distances = D_800C3A50[scene][track].arcLength;
         do {
             sample = (lo + hi) / 2;
             if (dist < distances[sample]) {
@@ -1471,14 +1471,14 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 slot, s32 *segmentOut) {
         j = 0;
         for (i = 0; i < 2; i++) {
             t = (f32)(sample + i) * 0.01f;
-            ((SeqVec3f *)out)[j].x = ((D_800C3A50[slot][track].coef3[0] * t + D_800C3A50[slot][track].coef2[0]) * t + D_800C3A50[slot][track].coef1[0]) * t + D_800C3A50[slot][track].coef0[0];
-            ((SeqVec3f *)out)[j].y = ((D_800C3A50[slot][track].coef3[1] * t + D_800C3A50[slot][track].coef2[1]) * t + D_800C3A50[slot][track].coef1[1]) * t + D_800C3A50[slot][track].coef0[1];
-            ((SeqVec3f *)out)[j].z = ((D_800C3A50[slot][track].coef3[2] * t + D_800C3A50[slot][track].coef2[2]) * t + D_800C3A50[slot][track].coef1[2]) * t + D_800C3A50[slot][track].coef0[2];
+            ((SeqVec3f *)out)[j].x = ((D_800C3A50[scene][track].coef3[0] * t + D_800C3A50[scene][track].coef2[0]) * t + D_800C3A50[scene][track].coef1[0]) * t + D_800C3A50[scene][track].coef0[0];
+            ((SeqVec3f *)out)[j].y = ((D_800C3A50[scene][track].coef3[1] * t + D_800C3A50[scene][track].coef2[1]) * t + D_800C3A50[scene][track].coef1[1]) * t + D_800C3A50[scene][track].coef0[1];
+            ((SeqVec3f *)out)[j].z = ((D_800C3A50[scene][track].coef3[2] * t + D_800C3A50[scene][track].coef2[2]) * t + D_800C3A50[scene][track].coef1[2]) * t + D_800C3A50[scene][track].coef0[2];
             j ^= 1;
         }
     } else {
-        t = D_800C3A50[slot][track].keyDistance[key + 1] - D_800C3A50[slot][track].keyDistance[key];
-        dist = dist - D_800C3A50[slot][track].keyDistance[key];
+        t = D_800C3A50[scene][track].keyDistance[key + 1] - D_800C3A50[scene][track].keyDistance[key];
+        dist = dist - D_800C3A50[scene][track].keyDistance[key];
         if (t != 0) {
             dist = dist / t;
         } else {
@@ -1497,7 +1497,7 @@ s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 slot, s32 *segmentOut) {
 
 
 /* Position of track `track` at `percent` (0-100) of its path length. */
-void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 slot) {
+void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 scene) {
     f32 dist;
     s32 segment;
     s32 sample;
@@ -1506,17 +1506,17 @@ void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 slot) {
     f32 covered;
     f32 ratio;
 
-    if (D_800C35C8[slot][track] >= 2) {
+    if (D_800C35C8[scene][track] >= 2) {
         if (percent > 100.0f) {
             percent = 100.0f;
         }
         if (percent < 0.0f) {
             percent = 0.0f;
         }
-        dist = D_800C3A50[slot][track].length * percent * 0.009999999776f;
-        sample = func_1501F72C(track, dist, positions, slot, &segment);
-        if (D_800C3868[slot][track][segment].linear == 0) {
-            arc = D_800C3A50[slot][track].arcLength + sample;
+        dist = D_800C3A50[scene][track].length * percent * 0.009999999776f;
+        sample = func_1501F72C(track, dist, positions, scene, &segment);
+        if (D_800C3868[scene][track][segment].linear == 0) {
+            arc = D_800C3A50[scene][track].arcLength + sample;
             percent = arc[1] - arc[0];
             covered = dist - arc[0];
             if (percent != 0) {
@@ -1539,7 +1539,7 @@ void func_1501FC8C(s32 track, f32 percent, f32 *x, f32 *y, f32 *z, s32 slot) {
 extern f32 D_800969D8;
 
 /* Heading in degrees of track `track`'s path at `percent` (0-100) of its length. */
-void func_1501FE68(s32 track, f32 percent, f32 *heading, s32 slot) {
+void func_1501FE68(s32 track, f32 percent, f32 *heading, s32 scene) {
     f32 dx;
     f32 positions[6];
     s32 segment[3];
@@ -1547,7 +1547,7 @@ void func_1501FE68(s32 track, f32 percent, f32 *heading, s32 slot) {
     f32 dz;
     register f32 dist;
 
-    if (D_800C35C8[slot][track] >= 2) {
+    if (D_800C35C8[scene][track] >= 2) {
         if (percent > 100.0f) {
             percent = 100.0f;
         }
@@ -1555,15 +1555,15 @@ void func_1501FE68(s32 track, f32 percent, f32 *heading, s32 slot) {
             percent = 0.0f;
         }
 
-        dist = D_800C3A50[slot][track].length * percent * D_800969D8;
-        func_1501F72C(track, dist, positions, slot, segment);
+        dist = D_800C3A50[scene][track].length * percent * D_800969D8;
+        func_1501F72C(track, dist, positions, scene, segment);
 
-        if (D_800C3868[slot][track][segment[0]].linear == 0) {
+        if (D_800C3868[scene][track][segment[0]].linear == 0) {
             dx = positions[0] - positions[3];
             dz = positions[2] - positions[5];
         } else {
             // matching: the 12-float buffer starts 2 floats below a 10-float local (frame size)
-            func_1501FFE8(points - 2, D_800C3868[slot][track], segment[0], D_800C35C8[slot][track]);
+            func_1501FFE8(points - 2, D_800C3868[scene][track], segment[0], D_800C35C8[scene][track]);
             dx = points[4] - points[1];
             dz = points[6] - points[3];
         }
@@ -1616,7 +1616,7 @@ void func_1501FFE8(f32 *out, SeqPathKey *keys, s32 key, s32 numKeys) {
 }
 
 /* Measure track `track`'s path: the distance at each key and the total length. */
-void func_15020388(s32 track, s32 slot) {
+void func_15020388(s32 track, s32 scene) {
     s32 i;
     s32 j;
     f32 pts[4][3];
@@ -1634,14 +1634,14 @@ void func_15020388(s32 track, s32 slot) {
     u8 cur;
     u16 linear;
 
-    if (D_800C35C8[slot][track] >= 2) {
-        D_800C3A50[slot][track].segment = 0xFF;
+    if (D_800C35C8[scene][track] >= 2) {
+        D_800C3A50[scene][track].segment = 0xFF;
         len = 0.0f;
         cur = 0;
-        for (i = 0; i < D_800C35C8[slot][track] - 1; i++) {
-            linear = D_800C3868[slot][track][i].linear;
-            func_1501FFE8(&pts[0][0], D_800C3868[slot][track], i, D_800C35C8[slot][track]);
-            D_800C3A50[slot][track].keyDistance[i] = len;
+        for (i = 0; i < D_800C35C8[scene][track] - 1; i++) {
+            linear = D_800C3868[scene][track][i].linear;
+            func_1501FFE8(&pts[0][0], D_800C3868[scene][track], i, D_800C35C8[scene][track]);
+            D_800C3A50[scene][track].keyDistance[i] = len;
             if (linear == 0) {
                 for (j = 0; j < 3; j++) {
                     a[j] = -0.5f * pts[0][j] + 1.5f * pts[1][j] + -1.5f * pts[2][j] + 0.5f * pts[3][j];
@@ -1677,9 +1677,9 @@ void func_15020388(s32 track, s32 slot) {
                 len += sqrtf(dist * dist + (t * t + y * y));
             }
         }
-        D_800C3A50[slot][track].keyDistance[i] = len;
-        D_800C3A50[slot][track].length = len;
-        D_800C3A50[slot][track].segment = 0xFF;
+        D_800C3A50[scene][track].keyDistance[i] = len;
+        D_800C3A50[scene][track].length = len;
+        D_800C3A50[scene][track].segment = 0xFF;
     }
 }
 
@@ -1688,7 +1688,7 @@ f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
 /* Cache the cubic and the 101-sample arc-length table of segment `segment` of track `track`. */
-void func_15020878(s32 track, s32 segment, s32 slot) {
+void func_15020878(s32 track, s32 segment, s32 scene) {
     s32 i;
     s32 k;
     f32 points[12];
@@ -1705,25 +1705,25 @@ void func_15020878(s32 track, s32 segment, s32 slot) {
     f32 dz;
     s32 linear;
 
-    if (segment >= D_800C35C8[slot][track] - 1) {
+    if (segment >= D_800C35C8[scene][track] - 1) {
         return;
     }
     j = 0;
-    total = D_800C3A50[slot][track].keyDistance[segment];
-    linear = D_800C3868[slot][track][segment].linear;
-    func_1501FFE8(points, D_800C3868[slot][track], segment, D_800C35C8[slot][track]);
+    total = D_800C3A50[scene][track].keyDistance[segment];
+    linear = D_800C3868[scene][track][segment].linear;
+    func_1501FFE8(points, D_800C3868[scene][track], segment, D_800C35C8[scene][track]);
     if (linear == 0) {
         for (i = 0; i < 3; i++) {
             a[i] = -0.5f * points[i] + 1.5f * points[i + 3] + -1.5f * points[i + 6] + points[i + 9] * 0.5f;
             b[i] = points[i] + -2.5f * points[i + 3] + (points[i + 6] + points[i + 6]) + points[i + 9] * -0.5f;
             c[i] = -0.5f * points[i] + points[i + 6] * 0.5f;
             d[i] = points[i + 3];
-            D_800C3A50[slot][track].coef0[i] = d[i];
-            D_800C3A50[slot][track].coef1[i] = c[i];
-            D_800C3A50[slot][track].coef2[i] = b[i];
-            D_800C3A50[slot][track].coef3[i] = a[i];
+            D_800C3A50[scene][track].coef0[i] = d[i];
+            D_800C3A50[scene][track].coef1[i] = c[i];
+            D_800C3A50[scene][track].coef2[i] = b[i];
+            D_800C3A50[scene][track].coef3[i] = a[i];
         }
-        D_800C3A50[slot][track].arcLength[0] = total;
+        D_800C3A50[scene][track].arcLength[0] = total;
         for (i = 0; i != 3; i++) {
             pos[!j][i] = d[i];
         }
@@ -1744,17 +1744,17 @@ void func_15020878(s32 track, s32 segment, s32 slot) {
             if (dx != 0.0f) {
                 total += sqrtf(dx);
             }
-            D_800C3A50[slot][track].arcLength[i] = total;
+            D_800C3A50[scene][track].arcLength[i] = total;
             i++;
             j ^= 1;
         }
     } else {
-        total = D_800C3A50[slot][track].keyDistance[segment + 1] - total;
+        total = D_800C3A50[scene][track].keyDistance[segment + 1] - total;
         for (k = 0; k < 101; k++) {
-            D_800C3A50[slot][track].arcLength[k] = (f32)k * total / 101.0f;
+            D_800C3A50[scene][track].arcLength[k] = (f32)k * total / 101.0f;
         }
     }
-    D_800C3A50[slot][track].segment = segment;
+    D_800C3A50[scene][track].segment = segment;
 }
 
 
