@@ -70,7 +70,10 @@ void func_1512E140(Camera *camera);
 void func_1512A390(Camera *camera);
 
 #define SQ(x) ((x) * (x))
+#define DEG2RAD 0.01745329238f
 
+/* Places the eye on an orbit around the target: yaw from the player's facing (or the camera yaw),
+   pitch from the player or pitchOverride, then eases it there and keeps it out of the target. */
 void func_15122440(Camera *camera) {
     vertex offset = D_800894C8;
     f32 horiz;
@@ -81,7 +84,7 @@ void func_15122440(Camera *camera) {
     f32 goalZ;
     f32 goalY;
 
-    yaw = (camera->player->unk40 + 90.0f) * 0.01745329238f;
+    yaw = (camera->player->unk40 + 90.0f) * DEG2RAD;
     func_1512A390(camera);
     if (!(camera->status & 1) && (camera->player->unk102 == 0)) {
         yaw = camera->yawRad - 1.570796371f;
@@ -102,7 +105,7 @@ void func_15122440(Camera *camera) {
     } else {
         D_800894C0 = pitch;
     }
-    pitch *= 0.01745329238f;
+    pitch *= DEG2RAD;
     func_15123070(camera);
     if (camera->contPad->button & R_TRIG) {
         offset.x = 150.0f;
@@ -117,45 +120,45 @@ void func_15122440(Camera *camera) {
     horiz = cosf(pitch) * offset.x;
     offset.y = sinf(pitch) * offset.x;
     offset.x = horiz;
-lbl:
+lbl: // matching: the unused label starts a new basic block before the orbit rotation
     {
-    f32 cosYaw;
-    sinYaw = sinf(yaw);
-    cosYaw = cosf(yaw);
-    camera->unk3DC = yaw;
-    do {
-    offset.z = -offset.x * sinYaw;
-    offset.x = offset.x * cosYaw;
-    offset.y = CLAMP(offset.y, -200.0f, 200.0f);
-    } while (0);
-    offset.x += camera->target.x;
-    offset.y += camera->target.y;
-    offset.z += camera->target.z;
+        f32 cosYaw;
+        sinYaw = sinf(yaw);
+        cosYaw = cosf(yaw);
+        camera->unk3DC = yaw;
+        do { // matching: block split after the unk3DC store keeps offset's fields in registers
+            offset.z = -offset.x * sinYaw;
+            offset.x = offset.x * cosYaw;
+            offset.y = CLAMP(offset.y, -200.0f, 200.0f);
+        } while (0);
+        offset.x += camera->target.x;
+        offset.y += camera->target.y;
+        offset.z += camera->target.z;
     }
     {
-    f32 accel = 1.0f;
-    f32 maxSpeed = 2.200000048f;
-    goalX = offset.x;
-    goalY = offset.y;
-    goalZ = offset.z;
-    if (camera->snap) {
-        camera->eye.x = goalX;
-        camera->eye.y = goalY;
-        camera->eye.z = goalZ;
-        camera->eyeVel.x = 0.0f;
-        camera->eyeVel.y = 0.0f;
-        camera->eyeVel.z = 0.0f;
-    } else {
-        accel *= 2.0f;
-        maxSpeed *= 2.0f;
-        if (camera->player->unk102) {
+        f32 accel = 1.0f;
+        f32 maxSpeed = 2.200000048f;
+        goalX = offset.x;
+        goalY = offset.y;
+        goalZ = offset.z;
+        if (camera->snap) {
+            camera->eye.x = goalX;
+            camera->eye.y = goalY;
+            camera->eye.z = goalZ;
+            camera->eyeVel.x = 0.0f;
+            camera->eyeVel.y = 0.0f;
+            camera->eyeVel.z = 0.0f;
+        } else {
             accel *= 2.0f;
             maxSpeed *= 2.0f;
+            if (camera->player->unk102) {
+                accel *= 2.0f;
+                maxSpeed *= 2.0f;
+            }
+            func_150495B0(&camera->eye.x, goalX, &camera->eyeVel.x, accel, maxSpeed, camera->dt);
+            func_150495B0(&camera->eye.y, goalY, &camera->eyeVel.y, accel, maxSpeed, camera->dt);
+            func_150495B0(&camera->eye.z, goalZ, &camera->eyeVel.z, accel, maxSpeed, camera->dt);
         }
-        func_150495B0(&camera->eye.x, goalX, &camera->eyeVel.x, accel, maxSpeed, camera->dt);
-        func_150495B0(&camera->eye.y, goalY, &camera->eyeVel.y, accel, maxSpeed, camera->dt);
-        func_150495B0(&camera->eye.z, goalZ, &camera->eyeVel.z, accel, maxSpeed, camera->dt);
-    }
     }
     if ((camera->player->unk102 == 0) && !(camera->buttonsPressed & R_TRIG)) {
         if (sqrtf(SQ(camera->eye.x - camera->target.x) + SQ(camera->eye.y - camera->target.y) + SQ(camera->eye.z - camera->target.z)) < 120.0f) {
@@ -196,7 +199,7 @@ void func_15122980(Camera *camera) {
         }
         func_150495B0(&camera->yawFollow, camera->yawFollowTarget, &camera->yawFollowVel, 1.0f, 2.0f, camera->dt);
         camera->yaw += func_15048A70(prevAngle, angle) * camera->yawFollow;
-        camera->yawRad = camera->yaw * 0.01745329238f;
+        camera->yawRad = camera->yaw * DEG2RAD;
     }
 
     func_15123A54(camera);
