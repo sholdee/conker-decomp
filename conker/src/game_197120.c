@@ -13,153 +13,164 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0x83];
-    /* 0x90 */ f32 unk90;
-    /* 0x94 */ f32 unk94;
-    /* 0x98 */ f32 unk98;
-    /* 0x9C */ f32 unk9C;
-    /* 0xA0 */ f32 unkA0;
-    /* 0xA4 */ f32 unkA4;
-    /* 0xA8 */ f32 unkA8;
-    /* 0xAC */ f32 unkAC;
-    /* 0xB0 */ f32 unkB0;
-    /* 0xB4 */ f32 unkB4;
-    /* 0xB8 */ f32 unkB8;
-    /* 0xBC */ f32 unkBC;
+    /* 0x90 */ f32 x;
+    /* 0x94 */ f32 y;
+    /* 0x98 */ f32 z;
+    /* 0x9C */ f32 rotX;
+    /* 0xA0 */ f32 rotY;
+    /* 0xA4 */ f32 rotZ;
+    /* 0xA8 */ f32 velX;
+    /* 0xAC */ f32 velY;
+    /* 0xB0 */ f32 velZ;
+    /* 0xB4 */ f32 spinX;
+    /* 0xB8 */ f32 spinY;
+    /* 0xBC */ f32 spinZ;
     /* 0xC0 */ u8 padC0[4];
-    /* 0xC4 */ f32 unkC4;
+    /* 0xC4 */ f32 scale;
     /* 0xC8 */ u8 padC8[4];
-    /* 0xCC */ s32 unkCC;
+    /* 0xCC */ s32 timer;
     /* 0xD0 */ u8 padD0[4];
-    /* 0xD4 */ f32 unkD4;
-    /* 0xD8 */ f32 unkD8;
-    /* 0xDC */ f32 unkDC;
-    /* 0xE0 */ f32 unkE0;
+    /* 0xD4 */ f32 baseScale;
+    /* 0xD8 */ f32 friction;
+    /* 0xDC */ f32 bounce;
+    /* 0xE0 */ f32 spinDamp;
     /* 0xE4 */ u8 padE4;
-    /* 0xE5 */ u8 unkE5;
+    /* 0xE5 */ u8 alpha;
     /* 0xE6 */ u8 padE6;
-    /* 0xE7 */ u8 unkE7;
-    /* 0xE8 */ u8 unkE8;
-    /* 0xE9 */ u8 unkE9;
-    /* 0xEA */ u8 unkEA;
-    /* 0xEB */ u8 unkEB;
-    /* 0xEC */ u8 unkEC;
-} Struct15169C70;
+    /* 0xE7 */ u8 phase;
+    /* 0xE8 */ u8 flags;
+    /* 0xE9 */ u8 floorOffset;
+    /* 0xEA */ u8 sound;
+    /* 0xEB */ u8 kind;
+    /* 0xEC */ u8 state;
+} Debris;
 
-extern f32 func_15048A40(u8 arg0);
+extern f32 func_15048A40(u8);
 extern s32 func_150ADA20(void);
 extern s32 func_1510F800(s32);
 extern s32 func_1510F8D8(s32, s32, s32, s32);
-void func_15171200(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5,
-                   f32 arg6, f32 arg7, f32 arg8, s32 arg9, s32 arg10, f32 arg11,
-                   s32 arg12, s32 arg13);
-void func_151709B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5,
-                   s32 arg6);
+void func_15171200(s32, s32, f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, s32);
+void func_151709B4(s32, s32, s32, s32, f32, s32, s32);
 void func_151718F0(f32, f32, f32, f32, s32, f32, s32, s32, s32, s32);
-void func_1518CA04(s32 arg0);
+void func_1518CA04(s32);
 
-void func_15169C70(Struct15169C70 *arg0) {
+/* Per-frame update of a bouncing debris particle: integrate motion, land/bounce on the floor, fade out. */
+void func_15169C70(Debris *debris) {
     f32 dt;
-    s32 temp;
-    s32 cc;
-    s32 e5;
+    s32 floorHeight;
+    s32 timer;
+    s32 alpha;
 
     dt = D_800BE9E4;
-    arg0->unk90 += arg0->unkA8 * dt;
-    arg0->unk98 += arg0->unkB0 * dt;
-    arg0->unk9C += arg0->unkB4 * dt;
-    arg0->unkA0 += arg0->unkB8 * dt;
-    arg0->unkA4 += arg0->unkBC * dt;
-    arg0->unkAC += -0.5f * dt;
-    arg0->unk94 += arg0->unkAC * dt;
-    if (arg0->unkE8 & 1) {
-        arg0->unkE7 += D_800BE9E4 * 8;
-        arg0->unkC4 = (func_15048A40(arg0->unkE7) * 0.400000006f + 1.0f) * arg0->unkD4;
+    debris->x += debris->velX * dt;
+    debris->z += debris->velZ * dt;
+    debris->rotX += debris->spinX * dt;
+    debris->rotY += debris->spinY * dt;
+    debris->rotZ += debris->spinZ * dt;
+    debris->velY += -0.5f * dt;
+    debris->y += debris->velY * dt;
+    if (debris->flags & 1) {
+        debris->phase += D_800BE9E4 * 8;
+        debris->scale = (func_15048A40(debris->phase) * 0.400000006f + 1.0f) * debris->baseScale;
     }
-    if (arg0->unkE8 & 2) {
-        arg0->unkA0 = func_150484A0(arg0->unkA8, arg0->unkB0) * 57.29577637f;
-        arg0->unk9C = func_150484A0(-arg0->unkAC, sqrtf(arg0->unkA8 * arg0->unkA8 + arg0->unkB0 * arg0->unkB0)) * 57.29577637f;
+    if (debris->flags & 2) {
+        debris->rotY = func_150484A0(debris->velX, debris->velZ) * 57.29577637f;
+        debris->rotX = func_150484A0(-debris->velY, sqrtf(debris->velX * debris->velX + debris->velZ * debris->velZ)) * 57.29577637f;
     }
     func_1510F800(0);
-    temp = func_1510F8D8(arg0->unk90, arg0->unk94, arg0->unk98, 0) + arg0->unkE9;
-    if (arg0->unk94 < temp && arg0->unkAC < 0.0f) {
-        arg0->unk94 = temp;
-        if (arg0->unkEB == 1) {
-            func_15171200(4, 0xB, arg0->unk90, arg0->unk94, arg0->unk98, arg0->unkAC * arg0->unkDC, 0.5f, 1.0f, 60.0f, 2, 0xFF, -0.400000006f, arg0->unkC, arg0->unk1);
-            func_151718F0(arg0->unk90, (arg0->unk94 - (f32)(u32)arg0->unkE9) + 30.0f, arg0->unk98, 50.0f, 0x28, 0.0030517578125f, 0, 0x14, arg0->unkC, arg0->unk1);
-            func_151718F0(arg0->unk90, (arg0->unk94 - (f32)(u32)arg0->unkE9) + 15.0f, arg0->unk98, 30.0f, 0x28, 0.0030517578125f, 0, 0xA, arg0->unkC, arg0->unk1);
-            func_1518CA04(arg0->unkEA);
-            func_1516972C((struct102 *)arg0);
+    floorHeight = func_1510F8D8(debris->x, debris->y, debris->z, 0) + debris->floorOffset;
+    if (debris->y < floorHeight && debris->velY < 0.0f) {
+        debris->y = floorHeight;
+        if (debris->kind == 1) {
+            func_15171200(4, 0xB, debris->x, debris->y, debris->z, debris->velY * debris->bounce,
+                          0.5f, 1.0f, 60.0f, 2, 255, -0.400000006f, debris->unkC, debris->unk1);
+            // matching: the (u32) step selects IDO's unsigned int-to-float sequence
+            func_151718F0(debris->x, (debris->y - (f32)(u32)debris->floorOffset) + 30.0f,
+                          debris->z, 50.0f, 40, 0.0030517578125f, 0, 20, debris->unkC,
+                          debris->unk1);
+            func_151718F0(debris->x, (debris->y - (f32)(u32)debris->floorOffset) + 15.0f,
+                          debris->z, 30.0f, 40, 0.0030517578125f, 0, 10, debris->unkC,
+                          debris->unk1);
+            func_1518CA04(debris->sound);
+            func_1516972C((struct102 *)debris);
             return;
         }
-        if (arg0->unkEB == 4) {
-            func_15171200(3, 0xB, arg0->unk90, arg0->unk94, arg0->unk98, arg0->unkAC * arg0->unkDC, 0.5f, 0.6999999881f, 40.0f, 2, 0x3C, -0.5f, arg0->unkC, arg0->unk1);
-            func_1518CA04(arg0->unkEA);
-            func_1516972C((struct102 *)arg0);
+        if (debris->kind == 4) {
+            func_15171200(3, 0xB, debris->x, debris->y, debris->z, debris->velY * debris->bounce,
+                          0.5f, 0.6999999881f, 40.0f, 2, 60, -0.5f, debris->unkC, debris->unk1);
+            func_1518CA04(debris->sound);
+            func_1516972C((struct102 *)debris);
             return;
         }
-        if (arg0->unkEB == 3) {
-            func_15171200(2, 0xCB, arg0->unk90, arg0->unk94, arg0->unk98, 6.0f, 0.5f, 1.0f, 60.0f, 5, 0x3C, -0.6999999881f, arg0->unkC, arg0->unk1);
-            func_151709B4(arg0->unk90, arg0->unk94 + 10.0f, arg0->unk98, 4, arg0->unkAC * 200.0f, arg0->unkC, arg0->unk1);
-            func_1518CA04(arg0->unkEA);
-            func_1516972C((struct102 *)arg0);
+        if (debris->kind == 3) {
+            func_15171200(2, 0xCB, debris->x, debris->y, debris->z, 6.0f, 0.5f, 1.0f, 60.0f, 5, 60,
+                          -0.6999999881f, debris->unkC, debris->unk1);
+            func_151709B4(debris->x, debris->y + 10.0f, debris->z, 4, debris->velY * 200.0f,
+                          debris->unkC, debris->unk1);
+            func_1518CA04(debris->sound);
+            func_1516972C((struct102 *)debris);
             return;
         }
-        if (arg0->unkEB == 6) {
-            arg0->unkB0 = 0.0f;
-            arg0->unkAC = 0.0f;
-            arg0->unkA8 = 0.0f;
-            arg0->unkBC = 0.0f;
-            arg0->unkB8 = 0.0f;
-            arg0->unkB4 = 0.0f;
-            arg0->unkDC = 0.0f;
-            arg0->unkEB = 0;
-            arg0->unkCC = 0x3C;
+        if (debris->kind == 6) {
+            debris->velZ = 0.0f;
+            debris->velY = 0.0f;
+            debris->velX = 0.0f;
+            debris->spinZ = 0.0f;
+            debris->spinY = 0.0f;
+            debris->spinX = 0.0f;
+            debris->bounce = 0.0f;
+            debris->kind = 0;
+            debris->timer = 60;
             return;
         }
-        if (arg0->unkEB == 8) {
-            func_1518CA04(arg0->unkEA);
-            func_1516972C((struct102 *)arg0);
+        if (debris->kind == 8) {
+            func_1518CA04(debris->sound);
+            func_1516972C((struct102 *)debris);
             return;
         }
-        arg0->unkA8 *= arg0->unkD8;
-        arg0->unkB0 *= arg0->unkD8;
-        arg0->unkAC *= arg0->unkDC;
-        if (arg0->unkAC < 2.0f) {
-            arg0->unkA8 = 0;
-            arg0->unkAC = 0;
-            arg0->unkB0 = 0;
-            arg0->unkB4 = 0;
-            arg0->unkB8 = 0;
-            arg0->unkBC = 0;
+        debris->velX *= debris->friction;
+        debris->velZ *= debris->friction;
+        debris->velY *= debris->bounce;
+        if (debris->velY < 2.0f) {
+            // matching: integer 0 (not 0.0f) makes IDO store $zero directly
+            debris->velX = 0;
+            debris->velY = 0;
+            debris->velZ = 0;
+            debris->spinX = 0;
+            debris->spinY = 0;
+            debris->spinZ = 0;
         } else {
-            func_151718F0(arg0->unk90, (arg0->unk94 - (f32)(u32)arg0->unkE9) + 15.0f, arg0->unk98, 20.0f, 0x32, 0.000457763671875f, 0, 4, arg0->unkC, arg0->unk1);
-            if (arg0->unkEB == 2) {
+            func_151718F0(debris->x, (debris->y - (f32)(u32)debris->floorOffset) + 15.0f,
+                          debris->z, 20.0f, 50, 0.000457763671875f, 0, 4, debris->unkC,
+                          debris->unk1);
+            if (debris->kind == 2) {
                 if (func_150ADA20() & 0x8000) {
-                    arg0->unkB4 = (f32)(func_150ADA20() >> 16) * 0.000152587890625f + 40.0f;
+                    debris->spinX = (f32)(func_150ADA20() >> 16) * 0.000152587890625f + 40.0f;
                 }
-            } else if (arg0->unkEB == 5) {
-                func_151709B4(arg0->unk90, arg0->unk94 + 10.0f, arg0->unk98, 4, arg0->unkAC * 200.0f, arg0->unkC, arg0->unk1);
+            } else if (debris->kind == 5) {
+                func_151709B4(debris->x, debris->y + 10.0f, debris->z, 4, debris->velY * 200.0f,
+                              debris->unkC, debris->unk1);
             }
         }
-        arg0->unkB4 *= arg0->unkE0;
-        arg0->unkBC *= arg0->unkE0;
+        debris->spinX *= debris->spinDamp;
+        debris->spinZ *= debris->spinDamp;
     }
-    cc = arg0->unkCC;
-    if (cc != 0) {
-        cc -= D_800BE9E4;
-        if (cc <= 0) {
-            arg0->unkEC = 2;
-            e5 = arg0->unkE5;
-            e5 -= D_800BE9E4 * 4;
-            if (e5 <= 0) {
-                func_1518CA04(arg0->unkEA);
-                func_1516972C((struct102 *)arg0);
+    timer = debris->timer;
+    if (timer != 0) {
+        timer -= D_800BE9E4;
+        if (timer <= 0) {
+            debris->state = 2;
+            alpha = debris->alpha;
+            alpha -= D_800BE9E4 * 4;
+            if (alpha <= 0) {
+                func_1518CA04(debris->sound);
+                func_1516972C((struct102 *)debris);
                 return;
             }
-            arg0->unkE5 = e5;
-            cc = 1;
+            debris->alpha = alpha;
+            timer = 1;
         }
-        arg0->unkCC = cc;
+        debris->timer = timer;
     }
 }
 
