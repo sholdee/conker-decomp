@@ -4783,132 +4783,142 @@ void func_150615DC(struct127 *actor) {
     actor->unkB = actor->unkC = actor->unkD = actor->unkE.ub[0] = 0xFF;
 }
 
-void func_1506160C(struct127 *arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
+/*
+ * Actor fading. unk7 is the alpha, faded toward unk8 by unk9 per frame in mode unkA (4: in, 5/6: out,
+ * then removed). Bytes unkB..unkE.ub[0] are per-player alphas, unkE.ub[1] holds per-player hide bits
+ * (low nibble) and pending bits (high nibble). Commands 8 and up act on player `player` only.
+ */
+void func_1506160C(struct127 *actor, u8 cmd, u8 value, u8 step, s32 player) {
     s32 bit;
     s32 hi;
 
-    if (arg1 >= 8) {
-        if (arg1 != 10) {
-            if (arg1 == 8) {
-                bit = 1 << (u8)arg4;
-                arg0->unkE.ub[1] |= bit;
-                arg2 = 0;
+    if (cmd >= 8) {
+        if (cmd != 10) {
+            if (cmd == 8) {
+                bit = 1 << (u8)player;
+                actor->unkE.ub[1] |= bit;
+                value = 0;
             } else {
-                bit = 1 << (u8)arg4;
-                arg0->unkE.ub[1] &= ~bit;
-                arg2 = 0xFF;
+                bit = 1 << (u8)player;
+                actor->unkE.ub[1] &= ~bit;
+                value = 0xFF;
             }
             hi = bit << 4;
-            if (arg0->unkE.ub[1] & hi) {
-                ((u8 *)arg0 + (u8)arg4)[0xB] = arg2;
+            if (actor->unkE.ub[1] & hi) {
+                (&actor->unkB)[(u8)player] = value;
             }
-            arg0->unkE.ub[1] &= ~hi;
+            actor->unkE.ub[1] &= ~hi;
         } else {
-            arg0->unkE.ub[1] |= (1 << (u8)arg4) << 4;
-            arg2 = 0;
+            actor->unkE.ub[1] |= (1 << (u8)player) << 4;
+            value = 0;
         }
-        if ((arg0->pad2FC[1] != 0) || (D_800DBFF4[(u8)arg4] != 0)) {
-            ((u8 *)arg0 + (u8)arg4)[0xB] = arg2;
+        if ((actor->pad2FC[1] != 0) || (D_800DBFF4[(u8)player] != 0)) {
+            (&actor->unkB)[(u8)player] = value;
         }
-    } else if (arg1 >= arg0->unkA) {
-        if (arg1 == 4) {
-            arg0->unkA = arg1;
-            arg0->unk7 = 0;
-            arg0->unk8 = 0xFF;
-            arg0->unk9 = 0x20;
-        } else if (arg1 == 5) {
-            arg0->unkA = arg1;
-            arg0->unk8 = 0;
-            arg0->unk9 = 0x20;
-        } else if (arg1 == 6) {
-            arg0->unkA = arg1;
-            arg0->unk8 = 0;
-            arg0->unk9 = 8;
-        } else if (arg1 == 2) {
-            arg0->unkA = arg1;
-            arg0->unk8 = arg2;
-            arg0->unk9 = arg3;
-        } else if (arg1 == 1) {
-            arg0->unkA = 0;
-            arg0->unk7 = arg2;
-            arg0->unk8 = arg2;
+    } else if (cmd >= actor->unkA) {
+        if (cmd == 4) {
+            actor->unkA = cmd;
+            actor->unk7 = 0;
+            actor->unk8 = 0xFF;
+            actor->unk9 = 0x20;
+        } else if (cmd == 5) {
+            actor->unkA = cmd;
+            actor->unk8 = 0;
+            actor->unk9 = 0x20;
+        } else if (cmd == 6) {
+            actor->unkA = cmd;
+            actor->unk8 = 0;
+            actor->unk9 = 8;
+        } else if (cmd == 2) {
+            actor->unkA = cmd;
+            actor->unk8 = value;
+            actor->unk9 = step;
+        } else if (cmd == 1) {
+            actor->unkA = 0;
+            actor->unk7 = value;
+            actor->unk8 = value;
         }
         if (*(s32 *)D_800DBFF4 != 0) {
-            arg0->unk7 = arg0->unk8;
+            actor->unk7 = actor->unk8;
         }
     }
 }
-void func_150617BC(u8 *arg0) {
+
+/* Per-frame fade step (see func_1506160C); removes the actor when a fade-out finishes. */
+void func_150617BC(struct127 *actor) {
     s32 i;
     s32 mask;
     s32 value;
 
-    if (*(s32 *)arg0 != 0) {
+    if (actor->interaction_state != 0) {
         mask = 1;
         for (i = 0; i <= D_80082FA0; i++) {
-            if (arg0[0xF] & mask) {
-                if (arg0[i + 0xB] > 0) {
+            if (actor->unkE.ub[1] & mask) {
+                if ((&actor->unkB)[i] > 0) {
                     if (((u8 *)&D_800DBFF4)[i] == 0) {
-                        value = arg0[i + 0xB] - 50;
+                        value = (&actor->unkB)[i] - 50;
                         if (value < 0) {
                             value = 0;
                         }
                     } else {
                         value = 0;
                     }
-                    arg0[i + 0xB] = value;
+                    (&actor->unkB)[i] = value;
                 }
             } else {
-                if (arg0[i + 0xB] < 0xFF) {
+                if ((&actor->unkB)[i] < 0xFF) {
                     if (((u8 *)&D_800DBFF4)[i] == 0) {
-                        value = arg0[i + 0xB] + 50;
+                        value = (&actor->unkB)[i] + 50;
                         if (value > 0xFF) {
                             value = 0xFF;
                         }
                     } else {
                         value = 0xFF;
                     }
-                    arg0[i + 0xB] = value;
+                    (&actor->unkB)[i] = value;
                 }
             }
             mask <<= 1;
         }
-        if (arg0[0xA] != 0) {
-            if (arg0[8] != arg0[7]) {
-                if (arg0[7] < arg0[8]) {
-                    value = arg0[9] + arg0[7];
-                    if (arg0[8] < value) {
-                        value = arg0[8];
+        /* matching: byte indexing (7: unk7, 8: unk8, 9: unk9, 0xA: unkA); field access loads in another order */
+        if (((u8 *)actor)[0xA] != 0) {
+            if (((u8 *)actor)[8] != ((u8 *)actor)[7]) {
+                if (((u8 *)actor)[7] < ((u8 *)actor)[8]) {
+                    value = ((u8 *)actor)[9] + ((u8 *)actor)[7];
+                    if (((u8 *)actor)[8] < value) {
+                        value = ((u8 *)actor)[8];
                     }
                 } else {
-                    value = arg0[7] - arg0[9];
-                    if (value < arg0[8]) {
-                        value = arg0[8];
+                    value = ((u8 *)actor)[7] - ((u8 *)actor)[9];
+                    if (value < ((u8 *)actor)[8]) {
+                        value = ((u8 *)actor)[8];
                     }
                 }
-                arg0[7] = value;
+                ((u8 *)actor)[7] = value;
             }
-            if (arg0[8] == arg0[7]) {
-                if (arg0[0xA] == 6) {
-                    func_15060F28((struct127 *)arg0, 1);
-                } else if (arg0[0xA] == 5) {
-                    func_15060F28((struct127 *)arg0, 2);
+            if (((u8 *)actor)[8] == ((u8 *)actor)[7]) {
+                if (((u8 *)actor)[0xA] == 6) {
+                    func_15060F28(actor, 1);
+                } else if (((u8 *)actor)[0xA] == 5) {
+                    func_15060F28(actor, 2);
                 } else {
-                    arg0[0xA] = 0;
+                    ((u8 *)actor)[0xA] = 0;
                 }
             }
         }
     }
 }
-// ???
-s32 func_1506196C(u8 *arg0, s32 arg1) {
-    s32 temp_v1 = arg0[7] * (arg0 + arg1)[0xB];
-    if (temp_v1 == 0xFE01) {
-        temp_v1 = 0xFF;
+
+/* The actor's alpha as seen by `player` (0..255). */
+s32 func_1506196C(struct127 *actor, s32 player) {
+    s32 alpha = actor->unk7 * (&actor->unkB)[player];
+
+    if (alpha == 255 * 255) {
+        alpha = 255;
     } else {
-        temp_v1 = temp_v1 >> 8;
+        alpha = alpha >> 8;
     }
-    return temp_v1;
+    return alpha;
 }
 
 s32 func_150623F4(struct127 *arg0);
