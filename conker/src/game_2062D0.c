@@ -17,9 +17,6 @@ s32 func_15046C80(f32 *arg0, s32 arg1, f32 arg2, void *arg3);
 void func_151D9FC0(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 void func_151DAB58(u8 kind, f32 size, u8 arg2, struct17 *pos, volatile u8 arg4, u8 arg5, s32 arg6);
 s32 func_15131918(struct17 *vel, f32 scale);
-struct three;
-struct struct218XXX;
-extern void func_15153F18(struct struct218XXX *arg0, struct three *arg1, s32 arg2, u8 arg3, s32 arg4);
 
 extern u8 (*D_8008FCD0[])(void);
 extern u8 (*D_8008FD04[])(void);
@@ -1336,167 +1333,131 @@ s32 func_151DB97C(Particle *particle, s32 arg1) {
     return 1;
 }
 
-struct three {
-    s32 a;
-    s32 b;
-    s32 c;
-};
+/* Direction spread shared by the burst specs: func_15143794 takes a random angle from each range. */
+typedef struct {
+    s16 angle1;
+    s16 angle1Range;
+    s16 angle2;
+    s16 angle2Range;
+} BurstAngles;
 
-struct struct218XXX {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    struct three unk8;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-    s16 unk36;
-    s16 unk38;
-    s16 unk3A;
-    s8 unk3C;
-    u8 pad3D[0x3];
-    f32 unk40;
+/*
+ * Parameters for func_15153F18, which throws count + rand(countRange) func_151DA6F8 splashes.
+ * Each `x` / `xRange` pair is drawn as x + rand(xRange). func_15153F18 reads `angles` from its first
+ * argument and everything else relative to its second (&spec->pos).
+ */
+typedef struct {
+    BurstAngles angles;
+    struct17 pos;
+    f32 scale;
+    f32 scaleRange;
+    f32 size;
+    f32 sizeRange;
+    f32 speed;
+    f32 speedRange;
+    s16 count;
+    s16 countRange;
+    s16 unk30; /* splash arg6 */
+    s16 unk30Range;
+    s16 lifetime;
+    s16 lifetimeRange;
+    s16 unk38; /* splash arg4 */
+    s16 unk38Range;
+    s8 kind;
+    u8 pad3D[3];
+    f32 unk40Chance; /* probability of splash arg7 */
     s16 unk44;
     s16 unk46;
     s32 unk48;
-};
+} SplashBurstSpec; /* 0x4C */
 
-void func_151DBAA8(struct00 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
-    struct struct218XXX tmp;
-    struct three *tmpVec;
+/* Parameters for func_15150178, which throws count + rand(countRange) func_151D9014 particles. */
+typedef struct {
+    BurstAngles angles;
+    struct17 pos;
+    s16 count;
+    s16 countRange;
+    f32 speed;
+    f32 speedRange;
+    s16 lifetime;
+    s16 lifetimeRange;
+    f32 gravity;
+    f32 gravityRange;
+    u8 unk2C; /* particle arg5 */
+    u8 unk2CRange;
+    u8 pad2E[2];
+    f32 size;
+    f32 sizeRange;
+    s8 unk38;
+    u8 kind;
+    u8 pad3A[2];
+    f32 unk3CChance; /* probability of particle arg7 */
+    s8 wobble;
+    u8 pad41[3];
+    f32 bounceChance;
+} DropBurstSpec; /* 0x48 */
 
-    tmpVec = &tmp.unk8;
-    *tmpVec = *(struct three *)arg0;
+extern void func_15153F18(SplashBurstSpec *spec, struct17 *params, s32 arg2, u8 arg3, s32 arg4);
+extern void func_15150178(DropBurstSpec *spec, struct17 *params, s32 arg2, u8 arg3, s32 arg4);
 
-    tmp.unk2C = arg1;
+void func_151DBAA8(struct17 *pos, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+    SplashBurstSpec splash;
 
-    tmp.unk2 = 0xFF;
-    tmp.unk4 = -0x40;
-    tmp.unk6 = 0x2E;
+    splash.pos = *pos;
 
-    tmp.unk2E = 0;
-    tmp.unk0 = 0;
-    tmp.unk30 = 3;
-    tmp.unk32 = 2;
-    tmp.unk34 = 0x1E;
-    tmp.unk36 = 0x1E;
-    tmp.unk38 = 0x9B;
-    tmp.unk14 = 5.5f;
+    splash.count = arg1;
 
-    tmp.unk18 = D_800AB4C0;
-    tmp.unk1C = D_800AB4C4;
-    tmp.unk20 = D_800AB4C8;
-    tmp.unk24 = 10.0f;
-    tmp.unk28 = D_800AB4CC;
+    splash.angles.angle1Range = 0xFF;
+    splash.angles.angle2 = -64;
+    splash.angles.angle2Range = 46;
 
-    tmp.unk3A = 0x64;
-    tmp.unk44 = 0x10;
-    tmp.unk46 = 0xF;
-    tmp.unk48 = 0;
-    tmp.unk40 = 0.5f;
+    splash.countRange = 0;
+    splash.angles.angle1 = 0;
+    splash.unk30 = 3;
+    splash.unk30Range = 2;
+    splash.lifetime = 30;
+    splash.lifetimeRange = 30;
+    splash.unk38 = 155;
+    splash.scale = 5.5f;
 
-    tmp.unk3C = arg2;
+    splash.scaleRange = 2.9399998f;
+    splash.size = 0.61300004f;
+    splash.sizeRange = 0.60300004f;
+    splash.speed = 10.0f;
+    splash.speedRange = 10.2f;
 
-    func_15153F18(&tmp, tmpVec, 0, arg3, arg4);
+    splash.unk38Range = 100;
+    splash.unk44 = 16;
+    splash.unk46 = 15;
+    splash.unk48 = 0;
+    splash.unk40Chance = 0.5f;
+
+    splash.kind = arg2;
+
+    func_15153F18(&splash, &splash.pos, 0, arg3, arg4);
+
 }
 
-// typedef struct {
-//     s16 unk0; // sp24
-//     s16 unk2;
-//     s16 unk4;
-//     s16 unk6;
-//     // s32 unk8[3]; // sp2C
-//     s32 unk8;
-//     s32 unkC;
-//     s32 unk10;
-//     f32 unk14;
-//     f32 unk18;
-//     f32 unk1C;
-//     f32 unk20; // sp44
-//     f32 unk24;
-//     f32 unk28;
-//     s16 unk2C; // sp50
-//     s16 unk2E;
-//     s16 unk30; // sp54
-//     s16 unk32;
-//     s16 unk34;
-//     s16 unk36;
-//     s16 unk38;
-//     s16 unk3A;
-//     s8  unk3C; // sp60
-//     u8  pad3D[0x3];
-//     f32 unk40; // sp64
-//     s16 unk44;
-//     s16 unk46;
-//     s32 unk48;
-// } struct218XXX;
-//
-// void func_15153F18(s32, s32, s32, u8, s32);
-// void func_151DBAA8(struct00 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
-//
-//     struct218XXX tmp;
-//
-//     // tmp.unk8[0] = arg0->unk0;
-//     // tmp.unk8[1] = arg0->unk4;
-//     // tmp.unk8[2] = arg0->unk8;
-//
-//     tmp.unk2C = arg1;
-//     tmp.unk3C = arg2;
-//
-//     tmp.unk0 = 0;
-//     tmp.unk2 = 0xFF;
-//     tmp.unk4 = -0x40;
-//     tmp.unk6 = 0x2E;
-//     tmp.unk8 = arg0->unk0;
-//     tmp.unkC = arg0->unk4;
-//     tmp.unk10 = arg0->unk8;
-//
-//     tmp.unk30 = 3;
-//     tmp.unk2E = 0;
-//     tmp.unk32 = 2;
-//     tmp.unk34 = 0x1E;
-//     tmp.unk36 = 0x1E;
-//     tmp.unk38 = 0x9B;
-//     tmp.unk14 = 5.5f;
-//
-//     tmp.unk18 = D_800AB4C0;
-//     tmp.unk1C = D_800AB4C4;
-//     tmp.unk20 = D_800AB4C8;
-//     tmp.unk24 = 10.0f;
-//     tmp.unk28 = D_800AB4CC;
-//
-//     tmp.unk3A = 0x64;
-//     tmp.unk44 = 0x10;
-//     tmp.unk46 = 0xF;
-//     tmp.unk48 = 0;
-//     tmp.unk40 = 0.5f;
-//
-//     func_15153F18(&tmp, &tmp.unk8, 0, arg3, arg4);
-// }
+/* Spawns a func_151D9B8C emitter of effect kind *kind just above `pos`, with random size and lifetime. */
+void func_151DBBD4(struct17 *pos, s32 arg1, u8 *kind, u8 arg3, s32 arg4) {
+    struct17 point;
+    u8 emitterKind;
+    s32 pad; // matching: unused stack slot
+    u32 rand;
+    f32 sizeRand;
 
-void func_151DBBD4(struct17 *arg0, s32 arg1, u8 *arg2, u8 arg3, s32 arg4) {
-    struct17 tmp;
-    struct217 tmp2;
+    point.unk0 = pos->unk0;
+    point.unk4 = pos->unk4 + 5.0f;
+    point.unk8 = pos->unk8;
 
-    tmp.unk0 = arg0->unk0;
-    tmp.unk4 = arg0->unk4 + 5.0f;
-    tmp.unk8 = arg0->unk8;
+    emitterKind = *kind;
+    sizeRand = func_150ADA68();
+    rand = func_150ADA20();
 
-    tmp2.unkF = *arg2;
-    tmp2.unk0 = func_150ADA68();
-    tmp2.unk4 = func_150ADA20();
-
-    func_151D9B8C(tmp2.unkF, (tmp2.unk0 * 25.0f) + 10.0f, ((tmp2.unk4 % 0x38U) + 200), arg1 + 4, &tmp, (func_150ADA20() % 0x97U) + 150, 0, 1, 0, arg3, arg4);
+    func_151D9B8C(emitterKind, (sizeRand * 25.0f) + 10.0f, (rand % 56U) + 200, arg1 + 4, &point,
+                  (func_150ADA20() % 151U) + 150, 0, 1, 0, arg3, arg4);
 }
+
 
 struct Struct151DBCBC {
     s32 unk0;
@@ -1551,76 +1512,45 @@ void func_151DBCBC(u8 arg0, f32 arg1, s16 arg2, s32 arg3, void *arg4, u8 arg5, s
     }
 }
 
-struct Struct151DBE80 {
-    s8 unk0;
-    s8 unk1;
-    s16 unk2;
-    s16 unk4;
-    u8 pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    struct17 unk1C;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    s8 unk46;
-    s8 unk47;
-    s32 unk48;
-    u8 unk4C;
-    u8 pad4D[3];
-    s32 unk50;
-    s16 unk54;
-    u16 unk56;
-};
+/* Starts an effect of kind `kind` (coloured from D_800AB414) at `pos`. */
+void func_151DBE80(u8 kind, f32 size, f32 arg2, s16 lifetime, struct17 *pos, s32 arg5, u8 arg6, u8 arg7, u8 arg8,
+                   s32 arg9) {
+    EffectDesc desc;
 
-void func_151DBE80(u8 arg0, f32 arg1, f32 arg2, s16 arg3, struct17 *arg4, s32 arg5, u8 arg6, u8 arg7, u8 arg8, s32 arg9) {
-    struct Struct151DBE80 tmp;
+    desc.unk0 = 0x38;
+    desc.unk2 = ((arg7 != 0) ? 2 : 1) + 0x440000; // matching: the s16 store truncates 0x440000 away, but dropping it changes the code
+    desc.unk4 = lifetime;
+    desc.unk8 = 0;
+    desc.unkC = 0x4000;
+    desc.unk10 = D_800AB414[kind * 3];
+    desc.scaleX = 1.0f;
+    desc.scaleY = 1.0f;
+    desc.unk11 = D_800AB414[kind * 3 + 1];
+    desc.unk12 = D_800AB414[kind * 3 + 2];
+    desc.unk13 = 0xFF;
 
-    tmp.unk0 = 0x38;
-    tmp.unk2 = ((arg7 != 0) ? 2 : 1) + 0x440000;
-    tmp.unk4 = arg3;
-    tmp.unk8 = 0;
-    tmp.unkC = 0x4000;
-    tmp.unk10 = D_800AB414[arg0 * 3];
-    tmp.unk14 = 1.0f;
-    tmp.unk18 = 1.0f;
-    tmp.unk11 = D_800AB414[arg0 * 3 + 1];
-    tmp.unk12 = D_800AB414[arg0 * 3 + 2];
-    tmp.unk13 = 0xFF;
+    desc.pos = *pos;
 
-    *(struct three *)&tmp.unk1C = *(struct three *)arg4;
+    desc.unk34 = arg2;
+    desc.flags = 0x466C0001;
+    desc.unk44 = arg6;
+    desc.unk45 = 0xFF;
+    desc.unk1 = 0;
+    desc.unk46 = 0;
+    desc.unk47 = 6;
+    desc.unk48 = 0;
+    desc.unk4C = 0xFF;
+    desc.unk50 = 0;
+    desc.unk54 = 1;
+    desc.unk56 = 0xFF;
+    desc.unk38 = 1.0f;
+    desc.unk3C = 1.0f;
+    desc.unk28 = 0.0f;
+    desc.unk2C = 0.0f;
+    desc.unk30 = 0.0f;
 
-    tmp.unk34 = arg2;
-    tmp.unk40 = 0x466C0001;
-    tmp.unk44 = arg6;
-    tmp.unk45 = 0xFF;
-    tmp.unk1 = 0;
-    tmp.unk46 = 0;
-    tmp.unk47 = 6;
-    tmp.unk48 = 0;
-    tmp.unk4C = 0xFF;
-    tmp.unk50 = 0;
-    tmp.unk54 = 1;
-    tmp.unk56 = 0xFF;
-    tmp.unk38 = 1.0f;
-    tmp.unk3C = 1.0f;
-    tmp.unk28 = 0.0f;
-    tmp.unk2C = 0.0f;
-    tmp.unk30 = 0.0f;
-
-    func_1513D668((s32)&tmp, 0, 0xB, 0x11, 0, (func_150ADA20() & 1) + (func_150ADA20() & 1), (s16)(func_150ADA20() & 0xFF), arg1, arg1, 0, arg5, 0, 0, arg8, arg9);
+    func_1513D668((s32)&desc, 0, 11, 17, 0, (func_150ADA20() & 1) + (func_150ADA20() & 1),
+                  (s16)(func_150ADA20() & 0xFF), size, size, 0, arg5, 0, 0, arg8, arg9);
 }
 
 typedef struct {
@@ -1725,268 +1655,117 @@ void func_151DC034(struct17 *arg0, f32 arg1, u8 arg2, s16 arg3, u8 arg4, u8 arg5
     sp30.unk6C = 1000.0f;
     func_15130280(&sp30, 1, 0, 0, arg5, arg6);
 }
-struct struct217XXX {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    struct three unk8;
-    s16 unk14;
-    s16 unk16;
-    f32 unk18;
-    f32 unk1C;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    u8 unk2C;
-    u8 unk2D;
-    u8 pad2E[2];
-    f32 unk30;
-    f32 unk34;
-    s8 unk38;
-    u8 unk39;
-    u8 pad3A[2];
-    f32 unk3C;
-    s8 unk40;
-    u8 pad41[3];
-    f32 unk44;
-};
+void func_151DC260(struct17 *pos, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+    SplashBurstSpec splash;
 
-extern void func_15150178(struct struct217XXX *arg0, struct three *arg1, s32 arg2, u8 arg3, s32 arg4);
-
-void func_151DC260(struct00 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
-    struct struct218XXX tmp;
-
-    tmp.unk8 = *(struct three *)arg0;
-    tmp.unk2C = 0xA;
-    tmp.unk2E = 0xA;
-    tmp.unk2 = 0xFF;
-    tmp.unk4 = -0x40;
-    tmp.unk6 = 0x28;
-    tmp.unk14 = 3.0f;
-    tmp.unk0 = 0;
-    tmp.unk30 = 3;
-    tmp.unk32 = 1;
-    tmp.unk34 = 0x3C;
-    tmp.unk36 = 0x28;
-    tmp.unk38 = 0x64;
-    tmp.unk3A = 0x64;
-    tmp.unk44 = 0x10;
-    tmp.unk46 = 0xF;
-    tmp.unk48 = 0;
-    tmp.unk18 = 4.0f;
-    tmp.unk1C = 0.807000041f;
-    tmp.unk20 = 0.5100000501f;
-    tmp.unk24 = 12.0f;
-    tmp.unk28 = 11.0f;
-    tmp.unk40 = 1.0f;
-    tmp.unk3C = arg2;
-    func_15153F18(&tmp, &tmp.unk8, arg1, arg3, arg4);
+    splash.pos = *pos;
+    splash.count = 10;
+    splash.countRange = 10;
+    splash.angles.angle1Range = 0xFF;
+    splash.angles.angle2 = -64;
+    splash.angles.angle2Range = 40;
+    splash.scale = 3.0f;
+    splash.angles.angle1 = 0;
+    splash.unk30 = 3;
+    splash.unk30Range = 1;
+    splash.lifetime = 60;
+    splash.lifetimeRange = 40;
+    splash.unk38 = 100;
+    splash.unk38Range = 100;
+    splash.unk44 = 16;
+    splash.unk46 = 15;
+    splash.unk48 = 0;
+    splash.scaleRange = 4.0f;
+    splash.size = 0.80700004f;
+    splash.sizeRange = 0.51000005f;
+    splash.speed = 12.0f;
+    splash.speedRange = 11.0f;
+    splash.unk40Chance = 1.0f;
+    splash.kind = arg2;
+    func_15153F18(&splash, &splash.pos, arg1, arg3, arg4);
 
     {
-        struct struct217XXX tmp2;
+        DropBurstSpec drops;
 
-        tmp2.unk8 = *(struct three *)arg0;
-        tmp2.unk0 = 0;
-        tmp2.unk14 = 0xC;
-        tmp2.unk18 = 6.0f;
-        tmp2.unk16 = 6;
-        tmp2.unk2 = 0xFF;
-        tmp2.unk4 = -0x40;
-        tmp2.unk6 = 0x24;
-        tmp2.unk20 = 0x23;
-        tmp2.unk22 = 0xF;
-        tmp2.unk2C = 0x9B;
-        tmp2.unk2D = 0x64;
-        tmp2.unk1C = 8.0f;
-        tmp2.unk38 = 1;
-        tmp2.unk24 = -1.266000032f;
-        tmp2.unk28 = 0.4660000205f;
-        tmp2.unk39 = arg2;
-        tmp2.unk30 = 123.0f;
-        tmp2.unk34 = 134.0f;
-        tmp2.unk40 = 1;
-        tmp2.unk3C = 0.6000000238f;
-        tmp2.unk44 = 0.0f;
-        func_15150178(&tmp2, &tmp2.unk8, arg1, arg3, arg4);
+        drops.pos = *pos;
+        drops.angles.angle1 = 0;
+        drops.count = 12;
+        drops.speed = 6.0f;
+        drops.countRange = 6;
+        drops.angles.angle1Range = 0xFF;
+        drops.angles.angle2 = -64;
+        drops.angles.angle2Range = 36;
+        drops.lifetime = 35;
+        drops.lifetimeRange = 15;
+        drops.unk2C = 155;
+        drops.unk2CRange = 100;
+        drops.speedRange = 8.0f;
+        drops.unk38 = 1;
+        drops.gravity = -1.266f;
+        drops.gravityRange = 0.46600002f;
+        drops.kind = arg2;
+        drops.size = 123.0f;
+        drops.sizeRange = 134.0f;
+        drops.wobble = 1;
+        drops.unk3CChance = 0.6f;
+        drops.bounceChance = 0.0f;
+        func_15150178(&drops, &drops.pos, arg1, arg3, arg4);
     }
 }
-void func_151DC484(struct00 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
-    struct struct218XXX tmp;
+void func_151DC484(struct17 *pos, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+    SplashBurstSpec splash;
 
-    tmp.unk8 = *(struct three *)arg0;
-    tmp.unk2C = 8;
-    tmp.unk2E = 6;
-    tmp.unk2 = 0xFF;
-    tmp.unk4 = -0x40;
-    tmp.unk14 = 3.0f;
-    tmp.unk0 = 0;
-    tmp.unk6 = 0x28;
-    tmp.unk30 = 3;
-    tmp.unk32 = 0;
-    tmp.unk34 = 0x3C;
-    tmp.unk36 = 0x28;
-    tmp.unk38 = 0x64;
-    tmp.unk3A = 0x64;
-    tmp.unk44 = 0x10;
-    tmp.unk46 = 0xF;
-    tmp.unk48 = 0;
-    tmp.unk18 = 2.0f;
-    tmp.unk1C = 0.6420000196f;
-    tmp.unk20 = 0.3140000105f;
-    tmp.unk24 = 8.0f;
-    tmp.unk28 = 5.0f;
-    tmp.unk40 = 1.0f;
-    tmp.unk3C = arg2;
-    func_15153F18(&tmp, &tmp.unk8, arg1, arg3, arg4);
+    splash.pos = *pos;
+    splash.count = 8;
+    splash.countRange = 6;
+    splash.angles.angle1Range = 0xFF;
+    splash.angles.angle2 = -64;
+    splash.scale = 3.0f;
+    splash.angles.angle1 = 0;
+    splash.angles.angle2Range = 40;
+    splash.unk30 = 3;
+    splash.unk30Range = 0;
+    splash.lifetime = 60;
+    splash.lifetimeRange = 40;
+    splash.unk38 = 100;
+    splash.unk38Range = 100;
+    splash.unk44 = 16;
+    splash.unk46 = 15;
+    splash.unk48 = 0;
+    splash.scaleRange = 2.0f;
+    splash.size = 0.642f;
+    splash.sizeRange = 0.314f;
+    splash.speed = 8.0f;
+    splash.speedRange = 5.0f;
+    splash.unk40Chance = 1.0f;
+    splash.kind = arg2;
+    func_15153F18(&splash, &splash.pos, arg1, arg3, arg4);
 
     {
-        struct struct217XXX tmp2;
+        DropBurstSpec drops;
 
-        tmp2.unk8 = *(struct three *)arg0;
-        tmp2.unk14 = 0xC;
-        tmp2.unk16 = 6;
-        tmp2.unk2 = 0xFF;
-        tmp2.unk0 = 0;
-        tmp2.unk4 = -0x40;
-        tmp2.unk6 = 0x1A;
-        tmp2.unk20 = 0x23;
-        tmp2.unk22 = 0xF;
-        tmp2.unk2C = 0x9B;
-        tmp2.unk2D = 0x64;
-        tmp2.unk30 = 59.0f;
-        tmp2.unk34 = 59.0f;
-        tmp2.unk38 = 1;
-        tmp2.unk18 = 7.0f;
-        tmp2.unk1C = 3.0f;
-        tmp2.unk24 = -1.230000019f;
-        tmp2.unk28 = 0.4750000238f;
-        tmp2.unk39 = arg2;
-        tmp2.unk40 = 1;
-        tmp2.unk3C = 0.6000000238f;
-        tmp2.unk44 = 0.0f;
-        func_15150178(&tmp2, &tmp2.unk8, arg1, arg3, arg4);
+        drops.pos = *pos;
+        drops.count = 12;
+        drops.countRange = 6;
+        drops.angles.angle1Range = 0xFF;
+        drops.angles.angle1 = 0;
+        drops.angles.angle2 = -64;
+        drops.angles.angle2Range = 26;
+        drops.lifetime = 35;
+        drops.lifetimeRange = 15;
+        drops.unk2C = 155;
+        drops.unk2CRange = 100;
+        drops.size = 59.0f;
+        drops.sizeRange = 59.0f;
+        drops.unk38 = 1;
+        drops.speed = 7.0f;
+        drops.speedRange = 3.0f;
+        drops.gravity = -1.23f;
+        drops.gravityRange = 0.47500002f;
+        drops.kind = arg2;
+        drops.wobble = 1;
+        drops.unk3CChance = 0.6f;
+        drops.bounceChance = 0.0f;
+        func_15150178(&drops, &drops.pos, arg1, arg3, arg4);
     }
 }
-
-// typedef struct {
-//     s16 unk10; // sp24
-//     s16 unk12; // sp26
-//     s16 unk14;
-//     s16 unk16; // sp2A
-//     s32 unk18[3];
-//     s16 unk24; // sp38;
-//     s16 unk26; // sp3A
-//     f32 unk28; // sp3C
-//     f32 unk2C; // sp40
-//     s16 unk30; // sp44
-//     s16 unk32; // sp46
-//     f32 unk34; // sp48;
-//     f32 unk38; // sp4C;
-//     s8  unk3C; // sp50;
-//     s8  unk3D; // sp51;
-//     u8  unk3E[2]; //
-//     f32 unk40; // sp54
-//     f32 unk44; // sp58
-//     s8  unk48; // sp5C
-//     u8  unk49; // sp5D
-//     u8  unk4A[2];
-//     f32 unk4C; // sp60
-//     s8  unk50; // sp64
-//     u8  pad51[3];
-//     f32 unk54; // sp68
-// } struct217;
-//
-// typedef struct {
-//     s16 unk58; // sp6C
-//     s16 unk5A; // sp6E
-//     s16 unk5C; // sp70
-//     s16 unk5E; // sp72
-//     s32 unk60[3]; // sp74
-//     f32 unk6C; // sp80
-//     f32 unk70; // sp84
-//     f32 unk74; // sp88
-//     f32 unk78; // sp8C
-//     f32 unk7C; // sp90
-//     f32 unk80; // sp94
-//     s16 unk84; // sp98
-//     s16 unk86; // sp9A
-//     s16 unk88; // sp9C
-//     s16 unk8A; // sp9E
-//     s16 unk8C; // spA0
-//     s16 unk8E; // spA2
-//     s16 unk90; // spA4
-//     s16 unk92; // spA6
-//     u8  unk94; // spA8;
-//     u8  pad95[3];
-//     f32 unk98; // spAC;
-//     s16 unk9C; // spB0
-//     s16 unk9E; // spB2
-//     s32 unkA0; // spB4
-// } struct218;
-//
-// void func_151DC484(struct00 *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
-//     struct218 tmp2;
-//     struct217 tmp;
-//
-//     tmp2.unk60[0] = arg0->unk0; // sp74.unk0 = (s32) arg0->unk0;
-//     tmp2.unk60[1] = arg0->unk4; // sp74.unk4 = (s32) arg0->unk4;
-//     tmp2.unk60[2] = arg0->unk8; // sp74.unk8 = (s32) arg0->unk8;
-//
-//     tmp2.unk5A = 0xFF;   // sp6E = 0xFF;
-//     tmp2.unk5C = -0x40;  // sp70 = -0x40;
-//     tmp2.unk84 = 8;      // sp98 = 8;
-//     tmp2.unk86 = 6;      // sp9A = 6;
-//     tmp2.unk58 = 0;      // sp6C = 0;
-//     tmp2.unk88 = 3;      // sp9C = 3;
-//     tmp2.unk8A = 0;      // sp9E = 0;
-//     tmp2.unk5E = 0x28;   // sp72 = 0x28;
-//     tmp2.unk8C = 0x3C;   // spA0 = 0x3C;
-//     tmp2.unk8E = 0x28;   // spA2 = 0x28;
-//
-//     tmp2.unk6C = 3.0f;   // sp80 = 3.0f;
-//     tmp2.unk90 = 100;     // spA4 = 0x64;
-//     tmp2.unk92 = 100;     // spA6 = 0x64;
-//     tmp2.unk9C = 16;      // spB0 = 0x10;
-//     tmp2.unk9E = 15;      // spB2 = 0xF;
-//     tmp2.unk70 = 2.0f;       // sp84 = 2.0f;
-//     tmp2.unk74 = D_800AB4E4; // sp88 = D_800AB4E4;
-//     tmp2.unk78 = D_800AB4E8; // sp8C = D_800AB4E8;
-//     tmp2.unk7C = 8.0f;       // sp90 = 8.0f;
-//     tmp2.unk80 = 5.0f;       // sp94 = 5.0f;
-//     tmp2.unk98 = 1.0f;       // spAC = 1.0f; 0x3f80
-//     tmp2.unk94 = arg2;       // spA8 = arg2;
-//     tmp2.unkA0 = 0;      // spB4 = 0;
-//
-//     // func_15153F18(&sp6C, &sp74, arg1, arg3, arg4);
-//     func_15153F18(&tmp2, &tmp2, arg1, arg3, arg4);
-//
-//     tmp.unk18[0] = arg0->unk0; // sp2C.unk0 = (s32) arg0->unk0;
-//     tmp.unk18[1] = arg0->unk4; // sp2C.unk4 = (s32) arg0->unk4;
-//     tmp.unk18[2] = arg0->unk8; // sp2C.unk8 = (s32) arg0->unk8;
-//
-//     tmp.unk24 = 0xC; // sp38 = 0xC;
-//     tmp.unk12 = 0xFF;   // sp26 = 0xFF;
-//     tmp.unk26 = 6;      // sp3A = 6;
-//     tmp.unk10 = 0;      // sp24 = 0;
-//     tmp.unk14 = -0x40;  // sp28 = -0x40;
-//     tmp.unk16 = 0x1A;   // sp2A = 0x1A;
-//     tmp.unk30 = 0x23;   // sp44 = 0x23;
-//     tmp.unk32 = 0xF;    // sp46 = 0xF;
-//     tmp.unk3C = 0x9B;   // sp50 = 0x9B;
-//     tmp.unk3D = 0x64;   // sp51 = 0x64;
-//     tmp.unk40 = 59.0f;  // sp54 = 59.0f;
-//     tmp.unk44 = 59.0f;  // sp58 = 59.0f;
-//     tmp.unk48 = 1;      // sp5C = 1;
-//     tmp.unk50 = 1;      // sp64 = 1;
-//     tmp.unk54 = 0.0f;   // sp68 = 0.0f;
-//     tmp.unk28 = 7.0f;   // sp3C = 7.0f;
-//     tmp.unk2C = 3.0f;   // sp40 = 3.0f;
-//     tmp.unk34 = D_800AB4EC; // sp48 = D_800AB4EC;
-//     tmp.unk38 = D_800AB4F0; // sp4C = D_800AB4F0;
-//     tmp.unk49 = arg2;       // sp5D = arg2;
-//     tmp.unk4C = D_800AB4F4; // sp60 = D_800AB4F4;
-//     // func_15150178(&sp24, &sp2C, arg1, arg3, arg4);
-//     func_15150178(&tmp, &tmp.unk18, arg1, arg3, arg4);
-// }
