@@ -1342,8 +1342,11 @@ extern s32 D_800D2DB4;
 extern s32 D_800D2F58;
 extern u32 D_800D3094; // number of trigger zones in D_800D3098
 extern TriggerZone *D_800D3098; // level placement / marker table (0x34-byte records)
+extern ZoneBounds *D_800D309C; // bounds of each trigger zone (D_800D3098)
 extern u64 D_800D30A0[3]; /* zones that are always tested */
 extern u64 D_800D30B8[3]; /* default candidate zones */
+extern u16 D_800D30D0[16]; /* per actor: 1 + index of the last zone box it was found in, 0 for none */
+extern u64 D_800D30F0[16][3]; /* per actor: zones it was inside last time */
 extern TriggerZone ** D_800D3270;
 extern s32 D_800D3274;
 extern GroundCandidate D_800D3300[]; // ground-probe hits

@@ -7,8 +7,6 @@
 #define OBJ_SHAPE(obj) ((obj)->kind & 3)
 
 extern void *allocate_memory(s32, s32, s32, s32);
-extern u8 D_800D30D0[];
-extern u8 D_800D30F0[];
 
 /* Clears the per-id record flag bits (D_800D2E4C) and state tables. */
 void func_15017790(void) {
@@ -86,25 +84,12 @@ void func_15017930(s32 arg0) {
             }
         }
     }
-    bzero(D_800D30F0, 0x180);
-    bzero(D_800D30D0, 0x20);
+    bzero(D_800D30F0, sizeof(D_800D30F0));
+    bzero(D_800D30D0, sizeof(D_800D30D0));
 }
 
-/* Axis-aligned bounds of a level object, plus the set of other objects whose bounds it overlaps. */
-typedef struct {
-    /* 0x00 */ u64 overlaps[3]; // bit j: overlaps object j
-    /* 0x18 */ u8 numOverlaps;
-    /* 0x1A */ s16 minX;
-    /* 0x1C */ s16 maxX;
-    /* 0x1E */ s16 minY;
-    /* 0x20 */ s16 maxY;
-    /* 0x22 */ s16 minZ;
-    /* 0x24 */ s16 maxZ;
-} ObjectBounds; /* size 0x28 */
-
 extern void func_150A0D14(TriggerZone *obj);
-void func_15017FA4(TriggerZone *obj, ObjectBounds *bounds);
-extern ObjectBounds *D_800D309C;
+void func_15017FA4(TriggerZone *obj, ZoneBounds *bounds);
 
 /* Whether the ranges [a0, a1) and [b0, b1) overlap. */
 #define OVERLAP(a0, a1, b0, b1) (((a0 <= b0) && (b0 < a1)) || ((b0 < a0) && (a0 < b1)) || ((a0 < b1) && (b1 < a1)))
@@ -124,7 +109,7 @@ void func_15017B20(TriggerZone *objects, s32 count) {
     s32 i;
     s32 j;
 
-    D_800D309C = allocate_memory(count * sizeof(ObjectBounds), 1, 1, 0);
+    D_800D309C = allocate_memory(count * sizeof(ZoneBounds), 1, 1, 0);
     for (i = 0; i < count; i++) {
         func_150A0D14(&objects[i]);
         func_15017FA4(&objects[i], &D_800D309C[i]);
@@ -188,7 +173,7 @@ void func_150A7DA0(MtxF mtx, f32, f32, f32);
  * object's scale (from its size and shape) and rotation, offset by its position. Unknown shapes
  * get zero-size bounds at the position.
  */
-void func_15017FA4(TriggerZone *obj, ObjectBounds *bounds) {
+void func_15017FA4(TriggerZone *obj, ZoneBounds *bounds) {
     s32 i;
     s32 shape;
     s32 invalid;

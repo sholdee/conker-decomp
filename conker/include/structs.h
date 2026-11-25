@@ -4127,4 +4127,16 @@ typedef struct {
     /* 0x0B */ u8 siz;
 } HudSprite; /* size 0xC */
 
+/* Axis-aligned bounds of trigger zone i (D_800D309C[i], built by func_15017FA4) plus the set of zones it overlaps. */
+typedef struct {
+    /* 0x00 */ u64 overlaps[3]; // bit j: overlaps zone j
+    /* 0x18 */ u8 numOverlaps;
+    /* 0x1A */ s16 minX;
+    /* 0x1C */ s16 maxX;
+    /* 0x1E */ s16 minY;
+    /* 0x20 */ s16 maxY;
+    /* 0x22 */ s16 minZ;
+    /* 0x24 */ s16 maxZ;
+} ZoneBounds; /* size 0x28 */
+
 #endif

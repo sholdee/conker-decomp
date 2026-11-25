@@ -184,27 +184,10 @@ void func_150A104C(Camera *cam, TriggerZone **zones, s32 count) {
     }
 }
 
-/* Bounding box of zone i (D_800D309C[i]) plus the set of zones that overlap it. */
-typedef struct {
-    /* 0x00 */ u64 mask[3]; /* bit n: zone n overlaps this box */
-    /* 0x18 */ u8  unk18;
-    /* 0x19 */ u8  pad19;
-    /* 0x1A */ s16 xmin;
-    /* 0x1C */ s16 xmax;
-    /* 0x1E */ s16 ymin;
-    /* 0x20 */ s16 ymax;
-    /* 0x22 */ s16 zmin;
-    /* 0x24 */ s16 zmax;
-    /* 0x26 */ u8  pad26[2];
-} ZoneBounds; /* size 0x28 */
-
-#define BOX_CONTAINS(b, px, py, pz) ((b)->xmin < (px) && (px) < (b)->xmax && (b)->ymin < (py) && \
-                                     (py) < (b)->ymax && (b)->zmin < (pz) && (pz) < (b)->zmax)
+#define BOX_CONTAINS(b, px, py, pz) ((b)->minX < (px) && (px) < (b)->maxX && (b)->minY < (py) && \
+                                     (py) < (b)->maxY && (b)->minZ < (pz) && (pz) < (b)->maxZ)
 
 extern s32 D_800D3278;
-extern ZoneBounds *D_800D309C;
-extern u16 D_800D30D0[16];    /* per actor: 1 + index of the last box it was found in, 0 for none */
-extern u64 D_800D30F0[16][3]; /* per actor: zones it was inside last time */
 
 void func_150806A8(s32);
 void func_150829D8(Actor *);
@@ -265,7 +248,7 @@ void func_150A11C4(Actor *actor) {
             box = &D_800D309C[D_800D30D0[idx] - 1];
             if (BOX_CONTAINS(box, x, (s32)prev, z)) {
                 for (i = 0; i < 3; i++) {
-                    mask[i] = box->mask[i];
+                    mask[i] = box->overlaps[i];
                 }
                 found = 1;
             }
@@ -294,11 +277,11 @@ void func_150A11C4(Actor *actor) {
             box = &D_800D309C[i];
             if (BOX_CONTAINS(box, x, (s32)prev, z)) {
                 for (k = 0; k < 3; k++) {
-                    mask[k] &= box->mask[k];
+                    mask[k] &= box->overlaps[k];
                 }
-                if (idx < 16 && box->unk18 < bestUnk18) {
+                if (idx < 16 && box->numOverlaps < bestUnk18) {
                     D_800D30D0[idx] = i + 1;
-                    bestUnk18 = box->unk18;
+                    bestUnk18 = box->numOverlaps;
                 }
             } else {
                 *word ^= 1LL << (i - base);
