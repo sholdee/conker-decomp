@@ -5,12 +5,10 @@
  * are made file-local here (the shared header is left alone). */
 #define D_800DC460 D_800DC460_s32_decl_in_variables_h
 #define D_800DC464 D_800DC464_s32_decl_in_variables_h
-#define D_800DC468 D_800DC468_u16_decl_in_variables_h
 #include "variables.h"
 #include "effects.h"
 #undef D_800DC460
 #undef D_800DC464
-#undef D_800DC468
 
 #define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
 
@@ -25,7 +23,6 @@ typedef struct ParticleNode {
 
 extern ParticleNode *D_800DC460;
 extern ParticleNode *D_800DC464;
-extern s16 D_800DC468[];
 
 s32 func_151464B8(s16 *arg0);
 extern u8 D_800C3E90;

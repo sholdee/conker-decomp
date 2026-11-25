@@ -35,8 +35,7 @@ extern CamOffset D_800DCDE0[];
 extern Entry800DC2C0 D_800DC2C0[];
 extern LookAt D_800D9B90[];
 
-/* variables.h declares D_800DC2A0 as struct10 *, but it is Mtx *[2]: double-buffered per-player view matrices. */
-#define VIEW_MTX(player) (&((Mtx **)&D_800DC2A0)[D_800BE9C0][player])
+#define VIEW_MTX(player) (&D_800DC2A0[D_800BE9C0][player])
 
 void func_1512D070(Camera *camera);
 void func_1512D2F8(Camera *camera);

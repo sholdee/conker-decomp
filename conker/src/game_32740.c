@@ -27,9 +27,8 @@ void func_15005290(s32 resource, s32 mode) {
     count = D_80082FA0 + 1;
     D_800DBFF0 = allocate_memory(count * sizeof(Camera), 1, 1, 0);
     D_800DC2B0 = (s32)allocate_memory(count * 0xB0, 1, 0, 0);
-    // matching: header declares D_800DC2A0 as a pointer, but it is an array of two pointers
-    ((s32 *)&D_800DC2A0)[0] = (s32)allocate_memory(count * 64, 1, 1, 0);
-    ((s32 *)&D_800DC2A0)[1] = (s32)allocate_memory(count * 64, 1, 1, 0);
+    D_800DC2A0[0] = allocate_memory(count * sizeof(Mtx), 1, 1, 0);
+    D_800DC2A0[1] = allocate_memory(count * sizeof(Mtx), 1, 1, 0);
     for (i = 0; i <= D_80082FA0; i++) {
         view = &D_800DBFF0[i];
         D_800BE2B0[i] = (s32)allocate_memory(D_800BE620 * 2, 1, 2, 0);
@@ -43,7 +42,7 @@ void func_15005290(s32 resource, s32 mode) {
     func_1512ABF8();
     func_1512D238();
     D_800894B0 = 0;
-    D_800DC010 = (s32)allocate_memory(D_80082FA0 * sizeof(Camera) + sizeof(Camera), 1, 2, 0);
+    D_800DC010 = allocate_memory(D_80082FA0 * sizeof(Camera) + sizeof(Camera), 1, 2, 0);
 }
 
 void func_1512D66C(Camera *arg0);

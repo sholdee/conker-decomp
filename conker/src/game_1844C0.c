@@ -437,7 +437,7 @@ Gfx *func_15157F80(Gfx *gfx, Effect *fx, s32 view, u8 *needSync, u8 *proceed) {
 Gfx *func_15157FE8(Gfx *gfx, Effect *fx, s32 view, u8 *needSync) {
     gSPMatrix(gfx++, &D_800BE628[view].projectionMtx[D_800BE9C0],
               G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    gSPMatrix(gfx++, ((Mtx **)&D_800DC2A0)[D_800BE9C0] + view, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, D_800DC2A0[D_800BE9C0] + view, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
     return gfx;
 }
 

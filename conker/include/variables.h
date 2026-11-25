@@ -1069,15 +1069,15 @@ extern s32 D_800D2138;
 extern s16 D_800D2340;
 extern s8  D_800D23A9;
 extern s32 D_800D23C0;
-extern s32 D_800D23D0;
+extern Mtx  D_800D23D0;
 
 extern f32 D_800D2410[];
 extern f32 D_800D2428[3];
 extern f32 D_800D2438[3];
 extern s32 D_800D2444;
 extern s32 D_800D2448;
-extern s32 D_800D244C;
-extern u8  D_800D2454;
+extern Mtx  *D_800D244C;
+extern u16  D_800D2454; // perspNorm for D_800D23D0
 extern u8  D_800D2456;
 extern u8  D_800D2457;
 extern u8  D_800D2458;
@@ -1087,7 +1087,7 @@ extern u8  D_800D246D;
 extern u8  D_800D247D;
 extern s32 D_800D2548;
 extern s32 D_800D2588;
-extern u8  D_800D2590;
+extern Mtx  D_800D2590[6][2];
 extern s32 D_800D24C0;
 extern s32 D_800D24C8;
 
@@ -1216,14 +1216,14 @@ extern u8  D_800DBFF5;
 extern u8  D_800DBFF6;
 extern u8  D_800DBFF7;
 
-extern s32  D_800DC010;
+extern Camera *D_800DC010; // saved cameras (one per view)
 extern s32 D_800DC020;
-extern struct10 *D_800DC2A0; // TODO: find correct struct
+extern Mtx  *D_800DC2A0[2]; // per framebuffer: one view matrix per view
 extern s32 D_800DC2B0;
 extern f32 *D_800DCC10[][4];
 extern s32 D_800DC460;
 extern s32 D_800DC464;
-extern u16 D_800DC468[];
+extern s16 D_800DC468[];
 extern s32 D_800DC63C;
 extern s8 D_800DCD30[4][3]; // per-player directional light direction
 extern u8  D_800DCD31;

@@ -617,8 +617,8 @@ Gfx *func_15019BB8(Gfx *gfx, s32 player) {
     return func_151674F8(gfx, 4, player, 1);
 }
 
-/* D_800DC2A0 (declared struct10 *) is one Mtx array per framebuffer, indexed by player. */
-#define FRAME_MTX(fb, player) (&((Mtx **)&D_800DC2A0)[fb][player])
+/* D_800DC2A0 is one Mtx array per framebuffer, indexed by player. */
+#define FRAME_MTX(fb, player) (&D_800DC2A0[fb][player])
 
 /* Loads player's viewport and projection, then draws group 5 display lists. */
 Gfx *func_15019CC8(Gfx *gfx, s32 player) {

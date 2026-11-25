@@ -1,17 +1,14 @@
 #include <ultra64.h>
 #include "functions.h"
-#define D_800DC2A0 D_800DC2A0_hdr
 #define D_800B0E00 D_800B0E00_hdr
 #define D_800B0E04 D_800B0E04_hdr
 #include "variables.h"
-#undef D_800DC2A0
 #undef D_800B0E00
 #undef D_800B0E04
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define gRenderViews ((RenderView *)D_800BE628)
 
-extern Mtx *D_800DC2A0[2];        // per framebuffer: one view matrix per view
 extern MtxF D_800D9C10[];    // per view: view matrix (float copy of D_800DC2A0)
 extern Gfx *D_800B0E00;
 extern Gfx *D_800B0E04;

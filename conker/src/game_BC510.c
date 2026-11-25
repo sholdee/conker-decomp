@@ -5,27 +5,15 @@ void func_1509093C(void);
 #define D_800D24C8 D_800D24C8_hdr
 #define D_800D2460 D_800D2460_hdr
 #define D_800D2890 D_800D2890_hdr
-#define D_800D2590 D_800D2590_hdr
-#define D_800D2454 D_800D2454_hdr
-#define D_800D23D0 D_800D23D0_hdr
-#define D_800D244C D_800D244C_hdr
 #include "variables.h"
 #undef D_800D24C8
 #undef D_800D2460
 #undef D_800D2890
-#undef D_800D2590
-#undef D_800D2454
-#undef D_800D23D0
-#undef D_800D244C
 void func_1508F9F4(void);
 void func_1508F0D4(void);
 void func_1508F7BC(void);
 extern u8 D_800CC49A;
 extern f32 D_800D2890[3];
-extern Mtx D_800D2590[6][2];
-extern u16 D_800D2454;
-extern Mtx D_800D23D0;
-extern Mtx *D_800D244C;
 
 
 extern s32 func_1510D0EC(s32, s32, s32, s32);

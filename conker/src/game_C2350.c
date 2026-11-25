@@ -51,7 +51,7 @@ void func_15094EA0(s32 view) {
     MtxF projection;
     MtxF viewMtx;
 
-    guMtxL2F(projection, &((Mtx **)&D_800DC2A0)[D_800BE9C0][view]);
+    guMtxL2F(projection, &D_800DC2A0[D_800BE9C0][view]);
     guMtxL2F(viewMtx, &VIEWS[view].projectionMtx[D_800BE9C0]);
     func_150A7A48(projection, viewMtx, D_800D2CA8[view]);
 }
