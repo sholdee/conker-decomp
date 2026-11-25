@@ -796,7 +796,7 @@ extern s32 D_800B0E58[7762];
 
 extern s32 D_800B87A0[];
 
-extern u8  D_800BC448[];
+extern s8  D_800BC448[]; // per texture: frames left before it is freed (0 = not loaded)
 
 extern ParticleResource D_800BE4A0[15];
 extern struct14 *D_800BE4F0;

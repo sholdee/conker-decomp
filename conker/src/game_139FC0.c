@@ -190,7 +190,6 @@ typedef struct {
 extern u8 D_800DBDBA;
 
 /* Per-texture lifetime in frames (1-3 count down; 4+ stays loaded) plus the 0x40 re-decompress flag. */
-#define TEX_LIFETIME(i) (*(s8 *)&D_800BC448[i])
 
 extern void func_10006240(u8 *, Entry1510D404 *, u32);
 extern s32 func_10004074(s16 *);
@@ -262,8 +261,8 @@ s32 func_1510D0EC(s32 index, s32 *sizeOut, s32 lifetime, s32 countUse) {
         *sizeOut = len;
     }
     len = D_800B0E58[index];
-    if (TEX_LIFETIME(index) < lifetime) {
-        TEX_LIFETIME(index) = lifetime;
+    if (D_800BC448[index] < lifetime) {
+        D_800BC448[index] = lifetime;
     }
     if (countUse != 0) {
         if (D_800D9F68[index] < 255) {
@@ -319,10 +318,10 @@ void func_1510D404(void) {
     }
     D_800DBDBC = -1;
     for (i = start; i <= end; i++) {
-        if (TEX_LIFETIME(i) != 0) {
-            if (TEX_LIFETIME(i) < 4) {
-                TEX_LIFETIME(i)--;
-                if (TEX_LIFETIME(i) == 0) {
+        if (D_800BC448[i] != 0) {
+            if (D_800BC448[i] < 4) {
+                D_800BC448[i]--;
+                if (D_800BC448[i] == 0) {
                     D_800DBDBC = i;
                     // matching: the empty compare counts as a loop use of -1, so IDO keeps -1 in a register
                     if (func_10004074((s16 *)D_800B0E58[i]) == -1) {
@@ -337,12 +336,12 @@ void func_1510D404(void) {
                         D_800D9F5C = i;
                     }
                 }
-            } else if (TEX_LIFETIME(i) & 0x40) {
+            } else if (D_800BC448[i] & 0x40) {
                 data = ((Entry1510D404 *)D_800B0E58[i])->data;
                 size = ((Entry1510D404 *)D_800B0E58[i])->size;
                 func_10006240(data + size, (Entry1510D404 *)D_800B0E58[i], D_8003809C);
                 func_10004074((s16 *)data);
-                TEX_LIFETIME(i) &= ~0x40;
+                D_800BC448[i] &= ~0x40;
                 if (i < D_800D9F58) {
                     D_800D9F58 = i;
                 }
@@ -357,7 +356,7 @@ void func_1510D404(void) {
 
 /* Sets a loaded texture's lifetime, keeping its 0x40 flag; unloaded textures (lifetime 0) are left alone. */
 void func_1510D608(s32 index, s32 lifetime) {
-    s8 *state = &TEX_LIFETIME(index);
+    s8 *state = &D_800BC448[index];
     s8 prev = *state;
 
     if (prev != 0) {
