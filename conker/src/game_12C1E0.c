@@ -6,6 +6,7 @@
 extern struct17 D_800A2050;
 
 struct126 *func_150FF288(struct127 *obj);
+/* Fills `direction`, `axis0` and `axis1` for `obj` through func_15145740. */
 void func_150FF2AC(struct127 *obj, struct17 *direction, struct17 *axis0, struct17 *axis1);
 void func_150FF2D4(u8 *valid, struct17 *points, struct17 *position, struct17 *hit, struct17 *normal,
                    struct17 *direction, struct17 *axis0, struct17 *axis1, struct17 *output0, struct17 *output1,
@@ -16,7 +17,7 @@ s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, 
 void func_150F7470(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, struct127 *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_151D3F14(struct17 *position, u8 arg1, s32 arg2);
 void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, s32, s32);
-void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
+void func_1505D1C4(f32 x, f32 y, f32 z, s32 flags, s32 objIndex, s32 angle, s32 arg6, struct17 *arg7);
 s32 func_1514654C(struct127 *obj, struct126 *attachment, s32 arg2, struct17 **src, struct17 **dst, s32 count);
 void func_15145740(struct127 *obj, struct17 *direction, struct17 *axis0, struct17 *axis1, f32 arg4);
 
@@ -170,6 +171,7 @@ struct126 *func_150FF288(struct127 *obj) {
     return func_1503195C(obj, 0x82, 0);
 }
 
+/* Fills `direction`, `axis0` and `axis1` for `obj` through func_15145740. */
 void func_150FF2AC(struct127 *obj, struct17 *direction, struct17 *axis0, struct17 *axis1) {
     func_15145740(obj, direction, axis0, axis1, 0.8110000491f);
 }
@@ -275,6 +277,7 @@ void func_150FF474(struct17 *position, struct17 *points, u8 arg2, s32 arg3) {
     }
 }
 
+/* Returns FALSE for object id 0x98, TRUE otherwise. */
 s32 func_150FF6B4(struct127 *obj, s32 arg1, s32 arg2) {
     if (obj->id == 0x98) {
         return FALSE;
@@ -334,6 +337,10 @@ s32 func_15081E78(struct127 *obj, void *arg1, s32 arg2);
 extern struct17 D_800A2130;
 extern struct17 D_800A213C;
 
+/*
+ * Shot effects for `obj`: a muzzle effect and particles when it has bones, three func_1505D1C4
+ * spawns along `direction` if `arg1`, a func_15081690 call if `arg2`, then a camera event.
+ */
 void func_150FF840(struct127 *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     struct17 position;
     struct17 direction;
@@ -391,6 +398,7 @@ void func_150FF840(struct127 *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     func_150FFC3C(obj);
 }
 
+/* Spawns func_1505D1C4 effect `type` at `position`, owned by `obj`. */
 void func_150FFB6C(struct17 *position, struct17 *origin, struct127 *obj, s32 type) {
     s32 flags;
     s32 index;
@@ -399,7 +407,7 @@ void func_150FFB6C(struct17 *position, struct17 *origin, struct127 *obj, s32 typ
     flags = type | 0x60000;
     index = obj - D_800CC2D0;
     angle = obj->unk7A;
-    func_1505D1C4(position->unk0, position->unk4, position->unk8, flags, index, angle, 0, (s32)origin);
+    func_1505D1C4(position->unk0, position->unk4, position->unk8, flags, index, angle, 0, origin);
 }
 
 s32 func_15145EA4(struct17 **src, struct17 **dst, void *mtx, s32 count);
@@ -426,6 +434,7 @@ typedef struct {
 
 void func_151D8868(Event151D8868 *event, s32 arg1, s32 arg2, s32 arg3);
 
+/* Sends a func_151D8868 event (kind 1, 20-30 long) to `obj`'s camera, if it has one. */
 void func_150FFC3C(struct127 *obj) {
     Event151D8868 event;
 
@@ -445,6 +454,7 @@ void func_151D5A18(struct127 *obj, struct17 *position, struct17 *direction, stru
                    struct17 *arg5, u8 arg6);
 void func_151D3E6C(struct127 *obj, struct17 *arg1, struct17 *arg2, s32 arg3);
 
+/* Gets the shot `position` and `direction` (and two axes) of `obj`. */
 void func_150FFCC8(struct127 *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1) {
     func_151D5A18(obj, position, direction, axis0, axis1, D_8008FC8C[0], *D_8008FC94[0]);
     func_151D3E6C(obj, position, position, 0x8003A);
@@ -452,6 +462,7 @@ void func_150FFCC8(struct127 *obj, struct17 *position, struct17 *direction, stru
 
 void func_15081E0C(struct127 *obj, s32 arg1, s32 arg2);
 
+/* Calls func_15081E0C(other, 4, 0) when `other` is a 0x9F/0xA0 object without flag 0x80 in unk94. */
 void func_150FFD2C(struct127 *obj, struct127 *other, s32 arg2) {
     if (other->id == 0x9F || other->id == 0xA0) {
         if (!(other->unk94 & 0x80)) {
