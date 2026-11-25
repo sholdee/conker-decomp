@@ -2,42 +2,240 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    u8 pad_0x0[0x18];
-    s32 field_0x18;
-    s32 field_0x1C;
-    u8 pad_0x20[0x34];
-    f32 field_0x54;
-    f32 field_0x58;
-    f32 field_0x5C;
-    u8 pad_0x60[0x8];
-    s32 field_0x68;
-    s32 field_0x6C;
-    s32 field_0x70;
-    s32 field_0x74;
-    s32 field_0x78;
-    f32 field_0x7C[2][4][4];
-    s32 field_0xFC;
-    u8 field_0x100;
-    u8 pad_0x101[0x3];
-    s32 field_0x104[4];
-    s32 field_0x114;
-    s32 field_0x118;
-    u8 pad_0x11C[0x4];
-    f32 field_0x120[0xE];
-} struct15157010;
-
-extern struct15157010 *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern void func_1503F62C(s32, s32, s32 *, s32 *, s32 *, s32 *, s32 *);
-extern void func_1503F5B8(s32, s32, s32, f32, f32, s32);
-extern void guMtxIdentF(float mf[4][4]);
-extern s32 func_1515D480(s32);
-extern s32 func_1515D440(void);
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_151539B4(void *, u8);
 extern void func_15130374(s32, u8, s32, u8, s32);
-extern s32 (*D_8008AD90[])(void *);
-extern s32 (*D_8008ADA0[])(void *);
-extern void func_1503F4B0(void *, void *, u8);
+
+/*
+ * A streak particle: a camera-facing triangle from its tail point to a
+ * width-wide edge at its head. Head and tail move with separate velocities.
+ */
+typedef struct {
+    /* 0x00 */ u8 header[0x10];
+    /* 0x10 */ vertex headPos;
+    /* 0x1C */ vertex headVel;
+    /* 0x28 */ vertex tailPos;
+    /* 0x34 */ vertex tailVel;
+    /* 0x40 */ u8 flags;            // 1: lifetime counts down, 2/4: render flags, 8: fades out
+    /* 0x42 */ s16 lifetime;
+    /* 0x44 */ u16 renderMode;      // low byte: D_800A4AC8 index, high byte: func_1513F4E4 arg
+    /* 0x48 */ f32 width;
+    /* 0x4C */ u8 alpha;
+    /* 0x4E */ s16 fadeStart;       // fade begins when lifetime drops below this
+    /* 0x50 */ s16 fadeRate;        // alpha = lifetime * fadeRate while fading
+    /* 0x52 */ u8 pad52[0x6];
+    /* 0x58 */ Vtx vtxTemplate[3];  // tail, head + side, head - side
+    /* 0x88 */ Vtx *vtxBuffers[4];  // per-view vertex buffers (two frames each)
+} StreakParticle;
+
+/* Spawn parameters for a streak particle. */
+typedef struct {
+    /* 0x00 */ vertex pos;
+    /* 0x0C */ vertex dir;
+    /* 0x18 */ f32 headSpeed;
+    /* 0x1C */ f32 tailSpeed;
+    /* 0x20 */ u8 headColor[4];
+    /* 0x24 */ u8 tailColor[4];
+    /* 0x28 */ u8 flags;
+    /* 0x2A */ s16 lifetime;
+    /* 0x2C */ u16 renderMode;
+    /* 0x30 */ f32 width;
+    /* 0x34 */ u8 alpha;
+    /* 0x36 */ s16 fadeStart;
+    /* 0x38 */ s16 fadeRate;
+} StreakParticleDesc;
+
+/* Allocates a streak particle (kind 0 or 1) with extraSize trailing bytes and fills it from desc. */
+StreakParticle *func_15156190(StreakParticleDesc *desc, u8 kind, s32 extraSize, s32 arg3, s32 arg4) {
+    StreakParticle *newParticle;
+    StreakParticle *particle;
+    s32 id;
+    vertex pos;
+
+    switch (kind) {
+        case 0:
+            id = 0x2C;
+            break;
+        case 1:
+            id = 0x53;
+            break;
+        default:
+            id = 0x2C;
+            break;
+    }
+
+    newParticle = func_15167A68(id, arg4, extraSize + sizeof(StreakParticle), 1, (u8)arg3, 1);
+    if (newParticle == NULL) {
+        return NULL;
+    }
+    particle = newParticle; // matching: the second pointer local survives the call as v1
+    particle->vtxTemplate[0].v.flag = 0;
+    particle->vtxTemplate[0].v.cn[0] = desc->tailColor[0];
+    particle->vtxTemplate[0].v.cn[1] = desc->tailColor[1];
+    particle->vtxTemplate[0].v.cn[2] = desc->tailColor[2];
+    particle->vtxTemplate[0].v.cn[3] = desc->tailColor[3];
+    particle->vtxTemplate[0].v.tc[0] = 0;
+    particle->vtxTemplate[0].v.tc[1] = 0;
+    particle->vtxTemplate[1].v.flag = 0;
+    particle->vtxTemplate[1].v.cn[0] = desc->headColor[0];
+    particle->vtxTemplate[1].v.cn[1] = desc->headColor[1];
+    do {} while (0); // matching: block boundary makes as1 keep the v1 copy of the pointer for the last stores
+    particle->vtxTemplate[1].v.cn[2] = desc->headColor[2];
+    particle->vtxTemplate[1].v.cn[3] = desc->headColor[3];
+    particle->vtxTemplate[2].v.flag = 0;
+    particle->vtxTemplate[2].v.cn[0] = desc->headColor[0];
+    particle->vtxTemplate[2].v.cn[1] = desc->headColor[1];
+    particle->vtxTemplate[2].v.cn[2] = desc->headColor[2];
+    particle->vtxTemplate[2].v.cn[3] = desc->headColor[3];
+    pos = desc->pos;
+    particle->tailPos = pos;
+    particle->headPos = pos;
+    particle->headVel.x = desc->dir.x * desc->headSpeed;
+    particle->headVel.y = desc->dir.y * desc->headSpeed;
+    particle->headVel.z = desc->dir.z * desc->headSpeed;
+    particle->tailVel.x = desc->dir.x * desc->tailSpeed;
+    particle->tailVel.y = desc->dir.y * desc->tailSpeed;
+    particle->tailVel.z = desc->dir.z * desc->tailSpeed;
+    particle->flags = desc->flags;
+    particle->lifetime = desc->lifetime;
+    particle->renderMode = desc->renderMode;
+    particle->width = desc->width;
+    particle->alpha = desc->alpha;
+    particle->fadeStart = desc->fadeStart;
+    particle->fadeRate = desc->fadeRate;
+    bzero(particle->vtxBuffers, sizeof(particle->vtxBuffers));
+    return particle;
+}
+
+void func_15156388(StreakParticleDesc *desc, u8 kind, s32 extraSize) {
+    func_15156190(desc, kind, extraSize, 0xFF, 0);
+}
+
+/* Per-frame update: count down the lifetime, move head and tail, fade out; frees the particle when expired. */
+void func_151563B8(StreakParticle *arg0) {
+    StreakParticle *particle;
+    u8 expired;
+    s16 fadedAlpha;
+
+    // matching: copying the parameter to a local steers IDO's register choice
+    particle = arg0;
+    expired = FALSE;
+    if (particle->flags & 1) {
+        particle->lifetime -= D_800BE9E4;
+        if (particle->lifetime < 0) {
+            expired = TRUE;
+        }
+    }
+    if (!expired) {
+        particle->headPos.x += particle->headVel.x * D_800BE9A4;
+        particle->headPos.y += particle->headVel.y * D_800BE9A4;
+        particle->headPos.z += particle->headVel.z * D_800BE9A4;
+        particle->tailPos.x += particle->tailVel.x * D_800BE9A4;
+        particle->tailPos.y += particle->tailVel.y * D_800BE9A4;
+        particle->tailPos.z += particle->tailVel.z * D_800BE9A4;
+        if (particle->flags & 8) {
+            if (particle->lifetime < particle->fadeStart) {
+                fadedAlpha = particle->lifetime * particle->fadeRate;
+                if (fadedAlpha < particle->alpha) {
+                    particle->alpha = fadedAlpha;
+                }
+            }
+        }
+    }
+    if (expired) {
+        func_1516972C((struct102 *)particle);
+    }
+}
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} RenderModeEntry;
+
+Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
+Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
+Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
+Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
+Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
+extern RenderModeEntry D_800A4AC8[];
+void func_151D5D60(void *, s16, s32, void **, u8 *);
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+
+/* Draws a streak particle for one view as a single triangle facing that view's eye. */
+Gfx *func_151564F8(Gfx *gfx, StreakParticle *particle, s16 viewIndex) {
+    StreakParticle *p;
+    vertex axis;
+    vertex toEye;
+    vertex side;
+    vertex *eye;
+    f32 lengthSquared;
+    u8 update;
+    s16 renderFlags;
+    s32 geometryFlags;
+    Vtx *vtx;
+    u8 mode;
+    u8 cycle;
+    u8 fresh;
+    f32 scale;
+
+    // matching: the p alias orders IDO's spill slots (expression ids follow first use)
+    p = particle;
+    func_151D5D60(particle->vtxBuffers, viewIndex, sizeof(particle->vtxTemplate), (void **)&vtx, &fresh);
+    if (fresh) {
+        memcpy(particle->vtxBuffers[viewIndex], particle->vtxTemplate, sizeof(particle->vtxTemplate));
+        memcpy(particle->vtxBuffers[viewIndex] + 3, particle->vtxTemplate, sizeof(particle->vtxTemplate));
+    }
+    eye = (vertex *)&D_800DBFF0[viewIndex].unk2F8;
+    update = TRUE;
+    renderFlags = particle->flags & 6;
+    mode = particle->renderMode & 0xFF;
+    cycle = (particle->renderMode & 0xFF00) >> 8;
+    geometryFlags = 0;
+    if (renderFlags & 2) {
+        geometryFlags = 0x200;
+    }
+    if (renderFlags & 4) {
+        geometryFlags |= 0x400;
+    }
+    gfx = func_15142B7C(gfx, geometryFlags | 1 | 4 | 0x200000, 0x1F0600);
+    gfx = func_15142C10(gfx, 0, 0, 0, particle->alpha, &update);
+    gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &update);
+    gfx = func_1513F4E4(gfx, cycle, &update);
+    gfx = func_15142FBC(gfx, 0x82CA0, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &update);
+    axis.x = p->headPos.x - p->tailPos.x;
+    axis.y = p->headPos.y - p->tailPos.y;
+    axis.z = p->headPos.z - p->tailPos.z;
+    toEye.x = p->headPos.x - eye->x;
+    toEye.y = p->headPos.y - eye->y;
+    toEye.z = p->headPos.z - eye->z;
+    side.x = axis.y * toEye.z - toEye.y * axis.z;
+    side.y = axis.z * toEye.x - toEye.z * axis.x;
+    side.z = axis.x * toEye.y - toEye.x * axis.y;
+    lengthSquared = side.x * side.x + side.y * side.y + side.z * side.z;
+    if (lengthSquared == 0.0f) {
+        side.x = 0.0f;
+        side.y = 0.0f;
+        side.z = 0.0f;
+    } else {
+        scale = p->width / sqrtf(lengthSquared);
+        side.x *= scale;
+        side.y *= scale;
+        side.z *= scale;
+    }
+    vtx[0].v.ob[0] = p->tailPos.x;
+    vtx[0].v.ob[1] = p->tailPos.y;
+    vtx[0].v.ob[2] = p->tailPos.z;
+    vtx[1].v.ob[0] = p->headPos.x + side.x;
+    vtx[1].v.ob[1] = p->headPos.y + side.y;
+    vtx[1].v.ob[2] = p->headPos.z + side.z;
+    vtx[2].v.ob[0] = p->headPos.x - side.x;
+    vtx[2].v.ob[1] = p->headPos.y - side.y;
+    vtx[2].v.ob[2] = p->headPos.z - side.z;
+    gSPVertex(gfx++, vtx, 3, 0);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    return gfx;
+}
 
 #define LOW_U8_151568F8(arg) (*(u8 *)((u8 *)&(arg) + 3))
 
@@ -51,21 +249,6 @@ typedef struct {
     s32 unk0;
     s32 unk4;
 } struct151568F8_08;
-
-typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    s8 unk11;
-    s8 unk12;
-    u8 pad13[0x3];
-    s16 unk16;
-    u8 pad18[0x2B];
-    u8 unk43;
-    u8 pad44[0x20];
-    s16 unk64;
-    s16 unk66;
-    void *unk68;
-} struct151572D0;
 
 typedef struct {
     struct151568F8_0C unk0;
@@ -203,341 +386,6 @@ typedef struct {
     u8 pad64[0xC];
 } struct151568F8_second;
 
-typedef struct {
-    u8 pad0[0x10];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 pad41;
-    s16 unk42;
-    u8 pad44[0x8];
-    u8 unk4C;
-    u8 pad4D;
-    s16 unk4E;
-    s16 unk50;
-} Struct151563B8;
-
-
-/* prior best attempt (old score 15); may be a good start */
-struct Obj15156190Vec {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-};
-
-struct Obj15156190Vec4 {
-    struct Obj15156190Vec unk0;
-    s32 padC;
-};
-
-struct Obj15156190Src {
-    struct Obj15156190Vec unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 pad29;
-    s16 unk2A;
-    u16 unk2C;
-    u8 pad2E[2];
-    f32 unk30;
-    u8 unk34;
-    u8 pad35;
-    s16 unk36;
-    s16 unk38;
-};
-
-struct Obj15156190Ret {
-    u8 pad0[0x10];
-    struct Obj15156190Vec unk10;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    struct Obj15156190Vec unk28;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    u8 unk40;
-    u8 pad41;
-    s16 unk42;
-    u16 unk44;
-    u8 pad46[2];
-    f32 unk48;
-    u8 unk4C;
-    u8 pad4D;
-    s16 unk4E;
-    s16 unk50;
-    u8 pad52[0xC];
-    s16 unk5E;
-    s16 unk60;
-    s16 unk62;
-    u8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 unk67;
-    u8 pad68[6];
-    s16 unk6E;
-    u8 pad70[4];
-    u8 unk74;
-    u8 unk75;
-    u8 unk76;
-    u8 unk77;
-    u8 pad78[6];
-    s16 unk7E;
-    u8 pad80[4];
-    u8 unk84;
-    u8 unk85;
-    u8 unk86;
-    u8 unk87;
-    u8 unk88[0x10];
-};
-
-void *func_15156190(struct Obj15156190Src *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4)
-{
-  struct Obj15156190Ret *temp_v0;
-  struct Obj15156190Ret *sp44;
-  s32 id;
-  struct Obj15156190Vec sp30;
-  switch (arg1)
-  {
-    case 0:
-      id = 0x2C;
-      break;
-
-    case 1:
-      id = 0x53;
-      break;
-
-    default:
-      id = 0x2C;
-      break;
-
-  }
-
-  temp_v0 = (struct Obj15156190Ret *) func_15167A68(id, arg4, arg2 + 0x98, 1, (u8) arg3, 1);
-  if (temp_v0 == 0)
-  {
-    return 0;
-  }
-  sp44 = temp_v0;
-  sp44->unk5E = 0;
-  sp44->unk64 = arg0->unk24;
-  sp44->unk65 = arg0->unk25;
-  sp44->unk66 = arg0->unk26;
-  sp44->unk67 = arg0->unk27;
-  sp44->unk60 = 0;
-  sp44->unk62 = 0;
-  sp44->unk6E = 0;
-  sp44->unk74 = arg0->unk20;
-  sp44->unk75 = arg0->unk21;
- do { } while (0);
-  sp44->unk76 = arg0->unk22;
-  sp44->unk77 = arg0->unk23;
-  sp44->unk7E = 0;
-  sp44->unk84 = arg0->unk20;
-  sp44->unk85 = arg0->unk21;
-  sp44->unk86 = arg0->unk22;
-  sp44->unk87 = arg0->unk23;
-  sp30 = arg0->unk0;
-  sp44->unk28 = sp30;
-  sp44->unk10 = sp30;
-  sp44->unk1C = arg0->unkC * arg0->unk18;
-  sp44->unk20 = arg0->unk10 * arg0->unk18;
-  sp44->unk24 = arg0->unk14 * arg0->unk18;
-  sp44->unk34 = arg0->unkC * arg0->unk1C;
-  sp44->unk38 = arg0->unk10 * arg0->unk1C;
-  sp44->unk3C = arg0->unk14 * arg0->unk1C;
-  sp44->unk40 = arg0->unk28;
-  sp44->unk42 = arg0->unk2A;
-  sp44->unk44 = arg0->unk2C;
-  sp44->unk48 = arg0->unk30;
-  sp44->unk4C = arg0->unk34;
-  sp44->unk4E = arg0->unk36;
-  sp44->unk50 = arg0->unk38;
-  bzero(sp44->unk88, 0x10);
-  return sp44;
-}
-
-
-extern void *func_15156190(struct Obj15156190Src *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-
-void func_15156388(void *arg0, u8 arg1, s32 arg2) {
-    func_15156190(arg0, arg1, arg2, 0xFF, 0);
-}
-
-void func_151563B8(void *arg0) {
-    Struct151563B8 *self;
-    u8 done;
-    s16 temp;
-
-    self = arg0;
-    done = 0;
-    if (self->unk40 & 1) {
-        self->unk42 -= D_800BE9E4;
-        if (self->unk42 < 0) {
-            done = 1;
-        }
-    }
-    if (!done) {
-        self->unk10 += self->unk1C * D_800BE9A4;
-        self->unk14 += self->unk20 * D_800BE9A4;
-        self->unk18 += self->unk24 * D_800BE9A4;
-        self->unk28 += self->unk34 * D_800BE9A4;
-        self->unk2C += self->unk38 * D_800BE9A4;
-        self->unk30 += self->unk3C * D_800BE9A4;
-        if (self->unk40 & 8) {
-            if (self->unk42 < self->unk4E) {
-                temp = self->unk42 * self->unk50;
-                if (temp < self->unk4C) {
-                    self->unk4C = temp;
-                }
-            }
-        }
-    }
-    if (done) {
-        func_1516972C((struct102 *)self);
-    }
-}
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_151564F8;
-
-typedef struct {
-    s16 x, y, z, flag;
-    u8 other[8];
-} Vtx_151564F8;
-
-typedef struct {
-    u8 pad0[0x10];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    u8 pad1C[0xC];
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    u8 pad34[0xC];
-    u8 unk40;
-    u8 pad41[3];
-    u16 unk44;
-    u8 pad46[2];
-    f32 unk48;
-    u8 unk4C;
-    u8 pad4D[0xB];
-    u8 vertexTemplate[0x30];
-    u8 *buffers[1];
-} Obj_151564F8;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Struct15157420_mode;
-
-Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
-Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-extern Struct15157420_mode D_800A4AC8[];
-void func_151D5D60(void *, s16, s32, void **, u8 *);
-f32 sqrtf(f32);
-#pragma intrinsic(sqrtf)
-
-Gfx *func_151564F8(Gfx *gfx, Obj_151564F8 *arg1, s16 arg2) {
-    Obj_151564F8 *p;
-    Vec3f_151564F8 d;
-    Vec3f_151564F8 v;
-    Vec3f_151564F8 n;
-    Vec3f_151564F8 *eye;
-    f32 lengthSquared;
-    u8 update;
-    s16 flags;
-    s32 modeFlags;
-    Vtx_151564F8 *vtx;
-    u8 mode;
-    u8 cyc;
-    u8 fresh;
-    f32 scale;
-
-    p = arg1;
-    func_151D5D60(arg1->buffers, arg2, 0x30, (void **)&vtx, &fresh);
-    if (fresh != 0) {
-        memcpy(arg1->buffers[arg2], arg1->vertexTemplate, 0x30);
-        memcpy(arg1->buffers[arg2] + 0x30, arg1->vertexTemplate, 0x30);
-    }
-    eye = (Vec3f_151564F8 *)&D_800DBFF0[arg2].unk2F8;
-    update = 1;
-    flags = arg1->unk40 & 6;
-    mode = arg1->unk44 & 0xFF;
-    cyc = (arg1->unk44 & 0xFF00) >> 8;
-    modeFlags = 0;
-    if (flags & 2) {
-        modeFlags = 0x200;
-    }
-    if (flags & 4) {
-        modeFlags |= 0x400;
-    }
-    gfx = func_15142B7C(gfx, modeFlags | 1 | 4 | 0x200000, 0x1F0600);
-    gfx = func_15142C10(gfx, 0, 0, 0, arg1->unk4C, &update);
-    gfx = func_15142CF0(gfx, 0, 0, 0, 0, 0, 0, &update);
-    gfx = func_1513F4E4(gfx, cyc, &update);
-    gfx = func_15142FBC(gfx, 0x82CA0, D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4, &update);
-    d.x = p->unk10 - p->unk28;
-    d.y = p->unk14 - p->unk2C;
-    d.z = p->unk18 - p->unk30;
-    v.x = p->unk10 - eye->x;
-    v.y = p->unk14 - eye->y;
-    v.z = p->unk18 - eye->z;
-    n.x = d.y * v.z - v.y * d.z;
-    n.y = d.z * v.x - v.z * d.x;
-    n.z = d.x * v.y - v.x * d.y;
-    lengthSquared = n.x * n.x + n.y * n.y + n.z * n.z;
-    if (lengthSquared == 0.0f) {
-        n.x = 0.0f;
-        n.y = 0.0f;
-        n.z = 0.0f;
-    } else {
-        scale = p->unk48 / sqrtf(lengthSquared);
-        n.x *= scale;
-        n.y *= scale;
-        n.z *= scale;
-    }
-    vtx[0].x = p->unk28;
-    vtx[0].y = p->unk2C;
-    vtx[0].z = p->unk30;
-    vtx[1].x = p->unk10 + n.x;
-    vtx[1].y = p->unk14 + n.y;
-    vtx[1].z = p->unk18 + n.z;
-    vtx[2].x = p->unk10 - n.x;
-    vtx[2].y = p->unk14 - n.y;
-    vtx[2].z = p->unk18 - n.z;
-    gSPVertex(gfx++, vtx, 3, 0);
-    gSP1Triangle(gfx++, 0, 1, 2, 0);
-    return gfx;
-}
 
 void func_151568F8(struct151568F8_src *arg0, s32 arg1) {
     struct151568F8_first first;
@@ -814,130 +662,4 @@ void func_15156FE4(struct102 *arg0) {
     func_15156F94(arg0);
     func_15169824(arg0);
 }
-struct15157010 *func_15157010(u8 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7);
 
-void func_100043B4(s32 *arg0, u32 arg1);
-extern s32 D_80082FA0;
-void func_151571C4(void *arg0);
-
-extern void func_151571C4(void *);
-
-
-extern void func_151571C4(void *);
-extern void func_1518CA04(void *);
-extern void func_1503F7B8(void *);
-void func_15157248(u8 *arg0);
-void func_1515728C(u8 *arg0);
-void func_151572D0(struct151572D0 *ptr);
-
-typedef struct {
-    u8 pad0[0x2];
-    s16 unk2;
-} Struct15157420_60;
-
-typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    u8 pad11[0x2];
-    s8 unk13;
-    s8 unk14;
-    u8 pad15[0xB];
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    u8 pad30[0x3];
-    u8 unk33;
-    s32 unk34;
-    s32 unk38;
-    s8 unk3C;
-    s8 unk3D;
-    u8 pad3E[0x2];
-    u8 unk40;
-    u8 unk41;
-    u8 unk42;
-    u8 unk43;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    u8 pad48[0x4];
-    void *unk4C;
-    u8 unk50;
-    u8 unk51;
-    u8 pad52[0x2];
-    u8 unk54[0xC];
-    Struct15157420_60 *unk60;
-    u8 pad64[0x4];
-    s32 *unk68;
-    s32 *unk6C;
-    u8 unk70;
-    u8 pad71[0x3];
-    s32 unk74;
-    u8 pad78[0x84];
-    u8 unkFC[1];
-} Struct15157420;
-
-extern Gfx *(*D_8008ADBC[])(Gfx *, Struct15157420 *, s16, u8 *, u8 *);
-extern Gfx *(*D_8008ADCC[])(Gfx *, Struct15157420 *, s16, u8 *);
-extern u8 D_80083740[];
-extern u8 D_800838C0[];
-extern u8 D_80083A40[];
-extern u8 D_80083BC0[];
-extern u8 D_800BE9C0;
-
-void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 arg10, u8 arg11, u8 arg12, u8 arg13);
-void *func_151462C8(void *arg0, void *arg1, u8 arg2, void *arg3, u8 arg4, s16 arg5, void *arg6, u8 arg7, s32 arg8);
-Gfx *func_15157420(Gfx *gfx, Struct15157420 *arg1, s16 arg2);
-
-extern u8 D_800BE9C0;
-extern void guMtxIdentF(float mf[4][4]);
-s32 func_15157860(u8 *arg0);
-struct15157010 *func_15157898(u8 *arg0, void *arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8);
-s32 func_15157918(struct15157010 *arg0);
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} MotionVec;
-
-typedef struct {
-    MotionVec rot;
-    f32 scale;
-    MotionVec vel;
-    MotionVec rotVel;
-    f32 gravity;
-    f32 drag;
-    u8 flags;
-} MotionState;
-
-typedef struct {
-    u8 pad_0x0[0x54];
-    f32 posX;
-    f32 posY;
-    f32 posZ;
-    u8 pad_0x60[0xC0];
-    MotionState motion;
-} struct15157AA8;
-s32 func_15157AA8(struct15157AA8 *arg0);
-void func_15157D88(s32 arg0, s32 arg1, u8 arg2);
-
-extern void func_15157DEC(struct15157010 *, f32 *);
-s32 func_15157DC8(struct15157010 *arg0);
-void func_15157DEC(struct15157010 *arg0, f32 *arg1);
-
-extern Mtx D_80089470;
-Gfx *func_15157F80(Gfx *pkt, s32 arg1, s32 arg2, s32 arg3, u8 *arg4);
-
-#define WGFX15157FE8(pkt, a, b)     \
-{                                   \
-    Gfx *_g = (Gfx *)(pkt);         \
-    _g->words.w0 = (u32)(a);        \
-    _g->words.w1 = (u32)(b);        \
-}
-Gfx *func_15157FE8(Gfx *pkt, s32 arg1, s32 arg2, s32 arg3);
-
-extern s32 D_800A6060;
-void func_15158078(s32 arg0, u8 arg1);
