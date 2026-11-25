@@ -15,13 +15,13 @@ extern Gfx D_80090028;
 extern u8 D_800917F8;
 extern u8 D_80091804;
 extern u8 D_80091810;
-extern s32 (*D_8008FFF4[])(s32);
+extern Gfx *(*D_8008FFF4[])(Gfx *);
 extern s32 D_80000300;
 extern u8 D_800BE616;
 extern u8 D_800BE740;
 extern s8 D_8008FD90;
 extern s8 D_800E0BD3;
-extern s32 *D_800E0BD8;
+extern char **D_800E0BD8;
 extern u8 D_7FB;
 extern u8 D_887;
 extern u8 D_800E0A94;
@@ -36,102 +36,100 @@ Gfx *func_151ED430(Gfx *, void *, s32, s32, s32, s32, f32, s32);
 Gfx *func_15096934(Gfx *);
 Gfx *func_1501A6CC(Gfx *arg0, s32 a, s32 b, s32 c, s32 d);
 
-s32 func_151E84B0(s32 arg0) {
-    s32 tmp;
+/* Draws the HUD overlay: shared HUD, the per-mode overlay, and a blinking warning message. */
+Gfx *func_151E84B0(Gfx *gfx) {
+    s32 message;
 
     D_8003C8E0 = 0x9000001;
-    tmp = 0;
-    arg0 = func_151ED1E0(arg0);
-    if (D_8008FFF4[D_800E0B94] != 0) {
-        arg0 = D_8008FFF4[D_800E0B94](arg0);
+    message = 0;
+    gfx = func_151ED1E0(gfx);
+    if (D_8008FFF4[D_800E0B94] != NULL) {
+        gfx = D_8008FFF4[D_800E0B94](gfx);
     }
 
     if (D_80000300 != 0) {
-        if ((D_800BE616 != 0) && (D_8008FD90 >= 2)) {
+        if (D_800BE616 != 0 && D_8008FD90 >= 2) {
             if ((D_800BE740 & 0xF) == 0) {
                 if (D_800E0BD3 == 1) {
-                    tmp = 0x33;
+                    message = 0x33;
                 } else if (D_800E0BD3 == 2) {
-                    tmp = 0x16;
+                    message = 0x16;
                 }
             }
         } else {
             if ((D_800BE740 & 1) == 0) {
                 if (D_800E0BD3 == 1) {
-                    tmp = 0x32;
+                    message = 0x32;
                 } else if (D_800E0BD3 == 2) {
-                    tmp = 0x15;
+                    message = 0x15;
                 }
             }
         }
     }
 
-    if (tmp != 0) {
+    if (message != 0) {
         func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
-        func_15042D94(0x94, 0xC8, 0x81, D_800E0BD8[tmp]);
+        func_15042D94(0x94, 0xC8, 0x81, D_800E0BD8[message]);
     }
 
     D_8003C8E0 = 0;
-    return arg0;
+    return gfx;
 }
 
 extern u8 D_800E0B94;
-extern s32 (*D_8008FFC0[])(s32);
+extern Gfx *(*D_8008FFC0[])(Gfx *);
 extern s32 D_8003C8E0;
 extern s32 D_80090058;
 extern s16 D_800E0C78;
 extern u8 D_800BE9C0;
-extern s32 D_800BE9C8[];
+extern Gfx *D_800BE9C8[];
 extern s32 D_800BEBA4;
 
-s32 func_151E8620(s32 arg0) {
-    s32 cond;
-    s32 orig;
-    s32 idx;
+/* Draws the per-mode overlay; if it overran the display list buffer, discards what it wrote. */
+Gfx *func_151E8620(Gfx *gfx) {
+    s32 overflow;
+    Gfx *start;
+    s32 mode;
 
-    idx = D_800E0B94;
-    orig = arg0;
+    mode = D_800E0B94;
+    start = gfx;
     D_8003C8E0 = 0x9000000;
-    if (D_8008FFC0[idx] != 0) {
-        arg0 = D_8008FFC0[idx](arg0);
+    if (D_8008FFC0[mode] != NULL) {
+        gfx = D_8008FFC0[mode](gfx);
     }
     if (D_800E0B94 != 0) {
         D_80090058 = 0;
         D_800E0C78 = 0;
     }
     D_8003C8E0 = 0;
-    if (((arg0 - D_800BE9C8[D_800BE9C0]) >> 3) > D_800BEBA4) {
-        cond = 1;
+    if (gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4) {
+        overflow = TRUE;
     } else {
-        cond = 0;
+        overflow = FALSE;
     }
-    if (cond) {
-        return orig;
+    if (overflow) {
+        return start;
     }
-    return arg0;
+    return gfx;
 }
 
 extern f32 D_8008FE1C;
 extern f32 D_8008FE20;
-Gfx *func_151E86E4(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy)
-{
-  f32 yScale;
-  s16 xlTemp;
-  if (D_8008FE1C != 1.0f)
-  {
-    xl = (s32) (((f32) xl) * D_8008FE1C);
-    yScale = D_8008FE20;
-    xh = (s32) (((f32) xh) * D_8008FE1C);
-    yl = (s32) (((f32) yl) * yScale);
-    yh = (s32) (((f32) yh) * yScale);
-    dsdx = (s32) (((f32) dsdx) / D_8008FE1C);
-    dtdy = (s32) (((f32) dtdy) / D_8008FE20);
-  }
- { Gfx *_g = (Gfx *) (gfx++); _g->words.w0 = (((unsigned int) ((((unsigned int) 0xe4) & ((0x01 << 8) - 1)) << 24)) | ((unsigned int) ((((unsigned int) ((((s16) xh) > 0) ? ((s16) xh) : (0))) & ((0x01 << 12) - 1)) << 12))) | ((unsigned int) ((((unsigned int) ((((s16) yh) > 0) ? ((s16) yh) : (0))) & ((0x01 << 12) - 1)) << 0)); _g->words.w1 = (((unsigned int) ((((unsigned int) tile) & ((0x01 << 3) - 1)) << 24)) | ((unsigned int) ((((unsigned int) ((((s16) xl) > 0) ? ((s16) xl) : (0))) & ((0x01 << 12) - 1)) << 12))) | ((unsigned int) ((((unsigned int) ((((s16) yl) > 0) ? ((s16) yl) : (0))) & ((0x01 << 12) - 1)) << 0)); { Gfx *_g = (Gfx *) (gfx++); _g->words.w0 = (unsigned int) ((((unsigned int) 0xe1) & ((0x01 << 8) - 1)) << 24); _g->words.w1 = (unsigned int) (((unsigned int) ((((unsigned int) (s - ((((s16) xl) < 0) ? ((((s16) dsdx) < 0) ? ((((((s16) xl) * ((s16) dsdx)) >> 7) > 0) ? ((((s16) xl) * ((s16) dsdx)) >> 7) : (0)) : ((((((s16) xl) * ((s16) dsdx)) >> 7) < 0) ? (((xlTemp = (s16) xl) * ((s16) dsdx)) >> 7) : (0))) : (0)))) & ((0x01 << 16) - 1)) << 16)) | ((unsigned int) ((((unsigned int) (t - ((yl < 0) ? ((((s16) dtdy) < 0) ? ((((((s16) yl) * ((s16) dtdy)) >> 7) > 0) ? ((((s16) yl) * ((s16) dtdy)) >> 7) : (0)) : ((((((s16) yl) * ((s16) dtdy)) >> 7) < 0) ? ((((s16) yl) * ((s16) dtdy)) >> 7) : (0))) : (0)))) & ((0x01 << 16) - 1)) << 0))); } ; { Gfx *_g = (Gfx *) (gfx++); _g->words.w0 = (unsigned int) ((((unsigned int) 0xf1) & ((0x01 << 8) - 1)) << 24); _g->words.w1 = (unsigned int) (((unsigned int) ((((unsigned int) dsdx) & ((0x01 << 16) - 1)) << 16)) | ((unsigned int) ((((unsigned int) dtdy) & ((0x01 << 16) - 1)) << 0))); }
-    ;
-  }
-  ;
-  return gfx;
+/* Emits a scissored texture rectangle, scaled by the current screen scale factors. */
+Gfx *func_151E86E4(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy) {
+    f32 yScale;
+
+    if (D_8008FE1C != 1.0f) {
+        xl = xl * D_8008FE1C;
+        yScale = D_8008FE20;
+        xh = xh * D_8008FE1C;
+        yl = yl * yScale;
+        yh = yh * yScale;
+        dsdx = dsdx / D_8008FE1C;
+        dtdy = dtdy / D_8008FE20;
+    }
+    gSPScisTextureRectangle(gfx++, xl, yl, xh, yh, tile, s, t, dsdx, dtdy);
+    return gfx;
 }
 
 
@@ -174,27 +172,28 @@ extern void func_15086CBC(s32, f32 *, f32 *, f32 *);
 Gfx *func_151E966C(Gfx *gfx, s32 arg1, s32 arg2, s8 arg3, u8 arg4);
 Gfx *func_151E9D18(Gfx *, s32, s32);
 
-Gfx *func_151E89A0(Gfx *gfx, s32 arg1, s32 arg2) {
-    s32 zero;
+/* Draws the multiplayer score HUD: team scores, target and team icons, and arrows. */
+Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
+    s32 zero; // matching: indexing D_800E0BCC through a zero variable keeps &D_800E0BCC in a register
     s32 x;
     s32 y;
     s32 i;
     s32 image;
-    s32 v;
-    s32 div;
-    s32 step;
-    s32 q;
-    s32 xp;
+    s32 score;
+    s32 place;
+    s32 spacing;
+    s32 digit;
+    s32 digitX;
     s32 team;
     s32 width;
     s32 kind;
     ScoreObjSub *sub;
     ScoreObj *obj;
-    u8 near;
+    u8 nearTarget;
     u8 flags;
     s8 started;
     s8 done;
-    s32 off;
+    s32 rowOffset;
     s32 t;
     f32 px;
     f32 py;
@@ -210,11 +209,11 @@ Gfx *func_151E89A0(Gfx *gfx, s32 arg1, s32 arg2) {
     } else {
         y = 0x198;
     }
-    step = 0x124;
-    if (D_800E0BB0 > 0) { step = 0x124 / D_800E0BB0; }
+    spacing = 0x124;
+    if (D_800E0BB0 > 0) { spacing = 0x124 / D_800E0BB0; } // matching: one line (-g3 line numbers steer scheduling)
     zero = 0;
     D_800E0BCC = 0;
-    near = 0;
+    nearTarget = 0;
     team = -1;
     for (i = 0; i < D_8008FD8C; i++) {
         obj = &D_800CC2D0[i];
@@ -237,12 +236,12 @@ Gfx *func_151E89A0(Gfx *gfx, s32 arg1, s32 arg2) {
         }
         if (kind == 0x25) {
             func_15086CBC(func_15086D48(0x49, i), &px, &py, &pz);
-            px = px - obj->unk14;
-            pz = pz - obj->unk1C;
+            px -= obj->unk14;
+            pz -= obj->unk1C;
             pz = px * px + pz * pz;
             if (pz < 6250000.0f) {
                 D_8008FDBC |= 0x10;
-                near = 1;
+                nearTarget = 1;
             }
             {
                 s32 bit = 1 << i;
@@ -252,7 +251,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 arg1, s32 arg2) {
     }
     if ((D_800BE9AC & 0x1F) < 0xB) {
         D_800E0BCC = 0;
-        near = 0;
+        nearTarget = 0;
         team = -1;
         flags = 0;
     }
@@ -273,41 +272,41 @@ Gfx *func_151E89A0(Gfx *gfx, s32 arg1, s32 arg2) {
         }
     }
     if ((D_8008FDC0 & 8) && (image != 0)) {
-        x = step >> 1;
+        x = spacing >> 1;
         for (i = 0; i < D_800E0BB0; i++) {
-            v = func_150859AC(i, 6);
+            score = func_150859AC(i, 6);
             started = 0;
             done = 0;
             gDPPipeSync(gfx++);
             {
                 u8 *col = (u8 *)D_800ABA90 + (i << 2);
-                gDPSetEnvColor(gfx++, col[0], col[1], col[2], arg2);
+                gDPSetEnvColor(gfx++, col[0], col[1], col[2], alpha);
             }
             gfx = func_151E86E4(gfx, (x + 3) << 2, y, (x + 10) << 2, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
-            xp = (x + 10) << 2;
-            div = 10000;
+            digitX = (x + 10) << 2;
+            place = 10000;
             do {
-                q = v / div;
-                if ((q != 0) || started || (div == 1)) {
+                digit = score / place;
+                if ((digit != 0) || started || (place == 1)) {
                     started = 1;
-                    s = D_8009006C[q & 3] << 5;
-                    t = D_80090070[q >> 2] << 5;
-                    gfx = func_151E86E4(gfx, xp, y, xp + 0x14, y + 0x1C, 0, s, t, 0x400, 0x400);
-                    xp += 0x18;
+                    s = D_8009006C[digit & 3] << 5;
+                    t = D_80090070[digit >> 2] << 5;
+                    gfx = func_151E86E4(gfx, digitX, y, digitX + 0x14, y + 0x1C, 0, s, t, 0x400, 0x400);
+                    digitX += 0x18;
                 }
-                v -= q * div;
-                if (div == 1) {
+                score -= digit * place;
+                if (place == 1) {
                     done = 1;
                 }
-                div /= 10;
+                place /= 10;
             } while (!done);
-            x += step;
+            x += spacing;
         }
     }
     if (D_8008FDC0 & 1) {
         gfx = func_151E966C(gfx, y, team, 0, 1);
     }
-    if (near || (team != -1)) {
+    if (nearTarget || (team != -1)) {
         if (D_8008FDC0 & 0x4000) {
             i = (s32)(&D_D16 + 1);
         } else {
@@ -326,22 +325,22 @@ Gfx *func_151E89A0(Gfx *gfx, s32 arg1, s32 arg2) {
             gDPLoadSync(gfx++);
             gDPLoadTLUTCmd(gfx++, 6, 15);
             gDPSetOtherMode(gfx++, 0x00AC3F, 0x504244);
-            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, arg2);
-            if (near) {
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
+            if (nearTarget) {
                 gfx = func_151E86E4(gfx, 0x238, 0xC, 0x268, 0x48, 0, 0x640, 0x660, 0x400, 0x400);
             }
             if (team != -1) {
                 if (D_8008FDC0 & 0x4000) {
                     gfx = func_151E86E4(gfx, 0x220, 0xC, 0x250, 0x48, 0, 0x600, 0x540, 0x400, 0x400);
                 } else {
-                    off = 0;
+                    rowOffset = 0;
                     if (D_8008FDC0 & 1) {
                         t = 0x1A;
                     } else {
                         t = 0x26;
-                        off = 0xB;
+                        rowOffset = 0xB;
                     }
-                    gfx = func_151E86E4(gfx, 0x238, (off + 3) << 2, 0x268, (off + 0xE) << 2, 0, 0x640, t << 5, 0x400, 0x400);
+                    gfx = func_151E86E4(gfx, 0x238, (rowOffset + 3) << 2, 0x268, (rowOffset + 0xE) << 2, 0, 0x640, t << 5, 0x400, 0x400);
                 }
             }
         }
@@ -368,7 +367,7 @@ Gfx *func_151E89A0(Gfx *gfx, s32 arg1, s32 arg2) {
             gDPSetOtherMode(gfx++, 0x000C3F, 0x504244);
             gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
             if (flags & 1) {
-                x = y - 0x10U;
+                x = y - 0x10U; // matching: unsigned subtract steers IDO register allocation
                 gfx = func_151E86E4(gfx, 0xA0, x, 0xE0, x + 0x40, 0, 0, 0x200, 0x400, 0x400);
             }
             if (flags & 2) {
@@ -1316,7 +1315,7 @@ Gfx *func_151EBB50(Gfx *gfx) {
 }
 
 extern s32 D_800E0A90;
-extern s32 *D_800E0BD8;
+extern char **D_800E0BD8;
 void func_15042D94();
 
 s32 func_151EC178(s32 arg0) {
