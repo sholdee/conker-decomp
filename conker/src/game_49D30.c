@@ -660,7 +660,6 @@ typedef struct {
 } struct_game49D30_4;
 
 extern u8 D_800C35A9;
-extern u16 D_800C3C8E;
 extern struct_game49D30_4 D_80084110[];
 extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
 
@@ -766,13 +765,7 @@ extern u8 D_800C3663;
 extern struct127 D_800CC2D0[26];
 extern s32 D_800D121C;
 extern u8 D_800DBFF4[];
-extern u8 D_800C3C99;
-extern u8 D_800C35A9;
-extern s8 D_800C3C8A;
-extern u8 D_800C3C8D;
-extern u8 D_800C3672;
 extern void func_1000E17C(void);
-extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
 extern void func_151F2BA8(void);
 void func_1501DE18(s32 arg0);
 /* Skip the running cutscene: jump to its end (again while the next one chains on, D_800C3C99),
@@ -814,7 +807,6 @@ void func_1501DF04(s32 scene) {
     D_800C3672 = 1;
 }
 
-extern u8 D_800C3663;
 
 
 /* Whether the running cutscene may be skipped now (button 0x20, or map-specific rules for maps
@@ -949,7 +941,6 @@ void func_1501E400(s32 scene) {
 }
 
 void func_10004074(s32);
-extern s32 D_800C3D50;
 
 /* Free everything func_1501D348 allocated for the scene, and the cutscene file itself. */
 void func_1501E540(s32 scene) {
@@ -2179,9 +2170,6 @@ s32 func_15022024(f32 *outA, f32 *outB, s32 objIndex, s32 scene) {
     return 0;
 }
 
-extern s16 D_800C358C[];
-extern f32 D_800C3594;
-extern u8 D_800C3663;
 
 /* Set D_800C358C/D_800C3594 and raise D_800C3663. */
 void func_15022190(s16 x, s16 y, s16 z, f32 value) {
@@ -2192,8 +2180,6 @@ void func_15022190(s16 x, s16 y, s16 z, f32 value) {
     D_800C3663 = 1;
 }
 
-extern s16 D_800C3598[];
-extern f32 D_800C35A0;
 extern u8 D_800C3510[];
 extern u8 D_800C3518[][25];
 extern u8 D_800C354A[];
@@ -2371,7 +2357,6 @@ void func_150226BC(s32 track, s32 scene) {
     }
 }
 
-extern u8 D_800C363A[];
 extern void func_150226BC(s32, s32);
 
 void func_15022754(s32 scene) {
@@ -2797,13 +2782,10 @@ s32 func_150235DC(s32 scene) {
 
 void func_150627D4(struct127 *arg0);
 extern u8 D_800C3E78;
-extern struct127 D_800CC2D0[26];
 extern void func_1504A730(void);
 extern void func_1507E73C(struct127 *);
 extern void func_1507FEA0(struct127 *);
 extern void func_15061B4C(void);
-extern void func_1502178C(struct127 *, s32, s32);
-extern s32 func_150229E4(struct127 *);
 void func_15022998(s32 *arg0);
 /* Per-frame update of the cutscene's objects (unless D_800C3654[0] hands it to func_1504A730): run
    each live object's handler and apply the track of objects bound to one. */
