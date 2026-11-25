@@ -4,7 +4,17 @@
 #include "variables.h"
 
 
-void func_15040350(void *arg0, u32 arg1) {
+/**
+ * Display-list checker state:
+ *   D_800C6860[16]  segment base table, mirrored from G_MW_SEGMENT moveword commands (-1 = unset)
+ *   D_800C68A0      set once something is drawn, cleared by G_RDPPIPESYNC
+ *   D_800C68A1      current G_DL nesting depth
+ *   D_800848B0      last G_SETTIMG address
+ *   D_800844B0[256] per-opcode handlers used when dumping commands
+ */
+
+/** Checks the display list at dl (up to end, or up to its G_ENDDL when end is 0). */
+void func_15040350(void *dl, u32 end) {
     s32 i;
 
     D_800C68A0 = D_800848B0 = 0;
@@ -14,120 +24,138 @@ void func_15040350(void *arg0, u32 arg1) {
         D_800C6860[i] = -1;
     }
     D_800C6860[0] = 0;
-    func_150403C8(arg0, arg1, 0);
+    func_150403C8(dl, end, 0);
 }
 
-// contains jump relative
 void func_10007DA0(void);
 s32 func_15040754(Gfx *gfx);
-void func_15040CC8(u8 *arg0);
+void func_15040CC8(Gfx *gfx);
 
-#define FLUSH()                              \
-    D_8003C8E0 = 0xC00005B;                  \
-    func_150AD770();                         \
-    D_800BE9C0 = 1 - D_800BE9C0;             \
-    func_10007DA0();                         \
+/** Posts debug code 0xC00005B and calls the debug hook. */
+#define DL_ERROR()                          \
+    D_8003C8E0 = 0xC00005B;                 \
+    func_150AD770();
+
+/** DL_ERROR(), then runs func_10007DA0 with D_800BE9C0 flipped. */
+#define DL_ERROR_REDRAW()                   \
+    DL_ERROR();                             \
+    D_800BE9C0 = 1 - D_800BE9C0;            \
+    func_10007DA0();                        \
     D_800BE9C0 = 1 - D_800BE9C0;
 
-void func_150403C8(void *arg0, u32 arg1, s32 arg2) {
-    u32 *gfx;
-    s32 pad[2];
-    s32 sp40 = 0;
-    s32 sync;
+/**
+ * Walks a display list (up to end, or up to its G_ENDDL when end is 0), following
+ * G_DL branches, and reports malformed commands: bad branch targets, nesting
+ * deeper than 20, corrupt G_VTX/G_TRI1 commands, and RDP state changes made after
+ * drawing without a G_RDPPIPESYNC. Each report dumps the commands around the
+ * culprit with func_15040CC8. parent (the calling G_DL command) is unused.
+ */
+void func_150403C8(void *dl, u32 end, s32 parent) {
+    Gfx *gfx;
+    s32 pad[2]; // matching: reserves the stack slots the original frame has
+    s32 isBad = 0;
+    s32 needsPipeSync;
     u32 addr;
-    u32 hi;
+    u32 segment;
 
-    gfx = arg0;
-    while (((arg1 == 0) && (*(s8 *)gfx != -0x21)) || ((arg1 != 0) && ((u32)gfx < arg1))) {
-        sync = 0;
-        switch (*(s8 *)gfx) {
-            case -0x22:
-                addr = gfx[1];
-                sp40 = func_150408CC((struct148 *)gfx);
-                hi = (addr >> 24) & 0xF;
+    gfx = dl;
+    while ((end == 0 && gfx->dma.cmd != (s8)G_ENDDL) || (end != 0 && (u32)gfx < end)) {
+        needsPipeSync = 0;
+        switch (gfx->dma.cmd) {
+            case (s8)G_DL:
+                addr = gfx->words.w1;
+                isBad = func_150408CC((struct148 *)gfx);
+                segment = (addr >> 24) & 0xF;
                 addr &= 0xFFFFFF;
-                addr += D_800C6860[hi];
+                addr += D_800C6860[segment];
                 addr |= 0x80000000;
                 D_800C68A1++;
                 if (D_800C68A1 == 20) {
-                    func_15040CC8((u8 *)gfx);
-                    D_8003C8E0 = 0xC00005B;
-                    func_150AD770();
+                    func_15040CC8(gfx);
+                    DL_ERROR();
                 }
-                if ((addr > 0x80000000) && (addr < 0xA0000000) && !(addr & 7)) {
+                if (addr > 0x80000000 && addr < 0xA0000000 && !(addr & 7)) {
                     func_150403C8((void *)addr, 0, (s32)gfx);
                 } else {
-                    func_15040CC8((u8 *)gfx);
-                    FLUSH();
+                    func_15040CC8(gfx);
+                    DL_ERROR_REDRAW();
                 }
                 if (D_800C68A1 > 0) {
                     D_800C68A1--;
                 } else {
-                    FLUSH();
+                    DL_ERROR_REDRAW();
                 }
                 break;
-            case -0x19:
+            case (s8)G_RDPPIPESYNC:
                 D_800C68A0 = 0;
                 break;
-            case -0x1C: case -0x1B: case -0x0A: case 0x06: case 0x07:
+            case (s8)G_TEXRECT: case (s8)G_TEXRECTFLIP: case (s8)G_FILLRECT: case G_TRI2: case G_QUAD:
+            // raw RDP triangle commands
             case 0x10: case 0x11: case 0x12: case 0x13: case 0x14: case 0x15: case 0x16: case 0x17:
             case 0x18: case 0x19: case 0x1A: case 0x1B: case 0x1C: case 0x1D: case 0x1E: case 0x1F:
                 D_800C68A0 = 1;
                 break;
-            case 0x05:
-                sp40 = func_1504082C(gfx);
+            case G_TRI1:
+                isBad = func_1504082C(&gfx->words.w0);
                 D_800C68A0 = 1;
                 break;
-            case 0x01:
-                sp40 = func_15040754((Gfx *)gfx);
+            case G_VTX:
+                isBad = func_15040754(gfx);
                 break;
-            case -0x03:
-                D_800848B0 = gfx[1];
+            case (s8)G_SETTIMG:
+                D_800848B0 = gfx->words.w1;
                 break;
-            case -0x01:
-                sync = 1;
+            // matching: these three groups are separate case bodies in the original;
+            // merging them changes the jump table and code size
+            case (s8)G_SETCIMG:
+                needsPipeSync = 1;
                 break;
-            case -0x1E: case -0x1D: case -0x14: case -0x13: case -0x12:
-            case -0x09: case -0x08: case -0x07: case -0x05: case -0x04: case -0x02:
-                sync = 1;
+            case (s8)G_SETOTHERMODE_L: case (s8)G_SETOTHERMODE_H: case (s8)G_SETCONVERT:
+            case (s8)G_SETSCISSOR: case (s8)G_SETPRIMDEPTH: case (s8)G_SETFILLCOLOR:
+            case (s8)G_SETFOGCOLOR: case (s8)G_SETBLENDCOLOR: case (s8)G_SETENVCOLOR:
+            case (s8)G_SETCOMBINE: case (s8)G_SETZIMG:
+                needsPipeSync = 1;
                 break;
-            case -0x16: case -0x15:
-                sync = 1;
+            case (s8)G_SETKEYGB: case (s8)G_SETKEYR:
+                needsPipeSync = 1;
                 break;
-            case -0x25:
+            case (s8)G_MOVEWORD:
                 {
-                    u32 type;
-                    s32 off;
-                    s32 w1;
-                    type = gfx[0] >> 16;
-                    off = gfx[0] & 0xFFFF;
-                    w1 = gfx[1];
-                    if ((type & 0xFF) == 6) {
-                        D_800C6860[off / 4] = w1;
+                    u32 index;
+                    s32 offset;
+                    s32 data;
+
+                    index = gfx->words.w0 >> 16;
+                    offset = gfx->words.w0 & 0xFFFF;
+                    data = gfx->words.w1;
+                    if ((index & 0xFF) == G_MW_SEGMENT) {
+                        D_800C6860[offset / 4] = data;
                     }
                 }
                 break;
-            case -0x2D: case -0x2C: case -0x2B: case -0x2A: case -0x29: case -0x28: case -0x27: case -0x26:
-            case -0x24: case -0x23: case -0x21: case -0x20: case -0x1F: case -0x1A: case -0x18: case -0x17:
-            case -0x11: case -0x10: case -0x0F: case -0x0E: case -0x0D: case -0x0C: case -0x0B:
-            case -0x06: case 0x00: case 0x02: case 0x03: case 0x04: case 0x08:
+            case (s8)G_SPECIAL_3: case (s8)G_SPECIAL_2: case (s8)G_SPECIAL_1: case (s8)G_DMA_IO:
+            case (s8)G_TEXTURE: case (s8)G_POPMTX: case (s8)G_GEOMETRYMODE: case (s8)G_MTX:
+            case (s8)G_MOVEMEM: case (s8)G_LOAD_UCODE: case (s8)G_ENDDL: case (s8)G_SPNOOP:
+            case (s8)G_RDPHALF_1: case (s8)G_RDPLOADSYNC: case (s8)G_RDPTILESYNC: case (s8)G_RDPFULLSYNC:
+            case (s8)G_RDPSETOTHERMODE: case (s8)G_LOADTLUT: case (s8)G_RDPHALF_2: case (s8)G_SETTILESIZE:
+            case (s8)G_LOADBLOCK: case (s8)G_LOADTILE: case (s8)G_SETTILE:
+            case (s8)G_SETPRIMCOLOR: case G_NOOP: case G_MODIFYVTX: case G_CULLDL: case G_BRANCH_Z: case G_LINE3D:
                 break;
             default:
-                D_8003C8E0 = 0xC00005B;
-                func_150AD770();
+                DL_ERROR();
                 break;
         }
-        if (sync && D_800C68A0) {
-            func_15040CC8((u8 *)gfx);
+        if (needsPipeSync && D_800C68A0) {
+            func_15040CC8(gfx);
             D_800C68A0 = 0;
-            FLUSH();
+            DL_ERROR_REDRAW();
         }
-        if (sp40) {
-            sp40 = 0;
-            func_15040CC8((u8 *)gfx);
-            FLUSH();
+        if (isBad) {
+            isBad = 0;
+            func_15040CC8(gfx);
+            DL_ERROR_REDRAW();
         }
-        gfx += 2;
+        gfx++;
     }
 }
 
@@ -490,56 +518,32 @@ void func_15040A78(u32 *arg0, u32 *arg1, u32 *arg2) {
     }
 }
 
-void func_15040CC8(u8 *arg0) {
+/**
+ * Dumps the commands from 20 before gfx to 9 after it through the D_800844B0
+ * handlers, then passes the last G_SETTIMG address to func_1500390C.
+ */
+void func_15040CC8(Gfx *gfx) {
     s32 i;
-    s32 offset;
-    s32 addr;
-    s32 temp;
-    void (**table)(s32);
+    s32 addr; // matching: a Gfx * local here changes the generated code
+    s32 lastTexture;
+    void (**handlers)(s32);
 
     for (i = 0; i < 16; i++) {
+        // empty: the loop itself is emitted
     }
 
-    table = D_800844B0;
+    handlers = D_800844B0;
+    // matching: "| 0" keeps IDO from rewriting the exit test as a bne against 10 held in a register
     for (i = -20; i < 10; i = (i + 1) | 0) {
-        offset = i << 3;
-        addr = (s32) (offset + arg0);
-        table[*(u8 *) addr](addr);
+        addr = (s32)&gfx[i];
+        handlers[*(u8 *)addr](addr);
     }
 
-    temp = D_800848B0;
-    if (temp != 0) {
-        func_1500390C(temp);
+    lastTexture = D_800848B0;
+    if (lastTexture != 0) {
+        func_1500390C(lastTexture);
     }
 }
-// NON-MATCHING: todo
-// void func_15040CC8(s32 *arg0) {
-//     s32 temp_a0_2;
-//     s32 temp_s0;
-//     s32 temp_s0_2;
-//     s32 *temp_a0;
-//     s32 phi_s0;
-//     s32 phi_s0_2;
-//
-//     for (phi_s0 = 0; phi_s0 < 16; phi_s0++)
-//     {
-//         // just waste time?
-//     }
-//
-//     phi_s0_2 = -0x14;
-// loop_3:
-//     temp_a0 = arg0[phi_s0_2]; // * 8) + arg0;
-//     D_800844B0[*temp_a0](temp_a0);
-//     temp_s0_2 = phi_s0_2 + 1;
-//     phi_s0_2 = temp_s0_2;
-//     if (temp_s0_2 < 0xA) {
-//         goto loop_3;
-//     }
-//     temp_a0_2 = D_800848B0;
-//     if (temp_a0_2 != 0) {
-//         func_1500390C(temp_a0_2);
-//     }
-// }
 
 /** G_SETPRIMDEPTH command handler (empty). */
 void func_15040D60(Gfx *gfx) {
