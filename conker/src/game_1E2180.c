@@ -157,7 +157,7 @@ Emitter *func_151B4FE0(struct127 *actor, u8 arg1, s32 arg2) {
     desc.emitter = 9;
     desc.callback = -1;
     desc.unk2D = 8;
-    emitter = func_1513418C(&desc, 0, arg1, arg2); // matching: the named result keeps the 0x38-byte frame
+    emitter = func_1513418C(&desc, 0, arg1, arg2); // matching: returning the call directly changes the stack frame
     return emitter;
 }
 
