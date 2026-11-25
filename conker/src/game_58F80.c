@@ -203,23 +203,6 @@ typedef struct {
     u8 pad1[0xF];
 } D_800C666FEntry;
 
-typedef struct {
-    u8 pad_0[0x4];
-    u8 field_0x4;
-    u8 pad_0x5[0x9B];
-    u32 field_0xA0;
-    u8 field_0xA4;
-    u8 field_0xA5;
-    u8 field_0xA6;
-    u8 field_0xA7;
-    u8 pad_0xA8[0x50];
-    u32 field_0xF8;
-    u8 pad_0xFC[0xD8];
-    void *field_0x1D4;
-    void *field_0x1D8;
-    u8 pad_0x1DC[0x88];
-    void *field_0x264;
-} ActorInteractionFields;
 
 extern D_800C666FEntry D_800C666F[];
 extern void *allocate_memory(s32, s32, s32, s32);
@@ -1528,96 +1511,105 @@ void func_1502E4C4(s32 index) {
 void func_1502E9FC(GameObj *obj, s32 dist) {
 }
 
-void func_1502EA0C(ActorInteractionFields *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    arg0->field_0xA4 = 4;
-    arg0->field_0xA5 = 0;
-    arg0->field_0xA6 = arg5;
-    arg0->field_0xA0 = (arg4 << 24) | (arg1 << 16) | (arg2 << 8) | arg3;
-    arg0->field_0xA7 = 0xFF;
+/* Fog effect modes (obj->fogMode), advanced by func_1502EAFC and turned into a fog colour by
+   func_1502EC34:
+     1    fixed colour fogLevel/fogRate/fogFade, alpha fogColor (or *(f32 *)fogColor percent)
+     2/3  black fog fading out / in at fogRate
+     4    fogColor pulsing (fogLevel is the phase), 5 the same while fading out
+     6/7  fogColor flash: one step up (6), then fading out at fogRate (7) */
+
+/* Starts a pulsing fog of colour (r, g, b, a). */
+void func_1502EA0C(GameObj *obj, s32 r, s32 g, s32 b, s32 a, s32 rate) {
+    obj->fogMode = 4;
+    obj->fogLevel = 0;
+    obj->fogRate = rate;
+    obj->fogColor = (a << 24) | (r << 16) | (g << 8) | b;
+    obj->fogFade = 0xFF;
 }
 
-typedef struct {
-    u8 pad0[0xA4];
-    /* 0xA4 */ u8 unkA4;
-} S1502EA50;
-
-void func_1502EA50(S1502EA50 *arg0) {
-    arg0->unkA4 = 0x5;
+/* Fades out the pulsing fog. */
+void func_1502EA50(GameObj *obj) {
+    obj->fogMode = 5;
 }
 
-void func_1502EA60(u8 *arg0, s32 arg1) {
-    arg0[0xA4] = 2;
-    arg0[0xA5] = 0xFF;
-    arg0[0xA6] = arg1;
+/* Starts black fog fading out. */
+void func_1502EA60(GameObj *obj, s32 rate) {
+    obj->fogMode = 2;
+    obj->fogLevel = 0xFF;
+    obj->fogRate = rate;
 }
 
-void func_1502EA7C(u8 *arg0, s32 arg1) {
-    arg0[0xA4] = 3;
-    arg0[0xA5] = 0xFF;
-    arg0[0xA6] = arg1;
+/* Starts black fog fading in. */
+void func_1502EA7C(GameObj *obj, s32 rate) {
+    obj->fogMode = 3;
+    obj->fogLevel = 0xFF;
+    obj->fogRate = rate;
 }
 
-void func_1502EA98(ActorInteractionFields *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
-    if (arg0->field_0xA4 != 6 && arg0->field_0xA4 != 7) {
-        if (arg5 != 0) {
-            arg0->field_0xA5 = 0xFF;
+/* Flashes fog of colour (r, g, b, a), from full strength when instant, then fades it out. */
+void func_1502EA98(GameObj *obj, s32 r, s32 g, s32 b, s32 a, s32 instant, s32 rate) {
+    if (obj->fogMode != 6 && obj->fogMode != 7) {
+        if (instant) {
+            obj->fogLevel = 0xFF;
         } else {
-            arg0->field_0xA5 = 0;
+            obj->fogLevel = 0;
         }
-        arg0->field_0xA0 = (arg4 << 24) | (arg1 << 16) | (arg2 << 8) | arg3;
-        arg0->field_0xA6 = arg6;
+        obj->fogColor = (a << 24) | (r << 16) | (g << 8) | b;
+        obj->fogRate = rate;
     }
-    arg0->field_0xA4 = 6;
+    obj->fogMode = 6;
 }
 
-void func_1502EAFC(GameObj *arg0) {
-    switch (*(u8 *)((u8 *)arg0 + 0xA4)) {
+/* Advances the object's fog effect by one frame. */
+void func_1502EAFC(GameObj *obj) {
+    // matching: per-case blocks with the break after them keep the last store out of the delay slot
+    switch (obj->fogMode) {
     case 2:
     case 3: {
-        s32 lo = *(u8 *)((u8 *)arg0 + 0xA6) * D_800BE9E4;
-        u8 v1 = *(u8 *)((u8 *)arg0 + 0xA5);
+        s32 step = obj->fogRate * D_800BE9E4;
+        u8 level = obj->fogLevel;
 
-        if (lo < (s32) v1) {
-            *(u8 *)((u8 *)arg0 + 0xA5) = (u8) (v1 - lo);
+        if (step < level) {
+            obj->fogLevel = level - step;
         } else {
-            *(u8 *)((u8 *)arg0 + 0xA5) = 0U;
+            obj->fogLevel = 0;
         }
     }
         break;
     case 5: {
-        s32 t1 = D_800BE9E4 * 0xA;
-        u8 v1 = *(u8 *)((u8 *)arg0 + 0xA7);
+        s32 step = D_800BE9E4 * 10;
+        u8 fade = obj->fogFade;
 
-        if (t1 < (s32) v1) {
-            *(u8 *)((u8 *)arg0 + 0xA7) = (u8) (v1 - t1);
+        if (step < fade) {
+            obj->fogFade = fade - step;
         } else {
-            *(u8 *)((u8 *)arg0 + 0xA4) = 0U;
+            obj->fogMode = 0;
         }
     }
         /* fallthrough */
     case 4:
-        *(u8 *)((u8 *)arg0 + 0xA5) += *(u8 *)((u8 *)arg0 + 0xA6) * D_800BE9E4;
+        obj->fogLevel += obj->fogRate * D_800BE9E4;
         break;
     case 6: {
-        s32 lo = *(u8 *)((u8 *)arg0 + 0xA6) * D_800BE9E4;
-        u8 v1 = *(u8 *)((u8 *)arg0 + 0xA5);
+        s32 step = obj->fogRate * D_800BE9E4;
+        u8 level = obj->fogLevel;
 
-        if ((s32) v1 < (0xFF - lo)) {
-            *(u8 *)((u8 *)arg0 + 0xA5) = (u8) (v1 + lo);
+        if (level < 0xFF - step) {
+            obj->fogLevel = level + step;
         } else {
-            *(u8 *)((u8 *)arg0 + 0xA5) = 0xFFU;
+            obj->fogLevel = 0xFF;
         }
-        *(u8 *)((u8 *)arg0 + 0xA4) = 7U;
+        obj->fogMode = 7;
     }
         break;
     case 7: {
-        s32 lo = *(u8 *)((u8 *)arg0 + 0xA6) * D_800BE9E4;
-        u8 v1 = *(u8 *)((u8 *)arg0 + 0xA5);
+        s32 step = obj->fogRate * D_800BE9E4;
+        u8 level = obj->fogLevel;
 
-        if (lo < (s32) v1) {
-            *(u8 *)((u8 *)arg0 + 0xA5) = (u8) (v1 - lo);
+        if (step < level) {
+            obj->fogLevel = level - step;
         } else {
-            *(u8 *)((u8 *)arg0 + 0xA4) = 0U;
+            obj->fogMode = 0;
         }
     }
         break;
@@ -1680,117 +1672,114 @@ void func_1502EC34(GameObj *arg0, s32 *r, s32 *g, s32 *b, s32 *a) {
     }
 }
 
-/* The two u8 slots at actor record +0x6A (GameObj still calls this word pad68). */
-typedef struct Act1502EE8C {
-    char pad0[0x6A];
-    /* 0x6A */ u8 unk6A[2];
-    char pad6C[0x32C - 0x6C];
-} Act1502EE8C;
 
-s32 func_1502EE8C(s32 arg0, s32 arg1) {
-    s32 v;
-    s32 r;
+/* Maps the object's unk6A[slot] value to 0, 1 or 2 (values 2..3 -> 0..1, 4 and up -> 2). */
+s32 func_1502EE8C(s32 index, s32 slot) {
+    s32 value;
+    s32 result;
 
-    v = ((Act1502EE8C *)D_800CC2D0)[arg0].unk6A[arg1];
-    if (v >= 2) {
-        if (v >= 4) {
-            r = 2;
+    value = D_800CC2D0[index].unk6A[slot];
+    if (value >= 2) {
+        if (value >= 4) {
+            result = 2;
         } else {
-            r = v - 2;
+            result = value - 2;
         }
     } else {
-        r = v;
+        result = value;
     }
-    return r;
+    return result;
 }
 
 
-/* The two u8 counters at actor record +0x6C (GameObj still calls this pad6C). */
-typedef struct Act1502EEF4 {
-    char pad0[0x6C];
-    /* 0x6C */ u8 unk6C[2];
-    char pad6E[0x32C - 0x6E];
-} Act1502EEF4;
 
 extern void func_1507E3C0(GameObj *);
 
-void func_1502EEF4(s32 arg0) {
+/* Steps each of the object's two unk6C counters towards the state func_1502EE8C reports. */
+void func_1502EEF4(s32 index) {
     s32 i;
-    u8 r;
+    u8 state;
 
     for (i = 0; i < 2; i++) {
-        if (((Act1502EEF4 *)D_800CC2D0)[arg0].unk6C[i] >= 10) {
+        if (D_800CC2D0[index].unk6C[i] >= 10) {
             continue;
         }
-        r = func_1502EE8C(arg0, i);
-        if (r == 0) {
-            if (((Act1502EEF4 *)D_800CC2D0)[arg0].unk6C[i] > 0) {
-                ((Act1502EEF4 *)D_800CC2D0)[arg0].unk6C[i]--;
+        state = func_1502EE8C(index, i);
+        if (state == 0) {
+            if (D_800CC2D0[index].unk6C[i] > 0) {
+                D_800CC2D0[index].unk6C[i]--;
             }
-        } else if (r == 1) {
-            if (((Act1502EEF4 *)D_800CC2D0)[arg0].unk6C[i] < 2) {
-                ((Act1502EEF4 *)D_800CC2D0)[arg0].unk6C[i]++;
+        } else if (state == 1) {
+            if (D_800CC2D0[index].unk6C[i] < 2) {
+                D_800CC2D0[index].unk6C[i]++;
             }
         } else {
-            ((Act1502EEF4 *)D_800CC2D0)[arg0].unk6C[i] = 1;
+            D_800CC2D0[index].unk6C[i] = 1;
         }
     }
-    func_1507E3C0(&D_800CC2D0[arg0]);
+    func_1507E3C0(&D_800CC2D0[index]);
 }
 
-u8 *func_1507E908(void *, s32);
-typedef struct {
-    u8 pad0[8];
-    u8 e[1][3];
-} Fn1502F01CTbl;
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-} Fn1502F01CTex;
-extern Fn1502F01CTex *D_800C5338[];
+u8 *func_1507E908(GameObj *, s32);
 
-Gfx *func_1502F01C(Gfx *gdl, s32 arg1) {
-    u8 *obj;
-    u8 sp80[2];
+/* The D_800D1C90 entry's texture choice per unk6C slot and state. */
+typedef struct ModelTexSlots {
+    /* 0x0 */ u8 pad0[8];
+    /* 0x8 */ u8 texture[2][3];
+} ModelTexSlots;
+
+/* Entries of the D_800C5338[id] texture tables. */
+typedef struct ObjTexture {
+    /* 0x0 */ s32 addr;
+    /* 0x4 */ s32 unk4;
+    /* 0x8 */ u16 width;
+    /* 0xA */ u16 height;
+} ObjTexture;
+extern ObjTexture *D_800C5338[];
+
+/* Binds the object's swappable textures to segments 6, 7 (unk6C slots), 10 and 11. */
+Gfx *func_1502F01C(Gfx *gdl, s32 index) {
+    GameObj *obj;
+    u8 texIndex[2];
     s32 id;
-    u8 *res;
+    u8 *override;
     s32 i;
-    Fn1502F01CTex *tex;
+    ObjTexture *tex;
 
-    obj = (u8 *)&D_800CC2D0[arg1];
-    id = obj[4];
-    res = NULL;
+    obj = &D_800CC2D0[index];
+    id = obj->id;
+    override = NULL;
     for (i = 0; i < 2; i++) {
-        if (obj[0x6C + i] >= 10) {
-            sp80[i] = obj[0x6C + i] - 10;
+        if (obj->unk6C[i] >= 10) {
+            texIndex[i] = obj->unk6C[i] - 10;
         } else {
-            sp80[i] = ((Fn1502F01CTbl *)D_800D1C90[id])->e[i][obj[0x6C + i]];
-            if (obj[0x6F] && !res) {
-                res = func_1507E908(obj, obj[0x6F]);
+            texIndex[i] = ((ModelTexSlots *)D_800D1C90[id])->texture[i][obj->unk6C[i]];
+            if (obj->unk6F && !override) {
+                override = func_1507E908(obj, obj->unk6F);
             }
-            if (res != NULL) {
-                s32 sp68[2];
-                sp68[0] = res[0];
-                sp68[1] = res[1];
-                if (res != NULL) {
-                    if (sp68[i] != ((Fn1502F01CTbl *)D_800D1C90[id])->e[i][2]) {
-                        if (obj[0x6C + i] == 0) {
-                            sp80[i] = sp68[i];
+            if (override != NULL) {
+                s32 overrideTex[2];
+
+                overrideTex[0] = override[0];
+                overrideTex[1] = override[1];
+                if (override != NULL) { // matching: redundant re-test is in the original
+                    if (overrideTex[i] != ((ModelTexSlots *)D_800D1C90[id])->texture[i][2]) {
+                        if (obj->unk6C[i] == 0) {
+                            texIndex[i] = overrideTex[i];
                         }
                     } else {
-                        sp80[i] = sp68[i];
+                        texIndex[i] = overrideTex[i];
                     }
                 }
             }
         }
     }
-    tex = D_800C5338[obj[4]];
+    tex = D_800C5338[obj->id];
     if (tex != NULL) {
-        gSPSegment(gdl++, 6, tex[sp80[0]].unk0);
-        gSPSegment(gdl++, 7, tex[sp80[1]].unk0);
-        gSPSegment(gdl++, 10, tex[obj[0x68]].unk0);
-        gSPSegment(gdl++, 11, tex[obj[0x69]].unk0);
+        gSPSegment(gdl++, 6, tex[texIndex[0]].addr);
+        gSPSegment(gdl++, 7, tex[texIndex[1]].addr);
+        gSPSegment(gdl++, 10, tex[obj->unk68].addr);
+        gSPSegment(gdl++, 11, tex[obj->unk69].addr);
     }
     return gdl;
 }
