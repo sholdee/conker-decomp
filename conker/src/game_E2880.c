@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern void func_151D2AB0(s32);
 
@@ -102,39 +103,23 @@ void func_150B5814(SparkEffect *effect) {
     func_15149368((struct260 *)effect);
 }
 
-/* Event data passed to func_150B5840; its layout depends on the event. */
-typedef union {
-    /* event 0 */
-    struct {
-        /* 0x00 */ Actor *obj;
-        /* 0x04 */ u8 id;
-    } obj;
-    /* event 0x2D: two objects swap places; effects attached to either move to the other */
-    struct {
-        /* 0x00 */ Actor *objA;
-        /* 0x04 */ Actor *objB;
-        /* 0x08 */ u8 idA;
-        /* 0x09 */ u8 idB;
-    } swap;
-} SparkEvent;
-
 /* Event handler of a spark effect: event 0 destroys it when it concerns its owner, event 0x2D swaps
  * its owner. */
-void func_150B5840(SparkEffect *effect, SparkEvent *event, u8 eventId) {
+void func_150B5840(SparkEffect *effect, ActorMsg *event, u8 eventId) {
     SparkEffectData *data = &effect->data;
     Actor *obj;
 
     if (eventId == 0) {
-        obj = event->obj.obj; // matching: loading the pointer first puts it in v1 ahead of data->owner
-        if ((obj == data->owner) || (event->obj.id == data->ownerId)) {
+        obj = event->ref.actor; // matching: loading the pointer first puts it in v1 ahead of data->owner
+        if ((obj == data->owner) || (event->ref.uniqueId == data->ownerId)) {
             func_1516972C((struct102 *)effect);
         }
     } else if (eventId == 0x2D) {
-        if (data->owner == event->swap.objA) {
-            data->owner = event->swap.objB;
+        if (data->owner == event->swap.actorA) {
+            data->owner = event->swap.actorB;
             data->ownerId = event->swap.idB;
-        } else if (data->owner == event->swap.objB) {
-            data->owner = event->swap.objA;
+        } else if (data->owner == event->swap.actorB) {
+            data->owner = event->swap.actorA;
             data->ownerId = event->swap.idA;
         }
     }

@@ -23,20 +23,6 @@ typedef struct {
     Data151B1AB0 data;
 } Task151B1AB0;
 
-/* Message passed to func_151B1FAC: kind 0x2D swaps two owners, kind 0 names an owner to drop. */
-typedef union {
-    struct {
-        Actor *a;
-        Actor *b;
-        u8 aUnk3B;
-        u8 bUnk3B;
-    } swap;
-    struct {
-        Actor *owner;
-        u8 ownerUnk3B;
-    } remove;
-} Msg151B1FAC;
-
 /* Live particle returned by func_15130374; its extra data starts at 0xA8. */
 typedef struct {
     /* 0x00 */ u8 pad0[0xA8];
@@ -157,24 +143,24 @@ void func_151B1B34(Task151B1AB0 *task) {
 }
 
 /* Message handler for the task: follows an owner swap, or destroys itself when its owner goes away. */
-void func_151B1FAC(Task151B1AB0 *task, Msg151B1FAC *msg, u8 kind) {
+void func_151B1FAC(Task151B1AB0 *task, ActorMsg *msg, u8 kind) {
     Data151B1AB0 *data = &task->data;
 
     if (kind == 0x2D) {
-        if (data->owner == msg->swap.a) {
-            data->owner = msg->swap.b;
-            data->ownerUnk3B = msg->swap.bUnk3B;
-        } else if (data->owner == msg->swap.b) {
+        if (data->owner == msg->swap.actorA) {
+            data->owner = msg->swap.actorB;
+            data->ownerUnk3B = msg->swap.idB;
+        } else if (data->owner == msg->swap.actorB) {
             // matching: the copy keeps IDO from moving the byte store into the branch delay slot
             Data151B1AB0 *dst = data;
 
-            dst->owner = msg->swap.a;
-            dst->ownerUnk3B = msg->swap.aUnk3B;
+            dst->owner = msg->swap.actorA;
+            dst->ownerUnk3B = msg->swap.idA;
         }
     } else if (kind == 0) {
-        Actor *owner = msg->remove.owner;
+        Actor *owner = msg->ref.actor;
 
-        if (owner == data->owner || msg->remove.ownerUnk3B == data->ownerUnk3B) {
+        if (owner == data->owner || msg->ref.uniqueId == data->ownerUnk3B) {
             func_1516972C((struct102 *)task);
         }
     }

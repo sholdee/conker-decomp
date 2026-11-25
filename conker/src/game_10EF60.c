@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* A tracer/beam effect: a textured quad stretched from its position along its direction. */
 typedef struct {
@@ -44,13 +45,6 @@ typedef struct {
 
 extern Game10EF60Texture *D_8008CA4C[];
 
-/* Payload of message 0x2D: a pair of objects (see func_150E2FC0). */
-typedef struct {
-    Actor *objA;
-    Actor *objB;
-    u8 idA; // unique_id of objA
-    u8 idB;
-} Game10EF60ObjectSwap;
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
@@ -451,13 +445,13 @@ s32 func_150E2F90(s32 a0, s32 a1, s16 a2) {
 }
 
 /* Message 0x2D: if the effect's owner is one object of the pair, retarget it to the other. */
-void func_150E2FC0(Game10EF60Effect *effect, Game10EF60ObjectSwap *swap, u8 msg) {
+void func_150E2FC0(Game10EF60Effect *effect, ActorSwapMsg *swap, u8 msg) {
     if (msg == 0x2D) {
-        if (effect->owner == swap->objA) {
-            effect->owner = swap->objB;
+        if (effect->owner == swap->actorA) {
+            effect->owner = swap->actorB;
             effect->ownerId = swap->idB;
-        } else if (effect->owner == swap->objB) {
-            effect->owner = swap->objA;
+        } else if (effect->owner == swap->actorB) {
+            effect->owner = swap->actorA;
             effect->ownerId = swap->idA;
         }
     }

@@ -1,12 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Message 0x48 payload: "this actor is gone"; effects it owns destroy themselves on it. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; /* owner->unique_id */
-} OwnerGoneMsg;
+#include "effects.h"
 
 /* Data of the effect spawned by func_151001B4 for an actor. */
 typedef struct {
@@ -25,10 +20,10 @@ typedef struct {
 
 /* Sends message 0x48 (func_151494E0) for `owner`; effects it owns destroy themselves on it. */
 void func_15100180(Actor *owner) {
-    OwnerGoneMsg msg;
+    ActorRef msg;
 
-    msg.owner = owner;
-    msg.ownerId = owner->unique_id;
+    msg.actor = owner;
+    msg.uniqueId = owner->unique_id;
     func_151494E0((s32)&msg, 0x48);
 }
 
@@ -50,12 +45,12 @@ void func_151001B4(Actor *owner) {
 
 /* Message handler: destroys the effect when its owner is reported gone (0x48); other messages
  * go to the default handler. */
-void func_15100230(OwnerEffect *effect, OwnerGoneMsg *msg, u8 msgId) {
+void func_15100230(OwnerEffect *effect, ActorRef *msg, u8 msgId) {
     OwnerEffectData *data = &effect->data;
 
     if (msgId == 0x48) {
         // matching: the punned read of msg makes IDO load it a second time for the id compare
-        if (msg->owner == data->owner || data->ownerId == ((OwnerGoneMsg *)*(s32 *)&msg)->ownerId) {
+        if (msg->actor == data->owner || data->ownerId == ((ActorRef *)*(s32 *)&msg)->uniqueId) {
             func_1516972C((struct102 *)effect);
         }
     } else {

@@ -277,39 +277,25 @@ s32 func_150AEDD8(struct202 *arg0) {
     return 1;
 }
 
-/* Message payloads seen by func_150AEDF8. */
-typedef union {
-    struct {
-        Actor *obj;
-        u8 id;
-    } removed; /* message 0 */
-    struct {
-        Actor *a;
-        Actor *b;
-        u8 idA;
-        u8 idB;
-    } swap; /* message 0x2D */
-} OwnerMsg;
-
 /* Message handler for an AttachedEffect: on 0x2D, re-links the effect from one actor of a pair to the
    other; on 0, destroys the effect if the given actor (or id) is its owner. */
-void func_150AEDF8(AttachedEffect *effect, OwnerMsg *msg, u8 type) {
+void func_150AEDF8(AttachedEffect *effect, ActorMsg *msg, u8 type) {
     OwnerLink *link = &effect->link;
 
     if (type == 0x2D) {
-        if (link->owner == msg->swap.a) {
-            link->owner = msg->swap.b;
+        if (link->owner == msg->swap.actorA) {
+            link->owner = msg->swap.actorB;
             link->ownerId = msg->swap.idB;
-        } else if (link->owner == msg->swap.b) {
+        } else if (link->owner == msg->swap.actorB) {
             OwnerLink *dst = link; // matching: a block-local alias keeps the ownerId store out of the branch delay slot
 
-            dst->owner = msg->swap.a;
+            dst->owner = msg->swap.actorA;
             dst->ownerId = msg->swap.idA;
         }
     } else if (type == 0) {
-        Actor *obj = msg->removed.obj;
+        Actor *obj = msg->ref.actor;
 
-        if (obj == link->owner || msg->removed.id == link->ownerId) {
+        if (obj == link->owner || msg->ref.uniqueId == link->ownerId) {
             func_1516972C((struct102 *)effect);
         }
     }

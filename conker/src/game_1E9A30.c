@@ -3,26 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Weak reference to an actor: valid while actor->unique_id still equals uniqueId. */
-typedef struct {
-    Actor *actor;
-    u8 uniqueId;
-} ActorRef;
-
-/* Message 0x2D payload: two actors exchange identities. */
-typedef struct {
-    Actor *actorA;
-    Actor *actorB;
-    u8 idA;
-    u8 idB;
-} ActorSwapMsg;
-
-/* Payload of the actor messages handled below (0 and 0x3B: an actor, 0x2D: an actor swap). */
-typedef union {
-    ActorRef ref;
-    ActorSwapMsg swap;
-} ActorMsg;
-
 typedef struct {
     u8 pad0[0x40];
     ActorRef owner;

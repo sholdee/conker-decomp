@@ -69,35 +69,23 @@ void func_150CF140(ActorEmitter *emitter) {
     }
 }
 
-/* Message payload for func_150CF484: message 0 names an actor that went away, message 0x2D two
-   actors that swapped places. */
-typedef struct {
-    /* 0x00 */ Actor *actorA;
-    /* 0x04 */ union {
-        Actor *actorB;
-        u8 id;
-    } u4;
-    /* 0x08 */ u8 actorAId;
-    /* 0x09 */ u8 actorBId;
-} ActorMsg;
-
 /* Emitter message handler: dies with its actor and follows it through a swap. */
 void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
     ActorEmitterState *state = &emitter->state;
     Actor *actorA;
 
     if (type == 0) {
-        actorA = msg->actorA; // matching: loaded before the state field, via a named local
-        if ((actorA == state->actor) || (msg->u4.id == state->actorId)) {
+        actorA = msg->ref.actor; // matching: loaded before the state field, via a named local
+        if ((actorA == state->actor) || (msg->ref.uniqueId == state->actorId)) {
             func_1516972C((struct102 *)emitter);
         }
     } else if (type == 0x2D) {
-        if (state->actor == msg->actorA) {
-            state->actor = msg->u4.actorB;
-            state->actorId = msg->actorBId;
-        } else if (state->actor == msg->u4.actorB) {
-            state->actor = msg->actorA;
-            state->actorId = msg->actorAId;
+        if (state->actor == msg->swap.actorA) {
+            state->actor = msg->swap.actorB;
+            state->actorId = msg->swap.idB;
+        } else if (state->actor == msg->swap.actorB) {
+            state->actor = msg->swap.actorA;
+            state->actorId = msg->swap.idA;
         }
     }
 }

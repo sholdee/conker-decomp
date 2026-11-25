@@ -285,20 +285,6 @@ typedef struct Game1DD500Task {
     /* 0x28 */ Game1DD500Emitter emitter;
 } Game1DD500Task;
 
-/* Message 0x13 (and 0): this actor's effects should end. */
-typedef struct Game1DD500ActorMsg {
-    /* 0x0 */ Actor *actor;
-    /* 0x4 */ u8 uniqueId;
-} Game1DD500ActorMsg;
-
-/* Message 0x2D: two actors swapped identities. */
-typedef struct Game1DD500SwapMsg {
-    /* 0x0 */ Actor *a;
-    /* 0x4 */ Actor *b;
-    /* 0x8 */ u8 uniqueIdA;
-    /* 0x9 */ u8 uniqueIdB;
-} Game1DD500SwapMsg;
-
 void func_151B1918(Game1DD500Task *task);
 
 void *memcpy(void *, const void *, u32);
@@ -310,7 +296,7 @@ Game1DD500Task *func_151B09BC(Actor *actor, Actor *other, s16 lifetime, u8 arg3,
     s32 profile;
     s16 life;
     u8 timed;
-    Game1DD500ActorMsg msg;
+    ActorRef msg;
 
     if (actor == NULL) {
         return NULL;
@@ -686,8 +672,8 @@ void func_151B1918(Game1DD500Task *task) {
  * follows the owner through an identity swap (0x2D). */
 void func_151B19A4(Game1DD500Task *task, void *msg, u8 type) {
     Game1DD500Emitter *emitter = &task->emitter;
-    Game1DD500ActorMsg *actorMsg = msg;
-    Game1DD500SwapMsg *swap = msg;
+    ActorRef *actorMsg = msg;
+    ActorSwapMsg *swap = msg;
     Actor *owner = emitter->owner;
 
     if (type == 0 || type == 0x13) {
@@ -695,12 +681,12 @@ void func_151B19A4(Game1DD500Task *task, void *msg, u8 type) {
             func_1516972C((struct102 *)task);
         }
     } else if (type == 0x2D) {
-        if (emitter->owner == swap->a) {
-            emitter->owner = swap->b;
-            emitter->ownerId = swap->uniqueIdB;
-        } else if (emitter->owner == swap->b) {
-            emitter->owner = swap->a;
-            emitter->ownerId = swap->uniqueIdA;
+        if (emitter->owner == swap->actorA) {
+            emitter->owner = swap->actorB;
+            emitter->ownerId = swap->idB;
+        } else if (emitter->owner == swap->actorB) {
+            emitter->owner = swap->actorA;
+            emitter->ownerId = swap->idA;
         }
     }
 }

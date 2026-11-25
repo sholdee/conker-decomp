@@ -436,12 +436,6 @@ block_151D4408: // matching: an unused label ends the basic block, keeping the s
     func_15132A4C(&p, 3, 255, 0, arg5, arg6);
 }
 
-/* Identifies an object; uniqueId tells a reused slot apart. */
-typedef struct {
-    Actor *obj;
-    u8 uniqueId;
-} ObjHandle;
-
 /* Effect user data that follows a point on an object, computed by D_8008FC70[posFunc]. */
 typedef struct {
     /* 0x00 */ Actor *obj;
@@ -455,9 +449,9 @@ typedef struct {
 
 /* Sends message 0x3C (handled by func_151D4C38) for obj's attached effects. */
 void func_151D4668(Actor *obj) {
-    ObjHandle handle;
+    ActorRef handle;
 
-    handle.obj = obj;
+    handle.actor = obj;
     handle.uniqueId = obj->unique_id;
     func_151494E0((s32)&handle, 0x3C);
 }
@@ -619,16 +613,16 @@ void func_151D4794(EmitterEffect *effect) {
 
 /* Effect message handler: 0x3C (see func_151D4668) destroys the effect when it belongs to the given
    object; 4 marks its tracked point as invalid. */
-void func_151D4C38(EmitterEffect *effect, ObjHandle *handle, u8 msg) {
+void func_151D4C38(EmitterEffect *effect, ActorRef *handle, u8 msg) {
     ObjEmitter *emitter;
 
     emitter = &effect->emitter;
     if (msg == 0x3C) {
-        if ((handle->obj == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
+        if ((handle->actor == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
             func_1516972C((struct102 *)effect);
         }
     } else if (msg == 4) {
-        if ((handle->obj == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
+        if ((handle->actor == emitter->obj) || (handle->uniqueId == emitter->uniqueId)) {
             emitter->flags &= ~1;
         }
     block_151D4C38: // matching: an empty labelled statement keeps the flag store out of the branch delay slot

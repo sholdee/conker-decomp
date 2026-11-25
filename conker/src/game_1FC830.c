@@ -384,26 +384,12 @@ void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-/* Message 0x18 (and 0): obj no longer exists. */
-typedef struct {
-    Actor *obj;
-    u8 objId;
-} OwnerGoneMsg;
-
-/* Message 0x2D: objects a and b swapped places. */
-typedef struct {
-    Actor *a;
-    Actor *b;
-    u8 aId;
-    u8 bId;
-} OwnerSwapMsg;
-
 /* Tells every effect that follows the object that it is gone (message 0x18). */
 void func_151D0024(Actor *obj) {
-    OwnerGoneMsg msg;
+    ActorRef msg;
 
-    msg.obj = obj;
-    msg.objId = obj->unique_id;
+    msg.actor = obj;
+    msg.uniqueId = obj->unique_id;
     func_151494E0((s32)&msg, 0x18);
 }
 
@@ -625,21 +611,21 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
     OwnerRef *ref = &effect->ref;
 
     if (type == 0 || type == 0x18) {
-        OwnerGoneMsg *gone = msg;
-        Actor *obj = gone->obj;
+        ActorRef *gone = msg;
+        Actor *obj = gone->actor;
 
-        if (obj == ref->owner || gone->objId == ref->ownerId) {
+        if (obj == ref->owner || gone->uniqueId == ref->ownerId) {
             func_1516972C((struct102 *)effect);
         }
     } else if (type == 0x2D) {
-        OwnerSwapMsg *swap = msg;
+        ActorSwapMsg *swap = msg;
 
-        if (ref->owner == swap->a) {
-            ref->owner = swap->b;
-            ref->ownerId = swap->bId;
-        } else if (ref->owner == swap->b) {
-            ref->owner = swap->a;
-            ref->ownerId = swap->aId;
+        if (ref->owner == swap->actorA) {
+            ref->owner = swap->actorB;
+            ref->ownerId = swap->idB;
+        } else if (ref->owner == swap->actorB) {
+            ref->owner = swap->actorA;
+            ref->ownerId = swap->idA;
         }
     }
 }

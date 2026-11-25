@@ -133,20 +133,6 @@ typedef struct {
     /* 0x28 */ BoneEmitter emitter;
 } BoneEmitterTask;
 
-/* Message sent to effects about their owner actor. */
-typedef union {
-    struct {
-        Actor *actor;
-        u8 actorId;
-    } removed;                      /* type 0: the actor (or any actor with this id) is gone */
-    struct {
-        Actor *actorA;
-        Actor *actorB;
-        u8 idA;
-        u8 idB;
-    } swap;                         /* type 0x2D: the two actors trade places */
-} ActorMessage;
-
 /* A func_151491F4 task that retries creating a trail until its owner can carry it. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
@@ -860,11 +846,11 @@ void func_151A4A38(BoneEmitterTask *task) {
 }
 
 /* Message handler of a trail: detach on owner removal, follow an owner swap. */
-void func_151A4CE0(TrailEffect *effect, ActorMessage *msg, u8 type) {
+void func_151A4CE0(TrailEffect *effect, ActorMsg *msg, u8 type) {
     BoneTrailParams *trail = &effect->state->params;
 
     if (type == 0) {
-        if ((msg->removed.actor == trail->owner) || (msg->removed.actorId == trail->ownerId)) {
+        if ((msg->ref.actor == trail->owner) || (msg->ref.uniqueId == trail->ownerId)) {
             func_151A4E9C(effect);
         }
     } else if (type == 0x2D) {
@@ -879,11 +865,11 @@ void func_151A4CE0(TrailEffect *effect, ActorMessage *msg, u8 type) {
 }
 
 /* Message handler of a BoneEmitterTask: end on owner removal, follow an owner swap. */
-void func_151A4D88(BoneEmitterTask *task, ActorMessage *msg, u8 type) {
+void func_151A4D88(BoneEmitterTask *task, ActorMsg *msg, u8 type) {
     BoneEmitter *emitter = &task->emitter;
 
     if (type == 0) {
-        if ((msg->removed.actor == emitter->owner) || (msg->removed.actorId == emitter->ownerId)) {
+        if ((msg->ref.actor == emitter->owner) || (msg->ref.uniqueId == emitter->ownerId)) {
             func_1516972C((struct102 *)task);
         }
     } else if (type == 0x2D) {
@@ -952,11 +938,11 @@ void func_151A4ECC(TrailRetryTask *task) {
 }
 
 /* Message handler of a TrailRetryTask: end when the owner is removed. */
-void func_151A4F7C(TrailRetryTask *task, ActorMessage *msg, u8 type) {
+void func_151A4F7C(TrailRetryTask *task, ActorMsg *msg, u8 type) {
     BoneTrailParams *trail = &task->trail;
 
     if (type == 0) {
-        if (msg->removed.actor == trail->owner || msg->removed.actorId == trail->ownerId) {
+        if (msg->ref.actor == trail->owner || msg->ref.uniqueId == trail->ownerId) {
             func_1516972C((struct102 *)task);
         }
     }

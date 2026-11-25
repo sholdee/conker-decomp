@@ -417,53 +417,39 @@ void func_150FC614(EmitterObj *obj) {
     }
 }
 
-/* Message payloads handled by func_150FC818, selected by its msgType argument. */
-typedef union {
-    struct {
-        Actor *obj;
-        u8 uniqueId;
-    } type0;
-    struct {
-        Actor *objA;
-        Actor *objB;
-        u8 uniqueIdA;
-        u8 uniqueIdB;
-    } type2D;
-} EmitterMsg;
-
 /* Message handler: type 0 destroys the emitter when it names the owner or the other object, type 0x2D
  * swaps two objects, retargeting the emitter's owner or other object. */
-void func_150FC818(EmitterObj *obj, EmitterMsg *msg, u8 msgType) {
+void func_150FC818(EmitterObj *obj, ActorMsg *msg, u8 msgType) {
     EmitterState *state = &obj->state;
     Actor *msgObj;
     Actor *msgObjA;
     Actor *owner;
 
     if (msgType == 0) {
-        msgObj = msg->type0.obj;
+        msgObj = msg->ref.actor;
         owner = state->owner;
-        if ((owner == msgObj) || (state->ownerUniqueId == msg->type0.uniqueId)) {
+        if ((owner == msgObj) || (state->ownerUniqueId == msg->ref.uniqueId)) {
             func_1516972C((struct102 *)obj);
         } else if (state->other != NULL) {
-            if ((msgObj == state->other) || (state->otherUniqueId == msg->type0.uniqueId)) {
+            if ((msgObj == state->other) || (state->otherUniqueId == msg->ref.uniqueId)) {
                 func_1516972C((struct102 *)obj);
             }
         }
     } else if (msgType == 0x2D) {
-        msgObjA = msg->type2D.objA;
+        msgObjA = msg->swap.actorA;
         if (msgObjA == state->owner) {
-            state->owner = msg->type2D.objB;
-            state->ownerUniqueId = msg->type2D.uniqueIdB;
-        } else if (state->owner == msg->type2D.objB) {
+            state->owner = msg->swap.actorB;
+            state->ownerUniqueId = msg->swap.idB;
+        } else if (state->owner == msg->swap.actorB) {
             state->owner = msgObjA;
-            state->ownerUniqueId = msg->type2D.uniqueIdA;
+            state->ownerUniqueId = msg->swap.idA;
         } else if (state->other != NULL) {
             if (msgObjA == state->other) {
-                state->other = msg->type2D.objB;
-                state->otherUniqueId = msg->type2D.uniqueIdB;
-            } else if (state->other == msg->type2D.objB) {
+                state->other = msg->swap.actorB;
+                state->otherUniqueId = msg->swap.idB;
+            } else if (state->other == msg->swap.actorB) {
                 state->other = msgObjA;
-                state->otherUniqueId = msg->type2D.uniqueIdA;
+                state->otherUniqueId = msg->swap.idA;
             }
         }
     }

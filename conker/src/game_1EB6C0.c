@@ -8,26 +8,6 @@
  * message handler of a particle that follows an owner actor.
  */
 
-/* Weak reference to an actor: valid while actor->unique_id still equals uniqueId. */
-typedef struct {
-    Actor *actor;
-    u8 uniqueId;
-} ActorRef;
-
-/* Message 0x2D payload: two actors exchange identities. */
-typedef struct {
-    Actor *actorA;
-    Actor *actorB;
-    u8 idA;
-    u8 idB;
-} ActorSwapMsg;
-
-/* Payload of the actor messages handled below (0: an actor, 0x2D: an actor swap). */
-typedef union {
-    ActorRef ref;
-    ActorSwapMsg swap;
-} ActorMsg;
-
 /* Fractions of a beam particle's width and length to draw. */
 typedef struct {
     f32 width;

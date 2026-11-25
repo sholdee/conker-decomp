@@ -19,6 +19,27 @@ typedef struct EffectHeader {
 struct Actor;
 struct ParticleViewMask;
 
+/* Weak reference to an actor: valid while actor->unique_id still equals uniqueId. Also the payload of the
+ * object messages (func_151403A8) that name an actor, e.g. message 0: the actor went away. */
+typedef struct ActorRef {
+    /* 0x0 */ struct Actor *actor;
+    /* 0x4 */ u8 uniqueId;
+} ActorRef; /* size 0x8 */
+
+/* Object message 0x2D payload: two actors exchange identities. */
+typedef struct ActorSwapMsg {
+    /* 0x0 */ struct Actor *actorA;
+    /* 0x4 */ struct Actor *actorB;
+    /* 0x8 */ u8 idA;
+    /* 0x9 */ u8 idB;
+} ActorSwapMsg; /* size 0xC */
+
+/* Payload of the actor object messages (0 and similar: an actor, 0x2D: an actor swap). */
+typedef union ActorMsg {
+    ActorRef ref;
+    ActorSwapMsg swap;
+} ActorMsg;
+
 /* ParticleDesc.flags (sprite particles, func_15130280) */
 #define PARTICLE_LIFETIME          0x1      /* timer counts down; the particle dies below 0 */
 #define PARTICLE_GRAVITY           0x2

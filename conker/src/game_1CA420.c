@@ -133,17 +133,9 @@ typedef struct TrailTask {
 
 /* Event payloads the handlers below get (see func_15147D64). */
 typedef union TrailEvent {
-    struct {
-        Actor *obj;
-        u8 id;
-    } object;         /* events 0 and 7: trails of this owner stop */
-    u8 specIndex;     /* event 6: trails of this kind stop (func_1519CF70) */
-    struct {
-        Actor *a;
-        Actor *b;
-        u8 idA;
-        u8 idB;
-    } swap;           /* event 0x2D: owners a and b trade places */
+    ActorRef object;    /* events 0 and 7: trails of this owner stop */
+    u8 specIndex;       /* event 6: trails of this kind stop (func_1519CF70) */
+    ActorSwapMsg swap;  /* event 0x2D: owners actorA and actorB trade places */
 } TrailEvent;
 
 extern void func_15147D64(void *event, u8 eventId);
@@ -664,7 +656,7 @@ void func_1519E1F4(Trail *trail, TrailEvent *event, u8 eventId) {
     TrailData *data = trail->data;
 
     if (eventId == 0) {
-        if ((event->object.obj == data->owner) || (event->object.id == data->ownerId)) {
+        if ((event->object.actor == data->owner) || (event->object.uniqueId == data->ownerId)) {
             func_1519CFA0(trail);
         }
     } else if (eventId == 6) {
@@ -672,15 +664,15 @@ void func_1519E1F4(Trail *trail, TrailEvent *event, u8 eventId) {
             func_1519CFA0(trail);
         }
     } else if (eventId == 7) {
-        if ((event->object.obj == data->owner) || (event->object.id == data->ownerId)) {
+        if ((event->object.actor == data->owner) || (event->object.uniqueId == data->ownerId)) {
             func_1519CFA0(trail);
         }
     } else if (eventId == 0x2D) {
-        if (data->owner == event->swap.a) {
-            data->owner = event->swap.b;
+        if (data->owner == event->swap.actorA) {
+            data->owner = event->swap.actorB;
             data->ownerId = event->swap.idB;
-        } else if (data->owner == event->swap.b) {
-            data->owner = event->swap.a;
+        } else if (data->owner == event->swap.actorB) {
+            data->owner = event->swap.actorA;
             data->ownerId = event->swap.idA;
         }
     }
@@ -750,15 +742,15 @@ void func_1519E570(TrailTask *task, TrailEvent *event, u8 eventId) {
     TrailTaskData *data = &task->data;
 
     if (eventId == 0) {
-        if ((event->object.obj == data->owner) || (event->object.id == data->ownerId)) {
+        if ((event->object.actor == data->owner) || (event->object.uniqueId == data->ownerId)) {
             func_1516972C((struct102 *)task);
         }
     } else if (eventId == 0x2D) {
-        if (data->owner == event->swap.a) {
-            data->owner = event->swap.b;
+        if (data->owner == event->swap.actorA) {
+            data->owner = event->swap.actorB;
             data->ownerId = event->swap.idB;
-        } else if (data->owner == event->swap.b) {
-            data->owner = event->swap.a;
+        } else if (data->owner == event->swap.actorB) {
+            data->owner = event->swap.actorA;
             data->ownerId = event->swap.idA;
         }
     }
@@ -832,18 +824,18 @@ void func_1519E818(TrailTask *task, TrailEvent *event, u8 eventId) {
     TrailTaskData *data = &task->data;
 
     if (eventId == 0) {
-        if ((event->object.obj == data->owner) || (event->object.id == data->ownerId)) {
+        if ((event->object.actor == data->owner) || (event->object.uniqueId == data->ownerId)) {
             func_1516972C((struct102 *)task);
             D_800E0920 = NULL;
         // matching: an unused label ends the basic block here, as in the ROM
         skip:;
         }
     } else if (eventId == 0x2D) {
-        if (data->owner == event->swap.a) {
-            data->owner = event->swap.b;
+        if (data->owner == event->swap.actorA) {
+            data->owner = event->swap.actorB;
             data->ownerId = event->swap.idB;
-        } else if (data->owner == event->swap.b) {
-            data->owner = event->swap.a;
+        } else if (data->owner == event->swap.actorB) {
+            data->owner = event->swap.actorA;
             data->ownerId = event->swap.idA;
         }
     }

@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *isNew);
 extern s32 func_15144E80(void *, Vec3f *, Vec3f *, Vec3f *);
@@ -267,18 +268,12 @@ s32 func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
                          20.0f, 20, 4.0f, 0.08f, arg3, arg4, arg5);
 }
 
-/* Message payload: an actor reference. */
-typedef struct {
-    Actor *actor;
-    u8 actorId;
-} ActorRefMsg;
-
 /* Sends message 0x1A for `actor` (stops the effect started by func_151026BC). */
 void func_151027E8(Actor *actor) {
-    ActorRefMsg msg;
+    ActorRef msg;
 
     msg.actor = actor;
-    msg.actorId = actor->unique_id;
+    msg.uniqueId = actor->unique_id;
     func_151403A8((s32)&msg, 0x1A);
 }
 

@@ -66,14 +66,6 @@ typedef struct {
     /* 0xA8 */ f32 unkA8;
 } Particle1368C0;
 
-/* Payload of message 0x2D: two objects trade places. */
-typedef struct {
-    /* 0x00 */ Actor *from;
-    /* 0x04 */ Actor *to;
-    /* 0x08 */ u8 fromId;
-    /* 0x09 */ u8 toId;
-} ObjectSwapMessage;
-
 /* Emission segments of effect 0x1A: particles start on segment i (D_800A24B0[i] to
  * D_800A24B0[i + 1]), picked with weight D_800A2504[i]; D_800A2504[6] is the weight total. */
 extern const Vec3f D_800A24B0[7];
@@ -579,31 +571,31 @@ void func_1510A40C(Effect1368C0 *effect) {
 }
 
 /* Message handler: on message 0x2D (two objects swapped), moves the effect to the other object. */
-void func_1510A870(Effect1368C0 *effect, ObjectSwapMessage *msg, u8 msgType) {
+void func_1510A870(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
     TrackedObject *tracked = &effect->data.tracked;
 
     if (msgType == 0x2D) {
-        if (tracked->object == msg->from) {
-            tracked->object = msg->to;
-            tracked->objectId = msg->toId;
-        } else if (tracked->object == msg->to) {
-            tracked->object = msg->from;
-            tracked->objectId = msg->fromId;
+        if (tracked->object == msg->actorA) {
+            tracked->object = msg->actorB;
+            tracked->objectId = msg->idB;
+        } else if (tracked->object == msg->actorB) {
+            tracked->object = msg->actorA;
+            tracked->objectId = msg->idA;
         }
     }
 }
 
 /* Message handler: the same as func_1510A870. */
-void func_1510A8CC(Effect1368C0 *effect, ObjectSwapMessage *msg, u8 msgType) {
+void func_1510A8CC(Effect1368C0 *effect, ActorSwapMsg *msg, u8 msgType) {
     TrackedObject *tracked = &effect->data.tracked;
 
     if (msgType == 0x2D) {
-        if (tracked->object == msg->from) {
-            tracked->object = msg->to;
-            tracked->objectId = msg->toId;
-        } else if (tracked->object == msg->to) {
-            tracked->object = msg->from;
-            tracked->objectId = msg->fromId;
+        if (tracked->object == msg->actorA) {
+            tracked->object = msg->actorB;
+            tracked->objectId = msg->idB;
+        } else if (tracked->object == msg->actorB) {
+            tracked->object = msg->actorA;
+            tracked->objectId = msg->idA;
         }
     }
 }

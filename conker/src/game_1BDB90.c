@@ -1,11 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
-
-/* An object plus its unique id, the payload of the 0x2A / 0x49 messages. */
-typedef struct ObjectRef {
-    /* 0x0 */ Actor *obj;
-    /* 0x4 */ u8 uniqueId;
-} ObjectRef;
+#include "effects.h"
 
 /* Payload of message 0x2D: two objects whose references are exchanged. */
 typedef struct ObjectPair {
@@ -24,8 +19,8 @@ struct TimedSoundObject {
     /* 0x90 */ struct TimedSoundTrigger trigger;
 };
 
-extern void func_151D343C(ObjectRef *, s32);
-extern void func_1518F45C(ObjectRef *, u8);
+extern void func_151D343C(ActorRef *, s32);
+extern void func_1518F45C(ActorRef *, u8);
 
 /* Message 0x2D: swap the trigger's target between the two objects in the message. */
 void func_151906E0(struct TimedSoundObject *self, ObjectPair *pair, u8 msg) {
@@ -44,10 +39,10 @@ void func_151906E0(struct TimedSoundObject *self, ObjectPair *pair, u8 msg) {
 
 /* Sends messages 0x2A and 0x49 carrying a reference to this object. */
 void func_1519072C(Actor *self) {
-    ObjectRef ref;
-    ObjectRef *refPtr[1]; // matching: an array keeps &ref in a stack slot across the first call
+    ActorRef ref;
+    ActorRef *refPtr[1]; // matching: an array keeps &ref in a stack slot across the first call
 
-    ref.obj = self;
+    ref.actor = self;
     ref.uniqueId = self->unique_id;
     refPtr[0] = &ref;
     func_151D343C(refPtr[0], 0x2A);

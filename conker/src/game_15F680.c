@@ -624,20 +624,6 @@ s32 func_15133510(Mtx *mtx, Particle *particle) {
     return 1;
 }
 
-/* Event 0 payload: an object going away (also handled by func_15133DE8). */
-typedef struct {
-    Actor *obj;
-    u8 id;
-} ParticleEventRemove;
-
-/* Event 0x2D payload: two objects trading places. */
-typedef struct {
-    Actor *a;
-    Actor *b;
-    u8 aId;
-    u8 bId;
-} ParticleEventSwap;
-
 typedef void (*ParticleEventFn)(Particle *particle, void *data, u8 event);
 extern ParticleEventFn D_800899F8[];
 void func_151B9660(Particle *particle);
@@ -653,21 +639,21 @@ void func_15133588(Particle *particle, void *data, u8 event) {
         func_151B9660(particle);
     }
     if (event == 0x2D) {
-        ParticleEventSwap *swap = data;
+        ActorSwapMsg *swap = data;
 
-        obj = swap->a;
+        obj = swap->actorA;
         if (obj == particle->owner) {
-            particle->owner = swap->b;
-            particle->ownerId = swap->bId;
-        } else if (particle->owner == swap->b) {
+            particle->owner = swap->actorB;
+            particle->ownerId = swap->idB;
+        } else if (particle->owner == swap->actorB) {
             particle->owner = obj;
-            particle->ownerId = swap->aId;
+            particle->ownerId = swap->idA;
         }
     } else if (event == 0) {
-        ParticleEventRemove *removed = data;
+        ActorRef *removed = data;
 
-        obj = removed->obj;
-        if (obj == particle->owner || removed->id == particle->ownerId) {
+        obj = removed->actor;
+        if (obj == particle->owner || removed->uniqueId == particle->ownerId) {
             particle->owner = NULL;
             particle->ownerId = 0;
         }
@@ -852,12 +838,12 @@ s32 func_15133D20(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, Coll
 }
 
 /* Event handler: destroy the particle when its owner goes away (event 0). */
-void func_15133DE8(Particle *particle, ParticleEventRemove *data, u8 event) {
+void func_15133DE8(Particle *particle, ActorRef *data, u8 event) {
     Actor *obj;
 
     if (event == 0) {
-        obj = data->obj;
-        if (obj == particle->owner || particle->ownerId == data->id) {
+        obj = data->actor;
+        if (obj == particle->owner || particle->ownerId == data->uniqueId) {
             func_1516972C((struct102 *)particle);
         }
     }

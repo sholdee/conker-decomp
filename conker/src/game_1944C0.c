@@ -1209,34 +1209,20 @@ void func_1516944C(s32 type, s32 event, u8 eventType) {
         }
     }
 }
-/* Event payload naming an actor (event types 0 and others). */
-typedef struct {
-    /* 0x0 */ Actor *actor;
-    /* 0x4 */ u8 id;             /* the actor's unique_id */
-} ActorEvent;
-
-/* Event type 0x2D payload: ownership moves from one actor to another. */
-typedef struct {
-    /* 0x0 */ Actor *from;
-    /* 0x4 */ Actor *to;
-    /* 0x8 */ u8 fromId;
-    /* 0x9 */ u8 toId;
-} ActorSwapEvent;
-
 /* Sends an actor event about `actor` to every object. */
 void func_151695F0(Actor *actor, u8 eventType) {
-    ActorEvent event;
+    ActorRef event;
 
     event.actor = actor;
-    event.id = actor->unique_id;
+    event.uniqueId = actor->unique_id;
     func_15169040((s32)&event, eventType);
 }
 
 /* Sends an actor event about `actor` to every object of one type. */
 void func_1516962C(s32 type, Actor *actor, u8 eventType) {
-    ActorEvent event;
+    ActorRef event;
     event.actor = actor;
-    event.id = actor->unique_id;
+    event.uniqueId = actor->unique_id;
     func_1516944C(type, (s32)&event, eventType);
 }
 
@@ -1313,18 +1299,18 @@ void func_15169824(struct102 *obj) {
  */
 void func_15169850(s32 event, u8 eventType, Actor **owner, u8 *ownerId, void *obj) {
     if (eventType == 0) {
-        if (((ActorEvent *)event)->actor == *owner || ((ActorEvent *)event)->id == *ownerId) {
+        if (((ActorRef *)event)->actor == *owner || ((ActorRef *)event)->uniqueId == *ownerId) {
             func_1516972C(obj);
         }
     } else if (eventType == 0x2D) {
-        Actor *from = ((ActorSwapEvent *)event)->from;
+        Actor *actorA = ((ActorSwapMsg *)event)->actorA;
 
-        if (from == *owner) {
-            *owner = ((ActorSwapEvent *)event)->to;
-            *ownerId = ((ActorSwapEvent *)event)->toId;
-        } else if (((ActorSwapEvent *)event)->to == *owner) {
-            *owner = from;
-            *ownerId = ((ActorSwapEvent *)event)->fromId;
+        if (actorA == *owner) {
+            *owner = ((ActorSwapMsg *)event)->actorB;
+            *ownerId = ((ActorSwapMsg *)event)->idB;
+        } else if (((ActorSwapMsg *)event)->actorB == *owner) {
+            *owner = actorA;
+            *ownerId = ((ActorSwapMsg *)event)->idA;
         }
     }
 }

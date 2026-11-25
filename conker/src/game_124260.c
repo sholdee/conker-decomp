@@ -3,18 +3,12 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Message 0x3E payload: "this actor is gone"; beams owned by it destroy themselves (func_150F7310). */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; /* owner->unique_id */
-} OwnerGoneMsg;
-
 /* Sends message 0x3E (func_151494E0) for `owner`; beams it owns destroy themselves on it. */
 void func_150F6DB0(Actor *owner) {
-    OwnerGoneMsg msg;
+    ActorRef msg;
 
-    msg.owner = owner;
-    msg.ownerId = owner->unique_id;
+    msg.actor = owner;
+    msg.uniqueId = owner->unique_id;
     func_151494E0((s32)&msg, 0x3E);
 }
 
@@ -196,7 +190,7 @@ void func_150F706C(BeamObj *obj) {
 }
 
 /* Message handler: destroys the beam when its owner is reported gone (0x3E); other messages go to the default handler. */
-void func_150F7310(BeamObj *obj, OwnerGoneMsg *msg, u8 msgId) {
+void func_150F7310(BeamObj *obj, ActorRef *msg, u8 msgId) {
     // matching: taking &obj keeps it in its arg slot (IDO reloads it instead of saving it in s0)
     BeamObj **objp = &obj;
     BeamState *beam;
@@ -204,7 +198,7 @@ void func_150F7310(BeamObj *obj, OwnerGoneMsg *msg, u8 msgId) {
     if (msgId == 0x3E) {
         beam = &(*objp)->beam;
         // matching: the punned read of msg makes IDO load it a second time for the id compare
-        if (msg->owner == beam->owner || beam->ownerId == ((OwnerGoneMsg *)*(s32 *)&msg)->ownerId) {
+        if (msg->actor == beam->owner || beam->ownerId == ((ActorRef *)*(s32 *)&msg)->uniqueId) {
             func_1516972C((struct102 *)*objp);
         }
     } else {

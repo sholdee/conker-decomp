@@ -207,36 +207,22 @@ label: // matching: unused label keeps the viewMtx stores ahead of the argument 
     return 1;
 }
 
-/* Messages delivered to effects through their message handler. */
-typedef union {
-    struct {
-        Actor *obj;
-        u8 objId;
-    } removed; /* type 0 */
-    struct {
-        Actor *a;
-        Actor *b;
-        u8 aId;
-        u8 bId;
-    } swap; /* type 0x2D */
-} EffectMsg;
-
 /* Message handler: removes the effect with its owner, and follows the owner when two objects swap. */
-void func_151BA468(struct260 *effect, EffectMsg *msg, u8 msgType) {
+void func_151BA468(struct260 *effect, ActorMsg *msg, u8 msgType) {
     EffectOwnerRef *ref = EFFECT_EXTRA(effect);
     Actor *owner = ref->owner;
 
     if (msgType == 0) {
-        if ((owner == msg->removed.obj) || (msg->removed.objId == owner->unique_id)) {
+        if ((owner == msg->ref.actor) || (msg->ref.uniqueId == owner->unique_id)) {
             func_1516972C((struct102 *)effect);
         }
     } else if (msgType == 0x2D) {
-        if (ref->owner == msg->swap.a) {
-            ref->owner = msg->swap.b;
-            ref->ownerId = msg->swap.bId;
-        } else if (ref->owner == msg->swap.b) {
-            ref->owner = msg->swap.a;
-            ref->ownerId = msg->swap.aId;
+        if (ref->owner == msg->swap.actorA) {
+            ref->owner = msg->swap.actorB;
+            ref->ownerId = msg->swap.idB;
+        } else if (ref->owner == msg->swap.actorB) {
+            ref->owner = msg->swap.actorA;
+            ref->ownerId = msg->swap.idA;
         }
     }
 }

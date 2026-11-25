@@ -12,14 +12,6 @@ typedef struct Emitter {
     /* 0x170 */ EmitterAttach attach;
 } Emitter;
 
-/* Payload of message 0x2D: two objects and their unique ids. */
-typedef struct {
-    /* 0x0 */ Actor *objA;
-    /* 0x4 */ Actor *objB;
-    /* 0x8 */ u8 idA;
-    /* 0x9 */ u8 idB;
-} SwapTargetMsg;
-
 Emitter *func_151407D0(GlowShape *, s32, ParticleDef *, u8, u8, u8, u8, s32, s32, s32);
 void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
@@ -152,15 +144,15 @@ s32 func_1518A324(Emitter *emitter, u8 *follow) {
 }
 
 /* Message handler: message 0x2D moves the emitter from one object of the pair to the other. */
-void func_1518A360(Emitter *emitter, SwapTargetMsg *msg, u8 msgId) {
+void func_1518A360(Emitter *emitter, ActorSwapMsg *msg, u8 msgId) {
     EmitterAttach *attach = &emitter->attach;
 
     if (msgId == 0x2D) {
-        if (attach->target == msg->objA) {
-            attach->target = msg->objB;
+        if (attach->target == msg->actorA) {
+            attach->target = msg->actorB;
             attach->targetId = msg->idB;
-        } else if (attach->target == msg->objB) {
-            attach->target = msg->objA;
+        } else if (attach->target == msg->actorB) {
+            attach->target = msg->actorA;
             attach->targetId = msg->idA;
         }
     }

@@ -1149,38 +1149,24 @@ void func_151AB9C8(EmitterTask *task) {
     }
 }
 
-/* Message data for func_151ABD54; the layout depends on the message id. */
-typedef union {
-    struct {
-        /* 0x00 */ Actor *actor;
-        /* 0x04 */ u8 actorId;
-    } m0;
-    struct {
-        /* 0x00 */ Actor *actorA;
-        /* 0x04 */ Actor *actorB;
-        /* 0x08 */ u8 idA;
-        /* 0x09 */ u8 idB;
-    } m2D;
-} TaskMsg151ABD54;
-
 /*
  * Message handler for a task whose payload (at +0x28, as in EmitterTask) names an actor:
  * message 0 ends the task when it concerns that actor; message 0x2D swaps actor A and B.
  */
-void func_151ABD54(EmitterTask *task, TaskMsg151ABD54 *msg, u8 msgId) {
+void func_151ABD54(EmitterTask *task, ActorMsg *msg, u8 msgId) {
     EmitterPayload *payload = &task->payload;
 
     if (msgId == 0) {
-        if ((msg->m0.actor == payload->actor) || (msg->m0.actorId == payload->actorId)) {
+        if ((msg->ref.actor == payload->actor) || (msg->ref.uniqueId == payload->actorId)) {
             func_1516972C((struct102 *)task);
         }
     } else if (msgId == 0x2D) {
-        if (payload->actor == msg->m2D.actorA) {
-            payload->actor = msg->m2D.actorB;
-            payload->actorId = msg->m2D.idB;
-        } else if (payload->actor == msg->m2D.actorB) {
-            payload->actor = msg->m2D.actorA;
-            payload->actorId = msg->m2D.idA;
+        if (payload->actor == msg->swap.actorA) {
+            payload->actor = msg->swap.actorB;
+            payload->actorId = msg->swap.idB;
+        } else if (payload->actor == msg->swap.actorB) {
+            payload->actor = msg->swap.actorA;
+            payload->actorId = msg->swap.idA;
         }
     }
 }

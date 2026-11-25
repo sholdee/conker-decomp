@@ -49,32 +49,25 @@ void func_150EEE00(Actor *actor, u8 slot) {
     }
 }
 
-/* Message payload: an actor reference (message types 0 and 0x43). */
+/* Message 0x43 payload: an actor reference plus the actor's effect slot. */
 typedef struct {
-    Actor *actor;
-    u8 actorId;
-    u8 slot;
-} ActorRefMsg;
+    /* 0x0 */ Actor *actor;
+    /* 0x4 */ u8 uniqueId;
+    /* 0x5 */ u8 slot;
+} ActorSlotMsg;
 
-/* Message payload for type 0x2D: two actors exchange identities. */
-typedef struct {
-    Actor *actorA;
-    Actor *actorB;
-    u8 idA;
-    u8 idB;
-} ActorSwapMsg;
-
+/* Payload of the messages a beam handles (0 and 0x43: ActorSlotMsg, 0x2D: an actor swap). */
 typedef union {
-    ActorRefMsg ref;
+    ActorSlotMsg ref;
     ActorSwapMsg swap;
-} ActorMsg;
+} BeamMsg;
 
 /* Sends message 0x43 for slot `slot` of `actor`. */
 void func_150EEF40(Actor *actor, u8 slot) {
-    ActorRefMsg msg;
+    ActorSlotMsg msg;
 
     msg.actor = actor;
-    msg.actorId = actor->unique_id;
+    msg.uniqueId = actor->unique_id;
     msg.slot = slot;
     func_151403A8((s32)&msg, 0x43);
 }
@@ -427,7 +420,7 @@ void func_150EF860(Beam *beam) {
 
 /* Message handler of a beam: releases it when its actor goes away (types 0 and 0x43)
  * and follows its actor and target through an identity swap (type 0x2D). */
-void func_150EF910(Beam *beam, ActorMsg *msg, u8 type) {
+void func_150EF910(Beam *beam, BeamMsg *msg, u8 type) {
     BeamLink *link = &beam->link;
     Actor *actor;
     Actor *msgActor;
@@ -439,7 +432,7 @@ void func_150EF910(Beam *beam, ActorMsg *msg, u8 type) {
         actor = link->actor;
         msgActor = msg->ref.actor;
         actorId = link->actorId;
-        msgActorId = msg->ref.actorId;
+        msgActorId = msg->ref.uniqueId;
         if (actor == msgActor || actorId == msgActorId) {
             func_1516972C((struct102 *)beam);
         }
@@ -463,7 +456,7 @@ void func_150EF910(Beam *beam, ActorMsg *msg, u8 type) {
         swapped:;
         }
     } else if (type == 0x43) {
-        if (link->actor == msg->ref.actor || link->actorId == msg->ref.actorId) {
+        if (link->actor == msg->ref.actor || link->actorId == msg->ref.uniqueId) {
             if (link->slot == msg->ref.slot) {
                 func_1516972C((struct102 *)beam);
             }
@@ -873,7 +866,7 @@ void func_150F07E4(Spark *spark, s32 data, u8 type) {
 
     if (type == 0) {
         msgActor = msg->ref.actor;
-        if ((msgActor == link->actor) || (msg->ref.actorId == link->actorId)) {
+        if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
             func_1516972C((struct102 *)spark);
         }
     } else if (type == 0x2D) {
@@ -894,7 +887,7 @@ void func_150F088C(Glow *glow, ActorMsg *msg, u8 type) {
 
     if (type == 0) {
         msgActor = msg->ref.actor;
-        if ((msgActor == link->actor) || (msg->ref.actorId == link->actorId)) {
+        if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
             func_1516972C((struct102 *)glow);
         }
     } else if (type == 0x2D) {
@@ -1123,7 +1116,7 @@ void func_150F1020(Particle *particle, s32 data, u8 type) {
         }
     } else if (type == 0 || type == 0x43) {
         msgActor = msg->ref.actor;
-        if ((msgActor == link->actor) || (msg->ref.actorId == link->actorId)) {
+        if ((msgActor == link->actor) || (msg->ref.uniqueId == link->actorId)) {
             func_1516972C((struct102 *)particle);
         }
     }
@@ -1271,7 +1264,7 @@ void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
     if (type == 0x43) {
         msgActor = ((ActorMsg *)data)->ref.actor;
         link = &(*self)->link;
-        if ((msgActor == link->actor) || (link->actorId == (*msg)->ref.actorId)) {
+        if ((msgActor == link->actor) || (link->actorId == (*msg)->ref.uniqueId)) {
             func_1516972C((struct102 *)*self);
         }
     } else {
@@ -1279,11 +1272,6 @@ void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
         func_15149514(data, type, &link->actor, &link->actorId, *self);
     }
 }
-
-typedef struct {
-    Actor *actor;
-    u8 actorId;
-} ActorRef;
 
 typedef struct {
     /* 0x00 */ u8 pad0[0x18];
@@ -1297,7 +1285,7 @@ void func_150F1684(ActorBound *self, ActorMsg *msg, u8 type) {
 
     if (type == 0x43) {
         msgActor = msg->ref.actor;
-        if ((ref->actor == msgActor) || (msg->ref.actorId == ref->actorId)) {
+        if ((ref->actor == msgActor) || (msg->ref.uniqueId == ref->uniqueId)) {
             func_1516972C((struct102 *)self);
         }
     }

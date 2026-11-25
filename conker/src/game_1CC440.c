@@ -883,13 +883,8 @@ void func_151A0928(TrailSpawner *spawner) {
     }
 }
 
-typedef struct TrailEvent {
-    /* 0x0 */ Actor *actor;
-    /* 0x4 */ u8 actorId;
-} TrailEvent;
-
 /* Event handler for a trail: event 10 about its owner's actor detaches the trail. */
-void func_151A0950(Trail *trail, TrailEvent *event, u8 type) {
+void func_151A0950(Trail *trail, ActorRef *event, u8 type) {
     TrailOwner *owner;
     TrailConfig *config = trail->config;
     Actor *actor;
@@ -898,7 +893,7 @@ void func_151A0950(Trail *trail, TrailEvent *event, u8 type) {
         owner = config->owner;
         if (owner != NULL) {
             actor = owner->actor;
-            if (event->actor == actor || event->actorId == owner->actorId) {
+            if (event->actor == actor || event->uniqueId == owner->actorId) {
                 func_1519F48C(trail);
             }
         }
@@ -906,11 +901,11 @@ void func_151A0950(Trail *trail, TrailEvent *event, u8 type) {
 }
 
 /* Event handler for a spawner: event 0 about its owner's actor deletes the spawner. */
-void func_151A09B4(TrailSpawner *spawner, TrailEvent *event, u8 type) {
+void func_151A09B4(TrailSpawner *spawner, ActorRef *event, u8 type) {
     Actor *actor = spawner->link.owner->actor;
 
     if (type == 0) {
-        if (actor == event->actor || event->actorId == actor->unique_id) {
+        if (actor == event->actor || event->uniqueId == actor->unique_id) {
             func_151A0928(spawner);
             func_1516972C((struct102 *)spawner);
         }

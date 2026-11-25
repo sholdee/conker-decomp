@@ -60,20 +60,6 @@ typedef struct {
     } data;
 } Particle;
 
-/* Payload of the messages the effect and particle handlers receive. */
-typedef union {
-    struct {
-        /* 0x00 */ Actor *object;
-        /* 0x04 */ u8 id;
-    } one;          /* messages 0, 3, 0x2F */
-    struct {
-        /* 0x00 */ Actor *from;
-        /* 0x04 */ Actor *to;
-        /* 0x08 */ u8 fromId;
-        /* 0x09 */ u8 toId;
-    } pair;         /* message 0x2D */
-} ObjectMessage;
-
 extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 extern s32 func_1515C0F8(Actor *arg0, f32 **arg1);
@@ -192,22 +178,22 @@ void func_150D54C8(FollowEffect *effect) {
 }
 
 /* FollowEffect message handler: dies with its owner and follows it through message 0x2D. */
-void func_150D596C(FollowEffect *effect, ObjectMessage *msg, u8 type) {
+void func_150D596C(FollowEffect *effect, ActorMsg *msg, u8 type) {
     FollowEffectData *data = &effect->data;
     Actor *object;
 
     if (type == 0 || type == 0x2F || type == 3) {
-        object = msg->one.object;
-        if (object == data->owner || msg->one.id == data->ownerId) {
+        object = msg->ref.actor;
+        if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
             func_1516972C((struct102 *)effect);
         }
     } else if (type == 0x2D) {
-        if (data->owner == msg->pair.from) {
-            data->owner = msg->pair.to;
-            data->ownerId = msg->pair.toId;
-        } else if (data->owner == msg->pair.to) {
-            data->owner = msg->pair.from;
-            data->ownerId = msg->pair.fromId;
+        if (data->owner == msg->swap.actorA) {
+            data->owner = msg->swap.actorB;
+            data->ownerId = msg->swap.idB;
+        } else if (data->owner == msg->swap.actorB) {
+            data->owner = msg->swap.actorA;
+            data->ownerId = msg->swap.idA;
         }
     }
 }
@@ -703,25 +689,25 @@ s32 func_150D6CC4(Particle *particle, s32 arg1) {
 }
 
 /* Drift particle message handler: dies with its owner and follows it through message 0x2D. */
-void func_150D6E60(Particle *particle, ObjectMessage *msg, u8 type) {
+void func_150D6E60(Particle *particle, ActorMsg *msg, u8 type) {
     DriftParticleData *data = &particle->data.drift;
     Actor *object;
 
     if (type == 0x2D) {
-        if (data->owner == msg->pair.from) {
-            data->owner = msg->pair.to;
-            data->ownerId = msg->pair.toId;
+        if (data->owner == msg->swap.actorA) {
+            data->owner = msg->swap.actorB;
+            data->ownerId = msg->swap.idB;
         } else {
-            if (data->owner == msg->pair.to) {
-                data->owner = msg->pair.from;
-                data->ownerId = msg->pair.fromId;
+            if (data->owner == msg->swap.actorB) {
+                data->owner = msg->swap.actorA;
+                data->ownerId = msg->swap.idA;
             }
         trailing_150D6E60: // matching: a label here keeps IDO from merging this path's exit branch
             ;
         }
     } else if (type == 0) {
-        object = msg->one.object;
-        if (object == data->owner || msg->one.id == data->ownerId) {
+        object = msg->ref.actor;
+        if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
             func_1516972C((struct102 *)particle);
         }
     }
@@ -756,25 +742,25 @@ s32 func_150D6F0C(Particle *particle, s32 arg1) {
 }
 
 /* Grow particle message handler: dies with its owner and follows it through message 0x2D. */
-void func_150D7068(Particle *particle, ObjectMessage *msg, u8 type) {
+void func_150D7068(Particle *particle, ActorMsg *msg, u8 type) {
     GrowParticleData *data = &particle->data.grow;
     Actor *object;
 
     if (type == 0x2D) {
-        if (data->owner == msg->pair.from) {
-            data->owner = msg->pair.to;
-            data->ownerId = msg->pair.toId;
+        if (data->owner == msg->swap.actorA) {
+            data->owner = msg->swap.actorB;
+            data->ownerId = msg->swap.idB;
         } else {
-            if (data->owner == msg->pair.to) {
-                data->owner = msg->pair.from;
-                data->ownerId = msg->pair.fromId;
+            if (data->owner == msg->swap.actorB) {
+                data->owner = msg->swap.actorA;
+                data->ownerId = msg->swap.idA;
             }
         trailing_150D7068: // matching: a label here keeps IDO from merging this path's exit branch
             ;
         }
     } else if (type == 0) {
-        object = msg->one.object;
-        if (object == data->owner || msg->one.id == data->ownerId) {
+        object = msg->ref.actor;
+        if (object == data->owner || msg->ref.uniqueId == data->ownerId) {
             func_1516972C((struct102 *)particle);
         }
     }

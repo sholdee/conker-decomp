@@ -70,12 +70,6 @@ typedef struct {
 
 extern DropKind D_800A9D40[];
 
-/* Actor reference sent with object messages (func_15191B8C). */
-typedef struct ActorRef {
-    Actor *actor;
-    u8 id;
-} ActorRef;
-
 /* An emitter's attachment to its actor. */
 typedef struct {
     /* 0x0 */ Actor *actor;
@@ -132,7 +126,7 @@ DripEmitter *func_15190770(ActorLink *link, s32 extraSize, u8 owner, s32 list) {
     ActorRef ref;
 
     ref.actor = link->actor;
-    ref.id = link->actor->unique_id;
+    ref.uniqueId = link->actor->unique_id;
     func_15191B8C(&ref, 0xE);
     emitter = func_15167A68(0x20, list, extraSize + sizeof(DripEmitter), 1, owner, 1);
     if (emitter == NULL) {
@@ -591,7 +585,7 @@ void func_15191980(DripEmitter *emitter, ActorRef *ref, u8 msg) {
         if (ref->actor == emitter->link.actor) {
             goto hit2;
         }
-        if (ref->id != emitter->link.actorId) {
+        if (ref->uniqueId != emitter->link.actorId) {
             goto skip;
         }
     hit2:
@@ -602,7 +596,7 @@ void func_15191980(DripEmitter *emitter, ActorRef *ref, u8 msg) {
         if (ref->actor == emitter->link.actor) {
             goto hit;
         }
-        if (ref->id == emitter->link.actorId) {
+        if (ref->uniqueId == emitter->link.actorId) {
         hit:
             func_1516972C((struct102 *)emitter);
         }
@@ -623,7 +617,7 @@ void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
         if (ref->actor == link->actor) {
             goto hit;
         }
-        if (ref->id == link->actorId) {
+        if (ref->uniqueId == link->actorId) {
         hit:
             func_1516972C((struct102 *)task);
         }
@@ -633,7 +627,7 @@ void func_15191A84(DripRetryTask *task, ActorRef *ref, u8 msg) {
         if (ref->actor == link->actor) {
             goto hit2;
         }
-        if (ref->id != link->actorId) {
+        if (ref->uniqueId != link->actorId) {
             goto skip;
         }
     hit2:

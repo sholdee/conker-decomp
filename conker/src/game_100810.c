@@ -723,38 +723,24 @@ loop:
     return gfx;
 }
 
-/* Message data for func_150D49C0. */
-typedef union {
-    struct {
-        Actor *obj;
-        u8 uniqueId;
-    } gone;             // messages 0, 3 and 0x2E
-    struct {
-        Actor *objA;
-        Actor *objB;
-        u8 uniqueIdA;
-        u8 uniqueIdB;
-    } swap;             // message 0x2D: objA and objB trade places
-} TrailMsg;
-
 /* Message handler: destroys the trail when its owner goes away and follows the owner through a swap. */
-void func_150D49C0(TrailActor *actor, TrailMsg *msg, u8 id) {
+void func_150D49C0(TrailActor *actor, ActorMsg *msg, u8 id) {
     TrailState *state = actor->state;
     Actor *obj;
 
     if (id == 0 || id == 0x2E || id == 3) {
-        obj = msg->gone.obj;
-        if (obj == state->owner || msg->gone.uniqueId == state->ownerId) {
+        obj = msg->ref.actor;
+        if (obj == state->owner || msg->ref.uniqueId == state->ownerId) {
             func_1516972C((struct102 *)actor);
         }
     } else if (id == 0x2D) {
-        if (state->owner == msg->swap.objA) {
-            state->owner = msg->swap.objB;
-            state->ownerId = msg->swap.uniqueIdB;
+        if (state->owner == msg->swap.actorA) {
+            state->owner = msg->swap.actorB;
+            state->ownerId = msg->swap.idB;
             state->attachment = func_1503195C(state->owner, (state->owner->id == 0x48) ? 0x7A : 0x79, 0);
-        } else if (state->owner == msg->swap.objB) {
-            state->owner = msg->swap.objA;
-            state->ownerId = msg->swap.uniqueIdA;
+        } else if (state->owner == msg->swap.actorB) {
+            state->owner = msg->swap.actorA;
+            state->ownerId = msg->swap.idA;
             state->attachment = func_1503195C(state->owner, (state->owner->id == 0x48) ? 0x7A : 0x79, 0);
         }
     }

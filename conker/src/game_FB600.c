@@ -181,44 +181,30 @@ void func_150CE450(MosaicEffect *effect, u16 *fb) {
     }
 }
 
-/* Payload of the messages the effect handlers receive. */
-typedef union {
-    struct {
-        /* 0x00 */ Actor *object;
-        /* 0x04 */ u8 id;
-    } one;          /* message 0 */
-    struct {
-        /* 0x00 */ Actor *from;
-        /* 0x04 */ Actor *to;
-        /* 0x08 */ u8 fromId;
-        /* 0x09 */ u8 toId;
-    } pair;         /* message 0x2D */
-} ObjectMessage;
-
 /*
  * Message handler: message 0x2D moves the effect between the two objects of the pair,
  * message 0 ends it when its owner goes away.
  */
-void func_150CE694(MosaicEffect *effect, ObjectMessage *msg, u8 type) {
+void func_150CE694(MosaicEffect *effect, ActorMsg *msg, u8 type) {
     MosaicData *mosaic = &effect->data;
     Actor *object;
 
     if (type == 0x2D) {
-        if (mosaic->owner == msg->pair.from) {
-            mosaic->owner = msg->pair.to;
-            mosaic->ownerId = msg->pair.toId;
+        if (mosaic->owner == msg->swap.actorA) {
+            mosaic->owner = msg->swap.actorB;
+            mosaic->ownerId = msg->swap.idB;
         } else {
-            if (mosaic->owner == msg->pair.to) {
-                mosaic->owner = msg->pair.from;
-                mosaic->ownerId = msg->pair.fromId;
+            if (mosaic->owner == msg->swap.actorB) {
+                mosaic->owner = msg->swap.actorA;
+                mosaic->ownerId = msg->swap.idA;
             }
         // matching: an empty labelled statement makes this branch jump straight to the epilogue
         end_swap:
             ;
         }
     } else if (type == 0) {
-        object = msg->one.object;
-        if (object == mosaic->owner || msg->one.id == mosaic->ownerId) {
+        object = msg->ref.actor;
+        if (object == mosaic->owner || msg->ref.uniqueId == mosaic->ownerId) {
             func_1516972C((struct102 *)effect);
         }
     }

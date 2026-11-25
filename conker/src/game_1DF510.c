@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Template copied into a new rope (HoltenRopeEffect 0x10-0x47, see game_1E0560.c). */
 typedef struct {
@@ -468,32 +469,24 @@ void func_151B2EC4(RopeLine *self, s32 arg1, u8 event) {
     func_15169850(arg1, event, &self->line.anchor.target, &self->line.anchor.targetId, self);
 }
 
-/* Event 0x2D payload: two objects that swap places. */
-typedef struct {
-    /* 0x00 */ Actor *a;
-    /* 0x04 */ Actor *b;
-    /* 0x08 */ u8 aId;
-    /* 0x09 */ u8 bId;
-} ObjectSwap;
-
 /* RopeTie event handler: on event 0x2D, swaps obj0/obj1 for the other object of the pair. */
-void func_151B2F04(RopeTie *self, ObjectSwap *swap, u8 event) {
+void func_151B2F04(RopeTie *self, ActorSwapMsg *swap, u8 event) {
     RopeTieData *tie = &self->tie;
 
     if (event == 0x2D) {
-        if (tie->obj0 == swap->a) {
-            tie->obj0 = swap->b;
-            tie->obj0Id = swap->bId;
-        } else if (tie->obj0 == swap->b) {
-            tie->obj0 = swap->a;
-            tie->obj0Id = swap->aId;
+        if (tie->obj0 == swap->actorA) {
+            tie->obj0 = swap->actorB;
+            tie->obj0Id = swap->idB;
+        } else if (tie->obj0 == swap->actorB) {
+            tie->obj0 = swap->actorA;
+            tie->obj0Id = swap->idA;
         }
-        if (tie->obj1 == swap->a) {
-            tie->obj1 = swap->b;
-            tie->obj1Id = swap->bId;
-        } else if (tie->obj1 == swap->b) {
-            tie->obj1 = swap->a;
-            tie->obj1Id = swap->aId;
+        if (tie->obj1 == swap->actorA) {
+            tie->obj1 = swap->actorB;
+            tie->obj1Id = swap->idB;
+        } else if (tie->obj1 == swap->actorB) {
+            tie->obj1 = swap->actorA;
+            tie->obj1Id = swap->idA;
         }
     }
 }
