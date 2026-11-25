@@ -14,23 +14,27 @@ void func_1515F170(s32 arg0, u8 arg1);
 extern u8 D_800886F0[];
 extern u8 D_800886F4[];
 extern u8 D_800886F8[];
-extern void (*D_8008B358[])(struct225 *, s32, u8);
 extern void (*D_8008B37C[])(s32);
 
+/* Payload of an effect tied to an actor without following a bone. */
 typedef struct {
-    s32 unk0;
-    u8 unk4;
-} SubA15161F4C;
+    struct127 *actor;
+    u8 actorId; // actor->unique_id when attached
+    u8 unk5;
+} LightActorRef;
 
+/* Event message about actors: event 0 removes `actor`; event 0x2D swaps actor and other. */
 typedef struct {
-    s32 unk0;
+    struct127 *actor;
     union {
-        s32 w4;
-        u8 b4;
+        struct127 *other; // event 0x2D
+        u8 actorId;       // event 0
     } u4;
-    u8 unk8;
-    u8 unk9;
-} ArgB15161F4C;
+    u8 actorId;           // event 0x2D: id of `actor`
+    u8 otherId;           // event 0x2D: id of `other`
+} ActorEvent;
+
+extern void (*D_8008B358[])(struct225 *, ActorEvent *, u8);
 
 struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
 struct225 *func_1516037C(Header *src, struct226 *arg1, s32 size, u8 arg3, s32 arg4);
@@ -56,11 +60,11 @@ void func_151617C4(struct225 *arg0);
 void func_151617E4(struct225 *arg0);
 void func_15161804(struct225 *arg0);
 void func_15161860(struct225 *arg0);
-void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5, s16 arg6);
-struct225 *func_151619A0(s32 arg0, s16 arg1, u8 arg2, s32 arg3);
+void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, struct17 *position, s16 arg5, s16 arg6);
+struct225 *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3);
 s32  func_15161A68(struct225 *arg0);
-struct225 *func_15161E24(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
-void func_15161F2C(struct225 *arg0);
+struct225 *func_15161E24(struct127 *actor, u8 unk5, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
+s32  func_15161F2C(struct225 *effect);
 struct225 *func_15162034(s32 arg0, u8 arg1, s32 arg2);
 void func_15162110(s32 arg0);
 struct225 *func_15162740(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
@@ -81,7 +85,7 @@ struct225 *func_15163BE8(s32 arg0, u8 arg1, s32 arg2);
 s32  func_15163CD0(struct225 *arg0);
 void func_15163CF8(struct227 *arg0, struct225 *arg1);
 void func_15163DEC(struct225 *arg0, struct228 *arg1);
-s32  func_15163F50(struct225 *arg0, struct225 *arg1);
+s32  func_15163F50(struct225 *effect, LightActorRef *ref);
 struct225 *func_15164208(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
 s32  func_1516429C(struct237 *arg0);
 void func_151643A8(struct225 *arg0, s32 arg1, u8 arg2);
@@ -770,164 +774,130 @@ void func_15161860(struct225 *effect) {
     D_8008B2B0[effect->unk12](effect);
 }
 
-void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5, s16 arg6) {
-    typedef struct {
-        s32 unk0[10];
-    } temp151618BC;
-    temp151618BC sp38;
+/* Plays one of ten random sounds at `position`. */
+void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, struct17 *position, s16 arg5, s16 arg6) {
+    s32 sounds[10] = { 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108 };
 
-    sp38 = *(temp151618BC *)D_800A66E4;
-    func_10010F88(sp38.unk0[func_150ADA20() % 10U], arg0, arg1, arg2, arg3, (s32)arg4->unk0, (s32)arg4->unk4, (s32)arg4->unk8, arg5, arg6);
+    func_10010F88(sounds[func_150ADA20() % 10U], arg0, arg1, arg2, arg3, position->unk0, position->unk4, position->unk8, arg5, arg6);
 }
 
-struct225 *func_151619A0(s32 arg0, s16 arg1, u8 arg2, s32 arg3) {
-    struct225 *temp_v0;
+/* Creates a light driven by entry `index` of D_800C3958 (see func_15161A68). */
+struct225 *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3) {
+    struct225 *effect;
     Header header;
-    s32 tmp;
-    Header2 header2;
+    s32 payload;
+    Header2 position;
 
-    tmp = arg0;
+    payload = index;
 
     header.unk0 = 3;
     header.unk1 = 9;
-    header.unk2 = arg1;
+    header.unk2 = lifetime;
     header.unk4 = 20;
 
-    header2.unk0 = 0;
-    header2.unk4 = 0;
-    header2.unk8 = 0;
+    position.unk0 = 0;
+    position.unk4 = 0;
+    position.unk8 = 0;
 
-    temp_v0 = func_151602C0(&header, &header2, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, sizeof(tmp), arg2, arg3);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &tmp, sizeof(tmp));
+    effect = func_151602C0(&header, &position, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, sizeof(payload), arg2, arg3);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &payload, sizeof(payload));
     }
-    return temp_v0;
+    return effect;
 }
 
-s32 func_15161A68(struct225 *arg0) {
-    struct233 **tmp = &D_800C3958; // fakematch?
+/* Copies position, colour and intensity (each clamped to 0-255) from the effect's D_800C3958 entry to the light. */
+s32 func_15161A68(struct225 *effect) {
+    // matching: both the table-address local and the (s32) read of unk18 are needed for IDO's register order
+    struct233 **table = &D_800C3958;
 
     if (D_800C35EA == 1) {
-        f32 phi_f0;
-        f32 phi_f2;
-        struct233 *temp_v0 = *tmp + (s32) arg0->unk18;
+        f32 value;
+        struct233 *source = *table + (s32)effect->unk18;
 
-        arg0->unk14->unkE = temp_v0->unk0;
-        arg0->unk14->unk10 = temp_v0->unk4;
-        arg0->unk14->unk12 = temp_v0->unk8;
+        effect->unk14->unkE = source->unk0;
+        effect->unk14->unk10 = source->unk4;
+        effect->unk14->unk12 = source->unk8;
 
-        if (temp_v0->unk24 < 0.0f) {
-            phi_f0 = 0.0f;
-        } else {
-            if (temp_v0->unk24 > 255.0f) {
-                phi_f2 = 255.0f;
-            } else {
-                phi_f2 = temp_v0->unk24;
-            }
-            phi_f0 = phi_f2;
-        }
-        temp_v0->unk24 = phi_f0;
-        arg0->unk14->unk5 = phi_f0;
-        if (temp_v0->unk28 < 0.0f) {
-            phi_f0 = 0.0f;
-        } else {
-            if (temp_v0->unk28 > 255.0f) {
-                phi_f2 = 255.0f;
-            } else {
-                phi_f2 = temp_v0->unk28;
-            }
-            phi_f0 = phi_f2;
-        }
-        temp_v0->unk28 = phi_f0;
-        arg0->unk14->unk6 = phi_f0;
-        if (temp_v0->unk2C < 0.0f) {
-            phi_f0 = 0.0f;
-        } else {
-            if (temp_v0->unk2C > 255.0f) {
-                phi_f2 = 255.0f;
-            } else {
-                phi_f2 = temp_v0->unk2C;
-            }
-            phi_f0 = phi_f2;
-        }
-        temp_v0->unk2C = phi_f0;
-        arg0->unk14->unk7 = phi_f0;
+        value = (source->unk24 < 0.0f) ? 0.0f : (source->unk24 > 255.0f) ? 255.0f : source->unk24;
+        source->unk24 = value;
+        effect->unk14->unk5 = value;
 
-        if (temp_v0->unk18 < 0.0f) {
-            phi_f0 = 0.0f;
-        } else {
-            if (temp_v0->unk18 > 255.0f) {
-                phi_f2 = 255.0f;
-            } else {
-                phi_f2 = temp_v0->unk18;
-            }
-            phi_f0 = phi_f2;
-        }
-        temp_v0->unk18 = phi_f0;
-        arg0->unk14->unk2F = phi_f0;
+        value = (source->unk28 < 0.0f) ? 0.0f : (source->unk28 > 255.0f) ? 255.0f : source->unk28;
+        source->unk28 = value;
+        effect->unk14->unk6 = value;
 
+        value = (source->unk2C < 0.0f) ? 0.0f : (source->unk2C > 255.0f) ? 255.0f : source->unk2C;
+        source->unk2C = value;
+        effect->unk14->unk7 = value;
+
+        value = (source->unk18 < 0.0f) ? 0.0f : (source->unk18 > 255.0f) ? 255.0f : source->unk18;
+        source->unk18 = value;
+        effect->unk14->unk2F = value;
     }
     return 1;
 }
 
-struct225 *func_15161E24(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9) {
-    struct225 *temp_v0;
+/* Creates a light at `actor` that stays tied to it (see func_15163F50). */
+struct225 *func_15161E24(struct127 *actor, u8 unk5, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9) {
+    struct225 *effect;
     Header header;
-    struct244 tmp;
-    Header2 header2;
+    LightActorRef ref;
+    Header2 position;
 
-    if (arg0 == NULL) {
-        return 0;
+    if (actor == NULL) {
+        return NULL;
     }
 
     header.unk0 = arg2;
     header.unk1 = 10;
-    header.unk2 = arg3;
+    header.unk2 = lifetime;
     header.unk4 = 21;
 
-    tmp.unk0 = arg0;
-    tmp.unk4 = arg0->unique_id;
-    tmp.unk5 = arg1;
+    ref.actor = actor;
+    ref.actorId = actor->unique_id;
+    ref.unk5 = unk5;
 
-    header2.unk0 = arg0->x_position;
-    header2.unk4 = arg0->y_position;
-    header2.unk8 = arg0->z_position;
+    position.unk0 = actor->x_position;
+    position.unk4 = actor->y_position;
+    position.unk8 = actor->z_position;
 
-    temp_v0 = func_151602C0(&header, &header2, arg4, arg5, arg6, arg7, 0xFF, 0, sizeof(tmp), arg8, arg9);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &tmp, sizeof(tmp));
+    effect = func_151602C0(&header, &position, arg4, arg5, arg6, arg7, 0xFF, 0, sizeof(ref), arg8, arg9);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &ref, sizeof(ref));
     }
-    return temp_v0;
+    return effect;
 }
 
-void func_15161F2C(struct225 *arg0) {
-    func_15163F50(arg0, &arg0->unk18);
+s32 func_15161F2C(struct225 *effect) {
+    return func_15163F50(effect, (LightActorRef *)&effect->unk18);
 }
 
-void func_15161F4C(struct225 *arg0, s32 arg1, u8 arg2) {
-    SubA15161F4C *temp_v0 = (SubA15161F4C *)((u8 *)arg0 + 0x18);
-    ArgB15161F4C *b = (ArgB15161F4C *)arg1;
-    void (*fn)(struct225 *, s32, u8);
+/* Event handler: drops the effect when its actor is removed and follows actor swaps, then runs the unk5 handler. */
+void func_15161F4C(struct225 *effect, ActorEvent *event, u8 eventId) {
+    LightActorRef *ref = (LightActorRef *)&effect->unk18;
+    void (*handler)(struct225 *, ActorEvent *, u8);
 
-    if (arg2 == 0) {
-        if ((b->unk0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C(arg0);
-        trailing_label_15161F4C:
+    if (eventId == 0) {
+        if (event->actor == ref->actor || event->u4.actorId == ref->actorId) {
+            func_1516972C(effect);
+        // matching: this label ends a basic block, letting IDO copy the handler load into the branch delay slot
+        trailing_label:
             ;
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (eventId == 0x2D) {
+        if (ref->actor == event->actor) {
+            ref->actor = event->u4.other;
+            ref->actorId = event->otherId;
+        } else if (ref->actor == event->u4.other) {
+            ref->actor = event->actor;
+            ref->actorId = event->actorId;
         }
     }
 
-    fn = D_8008B358[*(u8 *)((u8 *)arg0 + 0x1D)];
-    if (fn != NULL) {
-        fn(arg0, arg1, arg2);
+    handler = D_8008B358[((LightActorRef *)&effect->unk18)->unk5];
+    if (handler != NULL) {
+        handler(effect, event, eventId);
     }
 }
 
@@ -1718,120 +1688,94 @@ void func_15163DEC(struct225 *arg0, struct228 *arg1) {
     arg0->unk14->unk2F = arg1->unk1C;
 }
 
-s32 func_15163F50(struct225 *arg0, struct225 *arg1) {
-    struct127 *temp_v1;
+/* Update for actor-tied effects: keeps the light at the actor; returns 0 once the actor is gone. */
+s32 func_15163F50(struct225 *effect, LightActorRef *ref) {
+    struct127 *actor;
 
-    temp_v1 = arg1->unk0;
-    if (temp_v1->interaction_state == 0) {
+    actor = ref->actor;
+    if (actor->interaction_state == 0) {
         return 0;
     }
-    if (temp_v1->id == 0xFF) {
+    if (actor->id == 0xFF) {
         return 0;
     }
-    if (temp_v1->unique_id != arg1->unk4) {
+    if (actor->unique_id != ref->actorId) {
         return 0;
     }
-    arg0->unk14->unkE = temp_v1->x_position;
-    arg0->unk14->unk10 = temp_v1->y_position;
-    arg0->unk14->unk12 = temp_v1->z_position;
+    effect->unk14->unkE = actor->x_position;
+    effect->unk14->unk10 = actor->y_position;
+    effect->unk14->unk12 = actor->z_position;
     return 1;
 }
 
-typedef struct {
-    s32 field_0x0;
-    union {
-        s32 w;
-        u8 b;
-    } field_0x4;
-    u8 field_0x8;
-    u8 field_0x9;
-} ActorRefMessage;
+/* Event handler for bone-attached lights: like func_15161F4C, other events go to the unk15 handler. */
+void func_15163FEC(struct225 *effect, ActorEvent *event, u8 eventId) {
+    LightAttach *attach = (LightAttach *)&effect->unk18;
 
-typedef struct {
-    s32 field_0x0;
-    u8 field_0x4;
-} ActorRefPayload;
+    if (eventId == 0) {
+        struct127 *actor = event->actor;
 
-typedef struct {
-    u8 pad_0[0x18];
-    ActorRefPayload field_0x18;
-} ActorRefObject;
-
-void func_15163FEC(struct225 *arg0, ActorRefMessage *arg1, u8 arg2) {
-    ActorRefPayload *temp_v0;
-    s32 temp_v1;
-
-    temp_v0 = (ActorRefPayload *)((u8 *)arg0 + 0x18);
-    if (arg2 == 0) {
-        temp_v1 = arg1->field_0x0;
-        if ((temp_v1 == temp_v0->field_0x0) || (arg1->field_0x4.b == temp_v0->field_0x4)) {
-            func_1516972C(arg0);
+        if (actor == attach->actor || event->u4.actorId == attach->actorId) {
+            func_1516972C(effect);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->field_0x0 == arg1->field_0x0) {
-            temp_v0->field_0x0 = arg1->field_0x4.w;
-            temp_v0->field_0x4 = arg1->field_0x9;
-        } else {
-            if (temp_v0->field_0x0 == arg1->field_0x4.w) {
-                temp_v0->field_0x0 = arg1->field_0x0;
-                temp_v0->field_0x4 = arg1->field_0x8;
-            }
-        trailing_label_15163FEC:
-            ;
+    } else if (eventId == 0x2D) {
+        if (attach->actor == event->actor) {
+            attach->actor = event->u4.other;
+            attach->actorId = event->otherId;
+        } else if (attach->actor == event->u4.other) {
+            LightAttach *dst = attach;
+
+            dst->actor = event->actor;
+            dst->actorId = event->actorId;
         }
-    } else if (D_8008B374[arg0->unk2D] != NULL) {
-        D_8008B374[arg0->unk2D]((s32)arg0);
+    } else if (D_8008B374[effect->unk2D] != NULL) {
+        D_8008B374[effect->unk2D]((s32)effect);
     }
 }
-void func_151640C0(ActorRefObject *arg0, ActorRefMessage *arg1, u8 arg2) {
-    ActorRefObject **sp18;
-    ActorRefMessage **sp1C;
-    s32 temp_v1;
-    s32 temp_v0;
-    s32 temp_a0;
-    s32 temp_a1;
-    u8 temp_a3;
-    u8 temp_a2;
-    sp18 = &arg0;
-    sp1C = &arg1;
-    if (arg2 == 0x29) {
-        temp_v1 = (*sp1C)->field_0x4.w;
-        temp_v0 = (s32)*sp18;
-        temp_a0 = ((ActorRefPayload *)temp_v1)->field_0x0;
-        temp_a1 = ((ActorRefObject *)temp_v0)->field_0x18.field_0x0;
-        temp_v0 += 0x18;
-        temp_a2 = ((ActorRefPayload *)temp_v0)->field_0x4;
-        temp_a3 = ((ActorRefPayload *)temp_v1)->field_0x4;
-        if ((temp_a1 == temp_a0) || (temp_a2 == temp_a3) || (((struct127 *)temp_a1)->unique_id == temp_a3)) {
-            func_1516972C((struct225 *)*sp18);
+
+/* Event 0x29 (the message points at another actor reference): drops the effect if it refers to the same actor. */
+void func_151640C0(struct225 *effect, ActorEvent *event, u8 eventId) {
+    LightActorRef *other;
+    LightActorRef *ref = (LightActorRef *)&effect->unk18;
+    struct127 *otherActor;
+    struct127 *actor;
+    u8 otherId;
+    u8 actorId;
+
+    if (eventId == 0x29) {
+        other = (LightActorRef *)event->u4.other;
+        otherActor = other->actor;
+        actor = ref->actor;
+        actorId = ref->actorId;
+        otherId = other->actorId;
+        if (actor == otherActor || actorId == otherId || actor->unique_id == otherId) {
+            func_1516972C(effect);
         }
     }
 }
 
-void func_15164134(struct225 *arg0, ActorRefMessage *arg1, u8 arg2) {
-    ActorRefPayload *temp_v0;
-    s32 temp_v1;
+/* Event handler for beam lights: like func_15161F4C, other events go to the unk25 handler. */
+void func_15164134(struct225 *effect, ActorEvent *event, u8 eventId) {
+    LightBeam *beam = (LightBeam *)&effect->unk18;
 
-    temp_v0 = (ActorRefPayload *)((u8 *)arg0 + 0x18);
-    if (arg2 == 0) {
-        temp_v1 = arg1->field_0x0;
-        if ((temp_v1 == temp_v0->field_0x0) || (arg1->field_0x4.b == temp_v0->field_0x4)) {
-            func_1516972C(arg0);
+    if (eventId == 0) {
+        struct127 *actor = event->actor;
+
+        if (actor == beam->actor || event->u4.actorId == beam->actorId) {
+            func_1516972C(effect);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->field_0x0 == arg1->field_0x0) {
-            temp_v0->field_0x0 = arg1->field_0x4.w;
-            temp_v0->field_0x4 = arg1->field_0x9;
-        } else {
-            if (temp_v0->field_0x0 == arg1->field_0x4.w) {
-                temp_v0->field_0x0 = arg1->field_0x0;
-                temp_v0->field_0x4 = arg1->field_0x8;
-            }
-        trailing_label_15164134:
-            ;
+    } else if (eventId == 0x2D) {
+        if (beam->actor == event->actor) {
+            beam->actor = event->u4.other;
+            beam->actorId = event->otherId;
+        } else if (beam->actor == event->u4.other) {
+            LightBeam *dst = beam;
+
+            dst->actor = event->actor;
+            dst->actorId = event->actorId;
         }
-    } else if (D_8008B37C[*(u8 *)((s32)arg0 + 0x3D)] != NULL) {
-        D_8008B37C[*(u8 *)((s32)arg0 + 0x3D)]((s32)arg0);
+    } else if (D_8008B37C[beam->unk25] != NULL) {
+        D_8008B37C[beam->unk25]((s32)effect);
     }
 }
 
