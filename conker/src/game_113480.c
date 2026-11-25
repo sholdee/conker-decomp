@@ -1,4 +1,5 @@
 #include <ultra64.h>
+// functions.h declares func_1513D524 as void; this file uses the object it returns
 #define func_1513D524 func_1513D524_void_proto
 #include "functions.h"
 #undef func_1513D524
@@ -194,12 +195,12 @@ void *func_150E63A0(Streak *streak, s16 viewIdx) {
     f32 scale;
     f32 length;
     f32 lengthSquared;
-    f32 pad1;
+    f32 pad1; // matching: unused stack slots keep the original frame layout
     f32 pad2;
     StreakVtx *vertices;
     void *result;
     u8 fresh;
-    s32 pad3;
+    s32 pad3; // matching: unused stack slot (frame layout)
 
     func_151D5D60(streak->buffers, viewIdx, 0x40, (void **)&vertices, &fresh);
     result = vertices;
