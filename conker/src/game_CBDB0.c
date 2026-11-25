@@ -305,11 +305,12 @@ extern struct127 *func_1505EEF4(s32 path);
 extern s32 func_1000F568(s32 base, s32 count);
 extern s32 func_15103C14(s32, s32, s32, s32, s32);
 extern void func_15114D24(Struct1509E900 *, s32, s32, s16, s32, s32);
-s32 func_1509F354();
-s32 func_1509F47C();
-s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, s32 nearDistance);
+/* K&R definitions below (they narrow their short params from the stack); these are their promoted prototypes. */
+s32 func_1509F354(s32 first, s32 last, s32 unplayed, u32 volume, s32 path, s32 nearDistance, s32 farDistance);
+void func_1509F47C(s32 first, s32 last, s32 volume, s32 objId, s32 nearDistance, s32 farDistance);
+s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance);
 s32 func_1509F5A8(s32 first, s32 last, s32 volume);
-void func_1509F5F4();
+void func_1509F5F4(s32 sound, s32 volume, s32 path, s32 nearDistance, s32 farDistance, s32 force);
 void func_1509F660(s32 path, s32 secondVoice);
 s32 func_1509F6B0(s32 sound, s32 volume, s32 cents, s32 pan);
 s32 func_1509F6E8(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDistance);
@@ -319,6 +320,7 @@ void func_1509F77C(s32 handle, s32 path, s32 cents, s32 nearDistance, s32 farDis
  * on an actor, at an actor's position...). Returns (handle << 16) | 0x7000, or 0 if none plays. */
 s32 func_1509EFF0(s32 sound, u32 *cmd) {
     s32 ret;
+    s32 target;
     s32 cents;
     s32 pan;
     s32 force;
@@ -326,7 +328,7 @@ s32 func_1509EFF0(s32 sound, u32 *cmd) {
     if (D_800D3840 == 1) {
         ret = func_1509F6B0(sound, 0x7FFF, 0, 0x40);
     } else {
-        ret = cmd[1];
+        ret = cmd[1]; // matching: the kind must share a register with the result
         switch (ret) {
         case 1:
             pan = 0x40;
@@ -342,15 +344,15 @@ s32 func_1509EFF0(s32 sound, u32 *cmd) {
             break;
         case 0:
             /* a random sound from sound..cmd[2], placed by cmd[5]: 0xTnnn = kind T, target nnn */
-            ret = cmd[5];
-            switch (ret & 0xF000) {
+            target = cmd[5];
+            switch (target & 0xF000) {
             case 0x2000:
-                return func_1509F354(sound, cmd[2] & 0xFFF, cmd[3], cmd[4], ret & 0xFFF, cmd[6], cmd[7]);
+                return func_1509F354(sound, cmd[2] & 0xFFF, cmd[3], cmd[4], target & 0xFFF, cmd[6], cmd[7]);
             case 0x3000:
-                func_1509F47C(sound, cmd[2] & 0xFFF, cmd[4], ret & 0xFFF, cmd[6], cmd[7]);
+                func_1509F47C(sound, cmd[2] & 0xFFF, cmd[4], target & 0xFFF, cmd[6], cmd[7]);
                 return 0;
             case 0x4000:
-                return func_1509F4E8(sound, cmd[2] & 0xFFF, cmd[4], ret & 0xFFF, cmd[6]);
+                return func_1509F4E8(sound, cmd[2] & 0xFFF, cmd[4], target & 0xFFF, cmd[6]);
             default:
                 ret = func_1509F5A8(sound, cmd[2] & 0xFFF, cmd[4]);
                 break;
@@ -411,14 +413,14 @@ s32 func_1509F33C(s32 arg0, s32 arg1, s32 arg2) {
 /* Plays a random sound from first..last on the actor following `path`, picking only sounds whose
  * bit is still set in `unplayed` (all of them when it is 0). Returns the mask minus the one played. */
 s32 func_1509F354(first, last, unplayed, volume, path, nearDistance, farDistance)
-    s32 first; s32 last; s32 unplayed; s32 volume; s32 path; s16 nearDistance; s32 farDistance;
+    s32 first; s32 last; s32 unplayed; u32 volume; s32 path; s16 nearDistance; s32 farDistance;
 {
     struct127 *actor;
     s32 count;
     u8 pick;
 
     actor = func_1505EEF4(path);
-    if ((u32)volume >= 0x8000) {
+    if (volume >= 0x8000) {
         volume = 0x7FFF;
     }
     if (actor == NULL) {
@@ -441,7 +443,7 @@ s32 func_1509F354(first, last, unplayed, volume, path, nearDistance, farDistance
 }
 
 /* Plays a random sound from first..last on the object with id `objId`. */
-s32 func_1509F47C(first, last, volume, objId, nearDistance, farDistance)
+void func_1509F47C(first, last, volume, objId, nearDistance, farDistance)
     s32 first; s32 last; s32 volume; s32 objId; s16 nearDistance; s32 farDistance;
 {
     Struct1509E900 *obj;
@@ -452,13 +454,13 @@ s32 func_1509F47C(first, last, volume, objId, nearDistance, farDistance)
 
 /* Plays a random sound from first..last at point `index` of the D_800D3098 table, whose halfword at
  * 0x6 is the far distance (nearDistance is kept below it). */
-s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, s32 nearDistance) {
+s32 func_1509F4E8(s32 first, s32 last, s32 volume, s32 index, u32 nearDistance) {
     struct178 *point;
     s32 farDistance;
 
     point = &D_800D3098[index];
     farDistance = *(s16 *)point->unk6;
-    if ((u32)nearDistance >= (u32)farDistance) {
+    if (nearDistance >= farDistance) {
         nearDistance = farDistance - 1;
     }
     return func_10010F88(func_1000F568(first, (u8)(last - first + 1)), volume, 0, 0, 0, point->unk0, point->pad2,
