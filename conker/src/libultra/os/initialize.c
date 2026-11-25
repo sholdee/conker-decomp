@@ -1,9 +1,8 @@
 #include <ultra64.h>
+#include <os_internal.h>
+#include "osint.h"
+#include "piint.h"
 
-#include "functions.h"
-
-extern s32 D_8000030C;
-extern s32 D_8000031C[16];
 u64 osClockRate = 62500000;      /* OS_CLOCK_RATE */
 u32 __osShutdown = 0;
 u32 __OSGlobalIntMask = OS_IM_ALL;
@@ -17,17 +16,6 @@ typedef struct {
     u32 inst3;
     u32 inst4;
 } __osExceptionVector;
-
-extern s32 __osSiRawReadIo(u32, u32 *);
-extern s32 __osSiRawWriteIo(u32, u32);
-extern s32 osPiRawReadIo(u32, u32 *);
-extern u32 __osGetSR(void);
-extern void __osSetSR(u32);
-extern u32 __osSetFpcCsr(u32);
-extern void osMapTLBRdb(void);
-extern void __osSetHWIntrRoutine(s32, s32 (*)(void));
-extern s32 __osLeoInterrupt(void);
-extern void func_100071D0(void);
 
 void __osInitialize_common(void) {
     u32 pifdata;

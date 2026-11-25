@@ -56,9 +56,9 @@ extern s32  D_8000000C;
 
 extern s32  D_80000300;
 extern s32  D_80000308;
-extern s32  D_8000030C;
+extern s32  D_8000030C; // osResetType; libultra's declaration is in src/libultra/os/osint.h
 extern u32  D_80000310;
-extern s32  D_8000031C[16]; // 64 bytes
+extern s32  D_8000031C[16]; // osAppNMIBuffer (64 bytes); libultra's declaration is in src/libultra/os/osint.h
 
 /* 80020000 */
 
@@ -111,19 +111,9 @@ extern s32  D_80033330;
 extern s32  D_800354F8;
 extern s32 *D_800354FC; // contains chunk0 offsets
 extern s16  D_80035500;
-extern OSThread D_80035910; // piThread (stopped by the PI manager in init_2E50)
+extern OSThread D_80035910; // piThread of libultra/io/pimgr.c (which declares it itself); stopped by the PI manager in init_2E50
 
 extern s32 D_800364C4;
-extern OSMesgQueue D_80036B40;
-extern OSMesg      D_80036B58;
-extern OSTask D_80036B60;
-extern u64 *D_80036B70;
-extern u64 *D_80036B78;
-extern u64 *D_80036B80;
-extern u64 *D_80036B88;
-extern u64 *D_80036B8C;
-extern u64 *D_80036B90;
-extern u64 *D_80036B98;
 
 extern u32  D_80038070;
 extern u16  D_80038074;

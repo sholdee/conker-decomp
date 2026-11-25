@@ -18,6 +18,7 @@ extern void __osDequeueThread(OSThread **, OSThread *);
 extern void __osEnqueueThread(OSThread **, OSThread *);
 extern OSThread *__osPopThread(OSThread **);
 extern void __osDispatchThread(void);
+extern void __osCleanupThread(void);
 
 extern void __osSetTimerIntr(OSTime);
 extern OSTime __osInsertTimer(OSTimer *);
@@ -45,4 +46,15 @@ extern s32 osViClock;
 extern void __osTimerServicesInit(void);
 extern s32 __osAiDeviceBusy(void);
 extern int __osDpDeviceBusy(void);
+extern s32 __osLeoInterrupt(void);
+
+/* __osExceptionPreamble (init_71D0.s), the code that __osInitialize_common copies to the exception vectors. */
+extern void func_100071D0(void);
+
+/*
+ * osResetType and osAppNMIBuffer under the names of their fixed addresses. The game code's
+ * declarations of the same two symbols are in include/variables.h.
+ */
+extern s32 D_8000030C;
+extern s32 D_8000031C[16];
 #endif
