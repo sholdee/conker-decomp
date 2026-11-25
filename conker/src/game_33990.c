@@ -51,7 +51,7 @@ extern u32 D_800BE3E4;
 
 /* EEPROM access (game_20A3A0.c, game_20A850.c) */
 extern void func_151DD3A0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* read; matching: declared void (returns s32) */
-extern s32 func_151DCEF0(OSMesgQueue *mq, s32 block, u8 *buffer, s32 size); /* timed write */
+extern s32 func_151DCEF0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* timed write */
 extern s32 func_151DD4E0(OSMesgQueue *mq, u8 block, u8 *buffer);           /* write one block */
 extern void func_151DD9E4(void);
 extern void func_151E7EF8(void);
@@ -197,56 +197,53 @@ void func_15006590(s32 eepromSlot) {
         }
     }
 }
-typedef struct SaveSlot33990 {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ u8 padC[2];
-    /* 0x0E */ s8 unkE;
-    /* 0x0F */ s8 padF;
-} SaveSlot33990; /* size = 0x10 */
-
-
-void func_15006BEC(s32 arg0) {
+/*
+ * Writes the game state as save slot `saveSlot` (0-2). The save goes to an EEPROM save file that no
+ * other slot uses. Its last block is overwritten with 0xFE first, so an interrupted write fails the
+ * checksum. Layout: checksum, slot, sequence, the D_800D2E4C/D_800D2E60/D_800BE3DF/D_800BE3E0/
+ * D_800BE3E4/D_800BE3E8 values, then each D_800C3A60 entry packed MSB-first in D_800BE3F0[i] bits.
+ */
+void func_15006BEC(s32 saveSlot) {
     u64 mask;
     s32 i;
     s32 j;
-    volatile s32 ret;
+    volatile s32 ret; // matching: the dead func_151DCEF0 result is stored to the stack
     u8 *p;
-    s32 slot;
-    s32 id;
+    s32 eepromSlot;
+    s32 sequence;
     u8 bit;
     u8 byte;
     u16 sum;
 
-    id = (((SaveSlot33990 *)&D_800BE3F8)[arg0].unk8 + 1) & 0x7FFFFFFF;
-    j = -1;
+    sequence = (D_800BE3F8[saveSlot].sequence + 1) & 0x7FFFFFFF;
+    j = -1; /* free EEPROM save files */
     for (i = 0; i < 3; i++) {
-        if (((SaveSlot33990 *)&D_800BE3F8)[i].unk8 >= 0) {
-            j &= ~(1 << ((SaveSlot33990 *)&D_800BE3F8)[i].unkE);
+        if (D_800BE3F8[i].sequence >= 0) {
+            j &= ~(1 << D_800BE3F8[i].eepromSlot);
         }
     }
-    slot = 0;
+    eepromSlot = 0;
     for (i = 0; i < 4; i++) {
         if ((1 << i) & j) {
-            slot = i;
+            eepromSlot = i;
         }
     }
-    ((SaveSlot33990 *)&D_800BE3F8)[arg0].unkE = slot;
-    ((SaveSlot33990 *)&D_800BE3F8)[arg0].unk8 = id;
+    D_800BE3F8[saveSlot].eepromSlot = eepromSlot;
+    D_800BE3F8[saveSlot].sequence = sequence;
     if (D_8002AC5C == 0) {
         for (i = 0; i < 8; i++) { D_800BE358[i] = 0xFE; }
         osWritebackDCacheAll();
-        func_151DD4E0(&D_800BE900, (slot << 4) + 0x13, D_800BE358);
+        func_151DD4E0(&D_800BE900, (eepromSlot << 4) + 0x13, D_800BE358);
     }
     if (D_800BE3F0 == NULL) {
-        D_800BE3F0 = (u8 *)func_1502B5C8(0, 1, 7, slot) + 8;
+        D_800BE3F0 = (u8 *)func_1502B5C8(NULL, 1, 7) + 8;
     }
-    p = (u8 *)(u32)D_800BE35A;
-    *p++ = arg0;
-    *p++ = (id >> 24) & 0xFF;
-    *p++ = (id >> 16) & 0xFF;
-    *p++ = (id >> 8) & 0xFF;
-    *p++ = id & 0xFF;
+    p = (u8 *)(u32)D_800BE35A; // matching: &D_800BE358[2] or a plain D_800BE35A changes codegen
+    *p++ = saveSlot;
+    *p++ = (sequence >> 24) & 0xFF;
+    *p++ = (sequence >> 16) & 0xFF;
+    *p++ = (sequence >> 8) & 0xFF;
+    *p++ = sequence & 0xFF;
     for (i = 0; i < 27; i++) { *p++ = ((u8 *)D_800D2E4C)[i]; }
     for (i = 0; i < 9; i++) { *p++ = D_800D2E60[i]; }
     *p++ = *(s8 *)&D_800BE3DF;
@@ -258,10 +255,10 @@ void func_15006BEC(s32 arg0) {
     *p++ = ((u32)D_800BE3E8 >> 16) & 0xFF;
     *p++ = ((u32)D_800BE3E8 >> 8) & 0xFF;
     *p++ = (D_800BE3E8) & 0xFF;
-    for (i = 0; i < 0x45; i++) { p[i] = 0; }
+    for (i = 0; i < 69; i++) { p[i] = 0; }
     byte = 0;
     bit = 0x80;
-    for (i = 0; i < 0x45; i++) {
+    for (i = 0; i < 69; i++) {
         mask = (u64)1 << (D_800BE3F0[i] - 1);
         for (j = 0; j < D_800BE3F0[i]; j++) {
             if (D_800C3A60[i] & mask) {
@@ -282,29 +279,27 @@ void func_15006BEC(s32 arg0) {
     *(u16 *)D_800BE358 = sum;
     osWritebackDCacheAll();
     if (D_8002AC5C == 0) {
-        ret = func_151DCEF0(&D_800BE900, (u8)((slot << 4) + 4), D_800BE358, 0x80);
+        ret = func_151DCEF0(&D_800BE900, (eepromSlot << 4) + 4, D_800BE358, 0x80);
     }
 }
-void func_1500707C(s32 arg0) {
+/* Erases every EEPROM save file loaded as save slot `saveSlot` by overwriting its first two blocks. */
+void func_1500707C(s32 saveSlot) {
     s32 i;
     s32 ret;
-    s32 idx;
-    s32 idx2;
-    u8 *p358 = D_800BE358;
-    s8 *p3D8;
-    for (i = 0; i < 8; i++) { p358[i] = 0xFF; }
+    s32 block;
+    u8 *buffer = D_800BE358;
+
+    for (i = 0; i < 8; i++) { buffer[i] = 0xFF; }
     osWritebackDCacheAll();
-    p3D8 = D_800BE3D8;
     if (D_8002AC5C == 0) {
         for (i = 0; i < 4; i++) {
-            if (arg0 == *p3D8) {
-                idx = i * 16 + 4;
-                ret = func_151DD4E0(&D_800BE900, idx, p358);
-                idx2 = idx + 1;
-                ret = func_151DD4E0(&D_800BE900, idx2, p358) + ret - ret;
+            if (saveSlot == D_800BE3D8[i]) {
+                block = i * 16 + 4;
+                ret = func_151DD4E0(&D_800BE900, block, buffer);
+                // matching: "+ ret - ret" and "if (ret) {}" keep the unused first result in a saved register
+                ret = func_151DD4E0(&D_800BE900, block + 1, buffer) + ret - ret;
                 if (ret) {}
             }
-            p3D8++;
         }
     }
 }
@@ -315,32 +310,32 @@ void func_15007168(void) {
         D_800BE2F0[i] = 0;
     }
 
-    for (i = 0; i != 10; i++) {
-        ((Struct33990 *)D_80082BBC)[i].unk1 = 3;
-        ((Struct33990 *)D_80082BBC)[i].unk3 = 2;
-        ((Struct33990 *)D_80082BBC)[i].unk4 = 1;
-        ((Struct33990 *)D_80082BBC)[i].unk2 = 10;
+    for (i = 0; i < 10; i++) {
+        D_80082BBC[i].unk1 = 3;
+        D_80082BBC[i].unk3 = 2;
+        D_80082BBC[i].unk4 = 1;
+        D_80082BBC[i].unk2 = 10;
         switch (i) {
             case 0:
-                ((Struct33990 *)D_80082BBC)[i].unk5 = 3;
+                D_80082BBC[i].unk5 = 3;
                 break;
             case 1:
             case 2:
-                ((Struct33990 *)D_80082BBC)[i].unk5 = 5;
+                D_80082BBC[i].unk5 = 5;
                 break;
             case 7:
-                ((Struct33990 *)D_80082BBC)[i].unk5 = 20;
+                D_80082BBC[i].unk5 = 20;
                 break;
             case 5:
-                ((Struct33990 *)D_80082BBC)[i].unk5 = 20;
-                ((Struct33990 *)D_80082BBC)[i].unk2 = 0;
+                D_80082BBC[i].unk5 = 20;
+                D_80082BBC[i].unk2 = 0;
                 break;
             case 8:
             case 9:
-                ((Struct33990 *)D_80082BBC)[i].unk5 = 3;
+                D_80082BBC[i].unk5 = 3;
                 break;
         }
-        ((Struct33990 *)D_80082BBC)[i].unk9 = 0;
+        D_80082BBC[i].unk9 = 0;
     }
 }
 // PERMUTER CANDIDATE best 1165: loop structure byte-exact; remaining diff is a clean 3-register
