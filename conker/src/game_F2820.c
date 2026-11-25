@@ -3,139 +3,154 @@
 #include "variables.h"
 
 
+typedef struct Vec3f {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec3f;
+
+/* Spawn parameters; func_150C5370 copies them into the object at +0x18. */
+typedef struct StripDesc {
+    /* 0x00 */ Vec3f p0;
+    /* 0x0C */ Vec3f p1;
+    /* 0x18 */ s8 updateIdx;
+    /* 0x19 */ u8 pad19[3];
+    /* 0x1C */ f32 texScale;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 pad21[3];
+} StripDesc; // size 0x24
+
+/* Character the strip end follows; stored right after the object header. */
+typedef struct StripTarget {
+    /* 0x00 */ struct127 *obj;
+    /* 0x04 */ u8 uniqueId;     // obj->unique_id when attached
+    /* 0x05 */ u8 bone;         // matrix index into obj->unk1D4
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ Vec3f offset;    // bone-local position
+} StripTarget;
+
+/* A camera-facing textured strip drawn from p0 to p1 (object type 0x46). */
+typedef struct StripObj {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ Vec3f p0;
+    /* 0x24 */ Vec3f p1;
+    /* 0x30 */ s8 updateIdx;    // index into D_80088760, -1 for none
+    /* 0x31 */ u8 pad31[3];
+    /* 0x34 */ f32 texScale;    // texture repeats per unit of length
+    /* 0x38 */ u8 unk38;        // index into D_800887B8 / D_800887C0 / D_800887C8
+    /* 0x39 */ u8 pad39[7];
+    /* 0x40 */ Vtx quad[2][4];  // double-buffered by D_800BE9C0
+    /* 0xC0 */ f32 length;      // |p0 - p1|
+    /* 0xC4 */ u8 padC4[4];
+    /* 0xC8 */ StripTarget target;
+} StripObj;
+
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern f32 func_15143E64(Vec3f *);
 
-typedef struct {
-    u8 pad0[0x10];
-    s32 unk10;
-    s32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    u8 pad30[0xC0 - 0x30];
-    f32 unkC0;
-} Obj150C5370;
+/** Allocates a strip with `payloadSize` bytes of payload after the 0xC8-byte header and caches its length. */
+StripObj *func_150C5370(StripDesc *desc, s32 payloadSize) {
+    StripObj *strip;
 
-Obj150C5370 *func_150C5370(void *arg0, s32 arg1) {
-    Obj150C5370 *obj;
-    struct17 diff;
-
-    obj = func_15167A68(0x46, 0, arg1 + 0xC8, 1, 0xFF, 1);
-    if (obj == NULL) {
+    strip = func_15167A68(0x46, 0, payloadSize + 0xC8, 1, 0xFF, 1);
+    if (strip == NULL) {
         return NULL;
     }
-    memcpy(&obj->unk18, arg0, 0x24);
+    memcpy(&strip->p0, desc, sizeof(StripDesc));
     {
-        extern f32 func_15143E64(struct17 *);
+        Vec3f diff;
 
-        diff.unk0 = obj->unk18 - obj->unk24;
-        diff.unk4 = obj->unk1C - obj->unk28;
-        diff.unk8 = obj->unk20 - obj->unk2C;
-        obj->unkC0 = func_15143E64(&diff);
+        diff.x = strip->p0.x - strip->p1.x;
+        diff.y = strip->p0.y - strip->p1.y;
+        diff.z = strip->p0.z - strip->p1.z;
+        strip->length = func_15143E64(&diff);
     }
-    obj->unk10 = 1;
-    obj->unk14 = 0;
-    return obj;
+    strip->unk10 = 1;
+    strip->unk14 = 0;
+    return strip;
 }
 
-
-void func_150C5430(struct102 *arg0) {
-    func_15169804(arg0);
+void func_150C5430(StripObj *strip) {
+    func_15169804((struct102 *)strip);
 }
 
-void func_150C5450(struct102 *arg0) {
-    func_15169824(arg0);
+void func_150C5450(StripObj *strip) {
+    func_15169824((struct102 *)strip);
 }
 
 extern void (*D_800887B8[])(void);
 
-void func_150C5470(struct102 *arg0) {
-    s32 temp = *(u8 *)((u8 *)arg0 + 0x38);
+void func_150C5470(StripObj *strip) {
+    s32 idx = strip->unk38;
 
-    if (temp < 0) {
-        temp = 0;
-    } else if (temp >= 2) {
-        temp = 0;
+    if (idx < 0) {
+        idx = 0;
+    } else if (idx >= 2) {
+        idx = 0;
     }
-    D_800887B8[temp]();
+    D_800887B8[idx]();
 }
 
 extern void (*D_800887C0[])(void);
 
-void func_150C54C0(struct102 *arg0) {
-    s32 temp = *(u8 *)((u8 *)arg0 + 0x38);
+void func_150C54C0(StripObj *strip) {
+    s32 idx = strip->unk38;
 
-    if (temp < 0) {
-        temp = 0;
-    } else if (temp >= 2) {
-        temp = 0;
+    if (idx < 0) {
+        idx = 0;
+    } else if (idx >= 2) {
+        idx = 0;
     }
-    D_800887C0[temp]();
+    D_800887C0[idx]();
 }
 
-extern void func_1514EDF0(struct102 *arg0, s32 arg1);
+extern void func_1514EDF0(StripObj *strip, struct127 *obj);
 
-void func_150C5510(struct102 *arg0) {
-    func_1514EDF0(arg0, *(s32 *)((u8 *)arg0 + 0xC8));
-    func_150C5430(arg0);
+void func_150C5510(StripObj *strip) {
+    func_1514EDF0(strip, strip->target.obj);
+    func_150C5430(strip);
 }
 
-void func_150C553C(struct102 *arg0) {
-    func_1514EDF0(arg0, *(s32 *)((u8 *)arg0 + 0xC8));
-    func_150C5450(arg0);
+void func_150C553C(StripObj *strip) {
+    func_1514EDF0(strip, strip->target.obj);
+    func_150C5450(strip);
 }
 
-typedef struct {
-    u8 pad0[0x10];
-    s32 unk10;
-    s32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    s8 unk30;
-    u8 pad31[0xC0 - 0x31];
-    f32 unkC0;
-} Obj150C5568;
+extern s32 (*D_80088760[])(StripObj *);
 
-extern s32 (*D_80088760[])(Obj150C5568 *);
-
-void func_150C5568(Obj150C5568 *arg0) {
+/** Runs the strip's update handler; removes the strip when it returns 0, else refreshes the length if it moved. */
+void func_150C5568(StripObj *strip) {
     s32 idx;
-    u8 done;
-    struct17 prev;
+    u8 remove;
+    Vec3f prev;
 
-    if (arg0->unk10 & 1) {
-        done = 0;
-        idx = arg0->unk30;
-        prev.unk0 = arg0->unk18 - arg0->unk24;
-        prev.unk4 = arg0->unk1C - arg0->unk28;
-        prev.unk8 = arg0->unk20 - arg0->unk2C;
+    if (strip->unk10 & 1) {
+        remove = FALSE;
+        idx = strip->updateIdx;
+        prev.x = strip->p0.x - strip->p1.x;
+        prev.y = strip->p0.y - strip->p1.y;
+        prev.z = strip->p0.z - strip->p1.z;
 
         if (idx != -1) {
-            if (D_80088760[idx](arg0) == 0) {
-                done = 1;
+            if (D_80088760[idx](strip) == 0) {
+                remove = TRUE;
             }
         }
-        if (!done) {
-            struct17 diff;
-            s32 pad;
-            extern f32 func_15143E64(struct17 *);
+        if (!remove) {
+            Vec3f diff;
+            s32 pad; // matching: reserves the stack word the target frame has
 
-            diff.unk0 = arg0->unk18 - arg0->unk24;
-            diff.unk4 = arg0->unk1C - arg0->unk28;
-            diff.unk8 = arg0->unk20 - arg0->unk2C;
-            if (diff.unk0 != prev.unk0 || diff.unk4 != prev.unk4 || diff.unk8 != prev.unk8) {
-                arg0->unkC0 = func_15143E64(&diff);
+            diff.x = strip->p0.x - strip->p1.x;
+            diff.y = strip->p0.y - strip->p1.y;
+            diff.z = strip->p0.z - strip->p1.z;
+            if (diff.x != prev.x || diff.y != prev.y || diff.z != prev.z) {
+                strip->length = func_15143E64(&diff);
             }
         }
-        if (done) {
-            func_1516972C((struct102 *)arg0);
+        if (remove) {
+            func_1516972C((struct102 *)strip);
         }
     }
 }
