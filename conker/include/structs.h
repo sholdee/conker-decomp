@@ -1588,6 +1588,7 @@ struct WorldObject {
     /* 0x78 */ void (*onContact)(WorldObject *obj, Actor *actor);
     /* 0x7C */ union {
         s32 words[3];
+        f32 floats[3];
         struct {
             /* 0x7C */ s32 unk7C;
             /* 0x80 */ s32 tri;      // floor probe results, see func_150045C4

@@ -2,20 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-/* A level object whose vertices a wave deformer moves (func_151149AC returns one; see Prop in game_10B7D0.c). */
-typedef struct {
-    /* 0x00 */ f32 rotation[3];
-    /* 0x0C */ u8 padC[4];
-    /* 0x10 */ struct { s16 x, y, z; } position;
-    /* 0x16 */ u16 vertexCount;
-    /* 0x18 */ u8 pad18[8];
-    /* 0x20 */ Vtx *frameVerts[2]; // deformed copies, indexed by the frame buffer D_800BE9C0
-    /* 0x28 */ Vtx *baseVerts;
-    /* 0x2C */ f32 scale[3];
-    /* 0x38 */ u8 pad38[0x37];
-    /* 0x6F */ u8 unk6F;
-} WaveObject;
-
 /* The part of a WaveDeformer that the func_150A6FA0 family of vertex routines reads. */
 typedef struct {
     /* 0x00 */ f32 falloff;   // 1 / (radius / 100)^2
@@ -49,9 +35,9 @@ typedef struct {
 /* variables.h declares D_800DD410 as s32[2]; it holds the WaveDeformer pointers, D_800DD418 counts them. */
 #define gWaveDeformers ((WaveDeformer **)D_800DD410)
 
-extern WaveObject *func_151149AC(u8);
+extern WorldObject *func_151149AC(u8);
 void *allocate_memory(s32, s32, s32, s32);
-extern void func_1511490C(MtxF mtx, WaveObject *obj);
+extern void func_1511490C(MtxF mtx, WorldObject *obj);
 extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_150A6FA0(Vtx *dst, u16 count, WaveParams *params, s8 *phase, f32 *weight, Vtx *src);
 extern void func_150A70C0(Vtx *dst, u16 count, WaveParams *params, s8 *phase, Vtx *src);
@@ -66,7 +52,7 @@ extern void func_150A751C(Vtx *dst, u16 count, WaveParams *params, u8 *angle, s8
 void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 radius, f32 amplitude,
                    s8 speed, s8 phaseStep, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF) {
     WaveDeformer *deformer;
-    WaveObject *obj;
+    WorldObject *obj;
     WaveDeformer *other;
     s32 i;
     s8 shared;
@@ -99,9 +85,9 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
             }
         }
         deformer->sharesObject = shared;
-        center[0] = x - obj->position.x;
-        center[1] = y - obj->position.y;
-        center[2] = z - obj->position.z;
+        center[0] = x - obj->x;
+        center[1] = y - obj->y;
+        center[2] = z - obj->z;
         deformer->params.center[0] = center[0];
         deformer->params.center[1] = center[1];
         deformer->params.center[2] = center[2];
@@ -124,12 +110,12 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
             deformer->params.unk14[4] = argE;
             deformer->params.unk14[5] = argF;
         }
-        deformer->vertexPhase = allocate_memory(obj->vertexCount, 1, 0, 0);
+        deformer->vertexPhase = allocate_memory(obj->numVertices, 1, 0, 0);
         if ((flags & WAVE_MODE_MASK) == 2) {
-            deformer->vertexAngle = allocate_memory(obj->vertexCount, 1, 0, 0);
+            deformer->vertexAngle = allocate_memory(obj->numVertices, 1, 0, 0);
         }
         if ((flags & WAVE_WEIGHTED) == WAVE_WEIGHTED) {
-            deformer->vertexWeight = allocate_memory(obj->vertexCount * sizeof(f32), 1, 0, 0);
+            deformer->vertexWeight = allocate_memory(obj->numVertices * sizeof(f32), 1, 0, 0);
         }
         if ((flags & WAVE_DIRECTIONAL) == WAVE_DIRECTIONAL) {
             radians = -heading * 0.0174532924f; // degrees to radians
@@ -137,12 +123,12 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
             cosH = cosf(radians);
             headingAngle = heading * 0.7111111283f; // degrees to 256 per turn
         }
-        for (i = 0; i < obj->vertexCount; i++) {
+        for (i = 0; i < obj->numVertices; i++) {
             if ((flags & WAVE_DIRECTIONAL) == 0) {
-                dx = obj->baseVerts[i].v.ob[0] - center[0];
+                dx = obj->srcVertices[i].v.ob[0] - center[0];
                 dx = dx * dx;
-                dy = obj->baseVerts[i].v.ob[1] - center[1];
-                dz = obj->baseVerts[i].v.ob[2] - center[2];
+                dy = obj->srcVertices[i].v.ob[1] - center[1];
+                dz = obj->srcVertices[i].v.ob[2] - center[2];
                 dy = dy * dy;
                 dz = dz * dz;
                 distance = dx + dy + dz;
@@ -152,8 +138,8 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
                 absDist = distance * toUnits;
                 dist = absDist;
             } else if ((flags & WAVE_DIRECTIONAL) == WAVE_DIRECTIONAL) {
-                dx = obj->baseVerts[i].v.ob[0] - center[0];
-                dz = obj->baseVerts[i].v.ob[2] - center[2];
+                dx = obj->srcVertices[i].v.ob[0] - center[0];
+                dz = obj->srcVertices[i].v.ob[2] - center[2];
                 dz = -dx * sinH + dz * cosH;
                 absDist = dz * toUnits;
                 dist = absDist;
@@ -190,7 +176,7 @@ void func_15177410(u8 flags, u8 objectId, s16 x, s16 y, s16 z, f32 heading, u16 
 void func_15177A94(void) {
     s32 i;
     WaveDeformer *deformer;
-    WaveObject *obj;
+    WorldObject *obj;
     Vtx *src;
     MtxF mtx;
     f32 x;
@@ -201,32 +187,32 @@ void func_15177A94(void) {
     for (i = 0; i < D_800DD418; i++) {
         deformer = gWaveDeformers[i];
         obj = func_151149AC(deformer->objectId);
-        if (obj->unk6F & 0xF) {
+        if (obj->viewFlags & 0xF) {
             // the first deformer on an object starts from its base vertices, later ones stack
             if (!deformer->sharesObject) {
-                src = obj->baseVerts;
+                src = obj->srcVertices;
             } else {
-                src = obj->frameVerts[D_800BE9C0];
+                src = obj->vertices[D_800BE9C0];
             }
             if ((deformer->flags & WAVE_MODE_MASK) == 1) {
                 if ((deformer->flags & WAVE_WEIGHTED) == WAVE_WEIGHTED) {
-                    func_150A7360(obj->frameVerts[D_800BE9C0], obj->vertexCount, &deformer->params,
+                    func_150A7360(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
                                   deformer->params.unk14, deformer->vertexPhase, deformer->vertexWeight, src);
                 } else {
-                    func_150A71C8(obj->frameVerts[D_800BE9C0], obj->vertexCount, &deformer->params,
+                    func_150A71C8(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
                                   deformer->params.unk14, deformer->vertexPhase, src);
                 }
             } else if ((deformer->flags & WAVE_MODE_MASK) == 0) {
                 if ((deformer->flags & WAVE_WEIGHTED) == WAVE_WEIGHTED) {
-                    func_150A6FA0(obj->frameVerts[D_800BE9C0], obj->vertexCount, &deformer->params,
+                    func_150A6FA0(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
                                   deformer->vertexPhase, deformer->vertexWeight, src);
                 } else {
-                    func_150A70C0(obj->frameVerts[D_800BE9C0], obj->vertexCount, &deformer->params,
+                    func_150A70C0(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
                                   deformer->vertexPhase, src);
                 }
             } else if ((deformer->flags & WAVE_MODE_MASK) == 2) {
                 if ((deformer->flags & WAVE_WEIGHTED) == WAVE_WEIGHTED) {
-                    func_150A751C(obj->frameVerts[D_800BE9C0], obj->vertexCount, &deformer->params,
+                    func_150A751C(obj->vertices[D_800BE9C0], obj->numVertices, &deformer->params,
                                   deformer->vertexAngle, deformer->vertexPhase, deformer->vertexWeight, src);
                 }
             }
@@ -234,26 +220,26 @@ void func_15177A94(void) {
     }
     for (i = 0; i < D_800DD418; i++) {
         deformer = gWaveDeformers[i];
-        if (func_151149AC(deformer->objectId)->unk6F & 0xF) {
+        if (func_151149AC(deformer->objectId)->viewFlags & 0xF) {
             if (!deformer->sharesObject) {
                 obj = func_151149AC(deformer->objectId);
-                if (obj->rotation[0] == 0.0f && obj->rotation[1] == 0.0f && obj->rotation[2] == 0.0f &&
-                    obj->scale[0] == 1.0f && obj->scale[1] == 1.0f && obj->scale[2] == 1.0f) {
+                if (obj->rotX == 0.0f && obj->rotY == 0.0f && obj->rotZ == 0.0f &&
+                    obj->scaleX == 1.0f && obj->scaleY == 1.0f && obj->scaleZ == 1.0f) {
                     // no rotation or scale: just translate (y already holds the wave offset)
-                    for (j = 0; j < obj->vertexCount; j++) {
-                        obj->frameVerts[D_800BE9C0][j].v.ob[0] = obj->baseVerts[j].v.ob[0] + obj->position.x;
-                        obj->frameVerts[D_800BE9C0][j].v.ob[1] += obj->position.y;
-                        obj->frameVerts[D_800BE9C0][j].v.ob[2] = obj->baseVerts[j].v.ob[2] + obj->position.z;
+                    for (j = 0; j < obj->numVertices; j++) {
+                        obj->vertices[D_800BE9C0][j].v.ob[0] = obj->srcVertices[j].v.ob[0] + obj->x;
+                        obj->vertices[D_800BE9C0][j].v.ob[1] += obj->y;
+                        obj->vertices[D_800BE9C0][j].v.ob[2] = obj->srcVertices[j].v.ob[2] + obj->z;
                     }
                 } else {
                     func_1511490C(mtx, obj);
                     if (i) {} // matching: an extra use of i makes IDO keep it in a register and spill the list cursor
-                    for (j = 0; j < obj->vertexCount; j++) {
-                        func_150A7960(mtx, obj->baseVerts[j].v.ob[0], obj->frameVerts[D_800BE9C0][j].v.ob[1],
-                                      obj->baseVerts[j].v.ob[2], &x, &y, &z);
-                        obj->frameVerts[D_800BE9C0][j].v.ob[0] = x;
-                        obj->frameVerts[D_800BE9C0][j].v.ob[1] = y;
-                        obj->frameVerts[D_800BE9C0][j].v.ob[2] = z;
+                    for (j = 0; j < obj->numVertices; j++) {
+                        func_150A7960(mtx, obj->srcVertices[j].v.ob[0], obj->vertices[D_800BE9C0][j].v.ob[1],
+                                      obj->srcVertices[j].v.ob[2], &x, &y, &z);
+                        obj->vertices[D_800BE9C0][j].v.ob[0] = x;
+                        obj->vertices[D_800BE9C0][j].v.ob[1] = y;
+                        obj->vertices[D_800BE9C0][j].v.ob[2] = z;
                     }
                 }
             }
