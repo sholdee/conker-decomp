@@ -2420,63 +2420,55 @@ void func_15022998(s32 *obj) {
     }
 }
 
-s32 func_150229E4(struct127 *arg0)
-{
-  s32 i;
-  s32 idx;
-  s32 slot;
-  s32 id;
-  idx = 0;
-  idx = 0;
-  if (arg0 == 0)
-  {
-    return 0;
-  }
-  if (arg0->interaction_state == 0)
-  {
-    return 0;
-  }
-  if (D_800C35C8[idx] == 0)
-  {
-    return 0;
-  }
-  if (arg0->unk5 == 4)
-  {
-    idx = 1;
-  }
-  slot = arg0->unk65;
-  if (slot != 0)
-  {
-    id = D_800CC2D0[slot - 1].unique_id;
-  }
-  else
-  {
-    id = arg0->unique_id;
-  }
-  for (i = 0; i < D_800C363A[idx]; i++)
-  {
-    if (D_800C35C8[idx][i] != 0)
-    {
-      if (D_800C35F0[idx][i].type == 2 && id == D_800C35F0[idx][i].unk2)
-      {
-        if (slot == 0)
-        {
-          return 1;
-        }
-        return 2;
-      }
-    }
-  }
+/* Whether `obj` is bound to an object track of its scene (scene 1 when obj->unk5 is 4): 1 when
+   bound itself, 2 when bound through its parent (obj->unk65). */
+s32 func_150229E4(struct127 *obj) {
+    s32 i;
+    s32 scene;
+    s32 parent;
+    s32 id;
 
-  return 0;
+    scene = 0;
+    if (obj == NULL) {
+        return 0;
+    }
+    if (obj->interaction_state == 0) {
+        return 0;
+    }
+    if (D_800C35C8[scene] == NULL) {
+        return 0;
+    }
+    if (obj->unk5 == 4) {
+        scene = 1;
+    }
+    parent = obj->unk65;
+    if (parent != 0) {
+        id = D_800CC2D0[parent - 1].unique_id;
+    } else {
+        id = obj->unique_id;
+    }
+    for (i = 0; i < D_800C363A[scene]; i++) {
+        if (D_800C35C8[scene][i] != 0) {
+            if (D_800C35F0[scene][i].type == 2 && id == D_800C35F0[scene][i].unk2) {
+                if (parent == 0) {
+                    return 1;
+                }
+                return 2;
+            }
+        }
+    }
+
+    return 0;
 }
 
-s32 func_15022B08(s32 arg0, s32 arg1) {
+/* Whether actor `actorIndex` (D_800DBEF4[actorIndex].unk72) is bound to a track of the scene. */
+s32 func_15022B08(s32 actorIndex, s32 scene) {
     s32 i;
 
-    for (i = 0; i < D_800C363A[arg1]; i++) {
-        if (D_800C35C8[arg1][i] != 0) {
-            if (D_800C35F0[arg1][i].unk2 == ((u8 *)*(&D_800DBEF4) + (arg0 * 0xA0))[0x72]) {
+    for (i = 0; i < D_800C363A[scene]; i++) {
+        if (D_800C35C8[scene][i] != 0) {
+            // matching: byte arithmetic on the actor array (0x72 is padding in struct131; indexing schedules differently)
+            if (D_800C35F0[scene][i].unk2 == ((u8 *)D_800DBEF4 + actorIndex * 0xA0)[0x72]) {
                 return 1;
             }
         }
