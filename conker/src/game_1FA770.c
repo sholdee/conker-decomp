@@ -1,492 +1,427 @@
-/* functions.h types func_1513D2F0 arg1 as s32; func_151CE6D0 needs a pointer arg1 (an int-typed
- * address changes which loop invariants IDO keeps in saved registers). */
-#define func_1513D2F0 func_1513D2F0_s32_decl_in_functions_h
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#undef func_1513D2F0
 
-void *func_151CD4C0();
-void func_151CE47C();
+void *memcpy(void *dst, const void *src, u32 size);
 
-struct Vec3w151CEC10;
+typedef struct { f32 x, y, z; } Vec3f;
+typedef struct { f32 x, z; } Vec2f;
 
-extern f32 D_800AB020;
-extern f32 D_800AB024;
-extern f32 D_800AB008;
-extern f32 D_800D9860;
-extern f32 func_15144AA8(s32);
-extern struct17 *func_15144B34(s32);
-extern s32 func_15046C80(f32 *, s32, f32, f32 *);
-extern struct260 *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-s32 func_151CEC10(struct Vec3w151CEC10 *, f32 *, void *);
+/* Events posted through func_151494E0 with a stream id as the payload. */
+#define STREAM_EVENT_START 0x17 /* create the stream's emitter */
+#define STREAM_EVENT_STOP  0x18 /* stop emitting; the particles still fall */
+#define STREAM_EVENT_ENDED 0x23 /* the emitter was destroyed */
 
+#define STREAM_KIND 0xB /* Emitter.kind of a stream emitter */
+
+/* Emitter flags (Emitter.flags). */
+#define EMITTER_FLAG_EMITTING 2
+#define EMITTER_FLAG_STOPPED  8
+
+/* A level-placed stream: a column of particles falling from y + height down to y. */
 typedef struct {
-    char pad_0x0[0x48];
-    s32 field_0x48;
-} Func151CE4DCTemp;
+    s16 x;
+    s16 y;
+    s16 z;
+    s16 size;
+    s16 height;
+    u8 padA[0xA];
+    u8 unk14; /* 0 while the stream has an emitter, 1 once it ended */
+    u8 pad15[3];
+    s32 id;
+    s32 textureIndex; /* into D_800AAEE0 */
+} StreamSource;
 
+/* One particle of a stream (0x1C bytes); the emitter keeps them in a ring. */
 typedef struct {
-    char pad_0x0[0x98];
-    s32 field_0x98;
-} Func151CE4DCArg0;
+    Vec3f pos;
+    f32 velocity;
+    f32 width;
+    s16 alpha;
+    f32 tc; /* texture t coordinate */
+} StreamParticle;
 
+/* Per-stream state, the 0x50-byte data block of a stream emitter. */
 typedef struct {
-    char pad_0x0[0x30];
-    s32 field_0x30;
-} ConkerField30Object;
+    f32 swayAmpX;
+    f32 swayAmpZ;
+    f32 swayPhaseX;
+    f32 swayPhaseZ;
+    f32 swayRateX;
+    f32 swayRateZ;
+    Vec2f spawnPos; /* where the last particle was spawned */
+    f32 unk20;
+    f32 baseWidth;
+    f32 widthAmp;
+    f32 widthPhase;
+    f32 widthRate;
+    f32 width;
+    f32 unk38;
+    f32 tc;
+    f32 spawnCount; /* particles owed; one is spawned per whole unit */
+    f32 floorY;
+    s32 id;
+    u8 textureIndex;
+    u8 pad4D[3];
+} StreamData;
 
+typedef struct Emitter {
+    u8 pad0[8];
+    struct Emitter *next;
+    u8 padC[4];
+    Vec3f pos;
+    u8 pad1C[2];
+    u16 flags;
+    s32 kind;
+    u8 pad24;
+    u8 capacity;
+    u8 pad26[6];
+    s8 count;
+    s8 tail; /* oldest particle */
+    s8 head; /* next free slot */
+    u8 pad2F;
+    u8 unk30;
+    u8 pad31[0x23];
+    Vec3f prevPos;
+    u8 pad60[0x24];
+    u8 buffers[0x10];
+    StreamParticle *particles;
+    StreamData *data;
+} Emitter;
+
+/* Template for a new emitter, passed to func_15147A80. */
 typedef struct {
-    ConkerField30Object *field_0x0;
-} ConkerField0Slot;
-
-typedef struct {
-    char pad_0x0[0x98];
-    ConkerField0Slot *field_0x98;
-} ConkerField98Owner;
-
-
-struct260 *func_151CD2C0(void *arg0, u8 arg1, s32 arg2) {
-    struct260 *temp_v0;
-    struct {
-        void *unk0;
-        s32 unk4;
-        s32 unk8;
-        u8 unkC;
-        u8 padD;
-        u8 padE;
-        u8 padF;
-    } sp34;
-
-    sp34.unk0 = arg0;
-    sp34.unk4 = *(s32 *)((s32)arg0 + 0x18);
-    sp34.unk8 = 0;
-    sp34.unkC = *(s32 *)((s32)arg0 + 0x1C);
-
-    temp_v0 = func_15149130(0x12C, -1, -1, -1, 0, 0x1E, (struct37 *)0x10, arg1, arg2);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp34, 0x10);
-    }
-    return temp_v0;
-}
-
-void func_151CD35C(s32 arg0) {
-    s32 sp1C;
-
-    if (arg0 >= 0 && arg0 < 4) {
-        sp1C = arg0;
-        func_151494E0((s32)&sp1C, 0x17);
-    }
-}
-
-void func_151CD394(s32 arg0) {
-    s32 sp1C;
-
-    if (arg0 >= 0 && arg0 < 4) {
-        sp1C = arg0;
-        func_151494E0((s32)&sp1C, 0x18);
-    }
-}
-
-typedef struct {
-    void *unk0;
-    s32 unk4;
-    void *unk8;
-    u8 unkC;
-} Sub151CD3CC;
-
-void func_151CD3CC(struct260 *arg0, s32 arg1, u8 arg2) {
-    Sub151CD3CC *sub;
-    /* Reserves 12 bytes at the top of the -g3 stack frame that the shipped
-     * build allocated but never referenced. */
-    s32 unused[3];
-
-    sub = (Sub151CD3CC *)((s32)arg0 + 0x28);
-    if (arg2 == 0x17) {
-        if (sub->unk4 == *(s32 *)arg1) {
-            if (sub->unk8 == NULL) {
-                sub->unk8 = func_151CD4C0(sub->unk0, sub->unkC, sub->unk4, arg0->pad0[0xC], arg0->pad0[1]);
-                *(u8 *)((s32)sub->unk0 + 0x14) = 0;
-            dummy_label_151CD3CC_1: ;
-            }
-        }
-    } else if (arg2 == 0x18) {
-        if (sub->unk4 == *(s32 *)arg1) {
-            if (sub->unk8 != NULL) {
-                func_151CE47C(sub->unk8);
-            }
-        }
-    } else if (arg2 == 0x23) {
-        if (sub->unk4 == *(s32 *)arg1) {
-            sub->unk8 = NULL;
-            *(u8 *)((s32)sub->unk0 + 0x14) = 1;
-        }
-    }
-}
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-} Arg151CD4C0;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
+    Vec3f pos;
     s16 unkC;
     s16 unkE;
-    s32 unk10;
+    s32 kind;
     u8 unk14;
     u8 unk15;
     u8 pad16[2];
     s32 unk18;
-} Hdr151CD4C0;
+} EmitterTemplate;
+
+/* The spawner task's state: owns at most one emitter for its source. */
+typedef struct {
+    StreamSource *source;
+    s32 id;
+    Emitter *emitter;
+    u8 textureIndex;
+    u8 padD[3];
+} StreamSpawner;
 
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    s32 unk48;
-    u8 unk4C;
-    u8 pad4D[3];
-} Payload151CD4C0;
+    u8 pad0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0x1B];
+    StreamSpawner spawner;
+} StreamTask;
 
-void *func_151CD4C0(arg0, arg1, arg2, arg3, arg4)
-    Arg151CD4C0 *arg0;
-    u8 arg1;
-    s32 arg2;
+/* Unprototyped: func_151CD4C0 is a K&R definition (callers pass its u8 arguments unnarrowed). */
+Emitter *func_151CD4C0();
+void func_151CE47C(Emitter *emitter);
+Emitter *func_15147A80(EmitterTemplate *template, s32 dataSize, s32 particleSize, s32 arg3, s32 arg4, s32 arg5,
+                       s32 arg6, s32 arg7, s32 arg8, u8 arg9, s32 argA);
+
+/* Creates the spawner task for a stream source. */
+StreamTask *func_151CD2C0(StreamSource *source, u8 arg1, s32 arg2) {
+    StreamTask *task;
+    StreamSpawner spawner;
+
+    spawner.source = source;
+    spawner.id = source->id;
+    spawner.emitter = NULL;
+    spawner.textureIndex = source->textureIndex;
+
+    task = (StreamTask *)func_15149130(0x12C, -1, -1, -1, 0, 0x1E, (struct37 *)0x10, arg1, arg2);
+    if (task != NULL) {
+        memcpy(&task->spawner, &spawner, sizeof(spawner));
+    }
+    return task;
+}
+
+/* Starts stream `id` (0-3). */
+void func_151CD35C(s32 id) {
+    s32 payload;
+
+    if (id >= 0 && id < 4) {
+        payload = id;
+        func_151494E0((s32)&payload, STREAM_EVENT_START);
+    }
+}
+
+/* Stops stream `id` (0-3). */
+void func_151CD394(s32 id) {
+    s32 payload;
+
+    if (id >= 0 && id < 4) {
+        payload = id;
+        func_151494E0((s32)&payload, STREAM_EVENT_STOP);
+    }
+}
+
+/* Event handler of a stream spawner task. */
+void func_151CD3CC(StreamTask *task, s32 *id, u8 event) {
+    StreamSpawner *spawner;
+    s32 unused[3]; // matching: the shipped -g3 frame reserves 12 unreferenced bytes here
+
+    spawner = &task->spawner;
+    if (event == STREAM_EVENT_START) {
+        if (spawner->id == *id) {
+            if (spawner->emitter == NULL) {
+                spawner->emitter = func_151CD4C0(spawner->source, spawner->textureIndex, spawner->id, task->unkC, task->unk1);
+                spawner->source->unk14 = 0;
+            label: ; // matching: the empty block ends the if, so as1 fills the exit branch's delay slot with the ra reload
+            }
+        }
+    } else if (event == STREAM_EVENT_STOP) {
+        if (spawner->id == *id) {
+            if (spawner->emitter != NULL) {
+                func_151CE47C(spawner->emitter);
+            }
+        }
+    } else if (event == STREAM_EVENT_ENDED) {
+        if (spawner->id == *id) {
+            spawner->emitter = NULL;
+            spawner->source->unk14 = 1;
+        }
+    }
+}
+
+/* Creates the emitter for a stream source. */
+Emitter *func_151CD4C0(source, textureIndex, id, arg3, arg4)
+    StreamSource *source;
+    u8 textureIndex;
+    s32 id;
     u8 arg3;
     s32 arg4;
 {
-    struct260 *temp_v0;
-    Hdr151CD4C0 header;
-    Payload151CD4C0 payload;
+    Emitter *emitter;
+    EmitterTemplate template;
+    StreamData data;
     f32 size;
 
-    size = arg0->unk6;
-    header.unk15 = 0x23;
-    header.unk0 = arg0->unk0;
-    header.unk4 = arg0->unk2 + arg0->unk8;
-    header.unk8 = arg0->unk4;
-    header.unkC = 0x12C;
-    header.unkE = 0x34;
-    header.unk10 = 0xB;
-    payload.unk44 = arg0->unk2;
-    payload.unk0 = size * 0.125f;
-    payload.unk10 = 0.03000000119f;
-    payload.unk8 = 0.0f;
-    payload.unkC = 0.0f;
-    payload.unk4 = size * 0.125f;
-    payload.unk14 = 0.04000000283f;
-    payload.unk18 = header.unk0;
-    payload.unk1C = header.unk8;
-    payload.unk24 = size * 0.875f;
-    payload.unk34 = payload.unk24;
-    payload.unk28 = size * 0.0625f;
-    payload.unk2C = 0.0f;
-    payload.unk30 = 0.05500000343f;
-    payload.unk40 = 0.0f;
-    payload.unk48 = arg2;
-    payload.unk38 = -16384.0f;
-    payload.unk3C = -16384.0f;
-    payload.unk20 = 0.0f;
-    payload.unk4C = arg1;
-    header.unk18 = 0;
-    header.unk14 = 7;
-    temp_v0 = func_15147A80(&header, 0x50, 0x1C, 9, 9, 9, 0, 0, 0, arg3, arg4);
-    if (temp_v0 != NULL) {
-        memcpy(*(void **)((u8 *)temp_v0 + 0x98), &payload, 0x50);
+    size = source->size;
+    template.unk15 = 0x23;
+    template.pos.x = source->x;
+    template.pos.y = source->y + source->height;
+    template.pos.z = source->z;
+    template.unkC = 0x12C;
+    template.unkE = 0x34;
+    template.kind = STREAM_KIND;
+    data.floorY = source->y;
+    data.swayAmpX = size * 0.125f;
+    data.swayRateX = 0.03000000119f; // matching: these three ROM constants sit one ulp above 0.03f, 0.04f and 0.055f
+    data.swayPhaseX = 0.0f;
+    data.swayPhaseZ = 0.0f;
+    data.swayAmpZ = size * 0.125f;
+    data.swayRateZ = 0.04000000283f;
+    data.spawnPos.x = template.pos.x;
+    data.spawnPos.z = template.pos.z;
+    data.baseWidth = size * 0.875f;
+    data.width = data.baseWidth;
+    data.widthAmp = size * 0.0625f;
+    data.widthPhase = 0.0f;
+    data.widthRate = 0.05500000343f;
+    data.spawnCount = 0.0f;
+    data.id = id;
+    data.unk38 = -16384.0f;
+    data.tc = -16384.0f;
+    data.unk20 = 0.0f;
+    data.textureIndex = textureIndex;
+    template.unk18 = 0;
+    template.unk14 = 7;
+    emitter = func_15147A80(&template, sizeof(StreamData), sizeof(StreamParticle), 9, 9, 9, 0, 0, 0, arg3, arg4);
+    if (emitter != NULL) {
+        memcpy(emitter->data, &data, sizeof(data));
     }
-    return temp_v0;
+    return emitter;
 }
 
-typedef struct Game1FA770Particle {
-    f32 x;
-    f32 y;
-    u8 pad08[4];
-    f32 velocity;
-    u8 pad10[0xC];
-} Game1FA770Particle;
-
-typedef struct Vec3i151CD674 {
-    s32 x;
-    s32 y;
-    s32 z;
-} Vec3i151CD674;
-
-s32 func_151CD674(u8 *actor) {
-    u8 *owner;
-    Game1FA770Particle *particles;
-    Game1FA770Particle *particle;
-    s32 cursor;
+/* Moves a stream's particles under gravity; those that reach the floor are retired.
+ * Returns 0 once a stopped stream has run dry. */
+s32 func_151CD674(Emitter *emitter) {
+    StreamData *data;
+    StreamParticle *particles;
+    StreamParticle *particle;
+    s32 i;
     f32 velocity;
     f32 gravity;
-    f32 acceleration;
-    f32 step;
+    f32 halfGravity;
+    f32 dt;
     f32 travel;
-    f32 squared;
+    f32 dtSquared;
 
-    owner = *(u8 **)(actor + 0x98);
-    particles = *(Game1FA770Particle **)(actor + 0x94);
-    if ((*(s8 *)(actor + 0x2C) < 2) && (*(u16 *)(actor + 0x1E) & 8)) {
+    data = emitter->data;
+    particles = emitter->particles;
+    if (emitter->count < 2 && (emitter->flags & EMITTER_FLAG_STOPPED)) {
         return 0;
     }
-    cursor = *(s8 *)(actor + 0x2E);
-    if (cursor != *(s8 *)(actor + 0x2D)) {
-        gravity = -0.25500003f;
-        acceleration = -0.12750001f;
-        do {
-            cursor--;
-            if (cursor < 0) {
-                cursor = actor[0x25] - 1;
-            }
-            particle = &particles[cursor];
-            velocity = particle->velocity;
-            step = D_800BE9A4;
-            travel = velocity * step;
-            squared = step * step;
-            particle->y = particle->y + (travel + acceleration * squared);
-            particle->velocity = (f32)velocity + gravity * D_800BE9A4;
-            if (particle->y < *(f32 *)(owner + 0x44)) {
-                if (cursor != *(s8 *)(actor + 0x2D)) {
-                    do {
-                        *(s8 *)(actor + 0x2D) += 1;
-                        if (actor[0x25] == *(s8 *)(actor + 0x2D)) {
-                            *(s8 *)(actor + 0x2D) = 0;
-                        }
-                        *(s8 *)(actor + 0x2C) -= 1;
-                    } while (cursor != *(s8 *)(actor + 0x2D));
+    gravity = -0.25500003f;
+    halfGravity = -0.12750001f;
+    i = emitter->head;
+    while (i != emitter->tail) {
+        i--;
+        if (i < 0) {
+            i = emitter->capacity - 1;
+        }
+        particle = &particles[i];
+        velocity = particle->velocity;
+        dt = D_800BE9A4;
+        travel = velocity * dt;
+        dtSquared = dt * dt;
+        particle->pos.y += travel + halfGravity * dtSquared;
+        particle->velocity = (f32)velocity + gravity * D_800BE9A4; // matching: the no-op cast keeps velocity as the first add operand
+        if (particle->pos.y < data->floorY) {
+            while (i != emitter->tail) {
+                emitter->tail++;
+                if (emitter->tail == emitter->capacity) {
+                    emitter->tail = 0;
                 }
-                particles[*(s8 *)(actor + 0x2D)].y = *(f32 *)(owner + 0x44);
+                emitter->count--;
             }
-        } while (cursor != *(s8 *)(actor + 0x2D));
+            particles[emitter->tail].pos.y = data->floorY;
+        }
     }
-    *(Vec3i151CD674 *)(actor + 0x54) = *(Vec3i151CD674 *)(actor + 0x10);
+    emitter->prevPos = emitter->pos;
     return 1;
 }
 
-typedef struct Vec2f151CD7BC { f32 x; f32 z; } Vec2f151CD7BC;
-
-typedef struct Owner151CD7BC {
-    f32 amp0;
-    f32 amp1;
-    f32 phase0;
-    f32 phase1;
-    f32 rate0;
-    f32 rate1;
-    Vec2f151CD7BC pos;
+/* Spawns a stream's new particles at the emitter, swaying in x/z and wobbling in width. */
+s32 func_151CD7BC(Emitter *emitter) {
+    StreamData *data;
+    StreamParticle *particles;
+    StreamParticle *particle;
     f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 phase2;
-    f32 rate2;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-} Owner151CD7BC;
-
-typedef struct Particle151CD7BC {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 vel;
-    f32 unk10;
-    s16 alpha;
-    f32 unk18;
-} Particle151CD7BC;
-
-s32 func_151CD7BC(u8 *actor) {
-    Owner151CD7BC *owner;
-    Particle151CD7BC *particles;
-    Particle151CD7BC *p;
-    f32 h;
-    f32 dh;
+    f32 unk20Step;
     f32 dz;
     f32 dx;
-    Vec2f151CD7BC pos;
-    f32 inv;
-    f32 a;
-    f32 da;
-    f32 b;
-    f32 vel;
-    f32 db;
+    Vec2f pos;
+    f32 step;
+    f32 width;
+    f32 dWidth;
+    f32 tc;
+    f32 velocity;
+    f32 dTc;
     f32 gravity;
-    f32 acceleration;
+    f32 halfGravity;
     s32 tail;
 
-    owner = *(Owner151CD7BC **)(actor + 0x98);
-    particles = *(Particle151CD7BC **)(actor + 0x94);
-    owner->phase0 += owner->rate0 * D_800BE9A4;
-    owner->phase1 += owner->rate1 * D_800BE9A4;
-    owner->phase0 = func_15144B68(owner->phase0);
-    owner->phase1 = func_15144B68(owner->phase1);
-    owner->phase2 += owner->rate2 * D_800BE9A4;
-    owner->phase2 = func_15144B68(owner->phase2);
-    owner->unk40 += 0.2730129957f * D_800BE9A4;
-    owner->unk3C += (10220.0f + func_150ADA68() * 9434.0f) * 0.009999999776f * D_800BE9A4;
-    while (owner->unk3C >= 16384.0f) {
-        owner->unk3C -= 16384.0f;
+    data = emitter->data;
+    particles = emitter->particles;
+    data->swayPhaseX += data->swayRateX * D_800BE9A4;
+    data->swayPhaseZ += data->swayRateZ * D_800BE9A4;
+    data->swayPhaseX = func_15144B68(data->swayPhaseX);
+    data->swayPhaseZ = func_15144B68(data->swayPhaseZ);
+    data->widthPhase += data->widthRate * D_800BE9A4;
+    data->widthPhase = func_15144B68(data->widthPhase);
+    data->spawnCount += 0.2730129957f * D_800BE9A4;
+    data->tc += (10220.0f + func_150ADA68() * 9434.0f) * 0.01f * D_800BE9A4;
+    while (data->tc >= 16384.0f) {
+        data->tc -= 16384.0f;
     }
-    if (owner->unk40 > 1.0f) {
-        inv = 1.0f / owner->unk40;
-        h = owner->unk20 + D_800BE9A4;
-        dh = -(h * inv);
-        pos = owner->pos;
-        dx = (*(f32 *)(actor + 0x10) + (sinf(owner->phase0) * owner->amp0)) - owner->pos.x;
-        dz = (*(f32 *)(actor + 0x18) + (sinf(owner->phase1) * owner->amp1)) - owner->pos.z;
-        da = (owner->unk24 + (sinf(owner->phase2) * owner->unk28)) - owner->unk34;
-        db = owner->unk3C - owner->unk38;
-        a = owner->unk34;
-        b = owner->unk3C;
+    if (data->spawnCount > 1.0f) {
+        step = 1.0f / data->spawnCount;
+        unk20 = data->unk20 + D_800BE9A4;
+        unk20Step = -(unk20 * step);
+        pos = data->spawnPos;
+        dx = (emitter->pos.x + sinf(data->swayPhaseX) * data->swayAmpX) - data->spawnPos.x;
+        dz = (emitter->pos.z + sinf(data->swayPhaseZ) * data->swayAmpZ) - data->spawnPos.z;
+        dWidth = (data->baseWidth + sinf(data->widthPhase) * data->widthAmp) - data->width;
+        dTc = data->tc - data->unk38;
+        width = data->width;
+        tc = data->tc;
         gravity = -0.255000025f;
-        acceleration = -0.1275000125f;
-        vel = -3.772000074f;
-        while (owner->unk40 > 1.0f) {
-            p = &particles[*(s8 *)(actor + 0x2E)];
-            p->x = pos.x;
-            p->y = *(f32 *)(actor + 0x14);
-            p->z = pos.z;
-            p->vel = vel;
-            p->unk10 = a;
-            p->alpha = 0xFF;
-            p->unk18 = b;
-            p->y = p->y + ((vel * D_800BE9A4) + (acceleration * (D_800BE9A4 * D_800BE9A4)));
-            p->vel = (f32)vel + gravity * D_800BE9A4;
-            *(s8 *)(actor + 0x2E) += 1;
-            if (actor[0x25] == *(s8 *)(actor + 0x2E)) {
-                *(s8 *)(actor + 0x2E) = 0;
+        halfGravity = -0.1275000125f;
+        velocity = -3.772f;
+        while (data->spawnCount > 1.0f) {
+            particle = &particles[emitter->head];
+            particle->pos.x = pos.x;
+            particle->pos.y = emitter->pos.y;
+            particle->pos.z = pos.z;
+            particle->velocity = velocity;
+            particle->width = width;
+            particle->alpha = 0xFF;
+            particle->tc = tc;
+            particle->pos.y += velocity * D_800BE9A4 + halfGravity * (D_800BE9A4 * D_800BE9A4);
+            particle->velocity = (f32)velocity + gravity * D_800BE9A4; // matching: see func_151CD674
+            emitter->head++;
+            if (emitter->head == emitter->capacity) {
+                emitter->head = 0;
             }
-            tail = *(s8 *)(actor + 0x2D);
-            *(s8 *)(actor + 0x2C) += 1;
-            if (tail == *(s8 *)(actor + 0x2E)) {
-                *(s8 *)(actor + 0x2D) = tail + 1;
-                if (actor[0x25] == *(s8 *)(actor + 0x2D)) {
-                    *(s8 *)(actor + 0x2D) = 0;
+            /* The ring is full: drop the oldest particle. */
+            tail = emitter->tail;
+            emitter->count++;
+            if (tail == emitter->head) {
+                emitter->tail = tail + 1;
+                if (emitter->tail == emitter->capacity) {
+                    emitter->tail = 0;
                 }
-                *(s8 *)(actor + 0x2C) -= 1;
+                emitter->count--;
             }
-            pos.x += dx * inv;
-            pos.z += dz * inv;
-            a += da * inv;
-            b += db * inv;
-            h += dh;
-            owner->unk40 -= 1.0f;
+            pos.x += dx * step;
+            pos.z += dz * step;
+            width += dWidth * step;
+            tc += dTc * step;
+            unk20 += unk20Step;
+            data->spawnCount -= 1.0f;
         }
-        owner->pos = pos;
-        owner->unk34 = a;
-        owner->unk38 = b;
-        owner->unk20 = h;
+        data->spawnPos = pos;
+        data->width = width;
+        data->unk38 = tc;
+        data->unk20 = unk20;
     }
     return 1;
 }
 
-typedef struct Game1FA770Trail {
-    f32 x;
-    f32 y;
-    u8 pad08[0xC];
-    s16 alpha;
-    u8 pad16[0x6];
-} Game1FA770Trail;
-
-s32 func_151CDB94(u8 *actor) {
-    Game1FA770Trail *trail;
-    Game1FA770Trail *start;
-    Game1FA770Trail *cur;
+/* Fades a stream's ends: alpha ramps up over the lowest 19.7% of its height and down over the top 10%. */
+s32 func_151CDB94(Emitter *emitter) {
+    StreamParticle *particles;
+    StreamParticle *oldest;
+    StreamParticle *particle;
     s32 i;
-    f32 range;
-    f32 inv;
-    f32 d;
-    f32 fade;
-    f32 k;
+    f32 height;
+    f32 invHeight;
+    f32 rise;
+    f32 fadeOutScale;
+    f32 fadeInScale;
 
-    trail = *(Game1FA770Trail **)(actor + 0x94);
-    if (*(s8 *)(actor + 0x2C) <= 0) {
+    particles = emitter->particles;
+    if (emitter->count <= 0) {
         return 1;
     }
-    i = *(s8 *)(actor + 0x2E) - 1;
+    i = emitter->head - 1;
     if (i < 0) {
-        i = actor[0x25] - 1;
+        i = emitter->capacity - 1;
     }
-    start = &trail[*(s8 *)(actor + 0x2D)];
-    cur = &trail[i];
-    range = fabsf(cur->y - start->y);
-    if (range == 0.0f) {
+    oldest = &particles[emitter->tail];
+    particle = &particles[i];
+    height = fabsf(particle->pos.y - oldest->pos.y);
+    if (height == 0.0f) {
         return 1;
     }
-    inv = 1.0f / range;
-    fade = inv * 10.0f;
-    i = *(s8 *)(actor + 0x2D);
+    invHeight = 1.0f / height;
+    fadeOutScale = invHeight * 10.0f;
+    i = emitter->tail;
     do {
-        cur = &trail[i];
-        d = cur->y - start->y;
-        cur->alpha = 0xFF;
-        if (d < range * 0.1970000118f) {
-            k = inv * 5.076141834f;
-            cur->alpha = (u8)(d * k * 255.0f);
-        } else if (range - range * 0.1000000015f < d) {
-            cur->alpha = (u8)((range - d) * fade * 255.0f);
+        particle = &particles[i];
+        rise = particle->pos.y - oldest->pos.y;
+        particle->alpha = 0xFF;
+        if (rise < height * 0.1970000118f) {
+            fadeInScale = invHeight * 5.076141834f; /* 1 / 0.197 */
+            particle->alpha = (u8)(rise * fadeInScale * 255.0f);
+        } else if (height - height * 0.1f < rise) {
+            particle->alpha = (u8)((height - rise) * fadeOutScale * 255.0f);
         }
         i++;
-        if (i >= actor[0x25]) {
+        if (i >= emitter->capacity) {
             i = 0;
         }
-    } while (i != *(s8 *)(actor + 0x2E));
+    } while (i != emitter->head);
     return 1;
 }
-
-typedef struct {
-    f32 x, y, z;
-} Vec3_151CDE20;
-
-typedef struct {
-    Vec3_151CDE20 pos;
-    f32 unkC;
-    f32 width;
-    s16 alpha;
-    s16 pad16;
-    f32 tc;
-} Seg151CDE20;
-
-typedef struct {
-    char pad0[0x4C];
-    u8 unk4C;
-} Sub151CDE20;
-
-typedef struct {
-    char pad0[0x10];
-    Vec3_151CDE20 pos;
-    char pad1C[2];
-    u16 flags;
-    char pad20[5];
-    u8 count;
-    char pad26[6];
-    s8 unk2C;
-    s8 last;
-    s8 first;
-    char pad2F[0x84 - 0x2F];
-    char buffers[0x10];
-    Seg151CDE20 *segs;
-    Sub151CDE20 *sub;
-} Obj151CDE20;
 
 extern s32 D_800AAEE0[];
 extern u8 D_80090B60[][12];
@@ -496,767 +431,242 @@ extern struct {
     s32 unk4;
 } D_800A4AC8[];
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
-Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
-void func_151D5D60(void *, s16, s32, void **, u8 *);
+Gfx *func_15142E24(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *update,
+                   s32 argA);
+Gfx *func_15142FBC(Gfx *gfx, s32 otherModeH, s32 otherModeL, u8 *update);
+Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *update);
+void func_151D5D60(void *buffers, s16 index, s32 size, void **out, u8 *fresh);
 
-Gfx *func_151CDE20(Obj151CDE20 *arg0, Gfx *gfx, s16 arg2) {
+/* Draws a stream as a camera-facing ribbon: one quad per pair of neighbouring particles, newest to oldest. */
+Gfx *func_151CDE20(Emitter *emitter, Gfx *gfx, s16 view) {
     Vtx *vtx;
-    Seg151CDE20 *segs;
-    Sub151CDE20 *sub;
+    StreamParticle *particles;
+    StreamData *data;
     u8 update;
-    s32 i;
-    s32 k;
-    Vec3_151CDE20 b;
-    Vec3_151CDE20 a;
-    f32 dx;
-    f32 dz;
+    s32 next;
+    s32 cur;
+    Vec3f nextPos;
+    Vec3f curPos;
+    f32 offsetZ;
+    f32 offsetX;
 
-    if (arg0->unk2C >= 2) {
-        func_151D5D60(arg0->buffers, arg2, (arg0->count * 2 + 10) * sizeof(Vtx), (void **)&vtx, 0);
+    if (emitter->count >= 2) {
+        func_151D5D60(emitter->buffers, view, (emitter->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
-            sub = arg0->sub;
-            segs = arg0->segs;
+            data = emitter->data;
+            particles = emitter->particles;
             update = 1;
-            gfx = func_15142E24(gfx, (s32)D_80090B60[D_800AAEE0[sub->unk4C]], 0, 0, 0, 0, D_800AAEE0[sub->unk4C], 0, 0, &update, 3);
+            gfx = func_15142E24(gfx, (s32)D_80090B60[D_800AAEE0[data->textureIndex]], 0, 0, 0, 0, D_800AAEE0[data->textureIndex], 0,
+                                0, &update, 3);
             gfx = func_1513F4E4(gfx, 0x4E, &update);
             gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
-            gfx = func_15142FBC(gfx, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
-            if (arg0->flags & 2) {
-                i = arg0->first - 1;
-                if (i < 0) i = arg0->count - 1;
-                a = arg0->pos;
-                k = i;
+            gfx = func_15142FBC(gfx,
+                                D_800D2C9C | G_TP_PERSP | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+                                D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
+            /* While emitting, the ribbon starts at the emitter itself. */
+            if (emitter->flags & EMITTER_FLAG_EMITTING) {
+                next = emitter->head - 1;
+                if (next < 0) next = emitter->capacity - 1; // matching: one line, so -g3 line numbers keep as1's order
+                curPos = emitter->pos;
+                cur = next;
             } else {
-                k = arg0->first - 1;
-                if (k < 0) {
-                    k = arg0->count - 1;
+                cur = emitter->head - 1;
+                if (cur < 0) {
+                    cur = emitter->capacity - 1;
                 }
-                i = k - 1;
-                if (i < 0) {
-                    i = arg0->count - 1;
+                next = cur - 1;
+                if (next < 0) {
+                    next = emitter->capacity - 1;
                 }
-                a = segs[k].pos;
+                curPos = particles[cur].pos;
             }
-            b = segs[i].pos;
-            dx = D_800DD1D8[arg2] * segs[k].width;
-            dz = D_800DD1E8[arg2] * segs[k].width;
-            vtx->v.ob[0] = a.x + dz;
-            vtx->v.ob[1] = a.y;
-            vtx->v.ob[2] = a.z - dx;
+            nextPos = particles[next].pos;
+            offsetZ = D_800DD1D8[view] * particles[cur].width;
+            offsetX = D_800DD1E8[view] * particles[cur].width;
+            vtx->v.ob[0] = curPos.x + offsetX;
+            vtx->v.ob[1] = curPos.y;
+            vtx->v.ob[2] = curPos.z - offsetZ;
             vtx->v.tc[0] = 0;
-            vtx->v.tc[1] = segs[k].tc;
+            vtx->v.tc[1] = particles[cur].tc;
             vtx->v.cn[0] = 0xFF;
             vtx->v.cn[1] = 0xFF;
             vtx->v.cn[2] = 0xFF;
-            vtx->v.cn[3] = segs[k].alpha;
+            vtx->v.cn[3] = particles[cur].alpha;
             vtx->v.flag = 0;
             vtx++;
-            vtx->v.ob[0] = a.x - dz;
-            vtx->v.ob[1] = a.y;
-            vtx->v.ob[2] = a.z + dx;
+            vtx->v.ob[0] = curPos.x - offsetX;
+            vtx->v.ob[1] = curPos.y;
+            vtx->v.ob[2] = curPos.z + offsetZ;
             vtx->v.tc[0] = 0x7FF;
-            vtx->v.tc[1] = segs[k].tc;
+            vtx->v.tc[1] = particles[cur].tc;
             vtx->v.cn[0] = 0xFF;
             vtx->v.cn[1] = 0xFF;
             vtx->v.cn[2] = 0xFF;
-            vtx->v.cn[3] = segs[k].alpha;
+            vtx->v.cn[3] = particles[cur].alpha;
             vtx->v.flag = 0;
             vtx++;
             do {
-                dx = D_800DD1D8[arg2] * segs[i].width;
-                dz = D_800DD1E8[arg2] * segs[i].width;
-                vtx->v.ob[0] = b.x + dz;
-                vtx->v.ob[1] = b.y;
-                vtx->v.ob[2] = b.z - dx;
+                offsetZ = D_800DD1D8[view] * particles[next].width;
+                offsetX = D_800DD1E8[view] * particles[next].width;
+                vtx->v.ob[0] = nextPos.x + offsetX;
+                vtx->v.ob[1] = nextPos.y;
+                vtx->v.ob[2] = nextPos.z - offsetZ;
                 vtx->v.tc[0] = 0;
-                vtx->v.tc[1] = segs[i].tc;
+                vtx->v.tc[1] = particles[next].tc;
                 vtx->v.cn[0] = 0xFF;
                 vtx->v.cn[1] = 0xFF;
                 vtx->v.cn[2] = 0xFF;
-                vtx->v.cn[3] = segs[i].alpha;
+                vtx->v.cn[3] = particles[next].alpha;
                 vtx->v.flag = 0;
                 vtx++;
-                vtx->v.ob[0] = b.x - dz;
-                vtx->v.ob[1] = b.y;
-                vtx->v.ob[2] = b.z + dx;
+                vtx->v.ob[0] = nextPos.x - offsetX;
+                vtx->v.ob[1] = nextPos.y;
+                vtx->v.ob[2] = nextPos.z + offsetZ;
                 vtx->v.tc[0] = 0x7FF;
-                vtx->v.tc[1] = segs[i].tc;
+                vtx->v.tc[1] = particles[next].tc;
                 vtx->v.cn[0] = 0xFF;
                 vtx->v.cn[1] = 0xFF;
                 vtx->v.cn[2] = 0xFF;
-                vtx->v.cn[3] = segs[i].alpha;
+                vtx->v.cn[3] = particles[next].alpha;
                 vtx->v.flag = 0;
                 vtx++;
                 gSPVertex(gfx++, vtx - 4, 4, 0);
                 gSP1Triangle(gfx++, 0, 1, 2, 0);
                 gSP1Triangle(gfx++, 1, 3, 2, 0);
-                if (segs[k].tc < segs[i].tc) {
-                    memcpy(vtx, vtx - 2, 0x20);
+                /* The texture coordinate wrapped: restart the strip from a copy shifted back by one period. */
+                if (particles[cur].tc < particles[next].tc) {
+                    memcpy(vtx, vtx - 2, 2 * sizeof(Vtx));
                     vtx[-2].v.tc[1] -= 0x4000;
                     vtx++;
                     vtx[-2].v.tc[1] -= 0x4000;
                     vtx++;
                 }
-                k = i;
-                i--;
-                if (i < 0) {
-                    i = arg0->count - 1;
+                cur = next;
+                next--;
+                if (next < 0) {
+                    next = emitter->capacity - 1;
                 }
-                a = segs[k].pos;
-                b = segs[i].pos;
-            } while (k != arg0->last);
+                curPos = particles[cur].pos;
+                nextPos = particles[next].pos;
+            } while (cur != emitter->tail);
         }
     }
     return gfx;
 }
 
-typedef struct {
-    char pad0[0x1E];
-    u16 unk1E;
-    char pad20[0x10];
-    u8 unk30;
-} ConkerStruct151CE47C;
-
-void func_151CE47C(ConkerStruct151CE47C *arg0) {
-    arg0->unk30 = 0;
-    arg0->unk1E &= ~0x2;
-    arg0->unk1E |= 0x8;
+/* Stops a stream emitter: no new particles, the ones in flight keep falling. */
+void func_151CE47C(Emitter *emitter) {
+    emitter->unk30 = 0;
+    emitter->flags &= ~EMITTER_FLAG_EMITTING;
+    emitter->flags |= EMITTER_FLAG_STOPPED;
 }
 
 extern void func_151478F4(void *);
+extern void func_15147928(void *);
 
-void func_151CE49C(Func151CE4DCArg0 *arg0) {
-    s32 sp1C;
-    Func151CE4DCTemp *temp;
+/* Destroy callbacks: tell the spawner its stream ended, then free the emitter. */
+void func_151CE49C(Emitter *emitter) {
+    s32 payload;
+    StreamData *data;
 
-    temp = (Func151CE4DCTemp *)arg0->field_0x98;
-    sp1C = temp->field_0x48;
-    func_151494E0((s32)&sp1C, 0x23);
-    func_151478F4((void *)arg0);
+    data = emitter->data;
+    payload = data->id;
+    func_151494E0((s32)&payload, STREAM_EVENT_ENDED);
+    func_151478F4(emitter);
 }
 
-extern void func_15147928(s32);
+void func_151CE4DC(Emitter *emitter) {
+    s32 payload;
+    StreamData *data;
 
-void func_151CE4DC(Func151CE4DCArg0 *arg0) {
-    s32 sp1C;
-    Func151CE4DCTemp *temp;
-
-    temp = (Func151CE4DCTemp *)arg0->field_0x98;
-    sp1C = temp->field_0x48;
-    func_151494E0((s32)&sp1C, 0x23);
-    func_15147928((s32)arg0);
+    data = emitter->data;
+    payload = data->id;
+    func_151494E0((s32)&payload, STREAM_EVENT_ENDED);
+    func_15147928(emitter);
 }
 
-struct Obj151CE634 *func_151CE634(s32);
-void func_1515C1A0(void *, void *, f32 *, f32 *);
-s32 func_1505D024(void *, s32, u16, s32);
+Emitter *func_151CE634(s32 id);
+void func_1515C1A0(void *actor, f32 *pos, f32 *radius, f32 *height);
+s32 func_1505D024(void *actor, s32 arg1, u16 arg2, s32 arg3);
 
-typedef struct {
-    f32 position[3];
-    u8 unkC[0x10];
-} Game1FA770TrailPoint;
-
-void func_151CE51C(void *arg0, void *arg1) {
-    f32 position[3];
+/* Sends `actor` event 0x60019 when its collision cylinder reaches the falling column of `source`'s stream. */
+void func_151CE51C(void *actor, StreamSource *source) {
+    f32 pos[3];
     f32 radius;
     f32 height;
-    u8 *obj;
+    Emitter *emitter;
 
-    obj = (u8 *)func_151CE634(*(s32 *)((u8 *)arg1 + 0x18));
-    if (obj != 0) {
-        func_1515C1A0(arg0, position, &radius, &height);
-        if (*(u16 *)(obj + 0x1E) & 8) {
+    emitter = func_151CE634(source->id);
+    if (emitter != NULL) {
+        func_1515C1A0(actor, pos, &radius, &height);
+        if (emitter->flags & EMITTER_FLAG_STOPPED) {
+            /* The column has left the emitter: its top is the newest particle. */
             f32 bottom;
-            f32 level;
+            f32 columnTop;
 
-            bottom = position[1] - height;
-            if (*(s8 *)(obj + 0x2C) > 0) {
-                s32 index;
-                Game1FA770TrailPoint *points;
-
-                index = *(s8 *)(obj + 0x2E) - 1;
-                if (index < 0) {
-                    index = obj[0x25] - 1;
-                }
-                points = *(Game1FA770TrailPoint **)(obj + 0x94);
-                level = points[index].position[1];
-            } else {
+            bottom = pos[1] - height;
+            if (emitter->count <= 0) {
                 return;
             }
-            if (bottom <= level) {
-                func_1505D024(arg0, 0x60019, 0, -1);
+            {
+                s32 newest;
+                StreamParticle *particles;
+
+                newest = emitter->head - 1;
+                if (newest < 0) {
+                    newest = emitter->capacity - 1;
+                }
+                particles = emitter->particles;
+                columnTop = particles[newest].pos.y;
+            }
+            if (bottom <= columnTop) {
+                func_1505D024(actor, 0x60019, 0, -1);
             }
         } else {
+            /* Still attached to the emitter: its bottom is the oldest particle. */
             f32 top;
-            f32 level;
+            f32 columnBottom;
 
-            top = position[1] + height;
-            if (*(s8 *)(obj + 0x2C) > 0) {
-                Game1FA770TrailPoint *points;
-
-                points = *(Game1FA770TrailPoint **)(obj + 0x94);
-                level = points[*(s8 *)(obj + 0x2D)].position[1];
-            } else {
+            top = pos[1] + height;
+            if (emitter->count <= 0) {
                 return;
             }
-            if (level <= top) {
-                func_1505D024(arg0, 0x60019, 0, -1);
+            {
+                StreamParticle *particles;
+
+                particles = emitter->particles;
+                columnBottom = particles[emitter->tail].pos.y;
+            }
+            if (columnBottom <= top) {
+                func_1505D024(actor, 0x60019, 0, -1);
             }
         }
     }
 }
 
-typedef struct Obj151CE634Sub {
-    u8 pad0[0x48];
-    s32 unk48;
-} Obj151CE634Sub;
-
-typedef struct Obj151CE634 {
-    u8 pad0[8];
-    struct Obj151CE634 *next;
-    u8 padC[0x20 - 0xC];
-    s32 unk20;
-    u8 pad24[0x98 - 0x24];
-    Obj151CE634Sub *unk98;
-} Obj151CE634;
-
 extern s32 D_800A5760[];
-extern Obj151CE634 *D_800DCE50[][0x68];
+extern Emitter *D_800DCE50[][0x68];
 
-Obj151CE634 *func_151CE634(s32 arg0) {
+/* Finds the stream emitter whose data has the given id, or NULL. */
+Emitter *func_151CE634(s32 id) {
     u8 i;
     s32 j;
-    Obj151CE634 *p;
+    Emitter *emitter;
 
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
-            p = D_800DCE50[j][D_800A5760[i]];
-            while (p != NULL) {
-                if (p->unk20 == 0xB) {
-                    Obj151CE634Sub *sub = p->unk98;
+            emitter = D_800DCE50[j][D_800A5760[i]];
+            while (emitter != NULL) {
+                if (emitter->kind == STREAM_KIND) {
+                    StreamData *data = emitter->data;
 
-                    if (sub->unk48 == arg0) {
-                        return p;
+                    if (data->id == id) {
+                        return emitter;
                     }
                 }
-                p = p->next;
+                emitter = emitter->next;
             }
         }
     }
     return NULL;
 }
-
-
-typedef struct Game1FBB80Owner {
-    s16 field00;
-    s16 mask;
-} Game1FBB80Owner;
-
-typedef struct Game1FBB80Effect {
-    void *shape;
-    f32 rate;
-    f32 accumulator;
-    Game1FBB80Owner *owner;
-    f32 height;
-} Game1FBB80Effect;
-
-typedef struct Game1FBB80Object {
-    u8 pad00, flags01;
-    u8 pad02[0xA];
-    u8 flags0C;
-    u8 pad0D[0x1B];
-    Game1FBB80Effect effect;
-} Game1FBB80Object;
-
-typedef struct Game1FBB80Packet {
-    u8 field00, field01;
-    s16 field02, field04;
-    u8 pad06[2];
-    s32 field08, field0C;
-    u8 field10, field11, field12, field13;
-    f32 field14, field18;
-    f32 x, y, z;
-    f32 field28, field2C, field30, field34, field38, field3C;
-    u32 flags40;
-    u8 field44, field45, field46, field47;
-    Game1FBB80Owner *owner;
-    u8 pad4C[0xC]; /* func_1513D2F0 copies the complete 0x58-byte packet. */
-} Game1FBB80Packet;
-
-s32 func_1504530C(void *, f32, void *);
-void *func_1513D2F0(void *, void *, u8, u8, u8, u8, u8, s32, s32, s32, u8, s32);
-void func_151432BC(void *, f32 *, f32 *, f32 *, f32 *);
-void func_151CE6D0(Game1FBB80Object *arg0);
-s32 func_151CEA20(f32 *arg0);
-struct260 *func_151CEAAC(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
-
-struct Vec3w151CEC10 { s32 x, y, z; };
-s32 func_151CEC10(struct Vec3w151CEC10 *arg0, f32 *arg1, void *arg2);
-
-extern f32 D_800AB00C;
-extern f32 D_800AB010;
-f32 func_15143E64(struct17 *);
-
-typedef struct { f32 x, y, z; } TrailVec3;
-typedef struct { f32 x, z; } TrailVec2;
-typedef struct { f32 w[4]; } TrailQuad;
-
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-} TrailSub;
-
-typedef struct {
-    TrailSub *sub;
-    u8 unk4;
-    u8 pad5[3];
-    void *unk8;
-    TrailVec2 scaled;
-    TrailVec2 normal;
-    u8 flags;
-} TrailInfo;
-
-typedef struct {
-    TrailVec3 pos;
-    f32 dist;
-    f32 invLen;
-    f32 unk14;
-    TrailVec2 scaled;
-    TrailVec2 normal;
-} TrailEntry;
-
-typedef struct {
-    u8 pad0[0x10];
-    TrailVec3 pos;
-    u8 pad1C[2];
-    u16 flags;
-    u8 pad20[5];
-    u8 count;
-    u8 pad26[6];
-    s8 num;
-    s8 tail;
-    s8 head;
-    u8 pad2F[0x65];
-    TrailEntry *entries;
-    TrailInfo *info;
-} TrailObj;
-s32 func_151CEC54(TrailObj *arg0);
-
-typedef struct {
-    f32 x, y, z, distance;
-    u8 pad10[4];
-    f32 wave;
-    u8 pad18[0x10];
-} Game1FC5D0Point;
-
-typedef struct {
-    u8 pad00[0x20];
-    f32 limit, phase;
-} Game1FC5D0Config;
-
-typedef struct {
-    u8 pad00[0x25];
-    u8 capacity;
-    u8 pad26[6];
-    s8 count;
-    s8 head;
-    s8 tail;
-    u8 pad2F[0x65];
-    Game1FC5D0Point *points;
-    Game1FC5D0Config *config;
-} Game1FC5D0Actor;
-s32 func_151CF120(Game1FC5D0Actor *arg0);
-
-struct s151CF844 { s32 pad[0x26]; s32 *unk98p; };
-void func_151CF844(struct s151CF844 *arg0, s32 arg1, u8 arg2);
-
-typedef struct {
-    char pad0[0x23D];
-    u8 unk23D;
-} ConkerStruct151CF898Camera;
-
-typedef struct {
-    struct17 vec;
-    f32 unkC;
-} ConkerStruct151CF898Payload;
-void func_151CF898(struct127 *arg0, f32 arg1, f32 arg2);
-void func_151D0024(struct127 *arg0);
-void func_151D0058(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3);
-
-typedef struct {
-    char pad84[0x84];
-    u16 unk84;
-} ConkerStruct151D0128b;
-
-typedef struct {
-    char padE[0xE];
-    s16 unkE;
-    char pad10[0x18];
-    ConkerStruct151D0128b *unk28;
-    char pad2C[0x2];
-    u16 unk2E;
-} ConkerStruct151D0128;
-void func_151D0128(ConkerStruct151D0128 *arg0);
-
-typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA151D08F0;
-
-typedef struct {
-    s32 unk0;
-    union {
-        s32 w4;
-        u8  b4;
-    } u4;
-    u8  unk8;
-    u8  unk9;
-} ArgB151D08F0;
-void func_151D08F0(struct260 *arg0, s32 arg1, u8 arg2);
-
-typedef struct {
-    u8 unk0;
-    struct17 unk4;
-    struct17 unk10;
-    struct17 unk1C;
-    f32 unk28;
-} ShapeA151D09A8; /* 0x2C */
-
-typedef struct {
-    u8 unk0[0x24];
-} Dst151D09A8;
-
-typedef struct {
-    struct17 unk0;
-    s16 unkC;
-    s16 unkE;
-    f32 unk10;
-    f32 unk14;
-    s16 unk18;
-    s16 unk1A;
-    f32 unk1C;
-    f32 unk20;
-    u8 unk24;
-    u8 unk25;
-    u8 pad26[2];
-    f32 unk28;
-    f32 unk2C;
-    u8 unk30;
-    u8 unk31;
-    u8 pad32[2];
-    f32 unk34;
-    u8 unk38;
-    u8 pad39[3];
-    f32 unk3C;
-} EmitA151D09A8; /* 0x40 */
-
-typedef struct {
-    struct17 unk0;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    s16 unk24;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    s16 unk2C;
-    s16 unk2E;
-    s16 unk30;
-    s16 unk32;
-    u8 unk34;
-    u8 pad35[3];
-    f32 unk38;
-    s16 unk3C;
-    s16 unk3E;
-    s32 unk40;
-} EmitB151D09A8; /* 0x44 */
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 pos;
-    struct17 unk3C;
-    struct17 vel;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67;
-    s16 unk68;
-    u8 pad6A[2];
-    f32 unk6C;
-} Particle151D09A8; /* 0x70 */
-
-extern f32 D_800AAF84[3];
-extern f32 D_800AAF90[3];
-extern void func_15145EA4(s32 *, s32 *, s32, s32);
-extern void func_1504715C(void *, struct127 *);
-extern void func_1514FF44(ShapeA151D09A8 *, EmitA151D09A8 *, Dst151D09A8 *, u8, s32);
-extern void func_15153CCC(ShapeA151D09A8 *, EmitB151D09A8 *, Dst151D09A8 *, u8, s32);
-extern s32 func_1514F6E8(ShapeA151D09A8 *);
-extern void func_1514F808(ShapeA151D09A8 *, f32, struct17 *);
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-void func_151D09A8(struct127 *arg0, u8 arg1, s32 arg2);
-void func_151D0ED8(void *arg0);
-
-void func_151D0ED8(void *arg0);
-
-void func_1513173C(void *arg0);
-void func_151D0F08(void *arg0);
-
-void func_1513175C(void *arg0);
-void func_151D0F34(void *arg0);
-
-extern s32 (*D_8008FC30[])(struct127 *, void *);
-
-struct vec3_151D0F60 { f32 x; f32 y; f32 z; };
-void func_151D0F60(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3);
-s32 func_151D1074(f32 *arg0, f32 *arg1);
-
-s32 func_151D10E4(void *arg0, s32 arg1, u8 arg2);
-s32 func_151D10A4(void *arg0, s32 arg1);
-s32 func_151D10C4(void *arg0, s32 arg1);
-
-typedef struct {
-    struct127 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    s32 unk8;
-    struct17 unkC;
-    struct17 unk18;
-    struct17 unk24;
-    f32 unk30;
-    u8 unk34;
-} Sub151D1138;
-
-extern f32 func_15143E64(struct17 *);
-extern s32 func_1510F8CC(s32);
-void func_151D13E0(struct260 *arg0);
-void func_151D1448();
-void func_151D1138(struct260 *arg0);
-void func_151D1328(s32 arg0, s32 arg1, u8 arg2);
-
-void func_151D13E0(struct260 *arg0);
-void func_151D1368(struct260 *arg0);
-void func_151D1388(struct260 *arg0);
-
-void func_15149368(struct260 *arg0);
-void func_151D13B4(struct260 *arg0);
-
-struct Obj151D13E0 {
-    char pad0[0x1C];
-    s16 unk1C;
-    u16 unk1E;
-    char pad20[0x10];
-    u8 unk30;
-    char pad31[0x67];
-    s32 *unk98;
-};
-
-struct Slot151D13E0 {
-    char pad0[0x8];
-    struct Obj151D13E0 *unk8;
-};
-void func_151D13E0(struct260 *arg0);
-void func_151D1448(u8 *arg0);
-
-typedef struct {
-    f32 x, y, z;
-} Vec3_151D15D0;
-
-typedef struct {
-    f32 x, z;
-} Vec2_151D15D0;
-
-typedef struct {
-    Vec3_151D15D0 pos;
-    f32 speed;
-    f32 invLen;
-    u8 alpha;
-    u8 pad15[3];
-    f32 unk18;
-    f32 unk1C;
-    Vec2_151D15D0 n;
-} Rec_151D15D0;
-
-typedef struct {
-    u8 pad0[0x18];
-    Vec3_151D15D0 pos;
-    f32 vx;
-    f32 vy;
-    f32 vz;
-    f32 speed;
-} Inner_151D15D0;
-
-typedef struct {
-    u8 pad0[0x28];
-    Inner_151D15D0 inner;
-} Base_151D15D0;
-
-typedef struct {
-    Base_151D15D0 *base;
-    f32 angle;
-} Src_151D15D0;
-
-typedef struct {
-    u8 pad0[0x10];
-    Vec3_151D15D0 pos;
-    u8 pad1C[2];
-    u16 flags;
-    u8 pad20[5];
-    u8 count;
-    u8 pad26[6];
-    s8 n;
-    s8 tail;
-    s8 head;
-    u8 pad2F[0x94 - 0x2F];
-    Rec_151D15D0 *recs;
-    Src_151D15D0 *src;
-} Obj_151D15D0;
-
-extern f32 func_15144528(f32, f32, f32);
-s32 func_151D15D0(Obj_151D15D0 *arg0);
-void func_151D223C(ConkerField98Owner *arg0);
-
-extern void func_151478F4(void *);
-void func_151D2258(s32 arg0);
-
-extern void func_15147928(s32);
-void func_151D2284(s32 arg0);
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3_151D22B0;
-
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3_151D22B0 pos;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s8 unk40;
-} Cfg080C_151D22B0;
-
-typedef struct {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3_151D22B0 pos;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ s16 unk1A;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-} Cfg2190_151D22B0;
-
-typedef struct {
-    /* 0x00 */ Vec3_151D22B0 pos;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ s16 unk30;
-    /* 0x32 */ s16 unk32;
-    /* 0x34 */ s16 unk34;
-    /* 0x36 */ s16 unk36;
-    /* 0x38 */ s8 unk38;
-    /* 0x39 */ s8 unk39;
-    /* 0x3A */ u8 unk3A;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ s32 unk44;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ s32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ u8 unk54;
-    /* 0x55 */ u8 unk55;
-    /* 0x56 */ u8 unk56;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s32 unk60;
-    /* 0x64 */ s32 unk64;
-    /* 0x68 */ s32 unk68;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ s32 unk70;
-    /* 0x74 */ s32 unk74;
-    /* 0x78 */ s32 unk78;
-    /* 0x7C */ s8 unk7C;
-    /* 0x7D */ s8 unk7D;
-    /* 0x7E */ s16 pad7E;
-    /* 0x80 */ s16 unk80;
-    /* 0x82 */ s16 unk82;
-    /* 0x84 */ s32 pad84;
-} Cfg1A38_151D22B0;
-
-extern s32 D_800AB0B0[];
-extern f32 D_800AB0E0[];
-extern s32 D_800AB110[];
-extern f32 D_800AB114[];
-
-void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
-void func_1504715C(void *, struct127 *);
-void func_1515080C(Cfg080C_151D22B0 *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
-void func_15152190(Cfg2190_151D22B0 *, s32 *, f32 *, s32, f32, s32, u8, s32);
-void func_15151A38(Cfg1A38_151D22B0 *, u8, s32);
-void func_151D22B0(struct127 *arg0, u8 arg1, s32 arg2);

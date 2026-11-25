@@ -2,525 +2,523 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800DCDE0[0x60];
+/*
+ * Camera wobble effects: up to six sine waves (position xyz, rotation xyz) that are summed into a
+ * player's camera offset each frame (D_800DCDE0, applied to the view matrix in game_159940.c).
+ */
 
-struct Obj15164780 {
-    u8 pad0[0x10];
-    u8 unk10[0x38];
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 unk65;
-};
+/* One flag per axis: 1 while that wave's phase is below pi (its sine is positive). */
+typedef struct {
+    u8 v[3];
+} CamWobbleHalves;
+
+#define CAM_WOBBLE_TIMED    1 // stop once the timer runs out
+#define CAM_WOBBLE_STOPPING 2 // each wave stops at its next zero crossing
+#define CAM_WOBBLE_SCALED   4 // amplitudes are scaled by the scaleFn callback
+
+/* What a wobble is created from; copied into the effect at +0x10. */
+typedef struct {
+    /* 0x00 */ u8 flags;       // CAM_WOBBLE_*
+    /* 0x01 */ s8 updateFn;    // index into D_8008B390, or -1
+    /* 0x02 */ s8 scaleFn;     // index into D_8008B394, or -1
+    /* 0x04 */ s16 timer;      // frames left, with CAM_WOBBLE_TIMED
+    /* 0x06 */ u8 playerIndex;
+    /* 0x08 */ f32 amplitude[6]; // position xyz, rotation xyz
+    /* 0x20 */ f32 speed[6];     // phase step per D_800BE9A4 of time; 0 means the wave is off
+} CamWobbleDef; // size 0x38
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10]; // effect header, see func_15167A68
+    /* 0x10 */ CamWobbleDef def;
+    /* 0x48 */ f32 phase[6];
+    /* 0x60 */ CamWobbleHalves posHalf;
+    /* 0x63 */ CamWobbleHalves rotHalf;
+} CamWobble; // size 0x68
+
+extern f32 D_800DCDE0[4][6]; // per-player camera offset (position xyz, rotation xyz), summed from the wobbles
+
+extern s32 (*D_8008B390[])(CamWobble *); // update callbacks, return 0 to stop
+extern f32 (*D_8008B394[])(CamWobble *); // amplitude scale callbacks
 
 extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
-void *func_15164780(struct127 *arg0, s32 arg1, u8 arg2, s32 arg3) {
-    void *temp_v1;
-    struct108 *temp_v0;
+/*
+ * Creates a wobble effect from def with extraSize bytes of extra state after it. Returns NULL if the
+ * player's unk3D0->unk31C->unk198 is set or no effect could be allocated.
+ */
+CamWobble *func_15164780(CamWobbleDef *def, s32 extraSize, u8 arg2, s32 arg3) {
+    CamWobble *wobble;
+    struct108 *player;
 
-    temp_v0 = &D_800DBFF0[arg0->unk6];
-    temp_v1 = temp_v0->unk3D0;
-    if (temp_v1 != 0) {
-        temp_v0 = (struct108 *) ((struct127 *) temp_v1)->unk31C;
-        if ((temp_v0 != 0) && (((struct126 *) temp_v0)->unk198 != 0)) {
-            return NULL;
-        }
-    }
-    temp_v1 = func_15167A68(0x39, arg3, arg1 + 0x68, 1, arg2, 1);
-    if (temp_v1 == 0) {
+    player = &D_800DBFF0[def->playerIndex];
+    if (player->unk3D0 != NULL && player->unk3D0->unk31C != NULL && player->unk3D0->unk31C->unk198 != 0) {
         return NULL;
     }
-    memcpy((s32)temp_v1 + 0x10, arg0, 0x38);
-    ((struct Obj15164780 *) temp_v1)->unk60 = 1;
-    ((struct Obj15164780 *) temp_v1)->unk61 = 1;
-    ((struct Obj15164780 *) temp_v1)->unk62 = 1;
-    ((struct Obj15164780 *) temp_v1)->unk63 = 1;
-    ((struct Obj15164780 *) temp_v1)->unk64 = 1;
-    ((struct Obj15164780 *) temp_v1)->unk65 = 1;
-    ((struct Obj15164780 *) temp_v1)->unk48 = 0.0f;
-    ((struct Obj15164780 *) temp_v1)->unk4C = 0.0f;
-    ((struct Obj15164780 *) temp_v1)->unk50 = 0.0f;
-    ((struct Obj15164780 *) temp_v1)->unk54 = 0.0f;
-    ((struct Obj15164780 *) temp_v1)->unk58 = 0.0f;
-    ((struct Obj15164780 *) temp_v1)->unk5C = 0.0f;
-    return temp_v1;
+    wobble = func_15167A68(0x39, arg3, extraSize + sizeof(CamWobble), 1, arg2, 1);
+    if (wobble == NULL) {
+        return NULL;
+    }
+    memcpy(&wobble->def, def, sizeof(CamWobbleDef));
+    wobble->posHalf.v[0] = 1;
+    wobble->posHalf.v[1] = 1;
+    wobble->posHalf.v[2] = 1;
+    wobble->rotHalf.v[0] = 1;
+    wobble->rotHalf.v[1] = 1;
+    wobble->rotHalf.v[2] = 1;
+    wobble->phase[0] = 0.0f;
+    wobble->phase[1] = 0.0f;
+    wobble->phase[2] = 0.0f;
+    wobble->phase[3] = 0.0f;
+    wobble->phase[4] = 0.0f;
+    wobble->phase[5] = 0.0f;
+    return wobble;
 }
 
-typedef struct {
-    u8 pad0[0x10];
-    /* 0x10 */ u8 unk10;
-} S15164888;
-
-void func_15164888(S15164888 *arg0) {
-    arg0->unk10 |= 0x2;
+/* Asks the wobble to wind down: each wave stops at its next zero crossing. */
+void func_15164888(CamWobble *wobble) {
+    wobble->def.flags |= CAM_WOBBLE_STOPPING;
 }
 
-typedef struct {
-    u8 v[3];
-} S1516489CB3;
-
-typedef struct {
-    u8 pad0[0x10];
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ s8 unk11;
-    /* 0x12 */ s8 unk12;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ u8 unk16;
-    /* 0x18 */ f32 amp[6];
-    /* 0x30 */ f32 speed[6];
-    /* 0x48 */ f32 phase[6];
-    /* 0x60 */ S1516489CB3 flagA;
-    /* 0x63 */ S1516489CB3 flagB;
-} S1516489C;
-
-extern s32 (*D_8008B390[])(S1516489C *);
-extern f32 (*D_8008B394[])(S1516489C *);
-extern f32 D_800A6B20[6];
-
-#define WAVE(i, flag, prev) \
-    if (arg0->speed[i] != 0.0f) { \
-        arg0->phase[i] = func_15144B68(arg0->speed[i] * D_800BE9A4 + arg0->phase[i]); \
-        flag = arg0->phase[i] < D_800A6B20[i]; \
-        if ((arg0->unk10 & 2) && (prev != flag)) { \
-            arg0->speed[i] = 0.0f; \
-            arg0->phase[i] = 0.0f; \
-        } \
-        ((f32 (*)[6])D_800DCDE0)[arg0->unk16][i] += sinf(arg0->phase[i]) * arg0->amp[i] * scale; \
+/* Advances wave i (half: its CamWobbleHalves) and adds its displacement to the player's camera offset. */
+#define WOBBLE_WAVE(i, half, prevHalf)                                                            \
+    if (wobble->def.speed[i] != 0.0f) {                                                           \
+        wobble->phase[i] = func_15144B68(wobble->def.speed[i] * D_800BE9A4 + wobble->phase[i]);   \
+        half.v[(i) % 3] = wobble->phase[i] < 3.1415927f;                                          \
+        if ((wobble->def.flags & CAM_WOBBLE_STOPPING) && (prevHalf.v[(i) % 3] != half.v[(i) % 3])) { \
+            wobble->def.speed[i] = 0.0f;                                                          \
+            wobble->phase[i] = 0.0f;                                                              \
+        }                                                                                         \
+        D_800DCDE0[wobble->def.playerIndex][i] += sinf(wobble->phase[i]) * wobble->def.amplitude[i] * scale; \
     }
 
-void func_1516489C(S1516489C *arg0) {
-    s32 pad;
-    u8 done;
-    u8 kill;
+/* Per-frame update of a wobble effect; frees it once every wave has stopped. */
+void func_1516489C(CamWobble *wobble) {
+    s32 pad; // matching: unused stack slot in the original frame
+    u8 finished;
+    u8 stop;
     f32 scale;
-    S1516489CB3 prevA;
-    S1516489CB3 prevB;
+    CamWobbleHalves prevPosHalf;
+    CamWobbleHalves prevRotHalf;
 
-    done = 0;
-    kill = 0;
-    if (arg0->unk10 & 1) {
-        arg0->unk14 -= D_800BE9E4;
-        if (arg0->unk14 < 0) {
-            kill = 1;
+    finished = 0;
+    stop = 0;
+    if (wobble->def.flags & CAM_WOBBLE_TIMED) {
+        wobble->def.timer -= D_800BE9E4;
+        if (wobble->def.timer < 0) {
+            stop = 1;
         }
     }
-    if (!kill && arg0->unk11 != -1) {
-        if (!D_8008B390[arg0->unk11](arg0)) {
-            kill = 1;
+    if (!stop && wobble->def.updateFn != -1) {
+        if (!D_8008B390[wobble->def.updateFn](wobble)) {
+            stop = 1;
         }
     }
-    if (kill) {
-        func_15164888((S15164888 *)arg0);
+    if (stop) {
+        func_15164888(wobble);
     }
-    prevA = arg0->flagA;
-    prevB = arg0->flagB;
+    prevPosHalf = wobble->posHalf;
+    prevRotHalf = wobble->rotHalf;
     scale = 1.0f;
-    if (arg0->unk10 & 4) {
-        if (arg0->unk12 != -1) {
-            scale = D_8008B394[arg0->unk12](arg0);
+    if (wobble->def.flags & CAM_WOBBLE_SCALED) {
+        if (wobble->def.scaleFn != -1) {
+            scale = D_8008B394[wobble->def.scaleFn](wobble);
         }
     }
-    WAVE(0, arg0->flagA.v[0], prevA.v[0])
-    WAVE(1, arg0->flagA.v[1], prevA.v[1])
-    WAVE(2, arg0->flagA.v[2], prevA.v[2])
-    WAVE(3, arg0->flagB.v[0], prevB.v[0])
-    WAVE(4, arg0->flagB.v[1], prevB.v[1])
-    WAVE(5, arg0->flagB.v[2], prevB.v[2])
-    if (arg0->speed[0] == 0.0f && arg0->speed[1] == 0.0f && arg0->speed[2] == 0.0f &&
-        arg0->speed[3] == 0.0f && arg0->speed[4] == 0.0f && arg0->speed[5] == 0.0f) {
-        done = 1;
+    WOBBLE_WAVE(0, wobble->posHalf, prevPosHalf)
+    WOBBLE_WAVE(1, wobble->posHalf, prevPosHalf)
+    WOBBLE_WAVE(2, wobble->posHalf, prevPosHalf)
+    WOBBLE_WAVE(3, wobble->rotHalf, prevRotHalf)
+    WOBBLE_WAVE(4, wobble->rotHalf, prevRotHalf)
+    WOBBLE_WAVE(5, wobble->rotHalf, prevRotHalf)
+    if (wobble->def.speed[0] == 0.0f && wobble->def.speed[1] == 0.0f && wobble->def.speed[2] == 0.0f &&
+        wobble->def.speed[3] == 0.0f && wobble->def.speed[4] == 0.0f && wobble->def.speed[5] == 0.0f) {
+        finished = 1;
     }
-    if (done) {
-        func_1516972C((struct102 *)arg0);
+    if (finished) {
+        func_1516972C((struct102 *)wobble);
     }
 }
 
+/* Clears every player's camera offset. */
 void func_15164EE4(void) {
-    bzero(D_800DCDE0, 0x60);
+    bzero(D_800DCDE0, sizeof(D_800DCDE0));
 }
 
+/* The amplitudes and speeds of CamWobbleDef seen as four vectors. */
 typedef struct {
-    /* 0x00 */ struct17 unk0;
-    /* 0x0C */ struct17 unkC;
-    /* 0x18 */ struct17 unk18;
-    /* 0x24 */ struct17 unk24;
-} S15165Pose;
+    /* 0x00 */ vertex ampPos;
+    /* 0x0C */ vertex ampRot;
+    /* 0x18 */ vertex speedPos;
+    /* 0x24 */ vertex speedRot;
+} CamWobbleShape;
+
+/* A wobble that ramps up to peak over riseTime, holds it for holdTime and ramps down over fallTime. */
+typedef struct {
+    /* 0x00 */ CamWobbleShape peak;
+    /* 0x30 */ f32 riseTime;
+    /* 0x34 */ f32 holdTime;
+    /* 0x38 */ f32 fallTime;
+} CamWobblePreset;
 
 typedef struct {
-    /* 0x00 */ S15165Pose rate;
-    /* 0x30 */ S15165Pose fall;
-    /* 0x60 */ S15165Pose peak;
+    /* 0x00 */ CamWobbleShape riseRate; // peak / riseTime
+    /* 0x30 */ CamWobbleShape fallRate; // peak / fallTime, with the pos and rot vectors swapped
+    /* 0x60 */ CamWobbleShape peak;
     /* 0x90 */ f32 riseTime;
     /* 0x94 */ f32 holdTime;
     /* 0x98 */ f32 fallTime;
     /* 0x9C */ f32 time;
-} S15165Blend;
+} CamWobbleEnvelope; // size 0xA0
 
+/* Distance falloff used by scaleFn 1 (func_15165B80). */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ S15165Pose unk18;
-    /* 0x48 */ u8 pad48[0x20];
-    /* 0x68 */ S15165Blend unk68;
-} S15165Obj;
+    /* 0x00 */ vertex origin;
+    /* 0x0C */ f32 radius;       // full strength within this distance of origin
+    /* 0x10 */ f32 fadeRange;    // then fades to nothing over this distance
+    /* 0x14 */ f32 invFadeRange; // 1 / fadeRange
+} CamWobbleFalloff; // size 0x18
 
+/* A CamWobble made by func_15165628, with its envelope and room for a falloff after it. */
 typedef struct {
-    /* 0x00 */ S15165Pose pose;
-    /* 0x30 */ f32 riseTime;
-    /* 0x34 */ f32 holdTime;
-    /* 0x38 */ f32 fallTime;
-} S15165Def;
+    /* 0x000 */ u8 pad0[0x18];
+    /* 0x018 */ CamWobbleShape shape; // CamWobble.def.amplitude and .speed
+    /* 0x048 */ u8 pad48[0x20];       // rest of the CamWobble
+    /* 0x068 */ CamWobbleEnvelope envelope;
+    /* 0x108 */ CamWobbleFalloff falloff; // only with extraSize 24
+} CamWobbleEnv;
 
-typedef struct {
-    /* 0x00 */ u8  unk0;
-    /* 0x01 */ s8  unk1;
-    /* 0x02 */ s8  unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ u8  unk6;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-} S15165Child; /* size 0x38 */
+CamWobbleEnv *func_15165628(CamWobblePreset *preset, u8 playerIndex, s8 scaleFn, s32 extraSize, u8 arg4, s32 arg5);
 
-void *func_15165628(S15165Def *arg0, u8 arg1, s8 arg2, s32 arg3, u8 arg4, s32 arg5);
-
-void *func_15164F0C(u8 arg0, u8 arg1, void *arg2, u8 arg3, s32 arg4) {
-    switch (arg0) {
+/*
+ * Starts one of the preset wobbles for a player. Presets 5 and 6 fade with distance from falloff->origin;
+ * only they return the wobble.
+ */
+CamWobbleEnv *func_15164F0C(u8 presetIndex, u8 playerIndex, CamWobbleFalloff *falloff, u8 arg3, s32 arg4) {
+    switch (presetIndex) {
     case 7: {
-        f32 d[15];
-        d[0] = 8.0f;
-        d[1] = 12.0f;
-        d[2] = 9.0f;
-        d[3] = 0.5f;
-        d[4] = 0.199999988f;
-        d[5] = 0.299999982f;
-        d[6] = 1.15600002f;
-        d[7] = 0.964000046f;
-        d[8] = 0.458000034f;
-        d[9] = 2.27859998f;
-        d[10] = 1.91939998f;
-        d[11] = 1.52499998f;
-        d[12] = 4.0f;
-        d[13] = 10.0f;
-        d[14] = 16.0f;
-        func_15165628((S15165Def *)d, arg1, -1, 0, arg3, arg4);
+        CamWobblePreset preset;
+        preset.peak.ampPos.x = 8.0f;
+        preset.peak.ampPos.y = 12.0f;
+        preset.peak.ampPos.z = 9.0f;
+        preset.peak.ampRot.x = 0.5f;
+        preset.peak.ampRot.y = 0.199999988f;
+        preset.peak.ampRot.z = 0.299999982f;
+        preset.peak.speedPos.x = 1.15600002f;
+        preset.peak.speedPos.y = 0.964000046f;
+        preset.peak.speedPos.z = 0.458000034f;
+        preset.peak.speedRot.x = 2.27859998f;
+        preset.peak.speedRot.y = 1.91939998f;
+        preset.peak.speedRot.z = 1.52499998f;
+        preset.riseTime = 4.0f;
+        preset.holdTime = 10.0f;
+        preset.fallTime = 16.0f;
+        func_15165628(&preset, playerIndex, -1, 0, arg3, arg4);
         break;
     }
     case 0: {
-        f32 d[15];
-        d[0] = 10.0f;
-        d[1] = 4.0f;
-        d[2] = 7.0f;
-        d[3] = 0.780599952f;
-        d[4] = 0.286899984f;
-        d[5] = 0.888799965f;
-        d[6] = 0.666000009f;
-        d[7] = 1.19400001f;
-        d[8] = 1.00999999f;
-        d[9] = 0.435299993f;
-        d[10] = 0.586699963f;
-        d[11] = 0.709699988f;
-        d[12] = 6.0f;
-        d[13] = 17.0f;
-        d[14] = 48.0f;
-        func_15165628((S15165Def *)d, arg1, -1, 0, arg3, arg4);
+        CamWobblePreset preset;
+        preset.peak.ampPos.x = 10.0f;
+        preset.peak.ampPos.y = 4.0f;
+        preset.peak.ampPos.z = 7.0f;
+        preset.peak.ampRot.x = 0.780599952f;
+        preset.peak.ampRot.y = 0.286899984f;
+        preset.peak.ampRot.z = 0.888799965f;
+        preset.peak.speedPos.x = 0.666000009f;
+        preset.peak.speedPos.y = 1.19400001f;
+        preset.peak.speedPos.z = 1.00999999f;
+        preset.peak.speedRot.x = 0.435299993f;
+        preset.peak.speedRot.y = 0.586699963f;
+        preset.peak.speedRot.z = 0.709699988f;
+        preset.riseTime = 6.0f;
+        preset.holdTime = 17.0f;
+        preset.fallTime = 48.0f;
+        func_15165628(&preset, playerIndex, -1, 0, arg3, arg4);
         break;
     }
     case 1: {
-        f32 d[15];
-        d[0] = 20.0f;
-        d[1] = 19.0f;
-        d[2] = 53.0f;
-        d[3] = 0.0f;
-        d[4] = 0.0f;
-        d[5] = 1.47780001f;
-        d[6] = 0.602000058f;
-        d[7] = 1.02100003f;
-        d[8] = 1.1910001f;
-        d[9] = 0.0f;
-        d[10] = 0.0f;
-        d[11] = 2.90499997f;
-        d[12] = 3.0f;
-        d[13] = 5.0f;
-        d[14] = 30.0f;
-        func_15165628((S15165Def *)d, arg1, -1, 0, arg3, arg4);
+        CamWobblePreset preset;
+        preset.peak.ampPos.x = 20.0f;
+        preset.peak.ampPos.y = 19.0f;
+        preset.peak.ampPos.z = 53.0f;
+        preset.peak.ampRot.x = 0.0f;
+        preset.peak.ampRot.y = 0.0f;
+        preset.peak.ampRot.z = 1.47780001f;
+        preset.peak.speedPos.x = 0.602000058f;
+        preset.peak.speedPos.y = 1.02100003f;
+        preset.peak.speedPos.z = 1.1910001f;
+        preset.peak.speedRot.x = 0.0f;
+        preset.peak.speedRot.y = 0.0f;
+        preset.peak.speedRot.z = 2.90499997f;
+        preset.riseTime = 3.0f;
+        preset.holdTime = 5.0f;
+        preset.fallTime = 30.0f;
+        func_15165628(&preset, playerIndex, -1, 0, arg3, arg4);
         break;
     }
     case 2: {
-        f32 d[15];
-        d[0] = 10.0f;
-        d[1] = 7.0f;
-        d[2] = 6.0f;
-        d[3] = 1.0029f;
-        d[4] = 0.497699976f;
-        d[5] = 1.43059993f;
-        d[6] = 0.654000044f;
-        d[7] = 1.06200004f;
-        d[8] = 0.32100001f;
-        d[9] = 0.516900003f;
-        d[10] = 0.772799969f;
-        d[11] = 0.175599992f;
-        d[12] = 2.0f;
-        d[13] = 27.0f;
-        d[14] = 15.0f;
-        func_15165628((S15165Def *)d, arg1, -1, 0, arg3, arg4);
+        CamWobblePreset preset;
+        preset.peak.ampPos.x = 10.0f;
+        preset.peak.ampPos.y = 7.0f;
+        preset.peak.ampPos.z = 6.0f;
+        preset.peak.ampRot.x = 1.0029f;
+        preset.peak.ampRot.y = 0.497699976f;
+        preset.peak.ampRot.z = 1.43059993f;
+        preset.peak.speedPos.x = 0.654000044f;
+        preset.peak.speedPos.y = 1.06200004f;
+        preset.peak.speedPos.z = 0.32100001f;
+        preset.peak.speedRot.x = 0.516900003f;
+        preset.peak.speedRot.y = 0.772799969f;
+        preset.peak.speedRot.z = 0.175599992f;
+        preset.riseTime = 2.0f;
+        preset.holdTime = 27.0f;
+        preset.fallTime = 15.0f;
+        func_15165628(&preset, playerIndex, -1, 0, arg3, arg4);
         break;
     }
     case 3: {
-        f32 d[15];
-        d[0] = 7.0f;
-        d[1] = 11.0f;
-        d[2] = 5.0f;
-        d[3] = 0.432099998f;
-        d[4] = 0.6329f;
-        d[5] = 0.808200002f;
-        d[6] = 0.276000023f;
-        d[7] = 0.539000034f;
-        d[8] = 0.43900001f;
-        d[9] = 1.67269993f;
-        d[10] = 0.494699985f;
-        d[11] = 0.98939997f;
-        d[12] = 5.0f;
-        d[13] = 15.0f;
-        d[14] = 12.0f;
-        func_15165628((S15165Def *)d, arg1, -1, 0, arg3, arg4);
+        CamWobblePreset preset;
+        preset.peak.ampPos.x = 7.0f;
+        preset.peak.ampPos.y = 11.0f;
+        preset.peak.ampPos.z = 5.0f;
+        preset.peak.ampRot.x = 0.432099998f;
+        preset.peak.ampRot.y = 0.6329f;
+        preset.peak.ampRot.z = 0.808200002f;
+        preset.peak.speedPos.x = 0.276000023f;
+        preset.peak.speedPos.y = 0.539000034f;
+        preset.peak.speedPos.z = 0.43900001f;
+        preset.peak.speedRot.x = 1.67269993f;
+        preset.peak.speedRot.y = 0.494699985f;
+        preset.peak.speedRot.z = 0.98939997f;
+        preset.riseTime = 5.0f;
+        preset.holdTime = 15.0f;
+        preset.fallTime = 12.0f;
+        func_15165628(&preset, playerIndex, -1, 0, arg3, arg4);
         break;
     }
     case 4: {
-        f32 d[15];
-        d[0] = 8.0f;
-        d[1] = 17.0f;
-        d[2] = 4.0f;
-        d[3] = 0.761399984f;
-        d[4] = 1.57069993f;
-        d[5] = 1.26679993f;
-        d[6] = 0.587000012f;
-        d[7] = 0.906000018f;
-        d[8] = 0.403000027f;
-        d[9] = 1.15919995f;
-        d[10] = 0.697299957f;
-        d[11] = 1.34640002f;
-        d[12] = 5.0f;
-        d[13] = 3.0f;
-        d[14] = 45.0f;
-        func_15165628((S15165Def *)d, arg1, 0, 0, arg3, arg4);
+        CamWobblePreset preset;
+        preset.peak.ampPos.x = 8.0f;
+        preset.peak.ampPos.y = 17.0f;
+        preset.peak.ampPos.z = 4.0f;
+        preset.peak.ampRot.x = 0.761399984f;
+        preset.peak.ampRot.y = 1.57069993f;
+        preset.peak.ampRot.z = 1.26679993f;
+        preset.peak.speedPos.x = 0.587000012f;
+        preset.peak.speedPos.y = 0.906000018f;
+        preset.peak.speedPos.z = 0.403000027f;
+        preset.peak.speedRot.x = 1.15919995f;
+        preset.peak.speedRot.y = 0.697299957f;
+        preset.peak.speedRot.z = 1.34640002f;
+        preset.riseTime = 5.0f;
+        preset.holdTime = 3.0f;
+        preset.fallTime = 45.0f;
+        func_15165628(&preset, playerIndex, 0, 0, arg3, arg4);
         break;
     }
     case 5: {
-        f32 d[15];
-        void *ret;
-        d[0] = 15.0f;
-        d[1] = 10.0f;
-        d[2] = 19.0f;
-        d[3] = 0.539699972f;
-        d[4] = 0.76789999f;
-        d[5] = 0.988099992f;
-        d[6] = 1.04500008f;
-        d[7] = 0.636000037f;
-        d[8] = 1.40400004f;
-        d[9] = 0.452600002f;
-        d[10] = 0.484999985f;
-        d[11] = 0.684300005f;
-        d[12] = 5.0f;
-        d[13] = 5.0f;
-        d[14] = 25.0f;
-        ret = func_15165628((S15165Def *)d, arg1, 1, 24, arg3, arg4);
-        if (ret != NULL) {
-            memcpy((u8 *)ret + 0x108, arg2, 0x18);
+        CamWobblePreset preset;
+        CamWobbleEnv *wobble;
+        preset.peak.ampPos.x = 15.0f;
+        preset.peak.ampPos.y = 10.0f;
+        preset.peak.ampPos.z = 19.0f;
+        preset.peak.ampRot.x = 0.539699972f;
+        preset.peak.ampRot.y = 0.76789999f;
+        preset.peak.ampRot.z = 0.988099992f;
+        preset.peak.speedPos.x = 1.04500008f;
+        preset.peak.speedPos.y = 0.636000037f;
+        preset.peak.speedPos.z = 1.40400004f;
+        preset.peak.speedRot.x = 0.452600002f;
+        preset.peak.speedRot.y = 0.484999985f;
+        preset.peak.speedRot.z = 0.684300005f;
+        preset.riseTime = 5.0f;
+        preset.holdTime = 5.0f;
+        preset.fallTime = 25.0f;
+        wobble = func_15165628(&preset, playerIndex, 1, 24, arg3, arg4);
+        if (wobble != NULL) {
+            memcpy(&wobble->falloff, falloff, sizeof(CamWobbleFalloff));
         }
-        return ret;
+        return wobble;
     }
     case 6: {
-        f32 d[15];
-        void *ret;
-        d[0] = 15.0f;
-        d[1] = 10.0f;
-        d[2] = 19.0f;
-        d[3] = 0.539699972f;
-        d[4] = 0.76789999f;
-        d[5] = 0.988099992f;
-        d[6] = 1.04500008f;
-        d[7] = 0.636000037f;
-        d[8] = 1.40400004f;
-        d[9] = 0.452600002f;
-        d[10] = 0.484999985f;
-        d[11] = 0.684300005f;
-        d[12] = 5.0f;
-        d[13] = 5.0f;
-        d[14] = 25.0f;
-        ret = func_15165628((S15165Def *)d, arg1, 1, 24, arg3, arg4);
-        if (ret != NULL) {
-            memcpy((u8 *)ret + 0x108, arg2, 0x18);
+        CamWobblePreset preset;
+        CamWobbleEnv *wobble;
+        preset.peak.ampPos.x = 15.0f;
+        preset.peak.ampPos.y = 10.0f;
+        preset.peak.ampPos.z = 19.0f;
+        preset.peak.ampRot.x = 0.539699972f;
+        preset.peak.ampRot.y = 0.76789999f;
+        preset.peak.ampRot.z = 0.988099992f;
+        preset.peak.speedPos.x = 1.04500008f;
+        preset.peak.speedPos.y = 0.636000037f;
+        preset.peak.speedPos.z = 1.40400004f;
+        preset.peak.speedRot.x = 0.452600002f;
+        preset.peak.speedRot.y = 0.484999985f;
+        preset.peak.speedRot.z = 0.684300005f;
+        preset.riseTime = 5.0f;
+        preset.holdTime = 5.0f;
+        preset.fallTime = 25.0f;
+        wobble = func_15165628(&preset, playerIndex, 1, 24, arg3, arg4);
+        if (wobble != NULL) {
+            memcpy(&wobble->falloff, falloff, sizeof(CamWobbleFalloff));
         }
-        return ret;
+        return wobble;
     }
     }
 }
 
-void *func_15165628(S15165Def *arg0, u8 arg1, s8 arg2, s32 arg3, u8 arg4, s32 arg5) {
-    S15165Child child;
-    S15165Blend blend;
-    void *obj;
-    f32 riseScale;
-    f32 fallScale;
+/* Starts an envelope-driven wobble from preset; NULL if a duration is 0 or no effect was made. */
+CamWobbleEnv *func_15165628(CamWobblePreset *preset, u8 playerIndex, s8 scaleFn, s32 extraSize, u8 arg4, s32 arg5) {
+    CamWobbleDef def;
+    CamWobbleEnvelope envelope;
+    CamWobbleEnv *wobble;
+    f32 invRiseTime;
+    f32 invFallTime;
 
-    if ((arg0->riseTime == 0.0f) || (arg0->fallTime == 0.0f)) {
+    if (preset->riseTime == 0.0f || preset->fallTime == 0.0f) {
         return NULL;
     }
 
-    riseScale = 1.0f / arg0->riseTime;
-    fallScale = 1.0f / arg0->fallTime;
+    invRiseTime = 1.0f / preset->riseTime;
+    invFallTime = 1.0f / preset->fallTime;
 
-    child.unk0 = 4;
-    child.unk1 = 0;
-    child.unk4 = 0x12C;
-    child.unk6 = arg1;
-    child.unk2 = arg2;
-    child.unk8 = 0;
-    child.unkC = 0;
-    child.unk10 = 0;
-    child.unk14 = 0;
-    child.unk18 = 0;
-    child.unk1C = 0;
-    child.unk20 = 0;
-    child.unk24 = 0;
-    child.unk28 = 0;
-    child.unk2C = 0;
-    child.unk30 = 0;
-    child.unk34 = 0;
+    def.flags = CAM_WOBBLE_SCALED;
+    def.updateFn = 0; // func_151658DC
+    def.timer = 300;
+    def.playerIndex = playerIndex;
+    def.scaleFn = scaleFn;
+    // matching: integer 0s; 0.0f would reuse the register of the == 0.0f tests above
+    def.amplitude[0] = 0;
+    def.amplitude[1] = 0;
+    def.amplitude[2] = 0;
+    def.amplitude[3] = 0;
+    def.amplitude[4] = 0;
+    def.amplitude[5] = 0;
+    def.speed[0] = 0;
+    def.speed[1] = 0;
+    def.speed[2] = 0;
+    def.speed[3] = 0;
+    def.speed[4] = 0;
+    def.speed[5] = 0;
 
-    blend.rate.unk0.unk0 = arg0->pose.unk0.unk0 * riseScale;
-    blend.rate.unk0.unk4 = arg0->pose.unk0.unk4 * riseScale;
-    blend.rate.unk0.unk8 = arg0->pose.unk0.unk8 * riseScale;
-    blend.rate.unkC.unk0 = arg0->pose.unkC.unk0 * riseScale;
-    blend.rate.unkC.unk4 = arg0->pose.unkC.unk4 * riseScale;
-    blend.rate.unkC.unk8 = arg0->pose.unkC.unk8 * riseScale;
-    blend.rate.unk18.unk0 = arg0->pose.unk18.unk0 * riseScale;
-    blend.rate.unk18.unk4 = arg0->pose.unk18.unk4 * riseScale;
-    blend.rate.unk18.unk8 = arg0->pose.unk18.unk8 * riseScale;
-    blend.rate.unk24.unk0 = arg0->pose.unk24.unk0 * riseScale;
-    blend.rate.unk24.unk4 = arg0->pose.unk24.unk4 * riseScale;
-    blend.rate.unk24.unk8 = arg0->pose.unk24.unk8 * riseScale;
+    envelope.riseRate.ampPos.x = preset->peak.ampPos.x * invRiseTime;
+    envelope.riseRate.ampPos.y = preset->peak.ampPos.y * invRiseTime;
+    envelope.riseRate.ampPos.z = preset->peak.ampPos.z * invRiseTime;
+    envelope.riseRate.ampRot.x = preset->peak.ampRot.x * invRiseTime;
+    envelope.riseRate.ampRot.y = preset->peak.ampRot.y * invRiseTime;
+    envelope.riseRate.ampRot.z = preset->peak.ampRot.z * invRiseTime;
+    envelope.riseRate.speedPos.x = preset->peak.speedPos.x * invRiseTime;
+    envelope.riseRate.speedPos.y = preset->peak.speedPos.y * invRiseTime;
+    envelope.riseRate.speedPos.z = preset->peak.speedPos.z * invRiseTime;
+    envelope.riseRate.speedRot.x = preset->peak.speedRot.x * invRiseTime;
+    envelope.riseRate.speedRot.y = preset->peak.speedRot.y * invRiseTime;
+    envelope.riseRate.speedRot.z = preset->peak.speedRot.z * invRiseTime;
 
-    blend.fall.unkC.unk0 = arg0->pose.unk0.unk0 * fallScale;
-    blend.fall.unkC.unk4 = arg0->pose.unk0.unk4 * fallScale;
-    blend.fall.unkC.unk8 = arg0->pose.unk0.unk8 * fallScale;
-    blend.fall.unk0.unk0 = arg0->pose.unkC.unk0 * fallScale;
-    blend.fall.unk0.unk4 = arg0->pose.unkC.unk4 * fallScale;
-    blend.fall.unk0.unk8 = arg0->pose.unkC.unk8 * fallScale;
-    blend.fall.unk24.unk0 = arg0->pose.unk18.unk0 * fallScale;
-    blend.fall.unk24.unk4 = arg0->pose.unk18.unk4 * fallScale;
-    blend.fall.unk24.unk8 = arg0->pose.unk18.unk8 * fallScale;
-    blend.fall.unk18.unk0 = arg0->pose.unk24.unk0 * fallScale;
-    blend.fall.unk18.unk4 = arg0->pose.unk24.unk4 * fallScale;
-    blend.fall.unk18.unk8 = arg0->pose.unk24.unk8 * fallScale;
+    envelope.fallRate.ampRot.x = preset->peak.ampPos.x * invFallTime;
+    envelope.fallRate.ampRot.y = preset->peak.ampPos.y * invFallTime;
+    envelope.fallRate.ampRot.z = preset->peak.ampPos.z * invFallTime;
+    envelope.fallRate.ampPos.x = preset->peak.ampRot.x * invFallTime;
+    envelope.fallRate.ampPos.y = preset->peak.ampRot.y * invFallTime;
+    envelope.fallRate.ampPos.z = preset->peak.ampRot.z * invFallTime;
+    envelope.fallRate.speedRot.x = preset->peak.speedPos.x * invFallTime;
+    envelope.fallRate.speedRot.y = preset->peak.speedPos.y * invFallTime;
+    envelope.fallRate.speedRot.z = preset->peak.speedPos.z * invFallTime;
+    envelope.fallRate.speedPos.x = preset->peak.speedRot.x * invFallTime;
+    envelope.fallRate.speedPos.y = preset->peak.speedRot.y * invFallTime;
+    envelope.fallRate.speedPos.z = preset->peak.speedRot.z * invFallTime;
 
-    blend.peak.unk0 = arg0->pose.unk0;
-    blend.peak.unkC = arg0->pose.unkC;
-    blend.peak.unk18 = arg0->pose.unk18;
-    blend.peak.unk24 = arg0->pose.unk24;
+    envelope.peak.ampPos = preset->peak.ampPos;
+    envelope.peak.ampRot = preset->peak.ampRot;
+    envelope.peak.speedPos = preset->peak.speedPos;
+    envelope.peak.speedRot = preset->peak.speedRot;
 
-    blend.riseTime = arg0->riseTime;
-    blend.holdTime = arg0->holdTime;
-    blend.fallTime = arg0->fallTime;
-    blend.time = 0;
+    envelope.riseTime = preset->riseTime;
+    envelope.holdTime = preset->holdTime;
+    envelope.fallTime = preset->fallTime;
+    envelope.time = 0; // matching: integer 0, as above
 
-    obj = func_15164780((struct127 *)&child, arg3 + 0xA0, arg4, arg5);
-    if (obj != NULL) {
-        memcpy((s32)obj + 0x68, &blend, 0xA0);
+    wobble = (CamWobbleEnv *)func_15164780(&def, extraSize + sizeof(CamWobbleEnvelope), arg4, arg5);
+    if (wobble != NULL) {
+        memcpy(&wobble->envelope, &envelope, sizeof(CamWobbleEnvelope));
     }
-    return obj;
+    return wobble;
 }
 
-s32 func_151658DC(S15165Obj *arg0) {
-    S15165Blend *p;
-    s32 ret;
+/* Update callback 0: moves the amplitudes and speeds along the envelope; returns 0 once it has ended. */
+s32 func_151658DC(CamWobbleEnv *wobble) {
+    CamWobbleEnvelope *env;
+    s32 active;
 
-    p = &arg0->unk68;
-    ret = 1;
-    p->time = p->time + D_800BE9A4;
-    if (p->time < p->riseTime) {
-        arg0->unk18.unk0.unk0 = p->rate.unk0.unk0 * p->time;
-        arg0->unk18.unk0.unk4 = p->rate.unk0.unk4 * p->time;
-        arg0->unk18.unk0.unk8 = p->rate.unk0.unk8 * p->time;
-        arg0->unk18.unkC.unk0 = p->rate.unkC.unk0 * p->time;
-        arg0->unk18.unkC.unk4 = p->rate.unkC.unk4 * p->time;
-        arg0->unk18.unkC.unk8 = p->rate.unkC.unk8 * p->time;
-        arg0->unk18.unk18.unk0 = p->rate.unk18.unk0 * p->time;
-        arg0->unk18.unk18.unk4 = p->rate.unk18.unk4 * p->time;
-        arg0->unk18.unk18.unk8 = p->rate.unk18.unk8 * p->time;
-        arg0->unk18.unk24.unk0 = p->rate.unk24.unk0 * p->time;
-        arg0->unk18.unk24.unk4 = p->rate.unk24.unk4 * p->time;
-        arg0->unk18.unk24.unk8 = p->rate.unk24.unk8 * p->time;
-    } else if (p->time < p->riseTime + p->holdTime) {
-        arg0->unk18.unk0 = p->peak.unk0;
-        arg0->unk18.unkC = p->peak.unkC;
-        arg0->unk18.unk18 = p->peak.unk18;
-        arg0->unk18.unk24 = p->peak.unk24;
-    } else if (p->time < (p->riseTime + p->holdTime) + p->fallTime) {
-        f32 t = p->time - (p->riseTime + p->holdTime);
+    env = &wobble->envelope;
+    active = 1;
+    env->time += D_800BE9A4;
+    if (env->time < env->riseTime) {
+        wobble->shape.ampPos.x = env->riseRate.ampPos.x * env->time;
+        wobble->shape.ampPos.y = env->riseRate.ampPos.y * env->time;
+        wobble->shape.ampPos.z = env->riseRate.ampPos.z * env->time;
+        wobble->shape.ampRot.x = env->riseRate.ampRot.x * env->time;
+        wobble->shape.ampRot.y = env->riseRate.ampRot.y * env->time;
+        wobble->shape.ampRot.z = env->riseRate.ampRot.z * env->time;
+        wobble->shape.speedPos.x = env->riseRate.speedPos.x * env->time;
+        wobble->shape.speedPos.y = env->riseRate.speedPos.y * env->time;
+        wobble->shape.speedPos.z = env->riseRate.speedPos.z * env->time;
+        wobble->shape.speedRot.x = env->riseRate.speedRot.x * env->time;
+        wobble->shape.speedRot.y = env->riseRate.speedRot.y * env->time;
+        wobble->shape.speedRot.z = env->riseRate.speedRot.z * env->time;
+    } else if (env->time < env->riseTime + env->holdTime) {
+        wobble->shape.ampPos = env->peak.ampPos;
+        wobble->shape.ampRot = env->peak.ampRot;
+        wobble->shape.speedPos = env->peak.speedPos;
+        wobble->shape.speedRot = env->peak.speedRot;
+    } else if (env->time < (env->riseTime + env->holdTime) + env->fallTime) {
+        f32 t = env->time - (env->riseTime + env->holdTime);
 
-        arg0->unk18.unk0.unk0 = p->peak.unk0.unk0 - p->fall.unkC.unk0 * t;
-        arg0->unk18.unk0.unk4 = p->peak.unk0.unk4 - p->fall.unkC.unk4 * t;
-        arg0->unk18.unk0.unk8 = p->peak.unk0.unk8 - p->fall.unkC.unk8 * t;
-        arg0->unk18.unkC.unk0 = p->peak.unkC.unk0 - p->fall.unk0.unk0 * t;
-        arg0->unk18.unkC.unk4 = p->peak.unkC.unk4 - p->fall.unk0.unk4 * t;
-        arg0->unk18.unkC.unk8 = p->peak.unkC.unk8 - p->fall.unk0.unk8 * t;
-        arg0->unk18.unk18.unk0 = p->peak.unk18.unk0 - p->fall.unk24.unk0 * t;
-        arg0->unk18.unk18.unk4 = p->peak.unk18.unk4 - p->fall.unk24.unk4 * t;
-        arg0->unk18.unk18.unk8 = p->peak.unk18.unk8 - p->fall.unk24.unk8 * t;
-        arg0->unk18.unk24.unk0 = p->peak.unk24.unk0 - p->fall.unk18.unk0 * t;
-        arg0->unk18.unk24.unk4 = p->peak.unk24.unk4 - p->fall.unk18.unk4 * t;
-        arg0->unk18.unk24.unk8 = p->peak.unk24.unk8 - p->fall.unk18.unk8 * t;
+        wobble->shape.ampPos.x = env->peak.ampPos.x - env->fallRate.ampRot.x * t;
+        wobble->shape.ampPos.y = env->peak.ampPos.y - env->fallRate.ampRot.y * t;
+        wobble->shape.ampPos.z = env->peak.ampPos.z - env->fallRate.ampRot.z * t;
+        wobble->shape.ampRot.x = env->peak.ampRot.x - env->fallRate.ampPos.x * t;
+        wobble->shape.ampRot.y = env->peak.ampRot.y - env->fallRate.ampPos.y * t;
+        wobble->shape.ampRot.z = env->peak.ampRot.z - env->fallRate.ampPos.z * t;
+        wobble->shape.speedPos.x = env->peak.speedPos.x - env->fallRate.speedRot.x * t;
+        wobble->shape.speedPos.y = env->peak.speedPos.y - env->fallRate.speedRot.y * t;
+        wobble->shape.speedPos.z = env->peak.speedPos.z - env->fallRate.speedRot.z * t;
+        wobble->shape.speedRot.x = env->peak.speedRot.x - env->fallRate.speedPos.x * t;
+        wobble->shape.speedRot.y = env->peak.speedRot.y - env->fallRate.speedPos.y * t;
+        wobble->shape.speedRot.z = env->peak.speedRot.z - env->fallRate.speedPos.z * t;
     } else {
-        ret = 0;
+        active = 0;
     }
-    return ret;
+    return active;
 }
 
-f32 func_15165BB0(s32 *arg0, struct17 *arg1, f32 arg2, f32 arg3, f32 arg4);
+f32 func_15165BB0(CamWobble *wobble, vertex *origin, f32 radius, f32 fadeRange, f32 invFadeRange);
 
-void func_15165B80(s32 *arg0) {
-    func_15165BB0(arg0, (struct17 *)((s32)arg0 + 0x108), *(f32 *)&arg0[0x45], *(f32 *)&arg0[0x46], *(f32 *)((s32)arg0 + 0x11C));
+/* Scale callback 1: fades the wobble with the player's distance from its falloff origin. */
+f32 func_15165B80(CamWobbleEnv *wobble) {
+    return func_15165BB0((CamWobble *)wobble, &wobble->falloff.origin, wobble->falloff.radius, wobble->falloff.fadeRange,
+                         wobble->falloff.invFadeRange);
 }
 
-extern struct17 *func_15144B34(s32);
-extern f32 func_15143E64(struct17 *);
+extern vertex *func_15144B34(s32);
+extern f32 func_15143E64(vertex *);
 
-f32 func_15165BB0(s32 *arg0, struct17 *arg1, f32 arg2, f32 arg3, f32 arg4) {
-    f32 ret;
-    struct17 sp20;
-    struct17 *p;
+/* 1 within radius of origin, 0 beyond radius + fadeRange, linear in between. */
+f32 func_15165BB0(CamWobble *wobble, vertex *origin, f32 radius, f32 fadeRange, f32 invFadeRange) {
+    f32 scale;
+    vertex delta;
+    vertex *playerPos;
     f32 dist;
 
-    p = func_15144B34(*(u8 *)((s32)arg0 + 0x16));
-    sp20.unk0 = arg1->unk0 - p->unk0;
-    sp20.unk4 = arg1->unk4 - p->unk4;
-    sp20.unk8 = arg1->unk8 - p->unk8;
-    dist = func_15143E64(&sp20);
-    if (dist < arg2) {
-        ret = 1.0f;
-    } else if (arg2 + arg3 < dist) {
-        ret = 0.0f;
+    playerPos = func_15144B34(wobble->def.playerIndex);
+    delta.x = origin->x - playerPos->x;
+    delta.y = origin->y - playerPos->y;
+    delta.z = origin->z - playerPos->z;
+    dist = func_15143E64(&delta);
+    if (dist < radius) {
+        scale = 1.0f;
+    } else if (radius + fadeRange < dist) {
+        scale = 0.0f;
     } else {
-        ret = 1.0f - (dist - arg2) * arg4;
+        scale = 1.0f - (dist - radius) * invFadeRange;
     }
-    return ret;
+    return scale;
 }

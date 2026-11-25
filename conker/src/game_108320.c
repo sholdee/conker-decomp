@@ -4,28 +4,11 @@
 #undef func_1513D524
 #include "variables.h"
 
-extern void func_151D5D60();
-
-struct Foo150DB2D8 {
-    char pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    char pad44[0x4];
-    f32 unk48;
-    char pad4C[0x74];
-    char unkC0[0x40];
-    s16 *unk100[1];
-};
-
-
 typedef struct {
     f32 x, y, z;
-} Vec3_150DAE70;
+} Vec3f;
 
+/* Spawn packet passed to func_1513D524; it lands in the new Effect at +0x18. */
 typedef struct {
     u8  unk0;
     u8  pad1;
@@ -34,46 +17,69 @@ typedef struct {
     u8  pad6[2];
     s32 unk8;
     s32 unkC;
-    u8  unk10;
-    u8  unk11;
-    u8  unk12;
-    u8  unk13;
+    u8  color[4];
     u8  pad14[8];
-    Vec3_150DAE70 pos;
-    Vec3_150DAE70 dir;
-    f32 scale[3];
+    Vec3f pos;      /* -> Effect.pos */
+    Vec3f dir;      /* -> Effect.dir */
+    Vec3f scale;
     s32 unk40;
-    u8  unk44;
+    u8  alpha;      /* -> Effect.alpha */
     u8  unk45;
     u8  pad46[0x12];
-} Spawn150DAE70;
+} EffectSpawn; /* size 0x58 */
+
+/* Self-propelled beam quad (func_150DAE70 / func_150DB114). */
+typedef struct {
+    Vec3f vel;
+    f32 size;
+    f32 sizeRate;
+    f32 scaleX;     /* pulses between 0.8 and 1.2 */
+    f32 scaleY;
+    f32 scaleXRate;
+    f32 scaleYRate;
+    f32 damping;
+    u8  fadeRate;
+} BeamMotion;
+
+/* Quad that follows externally owned values (func_150DB518 / func_150DB630 / func_150DB714). */
+typedef struct {
+    f32 *pos;
+    f32 *angle;     /* degrees */
+    f32 *halfWidth;
+    f32 *halfHeight;
+    f32 *alpha;
+} LinkedQuad;
 
 typedef struct {
-    u8  pad0[0x110];
-    Vec3_150DAE70 vel;
-    f32 unk11C;
-    f32 unk120;
-    f32 unk124;
-    f32 unk128;
-    f32 unk12C;
-    f32 unk130;
-    f32 unk134;
-    u8  unk138;
-} Obj150DAE70;
+    u8  pad0[0x2C];
+    f32 halfWidth;
+    f32 halfHeight;
+    Vec3f pos;
+    Vec3f dir;
+    u8  pad4C[0x10];
+    u8  alpha;
+    u8  pad5D[0x63];
+    Vtx_t template[4];
+    Vtx_t *buffers[4];  /* each holds two copies of the 4-vertex quad */
+    union {
+        BeamMotion beam;
+        LinkedQuad linked;
+    } u;
+} Effect;
 
-extern void func_15143134(void *, Vec3_150DAE70 *, s32);
+typedef f32 BoneMtx[4][4];
+
 typedef struct {
-    u8  pad0[0x110];
-    s32 unk110;
-    s32 unk114;
-    s32 unk118;
-    s32 unk11C;
-    s32 unk120;
-} Struct150DB518Obj;
+    u8  pad0[0x1D4];
+    BoneMtx *bones;
+} BeamOwner;
 
-extern Struct150DB518Obj *func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
-extern Vec3_150DAE70 D_80088910[];
-extern Vec3_150DAE70 D_8008891C[];
+extern Effect *func_1513D524(EffectSpawn *spawn, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
+extern void func_15143134(Vec3f *in, Vec3f *out, BoneMtx *mtx);
+extern void func_151D5D60(Vtx_t **buffers, s16 index, s32 size, Vtx_t **vertices, u8 *fresh);
+
+extern Vec3f D_80088910[];
+extern Vec3f D_8008891C[];
 extern s32 D_80088928[];
 extern f32 D_8008892C[];
 extern s16 D_80088930[];
@@ -84,297 +90,237 @@ extern u8 D_80088940[];
 extern f32 D_80088944[];
 extern f32 D_80088948[];
 
-void func_150DAE70(void *arg0, s32 arg1, u8 arg2, s32 arg3) {
-    s32 base;
-    Vec3_150DAE70 from;
-    Vec3_150DAE70 to;
-    Vec3_150DAE70 vel;
-    Spawn150DAE70 spawn;
+/* Spawns a beam effect between two bone-relative points of the owner's skeleton. */
+void func_150DAE70(BeamOwner *owner, s32 type, u8 arg2, s32 arg3) {
+    BoneMtx *mtx;
+    Vec3f from;
+    Vec3f to;
+    Vec3f vel;
+    EffectSpawn spawn;
     f32 distSq;
-    f32 inv;
-    Obj150DAE70 *obj;
-    s32 bones;
+    f32 invDist;
+    Effect *effect;
 
-    if (arg0 != NULL) {
-        bones = *(s32 *)((u8 *)arg0 + 0x1D4);
-        if (bones != 0) {
-            base = (D_80088928[arg1] << 6) + bones;
-            func_15143134(&D_80088910[arg1], &from, base);
-            func_15143134(&D_8008891C[arg1], &to, base);
-            vel.x = D_8008892C[arg1] * (to.x - from.x);
-            vel.y = D_8008892C[arg1] * (to.y - from.y);
-            vel.z = D_8008892C[arg1] * (to.z - from.z);
-            distSq = (vel.x * vel.x) + (vel.z * vel.z);
-            if (!(fabsf(distSq) < 9.999999747e-05f)) {
-spawn.unk0 = 0x17;
-spawn.unkC = 0x243A;
-spawn.unk8 = 0;
-spawn.unk40 = 0x401;
-spawn.unk4 = D_80088930[arg1];
-spawn.unk44 = 0xFF;
-spawn.unk45 = 0xFF;
-spawn.unk12 = 0xC8; spawn.unk11 = 0xC8; spawn.unk10 = 0xC8;
-spawn.unk13 = 0xC8;
-spawn.unk2 = 0x401;
-                spawn.pos = from;
-                spawn.scale[0] = 1.0f;
-                spawn.scale[1] = 1.0f;
-                inv = 1.0f / sqrtf(distSq);
-                spawn.scale[2] = 1.0f;
-                spawn.dir.x = vel.z * inv;
-                spawn.dir.y = 0.0f;
-                spawn.dir.z = vel.x * inv;
-                obj = (Obj150DAE70 *)func_1513D524((s32)&spawn, 9, 0, 0, 7, 0, 0x2C, arg2, arg3);
-                if (obj != NULL) {
-                    obj->vel = vel;
-                    obj->unk11C = D_80088934[arg1];
-                    obj->unk120 = D_80088938[arg1];
-                    obj->unk12C = D_80088944[arg1];
-                    obj->unk130 = D_80088948[arg1];
-                    obj->unk124 = obj->unk128 = 1.0f;
-                    obj->unk134 = D_8008893C[arg1];
-                    obj->unk138 = D_80088940[arg1];
-                }
+    if (owner != NULL && owner->bones != NULL) {
+        mtx = &owner->bones[D_80088928[type]];
+        func_15143134(&D_80088910[type], &from, mtx);
+        func_15143134(&D_8008891C[type], &to, mtx);
+        vel.x = D_8008892C[type] * (to.x - from.x);
+        vel.y = D_8008892C[type] * (to.y - from.y);
+        vel.z = D_8008892C[type] * (to.z - from.z);
+        distSq = (vel.x * vel.x) + (vel.z * vel.z);
+        if (!(fabsf(distSq) < 9.999999747e-05f)) {
+            spawn.unk0 = 0x17;
+            spawn.unkC = 0x243A;
+            spawn.unk8 = 0;
+            spawn.unk40 = 0x401;
+            spawn.unk4 = D_80088930[type];
+            spawn.alpha = 255;
+            spawn.unk45 = 255;
+            // matching: the three stores share one line so as1 keeps IDO's t6-t9 constant order
+            spawn.color[2] = 200; spawn.color[1] = 200; spawn.color[0] = 200;
+            spawn.color[3] = 200;
+            spawn.unk2 = 0x401;
+            spawn.pos = from;
+            spawn.scale.x = 1.0f;
+            spawn.scale.y = 1.0f;
+            invDist = 1.0f / sqrtf(distSq);
+            spawn.scale.z = 1.0f;
+            spawn.dir.x = vel.z * invDist;
+            spawn.dir.y = 0.0f;
+            spawn.dir.z = vel.x * invDist;
+            effect = func_1513D524(&spawn, 9, 0, 0, 7, 0, 0x2C, arg2, arg3);
+            if (effect != NULL) {
+                effect->u.beam.vel = vel;
+                effect->u.beam.size = D_80088934[type];
+                effect->u.beam.sizeRate = D_80088938[type];
+                effect->u.beam.scaleXRate = D_80088944[type];
+                effect->u.beam.scaleYRate = D_80088948[type];
+                effect->u.beam.scaleX = effect->u.beam.scaleY = 1.0f;
+                effect->u.beam.damping = D_8008893C[type];
+                effect->u.beam.fadeRate = D_80088940[type];
             }
         }
     }
 }
 
-typedef struct {
-    f32 vel[3];   /* 0x110 */
-    f32 unkC;     /* 0x11C */
-    f32 unk10;    /* 0x120 */
-    f32 unk14;    /* 0x124 */
-    f32 unk18;    /* 0x128 */
-    f32 unk1C;    /* 0x12C */
-    f32 unk20;    /* 0x130 */
-    f32 unk24;    /* 0x134 */
-    u8 unk28;     /* 0x138 */
-} Sub150DB114;
+/* Beam update: moves, pulses the quad's scale and fades out. Returns 0 once fully faded. */
+s32 func_150DB114(Effect *effect) {
+    BeamMotion *beam;
+    s16 alpha;
 
-typedef struct {
-    char pad0[0x2C];
-    f32 unk2C;
-    f32 unk30;
-    f32 pos[3];
-    char pad40[0x1C];
-    u8 unk5C;
-    char pad5D[0xB3];
-    Sub150DB114 sub;
-} Obj150DB114;
-
-s32 func_150DB114(Obj150DB114 *arg0) {
-    Sub150DB114 *s;
-    f32 damp;
-    s16 t;
-    f32 max;
-    f32 min;
-
-    max = 1.2f;
-    min = 0.8f;
-    damp = arg0->sub.unk24;
-    t = arg0->unk5C;
-    s = &arg0->sub;
-    s->vel[0] *= damp;
-    s->vel[1] *= damp;
-    s->vel[2] *= damp;
-    arg0->pos[0] += s->vel[0] * D_800BE9A4;
-    arg0->pos[1] += s->vel[1] * D_800BE9A4;
-    arg0->pos[2] += s->vel[2] * D_800BE9A4;
-    arg0->sub.unk14 += arg0->sub.unk1C * D_800BE9A4;
-    if (arg0->sub.unk14 > max) {
-        s->unk14 = max;
-        s->unk1C = -s->unk1C;
-    } else if (s->unk14 < min) {
-        s->unk14 = min;
-        s->unk1C = -s->unk1C;
+    beam = &effect->u.beam;
+    alpha = effect->alpha;
+    beam->vel.x *= beam->damping;
+    beam->vel.y *= beam->damping;
+    beam->vel.z *= beam->damping;
+    effect->pos.x += beam->vel.x * D_800BE9A4;
+    effect->pos.y += beam->vel.y * D_800BE9A4;
+    effect->pos.z += beam->vel.z * D_800BE9A4;
+    beam->scaleX += beam->scaleXRate * D_800BE9A4;
+    if (beam->scaleX > 1.2f) {
+        beam->scaleX = 1.2f;
+        beam->scaleXRate = -beam->scaleXRate;
+    } else if (beam->scaleX < 0.8f) {
+        beam->scaleX = 0.8f;
+        beam->scaleXRate = -beam->scaleXRate;
     }
-    s->unk18 += s->unk20 * D_800BE9A4;
-    if (s->unk18 > max) {
-        s->unk18 = max;
-        s->unk20 = -s->unk20;
-    } else if (s->unk18 < min) {
-        s->unk18 = min;
-        s->unk20 = -s->unk20;
+    beam->scaleY += beam->scaleYRate * D_800BE9A4;
+    if (beam->scaleY > 1.2f) {
+        beam->scaleY = 1.2f;
+        beam->scaleYRate = -beam->scaleYRate;
+    } else if (beam->scaleY < 0.8f) {
+        beam->scaleY = 0.8f;
+        beam->scaleYRate = -beam->scaleYRate;
     }
-    s->unkC += s->unk10 * D_800BE9A4;
-    arg0->unk2C = s->unkC * s->unk14;
-    arg0->unk30 = s->unkC * s->unk18;
-    t -= s->unk28;
-    if (t < 0) {
-        arg0->unk5C = 0;
+    beam->size += beam->sizeRate * D_800BE9A4;
+    effect->halfWidth = beam->size * beam->scaleX;
+    effect->halfHeight = beam->size * beam->scaleY;
+    alpha -= beam->fadeRate;
+    if (alpha < 0) {
+        effect->alpha = 0;
         return 0;
     }
-    arg0->unk5C = t;
+    effect->alpha = alpha;
     return 1;
 }
 
-s16 *func_150DB2D8(struct Foo150DB2D8 *arg0, s16 arg1) {
-    s16 *var_v0;
-    s16 *ret;
-    f32 temp_f2;
-    f32 temp_f12;
-    u8 sp37;
+/* Beam draw: fills this frame's vertex buffer with a quad facing along dir. */
+Vtx_t *func_150DB2D8(Effect *effect, s16 bufferIndex) {
+    Vtx_t *vertices;
+    Vtx_t *result;
+    f32 offsetX;
+    f32 offsetZ;
+    u8 fresh;
 
-    func_151D5D60(arg0->unk100, arg1, 0x40, &var_v0, &sp37);
-    ret = var_v0;
-    if (var_v0) {
-        if (sp37) {
-            memcpy(arg0->unk100[arg1], arg0->unkC0, 0x40);
-            memcpy(arg0->unk100[arg1] + 0x20, arg0->unkC0, 0x40);
+    func_151D5D60(effect->buffers, bufferIndex, sizeof(effect->template), &vertices, &fresh);
+    result = vertices;
+    // matching: an early `return NULL` reorders the blocks; the else form keeps IDO's layout
+    if (vertices != NULL) {
+        if (fresh) {
+            memcpy(effect->buffers[bufferIndex], effect->template, sizeof(effect->template));
+            memcpy(effect->buffers[bufferIndex] + 4, effect->template, sizeof(effect->template));
         }
     } else {
-        return 0;
+        return NULL;
     }
 
-    temp_f2 = arg0->unk2C * arg0->unk40;
-    temp_f12 = -arg0->unk2C * arg0->unk48;
+    offsetX = effect->halfWidth * effect->dir.x;
+    offsetZ = -effect->halfWidth * effect->dir.z;
 
-    var_v0[0] = arg0->unk34 + temp_f2;
-    var_v0[1] = arg0->unk38 + arg0->unk30;
-    var_v0[2] = arg0->unk3C + temp_f12;
-    var_v0[3] = 0;
-    var_v0[8] = arg0->unk34 + temp_f2;
-    var_v0[9] = arg0->unk38 - arg0->unk30;
-    var_v0[10] = arg0->unk3C + temp_f12;
-    var_v0[11] = 0;
-    var_v0[16] = arg0->unk34 - temp_f2;
-    var_v0[17] = arg0->unk38 - arg0->unk30;
-    var_v0[18] = arg0->unk3C - temp_f12;
-    var_v0[19] = 0;
-    var_v0[24] = arg0->unk34 - temp_f2;
-    var_v0[25] = arg0->unk38 + arg0->unk30;
-    var_v0[26] = arg0->unk3C - temp_f12;
-    var_v0[27] = 0;
+    vertices[0].ob[0] = effect->pos.x + offsetX;
+    vertices[0].ob[1] = effect->pos.y + effect->halfHeight;
+    vertices[0].ob[2] = effect->pos.z + offsetZ;
+    vertices[0].flag = 0;
+    vertices[1].ob[0] = effect->pos.x + offsetX;
+    vertices[1].ob[1] = effect->pos.y - effect->halfHeight;
+    vertices[1].ob[2] = effect->pos.z + offsetZ;
+    vertices[1].flag = 0;
+    vertices[2].ob[0] = effect->pos.x - offsetX;
+    vertices[2].ob[1] = effect->pos.y - effect->halfHeight;
+    vertices[2].ob[2] = effect->pos.z - offsetZ;
+    vertices[2].flag = 0;
+    vertices[3].ob[0] = effect->pos.x - offsetX;
+    vertices[3].ob[1] = effect->pos.y + effect->halfHeight;
+    vertices[3].ob[2] = effect->pos.z - offsetZ;
+    vertices[3].flag = 0;
 
-    return ret;
+    return result;
 }
 
-typedef struct {
-    u8  unk0;
-    u8  unk1;
-    s16 unk2;
-    s16 unk4;
-    u8  pad6[2];
-    s32 unk8;
-    s32 unkC;
-    u8  unk10;
-    u8  unk11;
-    u8  unk12;
-    u8  unk13;
-    u8  pad14[0x2C];
-    s32 unk40;
-    u8  unk44;
-    u8  unk45;
-    u8  pad46[0x12];
-} Struct150DB518;
+/* Spawns a quad whose position, angle, size and alpha follow the given values. */
+void func_150DB518(f32 *pos, f32 *angle, f32 *halfWidth, f32 *alpha, f32 *halfHeight, s16 arg5, u8 arg6, s32 arg7) {
+    EffectSpawn spawn;
+    Effect *effect;
 
+    if (pos != NULL && angle != NULL && halfWidth != NULL && alpha != NULL && halfHeight != NULL && arg5 != 0) {
+        spawn.unk0 = 0x17;
+        spawn.unkC = 0x243A;
+        spawn.unk40 = 0x401;
+        spawn.alpha = 255;
+        spawn.unk8 = 0;
+        spawn.unk4 = arg5;
+        spawn.unk45 = 255;
+        // matching: the three stores share one line so as1 keeps IDO's t6-t9 constant order
+        spawn.color[2] = 200; spawn.color[1] = 200; spawn.color[0] = 200;
+        spawn.color[3] = 200;
+        spawn.unk2 = 0x401;
 
-void func_150DB518(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s16 arg5, u8 arg6, s32 arg7) {
-    Struct150DB518 sp38;
-    Struct150DB518Obj *temp_v0;
-
-    if (arg0 != 0 && arg1 != 0 && arg2 != 0 && arg3 != 0 && arg4 != 0 && arg5 != 0) {
-        sp38.unk0 = 0x17;
-        sp38.unkC = 0x243A;
-        sp38.unk40 = 0x401;
-        sp38.unk44 = 0xFF;
-        sp38.unk8 = 0;
-        sp38.unk4 = arg5;
-        sp38.unk45 = 0xFF;
-        *((u8 *)&sp38 + 0x12) = 0xC8; *((u8 *)&sp38 + 0x11) = 0xC8; *((u8 *)&sp38 + 0x10) = 0xC8;
-        *((u8 *)&sp38 + 0x13) = 0xC8;
-        sp38.unk2 = 0x401;
-
-        temp_v0 = func_1513D524((s32)&sp38, 0, 0xA, 0, 8, 0, 0x14, arg6, arg7);
-        if (temp_v0 != 0) {
-            temp_v0->unk110 = arg0;
-            temp_v0->unk114 = arg1;
-            temp_v0->unk118 = arg2;
-            temp_v0->unk11C = arg4;
-            temp_v0->unk120 = arg3;
+        effect = func_1513D524(&spawn, 0, 0xA, 0, 8, 0, 0x14, arg6, arg7);
+        if (effect != NULL) {
+            effect->u.linked.pos = pos;
+            effect->u.linked.angle = angle;
+            effect->u.linked.halfWidth = halfWidth;
+            effect->u.linked.halfHeight = halfHeight;
+            effect->u.linked.alpha = alpha;
         }
     }
 }
 
-s32 func_150DB630(void *arg0) {
-    f32 temp_f0;
-    s32 ret;
+/* Linked quad update: copies the followed alpha, clamped to 0..255. */
+s32 func_150DB630(Effect *effect) {
+    f32 **source;
+    f32 alpha;
 
-    ret = 1;
-    if (255.0f < **(f32 * volatile *)((u8 *)arg0 + 0x120)) {
-        *(u8 *)((u8 *)arg0 + 0x5C) = 0xFF;
+    // matching: reading through a second path to the field makes IDO reload it in the else branch
+    source = &effect->u.linked.alpha;
+    if (*effect->u.linked.alpha > 255.0f) {
+        effect->alpha = 255;
     } else {
-        temp_f0 = **(f32 * volatile *)((u8 *)arg0 + 0x120);
-        if (temp_f0 < 0.0f) {
-            *(u8 *)((u8 *)arg0 + 0x5C) = 0;
+        alpha = **source;
+        if (alpha < 0.0f) {
+            effect->alpha = 0;
         } else {
-            *(u8 *)((u8 *)arg0 + 0x5C) = (u32)temp_f0;
+            effect->alpha = (u32)alpha;
         }
     }
-    return ret;
+    return 1;
 }
 
-typedef struct Vtx150DB714 {
-    s16 x, y, z, flag;
-    u8 attributes[8];
-} Vtx150DB714;
-
-typedef struct Values150DB714 {
-    f32 *data[4];
-} Values150DB714;
-
-typedef struct Owner150DB714 {
-    u8 pad0[0xC0];
-    Vtx150DB714 template[4];
-    u8 *buffers[4];
-    Values150DB714 values;
-} Owner150DB714;
-
-extern f32 D_800A0BF0;
-
-void *func_150DB714(Owner150DB714 *owner, s16 bufferIndex) {
-    void *vertices;
-    void *result;
+/* Linked quad draw: fills this frame's vertex buffer with a quad rotated by the followed angle. */
+Vtx_t *func_150DB714(Effect *effect, s16 bufferIndex) {
+    Vtx_t *vertices;
+    Vtx_t *result;
     f32 cosine;
     s32 angle;
     f32 sine;
     f32 offsetX;
     f32 offsetZ;
-    Values150DB714 *values;
+    LinkedQuad *linked;
     u8 fresh;
 
-    func_151D5D60(owner->buffers, bufferIndex, 0x40, &vertices, &fresh);
+    func_151D5D60(effect->buffers, bufferIndex, sizeof(effect->template), &vertices, &fresh);
     result = vertices;
-    if (vertices != 0) {
-        if (fresh != 0) {
-            memcpy(owner->buffers[bufferIndex], owner->template, 0x40U);
-            memcpy(owner->buffers[bufferIndex] + 0x40, owner->template, 0x40U);
+    // matching: an early `return NULL` reorders the blocks; the else form keeps IDO's layout
+    if (vertices != NULL) {
+        if (fresh) {
+            memcpy(effect->buffers[bufferIndex], effect->template, sizeof(effect->template));
+            memcpy(effect->buffers[bufferIndex] + 4, effect->template, sizeof(effect->template));
         }
     } else {
-        return 0;
+        return NULL;
     }
-    angle = (s32)(*(owner->values.data[1]) * D_800A0BF0);
-    values = (Values150DB714 *)((u8 *)owner + 0x110);
-    sine = func_151423D8((u8)angle);
-    cosine = func_151423D8((u8)(angle - 0x40));
-    offsetX = *values->data[2] * sine;
-    offsetZ = -*values->data[2] * cosine;
-    ((Vtx150DB714 *)vertices)[0].x = (s32)(values->data[0][0] + offsetX);
-    ((Vtx150DB714 *)vertices)[0].y = (s32)(values->data[0][1] + *values->data[3]);
-    ((Vtx150DB714 *)vertices)[0].z = (s32)(values->data[0][2] + offsetZ);
-    ((Vtx150DB714 *)vertices)[0].flag = 0;
-    ((Vtx150DB714 *)vertices)[1].x = (s32)(values->data[0][0] + offsetX);
-    ((Vtx150DB714 *)vertices)[1].y = (s32)(values->data[0][1] - *values->data[3]);
-    ((Vtx150DB714 *)vertices)[1].z = (s32)(values->data[0][2] + offsetZ);
-    ((Vtx150DB714 *)vertices)[1].flag = 0;
-    ((Vtx150DB714 *)vertices)[2].x = (s32)(values->data[0][0] - offsetX);
-    ((Vtx150DB714 *)vertices)[2].y = (s32)(values->data[0][1] - *values->data[3]);
-    ((Vtx150DB714 *)vertices)[2].z = (s32)(values->data[0][2] - offsetZ);
-    ((Vtx150DB714 *)vertices)[2].flag = 0;
-    ((Vtx150DB714 *)vertices)[3].x = (s32)(values->data[0][0] - offsetX);
-    ((Vtx150DB714 *)vertices)[3].y = (s32)(values->data[0][1] + *values->data[3]);
-    ((Vtx150DB714 *)vertices)[3].z = (s32)(values->data[0][2] - offsetZ);
-    ((Vtx150DB714 *)vertices)[3].flag = 0;
+    linked = &effect->u.linked;
+    angle = *linked->angle * (256.0f / 360.0f);
+    sine = func_151423D8(angle);
+    cosine = func_151423D8(angle - 0x40);
+    offsetX = *linked->halfWidth * sine;
+    offsetZ = -*linked->halfWidth * cosine;
+    vertices[0].ob[0] = linked->pos[0] + offsetX;
+    vertices[0].ob[1] = linked->pos[1] + *linked->halfHeight;
+    vertices[0].ob[2] = linked->pos[2] + offsetZ;
+    vertices[0].flag = 0;
+    vertices[1].ob[0] = linked->pos[0] + offsetX;
+    vertices[1].ob[1] = linked->pos[1] - *linked->halfHeight;
+    vertices[1].ob[2] = linked->pos[2] + offsetZ;
+    vertices[1].flag = 0;
+    vertices[2].ob[0] = linked->pos[0] - offsetX;
+    vertices[2].ob[1] = linked->pos[1] - *linked->halfHeight;
+    vertices[2].ob[2] = linked->pos[2] - offsetZ;
+    vertices[2].flag = 0;
+    vertices[3].ob[0] = linked->pos[0] - offsetX;
+    vertices[3].ob[1] = linked->pos[1] + *linked->halfHeight;
+    vertices[3].ob[2] = linked->pos[2] - offsetZ;
+    vertices[3].flag = 0;
     return result;
 }

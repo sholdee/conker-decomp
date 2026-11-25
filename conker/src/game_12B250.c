@@ -2,143 +2,157 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_80088B80;
-extern s32 D_800A1F70;
-extern s32 D_800A1F7C;
-extern s32 D_800A1F88;
-extern f32 D_800A1F9C;
-extern f32 D_800A1FA0;
-extern f32 D_800A1FA4;
-extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
-extern void func_15102B38(s32, u8, s32, s32, f32 *, s32, s32, f32, s32, s32, s32, s32, u8, s32);
-void func_151D3E6C(struct127 *arg0, struct17 *arg1, struct17 *arg2, s32 arg3);
-void func_151D3F14(struct17 *arg0, u8 arg1, s32 arg2);
-void func_150FE0B8(struct127 *arg0, struct17 *arg1, s32 arg2, s32 arg3);
-void func_150FE288(struct127 *arg0);
+/* Argument of func_151D8868 (same layout as game_113D60.c's Game113D60Event). */
+typedef struct {
+    /* 0x0 */ u8 type;
+    /* 0x1 */ u8 pad1;
+    /* 0x2 */ s16 duration;
+    /* 0x4 */ u8 unk4;
+    /* 0x5 */ u8 cameraMask;
+    /* 0x6 */ s8 unk6;
+    /* 0x7 */ u8 pad7;
+} Event_150FE288;
 
-extern f32 D_800A1F94;
-extern f32 D_800A1F98;
-void func_15145740(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4);
-void func_150FDF38(struct127 *arg0, s32 arg1, s32 arg2, struct17 *arg3, struct17 *arg4);
-s32 func_151C229C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
+extern u8 D_80088B80;      // bone of the muzzle points below
+extern struct17 D_800A1F70; // muzzle point, in bone space
+extern struct17 D_800A1F7C;
+extern struct17 D_800A1F88; // launch point, in bone space
 
-s32 func_150FDDA0(struct127 *arg0, s32 arg1, s32 arg2) {
-    s32 unused;
-    struct17 spB0;
-    struct17 spA4;
-    struct17 sp98;
-    struct17 sp8C;
-    s32 temp_v0;
+extern s32 func_15145EA4(struct17 **src, struct17 **dst, Mtx *mtx, s32 count);
+extern void func_15102B38(struct127 *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6,
+                          f32 arg7, struct17 *position, s32 cameraMask, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
+extern void func_15145740(struct127 *obj, struct17 *target, struct17 *dir, struct17 *offsetDir, f32 pitchOffset);
+extern s32 func_151C229C(struct17 *origin, struct17 *dir, struct17 *hitPoint, struct17 *lineDir, s32 useTarget,
+                         s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *owner,
+                         s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20,
+                         f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
+extern void func_151D3E04(struct127 *obj, struct17 *out, struct17 *localPos, u8 bone, f32 yOffset);
+extern void func_151D3E6C(struct127 *obj, struct17 *a, struct17 *b, s32 arg3);
+extern void func_151D3F14(struct17 *position, u8 arg1, s32 arg2);
+extern void func_151D8868(Event_150FE288 *event, s32 arg1, s32 arg2, s32 arg3);
+
+void func_150FDF38(struct127 *obj, s32 arg1, s32 arg2, struct17 *muzzleOut, struct17 *launchOut);
+void func_150FE0B8(struct127 *obj, struct17 *muzzle, s32 arg2, s32 arg3);
+void func_150FE288(struct127 *obj);
+
+/* Fires a projectile (func_151C229C) from obj's launch point towards its target, after the muzzle
+ * effects of func_150FDF38. Returns func_151C229C's result, or 0 without an obj. */
+// matching: arg1 is a u8 read from its stack slot at each use; a K&R u8 parameter is
+// narrowed once into a spilled copy instead
+s32 func_150FDDA0(struct127 *obj, s32 arg1, s32 arg2) {
+    s32 pad; // matching: unused stack slot
+    struct17 dir;
+    struct17 muzzle;
+    struct17 target;
+    struct17 launch;
+    u32 random;
     s32 kind;
     f32 rand1;
     f32 rand0;
 
-    if (arg0 == 0) {
+    if (obj == NULL) {
         return 0;
     }
 
-    func_15145740(arg0, &sp98, &spB0, 0, 0.0f);
-    func_150FDF38(arg0, ((u8 *)&arg1)[3], arg2, &spA4, &sp8C);
+    func_15145740(obj, &target, &dir, NULL, 0.0f);
+    func_150FDF38(obj, ((u8 *)&arg1)[3], arg2, &muzzle, &launch);
 
     rand0 = func_150ADA68();
     rand1 = func_150ADA68();
-    temp_v0 = func_150ADA20();
+    random = func_150ADA20();
     kind = (D_800BE9F0 == 0x2B) ? 0x27 : 0x1A;
 
-    return func_151C229C(&sp8C, 0, &sp8C, &sp98, 0, 0, 300.0f, D_800A1F94,
-                         rand0 * 10.0f + 25.0f,
-                         rand1 * 201.0f + D_800A1F98, 50.0f,
-                         (temp_v0 % 0x38U) + 0xC8, arg0, 1, 1, 0, 0xFF, 1, 1,
-                         0, kind, 0.0f, 0xFF, -1, 0, ((u8 *)&arg1)[3], arg2);
+    return func_151C229C(&launch, NULL, &launch, &target, 0, 0, 300.0f, 0.003333333414f, rand0 * 10.0f + 25.0f,
+                         rand1 * 201.0f + 601.0f, 50.0f, (random % 56U) + 200, obj, 1, 1, 0, 0xFF, 1, 1, 0, kind,
+                         0.0f, 0xFF, -1, 0, ((u8 *)&arg1)[3], arg2);
 }
 
-void func_150FDF38(struct127 *arg0, s32 arg1, s32 arg2, struct17 *arg3, struct17 *arg4) {
-    struct17 sp44;
-    struct17 sp38;
-    s32 sp30[2];
-    s32 sp28[2];
+/* Computes obj's muzzle and launch points (bone D_80088B80, or 56 above its origin without bone
+ * matrices), runs the muzzle effects there and optionally returns both points. */
+void func_150FDF38(obj, arg1, arg2, muzzleOut, launchOut)
+    struct127 *obj;
+    u8 arg1;
+    s32 arg2;
+    struct17 *muzzleOut;
+    struct17 *launchOut;
+{
+    struct17 muzzle;
+    struct17 launch;
+    struct17 *src[2];
+    struct17 *dst[2];
 
-    if (arg0 != 0) {
-        if (arg0->unk1D4 != 0) {
-            sp30[0] = (s32)&D_800A1F70;
-            sp30[1] = (s32)&D_800A1F88;
-            sp28[0] = (s32)&sp44;
-            sp28[1] = (s32)&sp38;
-            func_15145EA4(sp30, sp28, (s32)arg0->unk1D4 + (D_80088B80 << 6), 2);
+    if (obj != NULL) {
+        if (obj->unk1D4 != NULL) {
+            src[0] = &D_800A1F70;
+            src[1] = &D_800A1F88;
+            dst[0] = &muzzle;
+            dst[1] = &launch;
+            func_15145EA4(src, dst, (Mtx *)obj->unk1D4 + D_80088B80, 2);
         } else {
-            sp44.unk0 = arg0->x_position;
-            sp44.unk4 = arg0->y_position + 56.0f;
-            sp44.unk8 = arg0->z_position;
-            sp38 = sp44;
+            muzzle.unk0 = obj->x_position;
+            muzzle.unk4 = obj->y_position + 56.0f;
+            muzzle.unk8 = obj->z_position;
+            launch = muzzle;
         }
-        func_151D3E6C(arg0, &sp44, &sp38, (D_800BE9F0 == 0x2B) ? 0x28 : 0x1E);
-        func_151D3F14(&sp44, ((u8 *)&arg1)[3], arg2);
-        func_150FE0B8(arg0, &sp44, ((u8 *)&arg1)[3], arg2);
-        func_150FE288(arg0);
-        if (arg3 != 0) {
-            *arg3 = sp44;
+        func_151D3E6C(obj, &muzzle, &launch, (D_800BE9F0 == 0x2B) ? 0x28 : 0x1E);
+        func_151D3F14(&muzzle, arg1, arg2);
+        func_150FE0B8(obj, &muzzle, arg1, arg2);
+        func_150FE288(obj);
+        if (muzzleOut != NULL) {
+            *muzzleOut = muzzle;
         }
-        if (arg4 != 0) {
-            *arg4 = sp38;
-        }
-    }
-}
-
-void func_150FE0B8(struct127 *arg0, struct17 *arg1, s32 arg2, s32 arg3) {
-    f32 sp60[2];
-    union { u8 b[8]; f64 d; } sp58;
-    s32 sp50;
-    s32 sp54;
-
-    if (arg0->unk1D4 != 0) {
-        if ((arg0->unk74 & 0xF) != 0xF) {
-            sp60[1] = func_150ADA68() * 1.5f + 2.0f;
-            sp60[0] = func_150ADA68() * D_800A1F9C + D_800A1FA0;
-
-            if ((arg0->unk31C != 0) && (*(u8 *)((u8 *)arg0->unk31C + 0x197) != 0) && (arg0->camera != 0)) {
-                sp58.b[7] = (~(1 << arg0->camera->unk23D)) & 0xFF;
-            } else {
-                sp58.b[7] = 0xFF;
-            }
-
-            sp54 = func_150ADA20();
-            sp50 = func_150ADA20();
-            func_15102B38((s32)arg0, D_80088B80, (s32)&D_800A1F70, (s32)&D_800A1F7C, sp60,
-                          (sp54 % 5U) + 6, (sp50 % 0x65U) + 0x9B,
-                          func_150ADA68() * 199.0f + D_800A1FA4, (s32)arg1, sp58.b[7],
-                          0, -1, ((u8 *)&arg2)[3], arg3);
+        if (launchOut != NULL) {
+            *launchOut = launch;
         }
     }
 }
 
-void func_151D3E04(s32, s32, s32*, s32, f32);
+/* Muzzle effect (func_15102B38) at `muzzle` for objects with bone matrices, hidden from the
+ * camera of obj's unk31C target while that has unk197 set. */
+void func_150FE0B8(obj, muzzle, arg2, arg3)
+    struct127 *obj;
+    struct17 *muzzle;
+    u8 arg2;
+    s32 arg3;
+{
+    f32 params[2];
+    u8 cameraMask;
+    s32 pad; // matching: unused stack slot
+    s32 random1;
+    s32 random0;
 
-void func_150FE248(s32 arg0, s32 arg1, s32 arg2) {
-    func_151D3E04(arg0, arg2, &D_800A1F70, D_80088B80, 0.0f);
+    if (obj->unk1D4 != NULL && (obj->unk74 & 0xF) != 0xF) {
+        params[1] = func_150ADA68() * 1.5f + 2.0f;
+        params[0] = func_150ADA68() * 10.10000038f + 2.059999943f;
+
+        if (obj->unk31C != NULL && ((struct127 *)obj->unk31C)->unk197 != 0 && obj->camera != NULL) {
+            cameraMask = ~(1 << obj->camera->unk23D) & 0xFF;
+        } else {
+            cameraMask = 0xFF;
+        }
+
+        random0 = func_150ADA20();
+        random1 = func_150ADA20();
+        func_15102B38(obj, D_80088B80, &D_800A1F70, &D_800A1F7C, params, (random0 % 5U) + 6, (random1 % 101U) + 155,
+                      func_150ADA68() * 199.0f + 501.0f, muzzle, cameraMask, 0, -1, arg2, arg3);
+    }
 }
 
-extern u8 func_150ADA20(void);
-extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
+/* Handler: writes the world position of obj's muzzle point to `out`. */
+void func_150FE248(struct127 *obj, s32 arg1, struct17 *out) {
+    func_151D3E04(obj, out, &D_800A1F70, D_80088B80, 0.0f);
+}
 
-struct sp18_150FE288 {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ u8 unk1;
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ u8 unk4;
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ u8 unk7;
-};
+/* Sends a func_151D8868 event (type 1, random duration 15-23) to the camera of obj. */
+void func_150FE288(struct127 *obj) {
+    Event_150FE288 event;
 
-void func_150FE288(struct127 *arg0) {
-    struct sp18_150FE288 sp18;
-
-    if (arg0->camera != 0) {
-        sp18.unk0 = 1;
-        sp18.unk2 = (func_150ADA20() % 9U) + 0xF;
-        sp18.unk5 = 1 << arg0->camera->unk23D;
-        sp18.unk4 = (func_150ADA20() & 3) + 3;
-        sp18.unk6 = -1;
-        func_151D8868(&sp18, 0, 0xFF, 1);
+    if (obj->camera != NULL) {
+        event.type = 1;
+        event.duration = (func_150ADA20() % 9U) + 15;
+        event.cameraMask = 1 << obj->camera->unk23D;
+        event.unk4 = (func_150ADA20() & 3) + 3;
+        event.unk6 = -1;
+        func_151D8868(&event, 0, 0xFF, 1);
     }
 }

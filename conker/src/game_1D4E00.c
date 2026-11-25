@@ -1,179 +1,183 @@
 #include <ultra64.h>
+// matching: func_150ADA20 returns a full u32 here (callers mask it); functions.h declares it u8
 #define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
 #include "functions.h"
 #undef func_150ADA20
 u32 func_150ADA20(void);
 #include "variables.h"
 
-extern f32 D_800A8F68;
-extern f32 D_800A8F6C;
-extern f32 D_800A8F58;
-extern f32 D_800A8F5C;
-extern f32 D_800A8F60;
-extern f32 D_800A8F64;
-extern f32 D_800A8DE0;
-extern void (*D_8008FA60[])(f32 *, void *, s32, u8, s32);
-
 void func_1514373C(f32, f32, f32 *, f32 *);
-s32 func_15046C80(f32 *, s32, f32, void *);
-typedef struct {
-    struct17 unk0;
-    struct17 unkC;
-} Point_151A7A90;
 
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-} Src151A7950;
-
-void *func_151A7950(Src151A7950 *, s32, u8, s32);
-s32 func_151A8B20(void *, s16, s32, u8, s32);
-
+    f32 x, y, z;
+} Vec3f;
 
 typedef struct {
-    u8 pad0[0x12];
-    s16 unk12;
-    u8 pad14[0x60 - 0x14];
-    Point_151A7A90 *unk60;
-    Point_151A7A90 *unk64;
-    f32 unk68;
-    u8 unk6C[0x10];
-    s32 unk7C;
-    Point_151A7A90 unk80[1];
-} Obj151A7950;
+    u8 r, g, b, a;
+} BoltColor;
+
+/* Spawn parameters of a lightning bolt; func_151A7950 copies them into Bolt.def. */
+typedef struct {
+    /* 0x00 */ s16 lifetime;         /* frames, counted down while BOLT_TIMED */
+    /* 0x02 */ s16 numPoints;
+    /* 0x04 */ f32 jitterDelay;      /* re-jitter after jitterDelay + rand * jitterDelayRange */
+    /* 0x08 */ f32 jitterDelayRange;
+    /* 0x0C */ u8 flags;             /* BOLT_TIMED | BOLT_ACTIVE */
+    /* 0x10 */ f32 jitter;           /* largest sideways displacement of a midpoint */
+    /* 0x14 */ BoltColor color;
+    /* 0x18 */ f32 width;
+    /* 0x1C */ s8 update1;           /* index into D_8008F940, -1 for none */
+    /* 0x1D */ s8 update2;           /* index into D_8008F948, -1 for none */
+    /* 0x20 */ Vec3f start;
+    /* 0x2C */ Vec3f end;
+    /* 0x38 */ Vec3f up;
+    /* 0x44 */ f32 length;
+    /* 0x48 */ f32 invLength;
+    /* 0x4C */ u8 type;              /* index into the D_8008F94C/D_8008F958/D_8008F964 handlers */
+} BoltDef; /* size 0x50 */
+
+#define BOLT_TIMED  1
+#define BOLT_ACTIVE 2
+
+typedef struct {
+    Vec3f local; /* x: sideways, y: along up, z: fraction of the way from start to end */
+    Vec3f world;
+} BoltPoint;
+
+/* User data of a bolt that runs from an actor bone to a point near the actor (func_151A8624). */
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 ownerId;           /* owner->unique_id at spawn; the bolt stops when it changes */
+    /* 0x08 */ Vec3f boneOffset;
+    /* 0x14 */ u8 bone;
+    /* 0x18 */ Vec3f targetOffset;   /* end point, relative to the owner's position */
+    /* 0x24 */ u8 unk24;
+    /* 0x25 */ u8 linkFlags;         /* 1: the end point has been ray-cast */
+} BoltLink; /* size 0x28 */
+
+typedef struct {
+    /* 0x00 */ u8 unk0[0x10];        /* object header */
+    /* 0x10 */ BoltDef def;
+    /* 0x60 */ BoltLink *link;       /* user data, stored after the points */
+    /* 0x64 */ BoltPoint *points;
+    /* 0x68 */ f32 jitterTimer;
+    /* 0x6C */ u8 vtxBuf[0x10];
+    /* 0x7C */ s32 vtxBufSize;
+    /* 0x80 */ BoltPoint pointData[1];
+} Bolt;
+
+Bolt *func_151A7950(BoltDef *, s32, u8, s32);
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
-void *func_151A7950(Src151A7950 *arg0, s32 arg1, u8 arg2, s32 arg3) {
-    Obj151A7950 *obj;
+/*
+ * Allocates a bolt for def with extraSize bytes of user data after its points. The local points run
+ * from (0, 0, 0) to (0, 0, 1); func_151A8340 fills in the ones between.
+ */
+Bolt *func_151A7950(BoltDef *def, s32 extraSize, u8 arg2, s32 arg3) {
+    Bolt *bolt;
 
-    obj = func_15167A68(0x2D, arg3, arg0->unk2 * sizeof(Point_151A7A90) + arg1 + 0x80, 1, arg2, 1);
-    if (obj == NULL) {
+    bolt = func_15167A68(0x2D, arg3, def->numPoints * sizeof(BoltPoint) + extraSize + sizeof(Bolt) - sizeof(BoltPoint), 1, arg2, 1);
+    if (bolt == NULL) {
         return NULL;
     }
-    memcpy((u8 *)obj + 0x10, arg0, 0x50);
-    obj->unk64 = obj->unk80;
-    obj->unk60 = obj->unk64 + arg0->unk2;
-    obj->unk68 = 0.0f;
-    obj->unk64[0].unk0.unk0 = 0.0f;
-    obj->unk64[0].unk0.unk4 = 0.0f;
-    obj->unk64[0].unk0.unk8 = 0.0f;
-    obj->unk64[arg0->unk2 - 1].unk0.unk0 = 0.0f;
-    obj->unk64[arg0->unk2 - 1].unk0.unk4 = 0.0f;
-    obj->unk64[arg0->unk2 - 1].unk0.unk8 = 1.0f;
-    bzero(obj->unk6C, 0x10);
-    obj->unk7C = (obj->unk12 << 6) + 0x140;
-    return obj;
+    memcpy(&bolt->def, def, sizeof(BoltDef));
+    bolt->points = bolt->pointData;
+    bolt->link = (BoltLink *)(bolt->points + def->numPoints);
+    bolt->jitterTimer = 0.0f;
+    bolt->points[0].local.x = 0.0f;
+    bolt->points[0].local.y = 0.0f;
+    bolt->points[0].local.z = 0.0f;
+    bolt->points[def->numPoints - 1].local.x = 0.0f;
+    bolt->points[def->numPoints - 1].local.y = 0.0f;
+    bolt->points[def->numPoints - 1].local.z = 1.0f;
+    bzero(bolt->vtxBuf, sizeof(bolt->vtxBuf));
+    /* four vertices per point, plus slack */
+    bolt->vtxBufSize = bolt->def.numPoints * 4 * (s32)sizeof(Vtx) + 0x140;
+    return bolt;
 }
 
+extern s32 (*D_8008F940[])(Bolt *);
+extern s32 (*D_8008F948[])(Bolt *);
 
-typedef struct {
-    u8  pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    f32 unk14;
-    f32 unk18;
-    u8  unk1C;
-    u8  pad1D[3];
-    f32 unk20;
-    u8  pad24[8];
-    s8  unk2C;
-    s8  unk2D;
-    u8  pad2E[2];
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    struct17 unk48;
-    u8  pad54[4];
-    f32 unk58;
-    u8  pad5C[8];
-    Point_151A7A90 *unk64;
-    f32 unk68;
-} Header_151A7A90;
+void func_151A8340(Bolt *, s16, s16, f32, s16);
 
-extern s32 (*D_8008F940[])(void *);
-extern s32 (*D_8008F948[])(void *);
+/*
+ * Per-frame update: counts down the lifetime, runs the update hooks, re-jitters the points when the
+ * timer runs out and places them in the world along start->end. The bolt is destroyed once a hook
+ * returns 0 or its lifetime runs out.
+ */
+void func_151A7A90(Bolt *bolt) {
+    Bolt *self; // matching: the loop bound is read through a second copy of bolt
+    u8 done;
+    Vec3f side;
+    Vec3f up;
+    Vec3f dir;
+    s32 update1;
+    s32 update2;
 
-void func_151A8340(void *, s16, s16, f32, s16);
-
-void func_151A7A90(Header_151A7A90 *arg0) {
-    Header_151A7A90 *hdr;
-    u8 flag;
-    struct17 scale;
-    struct17 up;
-    struct17 dir;
-    s32 idx1;
-    s32 idx2;
-
-    hdr = arg0;
-    flag = 0;
-    if (arg0->unk1C & 1) {
-        arg0->unk10 -= D_800BE9E4;
-        if (arg0->unk10 < 0) {
-            flag = 1;
+    self = bolt;
+    done = FALSE;
+    if (bolt->def.flags & BOLT_TIMED) {
+        bolt->def.lifetime -= D_800BE9E4;
+        if (bolt->def.lifetime < 0) {
+            done = TRUE;
         }
     }
-    idx1 = arg0->unk2C;
-    if (idx1 != -1) {
-        if (!flag) {
-            flag = (D_8008F940[idx1](arg0) == 0);
-        }
+    update1 = bolt->def.update1;
+    if (update1 != -1 && !done) {
+        done = (D_8008F940[update1](bolt) == 0);
     }
-    idx2 = arg0->unk2D;
-    if (idx2 != -1) {
-        if (!flag) {
-            flag = (D_8008F948[idx2](arg0) == 0);
-        }
+    update2 = bolt->def.update2;
+    if (update2 != -1 && !done) {
+        done = (D_8008F948[update2](bolt) == 0);
     }
 
-    if (!flag) {
-        arg0->unk68 -= D_800BE9A4;
-        if (arg0->unk68 < 0.0f) {
-            func_151A8340(arg0, 0, arg0->unk12 - 1, arg0->unk20, 100);
-            arg0->unk68 = func_150ADA68() * arg0->unk18 + arg0->unk14;
+    if (!done) {
+        bolt->jitterTimer -= D_800BE9A4;
+        if (bolt->jitterTimer < 0.0f) {
+            func_151A8340(bolt, 0, bolt->def.numPoints - 1, bolt->def.jitter, 100);
+            bolt->jitterTimer = func_150ADA68() * bolt->def.jitterDelayRange + bolt->def.jitterDelay;
         }
-        if (arg0->unk1C & 2) {
-            Point_151A7A90 *pt;
+        if (bolt->def.flags & BOLT_ACTIVE) {
+            BoltPoint *pt;
 
-            dir.unk0 = arg0->unk3C - arg0->unk30;
-            dir.unk4 = arg0->unk40 - arg0->unk34;
-            dir.unk8 = arg0->unk44 - arg0->unk38;
-            up = arg0->unk48;
-            func_151450B4(&dir, &up, &scale);
+            dir.x = bolt->def.end.x - bolt->def.start.x;
+            dir.y = bolt->def.end.y - bolt->def.start.y;
+            dir.z = bolt->def.end.z - bolt->def.start.z;
+            up = bolt->def.up;
+            func_151450B4((struct17 *)&dir, (struct17 *)&up, (struct17 *)&side);
             {
                 s32 i;
 
-                scale.unk0 *= arg0->unk58;
-                scale.unk4 *= arg0->unk58;
-                scale.unk8 *= arg0->unk58;
+                side.x *= bolt->def.invLength;
+                side.y *= bolt->def.invLength;
+                side.z *= bolt->def.invLength;
 
-                pt = arg0->unk64;
-                for (i = 0; i < hdr->unk12; i++) {
-                    pt->unkC.unk0 = arg0->unk30 + pt->unk0.unk0 * scale.unk0 +
-                                    pt->unk0.unk4 * up.unk0 + pt->unk0.unk8 * dir.unk0;
-                    pt->unkC.unk4 = arg0->unk34 + pt->unk0.unk0 * scale.unk4 +
-                                    pt->unk0.unk4 * up.unk4 + pt->unk0.unk8 * dir.unk4;
-                    pt->unkC.unk8 = arg0->unk38 + pt->unk0.unk0 * scale.unk8 +
-                                    pt->unk0.unk4 * up.unk8 + pt->unk0.unk8 * dir.unk8;
+                pt = bolt->points;
+                for (i = 0; i < self->def.numPoints; i++) {
+                    pt->world.x = bolt->def.start.x + pt->local.x * side.x +
+                                  pt->local.y * up.x + pt->local.z * dir.x;
+                    pt->world.y = bolt->def.start.y + pt->local.x * side.y +
+                                  pt->local.y * up.y + pt->local.z * dir.y;
+                    pt->world.z = bolt->def.start.z + pt->local.x * side.z +
+                                  pt->local.y * up.z + pt->local.z * dir.z;
                     pt++;
                 }
             }
         }
     }
 
-    if (flag) {
-        func_1516972C((struct102 *)arg0);
+    if (done) {
+        func_1516972C((struct102 *)bolt);
     }
 }
 
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
-s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
-s32 func_15144B34(s32);
-void func_15145548(void *, void *, void *, void *, f32 *);
+Gfx *func_15142E24(Gfx *, u8 *, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
+Vec3f *func_15144B34(s32);
+void func_15145548(Vec3f *, Vec3f *, Vec3f *, Vec3f *, f32 *);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 Gfx *func_1513F4E4(Gfx *, u8, u8 *);
 Gfx *func_15142B7C(Gfx *, s32, s32);
@@ -183,45 +187,22 @@ extern u8 D_80090D70[];
 extern s32 D_800A4AC8[][2];
 extern s32 D_800D2C9C;
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f_151A7D6C;
-
-typedef struct {
-    u8 pad0[0xC];
-    Vec3f_151A7D6C pos;
-} Game1D4E00Point;
-
-typedef struct {
-    u8 pad0[0x12];
-    s16 count;
-    u8 pad14[8];
-    u8 flags;
-    u8 pad1D[7];
-    u8 r;
-    u8 g;
-    u8 b;
-    u8 a;
-    f32 width;
-    u8 pad2C[0x38];
-    Game1D4E00Point *points;
-    u8 pad68[4];
-    u8 buffers[0x10];
-    s32 size;
-} Game1D4E00Bolt;
-
-Gfx *func_151A7D6C(Gfx *gdl, Game1D4E00Bolt *arg1, s16 arg2) {
-    Game1D4E00Bolt *self = arg1;
+/*
+ * Draws the bolt as one camera-facing quad (two triangles) per segment, def.width wide, with
+ * vertices from the bolt's vertex buffer for this view.
+ */
+Gfx *func_151A7D6C(Gfx *gdl, Bolt *bolt, s16 view) {
+    Bolt *self = bolt; // matching: the loop bound is read through a second copy of bolt
     Vtx_t *vtx;
-    Vec3f_151A7D6C dir;
-    Vec3f_151A7D6C closest;
+    Vec3f dir;
+    Vec3f closest;
     f32 dx;
     f32 dy;
     f32 dz;
     f32 nx;
     f32 ny;
     f32 nz;
-    f32 *camera;
+    Vec3f *camera;
     f32 lenSq;
     u8 changed;
     s16 last;
@@ -229,29 +210,29 @@ Gfx *func_151A7D6C(Gfx *gdl, Game1D4E00Bolt *arg1, s16 arg2) {
     s16 i;
     f32 parameter;
     s16 j;
-    Vec3f_151A7D6C *a;
-    Vec3f_151A7D6C *b;
+    Vec3f *from;
+    Vec3f *to;
 
-    if (arg1->flags & 2) {
-        func_151D5D60(arg1->buffers, arg2, arg1->size, (void **)&vtx, NULL);
+    if (bolt->def.flags & BOLT_ACTIVE) {
+        func_151D5D60(bolt->vtxBuf, view, bolt->vtxBufSize, (void **)&vtx, NULL);
         if (vtx != NULL) {
-            camera = (f32 *)func_15144B34(arg2);
+            camera = func_15144B34(view);
             changed = 1;
-            last = arg1->count - 1;
+            last = bolt->def.numPoints - 1;
             j = 0;
             i = 1;
-            gdl = (Gfx *)func_15142E24((s32)gdl, (s32)D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
+            gdl = func_15142E24(gdl, D_80090D70, 0, 0, 0, 0, 0x2C, 0, 0, &changed, 3);
             gdl = func_15142B7C(gdl, 0x200005, 0x1F0600);
-            gdl = func_15142C10(gdl, arg1->r, arg1->g, arg1->b, arg1->a, &changed);
+            gdl = func_15142C10(gdl, bolt->def.color.r, bolt->def.color.g, bolt->def.color.b, bolt->def.color.a, &changed);
             gdl = func_1513F4E4(gdl, 0x19, &changed);
             gdl = func_15142FBC(gdl, D_800D2C9C | 0x80000 | 0x2000 | 0xC00 | 0x80 | 0x20, D_800A4AC8[3][0] | D_800A4AC8[3][1], &changed);
-            dir.x = arg1->points[0].pos.x - arg1->points[last].pos.x;
-            dir.y = arg1->points[0].pos.y - arg1->points[last].pos.y;
-            dir.z = arg1->points[0].pos.z - arg1->points[last].pos.z;
-            func_15145548(&arg1->points[last].pos, &dir, camera, &closest, &parameter);
-            dx = camera[0] - closest.x;
-            dy = camera[1] - closest.y;
-            dz = camera[2] - closest.z;
+            dir.x = bolt->points[0].world.x - bolt->points[last].world.x;
+            dir.y = bolt->points[0].world.y - bolt->points[last].world.y;
+            dir.z = bolt->points[0].world.z - bolt->points[last].world.z;
+            func_15145548(&bolt->points[last].world, &dir, camera, &closest, &parameter);
+            dx = camera->x - closest.x;
+            dy = camera->y - closest.y;
+            dz = camera->z - closest.z;
             nx = dir.y * dz - dy * dir.z;
             ny = dir.z * dx - dz * dir.x;
             nz = dir.x * dy - dx * dir.y;
@@ -261,17 +242,17 @@ Gfx *func_151A7D6C(Gfx *gdl, Game1D4E00Bolt *arg1, s16 arg2) {
                 ny = 0.0f;
                 nz = 0.0f;
             } else {
-                scale = arg1->width / sqrtf(lenSq);
+                scale = bolt->def.width / sqrtf(lenSq);
                 nx *= scale;
                 ny *= scale;
                 nz *= scale;
             }
-            for (; i < self->count; i++, j++) {
-                b = &arg1->points[i].pos;
-                a = &arg1->points[j].pos;
-                vtx->ob[0] = a->x + nx;
-                vtx->ob[1] = a->y + ny;
-                vtx->ob[2] = a->z + nz;
+            for (; i < self->def.numPoints; i++, j++) {
+                to = &bolt->points[i].world;
+                from = &bolt->points[j].world;
+                vtx->ob[0] = from->x + nx;
+                vtx->ob[1] = from->y + ny;
+                vtx->ob[2] = from->z + nz;
                 vtx->tc[0] = 0;
                 vtx->tc[1] = 0;
                 vtx->cn[0] = 0xFF;
@@ -280,9 +261,9 @@ Gfx *func_151A7D6C(Gfx *gdl, Game1D4E00Bolt *arg1, s16 arg2) {
                 vtx->cn[3] = 0xFF;
                 vtx->flag = 0;
                 vtx++;
-                vtx->ob[0] = a->x - nx;
-                vtx->ob[1] = a->y - ny;
-                vtx->ob[2] = a->z - nz;
+                vtx->ob[0] = from->x - nx;
+                vtx->ob[1] = from->y - ny;
+                vtx->ob[2] = from->z - nz;
                 vtx->tc[0] = 0x3C0;
                 vtx->tc[1] = 0;
                 vtx->cn[0] = 0xFF;
@@ -291,9 +272,9 @@ Gfx *func_151A7D6C(Gfx *gdl, Game1D4E00Bolt *arg1, s16 arg2) {
                 vtx->cn[3] = 0xFF;
                 vtx->flag = 0;
                 vtx++;
-                vtx->ob[0] = b->x - nx;
-                vtx->ob[1] = b->y - ny;
-                vtx->ob[2] = b->z - nz;
+                vtx->ob[0] = to->x - nx;
+                vtx->ob[1] = to->y - ny;
+                vtx->ob[2] = to->z - nz;
                 vtx->tc[0] = 0x3C0;
                 vtx->tc[1] = 0x3C0;
                 vtx->cn[0] = 0xFF;
@@ -302,9 +283,9 @@ Gfx *func_151A7D6C(Gfx *gdl, Game1D4E00Bolt *arg1, s16 arg2) {
                 vtx->cn[3] = 0xFF;
                 vtx->flag = 0;
                 vtx++;
-                vtx->ob[0] = b->x + nx;
-                vtx->ob[1] = b->y + ny;
-                vtx->ob[2] = b->z + nz;
+                vtx->ob[0] = to->x + nx;
+                vtx->ob[1] = to->y + ny;
+                vtx->ob[2] = to->z + nz;
                 vtx->tc[0] = 0;
                 vtx->tc[1] = 0x3C0;
                 vtx->cn[0] = 0xFF;
@@ -322,13 +303,11 @@ Gfx *func_151A7D6C(Gfx *gdl, Game1D4E00Bolt *arg1, s16 arg2) {
     return gdl;
 }
 
-
-typedef struct {
-    u8 pad0[0x64];
-    f32 (*points)[6];
-} Curve8340;
-
-void func_151A8340(void *arg0, s16 first, s16 last, f32 amp, s16 depth) {
+/*
+ * Midpoint displacement: sets the point halfway between first and last to their average, moved up
+ * to amp sideways and along up, then recurses into both halves until depth runs out.
+ */
+void func_151A8340(Bolt *bolt, s16 first, s16 last, f32 amp, s16 depth) {
     s16 middle;
 
     if (last - first < 2) {
@@ -341,844 +320,752 @@ void func_151A8340(void *arg0, s16 first, s16 last, f32 amp, s16 depth) {
         f32 dx;
         f32 dy;
         f32 dz;
-        f32 *a;
+        Vec3f *a;
 
         {
-            f32 *b;
+            Vec3f *b;
 
-            a = &((Curve8340 *)arg0)->points[first][0];
+            a = &bolt->points[first].local;
             middle = first + ((last - first) >> 1);
-            b = ((Curve8340 *)arg0)->points[last];
-            dx = b[0] - ((Curve8340 *)arg0)->points[first][0];
-            dy = b[1] - ((Curve8340 *)arg0)->points[first][1];
-            dz = b[2] - ((Curve8340 *)arg0)->points[first][2];
+            b = &bolt->points[last].local;
+            dx = b->x - bolt->points[first].local.x;
+            dy = b->y - bolt->points[first].local.y;
+            dz = b->z - bolt->points[first].local.z;
         }
-        ((Curve8340 *)arg0)->points[middle][0] = (a[0] + dx * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
-        ((Curve8340 *)arg0)->points[middle][1] = (a[1] + dy * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
-        ((Curve8340 *)arg0)->points[middle][2] = a[2] + dz * 0.5f;
+        bolt->points[middle].local.x = (a->x + dx * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
+        bolt->points[middle].local.y = (a->y + dy * 0.5f) + (func_150ADA68() * (amp + amp) + -amp);
+        bolt->points[middle].local.z = a->z + dz * 0.5f;
     }
-    func_151A8340(arg0, first, middle, amp, depth - 1);
-    func_151A8340(arg0, middle, last, amp, depth - 1);
+    func_151A8340(bolt, first, middle, amp, depth - 1);
+    func_151A8340(bolt, middle, last, amp, depth - 1);
 }
 
 extern void func_151D5E30(void *);
 
-void func_151A8560(void *arg0) {
-    func_151D5E30((void *)((u8 *)arg0 + 0x6C));
+/* Frees the bolt's vertex buffers. */
+void func_151A8560(Bolt *bolt) {
+    func_151D5E30(bolt->vtxBuf);
 }
 
-typedef struct {
-    u8 pad_0[0x5C];
-    u8 field_5C;
-} Game1D4E00State;
+extern void (*D_8008F94C[])(Bolt *);
 
-extern void (*D_8008F94C[])(s32);
+/* Destroy handler: runs the type's hook, then frees the vertex buffers and the object. */
+void func_151A8584(Bolt *bolt) {
+    Bolt *self = bolt; // matching: the copy lets IDO read type from a0 before homing bolt
 
-void func_151A8584(s32 arg0) {
-    Game1D4E00State *state = (Game1D4E00State *)arg0;
-
-    if (D_8008F94C[state->field_5C] != NULL) {
-        D_8008F94C[state->field_5C](arg0);
+    if (D_8008F94C[self->def.type] != NULL) {
+        D_8008F94C[self->def.type](bolt);
     }
-    func_151A8560((void *)arg0);
-    func_15169804((struct102 *)arg0);
+    func_151A8560(bolt);
+    func_15169804((struct102 *)bolt);
 }
 
-typedef struct {
-    u8 pad_0[0x5C];
-    u8 field_5C;
-} Game1D4E00State_151A85D4;
+extern void (*D_8008F958[])(Bolt *);
 
-extern void (*D_8008F958[])(s32);
+/* Like func_151A8584, through the D_8008F958 hooks and func_15169824. */
+void func_151A85D4(Bolt *bolt) {
+    Bolt *self = bolt; // matching: the copy lets IDO read type from a0 before homing bolt
 
-void func_151A85D4(s32 arg0) {
-    Game1D4E00State_151A85D4 *state = (Game1D4E00State_151A85D4 *)arg0;
-
-    if (D_8008F958[state->field_5C] != NULL) {
-        D_8008F958[state->field_5C](arg0);
+    if (D_8008F958[self->def.type] != NULL) {
+        D_8008F958[self->def.type](bolt);
     }
-    func_151A8560((void *)arg0);
-    func_15169824((struct102 *)arg0);
+    func_151A8560(bolt);
+    func_15169824((struct102 *)bolt);
 }
 
-typedef struct {
-    u8 bytes[4];
-} Unaligned4_151A8624;
+/*
+ * Spawns a bolt from bone `bone` of owner (at boneOffset in bone space) to targetOffset from the
+ * owner's position; func_151A87F8 (update1) keeps both ends attached. lifetime -1 means untimed.
+ */
+Bolt *func_151A8624(struct127 *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
+                    f32 jitterDelay, f32 jitterDelayRange, BoltColor *color,
+                    f32 width, Vec3f *targetOffset, u8 arg9, u8 argA,
+                    s8 update2, s32 extraSize, u8 argD, s32 argE) {
+    Bolt *bolt;
+    BoltDef def;
+    BoltLink link;
+    u8 timed;
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-} Vec3f_151A8624;
-
-typedef struct {
-    void *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    Header2 unk8;
-    u8 unk14;
-    u8 pad15[3];
-    Header2 unk18;
-    u8 unk24;
-    u8 unk25;
-    u8 pad26[2];
-} Payload_151A8624;
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    f32 unk4;
-    f32 unk8;
-    u8 unkC;
-    u8 padD[3];
-    f32 unk10;
-    Unaligned4_151A8624 unk14;
-    f32 unk18;
-    u8 unk1C;
-    s8 unk1D;
-    u8 pad1E[2];
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    u8 unk4C;
-    u8 pad4D[3];
-} Header_151A8624;
-
-void *func_151A8624(u8 *arg0, Header2 *arg1, u8 arg2, s16 arg3,
-                    f32 arg4, f32 arg5, Unaligned4_151A8624 *arg6,
-                    f32 arg7, Vec3f_151A8624 *arg8, u8 arg9, u8 argA,
-                    s8 argB, s32 argC, u8 argD, s32 argE) {
-    void *temp_v0;
-    Header_151A8624 header;
-    Payload_151A8624 payload;
-    u8 flag;
-
-    if (arg0 == NULL) {
+    if (owner == NULL) {
         return NULL;
     }
     if (arg9 >= 2) {
         arg9 = 0;
     }
 
-    payload.unk8 = *arg1;
-    payload.unk14 = arg2;
-    payload.unk25 = 0;
-    payload.unk0 = arg0;
-    payload.unk4 = arg0[0x3B];
-    payload.unk24 = argA;
-    temp_v0 = &header;
+    link.boneOffset = *boneOffset;
+    link.bone = bone;
+    link.linkFlags = 0;
+    link.owner = owner;
+    link.ownerId = owner->unique_id;
+    link.unk24 = argA;
 
-    if (arg8 != NULL) {
-        *(Vec3f_151A8624 *)&payload.unk18 = *arg8;
+    if (targetOffset != NULL) {
+        link.targetOffset = *targetOffset;
     } else {
-        ((Vec3f_151A8624 *)&payload.unk18)->unk0 = 0.0f;
-        ((Vec3f_151A8624 *)&payload.unk18)->unk4 = 0.0f;
-        ((Vec3f_151A8624 *)&payload.unk18)->unk8 = 0.0f;
+        link.targetOffset.x = 0.0f;
+        link.targetOffset.y = 0.0f;
+        link.targetOffset.z = 0.0f;
     }
 
-    if (arg3 == -1) {
-        header.unk0 = 0x12C;
+    if (lifetime == -1) {
+        def.lifetime = 300;
     } else {
-        header.unk0 = arg3;
+        def.lifetime = lifetime;
     }
-    header.unk2 = 9;
-    header.unk4 = arg4;
-    header.unk8 = arg5;
-    if (arg3 == -1) {
-        flag = 0;
+    def.numPoints = 9;
+    def.jitterDelay = jitterDelay;
+    def.jitterDelayRange = jitterDelayRange;
+    if (lifetime == -1) {
+        timed = 0;
     } else {
-        flag = 1;
+        timed = BOLT_TIMED;
     }
-    header.unkC = flag;
-    header.unk10 = D_800A8DE0;
-    header.unk14 = *arg6;
-    header.unk18 = arg7;
+    def.flags = timed;
+    def.jitter = 79.75f;
+    def.color = *color;
+    def.width = width;
+    // matching: both arms pick update1 1 (func_151A87F8), but IDO must see the arg9 test
     if ((arg9 != 0) && (arg9 == 1)) {
-        header.unk1C = 1;
+        def.update1 = 1;
     } else {
-        header.unk1C = 1;
+        def.update1 = 1;
     }
-    header.unk20 = 0.0f;
-    header.unk24 = 0.0f;
-    header.unk28 = 0.0f;
-    header.unk2C = 0.0f;
-    header.unk30 = 0.0f;
-    header.unk34 = 0.0f;
-    header.unk38 = 0.0f;
-    header.unk3C = 0.0f;
-    header.unk40 = 0.0f;
-    header.unk44 = 0.0f;
-    header.unk1D = argB;
-    header.unk4C = 2;
-    header.unk48 = 1.0f;
+    def.start.x = 0.0f;
+    def.start.y = 0.0f;
+    def.start.z = 0.0f;
+    def.end.x = 0.0f;
+    def.end.y = 0.0f;
+    def.end.z = 0.0f;
+    def.up.x = 0.0f;
+    def.up.y = 0.0f;
+    def.up.z = 0.0f;
+    def.length = 0.0f;
+    def.update2 = update2;
+    def.type = 2;
+    def.invLength = 1.0f;
 
-    temp_v0 = func_151A7950(temp_v0, argC + 0x28, argD, argE);
-    if (temp_v0 != NULL) {
-        memcpy(*(void **)((u8 *)temp_v0 + 0x60), &payload, sizeof(payload));
+    bolt = func_151A7950(&def, extraSize + sizeof(BoltLink), argD, argE);
+    if (bolt != NULL) {
+        memcpy(bolt->link, &link, sizeof(link));
     }
-    return temp_v0;
+    return bolt;
 }
-
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-    u8 pad5[0x14 - 0x5];
-    struct17 unk14;
-    u8 pad20[0x3B - 0x20];
-    u8 unk3B;
-    u8 pad3C[0x1D4 - 0x3C];
-    s32 unk1D4;
-} Owner151A87F8;
-
-typedef struct {
-    Owner151A87F8 *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    struct17 unk8;
-    u8 unk14;
-    u8 pad15[3];
-    struct17 unk18;
-    u8 pad24;
-    u8 unk25;
-} Link151A87F8;
-
-typedef struct {
-    u8 pad0[0x1C];
-    u8 unk1C;
-    u8 pad1D[0x30 - 0x1D];
-    struct17 unk30;
-    struct17 unk3C;
-    struct17 unk48;
-    f32 unk54;
-    f32 unk58;
-    u8 pad5C[4];
-    Link151A87F8 *unk60;
-} Obj151A87F8;
 
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
 extern s32 func_15145C90(s32);
-extern void func_15143134(void *, void *, s32);
-extern f32 func_15143E64(struct17 *);
-extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
+extern void func_15143134(Vec3f *, Vec3f *, s32);
+extern f32 func_15143E64(Vec3f *);
+extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
 
-s32 func_151A87F8(Obj151A87F8 *arg0) {
-    Link151A87F8 *link;
-    Owner151A87F8 *owner;
-    struct17 diff;
+/*
+ * Update hook 1 of a bolt spawned by func_151A8624: puts the start on the owner's bone and, until
+ * a ray cast succeeds, casts from there towards the target point to place the end. Deactivates
+ * the bolt when it has no length or the cast fails; returns 0 (destroy) once the owner is gone.
+ */
+s32 func_151A87F8(Bolt *bolt) {
+    BoltLink *link;
+    struct127 *owner;
+    Vec3f dir;
     s32 hit;
-    f32 x;
-    f32 y;
-    f32 z;
-    struct17 tmp;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    Vec3f unused;
 
-    link = arg0->unk60;
-    owner = link->unk0;
-    if ((owner->unk0 == 0) || (owner->unk3B != link->unk4) || (owner->unk4 == 0xFF)) {
+    link = bolt->link;
+    owner = link->owner;
+    if ((owner->interaction_state == 0) || (owner->unique_id != link->ownerId) || (owner->id == 0xFF)) {
         return 0;
     }
-    if (owner->unk1D4 != 0) {
-        func_15143134(&link->unk8, &arg0->unk30, owner->unk1D4 + (link->unk14 << 6));
-        if (!(link->unk25 & 1)) {
-            x = arg0->unk30.unk0 - (owner->unk14.unk0 + link->unk18.unk0);
-            y = arg0->unk30.unk4 - (owner->unk14.unk4 + link->unk18.unk4);
-            z = arg0->unk30.unk8 - (owner->unk14.unk8 + link->unk18.unk8);
-            if (func_150AC9C0(arg0->unk30.unk0, arg0->unk30.unk4, arg0->unk30.unk8, x, y, z, 0, 0,
-                              &arg0->unk3C.unk0, &arg0->unk3C.unk4, &arg0->unk3C.unk8, 0, &hit, 0, 0.0f)) {
+    if (owner->unk1D4 != NULL) {
+        func_15143134(&link->boneOffset, &bolt->def.start, (s32)owner->unk1D4 + (link->bone << 6)); /* 0x40-byte bone matrices */
+        if (!(link->linkFlags & 1)) {
+            dx = bolt->def.start.x - (owner->x_position + link->targetOffset.x);
+            dy = bolt->def.start.y - (owner->y_position + link->targetOffset.y);
+            dz = bolt->def.start.z - (owner->z_position + link->targetOffset.z);
+            if (func_150AC9C0(bolt->def.start.x, bolt->def.start.y, bolt->def.start.z, dx, dy, dz, 0, 0,
+                              &bolt->def.end.x, &bolt->def.end.y, &bolt->def.end.z, 0, &hit, 0, 0.0f)) {
                 if (func_15145C90(hit)) {
-                    link->unk25 |= 1;
+                    link->linkFlags |= 1;
                 } else {
-                    arg0->unk1C &= ~2;
+                    bolt->def.flags &= ~BOLT_ACTIVE;
                     return 1;
                 }
             } else {
-                arg0->unk1C &= ~2;
+                bolt->def.flags &= ~BOLT_ACTIVE;
                 return 1;
             }
         }
-        diff.unk0 = arg0->unk3C.unk0 - arg0->unk30.unk0;
-        diff.unk4 = arg0->unk3C.unk4 - arg0->unk30.unk4;
-        diff.unk8 = arg0->unk3C.unk8 - arg0->unk30.unk8;
-        arg0->unk54 = func_15143E64(&diff);
-        if (arg0->unk54 != 0.0f) {
+        dir.x = bolt->def.end.x - bolt->def.start.x;
+        dir.y = bolt->def.end.y - bolt->def.start.y;
+        dir.z = bolt->def.end.z - bolt->def.start.z;
+        bolt->def.length = func_15143E64(&dir);
+        // matching: the unused labels split IDO's basic blocks (length is reloaded; removing any one mismatches)
+        if (bolt->def.length != 0.0f) {
         lbl0:
-            arg0->unk58 = 1.0f / arg0->unk54;
-            func_15146078(&diff, &tmp, &arg0->unk48);
-            arg0->unk1C |= 2;
+            bolt->def.invLength = 1.0f / bolt->def.length;
+            func_15146078(&dir, &unused, &bolt->def.up);
+            bolt->def.flags |= BOLT_ACTIVE;
         lbl1:
             return 1;
         } else {
-            arg0->unk1C &= ~2;
+            bolt->def.flags &= ~BOLT_ACTIVE;
         lbl2:
             return 1;
         }
     } else {
-        arg0->unk1C &= ~2;
+        bolt->def.flags &= ~BOLT_ACTIVE;
     }
 lbl3:
     return 1;
 }
 
-extern void (*D_8008F964[])(u8 *, s32, u8);
+extern void (*D_8008F964[])(Bolt *, void *, u8);
 
-void func_151A8A20(u8 *arg0, s32 arg1, u8 arg2) {
-    s32 idx;
+/* Message handler: forwards to the type's handler in D_8008F964 (types 3 and up use type 0). */
+void func_151A8A20(Bolt *bolt, void *msg, u8 msgType) {
+    s32 type;
 
-    idx = arg0[0x5C];
-    if (idx >= 3) {
-        idx = 0;
+    type = bolt->def.type;
+    if (type >= 3) {
+        type = 0;
     }
-    if (D_8008F964[idx] != NULL) {
-        D_8008F964[idx](arg0, arg1, arg2);
+    if (D_8008F964[type] != NULL) {
+        D_8008F964[type](bolt, msg, msgType);
     }
 }
 
+/* Message 0x2D: two actors traded places (each with its unique_id). */
 typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA_151A8A78;
-
-typedef struct {
-    s32 unk0;
+    struct127 *actorA;
     union {
-        s32 w4;
-        u8  b4;
+        struct127 *actorB;
+        u8 id;              /* message 0: the unique_id of the dying actor */
     } u4;
-    u8  unk8;
-    u8  unk9;
-} ArgB_151A8A78;
+    u8 idA;
+    u8 idB;
+} BoltOwnerMsg;
 
-void func_151A8A78(void *arg0, s32 arg1, u8 arg2) {
-    SubA_151A8A78 *temp_v0 = *(SubA_151A8A78 **)((u8 *)arg0 + 0x60);
-    ArgB_151A8A78 *b = (ArgB_151A8A78 *)arg1;
-    s32 b0;
+/*
+ * Type 2 message handler (bolts from func_151A8624): message 0 destroys the bolt when its owner goes
+ * away; message 0x2D re-attaches it when its owner is swapped for another actor.
+ */
+void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
+    BoltLink *link = bolt->link;
+    BoltOwnerMsg *msg = arg;
+    struct127 *actor;
 
-    if (arg2 == 0) {
-        b0 = b->unk0;
-        if ((b0 == temp_v0->unk0) || (temp_v0->unk4 == b->u4.b4)) {
-            func_1516972C((struct102 *)arg0);
+    if (msgType == 0) {
+        actor = msg->actorA;
+        if ((actor == link->owner) || (link->ownerId == msg->u4.id)) {
+            func_1516972C((struct102 *)bolt);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else if (temp_v0->unk0 == b->u4.w4) {
-            temp_v0->unk0 = b->unk0;
-            temp_v0->unk4 = b->unk8;
+    } else if (msgType == 0x2D) {
+        if (link->owner == msg->actorA) {
+            link->owner = msg->u4.actorB;
+            link->ownerId = msg->idB;
+        } else if (link->owner == msg->u4.actorB) {
+            link->owner = msg->actorA;
+            link->ownerId = msg->idA;
         }
     }
 }
 
-extern f32 D_800A8F50;
-extern f32 D_800A8F54;
+/* A placed level object; the shared headers type it as struct134. */
+typedef struct {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ u8 pad6[0x10];
+    /* 0x16 */ u8 flags;
+    /* 0x17 */ u8 pad17;
+    /* 0x18 */ s32 unk18;
+} LevelObject;
+
+/* Result of a ground probe (func_15046C80). */
+typedef struct {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ u8 unk4[0x14];
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 flags;
+    /* 0x1D */ u8 surfaceType;
+    /* 0x20 */ s32 unk20;
+} GroundHit; /* size 0x24 */
+
+/* Spawn parameters of a particle emitter (func_151A8B20). */
+typedef struct {
+    /* 0x00 */ u8 flags;             /* EMITTER_* */
+    /* 0x04 */ LevelObject *anchor;  /* centre (and area) with EMITTER_ANCHORED */
+    /* 0x08 */ f32 rate;             /* particles per frame and unit area: rate + rand * rateRange */
+    /* 0x0C */ f32 rateRange;
+    /* 0x10 */ Vec3f pos;            /* centre without EMITTER_ANCHORED */
+    /* 0x1C */ f32 bottom;           /* lowest height the ground probe searches */
+    /* 0x20 */ f32 radius;
+    /* 0x24 */ u8 type;              /* 1: switched on and off by messages (func_151A931C) */
+    /* 0x25 */ s8 update;            /* index into D_8008F980, -1 for none */
+    /* 0x26 */ s8 spawn;             /* index into D_8008F970, -1 for none */
+} EmitterDef; /* size 0x28 */
+
+#define EMITTER_ON       1
+#define EMITTER_ANCHORED 2
+#define EMITTER_ZONED    4 /* only spawns while its zone is visible */
+#define EMITTER_NO_PROBE 8 /* spawns at `bottom` without probing for the ground */
+
+typedef struct {
+    /* 0x00 */ EmitterDef def;
+    /* 0x28 */ f32 pending;          /* particles owed; one spawns per whole unit */
+    /* 0x2C */ GroundHit ground;
+    /* 0x50 */ s32 zone;             /* func_1510FD20 zone of the centre, with EMITTER_ZONED */
+    /* 0x54 */ f32 area;
+} EmitterState; /* size 0x58 */
+
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+    /* 0x28 */ EmitterState state;
+    /* 0x80 */ u8 data[1];           /* user data */
+} Emitter;
 
 extern void func_1510F800(s32);
 
-typedef struct {
-    u8  unk0;
-    u8  pad1[3];
-    struct134 *unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    u8  unk24;
-    u8  unk25;
-    u8  unk26;
-    u8  pad27;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    s32 unk44;
-    u8  unk48;
-    u8  unk49;
-    u8  pad4A[2];
-    s32 unk4C;
-    s32 unk50;
-    f32 unk54;
-} Header_151A8B20;
+/*
+ * Spawns an emitter object for def with extraSize bytes of user data. lifetime -1 means untimed.
+ * The spawn rate is scaled by the emitter's area: the anchor's, or that of a circle of def->radius.
+ */
+Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s32 arg4) {
+    Emitter *emitter;
+    EmitterState init;
+    EmitterState *state;
 
-s32 func_151A8B20(void *arg0, s16 arg1, s32 arg2, u8 arg3, s32 arg4) {
-    s32 effect;
-    Header_151A8B20 header;
-    Header_151A8B20 *ptr;
+    memcpy(&init, def, sizeof(EmitterDef));
 
-    memcpy(&header, arg0, 0x28);
+    init.pending = 0.0f;
+    init.ground.height = 99999.9f;
+    init.ground.unk18 = 0;
+    init.ground.flags = 0;
+    init.ground.surfaceType = 0;
+    init.ground.unk20 = 0;
 
-    header.unk28 = 0.0f;
-    header.unk2C = D_800A8F50;
-    header.unk44 = 0;
-    header.unk48 = 0;
-    header.unk49 = 0;
-    header.unk4C = 0;
+    /* func_15149130 takes the data size (after its 0x28-byte header) in its struct37 * parameter */
+    emitter = (Emitter *)func_15149130((lifetime == -1) ? 300 : lifetime, -1, 0x25, -1, (lifetime == -1) ? 0 : 1, 0x22, (struct37 *)(extraSize + sizeof(EmitterState)), arg3, arg4);
+    if (emitter != NULL) {
+        state = &emitter->state;
+        memcpy(state, &init, sizeof(EmitterState));
 
-    effect = (s32)func_15149130((arg1 == -1) ? 0x12C : arg1, -1, 0x25, -1, (arg1 == -1) ? 0 : 1, 0x22, (struct37 *)(arg2 + 0x58), arg3, arg4);
-    if (effect != 0) {
-        ptr = (Header_151A8B20 *)(effect + 0x28);
-        memcpy(ptr, &header, 0x58);
+        if (state->def.flags & EMITTER_ZONED) {
+            f32 z;
+            f32 x;
 
-        if (ptr->unk0 & 4) {
-            f32 posZ;
-            f32 posX;
-
-            if ((ptr->unk0 & 2) && (ptr->unk4 != NULL)) {
-                posX = (f32)ptr->unk4->unk0;
-                posZ = (f32)ptr->unk4->unk4;
+            if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
+                x = state->def.anchor->x;
+                z = state->def.anchor->z;
             } else {
-                posX = ptr->unk10;
-                posZ = ptr->unk18;
+                x = state->def.pos.x;
+                z = state->def.pos.z;
             }
             func_1510F800(0);
-            ptr->unk50 = func_1510FD20((s32)posX, (s32)posZ);
+            state->zone = func_1510FD20(x, z);
         } else {
-            ptr->unk50 = 0;
+            state->zone = 0;
         }
 
-        if ((ptr->unk0 & 2) && (ptr->unk4 != NULL)) {
-            ptr->unk54 = func_15144598(ptr->unk4);
+        if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
+            state->area = func_15144598((struct134 *)state->def.anchor);
         } else {
-            ptr->unk54 = (ptr->unk20 * ptr->unk20) * D_800A8F54;
+            state->area = (state->def.radius * state->def.radius) * 3.14159265f;
         }
     }
-    return effect;
+    return emitter;
 }
 
-typedef struct {
-    u8  unk0;
-    u8  pad1[3];
-    void *unk4;
-    f32 unk8;
-    f32 unkC;
-    u8  pad10[0x15];
-    s8  unk25;
-    s8  unk26;
-    u8  pad27;
-    f32 unk28;
-    f32 unk2C;
-    u8  pad30[0x20];
-    s32 unk50;
-    f32 unk54;
-} Header_151A8CEC;
-
-extern s32 (*D_8008F980[])(void *);
-extern void (*D_8008F970[])(void *, f32 *, f32, u8);
+extern s32 (*D_8008F980[])(Emitter *);
+extern void (*D_8008F970[])(Emitter *, Vec3f *, f32, u8);
 
 s32 func_151464B8(s32);
-void func_151A8F1C(void *, f32 *, f32 *, f32 *);
-void func_151A8F6C(void *, f32 *, f32 *, f32 *);
+s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
+void func_151A8F1C(Emitter *, Vec3f *, f32 *, f32 *);
+void func_151A8F6C(Emitter *, Vec3f *, f32 *, f32 *);
 
-void func_151A8CEC(u8 *arg0) {
-    Header_151A8CEC *ptr;
-    void (*cb)(void *, f32 *, f32 *, f32 *);
-    f32 pos[3];
-    f32 radius;
-    f32 angle;
-    u8 flag;
+/*
+ * Per-frame update: runs the update hook (0 kills the object), then while switched on (and its zone
+ * is visible) accumulates the spawn rate and calls the spawn hook once per whole particle, at a
+ * random point of the area dropped to the ground.
+ */
+void func_151A8CEC(Emitter *emitter) {
+    EmitterState *state;
+    void (*pick)(Emitter *, Vec3f *, f32 *, f32 *);
+    Vec3f pos;
+    f32 bottom;
+    f32 top;
+    u8 noGround;
 
-    ptr = (Header_151A8CEC *)(arg0 + 0x28);
+    state = &emitter->state;
 
-    if (*(s8 *)(arg0 + 0x4D) != -1) {
-        if (D_8008F980[ptr->unk25](arg0) == 0) {
-            *(s16 *)(arg0 + 0xE) = -1;
+    if (state->def.update != -1) {
+        if (D_8008F980[state->def.update](emitter) == 0) {
+            emitter->unkE = -1;
             return;
         }
     }
 
-    if ((ptr->unk0 & 4) && (ptr->unk50 != 0)) {
-        if (func_151464B8(ptr->unk50) != 0) {
+    if ((state->def.flags & EMITTER_ZONED) && (state->zone != 0)) {
+        if (func_151464B8(state->zone) != 0) {
             return;
         }
     }
-    if (!(ptr->unk0 & 1)) {
+    if (!(state->def.flags & EMITTER_ON)) {
         return;
     }
 
-    ptr->unk28 += (ptr->unk8 + func_150ADA68() * ptr->unkC) * D_800BE9A4 * ptr->unk54;
+    state->pending += (state->def.rate + func_150ADA68() * state->def.rateRange) * D_800BE9A4 * state->area;
 
-    if (ptr->unk28 > 1.0f) {
-        if ((ptr->unk0 & 2) && (ptr->unk4 != NULL)) {
-            cb = func_151A8F1C;
+    if (state->pending > 1.0f) {
+        if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
+            pick = func_151A8F1C;
         } else {
-            cb = func_151A8F6C;
+            pick = func_151A8F6C;
         }
         do {
-            cb(arg0, pos, &angle, &radius);
-            if (ptr->unk0 & 8) {
-                pos[1] = radius;
-                flag = 1;
-            } else if (func_15046C80(pos, 0, radius, &ptr->unk2C) != 0) {
-                pos[1] = ptr->unk2C;
+            pick(emitter, &pos, &top, &bottom);
+            if (state->def.flags & EMITTER_NO_PROBE) {
+                pos.y = bottom;
+                noGround = TRUE;
+            } else if (func_15046C80(&pos, 0, bottom, &state->ground) != 0) {
+                pos.y = state->ground.height; /* noGround keeps its previous (at first unset) value */
             } else {
-                pos[1] = radius;
-                flag = 1;
+                pos.y = bottom;
+                noGround = TRUE;
             }
-            if (ptr->unk26 != -1) {
-                D_8008F970[ptr->unk26](arg0, pos, angle, flag);
+            if (state->def.spawn != -1) {
+                D_8008F970[state->def.spawn](emitter, &pos, top, noGround);
             }
-            ptr->unk28 -= 1.0f;
-        } while (ptr->unk28 > 1.0f);
+            state->pending -= 1.0f;
+        } while (state->pending > 1.0f);
     }
 }
 
-extern void func_151432BC(void *, f32 *, f32 *, f32 *, f32 *);
+extern void func_151432BC(LevelObject *, f32 *, f32 *, f32 *, f32 *);
 
-void func_151A8F1C(void *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
-    func_151432BC(*(void **)((u8 *)arg0 + 0x2C), arg1, arg1 + 2, arg2, arg3);
-    arg1[1] = arg2[0];
+/* Picks a random point of the anchor object's area; *top is its height. */
+void func_151A8F1C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
+    func_151432BC(emitter->state.def.anchor, &pos->x, &pos->z, top, bottom);
+    pos->y = *top;
 }
 
 void func_15143874(s16, f32, f32 *, f32 *);
 
-void func_151A8F6C(void *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
-    u8 *state;
+/* Picks a random point within def.radius of def.pos; *top is def.pos.y, *bottom def.bottom. */
+void func_151A8F6C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
+    EmitterDef *def;
 
-    state = (u8 *)arg0 + 0x28;
-    func_15143874((s16)(func_150ADA20() & 0xFF), *(f32 *)(state + 0x20) * func_150ADA68(),
-                  arg1, arg1 + 2);
-    arg1[0] += *(f32 *)(state + 0x10);
-    arg1[2] += *(f32 *)(state + 0x18);
-    arg1[1] = *(f32 *)(state + 0x14);
-    *arg2 = *(f32 *)(state + 0x14);
-    *arg3 = *(f32 *)(state + 0x1C);
+    def = &emitter->state.def;
+    func_15143874((s16)(func_150ADA20() & 0xFF), def->radius * func_150ADA68(), &pos->x, &pos->z);
+    pos->x += def->pos.x;
+    pos->z += def->pos.z;
+    pos->y = def->pos.y;
+    *top = def->pos.y;
+    *bottom = def->bottom;
 }
 
-void func_151A931C(u8 *, s32, u8);
+void func_151A931C(Emitter *, u8 *, u8);
 
-void func_151A9024(u8 *arg0, s32 arg1, u8 arg2) {
-    if (arg0[0x4C] == 1) {
-        func_151A931C(arg0, arg1, arg2);
+/* Message handler: type 1 emitters are switched on and off by messages. */
+void func_151A9024(Emitter *emitter, u8 *msg, u8 msgType) {
+    if (emitter->state.def.type == 1) {
+        func_151A931C(emitter, msg, msgType);
     }
 }
 
-extern void (*D_8008F984[])(void);
-s32 func_151A9060(u8 *arg0)
-{
-  s32 temp;
-  s32 idx;
-  arg0[0x16] |= 0x4;
-  temp = *((s32 *) (arg0 + 0x18));
-  idx = temp & 0xFFFFFFFFu;
-  temp = idx < 0;
-  if (temp || (idx >= 8))
-  {
+extern void (*D_8008F984[])(LevelObject *, s32);
+
+/* Level object setup: marks the object and runs the handler for its kind (unk18, 0 to 7). */
+s32 func_151A9060(LevelObject *obj) {
+    s32 kind;
+
+    obj->flags |= 4;
+    kind = obj->unk18;
+    if (kind < 0 || kind >= 8) {
+        return 1;
+    }
+    if (D_8008F984[kind] != NULL) {
+        D_8008F984[kind](obj, kind);
+    }
     return 1;
-  }
-  if (D_8008F984[idx])
-  {
-    D_8008F984[idx]();
-  }
-  return 1;
 }
 
+/*
+ * Kind 0-5 level object handler: an emitter anchored to obj, with message id `kind`; odd kinds
+ * spawn faster.
+ */
+void func_151A90C0(LevelObject *obj, s32 kind) {
+    EmitterDef def;
+    // matching: the id byte sits 4 bytes below this unused slot, in frame padding no declared
+    // local reaches (a u8 local lands at sp+0x2F or grows the frame)
+    s32 idSlot;
+    f32 odd;
+    Emitter *emitter;
 
-void func_151A90C0(s32 arg0, s32 arg1) {
-    struct {
-        s8 unk0;
-        u8 pad1[3];
-        s32 unk4;
-        f32 unk8;
-        f32 unkC;
-        f32 unk10;
-        f32 unk14;
-        f32 unk18;
-        f32 unk1C;
-        f32 unk20;
-        s8 unk24;
-        s8 unk25;
-        s8 unk26;
-    } sp30;
-    s32 sp28;
-    f32 temp_f0;
-    s32 temp_v0;
-
-    sp30.unk0 = 2;
-    sp30.unk4 = arg0;
-    temp_f0 = (f32)(arg1 & 1);
-    if (temp_f0) {
-        sp30.unk8 = D_800A8F58;
+    def.flags = EMITTER_ANCHORED;
+    def.anchor = obj;
+    odd = kind & 1;
+    if (odd) {
+        def.rate = 1.4e-6f;
     } else {
-        sp30.unk8 = D_800A8F5C;
+        def.rate = 4e-7f;
     }
 
-    if (temp_f0) {
-        sp30.unkC = D_800A8F60;
+    if (odd) {
+        def.rateRange = 8e-7f;
     } else {
-        sp30.unkC = D_800A8F64;
+        def.rateRange = 6e-7f;
     }
 
-    temp_f0 = 0.0f;
-    sp30.unk10 = temp_f0;
-    sp30.unk14 = temp_f0;
-    sp30.unk18 = temp_f0;
-    sp30.unk1C = temp_f0;
-    sp30.unk20 = temp_f0;
-    sp30.unk24 = 1;
-    sp30.unk25 = -1;
-    sp30.unk26 = 0;
-    ((s8 *)&sp28)[-4] = (s8)arg1;
+    def.pos.x = 0.0f;
+    def.pos.y = 0.0f;
+    def.pos.z = 0.0f;
+    def.bottom = 0.0f;
+    def.radius = 0.0f;
+    def.type = 1;
+    def.update = -1;
+    def.spawn = 0;
+    ((u8 *)&idSlot)[-4] = kind;
 
-    temp_v0 = func_151A8B20(&sp30, -1, 1, 0xFF, 0);
-    if (temp_v0 != 0) {
-        memcpy((void *)(temp_v0 + 0x80), ((s8 *)&sp28) - 4, 1);
+    emitter = func_151A8B20(&def, -1, 1, 0xFF, 0);
+    if (emitter != NULL) {
+        memcpy(emitter->data, (u8 *)&idSlot - 4, 1);
     }
 }
 
-struct S6_151A91AC { s16 unk0; s16 unk2; s16 unk4; };
-extern struct S6_151A91AC D_8008F9A4;
+typedef struct {
+    s16 ids[3];
+} SpriteChoices;
 
-struct Loc_151A91AC {
-    s32 unk0;
-    s16 unk4;
-    u8  unk6;
-    u8  unk7;
-    s32 unk8;
-    s32 unkC;
-    u8  unk10;
-    u8  unk11;
-    u8  unk12;
-    u8  unk13;
-    u8  unk14;
-    u8  unk15;
-    u8  unk16;
-    u8  unk17;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-};
+extern SpriteChoices D_8008F9A4;
 
-void func_151A91AC(u8 *arg0, f32 *arg1, s32 arg2, s32 arg3) {
-    struct Loc_151A91AC sp64;
-    f32 fval;
-    struct S6_151A91AC sp58;
-    u32 idx;
-    s32 r3;
-    s32 r2;
+/* Spawn descriptor passed to func_1513C650. */
+typedef struct {
+    /* 0x00 */ s32 flags;
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 unk6;
+    /* 0x07 */ u8 unk7;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 unk11;
+    /* 0x12 */ u8 unk12;
+    /* 0x13 */ u8 unk13;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s32 unk24;
+    /* 0x28 */ s32 unk28;
+} SpriteSpawn;
 
-    sp58 = D_8008F9A4;
-    fval = func_150ADA68() * 50.0f + 50.0f;
-    idx = (u32)func_150ADA20() % 3U;
+/* Spawn hook 0: a sprite of random size (50 to 100) using one of three D_8008F9A4 images, at pos. */
+void func_151A91AC(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
+    SpriteSpawn spawn;
+    f32 size;
+    SpriteChoices choices;
+    u32 pick;
+    s32 rand2;
+    s32 rand1;
 
-    sp64.unk6 = (u8)((s16 *)&sp58)[idx];
-    sp64.unk7 = 0;
-    sp64.unk16 = 0;
-    sp64.unk17 = 7;
-    sp64.unk8 = 0;
-    sp64.unkC = 0;
-    sp64.unk0 = 0x1701;
-    sp64.unk4 = 0x3C;
-    sp64.unk10 = 0xA0;
-    sp64.unk11 = 0xFF;
-    sp64.unk12 = 0;
-    sp64.unk13 = 0;
-    sp64.unk14 = 0;
-    sp64.unk15 = 0xFF;
-    sp64.unk18 = 0x3B0002;
+    choices = D_8008F9A4;
+    size = func_150ADA68() * 50.0f + 50.0f;
+    pick = func_150ADA20() % 3;
 
-    r2 = func_150ADA20();
-    r3 = func_150ADA20();
-    func_1513C650((s32)&sp64, 1, 0, (s32)(arg0 + 0x58), arg1[0], arg1[1], arg1[2],
-                  fval, fval, r2 & 0xFF,
-                  (r3 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
-                  arg0[0xC], arg0[1]);
+    spawn.unk6 = choices.ids[pick];
+    spawn.unk7 = 0;
+    spawn.unk16 = 0;
+    spawn.unk17 = 7;
+    spawn.unk8 = 0;
+    spawn.unkC = 0;
+    spawn.flags = 0x1701;
+    spawn.lifetime = 60;
+    spawn.unk10 = 0xA0;
+    spawn.unk11 = 0xFF;
+    spawn.unk12 = 0;
+    spawn.unk13 = 0;
+    spawn.unk14 = 0;
+    spawn.unk15 = 0xFF;
+    spawn.unk18 = 0x3B0002;
+
+    rand1 = func_150ADA20();
+    rand2 = func_150ADA20();
+    func_1513C650((s32)&spawn, 1, 0, (s32)emitter->state.ground.unk4, pos->x, pos->y, pos->z,
+                  size, size, rand1 & 0xFF,
+                  (rand2 & 1) + (func_150ADA20() & 1), 3, 0xFF, 0,
+                  emitter->unkC, emitter->unk1);
 }
 
-void func_151A931C(u8 *arg0, s32 arg1, u8 arg2) {
-    u8 *ptr;
+/* Type 1 message handler: 0x17 switches the emitter on, 0x18 off, when the message carries its id. */
+void func_151A931C(Emitter *emitter, u8 *msg, u8 msgType) {
+    EmitterState *state;
 
-    if (arg2 == 0x17) {
-        ptr = arg0 + 0x28;
-        if (*(u8 *)arg1 != arg0[0x80]) {
+    if (msgType == 0x17) {
+        state = &emitter->state;
+        // matching: the goto keeps IDO from sharing the 0x18 branch's return
+        if (*msg != emitter->data[0]) {
             goto ret;
         }
-        *ptr |= 1;
+        state->def.flags |= EMITTER_ON;
     ret:
         return;
-    } else if (arg2 == 0x18) {
-        ptr = arg0 + 0x28;
-        if (*(u8 *)arg1 == arg0[0x80]) {
-            *ptr &= ~1;
+    } else if (msgType == 0x18) {
+        state = &emitter->state;
+        if (*msg == emitter->data[0]) {
+            state->def.flags &= ~EMITTER_ON;
         }
     }
 }
 
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    u8  unk8;
-    u8  unk9;
-    u8  unkA;
-    u8  unkB;
-    u8  unkC;
-    u8  padD[3];
-    void *unk10;
-} Def_151A9390;
+    s16 base;
+    s16 range;
+} RangeS16; /* base + rand % (range + 1) */
 
+/* User data of a type 2 emitter: the particles spawn hook 1 (func_151A9634) launches. */
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_151A9390;
+    /* 0x00 */ f32 vec0Base;         /* the two floats passed to func_1514B8E4: base + rand * range */
+    /* 0x04 */ f32 vec1Base;
+    /* 0x08 */ f32 vec0Range;
+    /* 0x0C */ f32 vec1Range;
+    /* 0x10 */ RangeS16 unk10;
+    /* 0x14 */ RangeS16 unk14;       /* goes into the particle's extra data */
+    /* 0x18 */ RangeS16 unk18;
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ f32 unk20Base;        /* goes into the particle's extra data */
+    /* 0x24 */ f32 unk20Range;
+    /* 0x28 */ u8 flags;             /* 1: particle kind 0x71 (else 0x13 or 0x14); 2: clear the 2 flag */
+} ParticleSettings; /* size 0x2C */
 
+/* One of the nine emitter presets of func_151A9390. */
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-} Pos_151A9390;
+    /* 0x00 */ f32 rate;
+    /* 0x04 */ f32 rateRange;
+    /* 0x08 */ u8 unk8;              /* unk8..unkC go to func_1516284C */
+    /* 0x09 */ u8 unk9;
+    /* 0x0A */ u8 unkA;
+    /* 0x0B */ u8 unkB;
+    /* 0x0C */ u8 unkC;
+    /* 0x10 */ ParticleSettings *settings;
+} EmitterPreset;
 
-typedef struct {
-    u8  unk0;
-    u8  pad1[3];
-    void *unk4;
-    f32 unk8;
-    f32 unkC;
-    Vec3f_151A9390 unk10;
-    f32 unk1C;
-    f32 unk20;
-    s8  unk24;
-    s8  unk25;
-    s8  unk26;
-    u8  pad27;
-} Header_151A9390;
-
-extern Def_151A9390 D_8008F9AC[];
+extern EmitterPreset D_8008F9AC[];
 
 void *func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
-void func_151A9390(u8 arg0, u8 arg1, Pos_151A9390 *arg2, Vec3f_151A9390 *arg3,
-                   f32 arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8) {
-    Header_151A9390 hdr;
-    s32 effect;
+/*
+ * Spawns particle emitter preset `preset` (0-8) on obj, or at pos when given. options:
+ * 1 EMITTER_ZONED, 2 EMITTER_NO_PROBE, 4 also call func_1516284C there, 8 and 0x10 set settings
+ * flags 1 and 2. lifetime -1 means untimed.
+ */
+void func_151A9390(u8 options, u8 preset, LevelObject *obj, Vec3f *pos,
+                   f32 bottom, f32 radius, s16 lifetime, u8 arg7, s32 arg8) {
+    EmitterDef def;
+    Emitter *emitter;
 
-    if (arg1 >= 9) {
+    if (preset >= 9) {
         return;
     }
 
-    hdr.unk0 = 1 | ((arg2 != NULL) ? 2 : 0) | ((arg0 & 1) ? 4 : 0) | ((arg0 & 2) ? 8 : 0);
-    hdr.unk4 = arg2;
-    hdr.unk8 = D_8008F9AC[arg1].unk0;
-    hdr.unkC = D_8008F9AC[arg1].unk4;
-    if (arg3 != NULL) {
-        hdr.unk10 = *arg3;
+    def.flags = EMITTER_ON | ((obj != NULL) ? EMITTER_ANCHORED : 0) | ((options & 1) ? EMITTER_ZONED : 0) |
+                ((options & 2) ? EMITTER_NO_PROBE : 0);
+    def.anchor = obj;
+    def.rate = D_8008F9AC[preset].rate;
+    def.rateRange = D_8008F9AC[preset].rateRange;
+    if (pos != NULL) {
+        def.pos = *pos;
     } else {
-        hdr.unk10.x = 0.0f;
-        hdr.unk10.y = 0.0f;
-        hdr.unk10.z = 0.0f;
+        def.pos.x = 0.0f;
+        def.pos.y = 0.0f;
+        def.pos.z = 0.0f;
     }
-    hdr.unk1C = arg4;
-    hdr.unk20 = arg5;
-    hdr.unk24 = 2;
-    hdr.unk25 = -1;
-    hdr.unk26 = 1;
+    def.bottom = bottom;
+    def.radius = radius;
+    def.type = 2;
+    def.update = -1;
+    def.spawn = 1;
 
-    effect = func_151A8B20(&hdr, arg6, 0x2C, arg7, arg8);
-    if (effect != 0) {
-        u8 *ptr;
+    emitter = func_151A8B20(&def, lifetime, sizeof(ParticleSettings), arg7, arg8);
+    if (emitter != NULL) {
+        ParticleSettings *settings;
 
-        ptr = (u8 *)(effect + 0x80);
-        memcpy(ptr, D_8008F9AC[arg1].unk10, 0x2C);
-        if (arg0 & 8) {
-            ptr[0x28] |= 1;
+        settings = (ParticleSettings *)emitter->data;
+        memcpy(settings, D_8008F9AC[preset].settings, sizeof(ParticleSettings));
+        if (options & 8) {
+            settings->flags |= 1;
         }
-        if (arg0 & 0x10) {
-            ptr[0x28] |= 2;
+        if (options & 0x10) {
+            settings->flags |= 2;
         }
     }
 
-    if (arg0 & 4) {
+    if (options & 4) {
         Header spawn;
-        s32 pos[3];
+        s32 spawnPos[3];
 
-        spawn.unk0 = ((arg6 == -1) ? 0 : 1) | 2;
+        spawn.unk0 = ((lifetime == -1) ? 0 : 1) | 2;
         spawn.unk1 = 2;
-        spawn.unk2 = (arg6 == -1) ? 0x12C : arg6;
-        spawn.unk4 = D_8008F9AC[arg1].unkB;
+        spawn.unk2 = (lifetime == -1) ? 300 : lifetime;
+        spawn.unk4 = D_8008F9AC[preset].unkB;
 
-        if (arg3 != NULL) {
-            pos[0] = (s32)arg3->x;
-            pos[1] = (s32)arg3->y;
-            pos[2] = (s32)arg3->z;
+        if (pos != NULL) {
+            spawnPos[0] = pos->x;
+            spawnPos[1] = pos->y;
+            spawnPos[2] = pos->z;
         } else {
-            pos[0] = arg2->unk0;
-            pos[1] = arg2->unk2;
-            pos[2] = arg2->unk4;
+            spawnPos[0] = obj->x;
+            spawnPos[1] = obj->y;
+            spawnPos[2] = obj->z;
         }
 
-        func_1516284C(&spawn, pos, D_8008F9AC[arg1].unk8, D_8008F9AC[arg1].unk9,
-                      D_8008F9AC[arg1].unkA, 0xFF, 0, 0, D_8008F9AC[arg1].unkC,
+        func_1516284C(&spawn, spawnPos, D_8008F9AC[preset].unk8, D_8008F9AC[preset].unk9,
+                      D_8008F9AC[preset].unkA, 0xFF, 0, 0, D_8008F9AC[preset].unkC,
                       0xFF, 1);
     }
 }
 
-typedef struct Emitter_151A9634 {
-    f32 field0;
-    f32 field4;
-    f32 field8;
-    f32 fieldC;
-    s16 field10;
-    s16 field12;
-    s16 field14;
-    s16 field16;
-    s16 field18;
-    s16 field1A;
-    s16 field1C;
-    s16 field1E;
-    f32 field20;
-    f32 field24;
-    u8 flags28;
-} Emitter_151A9634;
+/* Extra data stored at 0x160 of each particle (the particle object is not typed here). */
+typedef struct {
+    f32 unk0;
+    s16 unk4;
+} ParticleExtra;
 
-typedef struct Actor_151A9634 {
-    u8 pad0;
-    u8 field1;
-    u8 pad2[0xA];
-    u8 fieldC;
-    u8 padD[0x73];
-    Emitter_151A9634 emitter;
-} Actor_151A9634;
-
-typedef struct Payload_151A9634 {
-    f32 field0;
-    s16 field4;
-} Payload_151A9634;
-
-s32 func_1514B8E4(s32, f32 *, s16, s32, s32, f32, f32, f32,
+u8 *func_1514B8E4(Vec3f *, f32 *, s16, s32, s32, f32, f32, f32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_151A9634(Actor_151A9634 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    f32 position[2];
+/* Spawn hook 1: launches one particle at pos with values drawn from the emitter's ParticleSettings. */
+void func_151A9634(Emitter *emitter, Vec3f *pos, f32 top, u8 noGround) {
+    f32 vec[2];
     s32 choice;
-    Payload_151A9634 payload;
+    ParticleExtra extra;
     s32 kind;
     s32 flags;
-    s32 result;
-    Emitter_151A9634 *emitter;
-    u32 random2;
-    u32 random1;
+    u8 *particle;
+    ParticleSettings *settings;
+    u32 rand2;
+    u32 rand1;
 
-    emitter = &arg0->emitter;
-    position[0] = func_150ADA68() * emitter->field8 + emitter->field0;
-    position[1] = func_150ADA68() * emitter->fieldC + emitter->field4;
-    payload.field0 = func_150ADA68() * emitter->field24 + emitter->field20;
-    payload.field4 = func_150ADA20() % (u32)(emitter->field16 + 1) + emitter->field14;
-    random1 = func_150ADA20();
-    random2 = func_150ADA20();
-    if (emitter->flags28 & 1) {
+    settings = (ParticleSettings *)emitter->data;
+    vec[0] = func_150ADA68() * settings->vec0Range + settings->vec0Base;
+    vec[1] = func_150ADA68() * settings->vec1Range + settings->vec1Base;
+    extra.unk0 = func_150ADA68() * settings->unk20Range + settings->unk20Base;
+    extra.unk4 = func_150ADA20() % (u32)(settings->unk14.range + 1) + settings->unk14.base;
+    rand1 = func_150ADA20();
+    rand2 = func_150ADA20();
+    if (settings->flags & 1) {
         kind = 0x71;
     } else {
         if (func_150ADA20() & 1) {
@@ -1186,71 +1073,56 @@ void func_151A9634(Actor_151A9634 *arg0, s32 arg1, s32 arg2, s32 arg3) {
         } else {
             choice = 0x14;
         }
-        kind = choice;
+        kind = choice; // matching: the extra copy shapes IDO's register use
     }
-    flags = (emitter->flags28 & 2) ? 0 : 2;
-    result = func_1514B8E4(arg1, position,
-        (s16)(random1 % (u32)(emitter->field12 + 1) + emitter->field10),
-        (random2 % (u32)(emitter->field1A + 1) + emitter->field18) & 0xFF,
+    flags = (settings->flags & 2) ? 0 : 2;
+    particle = func_1514B8E4(pos, vec,
+        (s16)(rand1 % (u32)(settings->unk10.range + 1) + settings->unk10.base),
+        (rand2 % (u32)(settings->unk18.range + 1) + settings->unk18.base) & 0xFF,
         0, 0.0f, 1.0f, 1.0f, 0x21, 0x23, 2, kind, flags,
-        emitter->field1C, emitter->field1E, 8, arg0->fieldC, arg0->field1);
-    if (result != 0) {
-        memcpy((u8 *)result + 0x160, &payload, 8);
+        settings->unk1C, settings->unk1E, 8, emitter->unkC, emitter->unk1);
+    if (particle != NULL) {
+        memcpy(particle + 0x160, &extra, sizeof(extra));
     }
 }
 
-typedef struct {
-    f32 unk0;
-    u8 pad4[0x14];
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 pad1E[2];
-    s32 unk20;
-} Struct151A9834;
+extern void (*D_8008FA60[])(Vec3f *, GroundHit *, s32, u8, s32);
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f151A9834;
+/*
+ * Calls spawn function D_8008FA60[spawnFunc] at `count` random points within radius of center
+ * that have ground above minY (the spawn point is on the ground). hit is the probe result buffer;
+ * NULL uses a local one.
+ */
+void func_151A9834(Vec3f *center, f32 minY, f32 radius, GroundHit *hit,
+                   s32 count, u8 spawnFunc, s32 arg6, u8 arg7, s32 arg8) {
+    GroundHit localHit;
+    Vec3f probe;
+    Vec3f spawnPos;
+    f32 angle;
+    f32 dist;
 
-void func_151A9834(f32 *arg0, f32 arg1, f32 arg2, Struct151A9834 *arg3,
-                   s32 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
-    Struct151A9834 sp8C;
-    Vec3f151A9834 sp80;
-    Vec3f151A9834 sp74;
-    f32 temp_f22;
-    f32 temp_f20;
-    f32 temp_f0;
-
-    if (arg3 == 0) {
-        arg3 = &sp8C;
-        sp8C.unk0 = D_800A8F68;
-        sp8C.unk18 = 0;
-        sp8C.unk1C = 7;
-        sp8C.unk1D = 0;
-        sp8C.unk20 = 0;
+    if (hit == NULL) {
+        hit = &localHit;
+        localHit.height = 99999.9f;
+        localHit.unk18 = 0;
+        localHit.flags = 7;
+        localHit.surfaceType = 0;
+        localHit.unk20 = 0;
     }
 
-    sp80.y = arg0[1];
-    if (arg4 > 0) {
-        temp_f22 = D_800A8F6C;
-        do {
-            temp_f20 = func_150ADA68();
-            temp_f0 = func_150ADA68();
-            func_1514373C((temp_f20 + temp_f20) * temp_f22, temp_f0 * arg2,
-                          &sp80.x, &sp80.z);
-            sp80.x += arg0[0];
-            sp80.z += arg0[2];
+    probe.y = center->y;
+    for (; count > 0; count--) {
+        angle = func_150ADA68();
+        dist = func_150ADA68();
+        func_1514373C((angle + angle) * 3.14159265f, dist * radius, &probe.x, &probe.z);
+        probe.x += center->x;
+        probe.z += center->z;
 
-            if (func_15046C80(&sp80.x, 0, arg1, arg3) != 0) {
-                sp74.x = sp80.x;
-                sp74.y = arg3->unk0;
-                sp74.z = sp80.z;
-                D_8008FA60[arg5](&sp74.x, arg3, arg6, arg7, arg8);
-            }
-            arg4--;
-        } while (arg4 > 0);
+        if (func_15046C80(&probe, 0, minY, hit) != 0) {
+            spawnPos.x = probe.x;
+            spawnPos.y = hit->height;
+            spawnPos.z = probe.z;
+            D_8008FA60[spawnFunc](&spawnPos, hit, arg6, arg7, arg8);
+        }
     }
 }
