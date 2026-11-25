@@ -4,7 +4,7 @@
 #include "variables.h"
 
 extern u8 D_800A1C00[][8];
-extern s32 func_151149AC(u8);
+extern WorldObject *func_151149AC(u8);
 
 typedef struct {
     /* 0x00 */ s16 unk0;
@@ -32,7 +32,7 @@ typedef struct {
     /* 0x06 */ s16 unk6;
     /* 0x08 */ u8  unk8;
     /* 0x09 */ u8  pad9[3];
-    /* 0x0C */ s32 unkC[8];
+    /* 0x0C */ WorldObject *unkC[8]; /* the eight stage parts (StageState in game_124920.c) */
     /* 0x2C */ f32 unk2C;
     /* 0x30 */ f32 unk30;
     /* 0x34 */ f32 unk34;

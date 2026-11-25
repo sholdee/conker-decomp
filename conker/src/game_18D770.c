@@ -4,7 +4,7 @@
 #undef func_1000E770
 #include "variables.h"
 
-void *func_151149AC(u32 id);
+WorldObject *func_151149AC(u32 id);
 
 void func_15187FC0(s32 arg0, s32 *arg1);
 void func_15188010(s32 arg0, f32 *arg1);
@@ -231,20 +231,9 @@ s32 func_15160684(struct225 *effect) {
 
 void func_150A7960(f32 *mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
-/* Payload of func_151606A8: the object the light hangs from. */
-typedef struct {
-    f32 rotX; // passed to func_150A8050
-    f32 rotY;
-    f32 rotZ;
-    u8  padC[0x4];
-    s16 x;
-    s16 y;
-    s16 z;
-} LightMount;
-
 /* Places the light at the point (0, -415, 0) in the mount's rotated and translated frame. */
 s32 func_151606A8(struct225 *effect) {
-    LightMount **mount;
+    WorldObject **mount;
     union {
         MtxF mf;
         s64 align;
@@ -253,7 +242,7 @@ s32 func_151606A8(struct225 *effect) {
     f32 y;
     f32 x;
 
-    mount = (LightMount **)&effect->unk18;
+    mount = (WorldObject **)&effect->unk18;
     func_150A8050(mtx.mf, (*mount)->rotX, (*mount)->rotY, (*mount)->rotZ);
     mtx.mf[3][0] = (*mount)->x;
     mtx.mf[3][1] = (*mount)->y;
@@ -625,7 +614,7 @@ struct225 *func_15161334(struct226 *light, u8 arg1, s32 arg2) {
 struct225 *func_15161408(struct226 *light, u8 arg1, s32 arg2) {
     struct225 *effect;
     Header header;
-    LightMount *mount;
+    WorldObject *mount;
 
     mount = func_151149AC(249);
 
@@ -1199,27 +1188,27 @@ s32 func_15162B28(struct225 *effect) {
     return 1;
 }
 
-/* Cycle callback: sets bit 0 of unk7C on object unk48 and sends event 36. */
+/* Cycle callback: sets bit 0 of work.words[0] on object unk48 and sends event 36. */
 void func_15162EF8(struct239 *effect) {
     s8 message[9];
-    struct240 *object;
+    WorldObject *object;
 
     object = func_151149AC(effect->unk48);
     if (object != NULL) {
-        object->unk7C |= 1;
+        object->work.words[0] |= 1;
     }
     message[0] = effect->unk12 - 21;
     func_151403A8(&message, 36);
 }
 
-/* Cycle callback: clears bit 0 of unk7C on object unk48 and sends event 37. */
+/* Cycle callback: clears bit 0 of work.words[0] on object unk48 and sends event 37. */
 void func_15162F50(struct239 *effect) {
     s8 message[9];
-    struct240 *object;
+    WorldObject *object;
 
     object = func_151149AC(effect->unk48);
     if (object != NULL) {
-        object->unk7C &= ~1;
+        object->work.words[0] &= ~1;
     }
     message[0] = effect->unk12 - 21;
     func_151403A8(&message, 37);
@@ -1490,12 +1479,12 @@ void func_15163A18(struct225 *effect, s32 arg1, u8 eventId) {
     }
 }
 
-/* Creates a pulsing light at object `objectId` that lasts until the object's unk6E is 1 (see func_15163B98). */
+/* Creates a pulsing light at object `objectId` that lasts until the object is inactive (see func_15163B98). */
 struct225 *func_15163A60(u8 objectId, u8 arg1, s32 arg2) {
     struct225 *effect;
     Header header;
     LightPulse pulse;
-    struct240 *object;
+    WorldObject *object;
     Header2 position;
 
     object = func_151149AC(objectId);
@@ -1507,9 +1496,9 @@ struct225 *func_15163A60(u8 objectId, u8 arg1, s32 arg2) {
     pulse.phase = func_150ADA68() * 6.283185482f;
     pulse.speed = D_800A69D4[6];
 
-    position.unk0 = object->unk10;
-    position.unk4 = object->unk12;
-    position.unk8 = object->unk14;
+    position.unk0 = object->x;
+    position.unk4 = object->y;
+    position.unk8 = object->z;
 
     header.unk0 = 2;
     header.unk1 = 17;
@@ -1524,15 +1513,15 @@ struct225 *func_15163A60(u8 objectId, u8 arg1, s32 arg2) {
     return effect;
 }
 
-/* Pulse update that also ends the effect once its object's unk6E is 1. */
+/* Pulse update that also ends the effect once its object is inactive. */
 s32 func_15163B98(struct230 *effect) {
-    struct228 *object;
+    WorldObject *object;
 
     if (func_1516065C(effect) == 0) {
         return 0;
     } else {
         object = effect->unk28;
-        if (object->unk6E == 1) {
+        if (object->inactive == 1) {
             return 0;
         } else {
             return 1;

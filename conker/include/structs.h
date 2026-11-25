@@ -3030,19 +3030,6 @@ typedef struct {
     f32 unk4;
     f32 unk8;
     f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    u8  pad20[0x4E];
-    u8  unk6E;
-} struct228;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
     s16 unk10;
     u8  pad12[0x12];
     u8  unk24;
@@ -3091,7 +3078,7 @@ typedef struct {
 // only used by func_15163B98 ?
 typedef struct {
     u8 pad0[0x28];
-    struct228 *unk28;
+    WorldObject *unk28;
     u8  pad2C[0x14];
     f32 unk40;
 } struct230;
@@ -3187,15 +3174,6 @@ typedef struct {
     u8 pad13[0x35];
     u8 unk48;
 } struct239;
-
-typedef struct {
-    u8  pad0[0x10];
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    u8  pad16[0x66];
-    s32 unk7C;
-} struct240;
 
 typedef struct {
     f32 unk0;

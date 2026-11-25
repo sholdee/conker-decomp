@@ -1935,13 +1935,6 @@ void func_151E6BFC(void) {
     D_8008FDD8 = 0;
 }
 
-struct Struct151149AC {
-    char pad0[0x6E];
-    u8 unk6E;
-    char pad6F[0x11];
-    s32 unk80;
-};
-
 typedef struct {
     u8 pad0[9];
     u8 links[5];
@@ -1967,7 +1960,7 @@ extern Node151E6C1C *D_800D2350;
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
 extern s32 func_15086D48(s32);
 extern void func_1000D96C(s32, s32, s32);
-struct Struct151149AC *func_151149AC(s32);
+WorldObject *func_151149AC(s32);
 extern f32 sinf(f32);
 
 #define UNK2AC_F32 (*(f32 *)&obj->focus.z) // an f32; structs.h declares Camera.unk2AC as s32
@@ -1996,8 +1989,8 @@ void func_151E6C1C(s32 index) {
     s8 path[16];
     u8 *nodeTable;
     Snd151E6C1C *sounds;
-    struct Struct151149AC *r;
-    struct Struct151149AC *r2;
+    WorldObject *r;
+    WorldObject *r2;
     Node151E6C1C *node;
     Node151E6C1C *cur;
     s32 seg;
@@ -2108,11 +2101,11 @@ void func_151E6C1C(s32 index) {
                 if (r != NULL) {
                     if (D_8008FDD4->unkC > 0.0f || D_8008FDD0 < 1.0f) {
                         if (D_8008FF78[D_8008FDD4->unk2C] < (s32)(scale * 100.0f)) {
-                            r->unk80 = 1;
+                            r->work.words[1] = 1;
                         }
                     } else if (D_8008FDD4->unkC < 0.0f) {
                         if (D_8008FF80[D_8008FDD4->unk2C] >= (s32)(scale * 100.0f)) {
-                            r->unk80 = 0;
+                            r->work.words[1] = 0;
                         }
                     }
                 }
@@ -2320,20 +2313,20 @@ void func_151E6C1C(s32 index) {
     obj->unk1A0 = 15.0f;
 
     {
-    struct Struct151149AC *q1;
+    WorldObject *q1;
     r = func_151149AC(0xF8);
     if (r != NULL) {
-        r->unk6E = 1;
+        r->inactive = 1;
     }
     q1 = func_151149AC(0xF6);
     r2 = func_151149AC(0xF7);
     if (q1 != NULL && r2 != NULL) {
         if (D_8008FDD4->unk3E == 0) {
-            q1->unk6E = 0;
-            r2->unk6E = 1;
+            q1->inactive = 0;
+            r2->inactive = 1;
         } else {
-            q1->unk6E = 1;
-            r2->unk6E = 0;
+            q1->inactive = 1;
+            r2->inactive = 0;
         }
     }
     }
@@ -2342,7 +2335,7 @@ void func_151E6C1C(s32 index) {
 /* Sets unk80 = 2 on both objects of the current stop once the transition is far enough along. */
 void func_151E7DC0(void) {
     struct Struct151E5034 *state;
-    struct Struct151149AC *r;
+    WorldObject *r;
     s32 i;
     s32 objId;
 
@@ -2359,7 +2352,7 @@ void func_151E7DC0(void) {
         }
         r = func_151149AC(objId);
         if (r != NULL) {
-            r->unk80 = 2;
+            r->work.words[1] = 2;
         }
     }
 }
