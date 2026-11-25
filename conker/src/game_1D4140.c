@@ -1,312 +1,87 @@
 #include <ultra64.h>
-#define func_150ADA20 func_150ADA20_u8_decl_in_functions_h
+/* func_150ADA20 returns a full 32-bit value; the shared header narrows it to u8 */
+#define func_150ADA20 func_150ADA20_u8
 #include "functions.h"
 #undef func_150ADA20
 u32 func_150ADA20(void);
 #include "variables.h"
 
-extern f32 D_800A8DB0;
 
-extern void func_151A6F00(void *, s32, u8, s32);
-extern void func_151D5334(void *, f32, f32, f32, s32, u8, s32);
-extern void func_151D3FF4(void *, u8, s32);
-extern void func_151D5514(void *, u8, s32);
-extern void func_151541B8(void *, f32, s32, f32, f32, u8, s32);
-
-typedef struct { s16 x; s16 y2; s16 z; s16 r6; s16 h8; s16 rA; u8 pad[4]; f32 ang; u8 b14; u8 b15; } F5660Src;
+/* Debris emitter settings read by func_151A6F00 (same layout as in game_1D43B0.c). */
 typedef struct {
-    F5660Src *src; f32 f4; f32 f8; f32 fC; f32 f10; f32 f14; f32 f18; f32 f1c; f32 f20;
-    s16 s24; s16 s26; f32 f28; f32 f2c; f32 f30; f32 f34; f32 f38; f32 f3c;
-    u8 b40; u8 b41; u8 b42; u8 pad43; u8 pad44[4]; f32 f48; u8 pad4c[0x20]; s32 h6c;
-} F5660Obj;
-typedef struct { f32 x, y, z, f8c, fcc, fd0, fd4, fd8; s16 sdc, sde, se0; u8 be2, be3, be4, be5; s16 se6; u8 be8, be9, bea, beb; s32 sec; u8 bf0; f32 ff4, ff8, ffc, f100; } F5660P;
-extern s32 func_151464B8(s32);
-extern s32 func_15046C80(f32 *, s32, f32, f32 *);
-extern void func_15149550(void *, s32, s32, s32, s32, s32);
-void func_151A5660(u8 *arg0);
+    /* 0x00 */ s16 count;
+    /* 0x04 */ vertex pos;
+    /* 0x10 */ s16 lifetime;
+    /* 0x14 */ f32 radius;
+    /* 0x18 */ s16 yawBase;
+    /* 0x1A */ s16 yawRange;
+    /* 0x1C */ s16 pitchBase;
+    /* 0x1E */ s16 pitchRange;
+    /* 0x20 */ f32 speedBase;
+    /* 0x24 */ f32 speedRange;
+    /* 0x28 */ f32 velYBase;
+    /* 0x2C */ f32 velYRange;
+    /* 0x30 */ vertex dir;
+    /* 0x3C */ f32 sizeBase;
+    /* 0x40 */ f32 sizeRange;
+    /* 0x44 */ f32 gravityBase;
+    /* 0x48 */ f32 gravityRange;
+    /* 0x4C */ f32 spinBase;
+    /* 0x50 */ f32 spinRange;
+    /* 0x54 */ u8 landPuffs;
+    /* 0x55 */ u8 landPuffFlag;
+    /* 0x56 */ s16 landPuffLifeBase;
+    /* 0x58 */ s16 landPuffLifeRange;
+} DebrisEmitter;
 
-void func_151A5D2C(u16 arg0);
-void func_151A5CAC(struct260 *arg0);
-void func_151A5CEC(struct260 *arg0);
-void func_151A5D2C(u16 arg0);
+extern void func_151A6F00(DebrisEmitter *, s32, u8, s32);
+extern void func_151D5334(vertex *, f32, f32, f32, s32, u8, s32);
+extern void func_151D3FF4(vertex *, u8, s32);
+extern void func_151D5514(vertex *, u8, s32);
+extern void func_151541B8(vertex *, f32, f32, f32, f32, u8, s32);
 
-typedef struct {
-    s32 field_0x00;
-    s16 field_0x04;
-    u8 field_0x06;
-    u8 field_0x07;
-    s32 field_0x08;
-    s32 field_0x0C;
-    u8 field_0x10;
-    u8 field_0x11;
-    u8 field_0x12;
-    u8 field_0x13;
-    u8 field_0x14;
-    u8 field_0x15;
-    u8 field_0x16;
-    u8 field_0x17;
-    s32 field_0x18;
-    s32 field_0x1C;
-    u8 field_0x20;
-    u8 pad_0x21;
-    s16 field_0x22;
-    s16 field_0x24;
-    u8 pad_0x26[0x6];
-} SparkSpawnParams;
-struct210 *func_151A5D58(f32 arg0, u8 arg1, s32 arg2, f32 *arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, s32 arg8);
+/* Spawns a debris burst plus the follow-up effects at the object's position. */
+void func_151A6C90(struct127 *obj, u8 arg1, s32 arg2) {
+    vertex pos;
+    DebrisEmitter emitter;
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-} Obj151A6068;
+    pos.x = obj->x_position;
+    pos.y = obj->y_position;
+    pos.z = obj->z_position;
 
-void func_151A6068(Obj151A6068 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
+    if (obj != NULL) {
+        emitter.count = (func_150ADA20() & 3) + 6;
+        emitter.pos = pos;
+        emitter.radius = 60.0f;
+        emitter.speedBase = 0; // matching: an int 0 gets its own mtc1 zero; 0.0f would share the 0.0f register
+        emitter.dir.x = 0.0f;
+        emitter.lifetime = 80;
+        emitter.yawBase = 0;
+        emitter.yawRange = 255;
+        emitter.pitchBase = -63;
+        emitter.speedRange = 35.0f;
+        emitter.velYBase = 10.0f;
+        emitter.velYRange = 40.0f;
+        emitter.sizeBase = 0.2f;
+        emitter.sizeRange = 0.5f;
+        emitter.spinBase = -2.0f;
+        emitter.spinRange = 4.0f;
+        emitter.pitchRange = 80;
+        emitter.landPuffs = 0;
+        emitter.landPuffFlag = 0;
+        emitter.landPuffLifeBase = 50;
+        emitter.landPuffLifeRange = 25;
+        emitter.gravityBase = -1.0f;
+        emitter.gravityRange = -1.0f;
+        emitter.dir.y = 0.0f;
+        emitter.dir.z = 0.0f;
 
-typedef struct Game1D3420Message {
-    s32 count;
-    u8 *ids;
-    s32 value;
-} Game1D3420Message;
-
-typedef struct Game1D3420Target {
-    u8 *object;
-    u8 id;
-    u8 pad05[3];
-    s32 argument;
-    u8 flags;
-    u8 pad0D[3];
-    s32 value;
-} Game1D3420Target;
-void func_151A5F70(u8 *arg0, void *arg1, u8 arg2);
-
-typedef struct {
-    Obj151A6068 *unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    f32 unk18;
-} Ext151A6068;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    u8 unk4C;
-    u8 pad4D[0xB];
-} Spawn151A6068;
-
-extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
-void func_151A6068(Obj151A6068 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 unk30;
-    struct17 unk3C;
-    struct17 unk48;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    s8 unk60;
-    s8 unk61;
-    s8 unk62;
-    s8 unk63;
-    s8 unk64;
-    s8 unk65;
-    u8 pad66[2];
-} Spawn151A6600;
-
-typedef struct {
-    s16 *unk0;
-    f32 unk4;
-    f32 unk8;
-    u8 padC[8];
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 pad17;
-    f32 unk18;
-} Sub151A6600;
-
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x27];
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    u8 pad40[0x20];
-    s32 unk60;
-    u8 pad64[0xAC];
-    Sub151A6600 unk110;
-    u8 pad12C[0x127 - 0x12C + 0x10];
-} Obj151A6600;
-
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-extern void func_15143794(s16, s16, f32, struct17 *);
-extern void func_15143874(s16, f32, f32 *, f32 *);
-extern f32 func_15144528(f32, f32, f32);
-extern s32 func_151464B8(s32);
-s32 func_151A6600(Obj151A6600 *arg0);
-
-extern void func_1000FD38(void *, void *, s32);
-extern s32 func_1000EF40();
-void func_151A6AB8(struct210 *arg0);
-
-extern void func_151A6AB8(struct210 *);
-void func_151A6B10(struct210 *arg0);
-void func_151A6B3C(struct210 *arg0);
-
-struct Func151A6BD8Obj;
-extern struct Func151A6BD8Obj *func_151A6BD8(s32 arg0);
-
-typedef struct Obj151A6B68 {
-    char pad0[0x7A];
-    /* 0x7A */ u16 unk7A;
-} Obj151A6B68;
-
-extern void func_1505D024(Obj151A6B68 *, s32, u16, s32);
-void func_151A6B68(Obj151A6B68 *arg0, s32 arg1);
-
-extern s32 D_800A5770;
-extern s32 D_800DCE50[][0x68];
-typedef struct Func151A6BD8Obj
-{
-  u8 pad0[8];
-  struct Func151A6BD8Obj *next;
-  u8 padC[7];
-  u8 type;
-  u8 pad14[0x14];
-  s32 owner;
-} Func151A6BD8Obj;
-Func151A6BD8Obj *func_151A6BD8(s32 arg0);
-
-
-void func_151A6C90(void *arg0, u8 arg1, s32 arg2) {
-    struct17 sp9C;
-    struct {
-        s16 unk00;
-        u8 pad02[2];
-        struct17 unk04;
-        s16 unk10;
-        u8 pad12[2];
-        f32 unk14;
-        s16 unk18;
-        s16 unk1A;
-        s16 unk1C;
-        s16 unk1E;
-        f32 unk20;
-        f32 unk24;
-        f32 unk28;
-        f32 unk2C;
-        f32 unk30;
-        f32 unk34;
-        f32 unk38;
-        f32 unk3C;
-        f32 unk40;
-        f32 unk44;
-        f32 unk48;
-        f32 unk4C;
-        f32 unk50;
-        u8 unk54;
-        u8 unk55;
-        s16 unk56;
-        s16 unk58;
-    } sp40;
-
-    sp9C.unk0 = *(f32 *)((u8 *)arg0 + 0x14);
-    sp9C.unk4 = *(f32 *)((u8 *)arg0 + 0x18);
-    sp9C.unk8 = *(f32 *)((u8 *)arg0 + 0x1C);
-
-    if (arg0 != 0) {
-        sp40.unk00 = (func_150ADA20() & 3) + 6;
-        sp40.unk04 = sp9C;
-        sp40.unk14 = 60.0f;
-        sp40.unk20 = (f32)(s16)0;
-        sp40.unk30 = 0.0f;
-        sp40.unk10 = 0x50;
-        sp40.unk18 = 0;
-        sp40.unk1A = 0xFF;
-        sp40.unk1C = -0x3F;
-        sp40.unk24 = 35.0f;
-        sp40.unk28 = 10.0f;
-        sp40.unk2C = 40.0f;
-        sp40.unk3C = D_800A8DB0;
-        sp40.unk40 = 0.5f;
-        sp40.unk4C = -2.0f;
-        sp40.unk50 = 4.0f;
-        sp40.unk1E = 0x50;
-        sp40.unk54 = 0;
-        sp40.unk55 = 0;
-        sp40.unk56 = 0x32;
-        sp40.unk58 = 0x19;
-        sp40.unk44 = -1.0f;
-        sp40.unk48 = -1.0f;
-        sp40.unk34 = 0.0f;
-        sp40.unk38 = 0.0f;
-
-        func_151A6F00(&sp40, 0, arg1, arg2);
-        func_151D5334(&sp9C, 506.0f, 1013.0f, 0.00098716688808053732f, 5, arg1, arg2);
-        func_151D3FF4(&sp9C, arg1, arg2);
-        func_151D5514(&sp9C, arg1, arg2);
-
-        *(f32 *)((u8 *)&sp40 - 8) = func_150ADA68();
-        func_151541B8(&sp9C, (*(f32 *)((u8 *)&sp40 - 8) * 4.0f) + 12.0f, 0x3FD20C49,
-                      (func_150ADA20() % 0x38U) + 0xC8, 0.0f, arg1, arg2);
-        func_151D5404(&sp9C, 1502.0f, 3000.0f, 0.00033333332976326346f, 0xC, 0xF, 0xFF, 0);
+        func_151A6F00(&emitter, 0, arg1, arg2);
+        func_151D5334(&pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
+        func_151D3FF4(&pos, arg1, arg2);
+        func_151D5514(&pos, arg1, arg2);
+        func_151541B8(&pos, func_150ADA68() * 4.0f + 12.0f, 1.6409999f,
+                      func_150ADA20() % 56U + 200, 0.0f, arg1, arg2);
+        func_151D5404((struct17 *)&pos, 1502.0f, 3000.0f, 0.00033333333f, 12, 15, 255, 0);
     }
 }
