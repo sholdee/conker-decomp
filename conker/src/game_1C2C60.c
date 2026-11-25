@@ -548,13 +548,13 @@ typedef struct CharacterFlamethrowerJetTemplate {
     /* 0x41 */ s8 unk41;
     /* 0x42 */ s8 unk42;
     /* 0x44 */ u16 unk44;
-    /* 0x46 */ u8 unk46;
+    /* 0x46 */ u8 childPreset;
     /* 0x47 */ u8 childLife;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ u8 unk4C;
-    /* 0x50 */ f32 sparkRate;
-    /* 0x54 */ u8 unk54;
-    /* 0x58 */ f32 smokeRate;
+    /* 0x48 */ f32 childRate;
+    /* 0x4C */ u8 scatterPreset;
+    /* 0x50 */ f32 scatterRate;
+    /* 0x54 */ u8 spritePreset;
+    /* 0x58 */ f32 spriteRate;
     /* 0x5C */ u8 headFadeCount;
     /* 0x5D */ u8 headFadeStep;
     /* 0x5E */ u8 tailFadeCount;
@@ -564,7 +564,7 @@ typedef struct CharacterFlamethrowerJetTemplate {
 /* State block (0x90 bytes) of a jet effect: emits particles between two bone-relative points. */
 typedef struct CharacterFlamethrowerJet {
     /* 0x00 */ EffectOwner *owner;
-    /* 0x04 */ u8 unk4;
+    /* 0x04 */ u8 ownerId; /* owner->unk3B */
     /* 0x05 */ u8 bone;
     /* 0x06 */ u8 flags;
     /* 0x07 */ s8 speedFn; /* D_8008F870 index, -1 = none */
@@ -593,16 +593,16 @@ typedef struct CharacterFlamethrowerJet {
     /* 0x65 */ s8 unk65;     /* D_8008F898 index */
     /* 0x66 */ s16 unk66;
     /* 0x68 */ s8 unk68;     /* D_8008F89C index */
-    /* 0x69 */ u8 unk69;
+    /* 0x69 */ u8 childPreset; /* D_800A8710 index */
     /* 0x6A */ u8 childLife; /* points whose life drops below this spawn a child (func_15198110) */
-    /* 0x6C */ f32 unk6C;
-    /* 0x70 */ f32 unk70;
-    /* 0x74 */ u8 unk74;
-    /* 0x78 */ f32 sparkRate;
-    /* 0x7C */ f32 sparkAccum;
-    /* 0x80 */ u8 unk80;
-    /* 0x84 */ f32 smokeRate;
-    /* 0x88 */ f32 smokeAccum;
+    /* 0x6C */ f32 childRate;
+    /* 0x70 */ f32 childAccum;
+    /* 0x74 */ u8 scatterPreset; /* D_800A8728 index (func_15198D88) */
+    /* 0x78 */ f32 scatterRate;
+    /* 0x7C */ f32 scatterAccum;
+    /* 0x80 */ u8 spritePreset; /* D_800A8770 index (func_151990AC) */
+    /* 0x84 */ f32 spriteRate;
+    /* 0x88 */ f32 spriteAccum;
     /* 0x8C */ u8 headFadeCount;
     /* 0x8D */ u8 headFadeStep;
     /* 0x8E */ u8 tailFadeCount;
@@ -666,13 +666,13 @@ CharacterFlamethrowerActor *func_15196438(EffectOwner *owner, s32 preset, u8 arg
     }
     entry = &D_800A87A0[preset];
     jet.owner = owner;
-    jet.unk4 = owner->unk3B;
+    jet.ownerId = owner->unk3B;
     jet.flags = 2;
     jet.texS = 0;
     jet.emitAccum = 0.0f;
-    jet.unk70 = 0.0f;
-    jet.sparkAccum = 0.0f;
-    jet.smokeAccum = 0.0f;
+    jet.childAccum = 0.0f;
+    jet.scatterAccum = 0.0f;
+    jet.spriteAccum = 0.0f;
     jet.initFn = entry->initFn;
     jet.updateFn = entry->updateFn;
     jet.destroyFn = entry->destroyFn;
@@ -690,18 +690,18 @@ CharacterFlamethrowerActor *func_15196438(EffectOwner *owner, s32 preset, u8 arg
     jet.holdTime = entry->holdTime;
     spawn.unkE = entry->unk44;
     jet.childLife = entry->childLife;
-    jet.unk74 = entry->unk4C;
-    jet.unk80 = entry->unk54;
+    jet.scatterPreset = entry->scatterPreset;
+    jet.spritePreset = entry->spritePreset;
     jet.unk63 = entry->unk3F;
     jet.sizeRate = entry->sizeRate;
     jet.size = entry->size;
-    jet.unk6C = entry->unk48;
-    jet.sparkRate = entry->sparkRate;
-    jet.smokeRate = entry->smokeRate;
+    jet.childRate = entry->childRate;
+    jet.scatterRate = entry->scatterRate;
+    jet.spriteRate = entry->spriteRate;
     jet.unk64 = entry->unk40;
     jet.unk65 = entry->unk41;
     jet.unk68 = entry->unk42;
-    jet.unk69 = entry->unk46;
+    jet.childPreset = entry->childPreset;
     jet.headFadeCount = entry->headFadeCount;
     jet.headFadeStep = entry->headFadeStep;
     jet.tailFadeCount = entry->tailFadeCount;
@@ -966,12 +966,12 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
         } while (0);
         t = fq;
         do {
-            jet->sparkAccum += jet->sparkRate;
-            if (jet->sparkAccum > 1.0f) {
+            jet->scatterAccum += jet->scatterRate;
+            if (jet->scatterAccum > 1.0f) {
                 func_15198D88(actor, &end);
             }
-            jet->smokeAccum += jet->smokeRate;
-            if (jet->smokeAccum > 1.0f) {
+            jet->spriteAccum += jet->spriteRate;
+            if (jet->spriteAccum > 1.0f) {
                 func_151990AC(actor, &end);
             }
             points[actor->head].spawnedChild = 0;
@@ -1024,15 +1024,9 @@ s32 func_15196B4C(CharacterFlamethrowerActor *actor, s32 arg1) {
     return 1;
 }
 
-typedef struct Vec3f_15197C10 {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_15197C10;
-
 typedef struct CharacterFlamethrowerBeamCamera {
     u8 unknown0[0x2F8];
-    Vec3f_15197C10 position;
+    Vec3f position;
     u8 unknown304[0x69C];
 } CharacterFlamethrowerBeamCamera;
 
@@ -1286,7 +1280,32 @@ void func_15197A7C(EffectOwner *owner) {
     }
 }
 
-/* A particle of the shared particle system (func_1513D2F0); only the fields these callbacks use. */
+/* User data of the line particles a jet spawns (func_15198110), at SceneParticle 0x110. */
+typedef struct JetChildData {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ s16 unk2C;
+    /* 0x30 */ Vec3f velA;
+    /* 0x3C */ Vec3f velB;
+    /* 0x48 */ f32 gravity;
+    /* 0x4C */ f32 dragA;
+    /* 0x50 */ f32 dragB;
+    /* 0x54 */ f32 shrinkRate;
+    /* 0x58 */ s16 fadeStart;
+    /* 0x5A */ s16 alphaPerLife;
+} JetChildData;
+
+/* A particle of the shared particle system (func_1513D2F0/func_1513D524); only the fields used here. */
 typedef struct SceneParticle {
     /* 0x000 */ char pad0[0x1C];
     /* 0x01C */ s16 life;
@@ -1297,31 +1316,24 @@ typedef struct SceneParticle {
     /* 0x040 */ Vec3f posB;
     /* 0x04C */ char pad4C[0x10];
     /* 0x05C */ u8 alpha;
-    /* 0x05D */ char pad5D[0x140 - 0x5D];
-    /* 0x140 */ Vec3f velA;
-    /* 0x14C */ Vec3f velB;
-    /* 0x158 */ f32 gravity;
-    /* 0x15C */ f32 dragA;
-    /* 0x160 */ f32 dragB;
-    /* 0x164 */ f32 shrinkRate;
-    /* 0x168 */ s16 fadeStart;
-    /* 0x16A */ s16 alphaPerLife;
+    /* 0x05D */ char pad5D[0x110 - 0x5D];
+    /* 0x110 */ JetChildData data;
 } SceneParticle;
 
 /* Particle callback: applies drag and gravity to both end points' velocities, then moves them. */
 s32 func_15197AB4(SceneParticle *p) {
-    p->velA.x *= p->dragA;
-    p->velA.y += p->gravity * D_800BE9A4;
-    p->velA.z *= p->dragA;
-    p->velB.x *= p->dragB;
-    p->velB.y += p->gravity * D_800BE9A4;
-    p->velB.z *= p->dragB;
-    p->posA.x += p->velA.x * D_800BE9A4;
-    p->posA.y += p->velA.y * D_800BE9A4;
-    p->posA.z += p->velA.z * D_800BE9A4;
-    p->posB.x += p->velB.x * D_800BE9A4;
-    p->posB.y += p->velB.y * D_800BE9A4;
-    p->posB.z += p->velB.z * D_800BE9A4;
+    p->data.velA.x *= p->data.dragA;
+    p->data.velA.y += p->data.gravity * D_800BE9A4;
+    p->data.velA.z *= p->data.dragA;
+    p->data.velB.x *= p->data.dragB;
+    p->data.velB.y += p->data.gravity * D_800BE9A4;
+    p->data.velB.z *= p->data.dragB;
+    p->posA.x += p->data.velA.x * D_800BE9A4;
+    p->posA.y += p->data.velA.y * D_800BE9A4;
+    p->posA.z += p->data.velA.z * D_800BE9A4;
+    p->posB.x += p->data.velB.x * D_800BE9A4;
+    p->posB.y += p->data.velB.y * D_800BE9A4;
+    p->posB.z += p->data.velB.z * D_800BE9A4;
     return 1;
 }
 
@@ -1330,10 +1342,10 @@ s32 func_15197BBC(SceneParticle *p) {
     s16 life;
 
     life = p->life;
-    p->unk30 = p->unk30 - (p->unk30 * p->shrinkRate);
-    p->unk2C = p->unk2C - (p->unk2C * p->shrinkRate);
-    if (life < p->fadeStart) {
-        p->alpha = life * p->alphaPerLife;
+    p->unk30 = p->unk30 - (p->unk30 * p->data.shrinkRate);
+    p->unk2C = p->unk2C - (p->unk2C * p->data.shrinkRate);
+    if (life < p->data.fadeStart) {
+        p->alpha = life * p->data.alphaPerLife;
     }
     return 1;
 }
@@ -1347,52 +1359,52 @@ typedef struct CharacterFlamethrowerBeam {
     u8 unknown0[0x2C];
     f32 width;
     f32 progress;
-    Vec3f_15197C10 start;
-    Vec3f_15197C10 end;
+    Vec3f start;
+    Vec3f end;
     u8 unknown4C[0x74];
     u8 vertexTemplate[0x40];
     u8 *buffers[1];
 } CharacterFlamethrowerBeam;
 
 
-void *func_15197C10(CharacterFlamethrowerBeam *arg0, s16 arg1) {
+/* Builds the beam quad (4 vertices) from start towards end, `progress` of the way, facing the camera. */
+void *func_15197C10(CharacterFlamethrowerBeam *beam, s16 view) {
     CharacterFlamethrowerBeamVertex *vertices;
     void *result;
     f32 progress;
-    Vec3f_15197C10 tip;
+    Vec3f tip;
     f32 dx, dy, dz;
     f32 vx, vy, vz;
     f32 nx, ny, nz;
     f32 lengthSquared;
     u8 fresh;
-    Vec3f_15197C10 *eye;
+    Vec3f *eye;
     f32 scale;
 
-    func_151D5D60(arg0->buffers, arg1, 0x40, (void **)&vertices, &fresh);
-    arg1; /* no-op: shifts uopt state so stores via vertices[1] reload it (file-context dependent) */
+    func_151D5D60(beam->buffers, view, 0x40, (void **)&vertices, &fresh);
     result = vertices;
     if (vertices != NULL) {
         if (fresh != 0) {
-            memcpy(arg0->buffers[arg1], arg0->vertexTemplate, 0x40);
-            memcpy(arg0->buffers[arg1] + 0x40, arg0->vertexTemplate, 0x40);
+            memcpy(beam->buffers[view], beam->vertexTemplate, 0x40);
+            memcpy(beam->buffers[view] + 0x40, beam->vertexTemplate, 0x40);
         }
     } else {
         return NULL;
     }
-    progress = arg0->progress;
-    dx = arg0->end.x - arg0->start.x;
-    dy = arg0->end.y - arg0->start.y;
-    dz = arg0->end.z - arg0->start.z;
-    tip.x = arg0->start.x + dx * progress;
-    tip.y = arg0->start.y + dy * progress;
-    tip.z = arg0->start.z + dz * progress;
-    eye = &D_800DBFF0[arg1].position;
-    dx = tip.x - arg0->start.x;
-    dy = tip.y - arg0->start.y;
-    dz = tip.z - arg0->start.z;
-    vx = arg0->start.x - eye->x;
-    vy = arg0->start.y - eye->y;
-    vz = arg0->start.z - eye->z;
+    progress = beam->progress;
+    dx = beam->end.x - beam->start.x;
+    dy = beam->end.y - beam->start.y;
+    dz = beam->end.z - beam->start.z;
+    tip.x = beam->start.x + dx * progress;
+    tip.y = beam->start.y + dy * progress;
+    tip.z = beam->start.z + dz * progress;
+    eye = &D_800DBFF0[view].position;
+    dx = tip.x - beam->start.x;
+    dy = tip.y - beam->start.y;
+    dz = tip.z - beam->start.z;
+    vx = beam->start.x - eye->x;
+    vy = beam->start.y - eye->y;
+    vz = beam->start.z - eye->z;
     nx = dy * vz - vy * dz;
     ny = dz * vx - vz * dx;
     nz = dx * vy - vx * dy;
@@ -1402,19 +1414,19 @@ void *func_15197C10(CharacterFlamethrowerBeam *arg0, s16 arg1) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = arg0->width / sqrtf(lengthSquared);
+        scale = beam->width / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
     }
-    vertices->x = arg0->start.x + nx;
-    vertices->y = arg0->start.y + ny;
-    vertices->z = arg0->start.z + nz;
+    vertices->x = beam->start.x + nx;
+    vertices->y = beam->start.y + ny;
+    vertices->z = beam->start.z + nz;
     vertices->flag = 0;
     vertices++;
-    vertices->x = arg0->start.x - nx;
-    vertices->y = arg0->start.y - ny;
-    vertices->z = arg0->start.z - nz;
+    vertices->x = beam->start.x - nx;
+    vertices->y = beam->start.y - ny;
+    vertices->z = beam->start.z - nz;
     vertices->flag = 0;
     vertices++;
     dx = -dx;
@@ -1432,7 +1444,7 @@ void *func_15197C10(CharacterFlamethrowerBeam *arg0, s16 arg1) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = arg0->width / sqrtf(lengthSquared);
+        scale = beam->width / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;
@@ -1449,85 +1461,51 @@ void *func_15197C10(CharacterFlamethrowerBeam *arg0, s16 arg1) {
     return result;
 }
 
-typedef struct {
-    s32 unk0;
-    u8 unk4;
-} SubA_15198054;
-
-typedef struct {
-    s32 unk0;
-    union {
-        u8 b4;
-        s32 w4;
+/* Payload of the messages sent to effects through func_15147D64. */
+typedef struct EffectMessage {
+    /* 0x0 */ EffectOwner *owner;
+    /* 0x4 */ union {
+        u8 id;              /* messages 0, 2, 8 and 0x26: owner's unk3B */
+        EffectOwner *other; /* message 0x2D: owner and other swap */
     } u4;
-    u8 unk8;
-    u8 unk9;
-} ArgB_15198054;
+    /* 0x8 */ u8 ownerId; /* message 0x2D */
+    /* 0x9 */ u8 otherId; /* message 0x2D */
+} EffectMessage;
 
 void func_151993B4();
 
-void func_15198054(void *arg0, s32 arg1, u8 arg2) {
-    SubA_15198054 *temp_v1 = *(SubA_15198054 **)((u8 *)arg0 + 0x98);
-    ArgB_15198054 *b = (ArgB_15198054 *)arg1;
+/* Message handler: dies when its owner is killed (0, 2, 8); follows an owner swap (0x2D). */
+void func_15198054(CharacterFlamethrowerActor *actor, EffectMessage *msg, u8 kind) {
+    EffectOwnerRef *ref = actor->state;
 
-    if (arg2 == 0 || arg2 == 2 || arg2 == 8) {
-        if ((b->unk0 == temp_v1->unk0) || (b->u4.b4 == temp_v1->unk4)) {
-            func_151993B4(arg0);
+    if (kind == 0 || kind == 2 || kind == 8) {
+        if (msg->owner == ref->owner || msg->u4.id == ref->ownerId) {
+            func_151993B4(actor);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v1->unk0 == b->unk0) {
-            temp_v1->unk0 = b->u4.w4;
-            temp_v1->unk4 = b->unk9;
-        } else if (temp_v1->unk0 == b->u4.w4) {
-            temp_v1->unk0 = b->unk0;
-            temp_v1->unk4 = b->unk8;
+    } else if (kind == 0x2D) {
+        if (ref->owner == msg->owner) {
+            ref->owner = msg->u4.other;
+            ref->ownerId = msg->otherId;
+        } else if (ref->owner == msg->u4.other) {
+            ref->owner = msg->owner;
+            ref->ownerId = msg->ownerId;
         }
     }
 }
 
-typedef struct {
-    /* 0x00 */ Vec15196748 pos;
-    /* 0x0C */ Vec15196748 vel;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s8 unk1E;
-    /* 0x1F */ u8 unk1F;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21;
-    /* 0x22 */ u8 pad22[0x2];
-} Particle15198110;
+/* Preset in D_800A8710 for the child particles a jet point spawns (func_15198110). */
+typedef struct JetChildPreset {
+    /* 0x0 */ f32 sizeScale;
+    /* 0x4 */ f32 unk4;
+    /* 0x8 */ s16 lifeMin;
+    /* 0xA */ s16 lifeRange;
+} JetChildPreset;
 
-typedef struct {
-    /* 0x00 */ u8 pad0[0x40];
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ u8 pad44[0x69 - 0x44];
-    /* 0x69 */ u8 unk69;
-    /* 0x6A */ u8 pad6A[0x6C - 0x6A];
-    /* 0x6C */ f32 unk6C;
-    /* 0x70 */ f32 unk70;
-} Desc15198110;
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x25];
-    /* 0x25 */ u8 unk25;
-    /* 0x26 */ u8 pad26[0x2E - 0x26];
-    /* 0x2E */ s8 unk2E;
-    /* 0x2F */ u8 pad2F[0x94 - 0x2F];
-    /* 0x94 */ Particle15198110 *unk94;
-    /* 0x98 */ Desc15198110 *unk98;
-} Emitter15198110;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    s16 unk8;
-    s16 unkA;
-} Entry15198110;
-
-typedef struct {
-    /* 0x00 */ u8 unk0;
+/* Spawn description for func_1513D524. */
+typedef struct SceneParticleSpawn {
+    /* 0x00 */ u8 texture;
     /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
+    /* 0x04 */ s16 life;
     /* 0x08 */ s32 unk8;
     /* 0x0C */ s32 unkC;
     /* 0x10 */ u8 unk10;
@@ -1536,55 +1514,35 @@ typedef struct {
     /* 0x13 */ u8 unk13;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
-    /* 0x1C */ Vec15196748 unk1C;
-    /* 0x28 */ Vec15196748 unk28;
+    /* 0x1C */ Vec3f posA;
+    /* 0x28 */ Vec3f posB;
     /* 0x34 */ f32 unk34;
     /* 0x38 */ f32 unk38;
     /* 0x3C */ f32 unk3C;
     /* 0x40 */ s32 unk40;
     /* 0x44 */ u8 unk44;
     /* 0x45 */ u8 unk45;
-} Spawn15198110;
+} SceneParticleSpawn;
 
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ s16 unk1C;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s16 unk2C;
-    /* 0x30 */ Vec15196748 unk30;
-    /* 0x3C */ Vec15196748 unk3C;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s16 unk58;
-    /* 0x5A */ s16 unk5A;
-} Extra15198110;
+extern JetChildPreset D_800A8710[];
+extern SceneParticle *func_1513D524(SceneParticleSpawn *, u8, u8, u8, u8, u8, s32, u8, s32);
 
-extern Entry15198110 D_800A8710[];
-extern void *func_1513D524(void *, u8, u8, u8, u8, u8, s32, u8, s32);
-
-void func_15198110(Emitter15198110 *arg0, s32 arg1) {
-    Desc15198110 *desc;
-    Particle15198110 *arr;
-    Particle15198110 *cur;
-    Particle15198110 *next;
-    Entry15198110 *entry;
+/*
+ * Called when jet point `index` fades below childLife: spawns line particles (moved and faded by
+ * func_15197AB4/func_15197BBC) around the segment between it and the next newer point.
+ */
+void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
+    CharacterFlamethrowerJet *jet;
+    Particle *points;
+    Particle *cur;
+    Particle *next;
+    JetChildPreset *preset;
     s32 i;
-    void *ret;
+    SceneParticle *ret;
     u8 a;
     u8 b;
-    Spawn15198110 spawn;
-    Extra15198110 extra;
+    SceneParticleSpawn spawn;
+    JetChildData data;
     f32 sinA;
     f32 cosA;
     f32 sinB;
@@ -1596,59 +1554,59 @@ void func_15198110(Emitter15198110 *arg0, s32 arg1) {
     f32 dz;
     s32 flag;
 
-    desc = arg0->unk98;
-    arr = arg0->unk94;
-    entry = &D_800A8710[desc->unk69];
-    cur = (Particle15198110 *)((u8 *)arr + arg1 * 0x24);
-    desc->unk70 += desc->unk6C;
-    cur->unk21 = 1;
-    if ((i = arg1 + 1) == arg0->unk25) {
+    jet = actor->state;
+    points = actor->points;
+    preset = &D_800A8710[jet->childPreset];
+    cur = (Particle *)((u8 *)points + index * sizeof(Particle)); // matching: byte-offset form keeps the addu operand order
+    jet->childAccum += jet->childRate;
+    cur->spawnedChild = TRUE;
+    if ((i = index + 1) == actor->capacity) {
         i = 0;
     }
-    if (desc->unk70 > 1.0f && i != arg0->unk2E) {
-        s32 pad[2];
+    if (jet->childAccum > 1.0f && i != actor->head) {
+        s32 pad[2]; // matching: unused stack slots
 
         spawn.unk8 = 0;
-        extra.unk20 = 25137.0f;
-        extra.unk24 = 6733.0f;
-        extra.unk2C = 0;
-        spawn.unkC = (extra.unk20 + extra.unk24) * 0.5f;
-        extra.unk48 = desc->unk40;
-        extra.unk58 = 8;
-        extra.unk5A = 0x20;
-        extra.unk4C = 0.8280000091f;
-        extra.unk50 = 0.753000021f;
-        extra.unk54 = -0.0120000001f;
-        extra.unk0 = entry->unk0 * 30.09054375f;
-        extra.unk4 = entry->unk0 * 18.35523224f;
-        extra.unk1C = 0;
-        spawn.unk14 = (extra.unk0 + extra.unk4) * 0.5f;
-        extra.unk8 = spawn.unk14;
-        extra.unkC = entry->unk4 * 3.961740017f;
-        extra.unk10 = entry->unk4 * 2.919177055f;
-        extra.unk14 = entry->unk4 * 8.116548538f;
-        extra.unk1E = 0;
+        data.unk20 = 25137.0f;
+        data.unk24 = 6733.0f;
+        data.unk2C = 0;
+        spawn.unkC = (data.unk20 + data.unk24) * 0.5f;
+        data.gravity = jet->gravity;
+        data.fadeStart = 8;
+        data.alphaPerLife = 32;
+        data.dragA = 0.8280000091f;
+        data.dragB = 0.753000021f;
+        data.shrinkRate = -0.0120000001f;
+        data.unk0 = preset->sizeScale * 30.09054375f;
+        data.unk4 = preset->sizeScale * 18.35523224f;
+        data.unk1C = 0;
+        spawn.unk14 = (data.unk0 + data.unk4) * 0.5f;
+        data.unk8 = spawn.unk14;
+        data.unkC = preset->unk4 * 3.961740017f;
+        data.unk10 = preset->unk4 * 2.919177055f;
+        data.unk14 = preset->unk4 * 8.116548538f;
+        data.unk1E = 0;
         spawn.unk34 = 1.0f;
         spawn.unk3C = 1.0f;
         spawn.unk40 = 0x40000001;
-        spawn.unk44 = 0xFF;
-        spawn.unk45 = 0xFF;
-        spawn.unk18 = (extra.unkC + extra.unk10) * 0.5f;
-        extra.unk18 = spawn.unk18;
+        spawn.unk44 = 255;
+        spawn.unk45 = 255;
+        spawn.unk18 = (data.unkC + data.unk10) * 0.5f;
+        data.unk18 = spawn.unk18;
         spawn.unk38 = 0.0f;
         if (func_150ADA20() & 1) {
-            spawn.unk0 = 0x13;
+            spawn.texture = 0x13;
         } else {
-            spawn.unk0 = 0x14;
+            spawn.texture = 0x14;
         }
         spawn.unk10 = 0;
         spawn.unk11 = 0;
         spawn.unk12 = 0;
         spawn.unk13 = 0x68;
         spawn.unk2 = 0x301;
-        next = (Particle15198110 *)((u8 *)arr + i * 0x24);
-        extra.unk30 = next->vel;
-        extra.unk3C = cur->vel;
+        next = (Particle *)((u8 *)points + i * sizeof(Particle));
+        data.velA = next->vel;
+        data.velB = cur->vel;
         do {
             a = func_150ADA20() & 0xFF;
             b = func_150ADA20() & 0xFF;
@@ -1656,18 +1614,18 @@ void func_15198110(Emitter15198110 *arg0, s32 arg1) {
             cosA = func_151423D8(a);
             sinB = func_151423D8((u8)(b - 0x40));
             cosB = func_151423D8(b);
-            rad = next->unk18 * 0.8000000119f;
-            spawn.unk4 = (func_150ADA20() % (u32)(entry->unkA + 1)) + entry->unk8;
+            rad = next->size * 0.8000000119f;
+            spawn.life = (func_150ADA20() % (u32)(preset->lifeRange + 1)) + preset->lifeMin;
             rc = rad * cosB;
             dx = rc * sinA;
             dy = -rad * sinB;
             dz = rc * cosA;
-            spawn.unk1C.x = next->pos.x + dx;
-            spawn.unk1C.y = next->pos.y + dy;
-            spawn.unk1C.z = next->pos.z + dz;
-            spawn.unk28.x = cur->pos.x + dx;
-            spawn.unk28.y = cur->pos.y + dy;
-            spawn.unk28.z = cur->pos.z + dz;
+            spawn.posA.x = next->pos.x + dx;
+            spawn.posA.y = next->pos.y + dy;
+            spawn.posA.z = next->pos.z + dz;
+            spawn.posB.x = cur->pos.x + dx;
+            spawn.posB.y = cur->pos.y + dy;
+            spawn.posB.z = cur->pos.z + dz;
             if (func_150ADA20() & 1) {
                 flag = 1;
             } else {
@@ -1675,10 +1633,10 @@ void func_15198110(Emitter15198110 *arg0, s32 arg1) {
             }
             ret = func_1513D524(&spawn, 0xA, 0xB, 0, 9, (u8)(flag | 2), 0x5C, 0xFF, 0);
             if (ret != NULL) {
-                memcpy((u8 *)ret + 0x110, &extra, sizeof(extra));
+                memcpy(&ret->data, &data, sizeof(data));
             }
-            desc->unk70 -= 1.0f;
-        } while (desc->unk70 > 1.0f);
+            jet->childAccum -= 1.0f;
+        } while (jet->childAccum > 1.0f);
     }
 }
 
@@ -2429,21 +2387,21 @@ void func_15199834(EffectOwner *owner) {
 
 void func_1516972C();
 
-void func_1519986C(void *arg0, s32 arg1, u8 arg2) {
-    SubA_15198054 *temp_v1 = *(SubA_15198054 **)((u8 *)arg0 + 0x98);
-    ArgB_15198054 *b = (ArgB_15198054 *)arg1;
+/* Message handler: dies when its owner is killed (0, 2, 0x26); follows an owner swap (0x2D). */
+void func_1519986C(CharacterFlamethrowerActor *actor, EffectMessage *msg, u8 kind) {
+    EffectOwnerRef *ref = actor->state;
 
-    if (arg2 == 0 || arg2 == 2 || arg2 == 0x26) {
-        if ((b->unk0 == temp_v1->unk0) || (b->u4.b4 == temp_v1->unk4)) {
-            func_1516972C(arg0);
+    if (kind == 0 || kind == 2 || kind == 0x26) {
+        if (msg->owner == ref->owner || msg->u4.id == ref->ownerId) {
+            func_1516972C(actor);
         }
-    } else if (arg2 == 0x2D) {
-        if (temp_v1->unk0 == b->unk0) {
-            temp_v1->unk0 = b->u4.w4;
-            temp_v1->unk4 = b->unk9;
-        } else if (temp_v1->unk0 == b->u4.w4) {
-            temp_v1->unk0 = b->unk0;
-            temp_v1->unk4 = b->unk8;
+    } else if (kind == 0x2D) {
+        if (ref->owner == msg->owner) {
+            ref->owner = msg->u4.other;
+            ref->ownerId = msg->otherId;
+        } else if (ref->owner == msg->u4.other) {
+            ref->owner = msg->owner;
+            ref->ownerId = msg->ownerId;
         }
     }
 }
@@ -4042,8 +4000,8 @@ typedef struct {
     u8 pad0[0x2C];
     f32 width;
     f32 t;
-    Vec3f_15197C10 start;
-    Vec3f_15197C10 end;
+    Vec3f start;
+    Vec3f end;
     u8 pad4C[0x74];
     u8 tmpl[0x40];
     u8 *buffers[4];
@@ -4057,17 +4015,17 @@ typedef struct {
     u8 pad8[8];
 } Vtx_1519C56C;
 
-void func_15145548(Vec3f_15197C10 *arg0, Vec3f_15197C10 *arg1, Vec3f_15197C10 *arg2, Vec3f_15197C10 *arg3, f32 *arg4);
+void func_15145548(Vec3f *arg0, Vec3f *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4);
 
 void *func_1519C56C(Obj_1519C56C *arg0, s16 arg1) {
     Vtx_1519C56C *vertices;
     void *result;
-    Vec3f_15197C10 *pos;
-    Vec3f_15197C10 dir;
-    Vec3f_15197C10 mid;
+    Vec3f *pos;
+    Vec3f dir;
+    Vec3f mid;
     f32 dx, dy, dz;
     f32 nx, ny, nz;
-    Vec3f_15197C10 closest;
+    Vec3f closest;
     f32 t;
     f32 lengthSquared;
     u8 fresh;
@@ -4083,7 +4041,7 @@ void *func_1519C56C(Obj_1519C56C *arg0, s16 arg1) {
     } else {
         return NULL;
     }
-    pos = (Vec3f_15197C10 *)func_15144B34(arg1);
+    pos = (Vec3f *)func_15144B34(arg1);
     dir.x = arg0->end.x - arg0->start.x;
     dir.y = arg0->end.y - arg0->start.y;
     dir.z = arg0->end.z - arg0->start.z;
