@@ -6,6 +6,8 @@
 void func_1515D4D4();
 #define D_800D3098 D_800D3098_header
 #define D_800DCD30 D_800DCD30_header
+#define D_800DCD80 D_800DCD80_header
+#define D_800DCD84 D_800DCD84_header
 #define D_800BE4A0 D_800BE4A0_header
 #define D_800DDA90 D_800DDA90_header
 #define D_800B0DF0 D_800B0DF0_header
@@ -13,6 +15,8 @@ void func_1515D4D4();
 #include "variables.h"
 #undef D_800D3098
 #undef D_800DCD30
+#undef D_800DCD80
+#undef D_800DCD84
 #undef D_800BE4A0
 #undef D_800DDA90
 #undef D_800B0DF0
@@ -20,19 +24,39 @@ void func_1515D4D4();
 
 extern u8 D_800DCD30[4][3];
 
-extern f32 D_80095C64[];
-extern u8 D_800DDBD0[];
-s32 func_1500AF08(s32, s32, s32, s16, s16, s16, s32, u8, s32);
-void func_15009334(s32 arg0);
+typedef struct Game36680Point {
+    s16 position[3];
+    u8 pad6[0xF];
+    u8 type;
+    u8 flags;
+    u8 pad17;
+    u32 color;
+    u32 settings;
+    u32 action;
+    u8 pad24[0x10];
+} Game36680Point; // size 0x34
 
-/** Resets the lighting state: default ambient colour, fog colours and the light lists. */
+typedef struct Game36680PointLink {
+    struct Game36680PointLink *next;
+    Game36680Point *point;
+} Game36680PointLink;
+
+extern Game36680Point *D_800D3098;
+extern Game36680PointLink *D_800DCD80;
+extern Game36680PointLink *D_800DCD84;
+
+extern u8 D_800DDBD0[15];
+
+void func_15009334(s32 index);
+
+/** Resets the light state: the global light colour, the colour tables and the point lists. */
 void func_150091D0(void) {
     s32 i;
 
     D_800DCD78 = 0;
     D_800DCD7C = 1;
-    D_800DCD80 = 0;
-    D_800DCD84 = 0;
+    D_800DCD80 = NULL;
+    D_800DCD84 = NULL;
 
     func_1515D4D4(255, 255, 255, 0);
 
@@ -54,37 +78,24 @@ void func_150091D0(void) {
     bzero(&D_800DCD40, 56);
 }
 
+/** Applies every level point (see func_15009334). */
 void func_150092DC(void) {
     u32 i;
+
     for (i = 0; i < D_800D3094; i++) {
         func_15009334(i);
     }
 }
 
-typedef struct Game36680Point {
-    s16 position[3];
-    u8 pad6[0xF];
-    u8 type;
-    u8 flags;
-    u8 pad17;
-    u32 color;
-    u32 settings;
-    u32 action;
-    u8 pad24[0x10];
-} Game36680Point; // size 0x34
-
-typedef struct Game36680PointLink {
-    struct Game36680PointLink *next;
-    Game36680Point *point;
-} Game36680PointLink;
-
-extern Game36680Point *D_800D3098;
 extern void *allocate_memory(s32, s32, s32, s32);
 s32 func_1515D5AC(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-/** Applies one level point: sets ambient/fog colours, spawns a light, or links it into a point list. */
+/**
+ * Applies level point `index` by type: 10 sets the global light colour, 9 spawns a light (and runs its
+ * callback), 16 sets the colour tables, 15 and 24 link the point into the D_800DCD80 / D_800DCD84 lists.
+ */
 void func_15009334(s32 index) {
-    s32 pad;
+    s32 pad; // matching: unused stack slot keeps the original frame layout
     s32 red;
     s32 green;
     s32 blue;
@@ -145,15 +156,15 @@ void func_15009334(s32 index) {
         case 15:
             link = allocate_memory(sizeof(Game36680PointLink), 1, 0, 0);
             link->point = &D_800D3098[index];
-            link->next = (Game36680PointLink *)D_800DCD80;
-            D_800DCD80 = (s32)link;
+            link->next = D_800DCD80;
+            D_800DCD80 = link;
         unused_label: // matching: an unused label keeps IDO from threading this break to the epilogue
             break;
         case 24:
             link = allocate_memory(sizeof(Game36680PointLink), 1, 0, 0);
             link->point = &D_800D3098[index];
-            link->next = (Game36680PointLink *)D_800DCD84;
-            D_800DCD84 = (s32)link;
+            link->next = D_800DCD84;
+            D_800DCD84 = link;
             break;
     }
 }
@@ -779,6 +790,8 @@ s32 func_1500AF08(s32 index, s32 slot, s32 subtype, s16 x, s16 y, s16 z, s32 jit
     return index + 1;
 }
 
+extern f32 D_80095C64[]; // pairs of interpolation weights
+
 /** Linear interpolation from a to b by t, with the difference computed in the integer type of a and b. */
 #define LERP_INT(a, b, t) ((f32)(a) + (f32)((b) - (a)) * (t))
 /** Linear interpolation from a to b by t. */
@@ -1016,7 +1029,6 @@ extern s32 D_8008CEB4;
 extern u32 *D_800DBE5C;
 extern u8 D_800DDC10[];
 extern s16 D_800DDC90[60];
-extern void *allocate_memory(s32, s32, s32, s32);
 extern void func_1510F800(s32);
 extern void func_1517B89C(s32, s32);
 
