@@ -14,7 +14,7 @@ N64 decompilations publish theirs; you need your own copy of the game to build i
 This repository started as a fork of <https://github.com/mkst/conker>, which was published without
 a licence. The ROM layout, the splat and compressed-section configuration (`*.yaml`, `config/`), the
 original build system and Makefiles, the rarezip tools (`tools/rarezip.py`, `tools/rareunzip.py`,
-`tools/splat_ext/`, `tools/compress_dir.py`, `tools/extract_compressed.py`, `tools/progress.py`,
+`tools/splat_ext/`, `tools/compress_dir.py`, `tools/extract_compressed.py`,
 `conker/tools/`), the first matched functions and headers, and the SDK headers under
 `conker/include/2.0L/` come from that project. Its history is kept in this repository's git history.
 Contributors there were Mark Street (mkst), ianwal, Mittenshugg and alf. Those parts remain the
@@ -75,9 +75,8 @@ licence.
 
 | Path | Origin | Licence | Notes |
 |------|--------|---------|-------|
-| `ido/ido5.3_recomp/` | Static recompilation of the IRIX IDO 5.3 C compiler, built in 2021 from `tools/ido5.3_recomp` of <https://github.com/n64decomp/sm64> (recompiler by Emill, now maintained as <https://github.com/decompals/ido-static-recomp>; see its README) | The sm64 repository is now CC0-1.0; ido-static-recomp has no licence. The recompiled programs (`cc`, `cfe`, `uopt`, `ugen`, `as1`, …, `*_c.c`) are translations of SGI's proprietary IDO binaries | Prebuilt x86-64 Linux binaries |
+| IDO 5.3 (toolchain image) | Static recompilation of the IRIX IDO 5.3 C compiler: release v1.2 of <https://github.com/decompals/ido-static-recomp> (`ido-5.3-recomp-linux.tar.gz`, sha256 `ab5c7415…e506`) | ido-static-recomp has no licence. The recompiled programs are translations of SGI's proprietary IDO binaries | Not distributed in this repository. `tools/toolchain/Containerfile` downloads it |
 | `gzip-rare` (toolchain image) | GNU gzip from <https://github.com/mkst/gzip> at commit `f6f21831c51dd3d13c98f536e836aa1b43a0b0b2`, configured with `--enable-rare-deflate` (restores pre-1.5 deflate output) | GPL-3.0-or-later. Copyright (C) 2018 Free Software Foundation, Inc.; Copyright (C) 1993 Jean-loup Gailly | Not distributed in this repository. `tools/toolchain/Containerfile` builds it from that source |
-| `tools/first-diff.py`, `conker/tools/first-diff.py` | Adapted from `first-diff.py` in n64decomp/sm64 | CC0-1.0 | |
 
 ## Git submodules (not vendored; fetched from upstream)
 
@@ -88,5 +87,3 @@ licence.
 | `tools/asm-processor` | <https://github.com/simonlindholm/asm-processor> | Unlicense (public domain) |
 | `tools/mips_to_c` | <https://github.com/matt-kempster/m2c> (m2c) | GPL-3.0 |
 
-`tools/decomp-permuter` (<https://github.com/simonlindholm/decomp-permuter>, MIT) is optional and
-gitignored. Contributors clone it themselves.

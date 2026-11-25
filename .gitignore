@@ -1,46 +1,27 @@
-# directories
-
-__pycache__/
-asm/
-assets/
-bin/
-build/
-expected/
-extracted/
-html/
-junk/
-nonmatchings
-py/
-rodata/
-rzip/
-src_debug/
-src_eu/
-text/
-textures/
-
-# files
-
-conker/ctx.c
-.splat_cache
-*.bin
-*.csv
-*.gz
-*.o
-*.ok
-*.pad
+# ROMs: never commit game data
 *.z64
+*.n64
+*.v64
+
+# Build outputs (make extract / make)
+/assets/
+/extracted/
+/rzip/
+/build/
+/conker/asm/
+/conker/assets/
+/conker/build/
+/conker/expected/
+*.bin
+*.o
+*.gz
+*.ok
 *.ld
 *_auto.txt
+__pycache__/
 
-# optional tools
-
-tools/decomp-permuter
-tools/gzip
-tools/gfxdis
-.cycle
-.nearmiss/
-.progress_history.tsv
-tools/difficult_functions.txt
-tools/difficult_functions.tsv
-.permuter_cracks.tsv
-.mw_land.lock
+# Local maintainer state and tools
+/tools/gzip
+/tools/decomp-permuter/
+/.nearmiss/
+/.mw_land.lock

@@ -65,7 +65,9 @@ TARGET = $(BUILD_DIR)/$(BASENAME).$(VERSION)
 
 LD_SCRIPT = $(BASENAME).ld
 
-CC     := ../ido/ido5.3_recomp/cc
+# IDO 5.3 (static recomp); the toolchain image installs it here
+IDO    ?= /opt/ido/5.3
+CC     := $(IDO)/cc
 
 CROSS   = mips-linux-gnu-
 AS      = $(CROSS)as
@@ -225,8 +227,6 @@ check: $(BASENAME).$(VERSION).ok
 # check built bin
 verify: $(TARGET).ok
 
-progress: $(VERIFY) progress.csv
-
 # replace original binaries
 replace: $(VERIFY) $(TARGET).header.bin $(TARGET).boot.bin $(TARGET).init.bin $(TARGET_GAME_BIN) $(TARGET).debugger.bin
 	cp $(TARGET).header.bin ../assets/header.$(VERSION).bin
@@ -341,16 +341,6 @@ $(TARGET).game.data.padding.bin: $(TARGET).game.data.rzip.bin
 
 $(TARGET).game.rzip.bin: $(SPLIT_DIR)/offsets.bin $(TARGET).game.code.rzip.bin $(TARGET).game.code.padding.bin $(TARGET).game.data.rzip.bin $(TARGET).game.data.padding.bin
 	cat $^ > $@
-
-progress.csv: progress.init.csv progress.game.csv progress.debugger.csv
-	cat $^ > $@
-
-progress.init.csv: $(TARGET).elf
-	$(PYTHON) ../tools/progress.py . $(TARGET).map .init --version $(VERSION) > $@
-progress.game.csv: $(TARGET).elf
-	$(PYTHON) ../tools/progress.py . $(TARGET).map .game --version $(VERSION) > $@
-progress.debugger.csv: $(TARGET).elf
-	$(PYTHON) ../tools/progress.py . $(TARGET).map .debugger --version $(VERSION) > $@
 
 
 # settings

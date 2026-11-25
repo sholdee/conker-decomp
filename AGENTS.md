@@ -1,15 +1,19 @@
-# Conker decompilation — matching runbook (v2, `mw`)
+# Conker decompilation — maintainer and agent runbook
 
-Goal: every asm function → byte-identical C (IDO 5.3 `-O2 -g3`). The gate is the ROM sha1
-(inner `conker/build/conker.us.bin` = `842e3d34…`, outer `build/conker.us.z64` = `4cbadd3c…`).
+All US code is byte-matching C (IDO 5.3, mostly `-O2 -g3`) or proven hand-written asm (ACCOUNTING.md).
+Every change must keep the ROM byte-identical. The gate is the ROM sha1 (inner
+`conker/build/conker.us.bin` = `842e3d34…`, outer `build/conker.us.z64` = `4cbadd3c…`) plus
+`tools/accounting.py`. Locally `mw.py land`, `cw.py land` and `rename.py` enforce it; on GitHub the
+`Matching gate` workflow does.
 
 Paths: `~/conker` is the repository and `~/conker-ws` the workspace root on the maintainer's host.
 The tools take the repo root from their own location and honour `CONKER_REPO`, `CONKER_WS` and
 `CONKER_CONTAINER` (default `conker-tc`).
 
 ## Toolchain
-Builds run in the podman container `conker-tc` (ubuntu 24.04 + binutils-mips-linux-gnu +
-python reqs; `tools/toolchain/Containerfile`). It must be running:
+Builds run in the podman container `conker-tc`, made from `tools/toolchain/Containerfile` (Ubuntu
+24.04, MIPS binutils, pinned Python packages, IDO 5.3 from the ido-static-recomp release at
+`/opt/ido/5.3`, gzip-rare built from source). CI uses the same image. It must be running:
 ```
 podman start conker-tc   # or create it: tools/toolchain/run.sh
 podman exec -d conker-tc python3 ~/conker/tools/toolchain/tcd.py ~/conker-ws/.tcd.sock   # after a start
@@ -19,16 +23,14 @@ A clean build of the code bin is ~5 s; one file + relink + sha ~0.6 s. `mw.py` s
 the `tcd` socket daemon when it is up — `podman exec` serializes on podman's lock and took
 20-40 s per call with a 16-agent fleet; it remains the fallback.
 
-## Matching
-Read `tools/MATCHING.md` (the agent brief). In short:
-```
-python3 tools/mw.py pick [--min B] [--max B] [--desc]   # remaining stubs by size
-python3 tools/mw.py new FUNC     # private reflinked workspace ~/conker-ws/FUNC (+ m2c draft)
-python3 tools/mw.py check FUNC   # exact whole-bin verdict + asm diff (+ FRAME/LITERALS hints)
-python3 tools/mw.py land FUNC    # merge into main under a lock, full sha gate, commit
-```
-Workspaces never touch the main tree, so any number can run in parallel; `land` is the only
-writer and re-gates every merge. There is no other invariant to remember.
+## Workspaces
+- Editing matched C (cleanup, naming, types): `tools/cw.py` (see `tools/CLEANUP.md`, `tools/SHARED.md`).
+  `cw.py new FILE` or `--tree ITEM`, then `check` (names every function whose bytes moved) and `land`.
+- Renaming symbols tree-wide: `tools/rename.py` (see `tools/RENAMING.md`).
+- Re-matching a function from asm: `tools/mw.py` (see `tools/MATCHING.md`). Replace its C body with a
+  `#pragma GLOBAL_ASM` stub, then `mw.py new FUNC`, `check`, `land`.
+Workspaces never touch the main tree, so any number can run in parallel; `land` is the only writer
+and re-gates every merge.
 
 ## Build features that make C matchable
 - `tools/rodata_extern.py` (post-compile, in the Makefile): game rodata is still asm and
@@ -36,10 +38,6 @@ writer and re-gates every merge. There is no other invariant to remember.
   string literals, switch jump tables) is retargeted to its original ROM address. Write
   literals naturally — `extern f32 D_...` is NOT codegen-equivalent.
 - `conker/jtbl_labels.us.txt`: PROVIDEs the case labels the asm jump tables reference.
-
-## History
-The v1 Codex orchestrator / permuter daemon (stalled at ~10 matches/day, July 2026) was
-removed from the tree in 2026-11 (its runbook, `tools/AGENTS_v1_orchestrator.md`, is in git history).
 
 ## Fresh host
 ```
@@ -95,14 +93,14 @@ functions, with zero occurrences: (d) an opcode-2 `j`, or a branch that leaves t
 (IDO uses `b` for local jumps and never tail-calls); (e) a bare `cvt.w.s`/`cvt.w.d` with no `ctc1` in the
 function. GCC output is ruled out because GCC's `move` assembles to `addu rd,rs,zero` (9 in all compiled C,
 0 in these functions). Patterns that do appear in compiled C are not proof: `ra` saved above the frame,
-a second sp allocation, `addiu r,zero,0`. The 2026-11-24 audit (`~/conker-ws/asmproof/tiers.json`) converted 94 functions, and a second pass converted 17 more (rules d/e) plus func_150ADAF0. A third pass (2026-11-25) added
+a second sp allocation, `addiu r,zero,0`. The 2026-11-24 audit converted 94 functions, and a second pass converted 17 more (rules d/e) plus func_150ADAF0. A third pass (2026-11-25) added
 rules each found 0 times in compiled C: `syscall`; no return (falls into the next function); a store below `$sp`
 before the frame exists; `ra` saved in the outgoing-argument area or without allocating a frame; an odd FPR as a
 single-precision arithmetic operand; `jal` without saving `ra`; every `mul.s` (6 or more) followed by a `nop`
 (compiled C peaks at 67%); and object boundaries (IDO pads every C object's `.text` and `.rodata` to 16 at both
 ends, so a function that meets proven asm at a non-16-aligned code or rodata address shares its object).
 `bzero` and `__osSetFpcCsr` are source-identical with ultralib assembled by the full IDO 5.3 toolchain
-(`~/conker-ws/asmproof/g4/ido53_v12/x/cc -O1`, which includes `as0`). See ACCOUNTING.md. No unproven
+(`/opt/ido/5.3/cc -O1` in the image, which includes `as0`). See ACCOUNTING.md. No unproven
 function remains: `tools/accounting.py` checks that all US code is matched C or hasm with a recorded proof
 (rules computed from the instructions, plus `tools/hasm_proofs.tsv` for rules a, c and the search tier).
 Layout notes:
