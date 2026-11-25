@@ -58,13 +58,6 @@ s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, struct Entry1505C1E4 *arg2, 
 extern struct255 *D_800CC4A4;
 void func_1505F188(struct127 *arg0);
 s32 func_1505C7D8(struct127 *arg0, s32 arg1);
-extern f32 D_8009962C;
-extern f32 D_80099630;
-extern f32 D_800994C0;
-extern f32 D_800994C4;
-extern f32 D_800994C8;
-extern f32 D_800994CC;
-extern f32 D_800994D0;
 
 typedef struct {
     char pad_0[0x4];
@@ -118,46 +111,47 @@ typedef struct {
 
 extern Tbl15055E50 *D_800D18B0;
 
-void func_15055E50(struct127 *arg0, s32 arg1) {
-    s32 pad[5];
+/* Keeps the actor inside its zone set: pushed out of obstacle circles, snapped to the nearest allowed circle. */
+void func_15055E50(struct127 *actor, s32 zoneSetId) {
+    s32 pad[5]; // matching: stack frame size
     f32 bestX;
     f32 bestZ;
     f32 dist;
-    f32 inv;
+    f32 invDist;
     f32 dx;
     f32 dz;
-    f32 sz;
-    f32 r;
-    f32 best;
+    f32 segZ;
+    f32 radius;
+    f32 bestDist;
     f32 y;
     s32 i;
-    s32 ok;
-    s32 found;
-    u16 flags;
+    s32 outsideAll;
+    s32 haveZone;
+    u16 radiusFlags;
     s32 count;
     Seg15055E50 *seg;
     Seg15055E50 *segs;
 
-    ok = 1;
-    found = 0;
-    if (arg0->id == 0x3A) {
-        if (arg0->x_position > 1200.0f) {
-            arg0->x_position = 1200.0f;
+    outsideAll = 1;
+    haveZone = 0;
+    if (actor->id == 0x3A) {
+        if (actor->x_position > 1200.0f) {
+            actor->x_position = 1200.0f;
         }
-        if (arg0->x_position < -1200.0f) {
-            arg0->x_position = -1200.0f;
+        if (actor->x_position < -1200.0f) {
+            actor->x_position = -1200.0f;
         }
-        if (arg0->z_position > 1200.0f) {
-            arg0->z_position = 1200.0f;
+        if (actor->z_position > 1200.0f) {
+            actor->z_position = 1200.0f;
         }
-        if (arg0->z_position < -1200.0f) {
-            arg0->z_position = -1200.0f;
+        if (actor->z_position < -1200.0f) {
+            actor->z_position = -1200.0f;
         }
     }
-    if ((arg1 != 0) && (D_800D18B0 != NULL) && (arg0->unk13D < 100)) {
-        best = 1000000000.0f;
+    if ((zoneSetId != 0) && (D_800D18B0 != NULL) && (actor->unk13D < 100)) {
+        bestDist = 1000000000.0f;
         i = 0;
-        while (arg1 != D_800D18B0[i].id) {
+        while (zoneSetId != D_800D18B0[i].id) {
             if (D_800D18B0[i].segs == NULL) {
                 return;
             }
@@ -167,45 +161,45 @@ void func_15055E50(struct127 *arg0, s32 arg1) {
         count = D_800D18B0[i].count;
         for (i = 0; i < count; i++) {
             seg = &segs[i];
-            if (ok || (seg->r & 0x8000)) {
-                y = arg0->y_position;
+            if (outsideAll || (seg->r & 0x8000)) {
+                y = actor->y_position;
                 if ((seg->y <= y) && (y <= (seg->h + seg->y))) {
-                    flags = seg->r;
-                    r = flags & 0x7FFF;
-                    dx = arg0->x_position - seg->x;
-                    sz = seg->z;
-                    dz = arg0->z_position - sz;
-                    flags &= 0x8000;
-                    if (flags) {
+                    radiusFlags = seg->r;
+                    radius = radiusFlags & 0x7FFF;
+                    dx = actor->x_position - seg->x;
+                    segZ = seg->z;
+                    dz = actor->z_position - segZ;
+                    radiusFlags &= 0x8000;
+                    if (radiusFlags) {
                         dist = (dx * dx) + (dz * dz) + 0.1f;
-                        if (dist < (r * r)) {
-                            inv = 1.0f / sqrtf(dist);
-                            arg0->x_position = seg->x + (dx * inv * r);
-                            arg0->z_position = seg->z + (dz * inv * r);
-                            arg0->unkF4 |= 0x2000;
+                        if (dist < (radius * radius)) {
+                            invDist = 1.0f / sqrtf(dist);
+                            actor->x_position = seg->x + (dx * invDist * radius);
+                            actor->z_position = seg->z + (dz * invDist * radius);
+                            actor->unkF4 |= 0x2000;
                         }
                     } else {
-                        found = 1;
+                        haveZone = 1;
                         dist = (dx * dx) + (dz * dz) + 0.1f;
-                        if (dist < (r * r)) {
-                            ok = 0;
+                        if (dist < (radius * radius)) {
+                            outsideAll = 0;
                         } else {
-                            if ((sqrtf(dist) - r) < best) {
-                                inv = 1.0f / sqrtf(dist);
-                                best = sqrtf(dist) - r;
-                                bestX = seg->x + (dx * inv * r);
-                                bestZ = sz;
-                                bestZ += dz * inv * r;
+                            if ((sqrtf(dist) - radius) < bestDist) {
+                                invDist = 1.0f / sqrtf(dist);
+                                bestDist = sqrtf(dist) - radius;
+                                bestX = seg->x + (dx * invDist * radius);
+                                bestZ = segZ;
+                                bestZ += dz * invDist * radius; // matching: split statement orders the z add after x
                             }
                         }
                     }
                 }
             }
         }
-        if (ok && found) {
-            arg0->x_position = bestX;
-            arg0->z_position = bestZ;
-            arg0->unkF4 |= 0x2000;
+        if (outsideAll && haveZone) {
+            actor->x_position = bestX;
+            actor->z_position = bestZ;
+            actor->unkF4 |= 0x2000;
         }
     }
 }
@@ -231,7 +225,7 @@ void func_15056150(struct127 *arg0) {
         temp_f18 = arg0->x_position - temp_f2;
         temp_f20 = arg0->z_position - temp_f12;
         temp_f22 = arg0->y_position - temp_f14;
-        temp_f0 = sqrtf((temp_f18 * temp_f18) + (temp_f20 * temp_f20) + (temp_f22 * temp_f22) + D_80099440);
+        temp_f0 = sqrtf((temp_f18 * temp_f18) + (temp_f20 * temp_f20) + (temp_f22 * temp_f22) + 0.1000000015f);
         temp_f18 *= 1.0f / temp_f0;
         temp_f20 *= 1.0f / temp_f0;
         temp_f22 *= 1.0f / temp_f0;
@@ -257,7 +251,7 @@ void func_15056258(struct127 *arg0) {
             if (heightFactor > 300.0f) {
                 heightFactor = 300.0f;
             }
-            arg0->y_position += (heightFactor * temp_f2 * D_80099444);
+            arg0->y_position += (heightFactor * temp_f2 * 0.002997000003f);
         }
     }
 }
@@ -571,7 +565,7 @@ lbl:
 //                 phi_f18 = 1.0f;
 //             }
 //         } else {
-//             phi_f18 = D_80099448;
+//             phi_f18 = 0.8000000119f;
 //         }
 //
 //         sp70 = (f32) arg0->unk10F;
@@ -614,7 +608,7 @@ lbl:
 //             sp70 = 0.0f;
 //             temp_f0 = arg0->unkC4;
 //             arg0->xz_velocity = 0.0f;
-//             arg0->unkC4 = (f32) (temp_f0 + ((temp_t0_2->unkC4 - temp_f0) * D_8009944C));
+//             arg0->unkC4 = (f32) (temp_f0 + ((temp_t0_2->unkC4 - temp_f0) * 0.1199999973f));
 //         }
 //         func_1505A184(D_800CC2D0[sp63].unk7A,  sp70, 0, &sp70, &sp6C, &sp68);
 //         temp_t0_2 = &D_800CC2D0[sp63];
@@ -1235,7 +1229,7 @@ void func_1505841C(Func1505841CActor *arg0, f32 arg1) {
     s32 flags;
 
     flags = arg0->rate_flags;
-    rate = (f32)(((flags & 0x1F) << 8) + arg0->rate_low) * D_80099468;
+    rate = (f32)(((flags & 0x1F) << 8) + arg0->rate_low) * 0.0003906250058f;
     if (!(flags & 0x80)) {
         speed = arg0->speed;
         if ((speed <= 1.0f) || ((arg0->motion_flags & 0x10) && (arg0->vertical == 0.0f))) {
@@ -1244,14 +1238,14 @@ void func_1505841C(Func1505841CActor *arg0, f32 arg1) {
             scaled_speed = speed;
             scaled_speed *= 0.5f / arg0->scale;
             rate *= 10.0f;
-            rate = scaled_speed / rate + D_8009946C;
+            rate = scaled_speed / rate + 0.1000000015f;
             if (!(flags & 0x20)) {
-                rate += D_80099470;
+                rate += 0.400000006f;
             }
         }
     }
     if (arg0->mode == 0xD) {
-        rate = (f32)(arg0->strength & 0x7F) * D_80099474;
+        rate = (f32)(arg0->strength & 0x7F) * 0.1000000015f;
     }
     if (flags == 0xFF) {
         rate = 0.0f;
@@ -1274,7 +1268,7 @@ void func_1505841C(Func1505841CActor *arg0, f32 arg1) {
 //     f32 temp_f1;
 //     s32 idx;
 //
-//     temp_f0 = (((arg0->unk246 & 0x1F) << 8) + arg0->unk249) * D_80099468;
+//     temp_f0 = (((arg0->unk246 & 0x1F) << 8) + arg0->unk249) * 0.0003906250058f;
 //     if ((arg0->unk246 & 0x80) == 0) {
 //         if ((arg0->xz_velocity <= 1.0f) || (((arg0->unk22C & 0x10) != 0) && (arg0->unk28 == 0.0f))) {
 //             temp_f0 = arg1;
@@ -1282,15 +1276,15 @@ void func_1505841C(Func1505841CActor *arg0, f32 arg1) {
 //             // regalloc off here
 //             temp_f1 = (arg0->xz_velocity * (0.5f / arg0->xz_scale));
 //             temp_f0 = temp_f1 / (temp_f0 * 10.0f);
-//             temp_f0 += D_8009946C;
+//             temp_f0 += 0.1000000015f;
 //
 //             if ((arg0->unk246 & 0x20) == 0) {
-//                 temp_f0 += D_80099470;
+//                 temp_f0 += 0.400000006f;
 //             }
 //         }
 //     }
 //     if (arg0->unk223 == 0xD) {
-//         temp_f0 = (arg0->unk250 & 0x7F) * D_80099474;
+//         temp_f0 = (arg0->unk250 & 0x7F) * 0.1000000015f;
 //     }
 //     if (arg0->unk246 == 0xFF) {
 //         temp_f0 = 0.0f;
@@ -1364,9 +1358,9 @@ void func_150585F0(u8 *arg0, f32 arg1) {
     s32 owner;
 
     actor = (void *)arg0;
-    arg1 = (f32)(u32)actor->strength109 * D_80099478;
+    arg1 = (f32)(u32)actor->strength109 * 0.1000000015f;
     func_1505A3A8(0.0f, actor, 1.0f, arg1, 0);
-    if (actor->height1CC < D_8009947C) {
+    if (actor->height1CC < 100000.0f) {
         actor->height1CC = actor->height18;
     }
     mode = actor->modeAD;
@@ -1374,7 +1368,7 @@ void func_150585F0(u8 *arg0, f32 arg1) {
         value = actor->field20;
         actor->field24 = 0.0f;
         if (value < 60.0f) {
-            actor->field20 = value * D_80099480;
+            actor->field20 = value * 0.8999999762f;
         }
         if ((actor->ground118 - 60.0f) + 40.0f < actor->height18) {
             actor->field81 = 0;
@@ -1393,7 +1387,7 @@ void func_150585F0(u8 *arg0, f32 arg1) {
             actor->count104 = count - 1;
         }
         actor->timer10C -= D_800CC264;
-        if (actor->field28 < D_80099484 && (actor->flagsF4 & 0x100)) {
+        if (actor->field28 < 0.200000003f && (actor->flagsF4 & 0x100)) {
             actor->timer10C = 0;
         }
         if (actor->timer10C <= 0) {
@@ -1441,14 +1435,14 @@ void func_150585F0(u8 *arg0, f32 arg1) {
 //     f32 temp_f0;
 //     u16 phi_a2;
 //
-//     func_1505A3A8(arg0->unk109 * D_80099478, arg0, 1.0f, arg0->unk109 * D_80099478, 0);
-//     if (arg0->unk1CC < D_8009947C) {
+//     func_1505A3A8(arg0->unk109 * 0.1000000015f, arg0, 1.0f, arg0->unk109 * 0.1000000015f, 0);
+//     if (arg0->unk1CC < 100000.0f) {
 //         arg0->unk1CC = arg0->y_position;
 //     }
 //     if ((arg0->in_water != 0) && ((s32) arg0->in_water < 0xA)) {
 //         arg0->gravity = 0.0f;
 //         if (arg0->y_velocity < 60.0f) {
-//             arg0->y_velocity *= D_80099480;
+//             arg0->y_velocity *= 0.8999999762f;
 //         }
 //         if (((arg0->unk118 - 60.0f) + 40.0f) < arg0->y_position) {
 //             arg0->unk81 = (u8)0;
@@ -1468,7 +1462,7 @@ void func_150585F0(u8 *arg0, f32 arg1) {
 //             }
 //         }
 //         arg0->unk10C -= D_800CC264;
-//         if ((arg0->unk28 < D_80099484) && ((arg0->unkF4 & 0x100) != 0)) {
+//         if ((arg0->unk28 < 0.200000003f) && ((arg0->unkF4 & 0x100) != 0)) {
 //             arg0->unk10C = (u16)0;
 //         }
 //         if ((s32) arg0->unk10C <= 0) {
@@ -1705,7 +1699,7 @@ void func_15058F24(struct127 *arg0, f32 arg1, f32 arg2) {
             } else {
                 temp_f12 = arg0->y_position - ((temp_f14 + 10.0f) - (120.0f * arg1));
                 if ((fabsf(temp_f12) < 2.0f) && (fabsf(arg0->y_velocity) < 2.0f)) {
-                    arg0->y_position -= temp_f12 * D_800994A4;
+                    arg0->y_position -= temp_f12 * 0.6000000238f;
                     arg0->y_velocity = 0.0f;
                     arg0->gravity = 1.0f;
                 } else {
@@ -1756,7 +1750,7 @@ void func_15059140(struct127 *arg0) {
         }
     }
     if (arg0->unkB0 != 0) {
-        func_15058F24(arg0, arg0->unkB0 * D_800994A8, 1.0f);
+        func_15058F24(arg0, arg0->unkB0 * 0.009999999776f, 1.0f);
     }
     if (arg0->unkF8 & 0x20000) {
         func_15056258(arg0);
@@ -1765,17 +1759,17 @@ void func_15059140(struct127 *arg0) {
         func_15059444(arg0);
     }
     if (arg0->id == 0xA) {
-        arg0->unk180 = D_800994AC;
+        arg0->unk180 = -5000.0f;
     }
     if ((arg0->unkF8 & 0x180000) != 0) {
         func_150511E8(arg0);
     }
     func_1505B5F8(arg0, arg0->unk180);
-    if (((arg0->unkF4 & 0x1000) != 0) && (arg0->unk28 < D_800994B0)) {
+    if (((arg0->unkF4 & 0x1000) != 0) && (arg0->unk28 < 0.200000003f)) {
         func_15056B08(arg0);
     }
     if (arg0->unkF8 & 0x80000) {
-        sp2C = D_800994B4;
+        sp2C = 0.150000006f;
     }
     func_1505A250(0, 0, sp2C, &arg0->unk164, &arg0->unk168);
     if (arg0->unkD0 != 0) {
@@ -2216,18 +2210,18 @@ void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4) {
 //         }
 //     }
 //     if (obj->interaction_state == 1) {
-//         if (obj->in_water != 0) { aa = 2.0f; bb = bb * D_800994C0; }
+//         if (obj->in_water != 0) { aa = 2.0f; bb = bb * 0.400000006f; }
 //         if (obj->unkA8 != 0) bb = bb * 0.25f;
 //         if (obj->unk81 != 0) {
 //             if (obj->unk81 & 0x40) {
-//                 if (obj->unk81 & 0x20) bb = 0.0f; else bb = D_800994C4;
+//                 if (obj->unk81 & 0x20) bb = 0.0f; else bb = 1.299999952f;
 //             } else {
-//                 bb = bb * D_800994C8;
+//                 bb = bb * 0.349999994f;
 //                 if (arg4 >= 0x2E) aa = aa * 0.5f;
 //                 if (arg4 >= 0x5B) arg0 = arg0 * 0.5f;
 //             }
 //         }
-//         if (obj->unkAE != 0) bb = bb * D_800994CC;
+//         if (obj->unkAE != 0) bb = bb * 0.200000003f;
 //     }
 //     if (arg0 < 0.0f) {
 //         vel = obj->xz_velocity;
@@ -2240,7 +2234,7 @@ void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4) {
 //         obj->xz_velocity = vel - bb;
 //         if (obj->xz_velocity < arg0) obj->xz_velocity = arg0;
 //     } else {
-//         if ((arg0 - 1.0f) < vel) aa = aa * D_800994D0;
+//         if ((arg0 - 1.0f) < vel) aa = aa * 0.009999999776f;
 //         obj->xz_velocity = vel + aa;
 //         if (arg0 < obj->xz_velocity) obj->xz_velocity = arg0;
 //     }
@@ -2316,7 +2310,7 @@ f32 func_1505A5CC(struct49 *arg0) {
     x = ret;
     y = arg0->unk3;
 
-    x = sqrtf(x*x + y*y) * D_800994D4;
+    x = sqrtf(x*x + y*y) * 0.6000000238f;
     ret = x;
 
     if (ret > 35.0f) {
@@ -2327,7 +2321,7 @@ f32 func_1505A5CC(struct49 *arg0) {
 }
 
 u16 func_1505A630(f32 arg0, f32 arg1, s32 arg2) {
-    return ((u16) (u32) (func_150484A0(-arg0, arg1) * D_800994D8)) + 16384;
+    return ((u16) (u32) (func_150484A0(-arg0, arg1) * 10430.37793f)) + 16384;
 }
 
 f32 func_1505A6F8(struct127 *arg0, struct127 *arg1) {
@@ -2767,7 +2761,7 @@ void func_1505B5F8(struct127 *arg0_s, f32 arg1) {
                         if ((*(s32 *)(arg0 + 0xF8) & 0x800) && previousSpeed != 0.0f &&
                             *(f32 *)(arg0 + 0x20) < -4.0f * speed * D_800D1550) {
                             sound = *(s32 *)(arg0 + 0x2CC);
-                            factor = (f32)(s8)arg0[0x2CB] * D_8009950C;
+                            factor = (f32)(s8)arg0[0x2CB] * 0.009999999776f;
                             *(f32 *)(arg0 + 0x20) = (0.0f - *(f32 *)(arg0 + 0x20)) * factor;
                             if (sound != 0 && *(f32 *)(arg0 + 0x20) > 5.0f) {
                                 D_800D1580 = sound;
@@ -2783,10 +2777,10 @@ void func_1505B5F8(struct127 *arg0_s, f32 arg1) {
                                    -1.5f * *(f32 *)(arg0 + 0x24) * D_800D1550 < *(f32 *)(arg0 + 0x20)) {
                             *(f32 *)(arg0 + 0x20) = 0.0f;
                         } else {
-                            factor = (f32)(s8)arg0[0x2CB] * D_80099510;
+                            factor = (f32)(s8)arg0[0x2CB] * 0.009999999776f;
                             *(f32 *)(arg0 + 0x20) = (0.0f - *(f32 *)(arg0 + 0x20)) * factor;
                         }
-                        *(f32 *)(arg0 + 0x3C) *= D_80099514;
+                        *(f32 *)(arg0 + 0x3C) *= 0.8999999762f;
                     }
                 }
             }
@@ -2794,7 +2788,6 @@ void func_1505B5F8(struct127 *arg0_s, f32 arg1) {
     }
 }
 #undef arg0
-extern f32 D_80099518;
 extern f32 D_800CC270, D_800CC274, D_800CC278;
 extern u8 D_800BE616;
 extern s16 D_800D1582;
@@ -2974,7 +2967,7 @@ void func_1505B9C4(void *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, s32
                 arg1->unk10B |= 0x20;
             }
             if (arg1->y_velocity > 0.0f) {
-                arg1->unk28 += D_80099518;
+                arg1->unk28 += 0.1000000015f;
             }
             if (H(ENT2, 0x24) & 8) {
                 arg1->unk10B |= 0x40;
@@ -3226,7 +3219,6 @@ typedef struct {
 } Vec1505C7D8;
 
 extern s32 D_800B2CD0;
-extern f32 D_8009951C;
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
 void func_1507C3E0(struct127 *, s16 *, s32, s32);
 f32 func_15143E64(f32 *);
@@ -3834,7 +3826,6 @@ s32 func_1502AF04(u8 *, s32, s32, s32);
 s32 func_1502B110(u8 *, s32, s32, u32, ...);
 extern s32 D_8008630C[];
 extern u16 D_800993F8[];
-extern f32 D_8009953C;
 
 void func_1505E0C4(struct127 *arg0, u16 *arg1, u8 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11) {
     s32 index;
@@ -3951,7 +3942,7 @@ void func_1505E0C4(struct127 *arg0, u16 *arg1, u8 *arg2, s32 arg3, s32 arg4, s32
             case 0xB7:
             case 0xB8:
             case 0xB9:
-                *(f32 *)(arg2 + 0x18) = D_8009953C;
+                *(f32 *)(arg2 + 0x18) = 641.0f;
                 break;
             }
         }
