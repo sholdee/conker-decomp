@@ -43,18 +43,22 @@ typedef struct {
     u8 data[0x38];
 } HoltenRopeDesc;
 
-/* Endpoint data at 0x150 for ropes attached to an actor. */
+/* The actor a rope end is attached to. */
 typedef struct {
-    s32 unk0;
-    u8 pad4[0x10];
-    Vec3f_1E0560 pos;
-    u8 pad20[0x1B];
-    u8 unk3B;
+    /* 0x000 */ s32 unk0;
+    /* 0x004 */ u8 pad4[0x10];
+    /* 0x014 */ Vec3f_1E0560 pos;
+    /* 0x020 */ u8 pad20[0x1B];
+    /* 0x03B */ u8 unk3B;
+    /* 0x03C */ u8 pad3C[0x198];
+    /* 0x1D4 */ Mtx *boneMtx;
 } HoltenRopeTarget;
 
+/* Endpoint data at 0x150 for ropes hung from an actor. */
+
 typedef struct {
-    HoltenRopeTarget *target;
-    u8 targetId; // target->unk3B when the rope was attached
+    /* 0x00 */ HoltenRopeTarget *target;
+    /* 0x04 */ u8 targetId; // target->unk3B when the rope was attached
 } HoltenRopeAnchor;
 
 typedef struct {
@@ -319,114 +323,94 @@ Gfx *func_151B32C8(Gfx *gfx, HoltenRopeEffect *effect, s16 view) {
     return gfx;
 }
 
-extern void (*D_8008FB68[])(void *, s32, u8);
+extern void (*D_8008FB68[])(HoltenRopeEffect *, s32, u8);
 
-void func_151B3A34(struct102 *arg0, s32 arg1, u8 arg2) {
-    void (*fn)(void *, s32, u8) = D_8008FB68[*(u8 *)((u8 *)arg0 + 0x44)];
-    if (fn != NULL) {
-        fn(arg0, arg1, arg2);
+/* Calls the rope type's handler from D_8008FB68, if it has one. */
+void func_151B3A34(HoltenRopeEffect *effect, s32 arg1, u8 arg2) {
+    void (*handler)(HoltenRopeEffect *, s32, u8) = D_8008FB68[effect->type];
+    if (handler != NULL) {
+        handler(effect, arg1, arg2);
     }
 }
 
-typedef struct {
-    f32 x, y, z;
-} Vec3f_151B3A7C;
-
-typedef struct {
-    Vec3f_151B3A7C pos;
-    Vec3f_151B3A7C vel;
-} Node151B3A7C;
-
-typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-    u8 pad11[3];
-    Vec3f_151B3A7C start;
-    Vec3f_151B3A7C end;
-    u8 pad2C[0x10];
-    f32 unk3C;
-    f32 unk40;
-    u8 pad44[4];
-    Node151B3A7C nodes[10];
-    f32 unk138;
-} Struct151B3A7C;
-
-s32 func_151B3A7C(Struct151B3A7C *arg0) {
-    s32 pad1;
-    s32 pad2;
-    s32 pad3;
-    s32 pad4;
-    Vec3f_151B3A7C cur;
+/* Update callback: lays the points out in a straight line from start to end, at rest. */
+s32 func_151B3A7C(HoltenRopeEffect *effect) {
+    s32 pad[4]; // matching: stack slots
+    Vec3f_1E0560 pos;
     f32 dx;
     f32 dy;
     f32 dz;
     s32 i;
 
-    dx = -arg0->start.x + arg0->end.x;
-    dy = -arg0->start.y + arg0->end.y;
-    dz = -arg0->start.z + arg0->end.z;
-    cur = arg0->start;
+    dx = effect->end.x - effect->start.x;
+    dy = effect->end.y - effect->start.y;
+    dz = effect->end.z - effect->start.z;
+    pos = effect->start;
     for (i = 0; i < 10; i++) {
-        Node151B3A7C *node = &arg0->nodes[i];
-        node->pos = cur;
-        node->vel.x = 0.0f;
-        node->vel.y = 0.0f;
-        node->vel.z = 0.0f;
-        cur.x += dx * 0.1111111119f;
-        cur.y += dy * 0.1111111119f;
-        cur.z += dz * 0.1111111119f;
+        HoltenRopePoint *point = &effect->points[i];
+        point->pos = pos;
+        point->vel.x = 0.0f;
+        point->vel.y = 0.0f;
+        point->vel.z = 0.0f;
+        pos.x += dx * (1.0f / 9.0f);
+        pos.y += dy * (1.0f / 9.0f);
+        pos.z += dz * (1.0f / 9.0f);
     }
-    arg0->unk10 &= ~2;
-    return 1;
+    effect->flags &= ~2;
+    return TRUE;
 }
 
-s32 func_151B3CF0(Struct151B3A7C *arg0) {
-    Vec3f_151B3A7C delta;
-    Vec3f_151B3A7C mid;
-    Vec3f_151B3A7C a;
-    Vec3f_151B3A7C b;
-    f32 inv;
-    f32 nx;
-    f32 nz;
-    f32 px;
-    f32 py;
+/*
+ * Update callback: lays the points on a half circle whose diameter is the start-end segment,
+ * in the vertical plane through both ends.
+ */
+s32 func_151B3CF0(HoltenRopeEffect *effect) {
+    Vec3f_1E0560 delta;
+    Vec3f_1E0560 mid;
+    Vec3f_1E0560 relStart;
+    Vec3f_1E0560 relEnd;
+    f32 invDist;
+    f32 dirZ;
+    f32 dirX;
+    f32 across;
+    f32 up;
     f32 heading;
     f32 angle;
-    f32 r;
+    f32 radius;
     s32 i;
 
-    delta.x = arg0->end.x - arg0->start.x;
-    delta.y = arg0->end.y - arg0->start.y;
-    delta.z = arg0->end.z - arg0->start.z;
+    delta.x = effect->end.x - effect->start.x;
+    delta.y = effect->end.y - effect->start.y;
+    delta.z = effect->end.z - effect->start.z;
     if ((0.0001f < fabsf(delta.x)) || (0.0001f < fabsf(delta.z))) {
-        mid.x = arg0->start.x + (delta.x * 0.5f);
-        mid.y = arg0->start.y + (delta.y * 0.5f);
-        mid.z = arg0->start.z + (delta.z * 0.5f);
-        a.x = arg0->start.x - mid.x;
-        a.y = arg0->start.y - mid.y;
-        a.z = arg0->start.z - mid.z;
-        b.x = arg0->end.x - mid.x;
-        b.y = arg0->end.y - mid.y;
-        b.z = arg0->end.z - mid.z;
-        inv = 1.0f / sqrtf((delta.x * delta.x) + (delta.z * delta.z));
-        nx = delta.z * inv;
-        nz = delta.x * inv;
-        px = ((b.z * nx) + (b.x * nz)) - ((a.z * nx) + (a.x * nz));
-        py = b.y - a.y;
-        heading = func_150484A0(py, px);
-        r = sqrtf((px * px) + (py * py)) * 0.5f;
+        mid.x = effect->start.x + (delta.x * 0.5f);
+        mid.y = effect->start.y + (delta.y * 0.5f);
+        mid.z = effect->start.z + (delta.z * 0.5f);
+        relStart.x = effect->start.x - mid.x;
+        relStart.y = effect->start.y - mid.y;
+        relStart.z = effect->start.z - mid.z;
+        relEnd.x = effect->end.x - mid.x;
+        relEnd.y = effect->end.y - mid.y;
+        relEnd.z = effect->end.z - mid.z;
+        invDist = 1.0f / sqrtf((delta.x * delta.x) + (delta.z * delta.z));
+        dirZ = delta.z * invDist;
+        dirX = delta.x * invDist;
+        across = ((relEnd.z * dirZ) + (relEnd.x * dirX)) - ((relStart.z * dirZ) + (relStart.x * dirX));
+        up = relEnd.y - relStart.y;
+        heading = func_150484A0(up, across);
+        radius = sqrtf((across * across) + (up * up)) * 0.5f;
         angle = heading - 3.1415927f;
-        for (i = 0; i < 10; i++, angle += 0.34906587f) {
-            Node151B3A7C *point = &arg0->nodes[i];
+        for (i = 0; i < 10; i++, angle += 0.34906587f) { // 20 degrees
+            HoltenRopePoint *point = &effect->points[i];
             f32 s = sinf(angle);
             f32 c = cosf(angle);
 
-            point->pos.x = (r * c * nz) + mid.x;
-            point->pos.y = (r * s) + mid.y;
-            point->pos.z = (r * c * nx) + mid.z;
+            point->pos.x = (radius * c * dirX) + mid.x;
+            point->pos.y = (radius * s) + mid.y;
+            point->pos.z = (radius * c * dirZ) + mid.z;
         }
     }
-    return 1;
+    return TRUE;
 }
 
 /*
@@ -458,13 +442,13 @@ s32 func_151B3F28(HoltenRopeAttached *rope, Vec3f_1E0560 *pos, u8 isStart) {
     return ret;
 }
 
-s32 func_151B3FDC(Struct151B3A7C *arg0) {
+s32 func_151B3FDC(HoltenRopeEffect *arg0) {
     f32 dx;
     f32 dy;
     f32 dz;
-    Vec3f_151B3A7C mid;
-    Vec3f_151B3A7C relStart;
-    Vec3f_151B3A7C relEnd;
+    Vec3f_1E0560 mid;
+    Vec3f_1E0560 relStart;
+    Vec3f_1E0560 relEnd;
     f32 len;
     f32 inv;
     f32 c;
@@ -486,7 +470,7 @@ s32 func_151B3FDC(Struct151B3A7C *arg0) {
     f32 b;
     f32 t;
     s32 i;
-    Node151B3A7C *node;
+    HoltenRopePoint *node;
 
     dx = arg0->end.x - arg0->start.x;
     dy = arg0->end.y - arg0->start.y;
@@ -515,14 +499,14 @@ s32 func_151B3FDC(Struct151B3A7C *arg0) {
         ux = u * inv;
         uy = v * inv;
         h = d2 * 0.25f;
-        if (arg0->unk138 < h) {
+        if (arg0->maxSpanSq < h) {
             return func_151B3A7C(arg0);
         }
-        w = sqrtf(arg0->unk138 - h);
+        w = sqrtf(arg0->maxSpanSq - h);
         angle = 0.0f;
-        node = arg0->nodes;
+        node = arg0->points;
         for (i = 0; i < 10; i++, angle += 0.3490658700f) {
-            Node151B3A7C *n = &node[i];
+            HoltenRopePoint *n = &node[i];
             sn = sinf(angle);
             cs = cosf(angle);
             a = half * cs;
@@ -536,14 +520,14 @@ s32 func_151B3FDC(Struct151B3A7C *arg0) {
     return 1;
 }
 
-u8 func_151B42A4(Struct151B3A7C *arg0) {
+u8 func_151B42A4(HoltenRopeEffect *arg0) {
     u8 ret;
     f32 dx;
     f32 dy;
     f32 dz;
-    Vec3f_151B3A7C mid;
-    Vec3f_151B3A7C relStart;
-    Vec3f_151B3A7C relEnd;
+    Vec3f_1E0560 mid;
+    Vec3f_1E0560 relStart;
+    Vec3f_1E0560 relEnd;
     f32 len;
     f32 inv;
     f32 pad3[5];
@@ -569,8 +553,8 @@ u8 func_151B42A4(Struct151B3A7C *arg0) {
     f32 b;
     f32 t;
     f32 k;
-    Vec3f_151B3A7C cur;
-    Vec3f_151B3A7C np;
+    Vec3f_1E0560 cur;
+    Vec3f_1E0560 np;
     f32 dX;
     f32 dY;
     f32 dZ;
@@ -579,7 +563,7 @@ u8 func_151B42A4(Struct151B3A7C *arg0) {
     f32 aX;
     f32 aY;
     s32 i;
-    Node151B3A7C *node;
+    HoltenRopePoint *node;
 
     ret = 1;
     dx = -arg0->start.x + arg0->end.x;
@@ -609,14 +593,14 @@ u8 func_151B42A4(Struct151B3A7C *arg0) {
         ux = u * inv;
         uy = v * inv;
         h = d2 * 0.25f;
-        if (arg0->unk138 < h) {
+        if (arg0->maxSpanSq < h) {
             ret = func_151B3A7C(arg0);
         } else {
             f32 angle;
-            w = sqrtf(arg0->unk138 - h);
-            node = arg0->nodes;
+            w = sqrtf(arg0->maxSpanSq - h);
+            node = arg0->points;
             for (i = 0, angle = 0.0f, angle2 = 0.0f; i < 10; i++, angle += 0.3490658700f, angle2 += 0.3490658700f) {
-                Node151B3A7C *n = &node[i];
+                HoltenRopePoint *n = &node[i];
                 cur = n->pos;
                 sn = sinf(angle);
                 cs = cosf(angle);
@@ -627,24 +611,24 @@ u8 func_151B42A4(Struct151B3A7C *arg0) {
                 np.x = (t * s) + mid.x;
                 np.y = ((a * uy) - (b * ux)) + mid.y;
                 np.z = (t * c) + mid.z;
-                if (arg0->unk10 & 2) {
+                if (arg0->flags & 2) {
                     n->pos = np;
                     n->vel.x = 0.0f;
                     n->vel.y = 0.0f;
                     n->vel.z = 0.0f;
                 } else if (*(s32 *)D_800DBFF4 != 0) {
                     n->pos = np;
-                    n->vel = *(Vec3f_151B3A7C *)&D_800A5480;
+                    n->vel = *(Vec3f_1E0560 *)&D_800A5480;
                 } else {
-                    dX = (cur.x - np.x) * sn2 * arg0->unk40;
-                    dY = (cur.y - np.y) * sn2 * arg0->unk40;
-                    dZ = (cur.z - np.z) * sn2 * arg0->unk40;
+                    dX = (cur.x - np.x) * sn2 * arg0->stiffness;
+                    dY = (cur.y - np.y) * sn2 * arg0->stiffness;
+                    dZ = (cur.z - np.z) * sn2 * arg0->stiffness;
                     n->pos.x = np.x + dX;
                     n->pos.y = np.y + dY;
                     n->pos.z = np.z + dZ;
-                    aX = arg0->unk3C * dX;
-                    aY = arg0->unk3C * dY;
-                    aZ = arg0->unk3C * dZ;
+                    aX = arg0->gain * dX;
+                    aY = arg0->gain * dY;
+                    aZ = arg0->gain * dZ;
                     n->pos.x += (n->vel.x * D_800BE9A4) + (0.5f * aX * D_800BE9A4 * D_800BE9A4);
                     n->pos.y += (n->vel.y * D_800BE9A4) + (0.5f * aY * D_800BE9A4 * D_800BE9A4);
                     n->pos.z += (n->vel.z * D_800BE9A4) + (0.5f * aZ * D_800BE9A4 * D_800BE9A4);
@@ -655,53 +639,45 @@ u8 func_151B42A4(Struct151B3A7C *arg0) {
             }
         }
     }
-    arg0->unk10 &= ~2;
+    arg0->flags &= ~2;
     return ret;
 }
 
+/* Endpoint data at 0x150 for ropes tied between two actors' bones. */
 typedef struct {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x198];
-    s32 unk1D4;
-} Struct151B47D8Actor;
-
-typedef struct {
-    Struct151B47D8Actor *unk0;
-    u8 unk4;
-    u8 unk5;
-    u8 pad6[2];
-    f32 unk8[3];
-} Struct151B47D8Part;
+    /* 0x00 */ HoltenRopeTarget *target;
+    /* 0x04 */ u8 targetId; // target->unk3B when the rope was attached
+    /* 0x05 */ u8 bone;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ Vec3f_1E0560 offset; // in the bone's space
+} HoltenRopeBoneAnchor;
 
 typedef struct {
-    u8 pad0[0x10];
-    u8 unk10;
-} Struct151B47D8;
+    HoltenRopeBoneAnchor start;
+    HoltenRopeBoneAnchor end;
+} HoltenRopeBoneAnchors;
 
-typedef struct {
-    Struct151B47D8Part p0;
-    Struct151B47D8Part p1;
-} Struct151B47D8Pair;
+void func_15143134(Vec3f_1E0560 *in, Vec3f_1E0560 *out, Mtx *mtx);
 
-void func_15143134(void *, s32, s32);
+/*
+ * Places one end of a rope tied between two bones (called through func_151B2FA0). Returns 0 once
+ * either actor is gone; while either has no bone matrices yet, both ends are marked lost.
+ */
+s32 func_151B47D8(HoltenRopeEffect *effect, HoltenRopeBoneAnchors *anchors, Vec3f_1E0560 *pos, u8 isStart) {
+    HoltenRopeTarget *startTarget = anchors->start.target;
+    HoltenRopeTarget *endTarget = anchors->end.target;
 
-s32 func_151B47D8(Struct151B47D8 *arg0, Struct151B47D8Pair *arg1, s32 arg2, u8 arg3) {
-    Struct151B47D8Actor *a = arg1->p0.unk0;
-    Struct151B47D8Actor *b = arg1->p1.unk0;
-
-    if (a->unk1D4 == 0 || b->unk1D4 == 0) {
-        arg0->unk10 |= 0xC;
-        return 1;
+    if (startTarget->boneMtx == NULL || endTarget->boneMtx == NULL) {
+        effect->flags |= 0xC;
+        return TRUE;
     }
-    if (a->unk0 == 0 || a->unk3B != arg1->p0.unk4 || b->unk0 == 0 || b->unk3B != arg1->p1.unk4) {
-        return 0;
+    if (startTarget->unk0 == 0 || startTarget->unk3B != anchors->start.targetId || endTarget->unk0 == 0 || endTarget->unk3B != anchors->end.targetId) {
+        return FALSE;
     }
-    arg0->unk10 &= ~(arg3 ? 4 : 8);
-    func_15143134(arg3 ? arg1->p0.unk8 : arg1->p1.unk8, arg2,
-                  arg3 ? a->unk1D4 + (arg1->p0.unk5 << 6) : b->unk1D4 + (arg1->p1.unk5 << 6));
-    return 1;
+    effect->flags &= ~(isStart ? 4 : 8);
+    func_15143134(isStart ? &anchors->start.offset : &anchors->end.offset, pos,
+                  isStart ? &startTarget->boneMtx[anchors->start.bone] : &endTarget->boneMtx[anchors->end.bone]);
+    return TRUE;
 }
 
 typedef struct {
