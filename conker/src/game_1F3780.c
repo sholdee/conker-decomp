@@ -9,16 +9,10 @@
 s32 func_150ADA20(void);
 #include "variables.h"
 
-typedef struct 
-{
-  s32 unk0;
-  s32 unk4;
-  s32 unk8;
-} D_800AAB08Entry;
 extern s32 D_800AAB00[];
-extern D_800AAB08Entry D_800AAB08[];
-extern D_800AAB08Entry D_800AAB38[];
-extern D_800AAB08Entry D_800AAB50[];
+extern struct17 D_800AAB08[];
+extern struct17 D_800AAB38[];
+extern struct17 D_800AAB50[];
 typedef struct {
     s8 active;
     u8 pad1;
@@ -29,8 +23,8 @@ typedef struct {
     u8 pad7;
 } Func151C62D0Spawn;
 
-extern D_800AAB08Entry D_800AAB20[];
-extern D_800AAB08Entry D_800AAB68[];
+extern struct17 D_800AAB20[];
+extern struct17 D_800AAB68[];
 extern u8 D_800DCA20;
 s32 func_151C229C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
 void func_15145740(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4);
@@ -166,28 +160,25 @@ s32 func_151C62D0(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3, s16 arg4, s32 arg
 
 
 
-void func_151C69CC(void *a0, s32 a1, u8 a2);
+void func_15143134(struct17 *point, struct17 *out, s32 matrix);
+void func_151C69CC(struct127 *arg0, struct17 *out, u8 side);
 
-void func_151C6974(void *a0, s32 a1, s32 a2) {
-    func_151C69CC(a0, a2, 0);
+/* Handler-table entry: the side-0 point of func_151C69CC. */
+void func_151C6974(struct127 *arg0, s32 arg1, struct17 *out) {
+    func_151C69CC(arg0, out, 0);
 }
 
-void func_151C69A0(void *a0, s32 a1, s32 a2) {
-    func_151C69CC(a0, a2, 1);
+/* Handler-table entry: the side-1 point of func_151C69CC. */
+void func_151C69A0(struct127 *arg0, s32 arg1, struct17 *out) {
+    func_151C69CC(arg0, out, 1);
 }
 
-extern s32 D_800AAB00[];
-extern D_800AAB08Entry D_800AAB08[];
-void func_151C69CC(void *a0, s32 a1, u8 a2);
-void func_151C69CC(void *a0, s32 a1, u8 a2)
-{
-  D_800AAB08Entry *temp_a0;
-  s32 temp_a2;
-  temp_a2 = ((s32 *) a0)[0x1D4 / 4] + D_800AAB00[a2];
-  temp_a0 = &D_800AAB08[a2];
-  func_15143134(temp_a0, a1, temp_a2);
-}
+/* Transforms this side's D_800AAB08 point by its joint matrix (D_800AAB00 bytes into arg0->unk1D4) into *out. */
+void func_151C69CC(struct127 *arg0, struct17 *out, u8 side) {
+    s32 matrix = (s32)arg0->unk1D4 + D_800AAB00[side];
 
+    func_15143134(&D_800AAB08[side], out, matrix);
+}
 
 typedef struct {
     u8 pad0[8];
@@ -199,14 +190,13 @@ typedef struct {
     u8 pad5A[0x64 - 0x5A];
 } Func151C6A28Big;
 
-extern D_800AAB08Entry D_800AAB38[];
-extern D_800AAB08Entry D_800AAB50[];
+extern struct17 D_800AAB38[];
+extern struct17 D_800AAB50[];
 s32 func_15142A5C(struct127 *arg0);
 void func_151D5148(struct127 *arg0);
 extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
 void func_151D3F14(struct17 *arg0, u8 arg1, s32 arg2);
 void func_151D4408(struct17 *, struct17 *, s32, struct127 *, f32, u8, s32);
-void func_151C6D70(struct127 *, u8, struct17 *, s16, u8, s32);
 s32 func_1514ECE0(s32, s16, void *);
 void func_150F7470(struct17 *, s32, s32, s32, s32, Func151C6A28Big *, f32, f32, f32, struct127 *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
@@ -220,7 +210,7 @@ void func_151C6A28(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3) {
         func_151D5148(arg0);
         if (*(s32 *)&arg0->unk1D4 != 0) {
             {
-                D_800AAB08Entry *spFC[3];
+                struct17 *spFC[3];
                 struct17 *spF0[3];
 
                 sp108 = *(s32 *)&arg0->unk1D4 + D_800AAB00[arg1];
@@ -293,30 +283,25 @@ void func_151C6A28(struct127 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-void *func_15102B38(s32, u8, s32, s32, f32 *, s16, u8, f32, s32, u8, s32, s16, u8, s32);
-extern f32 D_800AAC10;
-extern f32 D_800AAC14;
-extern f32 D_800AAC18;
-extern f32 D_800AAC1C;
-extern f32 D_800AAC20;
+void *func_15102B38(struct127 *, u8, struct17 *, struct17 *, f32 *, s16, u8, f32, struct17 *, u8, s32, s16, u8,
+                    s32);
 
-void func_151C6D70(struct127 *arg0, u8 arg1, struct17 *arg2, s16 arg3, u8 arg4,
-                   s32 arg5) {
+/* Spawns a func_15102B38 effect at `pos` between this side's D_800AAB08/D_800AAB20 points, with random
+ * size, count and angle. */
+void func_151C6D70(struct127 *arg0, u8 side, struct17 *pos, s16 arg3, u8 arg4, s32 arg5) {
     f32 values[2];
     f32 angle;
     u32 random1;
     u32 random0;
 
-    values[1] = (func_150ADA68() * D_800AAC10) + D_800AAC14;
-    values[0] = (func_150ADA68() * D_800AAC18) + D_800AAC1C;
+    values[1] = (func_150ADA68() * 1.001f) + 0.6040000319f;
+    values[0] = (func_150ADA68() * 5.9f) + 14.1f;
     random0 = func_150ADA20();
     random1 = func_150ADA20();
     angle = func_150ADA68();
-    func_15102B38((s32)arg0, (u32)D_800AAB00[arg1] >> 6,
-                  (s32)((u8 *)D_800AAB08 + arg1 * 0xC), (s32)((u8 *)D_800AAB20 + arg1 * 0xC), values,
-                  (random0 % 4U) + 6,
-                  (random1 % 1U) + 0xFF, (angle * 270.0f) + D_800AAC20,
-                  (s32)arg2, 0xFF, 0, arg3, arg4, arg5);
+    func_15102B38(arg0, (u32)D_800AAB00[side] >> 6, &D_800AAB08[side], &D_800AAB20[side], values,
+                  (random0 % 4U) + 6, (random1 % 1U) + 255, (angle * 270.0f) + 359.0f, pos, 255, 0, arg3, arg4,
+                  arg5);
 }
 
 /* Spawn descriptor for func_1513264C (0x7C bytes); same layout as EffectSpawn in game_124920.c. */
