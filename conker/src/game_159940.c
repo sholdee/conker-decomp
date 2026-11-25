@@ -5,8 +5,6 @@
 extern void guMtxIdentF(float mf[4][4]);
 extern void guMtxF2L(float mf[4][4], Mtx *m);
 extern void guMtxCatL(Mtx *m, Mtx *n, Mtx *res);
-f32 func_150AD780(f32);
-f32 func_150AD78C(f32);
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 stiffness, f32 damping, f32 dt);
 void func_15047B80(Mtx *m, LookAt *l, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
                    f32 zUp);

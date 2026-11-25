@@ -5,7 +5,6 @@
 
 extern f32 D_800A0F60;
 extern f32 D_800A0F64;
-void func_15124B18(Camera *arg0);
 
 void func_150DF820(Camera *arg0) {
     arg0->flags &= ~0x4000;

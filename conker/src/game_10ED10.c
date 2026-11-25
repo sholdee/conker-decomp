@@ -3,7 +3,6 @@
 #include "variables.h"
 
 s32 func_1509BE40();
-void func_1509BFB0(s32 num, s32, s32, ...);
 void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 
 extern f32 D_80088990[4];

@@ -67,7 +67,6 @@ void func_150C09F0(Emitter *emitter) {
     func_15169804((struct102 *)emitter);
 }
 
-extern void func_15169824(struct102 *);
 
 void func_150C0A1C(Emitter *emitter) {
     func_150C0A48(emitter);

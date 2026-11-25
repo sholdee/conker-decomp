@@ -562,7 +562,6 @@ void func_150F6368(BeamEffect *effect) {
     func_1514933C((struct260 *)effect);
 }
 
-void func_15149368(struct260 *);
 
 void func_150F6394(BeamEffect *effect) {
     func_150F631C(effect);
@@ -604,7 +603,6 @@ void func_150F6484(struct210 *obj) {
     func_151411A4(obj);
 }
 
-void func_151411C4(struct210 *);
 
 void func_150F64B0(struct210 *obj) {
     func_150F6478(obj);

@@ -321,9 +321,6 @@ s32 func_1501374C(TriggerZone *obj) {
     return 1;
 }
 
-/* func_1000FA64 passes its arguments as full words (callers do not truncate). */
-void func_150A8050(MtxF mtx, f32 arg1, f32 arg2, f32 arg3);
-
 typedef struct Game40490BeamPacket {
     f32 position[3];
     f32 direction[3];

@@ -534,7 +534,6 @@ void func_15106EF8(BoltObj *bolt) {
     func_15169804((struct102 *)bolt);
 }
 
-void func_15169824(struct102 *arg0);
 
 /* Destroys the bolt's resources, then hands it to func_15169824. */
 void func_15106F24(BoltObj *bolt) {
@@ -675,7 +674,6 @@ void func_1510764C(BoltChainObj *obj) {
     func_1514933C(&obj->base);
 }
 
-void func_15149368(struct260 *arg0);
 
 void func_15107678(BoltChainObj *obj) {
     func_1510761C(obj);

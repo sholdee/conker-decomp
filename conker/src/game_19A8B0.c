@@ -220,7 +220,6 @@ void func_1516D4E8(x, y, z, texture, frame, r, g, b, alpha, envR, envG, envB, ki
 /* The int-argument prototype that callers use (game_19E040.c declares the same one). */
 void func_1516D4E8(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-void func_1516972C(struct102 *arg0);
 extern s32 (*D_8008CBA0[])(Particle *);
 
 void func_1516D678(Particle *particle) {

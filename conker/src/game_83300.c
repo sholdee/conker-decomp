@@ -1720,8 +1720,6 @@ void func_15059C84(Actor *actor) {
     actor->z_position += z;
     actor->y_position += y;
 }
-f32 func_150AD780(f32);
-f32 func_150AD78C(f32);
 /* Splits `speed` (halved) along yaw `angle` and pitch `pitch` (degrees) into x/z/y components. */
 void func_1505A184(u16 angle, f32 speed, f32 pitch, f32 *outX, f32 *outZ, f32 *outY) {
     f32 sinYaw;

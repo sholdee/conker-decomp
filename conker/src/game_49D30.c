@@ -726,9 +726,6 @@ void func_1501DE18(s32 scene) {
     func_1501E81C(1, scene);
 }
 
-s32 func_100127D0(void);
-void func_15060F28(Actor *arg0, s32 arg1);
-Actor *func_15072208(Actor *, s32);
 extern u8 D_800C35C4;
 extern u8 D_800C3663;
 extern Actor D_800CC2D0[26];
@@ -2682,7 +2679,6 @@ s32 func_150235DC(s32 scene) {
     }
 }
 
-void func_150627D4(Actor *arg0);
 extern u8 D_800C3E78;
 extern void func_1504A730(void);
 extern void func_1507E73C(Actor *);

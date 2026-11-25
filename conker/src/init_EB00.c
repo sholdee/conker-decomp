@@ -114,8 +114,6 @@ struct DelayedSoundRecord {
 
 s32 func_1000ECCC(DelayedSoundRecord *record, s32 *active, u32 *volume, s32 *pan,
                   s32 *cents, s32 *mix, u16 *sound);
-s32 func_1000EE70(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
-                  s32 *mix, u16 *sound);
 
 // Random ambient chirp: every 128-255 ticks, play one of sounds 0x6C-0x6E.
 s32 func_1000EB00(TimedSoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,

@@ -915,7 +915,6 @@ void func_150D4D58(Vec3f *pos, Vec3f *vel, f32 angle, u8 arg3, s32 arg4) {
     } while (count > 0);
 }
 
-extern void func_100111C8(u16);
 
 /*
  * Sound callback for the trail's three loops (0x5B3, 0x5B4, 0x5BC): moves volume and pitch toward

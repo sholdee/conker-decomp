@@ -798,7 +798,6 @@ void func_150F0328(Glow *glow) {
     func_151411A4((struct210 *)glow);
 }
 
-void func_151411C4(struct210 *arg0);
 
 void func_150F0354(Glow *glow) {
     func_150F0380(glow);

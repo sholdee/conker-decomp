@@ -1152,7 +1152,6 @@ void func_15159C08(DiskEmitterObject *obj) {
     }
 }
 
-f32 func_15144B68(f32 angle);
 
 /* Update callback: wobbles the size and moves the offset along direction by sin(angle). */
 s32 func_1515A11C(Particle *particle, ParticleUpdateArg *arg1) {

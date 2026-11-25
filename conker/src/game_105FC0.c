@@ -325,7 +325,6 @@ typedef struct {
 
 f32 sqrtf(f32);
 
-extern f32 func_150484A0(f32, f32);
 extern f32 func_15143E64(f32 *);
 extern f32 func_15144528(f32, f32, f32);
 extern void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);

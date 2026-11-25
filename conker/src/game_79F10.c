@@ -27,7 +27,6 @@ extern u8 D_800CC2B1;
 extern u16 D_800CC2B2;
 extern f32 D_800CC2B4;
 void func_1504C0E8(Actor *arg0, s32 arg1, f32 arg2);
-void func_1504C854(Actor *arg0);
 void func_1504C9E4(Actor *arg0, s8 arg1, u8 arg2);
 
 void func_1504CA60(Actor *actor) {

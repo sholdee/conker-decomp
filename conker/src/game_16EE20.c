@@ -69,7 +69,6 @@ typedef struct {
     /* 0x08 */ u8 unk8;
 } Link151419D0;
 
-void func_1516972C(struct102 *arg0);
 
 /* Message handler: message 0 destroys the object if it refers to it; 0x2D re-links it. */
 void func_151419D0(struct102 *obj, Msg151419D0 *msg, u8 msgType) {
@@ -527,7 +526,6 @@ Actor *func_15142444(u8 uniqueId, Actor *self) {
     }
     return NULL;
 }
-void func_150A8050(f32 (*)[4], f32, f32, f32);
 
 /*
  * Builds out = scale * rotation * translation: func_150A8050 makes the rotation, rows 0/2 are scaled

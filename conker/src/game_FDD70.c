@@ -14,7 +14,6 @@ extern void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 extern void func_1507CD64(Actor *, s32);
 
 s32 func_1509BE40(s32, s32, s32, ...);
-void func_1509BFB0(s32, s32, s32, ...);
 /* Eases *value toward target, tracking its rate of change in *velocity. */
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 arg3, f32 arg4, f32 delta);
 

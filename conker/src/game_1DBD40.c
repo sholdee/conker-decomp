@@ -5,7 +5,6 @@
 void func_151AE984(f32 *, f32, f32, f32, s32, u8);
 void func_151AEAB4(f32 *, s32, u8);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
-f32 func_151423D8(u8);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, u8, s32, s16, s16, s32, u8, s32);
 
 /* Randomly spawns a particle at (x, y, z): 15% nothing, 10% a random-direction one (func_151AEAB4),

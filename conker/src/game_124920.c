@@ -364,7 +364,6 @@ void func_150F7F58(struct210 *obj, s16 arg1) {
     func_15140410(obj, &obj->unk110, &obj->unk11C, arg1);
 }
 
-extern f32 func_150ADA68(void);
 void func_151541B8(Vec3f *pos, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6);
 void func_151D3F14(Vec3f *pos, u8, s32);
 ActorCtl *func_150FF288(Actor *);
