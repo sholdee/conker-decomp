@@ -11,7 +11,6 @@ typedef struct {
 
 extern ModelHitEntry D_8009BD30[23];
 
-
 /* One hit sphere bound to a bone of a model. */
 typedef struct {
     /* 0x0 */ u8  bone;
@@ -40,10 +39,10 @@ typedef f32 BoneMtx[4][4];
 void func_15143134(struct17 *in, struct17 *out, BoneMtx *mtx);
 void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
 
-/* Melee hit test: takes the point `dist` ahead of `self` (rotated by its pitch unkB8 and yaw
- * unk40), rejects it against obj's whole-body sphere, then tests it against each of obj's hit
- * spheres (table `type`) grown by `radius`.  On a hit, spawns the impact effect (unless obj is
- * immune) and returns bone + 1; returns 0 for a miss. */
+/* Point vs. hit-sphere test: takes the point `dist` ahead of `self` (rotated by its pitch unkB8
+ * and yaw unk40), rejects it against obj's whole-body sphere, then tests it against each of obj's
+ * hit spheres (table `type`) grown by `radius`.  On a hit, calls func_1505D1C4 at obj's position
+ * (unless obj is immune) and returns bone + 1; returns 0 for a miss. */
 s32 func_15080D20(struct127 *self, struct127 *obj, s32 type, f32 dist, f32 radius, s32 arg5) {
     f32 scale;
     f32 angle;
