@@ -1,0 +1,252 @@
+#include <ultra64.h>
+#include "functions.h"
+#include "variables.h"
+f32 func_1515F008(s16 *, s32);
+void func_1515F040(f32, s32);
+void func_1515F0AC(f32, s32);
+
+/* The type-0x2E object func_15105C24 finds by owner (Func15105C24Obj in game_131F30.c). */
+struct ZoneLinkObj {
+    u8 pad0[0x98];
+    Actor *unk98;
+};
+
+struct ZoneLinkObj *func_15105C24(s32 owner);
+void func_1515D4D4(s32 r, s32 g, s32 b, u8 priority);
+
+PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group);
+PointLight *func_1515D5F8(s32 x, s32 y, s32 z, s32 radius, s32 r, s32 g, s32 b, s32 arg7, s32 disabled, u8 group);
+void func_1515EF74(s16 *mtx);
+
+/* G_MOVEWORD index this microcode uses for the light-space scale matrix. */
+#define G_MW_LIGHTSCALE 0x10
+
+void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB);
+void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags);
+void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags);
+
+/* Loads the 0x30-byte light at `l` into the microcode light table at byte offset `ofs` (point lights start at 0x60). */
+#define gSPPointLight(pkt, l, ofs) gDma2p((pkt), G_MOVEMEM, (l), sizeof(PointLightGfx), G_MV_LIGHT, (ofs))
+
+TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node);
+void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags);
+void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB);
+TriggerZone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneLink *node);
+void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags);
+void func_1515EF74(s16 *mtx);
+f32 func_1515F008(s16 *mtx, s32 i);
+void func_1515F040(f32 value, s32 i);
+void func_1515F0AC(f32 value, s32 i);
+
+/* A node of a list of spawn regions with their cached volume and area. */
+RegionNode *func_1515F1B0(TriggerZone *region) {
+    RegionNode *node;
+
+    node = (RegionNode *)func_10003C6C(sizeof(RegionNode), 1, 2, 0, 1);
+    if (node == NULL) {
+        return NULL;
+    }
+    node->region = region;
+    if (region != NULL) {
+        node->volume = func_1514462C((s32)region);
+    } else {
+        node->volume = 0.0f;
+    }
+    if (region != NULL) {
+        node->area = func_15144598(region);
+    } else {
+        node->area = 0.0f;
+    }
+    node->next = NULL;
+    return node;
+}
+
+/* Pushes `node` onto the front of `list`. */
+void func_1515F25C(RegionNode **list, RegionNode *node) {
+    node->next = *list;
+    *list = node;
+}
+
+typedef void (*ZoneHandler)(Actor *obj, TriggerZone *zone);
+
+extern ZoneHandler D_8008B090[12];
+
+/* Runs zone handler zone->data1 for `obj`. */
+void func_1515F270(Actor *obj, TriggerZone *zone) {
+    s32 idx = zone->data1;
+
+    if (idx >= 0 && idx < 12) {
+        if (D_8008B090[idx] != NULL) {
+            D_8008B090[idx](obj, zone);
+        }
+    }
+}
+
+s32 func_1505D024(Actor *obj, s32 arg1, u16 arg2, s32 arg3);
+
+void func_1515F2B8(Actor *obj, TriggerZone *zone) {
+    func_1505D024(obj, 0x6001D, obj->langle, -1);
+}
+
+extern ZoneHandler D_8008B0C0[3];
+
+/* TriggerZone handler: when the player (unique id 1) is in the zone, runs ambient effect zone->data2. */
+void func_1515F2E8(Actor *obj, TriggerZone *zone) {
+    s32 idx;
+
+    if (obj->unique_id == 1) {
+        idx = zone->data2;
+        if (idx >= 0 && idx < 3) {
+            D_8008B0C0[idx](obj, zone);
+        }
+    }
+}
+
+/* Ambient effect 0: eases the ambient colour halfway towards (97, 96, 98) each frame. */
+void func_1515F338(Actor *obj, TriggerZone *zone) {
+    u8 red;
+    u8 green;
+    u8 blue;
+
+    red = D_800DCD20[0];
+    green = D_800DCD20[1];
+    blue = D_800DCD20[2];
+    if (D_800DCD94 != 97.0f) {
+        D_800DCD94 += (97.0f - D_800DCD94) * 0.5f;
+        red = (u32)D_800DCD94;
+    }
+    if (D_800DCD98 != 96.0f) {
+        D_800DCD98 += (96.0f - D_800DCD98) * 0.5f;
+        green = (u32)D_800DCD98;
+    }
+    if (D_800DCD9C != 98.0f) {
+        D_800DCD9C += (98.0f - D_800DCD9C) * 0.5f;
+        blue = (u32)D_800DCD9C;
+    }
+    func_1515D4D4(red, green, blue, 0);
+}
+
+/* Ambient effect 1: eases the ambient colour halfway towards (229, 253, 160) each frame. */
+void func_1515F5C4(Actor *obj, TriggerZone *zone) {
+    u8 red;
+    u8 green;
+    u8 blue;
+
+    red = D_800DCD20[0];
+    green = D_800DCD20[1];
+    blue = D_800DCD20[2];
+    if (D_800DCD94 != 229.0f) {
+        D_800DCD94 += (229.0f - D_800DCD94) * 0.5f;
+        red = (u32)D_800DCD94;
+    }
+    if (D_800DCD98 != 253.0f) {
+        D_800DCD98 += (253.0f - D_800DCD98) * 0.5f;
+        green = (u32)D_800DCD98;
+    }
+    if (D_800DCD9C != 160.0f) {
+        D_800DCD9C += (160.0f - D_800DCD9C) * 0.5f;
+        blue = (u32)D_800DCD9C;
+    }
+    func_1515D4D4(red, green, blue, 0);
+}
+
+/* Ambient effect 2: eases the ambient colour towards a colour pulsing with sin(D_800DCDA0). */
+void func_1515F850(Actor *obj, TriggerZone *zone) {
+    f32 s;
+    f32 targetR;
+    f32 targetG;
+    f32 targetB;
+    u8 color[3];
+
+    color[0] = D_800DCD20[0];
+    color[1] = D_800DCD20[1];
+    color[2] = D_800DCD20[2];
+    s = sinf(D_800DCDA0);
+    targetR = (s * 29.5f) + 127.5f;
+    targetG = (s * 71.0f) + 109.0f;
+    targetB = (s * 26.0f) + 26.0f;
+    D_800DCDA0 += 0.07100000232f * D_800BE9A4;
+    D_800DCDA0 = func_15144B68(D_800DCDA0);
+    if (targetR != D_800DCD94) {
+        D_800DCD94 += (targetR - D_800DCD94) * 0.5f;
+        color[0] = (u32)D_800DCD94;
+    }
+    if (targetG != D_800DCD98) {
+        D_800DCD98 += (targetG - D_800DCD98) * 0.5f;
+        color[1] = (u32)D_800DCD98;
+    }
+    if (targetB != D_800DCD9C) {
+        D_800DCD9C += (targetB - D_800DCD9C) * 0.5f;
+        color[2] = (u32)D_800DCD9C;
+    }
+    func_1515D4D4(color[0], color[1], color[2], 0);
+}
+
+/* TriggerZone handler: func_1515F2E8 for a handler table that is empty in this build. */
+void func_1515FB70(Actor *obj, TriggerZone *zone) {
+    s32 idx;
+
+    if (obj->unique_id == 1) {
+        idx = zone->data2;
+        if (idx >= 0 && idx < 0) {
+        }
+    }
+}
+
+void func_1515FB94(Actor *obj, TriggerZone *zone) {
+    func_1505D024(obj, 0x6002D, obj->langle, -1);
+}
+
+/* TriggerZone handler: like func_1515FB94, also passing the index of the object linked to this zone (or -1). */
+void func_1515FBC4(Actor *obj, TriggerZone *zone) {
+    struct ZoneLinkObj *link;
+    Actor *target;
+    s32 targetIndex;
+
+    target = NULL;
+    link = func_15105C24((s32)zone);
+    if (link != NULL) {
+        target = link->unk98;
+    }
+    if (target != NULL) {
+        targetIndex = target - movement_obj;
+    } else {
+        targetIndex = -1;
+    }
+    func_1505D024(obj, 0x6002E, obj->langle, targetIndex);
+}
+
+void func_1515FC34(Actor *obj, TriggerZone *zone) {
+    func_1505D024(obj, 0x33, 0xC000, -1);
+}
+
+s32 func_150AD960(s32, s32, s32, s32);
+void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
+void func_1507CD64(Actor *, s32);
+
+/*
+ * TriggerZone handler: unless the zone has a range (data2, in hundredths of its radius) that `obj`
+ * is outside of, fires event 0x2F on `obj`.
+ */
+void func_1515FC60(Actor *obj, TriggerZone *zone) {
+    s32 pad; // matching: stack slot
+    f32 limit;
+    f32 scale;
+    s32 value;
+
+    if (obj->mv != NULL && obj->mv->death_State == 0) {
+        value = zone->data2;
+        if (value != 0) {
+            scale = (f32)(u32)value * 0.009999999776f;
+            value = func_150AD960(zone->x, zone->z, obj->xpos, obj->zpos);
+            limit = (zone->xSize * scale) - obj->bodyRadius;
+            if (limit > value) {
+                return;
+            }
+        }
+        func_1505D024(obj, 0x2F, 0, -1);
+        func_15136C3C(obj, 1, 1, 1, 1, 0, 0xFF, 1);
+        func_15145A50(obj);
+        func_1507CD64(obj, 6);
+    }
+}
