@@ -31,7 +31,9 @@ typedef struct GameObjExt {
     /* 0x032 */ u16 unk32;
     /* 0x034 */ u8 pad34[0x3];
     /* 0x037 */ u8 unk37;
-    /* 0x038 */ u8 pad38[0xE];
+    /* 0x038 */ u8 pad38[0x4];
+    /* 0x03C */ u8 unk3C;
+    /* 0x03D */ u8 pad3D[0x9];
     /* 0x046 */ s16 unk46;
     /* 0x048 */ u8 pad48[0x2];
     /* 0x04A */ s8 chased;
@@ -141,7 +143,11 @@ typedef struct GameObj {
     /* 0x25C */ s32 unk25C;
     /* 0x260 */ u8 pad260[0x14];
     /* 0x274 */ u8 unk274;
-    /* 0x275 */ u8 pad275[0x85];
+    /* 0x275 */ u8 pad275[0x1];
+    /* 0x276 */ s8 unk276;
+    /* 0x277 */ u8 pad277[0xB];
+    /* 0x282 */ s16 unk282;
+    /* 0x284 */ u8 pad284[0x76];
     /* 0x2FA */ u8 unk2FA;
     /* 0x2FB */ u8 pad2FB[0x4];
     /* 0x2FF */ u8 unk2FF;
@@ -719,76 +725,56 @@ void func_1504BC38(struct127 *obj) {
     }
 }
 
-typedef struct {
-    u8  pad0[0x8];
-    s16 unk8;
-    u8  padA;
-    u8  unkB;
-    u8  padC[2];
-    u16 unkE;
-    u16 unk10;
-    u8  pad12[2];
-    u16 unk14;
-    u8  unk16;
-    u8  pad17[0x3C - 0x17];
-    u8  unk3C;
-} Struct1504BE2C;
-
 void func_1507EB2C(void *arg0);
 extern u16 D_800CC2B2;
 extern f32 D_800CC2B4;
 
-void func_1504BE2C(struct127 *arg0, u16 *arg1, f32 *arg2, s8 *arg3) {
-    s32 pad0;
-    s32 pad1;
-    f32 temp_f12;
-    Struct1504BE2C *sub;
+void func_1504BE2C(GameObj *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
+    s32 pad[2]; // matching: the frame has two unused words
+    f32 angle;
 
-    temp_f12 = ((Struct1504BE2C *)arg0->unk31C)->unkB * 0.02454369329f;
+    angle = obj->unk31C->unkB * 0.024543693f /* pi / 128 */;
     D_800CC2B4 = 16.0f;
-    sub = (Struct1504BE2C *)arg0->unk31C;
-    if ((sub->unk16 != 0) && (sub->unk16 == 0)) {
-        func_1507EB2C(arg0);
-        ((Struct1504BE2C *)arg0->unk31C)->unk8 = 0;
-        sub = (Struct1504BE2C *)arg0->unk31C;
+    if (obj->unk31C->unk16 != 0 && obj->unk31C->unk16 == 0) { // never true, but compiled in
+        func_1507EB2C(obj);
+        obj->unk31C->unk8 = 0;
     }
-    if (sub->unkE == 0) {
-        sub->unkE = 0xA6;
-        sub = (Struct1504BE2C *)arg0->unk31C;
+    if (obj->unk31C->unkE == 0) {
+        obj->unk31C->unkE = 0xA6;
     }
-    sub->unk3C = 5;
+    obj->unk31C->unk3C = 5;
+    if (arg1) { // matching: this and the empty if below keep arg1 live in a1 across the calls
+    }
+    if (*arg2 > 4.0f && obj->unk84 == 0xAA) {
+        obj->unk31C->unk3C = 1;
+        obj->unk31C->unk10 = *arg1;
+    }
+    func_150AD78C(angle);
     if (arg1) {
     }
-    if ((*arg2 > 4.0f) && (arg0->unk84.uh == 0xAA)) {
-        ((Struct1504BE2C *)arg0->unk31C)->unk3C = 1;
-        ((Struct1504BE2C *)arg0->unk31C)->unk10 = *arg1;
-    }
-    func_150AD78C(temp_f12);
-    if (arg1) {
-    }
-    ((Struct1504BE2C *)arg0->unk31C)->unkB += 2;
-    if (((Struct1504BE2C *)arg0->unk31C)->unk16 != 0) {
-        arg0->unkAA = 0x19;
-    } else if (arg0->unk84.uh == 0xA7) {
-        arg0->unkAA = 0x32;
+    obj->unk31C->unkB += 2;
+    if (obj->unk31C->unk16 != 0) {
+        obj->unkAA = 25;
+    } else if (obj->unk84 == 0xA7) {
+        obj->unkAA = 50;
     } else {
-        arg0->unkAA = 0x20;
+        obj->unkAA = 32;
     }
-    *(f32 *)&arg0->pad54 *= 0.5f;
-    if ((arg0->unk84.uh == 0x2C) || (arg0->unk84.uh == 0xE0)) {
-        *arg3 = ((s8 *)D_800CC284)[3] >> 1;
+    obj->unk54 *= 0.5f;
+    if (obj->unk84 == 0x2C || obj->unk84 == 0xE0) {
+        *arg3 = (*(OSContPad **)&D_800CC284)->stick_y >> 1;
     } else {
         if (!(func_150ADA20() & 0x3F)) {
-            ((Struct1504BE2C *)arg0->unk31C)->unk14 = (func_150ADA20() % 25000U) - 12500;
+            obj->unk31C->unk14 = (func_150ADA20() % 25000U) - 12500;
         }
-        D_800CC2B2 = ((Struct1504BE2C *)arg0->unk31C)->unk14;
-        if (((Struct1504BE2C *)arg0->unk31C)->unk16 != 0) {
+        D_800CC2B2 = obj->unk31C->unk14;
+        if (obj->unk31C->unk16 != 0) {
             D_800CC2B2 = (s16)D_800CC2B2 / 3;
         }
     }
-    if ((D_800C35EA == 0) && (((Struct1504BE2C *)arg0->unk31C)->unk16 == 0)) {
-        arg0->unk282 = 0x1E;
-        arg0->unk276 = 0;
+    if (D_800C35EA == 0 && obj->unk31C->unk16 == 0) {
+        obj->unk282 = 30;
+        obj->unk276 = 0;
     }
 }
 
@@ -810,7 +796,7 @@ s32 func_1504C0B8(void) {
 }
 
 void func_15064A14(void *);
-s32 func_15064B94(u8 *, f32, f32, s32, f32);
+s32 func_15064B94(GameObj *, f32, f32, s32, f32);
 extern f32 D_800991DC;
 extern f32 D_800991E0;
 extern f32 D_800991E4;
@@ -825,113 +811,113 @@ extern u8 D_800CC2B1;
 extern u16 D_800CC2B2;
 extern f32 D_800CC2B4;
 
-void func_1504C0E8(u8 *arg0, s32 arg1, f32 arg2) {
+void func_1504C0E8(GameObj *obj, s32 arg1, f32 arg2) {
     f32 blend;
     f32 start;
     f32 vel;
     s32 pressed;
     f32 speed;
     s32 anim;
-    u8 *st;
+    GameObjExt *ext;
 
     f32 diff;
 
-    if ((s16)D_800CC2B2 == 0 && (st = *(u8 **)(arg0 + 0x31C), *(s16 *)(st + 0x12) >= -29) && *(s16 *)(st + 0x12) < 30) {
-        *(s16 *)(st + 0x12) = 0;
+    if ((s16)D_800CC2B2 == 0 && (ext = obj->unk31C, ext->unk12 >= -29) && ext->unk12 < 30) {
+        ext->unk12 = 0;
     } else {
-        st = *(u8 **)(arg0 + 0x31C);
-        diff = (s16)D_800CC2B2 - *(s16 *)(st + 0x12);
+        ext = obj->unk31C;
+        diff = (s16)D_800CC2B2 - ext->unk12;
         diff = (D_800D1550[0] / D_800CC2B4) * diff;
-        *(s16 *)(st + 0x12) += (s16)(s32)diff;
+        ext->unk12 += (s16)(s32)diff;
     }
-    st = *(u8 **)(arg0 + 0x31C);
-    if (*(st + 0x6B) != 0) {
+    ext = obj->unk31C;
+    if (ext->unk6B != 0) {
         return;
     }
     anim = 999;
-    if (arg0[0x65] != 0 && arg0[0x104] == 0) {
-        func_15064A14(arg0);
+    if (obj->unk65 != 0 && obj->stunned == 0) {
+        func_15064A14(obj);
         return;
     }
-    if (arg0[0x81] == 0 && arg0[0x104] == 0 && arg0[0xAD] == 0) {
-        if (arg0[0x83] == 0 && *(st + 0x11A) != 3) {
-            arg0[0x80] = 1;
-            arg0[0x100] &= 0xF3;
+    if (obj->unk81 == 0 && obj->stunned == 0 && obj->in_water == 0) {
+        if (obj->unk83 == 0 && ext->unk11A != 3) {
+            obj->unk80 = 1;
+            obj->unk100 &= 0xF3;
             D_800CC2BC |= 0x80;
             speed = 1.0f;
             start = 0.0f;
             blend = 4.0f;
-            vel = *(f32 *)(arg0 + 0x3C) * D_800991DC + arg2 * D_800991E0;
-            st = *(u8 **)(arg0 + 0x31C);
-            if (*(s16 *)(st + 0x46) > 0 || *(st + 0x4E) != 0 || arg0[0x13C] >= 100 || arg1 != 0 ||
-                (*(u16 *)(st + 0x32) & 3) || *(st + 0x78) != 0 || *(st + 0x1A) != 0 ||
-                *(s16 *)(st + 8) > 0 || *(st + 0x17) != 0) {
-                if (func_15064B94(arg0, vel, vel, arg1, arg2) != 0) {
+            vel = obj->xz_velocity * D_800991DC + arg2 * D_800991E0;
+            ext = obj->unk31C;
+            if (ext->unk46 > 0 || ext->unk4E != 0 || obj->unk13C >= 100 || arg1 != 0 ||
+                (ext->unk32 & 3) || ext->unk78 != 0 || ext->unk1A != 0 ||
+                ext->unk8 > 0 || ext->unk17 != 0) {
+                if (func_15064B94(obj, vel, vel, arg1, arg2) != 0) {
                     return;
                 }
-                st = *(u8 **)(arg0 + 0x31C);
+                ext = obj->unk31C;
             }
-            pressed = *(u16 *)D_800CC284 & 0x2000;
-            if (pressed == 0 || D_800CC2B1 != 0 || *(st + 0x78) != 0 || (*(st + 0x4E) & 0xF) == 1) {
-                if (*(f32 *)(arg0 + 0x3C) > 4.0f) {
-                    *(st + 0x37) = 0;
-                    st = *(u8 **)(arg0 + 0x31C);
+            pressed = (*(OSContPad **)&D_800CC284)->button & Z_TRIG;
+            if (pressed == 0 || D_800CC2B1 != 0 || ext->unk78 != 0 || (ext->unk4E & 0xF) == 1) {
+                if (obj->xz_velocity > 4.0f) {
+                    ext->unk37 = 0;
+                    ext = obj->unk31C;
                 }
-                pressed = *(st + 0x4E);
-                if ((*(st + 0x4E) == 1 || pressed == 0x81) && vel > 1.0f) {
+                pressed = ext->unk4E;
+                if ((ext->unk4E == 1 || pressed == 0x81) && vel > 1.0f) {
                     arg2 = 10.0f;
                     anim = 0x302;
-                    speed = *(f32 *)(arg0 + 0x3C) / 7.0f + D_800991E4;
-                    if (*(f32 *)(arg0 + 0x3C) > 23.0f) {
+                    speed = obj->xz_velocity / 7.0f + D_800991E4;
+                    if (obj->xz_velocity > 23.0f) {
                         anim = 0x303;
-                        speed = *(f32 *)(arg0 + 0x3C) / 23.0f + D_800991E8;
+                        speed = obj->xz_velocity / 23.0f + D_800991E8;
                     }
-                } else if (*(s8 *)(st + 0x4A) > 0 && vel >= 5.0f) {
+                } else if (ext->chased > 0 && vel >= 5.0f) {
                     anim = 0x2B;
                     speed = vel / 12.0f;
-                } else if (*(s8 *)(st + 0x4B) > 0 && vel >= 5.0f) {
+                } else if (ext->chasing > 0 && vel >= 5.0f) {
                     anim = 0xDF;
                     speed = vel / 12.0f;
-                } else if (*(f32 *)(arg0 + 0x118) != D_800991EC && *(f32 *)(arg0 + 0x18) < *(f32 *)(arg0 + 0x118) &&
-                           *(f32 *)(arg0 + 0x3C) >= 1.0f && *(st + 0x4E) == 0) {
+                } else if (obj->unk118 != D_800991EC && obj->y_position < obj->unk118 &&
+                           obj->xz_velocity >= 1.0f && ext->unk4E == 0) {
                     speed = vel / 18.0f + D_800991F0;
                     anim = 0x8B;
-                    arg0[0xAA] = 0x4B;
+                    obj->unkAA = 0x4B;
                 } else if (vel > 14.0f) {
                     anim = (D_800BE9F0 != 4) ? 2 : 0x1B2;
                     speed = vel / 23.0f + D_800991F4;
-                } else if (vel > 6.0f || (arg2 < 1.0f && *(f32 *)(arg0 + 0x3C) > 1.0f)) {
+                } else if (vel > 6.0f || (arg2 < 1.0f && obj->xz_velocity > 1.0f)) {
                     anim = 1;
                     speed = vel * 0.125f + D_800991F8;
                 } else if (vel > 1.0f) {
                     blend = 15.0f;
-                    anim = (arg0[4] == 0x80) ? 1 : 0;
+                    anim = (obj->id == 0x80) ? 1 : 0;
                     speed = vel * 0.125f + D_800991FC;
                 } else {
                     anim = func_1504C078();
                 }
-                if (*(f32 *)(arg0 + 0x28) > 60.0f && *(*(u8 **)(arg0 + 0x31C) + 0x4E) == 0) {
+                if (obj->unk28 > 60.0f && obj->unk31C->unk4E == 0) {
                     speed = 0.5f;
                     anim = 0x38;
-                    arg0[0x100] |= 0x10;
+                    obj->unk100 |= 0x10;
                 }
-                if (*(f32 *)(arg0 + 0x3C) > 18.0f && *(*(u8 **)(arg0 + 0x31C) + 0x11A) != 1 && *(*(u8 **)(arg0 + 0x31C) + 0x11A) != 3 && arg2 == 0.0f &&
-                    *(f32 *)(arg0 + 0x28) == 0.0f && D_800CC27C == 0) {
+                if (obj->xz_velocity > 18.0f && obj->unk31C->unk11A != 1 && obj->unk31C->unk11A != 3 && arg2 == 0.0f &&
+                    obj->unk28 == 0.0f && D_800CC27C == 0) {
                     speed = 0.5f;
                     anim = 0x21;
                     blend = 3.0f;
-                    arg0[0x89] = 8;
-                    arg0[0x83] = 0x11;
+                    obj->disable_run = 8;
+                    obj->unk83 = 0x11;
                 }
             } else if (pressed != 0) {
-                if (*(f32 *)(arg0 + 0x3C) < 3.0f) {
-                    *(st + 0x37) = 1;
+                if (obj->xz_velocity < 3.0f) {
+                    ext->unk37 = 1;
                 }
-                if (*(f32 *)(arg0 + 0x44) > D_80099200 && *((st = *(u8 **)(arg0 + 0x31C)) + 0x37) != 0) {
-                    *(s32 *)(st + 4) = 1;
-                    arg0[0xAA] = 0x28;
+                if (obj->unk44 > D_80099200 && (ext = obj->unk31C)->unk37 != 0) {
+                    ext->unk4 = 1;
+                    obj->unkAA = 0x28;
                     blend = 5.0f;
-                    speed = *(f32 *)(arg0 + 0x44) / 15.0f + 0.5f;
+                    speed = obj->unk44 / 15.0f + 0.5f;
                     anim = func_1504C0B8();
                 } else {
                     blend = 6.0f;
@@ -941,11 +927,11 @@ void func_1504C0E8(u8 *arg0, s32 arg1, f32 arg2) {
             }
         }
         if (anim != 999) {
-            func_1505E650((struct127 *)arg0, anim, speed, blend, start, 0.0f, 0);
+            func_1505E650((struct127 *)obj, anim, speed, blend, start, 0.0f, 0);
         }
-    } else if (*(u16 *)(arg0 + 0x84) == 0x21 && D_800CC2B1 == 0 && *(f32 *)(arg0 + 0x44) == 0.0f &&
-               (*(u16 *)D_800CC284 & 0x2000)) {
-        func_1505E650((struct127 *)arg0, 0x16, 1.5f, 6.0f, 0.0f, 0.0f, 0);
+    } else if (obj->unk84 == 0x21 && D_800CC2B1 == 0 && obj->unk44 == 0.0f &&
+               ((*(OSContPad **)&D_800CC284)->button & Z_TRIG)) {
+        func_1505E650((struct127 *)obj, 0x16, 1.5f, 6.0f, 0.0f, 0.0f, 0);
     }
 }
 
