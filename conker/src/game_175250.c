@@ -20,21 +20,11 @@ typedef struct {
 } TrailCollision; /* size 0x24 */
 
 typedef struct {
-    u8 pad0[0x10];
-    Vec3f position;
-    s16 unk1C;
-    u8 pad1E[7];
-    u8 capacity; /* 0x25: number of points in the ring buffer */
-    u8 pad26[6];
-    s8 count;    /* 0x2C */
-    s8 start;    /* 0x2D: oldest point */
-    s8 end;      /* 0x2E: one past the newest point */
-    u8 pad2F[0x25];
-    Vec3f unk54;
-    TrailCollision collision; /* 0x60 */
-    u8 buffers[0x10];         /* 0x84 */
-    TrailPoint *points;       /* 0x94 */
-    TrailParams *params;      /* 0x98 */
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ TrailCollision collision;
+    /* 0x84 */ u8 buffers[0x10];
+    /* 0x94 */ TrailPoint *points;
+    /* 0x98 */ TrailParams *params;
 } Trail;
 
 extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -92,7 +82,7 @@ s8 func_15147EB8(Trail *trail) {
         }
     }
     if ((params->motion.flags & 0x40) && !done) {
-        unk1C = trail->unk1C;
+        unk1C = trail->head.tmpl.life;
         if (unk1C < params->motion.unk1C) {
             fade = unk1C * params->motion.unk1E;
             if (fade < params->motion.alpha) {
@@ -107,12 +97,12 @@ s8 func_15147EB8(Trail *trail) {
         }
     }
     points = trail->points;
-    if (trail->count > 0) {
-        trail->unk54 = points[trail->start].pos;
+    if (trail->head.count > 0) {
+        trail->head.modelPos = points[trail->head.start].pos;
     } else {
-        trail->unk54.x = 0.0f;
-        trail->unk54.y = 0.0f;
-        trail->unk54.z = 0.0f;
+        trail->head.modelPos.x = 0.0f;
+        trail->head.modelPos.y = 0.0f;
+        trail->head.modelPos.z = 0.0f;
     }
     return ret;
 }
@@ -166,14 +156,14 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
     s32 tex;
 
     params = trail->params;
-    if (trail->count >= 2) {
-        func_151D5D60(trail->buffers, arg2, (trail->capacity - 1) * 2 * sizeof(Vtx), (void **)&vtx, 0);
+    if (trail->head.count >= 2) {
+        func_151D5D60(trail->buffers, arg2, (trail->head.tmpl.itemCount - 1) * 2 * sizeof(Vtx), (void **)&vtx, 0);
         if (vtx == NULL) {
             return gfx;
         }
         if (vtx != NULL) { // matching: redundant re-test of vtx
             if (D_800BE9C0 != 0) {
-                vtx += (trail->capacity - 1) * 2;
+                vtx += (trail->head.tmpl.itemCount - 1) * 2;
             }
             update = 1;
             cam = func_15144B34(arg2);
@@ -191,13 +181,13 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
             gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &update);
             gfx = func_1513F4E4(gfx, ((u8 *)&params->render.unk10)[3] /* matching: reads the low byte */, &update);
             gfx = func_15142FBC(gfx, params->render.unk0 | G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | params->render.unk14 | params->render.unk18, D_800A4AC8[params->render.renderMode].unk0 | D_800A4AC8[params->render.renderMode].unk4, &update);
-            i = trail->end - 1;
+            i = trail->head.end - 1;
             if (i < 0) {
-                i = trail->capacity - 1;
+                i = trail->head.tmpl.itemCount - 1;
             }
             j = i - 1;
             if (j < 0) {
-                j = trail->capacity - 1;
+                j = trail->head.tmpl.itemCount - 1;
             }
             cur = points[i].pos;
             next = points[j].pos;
@@ -294,11 +284,11 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
                 i = j;
                 j--;
                 if (j < 0) {
-                    j = trail->capacity - 1;
+                    j = trail->head.tmpl.itemCount - 1;
                 }
                 cur = points[i].pos;
                 next = points[j].pos;
-            } while (i != trail->start);
+            } while (i != trail->head.start);
         }
     }
     return gfx;
@@ -318,32 +308,32 @@ s32 func_151488C4(Trail *trail) {
 
     points = trail->points;
     params = trail->params;
-    index = trail->start;
-    while (index != trail->end) {
+    index = trail->head.start;
+    while (index != trail->head.end) {
         points[index].velocityY -= params->motion.gravity * D_800BE9A4;
         points[index].pos.x += params->motion.velocity.x * D_800BE9A4;
         points[index].pos.y += points[index].velocityY * D_800BE9A4;
         points[index].pos.z += params->motion.velocity.z * D_800BE9A4;
         index++;
-        if (index == trail->capacity) {
+        if (index == trail->head.tmpl.itemCount) {
             index = 0;
         }
     }
-    count = trail->count;
-    if (count < trail->capacity - 1) {
+    count = trail->head.count;
+    if (count < trail->head.tmpl.itemCount - 1) {
         phase = (params->motion.flags & 0x20) ? 0x1000 : 0;
         if (count != 0) {
             interval.step = 0x1000 / count;
         }
-        trail->count = count + 1;
-        points[trail->end].pos = trail->position;
-        points[trail->end].velocityY = params->motion.velocity.y;
-        trail->end++;
-        if (trail->end == trail->capacity) {
-            trail->end = 0;
+        trail->head.count = count + 1;
+        points[trail->head.end].pos = trail->head.tmpl.pos;
+        points[trail->head.end].velocityY = params->motion.velocity.y;
+        trail->head.end++;
+        if (trail->head.end == trail->head.tmpl.itemCount) {
+            trail->head.end = 0;
         }
-        phaseIndex = trail->start;
-        while (phaseIndex != trail->end) {
+        phaseIndex = trail->head.start;
+        while (phaseIndex != trail->head.end) {
             points[phaseIndex].phase = phase;
             if (params->motion.flags & 0x20) {
                 phase = (phase - interval.step) & 0xFFFF;
@@ -352,7 +342,7 @@ s32 func_151488C4(Trail *trail) {
                 phase &= 0xFFFF;
             }
             phaseIndex++;
-            if (phaseIndex == trail->capacity) {
+            if (phaseIndex == trail->head.tmpl.itemCount) {
                 phaseIndex = 0;
             }
         }
@@ -372,17 +362,17 @@ s32 func_15148AF4(Trail *trail) {
 
     points = trail->points;
     params = trail->params;
-    idx = trail->end;
+    idx = trail->head.end;
     do {
         idx--;
         if (idx < 0) {
-            idx = trail->capacity - 1;
+            idx = trail->head.tmpl.itemCount - 1;
         }
         points[idx].velocityY -= params->motion.gravity * D_800BE9A4;
         points[idx].pos.x += params->motion.velocity.x * D_800BE9A4;
         points[idx].pos.y += points[idx].velocityY * D_800BE9A4;
         points[idx].pos.z += params->motion.velocity.z * D_800BE9A4;
-    } while (idx != trail->start);
+    } while (idx != trail->head.start);
     return 1;
 }
 
@@ -402,26 +392,26 @@ s32 func_15148BA4(Trail *trail) {
 
     params = trail->params;
     points = trail->points;
-    index = trail->end;
+    index = trail->head.end;
     if (params->motion.flags & 7) {
-        oldPosition = points[trail->start].pos;
+        oldPosition = points[trail->head.start].pos;
     }
     do {
         index--;
         if (index < 0) {
-            index = trail->capacity - 1;
+            index = trail->head.tmpl.itemCount - 1;
         }
         points[index].velocityY -= params->motion.gravity * D_800BE9A4;
         points[index].pos.x += params->motion.velocity.x * D_800BE9A4;
         points[index].pos.y += points[index].velocityY * D_800BE9A4;
         points[index].pos.z += params->motion.velocity.z * D_800BE9A4;
-    } while (index != trail->start);
+    } while (index != trail->head.start);
     if (params->motion.flags & 0x17) {
-        if (points[trail->start].pos.y < oldPosition.y) {
-            position.x = points[trail->start].pos.x;
+        if (points[trail->head.start].pos.y < oldPosition.y) {
+            position.x = points[trail->head.start].pos.x;
             position.y = oldPosition.y;
-            position.z = points[trail->start].pos.z;
-            if (func_15046C80(&position.x, 0, points[trail->start].pos.y,
+            position.z = points[trail->head.start].pos.z;
+            if (func_15046C80(&position.x, 0, points[trail->head.start].pos.y,
                               &trail->collision) != 0) {
                 if (trail->collision.kind == 3) {
                     callback = params->hitKind3Fn;
@@ -454,18 +444,18 @@ s32 func_15148DE0(Trail *trail) {
     TrailParams *params;
     TrailPoint *points;
 
-    if (trail->count >= 3) {
-        trail->count--;
+    if (trail->head.count >= 3) {
+        trail->head.count--;
         points = trail->points;
         params = trail->params;
-        idx = trail->start;
-        step = 0x1000 / trail->count;
+        idx = trail->head.start;
+        step = 0x1000 / trail->head.count;
         phase = (params->motion.flags & 0x20) ? 0x1000 : 0;
-        trail->end--;
-        if (trail->end < 0) {
-            trail->end = trail->capacity - 1;
+        trail->head.end--;
+        if (trail->head.end < 0) {
+            trail->head.end = trail->head.tmpl.itemCount - 1;
         }
-        while (idx != trail->end) {
+        while (idx != trail->head.end) {
             points[idx].phase = phase;
             if (params->motion.flags & 0x20) {
                 phase -= step;
@@ -473,7 +463,7 @@ s32 func_15148DE0(Trail *trail) {
                 phase += step;
             }
             idx++;
-            if (idx == trail->capacity) {
+            if (idx == trail->head.tmpl.itemCount) {
                 idx = 0;
             }
         }
@@ -547,7 +537,7 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
 /* Fades the trail in: alpha = 8 per unit of unk1C, capped at 255. */
 s32 func_151490C8(Trail *trail) {
     TrailParams *params = trail->params;
-    s32 alpha = trail->unk1C * 8;
+    s32 alpha = trail->head.tmpl.life * 8;
 
     if (alpha >= 0x100) {
         alpha = 0xFF;

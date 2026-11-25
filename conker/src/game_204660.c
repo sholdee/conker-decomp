@@ -262,20 +262,7 @@ typedef struct {
 } TrailData;
 
 typedef struct Trail {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ Vec3f pos; /* head of the trail */
-    /* 0x1C */ s16 timer;  /* while fading: alpha is timer * 12 */
-    /* 0x1E */ u16 flags;  /* bit 1: the head follows the emitter; bit 3: fading */
-    /* 0x20 */ u8 pad20[5];
-    /* 0x25 */ u8 capacity; /* size of the points ring buffer */
-    /* 0x26 */ u8 pad26[6];
-    /* 0x2C */ s8 count;
-    /* 0x2D */ s8 tail; /* oldest point */
-    /* 0x2E */ s8 head; /* next point to write */
-    /* 0x2F */ u8 pad2F;
-    /* 0x30 */ u8 unk30;
-    /* 0x31 */ u8 pad31[0x23];
-    /* 0x54 */ Vec3f tailPos;
+    /* 0x00 */ EffectObjHead head;
     /* 0x60 */ u8 pad60[0x24];
     /* 0x84 */ u8 unk84[0x10];
     /* 0x94 */ TrailPoint *points;
@@ -291,11 +278,11 @@ void func_151D77C8(TrailEmitter *emitter) {
     if (anchor->trail != NULL) {
         TrailData *data = anchor->trail->data;
 
-        anchor->trail->unk30 = 0;
-        anchor->trail->flags &= ~2;
-        anchor->trail->flags |= 8;
-        anchor->trail->flags |= 1;
-        anchor->trail->timer = 20;
+        anchor->trail->head.updateKind2 = 0;
+        anchor->trail->head.tmpl.flags &= ~2;
+        anchor->trail->head.tmpl.flags |= 8;
+        anchor->trail->head.tmpl.flags |= 1;
+        anchor->trail->head.tmpl.life = 20;
         data->emitter = NULL;
         anchor->trail = NULL;
     }
@@ -339,25 +326,25 @@ s32 func_151D792C(Trail *trail) {
     s32 i;
 
     points = trail->points;
-    if ((trail->count < 2) && (trail->flags & 8)) {
+    if ((trail->head.count < 2) && (trail->head.tmpl.flags & 8)) {
         return 0;
     }
-    i = trail->head;
-    while (i != trail->tail) {
+    i = trail->head.end;
+    while (i != trail->head.start) {
         i--;
         if (i < 0) {
-            i = trail->capacity - 1;
+            i = trail->head.tmpl.itemCount - 1;
         }
         func_151D8718(&points[i].pos, &points[i].velY, D_800BE9A4);
     }
 // matching: an (unused) label here makes IDO start a new block for the tail update
 tail:
-    if (trail->count > 0) {
-        trail->tailPos = points[trail->tail].pos;
+    if (trail->head.count > 0) {
+        trail->head.modelPos = points[trail->head.start].pos;
     } else {
-        trail->tailPos.x = 0.0f;
-        trail->tailPos.y = 0.0f;
-        trail->tailPos.z = 0.0f;
+        trail->head.modelPos.x = 0.0f;
+        trail->head.modelPos.y = 0.0f;
+        trail->head.modelPos.z = 0.0f;
     }
     return 1;
 }
@@ -390,7 +377,7 @@ s32 func_151D7A38(Trail *trail) {
         return 0;
     }
     anchorPos = emitter->anchor.pos;
-    trail->pos = anchorPos;
+    trail->head.tmpl.pos = anchorPos;
     data->spawnAccum += 0.25f * D_800BE9A4;
     if (data->spawnAccum > 1.0f) {
         invCount = 1.0f / data->spawnAccum;
@@ -406,26 +393,26 @@ s32 func_151D7A38(Trail *trail) {
         do {
             s32 pad; // matching: stack layout
 
-            point = &points[trail->head];
+            point = &points[trail->head.end];
             point->pos = pos;
             point->velY = 0.0f;
             point->length = 0.0f;
             point->alpha = 0;
             point->texU = 0.0f;
             func_151D8718(&point->pos, &point->velY, age);
-            trail->head++;
+            trail->head.end++;
             age -= ageStep;
-            if (trail->head == trail->capacity) {
-                trail->head = 0;
+            if (trail->head.end == trail->head.tmpl.itemCount) {
+                trail->head.end = 0;
             }
-            trail->count++;
-            if (trail->head == trail->tail) {
+            trail->head.count++;
+            if (trail->head.end == trail->head.start) {
                 /* full: drop the oldest point */
-                trail->tail++;
-                if (trail->tail == trail->capacity) {
-                    trail->tail = 0;
+                trail->head.start++;
+                if (trail->head.start == trail->head.tmpl.itemCount) {
+                    trail->head.start = 0;
                 }
-                trail->count--;
+                trail->head.count--;
             }
             pos.x += stepX;
             pos.y += stepY;
@@ -468,15 +455,15 @@ s32 func_151D7CD0(Trail *trail) {
 
     data = trail->data;
     points = trail->points;
-    if (trail->count >= 2) {
+    if (trail->head.count >= 2) {
         totalLength = 0;
-        i = trail->head;
-        if (trail->flags & 2) {
-            newerPos = &trail->pos;
+        i = trail->head.end;
+        if (trail->head.tmpl.flags & 2) {
+            newerPos = &trail->head.tmpl.pos;
         } else {
             i--;
             if (i < 0) {
-                i = trail->capacity - 1;
+                i = trail->head.tmpl.itemCount - 1;
             }
             newerPos = &points[i].pos;
         }
@@ -485,7 +472,7 @@ s32 func_151D7CD0(Trail *trail) {
 
             i--;
             if (i < 0) {
-                i = trail->capacity - 1;
+                i = trail->head.tmpl.itemCount - 1;
             }
             point = &points[i];
             delta.x = point->pos.x - newerPos->x;
@@ -504,44 +491,44 @@ s32 func_151D7CD0(Trail *trail) {
                     point->length = point->length * (1.0f - cut);
                 }
                 totalLength = 80.0f;
-                while (i != trail->tail) {
-                    trail->tail++;
-                    if (trail->tail == trail->capacity) {
-                        trail->tail = 0;
+                while (i != trail->head.start) {
+                    trail->head.start++;
+                    if (trail->head.start == trail->head.tmpl.itemCount) {
+                        trail->head.start = 0;
                     }
-                    trail->count--;
+                    trail->head.count--;
                 }
             }
             newerPos = &point->pos;
-        } while (i != trail->tail);
+        } while (i != trail->head.start);
     }
-    if (trail->count >= 2) {
+    if (trail->head.count >= 2) {
         data->texPhase += -41.0f * D_800BE9A4;
         data->texPhase = func_15144528(data->texPhase, 16383.0f, -16384.0f);
         distance = 0;
-        j = trail->head;
+        j = trail->head.end;
         do {
             j--;
             if (j < 0) {
-                j = trail->capacity - 1;
+                j = trail->head.tmpl.itemCount - 1;
             }
             texPoint = &points[j];
             distance += texPoint->length;
             texPoint->texU = func_15144528(data->texPhase + distance * 46.87999725f, 16383.0f, -16384.0f);
-        } while (j != trail->tail);
+        } while (j != trail->head.start);
     }
-    if (trail->count >= 2) {
+    if (trail->head.count >= 2) {
         fadeDist = 0;
         opaqueLength = totalLength * 0.2990000248f;
         fadeLength = totalLength - opaqueLength;
         invFadeLength = 1.0f / fadeLength;
-        k = trail->head;
+        k = trail->head.end;
         do {
             f32 into;
 
             k--;
             if (k < 0) {
-                k = trail->capacity - 1;
+                k = trail->head.tmpl.itemCount - 1;
             }
             fadePoint = &points[k];
             if (opaqueLength < fadeDist) {
@@ -556,7 +543,7 @@ s32 func_151D7CD0(Trail *trail) {
                 fadePoint->alpha = 60;
             }
             fadeDist += fadePoint->length;
-        } while (k != trail->tail);
+        } while (k != trail->head.start);
     }
     return 1;
 }
@@ -596,12 +583,12 @@ Gfx *func_151D80C4(Trail *trail, Gfx *gfx, s16 view) {
     Vtx *vtx;
     f32 sideZ;
 
-    if (trail->count < 2) {
+    if (trail->head.count < 2) {
         return gfx;
     }
     data = trail->data;
     points = trail->points;
-    func_151D5D60(trail->unk84, view, (trail->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, 0);
+    func_151D5D60(trail->unk84, view, (trail->head.tmpl.itemCount * 2 + 10) * sizeof(Vtx), (void **)&vtx, 0);
     if (vtx == NULL) {
         return gfx;
     }
@@ -610,22 +597,22 @@ Gfx *func_151D80C4(Trail *trail, Gfx *gfx, s16 view) {
     gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
     gfx = func_1513F4E4(gfx, 0x4C, &needSync);
     gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[1].unk0 | D_800A4AC8[1].unk4, &needSync);
-    if (trail->flags & 2) {
-        i = trail->head - 1;
+    if (trail->head.tmpl.flags & 2) {
+        i = trail->head.end - 1;
         if (i < 0) {
-            i = trail->capacity - 1;
+            i = trail->head.tmpl.itemCount - 1;
         }
-        newerPos = trail->pos;
+        newerPos = trail->head.tmpl.pos;
         newerAlpha = 0;
         newerU = data->texPhase;
     } else {
-        newest = trail->head - 1;
+        newest = trail->head.end - 1;
         if (newest < 0) {
-            newest = trail->capacity - 1;
+            newest = trail->head.tmpl.itemCount - 1;
         }
         i = newest - 1;
         if (i < 0) {
-            i = trail->capacity - 1;
+            i = trail->head.tmpl.itemCount - 1;
         }
         newerPos = points[newest].pos;
         newerAlpha = points[newest].alpha;
@@ -637,8 +624,8 @@ Gfx *func_151D80C4(Trail *trail, Gfx *gfx, s16 view) {
     alpha = point->alpha;
     sideZ = D_800DD1D8[view] * 5.5f;
     u = point->texU;
-    if (trail->flags & 8) {
-        fade = trail->timer * 12;
+    if (trail->head.tmpl.flags & 8) {
+        fade = trail->head.tmpl.life * 12;
     } else {
         fade = 0xFF;
     }
@@ -703,14 +690,14 @@ Gfx *func_151D80C4(Trail *trail, Gfx *gfx, s16 view) {
         newer = i;
         i--;
         if (i < 0) {
-            i = trail->capacity - 1;
+            i = trail->head.tmpl.itemCount - 1;
         }
         point = &points[i];
         pos = point->pos;
         alpha = point->alpha;
         newerU = points[newer].texU;
         u = point->texU;
-    } while (newer != trail->tail);
+    } while (newer != trail->head.start);
     return gfx;
 }
 

@@ -681,15 +681,11 @@ typedef struct {
 } SplashNode; /* 0x14 */
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x20];
-    s8 node;
-    u8 pad2E[0x66];
-    SplashNode *nodes;
-    SplashState *state;
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ SplashNode *nodes;
+    /* 0x98 */ SplashState *state;
 } Splash;
 
 extern Splash *func_15147DA0(EffectTemplate *, TrailMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
@@ -776,15 +772,15 @@ s32 func_151DA938(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
     Vec3f point;
     SplashBurst *burst = &state->burst;
 
-    point.x = nodes[splash->node].pos.x;
+    point.x = nodes[splash->head.start].pos.x;
     point.y = floorY + 2.0f;
-    point.z = nodes[splash->node].pos.z;
+    point.z = nodes[splash->head.start].pos.z;
     if (func_150ADA20() & 1) {
         func_151D9B8C(burst->kind, (state->motion.halfWidth * 3.0f) * burst->burstScale, state->motion.alpha, arg5,
-                      &point, 100, 0, 1, 0, splash->unkC, splash->unk1);
+                      &point, 100, 0, 1, 0, splash->head.header.owner, splash->head.header.kind);
     } else {
         func_151DAB58(burst->kind, (state->motion.halfWidth * 1.1f) * burst->burstScale, state->motion.alpha, &point, 1,
-                      splash->unkC, splash->unk1);
+                      splash->head.header.owner, splash->head.header.kind);
     }
     state->unk20 = 4;
     return 1;
@@ -796,11 +792,11 @@ s32 func_151DAA88(Splash *splash, s32 arg1, s32 arg2, s32 arg3, f32 floorY, s32 
     SplashNode *nodes = splash->nodes;
     Vec3f point;
 
-    point.x = nodes[splash->node].pos.x;
+    point.x = nodes[splash->head.start].pos.x;
     point.y = floorY;
-    point.z = nodes[splash->node].pos.z;
+    point.z = nodes[splash->head.start].pos.z;
     func_151D9FC0(state->burst.kind, state->motion.halfWidth * 11.0f * state->burst.altBurstScale, state->motion.alpha,
-                  arg5, &point, splash->unkC, splash->unk1);
+                  arg5, &point, splash->head.header.owner, splash->head.header.kind);
     state->unk20 = 4;
     return 1;
 }

@@ -6,10 +6,10 @@
 /* Trail types (see game_175250.c). */
 
 typedef struct {
-    /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ Vec3f position;
-    /* 0x1C */ s16 unk1C; /* counts down; copied from EffectTemplate.unkC */
-    /* 0x1E */ u8 pad1E[0x7A];
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ u8 *items;
     /* 0x98 */ TrailParams *params;
 } Trail;
 
@@ -78,7 +78,7 @@ void func_150AEEB0(Actor *obj, u8 owner) {
 /* Trail handler (D_8008A3F8[3]): fades the trail out over its last 8 frames. */
 s32 func_150AF1C0(Trail *trail) {
     TrailParams *params = trail->params;
-    s32 alpha = trail->unk1C * 32;
+    s32 alpha = trail->head.tmpl.life * 32;
 
     if (alpha >= 0x100) {
         alpha = 0xFF;

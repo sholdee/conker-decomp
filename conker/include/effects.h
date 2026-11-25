@@ -472,7 +472,9 @@ typedef struct DebrisEmitter {
 typedef struct EffectTemplate {
     /* 0x00 */ Vec3f pos;
     /* 0x0C */ s16 life;
-    /* 0x0E */ u16 flags;     /* bit 0: life counts down; 0x10: run unk14's handler; 0x20: pass unk18 to the draw */
+    /* 0x0E */ u16 flags;     /* bit 0: life counts down; 0x10: run unk14's handler; 0x20: pass unk18 to the draw;
+                               * 0x40: allocate as type 0x4D (else 0x22); trails: 2 attached (the strip starts
+                               * at pos), 4 pos is valid, 8 fading */
     /* 0x10 */ s32 kind;      /* index into D_8008A2F0 / D_8008A340 / D_8008A390 */
     /* 0x14 */ s8 unk14;      /* index into D_8008A284, -1: none */
     /* 0x15 */ u8 itemCount;  /* number of items allocated after the user data */
@@ -2179,5 +2181,23 @@ typedef struct QuadSprite {
     /* 0x84 */ ModelLink link;
     /* 0xA4 */ Vec3f pos;
 } QuadSprite; /* size 0xB0 */
+
+/* Head (first 0x60 bytes) of the object func_15147A80 (game_174BF0.c) makes from an EffectTemplate: trails,
+ * ribbons, sprays and splashes. The rest is per handler, so each user declares its own object as
+ * {EffectObjHead obj; 0x24-byte block at 0x60; u8 unk84[0x10]; items * at 0x94; user data * at 0x98}: the user
+ * data (dataSize bytes) and then the items (tmpl.itemCount of itemSize bytes) follow the object in memory. */
+typedef struct EffectObjHead {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ EffectTemplate tmpl;   /* tmpl.itemCount: size of the items ring buffer */
+    /* 0x2C */ s8 count;              /* items in use */
+    /* 0x2D */ s8 start;              /* oldest item */
+    /* 0x2E */ s8 end;                /* one past the newest item */
+    /* 0x2F */ u8 updateKind;         /* index into D_8008A200, 0: none */
+    /* 0x30 */ u8 updateKind2;        /* index into D_8008A23C, 0: none (trails clear it to stop emitting) */
+    /* 0x31 */ u8 drawKind;           /* index into D_8008A2A4, 0: none */
+    /* 0x32 */ u8 pad32[2];
+    /* 0x34 */ ModelLink model;       /* drawn through func_151462C8 */
+    /* 0x54 */ Vec3f modelPos;        /* func_151462C8's position; trails keep their tail point here */
+} EffectObjHead; /* size 0x60 */
 
 #endif

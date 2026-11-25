@@ -8,9 +8,10 @@ void func_1514C2F0(f32 x, f32 y, f32 z, f32 radius, u8 startAngle, s8 angleStep,
 
 /* A trail object; only the fields used here. */
 typedef struct {
-    /* 0x00 */ u8 pad0[0x1C];
-    /* 0x1C */ s16 lifetime;
-    /* 0x1E */ u8 pad1E[0x98 - 0x1E];
+    /* 0x00 */ EffectObjHead head;
+    /* 0x60 */ u8 pad60[0x24];
+    /* 0x84 */ u8 unk84[0x10];
+    /* 0x94 */ u8 *items;
     /* 0x98 */ TrailParams *params;
 } Trail;
 
@@ -84,7 +85,7 @@ s32 func_150C16C0(s32 shape, s16 index, f32 x, f32 y, f32 z, f32 originX, f32 or
 /* Trail fade handler: unk1B follows 8 * lifetime, capped at 0xFF. */
 s32 func_150C1978(Trail *trail) {
     TrailParams *params = trail->params;
-    s32 alpha = trail->lifetime << 3;
+    s32 alpha = trail->head.tmpl.life << 3;
 
     if (alpha >= 0x100) {
         alpha = 0xFF;
