@@ -1890,7 +1890,9 @@ typedef struct ModelBurst {
 typedef struct DefParticleHead {
     /* 0x000 */ u8 pad0[0x18];
     /* 0x018 */ ParticleDef def;
-    /* 0x070 */ u8 pad70[0xA0];
+    /* 0x070 */ u8 pad70[0x50];
+    /* 0x0C0 */ Vtx vtxTemplate[4];
+    /* 0x100 */ Vtx *vtxBuffers[4];  /* per viewport, refreshed from vtxTemplate */
 } DefParticleHead; /* size 0x110 */
 
 /* Burst effect (func_150F9BB0 in game_127060.c, func_151BD828 in game_1E9A30.c): an effect object that
@@ -1957,12 +1959,12 @@ typedef struct BurstGlowData {
 } BurstGlowData; /* size 0x18 */
 
 typedef struct BurstSpark {
-    /* 0x000 */ DefParticleHead particle;
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ BurstSparkData data;
 } BurstSpark;
 
 typedef struct BurstGlow {
-    /* 0x000 */ DefParticleHead particle;   /* particle.def.flags bit 1: visible */
+    /* 0x000 */ DefParticleHead head;       /* head.def.flags bit 1: visible */
     /* 0x110 */ GlowShape shape;
     /* 0x16C */ u8 pad16C[4];
     /* 0x170 */ BurstGlowData data;

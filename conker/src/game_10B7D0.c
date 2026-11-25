@@ -127,9 +127,7 @@ typedef struct {
 
 /* A particle spawned by func_1513D2F0, with func_150DE7C0's state at 0x110. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ ParticleDef def;
-    /* 0x070 */ u8 pad70[0xA0];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ ParticleTravel travel;
 } Particle;
 
@@ -241,9 +239,9 @@ void func_150DE7C0(Emitter *emitter) {
 
 /* Moves the particle along its travel velocity; returns 0 once its travel time has run out. */
 s32 func_150DEACC(Particle *particle) {
-    particle->def.pos.x += particle->travel.velocity.x * D_800BE9A4;
-    particle->def.pos.y += particle->travel.velocity.y * D_800BE9A4;
-    particle->def.pos.z += particle->travel.velocity.z * D_800BE9A4;
+    particle->head.def.pos.x += particle->travel.velocity.x * D_800BE9A4;
+    particle->head.def.pos.y += particle->travel.velocity.y * D_800BE9A4;
+    particle->head.def.pos.z += particle->travel.velocity.z * D_800BE9A4;
     particle->travel.timeLeft -= D_800BE9A4;
     if (particle->travel.timeLeft < 0.0f) {
         return 0;

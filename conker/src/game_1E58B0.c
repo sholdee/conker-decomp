@@ -22,9 +22,7 @@ typedef struct {
 
 /* A particle spawned by func_151B8400, which keeps its bullet at 0x110. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ ParticleDef def;
-    /* 0x070 */ u8 pad70[0xA0];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ Bullet *bullet;
 } BulletParticle;
 
@@ -78,12 +76,12 @@ s32 func_151B85AC(BulletParticle *particle) {
     Bullet *bullet = particle->bullet;
 
     if (bullet != NULL) {
-        particle->def.pos = bullet->pos;
-        particle->def.rot.x += particle->def.scale.x * D_800BE9A4;
-        particle->def.rot.y += particle->def.scale.y * D_800BE9A4;
-        particle->def.rot.z += particle->def.scale.z * D_800BE9A4;
+        particle->head.def.pos = bullet->pos;
+        particle->head.def.rot.x += particle->head.def.scale.x * D_800BE9A4;
+        particle->head.def.rot.y += particle->head.def.scale.y * D_800BE9A4;
+        particle->head.def.rot.z += particle->head.def.scale.z * D_800BE9A4;
     } else {
-        particle->def.flags |= 1;
+        particle->head.def.flags |= 1;
     }
     return 1;
 }

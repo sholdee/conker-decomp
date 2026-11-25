@@ -95,7 +95,7 @@ typedef struct {
 
 /* Quad particle of game_169510.c (only the fields used here), followed by its motion state. */
 typedef struct {
-    /* 0x000 */ DefParticleHead particle;
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ QuadBob bob;
 } BobQuad;
 
@@ -103,10 +103,10 @@ typedef struct {
 s32 func_151B8CFC(BobQuad *particle) {
     QuadBob *bob = &particle->bob;
 
-    particle->particle.def.pos.y = sinf(bob->phase) * bob->amplitude + bob->center;
+    particle->head.def.pos.y = sinf(bob->phase) * bob->amplitude + bob->center;
     bob->phase += bob->speed * D_800BE9A4;
     bob->phase = func_15144B68(bob->phase);
-    particle->particle.def.rot.x += bob->rotVel.x * D_800BE9A4;
-    particle->particle.def.rot.z += bob->rotVel.z * D_800BE9A4;
+    particle->head.def.rot.x += bob->rotVel.x * D_800BE9A4;
+    particle->head.def.rot.z += bob->rotVel.z * D_800BE9A4;
     return 1;
 }

@@ -45,7 +45,7 @@ s32 func_151BE210(BurstSpark *spark) {
         data->widthTimer = func_150ADA68() * 4.0f;
         data->widthTarget = func_150ADA68() * data->widthRange + data->widthBase;
     }
-    spark->particle.def.width += (data->widthTarget - spark->particle.def.width) * 0.35f;
+    spark->head.def.width += (data->widthTarget - spark->head.def.width) * 0.35f;
     data->heightTimer -= D_800BE9A4;
     if (data->heightTimer < 0.0f) {
         data->heightTimer = func_150ADA68() * 9.0f;
@@ -55,14 +55,14 @@ s32 func_151BE210(BurstSpark *spark) {
             data->heightTarget = func_150ADA68() * data->heightRange2 + data->heightBase;
         }
     }
-    spark->particle.def.height += (data->heightTarget - spark->particle.def.height) * 0.4f;
+    spark->head.def.height += (data->heightTarget - spark->head.def.height) * 0.4f;
     data->alphaTimer -= D_800BE9A4;
     if (data->alphaTimer < 0.0f) {
         data->alphaTimer = func_150ADA68() * 10.0f;
         data->alphaTarget = func_150ADA68() * data->alphaRange + data->alphaBase;
     }
     data->alpha += (data->alphaTarget - data->alpha) * 0.4f;
-    spark->particle.def.unk44 = data->alpha;
+    spark->head.def.unk44 = data->alpha;
     data->beamWidth += (data->beamWidthTarget - data->beamWidth) * 0.65000004f;
     data->beamLength += (data->beamLengthTarget - data->beamLength) * 0.65000004f;
     return 1;
@@ -151,7 +151,7 @@ s32 func_151BE6CC(BurstGlow *glow) {
 
     glow->data.textureTimer -= D_800BE9E4;
     if (glow->data.textureTimer < 0) {
-        glow->particle.def.texture = textures[func_150ADA20() & 3];
+        glow->head.def.texture = textures[func_150ADA20() & 3];
         glow->data.textureTimer = (func_150ADA20() & 7) + 3;
     }
     shape->scale += (glow->data.targetScale - shape->scale) * 0.65000004f;

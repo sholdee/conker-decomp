@@ -21,7 +21,7 @@ typedef struct {
 
 /* A particle object returned by func_151407D0. */
 typedef struct {
-    DefParticleHead particle;
+    DefParticleHead head;
     ParticleUnk110 unk110;
     u8 pad15C[0x170 - 0x15C];
     ParticleTail tail;
@@ -292,10 +292,10 @@ s32 func_150D3A68(TrailActor *actor) {
         switch (func_150D4AE0(&actor->spawn.pos, &end, owner, s126)) {
         case 0:
             if (state->effects[0] != NULL) {
-                state->effects[0]->particle.def.flags &= ~2;
+                state->effects[0]->head.def.flags &= ~2;
             }
             if (state->effects[1] != NULL) {
-                state->effects[1]->particle.def.flags &= ~2;
+                state->effects[1]->head.def.flags &= ~2;
             }
             actor->spawn.flags &= ~4;
             return 1;
@@ -305,16 +305,16 @@ s32 func_150D3A68(TrailActor *actor) {
             }
             actor->spawn.flags |= 4;
             if (state->effects[0] != NULL) {
-                state->effects[0]->particle.def.pos = actor->spawn.pos;
-                state->effects[0]->particle.def.rot = end;
-                state->effects[0]->particle.def.flags &= ~4;
-                state->effects[0]->particle.def.flags |= 2;
+                state->effects[0]->head.def.pos = actor->spawn.pos;
+                state->effects[0]->head.def.rot = end;
+                state->effects[0]->head.def.flags &= ~4;
+                state->effects[0]->head.def.flags |= 2;
             }
             if (state->effects[1] != NULL) {
-                state->effects[1]->particle.def.pos = actor->spawn.pos;
-                state->effects[1]->particle.def.rot = end;
-                state->effects[1]->particle.def.flags &= ~4;
-                state->effects[1]->particle.def.flags |= 2;
+                state->effects[1]->head.def.pos = actor->spawn.pos;
+                state->effects[1]->head.def.rot = end;
+                state->effects[1]->head.def.flags &= ~4;
+                state->effects[1]->head.def.flags |= 2;
             }
             break;
         case 2:
@@ -323,10 +323,10 @@ s32 func_150D3A68(TrailActor *actor) {
             }
             actor->spawn.flags |= 4;
             if (state->effects[0] != NULL) {
-                state->effects[0]->particle.def.flags &= ~2;
+                state->effects[0]->head.def.flags &= ~2;
             }
             if (state->effects[1] != NULL) {
-                state->effects[1]->particle.def.flags &= ~2;
+                state->effects[1]->head.def.flags &= ~2;
             }
             break;
         }
@@ -834,7 +834,7 @@ s32 func_150D4CC4(Particle *particle) {
 
     particle->tail.timer -= D_800BE9E4;
     if (particle->tail.timer < 0) {
-        particle->particle.def.texture = D_800A09C0[func_150ADA20() & 3];
+        particle->head.def.texture = D_800A09C0[func_150ADA20() & 3];
         particle->tail.timer = (func_150ADA20() & 7) + 3;
     }
 

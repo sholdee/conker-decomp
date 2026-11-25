@@ -447,7 +447,7 @@ typedef struct {
 
 /* Something drawn between two points (a beam or streak). */
 typedef struct {
-    DefParticleHead particle; /* particle.def.pos / rot: the two end points */
+    DefParticleHead head; /* head.def.pos / rot: the two end points */
     BeamPart part;
 } Beam;
 
@@ -510,8 +510,8 @@ void func_150F6178(BeamEffect *effect) {
         if (data->beam != NULL) {
             beam = data->beam;
             beam->part.flags |= 1;
-            beam->particle.def.pos = start;
-            beam->particle.def.rot = end;
+            beam->head.def.pos = start;
+            beam->head.def.rot = end;
         }
         flash = data->flash;
         if (flash != NULL) {

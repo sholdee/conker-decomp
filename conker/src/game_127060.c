@@ -218,15 +218,15 @@ void func_150FA1B8(BurstEffect *effect) {
             if (burst->sparks[i] != NULL) {
                 spark = burst->sparks[i];
                 spark->data.flags |= 1;
-                spark->particle.def.pos = positions[i];
-                spark->particle.def.rot = directions[i];
+                spark->head.def.pos = positions[i];
+                spark->head.def.rot = directions[i];
             }
             if (burst->glows[i] != NULL) {
                 glow = burst->glows[i];
-                glow->particle.def.flags |= 2;
-                glow->particle.def.flags &= ~4;
-                glow->particle.def.pos = positions[i];
-                glow->particle.def.rot = directions[i];
+                glow->head.def.flags |= 2;
+                glow->head.def.flags &= ~4;
+                glow->head.def.pos = positions[i];
+                glow->head.def.rot = directions[i];
             }
         }
     } else {
@@ -239,7 +239,7 @@ void func_150FA1B8(BurstEffect *effect) {
                 sparkData->flags &= ~1;
             }
             if (burst->glows[i] != NULL) {
-                burst->glows[i]->particle.def.flags &= ~2;
+                burst->glows[i]->head.def.flags &= ~2;
             }
         }
     }

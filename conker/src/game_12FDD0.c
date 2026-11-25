@@ -18,11 +18,7 @@ typedef struct {
 
 /* A particle spawned by func_1513D2F0 (as Particle in game_169510.c, followed by its data). */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ ParticleDef def;
-    /* 0x070 */ u8 pad70[0x50];
-    /* 0x0C0 */ Vtx vtxTemplate[4];
-    /* 0x100 */ Vtx *vtxBuffers[4]; /* per viewport */
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ BeamData beam;
 } Particle;
 
@@ -173,8 +169,8 @@ s32 func_15102D90(Particle *particle) {
     if (target->unk1D4 == NULL || (target->unk74 & 0xF) == 0xF) {
         return 1;
     }
-    src[0] = &particle->def.pos;
-    src[1] = &particle->def.rot;
+    src[0] = &particle->head.def.pos;
+    src[1] = &particle->head.def.rot;
     dst[0] = &beam->start;
     dst[1] = &beam->end;
     if (beam->node != -1) {
@@ -219,21 +215,21 @@ Vtx *func_15102EB8(Particle *particle, s16 viewport) {
     if (!(particle->beam.flags & 1)) {
         return NULL;
     }
-    func_151D5D60(particle->vtxBuffers, viewport, 0x40, &vtx, &fresh);
+    func_151D5D60(particle->head.vtxBuffers, viewport, 0x40, &vtx, &fresh);
     result = vtx;
     beam = &particle->beam;
     // matching: an early return for NULL reorders the blocks; the original tests vtx != NULL first
     if (vtx != NULL) {
         if (fresh) {
-            memcpy(particle->vtxBuffers[viewport], particle->vtxTemplate, sizeof(particle->vtxTemplate));
-            memcpy(particle->vtxBuffers[viewport] + 4, particle->vtxTemplate, sizeof(particle->vtxTemplate));
+            memcpy(particle->head.vtxBuffers[viewport], particle->head.vtxTemplate, sizeof(particle->head.vtxTemplate));
+            memcpy(particle->head.vtxBuffers[viewport] + 4, particle->head.vtxTemplate, sizeof(particle->head.vtxTemplate));
         }
     } else {
         return NULL;
     }
-    mid.x = beam->start.x + (beam->end.x - beam->start.x) * particle->def.height;
-    mid.y = beam->start.y + (beam->end.y - beam->start.y) * particle->def.height;
-    mid.z = beam->start.z + (beam->end.z - beam->start.z) * particle->def.height;
+    mid.x = beam->start.x + (beam->end.x - beam->start.x) * particle->head.def.height;
+    mid.y = beam->start.y + (beam->end.y - beam->start.y) * particle->head.def.height;
+    mid.z = beam->start.z + (beam->end.z - beam->start.z) * particle->head.def.height;
     dir.x = mid.x - beam->start.x;
     dir.y = mid.y - beam->start.y;
     dir.z = mid.z - beam->start.z;
@@ -250,7 +246,7 @@ Vtx *func_15102EB8(Particle *particle, s16 viewport) {
         ny = 0.0f;
         nz = 0.0f;
     } else {
-        scale = particle->def.width / sqrtf(lengthSquared);
+        scale = particle->head.def.width / sqrtf(lengthSquared);
         nx *= scale;
         ny *= scale;
         nz *= scale;

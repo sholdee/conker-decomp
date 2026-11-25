@@ -44,9 +44,7 @@ typedef struct {
 
 /* A particle spawned by func_1513D2F0. */
 typedef struct {
-    /* 0x000 */ u8 pad0[0x18];
-    /* 0x018 */ ParticleDef def;
-    /* 0x070 */ u8 pad70[0xA0];
+    /* 0x000 */ DefParticleHead head;
     /* 0x110 */ ParticleState state;
 } Particle;
 
@@ -242,13 +240,13 @@ s32 func_150F3214(Particle *particle) {
         return 0;
     }
 
-    func_15143134(D_800A1950, &particle->def.pos.x, (Mtx *)target->unk1D4 + 15);
+    func_15143134(D_800A1950, &particle->head.def.pos.x, (Mtx *)target->unk1D4 + 15);
 
     size = sqrtf(state->age) * state->growth;
-    particle->def.height = size;
-    particle->def.width = size;
+    particle->head.def.height = size;
+    particle->head.def.width = size;
 
-    particle->def.unk44 = (u32)(state->fadeFrom - ((state->fadeRate * state->age) * state->age));
+    particle->head.def.unk44 = (u32)(state->fadeFrom - ((state->fadeRate * state->age) * state->age));
     state->age = state->age + D_800BE9A4;
 
     if (state->lifetime < state->age) {
