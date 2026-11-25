@@ -88,91 +88,90 @@ s32 func_150C8730(Struct150C8730Arg0 *arg0, struct108 *arg1);
 extern void *func_15167A68(s32, s32, s32, s32, u8, s32);
 
 typedef struct {
-    u8 pad0[0x14];
-    s32 count;
-    s16 unk18;
-    u8 pad1A[0x16];
-} Struct150C88D0Def; /* size 0x30 */
+    f32 x, y, z;
+} Vec3f;
+
+/* Spawn parameters for an expanding ring effect (copied into RadialEffect.def). */
+typedef struct {
+    Vec3f pos;
+    u8 flags;          /* 0x0C: bit 0 = expires when remaining runs out */
+    s8 checkCallback;  /* 0x0D: index into D_80088860, -1 = none */
+    f32 speed;         /* 0x10: radius growth per tick */
+    s32 count;         /* 0x14: ring segments */
+    s16 remaining;     /* 0x18: ticks left */
+    s16 growUntil;     /* 0x1A */
+    f32 growRate;      /* 0x1C */
+    s16 shrinkFrom;    /* 0x20 */
+    f32 shrinkRate;    /* 0x24 */
+    f32 emitRate;      /* 0x28: emissions per unit of circumference per tick */
+    s8 emitCallback;   /* 0x2C: index into D_80088858, -1 = none */
+    s8 updateCallback; /* 0x2D: index into D_80088864, -1 = none */
+} RadialEffectDef; /* size 0x30 */
 
 typedef struct {
-    u8 pad0[0x10];
-    Struct150C88D0Def def;
-    f32 unk40;
-    f32 unk44;
-    f32 step;
-    s16 unk4C;
-    f32 unk50;
-    u8 *unk54;
-    u8 *unk58;
-    u8 pad5C[0x360 - 0x5C];
-    f32 (*sincos)[2];
-    u8 *unk364;
-    u8 data[1];
-} Struct150C88D0;
+    f32 x; /* sin of the segment angle */
+    f32 z; /* cos of the segment angle */
+} RadialDir;
 
-Struct150C88D0 *func_150C88D0(Struct150C88D0Def *arg0, s32 arg1, u8 arg2, s32 arg3) {
-    Struct150C88D0 *ret;
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[3];
+    RadialEffectDef def; /* 0x10 */
+    f32 size;            /* 0x40 */
+    f32 radius;          /* 0x44 */
+    f32 step;            /* 0x48: angle between segments */
+    s16 duration;        /* 0x4C: initial def.remaining */
+    f32 pending;         /* 0x50: emissions owed, see func_150C8A68 */
+    Vtx *vtx[2];         /* 0x54: double-buffered by D_800BE9C0 */
+    u8 pad5C[0x304];
+    RadialDir *dirs;     /* 0x360 */
+    u8 *unk364;
+    u8 data[1];          /* 0x368 */
+} RadialEffect;
+
+/*
+ * Allocates a ring effect from def. Behind the header: dirs[count], two vertex buffers of
+ * (count + 1) * 5 Vtx each, then extraSize bytes at unk364.
+ */
+RadialEffect *func_150C88D0(RadialEffectDef *def, s32 extraSize, u8 arg2, s32 arg3) {
+    RadialEffect *effect;
     s32 i;
 
-    ret = func_15167A68(0x31, arg3, (s32)&((f32 (*)[8])((u8 *)arg1 + arg0->count * 8 + 0x408))[arg0->count * 5], 1, arg2, 1);
-    if (ret == NULL) {
+    effect = func_15167A68(0x31, arg3, (s32)((Vtx (*)[2])((u8 *)extraSize + def->count * 8 + 0x408) + def->count * 5), 1, arg2, 1);
+    if (effect == NULL) {
         return NULL;
     }
-    memcpy(&ret->def, arg0, 0x30);
-    ret->sincos = (f32 (*)[2])ret->data;
-    ret->unk54 = (u8 *)((s32)ret + arg0->count * 8 + 0x368);
-    ret->unk58 = (u8 *)&((f32 (*)[4])((s32)ret + arg0->count * 8 + 0x3B8))[arg0->count * 5];
-    ret->unk364 = (u8 *)&((f32 (*)[8])((s32)ret + arg0->count * 8 + 0x408))[arg0->count * 5];
-    ret->unk40 = 0.0f;
-    ret->unk44 = 0.0f;
-    ret->step = 6.28318548f / ret->def.count;
-    ret->unk50 = 0.0f;
-    ret->unk4C = ret->def.unk18;
+    memcpy(&effect->def, def, sizeof(RadialEffectDef));
+    effect->dirs = (RadialDir *)effect->data;
+    effect->vtx[0] = (Vtx *)((u8 *)effect + def->count * 8 + 0x368);
+    effect->vtx[1] = (Vtx *)((u8 *)effect + def->count * 8 + 0x3B8) + def->count * 5;
+    effect->unk364 = (u8 *)((Vtx (*)[2])((u8 *)effect + def->count * 8 + 0x408) + def->count * 5);
+
+    effect->size = 0.0f;
+    effect->radius = 0.0f;
+    effect->step = 6.28318548f / effect->def.count;
+    effect->pending = 0.0f;
+    effect->duration = effect->def.remaining;
     i = 0;
     {
         f32 angle = 0.0f;
-        for (; i < ret->def.count; i++) {
-            ret->sincos[i][0] = sinf(angle);
-            ret->sincos[i][1] = cosf(angle);
-            angle += ret->step;
+        for (; i < effect->def.count; i++) {
+            effect->dirs[i].x = sinf(angle);
+            effect->dirs[i].z = cosf(angle);
+            angle += effect->step;
         }
     }
-    return ret;
+    return effect;
 }
 
-typedef struct {
-    u8 pad0[0x10];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 unk1C;
-    s8 unk1D;
-    u8 pad1E[2];
-    f32 unk20;
-    u8 pad24[4];
-    s16 unk28;
-    s16 unk2A;
-    f32 unk2C;
-    s16 unk30;
-    u8 pad32[2];
-    f32 unk34;
-    f32 unk38;
-    s8 unk3C;
-    s8 unk3D;
-    u8 pad3E[2];
-    f32 unk40;
-    f32 unk44;
-    u8 pad48[4];
-    s16 unk4C;
-    u8 pad4E[2];
-    f32 unk50;
-} Struct150C8A68;
+extern void (*D_80088858[])(RadialEffect *, f32 *, u8, f32, f32);
+extern s32 (*D_80088860[])(RadialEffect *);
+extern void (*D_80088864[])(RadialEffect *, f32);
 
-extern void (*D_80088858[])(Struct150C8A68 *, f32 *, u8, f32, f32);
-extern s32 (*D_80088860[])(Struct150C8A68 *);
-extern void (*D_80088864[])(Struct150C8A68 *, f32);
-
-void func_150C8A68(Struct150C8A68 *arg0) {
+void func_150C8A68(RadialEffect *effect) {
     s32 pad;
     u8 done;
     f32 oldScale;
@@ -183,51 +182,51 @@ void func_150C8A68(Struct150C8A68 *arg0) {
     u8 angle;
 
     done = 0;
-    if (arg0->unk1C & 1) {
-        arg0->unk28 -= D_800BE9E4;
-        if (arg0->unk28 < 0) {
+    if (effect->def.flags & 1) {
+        effect->def.remaining -= D_800BE9E4;
+        if (effect->def.remaining < 0) {
             done = 1;
         }
     }
     if (!done) {
         s16 t;
         s16 d;
-        oldScale = arg0->unk44;
-        arg0->unk44 += arg0->unk20 * D_800BE9A4;
-        if (arg0->unk2A < (t = arg0->unk28)) {
-            d = arg0->unk4C - t;
-            arg0->unk40 = d * arg0->unk2C;
+        oldScale = effect->radius;
+        effect->radius += effect->def.speed * D_800BE9A4;
+        if (effect->def.growUntil < (t = effect->def.remaining)) {
+            d = effect->duration - t;
+            effect->size = d * effect->def.growRate;
         }
-        if (t < arg0->unk30) {
-            arg0->unk40 = t * arg0->unk34;
+        if (t < effect->def.shrinkFrom) {
+            effect->size = t * effect->def.shrinkRate;
         }
-        if (arg0->unk3C != -1) {
-            arg0->unk50 += arg0->unk38 * D_800BE9A4 * (6.283185482f * arg0->unk44);
-            while (arg0->unk50 > 1.0f) {
+        if (effect->def.emitCallback != -1) {
+            effect->pending += effect->def.emitRate * D_800BE9A4 * (6.283185482f * effect->radius);
+            while (effect->pending > 1.0f) {
                 base = D_800DBFF0[D_80082FA4].unk380 * 0.7111111283f;
                 angle = (func_150ADA20() % 81U) + base - 40;
                 c = func_151423D8(angle - 64);
                 s = func_151423D8(angle);
-                pos[0] = arg0->x + c * arg0->unk44;
-                pos[1] = arg0->y;
-                pos[2] = arg0->z + s * arg0->unk44;
+                pos[0] = effect->def.pos.x + c * effect->radius;
+                pos[1] = effect->def.pos.y;
+                pos[2] = effect->def.pos.z + s * effect->radius;
                 if (pos[2] * pos[2] + pos[0] * pos[0] < 10894295.0f) {
-                    D_80088858[arg0->unk3C](arg0, pos, angle, c, s);
+                    D_80088858[effect->def.emitCallback](effect, pos, angle, c, s);
                 }
-                arg0->unk50 -= 1.0f;
+                effect->pending -= 1.0f;
             }
         }
-        if (arg0->unk3D != -1) {
-            D_80088864[arg0->unk3D](arg0, oldScale);
+        if (effect->def.updateCallback != -1) {
+            D_80088864[effect->def.updateCallback](effect, oldScale);
         }
-        if (arg0->unk1D != -1) {
-            if (D_80088860[arg0->unk1D](arg0) == 0) {
+        if (effect->def.checkCallback != -1) {
+            if (D_80088860[effect->def.checkCallback](effect) == 0) {
                 done = 1;
             }
         }
     }
     if (done) {
-        func_1516972C((struct102 *)arg0);
+        func_1516972C((struct102 *)effect);
     }
 }
 
@@ -737,14 +736,10 @@ void func_1504715C(void *, void *);
 s32 func_15046C80(void *, s32, f32, void *);
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
 
-typedef struct {
-    f32 x, y, z;
-} V3_150CA150;
-
-void func_150CA930(V3_150CA150 *pos);
+void func_150CA930(Vec3f *pos);
 
 typedef struct {
-    V3_150CA150 pos;
+    Vec3f pos;
     u8 unkF0;
     s8 unkF1;
     f32 unkF4;
@@ -772,7 +767,7 @@ typedef struct {
 } Fx_150CA150;
 
 void func_150CA150(u8 *arg0) {
-    V3_150CA150 pos;
+    Vec3f pos;
     f32 r, g, b;
     u8 cr, cg, cb;
     f32 floor[9];
@@ -809,22 +804,24 @@ void func_150CA150(u8 *arg0) {
         cb = b;
         func_151D5404((struct17 *)&pos, 500.0f, 5000.0f, 0.0002f, 0xC, 0xF, 0xFF, 0);
         {
-            Def_150CA150 def;
+            RadialEffectDef def;
             u8 padB[0x14];
-        def.pos = pos;
-        def.unkF4 = 43.20000076f;
-        def.unkF0 = 1;
-        def.unkF1 = -1;
-        def.unkF8 = 0xD;
-        def.unkFC = 0x65;
-        def.unkFE = 0x58;
-        def.unk100 = 21.80000114f / (f32)(s16)def.unkF8;
-        def.unk104 = 0x13;
-        def.unk108 = 21.80000114f / (f32)def.unk104;
-        def.unk110 = 1;
-        def.unk111 = 0;
-        def.unk10C = 7.999999798e-05f;
-        func_150C88D0((Struct150C88D0Def *)&def, 0, 0xFF, 1);
+
+            def.pos = pos;
+            def.speed = 43.20000076f;
+            def.flags = 1;
+            def.checkCallback = -1;
+            def.count = 13;
+            def.remaining = 101;
+            def.growUntil = 88;
+            def.growRate = 21.80000114f / (def.remaining - def.growUntil);
+            def.shrinkFrom = 19;
+            def.shrinkRate = 21.80000114f / def.shrinkFrom;
+            def.emitCallback = 1;
+            def.updateCallback = 0;
+            def.emitRate = 7.999999798e-05f;
+            func_150C88D0(&def, 0, 0xFF, 1);
+
         }
         if (hit != 0) {
             Fx_150CA150 fx;
@@ -895,7 +892,7 @@ void func_150CA150(u8 *arg0) {
 }
 
 
-void func_150CA930(V3_150CA150 *pos) {
+void func_150CA930(Vec3f *pos) {
     s16 randomArg;
 
     randomArg = (func_150ADA20() % 21U) + 10;
