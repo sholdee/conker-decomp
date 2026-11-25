@@ -691,174 +691,134 @@ s32 func_151B47D8(HoltenRopeEffect *effect, HoltenRopeBoneAnchors *anchors, Vec3
     return TRUE;
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 velocity[3];
-} Struct151B48DCPoint;
-
-typedef struct {
-    u8 pad0[0x10];
-    u8 flags;
-    u8 pad11;
-    s16 timer;
-    u8 primaryState[0xC];
-    u8 secondaryState[0xC];
-    s8 primaryCallback;
-    s8 secondaryCallback;
-    u8 pad2E[6];
-    s8 updateCallback;
-    u8 pad35[3];
-    f32 radius;
-    f32 accelScale;
-    f32 lagScale;
-    u8 pad44[4];
-    Struct151B48DCPoint points[10];
-} Struct151B48DC;
-
-s32 func_151B48DC(Struct151B48DC *arg0) {
-    f32 start;
-    f32 end;
+/* Update callback: spaces the points along x from start.x towards end.x, in tenths. */
+s32 func_151B48DC(HoltenRopeEffect *effect) {
+    f32 startX;
+    f32 endX;
     f32 step;
     f32 x;
     s32 i;
 
-    start = *(f32 *)arg0->primaryState;
-    end = *(f32 *)arg0->secondaryState;
-    step = -(start - end) * 0.1f;
-    x = start;
+    startX = effect->start.x;
+    endX = effect->end.x;
+    step = -(startX - endX) * 0.1f;
+    x = startX;
     for (i = 0; i < 10; i++, x += step) {
-        Struct151B48DCPoint *point = &arg0->points[i];
+        HoltenRopePoint *point = &effect->points[i];
 
-        point->x = x;
-        point->y = 0.0f;
-        point->z = 0.0f;
+        point->pos.x = x;
+        point->pos.y = 0.0f;
+        point->pos.z = 0.0f;
     }
-    arg0->flags &= ~2;
-    return 1;
+    effect->flags &= ~2;
+    return TRUE;
 }
 
-s32 func_151B498C(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg5,
-                   s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *arg10, s32 *arg11,
-                   u8 *arg12, u8 *arg13) {
-    *arg1 = 0x220005;
-    *arg2 = 0x40600;
-    *arg3 = 0xFF;
-    *arg4 = 0xFF;
-    *arg5 = 0xFF;
-    *arg6 = 0xFF;
-    *arg7 = 0xFF;
-    *arg8 = 0xFF;
-    *arg9 = 0xFF;
-    *arg10 = 0xFF;
-    *arg11 = 0;
-    *arg12 = 5;
-    *arg13 = 0x2B;
-    return 1;
+/* Draw style 0: white, one-cycle. */
+s32 func_151B498C(HoltenRopeEffect *effect, s32 *mode0, s32 *mode1,
+                   s32 *primR, s32 *primG, s32 *primB, s32 *primA,
+                   s32 *envR, s32 *envG, s32 *envB, s32 *envA,
+                   s32 *cycleType, u8 *renderMode, u8 *unk13) {
+    *mode0 = 0x220005;
+    *mode1 = 0x40600;
+    *primR = 255;
+    *primG = 255;
+    *primB = 255;
+    *primA = 255;
+    *envR = 255;
+    *envG = 255;
+    *envB = 255;
+    *envA = 255;
+    *cycleType = G_CYC_1CYCLE;
+    *renderMode = 5;
+    *unk13 = 0x2B;
+    return TRUE;
 }
 
 typedef struct {
-    u8 pad0[0xA4];
-    u8 unkA4;
-} Model151B4A14;
+    /* 0x00 */ u8 pad0[0xA4];
+    /* 0xA4 */ u8 unkA4;
+} HoltenRopeColorSource;
 
+/* A rope whose type data at 0x150 points to the object it takes its color from. */
 typedef struct {
-    u8 pad0[0x150];
-    Model151B4A14 *unk150;
-} Obj151B4A14;
+    HoltenRopeEffect effect;
+    HoltenRopeColorSource *colorSource;
+} HoltenRopeTinted;
 
-extern void func_1502EC34(void *, u32 *, u32 *, u32 *, u32 *);
+extern void func_1502EC34(HoltenRopeColorSource *, u32 *, u32 *, u32 *, u32 *);
 
-u8 func_151B4A14(Obj151B4A14 *arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg5,
-                 s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *arg10, s32 *arg11,
-                 u8 *arg12, u8 *arg13) {
+/* Draw style 1: two-cycle, tinted with the color source's color while its bit 0 of unkA4 is set; style 0 otherwise. */
+u8 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1,
+                 s32 *primR, s32 *primG, s32 *primB, s32 *primA,
+                 s32 *envR, s32 *envG, s32 *envB, s32 *envA,
+                 s32 *cycleType, u8 *renderMode, u8 *unk13) {
     u8 ret;
-    s32 mode1;
-    s32 mode2;
-    Model151B4A14 *model;
+    s32 pad[2]; // matching: stack slots
+    HoltenRopeColorSource *source;
     u32 r;
     u32 g;
     u32 b;
     u32 a;
-    s32 full;
     u32 alpha;
 
-    ret = 1;
-    full = 0xFF;
-    mode1 = 0x200005;
-    mode2 = 0x60600;
-    model = arg0->unk150;
-    func_1502EC34(model, &r, &g, &b, &a);
-    if (model->unkA4 & 1) {
-        *arg1 = mode1;
-        *arg2 = mode2;
-        *arg3 = r;
-        *arg4 = g;
-        *arg5 = b;
-        *arg6 = full;
-        *arg9 = alpha = a;
-        *arg8 = alpha;
-        *arg7 = alpha;
-        *arg10 = full;
-        *arg11 = 0x100000;
-        *arg12 = 5;
-        *arg13 = 0x2F;
+    ret = TRUE;
+    source = rope->colorSource;
+    func_1502EC34(source, &r, &g, &b, &a);
+    if (source->unkA4 & 1) {
+        *mode0 = 0x200005;
+        *mode1 = 0x60600;
+        *primR = r;
+        *primG = g;
+        *primB = b;
+        *primA = 255;
+        *envB = alpha = a;
+        *envG = alpha;
+        *envR = alpha;
+        *envA = 255;
+        *cycleType = G_CYC_2CYCLE;
+        *renderMode = 5;
+        *unk13 = 0x2F;
     } else {
-        ret = func_151B498C(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+        ret = func_151B498C(&rope->effect, mode0, mode1, primR, primG, primB, primA, envR, envG, envB, envA, cycleType, renderMode, unk13);
     }
     return ret;
-
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 velocity[3];
-} HoltenRopePoint_151B4B78;
-
-typedef struct {
-    u8 pad0[0x10];
-    u8 flags;
-    u8 pad11[0x37];
-    HoltenRopePoint_151B4B78 points[10];
-} HoltenRopeEffect_151B4B78;
-
-s32 func_151B4B78(HoltenRopeEffect_151B4B78 *arg0) {
+/* Update callback: spaces the points 2000 units along x, from x = -1000. */
+s32 func_151B4B78(HoltenRopeEffect *effect) {
     f32 x;
     s32 i;
 
     x = -1000.0f;
-    for (i = 0; i < 10; i++, x += 222.22223f) {
-        HoltenRopePoint_151B4B78 *point = &arg0->points[i];
+    for (i = 0; i < 10; i++, x += 2000.0f / 9.0f) {
+        HoltenRopePoint *point = &effect->points[i];
 
-        point->x = x;
-        point->y = 0.0f;
-        point->z = 0.0f;
+        point->pos.x = x;
+        point->pos.y = 0.0f;
+        point->pos.z = 0.0f;
     }
-    arg0->flags &= ~2;
-    return 1;
+    effect->flags &= ~2;
+    return TRUE;
 }
 
-void func_151B4C1C(u8 *arg0) {
-    void (*fn)(void *);
+/* Frees the rope's vertex buffers and runs the rope type's cleanup handler, if any. */
+void func_151B4C1C(HoltenRopeEffect *effect) {
+    void (*handler)(HoltenRopeEffect *);
 
-    func_151D5E30(arg0 + 0x140);
-    fn = D_8008FB70[arg0[0x44]];
-    if (fn != NULL) {
-        fn(arg0);
+    func_151D5E30(effect->vtxBuffer);
+    handler = D_8008FB70[effect->type];
+    if (handler != NULL) {
+        handler(effect);
     }
 }
 
-void func_151B4C1C(u8 *);
-
-void func_151B4C6C(struct102 *arg0) {
-    func_151B4C1C((u8 *)arg0);
-    func_15169824(arg0);
+void func_151B4C6C(HoltenRopeEffect *effect) {
+    func_151B4C1C(effect);
+    func_15169824((struct102 *)effect);
 }
 
-void func_151B4C98(struct102 *arg0) {
-    func_151B4C1C((u8 *)arg0);
-    func_15169824(arg0);
+void func_151B4C98(HoltenRopeEffect *effect) {
+    func_151B4C1C(effect);
+    func_15169824((struct102 *)effect);
 }
