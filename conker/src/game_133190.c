@@ -98,6 +98,15 @@ typedef struct BoltChainObj {
     /* 0x70 */ Vec3f points[1];    /* chain.count points */
 } BoltChainObj;
 
+/* Result of the func_15081690 ray cast. */
+typedef struct RayHit {
+    /* 0x00 */ u8 pad0[8];
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ u8 pad14[0x59 - 0x14];
+    /* 0x59 */ u8 hit;
+    /* 0x5A */ u8 pad5A[0x64 - 0x5A];
+} RayHit;
+
 /* Spawn descriptor for func_15130280 (an end flare). */
 typedef struct FlareSpawn {
     /* 0x00 */ s32 unk0;
@@ -140,7 +149,7 @@ void func_15107A20(struct127 *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *cent
 void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2);
 void func_15107F54(struct127 *actor, u8 bone, Vec3f *localPos, Vec3f *out);
 void func_15143794(s32 yaw, s32 pitch, f32 length, Vec3f *out);
-void func_15081690(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, void *arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
+void func_15081690(struct127 *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32, s32, s32, s32, s32, s32);
 BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
 void func_15106214(BoltObj *bolt);
 void func_15106610(BoltObj *bolt);
@@ -152,7 +161,10 @@ extern s32 (*D_80088C10[])(BoltObj *bolt, u8 *moved);
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 
-/* Allocates a bolt for desc with extraSize bytes of user data, samples and jitters it, and spawns its end flares. */
+/*
+ * Allocates a bolt for desc with extraSize bytes of user data, samples and jitters it, and spawns its
+ * end flares. arg2 and arg3 go through to the allocators; callers pass their own header bytes 0xC and 0x1.
+ */
 BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
     BoltObj *bolt;
     s32 segments;
@@ -177,48 +189,48 @@ BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3) {
     /* three vertices per joint point */
     bolt->vtxBufSize = (bolt->desc.segments + 2) * 3 * sizeof(Vtx);
     {
-    FlareSpawn spawn;
+        FlareSpawn spawn;
 
-    spawn.unk1D = 0x2B;
-    spawn.unk8 = 0x4404;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
-    spawn.life = 300;
-    spawn.unkC = 0;
-    spawn.unk10 = 0;
-    spawn.color0[0] = 0xFF;
-    spawn.color0[1] = 0xFF;
-    spawn.color0[2] = 0xFF;
-    spawn.color0[3] = 0xFF;
-    spawn.color1[0] = desc->color.r;
-    spawn.color1[1] = desc->color.g;
-    spawn.color1[2] = desc->color.b;
-    spawn.color1[3] = desc->color.a;
-    spawn.unk1C = 0xFF;
-    spawn.unk3C = *(Vec3f *)&D_800A5480;
-    spawn.vel = *(Vec3f *)&D_800A5480;
-    spawn.unk1E = 1;
-    spawn.unk20 = 0xFF;
-    spawn.unk22 = 1;
-    spawn.flags = 0xC000;
-    spawn.unk60 = 6;
-    spawn.unk61 = 6;
-    spawn.unk62 = -1;
-    spawn.unk63 = -1;
-    spawn.unk64 = -1;
-    spawn.unk65 = 0;
-    spawn.unk5C = 0;
-    spawn.unk66 = 0xFF;
-    spawn.unk68 = 0;
-    spawn.unk54 = 0.0f;
-    spawn.unk24 = 1.0f;
-    spawn.unk6C = 1000000.0f;
-    spawn.unk28 = spawn.unk2C = desc->width * 0.07692307979f * 200.0f;
-    for (i = 0; i < 2; i++) {
-        spawn.pos = desc->ctrl[(i == 0) ? 0 : 3];
-        spawn.flags = (func_150ADA20() ? 0x40 : 0) | (func_150ADA20() ? 0x80 : 0);
-        bolt->flares[i] = func_15130280(&spawn, 0, 0, 0, arg2, arg3);
-    }
+        spawn.unk1D = 0x2B;
+        spawn.unk8 = 0x4404;
+        spawn.unk0 = 0x200005;
+        spawn.unk4 = 0;
+        spawn.life = 300;
+        spawn.unkC = 0;
+        spawn.unk10 = 0;
+        spawn.color0[0] = 0xFF;
+        spawn.color0[1] = 0xFF;
+        spawn.color0[2] = 0xFF;
+        spawn.color0[3] = 0xFF;
+        spawn.color1[0] = desc->color.r;
+        spawn.color1[1] = desc->color.g;
+        spawn.color1[2] = desc->color.b;
+        spawn.color1[3] = desc->color.a;
+        spawn.unk1C = 0xFF;
+        spawn.unk3C = *(Vec3f *)&D_800A5480;
+        spawn.vel = *(Vec3f *)&D_800A5480;
+        spawn.unk1E = 1;
+        spawn.unk20 = 0xFF;
+        spawn.unk22 = 1;
+        spawn.flags = 0xC000;
+        spawn.unk60 = 6;
+        spawn.unk61 = 6;
+        spawn.unk62 = -1;
+        spawn.unk63 = -1;
+        spawn.unk64 = -1;
+        spawn.unk65 = 0;
+        spawn.unk5C = 0;
+        spawn.unk66 = 0xFF;
+        spawn.unk68 = 0;
+        spawn.unk54 = 0.0f;
+        spawn.unk24 = 1.0f;
+        spawn.unk6C = 1000000.0f;
+        spawn.unk28 = spawn.unk2C = desc->width * 0.07692307979f * 200.0f;
+        for (i = 0; i < 2; i++) {
+            spawn.pos = desc->ctrl[(i == 0) ? 0 : 3];
+            spawn.flags = (func_150ADA20() ? 0x40 : 0) | (func_150ADA20() ? 0x80 : 0);
+            bolt->flares[i] = func_15130280(&spawn, 0, 0, 0, arg2, arg3);
+        }
     }
     return bolt;
 }
@@ -415,6 +427,7 @@ extern u8 D_80090D70[];
 extern s32 D_800A4AC8[][2];
 extern s32 D_800D2C9C;
 
+/* Draws the bolt as a camera-facing strip: three vertices (one side, centre, other side) per joint point. */
 Gfx *func_151067B8(Gfx *gdl, BoltObj *bolt, s16 view) {
     Vec3f *camera;
     BoltObj *curve = bolt; // matching: a second copy of the bolt pointer steers IDO's register choice
@@ -556,6 +569,7 @@ void func_15106E78(BoltObj *bolt) {
     func_151D5E30(bolt->vtxBuf);
 }
 
+/* Destroys the bolt's resources, then hands it to func_15169804. */
 void func_15106EF8(BoltObj *bolt) {
     func_15106E78(bolt);
     func_15169804((struct102 *)bolt);
@@ -563,6 +577,7 @@ void func_15106EF8(BoltObj *bolt) {
 
 void func_15169824(struct102 *arg0);
 
+/* Destroys the bolt's resources, then hands it to func_15169824. */
 void func_15106F24(BoltObj *bolt) {
     func_15106E78(bolt);
     func_15169824((struct102 *)bolt);
@@ -735,15 +750,6 @@ typedef struct BoltBoneAnchor {
     /* 0x15 */ u8 pad15[3];
 } BoltBoneAnchor;
 
-/* Result of the func_15081690 ray cast. */
-typedef struct RayHit {
-    /* 0x00 */ u8 pad0[8];
-    /* 0x08 */ Vec3f pos;
-    /* 0x14 */ u8 pad14[0x59 - 0x14];
-    /* 0x59 */ u8 hit;
-    /* 0x5A */ u8 pad5A[0x64 - 0x5A];
-} RayHit;
-
 /*
  * Spawns a kind-2 bolt from a point on the actor's bounds (direction yaw/pitch) to where the ray
  * from that point away from the actor hits. life -1 means it never runs out.
@@ -784,12 +790,12 @@ BoltObj *func_15107700(struct127 *actor, s16 yaw, s16 pitch, s16 life, s32 segme
     desc.color = *(ColorRGBA *)color;
     desc.kind = 2;
 
-    // matching: a block with a declaration emits a scope marker that keeps IDO from hoisting &desc.color
+    // matching: a block holding a declaration emits a scope marker that keeps IDO from hoisting &desc.color
     {
-    void func_15107A20(struct127 *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
-    func_15107A20(actor, yaw, pitch, &desc.ctrl[0], &center);
-    func_15081690(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, desc.ctrl[0].x - center.x, desc.ctrl[0].y - center.y, desc.ctrl[0].z - center.z, &hit, 0.0f, 0, 1, 1, -1, 0, 0);
+        void func_15107A20(struct127 *actor, s32 yaw, s32 pitch, Vec3f *out, Vec3f *centerOut);
 
+        func_15107A20(actor, yaw, pitch, &desc.ctrl[0], &center);
+        func_15081690(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, desc.ctrl[0].x - center.x, desc.ctrl[0].y - center.y, desc.ctrl[0].z - center.z, &hit, 0.0f, 0, 1, 1, -1, 0, 0);
     }
     if (hit.hit == 0) {
         return NULL;
@@ -824,12 +830,10 @@ s32 func_15107924(BoltObj *bolt, u8 *moved) {
     *moved = FALSE;
     oldStart = bolt->desc.ctrl[0];
     func_15107A20(owner, anchor->yaw, anchor->pitch, &bolt->desc.ctrl[0], NULL);
-    if ((oldStart.x == bolt->desc.ctrl[0].x) && (oldStart.y == bolt->desc.ctrl[0].y) && (oldStart.z == bolt->desc.ctrl[0].z)) {
-        goto ret1;
+    if (oldStart.x != bolt->desc.ctrl[0].x || oldStart.y != bolt->desc.ctrl[0].y || oldStart.z != bolt->desc.ctrl[0].z) {
+        *moved = TRUE;
+        func_15107AE0(&bolt->desc.ctrl[0], &bolt->desc.ctrl[3], &bolt->desc.ctrl[1], &bolt->desc.ctrl[2]);
     }
-    *moved = TRUE;
-    func_15107AE0(&bolt->desc.ctrl[0], &bolt->desc.ctrl[3], &bolt->desc.ctrl[1], &bolt->desc.ctrl[2]);
-ret1:
     return 1;
 }
 
@@ -966,12 +970,10 @@ s32 func_15107E48(BoltObj *bolt, u8 *moved) {
     *moved = FALSE;
     oldStart = bolt->desc.ctrl[0];
     func_15107F54(owner, anchor->bone, &anchor->localPos, &bolt->desc.ctrl[0]);
-    if ((oldStart.x == bolt->desc.ctrl[0].x) && (oldStart.y == bolt->desc.ctrl[0].y) && (oldStart.z == bolt->desc.ctrl[0].z)) {
-        goto ret1;
+    if (oldStart.x != bolt->desc.ctrl[0].x || oldStart.y != bolt->desc.ctrl[0].y || oldStart.z != bolt->desc.ctrl[0].z) {
+        *moved = TRUE;
+        func_15107AE0(&bolt->desc.ctrl[0], &bolt->desc.ctrl[3], &bolt->desc.ctrl[1], &bolt->desc.ctrl[2]);
     }
-    *moved = TRUE;
-    func_15107AE0(&bolt->desc.ctrl[0], &bolt->desc.ctrl[3], &bolt->desc.ctrl[1], &bolt->desc.ctrl[2]);
-ret1:
     return 1;
 }
 
