@@ -1,0 +1,154 @@
+#include <ultra64.h>
+#include "functions.h"
+#include "variables.h"
+#include "effects.h"
+#include "libc/math.h"
+
+/* A point on the ground plane (world x and z). */
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 z;
+} Vec2f;
+
+/* Motion state of a ground-hugging flash, kept at +0x18 of the object func_151602C0 returns. */
+typedef struct {
+    /* 0x00 */ Vec2f position;
+    /* 0x08 */ Vec2f velocity;
+    /* 0x10 */ f32 height;      /* used when the ground probe finds nothing */
+    /* 0x14 */ f32 probeHeight; /* height the ground probe starts from */
+    /* 0x18 */ f32 lifetime;
+    /* 0x1C */ CollisionHit ground;
+} GroundFlash; // size 0x40
+
+/* Spawner state: flashes run between a random point on the start line and one on the end line. */
+typedef struct {
+    /* 0x00 */ Vec2f startOrigin;
+    /* 0x08 */ Vec2f endOrigin;
+    /* 0x10 */ Vec2f startExtent;
+    /* 0x18 */ Vec2f endExtent;
+    /* 0x20 */ f32 height;
+    /* 0x24 */ f32 probeHeight;
+    /* 0x28 */ f32 rate;        /* flashes per frame */
+    /* 0x2C */ f32 rateRange;
+    /* 0x30 */ f32 accumulator;
+    /* 0x34 */ f32 speed;
+    /* 0x38 */ f32 speedRange;
+    /* 0x3C */ u8  colour[4];
+} FlashSpawner;
+
+typedef struct {
+    /* 0x00 */ u8  pad0;
+    /* 0x01 */ u8  unk1;
+    /* 0x02 */ u8  pad2[0xA];
+    /* 0x0C */ u8  unkC;
+    /* 0x0D */ u8  padD[0x1B];
+    /* 0x28 */ FlashSpawner spawner;
+} struct_EAB10;
+
+/* The LightEffect func_151602C0 creates, with this file's GroundFlash payload at LightEffect.data;
+ * func_150EAE24 is its per-frame update. */
+typedef struct {
+    /* 0x00 */ u8  pad0[0x14];
+    /* 0x14 */ PointLight *light;
+    /* 0x18 */ GroundFlash flash;
+} FlashObject;
+
+FlashObject *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+/* Spawns this frame's share of flashes, each sliding from one line to the other along the ground. */
+void func_150EAB10(struct_EAB10 *actor) {
+    s32 pad; // matching: unused stack slots that keep the frame layout
+    GroundFlash flash;
+    LightEffectHeader header;
+    s32 padB0; // matching: see pad
+    Vec2f end;
+    Vec2f start;
+    f32 speed;
+    f32 length;
+    f32 random;
+    Vec3i origin;
+    FlashObject *obj;
+    FlashSpawner *spawner;
+
+    spawner = &actor->spawner;
+    spawner->accumulator += (spawner->rate + func_150ADA68() * spawner->rateRange) * D_800BE9A4;
+    if (spawner->accumulator > 1.0f) {
+        flash.ground.material = 0;
+        flash.ground.flags = 0;
+        flash.ground.source = 0;
+        flash.ground.surface = 0;
+        flash.ground.height = -10000.0f;
+        flash.height = spawner->height;
+        flash.probeHeight = spawner->probeHeight;
+        header.flags = 2;
+        header.update = 19;
+        header.lifetime = 300;
+        header.lightType = 0;
+        do {
+            speed = spawner->speed + spawner->speedRange * func_150ADA68();
+            if (speed != 0.0f) {
+                random = func_150ADA68();
+                start.x = spawner->startExtent.x * random + spawner->startOrigin.x;
+                start.z = spawner->startExtent.z * random + spawner->startOrigin.z;
+                random = func_150ADA68();
+                end.x = spawner->endExtent.x * random + spawner->endOrigin.x;
+                end.z = spawner->endExtent.z * random + spawner->endOrigin.z;
+                flash.velocity.x = end.x - start.x;
+                flash.velocity.z = end.z - start.z;
+                length = sqrtf(flash.velocity.x * flash.velocity.x + flash.velocity.z * flash.velocity.z);
+                if (length != 0.0f) {
+                    random = 1.0f / length;
+                    flash.velocity.x *= random;
+                    flash.velocity.z *= random;
+                    if (func_150ADA20() & 1) {
+                        flash.position = start;
+                    } else {
+                        flash.position = end;
+                        flash.velocity.x = -flash.velocity.x;
+                        flash.velocity.z = -flash.velocity.z;
+                    }
+                    flash.velocity.x *= speed;
+                    flash.velocity.z *= speed;
+                    flash.lifetime = length / speed;
+                    origin.x = flash.position.x;
+                    origin.y = spawner->height;
+                    origin.z = flash.position.z;
+                    obj = func_151602C0(&header, &origin, spawner->colour[3], spawner->colour[0],
+                                        spawner->colour[1], spawner->colour[2], 0xFF, 0, 0x40, actor->unkC,
+                                        actor->unk1);
+                    if (obj != NULL) {
+                        memcpy(&obj->flash, &flash, sizeof(flash));
+                    }
+                }
+            }
+            spawner->accumulator -= 1.0f;
+        } while (spawner->accumulator > 1.0f);
+    }
+}
+
+s32 func_15046C80(f32 *, s32, f32, CollisionHit *);
+
+/* Slides the flash along the ground and keeps its light on the ground; returns 0 once it expires. */
+s32 func_150EAE24(FlashObject *obj) {
+    GroundFlash *flash;
+    f32 probe[3];
+
+    obj->flash.position.x += obj->flash.velocity.x * D_800BE9A4;
+    obj->flash.position.z += obj->flash.velocity.z * D_800BE9A4;
+    probe[0] = obj->flash.position.x;
+    probe[1] = obj->flash.height;
+    probe[2] = obj->flash.position.z;
+    obj->light->x = obj->flash.position.x;
+    obj->light->z = obj->flash.position.z;
+    flash = &obj->flash;
+    if (func_15046C80(probe, 0, obj->flash.probeHeight, &flash->ground) != 0) {
+        obj->light->y = flash->ground.height;
+    } else {
+        obj->light->y = flash->height;
+    }
+    flash->lifetime -= D_800BE9A4;
+    if (flash->lifetime <= 0.0f) {
+        return 0;
+    }
+    return 1;
+}
