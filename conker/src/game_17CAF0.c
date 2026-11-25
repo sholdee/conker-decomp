@@ -1404,98 +1404,12 @@ void func_15153298(Game153298Config *config, u8 arg1, s32 arg2) {
     }
 }
 
-struct Local15153634Arg {
-    s16 countBase;
-    s16 countRange;
-    u8 unk4;
-    u8 pad5;
-    u16 unk6;
-    s32 unk8;
-    s32 unkC;
-    s16 unk10;
-    s16 unk12;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    u8 unk1E;
-    u8 unk1F;
-    u8 unk20;
-    u8 unk21;
-    u8 unk22;
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
-    s16 unk26;
-    s16 unk28;
-    s16 unk2A;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    Vec3f position;
-    s16 yawBase;
-    s16 pitchBase;
-    s16 yawRange;
-    s16 pitchRange;
-    f32 speedBase;
-    f32 speedRange;
-    f32 unk54;
-    f32 unk58;
-    s32 unk5C;
-    s8 unk60;
-    s8 unk61;
-    u8 unk62;
-    u8 unk63;
-    u8 unk64;
-    u8 pad65[3];
-    f32 extra; /* copied into the spawned object at +0xA8 */
-};
-
-/* First argument of func_15130280. */
-struct Local15153634Spawn {
-    s32 unk00;
-    s32 unk04;
-    u16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    Vec3f position;
-    u8 pad3C[0xC];
-    Vec3f velocity;
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    s8 unk62;
-    s8 unk63;
-    u8 pad64[2];
-    u8 unk66;
-    u8 pad67[9];
-};
-
-extern void *func_15130280(struct Local15153634Spawn *, u8, s32, s32, u8, s32);
+extern void *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spawns a random number of particles (func_15130280) at config->position, each moving at a random
  * yaw and pitch, and copies config->extra into each. */
-void func_15153634(struct Local15153634Arg *config, u8 arg1, u8 arg2, s32 arg3) {
-    struct Local15153634Spawn spawn;
+void func_15153634(SpriteBurst *config, u8 arg1, u8 arg2, s32 arg3) {
+    ParticleDesc spawn;
     f32 extra;
     s32 count;
     s16 yaw;
@@ -1510,30 +1424,30 @@ void func_15153634(struct Local15153634Arg *config, u8 arg1, u8 arg2, s32 arg3) 
 
     count = (func_150ADA20() % (u32)(config->countRange + 1)) + config->countBase;
     extra = config->extra;
-    spawn.unk1D = config->unk4;
-    spawn.unk08 = config->unk6;
-    spawn.unk04 = config->unkC;
-    spawn.unk00 = config->unk8;
-    spawn.unk0C = 0;
-    spawn.unk14 = config->unk1C;
-    spawn.unk15 = config->unk1D;
-    spawn.unk16 = config->unk1E;
-    spawn.unk17 = config->unk1F;
-    spawn.unk18 = config->unk20;
-    spawn.unk19 = config->unk21;
-    spawn.unk1A = config->unk22;
-    spawn.position = config->position;
-    spawn.unk58 = config->unk5C;
-    spawn.unk1C = config->unk25;
-    spawn.unk62 = config->unk60;
-    spawn.unk63 = config->unk61;
-    spawn.unk1E = config->unk26;
-    spawn.unk20 = config->unk28;
-    spawn.unk60 = config->unk62;
-    spawn.unk61 = config->unk63;
-    spawn.unk22 = config->unk2A;
-    spawn.unk24 = config->unk2C;
-    spawn.unk66 = arg1;
+    spawn.texture = config->texture;
+    spawn.renderMode = config->renderMode;
+    spawn.unk4 = config->unkC;
+    spawn.unk0 = config->unk8;
+    spawn.frame = 0;
+    spawn.r = config->r;
+    spawn.g = config->g;
+    spawn.b = config->b;
+    spawn.a = config->a;
+    spawn.r2 = config->r2;
+    spawn.g2 = config->g2;
+    spawn.b2 = config->b2;
+    spawn.pos = config->pos;
+    spawn.flags = config->flags;
+    spawn.brightness = config->brightness;
+    spawn.updateFunc = config->updateFunc;
+    spawn.deathFunc = config->deathFunc;
+    spawn.fadeStart = config->fadeStart;
+    spawn.fadeRate = config->fadeRate;
+    spawn.primColorMode = config->primColorMode;
+    spawn.envColorMode = config->envColorMode;
+    spawn.scaleStart = config->scaleStart;
+    spawn.scaleRate = config->scaleRate;
+    spawn.views = arg1;
     while (count != 0) {
         yaw = (func_150ADA20() % (u32)(config->yawRange + 1)) + config->yawBase;
         pitch = (func_150ADA20() % (u32)(config->pitchRange + 1)) + config->pitchBase;
@@ -1542,15 +1456,15 @@ void func_15153634(struct Local15153634Arg *config, u8 arg1, u8 arg2, s32 arg3) 
         cosYaw = func_151423D8((u8)yaw);
         sinYaw = func_151423D8((u8)(yaw - 0x40));
         speed = (func_150ADA68() * config->speedRange) + config->speedBase;
-        spawn.unk0A = (func_150ADA20() % (u32)(config->unk12 + 1)) + config->unk10;
-        spawn.unk10 = (func_150ADA20() % (u32)(config->unk18 + 1)) + config->unk14;
+        spawn.timer = (func_150ADA20() % (u32)(config->timerRange + 1)) + config->timerBase;
+        spawn.frameRate = (func_150ADA20() % (u32)(config->frameRateRange + 1)) + config->frameRateBase;
         horizontal = speed * cosPitch;
-        spawn.unk28 = spawn.unk2C = (func_150ADA68() * config->unk34) + config->unk30;
-        spawn.velocity.x = horizontal * sinYaw;
-        spawn.velocity.y = -speed * sinPitch;
-        spawn.velocity.z = horizontal * cosYaw;
-        spawn.unk54 = (func_150ADA68() * config->unk58) + config->unk54;
-        spawn.unk1B = (func_150ADA20() % (u32)(config->unk24 + 1)) + config->unk23;
+        spawn.width = spawn.height = (func_150ADA68() * config->sizeRange) + config->sizeBase;
+        spawn.vel.x = horizontal * sinYaw;
+        spawn.vel.y = -speed * sinPitch;
+        spawn.vel.z = horizontal * cosYaw;
+        spawn.gravity = (func_150ADA68() * config->gravityRange) + config->gravityBase;
+        spawn.alpha = (func_150ADA20() % (u32)(config->alphaRange + 1)) + config->alphaBase;
         object = func_15130280(&spawn, config->unk64, 0, 4, arg2, arg3);
         if (object != NULL) {
             memcpy((u8 *)object + 0xA8, &extra, sizeof(extra));

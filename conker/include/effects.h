@@ -1060,4 +1060,55 @@ typedef struct SurfacePuffSpray {
     /* 0xA0 */ s32 unkA0;           /* EffectTemplate.unk18 */
 } SurfacePuffSpray; /* size 0xA4 */
 
+/* func_15153634 (game_17CAF0.c): countBase + rand % (countRange + 1) sprite particles (func_15130280) at pos,
+ * each moving at a random yaw/pitch; the ParticleDesc fields are copied, the base/range pairs drawn per
+ * particle, and `extra` is copied into each particle at +0xA8. Note the yaw/pitch order differs from
+ * AngleRange. */
+typedef struct SpriteBurst {
+    /* 0x00 */ s16 countBase;
+    /* 0x02 */ s16 countRange;
+    /* 0x04 */ u8 texture;
+    /* 0x05 */ u8 pad5;
+    /* 0x06 */ u16 renderMode;
+    /* 0x08 */ s32 unk8;            /* ParticleDesc.unk0 */
+    /* 0x0C */ s32 unkC;            /* ParticleDesc.unk4 */
+    /* 0x10 */ s16 timerBase;
+    /* 0x12 */ s16 timerRange;
+    /* 0x14 */ s32 frameRateBase;
+    /* 0x18 */ s32 frameRateRange;
+    /* 0x1C */ u8 r;
+    /* 0x1D */ u8 g;
+    /* 0x1E */ u8 b;
+    /* 0x1F */ u8 a;
+    /* 0x20 */ u8 r2;
+    /* 0x21 */ u8 g2;
+    /* 0x22 */ u8 b2;
+    /* 0x23 */ u8 alphaBase;
+    /* 0x24 */ u8 alphaRange;
+    /* 0x25 */ u8 brightness;
+    /* 0x26 */ s16 fadeStart;
+    /* 0x28 */ s16 fadeRate;
+    /* 0x2A */ s16 scaleStart;
+    /* 0x2C */ f32 scaleRate;
+    /* 0x30 */ f32 sizeBase;        /* width and height */
+    /* 0x34 */ f32 sizeRange;
+    /* 0x38 */ Vec3f pos;
+    /* 0x44 */ s16 yawBase;
+    /* 0x46 */ s16 pitchBase;
+    /* 0x48 */ s16 yawRange;
+    /* 0x4A */ s16 pitchRange;
+    /* 0x4C */ f32 speedBase;
+    /* 0x50 */ f32 speedRange;
+    /* 0x54 */ f32 gravityBase;
+    /* 0x58 */ f32 gravityRange;
+    /* 0x5C */ s32 flags;           /* PARTICLE_* */
+    /* 0x60 */ s8 updateFunc;
+    /* 0x61 */ s8 deathFunc;
+    /* 0x62 */ u8 primColorMode;
+    /* 0x63 */ u8 envColorMode;
+    /* 0x64 */ u8 unk64;            /* func_15130280's second argument */
+    /* 0x65 */ u8 pad65[3];
+    /* 0x68 */ f32 extra;           /* copied into each particle at +0xA8 */
+} SpriteBurst; /* size 0x6C */
+
 #endif

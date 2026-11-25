@@ -826,54 +826,7 @@ typedef struct {
     /* 0x24 */ s16 unk24;
 } DebrisPacket; /* 0x28, func_1513C650 packet (as Packet15141F78 in game_16EE20.c) */
 
-typedef struct {
-    /* 0x00 */ s16 countBase;
-    /* 0x02 */ s16 countRange;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 pad5;
-    /* 0x06 */ u16 unk6;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E;
-    /* 0x1F */ u8 unk1F;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21;
-    /* 0x22 */ u8 unk22;
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ u8 unk24;
-    /* 0x25 */ u8 unk25;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ Vec3f position;
-    /* 0x44 */ s16 yawBase;
-    /* 0x46 */ s16 pitchBase;
-    /* 0x48 */ s16 yawRange;
-    /* 0x4A */ s16 pitchRange;
-    /* 0x4C */ f32 speedBase;
-    /* 0x50 */ f32 speedRange;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ s8 unk60;
-    /* 0x61 */ s8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 pad65[3];
-    /* 0x68 */ f32 extra;
-} SmokeConfig; /* 0x6C, func_15153634 config (as Config15153634 in game_1EC390.c) */
-
-void func_15153634(SmokeConfig *, u8, u8, s32);
+void func_15153634(SpriteBurst *, u8, u8, s32);
 
 /*
  * Impact effects where the projectile hit: with the given chances, debris, a spark, a smoke burst
@@ -975,7 +928,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         func_1513D2F0(&spark, &D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, trail->unkC, trail->unk1);
     }
     if (func_150ADA68() < smokeChance) {
-        SmokeConfig smoke;
+        SpriteBurst smoke;
         const u8 colorA[6][3] = { { 0xB7, 0x77, 0x34 }, { 0xB7, 0x77, 0x34 }, { 0xAA, 0x52, 0x1E },
                             { 0xAA, 0x52, 0x1E }, { 0x98, 0x92, 0x79 }, { 0xFF, 0xC0, 0x00 } };
         const u8 colorB[6][3] = { { 0x5C, 0x30, 0x00 }, { 0x5C, 0x30, 0x00 }, { 0x00, 0x00, 0x00 },
@@ -983,44 +936,44 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
 
         smoke.countBase = 5;
         smoke.countRange = 15;
-        smoke.unk4 = 0x6C;
-        smoke.unk6 = 0x5103;
+        smoke.texture = 0x6C;
+        smoke.renderMode = 0x5103;
         smoke.unk8 = 0x200005;
         smoke.unkC = 0;
-        smoke.unk10 = 0x14;
-        smoke.unk12 = 0xF;
-        smoke.unk14 = 0;
-        smoke.unk18 = 0;
-        smoke.unk1F = 0xFF;
-        smoke.unk1C = colorA[type][0];
-        smoke.unk1D = colorA[type][1];
-        smoke.unk1E = colorA[type][2];
-        smoke.unk20 = colorB[type][0];
-        smoke.unk21 = colorB[type][1];
-        smoke.unk22 = colorB[type][2];
-        smoke.unk23 = 0xE6;
-        smoke.unk24 = 0x14;
-        smoke.unk25 = 0xFF;
-        smoke.unk26 = 0x19;
-        smoke.unk28 = 0xA;
-        smoke.unk2A = 0x1E;
-        smoke.unk2C = 1.049999952f;
-        smoke.unk30 = 60.0f;
-        smoke.unk34 = 65.0f;
-        smoke.position = trail->trail.path.hit;
+        smoke.timerBase = 0x14;
+        smoke.timerRange = 0xF;
+        smoke.frameRateBase = 0;
+        smoke.frameRateRange = 0;
+        smoke.a = 0xFF;
+        smoke.r = colorA[type][0];
+        smoke.g = colorA[type][1];
+        smoke.b = colorA[type][2];
+        smoke.r2 = colorB[type][0];
+        smoke.g2 = colorB[type][1];
+        smoke.b2 = colorB[type][2];
+        smoke.alphaBase = 0xE6;
+        smoke.alphaRange = 0x14;
+        smoke.brightness = 0xFF;
+        smoke.fadeStart = 0x19;
+        smoke.fadeRate = 0xA;
+        smoke.scaleStart = 0x1E;
+        smoke.scaleRate = 1.049999952f;
+        smoke.sizeBase = 60.0f;
+        smoke.sizeRange = 65.0f;
+        smoke.pos = trail->trail.path.hit;
         smoke.yawBase = 0;
         smoke.pitchBase = -40;
         smoke.yawRange = 0xFF;
         smoke.pitchRange = 40;
         smoke.speedBase = 9.0f;
         smoke.speedRange = 17.0f;
-        smoke.unk54 = 0.00800000038f;
-        smoke.unk58 = 0.2610000074f;
-        smoke.unk5C = (D_800BE616 ? 0x800000 : 0) | 0x40E07;
-        smoke.unk60 = 0x10;
-        smoke.unk61 = -1;
-        smoke.unk62 = 8;
-        smoke.unk63 = 6;
+        smoke.gravityBase = 0.00800000038f;
+        smoke.gravityRange = 0.2610000074f;
+        smoke.flags = (D_800BE616 ? 0x800000 : 0) | 0x40E07;
+        smoke.updateFunc = 0x10;
+        smoke.deathFunc = -1;
+        smoke.primColorMode = 8;
+        smoke.envColorMode = 6;
         smoke.unk64 = 1;
         smoke.extra = 0.8702070117f;
         func_15153634(&smoke, smokeArg, trail->unkC, trail->unk1);

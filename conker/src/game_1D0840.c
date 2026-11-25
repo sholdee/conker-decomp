@@ -133,54 +133,6 @@ typedef struct {
     /* 0x28 */ BoneEmitter emitter;
 } BoneEmitterTask;
 
-/* Particle emitter description passed to func_15153634. */
-typedef struct {
-    /* 0x00 */ s16 count;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ u8 unk4;
-    /* 0x05 */ u8 pad5;
-    /* 0x06 */ u16 unk6;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s16 unk10;
-    /* 0x12 */ s16 unk12;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E;
-    /* 0x1F */ u8 unk1F;
-    /* 0x20 */ u8 unk20;
-    /* 0x21 */ u8 unk21;
-    /* 0x22 */ u8 unk22;
-    /* 0x23 */ u8 unk23;
-    /* 0x24 */ u8 unk24;
-    /* 0x25 */ u8 unk25;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ Vec3f pos;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s16 unk48;
-    /* 0x4A */ s16 unk4A;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ s32 flags;
-    /* 0x60 */ s8 unk60;
-    /* 0x61 */ s8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 pad65[3];
-    /* 0x68 */ f32 unk68;
-} ParticleSpawn151A4A38;
-
 /* Message sent to effects about their owner actor. */
 typedef union {
     struct {
@@ -217,7 +169,7 @@ Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
-void func_15153634(ParticleSpawn151A4A38 *, s32, s32, s32);
+void func_15153634(SpriteBurst *, s32, s32, s32);
 TrailEffect *func_151A3504(TrailParams *params, u8 arg1);
 void func_151A4590(Actor *owner, u8 arg1);
 void func_151A499C(Actor *owner, u8 arg1);
@@ -832,7 +784,7 @@ void func_151A499C(Actor *owner, u8 arg1) {
 void func_151A4A38(BoneEmitterTask *task) {
     BoneEmitter *emitter;
     Vec3f pos;
-    ParticleSpawn151A4A38 spawn;
+    SpriteBurst spawn;
     s16 angle;
 
     emitter = &task->emitter;
@@ -855,43 +807,43 @@ void func_151A4A38(BoneEmitterTask *task) {
         angle = (emitter->owner->unk76 >> 8) - 0x40;
         func_15143134(&emitter->offset, &pos, (s32)emitter->owner->unk1D4 + emitter->bone * sizeof(Mtx));
 
-        spawn.count = emitter->pending;
-        spawn.unk2 = 0;
-        emitter->pending -= spawn.count;
-        spawn.unk4 = 0x28;
-        spawn.unk6 = 0xC01;
+        spawn.countBase = emitter->pending;
+        spawn.countRange = 0;
+        emitter->pending -= spawn.countBase;
+        spawn.texture = 0x28;
+        spawn.renderMode = 0xC01;
         spawn.unk8 = 0x200005;
         spawn.unkC = 0;
-        spawn.unk10 = 23;
-        spawn.unk12 = 13;
-        spawn.unk14 = 0;
-        spawn.unk18 = 0;
-        spawn.unk1C = 0;
-        spawn.unk1D = 0;
-        spawn.unk1E = 0;
-        spawn.unk1F = 0xFF;
-        spawn.unk20 = 0;
-        spawn.unk21 = 0;
-        spawn.unk22 = 0;
-        spawn.unk30 = 300.0f;
-        spawn.unk34 = 400.0f;
+        spawn.timerBase = 23;
+        spawn.timerRange = 13;
+        spawn.frameRateBase = 0;
+        spawn.frameRateRange = 0;
+        spawn.r = 0;
+        spawn.g = 0;
+        spawn.b = 0;
+        spawn.a = 0xFF;
+        spawn.r2 = 0;
+        spawn.g2 = 0;
+        spawn.b2 = 0;
+        spawn.sizeBase = 300.0f;
+        spawn.sizeRange = 400.0f;
         spawn.pos = pos;
-        spawn.unk26 = 1;
-        spawn.unk28 = 0;
-        spawn.unk2A = 1;
-        spawn.unk2C = 1.0f;
+        spawn.fadeStart = 1;
+        spawn.fadeRate = 0;
+        spawn.scaleStart = 1;
+        spawn.scaleRate = 1.0f;
         spawn.unk64 = 0;
-        spawn.unk44 = angle - 25;
-        spawn.unk46 = -44;
-        spawn.unk48 = 50;
-        spawn.unk4A = 50;
-        spawn.unk4C = 0.0f;
-        spawn.unk50 = 15.0f;
-        spawn.unk54 = -0.5f;
-        spawn.unk58 = -0.5f;
+        spawn.yawBase = angle - 25;
+        spawn.pitchBase = -44;
+        spawn.yawRange = 50;
+        spawn.pitchRange = 50;
+        spawn.speedBase = 0.0f;
+        spawn.speedRange = 15.0f;
+        spawn.gravityBase = -0.5f;
+        spawn.gravityRange = -0.5f;
         spawn.flags = 7;
-        spawn.unk62 = 1;
-        spawn.unk63 = 0;
+        spawn.primColorMode = 1;
+        spawn.envColorMode = 0;
 
         if (func_150ADA20() & 1) {
             spawn.flags |= 0x40;
@@ -900,11 +852,11 @@ void func_151A4A38(BoneEmitterTask *task) {
             spawn.flags |= 0x80;
         }
 
-        spawn.unk23 = 0xFF;
-        spawn.unk24 = 0;
-        spawn.unk25 = 0xFF;
-        spawn.unk60 = -1;
-        spawn.unk61 = -1;
+        spawn.alphaBase = 0xFF;
+        spawn.alphaRange = 0;
+        spawn.brightness = 0xFF;
+        spawn.updateFunc = -1;
+        spawn.deathFunc = -1;
         func_15153634(&spawn, 0xFF, task->header.owner, task->header.kind);
     }
 }
