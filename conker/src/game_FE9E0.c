@@ -2,66 +2,67 @@
 #include "functions.h"
 #include "variables.h"
 
-extern f32 D_800A08D0;
-extern f32 D_800A08D4;
+// matching: rodata loads; the literals 1/170 and 24.6f allocate FP registers differently
+extern f32 D_800A08D0; // 1.0f / 170.0f
+extern f32 D_800A08D4; // 24.6f
 
 s32 func_1509BE40();
-s32 func_15123934(struct108 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32 func_151239CC(struct108 *arg0, s32 arg1);
 
-void func_150D1530(struct108 *arg0) {
-    if (arg0->unk2C == 0x40) {
+/* Unless camera->unk2C is 0x40: with unk5F0 bit 0x80 set, scales distances (unk348/unk34C/unk374/unk1A4/unk1A8)
+ * by the clamped xz speed (0..170, as a 0..1 fraction) and sets unk84 flags from func_1509BE40 queries;
+ * otherwise zeroes unk190/unk1A4/unk1A8 when func_151239CC(camera, 3) succeeds. On level 0x32, also mirrors
+ * a func_1509BE40 query into unk84 bit 0x1000. */
+void func_150D1530(struct108 *camera) {
+    if (camera->unk2C == 0x40) {
         return;
     }
 
-    if (arg0->unk5F0 & 0x80) {
-        f32 speed;
-        s32 ok;
+    if (camera->unk5F0 & 0x80) {
+        f32 speedFrac;
+        s32 found;
 
-        speed = (arg0->unk3D0->xz_velocity < 0.0f)
+        speedFrac = (camera->unk3D0->xz_velocity < 0.0f)
                     ? 0.0f
-                    : ((170.0f < arg0->unk3D0->xz_velocity) ? 170.0f : arg0->unk3D0->xz_velocity);
-        speed = speed * D_800A08D0;
-        if (func_15123934(arg0, 8, 0, arg0->unk134, 3) != 0) {
-            arg0->unk84 |= 0x1300080;
-            arg0->unk84 &= ~6;
-            arg0->unk1B4 = 1;
-            arg0->unk1E0 = 2;
+                    : ((170.0f < camera->unk3D0->xz_velocity) ? 170.0f : camera->unk3D0->xz_velocity);
+        speedFrac = speedFrac * D_800A08D0;
+        if (func_15123934(camera, 8, 0, camera->unk134, 3) != 0) {
+            camera->unk84 |= 0x1300080;
+            camera->unk84 &= ~6;
+            camera->unk1B4 = 1;
+            camera->unk1E0 = 2;
         }
-        arg0->unk374 = -194.0f * speed + 280.0f;
-        arg0->unk34C = arg0->unk348 = 34.0f * speed + 75.0f;
+        camera->unk374 = -194.0f * speedFrac + 280.0f;
+        camera->unk34C = camera->unk348 = 34.0f * speedFrac + 75.0f;
         if (D_800BE9F0 == 0x32) {
-            ok = func_1509BE40(4, arg0->unk23D | 0x2000, 0xAC, 0x4027, 0x4035, 0x4036, 0x4037);
+            found = func_1509BE40(4, camera->unk23D | 0x2000, 0xAC, 0x4027, 0x4035, 0x4036, 0x4037);
         } else {
-            ok = func_1509BE40(5, arg0->unk23D | 0x2000, 0xAC, 0x400A, 0x400B, 0x400C, 0x400D, 0x400E);
+            found = func_1509BE40(5, camera->unk23D | 0x2000, 0xAC, 0x400A, 0x400B, 0x400C, 0x400D, 0x400E);
         }
-        if (ok != 0) {
-            arg0->unk84 |= 0x10000000;
+        if (found != 0) {
+            camera->unk84 |= 0x10000000;
         } else {
-            if (arg0->unk3D0->unk81 != 0) {
-                arg0->unk190 = -30.0f;
+            if (camera->unk3D0->unk81 != 0) {
+                camera->unk190 = -30.0f;
             } else {
-                arg0->unk190 = 123.0f;
+                camera->unk190 = 123.0f;
             }
-            arg0->unk84 &= 0xEFFFFFFF;
+            camera->unk84 &= ~0x10000000;
         }
-        arg0->unk1A4 = arg0->unk1A8 = D_800A08D4 * speed + 10.0f;
-        if (arg0->unk23C != 0) {
-            /* Present in the ROM as a real load/store pair for each field: the original
-             * source assigned each of these to itself.  Not a matching device -- removing
-             * either statement removes four instructions from the golden stream. */
-            arg0->unk1A4 = arg0->unk1A4;
-            arg0->unk1A8 = arg0->unk1A8;
+        camera->unk1A4 = camera->unk1A8 = D_800A08D4 * speedFrac + 10.0f;
+        if (camera->unk23C != 0) {
+            // matching: the ROM has a real load/store pair per field; the original self-assigned them
+            camera->unk1A4 = camera->unk1A4;
+            camera->unk1A8 = camera->unk1A8;
         }
-    } else if (func_151239CC(arg0, 3) != 0) {
-        arg0->unk190 = arg0->unk1A4 = arg0->unk1A8 = 0.0f;
+    } else if (func_151239CC(camera, 3) != 0) {
+        camera->unk190 = camera->unk1A4 = camera->unk1A8 = 0.0f;
     }
 
     if (D_800BE9F0 == 0x32) {
         if (func_1509BE40(1, 0x4039, 6, 0x9000) != 0) {
-            arg0->unk84 |= 0x1000;
+            camera->unk84 |= 0x1000;
         } else {
-            arg0->unk84 &= ~0x1000;
+            camera->unk84 &= ~0x1000;
         }
     }
 }
