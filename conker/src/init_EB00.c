@@ -589,7 +589,7 @@ u16 func_1000FA64(u16 sound, s16 x, s16 y, s16 z, s32 volume, u16 farDistance,
                   s16 nearDistance, SoundRecordCallback callback, void *owner, s32 key,
                   s32 flags, s32 cents) {
     s32 count;
-    register s32 index;
+    s32 index;
 
     if (D_80042760 < 32) {
         index = D_80042760;
@@ -654,14 +654,15 @@ void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, u16 farDistance) {
         record = &D_80041FE0[i];
         if ((soundId == record->sound) && (posX == record->x) && (posY == record->y) &&
             (posZ == record->z) && ((record->farDistance & 0x7FFF) == farDistance)) {
-            handle = D_80041FE0[i].handle;
+            handle = record->handle;
             if (handle != 0) {
                 func_100111C8(handle);
             }
-            D_80041FE0[i].flags |= 0x80;
+            D_80041FE0[i].flags |= 0x80; // matching: indexed again, not through record
         }
     }
 }
+
 void func_1000FD38(SoundRecordCallback callback, void *owner, s32 key) {
     s32 i;
 
@@ -680,7 +681,7 @@ void func_1000FDF4(u16 handle) {
     s32 handleId = handle;
 
     for (i = 0; i < D_80042760; i++) {
-        if ((u32)D_80041FE0[i].handle == (u32)handleId) {
+        if ((u32)D_80041FE0[i].handle == (u32)handleId) { // matching: unsigned compare of the widened handle
             if (D_80041FE0[i].handle != 0) {
                 func_100111C8(D_80041FE0[i].handle);
             }
@@ -784,6 +785,7 @@ s32 func_10010154(u16 sound, struct127 *obj, s32 volume, s16 nearDistance, u16 f
         }
     }
     obj->unk8E = handle;
+    // no return statement here: the original falls off the end
 }
 
 s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farDistance) {
