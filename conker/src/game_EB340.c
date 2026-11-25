@@ -173,57 +173,55 @@ s32 func_150BE1C4(EB340Rising *arg0) {
     return 1;
 }
 
+/* Behaviour scratch state (WorldObject.work) of func_150BE210. */
 typedef struct {
-    /* 0x00 */ u8  pad0[0x4F];
-    /* 0x4F */ u8  unk4F;
-    /* 0x50 */ u8  pad50[0x14];
-    /* 0x64 */ f32 unk64;
-    /* 0x68 */ u8  pad68[0xB];
-    /* 0x73 */ u8  unk73; // low 2 bits: state, 3 = finished
-    /* 0x74 */ u16 sound;
-    /* 0x76 */ u8  pad76[0xE];
-    /* 0x84 */ f32 unk84;
-} EB340Turner;
+    /* 0x7C */ s32 unk7C;
+    /* 0x80 */ s32 unk80;
+    /* 0x84 */ f32 angle; // turns at spinY per frame until past 360
+} TurnerWork;
 
-extern void func_1511650C(EB340Turner *arg0, s32, s32, f32);
+#define TURNER_WORK(obj) ((TurnerWork *)&(obj)->work)
 
-/* Until finished: calls func_1511650C(1, 0x62C, 500), advances unk84 by unk64 (or clamps it to 270),
- * and once unk84 passes 360 marks itself finished and stops its sound. */
-void func_150BE210(EB340Turner *arg0) {
-    if ((arg0->unk73 & 3) == 3) {
+extern void func_1511650C(WorldObject *obj, s32, s32, f32);
+
+/* Until finished (behaviorState & 3 == 3): calls func_1511650C(1, 0x62C, 500), advances the work angle by
+ * spinY while flags bit 2 is set (or clamps it to 270), and once it passes 360 marks itself finished and stops
+ * its sound. */
+void func_150BE210(WorldObject *obj) {
+    if ((obj->behaviorState & 3) == 3) {
         return;
     }
-    func_1511650C(arg0, 1, 0x62C, 500.0f);
-    if (arg0->unk4F & 4) {
-        arg0->unk84 += arg0->unk64;
-    } else if (arg0->unk84 > 270.0f) {
-        arg0->unk84 = 270.0f;
+    func_1511650C(obj, 1, 0x62C, 500.0f);
+    if (obj->flags & 4) {
+        TURNER_WORK(obj)->angle += obj->spinY;
+    } else if (TURNER_WORK(obj)->angle > 270.0f) {
+        TURNER_WORK(obj)->angle = 270.0f;
     }
-    if (arg0->unk84 > 360.0f) {
-        arg0->unk73 &= ~3;
-        arg0->unk73 |= 3;
-        arg0->unk64 = 0.0f;
-        func_100111C8(arg0->sound);
-        arg0->sound = 0;
+    if (TURNER_WORK(obj)->angle > 360.0f) {
+        obj->behaviorState &= ~3;
+        obj->behaviorState |= 3;
+        obj->spinY = 0.0f;
+        func_100111C8(obj->sound);
+        obj->sound = 0;
     }
 }
 
+/* Behaviour scratch state (WorldObject.work) of func_150BE2E8: the end points of its path. */
 typedef struct {
-    /* 0x00 */ u8  pad0[0x10];
-    /* 0x10 */ s16 pos[3];
-    /* 0x16 */ u8  pad16[0x26];
-    /* 0x3C */ s16 speed;    // 2.14 fixed point
-    /* 0x3E */ s16 progress; // 2.14 fixed point, 0..1 from `from` to `to`
-    /* 0x40 */ u8  pad40[0x3C];
     /* 0x7C */ s16 from[3];
     /* 0x82 */ s16 to[3];
-} EB340Mover;
+} MoverWork;
+
+#define MOVER_WORK(obj) ((MoverWork *)&(obj)->work)
 
 // matching: 0.128f read through its rodata symbol; the plain literal allocates FP registers differently
 extern f32 D_800A0068;
 
-/* Moves pos along from -> to: speed decays by 12.8% per frame and is added to progress. */
-void func_150BE2E8(EB340Mover *mover) {
+/*
+ * Moves the object along from -> to. param holds two 2.14 fixed-point halves: the speed (high), which decays
+ * by 12.8% per frame, and the progress from `from` to `to` (low, 0..1), which it is added to.
+ */
+void func_150BE2E8(WorldObject *mover) {
     f32 fromZ;
     f32 fromY;
     f32 fromX;
@@ -233,26 +231,26 @@ void func_150BE2E8(EB340Mover *mover) {
     f32 speed;
     f32 progress;
 
-    fromX = mover->from[0];
-    fromY = mover->from[1];
-    fromZ = mover->from[2];
-    toX = mover->to[0];
-    toY = mover->to[1];
-    toZ = mover->to[2];
-    speed = mover->speed * (1.0f / 16384.0f);
-    progress = mover->progress * (1.0f / 16384.0f);
+    fromX = MOVER_WORK(mover)->from[0];
+    fromY = MOVER_WORK(mover)->from[1];
+    fromZ = MOVER_WORK(mover)->from[2];
+    toX = MOVER_WORK(mover)->to[0];
+    toY = MOVER_WORK(mover)->to[1];
+    toZ = MOVER_WORK(mover)->to[2];
+    speed = mover->param.half.hi * (1.0f / 16384.0f);
+    progress = mover->param.half.lo * (1.0f / 16384.0f);
     speed -= speed * D_800A0068;
     progress += speed * D_800BE9E4;
 
-    mover->pos[0] = (toX - fromX) * progress + fromX;
-    mover->pos[1] = (toY - fromY) * progress + fromY;
-    mover->pos[2] = (toZ - fromZ) * progress + fromZ;
+    mover->x = (toX - fromX) * progress + fromX;
+    mover->y = (toY - fromY) * progress + fromY;
+    mover->z = (toZ - fromZ) * progress + fromZ;
     if (progress > 1.0f) {
         progress = 1.0; // matching: a 1.0f literal here gets CSE'd with the compare's 1.0f
     }
 
-    mover->speed = speed * 16384.0f;
-    mover->progress = progress * 16384.0f;
+    mover->param.half.hi = speed * 16384.0f;
+    mover->param.half.lo = progress * 16384.0f;
 }
 
 /* Two-halfword command, as in game_61490.c's GameCommand. */

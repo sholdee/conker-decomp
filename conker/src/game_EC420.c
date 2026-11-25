@@ -228,57 +228,30 @@ s32 func_150BF0F4(Struct150BF0F4 *entry) {
 
 extern u8 D_800C35E8;
 
-/* A vertex of the object's mesh: 16 bytes, position first. */
+/*
+ * Behaviour scratch state (WorldObject.work) of func_150BF21C: an object whose mesh is translated toward a
+ * target height (param) and bobs (rotX-rotZ) while it is at rest.
+ */
 typedef struct {
-    /* 0x0 */ s16 x;
-    /* 0x2 */ s16 y;
-    /* 0x4 */ s16 z;
-    /* 0x6 */ u8 pad6[0xA];
-} Vtx150BF21C;
+    /* 0x7C */ f32 height;
+    /* 0x80 */ f32 bobPhase;
+    /* 0x84 */ f32 speed;
+} BobWork;
 
-/* An object whose mesh is translated toward a target height and bobs while it is at rest. */
-typedef struct {
-    /* 0x000 */ f32 x;
-    /* 0x004 */ f32 y;
-    /* 0x008 */ f32 z;
-    /* 0x00C */ u8 padC[0x4];
-    /* 0x010 */ s16 rx;
-    /* 0x012 */ s16 ry;
-    /* 0x014 */ s16 rz;
-    /* 0x016 */ u16 vtxCount;
-    /* 0x018 */ u8 pad18[0x8];
-    /* 0x020 */ Vtx150BF21C *dstVtx[2]; /* double-buffered, indexed by D_800BE9C0 */
-    /* 0x028 */ Vtx150BF21C *srcVtx;
-    /* 0x02C */ f32 sx;
-    /* 0x030 */ f32 sy;
-    /* 0x034 */ f32 sz;
-    /* 0x038 */ u8 pad38[0x4];
-    /* 0x03C */ s32 targetHeight;
-    /* 0x040 */ u8 pad40[0x33];
-    /* 0x073 */ u8 flags; /* bits 0-1: movement state */
-    /* 0x074 */ u16 unk74;
-    /* 0x076 */ u8 pad76[0x6];
-    /* 0x07C */ f32 height;
-    /* 0x080 */ f32 bobPhase;
-    /* 0x084 */ f32 speed;
-    /* 0x088 */ u8 pad88[0x54];
-    /* 0x0DC */ s32 unkDC;
-    /* 0x0E0 */ u8 padE0[0x44];
-    /* 0x124 */ f32 unk124;
-} Struct150BF21C;
+#define BOB_WORK(obj) ((BobWork *)&(obj)->work)
 
-extern void func_15114D24(Struct150BF21C *, s32, s32, s16, s16, s32);
-extern void func_15114F04(Struct150BF21C *, s32, s32);
+extern void func_15114D24(WorldObject *, s32, s32, s16, s16, s32);
+extern void func_15114F04(WorldObject *, s32, s32);
 extern void func_150A7DA0(f32 [4][4], f32, f32, f32);
 extern void func_15043F6C(f32 [4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
 extern void func_150A7A48(f32 [4][4], f32 [4][4], f32 [4][4]);
 extern void func_150A7960(f32 [4][4], f32, f32, f32, f32 *, f32 *, f32 *);
 
-/* Moves the object toward targetHeight (accelerating, with sounds), bobs it while at rest, then
+/* Moves the object toward its target height (param) (accelerating, with sounds), bobs it while at rest, then
  * writes its transformed mesh into the current vertex buffer. */
-void func_150BF21C(Struct150BF21C *obj) {
-    Vtx150BF21C *dst;
-    Vtx150BF21C *src;
+void func_150BF21C(WorldObject *obj) {
+    Vtx *dst;
+    Vtx *src;
     f32 diff;
     f32 x;
     f32 height;
@@ -292,7 +265,7 @@ void func_150BF21C(Struct150BF21C *obj) {
     s32 i;
     f32 bobXZ;
 
-    height = obj->height;
+    height = BOB_WORK(obj)->height;
     bob = 0.0f;
     rate = 0.05f;
     if (D_800C35EA == 0) {
@@ -303,14 +276,14 @@ void func_150BF21C(Struct150BF21C *obj) {
         paused = TRUE;
     }
     if (D_800BE9B4 != 0) {
-        height = obj->targetHeight;
-        obj->height = height;
+        height = obj->param.word;
+        BOB_WORK(obj)->height = height;
     }
     if (!paused) {
-        diff = obj->targetHeight - height;
+        diff = obj->param.word - height;
         if (diff == 0.0f) {
-            obj->speed = 0.0f;
-            obj->bobPhase += 0.05f;
+            BOB_WORK(obj)->speed = 0.0f;
+            BOB_WORK(obj)->bobPhase += 0.05f;
             bob = ((height / 1500.0f) + 1.0f) * D_800BE9A4;
             if (bob < 0.0f) {
                 bob = 0.0f;
@@ -318,8 +291,8 @@ void func_150BF21C(Struct150BF21C *obj) {
             func_15114D24(obj, -1, 0x7D00, 500, 2000, 0);
         } else {
             rate = 0.2f;
-            obj->bobPhase = 0.0f;
-            speed = obj->speed;
+            BOB_WORK(obj)->bobPhase = 0.0f;
+            speed = BOB_WORK(obj)->speed;
             if (diff < 0.0f) {
                 if (speed > -60.0f) {
                     speed -= 5.0f;
@@ -330,64 +303,55 @@ void func_150BF21C(Struct150BF21C *obj) {
                 }
                 func_15114D24(obj, 0xB9, 0x7D00, 500, 2000, 1);
             }
-            obj->speed = speed;
+            BOB_WORK(obj)->speed = speed;
             if (fabsf(speed) < fabsf(diff)) {
                 height += speed * D_800BE9A4;
                 if (speed < -25.0f) {
-                    obj->unk124 = -10.0f;
+                    BOB_WORK(&obj[1])->speed = -10.0f;
                 } else {
-                    obj->unk124 = speed * 0.4000000060f;
+                    BOB_WORK(&obj[1])->speed = speed * 0.4000000060f;
                 }
-                obj->unkDC = 0x7D00;
-                obj->flags &= ~3;
-                obj->flags |= 2;
-                if (obj->unk74 == 0) {
+                obj[1].param.word = 0x7D00;
+                obj->behaviorState &= ~3;
+                obj->behaviorState |= 2;
+                if (obj->sound == 0) {
                     func_15114D24(obj, 0xB9, 0x3E80, 1000, 4000, 0);
                 }
                 func_15114F04(obj, 0x3E80, speed * 500.0f);
             } else {
-                height = obj->targetHeight;
+                height = obj->param.word;
                 if (speed < 0.0f) {
-                    obj->unkDC = 0x80;
+                    obj[1].param.word = 0x80;
                 }
-                obj->flags &= ~3;
-                obj->flags |= 3;
-                obj->unk124 = 0.0f;
+                obj->behaviorState &= ~3;
+                obj->behaviorState |= 3;
+                BOB_WORK(&obj[1])->speed = 0.0f;
                 func_15114D24(obj, -1, 0, 0, 0, 0);
             }
-            obj->height = height;
-            obj->speed = speed;
+            BOB_WORK(obj)->height = height;
+            BOB_WORK(obj)->speed = speed;
         }
         bobXZ = bob * 3.0f;
-        obj->x += ((bobXZ * sinf(obj->bobPhase)) - obj->x) * rate;
-        obj->y += (((bob * 4.0f) * sinf(obj->bobPhase * 1.100000024f)) - obj->y) * rate;
-        obj->z += ((bobXZ * cosf(obj->bobPhase)) - obj->z) * rate;
+        obj->rotX += ((bobXZ * sinf(BOB_WORK(obj)->bobPhase)) - obj->rotX) * rate;
+        obj->rotY += (((bob * 4.0f) * sinf(BOB_WORK(obj)->bobPhase * 1.100000024f)) - obj->rotY) * rate;
+        obj->rotZ += ((bobXZ * cosf(BOB_WORK(obj)->bobPhase)) - obj->rotZ) * rate;
     } else {
         height = 0.0f;
     }
     func_150A7DA0(translate, 0.0f, height, 0.0f);
-    func_15043F6C(model, obj->x, obj->y, obj->z, obj->sx, obj->sy, obj->sz, obj->rx, obj->ry, obj->rz);
+    func_15043F6C(model, obj->rotX, obj->rotY, obj->rotZ, obj->scaleX, obj->scaleY, obj->scaleZ, obj->x, obj->y, obj->z);
     func_150A7A48(translate, model, translate);
-    dst = obj->dstVtx[D_800BE9C0];
-    src = obj->srcVtx;
-    for (i = 0; i < obj->vtxCount; i++) {
-        func_150A7960(translate, src->x, src->y, src->z, &x, &height, &z);
-        dst->x = x;
-        dst->y = height;
-        dst->z = z;
+    dst = obj->vertices[D_800BE9C0];
+    src = obj->srcVertices;
+    for (i = 0; i < obj->numVertices; i++) {
+        func_150A7960(translate, src->v.ob[0], src->v.ob[1], src->v.ob[2], &x, &height, &z);
+        dst->v.ob[0] = x;
+        dst->v.ob[1] = height;
+        dst->v.ob[2] = z;
         src++;
         dst++;
     }
 }
-
-typedef struct {
-    /* 0x000 */ u8 pad0[0x73];
-    /* 0x073 */ u8 flags; /* bits 0-1: mode */
-    /* 0x074 */ u8 pad74[0x34];
-    /* 0x0A8 */ f32 unkA8;
-    /* 0x0AC */ u8 padAC[0x78];
-    /* 0x124 */ void *unk124;
-} Struct150BF760;
 
 /* 0x30-byte entries of D_800D20FC (structs.h types it as struct258 *). */
 typedef struct {
@@ -396,13 +360,22 @@ typedef struct {
     /* 0x03 */ u8 pad3[0x2D];
 } SpawnSlot;
 
-void func_1511B51C(Struct150BF760 *);
-void *func_15195FB0(Struct150BF760 *, s32, s32, s32, s32, s32, s32);
+void func_1511B51C(WorldObject *);
+void *func_15195FB0(WorldObject *, s32, s32, s32, s32, s32, s32);
 void func_150825C0(s32, s32);
 
-/* Drives object 0x14 according to the mode in obj->flags, spawning it first when a mode needs it,
- * and sets obj->unkA8 to a sine of the object's animation progress. */
-void func_150BF760(Struct150BF760 *obj) {
+/* Behaviour scratch state (WorldObject.work) of the entry after func_150BF760's object. */
+typedef struct {
+    /* 0x7C */ s32 unk7C;
+    /* 0x80 */ s32 unk80;
+    /* 0x84 */ void *texScroll; // from func_15195FB0
+} ScrollWork;
+
+#define SCROLL_WORK(obj) ((ScrollWork *)&(obj)->work)
+
+/* Drives object 0x14 according to the mode in obj->behaviorState, spawning it first when a mode needs it,
+ * and sets obj[1].rotZ to a sine of the object's animation progress. */
+void func_150BF760(WorldObject *obj) {
     Actor *actor;
     struct197 *anim;
     s32 mode;
@@ -411,19 +384,19 @@ void func_150BF760(Struct150BF760 *obj) {
 
     if (D_800C35EA != 1 || D_800C35E8 == 1) {
         func_1511B51C(obj);
-        if (obj->unk124 == NULL) {
-            obj->unk124 = func_15195FB0(obj, D_800902B8, 1, -1, 0, 0, -8);
+        if (SCROLL_WORK(&obj[1])->texScroll == NULL) {
+            SCROLL_WORK(&obj[1])->texScroll = func_15195FB0(obj, D_800902B8, 1, -1, 0, 0, -8);
         }
         actor = func_15083E90(0x14);
-        mode = obj->flags & 3;
+        mode = obj->behaviorState & 3;
         if (actor != NULL) {
             anim = actor->unk2D0;
             progress = anim->unk8 / (anim->unk18 - 2.0f);
         }
-        obj->unkA8 = 0.0f;
+        obj[1].rotZ = 0.0f;
         if (mode == 2) {
             if (progress <= 0.75f) {
-                obj->unkA8 = -sinf(progress * 3.141592741f * 1.333333254f) * 10.0f;
+                obj[1].rotZ = -sinf(progress * 3.141592741f * 1.333333254f) * 10.0f;
             }
             if (actor == NULL) {
                 slot = func_15083E0C(0x14);
@@ -441,14 +414,14 @@ void func_150BF760(Struct150BF760 *obj) {
             }
         } else if (mode == 0) {
             if (progress >= 0.25f) {
-                obj->unkA8 = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
+                obj[1].rotZ = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
             }
             if (actor != NULL && progress >= 1.0f) {
                 func_15060F28(actor, 0);
             }
         } else if (mode == 1) {
             if (progress >= 0.25f) {
-                obj->unkA8 = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
+                obj[1].rotZ = sinf(progress * 4.188789368f - 4.188789368f) * 10.0f;
             }
             if (actor == NULL) {
                 slot = func_15083E0C(0x14);
