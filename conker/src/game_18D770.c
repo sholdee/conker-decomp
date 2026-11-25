@@ -14,7 +14,7 @@ void func_1515F170(s32 arg0, u8 arg1);
 extern u8 D_800886F0[];
 extern u8 D_800886F4[];
 extern u8 D_800886F8[];
-extern void (*D_8008B37C[])(s32);
+extern void (*D_8008B37C[])(struct225 *);
 
 /* Payload of an effect tied to an actor without following a bone. */
 typedef struct {
@@ -56,7 +56,7 @@ typedef struct {
     f32 level;     // current intensity
 } LightJitter;
 
-struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
+struct225 *func_151602C0(Header *header, Header2 *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA);
 struct225 *func_1516037C(Header *header, struct226 *light, s32 size, u8 arg3, s32 arg4);
 void func_151603FC(struct225 *effect);
 s32 func_15160600(struct225 *effect);
@@ -113,15 +113,15 @@ s32 func_151643F8(struct225 *effect);
 void func_151644F4(struct225 *effect, struct17 *pivot, f32 offset, f32 angleX, f32 angleZ);
 s32 func_151644A8(struct225 *effect);
 
-/* Creates a light at header2's position and an effect instance that owns it. */
-struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA) {
+/* Creates a light at `position` and an effect instance (with `size` bytes of payload) that owns it. */
+struct225 *func_151602C0(Header *header, Header2 *position, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 size, u8 arg9, s32 argA) {
     struct225 *effect;
     struct226 *light;
 
     effect = NULL;
-    light = func_1515D5F8(header2->unk0, header2->unk4, header2->unk8, arg2, arg3, arg4, arg5, arg6, arg7, 0);
+    light = func_1515D5F8(position->unk0, position->unk4, position->unk8, arg2, arg3, arg4, arg5, arg6, arg7, 0);
     if (light != NULL) {
-        effect = func_1516037C(header, light, offset, arg9, argA);
+        effect = func_1516037C(header, light, size, arg9, argA);
         if (effect != NULL) {
             effect->unkE |= 2;
         } else {
@@ -162,7 +162,6 @@ void func_151603FC(struct225 *effect) {
     }
 }
 
-// requires jump table
 extern void (*D_8008B150[])(void *);
 
 /* Event handler: events 0x17-0x22 addressed to this effect's type toggle or remove it; others go to the type's handler. */
@@ -221,12 +220,12 @@ s32 func_15160600(struct225 *effect) {
 }
 
 s32 func_1516065C(struct225 *effect) {
-    func_15163CF8((struct227 *)&effect->unk18, effect);
+    func_15163CF8((LightPulse *)&effect->unk18, effect);
     return 1;
 }
 
 s32 func_15160684(struct225 *effect) {
-    func_15163DEC(effect, (struct228 *)&effect->unk18);
+    func_15163DEC(effect, (LightJitter *)&effect->unk18);
     return 1;
 }
 
@@ -1496,7 +1495,7 @@ struct225 *func_15163A60(u8 objectId, u8 arg1, s32 arg2) {
     struct225 *effect;
     Header header;
     LightPulse pulse;
-    struct226 *object;
+    struct240 *object;
     Header2 position;
 
     object = func_151149AC(objectId);
@@ -1525,6 +1524,7 @@ struct225 *func_15163A60(u8 objectId, u8 arg1, s32 arg2) {
     return effect;
 }
 
+/* Pulse update that also ends the effect once its object's unk6E is 1. */
 s32 func_15163B98(struct230 *effect) {
     struct228 *object;
 
@@ -1631,8 +1631,8 @@ void func_15163FEC(struct225 *effect, ActorEvent *event, u8 eventId) {
             dst->actor = event->actor;
             dst->actorId = event->actorId;
         }
-    } else if (D_8008B374[effect->unk2D] != NULL) {
-        D_8008B374[effect->unk2D]((s32)effect);
+    } else if (D_8008B374[attach->unk15] != NULL) {
+        D_8008B374[attach->unk15]((s32)effect);
     }
 }
 
@@ -1678,7 +1678,7 @@ void func_15164134(struct225 *effect, ActorEvent *event, u8 eventId) {
             dst->actorId = event->actorId;
         }
     } else if (D_8008B37C[beam->unk25] != NULL) {
-        D_8008B37C[beam->unk25]((s32)effect);
+        D_8008B37C[beam->unk25](effect);
     }
 }
 
@@ -1775,17 +1775,17 @@ void func_1516441C(struct225 *effect, LightTransformed *point) {
     in = point;
     out = &position[0];
     func_15145CD0(point->mtx, &in, &out, 1);
-    effect->unk14->unkE = (s32)position[0];
-    effect->unk14->unk10 = (s32)position[1];
-    effect->unk14->unk12 = (s32)position[2];
+    effect->unk14->unkE = position[0];
+    effect->unk14->unk10 = position[1];
+    effect->unk14->unk12 = position[2];
 }
 
-/* Payload of func_151644A8: a light swinging below a pivot. */
+/* Payload of func_151644A8: a light swinging about a pivot. */
 typedef struct {
-    f32 unk0;         // offset below the pivot
-    f32 unk4;         // scale applied to the swing angles
-    struct17 *unk8;   // swing angles (x and z are used)
-    struct17 unkC;    // pivot position
+    f32 offset;       // passed as y to func_150A7960
+    f32 scale;        // applied to the swing angles
+    struct17 *angles; // swing angles (x and z are used)
+    struct17 pivot;
 } LightSwing;
 
 s32 func_151644A8(struct225 *effect) {
@@ -1793,9 +1793,9 @@ s32 func_151644A8(struct225 *effect) {
     f32 scale;
     struct17 *angles;
 
-    angles = swing->unk8;
-    scale = swing->unk4;
-    func_151644F4(effect, &swing->unkC, swing->unk0, angles->unk0 * scale, angles->unk8 * scale);
+    angles = swing->angles;
+    scale = swing->scale;
+    func_151644F4(effect, &swing->pivot, swing->offset, angles->unk0 * scale, angles->unk8 * scale);
     return 1;
 }
 
