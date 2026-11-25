@@ -1003,6 +1003,8 @@ segments:
       - [0x2275E0, data]
       - [0x227A50, .data, game_45B80]
       - [0x227A60, data]
+      - [0x228F40, .data, game_6CEA0]
+      - [0x228F70, data]
       - [0x22A980, rodata]
       - [0x22AA90, rodata]
       - [0x22AAB0, rodata]

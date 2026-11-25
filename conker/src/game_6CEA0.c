@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+s16 D_80084480 = 0; // the first word of this file's .data; read by game_14FF90.c and game_45B80.c
+
 
 #define STICK_DEADZONE 20
 
@@ -11,7 +13,7 @@
  * stick reading. On the other calls both outputs are 0.
  */
 void func_1503F9F0(s16 controller, s16 *dirX, s16 *dirY) {
-    static s16 D_80084484; // frames until the next repeat
+    static s16 D_80084484 = 5; // frames until the next repeat
     OSContPad *pad;
     s16 stickX;
 
@@ -40,11 +42,11 @@ void func_1503F9F0(s16 controller, s16 *dirX, s16 *dirY) {
 }
 
 /* State of the task list menu drawn by func_1503FB40. */
-extern s32 D_80084488; // scroll in progress: 1 = up, -1 = down, 0 = idle
+static s32 D_80084488 = 0; // scroll in progress: 1 = up, -1 = down, 0 = idle
 extern f32 D_800C6850; // scroll animation offset, +-11 at the end of a step
-extern s32 D_8008448C; // frames left showing "RESETTING ALL TASKS"
-extern s8 D_80084490;  // frames until the selection blink toggles
-extern u8 D_80084494;  // blink phase
+static s32 D_8008448C = 0; // frames left showing "RESETTING ALL TASKS"
+static s8 D_80084490 = 0;  // frames until the selection blink toggles
+static u8 D_80084494 = 0;  // blink phase
 
 /* Resets the task list menu's scroll and blink state. */
 void func_1503FB08(void) {
@@ -55,8 +57,8 @@ void func_1503FB08(void) {
     D_80084494 = 0;
 }
 
-extern u8 D_80084498;     // selected task (index into the list of tasks in use)
-extern char D_8008449C[]; // "ERROR"
+static u8 D_80084498 = 0;     // selected task (index into the list of tasks in use)
+static char D_8008449C[] = "ERROR";
 extern char D_80098930[]; // "RESETTING ALL TASKS"
 extern char D_80098944[]; // "."
 extern char D_80098948[]; // "RESET TO PLAY !"
