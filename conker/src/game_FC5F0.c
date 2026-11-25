@@ -150,26 +150,31 @@ extern struct struct_150D032C_prefix D_800A0880;
 extern f32 D_800A0888;
 void func_15042D94(s32, s32, s32, u8 *);
 typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ u8  unk10;
-    /* 0x11 */ u8  pad11;
+    f32 x;
+    f32 y;
+} Vec2f;
+
+/* Parameters for func_1515548C, which spawns a 2D particle. */
+typedef struct {
+    /* 0x00 */ Vec2f pos;
+    /* 0x08 */ f32 scaleX;
+    /* 0x0C */ f32 scaleY;
+    /* 0x10 */ u8 unk10;
+    /* 0x11 */ u8 pad11;
     /* 0x12 */ s16 unk12;
-    /* 0x14 */ s16 unk14;
+    /* 0x14 */ s16 flags;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  unk1A;
-    /* 0x1B */ u8  unk1B;
-    /* 0x1C */ u8  unk1C;
-    /* 0x1D */ u8  unk1D;
-    /* 0x1E */ u8  unk1E;
-    /* 0x1F */ u8  unk1F;
-    /* 0x20 */ u8  unk20;
-    /* 0x21 */ u8  unk21;
-    /* 0x22 */ u8  unk22;
-    /* 0x23 */ u8  unk23;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ u8 unk20;
+    /* 0x21 */ u8 unk21;
+    /* 0x22 */ u8 unk22;
+    /* 0x23 */ u8 unk23;
     /* 0x24 */ s32 unk24;
     /* 0x28 */ s32 unk28;
     /* 0x2C */ s32 unk2C;
@@ -177,227 +182,215 @@ typedef struct {
     /* 0x34 */ s32 unk34;
     /* 0x38 */ s32 unk38;
     /* 0x3C */ s32 unk3C;
-    /* 0x40 */ u8  unk40;
-    /* 0x41 */ u8  unk41;
-    /* 0x42 */ u8  pad42[2];
-    /* 0x44 */ u8  unk44;
-    /* 0x45 */ u8  pad45[3];
+    /* 0x40 */ u8 unk40;
+    /* 0x41 */ u8 unk41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ u8 unk44;
+    /* 0x45 */ u8 pad45[3];
     /* 0x48 */ f32 unk48;
     /* 0x4C */ f32 unk4C;
     /* 0x50 */ f32 unk50;
     /* 0x54 */ f32 unk54;
-} struct_150CF680;
+} ParticleSpawn;
 
+/* Particle motion: while flags & 1, hop from startX to startX + distance along an arc. */
 typedef struct {
-    /* 0x00 */ u8  unk0;
-    /* 0x01 */ u8  pad1[3];
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-} struct_150CF680b;
+    /* 0x00 */ u8 flags;
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ f32 phase; // 0 to 1 over the hop
+    /* 0x08 */ f32 startX;
+    /* 0x0C */ f32 distance;
+} HopMotion;
 
-void *func_1515548C(struct_150CF680 *, s32, s32, s32, s32, u8, s32);
-
-void func_150CF680(s16 arg0, u8 arg1, s32 arg2) {
-    struct_150CF680 sp40;
-    struct_150CF680b sp30;
-    void *temp_v0;
-
-    sp40.unk4 = 72.0f;
-    sp40.unk10 = 0xC1;
-    sp40.unk12 = arg0;
-    sp40.unk14 = 0x31;
-    sp40.unk16 = 1;
-    sp40.unk18 = 0xFF;
-    sp40.unk1A = 8;
-    sp40.unk1B = 0xFF;
-    sp40.unk1C = 0xFF;
-    sp40.unk1D = 0xFF;
-    sp40.unk1E = 0xFF;
-    sp40.unk1F = 0xFF;
-    sp40.unk20 = 0xFF;
-    sp40.unk21 = 0xFF;
-    sp40.unk22 = 0xFF;
-    sp40.unk23 = 0xFF;
-    sp40.unk28 = 0x200004;
-
-    sp30.unk0 = 0;
-    sp30.unk4 = 0.0f;
-    sp40.unk0 = -300.0f;
-    sp30.unk8 = -300.0f;
-    sp30.unkC = 0.0f;
-    sp40.unkC = 7.5f;
-    sp40.unk8 = 7.5f;
-    sp40.unk24 = 0;
-    sp40.unk2C = 0x9F0601;
-    sp40.unk40 = 0;
-    sp40.unk41 = 0xA;
-    sp40.unk30 = 0x17;
-    sp40.unk34 = 0x44;
-    sp40.unk38 = 0x80;
-    sp40.unk3C = 0x20;
-    sp40.unk4C = 1.0f;
-    sp40.unk48 = 1.0f;
-    sp40.unk54 = 0.0f;
-    sp40.unk50 = 0.0f;
-    sp40.unk44 = (u8)D_80082FA0;
-
-    temp_v0 = func_1515548C(&sp40, 0xC, 0, 0, 0x10, arg1, arg2);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x70, &sp30, 0x10);
-    }
-}
+/* Particle motion: fall under gravity and bounce on a floor line (y grows downwards). */
+typedef struct {
+    /* 0x00 */ Vec2f vel;
+    /* 0x08 */ f32 gravity;
+    /* 0x0C */ f32 floorY;
+} BounceMotion;
 
 typedef struct {
     /* 0x00 */ u8 pad0;
     /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xC - 2];
+    /* 0x02 */ u8 pad2[0xC - 0x2];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[3];
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
+    /* 0x10 */ Vec2f pos;
     /* 0x18 */ u8 pad18[0x70 - 0x18];
-    /* 0x70 */ struct_150CF680b unk70;
-} Obj150CF800;
+    /* 0x70 */ union {
+        HopMotion hop;
+        BounceMotion bounce;
+    } motion;
+} Particle;
 
-typedef struct {
-    f32 x;
-    f32 y;
-} Vec2_150CF800;
+Particle *func_1515548C(ParticleSpawn *, s32, s32, s32, s32, u8, s32);
 
-typedef struct {
-    u8 pad[8];
-    s8 (*unk8)(void);
-} Struct8008FCD0;
+/* Spawns the hopping particle, waiting off screen at (-300, 72). */
+void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
+    ParticleSpawn spawn;
+    HopMotion hop;
+    Particle *particle;
 
-extern Struct8008FCD0 D_8008FCD0;
-void func_15143874(s16, f32, f32 *, f32 *);
+    spawn.pos.y = 72.0f;
+    spawn.unk10 = 0xC1;
+    spawn.unk12 = unk12;
+    spawn.flags = 0x31;
+    spawn.unk16 = 1;
+    spawn.unk18 = 0xFF;
+    spawn.unk1A = 8;
+    spawn.unk1B = 0xFF;
+    spawn.unk1C = 0xFF;
+    spawn.unk1D = 0xFF;
+    spawn.unk1E = 0xFF;
+    spawn.unk1F = 0xFF;
+    spawn.unk20 = 0xFF;
+    spawn.unk21 = 0xFF;
+    spawn.unk22 = 0xFF;
+    spawn.unk23 = 0xFF;
+    spawn.unk28 = 0x200004;
 
-s32 func_150CF800(Obj150CF800 *arg0) {
-    f32 t;
-    struct_150CF680 sp;
-    f32 vel[4];
+    hop.flags = 0;
+    hop.phase = 0.0f;
+    spawn.pos.x = -300.0f;
+    hop.startX = -300.0f;
+    hop.distance = 0.0f;
+    spawn.scaleY = 7.5f;
+    spawn.scaleX = 7.5f;
+    spawn.unk24 = 0;
+    spawn.unk2C = 0x9F0601;
+    spawn.unk40 = 0;
+    spawn.unk41 = 10;
+    spawn.unk30 = 0x17;
+    spawn.unk34 = 0x44;
+    spawn.unk38 = 0x80;
+    spawn.unk3C = 0x20;
+    spawn.unk4C = 1.0f;
+    spawn.unk48 = 1.0f;
+    spawn.unk54 = 0.0f;
+    spawn.unk50 = 0.0f;
+    spawn.unk44 = D_80082FA0;
+
+    particle = func_1515548C(&spawn, 12, 0, 0, 0x10, unkC, unk1);
+    if (particle != NULL) {
+        memcpy(&particle->motion.hop, &hop, sizeof(hop));
+    }
+}
+
+extern s8 (*D_8008FCD0[])(void);
+void func_15143874(s16 angle, f32 distance, f32 *x, f32 *y);
+
+/* Hopping particle update: follows the hop arc and, on landing, kicks up 2 to 5 bouncing
+   dust particles. */
+s32 func_150CF800(Particle *hopper) {
+    f32 phase;
+    ParticleSpawn spawn;
+    BounceMotion dust;
     s8 count;
-    s32 r;
-    s32 b1;
-    void *obj;
-    struct_150CF680b *sub;
+    s32 rand;
+    s32 bit2;
+    Particle *particle;
+    HopMotion *hop;
 
-    sub = &arg0->unk70;
-    if (sub->unk0 & 1) {
-        sub->unk4 += 0.1900000125f * D_800BE9A4;
-        t = sub->unk4;
-        if (t >= 1.0f) {
-            sub->unk4 = 1.0f;
-            sub->unk0 &= ~1;
+    hop = &hopper->motion.hop;
+    if (hop->flags & 1) {
+        hop->phase += 0.19000001f * D_800BE9A4;
+        phase = hop->phase;
+        if (phase >= 1.0f) {
+            hop->phase = 1.0f;
+            hop->flags &= ~1;
             count = (func_150ADA20() & 3) + 2;
-            vel[3] = arg0->unk14 + 15.0f;
-            *(Vec2_150CF800 *)&sp.unk0 = *(Vec2_150CF800 *)&arg0->unk10;
-            sp.unk16 = 0xC;
-            sp.unk18 = 0x15;
-            sp.unk1A = 0;
-            sp.unk1B = 0xFF;
-            sp.unk1C = 0xFF;
-            sp.unk1D = 0xFF;
-            sp.unk1F = 0xFF;
-            sp.unk20 = 0xFF;
-            sp.unk21 = 0xFF;
-            sp.unk22 = 0xFF;
-            sp.unk23 = 0xFF;
-            sp.unk24 = 0;
-            sp.unk28 = 0x200004;
-            sp.unk2C = 0x9F0601;
-            sp.unk40 = 0;
-            sp.unk41 = 0xA;
-            sp.unk30 = 0x17;
-            sp.unk34 = 0x44;
-            sp.unk38 = 0x80;
-            sp.unk3C = 0x20;
-            sp.unk48 = 1.0f;
-            sp.unk4C = 1.0f;
-            sp.unk54 = 0.0f;
-            sp.unk50 = 0.0f;
-            sp.unk44 = (u8)D_80082FA0;
+            dust.floorY = hopper->pos.y + 15.0f;
+            spawn.pos = hopper->pos;
+            spawn.unk16 = 12;
+            spawn.unk18 = 0x15;
+            spawn.unk1A = 0;
+            spawn.unk1B = 0xFF;
+            spawn.unk1C = 0xFF;
+            spawn.unk1D = 0xFF;
+            spawn.unk1F = 0xFF;
+            spawn.unk20 = 0xFF;
+            spawn.unk21 = 0xFF;
+            spawn.unk22 = 0xFF;
+            spawn.unk23 = 0xFF;
+            spawn.unk24 = 0;
+            spawn.unk28 = 0x200004;
+            spawn.unk2C = 0x9F0601;
+            spawn.unk40 = 0;
+            spawn.unk41 = 10;
+            spawn.unk30 = 0x17;
+            spawn.unk34 = 0x44;
+            spawn.unk38 = 0x80;
+            spawn.unk3C = 0x20;
+            spawn.unk48 = 1.0f;
+            spawn.unk4C = 1.0f;
+            spawn.unk54 = 0.0f;
+            spawn.unk50 = 0.0f;
+            spawn.unk44 = D_80082FA0;
             for (; count > 0; count--) {
-                sp.unk1E = (func_150ADA20() % 101U) + 0x9B;
-                sp.unk10 = D_8008FCD0.unk8();
-                r = func_150ADA20();
-                t = (func_150ADA68() * 2) + 2.5f;
-                func_15143874((s16)((r % 65U) - 0xA0), t, &vel[0], &vel[1]);
-                vel[2] = (func_150ADA68() * 0.3330000043f) + 0.4040000141f;
-                sp.unk8 = sp.unkC = (func_150ADA68() * 1.789999962f) + 1.699999928f;
-                sp.unk12 = (func_150ADA20() % 26U) + 0x1E;
+                spawn.unk1E = (func_150ADA20() % 101U) + 155;
+                spawn.unk10 = D_8008FCD0[2]();
+                rand = func_150ADA20();
+                phase = (func_150ADA68() * 2) + 2.5f; // matching: the hop phase's register holds the dust speed
+                func_15143874((s16)((rand % 65U) - 160), phase, &dust.vel.x, &dust.vel.y);
+                dust.gravity = (func_150ADA68() * 0.333f) + 0.404f;
+                spawn.scaleX = spawn.scaleY = (func_150ADA68() * 1.79f) + 1.6999999f;
+                spawn.unk12 = (func_150ADA20() % 26U) + 30;
                 if (func_150ADA20() & 1) {
-                    b1 = 2;
+                    bit2 = 2;
                 } else {
-                    b1 = 0;
+                    bit2 = 0;
                 }
                 if (func_150ADA20() & 1) {
-                    r = 4;
+                    rand = 4; // matching: reusing rand's register for this flag bit
                 } else {
-                    r = 0;
+                    rand = 0;
                 }
-                sp.unk14 = r | 1 | b1 | 8 | 0x10 | 0x20;
-                obj = func_1515548C(&sp, 0xD, 0, 0, 0x10, arg0->unkC, arg0->unk1);
-                if (obj != NULL) {
-                    memcpy((u8 *)obj + 0x70, vel, 0x10);
+                spawn.flags = rand | 1 | bit2 | 8 | 0x10 | 0x20; // matching: folding the constants into 0x39 changes the code
+                particle = func_1515548C(&spawn, 13, 0, 0, 0x10, hopper->unkC, hopper->unk1);
+                if (particle != NULL) {
+                    memcpy(&particle->motion.bounce, &dust, sizeof(dust));
                 }
             }
-            t = sub->unk4;
+            phase = hop->phase;
         }
-        arg0->unk10 = sub->unk8 + (t * sub->unkC);
-        arg0->unk14 = (sinf(sub->unk4 * 3.141592741f) * -17.5f) + 72.0f;
+        hopper->pos.x = hop->startX + (phase * hop->distance);
+        hopper->pos.y = (sinf(hop->phase * 3.1415927f) * -17.5f) + 72.0f;
     }
     return 1;
 }
 
-struct sub150CFBEC {
-    u8 unk0;
-    u8 pad[3];
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-};
+/* Hopping particle message handler: message 0x52 starts a hop to the x given in the payload. */
+void func_150CFBEC(Particle *hopper, f32 *targetX, u8 type) {
+    HopMotion *hop = &hopper->motion.hop;
 
-struct par150CFBEC {
-    char pad10[0x10];
-    f32 unk10;
-    char pad14[0x70 - 0x14];
-    struct sub150CFBEC unk70;
-};
-
-void func_150CFBEC(struct par150CFBEC *arg0, f32 *arg1, u8 arg2) {
-    struct sub150CFBEC *temp = &arg0->unk70;
-
-    if (arg2 == 0x52) {
-        temp->unk0 |= 1;
-        temp->unk4 = 0.0f;
-        temp->unk8 = arg0->unk10;
-        temp->unkC = arg1[0] - arg0->unk10;
+    if (type == 0x52) {
+        hop->flags |= 1;
+        hop->phase = 0.0f;
+        hop->startX = hopper->pos.x;
+        hop->distance = targetX[0] - hopper->pos.x;
     }
 }
 
-extern void func_1515572C(f32 *, s32);
+void func_1515572C(f32 *, s32);
 
-void func_150CFC38(f32 arg0) {
-    f32 sp1C;
+/* Sends message 0x52: hop to targetX. */
+void func_150CFC38(f32 targetX) {
+    f32 payload = targetX;
 
-    sp1C = arg0;
-    func_1515572C(&sp1C, 0x52);
+    func_1515572C(&payload, 0x52);
 }
 
-extern f32 D_800A0878;
-extern f32 D_800A087C;
+/* Bouncing particle update: integrates the motion and bounces off the floor, damped. */
+s32 func_150CFC60(Particle *particle) {
+    BounceMotion *m = &particle->motion.bounce;
 
-s32 func_150CFC60(f32 *arg0) {
-    f32 *p = &arg0[28];
-    arg0[4] += p[0] * D_800BE9A4;
-    arg0[5] += (p[1] * D_800BE9A4) + (((0.5f * p[2]) * D_800BE9A4) * D_800BE9A4);
-    p[1] += p[2] * D_800BE9A4;
-    if (p[3] < arg0[5]) {
-        arg0[5] = p[3];
-        p[0] = p[0] * D_800A0878;
-        p[1] = fabsf(p[1]) * D_800A087C;
+    particle->pos.x += m->vel.x * D_800BE9A4;
+    particle->pos.y += (m->vel.y * D_800BE9A4) + (((0.5f * m->gravity) * D_800BE9A4) * D_800BE9A4);
+    m->vel.y += m->gravity * D_800BE9A4;
+    if (m->floorY < particle->pos.y) {
+        particle->pos.y = m->floorY;
+        m->vel.x *= 0.3f;
+        m->vel.y = fabsf(m->vel.y) * -0.15f;
     }
     return 1;
 }
