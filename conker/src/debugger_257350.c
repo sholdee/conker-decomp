@@ -26,69 +26,67 @@ typedef struct {
     u8 qual;
 } DebuggerPft;
 
-extern u8 D_16003CB8[];
-extern u8 D_16003CCC[];
-extern s32 func_16001BB4(s32 (*arg0)(u8 *, u8 *, u32), u8 *arg1, u8 *arg2, va_list arg3);
-extern u8 D_16003C70[];
-extern u8 D_16003C94[];
-extern u8 D_16004800[];
-extern u8 D_16004804[];
-extern u32 D_1600480C[];
+extern u8 D_16003C70[]; // 32 spaces (pad source)
+extern u8 D_16003C94[]; // 32 '0' characters (pad source)
+extern u8 D_16003CB8[]; // "0123456789abcdef"
+extern u8 D_16003CCC[]; // "0123456789ABCDEF"
+extern u8 D_16004800[]; // "hlL": size qualifiers
+extern u8 D_16004804[]; // " +-#0": flag characters
+extern u32 D_1600480C[]; // flag bit for each flag character
+extern double D_16004828[]; // powers of ten: 1e1, 1e2, 1e4, ... 1e256
+
+s32 func_16001BB4(s32 (*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args);
 void func_160021FC(DebuggerPft *px, va_list *pap, u8 code, u8 *ac);
 void func_1600288C(void *arg0, unsigned char code);
 void func_160033A8(DebuggerPft *px, u8 code);
 
-// whats wrong with bcopy?
-u8* func_16001AD0(u8 *arg0, u8 *arg1, u32 arg2) {
-    u8 *tmp0 = arg0;
-    u8 *tmp1 = arg1;
+#define FLAGS_SPACE 1
+#define FLAGS_PLUS 2
+#define FLAGS_MINUS 4
+#define FLAGS_HASH 8
+#define FLAGS_ZERO 16
 
-    while (arg2 > 0) {
-        *tmp0++ = *tmp1++;
-        arg2 -= 1;
+/* memcpy: copies count bytes from src to dst and returns dst. */
+u8 *func_16001AD0(u8 *dst, u8 *src, u32 count) {
+    u8 *out = dst;
+    u8 *in = src;
+
+    while (count > 0) {
+        *out++ = *in++;
+        count--;
     }
 
-    return arg0;
+    return dst;
 }
 
-s32 func_16001B00(u8 *arg0) {
-    s32 var_v1;
-    u8 *var_v0;
+/* strlen: returns the number of characters before the terminating NUL. */
+s32 func_16001B00(u8 *str) {
+    u8 *cursor = str;
+    s32 len = 0;
 
-    var_v0 = arg0;
-    var_v1 = 0;
-    if (*arg0 != 0) {
-        do {
-            var_v1 += 1;
-            var_v0 += 1;
-        } while (*var_v0 != 0);
+    while (*cursor != 0) {
+        len++;
+        cursor++;
     }
-    return var_v1;
+    return len;
 }
 
-s32 func_16001B34(u8 *arg0, u8 *arg1, ...) {
+/* sprintf: formats into buf and NUL-terminates it; returns the length written. */
+s32 func_16001B34(u8 *buf, u8 *fmt, ...) {
     va_list args;
-    s32 temp_v0;
+    s32 len;
 
-    va_start(args, arg1);
-    temp_v0 = func_16001BB4(func_16001B8C, arg0, arg1, args);
-    if (temp_v0 >= 0) {
-        arg0[temp_v0] = 0;
+    va_start(args, fmt);
+    len = func_16001BB4(func_16001B8C, buf, fmt, args);
+    if (len >= 0) {
+        buf[len] = 0;
     }
-    return temp_v0;
+    return len;
 }
-// s32 func_16001BB4(void *arg0, s32 arg1, void *arg2, s32 arg3) ;
-// NON-MATCHING: need to work out  func_16001BB4
-// s32 func_16001B34(s8 arg0[], s32 arg1, s32 arg2, s32 arg3) {
-//     s32 idx = func_16001BB4(&D_16001B8C, &arg1, arg2, &arg3);
-//     if (idx >= 0) {
-//         arg0[idx] = 0;
-//     }
-//     return idx;
-// }
 
-s32 func_16001B8C(u8 *arg0, u8 *arg1, u32 arg2) {
-    return func_16001AD0(arg0, arg1, arg2) + arg2;
+/* sprintf output callback: copies count bytes to dst and returns the advanced dst. */
+s32 func_16001B8C(u8 *dst, u8 *src, u32 count) {
+    return func_16001AD0(dst, src, count) + count;
 }
 
 #define ATOI(dst, src)                         \
@@ -103,17 +101,18 @@ s32 func_16001B8C(u8 *arg0, u8 *arg1, u32 arg2) {
         else                                            \
             return x.nchar;                             \
     }
+#define MAX_PAD 32 // length of the space/zero pad strings
 #define PAD(s, n)                                      \
     if (0 < (n)) {                                              \
         int i, j = (n);                                         \
         for (; 0 < j; j -= i) {                                 \
-            i = 32 < (unsigned int)j ? 32 : j;                  \
+            i = MAX_PAD < (unsigned int)j ? MAX_PAD : j;        \
             PUT(s, i);                                 \
         }                                                       \
     }
 
-/* libultra _Printf (xprintf.c), private debugger copy. D_16003C70 = spaces, D_16003C94 = zeroes
- * (32 chars each, hence MAX_PAD 32), D_16004800 = "hlL", D_16004804 = fchar, D_1600480C = fbit. */
+/* _Printf (libultra xprintf.c), private debugger copy: formats fmt with args, handing each
+ * piece to pfn(arg, piece, len). Returns the number of characters written. */
 s32 func_16001BB4(s32 (*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
     DebuggerPft x;
 
@@ -143,7 +142,7 @@ s32 func_16001BB4(s32 (*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
             x.width = va_arg(args, int);
             if (x.width < 0) {
                 x.width = -x.width;
-                x.flags |= 4;
+                x.flags |= FLAGS_MINUS;
             }
             s++;
         } else {
@@ -164,7 +163,7 @@ s32 func_16001BB4(s32 (*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
         }
         func_160021FC(&x, &args, *s, ac);
         x.width -= x.n0 + x.nz0 + x.n1 + x.nz1 + x.n2 + x.nz2;
-        if (!(x.flags & 4)) {
+        if (!(x.flags & FLAGS_MINUS)) {
             PAD(D_16003C70, x.width);
         }
         PUT(ac, x.n0);
@@ -173,7 +172,7 @@ s32 func_16001BB4(s32 (*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
         PAD(D_16003C94, x.nz1);
         PUT(x.s + x.n1, x.n2);
         PAD(D_16003C94, x.nz2);
-        if (x.flags & 4) {
+        if (x.flags & FLAGS_MINUS) {
             PAD(D_16003C70, x.width);
         }
         fmt = s + 1;
@@ -181,9 +180,8 @@ s32 func_16001BB4(s32 (*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args) {
     return 0;
 }
 
+/* _Putfld (libultra xprintf.c): converts one argument for conversion code into ac/px->s. */
 void func_160021FC(DebuggerPft *px, va_list *pap, u8 code, u8 *ac) {
-    s32 strLen;
-
     px->n0 = px->nz0 = px->n1 = px->nz1 = px->n2 = px->nz2 = 0;
 
     switch (code) {
@@ -207,9 +205,9 @@ void func_160021FC(DebuggerPft *px, va_list *pap, u8 code, u8 *ac) {
 
         if (px->v.ll < 0) {
             ac[px->n0++] = '-';
-        } else if (px->flags & 2) {
+        } else if (px->flags & FLAGS_PLUS) {
             ac[px->n0++] = '+';
-        } else if (px->flags & 1) {
+        } else if (px->flags & FLAGS_SPACE) {
             ac[px->n0++] = ' ';
         }
 
@@ -235,7 +233,7 @@ void func_160021FC(DebuggerPft *px, va_list *pap, u8 code, u8 *ac) {
             px->v.ll = (unsigned int)px->v.ll;
         }
 
-        if (px->flags & 8) {
+        if (px->flags & FLAGS_HASH) {
             ac[px->n0++] = '0';
             if (code == 'x' || code == 'X') {
                 ac[px->n0++] = code;
@@ -253,11 +251,11 @@ void func_160021FC(DebuggerPft *px, va_list *pap, u8 code, u8 *ac) {
     case 'G':
         px->v.d = (px->qual == 'L') ? va_arg(*pap, double) : va_arg(*pap, double);
 
-        if ((*(u16 *)&px->v.d) & 0x8000) {
+        if (*(u16 *)&px->v.d & 0x8000) { // sign bit of the double
             ac[px->n0++] = '-';
-        } else if (px->flags & 2) {
+        } else if (px->flags & FLAGS_PLUS) {
             ac[px->n0++] = '+';
-        } else if (px->flags & 1) {
+        } else if (px->flags & FLAGS_SPACE) {
             ac[px->n0++] = ' ';
         }
 
@@ -285,8 +283,7 @@ void func_160021FC(DebuggerPft *px, va_list *pap, u8 code, u8 *ac) {
 
     case 's':
         px->s = va_arg(*pap, u8 *);
-        strLen = func_16001B00(px->s);
-        px->n1 = strLen;
+        px->n1 = func_16001B00(px->s);
         if (px->prec >= 0 && px->prec < px->n1) {
             px->n1 = px->prec;
         }
@@ -301,7 +298,6 @@ void func_160021FC(DebuggerPft *px, va_list *pap, u8 code, u8 *ac) {
         break;
     }
 }
-extern double D_16004828[];
 s16 func_16002D2C(s16 *arg0, struct05 *arg1);
 void func_16002DE4(DebuggerPft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
 
@@ -457,10 +453,6 @@ s16 func_16002D2C(s16 *arg0, struct05 *arg1) {
     *arg0 = 0;
     return 0;
 }
-
-#define FLAGS_HASH 8
-#define FLAGS_ZERO 16
-#define FLAGS_MINUS 4
 
 void func_16002DE4(DebuggerPft *px, u8 code, u8 *p, s16 nsig, s16 xexp) {
     if (nsig <= 0) {
