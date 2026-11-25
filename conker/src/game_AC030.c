@@ -252,67 +252,65 @@ void func_1507EFD0(void) {
     } else if (D_800D18C0 & 2) {
         func_1507EB80(candidates, &count, 3);
         D_800D18C0 = 0;
-    } else {
-        if ((s16)D_800D154C->unk31C->unk66 != 0 && D_800D154C->unk31C->unk78 == 0) {
-            seq = 0xB;
-            if (idle->timer >= 121) {
-                D_800D154C->unk31C->unk66 = 0;
-                idle->timer = 0;
-                idle->phase = 0;
-                seq = 0xC;
-                func_1507FF94(D_800D154C);
-            } else {
-                seq = 0xB;
-            }
-            func_1507EB80(candidates, &count, seq);
-        } else if (D_800D154C->health < 2) {
-            func_1507EB80(candidates, &count, 0);
-        } else if (func_1515942C(&D_800CC2D0[D_800C3E78], 0, 0, -1, -1, -1) != 0) {
-            func_1507EB80(candidates, &count, 0);
-        } else if (idle->timer >= func_1507F4C0(idle->phase)) {
-            func_1507EEF4();
-            category = -1;
-            if (D_800D154C->unk2F8 & 0x200) {
-                category = 2;
-            } else if (D_800D154C->unk31C->unk78 == 9) {
-                category = 5;
-            } else if (D_800D154C->unk31C->unk78 == 0x23) {
-                category = 9;
-            } else if (D_800D154C->unk31C->unk78 == 0x16) {
-                category = 10;
-            } else if (func_1503195C(D_800D154C, 0x17, 0) != NULL) {
-                category = 6;
-            } else if (D_800BE9F0 == 0x31) {
-                if (D_800D18C0 & 4) {
-                    category = 8;
-                } else {
-                    category = 7;
-                }
-            } else if (D_800D154C->id == 0x96 || D_800BE9F0 == 0x10 || D_800BE9F0 == 0x1B ||
-                       D_800BE9F0 == 0x1E || D_800BE9F0 == 0x26 || D_800BE9F0 == 0x2F ||
-                       D_800BE9F0 == 0xE || D_800BE9F0 == 0x28 || D_800BE9F0 == 0x23 ||
-                       D_800BE9F0 == 0x1C || D_800BE9F0 == 0x36 || D_800BE9F0 == 0x3A) {
-                category = 2;
-            } else if (D_800D18C0 != 0) {
-                if (D_800D18C0 & 1) {
-                    category = 4;
-                }
-                D_800D18C0 = 0;
-            }
-            if (category != -1) {
-                count = 0;
-                func_1507EBB8(candidates, &count, category);
-            } else if (idle->phase == 1) {
-                func_1507EBB8(candidates, &count, 0);
-            } else {
-                func_1507EBB8(candidates, &count, 1);
-                if (idle->phase == 2 && idle->phaseCount >= 4 && func_1507FFD8(D_800D154C) != 0) {
-                    func_1507EBB8(candidates, &count, 3);
-                }
-            }
+    } else if (((IdleOwner *)D_800D154C->unk31C)->idle.delay != 0 && D_800D154C->unk31C->unk78 == 0) {
+        seq = 0xB;
+        if (idle->timer >= 121) {
+            ((IdleOwner *)D_800D154C->unk31C)->idle.delay = 0;
+            idle->timer = 0;
+            idle->phase = 0;
+            seq = 0xC;
+            func_1507FF94(D_800D154C);
         } else {
-            func_1507EB80(candidates, &count, 0);
+            seq = 0xB; // matching: the redundant store keeps the else-branch block
         }
+        func_1507EB80(candidates, &count, seq);
+    } else if (D_800D154C->health < 2) {
+        func_1507EB80(candidates, &count, 0);
+    } else if (func_1515942C(&D_800CC2D0[D_800C3E78], 0, 0, -1, -1, -1) != 0) {
+        func_1507EB80(candidates, &count, 0);
+    } else if (idle->timer >= func_1507F4C0(idle->phase)) {
+        func_1507EEF4();
+        category = -1;
+        if (D_800D154C->unk2F8 & 0x200) {
+            category = 2;
+        } else if (D_800D154C->unk31C->unk78 == 9) {
+            category = 5;
+        } else if (D_800D154C->unk31C->unk78 == 0x23) {
+            category = 9;
+        } else if (D_800D154C->unk31C->unk78 == 0x16) {
+            category = 10;
+        } else if (func_1503195C(D_800D154C, 0x17, 0) != NULL) {
+            category = 6;
+        } else if (D_800BE9F0 == 0x31) {
+            if (D_800D18C0 & 4) {
+                category = 8;
+            } else {
+                category = 7;
+            }
+        } else if (D_800D154C->id == 0x96 || D_800BE9F0 == 0x10 || D_800BE9F0 == 0x1B ||
+                   D_800BE9F0 == 0x1E || D_800BE9F0 == 0x26 || D_800BE9F0 == 0x2F ||
+                   D_800BE9F0 == 0xE || D_800BE9F0 == 0x28 || D_800BE9F0 == 0x23 ||
+                   D_800BE9F0 == 0x1C || D_800BE9F0 == 0x36 || D_800BE9F0 == 0x3A) {
+            category = 2;
+        } else if (D_800D18C0 != 0) {
+            if (D_800D18C0 & 1) {
+                category = 4;
+            }
+            D_800D18C0 = 0;
+        }
+        if (category != -1) {
+            count = 0;
+            func_1507EBB8(candidates, &count, category);
+        } else if (idle->phase == 1) {
+            func_1507EBB8(candidates, &count, 0);
+        } else {
+            func_1507EBB8(candidates, &count, 1);
+            if (idle->phase == 2 && idle->phaseCount >= 4 && func_1507FFD8(D_800D154C) != 0) {
+                func_1507EBB8(candidates, &count, 3);
+            }
+        }
+    } else {
+        func_1507EB80(candidates, &count, 0);
     }
     recent = idle->recent;
     reused = func_1507EC38(candidates, count, choices, &numChoices, recent);
@@ -464,10 +462,10 @@ void func_1507F640(void) {
     D_800D154C->unk76 = D_800D154C->unk7A;
     D_800D154C->unk100 &= 0xFE;
     D_800D154C->unk2F8 &= ~7;
-    D_800D154C->unk2F8 |= 0;
+    D_800D154C->unk2F8 |= 0; // matching: a second store, as from setting a 3-bit field to 0
     owner = (IdleOwner *)D_800D154C->unk31C;
     if (owner->unk17) {
-        s32 pad;
+        s32 pad; // matching: unused stack slot
         if (func_150ADA20() & 3) {
             anim = 0x4D;
         }
@@ -537,10 +535,8 @@ void func_1507F640(void) {
         override = 0x153;
         break;
     }
-    if (owner->unk1B2) {
-        if (type == 22) {
-            override = 0x2C5;
-        }
+    if (owner->unk1B2 && type == 22) {
+        override = 0x2C5;
     }
     if (owner->unk4E == 2) {
         override = 5;
@@ -557,11 +553,9 @@ void func_1507F640(void) {
     if (owner->unk32 & 2) {
         override = 0x6B;
         blend = 8.0f;
-    } else {
-        if (owner->unk32 & 1) {
-            override = 0xAF;
-            blend = 8.0f;
-        }
+    } else if (owner->unk32 & 1) {
+        override = 0xAF;
+        blend = 8.0f;
     }
     if (override != -1) {
         func_1505E650(D_800D154C, override, speed, blend, 0.0f, 0.0f, 0);
@@ -595,7 +589,7 @@ void func_1507F640(void) {
                 func_1507F54C(D_800D154C);
                 return;
             }
-            if (override != -1) {
+            if (override != -1) { // matching: always true here, but the compare is in the asm
                 func_1505E650(D_800D154C, override, 1.0f, 4.0f, 0.0f, 0.0f, 0);
                 return;
             }
@@ -631,7 +625,7 @@ void func_1507F640(void) {
             entry = &D_8009B8B0[sequence];
         }
     }
-    func_1505E650(D_800D154C, entry->anim, (u32)entry->speed * 0.01f, (u32)entry->blend * 0.1f, 0.0f,
+    func_1505E650(D_800D154C, entry->anim, entry->speed * 0.01f, entry->blend * 0.1f, 0.0f,
                   0.0f, 0);
     idle->holdFrames = entry->holdFrames;
     idle->active = TRUE;
@@ -732,7 +726,7 @@ void func_1507FEA0(struct127 *actor) {
         idle->phase = 0;
         idle->phaseCount = 0;
     }
-    delay = ((IdleOwner *)actor->unk31C)->idle.delay;
+    delay = ((IdleOwner *)actor->unk31C)->idle.delay; // matching: re-read through actor, not idle
     if (delay != 0) {
         if (D_800BE9E4 < delay) {
             ((IdleOwner *)actor->unk31C)->idle.delay = delay - D_800BE9E4;
@@ -791,9 +785,7 @@ s32 func_1507FFD8(struct127 *actor) {
     f32 z;
     f32 distSq;
     f32 out[3];
-    f32 dx;
-    f32 dy;
-    f32 dz;
+    f32 pad[3]; // matching: unused stack space (frame size)
     s32 type;
 
     inZone = func_150A3194(4, 5, actor->x_position, actor->y_position, actor->z_position);
