@@ -46,16 +46,17 @@ typedef struct BoltDesc {
     /* 0x4D */ u8 pad4D[3];
 } BoltDesc; /* size 0x50 */
 
-extern s32 D_800DCE50[][0x68];
+/* A node of the object lists D_800DCE50[list][type] (see game_1944C0.c), as func_15105C24 reads it. */
+typedef struct ListObj {
+    /* 0x00 */ u8 pad0[8];
+    /* 0x08 */ struct ListObj *next;
+    /* 0x0C */ u8 padC[7];
+    /* 0x13 */ u8 type;
+    /* 0x14 */ u8 pad14[0x14];
+    /* 0x28 */ s32 owner;
+} ListObj;
 
-typedef struct Func15105C24Obj {
-    u8 pad0[8];
-    struct Func15105C24Obj *next;
-    u8 padC[7];
-    u8 type;
-    u8 pad14[0x14];
-    s32 owner;
-} Func15105C24Obj;
+extern ListObj *D_800DCE50[2][104];
 
 extern s32 *D_800DBF94;
 
@@ -589,75 +590,23 @@ void func_15105BC8(SparkObj *obj) {
     }
 }
 
-Func15105C24Obj *func_15105C24(s32 arg0)
-{
-  u8 i;
-  u8 j;
-  Func15105C24Obj *obj;
- i = 0; do {
-    j = 0;
-    do
-    {
-      obj = (Func15105C24Obj *) D_800DCE50[j][(&D_800A5770)[i]];
-      if (obj != 0)
-      {
-        do
-        {
-          if ((obj->type == 0x2E) && (arg0 == obj->owner))
-          {
-            return obj;
-          }
-          obj = obj->next;
+/* Returns the first type-0x2E object owned by `owner` in either object list, searching the two
+ * object types listed in D_800A5770, or NULL. */
+ListObj *func_15105C24(s32 owner) {
+    u8 i;
+    u8 list;
+    ListObj *obj;
+
+    for (i = 0; i < 2; i++) {
+        for (list = 0; list < 2; list++) {
+            for (obj = D_800DCE50[list][(&D_800A5770)[i]]; obj != NULL; obj = obj->next) {
+                if (obj->type == 0x2E && owner == obj->owner) {
+                    return obj;
+                }
+            }
+        // matching: the label starts a new basic block, which keeps IDO from hoisting list++
+        next_list:;
         }
-        while (obj != 0);
-      }
-      next_j:
-      j++;
-
     }
-    while (j < 2);
-    next_i:
-    i++;
-
-  }
-  while (i < 2);
-  return 0;
+    return NULL;
 }
-// void *func_15105C24(s32 arg0) {
-//     s32 temp_t4;
-//     s32 temp_t5;
-//     void *temp_a0;
-//     void *temp_a0_2;
-//     s32 phi_v1;
-//     s32 phi_v0;
-//     void *phi_a0;
-//
-//     phi_v0 = 0;
-// loop_1:
-//     phi_v1 = 0;
-// loop_2:
-//     temp_a0 = *((((((phi_v1 * 4) - phi_v1) * 4) + phi_v1) << 5) + 0x800DCE50 + (((phi_v0 * 4) + 0x800A0000)->unk5770 * 4));
-//     phi_a0 = temp_a0;
-//     if (temp_a0 != 0) {
-// loop_3:
-//         if ((phi_a0->unk13 == 0x2E) && (arg0 == phi_a0->unk28)) {
-//             return phi_a0;
-//         }
-//         temp_a0_2 = phi_a0->unk8;
-//         phi_a0 = temp_a0_2;
-//         if (temp_a0_2 != 0) {
-//             goto loop_3;
-//         }
-//     }
-//     temp_t4 = (phi_v1 + 1) & 0xFF;
-//     phi_v1 = temp_t4;
-//     if (temp_t4 < 2) {
-//         goto loop_2;
-//     }
-//     temp_t5 = (phi_v0 + 1) & 0xFF;
-//     phi_v0 = temp_t5;
-//     if (temp_t5 < 2) {
-//         goto loop_1;
-//     }
-//     return NULL;
-// }
