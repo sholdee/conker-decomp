@@ -1801,38 +1801,6 @@ typedef struct {
 } struct148;
 
 typedef struct {
-    s32 unk0;   // used (unk3?)
-    s32 unk4;   // used
-    s32 unk8;
-    s32 unkC;
-    s32 *unk10;
-    s8  unk14;
-    u8  unk15;  // used
-    s8  unk16;
-    s8  unk17;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    s32 unk30;  // used
-    u8  pad34[0x4];
-    s32 unk38;
-    u8  unk3C[0x10];
-    u16 unk4C;
-    u16 unk4E;
-    u16 unk50;
-    u16 unk52;
-    u8  pad54[0x4];
-    u16 unk58;
-    s16 unk5A;
-    s16 unk5C;
-    u8  pad5E[0x2];
-    struct00 *unk60;  // used
-} struct151;
-
-typedef struct {
     s32 pad0;
     u8  unk4;
     s8  unk5; // used

@@ -1,13 +1,7 @@
 #include <ultra64.h>
 
-/* The shared headers give this file's music tables and lookups placeholder types; their real
-   declarations follow below. */
-#define func_1000B1B0 func_1000B1B0_hdr
-#define func_1000B1FC func_1000B1FC_hdr
 #include "functions.h"
 #include "variables.h"
-#undef func_1000B1B0
-#undef func_1000B1FC
 
 /* Per-frame update hook of a music sequence: takes and returns its private state word. */
 typedef s32 (*MusicCallback)(s32 state, s32 channel, f32 x, f32 y, f32 z);
@@ -28,8 +22,6 @@ typedef struct {
     u16 target;
     u16 rate;
 } VolumeRamp;
-
-typedef struct MusicTrack MusicTrack;
 
 /* One music sequence instance, from the pool D_800419A8. */
 struct MusicTrack {
@@ -68,8 +60,6 @@ extern u8 D_80041970[3][16];          /* per-event toggle */
 extern MusicTrack D_800419A8[12];     /* track pool */
 extern u8 D_800C35E8;
 
-MusicTrack *func_1000B1B0(s32 id);
-MusicTrack *func_1000B1FC(s32 id);
 void func_1000D96C(s32 newId, s32 oldId, s32 transition);
 void func_1000DEC4(void);
 void func_10008C04(u8, u8, s32);

@@ -21,6 +21,9 @@ typedef s32 (*SoundRecordCallback)(SoundRecord *record, s32 *active, u32 *volume
 typedef struct BankRecord BankRecord;
 typedef void *(*BankFetchProc)(u32 *slot, s32 mode);
 
+/* A playing music sequence (init_B1B0.c). */
+typedef struct MusicTrack MusicTrack;
+
 /* matching */
 void func_10001050(void);
 void func_100010F8(s32 arg0);
@@ -74,7 +77,7 @@ void func_10009B2C(BankRecord *record);
 void func_10009B4C(BankRecord *record);
 void func_10009B90(BankRecord *record);
 s32  func_1000BA18(u32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4);
-struct151 *func_1000B1B0(s32 arg0);
+MusicTrack *func_1000B1B0(s32 id);
 s32  func_1000B830(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32  func_1000B8B8(s32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4);
 s32  func_1000BBE8(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -930,7 +933,7 @@ BankFetchProc func_10009FFC(void);
 //func_1000A420
 //func_1000A750
 //func_1000B060
-struct151 *func_1000B1FC(s32 arg0);
+MusicTrack *func_1000B1FC(s32 id);
 //func_1000B294
 //func_1000B2F4
 //func_1000B3D4
