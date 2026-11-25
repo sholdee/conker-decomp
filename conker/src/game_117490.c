@@ -268,7 +268,7 @@ void func_150EA904(s32 arg0, s32 index) {
     WorldObject *entry = (WorldObject *)db_Object_array + index;
 
     if (entry->unique_id == 0xE0) {
-        entry->task_flag = (entry->task_flag & 0xFF) | 3; // matching: the no-op mask costs IDO one extra temp register
+        entry->task_flag = (entry->task_flag & 0xFF) | TASK_FLAG_ON; // matching: the no-op mask costs IDO one extra temp register
     }
 }
 
@@ -279,7 +279,7 @@ void func_150EA944(WorldObject *entry) {
     f32 angle;
     s32 timer;
 
-    if ((entry->task_flag & 3) == 3) {
+    if ((entry->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
         frames = D_800BE9E4;
 
         entry->t += entry->spinX * frames;

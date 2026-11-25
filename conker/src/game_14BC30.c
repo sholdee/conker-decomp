@@ -18,12 +18,6 @@ typedef union {
 
 #define WORK(prop) ((PropWork *)&(prop)->touch)
 
-/* Motion states kept in bits 0-1 of WorldObject.task_flag. */
-#define PROP_REST 0
-#define PROP_RETURNING 1
-#define PROP_MOVING 2
-#define PROP_ARRIVED 3
-
 #define PROP_SOUND_OPEN 0
 #define PROP_SOUND_CLOSE 1
 
@@ -43,17 +37,17 @@ void func_1511E780(WorldObject *prop) {
     f32 range;
     f32 rate;
 
-    motion = prop->task_flag & 3;
+    motion = prop->task_flag & TASK_FLAG_STATE;
     soundSlot = -1;
     if (WORK(prop)->slide.triggered == 1) {
-        if (motion == PROP_REST || motion == PROP_RETURNING) {
-            motion = PROP_MOVING;
+        if (motion == TASK_FLAG_OFF || motion == TASK_FLAG_GOING_OFF) {
+            motion = TASK_FLAG_GOING_ON;
             soundSlot = PROP_SOUND_OPEN;
         }
         speed = 1.0f;
     } else if (WORK(prop)->slide.triggered == 0) {
-        if (motion == PROP_ARRIVED || motion == PROP_MOVING) {
-            motion = PROP_RETURNING;
+        if (motion == TASK_FLAG_ON || motion == TASK_FLAG_GOING_ON) {
+            motion = TASK_FLAG_GOING_OFF;
             soundSlot = PROP_SOUND_CLOSE;
         }
         speed = -1.0f;
@@ -88,11 +82,11 @@ void func_1511E780(WorldObject *prop) {
         prop->v -= speed * rate;
         if (WORK(prop)->slide.home < prop->v) {
             prop->v = WORK(prop)->slide.home;
-            motion = PROP_REST;
+            motion = TASK_FLAG_OFF;
         }
         if (prop->v < -110.0f) {
             prop->v = -110.0f;
-            motion = PROP_ARRIVED;
+            motion = TASK_FLAG_ON;
         }
         break;
     case 3:
@@ -102,11 +96,11 @@ void func_1511E780(WorldObject *prop) {
         prop->u -= speed * 3.0f;
         if (prop->u < 260.0f) {
             prop->u = 260.0f;
-            motion = PROP_ARRIVED;
+            motion = TASK_FLAG_ON;
         }
         if (WORK(prop)->slide.home < prop->u) {
             prop->u = WORK(prop)->slide.home;
-            motion = PROP_REST;
+            motion = TASK_FLAG_OFF;
         }
         break;
     case 2:
@@ -117,11 +111,11 @@ void func_1511E780(WorldObject *prop) {
         prop->u += speed * rate;
         if (WORK(prop)->slide.home + range < prop->u) {
             prop->u = WORK(prop)->slide.home + range;
-            motion = PROP_ARRIVED;
+            motion = TASK_FLAG_ON;
         }
         if (prop->u < WORK(prop)->slide.home) {
             prop->u = WORK(prop)->slide.home;
-            motion = PROP_REST;
+            motion = TASK_FLAG_OFF;
         }
         break;
     case 4:
@@ -133,11 +127,11 @@ void func_1511E780(WorldObject *prop) {
         prop->u -= speed * rate;
         if (WORK(prop)->slide.home < prop->u) {
             prop->u = WORK(prop)->slide.home;
-            motion = PROP_REST;
+            motion = TASK_FLAG_OFF;
         }
         if (prop->u < WORK(prop)->slide.home - range) {
             prop->u = WORK(prop)->slide.home - range;
-            motion = PROP_ARRIVED;
+            motion = TASK_FLAG_ON;
         }
         break;
     case 10:
@@ -162,7 +156,7 @@ void func_1511E780(WorldObject *prop) {
         break;
     }
     WORK(prop)->slide.started = TRUE;
-    prop->task_flag &= ~3;
+    prop->task_flag &= ~TASK_FLAG_STATE;
     prop->task_flag |= motion;
 }
 

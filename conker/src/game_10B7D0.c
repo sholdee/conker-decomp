@@ -27,7 +27,7 @@ void func_150DE32C(s32 arg0, s32 arg1, s32 arg2) {
         if (func_150A32B4(&D_800D3098[ids[i]], arg0, arg1, arg2) != 0) {
             if (propIds[i] != 0) {
                 prop = func_151149AC(propIds[i]);
-                prop->task_flag = (prop->task_flag & ~3) | 3;
+                prop->task_flag = (prop->task_flag & ~TASK_FLAG_STATE) | TASK_FLAG_ON;
             } else {
                 func_150A2864(ids[i], 1);
             }
@@ -49,7 +49,7 @@ void func_150DE458(WorldObject *prop) {
     s32 slot;
     s32 nextSlot;
 
-    if ((prop->task_flag & 3) == 3) {
+    if ((prop->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
         frames = D_800BE9E4;
 
         prop->t += prop->spinX * frames;

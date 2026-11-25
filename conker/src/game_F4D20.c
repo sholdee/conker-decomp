@@ -35,7 +35,7 @@ extern s32 func_15116110(WorldObject *obj);
  * bit 3 of byte 0xA of the 27-byte flag record at D_800D2E4C is set. */
 void func_150C7870(WorldObject *obj) {
     if (!(D_800D2E4C[0xA] & 8)) {
-        if (!(db_Object_array[0].task_flag & 4)) {
+        if (!(db_Object_array[0].task_flag & TASK_FLAG_LOCKED)) {
             func_1511650C(obj, 1, 0x353, 1000.0f);
         } else {
             func_1511650C(obj, 1, 0x43, 400.0f);
@@ -47,7 +47,7 @@ void func_150C7870(WorldObject *obj) {
 void func_150C78E0(WorldObject *obj) {
     WorldObject *obj3;
 
-    if (!(obj->task_flag & 4)) {
+    if (!(obj->task_flag & TASK_FLAG_LOCKED)) {
         obj3 = &db_Object_array[3];
         obj->moveData.word = -(obj3->moveData.word & 0xFFFF0000) & 0xFFFF0000;
         func_151150BC(obj);
@@ -70,7 +70,7 @@ void func_150C7968(WorldObject *obj) {
     s32 speed;
 
     func_15116110(obj);
-    if (!(obj->task_flag & 4)) {
+    if (!(obj->task_flag & TASK_FLAG_LOCKED)) {
         obj3 = &db_Object_array[3];
         link = WORK(obj)->link;
         speed = obj3->moveData.half.hi >> 4;

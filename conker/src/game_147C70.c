@@ -137,9 +137,9 @@ void func_1511A838(WorldObject *mesh) {
     heights = ripple->heights;
     followRates = ripple->followRates;
     falloffs = ripple->falloffs;
-    if ((mesh->task_flag & 3) == 3) {
+    if ((mesh->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
         func_1511A7C0(mesh);
-        mesh->task_flag &= ~3;
+        mesh->task_flag &= ~TASK_FLAG_STATE;
     }
     if (ripple->active) {
         prevPhase = ripple->phase;

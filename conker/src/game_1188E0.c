@@ -97,14 +97,14 @@ void func_150EB614(WorldObject *obj) {
     f32 delta;
     f32 magnitude;
 
-    if ((obj->task_flag & 3) == 3) {
+    if ((obj->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
         return;
     }
-    if ((obj->task_flag & 3) != 2) {
+    if ((obj->task_flag & TASK_FLAG_STATE) != TASK_FLAG_GOING_ON) {
         if (obj->object_status & 4) {
             if (movement_obj->unk31C->unk57 != 0) {
-                obj->task_flag &= ~3;
-                obj->task_flag |= 2;
+                obj->task_flag &= ~TASK_FLAG_STATE;
+                obj->task_flag |= TASK_FLAG_GOING_ON;
                 obj->moveData.word = 0;
                 WORK(obj)->bounce.rebound = 0.5f;
                 WORK(obj)->bounce.acceleration = 0.3000000119f;
@@ -150,8 +150,8 @@ void func_150EB614(WorldObject *obj) {
         before = obj->t;
         func_15117770(obj);
         if (before == obj->t) {
-            obj->task_flag &= ~3;
-            obj->task_flag |= 3;
+            obj->task_flag &= ~TASK_FLAG_STATE;
+            obj->task_flag |= TASK_FLAG_ON;
             obj->t = 0.0f;
         }
     }

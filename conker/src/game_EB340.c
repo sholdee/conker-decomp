@@ -142,11 +142,11 @@ typedef struct {
 
 extern void func_1511650C(WorldObject *obj, s32, s32, f32);
 
-/* Until finished (task_flag & 3 == 3): calls func_1511650C(1, 0x62C, 500), advances the work angle by
+/* Until finished (task_flag state TASK_FLAG_ON): calls func_1511650C(1, 0x62C, 500), advances the work angle by
  * spinY while flags bit 2 is set (or clamps it to 270), and once it passes 360 marks itself finished and stops
  * its sound. */
 void func_150BE210(WorldObject *obj) {
-    if ((obj->task_flag & 3) == 3) {
+    if ((obj->task_flag & TASK_FLAG_STATE) == TASK_FLAG_ON) {
         return;
     }
     func_1511650C(obj, 1, 0x62C, 500.0f);
@@ -156,8 +156,8 @@ void func_150BE210(WorldObject *obj) {
         TURNER_WORK(obj)->angle = 270.0f;
     }
     if (TURNER_WORK(obj)->angle > 360.0f) {
-        obj->task_flag &= ~3;
-        obj->task_flag |= 3;
+        obj->task_flag &= ~TASK_FLAG_STATE;
+        obj->task_flag |= TASK_FLAG_ON;
         obj->spinY = 0.0f;
         func_100111C8(obj->sound_id);
         obj->sound_id = 0;

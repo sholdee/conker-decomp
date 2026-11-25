@@ -91,14 +91,14 @@ s32 func_1509E900(s32 id, s32 op, s32 *cmd) {
         obj->moveData.word = cmd[2];
         return 1;
     case 6:
-        obj->task_flag &= ~3;
-        obj->task_flag |= cmd[2] & 3;
+        obj->task_flag &= ~TASK_FLAG_STATE;
+        obj->task_flag |= cmd[2] & TASK_FLAG_STATE;
         return 1;
     case 7:
         if (cmd[2] != 0) {
-            obj->task_flag |= 4;
+            obj->task_flag |= TASK_FLAG_LOCKED;
         } else {
-            obj->task_flag &= ~4;
+            obj->task_flag &= ~TASK_FLAG_LOCKED;
         }
         return 1;
     case 8:
@@ -210,7 +210,7 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
     case 26:
         return obj->moveData.word;
     case 27:
-        return obj->task_flag & 3;
+        return obj->task_flag & TASK_FLAG_STATE;
     case 28:
         return obj->inactive == 0;
     case 29:
@@ -244,7 +244,7 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
         }
         break;
     case 35:
-        return (obj->task_flag & 4) != 0;
+        return (obj->task_flag & TASK_FLAG_LOCKED) != 0;
     }
     return 0;
 }

@@ -4,7 +4,7 @@
 
 /*
  * Per-type update routines for world objects (WorldObject, the db_Object_array array). The mode is in the low
- * two bits of task_flag (0 closed, 1 closing, 2 opening, 3 open); per-type state lives in work
+ * two bits of task_flag (TASK_FLAG_OFF closed, GOING_OFF closing, GOING_ON opening, ON open); per-type state lives in work
  * (Work1483E0, one member per routine).
  */
 
@@ -144,7 +144,7 @@ void func_1511B07C(WorldObject *obj) {
     if (state >= 4 && state < 7) {
         func_1511F990(obj, 1);
     }
-    mode = obj->task_flag & 3;
+    mode = obj->task_flag & TASK_FLAG_STATE;
     if (mode == 3 || mode == 2) {
         switch (state) {
         case 0:
@@ -251,7 +251,7 @@ void func_1511B07C(WorldObject *obj) {
         obj->z += step;
     } else if (mode == 2 || mode == 1) {
         // matching: the embedded &= makes IDO store the cleared flags before merging
-        obj->task_flag = ((mode == 2) ? 3 : 0) | (obj->task_flag &= ~3);
+        obj->task_flag = ((mode == 2) ? 3 : 0) | (obj->task_flag &= ~TASK_FLAG_STATE);
         if (obj->sound_id != 0) {
             func_100111C8(obj->sound_id);
             obj->sound_id = 0;
@@ -276,7 +276,7 @@ void func_1511B51C(WorldObject *obj) {
     f32 ratio;
 
     openAngle = obj->moveData.half.lo;
-    mode = obj->task_flag & 3;
+    mode = obj->task_flag & TASK_FLAG_STATE;
     target = openAngle;
     angle = obj->v;
     velocity = WORK(obj)->w1511B51C.velocity;
@@ -320,7 +320,7 @@ void func_1511B51C(WorldObject *obj) {
         } else if (angle >= 360.0f) {
             angle -= 360.0f;
         }
-        obj->task_flag &= ~3;
+        obj->task_flag &= ~TASK_FLAG_STATE;
         obj->task_flag |= mode;
     }
     WORK(obj)->w1511B51C.velocity = velocity;
@@ -532,8 +532,8 @@ void func_1511BEBC(WorldObject *obj) {
 
     onTrigger = func_150DDED0;
     func_1511BE5C(obj);
-    mode = obj->task_flag & 3;
-    flag4 = obj->task_flag & 4;
+    mode = obj->task_flag & TASK_FLAG_STATE;
+    flag4 = obj->task_flag & TASK_FLAG_LOCKED;
     flag8 = obj->task_flag & 8;
     triggered = WORK(obj)->w1511BEBC.triggered;
     velocity = WORK(obj)->w1511BEBC.velocity;
@@ -675,7 +675,7 @@ void func_1511BEBC(WorldObject *obj) {
             }
         }
         WORK(obj)->w1511BEBC.triggered = triggered;
-        obj->task_flag &= ~3;
+        obj->task_flag &= ~TASK_FLAG_STATE;
         obj->task_flag |= mode;
         WORK(obj)->w1511BEBC.restAndTimer &= 0xFFFF;
         WORK(obj)->w1511BEBC.restAndTimer |= timer << 16;
@@ -725,7 +725,7 @@ void func_1511C638(WorldObject *obj) {
     WorldObject *third;
 
     next = &obj[1];
-    mode = obj->task_flag & 3;
+    mode = obj->task_flag & TASK_FLAG_STATE;
     if (D_800BE9F0 == 4) {
         third = &obj[2];
     } else {
@@ -814,7 +814,7 @@ void func_1511C638(WorldObject *obj) {
             }
         }
     }
-    obj->task_flag &= ~3;
+    obj->task_flag &= ~TASK_FLAG_STATE;
     obj->task_flag |= mode;
 }
 
@@ -1221,7 +1221,7 @@ void func_1511DBC4(WorldObject *obj) {
         swing = WORK(obj)->w1511DBC4.swing;
     }
 
-    mode = obj->task_flag & 3;
+    mode = obj->task_flag & TASK_FLAG_STATE;
     if (mode == 0) {
         obj->v = 0.0f;
     } else if (mode == 3) {
@@ -1251,7 +1251,7 @@ void func_1511DBC4(WorldObject *obj) {
         }
     }
 
-    obj->task_flag &= ~3;
+    obj->task_flag &= ~TASK_FLAG_STATE;
     obj->task_flag |= mode;
 }
 

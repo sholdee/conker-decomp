@@ -32,12 +32,6 @@ typedef union {
 
 #define WORK(prop) ((PropWork *)&(prop)->touch)
 
-/* Motion states kept in bits 0-1 of WorldObject.task_flag. */
-#define PROP_REST 0
-#define PROP_RETURNING 1
-#define PROP_MOVING 2
-#define PROP_ARRIVED 3
-
 extern void *allocate_memory(s32, s32, s32, s32);
 extern WorldObject *func_151149AC(u8 id); /* the prop whose id is `id`, or NULL */
 extern void func_1511490C(MtxF mtx, WorldObject *prop);
@@ -201,13 +195,13 @@ void func_1511F4D0(WorldObject *prop) {
     s32 next;
     s32 home[4]; // matching: home x/y live in a stack array ([1] and [2]) in the original
 
-    motion = prop->task_flag & 3;
-    openY = prop->task_flag & 4; // matching: the flag test reuses openY's register
+    motion = prop->task_flag & TASK_FLAG_STATE;
+    openY = prop->task_flag & TASK_FLAG_LOCKED; // matching: the flag test reuses openY's register
     if (openY == 4) {
-        if (motion == PROP_MOVING) {
-            motion = PROP_REST;
-        } else if (motion == PROP_RETURNING) {
-            motion = PROP_ARRIVED;
+        if (motion == TASK_FLAG_GOING_ON) {
+            motion = TASK_FLAG_OFF;
+        } else if (motion == TASK_FLAG_GOING_OFF) {
+            motion = TASK_FLAG_ON;
         }
     }
     span = prop->moveData.word; // matching: loaded into span before the conversion
@@ -217,7 +211,7 @@ void func_1511F4D0(WorldObject *prop) {
     openY = next & 0xFFFF;
     if (WORK(prop)->opening.home == 0) {
         WORK(prop)->opening.home = (prop->x & 0xFFFF) | ((prop->y & 0xFFFF) << 16);
-        if (motion == PROP_ARRIVED) {
+        if (motion == TASK_FLAG_ON) {
             openY = 13;
             openX = 13;
         } else {
@@ -227,7 +221,7 @@ void func_1511F4D0(WorldObject *prop) {
     }
     home[1] = (s16)(WORK(prop)->opening.home & 0xFFFF);
     home[2] = (s16)((WORK(prop)->opening.home >> 16) & 0xFFFF);
-    if (motion == PROP_MOVING) {
+    if (motion == TASK_FLAG_GOING_ON) {
         next = openY + D_800BE9E4;
         if (next < 13) {
             openY = next;
@@ -240,10 +234,10 @@ void func_1511F4D0(WorldObject *prop) {
                 openX = next;
             } else {
                 openX = 13;
-                motion = PROP_ARRIVED;
+                motion = TASK_FLAG_ON;
             }
         }
-    } else if (motion == PROP_RETURNING) {
+    } else if (motion == TASK_FLAG_GOING_OFF) {
         next = openX - D_800BE9E4;
         if (next > 0) {
             openX = next;
@@ -256,7 +250,7 @@ void func_1511F4D0(WorldObject *prop) {
                 openY = next;
             } else {
                 openY = 0;
-                motion = PROP_REST;
+                motion = TASK_FLAG_OFF;
             }
         }
     }
@@ -266,7 +260,7 @@ void func_1511F4D0(WorldObject *prop) {
     prop[2].x = home[1] - next;
     prop[3].x = home[1] + next;
     WORK(prop)->opening.open = (openY & 0xFFFF) | ((openX & 0xFFFF) << 16);
-    prop->task_flag &= ~3;
+    prop->task_flag &= ~TASK_FLAG_STATE;
     prop->task_flag |= motion;
 }
 

@@ -158,7 +158,7 @@ void func_150039E0(s32 level, s32 arg1) {
         obj->sound_id = 0;
         obj->attach = 0;
         obj->effectFlags = 0;
-        obj->task_flag = 4;
+        obj->task_flag = TASK_FLAG_LOCKED;
         obj->spinX = obj->spinY = obj->spinZ = 0.0f;
         obj->moveX = obj->moveY = obj->moveZ = obj->spinZ; // matching: 0 via spinZ, not a literal
         obj->yOffset = 0;

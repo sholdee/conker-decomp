@@ -208,8 +208,8 @@ void func_150BF21C(WorldObject *obj) {
                     BOB_WORK(&obj[1])->speed = speed * 0.4000000060f;
                 }
                 obj[1].moveData.word = 0x7D00;
-                obj->task_flag &= ~3;
-                obj->task_flag |= 2;
+                obj->task_flag &= ~TASK_FLAG_STATE;
+                obj->task_flag |= TASK_FLAG_GOING_ON;
                 if (obj->sound_id == 0) {
                     func_15114D24(obj, 0xB9, 0x3E80, 1000, 4000, 0);
                 }
@@ -219,8 +219,8 @@ void func_150BF21C(WorldObject *obj) {
                 if (speed < 0.0f) {
                     obj[1].moveData.word = 0x80;
                 }
-                obj->task_flag &= ~3;
-                obj->task_flag |= 3;
+                obj->task_flag &= ~TASK_FLAG_STATE;
+                obj->task_flag |= TASK_FLAG_ON;
                 BOB_WORK(&obj[1])->speed = 0.0f;
                 func_15114D24(obj, -1, 0, 0, 0, 0);
             }
@@ -277,7 +277,7 @@ void func_150BF760(WorldObject *obj) {
             SCROLL_WORK(&obj[1])->texScroll = func_15195FB0(obj, D_800902B8, 1, -1, 0, 0, -8);
         }
         actor = func_15083E90(0x14);
-        mode = obj->task_flag & 3;
+        mode = obj->task_flag & TASK_FLAG_STATE;
         if (actor != NULL) {
             anim = actor->unk2D0;
             progress = anim->frame / (anim->numFrames - 2.0f);
@@ -361,7 +361,7 @@ void func_150BFA7C(WorldObject *platform) {
 
     step = 0x10;
     kind = (platform->moveData.word >> 16) & 0xFFFF;
-    state = platform->task_flag & 3;
+    state = platform->task_flag & TASK_FLAG_STATE;
     travel = 0;
     if (kind == 0) {
         travel = 0x82;
@@ -398,7 +398,7 @@ void func_150BFA7C(WorldObject *platform) {
         if (lowered != platform->y) {
             platform->y = lowered;
         }
-        if (!(platform->object_status & 4) && !(platform->task_flag & 4)) {
+        if (!(platform->object_status & 4) && !(platform->task_flag & TASK_FLAG_LOCKED)) {
             state = 1;
         }
     } else if (state == 0) {
@@ -464,7 +464,7 @@ void func_150BFA7C(WorldObject *platform) {
             state = 0;
         }
     }
-    platform->task_flag &= ~3;
+    platform->task_flag &= ~TASK_FLAG_STATE;
     platform->task_flag |= state;
 }
 

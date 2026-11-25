@@ -88,7 +88,7 @@ void func_150C4E9C(WorldObject *obj) {
     s32 mode;
     s32 i;
 
-    mode = obj->task_flag & 3;
+    mode = obj->task_flag & TASK_FLAG_STATE;
     if (WORK(obj)->scroll.state == NULL) {
         scroll = WORK(obj)->scroll.state = allocate_memory(sizeof(ScrollState), 1, 0, 0);
         func_1511A410(obj->displayList, &scroll->secondSetTImg);
@@ -131,8 +131,8 @@ void func_150C4E9C(WorldObject *obj) {
             }
             if (t >= startT && t - scroll->speed <= startT) {
                 scroll->speed = t - startT;
-                obj->task_flag &= ~3;
-                obj->task_flag |= 3; // mode 3: stopped
+                obj->task_flag &= ~TASK_FLAG_STATE;
+                obj->task_flag |= TASK_FLAG_ON; // mode 3: stopped
             }
         }
     }
