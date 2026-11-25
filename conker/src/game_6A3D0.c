@@ -218,19 +218,13 @@ void func_1503D45C(OffsetEntry *entry, s32 base) {
     }
 }
 
-/* One animation of a model's animation table (D_800D1588[id]). */
-typedef struct ActorAnim {
-    /* 0x0 */ u16 unk0;   // 999 ends the table
-    /* 0x4 */ s32 offset; // relative to the table
-} ActorAnim;
-
-/* The 16 bytes before an animation table: offsets from the header, made absolute by func_1503D660. */
-typedef struct AnimHeader {
-    /* 0x0 */ s32 unk0; // OffsetEntry list
-    /* 0x4 */ s32 unk4;
+/* AnimHeader as loaded: its pointers are still offsets from the header, made absolute by func_1503D660. */
+typedef struct AnimHeaderRaw {
+    /* 0x0 */ s32 scripts; // OffsetEntry list
+    /* 0x4 */ s32 hits;
     /* 0x8 */ s32 reactions;
-    /* 0xC */ s32 unkC;
-} AnimHeader;
+    /* 0xC */ u32 reactionsSize;
+} AnimHeaderRaw;
 
 /* Relocates the offsets of the animation table starting at anim and stores its length in D_800C5A90[id]. */
 void func_1503D484(ActorAnim *anim, s32 id) {
@@ -287,7 +281,7 @@ s32 func_1503D5F0(s32 id) {
 }
 
 /* D_800D1588[id] while it still points at the header (the original re-reads it on every use). */
-#define HEADER (((AnimHeader **)D_800D1588)[id])
+#define HEADER (((AnimHeaderRaw **)D_800D1588)[id])
 
 /*
  * Loads the animation table of model id (shared by its group, see func_1503D510) into
@@ -295,7 +289,7 @@ s32 func_1503D5F0(s32 id) {
  */
 s32 func_1503D660(s32 id, s32 arg1) {
     u32 size;
-    AnimHeader *data;
+    AnimHeaderRaw *data;
 
     if (HEADER != NULL) {
         return 0;
@@ -308,12 +302,12 @@ s32 func_1503D660(s32 id, s32 arg1) {
         return 4;
     }
     HEADER = data;
-    if (HEADER->unk0 != 0) {
-        HEADER->unk0 += (s32)HEADER;
-        func_1503D45C((OffsetEntry *)HEADER->unk0, (s32)(HEADER + 1));
+    if (HEADER->scripts != 0) {
+        HEADER->scripts += (s32)HEADER;
+        func_1503D45C((OffsetEntry *)HEADER->scripts, (s32)(HEADER + 1));
     }
-    if (HEADER->unk4 != 0) {
-        HEADER->unk4 += (s32)HEADER;
+    if (HEADER->hits != 0) {
+        HEADER->hits += (s32)HEADER;
     }
     if (HEADER->reactions != 0) {
         HEADER->reactions += (s32)HEADER;

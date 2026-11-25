@@ -1014,7 +1014,7 @@ s32 func_150838EC(Actor *obj, s32 arg1, s32 arg2, f32 arg3) {
     s32 modelId;
 
     modelId = obj->id;
-    if (D_800D1588[modelId] == 0) {
+    if (D_800D1588[modelId] == NULL) {
         return 0;
     }
     if (D_800C5A90[modelId] == 0) {
@@ -1397,7 +1397,7 @@ void func_15084558(Actor *self) {
     u8 *otherList;
     // matching: unused stack slot
     s32 pad;
-    s32 data;
+    ActorAnim *data;
     u8 *block;
     TexCoord *table;
 
@@ -1425,7 +1425,7 @@ void func_15084558(Actor *self) {
                             if (otherList[k] == list[i]) {
                                 unique = 0;
                             }
-                            if (D_800D1588[otherList[k]] == D_800D1588[list[i]] && D_800D1588[otherList[k]] != 0) {
+                            if (D_800D1588[otherList[k]] == D_800D1588[list[i]] && D_800D1588[otherList[k]] != NULL) {
                                 freeData = 0;
                             }
                             if (D_800D1C90[otherList[k]] == D_800D1C90[list[i]] && D_800D1C90[otherList[k]] != NULL) {
@@ -1435,13 +1435,13 @@ void func_15084558(Actor *self) {
                     }
                 }
             }
-            if (freeData && D_800D1588[list[i]] != 0) {
+            if (freeData && D_800D1588[list[i]] != NULL) {
                 data = D_800D1588[list[i]];
                 {
-                    func_100043B4((s32 *)(data - 0x10), 3);
+                    func_100043B4((s32 *)ANIM_HEADER(data), 3);
                     for (k = 0; k < 187; k++) {
                         if (data == D_800D1588[k]) {
-                            D_800D1588[k] = 0;
+                            D_800D1588[k] = NULL;
                         }
                     }
                 }

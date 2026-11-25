@@ -1007,7 +1007,7 @@ extern f32 D_800D1550; // frame time step
 extern s32 D_800D1580; // array?
 extern s16 D_800D1582;
 extern u8  D_800D1583;
-extern s32 D_800D1588[187]; // per model id: animation table (see func_1503D660)
+extern ActorAnim *D_800D1588[187]; // per model id: animation table, after its AnimHeader (see func_1503D660)
 extern s32 D_800D1548;
 extern Actor *D_800D154C;
 

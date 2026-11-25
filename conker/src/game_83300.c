@@ -224,8 +224,8 @@ typedef struct {
     u8 flags; /* bit 0: copied to unk10B; & 0xFE: stun time / 100 */
 } Game83300AnimSub;
 
-/* An actor type's reaction (0x18 bytes); ((s32 *)D_800D1588[id])[-2] points to the table. */
-typedef struct {
+/* An actor type's reaction (0x18 bytes); ANIM_HEADER(D_800D1588[id])->reactions points to the table. */
+typedef struct Game83300AnimEntry {
     u8 kind; /* matched by func_1505E7CC */
     u8 pad1[3];
     s32 sound;
@@ -238,7 +238,7 @@ void func_150649A0(s32, s32);
 
 /* Moves the actor toward its host D_800CC2D0[unk13D - 100] and picks the carried animation. */
 void func_150562FC(Actor *actor) {
-    s32 *animTable;
+    ActorAnim *animTable;
     Game83300AnimEntry *anims;
     s16 *hostData;
     u32 animIdx;
@@ -320,8 +320,8 @@ void func_150562FC(Actor *actor) {
         }
     }
     animIdx = func_1505E7CC(animKind, actor);
-    animTable = (s32 *)D_800D1588[actor->id];
-    anims = (Game83300AnimEntry *)animTable[-2];
+    animTable = D_800D1588[actor->id];
+    anims = ANIM_HEADER(animTable)->reactions;
     if ((D_800CC2D0[hostIdx].interaction_state == 1) && (D_800CC2D0[hostIdx].in_water != 0)) {
         actor->unk5C = 4;
         attached = 1; if (anims[animIdx].sub[1].anim != 0) { // matching: same line (as1 tie-break)
@@ -1407,7 +1407,7 @@ void func_15059444(Actor *actor) {
 /* Attaches the actor to D_800CC2D0[hostIdx] (grabbed/carried) and starts both actors' animations. */
 void func_1505959C(Actor *actor, s32 hostIdx) {
     Game83300AnimEntry *anims;
-    s32 *animTable;
+    ActorAnim *animTable;
     s32 variant;
 
     actor->unkF8 &= ~0x800000;
@@ -1442,9 +1442,9 @@ void func_1505959C(Actor *actor, s32 hostIdx) {
     actor->unk106 = func_1505E7CC(D_800860E4[variant], actor);
     actor->unk84.uh = 0xFFFF;
     func_1505E874(D_800C3E78, actor);
-    animTable = (s32 *)D_800D1588[actor->id];
+    animTable = D_800D1588[actor->id];
     if (animTable != NULL) {
-        anims = (Game83300AnimEntry *)animTable[-2];
+        anims = ANIM_HEADER(animTable)->reactions;
         if ((anims != NULL) && (anims[actor->unk106].sub[2].flags & 2)) {
             actor->unk7A = D_800CC2D0[hostIdx].unk7A;
         }
@@ -2524,8 +2524,8 @@ Entry1505C1E4 *func_1505C1A4(Actor *actor) {
     Entry1505C1E4 **slot;
     Entry1505C1E4 *ret;
 
-    if ((actor->id != 0xFF) && (D_800D1588[actor->id] != 0)) {
-        slot = (Entry1505C1E4 **)D_800D1588[actor->id] - 3; // matching: the address is formed before the load
+    if ((actor->id != 0xFF) && (D_800D1588[actor->id] != NULL)) {
+        slot = &ANIM_HEADER(D_800D1588[actor->id])->hits; // matching: the address is formed before the load
         ret = *slot;
     } else {
         ret = (Entry1505C1E4 *)&D_8009A9F8;
@@ -3505,7 +3505,7 @@ void func_1505E0C4(Actor *actor, u16 *animEntry, AnimPlaybackState *state, s32 a
 }
 /* Starts animation `anim` of the actor's type (see func_1505E0C4); ignored while a cutscene holds the actor. */
 void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 arg5, s32 flag8000) {
-    u16 (*animTable)[4];
+    ActorAnim *animTable;
     s32 idx;
     u16 *entry;
     u8 *data;
@@ -3531,14 +3531,14 @@ void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 a
     } else {
         return;
     }
-    animTable = (u16 (*)[4])D_800D1588[idx];
+    animTable = D_800D1588[idx];
     if (animTable == NULL) {
         func_1505DFDC(actor);
         return;
     }
     if (anim < D_800C5A90[idx]) {
-        if (animTable[0][0] != 999) {
-            entry = animTable[anim];
+        if (animTable[0].unk0 != 999) {
+            entry = ((u16 (*)[4])animTable)[anim]; // matching: indexing a u16[4] row view puts the base first in the addu
             animTable = NULL; // matching: dead store and do-while(0) shape the block like the original
             do {
                 if (entry[0] != 999) {
@@ -3558,7 +3558,7 @@ void func_1505E650(Actor *actor, u16 anim, f32 speed, f32 blend, f32 arg4, f32 a
 /* Index of the actor type's reaction entry of the given kind (0 if there is none). */
 u32 func_1505E7CC(s32 kind, Actor *actor) {
     s32 id;
-    s32 *animTable;
+    ActorAnim *animTable;
     u32 count;
     Game83300AnimEntry *table;
     Game83300AnimEntry *entry;
@@ -3568,16 +3568,16 @@ u32 func_1505E7CC(s32 kind, Actor *actor) {
     if (id == 0xFF) {
         return 0;
     }
-    animTable = (s32 *)D_800D1588[id];
+    animTable = D_800D1588[id];
     if (animTable == NULL) {
         return 0;
     }
-    count = animTable[-1];
+    count = ANIM_HEADER(animTable)->reactionsSize;
     if (count == 0) {
         return 0;
     }
     count = count / sizeof(Game83300AnimEntry);
-    table = (Game83300AnimEntry *)animTable[-2];
+    table = ANIM_HEADER(animTable)->reactions;
     if (table == NULL) {
         return 0;
     }
@@ -3607,7 +3607,7 @@ void func_1517F488(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
  * and stun time, starts the death animation when it ends with no health left, or ends the reaction.
  */
 void func_1505E874(s32 sourceIdx, Actor *actor) {
-    s32 *ptr;
+    ActorAnim *ptr;
     Game83300AnimEntry *table;
     f32 animSpeed;
     f32 blend;
@@ -3620,8 +3620,8 @@ void func_1505E874(s32 sourceIdx, Actor *actor) {
         return;
     }
     anim = actor->unk106;
-    ptr = (s32 *)D_800D1588[actor->id];
-    table = (Game83300AnimEntry *)ptr[-2];
+    ptr = D_800D1588[actor->id];
+    table = ANIM_HEADER(ptr)->reactions;
     if (table == NULL) {
         return;
     }

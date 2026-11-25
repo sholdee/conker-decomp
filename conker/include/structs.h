@@ -1360,6 +1360,23 @@ typedef struct AnimInstance {
     /* 0x3F6 */ u8  unk3F6;         // set once the part matrices have been built
 } AnimInstance; // size 0x3F8
 
+/* One animation of a model's animation table (D_800D1588[id]); unk0 == 999 ends the table. */
+typedef struct ActorAnim {
+    /* 0x0 */ u16 unk0;
+    /* 0x4 */ s32 offset; // relative to the table until func_1503D484 relocates it
+} ActorAnim; // size 0x8
+
+/* The 16 bytes before a model's animation table (loaded as offsets, made absolute by func_1503D660). */
+typedef struct AnimHeader {
+    /* 0x0 */ struct ScriptEntry *scripts;            // A28B0: script id -> script
+    /* 0x4 */ struct Entry1505C1E4 *hits;             // 83300: hit-reaction table (func_1505C1A4)
+    /* 0x8 */ struct Game83300AnimEntry *reactions;   // 83300: reaction entries
+    /* 0xC */ u32 reactionsSize;                      // byte size of reactions
+} AnimHeader; // size 0x10
+
+/* The header in front of an animation table from D_800D1588. */
+#define ANIM_HEADER(anims) ((AnimHeader *)(anims) - 1)
+
 /* Position/rotation offset of a ModelAttachment from its owner's joint. */
 typedef struct AttachmentOffset {
     /* 0x00 */ f32 x;

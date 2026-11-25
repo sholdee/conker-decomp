@@ -2444,7 +2444,7 @@ void func_1507BAF8(void) {
 void func_1507BB20(void) {
 }
 
-typedef struct {
+typedef struct ScriptEntry {
     struct216 *script;
     u8 id;
 } ScriptEntry;
@@ -2454,15 +2454,15 @@ extern struct216 D_8009A120[];    // fallback script
 
 /* Returns script `scriptId` of the current object's type, falling back to the default table. */
 struct216 *func_1507BB28(s32 arg0, s32 scriptId) {
-    s32 typeData;
+    ActorAnim *typeData;
     ScriptEntry *table;
     s32 i;
 
     typeData = D_800D1588[D_800D154C->id];
-    if (typeData == 0) {
+    if (typeData == NULL) {
         return D_8009A120;
     }
-    table = *(ScriptEntry **)(typeData - 0x10);
+    table = ANIM_HEADER(typeData)->scripts;
     if (table == NULL) {
         return D_8009A120;
     }

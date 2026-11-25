@@ -1802,7 +1802,7 @@ Gfx *func_1502F9FC(Gfx *gdl, s32 index) {
    uses a different animation set. */
 void func_1502FBE8(Actor *obj) {
     s32 lod;
-    s32 oldAnims;
+    ActorAnim *oldAnims;
     s32 model;
 
     if (obj->lodRequest == 0) {
