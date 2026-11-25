@@ -304,7 +304,7 @@ void func_1507EA44(Actor *actor, s32 action, s32 param) {
     if (action != 0) {
         actions = func_1507E9F8(actor, NULL);
         if (actions != NULL) {
-            func_15083568((Actor *)actor, actions[action - 1], param * 0.001f, 0);
+            func_15083568(actor, actions[action - 1], param * 0.001f, 0);
         }
     }
 }

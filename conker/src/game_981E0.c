@@ -216,7 +216,7 @@ extern u8 *D_800D210C;
 extern void func_1505F188(Actor *arg0);
 extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 s32 func_15037698(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
-u8 *func_15073118(u8 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
+Actor *func_15073118(Actor *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
 s32 func_1505D024(void *, s32, u16, s32);
 extern s32 func_15033BDC();
 extern void func_100100E0(void *, void *, void *, void *, void *, s32);
@@ -3456,8 +3456,8 @@ void func_150730D0(void) {
  * Spawns a projectile (state 0x21) playing animation `anim`, at bone `bone` of `parent` offset by
  * (offX, offY, offZ), or at the parent's position. Returns the new object.
  */
-u8 *func_15073118(u8 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, f32 yawOffset, f32 speed,
-                  f32 yVelocity, f32 gravity, s32 unk83) {
+Actor *func_15073118(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, f32 yawOffset, f32 speed,
+                     f32 yVelocity, f32 gravity, s32 unk83) {
     Mtx *mtx;
     MtxF mf;
     Actor *obj;
@@ -3471,29 +3471,29 @@ u8 *func_15073118(u8 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, 
     obj->y_velocity = yVelocity;
     obj->xz_velocity = speed;
     obj->unk83 = unk83;
-    if (((Actor *)parent)->unk1D4 != NULL && bone != -1) {
-        mtx = (Mtx *)((Actor *)parent)->unk1D4 + bone;
+    if (parent->unk1D4 != NULL && bone != -1) {
+        mtx = (Mtx *)parent->unk1D4 + bone;
         if (D_800C3E90 != 0) {
             guMtxL2F(mf, mtx);
             mtx = (Mtx *)mf;
         }
         func_150A7960((f32 *)mtx, offX, offY, offZ, &x, &y, &z);
     } else {
-        x = ((Actor *)parent)->x_position;
-        y = ((Actor *)parent)->y_position;
-        z = ((Actor *)parent)->z_position;
+        x = parent->x_position;
+        y = parent->y_position;
+        z = parent->z_position;
     }
     obj->x_position = x;
     obj->y_position = y;
     obj->z_position = z;
-    obj->unk76 = obj->unk7A = ((Actor *)parent)->unk7A + yawOffset * 182.04445f;
+    obj->unk76 = obj->unk7A = parent->unk7A + yawOffset * 182.04445f;
     obj->interaction_state = 0x21;
     obj->immune = 0xFF;
     obj->unkF8 = 2;
     if (anim != 0x42) {
         obj->unkF8 = 0x100E;
     }
-    obj->unk66 = ((Actor *)parent)->unk66 & 0xC;
+    obj->unk66 = parent->unk66 & 0xC;
     obj->bodyRadius = 10;
     obj->bodyHeight = 10;
     obj->unkEC = 1.0f;
@@ -3517,7 +3517,7 @@ u8 *func_15073118(u8 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, 
     }
     obj->unk314 = func_1515D440();
     func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
-    return (u8 *)obj;
+    return obj;
 }
 
 /* Fires projectiles from the current object; D_800D1580 picks the volley (0: aimed at the camera target). */
@@ -3545,7 +3545,7 @@ void func_1507342C(void) {
             func_150ADA20() % 1000 < 200) {
             hit = 1;
         }
-        obj = (Actor *)func_15073118((u8 *)D_800D154C, 23, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
+        obj = func_15073118(D_800D154C, 23, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
         obj->unkF8 |= 0x01000000;
         if (hit != 0) {
             dx = target->eye.x - obj->x_position;
@@ -3575,9 +3575,9 @@ void func_1507342C(void) {
         y = 58.4f + t;
         t = (s32)(func_150ADA20() % 40 - 20) * spread;
         x = 42.8f + t;
-        func_15073118((u8 *)D_800D154C, 14, 0x42, 0.0f, 0.0f, 16.0f, (s32)(func_150ADA20() % 40 - 20) * spread, x, y, 2.9f, 100);
+        func_15073118(D_800D154C, 14, 0x42, 0.0f, 0.0f, 16.0f, (s32)(func_150ADA20() % 40 - 20) * spread, x, y, 2.9f, 100);
     } else if (D_800D1580 == 2) {
-        obj = (Actor *)func_15073118((u8 *)D_800D154C, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
+        obj = func_15073118(D_800D154C, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
         obj->unkB8 = 180.0f;
         obj->unkF8 |= 0x01000000;
     } else if (D_800D1580 == 3) {
@@ -3587,7 +3587,7 @@ void func_1507342C(void) {
         y = 58.4f + t;
         t = (s32)(func_150ADA20() % 40 - 20) * 10.0f;
         x = 42.8f + t;
-        func_15073118((u8 *)D_800D154C, 14, 0x88, 0.0f, 0.0f, 16.0f, (s32)(func_150ADA20() % 40 - 20) * 10.0f, x, y, 2.9f, 100);
+        func_15073118(D_800D154C, 14, 0x88, 0.0f, 0.0f, 16.0f, (s32)(func_150ADA20() % 40 - 20) * 10.0f, x, y, 2.9f, 100);
     }
 }
 
