@@ -1016,63 +1016,71 @@ extern u8 D_D13[];
 extern u8 D_D14[];
 void func_150916B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 
+/* Draws the multiplayer HUD in each player's viewport, as enabled by the D_8008FDC0 flags:
+ * 0x002 an icon picked by func_150859AC(i, 3), 0x400 score, 0x800 name, 0x004 held-item icons
+ * (repeated per count) and bars from struct126 field 0x12C, 0x010 two rows of bars from
+ * func_150859AC(i, 4), grenade icons, 0x080 race time and lap, 0x1000 a map with player dots,
+ * 0x020 the radar (func_15093B58). */
 Gfx *func_150918EC(Gfx *gfx) {
     s32 i;
     s32 j;
     s32 x;
     s32 y;
-    s32 idx;
+    s32 mapTop;
     s32 h;
-    s32 left;
-    s32 t;
+    s32 iconH;
+    s32 texT;
     s32 n;
     s32 s;
     s32 v;
-    s32 y2;
-    s32 width;
-    s32 lap_total;
-    s32 right;
-    struct126 *a1;
-    struct127 *p;
-    s32 w;
-    s32 extra;
-    s32 laps;
-    s32 lap;
-    s32 y3;
-    s32 F3c;
+    s32 texS;
+    s32 vpWidth;
+    s32 lapCount;
+    s32 vpRight;
+    struct126 *a1; // matching: unused, yet removing it changes the register allocation
+    struct127 *player;
+    s32 rowY;
+    s32 cellShift;
+    s32 k;
+    s32 icon;
+    s32 vpLeft;
+    s32 barShift;
     s32 step;
-    u8 ok;
-    u8 loaded;
-    u8 mode;
-    HudBars bars;
+    u8 texOk;
+    u8 texLoaded;
+    u8 barMode;
+    HudBars barLen;
     s8 grenades;
-    s16 rows[33];
+    s16 scaled[33];
 
-    mode = 0;
+    barMode = 0;
     grenades = 0;
-    bars = D_800873B0;
-    width = D_800BE628->right - D_800BE628->left;
+    barLen = D_800873B0;
+    vpWidth = D_800BE628->right - D_800BE628->left;
     gSPDisplayList(gfx++, D_80087390);
-    func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
+    func_1504332C(255, 255, 255, 255);
     step = 0x400;
     if (D_8008FE1C != 1.0f) {
         step = (s32)((f32)step / D_8008FE1C);
-        for (j = 0; j < 33; j++) *(rows + j) = (s32)((f32)j * D_8008FE1C);
+        for (j = 0; j < 33; j++) {
+            scaled[j] = (s32)((f32)j * D_8008FE1C);
+        }
     } else {
-        for (j = 0; j < 33; j++) *(rows + j) = j;
+        // matching: one line; the loop body's line number steers as1's unrolled store order
+        for (j = 0; j < 33; j++) scaled[j] = j;
     }
 
     if (D_8008FDC0 & 0xC02) {
-        loaded = 0;
-        ok = 0;
+        texLoaded = 0;
+        texOk = 0;
         for (i = 0; i <= D_80082FA0; i++) {
             if (D_80087270[i] != 10) {
-                y3 = D_800BE628[i].left;
-                y = D_800BE628[i].top + rows[6];
+                vpLeft = D_800BE628[i].left;
+                y = D_800BE628[i].top + scaled[6];
                 if (D_8008FDC0 & 2) {
-                    if (!loaded) {
+                    if (!texLoaded) {
                         n = func_1510D0EC((s32)D_D14, 0, 3, 0);
-                        loaded = 1;
+                        texLoaded = 1;
                         if (n != (s32)0x80000000) {
                             gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 1, n);
                             gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
@@ -1081,30 +1089,31 @@ Gfx *func_150918EC(Gfx *gfx) {
                             gDPPipeSync(gfx++);
                             gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_32b, 8, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
                             gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 31 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
-                            ok = 1;
+                            texOk = 1;
                         }
                         gDPSetOtherMode(gfx++, 0x002C3F, 0x00504244);
                         gDPPipeSync(gfx++);
                         gDPSetEnvColor(gfx++, 255, 255, 255, 128);
                     }
-                    x = rows[5] + y3;
+                    x = scaled[5] + vpLeft;
                     n = func_150859AC(i, 3);
-                    y2 = D_800873C4[n & 3] << 5; t = D_800873C8[n >> 2] << 5;
-                    if (ok) {
-                        gSPScisTextureRectangle(gfx++, x * 4, y * 4, (rows[5] + x) * 4, (rows[7] + y) * 4, 0, y2, t, step, step);
+                    // matching: both on one line (as1 orders the two loads by line number)
+                    texS = D_800873C4[n & 3] << 5; texT = D_800873C8[n >> 2] << 5;
+                    if (texOk) {
+                        gSPScisTextureRectangle(gfx++, x * 4, y * 4, (scaled[5] + x) * 4, (scaled[7] + y) * 4, 0, texS, texT, step, step);
                     }
                 }
                 if (D_8008FDC0 & 0x400) {
-                    x = (width >> 1) + y3 - 8;
+                    x = (vpWidth >> 1) + vpLeft - 8;
                     if (D_8008FE1C != 1.0f) {
                         x -= 8;
                     }
                     func_15042D94(x, y, 0x41, (s32 *)"%d", D_8008FDD4->score[i]);
                 }
                 if (D_8008FDC0 & 0x800) {
-                    x = (width >> 1) + y3 + 0x10;
+                    x = (vpWidth >> 1) + vpLeft + 16;
                     if (D_8008FE1C != 1.0f) {
-                        x += 0x10;
+                        x += 16;
                     }
                     func_15042D94(x, y, 0x41, (s32 *)"(%s)", D_800E0BD8->name[D_800E0AC0[i]]);
                 }
@@ -1113,126 +1122,126 @@ Gfx *func_150918EC(Gfx *gfx) {
     }
 
     if (D_8008FDC0 & 0x14) {
-        loaded = 0;
-        ok = 0;
+        texLoaded = 0;
+        texOk = 0;
         for (i = 0; i <= D_80082FA0; i++) {
             if (D_80087270[i] != 10) {
-                y3 = D_800BE628[i].left + rows[5];
-                right = D_800BE628[i].right - rows[5];
-                y = D_800BE628[i].top + rows[5];
+                vpLeft = D_800BE628[i].left + scaled[5];
+                vpRight = D_800BE628[i].right - scaled[5];
+                y = D_800BE628[i].top + scaled[5];
                 if (D_8008FDC0 & 4) {
-                    p = &D_800CC2D0[i];
+                    player = &D_800CC2D0[i];
                     n = 1;
-                    h = p->unk31C->unk75;
+                    h = player->unk31C->unk75;
                     h &= 0x7F;
-                    if (p->interaction_state == 0x1F) {
+                    if (player->interaction_state == 0x1F) {
                         h = 0;
                     }
                     switch (h) {
                     case 0x9:
-                        lap = 0;
+                        icon = 0;
                         break;
                     case 0x16:
-                        lap = 1;
+                        icon = 1;
                         break;
                     case 0x14:
                     case 0x3F:
-                        lap = 3;
+                        icon = 3;
                         break;
                     case 0x20:
-                        lap = 5;
+                        icon = 5;
                         break;
                     case 0x18:
                     case 0x41:
-                        lap = 6;
+                        icon = 6;
                         break;
                     case 0x15:
-                        lap = 7;
+                        icon = 7;
                         break;
                     case 0x22:
-                        lap = 9;
+                        icon = 9;
                         break;
                     case 0x23:
-                        lap = 10;
+                        icon = 10;
                         break;
                     case 0x21:
-                        lap = 12;
+                        icon = 12;
                         break;
                     case 0x24:
-                        lap = 13;
+                        icon = 13;
                         break;
                     case 0x25:
-                        lap = 14;
+                        icon = 14;
                         break;
                     case 0x26:
                     case 0x3A:
-                        lap = -1;
-                        if (p->health != 0) {
+                        icon = -1;
+                        if (player->health != 0) {
                             grenades = 1;
                         }
                         break;
                     case 0x38:
-                        lap = -1;
+                        icon = -1;
                         break;
                     case 0x32:
                     case 0x33:
-                        n = HUD_S8(p->unk31C, 0x1AE);
-                        lap = 11;
+                        n = HUD_S8(player->unk31C, 0x1AE);
+                        icon = 11;
                         break;
                     case 0x40:
-                        lap = 4;
-                        extra = -3;
+                        icon = 4;
+                        cellShift = -3;
                         break;
                     default:
                         if (D_800BE9F0 == 0x1A) {
-                            lap = 4;
-                            extra = 4;
+                            icon = 4;
+                            cellShift = 4;
                         } else {
-                            lap = -1;
+                            icon = -1;
                         }
                         break;
                     }
-                    if (p->unk13C != 0) {
-                        lap = -1;
+                    if (player->unk13C != 0) {
+                        icon = -1;
                     }
-                    if (lap >= 0) {
+                    if (icon >= 0) {
                         j = 0;
-                        if (!loaded) {
-                            loaded = 1;
-                            gfx = func_15091534(gfx, 0, &ok);
+                        if (!texLoaded) {
+                            texLoaded = 1;
+                            gfx = func_15091534(gfx, 0, &texOk);
                         }
-                        x = (right - rows[25]) * 4;
-                        t = D_800873B4[lap / 3] << 5;
-                        left = rows[D_800873BC[lap / 3]] * 4;
-                        if (lap == 4) {
+                        x = (vpRight - scaled[25]) * 4;
+                        texT = D_800873B4[icon / 3] << 5;
+                        iconH = scaled[D_800873BC[icon / 3]] * 4;
+                        if (icon == 4) {
                             j = 4;
-                            left -= 8;
-                            t += extra << 5;
+                            iconH -= 8;
+                            texT += cellShift << 5;
                         }
-                        if (lap == 1) {
-                            left -= 4;
+                        if (icon == 1) {
+                            iconH -= 4;
                         }
                         do {
-                            if (ok) {
-                                gSPTextureRectangle(gfx++, x, y * 4 + j, rows[22] * 4 + x, y * 4 + left + j, 0, ((lap % 3) * 25) << 5, t, step, step);
+                            if (texOk) {
+                                gSPTextureRectangle(gfx++, x, y * 4 + j, scaled[22] * 4 + x, y * 4 + iconH + j, 0, ((icon % 3) * 25) << 5, texT, step, step);
                             }
-                            x -= 0x48;
+                            x -= 72;
                         } while (--n > 0);
                     }
                 }
                 if (D_8008FDC0 & 0x10) {
-                    if (!loaded) {
-                        gfx = func_15091534(gfx, 0, &ok);
+                    if (!texLoaded) {
+                        gfx = func_15091534(gfx, 0, &texOk);
                     }
                     s = func_150859AC(i, 4);
-                    x = rows[22] + y3;
+                    x = scaled[22] + vpLeft;
                     h = ((s + 1) >> 1) * 5;
-                    if (h != 0 && ok) {
-                        gSPTextureRectangle(gfx++, (x - rows[h]) * 4, y * 4, x * 4, rows[4] * 4 + y * 4, 0, 0x620, 0xA0, step, step);
+                    if (h != 0 && texOk) {
+                        gSPTextureRectangle(gfx++, (x - scaled[h]) * 4, y * 4, x * 4, scaled[4] * 4 + y * 4, 0, 0x620, 0xA0, step, step);
                     }
                     h = (s >> 1) * 5;
-                    if (h != 0 && ok) {
-                        gSPTextureRectangle(gfx++, (x - rows[h]) * 4, rows[5] * 4 + y * 4, x * 4, rows[9] * 4 + y * 4, 0, 0x620, 0xA0, step, step);
+                    if (h != 0 && texOk) {
+                        gSPTextureRectangle(gfx++, (x - scaled[h]) * 4, scaled[5] * 4 + y * 4, x * 4, scaled[9] * 4 + y * 4, 0, 0x620, 0xA0, step, step);
                     }
                 }
             }
@@ -1241,99 +1250,100 @@ Gfx *func_150918EC(Gfx *gfx) {
 
     if (D_8008FDC0 & 4) {
         u8 pad3a;
-        s32 ex3;
+        s32 cellOffset;
         s32 pad3b;
-        loaded = 0;
-        ok = 0;
+        texLoaded = 0;
+        texOk = 0;
         for (i = 0; i <= D_80082FA0; i++) {
             if (D_80087270[i] != 10) {
 
-                right = D_800BE628[i].right - 5.0f;
+                vpRight = D_800BE628[i].right - 5.0f;
                 y = D_800BE628[i].top + 5.0f;
                 n = 1;
-                lap = -1;
-                ex3 = 0;
+                icon = -1;
+                cellOffset = 0;
                 if (D_800CC2D0[i].interaction_state == 0x1E) {
                     j = D_800CC2D0[i].unk31C->unk128;
                     if (j & 1) {
-                        lap = 6;
-                        F3c = 4;
+                        icon = 6;
+                        barShift = 4;
                     } else if (j & 2) {
-                        lap = 3;
+                        icon = 3;
                     } else if (j & 0x80) {
-                        lap = 0;
-                        F3c = 6;
+                        icon = 0;
+                        barShift = 6;
                     } else if (j & 0x10) {
-                        lap = 9;
-                        F3c = -3;
+                        icon = 9;
+                        barShift = -3;
                     }
-                    if (lap >= 0 && lap != 3) {
-                        if (F3c > 0) {
-                            bars.b[i] = HUD_U16(D_800CC2D0[i].unk31C, 0x12C) >> F3c;
+                    if (icon >= 0 && icon != 3) {
+                        if (barShift > 0) {
+                            barLen.b[i] = HUD_U16(D_800CC2D0[i].unk31C, 0x12C) >> barShift;
                         } else {
-                            bars.b[i] = HUD_U16(D_800CC2D0[i].unk31C, 0x12C) << -F3c;
+                            barLen.b[i] = HUD_U16(D_800CC2D0[i].unk31C, 0x12C) << -barShift;
                         }
-                        mode = 1;
+                        barMode = 1;
                     }
                 } else {
-                    switch (ex3 = 3, D_800CC2D0[i].unk31C->unk75 & 0x7F) {
+                    cellOffset = 3;
+                    switch (D_800CC2D0[i].unk31C->unk75 & 0x7F) {
                     case 0x37:
-                        lap = 7;
+                        icon = 7;
                         break;
                     case 0x38:
-                        lap = 4;
+                        icon = 4;
                         break;
                     case 0x39:
-                        lap = 10;
+                        icon = 10;
                         break;
                     case 0x30:
                     case 0x31:
                         n = HUD_S8(D_800CC2D0[i].unk31C, 0x1AE);
-                        lap = 6;
+                        icon = 6;
                         break;
                     case 0x3E:
-                        bars.b[i] = HUD_U16(D_800CC2D0[i].unk31C, 0x12C) >> 4;
-                        mode = 2;
+                        barLen.b[i] = HUD_U16(D_800CC2D0[i].unk31C, 0x12C) >> 4;
+                        barMode = 2;
                         break;
                     }
                 }
-                if (lap >= 0) {
-                    if (!loaded) {
-                        loaded = 1;
-                        gfx = func_15091534(gfx, 1, &ok);
+                if (icon >= 0) {
+                    if (!texLoaded) {
+                        texLoaded = 1;
+                        gfx = func_15091534(gfx, 1, &texOk);
                     }
-                    x = right - rows[25];
-                    y2 = (lap % 3) * 25;
-                    lap = lap / 3;
-                    t = D_800873B4[lap] + ex3;
-                    y2 <<= 5;
-                    t <<= 5;
+                    x = vpRight - scaled[25];
+                    texS = (icon % 3) * 25;
+                    icon = icon / 3;
+                    texT = D_800873B4[icon] + cellOffset;
+                    texS <<= 5;
+                    texT <<= 5;
                     do {
-                        if (ok) {
-                            gSPTextureRectangle(gfx++, x * 4, y * 4, (x + rows[22]) * 4, (rows[D_800873BC[lap]] + y) * 4, 0, y2, t, step, step);
+                        if (texOk) {
+                            gSPTextureRectangle(gfx++, x * 4, y * 4, (x + scaled[22]) * 4, (scaled[D_800873BC[icon]] + y) * 4, 0, texS, texT, step, step);
                         }
-                        x -= 0x12;
+                        x -= 18;
                     } while (--n > 0);
                 }
             }
         }
     }
 
-    if (mode) {
+    if (barMode) {
         gDPPipeSync(gfx++);
         gDPSetOtherMode(gfx++, 0x002C3F, 0x0F0A4004);
         gDPSetCombine(gfx++, 0xFFFFFF, 0xFFFDF6FB);
         gDPSetPrimColor(gfx++, 0, 0, 255, 0, 0, 255);
-        if (mode == 2) {
-            laps = 15;
+        if (barMode == 2) {
+            k = 15;
         } else {
-            laps = 30;
+            k = 30;
         }
         for (i = 0; i <= D_80082FA0; i++) {
-            if (bars.b[i]) {
-                x = (s32)D_800BE628[i].right - laps;
-                w = (s32)D_800BE628[i].top + 10;
-                gDPFillRectangle(gfx++, x - bars.b[i], w, x, w + 4);
+            if (barLen.b[i]) {
+                x = (s32)D_800BE628[i].right - k;
+                rowY = (s32)D_800BE628[i].top + 10;
+                gDPFillRectangle(gfx++, x - barLen.b[i], rowY, x, rowY + 4);
             }
         }
     }
@@ -1342,71 +1352,71 @@ Gfx *func_150918EC(Gfx *gfx) {
         s32 pad2; // matching: three unused stack slots in the original frame
         s32 pad3;
         s32 pad4;
-        s32 iconH;
-        s32 iconW;
-        // matching: the original keeps the pipe-sync command word in a variable (iconW, reused below)
-        iconW = G_RDPPIPESYNC << 24;
+        s32 cellH;
+        s32 cellW;
+        // matching: the original keeps the pipe-sync command word in a variable (cellW, reused below)
+        cellW = G_RDPPIPESYNC << 24;
         j = func_1510D0EC((s32)D_D13, 0, 3, 0);
         gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, j);
         gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
         gDPLoadSync(gfx++);
         gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 1023, 0);
-        { Gfx *g = gfx++; g->words.w0 = iconW; g->words.w1 = 0; } /* gDPPipeSync */
+        { Gfx *g = gfx++; g->words.w0 = cellW; g->words.w1 = 0; } /* gDPPipeSync */
         gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 8, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOLOD);
         gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 31 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
-        { Gfx *g = gfx++; g->words.w0 = iconW; g->words.w1 = 0; } /* gDPPipeSync */
+        { Gfx *g = gfx++; g->words.w0 = cellW; g->words.w1 = 0; } /* gDPPipeSync */
         gDPSetOtherMode(gfx++, 0x002C3F, 0x00504244);
         for (i = 0; i <= D_80082FA0; i++) {
             j = D_800CC2D0[i].unk31C->unk75;
             if ((j &= 0x7F) == 0x26 || j == 0x3A) {
                 x = (s32)D_800BE628[i].right - 15;
                 x *= 4;
-                w = (s32)D_800BE628[i].top + 5;
-                w *= 4;
+                rowY = (s32)D_800BE628[i].top + 5;
+                rowY *= 4;
                 if (0x1A == D_800BE9F0 || 0x3F == D_800BE9F0) {
-                    iconW = 11;
-                    iconH = 14;
-                    y2 = 0x200;
+                    cellW = 11;
+                    cellH = 14;
+                    texS = 0x200;
                     v = 0x1E0;
                 } else if (D_800CC2D0[i].id == 0x75 || D_800CC2D0[i].id == 0xB1) {
-                    iconW = 5;
-                    iconH = 20;
-                    y2 = 0xC0;
+                    cellW = 5;
+                    cellH = 20;
+                    texS = 0xC0;
                     v = 0x100;
                 } else if (D_800CC2D0[i].id == 0x3B) {
-                    iconW = 11;
-                    iconH = 14;
-                    y2 = 0x200;
+                    cellW = 11;
+                    cellH = 14;
+                    texS = 0x200;
                     v = 0x1E0;
                 } else {
-                    iconW = 8;
-                    iconH = 9;
-                    y2 = 0x240;
+                    cellW = 8;
+                    cellH = 9;
+                    texS = 0x240;
                     v = 0x60;
                 }
                 for (j = 0; j < D_800CC2D0[i].unk31C->grenade_count; j++) {
-                    gSPScisTextureRectangle(gfx++, x, w, rows[iconW] * 4 + x, rows[iconH] * 4 + w, 0, y2, v, 0x400, step);
-                    x -= 0x2C;
+                    gSPScisTextureRectangle(gfx++, x, rowY, scaled[cellW] * 4 + x, scaled[cellH] * 4 + rowY, 0, texS, v, 0x400, step);
+                    x -= 44;
                 }
             }
         }
     }
 
     if ((D_8008FDC0 & 0x80) && D_800872A0 != NULL) {
-        lap_total = D_800E0BE7;
+        lapCount = D_800E0BE7;
         for (i = 0; i <= D_80082FA0; i++) {
-            w = (s32)D_800BE628[i].top + 5;
-            func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
+            rowY = (s32)D_800BE628[i].top + 5;
+            func_1504332C(255, 255, 255, 255);
             if (D_800872A0[i].unk20 > 0) {
                 x = (s32)D_800BE628[i].left;
-                func_150916B4(x + 0x17, w + 0x19, D_800872A0[i].unk20, 0xC0);
+                func_150916B4(x + 23, rowY + 25, D_800872A0[i].unk20, 0xC0);
             }
-            x = (s32)D_800BE628[i].left + (width >> 1);
-            lap = (s8)(D_800872A0[i].unk27 + 1);
-            if (lap <= lap_total) {
-                func_15042D94(x, w, 0xC1, (s32 *)"%s", D_800E0BD8->name[D_800E0AC0[i]]);
-                func_15042D94((s32)D_800BE628[i].left + 0x1D, w + 0xE, 0xC1, (s32 *)"lap %d/%d", lap, lap_total);
-                func_150916B4(x, (s32)D_800BE628[i].bottom - 0xC, D_800872A0[i].unk1C, 0xC0);
+            x = (s32)D_800BE628[i].left + (vpWidth >> 1);
+            icon = (s8)(D_800872A0[i].unk27 + 1); /* the current lap */
+            if (icon <= lapCount) {
+                func_15042D94(x, rowY, 0xC1, (s32 *)"%s", D_800E0BD8->name[D_800E0AC0[i]]);
+                func_15042D94((s32)D_800BE628[i].left + 29, rowY + 14, 0xC1, (s32 *)"lap %d/%d", icon, lapCount);
+                func_150916B4(x, (s32)D_800BE628[i].bottom - 12, D_800872A0[i].unk1C, 0xC0);
             }
         }
     }
@@ -1417,21 +1427,21 @@ Gfx *func_150918EC(Gfx *gfx) {
         f32 scale;
         f32 ax;
         f32 az;
-        scale = 0.01300000027f;
+        scale = 0.013f;
         i = 0;
-        x = (s32)D_800BE628->right - rows[32];
+        x = (s32)D_800BE628->right - scaled[32];
         x *= 4;
         if (D_8008FE1C != 1.0f) {
             shift = 6;
-            scale *= 1.559999943f;
-            size = 0x63;
+            scale *= 1.56f;
+            size = 99;
         } else {
             shift = 4;
-            size = 0x40;
+            size = 64;
         }
-        laps = (D_8008FDBC & 0x40) ? (s32)D_CF2 : (s32)D_CF1;
-        right = func_1510D0EC(laps, 0, 3, 0);
-        gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, right);
+        k = (D_8008FDBC & 0x40) ? (s32)D_CF2 : (s32)D_CF1;
+        vpRight = func_1510D0EC(k, 0, 3, 0);
+        gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, vpRight);
         gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
         gDPLoadSync(gfx++);
         gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 2047, 0);
@@ -1441,30 +1451,30 @@ Gfx *func_150918EC(Gfx *gfx) {
         gDPSetOtherMode(gfx++, 0x002C3F, 0x00504244);
         for (i = 0; i < D_8008FD90; i++) {
             if (func_150859AC(i, 3) > 0) {
-                w = rows[21] + ((s32)D_800BE628[i].top + rows[24]);
-                w *= 4;
+                rowY = scaled[21] + ((s32)D_800BE628[i].top + scaled[24]);
+                rowY *= 4;
                 gDPPipeSync(gfx++);
                 gDPSetEnvColor(gfx++, 255, 255, 255, 128);
                 gDPSetCombine(gfx++, 0x129A25, 0xFF37FFFF);
-                s = x - rows[32] * 4;
-                idx = w - rows[32] * 4;
-                gSPScisTextureRectangle(gfx++, s, idx, size * 4 + s, size * 4 + idx, 0, 0, 0, step, step);
+                s = x - scaled[32] * 4;
+                mapTop = rowY - scaled[32] * 4;
+                gSPScisTextureRectangle(gfx++, s, mapTop, size * 4 + s, size * 4 + mapTop, 0, 0, 0, step, step);
                 gDPPipeSync(gfx++);
                 gDPSetCombine(gfx++, 0x62FEC5, 0xFFFFFBFD);
-                for (laps = 0, p = D_800CC2D0; laps != 25; laps++, p++) {
-                    if (laps == i || (laps < D_8008FD8C && func_150859AC(laps, 3) > 0) || (s8)p->pad320[8] != 0) {
+                for (k = 0, player = D_800CC2D0; k != 25; k++, player++) {
+                    if (k == i || (k < D_8008FD8C && func_150859AC(k, 3) > 0) || (s8)player->pad320[8] != 0) {
                         gDPPipeSync(gfx++);
-                        if (laps == i) {
+                        if (k == i) {
                             gDPSetEnvColor(gfx++, 0, 255, 0, 255);
-                        } else if (laps < D_8008FD8C) {
+                        } else if (k < D_8008FD8C) {
                             gDPSetEnvColor(gfx++, 255, 0, 0, 255);
                         } else {
                             gDPSetEnvColor(gfx++, 255, 255, 255, 255);
                         }
-                        ax = p->x_position * scale;
-                        az = p->z_position * scale;
-                        v = (w + 3.400000095f) + (s32)az;
-                        n = (x + 3.599999905f) + (s32)ax;
+                        ax = player->x_position * scale;
+                        az = player->z_position * scale;
+                        v = (rowY + 3.4f) + (s32)az;
+                        n = (x + 3.6f) + (s32)ax;
                         gSPScisTextureRectangle(gfx++, n - shift, v - shift, n + shift, v + shift, 0, 0, 0, 0x400, 0x400);
                     }
                 }
@@ -1472,7 +1482,7 @@ Gfx *func_150918EC(Gfx *gfx) {
         }
     }
     if (D_800BEAC1 == 0 && (D_8008FDC0 & 0x20)) {
-        gfx = func_15093B58(gfx, step, rows, 0x2C30, 0);
+        gfx = func_15093B58(gfx, step, scaled, 0x2C30, 0);
     }
     return gfx;
 }
