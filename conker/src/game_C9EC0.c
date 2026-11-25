@@ -278,80 +278,89 @@ s32 func_1509D08C(s32 arg0, s32 index, s32 *firstDepOut, s32 *unk0Out) {
     return 1;
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-} Func1509D180Arg;
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    s32 pad8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    u8 unk1C;
-    u8 unk1D;
-    s32 unk20;
-    s32 pad[3];
-} Func1509D180Out;
-typedef struct {
-    s32 unk0[5];
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-} Func1509D180Obj;
-extern void *func_1505EEF4(s32);
+/* One argument word of a script command; handlers also read just its low halfword or low byte. */
+typedef union CmdArg {
+    s32 w;
+    struct {
+        s16 hi;
+        s16 lo;
+    } h;
+    struct {
+        u8 b0;
+        u8 b1;
+        u8 b2;
+        u8 lo;
+    } b;
+} CmdArg;
+
+typedef struct ScriptCmd {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ CmdArg args[8];
+} ScriptCmd;
+
+/* Result of a floor probe (func_15046C80). */
+typedef struct FloorHit {
+    /* 0x00 */ f32 height;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ s32 pad8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s32 pad24[2];
+} FloorHit; // size = 0x2C
+
+/* Object id arguments carry flags above the low 12 bits. */
+#define CMD_OBJECT_ID(arg) ((arg).w & 0xFFF)
+
+extern struct127 *func_1505EEF4(s32);
 extern void func_150BD070(s32, s32);
 extern void func_150FAD28(void);
 extern void func_150FAA40(s32, s32);
-extern void func_15108120(void *, s32, s32);
-extern void func_150ECC00(void *, s32, s32);
+extern void func_15108120(struct127 *, s32, s32);
+extern void func_150ECC00(struct127 *, s32, s32);
 extern void func_150FAD78(void);
-extern void func_150FCFD4(void *, s32, s32);
+extern void func_150FCFD4(struct127 *, s32, s32);
 extern void func_150E0300(void);
 extern void func_151557FC(s32, s32, f32);
-extern void *func_150F6DE4(void *);
-extern void func_1514EC1C(void *, void *, s32);
+extern void *func_150F6DE4(struct127 *);
+extern void func_1514EC1C(void *, struct127 *, s32);
 extern s32 func_15046C80(f32 *, s32, f32, void *);
 extern void func_151BFE84(void *, void *, void *, s32, s32, s32);
-extern void func_15136C3C(void *, s32, s32, s32, s32, s32, s32, s32);
-extern void func_151C0098(f32 *, void *, s32, s32, s32);
+extern void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
+extern void func_151C0098(f32 *, struct127 *, s32, s32, s32);
 extern void func_150FCA30(void);
-extern s32 func_1518F51C(void *, u8, s32, s32, s8, s8, u8, s32, u8, s32);
+extern s32 func_1518F51C(struct127 *, u8, s32, s32, s8, s8, u8, s32, u8, s32);
 extern void func_150E1060(s32, s32, s32);
 extern void func_151CD35C(s32);
 extern void func_1000E7A0(s32, s32);
 extern void func_151616D0(u8, u8, s32);
-extern void func_150B53D0(void *, s32, s32, s32);
+extern void func_150B53D0(struct127 *, s32, s32, s32);
 extern void func_150BEF7C(s32);
 extern void func_15178EFC(s32);
 extern s32 func_150E3208(s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 func_150E32D0(s32, s32, s32, void *, s32, f32);
+extern s32 func_150E32D0(s32, s32, s32, struct127 *, s32, f32);
 extern s32 func_150E3414(s32, s32, s32, s32, s32, s32, void *, s32, f32);
 extern void func_150DECC0(f32 *, s32, s32);
 extern void func_150E81A8(s32, s32, s32);
 extern void func_150E8930(void);
 extern void func_151D26C0(s16);
 extern void func_15163A60(s32, s32, s32);
-extern void func_150D5A6C(void *, s32, s32);
+extern void func_150D5A6C(struct127 *, s32, s32);
 extern u8 D_8009F0D0;
 extern u8 D_800D9920;
 extern struct127 D_800CC2D0[26];
 
-s32 func_1509D180(s32 arg0, Func1509D180Arg *arg1) {
+/* Starts script command `cmdId` with arguments `cmd`; returns a handle for commands 4-6. */
+s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
     s32 ret;
-    void *p;
+    struct127 *obj;
 
     ret = 0;
-    switch (arg0) {
+    switch (cmdId) {
         case 51:
             func_150BD070(0xFF, 1);
             break;
@@ -362,76 +371,83 @@ s32 func_1509D180(s32 arg0, Func1509D180Arg *arg1) {
             func_150FAA40(0xFF, 1);
             break;
         case 47:
-            p = func_1505EEF4(arg1->unk4 & 0xFFF);
-            if (p != 0) {
-                func_15108120(p, 0xFF, 1);
+            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
+            if (obj != NULL) {
+                func_15108120(obj, 0xFF, 1);
             }
             break;
         case 46:
-            p = func_1505EEF4(arg1->unk4 & 0xFFF);
-            if (p != 0) {
-                func_150ECC00(p, 0xFF, 1);
+            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
+            if (obj != NULL) {
+                func_150ECC00(obj, 0xFF, 1);
             }
             break;
         case 44:
             func_150FAD78();
             break;
         case 42:
-            p = func_1505EEF4(arg1->unk4 & 0xFFF);
-            if (p != 0) {
-                func_150FCFD4(p, 0xFF, 1);
+            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
+            if (obj != NULL) {
+                func_150FCFD4(obj, 0xFF, 1);
             }
             break;
         case 43:
             func_150E0300();
             break;
         case 37:
-            func_151557FC(arg1->unk4 & 0xFFF, 0x78, (f32)arg1->unk8);
+            func_151557FC(CMD_OBJECT_ID(cmd->args[0]), 120, cmd->args[1].w);
             break;
         case 36:
-            arg1 = func_1505EEF4(arg1->unk4 & 0xFFF);
-            if (arg1 != 0) {
-                func_1514EC1C(func_150F6DE4(arg1), arg1, 0x1B);
+            {
+                struct127 *target;
+
+                target = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
+                if (target != NULL) {
+                    func_1514EC1C(func_150F6DE4(target), target, 27);
+                }
             }
             break;
         case 34:
             {
-            Func1509D180Out sp90;
-            f32 sp84[3];
-            sp90.unk0 = -10000.0f;
-            sp90.unk18 = 0;
-            sp90.unk1C = 0;
-            sp90.unk1D = 0;
-            sp90.unk20 = 0;
-            sp84[0] = arg1->unk4;
-            sp84[1] = 20000.0f;
-            sp84[2] = arg1->unk8;
-            if (func_15046C80(sp84, 0, sp90.unk0, &sp90) != 0) {
-                {
-                f32 sp78[3];
-                sp84[1] = sp90.unk0;
-                sp78[0] = 0.0f;
-                sp78[2] = 0.0f;
-                sp78[1] = -1.0f;
-                func_151BFE84(&sp90.unk4, sp84, sp78, 1, 0xFF, 1);
+                FloorHit floor;
+                f32 pos[3];
+
+                floor.height = -10000.0f;
+                floor.unk18 = 0;
+                floor.unk1C = 0;
+                floor.unk1D = 0;
+                floor.unk20 = 0;
+                pos[0] = cmd->args[0].w;
+                pos[1] = 20000.0f;
+                pos[2] = cmd->args[1].w;
+                if (func_15046C80(pos, 0, floor.height, &floor) != 0) {
+                    { // matching: -g3 block keeps the float stores out of the branch delay slot
+                        f32 dir[3];
+
+                        pos[1] = floor.height;
+                        dir[0] = 0.0f;
+                        dir[2] = 0.0f;
+                        dir[1] = -1.0f;
+                        func_151BFE84(&floor.unk4, pos, dir, 1, 0xFF, 1);
+                    }
                 }
-            }
             }
             break;
         case 35:
-            p = func_1505EEF4(arg1->unk4 & 0xFFF);
-            func_15136C3C(p, 1, 1, 1, 1, 0, 0xFF, 1);
+            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
+            func_15136C3C(obj, 1, 1, 1, 1, 0, 0xFF, 1);
             break;
         case 33:
             {
-            f32 sp64[5];
-            p = func_1505EEF4(arg1->unk4 & 0xFFF);
-            if (p != 0) {
-                sp64[0] = ((Func1509D180Obj *)p)->unk14;
-                sp64[1] = ((Func1509D180Obj *)p)->unk18 + 50.0f;
-                sp64[2] = ((Func1509D180Obj *)p)->unk1C;
-                func_151C0098(sp64, p, 1, 0xFF, 1);
-            }
+                f32 pos[5];
+
+                obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
+                if (obj != NULL) {
+                    pos[0] = obj->x_position;
+                    pos[1] = obj->y_position + 50.0f;
+                    pos[2] = obj->z_position;
+                    func_151C0098(pos, obj, 1, 0xFF, 1);
+                }
             }
             break;
         case 27:
@@ -439,86 +455,91 @@ s32 func_1509D180(s32 arg0, Func1509D180Arg *arg1) {
             break;
         case 24:
             {
-            u8 sp5C[8];
-            sp5C[0] = D_8009F0D0;
-            p = func_15083E90(*((u8 *)arg1 + 7));
-            func_1518F51C(p ? p : p, sp5C[arg1->unk8], *(s16 *)((u8 *)arg1 + 0xE), -1, -1, -1, 0, 0, 0xFF, 1);
+                u8 values[8];
+
+                values[0] = D_8009F0D0;
+                obj = func_15083E90(cmd->args[0].b.lo);
+                // matching: the no-op ternary orders the argument moves
+                func_1518F51C(obj ? obj : obj, values[cmd->args[1].w], cmd->args[2].h.lo, -1, -1, -1, 0, 0, 0xFF, 1);
             }
             break;
         case 20:
-            func_150E1060(*((u8 *)arg1 + 7), 0xFF, 1);
+            func_150E1060(cmd->args[0].b.lo, 0xFF, 1);
             break;
         case 18:
-            func_151CD35C(arg1->unk4);
+            func_151CD35C(cmd->args[0].w);
             break;
         case 16:
-            func_1000E7A0(0x10, 0);
-            func_151616D0(0x16, 0x1F, 0);
+            func_1000E7A0(16, 0);
+            func_151616D0(22, 31, 0);
             break;
         case 0:
-            p = func_1505EEF4(arg1->unk4 & 0xFFF);
-            func_150B53D0(p, *(s16 *)((u8 *)arg1 + 0xA), 0xFF, 1);
+            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
+            func_150B53D0(obj, cmd->args[1].h.lo, 0xFF, 1);
             break;
         case 1:
-            func_150BEF7C(arg1->unk4);
+            func_150BEF7C(cmd->args[0].w);
             return 1;
         case 2:
             D_800D9920 = 1;
             break;
         case 3:
-            func_15178EFC(arg1->unk4);
+            func_15178EFC(cmd->args[0].w);
             break;
         case 4:
-            ret = func_150E3208(arg1->unk4, arg1->unk8, arg1->unkC, arg1->unk10, arg1->unk14, arg1->unk18, arg1->unk1C, arg1->unk20);
+            ret = func_150E3208(cmd->args[0].w, cmd->args[1].w, cmd->args[2].w, cmd->args[3].w, cmd->args[4].w,
+                                cmd->args[5].w, cmd->args[6].w, cmd->args[7].w);
             if (ret != 0) {
                 ret = (ret << 6) | 0xE000 | 4;
             }
             break;
         case 5:
-            p = func_1505EEF4(arg1->unk10 & 0xFFF);
-            if (p != 0) {
- ret = func_150E32D0(arg1->unk4, arg1->unk8, arg1->unkC, p, arg1->unk14, (f32)arg1->unk1C);
- if (ret != 0) {
- s32 pad;
- ret = (ret << 6) | 0xE000 | 4;
- }
- }
- break;
+            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[3]));
+            if (obj != NULL) {
+                ret = func_150E32D0(cmd->args[0].w, cmd->args[1].w, cmd->args[2].w, obj, cmd->args[4].w, cmd->args[6].w);
+                if (ret != 0) {
+                    s32 pad; // matching: -g3 block keeps the handle store in the branch delay slot
+                    ret = (ret << 6) | 0xE000 | 4;
+                }
+            }
+            break;
         case 6:
-            ret = func_150E3414(arg1->unk4, arg1->unk8, arg1->unkC, arg1->unk10, arg1->unk14, arg1->unk18, D_800CC2D0, arg1->unk1C, (f32)arg1->unk20);
+            ret = func_150E3414(cmd->args[0].w, cmd->args[1].w, cmd->args[2].w, cmd->args[3].w, cmd->args[4].w,
+                                cmd->args[5].w, D_800CC2D0, cmd->args[6].w, cmd->args[7].w);
             if (ret != 0) {
                 ret = (ret << 6) | 0xE000 | 4;
             }
             break;
         case 7:
             {
-            f32 sp44[5];
-            if (arg1->unk4 == 999) {
-                sp44[0] = arg1->unk8;
-                sp44[1] = arg1->unkC;
-                sp44[2] = arg1->unk10;
-                func_150DECC0(sp44, 0xFF, 1);
-            } else {
-                func_150E81A8(arg1->unk4 & 0xFF, 0xFF, 1);
-            }
+                f32 pos[5];
+
+                if (cmd->args[0].w == 999) {
+                    pos[0] = cmd->args[1].w;
+                    pos[1] = cmd->args[2].w;
+                    pos[2] = cmd->args[3].w;
+                    func_150DECC0(pos, 0xFF, 1);
+                } else {
+                    func_150E81A8(cmd->args[0].w & 0xFF, 0xFF, 1);
+                }
             }
             break;
         case 15:
             func_150E8930();
             break;
         case 19:
-            func_151D26C0(*(s16 *)((u8 *)arg1 + 6));
+            func_151D26C0(cmd->args[0].h.lo);
             break;
         case 22:
-            func_151616D0(0x23, 0x27, 0);
-            func_151616D0(0x24, 0x27, 0);
+            func_151616D0(35, 39, 0);
+            func_151616D0(36, 39, 0);
             break;
         case 23:
-            func_15163A60(*((u8 *)arg1 + 7), 0xFF, 1);
+            func_15163A60(cmd->args[0].b.lo, 0xFF, 1);
             break;
         case 32:
-            p = func_1505EEF4(arg1->unk4 & 0xFFF);
-            func_150D5A6C(p, 0xFF, 1);
+            obj = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
+            func_150D5A6C(obj, 0xFF, 1);
             break;
     }
     return ret;
@@ -532,7 +553,6 @@ typedef struct {
 
 extern void func_150EB8C4(void);
 extern void func_150F9720(u8);
-extern void *func_1505EEF4(s32);
 extern void func_150F6DB0(void *);
 extern void func_151616D0(u8, u8, s32);
 extern void func_151CD394(s32);
@@ -619,7 +639,6 @@ typedef struct {
     u8 unk7;
 } Func1509D8FCMsg;
 
-extern void *func_1505EEF4(s32);
 extern void func_15197A7C(void *);
 extern void func_151645C4(u8);
 extern void func_1515F170(s32 arg0, u8 arg1);
