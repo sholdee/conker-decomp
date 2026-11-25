@@ -318,56 +318,60 @@ void func_151717FC(EffectActor *actor, f32 halfX, f32 halfZ, f32 offsetX, f32 of
     func_151700D8(corners, centerX, centerZ, style, scale, type, countA, countB, owner, list);
 }
 
-f32 func_15048A40(u8);
-void func_151718F0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, f32 arg5, s32 arg6, s32 arg7,
-                   s32 arg8, s32 arg9) {
+/*
+ * Spawns `count` dust particles evenly spaced on a circle of `radius` around (x, y, z), each moving
+ * outward at 200 units (8.8 fixed point) with a random size of baseSize + rand * sizeScale.
+ */
+void func_151718F0(f32 x, f32 y, f32 z, f32 radius, s32 baseSize, f32 sizeScale, s32 color, s32 count,
+                   s32 owner, s32 list) {
     s32 i;
     s32 angle;
     u8 a;
     f32 sn;
     f32 cs;
-    f32 z;
-    s32 c;
-    u8 chi;
-    u8 clo;
-    f32 scale;
-    s32 spd;
-    s32 s;
+    f32 pz;
+    s32 velZ;
+    u8 velZHigh;
+    u8 velZLow;
+    f32 velY;
+    s32 size;
+    s32 velX;
     u32 r;
-    f32 x;
-    u8 shi;
-    u8 slo;
+    f32 px;
+    u8 velXHigh;
+    u8 velXLow;
     s32 step;
     u32 r1;
     u32 r2;
-    s32 pad;
+    s32 pad; // matching: moves colors to the target's stack slot
     const u8 colors[1][3] = { { 0x45, 0x53, 0x68 } };
 
-    if (arg7 != 0) {
+    if (count != 0) {
         angle = 0;
-        step = 0xFFFF / arg7;
-        for (i = 0; i < arg7; i++) {
+        step = 0xFFFF / count;
+        for (i = 0; i < count; i++) {
             a = angle >> 8;
-            angle |= 0;
+            angle |= 0; // matching: makes `a` a real variable instead of a CSE temp (one fewer uopt temp slot)
             sn = func_15048A40(a);
+            // matching: these no-ops swap s0/s1 to the target's allocation
             a |= 0; a |= 0; a |= 0; a |= 0; a |= 0; a |= 0; a |= 0; a |= 0; a |= 0;
             cs = func_150489B0(a);
-            z = arg3 * cs + arg2;
-            c = 200.0f * cs;
-            chi = c >> 8;
-            clo = c;
+            pz = radius * cs + z;
+            velZ = 200.0f * cs;
+            velZHigh = velZ >> 8;
+            velZLow = velZ;
             r1 = func_150ADA20();
-            scale = (f32)(r1 & 0xFFFF) * 0.0000152587890625f + 100.0f;
+            velY = (f32)(r1 & 0xFFFF) * (1.0f / 65536) + 100.0f;
             r2 = func_150ADA20();
-            spd = (f32)(r2 & 0xFFFF) * arg5 + (f32)arg4;
+            size = (f32)(r2 & 0xFFFF) * sizeScale + (f32)baseSize;
             r = func_150ADA20();
-            s = 200.0f * sn;
-            x = arg3 * sn + arg0;
-            shi = s >> 8;
-            slo = s;
-            func_1516D4E8(x, arg1, z, 0xD, 0, colors[arg6][0], colors[arg6][1],
-                          colors[arg6][2], 0, 0, 0, 0, 2, shi, slo, chi, clo, 0, 0, 5, 0, 0,
-                          0, (s16)spd, (s16)spd, (r & 0xF) + 0xA, scale, 0, 0, (u8)arg8, arg9);
+            velX = 200.0f * sn;
+            px = radius * sn + x;
+            velXHigh = velX >> 8;
+            velXLow = velX;
+            func_1516D4E8(px, y, pz, 0xD, 0, colors[color][0], colors[color][1], colors[color][2], 0, 0, 0, 0,
+                          2, velXHigh, velXLow, velZHigh, velZLow, 0, 0, 5, 0, 0, 0, (s16)size, (s16)size,
+                          (r & 0xF) + 10, velY, 0, 0, (u8)owner, list);
             angle += step;
         }
     }
