@@ -3,124 +3,135 @@
 #include "variables.h"
 
 
+/* Object that receives message 0x36; the three bytes at 0x28 are set to pure red or green, so they look like an RGB tint. */
 typedef struct {
-    char pad_0[0x28];
-    u8 field_0x28;
-    u8 field_0x29;
-    u8 field_0x2A;
-    char pad_0x2B[0x2D];
-    s32 field_0x58;
-} GameObjectColorFlags;
+    /* 0x00 */ u8 pad0[0x28];
+    /* 0x28 */ u8 r;
+    /* 0x29 */ u8 g;
+    /* 0x2A */ u8 b;
+    /* 0x2B */ u8 pad2B[0x2D];
+    /* 0x58 */ s32 flags; /* bit 1: tint enabled */
+} TintedObject;
 
-void func_150D7420(GameObjectColorFlags *arg0, u8 *arg1, u8 arg2) {
-    if (arg2 == 0x36) {
-        switch (*arg1) {
+#define TINT_ENABLED 2
+#define MSG_SET_TINT 0x36
+
+/* Message handler: state 1 or 2 tints the object red, 3 tints it green, anything else clears the tint. */
+void func_150D7420(TintedObject *obj, u8 *state, u8 msg) {
+    if (msg == MSG_SET_TINT) {
+        switch (*state) {
             case 0:
                 break;
             case 1:
-                arg0->field_0x58 |= 2;
-                arg0->field_0x28 = 0xFF;
-                arg0->field_0x29 = 0;
-                arg0->field_0x2A = 0;
+                obj->flags |= TINT_ENABLED;
+                obj->r = 0xFF;
+                obj->g = 0;
+                obj->b = 0;
                 return;
             case 2:
-                arg0->field_0x58 |= 2;
-                arg0->field_0x28 = 0xFF;
-                arg0->field_0x29 = 0;
-                arg0->field_0x2A = 0;
+                obj->flags |= TINT_ENABLED;
+                obj->r = 0xFF;
+                obj->g = 0;
+                obj->b = 0;
                 return;
             case 3:
-                arg0->field_0x28 = 0;
-                arg0->field_0x58 |= 2;
-                arg0->field_0x29 = 0xFF;
-                arg0->field_0x2A = 0;
+                obj->r = 0;
+                obj->flags |= TINT_ENABLED;
+                obj->g = 0xFF;
+                obj->b = 0;
                 return;
         }
-        arg0->field_0x58 &= ~2;
+        obj->flags &= ~TINT_ENABLED;
     }
 }
 
-void func_150D74DC(GameObjectColorFlags *arg0, u8 *arg1, u8 arg2) {
-    if (arg2 == 0x36) {
-        switch (*arg1) {
+/* Message handler: state 2 tints the object red, 3 tints it green, anything else clears the tint. */
+void func_150D74DC(TintedObject *obj, u8 *state, u8 msg) {
+    if (msg == MSG_SET_TINT) {
+        switch (*state) {
             case 0:
                 break;
             case 1:
-                arg0->field_0x58 &= ~2;
+                obj->flags &= ~TINT_ENABLED;
                 return;
             case 2:
-                arg0->field_0x58 |= 2;
-                arg0->field_0x28 = 0xFF;
-                arg0->field_0x29 = 0;
-                arg0->field_0x2A = 0;
+                obj->flags |= TINT_ENABLED;
+                obj->r = 0xFF;
+                obj->g = 0;
+                obj->b = 0;
                 return;
             case 3:
-                arg0->field_0x28 = 0;
-                arg0->field_0x58 |= 2;
-                arg0->field_0x29 = 0xFF;
-                arg0->field_0x2A = 0;
+                obj->r = 0;
+                obj->flags |= TINT_ENABLED;
+                obj->g = 0xFF;
+                obj->b = 0;
                 return;
         }
-        arg0->field_0x58 &= ~2;
+        obj->flags &= ~TINT_ENABLED;
     }
 }
 
-void func_150D758C(GameObjectColorFlags *arg0, u8 *arg1, u8 arg2) {
-    if (arg2 == 0x36) {
-        switch (*arg1) {
+/* Message handler: state 3 tints the object green, anything else clears the tint. */
+void func_150D758C(TintedObject *obj, u8 *state, u8 msg) {
+    if (msg == MSG_SET_TINT) {
+        switch (*state) {
             case 0:
                 break;
             case 1:
-                arg0->field_0x58 &= ~2;
+                obj->flags &= ~TINT_ENABLED;
                 return;
             case 2:
-                arg0->field_0x58 &= ~2;
+                obj->flags &= ~TINT_ENABLED;
                 return;
             case 3:
-                arg0->field_0x28 = 0;
-                arg0->field_0x58 |= 2;
-                arg0->field_0x29 = 0xFF;
-                arg0->field_0x2A = 0;
+                obj->r = 0;
+                obj->flags |= TINT_ENABLED;
+                obj->g = 0xFF;
+                obj->b = 0;
                 return;
         }
-        arg0->field_0x58 &= ~2;
+        obj->flags &= ~TINT_ENABLED;
     }
 }
 
-extern u16 D_800D9910;
+extern u16 D_800D9910; /* texture animation clock; the high byte is the frame */
 
+/* Advances the texture animation clock by this frame's tick count (unless arg0 is set). */
 void func_150D7630(s32 arg0) {
     if (arg0 == 0) {
         D_800D9910 += D_800BE9E4 << 6;
     }
 }
 
+/* Two texture-id tables of five animation frames each. */
 typedef struct {
-    s32 *t[2];
-} TexTables_150D765C;
-extern TexTables_150D765C D_80088900; /* = { D_80090230, D_80090244 } */
+    s32 *frames[2];
+} TextureFrameTables;
+extern TextureFrameTables D_80088900; /* = { D_80090230, D_80090244 } */
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
+/* Binds six animated textures to segments 2-7, texture i showing frame (clock + 13 * i) % 5;
+ * the last two come from the second frame table. */
 Gfx *func_150D765C(Gfx *gdl) {
     s32 i;
-    s32 seg;
+    s32 segment;
     s32 frame;
-    s32 out;
-    s32 set;
-    s32 idx;
+    s32 size;
+    s32 table;
+    s32 frameIndex;
     s32 addr;
-    TexTables_150D765C tables = D_80088900;
+    TextureFrameTables tables = D_80088900;
 
-    set = 0;
+    table = 0;
     frame = D_800D9910 >> 8;
     for (i = 0; i < 6; i++) {
         if (i >= 4) {
-            set = 1;
+            table = 1;
         }
-        idx = (frame + i * 13) % 5;
-        addr = func_1510D0EC(tables.t[set][idx], &out, 3, 0);
-        seg = i + 2;
-        gSPSegment(gdl++, seg, addr);
+        frameIndex = (frame + i * 13) % 5;
+        addr = func_1510D0EC(tables.frames[table][frameIndex], &size, 3, 0);
+        segment = i + 2;
+        gSPSegment(gdl++, segment, addr);
     }
     return gdl;
 }
