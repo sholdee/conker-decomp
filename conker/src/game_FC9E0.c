@@ -25,11 +25,6 @@ Gfx *func_150CF5E8(Gfx *gfx) {
     return gfx;
 }
 
-typedef struct {
-    f32 x;
-    f32 y;
-} Vec2f;
-
 /* Particle motion: while flags & 1, hop from startX to startX + distance along an arc. */
 typedef struct {
     /* 0x00 */ u8 flags;

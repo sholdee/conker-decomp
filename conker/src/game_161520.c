@@ -927,9 +927,6 @@ const BloodProfile D_800A40F8[2] = {
 };
 
 void *func_1515548C(ScreenSpriteInfo *, u8, s32, s32, s32, u8, s32);
-typedef struct {
-    f32 x, y;
-} Vec2f;
 
 /* Motion state of a blood splat particle, kept at BloodSplat::motion. */
 typedef struct {

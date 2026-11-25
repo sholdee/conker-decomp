@@ -288,11 +288,6 @@ void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *e
     emission->stream.speedY = func_150ADA68() * 0.150000006f;
 }
 
-typedef struct {
-    /* 0x0 */ f32 x;
-    /* 0x4 */ f32 y;
-} Vec2f;
-
 extern IdList2 D_80088A5C;
 extern Game113D60Ids1 D_80088A64;
 extern IdList3 D_80088A68;

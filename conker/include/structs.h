@@ -62,6 +62,18 @@ typedef struct Vec3s {
     /* 0x4 */ s16 z;
 } Vec3s; // size 0x6
 
+/* Two-float vector: screen or texture positions and velocities. */
+typedef struct Vec2f {
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
+} Vec2f; // size 0x8
+
+/* Two-float vector on the ground plane (world x and z). */
+typedef struct Vec2fXZ {
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 z;
+} Vec2fXZ; // size 0x8
+
 /* Three-int vector. */
 typedef struct Vec3i {
     /* 0x0 */ s32 x;

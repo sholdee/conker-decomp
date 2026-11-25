@@ -5,8 +5,6 @@
 
 void *memcpy(void *dst, const void *src, u32 size);
 
-typedef struct { f32 x, z; } Vec2f;
-
 /* Events posted through func_151494E0 with a stream id as the payload. */
 #define STREAM_EVENT_START 0x17 /* create the stream's emitter */
 #define STREAM_EVENT_STOP  0x18 /* stop emitting; the particles still fall */
@@ -49,7 +47,7 @@ typedef struct {
     f32 swayPhaseZ;
     f32 swayRateX;
     f32 swayRateZ;
-    Vec2f spawnPos; /* where the last particle was spawned */
+    Vec2fXZ spawnPos; /* where the last particle was spawned */
     f32 unk20;
     f32 baseWidth;
     f32 widthAmp;
@@ -266,7 +264,7 @@ s32 func_151CD7BC(Emitter *emitter) {
     f32 unk20Step;
     f32 dz;
     f32 dx;
-    Vec2f pos;
+    Vec2fXZ pos;
     f32 step;
     f32 width;
     f32 dWidth;

@@ -4,16 +4,10 @@
 #include "effects.h"
 #include "libc/math.h"
 
-/* A point on the ground plane (world x and z). */
-typedef struct {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 z;
-} Vec2f;
-
 /* Motion state of a ground-hugging flash, kept at +0x18 of the object func_151602C0 returns. */
 typedef struct {
-    /* 0x00 */ Vec2f position;
-    /* 0x08 */ Vec2f velocity;
+    /* 0x00 */ Vec2fXZ position;
+    /* 0x08 */ Vec2fXZ velocity;
     /* 0x10 */ f32 height;      /* used when the ground probe finds nothing */
     /* 0x14 */ f32 probeHeight; /* height the ground probe starts from */
     /* 0x18 */ f32 lifetime;
@@ -22,10 +16,10 @@ typedef struct {
 
 /* Spawner state: flashes run between a random point on the start line and one on the end line. */
 typedef struct {
-    /* 0x00 */ Vec2f startOrigin;
-    /* 0x08 */ Vec2f endOrigin;
-    /* 0x10 */ Vec2f startExtent;
-    /* 0x18 */ Vec2f endExtent;
+    /* 0x00 */ Vec2fXZ startOrigin;
+    /* 0x08 */ Vec2fXZ endOrigin;
+    /* 0x10 */ Vec2fXZ startExtent;
+    /* 0x18 */ Vec2fXZ endExtent;
     /* 0x20 */ f32 height;
     /* 0x24 */ f32 probeHeight;
     /* 0x28 */ f32 rate;        /* flashes per frame */
@@ -61,8 +55,8 @@ void func_150EAB10(struct_EAB10 *actor) {
     GroundFlash flash;
     LightEffectHeader header;
     s32 padB0; // matching: see pad
-    Vec2f end;
-    Vec2f start;
+    Vec2fXZ end;
+    Vec2fXZ start;
     f32 speed;
     f32 length;
     f32 random;
