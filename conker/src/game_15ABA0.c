@@ -52,7 +52,7 @@ extern u8 D_800895D0[][10];
 void func_1512D748(struct108 *view, s32 presetIndex, s32 mode) {
     ViewEnvelope *env = &D_800DC2C0[view->unk23D];
     u8 *preset;
-    volatile f32 sustainLevel;
+    f32 sustainLevel;
     f32 attackTime;
     f32 decayTime;
     f32 peak;
@@ -62,16 +62,16 @@ void func_1512D748(struct108 *view, s32 presetIndex, s32 mode) {
 
     if (view->unk3D4->unk120 == 0) {
         preset = D_800895D0[presetIndex];
-        env->frequency0 = (u32)preset[0];
-        env->frequency1 = (u32)preset[1];
-        env->frequency2 = (u32)preset[2];
-        env->frequency3 = (u32)preset[3];
-        env->attackTime = (u32)preset[4];
-        env->decayTime = (u32)preset[5];
-        env->sustainTime = (u32)preset[6];
-        env->releaseTime = (u32)preset[7];
-        env->peak = (u32)preset[8];
-        env->sustainLevel = (u32)preset[9];
+        env->frequency0 = preset[0];
+        env->frequency1 = preset[1];
+        env->frequency2 = preset[2];
+        env->frequency3 = preset[3];
+        env->attackTime = preset[4];
+        env->decayTime = preset[5];
+        env->sustainTime = preset[6];
+        env->releaseTime = preset[7];
+        env->peak = preset[8];
+        env->sustainLevel = preset[9];
         attackTime = env->attackTime;
         decayTime = env->decayTime;
         decayEnd = decayTime + attackTime;
@@ -106,6 +106,7 @@ void func_1512D980(struct108 *view) {
     }
     if (env->elapsed != -1.0f && env->stage != 5 && !(view->unk84 & 0x80000)) {
         env->output[0] = sinf(env->elapsed * 0.03333333507f * env->frequency0 * 360.0f * 0.01745329238f) * (sign * env->amplitude);
+        // matching: the integer `1 *` (not 1.0f, not omitted) is what IDO compiled
         env->output[1] = sinf(env->elapsed * 0.03333333507f * env->frequency1 * 360.0f * 0.01745329238f) * (1 * env->amplitude);
         env->output[2] = sinf(env->elapsed * 0.03333333507f * env->frequency2 * 360.0f * 0.01745329238f) * (-1.0f * env->amplitude);
         env->output[3] = sinf(env->elapsed * 0.03333333507f * env->frequency3 * 360.0f * 0.01745329238f) * (-1.0f * env->amplitude);
@@ -132,7 +133,7 @@ void func_1512D980(struct108 *view) {
             } else {
                 func_1512D6F0(view);
             }
-            env->elapsed += (u32)D_800BE9A0;
+            env->elapsed += D_800BE9A0;
         } else {
             env->stage = 5;
         }
