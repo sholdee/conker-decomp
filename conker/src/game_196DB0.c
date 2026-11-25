@@ -1,62 +1,27 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
-/* Spawn parameters of a 2D sprite effect, copied into the effect at offset 0x10. */
-typedef struct {
-    /* 0x10 */ void *texture;      // drawn with func_1509629C
-    /* 0x14 */ void *tile1Texture; // loaded into tile 1 when flags & 1
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s16 lifetime;       // frames left; 0 = lives forever
-    /* 0x26 */ s16 frame;          // animation frame, 8.8 fixed point
-    /* 0x28 */ s16 frameSpeed;     // added to frame every tick
-    /* 0x2A */ u8 pad2A[2];
-    /* 0x2C */ f32 x;
-    /* 0x30 */ f32 y;
-    /* 0x34 */ s16 sOffset;
-    /* 0x36 */ s16 extraWidth;
-    /* 0x38 */ s16 scaleX;         // 4096 = 1.0
-    /* 0x3A */ s16 scaleY;
-    /* 0x3C */ u16 width;
-    /* 0x3E */ u16 height;
-    /* 0x40 */ s8 behavior;        // index into D_8008CA20, 0 = none
-    /* 0x41 */ u8 frameCount;
-    /* 0x42 */ u8 red;
-    /* 0x43 */ u8 green;
-    /* 0x44 */ u8 blue;
-    /* 0x45 */ u8 alpha;
-    /* 0x46 */ u8 renderMode;      // index into D_800A4AC8
-    /* 0x47 */ u8 unk47;
-    /* 0x48 */ u8 cycleType;       // 2 = two-cycle
-    /* 0x49 */ u8 flags;
-} Game196DB0SpriteParams;
-
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ Game196DB0SpriteParams params;
-} Game196DB0Sprite; // size 0x4C
-
-extern void (*D_8008CA20[])(Game196DB0Sprite *);
+extern void (*D_8008CA20[])(Sprite2D *);
 
 /* Allocates a sprite effect and initialises it from `params`. */
-Game196DB0Sprite *func_15169900(Game196DB0SpriteParams *params, s32 arg1) {
-    Game196DB0Sprite *sprite;
+Sprite2D *func_15169900(Sprite2DParams *params, s32 arg1) {
+    Sprite2D *sprite;
 
-    sprite = func_15167A68(0x5E, 0, sizeof(Game196DB0Sprite), 0, arg1, 1);
+    sprite = func_15167A68(0x5E, 0, sizeof(Sprite2D), 0, arg1, 1);
     if (sprite != NULL) {
         bcopy(params, &sprite->params, sizeof(sprite->params));
     }
     return sprite;
 }
 
-Game196DB0Sprite *func_15169968(Game196DB0SpriteParams *params) {
+Sprite2D *func_15169968(Sprite2DParams *params) {
     return func_15169900(params, 0xFF);
 }
 
 /* Per-tick update: runs the sprite's behaviour, advances its animation and counts down its lifetime. */
-void func_15169988(Game196DB0Sprite *sprite) {
+void func_15169988(Sprite2D *sprite) {
     s32 behavior;
     s32 frame;
     s32 lifetime;
@@ -76,7 +41,7 @@ void func_15169988(Game196DB0Sprite *sprite) {
         frame += frameEnd;
     }
 
-    lifetime = sprite->params.lifetime;
+    lifetime = sprite->params.timer;
     sprite->params.frame = frame;
     if (lifetime != 0) {
         lifetime -= D_800BE9E4;
@@ -84,7 +49,7 @@ void func_15169988(Game196DB0Sprite *sprite) {
             func_1516972C(&sprite->header);
             return;
         }
-        sprite->params.lifetime = lifetime;
+        sprite->params.timer = lifetime;
     }
 }
 
@@ -100,7 +65,7 @@ Gfx *func_15142FBC(Gfx *gfx, s32 otherModeH, s32 otherModeL, u8 *update);
 Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *update);
 
 /* Draws the sprite as a scaled textured rectangle. */
-Gfx *func_15169A48(Gfx *gfx, Game196DB0Sprite *sprite, s32 arg2) {
+Gfx *func_15169A48(Gfx *gfx, Sprite2D *sprite, s32 arg2) {
     s32 pad; // matching: unused stack slots keep the original frame size
     s32 drawFlags;
     u8 update;
@@ -112,7 +77,7 @@ Gfx *func_15169A48(Gfx *gfx, Game196DB0Sprite *sprite, s32 arg2) {
         return gfx;
     }
     update = TRUE;
-    gfx = func_1513F4E4(gfx, sprite->params.unk47, &update);
+    gfx = func_1513F4E4(gfx, sprite->params.unk37, &update);
     gDPSetPrimColor(gfx++, 1, 0, sprite->params.red, sprite->params.green, sprite->params.blue,
                     sprite->params.alpha);
     if (sprite->params.flags & 1) {

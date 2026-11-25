@@ -2296,6 +2296,66 @@ typedef struct StreamEmitter {
     /* 0x34 */ f32 unk34;
 } StreamEmitter; /* size 0x38 */
 
+/* Per-behavior data of a Sprite2D (Sprite2DParams.data). */
+typedef union Sprite2DData {
+    struct {
+        s32 frame;                /* frame (8.8) to stop scrolling at */
+        s32 y;                    /* y to stop scrolling at */
+        s32 stage;
+    } scroll;                     /* func_150B6E3C (game_E4070.c) */
+    struct {
+        s32 elapsed;
+    } slide;                      /* func_150B709C */
+    struct {
+        s16 endX;
+        s16 endY;
+        s32 duration;
+        s16 startX;
+        s16 startY;
+    } move;                       /* func_150B73F0: from start to end as the timer runs down */
+    struct {
+        s32 fadeInHold;           /* fade-in frames << 16 | hold frames */
+        s32 fadeOutTotal;         /* fade-out frames << 16 | total frames */
+        s32 unk10;
+    } fade;                       /* game_1228D0.c, game_137DE0.c */
+    s32 words[3];                 /* move's points packed as x << 16 | y */
+} Sprite2DData; /* size 0xC */
+
+/* Spawn parameters of a 2D screen sprite (object type 0x5E, func_15169900 / func_15169968, game_196DB0.c),
+ * copied to Sprite2D.params. */
+typedef struct Sprite2DParams {
+    /* 0x00 */ void *texture;     /* drawn with func_1509629C */
+    /* 0x04 */ void *tile1Texture; /* loaded into tile 1 when flags & 1 */
+    /* 0x08 */ Sprite2DData data;
+    /* 0x14 */ s16 timer;         /* frames left; 0 = lives forever */
+    /* 0x16 */ s16 frame;         /* animation frame, 8.8 fixed point */
+    /* 0x18 */ s16 frameSpeed;    /* added to frame every tick */
+    /* 0x1A */ u8 pad1A[2];
+    /* 0x1C */ f32 x;
+    /* 0x20 */ f32 y;
+    /* 0x24 */ s16 sOffset;
+    /* 0x26 */ s16 extraWidth;
+    /* 0x28 */ s16 scaleX;        /* 0x1000 = 1.0 */
+    /* 0x2A */ s16 scaleY;
+    /* 0x2C */ u16 width;
+    /* 0x2E */ u16 height;
+    /* 0x30 */ s8 behavior;       /* index into D_8008CA20, 0 = none */
+    /* 0x31 */ u8 frameCount;
+    /* 0x32 */ u8 red;
+    /* 0x33 */ u8 green;
+    /* 0x34 */ u8 blue;
+    /* 0x35 */ u8 alpha;
+    /* 0x36 */ u8 renderMode;     /* index into D_800A4AC8 */
+    /* 0x37 */ u8 unk37;
+    /* 0x38 */ u8 cycleType;      /* 2 = two-cycle */
+    /* 0x39 */ u8 flags;
+} Sprite2DParams; /* size 0x3C */
+
+typedef struct Sprite2D {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ Sprite2DParams params;
+} Sprite2D; /* size 0x4C */
+
 /* Spawn parameters of a rumble effect object (func_151D8868, kind 0x3F; copied into RumbleObj.params):
  * a timed rumble on the controllers of the players in a mask. */
 typedef struct RumbleParams {

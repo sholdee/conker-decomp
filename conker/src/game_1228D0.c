@@ -3,125 +3,80 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Sprite descriptor passed to func_15169968; the sprite it creates keeps these fields from +0x10. */
-typedef struct {
-    /* 0x00 */ void *texture;
-    /* 0x04 */ void *unk4;
-    /* 0x08 */ s32 fadeInHold;    /* fade-in frames << 16 | hold frames */
-    /* 0x0C */ s32 fadeOutTotal;  /* fade-out frames << 16 | total frames */
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s16 timer;         /* frames left, counts down from the total */
-    /* 0x16 */ s16 unk16;
-    /* 0x18 */ s16 unk18;
-    /* 0x1A */ u8  pad1A[0x2];
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ s16 unk24;
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 scaleX;        /* 0x1000 = 1.0 */
-    /* 0x2A */ s16 scaleY;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ s16 unk2E;
-    /* 0x30 */ u8  unk30;
-    /* 0x31 */ u8  unk31;
-    /* 0x32 */ u8  red;
-    /* 0x33 */ u8  green;
-    /* 0x34 */ u8  blue;
-    /* 0x35 */ u8  alpha;
-    /* 0x36 */ u8  unk36;
-    /* 0x37 */ u8  unk37;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ u8  unk39;
-} struct_7484;
-
 extern u8 D_80091930;
 extern u8 D_8009193C;
 extern u8 D_80091948;
-EffectHeader *func_15169968(struct_7484 *);
+EffectHeader *func_15169968(Sprite2DParams *);
 
 /* Shows a sprite (picked by `style`) that fades in over `fadeIn` frames, holds for
  * `hold` frames and fades out over `fadeOut` frames. */
 void func_150F5420(s32 fadeIn, s32 hold, s32 fadeOut, s32 style) {
-    struct_7484 desc;
+    Sprite2DParams desc;
     s32 total;
 
     if (style != 0) {
         if (style == 2) {
-            desc.unk2C = 240;
-            desc.unk2E = 186;
+            desc.width = 240;
+            desc.height = 186;
             desc.texture = &D_80091948;
         } else {
-            desc.unk2C = 270;
-            desc.unk2E = 124;
+            desc.width = 270;
+            desc.height = 124;
             if (style == 1) {
                 desc.texture = &D_80091930;
             } else {
                 desc.texture = &D_8009193C;
             }
         }
-        desc.unk30 = 9;
-        desc.unk39 = 0x10;
+        desc.behavior = 9;
+        desc.flags = 0x10;
         desc.scaleX = 0;
         desc.scaleY = 0;
-        desc.unk36 = 8;
+        desc.renderMode = 8;
     } else {
         desc.texture = &D_800917F8;
-        desc.unk30 = 10;
-        desc.unk2C = 160;
-        desc.unk2E = 192;
-        desc.unk39 = 0x20;
+        desc.behavior = 10;
+        desc.width = 160;
+        desc.height = 192;
+        desc.flags = 0x20;
         desc.scaleX = 0x1000;
         desc.scaleY = 0x1000;
-        desc.unk36 = 0x18;
+        desc.renderMode = 0x18;
     }
 
     total = fadeIn + hold + fadeOut;
-    desc.fadeInHold = (fadeIn << 16) | hold;
-    desc.fadeOutTotal = (fadeOut << 16) | total;
-    desc.unk10 = 10000;
+    desc.data.fade.fadeInHold = (fadeIn << 16) | hold;
+    desc.data.fade.fadeOutTotal = (fadeOut << 16) | total;
+    desc.data.fade.unk10 = 10000;
     desc.timer = total;
-    desc.unk1C = 146.0f;
-    desc.unk20 = 100.0f;
-    desc.unk18 = 0;
-    desc.unk24 = 0;
-    desc.unk26 = 0;
-    desc.unk31 = 1;
+    desc.x = 146.0f;
+    desc.y = 100.0f;
+    desc.frameSpeed = 0;
+    desc.sOffset = 0;
+    desc.extraWidth = 0;
+    desc.frameCount = 1;
     desc.red = 0xFF;
     desc.green = 0xFF;
     desc.blue = 0xFF;
     desc.unk37 = 0x11;
     desc.alpha = 0;
-    desc.unk16 = 0;
+    desc.frame = 0;
     func_15169968(&desc);
 }
 
-/* The sprite created from a struct_7484 (its fields from +0x10 are the descriptor's). */
-struct Struct150F5590 {
-    char pad0[0x18];
-    s32 fadeInHold;   /* fade-in frames << 16 | hold frames */
-    s32 fadeOutTotal; /* fade-out frames << 16 | total frames */
-    char pad20[0x24 - 0x20];
-    s16 timer;        /* frames left */
-    char pad26[0x38 - 0x26];
-    s16 scaleX;       /* 0x1000 = 1.0 */
-    s16 scaleY;
-    char pad3C[0x45 - 0x3C];
-    u8 alpha;
-};
-
-void func_150F55C8(struct Struct150F5590 *);
+void func_150F55C8(Sprite2D *);
 
 /* Grows the sprite as its timer runs down, then updates its fade. */
-void func_150F5590(struct Struct150F5590 *sprite) {
-    s32 scale = 0x1000 - (sprite->timer << 2);
+void func_150F5590(Sprite2D *sprite) {
+    s32 scale = 0x1000 - (sprite->params.timer << 2);
 
-    sprite->scaleX = scale;
-    sprite->scaleY = sprite->scaleX;
+    sprite->params.scaleX = scale;
+    sprite->params.scaleY = sprite->params.scaleX;
     func_150F55C8(sprite);
 }
 
 /* Sets the sprite's alpha from its timer: fade in, hold at 0xFF, then fade out. */
-void func_150F55C8(struct Struct150F5590 *sprite) {
+void func_150F55C8(Sprite2D *sprite) {
     s32 timer;
     s32 total;
     s32 fadeIn;
@@ -129,19 +84,19 @@ void func_150F55C8(struct Struct150F5590 *sprite) {
     s32 fadeInEnd;
     s32 fadeOut;
 
-    total = sprite->fadeOutTotal & 0xFFFF;
-    fadeIn = sprite->fadeInHold >> 16;
-    hold = sprite->fadeInHold & 0xFFFF;
-    fadeOut = sprite->fadeOutTotal >> 16;
+    total = sprite->params.data.fade.fadeOutTotal & 0xFFFF;
+    fadeIn = sprite->params.data.fade.fadeInHold >> 16;
+    hold = sprite->params.data.fade.fadeInHold & 0xFFFF;
+    fadeOut = sprite->params.data.fade.fadeOutTotal >> 16;
     fadeInEnd = total - fadeIn;
-    timer = sprite->timer;
+    timer = sprite->params.timer;
 
     if (fadeInEnd < timer) {
-        sprite->alpha = (total - timer) * 0xFF / fadeIn;
+        sprite->params.alpha = (total - timer) * 0xFF / fadeIn;
     } else if (fadeInEnd - hold < timer) {
-        sprite->alpha = 0xFF;
+        sprite->params.alpha = 0xFF;
     } else {
-        sprite->alpha = timer * 0xFF / fadeOut;
+        sprite->params.alpha = timer * 0xFF / fadeOut;
     }
 }
 
