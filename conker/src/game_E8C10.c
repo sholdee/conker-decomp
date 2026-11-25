@@ -164,8 +164,8 @@ typedef struct GameE8C10SpawnRequest {
     u8 padA3[0x5];
 } GameE8C10SpawnRequest;
 
-void func_1516865C(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32 func_15168800(void *arg0, s32 arg1, s32 arg2);
+void func_1516865C(GameE8C10SpawnRequest *request, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+s32 func_15168800(GameE8C10SpawnRequest *request, s32 arg1, s32 arg2);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
 
