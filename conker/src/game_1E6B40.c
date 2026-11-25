@@ -93,7 +93,7 @@ void func_151B9690(s32 animIndex, s32 kind, s16 x, s16 y, s16 z, s16 unused, f32
     // matching: computing the random part first gives the target's addu operand order
     upSpeed = RAND_SPREAD(velYRange);
     upSpeed = velY + upSpeed;
-    // matching: listing cases 0, 1 and 3 gives the target's jump table
+    // matching: listing cases 0, 1 and 3 keeps the target's case dispatch
     switch (kind) {
     case 2:
         r = 0x68; g = 0x38; b = 0x10;
@@ -193,7 +193,7 @@ void func_151B9964(FallingParticle *particle) {
         // matching: `* 6` is emitted as a different shift/add sequence
         phase += D_800BE9E4 * 4 + D_800BE9E4 * 2;
         particle->phase = phase;
-        particle->size = particle->size * 0.99f;
+        particle->size *= 0.99f;
         size = particle->size;
         particle->width = (func_15048A40(phase) + 3.0f) * size * (1.0f / 3.0f);
         particle->height = (func_150489B0(phase) + 3.0f) * size * (1.0f / 3.0f);
