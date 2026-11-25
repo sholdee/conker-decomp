@@ -28,10 +28,12 @@ You need your own copy of the game to build it. This repository contains no ROM 
 
 You need:
 
-- an x86-64 Linux host, or a Linux VM (the IDO compiler in `ido/` is a prebuilt x86-64 Linux binary);
+- an x86-64 Linux host, or a Linux VM (the toolchain image installs the x86-64 Linux build of the IDO
+  compiler);
 - [Podman](https://podman.io/) or Docker. The toolchain image (Ubuntu 24.04, MIPS binutils, Python
-  packages pinned in `tools/toolchain/constraints.txt`, and a gzip with Rare's compression
-  behaviour built from source) is defined in
+  packages pinned in `tools/toolchain/constraints.txt`, the IDO 5.3 compiler from a pinned
+  ido-static-recomp release, and a gzip with Rare's compression behaviour built from source) is
+  defined in
   [tools/toolchain/Containerfile](tools/toolchain/Containerfile);
 - a US ROM of the game in big-endian `.z64` format, with sha1 `4cbadd3c4e0729dec46af64ad018050eada4f47a`.
 
@@ -86,7 +88,6 @@ matching build first: `mkdir -p conker/expected && cp -r conker/build conker/exp
 | `conker/conker.us.yaml` | splat configuration of the code segments; `conker.us.yaml` at the top splits the ROM |
 | `conker/symbol_addrs.us.txt`, `conker/undefined_*.us.txt` | Symbols |
 | `tools/` | Build tools (rarezip compression, splat extensions, `rodata_extern.py`) and contributor tooling |
-| `ido/ido5.3_recomp/` | The IDO 5.3 compiler, statically recompiled for Linux |
 
 ### Contributor tooling
 

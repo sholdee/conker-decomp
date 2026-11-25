@@ -377,7 +377,7 @@ def check_tree(func, m, wc, want, quiet=False, U=2):
     return 1, out + ["RESULT: DIFF"]
 
 
-NEAR = REPO / ".nearmiss"   # ratchet store (tracked in git): best attempt of every open function
+NEAR = REPO / ".nearmiss"   # ratchet store (local, gitignored): best attempt of every open function
 
 
 def rank(rec):
@@ -446,7 +446,7 @@ def ratchet(ws, m, rec, src):
 
 
 def log_check(ws, code, out, n, batch=False, src=None):
-    """Append one line per check to ws/checks.jsonl (read by tools/dashboard.py)."""
+    """Append one line per check to ws/checks.jsonl."""
     import time
     rec = {"t": round(time.time(), 1), "result": ["MATCH", "DIFF", "BUILD-FAIL", "STUB"][code], "n": n}
     text = "\n".join(out)
@@ -662,17 +662,10 @@ def cmd_land(a):
             msg = (f"game: match {len(landed)} functions ({total} bytes) [mw]\n\n"
                    + "\n".join(f"match {f} ({sizes[f]} bytes)" for f in landed))
         git("commit", "-q", "-m", msg + "\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>")
-        with open(REPO / "tools" / "mw_landed.tsv", "a") as fh:
-            for f in landed:
-                fh.write(f"{f}\t{m['file']}\t{sizes[f]}\n")
-        git("add", "tools/mw_landed.tsv")
         for f in landed:  # the ratchet store only holds open functions
             for ext in (".json", ".c"):
                 q = NEAR / f"{f}{ext}"
-                if q.exists():
-                    git("rm", "-q", "--cached", "--ignore-unmatch", str(q.relative_to(REPO)), check=False)
-                    q.unlink()
-        git("commit", "-q", "--amend", "--no-edit")
+                q.unlink(missing_ok=True)
         print(f"LANDED: {', '.join(landed)} ({total} bytes) — {git('rev-parse', '--short', 'HEAD').strip()}")
 
 
@@ -859,7 +852,7 @@ def cmd_note(a):
 # ---------------------------------------------------------------- pick / rm
 
 def skip_list():
-    """Functions in tools/skip.txt: known to be impossible from C (hand-written asm etc.)."""
+    """Functions in an optional, local tools/skip.txt that `pick` should leave out."""
     p = MAIN.parent / "tools" / "skip.txt"
     return {l.split()[0] for l in p.read_text().splitlines() if l.strip() and not l.startswith("#")} if p.exists() else set()
 

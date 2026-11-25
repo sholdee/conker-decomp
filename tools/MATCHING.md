@@ -39,8 +39,8 @@ when resuming, and append one line per hypothesis family you try (what, result) 
 agent does not repeat dead ends.
 Judge progress by the `ROWS:` line (structural / register-only / immediate counts), not the
 asm-differ `CURRENT` score, which is not monotonic. Get structural to 0 first. When only
-register-only rows remain and ~15 focused tries make no progress, stop and report it: the
-coordinator runs the permuter (`tools/mw_perm.py`) on regalloc-only residue.
+register-only rows remain and ~15 focused tries make no progress, stop and report it with the
+ledger up to date: register allocation residue needs a different approach, not more variants.
 `check` output: a `DIFF:` summary line (words equal, size, first mismatch offset) and an
 asm-differ table: left = TARGET, right = CURRENT (your build), with `r` = register-only diff,
 `i` = immediate diff, `|` = different instruction, `<`/`>` = missing/extra instruction.
@@ -58,8 +58,8 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
   `~/conker-ws/FUNC/my/`. Never use /tmp or the session scratchpad: other agents share them and
   overwrite each other's files.
 - Scripted variant sweeps (`mw.py batch`, generators) are fine, but keep each sweep to a few
-  hundred variants; the machine is shared by 16 agents and a permuter daemon. Register-only
-  residue is the permuter's job — stop and report REGALLOC instead of brute-forcing it.
+  hundred variants; the machine is shared by many agents. Stop and report REGALLOC instead of
+  brute-forcing register-only residue.
 - C89: all declarations at the top of a block. No `//`-only tricks needed (`-Xcpluscomm` is on).
 - Literals are fine: write float/double/string literals naturally (`10000.0f`, `"name"`). The
   build retargets every .rodata reference in your object to the ROM's original address
@@ -97,7 +97,7 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
    recorded as your best attempt. If a wrong version got recorded anyway, restore your correct
    file and run `mw.py best FUNC --reset`.
 6. Your best version is kept automatically: every check that beats your best so far is
-   snapshotted to `best/file.c` in the workspace and to `~/conker/.nearmiss/` (nothing is ever
+   snapshotted to `best/file.c` in the workspace and to the local `.nearmiss/` store (nothing is ever
    lost, and a later attempt starts from it). Still, don't wander away from your best — restore
    from `best/file.c` when a line of attack fails.
 7. After one failed sweep of a hypothesis family (e.g. statement orders), switch families
@@ -154,11 +154,11 @@ function is right but something ELSE in the bin changed — e.g. a new literal i
   function's entry is address-taken. If the target's jtbl code looks "impossible", grep asm/data for
   the function's address (a handler table). Then add a static table in the C file, for example
   `static s32 (*const D_800841D4_entry[])(...) = { func_X };`. Game `.rodata` from C objects is
-  discarded at link, so this adds no bytes. It landed func_15072B44 and func_15031FC8, which were
-  wrongly skip-listed.
+  discarded at link, so this adds no bytes. It landed func_15072B44 and func_15031FC8, which had been
+  written off as hand-written asm.
 - **Offline variant sweeps land near-misses in 2-3 checks.** Agents who closed register,
   stack-slot and scheduling residues fastest wrote a small script in `my/`. It runs the
-  workspace's `../ido/ido5.3_recomp/cc` through `mw.run(cmd, cwd)`, using the same flags
+  image's `/opt/ido/5.3/cc` through `mw.run(cmd, cwd)`, using the same flags
   the Makefile gives this file (game files add `-Olimit 3000`). The script compiles dozens of
   generated variants, disassembles each with `mips-linux-gnu-objdump -dr`, and scores it
   against `target.s`. Only the winner goes through `mw.py check`. If `-K` crashes ugen,

@@ -10,6 +10,12 @@ FROM docker.io/library/ubuntu:24.04
 COPY --from=gzip /gzip-rare /usr/local/bin/gzip-rare
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y binutils-mips-linux-gnu build-essential git less libglib2.0-0t64 python-is-python3 python3 python3-pip python3-venv unzip wget cpp && rm -rf /var/lib/apt/lists/*
+# IDO 5.3, statically recompiled for Linux (decompals/ido-static-recomp release v1.2). It builds the
+# game byte-identically; not distributed in this repository.
+ARG IDO_URL=https://github.com/decompals/ido-static-recomp/releases/download/v1.2/ido-5.3-recomp-linux.tar.gz
+ARG IDO_SHA256=ab5c741561f80913d58c8b074771f23941a3edd312505a8ebed6d1dfeb65e506
+RUN wget -q -O /tmp/ido.tar.gz "$IDO_URL" && echo "$IDO_SHA256  /tmp/ido.tar.gz" | sha256sum -c - \
+ && mkdir -p /opt/ido/5.3 && tar -xzf /tmp/ido.tar.gz -C /opt/ido/5.3 && rm /tmp/ido.tar.gz
 COPY requirements.txt /
 COPY tools/n64splat/requirements.txt /splat-req.txt
 COPY tools/toolchain/constraints.txt /constraints.txt

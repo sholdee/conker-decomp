@@ -6,7 +6,7 @@
 FILE.tsv has one `old<TAB>new` pair per line (# comments allowed). The whole batch is applied at once:
   1. validate: old names exist; new names are valid identifiers, unique, and unused anywhere in the tree;
   2. under the land lock: rewrite symbol_addrs.us.txt (the splat name source), replace every whole-word
-     occurrence in conker/src (.c/.h/.s), conker/include, the linker symbol files and tools/skip.txt;
+     occurrence in conker/src (.c/.h/.s), conker/include, and the linker symbol files;
   3. re-run splat (regenerates asm/ with the new names), restore the auto symbol files, rebuild with make -B;
   4. commit only if the whole-ROM sha1 still matches; otherwise restore everything exactly.
 """
@@ -56,7 +56,6 @@ def files():
     out = []
     for g in TEXT_GLOBS:
         out += [p for p in M.glob(g) if p.is_file()]
-    out.append(REPO / "tools" / "skip.txt")
     return sorted(set(out))
 
 
@@ -150,8 +149,7 @@ def main():
         if not ok:
             errs = [l for l in r.stdout.splitlines() if "rror" in l or "undefined reference" in l][:20]
             mw.git("checkout", "--", "conker/src", "conker/include", "conker/symbol_addrs.us.txt",
-                   "conker/undefined_syms.us.txt", "conker/undefined_funcs.us.txt", "conker/jtbl_labels.us.txt",
-                   "tools/skip.txt")
+                   "conker/undefined_syms.us.txt", "conker/undefined_funcs.us.txt", "conker/jtbl_labels.us.txt")
             for f in AUTO:  # untracked: put the pre-rename copies back
                 shutil.copy(orig / f, M / f)
             mw.run("python3 ../tools/n64splat/split.py conker.us.yaml >/dev/null 2>&1", M, timeout=3600)
