@@ -85,7 +85,8 @@ typedef struct {
 Emitter *func_151407D0(EmitterParams *, s32, SpawnParams *, u8, u8, u8, u8, s32, s32, s32);
 void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 
-/* Emitter update handlers; each sets *keepGoing and returns 0 to stop the update. */
+/* Emitter handlers run by func_1518A094 before it follows the bone. Returning 0 ends the emitter's
+ * update (func_1518A094 returns 0); setting *follow to FALSE skips this frame's bone follow. */
 extern s32 (*D_8008D5A0[])(Emitter *, u8 *);
 
 /* Spawns an emitter (type 0xB) that follows the bone described by `attach`. */
@@ -99,7 +100,7 @@ Emitter *func_15189FF0(SpawnParams *spawn, EmitterParams *params, EmitterAttach 
         EmitterAttach *dst = &emitter->attach;
 
         memcpy(dst, attach, sizeof(EmitterAttach));
-    } else {
+    } else { // matching: an early `if (emitter == NULL) return NULL;` changes the branch layout
         return NULL;
     }
     return emitter;
@@ -118,25 +119,25 @@ s32 func_1518A094(Emitter *emitter) {
     }
     if ((attach->target->interaction_state != 0) && (attach->target->unique_id == attach->targetId)) {
         if (attach->handler != -1) {
-            u8 keepGoing;
+            u8 follow;
 
-            if (D_8008D5A0[attach->handler](emitter, &keepGoing)) {
-                if (!keepGoing) {
+            if (D_8008D5A0[attach->handler](emitter, &follow)) {
+                if (!follow) {
                     return 1;
                 }
-            } else {
+            } else { // matching: early-return form reorders the branches
                 return 0;
             }
         }
         if (attach->target->unk1D4 != NULL) {
-            f32 *mtx;
-            f32 *out;
+            f32 (*mtx)[4];
+            Vec3f *out;
 
-            mtx = (f32 *)((u8 *)attach->target->unk1D4 + (attach->bone << 6));
-            out = &emitter->p0.x;
-            func_150A7960(mtx, attach->p0.x, attach->p0.y, attach->p0.z, &out[0], &out[1], &out[2]);
-            out = &emitter->p1.x;
-            func_150A7960(mtx, attach->p1.x, attach->p1.y, attach->p1.z, &out[0], &out[1], &out[2]);
+            mtx = ((MtxF *)attach->target->unk1D4)[attach->bone];
+            out = &emitter->p0;
+            func_150A7960(mtx, attach->p0.x, attach->p0.y, attach->p0.z, &out->x, &out->y, &out->z);
+            out = &emitter->p1;
+            func_150A7960(mtx, attach->p1.x, attach->p1.y, attach->p1.z, &out->x, &out->y, &out->z);
             emitter->flags |= 2;
             emitter->flags &= ~4;
         } else {
@@ -148,78 +149,81 @@ s32 func_1518A094(Emitter *emitter) {
     return 1;
 }
 
-s32 func_1518A214(void *arg0, u8 *arg1) {
-    s32 temp_v0;
-    EmitterParams *temp_v0_2;
-    f32 temp_f0;
+/* Handler: sets params unk18/unk1C and the color from the target's byte 0x68; 15 clears flag 2 and stops. */
+s32 func_1518A214(Emitter *emitter, u8 *follow) {
+    EmitterParams *params;
+    f32 value;
 
-    temp_v0 = ((AttachTargetBytes *)((Emitter *)arg0)->attach.target)->unk68 - 0xF;
-    temp_v0_2 = (EmitterParams *)((u8 *)arg0 + 0x110);
-    switch (temp_v0) {
-    default:
-        temp_f0 = 0.6000000238f;
-        temp_v0_2->unk18 = temp_f0;
-        temp_v0_2->unk1C = temp_f0;
-        ((Emitter *)arg0)->color[2] = 0;
-        ((Emitter *)arg0)->color[1] = 0;
-        ((Emitter *)arg0)->color[0] = 0xFF;
-        *arg1 = 1;
+    params = &emitter->params;
+    switch (((AttachTargetBytes *)emitter->attach.target)->unk68 - 15) {
+    default: // < 15 or > 17
+        value = 0.6f;
+        params->unk18 = value;
+        params->unk1C = value;
+        emitter->color[2] = 0;
+        emitter->color[1] = 0;
+        emitter->color[0] = 0xFF;
+        *follow = TRUE;
         break;
-    case 0:
-        ((Emitter *)arg0)->flags &= ~2;
-        *arg1 = 0;
+    case 0: // 15
+        emitter->flags &= ~2;
+        *follow = FALSE;
         break;
-    case 1:
-        temp_f0 = 0.3000000119f;
-        temp_v0_2->unk18 = temp_f0;
-        temp_v0_2->unk1C = temp_f0;
-        ((Emitter *)arg0)->color[0] = 0x80;
-        ((Emitter *)arg0)->color[1] = 0;
-        ((Emitter *)arg0)->color[2] = 0;
-        *arg1 = 1;
+    case 1: // 16
+        value = 0.3f;
+        params->unk18 = value;
+        params->unk1C = value;
+        emitter->color[0] = 0x80;
+        emitter->color[1] = 0;
+        emitter->color[2] = 0;
+        *follow = TRUE;
         break;
-    case 2:
-        temp_f0 = 0.6000000238f;
-        temp_v0_2->unk18 = temp_f0;
-        temp_v0_2->unk1C = temp_f0;
-        ((Emitter *)arg0)->color[0] = 0xFF;
-        ((Emitter *)arg0)->color[1] = 0;
-        ((Emitter *)arg0)->color[2] = 0;
-        *arg1 = 1;
+    case 2: // 17
+        value = 0.6f;
+        params->unk18 = value;
+        params->unk1C = value;
+        emitter->color[0] = 0xFF;
+        emitter->color[1] = 0;
+        emitter->color[2] = 0;
+        *follow = TRUE;
         break;
     }
     return 1;
 }
 
-s32 func_1518A2E8(Emitter *arg0, u8 *arg1) {
-    if (((AttachTargetBytes *)arg0->attach.target)->unk6A != 0) {
-        arg0->flags &= ~2;
-        *arg1 = 0;
+/* Handler: while the target's byte 0x6A is set, clears flag 2 and stops. */
+s32 func_1518A2E8(Emitter *emitter, u8 *follow) {
+    if (((AttachTargetBytes *)emitter->attach.target)->unk6A != 0) {
+        emitter->flags &= ~2;
+        *follow = FALSE;
     } else {
-        *arg1 = 1;
+        *follow = TRUE;
     }
     return 1;
 }
 
-s32 func_1518A324(Emitter *arg0, u8 *arg1) {
-    if (((AttachTargetBytes *)arg0->attach.target)->unk6F == 0) {
-        arg0->flags &= ~2;
-        *arg1 = 0;
+/* Handler: once the target's byte 0x6F is clear, clears flag 2 and stops. */
+s32 func_1518A324(Emitter *emitter, u8 *follow) {
+    if (((AttachTargetBytes *)emitter->attach.target)->unk6F == 0) {
+        emitter->flags &= ~2;
+        *follow = FALSE;
     } else {
-        *arg1 = 1;
+        *follow = TRUE;
     }
     return 1;
 }
 
-void func_1518A360(void *arg0, SwapTargetMsg *arg1, u8 arg2) {
-    EmitterAttach *v0 = &((Emitter *)arg0)->attach;
-    if (arg2 == 0x2D) {
-        if (v0->target == arg1->objA) {
-            v0->target = arg1->objB;
-            v0->targetId = arg1->idB;
-        } else if (v0->target == arg1->objB) {
-            v0->target = arg1->objA;
-            v0->targetId = arg1->idA;
+/* Message handler: message 0x2D moves the emitter from one object of the pair to the other. */
+void func_1518A360(Emitter *emitter, SwapTargetMsg *msg, u8 msgId) {
+    EmitterAttach *attach = &emitter->attach;
+
+    if (msgId == 0x2D) {
+        if (attach->target == msg->objA) {
+            attach->target = msg->objB;
+            attach->targetId = msg->idB;
+        } else if (attach->target == msg->objB) {
+            attach->target = msg->objA;
+            attach->targetId = msg->idA;
         }
     }
 }
