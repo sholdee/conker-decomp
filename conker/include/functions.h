@@ -301,15 +301,6 @@ void func_1504332C(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
 void func_15043A00(MsgRing *ring, u8 *buffer, s32 capacity);
 void func_15047F00(MtxF mtx, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 void func_15048134(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
-f32  func_150484A0(f32 arg0, f32 arg1); // libultra's declaration is in src/libultra/audio/n_synthInternals.h
-u16  func_15048664(s16 arg0);
-s16  func_150486B8(s16 arg0);
-f32  func_15048360(f32 arg0);
-f32  func_15048408(f32 arg0);
-f32  func_15048720(f32 arg0, f32 arg1, f32 arg2);
-void func_15048758(f32 *arg0);
-f32  func_150487E0(f32 arg0);
-f32  func_15048864(f32 arg0);
 s32  func_15043CA4(MsgRing *ring, u8 *dst, s32 dstSize);
 void func_15142314(void *bones, s32 bone, Vec3f *out);
 f32  func_1504A5E0(f32 arg0);

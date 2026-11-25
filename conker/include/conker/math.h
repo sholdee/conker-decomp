@@ -46,7 +46,7 @@ f32 func_15048360(f32 arg0);
 f32 func_15048408(f32 arg0);
 
 /* game/done/game_75950.c */
-f32 func_150484A0(f32 arg0, f32 arg1);
+f32 func_150484A0(f32 arg0, f32 arg1); /* libultra files see the declaration in src/libultra/audio/n_synthInternals.h */
 
 /* game/done/game_75A90.c */
 s32 func_150485E0(s32 x);
