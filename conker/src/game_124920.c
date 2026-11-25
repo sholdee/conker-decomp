@@ -423,10 +423,8 @@ void func_151541B8(struct17 *pos, f32 arg1, u32 arg2, f32 arg3, f32 arg4, u8 arg
 void func_151D3F14(struct17 *pos, u8, s32);
 struct126 *func_150FF288(struct127 *);
 s32 func_150FF6E0(struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct127 *, struct126 *);
-void func_150FF474(struct17 *, struct17 *, s32, s32);
+void func_150FF474(struct17 *position, struct17 *points, u8 arg2, s32 arg3);
 void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, s32, s32);
-
-typedef u8 Func150F9950Entry[0x40];
 
 /* Impact effect at `pos`. */
 void func_150F7F8C(struct17 *pos, u8 arg1, s32 arg2) {
@@ -1076,19 +1074,20 @@ void func_150F892C(StageObj *obj) {
     }
 }
 
-extern u8 D_800A1C40[];
+extern u8 D_800A1C40[][2];
 
-void func_150F9720(u8 arg0) {
-    struct { s32 unk0; u8 unk4; } sp18;
-    sp18.unk0 = 0;
-    sp18.unk4 = D_800A1C40[arg0 * 2];
-    func_151494E0((s32)&sp18, 0x42);
-    sp18.unk4 = D_800A1C40[arg0 * 2 + 1];
-    func_151494E0((s32)&sp18, 0x42);
+/* Broadcasts message 0x42 (jump to the last stage) for both StageState ids of pair `index`. */
+void func_150F9720(u8 index) {
+    StageMsg msg;
+
+    msg.unk0 = 0;
+    msg.unk4 = D_800A1C40[index][0];
+    func_151494E0((s32)&msg, 0x42);
+    msg.unk4 = D_800A1C40[index][1];
+    func_151494E0((s32)&msg, 0x42);
 }
 
 void func_150F9788(struct260 *arg0) {
-
 }
 
 void func_150F9788(struct260 *);
@@ -1104,53 +1103,62 @@ void func_150F97C0(struct260 *arg0) {
 }
 
 extern u8 D_80088B50;
-extern const f32 D_800A1C48[3];
-extern const f32 D_800A1C54[3];
-extern s32 func_15145EA4(s32 *arg0, s32 *arg1, s32 arg2, s32 arg3);
-extern void func_15102B38(s32, u8, const f32 *, const f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
+extern struct17 D_800A1C48;
+extern struct17 D_800A1C54;
+extern s32 func_15145EA4(struct17 **src, struct17 **dst, void *mtx, s32 count);
+extern void func_15102B38(struct127 *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6,
+                          f32 arg7, struct17 *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
 
-void func_150F97EC(s32 arg0, s32 arg1, s32 arg2) {
-    struct17 sp64;
-    f32 scale;
-    f32 sp58[2];
-    s32 sp54[1];
-    s32 sp50[1];
-    s32 mtx;
-    s32 sp48;
-    s32 sp44;
+/* Effect at the point D_800A1C48 on bone D_80088B50 of `obj`. */
+void func_150F97EC(obj, arg1, arg2)
+struct127 *obj;
+u8 arg1;
+s32 arg2;
+{
+    struct17 pos;
+    f32 one;
+    f32 motion[2];
+    struct17 *src;
+    struct17 *dst;
+    void *mtx;
+    s32 random1;
+    s32 random0;
 
-    if (((struct127 *)arg0)->unk1D4 == 0) {
+    if (obj->unk1D4 == NULL) {
         return;
     }
-    sp54[0] = (s32)D_800A1C48;
-    sp50[0] = (s32)&sp64;
-    mtx = (s32)((struct127 *)arg0)->unk1D4 + (D_80088B50 << 6);
-    func_15145EA4(sp54, sp50, mtx, 1);
-    scale = 1.0f;
-    sp58[1] = func_150ADA68() * scale + 2.0f;
-    sp58[0] = func_150ADA68() * 14.0f + 28.0f;
-    sp44 = func_150ADA20();
-    sp48 = func_150ADA20();
-    func_15102B38(arg0, D_80088B50, D_800A1C48, D_800A1C54, sp58,
-                  (sp44 % 3U) + 4, (sp48 % 0x9CU) + 0x64,
-                  func_150ADA68() * 300.0f + 400.0f, &sp64, 0xFF,
-                  0, -1, ((u8 *)&arg1)[3], arg2);
+    src = &D_800A1C48;
+    dst = &pos;
+    mtx = ((f32 (*)[4][4])obj->unk1D4)[D_80088B50];
+    func_15145EA4(&src, &dst, mtx, 1);
+    one = 1.0f; // matching: IDO folds a literal "* 1.0f" away; the original multiplies by a variable
+    motion[1] = func_150ADA68() * one + 2.0f;
+    motion[0] = func_150ADA68() * 14.0f + 28.0f;
+    random0 = func_150ADA20();
+    random1 = func_150ADA20();
+    func_15102B38(obj, D_80088B50, &D_800A1C48, &D_800A1C54, motion, (random0 % 3U) + 4, (random1 % 156U) + 100,
+                  func_150ADA68() * 300.0f + 400.0f, &pos, 0xFF, 0, -1, arg1, arg2);
 }
 
-void func_150F9950(struct127 *arg0, s32 arg1, s32 arg2) {
-    struct17 sp60[6];
-    struct17 sp54;
-    struct17 sp48;
-    struct17 sp3C;
-    struct17 sp30;
-    struct126 *temp;
+/* Muzzle effects of `obj`'s gun attachment (set 0x82): flash at the muzzle, impact at the hit point. */
+void func_150F9950(obj, arg1, arg2)
+struct127 *obj;
+u8 arg1;
+s32 arg2;
+{
+    struct17 points[6];
+    struct17 position;
+    struct17 hit;
+    struct17 normal;
+    struct17 unk30;
+    struct126 *gun;
 
-    temp = func_150FF288(arg0);
-    if (temp != 0) {
-        if (func_150FF6E0(sp60, &sp54, &sp48, &sp3C, &sp30, arg0, temp) != 0) {
-            func_151D3F14(&sp54, ((u8 *)&arg1)[3], arg2);
-            func_151D4408(&sp48, &sp3C, (*(Func150F9950Entry **)&arg0->unk1D4)[*((u8 *)temp + 2)], arg0, 1.0f, ((u8 *)&arg1)[3], arg2);
-            func_150FF474(&sp54, sp60, ((u8 *)&arg1)[3], arg2);
+    gun = func_150FF288(obj);
+    if (gun != NULL) {
+        if (func_150FF6E0(points, &position, &hit, &normal, &unk30, obj, gun) != 0) {
+            func_151D3F14(&position, arg1, arg2);
+            func_151D4408(&hit, &normal, ((f32 (*)[4][4])obj->unk1D4)[((u8 *)gun)[2]], obj, 1.0f, arg1, arg2);
+            func_150FF474(&position, points, arg1, arg2);
         }
     }
 }
