@@ -6,7 +6,6 @@
 #include "variables.h"
 #undef D_800D212C
 
-
 extern u8 D_8009D954[];
 extern u8 *D_80087240[];
 
@@ -40,13 +39,14 @@ typedef struct {
     /* 0x17 */ u8 pad17;
 } SpawnPoint;
 
+/* Multiplayer score state (ScoreState in game_215960); only the field used here. */
 typedef struct {
     /* 0x00 */ u8 pad0[0x42];
     /* 0x42 */ s8 unk42;
-} F15084D70_obj;
+} ScoreState;
 
 extern SpawnPoint *D_800D212C;
-extern F15084D70_obj *D_8008FDD4;
+extern ScoreState *D_8008FDD4;
 extern s8 D_800E0BE3;
 
 /* Copies spawn point `spawnIndex` (or, when it is -1, the player's stored one) into the out
@@ -171,10 +171,8 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
         *outUnk14 = D_800D212C[j].unk14;
         *outUnk15 = D_800D212C[j].unk15;
         if (D_800BE616 && D_800D18A8 == 0) {
-            f32 angle;
-            f32 offset;
-            angle = *outFacing * 3.1415927410f * (1.0f / 128);
-            offset = func_150ADA68() * 80.0f - 40.0f;
+            f32 angle = *outFacing * 3.1415927410f * (1.0f / 128);
+            f32 offset = func_150ADA68() * 80.0f - 40.0f;
             outPos[0] += sinf(angle) * offset;
             outPos[2] += cosf(angle) * offset;
         }
