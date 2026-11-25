@@ -103,7 +103,7 @@ Gfx *func_1513F4E4(Gfx *gfx, u8 arg1, u8 *update);
 
 /* Draws the sprite as a scaled textured rectangle. */
 Gfx *func_15169A48(Gfx *gfx, Game196DB0Sprite *sprite, s32 arg2) {
-    s32 pad;
+    s32 pad; // matching: unused stack slots keep the original frame size
     s32 drawFlags;
     u8 update;
     s32 sfrac;
@@ -118,18 +118,10 @@ Gfx *func_15169A48(Gfx *gfx, Game196DB0Sprite *sprite, s32 arg2) {
     gDPSetPrimColor(gfx++, 1, 0, sprite->params.red, sprite->params.green, sprite->params.blue,
                     sprite->params.alpha);
     if (sprite->params.flags & 1) {
-        if (sprite->params.flags & 2) {
-            sfrac = (sprite->params.sOffset * 4) >> 5;
-        } else {
-            sfrac = 0;
-        }
+        sfrac = (sprite->params.flags & 2) ? (sprite->params.sOffset * 4) >> 5 : 0;
         gfx = func_15094F70(gfx, sprite->params.tile1Texture, 0, NULL, 0x100, 1, sfrac, 2, 3);
     }
-    if (sprite->params.flags & 0x10) {
-        drawFlags = 1;
-    } else {
-        drawFlags = 0;
-    }
+    drawFlags = (sprite->params.flags & 0x10) ? 1 : 0;
     if (sprite->params.flags & 4) {
         drawFlags |= 2;
     }
@@ -139,11 +131,7 @@ Gfx *func_15169A48(Gfx *gfx, Game196DB0Sprite *sprite, s32 arg2) {
     if (sprite->params.flags & 0x20) {
         gDPSetPrimDepth(gfx++, 0x795A, 0);
     }
-    if (sprite->params.cycleType == 2) {
-        cycleType = G_CYC_2CYCLE;
-    } else {
-        cycleType = G_CYC_1CYCLE;
-    }
+    cycleType = (sprite->params.cycleType == 2) ? G_CYC_2CYCLE : G_CYC_1CYCLE;
     gfx = func_15142FBC(gfx,
                         cycleType | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                         D_800A4AC8[sprite->params.renderMode].cycle1 | D_800A4AC8[sprite->params.renderMode].cycle2 |
