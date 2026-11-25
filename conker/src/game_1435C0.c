@@ -2,16 +2,19 @@
 #include "functions.h"
 #include "variables.h"
 
-extern s32 func_15195FB0(void *, s32, s32, s32, s32, s32, s32);
-extern f32 func_1510F648(f32, f32, f32);
+/* Registers a TexScroll on res's display list (game_1C2C60.c). */
+extern void *func_15195FB0(void *res, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 speedS,
+                           s32 speedT);
+/* Height of the prop surface below (x, y, z), or -10000 (game_13BB20.c). */
+extern f32 func_1510F648(f32 x, f32 y, f32 z);
 extern u16 D_800CC354;
 
-/* Object that spawns a child from a packed spawn word on its first update. */
+/* Object whose display list gets a texture scroll registered on its first update. */
 struct Obj15116110 {
     u8 pad0[0x3C];
-    s32 spawnInfo; /* bits 0-14 id, 15+ passed whole, 16-23 and 24-31 two byte args */
+    s32 scrollInfo; /* bits 0-14 texture, >> 15 doubled, bits 16-23 speedT, 24-31 speedS */
     u8 pad40[0x3C];
-    s32 handle;
+    void *texScroll;
 };
 
 /* Object that follows the ground height with a damped vertical offset. */
@@ -44,60 +47,59 @@ struct Obj151162D4 {
     s32 phase; /* scaled by 360/65536 before cosf */
 };
 
-/* Spawns the object's child once, from the packed spawn word, then clears the word. */
-void func_15116110(struct Obj15116110 *arg0) {
+/* Registers the object's texture scroll once, from the packed scroll word, then clears the word. */
+void func_15116110(struct Obj15116110 *obj) {
     s32 info;
-    s32 id, hi;
+    s32 texture, doubled;
 
-    if (arg0->handle == 0) {
-        info = arg0->spawnInfo;
-        id = (u16)info & 0x7FFF;
-        hi = info >> 15;
-        info >>= 0; // matching: keeps the byte args' shifts below the id/hi setup (as1 orders by -g3 line)
-        arg0->handle = func_15195FB0(arg0, id, hi, -1, 0, (s8)(info >> 24) & 0xFF, (s8)(info >> 16) & 0xFF);
-        arg0->spawnInfo = 0;
+    if (obj->texScroll == NULL) {
+        info = obj->scrollInfo;
+        texture = (u16)info & 0x7FFF; // matching: the (u16) and (s8) casts pick IDO's register assignment
+        doubled = info >> 15;
+        info >>= 0; // matching: keeps the speed shifts below the texture/doubled setup (as1 orders by -g3 line)
+        obj->texScroll = func_15195FB0(obj, texture, doubled, -1, 0, (s8)(info >> 24) & 0xFF, (s8)(info >> 16) & 0xFF);
+        obj->scrollInfo = 0;
     }
 }
 
 /* Snaps the object to the ground and eases its height offset towards a rest value. */
-void func_1511617C(struct Obj1511617C *arg0) {
+void func_1511617C(struct Obj1511617C *obj) {
     f32 delta;
     s32 target;
     s16 oldY;
 
-    oldY = arg0->y;
-    arg0->groundY = func_1510F648(arg0->x, arg0->y, arg0->z);
-    if (fabsf(arg0->groundY - arg0->y) > 200.0f) {
-        arg0->heightOffset = 0;
+    oldY = obj->y;
+    obj->groundY = func_1510F648(obj->x, obj->y, obj->z);
+    if (fabsf(obj->groundY - obj->y) > 200.0f) {
+        obj->heightOffset = 0;
     }
-    if (!(arg0->flags & 4)) {
-        delta = -arg0->heightOffset;
-        arg0->heightOffset += delta * 0.2f;
+    if (!(obj->flags & 4)) {
+        delta = -obj->heightOffset;
+        obj->heightOffset += delta * 0.2f;
     } else {
         target = -20;
         if (D_800CC354 == 75) {
             target = -40;
         }
-        delta = target - arg0->heightOffset;
-        arg0->heightOffset += delta * 0.3f;
+        delta = target - obj->heightOffset;
+        obj->heightOffset += delta * 0.3f;
     }
-    arg0->y = arg0->groundY + arg0->heightOffset;
-    arg0->dy = arg0->y - oldY;
-
+    obj->y = obj->groundY + obj->heightOffset;
+    obj->dy = obj->y - oldY;
 }
 
 /* Moves the object along a cosine bob and records its vertical movement in dy. */
-void func_151162D4(struct Obj151162D4 *arg0) {
+void func_151162D4(struct Obj151162D4 *obj) {
     f32 amplitude;
     u32 speed;
     s16 prevY;
     f32 offset;
 
-    prevY = arg0->y + arg0->bobOffset;
-    amplitude = (s16)(arg0->wave & 0xFFFF);
-    speed = (arg0->wave >> 16) & 0xFFFF;
-    offset = cosf(arg0->phase * (360.0f / 65536.0f)) * amplitude;
-    arg0->bobOffset = offset;
-    arg0->phase += speed * D_800BE9E4;
-    arg0->dy = (arg0->y + offset) - prevY;
+    prevY = obj->y + obj->bobOffset;
+    amplitude = (s16)(obj->wave & 0xFFFF);
+    speed = (obj->wave >> 16) & 0xFFFF;
+    offset = cosf(obj->phase * (360.0f / 65536.0f)) * amplitude;
+    obj->bobOffset = offset;
+    obj->phase += speed * D_800BE9E4;
+    obj->dy = (obj->y + offset) - prevY;
 }
