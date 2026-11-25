@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
 typedef struct Vec3f {
     f32 x;
     f32 y;
@@ -38,7 +37,7 @@ typedef struct StripObj {
     /* 0x24 */ Vec3f p1;
     /* 0x30 */ s8 updateIdx;    // index into D_80088760, -1 for none
     /* 0x31 */ u8 pad31[3];
-    /* 0x34 */ f32 texScale;    // texture repeats per unit of length
+    /* 0x34 */ f32 texScale;    // v texcoord = length * texScale * 64
     /* 0x38 */ u8 unk38;        // index into D_800887B8 / D_800887C0 / D_800887C8
     /* 0x39 */ u8 pad39[7];
     /* 0x40 */ Vtx quad[2][4];  // double-buffered by D_800BE9C0
@@ -50,7 +49,7 @@ typedef struct StripObj {
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern f32 func_15143E64(Vec3f *);
 
-/** Allocates a strip with `payloadSize` bytes of payload after the 0xC8-byte header and caches its length. */
+/** Allocates a strip (0xC8-byte header plus `payloadSize` bytes of payload, its target) and caches its length. */
 StripObj *func_150C5370(StripDesc *desc, s32 payloadSize) {
     StripObj *strip;
 
@@ -72,10 +71,12 @@ StripObj *func_150C5370(StripDesc *desc, s32 payloadSize) {
     return strip;
 }
 
+/** Destroy handler: hands the strip to func_15169804. */
 void func_150C5430(StripObj *strip) {
     func_15169804((struct102 *)strip);
 }
 
+/** Free handler: hands the strip to func_15169824. */
 void func_150C5450(StripObj *strip) {
     func_15169824((struct102 *)strip);
 }
@@ -108,13 +109,15 @@ void func_150C54C0(StripObj *strip) {
     D_800887C0[idx](strip);
 }
 
-extern void func_1514EDF0(StripObj *strip, struct127 *obj);
+extern void func_1514EDF0(StripObj *handle, struct127 *owner);
 
+/** Detaches the strip from its target character, then destroys it (func_150C5430). */
 void func_150C5510(StripObj *strip) {
     func_1514EDF0(strip, strip->target.obj);
     func_150C5430(strip);
 }
 
+/** Detaches the strip from its target character, then frees it (func_150C5450). */
 void func_150C553C(StripObj *strip) {
     func_1514EDF0(strip, strip->target.obj);
     func_150C5450(strip);
