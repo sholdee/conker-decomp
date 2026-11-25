@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 void *memcpy(void *dst, const void *src, u32 size);
 
@@ -88,18 +89,6 @@ typedef struct Emitter {
     StreamData *data;
 } Emitter;
 
-/* Template for a new emitter, passed to func_15147A80. */
-typedef struct {
-    Vec3f pos;
-    s16 unkC;
-    s16 unkE;
-    s32 kind;
-    u8 unk14;
-    u8 unk15;
-    u8 pad16[2];
-    s32 unk18;
-} EmitterTemplate;
-
 /* The spawner task's state: owns at most one emitter for its source. */
 typedef struct {
     StreamSource *source;
@@ -121,7 +110,7 @@ typedef struct {
 /* Unprototyped: func_151CD4C0 is a K&R definition (callers pass its u8 arguments unnarrowed). */
 Emitter *func_151CD4C0();
 void func_151CE47C(Emitter *emitter);
-Emitter *func_15147A80(EmitterTemplate *template, s32 dataSize, s32 particleSize, s32 arg3, s32 arg4, s32 arg5,
+Emitter *func_15147A80(EffectTemplate *template, s32 dataSize, s32 particleSize, s32 arg3, s32 arg4, s32 arg5,
                        s32 arg6, s32 arg7, s32 arg8, u8 arg9, s32 argA);
 
 /* Creates the spawner task for a stream source. */
@@ -198,17 +187,17 @@ Emitter *func_151CD4C0(source, textureIndex, id, arg3, arg4)
     s32 arg4;
 {
     Emitter *emitter;
-    EmitterTemplate template;
+    EffectTemplate template;
     StreamData data;
     f32 size;
 
     size = source->size;
-    template.unk15 = 0x23;
+    template.itemCount = 0x23;
     template.pos.x = source->x;
     template.pos.y = source->y + source->height;
     template.pos.z = source->z;
-    template.unkC = 0x12C;
-    template.unkE = 0x34;
+    template.life = 0x12C;
+    template.flags = 0x34;
     template.kind = STREAM_KIND;
     data.floorY = source->y;
     data.swayAmpX = size * 0.125f;

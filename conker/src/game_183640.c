@@ -411,17 +411,6 @@ void func_151568F8(desc, owner)
 
 void func_151568F8(StreakBurstEffectDesc *desc, u8 owner);
 
-/* Common head of effect objects (same layout as Game113D60EffectHeader in game_113D60.c). */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 kind;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 owner;
-    /* 0x0D */ u8 padD;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ u8 pad10[0x18];
-} EffectHeader;
-
 /* A countdown restarted at base + rand() % (range + 1). */
 typedef struct {
     /* 0x00 */ s16 base;
@@ -432,6 +421,7 @@ typedef struct {
 /* An effect that sets off bursts at random points of D_800DCA30 at random intervals. */
 typedef struct {
     /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x18];
     /* 0x28 */ RandomTimer timer;
 } RandomBurstEffect;
 

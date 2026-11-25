@@ -539,19 +539,6 @@ typedef struct PipeExplodeParticle {
     /* 0x28 */ PipeExplodePoint *points;
 } PipeExplodeParticle;
 
-/* First three parameter blocks for func_15147DA0. */
-typedef struct PipeTrailPos {
-    /* 0x00 */ f32 x;
-    /* 0x04 */ f32 y;
-    /* 0x08 */ f32 z;
-    /* 0x0C */ s16 unk0C;
-    /* 0x0E */ s16 unk0E;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 pad14;
-    /* 0x15 */ u8 unk15;
-    /* 0x18 */ s32 pad18;
-} PipeTrailPos;
-
 typedef struct PipeTrailMotion {
     /* 0x00 */ f32 unk00;
     /* 0x04 */ f32 unk04;
@@ -584,7 +571,7 @@ typedef struct PipeKinds {
 
 extern PipeKinds D_80088700;
 
-s32 func_15147DA0(PipeTrailPos *pos, PipeTrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
+s32 func_15147DA0(EffectTemplate *pos, PipeTrailMotion *motion, s32 arg2, s32 arg3, s32 arg4, s32 arg5,
                   s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10, s32 *arg11,
                   s32 arg12, u8 arg13, s32 arg14);
 
@@ -594,7 +581,7 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
     PipeExplodeParticle particle;
     f32 size;
     PipeKinds kinds;
-    PipeTrailPos pos;
+    EffectTemplate pos;
     PipeTrailMotion motion;
     PipeTrailStyle style;
 
@@ -642,17 +629,17 @@ s32 func_150B37C8(PipeExplodeActor *actor, s32 arg1, s32 arg2, s32 arg3, f32 y, 
     style.unk18 = 32;
     style.unk1C = 0;
     style.unk1D = 9;
-    pos.unk10 = 1;
-    pos.unk0E = 1;
+    pos.kind = 1;
+    pos.flags = 1;
     motion.unk19 = state->unk19;
     motion.unk1A = state->unk1A;
     motion.unk18 = 8;
     motion.alpha = state->alpha;
-    pos.x = particle.points[actor->pointIndex].x;
-    pos.y = y;
-    pos.z = particle.points[actor->pointIndex].z;
-    pos.unk15 = actor->unk25;
-    pos.unk0C = 60;
+    pos.pos.x = particle.points[actor->pointIndex].x;
+    pos.pos.y = y;
+    pos.pos.z = particle.points[actor->pointIndex].z;
+    pos.itemCount = actor->unk25;
+    pos.life = 60;
     motion.unk00 = state->unk00 * 0.75f;
     motion.unk10 = state->unk10;
     motion.unk04 = state->unk04;

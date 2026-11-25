@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * Trails left behind an actor, following the surface below it. A TrailOwner keeps one trail per side
@@ -214,21 +215,9 @@ void func_1519F168(Trail *trail) {
     func_15147928(trail);
 }
 
-/* Spawn descriptor for func_15147A80; it becomes the new trail's fields from 0x10 on. */
-typedef struct TrailHeader {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ u16 flags;
-    /* 0x10 */ s32 side;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 capacity;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 unk18;
-} TrailHeader;
-
 extern u8 D_800AB414[][3]; /* rgb per colour index */
 u8 func_151D8E20(void);
-Trail *func_15147A80(TrailHeader *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
+Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
 
 /* Creates the trail for `side` behind the owner's actor. */
 Trail *func_1519F1C8(owner, side)
@@ -236,7 +225,7 @@ Trail *func_1519F1C8(owner, side)
     u8 side;
 {
     Actor *actor;
-    TrailHeader header;
+    EffectTemplate header;
     TrailConfig config;
     Trail *trail;
     u8 colorIndex;
@@ -246,8 +235,8 @@ Trail *func_1519F1C8(owner, side)
     colorIndex = func_151D8E20();
     config.owner = owner;
     header.flags = 0x42;
-    header.unkC = 300;
-    header.capacity = 10;
+    header.life = 300;
+    header.itemCount = 10;
     config.pointLife = 200;
     config.flags = 2 | 4;
     config.tailFadeCount = 3;
@@ -269,7 +258,7 @@ Trail *func_1519F1C8(owner, side)
     config.pendingPoints = 0.0f;
     config.emitTime = 0.0f;
     sideWord = side;
-    header.side = sideWord;
+    header.kind = sideWord;
     config.driftSpeed = 1.5f;
     config.actorX = actor->x_position;
     config.actorZ = actor->z_position;

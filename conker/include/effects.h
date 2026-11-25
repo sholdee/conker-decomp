@@ -3,6 +3,16 @@
 
 /* Particle / effect spawn descriptors shared by the spawn functions and their callers. */
 
+/* Common head of the effect / particle objects (the first 0x10 bytes of each). */
+typedef struct EffectHeader {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 kind;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 unkD;
+    /* 0x0E */ s16 state;   /* -1 frees the object */
+} EffectHeader; /* size 0x10 */
+
 struct Actor;
 struct ParticleViewMask;
 
@@ -176,5 +186,18 @@ typedef struct DebrisEmitter {
     /* 0x56 */ s16 landPuffLifeBase;
     /* 0x58 */ s16 landPuffLifeRange;
 } DebrisEmitter; /* size 0x5C */
+
+/* Spawn header of an effect object, copied into EffectObj.header by func_15147A80 (game_174BF0.c);
+ * the template of trails, streams and other func_15147A80 effects. */
+typedef struct EffectTemplate {
+    /* 0x00 */ Vec3f pos;
+    /* 0x0C */ s16 life;
+    /* 0x0E */ u16 flags;     /* bit 0: life counts down; 0x10: run unk14's handler; 0x20: pass unk18 to the draw */
+    /* 0x10 */ s32 kind;      /* index into D_8008A2F0 / D_8008A340 / D_8008A390 */
+    /* 0x14 */ s8 unk14;      /* index into D_8008A284, -1: none */
+    /* 0x15 */ u8 itemCount;  /* number of items allocated after the user data */
+    /* 0x16 */ u8 pad16[2];
+    /* 0x18 */ void *unk18;
+} EffectTemplate; /* size 0x1C */
 
 #endif

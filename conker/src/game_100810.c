@@ -8,18 +8,6 @@
  * ribbon, two particle emitters that follow the owner and three looping sounds driven by its state.
  */
 
-/* Spawn header passed to func_15147A80; the actor keeps a copy of it at 0x10. */
-typedef struct {
-    Vec3f pos;
-    s16 unkC;
-    u16 flags;      // 4: pos was found on the owner's model
-    s32 unk10;
-    u8 unk14;
-    u8 maxPoints;   // ring buffer size
-    u8 pad16[2];
-    s32 unk18;
-} TrailSpawn; // size 0x1C
-
 /* Written by func_15147A80's caller into a particle object at 0x170, read by func_150D4CC4. */
 typedef struct {
     s16 timer;
@@ -71,7 +59,7 @@ typedef struct {
     u8 pad2[0xA];
     u8 unkC;
     u8 padD[3];
-    TrailSpawn spawn;
+    EffectTemplate spawn;
     s8 numPoints;       // points in the ring buffer
     s8 tail;            // oldest point
     s8 head;            // next point to write
@@ -113,20 +101,20 @@ typedef struct {
 extern s32 D_800A09C0[];
 s32 func_150D4AE0(Vec3f *start, Vec3f *end, Actor *owner, ActorCtl *arg3);
 Particle *func_151407D0(ParticleParams *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
-TrailActor *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+TrailActor *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */
 void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
-    TrailSpawn spawn;
+    EffectTemplate spawn;
     TrailState init;
     ActorCtl *s126;
     Vec3f end;
     TrailState *state;
 
-    spawn.maxPoints = 25;
-    spawn.unkC = 300;
+    spawn.itemCount = 25;
+    spawn.life = 300;
     spawn.flags = 0x12;
-    spawn.unk10 = 15;
+    spawn.kind = 15;
     spawn.unk14 = 1;
     init.targetWidth = 20.0f;
     init.width = 20.0f;
@@ -370,13 +358,13 @@ s32 func_150D3A68(TrailActor *actor) {
             pt->len = dist;
             pt->width = 100.0f;
             actor->head++;
-            if (actor->head == actor->spawn.maxPoints) {
+            if (actor->head == actor->spawn.itemCount) {
                 actor->head = 0;
             }
             actor->numPoints++;
             if (actor->head == actor->tail) {
                 actor->tail++;
-                if (actor->tail == actor->spawn.maxPoints) {
+                if (actor->tail == actor->spawn.itemCount) {
                     actor->tail = 0;
                 }
                 actor->numPoints--;
@@ -486,13 +474,13 @@ s32 func_150D3FD4(TrailActor *actor) {
         total = 0.0f;
         i = actor->head - 1;
         if (i < 0) {
-            i = actor->spawn.maxPoints - 1;
+            i = actor->spawn.itemCount - 1;
         }
         while (i != actor->tail) {
             prev = i;
             i--;
             if (i < 0) {
-                i = actor->spawn.maxPoints - 1;
+                i = actor->spawn.itemCount - 1;
             }
             // matching: `prev + points` (not points[prev]) keeps IDO's index-add operand order
             total += (prev + points)->len;
@@ -513,7 +501,7 @@ s32 func_150D3FD4(TrailActor *actor) {
                 }
                 while (i != actor->tail) {
                     actor->tail++;
-                    if (actor->tail == actor->spawn.maxPoints) {
+                    if (actor->tail == actor->spawn.itemCount) {
                         actor->tail = 0;
                     }
                     actor->numPoints--;
@@ -537,7 +525,7 @@ s32 func_150D3FD4(TrailActor *actor) {
             TrailPoint *pt;
             j--;
             if (j < 0) {
-                j = actor->spawn.maxPoints - 1;
+                j = actor->spawn.itemCount - 1;
             }
             pt = &points[j];
             pt->width = rem * scale;
@@ -612,10 +600,10 @@ Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
     if (owner->unk1D4 == NULL || (owner->unk74 & 0xF) == 0xF) {
         return gfx;
     }
-    func_151D5D60(actor->vtxBufs, view, (actor->spawn.maxPoints * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), &vtx, &fresh);
+    func_151D5D60(actor->vtxBufs, view, (actor->spawn.itemCount * 3 * sizeof(Vtx)) + (5 * 3 * sizeof(Vtx)), &vtx, &fresh);
     if (fresh != 0) {
         tv = (TrailVtx *)actor->vtxBufs[view];
-        for (i = 0; i < actor->spawn.maxPoints * 2 + 10; i++) {
+        for (i = 0; i < actor->spawn.itemCount * 2 + 10; i++) {
             tv->v[0].v.tc[0] = 5;
             tv->v[0].v.tc[1] = 0;
             tv->v[0].v.flag = 0;
@@ -637,11 +625,11 @@ Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
     gfx = func_15142FBC(gfx, G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4, &update);
     cur = actor->head - 1;
     if (cur < 0) {
-        cur = actor->spawn.maxPoints - 1;
+        cur = actor->spawn.itemCount - 1;
     }
     next = cur - 1;
     if (next < 0) {
-        next = actor->spawn.maxPoints - 1;
+        next = actor->spawn.itemCount - 1;
     }
     p0 = points[cur].pos;
     width0 = points[cur].width;
@@ -743,7 +731,7 @@ loop:
     cur = next;
     next--;
     if (next < 0) {
-        next = actor->spawn.maxPoints - 1;
+        next = actor->spawn.itemCount - 1;
     }
     if (cur != actor->tail) {
         p0 = points[cur].pos;

@@ -1011,17 +1011,6 @@ typedef struct {
     /* 0x28 */ EffectOwnerRef ref;
 } Fx15163414;
 
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 unk18;
-} Desc15147A80;
-
 /* Data block of the object returned by func_15147A80. */
 typedef struct {
     /* 0x00 */ Actor *owner;
@@ -1039,7 +1028,7 @@ typedef struct {
 } Fx15147A80;
 
 Fx15134908 *func_15134908(Desc15134908 *, s32, u8, s32);
-Fx15147A80 *func_15147A80(Desc15147A80 *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+Fx15147A80 *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 Fx15163414 *func_15163414(Header *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*
@@ -1071,17 +1060,17 @@ void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
         }
     }
     {
-        Desc15147A80 desc;
+        EffectTemplate desc;
         Fx15147A80 *fx2;
         Data15147A80 data;
 
-        desc.unk15 = 40;
+        desc.itemCount = 40;
         desc.pos.x = obj->x_position;
         desc.pos.y = obj->y_position;
         desc.pos.z = obj->z_position;
-        desc.unkC = 300;
-        desc.unkE = 6;
-        desc.unk10 = 12;
+        desc.life = 300;
+        desc.flags = 6;
+        desc.kind = 12;
         data.owner = obj;
         data.ownerId = obj->unique_id;
         data.pos = desc.pos;

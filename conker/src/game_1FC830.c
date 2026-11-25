@@ -1145,25 +1145,13 @@ void func_151D13E0(TrackerEffect *effect) {
     }
 }
 
-/* Spawn description passed to func_15147A80 (see game_105FC0.c's TrailSpawn). */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 unk18;
-} TrailSpawn;
-
 extern FollowerActor *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns the trail that follows the tracker effect. */
 void func_151D1448(TrackerEffect *effect) {
     TrackerData *data;
     struct {
-        TrailSpawn spawn;
+        EffectTemplate spawn;
         FollowerData data;
     } req;
     Actor *owner;
@@ -1190,11 +1178,11 @@ void func_151D1448(TrackerEffect *effect) {
         req.data.unk18 = 180.0f;
     }
     req.data.scale = data->owner->xz_scale;
-    req.spawn.unk15 = 25;
+    req.spawn.itemCount = 25;
     req.spawn.pos = data->pos;
-    req.spawn.unkC = 300;
-    req.spawn.unkE = 54;
-    req.spawn.unk10 = 19;
+    req.spawn.life = 300;
+    req.spawn.flags = 54;
+    req.spawn.kind = 19;
     req.spawn.unk14 = 6;
     req.spawn.unk18 = 0;
     trail = func_15147A80(&req.spawn, sizeof(FollowerData), 0x28, 0, 0x11, 0x12, 0, 0, 0, effect->head.unkC, effect->head.unk1);

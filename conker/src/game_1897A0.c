@@ -2,18 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
-
-/* Spawn header that func_15147A80 copies to 0x10 of a new trail. */
-typedef struct TrailHeader {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 life;
-    /* 0x0E */ u16 flags;
-    /* 0x10 */ s32 kind;
-    /* 0x14 */ s8 unk14;
-    /* 0x15 */ u8 capacity; /* number of points in the ring buffer */
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ void *unk18;
-} TrailHeader; /* size 0x1C */
+#include "effects.h"
 
 /* One point of a trail. */
 typedef struct TrailPoint {
@@ -51,7 +40,7 @@ typedef struct TrailData {
 /* A trail object made by func_15147A80: a ring buffer of points falling under gravity. */
 typedef struct Trail {
     /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ TrailHeader header;
+    /* 0x10 */ EffectTemplate header;
     /* 0x2C */ s8 count;
     /* 0x2D */ s8 tail; /* oldest point */
     /* 0x2E */ s8 head; /* next point to write */
@@ -63,10 +52,10 @@ typedef struct Trail {
     /* 0x98 */ TrailData *data;
 } Trail;
 
-extern Trail *func_15147A80(TrailHeader *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
+extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32);
 
 /* Spawns a trail with extraSize + 0x40 bytes of data and copies *data into it. */
-Trail *func_1515C2F0(TrailHeader *header, s32 extraSize, TrailData *data, void *arg3, u8 arg4, s32 arg5) {
+Trail *func_1515C2F0(EffectTemplate *header, s32 extraSize, TrailData *data, void *arg3, u8 arg4, s32 arg5) {
     Trail *trail;
 
     header->kind = 10;
@@ -103,7 +92,7 @@ s32 func_1515C388(Trail *trail) {
             points[i].pos.z += data->vel.z * D_800BE9A4;
             points[i].velY += data->gravity * D_800BE9A4;
             i++;
-            if (i == trail->header.capacity) {
+            if (i == trail->header.itemCount) {
                 i = 0;
             }
         }
@@ -213,7 +202,7 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
     f32 scale;
 
     if (trail->count >= 2) {
-        func_151D5D60(trail->unk84, view, (trail->header.capacity * 2 + 10) * sizeof(Vtx), &vtx, NULL);
+        func_151D5D60(trail->unk84, view, (trail->header.itemCount * 2 + 10) * sizeof(Vtx), &vtx, NULL);
         if (vtx != NULL) {
             data = trail->data;
             update = 1;
@@ -236,9 +225,9 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
             gfx = func_15142FBC(gfx, cycleMode | G_TP_PERSP | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CD_NOISE | G_AD_NOISE,
                                 D_800A4AC8[data->renderMode].unk0 | D_800A4AC8[data->renderMode].unk4, &update);
             i = trail->head - 1;
-            i = (i < 0) ? trail->header.capacity - 1 : i;
+            i = (i < 0) ? trail->header.itemCount - 1 : i;
             j = i - 1;
-            j = (j < 0) ? trail->header.capacity - 1 : j;
+            j = (j < 0) ? trail->header.itemCount - 1 : j;
             cur = points[i].pos;
             next = points[j].pos;
             texStep = 0x800 / (trail->count - 1);
@@ -340,7 +329,7 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
                 gSP1Triangle(gfx++, 1, 3, 2, 0);
                 j--;
                 if (j < 0) {
-                    j = trail->header.capacity - 1;
+                    j = trail->header.itemCount - 1;
                 }
                 cur = next;
                 next = points[j].pos;
@@ -352,7 +341,7 @@ Gfx *func_1515C6F4(Trail *trail, Gfx *gfx, s16 view) {
 
 /* Handler: adds a point at the trail's position, or stops the unk39 handler once the buffer is full. */
 s32 func_1515CF9C(Trail *trail, TrailData *data) {
-    if (trail->count < trail->header.capacity - 1) {
+    if (trail->count < trail->header.itemCount - 1) {
         TrailPoint *points;
 
         points = trail->points;
@@ -360,7 +349,7 @@ s32 func_1515CF9C(Trail *trail, TrailData *data) {
         points[trail->head].pos = trail->header.pos;
         points[trail->head].velY = data->vel.y;
         trail->head++;
-        if (trail->head == trail->header.capacity) {
+        if (trail->head == trail->header.itemCount) {
             trail->head = 0;
         }
     } else {
@@ -380,7 +369,7 @@ s32 func_1515D030(Trail *trail, TrailData *data) {
         trail->count = count - 1;
         trail->head--;
         if (trail->head < 0) {
-            trail->head = trail->header.capacity - 1;
+            trail->head = trail->header.itemCount - 1;
         }
     } else {
         result = FALSE;

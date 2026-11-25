@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * Bone trails: an emitter object (a struct260 made by func_151D71B0) follows a point on an actor's
@@ -263,18 +264,6 @@ typedef struct {
     /* 0x18 */ f32 texPhase;
 } TrailData;
 
-/* The header func_15147A80 copies to 0x10 of the new trail. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 timer;
-    /* 0x0E */ u16 flags;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 capacity;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 unk18;
-} TrailHeader;
-
 typedef struct Trail {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ Vec3f pos; /* head of the trail */
@@ -319,7 +308,7 @@ void func_151D77C8(TrailEmitter *emitter) {
 void func_151D7830(TrailEmitter *emitter) {
     Trail *trail;
     TrailData data;
-    TrailHeader header;
+    EffectTemplate header;
     // matching: frame size (compiler temps below header)
     s32 pad;
 
@@ -328,12 +317,12 @@ void func_151D7830(TrailEmitter *emitter) {
     data.unk10 = 0.0f;
     data.spawnAccum = 0.0f;
     data.texPhase = 0.0f;
-    header.capacity = 25;
+    header.itemCount = 25;
 
     header.pos = emitter->anchor.pos;
-    header.timer = 300;
+    header.life = 300;
     header.flags = 0x76;
-    header.unk10 = 0x12;
+    header.kind = 0x12;
     header.unk14 = 4;
     header.unk18 = 0;
 

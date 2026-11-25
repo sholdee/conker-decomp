@@ -1,18 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-/* Spawn header of an effect object, copied into EffectObj.header by func_15147A80. */
-typedef struct EffectHeader {
-    /* 0x00 */ u8 unk0[0xC];
-    /* 0x0C */ s16 life;
-    /* 0x0E */ u16 flags;     /* bit 0: life counts down; 0x10: run unk14's handler; 0x20: pass unk18 to the draw */
-    /* 0x10 */ s32 kind;      /* index into D_8008A2F0 / D_8008A340 / D_8008A390 */
-    /* 0x14 */ s8 unk14;      /* index into D_8008A284, -1: none */
-    /* 0x15 */ u8 itemCount;  /* number of items allocated after the user data */
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ void *unk18;
-} EffectHeader; /* size 0x1C */
+#include "effects.h"
 
 typedef struct EffectObjUnk60 {
     /* 0x00 */ s32 unk0;
@@ -30,7 +19,7 @@ typedef struct EffectObjUnk60 {
 /* An effect object. It is followed in memory by its user data and then its items. */
 typedef struct EffectObj {
     /* 0x00 */ u8 pad0[0x10];   /* object header */
-    /* 0x10 */ EffectHeader header;
+    /* 0x10 */ EffectTemplate header;
     /* 0x2C */ u8 unk2C;
     /* 0x2D */ u8 unk2D;
     /* 0x2E */ u8 unk2E;
@@ -177,7 +166,7 @@ void func_15147A30(EffectObj *obj) {
 }
 
 /* Allocates an effect object with dataSize bytes of user data and header->itemCount items of itemSize bytes. */
-EffectObj *func_15147A80(EffectHeader *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
+EffectObj *func_15147A80(EffectTemplate *header, s32 dataSize, s32 itemSize, s32 updateKind, s32 updateKind2,
                          s32 drawKind, s32 arg6, s32 arg7, EffectObjUnk60 *arg8, u8 arg9, s32 argA) {
     EffectObj *obj;
     u8 type;
@@ -198,7 +187,7 @@ EffectObj *func_15147A80(EffectHeader *header, s32 dataSize, s32 itemSize, s32 u
 
     obj->userData = (u8 *)obj + sizeof(EffectObj);
     obj->items = obj->userData + dataSize;
-    memcpy(&obj->header, header, sizeof(EffectHeader));
+    memcpy(&obj->header, header, sizeof(EffectTemplate));
     obj->unk2C = 0;
     obj->unk2D = 0;
     obj->unk2E = 0;

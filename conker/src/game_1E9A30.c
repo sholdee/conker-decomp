@@ -439,19 +439,9 @@ void func_151BD21C(TrailEffect *trail, ActorMsg *msg, u8 msgId) {
     }
 }
 
-/* Common head of effect objects; each effect's own data starts at 0x28. */
-typedef struct {
-    u8 pad0;
-    u8 kind;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 state;             /* 0x0E: -1 frees the effect */
-    u8 pad10[0x18];
-} EffectHeader;
-
 typedef struct {
     EffectHeader header;
+    u8 pad10[0x18];
     ActorRef owner;
 } OwnedEffect28;
 
@@ -778,6 +768,7 @@ typedef struct {
 
 typedef struct {
     EffectHeader header;
+    u8 pad10[0x18];
     BurstData data;
 } BurstEffect;
 

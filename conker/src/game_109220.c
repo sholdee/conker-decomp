@@ -1,22 +1,12 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /*
  * A falling stream: a ring buffer of points that fall under gravity and, where they reach the
  * floor, splash (splash and drop particles plus flat ripple sprites) and play a sound.
  */
-
-/* Spawn header passed to func_15147A80; the actor keeps a copy of it at 0x10. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 unk0C;
-    /* 0x0E */ u16 flags;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 pad14;
-    /* 0x15 */ u8 capacity; /* records[] length */
-    /* 0x16 */ u8 pad16[6];
-} StreamSpawn; // size 0x1C
 
 /* One point of the stream ring buffer. */
 typedef struct {
@@ -141,7 +131,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unk0C;
     /* 0x0D */ u8 padD[3];
-    /* 0x10 */ StreamSpawn spawn;
+    /* 0x10 */ EffectTemplate spawn;
     /* 0x2C */ s8 count;
     /* 0x2D */ s8 head; /* oldest record */
     /* 0x2E */ s8 tail; /* next record to write */
@@ -208,7 +198,7 @@ typedef struct {
 extern u8 D_800903C8[];
 extern u8 D_80090414[];
 void *memcpy(void *, const void *, u32);
-StreamActor *func_15147A80(StreamSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+StreamActor *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void *func_15167D84(Emission *, s32, s32, s8, u8, s32);
 void func_151DA6F8(f32 *pos, f32 *vel, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
@@ -219,7 +209,7 @@ void func_151DA6F8(f32 *pos, f32 *vel, f32, s16, s32, f32, s32, s32, f32, f32,
  * state. Returns the actor, or 0 on failure.
  */
 s32 func_150DBD70(u8 kind) {
-    StreamSpawn spawn;
+    EffectTemplate spawn;
     StreamState state;
     StreamActor *actor;
 
@@ -260,8 +250,8 @@ s32 func_150DBD70(u8 kind) {
         state.splashSpeedRange = 5.63f;
         state.splashScaleBase = 5.0f;
         state.splashSizeBase = 1.1f;
-        spawn.capacity = 25;
-        spawn.unk0C = 133;
+        spawn.itemCount = 25;
+        spawn.life = 133;
         state.timer = 120;
         state.unk28 = 255;
         state.alpha = 255;
@@ -379,10 +369,10 @@ s32 func_150DBD70(u8 kind) {
         state.splashRate = 0.31f;
         state.splashRadius = 139.53f;
         state.splashSpeedBase = 18.8f;
-        spawn.capacity = 30;
+        spawn.itemCount = 30;
         state.splashScaleBase = 15.0f;
         state.splashScaleRange = 12.0f;
-        spawn.unk0C = 160;
+        spawn.life = 160;
         state.splashSizeBase = 2.75f;
         state.timer = 110;
         state.unk28 = 255;
@@ -455,7 +445,7 @@ s32 func_150DBD70(u8 kind) {
     default:
         return 0;
     }
-    spawn.unk10 = 5;
+    spawn.kind = 5;
     state.sound = 440;
     actor = func_15147A80(&spawn, 0x120, sizeof(StreamPoint), 4, 4, 4, 0, 0, 0, 0xFF, 1);
     if (actor != NULL) {
@@ -485,7 +475,7 @@ s32 func_150DC558(StreamActor *actor) {
     while (index != actor->head) {
         index--;
         if (index < 0) {
-            index = actor->spawn.capacity - 1;
+            index = actor->spawn.itemCount - 1;
         }
         // matching: the u32 byte offset gives IDO's multu (&records[index] uses a signed multiply)
         rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
@@ -629,7 +619,7 @@ s32 func_150DC558(StreamActor *actor) {
             }
             while (index != actor->head) {
                 actor->head++;
-                if (actor->head == actor->spawn.capacity) {
+                if (actor->head == actor->spawn.itemCount) {
                     actor->head = 0;
                 }
                 actor->count--;
@@ -641,19 +631,19 @@ s32 func_150DC558(StreamActor *actor) {
     index = actor->head;
     records[index].alpha = 0;
     index++;
-    if (index == actor->spawn.capacity) {
+    if (index == actor->spawn.itemCount) {
         index = 0;
     }
     rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
     rec->alpha = 0x3F;
     index++;
-    if (index == actor->spawn.capacity) {
+    if (index == actor->spawn.itemCount) {
         index = 0;
     }
     rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));
     rec->alpha = 0x7F;
     index++;
-    if (index == actor->spawn.capacity) {
+    if (index == actor->spawn.itemCount) {
         index = 0;
     }
     rec = (StreamPoint *)((u8 *)records + index * sizeof(StreamPoint));

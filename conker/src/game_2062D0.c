@@ -685,16 +685,6 @@ s32 func_151DA6A8(SteamEffect *effect) {
     }
     return 1;
 }
-typedef struct {
-    Vec3f pos;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    s8 unk14;
-    s8 unk15;
-    u8 pad16[2];
-    s32 unk18;
-} SplashSpawn; /* 0x1C */
 
 typedef struct {
     f32 scale;
@@ -758,7 +748,7 @@ typedef struct {
 
 extern u8 D_800AB3F4[];
 extern u8 D_800AB404[];
-extern Splash *func_15147DA0(SplashSpawn *, SplashMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+extern Splash *func_15147DA0(EffectTemplate *, SplashMotion *, s32, s32, s32, s32, s32, s32, s32, s32, s32,
                              SplashStyle *, s32, s32, s32);
 
 /* Spawns a splash of effect kind `kind` at `pos` moving with `vel`. */
@@ -766,7 +756,7 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
                       f32 burstScale, f32 altBurstScale, u8 argA, u8 kind, s32 argC, s16 argD, s16 argE, s32 argF,
                       u8 arg10, s32 arg11) {
     Splash *splash;
-    SplashSpawn spawn;
+    EffectTemplate spawn;
     SplashMotion motion;
     SplashBurst burst;
     s32 a;
@@ -777,11 +767,11 @@ Splash *func_151DA6F8(Vec3f *pos, Vec3f *vel, f32 size, s16 lifetime, u8 arg4, f
     s32 flag80;
     s32 flag20;
 
-    spawn.unk15 = arg6;
+    spawn.itemCount = arg6;
     spawn.pos = *pos;
-    spawn.unkC = lifetime + 16;
-    spawn.unkE = 0x35;
-    spawn.unk10 = 1;
+    spawn.life = lifetime + 16;
+    spawn.flags = 0x35;
+    spawn.kind = 1;
     spawn.unk14 = -1;
     spawn.unk18 = argF;
     motion.scale = scale;

@@ -499,17 +499,6 @@ typedef struct CharacterFlamethrowerActor {
     /* 0x98 */ void *state;
 } CharacterFlamethrowerActor;
 
-/* Spawn header passed to func_15147A80. */
-typedef struct EffectSpawn {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 lifetime;
-    /* 0x0E */ u16 kind;
-    /* 0x10 */ s32 flags;
-    /* 0x14 */ u8 mode;
-    /* 0x15 */ u8 id;
-    /* 0x16 */ u8 pad16[6];
-} EffectSpawn;
-
 /* Preset in D_800A87A0 that func_15196438 copies into a CharacterFlamethrowerJet. */
 typedef struct CharacterFlamethrowerJetTemplate {
     /* 0x00 */ s16 lifetime;
@@ -637,7 +626,7 @@ void *func_15147A80(void *spawn, s32 stateSize, s32 pointSize, s32, s32, s32, s3
 
 /* Spawns a jet effect from preset D_800A87A0[preset], attached to a bone of `owner`. */
 CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32 arg3) {
-    EffectSpawn spawn;
+    EffectTemplate spawn;
     CharacterFlamethrowerJet jet;
     CharacterFlamethrowerActor *actor;
     s32 matrix;
@@ -662,11 +651,11 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     jet.initFn = entry->initFn;
     jet.updateFn = entry->updateFn;
     jet.destroyFn = entry->destroyFn;
-    spawn.lifetime = entry->lifetime;
+    spawn.life = entry->lifetime;
     jet.gravity = entry->gravity;
     jet.emitRate = entry->emitRate;
     jet.shade = entry->shade;
-    spawn.id = entry->id;
+    spawn.itemCount = entry->id;
     jet.bone = entry->bone;
     jet.startOffset = entry->startOffset;
     jet.endOffset = entry->endOffset;
@@ -674,7 +663,7 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     jet.fadeRate = entry->fadeRate;
     jet.life = entry->life;
     jet.holdTime = entry->holdTime;
-    spawn.kind = entry->kind;
+    spawn.flags = entry->kind;
     jet.childLife = entry->childLife;
     jet.scatterPreset = entry->scatterPreset;
     jet.spritePreset = entry->spritePreset;
@@ -700,7 +689,7 @@ CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32
     matrix = (s32)jet.owner->unk1D4 + (jet.bone << 6);
     func_15143134(&jet.startOffset, &jet.start, matrix);
     func_15143134(&jet.endOffset, &jet.end, matrix);
-    spawn.flags = 3;
+    spawn.kind = 3;
     spawn.pos.x = jet.start.x;
     spawn.pos.y = jet.start.y;
     spawn.pos.z = jet.start.z;
@@ -2257,7 +2246,7 @@ extern s16 (*D_8008F8B8[])(void);
 /* Spawns a flame effect with `extraSize` extra state bytes; setup->flags & 1 also attaches a light. */
 CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSetup *setup, u8 arg2, s32 arg3) {
     CharacterFlamethrowerActor *result;
-    EffectSpawn spawn;
+    EffectTemplate spawn;
     CharacterFlamethrowerFlame initial;
     Actor *owner;
     Vec3f *inputs[2];
@@ -2268,11 +2257,11 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
     if (owner->unk1D4 == NULL) {
         return NULL;
     }
-    spawn.id = setup->kind;
-    spawn.lifetime = 300;
-    spawn.kind = 0x12;
-    spawn.flags = 0xE;
-    spawn.mode = 0;
+    spawn.itemCount = setup->kind;
+    spawn.life = 300;
+    spawn.flags = 0x12;
+    spawn.kind = 0xE;
+    spawn.unk14 = 0;
     initial.seed = setup->seed;
     inputs[0] = &initial.seed.startOffset;
     inputs[1] = &initial.seed.endOffset;

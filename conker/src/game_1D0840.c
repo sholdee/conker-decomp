@@ -48,18 +48,6 @@ typedef struct {
     /* 0x4D */ u8 pad4D[3];
 } TrailState;
 
-/* Leading fields of a new effect object, passed to func_15147A80 (they land at its 0x10). */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ u16 flags;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 unk18;
-} EffectSpawnInfo;
-
 /* One point of a trail. */
 typedef struct {
     /* 0x00 */ Vec3f pos;
@@ -116,16 +104,6 @@ typedef struct {
     /* 0x2C */ s8 unk2C;
     /* 0x2D */ u8 unk2D;
 } BoneEffectParams151A4590;
-
-/* Leading fields shared by the effect and task objects in this file. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 unkD;
-    /* 0x0E */ s16 unkE;
-} EffectHeader;
 
 /* Per-particle parameters copied in by func_151A4638: (age limit, factor) pairs. */
 typedef struct {
@@ -249,7 +227,7 @@ extern u8 D_80090CD4[];
 void *func_1513418C(void *, s32, u8, s32);
 void *func_15130374(void *spawn, u8, s32, u8, s32);
 s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void *func_15147A80(EffectSpawnInfo *info, s32 stateSize, s32 capacity, s32, s32, s32, s32, s32, s32, s32, s32);
+void *func_15147A80(EffectTemplate *info, s32 stateSize, s32 capacity, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_15143134(Vec3f *in, Vec3f *out, s32 matrix);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
 Gfx *func_15142E24(Gfx *arg0, void *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
@@ -301,7 +279,7 @@ void func_151A3390(Actor *owner, u8 arg1) {
 
 /* Creates a trail effect object from params. Returns NULL if there is no owner. */
 TrailEffect *func_151A3504(TrailParams *params, u8 arg1) {
-    EffectSpawnInfo info;
+    EffectTemplate info;
     TrailState state;
     TrailEffect *effect;
 
@@ -311,9 +289,9 @@ TrailEffect *func_151A3504(TrailParams *params, u8 arg1) {
 
     memcpy(&state, params, sizeof(TrailParams));
     state.texCoord = 0;
-    info.unk15 = 50;
+    info.itemCount = 50;
     info.flags = TRAIL_EFFECT_ATTACHED;
-    info.unkC = 1000;
+    info.life = 1000;
     state.flags = TRAIL_FADE_TAIL | TRAIL_FADE_HEAD;
     state.texOffset = 0;
     state.pending = 0.0f;
@@ -324,7 +302,7 @@ TrailEffect *func_151A3504(TrailParams *params, u8 arg1) {
         info.flags |= TRAIL_EFFECT_STARTED;
     }
 
-    info.unk10 = 8;
+    info.kind = 8;
     effect = func_15147A80(&info, sizeof(TrailState), 24, 6, 6, 6, 0, 0, 0, arg1, 0);
     if (effect != NULL) {
         memcpy(effect->state, &state, sizeof(TrailState));
@@ -789,7 +767,7 @@ void func_151A4638(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, EffectHead
     params[4] = 17;
     params[5] = -24;
 
-    particles = func_15130374(&spawn, 0, 12, parent->unkC, 1);
+    particles = func_15130374(&spawn, 0, 12, parent->owner, 1);
     if (particles != NULL) {
         memcpy(&particles->ageParams, params, sizeof(params));
     }
@@ -879,7 +857,7 @@ void func_151A4A38(BoneEmitterTask *task) {
     emitter = &task->emitter;
     if ((emitter->owner->interaction_state == 0) || (emitter->owner->interaction_state == 8)
         || (emitter->owner->unique_id != emitter->ownerId)) {
-        task->header.unkE = -1;
+        task->header.state = -1;
         task->header.unkD |= 1;
         return;
     }
@@ -946,7 +924,7 @@ void func_151A4A38(BoneEmitterTask *task) {
         spawn.unk25 = 0xFF;
         spawn.unk60 = -1;
         spawn.unk61 = -1;
-        func_15153634(&spawn, 0xFF, task->header.unkC, task->header.unk1);
+        func_15153634(&spawn, 0xFF, task->header.owner, task->header.kind);
     }
 }
 
@@ -1033,11 +1011,11 @@ void func_151A4ECC(TrailRetryTask *task) {
         done = 1;
     }
     if (!done && trail->owner->unk1D4 != NULL && (trail->owner->unk74 & 0xF) != 0xF) {
-        func_151A3504(trail, task->header.unkC);
+        func_151A3504(trail, task->header.owner);
         done = 1;
     }
     if (done) {
-        task->header.unkE = -1;
+        task->header.state = -1;
         task->header.unkD |= 1;
     }
 }

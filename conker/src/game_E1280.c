@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 /* Particle trails: a ring buffer of points emitted from a moving source and drawn as a ribbon. */
 
@@ -63,7 +64,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[3];
-    /* 0x10 */ Vec3f pos;     /* 0x10-0x2B are copied from the TrailSpawn header */
+    /* 0x10 */ Vec3f pos;     /* 0x10-0x2B are copied from the EffectTemplate header */
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ u16 flags;
     /* 0x20 */ s32 kind;
@@ -82,17 +83,6 @@ typedef struct {
     /* 0x94 */ TrailPoint *points;
     /* 0x98 */ TrailState *state;
 } Trail;
-
-/* Header copied to trail+0x10 when a trail is spawned. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ u16 flags;
-    /* 0x10 */ s32 kind;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 capacity;
-    /* 0x16 */ u8 pad16[6];
-} TrailSpawn; // size = 0x1C
 
 extern void func_15147D64(s32, s32);
 
@@ -133,16 +123,16 @@ extern void *func_15147A80(void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, 
 
 /* Spawns a trail at pos with the settings in params. Returns the new trail, or NULL. */
 Trail *func_150B3F5C(TrailState *params, Vec3f *pos, s16 capacity) {
-    TrailSpawn spawn;
+    EffectTemplate spawn;
     TrailState state;
     Trail *trail;
 
     memcpy(&state, params, 0x40); /* the settings, up to state.speed */
     state.emitAccum = 0.0f;
-    spawn.capacity = capacity;
+    spawn.itemCount = capacity;
     state.texS = 0;
     spawn.flags = TRAIL_ATTACHED;
-    spawn.unkC = 500;
+    spawn.life = 500;
     state.speedTarget = params->speedBase + params->speedSwing;
     state.phase = 0;
     state.burstAccum = 0.0f;
@@ -556,13 +546,13 @@ typedef struct {
 } BurstStyle; // size = 0x20
 
 extern TrailBurstPreset D_8009FBF0[];
-extern s32 func_15147DA0(TrailSpawn *, BurstParticle *, s32, s32, s32, s32, s32, s32, s32, s32, s32, BurstStyle *, s32, s32, s32);
+extern s32 func_15147DA0(EffectTemplate *, BurstParticle *, s32, s32, s32, s32, s32, s32, s32, s32, s32, BurstStyle *, s32, s32, s32);
 
 /* Throws out a burst of particles around the trail's emitter, one per whole unit of burstAccum. */
 void func_150B5088(Trail *trail) {
     BurstStyle style;
     TrailState *state;
-    TrailSpawn spawn;
+    EffectTemplate spawn;
     BurstParticle particle;
     f32 x;
     f32 y;
@@ -606,8 +596,8 @@ void func_150B5088(Trail *trail) {
         x = state->baseVel.x + preset->radius * sinB * cosA;
         y = state->baseVel.y - preset->radius * cosB;
         z = state->baseVel.z + preset->radius * sinB * sinA;
-        spawn.capacity = (func_150ADA20() % (preset->capacityRange + 1)) + preset->capacity;
-        spawn.unkC = (func_150ADA20() % (preset->unk1E + 1)) + preset->unk1C;
+        spawn.itemCount = (func_150ADA20() % (preset->capacityRange + 1)) + preset->capacity;
+        spawn.life = (func_150ADA20() % (preset->unk1E + 1)) + preset->unk1C;
         particle.unk0 = func_150ADA68() * preset->unk10 + preset->unkC;
         particle.unk10 = func_150ADA68() * preset->unk18 + preset->unk14;
         particle.vel.x = speed * x;

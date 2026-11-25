@@ -6,6 +6,7 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 
 /*
  * Ribbon trails attached to a point of an object (a game object's matrix plus an offset).
@@ -90,18 +91,6 @@ typedef struct TrailPoint {
     /* 0x22 */ u8 pad22[2];
 } TrailPoint;
 
-/* How a trail is created (func_15147A80); it starts the Trail at its offset 0x10. */
-typedef struct TrailSpawn {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 lifetime;
-    /* 0x0E */ u16 flags;
-    /* 0x10 */ s32 kind;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 pad16[2];
-    /* 0x18 */ s32 unk18;
-} TrailSpawn;
-
 /* A trail object; only the fields used here. */
 typedef struct Trail {
     /* 0x00 */ u8 pad0[0x10];
@@ -166,7 +155,7 @@ extern s32 func_1514ED3C(struct Attachment *list, s32 handle, struct Attachment 
 extern struct Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type);
 extern void func_1514EDF0(s32 handle, Actor *owner);
 extern TrailTask *D_800E0920;
-extern Trail *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_1519E304(TrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t);
 
 /* Stops every trail of kind specIndex (event 6). */
@@ -211,7 +200,7 @@ void func_1519D000(Trail *trail) {
 
 /* Starts a trail of kind specIndex on owner. Returns it, or NULL. */
 Trail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5) {
-    TrailSpawn spawn;
+    EffectTemplate spawn;
     TrailData data;
     Trail *trail;
     TrailSpec *spec;
@@ -231,7 +220,7 @@ Trail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4
     data.flags = 2;
     data.texS = 0;
     data.specIndex = specIndex;
-    spawn.lifetime = lifetime;
+    spawn.life = lifetime;
     data.spawnCount = 0.0f;
 
     spawn.flags = (arg3 ? 1 : 0) | 2;
@@ -239,7 +228,7 @@ Trail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4
     data.gravity = spec->gravity;
     data.spawnRate = spec->spawnRate;
     data.brightness = spec->brightness;
-    spawn.unk15 = spec->unkC;
+    spawn.itemCount = spec->unkC;
     data.matrixIndex = spec->matrixIndex;
     data.offset = spec->offset;
     data.life = spec->life;

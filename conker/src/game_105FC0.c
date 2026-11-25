@@ -4,18 +4,6 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Spawn description passed to func_15147A80. */
-typedef struct {
-    Vec3f pos;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 pad16[2];
-    s32 unk18;
-} TrailSpawn;
-
 /* One point of a trail's ring buffer (0x24 bytes). */
 typedef struct {
     Vec3f pos;
@@ -76,7 +64,7 @@ typedef struct {
 
 extern s32 func_151EF610(void);
 extern void func_1000D96C(s32, s32, s32);
-extern Trail *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern Trail *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15131828(void *, f32 *, void *, u8 *);
 extern void func_15131958(void *, f32, void *);
 
@@ -100,7 +88,7 @@ void func_150D8B3C(Actor *actor, Vec3f *out) {
 
 /* Spawns a trail object that follows the actor. */
 void func_150D8B88(Actor *actor) {
-    TrailSpawn spawn;
+    EffectTemplate spawn;
     s32 pad; // matching: stack slot above data
     TrailData data;
     Vec3f pos;
@@ -138,10 +126,10 @@ void func_150D8B88(Actor *actor) {
             }
         }
 
-        spawn.unk15 = 50;
-        spawn.unkC = 300;
-        spawn.unkE = 54;
-        spawn.unk10 = 2;
+        spawn.itemCount = 50;
+        spawn.life = 300;
+        spawn.flags = 54;
+        spawn.kind = 2;
         spawn.unk14 = 5;
         spawn.unk18 = 0;
 

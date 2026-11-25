@@ -131,14 +131,6 @@ void func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
 void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
 void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-/* The leading bytes of an effect; only unk1 and unkC are read here. */
-typedef struct {
-    /* 0x00 */ u8 pad0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0xA];
-    /* 0x0C */ u8 unkC;
-} EffectHeader;
-
 /* Emitter callback (D_80089B08): spawns one particle at (x, y, z), flung in a random direction and
  * pushed against the emitter's movement (dx, dy, dz). */
 void func_151B86F4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *effect) {
@@ -171,7 +163,7 @@ void func_151B86F4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
     random_b = func_150ADA20();
     func_151A26EC(position, acceleration, velocity, 1.0f, (random_f * 157.0f + -151.0f) * 0.00100000005f,
                   random_c * 55.0f + 75.0f, random_a % 26U + 25, random_b % 101U + 100, 10, 25, 0, -1, 0, 0, 0,
-                  effect->unkC, effect->unk1);
+                  effect->owner, effect->kind);
 }
 
 /* The four values (0x60-0x63) func_151B8908 picks unk1D from. */

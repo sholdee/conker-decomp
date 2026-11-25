@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 #include "libc/string.h"
 
 typedef struct { f32 x, z; } TrailVec2;
@@ -24,17 +25,6 @@ typedef struct {
     /* 0x24 */ f32 angle;
 } TrailInfo; /* 0x28 */
 
-/* Spawn parameters passed to func_15147A80. */
-typedef struct {
-    /* 0x00 */ Vec3f pos;
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x18 */ s32 unk18;
-} TrailSpawn;
-
 typedef struct {
     u8 pad0[0x98];
     TrailInfo *info;
@@ -51,7 +41,7 @@ typedef struct {
     /* 0x50 */ f32 fade;
 } Motion;
 
-extern TrailObject *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+extern TrailObject *func_15147A80(EffectTemplate *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 s32 func_151CEC10(Vec3f *pos, TrailOwner *owner, void *target);
 
 /* Integrates position/velocity under constant acceleration over one frame and ramps fade up to 1. */
@@ -71,16 +61,16 @@ s32 func_151CEA20(Motion *motion) {
 
 /* Spawns a trail effect that follows owner (or target, when given). */
 TrailObject *func_151CEAAC(TrailOwner *owner, void *target, u8 arg2, u8 arg3, s32 arg4) {
-    TrailSpawn spawn;
+    EffectTemplate spawn;
     TrailInfo info;
     TrailObject *trail;
     s32 flags;
     f32 random;
 
-    spawn.unk15 = 25;
-    spawn.unkC = 300;
-    spawn.unkE = 16;
-    spawn.unk10 = 17;
+    spawn.itemCount = 25;
+    spawn.life = 300;
+    spawn.flags = 16;
+    spawn.kind = 17;
     spawn.unk14 = 3;
 
     info.owner = owner;
