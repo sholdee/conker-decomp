@@ -38,7 +38,6 @@ void func_1507D4F8(s32);
 s32 func_1504C8BC(Actor *);
 void func_1504AF10(Actor *, s32, s32);
 void func_15061B4C(void);
-void func_15080C64(void);
 
 void func_1504A730(void) {
     Actor *obj;

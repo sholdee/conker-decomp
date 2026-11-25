@@ -1,13 +1,14 @@
 #include <ultra64.h>
 #define func_15150178 func_15150178_header // matching: this file keeps its own declarations of these
 #define func_15153F18 func_15153F18_header
+// matching: func_1519B4A4 returns what func_15042E3C (void) leaves in v0; hide the header's prototype
+#define func_15042E3C func_15042E3C_hdr
 #include "functions.h"
+#undef func_15042E3C
+s32 func_15042E3C(char *format, ...);
 #undef func_15150178
 #undef func_15153F18
 #include "variables.h"
-#include "effects.h"
-
-extern s32 func_15042E3C(char *format, ...);
 
 /* Style 3 text box state: an amount shown as "$ %d" that fades out with its owner. */
 typedef struct {

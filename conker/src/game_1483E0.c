@@ -1233,7 +1233,6 @@ struct Owner1511DF6C {
 extern void func_10010558(u16, void *, s32, s32, s32, s32);
 extern void *func_1509B570(s32);
 extern void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
-extern void func_151D6970(Actor *, WorldObject *);
 
 /* Plays the impact sound for this object type, with extra sounds for characters 0x3B and 0x80. */
 void func_1511DD98(WorldObject *obj, Actor *character) {

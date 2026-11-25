@@ -35,7 +35,6 @@ void func_15172E7C(void *arg0, s32 arg1, s32 arg2);
 void func_151E53E8(s32 arg0);
 void func_151E8214(void);
 void func_151E4DC4(void);
-void func_15042E3C(char *fmt, s32 arg1);
 
 /*
  * Runs command `cmd` for record `id` with arguments `args`. Returns 1 for some record commands, else 0.

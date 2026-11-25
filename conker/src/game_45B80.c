@@ -33,7 +33,6 @@ Gfx *func_15174B48(Gfx *gfx, s32 arg1, s32 player);
 void func_1517D7B0(Gfx **gfx, s32 arg1);
 Gfx *func_15188D00(Gfx *gfx, s32 arg1, s16 player);
 Gfx *func_1502BAD0(Gfx *gfx, s32 arg1, s16 player);
-Gfx *func_15043384(Gfx *gfx);
 s32 func_1501878C(void);
 void func_15019F20(void);
 

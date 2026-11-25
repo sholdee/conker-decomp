@@ -1861,7 +1861,7 @@ typedef struct {
     /* 0x2E */ u8 b;
     /* 0x2F */ u8 unk2F;
     /* 0x30 */ u8 pad30[4];
-    /* 0x34 */ s32 handle;
+    /* 0x34 */ TextBox *handle; /* func_1516A7B0 */
 } SeqSubtitle; // size 0x38
 
 /* Summary of one of the three save files the player can pick. */

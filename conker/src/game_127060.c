@@ -1,7 +1,11 @@
 #include <ultra64.h>
 #define func_15150178 func_15150178_header // matching: this file keeps its own declarations of these
 #define func_15153F18 func_15153F18_header
+// matching: func_150FB1E8 forwards its five words to func_151D710C unconverted; hide the header's prototype
+#define func_151D710C func_151D710C_hdr
 #include "functions.h"
+#undef func_151D710C
+s32 func_151D710C(s32, s32, s32, s32, s32);
 #undef func_15150178
 #undef func_15153F18
 #include "variables.h"
@@ -650,8 +654,6 @@ s32 func_150FB188(Func150FB188State *obj) {
     func_15157DEC(obj, &transform);
     return 1;
 }
-
-extern s32 func_151D710C(s32, s32, s32, s32, s32);
 
 /* Passes func_151D710C's result, with the same remaining arguments, to func_15157F80. */
 void func_150FB1E8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {

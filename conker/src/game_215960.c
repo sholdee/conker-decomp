@@ -40,7 +40,6 @@ extern u8 D_800E0C85;
 #define TEXTURE_NOT_LOADED ((s32)0x80000000)
 
 extern s32 func_1510D0EC(s32, s32, s32, s32); // matching: s32 params; converting &D_xxx ids to int steers scheduling
-void func_15042D94(s32 x, s32 y, u8 flags, void *fmt, ...);
 Gfx *func_15096934(Gfx *);
 
 /* Draws the HUD overlay: shared HUD, the per-mode overlay, and a blinking warning message. */
@@ -76,7 +75,7 @@ Gfx *func_151E84B0(Gfx *gfx) {
 
     if (message != 0) {
         func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
-        func_15042D94(0x94, 0xC8, 0x81, D_800E0BD8[message]);
+        func_15042D94(0x94, 0xC8, 0x81, (char *)D_800E0BD8[message]);
     }
 
     D_8003C8E0 = 0;
@@ -1050,7 +1049,7 @@ Gfx *func_151EB96C(Gfx *gfx) {
     line = D_800E0BD8[i];
     firstX = x;
     while (*line != '*') {
-        func_15042D94(0x94, x, 1, line);
+        func_15042D94(0x94, x, 1, (char *)line);
         func_1504332C(0xFF, 0xFF, 0xFF, alpha8);
         if (x == firstX) {
             x += 0xC;
@@ -1101,7 +1100,7 @@ Gfx *func_151EBB50(Gfx *gfx) {
         }
         func_150432BC(scale);
         func_1504332C(0xFF, 0, 0, alpha);
-        func_15042D94(0x94, 0x69, 1, D_800E0BD8[0x8E]);
+        func_15042D94(0x94, 0x69, 1, (char *)D_800E0BD8[0x8E]);
         func_150432BC(1.0f);
     } else if (D_800E0A90 < 0x21C) {
         if (D_800E0A90 < 0x12C) {
@@ -1125,20 +1124,20 @@ Gfx *func_151EBB50(Gfx *gfx) {
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
         gfx = func_151ED430(gfx, &D_800917EC, 0x92, 0x1C, 2, 1, 1.0f, 0);
         func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-        func_15042D94(0x94, 0x9D, 1, D_800E0BD8[0x81]);
-        func_15042D94(0x94, 0xAA, 1, D_800E0BD8[0x82]);
-        func_15042D94(0x94, 0xBC, 1, D_800E0BD8[0x83]);
+        func_15042D94(0x94, 0x9D, 1, (char *)D_800E0BD8[0x81]);
+        func_15042D94(0x94, 0xAA, 1, (char *)D_800E0BD8[0x82]);
+        func_15042D94(0x94, 0xBC, 1, (char *)D_800E0BD8[0x83]);
         func_150432BC(0.8999999762f);
-        func_15042D94(0x94, 0x2D, 1, D_800E0BD8[0x84]);
-        func_15042D94(0x94, 0x37, 1, D_800E0BD8[0x85]);
-        func_15042D94(0x94, 0x41, 1, D_800E0BD8[0x86]);
-        func_15042D94(0x94, 0x4B, 1, D_800E0BD8[0x87]);
-        func_15042D94(0x94, 0x55, 1, D_800E0BD8[0x88]);
-        func_15042D94(0x94, 0x5F, 1, D_800E0BD8[0x89]);
-        func_15042D94(0x94, 0x69, 1, D_800E0BD8[0x8A]);
-        func_15042D94(0x94, 0x73, 1, D_800E0BD8[0x8B]);
-        func_15042D94(0x94, 0x7D, 1, D_800E0BD8[0x8C]);
-        func_15042D94(0x94, 0x87, 1, D_800E0BD8[0x8D]);
+        func_15042D94(0x94, 0x2D, 1, (char *)D_800E0BD8[0x84]);
+        func_15042D94(0x94, 0x37, 1, (char *)D_800E0BD8[0x85]);
+        func_15042D94(0x94, 0x41, 1, (char *)D_800E0BD8[0x86]);
+        func_15042D94(0x94, 0x4B, 1, (char *)D_800E0BD8[0x87]);
+        func_15042D94(0x94, 0x55, 1, (char *)D_800E0BD8[0x88]);
+        func_15042D94(0x94, 0x5F, 1, (char *)D_800E0BD8[0x89]);
+        func_15042D94(0x94, 0x69, 1, (char *)D_800E0BD8[0x8A]);
+        func_15042D94(0x94, 0x73, 1, (char *)D_800E0BD8[0x8B]);
+        func_15042D94(0x94, 0x7D, 1, (char *)D_800E0BD8[0x8C]);
+        func_15042D94(0x94, 0x87, 1, (char *)D_800E0BD8[0x8D]);
         func_150432BC(1.0f);
         gDPPipeSync(gfx++);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, alpha);
@@ -1188,7 +1187,7 @@ Gfx *func_151EC178(Gfx *gfx) {
             alpha = 0xFF;
         }
         func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-        func_15042D94(0xDC, 0x130, 1, D_800E0BD8[0x74]);
+        func_15042D94(0xDC, 0x130, 1, (char *)D_800E0BD8[0x74]);
     }
     return gfx;
 }
@@ -1897,7 +1896,6 @@ void func_151EDF4C(void) {
     }
 }
 
-extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 extern void func_150A7D00(void *, f32, f32, f32);
 extern ObjScriptCmd *func_1507BB28(s32, s32);
 
@@ -2138,7 +2136,7 @@ Gfx *func_151EE184(Gfx *gfx) {
     if (i < 10) {
         i = 10;
     }
-    func_15042D94(i, 0xB4, 0x80, D_800E0C7C);
+    func_15042D94(i, 0xB4, 0x80, (char *)D_800E0C7C);
     if ((D_800BE9AC & 0x1F) >= 10) {
         width = i + width + 2;
         func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);

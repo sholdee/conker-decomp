@@ -33,7 +33,6 @@ struct CB3D0_arg2 {
     s32 params[4];
 };
 
-extern void func_15042D94(s32, s32, s32, char *, ...);
 extern s32 func_15089BC0(void);
 extern s32 func_1508A1BC(void);
 extern s32 func_1508A6FC(void);

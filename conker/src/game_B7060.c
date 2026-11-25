@@ -296,7 +296,6 @@ s32 func_1508A1BC(void) {
     return 0;
 }
 
-void func_15042D94(s32, s32, s32, char *, ...);
 s32 func_1508CAD8(s32, s32, s32, s32, s32, s32);
 void func_1508EC5C(s32, s32);
 void func_1508EBF8(s32, s32);
@@ -1585,7 +1584,6 @@ s32 func_1508DAEC(s32 player, s32 mode) {
 void func_1502EA0C(Actor *, s32, s32, s32, s32, s32);
 s32 func_1508E780(s32 arg0);
 void func_1502EA50(Actor *);
-void func_15080620(s32, s32, s32, s32);
 
 
 /*

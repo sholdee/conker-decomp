@@ -20,8 +20,6 @@ static u8 D_800CBD5E; // wave phase
 
 extern u8 D_80085930[]; // font charset, 95 entries
 
-s32 func_15042C40(u8 ch);
-
 /*
  * Size and layout of a special (icon) glyph, codes 0xA8-0xFF: its width and height in texels, how far
  * it is raised above the baseline, whether it keeps the current combiner (noCombine) and its scale.

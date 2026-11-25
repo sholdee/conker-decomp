@@ -1,6 +1,10 @@
 #include <ultra64.h>
 #define func_150E7290 func_150E7290_header // matching: this file keeps its own declaration of func_150E7290
+// matching: func_150A11C4 calls func_15080500 with a fifth argument; hide the header's prototype
+#define func_15080500 func_15080500_hdr
 #include "functions.h"
+#undef func_15080500
+void func_15080500(Actor *, TriggerZone *, s32, s32, s32);
 #undef func_150E7290
 #include "variables.h"
 
@@ -186,11 +190,9 @@ void func_150A104C(Camera *cam, TriggerZone **zoneList, s32 count) {
 
 extern s32 D_800D3278;
 
-void func_150806A8(s32);
 void func_150829D8(Actor *);
 void func_1512D560(Camera *, s32, TriggerZone *);
 void func_15055C88(Actor *arg0);
-void func_15080500(Actor *, TriggerZone *, s32, s32, s32);
 void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackArg);
 s32 __osPiGetAccess(void);
 void __osPiRelAccess(void);

@@ -391,10 +391,6 @@ extern void func_1515F170(s32, u8);
 extern void light_sendEvent(u8, u8, s32);
 extern void func_151645C4(u8);
 extern void func_15169040(s32, u8);
-extern s32 func_1516A7B0(s32, s32, s32, s32, void *, s32);
-extern void func_1516D2E0(s32);
-extern s32 func_1516D378(s32);
-extern s32 func_1516D3C4(s32);
 extern s32 func_1518D1C0(Actor *, s16, s16, s32, u8, s32, char *);
 extern void func_1518F45C(s32, u8);
 extern s32 func_1518F51C(void *, u8, s16, s8, s8, s8, u8, s32, s32, s32);
@@ -458,7 +454,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
                 if (event->unk5 == 2) {
                     sub->flags |= 0x40000;
                 }
-                sub->handle = func_1516A7B0(0, 0, 0, 0, &sub->flags, sceneTag);
+                sub->handle = func_1516A7B0(0, 0, 0, 0, (TextBoxConfig *)&sub->flags, sceneTag);
             } else if (event->unk4 == 1) {
                 func_15023440(sub, event->unk5);
             } else {

@@ -28,7 +28,6 @@ void func_1505A770(Actor *actor);
 void func_15059C84(Actor *actor);
 void func_1505A3A8(f32 targetSpeed, Actor *actor, f32 accel, f32 decel, u8 turnDiff);
 
-s32 func_15080738(s32 arg0);
 void func_150642AC(Actor *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4);
 s32 func_15065A5C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 

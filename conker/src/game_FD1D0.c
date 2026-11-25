@@ -153,8 +153,6 @@ void func_150D0134(u8 id, u8 *str, s16 duration, u8 arg3, s32 arg4) {
     }
 }
 
-void func_15042D94(s32 x, s32 y, s32, u8 *str);
-
 /* Style 0 update: draws the current line fading in over 8 frames and the previous one fading out. */
 s32 func_150D01A0(TextObj *obj) {
     s8 *fadeTimer;
@@ -177,11 +175,11 @@ s32 func_150D01A0(TextObj *obj) {
     }
     if (alpha) {
         func_1504332C(0xCE, 0xC4, 0x61, alpha);
-        func_15042D94(0x92, 0xBE, 0x81, text->lines[text->page]);
+        func_15042D94(0x92, 0xBE, 0x81, (char *)text->lines[text->page]);
     }
     if (fade) {
         func_1504332C(0xCE, 0xC4, 0x61, fade);
-        func_15042D94(0x92, 0xBE, 0x81, text->lines[text->page ^ 1]);
+        func_15042D94(0x92, 0xBE, 0x81, (char *)text->lines[text->page ^ 1]);
     }
     return 1;
 }
@@ -238,7 +236,7 @@ s32 func_150D032C(TextObj *obj) {
     buf[style->shown + 5] = 0xBB;
     buf[style->shown + 6] = 0;
     func_1504332C(0, 0xFF, 0, 0x96);
-    func_15042D94(15, 0xBE, 0x80, buf);
+    func_15042D94(15, 0xBE, 0x80, (char *)buf);
     return 1;
 }
 
@@ -276,11 +274,11 @@ s32 func_150D0534(TextObj *obj) {
     }
     if (alpha) {
         func_1504332C(0xFF, 0xFF, 0xFF, alpha);
-        func_15042D94(20, 20, 0x80, text->lines[text->page]);
+        func_15042D94(20, 20, 0x80, (char *)text->lines[text->page]);
     }
     if (fade) {
         func_1504332C(0xFF, 0xFF, 0xFF, fade);
-        func_15042D94(20, 20, 0x80, text->lines[text->page ^ 1]);
+        func_15042D94(20, 20, 0x80, (char *)text->lines[text->page ^ 1]);
     }
     return 1;
 }

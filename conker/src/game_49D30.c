@@ -47,8 +47,6 @@ extern SeqTrackPath *D_800C3A50[];
 extern SeqSubtitle D_800C3D48; /* == &D_800C3CA0[3] */
 s32 func_1501F72C(s32 track, f32 dist, f32 *out, s32 scene, s32 *segmentOut);
 void func_1501FFE8(f32 *out, SeqPathKey *keys, s32 key, s32 numKeys);
-extern void func_1516D2E0(s32);
-extern void func_1516D328(s32);
 
 typedef struct {
     /* 0x00 */ s32 next;

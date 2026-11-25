@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-void func_15042D94(s32, s32, u8, s32 *, ...);
 extern u8 D_D16[];
 
 /* Resets all bubbles to the idle state. */
@@ -846,15 +845,15 @@ void func_150916B4(s32 x, s32 y, s32 frames, s32 style) {
     x -= 8;
     if (frames >= 0) {
         seconds = frames / 60;
-        func_15042D94((x - (((seconds / 60) >= 10) ? 5 : 0)) - 8, y, (u8)style, &D_8009DCC0, seconds / 60);
-        func_15042D94(x, y, style, &D_8009DCC4, seconds % 60);
-        func_15042D94(x + 16, y, style, &D_8009DCCC, hundredths);
+        func_15042D94((x - (((seconds / 60) >= 10) ? 5 : 0)) - 8, y, (u8)style, (char *)&D_8009DCC0, seconds / 60);
+        func_15042D94(x, y, style, (char *)&D_8009DCC4, seconds % 60);
+        func_15042D94(x + 16, y, style, (char *)&D_8009DCCC, hundredths);
         return;
     }
 
-    func_15042D94(x - 8, y, (u8)style, &D_8009DCD4);
-    func_15042D94(x, y, style, &D_8009DCD8);
-    func_15042D94(x + 16, y, style, &D_8009DCE0);
+    func_15042D94(x - 8, y, (u8)style, (char *)&D_8009DCD4);
+    func_15042D94(x, y, style, (char *)&D_8009DCD8);
+    func_15042D94(x + 16, y, style, (char *)&D_8009DCE0);
 }
 
 typedef struct HudBars {
@@ -966,14 +965,14 @@ Gfx *func_150918EC(Gfx *gfx) {
                     if (D_8008FE1C != 1.0f) {
                         x -= 8;
                     }
-                    func_15042D94(x, y, 0x41, (s32 *)"%d", D_8008FDD4->score[i]);
+                    func_15042D94(x, y, 0x41, "%d", D_8008FDD4->score[i]);
                 }
                 if (D_8008FDC0 & 0x800) {
                     x = (vpWidth >> 1) + vpLeft + 16;
                     if (D_8008FE1C != 1.0f) {
                         x += 16;
                     }
-                    func_15042D94(x, y, 0x41, (s32 *)"(%s)", D_800E0BD8[8 + D_800E0AC0[i]]);
+                    func_15042D94(x, y, 0x41, "(%s)", D_800E0BD8[8 + D_800E0AC0[i]]);
                 }
             }
         }
@@ -1273,8 +1272,8 @@ Gfx *func_150918EC(Gfx *gfx) {
             x = (s32)D_800BE628[i].left + (vpWidth >> 1);
             icon = (s8)(D_800872A0[i].lap + 1); /* the current lap */
             if (icon <= lapCount) {
-                func_15042D94(x, rowY, 0xC1, (s32 *)"%s", D_800E0BD8[8 + D_800E0AC0[i]]);
-                func_15042D94((s32)D_800BE628[i].left + 29, rowY + 14, 0xC1, (s32 *)"lap %d/%d", icon, lapCount);
+                func_15042D94(x, rowY, 0xC1, "%s", D_800E0BD8[8 + D_800E0AC0[i]]);
+                func_15042D94((s32)D_800BE628[i].left + 29, rowY + 14, 0xC1, "lap %d/%d", icon, lapCount);
                 func_150916B4(x, (s32)D_800BE628[i].bottom - 12, D_800872A0[i].raceTime, 0xC0);
             }
         }
