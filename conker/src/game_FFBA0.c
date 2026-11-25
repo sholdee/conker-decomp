@@ -9,15 +9,10 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 #undef func_1513D2F0
 void *func_1513D2F0(void *params, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9,
                     u8 argA, s32 argB);
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f;
 
 /* Object data (at +0x28) of a trigger that spawns spark emitters. */
 typedef struct EmitterTrigger {
@@ -123,31 +118,31 @@ typedef struct SparkParticle {
     SparkMotion motion;
 } SparkParticle;
 
-/* Spawn parameters passed to func_1513D2F0 for one spark. */
-typedef struct SparkSpawn {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    s32 unk8;
-    s32 unkC;
-    u8 color[4];
-    f32 unk14;
-    f32 unk18;
-    Vec3f unk1C;
-    Vec3f position;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-    u8 unk4C;
-    s32 unk50;
-} SparkSpawn;
+/* matching: the first 0x54 bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
+typedef struct ParticleDef54 {
+    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
+    /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
+    /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 frame;       /* 16.16 animation frame */
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ vertex pos;
+    /* 0x28 */ vertex rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x34 */ vertex scale;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s16 *unk48;
+    /* 0x4C */ u8 viewportMask;
+    /* 0x4D */ u8 pad4D[3];
+    /* 0x50 */ s32 unk50;
+} ParticleDef54;
 
 extern void func_150A7960(f32 *matrix, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_1514373C(f32 angle, f32 radius, f32 *outX, f32 *outZ);
@@ -164,7 +159,7 @@ void func_150D2924(EffectObject *obj) {
     emitter->spawnAccum += emitter->rate * D_800BE9A4;
     emitter->elapsed += D_800BE9A4;
     if (emitter->spawnAccum > 1.0f) {
-        SparkSpawn spawn;
+        ParticleDef54 spawn;
         void *spark;
         SparkMotion motion;
 
@@ -172,38 +167,38 @@ void func_150D2924(EffectObject *obj) {
         motion.fadeScale = 9.0f;
         motion.phaseX = 0.0f;
         motion.phaseY = 0.0f;
-        spawn.unk0 = 0x59;
-        spawn.unk1 = 0;
-        spawn.unk2 = 0x5A03;
-        spawn.unk4 = 0x16;
-        spawn.unk8 = 0;
-        spawn.unkC = 0;
-        spawn.color[0] = emitter->color[0];
-        spawn.color[1] = emitter->color[1];
-        spawn.color[2] = emitter->color[2];
-        spawn.color[3] = 0xFF;
-        spawn.unk18 = 1.0f;
-        spawn.unk1C.x = record[0];
-        spawn.unk1C.y = record[1];
-        spawn.unk1C.z = record[2];
-        spawn.unk34 = 1.0f;
-        spawn.unk38 = 1.0f;
-        spawn.unk3C = 1.0f;
-        spawn.unk40 = 0x026C0000;
+        spawn.texture = 0x59;
+        spawn.type = 0;
+        spawn.renderModes = 0x5A03;
+        spawn.lifetime = 0x16;
+        spawn.frame = 0;
+        spawn.frameSpeed = 0;
+        spawn.rgba[0] = emitter->color[0];
+        spawn.rgba[1] = emitter->color[1];
+        spawn.rgba[2] = emitter->color[2];
+        spawn.rgba[3] = 0xFF;
+        spawn.height = 1.0f;
+        spawn.pos.x = record[0];
+        spawn.pos.y = record[1];
+        spawn.pos.z = record[2];
+        spawn.scale.x = 1.0f;
+        spawn.scale.y = 1.0f;
+        spawn.scale.z = 1.0f;
+        spawn.flags = 0x026C0000;
         spawn.unk45 = 0xFF;
         spawn.unk46 = 0;
         spawn.unk47 = 6;
         spawn.unk48 = 0;
-        spawn.unk4C = 0xFF;
+        spawn.viewportMask = 0xFF;
         do {
             motion.life = 22.0f - emitter->elapsed;
             if (motion.life > 0.0f) {
-                Vec3f point;
+                vertex point;
 
                 func_1514373C(emitter->angle, record[3], &point.x, &point.z);
                 point.y = record[4];
-                func_150A7960(emitter->matrix, point.x, point.y, point.z, &spawn.position.x, &spawn.position.y, &spawn.position.z);
-                spawn.unk14 = func_150ADA68() * 25.0f + 50.0f;
+                func_150A7960(emitter->matrix, point.x, point.y, point.z, &spawn.rot.x, &spawn.rot.y, &spawn.rot.z);
+                spawn.width = func_150ADA68() * 25.0f + 50.0f;
                 motion.posX = motion.baseX = func_150ADA68() * 1024.0f + -2560.0f + 2048.0f;
                 motion.baseY = func_150ADA68() * 1024.0f + 1536.0f + 2048.0f;
                 motion.posY = motion.baseY;
@@ -225,15 +220,15 @@ void func_150D2924(EffectObject *obj) {
 }
 
 void func_150AD8B0(f32 *a, f32 *b, f32 *out);
-Vec3f *func_15144B34(s32 viewport);
+vertex *func_15144B34(s32 viewport);
 void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **out, u8 *fresh);
 
 typedef struct GameFFBA0Beam {
     u8 pad0[0x2C];
     f32 width;
     u8 pad30[4];
-    Vec3f start;
-    Vec3f end;
+    vertex start;
+    vertex end;
     u8 pad4C[0x74];
     Vtx vertexTemplate[4];
     Vtx *buffers[4];
@@ -247,12 +242,12 @@ typedef struct GameFFBA0Beam {
 Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index) {
     Vtx *vertices;
     Vtx *result;
-    Vec3f *camera;
-    Vec3f delta;
-    Vec3f end;
-    Vec3f middle;
-    Vec3f view;
-    Vec3f side;
+    vertex *camera;
+    vertex delta;
+    vertex end;
+    vertex middle;
+    vertex view;
+    vertex side;
     f32 lengthSquared;
     f32 *texture;
     u8 fresh;

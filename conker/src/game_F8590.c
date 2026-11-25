@@ -232,95 +232,95 @@ s32 func_150CB7CC(FadeParticle *particle) {
     return 1;
 }
 
-/* Particle descriptor passed to func_15132A4C. */
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10[3];
-    /* 0x1C */ f32 unk1C[3];
-    /* 0x28 */ f32 pos[3];
-    /* 0x34 */ f32 vel[3];
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
+/* matching: ParticleSpawn plus 0x4 bytes; the stack frame needs the larger size. */
+typedef struct ParticleSpawn80 {
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 elasticity;
+    /* 0x08 */ f32 sizeXZ;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ vertex rot;
+    /* 0x1C */ vertex scale;
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ vertex rotVel;
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ u32 flags;
+    /* 0x54 */ s16 lifetime;
+    /* 0x56 */ u16 model;
+    /* 0x58 */ u8 variant;
     /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 pad69;
+    /* 0x5C */ s16 *unk5C;
+    /* 0x60 */ u8 alpha;
+    /* 0x61 */ u8 updateFn;
+    /* 0x62 */ u8 update2Fn;
+    /* 0x63 */ u8 floorHitFn;
+    /* 0x64 */ u8 floorType3Fn;
+    /* 0x65 */ u8 wallHitFn;
+    /* 0x66 */ u8 destroyFn;
+    /* 0x67 */ u8 squashFn;
+    /* 0x68 */ u8 matrixFn;
+    /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
     /* 0x6B */ u8 pad6B;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
+    /* 0x6C */ struct struct127 *owner;
+    /* 0x70 */ u8 ownerId;
     /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8 pad76[0xA];
-} ChunkDesc; /* size 0x80 */
+    /* 0x72 */ s16 fadeStart;
+    /* 0x74 */ s16 fadeRate;
+    /* 0x76 */ u8 pad76[2];
+    /* 0x78 */ s32 sound;
+    /* 0x7C */ u8 pad7C[0x4];
+} ParticleSpawn80;
 
-s32 func_15132A4C(ChunkDesc *, s32, s32, s32, u8, s32);
+s32 func_15132A4C(ParticleSpawn80 *, s32, s32, s32, u8, s32);
 
 /* Spawns one func_15132A4C particle at (x, y, z), its velocity built by func_15143794 from `angle`. */
 s32 func_150CB800(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle,
                   s32 arg9, s32 arg10, s32 arg11, s32 arg12, s32 arg13, u8 arg14) {
-    ChunkDesc desc;
+    ParticleSpawn80 desc;
     f32 fraction;
     u32 random;
 
-    desc.pos[0] = x;
-    desc.pos[1] = y;
-    desc.unk1C[0] = 1.0f;
-    desc.unk1C[1] = 1.0f;
-    desc.unk1C[2] = 1.0f;
-    desc.unk50 = 0x29E8;
-    desc.unk10[0] = 0.0f;
-    desc.unk10[1] = 0.0f;
-    desc.unk10[2] = 0.0f;
-    desc.unk44 = 0.0f;
-    desc.unk00 = 1.0f;
-    desc.unk56 = 32;
-    desc.pos[2] = z;
-    desc.unk04 = 0.2f;
+    desc.pos.x = x;
+    desc.pos.y = y;
+    desc.scale.x = 1.0f;
+    desc.scale.y = 1.0f;
+    desc.scale.z = 1.0f;
+    desc.flags = 0x29E8;
+    desc.rot.x = 0.0f;
+    desc.rot.y = 0.0f;
+    desc.rot.z = 0.0f;
+    desc.rotVel.y = 0.0f;
+    desc.radius = 1.0f;
+    desc.model = 32;
+    desc.pos.z = z;
+    desc.elasticity = 0.2f;
 
     random = func_150ADA20();
     fraction = func_150ADA68();
-    func_15143794(angle, (random % 36U) - 55, (fraction * 200.0f + 200.0f) * 0.1f, desc.vel);
-    desc.unk40 = (func_150ADA68() * 300.0f + -149.0f) * 0.1f;
-    desc.unk48 = (func_150ADA68() * 300.0f + -149.0f) * 0.1f;
-    desc.unk54 = (func_150ADA20() % 33U) + 32;
-    desc.unk4C = (func_150ADA68() * 603.0f + -2402.0f) * 0.001f;
-    desc.unk0C = (func_150ADA68() * 300.0f + 101.0f) * 0.001f;
-    desc.unk58 = 0;
+    func_15143794(angle, (random % 36U) - 55, (fraction * 200.0f + 200.0f) * 0.1f, &desc.vel.x);
+    desc.rotVel.x = (func_150ADA68() * 300.0f + -149.0f) * 0.1f;
+    desc.rotVel.z = (func_150ADA68() * 300.0f + -149.0f) * 0.1f;
+    desc.lifetime = (func_150ADA20() % 33U) + 32;
+    desc.gravity = (func_150ADA68() * 603.0f + -2402.0f) * 0.001f;
+    desc.sizeY = (func_150ADA68() * 300.0f + 101.0f) * 0.001f;
+    desc.variant = 0;
     desc.unk5C = 0;
-    desc.unk08 = desc.unk0C;
-    desc.unk60 = (func_150ADA20() % 101U) + 155;
-    desc.unk61 = 2;
-    desc.unk62 = 0;
-    desc.unk63 = 0;
-    desc.unk64 = 0;
-    desc.unk65 = 0;
-    desc.unk66 = 0;
-    desc.unk67 = 0;
-    desc.unk68 = 0;
+    desc.sizeXZ = desc.sizeY;
+    desc.alpha = (func_150ADA20() % 101U) + 155;
+    desc.updateFn = 2;
+    desc.update2Fn = 0;
+    desc.floorHitFn = 0;
+    desc.floorType3Fn = 0;
+    desc.wallHitFn = 0;
+    desc.destroyFn = 0;
+    desc.squashFn = 0;
+    desc.matrixFn = 0;
     desc.unk6A = 2;
-    desc.unk6C = 0;
-    desc.unk70 = 0;
-    desc.unk72 = 32;
-    desc.unk74 = 7;
+    desc.owner = 0;
+    desc.ownerId = 0;
+    desc.fadeStart = 32;
+    desc.fadeRate = 7;
     func_15132A4C(&desc, 3, 0xFF, 0, arg14, 0);
     return 1;
 }

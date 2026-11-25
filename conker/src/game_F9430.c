@@ -355,94 +355,96 @@ s32 func_150CC8D4(DecayParticle *p, s32 arg1) {
     return 1;
 }
 
-/* Spawn template for func_15132A4C, as filled in by func_150CCA7C. */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 size0;
-    /* 0x0C */ f32 size1;
-    /* 0x10 */ f32 rotation[3];
-    /* 0x1C */ f32 scale[3];
-    /* 0x28 */ f32 position[3];
-    /* 0x34 */ f32 velocity[3];
-    /* 0x40 */ f32 rotationVel[3];
+/* matching: ParticleSpawn plus 0x4 bytes; the stack frame needs the larger size. */
+typedef struct ParticleSpawn80 {
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 elasticity;
+    /* 0x08 */ f32 sizeXZ;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ vertex rot;
+    /* 0x1C */ vertex scale;
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ vertex rotVel;
     /* 0x4C */ f32 gravity;
-    /* 0x50 */ s32 flags;
+    /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
+    /* 0x56 */ u16 model;
+    /* 0x58 */ u8 variant;
     /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 unk5C;
+    /* 0x5C */ s16 *unk5C;
     /* 0x60 */ u8 alpha;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 pad69;
+    /* 0x61 */ u8 updateFn;
+    /* 0x62 */ u8 update2Fn;
+    /* 0x63 */ u8 floorHitFn;
+    /* 0x64 */ u8 floorType3Fn;
+    /* 0x65 */ u8 wallHitFn;
+    /* 0x66 */ u8 destroyFn;
+    /* 0x67 */ u8 squashFn;
+    /* 0x68 */ u8 matrixFn;
+    /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
     /* 0x6B */ u8 pad6B;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
+    /* 0x6C */ struct struct127 *owner;
+    /* 0x70 */ u8 ownerId;
     /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8 pad76[0xA];
-} TumbleSpawn;
+    /* 0x72 */ s16 fadeStart;
+    /* 0x74 */ s16 fadeRate;
+    /* 0x76 */ u8 pad76[2];
+    /* 0x78 */ s32 sound;
+    /* 0x7C */ u8 pad7C[0x4];
+} ParticleSpawn80;
 
 /* Spawns a tumbling particle at (x, y, z), flung along yaw with a random upward pitch and spin. */
 s32 func_150CCA7C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
                   s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10, s32 arg11,
                   s32 arg12, s32 arg13, u8 arg14) {
-    TumbleSpawn spawn;
+    ParticleSpawn80 spawn;
     f32 speed;
     u32 random;
 
-    spawn.position[0] = x;
-    spawn.position[1] = y;
-    spawn.scale[0] = 1.0f;
-    spawn.scale[1] = 1.0f;
-    spawn.scale[2] = 1.0f;
+    spawn.pos.x = x;
+    spawn.pos.y = y;
+    spawn.scale.x = 1.0f;
+    spawn.scale.y = 1.0f;
+    spawn.scale.z = 1.0f;
     spawn.flags = 0x29E8;
-    spawn.rotation[0] = 0.0f;
-    spawn.rotation[1] = 0.0f;
-    spawn.rotation[2] = 0.0f;
-    spawn.rotationVel[1] = 0.0f;
-    spawn.unk0 = 1.0f;
-    spawn.unk56 = 0x20;
-    spawn.position[2] = z;
-    spawn.unk4 = 0.200000003f;
+    spawn.rot.x = 0.0f;
+    spawn.rot.y = 0.0f;
+    spawn.rot.z = 0.0f;
+    spawn.rotVel.y = 0.0f;
+    spawn.radius = 1.0f;
+    spawn.model = 0x20;
+    spawn.pos.z = z;
+    spawn.elasticity = 0.200000003f;
 
     random = func_150ADA20();
     speed = (func_150ADA68() * 200.0f + 300.0f) * 0.1000000015f;
-    func_15143794(yaw, (s16)((random % 44U) - 63), speed, spawn.velocity);
+    func_15143794(yaw, (s16)((random % 44U) - 63), speed, &spawn.vel.x);
 
-    spawn.rotationVel[0] = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
-    spawn.rotationVel[2] = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
+    spawn.rotVel.x = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
+    spawn.rotVel.z = (func_150ADA68() * 260.0f + -130.0f) * 0.1000000015f;
     spawn.lifetime = (func_150ADA20() % 51U) + 50;
     spawn.gravity = (func_150ADA68() * 1500.0f + -3500.0f) * 0.001000000047f;
 
-    spawn.size0 = spawn.size1 = (func_150ADA68() * 500.0f + 100.0f) * 0.001000000047f;
-    spawn.unk58 = 0;
+    spawn.sizeXZ = spawn.sizeY = (func_150ADA68() * 500.0f + 100.0f) * 0.001000000047f;
+    spawn.variant = 0;
     spawn.unk5C = 0;
 
     spawn.alpha = (func_150ADA20() % 101U) + 155;
-    spawn.unk61 = 3;
-    spawn.unk62 = 0;
-    spawn.unk63 = 0;
-    spawn.unk64 = 0;
-    spawn.unk65 = 0;
-    spawn.unk66 = 0;
-    spawn.unk67 = 0;
-    spawn.unk68 = 0;
+    spawn.updateFn = 3;
+    spawn.update2Fn = 0;
+    spawn.floorHitFn = 0;
+    spawn.floorType3Fn = 0;
+    spawn.wallHitFn = 0;
+    spawn.destroyFn = 0;
+    spawn.squashFn = 0;
+    spawn.matrixFn = 0;
     spawn.unk6A = 2;
-    spawn.unk6C = 0;
-    spawn.unk70 = 0;
-    spawn.unk72 = 0x20;
-    spawn.unk74 = 7;
+    spawn.owner = 0;
+    spawn.ownerId = 0;
+    spawn.fadeStart = 0x20;
+    spawn.fadeRate = 7;
 
     func_15132A4C(&spawn, 3, 0xFF, 0, arg14, 0);
     return 1;

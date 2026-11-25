@@ -898,38 +898,43 @@ SightExtension *func_151C8FCC(SightBeamObject *owner, vertex *start, vertex *end
     return effect;
 }
 
-/* Spawn descriptor for func_15132A4C. */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 pitch;
-    /* 0x14 */ f32 yaw;
-    /* 0x18 */ f32 roll;
-    /* 0x1C */ f32 scale[3];
-    /* 0x28 */ vertex position;
-    /* 0x34 */ vertex unk34;
-    /* 0x40 */ vertex unk40;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 flags;
+/* matching: the first 0x78 bytes of ParticleSpawn; a full ParticleSpawn on the stack changes the frame. */
+typedef struct ParticleSpawn78 {
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 elasticity;
+    /* 0x08 */ f32 sizeXZ;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ vertex rot;
+    /* 0x1C */ vertex scale;
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ vertex rotVel;
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;
-    /* 0x56 */ s16 model;
-    /* 0x58 */ u8  unk58;
-    /* 0x59 */ u8  pad59[3];
-    /* 0x5C */ SightZone *zone;
-    /* 0x60 */ u8  unk60[8];
-    /* 0x68 */ u8  unk68;
-    /* 0x69 */ s8  unk69;
-    /* 0x6A */ u8  unk6A;
-    /* 0x6B */ u8  pad6B;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8  unk70;
-    /* 0x71 */ u8  pad71;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x76 */ u8  pad76[2];
-} SightEmitterDesc;
+    /* 0x56 */ u16 model;
+    /* 0x58 */ u8 variant;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s16 *unk5C;
+    /* 0x60 */ u8 alpha;
+    /* 0x61 */ u8 updateFn;
+    /* 0x62 */ u8 update2Fn;
+    /* 0x63 */ u8 floorHitFn;
+    /* 0x64 */ u8 floorType3Fn;
+    /* 0x65 */ u8 wallHitFn;
+    /* 0x66 */ u8 destroyFn;
+    /* 0x67 */ u8 squashFn;
+    /* 0x68 */ u8 matrixFn;
+    /* 0x69 */ s8 drawFn;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ struct struct127 *owner;
+    /* 0x70 */ u8 ownerId;
+    /* 0x71 */ u8 pad71;
+    /* 0x72 */ s16 fadeStart;
+    /* 0x74 */ s16 fadeRate;
+    /* 0x76 */ u8 pad76[2];
+} ParticleSpawn78;
 
 extern s32 func_15144E80(SightTriangle *, vertex *, vertex *, vertex *);
 extern void *func_15132A4C(void *, s32, s32, s32, u8, s32);
@@ -941,56 +946,56 @@ void func_151C9198(SightEmitter **emitters, vertex *pos, SightTriangle *triangle
     vertex edge1;
     vertex normal;
     s32 i;
-    SightEmitterDesc desc;
+    ParticleSpawn78 desc;
     void *unused; // matching: reserves a stack slot
     SightEmitterAnim anim;
 
     if (func_15144E80(triangle, &edge0, &edge1, &normal) != 0) {
-        func_15145974(&normal, &desc.yaw, &desc.pitch);
-        desc.unk0 = 1.0f;
-        desc.unk4 = 1.0f;
-        desc.scale[0] = 1.0f;
-        desc.scale[1] = 1.0f;
-        desc.pitch += 90.0f;
-        desc.scale[2] = 1.0f;
-        desc.unkC = 0.4000000059604645f;
-        desc.unk8 = 0.4000000059604645f;
-        desc.roll = 0.0f;
-        desc.position = *pos;
-        desc.unk34.x = 0.0f;
-        desc.unk34.y = 0.0f;
-        desc.unk34.z = 0.0f;
-        desc.unk40.x = 0.0f;
-        desc.unk40.y = 0.0f;
-        desc.unk40.z = 0.0f;
-        desc.unk4C = 0.0f;
+        func_15145974(&normal, &desc.rot.y, &desc.rot.x);
+        desc.radius = 1.0f;
+        desc.elasticity = 1.0f;
+        desc.scale.x = 1.0f;
+        desc.scale.y = 1.0f;
+        desc.rot.x += 90.0f;
+        desc.scale.z = 1.0f;
+        desc.sizeY = 0.4000000059604645f;
+        desc.sizeXZ = 0.4000000059604645f;
+        desc.rot.z = 0.0f;
+        desc.pos = *pos;
+        desc.vel.x = 0.0f;
+        desc.vel.y = 0.0f;
+        desc.vel.z = 0.0f;
+        desc.rotVel.x = 0.0f;
+        desc.rotVel.y = 0.0f;
+        desc.rotVel.z = 0.0f;
+        desc.gravity = 0.0f;
         desc.flags = (zoneMasked ? 0x400 : 0) | 0x100 | 0x800 | 0x10000 | 0x4000 | 0x40000 | 0x80000;
         desc.lifetime = 300;
         desc.model = 0x36;
-        desc.unk58 = 0;
-        desc.zone = zone;
-        desc.unk60[0] = 0xFF;
-        desc.unk60[1] = 0;
-        desc.unk60[2] = 0;
-        desc.unk60[3] = 0;
-        desc.unk60[4] = 0;
-        desc.unk60[5] = 0;
-        desc.unk60[6] = 0;
-        desc.unk60[7] = 0;
-        desc.unk68 = 2;
+        desc.variant = 0;
+        desc.unk5C = zone;
+        desc.alpha = 0xFF;
+        desc.updateFn = 0;
+        desc.update2Fn = 0;
+        desc.floorHitFn = 0;
+        desc.floorType3Fn = 0;
+        desc.wallHitFn = 0;
+        desc.destroyFn = 0;
+        desc.squashFn = 0;
+        desc.matrixFn = 2;
         desc.unk6A = 0;
-        desc.unk6C = 0;
-        desc.unk70 = 0;
-        desc.unk72 = 1;
-        desc.unk74 = 0xFF;
-        desc.unk69 = -1;
+        desc.owner = 0;
+        desc.ownerId = 0;
+        desc.fadeStart = 1;
+        desc.fadeRate = 0xFF;
+        desc.drawFn = -1;
         emitters[0] = func_15132A4C(&desc, 3, 0xFF, 0, arg7, arg8);
         if (emitters[0] != NULL) {
             for (i = 0; i < 2; i++) {
                 func_15133760(emitters[0]->parts[i], emitters[0]);
             }
         }
-        desc.unk69 = 2;
+        desc.drawFn = 2;
         anim.unk0 = 2;
         anim.unk6 = 4;
         anim.unkE = 6;
@@ -1004,7 +1009,7 @@ void func_151C9198(SightEmitter **emitters, vertex *pos, SightTriangle *triangle
             anim.unkC = 0x8C;
         }
         desc.model = 0x37;
-        desc.unk68 = 0;
+        desc.matrixFn = 0;
         emitters[1] = func_15132A4C(&desc, 3, 0xFF, 0x14, arg7, arg8);
         if (emitters[1] != NULL) {
             for (i = 0; i < 2; i++) {

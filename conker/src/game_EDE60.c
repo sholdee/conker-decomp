@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
@@ -124,46 +125,47 @@ Emitter *func_150C0AC0(EmitterDesc *desc, s32 arg1, s32 arg2) {
     return emitter;
 }
 
-/* Particle spawn template passed to func_15130280. */
-typedef struct {
+/* matching: the first 0x68 bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
+typedef struct ParticleDesc68 {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ u16 unk8;
-    /* 0x0A */ s16 unkA;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 scaleX;
-    /* 0x2C */ f32 scaleY;
+    /* 0x08 */ u16 renderMode; /* low byte: D_800A4AC8 index, high byte: func_1513F4E4 arg */
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;      /* 16.16 animation frame */
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;     /* D_80090B60 index */
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
     /* 0x30 */ vertex pos;
-    /* 0x3C */ vertex vel;
-    /* 0x48 */ vertex unk48;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ s8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ s8 unk65;
-    /* 0x66 */ u8 pad66[2];
-} ParticleSpawn; /* size 0x68 */
+    /* 0x3C */ vertex offset;
+    /* 0x48 */ vertex vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ u32 flags;      /* PARTICLE_* */
+    /* 0x5C */ struct ParticleViewMask *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
+    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
+    /* 0x64 */ s8 drawFunc;    /* D_80089804 index, -1 for none */
+    /* 0x65 */ u8 handlerSet;  /* D_80089814/D_80089844/D_80089878 index */
+    /* 0x66 */ u8 views;       /* bit per view the particle is drawn in */
+    /* 0x67 */ u8 pad67;
+} ParticleDesc68;
 
-extern Particle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
+extern Particle *func_15130280(ParticleDesc68 *, u8, s32, s32, u8, s32);
 
 /* Emitter update: follows its target and, while the target moves, spawns particles around it. */
 void func_150C0C38(Emitter *emitter) {
@@ -173,7 +175,7 @@ void func_150C0C38(Emitter *emitter) {
     struct127 *target;
     s16 i;
     s32 bit;
-    ParticleSpawn spawn;
+    ParticleDesc68 spawn;
     Emitter *owner;
 
     self = emitter;
@@ -217,27 +219,27 @@ void func_150C0C38(Emitter *emitter) {
                 f32 cosA;
                 f32 speed;
 
-                spawn.unk1D = 0x6C;
-                spawn.unk8 = 0x5103;
+                spawn.texture = 0x6C;
+                spawn.renderMode = 0x5103;
                 spawn.unk0 = 0x200005;
                 spawn.unk4 = 0x1F0600;
-                spawn.unkC = 0;
-                spawn.unk10 = 0;
-                spawn.unk17 = 0xFF;
-                spawn.unk1C = 0xFF;
-                spawn.unk48.x = 0.0f;
-                spawn.unk48.y = 0.0f;
-                spawn.unk48.z = 0.0f;
-                spawn.unk54 = 0.0f;
-                spawn.unk1E = 30;
-                spawn.unk20 = 8;
+                spawn.frame = 0;
+                spawn.frameRate = 0;
+                spawn.a = 0xFF;
+                spawn.brightness = 0xFF;
+                spawn.vel.x = 0.0f;
+                spawn.vel.y = 0.0f;
+                spawn.vel.z = 0.0f;
+                spawn.gravity = 0.0f;
+                spawn.fadeStart = 30;
+                spawn.fadeRate = 8;
                 spawn.flags = 0x80DE01;
-                spawn.unk60 = 8;
-                spawn.unk61 = 6;
-                spawn.unk62 = -1;
-                spawn.unk63 = 0;
-                spawn.unk64 = -1;
-                spawn.unk65 = 0;
+                spawn.primColorMode = 8;
+                spawn.envColorMode = 6;
+                spawn.updateFunc = -1;
+                spawn.deathFunc = 0;
+                spawn.drawFunc = -1;
+                spawn.handlerSet = 0;
                 owner = emitter;
                 while (emitter->spawnAccum > 1.0f && self->freeHead != -1) {
                     slot = emitter->freeHead;
@@ -245,23 +247,23 @@ void func_150C0C38(Emitter *emitter) {
                     sinA = func_151423D8(angle - 0x40);
                     cosA = func_151423D8(angle);
                     speed = func_150ADA68() * 33.0f + 40.0f;
-                    spawn.unk18 = 0x52;
-                    spawn.unk19 = 0x6B;
-                    spawn.unk1A = 0x97;
-                    spawn.unk14 = 0x87;
-                    spawn.unk15 = 0x6B;
-                    spawn.unk16 = 0x97;
-                    spawn.unk1B = func_150ADA20() % 121U + 80;
-                    spawn.scaleX = spawn.scaleY = func_150ADA68() * 17.0f + 67.0f;
+                    spawn.r2 = 0x52;
+                    spawn.g2 = 0x6B;
+                    spawn.b2 = 0x97;
+                    spawn.r = 0x87;
+                    spawn.g = 0x6B;
+                    spawn.b = 0x97;
+                    spawn.alpha = func_150ADA20() % 121U + 80;
+                    spawn.width = spawn.height = func_150ADA68() * 17.0f + 67.0f;
                     spawn.pos = pos;
-                    spawn.vel.x = speed * sinA;
-                    spawn.vel.y = 0.0f;
-                    spawn.vel.z = speed * cosA;
+                    spawn.offset.x = speed * sinA;
+                    spawn.offset.y = 0.0f;
+                    spawn.offset.z = speed * cosA;
                     spawn.flags &= ~0xC0;
                     bit = (func_150ADA20() & 1) ? 0x80 : 0;
                     spawn.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | bit;
-                    spawn.unkA = spawn.unk22 = func_150ADA20() % 22U + 70;
-                    spawn.unk24 = 1.035226941f;
+                    spawn.timer = spawn.scaleStart = func_150ADA20() % 22U + 70;
+                    spawn.scaleRate = 1.035226941f;
                     emitter->slots[slot].particle = func_15130280(&spawn, 1, 0, 4, emitter->unkC, emitter->unk1);
                     if (emitter->slots[slot].particle != NULL) {
                         memcpy(&emitter->slots[slot].particle->owner, &owner, sizeof(owner));
