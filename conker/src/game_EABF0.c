@@ -8,22 +8,6 @@
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                   s32, s32, s32, s32, s32, s32, s32, s32);
 
-
-struct Obj150BCFB8 {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 bounce;
-    /* 0x18 */ u8 pad18[0x3C - 0x18];
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ u8 pad40[0x44 - 0x40];
-    /* 0x44 */ Vec3f vel;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ f32 unk58;
-    /* 0x5C */ u8 pad5C[0x60 - 0x5C];
-    /* 0x60 */ s32 flags;
-};
-
 /* Live particle created by func_15130280. */
 typedef struct {
     /* 0x00 */ DescParticleHead head;
