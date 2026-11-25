@@ -599,6 +599,7 @@ void func_151E30C4(void) {
     func_1501C730(6, (s32)D_800BE9F4, func_1509CA50(resource), 0, 1);
 }
 
+/* Resets to a one-player session using the cue D_800BE3DF/D_800BE3E0. */
 void func_151E327C(void) {
     D_80087260 = 3;
     if (D_800E9D00 & 0x200) {
@@ -986,6 +987,7 @@ void func_151E3344(s32 optionMask, s32 carousel, s32 showArrows, u8 alpha, s8 fa
     }
 }
 
+/* State 5: skips one frame after the intro cue, then fades out into func_151E2834 on input (or unless D_800C35EA == 1). */
 void func_151E4264(void) {
     if (D_8008FD80 != 0) {
         D_8008FD80 = 0;
@@ -1045,6 +1047,7 @@ void func_150916B4(s32, s32, s32, s32);
 extern struct Struct151E4314 D_800AB7BC[];
 void func_151E4E00(void);
 
+/* State 6: results screen; plays the outcome cue, draws ranks and the continue/quit choice. */
 void func_151E43DC(void) {
     static s8 D_8008FF3C = 0;
     s32 idx;
@@ -1247,18 +1250,21 @@ void func_151E4BD8(void) {
 
 extern u8 D_800E0B94;
 
+/* Switches the menu to state 10. */
 void func_151E4DC4(void) {
     D_800E0B94 = 0xA;
 }
 
 extern s16 D_800E0B9A;
 
+/* Switches to state 4 when input bits 0x8020 are set. */
 void func_151E4DD8(void) {
     if (D_800E0B9A & 0x8020) {
         D_800E0B94 = 4;
     }
 }
 
+/* Returns to state 3 and plays cue 0x1D. */
 void func_151E4E00(void) {
     D_8008FDCC = 0;
     func_151E557C();
@@ -1269,6 +1275,7 @@ void func_151E4E00(void) {
     func_1501C730(6, 0x1D, 0, 0, 1);
 }
 
+/* Waits for input (or 1200 frames) and then fades out into func_151E4E00. */
 void func_151E4E64(void) {
     func_151E530C();
     func_151E55A8();
@@ -1322,6 +1329,7 @@ void func_151E4EE8(void) {
 
 extern struct Struct151E5034 *D_8008FDD4;
 
+/* Resets the path/selection state in D_8008FDD4. */
 void func_151E5034(void) {
     D_8008FDD4->unk0 = 0.0f;
     D_8008FDD4->unk4 = 0.0f;
@@ -1345,6 +1353,7 @@ extern struct Struct151E5034 D_800E0AF0;
 void func_151E6BFC(void);
 extern u8 D_800AB570[];
 
+/* Menu init: default option values, text bank reset, D_8008FDD4 state, then state 11. */
 void func_151E50C8(void) {
     s32 i;
 
@@ -1427,6 +1436,7 @@ void func_151E530C(void) {
 }
 
 
+/* End of a match: if D_800BE616 is set, records each player's unk1AA and schedules the results transition; else state 4. */
 void func_151E53E8(s32 arg0) {
     s32 i;
 
@@ -1463,6 +1473,7 @@ void func_151E53E8(s32 arg0) {
 
 extern u8 D_80084060[];
 
+/* Resets the player-to-controller map D_80084060 to identity. */
 void func_151E557C(void) {
     D_80084060[0] = 0;
     D_80084060[1] = 1;
@@ -1496,6 +1507,7 @@ void func_151E55A8(void) {
 
 extern u8 D_800E0A8C;
 
+/* Clears D_800E0A8C. */
 void func_151E562C(void) {
     if (D_800E0A8C != 0) {
         D_800E0A8C = 0;
@@ -1504,6 +1516,7 @@ void func_151E562C(void) {
 
 extern s8 D_8008FDC8;
 
+/* Returns D_8008FDC8: set when the mode entry's unk5 is negative (every player then gets a team of their own). */
 s8 func_151E564C(void) {
     return D_8008FDC8;
 }
@@ -1705,6 +1718,7 @@ extern u8 D_800BE616;
 extern u8 D_800E0B94;
 extern s8 D_800E0C00[];
 
+/* Returns the team of player arg0 during a match (0 if none), else arg0 itself. */
 s32 func_151E5F64(s32 arg0) {
     s32 ret;
 
@@ -1718,6 +1732,7 @@ s32 func_151E5F64(s32 arg0) {
     return arg0;
 }
 
+/* Returns D_8008FD8C when D_800E0BEB is set and it is below 5, else D_8008FD90. */
 s8 func_151E5FAC(void) {
     if (D_800E0BEB != 0) {
         if (D_8008FD8C >= 5) {
@@ -2025,6 +2040,7 @@ void func_151E6964(s32 bank) {
     } while (count != 80);
 }
 
+/* Forgets the loaded text banks without freeing them. */
 void func_151E6BFC(void) {
     D_800E0BD3 = 0;
     D_800E0BD4 = 0;
@@ -2473,6 +2489,7 @@ void func_151E7DC0(void) {
 
 extern s8 D_800E0BE9;
 
+/* Calls func_10017870 with 1, 2 or 4 depending on D_800E0BE9. */
 void func_151E7E9C(void) {
     if (D_800E0BE9 == 2) {
         func_10017870(1);
@@ -2485,17 +2502,18 @@ void func_151E7E9C(void) {
 
 extern void func_151DDC20(void);
 
+/* Anti-tamper: checksums the code from func_151DDC20 to func_151DE7D4 and breaks osSpTaskLoad if it was modified. */
 void func_151E7EF8(void) {
-    s32 *p;
+    s32 *word;
     s32 *end;
     s32 sum;
 
     func_151E7E9C();
     sum = 0;
-    p = (s32 *)func_151DDC20;
+    word = (s32 *)func_151DDC20;
     end = (s32 *)func_151DE7D4;
-    for (; p < end; p++) {
-        sum += *p;
+    for (; word < end; word++) {
+        sum += *word;
     }
     if (sum != (s32)0xBFC924E3) {
         *(s32 *)osSpTaskLoad = 0;
@@ -2529,55 +2547,57 @@ extern Pos151E7F60 D_800AB940[];
 extern s32 func_15082A44(void *, s32, s32, s32, s32);
 extern void func_15083384(struct127 *, u8);
 
-void func_151E7F60(s32 arg0, s32 arg1) {
-    s32 slot;
-    s32 id;
+/* Spawns the character D_800AB57C[charIdx] into slot slotIdx (replacing any previous one) at its D_800AB940 position. */
+void func_151E7F60(s32 slotIdx, s32 charIdx) {
+    s32 objSlot;
+    s32 spawnId;
     Spawn151E7F60 *spawn;
-    s32 i;
+    s32 posIdx;
     s32 kind;
     struct127 *obj;
 
-    if (D_800E0BA0[arg0] != NULL) {
-        func_15060F28(D_800E0BA0[arg0], 1);
+    if (D_800E0BA0[slotIdx] != NULL) {
+        func_15060F28(D_800E0BA0[slotIdx], 1);
     }
-    id = func_15083E0C(arg0 + 0x10);
-    spawn = (Spawn151E7F60 *)((id * 0x30) + (s32)D_800D20FC);
-    kind = D_800AB57C[arg1].unk5;
-    i = arg0;
+    spawnId = func_15083E0C(slotIdx + 0x10);
+    spawn = (Spawn151E7F60 *)((spawnId * 0x30) + (s32)D_800D20FC); // matching: offset + base operand order; struct258 in structs.h is not the real 0x30-byte entry
+    kind = D_800AB57C[charIdx].unk5;
+    posIdx = slotIdx;
     if (D_8008FDD4->unk2C == 7) {
-        i++;
+        posIdx++;
     }
     spawn->unk4 = kind;
-    spawn->unk6 = D_800AB940[i].unk0;
-    spawn->unk8 = D_800AB940[i].unk2;
-    spawn->unk8 += D_800AB57C[arg1].unk4;
-    spawn->unkA = D_800AB940[i].unk4;
-    spawn->unkC = D_800AB940[i].unk6;
+    spawn->unk6 = D_800AB940[posIdx].unk0;
+    spawn->unk8 = D_800AB940[posIdx].unk2;
+    spawn->unk8 += D_800AB57C[charIdx].unk4;
+    spawn->unkA = D_800AB940[posIdx].unk4;
+    spawn->unkC = D_800AB940[posIdx].unk6;
     if (kind == 0x53) {
         spawn->unkD = 0x24;
     } else {
         spawn->unkD = 0xE;
     }
-    slot = func_15082A44(spawn, id, 0, 0, 0);
-    if (slot != 0) {
-        obj = &D_800CC2D0[slot - 1];
-        D_800E0BA0[arg0] = obj;
+    objSlot = func_15082A44(spawn, spawnId, 0, 0, 0);
+    if (objSlot != 0) {
+        obj = &D_800CC2D0[objSlot - 1];
+        D_800E0BA0[slotIdx] = obj;
         obj->unk5 = 7;
         obj->unk2F8 |= 3;
-        obj->xz_scale = obj->y_scale = D_800AB57C[arg1].unk0;
+        obj->xz_scale = obj->y_scale = D_800AB57C[charIdx].unk0;
         if (obj->id == 0 || obj->id == 0x80) {
             obj->unk31C = allocate_memory(0x1C0, 1, 0, 0);
             bzero(obj->unk31C, 0x1C0);
         }
         if (kind == 0x3B) {
-            *(s8 *)&obj->pad68 = arg0 + 1;
+            *(s8 *)&obj->pad68 = slotIdx + 1; // first byte of struct127's unnamed pad68
         }
-        func_15083384(obj, D_800AB57C[arg1].unk6);
+        func_15083384(obj, D_800AB57C[charIdx].unk6);
         func_1505E650(obj, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);
     }
 }
 
 extern s8 D_8008FD84[];
+/* Clears the spawned character slots. */
 void func_151E81EC(void) {
     static struct127 *D_800E0BA0[4];
     s32 i;
@@ -2587,6 +2607,7 @@ void func_151E81EC(void) {
     D_8008FD84[0] = 0;
 }
 
+/* Switches to state 8 once D_800E0A90 passes 160 frames (held at 0 while func_1517EFDC() returns 0). */
 void func_151E8214(void) {
     if (D_800E0B94 != 8) {
         if (func_1517EFDC() == 0) {
@@ -2605,6 +2626,10 @@ void func_151E8214(void) {
     }
 }
 
+/*
+ * Pages through the text bank: every 445 frames D_800E0A80 skips past the next line starting with '*';
+ * a line starting with '=' ends paging, and 120 frames later the menu switches to state 9.
+ */
 void func_151E82B8(void) {
     func_151E530C();
     if (D_800E0A80 == -1) {
@@ -2623,11 +2648,11 @@ void func_151E82B8(void) {
 
     if (D_800E0A90 > 445) {
         if (D_800E0A80 >= 0) {
-            while (D_800E0BD8[D_800E0A80][0] != 0x2A) {
+            while (D_800E0BD8[D_800E0A80][0] != '*') {
                 D_800E0A80++;
             }
             D_800E0A80++;
-            if (D_800E0BD8[D_800E0A80][0] == 0x3D) {
+            if (D_800E0BD8[D_800E0A80][0] == '=') {
                 D_800E0A80 = -1;
             }
             D_800E0A90 = 0;
@@ -2635,6 +2660,7 @@ void func_151E82B8(void) {
     }
 }
 
+/* State 9: plays cue 0x1D once, then after 100 frames (timer held while func_1517EFDC() is 0) goes to state 1. */
 void func_151E83E8(void) {
     if (D_800E0A80 == 0) {
         D_800E0A80 = -1;
