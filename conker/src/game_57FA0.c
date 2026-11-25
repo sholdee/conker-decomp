@@ -9,9 +9,9 @@
 #include "macros.h"
 #include "libc/stdarg.h"
 
-extern void *allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-extern void func_10004074(void *arg0);
-extern s32 func_10006240(void *arg0, void *arg1, u32 arg2);
+extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
+extern void func_10004074(void *ptr);                     /* frees an allocate_memory() buffer */
+extern s32 func_10006240(void *src, void *dst, u32 arg2); /* decompresses; returns the size written */
 
 void func_1502AAF0(void) {
 }
@@ -22,7 +22,8 @@ void func_1502AAF8(s32 arg0) {
 /* One 8-byte entry of the ROM asset table at D_AB1950. */
 typedef struct {
     s32 offset; /* added to the table base to reach the next level */
-    s32 info;   /* bits 0-27: size (0 = missing), bits 28-30: compression (1 = compressed) */
+    s32 info;   /* bits 0-27: size (0 = missing), bits 28-30: compression (1 = compressed),
+                 * bit 31: last entry (tables loaded into RAM, see func_1502B4A8) */
 } RomTableEntry;
 
 /* Most-recently-used cache of ROM table entries; the newest is at the end. */
@@ -39,7 +40,7 @@ void func_1502AB04(s32 count, RomTableEntry *entries, s32 tick, u32 romAddr) {
     u32 n;
     u32 i;
 
-    n = count; // matching: IDO keeps the count in a callee-saved register only through a local copy
+    n = count; // matching: using the parameter directly allocates registers differently
     if (n != 0) {
         bcopy(&D_800C3D68[n], D_800C3D68, (16 - n) * sizeof(RomTableCacheLine));
     }
@@ -52,7 +53,7 @@ void func_1502AB04(s32 count, RomTableEntry *entries, s32 tick, u32 romAddr) {
     }
 }
 
-extern u32 D_800C3D60;
+extern u32 D_800C3D60; /* bumped on every cache miss */
 
 /*
  * Looks up entry `index` of the ROM table at `table` and returns its offset, storing its info word in
@@ -117,7 +118,8 @@ RomTableEntry *func_1502AF04(u8 *table, u8 *buf, s32 index, s32 count) {
     }
     return entries;
 }
-extern u8 D_AB1950[];
+
+extern u8 D_AB1950[]; /* root ROM table */
 
 /*
  * Follows `depth` table indices (the variadic arguments) down from the root ROM table. Returns the
@@ -425,78 +427,43 @@ s32 func_1502B8E0(void *dst, u32 maxSize, s32 depth, ...) {
     return size;
 }
 
-s32 func_1502B9B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    u8 *offset;
-    s32 *tmp;
-    s32 n;
-    s32 more;
-    s32 stack0;
-    s32 pad[3];
-    s32 stack2[2];
-    s32 stack1[2];
-    s32 pad0;
+/*
+ * Follows `depth` table indices from the root ROM table and returns the size the data reached takes
+ * once loaded: its stored size, or for compressed data the header word read from ROM. 0 if missing.
+ */
+s32 func_1502B9B4(s32 depth, ...) {
+    u8 *addr;
+    va_list args;
+    s32 size;
+    s32 index;
+    s32 info;
+    u64 buf[3];
+    s32 *header;
 
-    more = 1;
-    offset = D_AB1950;
-    tmp = &arg0 + 1;
+    size = 1;
+    addr = D_AB1950;
+    va_start(args, depth);
 
-    for (; arg0 != 0; arg0--) {
-        tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-        n = *(tmp - 1);
-        if (more != 0) {
-            offset += func_1502AC88(offset, n, &stack0);
+    for (; depth != 0; depth--) {
+        index = va_arg(args, s32);
+        if (size != 0) {
+            addr += func_1502AC88(addr, index, &info);
         }
-        more = stack0 & 0xFFFFFFF;
+        size = info & 0xFFFFFFF;
     }
 
-    if (more != 0) {
-        more = ((stack0 & 0xFFFFFFF) + 1) & -2;
-        if ((stack0 & 0x70000000) == 0x10000000) {
-            tmp = stack1;
-            if (((s32)stack1 & 8) != 0) {
-                tmp = stack2;
+    if (size != 0) {
+        size = ((info & 0xFFFFFFF) + 1) & ~1;
+        if ((info & 0x70000000) == 0x10000000) {
+            /* DMA needs a 16-byte aligned buffer. */
+            header = (s32 *)&buf[0];
+            if ((s32)header & 8) {
+                header = (s32 *)&buf[1];
             }
-            func_10004514((s32)offset, tmp, 0x10, 1);
-            more = tmp[0];
+            func_10004514((s32)addr, header, 0x10, 1);
+            size = header[0];
         }
     }
 
-    return more;
+    return size;
 }
-// NON-MATCHING: maybe 50% there?
-// s32 func_1502B9B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-//
-//     s32 stack2[2];
-//     s32 stack1[2];
-//     s32 stack0[5];
-//
-//     s32 more;
-//     s32 offset;
-//     s32 *tmp;
-//     s32 i;
-//
-//     more = 1;
-//     offset = &D_00AB1950;
-//     tmp = &arg1;
-//
-//     for (i = arg0; i != 0; i--) {
-//         tmp = ALIGN4(tmp) + 4;
-//         if (more != 0) {
-//             offset += func_1502AC88(offset, tmp - 4, &stack0);
-//         }
-//         more = *stack0 & 0xFFFFFFF;
-//     }
-//
-//     if (more != 0) {
-//         more = ALIGN2(stack0[0] & 0xFFFFFFF);
-//         if ((*stack0 & 0x70000000) == 0x10000000) {
-//             if (((s32) &stack1 & 8) != 0) {
-//                 *stack1 = &stack2;
-//             }
-//             func_10004514(offset, stack1, 0x10, 1); // decompress?
-//             more = *stack1;
-//         }
-//     }
-//
-//     return more;
-// }
