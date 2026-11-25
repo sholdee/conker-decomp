@@ -311,41 +311,35 @@ void func_150C44A4(Effect *effect) {
     }
 }
 
-void func_150C4AD8(struct260 *arg0) {
-    if (*(s32 *)((u8 *)arg0 + 0x34) != 0) {
-        func_1516972C(*(struct102 **)((u8 *)arg0 + 0x34));
+/* Frees the effect's particle, if it has one. */
+void func_150C4AD8(Effect *effect) {
+    // matching: the s32 read keeps IDO from merging the test and the argument into one load
+    if (*(s32 *)&effect->data.particle != 0) {
+        func_1516972C((struct102 *)effect->data.particle);
     }
 }
 
-extern void func_150C4AD8(struct260 *);
-
-void func_150C4B08(struct260 *arg0) {
-    func_150C4AD8(arg0);
-    func_1514933C(arg0);
+/* Frees the effect's particle, then calls func_1514933C on the effect. */
+void func_150C4B08(Effect *effect) {
+    func_150C4AD8(effect);
+    func_1514933C((struct260 *)effect);
 }
 
-extern void func_15149368(struct260 *);
-
-void func_150C4B34(struct260 *arg0) {
-    func_150C4AD8(arg0);
-    func_15149368(arg0);
+/* Frees the effect's particle, then calls func_15149368 on the effect. */
+void func_150C4B34(Effect *effect) {
+    func_150C4AD8(effect);
+    func_15149368((struct260 *)effect);
 }
 
-/* Event handler: events 0x55/0x56 clear/set flag 2 (suspend), others go to func_15149514. */
-void func_150C4B60(s32 arg0, s32 arg1, u8 event) {
-    s32 *p = &arg0;
-    EffectData *data;
+/* Event handler: events 0x55/0x56 clear/set flag 2 (pausing the effect), others go to func_15149514. */
+void func_150C4B60(Effect *effect, s32 arg1, u8 event) {
+    EffectData *data = &effect->data;
 
     if (event == 0x55) {
-        data = (EffectData *)*p;
-        data = (EffectData *)((s32)data + 0x28);
-        data->flags = data->flags & 0xFFFD;
+        data->flags &= ~2;
     } else if (event == 0x56) {
-        data = (EffectData *)*p;
-        data = (EffectData *)((s32)data + 0x28);
-        data->flags = data->flags | 2;
+        data->flags |= 2;
     } else {
-        data = (EffectData *)(*p + 0x28);
-        func_15149514(arg1, event, (s32)data, (s32)&data->ownerId, *p);
+        func_15149514(arg1, event, (s32)data, (s32)&data->ownerId, (s32)effect);
     }
 }
