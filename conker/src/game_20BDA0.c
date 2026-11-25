@@ -1088,26 +1088,30 @@ extern u32 D_8008FEA4[];
 extern char D_800AB854[];
 void func_151E7F60(s32 arg0, s32 arg1);
 
+/*
+ * Player-join page: controllers 2-4 press Start to join or leave (D_8008FE44 lists the players).
+ * Modes with a character choice let each player cycle D_800E0B90[] with left/right.
+ */
 void func_151E0B70(void) {
-    s32 val;
+    s32 alpha;
     s32 dir;
     s32 i;
     s32 j;
     s32 k;
-    s32 found;
-    s32 mode;
+    s32 left;
+    s32 nextPage;
     s8 *remap;
-    u32 mask;
-    s8 numSlots;
-    s8 force;
+    u32 allowed;
+    s8 maxPlayers;
+    s8 reload;
 
     remap = NULL;
-    mask = -1;
-    force = 0;
+    allowed = -1;
+    reload = 0;
     if (D_800E0A96 != -1) {
         D_8008FDD4->input &= ~MENU_BACK;
-        val = D_800E0A95 - (D_800BE9E4 << 5);
-        if (val <= 0) {
+        alpha = D_800E0A95 - (D_800BE9E4 << 5);
+        if (alpha <= 0) {
             D_800E0A95 = 0;
             D_8008FDD4->page = D_800E0A96;
             D_800E0A96 = -1;
@@ -1119,51 +1123,51 @@ void func_151E0B70(void) {
             }
             return;
         }
-        D_800E0A95 = val;
+        D_800E0A95 = alpha;
     } else {
-        val = D_800E0A95 + (D_800BE9E4 << 5);
-        if (val >= 0x100) {
-            val = 0xFF;
+        alpha = D_800E0A95 + (D_800BE9E4 << 5);
+        if (alpha >= 0x100) {
+            alpha = 0xFF;
         }
-        D_800E0A95 = val;
+        D_800E0A95 = alpha;
     }
-    func_1504332C(0xFF, 0xFF, 0xFF, val);
+    func_1504332C(0xFF, 0xFF, 0xFF, alpha);
     if (D_800AB68C[D_8008FDD4->selection].unk5 < 0) {
-        mode = 5;
+        nextPage = 5;
         i = -D_800AB68C[D_8008FDD4->selection].unk5 - 1;
         remap = D_8008FEC4 + (i << 2);
-        mask = D_8008FEA4[i];
+        allowed = D_8008FEA4[i];
         if (D_800E9D00 & 0x20) {
-            mask |= 0x8000;
+            allowed |= 0x8000;
         }
         if (D_800E9D00 & 0x10) {
-            mask |= 0x10000;
+            allowed |= 0x10000;
         }
         if (D_800E9D00 & 0x40) {
-            mask |= 0x30;
+            allowed |= 0x30;
         }
         if (D_800E9D00 & 0x80) {
-            mask |= 0x43C0;
+            allowed |= 0x43C0;
         }
         if (D_800E9D00 & 0x100) {
-            mask |= 0xE0800;
+            allowed |= 0xE0800;
         }
         if (D_800E9D00 & 0x10000) {
-            mask |= 0xA;
+            allowed |= 0xA;
         }
         if (D_800E9D00 & 0x20000) {
-            mask |= 0x300000;
+            allowed |= 0x300000;
         }
     } else {
-        mode = 1;
+        nextPage = 1;
     }
     if (D_8008FDD4->unk2C == 7) {
-        numSlots = 2;
+        maxPlayers = 2;
     } else {
-        numSlots = 4;
+        maxPlayers = 4;
     }
     D_800E0B8C = 0;
-    if ((mode == 5) && (D_800AB68C[D_8008FDD4->selection].unk8 != 8)) {
+    if ((nextPage == 5) && (D_800AB68C[D_8008FDD4->selection].unk8 != 8)) {
         if (D_800E0BA0[0] == NULL) {
             func_151E7F60(0, D_800E0B90[0]);
         }
@@ -1171,19 +1175,19 @@ void func_151E0B70(void) {
         D_800E0B8C = 1;
     }
     for (i = 1; i < 4; i++) {
-        if ((i < numSlots) && (val == 0xFF) && (D_800BE930[i] & START_BUTTON)) {
-            found = 0;
+        if ((i < maxPlayers) && (alpha == 0xFF) && (D_800BE930[i] & START_BUTTON)) {
+            left = 0;
             for (j = 0; j < D_8008FE40; j++) {
                 if (i == D_8008FE44[j]) {
                     D_8008FE40--;
-                    found = 1;
+                    left = 1;
                     for (k = j; k < D_8008FE40; k++) {
                         D_8008FE44[k] = D_8008FE44[k + 1];
                         D_800E0B90[k] = D_800E0B90[k + 1];
                     }
                 }
             }
-            if (!found) {
+            if (!left) {
                 for (j = 0; j < D_8008FE40 && D_8008FE44[j] < i; j++) {
                 }
                 for (k = D_8008FE40; k > j; k--) {
@@ -1198,7 +1202,7 @@ void func_151E0B70(void) {
                 }
                 D_8008FE40++;
                 if (D_800E0BA0[i] != NULL) {
-                    force = 1;
+                    reload = 1;
                 }
             }
         }
@@ -1222,7 +1226,7 @@ void func_151E0B70(void) {
                     D_800E0B90[i] = 21;
                 }
             }
-            while (!((1 << D_800E0B90[i]) & mask)) {
+            while (!((1 << D_800E0B90[i]) & allowed)) {
                 D_800E0B90[i] += dir;
                 if (D_800E0B90[i] < 0) {
                     D_800E0B90[i] = 21;
@@ -1231,19 +1235,19 @@ void func_151E0B70(void) {
                     D_800E0B90[i] = 0;
                 }
             }
-            if ((k != D_800E0B90[i]) || force) {
+            if ((k != D_800E0B90[i]) || reload) {
                 func_151E7F60(j, D_800E0B90[i]);
             }
         }
     }
     for (i = D_8008FE40; i < 16; i++) {
-        D_8008FE44[i] = 0xFF;
+        D_8008FE44[i] = -1;
     }
-    if (val == 0xFF) {
+    if (alpha == 0xFF) {
         if (D_8008FDD4->input & MENU_ACCEPT) {
             D_8008FD74 = 8;
             func_10010F30(0x500, 0x7D00, 0x40, 0, 0);
-            D_800E0A96 = mode;
+            D_800E0A96 = nextPage;
         }
         if (D_8008FDD4->input & MENU_BACK) {
             D_800E0A96 = 0;
