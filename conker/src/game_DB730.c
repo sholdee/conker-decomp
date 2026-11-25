@@ -52,7 +52,6 @@ struct Foo150AE36C {
 };
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DAFA0/func_150ADAF0.s")
 
 GLOBAL_ASM(
 glabel func_150AE280
