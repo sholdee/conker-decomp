@@ -7,7 +7,7 @@
  * numFrames past copies of its owner's joint matrices, double-buffered on
  * D_800BE9C0, and draws them with increasing transparency.
  * D_800DF7C8[0] lists type-0 trails (struct127 owners),
- * D_800DF7C8[1] lists type-1 trails (struct131 owners, one matrix).
+ * D_800DF7C8[1] lists type-1 trails (world object owners, one matrix).
  */
 
 /* Mtx viewed as its s16 integer and fraction halves. */
@@ -15,6 +15,12 @@ typedef struct MtxS16 {
     s16 intPart[4][4];
     s16 fracPart[4][4];
 } MtxS16;
+
+/* View of a world object (struct131; Game13F9D0Obj in game_13F9D0.c). */
+typedef struct WorldObj {
+    /* 0x00 */ u8 pad0[0x8A];
+    /* 0x8A */ u8 alpha;
+} WorldObj;
 
 typedef struct Trail {
     /* 0x00 */ u8 type;      /* index into the update/free/draw tables */
@@ -27,7 +33,8 @@ typedef struct Trail {
     /* 0x0C */ struct Trail *next;
     /* 0x10 */ union {
         struct127 *object;
-        struct131 *s131;
+        struct131 *worldObj;
+        WorldObj *worldObjView;
     } owner;
     /* 0x14 */ s32 unk14;    /* type 0 only: swapped into owner.object->unk94 while drawing */
 } Trail; // size 0x18 (type 1 trails are allocated without unk14)
@@ -92,7 +99,7 @@ void func_1518894C(struct131 *owner, s32 duration, s32 maxDist) {
     MtxS16 *frames;
 
     for (trail = sTrailLists[1]; trail != NULL; trail = trail->next) {
-        if (owner == trail->owner.s131) {
+        if (owner == trail->owner.worldObj) {
             if (trail->timer < duration) {
                 trail->timer = duration;
             }
@@ -116,7 +123,7 @@ void func_1518894C(struct131 *owner, s32 duration, s32 maxDist) {
         trail->maxDist = maxDist;
         trail->timer = duration;
         trail->frames = frames;
-        trail->owner.s131 = owner;
+        trail->owner.worldObj = owner;
         bzero(frames, 3 * 2 * sizeof(Mtx));
         func_15188A58(trail, &sTrailLists[1]);
     }
@@ -324,7 +331,7 @@ void func_15188F84(Trail *arg) {
     prevBase = (D_800BE9C0 ^ 1) * numFrames;
     for (i = 0; i < D_800DBEE8[view]; i++) {
         objects = D_800DBEF4;
-        if (trail->owner.s131 == &objects[(*D_80089240[0])[i].index]) {
+        if (trail->owner.worldObj == &objects[(*D_80089240[0])[i].index]) {
             break;
         }
     }
@@ -346,239 +353,184 @@ void func_15188F84(Trail *arg) {
     }
 }
 
-typedef struct Mtx15189118 {
-    s16 i[4][4];
-    s16 f[4][4];
-} Mtx15189118;
+/* Translation component `c` (0 = x, 1 = y, 2 = z) of a fixed-point matrix. */
+#define MTX_TRANSLATION(mtx, c) ((((mtx)->intPart[3][c] << 16) + (mtx)->fracPart[3][c]) * (1.0f / 65536.0f))
 
-typedef struct Sub15189118 {
-    char pad0[4];
-    u8 unk4;
-    char pad5[0x1D4 - 5];
-    Mtx15189118 *unk1D4;
-} Sub15189118;
+/*
+ * Limits how far apart consecutive history frames of list `listIndex` may be:
+ * when a frame's root joint is more than maxDist from the next newer frame's
+ * (or the owner's current one), every joint of the frame is pulled toward the
+ * newer frame to that distance.
+ */
+void func_15189118(s32 listIndex) {
+    Trail *trail;
+    s32 numFrames;
+    s32 numJoints;
+    s32 base;
+    s32 i;
+    s32 j;
+    f32 maxDist;
+    MtxS16 *cur;
+    MtxS16 *newer;
+    MtxS16 *jointMtx;
+    f32 dist;
+    f32 ratio;
+    f32 cx;
+    f32 cy;
+    f32 cz;
+    f32 nx;
+    f32 ny;
+    f32 nz;
 
-typedef struct Node15189118 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    u8 unk4;
-    char pad5[3];
-    Mtx15189118 *unk8;
-    struct Node15189118 *unkC;
-    Sub15189118 *unk10;
-} Node15189118;
-
-void func_15189118(s32 idx) {
-Node15189118 *node;
-s32 count;
-s32 m;
-s32 base;
-s32 i;
-s32 j;
-f32 maxdist;
-Mtx15189118 *cur;
-Mtx15189118 *from;
-Mtx15189118 *q;
-f32 dx;
-f32 dy;
-f32 dz;
-f32 dist;
-f32 ratio;
-f32 cx;
-f32 cy;
-f32 cz;
-f32 fx;
-f32 fy;
-f32 fz;
-
-node = (Node15189118 *)D_800DF7C8[idx];
-while (node != NULL) {
-if (node->unk4 != 0) {
-count = node->unk1;
-m = func_1502DB20(node->unk10->unk4);
-base = D_800BE9C0 * m * count;
-maxdist = (u32)node->unk4;
-for (i = node->unk2 - 1; i >= 0; i--) {
-cur = node->unk8 + (i * m + base);
-if (i + 1 == node->unk2) {
-q = node->unk10->unk1D4;
-if (q == NULL) {
-node->unk2 = 0;
-break;
-}
-from = q;
-} else {
-from = node->unk8 + ((i + 1) * m + base);
-}
-cx = ((cur->i[3][0] << 16) + cur->f[3][0]) * 1.52587890625e-05f;
-cy = ((cur->i[3][1] << 16) + cur->f[3][1]) * 1.52587890625e-05f;
-cz = ((cur->i[3][2] << 16) + cur->f[3][2]) * 1.52587890625e-05f;
-fx = ((from->i[3][0] << 16) + from->f[3][0]) * 1.52587890625e-05f;
-fy = ((from->i[3][1] << 16) + from->f[3][1]) * 1.52587890625e-05f;
-fz = ((from->i[3][2] << 16) + from->f[3][2]) * 1.52587890625e-05f;
-dist = sqrtf((cx - fx) * (cx - fx) + (cy - fy) * (cy - fy) + (cz - fz) * (cz - fz));
-if (maxdist < dist && dist != 0.0f) {
-ratio = maxdist / dist;
-for (j = 0; j < m; j++) {
-cx = ((cur->i[3][0] << 16) + cur->f[3][0]) * 1.52587890625e-05f;
-cy = ((cur->i[3][1] << 16) + cur->f[3][1]) * 1.52587890625e-05f;
-cz = ((cur->i[3][2] << 16) + cur->f[3][2]) * 1.52587890625e-05f;
-fx = ((from->i[3][0] << 16) + from->f[3][0]) * 1.52587890625e-05f;
-fy = ((from->i[3][1] << 16) + from->f[3][1]) * 1.52587890625e-05f;
-fz = ((from->i[3][2] << 16) + from->f[3][2]) * 1.52587890625e-05f;
-cx = (cx - fx) * ratio + fx;
-cy = (cy - fy) * ratio + fy;
-cz = (cz - fz) * ratio + fz;
-cur->i[3][0] = (s32)cx;
-cur->i[3][1] = (s32)cy;
-cur->i[3][2] = (s32)cz;
-cur->f[3][0] = 0;
-cur->f[3][1] = 0;
-cur->f[3][2] = 0;
-cur++;
-from++;
-}
-}
-}
-}
-node = node->unkC;
-}
+    for (trail = sTrailLists[listIndex]; trail != NULL; trail = trail->next) {
+        if (trail->maxDist != 0) {
+            numFrames = trail->numFrames;
+            numJoints = func_1502DB20(trail->owner.object->id);
+            base = D_800BE9C0 * numJoints * numFrames;
+            maxDist = trail->maxDist;
+            for (i = trail->numFilled - 1; i >= 0; i--) {
+                cur = &trail->frames[i * numJoints + base];
+                if (i + 1 == trail->numFilled) {
+                    jointMtx = (MtxS16 *)trail->owner.object->unk1D4;
+                    if (jointMtx == NULL) {
+                        trail->numFilled = 0;
+                        break;
+                    }
+                    newer = jointMtx; // matching: a separate NULL-checked temp keeps the branch layout
+                } else {
+                    newer = &trail->frames[(i + 1) * numJoints + base];
+                }
+                cx = MTX_TRANSLATION(cur, 0);
+                cy = MTX_TRANSLATION(cur, 1);
+                cz = MTX_TRANSLATION(cur, 2);
+                nx = MTX_TRANSLATION(newer, 0);
+                ny = MTX_TRANSLATION(newer, 1);
+                nz = MTX_TRANSLATION(newer, 2);
+                dist = sqrtf((cx - nx) * (cx - nx) + (cy - ny) * (cy - ny) + (cz - nz) * (cz - nz));
+                if (maxDist < dist && dist != 0.0f) {
+                    ratio = maxDist / dist;
+                    for (j = 0; j < numJoints; j++) {
+                        cx = MTX_TRANSLATION(cur, 0);
+                        cy = MTX_TRANSLATION(cur, 1);
+                        cz = MTX_TRANSLATION(cur, 2);
+                        nx = MTX_TRANSLATION(newer, 0);
+                        ny = MTX_TRANSLATION(newer, 1);
+                        nz = MTX_TRANSLATION(newer, 2);
+                        cx = (cx - nx) * ratio + nx;
+                        cy = (cy - ny) * ratio + ny;
+                        cz = (cz - nz) * ratio + nz;
+                        cur->intPart[3][0] = (s32)cx;
+                        cur->intPart[3][1] = (s32)cy;
+                        cur->intPart[3][2] = (s32)cz;
+                        cur->fracPart[3][0] = 0;
+                        cur->fracPart[3][1] = 0;
+                        cur->fracPart[3][2] = 0;
+                        cur++;
+                        newer++;
+                    }
+                }
+            }
+        }
+    }
 }
 
-void func_151895A4(s32 *arg0) {
-    func_100043B4((s32 *)arg0[2], 2);
+/* Type-0 free. */
+void func_151895A4(Trail *trail) {
+    func_100043B4((s32 *)trail->frames, 2);
 }
 
-void func_151895CC(s32 *arg0) {
-    func_100043B4((s32 *)arg0[2], 2);
+/* Type-1 free. */
+void func_151895CC(Trail *trail) {
+    func_100043B4((s32 *)trail->frames, 2);
 }
 
-typedef struct Node151895F4 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    char pad4[4];
-    u8 *unk8;
-    struct Node151895F4 *unkC;
-    struct127 *unk10;
-    s32 unk14;
-} Node151895F4;
-
-extern u8 func_150849CC(struct127 *, s32 *);
+extern s32 func_150849CC(struct127 *, s32 *);
 extern s32 func_1503DA9C(struct127 *, s32, s32, s32);
-extern s32 func_1502C974(s32, s32, s32, s32, s32);
-extern void *D_800DF7C0;
-extern u8 D_800DF7C4;
+extern Gfx *func_1502C974(Gfx *gfx, s32 index, s32 player, s32 mode, s32 wrap);
+extern MtxS16 *D_800DF7C0; // bone matrices drawn by func_1502C974 mode 4
+extern u8 D_800DF7C4;      // alpha scale for func_1502C974 mode 4
 
-s32 func_151895F4(s32 arg0, Node151895F4 *arg1, s16 arg2) {
+/* Type-0 draw: draws the owner object once per history frame, oldest faintest. */
+Gfx *func_151895F4(Gfx *gfx, Trail *trail, s16 player) {
     s32 i;
-    s32 m;
-    s32 count;
-    s32 dst;
-    s32 idx;
-    s32 n;
-    s32 shade;
-    s32 active;
-    void **model;
+    s32 numBones;
+    s32 numFilled;
+    s32 base;
+    s32 index;
+    s32 numFrames;
     s32 alpha;
+    s32 hasFrames;
+    MtxS16 **bonesOverride;
+    s32 alphaScale;
     s32 lod;
-    s32 p4;
-    s32 p5;
+    s32 pad[2]; // matching: unused stack slots
     s32 saved;
 
-    active = arg1->unk2;
-    if (active == 0) {
-        return arg0;
+    hasFrames = trail->numFilled; // matching: loading into a local picks v0 over t6
+    if (!hasFrames) {
+        return gfx;
     }
-    func_1503DA9C(arg1->unk10, func_150849CC(arg1->unk10, &lod), lod, 1);
-    n = arg1->unk1;
-    shade = arg1->unk3;
-    m = func_1502DB20(arg1->unk10->id);
-    count = arg1->unk2;
-    dst = D_800BE9C0 * m * n;
-    idx = arg1->unk10 - D_800CC2D0;
-    if (idx < 0 || idx >= 25) {
-        return arg0;
+    func_1503DA9C(trail->owner.object, func_150849CC(trail->owner.object, &lod), lod, 1);
+    numFrames = trail->numFrames;
+    alpha = trail->alpha;
+    numBones = func_1502DB20(trail->owner.object->id);
+    numFilled = trail->numFilled;
+    base = D_800BE9C0 * numBones * numFrames;
+    index = trail->owner.object - D_800CC2D0;
+    if (index < 0 || index >= 25) {
+        return gfx;
     }
-    saved = *(s32 *)((u8 *)arg1->unk10 + 0x94);
-    *(s32 *)((u8 *)arg1->unk10 + 0x94) = arg1->unk14;
-    model = &D_800DF7C0;
-    for (i = 0; i < count; i++) {
-        alpha = (((i + 3) * 32) * shade) >> 8;
-        *model = arg1->unk8 + ((dst + i * m) << 6);
-        D_800DF7C4 = alpha;
-        arg0 = func_1502C974(arg0, idx, arg2, 4, 1);
+    saved = trail->owner.object->unk94;
+    trail->owner.object->unk94 = trail->unk14;
+    bonesOverride = &D_800DF7C0; // matching: IDO keeps the global's address in a register only via a pointer
+    for (i = 0; i < numFilled; i++) {
+        alphaScale = ((i + 3) * 32 * alpha) >> 8;
+        *bonesOverride = &trail->frames[base + i * numBones];
+        D_800DF7C4 = alphaScale;
+        gfx = func_1502C974(gfx, index, player, 4, 1);
     }
-    *(s32 *)((u8 *)arg1->unk10 + 0x94) = saved;
-    return arg0;
+    trail->owner.object->unk94 = saved;
+    return gfx;
 }
 
-typedef struct Model151897A4 {
-    char pad0[0x8A];
-    u8 unk8A;
-} Model151897A4;
+extern Gfx *func_151137D4(Gfx *gfx, WorldObj *obj, MtxS16 *mtx, s32 view, s32 distance, s32 pass);
 
-typedef struct Node151897A4 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    char pad4[4];
-    u8 *unk8;
-    struct Node151897A4 *unkC;
-    Model151897A4 *unk10;
-    s32 unk14;
-} Node151897A4;
-
-extern s32 func_151137D4(s32, Model151897A4 *, u8 *, s32, s32, s32);
-
-s32 func_151897A4(s32 arg0, Node151897A4 *arg1, s16 arg2) {
+/* Type-1 draw: draws the owner world object once per history frame, oldest faintest. */
+Gfx *func_151897A4(Gfx *gfx, Trail *trail, s16 player) {
     s32 i;
-    s32 count;
-    s32 shade;
-    s32 n;
-    s32 dst;
+    s32 numFilled;
     s32 alpha;
-    s32 pad1;
-    s32 pad2;
+    s32 numFrames;
+    s32 base;
+    s32 objAlpha;
+    s32 pad[2]; // matching: unused stack slots
     s32 saved;
 
-    if (arg1->unk2 == 0) {
-        return arg0;
+    if (trail->numFilled == 0) {
+        return gfx;
     }
-    count = arg1->unk2;
-    n = arg1->unk1;
-    shade = arg1->unk3;
-    dst = D_800BE9C0 * n;
-    saved = arg1->unk10->unk8A;
-    for (i = 0; i < count; i++) {
-        alpha = (((i + 3) * 32) * shade) >> 8;
-        arg1->unk10->unk8A = alpha;
-        arg0 = func_151137D4(arg0, arg1->unk10, arg1->unk8 + ((dst + i) << 6), arg2, 0, 0);
+    numFilled = trail->numFilled;
+    numFrames = trail->numFrames;
+    alpha = trail->alpha;
+    base = D_800BE9C0 * numFrames;
+    saved = trail->owner.worldObjView->alpha;
+    for (i = 0; i < numFilled; i++) {
+        objAlpha = ((i + 3) * 32 * alpha) >> 8;
+        trail->owner.worldObjView->alpha = objAlpha;
+        gfx = func_151137D4(gfx, trail->owner.worldObjView, &trail->frames[base + i], player, 0, 0);
     }
-    arg1->unk10->unk8A = saved;
-    return arg0;
+    trail->owner.worldObjView->alpha = saved;
+    return gfx;
 }
 
-typedef struct Node151898C0 {
-    char pad0[12];
-    struct Node151898C0 *unkC;
-    s32 unk10;
-    s32 unk14;
-} Node151898C0;
+/* Sets unk14 of an object's type-0 trail. */
+void func_151898C0(struct127 *object, s32 value) {
+    Trail *trail;
 
-void func_151898C0(s32 arg0, s32 arg1) {
-    Node151898C0 *node;
-
-    node = (Node151898C0 *)D_800DF7C8[0];
-    while (node != 0) {
-        if (arg0 == node->unk10) {
-            node->unk14 = arg1;
+    for (trail = sTrailLists[0]; trail != NULL; trail = trail->next) {
+        if (object == trail->owner.object) {
+            trail->unk14 = value;
             return;
         }
-        node = node->unkC;
     }
 }
