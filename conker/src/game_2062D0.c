@@ -12,10 +12,8 @@
 s32 func_150ADA20(void);
 s32 func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE);
 s32 func_151DA08C(u8 arg0, f32 arg1, f32 arg2, u8 arg3, s16 arg4, s32 arg5, void *arg6, s32 arg7, s32 arg8);
-s32 func_151D9450(void *arg0p, void *arg1);
 s32 func_1514672C(struct17 *arg0);
 s32 func_15046C80(f32 *arg0, s32 arg1, f32 arg2, void *arg3);
-u8 func_151D9534();
 void func_151D9FC0(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 void func_151DAB58(u8 arg0, f32 arg1, u8 arg2, struct17 *arg3, volatile u8 arg4, u8 arg5, s32 arg6);
 s32 func_15131918(s32 arg0, s32 arg1);
@@ -42,7 +40,6 @@ extern f32 D_800AB4A4;
 extern f32 D_800AB4A8;
 extern f32 D_800AB4AC;
 
-void *func_151D9014(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, s32 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF);
 
 typedef struct {
     u8 unk0;
@@ -164,8 +161,7 @@ u8 func_151D8FE0(void) {
     return ids[func_150ADA20() & 3];
 }
 
-// big struct definition
-// void func_151D9014(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, u8 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, u8 argC, u8 argD, u8 argE, s32 argF);
+/* Sprite particle descriptor, consumed by func_15130280 (copied to Particle.desc). */
 typedef struct {
     s32 unk0;
     s32 unk4;
@@ -187,13 +183,13 @@ typedef struct {
     s16 unk20;
     s16 unk22;
     f32 unk24;
-    f32 unk28;
-    f32 unk2C;
+    f32 scaleX;
+    f32 scaleY;
     struct17 pos;
     struct17 unk3C;
     struct17 vel;
     f32 unk54;
-    u32 unk58;
+    s32 flags;
     s32 unk5C;
     u8 unk60;
     u8 unk61;
@@ -202,222 +198,202 @@ typedef struct {
     s8 unk64;
     u8 unk65;
     u8 unk66;
-    u8 pad67;
     s16 unk68;
-    u8 pad6A[2];
     f32 unk6C;
-} Particle9014; /* 0x70 */
+} ParticleDesc; /* 0x70 */
 
+#define WOBBLE_FLAG_FIXED_SIZE 1 /* skip the size wobble */
+#define WOBBLE_FLAG_BOUNCE     2 /* bounce on the floor instead of bursting */
+
+/* Per-particle data of a func_151D9014 particle (Particle.data). */
 typedef struct {
-    f32 unk0;
-    u8 unk4;
-    u8 unk5;
-    u8 unk6;
-    u8 unk7;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-    u8 unk19;
+    f32 size;
+    u8 phaseX;
+    u8 phaseY;
+    s8 stepX;
+    s8 stepY;
+    f32 amplitudeX;
+    f32 amplitudeY;
+    f32 unk10; /* burst size factor */
+    f32 unk14; /* burst size factor for kind 3 */
+    u8 kind;
+    u8 flags;
     u8 pad1A[2];
-} Extra9014; /* 0x1C */
+} ParticleWobble; /* 0x1C */
 
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-
-void *func_151D9014(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, s32 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF) {
-    void *ret;
-    Particle9014 spawn;
-    Extra9014 extra;
-
-    spawn.unk1D = D_8008FCD0[arg2]();
-    spawn.unk8 = ((argA ? 0x44 : 0x22) << 8) + 3;
-    spawn.unk0 = 0x200005;
-    spawn.unk4 = 0;
-    spawn.unkC = 0;
-    spawn.unk10 = 0;
-    spawn.unk14 = 0;
-    spawn.unk15 = 0;
-    spawn.unk16 = 0;
-    spawn.unk17 = 0xFF;
-    spawn.unk18 = 0;
-    spawn.unk19 = 0;
-    spawn.unk1A = 0;
-    spawn.unk1B = arg5;
-    spawn.unk1C = 0xFF;
-    spawn.pos = *(struct17 *)arg0;
-    spawn.unk3C = *(struct17 *)&D_800A5480;
-    spawn.vel = *(struct17 *)arg1;
-    spawn.unk22 = 1;
-    spawn.unk54 = arg3;
-    spawn.unk24 = 1.0f;
-    spawn.unk58 = ((arg4 == -99) ? 0 : 1) | 2 | 4 | ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0) | 0x200 | 0x4000 | 0x8000 | (argA ? 0x10000 : 0) | (D_800AB330[arg2] ? 0x800000 : 0);
-    if (arg4 == -99) {
-        spawn.unkA = 300;
-        spawn.unk1E = 1;
-        spawn.unk20 = 0xFF;
-    } else {
-        spawn.unkA = arg4 + 0x12;
-        spawn.unk1E = 0x12;
-        spawn.unk20 = 0xE;
-    }
-    spawn.unk60 = 6;
-    spawn.unk61 = 8;
-    spawn.unk64 = -1;
-    spawn.unk62 = (u8)arg7 ? 0x21 : 0x22;
-    spawn.unk63 = -1;
-    spawn.unk65 = 0;
-    spawn.unk5C = 0;
-    spawn.unk66 = 0xFF;
-    spawn.unk68 = 0;
-    spawn.unk6C = 10000.0f;
-    extra.unk4 = func_150ADA20() & 0xFF;
-    extra.unk5 = func_150ADA20() & 0xFF;
-    if (spawn.unk1D == 0x40 || spawn.unk1D == 0x67) {
-        extra.unk0 = spawn.unk28 = spawn.unk2C = arg6 * 0.6999999881f;
-    } else {
-        extra.unk0 = spawn.unk28 = spawn.unk2C = arg6;
-    }
-    extra.unk6 = (func_150ADA20() % 6U) + 5;
-    extra.unk7 = (func_150ADA20() % 6U) + 5;
-    extra.unk8 = ((func_150ADA68() * 0.25f) + 0.200000003f) * extra.unk0;
-    extra.unkC = ((func_150ADA68() * 0.25f) + 0.200000003f) * extra.unk0;
-    extra.unk10 = arg8;
-    extra.unk18 = arg2;
-    extra.unk14 = arg9;
-    extra.unk19 = ((u8)argC ? 0 : 1) | ((u8)argD ? 2 : 0);
-    ret = func_15130280(&spawn, 1, argB, 0x1C, argE, argF);
-    if (ret != NULL) {
-        memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
-    }
-    return ret;
-}
-
-s32 func_151D93F4(void *arg0, void *arg1) {
-    s32 res;
-
-    if (func_151D9450(arg0, arg1) != 0) {
-        if (func_151D9534(arg0, arg1) != 0) {
-            res = 1;
-        } else {
-            res = 0;
-        }
-    } else {
-        res = 0;
-    }
-    return res;
-}
-
-struct Sub151D9450 {
-    f32 unk0;
-    u8 unk4;
-    u8 unk5;
-    s8 unk6;
-    s8 unk7;
-    f32 unk8;
-    f32 unkC;
-};
-
-s32 func_151D9450(void *arg0p, void *arg1) {
-    struct Sub151D9450 *p;
-
-    p = (struct Sub151D9450 *)((u8 *)arg0p + 0xA8);
-    if (((u8 *)arg0p)[0xC1] & 1) {
-        return 1;
-    }
-    p->unk4 = p->unk4 + p->unk6 * D_800BE9E4;
-    p->unk5 = p->unk5 + p->unk7 * D_800BE9E4;
-    *(f32 *)((u8 *)arg0p + 0x38) = p->unk8 * func_151423D8((u8)(p->unk4 - 0x40)) + p->unk0;
-    *(f32 *)((u8 *)arg0p + 0x3C) = p->unkC * func_151423D8((u8)(p->unk5 - 0x40)) + p->unk0;
-    return 1;
-}
-
+/* A live sprite particle as returned by func_15130280. */
 typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    u8 unk18;
-    u8 unk19;
-} Struct151D9534Sub;
-
-typedef struct {
-    u8 pad0[0x1];
+    u8 unk0;
     u8 unk1;
     u8 pad2[0xA];
     u8 unkC;
-    u8 padD[0x1E];
-    u8 unk2B;
-    u8 pad2C[0xC];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    u8 pad4C[0xC];
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    f32 unk64;
-    s32 unk68;
-    u8 pad6C[0x14];
-    f32 unk80;
+    u8 padD[3];
+    ParticleDesc desc;
+    f32 floorY;
     struct17 unk84;
     u8 pad90[0xD];
     u8 unk9D;
     u8 pad9E[0xA];
-    Struct151D9534Sub unkA8;
-} Struct151D9534;
+    ParticleWobble wobble;
+} Particle;
 
-u8 func_151D9534(Struct151D9534 *arg0, struct17 *arg1) {
-    volatile u8 sp5F;
-    struct17 sp50;
-    Struct151D9534Sub *temp_v0;
-    f32 sp48;
-    f32 temp_f2;
+extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
+s32 func_151D9450(Particle *particle, struct17 *arg1);
+u8 func_151D9534(Particle *particle, struct17 *arg1);
 
-    sp5F = 1;
-    if (arg0->unk44 < arg1->unk4) {
-        sp50.unk0 = arg0->unk40;
-        sp50.unk4 = arg1->unk4;
-        sp50.unk8 = arg0->unk48;
-        if (func_1514672C(&sp50) == 0) {
+/* Spawns a wobbling sprite particle of effect kind `kind`; lifetime -99 means it never times out. */
+Particle *func_151D9014(struct17 *pos, struct17 *vel, u8 kind, f32 arg3, s16 lifetime, u8 arg5, f32 size, s32 arg7,
+                        f32 arg8, f32 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF) {
+    Particle *particle;
+    ParticleDesc desc;
+    ParticleWobble wobble;
+
+    desc.unk1D = D_8008FCD0[kind]();
+    desc.unk8 = ((argA ? 0x44 : 0x22) << 8) + 3;
+    desc.unk0 = 0x200005;
+    desc.unk4 = 0;
+    desc.unkC = 0;
+    desc.unk10 = 0;
+    desc.unk14 = 0;
+    desc.unk15 = 0;
+    desc.unk16 = 0;
+    desc.unk17 = 0xFF;
+    desc.unk18 = 0;
+    desc.unk19 = 0;
+    desc.unk1A = 0;
+    desc.unk1B = arg5;
+    desc.unk1C = 0xFF;
+    desc.pos = *pos;
+    desc.unk3C = *(struct17 *)&D_800A5480;
+    desc.vel = *vel;
+    desc.unk22 = 1;
+    desc.unk54 = arg3;
+    desc.unk24 = 1.0f;
+    desc.flags = ((lifetime == -99) ? 0 : 1) | 2 | 4 | ((func_150ADA20() & 1) ? 0x40 : 0) |
+                 ((func_150ADA20() & 1) ? 0x80 : 0) | 0x200 | 0x4000 | 0x8000 | (argA ? 0x10000 : 0) |
+                 (D_800AB330[kind] ? 0x800000 : 0);
+    if (lifetime == -99) {
+        desc.unkA = 300;
+        desc.unk1E = 1;
+        desc.unk20 = 0xFF;
+    } else {
+        desc.unkA = lifetime + 18;
+        desc.unk1E = 18;
+        desc.unk20 = 14;
+    }
+    desc.unk60 = 6;
+    desc.unk61 = 8;
+    desc.unk64 = -1;
+    desc.unk62 = (u8)arg7 ? 0x21 : 0x22;
+    desc.unk63 = -1;
+    desc.unk65 = 0;
+    desc.unk5C = 0;
+    desc.unk66 = 0xFF;
+    desc.unk68 = 0;
+    desc.unk6C = 10000.0f;
+    wobble.phaseX = func_150ADA20() & 0xFF;
+    wobble.phaseY = func_150ADA20() & 0xFF;
+    if (desc.unk1D == 0x40 || desc.unk1D == 0x67) {
+        wobble.size = desc.scaleX = desc.scaleY = size * 0.7f;
+    } else {
+        wobble.size = desc.scaleX = desc.scaleY = size;
+    }
+    wobble.stepX = (func_150ADA20() % 6U) + 5;
+    wobble.stepY = (func_150ADA20() % 6U) + 5;
+    wobble.amplitudeX = ((func_150ADA68() * 0.25f) + 0.2f) * wobble.size;
+    wobble.amplitudeY = ((func_150ADA68() * 0.25f) + 0.2f) * wobble.size;
+    wobble.unk10 = arg8;
+    wobble.kind = kind;
+    wobble.unk14 = arg9;
+    wobble.flags = ((u8)argC ? 0 : WOBBLE_FLAG_FIXED_SIZE) | ((u8)argD ? WOBBLE_FLAG_BOUNCE : 0);
+    particle = func_15130280(&desc, 1, argB, sizeof(wobble), argE, argF);
+    if (particle != NULL) {
+        memcpy(&particle->wobble, &wobble, sizeof(wobble));
+    }
+    return particle;
+}
+
+/* Per-frame update of a func_151D9014 particle; returns 0 once it should be removed. */
+s32 func_151D93F4(Particle *particle, struct17 *arg1) {
+    s32 alive;
+
+    if (func_151D9450(particle, arg1) != 0) {
+        if (func_151D9534(particle, arg1) != 0) {
+            alive = 1;
+        } else {
+            alive = 0;
+        }
+    } else {
+        alive = 0;
+    }
+    return alive;
+}
+
+/* Wobbles the particle's two scale axes around its base size. */
+s32 func_151D9450(Particle *particle, struct17 *arg1) {
+    ParticleWobble *wobble;
+
+    wobble = &particle->wobble;
+    if (wobble->flags & WOBBLE_FLAG_FIXED_SIZE) {
+        return 1;
+    }
+    wobble->phaseX = wobble->phaseX + wobble->stepX * D_800BE9E4;
+    wobble->phaseY = wobble->phaseY + wobble->stepY * D_800BE9E4;
+    particle->desc.scaleX = wobble->amplitudeX * func_151423D8((u8)(wobble->phaseX - 0x40)) + wobble->size;
+    particle->desc.scaleY = wobble->amplitudeY * func_151423D8((u8)(wobble->phaseY - 0x40)) + wobble->size;
+    return 1;
+}
+
+/*
+ * Floor collision: once the particle falls below arg1's height, finds the floor under it and either
+ * bounces (WOBBLE_FLAG_BOUNCE) or bursts into smaller effects. Returns 0 when the particle is gone.
+ */
+u8 func_151D9534(Particle *particle, struct17 *arg1) {
+    volatile u8 alive; // matching: IDO keeps the result in its stack slot and reloads it after each call
+    struct17 point;
+    ParticleWobble *wobble;
+    f32 avgScale;
+
+    alive = 1;
+    if (particle->desc.pos.unk4 < arg1->unk4) {
+        point.unk0 = particle->desc.pos.unk0;
+        point.unk4 = arg1->unk4;
+        point.unk8 = particle->desc.pos.unk8;
+        if (func_1514672C(&point) == 0) {
             return 0;
         }
-        if (func_15046C80((f32 *)&sp50, 0, arg0->unk44, &arg0->unk80) != 0) {
-            sp50.unk4 = arg0->unk80 + 2.0f;
-            if (arg0->unkA8.unk19 & 2) {
-                temp_f2 = D_800AB44C;
-                arg0->unk44 = (arg0->unk3C * D_800AB450) + sp50.unk4;
-                arg0->unk58 = arg0->unk58 * temp_f2;
-                arg0->unk5C = arg0->unk5C * D_800AB454;
-                arg0->unk60 = arg0->unk60 * temp_f2;
-                if (fabsf(arg0->unk5C) < D_800AB458) {
-                    arg0->unk58 = 0.0f;
-                    arg0->unk68 &= ~6;
-                    arg0->unk5C = 0.0f;
-                    arg0->unk60 = 0.0f;
-                    arg0->unk64 = 0.0f;
+        if (func_15046C80((f32 *)&point, 0, particle->desc.pos.unk4, &particle->floorY) != 0) {
+            point.unk4 = particle->floorY + 2.0f;
+            if (particle->wobble.flags & WOBBLE_FLAG_BOUNCE) {
+                particle->desc.pos.unk4 = (particle->desc.scaleY * 0.060000002f) + point.unk4;
+                particle->desc.vel.unk0 *= 0.39900002f;
+                particle->desc.vel.unk4 *= -0.39900002f;
+                particle->desc.vel.unk8 *= 0.39900002f;
+                if (fabsf(particle->desc.vel.unk4) < 0.326f) {
+                    particle->desc.vel.unk0 = 0.0f;
+                    particle->desc.flags &= ~6;
+                    particle->desc.vel.unk4 = 0.0f;
+                    particle->desc.vel.unk8 = 0.0f;
+                    particle->desc.unk54 = 0.0f;
                 }
             } else {
-                sp5F = 0;
-                temp_v0 = &arg0->unkA8;
-                sp48 = (arg0->unk38 + arg0->unk3C) * 0.5f;
-                if (arg0->unk9D == 3) {
-                    func_151D9FC0(temp_v0->unk18, temp_v0->unk14 * sp48, arg0->unk2B, (s32)&arg0->unk84, (s32)&sp50, arg0->unkC, arg0->unk1);
-                    return sp5F;
+                alive = 0;
+                wobble = &particle->wobble;
+                avgScale = (particle->desc.scaleX + particle->desc.scaleY) * 0.5f;
+                if (particle->unk9D == 3) {
+                    func_151D9FC0(wobble->kind, wobble->unk14 * avgScale, particle->desc.unk1B,
+                                  (s32)&particle->unk84, (s32)&point, particle->unkC, particle->unk1);
+                } else if (func_150ADA20() & 1) {
+                    func_151D9B8C(wobble->kind, (avgScale * 0.09f) * wobble->unk10, particle->desc.unk1B,
+                                  (s32)&particle->unk84, &point, 100, 0, 1, 0, particle->unkC, particle->unk1);
+                } else {
+                    func_151DAB58(wobble->kind, (avgScale * 0.025f) * wobble->unk10, particle->desc.unk1B, &point,
+                                  1, particle->unkC, particle->unk1);
                 }
-                if (func_150ADA20() & 1) {
-                    func_151D9B8C(temp_v0->unk18, (sp48 * D_800AB45C) * temp_v0->unk10, arg0->unk2B, (s32)&arg0->unk84, &sp50, 100, 0, 1, 0, arg0->unkC, arg0->unk1);
-                    return sp5F;
-                }
-                func_151DAB58(temp_v0->unk18, (sp48 * D_800AB460) * temp_v0->unk10, arg0->unk2B, &sp50, 1, arg0->unkC, arg0->unk1);
             }
         }
     }
-    return sp5F;
+    return alive;
 }
 
 /* Id picker for effect kind 0 in the D_8008FD04 table. */
@@ -1361,7 +1337,6 @@ typedef struct {
 } Extra151DB5D0;
 
 extern void (*D_8008FD38[])(Spawn151DB5D0 *);
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 
 void *func_151DB5D0(s32 arg0, f32 *arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8,
                     s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD) {
@@ -1786,7 +1761,6 @@ typedef struct {
 } Struct151DC034Local;
 
 extern u8 D_800AB320[];
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 
 void func_151DC034(struct17 *arg0, f32 arg1, u8 arg2, s16 arg3, u8 arg4, u8 arg5, s32 arg6) {
     Struct151DC034Local sp30;
