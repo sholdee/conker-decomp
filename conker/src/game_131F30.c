@@ -348,90 +348,110 @@ void func_15105548(BoltArcObj *obj, s32 *arg1, u8 msg) {
     }
 }
 
-typedef struct { f32 x, y, z; } Vec3f_1510558C;
-typedef struct Game131F30Surface { s16 values[9]; } Game131F30Surface;
-typedef struct Game131F30Color { s32 value; } Game131F30Color;
-typedef struct Game131F30Factor { f32 value; } Game131F30Factor;
-typedef struct Game131F30Descriptor {
-    s32 count, spread;
-    Vec3f_1510558C position, velocity;
-    Game131F30Surface surface;
-    u8 pad32[2];
-    f32 field34, field38, field3C, field40, field44;
-    s16 duration, durationRange;
-    f32 field4C, field50, field54;
-} Game131F30Descriptor;
-typedef struct Game131F30Part {
-    u8 pad0[0x30];
-    Vec3f_1510558C position;
-    u8 pad3C[0x24];
-    Vec3f_1510558C velocity;
-    Game131F30Surface surface;
-    u8 pad7E[0xA];
-    s32 flags;
-} Game131F30Part;
-typedef struct Game131F30Emitter {
-    u8 pad0, group, pad2[0xA], mode, padD[0x103];
-    Game131F30Part part;
-} Game131F30Emitter;
+/* Three s16 vertices (a collision triangle), wrapped so it can be copied by assignment. */
+typedef struct Triangle {
+    s16 v[9];
+} Triangle;
 
-s32 func_15102920(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32);
-void func_151C329C(void *, u8, s32);
-void func_15151D6C(Game131F30Descriptor *, Game131F30Color *, Game131F30Factor *, s32, u8, s32);
-extern Game131F30Color D_800A23A4;
-extern Game131F30Factor D_800A23A8;
-extern f32 D_800A23C0, D_800A23C4, D_800A23C8, D_800A23CC, D_800A23D0;
-extern f32 D_800A23D4, D_800A23D8, D_800A23DC, D_800A23E0, D_800A23E4, D_800A23E8;
+/* Same layout as struct Arg15151D6C in game_17CAF0.c: debris spawned off a surface. */
+typedef struct DebrisDesc {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3f position;
+    /* 0x14 */ Vec3f normal;
+    /* 0x20 */ Triangle triangle;
+    /* 0x34 */ f32 spread;
+    /* 0x38 */ f32 speedBase;
+    /* 0x3C */ f32 speedRange;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ s16 unk48;
+    /* 0x4A */ s16 unk4A;
+    /* 0x4C */ f32 scaleBase;
+    /* 0x50 */ f32 scaleRange;
+    /* 0x54 */ f32 spin;
+} DebrisDesc;
 
-void func_1510558C(Game131F30Emitter *arg0) {
-    Game131F30Part *part;
-    u32 flags;
+/* The surface hit an impact effect object was spawned for. */
+typedef struct ImpactHit {
+    /* 0x00 */ u8 pad0[0x30];
+    /* 0x30 */ Vec3f position;
+    /* 0x3C */ u8 pad3C[0x24];
+    /* 0x60 */ Vec3f velocity;
+    /* 0x6C */ Triangle triangle;
+    /* 0x7E */ u8 pad7E[0xA];
+    /* 0x88 */ s32 surfaceFlags;   /* bits 0-4: surface type */
+} ImpactHit;
+
+typedef struct ImpactObj {
+    /* 0x000 */ ObjHeader header;
+    /* 0x028 */ u8 pad28[0xE8];
+    /* 0x110 */ ImpactHit hit;
+} ImpactObj;
+
+void *func_15102920(f32 size, u8 alpha, Triangle *triangle, Vec3f *pos, s32 lifetime, s32, s32, s32 surfaceFlags,
+                   s32, s32);
+void func_151C329C(Vec3f *pos, u8, s32);
+
+/* One-entry variant lists for func_15151D6C, copied from rodata. */
+typedef struct { s32 v[1]; } S32x1;
+typedef struct { f32 v[1]; } F32x1;
+extern S32x1 D_800A23A4; /* { 0x85 } */
+extern F32x1 D_800A23A8; /* { 0.1f } */
+void func_15151D6C(DebrisDesc *desc, s32 *variantIds, f32 *variantScales, s32 variantCount, u8, s32);
+
+/* Spawns the effects of an impact: a func_15102920 effect, func_151C329C by chance and, except on
+ * surface type 9, sometimes debris flying back along the impact direction. */
+void func_1510558C(ImpactObj *obj) {
+    ImpactHit *hit;
+    u32 surfaceFlags;
+    // matching: one struct keeps IDO's stack order (scales, ids, desc) above the spilled locals
     struct {
-        Game131F30Factor factor;
-        Game131F30Color color;
-        Game131F30Descriptor descriptor;
-    } work;
+        F32x1 variantScales;
+        S32x1 variantIds;
+        DebrisDesc desc;
+    } debris;
     u32 lifetime;
     u32 random;
     f32 fraction;
 
-    part = (Game131F30Part *)((u8 *)arg0 + 0x110);
+    hit = &obj->hit;
     fraction = func_150ADA68();
     random = func_150ADA20();
-    lifetime = func_150ADA20() % 81U + 0x32;
-    func_15102920(fraction * 25.0f + 15.0f, ((random % 56U) + 0xC8) & 0xFF,
-                  &part->surface, &part->position, lifetime, 1, 1,
-                  part->flags, arg0->mode, arg0->group);
-    flags = part->flags;
-    if ((flags & 0x1F) == 9) {
-        if (func_150ADA68() < D_800A23C0) {
-            func_151C329C(&part->position, arg0->mode, arg0->group);
+    lifetime = func_150ADA20() % 81U + 50;
+    func_15102920(fraction * 25.0f + 15.0f, random % 56U + 200, &hit->triangle, &hit->position,
+                  lifetime, 1, 1, hit->surfaceFlags, obj->header.unkC, obj->header.unk1);
+    surfaceFlags = hit->surfaceFlags;
+    if ((surfaceFlags & 0x1F) == 9) {
+        if (func_150ADA68() < 0.400000006f) {
+            func_151C329C(&hit->position, obj->header.unkC, obj->header.unk1);
         }
     } else {
-        if (func_150ADA68() < D_800A23C4) {
-            func_151C329C(&part->position, arg0->mode, arg0->group);
+        if (func_150ADA68() < 0.1000000015f) {
+            func_151C329C(&hit->position, obj->header.unkC, obj->header.unk1);
         }
-        if (func_150ADA68() < D_800A23C8) {
-            work.color = D_800A23A4;
-            work.factor = D_800A23A8;
-            work.descriptor.count = 1;
-            work.descriptor.spread = 3;
-            work.descriptor.position = part->position;
-            work.descriptor.velocity.x = -part->velocity.x;
-            work.descriptor.velocity.y = -part->velocity.y;
-            work.descriptor.velocity.z = -part->velocity.z;
-            work.descriptor.surface = part->surface;
-            work.descriptor.field34 = D_800A23CC;
-            work.descriptor.field38 = D_800A23D0;
-            work.descriptor.duration = 15;
-            work.descriptor.durationRange = 15;
-            work.descriptor.field3C = D_800A23D4;
-            work.descriptor.field40 = D_800A23D8;
-            work.descriptor.field44 = D_800A23DC;
-            work.descriptor.field4C = D_800A23E0;
-            work.descriptor.field50 = D_800A23E4;
-            work.descriptor.field54 = D_800A23E8;
-            func_15151D6C(&work.descriptor, &work.color, &work.factor, 1, arg0->mode, arg0->group);
+        if (func_150ADA68() < 0.400000006f) {
+            debris.variantIds = D_800A23A4;
+            debris.variantScales = D_800A23A8;
+            debris.desc.countBase = 1;
+            debris.desc.countRange = 3;
+            debris.desc.position = hit->position;
+            debris.desc.normal.x = -hit->velocity.x;
+            debris.desc.normal.y = -hit->velocity.y;
+            debris.desc.normal.z = -hit->velocity.z;
+            debris.desc.triangle = hit->triangle;
+            debris.desc.spread = 614.0f;
+            debris.desc.speedBase = 0.009000000544f;
+            debris.desc.unk48 = 15;
+            debris.desc.unk4A = 15;
+            debris.desc.speedRange = 0.01000000071f;
+            debris.desc.unk40 = -0.9040000439f;
+            debris.desc.unk44 = 0.3950000107f;
+            debris.desc.scaleBase = 0.06000000238f;
+            debris.desc.scaleRange = 0.1420000046f;
+            debris.desc.spin = 25.77700043f;
+            func_15151D6C(&debris.desc, debris.variantIds.v, debris.variantScales.v, 1, obj->header.unkC,
+                          obj->header.unk1);
         }
     }
 }
