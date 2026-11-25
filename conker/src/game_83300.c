@@ -1135,7 +1135,7 @@ u8 func_1505DADC(struct127 *arg0, u16 *arg1, u8 arg2, u8 arg3, u8 arg4);
 extern u8 D_800CBDD3;
 
 /* Updates the actor's floor height (unk180) and pushes it out of walls, reacting to a wall hit. */
-void func_15058898(struct127 *actor, f32 arg1) {
+void func_15058898(struct127 *actor, f32 prevY) {
     f32 groundY;
     s32 hostIdx;
     s32 fastFloor;
@@ -1170,7 +1170,7 @@ void func_15058898(struct127 *actor, f32 arg1) {
             floorOut = NULL;
         }
         func_1510E8BC(&actor->pad188, &actor->unk18C, &groundY, floorOut, &actor->unk184, (u8 *)actor + 0x1A2,
-                      actor->x_position, actor->y_position, actor->z_position, arg1, 0, actor, -10000.0f,
+                      actor->x_position, actor->y_position, actor->z_position, prevY, 0, actor, -10000.0f,
                       actor->y_position, actor->unkF8 & 0x04000000);
     } else if (actor->unkF8 & 8) {
         actor->unk118 = func_1510F648(actor->x_position, actor->y_position, actor->z_position);
@@ -1238,7 +1238,7 @@ void func_15058898(struct127 *actor, f32 arg1) {
             if (!(actor->unkF8 & 2) ||
                 !func_150A3FC4(actor->x_position, actor->z_position, actor->pad188, &actor->unk18C, &groundY)) {
                 func_1510E8BC(&actor->pad188, &actor->unk18C, &groundY, &actor->unk118, &actor->unk184,
-                              (u8 *)actor + 0x1A2, actor->x_position, actor->y_position, actor->z_position, arg1, 0,
+                              (u8 *)actor + 0x1A2, actor->x_position, actor->y_position, actor->z_position, prevY, 0,
                               actor, -10000.0f, actor->y_position, actor->unkF8 & 0x04000000);
             }
         }
