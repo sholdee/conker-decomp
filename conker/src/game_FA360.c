@@ -240,117 +240,121 @@ Vtx_t *func_150CD59C(Effect *effect, s16 bufferIndex) {
     return result;
 }
 
-struct Particle150CD7F8 {
-    s32 unk00;
-    s32 unk04;
-    f32 unk08;
-    f32 unk0C;
-    f32 unk10;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    u8 unk30;
-    s16 unk32;
-    s16 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-};
+/* Burst description passed to func_15152874, which spawns countBase..+countRange func_150CCEB0 quads. */
+typedef struct {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countRange;
+    /* 0x08 */ Vec3f pos;
+    /* 0x14 */ s16 yawBase; /* binary angles (256 per turn) */
+    /* 0x16 */ s16 yawRange;
+    /* 0x18 */ s16 pitchBase;
+    /* 0x1A */ s16 pitchRange;
+    /* 0x1C */ f32 speedBase;
+    /* 0x20 */ f32 speedRange;
+    /* 0x24 */ f32 drag;
+    /* 0x28 */ f32 gravityBase;
+    /* 0x2C */ f32 gravityRange;
+    /* 0x30 */ s8 colorFunc; /* index into D_8008AC60, or -1 for opaque white */
+    /* 0x32 */ s16 lifeBase;
+    /* 0x34 */ s16 lifeRange;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ f32 unk44;
+    /* 0x48 */ f32 minVy;
+} DriftBurst;
 
-struct Arr5_150CD7F8 {
-    f32 v[5];
-};
+/* Five yaw angles (radians) around which the bursts appear. */
+typedef struct {
+    f32 yaw[5];
+} BurstYaws;
 
-struct Obj150CD7F8 {
-    u8 pad00;
-    u8 unk01;
-    u8 pad02[0xA];
-    u8 unk0C;
-    u8 pad0D[0x1B];
-    f32 unk28;
-    f32 unk2C;
-};
+typedef struct {
+    f32 pending; /* bursts owed; one is spawned per whole unit */
+    f32 rate;    /* 0..1, set by func_150CDB6C */
+} BurstTimer;
 
-extern struct Arr5_150CD7F8 D_80088874;
-extern f32 D_800BE9A4;
-extern void func_1514373C(f32, f32, f32 *, f32 *);
-extern void func_15152874(struct Particle150CD7F8 *, u8, u8);
+/* Emitter object driven by func_150CD7F8; D_80088870 points at one. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk01;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unk0C;
+    /* 0x0D */ u8 padD[0x1B];
+    /* 0x28 */ BurstTimer timer;
+} BurstEmitter;
 
-void func_150CD7F8(struct Obj150CD7F8 *arg0) {
-    f32 *pf = &arg0->unk28;
-    struct Particle150CD7F8 p;
-    struct Arr5_150CD7F8 arr;
-    u8 idx;
-    f32 angle;
-    f32 rot;
+extern BurstYaws D_80088874;
+extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
+extern void func_15152874(DriftBurst *burst, u8 arg1, s32 arg2);
+
+/*
+ * Emitter update: accumulates rate over time and, for each whole unit, spawns a burst at a random distance
+ * along one of the D_80088874 yaws, but only if that yaw is within pi/8 of the current camera's heading.
+ */
+void func_150CD7F8(BurstEmitter *emitter) {
+    f32 *pending = &emitter->timer.pending;
+    DriftBurst burst;
+    BurstYaws yaws;
+    u8 index;
+    f32 yaw;
+    f32 heading;
     f32 r;
     s32 pad;
 
-    arg0->unk28 += 0.07999999821f * D_800BE9A4 * arg0->unk2C;
-    if (arg0->unk28 > 1.0f) {
-        p.unk18 = -0x17;
-        p.unk1A = 6;
-        p.unk30 = 0;
-        p.unk24 = 0.9922329783f;
-        p.unk48 = -10.11759949f;
+    emitter->timer.pending += 0.08f * D_800BE9A4 * emitter->timer.rate;
+    if (emitter->timer.pending > 1.0f) {
+        burst.pitchBase = -23;
+        burst.pitchRange = 6;
+        burst.colorFunc = 0;
+        burst.drag = 0.992233f;
+        burst.minVy = -10.1175995f;
         do {
-            arr = D_80088874;
-            idx = func_150ADA20() % 5U;
-            angle = arr.v[idx] + func_150ADA68() * 0.5999999642f;
-            rot = D_800DBFF0[D_80082FA4].unk380 - 180.0f;
-            while (rot > 360.0f) {
-                rot -= 360.0f;
+            yaws = D_80088874;
+            index = func_150ADA20() % 5U;
+            yaw = yaws.yaw[index] + func_150ADA68() * 0.59999996f;
+            heading = D_800DBFF0[D_80082FA4].unk380 - 180.0f;
+            while (heading > 360.0f) {
+                heading -= 360.0f;
             }
-            while (rot < 0.0f) {
-                rot += 360.0f;
+            while (heading < 0.0f) {
+                heading += 360.0f;
             }
-            rot *= 0.01745329238f;
-            if (fabsf(angle - rot) < 0.3926991224f) {
+            heading *= 0.017453292f; /* degrees to radians */
+            if (fabsf(yaw - heading) < 0.39269912f) {
                 r = func_150ADA68();
-                p.unk0C = 1613.583496f * r + 2411.008545f + 500.0f;
-                func_1514373C(angle, r * 2026.68000000000029 + 8400.0, &p.unk08, &p.unk10);
-                p.unk00 = 0xF;
-                p.unk04 = 0x14;
-                p.unk14 = (angle + 3.141592741f - 0.151000008f) * 40.74366379f;
-                p.unk16 = 0xC;
-                p.unk32 = 0x226;
-                p.unk34 = 0;
-                p.unk3C = 15.0f;
-                p.unk38 = 15.0f;
-                p.unk44 = 25.30000114f;
-                p.unk40 = 25.30000114f;
-                p.unk1C = 78.59999847f;
-                p.unk20 = 25.20000076f;
-                p.unk28 = -1.10800004f;
-                p.unk2C = 0.201000005f;
-                func_15152874(&p, arg0->unk0C, arg0->unk01);
+                burst.pos.y = 1613.5835f * r + 2411.0085f + 500.0f;
+                func_1514373C(yaw, r * (10426.68 - 8400.0) + 8400.0, &burst.pos.x, &burst.pos.z);
+                burst.countBase = 15;
+                burst.countRange = 20;
+                /* 40.743664 = 256 / (2 * pi): radians to binary angle */
+                burst.yawBase = (yaw + 3.1415927f - 0.15100001f) * 40.743664f;
+                burst.yawRange = 12;
+                burst.lifeBase = 550;
+                burst.lifeRange = 0;
+                burst.unk3C = 15.0f;
+                burst.unk38 = 15.0f;
+                burst.unk44 = 25.300001f;
+                burst.unk40 = 25.300001f;
+                burst.speedBase = 78.6f;
+                burst.speedRange = 25.2f;
+                burst.gravityBase = -1.108f;
+                burst.gravityRange = 0.201f;
+                func_15152874(&burst, emitter->unk0C, emitter->unk01);
             }
-            *pf -= 1.0f;
-        } while (*pf > 1.0f);
+            *pending -= 1.0f;
+        } while (*pending > 1.0f);
     }
 }
 
-struct Inner150CDB6C {
-    s32 unk0;
-    f32 unk4;
-};
-extern u8* D_80088870;
-extern f32 D_800A07A4;
+extern BurstEmitter *D_80088870;
 
-void func_150CDB6C(s32 arg0) {
-    struct Inner150CDB6C* q;
-    if (arg0 >= 0 && arg0 < 0x100) {
-        if (D_80088870 != NULL) {
-            q = (struct Inner150CDB6C*)(D_80088870 + 0x28);
-            q->unk4 = (f32)arg0 * D_800A07A4;
-        }
+/* Sets the burst emitter's rate from a 0..255 intensity. */
+void func_150CDB6C(s32 intensity) {
+    BurstTimer *timer;
+
+    if (intensity >= 0 && intensity < 256 && D_80088870 != NULL) {
+        timer = &D_80088870->timer;
+        timer->rate = intensity * (1.0f / 255.0f);
     }
 }
