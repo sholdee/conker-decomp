@@ -111,20 +111,6 @@ void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
     }
 }
 
-/* State a DDB60Effect keeps at +0x28: func_150B0C58 fills it, func_150B0D20 updates it each frame. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; // owner->unique_id when attached; a mismatch means the slot was reused
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 timer;  // one particle is emitted per 1.0 accumulated
-} DDB60EffectData;
-
-/* The effect object spawned by func_150B0C58. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ DDB60EffectData data;
-} DDB60Effect;
-
 void func_150B0C58(Actor *owner, u8 arg1, s32 arg2);
 void func_150B0C58(Actor *owner, u8 arg1, s32 arg2);
 
