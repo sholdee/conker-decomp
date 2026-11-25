@@ -19,31 +19,28 @@ extern Struct15100340 D_80088BC0;
     _g->words.w1 = (u32)(b);        \
 }
 
+/* Each call with arg0 == 0, randomly toggles the five D_800BE500 flags and notifies func_151616D0. */
 void func_15100340(s32 arg0) {
-    volatile s32 pad;
-    Struct15100340 sp44 = D_80088BC0;
+    s32 pad; // matching: unused stack slot, sets the frame size
+    Struct15100340 ids = D_80088BC0;
     s32 i;
-    u8 *ptr;
-    u8 value;
-    s32 threshold;
+    u8 *flag;
+    u32 chance;
 
     if (arg0 == 0) {
-        ptr = D_800BE500;
+        flag = D_800BE500;
         D_800DD405++;
-        i = 0;
-        do {
-            threshold = (*ptr != 0) ? 0x46 : 0x23;
-            if (((u32)func_150ADA20() % 0x3E8U) < (u32)threshold) {
-                if ((*ptr ^= 1) != 0) {
-                    func_151616D0(sp44.unk0[i], 0x18, 0);
+        for (i = 0; i < 5; i++, flag++) {
+            chance = (*flag != 0) ? 70 : 35;
+            if (func_150ADA20() % 1000U < chance) {
+                if ((*flag ^= 1) != 0) {
+                    func_151616D0(ids.unk0[i], 0x18, 0);
                 } else {
-                    func_151616D0(sp44.unk0[i], 0x1C, 0);
-                    func_151616D0(sp44.unk0[i], 0x17, 0);
+                    func_151616D0(ids.unk0[i], 0x1C, 0);
+                    func_151616D0(ids.unk0[i], 0x17, 0);
                 }
             }
-            i++;
-            ptr++;
-        } while (i != 5);
+        }
     }
 }
 
