@@ -14,16 +14,6 @@ extern struct102 *D_800DCE50[2][OBJ_TYPE_COUNT];
  * callbacks may destroy the current node; func_151696DC repairs saved entries that point at a dying node.
  */
 
-/* Link fields shared by every object (struct102 has only u8 fields at 0x4). */
-typedef struct ObjLink {
-    /* 0x0 */ u8 type;
-    /* 0x1 */ u8 list;
-    /* 0x2 */ u8 pad2[2];
-    /* 0x4 */ struct ObjLink *prev;
-    /* 0x8 */ struct ObjLink *next;
-    /* 0xC */ u8 owner;
-} ObjLink;
-
 extern void (*D_8008CA20[])(struct102 *);
 extern void (*D_8008C9C8[])(struct102 *);
 extern void (*D_8008CB64[3])(void);
@@ -58,7 +48,7 @@ typedef struct {
 
 /* Type 0x10 object (0xF0 bytes): a display list drawn with a per-frame matrix (created by func_15168BE4). */
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ Mtx mtx[2];      /* double-buffered by D_800BE9C0 */
     /* 0x90 */ ModelFxData data;
 } ModelFx;
@@ -68,7 +58,7 @@ Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
 /* Type 3 object (0x28 bytes): a fading, animated billboard sprite. */
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ SpriteAnim *anim;
     /* 0x14 */ s16 frame;       /* 8.8 fixed point index into anim->frames */
     /* 0x16 */ s16 frameStep;
@@ -97,7 +87,7 @@ typedef struct {
 
 /* Type 5 / 0x42 object: a moving, animated billboard particle (created by func_15167D84). */
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ BillboardTemplate tmpl;
     /* 0x48 */ s8 onDeath;      /* index into D_8008CA20, -1 = none */
 } Particle;
@@ -363,7 +353,7 @@ Gfx *func_151674F8(Gfx *gfx, s32 group, s16 arg2, s32 list) {
     return gfx;
 }
 
-void func_15168A4C(ObjLink *obj, s32 type);
+void func_15168A4C(EffectHeader *obj, s32 type);
 
 /* Allocates a `size`-byte object (func_10003C6C) and links it into D_800DCE50[list][type]. */
 void *func_15167A68(type, list, size, arg3, owner, arg5)
@@ -374,11 +364,11 @@ void *func_15167A68(type, list, size, arg3, owner, arg5)
     u8 owner;
     u8 arg5;
 {
-    ObjLink *obj;
+    EffectHeader *obj;
 
-    obj = (ObjLink *)func_10003C6C(size, 1, arg3, 0, arg5);
+    obj = (EffectHeader *)func_10003C6C(size, 1, arg3, 0, arg5);
     if (obj != NULL) {
-        obj->list = list;
+        obj->kind = list;
         func_15168A4C(obj, type);
         obj->owner = owner;
     }
@@ -749,7 +739,7 @@ typedef struct {
 
 /* Type 0xE object. */
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ QuadFxData data;
 } QuadFx;
 
@@ -877,13 +867,13 @@ void func_15168870(QuadFx *fx) {
 void func_15168A2C(s32 obj) {
     func_15168B10(obj, 0);
 }
-/* Pushes obj onto the front of list D_800DCE50[obj->list][type] and sets its type. */
-void func_15168A4C(ObjLink *obj, s32 type) {
+/* Pushes obj onto the front of list D_800DCE50[obj->kind][type] and sets its type. */
+void func_15168A4C(EffectHeader *obj, s32 type) {
     s32 list;
-    ObjLink **head;
+    EffectHeader **head;
 
-    list = obj->list;
-    head = (ObjLink **)&D_800DCE50[list][type];
+    list = obj->kind;
+    head = (EffectHeader **)&D_800DCE50[list][type];
     obj->next = *head;
     if (obj->next != NULL) {
         obj->next->prev = obj;
@@ -894,10 +884,10 @@ void func_15168A4C(ObjLink *obj, s32 type) {
 }
 
 /* Unlinks obj from its current list. */
-void func_15168A9C(ObjLink *obj) {
-    s32 list = obj->list;
+void func_15168A9C(EffectHeader *obj) {
+    s32 list = obj->kind;
     s32 type = obj->type;
-    ObjLink **head = (ObjLink **)&D_800DCE50[list][type];
+    EffectHeader **head = (EffectHeader **)&D_800DCE50[list][type];
 
     if (obj == *head) {
         *head = obj->next;
@@ -912,8 +902,8 @@ void func_15168A9C(ObjLink *obj) {
 
 /* Moves obj to the list for another type. */
 void func_15168B10(s32 obj, s32 type) {
-    func_15168A9C((ObjLink *)obj);
-    func_15168A4C((ObjLink *)obj, type);
+    func_15168A9C((EffectHeader *)obj);
+    func_15168A4C((EffectHeader *)obj, type);
 }
 
 /*
@@ -1157,7 +1147,7 @@ void func_15169040(s32 event, u8 eventType) {
     func_15169070(0, OBJ_TYPE_COUNT, event, eventType);
 }
 void func_15143D18(s32 *, s32 *, s32, s32);
-void func_1516968C(ObjLink *obj, u8 *event, u8 eventType);
+void func_1516968C(EffectHeader *obj, u8 *event, u8 eventType);
 
 /* Sends an event to every object of types [first, last) (clamped by func_15143D18). */
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
@@ -1173,7 +1163,7 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
                 D_800DD190++;
                 while (node != NULL) {
                     D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C((ObjLink *)node, (u8 *)event, eventType);
+                    func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
                     D_8008B4A8[type].handleEvent(node, event, eventType);
                     node = D_800DD198[D_800DD190];
                 }
@@ -1183,7 +1173,7 @@ void func_15169070(s32 first, s32 last, s32 event, u8 eventType) {
                 D_800DD190++;
                 while (node != NULL) {
                     D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C((ObjLink *)node, (u8 *)event, eventType);
+                    func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
                     node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
@@ -1206,7 +1196,7 @@ void func_15169260(void *types, s32 count, s32 event, u8 eventType) {
                 D_800DD190++;
                 while (node != NULL) {
                     D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C((ObjLink *)node, (u8 *)event, eventType);
+                    func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
                     D_8008B4A8[*type].handleEvent(node, event, eventType);
                     node = D_800DD198[D_800DD190];
                 }
@@ -1216,7 +1206,7 @@ void func_15169260(void *types, s32 count, s32 event, u8 eventType) {
                 D_800DD190++;
                 while (node != NULL) {
                     D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                    func_1516968C((ObjLink *)node, (u8 *)event, eventType);
+                    func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
                     node = D_800DD198[D_800DD190];
                 }
                 D_800DD190--;
@@ -1240,7 +1230,7 @@ void func_1516944C(s32 type, s32 event, u8 eventType) {
             D_800DD190++;
             while (node != NULL) {
                 D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                func_1516968C((ObjLink *)node, (u8 *)event, eventType);
+                func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
                 D_8008B4A8[type].handleEvent(node, event, eventType);
                 node = D_800DD198[D_800DD190];
             }
@@ -1250,7 +1240,7 @@ void func_1516944C(s32 type, s32 event, u8 eventType) {
             D_800DD190++;
             while (node != NULL) {
                 D_800DD198[D_800DD190] = (struct102 *)node->unk8;
-                func_1516968C((ObjLink *)node, (u8 *)event, eventType);
+                func_1516968C((EffectHeader *)node, (u8 *)event, eventType);
                 node = D_800DD198[D_800DD190];
             }
             D_800DD190--;
@@ -1295,7 +1285,7 @@ s32 func_15169668(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 }
 
 /* Default event handling: event types 0xF and 0x10 destroy objects owned by event[0]. */
-void func_1516968C(ObjLink *obj, u8 *event, u8 eventType) {
+void func_1516968C(EffectHeader *obj, u8 *event, u8 eventType) {
     if (eventType == 0xF || eventType == 0x10) {
         // matching: obj->owner read as a byte array; the struct field form swaps the two loads
         if (event[0] == ((u8 *)obj)[0xC]) {
@@ -1351,7 +1341,7 @@ void func_15169804(struct102 *obj) {
 
 /* Default free: unlinks the object and releases its memory. */
 void func_15169824(struct102 *obj) {
-    func_15168A9C((ObjLink *)obj);
+    func_15168A9C((EffectHeader *)obj);
     func_10004074(obj);
 }
 

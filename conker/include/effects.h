@@ -3,7 +3,8 @@
 
 /* Particle / effect spawn descriptors shared by the spawn functions and their callers. */
 
-/* Common head of the effect / particle objects (the first 0x10 bytes of each). */
+/* Common head of the effect / particle objects (the first 0x10 bytes of each): the link of the object lists
+ * D_800DCE50[kind][type] (func_15168A4C in game_1944C0.c pushes an object onto its list). */
 typedef struct EffectHeader {
     /* 0x00 */ u8 type;
     /* 0x01 */ u8 kind;    /* also the object list it is linked into */

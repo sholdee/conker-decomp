@@ -7,18 +7,9 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
+#include "effects.h"
 
 #define RAIN_MAX_DROPS 300
-
-/* Link fields shared by every object (see game_1944C0.c). */
-typedef struct ObjLink {
-    /* 0x0 */ u8 type;
-    /* 0x1 */ u8 list;
-    /* 0x2 */ u8 pad2[2];
-    /* 0x4 */ struct ObjLink *prev;
-    /* 0x8 */ struct ObjLink *next;
-    /* 0xC */ u8 owner;
-} ObjLink;
 
 /* Template / payload of a type 0xE QuadFx object (see game_1944C0.c). */
 typedef struct {
@@ -47,7 +38,7 @@ typedef struct {
 
 /* Type 0xE object. */
 typedef struct {
-    /* 0x00 */ ObjLink link;
+    /* 0x00 */ EffectHeader link;
     /* 0x10 */ QuadFxData data;
 } QuadFx;
 
