@@ -193,7 +193,6 @@ void func_150CF680(s16 unk12, u8 unkC, s32 unk1) {
     }
 }
 
-extern s8 (*D_8008FCD0[])(void);
 void func_15143874(s16 angle, f32 distance, f32 *x, f32 *y);
 
 /* Hopping particle update: follows the hop arc and, on landing, kicks up 2 to 5 bouncing

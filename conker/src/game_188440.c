@@ -236,7 +236,6 @@ void func_1515B62C(SlidingSprite *sprite, s16 *payload, u8 type) {
     }
 }
 
-extern u8 (*D_8008FD04[])(void);
 extern s32 func_151D8E20(void);
 extern SlidingSprite *func_1515548C(ScreenSpriteInfo *, s32, s32, s32, s32, u8, s32);
 

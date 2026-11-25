@@ -11,8 +11,6 @@ void func_151D9FC0(u8 kind, f32 size, u8 arg2, s32 arg3, Vec3f *pos, u8 arg5, s3
 void func_151DAB58(u8 kind, f32 size, u8 arg2, Vec3f *pos, volatile u8 arg4, u8 arg5, s32 arg6);
 s32 func_15131918(Vec3f *vel, f32 scale);
 
-extern u8 (*D_8008FCD0[])(void);
-extern u8 (*D_8008FD04[])(void);
 extern u8 D_800AB330[]; /* per effect kind flag */
 
 /* Start of a live effect created from an ParticleDef. */

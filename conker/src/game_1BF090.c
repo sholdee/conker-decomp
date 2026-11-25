@@ -165,7 +165,6 @@ void func_15191D54(DustEmitter *effect) {
 }
 
 DustParticle *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
-extern u8 (*D_8008FCD0[])(void);
 
 /* Spawns a dust particle at `position` that pulses in size and splashes when it falls below floorY
  * (update func 0xF, func_1519257C). */

@@ -103,7 +103,6 @@ static u8 D_800CBD5B; // flashing text on
 extern u8 D_800CBD5C; // flash phase
 extern u8 D_800CBD5D; // waving text on
 extern u8 D_800CBD5E; // wave phase
-extern u8 *D_80085990[]; // per-font glyph bitmaps, 0xE0 bytes each
 extern u8 D_800915DC[];
 extern u8 D_800915EC[];
 extern u8 D_800915FC[];
@@ -433,7 +432,7 @@ Gfx *func_150417AC(Gfx *gfx, f32 x, f32 y, u8 *str, u8 r, u8 g, u8 b, u8 a, f32 
                         gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, ((w + 7) >> 3), 0, 3, 0, G_TX_CLAMP, 0, 0, G_TX_CLAMP, 0, 0);
                         gDPSetTileSize(gfx++, 3, 0, 0, (((w + 7) & 0xFFF8) - 1) << 2, h << 2);
                     }
-                    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, D_80085990[font] + c * 0xE0);
+                    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_16b, 1, D_80085990[font][0] + c * 0xE0); // matching: a byte offset; D_80085990[font][c] changes the frame
                     gDPLoadBlock(gfx++, 1, 0, 0, ((((w + 7) & 0xFFF8) * (h + 1) + 1) >> 1) - 1, 0);
                     yi = y;
                     gSPScisTextureRectangle(gfx++,

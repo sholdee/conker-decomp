@@ -39,7 +39,6 @@ void func_15015920(s16 font) {
     func_10004074(buffer);
 }
 
-extern u8 (*D_80085990[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
 
 /*
  * Unpacks one glyph record into glyph `glyph` of font `font`: stores its metrics (the record holds

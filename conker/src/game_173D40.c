@@ -9,7 +9,6 @@ void func_15141F78(u8, CollisionHit *, f32, u8, Vec3f *, u8);
 void func_15142180(u8, Vec3f *, s32, f32, f32);
 u8 func_151D8E20(void);
 void func_151DAB58(u8, f32, u8, Vec3f *, s32, u8, u8);
-extern u8 (*D_8008FD04)(void);
 extern u8 (*D_8008FD1C)(void);
 extern u8 (*D_8008FD30)(void);
 void func_15150F90(PieceSpray *config, u8 arg1, u8 arg2, s32 arg3);
@@ -271,7 +270,7 @@ s32 func_151470FC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 }
 
 /* Effect 0 at the ground below the actor's bone on `side` when strength is at least 115, then
-   effect D_8008FD04() there. */
+   effect D_8008FD04[0]() there. */
 void func_15147318(s32 actor, s32 side, s32 strength) {
     Vec3f pos;
     CollisionHit hit;
@@ -281,7 +280,7 @@ void func_15147318(s32 actor, s32 side, s32 strength) {
             if (strength >= 115) {
                 func_15142180(0, &pos, hit.material, 1.0f, 1.0f);
             }
-            func_15141F78(D_8008FD04(), &hit, strength * (1.0f / 130.0f),
+            func_15141F78(D_8008FD04[0](), &hit, strength * (1.0f / 130.0f),
                           (u32)(((Actor *)actor)->unk40 * (256.0f / 360.0f)), &pos, side);
         }
     }

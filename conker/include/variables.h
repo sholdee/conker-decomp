@@ -371,6 +371,7 @@ extern s16  D_80084480;
 extern void (*D_800844B0[])(s32 arg0);
 extern s32  D_800848B0;
 
+extern u8 (*D_80085990[])[0xE0]; // per-font glyph bitmaps, 0xE0 bytes each
 extern FontGlyph *D_80085994[];
 extern Gfx D_800859A0[]; // shared display list (2D/sprite render setup)
 extern f32 D_80085FD0;
@@ -482,6 +483,8 @@ extern f32 *D_8008CFFC[]; // per LevelHeader.unk10: sun position (game_1AB530 FL
 extern WavePreset D_8008D050[]; // static parameters of each wave spring chain
 extern Vec3f * D_8008FC8C[];
 extern u8 * D_8008FC94[];
+extern u8 (*D_8008FCD0[])(void); // texture id pickers by effect kind (game_2062D0)
+extern u8 (*D_8008FD04[])(void); // a second picker table by effect kind (game_2062D0)
 extern s8 D_8008FD70;
 extern u8 D_8008FD74;
 extern s32 D_8008FD78;
