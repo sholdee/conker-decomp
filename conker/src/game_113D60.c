@@ -71,6 +71,11 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x28 */ u8 data[1]; // effect-specific data
+} Game113D60AnyEffect;
+
+typedef struct {
+    /* 0x00 */ Game113D60EffectHeader header;
     /* 0x28 */ Game113D60Emission emission;
 } Game113D60Effect;
 
@@ -819,7 +824,7 @@ typedef struct {
     /* 0x0C */ f32 unkC;
 } Game113D60PointData;
 
-/* Creates a point effect (kind 0x28) at `position`, lasting `duration` frames (-1: 300). */
+/* Creates effect 0x28 at `position`, lasting `duration` frames (-1: 300). */
 void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind) {
     Game113D60PointData data;
     struct260 *effect;
@@ -830,165 +835,176 @@ void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind) {
     effect = func_15149130((duration == -1) ? 300 : duration, -1, 0x28, -1, (duration == -1) ? 0 : 1, 0, sizeof(data),
                            owner, kind);
     if (effect != NULL) {
-        memcpy((u8 *)effect + 0x28, &data, sizeof(data));
+        memcpy(((Game113D60AnyEffect *)effect)->data, &data, sizeof(data));
     }
 }
 
 typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s16 unk8;
-    s16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 unk30;
-    struct17 unk3C;
-    struct17 unk48;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67[9];
-} Spawn150E8470;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s16 unk8;
+    /* 0x0A */ s16 unkA;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ Vec3f position;
+    /* 0x3C */ Vec3f unk3C;
+    /* 0x48 */ Vec3f unk48;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ u32 flags;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ s8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 pad67[9];
+} Struct15130280Arg; // first argument of func_15130280
+
+/* Extra data of the particles func_150E8470 spawns, stored at 0xA8 of each particle. */
+typedef struct {
+    /* 0x0 */ u8 unk0;
+    /* 0x1 */ u8 unk1;
+    /* 0x2 */ u8 unk2;
+    /* 0x3 */ u8 unk3;
+    /* 0x4 */ f32 unk4;
+    /* 0x8 */ f32 unk8;
+} Game113D60ParticleExtra;
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
-    f32 unk4;
-    f32 unk8;
-} Extra150E8470;
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ Game113D60ParticleExtra extra;
+} Game113D60Particle;
 
 typedef struct {
-    struct17 pos;
-    f32 accum;
-} Sub150E8470;
+    /* 0x0 */ Vec3f position;
+    /* 0xC */ f32 accum;
+} Game113D60Emitter;
 
 typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    Sub150E8470 unk28;
-} Obj150E8470;
+    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x28 */ Game113D60Emitter emitter;
+} Game113D60EmitterEffect;
 
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
+extern Game113D60Particle *func_15130280(Struct15130280Arg *, u8, s32, s32, u8, s32);
 
-void func_150E8470(Obj150E8470 *arg0) {
-    Sub150E8470 *sub;
+/* Spawns a random number of particles per frame at the effect's position. */
+void func_150E8470(Game113D60EmitterEffect *effect) {
+    Game113D60Emitter *emitter;
 
-    sub = &arg0->unk28;
-    sub->accum += (0.09999999404f + func_150ADA68() * 0.08789999783f) * D_800BE9A4;
-    if (sub->accum > 1.0f) {
-        Spawn150E8470 spawn;
-        Extra150E8470 extra;
-        void *ret;
+    emitter = &effect->emitter;
+    emitter->accum += (0.09999999404f + func_150ADA68() * 0.08789999783f) * D_800BE9A4;
+    if (emitter->accum > 1.0f) {
+        Struct15130280Arg arg;
+        Game113D60ParticleExtra extra;
+        Game113D60Particle *particle;
 
-        spawn.unk1D = 0x6C;
-        spawn.unk8 = 0x5103;
-        spawn.unk0 = 0x200005;
-        spawn.unk1E = 0x73;
-        spawn.unk20 = 2;
-        spawn.unk58 = 0x80DE07;
-        spawn.unk60 = 8;
-        spawn.unk61 = 6;
-        spawn.unk62 = 0x19;
-        spawn.unk63 = -1;
+        arg.unk1D = 0x6C;
+        arg.unk8 = 0x5103;
+        arg.unk0 = 0x200005;
+        arg.unk1E = 0x73;
+        arg.unk20 = 2;
+        arg.flags = 0x80DE07;
+        arg.unk60 = 8;
+        arg.unk61 = 6;
+        arg.unk62 = 0x19;
+        arg.unk63 = -1;
         extra.unk0 = 0;
         extra.unk1 = 0;
-        spawn.unk4 = 0;
-        spawn.unkC = 0;
-        spawn.unk10 = 0;
-        spawn.unk64 = -1;
-        spawn.unk65 = 0;
-        spawn.unk22 = 0x73;
-        spawn.unk14 = 0x24;
-        spawn.unk15 = 0x22;
-        spawn.unk16 = 0x11;
-        spawn.unk17 = 0xFF;
-        spawn.unk18 = 0x7B;
-        spawn.unk19 = 0x93;
-        spawn.unk1A = 0xAA;
-        spawn.unk1C = 0xFF;
-        spawn.unk24 = 1.022418022f;
-        spawn.unk30 = sub->pos;
-        spawn.unk3C.unk0 = 0.0f;
-        spawn.unk3C.unk4 = 0.0f;
-        spawn.unk3C.unk8 = 0.0f;
-        spawn.unk48.unk0 = 0.0f;
-        spawn.unk48.unk4 = 0.0f;
-        spawn.unk48.unk8 = 0.0f;
+        arg.unk4 = 0;
+        arg.unkC = 0;
+        arg.unk10 = 0;
+        arg.unk64 = -1;
+        arg.unk65 = 0;
+        arg.unk22 = 0x73;
+        arg.unk14 = 0x24;
+        arg.unk15 = 0x22;
+        arg.unk16 = 0x11;
+        arg.unk17 = 0xFF;
+        arg.unk18 = 0x7B;
+        arg.unk19 = 0x93;
+        arg.unk1A = 0xAA;
+        arg.unk1C = 0xFF;
+        arg.unk24 = 1.022418022f;
+        arg.position = emitter->position;
+        arg.unk3C.x = 0.0f;
+        arg.unk3C.y = 0.0f;
+        arg.unk3C.z = 0.0f;
+        arg.unk48.x = 0.0f;
+        arg.unk48.y = 0.0f;
+        arg.unk48.z = 0.0f;
         do {
-            extra.unk2 = func_150ADA20() % 5U + 4;
-            extra.unk3 = func_150ADA20() % 5U + 4;
+            extra.unk2 = func_150ADA20() % 5 + 4;
+            extra.unk3 = func_150ADA20() % 5 + 4;
             extra.unk4 = func_150ADA68() * 13.0f;
             extra.unk8 = func_150ADA68() * 13.0f;
-            spawn.unk54 = (func_150ADA68() * 40.0f + 68.0f) * 0.001000000047f;
-            spawn.unk58 &= ~0xC0;
-            spawn.unk58 |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
-            spawn.unk1B = func_150ADA20() % 156U + 100;
-            spawn.unkA = func_150ADA20() % 34U + 0x8D;
-            spawn.unk28 = spawn.unk2C = func_150ADA68() * 71.0f + 80.0f;
-            ret = func_15130280(&spawn, 1, 0, 0xC, arg0->unkC, arg0->unk1);
-            if (ret != NULL) {
-                memcpy((u8 *)ret + 0xA8, &extra, sizeof(extra));
+            arg.unk54 = (func_150ADA68() * 40.0f + 68.0f) * 0.001000000047f;
+            arg.flags &= ~0xC0;
+            arg.flags |= ((func_150ADA20() & 1) ? 0x40 : 0) | ((func_150ADA20() & 1) ? 0x80 : 0);
+            arg.unk1B = func_150ADA20() % 156 + 100;
+            arg.unkA = func_150ADA20() % 34 + 141;
+            arg.unk28 = arg.unk2C = func_150ADA68() * 71.0f + 80.0f;
+            particle = func_15130280(&arg, 1, 0, sizeof(extra), effect->header.owner, effect->header.kind);
+            if (particle != NULL) {
+                memcpy(&particle->extra, &extra, sizeof(extra));
             }
-            sub->accum -= 1.0f;
-        } while (sub->accum > 1.0f);
+            emitter->accum -= 1.0f;
+        } while (emitter->accum > 1.0f);
     }
 }
 
-extern s32 func_15131828(s32, s32, s32, s32);
+extern s32 func_15131828(Game113D60Particle *, f32 *, u8 *, u8 *);
 
-s32 func_150E8824(s32 arg0, s32 arg1) {
-    func_15131828(arg0, arg0 + 0xAC, arg0 + 0xA8, arg0 + 0xAA);
+/* Update callback of the particles func_150E8470 spawns. */
+s32 func_150E8824(Game113D60Particle *particle, s32 arg1) {
+    func_15131828(particle, &particle->extra.unk4, &particle->extra.unk0, &particle->extra.unk2);
     return 1;
 }
 
+/* Creates the timer effect (0x35) that func_150E88C0 updates. */
 void func_150E8854(void) {
-    struct260 *temp_v0;
-    f32 sp30;
+    struct260 *effect;
+    f32 timer;
 
-    sp30 = 10.0f;
+    timer = 10.0f;
 
-    temp_v0 = func_15149130(0x12C, -1, 0x35, -1, 0, 0, 0x4, 0xFF, 1);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp30, 4);
+    effect = func_15149130(300, -1, 0x35, -1, 0, 0, sizeof(timer), 0xFF, 1);
+    if (effect != NULL) {
+        memcpy(((Game113D60AnyEffect *)effect)->data, &timer, sizeof(timer));
     }
 }
 
-extern f32 D_800A1378;
+typedef struct {
+    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x28 */ f32 timer;
+} Game113D60TimerEffect;
+
+// matching: unprototyped, since the call below also passes the effect (in a0) to this void function
 extern void func_150E8930();
 
-void func_150E88C0(void *arg0) {
-    *(f32 *)((u8 *)arg0 + 0x28) -= D_800BE9A4;
-    if (*(f32 *)((u8 *)arg0 + 0x28) < 0.0f) {
-        *(f32 *)((u8 *)arg0 + 0x28) = (func_150ADA68() * D_800A1378) + 201.0f;
-        func_150E8930(arg0);
+/* Counts the timer down and fires func_150E8930 every 201-538 frames. */
+void func_150E88C0(Game113D60TimerEffect *effect) {
+    effect->timer -= D_800BE9A4;
+    if (effect->timer < 0.0f) {
+        effect->timer = (func_150ADA68() * 337.0f) + 201.0f;
+        func_150E8930(effect);
     }
 }
 
