@@ -24,8 +24,8 @@ typedef struct {
     s16 unk2C;
 } GameStruct151C2050State;
 
-/* Queues a positional sound event (func_1000E7A0 kind 8) for sound arg3 in a few specific levels. */
-void func_151C2050(struct127 *arg0, Vec3f *pos, Vec3f *dir, s32 arg3, f32 distance) {
+/* Queues a positional sound event (func_1000E7A0 kind 8) for soundId, only in a few specific levels. */
+void func_151C2050(struct127 *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance) {
     s32 pan;
     s32 volume;
     struct108 *camera;
@@ -34,14 +34,14 @@ void func_151C2050(struct127 *arg0, Vec3f *pos, Vec3f *dir, s32 arg3, f32 distan
     f32 volumeLevel; // matching: separate spill slot for the value kept across func_1000B060
     f32 intensity;
 
-    if (arg0 != NULL) {
-        if (D_800BE616 || (camera = arg0->camera) == NULL) {
+    if (obj != NULL) {
+        if (D_800BE616 || (camera = obj->camera) == NULL) {
             level = ((GameStruct151C2050State *)D_800B0DF0)->unk2C;
             if (level == 0x24 || level == 0x13 || level == 0x4D || level == 0x85 || level == 0x93) {
                 func_100114D0((s32)pos->x, (s32)pos->y, (s32)pos->z, 0x7FFF, 1000, 100, &pan, &volume, NULL);
                 if ((u32)volume > 0x1000) {
                     volume = (u32)volume >> 7;
-                    func_1000E7A0(8, (func_1510F8CC(arg3) + 1) | (volume << 8) | (pan << 16));
+                    func_1000E7A0(8, (func_1510F8CC(soundId) + 1) | (volume << 8) | (pan << 16));
                 }
             }
         } else {
@@ -53,7 +53,7 @@ void func_151C2050(struct127 *arg0, Vec3f *pos, Vec3f *dir, s32 arg3, f32 distan
                     volumeLevel = intensity;
                     /* 40.74 = 256 / 2pi: radians to a 256-step angle */
                     direction = func_1000B060(dir->x, dir->z, (u32)(camera->unk3A0 * 40.74366379f));
-                    func_1000E7A0(8, (func_1510F8CC(arg3) + 1) | ((s32)volumeLevel << 8) | (direction << 16));
+                    func_1000E7A0(8, (func_1510F8CC(soundId) + 1) | ((s32)volumeLevel << 8) | (direction << 16));
                 }
             }
         }
@@ -129,15 +129,17 @@ typedef struct {
     /* 0x110 */ Game1EF500TrailExt trail;
 } Game1EF500Trail;
 
-typedef void (*GameFunc151C455CDispatch)(Game1EF500Trail *);
-typedef void (*GameFunc151C455CCallback)(Vec3f *, s32);
+/* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler (entry 0 is func_151C2F48). */
+typedef void (*TrailExpireHandler)(Game1EF500Trail *);
+/* Signature of the hook in D_800E0940: (hit position, index of the struct131 that was hit). */
+typedef void (*TrailHitCallback)(Vec3f *, s32);
 
-extern GameFunc151C455CDispatch D_8008FBD0[];
+extern TrailExpireHandler D_8008FBD0[];
 
 typedef struct {
     u16 sound;
     u16 range;
-} GameStruct151C2734Sfx;
+} FlybySound;
 
 /* Spawn template for func_1513D2F0 (0x58 bytes). */
 typedef struct Game1EF500TrailSpawn {
@@ -168,8 +170,8 @@ typedef struct Game1EF500TrailSpawn {
     /* 0x56 */ s16 field56;
 } Game1EF500TrailSpawn;
 
-extern GameStruct151C2734Sfx D_8008FBE8[];
-extern s32 func_1000A420(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 *, s32 *, s32);
+extern FlybySound D_8008FBE8[];
+extern s32 func_1000A420(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s32 *, s32);
 void func_151C436C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps);
 u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
@@ -365,7 +367,7 @@ s8 func_151C2734(Game1EF500Trail *trail) {
         if (player != NULL) {
             volume = 0x40;
             func_1000A420(trail->position.x - player->unk2F8, trail->position.y - player->unk2FC,
-                          trail->position.z - player->unk300, *(s32 *)&player->unk380,
+                          trail->position.z - player->unk300, player->unk380,
                           trail->position.x - player->unk2F8, trail->position.y - player->unk2FC,
                           trail->position.z - player->unk300, 10000, 9999, &volume, &pan, 0);
             if (sound != 0) {
@@ -928,7 +930,7 @@ typedef struct {
     /* 0x21 */ u8 pad21;
     /* 0x22 */ s16 unk22;
     /* 0x24 */ s16 unk24;
-} GameDebris151C3B0C; /* 0x28, func_1513C650 packet (as Packet15141F78 in game_16EE20.c) */
+} DebrisPacket; /* 0x28, func_1513C650 packet (as Packet15141F78 in game_16EE20.c) */
 
 typedef struct {
     /* 0x00 */ s16 countBase;
@@ -975,9 +977,9 @@ typedef struct {
     /* 0x64 */ u8 unk64;
     /* 0x65 */ u8 pad65[3];
     /* 0x68 */ f32 extra;
-} GameSmoke151C3B0C; /* 0x6C, func_15153634 config (as Config15153634 in game_1EC390.c) */
+} SmokeConfig; /* 0x6C, func_15153634 config (as Config15153634 in game_1EC390.c) */
 
-void func_15153634(GameSmoke151C3B0C *, u8, u8, s32);
+void func_15153634(SmokeConfig *, u8, u8, s32);
 
 /*
  * Impact effects where the projectile hit: with the given chances, debris, a spark, a smoke burst
@@ -1014,7 +1016,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         smokeChance = sparkChance = debrisChance = 0.0f;
     }
     if (func_150ADA68() < debrisChance) {
-        GameDebris151C3B0C debris;
+        DebrisPacket debris;
         f32 scale;
         const s32 shade[6] = { 0x6F, 0x6F, 0x70, 0x70, 0x4F, 0x76 };
         u8 big;
@@ -1079,7 +1081,7 @@ void func_151C3B0C(Game1EF500Trail *trail, f32 debrisChance, f32 sparkChance, f3
         func_1513D2F0(&spark, (s32)&D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, trail->unkC, trail->unk1);
     }
     if (func_150ADA68() < smokeChance) {
-        GameSmoke151C3B0C smoke;
+        SmokeConfig smoke;
         const u8 colorA[6][3] = { { 0xB7, 0x77, 0x34 }, { 0xB7, 0x77, 0x34 }, { 0xAA, 0x52, 0x1E },
                             { 0xAA, 0x52, 0x1E }, { 0x98, 0x92, 0x79 }, { 0xFF, 0xC0, 0x00 } };
         const u8 colorB[6][3] = { { 0x5C, 0x30, 0x00 }, { 0x5C, 0x30, 0x00 }, { 0x00, 0x00, 0x00 },
@@ -1205,14 +1207,14 @@ void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
 /* Counts down the projectile's remaining distance; when it runs out, fires its expiry callbacks and returns 0. */
 s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     s32 alive;
-    GameFunc151C455CCallback callback;
+    TrailHitCallback callback;
     struct131 *target;
     s8 handler;
 
     ext->remaining -= dt;
     alive = TRUE;
     if (ext->remaining <= 0.0f) {
-        callback = (GameFunc151C455CCallback)D_800E0940;
+        callback = (TrailHitCallback)D_800E0940;
         if (callback != NULL && (ext->flags & TRAIL_HIT_CALLBACK)) {
             target = ext->path.field_5C;
             if (target != NULL) {
