@@ -343,6 +343,10 @@ Emitter *func_1518D1C0(struct127 *owner, s16 kind, s16 lifetime, u8 killExisting
     return NULL;
 }
 
+/*
+ * Per-frame emitter update: follows the owner (or its bones), releases particles whose slot timer ran out
+ * and spawns new ones at the info's rate. Dies with its owner or when its lifetime callback says so.
+ */
 void func_1518D6E0(Emitter *emitter) {
     Emitter *self;
     s8 done;
