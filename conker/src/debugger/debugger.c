@@ -14,6 +14,11 @@
 #define DEBUGGER_CLEAR  2 /* clear the framebuffer before drawing */
 #define DEBUGGER_EXIT   4 /* leave the debugger */
 
+/* func_16001044 modes */
+#define PRINT_HEX   0
+#define PRINT_DEC   1
+#define PRINT_FLOAT 2
+
 /* Screens (D_16003AF4) indexing the draw (D_16003AF8) and input (D_16003B08) tables. */
 #define SCREEN_PRESS_BUTTON 0
 #define SCREEN_MAIN_MENU    1
@@ -79,7 +84,7 @@ void func_16000058(void) {
     }
     func_16001338(255, 255, 255);
     func_160012B0(611, D_16004700); // "Version"
-    func_16001044(619, 1, 163);
+    func_16001044(619, PRINT_DEC, 163);
     func_160012B0(643, D_16004708); // "Built"
     func_160012B0(651, D_16004710); // "Dec 19 2000"
     func_160012B0(663, D_1600471C); // "09:57:42"
@@ -174,24 +179,24 @@ void func_16000424(struct118 *arg0) {
 
     func_16001338(255, 255, 255);
     func_160012B0(35, D_16004728); // "Pc"
-    func_16001044(43, 0, thread->context.pc);
+    func_16001044(43, PRINT_HEX, thread->context.pc);
     func_160012B0(67, D_1600472C); // "Cause"
-    func_16001044(75, 0, thread->context.cause);
+    func_16001044(75, PRINT_HEX, thread->context.cause);
     func_16001338(128, 128, 255);
     cause = thread->context.cause;
     exception = (cause >> 2) & 0xF;
 
     func_160012B0(107, (u8 *)D_16003848[exception]);
     if (exception == 11) { // coprocessor unusable: show which one
-        func_16001044(111, 1, (cause >> 28) & 3);
+        func_16001044(111, PRINT_DEC, (cause >> 28) & 3);
     }
     func_16001338(255, 255, 255);
     func_160012B0(131, D_16004734); // "Sr"
-    func_16001044(139, 0, thread->context.sr);
+    func_16001044(139, PRINT_HEX, thread->context.sr);
     func_160012B0(163, D_16004738); // "Badvadr"
-    func_16001044(171, 0, thread->context.badvaddr);
+    func_16001044(171, PRINT_HEX, thread->context.badvaddr);
     func_160012B0(195, D_16004740); // "Thread"
-    func_16001044(203, 1, thread->id);
+    func_16001044(203, PRINT_DEC, thread->id);
     if (D_160038A4 != 0) {
         func_160012B0(52, D_16004748); // "Lockup_Now"
     }
@@ -212,7 +217,7 @@ void func_16000590(OSThread *thread) {
 
     bits = thread->context.fpcsr;
     func_160012B0(3, D_160047A4); // "Fpcsr:"
-    func_16001044(10, 0, bits);
+    func_16001044(10, PRINT_HEX, bits);
     bits >>= 12; // cause bits: inexact, underflow, overflow, div by zero, invalid, unimplemented
     position = 44;
     for (i = 0; i < 6; i++, bits >>= 1) {
@@ -231,8 +236,8 @@ void func_16000590(OSThread *thread) {
     }
     do {
         func_160012B0(position, D_160047AC); // "fp"
-        func_16001044(position + 2, 1, i + page);
-        func_16001044(position + 5, 2, words[word + 1]); // f_even, the register's low word
+        func_16001044(position + 2, PRINT_DEC, i + page);
+        func_16001044(position + 5, PRINT_FLOAT, words[word + 1]); // f_even, the register's low word
         word += 2;
         position += 32;
         i++;
@@ -256,7 +261,7 @@ void func_160006CC(OSThread *thread) {
         func_160012B0(position, label.text);
         position += 3;
         index = entry[2];
-        func_16001044(position, 0, ((u32 *)thread)[index + 1]); // low word
+        func_16001044(position, PRINT_HEX, ((u32 *)thread)[index + 1]); // low word
         position += 13;
         entry += 3;
     } while (entry[0] != 0);
@@ -295,7 +300,7 @@ void func_1600078C(void) {
         }
         position = 97;
         for (row = 0; row < 22; row++) {
-            func_16001044(position, 0, (u32)address);
+            func_16001044(position, PRINT_HEX, (u32)address);
             func_160012B0(position + 8, D_160047BC); // ":"
             value = *address;
             segment = (value >> 24) & 0xFF;
@@ -310,11 +315,11 @@ void func_1600078C(void) {
             } else {
                 func_16001338(255, 255, 255);
             }
-            func_16001044(position + 12, 0, value);
+            func_16001044(position + 12, PRINT_HEX, value);
             decimal_position = position + 22;
             func_160012B0(decimal_position, D_160047C0); // blank out the previous number
             func_16001338(255, 255, 255);
-            func_16001044(decimal_position, 1, value);
+            func_16001044(decimal_position, PRINT_DEC, value);
             if (IN_BSS_START(address)) {
                 func_16001338(128, 128, 255);
             } else if (IN_D_8002D8B0(address)) {
@@ -499,62 +504,42 @@ s32 func_16000B14(OSThread *thread) {
 }
 s32 func_16001B34(u8 *buffer, const u8 *format, ...);
 
+/* Print a float at a text position ("NaN" for NaN, infinity and denormals). */
 void func_16000F8C(s32 position, f32 value) {
     f32 copy;
     u8 buffer[44];
     u32 exponent;
 
-    if ((position >= (D_160038A0 << 5)) && (position < 0x341)) {
+    if ((position >= (D_160038A0 << 5)) && (position < 833)) {
         copy = value;
         exponent = (u32)(*(s32 *)&copy & 0x7F800000) >> 23;
-        if (((exponent == 0) || (exponent >= 0xFF)) &&
-            ((exponent = *(s32 *)&copy * 2) != 0)) {
-            func_160012B0(position, D_160047D0);
+        // matching: reusing exponent for the shifted bits keeps them in the same register
+        if (((exponent == 0) || (exponent >= 255)) && ((exponent = *(s32 *)&copy << 1) != 0)) {
+            func_160012B0(position, D_160047D0); // "NaN"
             return;
         }
-        func_16001B34(buffer, D_160047D4, D_160047DC, D_160047E0,
-                      (f64)value);
+        func_16001B34(buffer, D_160047D4, D_160047DC, D_160047E0, value); // "%s%s%f", "", ""
         func_160012B0(position, buffer);
     }
 }
-// NON-MATCHING: lots to figure out
-// void func_16000F8C(s32 arg0, f32 arg1) {
-//     struct165 tmp;
-//     s32 temp_v1;
-//     u32 temp_t9;
-//
-//     if ((arg0 >= (D_160038A0 << 5)) && (arg0 < 833)) {
-//         tmp.unk18 = arg1;
-//         temp_v1 = *(s32*)&tmp.unk18;
-//         temp_t9 = (u32) (temp_v1 & 0x7F800000) >> 0x17;
-//         if ((temp_t9 == 0) || (temp_t9 >= 0x255U)) {
-//             if ((temp_v1 * 2) != 0) {
-//                 func_160012B0(arg1, &D_160047D0); // arg0,
-//                 return;
-//             }
-//         }
-//         func_16001B34(&arg0, &tmp.unk0, &D_160047D4, &D_160047DC, &D_160047E0); // , (f64) arg1
-//         func_160012B0(arg0, &tmp.unk0);
-//     }
-// }
 
-u8 *func_1600160C();
+u8 *func_1600160C(s32 position);
 u8 *func_160014F0(u8 *destination, u8 character);
-s32 func_16001B34(u8 *buffer, const u8 *format, ...);
 
 typedef struct DebuggerDecimalPowers {
     s32 power[10];
 } DebuggerDecimalPowers;
-extern DebuggerDecimalPowers D_16003B50;
+extern DebuggerDecimalPowers D_16003B50; // 1, 10, 100, ... 1000000000
 extern const u8 D_160047E4[];
 extern const u8 D_160047E8[];
 extern const u8 D_160047F0[];
 extern const u8 D_160047F4[];
 
+/* Print value at a text position as 8 hex digits (PRINT_HEX), signed decimal (PRINT_DEC) or as float bits (PRINT_FLOAT). */
 void func_16001044(s32 position, s32 mode, u32 value) {
-    s32 index;
+    s32 i;
     s32 started;
-    s32 decimal_index;
+    s32 place;
     s32 digit;
     s32 exponent;
     u8 character;
@@ -566,66 +551,69 @@ void func_16001044(s32 position, s32 mode, u32 value) {
     u8 *destination;
 
     powers = D_16003B50;
-    if ((position >= (D_160038A0 << 5)) && (position < 0x341)) {
+    if ((position >= (D_160038A0 << 5)) && (position < 833)) {
         destination = func_1600160C(position);
         switch (mode) {
-        case 0:
-            destination += 0x70;
-            index = 0;
+        case PRINT_HEX:
+            destination += 7 * 16; // last digit first
+            i = 0;
             do {
                 character = value & 0xF;
                 if (character >= 10) {
-                    character += 7;
+                    character += 'A' - '0' - 10;
                 }
                 character += '0';
                 func_160014F0(destination, character);
                 value = (s32)value >> 4;
-                index++;
-                destination -= 0x10;
-            } while (index != 8);
+                i++;
+                destination -= 16;
+            } while (i != 8);
             break;
-        case 1:
+        case PRINT_DEC:
             if ((s32)value < 0) {
                 destination = func_160014F0(destination, '-');
                 value = -value;
             }
-            started = 0;
-            for (decimal_index = 9; decimal_index >= 0; decimal_index--) {
-                power = powers.power[decimal_index];
+            started = FALSE;
+            for (place = 9; place >= 0; place--) {
+                power = powers.power[place];
                 digit = (s32)value / power;
                 value = (s32)value % power;
-                if ((digit > 0) || started || (decimal_index == 0)) {
+                if ((digit > 0) || started || (place == 0)) {
                     destination = func_160014F0(destination, digit + '0');
-                    started = 1;
+                    started = TRUE;
                 }
             }
             break;
-        case 2:
+        case PRINT_FLOAT:
             exponent = (s32)(value & 0x7F800000) >> 23;
             mantissa = value << 9;
-            if (((exponent <= 0) || (exponent >= 0xFF)) &&
-                ((exponent != 0) || mantissa)) {
-                func_160012B0(position, D_160047E4);
+            if (((exponent <= 0) || (exponent >= 255)) && ((exponent != 0) || mantissa)) {
+                func_160012B0(position, D_160047E4); // "NaN"
                 return;
             }
-            *(s32 *)&copy = value;
-            func_16001B34(buffer, D_160047E8, D_160047F0, D_160047F4,
-                          (f64)copy);
+            *(u32 *)&copy = value;
+            func_16001B34(buffer, D_160047E8, D_160047F0, D_160047F4, copy); // "%s%s%f", "", ""
             func_160012B0(position, buffer);
             break;
         }
     }
 }
 
-void func_160012B0(s32 arg0, u8 *arg1) {
-    if (arg1 && (arg0 >= (D_160038A0 << 5)) && (arg0 < 833)) {
-        s32 fb = func_1600160C();
-        while (*arg1 != 0) {
-            fb = func_160014F0(fb, *arg1);
-            *arg1++;
+/* Print a NUL-terminated string at a text position (row * 32 + column). */
+void func_160012B0(s32 position, u8 *text) {
+    u8 *destination;
+    u8 character;
+
+    if ((text != NULL) && (position >= (D_160038A0 << 5)) && (position < 833)) {
+        destination = func_1600160C(position);
+        while ((character = *text) != '\0') {
+            destination = func_160014F0(destination, character);
+            text++;
         }
     }
 }
+
 // convert rgb to rgba16
 void func_16001338(u8 arg0, u8 arg1, u8 arg2) {
     D_1600388C = ((arg0 & 0xF8) << 8) | ((arg1 & 0xF8) << 3) | ((arg2 & 0xF8) >> 2) | 1;
