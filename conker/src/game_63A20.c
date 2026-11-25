@@ -2,153 +2,153 @@
 #include "functions.h"
 #include "variables.h"
 
+/* D_800C3FC0 is declared as a single struct222 *; it is really one vertex buffer per actor. */
+#define VTX_BUFFERS ((Vtx **)&D_800C3FC0)
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u8 pad6[0x1A];
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    u8 pad26[0xA];
-    s16 unk30;
-    s16 unk32;
-    s16 unk34;
-} Struct_15036570;
+/* D_800C3FC4 (declared as one s32): a smoothed position per actor, as s16 x, y, z. */
+// matching: integer address math hides the base from IDO's alias analysis (s16 (*)[3] indexing reorders loads)
+#define QUAD_ANCHOR(index) ((s16 *)((s32)&D_800C3FC4 + (index) * 6))
 
-void func_150A7960(s32, f32, f32, f32, f32 *, f32 *, f32 *);
+/* An actor's bone matrix: struct127.unk1D4 points at an array of these. */
+typedef f32 MtxF[4][4];
 
-void func_15036570(s32 arg0, s32 arg1, s32 arg2)
-{
-  f32 x;
-  f32 y;
-  f32 z;
-  f32 tx;
-  f32 ty;
-  f32 tz;
-  Struct_15036570 *obj;
-  struct127 *o;
-  s32 id;
-  f32 dist;
-  s16 *v;
-  f32 t;
-  f32 d;
-  obj = ((Struct_15036570 **) (&D_800C3FC0))[arg0];
-  o = &D_800CC2D0[arg0];
-  id = (*o).unk84.uh;
-  dist = (*o).unk2D0->unk8;
-  if ((((id == 0x3E) || (id == 0x41)) || ((id == 0x138) && (dist >= 36.0f))) || (((id == 0x3D) || (id == 0xD9)) && (dist > 21.0f)))
-  {
-    func_150A7960(arg1, -7.0f, -17.0f, -7.0f, &x, &y, &z);
-    v = (s16 *) (((s32) (&D_800C3FC4)) + (arg0 * 6));
-    v[0] = x;
-    v[1] = y;
-    v[2] = z;
-    d = tz - v[2];
-  }
-  else
-  {
-    if (((((id == 0x3D) || (id == 0xD9)) && (dist > 7.0f)) || (id == 0x138)) || (id == 0x139))
-    {
-      t = 1.0f;
+void func_150A7960(MtxF, f32, f32, f32, f32 *, f32 *, f32 *);
+
+/*
+ * Places vertex 0 of actor `index`'s quad. During some animation states it snaps to a fixed point of
+ * pinMtx; otherwise it eases toward the midpoint of vertices 2 and 3 transformed by followMtx.
+ */
+void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 targetX;
+    f32 targetY;
+    f32 targetZ;
+    Vtx *vtx;
+    struct127 *actor;
+    s32 state;
+    f32 frame;
+    s16 *anchor;
+    f32 blend;
+    f32 delta;
+
+    vtx = VTX_BUFFERS[index];
+    actor = &D_800CC2D0[index];
+    state = actor->unk84.uh;
+    frame = actor->unk2D0->unk8;
+    if (state == 0x3E || state == 0x41 || (state == 0x138 && frame >= 36.0f) ||
+        ((state == 0x3D || state == 0xD9) && frame > 21.0f)) {
+        func_150A7960(pinMtx, -7.0f, -17.0f, -7.0f, &x, &y, &z);
+        anchor = QUAD_ANCHOR(index);
+        anchor[0] = x;
+        anchor[1] = y;
+        anchor[2] = z;
+        delta = targetZ - anchor[2]; // matching: dead store; without it IDO assigns the else branch's FP registers differently
+    } else {
+        if (((state == 0x3D || state == 0xD9) && frame > 7.0f) || state == 0x138 || state == 0x139) {
+            blend = 1.0f;
+        } else {
+            blend = 0.6999999881f;
+        }
+        x = (vtx[2].v.ob[0] + vtx[3].v.ob[0]) * 0.5f;
+        y = (vtx[2].v.ob[1] + vtx[3].v.ob[1]) * 0.5f;
+        z = (vtx[2].v.ob[2] + vtx[3].v.ob[2]) * 0.5f;
+        func_150A7960(followMtx, x, y, z, &targetX, &targetY, &targetZ);
+        anchor = QUAD_ANCHOR(index);
+        delta = targetX - anchor[0];
+        anchor[0] += delta * blend;
+        delta = targetY - anchor[1];
+        anchor[1] += delta * blend;
+        delta = targetZ - anchor[2];
+        anchor[2] += delta * blend;
+        x = anchor[0];
+        y = anchor[1];
+        z = anchor[2];
     }
-    else
-    {
-      t = 0.6999999881f;
-    }
-    x = (obj->unk30 + obj->unk20) * 0.5f;
-    y = (obj->unk32 + obj->unk22) * 0.5f;
-    z = (obj->unk34 + obj->unk24) * 0.5f;
-    func_150A7960(arg2, x, y, z, &tx, &ty, &tz);
-    v = (s16 *) (((s32) (&D_800C3FC4)) + (arg0 * 6));
-    d = tx - v[0];
-    v[0] = v[0] + (d * t);
-    d = ty - v[1];
-    v[1] = v[1] + (d * t);
-    d = tz - v[2];
-    v[2] = v[2] + (d * t);
-    x = v[0];
-    y = v[1];
-    z = v[2];
-  }
-  obj->unk0 = x;
-  obj->unk2 = y;
-  obj->unk4 = z;
+    vtx[0].v.ob[0] = x;
+    vtx[0].v.ob[1] = y;
+    vtx[0].v.ob[2] = z;
 }
 
-typedef struct Game368C4State {
-    u8 pad0[0x66];
-    u8 mode;
-    u8 pad67[0x16D];
-    u8 *transforms;
-    u8 pad1D8[0x129];
-    u8 lighting0, lighting1;
-    u8 pad303;
-    s32 lights[4];
-    u8 *lightData;
-    u8 pad318[4];
-    u8 *model;
-} Game368C4State;
+/* Partial view of the Attachment struct from game_5D2C0.c (what func_1503195C returns). */
+typedef struct {
+    /* 0x00 */ u8 pad0[4];
+    /* 0x04 */ u8 flags;
+    /* 0x05 */ u8 pad5[0x23];
+    /* 0x28 */ Vtx *vtx[2]; // one per frame buffer
+} AttachmentView;
 
-s32 func_1515E544(s32, s32, u8, u8, void *);
-s32 func_15094F70(s32, void *, s32, void *, s32, s32, s32, s32, s32);
-extern u8 D_80084350[], D_80089470[], D_800903BC[];
+/* struct127 fields this file reads that the shared definition only has as padding (pad66, unk301[]). */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x66];
+    /* 0x066 */ u8 unk66;
+    /* 0x067 */ u8 pad67[0x29A];
+    /* 0x301 */ u8 unk301;
+    /* 0x302 */ u8 unk302;
+    /* 0x303 */ u8 pad303;
+    /* 0x304 */ s32 unk304[4]; // one per view
+    /* 0x314 */ u8 (*unk314)[8]; // one per frame buffer
+} ActorTail;
 
-typedef struct Game63A20Command {
-    u32 w0;
-    u32 w1;
-} Game63A20Command;
+#define ACTOR_TAIL(index) ((ActorTail *)&D_800CC2D0[index])
 
-#define GAME63A20_STATE(index) ((Game368C4State *)((u8 *)D_800CC2D0 + (index) * 0x32C))
+Gfx *func_1515E544(Gfx *gfx, s32, u8, u8, void *);
+Gfx *func_15094F70(Gfx *gfx, void *, s32, void *, s32, s32, s32, s32, s32);
+extern Gfx D_80084350[];
+extern Mtx D_80089470;
+extern u8 D_800903BC[];
 
-Game63A20Command *func_150368C4(Game63A20Command *arg0, s32 arg1, s32 arg2) {
-    u8 *transform;
-    u8 *effect;
-    u8 *colors;
-    s32 index;
+/*
+ * Draws two triangles from actor `index`'s 5-vertex buffer (only actor 0, and only for models of type 2
+ * or 0x13 that carry attachment set 8). The vertices take their color from that attachment's vertex 48;
+ * vertex 0 is placed by func_15036570 and drawn with D_80089470, vertices 1-4 with bone matrix 4.
+ */
+Gfx *func_150368C4(Gfx *gfx, s32 index, s32 view) {
+    MtxF *bones;
+    AttachmentView *attachment;
+    Vtx *color;
+    s32 i;
 
-    if (GAME63A20_STATE(arg1)->model[0x75] != 2 &&
-        GAME63A20_STATE(arg1)->model[0x75] != 0x13) {
-        return arg0;
+    if (D_800CC2D0[index].unk31C->unk75 != 2 && D_800CC2D0[index].unk31C->unk75 != 0x13) {
+        return gfx;
     }
-    effect = (u8 *)func_1503195C((struct127 *)GAME63A20_STATE(arg1), 8, 0);
-    if (effect == NULL) {
-        return arg0;
+    attachment = (AttachmentView *)func_1503195C(&D_800CC2D0[index], 8, 0);
+    if (attachment == NULL) {
+        return gfx;
     }
-    if (arg1 > 0) {
-        return arg0;
+    if (index > 0) {
+        return gfx;
     }
-    colors = *(u8 **)(effect + 0x28 + D_800BE9C0 * 4) + 0x300;
-    for (index = 0; index < 5; index++) {
-        (*(u8 **)((u8 *)&D_800C3FC0 + arg1 * 4))[index * 0x10 + 0xC] = colors[0xC];
-        (*(u8 **)((u8 *)&D_800C3FC0 + arg1 * 4))[index * 0x10 + 0xD] = colors[0xD];
-        (*(u8 **)((u8 *)&D_800C3FC0 + arg1 * 4))[index * 0x10 + 0xE] = colors[0xE];
+    color = &attachment->vtx[D_800BE9C0][48];
+    for (i = 0; i < 5; i++) {
+        VTX_BUFFERS[index][i].v.cn[0] = color->v.cn[0];
+        VTX_BUFFERS[index][i].v.cn[1] = color->v.cn[1];
+        VTX_BUFFERS[index][i].v.cn[2] = color->v.cn[2];
     }
-    transform = GAME63A20_STATE(arg1)->transforms;
-    if (transform == NULL) {
-        return arg0;
+    bones = (MtxF *)D_800CC2D0[index].unk1D4;
+    if (bones == NULL) {
+        return gfx;
     }
-    func_15036570(arg1, (s32)(transform + 0x240), (s32)(transform + 0x100));
-    { Game63A20Command *command = arg0++; command->w0 = 0xDE000000; command->w1 = (u32)D_80084350; }
-    arg0 = (Game63A20Command *)func_1515E544((s32)arg0, GAME63A20_STATE(arg1)->lights[arg2],
-                                                    GAME63A20_STATE(arg1)->lighting0, GAME63A20_STATE(arg1)->lighting1,
-                                                    GAME63A20_STATE(arg1)->lightData + D_800BE9C0 * 8);
-    if ((GAME63A20_STATE(arg1)->mode & 0xC) == 0xC) {
-        { Game63A20Command *command = arg0++; command->w0 = 0xD9FDFFFF; command->w1 = 0; }
-    } else if ((GAME63A20_STATE(arg1)->mode & 0xC) != 8 && !(effect[4] & 1)) {
-        { Game63A20Command *command = arg0++; command->w0 = 0xD9FDFFFF; command->w1 = 0; }
+    func_15036570(index, bones[9], bones[4]);
+    gSPDisplayList(gfx++, D_80084350);
+    gfx = func_1515E544(gfx, ACTOR_TAIL(index)->unk304[view], ACTOR_TAIL(index)->unk301,
+                        ACTOR_TAIL(index)->unk302, ACTOR_TAIL(index)->unk314[D_800BE9C0]);
+    if ((ACTOR_TAIL(index)->unk66 & 0xC) == 0xC) {
+        gSPClearGeometryMode(gfx++, G_LIGHTING);
+    } else if ((ACTOR_TAIL(index)->unk66 & 0xC) != 8 && !(attachment->flags & 1)) {
+        gSPClearGeometryMode(gfx++, G_LIGHTING);
     } else if (D_800DCD7C != 0) {
-        { Game63A20Command *command = arg0++; command->w0 = 0xD9FFFFFF; command->w1 = 0x20000; }
+        gSPSetGeometryMode(gfx++, G_LIGHTING);
     } else {
-        { Game63A20Command *command = arg0++; command->w0 = 0xD9FDFFFF; command->w1 = 0; }
+        gSPClearGeometryMode(gfx++, G_LIGHTING);
     }
-    arg0 = (Game63A20Command *)func_15094F70((s32)arg0, (void *)D_800903BC, 0, NULL, 0, 0, 0, 2, 3);
-    { Game63A20Command *command = arg0++; command->w0 = 0xDA380003; command->w1 = (u32)D_80089470; }
-    { Game63A20Command *command = arg0++; command->w0 = 0x01001002; command->w1 = (u32)*(u8 **)((u8 *)&D_800C3FC0 + arg1 * 4); }
-    { Game63A20Command *command = arg0++; command->w0 = 0xDA380003; command->w1 = (u32)(transform + 0x100); }
-    { Game63A20Command *command = arg0++; command->w0 = 0x0100400A; command->w1 = (u32)(*(u8 **)((u8 *)&D_800C3FC0 + arg1 * 4) + 0x10); }
-    { Game63A20Command *command = arg0++; command->w0 = 0x05000204; command->w1 = 0; }
-    { Game63A20Command *command = arg0++; command->w0 = 0x05000608; command->w1 = 0; }
-    return arg0;
+    gfx = func_15094F70(gfx, D_800903BC, 0, NULL, 0, 0, 0, 2, 3);
+    gSPMatrix(gfx++, &D_80089470, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPVertex(gfx++, &VTX_BUFFERS[index][0], 1, 0);
+    gSPMatrix(gfx++, &bones[4], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPVertex(gfx++, &VTX_BUFFERS[index][1], 4, 1);
+    gSP1Triangle(gfx++, 0, 1, 2, 0);
+    gSP1Triangle(gfx++, 0, 3, 4, 0);
+    return gfx;
 }
