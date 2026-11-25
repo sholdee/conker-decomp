@@ -160,7 +160,7 @@ extern s8 D_800D239A;
 extern s8 D_800D2398;
 extern s8 D_800D2399;
 extern MpGame *D_800D23B0;
-s32 func_1508802C();
+s32 func_1508802C(Racer *racer, struct127 *obj, s32 arg2);
 extern s16 D_80087290;
 extern PathNode *D_800D2350;
 extern f32 sqrtf(f32);
@@ -1981,7 +1981,6 @@ s32 func_1508A6FC(void) {
     return result;
 }
 
-extern s8 D_8008FD90;
 /* 12-byte per-player records at 0x70 of D_8008FDD4. */
 typedef struct ScoreRecord {
     /* 0x0 */ s16 unk0;
@@ -2411,7 +2410,6 @@ void *func_1505EEF4(s32);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *,
                   f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
 extern s16 D_800872C4[];
-extern s8 D_800E0BD0;
 
 /* Line-of-sight test between players a and b; sets their visibility bits in unk16C0. */
 void func_1508C1A4(s32 a, s32 b) {
@@ -3045,9 +3043,6 @@ s32 func_1508DA1C(void) {
     }
 }
 
-extern struct127 D_800CC2D0[26];
-extern MpGame *D_800D23B0;
-s32 func_1508802C();
 /*
  * Releases the slot held by `player` (returns 1 without doing so if `mode` < 0). Unless the
  * slot is flagged 2, it is reset; mode 1 also drops it at the player's position.
