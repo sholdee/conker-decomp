@@ -4,8 +4,8 @@
 #undef func_1000E770
 #include "variables.h"
 
-s32 func_151149AC(u32);
-void func_1516441C(struct225 *arg0, struct227 *arg1);
+void *func_151149AC(u32 id);
+
 void func_15187FC0(s32 arg0, s32 *arg1);
 void func_15188010(s32 arg0, f32 *arg1);
 void func_1511172C(s32 arg0);
@@ -57,34 +57,34 @@ typedef struct {
 } LightJitter;
 
 struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
-struct225 *func_1516037C(Header *src, struct226 *arg1, s32 size, u8 arg3, s32 arg4);
-void func_151603FC(struct225 *arg0);
-s32  func_15160600(struct225 *arg0);
-s32  func_1516065C(struct225 *arg0);
-s32  func_15160684(struct225 *arg0);
-s32  func_151607A4(struct225 *arg0);
-void func_15160954(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, struct225 *arg4);
-s32  func_15161238(struct127 *arg0, struct127 *arg1);
+struct225 *func_1516037C(Header *header, struct226 *light, s32 size, u8 arg3, s32 arg4);
+void func_151603FC(struct225 *effect);
+s32 func_15160600(struct225 *effect);
+s32 func_1516065C(struct225 *effect);
+s32 func_15160684(struct225 *effect);
+s32 func_151607A4(struct225 *effect);
+void func_15160954(f32 *level, f32 *peak, f32 *rate, f32 *delay, struct225 *effect);
+s32 func_15161238(struct127 *actor, struct127 *exclude);
 struct225 *func_1516127C(struct226 *light, u8 arg1, s32 arg2);
 struct225 *func_15161334(struct226 *light, u8 arg1, s32 arg2);
 struct225 *func_15161408(struct226 *light, u8 arg1, s32 arg2);
 struct225 *func_15161494(struct226 *light, u8 arg1, s32 arg2);
 struct225 *func_15161540(struct226 *light, u8 arg1, s32 arg2);
 struct225 *func_151615F8(struct226 *light, u8 sound, u8 kind, u8 type, u8 arg4, s32 arg5);
-void func_151616D0(u8 arg0, u8 arg1, s32 arg2);
-void func_15161714(struct225 *arg0);
-void func_15161740(struct225 *arg0);
-void func_1516176C(struct225 *arg0);
-void func_15161798(struct225 *arg0);
-void func_151617C4(struct225 *arg0);
-void func_151617E4(struct225 *arg0);
-void func_15161804(struct225 *arg0);
-void func_15161860(struct225 *arg0);
+void func_151616D0(u8 arg0, u8 event, s32 arg2);
+void func_15161714(struct225 *effect);
+void func_15161740(struct225 *effect);
+void func_1516176C(struct225 *effect);
+void func_15161798(struct225 *effect);
+void func_151617C4(struct225 *effect);
+void func_151617E4(struct225 *effect);
+void func_15161804(struct225 *effect);
+void func_15161860(struct225 *effect);
 void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, struct17 *position, s16 arg5, s16 arg6);
 struct225 *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3);
-s32  func_15161A68(struct225 *arg0);
+s32 func_15161A68(struct225 *effect);
 struct225 *func_15161E24(struct127 *actor, u8 unk5, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
-s32  func_15161F2C(struct225 *effect);
+s32 func_15161F2C(struct225 *effect);
 struct225 *func_15162034(struct226 *light, u8 arg1, s32 arg2);
 void func_15162110(s32 arg0);
 struct225 *func_15162740(struct226 *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
@@ -94,24 +94,24 @@ void func_15162F50(struct239 *effect);
 struct225 *func_15162FAC(struct226 *light, u8 kind, u8 type, u8 arg3, s16 lifetime, s8 update, u8 arg6, s32 arg7);
 struct225 *func_15163414(Header *header, f32 *x, f32 *y, f32 *z, s8 callback, u8 handler, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 extraSize, u8 argD, s32 argE);
 struct225 *func_15163604(struct226 *light, u8 kind, u8 type, s16 lifetime, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
-s32  func_15163704(struct225 *arg0);
+s32 func_15163704(struct225 *effect);
 void func_1516381C(struct226 *light, u8 type, u8 arg2, s32 arg3);
 void func_1516387C(struct226 *light, u8 arg1, s8 update, s16 lifetime, u8 type, s32 size, u8 arg6, s32 arg7);
 void func_151639D0(struct225 *effect, s32 arg1, u8 eventId);
-void func_15163A18(struct225 *arg0, s32 arg1, u8 arg2);
-struct225 *func_15163A60(u8 arg0, u8 arg1, s32 arg2);
-s32  func_15163B98(struct230 *arg0);
+void func_15163A18(struct225 *effect, s32 arg1, u8 eventId);
+struct225 *func_15163A60(u8 objectId, u8 arg1, s32 arg2);
+s32 func_15163B98(struct230 *effect);
 struct225 *func_15163BE8(struct127 *actor, u8 arg1, s32 arg2);
-s32  func_15163CD0(struct225 *arg0);
+s32 func_15163CD0(struct225 *effect);
 void func_15163CF8(LightPulse *pulse, struct225 *effect);
 void func_15163DEC(struct225 *effect, LightJitter *jitter);
-s32  func_15163F50(struct225 *effect, LightActorRef *ref);
-struct225 *func_15164208(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
-s32  func_1516429C(struct237 *arg0);
-void func_151643A8(struct225 *arg0, s32 arg1, u8 arg2);
-s32  func_151643F8(struct225 *arg0);
+s32 func_15163F50(struct225 *effect, LightActorRef *ref);
+struct225 *func_15164208(struct226 *light, u8 id, u8 arg2, s32 arg3);
+s32 func_1516429C(struct225 *effect);
+void func_151643A8(struct225 *effect, s32 arg1, u8 eventId);
+s32 func_151643F8(struct225 *effect);
 void func_151644F4(struct225 *effect, struct17 *pivot, f32 offset, f32 angleX, f32 angleZ);
-s32  func_151644A8(struct225 *effect);
+s32 func_151644A8(struct225 *effect);
 
 /* Creates a light at header2's position and an effect instance that owns it. */
 struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA) {
@@ -626,7 +626,7 @@ struct225 *func_15161334(struct226 *light, u8 arg1, s32 arg2) {
 struct225 *func_15161408(struct226 *light, u8 arg1, s32 arg2) {
     struct225 *effect;
     Header header;
-    s32 mount;
+    LightMount *mount;
 
     mount = func_151149AC(249);
 
@@ -1682,73 +1682,102 @@ void func_15164134(struct225 *effect, ActorEvent *event, u8 eventId) {
     }
 }
 
-struct225 *func_15164208(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
-    struct225 *temp_v0;
-    Header header;
-    struct243 src;
+/* Payload of func_1516429C: a flash that decays each frame and is relit by event 0x33. */
+typedef struct {
+    f32 level;
+    u8 id;
+} LightFlash;
 
-    src.unk0 = 0.0f;
-    src.unk4 = arg1;
+/* Event 0x33 message for func_1516434C. */
+typedef struct {
+    f32 level;
+    u8 id;
+    u8 r;
+    u8 g;
+    u8 b;
+} LightFlashEvent;
+
+struct225 *func_15164208(struct226 *light, u8 id, u8 arg2, s32 arg3) {
+    struct225 *effect;
+    Header header;
+    LightFlash flash;
+
+    flash.level = 0.0f;
+    flash.id = id;
 
     header.unk0 = 0;
     header.unk1 = 20;
     header.unk2 = 300;
     header.unk4 = 39;
 
-    temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg2, arg3);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &src, sizeof(src));
+    effect = func_1516037C(&header, light, sizeof(flash), arg2, arg3);
+    if (effect != NULL) {
+        memcpy(&effect->unk18, &flash, sizeof(flash));
     }
-    return temp_v0;
+    return effect;
 }
 
-s32 func_1516429C(struct237 *arg0) {
-    arg0->unk14->unk2F = arg0->unk18.unk0;
-    arg0->unk18.unk0 = arg0->unk18.unk0 - (arg0->unk18.unk0 * D_800A6B10);
+s32 func_1516429C(struct225 *effect) {
+    LightFlash *flash = (LightFlash *)&effect->unk18;
+
+    effect->unk14->unk2F = flash->level;
+    flash->level = flash->level - (flash->level * 0.7000000477f);
     return 1;
 }
 
-void func_1516434C(struct225 *arg0, struct227 *arg1, u8 arg2) {
-    struct227 *temp = &arg0->unk18;
+/* Event 0x33 with a matching id relights the flash and sets the light's colour. */
+void func_1516434C(struct225 *effect, LightFlashEvent *event, u8 eventId) {
+    LightFlash *flash = (LightFlash *)&effect->unk18;
 
-    if (arg2 == 0x33) {
-        if (*(u8 *)((u8 *)arg1 + 4) == *(u8 *)((u8 *)temp + 4)) {
-            temp->unk0 = arg1->unk0;
-            arg0->unk14->unk5 = *(u8 *)((u8 *)arg1 + 5);
-            arg0->unk14->unk6 = *(u8 *)((u8 *)arg1 + 6);
-            arg0->unk14->unk7 = *(u8 *)((u8 *)arg1 + 7);
+    if (eventId == 0x33) {
+        if (flash->id == event->id) {
+            flash->level = event->level;
+            effect->unk14->unk5 = event->r;
+            effect->unk14->unk6 = event->g;
+            effect->unk14->unk7 = event->b;
         }
     }
 }
 
-void func_151643A8(struct225 *arg0, s32 arg1, u8 arg2) {
-    struct227 *tmp;
-    tmp = &arg0->unk18;
-    if (arg2 == 64) {
-        tmp->unk24 |= 1;      // force odd?
-    } else if (arg2 == 65) {
-        tmp->unk24 &= 0xFFFE; // force even?
+/* Beam event handler: event 64 turns on casting from the bone, event 65 turns it off. */
+void func_151643A8(struct225 *effect, s32 arg1, u8 eventId) {
+    LightBeam *beam;
+
+    beam = (LightBeam *)&effect->unk18;
+    if (eventId == 64) {
+        beam->flags |= 1;
+    } else if (eventId == 65) {
+        beam->flags &= ~1;
     }
 }
 
-s32 func_151643F8(struct225 *arg0) {
-    func_1516441C(arg0, &arg0->unk18);
+/* Payload of func_151643F8: a fixed point in some transform's frame. */
+typedef struct {
+    struct17 position;
+    s32 mtx; // passed to func_15145CD0
+} LightTransformed;
+
+void func_1516441C(struct225 *effect, LightTransformed *point);
+
+s32 func_151643F8(struct225 *effect) {
+    func_1516441C(effect, (LightTransformed *)&effect->unk18);
     return 1;
 }
 
-void func_15145CD0(s32 arg0, struct227 **arg1, f32 **arg2, s32 arg3);
+void func_15145CD0(s32 mtx, LightTransformed **in, f32 **out, s32 count);
 
-void func_1516441C(struct225 *arg0, struct227 *arg1) {
-    struct227 *parg1;
-    f32 *pout;
-    f32 out[3];
+/* Moves the light to the point transformed by its matrix. */
+void func_1516441C(struct225 *effect, LightTransformed *point) {
+    LightTransformed *in;
+    f32 *out;
+    f32 position[3];
 
-    parg1 = arg1;
-    pout = &out[0];
-    func_15145CD0(*(s32 *)&arg1->unkC, &parg1, &pout, 1);
-    arg0->unk14->unkE = (s32)out[0];
-    arg0->unk14->unk10 = (s32)out[1];
-    arg0->unk14->unk12 = (s32)out[2];
+    in = point;
+    out = &position[0];
+    func_15145CD0(point->mtx, &in, &out, 1);
+    effect->unk14->unkE = (s32)position[0];
+    effect->unk14->unk10 = (s32)position[1];
+    effect->unk14->unk12 = (s32)position[2];
 }
 
 /* Payload of func_151644A8: a light swinging below a pivot. */
@@ -1787,17 +1816,20 @@ void func_151644F4(struct225 *effect, struct17 *pivot, f32 offset, f32 angleX, f
     effect->unk14->unk12 = z;
 }
 
-void func_151645C4(u8 arg0) {
-    D_800DCDD0 = arg0;
-    if (arg0 != 0) {
+/* Turns the special lighting for the current D_800BE9F0 setting on or off, setting the colours in D_800DCD20 and D_800B0DF0.
+ * D_800DCD20 is declared as a pointer in variables.h but holds an RGB triple here. */
+void func_151645C4(u8 enable) {
+    D_800DCDD0 = enable;
+    if (enable) {
         switch (D_800BE9F0) {
-        case 0xB:
+        case 11:
             func_1511172C(4);
             break;
         case 6:
             func_1515F170(10, 1);
             func_1511172C(4);
-        case 0x39:
+            // fallthrough
+        case 57:
             ((u8 *)&D_800DCD20)[0] = D_800886F0[0];
             ((u8 *)&D_800DCD20)[1] = D_800886F0[1];
             ((u8 *)&D_800DCD20)[2] = D_800886F0[2];
@@ -1806,16 +1838,17 @@ void func_151645C4(u8 arg0) {
             D_800B0DF0->unk7 = D_800886F4[2];
             break;
         case 7:
-        case 0xC:
+        case 12:
             break;
         }
     } else {
         switch (D_800BE9F0) {
         case 6:
             func_1515F170(10, 0);
+            // fallthrough
         case 7:
-        case 0xC:
-        case 0x39:
+        case 12:
+        case 57:
             func_1511172C(6);
             ((u8 *)&D_800DCD20)[0] = D_800886F8[0];
             ((u8 *)&D_800DCD20)[1] = D_800886F8[1];
@@ -1824,10 +1857,10 @@ void func_151645C4(u8 arg0) {
             D_800B0DF0->unk6 = 0xFF;
             D_800B0DF0->unk7 = 0xFF;
             break;
-        case 0xB:
+        case 11:
             func_1511172C(6);
             break;
-        case 0x29:
+        case 41:
             func_1511172C(1);
             break;
         }
