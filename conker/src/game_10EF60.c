@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
 /* A tracer/beam effect: a textured quad stretched from its position along its direction. */
 typedef struct {
     u8 pad0[0x10];
@@ -45,7 +44,7 @@ typedef struct {
 
 extern Game10EF60Texture *D_8008CA4C[];
 
-/* Payload of message 0x2D (see func_150E2FC0). */
+/* Payload of message 0x2D: a pair of objects (see func_150E2FC0). */
 typedef struct {
     struct127 *objA;
     struct127 *objB;
@@ -346,7 +345,6 @@ void func_150E1D14(Game10EF60Effect *effect) {
     }
 }
 
-
 typedef struct {
     f32 x;
     f32 y;
@@ -470,7 +468,7 @@ s32 func_150E2F90(s32 a0, s32 a1, s16 a2) {
     return func_150E2DA4(a0, a2);
 }
 
-/* Message 0x2D: two objects swap places; retarget the effect's owner to the other one. */
+/* Message 0x2D: if the effect's owner is one object of the pair, retarget it to the other. */
 void func_150E2FC0(Game10EF60Effect *effect, Game10EF60ObjectSwap *swap, u8 msg) {
     if (msg == 0x2D) {
         if (effect->owner == swap->objA) {
