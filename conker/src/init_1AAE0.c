@@ -11,204 +11,158 @@ typedef struct {
     void (*releaseProc)(void *);
 } InitBankCallbacks;
 
+/* Unlinks the voice state that owns `voice` from the allocated list and returns it to the free list. */
 void func_1001AAE0(N_ALSeqPlayer *seqp, N_ALVoice *voice) {
-    N_ALVoiceState *last;
+    N_ALVoiceState *prev = NULL;
     N_ALVoiceState *vs;
 
-    last = NULL;
-    vs = seqp->vAllocHead;
-
-    if (vs) do {
+    for (vs = seqp->vAllocHead; vs != NULL; vs = vs->next) {
         if (&vs->voice == voice) {
-            if (last) {
-                last->next = vs->next;
+            if (prev) {
+                prev->next = vs->next;
             } else {
                 seqp->vAllocHead = vs->next;
             }
-            if (seqp->vAllocTail == vs) {
-                seqp->vAllocTail = last;
+            if (vs == seqp->vAllocTail) {
+                seqp->vAllocTail = prev;
             }
             vs->next = seqp->vFreeList;
             seqp->vFreeList = vs;
             seqp->usedVoices--;
             return;
         }
-        last = vs;
-    } while ((vs = vs->next) != NULL);
-}
-
-// N_ALEventListItem: ALLink node (next/prev), ALMicroTime delta, then the event
-// (s16 type at 0xC, msg union at 0x10 whose first member is the ALVoice *).
-typedef struct RelNode {
-    struct RelNode *next;
-    struct RelNode *prev;
-    s32             delta;
-    s16             type;
-    u8              padE[0x2];
-    void           *voice;
-} RelNode;
-
-// N_ALSeqPlayer view: curTime at 0x1C, ALEventQueue at 0x48
-// (freeList.next == 0x48, allocList.next == 0x50).
-typedef struct {
-    u8       pad0[0x1C];
-    s32      curTime;
-    u8       pad20[0x28];
-    RelNode *evtqFreeList;
-    u8       pad4C[0x4];
-    RelNode *evtqAllocList;
-} RelSeqp;
-
-void __n_seqpReleaseVoice(RelSeqp *seqp, N_ALVoice *voice, s32 deltaTime) {
-    N_ALEvent evt;
-    N_ALVoiceState *vs;
-    RelNode *thisNode;
-    RelNode *nextNode;
-    RelNode *thisItem;
-    RelNode *nextItem;
-    RelNode *unlinkMe;
-    RelNode *relinkMe;
-    RelNode **freeList;
-
-    vs = voice->unk10;
-    if (vs->envPhase == 0) {
-        thisNode = seqp->evtqAllocList;
-        if (thisNode != 0) {
-            do {
-                nextNode = thisNode->next;
-                thisItem = thisNode;
-                nextItem = nextNode;
-                if (thisItem->type == 6) {
-                    if (thisItem->voice == voice) {
-                        if (nextItem != 0) {
-                            nextItem->delta += thisItem->delta;
-                        }
-                        unlinkMe = thisNode;
-                        if (unlinkMe->next != 0) {
-                            unlinkMe->next->prev = unlinkMe->prev;
-                        }
-                        if (unlinkMe->prev != 0) {
-                            unlinkMe->prev->next = unlinkMe->next;
-                        }
-                        relinkMe = thisNode;
-                        freeList = &seqp->evtqFreeList;
-                        relinkMe->next = *freeList;
-                        relinkMe->prev = (RelNode *)freeList;
-                        if (*freeList != 0) {
-                            (*freeList)->prev = relinkMe;
-                        }
-                        *freeList = relinkMe;
-                    }
-                }
-                thisNode = nextNode;
-            } while (thisNode != 0);
-        }
+        prev = vs;
     }
-    vs->velocity = 0;
-    vs->envPhase = 3;
-    vs->envGain = 0;
-    vs->envEndTime = seqp->curTime + deltaTime;
-    n_alSynSetPriority(voice, 0);
-    n_alSynSetVol(voice, 0, deltaTime);
-    evt.type = 5;
-    evt.msg.note.voice = voice;
-    deltaTime = deltaTime + 0x7D00;
-    n_alEvtqPostEvent((ALEventQueue *)&seqp->evtqFreeList, &evt, deltaTime, 0);
 }
 
-typedef struct EvtNode {
-    struct EvtNode *next;
-    struct EvtNode *prev;
-    s32             delta;
-    s16             type;
-    u8              padE[0x2];
-    void           *voice;
-} EvtNode;
+/* libaudio's alUnlink()/alLink(), expanded inline as Conker's libaudio does. */
+#define AL_UNLINK(ln) {                                     \
+    ALLink *unlinkMe = (ln);                                \
+    if (unlinkMe->next) {                                   \
+        unlinkMe->next->prev = unlinkMe->prev;              \
+    }                                                       \
+    if (unlinkMe->prev) {                                   \
+        unlinkMe->prev->next = unlinkMe->next;              \
+    }                                                       \
+}
 
-typedef struct {
-    u8       pad0[0x48];
-    EvtNode *evtqFreeList;
-    u8       pad4C[0x4];
-    EvtNode *evtqAllocList;
-} EvtSeqp;
+#define AL_LINK(ln, to) {                                   \
+    ALLink *relinkMe = (ln);                                \
+    ALLink *after = (to);                                   \
+    relinkMe->next = after->next;                           \
+    relinkMe->prev = after;                                 \
+    if (after->next) {                                      \
+        after->next->prev = relinkMe;                       \
+    }                                                       \
+    after->next = relinkMe;                                 \
+}
 
-s32 func_1001ADA4(EvtSeqp *seqp, void *voice, s32 deltaTime) {
-    EvtNode *thisNode;
-    EvtNode *nextNode;
-    EvtNode *thisItem;
-    s32 elapsed;
-    u8 result;
-    EvtNode *unlinkMe;
-    EvtNode *relinkMe;
-    EvtNode **freeList;
+void __n_seqpReleaseVoice(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime deltaTime) {
+    N_ALEvent evt;
+    N_ALVoiceState *vs = voice->unk10;
 
-    elapsed = 0;
-    result = 1;
-    thisNode = seqp->evtqAllocList;
-    if (thisNode != 0) {
-        do {
+    /*
+     * if in attack phase, remove all pending volume
+     * events for this voice from the queue
+     */
+    if (vs->envPhase == AL_PHASE_ATTACK) {
+        ALLink *thisNode;
+        ALLink *nextNode;
+        N_ALEventListItem *thisItem;
+        N_ALEventListItem *nextItem;
+
+        thisNode = seqp->evtq.allocList.next;
+        while (thisNode != NULL) {
             nextNode = thisNode->next;
-            thisItem = thisNode;
-            elapsed += thisItem->delta;
-            if (thisItem->type == 5) {
-                if (thisItem->voice == voice) {
-                    if (deltaTime < elapsed) {
-                        if (nextNode != 0) {
-                            nextNode->delta += thisItem->delta;
-                        }
-                        unlinkMe = thisNode;
-                        if (unlinkMe->next != 0) {
-                            unlinkMe->next->prev = unlinkMe->prev;
-                        }
-                        if (unlinkMe->prev != 0) {
-                            unlinkMe->prev->next = unlinkMe->next;
-                        }
-                        relinkMe = thisNode;
-                        freeList = &seqp->evtqFreeList;
-                        relinkMe->next = *freeList;
-                        relinkMe->prev = (EvtNode *)freeList;
-                        if (*freeList != 0) {
-                            (*freeList)->prev = relinkMe;
-                        }
-                        *freeList = relinkMe;
-                        goto done;
+            thisItem = (N_ALEventListItem *)thisNode;
+            nextItem = (N_ALEventListItem *)nextNode;
+            if (thisItem->evt.type == AL_SEQP_ENV_EVT) {
+                if (thisItem->evt.msg.vol.voice == voice) {
+                    if (nextItem) {
+                        nextItem->delta += thisItem->delta;
                     }
-                    result = 0;
-                done:
-                    break;
+                    AL_UNLINK(thisNode);
+                    AL_LINK(thisNode, &seqp->evtq.freeList);
                 }
             }
             thisNode = nextNode;
-        } while (thisNode != 0);
+        }
     }
-    return result;
+
+    vs->velocity = 0;
+    vs->envPhase = AL_PHASE_RELEASE;
+    vs->envGain = 0;
+    vs->envEndTime = seqp->curTime + deltaTime;
+
+    n_alSynSetPriority(voice, 0); /* make candidate for stealing */
+    n_alSynSetVol(voice, 0, deltaTime);
+
+    evt.type = AL_NOTE_END_EVT;
+    evt.msg.note.voice = voice;
+
+    deltaTime += AL_USEC_PER_FRAME * 2;
+    n_alEvtqPostEvent(&seqp->evtq, &evt, deltaTime, 0);
 }
 
-N_ALVoiceState *__n_mapVoice(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 channel)
-{
-    N_ALVoiceState  *vs = seqp->vFreeList;
+/*
+ * Returns whether `voice` still needs a note kill at `killTime`: a pending
+ * note-end event for it that falls after `killTime` is dropped from the queue
+ * (TRUE), while one at or before `killTime` will end the note anyway (FALSE).
+ */
+s32 func_1001ADA4(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime killTime) {
+    ALLink *thisNode;
+    ALLink *nextNode;
+    N_ALEventListItem *thisItem;
+    ALMicroTime itemTime = 0;
+    u8 needsNoteKill = TRUE;
+
+    thisNode = seqp->evtq.allocList.next;
+    while (thisNode != NULL) {
+        nextNode = thisNode->next;
+        thisItem = (N_ALEventListItem *)thisNode;
+        itemTime += thisItem->delta;
+        if (thisItem->evt.type == AL_NOTE_END_EVT) {
+            if (thisItem->evt.msg.note.voice == voice) {
+                if (itemTime > killTime) {
+                    if (nextNode) {
+                        ((N_ALEventListItem *)nextNode)->delta += thisItem->delta;
+                    }
+                    AL_UNLINK(thisNode);
+                    AL_LINK(thisNode, &seqp->evtq.freeList);
+                } else {
+                    needsNoteKill = FALSE;
+                }
+                break;
+            }
+        }
+        thisNode = nextNode;
+    }
+    return needsNoteKill;
+}
+
+/* Takes a voice state off the free list and appends it to the allocated list for this note. */
+N_ALVoiceState *__n_mapVoice(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 channel) {
+    N_ALVoiceState *vs = seqp->vFreeList;
 
     if (seqp->usedVoices > seqp->maxVoices) {
         return NULL;
     }
 
     if (vs) {
-
         seqp->vFreeList = vs->next;
+        vs->next = NULL;
 
-        vs->next = 0;
-
-        if (!seqp->vAllocHead)
+        if (!seqp->vAllocHead) {
             seqp->vAllocHead = vs;
-        else
+        } else {
             seqp->vAllocTail->next = vs;
-
+        }
         seqp->vAllocTail = vs;
 
-        vs->channel             = channel;
-        vs->key                 = key;
-        vs->velocity            = vel;
-        vs->voice.unk10         = vs; // this isn't right
+        vs->channel = channel;
+        vs->key = key;
+        vs->velocity = vel;
+        vs->voice.unk10 = vs; /* the SDK's clientPrivate */
 
         seqp->usedVoices++;
     }
@@ -216,13 +170,13 @@ N_ALVoiceState *__n_mapVoice(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 channel)
     return vs;
 }
 
+/* Finds the allocated voice still sounding `key` on `channel` (not yet released). */
 N_ALVoiceState *func_1001AFEC(N_ALSeqPlayer *seqp, u8 key, u8 channel) {
-    N_ALVoiceState *vs;
-
-    vs = seqp->vAllocHead;
+    N_ALVoiceState *vs = seqp->vAllocHead;
 
     while (vs) {
-        if (vs->key == key && vs->channel == channel && vs->phase != 3 && vs->phase != 4) {
+        if (vs->key == key && vs->channel == channel &&
+            vs->phase != AL_PHASE_RELEASE && vs->phase != AL_PHASE_SUSTREL) {
             return vs;
         }
         vs = vs->next;
@@ -230,15 +184,14 @@ N_ALVoiceState *func_1001AFEC(N_ALSeqPlayer *seqp, u8 key, u8 channel) {
     return NULL;
 }
 
+/* Binary-searches the channel instrument's sounds for the one whose keymap covers key and vel. */
 ALSound *func_1001B07C(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 chan) {
-    ALInstrument *inst;
-    s32 lo;
+    ALInstrument *inst = seqp->chanState[chan].instrument;
+    s32 lo = 1;
     s32 hi;
     s32 mid;
     ALKeyMap *keyMap;
 
-    inst = seqp->chanState[chan].instrument;
-    lo = 1;
     if (inst == NULL) {
         return NULL;
     }
@@ -249,25 +202,25 @@ ALSound *func_1001B07C(N_ALSeqPlayer *seqp, u8 key, u8 vel, u8 chan) {
         if (key >= keyMap->keyMin && key <= keyMap->keyMax &&
             vel >= keyMap->velocityMin && vel <= keyMap->velocityMax) {
             return inst->soundArray[mid - 1];
+        } else if (key < keyMap->keyMin ||
+                   (vel < keyMap->velocityMin && key <= keyMap->keyMax)) {
+            hi = mid - 1;
         } else {
-            if (key < keyMap->keyMin ||
-                (vel < keyMap->velocityMin && key <= keyMap->keyMax)) {
-                hi = mid - 1;
-            } else {
-                lo = mid + 1;
-            }
+            lo = mid + 1;
         }
     }
     return NULL;
 }
 
-s16 __n_vsVol(N_ALVoiceState *vs, N_ALSeqPlayer *seqp)
-{
-    u32     t1,t2;
+/*
+ * __n_vsVol calculates the target volume for the voice based on the
+ * note on velocity, envelope, sampleVolume and controller.
+ */
+s16 __n_vsVol(N_ALVoiceState *vs, N_ALSeqPlayer *seqp) {
+    u32 t1, t2;
 
-    t1 = (vs->tremelo*vs->velocity*vs->envGain) >> 6;
-    t2 = (vs->sound->sampleVolume*seqp->vol*
-          seqp->chanState[vs->channel].vol) >> 14;
+    t1 = (vs->tremelo * vs->velocity * vs->envGain) >> 6;
+    t2 = (vs->sound->sampleVolume * seqp->vol * seqp->chanState[vs->channel].vol) >> 14;
 
     if (seqp->chanState[vs->channel].unkD != 0xFF) {
         t2 = ((seqp->chanState[vs->channel].unkD * t2) + 1) >> 8;
@@ -279,14 +232,15 @@ s16 __n_vsVol(N_ALVoiceState *vs, N_ALSeqPlayer *seqp)
     return t1;
 }
 
-s32 func_1001B310(N_ALVoiceState *vs, N_ALCSPlayer *seqp) {
-    s32 sp14;
-    s32 sp10;
+/* The voice's fx mix: the channel's mix scaled by the player's mix controls, keeping bit 7. */
+u8 func_1001B310(N_ALVoiceState *vs, N_ALCSPlayer *seqp) {
+    s32 sign;
+    s32 fxmix;
 
-    sp14 = seqp->chanState[vs->channel].fxmix & 0x80;
-    sp10 = ((seqp->chanState[vs->channel].fxmix & 0x7F) + (s32) (seqp->unk7C * 127.0f)) * seqp->unk80;
+    sign = seqp->chanState[vs->channel].fxmix & 0x80;
+    fxmix = ((seqp->chanState[vs->channel].fxmix & 0x7F) + (s32)(seqp->unk7C * 127.0f)) * seqp->unk80;
 
-    return (MAX(0, MIN(127, sp10)) | sp14) & 0xff;
+    return MAX(0, MIN(127, fxmix)) | sign;
 }
 
 ALMicroTime __n_vsDelta(N_ALVoiceState *vs, ALMicroTime t) {
