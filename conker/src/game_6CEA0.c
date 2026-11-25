@@ -109,7 +109,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
     s32 unusedHeight;
 
     alpha = 0;
-    buttons = D_800BE710[0];
+    buttons = D_800BE710[0]; // buttons newly pressed on controller 1
     i = 0;
     row = 0;
     width = 0;
@@ -145,6 +145,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
     func_1503F9F0(0, &stickDirX, &stickDirY);
     if (D_80084488 != 0) {
         D_800C6850 += 1.25f * (D_80084488 * D_800BE9E4);
+        // matching: clamp through rowY (shares its FP register); a ternary or separate temp mismatches
         rowY = -SCROLL_LIMIT;
         if (D_800C6850 < -SCROLL_LIMIT) {
         } else if (D_800C6850 > SCROLL_LIMIT) {
@@ -224,9 +225,9 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
             textY += dotHeight;
         }
         if (row < 3) {
-            alpha = (row << 6) + 64;
+            alpha = row * 64 + 64;
         } else if (rowCount - 3 < row) {
-            alpha = (rowCount - row) << 6;
+            alpha = (rowCount - row) * 64;
         } else {
             alpha = 255;
         }
