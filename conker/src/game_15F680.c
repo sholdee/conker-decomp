@@ -165,25 +165,9 @@ extern f32 D_800A386C;
 extern f32 D_800A3870;
 
 typedef struct {
-    u8 pad[4];
-    f32 m[4][4];
-} PaddedMtxF15133A94;
-
-typedef struct {
     s32 unk0;
     s32 unk4;
 } Data15133E3C;
-
-typedef struct {
-    u8 pad_0[0x7C];
-    s32 field_0x7C;
-    u8 field_0x80;
-} InteractionTargetFields;
-
-typedef struct {
-    s32 field_0x0;
-    u8 field_0x4;
-} InteractionKeyFields;
 
 extern Data15133E3C D_800A3860;
 void func_15169260(Data15133E3C *, s32, s32, u8);
@@ -868,38 +852,36 @@ s32 func_15133A50(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight) {
     return 1;
 }
 
-s32 func_15133A94(Mtx *arg0, u8 *arg1) {
-    struct127 *obj;
-    struct255 *mtx;
-    PaddedMtxF15133A94 sp18;
-    u8 *src;
+/* Matrix handler for particles attached to their owner: use the owner's float matrix number extra[0]
+ * (as is when D_800C3E90 is set, else converted to fixed point). Returns -1 if the owner is gone. */
+s32 func_15133A94(Mtx *mtx, Particle *particle) {
+    struct127 *owner;
+    f32 (*ownerMtxs)[4][4];
+    f32 mf[4][4];
+    s32 pad; // matching: unused stack slot
 
-    obj = *(struct127 **)(arg1 + 0x7C);
-    if ((obj == NULL) || (obj->interaction_state == 0) || (obj->id == 0xFF) ||
-        (arg1[0x80] != *(u8 *)((u8 *)obj + 0x3B))) {
+    owner = particle->owner;
+    if (owner == NULL || owner->interaction_state == 0 || owner->id == 0xFF ||
+        owner->unique_id != particle->ownerId) {
         return -1;
     }
-    mtx = obj->unk1D4;
-    if (mtx == NULL) {
+    ownerMtxs = (f32 (*)[4][4])owner->unk1D4;
+    if (ownerMtxs == NULL) {
         return 0;
     }
-    if ((obj->unk74 & 0xF) == 0xF) {
+    if ((owner->unk74 & 0xF) == 0xF) {
         return 0;
     }
     if (D_800C3E90) {
-        src = (u8 *)mtx;
-        src += arg1[0x170] << 6;
-        memcpy(arg0, src, 0x40);
+        memcpy(mtx, ownerMtxs[particle->extra[0]], sizeof(mf));
         return 1;
     }
-    src = (u8 *)mtx;
-    src += arg1[0x170] << 6;
-    memcpy(sp18.m, src, 0x40);
-    sp18.m[0][3] = 0.0f;
-    sp18.m[1][3] = 0.0f;
-    sp18.m[2][3] = 0.0f;
-    sp18.m[3][3] = 1.0f;
-    guMtxF2L(sp18.m, arg0);
+    memcpy(mf, ownerMtxs[particle->extra[0]], sizeof(mf));
+    mf[0][3] = 0.0f;
+    mf[1][3] = 0.0f;
+    mf[2][3] = 0.0f;
+    mf[3][3] = 1.0f;
+    guMtxF2L(mf, mtx);
     return 1;
 }
 
@@ -947,83 +929,96 @@ s32 func_15133D20(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, Floo
     return 1;
 }
 
-void func_15133DE8(InteractionTargetFields *arg0, InteractionKeyFields *arg1, u8 arg2) {
-    s32 temp;
+/* Event handler: destroy the particle when its owner goes away (event 0). */
+void func_15133DE8(Particle *particle, ParticleEventRemove *data, u8 event) {
+    struct127 *obj;
 
-    if (arg2 == 0) {
-        temp = arg1->field_0x0;
-        if ((temp == arg0->field_0x7C) ||
-            (arg0->field_0x80 == arg1->field_0x4)) {
-            func_1516972C((struct102 *)arg0);
+    if (event == 0) {
+        obj = data->obj;
+        if (obj == particle->owner || particle->ownerId == data->id) {
+            func_1516972C((struct102 *)particle);
         }
     }
 }
 
 void func_15133E3C(s32 arg0, u8 arg1) {
-    Data15133E3C sp18;
+    Data15133E3C data;
 
-    sp18 = D_800A3860;
-    func_15169260(&sp18, 2, arg0, arg1);
+    data = D_800A3860;
+    func_15169260(&data, 2, arg0, arg1);
 }
 
-Gfx *func_15133EEC(Gfx *gfx, u16 arg1, u8 arg2, s32 arg3);
+/* A texture to bind to a segment: D_80090B60 index, segment number, and func_1510D0EC's third argument. */
+typedef struct {
+    /* 0x0 */ u16 index;
+    /* 0x2 */ u8 segment;
+    /* 0x3 */ u8 pad3;
+    /* 0x4 */ s32 arg;
+} ParticleTexture;
 
-void func_15133E84(s32 arg0, void *arg1, s32 arg2) {
-    func_15133EEC(arg0, *(u16 *)((u8 *)arg1 + 0x170), *(u8 *)((u8 *)arg1 + 0x172), *(s32 *)((u8 *)arg1 + 0x174));
+/* Variable-length texture list kept in Particle.extra. */
+typedef struct {
+    /* 0x0 */ u8 count;
+    /* 0x1 */ u8 pad1[3];
+    /* 0x4 */ ParticleTexture textures[1];
+} ParticleTextureList;
+
+Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
+
+/* Draw handler: bind the texture stored at extra. */
+Gfx *func_15133E84(Gfx *gfx, Particle *particle, s16 arg2) {
+    ParticleTexture *tex = (ParticleTexture *)particle->extra;
+
+    return func_15133EEC(gfx, tex->index, tex->segment, tex->arg);
 }
 
-void func_15133EB8(s32 arg0, void *arg1, s32 arg2) {
-    func_15133EEC(arg0, *(u16 *)((u8 *)arg1 + 0x174), *(u8 *)((u8 *)arg1 + 0x176), *(s32 *)((u8 *)arg1 + 0x178));
+/* Draw handler: bind the first texture of the list stored at extra. */
+Gfx *func_15133EB8(Gfx *gfx, Particle *particle, s16 arg2) {
+    ParticleTexture *tex = ((ParticleTextureList *)particle->extra)->textures;
+
+    return func_15133EEC(gfx, tex->index, tex->segment, tex->arg);
 }
 
 typedef struct {
-    s32 *unk0;
-    u8 pad4[6];
-    u8 unkA;
-    u8 unkB;
-} Entry15133EEC;
+    /* 0x0 */ s32 *unk0;
+    /* 0x4 */ u8 pad4[6];
+    /* 0xA */ u8 unkA; // 2: a palette follows the texels
+    /* 0xB */ u8 unkB; // palette size: 1 -> 0x200 bytes, else 0x20
+} TextureEntry; // size 0xC
 
-extern Entry15133EEC D_80090B60[];
+extern TextureEntry D_80090B60[];
 extern s32 func_1510D0EC(s32, s32 *, s32, s32);
 
-Gfx *func_15133EEC(Gfx *gfx, u16 arg1, u8 arg2, s32 arg3) {
+/* Bind texture D_80090B60[index] to `segment` (and its palette, at the end of the data, to segment + 1). */
+Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3) {
     s32 data;
-    u8 kind;
-    u8 fmt;
-    Entry15133EEC *e;
+    u8 unkA;
+    u8 unkB;
+    TextureEntry *entry;
     s32 size;
 
-    e = &D_80090B60[arg1];
-    data = *e->unk0;
-    kind = e->unkA;
-    fmt = e->unkB;
+    entry = &D_80090B60[index];
+    data = *entry->unk0;
+    unkA = entry->unkA;
+    unkB = entry->unkB;
     data = func_1510D0EC(data, &size, arg3, 0);
-    gSPSegment(gfx++, arg2, data);
-    if (kind == 2) {
-        gSPSegment(gfx++, arg2 + 1, data + size - ((fmt == 1) ? 0x200 : 0x20));
+    gSPSegment(gfx++, segment, data);
+    if (unkA == 2) {
+        gSPSegment(gfx++, segment + 1, data + size - ((unkB == 1) ? 0x200 : 0x20));
     }
     return gfx;
 }
 
-typedef struct {
-    u8 unk0[4];
-    u16 unk4;
-    u8 unk6;
-    u8 unk7;
-    s32 unk8;
-} Elem15133FD8B;
-
-typedef u8 Entry15133FD8[8];
-
-s32 func_15133FD8(s32 arg0, void *arg1, s32 arg2) {
+/* Draw handler: bind every texture of the list stored at extra. */
+Gfx *func_15133FD8(Gfx *gfx, Particle *particle, s16 arg2) {
     u8 i;
-    Entry15133FD8 *base;
-    Elem15133FD8B *e;
+    ParticleTextureList *list;
+    ParticleTexture *tex;
 
-    base = (Entry15133FD8 *)((u8 *)arg1 + 0x170);
-    for (i = 0; i < (*base)[0]; i++) {
-        e = (Elem15133FD8B *)base[i];
-        arg0 = func_15133EEC(arg0, e->unk4, e->unk6, e->unk8);
+    list = (ParticleTextureList *)particle->extra;
+    for (i = 0; i < list->count; i++) {
+        tex = &list->textures[i];
+        gfx = func_15133EEC(gfx, tex->index, tex->segment, tex->arg);
     }
-    return arg0;
+    return gfx;
 }
