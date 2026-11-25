@@ -74,86 +74,93 @@ extern void func_1502A8A0(SeqEvent *, s32, s32, s32, s32);
 void func_150238D0(void) {
 }
 
+/* Per-sound state allocated by func_15029BB8 for a cutscene sound event (0x10 bytes). */
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 pad3;
-    u16 unk4;
-    u16 unk6;
-    u16 unk8;
-    u16 unkA;
-    u16 unkC;
-    u8 unkE;
-} Snd150238D8;
+    /* 0x0 */ u8 scene;
+    /* 0x1 */ u8 track;
+    /* 0x2 */ u8 stopAtEnd;  /* stop when the scene reaches its end time */
+    /* 0x4 */ u16 remaining; /* ticks left, 0xFFFF = unlimited */
+    /* 0x6 */ u16 duration;
+    /* 0x8 */ u16 fadeIn;
+    /* 0xA */ u16 fadeOut;
+    /* 0xC */ u16 volume;
+    /* 0xE */ u8 sceneTag;   /* D_800C35E8[scene] when the sound started */
+} SeqSound;
 
+/* The sound voice handed to the func_150238D8 callback. */
 typedef struct {
-    u8 pad0[2];
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-    u8 pad8[8];
-    s32 unk10;
-    u8 pad14[4];
-    Snd150238D8 *unk18;
-} Obj150238D8;
+    /* 0x00 */ u8 pad0[2];
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ s16 z;
+    /* 0x08 */ u8 pad8[8];
+    /* 0x10 */ s32 flags;
+    /* 0x14 */ u8 pad14[4];
+    /* 0x18 */ SeqSound *userData;
+} SeqVoice;
 
 extern u8 D_800C3C89;
 extern void func_10004074(void *);
 extern s32 D_800C35B0[];
 extern s32 D_800C3640[];
 
-s32 func_150238D8(Obj150238D8 *arg0, s32 arg1, u32 *arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
-    Snd150238D8 *s;
-    SeqTrackState *p;
-    SeqTrackState *q;
-    s32 a;
+/*
+ * Per-frame callback for a cutscene sound: follows its track's position, counts
+ * down its lifetime and applies fade-in/fade-out to *volume. Returns 1 (after
+ * freeing the state) when the sound should stop.
+ */
+s32 func_150238D8(SeqVoice *voice, s32 arg1, u32 *volume, s32 arg3, s32 arg4, s32 arg5, s16 *arg6) {
+    SeqSound *snd;
+    SeqTrackState *states;
+    SeqTrackState *state;
+    s32 fadeOut;
 
-    s = arg0->unk18;
-    if ((s->unk2 != 0 && D_800C35B0[s->unk0] >= D_800C3640[s->unk0]) || (arg0->unk10 & 0x80)) {
-        *arg2 = 0;
+    snd = voice->userData;
+    if ((snd->stopAtEnd != 0 && D_800C35B0[snd->scene] >= D_800C3640[snd->scene]) || (voice->flags & 0x80)) {
+        *volume = 0;
         *arg6 = 0;
-        func_10004074(s);
+        func_10004074(snd);
         return 1;
     }
-    if (s->unkE == D_800C35E8[s->unk0]) {
-        p = D_800C3958[s->unk0];
-        if (p != NULL) {
-            arg0->unk2 = p[s->unk1].x;
-            q = &D_800C3958[s->unk0][s->unk1];
-            arg0->unk4 = q->unk38 + q->y;
-            arg0->unk6 = D_800C3958[s->unk0][s->unk1].z;
+    if (snd->sceneTag == D_800C35E8[snd->scene]) {
+        states = D_800C3958[snd->scene];
+        if (states != NULL) {
+            voice->x = states[snd->track].x;
+            state = &D_800C3958[snd->scene][snd->track];
+            voice->y = state->unk38 + state->y;
+            voice->z = D_800C3958[snd->scene][snd->track].z;
         }
     }
-    if (s->unk4 != 0xFFFF) {
-        if (D_800BE9E4 < s->unk4) {
-            s->unk4 -= D_800BE9E4;
+    if (snd->remaining != 0xFFFF) {
+        if (D_800BE9E4 < snd->remaining) {
+            snd->remaining -= D_800BE9E4;
         } else {
-            *arg2 = 0;
+            *volume = 0;
             *arg6 = 0;
-            func_10004074(s);
+            func_10004074(snd);
             return 1;
         }
     }
-    *arg2 = s->unkC;
-    a = s->unkA;
-    if (s->unk4 < a) {
-        if (s->unk4 != 0) {
-            *arg2 = *arg2 * (u32)s->unk4 / a;
+    *volume = snd->volume;
+    fadeOut = snd->fadeOut;
+    // matching: the (u32) casts keep IDO from sharing one temp between the u16 load and its int promotion
+    if (snd->remaining < fadeOut) {
+        if (snd->remaining != 0) {
+            *volume = *volume * (u32)snd->remaining / fadeOut;
         }
     } else {
-        if ((u32)s->unk8 != 0) {
-            if ((s->unk6 - s->unk8) < s->unk4) {
-                *arg2 = *arg2 * (s->unk6 - s->unk4) / s->unk8;
+        if ((u32)snd->fadeIn != 0) {
+            if ((snd->duration - snd->fadeIn) < snd->remaining) {
+                *volume = *volume * (snd->duration - snd->remaining) / snd->fadeIn;
             }
         }
     }
-    if (s->unk4 != 0xFFFF && D_800C3C88 != 0) {
-        *arg2 = *arg2 * D_800C3C89 / 30;
+    if (snd->remaining != 0xFFFF && D_800C3C88 != 0) {
+        *volume = *volume * D_800C3C89 / 30;
         if (D_800BE9E4 >= D_800C3C89) {
-            *arg2 = 0;
+            *volume = 0;
             *arg6 = 0;
-            func_10004074(s);
+            func_10004074(snd);
             return 1;
         }
     }
@@ -2584,20 +2591,6 @@ s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
     return 1;
 }
 
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 pad3;
-    s16 unk4;
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    u16 unkC;
-    u8 unkE;
-    u8 padF;
-} Snd15029BB8;
-
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 extern void func_1000D96C(s32, s32, s32);
 extern void func_1000DE1C(s32, s32);
@@ -2611,285 +2604,285 @@ extern void func_15188810(struct127 *, s32, s32);
 extern void func_1518894C(struct131 *, s32, s32);
 extern void func_15188AD0(struct127 *);
 extern void func_151D66F0(s32, s32);
-extern s32 func_150238D8();
 
 typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-} Color15029BB8;
+    u8 r;
+    u8 g;
+    u8 b;
+} SeqColor;
 
-extern Color15029BB8 D_80084110[];
+extern SeqColor D_80084110[];
 extern s8 D_800C3C8A;
 extern u16 D_800C3C8E;
 
+/*
+ * Third cutscene event handler: sounds (types 6 and 10), music (8), object
+ * animations (2) and a few type-5 commands. `skipping` is set when the scene is
+ * being skipped (D_800C3C88 == 2). Returns 1 when the event was handled.
+ */
 s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, struct131 *actor, f32 *pos, s32 sceneTag, s32 skipping) {
     if ((event->type == 6) || (event->type == 10)) {
-        {
-            s32 vol;
-            s32 time;
-            s32 t;
-            s32 pad;
-            SeqEvent *found;
-            s32 fade;
-            s32 fadeOut;
-            s32 fadeIn;
-            s32 sflags;
-            Snd15029BB8 *snd;
+        s32 vol;
+        s32 duration;
+        s32 markTime;
+        s32 clamped;
+        SeqEvent *found;
+        s32 fade;
+        s32 fadeOut;
+        s32 fadeIn;
+        s32 sflags;
+        SeqSound *snd;
 
-            found = NULL;
-            sflags = 0;
-            if ((event->unk4 == 0) || (event->type == 6)) {
-                if (event->unk6 == 0) {
-                    vol = 0xFF;
+        found = NULL;
+        sflags = 0;
+        if ((event->unk4 == 0) || (event->type == 6)) {
+            if (event->unk6 == 0) {
+                vol = 0xFF;
+            } else {
+                vol = event->unk6 & 0xFF;
+                if (vol < 0) {
+                    vol = 0;
                 } else {
-                    vol = event->unk6 & 0xFF;
-                    if (vol < 0) {
-                        vol = 0;
-                    } else {
-                        pad = (vol > 0xFF) ? 0xFF : vol;
-                        vol = pad;
+                    // matching: IDO needs the clamp result in its own local
+                    clamped = (vol > 0xFF) ? 0xFF : vol;
+                    vol = clamped;
+                }
+            }
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 1, 0, 0, scene) - eventTime;
+            if (event->type == 6) {
+                duration = 0xFFFF;
+            } else if (found == NULL) {
+                duration = 0xFFFF;
+            }
+            if ((skipping != 0) && ((event->type != 10) || (found != NULL))) {
+                return 1;
+            }
+            fade = event->unk5 * 50;
+            fadeOut = 0;
+            fadeIn = 0;
+            if (event->type == 10) {
+                markTime = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 2, 0, 0, scene);
+                if (found != NULL) {
+                    markTime -= eventTime;
+                    if (markTime < duration) {
+                        fadeIn = markTime;
                     }
                 }
-                time = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 1, 0, 0, scene) - eventTime;
-                if (event->type == 6) {
-                    time = 0xFFFF;
-                } else if (found == NULL) {
-                    time = 0xFFFF;
-                }
-                if ((skipping != 0) && ((event->type != 10) || (found != NULL))) {
-                    return 1;
-                }
-                fade = event->unk5 * 50;
-                fadeOut = 0;
-                fadeIn = 0;
-                if (event->type == 10) {
-                    t = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 2, 0, 0, scene);
-                    if (found != NULL) {
-                        t -= eventTime;
-                        if (t < time) {
-                            fadeIn = t;
-                        }
+                markTime = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 3, 0, 0, scene);
+                if (found != NULL) {
+                    markTime -= eventTime;
+                    if (markTime < duration) {
+                        fadeOut = duration - markTime;
                     }
-                    t = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 3, 0, 0, scene);
-                    if (found != NULL) {
-                        t -= eventTime;
-                        if (t < time) {
-                            fadeOut = time - t;
-                        }
-                    }
-                } else if (event->unk4 == 2) {
-                    sflags = 0x800;
-                } else {
-                    sflags = 0x400;
                 }
-                snd = allocate_memory(0x10, 1, 0, 0);
-                if (snd != NULL) {
-                    snd->unkE = D_800C35E8[scene];
-                    snd->unk0 = scene;
-                    snd->unk1 = track;
-                    snd->unk4 = time;
-                    snd->unk6 = time;
-                    snd->unk8 = fadeIn;
-                    snd->unkA = fadeOut;
-                    snd->unkC = (vol * 0x7FFF) >> 8;
-                    snd->unk2 = event->type == 10;
-                    func_1000FA64(event->value, (s16)pos[0], (s16)pos[1], (s16)pos[2], snd->unkC, 0x7D00, 0x7918, (s32)func_150238D8, snd, 0, sflags, fade);
-                }
+            } else if (event->unk4 == 2) {
+                sflags = 0x800;
+            } else {
+                sflags = 0x400;
+            }
+            snd = allocate_memory(sizeof(SeqSound), 1, 0, 0);
+            if (snd != NULL) {
+                snd->sceneTag = D_800C35E8[scene];
+                snd->scene = scene;
+                snd->track = track;
+                snd->remaining = duration;
+                snd->duration = duration;
+                snd->fadeIn = fadeIn;
+                snd->fadeOut = fadeOut;
+                snd->volume = (vol * 0x7FFF) >> 8;
+                snd->stopAtEnd = event->type == 10;
+                func_1000FA64(event->value, (s16)pos[0], (s16)pos[1], (s16)pos[2], snd->volume, 0x7D00, 0x7918, (s32)func_150238D8, snd, 0, sflags, fade);
             }
         }
     } else if (event->type == 8) {
-        {
-            s32 time;
-            SeqEvent *found;
+        s32 duration;
+        SeqEvent *found;
 
-            if (event->unk4 == 0) {
-                if ((skipping != 0) && (func_1000E134(event->value) != 0)) {
-                    return 1;
-                }
-                func_1000D96C(event->value, 0, 0);
-                if (event->unk6 != 0) {
-                }
-            } else if (event->unk4 == 1) {
-                func_1000E588(event->value, event->unk6 * 100, 1 << (event->unk5 + 31));
-            } else if (event->unk4 == 2) {
-                func_1000DF68(event->value, event->unk6 * 328, 1);
-            } else if (event->unk4 == 3) {
-            } else if (event->unk4 == 4) {
-                time = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 5, 1, event->unk5, scene) - eventTime;
-                if (skipping != 0) {
-                    func_1000E588(event->value, event->unk6, 1 << (event->unk5 + 31));
-                } else {
-                    func_1000E46C(event->value, event->unk6, 1 << (event->unk5 + 31), time);
-                }
-            } else if (event->unk4 == 6) {
-                time = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 7, 0, 0, scene) - eventTime;
-                if (time < 2) {
-                    time = 1;
-                }
-                func_1000DF68(event->value, event->unk6 * 328, time);
-            } else if (event->unk4 == 8) {
-                func_1000E654(event->value, event->unk6 + 1, 0, -1);
-            } else if (event->unk4 == 9) {
-                func_1000DE1C(event->value, 0);
-            }
-        }
-    } else if (event->type == 2) {
-        {
-            f32 speed;
-            f32 rate;
-            f32 time;
-            SeqEvent *found;
-            s32 loop;
-            s32 id;
-
-            if (obj == NULL) {
+        if (event->unk4 == 0) {
+            if ((skipping != 0) && (func_1000E134(event->value) != 0)) {
                 return 1;
             }
-            time = func_15023BB0(event, event->type, track, &found, 0, 0, 0, 0, 0, 0, scene) - eventTime;
-            if (event->unk4 == 0) {
-                if (obj->unk2D0 == NULL) {
-                    return 1;
-                }
-                rate = 5.0f;
-                id = event->value;
-                if (event->unk6 > 0) {
-                    rate = event->unk6 - 1;
-                }
-                if (eventTime == D_800C3C8E) {
-                    rate = 0.0f;
-                }
-                if (skipping != 0) {
-                    rate = 0.0f;
-                }
-                if (found != NULL) {
-                    loop = !found->unk4;
-                    if ((found->unk4 == 1) && (found->unk5 == 1)) {
-                        loop = 1;
-                    }
-                } else {
+            func_1000D96C(event->value, 0, 0);
+            if (event->unk6 != 0) { // matching: empty under -g3 but it still shapes the code
+            }
+        } else if (event->unk4 == 1) {
+            func_1000E588(event->value, event->unk6 * 100, 1 << (event->unk5 + 31));
+        } else if (event->unk4 == 2) {
+            func_1000DF68(event->value, event->unk6 * 328, 1);
+        } else if (event->unk4 == 3) {
+        } else if (event->unk4 == 4) {
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 5, 1, event->unk5, scene) - eventTime;
+            if (skipping != 0) {
+                func_1000E588(event->value, event->unk6, 1 << (event->unk5 + 31));
+            } else {
+                func_1000E46C(event->value, event->unk6, 1 << (event->unk5 + 31), duration);
+            }
+        } else if (event->unk4 == 6) {
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 7, 0, 0, scene) - eventTime;
+            if (duration < 2) {
+                duration = 1;
+            }
+            func_1000DF68(event->value, event->unk6 * 328, duration);
+        } else if (event->unk4 == 8) {
+            func_1000E654(event->value, event->unk6 + 1, 0, -1);
+        } else if (event->unk4 == 9) {
+            func_1000DE1C(event->value, 0);
+        }
+    } else if (event->type == 2) {
+        f32 speed;
+        f32 rate;
+        f32 duration;
+        SeqEvent *found;
+        s32 loop;
+        s32 id;
+
+        if (obj == NULL) {
+            return 1;
+        }
+        duration = func_15023BB0(event, event->type, track, &found, 0, 0, 0, 0, 0, 0, scene) - eventTime;
+        if (event->unk4 == 0) {
+            if (obj->unk2D0 == NULL) {
+                return 1;
+            }
+            rate = 5.0f;
+            id = event->value;
+            if (event->unk6 > 0) {
+                rate = event->unk6 - 1;
+            }
+            if (eventTime == D_800C3C8E) {
+                rate = 0.0f;
+            }
+            if (skipping != 0) {
+                rate = 0.0f;
+            }
+            if (found != NULL) {
+                loop = !found->unk4;
+                if ((found->unk4 == 1) && (found->unk5 == 1)) {
                     loop = 1;
                 }
-                if (id != obj->unk84.uh) {
-                    func_1505E650(obj, id, 1.0f, rate, 0.0f, 0.0f, loop);
-                }
-                if (time > 0.0f) {
-                    speed = obj->unk2D0->unk18 / time * 2.0f;
-                } else {
-                    speed = 0.0f;
-                }
-                if (event->unk5 != 0) {
-                    speed = 0.0f;
-                }
-                func_1505E650(obj, id, speed, rate, 0.0f, 0.0f, loop);
+            } else {
+                loop = 1;
             }
+            if (id != obj->unk84.uh) {
+                func_1505E650(obj, id, 1.0f, rate, 0.0f, 0.0f, loop);
+            }
+            if (duration > 0.0f) {
+                speed = obj->unk2D0->unk18 / duration * 2.0f;
+            } else {
+                speed = 0.0f;
+            }
+            if (event->unk5 != 0) {
+                speed = 0.0f;
+            }
+            func_1505E650(obj, id, speed, rate, 0.0f, 0.0f, loop);
         }
     } else if (event->type == 5) {
-            if (event->value == 1) {
-                SeqEvent *found;
-                s32 time;
-                SeqEvent *prev;
-                s32 prevTime;
+        if (event->value == 1) {
+            SeqEvent *found;
+            s32 duration;
+            SeqEvent *prev;
+            s32 prevTime;
 
-                if (event->unk4 == 0) {
-                    time = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                    if (skipping != 0) {
-                        time = 0;
-                    }
-                    func_1517EE40(D_80084110[event->unk5].unk0, D_80084110[event->unk5].unk1, D_80084110[event->unk5].unk2, time, !event->unk6, 0);
-                    D_800C3C8A = !event->unk6;
-                } else if (skipping != 0) {
-                    func_15023DE0(&prev, &found, NULL, &prevTime, track, event->type, 1, event->value, 1, 0, D_800C35B0[scene], scene);
-                    if (prev != NULL) {
-                        func_1517EE40(D_80084110[prev->unk5].unk0, D_80084110[prev->unk5].unk1, D_80084110[prev->unk5].unk2, 0, !prev->unk6, 0);
-                        D_800C3C8A = !prev->unk6;
-                    }
+            if (event->unk4 == 0) {
+                duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+                if (skipping != 0) {
+                    duration = 0;
                 }
-            } else if (event->value == 4) {
-                s32 a;
-
-                if (obj != NULL) {
-                    if (skipping == 0) {
-                        a = (obj->id == 0x4B) ? 2 : -1;
-                        if (a != -1) {
-                            index = (event->unk4 == 0) ? -1 : event->unk4 - 1;
-                            func_1503DE70(obj, a, index);
-                        }
-                    } else {
-                        func_15060F28(obj, 1);
-                    }
-                }
-            } else if (event->value == 0x5C) {
-                SeqEvent *found;
-                s32 fadeIn;
-                s32 fadeOut;
-                s32 start;
-
-                if (event->unk4 == 0) {
-                    if (skipping == 0) {
-                        start = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 1, 1, event->unk5, scene);
-                        fadeIn = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 2, 1, event->unk5, scene) - eventTime;
-                        if (found == NULL) {
-                            fadeIn = 0;
-                        }
-                        fadeOut = start - func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 3, 1, event->unk5, scene);
-                        if (found == NULL) {
-                            fadeOut = 0;
-                        }
-                        func_150F5420(fadeIn, start - eventTime - fadeOut - fadeIn, fadeOut, event->unk5);
-                    }
-                }
-            } else if (event->value == 0x56) {
-                if (event->unk4 == 0) {
-                    if (skipping == 0) {
-                        func_15178EFC(3);
-                    }
-                } else if (skipping != 0) {
-                    func_15178EFC(2);
-                } else if (event->unk5 == 0) {
-                    func_15178EFC(0);
-                } else {
-                    func_15178EFC(1);
-                }
-            } else if (event->value == 0x76) {
-                s32 mode;
-
-                if (event->unk4 == 1) {
-                    mode = 0;
-                } else if (event->unk5 == 1) {
-                    mode = 2;
-                } else {
-                    mode = 1;
-                }
-                func_151D66F0(event->unk6, mode);
-            } else if (event->value == 0x2D) {
-                s32 time;
-                SeqEvent *found;
-
-                time = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
-                if (actor != NULL) {
-                    if (event->unk4 == 0) {
-                        func_1518894C(actor, time, event->unk5);
-                    } else if (skipping != 0) {
-                    }
-                } else if (obj != NULL) {
-                    if (event->unk4 == 0) {
-                        func_15188810(obj, time, event->unk5);
-                    } else if (skipping != 0) {
-                        func_15188AD0(obj);
-                    }
-                }
-            } else if (event->value == 0x57) {
-                s32 time;
-                SeqEvent *found;
-
-                if (event->unk4 == 0) {
-                    func_151557FC(0, func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime, 0.0f);
-                } else if (skipping != 0) {
-                    D_800C3E78 = 0;
-                    func_15155F90();
+                func_1517EE40(D_80084110[event->unk5].r, D_80084110[event->unk5].g, D_80084110[event->unk5].b, duration, !event->unk6, 0);
+                D_800C3C8A = !event->unk6;
+            } else if (skipping != 0) {
+                func_15023DE0(&prev, &found, NULL, &prevTime, track, event->type, 1, event->value, 1, 0, D_800C35B0[scene], scene);
+                if (prev != NULL) {
+                    func_1517EE40(D_80084110[prev->unk5].r, D_80084110[prev->unk5].g, D_80084110[prev->unk5].b, 0, !prev->unk6, 0);
+                    D_800C3C8A = !prev->unk6;
                 }
             }
+        } else if (event->value == 4) {
+            s32 kind;
+
+            if (obj != NULL) {
+                if (skipping == 0) {
+                    kind = (obj->id == 0x4B) ? 2 : -1;
+                    if (kind != -1) {
+                        // matching: the original reuses the (otherwise unused) index parameter as the temp
+                        index = (event->unk4 == 0) ? -1 : event->unk4 - 1;
+                        func_1503DE70(obj, kind, index);
+                    }
+                } else {
+                    func_15060F28(obj, 1);
+                }
+            }
+        } else if (event->value == 0x5C) {
+            SeqEvent *found;
+            s32 fadeIn;
+            s32 fadeOut;
+            s32 start;
+
+            if (event->unk4 == 0) {
+                if (skipping == 0) {
+                    start = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 1, 1, event->unk5, scene);
+                    fadeIn = func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 2, 1, event->unk5, scene) - eventTime;
+                    if (found == NULL) {
+                        fadeIn = 0;
+                    }
+                    fadeOut = start - func_15023BB0(event, event->type, track, &found, 1, event->value, 1, 3, 1, event->unk5, scene);
+                    if (found == NULL) {
+                        fadeOut = 0;
+                    }
+                    func_150F5420(fadeIn, start - eventTime - fadeOut - fadeIn, fadeOut, event->unk5);
+                }
+            }
+        } else if (event->value == 0x56) {
+            if (event->unk4 == 0) {
+                if (skipping == 0) {
+                    func_15178EFC(3);
+                }
+            } else if (skipping != 0) {
+                func_15178EFC(2);
+            } else if (event->unk5 == 0) {
+                func_15178EFC(0);
+            } else {
+                func_15178EFC(1);
+            }
+        } else if (event->value == 0x76) {
+            s32 mode;
+
+            if (event->unk4 == 1) {
+                mode = 0;
+            } else if (event->unk5 == 1) {
+                mode = 2;
+            } else {
+                mode = 1;
+            }
+            func_151D66F0(event->unk6, mode);
+        } else if (event->value == 0x2D) {
+            s32 duration;
+            SeqEvent *found;
+
+            duration = func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime;
+            if (actor != NULL) {
+                if (event->unk4 == 0) {
+                    func_1518894C(actor, duration, event->unk5);
+                } else if (skipping != 0) {
+                }
+            } else if (obj != NULL) {
+                if (event->unk4 == 0) {
+                    func_15188810(obj, duration, event->unk5);
+                } else if (skipping != 0) {
+                    func_15188AD0(obj);
+                }
+            }
+        } else if (event->value == 0x57) {
+            s32 duration; // matching: unused, but its stack slot is needed
+            SeqEvent *found;
+
+            if (event->unk4 == 0) {
+                func_151557FC(0, func_15023BB0(event, event->type, track, &found, 1, event->value, 0, 0, 0, 0, scene) - eventTime, 0.0f);
+            } else if (skipping != 0) {
+                D_800C3E78 = 0;
+                func_15155F90();
+            }
+        }
     } else {
         return 0;
     }
