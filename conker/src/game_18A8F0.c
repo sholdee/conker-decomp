@@ -203,198 +203,189 @@ Gfx *func_1515D6D0(Gfx *gfx, s32 player) {
     return gfx;
 }
 
-/*MWSTART*/
-#ifndef CMDDEF
-#define CMD(a, b) { Gfx *_g = arg0++; _g->words.w0 = (a); _g->words.w1 = (b); }
-#endif
-struct Obj1515EC78;
-struct Light1515EC78;
-void func_1515E43C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7);
-void func_1515E278(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6);
-void func_1515EC78(struct Obj1515EC78 *arg0, s32 arg1, struct Light1515EC78 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-struct Node1515D914 {
-    struct Node1515D914 *next;
-    u8 unk4;
-    u8 pad5[3];
-    u8 unk8;
-    u8 unk9;
-    u8 unkA;
-    u8 padB;
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    u8 pad14[0x1B];
-    u8 unk2F;
-};
+void func_1515E43C(s32 x, s32 y, s32 z, s32 arg3, u8 *colorA, u8 *colorB, u8 *amountA, u8 *amountB);
+void func_1515E278(s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg5, s32 flags);
+void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags);
 
-Gfx *func_1515D914(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, s32 arg7, u8 *arg8, s8 *arg9, s32 argA, u8 *argB, s32 argC, s32 *argD) {
+/* Loads microcode light slot `l` at byte offset `ofs` (point lights start at 0x60). */
+#define gSPPointLight(pkt, l, ofs) gDma2p((pkt), G_MOVEMEM, (l), sizeof(PointLightGfx), G_MV_LIGHT, (ofs))
+
+/*
+ * Picks the (maxLights - 1) point lights nearest to (x, y, z) for player `player`, fills this
+ * frame's slice of lightBuf with them plus a directional light, and emits the commands that
+ * load them, followed by `ambient`.
+ */
+Gfx *func_1515D914(Gfx *gfx, s32 player, s32 x, s32 y, s32 z, u32 arg5, PointLightGfx *lightBuf, s32 maxLights,
+                   Ambient *ambient, s8 *outCount, s32 mask, u8 *smoothColor, s32 flags, PointLight **outLights) {
     s32 i;
     s32 j;
-    s32 cnt;
-    s32 special;
-    u8 *ent;
+    s32 count;
+    s32 padLight;
+    u8 *unused; // matching: stack slot
     s16 pos[3];
-    u8 colA[3];
-    u8 colB[3];
-    struct Node1515D914 *node;
-    struct Node1515D914 *lights[11];
-    s32 dists[11];
+    u8 color[3];
+    u8 dirColor[3];
+    PointLight *light;
+    PointLight *nearest[11];
+    s32 nearestDist[11];
     s32 dist;
-    u8 spB0[3];
-    u8 spAC[3];
-    u8 spAB;
-    u8 spAA;
-    f32 d;
-    f32 vec[3];
-    s32 lpos[3];
-    f32 *fp;
+    u8 colorA[3];
+    u8 colorB[3];
+    u8 amountA;
+    u8 amountB;
+    f32 scale;
+    f32 dir[3];
+    s32 lightPos[3];
+    f32 *posPtr;
 
-    func_1515E278(arg2, arg3, arg4, argA, colA, arg5, (u8 *)argC);
-    j = 1 << arg1;
-    if (argC & 2) {
-        func_1515E43C(arg2, arg3, arg4, argA, spB0, spAC, &spAB, &spAA);
+    func_1515E278(x, y, z, mask, color, arg5, flags);
+    j = 1 << player; // matching: dead store IDO still emits
+    if (flags & 2) {
+        func_1515E43C(x, y, z, mask, colorA, colorB, &amountA, &amountB);
         for (i = 0; i < 3; i++) {
-            s32 k;
-            k = (u8)((((0xFF - colA[i]) * spAB) >> 8) + colA[i]);
-            colB[i] = (spB0[i] * k) >> 8;
-            k = (u8)((((0xFF - colA[i]) * spAA) >> 8) + colA[i]);
-            colA[i] = (spAC[i] * k) >> 8;
+            s32 level;
+            level = (u8)((((0xFF - color[i]) * amountA) >> 8) + color[i]);
+            dirColor[i] = (colorA[i] * level) >> 8;
+            level = (u8)((((0xFF - color[i]) * amountB) >> 8) + color[i]);
+            color[i] = (colorB[i] * level) >> 8;
         }
     }
     for (i = 0; i < 3; i++) {
-        if (argB != 0) {
-            if (!(argC & 8)) {
-                colA[i] = (colA[i] + argB[i] * 3) >> 2;
+        if (smoothColor != NULL) {
+            if (!(flags & 8)) {
+                color[i] = (color[i] + smoothColor[i] * 3) >> 2;
             }
-            argB[i] = colA[i];
+            smoothColor[i] = color[i];
         }
-        arg8[i] = arg8[i + 4] = colA[i];
-        continue;
+        ambient->l.col[i] = ambient->l.colc[i] = color[i];
+        continue; // matching: see G
     }
-    for (i = 0; i < arg7; i++) {
-        dists[i] = 0x7FFFFFFF;
+    for (i = 0; i < maxLights; i++) {
+        nearestDist[i] = 0x7FFFFFFF;
     }
-    if (!(argC & 1)) {
-        pos[0] = arg2;
-        pos[1] = arg3;
-        pos[2] = arg4;
+    if (!(flags & 1)) {
+        pos[0] = x;
+        pos[1] = y;
+        pos[2] = z;
     } else {
-        vec[0] = D_800DBFF0[arg1].unk2BC - D_800DBFF0[arg1].unk2F8;
-        vec[1] = D_800DBFF0[arg1].unk2C0 - D_800DBFF0[arg1].unk2FC;
-        vec[2] = D_800DBFF0[arg1].unk2C4 - D_800DBFF0[arg1].unk300;
-        d = sqrtf(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
-        if (d != 0.0f) {
-            d = 1000.0f / d;
-            pos[0] = vec[0] * d + (f32)arg2;
-            pos[1] = vec[1] * d + (f32)arg3;
-            pos[2] = vec[2] * d + (f32)arg4;
+        // sample 1000 units along the camera's view direction instead
+        dir[0] = D_800DBFF0[player].unk2BC - D_800DBFF0[player].unk2F8;
+        dir[1] = D_800DBFF0[player].unk2C0 - D_800DBFF0[player].unk2FC;
+        dir[2] = D_800DBFF0[player].unk2C4 - D_800DBFF0[player].unk300;
+        scale = sqrtf(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+        if (scale != 0.0f) {
+            scale = 1000.0f / scale;
+            pos[0] = dir[0] * scale + (f32)x;
+            pos[1] = dir[1] * scale + (f32)y;
+            pos[2] = dir[2] * scale + (f32)z;
         } else {
-            pos[0] = arg2;
-            pos[1] = arg3;
-            pos[2] = arg4;
+            pos[0] = x;
+            pos[1] = y;
+            pos[2] = z;
         }
     }
-    node = (struct Node1515D914 *)D_800DCD78;
-    cnt = 0;
-    if (node != 0) {
-        do {
-            if (((node->unkC & (1 << arg1)) || (argC & 0x20) || !(node->unk8 & 1)) && (node->unk8 & argA) && (node->unk9 == 0) && !(node->unkA & (1 << arg1))) {
-                if (node->unk4 == 0) {
-                G:
-                    lpos[0] = node->unkE;
-                    if (lpos[0] != -0x8000) {
-                        lpos[1] = node->unk10;
-                        lpos[2] = node->unk12;
-                    } else {
-                        fp = (f32 *)((node->unk12 & 0xFFFF) | (node->unk10 << 16));
-                        lpos[0] = fp[0];
-                        lpos[1] = fp[1];
-                        lpos[2] = fp[2];
-                    }
-                    dist = (pos[0] - lpos[0]) * (pos[0] - lpos[0]) + (pos[1] - lpos[1]) * (pos[1] - lpos[1]) + (pos[2] - lpos[2]) * (pos[2] - lpos[2]);
-                    if (!(argC & 4) && ((node->unk2F << 17) < dist)) {
-                        dist = 0x7FFFFFFF;
-                    }
+    count = 0;
+    for (light = D_800DCD78; light != NULL; light = light->next) {
+        if (((light->unkC & (1 << player)) || (flags & 0x20) || !(light->unk8 & 1)) && (light->unk8 & mask) &&
+            (light->disabled == 0) && !(light->unkA & (1 << player))) {
+            if (light->unk4 == 0) {
+            G: // matching: this unused label (like the if (1) and continues below) steers IDO's regalloc
+                lightPos[0] = light->x;
+                if (lightPos[0] != -0x8000) {
+                    lightPos[1] = light->y;
+                    lightPos[2] = light->z;
+                } else {
+                    posPtr = (f32 *)((light->z & 0xFFFF) | (light->y << 16));
+                    lightPos[0] = posPtr[0];
+                    lightPos[1] = posPtr[1];
+                    lightPos[2] = posPtr[2];
                 }
-                for (i = 0; i < arg7 - 1; i++) {
-                    if (dist < dists[i]) {
-                        for (j = arg7 - 2; j > i; j--) {
-                            dists[j] = dists[j - 1];
-                            lights[j] = lights[j - 1];
-                        }
-                        dists[i] = dist;
-                        lights[i] = node;
-                        if (cnt != arg7 - 1) {
-                            cnt++;
-                        }
-                        goto found;
-                    }
+                dist = (pos[0] - lightPos[0]) * (pos[0] - lightPos[0]) + (pos[1] - lightPos[1]) * (pos[1] - lightPos[1]) +
+                       (pos[2] - lightPos[2]) * (pos[2] - lightPos[2]);
+                if (!(flags & 4) && ((light->radius << 17) < dist)) {
+                    dist = 0x7FFFFFFF;
                 }
-            found:;
             }
-            node = node->next;
-        } while (node != 0);
+            // insert into the distance-sorted nearest list
+            for (i = 0; i < maxLights - 1; i++) {
+                if (dist < nearestDist[i]) {
+                    for (j = maxLights - 2; j > i; j--) {
+                        nearestDist[j] = nearestDist[j - 1];
+                        nearest[j] = nearest[j - 1];
+                    }
+                    nearestDist[i] = dist;
+                    nearest[i] = light;
+                    if (count != maxLights - 1) {
+                        count++;
+                    }
+                    break;
+                }
+            }
+            if (1) {} // matching: see G
+        }
     }
-    if (arg7 != 0) {
-        if (cnt & 1) {
-            special = 1;
-            if (argD != 0) {
-                argD[cnt] = 0;
+    if (maxLights != 0) {
+        // an odd light count is padded with the dummy light D_800DCD40
+        if (count & 1) {
+            padLight = 1;
+            if (outLights != NULL) {
+                outLights[count] = NULL;
             }
         } else {
-            special = 0;
+            padLight = 0;
         }
-        if (arg9 != 0) {
-            if (special != 0) {
-                *arg9 = (cnt + special + 1) | 0x80;
+        if (outCount != NULL) {
+            if (padLight) {
+                *outCount = (count + padLight + 1) | 0x80;
             } else {
-                *arg9 = cnt + special + 1;
+                *outCount = count + padLight + 1;
             }
         }
-        CMD(0xDB020000, (cnt + special) * 0x30 + 0x30);
+        gMoveWd(gfx++, G_MW_NUMLIGHT, 0, (count + padLight) * 0x30 + 0x30);
     } else {
-        if (arg9 != 0) {
-            *arg9 = cnt;
+        if (outCount != NULL) {
+            *outCount = count;
         }
-        CMD(0xDB020000, cnt * 0x30);
+        gMoveWd(gfx++, G_MW_NUMLIGHT, 0, count * 0x30);
     }
-    if (arg7 != 0) {
-        u8 *p;
-        p = arg6 + (D_800BE9C0 * arg7 + cnt) * 0x30;
-        p[8] = ((s8 *)&D_800DCD30)[arg1 * 3];
-        p[9] = ((s8 *)&D_800DCD30)[arg1 * 3 + 1];
-        p[0xA] = ((s8 *)&D_800DCD30)[arg1 * 3 + 2];
-        if (argC & 2) {
-            p[0] = p[4] = colB[0];
-            p[1] = p[5] = colB[1];
-            p[2] = p[6] = colB[2];
+    if (maxLights != 0) {
+        PointLightGfx *out;
+        // the slot after the point lights holds the directional light
+        out = &lightBuf[D_800BE9C0 * maxLights + count];
+        out->dir[0] = D_800DCD30[player][0];
+        out->dir[1] = D_800DCD30[player][1];
+        out->dir[2] = D_800DCD30[player][2];
+        if (flags & 2) {
+            out->col[0] = out->colc[0] = dirColor[0];
+            out->col[1] = out->colc[1] = dirColor[1];
+            out->col[2] = out->colc[2] = dirColor[2];
         } else {
-            p[0] = p[4] = 0;
-            p[1] = p[5] = 0;
-            p[2] = p[6] = 0;
+            out->col[0] = out->colc[0] = 0;
+            out->col[1] = out->colc[1] = 0;
+            out->col[2] = out->colc[2] = 0;
         }
-        p -= cnt * 0x30;
-        for (i = 0; i < cnt; i++, p += 0x30) {
-            node = lights[i];
-            if (argD != 0) {
-                argD[i] = (s32)node;
+        out -= count;
+        for (i = 0; i < count; i++, out++) {
+            light = nearest[i];
+            if (outLights != NULL) {
+                outLights[i] = light;
             }
-            if (argC & 0x20) {
-                node->unkC |= 1 << arg1;
+            if (flags & 0x20) {
+                light->unkC |= 1 << player;
             }
-            if (node->unk4 == 0) {
-                func_1515EC78((struct Obj1515EC78 *)node, arg1, (struct Light1515EC78 *)p, arg2, arg3, arg4, argC);
+            if (light->unk4 == 0) {
+                func_1515EC78(light, player, out, x, y, z, flags);
             }
-            CMD(((((u32)(i * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA, (u32)p);
-            continue;
+            gSPPointLight(gfx++, out, (i + 2) * 0x30U);
+            continue; // matching: see G
         }
-        if (special != 0) CMD(((((u32)(i * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA, (u32)&D_800DCD40);
-        CMD(((((u32)((i + special + 1) * 0x30U + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA, ((D_800BE9C0 * arg7 + i) * 0x30) + (s32)arg6);
-        CMD(((((u32)((i + special + 2) * 0x30U + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA, (u32)arg8);
+        if (padLight) {
+            gSPPointLight(gfx++, &D_800DCD40, (i + 2) * 0x30U);
+        }
+        gSPPointLight(gfx++, &lightBuf[D_800BE9C0 * maxLights + i], (u32)((i + padLight + 1) * 0x30U + 0x30));
+        gSPPointLight(gfx++, ambient, (u32)((i + padLight + 2) * 0x30U + 0x30));
     }
-    return arg0;
+    return gfx;
 }
 
 
@@ -412,7 +403,7 @@ struct Node1515EB84 {
 struct Node1515E43C *func_1515EB84(s32, s32, s32, s32, struct Node1515EB84 *);
 void func_1515E43C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7);
 
-void func_1515E278(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6) {
+void func_1515E278(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u32 arg5, s32 arg6) {
     struct Node1515E43C *node;
     s32 i;
     s32 t;
@@ -431,13 +422,13 @@ void func_1515E278(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u
         arg4[1] = (node->unk18 >> 8) & 0xFF;
         arg4[2] = (node->unk18 >> 16) & 0xFF;
     } else {
-        v = (0x100 - (s32)((((u32)arg5 >> 5) & 3) << 6));
+        v = (0x100 - (s32)(((arg5 >> 5) & 3) << 6));
         dst = arg4;
         for (i = 0; i < 3; i++) {
             *dst++ = ((*(u8 (*)[3])&D_800DCD20)[i] * v) >> 8;
         }
     }
-    if ((s32)arg6 & 0x10) {
+    if (arg6 & 0x10) {
         func_1515E43C(arg0, arg1, arg2, arg3, sp4C, sp48, &sp47, &sp46);
         dst = arg4;
         for (i = 0; i < 3; i++) {
@@ -519,7 +510,6 @@ struct Light1515E888 {
 
 extern u8 D_800D9E21;
 extern struct Light1515E888 *D_800D9E28[];
-void func_1515E278(s32, s32, s32, s32, u8 *, u8 *, u8 *);
 
 void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u8 *arg6, u8 *arg7)
 {
@@ -534,7 +524,7 @@ void func_1515E888(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, u
   struct Light1515E888 **p;
   f32 f;
   s32 v;
-  func_1515E278(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+  func_1515E278(arg1, arg2, arg3, arg4, arg5, (u32)arg6, (s32)arg7);
   color[0] = arg5[0];
   color[1] = arg5[1];
   color[2] = arg5[2];
@@ -619,100 +609,78 @@ struct Node1515E43C *func_1515EB84(s32 arg0, s32 arg1, s32 arg2, s32 arg3, struc
     return 0;
 }
 
-struct Light1515EC78 {
-    u8 col[3];
-    u8 pad3;
-    u8 colc[3];
-    u8 pad7;
-    s8 dir[3];
-    u8 padB;
-    u8 unkC;
-    u8 padD[0x13];
-    s16 unk20[4];
-    s16 unk28[4];
-};
-
-struct Obj1515EC78 {
-    u8 pad0[5];
-    u8 col[3];
-    u8 pad8[6];
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14[4][3];
-    u8 pad2C[3];
-    u8 unk2F;
-    u8 unk30;
-};
-
 extern f32 D_800D9C10[][4][4];
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 
-void func_1515EC78(struct Obj1515EC78 *arg0, s32 arg1, struct Light1515EC78 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+/*
+ * Fills the microcode light `out` from `light` as seen by player `player`: colour, direction
+ * towards the light from (x, y, z) when flags & 2, and the view-space position (cached per player).
+ */
+void func_1515EC78(PointLight *light, s32 player, PointLightGfx *out, s32 x, s32 y, s32 z, s32 flags) {
     s32 i;
-    f32 out[3];
+    f32 viewPos[3];
     f32 dx;
     f32 dy;
     f32 dz;
-    f32 s;
-    s32 n[3];
+    f32 scale;
+    s32 dir[3];
     s32 pos[3];
-    f32 *p;
+    f32 *posPtr;
 
-    pos[0] = arg0->unkE;
+    pos[0] = light->x;
     if (pos[0] != -0x8000) {
-        pos[1] = arg0->unk10;
-        pos[2] = arg0->unk12;
+        pos[1] = light->y;
+        pos[2] = light->z;
     } else {
-        p = (f32 *)((arg0->unk12 & 0xFFFF) | (arg0->unk10 << 16));
-        pos[0] = p[0];
-        pos[1] = p[1];
-        pos[2] = p[2];
+        posPtr = (f32 *)((light->z & 0xFFFF) | (light->y << 16));
+        pos[0] = posPtr[0];
+        pos[1] = posPtr[1];
+        pos[2] = posPtr[2];
     }
-    if (arg6 & 2) {
-        dx = pos[0] - arg3;
-        dy = pos[1] - arg4;
-        dz = pos[2] - arg5;
-        s = sqrtf(dx * dx + dy * dy + dz * dz);
-        if (s) {
-            s = 127.0f / s;
-            dx *= s;
-            dy *= s;
-            dz *= s;
+    if (flags & 2) {
+        dx = pos[0] - x;
+        dy = pos[1] - y;
+        dz = pos[2] - z;
+        scale = sqrtf(dx * dx + dy * dy + dz * dz);
+        if (scale) {
+            scale = 127.0f / scale;
+            dx *= scale;
+            dy *= scale;
+            dz *= scale;
         } else {
             dz = dy = 0.0f;
             dx = 127.0f;
         }
-        n[0] = dx;
-        n[1] = dy;
-        n[2] = dz;
+        dir[0] = dx;
+        dir[1] = dy;
+        dir[2] = dz;
     } else {
-        n[0] = 0;
-        n[1] = 0;
-        n[2] = 0x7F;
+        dir[0] = 0;
+        dir[1] = 0;
+        dir[2] = 0x7F;
     }
-        if (arg0->unk30 & (1 << arg1)) {
-        pos[0] = arg0->unk14[arg1][0];
-        pos[1] = arg0->unk14[arg1][1];
-        pos[2] = arg0->unk14[arg1][2];
+        if (light->viewPosValid & (1 << player)) {
+        pos[0] = light->viewPos[player][0];
+        pos[1] = light->viewPos[player][1];
+        pos[2] = light->viewPos[player][2];
     } else {
-        func_150A7960(D_800D9C10[arg1][0], pos[0], pos[1], pos[2], &out[0], &out[1], &out[2]);
-        pos[0] = out[0];
-        pos[1] = out[1];
-        pos[2] = out[2];
-        arg0->unk14[arg1][0] = pos[0];
-        arg0->unk14[arg1][1] = pos[1];
-        arg0->unk14[arg1][2] = pos[2];
-        arg0->unk30 |= (1 << arg1);
+        func_150A7960(D_800D9C10[player][0], pos[0], pos[1], pos[2], &viewPos[0], &viewPos[1], &viewPos[2]);
+        pos[0] = viewPos[0];
+        pos[1] = viewPos[1];
+        pos[2] = viewPos[2];
+        light->viewPos[player][0] = pos[0];
+        light->viewPos[player][1] = pos[1];
+        light->viewPos[player][2] = pos[2];
+        light->viewPosValid |= (1 << player);
     }
     for (i = 0; i < 3; i++) {
-        arg2->col[i] = arg0->col[i];
-        arg2->colc[i] = arg0->col[i];
-        arg2->dir[i] = n[i];
-        arg2->unk20[i] = pos[i];
-        arg2->unk28[i] = pos[i];
+        out->col[i] = light->color[i];
+        out->colc[i] = light->color[i];
+        out->dir[i] = dir[i];
+        out->pos[i] = pos[i];
+        out->pos2[i] = pos[i];
     }
-    arg2->unkC = arg0->unk2F;
+    out->unkC = light->radius;
 }
 
 void func_1515EF74(s16 *arg0) {
