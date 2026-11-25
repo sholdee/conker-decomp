@@ -298,8 +298,6 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
 extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);
 extern void func_15107B78(Actor *, s32, s32, s32, s32);
 extern void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
-extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150E83AC(Vec3f *, s16, u8, s32);
 extern f32 sinf(f32);
 
 /*

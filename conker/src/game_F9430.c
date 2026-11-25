@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
 
@@ -29,25 +28,6 @@ typedef struct {
     /* 0x6 */ s16 a;
     /* 0x8 */ s16 unk8;
 } CornerColor;
-
-/* Per-particle data copied to 0x128 of a particle by func_150CBF80. */
-typedef struct {
-    /* 0x0 */ s16 growDelay; /* age after which the particle starts growing */
-    /* 0x4 */ f32 growRate;
-} GrowParticleExtra;
-
-typedef struct {
-    /* 0x000 */ u8 pad0[0x1C];
-    /* 0x01C */ s16 age;
-    /* 0x01E */ u8 pad1E[0x2C - 0x1E];
-    /* 0x02C */ f32 size0;
-    /* 0x030 */ f32 size1;
-    /* 0x034 */ u8 pad34[0x58 - 0x34];
-    /* 0x058 */ s32 flags;
-    /* 0x05C */ u8 alpha;
-    /* 0x05D */ u8 pad5D[0x128 - 0x5D];
-    /* 0x128 */ GrowParticleExtra extra;
-} GrowParticle;
 
 extern GroundBurstDef D_800A0640[];
 void func_1504715C(CollisionHit *, Actor *);
@@ -283,11 +263,6 @@ s32 func_150CC6B8(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     return 1;
 }
 
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ f32 decay; /* set by func_150CC6B8 */
-} DecayParticle;
-
 /* Particle update: scales unk58 and unk60 by the decay factor once per elapsed tick. */
 s32 func_150CC8D4(DecayParticle *p, s32 arg1) {
     f32 *decay;
@@ -355,16 +330,6 @@ s32 func_150CCA7C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5,
     func_15132A4C(&spawn, 3, 0xFF, 0, arg14, 0);
     return 1;
 }
-
-typedef struct {
-    /* 0x00 */ u8 pad0[0x20];
-    /* 0x20 */ f32 rotation[3];
-    /* 0x2C */ u8 pad2C[0xC];
-    /* 0x38 */ f32 position[3];
-    /* 0x44 */ f32 velocity[3];
-    /* 0x50 */ f32 rotationVel[3];
-    /* 0x5C */ f32 gravity;
-} TumbleParticle;
 
 /* Integrates a tumbling particle's position (with gravity) and rotation over one frame step. */
 s32 func_150CCCB4(TumbleParticle *p) {

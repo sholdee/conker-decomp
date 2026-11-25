@@ -1,7 +1,12 @@
 #include <ultra64.h>
+// matching: func_150E81A8 is a K&R definition, and a prototype in scope changes its code
+#define func_150E81A8 func_150E81A8_header
+// matching: this file keeps its own declaration of func_150E8930
+#define func_150E8930 func_150E8930_header
 #include "functions.h"
+#undef func_150E81A8
+#undef func_150E8930
 #include "variables.h"
-#include "effects.h"
 
 /* A one-byte id table in rodata, copied onto the stack like the IdList ones. */
 typedef struct {
@@ -11,22 +16,10 @@ typedef struct {
 
 extern void *func_151D8868(RumbleParams *event, s32 arg1, s32 arg2, s32 arg3);
 
-typedef struct Game113D60Emission {
-    /* 0x00 */ ParticleStream stream;
-    /* 0x38 */ f32 scale;
-    /* 0x3C */ s16 duration, durationRange;
-    /* 0x40 */ u8 color;
-} Game113D60Emission; // size 0x44
-
 typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ u8 data[1]; // effect-specific data
 } Game113D60AnyEffect;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game113D60Emission emission;
-} Game113D60Effect;
 
 typedef struct Game113D60Source {
     f32 chance;
@@ -111,7 +104,6 @@ void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
 
 extern f32 sinf(f32);
 extern void func_151436B4(f32, f32, f32, Vec3f *);
-extern s32 func_150E5FD0(Vec3f *, Vec3f *, f32, f32, f32, u8, s32, u8, u8, s16, s8);
 extern f32 func_15144528(f32, f32, f32);
 
 /* Emits this frame's particles along a sine-wobbled direction and advances the wobble phases. */
@@ -294,10 +286,6 @@ extern IdList3 D_80088A68;
 extern IdList3 D_80088A74;
 extern void *func_1515548C(ScreenSpriteInfo5C *, s32, s32 *, s32, s32, u8, s32);
 extern void func_15164F0C(u8, u8, void *, u8, s32);
-void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
-                   s32 idCount, u8 owner, s32 kind);
-void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,
-                   u8 owner, s32 kind);
 
 /* Occasionally spawns one of the two func_1515548C effects, plus a sound and an event. */
 void func_150E7290(u8 arg0, u8 owner, s32 kind) {
@@ -454,24 +442,6 @@ void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16,
 
     func_1515548C(&arg, 0, ids, idCount, 0, owner, kind);
 }
-
-typedef struct {
-    /* 0x00 */ f32 rate;
-    /* 0x04 */ f32 accum;
-    /* 0x08 */ s16 count;
-    /* 0x0A */ s16 next;
-} Game113D60BurstHead;
-
-typedef struct {
-    /* 0x00 */ Game113D60BurstHead head;
-    /* 0x0C */ s32 pad0C;
-    /* 0x10 */ f32 points[2]; // `head.count` interleaved x, y pairs
-} Game113D60Burst;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game113D60Burst burst;
-} Game113D60BurstEffect;
 
 extern f32 func_15142A80(f32);
 extern f32 func_15142AC0(f32);
@@ -680,29 +650,6 @@ void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind) {
     }
 }
 
-/* Extra data of the particles func_150E8470 spawns, stored at 0xA8 of each particle: effects.h WobbleData
- * without the drag (the particles are spawned with only these 0xC bytes). */
-typedef struct {
-    /* 0x0 */ u8 phase[2];
-    /* 0x2 */ u8 phaseStep[2];
-    /* 0x4 */ f32 amplitude[2];
-} Game113D60ParticleExtra;
-
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ Game113D60ParticleExtra extra;
-} Game113D60Particle;
-
-typedef struct {
-    /* 0x0 */ Vec3f position;
-    /* 0xC */ f32 accum;
-} Game113D60Emitter;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game113D60Emitter emitter;
-} Game113D60EmitterEffect;
-
 /* Spawns a random number of particles per frame at the effect's position. */
 void func_150E8470(Game113D60EmitterEffect *effect) {
     Game113D60Emitter *emitter;
@@ -787,11 +734,6 @@ void func_150E8854(void) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ f32 timer;
-} Game113D60TimerEffect;
-
 // matching: unprototyped, since the call below also passes the effect (in a0) to this void function
 extern void func_150E8930();
 
@@ -805,8 +747,6 @@ void func_150E88C0(Game113D60TimerEffect *effect) {
 }
 
 extern IdList2 D_80088A80;
-void func_150E8A80(void);
-void func_150E90DC(void);
 
 /* Fires the D_80088A80 pair through func_15169260 plus an event, effects 0x33 and 0x36 when the
  * D_800DCDC4 region list exists, and two sounds. */
@@ -853,18 +793,6 @@ void func_150E8A80(void) {
         memcpy(((Game113D60AnyEffect *)effect)->data, &data, sizeof(data));
     }
 }
-
-/* Spawn rate data shared by the region spawners: `rate + random * rateRange` per frame. */
-typedef struct {
-    /* 0x0 */ f32 rate;
-    /* 0x4 */ f32 rateRange;
-    /* 0x8 */ f32 accum;
-} Game113D60Spawner;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game113D60Spawner spawner;
-} Game113D60RegionSpawnerEffect;
 
 typedef struct {
     /* 0x00 */ Vec3f position;
@@ -920,19 +848,6 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
         } while (spawner->accum > 1.0f);
     }
 }
-
-/* A spawner at a fixed point: `position`, then the spawn rate as in Game113D60Spawner. */
-typedef struct {
-    /* 0x00 */ Vec3f position;
-    /* 0x0C */ f32 rate;
-    /* 0x10 */ f32 rateRange;
-    /* 0x14 */ f32 accum;
-} Game113D60PointSpawner;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ Game113D60PointSpawner spawner;
-} Game113D60PointSpawnerEffect;
 
 /* Spawns func_15130374 particles within 20 units of the spawner's position. */
 void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
@@ -1095,21 +1010,6 @@ void func_150E9178(Game113D60RegionSpawnerEffect *effect) {
         } while (spawner->accum > 1.0f);
     }
 }
-
-/* Extra data of the particles func_150E93DC spawns, stored at 0x170 of each particle. */
-typedef struct {
-    /* 0x00 */ f32 floorY;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ u8 unk8[0x14];
-} Game113D60DebrisExtra;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x028 */ u8 pad28[0x10];
-    /* 0x038 */ Vec3f position;
-    /* 0x044 */ u8 pad44[0x12C];
-    /* 0x170 */ Game113D60DebrisExtra extra;
-} Game113D60Debris;
 
 extern u8 D_800A12F0[];
 extern f32 D_800A12F4[];

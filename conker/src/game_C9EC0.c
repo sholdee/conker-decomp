@@ -302,11 +302,8 @@ extern s32 func_150E3208(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_150E32D0(s32, s32, s32, Actor *, s32, f32);
 extern s32 func_150E3414(s32, s32, s32, s32, s32, s32, void *, s32, f32);
 extern void func_150DECC0(f32 *, s32, s32);
-extern void func_150E81A8(s32, s32, s32);
-extern void func_150E8930(void);
 extern void func_151D26C0(s16);
 extern void func_15163A60(s32, s32, s32);
-extern void func_150D5A6C(Actor *, s32, s32);
 extern u8 D_8009F0D0;
 
 /* Starts script command `cmdId` with arguments `cmd`; returns a handle for commands 4-6. */

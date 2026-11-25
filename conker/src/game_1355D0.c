@@ -6,7 +6,6 @@
 
 extern s32 D_800A2430;
 extern f32 D_800A2434;
-void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind);
 void func_15136C3C(Actor *, s32, s32, s32, s32, s32, u8, s32);
 void func_15152190(DebrisBurst *, s32 *variantIds, f32 *variantScales, s32 variantCount, f32 radius, s32, u8,
                    s32);

@@ -1,5 +1,7 @@
 #include <ultra64.h>
+#define func_150E7FEC func_150E7FEC_header // matching: this file keeps its own declaration of func_150E7FEC
 #include "functions.h"
+#undef func_150E7FEC
 #include "variables.h"
 
 extern void func_15145974(Vec3f *, f32 *, f32 *);
@@ -534,6 +536,7 @@ s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
 const s32 D_800AAC30[] = { 0x17, 0x18 };
 extern void func_1514FBFC(SurfaceJetSpray *, u8, s32);
 extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+// matching: s32 parameters where the definition has u8 and s16 (no truncation at the call)
 extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15164F0C(s32, u8, s32, u8, s32);
 extern void func_151D8868(RumbleParams *, s32, s32, s32);
@@ -881,7 +884,6 @@ void func_151C970C(s32 command, s32 source) {
 }
 
 extern s32 func_15046C80(f32 *, u16, f32, void *);
-extern void func_150E83AC(void *, s16, u8, s32);
 extern void func_15136C3C(void *, u8, u8, u8, u8, u8, u8, s32);
 extern void *func_151541B8(void *, f32, f32, f32, f32, u8, s32);
 extern void func_151D5334(void *, f32, f32, f32, u8, u8, s32);

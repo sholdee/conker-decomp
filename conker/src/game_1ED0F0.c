@@ -184,8 +184,6 @@ s32 func_151C02E4(Actor *obj, Actor *self, s32 ignoreCount, Actor **ignore) {
     return TRUE;
 }
 
-void func_150E7FEC(f32, s32, CollisionTri *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
-
 void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList) {
     // matching: the f64 member gives the random value an 8-byte aligned stack slot
     union { u32 w; f64 align; } shade;
@@ -236,8 +234,6 @@ void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList) {
 void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList) {
     func_151D5404(pos, 800.0f, 2000.0f, 0.0005f, 15, 20, fxOwner, fxList);
 }
-
-void func_150E83AC(Vec3f *, s16, u8, s32);
 
 void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList) {
     func_150E83AC(pos, func_150ADA20() % 62 + 120, fxOwner, fxList);

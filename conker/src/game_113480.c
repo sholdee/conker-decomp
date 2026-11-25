@@ -1,25 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Hit record copied to Streak.impact (+0x110) when a streak is spawned. */
-typedef struct {
-    /* 0x00 */ u8 flags; /* bit 0: the streak's path hits a surface */
-    /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ Vec3f point;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14[5];
-    /* 0x28 */ f32 side; /* side of the surface the streak starts on (+1 / -1) */
-    /* 0x2C */ s8 callback; /* index into D_80088A10, -1 for none */
-    /* 0x2D */ u8 pad2D[3];
-} StreakImpact; /* size 0x30 */
-
-/* The particle object spawned by func_150E5FD0 (kind 0x41). */
-typedef struct {
-    /* 0x00 */ DefParticleHead head; /* head.def.height: length, head.def.rot: direction, head.def.scale.y: speed, head.def.unk44: alpha */
-    /* 0x110 */ StreakImpact impact;
-} Streak;
 
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 extern f32 func_15144A74(Vec3f *, Vec3f *);

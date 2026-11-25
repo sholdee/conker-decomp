@@ -415,8 +415,156 @@ void func_150C6410(WatcherEmitter *obj);
 void func_150C6438(WatcherEmitter *obj);
 FlickerSprite *func_150C6460(GameF3270Emitter *emitter);
 
+/* game_F8590.c */
+/* Growth applied by func_150CBA30, stored in the dust particle at 0x128. */
+typedef struct {
+    /* 0x00 */ s16 growTime; // frames left to grow
+    /* 0x04 */ f32 growRate; // size gained per frame
+} DustGrowth;
+
+/* The dust puff particle func_150CB1F4 spawns (func_1513D668, a DefParticleHead view); updated by func_150CBA30. */
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0xC];
+    /* 0x01C */ s16 timer;
+    /* 0x01E */ u8 pad1E[0xE];
+    /* 0x02C */ f32 size0;
+    /* 0x030 */ f32 size1;
+    /* 0x034 */ u8 pad34[0x24];
+    /* 0x058 */ s32 flags;
+    /* 0x05C */ u8 alpha;
+    /* 0x05D */ u8 pad5D[0xCB];
+    /* 0x128 */ DustGrowth growth;
+} DustPuff;
+
+/* Particle moved by func_150CBE88. */
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0x10];
+    /* 0x20 */ f32 unk20[3]; // integrated from unk50
+    /* 0x2C */ u8 pad2C[0xC];
+    /* 0x38 */ f32 pos[3];
+    /* 0x44 */ f32 vel[3];
+    /* 0x50 */ f32 unk50[3];
+    /* 0x5C */ f32 gravity;  // added to vel[1]
+} BallisticParticle;
+
+/* Particle handled by func_150CBF5C. */
+typedef struct {
+    /* 0x00 */ EffectHeader header;
+    /* 0x10 */ u8 pad10[0xC];
+    /* 0x1C */ s16 timer;
+    /* 0x1E */ u8 pad1E[0x3A];
+    /* 0x58 */ s32 flags;
+} FadeoutParticle;
+
+s32 func_150CB0E0(f32 *pos, Actor *actor, CollisionHit *ground, u8 side);
+s32 func_150CB1E0(s32 arg0, s32 arg1);
+void func_150CB1F4(Actor *actor, s32 side, s32 arg2);
+s32 func_150CB7CC(QuadSprite *sprite);
+s32 func_150CB800(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle, s32 arg9, s32 arg10,
+                  s32 arg11, s32 arg12, s32 arg13, u8 arg14);
+s32 func_150CBA30(DustPuff *dust);
+s32 func_150CBABC(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 angle, s32 arg9, s32 argA,
+                  s32 argB, s32 argC, s32 argD, u8 argE);
+s32 func_150CBCE0(SparkParticle *particle, s32 arg1);
+s32 func_150CBE88(BallisticParticle *particle);
+void func_150CBF5C(FadeoutParticle *particle);
+
+/* game_F9430.c */
+/* Per-particle data copied to 0x128 of a particle by func_150CBF80. */
+typedef struct {
+    /* 0x0 */ s16 growDelay; /* age after which the particle starts growing */
+    /* 0x4 */ f32 growRate;
+} GrowParticleExtra;
+
+typedef struct {
+    /* 0x000 */ u8 pad0[0x1C];
+    /* 0x01C */ s16 age;
+    /* 0x01E */ u8 pad1E[0x2C - 0x1E];
+    /* 0x02C */ f32 size0;
+    /* 0x030 */ f32 size1;
+    /* 0x034 */ u8 pad34[0x58 - 0x34];
+    /* 0x058 */ s32 flags;
+    /* 0x05C */ u8 alpha;
+    /* 0x05D */ u8 pad5D[0x128 - 0x5D];
+    /* 0x128 */ GrowParticleExtra extra;
+} GrowParticle;
+
+typedef struct {
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ f32 decay; /* set by func_150CC6B8 */
+} DecayParticle;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x20];
+    /* 0x20 */ f32 rotation[3];
+    /* 0x2C */ u8 pad2C[0xC];
+    /* 0x38 */ f32 position[3];
+    /* 0x44 */ f32 velocity[3];
+    /* 0x50 */ f32 rotationVel[3];
+    /* 0x5C */ f32 gravity;
+} TumbleParticle;
+
+void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3);
+s32 func_150CC638(GrowParticle *p);
+s32 func_150CC6B8(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10,
+                  s32 arg11, s32 arg12, s32 arg13, u8 arg14);
+s32 func_150CC8D4(DecayParticle *p, s32 arg1);
+s32 func_150CCA7C(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10,
+                  s32 arg11, s32 arg12, s32 arg13, u8 arg14);
+s32 func_150CCCB4(TumbleParticle *p);
+
 /* game_FA240.c */
 void func_150CCD90(f32 z, f32 *r, f32 *g, f32 *b);
+
+/* game_FA360.c */
+/* Per-effect motion state of a drifting quad (lives at DriftQuad + 0x110). */
+typedef struct {
+    /* 0x00 */ Vec3f vel;
+    /* 0x0C */ f32 gravity;
+    /* 0x10 */ f32 drag;
+    /* 0x14 */ Vec3f spin; /* added to DriftQuad.dir every frame */
+    /* 0x20 */ u8 pad20[4];
+    /* 0x24 */ f32 swayLength;
+    /* 0x28 */ f32 swayLengthRate;
+    /* 0x2C */ f32 swayYaw;
+    /* 0x30 */ f32 phase;
+    /* 0x34 */ f32 phaseSpeed;
+    /* 0x38 */ f32 phaseScale;
+    /* 0x3C */ f32 minVy;
+} QuadDriftMotion; /* size 0x40 */
+
+/* Effect instance created by func_1513D524 from an ParticleDef. */
+typedef struct {
+    /* 0x000 */ u8 pad0[0x2C];
+    /* 0x02C */ f32 halfWidth;
+    /* 0x030 */ f32 halfHeight;
+    /* 0x034 */ Vec3f pos;
+    /* 0x040 */ Vec3f dir;   /* rotation angles for func_150A8050 */
+    /* 0x04C */ Vec3f sway;  /* offset added to pos while falling */
+    /* 0x058 */ u8 pad58[0x68];
+    /* 0x0C0 */ Vtx_t template[4];
+    /* 0x100 */ Vtx_t *buffers[4]; /* each holds two copies of the 4-vertex quad */
+    /* 0x110 */ QuadDriftMotion drift;
+} DriftQuad;
+
+typedef struct {
+    f32 pending; /* bursts owed; one is spawned per whole unit */
+    f32 rate;    /* 0..1, set by func_150CDB6C */
+} BurstTimer;
+
+/* Timed effect driven by func_150CD7F8 (a D_8008A4E8 tick callback); D_80088870 points at one. */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ BurstTimer timer;
+} DriftBurstEmitter;
+
+DriftQuad *func_150CCEB0(DriftSpawn *spawn, u8 arg1, u8 arg2);
+s32 func_150CD17C(DriftQuad *effect);
+Vtx_t *func_150CD59C(DriftQuad *effect, s16 bufferIndex);
+void func_150CD7F8(DriftBurstEmitter *emitter);
+void func_150CDB6C(s32 intensity);
 
 /* game_FB060.c */
 void func_150CDBB0(Actor *actor, u8 owner, s32 arg2);
@@ -424,6 +572,339 @@ s32 func_150CDCF4(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
                   s32 arg11, s32 arg12, s32 arg13, u8 arg14);
 s32 func_150CDF10(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s32 arg7, s16 yaw, s32 arg9, s32 arg10,
                   s32 arg11, s32 arg12, s32 arg13, u8 arg14);
+
+/* game_FFBA0.c */
+/* Object data (at +0x28) of a trigger that spawns spark emitters. */
+typedef struct EmitterTrigger {
+    s16 *record;
+    s32 minDelay;
+    s32 delayRange;
+    s32 countdown;
+    f32 matrix[16];
+    u8 params[2]; // [0] bit 0: spawn periodically; [1]: id matched by event 0x34
+                  // matching: one array; two u8 fields swap the compare's registers in func_150D32FC
+} EmitterTrigger;
+
+/* Object data (at +0x28) of a spark emitter: created by func_150D278C, updated by func_150D2924. */
+typedef struct RingSparkEmitter {
+    s16 *record;
+    f32 angle;
+    f32 rate;
+    f32 interval;
+    f32 angleStep;
+    f32 spawnAccum;
+    f32 elapsed;
+    f32 matrix[16];
+    u8 color[3];
+} RingSparkEmitter; // size 0x60
+
+/* Timed effect (func_15149130) of this file, with an emitter trigger or a spark emitter (func_150D278C) as data. */
+typedef struct SparkEffect {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ union {
+        EmitterTrigger trigger;
+        RingSparkEmitter emitter;
+    } data;
+} SparkEffect;
+
+/* Motion data (at +0x110) of a spark particle spawned by func_150D2924. */
+typedef struct SparkMotion {
+    f32 posX;
+    f32 posY;
+    f32 baseX;
+    f32 baseY;
+    f32 amplitudeX;
+    f32 amplitudeY;
+    f32 phaseX;
+    f32 phaseY;
+    f32 phaseSpeedX;
+    f32 phaseSpeedY;
+    f32 life;
+    f32 fadeScale;
+} SparkMotion;
+
+typedef struct RingSparkParticle {
+    u8 pad0[0x5C];
+    u8 unk5C; // fades out with the remaining life
+    u8 pad5D[0xB3];
+    SparkMotion motion;
+} RingSparkParticle;
+
+typedef struct GameFFBA0Beam {
+    /* 0x00 */ DefParticleHead head;
+    /* 0x110 */ f32 texture[2];
+} GameFFBA0Beam;
+
+void func_150D26F0(SparkEffect *obj);
+void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1);
+void func_150D2924(SparkEffect *obj);
+Vtx *func_150D2D6C(GameFFBA0Beam *beam, s16 index);
+s32 func_150D317C(RingSparkParticle *particle);
+void func_150D32FC(SparkEffect *obj, u8 *msg, u8 event);
+
+/* game_1028F0.c */
+/* Effect (a TimedEffect with per-effect data at 0x28) that follows an object. */
+typedef struct {
+    /* 0x00 */ Actor *owner;
+    /* 0x04 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ f32 spawnAccum;
+} FollowEffectData;
+
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ FollowEffectData data;
+} FollowEffect;
+
+/* Per-particle data of the drifting particles that follow an object (func_150D6CC4). */
+typedef struct {
+    /* 0x00 */ Actor *owner;
+    /* 0x04 */ u8 ownerId;
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ f32 drag; /* passed to func_15131958 with the velocity */
+} FollowDriftData;
+
+/* Per-particle data of the growing, fading particle that follows an object (func_150D6F0C). */
+typedef struct {
+    /* 0x00 */ Actor *owner;
+    /* 0x04 */ u8 ownerId;
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ f32 time;
+    /* 0x0C */ f32 lifetime;
+    /* 0x10 */ f32 growth;    /* size = sqrt(time) * growth */
+    /* 0x14 */ f32 fadeStart; /* unk2B = fadeStart - fadeRate * time^2 */
+    /* 0x18 */ f32 fadeRate;
+} GrowParticleData;
+
+/* Live particle, as created by func_15130280 from a ParticleDesc. */
+typedef struct {
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ union {
+        FollowDriftData drift;
+        GrowParticleData grow;
+    } data;
+} FollowParticle;
+
+typedef struct {
+    /* 0x00 */ s32 unk00;
+    /* 0x04 */ s32 unk04;
+    /* 0x08 */ u8  pad08[0xC];
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s32 unk2C;
+    /* 0x30 */ s32 unk30;
+    /* 0x34 */ f32 unk34;
+    /* 0x38 */ f32 unk38;
+    /* 0x3C */ f32 unk3C;
+    /* 0x40 */ f32 unk40;
+    /* 0x44 */ s16 unk44;
+    /* 0x46 */ s16 unk46;
+    /* 0x48 */ s16 unk48;
+    /* 0x4A */ s16 unk4A;
+    /* 0x4C */ s16 unk4C;
+    /* 0x4E */ s16 unk4E;
+    /* 0x50 */ s8  unk50;
+} Struct150D64E8;
+
+void func_150D5440(Actor *obj, u8 arg1, s32 arg2);
+void func_150D54C8(FollowEffect *effect);
+void func_150D596C(FollowEffect *effect, ActorMsg *msg, u8 type);
+void func_150D5A2C(TimedEffect *effect);
+void func_150D5A4C(TimedEffect *effect);
+void func_150D5A6C(Actor *obj, u8 arg1, s32 arg2);
+void func_150D6388(Vec3f *pos, u8 arg1, s32 arg2);
+void func_150D6434(Vec3f *pos, u8 arg1, s32 arg2);
+void func_150D64E8(Struct150D64E8 *info, f32 *outValue);
+void func_150D65F0(f32 *pos, s32 *arg1, u8 arg2, s32 arg3);
+void func_150D66A4(u8 arg0, u8 arg1, s32 arg2);
+void func_150D6730(Actor *obj, u8 arg1, s32 arg2);
+void func_150D6C98(Actor *obj, Vec3f *out);
+s32 func_150D6CC4(FollowParticle *particle, s32 arg1);
+void func_150D6E60(FollowParticle *particle, ActorMsg *msg, u8 type);
+s32 func_150D6F0C(FollowParticle *particle, s32 arg1);
+void func_150D7068(FollowParticle *particle, ActorMsg *msg, u8 type);
+
+/* game_113480.c */
+/* Hit record copied to Streak.impact (+0x110) when a streak is spawned. */
+typedef struct {
+    /* 0x00 */ u8 flags; /* bit 0: the streak's path hits a surface */
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ Vec3f point;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14[5];
+    /* 0x28 */ f32 side; /* side of the surface the streak starts on (+1 / -1) */
+    /* 0x2C */ s8 callback; /* index into D_80088A10, -1 for none */
+    /* 0x2D */ u8 pad2D[3];
+} StreakImpact; /* size 0x30 */
+
+/* The particle object spawned by func_150E5FD0 (kind 0x41). */
+typedef struct {
+    /* 0x00 */ DefParticleHead head; /* head.def.height: length, head.def.rot: direction, head.def.scale.y: speed, head.def.unk44: alpha */
+    /* 0x110 */ StreakImpact impact;
+} Streak;
+
+void *func_150E5FD0(Vec3f *start, Vec3f *dir, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6, u8 checkHit, u8 arg8,
+                    s16 life, s8 callback);
+s8 func_150E6230(Streak *streak);
+void *func_150E63A0(Streak *streak, s16 viewIdx);
+s32 func_150E679C(Streak *streak);
+s32 func_150E67D0(Streak *streak);
+
+/* game_113D60.c */
+typedef struct Game113D60Emission {
+    /* 0x00 */ ParticleStream stream;
+    /* 0x38 */ f32 scale;
+    /* 0x3C */ s16 duration, durationRange;
+    /* 0x40 */ u8 color;
+} Game113D60Emission; // size 0x44
+
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ Game113D60Emission emission;
+} Game113D60Effect;
+
+typedef struct {
+    /* 0x00 */ f32 rate;
+    /* 0x04 */ f32 accum;
+    /* 0x08 */ s16 count;
+    /* 0x0A */ s16 next;
+} Game113D60BurstHead;
+
+typedef struct {
+    /* 0x00 */ Game113D60BurstHead head;
+    /* 0x0C */ s32 pad0C;
+    /* 0x10 */ f32 points[2]; // `head.count` interleaved x, y pairs
+} Game113D60Burst;
+
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ Game113D60Burst burst;
+} Game113D60BurstEffect;
+
+/* Extra data of the particles func_150E8470 spawns, stored at 0xA8 of each particle: effects.h WobbleData
+ * without the drag (the particles are spawned with only these 0xC bytes). */
+typedef struct {
+    /* 0x0 */ u8 phase[2];
+    /* 0x2 */ u8 phaseStep[2];
+    /* 0x4 */ f32 amplitude[2];
+} Game113D60ParticleExtra;
+
+typedef struct {
+    /* 0x00 */ DescParticleHead head;
+    /* 0xA8 */ Game113D60ParticleExtra extra;
+} Game113D60Particle;
+
+typedef struct {
+    /* 0x0 */ Vec3f position;
+    /* 0xC */ f32 accum;
+} Game113D60Emitter;
+
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ Game113D60Emitter emitter;
+} Game113D60EmitterEffect;
+
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ f32 timer;
+} Game113D60TimerEffect;
+
+/* Spawn rate data shared by the region spawners: `rate + random * rateRange` per frame. */
+typedef struct {
+    /* 0x0 */ f32 rate;
+    /* 0x4 */ f32 rateRange;
+    /* 0x8 */ f32 accum;
+} Game113D60Spawner;
+
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ Game113D60Spawner spawner;
+} Game113D60RegionSpawnerEffect;
+
+/* A spawner at a fixed point: `position`, then the spawn rate as in Game113D60Spawner. */
+typedef struct {
+    /* 0x00 */ Vec3f position;
+    /* 0x0C */ f32 rate;
+    /* 0x10 */ f32 rateRange;
+    /* 0x14 */ f32 accum;
+} Game113D60PointSpawner;
+
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ Game113D60PointSpawner spawner;
+} Game113D60PointSpawnerEffect;
+
+/* Extra data of the particles func_150E93DC spawns, stored at 0x170 of each particle. */
+typedef struct {
+    /* 0x00 */ f32 floorY;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u8 unk8[0x14];
+} Game113D60DebrisExtra;
+
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x028 */ u8 pad28[0x10];
+    /* 0x038 */ Vec3f position;
+    /* 0x044 */ u8 pad44[0x12C];
+    /* 0x170 */ Game113D60DebrisExtra extra;
+} Game113D60Debris;
+
+void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex);
+void func_150E6B84(Game113D60Effect *effect);
+void func_150E6E34(Vec3f *out);
+void func_150E6ED8(Vec3f *out);
+void func_150E6F18(Vec3f *out);
+void func_150E6FAC(Vec3f *out, Actor *actor);
+void func_150E70CC(Vec3f *out, Actor *actor);
+void func_150E70EC(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission);
+void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission);
+void func_150E7290(u8 arg0, u8 owner, s32 kind);
+void func_150E75A0(Vec2f *position, f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids,
+                   s32 idCount, u8 owner, s32 kind);
+void func_150E76D0(f32 size, s16 unk12, u8 flags, u8 unk1E, u8 unk23, s16 unk16, s16 unk18, s32 *ids, s32 idCount,
+                   u8 owner, s32 kind);
+TimedEffect *func_150E7994(s16 count, f32 rate, u8 owner, s32 kind);
+void func_150E7C9C(Game113D60BurstEffect *effect);
+void func_150E7FEC(f32 size, u8 arg1, s32 arg2, Vec3f *position, s16 duration, u8 arg5, u8 arg6, u8 arg7, u8 arg8,
+                   u8 arg9, u8 owner, s32 kind);
+void func_150E81A8(s32 index, s32 owner, s32 kind);
+void func_150E83AC(Vec3f *position, s16 duration, u8 owner, s32 kind);
+void func_150E8470(Game113D60EmitterEffect *effect);
+s32 func_150E8824(Game113D60Particle *particle, s32 arg1);
+void func_150E8854(void);
+void func_150E88C0(Game113D60TimerEffect *effect);
+void func_150E8930(void);
+void func_150E8A80(void);
+void func_150E8B1C(Game113D60RegionSpawnerEffect *effect);
+void func_150E8D5C(Game113D60PointSpawnerEffect *effect);
+void func_150E90DC(void);
+void func_150E9178(Game113D60RegionSpawnerEffect *effect);
+void func_150E93DC(Game113D60PointSpawnerEffect *effect);
+s32 func_150E971C(Game113D60Debris *debris);
+
+/* game_116D40.c */
+/* Spawner state at +0x28 of a burst emitter. */
+typedef struct {
+    /* 0x00 */ s32 source;      // where func_1514470C places each burst
+    /* 0x04 */ f32 rateBase;    // bursts per unit of D_800BE9A4
+    /* 0x08 */ f32 rateRange;
+    /* 0x0C */ f32 scaleBase;   // size scale passed to func_150E9890
+    /* 0x10 */ f32 scaleRange;
+    /* 0x14 */ f32 spawnAccum;
+} BurstSpawner;
+
+/* Timed effect driven by func_150E9E34 (a D_8008A4E8 tick callback). */
+typedef struct {
+    /* 0x00 */ TimedEffect base;
+    /* 0x28 */ BurstSpawner spawner;
+} RandomBurstEmitter;
+
+void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4);
+void func_150E9E34(RandomBurstEmitter *emitter);
 
 /* game_120950.c */
 f32 func_150F34A0(Actor *obj, f32 pitch);

@@ -6,42 +6,6 @@
 #undef func_150ADA20
 u8 func_150ADA20(void);
 #include "variables.h"
-#include "effects.h"
-
-/* Object data (at +0x28) of a trigger that spawns spark emitters. */
-typedef struct EmitterTrigger {
-    s16 *record;
-    s32 minDelay;
-    s32 delayRange;
-    s32 countdown;
-    f32 matrix[16];
-    u8 params[2]; // [0] bit 0: spawn periodically; [1]: id matched by event 0x34
-                  // matching: one array; two u8 fields swap the compare's registers in func_150D32FC
-} EmitterTrigger;
-
-/* Object data (at +0x28) of a spark emitter: created by func_150D278C, updated by func_150D2924. */
-typedef struct RingSparkEmitter {
-    s16 *record;
-    f32 angle;
-    f32 rate;
-    f32 interval;
-    f32 angleStep;
-    f32 spawnAccum;
-    f32 elapsed;
-    f32 matrix[16];
-    u8 color[3];
-} RingSparkEmitter; // size 0x60
-
-/* Timed effect (func_15149130) of this file, with an emitter trigger or a spark emitter (func_150D278C) as data. */
-typedef struct SparkEffect {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ union {
-        EmitterTrigger trigger;
-        RingSparkEmitter emitter;
-    } data;
-} SparkEffect;
-
-void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1);
 
 /* While params[0] bit 0 is set, spawns a spark emitter after each random delay. */
 void func_150D26F0(SparkEffect *obj) {
@@ -85,29 +49,6 @@ void func_150D278C(s16 *record, f32 *matrix, u8 unkC, s32 unk1) {
         memcpy(&((SparkEffect *)object)->data, &emitter, sizeof(emitter));
     }
 }
-
-/* Motion data (at +0x110) of a spark particle spawned by func_150D2924. */
-typedef struct SparkMotion {
-    f32 posX;
-    f32 posY;
-    f32 baseX;
-    f32 baseY;
-    f32 amplitudeX;
-    f32 amplitudeY;
-    f32 phaseX;
-    f32 phaseY;
-    f32 phaseSpeedX;
-    f32 phaseSpeedY;
-    f32 life;
-    f32 fadeScale;
-} SparkMotion;
-
-typedef struct RingSparkParticle {
-    u8 pad0[0x5C];
-    u8 unk5C; // fades out with the remaining life
-    u8 pad5D[0xB3];
-    SparkMotion motion;
-} RingSparkParticle;
 
 extern void func_150A7960(f32 *matrix, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_1514373C(f32 angle, f32 radius, f32 *outX, f32 *outZ);
@@ -187,11 +128,6 @@ void func_150D2924(SparkEffect *obj) {
 void func_150AD8B0(f32 *a, f32 *b, f32 *out);
 Vec3f *func_15144B34(s32 viewport);
 void func_151D5D60(Vtx **buffers, s16 index, s32 size, Vtx **out, u8 *fresh);
-
-typedef struct GameFFBA0Beam {
-    /* 0x00 */ DefParticleHead head;
-    /* 0x110 */ f32 texture[2];
-} GameFFBA0Beam;
 
 /*
  * Builds the beam's camera-facing quad (start to end, `width` to each side) in this frame's

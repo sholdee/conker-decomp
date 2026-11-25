@@ -840,7 +840,6 @@ ModelAttachment *func_150319CC(s32 setId, Actor *owner) {
     return NULL;
 }
 
-void func_150D5440(void *, u8, s32);
 void func_150D3360(void *, u8, s32);
 void func_151001B4();
 void func_15163BE8(void *, u8, s32);

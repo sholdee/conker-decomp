@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 
 extern void *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
@@ -111,22 +110,6 @@ void func_150E9890(Vec3f *pos, Vec3f *vel, f32 scale, u8 arg3, s32 arg4) {
 
 
 void func_1514470C(s32, Vec3f *);
-
-/* Spawner state at +0x28 of a burst emitter. */
-typedef struct {
-    /* 0x00 */ s32 source;      // where func_1514470C places each burst
-    /* 0x04 */ f32 rateBase;    // bursts per unit of D_800BE9A4
-    /* 0x08 */ f32 rateRange;
-    /* 0x0C */ f32 scaleBase;   // size scale passed to func_150E9890
-    /* 0x10 */ f32 scaleRange;
-    /* 0x14 */ f32 spawnAccum;
-} BurstSpawner;
-
-/* Timed effect driven by func_150E9E34 (a D_8008A4E8 tick callback). */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ BurstSpawner spawner;
-} RandomBurstEmitter;
 
 /* Emitter update (handler table entry): accumulates a random spawn rate and, for each whole unit,
  * fires a func_150E9890 burst at the spawner's source with a random direction and scale. */

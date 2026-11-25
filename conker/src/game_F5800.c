@@ -63,8 +63,6 @@ void func_150C84F4(s32 arg0) {
     }
 }
 
-void func_150CDB6C(s32);
-
 /* Gives every record a random target speed: scale * 300 / 256 plus 0 .. scale * 50 / 256 + 49. */
 void func_150C851C(s32 scale) {
     s32 i;

@@ -126,7 +126,6 @@ void func_1507CD0C(Actor *obj) {
 
 void func_15169040(void *, s32);
 void func_1504BAF0(Actor *);
-void func_150E7994(s16, f32, u8, s32);
 
 /* Kills obj with the given cause: plays its sound, resets movement and moves it to a dead state. */
 void func_1507CD64(Actor *obj, s32 cause) {

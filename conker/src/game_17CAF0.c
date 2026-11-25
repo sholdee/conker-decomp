@@ -858,7 +858,6 @@ void func_15152520(ModelBurst *config, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_150CCEB0(DriftSpawn *, u8, u8);
 extern void (*D_8008AC60[])(Color8 *);
 
 void func_15152874(DriftBurst *config, u8 arg1, s32 arg2) {

@@ -1,37 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Per-effect motion state of a drifting quad (lives at DriftQuad + 0x110). */
-typedef struct {
-    /* 0x00 */ Vec3f vel;
-    /* 0x0C */ f32 gravity;
-    /* 0x10 */ f32 drag;
-    /* 0x14 */ Vec3f spin; /* added to DriftQuad.dir every frame */
-    /* 0x20 */ u8 pad20[4];
-    /* 0x24 */ f32 swayLength;
-    /* 0x28 */ f32 swayLengthRate;
-    /* 0x2C */ f32 swayYaw;
-    /* 0x30 */ f32 phase;
-    /* 0x34 */ f32 phaseSpeed;
-    /* 0x38 */ f32 phaseScale;
-    /* 0x3C */ f32 minVy;
-} QuadDriftMotion; /* size 0x40 */
-
-/* Effect instance created by func_1513D524 from an ParticleDef. */
-typedef struct {
-    /* 0x000 */ u8 pad0[0x2C];
-    /* 0x02C */ f32 halfWidth;
-    /* 0x030 */ f32 halfHeight;
-    /* 0x034 */ Vec3f pos;
-    /* 0x040 */ Vec3f dir;   /* rotation angles for func_150A8050 */
-    /* 0x04C */ Vec3f sway;  /* offset added to pos while falling */
-    /* 0x058 */ u8 pad58[0x68];
-    /* 0x0C0 */ Vtx_t template[4];
-    /* 0x100 */ Vtx_t *buffers[4]; /* each holds two copies of the 4-vertex quad */
-    /* 0x110 */ QuadDriftMotion drift;
-} DriftQuad;
 
 
 /* Spawns a tumbling, swaying quad that drifts down from spawn->pos. */
@@ -197,17 +166,6 @@ Vtx_t *func_150CD59C(DriftQuad *effect, s16 bufferIndex) {
 typedef struct {
     f32 yaw[5];
 } BurstYaws;
-
-typedef struct {
-    f32 pending; /* bursts owed; one is spawned per whole unit */
-    f32 rate;    /* 0..1, set by func_150CDB6C */
-} BurstTimer;
-
-/* Timed effect driven by func_150CD7F8 (a D_8008A4E8 tick callback); D_80088870 points at one. */
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ BurstTimer timer;
-} DriftBurstEmitter;
 
 extern BurstYaws D_80088874;
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);

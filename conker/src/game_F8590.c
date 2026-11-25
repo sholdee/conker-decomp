@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern f32 D_800A05E0[];
 extern f32 D_800A05EC[];
@@ -52,27 +51,6 @@ s32 func_150CB0E0(f32 *pos, Actor *actor, CollisionHit *ground, u8 side) {
 s32 func_150CB1E0(s32 arg0, s32 arg1) {
     return 0xB;
 }
-
-/* Growth applied by func_150CBA30, stored in the dust particle at 0x128. */
-typedef struct {
-    /* 0x00 */ s16 growTime; // frames left to grow
-    /* 0x04 */ f32 growRate; // size gained per frame
-} DustGrowth;
-
-/* The dust puff particle func_150CB1F4 spawns (func_1513D668, a DefParticleHead view); updated by func_150CBA30. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0xC];
-    /* 0x01C */ s16 timer;
-    /* 0x01E */ u8 pad1E[0xE];
-    /* 0x02C */ f32 size0;
-    /* 0x030 */ f32 size1;
-    /* 0x034 */ u8 pad34[0x24];
-    /* 0x058 */ s32 flags;
-    /* 0x05C */ u8 alpha;
-    /* 0x05D */ u8 pad5D[0xCB];
-    /* 0x128 */ DustGrowth growth;
-} DustPuff;
 
 /* One corner colour passed to func_1513D668. */
 typedef struct {
@@ -355,18 +333,6 @@ s32 func_150CBCE0(SparkParticle *particle, s32 arg1) {
     return 1;
 }
 
-/* Particle moved by func_150CBE88. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0x10];
-    /* 0x20 */ f32 unk20[3]; // integrated from unk50
-    /* 0x2C */ u8 pad2C[0xC];
-    /* 0x38 */ f32 pos[3];
-    /* 0x44 */ f32 vel[3];
-    /* 0x50 */ f32 unk50[3];
-    /* 0x5C */ f32 gravity;  // added to vel[1]
-} BallisticParticle;
-
 /* Advances the particle one frame step under constant vertical acceleration. */
 s32 func_150CBE88(BallisticParticle *particle) {
     particle->pos[0] += particle->vel[0] * D_800BE9A4;
@@ -378,15 +344,6 @@ s32 func_150CBE88(BallisticParticle *particle) {
     particle->unk20[2] += particle->unk50[2] * D_800BE9A4;
     return 1;
 }
-
-/* Particle handled by func_150CBF5C. */
-typedef struct {
-    /* 0x00 */ EffectHeader header;
-    /* 0x10 */ u8 pad10[0xC];
-    /* 0x1C */ s16 timer;
-    /* 0x1E */ u8 pad1E[0x3A];
-    /* 0x58 */ s32 flags;
-} FadeoutParticle;
 
 /* Sets flag 1 and a 32-frame timer (the fade-out func_150CBA30 runs on its dust). */
 void func_150CBF5C(FadeoutParticle *particle) {

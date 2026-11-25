@@ -1,49 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
-
-/* Effect (a TimedEffect with per-effect data at 0x28) that follows an object. */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 spawnAccum;
-} FollowEffectData;
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ FollowEffectData data;
-} FollowEffect;
-
-/* Per-particle data of the drifting particles that follow an object (func_150D6CC4). */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 drag; /* passed to func_15131958 with the velocity */
-} FollowDriftData;
-
-/* Per-particle data of the growing, fading particle that follows an object (func_150D6F0C). */
-typedef struct {
-    /* 0x00 */ Actor *owner;
-    /* 0x04 */ u8 ownerId;
-    /* 0x05 */ u8 pad5[3];
-    /* 0x08 */ f32 time;
-    /* 0x0C */ f32 lifetime;
-    /* 0x10 */ f32 growth;    /* size = sqrt(time) * growth */
-    /* 0x14 */ f32 fadeStart; /* unk2B = fadeStart - fadeRate * time^2 */
-    /* 0x18 */ f32 fadeRate;
-} GrowParticleData;
-
-/* Live particle, as created by func_15130280 from a ParticleDesc. */
-typedef struct {
-    /* 0x00 */ DescParticleHead head;
-    /* 0xA8 */ union {
-        FollowDriftData drift;
-        GrowParticleData grow;
-    } data;
-} FollowParticle;
 
 extern void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 extern s32 func_1515C0F8(Actor *arg0, f32 **arg1);
@@ -203,10 +160,6 @@ void func_15143874(s16, f32, f32 *, f32 *);
 void func_151C05A4(Vec3f *, u8, s32);
 void func_151C05F0(Vec3f *, u8, s32);
 void func_151C0360(f32 *, s32 *, u8, s32);
-void func_150D6388(Vec3f *pos, u8 arg1, s32 arg2);
-void func_150D6434(Vec3f *pos, u8 arg1, s32 arg2);
-void func_150D65F0(f32 *pos, s32 *arg1, u8 arg2, s32 arg3);
-void func_150D66A4(u8 arg0, u8 arg1, s32 arg2);
 
 /*
  * Breakup effect for obj: plays sounds, then spawns pieces (three fixed models, then
@@ -429,31 +382,6 @@ void func_150D6434(Vec3f *pos, u8 arg1, s32 arg2) {
     func_15154884(pos, rand1 * 3.0f + 8.0f, rand2 * 0.4030000269f + 1.305000067f, rand3 * 50.0f + 100.0f, arg1, arg2);
 }
 
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ u8  pad08[0xC];
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ s16 unk44;
-    /* 0x46 */ s16 unk46;
-    /* 0x48 */ s16 unk48;
-    /* 0x4A */ s16 unk4A;
-    /* 0x4C */ s16 unk4C;
-    /* 0x4E */ s16 unk4E;
-    /* 0x50 */ s8  unk50;
-} Struct150D64E8;
-
 /* Fills in fixed settings; unk50 is -1 when D_80082FA0 >= 2 or D_8008FD8C >= 8, else 0. */
 void func_150D64E8(Struct150D64E8 *info, f32 *outValue) {
     info->unk00 = 6;
@@ -507,7 +435,6 @@ void func_150D66A4(u8 arg0, u8 arg1, s32 arg2) {
     func_15182670(0xFF, 0xFF, 0xFF, rand1 % 56 + 200, rand2 % 6 + 25, arg0, arg1, arg2);
 }
 
-void func_150D6C98(Actor *obj, Vec3f *out);
 extern void func_15143794(s16, s16, f32, Vec3f *);
 
 /* Spawns 15-25 drift particles and one grow particle that follow obj. */
