@@ -11,16 +11,8 @@ extern s32 D_800902BC[];
 void func_1000FD38(void *, void *, s32);
 s32 func_15033BDC();
 
-typedef struct Game5D2C0RenderState {
-    u8 pad_0[0x2];
-    u8 field_0x02;
-    u8 pad_0x03[0x13];
-    u8 field_0x16;
-    u8 pad_0x17[0x29];
-    f32 field_0x40;
-} Game5D2C0RenderState;
 
-Game5D2C0RenderState *func_15083568(struct127 *, s32, f32, s32);
+
 extern void func_150A7A48(f32 arg0[4][4], f32 arg1[4][4], f32 arg2[4][4]);
 extern void func_1503E5F8();
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
@@ -216,6 +208,7 @@ typedef struct Attachment {
 } Attachment; // size 0x5C
 
 void func_15031C14(Attachment *att);
+Attachment *func_15083568(struct127 *obj, s32 setId, f32 arg2, s32 arg3);
 void func_1503F5B8(AnimInstance *anim, s32 arg1, s32 animId, f32 arg3, f32 arg4, s32 arg5);
 void func_1503F7B8(AnimInstance *anim);
 
@@ -466,7 +459,7 @@ typedef struct S15030468 {
 
 typedef s32 (*S15030468Func)(S15030468 *, struct127 *);
 extern S15030468Func D_800841C0[];
-s32 func_15031070(S15031070 *arg0, struct127 *arg1, u8 **arg2, u8 **arg3);
+s32 func_15031070(Attachment *att, struct127 *owner, Mtx **mtx, Mtx **boneMtx);
 void func_1503F4B0(S15031070Sub *);
 
 void func_15030468(void) {
@@ -538,7 +531,7 @@ void func_15030468(void) {
                             var = next;
                             continue;
                         }
-                        if (func_15031070((S15031070 *)ret, obj, &sp198, &sp194) == 0) {
+                        if (func_15031070((Attachment *)ret, obj, (Mtx **)&sp198, (Mtx **)&sp194) == 0) {
                             func_15030158((Func15030158Arg0 *)var, 0);
                             var = next;
                             continue;
@@ -749,28 +742,21 @@ Attachment *func_15030AF4(struct127 *owner, s32 model, s32 bone, s32 flags, s32 
     return att;
 }
 
-extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-void func_15030D54(void *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6)
-{
-  f32 *temp;
-  temp = allocate_memory(0x18, 1, 0, 2);
-  *((f32 **) (((u8 *) arg0) + 0x44)) = temp;
-  if (temp)
-  {
-    temp[((0, (*((s32 *) (((u8 *) arg0) + 0x34))) == 0)) * 0] = arg1;
-    *((f32 *) ((*((s32 *) (((u8 *) arg0) + 0x44))) + 0x4)) = arg2;
-    *((f32 *) ((*((s32 *) (((u8 *) arg0) + 0x44))) + 0x8)) = arg3;
-    *((f32 *) ((*((s32 *) (((u8 *) arg0) + 0x44))) + 0xC)) = arg4;
-    *((f32 *) ((*((s32 *) (((u8 *) arg0) + 0x44))) + 0x10)) = arg5;
-    temp = ((u8 *) arg0) + 0x44;
-    *((f32 *) ((*((s32 *) temp)) + 0x14)) = arg6;
-    if (0, (*((s32 *) (((u8 *) arg0) + 0x34))) == 0)
-    {
-      *((void **) (((u8 *) arg0) + 0x34)) = allocate_memory(0x80, 1, 2, 2);
+/* Gives the attachment a fixed offset from its bone, and a matrix buffer to draw it with. */
+void func_15030D54(Attachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY, f32 rotZ) {
+    att->offset = allocate_memory(sizeof(AttachmentOffset), 1, 0, 2);
+    if (att->offset != NULL) {
+        att->offset->x = x;
+        att->offset->y = y;
+        att->offset->z = z;
+        att->offset->rotX = rotX;
+        att->offset->rotY = rotY;
+        att->offset->rotZ = rotZ;
+        if (att->mtx == NULL) {
+            att->mtx = allocate_memory(2 * sizeof(Mtx), 1, 2, 2);
+        }
     }
-  }
 }
-
 
 struct S15030F94 {
     u8 unk0;
@@ -858,35 +844,37 @@ s32 func_15030F94(s32 arg0, struct127 *arg1, s32 arg2, s32 arg3) {
 }
 
 
-s32 func_15031070(S15031070 *arg0, struct127 *arg1, u8 **arg2, u8 **arg3) {
-    S15031070 *other;
+/* Finds the matrix to draw `att` with this frame (*mtx) and the bone matrix it follows (*boneMtx).
+ * Returns 0 when none is available yet. */
+s32 func_15031070(Attachment *att, struct127 *owner, Mtx **mtx, Mtx **boneMtx) {
+    Attachment *parent;
 
-    if (arg0->unk48 != NULL) {
-        if (arg0->unk48->unk3F6 == 0) {
+    if (att->anim != NULL) {
+        if (att->anim->unk3F6 == 0) {
             return 0;
         }
-        *arg2 = arg0->unk48->unk3E8[D_800BE9C0];
-        *arg3 = arg0->unk48->unk3E0[D_800BE9C0];
-    } else if (arg0->unk34 != NULL) {
-        *arg2 = arg0->unk34 + (D_800BE9C0 << 6);
-        *arg3 = (u8 *)arg1->unk1D4 + (arg0->unk2 << 6);
-    } else if (arg0->unk1E) {
-        other = (S15031070 *)func_1503195C(arg1, arg0->unk1E, 0);
-        if (other == NULL) {
+        *mtx = (Mtx *)att->anim->unk3E8[D_800BE9C0];
+        *boneMtx = (Mtx *)att->anim->unk3E0[D_800BE9C0];
+    } else if (att->mtx != NULL) {
+        *mtx = &att->mtx[D_800BE9C0];
+        *boneMtx = (Mtx *)owner->unk1D4 + att->bone;
+    } else if (att->parentSet) {
+        parent = (Attachment *)func_1503195C(owner, att->parentSet, 0);
+        if (parent == NULL) {
             return 0;
         }
-        if (func_15031070(other, arg1, arg2, arg3) == 0) {
+        if (func_15031070(parent, owner, mtx, boneMtx) == 0) {
             return 0;
         }
         {
-            s32 pad;
-            *arg2 += arg0->unk20 << 6;
+            s32 pad; // matching: as1 schedules the store after `li v0,1` only with this block
+            *mtx += att->parentMtx;
         }
         return 1;
     } else {
-        *arg2 = (u8 *)arg1->unk1D4;
-        *arg2 += arg0->unk2 << 6;
-        *arg3 = *arg2;
+        *mtx = (Mtx *)owner->unk1D4;
+        *mtx += att->bone;
+        *boneMtx = *mtx;
     }
     return 1;
 }
@@ -948,7 +936,7 @@ Gfx *func_150311C4(Gfx *gdl, struct S15030F94 *arg1, struct127 *arg2, s32 arg3, 
     } else {
         gSPSegment(gdl++, 8, D_80083140);
     }
-    if (func_15031070((S15031070 *)arg1, arg2, &sp114, &sp110) == 0) {
+    if (func_15031070((Attachment *)arg1, arg2, (Mtx **)&sp114, (Mtx **)&sp110) == 0) {
         return gdl;
     }
     func_1502D54C(arg2 - D_800CC2D0, spBC);
@@ -2747,66 +2735,68 @@ s32 func_150334B8(Attachment *att, struct127 *owner) {
     return 0;
 }
 
-void *func_150335C8(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
-    Game5D2C0RenderState *temp_v0;
-    f32 sp124[4][4];
-    f32 spE4[4][4];
-    f32 spA4[4][4];
-    f32 sp64[4][4];
-    f32 sp60;
-    f32 sp5C;
-    f32 sp58;
-    f32 sp54;
-    f32 sp50;
-    f32 sp4C;
-    f32 sp48;
-    f32 sp44;
-    f32 sp40;
+/* Attaches set `setId` to bone `bone` of `target`, with the offset that keeps it where `obj` is now
+ * (only rotation when `noTranslation`). */
+Attachment *func_150335C8(struct127 *obj, struct127 *target, s32 setId, s32 bone, s32 arg4, s32 noTranslation) {
+    Attachment *att;
+    f32 boneMtx[4][4];
+    f32 invBoneMtx[4][4];
+    f32 objMtx[4][4];
+    f32 relMtx[4][4];
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 scaleX;
+    f32 scaleY;
+    f32 scaleZ;
+    f32 rotX;
+    f32 rotY;
+    f32 rotZ;
     f32 scale;
 
-    if (arg1->unk1D4 == 0) {
-        return 0;
+    if (target->unk1D4 == NULL) {
+        return NULL;
     }
 
-    temp_v0 = func_15083568(arg1, arg2, 1.0f, 0);
-    if (temp_v0 != 0) {
-        temp_v0->field_0x02 = arg3;
-        temp_v0->field_0x40 = arg0->xz_scale;
+    att = func_15083568(target, setId, 1.0f, 0);
+    if (att != NULL) {
+        att->bone = bone;
+        att->scale = obj->xz_scale;
 
         if (arg4 != 0) {
-            temp_v0->field_0x16 = temp_v0->field_0x16 & ~4;
+            att->unk16 &= ~4;
         } else {
-            temp_v0->field_0x16 = temp_v0->field_0x16 | 4;
+            att->unk16 |= 4;
         }
 
-        guMtxL2F(sp124, (Mtx *)((u8 *)arg1->unk1D4 + (arg3 << 6)));
-        func_15048B10((s32)sp124, (s32)spE4);
+        guMtxL2F(boneMtx, (Mtx *)((u8 *)target->unk1D4 + (bone << 6)));
+        func_15048B10((s32)boneMtx, (s32)invBoneMtx);
 
-        scale = arg0->xz_scale;
-        func_150A9B0C(spA4, arg0->unkB8, arg0->unk40, arg0->unkC4, scale, arg0->y_scale, scale);
+        scale = obj->xz_scale;
+        func_150A9B0C(objMtx, obj->unkB8, obj->unk40, obj->unkC4, scale, obj->y_scale, scale);
 
-        spA4[3][0] = arg0->x_position;
-        spA4[3][1] = arg0->y_position;
-        spA4[3][2] = arg0->z_position;
-        spA4[0][3] = 0.0f;
-        spA4[1][3] = 0.0f;
-        spA4[2][3] = 0.0f;
-        spA4[3][3] = 1.0f;
+        objMtx[3][0] = obj->x_position;
+        objMtx[3][1] = obj->y_position;
+        objMtx[3][2] = obj->z_position;
+        objMtx[0][3] = 0.0f;
+        objMtx[1][3] = 0.0f;
+        objMtx[2][3] = 0.0f;
+        objMtx[3][3] = 1.0f;
 
-        func_150A7A48(spA4, spE4, sp64);
-        func_1503E5F8(sp64, &sp60, &sp5C, &sp58, &sp48, &sp44, &sp40, &sp54, &sp50, &sp4C);
+        func_150A7A48(objMtx, invBoneMtx, relMtx);
+        func_1503E5F8(relMtx, &x, &y, &z, &rotX, &rotY, &rotZ, &scaleX, &scaleY, &scaleZ);
 
-        if (arg5 != 0) {
-            sp58 = 0.0f;
-            sp5C = 0.0f;
-            sp60 = 0.0f;
+        if (noTranslation) {
+            z = 0.0f;
+            y = 0.0f;
+            x = 0.0f;
         }
 
-        func_15030D54(temp_v0, sp60, sp5C, sp58, sp48, sp44, sp40);
-        return temp_v0;
+        func_15030D54(att, x, y, z, rotX, rotY, rotZ);
+        return att;
     }
 
-    return 0;
+    return NULL;
 }
 
 /* Hook: model 0x11 is removed unless its owner is in one of a few states. */
