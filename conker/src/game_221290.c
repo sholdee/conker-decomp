@@ -136,9 +136,13 @@ extern s16 D_800AE840[][3][22];  /* long-block band ends, [id][sampleRateIndex] 
 extern u8  D_800AE948[][3][13];  /* short-block band ends, [id][sampleRateIndex] */
 extern s32 D_800AE7B8[34];       /* Huffman linbits, per table */
 extern Mp3Pretab D_800B0AB4;
-/* Scalefactor-band boundary table, six [id][sfreq] rows of 37 s16: entries
- * 0..22 are the 23 long-block boundaries, 23..36 the 14 short-block ones. */
-extern s16 D_800AE998[6][37];
+/* Scalefactor-band boundaries, one row per id * 3 + sampleRateIndex. */
+typedef struct {
+    /* 0x00 */ s16 l[23]; /* long-block band boundaries, l[0] = 0 */
+    /* 0x2E */ s16 s[14]; /* short-block band boundaries (per window) */
+} Mp3BandBounds; /* size 0x4A */
+
+extern Mp3BandBounds D_800AE998[6];
 extern Mp3SfbCounts D_800B0B0C;
 extern s16 D_800AEB7C[2][3][576]; /* short-block reorder index, [id][sampleRateIndex] */
 extern f32 D_800B067C[8];        /* alias-reduction ca */
@@ -240,126 +244,124 @@ s32 func_151F3DE0(void) {
     return 1;
 }
 
-s32 func_151F42E8(Mp3Decoder *arg0, s32 arg1, s32 arg2) {
-    s32 sp1BC;
-    s32 sp1B8;
-    s32 sp1B4;
-    s32 sp1B0;
-    Mp3Pretab sp158 = D_800B0AB4;
-    f32 sp100[22];
-    f32 sp64[3][13];
-    f32 sp60;
-    s32 sp5C;
-    s32 sp58;
-    s32 sp54;
-    s32 sp50;
-    s32 sp4C;
-    s32 sp48;
-    s32 sp44;
-    f32 *sp40;
-    s16 *sp3C;
-    u8 *sp38;
-    s32 sp34;
-    s32 sp30;
-    s32 sp2C;
-    s32 sp28;
-    f32 *sp24;
+/* Dequantisation: xr = sign * |val|^(4/3) * 2^((globalGain - 210) / 4) * the
+ * band's scalefactor (and, for short windows, subblock-gain) power, walking
+ * the long / short band boundaries; lines past nonZero are cleared. */
+s32 func_151F42E8(Mp3Decoder *dec, s32 gr, s32 ch) {
+    s32 bandTable;
+    s32 bandEnd;
+    s32 windowStart;
+    s32 windowWidth;
+    Mp3Pretab pretab = D_800B0AB4;
+    f32 longGain[22];
+    f32 shortGain[3][13];
+    f32 globalGain;
+    s32 sfb;
+    s32 window;
+    s32 scalefacScale;
+    s32 subblockGain;
+    s32 exponent;
+    s32 line;
+    s32 lineCount;
+    f32 *xr;
+    s16 *val;
+    u8 *sign;
+    s32 pureShort;
+    s32 mixedShort;
+    s32 windowSwitching;
+    s32 windowEnd;
+    f32 *gains;
 
-    sp1BC = arg0->sampleRateIndex + arg0->id * 3;
-    if ((arg0->windowSwitching[arg1][arg2] != 0) && (arg0->blockType[arg1][arg2] == 2)) {
-        if (arg0->mixedBlock[arg1][arg2] != 0) {
-            sp1B8 = D_800AE998[sp1BC][1];
+    bandTable = dec->sampleRateIndex + dec->id * 3;
+    if ((dec->windowSwitching[gr][ch] != 0) && (dec->blockType[gr][ch] == 2)) {
+        if (dec->mixedBlock[gr][ch] != 0) {
+            bandEnd = D_800AE998[bandTable].l[1];
         } else {
-            sp1B8 = D_800AE998[sp1BC][24] * 3;
-            sp1B0 = D_800AE998[sp1BC][24];
-            sp1B4 = 0;
+            bandEnd = D_800AE998[bandTable].s[1] * 3;
+            windowWidth = D_800AE998[bandTable].s[1];
+            windowStart = 0;
         }
     } else {
-        sp1B8 = D_800AE998[sp1BC][1];
+        bandEnd = D_800AE998[bandTable].l[1];
     }
-    sp60 = func_1504A400(2.0f, ((f32)arg0->globalGain[arg1][arg2] - 210.0f) * 0.25f);
-    sp54 = arg0->scalefacScale[arg1][arg2];
-    for (sp5C = 0; sp5C < 22; sp5C++) {
-        sp4C = (arg0->scalefac[arg1][arg2].l[sp5C] +
-                arg0->preflag[arg1][arg2] * sp158.band[sp5C]) * (sp54 + 1);
-        sp100[sp5C] = D_800E1080[sp4C] * sp60;
+    globalGain = func_1504A400(2.0f, (dec->globalGain[gr][ch] - 210.0f) * 0.25f);
+    scalefacScale = dec->scalefacScale[gr][ch];
+    for (sfb = 0; sfb < 22; sfb++) {
+        exponent = (dec->scalefac[gr][ch].l[sfb] +
+                dec->preflag[gr][ch] * pretab.band[sfb]) * (scalefacScale + 1);
+        longGain[sfb] = D_800E1080[exponent] * globalGain;
     }
-    for (sp58 = 0; sp58 < 3; sp58++) {
-        for (sp5C = 0; sp5C < 13; sp5C++) {
-            sp50 = arg0->subblockGain[arg1][arg2][sp58];
-            sp4C = arg0->scalefac[arg1][arg2].s[sp58][sp5C] * (sp54 + 1);
-            sp64[sp58][sp5C] = sp60 * D_800E1480[sp50] * D_800E1080[sp4C];
+    for (window = 0; window < 3; window++) {
+        for (sfb = 0; sfb < 13; sfb++) {
+            subblockGain = dec->subblockGain[gr][ch][window];
+            exponent = dec->scalefac[gr][ch].s[window][sfb] * (scalefacScale + 1);
+            shortGain[window][sfb] = globalGain * D_800E1480[subblockGain] * D_800E1080[exponent];
         }
     }
-    sp5C = 0;
-    sp48 = 0;
-    sp44 = arg0->nonZero[arg2];
-    sp40 = arg0->xr[arg2];
-    sp3C = arg0->huffVal[arg2];
-    sp38 = arg0->huffSign[arg2];
-    sp34 = (arg0->blockType[arg1][arg2] == 2) && (arg0->mixedBlock[arg1][arg2] == 0);
-    sp30 = (arg0->blockType[arg1][arg2] == 2) && (arg0->mixedBlock[arg1][arg2] != 0);
-    sp2C = arg0->windowSwitching[arg1][arg2];
-    while (sp48 < sp44) {
-        if (sp1B8 > sp44) {
-            sp1B8 = sp44;
+    sfb = 0;
+    line = 0;
+    lineCount = dec->nonZero[ch];
+    xr = dec->xr[ch];
+    val = dec->huffVal[ch];
+    sign = dec->huffSign[ch];
+    pureShort = (dec->blockType[gr][ch] == 2) && (dec->mixedBlock[gr][ch] == 0);
+    mixedShort = (dec->blockType[gr][ch] == 2) && (dec->mixedBlock[gr][ch] != 0);
+    windowSwitching = dec->windowSwitching[gr][ch];
+    while (line < lineCount) {
+        if (bandEnd > lineCount) {
+            bandEnd = lineCount;
         }
-        if (sp2C && (sp34 || (sp30 && (sp48 >= 0x24)))) {
-            sp58 = (sp48 - sp1B4) / sp1B0;
-            sp28 = sp1B4 + sp1B0;
+        if (windowSwitching && (pureShort || (mixedShort && (line >= 36)))) {
+            window = (line - windowStart) / windowWidth;
+            windowEnd = windowStart + windowWidth;
         }
-        while (sp48 < sp1B8) {
-            if (sp2C && (sp34 || (sp30 && (sp48 >= 0x24)))) {
-                if (sp48 >= sp28) {
-                    sp28 += sp1B0;
-                    sp58++;
+        while (line < bandEnd) {
+            if (windowSwitching && (pureShort || (mixedShort && (line >= 36)))) {
+                if (line >= windowEnd) {
+                    windowEnd += windowWidth;
+                    window++;
                 }
-                sp24 = sp64[sp58];
-                if (*sp38++) {
-                    *sp40++ = -(D_800E1078[*sp3C++] * sp24[sp5C]);
+                gains = shortGain[window];
+                if (*sign++) {
+                    *xr++ = -(D_800E1078[*val++] * gains[sfb]);
                 } else {
-                    *sp40++ = D_800E1078[*sp3C++] * sp24[sp5C];
+                    *xr++ = D_800E1078[*val++] * gains[sfb];
                 }
             } else {
-                if (*sp38++) {
-                    *sp40++ = -(D_800E1078[*sp3C++] * sp100[sp5C]);
+                if (*sign++) {
+                    *xr++ = -(D_800E1078[*val++] * longGain[sfb]);
                 } else {
-                    *sp40++ = D_800E1078[*sp3C++] * sp100[sp5C];
+                    *xr++ = D_800E1078[*val++] * longGain[sfb];
                 }
             }
-            sp48++;
+            line++;
         }
-        if ((arg0->windowSwitching[arg1][arg2] != 0) && (arg0->blockType[arg1][arg2] == 2)) {
-            if (arg0->mixedBlock[arg1][arg2] != 0) {
-                if (D_800AE998[sp1BC][8] == sp48) {
-                    sp1B8 = D_800AE998[sp1BC][27] * 3;
-                    sp5C = 3;
-                    sp1B0 = D_800AE998[sp1BC][sp5C + 24] - D_800AE998[sp1BC][sp5C + 23];
-                    sp1B4 = D_800AE998[sp1BC][sp5C + 23] * 3;
-                } else if (sp48 < D_800AE998[sp1BC][8]) {
-                    sp1B8 = D_800AE998[sp1BC][++sp5C + 1];
+        if ((dec->windowSwitching[gr][ch] != 0) && (dec->blockType[gr][ch] == 2)) {
+            if (dec->mixedBlock[gr][ch] != 0) {
+                if (D_800AE998[bandTable].l[8] == line) {
+                    bandEnd = D_800AE998[bandTable].s[4] * 3;
+                    sfb = 3;
+                    windowWidth = D_800AE998[bandTable].s[sfb + 1] - D_800AE998[bandTable].s[sfb];
+                    windowStart = D_800AE998[bandTable].s[sfb] * 3;
+                } else if (line < D_800AE998[bandTable].l[8]) {
+                    bandEnd = D_800AE998[bandTable].l[++sfb + 1];
                 } else {
-                    sp1B8 = D_800AE998[sp1BC][++sp5C + 24] * 3;
-                    sp1B0 = D_800AE998[sp1BC][sp5C + 24] - D_800AE998[sp1BC][sp5C + 23];
-                    sp1B4 = D_800AE998[sp1BC][sp5C + 23] * 3;
+                    bandEnd = D_800AE998[bandTable].s[++sfb + 1] * 3;
+                    windowWidth = D_800AE998[bandTable].s[sfb + 1] - D_800AE998[bandTable].s[sfb];
+                    windowStart = D_800AE998[bandTable].s[sfb] * 3;
                 }
             } else {
-                sp1B8 = D_800AE998[sp1BC][++sp5C + 24] * 3;
-                sp1B0 = D_800AE998[sp1BC][sp5C + 24] - D_800AE998[sp1BC][sp5C + 23];
-                sp1B4 = D_800AE998[sp1BC][sp5C + 23] * 3;
+                bandEnd = D_800AE998[bandTable].s[++sfb + 1] * 3;
+                windowWidth = D_800AE998[bandTable].s[sfb + 1] - D_800AE998[bandTable].s[sfb];
+                windowStart = D_800AE998[bandTable].s[sfb] * 3;
             }
         } else {
-            sp1B8 = D_800AE998[sp1BC][++sp5C + 1];
+            bandEnd = D_800AE998[bandTable].l[++sfb + 1];
         }
     }
-    /* The early `return 1` is LOAD-BEARING SOURCE, not a redundancy: at -g each `return`
-       emits its own `b <epilogue>; addiu v0,1` pair, and golden has TWO of them plus the
-       implicit end-of-function `b; nop`.  Delete-and-measure, run both ways: with it 788
-       instructions (match), folded into a single trailing `return 1;` 786 -- i.e. removing
-       it drops us BELOW golden.  An if/else with a `return 1` in each arm is wrong the
-       other way: it adds the else's merge jump, giving 790. */
-    if (sp48 < 0x240) {
-        bzero(sp40, arg0->zeroTail[arg2] * 4);
+    if (line < 576) {
+        bzero(xr, dec->zeroTail[ch] * sizeof(*xr));
+        // matching: -g emits a branch per return; the ROM has this extra one
         return 1;
     }
     return 1;
