@@ -68,7 +68,7 @@ s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
 }
 
 extern s32 D_800D3840;
-struct127 *func_1505EEF4(s32);
+Actor *func_1505EEF4(s32);
 s32 func_150A2D84(s32, s32);
 s32 func_150A2EE4(s32, s32);
 s32 func_150A2FA4(s32, s32);
@@ -85,7 +85,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             s32 pad; // matching: unused stack slot keeps `result` at the original sp offset
             s32 id;
             s32 result;
-            struct127 *obj;
+            Actor *obj;
             s32 ret = 0;
 
             id = msg->params[0] & 0xFFFF0FFF;
@@ -170,7 +170,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             s32 pad; // matching: unused stack slot; removing it shifts the frame layout
             s32 id;
             s32 result;
-            struct127 *obj;
+            Actor *obj;
 
             id = msg->params[0] & 0xFFFF0FFF;
             switch (msg->params[0] & 0xF000) {

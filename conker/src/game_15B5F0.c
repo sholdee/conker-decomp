@@ -7,7 +7,7 @@ extern f32 D_800DC004; // camera transition height (see func_15128030)
 
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 accel, f32 maxSpeed, f32 dt);
 
-/* The player object the camera follows (Camera.player, a struct127): the fields struct127 does not
+/* The player object the camera follows (Camera.player, a Actor): the fields Actor does not
    declare yet (0x137, 0x17C) or declares as a union (0x84). */
 typedef struct CamPlayer {
     /* 0x000 */ u8 pad0[0x18];

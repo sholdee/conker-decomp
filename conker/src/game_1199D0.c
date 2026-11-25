@@ -31,7 +31,7 @@ typedef struct {
 
 /* Data of the fog flash effect (func_150ECB8C). */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
     /* 0x05 */ u8 r;
     /* 0x06 */ u8 g;
@@ -170,7 +170,7 @@ void func_150EC6B0(Effect *effect) {
 
 /* Attaches a fog flash effect to obj: flashes it with fog colour (r, g, b, a) each frame,
  * for duration frames or, when duration is -1, until obj goes away. */
-void func_150ECA68(struct127 *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8 owner, s32 kind) {
+void func_150ECA68(Actor *obj, u8 r, u8 g, u8 b, u8 a, u8 rate, s16 duration, u8 owner, s32 kind) {
     FogFlashData data;
     Effect *effect;
 
@@ -194,12 +194,12 @@ void func_150ECB4C(Effect *effect, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, (s32)&effect->data.fog.owner, (s32)&effect->data.fog.ownerId, (s32)effect);
 }
 
-extern void func_1502EA98(struct127 *, u8, u8, u8, u8, s32, u8);
+extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);
 
 /* Fog flash effect: re-flashes the owner's fog each frame, and ends once the owner is gone. */
 void func_150ECB8C(Effect *effect) {
     FogFlashData *fog = &effect->data.fog;
-    struct127 *owner = fog->owner;
+    Actor *owner = fog->owner;
 
     if ((owner->interaction_state == 0) || (owner->unique_id != fog->ownerId)) {
         effect->state = -1;
@@ -208,10 +208,10 @@ void func_150ECB8C(Effect *effect) {
     }
 }
 
-extern void func_151C9AC0(struct127 *, u8, s32);
+extern void func_151C9AC0(Actor *, u8, s32);
 
 /* Runs func_151C9AC0 on obj and flashes it green. */
-void func_150ECC00(struct127 *obj, u8 owner, s32 kind) {
+void func_150ECC00(Actor *obj, u8 owner, s32 kind) {
     func_151C9AC0(obj, owner, kind);
     func_150ECA68(obj, 0, 0xFF, 0, 0xFF, 4, -1, owner, kind);
 }

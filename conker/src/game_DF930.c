@@ -38,7 +38,7 @@ s32 func_150B2480(s32 arg0, s32 arg1) {
 }
 
 /* Spawns an effect burst at the object's x/z and unk180 height (func_1514C678, func_151D5404, func_151D3FF4). */
-void func_150B2494(struct127 *obj, s32 arg1, s32 arg2) {
+void func_150B2494(Actor *obj, s32 arg1, s32 arg2) {
     struct17 position;
 
     position.unk0 = obj->x_position;

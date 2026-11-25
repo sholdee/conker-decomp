@@ -5,7 +5,7 @@
 
 
 void func_15016370(void) {
-    struct127 *tmp;
+    Actor *tmp;
     s32 i;
 
     for (i = 0; i < D_8008FD8C; i++) {

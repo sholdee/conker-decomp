@@ -19,7 +19,7 @@ typedef struct {
     /* 0x00 */ s32 target[2];
     /* 0x08 */ u8 ownerId;
     /* 0x09 */ u8 pad9[0x3];
-    /* 0x0C */ struct127 *owner;
+    /* 0x0C */ Actor *owner;
     /* 0x10 */ u8 bone;
     /* 0x11 */ u8 pad11[0x3];
     /* 0x14 */ f32 offset[3];
@@ -40,15 +40,15 @@ typedef struct {
     /* 0x58 */ u8 payload[1];
 } Emitter;
 
-s32 func_15134070(struct127 *);
-void func_1516962C(s32, struct127 *, s32);
+s32 func_15134070(Actor *);
+void func_1516962C(s32, Actor *, s32);
 Emitter *func_1513418C(EmitterDesc *, s32, u8, s32);
 void func_151D9014(f32 *position, f32 *velocity, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, u8,
                    s32);
 
 /* Attaches emitter 8 (func_151B4E4C) to bone 2 of `actor` for 40-60 frames, unless its blood profile
  * rules it out (unkE == 2). The emitter's 1-byte payload records whether unkE == 1. */
-Emitter *func_151B4CD0(struct127 *actor, u8 arg1, s32 arg2) {
+Emitter *func_151B4CD0(Actor *actor, u8 arg1, s32 arg2) {
     Emitter *emitter;
     EmitterDesc desc;
     u8 payload[1];
@@ -135,7 +135,7 @@ void func_151B4EA4(f32 *position, f32 dirX, f32 dirY, f32 dirZ, u8 arg4, u8 arg5
 }
 
 /* Attaches emitter 9 (func_151B50A4) to bone 2 of `actor`. */
-Emitter *func_151B4FE0(struct127 *actor, u8 arg1, s32 arg2) {
+Emitter *func_151B4FE0(Actor *actor, u8 arg1, s32 arg2) {
     Emitter *emitter;
     EmitterDesc desc;
 

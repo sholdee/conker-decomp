@@ -11,10 +11,10 @@ typedef struct {
 /* Effect data of the wavy beam drawn between two actors' bones (func_151B5328). */
 typedef struct {
     /* 0x000 */ Vtx vertices[2][44];  // double-buffered, indexed by D_800BE9C0
-    /* 0x580 */ struct127 *first;
+    /* 0x580 */ Actor *first;
     /* 0x584 */ u8 firstId;             // first->unique_id, to notice the slot being reused
     /* 0x585 */ u8 pad585[3];
-    /* 0x588 */ struct127 *second;
+    /* 0x588 */ Actor *second;
     /* 0x58C */ u8 secondId;
     /* 0x58D */ u8 pad58D[3];
     /* 0x590 */ f32 width;
@@ -34,15 +34,15 @@ typedef struct {
 
 /* Message 0x2D: actors a and b swapped slots. */
 typedef struct {
-    struct127 *a;
-    struct127 *b;
+    Actor *a;
+    Actor *b;
     u8 aId;
     u8 bId;
 } ActorSwap;
 
 /* Message 0: an actor went away. */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     u8 id;
 } ActorGone;
 
@@ -252,7 +252,7 @@ void func_151B5A9C(BeamEffect *effect, void *msg, u8 type) {
         }
     } else if (type == 0) {
         ActorGone *gone = msg;
-        struct127 *actor = gone->actor;
+        Actor *actor = gone->actor;
 
         if (actor == data->first || actor == data->second || gone->id == data->firstId || gone->id == data->secondId) {
             func_1516972C((struct102 *)effect);

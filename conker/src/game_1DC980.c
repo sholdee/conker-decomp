@@ -17,7 +17,7 @@ void func_15135DD0(f32 *from, f32 *to, f32 radius, u8 sceneTag, s32 arg4);
 
 /* Blood spray of kind `type` between two points attached to one of obj's bones (skipped when unk74&0xF is 0xF). */
 void func_151AF4D0(obj, type, sceneTag, arg3)
-    struct127 *obj;
+    Actor *obj;
     u8 type;
     u8 sceneTag;
     s32 arg3;

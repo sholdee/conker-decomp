@@ -5,13 +5,13 @@
 
 extern s32 *D_800DBF94;
 extern WorldObject *func_151149AC(u8);
-extern s32 func_1505D024(struct127 *, s32, u16, s32);
+extern s32 func_1505D024(Actor *, s32, u16, s32);
 extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
 extern void func_150E1AB0(s32, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
                           f32 halfWidth, f32 length, u16 lifetime, s32 texture, s32 mode, s16 onTime, s16 offTime,
-                          struct127 *owner, u8 ownerId, s16 bone, s32 ownerTag, s32 impactEffect, u8 unkFE,
+                          Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, s32 impactEffect, u8 unkFE,
                           f32 startX, f32 startY, f32 startZ, f32 endX, f32 endY, f32 endZ);
-extern void func_150E2DB4(struct127 *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY,
+extern void func_150E2DB4(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY,
                           f32 startZ, f32 endX, f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8);
 extern void func_15179008(s32);
 
@@ -622,7 +622,7 @@ extern const s32 D_8009F790[5];
 extern const f32 D_8009F7A4[5];
 
 /* Spawns a particle burst and a burst of debris (5 variants) 30 units above obj. */
-void func_150B0348(struct127 *obj, u8 arg1, s32 arg2) {
+void func_150B0348(Actor *obj, u8 arg1, s32 arg2) {
     vertex pos;
 
     pos.x = obj->x_position;

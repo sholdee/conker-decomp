@@ -632,7 +632,7 @@ s32 func_150C308C(Particle_EF410 *particle) {
     return 1;
 }
 
-Gfx *func_150C3160(Gfx *gdl, struct127 *obj) {
+Gfx *func_150C3160(Gfx *gdl, Actor *obj) {
     s32 total;
     s32 uls;
     s32 ult;
@@ -651,21 +651,21 @@ Gfx *func_150C3160(Gfx *gdl, struct127 *obj) {
     return gdl;
 }
 typedef struct {
-    struct127 *unk0;
+    Actor *unk0;
     f32 pos[3];
     s32 targetIndex;
     s32 unk14;
 } Struct150C3230;
 
-void func_15059C84(struct127 *arg0);
-void func_1505A770(struct127 *arg0);
-void func_1507C324(struct127 *arg0, struct127 *arg1);
-void func_1506AC8C(struct127 *arg0, s32 arg1, void *arg2);
+void func_15059C84(Actor *arg0);
+void func_1505A770(Actor *arg0);
+void func_1507C324(Actor *arg0, Actor *arg1);
+void func_1506AC8C(Actor *arg0, s32 arg1, void *arg2);
 
-void func_150C3230(struct127 *obj) {
+void func_150C3230(Actor *obj) {
     s32 index;
     s32 type;
-    struct127 *target;
+    Actor *target;
     Struct150C3230 eventData;
 
     obj->unkF8 |= 0x4000000;
@@ -745,12 +745,12 @@ void func_150C3230(struct127 *obj) {
 }
 void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 f32 func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
-void func_15056B08(struct127 *arg0);
-void func_150562FC(struct127 *arg0);
-u8 func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
-void func_1001091C(struct127 *arg0, s32 arg1);
+void func_15056B08(Actor *arg0);
+void func_150562FC(Actor *arg0);
+u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
+void func_1001091C(Actor *arg0, s32 arg1);
 
-void func_150C3574(struct127 *obj) {
+void func_150C3574(Actor *obj) {
     f32 accel;
     f32 dist;
     s32 vol;
@@ -766,7 +766,7 @@ void func_150C3574(struct127 *obj) {
         if (obj->unk87 & 1) {
             obj->unk224 = (s32)obj->y_position;
         }
-        *(s16 *)&obj->pad160 = 0;
+        obj->unk160 = 0;
     }
     func_1505A3A8(0.0f, obj, 2.0f, accel, 0);
     obj->gravity = 3.0f;
@@ -782,9 +782,9 @@ void func_150C3574(struct127 *obj) {
         func_150562FC(obj);
     }
     func_15059140(obj);
-    *(f32 *)&obj->padBC = (obj->x_position - obj->old_x_position) * D_800BE9A8;
+    obj->unkBC = (obj->x_position - obj->old_x_position) * D_800BE9A8;
     obj->unk148 = (obj->z_position - obj->old_z_position) * D_800BE9A8;
-    dist = sqrtf(*(f32 *)&obj->padBC * *(f32 *)&obj->padBC + obj->unk148 * obj->unk148);
+    dist = sqrtf(obj->unkBC * obj->unkBC + obj->unk148 * obj->unk148);
     if ((dist + 4.0f) + (dist + 4.0f) < obj->xz_velocity) {
         obj->xz_velocity = dist + dist;
     }
@@ -793,7 +793,7 @@ void func_150C3574(struct127 *obj) {
         D_800D154C = D_800CC2D0;
         func_1506E8D8();
         D_800D154C = obj;
-        obj->unk164 = *(f32 *)&obj->padBC;
+        obj->unk164 = obj->unkBC;
         obj->unk168 = obj->unk148;
         obj->xz_velocity = 0.0f;
     }
@@ -841,11 +841,11 @@ void func_150C3574(struct127 *obj) {
         func_100109D0(obj);
     }
 }
-void func_15188810(struct127 *arg0, s32 arg1, s32 arg2);
+void func_15188810(Actor *arg0, s32 arg1, s32 arg2);
 void func_150C1660(f32 arg0, f32 arg1, f32 arg2, u8 arg3);
-void func_150C3D5C(struct127 *obj);
+void func_150C3D5C(Actor *obj);
 
-void func_150C3994(struct127 *obj) {
+void func_150C3994(Actor *obj) {
     if (obj->interaction_state == 0x14) {
         if (obj->unk2E4 == 0) {
             func_151B9BF0(0x2F, 1, (s16)obj->x_position, (s16)(obj->y_position + 30.0f), (s32)obj->z_position, 0x7D0, 0x3E8, 0x190, 0xC8, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);
@@ -893,7 +893,7 @@ s32 func_150C3D48(s32 value) {
     return value + 0xEDCBA988;
 }
 
-void func_150C3D5C(struct127 *obj) {
+void func_150C3D5C(Actor *obj) {
     Struct150C3D5CLocals locals;
 
     func_151B9BF0(0x2F, 1, (s16)obj->x_position, (s16)obj->y_position,

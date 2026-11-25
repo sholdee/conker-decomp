@@ -11,7 +11,7 @@ typedef struct {
 } TrailVec2;
 
 typedef struct {
-    /* 0x00 */ struct127 *object;
+    /* 0x00 */ Actor *object;
     /* 0x04 */ u8 pad4[4];
     /* 0x08 */ s32 unk8;
     /* 0x0C */ u8 padC[0xC];
@@ -210,7 +210,7 @@ s32 func_151D197C(TrailActor *actor) {
     state = actor->state;
     points = actor->points;
     if (state->owner != NULL) {
-        struct127 *object = state->owner->motion.object;
+        Actor *object = state->owner->motion.object;
 
         state->ownerScale = object->xz_scale;
     }

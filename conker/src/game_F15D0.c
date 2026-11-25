@@ -22,7 +22,7 @@ typedef struct {
 
 /* Data of the effect spawned by func_150C4120 (at +0x28 of the effect object). */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;       /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x08 */ f32 unk8;
     /* 0x0C */ Particle *particle;
@@ -48,7 +48,7 @@ extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spawns an effect that follows `owner` (lifetime `duration`, -1 for the default 300) together with
  * a pulsing particle. */
-void func_150C4120(struct127 *owner, s16 duration, u8 arg2, s32 arg3) {
+void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     EffectData data;
     Effect *effect;
     EffectData *state;
@@ -135,11 +135,11 @@ typedef struct {
     s32 unk20;
 } GroundHit; /* size 0x24 */
 
-extern void func_1504715C(GroundHit *, struct127 *);
-extern s32 func_1514654C(struct127 *, ActorCtl *, s32, vertex **, vertex **, s32);
+extern void func_1504715C(GroundHit *, Actor *);
+extern s32 func_1514654C(Actor *, ActorCtl *, s32, vertex **, vertex **, s32);
 extern void func_15143134(vertex *, vertex *, Mtx *);
 extern void func_15143794(s16 yaw, s16 pitch, f32 length, vertex *out);
-extern s32 func_1515C0F8(struct127 *, vertex **);
+extern s32 func_1515C0F8(Actor *, vertex **);
 extern void func_151C36D8(vertex *, s32, s32);
 extern void func_151D9014(vertex *, vertex *, s32, f32, s32, s32, f32, s32, f32, f32, s32, void *, s32, s32, s32, s32);
 extern vertex D_800A0350[];
@@ -150,7 +150,7 @@ extern u8 D_800A03A8[];
 /* Per-frame update of the func_150C4120 effect: keeps its particle at a point on the owner and emits
  * smaller particles from there. Frees the effect once the owner is gone. */
 void func_150C44A4(Effect *effect) {
-    struct127 *owner;
+    Actor *owner;
     EffectData *data;
     vertex pos;
     vertex offset;
@@ -190,7 +190,7 @@ void func_150C44A4(Effect *effect) {
         if (bone == NULL) {
             return;
         }
-        /* struct127 has no fields at 0x2D8/0x2DC yet */
+        /* Actor has no fields at 0x2D8/0x2DC yet */
         if (owner->unk2EC != 0) {
             progress = *(f32 *)((u8 *)owner + 0x2D8) * *(f32 *)((u8 *)owner + 0x2DC);
         } else {

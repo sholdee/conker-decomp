@@ -22,7 +22,7 @@ void func_150104F0(void) {
     D_80088980 = 0;
 }
 
-void func_15010538(struct127 *arg0) {
+void func_15010538(Actor *arg0) {
     struct175 tmp;
     struct37 *temp_v0;
 

@@ -11,7 +11,7 @@
 
 /* Data of an effect that follows an object. */
 typedef struct {
-    /* 0x00 */ struct127 *object;
+    /* 0x00 */ Actor *object;
     /* 0x04 */ u8 objectId; /* object->unique_id when attached */
     /* 0x08 */ f32 spawnAccum;
 } ObjectEmitterData; /* size 0xC */
@@ -41,7 +41,7 @@ typedef struct {
 } Particle1BFDD0;
 
 /* Attaches effect 0x23 to the object. */
-void func_15192920(struct127 *object) {
+void func_15192920(Actor *object) {
     Effect1BFDD0 *effect;
     ObjectEmitterData data;
 
@@ -58,7 +58,7 @@ void func_15192920(struct127 *object) {
     }
 }
 
-extern s32 func_1515C0F8(struct127 *, vertex **);
+extern s32 func_1515C0F8(Actor *, vertex **);
 extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
 extern Particle1BFDD0 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
@@ -131,7 +131,7 @@ void func_151929A4(Effect1BFDD0 *effect) {
 }
 
 /* Attaches an effect of the given type to the object; returns the effect or NULL. */
-Effect1BFDD0 *func_15192D48(struct127 *object, s16 type, u8 arg2, s32 arg3) {
+Effect1BFDD0 *func_15192D48(Actor *object, s16 type, u8 arg2, s32 arg3) {
     Effect1BFDD0 *effect;
     ObjectEmitterData data;
 
@@ -235,15 +235,15 @@ void func_15192DF0(Effect1BFDD0 *effect) {
 
 /* Payload of message 0x2D: two objects trade places. */
 typedef struct {
-    /* 0x00 */ struct127 *from;
-    /* 0x04 */ struct127 *to;
+    /* 0x00 */ Actor *from;
+    /* 0x04 */ Actor *to;
     /* 0x08 */ u8 fromId;
     /* 0x09 */ u8 toId;
 } ObjectSwapMessage;
 
 /* Payload of message 0: names an object by pointer or by unique id. */
 typedef struct {
-    /* 0x00 */ struct127 *object;
+    /* 0x00 */ Actor *object;
     /* 0x04 */ u8 objectId;
 } ObjectRemovedMessage;
 
@@ -253,7 +253,7 @@ void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     ObjectEmitterData *data = &effect->data;
     ObjectSwapMessage *swap = msg;
     ObjectRemovedMessage *removal = msg;
-    struct127 *removed;
+    Actor *removed;
 
     if (msgType == 0x2D) {
         if (data->object == swap->from) {
@@ -278,7 +278,7 @@ void func_151932E0(Effect1BFDD0 *effect, void *msg, u8 msgType) {
     ObjectEmitterData *data = &effect->data;
     ObjectSwapMessage *swap = msg;
     ObjectRemovedMessage *removal = msg;
-    struct127 *removed;
+    Actor *removed;
 
     if (msgType == 0x2D) {
         if (data->object == swap->from) {

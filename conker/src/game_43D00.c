@@ -105,7 +105,7 @@ void func_150169A0(s32 level) {
     u8 *romEnd;
     u8 *romStart;
     u32 size;
-    struct127 *obj;
+    Actor *obj;
     s32 count;
     s32 i;
 

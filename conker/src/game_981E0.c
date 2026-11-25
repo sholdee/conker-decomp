@@ -7,7 +7,7 @@
 #undef func_10010630
 /* volume (arg2) is unsigned at the call sites. */
 u16 func_10010154(u16 arg0, void *arg1, u32 arg2, s16 arg3, u16 arg4);
-void func_10010630(u16 arg0, struct127 *arg1, u32 arg2, s16 arg3, u16 arg4);
+void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 #define D_80099A3C D_80099A3C_s16_hdr
 #define D_80099A3E D_80099A3E_s16_hdr
 #define D_80099AB4 D_80099AB4_s16_hdr
@@ -24,8 +24,8 @@ extern u8 D_80099AB4[];
 extern u8 D_80099ABC[];
 
 /*
- * struct127 fields that include/structs.h only covers with padding, as a same-layout view.
- * (Fold into struct127 in the central pass.)
+ * Actor fields that include/structs.h only covers with padding, as a same-layout view.
+ * (Fold into Actor in the central pass.)
  */
 typedef struct struct127Hidden {
     /* 0x000 */ u8 pad0[0x70];
@@ -54,7 +54,7 @@ typedef struct struct127Hidden {
 } struct127Hidden;
 #define HIDDEN(obj) ((struct127Hidden *)(obj))
 
-/* Same for ActorCtl (struct127.unk31C). */
+/* Same for ActorCtl (Actor.unk31C). */
 typedef struct struct126Hidden {
     /* 0x000 */ f32 unk0;
     /* 0x004 */ u8 pad4[0x24 - 0x4];
@@ -83,15 +83,15 @@ void func_1506BF5C(void);
 s32 func_1000F568(s32 arg0, s32 arg1);
 extern s32 func_151EF610(void);
 extern s32 D_800D187C;
-extern void *func_150335C8(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+extern void *func_150335C8(Actor *arg0, Actor *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 extern void func_15166118(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
 extern void func_151942E8();
-void func_151C0698(struct127 *arg0, struct127 *arg1, void *arg2, u8 arg3, s32 arg4, s32 arg5);
+void func_151C0698(Actor *arg0, Actor *arg1, void *arg2, u8 arg3, s32 arg4, s32 arg5);
 
 /* Parameter block for func_151994B8 (CharacterFlamethrowerSetup in game_1C2C60.c). */
 typedef struct Func151994B8Desc {
     s32 kind;
-    struct127 *owner;
+    Actor *owner;
     u8 ownerUniqueId;
     s8 joint;
     u8 pad0A[2];
@@ -219,26 +219,26 @@ extern Vec3w D_80099BBC;
 extern void func_15143134(void *, void *, s32);
 extern void func_151DC484(f32 *, struct199 *, s32, u8, s32);
 extern void func_15102B38(s32, u8, s32, s32, f32 *, s32, s32, f32, s32, s32, s32, s32, u8, s32);
-extern void func_150E1570(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
+extern void func_150E1570(Actor *, f32, f32, f32, f32, f32, f32, s32, s32);
 
 extern u8 *D_80086CAC[];
 u16 func_10011EB8(s32 arg0, u16 *arg1, s32 arg2);
 s32 func_1510F8CC(s32);
-extern struct127 *func_1505EEB0(s32 state, s32 *arg1);
-extern u8 func_1505DADC(struct127 *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4);
+extern Actor *func_1505EEB0(s32 state, s32 *arg1);
+extern u8 func_1505DADC(Actor *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4);
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s16 D_80099AD8[][4];
-extern void func_1506AC8C(struct127 *, s32, s32);
-extern struct127 *func_1505ED34(void);
+extern void func_1506AC8C(Actor *, s32, s32);
+extern Actor *func_1505ED34(void);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern s32 func_1515D480(s32);
 extern s32 *func_1515D440(void);
-extern s32 func_15158BD0(struct127 *, s32, s32);
-extern void func_1514EC1C(s32, struct127 *, s32);
+extern s32 func_15158BD0(Actor *, s32, s32);
+extern void func_1514EC1C(s32, Actor *, s32);
 extern u8 D_800C3E90;
 extern u8 D_80099AC4[];
 extern void func_15145974(void *, f32 *, f32 *);
-extern struct127 *func_1505EEF4(s32 arg0);
+extern Actor *func_1505EEF4(s32 arg0);
 extern void func_151A3390(void *arg0, u8 arg1);
 extern void func_1507E7E4(u8 *, u8, u8, u16, s32);
 void func_1516F1C0(s32, s32, u8, s32);
@@ -255,16 +255,16 @@ extern s8 D_800E0BCE[];
 extern Vec3w D_80099B70;
 extern Vec3w D_80099B7C;
 extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
-extern struct127 *func_1507515C(struct127 *);
+extern Actor *func_1507515C(Actor *);
 extern void func_151C1860(void *, s32, s32);
-void func_15103E40(struct127 *, struct127 *, struct17 *, u8, u8, u8, u8);
+void func_15103E40(Actor *, Actor *, struct17 *, u8, u8, u8, u8);
 extern Vec3w D_80099BA0;
 extern Vec3w D_80099BAC;
 extern void func_151D5334(struct17*, f32, f32, f32, s32, s32, s32);
-extern void func_150FE860(struct127 *arg0, s32 arg1, s32 arg2);
+extern void func_150FE860(Actor *arg0, s32 arg1, s32 arg2);
 extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-extern void func_150FF084(struct127 *arg0, s32 arg1, s32 arg2);
-extern void func_150FED30(struct127 *arg0, s32 arg1, s32 arg2);
+extern void func_150FF084(Actor *arg0, s32 arg1, s32 arg2);
+extern void func_150FED30(Actor *arg0, s32 arg1, s32 arg2);
 extern u32 D_80099BB8;
 void func_151C329C(s32 arg0, s32 arg1, s32 arg2);
 void func_151DC260(f32 *, void *, s32, s32, s32);
@@ -273,15 +273,15 @@ extern f32 D_80099BC8[3][3];
 extern u8 D_80099BEC[];
 extern u8 D_80099C04[];
 extern u8 *D_800D210C;
-extern void func_1505F188(struct127 *arg0);
+extern void func_1505F188(Actor *arg0);
 extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 s32 func_15037698(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
 u8 *func_15073118(u8 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
 s32 func_1505D024(void *, s32, u16, s32);
 extern s32 func_15033BDC();
 extern void func_100100E0(void *, void *, void *, void *, void *, s32);
-extern void func_150F16DC(struct127 *, u8, u8, s32, s32);
-void func_15194408(struct127 *arg0, struct127 *arg1);
+extern void func_150F16DC(Actor *, u8, u8, s32, s32);
+void func_15194408(Actor *arg0, Actor *arg1);
 
 /* One entry of an object's timed event list. */
 typedef struct TimedEvent {
@@ -291,7 +291,7 @@ typedef struct TimedEvent {
     s32 parameter;
 } TimedEvent;
 
-/* struct197 (struct127.unk2D0) with the state token it lacks. */
+/* struct197 (Actor.unk2D0) with the state token it lacks. */
 typedef struct struct197Hidden {
     /* 0x00 */ u8 pad0[0x28];
     /* 0x28 */ s32 token;
@@ -309,7 +309,7 @@ extern u8 D_800C365E;
  * restarts the object's state (new token) rewinds `time` to the state's time. Returns
  * D_800D1878, which handlers may set.
  */
-f32 func_1506AD30(struct127 *obj, f32 time, u8 filtered) {
+f32 func_1506AD30(Actor *obj, f32 time, u8 filtered) {
     s32 token;
     u8 id;
 
@@ -412,7 +412,7 @@ void func_1506B268(void) {
 }
 
 void func_1506B2BC(void) {
-    struct127 *obj = func_150721E8(D_800D154C);
+    Actor *obj = func_150721E8(D_800D154C);
 
     if (obj != NULL && (obj - D_800CC2D0) + 1 == D_800CC2D0[0].unk274) {
         D_800D154C->unk218 = NULL;
@@ -673,7 +673,7 @@ void func_1506BCA0(void) {
 
 /* Jump: sets y_velocity from D_800D1580 when the object is (nearly) at height unk180. */
 void func_1506BCC8(void) {
-    struct127 *obj;
+    Actor *obj;
     f32 height;
 
     obj = D_800D154C;
@@ -889,7 +889,7 @@ void func_1506C43C(void) {
  */
 u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32 kind, f32 minHeight,
                   f32 scale, s32 pos, s32 flags, s32 arg10) {
-    struct127 *obj;
+    Actor *obj;
     s16 aimAngle;
     s16 angle;
     s32 slot;
@@ -960,7 +960,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
             HIDDEN(obj)->unk304[i] = func_1515D480(1);
         }
         if (HIDDEN(obj)->unk304[i - 1] != 0) {
-            obj->unk301[0] = 1;
+            obj->unk301 = 1;
         }
         HIDDEN(obj)->unk314 = func_1515D440();
         switch (kind) {
@@ -1040,7 +1040,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
         f32 offx;
         f32 offz;
         f32 offy;
-        struct127 *target;
+        Actor *target;
         f32 hdist;
         f32 pitch;
         f32 dummy;
@@ -1096,7 +1096,7 @@ u8 *func_1506C460(f32 yaw, f32 speed, f32 yVelocity, f32 gravity, s32 unk83, s32
     }
     obj->xz_scale = scale;
     obj->y_scale = scale;
-    obj->pad66 = D_800D154C->pad66 & 0xC;
+    obj->unk66 = D_800D154C->unk66 & 0xC;
     obj->unk278 = kind;
     obj->unk284 = arg10;
     if (kind == 2 || kind == 18) {
@@ -1256,7 +1256,7 @@ typedef struct MarkerPoint {
 
 /* Spawns object D_800D1580 & 0xFF ahead of the current object, with its marker 5000 units out. */
 void func_1506D2E8(void) {
-    struct127 *obj;
+    Actor *obj;
     f32 xOff;
     f32 zOff;
     f32 yOff;
@@ -1325,7 +1325,7 @@ void func_1506D570(void) {
  * scaled by 1 / unk2D0->unk10.
  */
 void func_1506D584(void) {
-    struct127 *obj = D_800D154C;
+    Actor *obj = D_800D154C;
     f32 divisor;
     u16 value;
     u8 hi;
@@ -1347,13 +1347,13 @@ void func_1506D584(void) {
 }
 
 void func_1506D6B4(void) {
-    struct127 *obj = D_800D154C;
+    Actor *obj = D_800D154C;
     s32 sel;
 
     if (obj->unk118 == -10000.0f) {
         return;
     }
-    if (obj->unk118 < obj->unk1A6) {
+    if (obj->unk118 < obj->aim.y) {
         return;
     }
     if (obj->health >= 2) {
@@ -1451,7 +1451,7 @@ void func_1506DBA0(void) {
 }
 
 void func_1506DBD4(void) {
-    struct127 *obj = func_15072208(D_800D154C, 0);
+    Actor *obj = func_15072208(D_800D154C, 0);
 
     if (obj != NULL) {
         func_15054A5C(obj, D_800D154C);
@@ -1674,7 +1674,7 @@ void func_1506E2CC(void) {
  * the top byte is a play chance out of 256 and bits 16-20 a count of random variants.
  * Returns 0 if nothing should play.
  */
-s32 func_1506E46C(struct127 *obj, s32 *command, s32 mode) {
+s32 func_1506E46C(Actor *obj, s32 *command, s32 mode) {
     s32 pad0; // matching: stack layout (pad0 / pad[3] / inner pad)
     u32 cmd;
     s32 pad[3];
@@ -1847,7 +1847,7 @@ void func_1506EA58(void) {
 /* Throws the object held in unk13C (object index + 100) along the current object's facing. */
 void func_1506EA98(void) {
     u8 index;
-    struct127 *held;
+    Actor *held;
 
     index = D_800D154C->unk13C - 100;
     if (D_800D154C->unk13C != 0) {
@@ -2044,7 +2044,7 @@ void func_1506F17C(s32 cmd) {
 
 void func_1506F1A8(s32 cmd) {
     Func151994B8Desc descriptor;
-    struct127 *obj;
+    Actor *obj;
 
     obj = D_800D154C;
     descriptor.owner = obj;
@@ -2412,17 +2412,17 @@ void func_15070224(s32 cmd) {
 /* struct198 with its object fields typed. */
 typedef struct {
     s32 unk0;
-    struct127 *unk4;
-    struct127 *unk8;
-    struct127 *unkC;
+    Actor *unk4;
+    Actor *unk8;
+    Actor *unkC;
 } struct198Objs;
 
 /* Objects 0x77 / 0x28: fires (func_151C0698, else func_1506CE6C), then spawns effect func_15102B38 at bone 4. */
 void func_15070300(s32 cmd) {
     u8 flag;
-    struct127 *obj;
+    Actor *obj;
     u8 mode;
-    struct127 *other;
+    Actor *other;
     u8 idx;
     struct198Objs info;
     Vec3w localPos;
@@ -2647,8 +2647,8 @@ void func_15070C18(s32 cmd) {
 
 void func_15070C40(u8 variant) {
     struct17 pos;
-    struct127 *obj;
-    struct127 *owner;
+    Actor *obj;
+    Actor *owner;
 
     obj = D_800D154C;
     pos.unk0 = obj->x_position;
@@ -2840,7 +2840,7 @@ void func_15071668(s32 cmd) {
 }
 
 void func_15071690(s32 cmd) {
-    struct127 *obj;
+    Actor *obj;
     s32 pad0; // matching: unused stack slot
     s32 buf;
 
@@ -2853,7 +2853,7 @@ void func_15071690(s32 cmd) {
 
 void func_150716EC(s32 cmd) {
     struct17 pos;
-    struct127 *obj;
+    Actor *obj;
 
     obj = D_800D154C;
     pos.unk0 = obj->x_position;
@@ -2863,7 +2863,7 @@ void func_150716EC(s32 cmd) {
 }
 
 void func_15071764(s32 cmd) {
-    struct127 *obj = func_15083E90(18);
+    Actor *obj = func_15083E90(18);
     if (obj != NULL) {
         func_150F0BEC(obj);
         func_150F10D4(obj);
@@ -2873,10 +2873,10 @@ void func_15071764(s32 cmd) {
 
 void func_150717E0(s32 cmd) {
     struct {
-        struct127 *unk0;
+        Actor *unk0;
         u8 unk4;
     } ref;
-    struct127 *obj;
+    Actor *obj;
 
     obj = func_15083E90(18);
     if (obj != NULL) {
@@ -3018,8 +3018,8 @@ void func_15071D38(void) {
 
 /* Runs the D_80086150 handler on the object func_150721E8 returns. */
 void func_15071D78(void) {
-    struct127 *target;
-    struct127 *saved;
+    Actor *target;
+    Actor *saved;
 
     target = func_150721E8(D_800D154C);
     if (target != NULL) {
@@ -3082,8 +3082,8 @@ void func_15071FB0(void) {
  * current player (unk65), and the player is turned around.
  */
 void func_15071FDC(void) {
-    struct127 *player;
-    struct127 *entry;
+    Actor *player;
+    Actor *entry;
     s32 found;
     s32 anim;
     s32 visible;
@@ -3140,12 +3140,12 @@ void func_150721A4(void) {
     func_1506160C(D_800D154C, (u8)hi, lo, mid, 0);
 }
 
-struct127 *func_150721E8(struct127 *owner) {
+Actor *func_150721E8(Actor *owner) {
     return func_15072208(owner, 0);
 }
 
 /* Returns the n-th object owned by `owner` (unk65 = owner index + 1), or NULL. */
-struct127 *func_15072208(struct127 *owner, s32 n) {
+Actor *func_15072208(Actor *owner, s32 n) {
     s32 ownerId;
     s32 count;
     s32 i;
@@ -3164,7 +3164,7 @@ struct127 *func_15072208(struct127 *owner, s32 n) {
 }
 
 void func_150722F0(void) {
-    struct127 *child = func_150721E8(D_800D154C);
+    Actor *child = func_150721E8(D_800D154C);
 
     if (child != NULL) {
         s32 hi = D_800D1580 >> 8;
@@ -3187,7 +3187,7 @@ void func_15072388(void) {
 }
 
 void func_150723AC(void) {
-    struct127 *obj = func_15083E90(D_800D1583);
+    Actor *obj = func_15083E90(D_800D1583);
 
     if (obj != NULL) {
         func_15060F28(obj, 0);
@@ -3195,7 +3195,7 @@ void func_150723AC(void) {
 }
 
 void func_150723E0(void) {
-    struct127 *obj = func_15083E90(D_800D1583);
+    Actor *obj = func_15083E90(D_800D1583);
 
     if (obj != NULL && obj->unk65 != 0) {
         func_15060F28(obj, 0);
@@ -3210,7 +3210,7 @@ typedef struct SpawnSlot {
 } SpawnSlot;
 
 void func_15072420(void) {
-    struct127 *obj;
+    Actor *obj;
     s32 spawnFlags;
     s32 angle;
     s32 slot;
@@ -3266,7 +3266,7 @@ void func_15072420(void) {
 void func_1507266C(void) {
     u16 packed;
     s32 angle;
-    struct127 *obj;
+    Actor *obj;
 
     if (D_800BE616 == 0) {
         if (D_800D154C->unk222 == 0) {
@@ -3294,7 +3294,7 @@ void func_1507266C(void) {
 
 void func_15072740(void) {
     s32 angle;
-    struct127 *obj;
+    Actor *obj;
 
     angle = D_800D1580 >> 16;
     obj = &D_800CC2D0[D_800D154C->unk222];
@@ -3555,7 +3555,7 @@ u8 *func_15073118(u8 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, 
                   f32 yVelocity, f32 gravity, s32 unk83) {
     Mtx *mtx;
     f32 mf[4][4];
-    struct127 *obj;
+    Actor *obj;
     f32 x;
     f32 y;
     f32 z;
@@ -3566,29 +3566,29 @@ u8 *func_15073118(u8 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, 
     obj->y_velocity = yVelocity;
     obj->xz_velocity = speed;
     obj->unk83 = unk83;
-    if (((struct127 *)parent)->unk1D4 != NULL && bone != -1) {
-        mtx = (Mtx *)((struct127 *)parent)->unk1D4 + bone;
+    if (((Actor *)parent)->unk1D4 != NULL && bone != -1) {
+        mtx = (Mtx *)((Actor *)parent)->unk1D4 + bone;
         if (D_800C3E90 != 0) {
             guMtxL2F(mf, mtx);
             mtx = (Mtx *)mf;
         }
         func_150A7960((f32 *)mtx, offX, offY, offZ, &x, &y, &z);
     } else {
-        x = ((struct127 *)parent)->x_position;
-        y = ((struct127 *)parent)->y_position;
-        z = ((struct127 *)parent)->z_position;
+        x = ((Actor *)parent)->x_position;
+        y = ((Actor *)parent)->y_position;
+        z = ((Actor *)parent)->z_position;
     }
     obj->x_position = x;
     obj->y_position = y;
     obj->z_position = z;
-    obj->unk76 = obj->unk7A = ((struct127 *)parent)->unk7A + yawOffset * 182.04445f;
+    obj->unk76 = obj->unk7A = ((Actor *)parent)->unk7A + yawOffset * 182.04445f;
     obj->interaction_state = 0x21;
     obj->immune = 0xFF;
     obj->unkF8 = 2;
     if (anim != 0x42) {
         obj->unkF8 = 0x100E;
     }
-    obj->pad66 = ((struct127 *)parent)->pad66 & 0xC;
+    obj->unk66 = ((Actor *)parent)->unk66 & 0xC;
     obj->unkE4 = 10;
     obj->unkE6 = 10;
     obj->unkEC = 1.0f;
@@ -3608,7 +3608,7 @@ u8 *func_15073118(u8 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, 
         HIDDEN(obj)->unk304[i] = func_1515D480(1);
     }
     if (HIDDEN(obj)->unk304[i - 1] != 0) {
-        obj->unk301[0] = 1;
+        obj->unk301 = 1;
     }
     HIDDEN(obj)->unk314 = func_1515D440();
     func_1514EC1C(func_15158BD0(obj, 1, 0), obj, 0x13);
@@ -3617,7 +3617,7 @@ u8 *func_15073118(u8 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ, 
 
 /* Fires projectiles from the current object; D_800D1580 picks the volley (0: aimed at the camera target). */
 void func_1507342C(void) {
-    struct127 *obj;
+    Actor *obj;
     s32 rot;
     f32 y;
     f32 x;
@@ -3640,7 +3640,7 @@ void func_1507342C(void) {
             func_150ADA20() % 1000 < 200) {
             hit = 1;
         }
-        obj = (struct127 *)func_15073118((u8 *)D_800D154C, 23, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
+        obj = (Actor *)func_15073118((u8 *)D_800D154C, 23, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
         obj->unkF8 |= 0x01000000;
         if (hit != 0) {
             dx = target->eye.x - obj->x_position;
@@ -3672,7 +3672,7 @@ void func_1507342C(void) {
         x = 42.8f + t;
         func_15073118((u8 *)D_800D154C, 14, 0x42, 0.0f, 0.0f, 16.0f, (s32)(func_150ADA20() % 40 - 20) * spread, x, y, 2.9f, 100);
     } else if (D_800D1580 == 2) {
-        obj = (struct127 *)func_15073118((u8 *)D_800D154C, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
+        obj = (Actor *)func_15073118((u8 *)D_800D154C, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
         obj->unkB8 = 180.0f;
         obj->unkF8 |= 0x01000000;
     } else if (D_800D1580 == 3) {
@@ -3724,7 +3724,7 @@ void func_15073A28(void) {
 
 /* Applies func_1505D024 (D_800D1580 & 0xFF00FF) to object unk124; bit 30 sets its unk1CC to our height. */
 void func_15073A50(void) {
-    struct127 *parent;
+    Actor *parent;
     s32 flags;
     s32 index;
 
@@ -3747,7 +3747,7 @@ void func_15073A50(void) {
 /* Unpacks D_800D1580 into unk31C's unkA8 (low half, as f32), unkAC and unkAD (top bytes). */
 void func_15073B38(void) {
     s32 *param;
-    struct127 **objp;
+    Actor **objp;
     f32 low;
     f32 mid;
 
@@ -3773,7 +3773,7 @@ void func_15073C50(void) {
 }
 
 void func_15073CB8(void) {
-    struct127 *obj = func_1505F0AC(0x53);
+    Actor *obj = func_1505F0AC(0x53);
 
     if (obj != NULL && (u16)obj->unk244 == 0x1F) {
         obj->unk21C = 0;
@@ -3789,7 +3789,7 @@ void func_15073D34(void) {
 }
 
 void func_15073D74(void) {
-    struct127 *obj;
+    Actor *obj;
 
     obj = func_15083E90(D_800D1583);
     if (obj != NULL) {
@@ -3845,7 +3845,7 @@ void func_15073FA0(void) {
     s32 useDefault;
     s32 arg;
     f32 speed;
-    struct127 *obj;
+    Actor *obj;
     s32 bone;
     s32 slot;
     s32 cmd;
@@ -3857,7 +3857,7 @@ void func_15073FA0(void) {
     f32 y2;
     s32 rnd;
     s16 angle;
-    struct127 *player;
+    Actor *player;
 
     arg = D_800D1580 & 0xFFFF;
     slot = func_15083E0C(arg);
@@ -4011,7 +4011,7 @@ void func_15074664(void) {
 
 /* Deals D_800D1580 damage to the current object (or, while it holds one, to the player). */
 void func_150746F0(void) {
-    struct127 *target;
+    Actor *target;
     s32 damage;
     ActorCtl *ext;
     Camera *camera;
@@ -4180,7 +4180,7 @@ void func_15074BEC(s32 arg0, s32 arg1, s32 arg2) {
 
 /* Collision handlers (self, other, result): */
 
-void func_15074C00(s32 self, struct127 *other, s32 result) {
+void func_15074C00(s32 self, Actor *other, s32 result) {
     struct199 hit;
 
     if (((u8)other->unk239 & 0x7F) == 5) {
@@ -4192,7 +4192,7 @@ void func_15074C00(s32 self, struct127 *other, s32 result) {
     }
 }
 
-void func_15074C80(struct127 *self, struct127 *other) {
+void func_15074C80(Actor *self, Actor *other) {
     s32 anim;
 
     if ((u16)self->unk278 == 17) {
@@ -4231,16 +4231,16 @@ void func_15074C80(struct127 *self, struct127 *other) {
     }
 }
 
-void func_15074DEC(struct127 *self, s32 other, s32 result) {
+void func_15074DEC(Actor *self, s32 other, s32 result) {
     self->unk2E8 = 1;
 }
 
 void func_15074E04(s32 self, s32 other, s32 result) {
-    func_1516FE1C((struct127 *)other - D_800CC2D0, 180, 0xFF, 0);
+    func_1516FE1C((Actor *)other - D_800CC2D0, 180, 0xFF, 0);
     func_1518D1C0(other, 11, 0, 1, 0xFF, 0, &D_80099C1C);
 }
 
-void func_15074E80(struct127 *self, struct127 *other, s32 result) {
+void func_15074E80(Actor *self, Actor *other, s32 result) {
     s8 hitResult = 0;
 
     func_15194794(self, other, &hitResult);
@@ -4252,7 +4252,7 @@ void func_15074E80(struct127 *self, struct127 *other, s32 result) {
     }
 }
 
-void func_15074EE8(struct127 *self, struct127 *other, s32 result) {
+void func_15074EE8(Actor *self, Actor *other, s32 result) {
     if (other->interaction_state == 1) {
         self->immune = 0xFF;
         other->immune = 200;
@@ -4261,13 +4261,13 @@ void func_15074EE8(struct127 *self, struct127 *other, s32 result) {
     }
 }
 
-void func_15074F30(struct127 *self, struct127 *other, s32 result) {
+void func_15074F30(Actor *self, Actor *other, s32 result) {
     self->unk232 = other->unk109;
     self->unk218 = NULL;
 }
 
 /* Sends `other` towards (-2641, 3039). */
-void func_15074F48(struct127 *self, struct127 *other, s32 result) {
+void func_15074F48(Actor *self, Actor *other, s32 result) {
     f32 dx = -2641.0f - self->x_position;
     f32 dz = self->z_position - 3039.0f;
 
@@ -4276,7 +4276,7 @@ void func_15074F48(struct127 *self, struct127 *other, s32 result) {
     func_15194408(self, other);
 }
 
-void func_15074FD4(struct127 *self, struct127 *other, s32 result) {
+void func_15074FD4(Actor *self, Actor *other, s32 result) {
     if (other->interaction_state == 1) {
         self->immune = 0xFF;
         other->immune = 200;
@@ -4289,7 +4289,7 @@ void func_15074FD4(struct127 *self, struct127 *other, s32 result) {
     func_151942B0(self, other, result);
 }
 
-void func_15075050(struct127 *self, s32 other, s32 result) {
+void func_15075050(Actor *self, s32 other, s32 result) {
     self->unkB8 = 5.0f;
     if (self->xz_velocity > 0.0f) {
         self->unkB8 = -5.0f;
@@ -4298,11 +4298,11 @@ void func_15075050(struct127 *self, s32 other, s32 result) {
     self->y_velocity = 12.0f;
 }
 
-void func_150750A4(struct127 *self, s32 other, s32 result) {
+void func_150750A4(Actor *self, s32 other, s32 result) {
     self->gravity = 5.0f;
 }
 
-void func_150750C4(struct127 *self, struct127 *other, u8 *result) {
+void func_150750C4(Actor *self, Actor *other, u8 *result) {
     if (other->id == 0x88 && self->unk107 < 55) {
         self->unk138 += 3;
     }
@@ -4316,8 +4316,8 @@ void func_150750C4(struct127 *self, struct127 *other, u8 *result) {
 }
 
 /* Returns the first live object owned by `owner` (unk65 = owner index + 1), or NULL. */
-struct127 *func_1507515C(struct127 *owner) {
-    struct127 *obj;
+Actor *func_1507515C(Actor *owner) {
+    Actor *obj;
     s32 i;
 
     obj = D_800CC2D0;

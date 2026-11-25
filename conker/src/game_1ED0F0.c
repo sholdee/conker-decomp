@@ -129,7 +129,7 @@ void func_151C05F0(vertex *pos, u8 fxOwner, s32 fxList);
 void func_1514FB98(ImpactFx *, u8, s32);
 void func_1514FBFC(SurfaceImpactFx *, u8, s32);
 void func_1514FCE8(DebrisFx *, u8, s32);
-void func_1504715C(SurfaceHit *, struct127 *);
+void func_1504715C(SurfaceHit *, Actor *);
 s32 func_15046C80(vertex *, s32, f32, SurfaceHit *);
 void func_151C0360(HitSurface *surface, vertex *pos, u8 fxOwner, s32 fxList);
 void func_151C0644(vertex *pos, u8 fxOwner, s32 fxList);
@@ -197,7 +197,7 @@ void func_151BFE84(HitSurface *surface, vertex *pos, vertex *dir, u8 withParticl
 }
 
 /* Bullet hit on an object: sparks and debris at pos, plus a ground mark below it if hitObj is set. */
-void func_151C0098(vertex *pos, struct127 *hitObj, u8 withParticles, u8 fxOwner, s32 fxList) {
+void func_151C0098(vertex *pos, Actor *hitObj, u8 withParticles, u8 fxOwner, s32 fxList) {
     DebrisFx fx;
     vertex probe;
     SurfaceHit floor;
@@ -255,7 +255,7 @@ void func_151C0098(vertex *pos, struct127 *hitObj, u8 withParticles, u8 fxOwner,
 }
 
 /* Whether obj is a valid target: not in the ignore list, not self, active, and with a valid id. */
-s32 func_151C02E4(struct127 *obj, struct127 *self, s32 ignoreCount, struct127 **ignore) {
+s32 func_151C02E4(Actor *obj, Actor *self, s32 ignoreCount, Actor **ignore) {
     u8 i;
 
     for (i = 0; i < ignoreCount; i++) {
@@ -334,12 +334,12 @@ void func_151C0644(vertex *pos, u8 fxOwner, s32 fxList) {
     func_150E83AC(pos, func_150ADA20() % 62 + 120, fxOwner, fxList);
 }
 
-/* A world-space 4x4 float matrix; struct127.unk1D4 points at an array of them (one per bone). */
+/* A world-space 4x4 float matrix; Actor.unk1D4 points at an array of them (one per bone). */
 typedef f32 BoneMtx[4][4];
 
 /* Result of a ray cast (func_15081690). */
 typedef struct {
-    /* 0x00 */ struct127 *obj;
+    /* 0x00 */ Actor *obj;
     /* 0x04 */ f32 dist;
     /* 0x08 */ vertex hitPos;
     /* 0x14 */ vertex unk14;
@@ -359,7 +359,7 @@ typedef struct {
 /* Objects the bullet trace ignores (see func_151C1940). */
 typedef struct {
     /* 0x00 */ s32 count;
-    /* 0x04 */ struct127 *objs[3];
+    /* 0x04 */ Actor *objs[3];
 } IgnoreList;
 
 typedef struct {
@@ -382,7 +382,7 @@ typedef struct {
     /* 0x000 */ RayHit ray;
     /* 0x064 */ f32 lifetime;
     /* 0x068 */ f32 speed;
-    /* 0x06C */ struct127 *owner;
+    /* 0x06C */ Actor *owner;
     /* 0x070 */ IgnoreList ignore;
     /* 0x080 */ TrailFx *trail;
     /* 0x084 */ FollowFx *follow;
@@ -423,26 +423,26 @@ typedef struct {
 } SoundEmitter;
 
 f32 func_15144AA8(u8, Camera *);
-void func_15145740(struct127 *, vertex *, void *, s32, f32);
-s32 func_151D5B6C(vertex *, vertex *, struct127 *, s32, IgnoreList *);
+void func_15145740(Actor *, vertex *, void *, s32, f32);
+s32 func_151D5B6C(vertex *, vertex *, Actor *, s32, IgnoreList *);
 Bullet *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 void func_15145974(vertex *, f32 *, f32 *);
 FollowFx *func_151B8908(Bullet *);
 Bullet88 *func_151B8400(Bullet *);
 void *func_151B8668(Bullet *, u8, s32);
 void func_15145EA4(vertex **, vertex **, BoneMtx *, s32);
-void func_15102B38(struct127 *, s32, vertex *, vertex *, f32 *, s32, s32, f32,
+void func_15102B38(Actor *, s32, vertex *, vertex *, f32 *, s32, s32, f32,
                    vertex *, s32, s32, s32, u8, s32);
 void func_15103254(s16, u8, f32, vertex *, s32, u8, s32);
-void func_151C1798(struct127 *obj, vertex *pos);
+void func_151C1798(Actor *obj, vertex *pos);
 void func_151C1860(vertex *pos, u8 fxOwner, s32 fxList);
 s32 func_151C196C(RayHit *ray, vertex *start, vertex *dir, vertex *aimPos, vertex *aimDir,
-                  struct127 *shooter, IgnoreList *ignore, vertex *passPos, f32 *passDist,
+                  Actor *shooter, IgnoreList *ignore, vertex *passPos, f32 *passDist,
                   SurfaceHit *pass, s32 mode);
 s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
 
 /* Fires a bullet from shooter (aimed by aimer's view, if given) and spawns its object and effects. */
-void func_151C0698(struct127 *shooter, struct127 *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList) {
+void func_151C0698(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList) {
     RayHit ray;
     f32 passDist;
     vertex passPos;
@@ -454,7 +454,7 @@ void func_151C0698(struct127 *shooter, struct127 *aimer, IgnoreList *ignore, u8 
     vertex aimDir;
     s32 mode;
     vertex *src;
-    struct127 *who;
+    Actor *who;
     f32 angle;
     u8 scratch[0x14];
     BulletState state;
@@ -664,8 +664,8 @@ s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 ar
 }
 
 void func_15055A2C(s32, f32, f32, f32, s32);
-void func_151C1654(vertex *pos, vertex *dir, struct127 *owner, u8 impactType, HitSurface *surface);
-void func_15081690(struct127 *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32,
+void func_151C1654(vertex *pos, vertex *dir, Actor *owner, u8 impactType, HitSurface *surface);
+void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32,
                    IgnoreList *, s32);
 s32 func_151ABE40(vertex *, SurfaceHit *, s32, s32, s32);
 
@@ -780,11 +780,11 @@ void func_151C1628(Bullet *bullet) {
     func_1513259C(bullet);
 }
 
-void func_151D40D4(vertex *, vertex *, struct127 *, s32, HitSurface *, s32, s32, s32);
-void func_151D42E8(vertex *, vertex *, struct127 *, HitSurface *, s32);
+void func_151D40D4(vertex *, vertex *, Actor *, s32, HitSurface *, s32, s32, s32);
+void func_151D42E8(vertex *, vertex *, Actor *, HitSurface *, s32);
 
 /* Impact sound/decal for a bullet hit, chosen by impactType. */
-void func_151C1654(vertex *pos, vertex *dir, struct127 *owner, u8 impactType, HitSurface *surface) {
+void func_151C1654(vertex *pos, vertex *dir, Actor *owner, u8 impactType, HitSurface *surface) {
     void (*callback)(s32, s32, s32);
 
     callback = (void (*)(s32, s32, s32))D_800E0934;
@@ -814,7 +814,7 @@ extern u8 D_800AA954[];      /* bone index per muzzle */
 extern vertex D_800AA958[];  /* muzzle offset in bone space */
 
 /* World position of obj's gun muzzle, from its bone matrices. */
-void func_151C1798(struct127 *obj, vertex *pos) {
+void func_151C1798(Actor *obj, vertex *pos) {
     s32 index;
 
     switch (obj->id) {
@@ -832,7 +832,7 @@ void func_151C1798(struct127 *obj, vertex *pos) {
 }
 
 /* Event handler: event 0x2D hands the bullet's ownership between the two objects in pair. */
-void func_151C1814(Bullet *bullet, struct127 **pair, u8 event) {
+void func_151C1814(Bullet *bullet, Actor **pair, u8 event) {
     BulletState *state = &bullet->state;
     if (event == 0x2D) {
         // matching: the indexed form state[0] keeps IDO's compare operands in source order
@@ -861,11 +861,11 @@ void func_151C1860(vertex *pos, u8 fxOwner, s32 fxList) {
 }
 
 /* Target filter callback: func_151C02E4 with the ignore list packed in a struct. */
-s32 func_151C1940(struct127 *obj, struct127 *self, IgnoreList *ignore) {
+s32 func_151C1940(Actor *obj, Actor *self, IgnoreList *ignore) {
     return func_151C02E4(obj, self, ignore->count, ignore->objs);
 }
 
-void func_151C1D5C(struct127 *, vertex *, vertex *, RayHit *, f32, s32, s32, s32, s8,
+void func_151C1D5C(Actor *, vertex *, vertex *, RayHit *, f32, s32, s32, s32, s8,
                    IgnoreList *, vertex *, f32 *, SurfaceHit *, s32);
 s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
 
@@ -875,7 +875,7 @@ s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
  * direction. Returns FALSE only when re-aiming fails.
  */
 s32 func_151C196C(RayHit *ray, vertex *start, vertex *dir, vertex *aimPos, vertex *aimDir,
-                  struct127 *shooter, IgnoreList *ignore, vertex *passPos, f32 *passDist,
+                  Actor *shooter, IgnoreList *ignore, vertex *passPos, f32 *passDist,
                   SurfaceHit *pass, s32 mode) {
     u8 trace;
     u8 hit;
@@ -950,7 +950,7 @@ s32 func_151C196C(RayHit *ray, vertex *start, vertex *dir, vertex *aimPos, verte
  * Ray cast that continues through pass-through surfaces; the first one it passes is reported in
  * passPos/passDist/pass. ray->dist is the total distance travelled.
  */
-void func_151C1D5C(struct127 *shooter, vertex *start, vertex *dir, RayHit *ray, f32 arg4,
+void func_151C1D5C(Actor *shooter, vertex *start, vertex *dir, RayHit *ray, f32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s8 arg8, IgnoreList *ignore, vertex *passPos,
                    f32 *passDist, SurfaceHit *pass, s32 mode) {
     RayHitPart *part;
@@ -1008,7 +1008,7 @@ typedef struct {
 
 void func_151D8868(Event151D8868 *, s32, s32, s32);
 
-void func_151C1FB8(struct127 *obj) {
+void func_151C1FB8(Actor *obj) {
     Event151D8868 event;
 
     if (obj->camera != NULL) {

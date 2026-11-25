@@ -3,18 +3,18 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
-s32 func_150535F4(struct127 *arg0);
-void func_15056B08(struct127 *arg0);
-void func_150585F0(struct127 *arg0, f32 arg1);
-void func_1504CA60(struct127 *arg0);
+void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
+s32 func_150535F4(Actor *arg0);
+void func_15056B08(Actor *arg0);
+void func_150585F0(Actor *arg0, f32 arg1);
+void func_1504CA60(Actor *arg0);
 void func_150D7790(u8 *arg0, s32 arg1);
 
 /**
  * Eases the object's unkC4 toward its turn rate: the change from prevAngle to the current moving angle,
  * scaled by 100 / D_800CC264.
  */
-void func_15052760(struct127 *obj, s16 prevAngle) {
+void func_15052760(Actor *obj, s16 prevAngle) {
     f32 blend;
     s8 direction;
     s32 divisor;
@@ -65,7 +65,7 @@ typedef struct {
  * Per-frame movement for a path-following object: picks a target height (the next path point, or the
  * object in unk222), eases y_position toward it, updates the pitch-like unkB8, then moves the object.
  */
-void func_150528C8(struct127 *obj) {
+void func_150528C8(Actor *obj) {
     f32 targetY;
     f32 climbSpeed;
     u32 pitch;

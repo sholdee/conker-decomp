@@ -55,7 +55,7 @@ typedef struct {
     /* 0x038 */ struct17 pos;
     /* 0x044 */ struct17 vel;
     /* 0x050 */ u8 pad50[0x2C];
-    /* 0x07C */ struct127 *owner;
+    /* 0x07C */ Actor *owner;
     /* 0x080 */ u8 pad80[8];
     /* 0x088 */ s32 sound;
     /* 0x08C */ u8 pad8C[0xE4];
@@ -66,7 +66,7 @@ typedef struct {
 } EffectObj;
 
 extern s32 func_151C4B0C(s32, ProjectileState *, struct17 *, struct17 *, f32 *, f32, u8, s32, struct17 *, u8 *, s32,
-                         f32, struct127 *, s32, u8, u8, s32, u8);
+                         f32, Actor *, s32, u8, u8, s32, u8);
 extern void func_15145974(struct17 *, f32 *, f32 *);
 EffectObj *func_1513264C(void *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 s32 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16 y, s16 z, s16 nearDistance,
@@ -74,7 +74,7 @@ s32 func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4, s16 x, s16
 
 /* Spawns a projectile at `pos`, aimed along `aim` (or at `target` when arg2 is set). */
 void func_150F7470(vertex *pos, struct17 *aim, s32 arg2, struct17 *target, u8 targetIsDir, s32 arg5, f32 speed,
-                   f32 arg7, f32 arg8, struct127 *owner, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14,
+                   f32 arg7, f32 arg8, Actor *owner, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14,
                    s8 arg15, s32 sound, u8 arg17, u8 arg18, s32 arg19) {
     ProjectileState state;
     ParticleSpawn spawn;
@@ -236,9 +236,9 @@ typedef struct {
     /* 0x64 */ u8 pad64[0xC];
 } RayHit;
 
-void func_15081690(struct127 *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
+void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
                    s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
-void func_151D4DAC(s32, struct127 *, struct17 *, struct17 *, RayHit *, s32, struct17 *, u8, s32);
+void func_151D4DAC(s32, Actor *, struct17 *, struct17 *, RayHit *, s32, struct17 *, u8, s32);
 void func_150F7F8C(struct17 *pos, u8 arg1, s32 arg2);
 
 /*
@@ -247,7 +247,7 @@ void func_150F7F8C(struct17 *pos, u8 arg1, s32 arg2);
  */
 s8 func_150F78B4(EffectObj *obj) {
     ProjectileState *state;
-    struct127 *owner;
+    Actor *owner;
     s8 alive;
     f32 dt;
     f32 dist;
@@ -372,10 +372,10 @@ void func_150F7F58(struct210 *obj, s16 arg1) {
 extern f32 func_150ADA68(void);
 void func_151541B8(struct17 *pos, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, s32 arg6);
 void func_151D3F14(struct17 *pos, u8, s32);
-ActorCtl *func_150FF288(struct127 *);
-s32 func_150FF6E0(struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct127 *, ActorCtl *);
+ActorCtl *func_150FF288(Actor *);
+s32 func_150FF6E0(struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, Actor *, ActorCtl *);
 void func_150FF474(struct17 *position, struct17 *points, u8 arg2, s32 arg3);
-void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, s32, s32);
+void func_151D4408(struct17 *, struct17 *, void *, Actor *, f32, s32, s32);
 
 /* Impact effect at `pos`. */
 void func_150F7F8C(struct17 *pos, u8 arg1, s32 arg2) {
@@ -594,7 +594,7 @@ extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8,
 extern void func_15152B38(EmitterSpawn *, u8, s32);
 
 /* Effects 50 units above `obj`: a func_151602C0 burst and a func_15152B38 emitter. */
-void func_150F85A0(s32 arg0, struct127 *obj, s32 arg2) {
+void func_150F85A0(s32 arg0, Actor *obj, s32 arg2) {
     struct17 pos;
 
     pos.unk0 = obj->x_position;
@@ -778,7 +778,7 @@ void func_150F892C(StageObj *obj) {
 
     count = 0;
     {
-        struct127 *other;
+        Actor *other;
 
         other = D_800CC2D0;
         for (i = 0; i < 25; i++, other++) {
@@ -1016,12 +1016,12 @@ extern u8 D_80088B50;
 extern struct17 D_800A1C48;
 extern struct17 D_800A1C54;
 extern s32 func_15145EA4(struct17 **src, struct17 **dst, void *mtx, s32 count);
-extern void func_15102B38(struct127 *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6,
+extern void func_15102B38(Actor *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6,
                           f32 arg7, struct17 *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
 
 /* Effect at the point D_800A1C48 on bone D_80088B50 of `obj`. */
 void func_150F97EC(obj, arg1, arg2)
-struct127 *obj;
+Actor *obj;
 u8 arg1;
 s32 arg2;
 {
@@ -1052,7 +1052,7 @@ s32 arg2;
 
 /* Muzzle effects of `obj`'s gun attachment (set 0x82): flash at the muzzle, impact at the hit point. */
 void func_150F9950(obj, arg1, arg2)
-struct127 *obj;
+Actor *obj;
 u8 arg1;
 s32 arg2;
 {

@@ -19,11 +19,11 @@ struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32,
 s32 func_15160A58(s32, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150F0A24(f32 *);
 
-struct Beam *func_150EEF80(struct127 *, u8, u8, s32);
+struct Beam *func_150EEF80(Actor *, u8, u8, s32);
 
 /* Fires beam slot `slot` (0 or 1) of `actor`: spawns its beam, a spark burst and an effect
  * at the muzzle. */
-void func_150EEE00(struct127 *actor, u8 slot) {
+void func_150EEE00(Actor *actor, u8 slot) {
     f32 muzzle[3];
     Header header;
     Header2 origin;
@@ -51,15 +51,15 @@ void func_150EEE00(struct127 *actor, u8 slot) {
 
 /* Message payload: an actor reference (message types 0 and 0x43). */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     u8 actorId;
     u8 slot;
 } ActorRefMsg;
 
 /* Message payload for type 0x2D: two actors exchange identities. */
 typedef struct {
-    struct127 *actorA;
-    struct127 *actorB;
+    Actor *actorA;
+    Actor *actorB;
     u8 idA;
     u8 idB;
 } ActorSwapMsg;
@@ -70,7 +70,7 @@ typedef union {
 } ActorMsg;
 
 /* Sends message 0x43 for slot `slot` of `actor`. */
-void func_150EEF40(struct127 *actor, u8 slot) {
+void func_150EEF40(Actor *actor, u8 slot) {
     ActorRefMsg msg;
 
     msg.actor = actor;
@@ -97,9 +97,9 @@ typedef struct {
 
 /* State a beam object carries at +0x110. The beam runs from a bone of `actor` to `target`. */
 typedef struct {
-    /* 0x00 */ struct127 *actor;       /* the shooter */
+    /* 0x00 */ Actor *actor;       /* the shooter */
     /* 0x04 */ u8 actorId;             /* actor->unique_id at spawn */
-    /* 0x08 */ struct127 *target;
+    /* 0x08 */ Actor *target;
     /* 0x0C */ u8 targetId;
     /* 0x0D */ u8 slot;                /* 0 or 1: picks the source bone and offset */
     /* 0x10 */ f32 widthPhase;
@@ -147,7 +147,7 @@ typedef struct {
 
 /* Back-reference a beam's spark carries (at spark->link). */
 typedef struct {
-    /* 0x00 */ struct127 *actor;
+    /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;
     /* 0x08 */ Beam *beam;
     /* 0x0C */ u8 index;               /* which beam->link.sparks[] entry */
@@ -183,11 +183,11 @@ typedef struct Spark {
 } Spark;
 
 extern void *func_151A7950(void *, s32, u8, s32);
-struct Glow *func_150EFEC8(struct127 *, u8, u8, u8, u8, Beam *, u8, s32);
+struct Glow *func_150EFEC8(Actor *, u8, u8, u8, u8, Beam *, u8, s32);
 Flash *func_150F0198(u8, u8, u8, u8, Beam *, u8, s32);
 
 /* Spawns the beam of slot `slot` of `actor`, with its sparks, emitter, glow and flash. */
-Beam *func_150EEF80(struct127 *actor, u8 slot, u8 arg2, s32 arg3) {
+Beam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     Beam *beam;
     ParticleDef spawn;
     BeamLink init;
@@ -310,8 +310,8 @@ void func_1502EA98(void *, s32, s32, s32, s32, s32, s32);
 /* Per-frame update of a beam: aims it from the muzzle to the target, pulses it and applies its hit. */
 s32 func_150EF38C(Beam *beam) {
     BeamLink *link;
-    struct127 *actor;
-    struct127 *target;
+    Actor *actor;
+    Actor *target;
     s16 *position;
     BeamHit hit;
     f32 angle;
@@ -373,7 +373,7 @@ s32 func_150EF38C(Beam *beam) {
 }
 
 /* Whether `actor` has id 0x28. */
-s32 func_150EF784(struct127 *actor, s32 arg1, s32 arg2) {
+s32 func_150EF784(Actor *actor, s32 arg1, s32 arg2) {
     if (actor->id == 0x28) {
         return TRUE;
     }
@@ -438,8 +438,8 @@ void func_150EF860(Beam *beam) {
  * and follows its actor and target through an identity swap (type 0x2D). */
 void func_150EF910(Beam *beam, ActorMsg *msg, u8 type) {
     BeamLink *link = &beam->link;
-    struct127 *actor;
-    struct127 *msgActor;
+    Actor *actor;
+    Actor *msgActor;
     u8 actorId;
     u8 msgActorId;
 
@@ -492,7 +492,7 @@ s32 func_150EFA4C(Spark *spark) {
     beam = sparkLink->beam;
     link = &beam->link;
     if (link->flags & 1) {
-        struct127 *actor;
+        Actor *actor;
 
         actor = link->actor;
         if (actor->unk1D4) {
@@ -620,7 +620,7 @@ void func_150EFB80(BeamEmitter *emitter) {
 
 /* Back-reference a beam's glow carries at +0x170. */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     u8 actorId;
     u8 slot;
     Beam *beam;
@@ -670,7 +670,7 @@ typedef struct Glow {
 } Glow;
 
 /* Spawns the glow sprite of `beam` (slot `slot` of `actor`), tinted (r, g, b). */
-Glow *func_150EFEC8(struct127 *actor, u8 slot, u8 r, u8 g, u8 b, Beam *beam, u8 arg6, s32 arg7) {
+Glow *func_150EFEC8(Actor *actor, u8 slot, u8 r, u8 g, u8 b, Beam *beam, u8 arg6, s32 arg7) {
     Glow *glow;
     GlowSprite sprite;
     ParticleDef spawn;
@@ -873,15 +873,15 @@ extern f32 D_800A1640[][3];
 extern f32 D_800A1658[][3];
 extern u8 D_800A1670[];
 extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
-extern void func_15102B38(struct127 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8,
+extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8,
                           s32);
-s32 func_151C229C(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, struct127 *,
+s32 func_151C229C(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, Actor *,
                   s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 
 /* Fires a projectile (func_151C229C) from slot `slot` of `actor` once actor->unk2EC
  * reaches 90, with a spark burst and a func_15102B38 effect at the muzzle. */
 s32 func_150F03F8(actor, slot, arg2, arg3)
-    struct127 *actor;
+    Actor *actor;
     u8 slot;
     u8 arg2;
     s32 arg3;
@@ -953,7 +953,7 @@ s32 func_150F03F8(actor, slot, arg2, arg3)
 void func_150F07E4(Spark *spark, s32 data, u8 type) {
     SparkLink *link = spark->link;
     ActorMsg *msg = (ActorMsg *)data;
-    struct127 *msgActor;
+    Actor *msgActor;
 
     if (type == 0) {
         msgActor = msg->ref.actor;
@@ -974,7 +974,7 @@ void func_150F07E4(Spark *spark, s32 data, u8 type) {
 /* Message handler of a beam glow; same as func_150F07E4. */
 void func_150F088C(Glow *glow, ActorMsg *msg, u8 type) {
     GlowLink *link = &glow->link;
-    struct127 *msgActor;
+    Actor *msgActor;
 
     if (type == 0) {
         msgActor = msg->ref.actor;
@@ -1095,7 +1095,7 @@ void func_150F0A24(f32 *pos) {
 
 /* State an actor-following particle (created by func_15130280) carries at +0xA8. */
 typedef struct {
-    /* 0x00 */ struct127 *actor;
+    /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;
     /* 0x08 */ f32 phase[3];
 } ActorParticleLink;
@@ -1128,7 +1128,7 @@ typedef struct {
 extern void *func_15130280(void *, u8, s32, s32, u8, s32);
 
 /* Spawns a particle that follows `actor` (see func_150F0E48). */
-void func_150F0BEC(struct127 *actor) {
+void func_150F0BEC(Actor *actor) {
     ParticleDesc spawn;
     ActorParticleLink link;
     Particle *particle;
@@ -1198,7 +1198,7 @@ void func_150F0BEC(struct127 *actor) {
 /* Per-frame update of an actor-following particle: tracks the actor and pulses its size and alpha. */
 s32 func_150F0E48(Particle *particle, s32 arg1) {
     ActorParticleLink *link;
-    struct127 *actor;
+    Actor *actor;
 
     link = &particle->link.actor;
     actor = link->actor;
@@ -1226,7 +1226,7 @@ s32 func_150F0E48(Particle *particle, s32 arg1) {
 void func_150F1020(Particle *particle, s32 data, u8 type) {
     ActorParticleLink *link = &particle->link.actor;
     ActorMsg *msg = (ActorMsg *)data;
-    struct127 *msgActor;
+    Actor *msgActor;
 
     if (type == 0x2D) {
         if (link->actor == msg->swap.actorA) {
@@ -1250,7 +1250,7 @@ void func_150F1020(Particle *particle, s32 data, u8 type) {
 
 /* State an actor's trail emitter (created by func_15149130) carries at +0x28. */
 typedef struct {
-    /* 0x00 */ struct127 *actor;
+    /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;
     /* 0x08 */ f32 accum;              /* particles owed, spawned one per 1.0 */
     /* 0x0C */ Vec3f lastPos;          /* actor position on the previous frame */
@@ -1268,7 +1268,7 @@ typedef struct {
 } TrailEmitter;
 
 /* Attaches a trail emitter (func_150F1170) to `actor`. */
-void func_150F10D4(struct127 *actor) {
+void func_150F10D4(Actor *actor) {
     TrailLink link;
     TrailEmitter *emitter;
 
@@ -1290,7 +1290,7 @@ void func_150F10D4(struct127 *actor) {
  * this frame; the emitter ends when the actor goes away. */
 void func_150F1170(TrailEmitter *emitter) {
     TrailLink *link;
-    struct127 *actor;
+    Actor *actor;
     Vec3f last;
     f32 dx;
     f32 dy;
@@ -1385,7 +1385,7 @@ void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
     TrailEmitter **self = &emitter; // matching: address-taken args stay in their stack slots
     ActorMsg **msg = (ActorMsg **)&data;
     TrailLink *link;
-    struct127 *msgActor;
+    Actor *msgActor;
 
     if (type == 0x43) {
         msgActor = ((ActorMsg *)data)->ref.actor;
@@ -1400,7 +1400,7 @@ void func_150F15F8(TrailEmitter *emitter, s32 data, u8 type) {
 }
 
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     u8 actorId;
 } ActorRef;
 
@@ -1412,7 +1412,7 @@ typedef struct {
 /* Message handler of an object bound to an actor: released by message 0x43 for that actor. */
 void func_150F1684(ActorBound *self, ActorMsg *msg, u8 type) {
     ActorRef *ref = &self->ref;
-    struct127 *msgActor;
+    Actor *msgActor;
 
     if (type == 0x43) {
         msgActor = msg->ref.actor;
@@ -1429,7 +1429,7 @@ extern u8 D_800A180C[][2];
 /* Spark burst and func_15102B38 effect at slot `slot` of `actor`, muzzle variant
  * `variant` (0-3); actors with id 0x23 use the second table set. */
 void func_150F16DC(actor, slot, variant, arg3, arg4)
-    struct127 *actor;
+    Actor *actor;
     u8 slot;
     u8 variant;
     u8 arg3;
@@ -1511,7 +1511,7 @@ extern Rates150F1A00 D_80088B00;
 f32 cosf(f32);
 
 /* Pulses the scale of bone matrix 62 of `actor`, faster as bit pairs of actor->unk2E4 are set. */
-void func_150F1A00(struct127 *actor) {
+void func_150F1A00(Actor *actor) {
     f32 (*mtx)[4];
     Rates150F1A00 rates;
     s32 idx;
@@ -1579,7 +1579,7 @@ GameCommand *func_150F1B48(GameCommand *cmd, s32 index) {
     return cmd;
 }
 
-/* struct127 view for func_150F1CB0: the header declares bytes 0x68-0x6B as one u32 pad. */
+/* Actor view for func_150F1CB0: the header declares bytes 0x68-0x6B as one u32 pad. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x68];
     /* 0x068 */ u8 unk68;
@@ -1660,7 +1660,7 @@ void func_15152190(Cfg150F1D10B *, s32 *, f32 *, s32, f32, s32, u8, s32);
 
 /* Burst of effects at `actor` (func_151D5404 and friends, sound 0x2B6/0x2BE, two particle
  * sprays scaled by the actor's size). */
-void func_150F1D10(struct127 *actor, u8 arg1, s32 arg2) {
+void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
     struct17 pos;
     f32 scale;
 
@@ -1731,7 +1731,7 @@ void func_150F20F0(s32 index) {
     s32 pan;
     s32 out2;
     s32 out3;
-    struct127 *actor;
+    Actor *actor;
 
     actor = &D_800CC2D0[index];
     x = actor->x_position;
@@ -1757,7 +1757,7 @@ void func_150F20F0(s32 index) {
 
 /* Spawns func_151C329C's effect at a random point 100 units around bone 19 of `actor`
  * (unless actor->unk74's low nibble is 0xF). */
-void func_150F2230(struct127 *actor, s32 arg1, s32 arg2) {
+void func_150F2230(Actor *actor, s32 arg1, s32 arg2) {
     Vec3f offset;
     Vec3f pos;
 

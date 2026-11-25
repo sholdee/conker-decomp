@@ -3,10 +3,10 @@
 #include "functions.h"
 #include "variables.h"
 
-u8 *func_15033E84(struct127 *arg0);
+u8 *func_15033E84(Actor *arg0);
 
 /* Sets the object's immunity timer and heading (in degrees, from its facing angle) and starts animation 0. */
-void func_15052EF0(struct127 *obj) {
+void func_15052EF0(Actor *obj) {
     obj->immune = 100;
     // binary angle (0x10000 per turn) to degrees, a quarter turn ahead of the facing angle
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
@@ -14,8 +14,8 @@ void func_15052EF0(struct127 *obj) {
 }
 
 /* Resets object `index` (unk13C, unk218) and sets its unk232; returns the object. */
-struct127 *func_15052F58(s32 index, s32 arg1) {
-    struct127 *obj;
+Actor *func_15052F58(s32 index, s32 arg1) {
+    Actor *obj;
 
     obj = &D_800CC2D0[index];
     obj->unk13C = 0;
@@ -29,9 +29,9 @@ struct127 *func_15052F58(s32 index, s32 arg1) {
  * `force` is set: records it on arg0 (unk13C), copies arg0's facing angle to it and resets its state; with
  * arg0 in interaction_state 0x20 it is also stopped and turned to face arg0's way.
  */
-void func_15052F9C(struct127 *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
+void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7,
                    s32 force, s32 arg9) {
-    struct127 *obj;
+    Actor *obj;
     s32 anim;
     s32 callF28;
     u8 *info;
@@ -111,10 +111,10 @@ void func_15052F9C(struct127 *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s3
  * Launches the object linked by arg0->unk124 (velocity/gravity given), starts animation 50 and sets its
  * unk31C target x/z to arg0's position, or to the translation of matrix `mtxIndex` of arg0->unk1D4.
  */
-void func_1505327C(struct127 *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex) {
+void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex) {
     s32 pad[2]; // matching: frame keeps 8 unused bytes above pos
     vertex pos;
-    struct127 *obj;
+    Actor *obj;
 
     obj = &D_800CC2D0[arg0->unk124];
     if ((obj->disable_run == 0) && (obj->stunned == 0)) {

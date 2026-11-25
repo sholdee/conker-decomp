@@ -6,8 +6,8 @@
 // Screen fade-to-black effect spawned for a pair of objects (caller: game_1C1150.c).
 typedef struct {
     u8         pad0[0x10];
-    struct127 *owner;  // 0x10
-    struct127 *source; // 0x14
+    Actor *owner;  // 0x10
+    Actor *source; // 0x14
     u16        timer;  // 0x18
     u8         state;  // 0x1A
     u8         alpha;  // 0x1B
@@ -17,7 +17,7 @@ typedef struct {
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
 
 /* Spawns a fade effect for owner/source; mode picks how it triggers. */
-void func_15104170(s32 mode, struct127 *owner, struct127 *source) {
+void func_15104170(s32 mode, Actor *owner, Actor *source) {
     FadeEffect *effect;
 
     effect = func_15167A68(100, 0, 0x20, 0, 0xFF, 1);
@@ -61,8 +61,8 @@ void func_151041E4(FadeEffect *effect) {
             }
         }
         if (triggered) {
-            struct127 *source;
-            struct127 *owner;
+            Actor *source;
+            Actor *owner;
 
             source = effect->source;
             owner = effect->owner;
@@ -93,7 +93,7 @@ void func_151041E4(FadeEffect *effect) {
     }
         break;
     case 2: {
-        struct127 *owner;
+        Actor *owner;
 
         if (D_800BEA08 < effect->timer) {
             effect->timer -= D_800BEA08;

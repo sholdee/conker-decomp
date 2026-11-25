@@ -13,7 +13,7 @@ extern f32 D_800A3730; // pi; matching: the 3.141592741f literal changes the byt
  */
 void func_1512E4B0(Camera *camera) {
     s32 index;
-    struct127 *obj;
+    Actor *obj;
     s16 heading;
     f32 radians;
 

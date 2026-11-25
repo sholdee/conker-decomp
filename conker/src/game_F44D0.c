@@ -6,7 +6,7 @@
 typedef struct {
     /* 0x00 */ u8  ownerId;
     /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ struct127 *owner;
+    /* 0x04 */ Actor *owner;
     /* 0x08 */ u8  unk8;
     /* 0x09 */ u8  pad9[0x3];
     /* 0x0C */ f32 unkC;
@@ -31,13 +31,13 @@ typedef struct {
 } struct_E9FE0_2F8;
 
 void *func_15134DAC(struct_E9FE0_2F8 *, s32);
-void func_1516962C(s32, struct127 *, s32);
+void func_1516962C(s32, Actor *, s32);
 
 /*
  * Attaches two mirrored func_15134DAC effects (unk8 13 and 12) to `owner`, lasting `duration`,
  * or 300 when `duration` is 0.
  */
-void func_150C7020(struct127 *owner, s16 duration, s32 arg2, s32 arg3) {
+void func_150C7020(Actor *owner, s16 duration, s32 arg2, s32 arg3) {
     struct_E9FE0_2F8 desc;
 
     if (owner == NULL) {

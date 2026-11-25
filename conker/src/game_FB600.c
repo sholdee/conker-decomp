@@ -19,7 +19,7 @@ typedef struct {
  * blocks of 0x10000 / step pixels.
  */
 typedef struct {
-    /* 0x000 */ struct127 *owner;
+    /* 0x000 */ Actor *owner;
     /* 0x004 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
     /* 0x008 */ f32 halfWidth;
     /* 0x00C */ f32 halfHeight;
@@ -42,7 +42,7 @@ typedef struct {
 extern MosaicEffect *func_1515FF74(EffectDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
 
 /* Starts a mosaic effect over owner for lifetime frames. */
-MosaicEffect *func_150CE150(struct127 *owner, s16 lifetime, u8 arg2, s32 arg3) {
+MosaicEffect *func_150CE150(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     EffectDesc desc;
     MosaicData data;
     MosaicEffect *effect;
@@ -194,12 +194,12 @@ void func_150CE450(MosaicEffect *effect, u16 *fb) {
 /* Payload of the messages the effect handlers receive. */
 typedef union {
     struct {
-        /* 0x00 */ struct127 *object;
+        /* 0x00 */ Actor *object;
         /* 0x04 */ u8 id;
     } one;          /* message 0 */
     struct {
-        /* 0x00 */ struct127 *from;
-        /* 0x04 */ struct127 *to;
+        /* 0x00 */ Actor *from;
+        /* 0x04 */ Actor *to;
         /* 0x08 */ u8 fromId;
         /* 0x09 */ u8 toId;
     } pair;         /* message 0x2D */
@@ -211,7 +211,7 @@ typedef union {
  */
 void func_150CE694(MosaicEffect *effect, ObjectMessage *msg, u8 type) {
     MosaicData *mosaic = &effect->data;
-    struct127 *object;
+    Actor *object;
 
     if (type == 0x2D) {
         if (mosaic->owner == msg->pair.from) {
@@ -237,17 +237,17 @@ void func_150CE694(MosaicEffect *effect, ObjectMessage *msg, u8 type) {
 extern u16 D_800BE648[];
 extern u8 D_800A080F[];
 extern u8 D_800A0818[];
-void func_15052590(struct127 *arg0);
-void func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
-void func_15063168(struct127 *arg0);
+void func_15052590(Actor *arg0);
+void func_15052F9C(Actor *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+void func_1505327C(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+void func_15063168(Actor *arg0);
 
 /*
  * Per-frame control update: picks an action (unk232) from the button word D_800CC288, sets the
  * target speed (unk44) and heading (unk78), then eases unkC4 toward the clamped turn. Objects
  * with id 0x21 use their own tables and a random wandering heading.
  */
-void func_150CE740(struct127 *obj) {
+void func_150CE740(Actor *obj) {
     ActorCtl *owner;
     u16 heading;
     u16 prevFacing;

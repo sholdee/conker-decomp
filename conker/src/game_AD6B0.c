@@ -8,14 +8,14 @@
 /*
  * Scripted expression control for the current object.
  *
- * struct127 leaves 0x72 and 0x134-0x135 as padding. game_AB760.c's ExpressionActor view names
+ * Actor leaves 0x72 and 0x134-0x135 as padding. game_AB760.c's ExpressionActor view names
  * them: 0x72 u16 expressionTimer (0xFFFE = frozen), 0x134 u8 unk134, 0x135 u8 morphDuration.
  */
 
 extern s32 func_100126E8(u8 *buf, s32 size);
-extern void func_15080430(struct127 *actor, s32 expression, s32 morphDuration);
-extern s32 func_1507E968(struct127 *actor);
-extern void func_1507E500(struct127 *actor, s32 expression, s32 morphDuration);
+extern void func_15080430(Actor *actor, s32 expression, s32 morphDuration);
+extern s32 func_1507E968(Actor *actor);
+extern void func_1507E500(Actor *actor, s32 expression, s32 morphDuration);
 extern s32 func_151EF610(void);
 extern s32 D_800427F0;
 extern s32 D_8009BD10[];
@@ -54,7 +54,7 @@ void func_15080228(void) {
  * D_800427F0 exceeds 1000 and morphDuration is below the frame step, moves unk134 to the next of
  * the 5 D_8009BD10 values with a random morphDuration of 4-10. Both clear D_800427F0.
  */
-void func_15080348(struct127 *actor) {
+void func_15080348(Actor *actor) {
     s32 index;
     s32 countdown;
 
@@ -90,7 +90,7 @@ void func_15080348(struct127 *actor) {
  * others are set directly with morphDuration clamped to 1-20. Objects without an expression table
  * only get mode 1 (expression != 0) or 0.
  */
-void func_15080430(struct127 *actor, s32 expression, s32 morphDuration) {
+void func_15080430(Actor *actor, s32 expression, s32 morphDuration) {
     s32 enabled;
 
     if (actor != NULL) {

@@ -44,7 +44,7 @@ extern void func_151749A0(s32, s32);
  * disables them when the actor is missing, then scrolls the texture of each of the three
  * materials in the D_800B0E00 display list that loads its image from segment 2 + i. */
 void func_150DF920(s32 arg0) {
-    struct127 *obj;
+    Actor *obj;
     s32 i;
     s32 j;
     s32 id;
@@ -202,11 +202,11 @@ void func_150DFCA8(SwingObject *obj) {
     }
 }
 
-/* An actor's bone matrices: struct127.unk1D4 points at an array of these, 0x40 bytes each. */
+/* An actor's bone matrices: Actor.unk1D4 points at an array of these, 0x40 bytes each. */
 typedef f32 MtxF[4][4];
 
 /* Moves bone 1 of the actor to its x/z position at a fixed height of 2706. */
-void func_150DFDA4(struct127 *actor) {
+void func_150DFDA4(Actor *actor) {
     f32 (*bone)[4] = ((MtxF *)actor->unk1D4)[1];
 
     bone[3][0] = actor->x_position;
@@ -272,7 +272,7 @@ s32 func_150DFDD0(Game10CD70Object *obj, Game10CD70FadeState *state) {
  * (arg0 + 0x28, arg0 + 0x2C): the source actor (with its unique_id, to detect a reused slot)
  * plus three independent countdowns. */
 typedef struct {
-    /* 0x00 */ struct127 *obj;
+    /* 0x00 */ Actor *obj;
     /* 0x04 */ u8  id;
     /* 0x05 */ u8  pad5;
     /* 0x06 */ s16 flashTimer;
@@ -292,15 +292,15 @@ typedef struct {
 } BoltEmitter;
 
 extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
-extern void func_15107700(struct127 *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
-extern void func_15107B78(struct127 *, s32, s32, s32, s32);
+extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
+extern void func_15107B78(Actor *, s32, s32, s32, s32);
 
 /* Spawns flashes (func_151602C0), light-blue bolts (func_15107700) and func_15107B78 effects
  * around the emitter's source actor, each on its own random timer,
  * and ends the emitter (unkE = -1) once that actor is gone or its slot was reused. */
 void func_150DFEFC(BoltEmitter *emitter) {
     BoltSource *src;
-    struct127 *obj;
+    Actor *obj;
     Header header;
     Header2 pos;
     s8 count;
@@ -372,7 +372,7 @@ typedef struct {
     /* 0x00 */ s32 target[2];
     /* 0x08 */ u8 ownerId;
     /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ struct127 *owner;
+    /* 0x0C */ Actor *owner;
     /* 0x10 */ u8 bone;
     /* 0x11 */ u8 pad11[3];
     /* 0x14 */ struct17 offset;
@@ -388,7 +388,7 @@ typedef struct {
 extern void *func_1513418C(BloodDripDesc *, s32, u8, s32);
 
 /* Attaches a blood drip to the actor's bone 0. */
-void func_150E0348(struct127 *actor, u8 arg1, s32 arg2) {
+void func_150E0348(Actor *actor, u8 arg1, s32 arg2) {
     BloodDripDesc desc;
 
     desc.target[0] = 0;
@@ -496,12 +496,12 @@ extern u8 D_80088988;
 extern f32 D_800A0F70[][3];
 extern f32 D_800A0F88[][3];
 extern s32 func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
-extern void func_15102B38(struct127 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8,
+extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8,
                           s32);
 
 /* Spawns a func_15102B38 effect between points D_800A0F70[slot] and D_800A0F88[slot] of the
  * actor's bone D_80088988, starting at the first point in world space. */
-void func_150E06D8(struct127 *actor, u8 slot, u8 arg2, s32 arg3) {
+void func_150E06D8(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     struct17 start;
     f32 scale;
     f32 params[2];

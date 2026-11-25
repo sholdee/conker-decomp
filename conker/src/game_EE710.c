@@ -24,7 +24,7 @@ Particle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 /* Dust at one of actor's feet (foot 0 or 1: bone 13 or 17), on the ground height unk180: a func_1514C2F0
  * ring and a func_15165F80 quad under the foot, then 5-12 particles thrown outwards, sized by the actor's
  * mean scale. */
-void func_150C1260(struct127 *actor, u8 foot) {
+void func_150C1260(Actor *actor, u8 foot) {
     vertex footPos;
     s32 bone;
     f32 size;

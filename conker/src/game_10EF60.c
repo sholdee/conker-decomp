@@ -24,7 +24,7 @@ typedef struct {
     s16 texture;    // index into D_8008CA4C
     u8 ownerId;     // owner's unique_id when attached
     u8 drawn;
-    struct127 *owner;
+    Actor *owner;
     s16 ownerTag;   // compared with owner->unk84.uh; -1 for none
     u8 bone;
     u8 attachDelay;
@@ -46,8 +46,8 @@ extern Game10EF60Texture *D_8008CA4C[];
 
 /* Payload of message 0x2D: a pair of objects (see func_150E2FC0). */
 typedef struct {
-    struct127 *objA;
-    struct127 *objB;
+    Actor *objA;
+    Actor *objB;
     u8 idA; // unique_id of objA
     u8 idB;
 } Game10EF60ObjectSwap;
@@ -56,7 +56,7 @@ extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 /* Spawns a tracer effect from (x0, y0, z0) towards (x1, y1, z1). */
 void func_150E1AB0(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 speed, f32 stopDist,
                    f32 halfWidth, f32 length, s16 lifetime, u16 texture, s8 mode, s16 onTime, s16 offTime,
-                   struct127 *owner, u8 ownerId, u8 bone, s32 ownerTag, u8 impactEffect, u8 unkFE,
+                   Actor *owner, u8 ownerId, u8 bone, s32 ownerTag, u8 impactEffect, u8 unkFE,
                    f32 startX, f32 startY, f32 startZ, f32 endX, f32 endY, f32 endZ) {
     Game10EF60Effect *effect;
     s32 i;
@@ -140,12 +140,12 @@ typedef struct {
 
 extern Game10EF60Impact D_800D9960[];
 
-/* An actor's bone matrices: struct127.unk1D4 points at an array of these. */
+/* An actor's bone matrices: Actor.unk1D4 points at an array of these. */
 typedef f32 MtxF[4][4];
 
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, u32 *, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
-s32 func_150E1570(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
+s32 func_150E1570(Actor *, f32, f32, f32, f32, f32, f32, s32, s32);
 void func_150E4550(f32, f32, f32, s32, s32, s32, s32);
 s32 func_1510F8CC(s32);
 s32 func_151EF610(void);
@@ -448,7 +448,7 @@ s32 func_150E2DA4(s32 arg0, s32 arg1) {
 }
 
 /* Spawns a tracer attached to a bone of owner, refiring every onTime + offTime frames. */
-void func_150E2DB4(struct127 *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
+void func_150E2DB4(Actor *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
                    f32 endX, f32 endY, f32 endZ, s16 onTime, s16 offTime, u16 lifetime, u8 unkFE) {
     func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 40.0f, 400.0f, lifetime, 39, 1, onTime, offTime,
                   owner, ownerId, bone, ownerTag, 0, unkFE, startX, startY, startZ, endX, endY, endZ);
@@ -456,7 +456,7 @@ void func_150E2DB4(struct127 *owner, u8 ownerId, s16 bone, s32 ownerTag, f32 sta
 
 /* Like func_150E2DB4 with a caller-chosen width, length and speed. */
 // matching: functions.h declares the narrow params as s32, but the original took u8/s16 (lbu/lh of the arg slot)
-void func_150E2EA4(struct127 *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
+void func_150E2EA4(Actor *owner, s32 ownerId, s32 bone, s32 ownerTag, f32 startX, f32 startY, f32 startZ,
                    f32 endX, f32 endY, f32 endZ, s32 onTime, s32 offTime, s32 lifetime, f32 halfWidth, f32 length,
                    s32 unkFE, f32 speed) {
     func_150E1AB0(0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, speed, 0.0f, halfWidth, length, *(u16 *)((u8 *)&lifetime + 2),

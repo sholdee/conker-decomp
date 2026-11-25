@@ -410,7 +410,7 @@ void func_150825C0(s32, s32);
 /* Drives object 0x14 according to the mode in obj->flags, spawning it first when a mode needs it,
  * and sets obj->unkA8 to a sine of the object's animation progress. */
 void func_150BF760(Struct150BF760 *obj) {
-    struct127 *actor;
+    Actor *actor;
     struct197 *anim;
     s32 mode;
     s32 slot;
@@ -633,10 +633,10 @@ void func_150BFA7C(Platform150BFA7C *platform) {
     platform->flags |= state;
 }
 
-void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
+void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 
 /* func_15136C3C on the object, then a burst of particles at its x/z, unk180 + 105 high. */
-void func_150BFFE0(struct127 *obj) {
+void func_150BFFE0(Actor *obj) {
     Vec3F pos;
     Arg15153634 spawn;
 

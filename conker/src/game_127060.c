@@ -16,7 +16,7 @@ void *func_1513D2F0(void *spawn, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5,
 
 /* Per-spark data of a burst spark (func_150F9BB0), stored at 0x110 of the spawned object. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
     /* 0x05 */ u8 index;
     /* 0x08 */ f32 unk8;
@@ -57,7 +57,7 @@ typedef struct {
     /* 0x04 */ f32 size;
     /* 0x08 */ struct260 *effect;
     /* 0x0C */ u8 index;
-    /* 0x10 */ struct127 *owner;
+    /* 0x10 */ Actor *owner;
     /* 0x14 */ u8 ownerId;
 } BurstGlowData; /* 0x18 */
 
@@ -74,7 +74,7 @@ typedef struct {
 
 /* Effect data of the burst effect (updated by func_150FA1B8). */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
     /* 0x08 */ BurstSpark *sparks[2];
     /* 0x10 */ BurstGlow *glows[2];
@@ -134,7 +134,7 @@ void func_151D8868(void *, s32, u8, s32);
 s32 func_15160A58(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns the burst effect on actor: two sparks and two glows that follow its second matrix. */
-void func_150F9BB0(struct127 *actor, u8 owner, s32 kind) {
+void func_150F9BB0(Actor *actor, u8 owner, s32 kind) {
     BurstEffect *effect;
     BurstData data;
     BurstData *burst;
@@ -301,7 +301,7 @@ extern struct17 D_800A1CF0;
  * second matrix (hiding them while it has none), and shows them once the effect is 10 frames old.
  */
 void func_150FA1B8(BurstEffect *effect) {
-    struct127 *actor;
+    Actor *actor;
     BurstData *burst;
 
     actor = effect->data.owner;
@@ -466,7 +466,7 @@ typedef struct {
 
 extern struct17 D_800A1CFC[];
 extern void func_15143134(struct17 *offset, struct17 *out, Mtx *mtx);
-extern void func_1504715C(void *ground, struct127 *actor);
+extern void func_1504715C(void *ground, Actor *actor);
 extern void func_15153F18(s16 *, void *, void *, u8, s32);
 extern void func_15150178(s16 *, void *, void *, u8, s32);
 extern ImpactParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
@@ -476,7 +476,7 @@ extern void func_151C329C(struct17 *, u8, s32);
  * Spawns an impact at offset D_800A1CFC[point] in actor's sixth matrix: two func_15153F18 /
  * func_15150178 bursts, a particle with a random rise, and func_151C329C at the point.
  */
-void func_150FA520(struct127 *actor, u8 point, u8 owner, s32 kind) {
+void func_150FA520(Actor *actor, u8 point, u8 owner, s32 kind) {
     vertex pos;
     u8 ground[0x24];
 

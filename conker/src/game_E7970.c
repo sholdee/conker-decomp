@@ -9,7 +9,7 @@ void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, s32 arg5, s
 
 /* Per-effect data: the object the effect is attached to and a spawn accumulator. */
 typedef struct {
-    /* 0x0 */ struct127 *owner;
+    /* 0x0 */ Actor *owner;
     /* 0x4 */ u8 ownerId; // owner's unique_id when the effect was created
     /* 0x8 */ f32 spawnAccum;
 } EffectE7970Data; // size 0xC
@@ -27,7 +27,7 @@ typedef struct {
 } EffectE7970;
 
 /* Spawns an effect attached to `owner`. */
-void func_150BA4C0(struct127 *owner, u8 arg1, s32 arg2) {
+void func_150BA4C0(Actor *owner, u8 arg1, s32 arg2) {
     EffectE7970Data data;
     struct260 *effect;
 
@@ -42,12 +42,12 @@ void func_150BA4C0(struct127 *owner, u8 arg1, s32 arg2) {
 }
 
 void func_15143794(s16, s16, f32, f32 *);
-void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
+void func_1515C244(Actor *, f32 *, f32 *, f32 *);
 void func_1518A3C0(f32 *arg0, f32 *arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC);
 
 /* Per-frame update: kills the effect once its owner is gone, otherwise emits particles around the owner at a random rate. */
 void func_150BA55C(EffectE7970 *effect) {
-    struct127 *owner;
+    Actor *owner;
     EffectE7970Data *data;
     s32 heading;
     f32 ownerPos[3];
@@ -113,11 +113,11 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } GroundHit; // size 0x24
 
-void func_1504715C(GroundHit *hit, struct127 *obj);
+void func_1504715C(GroundHit *hit, Actor *obj);
 s32 func_15046C80(struct17 *pos, s32 arg1, f32 minY, GroundHit *hit);
 
 /* Copies obj's position into pos (using unk180 as the height when set); with a hit buffer, also probes the ground below. */
-s32 func_150BA930(struct17 *pos, struct127 *obj, GroundHit *hit, s32 arg3) {
+s32 func_150BA930(struct17 *pos, Actor *obj, GroundHit *hit, s32 arg3) {
     struct17 probe;
 
     pos->unk0 = obj->x_position;
@@ -143,7 +143,7 @@ s32 func_150BAA00(s32 arg0, s32 arg1) {
 }
 
 /* Spawns effects at obj; when the ground probe hits, also a burst aimed by D_800DBFF0[D_80082FA4].unk380 (degrees). */
-void func_150BAA14(struct127 *obj, s32 arg1, s32 arg2) {
+void func_150BAA14(Actor *obj, s32 arg1, s32 arg2) {
     struct17 pos;
     GroundHit hit;
     s32 angle;

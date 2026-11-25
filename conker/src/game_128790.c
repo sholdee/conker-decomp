@@ -17,8 +17,8 @@ typedef struct {
 
 void func_150FB240(u8 *alpha, s16 timer, s16 duration, s16 fadeLength, s16 fadeRate);
 s32 func_15145EA4(struct17 **src, struct17 **dst, void *mtx, s32 count);
-void func_150FEC28(struct127 *actor, u8 bone, struct17 *arg2, struct17 *arg3, struct17 *position, u8 arg5, s32 arg6);
-void func_151D4408(struct17 *pos, struct17 *dir, void *mtx, struct127 *owner, f32 scale, u8 arg5, s32 arg6);
+void func_150FEC28(Actor *actor, u8 bone, struct17 *arg2, struct17 *arg3, struct17 *position, u8 arg5, s32 arg6);
+void func_151D4408(struct17 *pos, struct17 *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
 
 /* D_8008ACC8 sprite callback: fades the sprite's alpha in over its first fadeStart ticks. */
 s32 func_150FB2E0(FadeInSprite *sprite) {
@@ -28,7 +28,7 @@ s32 func_150FB2E0(FadeInSprite *sprite) {
 
 /* Spawns the func_150FEC28 / func_151D4408 effects on bone 14 of `actor`: point0 goes to `position`,
  * point2 to `origin` and point3 to `origin + delta`, all in world space. */
-void func_150FB324(struct127 *actor, u8 arg1, s32 arg2) {
+void func_150FB324(Actor *actor, u8 arg1, s32 arg2) {
     struct17 position;
     struct17 origin;
     struct17 delta;

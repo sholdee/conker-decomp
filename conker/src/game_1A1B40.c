@@ -75,7 +75,7 @@ void func_15174690(s32 objIndex, s32 spread, s32 growth, s32 growthRange, s32 si
     f32 y;
     f32 z;
     s32 rand;
-    struct127 *obj;
+    Actor *obj;
     ParticleTemplate template;
 
     obj = &D_800CC2D0[objIndex];

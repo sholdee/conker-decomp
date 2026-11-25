@@ -67,7 +67,7 @@ typedef struct {
 } CameraZoneView; /* size 0x9A0, as Camera */
 
 void func_1000FC18(u16 sound, s16 x, s16 y, s16 z, s32 farDistance); /* stops a positional sound */
-s32 func_150A1DA0(struct127 *actor, TriggerZone *zone, s32 withMargin);
+s32 func_150A1DA0(Actor *actor, TriggerZone *zone, s32 withMargin);
 void func_150A23E4(TriggerZone *zone);
 
 /* Per-frame update of the zone state that does not depend on an actor (ticks is unused). */
@@ -170,7 +170,7 @@ s32 func_150AD9A0(s16, s16, s16);
 void func_150A0D8C(void) {
     u32 i;
     s32 j;
-    struct127 *obj;
+    Actor *obj;
     s16 dy;
     f32 fade;
 
@@ -210,7 +210,7 @@ s32 func_150A1040(s32 value) {
 
 /* Tests the camera position against the given zones and applies the type-1 (camera) ones. */
 void func_150A104C(Camera *cam, TriggerZone **zones, s32 count) {
-    struct127 probe;
+    Actor probe;
 
     probe.x_position = cam->eye.x;
     probe.y_position = cam->eye.y;
@@ -273,22 +273,22 @@ extern u8 D_800DF0E0;
 extern u8 D_800DF0E1;
 
 void func_150806A8(s32);
-void func_150829D8(struct127 *);
+void func_150829D8(Actor *);
 void func_1512D560(Camera *, s32, TriggerZone *);
-void func_15055C88(struct127 *arg0);
+void func_15055C88(Actor *arg0);
 void func_1000D96C(s32 newId, s32 oldId, s32 transition);
-void func_15080500(struct127 *, TriggerZone *, s32, s32, s32);
-void func_151AE06C(struct127 *, TriggerZone *);
+void func_15080500(Actor *, TriggerZone *, s32, s32, s32);
+void func_151AE06C(Actor *, TriggerZone *);
 void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackArg);
 s32 __osPiGetAccess(void);
 void __osPiRelAccess(void);
 s32 osPiRawReadIo(u32, u32 *);
 void func_150A24C0(TriggerZone *zone, s32 unk127);
-void func_15172E7C(struct127 *actor, s32 arg1, s32 arg2);
-void func_150A25D4(TriggerZone *zone, struct127 *actor, s32 unk127, s64 prevBits);
+void func_15172E7C(Actor *actor, s32 arg1, s32 arg2);
+void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits);
 
 /* Finds the zones that contain the actor (narrowed through the zone bounding boxes) and applies them. */
-void func_150A11C4(struct127 *actor) {
+void func_150A11C4(Actor *actor) {
     u32 i;
     u32 base;
     u64 *word;
@@ -559,7 +559,7 @@ s32 func_150AD960(s32, s32, s32, s32);
  * zone by the actor's unkE4.  Shapes: 0 cylinder (optionally rotated), 1 sphere, 2 rotated box,
  * 3 rotated gate crossed by the move from the old to the current position.
  */
-s32 func_150A1DA0(struct127 *actor, TriggerZone *zone, s32 withMargin) {
+s32 func_150A1DA0(Actor *actor, TriggerZone *zone, s32 withMargin) {
     s16 dx;
     s16 dy;
     s16 dz;
@@ -754,11 +754,11 @@ void func_150A24C0(TriggerZone *zone, s32 unk127) {
 extern u8 D_800D3090;
 extern u8 D_800D9EB8[][3];
 void func_150E7290(s32 arg0, s32 owner, s32 kind);
-void func_150E68B0(struct127 *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex);
-void func_151CE51C(struct127 *actor, TriggerZone *zone);
+void func_150E68B0(Actor *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex);
+void func_151CE51C(Actor *actor, TriggerZone *zone);
 
 /* Type-12 zone: subtype-specific effect on the actor inside it; prevBits bit 0 is "was inside last time". */
-void func_150A25D4(TriggerZone *zone, struct127 *actor, s32 unk127, s64 prevBits) {
+void func_150A25D4(TriggerZone *zone, Actor *actor, s32 unk127, s64 prevBits) {
     switch (zone->subtype) {
     case 0:
         break;
@@ -812,7 +812,7 @@ void func_150A25D4(TriggerZone *zone, struct127 *actor, s32 unk127, s64 prevBits
 }
 
 /* Applies the type-8 zones containing the actor (func_15172E7C), unless its unk65 is set. */
-void func_150A278C(struct127 *actor) {
+void func_150A278C(Actor *actor) {
     s32 i;
 
     if (actor->unk65 != 0) {
@@ -921,7 +921,7 @@ s32 func_150A2CA4(u32 id) {
 /* Returns 0 if camera `camIndex`'s position is inside zone id, else 1. */
 s32 func_150A2D84(s32 camIndex, s32 id) {
     Camera *cam;
-    struct127 probe;
+    Actor probe;
 
     cam = &D_800DBFF0[camIndex];
     id &= 0xFFF;
@@ -998,7 +998,7 @@ s32 func_150A2FA4(s32 camIndex, s32 id) {
 /* Returns 1 if the point is inside an enabled type-3 zone of the given subtype. */
 s32 func_150A3058(s32 subtype, s16 x, s16 y, s16 z) {
     u8 pad[4]; // matching: unused local of the original (frame layout)
-    struct127 probe;
+    Actor probe;
     s32 i;
 
     probe.x_position = x;
@@ -1026,7 +1026,7 @@ s32 func_150A3058(s32 subtype, s16 x, s16 y, s16 z) {
 /* Returns the first enabled zone of the given type and subtype that contains the point, or NULL. */
 TriggerZone *func_150A3194(s32 type, s32 subtype, s32 x, s32 y, s32 z) {
     s32 i;
-    struct127 probe;
+    Actor probe;
 
     probe.x_position = x;
     probe.old_x_position = x;
@@ -1052,7 +1052,7 @@ TriggerZone *func_150A3194(s32 type, s32 subtype, s32 x, s32 y, s32 z) {
 
 /* Returns 1 if the point is inside the zone. */
 s32 func_150A32B4(TriggerZone *zone, s32 x, s32 y, s32 z) {
-    struct127 probe;
+    Actor probe;
     u8 pad[8]; // matching: unused local of the original (frame layout)
 
     probe.x_position = x;

@@ -3,7 +3,7 @@
 #include "variables.h"
 #include "effects.h"
 
-/* Per-side (0, 1) tables: byte offset of the side's joint matrix in struct127.unk1D4, and model-space points
+/* Per-side (0, 1) tables: byte offset of the side's joint matrix in Actor.unk1D4, and model-space points
  * that func_15145EA4 transforms by it. */
 extern s32 D_800AAB00[];
 extern struct17 D_800AAB08[];
@@ -24,24 +24,24 @@ typedef struct {
 } EffectEvent;
 
 s32 func_151C229C(struct17 *pos, struct17 *dir, struct17 *arg2, struct17 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7,
-                  f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15,
+                  f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15,
                   s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24,
                   s32 arg25, s32 arg26);
-void func_15145740(struct127 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4);
-s32 func_1514654C(struct127 *, s32, s32, struct17 **points, struct17 **results, s32 count);
-void func_151D5174(struct127 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 **,
+void func_15145740(Actor *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 arg4);
+s32 func_1514654C(Actor *, s32, s32, struct17 **points, struct17 **results, s32 count);
+void func_151D5174(Actor *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 *, struct17 **,
                    struct17 **, struct17 *);
 void *func_151D8868(EffectEvent *event, s32 arg1, s32 arg2, s32 arg3);
-s32 func_15142A5C(struct127 *arg0);
-void func_151D5148(struct127 *arg0);
+s32 func_15142A5C(Actor *arg0);
+void func_151D5148(Actor *arg0);
 s32 func_15145EA4(struct17 **points, struct17 **results, s32 matrix, s32 count);
 void func_151D3F14(struct17 *arg0, u8 arg1, s32 arg2);
-void func_151D4408(struct17 *, struct17 *, s32, struct127 *, f32, u8, s32);
-void func_151C6D70(struct127 *, u8, struct17 *, s16, u8, s32);
+void func_151D4408(struct17 *, struct17 *, s32, Actor *, f32, u8, s32);
+void func_151C6D70(Actor *, u8, struct17 *, s16, u8, s32);
 
 /* Fires this side's shot from its joint points (or, without a skeleton, from beside the object): posts
  * a func_151D8868 event for its camera, side effects, then func_151C229C along `aim` (from the joints when arg2). */
-s32 func_151C62D0(struct127 *arg0, u8 side, u8 arg2, s32 arg3, s16 arg4, u8 arg5, s32 arg6) {
+s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, s32 arg3, s16 arg4, u8 arg5, s32 arg6) {
     struct17 origin;
     struct17 aim;
     struct17 shotPos;
@@ -165,20 +165,20 @@ s32 func_151C62D0(struct127 *arg0, u8 side, u8 arg2, s32 arg3, s16 arg4, u8 arg5
 }
 
 void func_15143134(struct17 *point, struct17 *out, s32 matrix);
-void func_151C69CC(struct127 *arg0, struct17 *out, u8 side);
+void func_151C69CC(Actor *arg0, struct17 *out, u8 side);
 
 /* Handler-table entry: the side-0 point of func_151C69CC. */
-void func_151C6974(struct127 *arg0, s32 arg1, struct17 *out) {
+void func_151C6974(Actor *arg0, s32 arg1, struct17 *out) {
     func_151C69CC(arg0, out, 0);
 }
 
 /* Handler-table entry: the side-1 point of func_151C69CC. */
-void func_151C69A0(struct127 *arg0, s32 arg1, struct17 *out) {
+void func_151C69A0(Actor *arg0, s32 arg1, struct17 *out) {
     func_151C69CC(arg0, out, 1);
 }
 
 /* Transforms this side's D_800AAB08 point by its joint matrix (D_800AAB00 bytes into arg0->unk1D4) into *out. */
-void func_151C69CC(struct127 *arg0, struct17 *out, u8 side) {
+void func_151C69CC(Actor *arg0, struct17 *out, u8 side) {
     s32 matrix = (s32)arg0->unk1D4 + D_800AAB00[side];
 
     func_15143134(&D_800AAB08[side], out, matrix);
@@ -213,12 +213,12 @@ typedef struct {
 } ShotSourceEntry;
 
 s32 func_1514ECE0(s32, s16, ShotSourceEntry **);
-void func_150F7470(struct17 *, s32, s32, s32, s32, ShotDesc *, f32, f32, f32, struct127 *, s32, s32, s32, s32, s32, s32,
+void func_150F7470(struct17 *, s32, s32, s32, s32, ShotDesc *, f32, f32, f32, Actor *, s32, s32, s32, s32, s32, s32,
                    s32, s32, u8, s32);
 
 /* Emits this side's effects (func_151D3F14, func_151D4408, func_151C6D70) from its joint points, then fires a
  * copy of the shot described by the owner's 0x1B entry, its end pushed 10% beyond its start. */
-void func_151C6A28(struct127 *arg0, u8 side, u8 arg2, s32 arg3) {
+void func_151C6A28(Actor *arg0, u8 side, u8 arg2, s32 arg3) {
     struct17 origin;
     struct17 start;
     struct17 dir;
@@ -255,7 +255,7 @@ void func_151C6A28(struct127 *arg0, u8 side, u8 arg2, s32 arg3) {
                 ShotHolder *holder;
                 ShotDesc *src;
 
-                /* 0x2F4 lies in struct127's pad2F0 */
+                /* 0x2F4 lies in Actor's pad2F0 */
                 if (func_1514ECE0(*(s32 *)((u8 *)arg0 + 0x2F4), 0x1B, &entry) != 0) {
                     source = entry->source;
                     holder = &source->holder;
@@ -292,12 +292,12 @@ void func_151C6A28(struct127 *arg0, u8 side, u8 arg2, s32 arg3) {
     }
 }
 
-void *func_15102B38(struct127 *, u8, struct17 *, struct17 *, f32 *, s16, u8, f32, struct17 *, u8, s32, s16, u8,
+void *func_15102B38(Actor *, u8, struct17 *, struct17 *, f32 *, s16, u8, f32, struct17 *, u8, s32, s16, u8,
                     s32);
 
 /* Spawns a func_15102B38 effect at `pos` between this side's D_800AAB08/D_800AAB20 points, with random
  * size, count and angle. */
-void func_151C6D70(struct127 *arg0, u8 side, struct17 *pos, s16 arg3, u8 arg4, s32 arg5) {
+void func_151C6D70(Actor *arg0, u8 side, struct17 *pos, s16 arg3, u8 arg4, s32 arg5) {
     f32 values[2];
     f32 angle;
     u32 random1;
@@ -322,7 +322,7 @@ typedef struct {
 SpawnedEffect *func_1513264C(ParticleSpawn *spawn, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 
 /* Spawns an effect object owned by `owner` and initialises its one-byte state block. */
-void func_151C6EA0(struct127 *owner, u8 arg1, s32 arg2) {
+void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
     ParticleSpawn spawn;
     struct {
         u8 unk0;
@@ -377,12 +377,12 @@ typedef struct {
     u8 pad64[0x70 - 0x64];
     u8 unk70;
     u8 pad71[0x7C - 0x71];
-    struct127 *unk7C;
+    Actor *unk7C;
 } Func151C7038Arg;
 
 /* Mirrors the owner object's state (type 0xE9 only): flag 0x20000 and its animation speed scaled to 0-255. */
 s32 func_151C7038(Func151C7038Arg *arg0) {
-    struct127 *owner;
+    Actor *owner;
     f32 speed;
 
     owner = arg0->unk7C;

@@ -18,7 +18,7 @@ typedef struct {
 } GroundHit; /* size 0x24 */
 
 void func_15143134(f32 *, f32 *, Mtx *);
-void func_1504715C(GroundHit *, struct127 *);
+void func_1504715C(GroundHit *, Actor *);
 s32 func_15046C80(f32 *, s32, f32, GroundHit *);
 void func_15143794(s16, s16, f32, f32 *);
 
@@ -27,7 +27,7 @@ void func_15143794(s16, s16, f32, f32 *);
  * (bone 40 or 47) into `pos`.
  * If `ground` is non-NULL, also probes the ground below that point into it.
  */
-s32 func_150CB0E0(f32 *pos, struct127 *actor, GroundHit *ground, u8 side) {
+s32 func_150CB0E0(f32 *pos, Actor *actor, GroundHit *ground, u8 side) {
     f32 probe[3];
     f32 *offset;
     Mtx *bone;
@@ -108,7 +108,7 @@ DustParticle *func_1513D668(ParticleDef *desc, DustColor *colors, u8 updateFn1, 
                             s32 motionSize, u8 argD, s32 argE);
 
 /* Spawns a dust puff (tinted by func_150CCD90) on the ground below the actor's bone on `side`. */
-void func_150CB1F4(struct127 *actor, s32 side, s32 arg2) {
+void func_150CB1F4(Actor *actor, s32 side, s32 arg2) {
     f32 pos[3];
     GroundHit ground;
     f32 fr;
@@ -262,7 +262,7 @@ typedef struct ParticleSpawn80 {
     /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
     /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct struct127 *owner;
+    /* 0x6C */ struct Actor *owner;
     /* 0x70 */ u8 ownerId;
     /* 0x71 */ u8 pad71;
     /* 0x72 */ s16 fadeStart;

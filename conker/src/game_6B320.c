@@ -68,7 +68,7 @@ extern void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 
 extern void func_1503DF0C(s32 objIndex, s32 kind, s32 maskLo, s32 maskHi);
 
 /* Start breaking `obj` into parts; variant -1 selects every part, otherwise D_8008446C[kind][variant]. */
-void func_1503DE70(struct127 *obj, s32 kind, s32 variant) {
+void func_1503DE70(Actor *obj, s32 kind, s32 variant) {
     if (variant != -1) {
         func_1503DF0C(obj - D_800CC2D0, kind, D_8008446C[kind][variant].lo, D_8008446C[kind][variant].hi);
         return;
@@ -205,7 +205,7 @@ void func_1503E3C4(s32 objIndex, s32 partIndex, s32 boneOffset, ObjPart *part, s
     s32 pad; // matching: unused stack slot above the matrices
     f32 local[4][4];
     f32 parentInv[4][4];
-    struct127 *obj;
+    Actor *obj;
     s32 parent;
     f32 len;
     f32 dx;

@@ -22,7 +22,7 @@ typedef struct {
 
 /* Emitter data at 0x40 for anchor type 0: a point on an actor's bone. */
 typedef struct {
-    /* 0x00 */ struct127 *actor;
+    /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;  /* actor->unique_id when attached; a mismatch means the slot was reused */
     /* 0x05 */ u8 bone;     /* index into D_800AB280 (offset) and D_800AB2D4 (bone matrix) */
     /* 0x06 */ s8 condition; /* index into D_8008FCA8, or -1 for none */
@@ -132,9 +132,9 @@ void func_151D7450(struct260 *emitter) {
 }
 
 /* Broadcasts message 0x3D ({actor, unique_id}): the actor is going away. */
-void func_151D747C(struct127 *actor) {
+void func_151D747C(Actor *actor) {
     struct {
-        struct127 *actor;
+        Actor *actor;
         u8 actorId;
     } msg;
 
@@ -144,7 +144,7 @@ void func_151D747C(struct127 *actor) {
 }
 
 /* Attaches a trail to `bone` of `actor`; `condition` picks an extra D_8008FCA8 check (-1 for none). */
-void func_151D74B0(struct127 *actor, u8 bone, s8 condition, u8 arg3, s32 arg4) {
+void func_151D74B0(Actor *actor, u8 bone, s8 condition, u8 arg3, s32 arg4) {
     TrailBoneLink link;
     struct260 *emitter;
 
@@ -183,7 +183,7 @@ void func_151D7538(TrailEmitter *emitter, TrailBoneLink *msg, u8 msgType) {
  */
 s32 func_151D75C4(TrailEmitter *emitter) {
     TrailBoneLink *link;
-    struct127 *actor;
+    Actor *actor;
     TrailAnchor *anchor;
 
     anchor = &emitter->anchor;
@@ -214,7 +214,7 @@ s32 func_151D75C4(TrailEmitter *emitter) {
 
 /* Condition 0: the anchor is invalid while unk94 bit 1 is set or unk84 is 4, 10 or 12. */
 s32 func_151D7724(TrailEmitter *emitter) {
-    struct127 *actor = emitter->link.actor;
+    Actor *actor = emitter->link.actor;
     TrailAnchor *anchor = &emitter->anchor;
 
     if ((actor->unk94 & 2) || actor->unk84.uh == 4 || actor->unk84.uh == 10 || actor->unk84.uh == 12) {
@@ -226,7 +226,7 @@ s32 func_151D7724(TrailEmitter *emitter) {
 /* Condition 1: the anchor is invalid while the actor's unk84 is 0. */
 s32 func_151D7770(TrailEmitter *emitter) {
     TrailAnchor *anchor = &emitter->anchor;
-    struct127 *actor = emitter->link.actor;
+    Actor *actor = emitter->link.actor;
 
     if (actor->unk84.uh == 0) {
         anchor->flags &= ~1;
@@ -237,7 +237,7 @@ s32 func_151D7770(TrailEmitter *emitter) {
 /* Condition 2: the anchor is invalid while the actor is in water. */
 s32 func_151D779C(TrailEmitter *emitter) {
     TrailAnchor *anchor = &emitter->anchor;
-    struct127 *actor = emitter->link.actor;
+    Actor *actor = emitter->link.actor;
 
     if (actor->in_water) {
         anchor->flags &= ~1;

@@ -10,7 +10,7 @@
 
 /* Data of effect 0x1A (func_15109410 / func_151094FC). */
 typedef struct {
-    /* 0x00 */ struct127 *object;
+    /* 0x00 */ Actor *object;
     /* 0x04 */ u8 objectId; /* object->unique_id when attached; a mismatch means the slot was reused */
     /* 0x08 */ f32 spawnAccum;
     /* 0x0C */ f32 spawnRate;
@@ -29,7 +29,7 @@ typedef struct {
 
 /* Data of effect 0x1C (func_1510A344 / func_1510A40C). */
 typedef struct {
-    /* 0x00 */ struct127 *object;
+    /* 0x00 */ Actor *object;
     /* 0x04 */ u8 objectId;
     /* 0x08 */ f32 spawnAccum;
     /* 0x0C */ f32 spawnRate;
@@ -38,7 +38,7 @@ typedef struct {
 
 /* Head shared by the data of the effects that follow an object. */
 typedef struct {
-    /* 0x00 */ struct127 *object;
+    /* 0x00 */ Actor *object;
     /* 0x04 */ u8 objectId;
 } TrackedObject;
 
@@ -152,7 +152,7 @@ typedef struct ParticleSpawn78 {
     /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
     /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct struct127 *owner;
+    /* 0x6C */ struct Actor *owner;
     /* 0x70 */ u8 ownerId;
     /* 0x71 */ u8 pad71;
     /* 0x72 */ s16 fadeStart;
@@ -162,8 +162,8 @@ typedef struct ParticleSpawn78 {
 
 /* Payload of message 0x2D: two objects trade places. */
 typedef struct {
-    /* 0x00 */ struct127 *from;
-    /* 0x04 */ struct127 *to;
+    /* 0x00 */ Actor *from;
+    /* 0x04 */ Actor *to;
     /* 0x08 */ u8 fromId;
     /* 0x09 */ u8 toId;
 } ObjectSwapMessage;
@@ -199,7 +199,7 @@ extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *ou
  * Creates effect 0x1A on `object`, lasting `duration` frames (negative: 300), emitting
  * particles at `spawnRate` through D_80088C64[emitFunc]. `extraSize` more data bytes are reserved.
  */
-struct260 *func_15109410(struct127 *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
+struct260 *func_15109410(Actor *object, s16 duration, s8 tickFunc, s8 emitFunc, f32 spawnRate, s32 extraSize,
                          u8 owner, s32 kind) {
     Effect1368C0 *effect;
     ObjectEmitterData data;
@@ -239,7 +239,7 @@ struct260 *func_15109410(struct127 *object, s16 duration, s8 tickFunc, s8 emitFu
  */
 void func_151094FC(Effect1368C0 *effect) {
     ObjectEmitterData *data;
-    struct127 *object;
+    Actor *object;
     vertex point;
     vertex start;
     vertex end;
@@ -401,7 +401,7 @@ void func_15109848(Effect1368C0 *effect, vertex *point, vertex *start, vertex *e
 /* Particle emitter: a randomly sized and spun piece of debris thrown along `dir` from `point`. */
 void func_15109C20(Effect1368C0 *effect, vertex *point, vertex *start, vertex *end, vertex *tip, vertex *dir) {
     s32 padA4; // matching: unused stack slots in the original frame
-    struct127 *object;
+    Actor *object;
     f32 speed;
     s32 pad98;
     ParticleSpawn78 debris;
@@ -553,7 +553,7 @@ void func_15109FB8(Effect1368C0 *effect) {
 }
 
 /* Creates effect 0x1C on `object`, lasting `duration` frames. */
-struct260 *func_1510A344(struct127 *object, s32 duration, u8 owner, s32 kind) {
+struct260 *func_1510A344(Actor *object, s32 duration, u8 owner, s32 kind) {
     Effect1368C0 *effect;
     PairEmitterData data;
 
@@ -580,7 +580,7 @@ struct260 *func_1510A344(struct127 *object, s32 duration, u8 owner, s32 kind) {
  */
 void func_1510A40C(Effect1368C0 *effect) {
     PairEmitterData *data;
-    struct127 *object;
+    Actor *object;
     vertex points[2];
     vertex dirs[2];
     void *matrix;

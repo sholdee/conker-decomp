@@ -14,20 +14,20 @@ extern s32 func_15084D70(s32, s32, s32, s16*, f32*, u8*, u8*, s32*, s32*, s32, s
 extern void func_15022190(s16, s16, s16, f32);
 extern void func_1501D348(s32, s32, s32, s32, s32);
 extern void func_1501C730(s32, s32, s32, s32, s32);
-void func_1507D1D8(struct127 *obj);
+void func_1507D1D8(Actor *obj);
 extern void func_1509C3A0(void);
 
 
 
-void func_1507CD0C(struct127 *obj);
-void func_1506160C(struct127 *, u8, u8, u8, u8);
+void func_1507CD0C(Actor *obj);
+void func_1506160C(Actor *, u8, u8, u8, u8);
 void func_1507D4F8(s32);
-void func_1507E1D0(struct127 *, f32 *, f32 *, f32 *);
+void func_1507E1D0(Actor *, f32 *, f32 *, f32 *);
 void func_1517EE40(s32, s32, s32, s32, s8, s32);
 void func_1517F814(s32, f32, f32, f32, s32);
 
 /* Puts obj into state 2 with the given timer. */
-void func_1507C8E0(struct127 *obj, s32 timer) {
+void func_1507C8E0(Actor *obj, s32 timer) {
     obj->unk31C->unk120 = 2;
     obj->unk31C->unk124 = timer;
 }
@@ -38,7 +38,7 @@ void func_1507C8FC(void) {
     f32 x;
     f32 y;
     f32 z;
-    struct127 *player;
+    Actor *player;
 
     if (D_800BEAC0 == 0) {
         player = D_800CC2D0;
@@ -123,7 +123,7 @@ void func_1507C8FC(void) {
 }
 
 /* Puts obj into state 3 and, for a local player slot, calls func_15181D70 on it. */
-void func_1507CD0C(struct127 *obj) {
+void func_1507CD0C(Actor *obj) {
     s32 slot = obj - D_800CC2D0;
 
     obj->unk31C->unk120 = 3;
@@ -134,25 +134,25 @@ void func_1507CD0C(struct127 *obj) {
 }
 
 typedef struct CD64Msg {
-    struct127 *obj;
+    Actor *obj;
     u8 id;
 } CD64Msg;
 
 extern u8 D_800D18A9;
 extern s16 D_800E0AD0[];
 void func_15169040(void *, s32);
-void func_1504BAF0(struct127 *);
+void func_1504BAF0(Actor *);
 void func_150E7994(s16, f32, u8, s32);
 
 /* Kills obj with the given cause: plays its sound, resets movement and moves it to a dead state. */
-void func_1507CD64(struct127 *obj, s32 cause) {
+void func_1507CD64(Actor *obj, s32 cause) {
     f32 f;
     s32 sound;
     u32 r;
     s32 mode;
     s32 slot;
     CD64Msg msg;
-    struct127 *saved;
+    Actor *saved;
     s32 again;
     s32 flag;
 
@@ -176,7 +176,7 @@ void func_1507CD64(struct127 *obj, s32 cause) {
         if (slot < 16) {
             D_800E0AD0[slot]++;
         }
-        if ((D_8008FDBC & 0x20) && *(u8 *)&obj->pad128 == 0) { // byte at 0x128 (struct127 has a u32 pad there)
+        if ((D_8008FDBC & 0x20) && obj->team == 0) { // byte at 0x128 (Actor has a u32 pad there)
             func_15085710(1, 10, 1);
         }
     }
@@ -313,16 +313,16 @@ typedef struct D20FCEntry {
 } D20FCEntry;
 
 void func_150054C4(Camera *, u32, s32, s32);
-void func_15085430(struct127 *, s32, s32);
+void func_15085430(Actor *, s32, s32);
 void func_15181DC8(s32);
 void func_15082A44(D20FCEntry *, s32, s32, s32, s32);
-void func_15088D58(struct127 *);
+void func_15088D58(Actor *);
 extern s16 D_800BE9F2;
 extern s32 D_800BE9F4;
 extern D20FCEntry *D_800D20FC;
 
 /* Re-initialises obj through func_15060F28/func_15082A44 (health back to D_8008726C), keeping a few state bytes. */
-void func_1507D1D8(struct127 *obj) {
+void func_1507D1D8(Actor *obj) {
     s32 value;
     s32 saved1AA;
     s8 player;
@@ -334,7 +334,7 @@ void func_1507D1D8(struct127 *obj) {
 
     saved1AA = obj->unk31C->unk1AA;
     saved1B0 = obj->unk31C->lastSpawnIndex;
-    saved328 = *(s8 *)&obj->pad320[8]; // signed byte at 0x328 (struct127 types it u8)
+    saved328 = obj->unk328; // signed byte at 0x328 (Actor types it u8)
     saved1AF = obj->unk31C->unk1AF;
     if (D_800BE616 != 0) {
         player = obj->unk31C->spawnIndex;
@@ -360,7 +360,7 @@ void func_1507D1D8(struct127 *obj) {
     func_15082A44(&D_800D20FC[slot], slot, 0, 0, 0);
     obj->unk31C->lastSpawnIndex = saved1B0;
     obj->unk31C->unk1AF = saved1AF;
-    obj->pad320[8] = saved328;
+    obj->unk328 = saved328;
     if (D_80082FA0 >= slot) {
         func_150054C4(&D_800DBFF0[slot], slot, D_800BE9F2, player);
         func_15181DC8(slot);
@@ -378,7 +378,7 @@ void func_1507D1D8(struct127 *obj) {
     obj->unk22C |= 0x100;
     obj->unk31C->unk75 = 0;
     obj->unk20F = 0xFF;
-    obj->pad210 = 0xFF;
+    obj->unk210 = 0xFF;
     obj->unk211 = 0xFF;
     obj->unk232 = 1;
     obj->unk218 = NULL;
@@ -395,7 +395,7 @@ void func_1507D1D8(struct127 *obj) {
 
 /* Ends slot's current run: re-initialises it if func_150859AC(slot, 3) allows, else retires it (state 10). */
 void func_1507D4F8(s32 slot) {
-    struct127 *obj;
+    Actor *obj;
     ActorCtl *state;
 
     if (!(D_8008FDBC & 1)) {
@@ -466,30 +466,30 @@ typedef struct D754Obj {
     /* 0x8A */ u8 unk8A;
 } D754Obj;
 
-extern void func_150B0348(struct127 *, s32, s32);
-extern void func_150BFFE0(struct127 *);
-extern void func_150D85AC(struct127 *);
-extern void func_150F1D10(struct127 *, s32, s32);
-extern void func_151C9740(struct127 *, s32, s32);
-extern void func_151CFA4C(struct127 *, s32, s32);
-extern void func_150BE494(struct127 *, s32, s32);
-extern void func_150AEB9C(struct127 *);
-extern void func_151BA518(struct127 *, s32, s32);
+extern void func_150B0348(Actor *, s32, s32);
+extern void func_150BFFE0(Actor *);
+extern void func_150D85AC(Actor *);
+extern void func_150F1D10(Actor *, s32, s32);
+extern void func_151C9740(Actor *, s32, s32);
+extern void func_151CFA4C(Actor *, s32, s32);
+extern void func_150BE494(Actor *, s32, s32);
+extern void func_150AEB9C(Actor *);
+extern void func_151BA518(Actor *, s32, s32);
 extern D754Obj *func_151149AC(s32);
-extern void *func_1507515C(struct127 *);
+extern void *func_1507515C(Actor *);
 extern void func_15136C3C(void *, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150B7B40(struct127 *, s32, s32);
-extern void func_150BC488(struct127 *);
-extern void func_150BBB5C(struct127 *);
-extern void func_151A6C90(struct127 *, s32, s32);
-extern void func_150E0870(struct127 *, s32, s32);
-extern void func_151D22B0(struct127 *, s32, s32);
-void func_1503DE70(struct127 *, s32, s32);
-void func_1507DB44(struct127 *obj, s32 arg1);
+extern void func_150B7B40(Actor *, s32, s32);
+extern void func_150BC488(Actor *);
+extern void func_150BBB5C(Actor *);
+extern void func_151A6C90(Actor *, s32, s32);
+extern void func_150E0870(Actor *, s32, s32);
+extern void func_151D22B0(Actor *, s32, s32);
+void func_1503DE70(Actor *, s32, s32);
+void func_1507DB44(Actor *obj, s32 arg1);
 
 /* Death handler: dispatches on obj->id; returns 1 or 2 when the object was handled specially, else 0. */
 /* Runs the per-id handler for obj (mostly id handler(obj, 0xFF, 1)); returns 1 or 2 for ids handled specially, else 0. */
-s32 func_1507D754(struct127 *obj) {
+s32 func_1507D754(Actor *obj) {
     D754Obj *spawned;
     void *handle;
 
@@ -524,7 +524,7 @@ s32 func_1507D754(struct127 *obj) {
     case 0xAD:
     case 0xAE:
     case 0xAF:
-        obj->pad320[8] = 0;
+        obj->unk328 = 0;
         func_1507DB44(obj, 0);
         func_150AEB9C(obj);
         return 1;
@@ -604,7 +604,7 @@ void func_1507DB34(void) {
 void func_1507DB3C(void) {
 }
 
-void func_1507DB44(struct127 *obj, s32 arg1) {
+void func_1507DB44(Actor *obj, s32 arg1) {
     func_1503DE70(obj, arg1, -1);
 }
 
@@ -670,10 +670,10 @@ Gfx *func_1507DB6C(Gfx *gfx, s32 player) {
     return gfx;
 }
 
-void func_150836CC(struct127 *, s32);
+void func_150836CC(Actor *, s32);
 
 /* Sets bits in obj->unk9C (after re-running func_150836CC 0x44/0x23 when interaction_state is 1). */
-void func_1507DE4C(struct127 *obj) {
+void func_1507DE4C(Actor *obj) {
     if (obj->interaction_state == 1) {
         func_150836CC(obj, 0x44);
         func_150836CC(obj, 0x23);
@@ -697,7 +697,7 @@ void func_1507DE4C(struct127 *obj) {
 }
 
 /* Sets obj's unk94/unk9C flags and unk2E4 (1, 2, 4 or 8) for part 4..9. */
-void func_1507DF10(struct127 *obj, s32 part) {
+void func_1507DF10(Actor *obj, s32 part) {
     switch (part) {
     case 9:
         obj->unk94 |= 0x20;
@@ -787,7 +787,7 @@ typedef f32 BoneMtx[4][4];
 void func_15143134(f32 *in, f32 *out, BoneMtx *mtx);
 
 /* Gets obj's tracking point: 30 * y_scale up through bone 0 (12 or 3 in some states), or its position. */
-void func_1507E1D0(struct127 *obj, f32 *x, f32 *y, f32 *z) {
+void func_1507E1D0(Actor *obj, f32 *x, f32 *y, f32 *z) {
     if (obj->unk1D4 != NULL) {
         BoneMtx *bone;
         f32 in[3];

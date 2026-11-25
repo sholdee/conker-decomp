@@ -83,7 +83,7 @@ typedef struct Particle {
     /* 0x079 */ s8 drawFn;
     /* 0x07A */ u8 unk7A;
     /* 0x07B */ u8 pad7B;
-    /* 0x07C */ struct127 *owner;
+    /* 0x07C */ Actor *owner;
     /* 0x080 */ u8 ownerId;
     /* 0x081 */ u8 pad81;
     /* 0x082 */ s16 fadeStart;
@@ -472,7 +472,7 @@ extern u8 D_800838C0[];
 extern Gfx *(*D_800899A4[])(Gfx *gfx, Particle *particle, s16 arg2);
 Gfx *func_15142B7C(Gfx *gfx, s32 setGeometryMode, s32 clearGeometryMode);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 alpha, u8 *state);
-Gfx *func_151462C8(Gfx *gfx, s32 *arg1, u8 arg2, struct127 *owner, u8 ownerId, s16 arg5, f32 *pos, u8 arg7,
+Gfx *func_151462C8(Gfx *gfx, s32 *arg1, u8 arg2, Actor *owner, u8 ownerId, s16 arg5, f32 *pos, u8 arg7,
                    s32 arg8);
 
 /* Draw a particle whose matrix func_15132A88 built this frame: segment 8, render and geometry mode (lit when
@@ -696,14 +696,14 @@ s32 func_15133510(Mtx *mtx, Particle *particle) {
 
 /* Event 0 payload: an object going away (also handled by func_15133DE8). */
 typedef struct {
-    struct127 *obj;
+    Actor *obj;
     u8 id;
 } ParticleEventRemove;
 
 /* Event 0x2D payload: two objects trading places. */
 typedef struct {
-    struct127 *a;
-    struct127 *b;
+    Actor *a;
+    Actor *b;
     u8 aId;
     u8 bId;
 } ParticleEventSwap;
@@ -717,7 +717,7 @@ void func_151B9660(Particle *particle);
 void func_15133588(Particle *particle, void *data, u8 event) {
     s32 variant;
     ParticleEventFn handler;
-    struct127 *obj;
+    Actor *obj;
 
     if (event == 0x1B && particle->model == 0x22) {
         func_151B9660(particle);
@@ -847,7 +847,7 @@ s32 func_15133A50(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight) {
 /* Matrix handler for particles attached to their owner: use the owner's float matrix number extra[0]
  * (as is when D_800C3E90 is set, else converted to fixed point). Returns -1 if the owner is gone. */
 s32 func_15133A94(Mtx *mtx, Particle *particle) {
-    struct127 *owner;
+    Actor *owner;
     f32 (*ownerMtxs)[4][4];
     f32 mf[4][4];
     s32 pad; // matching: unused stack slot
@@ -923,7 +923,7 @@ s32 func_15133D20(Particle *particle, f32 x, f32 y, f32 z, f32 floorHeight, Floo
 
 /* Event handler: destroy the particle when its owner goes away (event 0). */
 void func_15133DE8(Particle *particle, ParticleEventRemove *data, u8 event) {
-    struct127 *obj;
+    Actor *obj;
 
     if (event == 0) {
         obj = data->obj;

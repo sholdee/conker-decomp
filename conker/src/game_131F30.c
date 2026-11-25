@@ -58,20 +58,20 @@ extern s32 *D_800DBF94;
 typedef struct {
     s32 count;
     const u8 *list;
-    struct127 *player;
+    Actor *player;
 } Msg35;
 
 /* Arrival callback of a level prop (D_800DBEF4 entry): finds the first active player in the prop's
  * player mask and sends message 0x35 with a 9-entry list chosen by the prop's id (0xF7-0xF9),
  * or message 0x38 for 0xF6. */
 void func_15104A80(WorldObject *prop) {
-    struct127 *player;
+    Actor *player;
 
     player = NULL;
     {
         s32 mask;
         s32 i;
-        struct127 *candidate;
+        Actor *candidate;
 
         i = prop - D_800DBEF4;
         mask = D_800DBF94[i];

@@ -1,7 +1,7 @@
 #include <ultra64.h>
 
 // functions.h and variables.h declare several of the symbols below with types that do not fit how
-// this file uses them (struct127 lacks or mistypes many object fields, model tables are declared as
+// this file uses them (Actor lacks or mistypes many object fields, model tables are declared as
 // plain s32, ...). Their header declarations are renamed out of the way and redeclared further down.
 #define func_15083E90 func_15083E90_hdr
 #define func_15083568 func_15083568_hdr
@@ -107,7 +107,7 @@ typedef struct ObjAlloc260 {
     /* 0x9 */ u8 unk9;
 } ObjAlloc260;
 
-// File-local view of a game object (struct127, the 0x32C-byte entries of D_800CC2D0).
+// File-local view of a game object (Actor, the 0x32C-byte entries of D_800CC2D0).
 // include/structs.h lacks or mistypes several fields used here (0x10 is a u16, 0x38 an s16, 0x140 a
 // u8, 0x2C4 a pointer, ...); fold them in during the central pass.
 typedef struct GameObj {

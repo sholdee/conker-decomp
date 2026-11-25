@@ -77,7 +77,7 @@ extern void func_10004074(void *);
 /* The type-0x2E object func_15105C24 finds by owner (Func15105C24Obj in game_131F30.c). */
 struct ZoneLinkObj {
     u8 pad0[0x98];
-    struct127 *unk98;
+    Actor *unk98;
 };
 
 struct ZoneLinkObj *func_15105C24(s32 owner);
@@ -589,11 +589,11 @@ void func_1515E888(s32 player, s32 x, s32 y, s32 z, s32 mask, u8 *color, u32 arg
     color[2] = v;
 }
 
-s32 func_150A1DA0(struct127 *obj, Zone *zone, s32);
+s32 func_150A1DA0(Actor *obj, Zone *zone, s32);
 
 /* First zone in the list whose type matches `mask` (0 = any) and that contains (x, y, z). */
 Zone *func_1515EB84(s32 x, s32 y, s32 z, s32 mask, ZoneNode *node) {
-    struct127 probe;
+    Actor probe;
     Zone *zone;
 
     probe.x_position = x;
@@ -792,12 +792,12 @@ void func_1515F25C(RegionNode **list, RegionNode *node) {
     *list = node;
 }
 
-typedef void (*ZoneHandler)(struct127 *obj, Zone *zone);
+typedef void (*ZoneHandler)(Actor *obj, Zone *zone);
 
 extern ZoneHandler D_8008B090[12];
 
 /* Runs zone handler zone->unk18 for `obj`. */
-void func_1515F270(struct127 *obj, Zone *zone) {
+void func_1515F270(Actor *obj, Zone *zone) {
     s32 idx = zone->unk18;
 
     if (idx >= 0 && idx < 12) {
@@ -807,16 +807,16 @@ void func_1515F270(struct127 *obj, Zone *zone) {
     }
 }
 
-s32 func_1505D024(struct127 *obj, s32 arg1, u16 arg2, s32 arg3);
+s32 func_1505D024(Actor *obj, s32 arg1, u16 arg2, s32 arg3);
 
-void func_1515F2B8(struct127 *obj, Zone *zone) {
+void func_1515F2B8(Actor *obj, Zone *zone) {
     func_1505D024(obj, 0x6001D, obj->unk7A, -1);
 }
 
 extern ZoneHandler D_8008B0C0[3];
 
 /* Zone handler: when the player (unique id 1) is in the zone, runs ambient effect zone->unk1C. */
-void func_1515F2E8(struct127 *obj, Zone *zone) {
+void func_1515F2E8(Actor *obj, Zone *zone) {
     s32 idx;
 
     if (obj->unique_id == 1) {
@@ -828,7 +828,7 @@ void func_1515F2E8(struct127 *obj, Zone *zone) {
 }
 
 /* Ambient effect 0: eases the ambient colour halfway towards (97, 96, 98) each frame. */
-void func_1515F338(struct127 *obj, Zone *zone) {
+void func_1515F338(Actor *obj, Zone *zone) {
     u8 red;
     u8 green;
     u8 blue;
@@ -852,7 +852,7 @@ void func_1515F338(struct127 *obj, Zone *zone) {
 }
 
 /* Ambient effect 1: eases the ambient colour halfway towards (229, 253, 160) each frame. */
-void func_1515F5C4(struct127 *obj, Zone *zone) {
+void func_1515F5C4(Actor *obj, Zone *zone) {
     u8 red;
     u8 green;
     u8 blue;
@@ -876,7 +876,7 @@ void func_1515F5C4(struct127 *obj, Zone *zone) {
 }
 
 /* Ambient effect 2: eases the ambient colour towards a colour pulsing with sin(D_800DCDA0). */
-void func_1515F850(struct127 *obj, Zone *zone) {
+void func_1515F850(Actor *obj, Zone *zone) {
     f32 s;
     f32 targetR;
     f32 targetG;
@@ -908,7 +908,7 @@ void func_1515F850(struct127 *obj, Zone *zone) {
 }
 
 /* Zone handler: func_1515F2E8 for a handler table that is empty in this build. */
-void func_1515FB70(struct127 *obj, Zone *zone) {
+void func_1515FB70(Actor *obj, Zone *zone) {
     s32 idx;
 
     if (obj->unique_id == 1) {
@@ -918,14 +918,14 @@ void func_1515FB70(struct127 *obj, Zone *zone) {
     }
 }
 
-void func_1515FB94(struct127 *obj, Zone *zone) {
+void func_1515FB94(Actor *obj, Zone *zone) {
     func_1505D024(obj, 0x6002D, obj->unk7A, -1);
 }
 
 /* Zone handler: like func_1515FB94, also passing the index of the object linked to this zone (or -1). */
-void func_1515FBC4(struct127 *obj, Zone *zone) {
+void func_1515FBC4(Actor *obj, Zone *zone) {
     struct ZoneLinkObj *link;
-    struct127 *target;
+    Actor *target;
     s32 targetIndex;
 
     target = NULL;
@@ -941,19 +941,19 @@ void func_1515FBC4(struct127 *obj, Zone *zone) {
     func_1505D024(obj, 0x6002E, obj->unk7A, targetIndex);
 }
 
-void func_1515FC34(struct127 *obj, Zone *zone) {
+void func_1515FC34(Actor *obj, Zone *zone) {
     func_1505D024(obj, 0x33, 0xC000, -1);
 }
 
 s32 func_150AD960(s32, s32, s32, s32);
-void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
-void func_1507CD64(struct127 *, s32);
+void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
+void func_1507CD64(Actor *, s32);
 
 /*
  * Zone handler: unless the zone has a range (unk1C, in hundredths of its radius) that `obj`
  * is outside of, fires event 0x2F on `obj`.
  */
-void func_1515FC60(struct127 *obj, Zone *zone) {
+void func_1515FC60(Actor *obj, Zone *zone) {
     s32 pad; // matching: stack slot
     f32 limit;
     f32 scale;

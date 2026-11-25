@@ -16,8 +16,8 @@ void func_150C7E00(Camera *camera)
   s32 queryBB;
   f32 t;
   f32 blend;
-  struct127 *target;
-  struct127 *actor;
+  Actor *target;
+  Actor *actor;
   queryBC = func_1509BE40(0, func_1509BE40(0, 0x2010, 0xB7) | 0x2000, 0xBC);
   globalBB = func_1509BE40(0, 0x2000, 0xBB);
   queryBB = func_1509BE40(0, func_1509BE40(0, 0x2010, 0xB7) | 0x2000, 0xBB);

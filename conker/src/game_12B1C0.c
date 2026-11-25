@@ -3,10 +3,10 @@
 #include "variables.h"
 
 
-extern void func_150ED638(struct127 *, s32, s32);
+extern void func_150ED638(Actor *, s32, s32);
 
 void func_150FDD10(s32 arg0) {
-    struct127 *obj;
+    Actor *obj;
 
     func_15103828();
     if (D_800C35EA == 1) {
@@ -16,6 +16,6 @@ void func_150FDD10(s32 arg0) {
                 func_150ED638(obj, 0x14, 0x14);
             }
             obj++;
-        } while (obj != (struct127 *)&D_800D121C);
+        } while (obj != (Actor *)&D_800D121C);
     }
 }

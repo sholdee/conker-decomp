@@ -8,7 +8,7 @@
 
 extern s32 func_10010F30(s32, u16, u8, s16, u8);
 extern s32 func_151EF610(void);
-extern s32 func_10010FFC(s32, s32, s32, s32, s32, struct127 *);
+extern s32 func_10010FFC(s32, s32, s32, s32, s32, Actor *);
 extern u8 func_151D8E20(void);
 
 /* Spawn descriptor for func_1513418C. */
@@ -17,7 +17,7 @@ typedef struct {
     /* 0x04 */ s32 unk4;
     /* 0x08 */ u8 ownerId;
     /* 0x09 */ u8 pad9[0x3];
-    /* 0x0C */ struct127 *owner;
+    /* 0x0C */ Actor *owner;
     /* 0x10 */ u8 unk10;
     /* 0x11 */ u8 pad11[0x3];
     /* 0x14 */ f32 offset[3];
@@ -125,20 +125,20 @@ typedef struct ActorTask {
     /* 0x0D */ u8 padD;
     /* 0x0E */ s16 unkE;
     /* 0x10 */ u8 pad10[0x8];
-    /* 0x18 */ struct127 *actor;
+    /* 0x18 */ Actor *actor;
     /* 0x1C */ u8 pad1C[0x18];
     /* 0x34 */ GroundHit hit;
     /* 0x58 */ ActorTaskFx fx;
 } ActorTask;
 
-void func_151AA264(struct127 *actor, GroundHit *hit);
-void func_151ABE00(struct127 *actor);
+void func_151AA264(Actor *actor, GroundHit *hit);
+void func_151ABE00(Actor *actor);
 extern s32 func_15045800(f32 *pos, s32 arg1, f32 minY, GroundHit *hit);
 extern s32 func_151ABE40(f32 *pos, GroundHit *hit, s32 kind, s32 arg3, s32 arg4);
 
 /* Probes the ground under the task's actor and spawns ground effect 3 there. */
 void func_151A99D0(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -159,7 +159,7 @@ void func_151A99D0(ActorTask *task) {
 
 /* Ground effect 3 under the actor (with sound 0x5208), then func_151ABE00. */
 void func_151A9AA4(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -184,7 +184,7 @@ void func_151A9AA4(ActorTask *task) {
 
 /* Ground effect 1 under the actor, with sound 0x5208. */
 void func_151A9BA0(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -209,7 +209,7 @@ void func_151A9BA0(ActorTask *task) {
 
 /* Unless the actor's unk31C->unk95 is set: ground effect 1 (sound 0x6978), func_151AA264, func_151ABE00. */
 void func_151A9CA0(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
     f32 pos[3];
 
     // matching: structs.h types unk95 as s8, but this read is unsigned (lbu)
@@ -234,7 +234,7 @@ void func_151A9CA0(ActorTask *task) {
 
 /* Ground effect 2 under the actor, with sound 0x5208. */
 void func_151A9DC0(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -258,7 +258,7 @@ void func_151A9DC0(ActorTask *task) {
 
 /* Ground effect 2 (sound 0x6978), then func_151AA264 and func_151ABE00. */
 void func_151A9EC0(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -284,7 +284,7 @@ void func_151A9EC0(ActorTask *task) {
 
 /* Ground effect 4 under the actor. */
 void func_151A9FC8(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -305,7 +305,7 @@ void func_151A9FC8(ActorTask *task) {
 
 /* Ground effect 4 under the actor. */
 void func_151AA09C(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -380,7 +380,7 @@ void func_151AA210(Task151AA17C *task) {
 }
 
 /* When the ground hit has flag bit 0 set, spawns a func_1513418C effect on the actor. */
-void func_151AA264(struct127 *actor, GroundHit *hit) {
+void func_151AA264(Actor *actor, GroundHit *hit) {
     SpawnDesc1513418C desc;
 
     if (hit->flags & 1) {
@@ -409,17 +409,17 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0xF];
-    /* 0x1C */ struct127 *actor;
+    /* 0x1C */ Actor *actor;
 } Task151AA30C;
 
-extern s32 func_1515A920(struct127 *actor, s32 *out);
+extern s32 func_1515A920(Actor *actor, s32 *out);
 extern void func_1515A238(f32 *pos, f32 *vel, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 
 /* Spawns one falling particle at (x, y, z) when that point is not above the task actor's unk118. */
 void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA30C *task) {
     f32 pos[3];
     f32 vel[3];
-    struct127 *actor;
+    Actor *actor;
     s32 surface;
 
     actor = task->actor;
@@ -444,7 +444,7 @@ void func_151AA30C(f32 x, f32 y, f32 z, f32 arg3, f32 scale, f32 arg5, Task151AA
 typedef struct {
     /* 0x00 */ u8  ownerId;
     /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ struct127 *owner;
+    /* 0x04 */ Actor *owner;
     /* 0x08 */ u8  unk8;
     /* 0x09 */ u8  pad9[0x3];
     /* 0x0C */ f32 unkC;
@@ -471,7 +471,7 @@ typedef struct {
 extern void *func_15134DAC(SpawnDesc15134DAC *desc, s32 payloadSize);
 
 /* Spawns the pulse effect owned by `task`. */
-PulseFx *func_151AA48C(struct127 *actor, ActorTask *task) {
+PulseFx *func_151AA48C(Actor *actor, ActorTask *task) {
     SpawnDesc15134DAC desc;
     PulseFx *fx;
     PulseFxPayload payload;
@@ -633,13 +633,13 @@ f32 func_151AAA4C(PulseFx *fx) {
     return value;
 }
 
-LoopSoundFx *func_151AB2C4(struct127 *actor, ActorTask *task);
+LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task);
 extern void func_151346EC(LoopSoundFx *fx);
 extern void func_1513470C(LoopSoundFx *fx);
 
 /* Refreshes the task's pulse and loop-sound effects, spawning whichever is missing. */
 void func_151AAABC(ActorTask *task) {
-    struct127 *actor;
+    Actor *actor;
     ActorTaskFx *fx;
 
     actor = task->actor;
@@ -721,13 +721,13 @@ typedef struct {
 } Cfg_151AABC4;
 
 extern u8 D_800A8F70[];
-extern void func_15142314(struct255 *, u8, vertex *, struct127 *);
-extern void func_1504715C(GroundHit *hit, struct127 *actor);
+extern void func_15142314(struct255 *, u8, vertex *, Actor *);
+extern void func_1504715C(GroundHit *hit, Actor *actor);
 extern s32 func_1504697C(vertex *pos, s32 arg1, f32 minY, GroundHit *hit);
 extern void func_15153F18(Cfg_151AABC4 *, vertex *, GroundHit *, u8, s32);
 
 /* Finds point D_800A8F70[index] of the actor's unk1D4 (func_15142314) and spawns two effects on the ground below it. */
-void func_151AABC4(struct127 *actor, u8 index) {
+void func_151AABC4(Actor *actor, u8 index) {
     vertex pos;
     GroundHit floor;
     f32 y;
@@ -834,7 +834,7 @@ extern u8 D_800AB414[];
 
 /* Keeps the task's flicker effect alive, or spawns it on the ground under the actor. */
 void func_151AADF8(ActorTask *task) {
-    struct127 *actor;
+    Actor *actor;
     ActorTaskFx *fx;
     FlickerFxPayload *keep;
     f32 pos[3];
@@ -929,7 +929,7 @@ s32 func_151AB180(FlickerFx *fx) {
 
 /* Ground effect 3 (sound 0x5208), then func_151AA264. */
 void func_151AB1C4(ActorTask *task) {
-    struct127 *actor = task->actor;
+    Actor *actor = task->actor;
 
     {
         f32 pos[3];
@@ -953,7 +953,7 @@ void func_151AB1C4(ActorTask *task) {
 }
 
 /* Spawns the looping-sound effect owned by `task`. */
-LoopSoundFx *func_151AB2C4(struct127 *actor, ActorTask *task) {
+LoopSoundFx *func_151AB2C4(Actor *actor, ActorTask *task) {
     SpawnDesc1513418C desc;
     LoopSoundFxPayload payload;
     LoopSoundFx *fx;
@@ -1112,7 +1112,7 @@ extern void *func_15190770(struct185 *desc, s32 arg1, s32 arg2, s32 arg3);
 
 /* For actors of kind 0-4 or 150: spawns a func_15190770 effect on the actor. */
 void func_151AB854(ActorTask *task) {
-    struct127 *actor;
+    Actor *actor;
     struct185 desc;
 
     actor = task->actor;
@@ -1141,7 +1141,7 @@ void func_151AB920(s32 arg0, s32 arg1) {
 
 /* Payload at +0x28 of the spark emitter task spawned by func_151AB930. */
 typedef struct {
-    /* 0x00 */ struct127 *actor;
+    /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId;
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ s32 actorSerial;  // actor->unk84 at spawn
@@ -1163,7 +1163,7 @@ typedef struct {
 } EmitterTask;
 
 /* Spawns a spark emitter task that follows `actor`. */
-void func_151AB930(struct127 *actor) {
+void func_151AB930(Actor *actor) {
     struct260 *task;
     EmitterPayload payload;
 
@@ -1247,12 +1247,12 @@ void func_151AB9C8(EmitterTask *task) {
 /* Message data for func_151ABD54; the layout depends on the message id. */
 typedef union {
     struct {
-        /* 0x00 */ struct127 *actor;
+        /* 0x00 */ Actor *actor;
         /* 0x04 */ u8 actorId;
     } m0;
     struct {
-        /* 0x00 */ struct127 *actorA;
-        /* 0x04 */ struct127 *actorB;
+        /* 0x00 */ Actor *actorA;
+        /* 0x04 */ Actor *actorB;
         /* 0x08 */ u8 idA;
         /* 0x09 */ u8 idB;
     } m2D;
@@ -1281,12 +1281,12 @@ void func_151ABD54(EmitterTask *task, TaskMsg151ABD54 *msg, u8 msgId) {
 }
 
 typedef struct {
-    /* 0x00 */ struct127 *actor;
+    /* 0x00 */ Actor *actor;
     /* 0x04 */ s8 actorId;
 } Msg151ABE00;
 
 /* Broadcasts message 0x20 ({actor, unique_id}) via func_1516944C. */
-void func_151ABE00(struct127 *actor) {
+void func_151ABE00(Actor *actor) {
     Msg151ABE00 msg;
 
     msg.actor = actor;

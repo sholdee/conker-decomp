@@ -24,7 +24,7 @@ typedef struct {
 } RibbonPoint;
 
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
 } RibbonInfo;
 
 /* Trail actor (func_15147A80, see game_105FC0.c) drawn as a ribbon through its ring buffer of points. */
@@ -207,7 +207,7 @@ typedef struct {
 
 /* With probability 0.222, spawns an effect on the ground at a random point up to 2000 units from
  * the camera of the object's player, within 40 degrees either side of the camera's yaw. */
-void func_151CF898(struct127 *obj, f32 probeY, f32 arg2) {
+void func_151CF898(Actor *obj, f32 probeY, f32 arg2) {
     Camera *player;
     struct17 spawnPos;
     struct17 *camPos;
@@ -321,7 +321,7 @@ typedef struct ParticleSpawn78 {
     /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
     /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct struct127 *owner;
+    /* 0x6C */ struct Actor *owner;
     /* 0x70 */ u8 ownerId;
     /* 0x71 */ u8 pad71;
     /* 0x72 */ s16 fadeStart;
@@ -360,11 +360,11 @@ s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 void func_15150D1C(Spawn15150D1C *, u8, s32);
 void func_151A9834(struct17 *, f32, f32, FloorInfo *, s32, s32, s8 *, u8, s32);
 void func_15151A38(Spawn15151A38 *, u8, s32);
-void func_1504715C(FloorInfo *, struct127 *);
+void func_1504715C(FloorInfo *, Actor *);
 
 /* Breaks the object apart: seven model pieces fly off its model's points with random velocity and
  * spin, plus three more effects at 200 units above it. */
-void func_151CFA4C(struct127 *obj, u8 arg1, s32 arg2) {
+void func_151CFA4C(Actor *obj, u8 arg1, s32 arg2) {
     vertex vecB;
     struct17 pos;
     struct17 vecA;
@@ -501,20 +501,20 @@ void func_151CFA4C(struct127 *obj, u8 arg1, s32 arg2) {
 
 /* Message 0x18 (and 0): obj no longer exists. */
 typedef struct {
-    struct127 *obj;
+    Actor *obj;
     u8 objId;
 } OwnerGoneMsg;
 
 /* Message 0x2D: objects a and b swapped places. */
 typedef struct {
-    struct127 *a;
-    struct127 *b;
+    Actor *a;
+    Actor *b;
     u8 aId;
     u8 bId;
 } OwnerSwapMsg;
 
 /* Tells every effect that follows the object that it is gone (message 0x18). */
-void func_151D0024(struct127 *obj) {
+void func_151D0024(Actor *obj) {
     OwnerGoneMsg msg;
 
     msg.obj = obj;
@@ -524,7 +524,7 @@ void func_151D0024(struct127 *obj) {
 
 /* Data of the camera-facing strip effect spawned by func_151D0058 and drawn by func_151D014C. */
 typedef struct {
-    /* 0x0 */ struct127 *owner;
+    /* 0x0 */ Actor *owner;
     /* 0x4 */ u8 ownerId;   /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x5 */ u8 pad5;
     /* 0x6 */ u16 ownerUnk84; /* owner->unk84 at spawn; the effect ends when it changes */
@@ -543,7 +543,7 @@ typedef struct {
 } StripEffect;
 
 /* Spawns a strip effect of the given variant on the object. */
-void func_151D0058(struct127 *obj, u8 variant, u8 arg2, s32 arg3) {
+void func_151D0058(Actor *obj, u8 variant, u8 arg2, s32 arg3) {
     StripEffect *effect;
     StripEffectData data;
 
@@ -562,7 +562,7 @@ void func_151D0058(struct127 *obj, u8 variant, u8 arg2, s32 arg3) {
 
 /* Ends the strip effect once its owner's unk84 has changed. */
 void func_151D0128(StripEffect *effect) {
-    struct127 *owner = effect->data.owner;
+    Actor *owner = effect->data.owner;
 
     if (effect->data.ownerUnk84 != owner->unk84.uh) {
         effect->state = -1;
@@ -580,7 +580,7 @@ Gfx *func_15142E24(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
 Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
     StripEffectData *data;
     Vtx *vtx;
-    struct127 *owner;
+    Actor *owner;
     u8 update;
     struct17 *camPos;
     f32 midX;
@@ -724,7 +724,7 @@ Gfx *func_151D014C(Gfx *gfx, StripEffect *effect, s16 cameraIdx) {
 
 /* The owner an effect follows, kept at the start of its data. */
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
 } OwnerRef;
 
@@ -740,7 +740,7 @@ void func_151D08F0(OwnedEffect *effect, void *msg, u8 type) {
 
     if (type == 0 || type == 0x18) {
         OwnerGoneMsg *gone = msg;
-        struct127 *obj = gone->obj;
+        Actor *obj = gone->obj;
 
         if (obj == ref->owner || gone->objId == ref->ownerId) {
             func_1516972C((struct102 *)effect);
@@ -832,7 +832,7 @@ extern CarrierParticle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Emits two particle bursts along the line between two of the object's model points, and sometimes
  * 5-10 more particles that each carry a func_151CEAAC effect. */
-void func_151D09A8(struct127 *obj, u8 arg1, s32 arg2) {
+void func_151D09A8(Actor *obj, u8 arg1, s32 arg2) {
     vertex pos;
     struct17 dir;
     FloorInfo floor;
@@ -987,11 +987,11 @@ void func_151D0F34(CarrierParticle *particle) {
 }
 
 /* Point functions: each writes a point of the object to out and returns whether it has one. */
-extern s32 (*D_8008FC30[])(struct127 *obj, struct17 *out);
+extern s32 (*D_8008FC30[])(Actor *obj, struct17 *out);
 
 /* Data of the tracker effect: follows one point of its owner and leaves a trail behind it. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ FollowerActor *trail; /* spawned by func_151D1448 */
@@ -1008,7 +1008,7 @@ typedef struct {
 } TrackerEffect;
 
 /* Spawns a tracker effect that follows the object's point D_8008FC30[pointFn]. */
-void func_151D0F60(struct127 *obj, u8 pointFn, u8 arg2, s32 arg3) {
+void func_151D0F60(Actor *obj, u8 pointFn, u8 arg2, s32 arg3) {
     TrackerEffect *effect;
     TrackerData data;
 
@@ -1032,29 +1032,29 @@ void func_151D0F60(struct127 *obj, u8 pointFn, u8 arg2, s32 arg3) {
 }
 
 /* Point function: 8 units above the object's unk180 height, at its x/z. */
-s32 func_151D1074(struct127 *obj, struct17 *out) {
+s32 func_151D1074(Actor *obj, struct17 *out) {
     out->unk0 = obj->x_position;
     out->unk4 = obj->unk180 + 8.0f;
     out->unk8 = obj->z_position;
     return TRUE;
 }
 
-s32 func_151D10E4(struct127 *obj, struct17 *out, u8 which);
+s32 func_151D10E4(Actor *obj, struct17 *out, u8 which);
 
 /* Point function: the object's model point 0. */
-s32 func_151D10A4(struct127 *obj, struct17 *out) {
+s32 func_151D10A4(Actor *obj, struct17 *out) {
     return func_151D10E4(obj, out, 0);
 }
 
 /* Point function: the object's model point 1. */
-s32 func_151D10C4(struct127 *obj, struct17 *out) {
+s32 func_151D10C4(Actor *obj, struct17 *out) {
     return func_151D10E4(obj, out, 1);
 }
 
 extern struct17 D_800AAF9C[];
 
 /* Writes model point D_800AAF9C[which] of the object, in world space, to out. */
-s32 func_151D10E4(struct127 *obj, struct17 *out, u8 which) {
+s32 func_151D10E4(Actor *obj, struct17 *out, u8 which) {
     s32 joints = (s32)obj->unk1D4;
 
     if (joints == 0) {
@@ -1073,7 +1073,7 @@ void func_151D1448(TrackerEffect *effect);
  * than 300 units, stops, or the owner is airborne, in water or in state 5, 6, 9, 13 or 14. */
 void func_151D1138(TrackerEffect *effect) {
     TrackerData *data;
-    struct127 *owner;
+    Actor *owner;
     u8 finished = FALSE;
     s32 state;
 
@@ -1167,7 +1167,7 @@ void func_151D1448(TrackerEffect *effect) {
         TrailSpawn spawn;
         FollowerData data;
     } req;
-    struct127 *owner;
+    Actor *owner;
     FollowerActor *trail;
 
     data = &effect->data;

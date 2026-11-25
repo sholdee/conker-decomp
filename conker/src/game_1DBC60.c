@@ -7,7 +7,7 @@ typedef struct {
     /* 0x00 */ s32 target[2];
     /* 0x08 */ u8 ownerId;
     /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ struct127 *owner;
+    /* 0x0C */ Actor *owner;
     /* 0x10 */ u8 bone;
     /* 0x11 */ u8 pad11[3];
     /* 0x14 */ struct17 offset;
@@ -24,11 +24,11 @@ typedef struct {
 #define EFFECT_ON_BONE  0x02
 #define EFFECT_LIFETIME 0x04
 
-void func_1516962C(s32 type, struct127 *actor, u8 eventType);
+void func_1516962C(s32 type, Actor *actor, u8 eventType);
 void *func_1513418C(EffectDesc *desc, s32 arg1, u8 arg2, s32 arg3);
 
 /* Attaches emitter 6 to bone 1 of `actor`; a nonzero `lifetime` ends it after that many frames. */
-void *func_151AE7B0(struct127 *actor, f32 rate, s16 lifetime, u8 arg3, s32 arg4) {
+void *func_151AE7B0(Actor *actor, f32 rate, s16 lifetime, u8 arg3, s32 arg4) {
     void *effect; // matching: the named result keeps IDO's 80-byte frame (direct return: 72)
     EffectDesc desc;
 

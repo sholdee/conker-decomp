@@ -230,7 +230,7 @@ extern u8 D_800A2248[];
 s32 func_15100600(u8 *, f32 *, f32 *, u8, s16, u8, u8, u8, f32, f32, f32, f32, u8, u8, s32);
 
 /* Starts effect `kind` on obj, using the effect tables for its parameters; picks one of two styles by object id. */
-s32 func_151026BC(struct127 *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
+s32 func_151026BC(Actor *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5) {
     s32 unk5;
     s32 unk6;
 
@@ -269,12 +269,12 @@ s32 func_151026BC(struct127 *obj, s16 arg1, u8 kind, u8 arg3, u8 arg4, s32 arg5)
 
 /* Message payload: an actor reference. */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     u8 actorId;
 } ActorRefMsg;
 
 /* Sends message 0x1A for `actor` (stops the effect started by func_151026BC). */
-void func_151027E8(struct127 *actor) {
+void func_151027E8(Actor *actor) {
     ActorRefMsg msg;
 
     msg.actor = actor;

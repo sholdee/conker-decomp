@@ -66,12 +66,12 @@ typedef struct {
     /* 0x120 */ S151BECB8Params params;
 } S151BECB8;
 
-extern void func_1515C1A0(struct127 *, f32 *, f32 *, f32 *);
+extern void func_1515C1A0(Actor *, f32 *, f32 *, f32 *);
 extern f32 func_15143E64(struct17 *);
 void func_151BF340(u8 arg0, s32 arg1);
 void func_151BF0C8(struct17 *arg0);
 void *func_151BEEE0(f32 arg0, struct17 *arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
-s32 func_151BEE94(struct127 *arg0);
+s32 func_151BEE94(Actor *arg0);
 
 /*
  * Proximity check: for every active object whose bounding radius comes within 43 units of
@@ -82,7 +82,7 @@ s32 func_151BECB8(S151BECB8 *arg0) {
     s32 untouched = 1;
 
     {
-        struct127 *obj;
+        Actor *obj;
         S151BECB8Params *params;
         f32 range = 43.0f; // matching: a local keeps 43.0f in $f20 across the loop
         f32 radius;
@@ -129,13 +129,13 @@ s32 func_151BECB8(S151BECB8 *arg0) {
                 }
             }
             obj++;
-        } while (obj != (struct127 *)&D_800D1548); /* end of D_800CC2D0[26] */
+        } while (obj != (Actor *)&D_800D1548); /* end of D_800CC2D0[26] */
     }
     return untouched;
 }
 
 /* An object counts as active when it has a player slot, an interaction state and a valid id. */
-s32 func_151BEE94(struct127 *arg0) {
+s32 func_151BEE94(Actor *arg0) {
     if (arg0->unk127 == 0xFF) {
         return 0;
     }

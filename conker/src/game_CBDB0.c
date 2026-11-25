@@ -30,7 +30,7 @@ typedef union {
 /* Per-behaviour handlers (D_80088C90, see game_30E90.c). */
 typedef struct {
     void (*update)(WorldObject *obj);
-    void (*onContact)(WorldObject *obj, struct127 *actor);
+    void (*onContact)(WorldObject *obj, Actor *actor);
     s32 unk8;
 } Struct80088C90;
 
@@ -273,7 +273,7 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
 /* Looks like the script format version: later versions carry more operands. */
 extern s32 D_800D3840;
 
-extern struct127 *func_1505EEF4(s32 path);
+extern Actor *func_1505EEF4(s32 path);
 extern s32 func_1000F568(s32 base, s32 count);
 extern s32 func_15103C14(s32, s32, s32, s32, s32);
 extern void func_15114D24(WorldObject *, s32, s32, s16, s32, s32);
@@ -387,7 +387,7 @@ s32 func_1509F33C(s32 arg0, s32 arg1, s32 arg2) {
 s32 func_1509F354(first, last, unplayed, volume, path, nearDistance, farDistance)
     s32 first; s32 last; s32 unplayed; u32 volume; s32 path; s16 nearDistance; s32 farDistance;
 {
-    struct127 *actor;
+    Actor *actor;
     s32 count;
     u8 pick;
 
@@ -448,7 +448,7 @@ s32 func_1509F5A8(s32 first, s32 last, s32 volume) {
 void func_1509F5F4(sound, volume, path, nearDistance, farDistance, force)
     u16 sound; s32 volume; s32 path; s16 nearDistance; s32 farDistance; s32 force;
 {
-    struct127 *actor;
+    Actor *actor;
 
     actor = func_1505EEF4(path);
     if (actor != NULL) {
@@ -460,7 +460,7 @@ void func_1509F5F4(sound, volume, path, nearDistance, farDistance, force)
 
 /* Stops the sound of the actor following `path`: its 0x8C voice if `secondVoice`, else its 0x8E voice. */
 void func_1509F660(s32 path, s32 secondVoice) {
-    struct127 *actor;
+    Actor *actor;
 
     actor = func_1505EEF4(path);
     if (actor != NULL) {
@@ -479,7 +479,7 @@ s32 func_1509F6B0(s32 sound, s32 volume, s32 cents, s32 pan) {
 
 /* Plays `sound` at the position of the actor following `path`. */
 s32 func_1509F6E8(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDistance) {
-    struct127 *actor;
+    Actor *actor;
     s32 x;
     s32 y;
     s32 z;
@@ -496,7 +496,7 @@ s32 func_1509F6E8(s32 sound, s32 path, s32 volume, s32 nearDistance, s32 farDist
 
 /* Moves the voice `handle` to the position of the actor following `path`. */
 void func_1509F77C(s32 handle, s32 path, s32 cents, s32 nearDistance, s32 farDistance) {
-    struct127 *actor;
+    Actor *actor;
     s32 x;
     s32 y;
     s32 z;

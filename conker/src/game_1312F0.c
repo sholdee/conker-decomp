@@ -12,7 +12,7 @@ typedef struct {
 } GroundHit; /* 0x24 */
 
 f32 func_150ADA68(void);
-void func_1504715C(GroundHit *, struct127 *);
+void func_1504715C(GroundHit *, Actor *);
 s32 func_15046C80(struct17 *, s32, f32, GroundHit *);
 void func_151D3FF4(struct17 *, u8, s32);
 void func_150E7FEC(f32, u8, s16 *, struct17 *, s32, s32, s32, s32, s32, s32, u8, s32);
@@ -20,12 +20,12 @@ void func_150E83AC(struct17 *, s16, u8, s32);
 void func_151D5404(struct17 *, f32, f32, f32, s32, s32, u8, s32);
 void func_151D5334(struct17 *, f32, f32, f32, s32, u8, s32);
 void func_151D5514(struct17 *, u8, s32);
-void func_151D40D4(struct17 *, s32, struct127 *, struct127 *, s32, s32, s32, s32);
+void func_151D40D4(struct17 *, s32, Actor *, Actor *, s32, s32, s32, s32);
 void func_15055A2C(s32, f32, f32, f32, s32);
 void func_151541B8(struct17 *, f32, f32, f32, f32, u8, s32);
 
 /* Spawns an impact burst at pos: a ground splash when there is floor just below, effects, an optional variant-specific effect pair and particles. */
-void func_15103E40(struct127 *owner, struct127 *obj, struct17 *pos, u8 variant, s32 arg4, u8 arg5, s32 arg6) {
+void func_15103E40(Actor *owner, Actor *obj, struct17 *pos, u8 variant, s32 arg4, u8 arg5, s32 arg6) {
     struct17 impact;
     u8 hitGround;
     struct17 top;

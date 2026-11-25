@@ -10,7 +10,7 @@ void func_15143134(f32 *, f32 *, Mtx *);
 
 /* State the emitter object keeps at +0x28: func_150F2C8C fills it, func_150F2D14 updates it each frame. */
 typedef struct {
-    /* 0x00 */ struct127 *target;
+    /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId;   // target->unique_id when attached; a mismatch means the slot was reused
     /* 0x05 */ u8 prevUnk222; // target->unk222 seen last frame
     /* 0x08 */ f32 timer;     // one particle is emitted per 1.0 accumulated
@@ -31,7 +31,7 @@ typedef struct {
 
 /* State each emitted particle keeps after its Particle (copied in by func_150F2D14, updated by func_150F3214). */
 typedef struct {
-    /* 0x00 */ struct127 *target;
+    /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId;
     /* 0x08 */ f32 age;
     /* 0x0C */ f32 lifetime;
@@ -60,8 +60,8 @@ extern s32 *D_800DBF94;
 extern u8 D_800CC40C;
 extern u8 D_800CC49A;
 WorldObject *func_151149AC(s32);
-void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
-void func_1507CD64(struct127 *, s32);
+void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
+void func_1507CD64(Actor *, s32);
 void func_15196318(s32, s32, s32);
 
 /* While D_800CC2D0[0] has unk31C: if entry 0xFA or 0xF9 of D_800DBEF4 has its D_800DBF94 bit 0 set, runs
@@ -70,7 +70,7 @@ void func_15196318(s32, s32, s32);
 void func_150F2A60(s32 arg0) {
     s32 i;
     s32 scroll;
-    struct127 *obj;
+    Actor *obj;
     WorldObject *entry;
     s32 entryIndex;
 
@@ -107,7 +107,7 @@ void func_150F2A60(s32 arg0) {
 }
 
 /* Spawns an emitter object that follows `target` (see func_150F2D14). */
-void func_150F2C8C(struct127 *target) {
+void func_150F2C8C(Actor *target) {
     EmitterState state;
     Emitter *emitter;
 
@@ -124,7 +124,7 @@ void func_150F2C8C(struct127 *target) {
 }
 
 extern f32 D_800A195C[];
-void func_1502EA98(struct127 *, s32, s32, s32, s32, s32, s32);
+void func_1502EA98(Actor *, s32, s32, s32, s32, s32, s32);
 void func_15145EA4(f32 **, f32 **, Mtx *, s32);
 extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
 
@@ -132,7 +132,7 @@ extern s32 func_15146078(struct17 *, struct17 *, struct17 *);
  * changes to a nonzero value. */
 void func_150F2D14(Emitter *emitter) {
     EmitterState *state;
-    struct127 *target;
+    Actor *target;
     ParticleDef def;
     ParticleState particle;
     Particle *spawned;
@@ -232,7 +232,7 @@ void func_150F31D4(Particle *particle, s32 arg1, u8 arg2) {
 /* Particle update: follows the target's bone 15, grows and fades with age. Returns 0 when it should die. */
 s32 func_150F3214(Particle *particle) {
     ParticleState *state;
-    struct127 *target;
+    Actor *target;
     f32 size;
 
     state = &particle->state;
@@ -289,7 +289,7 @@ void func_150F33F8(s32 player) {
 }
 
 /* Animation speed for `pitch`: 0.75, or faster the further it is below -5. */
-f32 func_150F34A0(struct127 *obj, f32 pitch) {
+f32 func_150F34A0(Actor *obj, f32 pitch) {
     f32 speed;
 
     if (pitch < -5.0f) {
@@ -309,9 +309,9 @@ typedef struct {
 
 extern u8 D_800CC26D;
 extern u8 D_800CBDD3;
-void func_150585F0(struct127 *arg0, f32 arg1);
-void func_15052590(struct127 *arg0);
-u8 func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
+void func_150585F0(Actor *arg0, f32 arg1);
+void func_15052590(Actor *arg0);
+u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
 f32 func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
 void func_15073FA0(void);
 
@@ -320,7 +320,7 @@ void func_15073FA0(void);
 /* Per-frame control of a flying mode: the stick steers and pitches, B thrusts, A reverses, R holds altitude,
  * Z fires (only when D_800BE9F0 is 0x3C and fewer than 5 id-0x25 objects exist). Also picks up the
  * D_800CC26D object into unk13C and drops it again when unk25C bit 1 is set. */
-void func_150F34F4(struct127 *actor) {
+void func_150F34F4(Actor *actor) {
     u16 angle;
     f32 mag;
     f32 accel;
@@ -335,7 +335,7 @@ void func_150F34F4(struct127 *actor) {
     s32 i;
     f32 dist;
     f32 minDist;
-    struct127 *obj;
+    Actor *obj;
     s32 idx;
 
     floorLevel = 0.0f;
@@ -360,7 +360,7 @@ void func_150F34F4(struct127 *actor) {
         func_15059140(actor);
         actor->unk40 = ((s16)actor->unk7A + 0x4000) * (360.0f / 65536.0f);
         if (actor->unk13C != 0) {
-            struct127 *rider;
+            Actor *rider;
 
             idx = actor->unk13C - 100;
             rider = &D_800CC2D0[idx];
@@ -543,7 +543,7 @@ void func_150F34F4(struct127 *actor) {
         }
         if (actor->unk13C != 0) {
             if (actor->unk25C & 2) {
-                struct127 *rider;
+                Actor *rider;
 
                 actor->unk25C &= ~2;
                 idx = actor->unk13C - 100;
@@ -568,7 +568,7 @@ void func_150F34F4(struct127 *actor) {
                         count++;
                     }
                     obj++;
-                } while (obj != (struct127 *)&D_800D121C);
+                } while (obj != (Actor *)&D_800D121C);
                 if (count < 5) {
                     D_800D1580 = 6;
                     actor->unk103 = 4;

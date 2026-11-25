@@ -11,8 +11,8 @@ typedef struct {
 } GameCommand;
 
 /*
- * The actor fields this file uses. They overlap fields that struct127 declares with other
- * types (e.g. struct127::unk204 is an s32), so the view stays local.
+ * The actor fields this file uses. They overlap fields that Actor declares with other
+ * types (e.g. Actor::unk204 is an s32), so the view stays local.
  */
 typedef struct {
     u8 pad0[4];
@@ -211,7 +211,7 @@ GameCommand *func_15034860(GameCommand *cmd, Obj15034860 *actor, s32 channel, s3
     return cmd;
 }
 
-/* Element of the array that struct127::unk1D4 points to here (0x40 bytes). */
+/* Element of the array that Actor::unk1D4 points to here (0x40 bytes). */
 typedef struct {
     u8 pad0[0x34];
     f32 unk34;
@@ -219,7 +219,7 @@ typedef struct {
 } Entry15034EB4;
 
 /* Subtracts the last value stored in D_800C3EF0, scaled by the actor's xz_scale, from unk34 of one or two entries. */
-void func_15034EB4(struct127 *actor, s32 first, s32 second) {
+void func_15034EB4(Actor *actor, s32 first, s32 second) {
     f32 amount;
     Entry15034EB4 *entry;
     Entry15034EB4 *entry2;

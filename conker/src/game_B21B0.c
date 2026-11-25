@@ -12,7 +12,7 @@ extern u8 *D_80087240[];
 /* Looks obj->id up in the 7 rows of D_80087240 (row lengths in D_8009D954) and returns
  * the first entry of the row that contains it, or the id itself when no row does.
  * Same search as func_1503D5F0 (game_6A3D0). */
-s32 func_15084D00(struct127 *obj) {
+s32 func_15084D00(Actor *obj) {
     s32 id = obj->id;
     s32 i;
     s32 j;
@@ -94,8 +94,8 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
         if (D_800BE616 && D_800D18A8) {
             u8 candidates[32];
 
-            /* the byte at 0x128 (inside struct127's pad128) is the player's team */
-            team = *(u8 *)&D_800CC2D0[playerIndex].pad128;
+            /* the byte at 0x128 (inside Actor's pad128) is the player's team */
+            team = D_800CC2D0[playerIndex].team;
             state = D_800CC2D0[playerIndex].unk31C;
             count = 0;
             best = 0;
@@ -117,7 +117,7 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
                 if (lastSpawn != candidates[i]) {
                     nearestDistSq = 100000000.0f;
                     for (mask = 0; mask < D_8008FD8C; mask++) {
-                        if (team != *(u8 *)&D_800CC2D0[mask].pad128) {
+                        if (team != D_800CC2D0[mask].team) {
                             dx = D_800CC2D0[mask].x_position - D_800D212C[candidates[i]].pos[0];
                             dz = D_800CC2D0[mask].z_position - D_800D212C[candidates[i]].pos[2];
                             dx = dx * dx + dz * dz;
@@ -185,34 +185,34 @@ s32 func_15084D70(s32 playerIndex, s32 spawnIndex, s32 useLink, s16 *outPos, f32
 }
 
 /* Sets the spawn index func_15084D70 falls back to for this player object. */
-void func_15085410(struct127 *obj, s32 spawnIndex) {
+void func_15085410(Actor *obj, s32 spawnIndex) {
     obj->unk31C->spawnIndex = spawnIndex;
 }
 
 /* Returns the player object's stored spawn index. */
-u8 func_15085420(struct127 *obj) {
+u8 func_15085420(Actor *obj) {
     return obj->unk31C->spawnIndex;
 }
 
-extern f32  func_1506AD30(struct127 *, f32, s32);
-extern void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
-extern void func_1505D6F0(struct127 *, s32);
-extern void func_15005818(Camera *, struct127 *, f32 *);
+extern f32  func_1506AD30(Actor *, f32, s32);
+extern void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
+extern void func_1505D6F0(Actor *, s32);
+extern void func_15005818(Camera *, Actor *, f32 *);
 extern void func_15169040(void *, u8);
 
 /* Moves obj to spawn point `spawnIndex` (see func_15084D70): sets its position and angles,
  * clears its motion, places its camera and passes {obj, unique_id} to func_15169040. */
-void func_15085430(struct127 *obj, s32 spawnIndex, s32 unused) {
+void func_15085430(Actor *obj, s32 spawnIndex, s32 unused) {
     s16 pos[3];
     f32 unk8[3];
     u8 unk6;
     u8 facing;
     s32 unk15;
     s32 unk14;
-    struct127 *savedObject;
+    Actor *savedObject;
     s32 savedIndex;
     struct {
-        struct127 *obj;
+        Actor *obj;
         u8 uniqueId;
     } event;
 

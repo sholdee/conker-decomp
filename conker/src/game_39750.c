@@ -55,7 +55,7 @@ typedef struct ParticleSpawn78 {
     /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
     /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct struct127 *owner;
+    /* 0x6C */ struct Actor *owner;
     /* 0x70 */ u8 ownerId;
     /* 0x71 */ u8 pad71;
     /* 0x72 */ s16 fadeStart;

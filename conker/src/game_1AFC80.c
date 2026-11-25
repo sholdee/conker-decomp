@@ -27,7 +27,7 @@ extern u8 D_800DDE54[];
 extern WavePreset D_8008D050[];
 extern WaveSample *D_800DDE60[];
 
-s32 func_15182FDC(struct127 *actor, s32 sample, s32 chain);
+s32 func_15182FDC(Actor *actor, s32 sample, s32 chain);
 
 /*
  * Steps every active wave chain: actors on it push the samples under them, each sample is pulled
@@ -175,7 +175,7 @@ f32 func_15182F58(s32 dist, s32 chain) {
  * Returns how far `actor` pushes sample `sample` of chain `chain`: the preset's push value
  * on the sample under it, 4/7 of that on its neighbours, 0 if the actor is off the chain.
  */
-s32 func_15182FDC(struct127 *actor, s32 sample, s32 chain) {
+s32 func_15182FDC(Actor *actor, s32 sample, s32 chain) {
     f32 dx;
     f32 dy;
     f32 dz;

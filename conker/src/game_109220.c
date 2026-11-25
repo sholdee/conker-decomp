@@ -339,7 +339,7 @@ s32 func_150DBD70(u8 kind) {
     case 2:
     case 3:
     case 4: {
-        struct127 *character = func_15083E90(6);
+        Actor *character = func_15083E90(6);
 
         if (character == NULL) {
             return 0;

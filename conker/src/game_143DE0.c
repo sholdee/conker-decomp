@@ -80,7 +80,7 @@ void func_15116BAC(MoverObj *obj);
  * Actor handler paired with func_15116984: a triggerable object (flags & 4) at rest (state bits 0-2 clear)
  * enters the moving state 2 when the actor's unk31C->unk57 is 1.
  */
-void func_15116930(MoverObj *obj, struct127 *actor) {
+void func_15116930(MoverObj *obj, Actor *actor) {
     if ((obj->flags & 4) && !(obj->state & 3) && !(obj->state & 4) && actor->unk31C->unk57 == 1) {
         obj->state &= ~3;
         obj->state |= 2;

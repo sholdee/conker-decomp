@@ -303,9 +303,9 @@ s32 func_15158AFC(EffectActor *actor) {
 
 /* Message passed to the effect message handlers; msgId 0x2D swaps owners first <-> second. */
 typedef struct {
-    /* 0x00 */ struct127 *first;
+    /* 0x00 */ Actor *first;
     /* 0x04 */ union {
-        struct127 *ptr;
+        Actor *ptr;
         u8 uniqueId; /* msgId 0: unique id of `first` */
     } second;
     /* 0x08 */ u8 firstId;
@@ -314,7 +314,7 @@ typedef struct {
 
 /* Message handler: follows owner swaps (0x2D) and drops the owner when it goes away (0). */
 void func_15158B3C(EffectActor *actor, EffectMessage *msg, u8 msgId) {
-    struct127 *first;
+    Actor *first;
 
     if (msgId == 0x2D) {
         first = msg->first;
@@ -348,7 +348,7 @@ typedef struct {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
-    /* 0x18 */ struct127 *character;
+    /* 0x18 */ Actor *character;
     /* 0x1C */ u8 characterId;
     /* 0x1D */ u8 mode; /* from func_15159370 */
     /* 0x1E */ u8 pad1E[2];
@@ -364,11 +364,11 @@ typedef struct {
     /* 0x50 */ u8 unk50;
 } CharacterWatcher;
 
-s32 func_15159370(struct127 *chr, u8 *mode);
-void func_1514EDF0(CharacterWatcher *watcher, struct127 *chr);
+s32 func_15159370(Actor *chr, u8 *mode);
+void func_1514EDF0(CharacterWatcher *watcher, Actor *chr);
 
 /* Creates a watcher for chr; returns NULL when chr is NULL or has no watchable mode. */
-CharacterWatcher *func_15158BD0(struct127 *chr, u8 enableActions, s32 extraSize) {
+CharacterWatcher *func_15158BD0(Actor *chr, u8 enableActions, s32 extraSize) {
     CharacterWatcher *watcher;
 
     if (chr == NULL) {
@@ -412,11 +412,11 @@ void func_15158D00(CharacterWatcher *watcher) {
     func_15169824((struct102 *)watcher);
 }
 
-s32 func_15159084(struct127 *chr, u8 mode);
-s32 func_15159120(struct127 *chr, u8 mode);
-s32 func_15159184(struct127 *chr, u8 mode);
-s32 func_15159230(struct127 *chr, vertex *lastPosition, u8 prevState);
-s32 func_151592B8(struct127 *chr, u8 mode);
+s32 func_15159084(Actor *chr, u8 mode);
+s32 func_15159120(Actor *chr, u8 mode);
+s32 func_15159184(Actor *chr, u8 mode);
+s32 func_15159230(Actor *chr, vertex *lastPosition, u8 prevState);
+s32 func_151592B8(Actor *chr, u8 mode);
 
 /* A state-change rule: both masks are unions of STATE_BITS values. */
 typedef struct {
@@ -496,7 +496,7 @@ void func_1519F400(void *);
 /* Message handler: frees the watcher when its character goes away (0), follows swaps (0x2D). */
 void func_15158FA4(void *self, EffectMessage *msg, u8 msgId) {
     CharacterWatcher *watcher = self;
-    struct127 *first;
+    Actor *first;
 
     if (msgId == 0) {
         if ((msg->first == watcher->character) || (msg->second.uniqueId == watcher->characterId)) {
@@ -521,7 +521,7 @@ void func_15158FA4(void *self, EffectMessage *msg, u8 msgId) {
     }
 }
 
-s32 func_15159084(struct127 *chr, u8 mode) {
+s32 func_15159084(Actor *chr, u8 mode) {
     s32 ret;
     s32 flags;
 
@@ -531,7 +531,7 @@ s32 func_15159084(struct127 *chr, u8 mode) {
     } else {
         if ((-10000.0f == chr->unk118) && ((flags & 0xA) == 0)) {
             ret = 1;
-        } else if ((chr->unk118 < chr->y_position) || (((u8 *)&chr->pad134)[3] != 0)) { /* byte 0x137 */
+        } else if ((chr->unk118 < chr->y_position) || (chr->unk137 != 0)) { /* byte 0x137 */
             ret = 1;
         } else {
             ret = 0;
@@ -540,7 +540,7 @@ s32 func_15159084(struct127 *chr, u8 mode) {
     return ret;
 }
 
-s32 func_15159120(struct127 *chr, u8 mode) {
+s32 func_15159120(Actor *chr, u8 mode) {
     s32 ret;
 
     if ((mode == 2) || (mode == 3)) {
@@ -553,7 +553,7 @@ s32 func_15159120(struct127 *chr, u8 mode) {
     return ret;
 }
 
-s32 func_15159184(struct127 *chr, u8 mode) {
+s32 func_15159184(Actor *chr, u8 mode) {
     s32 ret;
 
     if ((mode == 2) || (mode == 3)) {
@@ -573,7 +573,7 @@ s32 func_15159184(struct127 *chr, u8 mode) {
 }
 
 /* Returns 0 if chr has not moved since lastPosition, 1 if it started moving, 2 if it kept moving. */
-s32 func_15159230(struct127 *chr, vertex *lastPosition, u8 prevState) {
+s32 func_15159230(Actor *chr, vertex *lastPosition, u8 prevState) {
     s32 ret;
 
     if ((chr->x_position != lastPosition->x) || (chr->y_position != lastPosition->y) ||
@@ -592,7 +592,7 @@ s32 func_15159230(struct127 *chr, vertex *lastPosition, u8 prevState) {
 extern u16 D_8008B040; /* two u8 ids, 0x3B and 0x3C */
 
 /* Returns 3 on one of the D_8008B040 ids (mode 0 only), 2 in water, 1 if unk28 is set, else 4. */
-s32 func_151592B8(struct127 *chr, u8 mode) {
+s32 func_151592B8(Actor *chr, u8 mode) {
     s32 i;
     s32 found;
     union {
@@ -625,7 +625,7 @@ s32 func_151592B8(struct127 *chr, u8 mode) {
 }
 
 /* Picks the watcher mode for chr; returns 0 if nothing applies. */
-s32 func_15159370(struct127 *chr, u8 *mode) {
+s32 func_15159370(Actor *chr, u8 *mode) {
     s32 ret;
 
     ret = 0;
@@ -669,9 +669,9 @@ s32 func_1514ECE0(void *, s16, void *);
 
 /*
  * Returns whether chr's watcher state matches the given field values (-1 matches anything).
- * chr+0x2F4 (unnamed in struct127) is its component list.
+ * chr+0x2F4 (unnamed in Actor) is its component list.
  */
-u8 func_1515942C(struct127 *chr, s16 state0, s16 state1, s16 state2, s16 moveState, s16 surfaceState) {
+u8 func_1515942C(Actor *chr, s16 state0, s16 state1, s16 state2, s16 moveState, s16 surfaceState) {
     CharacterWatcher *watcher;
     WatcherNode *node;
     u8 ret;
@@ -684,7 +684,7 @@ u8 func_1515942C(struct127 *chr, s16 state0, s16 state1, s16 state2, s16 moveSta
     s32 have;
 
     ret = 0;
-    if (func_1514ECE0(*(void **)&chr->pad2F0[4], 0x13, &node) == 0) {
+    if (func_1514ECE0(chr->attachments, 0x13, &node) == 0) {
         return 0;
     }
     watcher = node->watcher;
@@ -1342,11 +1342,11 @@ u8 func_1515A78C(Particle *particle, ParticleUpdateArg *arg1) {
 }
 
 /* Returns the address of chr's watcher unk34 block through *out; 0 if chr has no watcher. */
-s32 func_1515A920(struct127 *chr, u8 **out) {
+s32 func_1515A920(Actor *chr, u8 **out) {
     WatcherNode *node;
     CharacterWatcher *watcher;
 
-    if (func_1514ECE0(*(void **)&chr->pad2F0[4], 0x13, &node) == 0) {
+    if (func_1514ECE0(chr->attachments, 0x13, &node) == 0) {
         return 0;
     }
     watcher = node->watcher;

@@ -110,7 +110,7 @@ extern u8 D_800E0B99;
 extern s8 D_800E0BB1;
 extern u8 D_800E0BD1;
 
-static struct127 *D_800E0BA0[4]; /* characters spawned by func_151E7F60 */
+static Actor *D_800E0BA0[4]; /* characters spawned by func_151E7F60 */
 static s8 D_800E0BE0[23]; /* option values (see func_151E3344) */
 extern s8 D_8008FE54[];
 extern s8 D_8008FE6C[];
@@ -1522,7 +1522,7 @@ s32 func_151E565C(void) {
     }
     k = 0; // matching: k is 0 here; teamStats[i + k] below shares CSE temps like the target
     for (i = 0; i < D_8008FD8C; i++) {
-        team = *(u8 *)&D_800CC2D0[i].pad128; // team: first byte of an unnamed struct127 field
+        team = D_800CC2D0[i].team; // team: first byte of an unnamed Actor field
         teamStats[team] += D_8008FDD4->unk46[i];
         teamStats[team + 4] += func_150859AC(i, 3) * 6 + func_150859AC(i, 4);
         teamStats[team + 8] = func_150859AC(team, 6);
@@ -1579,7 +1579,7 @@ s32 func_151E565C(void) {
     j = 0;
     for (i = 0; i < D_8008FD8C; i++) {
         if (D_80087270[i] != 10) {
-            team = *(u8 *)&D_800CC2D0[i].pad128;
+            team = D_800CC2D0[i].team;
             if (!(D_800D18A0 & (1 << i))) {
                 liveTeams |= 1 << team;
             }
@@ -1632,14 +1632,14 @@ s8 func_151E5FAC(void) {
 }
 
 s32 func_1000F568(s32 arg0, s32 arg1);
-void func_10010558(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5);
+void func_10010558(u16 arg0, Actor *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5);
 
 /*
  * Records a hit by source (or the player owning it) on victim: per-player hit/kill tallies in D_8008FDD4,
  * then picks a character-specific voice line for the attacker.
  */
-void func_151E5FF4(struct127 *source, struct127 *victim, s32 cause) {
-    struct127 *attacker;
+void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
+    Actor *attacker;
     s32 pad50; // matching: unused stack slot
     s32 attackerIdx;
     s32 victimIdx;
@@ -2421,7 +2421,7 @@ typedef struct {
 
 extern Pos151E7F60 D_800AB940[];
 extern s32 func_15082A44(void *, s32, s32, s32, s32);
-extern void func_15083384(struct127 *, u8);
+extern void func_15083384(Actor *, u8);
 
 /* Spawns the character D_800AB57C[charIdx] into slot slotIdx (replacing any previous one) at its D_800AB940 position. */
 void func_151E7F60(s32 slotIdx, s32 charIdx) {
@@ -2430,7 +2430,7 @@ void func_151E7F60(s32 slotIdx, s32 charIdx) {
     Spawn151E7F60 *spawn;
     s32 posIdx;
     s32 kind;
-    struct127 *obj;
+    Actor *obj;
 
     if (D_800E0BA0[slotIdx] != NULL) {
         func_15060F28(D_800E0BA0[slotIdx], 1);
@@ -2465,7 +2465,7 @@ void func_151E7F60(s32 slotIdx, s32 charIdx) {
             bzero(obj->unk31C, 0x1C0);
         }
         if (kind == 0x3B) {
-            *(s8 *)&obj->pad68 = slotIdx + 1; // first byte of struct127's unnamed pad68
+            obj->unk68 = slotIdx + 1;
         }
         func_15083384(obj, D_800AB57C[charIdx].unk6);
         func_1505E650(obj, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);

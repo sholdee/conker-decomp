@@ -96,7 +96,7 @@ GrowParticle *func_1513D668(ParticleDef *spawn, CornerColor *colors, u8 arg2, u8
                             s32 argE);
 
 extern GroundBurstDef D_800A0640[];
-void func_1504715C(GroundHit *, struct127 *);
+void func_1504715C(GroundHit *, Actor *);
 s32 func_15046C80(f32 *, s32, f32, GroundHit *);
 void func_15143134(f32 *in, f32 *out, BoneMtx *mtx);
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
@@ -106,7 +106,7 @@ void *memcpy(void *, void *, s32);
 
 /* Spawns a burst at a bone-relative point of owner, dropped onto the ground below: a growing
    ground-coloured particle, two func_1514C678 effects, a func_150C88D0 effect and a func_151D5404 effect. */
-void func_150CBF80(struct127 *owner, u8 index, s32 arg2, u8 arg3) {
+void func_150CBF80(Actor *owner, u8 index, s32 arg2, u8 arg3) {
     f32 pos[3];
     GroundBurstDef *def;
     f32 fr;
@@ -122,7 +122,7 @@ void func_150CBF80(struct127 *owner, u8 index, s32 arg2, u8 arg3) {
     }
     func_1504715C(&ground, owner);
     def = &D_800A0640[index];
-    /* struct127.unk1D4 (typed struct255 * in structs.h) is the owner's bone matrix array */
+    /* Actor.unk1D4 (typed struct255 * in structs.h) is the owner's bone matrix array */
     func_15143134(def->offset, pos, &((BoneMtx *)owner->unk1D4)[def->bone]);
     {
         f32 ray[3];
@@ -385,7 +385,7 @@ typedef struct ParticleSpawn80 {
     /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
     /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct struct127 *owner;
+    /* 0x6C */ struct Actor *owner;
     /* 0x70 */ u8 ownerId;
     /* 0x71 */ u8 pad71;
     /* 0x72 */ s16 fadeStart;

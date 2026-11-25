@@ -71,7 +71,7 @@ extern Trail *func_15147DA0(TrailSpawn *spawn, TrailMotion *motion, s32 extraSiz
                             TrailRender *render, s32 arg12, u8 arg13, s32 arg14);
 
 /* Sprays up to 30 trails from a ring around obj; stops early when a trail can't be created. */
-void func_150AEEB0(struct127 *obj, u8 owner) {
+void func_150AEEB0(Actor *obj, u8 owner) {
     TrailSpawn spawn;
     TrailMotion motion;
     s32 remaining;

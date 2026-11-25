@@ -19,7 +19,7 @@ extern u8 D_800BE9B4;
 void func_1517EE40(s32 r, s32 g, s32 b, s32 duration, s8 toColor, s32 view);
 s32 func_1517F40C(s32 view);
 void func_1501C730(s32, s32, s32, s32, s32);
-void func_15085430(struct127 *obj, s32 spawnIndex, s32 unused);
+void func_15085430(Actor *obj, s32 spawnIndex, s32 unused);
 
 /* Clears every pending warp and spawn point, then sets player 0's spawn point to `spawn0`. */
 void func_15172C50(s32 spawn0) {
@@ -42,7 +42,7 @@ void func_15172CA8(s32 player) {
 }
 
 /* Respawns `actor` at spawn point `spawnIndex` and clears its warping flag (0x10). */
-void func_15172D28(struct127 *actor, s32 spawnIndex) {
+void func_15172D28(Actor *actor, s32 spawnIndex) {
     func_15085430(actor, spawnIndex, 1);
     actor->unk2F8 &= ~0x10;
     if (D_800BE9B4 == 0 && actor->unk31C != NULL) {
@@ -75,7 +75,7 @@ void func_15172D80(s32 player) {
  * camera) with no warp pending starts a 10-frame fade-out and records the warp; any other actor is
  * respawned at once when `level` is the current one.
  */
-void func_15172E7C(struct127 *actor, s32 level, s32 spawnIndex) {
+void func_15172E7C(Actor *actor, s32 level, s32 spawnIndex) {
     s32 player = actor->unk127;
 
     // ActorCtl has no field at 0x23 (only padding there in structs.h)

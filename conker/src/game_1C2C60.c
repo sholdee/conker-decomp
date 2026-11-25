@@ -556,7 +556,7 @@ typedef struct CharacterFlamethrowerJetTemplate {
 
 /* State block (0x90 bytes) of a jet effect: emits particles between two bone-relative points. */
 typedef struct CharacterFlamethrowerJet {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id */
     /* 0x05 */ u8 bone;
     /* 0x06 */ u8 flags;
@@ -643,7 +643,7 @@ void func_15143134(vertex *in, vertex *out, s32 matrix);
 void *func_15147A80(void *spawn, s32 stateSize, s32 pointSize, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a jet effect from preset D_800A87A0[preset], attached to a bone of `owner`. */
-CharacterFlamethrowerActor *func_15196438(struct127 *owner, s32 preset, u8 arg2, s32 arg3) {
+CharacterFlamethrowerActor *func_15196438(Actor *owner, s32 preset, u8 arg2, s32 arg3) {
     EffectSpawn spawn;
     CharacterFlamethrowerJet jet;
     CharacterFlamethrowerActor *actor;
@@ -1200,14 +1200,14 @@ f32 func_15197A68(CharacterFlamethrowerActor *actor) {
 
 /* Message payload naming an effect owner (func_15147D64). */
 typedef struct EffectOwnerRef {
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId;
 } EffectOwnerRef;
 
 extern void func_15147D64(EffectOwnerRef *, s32);
 
 /* Sends message 8 for `owner`, which stops its jets (see func_15198054). */
-void func_15197A7C(struct127 *owner) {
+void func_15197A7C(Actor *owner) {
     EffectOwnerRef ref;
 
     if (owner != NULL) {
@@ -1405,10 +1405,10 @@ void *func_15197C10(SceneParticle *beam, s16 view) {
 
 /* Payload of the messages sent to effects through func_15147D64. */
 typedef struct EffectMessage {
-    /* 0x0 */ struct127 *owner;
+    /* 0x0 */ Actor *owner;
     /* 0x4 */ union {
         u8 id;              /* messages 0, 2, 8 and 0x26: owner's unique_id */
-        struct127 *other; /* message 0x2D: owner and other swap */
+        Actor *other; /* message 0x2D: owner and other swap */
     } u4;
     /* 0x8 */ u8 ownerId; /* message 0x2D */
     /* 0x9 */ u8 otherId; /* message 0x2D */
@@ -1581,14 +1581,14 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
     }
 }
 
-extern void func_1505D024(struct127 *, s32, u16, s32);
-extern s32 func_1518D1C0(struct127 *, s32, s32, s32, s32, s32, const char *);
+extern void func_1505D024(Actor *, s32, u16, s32);
+extern s32 func_1518D1C0(Actor *, s32, s32, s32, s32, s32, const char *);
 
 /* Jet update callback: a point inside object 0's (the player's) cylinder hits it and retires the older points. */
 s32 func_15198570(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
     Particle *points;
-    struct127 *obj;
+    Actor *obj;
     s32 i;
     vertex pos;
     f32 r;
@@ -1635,7 +1635,7 @@ s32 func_15198570(CharacterFlamethrowerActor *actor) {
 s32 func_151987CC(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
     Particle *points;
-    struct127 *obj;
+    Actor *obj;
     s32 i;
     s32 j;
     vertex pos;
@@ -1717,7 +1717,7 @@ s32 func_1510F8D8(s32, s32, s32, s32);
 s32 func_1519897C(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet = actor->state;
     Particle *points = actor->points;
-    struct127 *owner;
+    Actor *owner;
     ActorCtl *sub;
     ListedObject *head;
     ListedObject *node;
@@ -2073,7 +2073,7 @@ extern u8 D_800A8A9C[];
 /* Jet init callback (D_8008F87C): clears the owner's FlamethrowerSlot `active` flag. */
 void func_151993E4(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
-    struct127 *owner;
+    Actor *owner;
     s32 i;
     s32 found;
 
@@ -2097,7 +2097,7 @@ void func_151993E4(CharacterFlamethrowerActor *actor) {
 /* Jet destroy callback (D_8008F88C): sets the owner's FlamethrowerSlot `active` flag again. */
 void func_1519944C(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerJet *jet;
-    struct127 *owner;
+    Actor *owner;
     s32 i;
     s32 found;
 
@@ -2131,7 +2131,7 @@ typedef struct FlamePoint {
 
 /* First 0x4C bytes of a flame's state, also given in its CharacterFlamethrowerSetup. */
 typedef struct FlameSeed {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id */
     /* 0x05 */ u8 bone;
     /* 0x06 */ u8 flags;
@@ -2275,7 +2275,7 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
     CharacterFlamethrowerActor *result;
     EffectSpawn spawn;
     CharacterFlamethrowerFlame initial;
-    struct127 *owner;
+    Actor *owner;
     vertex *inputs[2];
     vertex *outputs[2];
     CharacterFlamethrowerFlame *state;
@@ -2347,7 +2347,7 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
 }
 
 /* Sends message 0x26 for `owner`, which stops its flames (see func_1519986C). */
-void func_15199834(struct127 *owner) {
+void func_15199834(Actor *owner) {
     EffectOwnerRef ref;
 
     if (owner != NULL) {
@@ -2499,7 +2499,7 @@ void func_151D8868(void *, s32, s32, s32);
 s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
     FlamePoint *points;
-    struct127 *obj;
+    Actor *obj;
     vertex pos0;
     vertex pos1;
     vertex pos2;
@@ -2809,7 +2809,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
     points = actor->points;
     maxLen = flame->seed.maxLength;
     if ((flame->flags & 4) && actor->count >= 2) {
-        struct127 *obj;
+        Actor *obj;
         vertex *end;
         s32 i;
         vertex hitPos;
@@ -3326,7 +3326,7 @@ void func_1519BE1C(vertex *pos, vertex *vel, f32 gravity, f32 dt) {
 /* Flame init callback (D_8008F8A4): clears the owner's FlamethrowerSlot `active` flag. */
 void func_1519BEB8(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
-    struct127 *owner;
+    Actor *owner;
     s32 i;
     s32 found;
 
@@ -3350,7 +3350,7 @@ void func_1519BEB8(CharacterFlamethrowerActor *actor) {
 /* Flame destroy callback (D_8008F8B4): sets the owner's FlamethrowerSlot `active` flag again. */
 void func_1519BF20(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlame *flame;
-    struct127 *owner;
+    Actor *owner;
     s32 i;
     s32 found;
 
@@ -3626,7 +3626,7 @@ typedef struct CharacterFlamethrowerFlameEx {
 /* Flame update callback (D_8008F8C4): keeps the flame only while its owner's unk84 is one of aliveState. */
 s32 func_1519C910(CharacterFlamethrowerActor *actor) {
     CharacterFlamethrowerFlameEx *state = actor->state;
-    struct127 *owner = state->flame.seed.owner;
+    Actor *owner = state->flame.seed.owner;
     u16 v = owner->unk84.uh;
 
     if (v != state->aliveState) {
@@ -3662,7 +3662,7 @@ typedef struct FlamethrowerController {
     /* 0x0D */ u8 flags;
     /* 0x0E */ s16 unkE;
     /* 0x10 */ u8 pad10[0x18];
-    /* 0x28 */ struct127 *owner;
+    /* 0x28 */ Actor *owner;
     /* 0x2C */ u8 ownerId;
     /* 0x2D */ u8 pad2D[3];
     /* 0x30 */ s32 aliveState[2];
@@ -3672,7 +3672,7 @@ typedef struct FlamethrowerController {
 void func_1519C9C4(FlamethrowerController *ctrl) {
     CharacterFlamethrowerActor *flame;
     CharacterFlamethrowerSetup setup;
-    struct127 *obj;
+    Actor *obj;
     s32 pad; // matching: unused stack slot
     CharacterFlamethrowerFlameEx *state;
 
@@ -3774,7 +3774,7 @@ void func_1519C9C4(FlamethrowerController *ctrl) {
 
 /* Controller callback: kills the controller once its owner is gone or replaced. */
 void func_1519CD64(FlamethrowerController *ctrl) {
-    struct127 *owner = ctrl->owner;
+    Actor *owner = ctrl->owner;
 
     if (owner->interaction_state != 0 && owner->id != 0xFF && owner->unique_id == ctrl->ownerId) {
         return;
@@ -3795,7 +3795,7 @@ void func_1519CDB0(CharacterFlamethrowerActor *actor, f32 fraction, s32 kind) {
     s32 index;
     CharacterFlamethrowerFlame *state;
     FlamePoint *point;
-    struct127 *owner;
+    Actor *owner;
     vertex *previous;
 
     state = actor->state;

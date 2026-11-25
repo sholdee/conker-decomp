@@ -237,7 +237,7 @@ void func_151179BC(WorldObject *prop) {
 }
 
 /* Starts the prop moving when an object with interaction_state 1 triggers it while it is at rest. */
-void func_15117D3C(WorldObject *prop, struct127 *obj) {
+void func_15117D3C(WorldObject *prop, Actor *obj) {
     s32 delay = prop->param.word & 0xFFFF;
 
     if (obj->interaction_state == 1 && (prop->flags & 4) && !(prop->behaviorState & 3) && !(prop->behaviorState & 4) &&
@@ -284,7 +284,7 @@ void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
 }
 
 
-extern void func_15060A30(s32, struct127 *);
+extern void func_15060A30(s32, Actor *);
 extern void func_15114D24(WorldObject *prop, s32 sound, s32, s32, s32, s32);
 
 /*
@@ -296,7 +296,7 @@ void func_15117F3C(WorldObject *prop) {
     s32 pad1; // matching: pad1-pad4 are unused stack slots of the original frame
     f32 speed;
     f32 accel;
-    struct127 *obj;
+    Actor *obj;
     ActorCtl *control;
     s32 i;
     f32 dx;
@@ -305,7 +305,7 @@ void func_15117F3C(WorldObject *prop) {
     s32 sound;
     f32 rangeSq;
     s32 pad2;
-    struct127 *target;
+    Actor *target;
     s32 pad3;
     f32 anchorX;
     f32 anchorY;
@@ -832,7 +832,7 @@ void func_15118F24(WorldObject *prop) {
 }
 
 /* Starts the prop moving when an object with interaction_state 1 (and unk65 clear) triggers it at rest. */
-void func_151193AC(WorldObject *prop, struct127 *obj) {
+void func_151193AC(WorldObject *prop, Actor *obj) {
     if (obj->interaction_state == 1 && obj->unk65 == 0 && !(prop->behaviorState & 3) && !(prop->behaviorState & 4)) {
         PROP_SET_MOTION(prop, PROP_MOVING);
     }
@@ -1008,7 +1008,7 @@ void func_151196D4(WorldObject *prop) {
 }
 
 extern s32 func_151EF610(void);
-extern struct127 *func_1505EFD0(s32);
+extern Actor *func_1505EFD0(s32);
 
 /*
  * Sways the vertex groups set up by func_151196D4 (plants or similar) and writes the transformed
@@ -1021,7 +1021,7 @@ void func_15119938(WorldObject *prop) {
     s32 yaw;
     s32 i;
     f32 *bend;
-    struct127 *player;
+    Actor *player;
     f32 posX;
     f32 posY;
     f32 posZ;

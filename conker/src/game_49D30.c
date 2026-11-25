@@ -112,16 +112,16 @@ extern void func_1508F060(void);
 extern void func_150242F8(s32, s32);
 void func_1501EC38(s32 scene);
 void func_15020EC4(s32 scene);
-void func_1502178C(struct127 *target, s32 scene, s32 onlyTrack);
+void func_1502178C(Actor *target, s32 scene, s32 onlyTrack);
 void func_1501E81C(s32 skipped, s32 scene);
-s32 func_150229E4(struct127 *obj);
+s32 func_150229E4(Actor *obj);
 extern s32 func_1502B6BC(s32 *, s32, s32 *, s32, s32, s32, s32);
 extern SeqEvent *D_800C3688[][30];
 extern s32 D_800C3668[];
 extern s32 func_15023BB0(SeqEvent *, s32, s32, SeqEvent **, s32, s32, s32, s32, s32, s32, s32);
 void func_15022640(s32 id, s32 scene);
 extern WorldObject *func_151149AC(u8);
-extern struct127 *func_1505EEF4(s32);
+extern Actor *func_1505EEF4(s32);
 extern void func_15082A44(void *, s32, s32, s32, s32);
 extern u8 D_800D2100;
 
@@ -756,7 +756,7 @@ void func_1501DAAC(s32 scene) {
 void func_1501DE18(s32 scene) {
     s32 i;
     s32 count;
-    struct127 *obj;
+    Actor *obj;
 
     D_800C35B0[scene] = D_800C3640[scene] + D_800BEA08;
     func_150242F8(1, 0);
@@ -778,11 +778,11 @@ void func_1501DE18(s32 scene) {
 }
 
 s32 func_100127D0(void);
-void func_15060F28(struct127 *arg0, s32 arg1);
-struct127 *func_15072208(struct127 *, s32);
+void func_15060F28(Actor *arg0, s32 arg1);
+Actor *func_15072208(Actor *, s32);
 extern u8 D_800C35C4;
 extern u8 D_800C3663;
-extern struct127 D_800CC2D0[26];
+extern Actor D_800CC2D0[26];
 extern s32 D_800D121C;
 extern u8 D_800DBFF4[];
 extern void func_1000E17C(void);
@@ -791,7 +791,7 @@ void func_1501DE18(s32 scene);
 /* Skip the running cutscene: jump to its end (again while the next one chains on, D_800C3C99),
    then restore the screen fade and clear the objects' cutscene state. */
 void func_1501DF04(s32 scene) {
-    struct127 *obj;
+    Actor *obj;
     u8 chained;
     s32 sceneCopy;
 
@@ -814,12 +814,12 @@ void func_1501DF04(s32 scene) {
         }
     }
     // matching: the fade call and the loop setup share a source line (-g3 line numbers steer scheduling),
-    // and the loop walks D_800CC2D0 by bytes (0xA4 is padding in struct127)
+    // and the loop walks D_800CC2D0 by bytes (0xA4 is padding in Actor)
     if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) { func_1517EE40(0, 0, 0, 0x1E, 0, 0); } { u8 *ptr = (u8 *)D_800CC2D0; u8 *end = (u8 *)&D_800D121C; do {
         if (*(s32 *)ptr != 0) {
             ptr[0xA4] = 0;
         }
-        ptr += sizeof(struct127);
+        ptr += sizeof(Actor);
     } while (ptr != end); }
     D_800C3663 = 0;
     func_1000E17C();
@@ -1000,7 +1000,7 @@ void func_1501E540(s32 scene) {
     }
 }
 
-/* struct127 bytes 0x6A..0x6D, which include/structs.h still declares as padding. */
+/* Actor bytes 0x6A..0x6D, which include/structs.h still declares as padding. */
 typedef struct {
     u8 pad0[0x6A];
     u8 unk6A;
@@ -1110,7 +1110,7 @@ extern f32 D_800C35A0;
 /* Hand control back after the scene's cutscene: restore the player camera and object state. */
 void func_1501EA18(s32 scene) {
     Camera *player;
-    struct127 *obj;
+    Actor *obj;
     s32 i;
 
     player = D_800DBFF0;
@@ -1147,7 +1147,7 @@ void func_1501EA18(s32 scene) {
     func_150227BC(scene);
     for (i = 0; i != 25; i++) {
         if (D_800CC2D0[i].interaction_state != 0 && func_150229E4(&D_800CC2D0[i]) != 0) {
-            *(u8 *)&D_800CC2D0[i].padA4 = 0;
+            D_800CC2D0[i].fogMode = 0;
             D_800CC2D0[i].unkB8 = 0.0f;
             D_800CC2D0[i].unkC4 = 0.0f;
         }
@@ -1848,7 +1848,7 @@ void func_15020EC4(s32 scene) {
                         MSG.unk30 = tilt3C;
                         MSG.unk34 = tilt40;
                     } else if (ENT(scene, track)->unk2 == 2) {
-                        struct127 *obj;
+                        Actor *obj;
 
                         obj = func_15083E90(ENT(scene, track)->unk3);
                         if (obj == NULL) {
@@ -1918,7 +1918,7 @@ void func_15020EC4(s32 scene) {
                         actor->alpha = (s32)ELEM(scene, track)->unk34;
                     }
                 } else if (ENT(scene, track)->type == 2) {
-                    struct127 *obj2;
+                    Actor *obj2;
 
                     obj2 = func_15083E90(ENT(scene, track)->unk2);
                     func_1502178C(obj2, scene, track);
@@ -1940,17 +1940,17 @@ void func_15020EC4(s32 scene) {
     }
 }
 
-extern void func_1510E7A4(void *, void *, f32 *, void *, void *, void *, f32, f32, f32, f32, u16, struct127 *, f32, f32);
+extern void func_1510E7A4(void *, void *, f32 *, void *, void *, void *, f32, f32, f32, f32, u16, Actor *, f32, f32);
 
 // matching: ((u8 *)&D_800D35E0)[-4] is D_800D35DC; a distinct base keeps IDO from reusing the hoisted address
 extern f32 D_800D35E0;
 
 /* Move object `target` to the state of the scene's object track bound to it (all tracks, or only
    `onlyTrack` unless it is -1): position, velocity, floor probe, scale, facing and alpha. */
-void func_1502178C(struct127 *target, s32 scene, s32 onlyTrack) {
+void func_1502178C(Actor *target, s32 scene, s32 onlyTrack) {
     s32 track;
     f32 floorY;
-    struct127 *obj;
+    Actor *obj;
     s32 end;
     SeqTrackInfo *info;
     f32 angle;
@@ -1993,11 +1993,11 @@ void func_1502178C(struct127 *target, s32 scene, s32 onlyTrack) {
                     if (obj->unk31C != NULL) {
                         *(f32 *)obj->unk31C = obj->xz_velocity * 2.0f;
                     }
-                    *(f32 *)&obj->pad54 = 0.0f;
+                    obj->unk54 = 0.0f;
                     obj->unkCC = 0;
                     rescaled = 0;
                     *(u8 *)&D_800D35DC = (target - D_800CC2D0) + 1;
-                    func_1510E7A4(&obj->pad188, &obj->unk18C, &floorY, &obj->unk118, &obj->unk184, (u8 *)obj + 0x1A2,
+                    func_1510E7A4(&obj->unk188, obj->floorVerts, &floorY, &obj->unk118, &obj->unk184, &obj->floorType,
                                   obj->x_position, obj->y_position, obj->z_position, obj->y_position, 0, obj,
                                   -10000.0f, target->y_position);
                     ((u8 *)&D_800D35E0)[-4] = 0;
@@ -2195,7 +2195,7 @@ void func_1502225C(s32 id, s32 scene) {
 
 /* Reset the animation state of the object bound to the scene's track `track`. */
 void func_150222E0(s32 track, s32 scene) {
-    struct127 *obj;
+    Actor *obj;
     SeqTrackInfo *info;
 
     if (D_800C35C8[scene][track] != 0) {
@@ -2222,7 +2222,7 @@ void func_150222E0(s32 track, s32 scene) {
 /* Make sure the object bound to the scene's track `track` exists: spawn it from its D_800D20FC
    slot if needed and add it to the scene's D_800C3518 list. */
 void func_15022398(s32 track, s32 scene) {
-    struct127 *obj;
+    Actor *obj;
     s32 slot;
     s32 id;
 
@@ -2261,7 +2261,7 @@ void func_15022398(s32 track, s32 scene) {
 /* Apply every object track of the scene to its object (func_1502178C). */
 void func_15022528(s32 scene) {
     s32 track;
-    struct127 *obj;
+    Actor *obj;
 
     for (track = 0; track < D_800C363A[scene]; track++) {
         if (D_800C35D0[scene][track] == 0) {
@@ -2365,7 +2365,7 @@ void func_15022848(s32 scene) {
 void func_150228E4(s32 scene) {
     s32 i;
     s32 count;
-    struct127 *obj;
+    Actor *obj;
     u8 *countPtr;
 
     countPtr = &D_800C3510[scene];
@@ -2390,7 +2390,7 @@ void func_15022998(s32 *obj) {
 
 /* Whether `obj` is bound to an object track of its scene (scene 1 when obj->unk5 is 4): 1 when
    bound itself, 2 when bound through its parent (obj->unk65). */
-s32 func_150229E4(struct127 *obj) {
+s32 func_150229E4(Actor *obj) {
     s32 i;
     s32 scene;
     s32 parent;
@@ -2470,7 +2470,7 @@ void func_15022BA4(s32 scene) {
                 func_15022190(key->x, key->y, key->z, 0.0f);
             }
             if (D_800C35F0[scene][track].unk2 == 0) {
-                struct127 *obj;
+                Actor *obj;
                 obj = func_15083E90(D_800C35F0[scene][track].unk3);
                 if (obj == NULL) {
                     return;
@@ -2689,7 +2689,7 @@ SeqSubtitle *func_150234A4(s32 track, s32 replaceOpen) {
 /* Give object 1 back to normal control after a cutscene: stop it, drop it to the floor or leave it
    swimming, and clear its movement locks. */
 s32 func_150235DC(s32 scene) {
-    struct127 *obj;
+    Actor *obj;
     void *unk31C;
     s8 zero;
 
@@ -2703,7 +2703,7 @@ s32 func_150235DC(s32 scene) {
             if (unk31C != NULL) {
                 *(f32 *)unk31C = 0.0f;
             }
-            *(f32 *)&obj->pad54 = 0.0f;
+            obj->unk54 = 0.0f;
             obj->unkCC = 0;
             obj->unkD0 = 0;
 
@@ -2711,7 +2711,7 @@ s32 func_150235DC(s32 scene) {
                 obj->in_water = 1;
                 obj->y_velocity = 0.0f;
                 obj->gravity = 0.0f;
-                if (((obj->unk118 - 50.0f) < obj->unk1A6) || ((((u8 *)obj->unk31C)[0x20] & 1) != 0)) {
+                if (((obj->unk118 - 50.0f) < obj->aim.y) || ((((u8 *)obj->unk31C)[0x20] & 1) != 0)) {
                     obj->unkB2 = 0;
                     func_1508F060();
                 }
@@ -2746,11 +2746,11 @@ s32 func_150235DC(s32 scene) {
     }
 }
 
-void func_150627D4(struct127 *arg0);
+void func_150627D4(Actor *arg0);
 extern u8 D_800C3E78;
 extern void func_1504A730(void);
-extern void func_1507E73C(struct127 *);
-extern void func_1507FEA0(struct127 *);
+extern void func_1507E73C(Actor *);
+extern void func_1507FEA0(Actor *);
 extern void func_15061B4C(void);
 void func_15022998(s32 *obj);
 /* Per-frame update of the cutscene's objects (unless D_800C3654[0] hands it to func_1504A730): run
@@ -2760,7 +2760,7 @@ void func_1502378C(void) {
     s32 i;
     s32 limit;
     s32 one;
-    struct127 *obj;
+    Actor *obj;
 
     obj = D_800CC2D0;
     i = 0;

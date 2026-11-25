@@ -99,7 +99,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[3];
-    /* 0x10 */ struct127 *owner;
+    /* 0x10 */ Actor *owner;
     /* 0x14 */ u8 pad14[0xC];
     /* 0x20 */ s16 count;
     /* 0x22 */ u8 pad22[0xE];
@@ -107,7 +107,7 @@ typedef struct {
 } Emitter;
 
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
     /* 0x05 */ u8 pad5;
     /* 0x06 */ s16 duration;
@@ -127,7 +127,7 @@ typedef struct {
 } BoneAnchor; /* 0x10 */
 
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
     /* 0x08 */ struct17 offset;
     /* 0x14 */ u8 bone;
@@ -167,7 +167,7 @@ typedef struct {
 } Desc15169260;
 
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
 } ChildOwner;
 
@@ -192,11 +192,11 @@ void func_151D2AB0(s32);
 void func_151D2BA4(EmitterParticleDesc *, struct17 *, s32, u8, s32);
 Emitter *func_151D2F00(EmitterDesc *, s32, u8, s32);
 
-s32 func_1518FDC4(struct127 *obj, u8 *kind, u8 variant);
-Emitter *func_1518F5D0(struct127 *owner, EmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
+s32 func_1518FDC4(Actor *obj, u8 *kind, u8 variant);
+Emitter *func_1518F5D0(Actor *owner, EmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
                        s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9);
 void func_1518F8E0(Emitter *emitter);
-struct225 *func_1519021C(Emitter *emitter, struct127 *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
+struct225 *func_1519021C(Emitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5);
 
 extern EmitterTemplate *D_8008D630[];
 extern s32 (*D_8008D67C[])(Emitter *);
@@ -268,7 +268,7 @@ void func_1518F49C(ContactObj *self, ContactKey *other, u8 arg2) {
 }
 
 /* Creates emitter `index` of the kind matching `owner`'s object id. */
-Emitter *func_1518F51C(struct127 *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind,
+Emitter *func_1518F51C(Actor *owner, u8 index, s16 duration, s8 updateFunc, s8 unk59Func, s8 childKind,
                        u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
     u8 pad[4]; // matching: unused stack slot
     u8 kind;
@@ -284,7 +284,7 @@ Emitter *func_1518F51C(struct127 *owner, u8 index, s16 duration, s8 updateFunc, 
 }
 
 /* Creates an emitter attached to `owner` from `tmpl`; duration -1 means none (uses 300). */
-Emitter *func_1518F5D0(struct127 *owner, EmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
+Emitter *func_1518F5D0(Actor *owner, EmitterTemplate *tmpl, s16 duration, s8 updateFunc, s8 unk59Func,
                        s8 childKind, u8 unk5A, s32 arg7, u8 arg8, s32 arg9) {
     EmitterDesc desc;
     u8 pad[4]; // matching: unused stack slot
@@ -362,7 +362,7 @@ void func_1518F89C(Emitter *emitter) {
 /* Spawns one particle at a random bone anchor of the owner per whole unit in `accum`. */
 void func_1518F8E0(Emitter *emitter) {
     EmitterParams *params;
-    struct127 *owner;
+    Actor *owner;
     SpriteSize size;
     struct17 pos;
     BoneAnchor *anchor;
@@ -472,7 +472,7 @@ void func_1518FC84(EmitterParticle *particle, struct17 *dest) {
 }
 
 /* Maps an object id to its emitter kind; only variant 0 exists. Returns 0 for unknown ids. */
-s32 func_1518FDC4(struct127 *obj, u8 *kind, u8 variant) {
+s32 func_1518FDC4(Actor *obj, u8 *kind, u8 variant) {
     switch (obj->id) {
     case 0x87:
     case 0xB0:
@@ -629,7 +629,7 @@ extern u8 D_800A7B0C;
 extern u8 D_800A7B10;
 
 /* Returns the per-object-id data block (all empty in this build), setting *found. */
-u8 *func_1519003C(struct127 *obj, s32 *found) {
+u8 *func_1519003C(Actor *obj, s32 *found) {
     u8 *data;
 
     switch (obj->id) {
@@ -729,7 +729,7 @@ u8 *func_1519003C(struct127 *obj, s32 *found) {
 }
 
 /* Creates the child sprite of an emitter, colored from the D_800A67C0/6760/6820 tables. */
-struct225 *func_1519021C(Emitter *emitter, struct127 *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
+struct225 *func_1519021C(Emitter *emitter, Actor *owner, u8 kind, s16 duration, u8 arg4, s32 arg5) {
     ChildDesc desc;
     Header2 pos;
     struct225 *child;

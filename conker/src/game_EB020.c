@@ -2,21 +2,21 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15052590(struct127 *obj);
-void func_15052F9C(struct127 *obj, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void func_1505327C(struct127 *obj, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+void func_15052590(Actor *obj);
+void func_15052F9C(Actor *obj, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+void func_1505327C(Actor *obj, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 
 /*
  * Per-frame update: copy the owning object's angles (unk13C is the owner's index + 100), then either
  * start the runState action or, in searchState, target the first eligible object in the active mask.
  */
-void func_150BDB70(struct127 *self) {
+void func_150BDB70(Actor *self) {
     s32 searchState;
     s32 runState;
     s32 runArg;
     s32 stateArg;
-    struct127 *other;
-    struct127 *owner;
+    Actor *other;
+    Actor *owner;
     f32 angle;
     s32 i;
     s32 mask;
@@ -33,18 +33,18 @@ void func_150BDB70(struct127 *self) {
         stateArg = 3;
     }
     self->unk2E8 = 0;
-    self->pad2FC[0] = 0;
+    self->unk2FC = 0;
     self->unk2E4 -= self->unk2E4 >> 3;
     if (1) {} // matching: splits the block here; without it IDO swaps the owner/state registers
     owner = D_800CC2D0;
     if (D_800BE616 != 0) {
-        self->pad66 &= ~0x20;
+        self->unk66 &= ~0x20;
     }
     mask = self->unk13C;
     if (mask != 0) {
         owner += mask - 100;
         if (owner->camera != NULL) {
-            self->pad2FC[0] = 1 << owner->camera->playerIndex;
+            self->unk2FC = 1 << owner->camera->playerIndex;
         }
         // matching: the state pointer must reuse mask's register (a separate local grows the frame)
         mask = (s32) owner->unk31C;
@@ -58,7 +58,7 @@ void func_150BDB70(struct127 *self) {
             angle *= 10.0f;
             self->unk2E4 = angle;
             self->unk2E8 = 1;
-            self->pad66 |= 0x20;
+            self->unk66 |= 0x20;
         }
     }
     func_15052590(self);

@@ -158,9 +158,9 @@ void func_150C7C90(WorldObject *obj) {
     last->head.word |= angle;
 }
 
-/* Places the object at (-30, +50, +30) from the struct127 that func_15083E90(0xC) returns. */
+/* Places the object at (-30, +50, +30) from the Actor that func_15083E90(0xC) returns. */
 void func_150C7D7C(WorldObject *obj) {
-    struct127 *target;
+    Actor *target;
 
     target = func_15083E90(0xC);
     obj->x = target->x_position - 30.0f;

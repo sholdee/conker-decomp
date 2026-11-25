@@ -8,7 +8,7 @@ typedef struct GroundInfo {
     /* 0x04 */ u8 unk4[0x20];
 } GroundInfo;
 
-extern void func_1504715C(GroundInfo *ground, struct127 *obj);
+extern void func_1504715C(GroundInfo *ground, Actor *obj);
 
 typedef struct Vec3f {
     f32 x, y, z;
@@ -26,9 +26,9 @@ typedef struct {
 } Struct15195738Small;
 
 extern void func_151D8868(Struct15195738Small *params, s32 arg1, u8 arg2, s32 arg3);
-extern void func_151C0098(f32 *pos, struct127 *obj, s32 arg2, u8 arg3, s32 arg4);
-extern void func_1507CD64(struct127 *obj, s32 arg1);
-extern s32 func_1518D1C0(struct127 *obj, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 *arg6);
+extern void func_151C0098(f32 *pos, Actor *obj, s32 arg2, u8 arg3, s32 arg4);
+extern void func_1507CD64(Actor *obj, s32 arg1);
+extern s32 func_1518D1C0(Actor *obj, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 *arg6);
 extern u8 D_800A8244[];
 
 extern void func_151C329C(f32 *pos, u8 arg1, s32 arg2);
@@ -38,7 +38,7 @@ extern s32 func_150A11C4;
 extern s32 func_150A1DA0;
 
 // Spawns one of several effects at the point D_800CC2C0, picked by obj's id.
-void func_15193CA0(struct127 *obj, u8 arg1, u8 arg2, s32 arg3) {
+void func_15193CA0(Actor *obj, u8 arg1, u8 arg2, s32 arg3) {
     f32 pos[3];
     GroundInfo ground;
     s32 type;
@@ -90,17 +90,17 @@ void func_15193CA0(struct127 *obj, u8 arg1, u8 arg2, s32 arg3) {
 }
 
 
-void func_151942B0(struct127 *self, struct127 *other, u8 *arg2) {
+void func_151942B0(Actor *self, Actor *other, u8 *arg2) {
     func_15193CA0(other, FALSE, 0xFF, 1);
 }
 
-void func_151942E8(struct127 *self, struct127 *other, u8 *arg2) {
+void func_151942E8(Actor *self, Actor *other, u8 *arg2) {
     func_15193CA0(other, TRUE, 0xFF, 1);
 }
 
 extern u8 D_800A8210;
 
-void func_15194320(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194320(Actor *self, Actor *other, u8 *arg2) {
     switch (other->id) {
     case 0:
     case 1:
@@ -114,7 +114,7 @@ void func_15194320(struct127 *self, struct127 *other, u8 *arg2) {
 
 extern u8 D_800A822C;
 
-void func_15194394(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194394(Actor *self, Actor *other, u8 *arg2) {
     switch (other->id) {
     case 0:
     case 1:
@@ -157,10 +157,10 @@ typedef struct BurstParams {
 
 
 extern void func_15153F18(BurstParams *params, Vec3f *position, GroundInfo *ground, u8 arg3, s32 arg4);
-extern void *func_151AE7B0(struct127 *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);
+extern void *func_151AE7B0(Actor *obj, f32 arg1, s16 arg2, u8 arg3, s32 arg4);
 
 // Spawns a burst of effects from other when its id is 0-4.
-void func_15194408(struct127 *self, struct127 *other) {
+void func_15194408(Actor *self, Actor *other) {
     BurstParams burst;
     GroundInfo ground;
 
@@ -206,19 +206,19 @@ void func_15194408(struct127 *self, struct127 *other) {
     func_15153F18(&burst, &burst.position, &ground, 0xFF, 1);
 }
 
-extern void func_150C7020(struct127 *obj, s32 arg1, u8 arg2, s32 arg3);
+extern void func_150C7020(Actor *obj, s32 arg1, u8 arg2, s32 arg3);
 
-void func_15194588(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194588(Actor *self, Actor *other, u8 *arg2) {
     func_150C7020(self, 500, 0xFF, 1);
     func_15194408(self, other);
 }
 
 extern u8 D_800A3FE6[];
-extern s32 func_15134070(struct127 *);
-extern void func_151B4CD0(struct127 *obj, u8 arg1, s32 arg2);
+extern s32 func_15134070(Actor *);
+extern void func_151B4CD0(Actor *obj, u8 arg1, s32 arg2);
 
 // Spawns a burst of effects above other, aimed by self's facing angle, unless other's kind forbids it.
-void func_151945CC(struct127 *self, struct127 *other, u8 *arg2) {
+void func_151945CC(Actor *self, Actor *other, u8 *arg2) {
     Vec3f pos;
     s16 facingYaw;
     BurstParams burst;
@@ -272,11 +272,11 @@ void func_151945CC(struct127 *self, struct127 *other, u8 *arg2) {
     }
 }
 
-void func_151B01B8(struct127 *self, struct127 *other);
-void func_151B09BC(struct127 *self, struct127 *other, s16 arg2, u8 arg3, s32 arg4);
-void *func_151AF270(struct127 *obj, u8 arg1, s32 arg2);
+void func_151B01B8(Actor *self, Actor *other);
+void func_151B09BC(Actor *self, Actor *other, s16 arg2, u8 arg3, s32 arg4);
+void *func_151AF270(Actor *obj, u8 arg1, s32 arg2);
 
-void func_15194794(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194794(Actor *self, Actor *other, u8 *arg2) {
     func_151B01B8(self, other);
     func_151B09BC(self, other, 1000, 0xFF, 0);
     switch (other->id) {
@@ -291,7 +291,7 @@ void func_15194794(struct127 *self, struct127 *other, u8 *arg2) {
 }
 
 // For ids 0-4 and 0x53, spawns a burst of effects above other and calls func_151D8868.
-void func_15194810(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194810(Actor *self, Actor *other, u8 *arg2) {
     Vec3f pos;
     BurstParams burst;
     GroundInfo ground;
@@ -344,29 +344,29 @@ void func_15194810(struct127 *self, struct127 *other, u8 *arg2) {
     }
 }
 
-void func_151949E0(struct127 *self, struct127 *other, u8 *arg2) {
+void func_151949E0(Actor *self, Actor *other, u8 *arg2) {
 }
 
-extern void func_15104170(s32 arg0, struct127 *self, struct127 *other);
-extern void func_1507DE4C(struct127 *obj);
-extern void func_15138BC0(struct127 *obj, u8 arg1, s32 arg2);
+extern void func_15104170(s32 arg0, Actor *self, Actor *other);
+extern void func_1507DE4C(Actor *obj);
+extern void func_15138BC0(Actor *obj, u8 arg1, s32 arg2);
 
 // Calls func_15104170 when D_8008FD90 == 1 and self's unk31C->unk1A0 cooldown has run out, then restarts it.
-void func_151949F4(s32 arg0, struct127 *self, struct127 *other) {
+void func_151949F4(s32 arg0, Actor *self, Actor *other) {
     if (D_8008FD90 == 1 && self->unk127 == 0 && (D_800E9D00 & 8) && self->unk31C->unk1A0 == 0) {
         func_15104170(arg0, self, other);
         self->unk31C->unk1A0 = 1200;
     }
 }
 
-void func_15194A68(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194A68(Actor *self, Actor *other, u8 *arg2) {
     func_1507DE4C(other);
     func_15138BC0(other, 0xFF, 1);
     func_151949F4(0, self, other);
 }
 
 // Sets obj's unk9C flags and starts an id-specific animation for ids 0x75 and 0x80.
-void func_15194AB4(struct127 *obj) {
+void func_15194AB4(Actor *obj) {
     s32 anim;
 
     obj->unk9C |= 0xFFFE;
@@ -384,10 +384,10 @@ void func_15194AB4(struct127 *obj) {
     }
 }
 
-extern void func_15138120(struct127 *obj, s32 kind, s32 arg2);
-extern void func_15136C3C(struct127 *obj, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7);
+extern void func_15138120(Actor *obj, s32 kind, s32 arg2);
+extern void func_15136C3C(Actor *obj, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7);
 
-void func_15194B1C(struct127 *obj) {
+void func_15194B1C(Actor *obj) {
     s32 kind;
 
     kind = func_15134070(obj);
@@ -398,7 +398,7 @@ void func_15194B1C(struct127 *obj) {
     func_15194AB4(obj);
 }
 
-void func_15194B94(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194B94(Actor *self, Actor *other, u8 *arg2) {
     if (other->id == 0x53) {
         func_151942B0(self, other, arg2);
         return;
@@ -407,7 +407,7 @@ void func_15194B94(struct127 *self, struct127 *other, u8 *arg2) {
     func_151949F4(1, self, other);
 }
 
-void func_15194BF0(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194BF0(Actor *self, Actor *other, u8 *arg2) {
     switch (other->id) {
     case 0x16:
         func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
@@ -461,19 +461,19 @@ void func_15194BF0(struct127 *self, struct127 *other, u8 *arg2) {
     }
 }
 
-void func_15194FF4(struct127 *self, struct127 *other, s32 arg2);
+void func_15194FF4(Actor *self, Actor *other, s32 arg2);
 
-void func_15194D80(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194D80(Actor *self, Actor *other, u8 *arg2) {
     func_15194FF4(self, other, FALSE);
 }
 
-void func_15194DA4(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194DA4(Actor *self, Actor *other, u8 *arg2) {
     func_15194FF4(self, other, TRUE);
 }
 
 extern void func_1514B364(f32 *pos, GroundInfo *ground, u8 arg2, s32 arg3);
 
-void func_15194DC8(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194DC8(Actor *self, Actor *other, u8 *arg2) {
     GroundInfo ground;
 
     if (D_800BE616 != 0) {
@@ -485,9 +485,9 @@ void func_15194DC8(struct127 *self, struct127 *other, u8 *arg2) {
     func_1514B364(&other->x_position, &ground, 0xFF, 1);
 }
 
-extern void func_150B06B0(struct127 *obj, struct127 *other, u8 arg2, s32 arg3);
+extern void func_150B06B0(Actor *obj, Actor *other, u8 arg2, s32 arg3);
 
-void func_15194E54(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194E54(Actor *self, Actor *other, u8 *arg2) {
     if (other->id == 0x3E || other->id == 0xA6) {
         func_150B06B0(other, self, 0xFF, 1);
     }
@@ -495,7 +495,7 @@ void func_15194E54(struct127 *self, struct127 *other, u8 *arg2) {
 
 extern void func_15182670(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, u8 arg5, u8 arg6, s32 arg7);
 
-void func_15194EA8(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194EA8(Actor *self, Actor *other, u8 *arg2) {
     u8 result;
     u32 rand1;
     u32 rand0;
@@ -510,7 +510,7 @@ void func_15194EA8(struct127 *self, struct127 *other, u8 *arg2) {
     func_15194BF0(self, other, &result);
 }
 
-void func_15194F48(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15194F48(Actor *self, Actor *other, u8 *arg2) {
     f32 pos[3];
 
     pos[0] = other->x_position;
@@ -525,15 +525,15 @@ void func_15194F48(struct127 *self, struct127 *other, u8 *arg2) {
 typedef struct {
     s32 unk0;
     s32 unk4;
-    struct127 *source;
+    Actor *source;
 } Struct15194FF4;
 
-extern u8 *func_1518F51C(struct127 *obj, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
-extern void func_15190518(struct127 *obj);
+extern u8 *func_1518F51C(Actor *obj, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+extern void func_15190518(Actor *obj);
 
 void func_15194FF4(self, other, arg2)
-struct127 *self;
-struct127 *other;
+Actor *self;
+Actor *other;
 u8 arg2;
 {
     u8 *spawned;
@@ -572,17 +572,17 @@ u8 arg2;
     }
 }
 
-extern struct127 *func_1505ED34(void);
-extern s32 func_150838EC(struct127 *obj, s32 anim, s32 arg2, f32 speed);
-extern void func_150D10E4(struct127 *obj, u8 arg1);
+extern Actor *func_1505ED34(void);
+extern s32 func_150838EC(Actor *obj, s32 anim, s32 arg2, f32 speed);
+extern void func_150D10E4(Actor *obj, u8 arg1);
 
-// struct127 declares these offsets as padding, so they are reached by offset.
+// Actor declares these offsets as padding, so they are reached by offset.
 #define U8AT(p, off) (*(u8 *)((u8 *)(p) + (off)))
 #define F32AT(p, off) (*(f32 *)((u8 *)(p) + (off)))
 
 // Kills obj and spawns a copy of it; the two are thrown apart with random velocities.
-void func_151951E0(struct127 *obj) {
-    struct127 *copy;
+void func_151951E0(Actor *obj) {
+    Actor *copy;
 
     obj->health = 0;
     func_1507CD64(obj, 5);
@@ -626,10 +626,10 @@ void func_151951E0(struct127 *obj) {
 }
 
 extern void func_1514373C(f32 angle, f32 length, f32 *x, f32 *z);
-extern void func_15137610(struct127 *obj, f32 *from, f32 *to, f32 *dir, u8 arg4, s32 arg5);
+extern void func_15137610(Actor *obj, f32 *from, f32 *to, f32 *dir, u8 arg4, s32 arg5);
 
 // Calls func_15137610 on a 40-unit segment through other, at right angles to self's (or other's, or a random) heading.
-void func_15195528(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15195528(Actor *self, Actor *other, u8 *arg2) {
     f32 angle;
     f32 from[3];
     f32 to[3];
@@ -657,12 +657,12 @@ void func_15195528(struct127 *self, struct127 *other, u8 *arg2) {
     func_15137610(other, from, to, dir, 0xFF, 1);
 }
 
-void func_15195650(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15195650(Actor *self, Actor *other, u8 *arg2) {
     func_151B01B8(self, other);
     func_151B09BC(self, other, 1000, 0xFF, 0);
 }
 
-void func_15195698(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15195698(Actor *self, Actor *other, u8 *arg2) {
     if (other->health == 0 && other->unk127 != 0xFF) {
         func_15136C3C(other, 1, 1, 1, 1, 0, 0xFF, 1);
         func_15145A50(other);
@@ -673,7 +673,7 @@ void func_15195698(struct127 *self, struct127 *other, u8 *arg2) {
     }
 }
 
-void func_15195738(struct127 *self, struct127 *other, u8 *arg2) {
+void func_15195738(Actor *self, Actor *other, u8 *arg2) {
     Struct15195738Small params;
 
     params.unk0 = 1;

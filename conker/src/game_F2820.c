@@ -21,7 +21,7 @@ typedef struct StripDesc {
 
 /* Character the strip end follows; stored right after the object header. */
 typedef struct StripTarget {
-    /* 0x00 */ struct127 *obj;
+    /* 0x00 */ Actor *obj;
     /* 0x04 */ u8 uniqueId;     // obj->unique_id when attached
     /* 0x05 */ u8 bone;         // matrix index into obj->unk1D4
     /* 0x06 */ u8 pad6[2];
@@ -109,7 +109,7 @@ void func_150C54C0(StripObj *strip) {
     D_800887C0[idx](strip);
 }
 
-extern void func_1514EDF0(StripObj *handle, struct127 *owner);
+extern void func_1514EDF0(StripObj *handle, Actor *owner);
 
 /** Detaches the strip from its target character, then destroys it (func_150C5430). */
 void func_150C5510(StripObj *strip) {
@@ -302,24 +302,24 @@ s32 func_150C5BD4(StripObj *strip) {
 }
 
 /** Sends message 1 to `obj`'s type-0x15 attachments (its strips). */
-void func_150C5C74(struct127 *obj) {
+void func_150C5C74(Actor *obj) {
     func_1514D3B0((s32)obj, 0x15, 1, 0);
 }
 
 /** Sends message 2 to `obj`'s type-0x15 attachments (its strips). */
-void func_150C5C9C(struct127 *obj) {
+void func_150C5C9C(Actor *obj) {
     func_1514D3B0((s32)obj, 0x15, 2, 0);
 }
 
 /* func_150C5D0C's data; which member applies depends on the message. */
 typedef union StripMsgData {
     struct {
-        struct127 *obj;
+        Actor *obj;
         u8 uniqueId;
     } m0; // message 0
     struct {
-        struct127 *objA;
-        struct127 *objB;
+        Actor *objA;
+        Actor *objB;
         u8 uniqueIdA;
         u8 uniqueIdB;
     } m2D; // message 0x2D

@@ -17,11 +17,11 @@ GameCommand *func_150B58F0(GameCommand *, s32);
 GameCommand *func_150F1B48(GameCommand *, s32);
 GameCommand *func_150D8590(GameCommand *, s32);
 s32 func_1503DA3C(s32, s32);
-s16 *func_15034860(GameCommand *, struct127 *, s32, s32);
+s16 *func_15034860(GameCommand *, Actor *, s32, s32);
 
 /* Builds the command list for actor `index`, dispatching on its id, and terminates it with 0x1000. */
 void func_15033FE0(GameCommand *commands, s32 index) {
-    struct127 *actor;
+    Actor *actor;
     s32 first;
     GameCommand *cursor;
 
@@ -71,7 +71,7 @@ void func_15033FE0(GameCommand *commands, s32 index) {
 
 /* Appends the commands for an actor in interaction state 1. Angles are in degrees, scaled to 65536/360 units. */
 GameCommand *func_150341BC(GameCommand *cmd, s32 index) {
-    struct127 *actor;
+    Actor *actor;
     ActorCtl *sub;
     s16 angle;
     s32 kind;
@@ -81,7 +81,7 @@ GameCommand *func_150341BC(GameCommand *cmd, s32 index) {
     sub = actor->unk31C;
     if ((sub != NULL) && !(actor->unk2F8 & 0x80)) {
         // pad54 is declared u32 in structs.h but holds an f32 here
-        angle = *(f32 *)&actor->pad54 * (65536.0f / 360.0f);
+        angle = actor->unk54 * (65536.0f / 360.0f);
         kind = actor->unk84.uh;
         if ((kind != 0x42) && (kind != 0x14) && (kind != 0x76)) {
             offset = (sub->unk78 == 10) ? 0 : 4;
@@ -114,7 +114,7 @@ GameCommand *func_150341BC(GameCommand *cmd, s32 index) {
 
 /* Appends an opcode-6 command scaled from unk1D1, if it is set. */
 GameCommand *func_15034340(GameCommand *cmd, s32 index) {
-    struct127 *actor = &D_800CC2D0[index];
+    Actor *actor = &D_800CC2D0[index];
 
     if (actor->unk1D1 != 0) {
         cmd->opcode = 6;
@@ -126,7 +126,7 @@ GameCommand *func_15034340(GameCommand *cmd, s32 index) {
 
 /* Identical to func_15034340. */
 GameCommand *func_150343B0(GameCommand *cmd, s32 index) {
-    struct127 *actor = &D_800CC2D0[index];
+    Actor *actor = &D_800CC2D0[index];
 
     if (actor->unk1D1 != 0) {
         cmd->opcode = 6;

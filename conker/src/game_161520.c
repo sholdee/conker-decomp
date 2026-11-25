@@ -40,7 +40,7 @@ typedef struct {
 
 extern Struct15136698Table D_80089BAC;
 
-/* Actor model ids (struct127::id) that have a blood profile. */
+/* Actor model ids (Actor::id) that have a blood profile. */
 enum {
     MODEL_CONKER = 0,
     MODEL_CONKER_VARIANT_1 = 1,
@@ -88,7 +88,7 @@ enum {
 #define BONE_MATRIX(actor, bone) ((u8 *)(actor)->unk1D4 + (bone) * 0x40)
 
 /* Returns the blood profile index (0-19) for an actor's model, or BLOOD_PROFILE_NONE. */
-s32 func_15134070(struct127 *actor) {
+s32 func_15134070(Actor *actor) {
     switch (actor->id) {
     case MODEL_SHC_SOLDIER_DECORATED_UNIFORM:
     case MODEL_SHC_SOLDIER_DECORATED_UNIFORM_VARIANT:
@@ -169,7 +169,7 @@ typedef struct {
     s32 target[2];          /* matrices to transform offset by, double-buffered */
     u8 ownerId;             /* owner->unique_id when attached */
     u8 pad19[3];
-    struct127 *owner;
+    Actor *owner;
     u8 bone;
     u8 pad21[3];
     f32 offset[3];
@@ -194,7 +194,7 @@ typedef struct {
 /* Spawns a BloodDrip effect from a template. */
 BloodDrip *func_1513418C(void *desc, s32 arg1, u8 arg2, s32 arg3) {
     BloodDrip *drip;
-    struct127 *owner;
+    Actor *owner;
     u8 flags;
 
     drip = func_15167A68(0x28, arg3, arg1 + 0x58, 1, arg2, 1);
@@ -364,7 +364,7 @@ typedef struct {
     u8 pad0[0x18];
     u8 ownerId;
     u8 pad19[0x3];
-    struct127 *owner;
+    Actor *owner;
     u8 pad20[0x1D];
     u8 unk3D;
 } SubA_151347CC;
@@ -374,9 +374,9 @@ typedef struct {
  * the second word) its unique id; message 0x2D swaps actorA and actorB.
  */
 typedef struct {
-    struct127 *actorA;
+    Actor *actorA;
     union {
-        struct127 *actorB;
+        Actor *actorB;
         u8 actorAId;
     } u4;
     u8 swapIdA;
@@ -386,7 +386,7 @@ typedef struct {
 /* Message handler: frees the effect when its owner goes away, follows owner handle swaps. */
 void func_151347CC(void *arg0, BloodActorMsg *msg, u8 message) {
     SubA_151347CC *effect = arg0; // matching: copying the parameter keeps IDO's register choice in case 0x2D
-    struct127 *actorA;
+    Actor *actorA;
 
     if ((message == 0) || (message == 3)) {
         if ((msg->actorA == effect->owner) || (msg->u4.actorAId == effect->ownerId)) {
@@ -399,7 +399,7 @@ void func_151347CC(void *arg0, BloodActorMsg *msg, u8 message) {
             }
         }
     } else if (message == 0x16) {
-        if ((struct127 *)msg == effect->owner) {
+        if ((Actor *)msg == effect->owner) {
             func_1516972C((struct102 *)effect);
         }
     } else if (message == 0x2D) {
@@ -586,7 +586,7 @@ s32 func_15134CEC(Struct15134CEC *particle) {
 typedef struct {
     u8 ownerId;
     u8 pad1[3];
-    struct127 *owner;
+    Actor *owner;
     u8 bone;
     u8 pad9[3];
     vertex offsetA;
@@ -617,7 +617,7 @@ typedef struct {
     s32 unk14;
     u8 ownerId;
     u8 pad19[3];
-    struct127 *owner;
+    Actor *owner;
     u8 bone;
     u8 pad21[3];
     vertex offsetA;
@@ -853,7 +853,7 @@ void func_15135480(BloodStrip *strip, BloodActorMsg *msg, u8 message) {
             strip->owner = msg->u4.actorB;
             strip->ownerId = msg->swapIdB;
         } else if ((owner | 0) == (s32)msg->u4.actorB) { // matching: `| 0` makes IDO copy owner, fixing operand order
-            strip->owner = (struct127 *)actorA;
+            strip->owner = (Actor *)actorA;
             strip->ownerId = msg->swapIdA;
         }
     }
@@ -1206,7 +1206,7 @@ void func_1504715C();
 s32 func_15046C80(vertex *, u16, f32, GroundHit *);
 
 /* Scatters blood decals on the ground within radius of the actor, more for a larger area. */
-void func_15136404(struct127 *actor, f32 radius, u8 arg2, s32 arg3) {
+void func_15136404(Actor *actor, f32 radius, u8 arg2, s32 arg3) {
     f32 area;
     f32 count;
     GroundHit hit;
@@ -1457,7 +1457,7 @@ typedef struct Blood36C3CSpray {
     u8 kind;
 } Blood36C3CSpray;
 
-void func_1515C244(struct127 *, vertex *, f32 *, f32 *);
+void func_1515C244(Actor *, vertex *, f32 *, f32 *);
 void func_1513A24C(vertex *, s32 *, f32 *, s32, f32, u8, u8, u8 *, void *,
                    u8, s32);
 void func_15150D1C(Blood36C3CSpray *, u8, s32);
@@ -1474,7 +1474,7 @@ extern s32 D_800A3F64[];
  * Blood effects for a hit on actor: arg3 runs func_1513A24C (arg5 lowers its count), arg1
  * a spray, arg2 drops falling to the ground below, arg4 a splat at the actor's position.
  */
-void func_15136C3C(struct127 *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
+void func_15136C3C(Actor *actor, u8 arg1, u8 arg2, u8 arg3, u8 arg4,
                    u8 arg5, u8 arg6, s32 arg7) {
     vertex position;
     f32 unused0;
@@ -1660,7 +1660,7 @@ void func_151C577C(struct17 *, struct17 *, struct17 *, u8, u8, u8, u8, s32);
 void func_151036B4(void *, u8, s32);
 
 /* Picks the impact effect for a hit on actor (NULL: plain blood) from its model and state. */
-void func_15137610(struct127 *actor, struct17 *from, struct17 *to,
+void func_15137610(Actor *actor, struct17 *from, struct17 *to,
                    struct17 *direction, u8 arg4, s32 arg5) {
     s32 mode;
 
@@ -1755,7 +1755,7 @@ void *func_151B5BF0(vertex *, vertex *, f32, vertex *, vertex *, f32, s32, s32,
 void *func_151B6010(vertex *, vertex *, f32, vertex *, vertex *, f32, s32, s32,
                     s32, f32, s32, s32, s32, s32);
 /* Blood when an actor dies: a burst, a splat and, on flagged ground, a pool and a chunk. */
-void func_1513783C(struct127 *actor, u8 arg1, s32 arg2) {
+void func_1513783C(Actor *actor, u8 arg1, s32 arg2) {
     vertex position;
     f32 unused0;
     f32 unused1;
@@ -1926,7 +1926,7 @@ void func_15137F30(vertex *pointA, vertex *pointB, vertex *velocityA, vertex *ve
 }
 
 /* Writes the actor's blood point for profile `kind` (bone 12 space) to out; 0 if no skeleton. */
-s32 func_151380B4(struct127 *actor, s32 kind, f32 *out) {
+s32 func_151380B4(Actor *actor, s32 kind, f32 *out) {
     s32 bones = (s32)actor->unk1D4;
 
     if (bones == 0) {
@@ -1940,7 +1940,7 @@ s32 func_151380B4(struct127 *actor, s32 kind, f32 *out) {
 }
 
 /* Starts a bleeding BloodStrip on the actor's bone 12 (or 1) playing sound 0x4FE. */
-void func_15138120(struct127 *actor, s32 kind, u8 arg2) {
+void func_15138120(Actor *actor, s32 kind, u8 arg2) {
     BloodStripDesc desc;
 
     if (D_800A3FD8[kind].unkE != 2) {
@@ -2058,7 +2058,7 @@ extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
  * Throws a func_1513264C chunk (model D_800A3FD8[kind].unkC) off the actor from position, and for
  * profiles 4-6 also the accessories it still wears (bits of unk94).
  */
-void func_15138424(struct127 *actor, vertex *position, s32 kind, void *arg3, u8 arg4, s32 arg5) {
+void func_15138424(Actor *actor, vertex *position, s32 kind, void *arg3, u8 arg4, s32 arg5) {
     vertex v;
     ParticleSpawn spawn;
     vertex a;
@@ -2221,7 +2221,7 @@ s32 func_151389A8(BloodChunk *chunk, s32 arg1, s32 arg2, s32 arg3, f32 groundY, 
 }
 
 /* Blood for a hit on the actor's bone-12 blood point: strip, burst and chunk. */
-void func_15138BC0(struct127 *actor, u8 arg1, s32 arg2) {
+void func_15138BC0(Actor *actor, u8 arg1, s32 arg2) {
     s32 kind;
     vertex position;
     u8 valid;
@@ -2239,17 +2239,17 @@ void func_15138BC0(struct127 *actor, u8 arg1, s32 arg2) {
     }
 }
 
-void func_15138E98(struct127 *, f32 *, u8, void *, u8, s32);
-void func_15139768(struct127 *, f32 *, f32, void *, u8, s32);
-void func_15139D74(struct127 *, f32 *, void *, u8, s32);
-void func_1513A6E0(struct127 *, f32 *, void *, u8, s32);
-void func_1513ABB8(struct127 *, f32 *, u8, void *, u8, s32);
-void func_1513B0F8(struct127 *, f32 *, void *, u8, s32);
-void func_1513A594(struct127 *, vertex *, GroundHit *, u8, s32);
+void func_15138E98(Actor *, f32 *, u8, void *, u8, s32);
+void func_15139768(Actor *, f32 *, f32, void *, u8, s32);
+void func_15139D74(Actor *, f32 *, void *, u8, s32);
+void func_1513A6E0(Actor *, f32 *, void *, u8, s32);
+void func_1513ABB8(Actor *, f32 *, u8, void *, u8, s32);
+void func_1513B0F8(Actor *, f32 *, void *, u8, s32);
+void func_1513A594(Actor *, vertex *, GroundHit *, u8, s32);
 void func_151036B4(void *, u8, s32);
 
 /* Blood for a fatal hit: strip and burst, then the per-profile gore effect. */
-void func_15138C80(struct127 *actor, u8 arg1, s32 arg2) {
+void func_15138C80(Actor *actor, u8 arg1, s32 arg2) {
     s32 kind;
     vertex position;
     u8 valid;
@@ -2318,7 +2318,7 @@ extern vertex D_800A41B8;
 void func_1513A5E0(vertex *position, s32 arg1, s32 arg2);
 
 /* Gore for profile 3, 5 and 6 actors: a random chunk set from D_800A4160 and, with extraSpray, chunk model 0x48. */
-void func_15138E98(struct127 *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4, s32 arg5) {
+void func_15138E98(Actor *actor, f32 *origin, u8 extraSpray, void *hit, u8 arg4, s32 arg5) {
     u8 index;
     vertex position;
 
@@ -2532,7 +2532,7 @@ extern struct17 D_800A41E8[];
 extern void func_151C5F44(s32, f32 *, f32, f32, s32, s32, f32, s32, s32, u8, s32);
 
 /* Gore for profile 2/15 actors, chunk sizes scaled by `scale`. */
-void func_15139768(struct127 *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32 arg5) {
+void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32 arg5) {
     u8 idx;
     u8 i;
     u8 mask;
@@ -2655,7 +2655,7 @@ extern s32 D_800A4228[];
 extern vertex D_800A4234[];
 
 /* Default gore (profiles 1, 12, 13 and others): a random chunk set from bone 12. */
-void func_15139D74(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
+void func_15139D74(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
     u8 index;
     vertex position;
 
@@ -2809,7 +2809,7 @@ typedef struct {
 void func_1515080C(Cfg080C_1513A24C *, s32 *, f32 *, s32, Extra080C_1513A24C *, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
 void func_15133E3C(s32, u8);
 
-/* Blood burst (func_1515080C) for an actor of blood profile `kind`; actor is a struct127. */
+/* Blood burst (func_1515080C) for an actor of blood profile `kind`; actor is a Actor. */
 void func_1513A24C(vertex *position, s32 *table, f32 *arg2, s32 count, f32 scale, u8 kind, u8 arg6, u8 *actor, void *hit, u8 arg9, s32 argA) {
     Cfg080C_1513A24C config;
     Extra080C_1513A24C extra;
@@ -2853,7 +2853,7 @@ void func_1513A24C(vertex *position, s32 *table, f32 *arg2, s32 count, f32 scale
     case 1: {
         const u16 models[4] = { 0x83, 0x81, 0x82, 0x84 };
         s32 index;
-        index = actor[0x128]; /* struct127 byte 0x128, not in the shared struct yet */
+        index = actor[0x128]; /* Actor byte 0x128, not in the shared struct yet */
         if (index >= 4) {
             index = 3;
         }
@@ -2917,7 +2917,7 @@ void func_1513A48C(vertex *position, u8 arg1, s32 arg2) {
 }
 
 /* Gore for profile 4 actors: just a splash. */
-void func_1513A594(struct127 *actor, vertex *origin, GroundHit *hit, u8 arg3, s32 arg4) {
+void func_1513A594(Actor *actor, vertex *origin, GroundHit *hit, u8 arg3, s32 arg4) {
     func_1513A5E0(origin, arg3 & 0xFF, arg4);
     if (actor->unk1D4 != 0) { // matching: dead test, IDO still emits the unk1D4 load
         if (actor) {
@@ -2961,7 +2961,7 @@ extern s32 func_15132A4C(void *, s32, s32, s32, u8, s32);
 extern s32 func_1513264C(void *, s32, s32, s32, s32, u8, s32);
 
 /* Gore for profile 0/7 actors. */
-void func_1513A6E0(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
+void func_1513A6E0(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
     u8 idx;
     u8 i;
     u8 mask;
@@ -3081,7 +3081,7 @@ extern s32 D_800A42E4[][2];
 extern vertex D_800A42F4[][2];
 
 /* Gore for profile 8/9 actors (variant 1 for profile 9). */
-void func_1513ABB8(struct127 *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s32 arg5) {
+void func_1513ABB8(Actor *actor, f32 *origin, u8 variant, void *hit, u8 arg4, s32 arg5) {
     u8 index;
     vertex position;
 
@@ -3221,7 +3221,7 @@ extern s32 D_800A4328[];
 extern s32 D_800A4330[];
 extern f32 D_800A4338[][3];
 /* Gore for profile 16 actors. */
-void func_1513B0F8(struct127 *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
+void func_1513B0F8(Actor *actor, f32 *origin, void *hit, u8 arg3, s32 arg4) {
     u8 index;
     vertex rotation;
     ParticleSpawn spawn;

@@ -8,7 +8,7 @@ typedef struct {
     /* 0x00 */ s32 target[2];
     /* 0x08 */ u8 ownerId;
     /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ struct127 *owner;
+    /* 0x0C */ Actor *owner;
     /* 0x10 */ u8 bone;
     /* 0x11 */ u8 pad11[3];
     /* 0x14 */ f32 offset[3];
@@ -27,13 +27,13 @@ typedef struct {
     /* 0x0C */ u8 unkC;
 } EffectHeader;
 
-void func_1516962C(s32 type, struct127 *actor, u8 eventType);
+void func_1516962C(s32 type, Actor *actor, u8 eventType);
 void *func_1513418C(EmitterDesc *desc, s32 arg1, u8 arg2, s32 arg3);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
 void func_151AF388(f32 *position, f32 dx, f32 dy, f32 dz, s32 effectUnkC);
 
 /* Attaches emitter 10 (func_151AF338) to bone 1 of `actor` for 320 frames. */
-void *func_151AF270(struct127 *actor, u8 arg1, s32 arg2) {
+void *func_151AF270(Actor *actor, u8 arg1, s32 arg2) {
     void *result;
     EmitterDesc desc;
 

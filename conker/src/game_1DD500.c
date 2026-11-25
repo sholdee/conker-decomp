@@ -57,8 +57,8 @@ typedef struct Game1DD500Impact {
 void func_15143794(s16 yaw, s16 pitch, f32 speed, f32 *out);
 void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
                    s32, s32, s32, s32, s32, s32, s32, s32);
-void func_1504715C(Game1DD500Ground *, struct127 *);
-s32 func_15134070(struct127 *);
+void func_1504715C(Game1DD500Ground *, Actor *);
+s32 func_15134070(Actor *);
 void func_15143134(vertex *, vertex *, Mtx *);
 void func_15153F18(Game1DD500Impact *, vertex *, Game1DD500Ground *, s32, s32);
 extern Game1DD500Profile D_800A3FD8[];
@@ -91,7 +91,7 @@ s32 func_151B0050(s32 arg0, s32 arg1, f32 x, f32 y, f32 z, s32 arg5, s32 arg6, s
 }
 
 /* Spawns an impact effect at joint 6 of actor, styled by the profile of other. */
-void func_151B01B8(struct127 *actor, struct127 *other) {
+void func_151B01B8(Actor *actor, Actor *other) {
     Game1DD500Impact impact;
     u8 shade;
     Game1DD500Ground ground;
@@ -144,7 +144,7 @@ void func_151DAB58(u8, f32, u8, f32 *, s32, u8, s32);
 void func_15136698(f32, f32, u8, u8, s32, void *, f32 *, s32, s32, u8, s32);
 
 /* Big landing burst at actor: an impact effect, 12-17 splats scattered on the ground around it, and a mark under it. */
-void func_151B03B8(struct127 *actor, u8 arg1, s32 arg2) {
+void func_151B03B8(Actor *actor, u8 arg1, s32 arg2) {
     Game1DD500Impact impact;
     Game1DD500Ground ground;
     s32 count;
@@ -294,7 +294,7 @@ typedef struct Game1DD500Slot {
 
 /* Effect that keeps particles stuck to an actor's joints and drops them over time. */
 typedef struct Game1DD500Emitter {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;   /* owner->unique_id at creation */
     /* 0x08 */ s32 count;    /* attached particles */
     /* 0x0C */ Game1DD500Slot slots[11];
@@ -316,14 +316,14 @@ typedef struct Game1DD500Task {
 
 /* Message 0x13 (and 0): this actor's effects should end. */
 typedef struct Game1DD500ActorMsg {
-    /* 0x0 */ struct127 *actor;
+    /* 0x0 */ Actor *actor;
     /* 0x4 */ u8 uniqueId;
 } Game1DD500ActorMsg;
 
 /* Message 0x2D: two actors swapped identities. */
 typedef struct Game1DD500SwapMsg {
-    /* 0x0 */ struct127 *a;
-    /* 0x4 */ struct127 *b;
+    /* 0x0 */ Actor *a;
+    /* 0x4 */ Actor *b;
     /* 0x8 */ u8 uniqueIdA;
     /* 0x9 */ u8 uniqueIdB;
 } Game1DD500SwapMsg;
@@ -333,7 +333,7 @@ void func_151B1918(Game1DD500Task *task);
 void *memcpy(void *, const void *, u32);
 
 /* Starts an emitter task on actor (lifetime 300 when -1), first telling older ones on it to end. */
-Game1DD500Task *func_151B09BC(struct127 *actor, struct127 *other, s16 lifetime, u8 arg3, s32 arg4) {
+Game1DD500Task *func_151B09BC(Actor *actor, Actor *other, s16 lifetime, u8 arg3, s32 arg4) {
     Game1DD500Task *task;
     Game1DD500Emitter emitter;
     s32 profile;
@@ -719,7 +719,7 @@ void func_151B19A4(Game1DD500Task *task, void *msg, u8 type) {
     Game1DD500Emitter *emitter = &task->emitter;
     Game1DD500ActorMsg *actorMsg = msg;
     Game1DD500SwapMsg *swap = msg;
-    struct127 *owner = emitter->owner;
+    Actor *owner = emitter->owner;
 
     if (type == 0 || type == 0x13) {
         if (owner == actorMsg->actor || actorMsg->uniqueId == emitter->ownerId) {

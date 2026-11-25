@@ -16,7 +16,7 @@ extern f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */
 #define PADS ((OSContPad *)D_800BE748)
 #define CONT_PADS (*(OSContPad ***)&D_800BE728)
 
-/* struct127 (structs.h) declares 0x6C, 0x128, 0x1A8 and 0x2E4 with other widths, so the code below
+/* Actor (structs.h) declares 0x6C, 0x128, 0x1A8 and 0x2E4 with other widths, so the code below
    reaches the bytes and halves it uses through those fields. */
 
 /* Signed angle in degrees from `from` to `to`, in (-180, 180]. */
@@ -32,7 +32,7 @@ f32 func_150ED1D0(f32 from, f32 to) {
 }
 
 /* Signed angle in degrees from `self`'s heading (unk40) to the direction of `target`. */
-f32 func_150ED234(struct127 *self, struct127 *target) {
+f32 func_150ED234(Actor *self, Actor *target) {
     s32 angle;
 
     angle = func_1505A630(target->x_position - self->x_position, self->z_position - target->z_position, 0) + 0x4000;
@@ -48,7 +48,7 @@ extern void func_150A7960(f32 *mf, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f3
  * Returns how far the shell lands short (+) or long (-) of the target, or, when the target is too high
  * to reach, 1000 times the extra elevation it needs.
  */
-f32 func_150ED298(struct127 *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, f32 radius) {
+f32 func_150ED298(Actor *obj, f32 pitch, f32 targetX, f32 targetY, f32 targetZ, f32 radius) {
     Mtx *bones;
     f32 gravity;
     f32 disc;
@@ -119,10 +119,10 @@ f32 func_150ED298(struct127 *obj, f32 pitch, f32 targetX, f32 targetY, f32 targe
 }
 
 /* Lets `obj` see the controlling player's camera (bit in unk2FC) while that player holds R with unk197 set. */
-void func_150ED578(struct127 *obj) {
+void func_150ED578(Actor *obj) {
     ActorCtl *state;
     s32 player;
-    struct127 *owner;
+    Actor *owner;
     Camera *camera;
 
     state = obj->unk31C;
@@ -133,7 +133,7 @@ void func_150ED578(struct127 *obj) {
             if (owner->unk31C->aimState != 0) {
                 camera = owner->camera;
                 if (camera != NULL) {
-                    obj->pad2FC[0] |= 1 << camera->playerIndex;
+                    obj->unk2FC |= 1 << camera->playerIndex;
                 }
             }
         }
@@ -141,10 +141,10 @@ void func_150ED578(struct127 *obj) {
 }
 
 // matching: arg2 as s32 here; the u8 of game_83300.c's definition would add a narrowing
-extern void func_15062FC0(struct127 *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
+extern void func_15062FC0(Actor *actor, s32 group, s32 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
 
 /* Scrolls texture groups 0 and 1 of `obj` (its two treads) by the track speeds, each clamped to [-45, 45]. */
-void func_150ED638(struct127 *obj, s32 left, s32 right) {
+void func_150ED638(Actor *obj, s32 left, s32 right) {
     s32 temp;
     s32 size;
 
@@ -167,10 +167,10 @@ void func_150ED638(struct127 *obj, s32 left, s32 right) {
 extern s8 D_800E0BCE[];
 extern s32 func_1508DAEC(s32 player, s32 mode);
 extern struct216 *func_1507BB28(s32 arg0, s32 scriptId);
-extern void func_15052F9C(struct127 *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7, s32 force, s32 arg9);
-extern void func_1505327C(struct127 *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
+extern void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7, s32 force, s32 arg9);
+extern void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxIndex);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
-extern void func_15052590(struct127 *obj);
+extern void func_15052590(Actor *obj);
 /* Ray (origin, normalized dir) vs sphere (center, radius); 0 on a miss or when the near hit is behind. */
 extern s32 func_151452C4(f32 *origin, f32 *dir, f32 *center, f32 radius, f32 *hitNear, f32 *hitFar, f32 *tNear, f32 *tFar);
 
@@ -183,7 +183,7 @@ extern s32 func_151452C4(f32 *origin, f32 *dir, f32 *center, f32 radius, f32 *hi
  *   the pitch homes in on the best object ahead, or follow the line of sight of camera camSlot - 1.
  *   They end up in unk2E4 as two s16 angles (x50).
  */
-void func_150ED748(struct127 *obj) {
+void func_150ED748(Actor *obj) {
     s32 viewer[1]; // matching: an array keeps the viewer index in memory; a scalar is register-allocated
     f32 velocity;
     s32 health;
@@ -202,12 +202,12 @@ void func_150ED748(struct127 *obj) {
     s32 right;
     s32 stateFlags;
     f32 blend;
-    struct127 *driver;
-    struct127 *other;
+    Actor *driver;
+    Actor *other;
     s32 reversing;
     OSContPad *pad;
     s8 unused1; // matching: unused, but keeps the stack layout
-    struct127 *target;
+    Actor *target;
     f32 aimOffset;
     f32 heading;
     f32 leadX;
@@ -241,7 +241,7 @@ void func_150ED748(struct127 *obj) {
     f32 tNear;
     f32 tFar;
     Camera *camera;
-    struct127 *subject;
+    Actor *subject;
 
     health = 1;
     if (D_800BE616) {
@@ -249,7 +249,7 @@ void func_150ED748(struct127 *obj) {
     } else {
         viewer[0] = 0;
     }
-    obj->pad2FC[0] = 0;
+    obj->unk2FC = 0;
     obj->unk124 = 0;
     controlled = 0;
     player = obj->unk124;
@@ -419,8 +419,8 @@ void func_150ED748(struct127 *obj) {
                 func_1514D3B0(obj, 25, 14, 0);
             }
             reversing = reversing ? 12 : 15;
-            ((u8 *)&obj->pad6C)[0] = reversing + 10;
-            ((u8 *)&obj->pad6C)[1] = 19;
+            obj->eyeCode[0] = reversing + 10;
+            obj->eyeCode[1] = 19;
         }
         /* Gun aim. */
         if (D_800CC2D0[viewer[0]].unk31C->unk84 != 0) {
@@ -514,7 +514,7 @@ void func_150ED748(struct127 *obj) {
                     if (D_800BE616 != 0) {
                         limit = subject->y_position + 40.0f;
                     } else {
-                        limit = ((s16 *)&subject->pad1A8)[1];
+                        limit = subject->aim.topY;
                     }
                     deltaZ = func_150ED298(obj, 0.0f, subject->x_position, limit, subject->z_position, 0.0f) * 0.001000000047f;
                     limit = 4.0f * D_800BE9A4;
@@ -568,7 +568,7 @@ void func_150ED748(struct127 *obj) {
                         hit = 1;
                     }
                     for (j = 0; j < D_8008FD8C; j++) {
-                        if (*(u8 *)&obj->pad128 != *(u8 *)&D_800CC2D0[j].pad128) {
+                        if (obj->team != D_800CC2D0[j].team) {
                             hitX = D_800CC2D0[j].x_position - camera->eye.x;
                             hitZ = D_800CC2D0[j].z_position - camera->eye.z;
                             if (sqrtf(hitX * hitX + hitZ * hitZ) + 200.0f < dist) {
@@ -579,10 +579,10 @@ void func_150ED748(struct127 *obj) {
                             }
                         }
                     }
-                    *(u8 *)&subject->pad128 &= ~0x40;
+                    subject->team &= ~0x40;
                     if (hit != 0) {
                         if (hit == 2) {
-                            *(u8 *)&subject->pad128 |= 0x40;
+                            subject->team |= 0x40;
                         }
                         hitX = dir[0] * dist + camera->eye.x;
                         hitY = dir[1] * dist + camera->eye.y;
@@ -612,15 +612,15 @@ void func_150ED748(struct127 *obj) {
 }
 
 /* Sets `obj` to state 3 (immune) and gives its camera back to player object 0 or 1, clearing that pad's R. */
-void func_150EEC84(struct127 *obj) {
+void func_150EEC84(Actor *obj) {
     Camera *camera;
-    struct127 *player;
+    Actor *player;
     s32 index;
 
     obj->unk5 = 3;
     obj->unkE4 = 0;
     obj->immune = 0xFF;
-    obj->pad320[8] = 0;
+    obj->unk328 = 0;
     if (obj->camera != NULL) {
         camera = obj->camera;
         index = 0;
@@ -631,7 +631,7 @@ void func_150EEC84(struct127 *obj) {
         obj->unk31C->unk78 = 0x29;
         PADS[index].button &= ~R_TRIG;
         player = &D_800CC2D0[index];
-        player->pad2FC[0] |= 1 << camera->playerIndex;
+        player->unk2FC |= 1 << camera->playerIndex;
         if (player->pad10A != 0) {
             func_1517F488(0xFF, 0, 0, 180, 20, camera->playerIndex);
             player->pad10A = 0;
@@ -642,7 +642,7 @@ void func_150EEC84(struct127 *obj) {
 extern void func_151045E0(void *, s32, f32);
 
 /* Sets `obj` to state 3 (immune) if it is not already, then runs the common object update. */
-void func_150EEDA8(struct127 *obj) {
+void func_150EEDA8(Actor *obj) {
     if (obj->unk5 != 3) {
         func_151045E0(obj, 15, 250.0f);
         obj->unk5 = 3;

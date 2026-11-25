@@ -58,15 +58,15 @@ extern u8 D_800CBDD3;
 extern f32 D_800CBDF4;
 extern f32 D_800CBDF8;
 void func_1510F800(s32);
-void func_15044660(struct127 *, f32, f32, f32);
-s32 func_150AB1F0(f32, f32, f32, struct127 *, s32);
-void func_150AC3E4(f32, f32, f32, struct127 *, s32);
+void func_15044660(Actor *, f32, f32, f32);
+s32 func_150AB1F0(f32, f32, f32, Actor *, s32);
+void func_150AC3E4(f32, f32, f32, Actor *, s32);
 
 /*
  * Runs func_150AB1F0 for obj against each enabled collision set (3 down to 0; set 3 is skipped when obj
  * flag 0x200 is set) and returns the summed results. With secondPass, also runs func_150AC3E4 on sets 0-2.
  */
-s32 func_15044380(f32 x, f32 y, f32 z, struct127 *obj, s32 arg4, s32 secondPass) {
+s32 func_15044380(f32 x, f32 y, f32 z, Actor *obj, s32 arg4, s32 secondPass) {
     s32 i;
     s32 total;
     s32 saved_mode;
@@ -123,10 +123,10 @@ void func_15044658(void) {
 
 extern f32 D_800CBDD8;
 extern f32 D_800CBDDC;
-void func_1507C3E0(struct127 *obj, s16 *height, s16 *arg2, s16 *arg3);
+void func_1507C3E0(Actor *obj, s16 *height, s16 *arg2, s16 *arg3);
 
 /* Sets D_800CBDD8/D_800CBDDC (a height and a mid-height) for obj's collision probe. */
-void func_15044660(struct127 *obj, f32 x, f32 y, f32 z) {
+void func_15044660(Actor *obj, f32 x, f32 y, f32 z) {
     s16 height;
     s16 unk2C;
     s16 unk2A;
@@ -326,7 +326,7 @@ s32 func_15044D40(TriggerVolume *volume) {
     return FALSE;
 }
 
-s32 func_1505D024(struct127 *obj, s32 type, u16 angle, s32 arg3);
+s32 func_1505D024(Actor *obj, s32 type, u16 angle, s32 arg3);
 
 /* Trigger actions 1-4: hit the player with a func_1505D024 type unless stunned or immune. */
 
@@ -1217,7 +1217,7 @@ s32 func_150470B0(struct17 *pos, f32 top, CollisionHit *hit) {
     return 0;
 }
 
-/* Floor state an object keeps (overlays struct127, whose header copy lacks these fields). */
+/* Floor state an object keeps (overlays Actor, whose header copy lacks these fields). */
 typedef struct ObjFloorState {
     /* 0x000 */ u8 pad0[0x14];
     /* 0x014 */ f32 x;

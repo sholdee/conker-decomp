@@ -5,10 +5,10 @@
 
 struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
 
-void func_15145740(struct127 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4);
-s32 func_1514654C(struct127 *, ActorCtl *, s32, vertex **, f32 **, s32);
-s32 func_151C229C(f32 *arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
-void func_151C5588(struct127 *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4);
+void func_15145740(Actor *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4);
+s32 func_1514654C(Actor *, ActorCtl *, s32, vertex **, f32 **, s32);
+s32 func_151C229C(f32 *arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
+void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4);
 void func_151C56A4(f32 *pos, u8 arg1, s32 arg2);
 
 /* Model-space points that func_1514654C transforms through model part 0x46 into world space. */
@@ -18,7 +18,7 @@ extern vertex D_800AAAA8;
 /* Spawns a func_151C229C effect along a segment at `obj`: offset along func_15145740's `dir` from its
  * position, or, when it has unk1D4, between two points of model part 0x46, plus func_151C56A4 and
  * (half the time) func_151C5588 effects at the segment start. */
-void func_151C5280(struct127 *obj, u8 arg1, s32 arg2) {
+void func_151C5280(Actor *obj, u8 arg1, s32 arg2) {
     f32 start[3];
     f32 end[3];
     f32 dir[3];
@@ -83,11 +83,11 @@ void func_151C5280(struct127 *obj, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_15102B38(struct127 *, u8, vertex *, vertex *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
+extern void func_15102B38(Actor *, u8, vertex *, vertex *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
 extern vertex D_800AAA9C;
 
 /* Spawns a func_15102B38 effect at `pos` on `obj` with randomized scale and parameters. */
-void func_151C5588(struct127 *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4) {
+void func_151C5588(Actor *obj, f32 *pos, s16 arg2, u8 arg3, s32 arg4) {
     f32 scale[2];
     f32 angle;
     s32 rand[2]; /* rand[1] is drawn but never used */
@@ -416,7 +416,7 @@ void func_151C61A0(vertex *arg0, vertex *arg1, u8 arg2, s32 arg3) {
 }
 
 /* D_80086C90 object filter: rejects objects with id 0x5A, 0x74 or 0x7A. */
-s32 func_151C6290(struct127 *obj, struct127 *self, s32 arg2) {
+s32 func_151C6290(Actor *obj, Actor *self, s32 arg2) {
     if (obj->id == 0x5A || obj->id == 0x74 || obj->id == 0x7A) {
         return FALSE;
     }

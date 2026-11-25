@@ -33,7 +33,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0xB];
-    /* 0x18 */ struct127 *character;
+    /* 0x18 */ Actor *character;
     /* 0x1C */ u8 pad1C[0x18];
     /* 0x34 */ FloorHit floor;
     /* 0x58 */ WatcherEffects effects;
@@ -98,7 +98,7 @@ typedef struct {
     /* 0x00 */ s32 target[2];
     /* 0x08 */ u8 ownerId;
     /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ struct127 *owner;
+    /* 0x0C */ Actor *owner;
     /* 0x10 */ u8 bone;
     /* 0x11 */ u8 pad11[3];
     /* 0x14 */ vertex offset;
@@ -147,7 +147,7 @@ void func_151346EC(struct102 *effect);
 void func_1513470C(struct102 *effect);
 
 FlickerSprite *func_150C6D90(Watcher *watcher);
-Emitter *func_150C68C4(struct127 *character, Watcher *watcher);
+Emitter *func_150C68C4(Actor *character, Watcher *watcher);
 
 extern vertex D_800887E0;
 /* matching: rodata holds second copies of these constants, which repeated literals would fold into the first */
@@ -203,7 +203,7 @@ s32 func_150C682C(FlickerSprite *sprite) {
 
 /* Watcher action: keeps the rising-particle emitter alive, creating it on first use. */
 void func_150C6870(Watcher *watcher) {
-    struct127 *character = watcher->character;
+    Actor *character = watcher->character;
 
     if (watcher->effects.emitter != NULL) {
         EmitterLink *link = &watcher->effects.emitter->link;
@@ -218,7 +218,7 @@ void func_150C6870(Watcher *watcher) {
  * Attaches an emitter to the character; its particles rise to the surface found above the
  * character (or 5000 units up when there is none).
  */
-Emitter *func_150C68C4(struct127 *character, Watcher *watcher) {
+Emitter *func_150C68C4(Actor *character, Watcher *watcher) {
     EmitterDesc desc;
     EmitterLink link;
     Emitter *emitter;
@@ -355,7 +355,7 @@ void func_150C6D68(Emitter *emitter) {
 FlickerSprite *func_150C6D90(Watcher *watcher) {
     FlickerSprite *sprite;
     vertex pos;
-    struct127 *character;
+    Actor *character;
 
     sprite = NULL;
     character = watcher->character;

@@ -187,7 +187,7 @@ typedef struct Actor150FD514 Actor150FD514;
 
 /* State that follows the particle (its ParticleMotion slot at 0x110). */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;      /* owner->unique_id when the link was made */
     /* 0x08 */ f32 maxWidth;
     /* 0x0C */ f32 timer;       /* counts down by D_800BE9A4; the particle dies below 0 */
@@ -220,16 +220,16 @@ struct Actor150FD514 {
 
 extern Vtx *func_1513EDE4(Actor150FD514 *particle, s16 viewport);
 extern s32 D_800A1EEC[];
-extern void func_1504715C(GroundHit *, struct127 *);
+extern void func_1504715C(GroundHit *, Actor *);
 extern s32 func_15046C80(struct17 *, s32, f32, GroundHit *);
-extern void func_1505D024(struct127 *, s32, u16, s32);
+extern void func_1505D024(Actor *, s32, u16, s32);
 extern s32 func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /*
  * Spawns a particle that follows obj, standing on the ground below it when the probe finds ground, with a
  * positioned sound, a func_1516284C effect and (on ground) a second particle lying on the ground.
  */
-void func_150FCFD4(struct127 *obj, u8 arg1, s32 arg2) {
+void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     GroundHit ground;
     vertex pos;
     u8 onGround;
@@ -359,8 +359,8 @@ void func_150FCFD4(struct127 *obj, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_1502EA98(struct127 *, u8, u8, u8, u8, s32, u8);
-extern void func_15107B78(struct127 *, s32, s32, s32, s32);
+extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);
+extern void func_15107B78(Actor *, s32, s32, s32, s32);
 extern void func_151D5334(struct17 *, f32, f32, f32, s32, u8, s32);
 extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_150E83AC(struct17 *, s16, u8, s32);
@@ -372,7 +372,7 @@ extern f32 sinf(f32);
  * one-time burst as it starts shrinking, pulses def.unk44 and scrolls its texture. Returns 0 once expired.
  */
 s32 func_150FD514(Actor150FD514 *particle) {
-    struct127 *owner;
+    Actor *owner;
     Ext150FCFD4 *ext;
     f32 z;
     f32 x;

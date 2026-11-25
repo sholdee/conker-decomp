@@ -31,11 +31,11 @@ extern IdleFrame D_8009B8B0[];
 extern s32 D_800D18C4;
 
 void func_1507EEB8(u8 seq, u8 *recent);
-s32 func_1507FFD8(struct127 *actor);
+s32 func_1507FFD8(Actor *actor);
 s32 func_1507F4C0(s32 phase);
-void func_1507FF94(struct127 *actor);
-s32 func_1515942C(struct127 *, s32, s32, s32, s32, s32);
-void func_1507CD64(struct127 *actor, s32 arg1);
+void func_1507FF94(Actor *actor);
+s32 func_1515942C(Actor *, s32, s32, s32, s32, s32);
+void func_1507CD64(Actor *actor, s32 arg1);
 void func_1000D96C(s32 arg0, s32 arg1, s32 arg2);
 void func_1000DE1C(s32 arg0, s32 arg1);
 void func_1000E7A0(u32 arg0, s32 arg1);
@@ -211,10 +211,10 @@ void func_1507EFD0(void) {
 
     idle = &D_800D154C->unk31C->idle;
     count = 0;
-    /* struct127 0x139: a requested sequence, 0x13A: its countdown (pad139 in include/structs.h) */
-    if (D_800D154C->pad139[1] != 0) {
-        if (D_800D154C->pad139[0] < 0x21) {
-            func_1507EB80(candidates, &count, D_800D154C->pad139[0]);
+    /* Actor 0x139: a requested sequence, 0x13A: its countdown (pad139 in include/structs.h) */
+    if (D_800D154C->unk13A != 0) {
+        if (D_800D154C->unk139 < 0x21) {
+            func_1507EB80(candidates, &count, D_800D154C->unk139);
         }
     } else if (D_800D18C0 & 2) {
         func_1507EB80(candidates, &count, 3);
@@ -344,7 +344,7 @@ s32 func_1507F4C0(s32 phase) {
 
 /* Plays the actor's idle animation; when unk13C names an object slot (100 and up), one that
  * suits that object's id. */
-void func_1507F54C(struct127 *actor) {
+void func_1507F54C(Actor *actor) {
     s32 slot;
     s32 anim;
 
@@ -599,7 +599,7 @@ void func_1507F640(void) {
 }
 
 /* Applies the side effects of the actor's current idle frame flags, on their rising/falling edges. */
-void func_1507FC2C(struct127 *actor) {
+void func_1507FC2C(Actor *actor) {
     struct197 *sound;
     f32 level;
     s32 flags;
@@ -665,7 +665,7 @@ void func_1507FC2C(struct127 *actor) {
 
 /* Per-frame idle bookkeeping for an actor: counts down unk13A, advances the idle timer while
  * idle (resetting the state otherwise), runs the delay, then applies the frame flags. */
-void func_1507FEA0(struct127 *actor) {
+void func_1507FEA0(Actor *actor) {
     IdleState *idle;
     u8 countdown;
     u16 timer;
@@ -675,10 +675,10 @@ void func_1507FEA0(struct127 *actor) {
     if (actor->unk31C == NULL || actor->unk127 == 0xFF) {
         return;
     }
-    countdown = actor->pad139[1];
+    countdown = actor->unk13A;
     idle = &actor->unk31C->idle;
     if (countdown != 0) {
-        actor->pad139[1] = countdown - 1;
+        actor->unk13A = countdown - 1;
     }
     if (idle->active == TRUE && D_800C35EA != 1) {
         limit = 0xFFFF - D_800BE9E4;
@@ -706,9 +706,9 @@ void func_1507FEA0(struct127 *actor) {
 }
 
 /* Sends event 0xD about actor (pointer plus unique id) to both event handlers. */
-void func_1507FF94(struct127 *actor) {
+void func_1507FF94(Actor *actor) {
     struct {
-        struct127 *actor;
+        Actor *actor;
         u8 uniqueId;
     } event;
 
@@ -742,7 +742,7 @@ extern ObjTypeList D_80086C50;
  * Returns 1 when the actor stands in a trigger zone (type 4, subtype 5 or 11) and one of the
  * objects of the three D_80086C50 types is within 1000 units and inside its 90-degree view.
  */
-s32 func_1507FFD8(struct127 *actor) {
+s32 func_1507FFD8(Actor *actor) {
     s32 inZone;
     s32 i;
     ListObject *obj;

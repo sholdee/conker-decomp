@@ -33,7 +33,7 @@ extern ZScanParams D_800DC200[4][4];
 
 void func_15123A54(Camera *arg0);
 
-/* An object the camera tracks (Camera's unk3D0 / unk3D4); a struct127 game object at least for unk3D0. */
+/* An object the camera tracks (Camera's unk3D0 / unk3D4); a Actor game object at least for unk3D0. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x14];
     /* 0x014 */ f32 x_position;
@@ -117,7 +117,7 @@ void func_1512A390(Camera *arg0) {
     func_151236D0(arg0);
     if (!(arg0->flags & 0x10) && (arg0->player->unk102 == 0) && (D_800C3671 == 0) && (arg0->unk92C == 0) &&
         (((CamObj *)arg0->player)->unk17C < arg0->unk35C)) {
-        func_15128774((Camera *)arg0, (struct127 *)arg0->player);
+        func_15128774((Camera *)arg0, (Actor *)arg0->player);
     }
     if (-10000.0f == arg0->unk35C) {
         if (D_800BE616 != 0) {
@@ -582,7 +582,7 @@ s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, s32 arg5);
 void func_1512BB10(Camera *arg0) {
     s32 savedDD3;
     s32 flag;
-    struct127 probe;
+    Actor probe;
     s32 hit;
     s32 saved2;
     s32 saved1;
@@ -643,7 +643,7 @@ void func_1512BB10(Camera *arg0) {
             probe.y_position = arg0->eye.y;
         }
         probe.z_position = arg0->eye.z;
-        probe.pad188 = arg0->unk644;
+        probe.unk188 = arg0->unk644;
         probe.unk28 = probe.y_position - arg0->unk354;
         probe.unk180 = arg0->unk354;
         probe.y_velocity = 0.0f;

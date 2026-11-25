@@ -6,7 +6,7 @@
  * Bone-matrix trails ("afterimages") drawn behind objects. Each trail keeps
  * numFrames past copies of its owner's bone matrices, double-buffered on
  * D_800BE9C0, and draws them with increasing transparency.
- * D_800DF7C8[0] lists type-0 trails (struct127 owners),
+ * D_800DF7C8[0] lists type-0 trails (Actor owners),
  * D_800DF7C8[1] lists type-1 trails (world object owners, one matrix).
  */
 
@@ -32,7 +32,7 @@ typedef struct Trail {
     /* 0x08 */ MtxS16 *frames;
     /* 0x0C */ struct Trail *next;
     /* 0x10 */ union {
-        struct127 *object;
+        Actor *object;
         WorldObject *worldObj;
         WorldObj *worldObjView;
     } owner;
@@ -47,7 +47,7 @@ extern s32 func_1502DB20(s32);
 void func_15188A58(Trail *trail, Trail **list);
 
 /* Starts (or extends) a type-0 trail behind a game object. */
-void func_15188810(struct127 *object, s32 duration, s32 maxDist) {
+void func_15188810(Actor *object, s32 duration, s32 maxDist) {
     Trail *trail;
     s32 numBones;
     s32 size;
@@ -146,7 +146,7 @@ void func_15188A58(Trail *trail, Trail **list) {
 }
 
 /* Lets an object's type-0 trail start fading out. */
-void func_15188A9C(struct127 *object) {
+void func_15188A9C(Actor *object) {
     Trail *trail;
 
     for (trail = sTrailLists[0]; trail != NULL; trail = trail->next) {
@@ -157,7 +157,7 @@ void func_15188A9C(struct127 *object) {
 }
 
 /* Removes and frees an object's type-0 trails immediately. */
-void func_15188AD0(struct127 *object) {
+void func_15188AD0(Actor *object) {
     Trail *trail;
     Trail *prev;
     Trail *next;
@@ -444,8 +444,8 @@ void func_151895CC(Trail *trail) {
     func_100043B4((s32 *)trail->frames, 2);
 }
 
-extern s32 func_150849CC(struct127 *, s32 *);
-extern s32 func_1503DA9C(struct127 *, s32, s32, s32);
+extern s32 func_150849CC(Actor *, s32 *);
+extern s32 func_1503DA9C(Actor *, s32, s32, s32);
 extern Gfx *func_1502C974(Gfx *gfx, s32 index, s32 player, s32 mode, s32 wrap);
 extern MtxS16 *D_800DF7C0; // bone matrices drawn by func_1502C974 mode 4
 extern u8 D_800DF7C4;      // alpha scale for func_1502C974 mode 4
@@ -524,7 +524,7 @@ Gfx *func_151897A4(Gfx *gfx, Trail *trail, s16 player) {
 }
 
 /* Sets unk14 of an object's type-0 trail. */
-void func_151898C0(struct127 *object, s32 value) {
+void func_151898C0(Actor *object, s32 value) {
     Trail *trail;
 
     for (trail = sTrailLists[0]; trail != NULL; trail = trail->next) {

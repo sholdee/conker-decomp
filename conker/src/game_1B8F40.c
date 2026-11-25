@@ -36,7 +36,7 @@ typedef struct {
     /* 0x0C */ f32 halfWidthRange;
     /* 0x10 */ s16 pointRange; /* each trail gets 3 + rand % (pointRange + 1) points */
     /* 0x12 */ s16 angleRange;
-    /* 0x14 */ struct127 *owner;
+    /* 0x14 */ Actor *owner;
     /* 0x18 */ u8 ownerId;     /* owner->unique_id when attached */
     /* 0x19 */ u8 texture;
     /* 0x1A */ u8 flags;
@@ -55,7 +55,7 @@ void *func_15167A68(s32 type, s32 list, s32 size, s32 arg3, s32 owner, s32 arg5)
 TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list);
 
 /* Returns the actor's trail emitter, creating one if its kind has emitter settings. */
-TrailEmitter *func_1518BA90(struct127 *actor, u8 owner, s32 list) {
+TrailEmitter *func_1518BA90(Actor *actor, u8 owner, s32 list) {
     ObjLink **heads;
     TrailEmitterParams params;
     TrailEmitter *emitter;
@@ -110,7 +110,7 @@ TrailEmitter *func_1518BA90(struct127 *actor, u8 owner, s32 list) {
 }
 
 /* Destroys every trail emitter (after pointing each at `actor`). */
-void func_1518BBF4(struct127 *actor) {
+void func_1518BBF4(Actor *actor) {
     s32 i;
     TrailEmitter *emitter;
 
@@ -149,19 +149,6 @@ TrailEmitter *func_1518BCD0(TrailEmitterParams *params, u8 owner, s32 list) {
     emitter->timers[1] = func_150ADA20() & 0x1F;
     return emitter;
 }
-
-/*
- * struct127 bytes 0x1AC..0x1BA (padding in structs.h): the two points trails are emitted from
- * and the actor's facing direction in 1/256 units.
- */
-typedef struct {
-    /* 0x1AC */ Vec3s points[2];
-    /* 0x1B8 */ s8 dirX;
-    /* 0x1B9 */ u8 pad1B9;
-    /* 0x1BA */ s8 dirZ;
-} ActorTrailPoints;
-
-#define ACTOR_TRAIL_POINTS(actor) ((ActorTrailPoints *)&(actor)->pad1AC)
 
 /* Trail types (see game_175250.c). */
 
@@ -269,7 +256,7 @@ void func_1518BD60(TrailEmitter *emitter) {
     f32 sinA;
     f32 cosA;
     s32 angle;
-    struct127 *owner;
+    Actor *owner;
     TrailEmitterLink *link;
 
     for (i = 0; i < 2; i++) {
@@ -316,8 +303,8 @@ void func_1518BD60(TrailEmitter *emitter) {
                 }
                 owner = emitter->params.owner;
             }
-            emitter->prevX[i] = ACTOR_TRAIL_POINTS(owner)->points[i].x;
-            emitter->prevZ[i] = ACTOR_TRAIL_POINTS(emitter->params.owner)->points[i].z;
+            emitter->prevX[i] = owner->aim.side[i][0];
+            emitter->prevZ[i] = emitter->params.owner->aim.side[i][2];
         }
     }
 }
@@ -359,11 +346,11 @@ s32 func_1518C0B8(Trail *trail) {
         link->emitter->params.owner->unique_id != link->emitter->params.ownerId) {
         return 0;
     }
-    pos.x = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->points[link->point].x;
-    pos.y = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->points[link->point].y;
-    pos.z = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->points[link->point].z;
-    dirX = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->dirX * (1.0f / 256);
-    dirZ = ACTOR_TRAIL_POINTS(link->emitter->params.owner)->dirZ * (1.0f / 256);
+    pos.x = link->emitter->params.owner->aim.side[link->point][0];
+    pos.y = link->emitter->params.owner->aim.side[link->point][1];
+    pos.z = link->emitter->params.owner->aim.side[link->point][2];
+    dirX = link->emitter->params.owner->aim.dir[0] * (1.0f / 256);
+    dirZ = link->emitter->params.owner->aim.dir[2] * (1.0f / 256);
     lenSq = dirX * dirX + dirZ * dirZ;
     if (lenSq) {
         // matching: a slotless block-scope decl adds the -g3 line that gives the nop after the mul.s
@@ -534,10 +521,10 @@ s32 func_1518C69C(Trail *trail, s32 arg1, s32 arg2, s32 arg3, f32 hitY, s32 arg5
 
 /* Message sent to objects about an actor (see game_105FC0.c's TrailMessage). */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     union {
         u8 actorId;        /* type 0 */
-        struct127 *other;  /* type 0x2D */
+        Actor *other;  /* type 0x2D */
     } x4;
     u8 actorId;  /* type 0x2D */
     u8 otherId;  /* type 0x2D */
@@ -549,7 +536,7 @@ typedef struct {
  */
 void func_1518C850(TrailEmitter *emitter, s32 data, u8 type) {
     ActorMessage *msg = (ActorMessage *)data;
-    struct127 *actor;
+    Actor *actor;
 
     if (type == 0x2D) {
         actor = msg->actor;

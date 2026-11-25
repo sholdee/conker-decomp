@@ -3,7 +3,7 @@
 #define func_1502B7F0 func_1502B7F0_5
 #include "functions.h"
 #undef func_1502B7F0
-/* variables.h types D_800CC2D0 as struct127[], whose 0x128 is inside `u32 pad128`;
+/* variables.h types D_800CC2D0 as Actor[], whose 0x128 is inside `u32 pad128`;
    func_151E9D18 needs a byte there, so shadow the declaration file-locally. */
 #define D_800CC2D0 D_800CC2D0_struct127_decl_in_variables_h
 /* variables.h declares D_800BE3F8 as a pointer; this file uses it as an array of SaveSlot215960. */
@@ -1450,7 +1450,7 @@ extern s8 D_8008FE40;
 extern u8 *D_800900D8[];
 extern u8 *D_800900FC[];
 extern s8 D_800E0B90[];
-extern struct127 *D_800E0BA0[];
+extern Actor *D_800E0BA0[];
 extern u8 D_800E0C88[];
 extern u8 D_87B;
 extern u8 D_88C;
@@ -1600,7 +1600,7 @@ Gfx *func_151EC648(Gfx *gfx) {
         s32 slot;
         s32 valueIndex;
         s32 values[3];
-        struct127 **slotObj;
+        Actor **slotObj;
 
         sc = (D_800BE9AC & 0x3F) * 0.0981746912f;
         sc = sinf(sc + 0.7853975296f);
@@ -2069,7 +2069,7 @@ Gfx *func_151EE184(Gfx *gfx) {
     s32 rowLength;
     s32 i;
     s32 selectedKey;
-    struct127 *obj;
+    Actor *obj;
     Mtx *mtx;
     s32 j;
     u32 matchMask;

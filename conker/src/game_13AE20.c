@@ -71,7 +71,7 @@ Shadow *func_1510D970(s32 ownerType, u8 *owner, s32 texture, s32 createFlags, s3
     return shadow;
 }
 
-/* This file's view of a struct127 game object (cf. GameObj in game_58F80.c), shadow owner type 0. */
+/* This file's view of a Actor game object (cf. GameObj in game_58F80.c), shadow owner type 0. */
 typedef struct {
     /* 0x000 */ u8 pad0[4];
     /* 0x004 */ u8 id;

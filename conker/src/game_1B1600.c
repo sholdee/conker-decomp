@@ -38,7 +38,7 @@ extern u8 D_800C3E90;
 /* Half-extents of an object's bounding box, from its bone matrices or, failing that, its model size. */
 s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
     s32 id;
-    struct127 *obj;
+    Actor *obj;
     s32 count;
     s32 i;
     f32 dx;
@@ -153,7 +153,7 @@ f32 func_15184368(s32 objIndex, s32 slot, f32 halfX, f32 halfY, f32 halfZ, f32 m
     f32 nodePos[3];
     f32 perspScale;
     f32 v;
-    struct127 *obj;
+    Actor *obj;
     struct17 *eye;
 
     obj = &D_800CC2D0[objIndex];
@@ -377,7 +377,7 @@ extern Vp D_8008D3E8;
 extern Mtx D_89470;
 extern s16 D_80082FA6;
 Gfx *func_1501A680(Gfx *gfx);
-extern s32 func_1506196C(struct127 *, s32);
+extern s32 func_1506196C(Actor *, s32);
 extern Gfx *func_1502CCFC(Gfx *, s32, s32, struct255 *, s32, s32 *, s32, s32);
 Gfx *func_1510B7B4(Gfx *gfx, s32 idx);
 
@@ -390,9 +390,9 @@ Gfx *func_15184FA4(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
     s32 col[3];
 
     if (D_800CC2D0[objIndex].unk127 == 0xFF) {
-        lod = D_800CC2D0[objIndex].pad1C8 + 1;
+        lod = D_800CC2D0[objIndex].lod + 1;
     } else {
-        lod = D_800CC2D0[objIndex].pad1C8;
+        lod = D_800CC2D0[objIndex].lod;
     }
     gDPPipeSync(gfx++);
     gDPSetColorImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 64, D_800DF088);
@@ -788,10 +788,10 @@ extern s32 D_800C48F0[];
 extern s32 D_800BEBA4;
 extern Vp D_800DF090[];
 extern u8 D_800DF0E0;
-extern s32 func_150849CC(struct127 *, s32 *);
+extern s32 func_150849CC(Actor *, s32 *);
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_10004074(void *);
-extern void func_1503DA9C(struct127 *, s32, s32, s32);
+extern void func_1503DA9C(Actor *, s32, s32, s32);
 
 /*
  * Rare microcode command 0x10: four triangles sharing vertex c, (c, v-3, v-2) (c, v-2, v-1) (c, v, v+1)
@@ -876,7 +876,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
         // matching: the dead store to v and the repeated unk74 test (as u32) steer IDO's register allocation
         if (D_800CC2D0[i].interaction_state == 0 || D_800CC2D0[i].unk1D4 == NULL ||
             ((v = D_800CC2D0[i].unk74) & (1 << view)) || D_800CC2D0[i].unk5 != 0 ||
-            (D_800CC2D0[i].pad66 & 0x10) != 0x10 ||
+            (D_800CC2D0[i].unk66 & 0x10) != 0x10 ||
             (u32)(D_800CC2D0[i].unk74 & (1 << view)) == (u32)(1 << view) ||
             D_800CC2D0[i].unk84.uh == 0x2D8 ||
             (D_800CC2D0[i].unk31C != NULL && (D_800CC2D0[i].unk31C->unk95 != 0 || D_800CC2D0[i].unk31C->ropeId != 0)) ||
@@ -886,7 +886,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
         if (D_800CC2D0[i].unk65 != 0 && D_800CC2D0[i].id != 0x62) {
             continue;
         }
-        if (D_800CC2D0[i].pad288[0x40] != 0) {
+        if (D_800CC2D0[i].unk2C8 != 0) {
             modelId = func_150849CC(&D_800CC2D0[i], &modelSub);
             func_1503DA9C(&D_800CC2D0[i], modelId, modelSub, 0);
         } else {
@@ -912,7 +912,7 @@ Gfx *func_15186794(Gfx *gfx, s32 view) {
                 idx = 0;
                 gfx = func_15184FA4(gfx, i, slot, view);
                 batch = 0;
-                if (D_800CC2D0[i].unk127 != 0xFF && D_800CC2D0[i].pad1C8 < 2) {
+                if (D_800CC2D0[i].unk127 != 0xFF && D_800CC2D0[i].lod < 2) {
                     split = 1;
                 } else if (i + 1 == D_800CC2D0[D_800CC2D0[i].unk124].unk65 &&
                            D_800CC2D0[D_800CC2D0[i].unk124].unk127 != 0xFF && D_800CC2D0[i].id == 0x53) {

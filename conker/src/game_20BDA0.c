@@ -366,7 +366,7 @@ void func_151DF1BC(void) {
     u16 unused; // matching: unused stack slot sets IDO's frame layout
     s32 alpha;
     s32 anim;
-    struct127 *obj;
+    Actor *obj;
 
     obj = func_15083E90(9);
     if (D_800E0A96 != -1) {
@@ -387,7 +387,7 @@ void func_151DF1BC(void) {
                 D_800C3E78 = D_800D154C - D_800CC2D0;
                 obj->unk218 = func_1507BB28(0, obj->unk232);
                 obj->unk21C = 0;
-                obj->pad201[0] = 0x14;
+                obj->unk201 = 0x14;
             }
             D_800E0A96 = -1;
         }
@@ -1074,7 +1074,7 @@ void func_151E09DC(void) {
     D_8008FDD4->input &= ~MENU_BACK;
 }
 
-extern struct127 *D_800E0BA0[];
+extern Actor *D_800E0BA0[];
 extern u32 D_8008FEA4[];
 extern char D_800AB854[];
 void func_151E7F60(s32, s32);

@@ -42,7 +42,7 @@ typedef struct {
 
 /* User data of a bolt that runs from an actor bone to a point near the actor (func_151A8624). */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;           /* owner->unique_id at spawn; the bolt stops when it changes */
     /* 0x08 */ Vec3f boneOffset;
     /* 0x14 */ u8 bone;
@@ -373,7 +373,7 @@ void func_151A85D4(Bolt *bolt) {
  * Spawns a bolt from bone `bone` of owner (at boneOffset in bone space) to targetOffset from the
  * owner's position; func_151A87F8 (update1) keeps both ends attached. lifetime -1 means untimed.
  */
-Bolt *func_151A8624(struct127 *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
+Bolt *func_151A8624(Actor *owner, Vec3f *boneOffset, u8 bone, s16 lifetime,
                     f32 jitterDelay, f32 jitterDelayRange, BoltColor *color,
                     f32 width, Vec3f *targetOffset, u8 arg9, u8 argA,
                     s8 update2, s32 extraSize, u8 argD, s32 argE) {
@@ -461,7 +461,7 @@ extern s32 func_15146078(Vec3f *, Vec3f *, Vec3f *);
  */
 s32 func_151A87F8(Bolt *bolt) {
     BoltLink *link;
-    struct127 *owner;
+    Actor *owner;
     Vec3f dir;
     s32 hit;
     f32 dx;
@@ -534,9 +534,9 @@ void func_151A8A20(Bolt *bolt, void *msg, u8 msgType) {
 
 /* Message 0x2D: two actors traded places (each with its unique_id). */
 typedef struct {
-    struct127 *actorA;
+    Actor *actorA;
     union {
-        struct127 *actorB;
+        Actor *actorB;
         u8 id;              /* message 0: the unique_id of the dying actor */
     } u4;
     u8 idA;
@@ -550,7 +550,7 @@ typedef struct {
 void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
     BoltLink *link = bolt->link;
     BoltOwnerMsg *msg = arg;
-    struct127 *actor;
+    Actor *actor;
 
     if (msgType == 0) {
         actor = msg->actorA;

@@ -6,7 +6,7 @@ extern void func_151D2AB0(s32);
 
 /* Per-effect data (at 0x28) of the spark effect that follows an object. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id when attached; a mismatch means the slot was reused */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ f32 sparkAccum; /* fractional count of func_15107700 particles still to spawn */
@@ -26,7 +26,7 @@ typedef struct {
 } SparkEffect;
 
 /* Spawns a spark effect attached to `owner`; a duration of -1 means 300 frames, not looping. */
-SparkEffect *func_150B53D0(struct127 *owner, s16 duration, u8 arg2, s32 arg3) {
+SparkEffect *func_150B53D0(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     SparkEffect *effect;
     SparkEffectData data;
 
@@ -49,14 +49,14 @@ SparkEffect *func_150B53D0(struct127 *owner, s16 duration, u8 arg2, s32 arg3) {
     return effect;
 }
 
-extern void func_1502EA98(struct127 *, u8, u8, u8, u8, s32, u8);
-extern void func_15107700(struct127 *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
-extern void func_15107B78(struct127 *, s32, s32, s32, s32);
+extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);
+extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
+extern void func_15107B78(Actor *, s32, s32, s32, s32);
 
 /* Per-frame update of a spark effect: ends it once the owner is gone, else spawns sparks around it. */
 void func_150B54A8(SparkEffect *effect) {
     SparkEffectData *data;
-    struct127 *owner;
+    Actor *owner;
 
     owner = effect->data.owner;
     data = &effect->data;
@@ -106,13 +106,13 @@ void func_150B5814(SparkEffect *effect) {
 typedef union {
     /* event 0 */
     struct {
-        /* 0x00 */ struct127 *obj;
+        /* 0x00 */ Actor *obj;
         /* 0x04 */ u8 id;
     } obj;
     /* event 0x2D: two objects swap places; effects attached to either move to the other */
     struct {
-        /* 0x00 */ struct127 *objA;
-        /* 0x04 */ struct127 *objB;
+        /* 0x00 */ Actor *objA;
+        /* 0x04 */ Actor *objB;
         /* 0x08 */ u8 idA;
         /* 0x09 */ u8 idB;
     } swap;
@@ -122,7 +122,7 @@ typedef union {
  * its owner. */
 void func_150B5840(SparkEffect *effect, SparkEvent *event, u8 eventId) {
     SparkEffectData *data = &effect->data;
-    struct127 *obj;
+    Actor *obj;
 
     if (eventId == 0) {
         obj = event->obj.obj; // matching: loading the pointer first puts it in v1 ahead of data->owner

@@ -928,7 +928,7 @@ typedef struct ParticleSpawn78 {
     /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
     /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct struct127 *owner;
+    /* 0x6C */ struct Actor *owner;
     /* 0x70 */ u8 ownerId;
     /* 0x71 */ u8 pad71;
     /* 0x72 */ s16 fadeStart;
@@ -1917,7 +1917,7 @@ void func_151CB49C(SightLensObject *obj, void **msg, u8 msgId) {
     }
 }
 
-/* The part of struct127 read through Camera.unk3D4 here (struct127 does not declare it). */
+/* The part of Actor read through Camera.unk3D4 here (Actor does not declare it). */
 typedef struct {
     u8 pad0[0x19E];
     u16 unk19E;
@@ -2261,7 +2261,7 @@ s32 func_151CC77C(SightSprite *sprite) {
         s32 pad[2];
     } angles;
     ActorCtl *aimer;
-    struct127 *state;
+    Actor *state;
 
     // matching: one variable first holds the player, then the aimer (as IDO allocated it)
     aimer = (ActorCtl *)sprite->payload.player;

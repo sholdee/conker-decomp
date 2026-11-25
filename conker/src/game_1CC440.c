@@ -37,7 +37,7 @@ typedef struct TrailSet {
 
 typedef struct TrailOwner {
     /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ struct127 *actor;
+    /* 0x18 */ Actor *actor;
     /* 0x1C */ u8 actorId; /* actor->unique_id this owner belongs to */
     /* 0x1D */ u8 pad1D[0x17];
     /* 0x34 */ u8 unk34[0x24];
@@ -139,7 +139,7 @@ s32 func_1519EF90(config, side, out)
     u8 side;
     TrailVec3 *out;
 {
-    struct127 *actor;
+    Actor *actor;
     TrailSet *trails;
     f32 dx;
     f32 dz;
@@ -241,7 +241,7 @@ Trail *func_1519F1C8(owner, side)
     TrailOwner *owner;
     u8 side;
 {
-    struct127 *actor;
+    Actor *actor;
     TrailHeader header;
     TrailConfig config;
     Trail *trail;
@@ -431,7 +431,7 @@ s32 func_1519F4F0(Trail *trail) {
 s32 func_1519F7F0(Trail *trail) {
     TrailConfig *config;
     TrailPoint *points;
-    struct127 *actor;
+    Actor *actor;
     s32 pad; // matching: unused stack slot in the original frame
     s32 found;
     f32 widthStep;
@@ -859,7 +859,7 @@ Gfx *func_1519FE6C(Trail *trail, Gfx *gfx, s16 arg2) {
 void func_151A084C(TrailSpawner *spawner) {
     Trail *trail;
     TrailSet *trails;
-    struct127 *actor;
+    Actor *actor;
     u8 done;
     TrailLink *link;
 
@@ -902,7 +902,7 @@ void func_151A0928(TrailSpawner *spawner) {
 }
 
 typedef struct TrailEvent {
-    /* 0x0 */ struct127 *actor;
+    /* 0x0 */ Actor *actor;
     /* 0x4 */ u8 actorId;
 } TrailEvent;
 
@@ -910,7 +910,7 @@ typedef struct TrailEvent {
 void func_151A0950(Trail *trail, TrailEvent *event, u8 type) {
     TrailOwner *owner;
     TrailConfig *config = trail->config;
-    struct127 *actor;
+    Actor *actor;
 
     if (type == 10) {
         owner = config->owner;
@@ -925,7 +925,7 @@ void func_151A0950(Trail *trail, TrailEvent *event, u8 type) {
 
 /* Event handler for a spawner: event 0 about its owner's actor deletes the spawner. */
 void func_151A09B4(TrailSpawner *spawner, TrailEvent *event, u8 type) {
-    struct127 *actor = spawner->link.owner->actor;
+    Actor *actor = spawner->link.owner->actor;
 
     if (type == 0) {
         if (actor == event->actor || event->actorId == actor->unique_id) {

@@ -11,7 +11,7 @@ u8 func_150ADA20(void);
 void func_15142314(struct255 *bones, s32 bone, vertex *out);
 
 /* Gets the position of the actor's bone 0x18 (side 1) or 0x15 (side 2). */
-s32 func_150C19C0(vertex *pos, struct127 *actor, u8 side) {
+s32 func_150C19C0(vertex *pos, Actor *actor, u8 side) {
     s32 bone;
 
     switch (side) {
@@ -46,7 +46,7 @@ void func_15165F80(s32 direction, s32 x, s32 y, s32 z, s32 growthRate, s32 life,
  * Spawns an effect at the actor's bone for `side` (see func_150C19C0): a ring of particles and a
  * flat quad at the actor's unk180 height, and 5 to 12 debris particles flying outwards from it.
  */
-void func_150C1A40(struct127 *actor, s32 side, s32 arg2) {
+void func_150C1A40(Actor *actor, s32 side, s32 arg2) {
     vertex pos;
     f32 scale;
     ParticleSpawn spawn;

@@ -19,7 +19,7 @@ typedef struct {
 } EffectParams;
 
 /*
- * Object type 0x27: moves from pos toward target (a fixed point, a struct127 or a followed f32[3]) at
+ * Object type 0x27: moves from pos toward target (a fixed point, a Actor or a followed f32[3]) at
  * speed units per frame, spawning particles that run from origin to the moving point. Live effects are
  * registered in the 8 handle slots D_800D99D0 (handle = slot + 1).
  */
@@ -36,7 +36,7 @@ typedef struct Effect {
     /* 0x28 */ Vec3f origin;
     /* 0x34 */ f32 speed;
     /* 0x38 */ f32 startY;
-    /* 0x3C */ struct127 *targetObj;
+    /* 0x3C */ Actor *targetObj;
     /* 0x40 */ s32 unk40;
     /* 0x44 */ s32 lingerTimer;
     /* 0x48 */ u8 slot;
@@ -64,7 +64,7 @@ extern Effect *D_800DCE50[2][104];
 
 /* Creates an effect from (x, y, z) toward (targetX, targetY, targetZ) and registers it in a free slot. */
 Effect *func_150E3020(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s32 arg6, f32 speed,
-                      struct127 *targetObj, f32 originX, f32 originY, f32 originZ, f32 *follow, s16 lifetime) {
+                      Actor *targetObj, f32 originX, f32 originY, f32 originZ, f32 *follow, s16 lifetime) {
     Effect *effect;
     s32 i;
 
@@ -121,7 +121,7 @@ s32 func_150E3208(s32 x, s32 y, s32 z, s32 targetX, s32 targetY, s32 targetZ, s3
 }
 
 /* Starts an effect that homes in on targetObj; returns its handle, or 0. */
-s32 func_150E32D0(s32 x, s32 y, s32 z, struct127 *targetObj, s32 arg4, f32 speed) {
+s32 func_150E32D0(s32 x, s32 y, s32 z, Actor *targetObj, s32 arg4, f32 speed) {
     Effect *effect;
 
     effect = func_150E3020(x, y, z, 0, 0, 0, arg4, speed, targetObj, 0.0f, 0.0f, 0.0f, NULL, -99);
@@ -155,7 +155,7 @@ s32 func_150E33CC(s32 arg0, s32 arg1, void **arg2, s32 arg3) {
 }
 
 /* Starts an effect with a looping sound (0x2D0) at its origin; returns its handle, or 0. */
-s32 func_150E3414(s32 originX, s32 originY, s32 originZ, s32 x, s32 y, s32 z, struct127 *targetObj, s32 arg7,
+s32 func_150E3414(s32 originX, s32 originY, s32 originZ, s32 x, s32 y, s32 z, Actor *targetObj, s32 arg7,
                   f32 speed) {
     Effect *effect;
 

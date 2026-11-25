@@ -7,15 +7,15 @@
 #undef D_800D2104
 
 f32 func_150489B0(u8 arg0);
-void func_1502178C(struct127 *arg0, s32 arg1, s32 arg2);
-void func_15052760(struct127 *arg0, s16 arg1);
-s32 func_150535F4(struct127 *arg0);
-void func_150562FC(struct127 *arg0);
-void func_15056B08(struct127 *arg0);
-void func_150585F0(struct127 *arg0, f32 arg1);
-void func_150597FC(struct127 *arg0);
-void func_1505A770(struct127 *arg0);
-struct127 *func_1505EEB0(s32 state, s32 *outIdx);
+void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
+void func_15052760(Actor *arg0, s16 arg1);
+s32 func_150535F4(Actor *arg0);
+void func_150562FC(Actor *arg0);
+void func_15056B08(Actor *arg0);
+void func_150585F0(Actor *arg0, f32 arg1);
+void func_150597FC(Actor *arg0);
+void func_1505A770(Actor *arg0);
+Actor *func_1505EEB0(s32 state, s32 *outIdx);
 void func_1510F800(s32);
 s32 func_1510F8D8(s16, s16, s16, s32);
 s32 func_15167D84(void *, s32, s32, s32, s32, s32);
@@ -43,7 +43,7 @@ typedef struct {
 extern Path **D_800D2104; // header declares it as s32 *
 
 /* Remembers the object's x/z, and drags a swimming player who comes within range down and sideways around it. */
-void func_150B10F0(struct127 *obj) {
+void func_150B10F0(Actor *obj) {
     f32 dist;
     f32 pushX;
     f32 pushZ;
@@ -54,8 +54,8 @@ void func_150B10F0(struct127 *obj) {
     u16 angle;
 
     // 0x174/0x178 are f32 fields the shared header still declares as pads
-    *(f32 *)&obj->pad174 = obj->x_position;
-    *(f32 *)&obj->pad178 = obj->z_position;
+    obj->unk174 = obj->x_position;
+    obj->unk178 = obj->z_position;
     obj->immune = 100;
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
     if (func_1505A6F8(D_800CC2D0, obj) < 1100.0f) {
@@ -69,7 +69,7 @@ void func_150B10F0(struct127 *obj) {
         }
         if (dist < range && D_800CC2D0[0].in_water == 1) {
             closeness = 1100.0f - distCopy;
-            angle = func_1505A630(*(f32 *)&obj->pad174 - D_800CC2D0[0].x_position, D_800CC2D0[0].z_position - *(f32 *)&obj->pad178, 0);
+            angle = func_1505A630(obj->unk174 - D_800CC2D0[0].x_position, D_800CC2D0[0].z_position - obj->unk178, 0);
             if (850.0f < closeness) {
                 D_800CC2D0[0].y_position -= (closeness - 820.0f) * 0.09f * D_800D1550;
             }
@@ -82,7 +82,7 @@ void func_150B10F0(struct127 *obj) {
 }
 
 /* Holds the object at its path's centre height and eases unkC4 toward its turn rate (clamped to +-6). */
-void func_150B12FC(struct127 *obj) {
+void func_150B12FC(Actor *obj) {
     s16 turn;
     s16 prevAngle;
     f32 leanStep;
@@ -129,7 +129,7 @@ typedef struct {
  * straight at its target object D_800CC2D0[unk222]. A nonzero unk224 overrides the height: 10000 means its
  * current path waypoint, anything else is unk224 * 8 (plus unk180 for most ids). Stunned objects only recover.
  */
-void func_150B1484(struct127 *obj) {
+void func_150B1484(Actor *obj) {
     s16 prevAngle;
 
     prevAngle = obj->unk76;
@@ -201,13 +201,13 @@ void func_150B1484(struct127 *obj) {
  * `other`; otherwise `other` hangs 170 below the object, swaying (unkB8) with the phase unk7E and spinning
  * with the frame step D_800BE9A0. Either way the object then faces the player.
  */
-void func_150B17DC(struct127 *obj) {
+void func_150B17DC(Actor *obj) {
     s32 otherIdx;
     f32 phase;
     f32 offsetX;
     f32 offsetZ;
     f32 unusedOut;
-    struct127 *other;
+    Actor *other;
 
     other = func_1505EEB0(10, &otherIdx);
     func_15056B08(obj);
@@ -277,7 +277,7 @@ typedef struct {
  * and D_800B86A4's row clear or D_800CC250 bit 2 set), and
  * now and then emits a particle at a random point around it that drifts with the player's motion.
  */
-void func_150B19E0(struct127 *obj) {
+void func_150B19E0(Actor *obj) {
     f32 target;
     f32 radius;
     f32 speed;

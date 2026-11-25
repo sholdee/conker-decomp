@@ -33,7 +33,7 @@ typedef struct ParticleSpawn78 {
     /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
     /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct struct127 *owner;
+    /* 0x6C */ struct Actor *owner;
     /* 0x70 */ u8 ownerId;
     /* 0x71 */ u8 pad71;
     /* 0x72 */ s16 fadeStart;
@@ -102,10 +102,10 @@ extern f32 D_8009FD48[3];
 // matching: the model is passed as s32; a pointer type moves the unk1D4 temp from v0 to a3
 void func_15142314(s32 model, s32 joint, f32 *out);
 void func_15143134(f32 *in, f32 *out, void *mtx);
-void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
+void func_1515C244(Actor *, f32 *, f32 *, f32 *);
 void func_150B82D0(vertex *, f32 *, f32 *, f32 *, u8, s32);
 void func_150B85C0(vertex *, f32 *, f32 *, u8, s32);
-void func_1504715C(Ground *, struct127 *);
+void func_1504715C(Ground *, Actor *);
 s32 func_15046C80(vertex *, s32, f32, Ground *);
 void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
 s32 func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
@@ -116,7 +116,7 @@ void func_15151A38(BurstConfig *, u8, s32);
  * func_150B85C0), an effect on the ground below it, and two chunks, each with a burst, flung
  * from joints 4 and 5 of its model (or from fixed points above it when it has no model).
  */
-void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
+void func_150B7B40(Actor *obj, u8 arg1, s32 arg2) {
     vertex joints[2];
     vertex root;
     f32 scaleXZ;

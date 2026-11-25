@@ -1,6 +1,6 @@
 #include <ultra64.h>
-/* functions.h / variables.h type these with struct127 (or as scalars); shadow them and redeclare
-   them below with this file's GameObj view, which names the offsets struct127 leaves as padding. */
+/* functions.h / variables.h type these with Actor (or as scalars); shadow them and redeclare
+   them below with this file's GameObj view, which names the offsets Actor leaves as padding. */
 #define func_1505E650 func_1505E650_hdr
 #define func_1506160C func_1506160C_hdr
 #define func_15072208 func_15072208_hdr
@@ -45,8 +45,8 @@ typedef struct ObjDef {
     /* 0x2E */ u8 keepTime; // seconds (x30 frames) to keep the model's D_800D2040 counter; 0xFF = never set
 } ObjDef;
 
-/* File-local view of struct127 (the 0x32C-byte game objects in D_800CC2D0); field names follow
-   include/structs.h where it has them. Central pass: fold into struct127. */
+/* File-local view of Actor (the 0x32C-byte game objects in D_800CC2D0); field names follow
+   include/structs.h where it has them. Central pass: fold into Actor. */
 typedef struct GameObj {
     /* 0x000 */ s32 interaction_state;
     /* 0x004 */ u8 id;

@@ -271,7 +271,7 @@ void func_15113180(void) {
     }
 }
 
-/* The part of the D_800CC2D0 actor (struct127) this file uses. */
+/* The part of the D_800CC2D0 actor (Actor) this file uses. */
 typedef struct Game13F9D0Actor {
     /* 0x000 */ u8 pad0[0x14];
     /* 0x014 */ f32 pos[3];

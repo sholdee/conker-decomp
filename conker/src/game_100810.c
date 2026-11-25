@@ -4,7 +4,7 @@
 #include "effects.h"
 
 /*
- * A trail effect attached to a character (struct127): a ring buffer of points that is drawn as a
+ * A trail effect attached to a character (Actor): a ring buffer of points that is drawn as a
  * ribbon, two particle emitters that follow the owner and three looping sounds driven by its state.
  */
 
@@ -51,7 +51,7 @@ typedef struct {
 
 /* Per-trail state, at TrailActor.state; also the sound callbacks' user data. */
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId;         // owner->unique_id, to notice the owner slot being reused
     u8 mode;            // 0, 1 or 2 (from owner speed or stick tilt); selects sounds and sizes
     u8 pad6[2];
@@ -114,12 +114,12 @@ typedef struct {
 } ParticleParams;
 
 extern s32 D_800A09C0[];
-s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, ActorCtl *arg3);
+s32 func_150D4AE0(struct17 *start, struct17 *end, Actor *owner, ActorCtl *arg3);
 Particle *func_151407D0(ParticleParams *, s32, ParticleDef *, u8, u8, u8, u8, s8, u8, s32);
 TrailActor *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 
 /* Spawns a trail on `owner` with its sounds and two particle emitters. */
-void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
+void func_150D3360(Actor *owner, u8 arg1, s32 arg2) {
     TrailSpawn spawn;
     TrailState init;
     ActorCtl *s126;
@@ -293,7 +293,7 @@ void func_150D3360(struct127 *owner, u8 arg1, s32 arg2) {
 
 void func_150D4D58(vertex *pos, struct17 *vel, f32 angle, u8 arg3, s32 arg4);
 extern f32 func_15143E64(struct17 *);
-extern s32 func_1515C0F8(struct127 *, struct17 **);
+extern s32 func_1515C0F8(Actor *, struct17 **);
 
 /*
  * Per-frame update: appends the owner's current model point to the ring buffer, aims the emitters
@@ -302,7 +302,7 @@ extern s32 func_1515C0F8(struct127 *, struct17 **);
 s32 func_150D3A68(TrailActor *actor) {
     TrailState *state;
     TrailPoint *points;
-    struct127 *owner;
+    Actor *owner;
     ActorCtl *s126;
     struct17 prevPos;
     struct17 delta;
@@ -574,7 +574,7 @@ Gfx *func_150D4300(TrailActor *actor, Gfx *gfx, s16 view) {
     struct17 p1;
     struct17 p0;
     TrailState *state;
-    struct127 *owner;
+    Actor *owner;
     struct17 *eye;
     TrailVtx *tv;
     s32 i;
@@ -760,12 +760,12 @@ loop:
 /* Message data for func_150D49C0. */
 typedef union {
     struct {
-        struct127 *obj;
+        Actor *obj;
         u8 uniqueId;
     } gone;             // messages 0, 3 and 0x2E
     struct {
-        struct127 *objA;
-        struct127 *objB;
+        Actor *objA;
+        Actor *objB;
         u8 uniqueIdA;
         u8 uniqueIdB;
     } swap;             // message 0x2D: objA and objB trade places
@@ -774,7 +774,7 @@ typedef union {
 /* Message handler: destroys the trail when its owner goes away and follows the owner through a swap. */
 void func_150D49C0(TrailActor *actor, TrailMsg *msg, u8 id) {
     TrailState *state = actor->state;
-    struct127 *obj;
+    Actor *obj;
 
     if (id == 0 || id == 0x2E || id == 3) {
         obj = msg->gone.obj;
@@ -794,7 +794,7 @@ void func_150D49C0(TrailActor *actor, TrailMsg *msg, u8 id) {
     }
 }
 
-extern s32 func_1514654C(struct127 *, ActorCtl *, s32, struct17 **, struct17 **, s32);
+extern s32 func_1514654C(Actor *, ActorCtl *, s32, struct17 **, struct17 **, s32);
 extern struct17 D_800A09D0;
 extern struct17 D_800A09DC;
 
@@ -802,7 +802,7 @@ extern struct17 D_800A09DC;
  * Computes the trail's start and end points: the owner's model points D_800A09D0 / D_800A09DC
  * (returns 1 when found, 0 when not), or 100 and 600 units above the owner when it has no model (2).
  */
-s32 func_150D4AE0(struct17 *start, struct17 *end, struct127 *owner, ActorCtl *arg3) {
+s32 func_150D4AE0(struct17 *start, struct17 *end, Actor *owner, ActorCtl *arg3) {
     struct17 *modelPoints[2];
     struct17 *out[2];
 

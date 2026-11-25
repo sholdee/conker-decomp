@@ -33,7 +33,7 @@ typedef struct LinkedObject {
 typedef struct PeriodicTrigger {
     /* 0x0 */ s32 interval;
     /* 0x4 */ s32 elapsed;
-    /* 0x8 */ struct127 *target;
+    /* 0x8 */ Actor *target;
 } PeriodicTrigger;
 
 typedef struct PeriodicObject {

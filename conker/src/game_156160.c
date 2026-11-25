@@ -25,7 +25,7 @@ struct Entry151298C0 {
 
 extern struct Entry151298C0 D_800DC028[];
 
-/* Camera.player (struct127): 0x84 read as a plain u16 (struct127 declares a union there). */
+/* Camera.player (Actor): 0x84 read as a plain u16 (Actor declares a union there). */
 typedef struct {
     /* 0x000 */ u8 pad0[0x84];
     /* 0x084 */ u16 unk84;
@@ -89,7 +89,7 @@ void func_151C9ED4(Camera *);
 void func_1512E8E0(Camera *);
 void func_151C9BA0(Camera *, s32);
 void func_150A09D0(s32);
-void func_150A11C4(struct127 *);
+void func_150A11C4(Actor *);
 void func_151287E0(Camera *, s32, s32);
 void func_151283B8(Camera *);
 void func_1510B128(s32, f32, f32, f32, f32);

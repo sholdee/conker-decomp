@@ -211,7 +211,7 @@ void func_1511575C(WorldObject *obj) {
 
 /* While triggered, adds the player's x/z offset from the object, rotated into its frame, to the weights.
  * param: s8 weight divisor | s8 max tilt << 8 | s8 bias << 16 | s8 min tilt << 24. */
-void func_15115E0C(WorldObject *obj, struct127 *player) {
+void func_15115E0C(WorldObject *obj, Actor *player) {
     f32 sinYaw;
     f32 cosYaw;
     f32 dx;
@@ -228,7 +228,7 @@ void func_15115E0C(WorldObject *obj, struct127 *player) {
 }
 
 /* func_15115E0C, with the weight gained this frame multiplied by 5 when player->unk84 is 0x4B. */
-void func_15115EDC(WorldObject *obj, struct127 *player) {
+void func_15115EDC(WorldObject *obj, Actor *player) {
     f32 oldX;
     f32 oldZ;
 

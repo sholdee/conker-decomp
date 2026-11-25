@@ -9,7 +9,7 @@ void func_1500ED80(void) {
     func_150124A0();
 }
 
-void func_1500EE18(struct127 *arg0, s32 arg1, s32 arg2) {
+void func_1500EE18(Actor *arg0, s32 arg1, s32 arg2) {
     struct172 tmp;
     struct37 *temp_v0;
 

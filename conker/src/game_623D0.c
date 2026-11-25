@@ -23,7 +23,7 @@ void func_15034F20(void) {
 
 void func_150A7A48(void *, void *, void *);
 void guMtxF2L2(void *, void *);
-void func_15034728(struct127 *);
+void func_15034728(Actor *);
 s32 func_150AD960(s32, s32, s32, s32);
 
 /*
@@ -32,7 +32,7 @@ s32 func_150AD960(s32, s32, s32, s32);
  * vertical plane through (planeX, planeZ) at `angle`. `srcIsFixed`: the sources are fixed point
  * (Mtx); `dstToFixed`: convert the results to fixed point.
  */
-void func_15034F30(struct127 *obj, ReflectionEntry *entry, s32 mode, f32 (*srcMtx)[4][4],
+void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, f32 (*srcMtx)[4][4],
                    f32 (*dstMtx)[4][4], s32 count, f32 planeX, f32 planeY, f32 planeZ, f32 unused,
                    f32 angle, f32 objX, f32 objY, f32 objZ, f32 fadeStart, f32 fadeEnd, f32 maxAlpha,
                    s32 srcIsFixed, s32 dstToFixed) {
@@ -163,7 +163,7 @@ extern u8 D_800D9C10; // view matrices
  * Returns 1 when the reflection of `obj`, whose mirrored root matrix is `mtx`, is outside the view.
  * In modes 0 and 1 the bounds centre is mirrored in the plane y = planeY.
  */
-s32 func_15035714(s32 mode, struct127 *obj, f32 (*mtx)[4], f32 planeY) {
+s32 func_15035714(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     f32 height;
     f32 radiusXZ;
     f32 radiusY;
@@ -204,7 +204,7 @@ typedef struct AnimInstance {
 /* A model attached to a game object, from the list headed by D_800C3EE0 (layout as in
  * game_5D2C0.c; only the fields used here). */
 typedef struct Attachment {
-    /* 0x00 */ u8 ownerId;        // unique_id of the owning struct127
+    /* 0x00 */ u8 ownerId;        // unique_id of the owning Actor
     /* 0x01 */ u8 pad1[2];
     /* 0x03 */ u8 alpha;
     /* 0x04 */ u8 pad4[2];
@@ -228,7 +228,7 @@ extern u32 D_800C3E8C; // bone-matrix pool start
 extern void *allocate_memory(s32, s32, s32, s32);
 void func_1502D54C(s32, s32 *);
 s32 func_1502DB20(u8);
-s32 func_15031070(Attachment *, struct127 *, struct255 **, s32 *);
+s32 func_15031070(Attachment *, Actor *, struct255 **, s32 *);
 s32 func_150AD9A0(s32, s32, s32);
 
 /*
@@ -447,7 +447,7 @@ Gfx *func_15035FE8(Gfx *gfx, s32 player) {
     return gfx;
 }
 
-void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
+void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
 
 /*
  * Queues a reflection in the horizontal plane y = unk118 for every moving object of kind 0 or 1

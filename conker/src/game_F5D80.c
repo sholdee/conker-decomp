@@ -410,12 +410,12 @@ void func_150C99B4(RadialEffect *effect, vertex *pos, u8 heading, f32 cosine, f3
     func_15130374(&packet, 1, 0, effect->unkC, effect->unk1);
 }
 
-extern s32 func_1505D024(struct127 *, s32, u16, s32);
+extern s32 func_1505D024(Actor *, s32, u16, s32);
 
 /* Ring update callback: hits actors that lie up to 250 units inside the ring edge. */
 void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
     s32 i;
-    struct127 *actor;
+    Actor *actor;
     f32 dx;
     f32 dz;
     f32 dist;
@@ -547,7 +547,7 @@ typedef struct {
  * Impact effect at the actor: finds the floor below it, spawns an expanding ring there and,
  * when the floor was found, four func_1513C5B0 quads around the impact point plus particles.
  */
-void func_150CA150(struct127 *actor) {
+void func_150CA150(Actor *actor) {
     vertex pos;
     f32 r, g, b;
     u8 red, green, blue;

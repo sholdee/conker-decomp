@@ -18,7 +18,7 @@ typedef struct {
     /* 0x16 */ u8 pad16[0x24 - 0x16];
 } FloorInfo;
 
-void func_1504715C(FloorInfo *, struct127 *);
+void func_1504715C(FloorInfo *, Actor *);
 
 /* Effect objects keep a per-type extra-data block at 0xF8 + extraOffset. */
 typedef struct {
@@ -30,7 +30,7 @@ typedef struct {
 
 /* Extra data of effects that follow an object: the owner and its unique_id at spawn time. */
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId;
 } EffectOwnerRef;
 
@@ -63,7 +63,7 @@ extern s8 D_8008FD90;
 void *func_1513B5E0(void *, s32, s32, u8, s32);
 
 /* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */
-void *func_151B9F00(struct127 *owner, u8 arg1, s32 arg2) {
+void *func_151B9F00(Actor *owner, u8 arg1, s32 arg2) {
     void *effect;
     Desc1513B5E0 desc;
     EffectOwnerRef ref;
@@ -129,10 +129,10 @@ void func_150A7960(f32 m[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
  */
 s32 func_151BA084(Obj151BA084 *effect, s16 viewport) {
     EffectOwnerRef *ref;
-    struct127 *owner;
+    Actor *owner;
     u8 *model;
     f32 modelMtx[4][4];
-    struct127 *player;
+    Actor *player;
     f32 viewMtx[4][4];
     s32 i;
     f32 originS;
@@ -218,12 +218,12 @@ label: // matching: unused label keeps the viewMtx stores ahead of the argument 
 /* Messages delivered to effects through their message handler. */
 typedef union {
     struct {
-        struct127 *obj;
+        Actor *obj;
         u8 objId;
     } removed; /* type 0 */
     struct {
-        struct127 *a;
-        struct127 *b;
+        Actor *a;
+        Actor *b;
         u8 aId;
         u8 bId;
     } swap; /* type 0x2D */
@@ -232,7 +232,7 @@ typedef union {
 /* Message handler: removes the effect with its owner, and follows the owner when two objects swap. */
 void func_151BA468(struct260 *effect, EffectMsg *msg, u8 msgType) {
     EffectOwnerRef *ref = EFFECT_EXTRA(effect);
-    struct127 *owner = ref->owner;
+    Actor *owner = ref->owner;
 
     if (msgType == 0) {
         if ((owner == msg->removed.obj) || (msg->removed.objId == owner->unique_id)) {
@@ -304,7 +304,7 @@ typedef struct ParticleSpawn80 {
     /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
     /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct struct127 *owner;
+    /* 0x6C */ struct Actor *owner;
     /* 0x70 */ u8 ownerId;
     /* 0x71 */ u8 pad71;
     /* 0x72 */ s16 fadeStart;
@@ -327,7 +327,7 @@ extern void func_15143134(vertex *in, vertex *out, Mtx *mtx);
  * Spawns a burst effect at `obj` plus up to twelve particles launched along fixed paths in the space of
  * the object's model matrix (several of them picked at random).
  */
-void func_151BA518(struct127 *obj, u8 arg1, s32 arg2) {
+void func_151BA518(Actor *obj, u8 arg1, s32 arg2) {
     Desc1514FCE8 burst;
     FloorInfo floor;
     vertex objPos;
@@ -537,7 +537,7 @@ void func_151BA518(struct127 *obj, u8 arg1, s32 arg2) {
 
 
 /* Starts sound 0x4A7 at `obj`; func_151BB0E0 keeps it updated. */
-void func_151BB044(struct127 *obj) {
+void func_151BB044(Actor *obj) {
     func_1000FA64(0x4A7, obj->x_position, obj->y_position, obj->z_position, 0x2000, 0x320, 0xC8,
                   (s32)func_151BB0E0, obj, 0, 8, 0);
 }
@@ -552,7 +552,7 @@ typedef struct {
     /* 0x08 */ u8 pad8[0x10 - 0x8];
     /* 0x10 */ s32 flags;
     /* 0x14 */ u8 pad14[0x18 - 0x14];
-    /* 0x18 */ struct127 *obj;
+    /* 0x18 */ Actor *obj;
     /* 0x1C */ u32 userData; /* bits 0-6 state, 7 fading in, 8-15 fade volume, 16-27 timer */
     /* 0x20 */ u8 pad20[0x24 - 0x20];
     /* 0x24 */ u16 unk24;
@@ -564,7 +564,7 @@ typedef struct {
  */
 s32 func_151BB0E0(SoundChannel *chan, s32 arg1, u32 *volume, s32 arg3, s32 *speedOut,
                   s32 arg5, u16 *soundId) {
-    struct127 *obj;
+    Actor *obj;
     s32 state;
     s32 prevState;
     s32 sound;
@@ -737,7 +737,7 @@ void func_151BBFBC(Surface *surf, vertex *pos, s32 arg2, s32 arg3);
  * Impact effect for a shot from `from` towards `to`: effects at the origin, then a ray cast along the
  * shot and, where it hits a surface, impact effects there.
  */
-void func_151BB61C(struct127 *obj, vertex *from, vertex *to, u8 arg3, s32 arg4) {
+void func_151BB61C(Actor *obj, vertex *from, vertex *to, u8 arg3, s32 arg4) {
     Surface surf;
     vertex hit;
     vertex delta;
@@ -850,7 +850,7 @@ extern vertex D_8008FBAC;
  * Impact effect halfway between `a` and `b`: a burst there, a ground impact on the floor below it,
  * and a shower of debris.
  */
-void func_151BBA9C(struct127 *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
+void func_151BBA9C(Actor *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
     vertex center;
     Desc1514FCE8 burst;
     FloorInfo floor;
@@ -974,10 +974,10 @@ void func_151BBFBC(Surface *surf, vertex *pos, s32 arg2, s32 arg3) {
 
 extern u8 D_800AA760;
 extern u8 D_800AA76C;
-void func_15160CDC(struct127 *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_15160CDC(Actor *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns the func_15160CDC effect (tables D_800AA760/D_800AA76C) on `obj`. */
-void func_151BC074(struct127 *obj) {
+void func_151BC074(Actor *obj) {
     if (obj != NULL) {
         func_15160CDC(obj, 1, &D_800AA760, &D_800AA76C, 0.01769899949f, 2, 300,
                       0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
@@ -1024,7 +1024,7 @@ typedef struct {
 
 /* Data block of the object returned by func_15147A80. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
     /* 0x08 */ vertex pos;
     /* 0x14 */ f32 unk14;
@@ -1046,7 +1046,7 @@ Fx15163414 *func_15163414(Header *, f32 *, f32 *, f32 *, s8, u8, u8, u8, u8, u8,
  * Spawns three effects that follow `obj` (the first only while D_80082FA0 < 2 and D_8008FD8C < 5),
  * each with a reference back to its owner.
  */
-void func_151BC104(struct127 *obj, u8 arg1, s32 arg2) {
+void func_151BC104(Actor *obj, u8 arg1, s32 arg2) {
     Fx15134908 *fx1;
 
     if ((D_80082FA0 < 2) && (D_8008FD8C < 5)) {

@@ -41,7 +41,7 @@ typedef struct EmitterParams {
 typedef struct EmitterAttach {
     /* 0x00 */ Vec3f p0;
     /* 0x0C */ Vec3f p1;
-    /* 0x18 */ struct127 *target;
+    /* 0x18 */ Actor *target;
     /* 0x1C */ u8 bone;
     /* 0x1D */ u8 targetId; // the target's unique_id
     /* 0x1E */ s8 handler;  // index into D_8008D5A0, or -1
@@ -64,7 +64,7 @@ typedef struct Emitter {
     /* 0x170 */ EmitterAttach attach;
 } Emitter;
 
-/* Byte view of the attach target (struct127 declares these offsets as padding). */
+/* Byte view of the attach target (Actor declares these offsets as padding). */
 typedef struct {
     /* 0x00 */ u8 pad0[0x68];
     /* 0x68 */ u8 unk68;
@@ -76,8 +76,8 @@ typedef struct {
 
 /* Payload of message 0x2D: two objects and their unique ids. */
 typedef struct {
-    /* 0x0 */ struct127 *objA;
-    /* 0x4 */ struct127 *objB;
+    /* 0x0 */ Actor *objA;
+    /* 0x4 */ Actor *objB;
     /* 0x8 */ u8 idA;
     /* 0x9 */ u8 idB;
 } SwapTargetMsg;

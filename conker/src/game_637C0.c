@@ -15,7 +15,7 @@ void func_15036310(s32 unused, s32 actorIndex, s32 bone, s32 quarterTurn) {
     f32 position[3];
     f32 dir[3];
     f32 side[3];
-    struct127 *actor;
+    Actor *actor;
     f32 swap;
 
     actor = &D_800CC2D0[actorIndex];

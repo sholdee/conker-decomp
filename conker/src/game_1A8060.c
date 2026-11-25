@@ -18,7 +18,7 @@ typedef struct {
     u8 hold;   // counts down once the blend has reached 1.0f
 } VtxMorphState;
 
-/* The parts of the game object (struct127, 0x32C bytes) this file uses. */
+/* The parts of the game object (Actor, 0x32C bytes) this file uses. */
 typedef struct {
     u8 pad0[4];
     u8 id;

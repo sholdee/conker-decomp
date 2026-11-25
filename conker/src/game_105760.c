@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-/* An actor's bone matrix: struct127.unk1D4 points at an array of these. */
+/* An actor's bone matrix: Actor.unk1D4 points at an array of these. */
 typedef f32 MtxF[4][4];
 
 void func_150A7960(MtxF, f32, f32, f32, f32 *, f32 *, f32 *);
@@ -28,7 +28,7 @@ typedef struct {
 
 /* While the actor runs action 13 with anim->unk8 in 23..40, scrolls the texture of the first
  * G_SETTILESIZE command in the display list horizontally. */
-s32 func_150D82BC(DLCallbackState *state, struct127 *actor) {
+s32 func_150D82BC(DLCallbackState *state, Actor *actor) {
     struct197 *anim = actor->unk2D0;
     Gfx *list;
     s32 i;
@@ -62,7 +62,7 @@ s32 func_150D82BC(DLCallbackState *state, struct127 *actor) {
 
 /* Scrolls the first G_SETTILESIZE command's texture vertically by a progress value that rises
  * to 100% once action 0x18D reaches anim->unk8 46, then falls to 0 once action 0x18E reaches 34. */
-s32 func_150D83D8(DLCallbackState *state, struct127 *actor) {
+s32 func_150D83D8(DLCallbackState *state, Actor *actor) {
     Gfx *list;
     s32 i;
     f32 t;
@@ -175,7 +175,7 @@ typedef struct {
     f32 unk68;
 } ParticleBurst;
 
-void func_1504715C(GroundHit *, struct127 *);
+void func_1504715C(GroundHit *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, GroundHit *);
 void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150E83AC(Vec3f *, s16, u8, s32);
@@ -183,7 +183,7 @@ void func_15153634(ParticleBurst *, u8, u8, s32);
 
 /* Spawns impact effects at the actor's feet: a ground effect if the ground below is flagged,
  * then func_150E83AC's effect and a particle burst. */
-void func_150D85AC(struct127 *actor) {
+void func_150D85AC(Actor *actor) {
     Vec3f pos;
 
     pos.x = actor->x_position;
@@ -282,7 +282,7 @@ s32 func_150D88AC(struct S150D88AC *arg0) {
 
 /* Writes to *out the world position of a fixed offset from one of the actor's bones, chosen by
  * point (3..6). */
-s32 func_150D88E0(Vec3f *out, struct127 *actor, u8 point) {
+s32 func_150D88E0(Vec3f *out, Actor *actor, u8 point) {
     s32 bone;
     f32 x;
     f32 y;
@@ -326,7 +326,7 @@ void func_151875E0(f32, f32, f32, s32, s32, s32, f32, f32);
 void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns two effects at bone point `point` of the actor (see func_150D88E0), if it has bones. */
-void func_150D8A34(struct127 *actor, s32 point, s32 arg2) {
+void func_150D8A34(Actor *actor, s32 point, s32 arg2) {
     Vec3f pos;
 
     if (actor->unk1D4 != NULL) {

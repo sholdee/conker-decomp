@@ -159,7 +159,7 @@ s32 func_150F25A0(struct242 *arg0) {
 }
 
 void func_150F26A0(Camera *actor) {
-    struct127 *state;
+    Actor *state;
     s32 mode;
 
     state = actor->player;

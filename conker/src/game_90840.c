@@ -15,7 +15,7 @@ s32 func_100109D0();
 s32 func_10010A3C();
 s32 func_1000FF90(void *arg0, s32 arg1, s32 arg2);
 u16 func_1000FA64(u16 arg0, s16 arg1, s16 arg2, s16 arg3, s32 arg4, u16 arg5, s16 arg6, void *arg7, void *arg8, void *arg9, s32 argA, s32 argB);
-struct127 *func_15083568(struct127 *, s32, f32, s32);
+Actor *func_15083568(Actor *, s32, f32, s32);
 #include "variables.h"
 
 /* Controller state that D_800CC284 points to. */
@@ -30,26 +30,26 @@ typedef struct ContPad {
 extern s16 D_800CC2B2;
 extern f32 D_800CC2B4;
 void func_15143134(void *, f32 *, s32);
-void func_1506AC8C(struct127 *, s32, void *);
+void func_1506AC8C(Actor *, s32, void *);
 
 /* Packet handed to func_1506AC8C by func_15063B64. */
 typedef struct ThrowPacket {
-    struct127 *thrower;
+    Actor *thrower;
     f32 position[3];
     s32 throwerId;          /* object index + 1 */
     volatile s32 anim;      // matching: volatile keeps the anim in its stack slot across the call
 } ThrowPacket;
 
 /* Returns the angle from this object to the object it is linked to (unk222). */
-s16 func_15063390(struct127 *arg0) {
-    struct127 *other;
+s16 func_15063390(Actor *arg0) {
+    Actor *other;
 
     other = &D_800CC2D0[arg0->unk222];
     return func_1505A630(other->x_position - arg0->x_position, arg0->z_position - other->z_position, 0);
 }
 
-void func_15063404(struct127 *arg0) {
-    struct127 *self = &D_800CC2D0[arg0 - D_800CC2D0];
+void func_15063404(Actor *arg0) {
+    Actor *self = &D_800CC2D0[arg0 - D_800CC2D0];
 
     self->unk31C->unk78 = 9;
     func_15083568(arg0, 0x1D, 1.0f, 0);
@@ -62,9 +62,9 @@ void func_15063404(struct127 *arg0) {
     func_1505E650(arg0, 0x7F, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-void func_150836CC(struct127 *arg0, s32 arg1);
+void func_150836CC(Actor *arg0, s32 arg1);
 
-void func_150634E4(struct127 *arg0) {
+void func_150634E4(Actor *arg0) {
     D_800CC2D0[arg0 - D_800CC2D0].unk31C->unk78 = 0;
     D_800CC2D0[arg0 - D_800CC2D0].unk31C->unk11A = 0;
     func_150836CC(arg0, 0x1D);
@@ -74,7 +74,7 @@ void func_150634E4(struct127 *arg0) {
     arg0->unk83 = 0;
 }
 
-void func_15063570(struct127 *arg0) {
+void func_15063570(Actor *arg0) {
     D_800CC2D0[arg0 - D_800CC2D0].unk31C->unk78 = 0x3B;
     D_800CC2D0[arg0 - D_800CC2D0].unk31C->unk11A = 2;
     func_15083568(arg0, 0x89, 1.0f, 0);
@@ -84,10 +84,10 @@ void func_15063570(struct127 *arg0) {
     func_1505E650(arg0, 0x221, 1.0f, 0.0f, 0.0f, 0.0f, 0);
 }
 
-void func_15081690(struct127 *, f32, f32, f32, f32, f32, f32, struct127 **, f32, s32, s32, s32, s32, s32, s32);
-void func_150636A4(struct127 *arg0);
+void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, Actor **, f32, s32, s32, s32, s32, s32, s32);
+void func_150636A4(Actor *arg0);
 
-void func_15063628(struct127 *arg0, f32 arg1) {
+void func_15063628(Actor *arg0, f32 arg1) {
     ActorCtl *ctl = arg0->unk31C;
 
     func_15081690(arg0, ctl->aimEye.x, ctl->aimEye.y, ctl->aimEye.z,
@@ -97,8 +97,8 @@ void func_15063628(struct127 *arg0, f32 arg1) {
 }
 
 /* Tells the object in unkB0 (if any) that this object is targeting it. */
-void func_150636A4(struct127 *arg0) {
-    struct127 *target;
+void func_150636A4(Actor *arg0) {
+    Actor *target;
     ActorCtl *targetCtl;
 
     target = arg0->unk31C->unkB0;
@@ -111,9 +111,9 @@ void func_150636A4(struct127 *arg0) {
     }
 }
 
-void func_15063FA0(struct127 *, s32);
-void func_151D57F8(struct127 *, s32);
-s32 func_15081E78(struct127 *, struct127 **, s32);
+void func_15063FA0(Actor *, s32);
+void func_151D57F8(Actor *, s32);
+s32 func_15081E78(Actor *, Actor **, s32);
 void func_10010558(u16, void *, s32, s32, s32, s32);
 void func_150FFCC8(void *, void *, void *, void *, void *);
 void func_150FFD84(f32 *, f32 *, s32, s32);
@@ -121,7 +121,7 @@ void func_1512D2E4(void *, s32);
 
 /* Runs the work each object queued in its control block's `pending` flags this frame. */
 void func_150636F0(void) {
-    struct127 *actor;
+    Actor *actor;
     s32 index;
     s32 action;
     f32 position[3];
@@ -214,7 +214,7 @@ void func_150636F0(void) {
 
 /* Stores in D_800CC2B2 (and returns) how far this object's heading is off the bearing to its
  * linked object, clamped to +-16000. */
-s32 func_150639BC(struct127 *arg0) {
+s32 func_150639BC(Actor *arg0) {
     D_800CC2B2 = arg0->unk7A - arg0->unk31C->unk12 - func_15063390(arg0);
     if (D_800CC2B2 > 16000) {
         D_800CC2B2 = 16000;
@@ -227,7 +227,7 @@ s32 func_150639BC(struct127 *arg0) {
 
 /* When any of `mask` is set in `buttons`, turns the object's unk12 offset from the stick (or
  * toward its linked object), limited to +-9000; the excess turns the whole object. */
-s32 func_15063A38(struct127 *arg0, s32 buttons, s32 mask) {
+s32 func_15063A38(Actor *arg0, s32 buttons, s32 mask) {
     if (buttons & mask) {
         D_800CC2B2 = PAD->stick_x * 200;
         if (arg0->unk31C->unk84 != 0) {
@@ -254,7 +254,7 @@ s32 func_15063A38(struct127 *arg0, s32 buttons, s32 mask) {
 }
 
 /* Throws one of the object's grenades (anim 0x64 for ids 0x75 and 0xB1, 0x2C otherwise). */
-void func_15063B64(struct127 *arg0) {
+void func_15063B64(Actor *arg0) {
     ThrowPacket packet;
 
     if ((arg0->id == 0x75) || (arg0->id == 0xB1)) {
@@ -287,7 +287,7 @@ void func_15063B64(struct127 *arg0) {
 /* Returns the active object with id `id` that is linked (unk65) to arg0, or NULL.
  * (asm-differ shows relocation-addend diffs here: the .s names interior symbols of
  * D_800CC2D0[], C spells them base+offset; the linked bytes are identical.) */
-struct127 *func_15063C60(struct127 *arg0, s32 id) {
+Actor *func_15063C60(Actor *arg0, s32 id) {
     s32 i;
 
     for (i = 0; i < 25; i++) {
@@ -301,7 +301,7 @@ struct127 *func_15063C60(struct127 *arg0, s32 id) {
 
 /* Starts `anim` as a new action when the object stands on the ground with nothing else going
  * on and B is pressed. Returns `anim`, or 999 when the action can't start. */
-s32 func_15063E84(struct127 *arg0, u16 anim, u16 flags, s32 action, s32 buttons) {
+s32 func_15063E84(Actor *arg0, u16 anim, u16 flags, s32 action, s32 buttons) {
     s32 state;
 
     if ((buttons & B_BUTTON) && (arg0->unk28 == 0.0f) && (arg0->y_velocity <= 0.0f) &&
@@ -333,7 +333,7 @@ s32 func_15063E84(struct127 *arg0, u16 anim, u16 flags, s32 action, s32 buttons)
 
 /* Fires a shot of kind `kind` (2, 3, 6, 0x12) from the object's muzzle (unk13C..unk144),
  * aimed along its yaw/pitch or, when unk109 is set, at the point unkB8..unkC0. */
-void func_15063FA0(struct127 *arg0, s32 kind) {
+void func_15063FA0(Actor *arg0, s32 kind) {
     f32 velX;
     f32 velY;
     f32 velZ;
@@ -385,13 +385,13 @@ void func_15063FA0(struct127 *arg0, s32 kind) {
     func_1506C460(yaw, velX, velY, 0.0f, 100, kind, 0.0f, 0.5f, (s32)pos, 1, 1);
 }
 
-s32 func_1505DADC(struct127 *, u16 *, s32, s32, s32);
+s32 func_1505DADC(Actor *, u16 *, s32, s32, s32);
 
 /* Picks animA or animB at random; if one of them is already playing, picks animC instead
  * (or returns 999 while unk107 < 40). Returns 999 when animC is already playing. */
-u16 func_150641D8(struct127 *arg0, u16 animA, u16 animB, u16 animC) {
+u16 func_150641D8(Actor *arg0, u16 animA, u16 animB, u16 animC) {
     u16 selected;
-    struct127 *actor = arg0;  // matching: the copy reserves the extra stack slot IDO gave the original
+    Actor *actor = arg0;  // matching: the copy reserves the extra stack slot IDO gave the original
     u16 angle;
 
     angle = 0;
@@ -423,16 +423,16 @@ typedef struct MtxParts {
     u16 frac[4][4];
 } MtxParts;
 void func_15074664(void);
-void func_15060A30(s32 arg0, struct127 *arg1);
+void func_15060A30(s32 arg0, Actor *arg1);
 void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 
 /* Handles the scripted move requested in unk7B, then the default B-button move; plays the
  * chosen animation unless `noPlay` is set. */
-void func_150642AC(struct127 *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
+void func_150642AC(Actor *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB) {
     s32 anim;
     f32 speed;
     f32 blend;
-    struct127 *obj;
+    Actor *obj;
     s32 pad;  // matching: unused stack slot
     MtxParts *mtx;
     f32 dx;
@@ -630,7 +630,7 @@ void func_150642AC(struct127 *arg0, s32 buttons, f32 arg2, s32 noPlay, s32 lockB
 /* Copies object srcIndex's animation position (unk2D0->unk8) to object dstIndex, keeping it
  * below dstIndex's unk18. */
 void func_150649A0(s32 srcIndex, s32 dstIndex) {
-    struct127 *objects;
+    Actor *objects;
     struct197 *dst;
     struct197 *src;
 
@@ -648,8 +648,8 @@ void func_150649A0(s32 srcIndex, s32 dstIndex) {
 
 /* Plays the animation that pairs with what the linked object (unk65) is doing, and syncs
  * this object's animation to it. */
-void func_15064A14(struct127 *arg0) {
-    struct127 *partner;
+void func_15064A14(Actor *arg0) {
+    Actor *partner;
     s32 anim;
     s32 variant;
 
@@ -685,7 +685,7 @@ void func_15064A14(struct127 *arg0) {
 
 /* Picks the object's movement animation from its action and speed, plays it, and returns it
  * (0 or 999 when nothing new plays). */
-s32 func_15064B94(struct127 *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
+s32 func_15064B94(Actor *arg0, f32 arg1, f32 arg2, s32 overrideAnim, f32 arg4) {
     s32 anim;
     f32 blend;
     f32 speed;
@@ -1070,14 +1070,14 @@ void func_15073FA0(void);
 struct216 *func_1507BB28(s32, s32);
 void func_1507E7E4(void *, u8, u8, u16, s32);
 void func_1507EABC(void *);
-void func_1507EB4C(struct127 *, s32);
+void func_1507EB4C(Actor *, s32);
 void func_15080828(s32 arg0);
 void func_15080BE8(void);
 s32 func_15080CF4(void);
-void func_150D8B88(struct127 *);
+void func_150D8B88(Actor *);
 s32 func_150DBD70(u8);
-void func_150FC438(struct127 *, struct127 *, u8, u8);
-void func_1514F568(struct127 *);
+void func_150FC438(Actor *, Actor *, u8, u8);
+void func_1514F568(Actor *);
 void func_151D4668(void *);
 void func_151D469C(void *arg0, s32 a1, s32 a2, s32 a3, s32 a4);
 void func_151D4D58(void *arg0);
@@ -1085,13 +1085,13 @@ s32 func_151F2CDC(void);
 
 /* variables.h types D_800D3098 as a struct178 array, but its first word points to the MarkerPoint table. */
 #define MARKERS (*(MarkerPoint **)&D_800D3098)
-/* Bytes of struct127 that structs.h still declares only as padding. */
+/* Bytes of Actor that structs.h still declares only as padding. */
 #define OBJ_U8(o, off) (((u8 *)(o))[off])
 
 /* Per-frame handler for the object's held item / special action `act`: starts, steps and ends
  * it from the held and pressed buttons. Returns the animation started (0 or 999 for none), or
  * 1000 when the action consumed the input. */
-s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s32 arg4, s32 act, s32 arg6, s32 arg7, s32 arg8) {
+s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s32 arg4, s32 act, s32 arg6, s32 arg7, s32 arg8) {
     s32 anim;
     f32 speed;
     f32 blend;
@@ -1115,7 +1115,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         D_800CC28C &= ~B_BUTTON;
         if (arg4 != 0) {
             if (arg0->stunned == 0) {
-                arg0->pad1C4 = 0;
+                arg0->events = NULL;
             }
             pressedButtons &= ~Z_TRIG;
             D_800CC28C &= ~Z_TRIG;
@@ -1496,12 +1496,12 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         break;
     case 0x8:
         {
-            struct127 *obj;
+            Actor *obj;
 
             obj = &D_800CC2D0[arg0->unk65 - 1];
             arg0->disable_jump = 0x14;
             if (pressedButtons & (A_BUTTON | B_BUTTON)) {
-                if ((obj->unk84.uh == 0) || (*(u16 *)&obj->unk22E != 0 /* matching: lhu; struct127 says s16 */) || (obj->unk84.uh == 0xC) || (obj->unk84.uh == 0xD)) {
+                if ((obj->unk84.uh == 0) || (*(u16 *)&obj->unk22E != 0 /* matching: lhu; Actor says s16 */) || (obj->unk84.uh == 0xC) || (obj->unk84.uh == 0xD)) {
                     u8 mode;
 
                     mode = 0x10;
@@ -2112,7 +2112,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             if (arg0->unk13C != 0) {
                 s16 old;
                 f32 mag;
-                struct127 *obj;
+                Actor *obj;
 
                 old = arg0->unk31C->unk18;
                 arg0->unk83 = 0xFF;
@@ -2621,7 +2621,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
             s32 sounds[2] = { 0x39, 0x35 };
 
             arg0->unk282 = 0x64;
-            if ((s8)arg0->unk284 == 0) {  // matching: read signed (lb); struct127 declares u8
+            if ((s8)arg0->unk284 == 0) {  // matching: read signed (lb); Actor declares u8
                 arg0->unk278 = (u16)arg0->unk278 + D_800BE9E4;
                 if (((func_150ADA20() % 120U) + 0xB4) < (u16)arg0->unk278) {
                     func_1507E7E4(arg0, sounds[func_150ADA20() & 1], 1, (func_150ADA20() % 180U) + 0x1A4, 0);
@@ -2638,7 +2638,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         break;
     case 0x1B:
         {
-            struct127 *obj;
+            Actor *obj;
             s32 animHold;
             s32 animIdle;
             s32 animRelease;
@@ -2785,7 +2785,7 @@ s32 func_15065A5C(struct127 *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3
         break;
     case 0x3A:
         {
-            struct127 *obj;
+            Actor *obj;
             s32 item;
 
             if (D_800BE9F0 == 0x3F) {

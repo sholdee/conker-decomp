@@ -200,7 +200,7 @@ Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 
 /* On maps 0x1B and 0x1E (and 0x31 while camera 0's unk3D4 has state 3) fills the whole drawable area with the
  * background colour D_800DBEA8. */
 Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
-    // unk78 is the high byte of struct127's u16 unk78
+    // unk78 is the high byte of Actor's u16 unk78
     if (D_800BE9F0 == 0x1B || D_800BE9F0 == 0x1E ||
         (D_800BE9F0 == 0x31 && D_800DBFF0->playerExt->unk78 == 3)) {
         gfx = func_15110544(gfx, 2, 0, D_800BE620 - 2, D_800BE624,

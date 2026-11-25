@@ -316,46 +316,46 @@ typedef struct FloorHit {
 /* Object id arguments carry flags above the low 12 bits. */
 #define CMD_OBJECT_ID(arg) ((arg).w & 0xFFF)
 
-extern struct127 *func_1505EEF4(s32);
+extern Actor *func_1505EEF4(s32);
 extern void func_150BD070(s32, s32);
 extern void func_150FAD28(void);
 extern void func_150FAA40(s32, s32);
-extern void func_15108120(struct127 *, s32, s32);
-extern void func_150ECC00(struct127 *, s32, s32);
+extern void func_15108120(Actor *, s32, s32);
+extern void func_150ECC00(Actor *, s32, s32);
 extern void func_150FAD78(void);
-extern void func_150FCFD4(struct127 *, s32, s32);
+extern void func_150FCFD4(Actor *, s32, s32);
 extern void func_150E0300(void);
 extern void func_151557FC(s32, s32, f32);
-extern void *func_150F6DE4(struct127 *);
-extern void func_1514EC1C(void *, struct127 *, s32);
+extern void *func_150F6DE4(Actor *);
+extern void func_1514EC1C(void *, Actor *, s32);
 extern s32 func_15046C80(f32 *, s32, f32, void *);
 extern void func_151BFE84(void *, void *, void *, s32, s32, s32);
-extern void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
-extern void func_151C0098(f32 *, struct127 *, s32, s32, s32);
+extern void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
+extern void func_151C0098(f32 *, Actor *, s32, s32, s32);
 extern void func_150FCA30(void);
-extern s32 func_1518F51C(struct127 *, u8, s32, s32, s8, s8, u8, s32, u8, s32);
+extern s32 func_1518F51C(Actor *, u8, s32, s32, s8, s8, u8, s32, u8, s32);
 extern void func_150E1060(s32, s32, s32);
 extern void func_151CD35C(s32);
 extern void func_1000E7A0(s32, s32);
 extern void func_151616D0(u8, u8, s32);
-extern void func_150B53D0(struct127 *, s32, s32, s32);
+extern void func_150B53D0(Actor *, s32, s32, s32);
 extern void func_150BEF7C(s32);
 extern void func_15178EFC(s32);
 extern s32 func_150E3208(s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 func_150E32D0(s32, s32, s32, struct127 *, s32, f32);
+extern s32 func_150E32D0(s32, s32, s32, Actor *, s32, f32);
 extern s32 func_150E3414(s32, s32, s32, s32, s32, s32, void *, s32, f32);
 extern void func_150DECC0(f32 *, s32, s32);
 extern void func_150E81A8(s32, s32, s32);
 extern void func_150E8930(void);
 extern void func_151D26C0(s16);
 extern void func_15163A60(s32, s32, s32);
-extern void func_150D5A6C(struct127 *, s32, s32);
+extern void func_150D5A6C(Actor *, s32, s32);
 extern u8 D_8009F0D0;
 
 /* Starts script command `cmdId` with arguments `cmd`; returns a handle for commands 4-6. */
 s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
     s32 ret;
-    struct127 *obj;
+    Actor *obj;
 
     ret = 0;
     switch (cmdId) {
@@ -397,7 +397,7 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
             break;
         case 36:
             {
-                struct127 *target;
+                Actor *target;
 
                 target = func_1505EEF4(CMD_OBJECT_ID(cmd->args[0]));
                 if (target != NULL) {
@@ -546,17 +546,17 @@ s32 func_1509D180(s32 cmdId, ScriptCmd *cmd) {
 
 extern void func_150EB8C4(void);
 extern void func_150F9720(u8);
-extern void func_150F6DB0(struct127 *);
+extern void func_150F6DB0(Actor *);
 extern void func_151CD394(s32);
 extern void func_150E35DC(s32);
 extern void func_150B3DD0(void);
-extern void func_150C5C9C(struct127 *);
+extern void func_150C5C9C(Actor *);
 extern void func_150C522C(void);
 extern void func_151D2718(s16);
 
 /* Ends script command `cmdId` started by func_1509D180. */
 s32 func_1509D780(s32 cmdId, ScriptCmd *cmd) {
-    struct127 *obj;
+    Actor *obj;
 
     switch (cmdId) {
         case 41:
@@ -622,7 +622,7 @@ typedef struct Msg1509D8FC {
     /* 0x7 */ u8 unk7;
 } Msg1509D8FC;
 
-extern void func_15197A7C(struct127 *);
+extern void func_15197A7C(Actor *);
 extern void func_151645C4(u8);
 extern void func_1515F170(s32 arg0, u8 arg1);
 extern void func_150DEC28(u8, u8);

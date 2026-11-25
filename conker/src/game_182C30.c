@@ -78,7 +78,7 @@ void func_1515F10C();
  */
 void func_1515589C(PlayerMarker *marker) {
     s32 playerId;
-    struct127 *player;
+    Actor *player;
     s32 timer;
     s32 kind;
     ActorCtl *info;
@@ -163,7 +163,7 @@ Gfx *func_15155CFC(Gfx *gfx, PlayerMarker *marker, s16 view) {
     s32 state;
     s32 playerId;
     f32 yaw;
-    struct127 *player;
+    Actor *player;
     f32 extraHeight;
 
     state = marker->state;
@@ -243,7 +243,7 @@ PlayerMarker *func_15155FD4(s32 playerId) {
  * Event handler. `actors` is the event payload: event type 0 (actors[0] is gone) destroys the marker of that
  * player; type 0x2D (actors[0] and actors[1] swap) moves the marker to the other player.
  */
-void func_15156028(PlayerMarker *marker, struct127 **actors, u8 eventType) {
+void func_15156028(PlayerMarker *marker, Actor **actors, u8 eventType) {
     if (eventType == 0) {
         s32 player = actors[0] - D_800CC2D0;
 

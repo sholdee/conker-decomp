@@ -64,7 +64,7 @@ typedef struct EffectHead {
 
 /* Data of the dust emitter effect (func_15191BE0, run by func_15191D54). */
 typedef struct DustEmitterData {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ vertex offset;      /* emitter position in the bone's space */
@@ -92,11 +92,11 @@ typedef struct DustEmitter {
     DustEmitterData data;
 } DustEmitter;
 
-void func_1504715C(FloorProbe *probe, struct127 *obj);
+void func_1504715C(FloorProbe *probe, Actor *obj);
 
 /* Spawns a dust emitter effect (func_15191D54) on `owner`'s bone; it emits dust particles at `offset`
  * in the bone's space at a randomised rate. Returns the effect, or NULL without an owner. */
-DustEmitter *func_15191BE0(struct127 *owner, vertex *offset, u8 bone, f32 rateBase, f32 rateRandom,
+DustEmitter *func_15191BE0(Actor *owner, vertex *offset, u8 bone, f32 rateBase, f32 rateRandom,
                           s16 duration, f32 gravityBase, f32 gravityRandom, s16 lifetimeBase,
                           s16 lifetimeRandom, u8 alphaBase, u8 alphaRandom, f32 sizeBase, f32 sizeRandom,
                           f32 unk60, u8 kind, u8 arg16, s32 arg17) {
@@ -147,7 +147,7 @@ DustParticle *func_1519203C(vertex *position, vertex *velocity, f32 gravity, s16
 /* Dust emitter effect update: frees the effect once its owner is gone, otherwise accumulates the
  * emission rate and spawns one dust particle (func_1519203C) per whole unit at the emitter's bone. */
 void func_15191D54(DustEmitter *effect) {
-    struct127 *owner;
+    Actor *owner;
     DustEmitterData *data;
     vertex position;
     f32 floorY;
@@ -357,7 +357,7 @@ extern u8 D_800A80E4[];
 
 /* Spawns the dust emitter preset that suits obj's id (func_15191BE0) for `duration` frames, -1 for
  * the default. Returns the effect, or NULL when obj is NULL or has no preset. */
-DustEmitter *func_151925C4(struct127 *obj, s16 duration, u8 arg2, s32 arg3) {
+DustEmitter *func_151925C4(Actor *obj, s16 duration, u8 arg2, s32 arg3) {
     s32 kind;
     DustEmitter *effect;
 

@@ -24,7 +24,7 @@ extern CamPathNode *D_800D2350;
 extern CamPoint *D_800DC024;
 
 void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
-struct127 *func_1505EEF4(s32 arg0);
+Actor *func_1505EEF4(s32 arg0);
 s32 func_15085DF8(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 void func_15124C38(Camera *arg0, s32 arg1);
 void func_151254F4(Camera *arg0, s32 arg1);
@@ -246,10 +246,10 @@ void func_1512E8E0(Camera *camera) {
             return;
         }
         if ((cmd->type == 10) || (cmd->type == 14)) {
-            struct127 *obj;
+            Actor *obj;
 
             // matching: reusing obj for the id (instead of nesting the calls) drops a cfe temp
-            obj = (struct127 *)func_15083E0C(cmd->unk1C);
+            obj = (Actor *)func_15083E0C(cmd->unk1C);
             obj = func_1505EEF4((s32)obj);
             if (obj != NULL) {
                 f32 dist;

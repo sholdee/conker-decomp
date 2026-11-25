@@ -463,7 +463,7 @@ void func_15120158(Camera *camera) {
 
 /* While R is held in a facing zone, publishes the player's aim ray (eye, target, direction) to the
    player extension block. */
-void func_15121490(struct127 *player, OSContPad *pad) {
+void func_15121490(Actor *player, OSContPad *pad) {
     CamPlayerExt *ext;
     s32 zone;
     vertex target;

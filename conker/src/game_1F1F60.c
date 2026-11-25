@@ -62,7 +62,7 @@ void func_15081690(void *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, Gam
                    s32, s32, s32, s32, s32);
 s32 func_15145128(f32 *in, f32 *out, f32 *length, f32 *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
-void func_151C2050(struct127 *arg0, f32 *arg1, f32 *arg2, s32 arg3, f32 arg4);
+void func_151C2050(Actor *arg0, f32 *arg1, f32 *arg2, s32 arg3, f32 arg4);
 
 /*
  * Sets up the ray `hit` for a projectile starting at `origin`: reuses `knownHit` when given (re-aimed from

@@ -36,7 +36,7 @@ extern f32 D_800DCA08;
 extern f32 D_800DCA0C;
 extern f32 D_800DCA10;
 
-struct127 *func_15083E90();
+Actor *func_15083E90();
 void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 void func_15142314(Mtx *, s32, f32 *);
 Gfx *func_15094FE8(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -97,7 +97,7 @@ void func_151419D0(struct102 *obj, Msg151419D0 *msg, u8 msgType) {
 /* Payload copied into an attached effect (see func_15141E38). */
 typedef struct {
     /* 0x00 */ s32 handler;    /* index into D_8008A0B4 */
-    /* 0x04 */ struct127 *owner;
+    /* 0x04 */ Actor *owner;
     /* 0x08 */ u8 ownerId;     /* owner->unique_id */
 } EffectInfo;
 
@@ -109,29 +109,26 @@ typedef struct {
 } AttachedEffect;
 
 /* Node of the list an actor keeps at 0x2F4 (see func_1514EC1C / func_1514ECE0). */
-typedef struct AttachNode {
+typedef struct Attachment {
     /* 0x00 */ u8 pad0[0x10];
     /* 0x10 */ AttachedEffect *effect;
-    /* 0x14 */ struct AttachNode *next;
-} AttachNode;
-
-/* struct127 (shared header) leaves the attachment list head at 0x2F4 inside pad2F0. */
-#define ACTOR_ATTACHMENTS(actor) (*(AttachNode **)&(actor)->pad2F0[4])
+    /* 0x14 */ struct Attachment *next;
+} Attachment;
 
 /* List tag of the attached timed effects. */
 #define ATTACH_TIMED_EFFECT 0x1A
 
-typedef s32 (*EffectSelector)(s32, struct127 *);
-typedef void (*EffectHandler)(struct127 *, s32, s32);
+typedef s32 (*EffectSelector)(s32, Actor *);
+typedef void (*EffectHandler)(Actor *, s32, s32);
 
-s32 func_15141C0C(struct127 *actor);
+s32 func_15141C0C(Actor *actor);
 s32 func_15141CC0(u32 arg0);
 u32 func_1510F8CC(s32);
-void func_15141E38(struct127 *actor, s32 handler);
-s32 func_1514ECE0(AttachNode *, s16, AttachNode **);
+void func_15141E38(Actor *actor, s32 handler);
+s32 func_1514ECE0(Attachment *, s16, Attachment **);
 
 /* Runs the actor's model-specific effect selector, then every attached timed effect's handler. */
-void func_15141A7C(struct127 *actor, s32 arg1) {
+void func_15141A7C(Actor *actor, s32 arg1) {
     s32 selector;
     s32 handler;
 
@@ -150,8 +147,8 @@ void func_15141A7C(struct127 *actor, s32 arg1) {
             }
         }
         {
-        AttachNode *node;
-        node = ACTOR_ATTACHMENTS(actor);
+        Attachment *node;
+        node = actor->attachments;
         if (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0) {
             do {
                 AttachedEffect *effect;
@@ -168,7 +165,7 @@ void func_15141A7C(struct127 *actor, s32 arg1) {
 }
 
 /* Maps an actor's model id to its effect selector index (11: none). */
-s32 func_15141C0C(struct127 *actor) {
+s32 func_15141C0C(Actor *actor) {
     switch (actor->id) {
     case 121:
         return 10;
@@ -262,13 +259,13 @@ s32 func_1514EC1C(s32, s32, s16);
 void *memcpy(void *, const void *, u32);
 
 /* Restarts the actor's timed effect `handler`, or creates and attaches it if it has none. */
-void func_15141E38(struct127 *actor, s32 handler) {
-    AttachNode *found;
-    AttachNode *node;
+void func_15141E38(Actor *actor, s32 handler) {
+    Attachment *found;
+    Attachment *node;
     s32 pad; // matching: unused stack slot (keeps `info` at sp+0x40)
 
     found = NULL;
-    node = ACTOR_ATTACHMENTS(actor);
+    node = actor->attachments;
     if (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0) {
         do {
             AttachedEffect *effect;
@@ -372,7 +369,7 @@ s32 func_151420F8(s32 actor) {
     Args151420F8 args;
 
     args = D_800A5200;
-    if (func_150A2AEC((actor - (s32)D_800CC2D0) / (s32)sizeof(struct127), 6, &args, actor) == -1) {
+    if (func_150A2AEC((actor - (s32)D_800CC2D0) / (s32)sizeof(Actor), 6, &args, actor) == -1) {
         return 0;
     }
     return 1;
@@ -505,9 +502,9 @@ f32 func_151423D8(u8 angle) {
 }
 
 /* Resolves an actor unique id (0xFF: `self`) to an actor with a model (unk1D4), or NULL. */
-struct127 *func_15142444(u8 uniqueId, struct127 *self) {
+Actor *func_15142444(u8 uniqueId, Actor *self) {
     s32 id;
-    struct127 *actor;
+    Actor *actor;
 
     id = uniqueId;
     if (id == 0xFF) {
@@ -652,7 +649,7 @@ typedef struct {
     /* 0x3C */ s16 unk3C;
 } Unk2D0View;
 
-s32 func_15142A5C(struct127 *actor) {
+s32 func_15142A5C(Actor *actor) {
     Unk2D0View *unk2D0 = (Unk2D0View *)actor->unk2D0;
     s32 ret = 0;
 
@@ -1205,12 +1202,12 @@ s32 func_15143DA8(s32 *value, s32 lo, s32 hi) {
 }
 
 /* The actor's facing angle (unk7A) as a binary angle, a quarter turn ahead. */
-s32 func_15143E08(struct127 *actor) {
+s32 func_15143E08(Actor *actor) {
     return (((s32)actor->unk7A >> 8) + 64) & 0xFF;
 }
 
 /* The actor's facing angle in 256ths of a turn, relative to unk31C's angle when it has one. */
-s32 func_15143E24(struct127 *actor) {
+s32 func_15143E24(Actor *actor) {
     ActorCtl *ref = actor->unk31C;
     if (ref != NULL) {
         return (s16)((actor->unk7A - ref->unk12) >> 8);
@@ -1977,7 +1974,7 @@ s32 func_1514563C(struct17 *start, struct17 *dir, struct17 *point, struct17 *out
  * 2000 units along its yaw/pitch to target and, optionally, unit-1000 direction vectors for the
  * pitch and for the pitch plus pitchOffset (radians).
  */
-void func_15145740(struct127 *actor, struct17 *target, struct17 *dir, struct17 *offsetDir, f32 pitchOffset) {
+void func_15145740(Actor *actor, struct17 *target, struct17 *dir, struct17 *offsetDir, f32 pitchOffset) {
     s16 yaw;
     s16 pitch;
     volatile f32 angle;
@@ -2043,7 +2040,7 @@ f32 func_15145A0C(f32 arg0, f32 scale, f32 arg2) {
     return D_800A548C[(s32)(arg0 * arg2 * 100.0f)] * scale;
 }
 
-void func_15145A50(struct127 *actor) {
+void func_15145A50(Actor *actor) {
     actor->unk5 = 3;
     if (D_800BE9F0 != 51) {
         if ((D_800BE616 != 0) || (actor->interaction_state == 5) || (actor->interaction_state == 1) ||
@@ -2064,7 +2061,7 @@ void func_1515C1A0(void *, struct17 *, f32 *, f32 *);
  * Ray (start, dir) against the actor's collision ellipsoid (centre/radius from func_1515C1A0, y squashed
  * by unkDC); writes the near and far hits, unsquashed by unkE0. Returns 0 on a miss.
  */
-s32 func_15145AD8(struct17 *start, struct17 *dir, struct127 *actor, struct17 *hitNear, struct17 *hitFar,
+s32 func_15145AD8(struct17 *start, struct17 *dir, Actor *actor, struct17 *hitNear, struct17 *hitFar,
                   f32 *radius, f32 *arg6, struct17 *center) {
     struct17 centerBuf;
     f32 radiusBuf;
@@ -2318,7 +2315,7 @@ extern u8 D_800D9E20;
 extern u8 D_800D9E21;
 void *func_1515D914(void *, s16, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32, s32, s32);
 void *func_1515E544(void *, s32, u8, u8, void *);
-/* Per-slot texture overrides an actor carries in its tail (struct127 has these in unk301[]). */
+/* Per-slot texture overrides an actor carries in its tail (Actor has these in unk301[]). */
 typedef struct {
     /* 0x000 */ u8 pad0[0x301];
     /* 0x301 */ u8 unk301;
@@ -2332,7 +2329,7 @@ typedef struct {
  * Draws `slot` of a model: with the owning actor's own textures (mode 1, falling back to the shared
  * ones in mode 2 when the actor is gone or has none), or plainly through func_1515D914.
  */
-void *func_151462C8(void *gfx, s32 *model, u8 mode, struct127 *actor, u8 uniqueId, s16 slot, struct17 *pos,
+void *func_151462C8(void *gfx, s32 *model, u8 mode, Actor *actor, u8 uniqueId, s16 slot, struct17 *pos,
                     u8 flags, s32 arg8) {
     ActorTail *tail = (ActorTail *)actor;
     s32 tex;
@@ -2391,7 +2388,7 @@ u8 func_151464B8(s16 *flags) {
 }
 
 /* Broadcasts message 45 (see func_151419D0) linking actors a and b. */
-void func_15146508(struct127 *a, struct127 *b) {
+void func_15146508(Actor *a, Actor *b) {
     struct193 msg;
 
     msg.unk0 = a;
@@ -2421,14 +2418,14 @@ typedef struct {
     /* 0x48 */ AttachModel *model;
 } AttachPoint;
 
-s32 func_15031070(ActorCtl *, struct127 *, Mtx **, s32 *);
+s32 func_15031070(ActorCtl *, Actor *, Mtx **, s32 *);
 void func_15145EA4(f32 **, f32 **, Mtx *, s32);
 
 /*
  * Transforms `count` offsets by the matrix of an attachment point on the actor: a model's matrix,
  * a part's bone, a fixed matrix, or else one of the actor's bones. Returns 0 if it is unavailable.
  */
-s32 func_1514654C(struct127 *actor, AttachPoint *point, s32 index, f32 **offsets, f32 **results, s32 count) {
+s32 func_1514654C(Actor *actor, AttachPoint *point, s32 index, f32 **offsets, f32 **results, s32 count) {
     s32 i;
     Mtx *mtx;
     ActorCtl *part;

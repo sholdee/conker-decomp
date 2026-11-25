@@ -56,7 +56,7 @@ void func_15142314(struct255 *bones, s32 bone, Vec3f *out);
 void func_15152520(ParticleBurst *burst, u8 arg1, s32 arg2);
 
 /* Spawns a particle burst at bone 10 of `actor`. */
-void func_15193660(struct127 *actor, u8 arg1, s32 arg2) {
+void func_15193660(Actor *actor, u8 arg1, s32 arg2) {
     ParticleBurst burst;
     struct255 *bones;
 
@@ -110,7 +110,7 @@ void func_15193660(struct127 *actor, u8 arg1, s32 arg2) {
 typedef struct {
     /* 0x00 */ u8  ownerId;
     /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ struct127 *owner;
+    /* 0x04 */ Actor *owner;
     /* 0x08 */ u8  unk8;
     /* 0x09 */ u8  pad9[0x3];
     /* 0x0C */ f32 unkC;
@@ -137,7 +137,7 @@ typedef struct {
 void *func_15134DAC(EffectDesc *desc, s32 arg1);
 
 /* Creates a func_15134DAC object attached to `owner`. */
-void func_151937F4(struct127 *owner, s32 arg1, s32 arg2) {
+void func_151937F4(Actor *owner, s32 arg1, s32 arg2) {
     EffectDesc desc;
 
     if ((owner != NULL) && (owner->interaction_state != 0)) {
@@ -171,7 +171,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0xF];
-    /* 0x1C */ struct127 *owner;
+    /* 0x1C */ Actor *owner;
     /* 0x20 */ u8 pad20[0x54];
     /* 0x74 */ f32 scale; /* scales (to - from) into the spawn velocity */
 } Emitter;
@@ -219,7 +219,7 @@ typedef struct {
     /* 0x34 */ Color8 unk34;
     /* 0x38 */ u8 unk38;
     /* 0x39 */ u8 pad39[3];
-    /* 0x3C */ struct127 *owner;
+    /* 0x3C */ Actor *owner;
     /* 0x40 */ u8 ownerId;
     /* 0x41 */ u8 unk41;
     /* 0x42 */ u8 pad42[2];
@@ -231,7 +231,7 @@ typedef struct {
 
 extern f32 D_800A81F0;
 
-s32 func_1515C0F8(struct127 *actor, Vec3f **motion);
+s32 func_1515C0F8(Actor *actor, Vec3f **motion);
 void func_15157898(ParticleParams *params, ParticleMotion *motion, s32, f32, s32, s32, s32, u8, s32);
 
 /*

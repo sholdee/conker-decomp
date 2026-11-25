@@ -18,7 +18,7 @@ typedef struct Attachment {
     /* 0x1C */ s16 type;                    // index into D_8008ABE8
 } Attachment;
 
-/* Game objects keep the head of their attachment list at +0x2F4 (padding in struct127). */
+/* Game objects keep the head of their attachment list at +0x2F4 (padding in Actor). */
 typedef struct AttachmentOwner {
     /* 0x000 */ u8 pad0[0x2F4];
     /* 0x2F4 */ Attachment *attachments;
@@ -39,7 +39,7 @@ typedef struct AttachmentType {
 typedef struct EmitterAttach {
     /* 0x00 */ vertex p0;
     /* 0x0C */ vertex p1;
-    /* 0x18 */ struct127 *target;
+    /* 0x18 */ Actor *target;
     /* 0x1C */ u8 bone;
     /* 0x1D */ u8 targetId;             // the target's unique_id
     /* 0x1E */ s8 handler;              // index into D_8008D5A0, or -1
@@ -68,7 +68,7 @@ typedef struct EmitterParams {
     /* 0x58 */ u8 pad58[4];
 } EmitterParams;
 
-/* What func_15083568 returns, seen as a raw view (struct127 has a u8 at 0x38). */
+/* What func_15083568 returns, seen as a raw view (Actor has a u8 at 0x38). */
 struct St1514DE94 {
     /* 0x00 */ u8 pad0[0x38];
     /* 0x38 */ s32 unk38;
@@ -77,7 +77,7 @@ struct St1514DE94 {
 typedef struct Struct1514F5CCArg {
     /* 0x00 */ s32 unk00;
     /* 0x04 */ f32 unk04;
-    /* 0x08 */ struct127 *obj;
+    /* 0x08 */ Actor *obj;
     /* 0x0C */ u8 uniqueId;
     /* 0x0D */ u8 pad0D[3];
     /* 0x10 */ f32 unk10;
@@ -97,8 +97,8 @@ typedef struct HudSpriteHandle {
 } HudSpriteHandle;
 
 /* Spawn-callback tables (see func_1514D15C). */
-extern void (*D_8008AA70[])(struct127 *);
-extern void (*D_8008AACC[])(struct127 *);
+extern void (*D_8008AA70[])(Actor *);
+extern void (*D_8008AACC[])(Actor *);
 extern u8 *D_8008AB90[];
 extern u8 D_800A5EC0[];
 extern u8 D_800A5ED8[];
@@ -120,37 +120,37 @@ extern vertex D_800A5958;
 extern vertex D_800A5964;
 
 /* This file. */
-s32 func_1514CA80(struct127 *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
+s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot);
 s32 func_1514D4B8(s16 root, s16 type);
-Attachment *func_1514EC1C(s32 handle, struct127 *owner, s16 type);
-void func_1514F194(struct127 *obj);
+Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type);
+void func_1514F194(Actor *obj);
 
 /* Elsewhere. */
-void func_1501175C(struct127 *obj, u8 arg1, s32 arg2);
-struct St1514DE94 *func_15083568(struct127 *obj, s32 arg1, f32 arg2, s32 arg3);
+void func_1501175C(Actor *obj, u8 arg1, s32 arg2);
+struct St1514DE94 *func_15083568(Actor *obj, s32 arg1, f32 arg2, s32 arg3);
 s32 func_15083FB0(u8 uniqueId);
 void func_150C0AC0(Struct1514F5CCArg *desc, s32 arg1, s32 arg2);
-void func_150C4120(struct127 *obj, s32 arg1, s32 arg2, s32 arg3);
+void func_150C4120(Actor *obj, s32 arg1, s32 arg2, s32 arg3);
 s32 func_150C5370(void *desc, s32 payloadSize);
 void *func_15155780(s32 slot, s32 arg1);
 struct102 *func_15155FD4(s32 slot);
-s32 func_15158BD0(struct127 *obj, s32 arg1, s32 payloadSize);
+s32 func_15158BD0(Actor *obj, s32 arg1, s32 payloadSize);
 void func_1515F10C(void *);
-s32 func_15160A58(struct127 *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-void func_15160CDC(struct127 *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_15160A58(Actor *, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_15160CDC(Actor *, s32, void *, void *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
 s32 func_15189FF0(ParticleDef *spawn, EmitterParams *emitter, EmitterAttach *attach, s32, s32, s32, s32);
 s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_1518D1C0(struct127 *obj, s32, s32, s32, s32, s32, char *name);
+s32 func_1518D1C0(Actor *obj, s32, s32, s32, s32, s32, char *name);
 void func_1518E308(void *);
-s32 func_151ACA60(struct127 *obj, f32 arg1, s32 arg2);
-void func_151B2060(struct127 *obj);
-void func_151B9F00(struct127 *obj, s32, s32);
-void func_151BB044(struct127 *obj);
-void func_151BC074(struct127 *obj);
-void func_151BD2F8(struct127 *obj, s32, s32);
-void func_151D0F60(struct127 *obj, s32, s32, s32);
-void func_151D74B0(struct127 *obj, s32, s32, s32, s32);
+s32 func_151ACA60(Actor *obj, f32 arg1, s32 arg2);
+void func_151B2060(Actor *obj);
+void func_151B9F00(Actor *obj, s32, s32);
+void func_151BB044(Actor *obj);
+void func_151BC074(Actor *obj);
+void func_151BD2F8(Actor *obj, s32, s32);
+void func_151D0F60(Actor *obj, s32, s32, s32);
+void func_151D74B0(Actor *obj, s32, s32, s32, s32);
 
 
 
@@ -160,7 +160,7 @@ void func_151D74B0(struct127 *obj, s32, s32, s32, s32);
  * one chosen by D_800BE9F0 (*globalSlot, flag 2) and, inside that, one chosen by its unique_id
  * (*uniqueSlot, flag 1). Returns the OR of the flags that were set.
  */
-s32 func_1514CA80(struct127 *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
+s32 func_1514CA80(Actor *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
     u8 found = 0;
 
     switch (obj->id) {
@@ -517,7 +517,7 @@ s32 func_1514CA80(struct127 *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot)
  * Runs the spawn callbacks for `obj` (see func_1514CA80), after freeing whatever is still
  * queued for its slot. Does nothing if the object already has attachments.
  */
-s32 func_1514D15C(struct127 *obj) {
+s32 func_1514D15C(Actor *obj) {
     s32 uniqueSlot;
     s32 globalSlot;
     s32 idSlot;
@@ -577,7 +577,7 @@ s32 func_1514D15C(struct127 *obj) {
 }
 
 /** Frees every attachment of `owner`, letting each attachment type release its handle first. */
-s32 func_1514D310(struct127 *owner) {
+s32 func_1514D310(Actor *owner) {
     Attachment *node;
     Attachment *next;
 
@@ -597,7 +597,7 @@ s32 func_1514D310(struct127 *owner) {
  * Sends message `msg` (with `arg`) to every attachment of `owner` whose type is `type` or one
  * of its subtypes. Returns the result of the last handler called, as 0 or 1.
  */
-s32 func_1514D3B0(struct127 *owner, s16 type, s32 msg, s32 arg) {
+s32 func_1514D3B0(Actor *owner, s16 type, s32 msg, s32 arg) {
     Attachment *node;
     s32 result;
 
@@ -634,7 +634,7 @@ s32 func_1514D4B8(s16 root, s16 type) {
 }
 
 typedef struct Struct1514D564Payload {
-    struct127 *obj;
+    Actor *obj;
     u8 uniqueId;
     s8 unk5;
     u8 pad6[2];
@@ -655,7 +655,7 @@ typedef struct Struct1514D564Desc {
 } Struct1514D564Desc;
 
 /** Spawns a func_150C5370 object running from a fixed point to `obj` and attaches it (type 0x15). */
-void func_1514D564(struct127 *obj) {
+void func_1514D564(Actor *obj) {
     Struct1514D564Desc desc;
     s32 spawned;   // the object func_150C5370 allocated; the payload goes at +0xC8
     Struct1514D564Payload payload;
@@ -683,7 +683,7 @@ void func_1514D564(struct127 *obj) {
 }
 
 /** Attaches two emitters to `obj` (bones 0x2B and 5, types 9 and 10) plus a func_15160A58 effect. */
-void func_1514D64C(struct127 *obj) {
+void func_1514D64C(Actor *obj) {
     EmitterParams emitter;
     ParticleDef spawn;
     EmitterAttach attach;
@@ -785,11 +785,11 @@ void func_1514D64C(struct127 *obj) {
     func_15160A58(obj, 5, &attach, 2, 300, 40, 0xFF, 0, 0, 0xFF, 0, 1, 0, 0, 0xFF, 1);
 }
 
-void func_1514D96C(struct127 *obj) {
+void func_1514D96C(Actor *obj) {
 }
 
 /** Attaches a func_15158BD0 object (type 0x13) with a zeroed 0x20-byte payload. */
-void func_1514D978(struct127 *obj) {
+void func_1514D978(Actor *obj) {
     struct {
         s32 unk0;
         s32 unk4;
@@ -818,7 +818,7 @@ void func_1514D978(struct127 *obj) {
     }
 }
 
-void func_1514D9F4(struct127 *obj) {
+void func_1514D9F4(Actor *obj) {
     s32 handle;
 
     func_1514D978(obj);
@@ -827,7 +827,7 @@ void func_1514D9F4(struct127 *obj) {
 }
 
 /** Attaches a func_15158BD0 object (type 0x13) with a zeroed 0x1C-byte payload. */
-void func_1514DA38(struct127 *obj) {
+void func_1514DA38(Actor *obj) {
     s32 handle;
     struct {
         s32 unk0;
@@ -853,7 +853,7 @@ void func_1514DA38(struct127 *obj) {
 }
 
 /** Sets bit 1 of obj->unk94 and attaches a func_15158BD0 object (type 0x13) with an 8-byte payload. */
-void func_1514DAA4(struct127 *obj) {
+void func_1514DAA4(Actor *obj) {
     s32 handle;
     s32 payload[2];
 
@@ -872,7 +872,7 @@ void func_1514DAA4(struct127 *obj) {
 }
 
 /** Attaches a func_15158BD0 object (type 0x13) without payload. */
-void func_1514DB18(struct127 *obj) {
+void func_1514DB18(Actor *obj) {
     s32 handle = func_15158BD0(obj, 1, 0);
 
     if (handle != 0) {
@@ -880,104 +880,104 @@ void func_1514DB18(struct127 *obj) {
     }
 }
 
-void func_1514DB58(struct127 *obj) {
+void func_1514DB58(Actor *obj) {
 }
 
-void func_1514DB64(struct127 *obj) {
+void func_1514DB64(Actor *obj) {
     if (D_800BE9F0 == 20) {
         func_151B2060(obj);
     }
 }
 
-void func_1514DB98(struct127 *obj) {
+void func_1514DB98(Actor *obj) {
     func_1514F194(obj);
 }
 
-void func_1514DBB8(struct127 *obj) {
+void func_1514DBB8(Actor *obj) {
     func_15160A58(obj, 2, &D_800A58A0, 2, 300, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
 }
 
-void func_1514DC38(struct127 *obj) {
+void func_1514DC38(Actor *obj) {
     func_1500EE18(obj, 0xFF, 1);
 }
 
-void func_1514DC5C(struct127 *obj) {
+void func_1514DC5C(Actor *obj) {
     func_151D0F60(obj, 0, 0xFF, 1);
 }
 
-void func_1514DC84(struct127 *obj) {
+void func_1514DC84(Actor *obj) {
     obj->unk94 |= 2;
 }
 
-void func_1514DC98(struct127 *obj) {
+void func_1514DC98(Actor *obj) {
     obj->unk94 |= 0x710;
 }
 
 /** Sets obj->unk9C to 0x6000 and spawns part sets 0x23 and 0x44 on `obj`. */
-void func_1514DCAC(struct127 *obj) {
+void func_1514DCAC(Actor *obj) {
     obj->unk9C = 0x6000;
     func_15083568(obj, 0x23, 1.0f, 0);
     func_15083568(obj, 0x44, 1.0f, 0);
 }
 
-void func_1514DCF4(struct127 *obj) {
+void func_1514DCF4(Actor *obj) {
     if (obj->unk31C != NULL) {
         obj->unk31C->unk94 = 1;
     }
     func_15083568(obj, 0x17, 1.0f, 0);
 }
 
-void func_1514DD2C(struct127 *obj) {
+void func_1514DD2C(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DD4C(struct127 *obj) {
+void func_1514DD4C(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DD6C(struct127 *obj) {
+void func_1514DD6C(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DD8C(struct127 *obj) {
+void func_1514DD8C(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DDAC(struct127 *obj) {
+void func_1514DDAC(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DDCC(struct127 *obj) {
+void func_1514DDCC(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DDEC(struct127 *obj) {
+void func_1514DDEC(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DE0C(struct127 *obj) {
+void func_1514DE0C(Actor *obj) {
     func_1514DCAC(obj);
 }
 
-void func_1514DE2C(struct127 *obj) {
+void func_1514DE2C(Actor *obj) {
 }
 
-void func_1514DE38(struct127 *obj) {
+void func_1514DE38(Actor *obj) {
 }
 
-void func_1514DE44(struct127 *obj) {
+void func_1514DE44(Actor *obj) {
 }
 
-void func_1514DE50(struct127 *obj) {
+void func_1514DE50(Actor *obj) {
     if (((u8 *)D_800D2E4C)[0x11] & 8) { // low byte of D_800D2E4C->unk10
         func_1514DCAC(obj);
     }
 }
 
-void func_1514DE88(struct127 *obj) {
+void func_1514DE88(Actor *obj) {
 }
 
-void func_1514DE94(struct127 *obj) {
+void func_1514DE94(Actor *obj) {
     struct St1514DE94 *part;
 
     func_15160CDC(obj, 12, &D_800A58AC, &D_800A58B8, 0.008333000354f, 2, 300,
@@ -990,12 +990,12 @@ void func_1514DE94(struct127 *obj) {
 }
 
 /** Links `obj` to the object whose unique_id is 9 (unk65 holds that object's slot + 1). */
-void func_1514DFD0(struct127 *obj) {
+void func_1514DFD0(Actor *obj) {
     obj->unk65 = func_15083FB0(9) + 1;
     obj->unk101 |= 0x34;
 }
 
-void func_1514E00C(struct127 *obj) {
+void func_1514E00C(Actor *obj) {
     EmitterParams emitter;
     ParticleDef spawn;
     EmitterAttach attach;
@@ -1049,7 +1049,7 @@ void func_1514E00C(struct127 *obj) {
     func_151D74B0(obj, 5, -1, 0xFF, 1);
 }
 
-void func_1514E194(struct127 *obj) {
+void func_1514E194(Actor *obj) {
     EmitterParams emitter;
     ParticleDef spawn;
     EmitterAttach attach;
@@ -1103,7 +1103,7 @@ void func_1514E194(struct127 *obj) {
     func_151D74B0(obj, 5, -1, 0xFF, 1);
 }
 
-void func_1514E31C(struct127 *obj) {
+void func_1514E31C(Actor *obj) {
     EmitterParams emitter;
     ParticleDef spawn;
     EmitterAttach attach;
@@ -1166,7 +1166,7 @@ void func_1514E31C(struct127 *obj) {
 }
 
 /** Attaches the "Charactereffect 0" effect (type 0xD) and a func_1515D5F8 object tracking obj's position (type 0x18). */
-void func_1514E508(struct127 *obj) {
+void func_1514E508(Actor *obj) {
     s32 handle;
     s32 pos;
 
@@ -1177,7 +1177,7 @@ void func_1514E508(struct127 *obj) {
     func_1514EC1C(handle, obj, 0x18);
 }
 
-void func_1514E5B8(struct127 *obj) {
+void func_1514E5B8(Actor *obj) {
     s32 handle;
     s32 pos;
 
@@ -1188,7 +1188,7 @@ void func_1514E5B8(struct127 *obj) {
     func_1514EC1C(handle, obj, 0x18);
 }
 
-void func_1514E668(struct127 *obj) {
+void func_1514E668(Actor *obj) {
     s32 handle;
     s32 pos;
 
@@ -1199,7 +1199,7 @@ void func_1514E668(struct127 *obj) {
     func_1514EC1C(handle, obj, 0x18);
 }
 
-void func_1514E718(struct127 *obj) {
+void func_1514E718(Actor *obj) {
     s32 handle;
     s32 pos;
 
@@ -1210,7 +1210,7 @@ void func_1514E718(struct127 *obj) {
     func_1514EC1C(handle, obj, 0x18);
 }
 
-void func_1514E7C8(struct127 *obj) {
+void func_1514E7C8(Actor *obj) {
     s32 handle;
 
     handle = func_1518D1C0(obj, 7, 0, 1, 0xFF, 1, "Charactereffect 3");
@@ -1400,7 +1400,7 @@ Attachment *func_1514EBA4(s32 handle, s16 type, s32 extraSize) {
  * Attaches `handle` to `owner` as an attachment of `type` (pushed at the head of its list).
  * If no node can be allocated, the handle is released instead. Returns the node or NULL.
  */
-Attachment *func_1514EC1C(s32 handle, struct127 *owner, s16 type) {
+Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type) {
     Attachment *result;
     Attachment *node;
 
@@ -1472,7 +1472,7 @@ s32 func_1514ED3C(Attachment *list, s32 handle, Attachment **out) {
 }
 
 /** Unlinks `node` from `owner`'s attachment list and frees it. Returns the node's handle. */
-s32 func_1514ED8C(Attachment *node, struct127 *owner) {
+s32 func_1514ED8C(Attachment *node, Actor *owner) {
     s32 handle;
 
     if (node == ATTACHMENTS(owner)) {
@@ -1490,7 +1490,7 @@ s32 func_1514ED8C(Attachment *node, struct127 *owner) {
 }
 
 /** Removes (without releasing the handle) every attachment of `owner` that holds `handle`. */
-void func_1514EDF0(s32 handle, struct127 *owner) {
+void func_1514EDF0(s32 handle, Actor *owner) {
     Attachment *node;
     s32 ret;
     Attachment *match;
@@ -1510,7 +1510,7 @@ void func_1514EDF0(s32 handle, struct127 *owner) {
 }
 
 struct Struct1514EE70 {
-    struct127 *obj;
+    Actor *obj;
     u8 uniqueId;
     u8 unk5;
     u16 unk6;
@@ -1519,7 +1519,7 @@ struct Struct1514EE70 {
 s32 func_1515BE50(struct Struct1514EE70 *, s32, s32, s32);
 
 /** Attaches a func_1515BE50 object for `obj` (type 0x16). */
-void func_1514EE70(struct127 *obj) {
+void func_1514EE70(Actor *obj) {
     struct Struct1514EE70 desc;
     s32 handle;
 
@@ -1532,7 +1532,7 @@ void func_1514EE70(struct127 *obj) {
 }
 
 
-void func_1514EECC(struct127 *obj) {
+void func_1514EECC(Actor *obj) {
     s32 handle;
 
     handle = func_15160A58(obj, 1, &D_800A5934, 2, 300, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1);
@@ -1600,7 +1600,7 @@ void func_1514EECC(struct127 *obj) {
     }
 }
 
-void func_1514F110(struct127 *obj) {
+void func_1514F110(Actor *obj) {
     func_1514F194(obj);
 }
 
@@ -1618,7 +1618,7 @@ s32 func_1514F130(HudSpriteHandle *target, s32 msg, s32 arg) {
     return 1;
 }
 
-void func_1514F194(struct127 *obj) {
+void func_1514F194(Actor *obj) {
     s32 handle;
 
     func_151D0F60(obj, 1, 0xFF, 1);
@@ -1636,7 +1636,7 @@ void func_1514F194(struct127 *obj) {
     }
 }
 
-void func_1514F308(struct127 *obj) {
+void func_1514F308(Actor *obj) {
     vertex pointA = { 52.0f, 0.0f, 80.0f };
     vertex pointB = { 52.0f, 0.0f, 353.0f };
 
@@ -1644,9 +1644,9 @@ void func_1514F308(struct127 *obj) {
                   0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
 }
 
-void func_1514F3CC(struct127 *obj) {
+void func_1514F3CC(Actor *obj) {
     struct {
-        struct127 *obj;
+        Actor *obj;
         u8 uniqueId;
         f32 unk8;
     } payload;
@@ -1663,39 +1663,39 @@ void func_1514F3CC(struct127 *obj) {
     }
 }
 
-void func_1514F44C(struct127 *obj) {
+void func_1514F44C(Actor *obj) {
     s32 handle;
 
     handle = func_1518D1C0(obj, 5, 0, 1, 0xFF, 1, "Charactereffect frontend fire imp");
     func_1514EC1C(handle, obj, 0xD);
 }
 
-void func_1514F4A8(struct127 *obj) {
+void func_1514F4A8(Actor *obj) {
     func_151D74B0(obj, 1, -1, 0xFF, 1);
 }
 
-void func_1514F4D8(struct127 *obj) {
+void func_1514F4D8(Actor *obj) {
     func_151D74B0(obj, 2, 1, 0xFF, 1);
 }
 
-void func_1514F508(struct127 *obj) {
+void func_1514F508(Actor *obj) {
     func_151D74B0(obj, 3, 0, 0xFF, 1);
 }
 
-void func_1514F538(struct127 *obj) {
+void func_1514F538(Actor *obj) {
     func_151D74B0(obj, 4, -1, 0xFF, 1);
 }
 
-void func_1514F568(struct127 *obj) {
+void func_1514F568(Actor *obj) {
     func_150C4120(obj, -1, 0xFF, 1);
 }
 
-void func_1514F590(struct127 *obj) {
+void func_1514F590(Actor *obj) {
     func_1501175C(obj, 0xFF, 1);
     func_15011A78(obj, 0xFF, 1);
 }
 
-void func_1514F5CC(struct127 *obj) {
+void func_1514F5CC(Actor *obj) {
     Struct1514F5CCArg desc;
 
     desc.unk00 = 0;

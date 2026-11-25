@@ -133,7 +133,7 @@ void func_150113E0(void) {
 
 /* Per-owner data stored in the effect object func_1501175C spawns. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 id;
     /* 0x08 */ struct MotionEffect *effect;
     /* 0x0C */ struct225 *light;
@@ -146,7 +146,7 @@ typedef struct {
 
 /* Motion data copied into the effect spawned by func_1513D2F0. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 id;
     /* 0x08 */ f32 unk08;
     /* 0x0C */ f32 unk0C;
@@ -180,7 +180,7 @@ struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s
                          s32 offset, u8 arg9, s32 argA);
 
 /* Spawns an effect tied to owner, with a moving child effect and a light attached to it. */
-void func_1501175C(struct127 *owner, u8 arg1, s32 arg2) {
+void func_1501175C(Actor *owner, u8 arg1, s32 arg2) {
     ControllerEffect *object;
     Controller data;
     Controller *controller;
@@ -269,7 +269,7 @@ typedef struct {
 } OwnerEffect;
 
 /* Spawns an effect that remembers its owner and the owner's unique id. */
-void func_15011A78(struct127 *owner, u8 arg1, s32 arg2) {
+void func_15011A78(Actor *owner, u8 arg1, s32 arg2) {
     struct182 data;
     OwnerEffect *effect;
 

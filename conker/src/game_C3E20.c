@@ -333,7 +333,7 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
 }
 
 
-struct127 *func_1505EEF4(s32);
+Actor *func_1505EEF4(s32);
 
 /*
  * Answers script query `query` about actor `actorIndex` (arguments in args[2..]); fixed-point results
@@ -345,7 +345,7 @@ s32 func_1509759C(s32 actorIndex, s32 query, s32 *args) {
     struct17 facing;
     struct17 toTarget;
     f32 angle;
-    struct127 *target;
+    Actor *target;
     C3E20Pose *pose;
     f32 dx;
     f32 dz;

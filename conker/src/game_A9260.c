@@ -3,7 +3,7 @@
 #include "variables.h"
 
 /* struct197 in structs.h stops at 0x1C; func_1507BDB0 reads 0x20, 0x28, 0x3A and
- * 0x3C off the same object (struct127::unk2D0), so a file-local widened view is
+ * 0x3C off the same object (Actor::unk2D0), so a file-local widened view is
  * used here rather than retyping the shared header. */
 typedef struct AnimPlay {
     /* 0x00 */ void (*callback)(void); // called once when playback reaches the last frame
@@ -26,10 +26,10 @@ typedef struct AnimPlay {
 extern u8 D_800BEA0C;
 extern u8 D_800C365E[];
 
-f32 func_1506AD30(struct127 *obj, f32 time, s32 arg2);
+f32 func_1506AD30(Actor *obj, f32 time, s32 arg2);
 
 /* Advances an animation playback by rate, handling looping, hold and end callbacks. */
-void func_1507BDB0(AnimPlay *anim, f32 rate, struct127 *obj, s32 mode) {
+void func_1507BDB0(AnimPlay *anim, f32 rate, Actor *obj, s32 mode) {
     f32 time;
     s32 hold;
     u8 jumped;
@@ -84,7 +84,7 @@ void func_1507BDB0(AnimPlay *anim, f32 rate, struct127 *obj, s32 mode) {
             oldAnimId = anim->animId;
             if ((obj != NULL) && (obj->unkF4 & 8)) {
                 obj->unk10C = 0;
-                obj->pad1C4 = 0;
+                obj->events = NULL;
                 anim->speed = 0.0f;
             }
             if (D_800C35EA == 0) {
@@ -127,7 +127,7 @@ void func_1507BDB0(AnimPlay *anim, f32 rate, struct127 *obj, s32 mode) {
             }
             if ((obj != NULL) && (obj->unkF4 & 8)) {
                 obj->unk10C = 0;
-                obj->pad1C4 = 0;
+                obj->events = NULL;
                 anim->speed = 0.0f;
             }
             if (anim->time < 0.0f) {
@@ -150,16 +150,16 @@ void func_1507BDB0(AnimPlay *anim, f32 rate, struct127 *obj, s32 mode) {
             func_1506AD30(D_800D154C, anim->time, 0);
         }
         // structs.h declares 0xB4 as s32 padB4; it holds the object's f32 animation time
-        *(f32 *)&obj->padB4 = anim->time;
+        obj->unkB4 = anim->time;
     }
 }
 
-s32 func_150229E4(struct127 *obj);
+s32 func_150229E4(Actor *obj);
 
 /* Steps the animation of every active object; with onlyType4 set, only objects whose unk5 is 4. */
 void func_1507C22C(s32 onlyType4) {
     s32 i;
-    struct127 *obj;
+    Actor *obj;
     struct197 *anim;
 
     for (i = 0; i < 25; i++) {
@@ -177,7 +177,7 @@ void func_1507C22C(s32 onlyType4) {
 }
 
 /* Copies src's animation time onto dst, clamped to dst's last frame. */
-void func_1507C324(struct127 *dst, struct127 *src) {
+void func_1507C324(Actor *dst, Actor *src) {
     AnimPlay *dstAnim = (AnimPlay *)dst->unk2D0;
     AnimPlay *srcAnim = (AnimPlay *)src->unk2D0;
     f32 lastFrame;

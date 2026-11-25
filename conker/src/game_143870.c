@@ -40,7 +40,7 @@ typedef struct {
 } Game143870Object;
 
 void func_1511515C(Game143870Object *obj);
-s32 func_15116888(s32 x, s32 z, s32 *unused, struct127 *other);
+s32 func_15116888(s32 x, s32 z, s32 *unused, Actor *other);
 
 /* Bobs the object: params bytes are (height scale, sway scale, height rate, sway rate) from low to high. */
 void func_151163C0(Game143870Object *obj) {
@@ -168,7 +168,7 @@ void func_1511650C(Game143870Object *obj, s32 arg1, s32 soundId, f32 pitchScale)
 }
 
 /* Returns other's horizontal speed projected onto the direction from (x, z) towards it. */
-s32 func_15116888(s32 x, s32 z, s32 *unused, struct127 *other) {
+s32 func_15116888(s32 x, s32 z, s32 *unused, Actor *other) {
     s32 otherX;
     s32 otherZ;
     s32 bearing;

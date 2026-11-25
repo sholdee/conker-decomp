@@ -49,15 +49,15 @@ void func_15005290(s32 resource, s32 mode) {
 void func_1512D66C(Camera *arg0);
 void func_1512D6F0(Camera *arg0);
 void func_15125924(Camera *arg0);
-void func_151298C0(Camera *arg0, s32 arg1, struct127 *arg2);
-void func_15085430(struct127 *, s32, s32);
+void func_151298C0(Camera *arg0, s32 arg1, Actor *arg2);
+void func_15085430(Actor *, s32, s32);
 
 /**
  * Resets view state `index` and attaches it, as camera, to actor D_800CC2D0[index].
  */
 void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
     u16 i;
-    struct127 *actor;
+    Actor *actor;
     u8 actorIndex;
 
     bzero(view, sizeof(Camera));
@@ -138,7 +138,7 @@ void func_150054C4(Camera *view, s32 index, s16 resource, s32 mode) {
 /**
  * Moves camera `view` to `eye`, aims it at `actor`'s position and resets its derived state.
  */
-void func_15005818(Camera *view, struct127 *actor, vertex *eye) {
+void func_15005818(Camera *view, Actor *actor, vertex *eye) {
     vertex *viewEye;
 
     view->snap = 1;

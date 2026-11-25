@@ -73,9 +73,9 @@ extern u8 D_800C35E8[];            /* changes with each run of the scene */
 extern SeqQueueEntry *D_800C3D50;  /* dispatch queue, D_800C3C9A entries */
 
 extern WorldObject *func_151149AC(s32);
-extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, struct127 *, WorldObject *, f32 *, s32);
-extern s32 func_150265CC(SeqEvent *, s32, s32, s32, s32, struct127 *, WorldObject *, f32 *, s32);
-extern s32 func_15029BB8(SeqEvent *, s32, s32, s32, s32, struct127 *, WorldObject *, f32 *, s32, s32);
+extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
+extern s32 func_150265CC(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
+extern s32 func_15029BB8(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32, s32);
 extern void func_1502A8A0(SeqEvent *, s32, s32, s32, s32);
 
 void func_150238D0(void) {
@@ -449,7 +449,7 @@ typedef struct {
 } SeqSubtitle;
 
 typedef struct {
-    struct127 *obj;
+    Actor *obj;
     u8 id;
 } ObjRef1502460C;
 
@@ -495,16 +495,16 @@ extern void func_1501C730(s32, s32, s32, s32, s32);
 extern s32 func_1514D3B0(void *, s16, s32, s32);
 extern void func_15023440(SeqSubtitle *, s32);
 extern SeqSubtitle *func_150234A4(s32, s32);
-extern s32 func_15052F9C(struct127 *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 func_15053430(struct127 *);
+extern s32 func_15052F9C(Actor *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern s32 func_15053430(Actor *);
 extern void func_1507E7E4(void *, s32, s32, s32, s32);
 extern void func_1507EB4C(void *, s32);
-extern void func_150836CC(struct127 *, s32);
+extern void func_150836CC(Actor *, s32);
 extern s32 func_15083FB0(s32);
 extern void func_150B648C(u8);
 extern void func_150B7220(s32, s32, s32, s32);
-extern void func_150C5C74(struct127 *);
-extern void func_150C5C9C(struct127 *);
+extern void func_150C5C74(Actor *);
+extern void func_150C5C9C(Actor *);
 extern void func_150C851C(s32);
 extern void func_150E0300(void);
 extern void func_150F5340(void);
@@ -524,13 +524,13 @@ extern s32 func_1516D378(s32);
 extern s32 func_1516D3C4(s32);
 extern void func_1517F488(s32, s32, s32, s32, s32, s32);
 extern void func_1517F720(s32, s32, s32, s32, s32);
-extern s32 func_1518D1C0(struct127 *, s16, s16, s32, u8, s32, char *);
+extern s32 func_1518D1C0(Actor *, s16, s16, s32, u8, s32, char *);
 extern void func_1518F45C(s32, u8);
 extern s32 func_1518F51C(void *, u8, s16, s8, s8, s8, u8, s32, s32, s32);
-extern u8 *func_1519003C(struct127 *, s32 *);
+extern u8 *func_1519003C(Actor *, s32 *);
 extern void func_15190518(void *);
 extern void func_15191B8C(ObjRef1502460C *, u8);
-extern void func_151937F4(struct127 *, s32, s32);
+extern void func_151937F4(Actor *, s32, s32);
 extern s32 func_1519D030(void *, s32, s32, s32, s32, s32);
 extern s32 func_151A4FD0(s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151A9390(s32, s32, s32, f32 *, f32, f32, s32, s32, s32);
@@ -548,7 +548,7 @@ extern void func_151E53E8(s32);
  * when D_800E0BF4 is set and D_800BEAAB selects that type), event types 1, 3, 4,
  * 9, 0xC and 0xD, and most type-5 commands. Returns 1 when the event was handled.
  */
-s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
+s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, Actor *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
     if (D_800E0BF4 != 0 && (event->type == 7 || event->type == 0xE || event->type == 0xF || event->type == 0x10 || event->type == 0x12)) {
         s32 opening;
         SeqSubtitle *sub;
@@ -1312,7 +1312,7 @@ typedef struct {
 } Ev15167AD8;
 
 typedef struct {
-    struct127 *unk0;
+    Actor *unk0;
     u8 unk4;
     s16 unk6;
     s8 unk8;
@@ -1349,36 +1349,36 @@ extern void func_15167AD8(Ev15167AD8 *, u8, s32);
 extern void func_15177F90(u8, f32 *, u8, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_150B0094(f32 *, f32 *, u8, s32);
 extern void func_150E1AB0(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
-extern void func_150E2DB4(struct127 *, u8, s16, s32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32);
+extern void func_150E2DB4(Actor *, u8, s16, s32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32);
 extern void func_1516E778(f32 *, s32, s8, u8, s32);
 extern void func_150BEF7C(s32);
 extern f32 func_150489B0(u8);
 extern void func_1516F548(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 extern void func_151DC8BC(f32 *, s16, s32, s32, s32, s32);
-extern void func_150BA4C0(struct127 *, u8, s32);
-extern void func_151A3390(struct127 *, u8);
+extern void func_150BA4C0(Actor *, u8, s32);
+extern void func_151A3390(Actor *, u8);
 extern void func_15165F80(s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150B2494(struct127 *, s32, s32);
+extern void func_150B2494(Actor *, s32, s32);
 extern void func_15136A50(f32 *, f32 *, f32 *, s16, s32, s32);
-extern void func_150CE150(struct127 *, s16, u8, s32);
+extern void func_150CE150(Actor *, s16, u8, s32);
 extern void func_150CFC38(f32);
-extern void func_15109410(struct127 *, s16, s32, s32, f32, s32, s32, s32);
+extern void func_15109410(Actor *, s16, s32, s32, f32, s32, s32, s32);
 extern void func_15109ED4(WorldObject *, s16, s32, s32, f32, s32, s32, s32);
-extern void func_1510A344(struct127 *, s16, u8, s32);
+extern void func_1510A344(Actor *, s16, u8, s32);
 extern void func_151619A0(s32, s16, u8, s32);
 extern void func_15108FFC(s32, s32, u8);
 extern void func_15190770(Ev15190770 *, s32, u8, s32);
 extern void func_150F802C(SeqTrackState *, s16, u8, s32);
 extern void func_150AF738(s16, u8, s32);
-extern void func_150F5C08(struct127 *, s16, u8, s32);
+extern void func_150F5C08(Actor *, s16, u8, s32);
 extern void func_1519EB8C(SeqTrackState *, u16, s16, u8, s32);
-extern void func_150C4120(struct127 *, s16, u8, s32);
-extern void func_150F6890(struct127 *, s16, u8, s32);
+extern void func_150C4120(Actor *, s16, u8, s32);
+extern void func_150F6890(Actor *, s16, u8, s32);
 extern void func_150D0134(u8, s32, s16, u8, s32);
 extern void func_150D02B4(u8, s32, s16, u8, s32);
 extern void func_150D04C4(u8, s32, s16, u8, s32);
 extern void func_150CF680(s16, u8, s32);
-extern void func_151925C4(struct127 *, s16, u8, s32);
+extern void func_151925C4(Actor *, s16, u8, s32);
 extern void func_1519ED84(SeqTrackState *, u16, s16, u8, s32);
 extern void func_150FAE18(s16, u8, s32);
 extern s32 func_15046C80(f32 *, s32, f32, EvFloor *);
@@ -1386,64 +1386,64 @@ extern void func_15136698(f32, f32, u8, s32, s32, f32 *, f32 *, s32, s32, s32, s
 extern void func_150E3340(f32 *, s32 *, SeqTrackState *, s16);
 extern void func_151D8868(Ev151D8868 *, s32, u8, s32);
 extern void func_151B5240(s16, u8, s32);
-extern void func_15192D48(struct127 *, s16, u8, s32);
-extern void func_151B09BC(struct127 *, s32, s16, u8, s32);
+extern void func_15192D48(Actor *, s16, u8, s32);
+extern void func_151B09BC(Actor *, s32, s16, u8, s32);
 extern void func_15134908(Ev15134908 *, s32, u8, s32);
-extern void func_150E9FE0(struct127 *, s16, u8, s32);
-extern void func_150EA500(struct127 *, s16, u8, s32);
+extern void func_150E9FE0(Actor *, s16, u8, s32);
+extern void func_150EA500(Actor *, s16, u8, s32);
 extern void func_151356D4(f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_150C7020(struct127 *, s32, u8, s32);
+extern void func_150C7020(Actor *, s32, u8, s32);
 extern void func_150DB518(f32 *, f32 *, f32 *, f32 *, f32 *, s32, s32, s32);
 extern s32 func_1514D4B8(s16, s16);
 extern s32 func_1519E970(s16, EvNodeData *, s32, f32 *, f32 *, s32, s32);
 extern void func_1516F2F8(s32, s32, s32, s32, s32, s32);
 extern void func_1516F1C0(s32, s32, u8, s32);
-extern void func_15136404(struct127 *, f32, u8, s32);
-extern void func_1504715C(EvFloor *, struct127 *);
+extern void func_15136404(Actor *, f32, u8, s32);
+extern void func_1504715C(EvFloor *, Actor *);
 extern void func_150CA930(f32 *);
 extern void func_151090DC(void);
-extern void func_150FB324(struct127 *, u8, s32);
-extern void func_150F97EC(struct127 *, u8, s32);
-extern void func_150F9950(struct127 *, u8, s32);
-extern s32 func_1514654C(struct127 *, ActorCtl *, s32, f32 **, f32 **, s32);
-extern void func_151C5588(struct127 *, f32 *, s32, u8, s32);
+extern void func_150FB324(Actor *, u8, s32);
+extern void func_150F97EC(Actor *, u8, s32);
+extern void func_150F9950(Actor *, u8, s32);
+extern s32 func_1514654C(Actor *, ActorCtl *, s32, f32 **, f32 **, s32);
+extern void func_151C5588(Actor *, f32 *, s32, u8, s32);
 extern void func_151C56A4(f32 *, u8, s32);
-extern void func_150E06D8(struct127 *, u8, u8, s32);
-extern void func_151CFA4C(struct127 *, u8, s32);
-extern void func_151C62D0(struct127 *, u8, s32, ActorCtl *, s32, s32, s32);
-extern void func_150BAA14(struct127 *, s32, s32);
-extern void func_150E0870(struct127 *, u8, s32);
+extern void func_150E06D8(Actor *, u8, u8, s32);
+extern void func_151CFA4C(Actor *, u8, s32);
+extern void func_151C62D0(Actor *, u8, s32, ActorCtl *, s32, s32, s32);
+extern void func_150BAA14(Actor *, s32, s32);
+extern void func_150E0870(Actor *, u8, s32);
 extern void func_151D5648(f32 *, u8, s32);
-extern void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
+extern void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15143134(const f32 *, f32 *, void *);
 extern void func_151C329C(f32 *, u8, s32);
-extern void func_15107B78(struct127 *, s16, s16, u8, s32);
+extern void func_15107B78(Actor *, s16, s16, u8, s32);
 extern void func_151CC290(Camera *);
 extern void func_1519EA78(f32 *, u16, f32, u8, s32);
-extern void func_15107700(struct127 *, s16, s16, s16, s32, f32, f32, s32, s32, u8 *, s32, s32);
-extern void func_150F16DC(struct127 *, u8, u8, u8, s32);
+extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s32, s32, u8 *, s32, s32);
+extern void func_150F16DC(Actor *, u8, u8, u8, s32);
 extern void func_15131EE4(f32 *, f32, u8, s32);
 extern void func_15170B90(void *, s32, s32, s32, s32, s32);
-extern void func_1507DE4C(struct127 *);
-extern void func_15138C80(struct127 *, u8, s32);
-extern void func_15193660(struct127 *, u8, s32);
-extern void func_151A0A10(struct127 *, s32, u8, s32);
+extern void func_1507DE4C(Actor *);
+extern void func_15138C80(Actor *, u8, s32);
+extern void func_15193660(Actor *, u8, s32);
+extern void func_151A0A10(Actor *, s32, u8, s32);
 extern void func_151A6F00(void *, s32, u8, s32);
 extern void func_15153F18(s16 *, f32 *, s32, u8, s32);
 extern void func_151DBAA8(f32 *, s32, u8, u8, s32);
-extern void func_151AF4D0(struct127 *, u8, u8, s32);
+extern void func_151AF4D0(Actor *, u8, u8, s32);
 extern void func_150C1F60(u8);
 extern void func_150C2290(u8);
 extern void func_150C2424(u8);
-extern void func_150DAE70(struct127 *, s32, u8, s32);
+extern void func_150DAE70(Actor *, s32, u8, s32);
 extern void func_15148F1C(u8, f32, f32, f32, s32, s32, s32, f32, s16, f32, f32, s32);
-extern void func_150DB9E0(struct127 *, s32, u8);
+extern void func_150DB9E0(Actor *, s32, u8);
 extern void func_1518B264(f32 *, f32, f32, s32, s32);
 extern void func_1518B2A8(f32 *, f32, f32, s32, s32, s32, s32);
 extern void func_15171600(WorldObject *, u8, s32);
-extern void func_15171BF4(struct127 *, u8);
+extern void func_15171BF4(Actor *, u8);
 extern void func_15170EC4(WorldObject *, u8, s32);
-extern void func_151711C4(struct127 *);
+extern void func_151711C4(Actor *);
 extern void func_1518B6B0(f32, f32, f32, u8, s32);
 extern void func_1516ED68(s32, s32, u8, s32);
 extern void func_150C2804(f32 *, f32 *, f32 *, s16, s32, s32);
@@ -1453,7 +1453,7 @@ extern void func_150C2804(f32 *, f32 *, f32 *, s16, s32, s32);
  * 0x11 (records the event index in D_800C3960), and the effect-spawning type-5
  * commands. Returns 1 when the event was handled.
  */
-s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
+s32 func_150265CC(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, Actor *obj, WorldObject *actor, f32 *pos, s32 sceneTag) {
     if (event->type == 0xB) {
         s32 vol;
         s32 vol2;
@@ -2637,14 +2637,14 @@ extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 extern void func_1000D96C(s32, s32, s32);
 extern void func_1000DE1C(s32, s32);
 extern s32 func_1000E134(s32);
-extern void func_1503DE70(struct127 *, s32, s32);
+extern void func_1503DE70(Actor *, s32, s32);
 extern void func_151557FC(s32, s32, f32);
 extern void func_15155F90(void);
 extern void func_15178EFC(s32);
 extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
-extern void func_15188810(struct127 *, s32, s32);
+extern void func_15188810(Actor *, s32, s32);
 extern void func_1518894C(WorldObject *, s32, s32);
-extern void func_15188AD0(struct127 *);
+extern void func_15188AD0(Actor *);
 extern void func_151D66F0(s32, s32);
 
 typedef struct {
@@ -2662,7 +2662,7 @@ extern u16 D_800C3C8E;
  * commands (8), object animations (2) and a few type-5 commands. `skipping` is set when the scene is
  * being skipped (D_800C3C88 == 2). Returns 1 when the event was handled.
  */
-s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, struct127 *obj, WorldObject *actor, f32 *pos, s32 sceneTag, s32 skipping) {
+s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene, Actor *obj, WorldObject *actor, f32 *pos, s32 sceneTag, s32 skipping) {
     if ((event->type == 6) || (event->type == 10)) {
         s32 vol;
         s32 duration;
@@ -2937,7 +2937,7 @@ s32 func_15029BB8(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
  * then offers the event to each handler until one accepts it.
  */
 void func_1502A8A0(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scene) {
-    struct127 *obj;
+    Actor *obj;
     WorldObject *actor;
     f32 *pos;
     SeqTrackInfo *info;

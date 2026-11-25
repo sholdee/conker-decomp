@@ -6,7 +6,7 @@
 
 /* Per-particle data of a beam attached to an actor's bone, stored at Particle.beam. */
 typedef struct {
-    /* 0x00 */ struct127 *target;
+    /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId;
     /* 0x08 */ s32 boneOffset; /* byte offset of the bone's matrix in target->unk1D4 */
     /* 0x0C */ s16 node;       /* func_1503195C node, -1: use the bone matrix */
@@ -121,7 +121,7 @@ struct210 *func_15102920(f32 size, u8 arg1, s32 arg2, struct17 *position, s16 du
 
 /* Spawns a beam particle from `start` to `end`, attached to bone `bone` of `target` (or to its model node `node`),
  * plus a flash at `flashPos`. */
-Particle *func_15102B38(struct127 *target, u8 bone, vertex *start, vertex *end, ParticleSize *size, s16 lifetime,
+Particle *func_15102B38(Actor *target, u8 bone, vertex *start, vertex *end, ParticleSize *size, s16 lifetime,
                   u8 alpha, f32 flashSize, struct17 *flashPos, u8 viewMask, s32 extraSize, s16 node, u8 arg12,
                   s32 arg13) {
     Particle *particle;
@@ -185,13 +185,13 @@ void func_15102D50(Particle *particle, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, (s32)&particle->beam.target, (s32)&particle->beam.targetId, (s32)particle);
 }
 
-extern s32 func_1514654C(struct127 *, ActorCtl *, s32, void *, void *, s32);
+extern s32 func_1514654C(Actor *, ActorCtl *, s32, void *, void *, s32);
 extern void func_15145EA4(struct17 **src, struct17 **dst, Mtx *matrix, s32 count);
 
 /* Beam update: moves the beam's end points with its target's bone or model node.
  * Returns 0 when the beam should die (target gone or node missing). */
 s32 func_15102D90(Particle *particle) {
-    struct127 *target;
+    Actor *target;
     BeamData *beam;
     struct17 *src[2];
     struct17 *dst[2];

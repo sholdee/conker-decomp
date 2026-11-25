@@ -9,7 +9,7 @@
 // matching: integer address math hides the base from IDO's alias analysis (s16 (*)[3] indexing reorders loads)
 #define QUAD_ANCHOR(index) ((s16 *)((s32)&D_800C3FC4 + (index) * 6))
 
-/* An actor's bone matrix: struct127.unk1D4 points at an array of these. */
+/* An actor's bone matrix: Actor.unk1D4 points at an array of these. */
 typedef f32 MtxF[4][4];
 
 void func_150A7960(MtxF, f32, f32, f32, f32 *, f32 *, f32 *);
@@ -26,7 +26,7 @@ void func_15036570(s32 index, MtxF pinMtx, MtxF followMtx) {
     f32 targetY;
     f32 targetZ;
     Vtx *vtx;
-    struct127 *actor;
+    Actor *actor;
     s32 state;
     f32 frame;
     s16 *anchor;
@@ -79,7 +79,7 @@ typedef struct {
     /* 0x28 */ Vtx *vtx[2]; // one per frame buffer
 } AttachmentView;
 
-/* struct127 fields this file reads that the shared definition only has as padding (pad66, unk301[]). */
+/* Actor fields this file reads that the shared definition only has as padding (pad66, unk301[]). */
 typedef struct {
     /* 0x000 */ u8 pad0[0x66];
     /* 0x066 */ u8 unk66;

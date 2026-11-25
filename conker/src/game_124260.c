@@ -5,12 +5,12 @@
 
 /* Message 0x3E payload: "this actor is gone"; beams owned by it destroy themselves (func_150F7310). */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id */
 } OwnerGoneMsg;
 
 /* Sends message 0x3E (func_151494E0) for `owner`; beams it owns destroy themselves on it. */
-void func_150F6DB0(struct127 *owner) {
+void func_150F6DB0(Actor *owner) {
     OwnerGoneMsg msg;
 
     msg.owner = owner;
@@ -38,7 +38,7 @@ typedef struct {
 
 /* Per-object state of a beam (0x78 bytes, copied in by func_150F6DE4). */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id */
     /* 0x08 */ BeamEnd *ends[2];
     /* 0x10 */ RayHit ray;
@@ -60,7 +60,7 @@ typedef struct {
 extern BeamEnd *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 
 /* Spawns a beam object for `owner`, with two end sprites (blue-tinted, then red-tinted). */
-BeamObj *func_150F6DE4(struct127 *owner) {
+BeamObj *func_150F6DE4(Actor *owner) {
     BeamState state;
     u8 i;
     BeamObj *obj;
@@ -128,8 +128,8 @@ BeamObj *func_150F6DE4(struct127 *owner) {
     return obj;
 }
 
-void func_15145740(struct127 *actor, struct17 *out, struct17 *arg2, struct17 *arg3, f32 arg4);
-void func_15081690(struct127 *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
+void func_15145740(Actor *actor, struct17 *out, struct17 *arg2, struct17 *arg3, f32 arg4);
+void func_15081690(Actor *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
                    s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
 s32 func_1506196C(u8 *obj, s32 arg1);
 void func_1502EA98(u8 *obj, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
@@ -137,7 +137,7 @@ void func_1502EA98(u8 *obj, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
 /* Per-frame update: re-casts the beam from the owner and moves the end sprites to where it hits. */
 void func_150F706C(BeamObj *obj) {
     BeamState *beam;
-    struct127 *owner;
+    Actor *owner;
     struct17 origin;
     struct17 hitPos;
 
@@ -213,7 +213,7 @@ void func_150F7310(BeamObj *obj, OwnerGoneMsg *msg, u8 msgId) {
     }
 }
 
-void func_1514EDF0(BeamObj *handle, struct127 *owner);
+void func_1514EDF0(BeamObj *handle, Actor *owner);
 
 /* Destroys the beam's end sprites and detaches the beam from its owner. */
 void func_150F739C(BeamObj *obj) {

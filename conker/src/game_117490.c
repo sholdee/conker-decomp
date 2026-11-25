@@ -10,7 +10,7 @@ void func_150E5AE0(void);
 typedef struct {
     /* 0x00 */ u8  ownerId;
     /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ struct127 *owner;
+    /* 0x04 */ Actor *owner;
     /* 0x08 */ u8  unk8;
     /* 0x09 */ u8  pad9[0x3];
     /* 0x0C */ f32 unkC;
@@ -77,7 +77,7 @@ void *func_151303BC(ParticleDesc *, s32, s32);
 void *func_15134DAC(struct_E9FE0 *, s32);
 
 /* Creates a func_15134DAC object attached to `owner`, with a slowly pulsing oscillator. */
-OscillatorObject *func_150E9FE0(struct127 *owner, s16 arg1, s32 arg2, s32 arg3) {
+OscillatorObject *func_150E9FE0(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
     struct_E9FE0 desc;
     OscillatorObject *obj;
     Oscillator oscillator;
@@ -208,7 +208,7 @@ typedef struct {
     /* 0x00 */ s32 target[2];
     /* 0x08 */ u8  ownerId;
     /* 0x09 */ u8  pad9[0x3];
-    /* 0x0C */ struct127 *owner;
+    /* 0x0C */ Actor *owner;
     /* 0x10 */ u8  bone;
     /* 0x11 */ u8  pad11[0x3];
     /* 0x14 */ Vec3f offset;
@@ -224,7 +224,7 @@ typedef struct {
 void *func_1513418C(EmitterDesc *, s32, u8, s32);
 
 /* Attaches an emitter to bone 1 of `owner` for `lifetime` frames (-1: 300 frames). */
-void *func_150EA500(struct127 *owner, s16 lifetime, s32 arg2, s32 arg3) {
+void *func_150EA500(Actor *owner, s16 lifetime, s32 arg2, s32 arg3) {
     EmitterDesc desc;
 
     desc.target[0] = 0;

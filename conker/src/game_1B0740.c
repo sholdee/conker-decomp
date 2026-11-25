@@ -51,7 +51,7 @@ void func_151838B0(s32);
 void func_15183974(s32);
 void func_151839F0(s32, s32);
 void func_15183ACC(s32);
-s32 func_15184118(struct127 *);
+s32 func_15184118(Actor *);
 ModelResource *func_1502B6BC(s32, s32, s32, s32, s32, s32);
 void func_1510CE60(Gfx *, s32, s32, s32, void **);
 void func_1510D630(void *);
@@ -77,7 +77,7 @@ extern u8 D_800A72E8[];
 s32 func_15183290(s32 x, s32 y, s32 z, s32 count, s32 type, s32 radius, s32 player, s32 maxRadius,
                   s32 heightRange, s32 minRadius, s32 spawnFlags) {
     s32 group;
-    struct127 *target;
+    Actor *target;
 
     for (group = 0; group < 4; group++) {
         if (D_800DDF5C[group] == 0) {
@@ -328,7 +328,7 @@ void func_15183D28(void) {
 }
 
 /* Returns whether `obj`'s unk31C data has unk57 set. */
-s32 func_15184118(struct127 *obj) {
+s32 func_15184118(Actor *obj) {
     if (obj->unk31C != NULL && obj->unk31C->unk57 != 0) {
         return 1;
     }

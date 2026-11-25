@@ -430,7 +430,7 @@ typedef struct Game1483E0State {
     u8 reference_id;
     u8 unknown40[0x3C];
     Game1483E0UvPair *coords;
-    struct127 *reference;
+    Actor *reference;
 } Game1483E0State;
 
 extern f32 D_800A31D0;
@@ -489,7 +489,7 @@ void func_1511BB04(Game1483E0State *obj, f32 refX, f32 refZ, f32 scaleS, f32 sca
 
 /* Projects the mesh texture under its reference object (or the object numbered reference_id). */
 void func_1511BDF4(Game1483E0State *obj) {
-    struct127 *reference;
+    Actor *reference;
 
     if (obj->reference != NULL) {
         reference = obj->reference;
@@ -515,7 +515,7 @@ struct CharacterTrap {
     s16 z;
 };
 
-/* The 0x32C-byte character object (struct127) as func_1511BEBC sees it. */
+/* The 0x32C-byte character object (Actor) as func_1511BEBC sees it. */
 struct TrapCharacter {
     u8 pad0[0x14];
     f32 x;
@@ -1307,11 +1307,11 @@ struct Owner1511DF6C {
 
 extern void func_10010558(u16, void *, s32, s32, s32, s32);
 extern void *func_1509B570(s32);
-extern void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
-extern void func_151D6970(struct127 *, WorldObject *);
+extern void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
+extern void func_151D6970(Actor *, WorldObject *);
 
 /* Plays the impact sound for this object type, with extra sounds for characters 0x3B and 0x80. */
-void func_1511DD98(WorldObject *obj, struct127 *character) {
+void func_1511DD98(WorldObject *obj, Actor *character) {
     s32 sound;
     s32 volume;
     s32 isChar3B;
@@ -1416,7 +1416,7 @@ void func_1511DF6C(WorldObject *obj) {
     s32 skip;
     s32 anim;
     s32 i;
-    struct127 *character;
+    Actor *character;
     u8 *data; // matching: one pointer for both lookups; a second local grows the frame
     f32 y;
 
@@ -1465,7 +1465,7 @@ void func_1511DF6C(WorldObject *obj) {
             if (character->unk300 == 0) {
                 continue;
             }
-            if ((WORK(obj)->w1511DF6C.filter == 1 && *(u8 *)&character->pad128 != 0) || (WORK(obj)->w1511DF6C.filter == 2 && *(u8 *)&character->pad128 == 0) || (WORK(obj)->w1511DF6C.filter == 3 && (*(u8 *)&character->pad128 & 1))) {
+            if ((WORK(obj)->w1511DF6C.filter == 1 && character->team != 0) || (WORK(obj)->w1511DF6C.filter == 2 && character->team == 0) || (WORK(obj)->w1511DF6C.filter == 3 && (character->team & 1))) {
                 continue;
             }
             if (anim != -1 && func_1503195C(character, anim, 0) != NULL) {
@@ -1482,7 +1482,7 @@ void func_1511DF6C(WorldObject *obj) {
             if (dist < radius * radius) {
                 func_1507C3E0(character, &height, &unused1, &unused2);
                 y = (f32)obj->y;
-                if (y < *(f32 *)&character->pad17C && character->y_position < y + radius && y - radius < character->y_position + height) {
+                if (y < character->ceilingY && character->y_position < y + radius && y - radius < character->y_position + height) {
                     WORK(obj)->w1511DF6C.lastCharacter = character->unique_id;
                     pulse->state = 3;
                     func_1511DD98(obj, character);

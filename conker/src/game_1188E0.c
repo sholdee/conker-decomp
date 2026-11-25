@@ -53,7 +53,7 @@ void func_150EB430(vertex *start, vertex *delta, vertex *hit) {
 s32 func_150EB484(vertex *start, vertex *end, vertex *hit) {
     s32 i;
     s32 id;
-    struct127 *obj;
+    Actor *obj;
 
     obj = func_15083E90(9);
     if (obj != NULL) {

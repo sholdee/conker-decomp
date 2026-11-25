@@ -9,9 +9,9 @@ extern s32 D_8008889C;
 extern s32 *D_800DBF94; /* per prop: bit i set while D_800CC2D0[i] stands on it */
 
 extern WorldObject *func_151149AC(u8 id); /* the prop whose id is `id` */
-extern void func_151951E0(struct127 *);
-extern void func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
-extern void func_1507CD64(struct127 *, s32);
+extern void func_151951E0(Actor *);
+extern void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
+extern void func_1507CD64(Actor *, s32);
 
 s32 func_1509BE40(s32, s32, s32, ...);
 void func_1509BFB0(s32, s32, s32, ...);
@@ -111,7 +111,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ u8 ownerId;
     /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ struct127 *owner;
+    /* 0x04 */ Actor *owner;
     /* 0x08 */ u8 bone;
     /* 0x09 */ u8 pad9[3];
     /* 0x0C */ Vec3f offsetA;
@@ -147,7 +147,7 @@ BloodStrip *func_15134DAC(BloodStripDesc *desc, s32 arg1);
 
 /* Spawns a blood strip on obj that uses sample callback 6 and emit callback 7 (below);
  * mirrored selects which way it is offset. */
-void func_150D10E4(struct127 *obj, u8 mirrored) {
+void func_150D10E4(Actor *obj, u8 mirrored) {
     BloodStripDesc desc;
 
     desc.ownerId = obj->unique_id;

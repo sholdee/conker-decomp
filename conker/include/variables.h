@@ -393,8 +393,8 @@ extern u8  D_80087280[];
 extern u32 D_80087380;
 
 extern u64 D_800885B0;
-extern struct127 *D_80088720;
-extern struct127 *D_80088730;
+extern Actor *D_80088720;
+extern Actor *D_80088730;
 extern s32 D_80088750;
 extern vertex D_80088724;
 extern u8  D_80088980;
@@ -984,7 +984,7 @@ extern u8  D_800CC2B0;
 extern u8  D_800CC2B8;
 extern s32 D_800CC2BA;
 extern s32 D_800CC2BC;
-extern struct127 D_800CC2D0[26]; // objects
+extern Actor D_800CC2D0[26]; // objects
 extern u8  D_800CC2D4[];
 extern f32 D_800CC2E8[];
 extern f32 D_800CC30C[];
@@ -995,10 +995,10 @@ extern u8  D_800CC3D4[];
 extern s8  D_800CC3D7;
 extern u8  D_800CC3F5[] ; // ??
 
-extern struct127  D_800CC5A0[];
+extern Actor  D_800CC5A0[];
 extern u8  D_800CC521[]; // ??
 
-extern struct127 *D_800CE370;
+extern Actor *D_800CE370;
 
 /* 800D0000 */
 
@@ -1022,7 +1022,7 @@ extern s16 D_800D1582;
 extern u8  D_800D1583;
 extern s32 D_800D1588[187];  // 748 bytes
 extern s32 D_800D1548;
-extern struct127 *D_800D154C;
+extern Actor *D_800D154C;
 
 extern f32 D_800D1874;
 extern f32 D_800D1878;

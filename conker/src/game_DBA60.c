@@ -110,7 +110,7 @@ typedef struct {
 
 /* Link from an effect to the actor it is attached to. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; /* owner->unique_id when the link was made */
     /* 0x05 */ u8 bone;
 } OwnerLink;
@@ -133,7 +133,7 @@ s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 /* Bursts 12-20 particles plus one emission from the owner's bone, when the owner is still the same actor. */
 void func_150AE790(AttachedEffect *effect) {
     OwnerLink *link;
-    struct127 *owner;
+    Actor *owner;
     Spawn150AE790 spawn;
     Motion150AE790 motion;
     s32 pad; // matching: unused stack slot
@@ -253,7 +253,7 @@ void func_15001A08(void);
 
 /* Spawns the effects in D_800886E0[0] and attaches each to `actor`. Also checksums the code from
    func_15001A08 to D_15001B08 and, if it was modified, empties object list 35. */
-void func_150AEB9C(struct127 *actor) {
+void func_150AEB9C(Actor *actor) {
     u32 *p;
     u32 sum;
     s32 i;
@@ -350,12 +350,12 @@ s32 func_150AEDD8(struct202 *arg0) {
 /* Message payloads seen by func_150AEDF8. */
 typedef union {
     struct {
-        struct127 *obj;
+        Actor *obj;
         u8 id;
     } removed; /* message 0 */
     struct {
-        struct127 *a;
-        struct127 *b;
+        Actor *a;
+        Actor *b;
         u8 idA;
         u8 idB;
     } swap; /* message 0x2D */
@@ -377,7 +377,7 @@ void func_150AEDF8(AttachedEffect *effect, OwnerMsg *msg, u8 type) {
             dst->ownerId = msg->swap.idA;
         }
     } else if (type == 0) {
-        struct127 *obj = msg->removed.obj;
+        Actor *obj = msg->removed.obj;
 
         if (obj == link->owner || msg->removed.id == link->ownerId) {
             func_1516972C((struct102 *)effect);

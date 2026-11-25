@@ -3,22 +3,22 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-void func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+void func_15052F9C(Actor *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+void func_1505327C(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 void func_15060A30(s32, void *);
 void func_1507CD64(void *, s32);
-void func_1505A770(struct127 *arg0);
-void func_15055B0C(struct127 *arg0, s32 arg1);
+void func_1505A770(Actor *arg0);
+void func_15055B0C(Actor *arg0, s32 arg1);
 void func_151026BC(void *, s32, s32, s32, s32, s32);
 void func_15188810(void *, s32, s32);
-void func_150836CC(struct127 *, s32);
+void func_150836CC(Actor *, s32);
 void func_1507C324(void *, void *);
 void func_1514AD9C(f32 *, s32, s32);
-void func_1503192C(struct127 *, s32, s32, s32);
+void func_1503192C(Actor *, s32, s32, s32);
 void func_151DCDE0(struct17 *, s32, s32);
 
-s32 func_1505C7D8(struct127 *, u8);
-void func_15059C84(struct127 *);
+s32 func_1505C7D8(Actor *, u8);
+void func_15059C84(Actor *);
 
 typedef struct {
     f32 unk0;
@@ -35,38 +35,38 @@ extern f32 D_800CC254;
 extern f32 D_800CC258;
 extern f32 D_800CC25C;
 extern s32 D_800CC260;
-s32 func_1508855C(struct127 *arg0);
+s32 func_1508855C(Actor *arg0);
 void func_15087350(s32, s32, f32);
-struct127 *func_150883B0(s32, s32, f32 *, s32 *);
+Actor *func_150883B0(s32, s32, f32 *, s32 *);
 s32 func_15104634(f32, f32, f32, f32 *);
-u8 func_15059B54(struct127 *arg0, u16 arg1);
+u8 func_15059B54(Actor *arg0, u16 arg1);
 s32 func_151EF610(void);
-s8 func_1505DDA8(struct127 *arg0, s32 arg1, u16 arg2, f32 arg3);
-void func_15081690(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, void *arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
-s32 func_15081E78(struct127 *, void *, s32);
-void func_1505A3A8(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
-void func_1505D6F0(struct127 *arg0, s32 arg1);
+s8 func_1505DDA8(Actor *arg0, s32 arg1, u16 arg2, f32 arg3);
+void func_15081690(Actor *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, void *arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
+s32 func_15081E78(Actor *, void *, s32);
+void func_1505A3A8(f32 arg0, Actor *arg1, f32 arg2, f32 arg3, u8 arg4);
+void func_1505D6F0(Actor *arg0, s32 arg1);
 void func_150D7120(f32 *arg0, u8 arg1, s32 arg2);
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
 void func_150D728C(void *arg0, f32 *arg1, f32 *arg2, u8 arg3, s32 arg4);
-void func_15088780(struct127 *);
+void func_15088780(Actor *);
 
-void func_150536D0(struct127 *obj) {
+void func_150536D0(Actor *obj) {
     obj->interaction_state = 13;
     obj->unkE4 = 0;
     obj->unkE6 = 0;
 }
 
-void func_150536E8(struct127 *obj) {
+void func_150536E8(Actor *obj) {
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
 }
 
-void func_1505371C(struct127 *obj) {
+void func_1505371C(Actor *obj) {
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
 }
 
 // Moves the object's scale towards (unk154, unk158) by at most unk15C per call.
-void func_15053750(struct127 *obj) {
+void func_15053750(Actor *obj) {
     f32 diff;
     f32 step;
 
@@ -91,14 +91,14 @@ void func_15053750(struct127 *obj) {
     }
 }
 
-void func_15053894(struct127 *obj) {
+void func_15053894(Actor *obj) {
     obj->unk7F++;
     if (obj->unk7F >= 31) {
         func_15060F28(obj, 1);
     }
 }
 
-void func_150538CC(struct127 *obj) {
+void func_150538CC(Actor *obj) {
     s8 done;
     s32 left;
     f32 prevY;
@@ -114,7 +114,7 @@ void func_150538CC(struct127 *obj) {
     f32 slotValue;
     s32 searchDir;
     s32 slotFlag;
-    struct127 *target;
+    Actor *target;
 
     done = 0;
     kind = (u16)obj->unk278;
@@ -145,7 +145,7 @@ void func_150538CC(struct127 *obj) {
                 maxStep = 30.0f;
             }
             func_15087350(slot, 0, dist);
-            obj->pad320[8] = 1; // 0x328
+            obj->unk328 = 1; // 0x328
             if (obj->unk221 == -1) {
                 target = func_150883B0(slot, searchDir, &slotValue, &slotFlag);
                 if ((obj->unk124 != 0) && (target + 1 == &D_800CC2D0[obj->unk124])) {
@@ -310,7 +310,7 @@ void func_150538CC(struct127 *obj) {
         f32 len;
         f32 inv;
         s32 hit;
-        struct127 *owner;
+        Actor *owner;
 
         dir[0] = obj->x_position - obj->old_x_position;
         dir[1] = obj->y_position - obj->old_y_position;
@@ -362,7 +362,7 @@ void func_150538CC(struct127 *obj) {
                 hitFlags |= 8;
                 obj->xz_velocity *= 0.3000000119f;
                 if (kind == 15) {
-                    struct127 *other;
+                    Actor *other;
 
                     other = func_15083E90(6);
                     if (other != NULL) {
@@ -389,7 +389,7 @@ void func_150538CC(struct127 *obj) {
             func_1505A3A8(0.0f, obj, 1.0f, 1.0f, 0);
             func_1505D6F0(obj, D_800C3E78);
             if ((D_800CC268 >> 1) != 0) {
-                struct127 *other;
+                Actor *other;
 
                 other = func_15083E90(6);
                 if (D_800CC268 & (1U << (other - D_800CC2D0))) {
@@ -463,8 +463,8 @@ void func_150538CC(struct127 *obj) {
 void func_150548D8(s32 arg0) {
 }
 
-void func_150548E4(struct127 *obj) {
-    struct127 *owner;
+void func_150548E4(Actor *obj) {
+    Actor *owner;
     s32 sfx;
     s32 i;
 
@@ -485,7 +485,7 @@ void func_150548E4(struct127 *obj) {
     }
 }
 
-void func_15054A0C(struct127 *obj) {
+void func_15054A0C(Actor *obj) {
     if (obj->unk2D0 != NULL) {
         if ((obj->unk2D0->unk18 - 1.0f) <= obj->unk2D0->unk8) {
             func_15060F28(obj, 0);
@@ -493,15 +493,15 @@ void func_15054A0C(struct127 *obj) {
     }
 }
 
-void func_15054A5C(struct127 *obj, struct127 *other) {
+void func_15054A5C(Actor *obj, Actor *other) {
     other->unk31C->unk11A = 0;
     func_151027E8(other);
     func_15060F28(obj, 0);
 }
 
-void func_15054A94(struct127 *obj) {
+void func_15054A94(Actor *obj) {
     struct197 *anim;
-    struct127 *other;
+    Actor *other;
     struct197 *otherAnim;
     s32 motion;
     s32 attach;
@@ -626,7 +626,7 @@ void func_15054A94(struct127 *obj) {
     }
 }
 
-void func_15054F74(struct127 *obj) {
+void func_15054F74(Actor *obj) {
     s16 angle;
     f32 offsetX;
     f32 offsetY;
@@ -680,11 +680,11 @@ void func_15054F74(struct127 *obj) {
     }
 }
 
-void func_15055260(struct127 *obj, struct127 *target, s32 hitIndex) {
+void func_15055260(Actor *obj, Actor *target, s32 hitIndex) {
     func_150335C8(obj, target, 0x4D, hitIndex, 0, 0);
 }
 
-void func_1505528C(struct127 *obj) {
+void func_1505528C(Actor *obj) {
     f32 prevX;
     f32 prevY;
     f32 prevZ;
@@ -693,7 +693,7 @@ void func_1505528C(struct127 *obj) {
     f32 hoverHeight;
     s32 hitFlags;
     s32 timer;
-    struct127 *target;
+    Actor *target;
 
     kind = (u16)obj->unk278;
     hitFlags = 0;
@@ -856,7 +856,7 @@ void func_15055A2C(s32 arg0, f32 x, f32 y, f32 z, s32 arg4) {
     func_10010F88(sfx, 32700, func_150ADA20() % 500U, 0, 0, x, y, z, range, 3000);
 }
 
-void func_15055B0C(struct127 *obj, s32 duration) {
+void func_15055B0C(Actor *obj, s32 duration) {
     obj->interaction_state = 39;
     func_1505E650(obj, obj->unk84.uh, 0, 0.0f, 0.0f, 0.0f, 0);
     obj->unkE4 = 0;
@@ -864,7 +864,7 @@ void func_15055B0C(struct127 *obj, s32 duration) {
     obj->unk21C = duration;
 }
 
-void func_15055B64(struct127 *obj) {
+void func_15055B64(Actor *obj) {
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
     obj->unkF8 |= 0x1000000;
 
@@ -878,7 +878,7 @@ void func_15055B64(struct127 *obj) {
     }
 }
 
-void func_15055BF8(struct127 *obj) {
+void func_15055BF8(Actor *obj) {
     obj->unk40 = (s16)(obj->unk7A + 0x4000) * 0.005493164f;
     obj->unkF8 |= 0x1000000;
     obj->y_position -= D_800BE9A4;
@@ -888,7 +888,7 @@ void func_15055BF8(struct127 *obj) {
     }
 }
 
-void func_15055C88(struct127 *obj) {
+void func_15055C88(Actor *obj) {
     s32 sfx = 0x2007E4;
 
     if (!(obj->unk9C & 0x1000) && func_1506E46C(obj, &sfx, 1)) {
@@ -906,7 +906,7 @@ void func_15055C88(struct127 *obj) {
     func_1507CD64(obj, 9);
 }
 
-void func_15055D48(struct127 *obj) {
+void func_15055D48(Actor *obj) {
     obj->unk31C->unk36 += D_800BE9A0;
     if (obj->unk31C->unk36 >= 141) {
         D_800D18A0 |= 1 << (obj - D_800CC2D0);

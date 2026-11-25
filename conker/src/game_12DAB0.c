@@ -39,7 +39,7 @@ typedef struct {
 
 /* State of the effect, stored after its main particle. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;          /* owner->unique_id */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ struct17 unk8;
@@ -126,7 +126,7 @@ extern struct225 *func_151602C0(Header *, Header2 *, s32, u8, u8, u8, u8, u8, s3
  * a flash, a glow and two func_15130374 particles) that keep a pointer back to it. lifetime -1 means
  * endless. Returns the main particle, or NULL.
  */
-EffectParticle *func_15100600(struct127 *owner, struct17 *vec1, struct17 *vec2, u8 arg3, s16 lifetime, u8 r,
+EffectParticle *func_15100600(Actor *owner, struct17 *vec1, struct17 *vec2, u8 arg3, s16 lifetime, u8 r,
                               u8 g, u8 b, f32 arg8, f32 arg9, f32 argA, f32 argB, u8 argC, u8 argD, s32 argE) {
     EffectParticle *particle;
     ParticleDef def;

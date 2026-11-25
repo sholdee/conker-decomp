@@ -33,7 +33,7 @@ typedef struct {
 extern HitSphere *D_80086C60[];
 extern u8 D_8009CBCC[];
 
-/* One 4x4 matrix per model bone (struct127.unk1D4 points at an array of them). */
+/* One 4x4 matrix per model bone (Actor.unk1D4 points at an array of them). */
 typedef f32 BoneMtx[4][4];
 
 void func_15143134(struct17 *in, struct17 *out, BoneMtx *mtx);
@@ -43,7 +43,7 @@ void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
  * and yaw unk40), rejects it against obj's whole-body sphere, then tests it against each of obj's
  * hit spheres (table `type`) grown by `radius`.  On a hit, calls func_1505D1C4 at obj's position
  * (unless obj is immune) and returns bone + 1; returns 0 for a miss. */
-s32 func_15080D20(struct127 *self, struct127 *obj, s32 type, f32 dist, f32 radius, s32 arg5) {
+s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 arg5) {
     f32 scale;
     f32 angle;
     f32 s;
@@ -125,7 +125,7 @@ s32 func_15080D20(struct127 *self, struct127 *obj, s32 type, f32 dist, f32 radiu
 }
 
 /* Returns the index of obj's model in the D_8009BD30 hit table, or -1 if it has none. */
-s32 func_1508108C(struct127 *obj) {
+s32 func_1508108C(Actor *obj) {
     s32 i;
 
     for (i = 0; i < 23; i++) {
@@ -149,7 +149,7 @@ s32 func_151452C4(struct17 *origin, struct17 *dir, struct17 *centre, f32 radius,
  * loop, overwriting the tracked best distance with the LAST call's near-t rather than the
  * best one.  Golden does exactly this (0x15081460..0x15081484); it is not to be "fixed".
  */
-s32 func_1508114C(struct127 *obj, struct17 *rayOrigin, struct17 *rayDir, struct17 *outNear, struct17 *outFar, struct17 *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset) {
+s32 func_1508114C(Actor *obj, struct17 *rayOrigin, struct17 *rayDir, struct17 *outNear, struct17 *outFar, struct17 *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset) {
     s32 idx;
     HitSphere *spheres;
     s32 count;
@@ -237,18 +237,18 @@ s32 func_1508114C(struct127 *obj, struct17 *rayOrigin, struct17 *rayDir, struct1
 }
 
 
-s32 func_15080D20(struct127 *, struct127 *, s32, f32, f32, s32);
+s32 func_15080D20(Actor *, Actor *, s32, f32, f32, s32);
 
 /* Finds the first live object of the given model whose hit spheres the point `dist` ahead of
  * `self` (with reach `radius`) touches.  Stores it in *outTarget and returns bone + 1, or 0. */
-/* include/functions.h declares outTarget (really a struct127 **) as s32. */
+/* include/functions.h declares outTarget (really a Actor **) as s32. */
 s32 func_15081574(s32 self, f32 dist, f32 radius, s32 outTarget, s32 arg4, s32 model) {
     s32 i;
-    struct127 *obj;
+    Actor *obj;
     s32 idx;
     s32 bone;
 
-    *(struct127 **)outTarget = NULL;
+    *(Actor **)outTarget = NULL;
     for (i = 0; i < 25; i++) {
         obj = &D_800CC2D0[i];
         if (obj->interaction_state == 0 || obj->unk1D4 == NULL || model != obj->id) {
@@ -258,9 +258,9 @@ s32 func_15081574(s32 self, f32 dist, f32 radius, s32 outTarget, s32 arg4, s32 m
         if (idx == -1) {
             continue;
         }
-        bone = func_15080D20((struct127 *)self, obj, D_8009BD30[idx].sphereTable, dist, radius, arg4);
+        bone = func_15080D20((Actor *)self, obj, D_8009BD30[idx].sphereTable, dist, radius, arg4);
         if (bone != 0) {
-            *(struct127 **)outTarget = obj;
+            *(Actor **)outTarget = obj;
             return bone;
         }
     }

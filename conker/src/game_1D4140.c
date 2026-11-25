@@ -37,7 +37,7 @@ extern void func_151D5514(vertex *, u8, s32);
 extern void func_151541B8(vertex *, f32, f32, f32, f32, u8, s32);
 
 /* Spawns a debris burst plus the follow-up effects at the object's position. */
-void func_151A6C90(struct127 *obj, u8 arg1, s32 arg2) {
+void func_151A6C90(Actor *obj, u8 arg1, s32 arg2) {
     vertex pos;
     DebrisEmitter emitter;
 

@@ -19,7 +19,7 @@ typedef struct {
 } GameStruct151C2050State;
 
 /* Queues a positional sound event (func_1000E7A0 kind 8) for soundId, only in a few specific levels. */
-void func_151C2050(struct127 *obj, vertex *pos, vertex *dir, s32 soundId, f32 distance) {
+void func_151C2050(Actor *obj, vertex *pos, vertex *dir, s32 soundId, f32 distance) {
     s32 pan;
     s32 volume;
     Camera *camera;
@@ -83,7 +83,7 @@ typedef struct Game1EF500TrailExt {
     /* 0x1C */ vertex drift;
     /* 0x28 */ Game1F1F60Hit path;
     /* 0x8C */ f32 remaining; /* distance left before the projectile expires */
-    /* 0x90 */ struct127 *owner;
+    /* 0x90 */ Actor *owner;
     /* 0x94 */ u8 ownerId; /* owner->unique_id at spawn */
     /* 0x95 */ u8 pad95[3];
     /* 0x98 */ f32 scale;
@@ -172,7 +172,7 @@ void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 void *memcpy(void *, const void *, u32);
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
-s32 func_151D5B6C(vertex *, vertex *, struct127 *, s8, s32);
+s32 func_151D5B6C(vertex *, vertex *, Actor *, s8, s32);
 s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, vertex *arg2, vertex *arg3, f32 *arg4, f32 arg5,
                   u8 arg6, vertex *arg7, vertex *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13,
                   u8 arg14, u8 arg15, s32 arg16, u8 arg17);
@@ -184,7 +184,7 @@ s32 func_151C4B0C(Game1F1F60Hit *arg0, Game1F1F60Hit *arg1, vertex *arg2, vertex
  */
 Game1EF500Trail *func_151C229C(vertex *origin, vertex *direction, vertex *altOrigin, vertex *altDirection,
                                u8 altNormalized, Game1F1F60Hit *knownHit, f32 speed, f32 arg7, f32 arg8,
-                               f32 driftSpeed, f32 arg10, u8 arg11, struct127 *owner, u8 arg13, u8 collide, u8 arg15,
+                               f32 driftSpeed, f32 arg10, u8 arg11, Actor *owner, u8 arg13, u8 collide, u8 arg15,
                                u8 soundChance, u8 hitCallback, u8 expireHandler, s8 handlerIndex, s32 arg20,
                                f32 dt, u8 arg22, s8 arg23, s32 extraSize, u8 arg25, s32 arg26) {
     Game1EF500Trail *result;
@@ -462,7 +462,7 @@ Vtx *func_151C2AD0(Game1EF500Trail *trail, s16 index) {
 }
 
 /* Whether obj is a live object other than self (a ray-cast filter). */
-s32 func_151C2E4C(struct127 *obj, struct127 *self) {
+s32 func_151C2E4C(Actor *obj, Actor *self) {
     if (obj == self) {
         return FALSE;
     }
@@ -476,7 +476,7 @@ s32 func_151C2E4C(struct127 *obj, struct127 *self) {
 }
 
 /* As func_151C2E4C, and obj's unk127 must also be set (not 0xFF). */
-s32 func_151C2E94(struct127 *obj, struct127 *self) {
+s32 func_151C2E94(Actor *obj, Actor *self) {
     if (obj == self) {
         return FALSE;
     }
@@ -492,10 +492,10 @@ s32 func_151C2E94(struct127 *obj, struct127 *self) {
     return TRUE;
 }
 
-s32 func_151D4DAC(void *, struct127 *, vertex *, vertex *, Game1F1F60Hit *, s32, vertex *, u8, u8);
+s32 func_151D4DAC(void *, Actor *, vertex *, vertex *, Game1F1F60Hit *, s32, vertex *, u8, u8);
 
 /* Impact handler: the projectile hit actor (at hitPos) during its ray cast. */
-s32 func_151C2EF0(void *actor, struct127 *owner, Game1EF500Trail *trail, vertex *hitPos, vertex *hitPoint,
+s32 func_151C2EF0(void *actor, Actor *owner, Game1EF500Trail *trail, vertex *hitPos, vertex *hitPoint,
                   Game1F1F60Hit *hit) {
     return func_151D4DAC(actor, owner, hitPos, hitPoint, hit, trail->trail.fieldA4, &trail->trail.path.end,
                          trail->unkC, trail->unk1);
@@ -1119,7 +1119,7 @@ void func_15081690(void *, f32, f32, f32, f32, f32, f32, Game1F1F60Hit *, f32, s
  */
 u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     u8 result;
-    struct127 *owner;
+    Actor *owner;
     f32 length;
     s32 pad[3]; // matching: unused stack space in the original frame
     Game1F1F60Hit ray;

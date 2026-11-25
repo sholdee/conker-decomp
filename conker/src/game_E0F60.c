@@ -49,7 +49,7 @@ typedef struct {
 extern void func_151D8868(CameraEvent *event, s32 arg1, s32 arg2, s32 arg3);
 
 /* Spawns an effect at bone 25 of obj, plus a camera event (type 1, 12-27 long) and a func_151D3FF4 at the same point. */
-void func_150B3AB0(struct127 *obj, u8 arg1) {
+void func_150B3AB0(Actor *obj, u8 arg1) {
     s16 yaw;
     vertex pos;
     CameraEvent event;

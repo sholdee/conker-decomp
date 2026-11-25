@@ -7,7 +7,7 @@
 void *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 
 /* Actor id 0x20 with a unk1D4 model: spawns one 0x29E9 particle near it with the actor as owner. */
-s32 func_150BB760(struct127 *actor) {
+s32 func_150BB760(Actor *actor) {
     ParticleSpawn particle;
     f32 width;
     f32 height;
@@ -127,7 +127,7 @@ void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32,
 
 /* Actor id 0x20: func_1516865C/func_15168800 request, then bursts of 0x29E9 particles,
  * func_151DA6F8 effects and two 0x39E8 particles, then func_10010F88. */
-s32 func_150BBB5C(struct127 *actor) {
+s32 func_150BBB5C(Actor *actor) {
     ParticleSpawn particle;
     s8 i;
     GameE8C10SpawnRequest request;
@@ -332,7 +332,7 @@ s32 func_150BBB5C(struct127 *actor) {
 }
 
 /* Actor id 0x20: like func_150BBB5C but smaller, with no request; stops early if spawning fails. */
-s32 func_150BC488(struct127 *actor) {
+s32 func_150BC488(Actor *actor) {
     f32 width;
     s32 count;
     s32 ok;
@@ -515,7 +515,7 @@ s32 func_150BC488(struct127 *actor) {
 }
 
 /* Actor id 0x20: sometimes spawns one 0x29E9 particle moving forward or backward along unk76. */
-s32 func_150BCBBC(struct127 *actor) {
+s32 func_150BCBBC(Actor *actor) {
     f32 width;
     f32 height;
     s32 count;
@@ -789,7 +789,7 @@ void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 arg6, s32
                    s32 arg8, f32 arg9, vertex *dir, u8 arg11);
 
 /* Transforms three 4-point tables by the actor's unk1D4 and emits two segments (point 2->3 and 3->0). */
-void func_150BD740(struct127 *actor, u8 arg1, s32 arg2) {
+void func_150BD740(Actor *actor, u8 arg1, s32 arg2) {
     vertex points[4];
     vertex dirFrom[4];
     vertex dirTo[4];

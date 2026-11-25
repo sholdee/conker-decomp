@@ -8,7 +8,7 @@
 
 /* Settings an emitter is created with; copied verbatim into Emitter.params. */
 typedef struct EmitterParams {
-    /* 0x0 */ struct127 *owner;
+    /* 0x0 */ Actor *owner;
     /* 0x4 */ u8 ownerId;   // owner->unique_id at creation; the emitter dies when it changes
     /* 0x6 */ s16 lifetime; // counts down when (flags & 1)
     /* 0x8 */ u8 flags;
@@ -109,14 +109,14 @@ typedef struct {
     /* 0x34 */ u8 bone;
 } EmitterInfo;
 
-/* IDs (struct127.unk84) that select one row of an EmitterTable. */
+/* IDs (Actor.unk84) that select one row of an EmitterTable. */
 typedef struct {
     /* 0x0 */ s16 count;
     /* 0x4 */ u8 *ids;
 } EmitterIdList;
 
 /*
- * infos holds (n + 2) entries per owner variant (struct127.pad1C8): one per id list,
+ * infos holds (n + 2) entries per owner variant (Actor.lod): one per id list,
  * then the attached-mode default, then the unattached one.
  */
 typedef struct {
@@ -173,7 +173,7 @@ void func_1518E308(Emitter *emitter);
 Emitter *func_1518E3C4(EmitterParams *params, u8 arg1);
 
 /* Creates an emitter of the given kind on owner, optionally killing the owner's existing emitters first. */
-Emitter *func_1518D1C0(struct127 *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
+Emitter *func_1518D1C0(Actor *owner, s16 kind, s16 lifetime, u8 killExisting, u8 arg4, u8 arg5,
                        void *arg6) {
     EmitterParams params;
     s32 i;
@@ -375,7 +375,7 @@ void func_1518D6E0(Emitter *emitter) {
             table = D_8008D5E0[self->params.table];
             if (self->params.owner->unk1D4 != NULL && (self->params.owner->unk74 & 0xF) != 0xF) {
                 attach = 4;
-                row = &table->infos[self->params.owner->pad1C8 * (table->n + 2)];
+                row = &table->infos[self->params.owner->lod * (table->n + 2)];
                 i = 0;
                 found = 0;
                 info = row[table->n];
@@ -393,7 +393,7 @@ void func_1518D6E0(Emitter *emitter) {
                     } while (!found && i < table->n);
                 }
             } else {
-                info = table->infos[self->params.owner->pad1C8 * (table->n + 2) + table->n + 1];
+                info = table->infos[self->params.owner->lod * (table->n + 2) + table->n + 1];
                 attach = 2;
             }
             if (!(self->state & 8) && (self->state != attach || info->mode != self->infoMode)) {
@@ -595,12 +595,12 @@ typedef struct {
     /* 0x04 */ s16 y;
     /* 0x06 */ s16 z;
     /* 0x08 */ u8 pad8[0x14];
-    /* 0x1C */ struct127 *target;
+    /* 0x1C */ Actor *target;
 } Struct1518E298;
 
 /* Copies the target's position into the tracker (as s16); returns 1 when there is no live target. */
 s32 func_1518E298(Struct1518E298 *tracker, s32 arg1, s32 arg2, s32 arg3) {
-    struct127 *target;
+    Actor *target;
 
     target = tracker->target;
     if (target != NULL && target->interaction_state != 0) {

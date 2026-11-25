@@ -4,7 +4,7 @@
 
 /* State block that func_150FC438 copies into its spawned object at offset 0x28. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerUniqueId;
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ f32 spawnTimer;
@@ -15,7 +15,7 @@ typedef struct {
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s8 unk16; // owner camera's unk23D, or -1
     /* 0x17 */ u8 pad17;
-    /* 0x18 */ struct127 *other;
+    /* 0x18 */ Actor *other;
     /* 0x1C */ u8 otherUniqueId;
     /* 0x1D */ u8 unk1D;
     /* 0x1E */ u8 pad1E[2];
@@ -114,11 +114,11 @@ typedef struct {
 
 extern u8 D_800A1DD0[], D_800A1E34[];
 extern f32 D_800A1DD4[][3], D_800A1DEC[][3], D_800A1E04[][3], D_800A1E1C[][3], D_800A1E38[][3], D_800A1E50[][3], D_800A1E68[][3], D_800A1E80[][3];
-extern struct127 *func_1507515C(struct127 *);
+extern Actor *func_1507515C(Actor *);
 extern void func_15145EA4(f32 **, f32 **, s32, s32);
-extern s32 func_151C229C(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, struct127 *, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
+extern s32 func_151C229C(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, Actor *, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 extern s32 func_151602C0(SparkArg_150FB8C0 *, s32 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_15102B38(struct127 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
+extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, u8, s32);
 extern void func_1515548C(EffectArg_150FB8C0 *, s32, s32, s32, s32, s32, s32);
 extern void func_1515572C(CameraArg_150FB8C0 *, s32);
 
@@ -126,8 +126,8 @@ extern void func_1515572C(CameraArg_150FB8C0 *, s32);
  * unk1D4 matrices; when the target found by func_1507515C has unk197 set, the effect is aimed at the point
  * where the target's line meets the plane through the transformed points. Also spawns occasional sparks
  * and trails, and a camera effect for the target's camera. */
-void func_150FB8C0(struct127 *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, s32 arg5) {
-    struct127 *target;
+void func_150FB8C0(Actor *obj, u8 side, f32 timeOffset, u8 skipTarget, u8 arg4, s32 arg5) {
+    Actor *target;
     u8 useTarget;
     f32 origin[3];
     f32 dir[3];
@@ -318,7 +318,7 @@ void func_151C3B0C(void *, f32, f32, f32, f32, s32, s32, s32);
 
 typedef struct {
     /* 0x000 */ u8 pad0[0x1A0];
-    /* 0x1A0 */ struct127 *owner;
+    /* 0x1A0 */ Actor *owner;
     /* 0x1A4 */ u8 ownerUniqueId;
 } Particle_150FC368;
 
@@ -326,7 +326,7 @@ typedef struct {
  * or 0xFF when the owner is gone, has no camera or fails one of the other checks. */
 void func_150FC368(Particle_150FC368 *particle) {
     u8 cameraMask;
-    struct127 *owner;
+    Actor *owner;
 
     owner = particle->owner;
     if ((owner == NULL) || (owner->interaction_state == 0) || (owner->id == 0xFF) ||
@@ -341,7 +341,7 @@ void func_150FC368(Particle_150FC368 *particle) {
 
 /* Spawns an emitter object that follows `owner` (see func_150FC614); when `other` has a camera, also
  * creates an effect for that camera. */
-void func_150FC438(struct127 *owner, struct127 *other, u8 arg2, u8 arg3) {
+void func_150FC438(Actor *owner, Actor *other, u8 arg2, u8 arg3) {
     EmitterState state;
     EmitterObj *obj;
     EmitterState *dest;
@@ -410,7 +410,7 @@ extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
  * func_150FB8C0 from alternating sides whenever the spawn timer runs out. */
 void func_150FC614(EmitterObj *obj) {
     EmitterState *state;
-    struct127 *owner;
+    Actor *owner;
     Spark_150FC614 spark;
 
     state = &obj->state;
@@ -456,12 +456,12 @@ void func_150FC614(EmitterObj *obj) {
 /* Message payloads handled by func_150FC818, selected by its msgType argument. */
 typedef union {
     struct {
-        struct127 *obj;
+        Actor *obj;
         u8 uniqueId;
     } type0;
     struct {
-        struct127 *objA;
-        struct127 *objB;
+        Actor *objA;
+        Actor *objB;
         u8 uniqueIdA;
         u8 uniqueIdB;
     } type2D;
@@ -471,9 +471,9 @@ typedef union {
  * swaps two objects, retargeting the emitter's owner or other object. */
 void func_150FC818(EmitterObj *obj, EmitterMsg *msg, u8 msgType) {
     EmitterState *state = &obj->state;
-    struct127 *msgObj;
-    struct127 *msgObjA;
-    struct127 *owner;
+    Actor *msgObj;
+    Actor *msgObjA;
+    Actor *owner;
 
     if (msgType == 0) {
         msgObj = msg->type0.obj;

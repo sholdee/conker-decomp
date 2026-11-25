@@ -4,8 +4,8 @@
 #include "variables.h"
 
 
-/* Player extension block (struct127.unk31C, cached in Camera.playerExt). File-local view: Camera
-   declares this pointer as struct127 *, and ActorCtl in include/ lacks these fields. */
+/* Player extension block (Actor.unk31C, cached in Camera.playerExt). File-local view: Camera
+   declares this pointer as Actor *, and ActorCtl in include/ lacks these fields. */
 typedef struct CamPlayerExt {
     /* 0x000 */ u8 pad0[0x8];
     /* 0x008 */ s16 unk8;
@@ -68,7 +68,7 @@ typedef struct CamPlayerExt {
 /* variables.h declares D_800BE728 as s32[]; it holds a pointer to the per-controller OSContPad pointers. */
 #define CONT_PADS (*(OSContPad ***)&D_800BE728)
 
-/* struct127 has only pad134 over this byte. */
+/* Actor has only pad134 over this byte. */
 #define PLAYER_UNK137(obj) (((u8 *)(obj))[0x137])
 
 #define DEG2RAD 0.01745329238474369f
@@ -163,8 +163,8 @@ void func_150495B0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5)
 s32 func_15125490(Camera *camera);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s16 *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 void func_150AD8B0(struct17 *, struct17 *, struct17 *);
-void func_1507C3E0(struct127 *, s16 *, s16 *, s16 *);
-void func_1507E1D0(struct127 *, f32 *, f32 *, f32 *);
+void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
+void func_1507E1D0(Actor *, f32 *, f32 *, f32 *);
 void func_1512D560(void *, s32, s32);
 void func_1509BFB0(s32 num, s32, s32, ...);
 void func_151C9BA0(Camera *camera, s32 arg1);
@@ -789,8 +789,8 @@ void func_15124770(Camera *camera, s32 index) {
 void func_151247C0(Camera *camera) {
     f32 pad[3]; // matching: three unused stack words in the frame
     f32 sideX;
-    struct127 *obj;
-    struct127 *pair;
+    Actor *obj;
+    Actor *pair;
     CamPlayerExt *ext;
     u8 slow;
     f32 sideZ;
@@ -1086,7 +1086,7 @@ s32 func_151253CC(Camera *camera) {
 
 /* Whether the player is in water far (over 300 units) from unk118; 0 when closer than 100. */
 s32 func_15125490(Camera *camera) {
-    struct127 *player = camera->player;
+    Actor *player = camera->player;
     s32 depth;
 
     if (player->in_water == 1) {
@@ -1408,7 +1408,7 @@ void func_15125DB4(Camera *camera) {
 
 /* Moves focus and target height, and flags whether the player moved since the last frame. */
 void func_15126138(Camera *camera) {
-    struct127 *player;
+    Actor *player;
 
     func_151247C0(camera);
 
@@ -1441,7 +1441,7 @@ void func_15126138(Camera *camera) {
 
 /* Aim eye position for `obj`: a point fixed to one of its bone matrices for the zones that have one,
    else the object position raised to 3/4 of its height. */
-void func_1512623C(struct127 *obj, CamPlayerExt *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView) {
+void func_1512623C(Actor *obj, CamPlayerExt *ext, s32 zone, f32 *outX, f32 *outY, f32 *outZ, s32 lowView) {
     s32 useObjectPos;
     f32 localPos[3];
     f32 worldPos[3];
@@ -1489,7 +1489,7 @@ void func_1512623C(struct127 *obj, CamPlayerExt *ext, s32 zone, f32 *outX, f32 *
    yaw/pitch with the stick and zoom with C-up/C-down. Returns 1 while aiming. */
 s32 func_15126378(Camera *camera) {
     CamPlayerExt *ext;
-    struct127 *viewer;
+    Actor *viewer;
     f32 zoomRatio;
     f32 aspect;
     f32 maxZoom;
@@ -1595,7 +1595,7 @@ s32 func_15126378(Camera *camera) {
                           (u32)(-camera->unk1A4 * 10000.0f) | 0x80000000, 0x100, 0);
             func_1000FA64(0x622, 0, 0, 0, 0x3E80, 300, 299, (s32)func_151277B0, camera, *(s32 *)&aimKey, 0x100, 0);
         }
-        viewer->pad2FC[0] |= 1 << camera->playerIndex;
+        viewer->unk2FC |= 1 << camera->playerIndex;
         viewer->unk74 |= 1 << camera->playerIndex;
         { typedef s32 LineMark; } // matching: -g3 line marker; as1 then schedules the aimState load after the a2 reload
     }
@@ -1838,7 +1838,7 @@ s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 a
 
 /* Aiming view for an object without a player camera (stick-steered yaw/pitch around its head).
    Returns 1 while aiming. */
-s32 func_151279A0(struct127 *obj, OSContPad *contPad) {
+s32 func_151279A0(Actor *obj, OSContPad *contPad) {
     CamPlayerExt *ext;
     s32 zone;
     vertex pos;
@@ -1920,8 +1920,8 @@ s32 func_151279A0(struct127 *obj, OSContPad *contPad) {
 
 /* Leaves the aiming camera: restores slot 1, resets the zoom and clears this player's bit on the target. */
 void func_15127EB8(Camera *camera) {
-    struct127 *player;
-    struct127 *target;
+    Actor *player;
+    Actor *target;
     u8 linked;
 
     func_151239CC(camera, 1);
@@ -1941,7 +1941,7 @@ void func_15127EB8(Camera *camera) {
     // matching: [linked] - 1 rather than [linked - 1] (the latter changes the code)
     target = (linked != 0) ? &D_800CC2D0[linked] - 1 : player;
 
-    target->pad2FC[0] &= ~(1 << camera->playerIndex);
+    target->unk2FC &= ~(1 << camera->playerIndex);
     target->unk74 &= ~(1 << camera->playerIndex);
     camera->snap = 1;
 }
@@ -2080,7 +2080,7 @@ void func_151283B8(Camera *camera) {
 
 /* End of the camera update: remembers the player position and counts down the snap frames. */
 void func_151284C4(Camera *camera) {
-    struct127 *player;
+    Actor *player;
 
     func_1512C490(camera);
     player = camera->player;
@@ -2152,7 +2152,7 @@ void func_15128680(Camera *camera) {
 
 /* Resets the camera to its defaults and attaches it to player playerIndex. */
 void func_1512868C(Camera *camera) {
-    struct127 *player;
+    Actor *player;
     u8 index;
     s32 i;
 
@@ -2180,7 +2180,7 @@ void func_1512868C(Camera *camera) {
 }
 
 /* Places the eye at obj (current and previous position) and looks the way the player faces. */
-void func_15128774(Camera *camera, struct127 *obj) {
+void func_15128774(Camera *camera, Actor *obj) {
     camera->unk35C = obj->unk180;
     camera->prevEye.x = camera->eye.x = obj->x_position;
     camera->prevEye.y = camera->eye.y = obj->y_position;

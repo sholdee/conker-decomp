@@ -109,7 +109,7 @@ extern void func_151511FC(SurfaceBurstConfig *, u8, s32);
  * sprite when func_15145C90 accepts the hit object). First runs an anti-tamper checksum over the code
  * at func_151E7EF8. Nothing is spawned while func_150A3058(2 or 1, position) reports anything.
  */
-void func_150B9ED0(struct127 *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
+void func_150B9ED0(Actor *actor, f32 prevX, f32 prevZ, u8 arg3, s32 arg4) {
     s32 pad[3]; // matching: unused locals of the original; the frame is 16 bytes larger than the named ones need
     u32 addr;
     u32 end;

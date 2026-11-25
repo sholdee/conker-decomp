@@ -56,8 +56,8 @@ typedef struct {
     u8 pad[0x24];
 } Floor150B06B0;
 
-extern s32 func_15143E24(struct127 *);
-extern void func_1504715C(Floor150B06B0 *, struct127 *);
+extern s32 func_15143E24(Actor *);
+extern void func_1504715C(Floor150B06B0 *, Actor *);
 extern void func_151C329C(void *, u8, s32);
 extern void func_15152190(Arg150B06B0_2190 *, const s32 *, const f32 *, s32, f32, s32, u8, s32);
 extern void func_15153F18(Arg150B06B0_3F18 *, struct17 *, Floor150B06B0 *, u8, s32);
@@ -72,7 +72,7 @@ extern const f32 D_8009F81C[1];
  * 50 units above it and one func_15152190 burst; any other actor gets a different burst plus two
  * func_15153F18 passes (unk3C = 0, then 1) using the func_1504715C info for actor.
  */
-void func_150B06B0(struct127 *actor, struct127 *other, u8 arg2, s32 arg3) {
+void func_150B06B0(Actor *actor, Actor *other, u8 arg2, s32 arg3) {
     struct17 pos;
     s8 angle;
     Floor150B06B0 floor;
@@ -168,7 +168,7 @@ void func_150B06B0(struct127 *actor, struct127 *other, u8 arg2, s32 arg3) {
  * (-31.5 along forward), or 63 units along either side (61 out along right). Writes the point to outPos
  * (y taken from player->unk118) and a matching s16 yaw to outAngle.
  */
-void func_150B0A60(struct127 *owner, struct127 *player, f32 *forward, f32 *right, f32 *outPos, s16 *outAngle) {
+void func_150B0A60(Actor *owner, Actor *player, f32 *forward, f32 *right, f32 *outPos, s16 *outAngle) {
     f32 along;
     f32 spread;
     f32 side;
@@ -202,7 +202,7 @@ void func_150B0A60(struct127 *owner, struct127 *player, f32 *forward, f32 *right
 
 /* State a DDB60Effect keeps at +0x28: func_150B0C58 fills it, func_150B0D20 updates it each frame. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; // owner->unique_id when attached; a mismatch means the slot was reused
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ f32 timer;  // one particle is emitted per 1.0 accumulated
@@ -220,15 +220,15 @@ typedef struct {
     /* 0x28 */ DDB60EffectData data;
 } DDB60Effect;
 
-void func_150B0C58(struct127 *owner, u8 arg1, s32 arg2);
+void func_150B0C58(Actor *owner, u8 arg1, s32 arg2);
 
 /* func_150B0C58 with the default arguments (0xFF, 1). */
-void func_150B0C34(struct127 *owner) {
+void func_150B0C34(Actor *owner) {
     func_150B0C58(owner, 0xFF, 1);
 }
 
 /* Attaches a DDB60Effect (updated by func_150B0D20) to owner. */
-void func_150B0C58(struct127 *owner, u8 arg1, s32 arg2) {
+void func_150B0C58(Actor *owner, u8 arg1, s32 arg2) {
     DDB60EffectData data;
     DDB60Effect *effect;
 
@@ -249,7 +249,7 @@ void func_150B0CE0(DDB60Effect *effect, s32 arg1, u8 arg2) {
 
 extern f32 D_8009F860[];
 extern f32 D_8009F868[];
-s32 func_1515C0F8(struct127 *, f32 **);
+s32 func_1515C0F8(Actor *, f32 **);
 void func_1514373C(f32, f32, f32 *, f32 *);
 void func_15143794(s16, s16, f32, f32 *);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
@@ -260,7 +260,7 @@ void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s3
  */
 void func_150B0D20(DDB60Effect *effect) {
     DDB60EffectData *data;
-    struct127 *owner;
+    Actor *owner;
     s32 emit;
     f32 speed;
     f32 minSpeed;

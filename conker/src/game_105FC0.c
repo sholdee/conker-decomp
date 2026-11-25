@@ -30,7 +30,7 @@ typedef struct {
 
 /* Trail state block (0x50 bytes), copied into trail->data at spawn. */
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId;
     u8 pad5[3];
     struct17 unk8;
@@ -84,17 +84,17 @@ extern void func_15131828(void *, f32 *, void *, u8 *);
 extern void func_15131958(void *, f32, void *);
 
 /* Trail anchor point: 20 units above the actor. */
-void func_150D8B10(struct127 *actor, struct17 *out) {
+void func_150D8B10(Actor *actor, struct17 *out) {
     out->unk0 = actor->x_position;
     out->unk4 = actor->y_position + 20.0f;
     out->unk8 = actor->z_position;
 }
 
 extern u8 D_800BE616;
-void func_15145740(struct127 *actor, struct17 *target, struct17 *dir, struct17 *offsetDir, f32 pitchOffset);
+void func_15145740(Actor *actor, struct17 *target, struct17 *dir, struct17 *offsetDir, f32 pitchOffset);
 
 /* Trail launch vector from the actor (func_15145740's offset direction). */
-void func_150D8B3C(struct127 *actor, struct17 *out) {
+void func_150D8B3C(Actor *actor, struct17 *out) {
     struct17 target;
     struct17 dir;
 
@@ -102,7 +102,7 @@ void func_150D8B3C(struct127 *actor, struct17 *out) {
 }
 
 /* Spawns a trail object that follows the actor. */
-void func_150D8B88(struct127 *actor) {
+void func_150D8B88(Actor *actor) {
     TrailSpawn spawn;
     s32 pad; // matching: stack slot above data
     TrailData data;
@@ -218,7 +218,7 @@ s32 func_150D8E4C(Trail *trail) {
 s32 func_150D8FAC(Trail *trail) {
     TrailData *data;
     TrailPoint *points;
-    struct127 *actor;
+    Actor *actor;
     struct17 pos;
     struct17 vel;
     f32 time;
@@ -329,7 +329,7 @@ typedef struct {
 
 /* Result of the func_15081690 ray cast. */
 typedef struct {
-    struct127 *obj;
+    Actor *obj;
     f32 dist;
     struct17 pos;
     u8 pad14[0x30];
@@ -344,9 +344,9 @@ f32 sqrtf(f32);
 extern f32 func_150484A0(f32, f32);
 extern f32 func_15143E64(f32 *);
 extern f32 func_15144528(f32, f32, f32);
-extern void func_15081690(struct127 *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
+extern void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 extern void func_1505A250(f32, f32, f32, f32 *, f32 *);
-extern void func_1505D024(struct127 *, s32, u16, s32);
+extern void func_1505D024(Actor *, s32, u16, s32);
 void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir);
 
 /*
@@ -369,8 +369,8 @@ s32 func_150D942C(Trail *trail) {
     TrailPoint *points;
     TrailPoint *prev;
     TrailData *data;
-    struct127 *owner;
-    struct127 *target;
+    Actor *owner;
+    Actor *target;
     f32 dx;
     f32 dz;
     s32 ownerIndex;
@@ -757,10 +757,10 @@ void func_150DA4E0(Trail *trail) {
 
 /* Message broadcast to trails by func_15147D64. */
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     union {
         u8 ownerId;             /* types 0, 0x44 */
-        struct127 *other;       /* type 0x2D */
+        Actor *other;       /* type 0x2D */
     } x4;
     union {
         f32 speedScale;         /* type 0x44 */
@@ -774,7 +774,7 @@ typedef struct {
 /* Trail message handler: 0x44 sets the speed scale, 0 removes the trail, 0x2D swaps owners. */
 void func_150DA50C(Trail *trail, TrailMessage *msg, u8 type) {
     TrailData *data = trail->data;
-    struct127 *owner;
+    Actor *owner;
 
     if (type == 0x44) {
         if ((msg->owner == data->owner) || (msg->x4.ownerId == data->ownerId)) {
@@ -802,7 +802,7 @@ void func_150DA50C(Trail *trail, TrailMessage *msg, u8 type) {
 extern void func_15147D64(TrailMessage *, s32);
 
 /* Sets the speed scale of every trail owned by the actor. */
-void func_150DA5EC(struct127 *actor, f32 speedScale) {
+void func_150DA5EC(Actor *actor, f32 speedScale) {
     TrailMessage msg;
 
     msg.owner = actor;
@@ -887,7 +887,7 @@ extern void func_15153C84(ImpactSpray *, ImpactEmitter *, ImpactOrigin *, u8, s3
 /* Spawns the impact effects of a trail segment hitting something (hit from func_15081690). */
 void func_150DA67C(Trail *trail, RayHit *hit, f32 *dir) {
     TrailData *data;
-    struct127 *target;
+    Actor *target;
 
     data = trail->data;
     target = hit->obj;

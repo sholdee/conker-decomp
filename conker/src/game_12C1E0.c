@@ -6,24 +6,24 @@
 /* Local point of the gun's muzzle in its attachment's space. */
 extern struct17 D_800A2050;
 
-ActorCtl *func_150FF288(struct127 *obj);
+ActorCtl *func_150FF288(Actor *obj);
 /* Fills `direction`, `axis0` and `axis1` for `obj` through func_15145740. */
-void func_150FF2AC(struct127 *obj, struct17 *direction, struct17 *axis0, struct17 *axis1);
+void func_150FF2AC(Actor *obj, struct17 *direction, struct17 *axis0, struct17 *axis1);
 void func_150FF2D4(u8 *valid, struct17 *points, struct17 *position, struct17 *hit, struct17 *normal,
                    struct17 *direction, struct17 *axis0, struct17 *axis1, struct17 *output0, struct17 *output1,
-                   s32 *value0, s32 *value1, struct17 *endpoint, struct127 *obj, ActorCtl *gun);
+                   s32 *value0, s32 *value1, struct17 *endpoint, Actor *obj, ActorCtl *gun);
 void func_150FF474(struct17 *position, struct17 *points, u8 arg2, s32 arg3);
-void func_151D5148(struct127 *obj);
-s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
-void func_150F7470(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, struct127 *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+void func_151D5148(Actor *obj);
+s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
+void func_150F7470(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, Actor *, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
 void func_151D3F14(struct17 *position, u8 arg1, s32 arg2);
-void func_151D4408(struct17 *, struct17 *, void *, struct127 *, f32, s32, s32);
+void func_151D4408(struct17 *, struct17 *, void *, Actor *, f32, s32, s32);
 void func_1505D1C4(f32 x, f32 y, f32 z, s32 flags, s32 objIndex, s32 angle, s32 arg6, struct17 *arg7);
-s32 func_1514654C(struct127 *obj, ActorCtl *attachment, s32 arg2, struct17 **src, struct17 **dst, s32 count);
-void func_15145740(struct127 *obj, struct17 *direction, struct17 *axis0, struct17 *axis1, f32 arg4);
+s32 func_1514654C(Actor *obj, ActorCtl *attachment, s32 arg2, struct17 **src, struct17 **dst, s32 count);
+void func_15145740(Actor *obj, struct17 *direction, struct17 *axis0, struct17 *axis1, f32 arg4);
 
 /* Fires a shot from the gun attachment (set 0x82) of `obj`, with muzzle effects when it has bones. */
-void func_150FED30(struct127 *obj, s32 arg1, s32 arg2) {
+void func_150FED30(Actor *obj, s32 arg1, s32 arg2) {
     struct17 position;
     struct17 endpoint;
     struct17 direction;
@@ -92,7 +92,7 @@ void func_150FED30(struct127 *obj, s32 arg1, s32 arg2) {
 }
 
 /* Writes the world position of attachment set `setId` of `obj` to `out` (`obj`'s own position for -1). */
-void func_150FEFD0(struct127 *obj, s16 setId, struct17 *out) {
+void func_150FEFD0(Actor *obj, s16 setId, struct17 *out) {
     struct17 *src;
     struct17 *dst;
     ActorCtl *attachment;
@@ -116,7 +116,7 @@ void func_150FEFD0(struct127 *obj, s16 setId, struct17 *out) {
 }
 
 /* Like func_150FED30, but spawns its shot through func_150F7470. */
-void func_150FF084(struct127 *obj, u8 arg1, s32 arg2) {
+void func_150FF084(Actor *obj, u8 arg1, s32 arg2) {
     struct17 position;
     struct17 endpoint;
     struct17 direction;
@@ -168,18 +168,18 @@ void func_150FF084(struct127 *obj, u8 arg1, s32 arg2) {
 }
 
 /* Returns `obj`'s gun attachment (set 0x82), or NULL. */
-ActorCtl *func_150FF288(struct127 *obj) {
+ActorCtl *func_150FF288(Actor *obj) {
     return func_1503195C(obj, 0x82, 0);
 }
 
 /* Fills `direction`, `axis0` and `axis1` for `obj` through func_15145740. */
-void func_150FF2AC(struct127 *obj, struct17 *direction, struct17 *axis0, struct17 *axis1) {
+void func_150FF2AC(Actor *obj, struct17 *direction, struct17 *axis0, struct17 *axis1) {
     func_15145740(obj, direction, axis0, axis1, 0.8110000491f);
 }
 
 u8 func_150FF6E0(struct17 *points, struct17 *position, struct17 *hit, struct17 *normal, struct17 *endpoint,
-                 struct127 *obj, ActorCtl *gun);
-void func_151D5174(struct127 *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1,
+                 Actor *obj, ActorCtl *gun);
+void func_151D5174(Actor *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1,
                    struct17 *output0, struct17 *output1, s32 *value0, s32 *value1, struct17 *endpoint);
 
 /*
@@ -188,7 +188,7 @@ void func_151D5174(struct127 *obj, struct17 *position, struct17 *direction, stru
  */
 void func_150FF2D4(u8 *valid, struct17 *points, struct17 *position, struct17 *hit, struct17 *normal,
                    struct17 *direction, struct17 *axis0, struct17 *axis1, struct17 *output0, struct17 *output1,
-                   s32 *value0, s32 *value1, struct17 *endpoint, struct127 *obj, ActorCtl *gun) {
+                   s32 *value0, s32 *value1, struct17 *endpoint, Actor *obj, ActorCtl *gun) {
     if (*valid) {
         *valid = func_150FF6E0(points, position, hit, normal, endpoint, obj, gun);
     }
@@ -279,7 +279,7 @@ void func_150FF474(struct17 *position, struct17 *points, u8 arg2, s32 arg3) {
 }
 
 /* Returns FALSE for object id 0x98, TRUE otherwise. */
-s32 func_150FF6B4(struct127 *obj, s32 arg1, s32 arg2) {
+s32 func_150FF6B4(Actor *obj, s32 arg1, s32 arg2) {
     if (obj->id == 0x98) {
         return FALSE;
     }
@@ -297,7 +297,7 @@ extern struct17 D_800A2080[2][6]; /* two random sets of flash points */
  * Returns FALSE if the transform fails.
  */
 u8 func_150FF6E0(struct17 *points, struct17 *position, struct17 *hit, struct17 *normal, struct17 *endpoint,
-                 struct127 *obj, ActorCtl *gun) {
+                 Actor *obj, ActorCtl *gun) {
     u8 i;
     struct17 *src[10];
     struct17 *dst[10];
@@ -326,15 +326,15 @@ u8 func_150FF6E0(struct17 *points, struct17 *position, struct17 *hit, struct17 *
     return TRUE;
 }
 
-void func_150FFCC8(struct127 *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1);
+void func_150FFCC8(Actor *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1);
 void func_150FFD84(vertex *position, struct17 *direction, u8 arg2, s32 arg3);
-void func_150FFB6C(struct17 *position, struct17 *origin, struct127 *obj, s32 type);
-void func_150FFC3C(struct127 *obj);
-void func_15102B38(struct127 *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6, f32 arg7,
+void func_150FFB6C(struct17 *position, struct17 *origin, Actor *obj, s32 type);
+void func_150FFC3C(Actor *obj);
+void func_15102B38(Actor *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6, f32 arg7,
                    struct17 *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
-void func_15081690(struct127 *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, void *arg7, f32 arg8, s32 arg9,
+void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, void *arg7, f32 arg8, s32 arg9,
                    s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
-s32 func_15081E78(struct127 *obj, void *arg1, s32 arg2);
+s32 func_15081E78(Actor *obj, void *arg1, s32 arg2);
 extern struct17 D_800A2130;
 extern struct17 D_800A213C;
 
@@ -342,7 +342,7 @@ extern struct17 D_800A213C;
  * Shot effects for `obj`: a muzzle effect and particles when it has bones, three func_1505D1C4
  * spawns along `direction` if `arg1`, a func_15081690 call if `arg2`, then a camera event.
  */
-void func_150FF840(struct127 *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
+void func_150FF840(Actor *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     struct17 position;
     struct17 direction;
     struct17 axis0;
@@ -400,7 +400,7 @@ void func_150FF840(struct127 *obj, u8 arg1, u8 arg2, u8 arg3, s32 arg4) {
 }
 
 /* Spawns func_1505D1C4 effect `type` at `position`, owned by `obj`. */
-void func_150FFB6C(struct17 *position, struct17 *origin, struct127 *obj, s32 type) {
+void func_150FFB6C(struct17 *position, struct17 *origin, Actor *obj, s32 type) {
     s32 flags;
     s32 index;
     u16 angle;
@@ -414,7 +414,7 @@ void func_150FFB6C(struct17 *position, struct17 *origin, struct127 *obj, s32 typ
 s32 func_15145EA4(struct17 **src, struct17 **dst, void *mtx, s32 count);
 
 /* Writes the world position of the muzzle point D_800A2130 on bone D_80088BB0 of `obj` to `out`. */
-void func_150FFBDC(struct127 *obj, s32 arg1, struct17 *out) {
+void func_150FFBDC(Actor *obj, s32 arg1, struct17 *out) {
     struct17 *src;
     struct17 *dst;
 
@@ -436,7 +436,7 @@ typedef struct {
 void func_151D8868(Event151D8868 *event, s32 arg1, s32 arg2, s32 arg3);
 
 /* Sends a func_151D8868 event (kind 1, 20-30 long) to `obj`'s camera, if it has one. */
-void func_150FFC3C(struct127 *obj) {
+void func_150FFC3C(Actor *obj) {
     Event151D8868 event;
 
     if (obj->camera != NULL) {
@@ -451,20 +451,20 @@ void func_150FFC3C(struct127 *obj) {
 
 extern struct17 *D_8008FC8C[];
 extern u8 *D_8008FC94[];
-void func_151D5A18(struct127 *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1,
+void func_151D5A18(Actor *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1,
                    struct17 *arg5, u8 arg6);
-void func_151D3E6C(struct127 *obj, struct17 *arg1, struct17 *arg2, s32 arg3);
+void func_151D3E6C(Actor *obj, struct17 *arg1, struct17 *arg2, s32 arg3);
 
 /* Gets the shot `position` and `direction` (and two axes) of `obj`. */
-void func_150FFCC8(struct127 *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1) {
+void func_150FFCC8(Actor *obj, struct17 *position, struct17 *direction, struct17 *axis0, struct17 *axis1) {
     func_151D5A18(obj, position, direction, axis0, axis1, D_8008FC8C[0], *D_8008FC94[0]);
     func_151D3E6C(obj, position, position, 0x8003A);
 }
 
-void func_15081E0C(struct127 *obj, s32 arg1, s32 arg2);
+void func_15081E0C(Actor *obj, s32 arg1, s32 arg2);
 
 /* Calls func_15081E0C(other, 4, 0) when `other` is a 0x9F/0xA0 object without flag 0x80 in unk94. */
-void func_150FFD2C(struct127 *obj, struct127 *other, s32 arg2) {
+void func_150FFD2C(Actor *obj, Actor *other, s32 arg2) {
     if (other->id == 0x9F || other->id == 0xA0) {
         if (!(other->unk94 & 0x80)) {
             func_15081E0C(other, 4, 0);

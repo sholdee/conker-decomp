@@ -11,7 +11,7 @@ void *memcpy(void *, const void *, u32);
 f32 sqrtf(f32);
 #pragma intrinsic(sqrtf)
 
-void func_15169850(struct ActorRef *ref, u8 msg, struct127 **actor, u8 *actorId, struct102 *self);
+void func_15169850(struct ActorRef *ref, u8 msg, Actor **actor, u8 *actorId, struct102 *self);
 void func_151D5D60(Vtx **buffers, s16 viewport, s32 size, Vtx **out, u8 *fresh);
 void *func_1513D524(void *def, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn, u8 flip, s32 motionSize,
                     u8 owner, s32 list);
@@ -79,13 +79,13 @@ extern DropKind D_800A9D40[];
 
 /* Actor reference sent with object messages (func_15191B8C). */
 typedef struct ActorRef {
-    struct127 *actor;
+    Actor *actor;
     u8 id;
 } ActorRef;
 
 /* An emitter's attachment to its actor. */
 typedef struct {
-    /* 0x0 */ struct127 *actor;
+    /* 0x0 */ Actor *actor;
     /* 0x4 */ u8 actorId;           /* actor->unique_id when attached */
     /* 0x5 */ u8 pad5;
     /* 0x6 */ s16 timer;
@@ -189,7 +189,7 @@ typedef struct {
 extern EmitterKind D_8008FA70[];
 extern u8 D_800AB310[];
 extern u8 D_800AB404[];
-void func_1504715C(Ground *ground, struct127 *actor);
+void func_1504715C(Ground *ground, Actor *actor);
 void func_15143134(vertex *offset, vertex *out, Mtx *mtx);
 void func_1513F680(Particle *particle, u8 updateFn1, u8 updateFn2, u8 expireFn, u8 vertexFn);
 
@@ -565,7 +565,7 @@ s32 func_1519187C(Particle *drop) {
 
 /* Retries creating the emitter until its actor has bone matrices; gives up when the actor is gone. */
 void func_151918BC(DripRetryTask *task) {
-    struct127 *actor;
+    Actor *actor;
     ActorLink *link;
     u8 done;
 

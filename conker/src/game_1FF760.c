@@ -97,15 +97,15 @@ extern f32 D_800AB0E0[];
 extern s32 D_800AB110[];
 extern f32 D_800AB114[];
 
-void func_1515C244(struct127 *, vertex *, f32 *, f32 *);
-void func_1504715C(void *, struct127 *);
+void func_1515C244(Actor *, vertex *, f32 *, f32 *);
+void func_1504715C(void *, Actor *);
 void func_1515080C(Emitter080CParams *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
 void func_15152190(Emitter2190Params *, s32 *, f32 *, s32, f32, s32, u8, s32);
 void func_15151A38(Emitter1A38Params *, u8, s32);
 
 /* Plays sound 0xAA at the actor and spawns three particle effects (via func_1515080C, func_15152190
  * and func_15151A38) at its origin. */
-void func_151D22B0(struct127 *actor, u8 arg1, s32 arg2) {
+void func_151D22B0(Actor *actor, u8 arg1, s32 arg2) {
     vertex origin;
     f32 extent1;
     f32 extent2;

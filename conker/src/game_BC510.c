@@ -1017,7 +1017,7 @@ Gfx *func_150918EC(Gfx *gfx) {
     s32 lapCount;
     s32 vpRight;
     ActorCtl *a1; // matching: unused, yet removing it changes the register allocation
-    struct127 *player;
+    Actor *player;
     s32 rowY;
     s32 cellShift;
     s32 k;
@@ -1442,7 +1442,7 @@ Gfx *func_150918EC(Gfx *gfx) {
                 gDPPipeSync(gfx++);
                 gDPSetCombine(gfx++, 0x62FEC5, 0xFFFFFBFD);
                 for (k = 0, player = D_800CC2D0; k != 25; k++, player++) {
-                    if (k == i || (k < D_8008FD8C && func_150859AC(k, 3) > 0) || (s8)player->pad320[8] != 0) {
+                    if (k == i || (k < D_8008FD8C && func_150859AC(k, 3) > 0) || player->unk328 != 0) {
                         gDPPipeSync(gfx++);
                         if (k == i) {
                             gDPSetEnvColor(gfx++, 0, 255, 0, 255);
@@ -1585,7 +1585,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
             s32 dsdx;
             s32 x;
             s32 y;
-            struct127 *obj;
+            Actor *obj;
             Camera *cam;
             Camera *cam2;
 
@@ -1646,7 +1646,7 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                 s32 yl;
                 s32 xh;
                 s32 yh;
-                struct127 *other;
+                Actor *other;
                 u8 *rgb;
 
                 if (j == i || j == skip) {
@@ -1654,8 +1654,8 @@ Gfx *func_15093B58(Gfx *gfx, s32 step, s16 *scaled, s32 renderMode, u8 large) {
                 }
                 other = &D_800CC2D0[j];
                 if (other->interaction_state != 0) {
-                    if ((s8)other->pad320[8] != 0) {
-                        color = (s8)other->pad320[8] - 1;
+                    if (other->unk328 != 0) {
+                        color = other->unk328 - 1;
                         if (j < D_8008FD8C) {
                             if (func_150859AC(j, 3) <= 0) {
                                 color = -1;

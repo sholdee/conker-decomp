@@ -21,7 +21,7 @@ typedef struct {
 
 /* Data of an object that emits particles around an actor while that actor has bones. */
 typedef struct {
-    /* 0x00 */ struct127 *actor;
+    /* 0x00 */ Actor *actor;
     /* 0x04 */ u8 actorId; // the actor's unique_id when the emitter was attached
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ f32 spawnCredit; // one particle is emitted per whole unit
@@ -32,9 +32,9 @@ typedef struct {
     /* 0x28 */ ActorEmitterState state;
 } ActorEmitter;
 
-void func_1504715C(Ground *, struct127 *);
+void func_1504715C(Ground *, Actor *);
 void func_15143794(s16 yaw, s16 pitch, f32 distance, f32 *out);
-void func_1515C244(struct127 *, f32 *center, f32 *, f32 *);
+void func_1515C244(Actor *, f32 *center, f32 *, f32 *);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
                    s32, Ground *, s32, s32, s32, s32);
 
@@ -42,7 +42,7 @@ void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32,
    from a sphere around the actor's center at a random rate. */
 void func_150CF140(ActorEmitter *emitter) {
     ActorEmitterState *state;
-    struct127 *actor;
+    Actor *actor;
     f32 center[3];
     f32 radius;
     Ground ground;
@@ -81,9 +81,9 @@ void func_150CF140(ActorEmitter *emitter) {
 /* Message payload for func_150CF484: message 0 names an actor that went away, message 0x2D two
    actors that swapped places. */
 typedef struct {
-    /* 0x00 */ struct127 *actorA;
+    /* 0x00 */ Actor *actorA;
     /* 0x04 */ union {
-        struct127 *actorB;
+        Actor *actorB;
         u8 id;
     } u4;
     /* 0x08 */ u8 actorAId;
@@ -93,7 +93,7 @@ typedef struct {
 /* Emitter message handler: dies with its actor and follows it through a swap. */
 void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
     ActorEmitterState *state = &emitter->state;
-    struct127 *actorA;
+    Actor *actorA;
 
     if (type == 0) {
         actorA = msg->actorA; // matching: loaded before the state field, via a named local
@@ -111,7 +111,7 @@ void func_150CF484(ActorEmitter *emitter, ActorMsg *msg, u8 type) {
     }
 }
 
-void func_151CF898(struct127 *, f32, f32);
+void func_151CF898(Actor *, f32, f32);
 
 void func_150CF530(s32 arg0) {
     func_151CF898(&D_800CC2D0[0], D_800CC2D0[0].y_position + 300.0f, -10000.0f);

@@ -40,7 +40,7 @@ void func_15142314(s32, s32, vertex *);
 void func_15143E94(s32 arg0, s32 arg1);
 void func_15165F80(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
 void func_1514C678(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s32 arg6, s32 arg7, s32 arg8, f32 arg9, s32 argA, s32 argB);
-void func_1504715C(Ground_150BABE0 *, struct127 *);
+void func_1504715C(Ground_150BABE0 *, Actor *);
 s32 func_15046C80(vertex *, s32, f32, Ground_150BABE0 *);
 s32 func_1518ABD0(s32, struct210 *, u8);
 
@@ -49,7 +49,7 @@ s32 func_1518ABD0(s32, struct210 *, u8);
  * two particle bursts and, when the ground below is found, a ground decal.
  */
 // matching: each `*(u8 *)&arg2` reloads arg2 from its stack slot; plain or K&R arg2 is kept in a register
-void func_150BABE0(struct127 *obj, u8 side, u8 arg2) {
+void func_150BABE0(Actor *obj, u8 side, u8 arg2) {
     vertex pos;
     s32 joint;
     s32 yaw;

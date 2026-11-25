@@ -10,15 +10,15 @@ extern u8 D_800A1548[];
 extern void func_15145EA4(f32 **src, f32 **dst, Mtx *mtx, s32 count);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, s32 *, void *, f32);
 extern void func_15143874(s16, f32, f32 *, f32 *);
-extern void func_15102B38(struct127 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
+extern void func_15102B38(Actor *, u8, f32 *, f32 *, f32 *, s32, s32, f32, struct17 *, s32, s32, s32, u8, s32);
 extern s32 func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-s32 func_151C229C(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, struct127 *, s32, s32, s32,
+s32 func_151C229C(struct17 *, struct17 *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, Actor *, s32, s32, s32,
                   s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 
 /* Fires a shot from muzzle `slot` (0 or 1) of `actor`: casts a ray along the aim given by bone 2, spawns a
  * func_151C229C effect from the muzzle towards the jittered hit point (or along the aim on a miss), a
  * func_151602C0 flash at the muzzle and a func_15102B38 beam on the muzzle's bone. */
-s32 func_150EBEC0(struct127 *actor, u8 slot, u8 arg2, s32 arg3) {
+s32 func_150EBEC0(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
     s32 tracer;
     struct17 aimStart;
     struct17 aimDir;
@@ -115,7 +115,7 @@ s32 func_150EBEC0(struct127 *actor, u8 slot, u8 arg2, s32 arg3) {
 
 /* Returns whether `actor` is not `self`, is active (nonzero interaction_state) and has one of the ids 0-4, 40
  * or 119. */
-s32 func_150EC3D4(struct127 *actor, struct127 *self) {
+s32 func_150EC3D4(Actor *actor, Actor *self) {
     s32 id;
 
     if (actor == self) {

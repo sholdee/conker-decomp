@@ -28,7 +28,7 @@ typedef struct {
 
 /* A point fixed relative to one of an object's bones. */
 typedef struct {
-    /* 0x00 */ struct127 *target;
+    /* 0x00 */ Actor *target;
     /* 0x04 */ u8 targetId; // target->unique_id when attached
     /* 0x05 */ u8 bone;     // index into the Mtx array at target->unk1D4
     /* 0x08 */ Vec3f_1DF510 offset;
@@ -39,9 +39,9 @@ typedef struct RopeLine RopeLine;
 
 /* Data at 0x28 of the effect that ties obj0 to obj1 with ropes. */
 typedef struct {
-    /* 0x00 */ struct127 *obj0;
+    /* 0x00 */ Actor *obj0;
     /* 0x04 */ u8 obj0Id;   // obj0->unique_id when attached
-    /* 0x08 */ struct127 *obj1;
+    /* 0x08 */ Actor *obj1;
     /* 0x0C */ u8 obj1Id;
     /* 0x0D */ u8 state;    // last func_151B22F4 result, 0 before the first update
     /* 0x10 */ TiedRope *ropes[3];
@@ -98,7 +98,7 @@ void func_151B2690(RopeTie *self);
 void func_151B47D8(TiedRope *rope, RopeTieLink *link, s32 arg2, u8 event);
 
 /* Spawns a RopeTie between `obj` and the object from func_15083E90(1). */
-void func_151B2060(struct127 *obj) {
+void func_151B2060(Actor *obj) {
     RopeTie *effect;
     RopeTieData tie;
 
@@ -121,8 +121,8 @@ void func_151B2060(struct127 *obj) {
 /* Per-frame update: dies when either object is gone, and respawns the ropes when the state changes. */
 void func_151B2100(RopeTie *self) {
     RopeTieData *tie;
-    struct127 *obj0;
-    struct127 *obj1;
+    Actor *obj0;
+    Actor *obj1;
     u8 oldState;
 
     obj0 = self->tie.obj0;
@@ -182,7 +182,7 @@ void func_151B22C8(RopeTie *self) {
 
 /* Returns 1 when obj1->unk65 holds obj0's 1-based index in D_800CC2D0 and obj1->unk5C is 1, else 2. */
 s32 func_151B22F4(RopeTie *self) {
-    struct127 *obj0 = self->tie.obj0;
+    Actor *obj0 = self->tie.obj0;
 
     if (self->tie.obj1->unk65 == (obj0 - D_800CC2D0) + 1) {
         if (self->tie.obj1->unk5C == 1) {
@@ -194,8 +194,8 @@ s32 func_151B22F4(RopeTie *self) {
 
 /* State 1: hangs three ropes between bones of obj0 and obj1. */
 void func_151B2348(RopeTie *self) {
-    struct127 *obj1;
-    struct127 *obj0;
+    Actor *obj1;
+    Actor *obj0;
     RopeTieData *tie;
     HoltenRopeDesc desc;
     RopeTieLink link;
@@ -282,7 +282,7 @@ void func_151B2348(RopeTie *self) {
 
 /* States 0 and 2: hangs two ropes and a line from obj0's bones. */
 void func_151B2690(RopeTie *self) {
-    struct127 *obj;
+    Actor *obj;
     RopeTieData *tie;
     HoltenRopeDesc desc;
     RopeTieLink link;
@@ -476,8 +476,8 @@ void func_151B2EC4(RopeLine *self, s32 arg1, u8 event) {
 
 /* Event 0x2D payload: two objects that swap places. */
 typedef struct {
-    /* 0x00 */ struct127 *a;
-    /* 0x04 */ struct127 *b;
+    /* 0x00 */ Actor *a;
+    /* 0x04 */ Actor *b;
     /* 0x08 */ u8 aId;
     /* 0x09 */ u8 bId;
 } ObjectSwap;

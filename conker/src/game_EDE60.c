@@ -19,7 +19,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ vertex *source;     /* followed when flags & 2 */
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ struct127 *target;  /* followed otherwise */
+    /* 0x08 */ Actor *target;  /* followed otherwise */
     /* 0x0C */ u8 targetId;        /* target->unique_id; a mismatch means the object was reused */
     /* 0x0D */ u8 padD[3];
     /* 0x10 */ f32 rate;           /* particles per frame step while the target moves */
@@ -172,7 +172,7 @@ void func_150C0C38(Emitter *emitter) {
     Emitter *self; // matching: IDO's register/stack allocation needs this copy of the parameter
     u8 kill;
     vertex pos;
-    struct127 *target;
+    Actor *target;
     s16 i;
     s32 bit;
     ParticleDesc68 spawn;

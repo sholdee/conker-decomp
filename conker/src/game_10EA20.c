@@ -10,7 +10,7 @@ s32 func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32);
  * one func_15049440 scores lowest, skipping slot `skipIndex` and `source`'s own slot. If one is found,
  * spawns func_1505D1C4 effect `effect` at it and copies `source`'s unk76 to it.
  */
-s32 func_150E1570(struct127 *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 toY, f32 toZ, s32 skipIndex,
+s32 func_150E1570(Actor *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f32 toY, f32 toZ, s32 skipIndex,
                   s32 effect) {
     f32 view[4][4];
     f32 dx;
@@ -23,7 +23,7 @@ s32 func_150E1570(struct127 *source, f32 fromX, f32 fromY, f32 fromZ, f32 toX, f
     s32 best;
     s32 bestHit;
     s32 sourceIndex;
-    struct127 *obj;
+    Actor *obj;
 
     bestHit = 0;
     result = 0;

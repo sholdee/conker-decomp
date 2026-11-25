@@ -8,17 +8,17 @@ extern struct17 D_800A2000;
 extern struct17 D_800A200C;
 extern struct17 D_800A2018;
 extern struct17 D_800A2024;
-void func_151D5148(struct127 *obj);
+void func_151D5148(Actor *obj);
 void func_151D3F14(struct17 *pos, u8 arg1, s32 arg2);
-void func_15145740(struct127 *obj, struct17 *direction, struct17 *axis0, struct17 *axis1, f32 arg4);
-s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, u8 arg25, s32 arg26);
-void func_151D4408(struct17 *pos, struct17 *dir, void *mtx, struct127 *owner, f32 scale, u8 arg5, s32 arg6);
-void func_150FEC28(struct127 *actor, u8 bone, struct17 *arg2, struct17 *arg3, struct17 *position, u8 arg5, s32 arg6);
+void func_15145740(Actor *obj, struct17 *direction, struct17 *axis0, struct17 *axis1, f32 arg4);
+s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, u8 arg25, s32 arg26);
+void func_151D4408(struct17 *pos, struct17 *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
+void func_150FEC28(Actor *actor, u8 bone, struct17 *arg2, struct17 *arg3, struct17 *position, u8 arg5, s32 arg6);
 
 /* Spawns a projectile (func_151C229C) along `actor`'s direction. With bone matrices it starts at
  * bone D_80088BA0 and is followed by the func_151D3F14 / func_151D4408 / func_150FEC28 effects;
  * without them it starts 34 units to the side of and 49 units above the actor. */
-void func_150FE860(struct127 *actor, u8 arg1, s32 arg2) {
+void func_150FE860(Actor *actor, u8 arg1, s32 arg2) {
     struct17 position;
     struct17 direction;
     struct17 axis0;
@@ -79,7 +79,7 @@ void func_150FE860(struct127 *actor, u8 arg1, s32 arg2) {
 }
 
 /* Transforms the point D_800A2000 by bone D_80088BA0 of `actor` into `*out`. */
-void func_150FEBC8(struct127 *actor, s32 arg1, struct17 *out) {
+void func_150FEBC8(Actor *actor, s32 arg1, struct17 *out) {
     void *mtx;
     struct17 *src;
     struct17 *dst;
@@ -90,11 +90,11 @@ void func_150FEBC8(struct127 *actor, s32 arg1, struct17 *out) {
     func_15145EA4(&src, &dst, mtx, 1);
 }
 
-extern void func_15102B38(struct127 *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6,
+extern void func_15102B38(Actor *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6,
                           f32 arg7, struct17 *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
 
 /* Spawns a randomized effect (func_15102B38) on bone `bone` of `actor` at `position`. */
-void func_150FEC28(struct127 *actor, u8 bone, struct17 *arg2, struct17 *arg3, struct17 *position, u8 arg5, s32 arg6) {
+void func_150FEC28(Actor *actor, u8 bone, struct17 *arg2, struct17 *arg3, struct17 *position, u8 arg5, s32 arg6) {
     f32 motion[2];
     s32 pad; // matching: unused stack slot between motion and random
     s32 random[2];

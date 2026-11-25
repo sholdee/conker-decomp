@@ -77,11 +77,11 @@ extern u8 D_80090514[];
 
 void func_15152F70(PuffConfig *config, u8 sceneTag);
 void func_15153298(BurstConfig *config, u8 sceneTag, s32 arg2);
-void *func_15196438(struct127 *owner, s32 preset, u8 sceneTag, s32 arg3);
+void *func_15196438(Actor *owner, s32 preset, u8 sceneTag, s32 arg3);
 
 /* Sequence event 0x35 on `owner`: type 0 starts jet preset 1 with a puff, a 30-frame timer that keeps
  * puffing (func_150DBC60) and a particle burst, all at a fixed world position; type 1 starts preset 2. */
-void func_150DB9E0(struct127 *owner, s32 type, u8 sceneTag) {
+void func_150DB9E0(Actor *owner, s32 type, u8 sceneTag) {
     PuffConfig puff;
     BurstConfig burst;
 

@@ -137,18 +137,18 @@ Gfx *func_150D765C(Gfx *gdl) {
 }
 
 
-s32 func_1508855C(struct127 *obj);
+s32 func_1508855C(Actor *obj);
 void func_150885EC(s32 src, s32 dst);
-s32 func_1508868C(struct127 *obj);
+s32 func_1508868C(Actor *obj);
 
 /* Performs action `action` for obj: 0x30/0x31 play sound 0x628 and set unk12C to 120; 0x32/0x33 fire a
  * kind-0xD projectile (0x33 with unk83 60 instead of 30, and the projectile takes over a copy of obj's racer
  * slot). Each spends one use of unk1AE, and nothing happens once those run out. */
-void func_150D7790(struct127 *obj, s32 action) {
+void func_150D7790(Actor *obj, s32 action) {
     s32 newRacer;
     s32 oldRacer;
     s32 variant;
-    struct127 *projectile;
+    Actor *projectile;
 
     variant = 0;
     if (obj->unk31C != NULL && obj->unk31C->unk1AE <= 0) {
@@ -170,7 +170,7 @@ void func_150D7790(struct127 *obj, s32 action) {
     default:
         return;
     }
-    projectile = (struct127 *)func_1506C460(obj->unk40, 310.0f, 0.0f, 0.0f, variant * 30 + 30, 0xD, 0.0f, 1.0f,
+    projectile = (Actor *)func_1506C460(obj->unk40, 310.0f, 0.0f, 0.0f, variant * 30 + 30, 0xD, 0.0f, 1.0f,
                                             0, 1, variant == 0);
     if (projectile != NULL) {
         projectile->unk124 = D_800C3E78 + 1;
@@ -191,14 +191,14 @@ void func_150D7790(struct127 *obj, s32 action) {
 }
 
 extern s8 D_800CC4B4;
-extern u8 *func_15033E84(struct127 *arg0);
-extern s32 func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-extern void func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
-extern void func_1505A3A8(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
-extern void func_1505C7D8(struct127 *arg0, u8 arg1);
-extern s32 func_150535F4(struct127 *arg0);
-extern void func_1001091C(struct127 *arg0, s32 arg1);
-extern void func_10010FFC(s32 a, s32 b, s32 c, s32 d, s32 e, struct127 *f);
+extern u8 *func_15033E84(Actor *arg0);
+extern s32 func_15052F9C(Actor *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+extern void func_1505327C(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+extern void func_1505A3A8(f32 arg0, Actor *arg1, f32 arg2, f32 arg3, u8 arg4);
+extern void func_1505C7D8(Actor *arg0, u8 arg1);
+extern s32 func_150535F4(Actor *arg0);
+extern void func_1001091C(Actor *arg0, s32 arg1);
+extern void func_10010FFC(s32 a, s32 b, s32 c, s32 d, s32 e, Actor *f);
 
 /*
  * Per-frame update for an object that can be carried by a player (unk13C set, unk124 = player index).
@@ -208,11 +208,11 @@ extern void func_10010FFC(s32 a, s32 b, s32 c, s32 d, s32 e, struct127 *f);
  * spent more than 10 frames over 75 units high, it dies when the player lands or it is in water. Finally it
  * plays its movement sound and runs func_150535F4.
  */
-void func_150D7928(struct127 *obj) {
+void func_150D7928(Actor *obj) {
     f32 angleOffset;
     u8 playerIndex;
     f32 speed;
-    struct127 *player;
+    Actor *player;
     s32 linkType;
     s16 *dst;
     s16 *src;
@@ -230,7 +230,7 @@ void func_150D7928(struct127 *obj) {
     id = obj->id;
     linkType = -1;
     if (id == 0x48) {
-        player = (struct127 *)func_15033E84(obj);
+        player = (Actor *)func_15033E84(obj);
         if (player != NULL) {
             linkType = player->unk6;
         }
@@ -244,14 +244,14 @@ void func_150D7928(struct127 *obj) {
         obj->unkE4 = 0;
         obj->unk180 = player->unk180;
         obj->unk184 = player->unk184;
-        /* copy the nine halfwords at 0x18C from the player */
-        dst = (s16 *)&obj->unk18C;
-        src = (s16 *)&player->unk18C;
+        /* copy the player's floor triangle */
+        dst = obj->floorVerts[0];
+        src = player->floorVerts[0];
         for (i = 0; i < 9; i++) {
             dst[i] = src[i];
         }
         obj->gravity = 6.0f;
-        angleOffset = *(f32 *)&player->pad54 * 0.45f;
+        angleOffset = player->unk54 * 0.45f;
         obj->unk44 = player->unkC4;
         if (id == 0x7F) {
             player->immune = 20;
@@ -367,7 +367,7 @@ void func_150D7928(struct127 *obj) {
         }
         if (obj->unk28 == 0.0f) {
             obj->target_speed = 0.0f;
-            *(f32 *)&obj->padBC *= 0.5f;
+            obj->unkBC *= 0.5f;
         }
         if (obj->target_speed == 0.0f) {
             obj->unkC4 = obj->unk44 + angleOffset;
@@ -381,10 +381,10 @@ void func_150D7928(struct127 *obj) {
         }
         if (obj->unk13C != 0) {
             scratch = (s16)(fabsf(obj->unkC4 * 0.7f) + 44.0f);
-            *(f32 *)&obj->padC8 = scratch;
+            obj->unkC8 = scratch;
             D_800CC2D0[obj->unk124].unkCC = (s16)(scratch + 44) * obj->y_scale;
         } else {
-            *(f32 *)&obj->padC8 = 44.0f;
+            obj->unkC8 = 44.0f;
         }
         if (speed > 0.2f && obj->unk28 < 10.0f && obj->health != 0 && D_800C35EA != 1) {
             volume = (s32)(1000.0f * speed);

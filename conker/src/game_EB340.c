@@ -149,7 +149,7 @@ void func_150BE150(EB340Obj *obj, void **msg, u8 event) {
             func_1516972C((struct102 *)obj);
         }
     } else if (event == 0) {
-        struct127 *sender = msg[0];
+        Actor *sender = msg[0];
 
         if (sender->camera == obj->spawn.owner) {
             func_1516972C((struct102 *)obj);
@@ -345,15 +345,15 @@ extern f32 D_800A0038[];
 extern s32 D_800A0060[];
 extern f32 D_800A0064[];
 
-void func_1515C244(struct127 *, struct17 *, f32 *, f32 *);
-void func_1504715C(void *, struct127 *);
+void func_1515C244(Actor *, struct17 *, f32 *, f32 *);
+void func_1504715C(void *, Actor *);
 void func_1515080C(EB340Cfg80C *, s32 *, f32 *, s32, s32, s32, s32, s32, s32, void *, f32, s32, s32, u8, s32);
 void func_15152190(EB340Cfg2190 *, s32 *, f32 *, s32, f32, s32, u8, s32);
 void func_15153F18(EB340Cfg3F18 *, struct17 *, void *, u8, s32);
 
 /* Spawns the burst of effects at `obj`'s centre: one func_1515080C, one func_15152190
  * and three func_15153F18 particle sets (kinds 0, 2 and 10). */
-void func_150BE494(struct127 *obj, u8 arg1, s32 arg2) {
+void func_150BE494(Actor *obj, u8 arg1, s32 arg2) {
     struct17 pos;
     f32 radius;
     f32 unk2;

@@ -29,7 +29,7 @@ typedef struct {
 /* Mirrors game flag 0x4054 into camera->flags bit 0x10000; when 0x405B is set but 0x405C is not (and
  * camera->mode != 0x40), sets the camera target's unk17C to its unk180 + 10. */
 void func_150B1E20(Camera *camera) {
-    struct127 *target;
+    Actor *target;
 
     if (func_1509BE40(1, 0x4054, 6, 0x9000)) {
         camera->flags |= 0x10000;
@@ -39,7 +39,7 @@ void func_150B1E20(Camera *camera) {
     if (!func_1509BE40(1, 0x405C, 6, 0x9000)) {
         if (func_1509BE40(1, 0x405B, 6, 0x2000) && camera->mode != 0x40) {
             target = camera->player;
-            // struct127 has only pad17C at 0x17C (include/structs.h)
+            // Actor has only pad17C at 0x17C (include/structs.h)
             *(f32 *)((u8 *)target + 0x17C) = target->unk180 + 10.0f;
         }
     }

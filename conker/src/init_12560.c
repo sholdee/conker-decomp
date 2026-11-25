@@ -71,7 +71,7 @@ void func_100126E8(s32 dst, s32 dstSize) {
  * Start track `id` as if played from `obj`'s position: full `volume` and centred when `obj` is
  * a camera, otherwise attenuated between `nearDistance` and `farDistance` and panned.
  */
-s32 func_10012718(u16 id, struct127 *obj, s32 volume, s16 nearDistance, u16 farDistance) {
+s32 func_10012718(u16 id, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance) {
     s32 pan;
     s32 attenuatedVolume;
     s32 unused;

@@ -47,14 +47,14 @@ typedef struct {
 } GroundHit;
 
 void func_15153F18(s16 *, void *, GroundHit *, s32, s32);
-void func_1504715C(GroundHit *, struct127 *);
+void func_1504715C(GroundHit *, Actor *);
 s32 func_15046C80(f32 *, s32, f32, GroundHit *);
 void func_15143874(s16, f32, f32 *, f32 *);
 void func_15136698(f32, f32, u8, u8, s32, void *, f32 *, s32, s32, s32, s32);
 
 /* Spawns a ground burst effect around obj: one func_15153F18 burst, 7-12 scattered
  * func_151D9B8C / func_151DAB58 particles on the ground, and a func_15136698 effect under obj. */
-void func_151AECA0(struct127 *obj, u8 arg1, s32 arg2) {
+void func_151AECA0(Actor *obj, u8 arg1, s32 arg2) {
     GroundHit ground;
     BurstParams burst;
     s32 count;

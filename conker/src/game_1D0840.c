@@ -8,7 +8,7 @@
  * on one of an actor's bones). The same 0x30 bytes start TrailState.
  */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
     /* 0x05 */ u8 bone;
     /* 0x06 */ u8 pad6[2];
@@ -104,7 +104,7 @@ typedef struct {
     /* 0x04 */ s32 unk4;
     /* 0x08 */ u8 ownerId;
     /* 0x09 */ u8 pad9[3];
-    /* 0x0C */ struct127 *owner;
+    /* 0x0C */ Actor *owner;
     /* 0x10 */ u8 bone;
     /* 0x11 */ u8 pad11[3];
     /* 0x14 */ vertex offset;
@@ -158,7 +158,7 @@ typedef struct {
 
 /* Emits particles from a point on one of the owner's bones (task data of func_151A499C). */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;          /* owner->unique_id when created */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ f32 rate;            /* emissions per second */
@@ -225,12 +225,12 @@ typedef struct {
 /* Message sent to effects about their owner actor. */
 typedef union {
     struct {
-        struct127 *actor;
+        Actor *actor;
         u8 actorId;
     } removed;                      /* type 0: the actor (or any actor with this id) is gone */
     struct {
-        struct127 *actorA;
-        struct127 *actorB;
+        Actor *actorA;
+        Actor *actorB;
         u8 idA;
         u8 idB;
     } swap;                         /* type 0x2D: the two actors trade places */
@@ -260,13 +260,13 @@ Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 void func_15153634(ParticleSpawn151A4A38 *, s32, s32, s32);
 TrailEffect *func_151A3504(TrailParams *params, u8 arg1);
-void func_151A4590(struct127 *owner, u8 arg1);
-void func_151A499C(struct127 *owner, u8 arg1);
+void func_151A4590(Actor *owner, u8 arg1);
+void func_151A499C(Actor *owner, u8 arg1);
 s32 func_151A4E34(TrailParams *params, vertex *out);
 void func_151A4E9C(TrailEffect *effect);
 
 /* Spawns the effects attached to an actor: a trail and two more effects. */
-void func_151A3390(struct127 *owner, u8 arg1) {
+void func_151A3390(Actor *owner, u8 arg1) {
     TrailParams params;
     f32 origin[3];
 
@@ -390,7 +390,7 @@ s32 func_151A361C(TrailEffect *effect) {
 s32 func_151A37C0(TrailEffect *effect) {
     TrailState *state = effect->state;
     TrailPoint *points = effect->points;
-    struct127 *owner;
+    Actor *owner;
     vertex delta;
     s32 started;
     TrailParams retry;
@@ -707,7 +707,7 @@ Gfx *func_151A3BE4(TrailEffect *effect, Gfx *gfx, s16 view) {
     return gfx;
 }
 
-void func_151A4590(struct127 *owner, u8 arg1) {
+void func_151A4590(Actor *owner, u8 arg1) {
     BoneEffectParams151A4590 params;
 
     // matching: an integer test makes IDO reload owner from its arg slot
@@ -848,7 +848,7 @@ s32 func_151A4900(Particle *particle, u8 arg1) {
 }
 
 /* Starts a BoneEmitterTask on the owner's bone 1. */
-void func_151A499C(struct127 *owner, u8 arg1) {
+void func_151A499C(Actor *owner, u8 arg1) {
     BoneEmitterTask *task;
     BoneEmitter emitter;
 
@@ -993,7 +993,7 @@ void func_151A4D88(BoneEmitterTask *task, ActorMessage *msg, u8 type) {
  * Returns 0 if the owner has no bone matrices or is not being drawn.
  */
 s32 func_151A4E34(TrailParams *params, vertex *out) {
-    struct127 *owner = params->owner;
+    Actor *owner = params->owner;
     u8 *bones = (u8 *)owner->unk1D4;
 
     if (bones == NULL) {

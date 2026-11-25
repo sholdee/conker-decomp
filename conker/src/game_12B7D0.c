@@ -15,18 +15,18 @@ extern struct17 D_800A1FD4;
 extern struct17 D_800A1FE0;
 
 s32 func_15145EA4(struct17 **src, struct17 **dst, Mtx *mtx, s32 count);
-void func_151D3E6C(struct127 *obj, struct17 *arg1, struct17 *arg2, s32 arg3);
+void func_151D3E6C(Actor *obj, struct17 *arg1, struct17 *arg2, s32 arg3);
 void func_151D3F14(struct17 *position, u8 arg1, s32 arg2);
-void func_150FE604(struct127 *obj, struct17 *position, u8 arg2, s32 arg3);
-void func_150FE7D4(struct127 *obj);
-void func_15102B38(struct127 *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6, f32 arg7,
+void func_150FE604(Actor *obj, struct17 *position, u8 arg2, s32 arg3);
+void func_150FE7D4(Actor *obj);
+void func_15102B38(Actor *obj, u8 bone, struct17 *arg2, struct17 *arg3, f32 *arg4, s32 arg5, s32 arg6, f32 arg7,
                    struct17 *position, s32 arg9, s32 arg10, s32 arg11, u8 arg12, s32 arg13);
-void func_15145740(struct127 *obj, struct17 *direction, struct17 *axis0, struct17 *axis1, f32 arg4);
-void func_150FE49C(struct127 *obj, u8 arg1, s32 arg2, struct17 *outPosition, struct17 *outOrigin);
-s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, struct127 *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
+void func_15145740(Actor *obj, struct17 *direction, struct17 *axis0, struct17 *axis1, f32 arg4);
+void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, struct17 *outPosition, struct17 *outOrigin);
+s32 func_151C229C(struct17 *arg0, struct17 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
 
 /* Runs the func_150FE49C effects for `obj`, then spawns a func_151C229C effect from the result. */
-s32 func_150FE320(struct127 *obj, u8 arg1, s32 arg2) {
+s32 func_150FE320(Actor *obj, u8 arg1, s32 arg2) {
     s32 pad; // matching: unused stack slot
     struct17 axis0;
     struct17 position;
@@ -58,7 +58,7 @@ s32 func_150FE320(struct127 *obj, u8 arg1, s32 arg2) {
  * Computes the effect position and origin of `obj` (its bone points D_800A1FC8 / D_800A1FD4, or 70 units
  * above it when it has no bone matrices), runs the effects there and copies both to the non-NULL outputs.
  */
-void func_150FE49C(struct127 *obj, u8 arg1, s32 arg2, struct17 *outPosition, struct17 *outOrigin) {
+void func_150FE49C(Actor *obj, u8 arg1, s32 arg2, struct17 *outPosition, struct17 *outOrigin) {
     struct17 position;
     struct17 origin;
     struct17 *src[2];
@@ -94,7 +94,7 @@ void func_150FE49C(struct127 *obj, u8 arg1, s32 arg2, struct17 *outPosition, str
  * Spawns a func_15102B38 effect for `obj` between its bone points D_800A1FC8 and D_800A1FE0, from `position`;
  * when the object has bone matrices and unk74's low nibble isn't 0xF.
  */
-void func_150FE604(struct127 *obj, struct17 *position, u8 arg2, s32 arg3) {
+void func_150FE604(Actor *obj, struct17 *position, u8 arg2, s32 arg3) {
     f32 motion[2];
     u8 mask;
     s32 pad; // matching: unused stack slot
@@ -122,10 +122,10 @@ void func_150FE604(struct127 *obj, struct17 *position, u8 arg2, s32 arg3) {
     }
 }
 
-void func_151D3E04(struct127 *obj, struct17 *out, struct17 *localPos, u8 bone, f32 yOffset);
+void func_151D3E04(Actor *obj, struct17 *out, struct17 *localPos, u8 bone, f32 yOffset);
 
 /* Handler: writes the world position of `obj`'s bone point D_800A1FC8 to `out`. */
-void func_150FE794(struct127 *obj, s32 arg1, struct17 *out) {
+void func_150FE794(Actor *obj, s32 arg1, struct17 *out) {
     func_151D3E04(obj, out, &D_800A1FC8, D_80088B94, 0.0f);
 }
 
@@ -142,7 +142,7 @@ typedef struct {
 void func_151D8868(Event151D8868 *event, s32 arg1, s32 arg2, s32 arg3);
 
 /* Sends a func_151D8868 event (kind 1, 20-32 long) to `obj`'s camera, if it has one. */
-void func_150FE7D4(struct127 *obj) {
+void func_150FE7D4(Actor *obj) {
     Event151D8868 event;
 
     if (obj->camera != NULL) {

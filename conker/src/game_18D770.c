@@ -18,16 +18,16 @@ extern void (*D_8008B37C[])(struct225 *);
 
 /* Payload of an effect tied to an actor without following a bone. */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     u8 actorId; // actor->unique_id when attached
     u8 unk5;
 } LightActorRef;
 
 /* Event message about actors: event 0 removes `actor`; event 0x2D swaps actor and other. */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     union {
-        struct127 *other; // event 0x2D
+        Actor *other; // event 0x2D
         u8 actorId;       // event 0
     } u4;
     u8 actorId;           // event 0x2D: id of `actor`
@@ -64,7 +64,7 @@ s32 func_1516065C(struct225 *effect);
 s32 func_15160684(struct225 *effect);
 s32 func_151607A4(struct225 *effect);
 void func_15160954(f32 *level, f32 *peak, f32 *rate, f32 *delay, struct225 *effect);
-s32 func_15161238(struct127 *actor, struct127 *exclude);
+s32 func_15161238(Actor *actor, Actor *exclude);
 struct225 *func_1516127C(struct226 *light, u8 arg1, s32 arg2);
 struct225 *func_15161334(struct226 *light, u8 arg1, s32 arg2);
 struct225 *func_15161408(struct226 *light, u8 arg1, s32 arg2);
@@ -83,7 +83,7 @@ void func_15161860(struct225 *effect);
 void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, struct17 *position, s16 arg5, s16 arg6);
 struct225 *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3);
 s32 func_15161A68(struct225 *effect);
-struct225 *func_15161E24(struct127 *actor, u8 unk5, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
+struct225 *func_15161E24(Actor *actor, u8 unk5, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
 s32 func_15161F2C(struct225 *effect);
 struct225 *func_15162034(struct226 *light, u8 arg1, s32 arg2);
 void func_15162110(s32 arg0);
@@ -101,7 +101,7 @@ void func_151639D0(struct225 *effect, s32 arg1, u8 eventId);
 void func_15163A18(struct225 *effect, s32 arg1, u8 eventId);
 struct225 *func_15163A60(u8 objectId, u8 arg1, s32 arg2);
 s32 func_15163B98(struct230 *effect);
-struct225 *func_15163BE8(struct127 *actor, u8 arg1, s32 arg2);
+struct225 *func_15163BE8(Actor *actor, u8 arg1, s32 arg2);
 s32 func_15163CD0(struct225 *effect);
 void func_15163CF8(LightPulse *pulse, struct225 *effect);
 void func_15163DEC(struct225 *effect, LightJitter *jitter);
@@ -320,7 +320,7 @@ void func_15160954(f32 *level, f32 *peak, f32 *rate, f32 *delay, struct225 *effe
 
 /* Payload of an effect whose light follows an actor, or a point on one of its bones. */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     u8 actorId;      // actor->unique_id when attached; a change means the actor slot was reused
     u8 bone;         // index of the bone matrix in actor->unk1D4
     u8 pad6[0x2];
@@ -330,7 +330,7 @@ typedef struct {
 } LightAttach;
 
 /* Creates a light that follows `actor` (see func_15160B74). */
-struct225 *func_15160A58(struct127 *actor, u8 bone, struct17 *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 unk15, u8 argE, s32 argF) {
+struct225 *func_15160A58(Actor *actor, u8 bone, struct17 *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 unk15, u8 argE, s32 argF) {
     struct225 *effect;
     Header header;
     LightAttach attach;
@@ -371,7 +371,7 @@ u8 func_15160B74(struct225 *effect) {
     u8 result;
     s8 callback;
     LightAttach *attach;
-    struct127 *actor;
+    Actor *actor;
 
     actor = ((LightAttach *)&effect->unk18)->actor;
     result = 1;
@@ -403,7 +403,7 @@ u8 func_15160B74(struct225 *effect) {
 
 /* Payload of func_15160E30: a light cast along a beam from an actor's bone, stopping at the first hit. */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     u8 actorId;      // actor->unique_id when attached
     u8 bone;         // index of the bone matrix in actor->unk1D4
     u8 pad6[0x2];
@@ -415,7 +415,7 @@ typedef struct {
 } LightBeam;
 
 /* Creates a beam light on `actor` (see func_15160E30). */
-struct225 *func_15160CDC(struct127 *actor, u8 bone, struct17 *start, struct17 *end, f32 scale, u8 arg5, s16 lifetime, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 unk25, u8 flagHit, u8 argE, s32 argF) {
+struct225 *func_15160CDC(Actor *actor, u8 bone, struct17 *start, struct17 *end, f32 scale, u8 arg5, s16 lifetime, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 unk25, u8 flagHit, u8 argE, s32 argF) {
     struct225 *effect;
     Header header;
     LightBeam beam;
@@ -457,7 +457,7 @@ struct225 *func_15160CDC(struct127 *actor, u8 bone, struct17 *start, struct17 *e
 
 /* Result of func_15081690's ray cast. */
 typedef struct {
-    struct127 *hit;
+    Actor *hit;
     f32 distance;
     f32 position[3];
     u8 pad14[0x45];
@@ -465,13 +465,13 @@ typedef struct {
     u8 pad5A[0xA];
 } RayHit;
 
-void func_15081690(struct127 *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
+void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
 s32 func_15145EA4(f32 **in, f32 **out, f32 mtx[4][4], s32 count);
 
 /* Casts the beam and puts the light where it hits; the light is off and at the actor when nothing is hit. */
 s32 func_15160E30(struct225 *effect) {
-    struct127 *actor;
+    Actor *actor;
     LightBeam *beam;
     s32 hitCount;
 
@@ -525,7 +525,7 @@ s32 func_15160E30(struct225 *effect) {
             return 1;
         }
         if ((beam->flags & 2) && hitCount >= 2) {
-            struct127 *hit;
+            Actor *hit;
 
             hit = ray.hit;
             if (hit->id == 0x9E) {
@@ -559,7 +559,7 @@ s32 func_15160E30(struct225 *effect) {
 }
 
 /* Returns whether `actor` is live and is not `exclude`. */
-s32 func_15161238(struct127 *actor, struct127 *exclude) {
+s32 func_15161238(Actor *actor, Actor *exclude) {
     if (actor->interaction_state == 0) {
         return 0;
     }
@@ -838,7 +838,7 @@ s32 func_15161A68(struct225 *effect) {
 }
 
 /* Creates a light at `actor` that stays tied to it (see func_15163F50). */
-struct225 *func_15161E24(struct127 *actor, u8 unk5, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9) {
+struct225 *func_15161E24(Actor *actor, u8 unk5, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9) {
     struct225 *effect;
     Header header;
     LightActorRef ref;
@@ -1547,7 +1547,7 @@ typedef struct {
 } LightAttachPulse;
 
 /* Creates a pulsing light attached to `actor`. */
-struct225 *func_15163BE8(struct127 *actor, u8 arg1, s32 arg2) {
+struct225 *func_15163BE8(Actor *actor, u8 arg1, s32 arg2) {
     struct225 *effect;
     LightPulse pulse;
 
@@ -1593,7 +1593,7 @@ void func_15163DEC(struct225 *effect, LightJitter *jitter) {
 }
 
 s32 func_15163F50(struct225 *effect, LightActorRef *ref) {
-    struct127 *actor;
+    Actor *actor;
 
     actor = ref->actor;
     if (actor->interaction_state == 0) {
@@ -1616,7 +1616,7 @@ void func_15163FEC(struct225 *effect, ActorEvent *event, u8 eventId) {
     LightAttach *attach = (LightAttach *)&effect->unk18;
 
     if (eventId == 0) {
-        struct127 *actor = event->actor;
+        Actor *actor = event->actor;
 
         if (actor == attach->actor || event->u4.actorId == attach->actorId) {
             func_1516972C(effect);
@@ -1640,8 +1640,8 @@ void func_15163FEC(struct225 *effect, ActorEvent *event, u8 eventId) {
 void func_151640C0(struct225 *effect, ActorEvent *event, u8 eventId) {
     LightActorRef *other;
     LightActorRef *ref = (LightActorRef *)&effect->unk18;
-    struct127 *otherActor;
-    struct127 *actor;
+    Actor *otherActor;
+    Actor *actor;
     u8 otherId;
     u8 actorId;
 
@@ -1662,7 +1662,7 @@ void func_15164134(struct225 *effect, ActorEvent *event, u8 eventId) {
     LightBeam *beam = (LightBeam *)&effect->unk18;
 
     if (eventId == 0) {
-        struct127 *actor = event->actor;
+        Actor *actor = event->actor;
 
         if (actor == beam->actor || event->u4.actorId == beam->actorId) {
             func_1516972C(effect);

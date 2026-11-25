@@ -1336,20 +1336,20 @@ void func_1516944C(s32 type, s32 event, u8 eventType) {
 }
 /* Event payload naming an actor (event types 0 and others). */
 typedef struct {
-    /* 0x0 */ struct127 *actor;
+    /* 0x0 */ Actor *actor;
     /* 0x4 */ u8 id;             /* the actor's unique_id */
 } ActorEvent;
 
 /* Event type 0x2D payload: ownership moves from one actor to another. */
 typedef struct {
-    /* 0x0 */ struct127 *from;
-    /* 0x4 */ struct127 *to;
+    /* 0x0 */ Actor *from;
+    /* 0x4 */ Actor *to;
     /* 0x8 */ u8 fromId;
     /* 0x9 */ u8 toId;
 } ActorSwapEvent;
 
 /* Sends an actor event about `actor` to every object. */
-void func_151695F0(struct127 *actor, u8 eventType) {
+void func_151695F0(Actor *actor, u8 eventType) {
     ActorEvent event;
 
     event.actor = actor;
@@ -1358,7 +1358,7 @@ void func_151695F0(struct127 *actor, u8 eventType) {
 }
 
 /* Sends an actor event about `actor` to every object of one type. */
-void func_1516962C(s32 type, struct127 *actor, u8 eventType) {
+void func_1516962C(s32 type, Actor *actor, u8 eventType) {
     ActorEvent event;
     event.actor = actor;
     event.id = actor->unique_id;
@@ -1438,17 +1438,17 @@ void func_15169824(struct102 *obj) {
  */
 void func_15169850(s32 event, u8 eventType, s32 owner, s32 ownerId, s32 obj) {
     if (eventType == 0) {
-        if (((ActorEvent *)event)->actor == *(struct127 **)owner || ((ActorEvent *)event)->id == *(u8 *)ownerId) {
+        if (((ActorEvent *)event)->actor == *(Actor **)owner || ((ActorEvent *)event)->id == *(u8 *)ownerId) {
             func_1516972C((struct102 *)obj);
         }
     } else if (eventType == 0x2D) {
-        struct127 *from = ((ActorSwapEvent *)event)->from;
+        Actor *from = ((ActorSwapEvent *)event)->from;
 
-        if (from == *(struct127 **)owner) {
-            *(struct127 **)owner = ((ActorSwapEvent *)event)->to;
+        if (from == *(Actor **)owner) {
+            *(Actor **)owner = ((ActorSwapEvent *)event)->to;
             *(u8 *)ownerId = ((ActorSwapEvent *)event)->toId;
-        } else if (((ActorSwapEvent *)event)->to == *(struct127 **)owner) {
-            *(struct127 **)owner = from;
+        } else if (((ActorSwapEvent *)event)->to == *(Actor **)owner) {
+            *(Actor **)owner = from;
             *(u8 *)ownerId = ((ActorSwapEvent *)event)->fromId;
         }
     }

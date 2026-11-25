@@ -9,7 +9,7 @@ typedef struct struct54 struct54;
 typedef struct struct56 struct56;
 typedef struct struct119 struct119;
 typedef struct struct124 struct124;
-typedef struct struct127 struct127;
+typedef struct Actor Actor;
 typedef struct Camera Camera;
 struct Rope;
 struct BoneChain;
@@ -923,7 +923,7 @@ typedef struct {
     /* 0xE */ s16 delay;
 } IdleState; // size 0x10
 
-/* Per-character control block (struct127.unk31C, 0x1C0 bytes, allocated for player-controlled and
+/* Per-character control block (Actor.unk31C, 0x1C0 bytes, allocated for player-controlled and
  * scripted characters): movement state, controller input, rope riding, idle animation and the
  * first-person aim state. */
 typedef struct {
@@ -1029,7 +1029,7 @@ typedef struct {
     /* 0x0AD */ u8  ropeSwingTimer;
     /* 0x0AE */ u8  ropeNode;
     /* 0x0AF */ u8  unkAF;
-    /* 0x0B0 */ struct127 *unkB0;
+    /* 0x0B0 */ Actor *unkB0;
     /* 0x0B4 */ u8  padB4[4];
     /* 0x0B8 */ f32 unkB8;
     /* 0x0BC */ f32 unkBC;
@@ -1130,7 +1130,23 @@ typedef struct {
     f32 unk18;
 } struct197;
 
-struct struct127 {
+/* Defined by the files that use them. */
+struct Attachment;
+struct CamData;
+struct TimedEvent;
+
+/* Aim and trail points an actor keeps at 0x1A4 (filled in by func_1503A08C). */
+typedef struct ActorAimPoints {
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ s16 z;
+    /* 0x06 */ s16 topY;
+    /* 0x08 */ s16 side[2][3]; // points pushed out to either side (trails are emitted from them)
+    /* 0x14 */ s8  dir[3];     // facing direction in 1/256 units
+} ActorAimPoints; // size 0x18
+
+/* The game actor: the 0x32C-byte entries of D_800CC2D0. */
+struct Actor {
     /* 0x00 */  s32 interaction_state;
     /* 0x04 */  u8  id;
     u8  unk5;
@@ -1169,19 +1185,23 @@ struct struct127 {
     f32 unk48;
     /* 0x4C */  f32 animation_speed;
     u32 pad50;
-    u32 pad54;
-    u32 pad58;
+    /* 0x54 */  f32 unk54;
+    /* 0x58 */  s32 unk58;
     s32 unk5C;  // used
     s32 unk60;
     s8  unk64;
     u8  unk65;  // used
-    u8  pad66;
+    /* 0x66 */  u8  unk66;      // flags
     u8  pad67;
-    u32 pad68;
-    s16 pad6C;
+    /* 0x68 */  u8  unk68;
+    /* 0x69 */  u8  unk69;
+    /* 0x6A */  u8  eyeClosed[2]; // per eye, toggled by blinking
+    /* 0x6C */  u8  eyeCode[2];   // >= 10: set by the current expression
     s8  unk6E;
-    s8  pad6F;
-    u32 pad70;
+    /* 0x6F */  u8  expression;   // current expression index
+    /* 0x70 */  u8  defaultExpression;
+    /* 0x71 */  u8  expressionPriority;
+    /* 0x72 */  u16 expressionTimer; // 0xFFFF = no timeout, 0xFFFE = frozen
     u8  unk74;
     s8  pad75;
     u16 unk76;  // moving_angle
@@ -1203,32 +1223,36 @@ struct struct127 {
     u8  unk88;
     /* 0x89 */  u8  disable_run;   // slowdown?
     /* 0x8A */  u8  disable_jump; // unk8A;
+    u8  pad8B;
     u16 unk8C;  // used
     u16 unk8E;  // used
     u16 unk90;
     u16 unk92;
     s32 unk94;
-    u32 pad98;
+    /* 0x98 */  s32 unk98;     // blacked-out display-list mask
     u32 unk9C;
-    u32 padA0;
-    u32 padA4;
+    /* 0xA0 */  u32 fogColor;  // packed ARGB; in fog mode 1 a pointer to an f32 percentage
+    /* 0xA4 */  u8  fogMode;
+    /* 0xA5 */  u8  fogLevel;  // fade level, or pulse phase in modes 4/5
+    /* 0xA6 */  u8  fogRate;
+    /* 0xA7 */  u8  fogFade;   // pulse fade-out, 0xFF = full
     u8  unkA8;
     u8  unkA9;
     u8  unkAA;
     u8  unkAB;
-    u8  padAC;
+    /* 0xAC */  u8  unkAC;
     /* 0xAD */  u8  in_water;
     u8  unkAE;
     u8  padAF;
     s8  unkB0;
     u8  padB1;
     u16 unkB2;  // (oxygen?)
-    s32 padB4;
+    /* 0xB4 */  f32 unkB4;
     f32 unkB8;  // used
-    u32 padBC;
+    /* 0xBC */  f32 unkBC;
     /* 0xC0 */  f32 target_speed;
     f32 unkC4;
-    u32 padC8;
+    /* 0xC8 */  f32 unkC8;
     s16 unkCC;
     s16 unkCE;
     u8  unkD0;
@@ -1264,24 +1288,34 @@ struct struct127 {
     s16 unk10C;
     u8  unk10E;
     u8  unk10F;
-    u32 pad110;
+    /* 0x110 */ u8  unk110;
+    u8  pad111;
+    /* 0x112 */ u16 unk112;
     f32 unk114;
     f32 unk118;
     f32 unk11C;
-    u8  unk120;
-    u8  unk121;
+    /* 0x120 */ s16 unk120;
     u8  unk122;
     u8  unk123;
     u8  unk124;
     /* 0x125 */ u8  immune; // used
     u8  pad126;
     u8  unk127;
-    u32 pad128;
-    u32 pad12C;
+    /* 0x128 */ u8  team;
+    /* 0x129 */ u8  unk129;
+    /* 0x12A */ u8  unk12A;
+    u8  pad12B;
+    /* 0x12C */ s16 unk12C;
+    u16 pad12E;
     u32 pad130;
-    u32 pad134;
+    /* 0x134 */ u8  unk134;
+    /* 0x135 */ u8  unk135;  // morph duration
+    /* 0x136 */ u8  unk136;  // sprite texture
+    /* 0x137 */ u8  unk137;
     u8  unk138;
-    u8  pad139[0x3];
+    /* 0x139 */ u8  unk139;  // requested sequence
+    /* 0x13A */ u8  unk13A;  // its countdown
+    /* 0x13B */ u8  unk13B;
     u8  unk13C; // used
     u8  unk13D;
     u8  unk13E;
@@ -1294,41 +1328,29 @@ struct struct127 {
     f32 unk154;
     f32 unk158;
     f32 unk15C;
-    u32 pad160;
+    /* 0x160 */ s16 unk160;
+    /* 0x162 */ u8  unk162;
+    u8  pad163;
     f32 unk164;
     f32 unk168;
     f32 unk16C;
     f32 unk170;
-    u32 pad174;
-    u32 pad178;
-    u32 pad17C;
+    /* 0x174 */ f32 unk174;
+    /* 0x178 */ f32 unk178;
+    /* 0x17C */ f32 ceilingY;
     f32 unk180;
-    s32 unk184;
-    u32 pad188;
-    f32 unk18C; // used
-    u32 pad190;
-    u8  pad194;
-    u8  unk195;
-    u8  pad196;
-    u8  unk197;
-    u8  unk198;
-    u8  pad199;
-    u8  pad19A;
-    u8  pad19B;
-    u32 pad19C;
-    u32 pad1A0;
-    u16 pad1A4;
-    s16 unk1A6;
-    u32 pad1A8;
-    u32 pad1AC;
-    u32 pad1B0;
-    u32 pad1B4;
-    u32 pad1B8;
+    u32 unk184;
+    /* 0x188 */ void *unk188;     // floor triangle found by the floor probe
+    /* 0x18C */ s16 floorVerts[3][3]; // the floor triangle under the actor
+    /* 0x19E */ s16 floorTriIndex;
+    /* 0x1A0 */ u16 propNum;   // D_800DBEF4 index + 1 of the prop stood on, 0 = none
+    /* 0x1A2 */ s16 floorType;
+    /* 0x1A4 */ ActorAimPoints aim;
     u32 pad1BC;
     u32 pad1C0;
-    u32 pad1C4;
-    u8  pad1C8;
-    u8  unk1C9;
+    /* 0x1C4 */ struct TimedEvent *events; // timed event list
+    /* 0x1C8 */ u8  lod;       // current level of detail
+    /* 0x1C9 */ u8  unk1C9;   // requested LOD + 1, 0xFF = reset to 0
     /* 0x1CA */ u8  health;
     u8  unk1CB;
     f32 unk1CC;
@@ -1337,8 +1359,10 @@ struct struct127 {
     u16 pad1D2;
     struct255 *unk1D4;
     u32 pad1D8;
-    u32 pad1DC;
-    u32 pad1E0;
+    u8  pad1DC;
+    /* 0x1DD */ u8  unk1DD[3];
+    /* 0x1E0 */ u8  unk1E0[3];
+    /* 0x1E3 */ u8  unk1E3;
     u8  unk1E4;
     u8  unk1E5;
     u8  unk1E6;
@@ -1350,18 +1374,20 @@ struct struct127 {
     u8  pad1EE[0x2];
     u32 pad1F0;
     s32 unk1F4;
-    u32 pad1F8;
+    /* 0x1F8 */ f32 unk1F8;
     u8  unk1FC;
     u8  unk1FD;
-    u8  pad1FE;
+    /* 0x1FE */ u8  unk1FE;
     u8  unk1FF;
     s8  unk200;
-    u8  pad201[0x3];
+    /* 0x201 */ u8  unk201;
+    /* 0x202 */ s8  unk202;
+    /* 0x203 */ s8  unk203;
     s32 unk204;
     u32 pad208;
     u8  pad20C[0x3];
     u8  unk20F;
-    u8  pad210;
+    /* 0x210 */ u8  unk210;
     u8  unk211;
     u8  unk212[0x2];
     s32 unk214;
@@ -1373,7 +1399,7 @@ struct struct127 {
     s8  unk221;
     u8  unk222;
     u8  unk223;
-    u16 unk224;
+    s16 unk224;
     u8  unk226;
     u8  pad227;
     u8  unk228;
@@ -1394,7 +1420,7 @@ struct struct127 {
     s8  unk239; // used
     u8  unk23A;
     u8  unk23B;
-    u8  pad23C;
+    /* 0x23C */ u8  unk23C;
     u8  unk23D;
     u8  unk23E;
     u8  unk23F;
@@ -1424,7 +1450,10 @@ struct struct127 {
     u8  unk258;
     u8  pad259[0x3];
     s32 unk25C;
-    u8  pad260[0x14];
+    /* 0x260 */ void *unk260;
+    /* 0x264 */ s32 unk264;
+    u8  pad268[0x8];
+    /* 0x270 */ f32 unk270;
     u8  unk274;
     u8  pad275;
     s8  unk276;
@@ -1436,27 +1465,43 @@ struct struct127 {
     u8  unk285;
     u8  unk286;
     u8  unk287;
-    u8  pad288[0x41];
+    /* 0x288 */ u8  unk288;
+    u8  pad289[0x3];
+    /* 0x28C */ u8 *modelData[7][2]; // per model in modelIds
+    /* 0x2C4 */ u8 *modelIds;
+    /* 0x2C8 */ u8  unk2C8;
     u8  unk2C9;
     s8  unk2CA;
     s8  unk2CB;
     s32 unk2CC;
     struct197 *unk2D0;
-    u8  pad2D4[0x10];
+    /* 0x2D4 */ struct102 *unk2D4;
+    /* 0x2D8 */ f32 unk2D8;
+    /* 0x2DC */ f32 unk2DC;
+    /* 0x2E0 */ f32 unk2E0;
     s32 unk2E4;
     s32 unk2E8;
     s32 unk2EC;
-    u8  pad2F0[0x8];
+    u32 pad2F0;
+    /* 0x2F4 */ struct Attachment *attachments; // head of the attachment list
     u16 unk2F8; // wait animation?
     u8  unk2FA;
     u8  unk2FB;
-    u8  pad2FC[0x3];
+    /* 0x2FC */ u8  unk2FC;
+    /* 0x2FD */ u8  unk2FD;
+    /* 0x2FE */ u8  unk2FE;
     u8  unk2FF;
     u8  unk300;
-    u8  unk301[0x17];
+    /* 0x301 */ u8  unk301;
+    /* 0x302 */ u8  unk302[2];
+    /* 0x304 */ s32 unk304[4]; // one per view
+    /* 0x314 */ void *unk314;
     /* 0x318 */ Camera *camera;
     /* 0x31C */ ActorCtl *unk31C;
-    u8  pad320[0xC];
+    /* 0x320 */ u32 unk320;
+    /* 0x324 */ struct CamData *camData; // aim easing state, one entry per aim slot
+    /* 0x328 */ s8  unk328;
+    u8  pad329[0x3];
 }; // size 0x32C => 812 bytes game_object
 
 /*
@@ -1522,7 +1567,7 @@ struct WorldObject {
     /* 0x73 */ u8 behaviorState;     // per-behaviour state bits
     /* 0x74 */ u16 sound;            // handle from func_15114D24
     /* 0x76 */ u8 pad76[2];
-    /* 0x78 */ void (*onContact)(WorldObject *obj, struct127 *actor);
+    /* 0x78 */ void (*onContact)(WorldObject *obj, Actor *actor);
     /* 0x7C */ union {
         s32 words[3];
         struct {
@@ -1910,7 +1955,7 @@ typedef struct CamRail {
     /* 0x38 */ vertex eyeGoal;
 } CamRail; // size 0x44
 
-/* One player camera (struct127.camera; array at D_800DBFF0). Mode state 0x000..0x236 is a stack of 21 save slots (func_15123934 / func_151239CC). */
+/* One player camera (Actor.camera; array at D_800DBFF0). Mode state 0x000..0x236 is a stack of 21 save slots (func_15123934 / func_151239CC). */
 struct Camera {
     /* 0x000 */ u16 modeIndex;                       /* bit index of mode */
     /* 0x002 */ u16 savedModeIndex[21];
@@ -1945,7 +1990,7 @@ struct Camera {
     /* 0x240 */ s32 unk240;
     /* 0x244 */ s16 pairIndex;                       /* second object kept in frame (0 = none) */
     /* 0x246 */ u8 pad246[0x2];
-    /* 0x248 */ struct127 *pairObj;
+    /* 0x248 */ Actor *pairObj;
     /* 0x24C */ f32 unk24C;
     /* 0x250 */ f32 unk250;
     /* 0x254 */ u8 pad254[0x4];
@@ -2011,7 +2056,7 @@ struct Camera {
     /* 0x3C0 */ vertex eyeVel;                       /* easing velocity of eye */
     /* 0x3CC */ s16 unk3CC;
     /* 0x3CE */ u8 pad3CE[0x2];
-    /* 0x3D0 */ struct127 *player;                   /* the object the camera follows */
+    /* 0x3D0 */ Actor *player;                   /* the object the camera follows */
     /* 0x3D4 */ ActorCtl *playerExt;                /* player->unk31C */
     /* 0x3D8 */ u8 pad3D8[0x4];
     /* 0x3DC */ f32 unk3DC;                          /* orbit yaw of the eye, radians */
@@ -2422,7 +2467,7 @@ typedef struct {
 } struct174; // size 0x10
 
 typedef struct {
-    struct127* unk0;
+    Actor* unk0;
     u8  unk4;
     u8  pad5;
     s16 unk6;
@@ -2474,7 +2519,7 @@ typedef struct {
 } struct181;
 
 typedef struct {
-    struct127 *unk0;
+    Actor *unk0;
     u8 unk4;
     u8 pad5[0x1];
     s16 unk6;
@@ -2508,7 +2553,7 @@ typedef struct {
 } struct184; // size 0x20, 32 bytes
 
 typedef struct {
-    struct127* unk0;
+    Actor* unk0;
     u8  unk4;
     u8  pad5;
     s16 unk6;
@@ -2621,8 +2666,8 @@ typedef struct {
 } struct192; // size 0x14
 
 typedef struct {
-    struct127 *unk0;
-    struct127 *unk4;
+    Actor *unk0;
+    Actor *unk4;
     u8 unk8;
     u8 unk9;
 } struct193;
@@ -2644,7 +2689,7 @@ typedef struct {
 
 typedef struct {
     s32 unk0;
-    struct127 *unk4;
+    Actor *unk4;
     s32 unk8;
     s32 unkC;
 } struct198;
@@ -2984,7 +3029,7 @@ typedef struct {
 } struct226;
 
 typedef struct {
-    struct127 *unk0; // struct127 pointer?
+    Actor *unk0; // Actor pointer?
     u8  unk4;
     u8  pad5[0x9];
     u8  unkE; // 6 bytes?

@@ -166,7 +166,7 @@ typedef struct {
 
 /* Picks the hook's texture (an entry of D_80090274) from the actor's animation frame while
  * the actor is in state 0xAE. */
-s32 func_150F56B0(DrawHook *hook, struct127 *actor) {
+s32 func_150F56B0(DrawHook *hook, Actor *actor) {
     struct197 *anim;
     s32 frame;
     f32 two; // matching: IDO materializes 2.0f once only when it is a variable
@@ -225,7 +225,7 @@ s32 func_150F56B0(DrawHook *hook, struct127 *actor) {
 
 /* While the actor is in state 5, slides the hook's texture over animation frames 69-84 by
  * patching the upper-left t of the first G_SETTILESIZE in its display list. */
-s32 func_150F5A54(DrawHook *hook, struct127 *actor) {
+s32 func_150F5A54(DrawHook *hook, Actor *actor) {
     struct197 *anim;
     Gfx *gfx;
     s32 count;
@@ -306,7 +306,7 @@ typedef struct {
 
 /* Data of the spark effect spawned by func_150F5C08 and run by func_150F5C98. */
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId; /* owner->unique_id at spawn; a mismatch means the owner died */
     u8 pad5[3];
     f32 accum;  /* sparks owed; one is spawned per whole unit */
@@ -318,7 +318,7 @@ typedef struct {
 } SparkEffect;
 
 /* Spawns a spark effect (func_150F5C98) on `owner`. */
-void func_150F5C08(struct127 *owner, s16 arg1, u8 arg2, s32 arg3) {
+void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     SparkData data;
     struct260 *effect;
 
@@ -347,7 +347,7 @@ extern Particle *func_15130280(ParticleDesc *, u8, s32, s32, u8, s32);
 /* Spark effect: while the owner lives, emits sparks along the segment between two points of
  * its bone 5, at a random rate. */
 void func_150F5C98(SparkEffect *effect) {
-    struct127 *owner;
+    Actor *owner;
     SparkData *data;
     ParticleDesc spawn;
     f32 scale;
@@ -479,7 +479,7 @@ typedef struct {
 } Flash;
 
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId;
     u8 pad5[3];
     Beam *beam;
@@ -498,7 +498,7 @@ extern f32 D_800A1B24[3];
  * beam between two points of the model and puts the flash at the first; otherwise hides both. */
 void func_150F6178(BeamEffect *effect) {
     BeamData *data;
-    struct127 *owner;
+    Actor *owner;
     struct17 start;
     struct17 end;
     f32 *srcs[2];
@@ -623,7 +623,7 @@ void func_150F64B0(struct210 *obj) {
 
 /* Data of the effect run by func_150F64DC. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
     /* 0x05 */ u8 pad5;
     /* 0x06 */ s16 timer; /* frames until the next burst */
@@ -637,14 +637,14 @@ typedef struct {
 extern f32 D_800A1B30[3];
 void func_15143134(void *, f32 *, Mtx *);
 extern struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
-void *func_15107C1C(struct127 *, u8, void *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, s32, s32);
+void *func_15107C1C(Actor *, u8, void *, s16, s32, s32, s32, f32, f32, s32, s32, u8 *, s32, s32);
 
 /* Burst effect: while the owner lives and has a model (and unk94 bit 1 is clear), every 90-180
  * frames calls func_10010F88(0x679) at the owner, makes a flash at a point of the model and emits
  * 2 or 3 blue-white particles from it. */
 void func_150F64DC(BurstEffect *effect) {
     BurstData *data;
-    struct127 *owner;
+    Actor *owner;
     s8 count;
 
     owner = effect->data.owner;
@@ -707,7 +707,7 @@ void func_150F6850(BurstEffect *effect, s32 arg1, u8 arg2) {
 typedef struct {
     /* 0x00 */ u8  ownerId;
     /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ struct127 *owner;
+    /* 0x04 */ Actor *owner;
     /* 0x08 */ u8  unk8;
     /* 0x09 */ u8  pad9[0x3];
     /* 0x0C */ f32 unkC;
@@ -734,7 +734,7 @@ typedef struct {
 void *func_15134DAC(struct_150F6890 *, s32);
 
 /* Creates a func_15134DAC object attached to `owner`. */
-void func_150F6890(struct127 *owner, s16 arg1, s32 arg2, s32 arg3) {
+void func_150F6890(Actor *owner, s16 arg1, s32 arg2, s32 arg3) {
     struct_150F6890 desc;
 
     desc.ownerId = owner->unique_id;
@@ -768,7 +768,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xC - 0x2];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[0x1C - 0xD];
-    /* 0x1C */ struct127 *owner;
+    /* 0x1C */ Actor *owner;
 } BloodStrip;
 
 /* Ground probe result filled by func_1504715C (game_105760.c's Ground_150D85AC). */
@@ -785,7 +785,7 @@ typedef struct {
 void func_15137F30(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32 time, BloodStrip *strip,
                    f32 *start, f32 *end, f32 *velocity, f32 *arg3, s16 *arg4, s8 *arg5, f32 *arg6);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
-void func_1504715C(Ground *, struct127 *);
+void func_1504715C(Ground *, Actor *);
 
 /* BloodStrip emit callback: one func_151D9014 blood particle, larger than func_15137E60's. 60% of
  * them get a ground probe under the strip's owner; the rest get none (height -10000). */

@@ -51,7 +51,7 @@ extern TrailSpec D_800A8B80[];
 
 /* A trail's own data (0x60 bytes), at Trail::data. */
 typedef struct TrailData {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;      /* owner's unique_id when the trail started */
     /* 0x05 */ u8 matrixIndex;  /* which of the owner's matrices the trail follows */
     /* 0x06 */ u8 flags;        /* bit 0: stopped, bit 1: fade in the head, bit 2: fade out the tail */
@@ -130,7 +130,7 @@ typedef struct Trail {
 
 /* Data of a trail task (func_151491F4), at TrailTask::data. */
 typedef struct TrailTaskData {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;
     /* 0x08 */ s32 unk8;  /* spec index for func_1519E464, a frame timer for func_1519E754 */
 } TrailTaskData;
@@ -149,19 +149,19 @@ typedef struct TrailTask {
 /* Event payloads the handlers below get (see func_15147D64). */
 typedef union TrailEvent {
     struct {
-        struct127 *obj;
+        Actor *obj;
         u8 id;
     } object;         /* events 0 and 7: trails of this owner stop */
     u8 specIndex;     /* event 6: trails of this kind stop (func_1519CF70) */
     struct {
-        struct127 *a;
-        struct127 *b;
+        Actor *a;
+        Actor *b;
         u8 idA;
         u8 idB;
     } swap;           /* event 0x2D: owners a and b trade places */
 } TrailEvent;
 
-/* Game objects keep the head of their attachment list at +0x2F4 (padding in struct127). */
+/* Game objects keep the head of their attachment list at +0x2F4 (padding in Actor). */
 typedef struct AttachmentOwner {
     /* 0x000 */ u8 pad0[0x2F4];
     /* 0x2F4 */ struct Attachment *attachments;
@@ -170,12 +170,12 @@ typedef struct AttachmentOwner {
 
 extern void func_15147D64(void *event, u8 eventId);
 extern /* Restarts the kind 3 and 4 trails on owner and spawns a func_151491F4 object. */
-void func_1519E3BC(struct127 *owner, s16 lifetime, u8 arg2, s32 arg3);
-extern Trail *func_1519D030(struct127 *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5);
+void func_1519E3BC(Actor *owner, s16 lifetime, u8 arg2, s32 arg3);
+extern Trail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5);
 extern void func_1519E688(void);
 extern s32 func_1514ED3C(struct Attachment *list, s32 handle, struct Attachment **out);
-extern struct Attachment *func_1514EC1C(s32 handle, struct127 *owner, s16 type);
-extern void func_1514EDF0(s32 handle, struct127 *owner);
+extern struct Attachment *func_1514EC1C(s32 handle, Actor *owner, s16 type);
+extern void func_1514EDF0(s32 handle, Actor *owner);
 extern TrailTask *D_800E0920;
 extern Trail *func_15147A80(TrailSpawn *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 func_1519E304(TrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t);
@@ -221,7 +221,7 @@ void func_1519D000(Trail *trail) {
 }
 
 /* Starts a trail of kind specIndex on owner. Returns it, or NULL. */
-Trail *func_1519D030(struct127 *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5) {
+Trail *func_1519D030(Actor *owner, s32 specIndex, s16 lifetime, u8 arg3, u8 arg4, s32 arg5) {
     TrailSpawn spawn;
     TrailData data;
     Trail *trail;
@@ -734,7 +734,7 @@ s32 func_1519E304(TrailData *data, Vec3f *out, f32 x, f32 y, f32 z, f32 t) {
 }
 
 /* Restarts the kind 3 and 4 trails on owner and spawns a func_151491F4 object. */
-void func_1519E3BC(struct127 *owner, s16 lifetime, u8 arg2, s32 arg3) {
+void func_1519E3BC(Actor *owner, s16 lifetime, u8 arg2, s32 arg3) {
     func_1519E688();
     func_1519D030(owner, 3, 300, 0, arg2, arg3);
     func_1519D030(owner, 4, 300, 0, arg2, arg3);
@@ -810,7 +810,7 @@ void func_1519E688(void) {
 }
 
 /* Stops the kind 3 and 4 trails and, unless one is pending, starts the func_1519E754 task for owner. */
-void func_1519E6BC(struct127 *owner) {
+void func_1519E6BC(Actor *owner) {
     TrailTaskData taskData;
 
     func_1519E688();

@@ -4,7 +4,7 @@
 
 extern void func_1503E5F8(f32 mtx[4][4], f32 *x, f32 *y, f32 *z, f32 *rotX, f32 *rotY, f32 *rotZ,
                           f32 *scaleX, f32 *scaleY, f32 *scaleZ);
-extern struct127 *func_15073118(struct127 *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ,
+extern Actor *func_15073118(Actor *parent, s32 bone, s32 anim, f32 offX, f32 offY, f32 offZ,
                                 f32 yawOffset, f32 speed, f32 yVelocity, f32 gravity, s32 unk83);
 
 typedef struct {
@@ -17,10 +17,10 @@ typedef struct {
  * (animation 0x4E) placed and rotated by the hook's matrix from the other frame buffer.
  * Returns 1 when it spawned one.
  */
-s32 func_150C8730(Hook150C8730 *hook, struct127 *actor) {
+s32 func_150C8730(Hook150C8730 *hook, Actor *actor) {
     struct197 *anim;
     s32 state;
-    struct127 *obj;
+    Actor *obj;
     u8 frame;
     Mtx *mtx;
     s32 pad[2]; // matching: unused stack space

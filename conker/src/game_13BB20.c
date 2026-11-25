@@ -77,32 +77,32 @@ s32 func_1510E670(s32 index) {
 }
 
 void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 *outFloorY, f32 *outPropFloorY,
-                   s32 *outFlags, s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, struct127 *object,
+                   s32 *outFlags, s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *object,
                    f32 minY, f32 maxY, s32 noFallback);
 
 /* Floor query (see func_1510E950) with an explicit height window for the prop probe. */
 void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,
-                   s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, struct127 *obj, f32 minY, f32 maxY) {
+                   s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj, f32 minY, f32 maxY) {
     func_1510E950(outTri, outVerts, NULL, outFloorY, outPropFloorY, outFlags, outType, x, y, z, refY, group, obj,
                   minY, maxY, 0);
 }
 
 /* Floor query (see func_1510E950) with the default height window. */
 void func_1510E82C(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,
-                   s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, struct127 *obj) {
+                   s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj) {
     func_1510E950(outTri, outVerts, NULL, outFloorY, outPropFloorY, outFlags, outType, x, y, z, refY, group, obj,
                   -10000.0f, 20000.0f, 0);
 }
 
 /* Floor query (see func_1510E950) with the default height window and a noFallback choice. */
 void func_1510E8BC(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outPropFloorY, s32 *outFlags,
-                   s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, struct127 *obj, f32 unused12,
+                   s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *obj, f32 unused12,
                    f32 unused13, s32 noFallback) {
     func_1510E950(outTri, outVerts, NULL, outFloorY, outPropFloorY, outFlags, outType, x, y, z, refY, group, obj,
                   -10000.0f, 20000.0f, noFallback);
 }
 
-/* struct127 fields that structs.h still covers with padding. */
+/* Actor fields that structs.h still covers with padding. */
 typedef struct ObjFloorView {
     /* 0x000 */ u8 pad0[0xF8];
     /* 0x0F8 */ s32 unkF8;
@@ -151,7 +151,7 @@ extern s32 *D_800DBF94;
  * Unless noFallback is set, the first upward-facing hit is used when none is within reach.
  */
 void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 *outFloorY, f32 *outPropFloorY,
-                   s32 *outFlags, s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, struct127 *object,
+                   s32 *outFlags, s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, Actor *object,
                    f32 minY, f32 maxY, s32 noFallback) {
     s32 i;
     s32 bestHit;

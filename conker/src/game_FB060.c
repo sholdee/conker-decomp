@@ -18,13 +18,13 @@ typedef struct {
     /* 0x20 */ s32 unk20;
 } GroundHit; // size 0x24
 
-void func_1504715C(GroundHit *hit, struct127 *actor);
+void func_1504715C(GroundHit *hit, Actor *actor);
 s32 func_15046C80(vertex *probe, s32 arg1, f32 bottom, GroundHit *hit);
 void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
                    f32 arg9, s32 argA, u8 argB);
 
 /* Spawns two effects on the ground under the actor, probing from 1000 units above it to 3000 below. */
-void func_150CDBB0(struct127 *actor, u8 owner, s32 arg2) {
+void func_150CDBB0(Actor *actor, u8 owner, s32 arg2) {
     vertex pos;
 
     if (actor == NULL) {
@@ -148,7 +148,7 @@ typedef struct ParticleSpawn80 {
     /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
     /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct struct127 *owner;
+    /* 0x6C */ struct Actor *owner;
     /* 0x70 */ u8 ownerId;
     /* 0x71 */ u8 pad71;
     /* 0x72 */ s16 fadeStart;

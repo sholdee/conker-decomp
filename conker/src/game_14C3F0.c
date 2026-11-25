@@ -70,7 +70,7 @@ extern s32 func_15086D48(s32);
  * 60 frames later.
  */
 void func_1511EF40(WorldObject *prop) {
-    struct127 *character;
+    Actor *character;
     f32 x, y, z, angle;
     SwingMotion *motion;
     Camera *actor;

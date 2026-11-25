@@ -80,7 +80,7 @@ extern void func_10004074(void *ptr); // frees an allocate_memory() buffer
 extern void *func_1502B5C8(u32 *size, s32 depth, ...);
 extern void *func_1502B6BC(u32 *size, s32 count, s32 *countOut, s32 depth, ...);
 extern s32 func_150028BC(s32 id);
-extern s32 func_15084044(struct127 *obj, s32 model);
+extern s32 func_15084044(Actor *obj, s32 model);
 extern s32 func_1510CE60(Gfx *dl, s32, s32, s32, s16 **);
 extern s32 func_1510D0EC(s32 id, s32 *, s32, s32);
 
@@ -457,7 +457,7 @@ s32 func_1503DA3C(s32 id, s32 index) {
  * Makes sure model id is loaded for obj (and, with loadTextures, its textures), then sets up obj's
  * model'th model with func_15084044. Returns 0, or the error bits of the step that failed.
  */
-s32 func_1503DA9C(struct127 *obj, s32 id, s32 model, s32 loadTextures) {
+s32 func_1503DA9C(Actor *obj, s32 id, s32 model, s32 loadTextures) {
     struct129 *def;
     Gfx *dl;
     s32 ret;
@@ -465,10 +465,10 @@ s32 func_1503DA9C(struct127 *obj, s32 id, s32 model, s32 loadTextures) {
 
     def = obj->unk144;
     if (D_800D19A0[id] == NULL) {
-        ret = func_1503CF20(id, 0, def, loadTextures, obj->padAC);
+        ret = func_1503CF20(id, 0, def, loadTextures, obj->unkAC);
     } else {
         ret = 0;
-        if ((def != NULL && (def->unk18 & 0x4000)) || (obj->padAC & 1)) {
+        if ((def != NULL && (def->unk18 & 0x4000)) || (obj->unkAC & 1)) {
             if (D_800C5C08[id] == 0) {
                 func_150028BC(id);
             }

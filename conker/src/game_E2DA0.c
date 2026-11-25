@@ -6,7 +6,7 @@
 void func_150B5A3C(vertex *pos, u8 owner, s32 kind);
 void func_150B5E34(vertex *pos, u8 owner, s32 kind);
 void func_150B6000(vertex *pos, u8 owner, s32 kind);
-void func_150B60E0(struct127 *obj, vertex *out);
+void func_150B60E0(Actor *obj, vertex *out);
 
 /* Effect instance whose per-type data (from 0x28) tracks a game object. */
 typedef struct ObjBurstEffect {
@@ -17,7 +17,7 @@ typedef struct ObjBurstEffect {
     /* 0x0D */ u8 padD;
     /* 0x0E */ s16 timer; /* frames left (as in FlashEffect, game_1AC2F0.c) */
     /* 0x10 */ u8 pad10[0x18];
-    /* 0x28 */ struct127 *obj;
+    /* 0x28 */ Actor *obj;
     /* 0x2C */ u8 objUniqueId;
 } ObjBurstEffect;
 
@@ -101,7 +101,7 @@ GameCommand *func_150B58F0(GameCommand *cmd, s32 objIndex) {
 void func_150B5950(ObjBurstEffect *effect) {
     vertex *posp;
     vertex pos;
-    struct127 *obj;
+    Actor *obj;
 
     obj = effect->obj;
     posp = &pos; // matching: IDO keeps &pos in a saved register only via a named pointer
@@ -321,7 +321,7 @@ extern void func_15143134(vertex *in, vertex *out, void *mtx);
 extern vertex D_8009FC30;
 
 /** Transforms the fixed point D_8009FC30 by the matrix at obj->unk1D4 + 0x140 into out. */
-void func_150B60E0(struct127 *obj, vertex *out) {
+void func_150B60E0(Actor *obj, vertex *out) {
     func_15143134(&D_8009FC30, out, (u8 *)obj->unk1D4 + 0x140);
 }
 

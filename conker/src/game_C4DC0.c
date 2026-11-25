@@ -9,7 +9,7 @@
 #include "variables.h"
 #undef D_800D3098
 
-struct127 *func_15083E90(u8);
+Actor *func_15083E90(u8);
 extern struct178 *D_800D3098;
 
 /* One 0x30-byte spawn slot of the D_800D20FC table (struct258 in structs.h is not the real layout). */
@@ -27,15 +27,15 @@ typedef struct {
 } C4DC0_arg1;
 
 extern s32 func_15082A44(void *, s32, s32, s32, s32);
-extern struct127 *func_1505EEF4(s32);
-extern s32 func_15053430(struct127 *);
+extern Actor *func_1505EEF4(s32);
+extern s32 func_15053430(Actor *);
 extern u8 D_800D2100;
 extern s32 D_800D3840;
 
 /* Returns the object id for script id `scriptId` (| 0x2000 when nonzero), spawning it from its slot if needed. */
 s32 func_15097910(s32 scriptId, s32 unused) {
     s32 ret;
-    struct127 *obj;
+    Actor *obj;
 
     ret = func_15083E0C((u8)scriptId);
     if (ret != -1) {
@@ -58,7 +58,7 @@ s32 func_15097910(s32 scriptId, s32 unused) {
 
 /* Removes object `objId` (flagging its spawn slot); returns 999999 on success, 0 if there is no such object. */
 s32 func_150979CC(s32 objId, C4DC0_arg1 *arg1) {
-    struct127 *obj;
+    Actor *obj;
 
     obj = func_1505EEF4(objId);
     if (obj == NULL) {
@@ -96,7 +96,7 @@ typedef struct {
     s16 pad;
 } PathPoint;
 
-/* D_800D2104[id] points at the path of the object with script id `id` (struct127.unk13F); D_800D2108[id]
+/* D_800D2104[id] points at the path of the object with script id `id` (Actor.unk13F); D_800D2108[id]
  * is its point count. func_15099C14 reads the points from the start of the block, while func_15097A8C
  * writes them 8 bytes in (a header or 1-based indexing; unknown), hence this view. */
 typedef struct {
@@ -104,7 +104,7 @@ typedef struct {
     PathPoint pts[1];
 } PathData;
 
-/* Raw field access for bytes of struct127 / ActorCtl that structs.h declares only as padding or with
+/* Raw field access for bytes of Actor / ActorCtl that structs.h declares only as padding or with
  * another width (the shared headers are not edited in this pass). */
 /* Index of an object in the D_800CC2D0 object table. */
 #define OBJ_INDEX(o) ((o) - D_800CC2D0)
@@ -113,39 +113,39 @@ typedef struct {
 
 extern s32 D_800BE3E4;
 extern s16 D_800C3FF4[3];
-extern void func_1503DE70(struct127 *, s32, s32);
-extern void func_1504BAF0(struct127 *);
-extern void func_15052F9C(struct127 *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_1505D024(struct127 *, s32, u16, s32);
+extern void func_1503DE70(Actor *, s32, s32);
+extern void func_1504BAF0(Actor *);
+extern void func_15052F9C(Actor *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_1505D024(Actor *, s32, u16, s32);
 extern void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
-extern void func_15063254(struct127 *, s32, s32, f32);
-extern void func_15063404(struct127 *);
-extern void func_150634E4(struct127 *);
-extern void func_15063570(struct127 *);
+extern void func_15063254(Actor *, s32, s32, f32);
+extern void func_15063404(Actor *);
+extern void func_150634E4(Actor *);
+extern void func_15063570(Actor *);
 extern struct216 *func_1507BB28(s32, s32);
-extern void func_1507CD64(struct127 *, s32);
-extern void func_1507D1D8(struct127 *);
+extern void func_1507CD64(Actor *, s32);
+extern void func_1507D1D8(Actor *);
 extern void func_1507D4F8(s32);
-extern void func_1507EB2C(struct127 *);
-extern void func_1507EB4C(struct127 *, s32);
+extern void func_1507EB2C(Actor *);
+extern void func_1507EB4C(Actor *, s32);
 extern void func_15080620(s32, s32, s32, s32);
-extern void func_150836CC(struct127 *, s32);
+extern void func_150836CC(Actor *, s32);
 extern s32 func_15084000(s32);
-extern void func_15085410(struct127 *, s32);
+extern void func_15085410(Actor *, s32);
 extern s32 func_15086CBC(s32, f32 *, f32 *, f32 *);
 extern s32 func_15086D48(s32);
 extern void func_1510E7A4(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32, f32, f32);
-extern void func_1514DE94(struct127 *);
-extern void func_15172D28(struct127 *, s32);
+extern void func_1514DE94(Actor *);
+extern void func_15172D28(Actor *, s32);
 extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
-extern void func_1518BA90(struct127 *, s32, s32);
-extern void func_1518BBF4(struct127 *);
-extern void func_15193660(struct127 *, s32, s32);
-extern void func_151937F4(struct127 *, s32, s32);
-extern void func_151D6BFC(struct127 *, s32, s32);
+extern void func_1518BA90(Actor *, s32, s32);
+extern void func_1518BBF4(Actor *);
+extern void func_15193660(Actor *, s32, s32);
+extern void func_151937F4(Actor *, s32, s32);
+extern void func_151D6BFC(Actor *, s32, s32);
 extern f32 sinf(f32);
 extern f32 cosf(f32);
-extern u8 func_15085420(struct127 *);
+extern u8 func_15085420(Actor *);
 extern u8 func_15085DA8(f32);
 extern s32 func_15086098(f32, f32, f32, s32, s32, s8 *, s8 *);
 extern void func_15086364(s32, s8, s8, s8 *, s8 *);
@@ -173,7 +173,7 @@ extern u8 D_800E0BB8[];
  * Returns 0 for an unknown command or missing object, 1 otherwise.
  * matching: the unused `pad` locals reserve stack slots of the original's block locals; each one is needed. */
 s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
-    struct127 *obj;
+    Actor *obj;
     s32 i;
     s32 node;
     s32 pad;
@@ -543,7 +543,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         obj->unk65 = cmd->a[0];
         break;
     case 0x2F: {
-        struct127 *other;
+        Actor *other;
 
         other = func_15072208(obj, cmd->a[0]);
         if (other != NULL) {
@@ -742,7 +742,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
     }
         break;
     case 0x4E: {
-        struct127 *other;
+        Actor *other;
         s32 pad;
 
         other = func_15083E90(cmd->a[0] & 0xFF);
@@ -920,7 +920,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
             obj->unk1C9 = 6;
             break;
         case 3: {
-            struct127 *other;
+            Actor *other;
 
             other = func_1505EEF4(cmd->a[1] & 0xFFFF0FFF);
             if (other != NULL) {
@@ -947,7 +947,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         }
         break;
     case 0x7A: {
-        struct127 *other;
+        Actor *other;
         s32 pad;
 
         other = func_15083E90(cmd->a[0] & 0xFF);
@@ -1018,7 +1018,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         FLD(obj, 0xA4, u8) = cmd->a[0];
         FLD(obj, 0xA5, u8) = cmd->a[1];
         FLD(obj, 0xA6, u8) = cmd->a[2];
-        obj->padA0 = cmd->a[3];
+        obj->fogColor = cmd->a[3];
         FLD(obj, 0xA7, u8) = cmd->a[4];
         break;
     case 0x8C:
@@ -1052,8 +1052,8 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
  * 0 for an unknown query or a missing object (except the existence queries 0xB0 / 0xB1 / 0xB7).
  * matching: the unused `pad` locals reserve stack slots of the original's block locals; each one is needed. */
 s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
-    struct127 *obj;
-    struct127 *other;
+    Actor *obj;
+    Actor *other;
     s32 ret;
     s32 ix;
     s32 iz;
@@ -1558,7 +1558,7 @@ s32 func_15099C14(s32 objId, s32 opcode, ScriptCmd *cmd) {
         return obj->pad275;
     case 0xE6: {
         u8 v;
-        struct127 *p;
+        Actor *p;
         if (obj->pad275 != 0) {
             p = &D_800CC2D0[obj->pad275 - 1];
             obj->pad275 = 0;

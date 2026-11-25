@@ -6,7 +6,7 @@
 // Resets four distance parameters to their defaults, then calls func_15128774 when the target
 // is moving slowly and the value at 0x370 exceeds 1.5 * unk374.
 void func_15104520(Camera *camera) {
-    struct127 *target;
+    Actor *target;
 
     if (camera->cmd.type != 0 || camera->cmdRunning == 0) {
         camera->height = 117.0f;

@@ -137,7 +137,7 @@ typedef struct {
         s32 w;
         u16 h[2];
     } delay;
-    /* 0x1C */ struct127 *obj;
+    /* 0x1C */ Actor *obj;
 } DelayedSoundRecord;
 
 s32 func_1000ECCC(DelayedSoundRecord *record, s32 *active, u32 *volume, s32 *pan,
@@ -270,7 +270,7 @@ s32 func_1000EDA0(DelayedSoundRecord *record, s32 *active, u32 *volume, s32 *pan
 // Follow the owning object: copy its position into the record while it lives.
 s32 func_1000EE70(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *cents,
                   s32 *mix, u16 *sound) {
-    struct127 *obj;
+    Actor *obj;
     u8 uid;
 
     if ((obj = record->owner) != NULL) {
@@ -307,7 +307,7 @@ s32 func_1000EF40(SoundRecord *record, s32 *active, u32 *volume, s32 *pan, s32 *
 }
 
 // func_1000EFB4: the key word points to a 0-terminated list of the owner's animation
-// ids (struct127.unk84) for which the sound keeps following the owner.
+// ids (Actor.unk84) for which the sound keeps following the owner.
 typedef struct {
     /* 0x00 */ u16 sound;
     /* 0x02 */ s16 x;
@@ -316,13 +316,13 @@ typedef struct {
     /* 0x08 */ u8 pad8[8];
     /* 0x10 */ u32 flags;
     /* 0x14 */ u8 pad14[4];
-    /* 0x18 */ struct127 *owner;
+    /* 0x18 */ Actor *owner;
     /* 0x1C */ u16 *ids;
 } OwnerListSoundRecord;
 
 s32 func_1000EFB4(OwnerListSoundRecord *record, s32 *active, u32 *volume, s32 *pan,
                   s32 *cents, s32 *mix, u16 *sound) {
-    struct127 *owner = record->owner;
+    Actor *owner = record->owner;
     s32 level;
     u16 *id;
     s32 soundId;
@@ -748,7 +748,7 @@ void func_100100E0(SoundRecordCallback callback, void *owner, s32 key,
     }
 }
 
-s32 func_10010154(u16 sound, struct127 *obj, s32 volume, s16 nearDistance, u16 farDistance) {
+s32 func_10010154(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance) {
     s32 handle = 0;
     s32 flags = 0;
 
@@ -784,7 +784,7 @@ s32 func_10010154(u16 sound, struct127 *obj, s32 volume, s16 nearDistance, u16 f
 }
 
 s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farDistance) {
-    struct127 *obj = owner;
+    Actor *obj = owner;
     s32 flags = 0;
 
     if ((obj->interaction_state == 0) || (obj->interaction_state == 5)) {
@@ -825,7 +825,7 @@ s32 func_10010344(u16 sound, void *owner, u32 volume, s16 nearDistance, u16 farD
     return flags;
 }
 
-void func_10010558(u16 sound, struct127 *obj, s32 volume, s16 nearDistance, u16 farDistance,
+void func_10010558(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance,
                    s32 delay) {
     if (delay <= 0) {
         func_10010344(sound, obj, volume, nearDistance, farDistance);
@@ -837,7 +837,7 @@ void func_10010558(u16 sound, struct127 *obj, s32 volume, s16 nearDistance, u16 
 }
 
 // matching: the empty ifs add uses of volume so that IDO keeps it in s1 like the target
-void func_10010630(u16 sound, struct127 *obj, s32 volume, s16 nearDistance, u16 farDistance) {
+void func_10010630(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance) {
     if (volume) {}
     if (volume) {}
     if (volume) {}
@@ -854,7 +854,7 @@ void func_10010630(u16 sound, struct127 *obj, s32 volume, s16 nearDistance, u16 
     }
 }
 
-void func_10010720(u16 sound, struct127 *obj, s32 volume, s16 nearDistance, u16 farDistance,
+void func_10010720(u16 sound, Actor *obj, s32 volume, s16 nearDistance, u16 farDistance,
                    s32 delay) {
     if (delay <= 0) {
         func_10010630(sound, obj, volume, nearDistance, farDistance);
@@ -865,7 +865,7 @@ void func_10010720(u16 sound, struct127 *obj, s32 volume, s16 nearDistance, u16 
     }
 }
 
-s32 func_100107F8(struct127 *obj) {
+s32 func_100107F8(Actor *obj) {
     if (obj->interaction_state == 0) {
         return 0;
     } else {
@@ -886,7 +886,7 @@ s32 func_100107F8(struct127 *obj) {
     return 0;
 }
 
-s32 func_10010894(struct127 *obj) {
+s32 func_10010894(Actor *obj) {
     if (obj->camera != NULL) {
         if (obj->unk8C != 0) {
             if (func_1000F3D0(obj->unk8C) != 0) {
@@ -903,7 +903,7 @@ s32 func_10010894(struct127 *obj) {
     return 0;
 }
 
-void func_1001091C(struct127 *obj, u32 volume) {
+void func_1001091C(Actor *obj, u32 volume) {
     s32 index;
 
     if ((volume != 0) && (obj->interaction_state != 0)) {
@@ -923,7 +923,7 @@ void func_1001091C(struct127 *obj, u32 volume) {
     }
 }
 
-void func_100109D0(struct127 *obj) {
+void func_100109D0(Actor *obj) {
     if (obj->camera != NULL) {
         if (obj->unk8E != 0) {
             func_100111C8(obj->unk8E);
@@ -934,7 +934,7 @@ void func_100109D0(struct127 *obj) {
     obj->unk8E = 0;
 }
 
-void func_10010A3C(struct127 *obj) {
+void func_10010A3C(Actor *obj) {
     if (obj->camera != NULL) {
         if (obj->unk8C != 0) {
             func_100111C8(obj->unk8C);
@@ -945,7 +945,7 @@ void func_10010A3C(struct127 *obj) {
     obj->unk8C = 0;
 }
 
-void func_10010AA8(struct127 *obj) {
+void func_10010AA8(Actor *obj) {
     s32 index;
     SoundRecord *record;
 
@@ -1066,7 +1066,7 @@ void func_10010F88(s32 sound, u16 volume, s16 cents, u8 mix, s32 arg4,
 
 // Plays a sound positioned on obj; a player-camera object (obj->camera set) plays it
 // unpositioned instead.
-s32 func_10010FFC(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, struct127 *obj) {
+s32 func_10010FFC(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, Actor *obj) {
     f32 scale;
 
     if ((obj == NULL) || (obj->interaction_state == 0)) {

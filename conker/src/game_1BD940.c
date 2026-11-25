@@ -48,7 +48,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[3];
-    /* 0x10 */ struct127 *owner;
+    /* 0x10 */ Actor *owner;
     /* 0x14 */ u8 pad14[0xC];
     /* 0x20 */ s16 count;
     /* 0x22 */ u8 pad22[0xE];
@@ -57,7 +57,7 @@ typedef struct {
 
 /* Event payload naming an actor, as in game_1944C0.c. */
 typedef struct {
-    /* 0x0 */ struct127 *actor;
+    /* 0x0 */ Actor *actor;
     /* 0x4 */ u8 id; /* the actor's unique_id */
 } ActorEvent;
 
@@ -87,7 +87,7 @@ void func_151904BC(Emitter *emitter) {
 }
 
 /* Sends event 0x2A about `actor` to every object of type 0x3E. */
-void func_15190518(struct127 *actor) {
+void func_15190518(Actor *actor) {
     ActorEvent event;
 
     event.actor = actor;

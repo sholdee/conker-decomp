@@ -17,7 +17,7 @@ u8 func_150ADA20(void);
 /*
  * Object script interpreter commands.
  *
- * Each object runs a byte-code script (struct127.unk218 points at its next command). A command
+ * Each object runs a byte-code script (Actor.unk218 points at its next command). A command
  * is five bytes: an opcode (< 247, an index into D_80086730) and four argument bytes, which the
  * interpreter copies to D_800D1890..D_800D1893 before calling the handler. Bytes >= 247 are
  * one-byte jump labels.
@@ -50,11 +50,11 @@ typedef struct {
 
 extern Row56A00 D_80099A3C[]; // header declares it as s16[]
 
-s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3);
-void func_1504715C(f32 *arg0, struct127 *arg1);
+s32 func_1505D024(Actor *arg0, s32 arg1, u16 arg2, s32 arg3);
+void func_1504715C(f32 *arg0, Actor *arg1);
 void func_1514B364(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3);
-void func_15197A7C(struct127 *arg0);
-u8 func_15056A00(struct127 *arg0, u8 arg1, u8 arg2);
+void func_15197A7C(Actor *arg0);
+u8 func_15056A00(Actor *arg0, u8 arg1, u8 arg2);
 struct216 *func_1507BB28(s32 arg0, s32 arg1);
 
 /* Jumps the script: skips `target` commands, or for target >= 247 skips forward to label `target`. */
@@ -128,7 +128,7 @@ void func_15075650(void) {
     u8 range;
     u8 index;
     u8 previous;
-    struct127 *obj;
+    Actor *obj;
 
     index = D_800D2108[D_800D154C->unk13F] - 1;
     if (D_800D154C->unk21F != 0) {
@@ -177,7 +177,7 @@ set_timer:
 
 /* Starts a move towards the current waypoint, arriving in arg1 ticks. */
 void func_15075884(void) {
-    struct127 *obj;
+    Actor *obj;
     f32 dx;
     f32 dz;
     f32 dist;
@@ -551,7 +551,7 @@ void func_15076768(void) {
 
 /* Jumps to arg0 when the direction from the object to its target is within arg1 of the target's facing. */
 void func_150767F4(void) {
-    struct127 *target;
+    Actor *target;
     u16 angle;
 
     target = &D_800CC2D0[D_800D154C->unk222];
@@ -572,8 +572,8 @@ void func_150768DC(void) {
     s32 viewAngle;
     f32 dist;
     s32 self;
-    struct127 *found;
-    struct127 *obj;
+    Actor *found;
+    Actor *obj;
     f32 nearest;
     s32 i;
     u8 script;
@@ -858,7 +858,7 @@ s32 func_15086098(f32 x, f32 y, f32 z, s8 arg3, s8 arg4, u8 *arg5, u8 *arg6);
 s32 func_15086364(s32 arg0, s8 arg1, s8 arg2, u8 *arg3, u8 *arg4);
 s32 func_15086CBC(s32 index, f32 *x, f32 *y, f32 *z);
 
-/* the s16 at 0x216 overlaps struct127's s32 unk214 */
+/* the s16 at 0x216 overlaps Actor's s32 unk214 */
 #define UNK216(p) (*(s16 *)((u8 *)(p) + 0x216))
 
 /*
@@ -910,7 +910,7 @@ void func_15077508(void) {
             if (D_800D1890 == 1) {
                 hasGoal2 = 0;
                 hasGoal = 0;
-                next = D_800D154C->pad210;
+                next = D_800D154C->unk210;
             }
             if (next == 0xFF) {
                 next = func_15086098(D_800D154C->x_position, D_800D154C->y_position, D_800D154C->z_position,
@@ -920,14 +920,14 @@ void func_15077508(void) {
             if (D_800D1890 == 1) {
                 best = 0xFF;
                 node = &D_800D2350[current];
-                if (D_800D154C->pad210 != 0xFF) {
+                if (D_800D154C->unk210 != 0xFF) {
                     // matching: dead code standing in for something the original compiled away; it
                     // keeps IDO's branch on pad210 and its register assignment
-                    tmp = 0; for (i = 0, q = (u8 *)D_800D2350; i < 4; i++, q++) { tmp += q[9] == D_800D154C->pad210; } tmp += (s32)node; tmp ^= (s32)node; tmp -= (s32)node; tmp |= (s32)node;
+                    tmp = 0; for (i = 0, q = (u8 *)D_800D2350; i < 4; i++, q++) { tmp += q[9] == D_800D154C->unk210; } tmp += (s32)node; tmp ^= (s32)node; tmp -= (s32)node; tmp |= (s32)node;
                 }
                 bestRoll = 10.0f;
                 for (i = 0; i < 5; i++) {
-                    if (node->links[i] != 0xFF && D_800D154C->pad210 != node->links[i]) {
+                    if (node->links[i] != 0xFF && D_800D154C->unk210 != node->links[i]) {
                         roll = func_150ADA68();
                         if (roll < bestRoll) {
                             bestRoll = roll;
@@ -938,7 +938,7 @@ void func_15077508(void) {
                 next = best;
                 if (next == 0xFF) {
                     D_800D154C->unk25C |= 0x800;
-                    next = D_800D154C->pad210;
+                    next = D_800D154C->unk210;
                 }
             } else {
                 next = func_15086364(current, hasGoal, hasGoal2, &D_800D154C->unk211, D_800D154C->unk212);
@@ -948,7 +948,7 @@ void func_15077508(void) {
             D_800D154C->unk21E = 0;
             if (func_15086CBC(next, &x, &y, &z)) {
                 UNK216(D_800D154C) = D_800D2354;
-                D_800D154C->pad210 = D_800D154C->unk20F;
+                D_800D154C->unk210 = D_800D154C->unk20F;
                 D_800D154C->unk20F = next;
                 {
                     f32 width;
@@ -997,7 +997,7 @@ void func_150779A8(void) {
 
 /* Jumps to arg0 when object 0 (or, with arg2, the target) is within arg3 * 8 units. */
 void func_150779D4(void) {
-    struct127 *obj;
+    Actor *obj;
     u8 index;
     f32 range;
 
@@ -1043,7 +1043,7 @@ void func_15077B80(void) {
 
 /* Restarts the object returned by func_1505F0AC(arg1) on script arg0. */
 void func_15077BB4(void) {
-    struct127 *obj = func_1505F0AC(D_800D1891);
+    Actor *obj = func_1505F0AC(D_800D1891);
 
     obj->unk218 = NULL;
     obj->unk232 = D_800D1890;
@@ -1064,7 +1064,7 @@ void func_15077C1C(void) {
  * type arg0 or in state arg1 and not stunned: the first one found if arg3 == 0, else the nearest.
  */
 void func_15077C38(void) {
-    struct127 *obj;
+    Actor *obj;
     f32 nearest;
     f32 dist;
     s32 i;
@@ -1148,7 +1148,7 @@ void func_15077F64(void) {
 /* Jumps to arg0 when any other active object is within arg3 * 8 units. */
 void func_15078074(void) {
     f32 range;
-    struct127 *obj;
+    Actor *obj;
     s32 i;
 
     range = 8 * D_800D1893;
@@ -1227,7 +1227,7 @@ void func_15078358(void) {
  * height difference) is below (arg1 == 0) or above (arg1 == 1) arg3 * 8 (0xFF: unk23D * 8).
  */
 void func_1507839C(void) {
-    struct127 *target;
+    Actor *target;
     f32 dist;
     f32 threshold;
 
@@ -1265,7 +1265,7 @@ extern f32 cosf(f32);
  * (mode 1) or by the direction from the target to this object (mode 2).
  */
 void func_15078544(void) {
-    struct127 *pad; // matching: unused stack slot
+    Actor *pad; // matching: unused stack slot
     f32 y;
     f32 x;
     f32 offsetX;
@@ -1493,7 +1493,7 @@ void func_150791F0(void) {
 
 /* Calls func_1505D024 with the direction from gate unk251 to the object (never 0) and holds for a tick. */
 void func_15079228(void) {
-    struct127 *obj;
+    Actor *obj;
     struct178 *gate;
     f32 x;
     f32 z;
@@ -1524,7 +1524,7 @@ void func_150792FC(void) {
 
 /* Restarts the object found by func_150768DC on script arg0. */
 void func_15079334(void) {
-    struct127 *found;
+    Actor *found;
 
     if (D_800D154C->unkA8 != 0) {
         found = &D_800CC2D0[D_800D154C->unkA8 & 0x7F];
@@ -1595,7 +1595,7 @@ void func_15079570(void) {
 /* Restarts the object with unique id arg0 on script arg1. */
 void func_1507965C(void) {
     s32 index;
-    struct127 *obj;
+    Actor *obj;
 
     index = func_15083FB0(D_800D1890);
     if (index != -1) {
@@ -1689,7 +1689,7 @@ void func_15079A58(void) {
 /* Returns the direction from object `arg0` to the centre of the current object's path. */
 u16 func_15079A98(s32 arg0) {
     Path *path;
-    struct127 *obj;
+    Actor *obj;
 
     path = D_800D2104[D_800D154C->unk13F];
     obj = &D_800CC2D0[arg0];
@@ -1703,7 +1703,7 @@ u16 func_15079A98(s32 arg0) {
 void func_15079B30(void) {
     s32 index;
     s32 *counter;
-    struct127 *savedObj;
+    Actor *savedObj;
     s32 savedIndex;
     u16 angle;
     s32 select;
@@ -1739,7 +1739,7 @@ select_object: // matching: unused label, splits the block for the scheduler
     case 4:
     case 5: {
         // matching: the block-scope redeclaration changes how IDO schedules the address of D_800D154C
-        extern struct127 *D_800D154C;
+        extern Actor *D_800D154C;
 
         // restart the object on script arg0, running as the current object meanwhile
         savedObj = D_800D154C;
@@ -1756,8 +1756,8 @@ select_object: // matching: unused label, splits the block for the scheduler
         return;
     }
     case 6:
-        // struct127 declares 0xC8 as u32 padC8
-        *(f32 *)&D_800CC2D0[index].padC8 = D_800D1890;
+        // Actor declares 0xC8 as u32 padC8
+        D_800CC2D0[index].unkC8 = D_800D1890;
         return;
     case 7:
         D_800CC2D0[index].unkB8 = 0.0f;
@@ -2069,7 +2069,7 @@ void func_1507A8EC(void) {
 
 /* Links the object to the one found by func_15083E90(arg0) (unk65 = its index + 1), or unlinks it (arg0 == 0). */
 void func_1507A984(void) {
-    struct127 *linked;
+    Actor *linked;
 
     if (D_800D1890 != 0) {
         linked = func_15083E90(D_800D1890);
@@ -2213,7 +2213,7 @@ void func_1507B040(void) {
 
 /* Acts on the object returned by func_15072208: arg0 0 calls func_1506160C, 1 sets and 2 restarts script arg1. */
 void func_1507B058(void) {
-    struct127 *savedObj = D_800D154C;
+    Actor *savedObj = D_800D154C;
     s32 savedIndex = D_800C3E78;
 
     D_800D154C = func_15072208(D_800D154C, 0);
@@ -2387,7 +2387,7 @@ void func_1507B7BC(void) {
 
 /* Jumps to arg0 when the target is (arg1 == 0) or is not (arg1 == 1) stunned or dead. */
 void func_1507B7E8(void) {
-    struct127 *target = &D_800CC2D0[D_800D154C->unk222];
+    Actor *target = &D_800CC2D0[D_800D154C->unk222];
 
     if ((target->stunned != 0) || (target->health == 0)) {
         D_800D1891 ^= 1;
@@ -2399,7 +2399,7 @@ void func_1507B7E8(void) {
 
 /* Calls handler arg0 of D_80086150, preserving the current object. */
 void func_1507B884(void) {
-    struct127 *savedObj;
+    Actor *savedObj;
     s32 savedIndex;
     u8 index;
     void (*handler)(s32);
@@ -2432,7 +2432,7 @@ void func_1507B958(void) {
  * if any) is (arg2 == 0) or is not (arg2 == 1) arg1.
  */
 void func_1507B974(void) {
-    struct127 *obj;
+    Actor *obj;
 
     obj = D_800D154C;
     if (D_800D154C->unk65 != 0) {
@@ -2513,7 +2513,7 @@ struct216 *func_1507BB28(s32 arg0, s32 scriptId) {
  * Runs an object's script: counts down the wait timer unk21C (25500 waits forever) and, once it
  * expires, executes commands until one sets a new wait time.
  */
-void func_1507BC14(struct127 *obj) {
+void func_1507BC14(Actor *obj) {
     if (obj->unk21C != 0) {
         if (obj->unk218 != NULL) {
             if (obj->unk21C != 25500) {

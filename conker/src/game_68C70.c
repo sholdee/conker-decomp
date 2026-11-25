@@ -14,13 +14,13 @@ typedef struct BoneChain {
     /* 0x4E */ u8 blendTimer;   /* frames left blending back from the animated pose */
 } BoneChain;
 
-typedef f32 MtxF[4][4]; /* one bone matrix; struct127.unk1D4 points at an array of them */
+typedef f32 MtxF[4][4]; /* one bone matrix; Actor.unk1D4 points at an array of them */
 
 
 extern void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
 
 /* Allocates and initialises the bone chain state of an object. */
-void func_1503B7C0(struct127 *obj) {
+void func_1503B7C0(Actor *obj) {
     obj->unk31C->boneChain = allocate_memory(sizeof(BoneChain), 1, 0, 0);
     bzero(obj->unk31C->boneChain, sizeof(BoneChain));
     obj->unk31C->boneChain->swaySpeed = 30.0f;
@@ -34,7 +34,7 @@ extern u16 D_80098830[3];
  * Flags in unk2FB whether the object's current animation (unk84) poses the bone chain itself:
  * bit 1 for the animations in D_80098830, bit 0 for those in D_8009877C.
  */
-void func_1503B840(struct127 *obj) {
+void func_1503B840(Actor *obj) {
     s32 i;
 
     if (obj->interaction_state == 1) {
@@ -67,7 +67,7 @@ s32 func_1503B95C(s32 objIndex, BoneChain *chain) {
     return 1;
 }
 
-/* The fields of the camera (struct127.camera) read here; see the Camera struct in game_14FF90.c. */
+/* The fields of the camera (Actor.camera) read here; see the Camera struct in game_14FF90.c. */
 typedef struct {
     /* 0x000 */ u8 pad0[0x2C];
     /* 0x02C */ s32 mode;       /* one-hot mode bit; 0x100 is the R-trigger camera */
@@ -110,7 +110,7 @@ extern f32 cosf(f32);
  * bone matrices with func_1503CB98.
  */
 void func_1503B9BC(s32 objIndex) {
-    struct127 *obj;
+    Actor *obj;
     s32 prev;
     s32 i;
     f32 link[3];
@@ -169,7 +169,7 @@ void func_1503B9BC(s32 objIndex) {
         reset = 0;
     }
     /* any of the four camera hold timers, or byte 0x2FD of the object */
-    if (*(s32 *)D_800DBFF4 != 0 || obj->pad2FC[1] != 0) {
+    if (*(s32 *)D_800DBFF4 != 0 || obj->unk2FD != 0) {
         reset = 1;
     }
     if (reset) {
@@ -447,7 +447,7 @@ void func_150440A0(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 a
  * first blended towards the animated pose by `blend`; otherwise the blend timer is rearmed.
  */
 void func_1503CB98(s32 objIndex, s32 mode, f32 blend, BoneChain *chain) {
-    struct127 *obj;
+    Actor *obj;
     f32 up[3];
     f32 eyeX, eyeY, eyeZ;
     f32 atX, atY, atZ;

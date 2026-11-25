@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern struct127 *func_1505EEF4(s32);
+extern Actor *func_1505EEF4(s32);
 extern void func_15022190(s16, s16, s16, f32);
 extern void func_150221E8(s16, s16, s16, f32);
 
@@ -154,7 +154,7 @@ s32 func_1509C7C8(s32 id, s32 event, s32 unused) {
  * player's (D_800DBFF0) angle turned by 180 degrees, to func_150221E8 if `alt` else func_15022190.
  */
 void func_1509C8FC(s32 ref, s32 alt) {
-    struct127 *obj;
+    Actor *obj;
     Camera *player;
     f32 angle;
 

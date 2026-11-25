@@ -28,8 +28,8 @@ typedef struct {
 } ExpressionTableHeader;
 
 /*
- * The expression fields of a game object (struct127, size 0x32C). struct127 leaves 0x68-0x73 and
- * 0x134-0x135 as padding, so this file uses its own view; the other names follow struct127.
+ * The expression fields of a game object (Actor, size 0x32C). Actor leaves 0x68-0x73 and
+ * 0x134-0x135 as padding, so this file uses its own view; the other names follow Actor.
  */
 typedef struct {
     /* 0x000 */ u8 pad0[4];
@@ -335,7 +335,7 @@ void func_1507EA44(ExpressionActor *actor, s32 action, s32 param) {
     if (action != 0) {
         actions = func_1507E9F8(actor, NULL);
         if (actions != NULL) {
-            func_15083568((struct127 *)actor, actions[action - 1], param * 0.001f, 0);
+            func_15083568((Actor *)actor, actions[action - 1], param * 0.001f, 0);
         }
     }
 }

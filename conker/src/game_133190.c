@@ -104,11 +104,11 @@ typedef struct RayHit {
 } RayHit;
 
 void func_151070F8(BoltChainObj *obj, s16 lo, s16 hi, f32 spread);
-void func_15107A20(struct127 *actor, s32 yaw, s32 pitch, vertex *out, vertex *centerOut);
+void func_15107A20(Actor *actor, s32 yaw, s32 pitch, vertex *out, vertex *centerOut);
 void func_15107AE0(vertex *start, vertex *end, vertex *ctrl1, vertex *ctrl2);
-void func_15107F54(struct127 *actor, u8 bone, vertex *localPos, vertex *out);
+void func_15107F54(Actor *actor, u8 bone, vertex *localPos, vertex *out);
 void func_15143794(s32 yaw, s32 pitch, f32 length, vertex *out);
-void func_15081690(struct127 *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32, s32, s32, s32, s32, s32);
+void func_15081690(Actor *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32, s32, s32, s32, s32, s32);
 BoltObj *func_15105CE0(BoltDesc *desc, s32 extraSize, u8 arg2, s32 arg3);
 void func_15106214(BoltObj *bolt);
 void func_15106610(BoltObj *bolt);
@@ -691,7 +691,7 @@ void func_151076A4(BoltChainObj *obj, s32 arg1, u8 arg2) {
 
 /* User data of a kind-2 bolt: starts on the owner actor's bounds, in direction yaw/pitch. */
 typedef struct BoltAnchor {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;         /* owner's unique_id when spawned */
     /* 0x05 */ u8 pad5;
     /* 0x06 */ s16 yaw;
@@ -701,7 +701,7 @@ typedef struct BoltAnchor {
 
 /* User data of a kind-3 bolt: starts at localPos in one of the owner actor's bone matrices. */
 typedef struct BoltBoneAnchor {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId;         /* owner's unique_id when spawned */
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ vertex localPos;
@@ -713,7 +713,7 @@ typedef struct BoltBoneAnchor {
  * Spawns a kind-2 bolt from a point on the actor's bounds (direction yaw/pitch) to where the ray
  * from that point away from the actor hits. life -1 means it never runs out.
  */
-BoltObj *func_15107700(struct127 *actor, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argA, s32 argB) {
+BoltObj *func_15107700(Actor *actor, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argA, s32 argB) {
     BoltAnchor anchor;
     BoltObj *bolt;
     BoltDesc desc;
@@ -751,7 +751,7 @@ BoltObj *func_15107700(struct127 *actor, s16 yaw, s16 pitch, s16 life, s32 segme
 
     // matching: a block holding a declaration emits a scope marker that keeps IDO from hoisting &desc.color
     {
-        void func_15107A20(struct127 *actor, s32 yaw, s32 pitch, vertex *out, vertex *centerOut);
+        void func_15107A20(Actor *actor, s32 yaw, s32 pitch, vertex *out, vertex *centerOut);
 
         func_15107A20(actor, yaw, pitch, &desc.ctrl[0], &center);
         func_15081690(actor, desc.ctrl[0].x, desc.ctrl[0].y, desc.ctrl[0].z, desc.ctrl[0].x - center.x, desc.ctrl[0].y - center.y, desc.ctrl[0].z - center.z, &hit, 0.0f, 0, 1, 1, -1, 0, 0);
@@ -778,7 +778,7 @@ void func_151078E4(BoltObj *bolt, s32 arg1, u8 arg2) {
 /* updateKind 0: keeps a kind-2 bolt's start on its owner; returns 0 once the owner is gone. */
 s32 func_15107924(BoltObj *bolt, u8 *moved) {
     BoltAnchor *anchor;
-    struct127 *owner;
+    Actor *owner;
     vertex oldStart;
 
     anchor = bolt->userData;
@@ -796,10 +796,10 @@ s32 func_15107924(BoltObj *bolt, u8 *moved) {
     return 1;
 }
 
-void func_1515C244(struct127 *actor, vertex *center, f32 *radius, f32 *arg3);
+void func_1515C244(Actor *actor, vertex *center, f32 *radius, f32 *arg3);
 
 /* The point on the actor's bounds in direction yaw/pitch (vertically scaled by unkF0); optionally the bounds centre. */
-void func_15107A20(struct127 *actor, s32 yaw, s32 pitch, vertex *out, vertex *centerOut) {
+void func_15107A20(Actor *actor, s32 yaw, s32 pitch, vertex *out, vertex *centerOut) {
     vertex center;
     f32 radius;
     f32 unused;
@@ -835,7 +835,7 @@ void func_15107AE0(vertex *start, vertex *end, vertex *ctrl1, vertex *ctrl2) {
 extern void func_151C329C(void *, s32, s32);
 
 /* Calls func_151C329C at the point on the actor's bounds in direction yaw/pitch. */
-void func_15107B78(struct127 *actor, s32 yaw, s32 pitch, s32 arg3, s32 arg4) {
+void func_15107B78(Actor *actor, s32 yaw, s32 pitch, s32 arg3, s32 arg4) {
     vertex pos;
     vertex center;
     f32 radius;
@@ -856,7 +856,7 @@ void func_15107B78(struct127 *actor, s32 yaw, s32 pitch, s32 arg3, s32 arg4) {
  * Spawns a kind-3 bolt from localPos in the actor's bone matrix along direction yaw/pitch, up to 300
  * units or to what the ray hits. life -1 means it never runs out.
  */
-BoltObj *func_15107C1C(struct127 *actor, u8 bone, vertex *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
+BoltObj *func_15107C1C(Actor *actor, u8 bone, vertex *localPos, s16 yaw, s16 pitch, s16 life, s32 segments, f32 jitter, f32 width, s16 rejitterBase, s16 rejitterRange, u8 *color, u8 argC, s32 argD) {
     BoltBoneAnchor anchor;
     BoltObj *bolt;
     BoltDesc desc;
@@ -915,7 +915,7 @@ BoltObj *func_15107C1C(struct127 *actor, u8 bone, vertex *localPos, s16 yaw, s16
 /* updateKind 1: keeps a kind-3 bolt's start on its owner's bone; returns 0 once the owner is gone. */
 s32 func_15107E48(BoltObj *bolt, u8 *moved) {
     BoltBoneAnchor *anchor;
-    struct127 *owner;
+    Actor *owner;
     vertex oldStart;
 
     anchor = bolt->userData;
@@ -939,7 +939,7 @@ s32 func_15107E48(BoltObj *bolt, u8 *moved) {
 void func_15143134(vertex *in, vertex *out, s32 mtx);
 
 /* Transforms localPos by the actor's bone matrix (64 bytes each, at unk1D4). */
-void func_15107F54(struct127 *actor, u8 bone, vertex *localPos, vertex *out) {
+void func_15107F54(Actor *actor, u8 bone, vertex *localPos, vertex *out) {
     func_15143134(localPos, out, (s32)actor->unk1D4 + (bone << 6));
 }
 

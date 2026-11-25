@@ -24,7 +24,7 @@ typedef struct {
 } GroundHit; /* size 0x24 */
 
 void func_15143134(f32 *, f32 *, Mtx *);
-void func_1504715C(GroundHit *, struct127 *);
+void func_1504715C(GroundHit *, Actor *);
 s32 func_15046C80(f32 *, s32, f32, GroundHit *);
 
 /*
@@ -32,7 +32,7 @@ s32 func_15046C80(f32 *, s32, f32, GroundHit *);
  * (bone 32 or 25) into `pos`.
  * If `ground` is non-NULL, also probes the ground below that point into it.
  */
-s32 func_151AF5C0(f32 *pos, struct127 *actor, GroundHit *ground, u8 side) {
+s32 func_151AF5C0(f32 *pos, Actor *actor, GroundHit *ground, u8 side) {
     f32 probe[3];
     f32 *offset;
     Mtx *bone;
@@ -97,7 +97,7 @@ SprayParticle *func_1513D668(ParticleDef *desc, SprayColor *colors, u8 updateFn1
  * Spawns a spray particle on the ground below the emission point on the actor's `side`, plus a
  * func_1514C678 puff there. The colour is tinted by func_150CCD90 when D_800BE9F0 is 20.
  */
-void func_151AF6D4(struct127 *actor, s32 side, s32 arg2) {
+void func_151AF6D4(Actor *actor, s32 side, s32 arg2) {
     f32 pos[3];
     GroundHit ground;
     f32 fr;

@@ -3,7 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 
-// File-local views of a game object (struct127, the 0x32C-byte entries of D_800CC2D0) and of the
+// File-local views of a game object (Actor, the 0x32C-byte entries of D_800CC2D0) and of the
 // extension block it points to at 0x31C (ActorCtl). include/structs.h lacks or mistypes several
 // fields used here (0x12 is a u16, 0x38 an s16, 0xBC an f32, ...); fold them in during the central pass.
 typedef struct GameObjExt {
@@ -165,7 +165,7 @@ s32 func_1504C8BC(GameObj *);
 void func_150A11C4(void *);
 void func_150A278C(void *);
 void func_1507E73C(void *);
-void func_1504AF10(struct127 *, s32, s32);
+void func_1504AF10(Actor *, s32, s32);
 void func_15061B4C(void);
 void func_15080C64(void);
 
@@ -197,7 +197,7 @@ void func_1504A730(void) {
         D_800C3E78 = i;
         if (obj->y_position <= (f32)obj->unk38) {
             if (obj->unk127 == 0xFF) {
-                func_15060F28((struct127 *)obj, 0);
+                func_15060F28((Actor *)obj, 0);
                 continue;
             }
             if (D_800BE616 == 0) {
@@ -208,7 +208,7 @@ void func_1504A730(void) {
         if (obj->unk2FA == 0) {
             continue;
         }
-        D_800D154C = (struct127 *)obj;
+        D_800D154C = (Actor *)obj;
         obj->unk12++;
         *(u8 *)&D_800D35DC = i + 1;
         *(u16 *)&D_800CC2BA = 0;
@@ -273,7 +273,7 @@ void func_1504A730(void) {
             }
             if (obj->interaction_state != 0) {
                 func_1507E73C(obj);
-                func_1504AF10((struct127 *)obj, 0, 0);
+                func_1504AF10((Actor *)obj, 0, 0);
                 if (i < D_8008FD8C && D_800D18A8 == 0) {
                     func_15085710(obj->unk127, 5, obj->health);
                 }
@@ -318,11 +318,11 @@ void func_1504A730(void) {
     *(u8 *)&D_800D35DC = 0;
 }
 
-void func_150ED578(struct127 *arg0);
+void func_150ED578(Actor *arg0);
 
 void func_1504ADD0(void) {
     s32 i;
-    struct127 *obj;
+    Actor *obj;
     OSContPad noPad;
 
     if (D_800C35EA != 1) {
@@ -358,7 +358,7 @@ s32 func_1504AEF4(s32 arg0, s32 arg1) {
     return 0;
 }
 
-void func_1504AF10(struct127 *obj, s32 force, s32 release) {
+void func_1504AF10(Actor *obj, s32 force, s32 release) {
     s32 pad; // matching: unused slot that places index at its original stack offset
     s32 index;
     s32 type;
@@ -394,7 +394,7 @@ void func_1504AF10(struct127 *obj, s32 force, s32 release) {
 }
 
 void func_1510F820(void *, void *, f32 *, f32 *, f32 *, f32 *, f32 *);
-f32 func_1505210C(struct127 *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4);
+f32 func_1505210C(Actor *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4);
 void func_15060A30(s32, void *);
 void func_1507CD64(void *, s32);
 
@@ -445,7 +445,7 @@ f32 func_1504B0FC(GameObj *obj, f32 arg1) {
     if (obj->in_water == 1) {
         obj->unk1CC = obj->y_position;
         if (obj->unk118 == -10000.0f) {
-            func_15052408((struct127 *)obj);
+            func_15052408((Actor *)obj);
             return 0.0f;
         }
         if (stickY != 0 || ((obj->unk118 - 60.0f) - 175.0f) < obj->y_position) {
@@ -456,7 +456,7 @@ f32 func_1504B0FC(GameObj *obj, f32 arg1) {
         if (obj->unk31C->unk21 != 0) {
             targetPitch = 0.0f;
         }
-        func_15059444((struct127 *)obj);
+        func_15059444((Actor *)obj);
         if ((obj->stunned != 0 && (obj->health != 0 || obj->y_velocity >= 60.0f)) || obj->unk84 == 0x262) {
             return 0.0f;
         }
@@ -533,7 +533,7 @@ f32 func_1504B0FC(GameObj *obj, f32 arg1) {
         }
         if (obj->unk28 < 40.0f) {
             func_1510F820(obj->unk188, &obj->unk18C, &out0, &out1, &out2, &out3, &out4);
-            out3 = func_1505210C((struct127 *)obj, out3, out4, &out4, 180.0f);
+            out3 = func_1505210C((Actor *)obj, out3, out4, &out4, 180.0f);
             if (out4 < obj->unkB8) {
                 obj->unkB8 += (out4 - obj->unkB8) * 0.2f;
             }
@@ -565,7 +565,7 @@ f32 func_1504B0FC(GameObj *obj, f32 arg1) {
         }
         obj->unk80 = 1;
     } else {
-        func_15052408((struct127 *)obj);
+        func_15052408((Actor *)obj);
         if (obj->xz_velocity > 16.0f) {
             obj->xz_velocity = 16.0f;
         }
@@ -587,7 +587,7 @@ typedef struct {
     s8 unk2;
 } Struct80099140;
 
-void func_1504BA38(struct127 *obj) {
+void func_1504BA38(Actor *obj) {
     Struct80099140 *entry;
     s8 unk2;
     s32 unk1;
@@ -612,9 +612,9 @@ void func_1504BA38(struct127 *obj) {
     }
 }
 
-void func_1504BAF0(struct127 *obj) {
+void func_1504BAF0(Actor *obj) {
     s16 index;
-    struct127 *other;
+    Actor *other;
 
     index = obj->unk13C - 100;
     if (index >= 0) {
@@ -627,7 +627,7 @@ void func_1504BAF0(struct127 *obj) {
     func_1506EBC0();
 }
 
-void func_1504BB88(struct127 *obj) {
+void func_1504BB88(Actor *obj) {
     if (obj->unk25C & 0x10) {
         obj->unk83 = 0xFF;
         obj->disable_run = 0xFF;
@@ -645,7 +645,7 @@ void func_1504BB88(struct127 *obj) {
     }
 }
 
-void func_1504BC38(struct127 *obj) {
+void func_1504BC38(Actor *obj) {
     if (obj->disable_run != 0 && obj->disable_run < 250) {
         if (obj->disable_run <= D_800BE9A0) {
             obj->disable_run = 0;
@@ -915,15 +915,15 @@ void func_1504C0E8(GameObj *obj, s32 arg1, f32 arg2) {
             }
         }
         if (anim != 999) {
-            func_1505E650((struct127 *)obj, anim, speed, blend, start, 0.0f, 0);
+            func_1505E650((Actor *)obj, anim, speed, blend, start, 0.0f, 0);
         }
     } else if (obj->unk84 == 0x21 && D_800CC2B1 == 0 && obj->unk44 == 0.0f &&
                ((*(OSContPad **)&D_800CC284)->button & Z_TRIG)) {
-        func_1505E650((struct127 *)obj, 0x16, 1.5f, 6.0f, 0.0f, 0.0f, 0);
+        func_1505E650((Actor *)obj, 0x16, 1.5f, 6.0f, 0.0f, 0.0f, 0);
     }
 }
 
-void func_1504C854(struct127 *obj) {
+void func_1504C854(Actor *obj) {
     D_800CC288 = obj->unk31C->unk8C;
     if (obj->unk31C->unk8E > 0) {
         obj->unk31C->unk8E -= D_800BE9A0;
@@ -967,7 +967,7 @@ s32 func_1504C8BC(GameObj *obj) {
     return 0;
 }
 
-void func_1504C9E4(struct127 *obj, s8 target, u8 mode) {
+void func_1504C9E4(Actor *obj, s8 target, u8 mode) {
     u8 step;
     s32 delta;
     s32 saved;

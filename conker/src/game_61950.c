@@ -3,9 +3,9 @@
 #include "variables.h"
 
 extern void func_15036310(s32, s32, s32, s32);
-extern void func_15034EB4(struct127 *, s32, s32);
-extern void func_150F1A00(struct127 *);
-extern void func_150DFDA4(struct127 *);
+extern void func_15034EB4(Actor *, s32, s32);
+extern void func_150F1A00(Actor *);
+extern void func_150DFDA4(Actor *);
 extern s32 func_1502DB20(u8);
 void func_1503B9BC(void);
 
@@ -14,7 +14,7 @@ typedef struct GameCommand {
     s16 value;
 } GameCommand;
 
-/* An actor's bone matrix: struct127.unk1D4 points at an array of these. */
+/* An actor's bone matrix: Actor.unk1D4 points at an array of these. */
 typedef f32 MtxF[4][4];
 
 /*
@@ -81,7 +81,7 @@ void func_150345E4(s32 index) {
 }
 
 /* Zeroes the 3x3 rotation part of every bone matrix whose bit is set in unk9C (bones 0-31). */
-void func_15034728(struct127 *obj) {
+void func_15034728(Actor *obj) {
     s32 bone;
     s32 row;
     s32 col;
@@ -111,7 +111,7 @@ void func_15034728(struct127 *obj) {
 
 /* Runs func_15034728 on every active object with a non-zero unk9C mask. */
 void func_150347E8(void) {
-    struct127 *obj;
+    Actor *obj;
 
     if (D_800BEAC0 != 0) {
         return;
@@ -124,5 +124,5 @@ void func_150347E8(void) {
         }
         obj++;
         // matching: the end is its own symbol (D_800D121C == &D_800CC2D0[25]), and the loop is bottom-tested
-    } while (obj != (struct127 *)&D_800D121C);
+    } while (obj != (Actor *)&D_800D121C);
 }

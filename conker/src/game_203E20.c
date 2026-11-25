@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_150D6730(struct127 *obj, u8 arg1, s32 arg2);
+extern void func_150D6730(Actor *obj, u8 arg1, s32 arg2);
 extern s32 func_15042E3C(char *format, ...);
 extern Gfx *func_15133EEC(Gfx *gfx, u16 index, u8 segment, s32 arg3);
 extern u32 D_80083740[];
@@ -46,7 +46,7 @@ typedef struct {
 
 /* Style 3 text box state: an amount shown as "$ %d" that fades out with its owner. */
 typedef struct {
-    /* 0x00 */ struct127 *owner;
+    /* 0x00 */ Actor *owner;
     /* 0x04 */ u8 ownerId; // owner->unique_id when the box was made
     /* 0x05 */ u8 pad5[3];
     /* 0x08 */ s32 amount;
@@ -56,7 +56,7 @@ typedef struct {
 
 /* Called when `character` touches a pulse object (game_1483E0.c): spawns func_150D6730's particles on it
    while D_800BE9F0 is 0x32 or 0x33. */
-void func_151D6970(struct127 *character, void *obj) {
+void func_151D6970(Actor *character, void *obj) {
     if ((D_800BE9F0 == 0x32) || (D_800BE9F0 == 0x33)) {
         func_150D6730(character, 0xFF, 1);
     }
@@ -126,12 +126,12 @@ typedef struct {
     /* 0x10 */ s16 position[3];
 } Pickup;
 
-extern void func_1504715C(void *ground, struct127 *actor);
+extern void func_1504715C(void *ground, Actor *actor);
 extern void func_15153F18(s16 *params, f32 *pos, void *ground, s32 arg3, s32 arg4);
 extern void func_15150178(s16 *params, f32 *pos, void *ground, s32 arg3, s32 arg4);
 
 /* Spawns the func_15153F18 and func_15150178 bursts at `pickup`, on the ground under `player`. */
-void func_151D69B4(Pickup *pickup, struct127 *player) {
+void func_151D69B4(Pickup *pickup, Actor *player) {
     u8 ground[0x24]; // ground probe result (Ground in game_1228D0.c)
     Params15153F18 first;
 
@@ -219,7 +219,7 @@ typedef struct {
     /* 0x34 */ u8 color1[4];
     /* 0x38 */ u8 unk38;
     /* 0x39 */ u8 pad39[3];
-    /* 0x3C */ struct127 *owner;
+    /* 0x3C */ Actor *owner;
     /* 0x40 */ u8 ownerId;
     /* 0x41 */ u8 unk41;
     /* 0x42 */ u8 pad42[2];
@@ -251,7 +251,7 @@ extern Struct1509B570 *func_1509B570(s32);
  * Spawns model effect 0xA5 on `owner` (updated by func_151D6E60, drawn with func_151D710C) and a text box
  * showing a random amount as "$ %d" (style 3: func_151D7000 / func_151D70CC).
  */
-void func_151D6BFC(struct127 *owner, u8 arg1, s32 arg2) {
+void func_151D6BFC(Actor *owner, u8 arg1, s32 arg2) {
     EffectParams params;
     Struct1509B570 *entry;
 
@@ -355,7 +355,7 @@ s32 func_151D6E60(ModelEffect *fx) {
  * replaced, otherwise prints the amount, fading out over the last fadeStart frames.
  */
 s32 func_151D7000(TextObj *obj) {
-    struct127 *owner;
+    Actor *owner;
     AmountTextStyle *style;
     s16 timeLeft;
     s16 pad; // matching: unused, but alpha's register allocation depends on it

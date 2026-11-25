@@ -3,14 +3,14 @@
 
 /* Message payload: an actor reference (message type 0 asks effects bound to that actor to go away). */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     u8 actorId;
 } ActorRefMsg;
 
 /* An effect bound to an actor. */
 typedef struct {
     u8 pad0[0x18];
-    struct127 *actor;
+    Actor *actor;
     u8 actorId;
 } BoundEffect;
 
@@ -28,8 +28,8 @@ void func_151617C4(Game1BD8B0Object *arg0);
 
 /* Message handler: type 0 removes the effect when the message names its actor. */
 void func_15190400(BoundEffect *effect, ActorRefMsg *msg, u8 type) {
-    struct127 *actor;
-    struct127 *msgActor;
+    Actor *actor;
+    Actor *msgActor;
     u8 actorId;
     u8 msgActorId;
 

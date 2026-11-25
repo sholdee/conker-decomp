@@ -9,12 +9,12 @@ typedef struct {
     /* 0x960 */ f32 unk960;
 } CameraSizeView;
 
-void func_1507C3E0(struct127 *obj, s16 *height, s16 *width, s16 *depth);
+void func_1507C3E0(Actor *obj, s16 *height, s16 *width, s16 *depth);
 
 /* Refreshes the cached height/width/depth (ActorCtl unk114-unk118) of every object that has one. */
 void func_1507C370(void) {
     s32 i;
-    struct127 *obj = D_800CC2D0;
+    Actor *obj = D_800CC2D0;
 
     for (i = 0; i < D_8008FD8C; i++, obj++) {
         ActorCtl *ext = obj->unk31C;
@@ -35,7 +35,7 @@ void dbgu();
 extern f32 dbgx[];
 /* Computes an object's height, width and depth (each output may be NULL): fixed sizes for
  * special states and object ids, otherwise its unkE6/unkE4, scaled by y_scale/xz_scale. */
-void func_1507C3E0(struct127 *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
+void func_1507C3E0(Actor *obj, s16 *outHeight, s16 *outWidth, s16 *outDepth) {
     f32 height;
     f32 width;
     f32 depth;

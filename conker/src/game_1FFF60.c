@@ -15,7 +15,7 @@ typedef struct ActorFollowerGroup ActorFollowerGroup;
 /* Object type 0x3D: a point on one bone of an actor, re-transformed every frame. */
 struct BoneFollower {
     /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ struct127 *actor;
+    /* 0x10 */ Actor *actor;
     /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
     /* 0x15 */ u8 pad15[3];
     /* 0x18 */ Vec3f offset;        // point in bone space
@@ -36,7 +36,7 @@ struct BoneFollower {
 /* Object type 0x3E: watches an actor and owns a list of BoneFollowers. */
 struct ActorFollowerGroup {
     /* 0x00 */ u8 pad0[0x10];
-    /* 0x10 */ struct127 *actor;
+    /* 0x10 */ Actor *actor;
     /* 0x14 */ u8 actorUid;         // actor->unique_id when spawned
     /* 0x15 */ u8 pad15;
     /* 0x16 */ s16 timer;
@@ -56,7 +56,7 @@ struct ActorFollowerGroup {
 
 void *func_15167A68(s32, s32, s32, s32, s32, s32);
 void func_15143134(Vec3f *in, Vec3f *out, BoneMatrix *mtx);
-void func_1514EDF0(ActorFollowerGroup *, struct127 *);
+void func_1514EDF0(ActorFollowerGroup *, Actor *);
 
 void func_151D3308(BoneFollower *follower);
 void func_151D3354(BoneFollower *follower);
@@ -109,7 +109,7 @@ BoneFollower *func_151D2BA4(void *params, Vec3f *position, s32 extraSize, u8 arg
 
 /* Per-frame update: tracks the bone, runs the timer and the update callback. */
 void func_151D2C40(BoneFollower *follower) {
-    struct127 *actor;
+    Actor *actor;
     Vec3f position;
 
     actor = follower->actor;
@@ -183,10 +183,10 @@ void func_151D2E5C(BoneFollower *follower, struct223 *msg, u8 type) {
     } else if (type == 0x2D) {
         actor = msg->unk0;
         if (actor == (s32)follower->actor) {
-            follower->actor = (struct127 *)msg->unk4.w;
+            follower->actor = (Actor *)msg->unk4.w;
             follower->actorUid = msg->unk9;
         } else if ((s32)follower->actor == msg->unk4.w) {
-            follower->actor = (struct127 *)actor;
+            follower->actor = (Actor *)actor;
             follower->actorUid = msg->unk8;
         }
     }
@@ -209,7 +209,7 @@ ActorFollowerGroup *func_151D2F00(void *params, s32 extraSize, u8 arg2, s32 arg3
 
 /* Per-frame update: refreshes the trackable flag, runs the timer and the callbacks. */
 void func_151D2F90(ActorFollowerGroup *group) {
-    struct127 *actor;
+    Actor *actor;
     u8 wasTrackable;
     u8 isTrackable;
 
@@ -297,10 +297,10 @@ void func_151D324C(ActorFollowerGroup *group, struct223 *msg, u8 type) {
     } else if (type == 0x2D) {
         otherActor = msg->unk0;
         if ((s32)group->actor == otherActor) {
-            group->actor = (struct127 *)msg->unk4.w;
+            group->actor = (Actor *)msg->unk4.w;
             group->actorUid = msg->unk9;
         } else if ((s32)group->actor == msg->unk4.w) {
-            group->actor = (struct127 *)otherActor;
+            group->actor = (Actor *)otherActor;
             group->actorUid = msg->unk8;
         }
     }

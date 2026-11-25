@@ -11,14 +11,14 @@ void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, 
 
 /* Weak reference to an actor: valid while actor->unique_id still equals uniqueId. */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     u8 uniqueId;
 } ActorRef;
 
 /* Message 0x2D payload: two actors exchange identities. */
 typedef struct {
-    struct127 *actorA;
-    struct127 *actorB;
+    Actor *actorA;
+    Actor *actorB;
     u8 idA;
     u8 idB;
 } ActorSwapMsg;
@@ -36,7 +36,7 @@ typedef struct {
 
 /* Returns whether the effect's owner is still active. */
 s32 func_151BC580(OwnedEffect40 *effect) {
-    struct127 *owner = effect->owner.actor;
+    Actor *owner = effect->owner.actor;
 
     if (owner->interaction_state == 0) {
         return 0;
@@ -47,7 +47,7 @@ s32 func_151BC580(OwnedEffect40 *effect) {
 /* Message handler: message 0 for its owner frees the effect; 0x2D makes it follow the owner through a swap. */
 void func_151BC5A4(OwnedEffect40 *effect, ActorMsg *msg, u8 msgId) {
     ActorRef *owner = &effect->owner;
-    struct127 *actor = owner->actor;
+    Actor *actor = owner->actor;
 
     if (msgId == 0) {
         if (actor == msg->ref.actor || owner->uniqueId == msg->ref.uniqueId) {
@@ -158,7 +158,7 @@ extern f32 func_15143E64(struct17 *);
 s32 func_151BC794(TrailEffect *trail) {
     TrailData *data;
     TrailPoint *points;
-    struct127 *owner;
+    Actor *owner;
     struct17 delta;
     TrailPoint *point;
     f32 dist;
@@ -419,8 +419,8 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
 /* Message handler: message 0 for its owner finishes the trail; 0x2D makes it follow the owner through a swap. */
 void func_151BD21C(TrailEffect *trail, ActorMsg *msg, u8 msgId) {
     ActorRef *owner;
-    struct127 *actor;
-    struct127 *actorA;
+    Actor *actor;
+    Actor *actorA;
 
     owner = &trail->data->owner;
     actor = owner->actor;
@@ -463,7 +463,7 @@ typedef struct {
 
 /* Returns whether the effect's owner is still the same active actor. */
 s32 func_151BD2BC(OwnedEffect28 *effect) {
-    struct127 *owner = effect->owner.actor;
+    Actor *owner = effect->owner.actor;
 
     if (owner->interaction_state == 0) {
         return 0;
@@ -478,7 +478,7 @@ s32 func_151BD2BC(OwnedEffect28 *effect) {
 typedef struct {
     u8 ownerId;
     u8 pad1[3];
-    struct127 *owner;
+    Actor *owner;
     u8 bone;
     u8 pad9[3];
     struct17 offsetA;
@@ -510,7 +510,7 @@ typedef struct {
     s32 unk14;
     u8 ownerId;
     u8 pad19[3];
-    struct127 *owner;
+    Actor *owner;
     u8 bone;
     u8 pad21[3];
     struct17 offsetA;
@@ -548,7 +548,7 @@ typedef struct {
 AgedBloodStrip *func_15134DAC(BloodStripDesc *desc, s32 extraSize);
 
 /* Spawns two mirrored blood strips on bone 1 of actor. */
-void func_151BD2F8(struct127 *actor, s32 arg1, s32 arg2) {
+void func_151BD2F8(Actor *actor, s32 arg1, s32 arg2) {
     BloodStripDesc desc;
     struct {
         s16 value;
@@ -673,7 +673,7 @@ BloodDroplet *func_15130374(ParticleDesc68 *desc, u8 kind, s32 dataSize, u8 arg3
 void func_151BD43C(struct17 *pointA, struct17 *pointB, struct17 *velA, struct17 *velB, f32 time,
                    BloodStrip *strip) {
     BloodDroplet *particle;
-    struct127 *owner;
+    Actor *owner;
     ParticleDesc68 desc;
     f32 drag;
     s32 pad;  // matching: stack slot of the original frame
@@ -753,7 +753,7 @@ f32 func_151BD750(AgedBloodStrip *strip) {
 
 /* Particle update: keeps the droplet moving with its owner, then runs the standard update. */
 void func_151BD79C(BloodDroplet *particle, struct17 *prevPos) {
-    struct127 *owner = particle->owner.actor;
+    Actor *owner = particle->owner.actor;
 
     if (owner->interaction_state != 0 && owner->id != 0xFF) {
         particle->offset.unk0 = owner->x_position;
@@ -764,7 +764,7 @@ void func_151BD79C(BloodDroplet *particle, struct17 *prevPos) {
 }
 
 /* Broadcasts message 0x3B for actor. */
-void func_151BD7F4(struct127 *actor) {
+void func_151BD7F4(Actor *actor) {
     ActorRef ref;
 
     ref.actor = actor;
@@ -789,7 +789,7 @@ typedef struct {
 
 /* Per-object data func_151BD828 copies into each spark (at spark+0x110). */
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId;
     u8 index;
     u8 pad06[2];
@@ -859,7 +859,7 @@ typedef struct {
     BurstEffect *burst;
     u8 index;
     u8 pad0D[3];
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId;
     u8 pad15[3];
 } BurstGlowData;
@@ -885,7 +885,7 @@ struct BurstGlow {
 BurstGlow *func_151407D0(BurstGlowShape *shape, u32 shapeSize, ParticleDef *desc, u8, u8, u8, u8, s8, u8, s32);
 
 /* Spawns the burst effect on actor: two sparks and two glows that the effect keeps on the actor. */
-void func_151BD828(struct127 *actor, u8 arg1, s32 arg2) {
+void func_151BD828(Actor *actor, u8 arg1, s32 arg2) {
     BurstEffect *effect;
     BurstData burst;
     BurstData *data;
@@ -1040,7 +1040,7 @@ extern s32 func_15145EA4(struct17 **src, struct17 **dst, Mtx *matrix, s32 count)
 /* Per-frame update of the burst: keeps the sparks and glows on bone 1 of the owner. */
 void func_151BDD8C(BurstEffect *effect) {
     BurstData *data;
-    struct127 *owner;
+    Actor *owner;
     struct17 starts[2];
     struct17 ends[2];
     u8 i;

@@ -9,14 +9,14 @@
 
 /* Weak reference to an actor: valid while actor->unique_id still equals uniqueId. */
 typedef struct {
-    struct127 *actor;
+    Actor *actor;
     u8 uniqueId;
 } ActorRef;
 
 /* Message 0x2D payload: two actors exchange identities. */
 typedef struct {
-    struct127 *actorA;
-    struct127 *actorB;
+    Actor *actorA;
+    Actor *actorB;
     u8 idA;
     u8 idB;
 } ActorSwapMsg;
@@ -66,7 +66,7 @@ typedef struct {
  * countdown timer; when it runs out a new random target base + rand * range is picked.
  */
 typedef struct {
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId;
     u8 index;              /* slot in burst->data.sparks */
     u8 pad06[2];
@@ -109,7 +109,7 @@ typedef struct {
     BurstEffect *burst;
     u8 index;              /* slot in burst->data.glows */
     u8 pad0D[3];
-    struct127 *owner;
+    Actor *owner;
     u8 ownerId;
     u8 pad15[3];
 } BurstGlowData;
@@ -168,7 +168,7 @@ s32 func_151BE210(BurstSpark *spark) {
 /* Builds a burst spark's beam vertices; frees the spark once its owner is gone, and draws nothing while it is hidden. */
 Vtx *func_151BE4B8(BurstSpark *spark, s16 viewport) {
     BurstSparkData *data = &spark->data;
-    struct127 *owner = data->owner;
+    Actor *owner = data->owner;
     BeamScale scale;
 
     if (owner->unique_id != data->ownerId || owner->interaction_state == 0) {
@@ -194,7 +194,7 @@ void func_151BE558(OwnedParticle *particle, ActorMsg *msg, u8 msgId) {
     ActorRef *owner = &particle->owner;
 
     if (msgId == 0x2D) {
-        struct127 *actorA;
+        Actor *actorA;
 
         if (owner->actor == (actorA = msg->swap.actorA)) {
             owner->actor = msg->swap.actorB;
@@ -204,7 +204,7 @@ void func_151BE558(OwnedParticle *particle, ActorMsg *msg, u8 msgId) {
             owner->uniqueId = msg->swap.idA;
         }
     } else if (msgId == 0) {
-        struct127 *actor = msg->ref.actor;
+        Actor *actor = msg->ref.actor;
 
         if (actor == owner->actor || msg->ref.uniqueId == owner->uniqueId) {
             func_1516972C((struct102 *)particle);
