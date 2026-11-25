@@ -58,7 +58,7 @@ void func_15161860(LightEffect *effect);
 void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, Vec3f *position, s16 arg5, s16 arg6);
 LightEffect *func_151619A0(s32 index, s16 lifetime, u8 arg2, s32 arg3);
 s32 func_15161A68(LightEffect *effect);
-LightEffect *func_15161E24(Actor *actor, u8 unk5, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
+LightEffect *func_15161E24(Actor *actor, u8 eventHandler, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
 s32 func_15161F2C(LightEffect *effect);
 LightEffect *func_15162034(PointLight *light, u8 arg1, s32 arg2);
 void func_15162110(s32 arg0);
@@ -71,7 +71,7 @@ LightEffect *func_15163414(LightEffectHeader *header, f32 *x, f32 *y, f32 *z, s8
 LightEffect *func_15163604(PointLight *light, u8 kind, u8 type, s16 lifetime, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 s32 func_15163704(LightEffect *effect);
 void func_1516381C(PointLight *light, u8 type, u8 arg2, s32 arg3);
-void func_1516387C(PointLight *light, u8 arg1, s8 update, s16 lifetime, u8 type, s32 size, u8 arg6, s32 arg7);
+LightEffect *func_1516387C(PointLight *light, u8 flags, s8 update, s16 lifetime, u8 type, s32 size, u8 arg6, s32 arg7);
 void func_151639D0(LightEffect *effect, s32 arg1, u8 eventId);
 void func_15163A18(LightEffect *effect, s32 arg1, u8 eventId);
 LightEffect *func_15163A60(u8 objectId, u8 arg1, s32 arg2);
@@ -273,7 +273,7 @@ void func_15160954(f32 *level, f32 *peak, f32 *rate, f32 *delay, LightEffect *ef
 }
 
 /* Creates a light that follows `actor` (see func_15160B74). */
-LightEffect *func_15160A58(Actor *actor, u8 bone, Vec3f *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 unk15, u8 argE, s32 argF) {
+LightEffect *func_15160A58(Actor *actor, u8 bone, Vec3f *offset, u8 arg3, s16 lifetime, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 callback, s32 extraSize, u8 eventHandler, u8 argE, s32 argF) {
     LightEffect *effect;
     LightEffectHeader header;
     LightAttach attach;
@@ -298,7 +298,7 @@ LightEffect *func_15160A58(Actor *actor, u8 bone, Vec3f *offset, u8 arg3, s16 li
     position.z = 0;
 
     attach.callback = callback;
-    attach.unk15 = unk15;
+    attach.eventHandler = eventHandler;
 
     effect = func_151602C0(&header, &position, arg5, arg6, arg7, arg8, 0xFF, 0, extraSize + sizeof(LightAttach), argE, argF);
     if (effect != NULL) {
@@ -345,7 +345,7 @@ u8 func_15160B74(LightEffect *effect) {
 }
 
 /* Creates a beam light on `actor` (see func_15160E30). */
-LightEffect *func_15160CDC(Actor *actor, u8 bone, Vec3f *start, Vec3f *end, f32 scale, u8 arg5, s16 lifetime, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 unk25, u8 flagHit, u8 argE, s32 argF) {
+LightEffect *func_15160CDC(Actor *actor, u8 bone, Vec3f *start, Vec3f *end, f32 scale, u8 arg5, s16 lifetime, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 fromBone, u8 eventHandler, u8 flagHit, u8 argE, s32 argF) {
     LightEffect *effect;
     LightEffectHeader header;
     LightBeam beam;
@@ -372,7 +372,7 @@ LightEffect *func_15160CDC(Actor *actor, u8 bone, Vec3f *start, Vec3f *end, f32 
     flag1 = fromBone ? 1 : 0;
     flag2 = flagHit ? 2 : 0;
     beam.flags = flag2 | flag1;
-    beam.unk25 = unk25;
+    beam.eventHandler = eventHandler;
 
     position.x = 0;
     position.y = 0;
@@ -768,7 +768,7 @@ s32 func_15161A68(LightEffect *effect) {
 }
 
 /* Creates a light at `actor` that stays tied to it (see func_15163F50). */
-LightEffect *func_15161E24(Actor *actor, u8 unk5, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9) {
+LightEffect *func_15161E24(Actor *actor, u8 eventHandler, u8 arg2, s16 lifetime, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9) {
     LightEffect *effect;
     LightEffectHeader header;
     LightActorRef ref;
@@ -785,7 +785,7 @@ LightEffect *func_15161E24(Actor *actor, u8 unk5, u8 arg2, s16 lifetime, s32 arg
 
     ref.actor = actor;
     ref.actorId = actor->unique_id;
-    ref.unk5 = unk5;
+    ref.eventHandler = eventHandler;
 
     position.x = actor->x_position;
     position.y = actor->y_position;
@@ -802,7 +802,7 @@ s32 func_15161F2C(LightEffect *effect) {
     return func_15163F50(effect, &effect->data.actorRef);
 }
 
-/* Event handler: drops the effect when its actor is removed and follows actor swaps, then runs the unk5 handler. */
+/* Event handler: drops the effect when its actor is removed and follows actor swaps, then runs the payload's event handler (D_8008B358). */
 void func_15161F4C(LightEffect *effect, ActorEvent *event, u8 eventId) {
     LightActorRef *ref = &effect->data.actorRef;
     void (*handler)(LightEffect *, ActorEvent *, u8);
@@ -824,7 +824,7 @@ void func_15161F4C(LightEffect *effect, ActorEvent *event, u8 eventId) {
         }
     }
 
-    handler = D_8008B358[effect->data.actorRef.unk5];
+    handler = D_8008B358[effect->data.actorRef.eventHandler];
     if (handler != NULL) {
         handler(effect, event, eventId);
     }
@@ -1320,15 +1320,15 @@ void func_1516381C(PointLight *light, u8 type, u8 arg2, s32 arg3) {
 }
 
 /* Creates an effect with an uninitialised payload of `size` bytes. */
-void func_1516387C(PointLight *light, u8 arg1, s8 update, s16 lifetime, u8 type, s32 size, u8 arg6, s32 arg7) {
+LightEffect *func_1516387C(PointLight *light, u8 flags, s8 update, s16 lifetime, u8 type, s32 size, u8 arg6, s32 arg7) {
     LightEffectHeader header;
 
-    header.flags = arg1;
+    header.flags = flags;
     header.update = update;
     header.lifetime = lifetime;
     header.lightType = type;
 
-    func_1516037C(&header, light, size, arg6, arg7);
+    return func_1516037C(&header, light, size, arg6, arg7);
 }
 
 s32 func_151638E0(LightEffect *effect) {
@@ -1476,7 +1476,7 @@ s32 func_15163F50(LightEffect *effect, LightActorRef *ref) {
     return 1;
 }
 
-/* Event handler for bone-attached lights: like func_15161F4C, other events go to the unk15 handler. */
+/* Event handler for bone-attached lights: like func_15161F4C, other events go to the payload's D_8008B374 handler. */
 void func_15163FEC(LightEffect *effect, ActorEvent *event, u8 eventId) {
     LightAttach *attach = &effect->data.attach;
 
@@ -1496,8 +1496,8 @@ void func_15163FEC(LightEffect *effect, ActorEvent *event, u8 eventId) {
             dst->actor = event->actor;
             dst->actorId = event->actorId;
         }
-    } else if (D_8008B374[attach->unk15] != NULL) {
-        D_8008B374[attach->unk15](effect);
+    } else if (D_8008B374[attach->eventHandler] != NULL) {
+        D_8008B374[attach->eventHandler](effect);
     }
 }
 
@@ -1522,7 +1522,7 @@ void func_151640C0(LightEffect *effect, ActorEvent *event, u8 eventId) {
     }
 }
 
-/* Event handler for beam lights: like func_15161F4C, other events go to the unk25 handler. */
+/* Event handler for beam lights: like func_15161F4C, other events go to the payload's D_8008B37C handler. */
 void func_15164134(LightEffect *effect, ActorEvent *event, u8 eventId) {
     LightBeam *beam = &effect->data.beam;
 
@@ -1542,8 +1542,8 @@ void func_15164134(LightEffect *effect, ActorEvent *event, u8 eventId) {
             dst->actor = event->actor;
             dst->actorId = event->actorId;
         }
-    } else if (D_8008B37C[beam->unk25] != NULL) {
-        D_8008B37C[beam->unk25](effect);
+    } else if (D_8008B37C[beam->eventHandler] != NULL) {
+        D_8008B37C[beam->eventHandler](effect);
     }
 }
 

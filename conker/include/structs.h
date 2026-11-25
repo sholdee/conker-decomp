@@ -3395,7 +3395,7 @@ typedef struct LightFlicker {
 typedef struct LightActorRef {
     /* 0x0 */ Actor *actor;
     /* 0x4 */ u8 actorId; // actor->unique_id when attached
-    /* 0x5 */ u8 unk5;    // index into D_8008B358 (actor event handler)
+    /* 0x5 */ u8 eventHandler; // index into D_8008B358: handler for other events
 } LightActorRef; // size 0x8
 
 /* The light follows an actor, or a point on one of its bones (func_15160B74). */
@@ -3405,8 +3405,8 @@ typedef struct LightAttach {
     /* 0x05 */ u8 bone;      // index of the bone matrix in actor->unk1D4
     /* 0x06 */ u8 pad6[0x2];
     /* 0x08 */ Vec3f offset; // position in the bone's frame
-    /* 0x14 */ s8 callback;  // index into D_8008B1F8, or -1
-    /* 0x15 */ u8 unk15;
+    /* 0x14 */ s8 callback;     // index into D_8008B1F8, or -1
+    /* 0x15 */ u8 eventHandler; // index into D_8008B374: handler for other events
 } LightAttach; // size 0x18
 
 /* A light cast along a beam from an actor's bone, stopping at the first hit (func_15160E30). */
@@ -3418,8 +3418,8 @@ typedef struct LightBeam {
     /* 0x08 */ Vec3f start; // beam start in the bone's frame
     /* 0x14 */ Vec3f end;   // beam end in the bone's frame
     /* 0x20 */ f32 scale;   // hit distance to radius
-    /* 0x24 */ u8 flags;    // 1: cast from the bone, 2: flag the hit actor
-    /* 0x25 */ u8 unk25;
+    /* 0x24 */ u8 flags;        // 1: cast from the bone, 2: flag the hit actor
+    /* 0x25 */ u8 eventHandler; // index into D_8008B37C: handler for other events
 } LightBeam; // size 0x28
 
 /* Colour pulse: colour = base + amplitude * sin(phase). */
@@ -3550,7 +3550,7 @@ typedef union LightEffectData {
 /*
  * A light effect instance (object type 53, allocated by func_1516037C with func_15167A68): a 0x18-byte
  * header, then a payload of the requested size. The first 0xE bytes are the object-list link of
- * EffectHeader (effects.h). The allocation is 0x18 + payload size, so sizeof(LightEffect) is not used.
+ * EffectHeader. The allocation is 0x18 + payload size, so sizeof(LightEffect) is not used.
  */
 typedef struct LightEffect {
     /* 0x00 */ u8 type;
