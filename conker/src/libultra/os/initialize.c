@@ -2,12 +2,13 @@
 
 #include "functions.h"
 
-extern s32 D_800428E0;
 extern s32 D_8000030C;
 extern s32 D_8000031C[16];
-#pragma weak D_8002BD10
-u64 D_8002BD10;
-extern s32 D_8002BD20;
+u64 osClockRate = 62500000;      /* OS_CLOCK_RATE */
+u32 __osShutdown = 0;
+u32 __OSGlobalIntMask = OS_IM_ALL;
+s32 osDiskExist = 0;
+u32 __osFinalrom;
 
 
 typedef struct {
@@ -34,7 +35,7 @@ void __osInitialize_common(void) {
     u32 leostatus;
     u32 pistatus;
 
-    D_800428E0 = 1;
+    __osFinalrom = 1;
     __osSetSR(__osGetSR() | 0x20000000);
     __osSetFpcCsr(0x01000800);
     while (__osSiRawReadIo(0x1FC007FC, &pifdata)) {
@@ -51,9 +52,9 @@ void __osInitialize_common(void) {
     osPiRawReadIo(4, &clock);
     clock &= ~0xF;
     if (clock != 0) {
-        D_8002BD10 = clock;
+        osClockRate = clock;
     }
-    D_8002BD10 = D_8002BD10 * 3 / 4;
+    osClockRate = osClockRate * 3 / 4;
     if (D_8000030C == 0) {
         bzero(D_8000031C, 0x40);
     }
@@ -63,9 +64,9 @@ void __osInitialize_common(void) {
     }
     leostatus = *(vu32 *)0xA5000508;
     if (!(leostatus & 0xFFFF)) {
-        D_8002BD20 = 1;
+        osDiskExist = 1;
         __osSetHWIntrRoutine(1, __osLeoInterrupt);
     } else {
-        D_8002BD20 = 0;
+        osDiskExist = 0;
     }
 }

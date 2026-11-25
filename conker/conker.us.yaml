@@ -221,6 +221,21 @@ segments:
     bss_size: 0x16690
     subsegments:
       - [0x290D0, data] # could be larger/smaller
+      - [0x2AB40, .data, libultra/io/aisetnextbuf]
+      - [0x2AB50, .data, libultra/io/pimgr]
+      - [0x2AB70, .data, libultra/io/vimgr]
+      - [0x2AB90, data]
+      - [0x2BD10, .data, libultra/os/initialize]
+      - [0x2BD30, .data, libultra/libc/xlitob]
+      - [0x2BD60, .data, libultra/os/piacs]
+      - [0x2BD70, data]                            # libultra/os/timerintr (its .data points into its .bss)
+      - [0x2BD80, .data, libultra/io/vi]
+      - [0x2BDF0, .data, libultra/os/thread]
+      - [0x2BE10, .data, libultra/io/controller]
+      - [0x2BE20, .data, libultra/io/siacs]
+      - [0x2BE30, .data, libultra/io/vimodepallan1]
+      - [0x2BE80, .data, libultra/io/vimodempallan1]
+      - [0x2BED0, .data, libultra/io/vimodentsclan1]
 
       - [0x2BF20, .rodata, init_1420]
       - [0x2BF7C, rodata]

@@ -91,11 +91,7 @@ extern s16  D_8002BA30;
 
 extern s16  D_8002BC10[];
 extern s16  D_8002BD0E[];
-extern u64  D_8002BD10; // osClockRate
-extern s32  D_8002BD14; // low word of osClockRate (D_8002BD10)
-extern s32  D_8002BD18;
-extern s32  D_8002BD20; // init ok?
-extern s32  D_8002BD60;
+extern u32  __osShutdown;
 
 /* DATA section from D_8002C080 to D_8002D4B0 */
 
@@ -291,7 +287,6 @@ extern u8   D_800428C2;
 extern u8   D_800428C4[];
 extern u8   D_800428C6[];
 extern u8   D_800428C8[];
-extern s32  D_800428E0;
 extern s32 *D_800428F8;
 
 // BSS ENDS AT D_80043B40

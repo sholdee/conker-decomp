@@ -33,7 +33,7 @@ typedef struct {
     /* 0x7 */ u8 dummy1;
 } __OSContRequesFormat;
 
-extern s32 __osContInitialized;
+extern s32 __osContinitialized;
 extern u8 __osMaxControllers;
 extern u8 __osContLastCmd;
 extern u32 __osContPifRam[16];
@@ -46,7 +46,7 @@ void __osSiCreateAccessQueue(void);
 
 /* This ROM predates the OS_CPU_COUNTER form in include/2.0L/PR/os_convert.h: golden loads the
  * 64-bit osClockRate global at 0x8002BD10 and divides by 1000000. */
-#define GAME_USEC_TO_CYCLES(n) (((u64)(n) * (u64)D_8002BD10) / 1000000)
+#define GAME_USEC_TO_CYCLES(n) (((u64)(n) * (u64)osClockRate) / 1000000)
 
 s32 func_151EF090(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data) {
     OSMesg dummy;
@@ -55,10 +55,10 @@ s32 func_151EF090(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data) {
     OSTimer t;
     OSMesgQueue timerMesgQueue;
 
-    if (__osContInitialized) {
+    if (__osContinitialized) {
         return 0;
     }
-    __osContInitialized = 1;
+    __osContinitialized = 1;
 
     time = osGetTime();
     if (time < GAME_USEC_TO_CYCLES(500000)) {

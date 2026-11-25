@@ -1,10 +1,9 @@
-/* SDK osCreatePiManager. The file-statics (piThread, piThreadStack, piEventQueue,
- * piEventBuf, __osPiDevMgr) live at fixed addresses; reference them by their extracted
- * symbol names. __osDevMgrMain is func_10002E50. The thread stack top
+/* SDK osCreatePiManager. __osPiDevMgr and __osPiTable are this file's .data. The .bss
+ * file-statics (piThread, piThreadStack, piEventQueue, piEventBuf) are still referenced by
+ * their extracted symbol names. __osDevMgrMain is func_10002E50. The thread stack top
  * &piThreadStack[OS_PIM_STACKSIZE] resolves to &piEventQueue (adjacent in .bss). */
 #include <ultra64.h>
 
-extern OSDevMgr D_8002AB50;      /* __osPiDevMgr */
 extern OSThread D_80035910;      /* piThread */
 extern OSMesgQueue piEventQueue;
 extern OSMesg D_80036B58;        /* piEventBuf */
@@ -15,13 +14,16 @@ extern void __osPiCreateAccessQueue(void);
 extern s32 osPiRawStartDma(s32, u32, void *, u32);
 extern s32 osEPiRawStartDma(OSPiHandle *, s32, u32, void *, u32);
 
+OSDevMgr __osPiDevMgr = { 0 };
+OSPiHandle *__osPiTable = NULL;
+
 void osCreatePiManager(OSPri pri, OSMesgQueue *cmdQ, OSMesg *cmdBuf, s32 cmdMsgCnt)
 {
     u32 savedMask;
     OSPri oldPri;
     OSPri myPri;
 
-    if (!D_8002AB50.active)
+    if (!__osPiDevMgr.active)
     {
         osCreateMesgQueue(cmdQ, cmdBuf, cmdMsgCnt);
         osCreateMesgQueue(&piEventQueue, (OSMesg *) &D_80036B58, 1);
@@ -36,15 +38,15 @@ void osCreatePiManager(OSPri pri, OSMesgQueue *cmdQ, OSMesg *cmdBuf, s32 cmdMsgC
             osSetThreadPri(NULL, pri);
         }
         savedMask = __osDisableInt();
-        D_8002AB50.active = 1;
-        D_8002AB50.thread = &D_80035910;
-        D_8002AB50.cmdQueue = cmdQ;
-        D_8002AB50.evtQueue = &piEventQueue;
-        D_8002AB50.acsQueue = &__osPiAccessQueue;
-        D_8002AB50.dma = osPiRawStartDma;
-        D_8002AB50.edma = osEPiRawStartDma;
+        __osPiDevMgr.active = 1;
+        __osPiDevMgr.thread = &D_80035910;
+        __osPiDevMgr.cmdQueue = cmdQ;
+        __osPiDevMgr.evtQueue = &piEventQueue;
+        __osPiDevMgr.acsQueue = &__osPiAccessQueue;
+        __osPiDevMgr.dma = osPiRawStartDma;
+        __osPiDevMgr.edma = osEPiRawStartDma;
         /* stack top == &piThreadStack[OS_PIM_STACKSIZE], which is &piEventQueue */
-        osCreateThread(&D_80035910, 0, func_10002E50, &D_8002AB50, &piEventQueue, pri);
+        osCreateThread(&D_80035910, 0, func_10002E50, &__osPiDevMgr, &piEventQueue, pri);
         osStartThread(&D_80035910);
         __osRestoreInt(savedMask);
         if (oldPri != -1)

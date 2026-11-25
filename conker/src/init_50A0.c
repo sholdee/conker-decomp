@@ -54,7 +54,7 @@ void func_100052A0(s32 arg0) {
     s32 i;
 
     mesg = NULL;
-    if (D_8002BD18 == 0) {
+    if (__osShutdown == 0) {
         osRecvMesg(&D_8003B9D0, &mesg, 1);
     }
     D_8002AC5C = 1;
