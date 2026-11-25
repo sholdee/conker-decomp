@@ -2,10 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
-
-/* A four-oscillator wobble driven by an attack/decay/sustain/release envelope, one per player view. */
+/* A four-oscillator wobble driven by an attack/decay/sustain/release envelope, one per view (indexed by struct108.unk23D). */
 typedef struct {
-    /* 0x00 */ f32 frequency0;     /* oscillator frequencies, in cycles per 30 frames */
+    /* 0x00 */ f32 frequency0;     /* oscillator frequencies in Hz (elapsed is in 30 fps frames) */
     /* 0x04 */ f32 frequency1;     // matching: an f32[4] array here changes FP regalloc in func_1512D980
     /* 0x08 */ f32 frequency2;
     /* 0x0C */ f32 frequency3;
@@ -99,11 +98,7 @@ void func_1512D980(struct108 *view) {
     ViewEnvelope *env = &D_800DC2C0[view->unk23D];
     f32 sign;
 
-    if (func_150ADA20() & 1) {
-        sign = 1.0f;
-    } else {
-        sign = -1.0f;
-    }
+    sign = (func_150ADA20() & 1) ? 1.0f : -1.0f;
     if (env->elapsed != -1.0f && env->stage != 5 && !(view->unk84 & 0x80000)) {
         env->output[0] = sinf(env->elapsed * 0.03333333507f * env->frequency0 * 360.0f * 0.01745329238f) * (sign * env->amplitude);
         // matching: the integer `1 *` (not 1.0f, not omitted) is what IDO compiled
