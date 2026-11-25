@@ -2050,33 +2050,6 @@ typedef struct {
 } struct140; // 0x180
 
 typedef struct {
-    u16 unk0;
-    u16 unk2;
-    s16 unk4;
-    u16 unk6;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    s32 unk28;
-    f32 unk2C;
-    f32 unk30; // sp70
-    f32 unk34;
-    s16 unk38;
-    s16 unk3A;
-    f32 unk3C;
-    f32 unk40; // sp80
-    s16 unk44;
-    s16 unk46;
-    s32 unk48;
-    s32 unk4C;
-} struct145;
-
-typedef struct {
     s32 unk0;
     s32 unk4;
     s32 unk8;
