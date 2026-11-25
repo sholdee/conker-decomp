@@ -7,6 +7,7 @@
 #include "variables.h"
 #undef D_800D3098
 
+/* Cached RDP state (prim/env colour, geometry and other modes, last texture) for func_15142B7C..func_15142FBC. */
 extern s16 D_800DD1C0;
 extern s16 D_800DD1C2;
 extern s16 D_800DD1C4;
@@ -28,6 +29,7 @@ extern s32 D_800DD218;
 extern s32 D_800DD21C;
 extern u8 D_800C3E90;
 extern u8 D_8008A160[]; /* palettes of four RGB triples */
+/* Debug breadcrumbs of func_15143134. */
 extern s32 D_800DCA00;
 extern Mtx *D_800DCA04;
 extern f32 D_800DCA08;
@@ -419,7 +421,7 @@ void func_15142180(u8 kind, struct17 *pos, s32 arg2, f32 scaleA, f32 scaleB) {
     params.unk4 = -25;
     params.unk6 = 10;
     params.unk14 = 2.5f * scaleA;
-    params.unk18 = (1.0f + 1.0f) * scaleA;
+    params.unk18 = (1.0f + 1.0f) * scaleA; // matching: folds to 2.0f but avoids IDO turning 2.0f * x into x + x
     params.unk1C = D_800A5470;
     params.unk20 = D_800A5474;
     params.unk24 = 3.0f * scaleB;
@@ -439,6 +441,7 @@ void func_15142180(u8 kind, struct17 *pos, s32 arg2, f32 scaleA, f32 scaleB) {
     func_15153F18(&params, &params.pos, 0, 0xFF, 1);
 }
 
+/* Interpolation callbacks: the midpoint of arg2/arg3, or arg4 unchanged. */
 s32 func_151422C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return (arg3 + arg2) >> 1;
 }
@@ -1234,6 +1237,10 @@ typedef struct Func15143E94Spawn {
 } Func15143E94Spawn;
 extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 
+/*
+ * If any actor is alive and some i passes func_150A29C8(i, arg1) == 0, plays arg0 through func_1512D748
+ * and spawns a short random func_151D8868 effect. Returns whether it did.
+ */
 u8 func_15143E94(s32 arg0, s32 arg1) {
     u8 ret;
     s8 i;
@@ -1628,6 +1635,7 @@ f32 func_15144AA8(s32 index) {
     return v;
 }
 
+/* Position (unk2F8) of D_800DBFF0[index]. */
 struct17 *func_15144B34(s32 index) {
     return (struct17 *)&D_800DBFF0[index].unk2F8;
 }
