@@ -7,29 +7,30 @@ extern s32 D_800DBDC4;
 extern s32 D_800DBDC8;
 extern f32 D_800DBDCC;
 extern f32 D_800DBDD0;
-extern f32 D_800A2D50;
-extern f32 D_800A2D54;
-extern f32 D_800A2D58;
-extern f32 D_800A2D5C;
 
-typedef struct unkfunc_1510FE30 {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    u16 unk6;
-    s16 unk8;
-    s16 unkA;
-    s16 unkC;
-} unkfunc_1510FE30;
+/* Node of the zone tree at D_800DBE48: square regions linked by byte offsets. */
+typedef struct ZoneNode {
+    /* 0x0 */ s16 unk0;
+    /* 0x2 */ s16 unk2;
+    /* 0x4 */ s16 next;     // byte offset to the next sibling, 0 = last
+    /* 0x6 */ u16 halfSize; // half the region's side length
+    /* 0x8 */ s16 x;        // region centre
+    /* 0xA */ s16 z;
+    /* 0xC */ s16 child;    // byte offset to the first child, 0 = leaf
+} ZoneNode;
 
-typedef struct unkfunc_1510F8D8 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-} unkfunc_1510F8D8;
+/* Ground-probe hit records written to D_800D3300 by func_150A3A70 and friends. */
+typedef struct GroundHit {
+    /* 0x0 */ s32 height;  // 24.8 fixed point
+    /* 0x4 */ s32 *tri;    // collision triangle: three vertex offsets from vtxBase
+    /* 0x8 */ s32 vtxBase; // 0 for the static world mesh
+    /* 0xC */ s32 unkC;    // group or object index, depending on the probe type
+} GroundHit;
 
-extern unkfunc_1510FE30 *D_800DBE48;
+// D_800D3300 is declared as a pointer in variables.h, but it is the hit array itself.
+#define sGroundHits ((GroundHit *)&D_800D3300)
+
+extern ZoneNode *D_800DBE48;
 
 extern s32 func_150A3A70(s32, s32);
 extern void func_150A6760(s32);
@@ -38,52 +39,63 @@ extern s32 func_1510FE30(s32);
 
 extern void func_150AD8B0(f32 *, f32 *, f32 *);
 
-s32 func_1510E670(s32 arg0) {
+/* Returns whether ground hit `index`'s triangle faces up (its normal has y >= 0). */
+s32 func_1510E670(s32 index) {
     s32 *tri;
-    s32 base;
+    s32 vtxBase;
     s16 *v0;
     s16 *v1;
     s16 *v2;
-    f32 a[3];
-    f32 b[3];
-    f32 c[3];
-    f32 y;
+    f32 edge1[3];
+    f32 edge2[3];
+    f32 normal[3];
+    f32 normalY;
 
-    tri = (s32 *)((unkfunc_1510F8D8 *)&D_800D3300)[arg0].unk4;
-    base = ((unkfunc_1510F8D8 *)&D_800D3300)[arg0].unk8;
+    tri = sGroundHits[index].tri;
+    vtxBase = sGroundHits[index].vtxBase;
     if (tri != NULL) {
-        v0 = (s16 *)(tri[0] + base);
-        v1 = (s16 *)(tri[1] + base);
-        v2 = (s16 *)(tri[2] + base);
-        a[0] = v1[0] - v0[0];
-        a[1] = v1[1] - v0[1];
-        a[2] = v1[2] - v0[2];
-        b[0] = v2[0] - v0[0];
-        b[1] = v2[1] - v0[1];
-        b[2] = v2[2] - v0[2];
-        func_150AD8B0(a, b, c);
-        y = c[1];
-        if (y < 0.0f) {
-            return 0;
+        v0 = (s16 *)(tri[0] + vtxBase);
+        v1 = (s16 *)(tri[1] + vtxBase);
+        v2 = (s16 *)(tri[2] + vtxBase);
+        edge1[0] = v1[0] - v0[0];
+        edge1[1] = v1[1] - v0[1];
+        edge1[2] = v1[2] - v0[2];
+        edge2[0] = v2[0] - v0[0];
+        edge2[1] = v2[1] - v0[1];
+        edge2[2] = v2[2] - v0[2];
+        func_150AD8B0(edge1, edge2, normal);
+        normalY = normal[1];
+        if (normalY < 0.0f) {
+            return FALSE;
         } else {
-            return 1;
+            return TRUE;
         }
     }
-    return 0;
+    return FALSE;
 }
 
 void func_1510E950(s32 *arg0, s16 (*arg1)[3], s16 (*arg2)[3], f32 *arg3, f32 *arg4, s32 *arg5, s16 *arg6, f32 x, f32 y, f32 z, f32 argA, u16 argB, struct127 *argC, f32 argD, f32 argE, s32 argF);
 
-void func_1510E7A4(s32 a0, s32 a1, s32 a2, s32 a3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 arg10, s32 arg11, f32 arg12, f32 arg13) {
-    func_1510E950(a0, a1, 0, a2, a3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, 0);
+/* Floor query with an explicit height window for the type-2 collision groups. */
+void func_1510E7A4(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outGroupFloorY, s32 *outFlags,
+                   s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, struct127 *obj, f32 minY, f32 maxY) {
+    func_1510E950(outTri, outVerts, NULL, outFloorY, outGroupFloorY, outFlags, outType, x, y, z, refY, group, obj,
+                  minY, maxY, 0);
 }
 
-void func_1510E82C(s32 a0, s32 a1, s32 a2, s32 a3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 arg10, s32 arg11) {
-    func_1510E950(a0, a1, 0, a2, a3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, D_800A2D50, D_800A2D54, 0);
+/* Floor query with the default height window. */
+void func_1510E82C(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outGroupFloorY, s32 *outFlags,
+                   s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, struct127 *obj) {
+    func_1510E950(outTri, outVerts, NULL, outFloorY, outGroupFloorY, outFlags, outType, x, y, z, refY, group, obj,
+                  -10000.0f, 20000.0f, 0);
 }
 
-void func_1510E8BC(s32 a0, s32 a1, s32 a2, s32 a3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 arg10, s32 arg11, f32 arg12, f32 arg13, s32 arg14) {
-    func_1510E950(a0, a1, 0, a2, a3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, D_800A2D58, D_800A2D5C, arg14);
+/* Floor query with the default height window; noFallback disables the upward-facing fallback triangle. */
+void func_1510E8BC(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outGroupFloorY, s32 *outFlags,
+                   s16 *outType, f32 x, f32 y, f32 z, f32 refY, u16 group, struct127 *obj, f32 unused12,
+                   f32 unused13, s32 noFallback) {
+    func_1510E950(outTri, outVerts, NULL, outFloorY, outGroupFloorY, outFlags, outType, x, y, z, refY, group, obj,
+                  -10000.0f, 20000.0f, noFallback);
 }
 
 typedef struct Obj1510E950 {
@@ -126,7 +138,7 @@ extern f32 D_800DBE6C;
 extern f32 D_800DBE70;
 extern s32 *D_800DBF94;
 
-#define ENTS ((unkfunc_1510F8D8 *)&D_800D3300)
+#define ENTS sGroundHits
 #define obj ((Obj1510E950 *)argC)
 #define OBJS2 ((Ent1510E950 *)D_800DBEF4)
 
@@ -155,7 +167,7 @@ void func_1510E950(s32 *arg0, s16 (*arg1)[3], s16 (*arg2)[3], f32 *arg3, f32 *ar
     s32 dummy;
     s32 idx;
     s32 id;
-    unkfunc_1510F8D8 *e;
+    GroundHit *e;
     s32 *t;
     s16 *v;
     s32 b2;
@@ -226,7 +238,7 @@ void func_1510E950(s32 *arg0, s16 (*arg1)[3], s16 (*arg2)[3], f32 *arg3, f32 *ar
                         if (count != 0) {
                             best = none;
                             for (i = 0; i < count; i++) {
-                                h = ENTS[i].unk0 * 0.00390625f;
+                                h = ENTS[i].height * 0.00390625f;
                                 if (best < h && h < maxY) {
                                     bestIdx = i;
                                     best = h;
@@ -235,8 +247,8 @@ void func_1510E950(s32 *arg0, s16 (*arg1)[3], s16 (*arg2)[3], f32 *arg3, f32 *ar
                             *arg4 = best;
                         }
                         if (*arg4 != none && arg2 != 0) {
-                            t = (s32 *)ENTS[bestIdx].unk4;
-                            off = ENTS[bestIdx].unk8;
+                            t = ENTS[bestIdx].tri;
+                            off = ENTS[bestIdx].vtxBase;
                             for (i = 0; i < 3; i++) {
                                 vp = (s16 *)(t[i] + off);
                                 arg2[i][0] = vp[0];
@@ -260,7 +272,7 @@ void func_1510E950(s32 *arg0, s16 (*arg1)[3], s16 (*arg2)[3], f32 *arg3, f32 *ar
                 }
                 for (i = 0; i < count; i++) {
                     f32 rg;
-                    h = ENTS[i].unk0 / 256.0f;
+                    h = ENTS[i].height / 256.0f;
                     if (argF == 0 && canAlt != 0 && *arg3 == none && (none == none || h < none)) {
                         s32 padM;
                         if (func_1510E670(i)) {
@@ -315,13 +327,13 @@ void func_1510E950(s32 *arg0, s16 (*arg1)[3], s16 (*arg2)[3], f32 *arg3, f32 *ar
                     if (chosen != -1) {
                         e = &ENTS[chosen];
                         canAlt = 0;
-                        *arg3 = e->unk0 / 256.0f;
+                        *arg3 = e->height / 256.0f;
                         if (*arg3 < none) {
                             *arg3 = none;
                         }
-                        vi = e->unk4;
+                        vi = (s32)e->tri;
                         tri = vi;
-                        b2 = e->unk8;
+                        b2 = e->vtxBase;
                         if (type != 3) {
                             if (obj != NULL && b2 == 0) {
                                 obj->unk19E = (vi - D_800DBE3C) / 12;
@@ -330,7 +342,7 @@ void func_1510E950(s32 *arg0, s16 (*arg1)[3], s16 (*arg2)[3], f32 *arg3, f32 *ar
                             obj->unk19E = (vi - D_800C6070[D_800CC2D4[e->unkC * 0x32C]]) / 12;
                         }
                         if (b2 == 0 && arg0 != 0) {
-                            *arg0 = e->unk4;
+                            *arg0 = (s32)e->tri;
                         }
                         base = b2;
                     } else {
@@ -372,12 +384,12 @@ void func_1510E950(s32 *arg0, s16 (*arg1)[3], s16 (*arg2)[3], f32 *arg3, f32 *ar
                     e = ENTS;
                     if (count > 0) {
                     do {
-                        h = e->unk0 / 256.0f;
+                        h = e->height / 256.0f;
                         if (lo < h && h < maxY) {
                             if (!func_1510E670(i)) {
                                 s32 vt;
                                 maxY = h;
-                                vt = e->unk4;
+                                vt = (s32)e->tri;
                                 idx = (vt - D_800DBE3C) / 12;
                                 if (type == 0) {
                                     if (*(s32 **)&D_800DBE5C != NULL) {
@@ -469,28 +481,28 @@ f32 func_1510F648(f32 arg0, f32 arg1, f32 arg2) {
 
 #define ABS_1510F720(x) ((x) < 0 ? -(x) : (x))
 
-s32 func_1510F720(s32 x, s32 y, s32 r, unkfunc_1510FE30 **out) {
-    unkfunc_1510FE30 *node;
+s32 func_1510F720(s32 x, s32 y, s32 r, ZoneNode **out) {
+    ZoneNode *node;
     s32 count;
     s32 off;
 
     node = D_800DBE48;
     count = 0;
     while (node != NULL) {
-        if (ABS_1510F720(node->unk8 - x) < r + node->unk6
-            && ABS_1510F720(node->unkA - y) < r + node->unk6) {
-            if (node->unkC != 0) {
-                off = node->unkC;
+        if (ABS_1510F720(node->x - x) < r + node->halfSize
+            && ABS_1510F720(node->z - y) < r + node->halfSize) {
+            if (node->child != 0) {
+                off = node->child;
             } else {
                 *out++ = node;
                 count++;
-                off = node->unk4;
+                off = node->next;
             }
         } else {
-            off = node->unk4;
+            off = node->next;
         }
         if (off != 0) {
-            node = (unkfunc_1510FE30 *)((u8 *)node + off);
+            node = (ZoneNode *)((u8 *)node + off);
         } else {
             node = NULL;
         }
@@ -539,7 +551,7 @@ s32 func_1510F8D8(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
     s32 count;
     s32 bestIndex;
     s32 i;
-    unkfunc_1510F8D8 *entries;
+    GroundHit *entries;
     f32 arg1f;
     f32 best;
     f32 current;
@@ -550,13 +562,13 @@ s32 func_1510F8D8(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
         return -10000;
     }
 
-    entries = (unkfunc_1510F8D8 *)&D_800D3300;
+    entries = (GroundHit *)&D_800D3300;
     bestIndex = 0;
     arg1f = (f32)arg1;
-    best = arg1f - ((f32)entries[0].unk0 * 0.00390625f);
+    best = arg1f - ((f32)entries[0].height * 0.00390625f);
 
     for (i = 1; i < count; i++) {
-        current = arg1f - ((f32)entries[i].unk0 * 0.00390625f);
+        current = arg1f - ((f32)entries[i].height * 0.00390625f);
         if (((best >= 0.0f) && (current < best) && (current >= 0.0f)) ||
             ((best < 0.0f) && (best < current))) {
             best = current;
@@ -565,10 +577,10 @@ s32 func_1510F8D8(s32 arg0, s32 arg1, s32 arg2, s32 *arg3) {
     }
 
     if (arg3 != NULL) {
-        *arg3 = entries[bestIndex].unk4;
+        *arg3 = (s32)entries[bestIndex].tri;
     }
 
-    return (s32)((f32)entries[bestIndex].unk0 * 0.00390625f);
+    return (s32)((f32)entries[bestIndex].height * 0.00390625f);
 }
 
 void func_1510FC34(s32 arg0) {
@@ -601,24 +613,24 @@ void func_1510FC34(s32 arg0) {
 #define ABS_1510FD20(x) ((x) < 0 ? -(x) : (x))
 
 s32 func_1510FD20(s32 arg0, s32 arg1) {
-    unkfunc_1510FE30 *node;
+    ZoneNode *node;
 
     node = D_800DBE48;
     while (node != NULL) {
-        if (node->unkC != 0) {
-            if (ABS_1510FD20(arg0 - node->unk8) <= node->unk6 && ABS_1510FD20(arg1 - node->unkA) <= node->unk6) {
-                node = (unkfunc_1510FE30 *)((u8 *)node + node->unkC);
-            } else if (node->unk4 != 0) {
-                node = (unkfunc_1510FE30 *)((u8 *)node + node->unk4);
+        if (node->child != 0) {
+            if (ABS_1510FD20(arg0 - node->x) <= node->halfSize && ABS_1510FD20(arg1 - node->z) <= node->halfSize) {
+                node = (ZoneNode *)((u8 *)node + node->child);
+            } else if (node->next != 0) {
+                node = (ZoneNode *)((u8 *)node + node->next);
             } else {
                 node = NULL;
             }
         } else {
-            if (ABS_1510FD20(arg0 - node->unk8) <= node->unk6 && ABS_1510FD20(arg1 - node->unkA) <= node->unk6) {
+            if (ABS_1510FD20(arg0 - node->x) <= node->halfSize && ABS_1510FD20(arg1 - node->z) <= node->halfSize) {
                 return (s32)node;
             }
-            if (node->unk4 != 0) {
-                node = (unkfunc_1510FE30 *)((u8 *)node + node->unk4);
+            if (node->next != 0) {
+                node = (ZoneNode *)((u8 *)node + node->next);
             } else {
                 node = NULL;
             }
@@ -630,7 +642,7 @@ s32 func_1510FD20(s32 arg0, s32 arg1) {
 #undef ABS_1510FD20
 
 s32 func_1510FE30(s32 arg0) {
-    unkfunc_1510FE30 *temp_v0;
+    ZoneNode *temp_v0;
     s32 temp_v1;
     s16 temp_a1;
 
@@ -641,13 +653,13 @@ s32 func_1510FE30(s32 arg0) {
         if ((s32)temp_v0 == arg0) {
             return temp_v1;
         }
-        temp_a1 = temp_v0->unkC;
+        temp_a1 = temp_v0->child;
         if (temp_a1 != 0) {
-            temp_v0 = (unkfunc_1510FE30 *)((u8 *)temp_v0 + temp_a1);
+            temp_v0 = (ZoneNode *)((u8 *)temp_v0 + temp_a1);
         } else {
-            temp_a1 = temp_v0->unk4;
+            temp_a1 = temp_v0->next;
             if (temp_a1 != 0) {
-                temp_v0 = (unkfunc_1510FE30 *)((u8 *)temp_v0 + temp_a1);
+                temp_v0 = (ZoneNode *)((u8 *)temp_v0 + temp_a1);
                 temp_v1++;
             } else {
                 temp_v0 = NULL;
