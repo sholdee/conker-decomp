@@ -3388,91 +3388,91 @@ void func_1508E6C8(void) {
 s32 func_1508E6D0(s32 arg0) {
     switch (arg0) {
     case 0x3F:
-        return 0x708;
+        return 1800;
     case 0x14:
-        return 0xC80;
+        return 3200;
     case 0x22:
-        return 0x1F4;
+        return 500;
     case 0x23:
-        return 0x2710;
+        return 10000;
     case 0x16:
-        return 0x186A0;
+        return 100000;
     case 0x15:
-        return 0x1F4;
+        return 500;
     case 0x21:
-        return 0x1F4;
+        return 500;
     case 0x24:
-        return 0x186A0;
+        return 100000;
     case 0x19:
     case 0x40:
-        return 0x1F4;
-    case 0x9:
-        return 0x1388;
+        return 500;
+    case 9:
+        return 5000;
     case 0x38:
-        return 0x1388;
+        return 5000;
     case 0x18:
     case 0x41:
-        return 0x186A0;
-    case 0x3:
-        return 0x2EE;
+        return 100000;
+    case 3:
+        return 750;
     case 0x37:
-        return 0x5DC;
+        return 1500;
     default:
-        return 0x186A0;
+        return 100000;
     }
 }
 
 s32 func_1508E780(s32 arg0) {
     if (D_800D23B0->gameType != 0xB8) {
-        switch (arg0) {                             /* switch 1 */
-        case 0x14:                                  /* switch 1 */
+        switch (arg0) {
+        case 0x14:
             return 0x28;
-        case 0x3F:                                  /* switch 1 */
+        case 0x3F:
             return 0x2F;
-        case 0x22:                                  /* switch 1 */
+        case 0x22:
             return 0x56;
-        case 0x23:                                  /* switch 1 */
+        case 0x23:
             return 0x16;
-        case 0x16:                                  /* switch 1 */
+        case 0x16:
             return 0x24;
-        case 0x15:                                  /* switch 1 */
+        case 0x15:
             return 0x4B;
-        case 0x21:                                  /* switch 1 */
+        case 0x21:
             return 0x58;
-        case 0x24:                                  /* switch 1 */
+        case 0x24:
             return 0x63;
-        case 0x19:                                  /* switch 1 */
+        case 0x19:
             return 0x57;
-        case 0x40:                                  /* switch 1 */
+        case 0x40:
             return 0x21;
-        case 0x9:                                   /* switch 1 */
+        case 9:
             return 0x1D;
-        case 0x38:                                  /* switch 1 */
+        case 0x38:
             return 0x7B;
-        case 0x39:                                  /* switch 1 */
+        case 0x39:
             return 0x82;
-        case 0x37:                                  /* switch 1 */
+        case 0x37:
             return 0x85;
-        case 0x18:                                  /* switch 1 */
+        case 0x18:
             return 0x55;
-        case 0x41:                                  /* switch 1 */
+        case 0x41:
             return 0x2E;
-        case 0x25:                                  /* switch 1 */
+        case 0x25:
             return 0x1060;
-        default:                                    /* switch 1 */
+        default:
             return -1;
         }
     } else {
-        switch (arg0) {                             /* switch 2; irregular */
-        case 8:                                     /* switch 2 */
+        switch (arg0) {
+        case 8:
             return -1;
-        case 1:                                     /* switch 2 */
+        case 1:
             return 0x105C;
-        case 16:                                    /* switch 2 */
+        case 16:
             return 0x1019;
-        case 2:                                     /* switch 2 */
+        case 2:
             return 0x1059;
-        default:                                    /* switch 2 */
+        default:
             return -1;
         }
     }
@@ -3514,7 +3514,7 @@ s32 func_1508E89C(s32 arg0, s32 arg1) {
             if (D_800D23B0->slot) {
                 D_800D23B0->slot[arg0] = D_800D23B0->slot[arg1];
                 if (D_800D23B0->slot[arg0] >= 0) {
-                    D_800D23B0->slotOwner[(D_800D23B0->slot)[arg0]] = arg0;
+                    D_800D23B0->slotOwner[D_800D23B0->slot[arg0]] = arg0;
                 }
             }
             D_800D23B0->unk16C0[arg0] = D_800D23B0->unk16C0[arg1];
@@ -3546,43 +3546,46 @@ s32 func_1508E89C(s32 arg0, s32 arg1) {
     return 0;
 }
 
-extern struct127 D_800CC40F[];
-
 void func_1508EB90(s32 arg0, s32 arg1, s32 arg2) {
-    s32 temp = *(u8*)&D_800CC40F[arg0];
+    s32 temp = D_800CC2D0[arg0].unk13F;
     func_1509BFB0(1, temp | 0x2000, arg1, arg2);
 }
 
 void func_1508EBF8(s32 arg0, s32 arg1) {
-    s32 temp = *(u8*)&D_800CC40F[arg0];
+    s32 temp = D_800CC2D0[arg0].unk13F;
     func_1509BFB0(1, temp | 0x2000, 0x14, arg1);
 }
 
 void func_1508EC5C(s32 arg0, s32 arg1) {
-    s32 temp = *(u8*)&D_800CC40F[arg0];
+    s32 temp = D_800CC2D0[arg0].unk13F;
     func_1509BFB0(1, temp | 0x2000, 0x61, arg1);
 }
 
-typedef struct {
-    u16 unk0;
-    u16 count;
-    s32 unk4;
-    u16 entries[8];
-} GameB4080Group;
+/* A group of linked (kind << 12 | id) entries, D_800D23C0[D_80087380]. */
+typedef struct LinkGroup {
+    /* 0x00 */ u16 unk0;
+    /* 0x02 */ u16 count;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 entries[8];
+} LinkGroup;
 
-s32 func_1508ECC0(u16 arg0, u16 arg1, u16 arg2) {
+/* D_800D23C0 is declared as s32 in variables.h; it holds a LinkGroup array. */
+#define LINK_GROUPS (*(LinkGroup **)&D_800D23C0)
+
+/* Finds the entry of kind `kind` linked to (type, id); returns its id or -1. */
+s32 func_1508ECC0(u16 type, u16 id, u16 kind) {
     u32 i;
     u32 j;
     u32 k;
     u16 key;
 
-    key = (arg0 << 12) + arg1;
+    key = (type << 12) + id;
     for (i = 0; i < D_80087380; i++) {
-        for (j = 0; j < (*(GameB4080Group **)&D_800D23C0)[i].count; j++) {
-            if (key == (*(GameB4080Group **)&D_800D23C0)[i].entries[j]) {
-                for (k = 0; k < (*(GameB4080Group **)&D_800D23C0)[i].count; k++) {
-                    if (arg2 == ((*(GameB4080Group **)&D_800D23C0)[i].entries[k] >> 12) && k != j) {
-                        return (*(GameB4080Group **)&D_800D23C0)[i].entries[k] & 0xFFF;
+        for (j = 0; j < LINK_GROUPS[i].count; j++) {
+            if (key == LINK_GROUPS[i].entries[j]) {
+                for (k = 0; k < LINK_GROUPS[i].count; k++) {
+                    if (kind == (LINK_GROUPS[i].entries[k] >> 12) && k != j) {
+                        return LINK_GROUPS[i].entries[k] & 0xFFF;
                     }
                 }
                 return -1;
@@ -3592,37 +3595,32 @@ s32 func_1508ECC0(u16 arg0, u16 arg1, u16 arg2) {
     return -1;
 }
 
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s32 unk4;
-    s32 unk8[4];
-} Struct1508EDBC;
-
-void func_1508EDBC(s32 arg0) {
-    if (arg0 < D_80087380) {
-        ((Struct1508EDBC *)D_800D23C0)[arg0].unk2 = 0;
-        ((Struct1508EDBC *)D_800D23C0)[arg0].unk4 = 0;
-        ((Struct1508EDBC *)D_800D23C0)[arg0].unk0 = 0;
+/* Clears link group `index`. */
+void func_1508EDBC(s32 index) {
+    if (index < D_80087380) {
+        ((LinkGroup *)D_800D23C0)[index].count = 0;
+        ((LinkGroup *)D_800D23C0)[index].unk4 = 0;
+        ((LinkGroup *)D_800D23C0)[index].unk0 = 0;
     }
 }
 
 void func_1503DDD0(s32);
 void func_15114B94(u32);
 
-void func_1508EE0C(u16 arg0, u16 arg1) {
+/* Fires every entry of the link group containing (type, id), then clears the group. */
+void func_1508EE0C(u16 type, u16 id) {
     u32 i;
     u32 j;
     s32 operand;
     u16 key;
 
-    key = (arg0 << 12) + arg1;
+    key = (type << 12) + id;
     for (i = 0; i < D_80087380; i++) {
-        for (j = 0; j < (*(GameB4080Group **)&D_800D23C0)[i].count; j++) {
-            if ((*(GameB4080Group **)&D_800D23C0)[i].entries[j] == key) {
-                for (j = 0; j < (*(GameB4080Group **)&D_800D23C0)[i].count; j++) {
-                    operand = (*(GameB4080Group **)&D_800D23C0)[i].entries[j] & 0xFFF;
-                    switch ((*(GameB4080Group **)&D_800D23C0)[i].entries[j] >> 12) {
+        for (j = 0; j < LINK_GROUPS[i].count; j++) {
+            if (LINK_GROUPS[i].entries[j] == key) {
+                for (j = 0; j < LINK_GROUPS[i].count; j++) {
+                    operand = LINK_GROUPS[i].entries[j] & 0xFFF;
+                    switch (LINK_GROUPS[i].entries[j] >> 12) {
                     case 2:
                         func_15114B94(operand);
                         break;
