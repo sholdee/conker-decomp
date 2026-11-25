@@ -1,6 +1,9 @@
 #include <ultra64.h>
 
+/* functions.h declares func_1502B7F0 with fixed parameters; it is variadic. */
+#define func_1502B7F0 func_1502B7F0_fixed_args
 #include "functions.h"
+#undef func_1502B7F0
 #include "variables.h"
 
 #include "macros.h"
@@ -314,105 +317,112 @@ void *func_1502B5C8(u32 *size, s32 depth, ...) {
 
     return data;
 }
-s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3) {
-    s32 *more;
-    u8 *offset;
-    s32 *tmp;
-    s32 sp44;
-    s32 ret;
-    s32 sp38;
-    s32 n;
+/*
+ * Like func_1502B5C8, but the data loaded is a table of `count` entries (0 = terminated by bit 31),
+ * which is turned into pointers by func_1502B4A8. Stores the entry count in *countOut if non-NULL.
+ */
+RomTableEntry *func_1502B6BC(u32 *size, s32 count, s32 *countOut, s32 depth, ...) {
+    u32 *found;
+    u8 *addr;
+    u32 localSize;
+    va_list args;
+    RomTableEntry *table;
+    s32 info;
+    s32 index;
 
-    more = &sp44 + 1;
-    if (arg0 != 0) {
-        more = arg0;
+    found = &localSize;
+    if (size != NULL) {
+        found = size;
     }
 
-    *more = 1;
-    offset = D_AB1950;
-    tmp = &arg3 + 1;
+    *found = 1;
+    addr = D_AB1950;
+    va_start(args, depth);
 
-    if (arg3 != 0) {
-        do {
-            tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-            n = *(tmp - 1);
-            if (*more != 0) {
-                offset += func_1502AC88(offset, n, &sp38);
-            }
-            *more = sp38 & 0xFFFFFFF;
-        } while (--arg3 != 0);
+    for (; depth != 0; depth--) {
+        index = va_arg(args, s32);
+        if (*found != 0) {
+            addr += func_1502AC88(addr, index, &info);
+        }
+        *found = info & 0xFFFFFFF;
     }
 
-    if (*more != 0) {
-        ret = (s32)func_1502B350(offset, sp38, (u32 *)more);
-        if (*more != 0 && ret != 0) {
-            arg1 = func_1502B4A8(ret, arg1);
+    if (*found != 0) {
+        table = func_1502B350(addr, info, found);
+        if (*found != 0 && table != NULL) {
+            count = func_1502B4A8(table, count);
         } else {
-            arg1 = 0;
+            count = 0;
         }
-        if (arg2 != 0) {
-            *arg2 = arg1;
+        if (countOut != NULL) {
+            *countOut = count;
         }
     } else {
-        ret = 0;
+        table = NULL;
     }
 
-    return ret;
+    return table;
 }
-s32 func_1502B7F0(s32 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-    u8 *offset;
-    s32 *tmp;
-    s32 n;
-    s32 sp38;
-    s32 sp34;
+/*
+ * Follows `depth` table indices from the root ROM table and loads the data reached into a new buffer
+ * (see func_1502B350), stored in *data (NULL if missing). Returns the size loaded.
+ */
+u32 func_1502B7F0(void **data, s32 depth, ...) {
+    va_list args;
+    u8 *addr;
+    s32 index;
+    u32 size;
+    s32 info;
 
-    sp38 = 1;
-    offset = D_AB1950;
-    tmp = &arg1 + 1;
+    size = 1;
+    addr = D_AB1950;
+    va_start(args, depth);
 
-    for (; arg1 != 0; arg1--) {
-        tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-        n = *(tmp - 1);
-        if (sp38 != 0) {
-            offset += func_1502AC88(offset, n, &sp34);
+    for (; depth != 0; depth--) {
+        index = va_arg(args, s32);
+        if (size != 0) {
+            addr += func_1502AC88(addr, index, &info);
         }
-        sp38 = sp34 & 0xFFFFFFF;
+        size = info & 0xFFFFFFF;
     }
 
-    if (sp38 != 0) {
-        *arg0 = (s32)func_1502B350(offset, sp34, (u32 *)&sp38);
+    if (size != 0) {
+        *data = func_1502B350(addr, info, &size);
     } else {
-        *arg0 = 0;
+        *data = NULL;
     }
 
-    return sp38;
+    return size;
 }
 
-s32 func_1502B8E0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    u8 *offset;
-    s32 *tmp;
-    s32 n;
-    s32 more;
-    s32 sp34;
+/*
+ * Follows `depth` table indices from the root ROM table and loads the data reached into `dst` (see
+ * func_1502B224), at most `maxSize` bytes if nonzero. Returns the size loaded, or 0 if missing.
+ */
+s32 func_1502B8E0(void *dst, u32 maxSize, s32 depth, ...) {
+    u8 *addr;
+    va_list args;
+    s32 index;
+    s32 size;
+    s32 info;
 
-    more = 1;
-    offset = D_AB1950;
-    tmp = &arg2 + 1;
+    size = 1;
+    addr = D_AB1950;
+    va_start(args, depth);
 
-    for (; arg2 != 0; arg2--) {
-        tmp = (s32 *)(((s32)tmp + 3) & -4) + 1;
-        n = *(tmp - 1);
-        if (more != 0) {
-            offset += func_1502AC88(offset, n, &sp34);
+    for (; depth != 0; depth--) {
+        index = va_arg(args, s32);
+        if (size != 0) {
+            addr += func_1502AC88(addr, index, &info);
         }
-        more = sp34 & 0xFFFFFFF;
+        size = info & 0xFFFFFFF;
     }
 
-    if (more != 0) {
-        more = func_1502B224(offset, arg0, sp34, arg1);
+    if (size != 0) {
+        size = func_1502B224(addr, dst, info, maxSize);
     }
 
-    return more;
+    return size;
 }
 
 s32 func_1502B9B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
