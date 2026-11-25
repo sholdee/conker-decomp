@@ -248,38 +248,42 @@ Gfx *func_15110600(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3) {
 
 extern u8 D_800BEAC2;
 
-Gfx *func_151106A8(Gfx *arg0) {
+/* On view 0, clears the depth buffer (fills it with the maximum depth) and switches back to the framebuffer;
+ * in split screen also draws the black divider bars, and blacks out the whole screen while D_800BEAC2 is set. */
+Gfx *func_151106A8(Gfx *gfx) {
     if (D_80082FA4 == 0) {
-        { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xE7, 24, 8); command->words.w1 = 0; }
-        { Gfx *command = arg0++; command->words.w0 = 0xEF302C0F; command->words.w1 = 4; }
-        { Gfx *command = arg0++; command->words.w0 = 0xFCFFFFFF; command->words.w1 = 0xFFFE793C; }
-        { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xFF, 24, 8) | _SHIFTL(0, 21, 3) | _SHIFTL(2, 19, 2) | _SHIFTL(D_800BE620 - 1, 0, 12); command->words.w1 = D_800BE9C4; }
-        { Gfx *command = arg0++; command->words.w0 = 0xF7000000; command->words.w1 = 0xFFFCFFFC; }
-        arg0 = (Gfx *)func_1501A490((s32)arg0, 0xFF, 0, 0, 0, 0);
-        { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xF6, 24, 8) | _SHIFTL(D_800BE620 - 2, 14, 10) | _SHIFTL(D_800BE624, 2, 10); command->words.w1 = _SHIFTL(2, 14, 10) | _SHIFTL(0, 2, 10); }
-        { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xE7, 24, 8); command->words.w1 = 0; }
-        arg0 = func_1501A680(arg0);
+        gDPPipeSync(gfx++);
+        gDPSetOtherMode(gfx++, 0x302C0F, 4);
+        gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+        gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_800BE9C4);
+        gDPSetFillColor(gfx++, (GPACK_ZDZ(G_MAXFBZ, 0) << 16) | GPACK_ZDZ(G_MAXFBZ, 0));
+        gfx = (Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0);
+        gDPFillRectangle(gfx++, 2, 0, D_800BE620 - 2, D_800BE624);
+        gDPPipeSync(gfx++);
+        gfx = func_1501A680(gfx);
         if (D_80082FA0 != 0) {
-            { Gfx *command = arg0++; command->words.w0 = _SHIFTL(0xE7, 24, 8); command->words.w1 = 0; }
-            arg0 = (Gfx *)func_1501A490((s32)arg0, 0xFF, 0, 0, 0, 0);
-            { Gfx *command = arg0++; command->words.w0 = 0xF7000000; command->words.w1 = 0x10001; }
-            arg0 = func_1501A6CC(arg0, 0, (D_800BE624 >> 1) - 6, D_800BE620, (D_800BE624 >> 1) + 6);
+            gDPPipeSync(gfx++);
+            gfx = (Gfx *)func_1501A490((s32)gfx, 0xFF, 0, 0, 0, 0);
+            gDPSetFillColor(gfx++, (GPACK_RGBA5551(0, 0, 0, 1) << 16) | GPACK_RGBA5551(0, 0, 0, 1));
+            gfx = func_1501A6CC(gfx, 0, (D_800BE624 >> 1) - 6, D_800BE620, (D_800BE624 >> 1) + 6);
             if (D_80082FA0 != 1) {
-                arg0 = func_1501A6CC(arg0, (D_800BE620 >> 1) - 1, 0, (D_800BE620 >> 1) + 1, D_800BE624);
+                gfx = func_1501A6CC(gfx, (D_800BE620 >> 1) - 1, 0, (D_800BE620 >> 1) + 1, D_800BE624);
             }
             if (D_800BEAC2 != 0) {
-                arg0 = func_1501A6CC(arg0, 0, 0, D_800BE620, D_800BE624);
+                gfx = func_1501A6CC(gfx, 0, 0, D_800BE620, D_800BE624);
             }
         }
     }
-    return arg0;
+    return gfx;
 }
 
 extern u8 D_800C35E8;
 
+/* Returns how much of the sky shows for the camera at (x, y, z) looking at (pitch, yaw) on the current map
+ * D_800BE9F0: 0 hides it, 320 (a full screen height) draws all of it; func_15110CFC turns it into a row count. */
 s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
     s32 ret;
-    s32 flag;
+    s32 byHeight;
 
     switch (D_800BE9F0) {
     case 0x6:
@@ -293,7 +297,7 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
         ret = y * 90.0f / 1800.0f + 150.0f;
         break;
     case 0x0:
-        if (y < 1600.0f && 26.0f < pitch) {
+        if (y < 1600.0f && pitch > 26.0f) {
             ret = 0;
         } else {
             ret = y * 51.0f / 1800.0f + 134.0f;
@@ -301,46 +305,46 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
         break;
     case 0x7:
         if (z < -1100.0f) {
-            ret = 0x140;
-        } else if (20.0f < pitch) {
+            ret = 320;
+        } else if (pitch > 20.0f) {
             ret = 0;
         } else {
             ret = y * 54.0f / 1800.0f + 167.0f;
         }
         break;
     case 0x41:
-        ret = 0x89;
+        ret = 137;
         break;
     case 0x3C:
-        if (z < -1650.0f || (3495.0f < x && x < 4578.0f && z < 2960.0f)) {
-            ret = 0x140;
+        if (z < -1650.0f || (x > 3495.0f && x < 4578.0f && z < 2960.0f)) {
+            ret = 320;
         } else {
             ret = 0;
         }
         break;
     case 0xB:
-        flag = 0;
+        byHeight = FALSE;
         if (func_150A29C8(0, 0x18) == 1) {
             if (func_150A29C8(0, 0x2E) == 0) {
-                if (0.0f < pitch) {
+                if (pitch > 0.0f) {
                     ret = 0;
                 } else {
-                    flag = 1;
+                    byHeight = TRUE;
                 }
             } else {
                 ret = 0;
             }
         } else {
-            flag = 1;
+            byHeight = TRUE;
         }
-        if (flag) {
+        if (byHeight) {
             if (y < 1218.0f) {
-                ret = 0x1E;
+                ret = 30;
             } else {
-                s32 lim = 0x140;
+                s32 lim = 320; // matching: IDO loads the 320 before the y < 2000 test only from a local
 
                 if (y < 2000.0f) {
-                    ret = 0xA0;
+                    ret = 160;
                 } else {
                     ret = lim;
                 }
@@ -349,21 +353,21 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
         break;
     case 0x13:
         if (D_800C35EA == 1 && (D_800C35E8 == 2 || D_800C35E8 == 1)) {
-            ret = 0x140;
+            ret = 320;
         } else if (y < 1900.0f) {
-            ret = 0x10E;
+            ret = 270;
         } else {
-            ret = 0x140;
+            ret = 320;
         }
         break;
     case 0x1C:
         ret = y * 34.0f / 1800.0f + 130.0f;
         break;
     case 0xE:
-        ret = 0xA5;
+        ret = 165;
         break;
     case 0x39:
-        ret = 0x54;
+        ret = 84;
         break;
     case 0x2D:
         ret = y * 53.0f / 1800.0f + 139.0f;
@@ -372,7 +376,7 @@ s32 func_151108C4(f32 x, f32 y, f32 z, f32 pitch, f32 yaw) {
         ret = y * 53.0f / 1800.0f + 139.0f;
         break;
     default:
-        ret = 0x140;
+        ret = 320;
         break;
     }
     return ret;
