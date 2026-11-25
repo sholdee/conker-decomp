@@ -584,27 +584,6 @@ void func_151DBBD4(Vec3f *arg0, s32 arg1, u8 *arg2, u8 arg3, s32 arg4);
 void func_151F0080(MtxF arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 void func_151F00E0(MtxF arg0, MtxF arg1, MtxF arg2);
 
-void func_16000000(void);
-s32  func_16000028(void);
-void func_16000058(void);
-s32  func_16000224(void);
-void func_16000304(void);
-void func_1600030C(void);
-void func_16000314(void);
-s32  func_16000384(void);
-void func_16000424(OSThread *faulted);
-void func_160012B0(s32 arg0, u8 *arg1);
-void func_16001338(u8 arg0, u8 arg1, u8 arg2);
-s32  func_160016F4(s32 arg0);
-s32  func_16001984();
-s32  func_160019A8(s32 direction, void *dramAddr);
-void func_16001A64(void);
-s32  func_16001A6C(f32 arg0);
-void func_16001AB0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-u8*  func_16001AD0(u8 *arg0, u8 *arg1, u32 arg2);
-s32  func_16001B8C(u8 *arg0, u8 *arg1, u32 arg2);
-
-
 /* non-matching */
 
 void func_10001420(void);

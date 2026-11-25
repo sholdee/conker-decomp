@@ -6,12 +6,9 @@
 
 
 extern u32 osGetCount(void);
-s32 func_160016F4(s32 arg0);
-s32 func_160019A8(s32 direction, void *dramAddr);
 extern u8 __osContLastCmd;
 extern u8 __osMaxControllers;
 extern OSPifRam __osContPifRam;
-void func_160018BC(void);
 s32 func_16001700(void)
 {
   s32 ret;
@@ -50,8 +47,6 @@ s32 func_16001700(void)
   func_160016F4(count2);
   return ret;
 }
-
-s32 func_160019A8(s32 direction, void *dramAddr);
 
 void func_16001830(OSContPad *data)
 {

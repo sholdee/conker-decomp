@@ -6,36 +6,10 @@
 #include "functions.h"
 #include "variables.h"
 
-/* Conversion state for one printf field (libultra _Pft): n0/n1/n2 are the lengths of the
- * prefix, digits and suffix pieces, nz0/nz1/nz2 the zero padding after each. */
-typedef struct {
-    union {
-        long long ll;
-        double d;
-    } v;
-    u8 *s;
-    s32 n0;
-    s32 nz0;
-    s32 n1;
-    s32 nz1;
-    s32 n2;
-    s32 nz2;
-    s32 prec;
-    s32 width;
-    u32 nchar;
-    u32 flags;
-    u8 qual;
-} DebuggerPft;
-
 extern u8 D_16003C70[]; // 32 spaces (pad source)
 extern u8 D_16003C94[]; // 32 '0' characters (pad source)
 extern u8 D_16003CB8[]; // "0123456789abcdef"
 extern u8 D_16003CCC[]; // "0123456789ABCDEF"
-
-s32 func_16001BB4(s32 (*pfn)(u8 *, u8 *, u32), u8 *arg, u8 *fmt, va_list args);
-void func_160021FC(DebuggerPft *px, va_list *pap, u8 code, u8 *ac);
-void func_1600288C(void *arg0, unsigned char code);
-void func_160033A8(DebuggerPft *px, u8 code);
 
 #define FLAGS_SPACE 1
 #define FLAGS_PLUS 2
@@ -300,8 +274,6 @@ void func_160021FC(DebuggerPft *px, va_list *pap, u8 code, u8 *ac) {
         break;
     }
 }
-s16 func_16002D2C(s16 *pex, u16 *ps);
-void func_16002DE4(DebuggerPft *px, u8 code, u8 *p, s16 nsig, s16 xexp);
 
 /* _Ldtob (libultra xldtob.c): converts px->v.d to decimal digits for an e/f/g conversion.
  * Unlike the SDK, this copy builds its 0.0/1.0 constants from float locals at runtime. */
