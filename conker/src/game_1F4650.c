@@ -6,7 +6,7 @@
 #include "functions.h"
 #undef func_150ADA20
 #undef func_1513D4B8
-s32 func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+void *func_1513D4B8(void *desc, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
 u32 func_150ADA20(void);
 #include "variables.h"
 
@@ -70,13 +70,13 @@ typedef struct {
     u32 flags;
     u32 colors;
     u32 widths;
-} Game1F4650Beam;
+} SightBeamParams;
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, void *, void *, s32, f32);
-extern s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTriangle *endTri, Game1F4650Beam *beam, Game1F4650Beam *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
+extern s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTriangle *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17);
 
 /* Casts rays both ways from the beam's midpoint and spawns a sight beam between the two surfaces hit. */
-s32 func_151C71A0(Game1F4650Beam *beam) {
+s32 func_151C71A0(SightBeamParams *beam) {
     f32 originZ;
     f32 originY;
     f32 originX;
@@ -193,12 +193,12 @@ typedef struct {
 /* Message 0x20 (see func_151C8674). */
 typedef struct {
     SightActor *actor;
-    Game1F4650Beam *source;
+    SightBeamParams *source;
 } SightTouchMsg;
 
 /* Message 0x3A: 0 = switch on, 1 = switch off, 2 = trigger. */
 typedef struct {
-    Game1F4650Beam *source;
+    SightBeamParams *source;
     u8 command;
 } SightCommandMsg;
 
@@ -220,11 +220,11 @@ typedef struct {
     f32 angleT;
     f32 speedS;
     f32 speedT;
-    Game1F4650Beam *source;
+    SightBeamParams *source;
     SightModelOwner *midEffect;
     s32 unk30;
-    s32 endEffect0;
-    s32 endEffect1;
+    struct SightExtension *endEffect0;
+    struct SightExtension *endEffect1;
     SightEmitter *emitter0[3];
     SightEmitter *emitter1[3];
     f32 phase;
@@ -236,7 +236,7 @@ typedef struct {
     s16 timer;
     s16 period;
     u8 flags;
-    Game1F4650Beam *beam;
+    SightBeamParams *beam;
     SightZone *zone0;
     SightZone *zone1;
     u8 unk94;
@@ -279,15 +279,29 @@ typedef struct {
 } SightSpawnDesc;
 
 
+/* A sight beam object: spawn descriptor copy at +0x18, quad vertex buffers, beam state at +0x110. */
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[0xB];
+    SightSpawnDesc spawn;
+    u8 pad70[0x50];
+    u8 vtxTemplate[0x40];
+    u8 *vtxBuffers[4];
+    SightBeamState state;
+} SightBeamObject;
+
 extern void func_1510F800(s32);
 extern s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
 extern SightModelOwner *func_1516284C(Header *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
-s32 func_151C8FCC(s32 owner, vertex *start, vertex *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
+struct SightExtension *func_151C8FCC(SightBeamObject *owner, vertex *start, vertex *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9);
 s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 *volume);
 
 /* Spawns a sight beam object between two surface points, with emitters at both ends. */
-s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTriangle *endTri, Game1F4650Beam *beam, Game1F4650Beam *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
-    s32 obj;
+s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTriangle *endTri, SightBeamParams *beam, SightBeamParams *source, u8 red, u8 green, u8 blue, u8 hasMidEffect, s16 activeTime, s16 inactiveTime, s16 startTime, u8 blinks, u8 startsOff, u8 zoneMasked, u8 hasEndEffects, u8 arg11, u8 pulses, f32 pulseAngle, f32 pulseSpeed, u8 keepEnabled, u8 arg16, s32 arg17) {
+    SightBeamObject *obj;
     SightSpawnDesc spawn;
     SightBeamState state;
     s32 pos[3];
@@ -393,8 +407,8 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
     spawn.unk45 = 0xFF;
     spawn.unk46 = 0;
     spawn.unk47 = 6;
-    obj = func_1513D4B8((s32)&spawn, (s32)&D_800A4AA0, 0x1A, 0, 0, 0x18, 0, 0xA0, arg16, arg17);
-    if (obj != 0) {
+    obj = func_1513D4B8(&spawn, &D_800A4AA0, 0x1A, 0, 0, 0x18, 0, 0xA0, arg16, arg17);
+    if (obj != NULL) {
         SightBeamState *objState;
         vertex dir;
         f32 len;
@@ -408,7 +422,7 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
             // matching: a block-scope declaration gives IDO a scope boundary here
             extern s32 D_800BE9F0;
 
-            objState = (SightBeamState *)(obj + 0x110);
+            objState = &obj->state;
             memcpy(objState, &state, sizeof(SightBeamState));
         }
         dir = spawn.unk34;
@@ -428,28 +442,15 @@ s32 func_151C756C(vertex *start, SightTriangle *startTri, vertex *end, SightTria
             objState->endEffect0 = func_151C8FCC(obj, &p0, &p1, red, green, blue, state.zone0, zoneMasked, arg16, arg17);
             objState->endEffect1 = func_151C8FCC(obj, &q0, &q1, red, green, blue, state.zone1, zoneMasked, arg16, arg17);
         } else {
-            objState->endEffect0 = 0;
-            objState->endEffect1 = 0;
+            objState->endEffect0 = NULL;
+            objState->endEffect1 = NULL;
         }
         if (objState->midEffect != NULL) {
             func_1000FA64(0x4D0, pos[0], pos[1], pos[2], 0x1F40, 0xFA, 0x64, (s32)func_151C87AC, objState, 0, 8, (u8)func_150ADA20());
         }
     }
-    return obj;
+    return (s32)obj;
 }
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0xB];
-    SightSpawnDesc spawn;
-    u8 pad70[0x50];
-    u8 vtxTemplate[0x40];
-    u8 *vtxBuffers[4];
-    SightBeamState state;
-} SightBeamObject;
 
 extern vertex *func_15144B34(s32);
 void func_151D5D60(void *, s16, s32, void **, u8 *);
@@ -541,7 +542,7 @@ s32 func_151C82D0(SightBeamObject *obj) {
     SightBeamState *state = &obj->state;
     s16 period;
     SightModelOwner *midEffect;
-    Game1F4650Beam *beam;
+    SightBeamParams *beam;
     SightEmitter *emitter0;
     SightEmitter *emitter1;
     SightEmitter *emitter2;
@@ -871,17 +872,17 @@ typedef struct {
 void *func_151407D0(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32);
 
 /* Effect spawned by func_151C8FCC; +0x170 holds the beam object that owns it. */
-typedef struct {
+typedef struct SightExtension {
     u8 pad0[0x170];
     SightBeamObject *owner;
 } SightExtension;
 
 /* Spawns a beam extension effect from `start` to `end`, owned by beam object `owner`. */
-s32 func_151C8FCC(s32 owner, vertex *start, vertex *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
-    void *effect;
+SightExtension *func_151C8FCC(SightBeamObject *owner, vertex *start, vertex *end, u8 red, u8 green, u8 blue, SightZone *zone, u8 zoneMasked, u8 arg8, s32 arg9) {
+    SightExtension *effect;
     SightExtensionParams params;
     SightSpawnDesc desc;
-    s32 ownerCopy; // matching: copied to the stack before the memcpy below
+    SightBeamObject *ownerCopy; // matching: copied to the stack before the memcpy below
 
     desc.start = *start;
     desc.end = *end;
@@ -922,9 +923,9 @@ s32 func_151C8FCC(s32 owner, vertex *start, vertex *end, u8 red, u8 green, u8 bl
     params.unk20 = 9.999999975e-07f;
     effect = func_151407D0(&params, 100, &desc, 0, 0, 0, 0, 1, arg8, arg9);
     if (effect != NULL) {
-        memcpy((u8 *)effect + 0x170, &ownerCopy, 4);
+        memcpy(&effect->owner, &ownerCopy, sizeof(ownerCopy));
     }
-    return (s32)effect;
+    return effect;
 }
 
 /* Spawn descriptor for func_15132A4C. */
@@ -1071,12 +1072,12 @@ void func_151C94D4(SightBeamObject *obj) {
         func_1000FD38(func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
-    part = (void *)((SightBeamObject *)state)->state.endEffect0;
+    part = ((SightBeamObject *)state)->state.endEffect0;
     state = &((SightBeamObject *)state)->state;
     if (part != NULL) {
         func_1516972C(part);
     }
-    part = (void *)state->endEffect1;
+    part = state->endEffect1;
     if (part != NULL) {
         func_1516972C(part);
     }
@@ -1119,12 +1120,12 @@ void func_151C95D8(SightBeamObject *obj) {
         func_1000FD38(func_151C87AC, state, 0);
     }
     state = *(SightBeamState **)&obj; // matching: read through &obj so IDO reloads it into this register
-    part = (void *)((SightBeamObject *)state)->state.endEffect0;
+    part = ((SightBeamObject *)state)->state.endEffect0;
     state = &((SightBeamObject *)state)->state;
     if (part != NULL) {
         func_1516972C(part);
     }
-    part = (void *)state->endEffect1;
+    part = state->endEffect1;
     if (part != NULL) {
         func_1516972C(part);
     }
@@ -1557,7 +1558,7 @@ void func_151CA6A0(struct108 *player, u8 big) {
         desc.texture = 0x5D;
     }
     desc.lifetime = 300;
-    desc.flags = (1 << (player->unk23D + 0xB)) | 0x50;
+    desc.flags = (1 << (player->unk23D + 11)) | 0x50;
     desc.unk16 = 1;
     desc.unk18 = 0xFF;
     desc.unk1A = 7;
@@ -1620,7 +1621,7 @@ void func_151CA6A0(struct108 *player, u8 big) {
         desc.height = 3.0f;
         desc.width = 3.0f;
         desc.texture = 0x99;
-        desc.flags = (1 << (player->unk23D + 0xB)) | 0x50;
+        desc.flags = (1 << (player->unk23D + 11)) | 0x50;
         desc.unk30 = 8;
         desc.unk34 = 0x44;
         payload.lastValue = 99999.0f;
@@ -2234,7 +2235,7 @@ void func_151CC524(struct108 *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg
     desc.unk50 = 0.0f;
     desc.unk54 = 0.0f;
     desc.lifetime = 300;
-    desc.flags = (1 << (player->unk23D + 0xB)) | ((arg4 ? 0x40 : 0) | 0x10 | 0x80 | 0x100 | 0x200);
+    desc.flags = (1 << (player->unk23D + 11)) | ((arg4 ? 0x40 : 0) | 0x10 | 0x80 | 0x100 | 0x200);
     desc.unk16 = 1;
     desc.unk18 = 0xFF;
     desc.unk1A = 7;
@@ -2335,7 +2336,7 @@ void func_151CC840(struct108 *player, u8 red, u8 green, u8 blue, u8 arg4, u8 arg
     payload.unk8 = 130.0f;
 
     desc.lifetime = 300;
-    desc.flags = (1 << (player->unk23D + 0xB)) | ((arg4 ? 0x40 : 0) | 0x10);
+    desc.flags = (1 << (player->unk23D + 11)) | ((arg4 ? 0x40 : 0) | 0x10);
     desc.unk16 = 1;
     desc.unk18 = 0xFF;
     desc.unk1A = 7;
@@ -2462,7 +2463,7 @@ void func_151CCD1C(struct108 *player, u8 red, u8 green, u8 blue) {
     payload.unk8 = 130.0f;
 
     desc.lifetime = 300;
-    desc.flags = (1 << (player->unk23D + 0xB)) | 0x50;
+    desc.flags = (1 << (player->unk23D + 11)) | 0x50;
     desc.unk16 = 1;
     desc.unk18 = 0xFF;
     desc.unk1A = 7;
