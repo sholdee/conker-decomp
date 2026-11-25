@@ -363,7 +363,7 @@ extern Mtx D_89470;
 extern s16 D_80082FA6;
 Gfx *func_1501A680(Gfx *gfx);
 extern s32 func_1506196C(Actor *, s32);
-extern Gfx *func_1502CCFC(Gfx *, s32, s32, struct255 *, s32, s32 *, s32, s32);
+extern Gfx *func_1502CCFC(Gfx *, s32, s32, MtxF *, s32, s32 *, s32, s32);
 Gfx *func_1510B7B4(Gfx *gfx, s32 idx);
 
 /*

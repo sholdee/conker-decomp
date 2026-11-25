@@ -340,7 +340,7 @@ typedef struct {
 } FloorInfo;
 
 extern Vec3f D_800AAEEC[];
-// matching: the model goes in as s32; a struct255 * argument changes the temp registers
+// matching: the model goes in as s32; a pointer argument changes the temp registers
 void func_1503F404(s32, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
 void func_15143134(Vec3f *, Vec3f *, Mtx *);
 void func_15143794(s16, s16, f32, Vec3f *);

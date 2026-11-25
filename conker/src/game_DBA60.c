@@ -118,7 +118,7 @@ void func_150AE790(AttachedEffect *effect) {
     s32 count;
     u8 yaw;
     u8 pitch;
-    struct255 *bones;
+    MtxF *bones;
     f32 duration;
     f32 distance;
 

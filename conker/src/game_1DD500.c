@@ -35,7 +35,7 @@ void func_15153F18(AngleRange *, SplashSpray *, Game1DD500Ground *, s32, s32);
 extern Game1DD500Profile D_800A3FD8[];
 extern Vec3f D_800AA120;
 
-/* Joint matrix of an actor; include/ types the array as struct255 *. */
+/* Joint matrix of an actor, as an Mtx. */
 #define JOINT_MTX(actor, joint) (&((Mtx *)(actor)->unk1D4)[joint])
 
 /* Effect profile index for an actor; actor types 0x53 and 0xA5 (and no actor) use profile 4. */

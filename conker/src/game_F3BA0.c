@@ -120,7 +120,7 @@ typedef struct {
 
 void *memcpy(void *, const void *, u32);
 s32 func_15045800(f32 *pos, s32 mask, f32 bottom, FloorHit *hit);
-void func_15143134(Vec3f *in, Vec3f *out, struct255 *matrix);
+void func_15143134(Vec3f *in, Vec3f *out, MtxF *matrix);
 u8 func_151D8E20(void);
 Emitter *func_1513418C(BloodDripDesc *desc, s32 dataSize, u8 arg2, s32 arg3);
 RiseParticle *func_151303BC(ParticleDesc *desc, u8 kind, s32 dataSize);

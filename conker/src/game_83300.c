@@ -46,7 +46,7 @@ extern void (*D_80086694[])(void *, Actor *, u8 *);
 s32 func_1506E46C(Actor *, s32 *, s32);
 struct Entry1505C1E4;
 s32 func_1505C1E4(Actor *arg0, Actor *arg1, struct Entry1505C1E4 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-extern struct255 *D_800CC4A4;
+extern MtxF *D_800CC4A4;
 void func_1505F188(Actor *arg0);
 s32 func_1505C7D8(Actor *arg0, s32 arg1);
 
@@ -2939,7 +2939,7 @@ s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
     }
     if (ret != 0) {
         hit = (Entry1505C1E4 *)((u8 *)hits + attackIdx * sizeof(Entry1505C1E4));
-        /* pad108 holds victim slot | 0x80, and D_800B2CD0 + 0x80 * 0x32C is D_800CC2D0 */
+        /* unk108 holds victim slot | 0x80, and D_800B2CD0 + 0x80 * 0x32C is D_800CC2D0 */
         if (((s32 (*)[0x32C / 4])&D_800B2CD0)[attacker->unk108][0] == 1) {
             if (attacker->unk254 != 0) {
                 attacker->unk232 = attacker->unk254;

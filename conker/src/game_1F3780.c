@@ -51,7 +51,7 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, s32 arg3, s16 arg4, u8 arg5, s3
     Vec3f start;
     Vec3f dir;
     s32 matrix;
-    struct255 *joints;
+    MtxF *joints;
     Vec3f *spF4;
     Vec3f *spF0;
     Vec3f spE4;

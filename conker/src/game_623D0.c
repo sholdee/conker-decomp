@@ -43,7 +43,7 @@ void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx,
     f32 (*src)[4];
     f32 dist;
     MtxF temp;
-    struct255 *savedMtx;
+    MtxF *savedMtx;
 
     guMtxIdentF(flip);
     if (mode == 1 || mode == 0) {
@@ -132,7 +132,7 @@ void func_15034F30(Actor *obj, ReflectionEntry *entry, s32 mode, MtxF *srcMtx,
     }
     if (obj != NULL && obj->unk9C != 0) {
         savedMtx = obj->unk1D4;
-        obj->unk1D4 = (struct255 *)dstMtx;
+        obj->unk1D4 = (MtxF *)dstMtx;
         func_15034728(obj);
         obj->unk1D4 = savedMtx;
     }
@@ -227,7 +227,7 @@ extern u32 D_800C3E8C; // bone-matrix pool start
 extern void *allocate_memory(s32, s32, s32, s32);
 void func_1502D54C(s32, s32 *);
 s32 func_1502DB20(u8);
-s32 func_15031070(Attachment *, Actor *, struct255 **, s32 *);
+s32 func_15031070(Attachment *, Actor *, MtxF **, s32 *);
 s32 func_150AD9A0(s32, s32, s32);
 
 /*
@@ -239,7 +239,7 @@ void func_15035808(s32 mode, s32 objIndex, f32 planeX, f32 planeY, f32 planeZ, f
     ReflectionEntry *entry;
     u32 mtx;
     s32 color[3];
-    struct255 *srcMtx;
+    MtxF *srcMtx;
     s32 partCount[4]; // matching: one s32 is written; the array keeps the stack layout
     Attachment *att;
     Attachment *next;

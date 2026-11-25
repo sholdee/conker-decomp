@@ -51,7 +51,7 @@ void func_15152520(ParticleBurst *burst, u8 arg1, s32 arg2);
 /* Spawns a particle burst at bone 10 of `actor`. */
 void func_15193660(Actor *actor, u8 arg1, s32 arg2) {
     ParticleBurst burst;
-    struct255 *bones;
+    MtxF *bones;
 
     if ((actor != NULL) && (actor->interaction_state != 0)) {
         bones = actor->unk1D4;

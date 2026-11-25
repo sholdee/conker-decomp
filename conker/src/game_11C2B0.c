@@ -27,7 +27,7 @@ void func_150EEE00(Actor *actor, u8 slot) {
     f32 muzzle[3];
     Header header;
     Header2 origin;
-    struct255 *bones;
+    MtxF *bones;
 
     if (D_800A163C[slot] & actor->unk94) {
         return;

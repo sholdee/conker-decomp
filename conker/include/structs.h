@@ -14,7 +14,6 @@ typedef struct Camera Camera;
 struct Rope;
 struct BoneChain;
 typedef struct struct216 struct216;
-typedef struct struct255 struct255;
 typedef struct struct256 struct256;
 
 /*
@@ -3401,15 +3400,6 @@ typedef struct {
     u8  pad20[0x8];
 } struct253; // size 0x28
 
-typedef struct {
-    u8 pad0[0x1A];
-    s16 unk1A;
-} struct254;
-
-struct struct255 {
-    u8 pad0[0x240];
-    struct254 *unk240;
-};
 
 struct struct256 {
     u8 pad0[0x80];

@@ -783,7 +783,7 @@ void func_150BD070(u8 arg0, s32 arg1) {
 extern Vec3f D_8009FF40[4];
 extern Vec3f D_8009FF70[4];
 extern Vec3f D_8009FFA0[4];
-void func_15143134(Vec3f *src, Vec3f *dst, struct255 *frame);
+void func_15143134(Vec3f *src, Vec3f *dst, MtxF *frame);
 void func_1514C470(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 arg6, s32 arg7,
                    s32 arg8, f32 arg9, Vec3f *dir, u8 arg11);
 
