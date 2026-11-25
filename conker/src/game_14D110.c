@@ -16,31 +16,6 @@
     (((z) == 9) || ((z) == 0x38) || ((z) == 0x39) || ((z) == 0x37) || ((z) == 0x3B) || ((z) == 0x15) || \
      ((z) == 0x26) || ((z) == 0x3A))
 
-/* Camera.playerExt (ActorCtl, the player's unk31C): fields ActorCtl does not declare yet; layout as in
-   game_14FF90.c. */
-typedef struct CamPlayerExt {
-    /* 0x000 */ u8 pad0[0x12];
-    /* 0x012 */ s16 unk12;
-    /* 0x014 */ u8 pad14[0x78 - 0x14];
-    /* 0x078 */ u8 cameraZone;
-    /* 0x079 */ u8 pad79[0x114 - 0x79];
-    /* 0x114 */ s16 unk114;
-    /* 0x116 */ u8 pad116[0x130 - 0x116];
-    /* 0x130 */ Vec3f aimDir;
-    /* 0x13C */ Vec3f aimEye;
-    /* 0x148 */ Vec3f aimTarget;
-    /* 0x154 */ u8 pad154[0x16C - 0x154];
-    /* 0x16C */ f32 aimYaw;
-    /* 0x170 */ f32 aimPitch;
-    /* 0x174 */ u8 pad174[0x198 - 0x174];
-    /* 0x198 */ u8 aimActive;
-    /* 0x199 */ u8 pad199[0x1A2 - 0x199];
-    /* 0x1A2 */ u16 unk1A2;
-} CamPlayerExt;
-
-#define CAMERA_CHECK(name, cond) typedef char name[(cond) ? 1 : -1]
-CAMERA_CHECK(off_aimPitch, (u32)&((CamPlayerExt *)0)->aimPitch == 0x170);
-
 void func_151C9BA0(Camera *camera, s32 zone);
 void func_151C9ED4(Camera *camera);
 void func_151216F8(Camera *camera);
@@ -334,12 +309,12 @@ void func_15120158(Camera *camera) {
             if (zone == 0x38) {
                 // matching: sinPitch doubles as the pitch adjustment; a separate local changes the frame
                 if (camera->contPad->button & Z_TRIG) {
-                    sinPitch = camera->unk8B4 - (f32)(((CamPlayerExt *)camera->player->unk31C)->unk1A2 >> 8) * 1.098632812f;
+                    sinPitch = camera->unk8B4 - (f32)(camera->player->unk31C->unk1A2 >> 8) * 1.098632812f;
                 } else {
                     sinPitch = 0.0f;
                 }
                 aim->targetPitch += sinPitch;
-                camera->unk8B4 = (f32)(((CamPlayerExt *)camera->player->unk31C)->unk1A2 >> 8) * 1.098632812f;
+                camera->unk8B4 = (f32)(camera->player->unk31C->unk1A2 >> 8) * 1.098632812f;
             }
             func_15048758(&aim->targetYaw);
             if (zone == 0x34) {
@@ -464,7 +439,7 @@ void func_15120158(Camera *camera) {
 /* While R is held in a facing zone, publishes the player's aim ray (eye, target, direction) to the
    player extension block. */
 void func_15121490(Actor *player, OSContPad *pad) {
-    CamPlayerExt *ext;
+    ActorCtl *ext;
     s32 zone;
     Vec3f target;
     Vec3f eye;
@@ -476,7 +451,7 @@ void func_15121490(Actor *player, OSContPad *pad) {
     if (pad->button & R_TRIG) {
         zone = player->unk31C->unk78;
         if (IS_FACING_ZONE(zone)) {
-            ext = (CamPlayerExt *)player->unk31C;
+            ext = player->unk31C;
             angle = (player->unk40 - 90.0f) * DEG2RAD;
             target.x = player->x_position;
             target.y = player->y_position + ((f32)ext->unk114 * 0.75f);
@@ -488,7 +463,7 @@ void func_15121490(Actor *player, OSContPad *pad) {
             eye.y += player->y_position - player->old_y_position;
             ext->aimEye = eye;
             ext->aimTarget = target;
-            ext->aimActive = 1;
+            ext->unk198 = 1;
             dir.x = 1.0f;
             temp = dir.x * cosf(ext->aimPitch * -DEG2RAD);
             dir.y = dir.x * sinf(ext->aimPitch * -DEG2RAD);
