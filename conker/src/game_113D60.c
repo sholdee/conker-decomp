@@ -58,38 +58,45 @@ typedef struct {
 } Struct150E81A8Small;
 
 extern Struct150E81A8Vec D_800A1290[];
-extern f32 *D_80088A3C;
-extern f32 *D_80088A40;
-extern f32 D_800A130C;
 extern f32 D_800A1354;
 extern f32 D_800A1358;
 extern f32 D_800A135C;
 extern f32 D_800A1360;
 extern f32 D_800A1364;
-extern f32 D_800A1310;
-extern f32 D_800A1314;
-extern f32 D_800A1318;
-extern f32 D_800A131C;
-extern f32 D_800A1320;
 extern void func_151D3FF4(Struct150E81A8Vec *arg0, u8 arg1, s32 arg2);
 extern void func_1514FCE8(Struct150E81A8 *arg0, u8 arg1, s32 arg2);
 extern void *func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 func_151337C0(f32 *arg0);
 
-
-typedef struct Vec3f150E68B0 {
+typedef struct {
     f32 x, y, z;
-} Vec3f150E68B0;
+} Vec3f;
 
 typedef struct Game113D60Emission {
-    f32 x, y, amplitudeX, amplitudeY;
-    f32 phaseX, phaseY, speedX, speedY;
-    f32 time, rate, remaining;
-    Vec3f150E68B0 position;
-    f32 scale;
-    s16 duration, durationRange;
-    u8 color;
-} Game113D60Emission;
+    /* 0x00 */ f32 x, y, amplitudeX, amplitudeY;
+    /* 0x10 */ f32 phaseX, phaseY, speedX, speedY;
+    /* 0x20 */ f32 time, rate, remaining;
+    /* 0x2C */ Vec3f position;
+    /* 0x38 */ f32 scale;
+    /* 0x3C */ s16 duration, durationRange;
+    /* 0x40 */ u8 color;
+} Game113D60Emission; // size 0x44
+
+/* Common head of the effect objects this file updates; each effect's own data starts at 0x28. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 kind;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 padD;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ u8 pad10[0x18];
+} Game113D60EffectHeader; // size 0x28
+
+typedef struct {
+    /* 0x00 */ Game113D60EffectHeader header;
+    /* 0x28 */ Game113D60Emission emission;
+} Game113D60Effect;
 
 typedef struct Game113D60Source {
     f32 chance;
@@ -103,33 +110,32 @@ typedef struct Game113D60Source {
     u8 padD[3];
 } Game113D60Source;
 
-typedef void (*Game113D60EndCallback)(Vec3f150E68B0 *, s32);
-typedef void (*Game113D60StartCallback)(Vec3f150E68B0 *);
-typedef void (*Game113D60MotionCallback)(Vec3f150E68B0 *, Vec3f150E68B0 *, Vec3f150E68B0 *, Game113D60Emission *);
+typedef void (*Game113D60EndCallback)(Vec3f *, s32);
+typedef void (*Game113D60StartCallback)(Vec3f *);
+typedef void (*Game113D60MotionCallback)(Vec3f *, Vec3f *, Vec3f *, Game113D60Emission *);
 
 void *memcpy(void *, const void *, u32);
 extern Game113D60StartCallback D_80088A20[];
 extern Game113D60EndCallback D_80088A2C[];
 extern Game113D60MotionCallback D_80088A34[];
 extern Game113D60Source D_800A1190[];
-extern f32 D_800A12F8;
-extern f32 D_800A12FC;
-extern f32 D_800A1300;
 extern u8 D_800C35E8;
 
-void func_150E68B0(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
+/* Randomly starts an emission of the source effect `sourceIndex` from one of the start
+ * points towards `actor`. */
+void func_150E68B0(s32 actor, s32 arg1, s32 arg2, u8 sourceIndex) {
     Game113D60Source *source;
-    Vec3f150E68B0 end;
-    Vec3f150E68B0 start;
-    Vec3f150E68B0 delta;
+    Vec3f end;
+    Vec3f start;
+    Vec3f delta;
     Game113D60Emission emission;
-    void *result;
+    Game113D60Effect *effect;
 
-    if ((arg0 != 0) && ((D_800C35EA != 1) || (D_800C35E8 != 9))) {
-        source = &D_800A1190[arg3];
+    if ((actor != 0) && ((D_800C35EA != 1) || (D_800C35E8 != 9))) {
+        source = &D_800A1190[sourceIndex];
         if ((func_150ADA68() < source->chance) && (source->start != -1)) {
             if (source->end != -1) {
-                D_80088A2C[source->end](&end, arg0);
+                D_80088A2C[source->end](&end, actor);
             } else {
                 end.x = 0.0f;
                 end.y = 0.0f;
@@ -156,17 +162,18 @@ void func_150E68B0(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
                     emission.amplitudeY = 0.0f;
                     emission.phaseY = 0.0f;
                 }
-                emission.rate = func_150ADA68() * D_800A12F8 + D_800A12FC;
+                emission.rate = func_150ADA68() * 0.150000006f + 0.200000003f;
                 emission.remaining = 0.0f;
                 emission.position = start;
                 emission.time = 0.0f;
-                emission.scale = (func_150ADA68() * 100.0f + 150.0f) * D_800A1300;
+                emission.scale = (func_150ADA68() * 100.0f + 150.0f) * 0.1000000015f;
                 emission.duration = source->duration;
                 emission.durationRange = source->durationRange;
                 emission.color = source->color;
-                result = func_151491F4(func_150ADA68() * 70.0f + 30.0f, -1, 0xF, 1, 0xB, 0x44, 0xFF, 1);
-                if (result != NULL) {
-                    memcpy((u8 *)result + 0x28, &emission, 0x44);
+                effect = (Game113D60Effect *)func_151491F4(func_150ADA68() * 70.0f + 30.0f, -1, 15, 1, 11,
+                                                           sizeof(Game113D60Emission), 0xFF, 1);
+                if (effect != NULL) {
+                    memcpy(&effect->emission, &emission, sizeof(Game113D60Emission));
                 }
             }
         }
@@ -204,177 +211,196 @@ typedef struct {
 } Struct150E6B84;
 
 extern f32 sinf(f32);
-extern void func_151436B4(f32, f32, f32, f32 *);
-extern s32 func_150E5FD0(void *, f32 *, f32, f32, f32, u8, s32, u8, u8, s16, s8);
+extern void func_151436B4(f32, f32, f32, Vec3f *);
+extern s32 func_150E5FD0(Vec3f *, Vec3f *, f32, f32, f32, u8, s32, u8, u8, s16, s8);
 extern f32 func_15144528(f32, f32, f32);
 
-void func_150E6B84(Struct150E6B84 *arg0) {
-    Struct150E6B84Sub *sub;
-    f32 inv;
-    f32 y;
-    f32 step;
-    f32 pos[9];
+/* Emits this frame's particles along a sine-wobbled direction and advances the wobble phases. */
+void func_150E6B84(Game113D60Effect *effect) {
+    Game113D60Emission *emission;
+    f32 inverse;
+    f32 time;
+    f32 timeStep;
+    f32 phaseStepX;
+    f32 phaseStepY;
+    f32 speedX;
+    f32 speedY;
+    f32 factor;
+    f32 period;
+    Vec3f direction;
     f32 phaseX;
     f32 phaseY;
-    f32 vx;
-    f32 vy;
-    f32 s1;
-    f32 s2;
-    u32 rnd;
-    u32 rnd2;
+    f32 sineX;
+    f32 sineY;
+    f32 randomX;
+    f32 randomY;
+    u32 randomDuration;
+    u32 randomColor;
 
-    sub = (Struct150E6B84Sub *)arg0->sub;
-    arg0->accum += arg0->rate * D_800BE9A4;
-    if (arg0->accum > 1.0f) {
-        inv = 1.0f / sub->count;
-        y = sub->unk20 + D_800BE9A4;
-        step = y * inv;
-        phaseX = sub->phaseX;
-        phaseY = sub->phaseY;
-        vx = sub->speedX * D_800BE9A4;
-        vy = sub->speedY * D_800BE9A4;
+    emission = &effect->emission;
+    effect->emission.remaining += effect->emission.rate * D_800BE9A4;
+    if (effect->emission.remaining > 1.0f) {
+        inverse = 1.0f / emission->remaining;
+        factor = 0.1f;
+        time = emission->time + D_800BE9A4;
+        timeStep = time * inverse;
+        speedX = emission->speedX * D_800BE9A4;
+        speedY = emission->speedY * D_800BE9A4;
+        phaseX = emission->phaseX;
+        phaseY = emission->phaseY;
+        phaseStepX = speedX * inverse;
+        phaseStepY = speedY * inverse;
         do {
-            s1 = sinf(phaseX);
-            s2 = sinf(phaseY);
-            func_151436B4(sub->x + s1 * sub->ampX, sub->y + s2 * sub->ampY, 5.0f, pos);
-            s1 = func_150ADA68();
-            s2 = func_150ADA68();
-            rnd = func_150ADA20();
-            rnd2 = func_150ADA20();
-            func_150E5FD0(sub->unk2C, pos, sub->unk38, (s1 * 300.0f + 100.0f) * 0.1000000015f,
-                          (s2 * 700.0f + 300.0f) * 0.1000000015f, arg0->unkC, arg0->unk1, sub->unk40,
-                          rnd % 86 + 0xAA, rnd2 % (u32)(sub->unk3E + 1) + sub->unk3C, -1);
-            phaseX += vx * inv;
-            phaseY += vy * inv;
-            y -= step;
-            sub->count -= 1.0f;
-        } while (sub->count > 1.0f);
-        sub->phaseX = func_15144528(phaseX, 6.283185482f, 0.0f);
-        sub->phaseY = func_15144528(phaseY, 6.283185482f, 0.0f);
-        sub->unk20 = y;
+            sineX = sinf(phaseX);
+            sineY = sinf(phaseY);
+            func_151436B4(emission->x + sineX * emission->amplitudeX, emission->y + sineY * emission->amplitudeY, 5.0f,
+                          &direction);
+            randomX = func_150ADA68();
+            randomY = func_150ADA68();
+            randomColor = func_150ADA20();
+            randomDuration = func_150ADA20();
+            func_150E5FD0(&emission->position, &direction, emission->scale, (randomX * 300.0f + 100.0f) * factor,
+                          (randomY * 700.0f + 300.0f) * factor, effect->header.owner, effect->header.kind,
+                          emission->color, randomColor % 86 + 170,
+                          randomDuration % (u32)(emission->durationRange + 1) + emission->duration, -1);
+            phaseX += phaseStepX;
+            phaseY += phaseStepY;
+            time -= timeStep;
+            emission->remaining -= 1.0f;
+        } while (emission->remaining > 1.0f);
+        period = 6.283185482f;
+        emission->phaseX = func_15144528(phaseX, period, 0.0f);
+        emission->phaseY = func_15144528(phaseY, period, 0.0f);
+        emission->time = time;
     }
-}
-
-void func_150E6E34(f32 *out) {
-    f32 *p;
-    f32 t;
-
-    if (func_150ADA68() < D_800A130C) {
-        p = D_80088A3C;
-    } else {
-        p = D_80088A40;
-    }
-    t = func_150ADA68();
-    out[0] = p[0] + (p[3] - p[0]) * t;
-    out[1] = p[1] + (p[4] - p[1]) * t;
-    out[2] = p[2] + (p[5] - p[2]) * t;
-}
-
-extern s32 func_1514470C(struct134 *, s32);
-
-void func_150E6ED8(s32 arg0) {
-    func_1514470C((&D_800D9A20)[func_150ADA20() & 1], arg0);
-}
-
-extern f32 *D_80088A44[];
-
-void func_150E6F18(f32 *out) {
-    f32 *p;
-    f32 t;
-    p = D_80088A44[(u32)func_150ADA20() % 6];
-    t = func_150ADA68();
-    out[0] = p[0] + (p[3] - p[0]) * t;
-    out[1] = p[1] + (p[4] - p[1]) * t;
-    out[2] = p[2] + (p[5] - p[2]) * t;
 }
 
 typedef struct {
-    u8 pad0[0x38];
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
+    /* 0x00 */ Vec3f start;
+    /* 0x0C */ Vec3f end;
+} Game113D60Segment;
+
+extern Game113D60Segment *D_80088A3C;
+extern Game113D60Segment *D_80088A40;
+
+/* Start callback: a random point on one of two segments. */
+void func_150E6E34(Vec3f *out) {
+    Game113D60Segment *segment;
+    f32 t;
+
+    if (func_150ADA68() < 0.5632223487f) {
+        segment = D_80088A3C;
+    } else {
+        segment = D_80088A40;
+    }
+    t = func_150ADA68();
+    out->x = (segment->end.x - segment->start.x) * t + segment->start.x;
+    out->y = (segment->end.y - segment->start.y) * t + segment->start.y;
+    out->z = (segment->end.z - segment->start.z) * t + segment->start.z;
+}
+
+extern void func_1514470C(struct134 *, void *);
+
+/* End callback: the position of one of the two entries of the D_800D9A20 table. */
+void func_150E6ED8(Vec3f *out) {
+    // D_800D9A20 is declared as a single pointer in variables.h but is a two-entry table here.
+    func_1514470C((&D_800D9A20)[func_150ADA20() & 1], out);
+}
+
+extern Game113D60Segment *D_80088A44[];
+
+/* Start callback: a random point on one of six segments. */
+void func_150E6F18(Vec3f *out) {
+    Game113D60Segment *segment;
+    f32 t;
+
+    segment = D_80088A44[func_150ADA20() % 6];
+    t = func_150ADA68();
+    out->x = (segment->end.x - segment->start.x) * t + segment->start.x;
+    out->y = (segment->end.y - segment->start.y) * t + segment->start.y;
+    out->z = (segment->end.z - segment->start.z) * t + segment->start.z;
+}
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x38];
+    /* 0x38 */ Vec3f unk38;
 } Bone150E6FAC;
 
 typedef struct {
-    u8 pad0[0x10];
-    Bone150E6FAC *unk10;
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ Bone150E6FAC *unk10;
 } Node150E6FAC;
 
 typedef struct {
-    u8 pad0[0x14];
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 pad20[0x2D4];
-    void *unk2F4;
-} Obj150E6FAC;
+    /* 0x000 */ u8 pad0[0x14];
+    /* 0x014 */ Vec3f position;
+    /* 0x020 */ u8 pad20[0x2D4];
+    /* 0x2F4 */ void *unk2F4;
+} Actor150E6FAC;
 
 s32 func_1514ECE0(void *, s16, void *);
 
-void func_150E6FAC(f32 *out, Obj150E6FAC *obj) {
+/* End callback: a random point on a ring around node 0x16 of the actor's model, or the actor's
+ * position when the model has no such node. */
+void func_150E6FAC(Vec3f *out, Actor150E6FAC *actor) {
     Node150E6FAC *node;
-    f32 c;
+    f32 sine;
     f32 radius;
     s16 angle;
-    f32 s;
+    f32 cosine;
 
-    if (func_1514ECE0(obj->unk2F4, 0x16, &node) != 0) {
+    if (func_1514ECE0(actor->unk2F4, 0x16, &node) != 0) {
         Bone150E6FAC *bone;
 
         radius = (func_150ADA68() * 100.0f) + 80.0f;
         angle = func_150ADA20() & 0xFF;
-        s = func_151423D8(angle - 0x40);
-        c = func_151423D8(angle);
+        cosine = func_151423D8(angle - 0x40);
+        sine = func_151423D8(angle);
         bone = node->unk10;
-        out[0] = obj->x + (bone->unk38 * -80.0f) + (s * radius);
-        out[1] = obj->y + (bone->unk3C * -80.0f) + 100.0f;
-        out[2] = obj->z + (bone->unk40 * -80.0f) + (c * radius);
+        out->x = actor->position.x + (bone->unk38.x * -80.0f) + (cosine * radius);
+        out->y = actor->position.y + (bone->unk38.y * -80.0f) + 100.0f;
+        out->z = actor->position.z + (bone->unk38.z * -80.0f) + (sine * radius);
     } else {
-        out[0] = obj->x;
-        out[1] = obj->y;
-        out[2] = obj->z;
+        out->x = actor->position.x;
+        out->y = actor->position.y;
+        out->z = actor->position.z;
     }
 }
 
-void func_150E70CC(f32 *arg0, f32 *arg1) {
-    arg0[0] = arg1[5];
-    arg0[1] = arg1[6];
-    arg0[2] = arg1[7];
+/* End callback: the actor's position. */
+void func_150E70CC(Vec3f *out, Actor150E6FAC *actor) {
+    out->x = actor->position.x;
+    out->y = actor->position.y;
+    out->z = actor->position.z;
 }
 
-void func_150E70EC(s32 arg0, s32 arg1, f32 *arg2, f32 *out) {
-    f32 temp_f2;
-    f32 temp_f16;
+/* Motion callback: aims the emission along `delta` with a random wobble. */
+void func_150E70EC(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission) {
+    f32 dx;
+    f32 dz;
 
-    out[0] = func_150484A0(arg2[0], arg2[2]);
-    out[2] = func_150ADA68() * D_800A1310;
-    out[4] = func_150ADA68() * D_800A1314;
-    out[6] = func_150ADA68() * 0.5f;
-    temp_f2 = arg2[0];
-    temp_f16 = arg2[2];
-    out[1] = func_150484A0(sqrtf((temp_f2 * temp_f2) + (temp_f16 * temp_f16)), arg2[1]) - D_800A1318;
-    out[3] = func_150ADA68() * D_800A131C;
-    out[5] = func_150ADA68() * D_800A1320;
-    out[7] = func_150ADA68() * 0.5f;
+    emission->x = func_150484A0(delta->x, delta->z);
+    emission->amplitudeX = func_150ADA68() * 0.09000000358f;
+    emission->phaseX = func_150ADA68() * 6.283185482f;
+    emission->speedX = func_150ADA68() * 0.5f;
+    dx = delta->x;
+    dz = delta->z;
+    emission->y = func_150484A0(sqrtf((dx * dx) + (dz * dz)), delta->y) - 1.570796371f;
+    emission->amplitudeY = func_150ADA68() * 0.0700000003f;
+    emission->phaseY = func_150ADA68() * 6.283185482f;
+    emission->speedY = func_150ADA68() * 0.5f;
 }
 
-extern f32 D_800A1324;
-extern f32 D_800A1328;
-extern f32 D_800A132C;
-extern f32 D_800A1330;
-extern f32 D_800A1334;
-extern f32 D_800A1338;
-extern f32 D_800A133C;
-
-void func_150E71E4(s32 arg0, s32 arg1, f32 *arg2, f32 *out) {
-    out[0] = func_150484A0(arg2[0], arg2[2]);
-    out[2] = D_800A1324;
-    out[4] = func_150ADA68() * D_800A1328;
-    out[6] = func_150ADA68() * D_800A132C;
-    out[1] = D_800A1330;
-    out[3] = D_800A1334;
-    out[5] = func_150ADA68() * D_800A1338;
-    out[7] = func_150ADA68() * D_800A133C;
+/* Motion callback: aims the emission along `delta` with a fixed tilt and a random wobble. */
+void func_150E71E4(Vec3f *start, Vec3f *end, Vec3f *delta, Game113D60Emission *emission) {
+    emission->x = func_150484A0(delta->x, delta->z);
+    emission->amplitudeX = 0.471238941f;
+    emission->phaseX = func_150ADA68() * 6.283185482f;
+    emission->speedX = func_150ADA68() * 0.200000003f;
+    emission->y = -0.5654867291f;
+    emission->amplitudeY = 0.3141592741f;
+    emission->phaseY = func_150ADA68() * 6.283185482f;
+    emission->speedY = func_150ADA68() * 0.150000006f;
 }
 
 typedef struct {
@@ -429,7 +455,6 @@ void func_150E7290(u8 arg0, u8 arg1, s32 arg2) {
         func_151D8868(&sp50, 0, 0xFF, 0);
     }
 }
-
 
 typedef struct {
     /* 0x00 */ f32 unk00;
@@ -520,7 +545,6 @@ void func_150E75A0(Struct150E75A0Pos *arg0, f32 arg1, s16 arg2, u8 arg3, u8 arg4
     sp2C.unk3C = 0x20;
     func_1515548C(&sp2C, 0, arg8, arg9, 0, argA, argB);
 }
-
 
 void func_150E76D0(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 arg6, s32 arg7, s32 arg8, u8 arg9, s32 arg10) {
     Struct150E76D0 sp54;
@@ -1130,7 +1154,6 @@ void func_150E8B1C(Struct150E8B1C *arg0) {
 }
 
 struct260 *func_15130374(void *, u8, s32, u8, s32);
-void func_151436B4(f32, f32, f32, f32 *);
 
 typedef struct {
     u8 unk0;
