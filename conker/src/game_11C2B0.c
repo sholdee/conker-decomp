@@ -2,13 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-typedef struct {
-    u8 pad0[0x94];
-    s32 unk94;
-    u8 pad98[0x13C];
-    s32 unk1D4;
-} struct_150EEE00_arg0;
-
 extern u8 D_800A1638[];
 extern u8 D_800A163C[];
 extern f32 D_800A15F0[][3];
@@ -63,8 +56,7 @@ typedef struct {
     s32 field_0x2E4;
 } ActorStateFields;
 
-void *func_150EEF80(struct_150EEE00_arg0 *, u8, u8, s32);
-void func_15143134(void *, void *, s32);
+void func_15143134(void *, f32 *, Mtx *);
 void func_15143874(s32, f32, f32 *, f32 *);
 void func_151C329C(void *, s32, s32);
 void *func_151407D0(void *, s32, void *, s32, s32, s32, s32, s32, s32, s32);
@@ -72,45 +64,61 @@ struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32,
 s32 func_15160A58(s32, s32, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150F0A24(f32 *);
 
-void func_150EEE00(struct_150EEE00_arg0 *arg0, u8 arg1) {
-    f32 sp54[3];
-    Header sp4C;
-    Header2 sp40;
-    s32 temp_v1;
+/* Fires gun slot `slot` of `actor`: spawns the shot, a spark burst and a flash at the muzzle. */
+struct Beam *func_150EEF80(struct127 *, u8, u8, s32);
 
-    if (D_800A163C[arg1] & arg0->unk94) {
+void func_150EEE00(struct127 *actor, u8 slot) {
+    f32 muzzle[3];
+    Header header;
+    Header2 origin;
+    struct255 *bones;
+
+    if (D_800A163C[slot] & actor->unk94) {
         return;
     }
 
-    func_150EEF80(arg0, arg1, 0xFF, 1);
-    temp_v1 = arg0->unk1D4;
-    if (temp_v1 != 0) {
-        func_15143134(D_800A15F0[arg1], sp54, temp_v1 + (D_800A1638[arg1] << 6));
-        sp4C.unk0 = 3;
-        sp4C.unk1 = -1;
-        sp4C.unk2 = (func_150ADA20() % 3U) + 4;
-        sp4C.unk4 = 0;
-        sp40.unk0 = (s32) sp54[0];
-        sp40.unk4 = (s32) sp54[1];
-        sp40.unk8 = (s32) sp54[2];
-        func_151602C0(&sp4C, &sp40, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
-        func_150F0A24(sp54);
+    func_150EEF80(actor, slot, 0xFF, 1);
+    bones = actor->unk1D4;
+    if (bones != NULL) {
+        func_15143134(D_800A15F0[slot], muzzle, (Mtx *)bones + D_800A1638[slot]);
+        header.unk0 = 3;
+        header.unk1 = -1;
+        header.unk2 = (func_150ADA20() % 3U) + 4;
+        header.unk4 = 0;
+        origin.unk0 = muzzle[0];
+        origin.unk4 = muzzle[1];
+        origin.unk8 = muzzle[2];
+        func_151602C0(&header, &origin, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+        func_150F0A24(muzzle);
     }
 }
 
-void func_150EEF40(struct210 *arg0, u8 arg1) {
-    s8 sp18[6];
+/* Message payload: an actor reference (message types 0 and 0x43). */
+typedef struct {
+    struct127 *actor;
+    u8 actorId;
+    u8 slot;
+} ActorRefMsg;
 
-    *(struct210 **)&sp18[0] = arg0;
-    sp18[4] = *(u8 *)((s32)arg0 + 0x3B);
-    sp18[5] = arg1;
-    func_151403A8(&sp18, 0x43);
+/* Message payload for type 0x2D: two actors exchange identities. */
+typedef struct {
+    struct127 *actorA;
+    struct127 *actorB;
+    u8 idA;
+    u8 idB;
+} ActorSwapMsg;
+
+/* Sends message 0x43 for gun slot `slot` of `actor`. */
+void func_150EEF40(struct127 *actor, u8 slot) {
+    ActorRefMsg msg;
+
+    msg.actor = actor;
+    msg.actorId = actor->unique_id;
+    msg.slot = slot;
+    func_151403A8((s32)&msg, 0x43);
 }
 
-typedef struct {
-    u8 pad_0[0x3B];
-    u8 field_0x3B;
-} ActorIdByteFields;
+typedef struct { f32 x, y, z; } Vec3f;
 
 typedef struct {
     /* 0x00 */ u8 unk0;
@@ -140,25 +148,38 @@ typedef struct {
     /* 0x50 */ s32 unk50;
     /* 0x54 */ s16 unk54;
     /* 0x56 */ s16 unk56;
-} Spawn150EEF80; /* 0x58 */
+} BeamSpawn; /* 0x58 */
 
+/* State a gun beam object carries at +0x110. */
 typedef struct {
-    /* 0x00 */ struct_150EEE00_arg0 *unk0;
-    /* 0x04 */ u8 unk4;
-    /* 0x08 */ struct127 *unk8;
-    /* 0x0C */ u8 unkC;
-    /* 0x0D */ u8 unkD;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ u8 unk18;
-    /* 0x1C */ void *unk1C[2];
-    /* 0x24 */ struct260 *unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ struct225 *unk2C;
-    /* 0x30 */ struct17 unk30;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-} Ext150EEF80; /* 0x44 */
+    /* 0x00 */ struct127 *actor;       /* the shooter */
+    /* 0x04 */ u8 actorId;             /* actor->unique_id at spawn */
+    /* 0x08 */ struct127 *target;
+    /* 0x0C */ u8 targetId;
+    /* 0x0D */ u8 slot;                /* gun slot, 0 or 1 */
+    /* 0x10 */ f32 widthPhase;
+    /* 0x14 */ f32 alphaPhase;
+    /* 0x18 */ u8 flags;               /* bit 0: the beam is aimed this frame */
+    /* 0x1C */ void *sparks[2];
+    /* 0x24 */ struct260 *emitter;
+    /* 0x28 */ void *glow;
+    /* 0x2C */ struct225 *flash;
+    /* 0x30 */ Vec3f direction;
+    /* 0x3C */ f32 distance;
+    /* 0x40 */ f32 inverse;
+} BeamLink; /* 0x44 */
+
+typedef struct Beam {
+    /* 0x000 */ u8 pad0[0x2C];
+    /* 0x02C */ f32 width;
+    /* 0x030 */ u8 pad30[4];
+    /* 0x034 */ Vec3f start;
+    /* 0x040 */ Vec3f end;
+    /* 0x04C */ u8 pad4C[0x10];
+    /* 0x05C */ u8 alpha;
+    /* 0x05D */ u8 pad5D[0xB3];
+    /* 0x110 */ BeamLink link;
+} Beam;
 
 typedef struct {
     /* 0x00 */ s16 unk0;
@@ -177,65 +198,66 @@ typedef struct {
     /* 0x20 */ f32 unk20[10];
     /* 0x48 */ f32 unk48;
     /* 0x4C */ u8 unk4C;
-} Part150EEF80; /* 0x50 */
+} SparkSpawn; /* 0x50 */
 
+/* Back-reference a beam's spark carries (at spark->link). */
 typedef struct {
-    /* 0x00 */ struct_150EEE00_arg0 *unk0;
-    /* 0x04 */ u8 unk4;
-    /* 0x08 */ void *unk8;
-    /* 0x0C */ u8 unkC;
-} Link150EEF80; /* 0x10 */
+    /* 0x00 */ struct127 *actor;
+    /* 0x04 */ u8 actorId;
+    /* 0x08 */ Beam *beam;
+    /* 0x0C */ u8 index;               /* which beam->link.sparks[] entry */
+} SparkLink; /* 0x10 */
 
+/* Back-reference a beam's emitter carries at +0x28. */
 typedef struct {
-    /* 0x00 */ void *unk0;
-    /* 0x04 */ f32 unk4;
-} Link2150EEF80; /* 0x8 */
+    /* 0x00 */ Beam *beam;
+    /* 0x04 */ f32 accum;              /* particles owed, spawned one per 1.0 */
+} EmitterLink; /* 0x8 */
 
 typedef struct {
     u8 pad0[0x60];
-    void *unk60;
-} Obj150EEF80;
+    SparkLink *link;
+} Spark;
 
-extern f32 D_800A1814;
-extern f32 D_800A1818;
 extern void *func_151A7950(void *, s32, u8, s32);
-s32 func_150EFEC8(ActorIdByteFields *, u8, u8, u8, u8, s32, u8, s32);
-struct225 *func_150F0198(u8, u8, u8, u8, s32, u8, s32);
+s32 func_150EFEC8(struct127 *, u8, u8, u8, u8, Beam *, u8, s32);
+struct225 *func_150F0198(u8, u8, u8, u8, Beam *, u8, s32);
 
-void *func_150EEF80(struct_150EEE00_arg0 *arg0, u8 arg1, u8 arg2, s32 arg3) {
-    void *ret;
-    Spawn150EEF80 spawn;
-    Ext150EEF80 ext;
-    Ext150EEF80 *dst;
+/* Spawns the beam of gun slot `slot` of `actor`, with its sparks, emitter, glow and flash. */
+Beam *func_150EEF80(struct127 *actor, u8 slot, u8 arg2, s32 arg3) {
+    Beam *beam;
+    BeamSpawn spawn;
+    BeamLink init;
+    BeamLink *link;
 
-    if (arg0 == NULL) {
+    if (actor == NULL) {
         return NULL;
     }
-    if (arg1 >= 2) {
+    if (slot >= 2) {
         return NULL;
     }
-    ext.unk10 = func_150ADA68() * 6.283185482f;
-    ext.unk14 = func_150ADA68() * 6.283185482f;
-    ext.unk0 = arg0;
-    ext.unk4 = arg0->pad0[0x3B];
-    ext.unk8 = func_15083E90(0x12);
-    ext.unkC = 0x12;
-    ext.unkD = arg1;
-    ext.unk30 = *(struct17 *)&D_800A5480;
-    ext.unk18 = 0;
+    init.widthPhase = func_150ADA68() * 6.283185482f;
+    init.alphaPhase = func_150ADA68() * 6.283185482f;
+    init.actor = actor;
+    init.actorId = actor->unique_id;
+    init.target = func_15083E90(0x12);
+    init.targetId = 0x12;
+    init.slot = slot;
+    init.direction = *(Vec3f *)&D_800A5480;
+    init.flags = 0;
     spawn.unk0 = 0x94;
     spawn.unk1 = 7;
     spawn.unk2 = 0x2203;
-    spawn.unk4 = 0x12C;
+    spawn.unk4 = 300;
     spawn.unk8 = 0;
     spawn.unkC = 0;
     spawn.unk10 = 0xFF;
     spawn.unk11 = 0xFF;
     spawn.unk12 = 0xFF;
     spawn.unk13 = 0xFF;
-    ext.unk40 = 1.0f;
+    init.inverse = 1.0f;
     spawn.unk18 = 1.0f;
-    ext.unk3C = 0.0f;
+    init.distance = 0.0f;
     spawn.unk34 = 0.0f;
     spawn.unk38 = 0.0f;
     spawn.unk3C = 0.0f;
@@ -252,16 +274,16 @@ void *func_150EEF80(struct_150EEE00_arg0 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     spawn.unk50 = 0;
     spawn.unk54 = 1;
     spawn.unk56 = 0xFF;
-    ret = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x1D, 0, 0, 0x1C, 0, 0, 0, 0x44, arg2, arg3);
-    if (ret != NULL) {
-        dst = (Ext150EEF80 *)((u8 *)ret + 0x110);
-        memcpy(dst, &ext, sizeof(ext));
+    beam = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x1D, 0, 0, 0x1C, 0, 0, 0, 0x44, arg2, arg3);
+    if (beam != NULL) {
+        link = &beam->link;
+        memcpy(link, &init, sizeof(init));
         {
-        Part150EEF80 part;
-        Link150EEF80 link;
-        Link2150EEF80 link2;
-        struct260 *tmp;
-        part.unk0 = 0x12C;
+        SparkSpawn part;
+        SparkLink sparkLink;
+        EmitterLink emitterLink;
+        struct260 *emitter;
+        part.unk0 = 300;
         part.unk2 = 9;
         part.unk4 = 1.0f;
         part.unk8 = 1.0f;
@@ -283,212 +305,181 @@ void *func_150EEF80(struct_150EEE00_arg0 *arg0, u8 arg1, u8 arg2, s32 arg3) {
         part.unk20[8] = 0.0f;
         part.unk20[9] = 0.0f;
         part.unk48 = 1.0f;
-        link.unk0 = arg0;
+        sparkLink.actor = actor;
         part.unk10 = 0.9499999881f;
         part.unk18 = 40.0f;
-        link.unk4 = arg0->pad0[0x3B];
-        link.unk8 = ret;
+        sparkLink.actorId = actor->unique_id;
+        sparkLink.beam = beam;
         part.unk4C = 1;
-        for (link.unkC = 0; link.unkC < 2; link.unkC++) {
-            dst->unk1C[link.unkC] = func_151A7950(&part, 0x10, arg2, arg3);
-            if (dst->unk1C[link.unkC] != NULL) {
-                memcpy(((Obj150EEF80 *)dst->unk1C[link.unkC])->unk60, &link, sizeof(link));
+        for (sparkLink.index = 0; sparkLink.index < 2; sparkLink.index++) {
+            link->sparks[sparkLink.index] = func_151A7950(&part, 0x10, arg2, arg3);
+            if (link->sparks[sparkLink.index] != NULL) {
+                memcpy(((Spark *)link->sparks[sparkLink.index])->link, &sparkLink, sizeof(sparkLink));
             }
         }
-        link2.unk0 = ret;
-        link2.unk4 = 0.0f;
-        tmp = func_15149130(0x12C, -1, 0x22, -1, 0, 0x20, (struct37 *)8, arg2, arg3);
-        dst->unk24 = tmp;
-        if (tmp != NULL) {
-            memcpy((u8 *)tmp + 0x28, &link2, sizeof(link2));
+        emitterLink.beam = beam;
+        emitterLink.accum = 0.0f;
+        emitter = func_15149130(300, -1, 0x22, -1, 0, 0x20, (struct37 *)8, arg2, arg3);
+        link->emitter = emitter;
+        if (emitter != NULL) {
+            memcpy((u8 *)emitter + 0x28, &emitterLink, sizeof(emitterLink));
         }
-        dst->unk28 = func_150EFEC8((ActorIdByteFields *)arg0, arg1, 0xFF, 0xD9, 0xA0, (s32)ret, arg2, arg3);
-        dst->unk2C = func_150F0198(0x46, 0xFF, 0x82, 0, (s32)ret, arg2, arg3);
+        link->glow = (void *)func_150EFEC8(actor, slot, 0xFF, 0xD9, 0xA0, beam, arg2, arg3);
+        link->flash = func_150F0198(0x46, 0xFF, 0x82, 0, beam, arg2, arg3);
         }
     }
-    return ret;
+    return beam;
 }
 
-typedef struct { f32 x, y, z; } Vec3f_150EF38C;
-
-typedef struct Game11C2B0Effect {
-    u8 pad0[9];
-    u8 hidden;
-    u8 padA[4];
-    s16 position[3];
-} Game11C2B0Effect;
-
-typedef struct Game11C2B0EffectOwner {
-    u8 pad0[0x14];
-    Game11C2B0Effect *sprite;
-} Game11C2B0EffectOwner;
-
-typedef struct Game11C2B0Link {
-    u8 *actor;
-    u8 group;
-    u8 pad5[3];
-    u8 *target;
-    u8 targetGroup;
-    u8 slot;
-    u8 padE[2];
-    f32 phase10;
-    f32 phase14;
-    u8 flags;
-    u8 pad19[0x13];
-    Game11C2B0EffectOwner *effect;
-    Vec3f_150EF38C direction;
-    f32 distance;
-    f32 inverse;
-} Game11C2B0Link;
-
-typedef struct Game11C2B0Beam {
-    u8 pad0[0x2C];
-    f32 width;
-    u8 pad30[4];
-    Vec3f_150EF38C start;
-    Vec3f_150EF38C end;
-    u8 pad4C[0x10];
-    u8 alpha;
-    u8 pad5D[0xB3];
-    Game11C2B0Link link;
-} Game11C2B0Beam;
-
-typedef struct Game11C2B0Hit {
+/* Result record of the beam's hit test. */
+typedef struct {
     void *object;
     u8 pad4[0x55];
     u8 count;
     u8 pad5A[0xA];
-} Game11C2B0Hit;
+} BeamHit;
+
+typedef struct {
+    u8 pad0[9];
+    u8 hidden;
+    u8 padA[4];
+    s16 position[3];
+} FlashSprite;
+
+typedef struct {
+    u8 pad0[0x14];
+    FlashSprite *sprite;
+} Flash;
 
 s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
 void func_15081690(void *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
 s32 func_1505D024(void *, s32, s32, s32);
 void func_1502EA98(void *, s32, s32, s32, s32, s32, s32);
-extern f32 D_800A181C;
-extern f32 D_800A1820;
 
-s32 func_150EF38C(Game11C2B0Beam *arg0) {
-    Game11C2B0Link *link;
-    u8 *actor;
-    u8 *target;
+/* Per-frame update of a beam: aims it from the muzzle to the target, pulses it and applies its hit. */
+s32 func_150EF38C(Beam *beam) {
+    BeamLink *link;
+    struct127 *actor;
+    struct127 *target;
     s16 *position;
-    Game11C2B0Hit hit;
+    BeamHit hit;
     f32 angle;
     void *object;
 
-    link = &arg0->link;
+    link = &beam->link;
     actor = link->actor;
     target = link->target;
-    if (link->group != actor[0x3B] || *(s32 *)actor == 0 || actor[4] == 0xFF) {
+    if (actor->unique_id != link->actorId || actor->interaction_state == 0 || actor->id == 0xFF) {
         return 0;
     }
-    if (link->targetGroup != target[0x3B] || *(s32 *)target == 0) {
+    if (target->unique_id != link->targetId || target->interaction_state == 0) {
         return 0;
     }
-    if (*(s32 *)(actor + 0x94) & D_800A163C[link->slot]) {
+    if (actor->unk94 & D_800A163C[link->slot]) {
         return 0;
     }
     link->flags &= ~1;
-    if (*(s32 *)(actor + 0x1D4) != 0) {
-        func_15143134((f32 *)&((u8 *)D_800A15F0)[link->slot * 0xC], &arg0->start.x,
-                      *(s32 *)(actor + 0x1D4) + (D_800A1638[link->slot] << 6));
-        arg0->end.x = ((Vec3f_150EF38C *)(target + 0x14))->x;
-        arg0->end.y = ((Vec3f_150EF38C *)(target + 0x14))->y;
-        arg0->end.z = ((Vec3f_150EF38C *)(target + 0x14))->z;
-        link->direction.x = arg0->end.x - arg0->start.x;
-        link->direction.y = arg0->end.y - arg0->start.y;
-        link->direction.z = arg0->end.z - arg0->start.z;
+    if (actor->unk1D4 != NULL) {
+        func_15143134(D_800A15F0[link->slot], &beam->start.x, (Mtx *)actor->unk1D4 + D_800A1638[link->slot]);
+        beam->end.x = target->x_position;
+        beam->end.y = target->y_position;
+        beam->end.z = target->z_position;
+        link->direction.x = beam->end.x - beam->start.x;
+        link->direction.y = beam->end.y - beam->start.y;
+        link->direction.z = beam->end.z - beam->start.z;
         if (func_15145128(&link->direction.x, &link->direction.x, &link->distance, &link->inverse) != 0) {
             link->flags |= 1;
         }
     }
-    link->phase10 += D_800A181C * D_800BE9A4;
-    angle = func_15144B68(link->phase10);
-    link->phase10 = angle;
-    arg0->width = sinf(angle) * 5.0f + 16.0f;
-    link->phase14 += D_800A1820 * D_800BE9A4;
-    angle = func_15144B68(link->phase14);
-    link->phase14 = angle;
-    arg0->alpha = sinf(angle) * 25.0f + 230.0f;
+    link->widthPhase += 0.1600000113f * D_800BE9A4;
+    angle = func_15144B68(link->widthPhase);
+    link->widthPhase = angle;
+    beam->width = sinf(angle) * 5.0f + 16.0f;
+    link->alphaPhase += 0.1600000113f * D_800BE9A4;
+    angle = func_15144B68(link->alphaPhase);
+    link->alphaPhase = angle;
+    beam->alpha = sinf(angle) * 25.0f + 230.0f;
     if (link->flags & 1) {
-        if (link->effect != NULL) {
-            link->effect->sprite->hidden = 0;
-            position = link->effect->sprite->position;
-            position[0] = arg0->start.x;
-            position[1] = arg0->start.y;
-            position[2] = arg0->start.z;
+        if (link->flash != NULL) {
+            ((Flash *)link->flash)->sprite->hidden = FALSE;
+            position = ((Flash *)link->flash)->sprite->position;
+            position[0] = beam->start.x;
+            position[1] = beam->start.y;
+            position[2] = beam->start.z;
         }
-        func_15081690(actor, arg0->start.x, arg0->start.y, arg0->start.z,
+        func_15081690(actor, beam->start.x, beam->start.y, beam->start.z,
                       link->direction.x, link->direction.y, link->direction.z,
                       &hit, link->distance, 1, 0, 1, 4, 0, 0);
         if (hit.count >= 2) {
             object = hit.object;
             func_1502EA98(object, 0xFF, 0, 0, 0x90, 0, 1);
-            func_1505D024(object, 0xA0038, 0, (actor - (u8 *)D_800CC2D0) / 0x32C);
+            func_1505D024(object, 0xA0038, 0, actor - D_800CC2D0);
         }
-    } else if (link->effect != NULL) {
-        link->effect->sprite->hidden = 1;
+    } else if (link->flash != NULL) {
+        ((Flash *)link->flash)->sprite->hidden = TRUE;
     }
     return 1;
 }
 
-s32 func_150EF784(u8 *arg0, s32 arg1, s32 arg2) {
-    if (arg0[4] == 0x28) {
+s32 func_150EF784(struct127 *actor, s32 arg1, s32 arg2) {
+    if (actor->id == 0x28) {
         return 1;
     }
     return 0;
 }
 
-void func_150EF7B0(u8 *arg0) {
+/* Releases a beam's sparks, emitter, glow and flash (func_1516972C), then the beam itself. */
+void func_150EF7B0(Beam *beam) {
     s32 i;
-    s32 v;
-    s32 *p = (s32 *)(arg0 + 0x110);
+    void *part;
+    BeamLink *link = &beam->link;
 
-    for (i = 0; i != 8; i += 4) {
-        v = *(s32 *)((u8 *)p + i + 0x1C);
-        if (v != 0) {
-            func_1516972C((struct102 *)v);
+    for (i = 0; i < 2; i++) {
+        part = link->sparks[i];
+        if (part != NULL) {
+            func_1516972C(part);
         }
     }
-    v = p[9];
-    if (v != 0) {
-        func_1516972C((struct102 *)v);
+    part = link->emitter;
+    if (part != NULL) {
+        func_1516972C(part);
     }
-    v = p[10];
-    if (v != 0) {
-        func_1516972C((struct102 *)v);
+    part = link->glow;
+    if (part != NULL) {
+        func_1516972C(part);
     }
-    v = p[11];
-    if (v != 0) {
-        func_1516972C((struct102 *)v);
+    part = link->flash;
+    if (part != NULL) {
+        func_1516972C(part);
     }
-    func_1513CA6C(arg0);
+    func_1513CA6C((struct210 *)beam);
 }
 
-void func_150EF860(u8 *arg0) {
+/* Like func_150EF7B0, through the func_1516979C / func_1513CAA0 variants. */
+void func_150EF860(Beam *beam) {
     s32 i;
-    s32 v;
-    s32 *p = (s32 *)(arg0 + 0x110);
+    void *part;
+    BeamLink *link = &beam->link;
 
-    for (i = 0; i != 8; i += 4) {
-        v = *(s32 *)((u8 *)p + i + 0x1C);
-        if (v != 0) {
-            func_1516979C((struct102 *)v);
+    for (i = 0; i < 2; i++) {
+        part = link->sparks[i];
+        if (part != NULL) {
+            func_1516979C(part);
         }
     }
-    v = p[9];
-    if (v != 0) {
-        func_1516979C((struct102 *)v);
+    part = link->emitter;
+    if (part != NULL) {
+        func_1516979C(part);
     }
-    v = p[10];
-    if (v != 0) {
-        func_1516979C((struct102 *)v);
+    part = link->glow;
+    if (part != NULL) {
+        func_1516979C(part);
     }
-    v = p[11];
-    if (v != 0) {
-        func_1516979C((struct102 *)v);
+    part = link->flash;
+    if (part != NULL) {
+        func_1516979C(part);
     }
-    func_1513CAA0((struct210 *)arg0);
+    func_1513CAA0((struct210 *)beam);
 }
 
 typedef struct {
@@ -749,13 +740,13 @@ void func_150EFB80(u8 *arg0) {
     }
 }
 
+/* Back-reference a beam's glow carries at +0x170. */
 typedef struct {
-    s32 unk00;
-    u8 unk04;
-    u8 unk05;
-    u8 pad06[2];
-    s32 unk08;
-} Payload_150EFEC8;
+    struct127 *actor;
+    u8 actorId;
+    u8 slot;
+    Beam *beam;
+} GlowLink;
 
 typedef struct {
     f32 unk00;
@@ -823,30 +814,31 @@ typedef struct {
 } Struct40_150EFEC8;
 
 typedef struct {
-    u8 pad_0[0x170];
-    Payload_150EFEC8 field_0x170;
-} CreatedObjectPayloadFields;
+    u8 pad0[0x170];
+    GlowLink link;
+} Glow;
 
-s32 func_150EFEC8(ActorIdByteFields *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7) {
-    CreatedObjectPayloadFields *temp_v0;
+/* Spawns the glow sprite of `beam` (gun slot `slot` of `actor`), tinted (r, g, b). */
+s32 func_150EFEC8(struct127 *actor, u8 slot, u8 r, u8 g, u8 b, Beam *beam, u8 arg6, s32 arg7) {
+    Glow *glow;
     Struct98_150EFEC8 sp98;
     Struct40_150EFEC8 sp40;
-    Payload_150EFEC8 sp34;
+    GlowLink link;
 
-    sp34.unk00 = (s32)arg0;
-    sp34.unk04 = arg0->field_0x3B;
-    sp34.unk05 = arg1;
-    sp34.unk08 = arg5;
+    link.actor = actor;
+    link.actorId = actor->unique_id;
+    link.slot = slot;
+    link.beam = beam;
 
-    sp40.unk00 = D_8008FD00((s32)arg0, arg1);
+    sp40.unk00 = D_8008FD00((s32)actor, slot);
     sp40.unk01 = 3;
     sp40.unk02 = 0x2203;
-    sp40.unk04 = 0x12C;
+    sp40.unk04 = 300;
     sp40.unk08 = 0;
     sp40.unk0C = 0;
-    sp40.unk10 = arg2;
-    sp40.unk11 = arg3;
-    sp40.unk12 = arg4;
+    sp40.unk10 = r;
+    sp40.unk11 = g;
+    sp40.unk12 = b;
     sp40.unk13 = 0xFF;
     sp40.unk18 = 100.0f;
     sp40.unk14 = 100.0f;
@@ -893,14 +885,14 @@ s32 func_150EFEC8(ActorIdByteFields *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, s
     sp98.unk55 = 0xFF;
     sp98.unk56 = 0xFF;
     sp98.unk57 = 0xFF;
-    sp98.unk58 = 0xA;
+    sp98.unk58 = 10;
     sp98.unk59 = -1;
 
-    temp_v0 = func_151407D0(&sp98, 0x6C, &sp40, 0x1E, 0, 0, 0, -1, arg6, arg7);
-    if (temp_v0 != 0) {
-        memcpy(&temp_v0->field_0x170, &sp34, 0xC);
+    glow = func_151407D0(&sp98, 0x6C, &sp40, 0x1E, 0, 0, 0, -1, arg6, arg7);
+    if (glow != NULL) {
+        memcpy(&glow->link, &link, sizeof(link));
     }
-    return (s32)temp_v0;
+    return (s32)glow;
 }
 
 typedef struct {
@@ -955,26 +947,27 @@ s32 func_150F00EC(Arg150F00EC *arg0) {
     return 1;
 }
 
-struct225 *func_150F0198(u8 arg0, u8 arg1, u8 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6) {
-    struct225 *temp_v0;
+/* Spawns the muzzle flash of `beam`, colored (r, g, b, a). */
+struct225 *func_150F0198(u8 r, u8 g, u8 b, u8 a, Beam *beam, u8 arg5, s32 arg6) {
+    struct225 *flash;
     Header header;
-    Header2 header2;
-    s32 payload;
+    Header2 origin;
+    Beam *link;
 
-    payload = arg4;
+    link = beam; // matching: the payload is copied from a stack local, not the arg slot
     header.unk0 = 2;
     header.unk1 = -1;
-    header.unk2 = 0x12C;
+    header.unk2 = 300;
     header.unk4 = 0x21;
-    header2.unk0 = 0;
-    header2.unk4 = 0;
-    header2.unk8 = 0;
+    origin.unk0 = 0;
+    origin.unk4 = 0;
+    origin.unk8 = 0;
 
-    temp_v0 = func_151602C0(&header, &header2, arg0, arg1, arg2, arg3, 0xFF, 0, 4, arg5, arg6);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk18, &payload, 4);
+    flash = func_151602C0(&header, &origin, r, g, b, a, 0xFF, 0, 4, arg5, arg6);
+    if (flash != NULL) {
+        memcpy(&flash->unk18, &link, sizeof(link));
     }
-    return temp_v0;
+    return flash;
 }
 
 typedef struct {
