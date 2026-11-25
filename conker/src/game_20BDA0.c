@@ -357,27 +357,28 @@ struct216 *func_1507BB28(s32, s32);
 void func_1000DE1C(s32, s32);
 void func_151E7E9C(void);
 
+/* Menu page for unk2C == 1: fades in and out, toggling D_8008FEF8 and object 9's animation (0xE/0xF) each fade-out. */
 void func_151DF1BC(void) {
-    u16 unused;
-    s32 val;
-    s32 id;
+    u16 unused; // matching: unused stack slot sets IDO's frame layout
+    s32 alpha;
+    s32 anim;
     struct127 *obj;
 
     obj = func_15083E90(9);
     if (D_800E0A96 != -1) {
-        val = D_800E0A95 - (D_800BE9E4 << 5);
-        if (val <= 0) {
-            val = 0;
+        alpha = D_800E0A95 - (D_800BE9E4 << 5);
+        if (alpha <= 0) {
+            alpha = 0;
             D_8008FEF8 = D_8008FEF8 == 0;
             if (D_8008FEF8 == 0) {
-                id = 0xE;
+                anim = 0xE;
                 func_1001263C((func_150ADA20() & 1) + 0xC8, 0x7D00, 0x40);
             } else {
-                id = 0xF;
+                anim = 0xF;
                 func_1001263C((func_150ADA20() % 3U) + 0xBE, 0x7D00, 0x40);
             }
             if (obj != NULL) {
-                obj->unk232 = id;
+                obj->unk232 = anim;
                 D_800D154C = obj;
                 D_800C3E78 = D_800D154C - D_800CC2D0;
                 obj->unk218 = func_1507BB28(0, obj->unk232);
@@ -388,34 +389,35 @@ void func_151DF1BC(void) {
         }
         D_8008FDD4->input &= ~(MENU_ACCEPT | MENU_BACK);
     } else {
-        val = D_800E0A95 + (D_800BE9E4 << 5);
-        if (val >= 0x100) {
-            val = 0xFF;
+        alpha = D_800E0A95 + (D_800BE9E4 << 5);
+        if (alpha >= 0x100) {
+            alpha = 0xFF;
         }
     }
-    D_800E0A95 = val;
-    val = (D_800E0A94 * val) >> 8;
-    if (val >= 0xFE) {
-        val = 0xFF;
+    D_800E0A95 = alpha;
+    alpha = (D_800E0A94 * alpha) >> 8;
+    if (alpha >= 0xFE) {
+        alpha = 0xFF;
     }
     if (D_8008FEF8 == 0) {
-        func_151E3344(0x200200, 0, 1, val & 0xFF, 1);
+        func_151E3344(0x200200, 0, 1, alpha & 0xFF, 1);
         if ((D_8008FE34 == 9) && (D_8008FDD4->input & (MENU_LEFT | MENU_RIGHT))) {
             func_151E7E9C();
             func_1000DE1C(D_800E0A97, 0);
             D_800E0A97 = func_1000EA94(D_800E0BE9);
         }
         {
-        s32 flags;
-        flags = D_8008FDD4->input;
-        if ((flags & MENU_ACCEPT) && (D_8008FE34 == 0x15) && (D_8008FDE8 == 0.0f)) {
-            D_800E0A96 = 1;
-            D_8008FDD4->input &= ~(MENU_ACCEPT | MENU_BACK);
-            flags = D_8008FDD4->input;
-        }
-        if (flags & MENU_BACK) {
-            func_15007668();
-        }
+            s32 input;
+
+            input = D_8008FDD4->input;
+            if ((input & MENU_ACCEPT) && (D_8008FE34 == 21) && (D_8008FDE8 == 0.0f)) {
+                D_800E0A96 = 1;
+                D_8008FDD4->input &= ~(MENU_ACCEPT | MENU_BACK);
+                input = D_8008FDD4->input;
+            }
+            if (input & MENU_BACK) {
+                func_15007668();
+            }
         }
     }
     if (obj != NULL) {
@@ -432,8 +434,8 @@ void func_151DF1BC(void) {
             D_800E0A96 = 1;
         }
         D_8008FDD4->input &= ~MENU_BACK;
-        if (D_8008FEF8 != 0) {
-            func_1504332C(0xFF, 0, 0, val);
+        if (D_8008FEF8 != 0) { // matching: redundant re-test; IDO reloads D_8008FEF8 here
+            func_1504332C(0xFF, 0, 0, alpha);
             func_15042D94(0x94, 0x14, 0x81, D_800AB800, 0x10);
         }
         D_800BE9EC = 0;
@@ -448,15 +450,18 @@ void func_151DF1BC(void) {
 
 
 extern s8 D_8008FDB0;
-typedef struct { u8 r; u8 g; u8 b; } Rgb151DF574;
 extern s8 D_800AB804[];
 extern char D_800AB810[];
-extern s8 D_800BE91B;
+extern s8 D_800BE91B; /* == D_800BE918[0].stick_y; the field spelling mismatches */
 extern u8 **D_800E0B88;
 void func_151E30C4(void);
 
+/*
+ * Menu page for unk2C == 2: a scrolling list of the entries in category D_8008FF00.
+ * Left/right changes category, the stick scrolls; the highlighted entry goes to D_8008FF04.
+ */
 void func_151DF574(void) {
-    s32 c0;
+    s32 r;
     s32 redo;
     s32 i;
     s32 j;
@@ -465,44 +470,44 @@ void func_151DF574(void) {
     s32 offset;
     s32 alpha;
     s32 y;
-    s32 h;
-    s32 t;
-    s32 a;
-    s32 p;
-    s8 row;
+    s32 height;
+    s32 shade;
+    s32 rowAlpha;
+    s32 wave;
+    s8 pass;
     s32 sfx;
-    s8 prev;
-    s32 c1;
-    s32 sel;
+    s8 prevCategory;
+    s32 g;
+    s32 color;
     s32 scale;
-    s32 c2;
+    s32 b;
     s8 list[20];
-    static s8 D_8008FF24 = 0;
-    static s8 D_8008FF28 = -1;
-    static s8 D_8008FF2C = 1;
-    static u8 D_8008FF30 = 0;
+    static s8 scroll = 0;
+    static s8 prevRow = -1;
+    static s8 step = 1;
+    static u8 pulse = 0;
 
     sfx = 0;
     scale = D_800E0A94;
     do {
         redo = 0;
-        prev = D_8008FF00;
+        prevCategory = D_8008FF00;
         if (D_800E0A96 == 1) {
             D_8008FF00--;
             if (D_8008FF00 < 0) {
                 D_8008FF00 = 8;
             }
-            D_8008FF2C = -1;
+            step = -1;
         } else if (D_800E0A96 == 2) {
             D_8008FF00++;
             if (D_8008FF00 >= 9) {
                 D_8008FF00 = 0;
             }
-            D_8008FF2C = 1;
+            step = 1;
         }
         do {
             offset = 1;
-            i = 0;
+            i = 0; // matching: i is initialised before mask/count, outside the for
             mask = 0;
             count = 0;
             for (; i < D_8008FF00; i++) {
@@ -532,11 +537,11 @@ void func_151DF574(void) {
             if ((D_8008FF00 == 2) && (D_800E9D00 & 0x04000000)) {
                 mask |= 1;
             }
-            a = func_1509CF28(D_8008FF00, &i);
+            rowAlpha = func_1509CF28(D_8008FF00, &i); // matching: reuses rowAlpha; a separate local reallocates
             if (D_8008FF00 == 0) {
                 mask |= 1;
             }
-            if (a) {
+            if (rowAlpha) {
                 for (i = 0; i < D_800AB804[D_8008FF00] - 1; i++) {
                     if (func_1509D08C(D_8008FF00, i, &j, NULL)) {
                         mask |= 1 << i;
@@ -555,7 +560,7 @@ void func_151DF574(void) {
                 count = 1;
             }
             if (count == 0) {
-                D_8008FF00 += D_8008FF2C;
+                D_8008FF00 += step;
                 if (D_8008FF00 >= 9) {
                     D_8008FF00 = 0;
                 }
@@ -565,11 +570,11 @@ void func_151DF574(void) {
             }
         } while (count == 0);
         if ((D_800E0A96 == 1) || (D_800E0A96 == 2)) {
-            if (prev == D_8008FF00) {
+            if (prevCategory == D_8008FF00) {
                 D_800E0A96 = -1;
             } else {
                 D_800E0A96 += 2;
-                D_8008FF00 = prev;
+                D_8008FF00 = prevCategory;
             }
             redo = 1;
         }
@@ -585,14 +590,14 @@ void func_151DF574(void) {
                 if (D_8008FF00 < 0) {
                     D_8008FF00 = 8;
                 }
-                D_8008FF2C = -1;
+                step = -1;
             } else {
                 D_800E0A96 = -1;
                 D_8008FF00++;
                 if (D_8008FF00 >= 9) {
                     D_8008FF00 = 0;
                 }
-                D_8008FF2C = 1;
+                step = 1;
             }
         }
     } else {
@@ -606,32 +611,32 @@ void func_151DF574(void) {
     if (alpha >= 0xFE) {
         alpha = 0xFF;
     }
-    if (D_8008FF24 > 0) {
-        D_8008FF24 -= 2;
-    } else if (D_8008FF24 < 0) {
-        D_8008FF24 += 2;
+    if (scroll > 0) {
+        scroll -= 2;
+    } else if (scroll < 0) {
+        scroll += 2;
     }
-    if ((D_8008FF24 == 0) && (D_800E0A95 == 0xFF)) {
+    if ((scroll == 0) && (D_800E0A95 == 0xFF)) {
         if (D_800BE91B < -49) {
-            D_8008FF28 = D_8008FDB0;
+            prevRow = D_8008FDB0;
             D_8008FDB0++;
-            D_8008FF24 = -10;
+            scroll = -10;
             sfx = 0x4FF;
         } else if (D_800BE91B >= 50) {
-            D_8008FF28 = D_8008FDB0;
+            prevRow = D_8008FDB0;
             D_8008FDB0--;
-            D_8008FF24 = 10;
+            scroll = 10;
             sfx = 0x4FF;
         }
     }
     if (D_8008FDB0 < 0) {
         D_8008FDB0 = 0;
-        D_8008FF24 = 0;
+        scroll = 0;
         sfx = 0;
     }
     if (D_8008FDB0 >= count) {
         D_8008FDB0 = count - 1;
-        D_8008FF24 = 0;
+        scroll = 0;
         sfx = 0;
     }
     func_1504332C(0xFF, 0xFF, 0xFF, alpha);
@@ -642,73 +647,73 @@ void func_151DF574(void) {
         }
         list[i] = j++;
     }
-draw_rows:
-    sel = D_8008FF00 + D_8008FF00 + D_8008FF00;
+draw_rows: // matching: unused label splits the basic block for as1
+    color = D_8008FF00 + D_8008FF00 + D_8008FF00; // matching: the sum, not * 3
     func_1504332C(0xFF, 0, 0, alpha);
     if (count < 6) {
         y = 0x2F;
-        h = count * 11;
+        height = count * 11;
     } else {
-        y = -(D_8008FDB0 * 11) - D_8008FF24 + 0x45;
-        h = 0x37;
+        y = -(D_8008FDB0 * 11) - scroll + 0x45;
+        height = 0x37;
         if (y >= 0x30) {
             y = 0x2F;
         }
     }
-    row = -1;
+    pass = -1;
     i = count - 3;
     for (j = -3; j < count + 3; j++) {
-        t = D_8008FF24 * 12;
-        if (t < 0) {
-            t = -t;
+        shade = scroll * 12;
+        if (shade < 0) {
+            shade = -shade;
         }
         if (i == D_8008FDB0) {
-            t = 0xFF - t;
-            if (t == 0xFF) {
-                p = (D_8008FF30 * 2) & 0x7F;
-                if (p >= 0x40) {
-                    p = 0x7F - p;
+            shade = 0xFF - shade;
+            if (shade == 0xFF) {
+                wave = (pulse * 2) & 0x7F;
+                if (wave >= 0x40) {
+                    wave = 0x7F - wave;
                 }
-                t = p + 0xC0;
-                D_8008FF30 += D_800BE9E4;
+                shade = wave + 0xC0;
+                pulse += D_800BE9E4;
             } else {
-                D_8008FF30 = 0x1F;
+                pulse = 0x1F;
             }
-        } else if (D_8008FF28 == i) {
-            t += 0x80;
+        } else if (prevRow == i) {
+            shade += 0x80;
         } else {
-            t = 0x80;
+            shade = 0x80;
         }
         if (i == D_8008FDB0) {
             D_8008FF04 = list[i];
         }
         if (y < 0x50) {
-            a = y * 25 - 0x6D6;
-        } else if ((h + 0x46 < y) && (y < h + 0x50)) {
-            a = (10 - (y - h)) * 25 + 0x6D6;
+            rowAlpha = y * 25 - 0x6D6;
+        } else if ((height + 0x46 < y) && (y < height + 0x50)) {
+            rowAlpha = (10 - (y - height)) * 25 + 0x6D6;
         } else {
-            a = 0xFF;
+            rowAlpha = 0xFF;
         }
-        if (a < 0) {
-            a = 0;
+        if (rowAlpha < 0) {
+            rowAlpha = 0;
         }
-        if (a >= 0xFA) {
-            a = 0xFF;
+        if (rowAlpha >= 0xFA) {
+            rowAlpha = 0xFF;
         }
-        if (alpha < a) {
-            a = alpha;
+        if (alpha < rowAlpha) {
+            rowAlpha = alpha;
         }
-        c0 = (D_8008FF08[sel] * t) >> 8;
-        c1 = (D_8008FF08[sel + 1] * t) >> 8;
-        c2 = (D_8008FF08[sel + 2] * t) >> 8;
-        func_1504332C(c0, c1, c2, a);
-        if ((y >= 0x46) && (y < h + 0x50) && (row == 0)) {
-            func_15042D94(0x94, y + 0xF, 0x81, (char *)(&D_800E0B88[list[i]])[offset]);
+        r = (D_8008FF08[color] * shade) >> 8;
+        g = (D_8008FF08[color + 1] * shade) >> 8;
+        b = (D_8008FF08[color + 2] * shade) >> 8;
+        func_1504332C(r, g, b, rowAlpha);
+        if ((y >= 0x46) && (y < height + 0x50) && (pass == 0)) {
+            func_15042D94(0x94, y + 0xF, 0x81, (char *)D_800E0B88[list[i] + offset]);
         }
         y += 11;
         i++;
         if (i >= count) {
-            row++;
+            pass++;
             i = 0;
         }
     }
@@ -723,7 +728,7 @@ draw_rows:
         if ((D_8008FDD4->input & MENU_ACCEPT) && (D_8008FF04 != 0xFF)) {
             D_800E0B94 = 7;
             D_800E0A88 = func_151E30C4;
-            *(u8 *)&D_8008FD74 = 3;
+            *(u8 *)&D_8008FD74 = 3; // matching: a u8 view of the s8 (same sb) keeps IDO's schedule
             sfx = 0x500;
         }
     }
