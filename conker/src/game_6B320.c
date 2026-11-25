@@ -430,50 +430,30 @@ void func_1503E82C(s32 objIndex) {
     }
 }
 
-struct func_1503EA54_part {
-    u8 pad0[0x24];
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    u8 pad3C[0xC];
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-    f32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
-    u8 unk64;
-    u8 pad65[0x3];
-};
-
-
-void func_1503EA54(s32 arg0) {
-    struct func_1503EA54_part *part;
+/* Move the free (parentless) parts by their velocities and apply gravity. */
+void func_1503EA54(s32 objIndex) {
+    ObjPart *part;
     s32 count;
     s32 i;
     f32 dt;
 
-    count = D_80098914[*(u8 *)&D_800C6660[arg0].pad[2]];
+    count = D_80098914[sPartsStates[objIndex].kind];
     dt = D_800BE9E4;
     for (i = 0; i < count; i++) {
-        if (((struct func_1503EA54_part *)D_800C6660[arg0].unk0)[i].unk64 == 0) {
+        if (!sPartsStates[objIndex].parts[i].active) {
             continue;
         }
-        if (D_80084454[*(u8 *)&D_800C6660[arg0].pad[2]][i] != -1) {
+        if (D_80084454[sPartsStates[objIndex].kind][i] != PART_PARENT_NONE) {
             continue;
         }
-        part = &((struct func_1503EA54_part *)D_800C6660[arg0].unk0)[i];
-        part->unk24 += part->unk48 * dt;
-        part->unk28 += part->unk4C * dt;
-        part->unk2C += part->unk50 * dt;
-        part->unk30 += part->unk54 * dt;
-        part->unk34 += part->unk58 * dt;
-        part->unk38 += part->unk5C * dt;
-        part->unk4C += part->unk60 * dt;
+        part = &sPartsStates[objIndex].parts[i];
+        part->pos[0] += part->vel[0] * dt;
+        part->pos[1] += part->vel[1] * dt;
+        part->pos[2] += part->vel[2] * dt;
+        part->rot[0] += part->rotVel[0] * dt;
+        part->rot[1] += part->rotVel[1] * dt;
+        part->rot[2] += part->rotVel[2] * dt;
+        part->vel[1] += part->gravity * dt;
     }
 }
 
@@ -483,192 +463,144 @@ void func_1503EA54(s32 arg0) {
 static void func_1503EB70(void) {
 }
 
-void func_1503EB78(void *arg0, f32 arg1, f32 arg2, s32 arg3)
-{
-  s32 i;
-  f32 vec[3];
-  s32 mask;
-  s32 add;
-  if (arg3 != 0)
-  {
-    mask = 0x80;
-    add = 0x7F;
-  }
-  else
-  {
-    mask = 0xFF;
-    add = 0;
-  }
-  arg1 *= 0.02745098062f;
-  arg2 *= 0.02745098062f;
-  vec[0] = (vec[2] = arg1);
-  vec[1] = arg2;
-  for (i = 0; i < 3; i++)
-  {
-    ((f32 *) (((u8 *) arg0) + 0x48))[i] *= (((func_150ADA20() & mask) + add) * vec[i]) + 2.0f;
-  }
+/*
+ * Randomise a freshly initialised part: scale its outward velocity by a random factor per axis
+ * (spreadXZ on x/z, spreadY on y; `strong` picks a factor from the upper half of the range),
+ * give it a random spin and gravity.
+ */
+void func_1503EB78(ObjPart *part, f32 spreadXZ, f32 spreadY, s32 strong) {
+    s32 i;
+    f32 spread[3];
+    s32 mask;
+    s32 base;
 
-  for (i = 0; i < 3; i++)
-  {
-    ((f32 *) (((u8 *) arg0) + 0x54))[i] = ((func_150ADA20() & 0xFF) - 0x80) * 0.03125f;
-  }
-
-  *((f32 *) (((u8 *) arg0) + 0x60)) = -0.3000000119f;
+    if (strong) {
+        mask = 0x80;
+        base = 0x7F;
+    } else {
+        mask = 0xFF;
+        base = 0;
+    }
+    spreadXZ *= 0.02745098062f;
+    spreadY *= 0.02745098062f;
+    spread[0] = spread[2] = spreadXZ;
+    spread[1] = spreadY;
+    for (i = 0; i < 3; i++) {
+        part->vel[i] *= ((func_150ADA20() & mask) + base) * spread[i] + 2.0f;
+    }
+    for (i = 0; i < 3; i++) {
+        part->rotVel[i] = ((func_150ADA20() & 0xFF) - 128) * 0.03125f;
+    }
+    part->gravity = -0.3f;
 }
 
-typedef struct {
-    u8 pad_0[0x1EC];
-    f32 field_1EC;
-} func_1503ECA0_Entity;
-
-typedef struct {
-    func_1503ECA0_Entity *entity;
-    u8 pad_4[8];
-    s16 field_C;
-    u8 pad_E[2];
-} func_1503ECA0_Slot;
-
 void func_1510F800(s32);
-s32 func_1510F8D8(s32, s32, s32, s32);
+s32 func_1510F8D8(s32 x, s32 y, s32 z, s32 arg3);
 
-void func_1503ECA0(s32 arg0) {
-    func_1503ECA0_Entity *entity;
-    func_1503ECA0_Slot *slot;
-    f32 smallScale;
-    f32 largeScale;
-    f32 floor;
-    f32 velocityY;
-    s32 index;
-    s32 offset;
-    u8 *particle;
+/* Bounce falling free parts off the floor below them; slow ones come to rest. */
+void func_1503ECA0(s32 objIndex) {
+    ObjPartsState *ps;
+    ObjPart *part;
+    f32 floorY;
+    f32 velY;
+    s32 i;
     s32 count;
 
     func_1510F800(0);
-    slot = &((func_1503ECA0_Slot *)D_800C6660)[arg0];
-    index = 0;
-    count = D_80098914[slot->pad_E[0]];
-    offset = 0;
-    if (count > 0) {
-        smallScale = 0.4f;
-        largeScale = 0.8f;
-        do {
-            entity = slot->entity;
-            if (*((u8 *)slot->entity + offset + 0x64) != 0) {
-                particle = (u8 *)entity + offset;
-                if (D_80084454[slot->pad_E[0]][index] == -1 && *(f32 *)(particle + 0x60) != 0.0f) {
-                    floor = func_1510F8D8((s32)*(f32 *)(particle + 0x24), (s32)*(f32 *)(particle + 0x28),
-                                          (s32)*(f32 *)(particle + 0x2C), 0) + 5;
-                    if (*(f32 *)(particle + 0x28) < floor) {
-                        velocityY = *(f32 *)(particle + 0x4C);
-                        *(f32 *)(particle + 0x28) = floor;
-                        if (velocityY < -4.0f) {
-                            *(f32 *)(particle + 0x48) = *(f32 *)(particle + 0x48) * largeScale;
-                            *(f32 *)(particle + 0x4C) = velocityY * -0.5f;
-                            *(f32 *)(particle + 0x50) = *(f32 *)(particle + 0x50) * largeScale;
-                            *(f32 *)(particle + 0x54) = *(f32 *)(particle + 0x54) * -1.0f;
-                            *(f32 *)(particle + 0x58) = *(f32 *)(particle + 0x58) * smallScale;
-                            *(f32 *)(particle + 0x5C) = *(f32 *)(particle + 0x5C) * -1.0f;
-                        } else {
-                            *(f32 *)(particle + 0x5C) = 0.0f;
-                            *(f32 *)(particle + 0x58) = 0.0f;
-                            *(f32 *)(particle + 0x54) = 0.0f;
-                            *(f32 *)(particle + 0x60) = 0.0f;
-                            *(f32 *)(particle + 0x50) = 0.0f;
-                            *(f32 *)(particle + 0x4C) = 0.0f;
-                            *(f32 *)(particle + 0x48) = 0.0f;
-                        }
+    ps = &sPartsStates[objIndex];
+    count = D_80098914[ps->kind];
+    for (i = 0; i < count; i++) {
+        if (ps->parts[i].active) {
+            part = &ps->parts[i];
+            if (D_80084454[ps->kind][i] == PART_PARENT_NONE && part->gravity != 0.0f) {
+                floorY = func_1510F8D8(part->pos[0], part->pos[1], part->pos[2], 0) + 5;
+                if (part->pos[1] < floorY) {
+                    velY = part->vel[1];
+                    part->pos[1] = floorY;
+                    if (velY < -4.0f) {
+                        part->vel[0] *= 0.8f;
+                        part->vel[1] = velY * -0.5f;
+                        part->vel[2] *= 0.8f;
+                        part->rotVel[0] *= -1.0f;
+                        part->rotVel[1] *= 0.4f;
+                        part->rotVel[2] *= -1.0f;
+                    } else {
+                        part->rotVel[2] = 0.0f;
+                        part->rotVel[1] = 0.0f;
+                        part->rotVel[0] = 0.0f;
+                        part->gravity = 0.0f;
+                        part->vel[2] = 0.0f;
+                        part->vel[1] = 0.0f;
+                        part->vel[0] = 0.0f;
                     }
                 }
             }
-            index++;
-            offset += 0x68;
-        } while (index != count);
+        }
     }
 }
 
 void func_1503EEB8(void) {
 }
 
-struct func_1503EEC0_s {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s16 unkC;
-    s8 padE[2];
-};
-
-void func_1503EEC0(s32 arg0) {
-    struct func_1503EEC0_s *p;
+/* Update for kinds 0 and 1: bounce the parts until the timer runs out, then call func_15060F28. */
+void func_1503EEC0(s32 objIndex) {
+    ObjPartsState *ps;
     s32 timer;
 
-    func_1503ECA0(arg0);
-    p = (struct func_1503EEC0_s *)&D_800C6660[arg0];
-    timer = p->unkC;
+    func_1503ECA0(objIndex);
+    ps = &sPartsStates[objIndex];
+    timer = ps->timer;
     timer -= D_800BE9E4;
-    p->unkC = timer;
+    ps->timer = timer;
     if (timer <= 0) {
-        func_15060F28(&D_800CC2D0[arg0], 1);
+        func_15060F28(&D_800CC2D0[objIndex], 1);
     }
 }
 
-s32 func_1503EF4C(s32 arg0, s32 arg1, s32 arg2)
-{
-  struct func_1503DE70_s *row;
-  struct func_1503DE70_s *p;
-  row = (struct func_1503DE70_s *)D_8008446C[arg0];
-  p = (struct func_1503DE70_s *) (((u8 *) row) + (arg1 * 8));
-  if (((struct func_1503DE70_s *) (((u8 *) row) + (arg1 * 8)))->unk0 != 0)
-  {
-    if ((p->unk0 & (D_800C6664 + arg2)->f) == 0)
-    {
-      goto ret0;
-    }
-  }
-  if (p->unk4 != 0)
-  {
-    if ((p->unk4 & (D_800C6668 + arg2)->f) == 0)
-    {
-      goto ret0;
-    }
-  }
-  return 1;
-  ret0:
-  return 0;
+/* Whether the object's selected parts overlap each non-empty mask word of D_8008446C[kind][variant]. */
+s32 func_1503EF4C(s32 kind, s32 variant, s32 objIndex) {
+    PartMasks *row;
+    PartMasks *masks;
 
+    row = D_8008446C[kind];
+    // matching: byte arithmetic gives `addu row, offset` (&row[variant] swaps the operands)
+    masks = (PartMasks *)((u8 *)row + variant * sizeof(PartMasks));
+    // matching: `(base + i)->field` keeps the `and` operand order of the target
+    if (masks->lo != 0 && !(masks->lo & (sPartsStates + objIndex)->partMaskLo)) {
+        goto fail;
+    }
+    if (masks->hi != 0 && !(masks->hi & (sPartsStates + objIndex)->partMaskHi)) {
+        goto fail;
+    }
+    return TRUE;
+fail: // matching: one shared `return FALSE` block
+    return FALSE;
 }
 
-
-extern u8 D_80098914[];
-
-void func_1503EFC4(s32 arg0) {
-    Game6B320EffectState *p = (Game6B320EffectState *)&D_800C6660[arg0];
+/* Start for kind 0: 120-tick timer and a random vertical kick for every part. */
+void func_1503EFC4(s32 objIndex) {
+    ObjPartsState *ps = &sPartsStates[objIndex];
     s32 i;
-    s32 off;
     s32 count;
 
-    p->field_0x0C = 0x78;
-    count = D_80098914[p->field_0x0E];
-    i = 0;
-    off = 0;
-    for (; i < count; i++, off += 0x68) {
-        ((Game6B320EffectEntry *)((s32)p->field_0x00 + off))->field_0x4C = (f32)((s32)((u32)func_150ADA20() % 0x14) - 5);
+    ps->timer = 120;
+    count = D_80098914[ps->kind];
+    for (i = 0; i < count; i++) {
+        ps->parts[i].vel[1] = (s32)(func_150ADA20() % 20u) - 5;
     }
 }
 
-extern void func_1503EB78(void *arg0, f32 arg1, f32 arg2, s32 arg3);
-
-void func_1503F078(void *arg0, s32 arg1) {
-    func_1503EB78(arg0, 2.0f, 2.0f, 0);
+/* Per-part init for kinds 0, 1 and 2 (D_80084430). */
+void func_1503F078(ObjPart *part, s32 objIndex) {
+    func_1503EB78(part, 2.0f, 2.0f, FALSE);
 }
 
-extern void func_1503EB78(void *arg0, f32 arg1, f32 arg2, s32 arg3);
-
-void func_1503F0AC(void *arg0, s32 arg1) {
-    func_1503EB78(arg0, 1.0f, 2.0f, 1);
+void func_1503F0AC(ObjPart *part, s32 objIndex) {
+    func_1503EB78(part, 1.0f, 2.0f, TRUE);
 }
 
-void func_1503F0D8(void *arg0, s32 arg1) {
-    func_1503EB78(arg0, 2.06f, 3.0f, 1);
+void func_1503F0D8(ObjPart *part, s32 objIndex) {
+    func_1503EB78(part, 2.06f, 3.0f, TRUE);
 }
 
 extern Game6B320ObjectStatusEntry D_800CC364[];
