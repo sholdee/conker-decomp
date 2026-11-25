@@ -78,9 +78,6 @@ extern s32  D_80000004;
 extern s32  D_80000008;
 extern s32  D_8000000C;
 
-extern struct14 *D_80000080;
-extern struct14 *D_80000100;
-extern struct14 *D_80000180;
 
 extern s32  D_80000300;
 extern s32  D_80000308;
@@ -281,7 +278,6 @@ extern u8   D_80041F61;
 extern s8   D_80041FD8;
 extern u8   D_80041FD9;
 extern s32  D_80041FDC;
-// extern struct15 **D_80041FEC[]; // struct size 0x30 ?
 extern s32 D_80041FEC[][12];
 
 extern OSMesgQueue D_80041298;
@@ -295,7 +291,7 @@ extern s32 D_800418B0[3][16]; /* per-channel music event level */
 
 extern u8 D_800419A0;
 extern OSMesgQueue D_80041E58[3];
-extern struct117 D_80041EA0[3];
+extern OSMesg      D_80041EA0[3][8]; /* message buffers of the D_80041E58 queues */
 
 extern s32  D_80042760;
 extern s32  D_80042770;
@@ -312,7 +308,7 @@ extern MsgRing D_800427A0;
 extern u8   D_800427B0[64]; // D_800427A0's buffer
 extern u16  D_800427F4;
 extern SoundSlot D_800425E0[];
-extern struct124 *D_80042800;
+extern struct OscState *D_80042800; /* free oscillator states */
 extern s32  D_80042804;
 extern u16 *D_800428B8;
 extern u8   D_800428C0;
@@ -452,7 +448,7 @@ extern f32 D_800895B0;
 extern ZDecode D_80089630[8]; // z-buffer decompression table
 extern s32 * D_80089A20[];
 extern IdList2 D_8008A074; // effect-object kinds (game_16DC80)
-extern struct32 D_8008A0B4[];
+extern ActorEffectDef D_8008A0B4[];
 extern s32  D_8008A084[];
 extern void (*D_8008A4E8[])(TimedEffect*);
 extern void (*D_8008A4C0[])(TimedEffect*);
@@ -910,7 +906,7 @@ extern s8  D_800BC448[]; // per texture: frames left before it is freed (0 = not
 extern u32 D_800BE3E4; // saved clock (seconds)
 extern u8 * D_800BE3F0; /* bit width of each of the 69 D_800C3A60 entries in a save file */
 extern ParticleResource D_800BE4A0[15];
-extern struct14 *D_800BE4F0;
+extern struct TexScroll **D_800BE4F0; /* four texture scrolls (func_15010FB0) */
 extern BounceRecord *D_800BE4E0;
 extern u8  D_800BE500[5]; // might be a struct?
 extern u8 (*D_800BE510)[3]; // base RGB of every level vertex, then the props'; (&D_800BE510)[i] for i < 4 is level model i's first vertex (no symbols of their own)

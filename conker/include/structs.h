@@ -1,9 +1,8 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
-typedef struct struct12 struct12;
 typedef struct SndState SndState;
-typedef struct struct124 struct124;
+typedef struct OscState OscState;
 typedef struct Actor Actor;
 typedef struct Camera Camera;
 struct Rope;
@@ -27,101 +26,17 @@ union ActorMsg;
   uw -> unsigned word (u16)
 */
 
-struct struct12 {
-    s32 unk0;
-    s32 unk4;
-    u8  unk8;
-    u8  unk9;
-    u8  padA[0x2];
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-};
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s16 unkC;
-    u8  unkE;
-} struct9;
-
-typedef struct {
-    u16 unk0;
-    u8  unk2;
-    u8  unk3;       // used
-    s32 unk4;
-    s32 unk8;
-    s16 unkC;
-    s16 unkE;       // used
-    u32 unk10[16];  // used
-} struct11;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-} struct13;
-
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-} struct14; // size 0x10
-
-typedef struct {
-    u32 unk0;
-    s32 unk4;
-    u32 unk8;
-    s32 unkC;
-    s32 unk10;  // used
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    u16 unk24;
-    u16 unk26;
-    s32 unk28;
-    s32 unk2C;  // used
-} struct15; // 0x30 size
-
-typedef struct {
-    u32 unk0;
-    u16 unk4;
-    u8  unk6;
-    u8  unk7;
-    u8  unk8;
-    u8  unk9;
-    u8  unkA;
-    u8  unkC;
-    u8  unkD;
-    u8  unkE;
-    u8  unkF;
-    u32 unk10;
-    u8  unk14;
-    u8  unk15;
-    u8  unk16;
-    u8  unk17;
-    f32 unk18;
-    // padding
-    u32 unk1C;
-    u32 pad20;
-    u32 pad24;
-    u32 pad28;
-    u32 pad2C;
-    u32 pad30;
-    u32 pad34;
-    u32 pad38;
-} struct16; // 0x3C
+/* ALWaveTable as Conker's bank loader (func_10012CFC) sees it: the ADPCM wave info, then a word it clears. */
+typedef struct WaveTable {
+    /* 0x00 */ u8 *base;
+    /* 0x04 */ s32 len;
+    /* 0x08 */ u8 type;    // AL_ADPCM_WAVE / AL_RAW16_WAVE
+    /* 0x09 */ u8 flags;   // 1 once relocated
+    /* 0x0A */ u8 padA[0x2];
+    /* 0x0C */ void *loop; // ALADPCMloop or ALRawLoop
+    /* 0x10 */ ALADPCMBook *book;
+    /* 0x14 */ s32 unk14;
+} WaveTable;
 
 /* Three-float vector: positions, directions, velocities, scales. */
 typedef struct Vec3f {
@@ -147,30 +62,14 @@ typedef struct Vec3i {
     /* 0x8 */ s32 z;
 } Vec3i; // size 0xC
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    s32 unk30;
-    s16 unk34;
-    s8  unk36;
-} struct24;
-
 // size 0x44
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} struct32;
+/* Actor effect D_8008A0B4[handler] (game_16EE20.c): its handler runs once, or every frame while it is
+ * attached to the actor as a timed effect of `duration` frames. */
+typedef struct ActorEffectDef {
+    /* 0x0 */ void (*handler)(struct Actor *actor, s32 arg1, s32 timer);
+    /* 0x4 */ s32 duration;  // > 0: attached as a timed effect
+} ActorEffectDef;
 
 /* A sound player voice record: init_15550.c's SndState (the audio library's sound state), as seen by game code
  * that cannot include n_libaudio.h; the sound slots of init_EB00.c (D_800425E0) point at one. */
@@ -198,18 +97,6 @@ struct SndState {
     /* 0x54 */ u8 state;             /* play state */
     /* 0x55 */ u8 pad55[3];
 }; /* size 0x58 */
-
-typedef struct {
-    s16 unk0;   // used
-    s16 unk2;
-    s16 unk4;   // used
-    s16 unk6;
-    s16 unk8;
-    s16 unkA;
-    u8  unkC;
-    u8  unkD;
-    s16 unkE;
-} struct39;
 
 typedef struct {
     s16 unk0;   // used
@@ -424,37 +311,6 @@ typedef struct ObjPartsState {
 } ObjPartsState;
 
 typedef struct {
-    u8  unk0;
-    u8  pad1;
-    u8  unk2;
-    u8  pad3;
-    u8  unk4;
-    u8  pad5;
-    s16 unk6;
-    u8  pad8[0x4];
-    u8  unkC;
-    u8  padD[0x3];
-    u8  unk10;
-    u8  pad11[0x5];
-    u8  unk16;
-    u8  pad17[0x4];
-    u8  unk1B;
-} struct110;
-
-typedef struct {
-    u8 pad0[0x18];
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    s16 unk1E;
-    u8 pad1[0x18];
-    s16 unk38;
-    s16 unk3A;
-    s16 unk3C;
-    s16 unk3E;
-} struct113;
-
-typedef struct {
     s32 unk0;
     s32 unk4;
     s32 unk8;
@@ -494,10 +350,6 @@ typedef struct ObjType {
     /* 0x31 */ u8 pad31[3];
 } ObjType; // size 0x34
 
-typedef struct {
-    u8 pad[0x20];
-} struct117; // used as OSMesg
-
 /* A positional sound slot of init_EB00.c (D_800425E0[16]); a handle's low 4 bits are its slot. */
 typedef struct {
     /* 0x0 */ u16 handle;
@@ -507,58 +359,32 @@ typedef struct {
     /* 0x8 */ SndState *voice;
 } SoundSlot;
 
-typedef struct {
-    s16 unk0;
-    u8  unk2;
-    u8  unk3;
-    s32 unk4;
-    s32 unk8;
-    s32 unkC[8];
-} struct121;
-
-struct FLOAT {
-    f32 unk0;
-};
-
 struct SHORTS {
     s16 unk0;
     s16 unk2;
-};
-
-struct UBYTES4 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
 };
 
 struct WORD {
     s32 unk0;
 };
 
-struct struct124 {
-    struct124* unk0;
-    u8 unk4;
-    s8 unk5;
-    s8 unk6;
-    s8 unk7;
-    s32 unk8;
-    s16 unkC;
-    s16 unkE;
-    s32 unk10;
-    u8  pad14[0x3];
-    u8  unk17;
-    s16 unk18;
-    s16 unk1A;  // used
-    s16 unk1C;  // used
-    s16 unk1E;  // used
-    s16 unk20;
-    s16 unk22;  // used
-    s16 unk24;  // used
-    s16 unk26;  // used
-    union {
-        struct UBYTES4 i;
-        struct FLOAT f;
+/* Oscillator state of the sequence players' tremolo / vibrato (init_128D0.c: func_10012E04 init,
+ * func_10012F94 update, func_100131D8 stop), the libultra demo's oscData; free ones are linked from D_80042800. */
+struct OscState {
+    /* 0x00 */ struct OscState *next;
+    /* 0x04 */ u8  type;      // 1 = tremolo sine, 128 = vibrato sine
+    /* 0x05 */ u8  pad5[0x1D];
+    /* 0x22 */ s16 maxCount;  // period in updates
+    /* 0x24 */ s16 curCount;
+    /* 0x26 */ u8  pad26[2];
+    /* 0x28 */ union {
+        struct {
+            u8 halfdepth;
+            u8 baseVol;
+        } tsin;
+        struct {
+            f32 depth;    // cents ratio (func_10012D80)
+        } vsin;
     } data;
 }; // size 0x2C
 
@@ -605,14 +431,6 @@ typedef struct ModelDef {
     /* 0x3D */ u8  pad3D;
     /* 0x3E */ u16 cullDistance;    // 0 = Actor.unkE4, 1 = never culled, else scaled by scale_xz
 } ModelDef;
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;       // used
-    s32 unk4;
-    s16 unk8[0x10]; // used
-    s32 unk28;      // used
-} struct125;
 
 /* Idle animation state of an ActorCtl (ActorCtl.idle, 0x58). While an actor stands still it plays
  * short "sequences" of frames, picked at random while avoiding the ones played most recently. */
@@ -1600,47 +1418,6 @@ typedef struct {
     u8 unk1B;
 } struct133;
 
-typedef struct {
-    s16 unk0;
-    u16 unk2;
-    s16 unk4;
-    u16 unk6;
-    u16 unk8;
-    u16 unkA;
-    s32 unkC;
-    s32 unk10;
-    u16 unk14;
-    u8  unk16;
-    u8  unk17;
-    s32 unk18;
-    s32 unk1C; // struct ptr?
-    s32 unk20;
-    s32 unk24;
-} struct134;
-
-typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s32 unk4;
-    s16 unk8[16];
-} struct139;
-
-typedef struct {
-    u32 unk0;
-    u32 unk4;
-} struct148;
-
-typedef struct {
-    s32 pad0;
-    u8  unk4;
-    s8  unk5; // used
-} struct152;
-
-typedef struct {
-    s32 pad0;
-    struct152 *unk4;
-} struct153;
-
 /* Camera command playback state (Camera.cmdState, at 0x6CC). */
 typedef struct CamCmdState {
     /* 0x00 */ s16 unk0;
@@ -2196,7 +1973,7 @@ typedef struct {
 } struct175;
 
 typedef struct {
-    struct39* unk0;
+    struct TriggerZone *unk0;
     f32 unk4;
     s32 unk8;
     f32 unkC;

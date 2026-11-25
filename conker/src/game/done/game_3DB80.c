@@ -4,17 +4,18 @@
 #include "variables.h"
 
 
-s32 func_150106D0(struct39 *arg0) {
+/* Zone handler D_80082ECC[...]: spawns timed effect 89 for the zone at its x/z. */
+s32 func_150106D0(TriggerZone *zone) {
     struct176 tmp;
     TimedEffect *effect;
 
-    tmp.unk0 = arg0;
-    tmp.unk4 = func_15144598(arg0);
+    tmp.unk0 = zone;
+    tmp.unk4 = func_15144598(zone);
     tmp.unkC = 0.0f;
 
     func_1510F800(0);
 
-    tmp.unk8 = func_1510FD20(arg0->unk0, arg0->unk4);
+    tmp.unk8 = func_1510FD20(zone->x, zone->z);
     if (tmp.unk8 == 0) {
         return 1;
     } else {

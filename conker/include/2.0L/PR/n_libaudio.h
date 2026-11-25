@@ -273,7 +273,7 @@ typedef struct {
     /* 0x32 */  s16                 vol;            /* overall sequence volume          */
     /* 0x34 */  u8                  maxChannels;    /* number of MIDI channels          */
     /* 0x35 */  u8                  debugFlags;     /* control which error get reported */
-    /* 0x36 */  u8                  mpegBank;       /* Rare: shown by the Oct 2000 debugger; unused in US */
+    /* 0x36 */  u8                  mpegBank;       /* Rare: the Oct 2000 debugger's name; set by func_1001A3E0 */
     /* 0x37 */  u8                  pad37;
     /* 0x38 */  N_ALEvent           nextEvent;
     /* 0x48 */  ALEventQueue        evtq;

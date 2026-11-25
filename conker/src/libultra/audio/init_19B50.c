@@ -142,18 +142,13 @@ void func_1001A39C(N_ALCSPlayer *seqp, s32 arg1, s32 chan, u32 arg3) {
     }
 }
 
-// FIXME:
-typedef struct {
-    u8 pad0[0x36];
-    u8 unk36;
-} struct24;
-
-void func_1001A3E0(struct24 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    arg0->unk36 = arg3;
+void func_1001A3E0(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+    seqp->mpegBank = arg3;
 }
 
-void func_1001A3FC(struct24 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    func_1001263C(arg0->unk36 * 100 + arg3, 0x7FFF, 0x40);
+/* Plays sound mpegBank * 100 + arg3. */
+void func_1001A3FC(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+    func_1001263C(seqp->mpegBank * 100 + arg3, 0x7FFF, 0x40);
 }
 
 void func_1001A45C(N_ALCSPlayer *seqp, u8 chan) {

@@ -63,7 +63,7 @@ void func_150403C8(void *dl, u32 end, s32 parent) {
         switch (gfx->dma.cmd) {
             case (s8)G_DL:
                 addr = gfx->words.w1;
-                isBad = func_150408CC((struct148 *)gfx);
+                isBad = func_150408CC(gfx);
                 segment = (addr >> 24) & 0xF;
                 addr &= 0xFFFFFF;
                 addr += D_800C6860[segment];
@@ -281,8 +281,8 @@ void func_150408C0(Gfx *gfx) {
 }
 
 /** G_DL check: returns nonzero when the branch target is misaligned. */
-s32 func_150408CC(struct148 *arg0) {
-    return func_1504072C(arg0->unk4);
+s32 func_150408CC(Gfx *gfx) {
+    return func_1504072C(gfx->words.w1);
 }
 
 /** G_DL command handler (empty). */

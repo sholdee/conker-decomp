@@ -96,7 +96,6 @@ typedef struct {
 #define ATTACH_TIMED_EFFECT 0x1A
 
 typedef s32 (*EffectSelector)(s32, Actor *);
-typedef void (*EffectHandler)(Actor *, s32, s32);
 
 s32 func_15141C0C(Actor *actor);
 s32 func_15141CC0(u32 arg0);
@@ -113,11 +112,11 @@ void func_15141A7C(Actor *actor, s32 arg1) {
         if (D_8008A084[selector] != 0) {
             handler = ((EffectSelector)D_8008A084[selector])(func_15141CC0(func_1510F8CC(actor->floorMaterial)), actor);
             if (handler != -1) {
-                if (D_8008A0B4[handler].unk0 != 0) {
-                    if (D_8008A0B4[handler].unk4 > 0) {
+                if (D_8008A0B4[handler].handler != NULL) {
+                    if (D_8008A0B4[handler].duration > 0) {
                         func_15141E38(actor, handler);
                     } else {
-                        ((EffectHandler)D_8008A0B4[handler].unk0)(actor, arg1, 0);
+                        D_8008A0B4[handler].handler(actor, arg1, 0);
                     }
                 }
             }
@@ -129,9 +128,9 @@ void func_15141A7C(Actor *actor, s32 arg1) {
             do {
                 AttachedEffect *effect;
                 effect = node->handle;
-                if (D_8008A0B4[effect->info.handler].unk0 != 0) {
+                if (D_8008A0B4[effect->info.handler].handler != NULL) {
                     // matching: the u32 view makes IDO reload the index instead of reusing it
-                    ((EffectHandler)D_8008A0B4[*(u32 *)&effect->info.handler].unk0)(actor, arg1, effect->base.header.state);
+                    D_8008A0B4[*(u32 *)&effect->info.handler].handler(actor, arg1, effect->base.header.state);
                 }
                 node = node->next;
             } while (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0);
@@ -225,7 +224,7 @@ void func_15141DA4(void *actor, s32 selector, s32 handler) {
         (handler < 20) && (handler >= 0) &&
         (D_800BE616 == 0) &&
         (D_8008A084[selector] != 0) && (handler != -1)) {
-        if ((D_8008A0B4[handler].unk0 != 0) && (D_8008A0B4[handler].unk4 > 0)) {
+        if ((D_8008A0B4[handler].handler != NULL) && (D_8008A0B4[handler].duration > 0)) {
             func_15141E38(actor, handler);
         }
     }
@@ -247,7 +246,7 @@ void func_15141E38(Actor *actor, s32 handler) {
             effect = node->handle;
             if (handler == effect->info.handler) {
                 found = node;
-                effect->base.header.state = D_8008A0B4[handler].unk4;
+                effect->base.header.state = D_8008A0B4[handler].duration;
             }
             node = node->next;
         } while (func_1514ECE0(node, ATTACH_TIMED_EFFECT, &node) != 0);
@@ -258,7 +257,7 @@ void func_15141E38(Actor *actor, s32 handler) {
         info.handler = handler;
         info.owner = actor;
         info.ownerId = actor->unique_id;
-        effect = (AttachedEffect *)func_15149130(D_8008A0B4[handler].unk4, -1, -1, -1, 1, 50, 0xC, 0xFF, 1);
+        effect = (AttachedEffect *)func_15149130(D_8008A0B4[handler].duration, -1, -1, -1, 1, 50, 0xC, 0xFF, 1);
         if (effect != NULL) {
             memcpy(&effect->info, &info, sizeof(info));
             func_1514EC1C(effect, actor, ATTACH_TIMED_EFFECT);

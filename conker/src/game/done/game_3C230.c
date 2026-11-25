@@ -22,13 +22,14 @@ void func_1500EE18(Actor *arg0, s32 arg1, s32 arg2) {
     }
 }
 
-void func_1500EE94(struct16 *arg0) {
+/* Zone handler D_80082F70[1]: spawns timed effect 0x46 for the zone. */
+void func_1500EE94(TriggerZone *zone) {
     struct173 tmp;
     TimedEffect *effect;
 
-    tmp.unk0 = arg0;
+    tmp.unk0 = zone;
     tmp.unk4 = 0.0f;
-    tmp.unk8 = arg0->unk14;
+    tmp.unk8 = zone->inactive;
     effect = func_15149130(0x12C, -1, 0x46, -1, 0, 0x39, 0xC, 0xFF, 1);
     if (effect != NULL) {
         memcpy(effect + 1, &tmp, 12);

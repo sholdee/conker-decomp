@@ -551,21 +551,10 @@ void func_151A8A78(Bolt *bolt, void *arg, u8 msgType) {
     }
 }
 
-/* A placed level object; the shared headers type it as struct134. */
-typedef struct {
-    /* 0x00 */ s16 x;
-    /* 0x02 */ s16 y;
-    /* 0x04 */ s16 z;
-    /* 0x06 */ u8 pad6[0x10];
-    /* 0x16 */ u8 flags;
-    /* 0x17 */ u8 pad17;
-    /* 0x18 */ s32 unk18;
-} LevelObject;
-
 /* Spawn parameters of a particle emitter (func_151A8B20). */
 typedef struct {
     /* 0x00 */ u8 flags;             /* EMITTER_* */
-    /* 0x04 */ LevelObject *anchor;  /* centre (and area) with EMITTER_ANCHORED */
+    /* 0x04 */ TriggerZone *anchor;  /* zone giving the centre (and area) with EMITTER_ANCHORED */
     /* 0x08 */ f32 rate;             /* particles per frame and unit area: rate + rand * rateRange */
     /* 0x0C */ f32 rateRange;
     /* 0x10 */ Vec3f pos;            /* centre without EMITTER_ANCHORED */
@@ -638,7 +627,7 @@ Emitter *func_151A8B20(EmitterDef *def, s16 lifetime, s32 extraSize, u8 arg3, s3
         }
 
         if ((state->def.flags & EMITTER_ANCHORED) && (state->def.anchor != NULL)) {
-            state->area = func_15144598((TriggerZone *)state->def.anchor);
+            state->area = func_15144598(state->def.anchor);
         } else {
             state->area = (state->def.radius * state->def.radius) * 3.14159265f;
         }
@@ -712,7 +701,7 @@ void func_151A8CEC(Emitter *emitter) {
     }
 }
 
-extern void func_151432BC(LevelObject *, f32 *, f32 *, f32 *, f32 *);
+extern void func_151432BC(TriggerZone *, f32 *, f32 *, f32 *, f32 *);
 
 /* Picks a random point of the anchor object's area; *top is its height. */
 void func_151A8F1C(Emitter *emitter, Vec3f *pos, f32 *top, f32 *bottom) {
@@ -744,14 +733,14 @@ void func_151A9024(Emitter *emitter, u8 *msg, u8 msgType) {
     }
 }
 
-extern void (*D_8008F984[])(LevelObject *, s32);
+extern void (*D_8008F984[])(TriggerZone *, s32);
 
-/* Level object setup: marks the object and runs the handler for its kind (unk18, 0 to 7). */
-s32 func_151A9060(LevelObject *obj) {
+/* Zone handler (D_80082ECC): marks the zone and runs the handler for its kind (data1, 0 to 7). */
+s32 func_151A9060(TriggerZone *obj) {
     s32 kind;
 
     obj->flags |= 4;
-    kind = obj->unk18;
+    kind = obj->data1;
     if (kind < 0 || kind >= 8) {
         return 1;
     }
@@ -762,10 +751,10 @@ s32 func_151A9060(LevelObject *obj) {
 }
 
 /*
- * Kind 0-5 level object handler: an emitter anchored to obj, with message id `kind`; odd kinds
+ * Kind 0-5 zone handler: an emitter anchored to the zone obj, with message id `kind`; odd kinds
  * spawn faster.
  */
-void func_151A90C0(LevelObject *obj, s32 kind) {
+void func_151A90C0(TriggerZone *obj, s32 kind) {
     EmitterDef def;
     // matching: the id byte sits 4 bytes below this unused slot, in frame padding no declared
     // local reaches (a u8 local lands at sp+0x2F or grows the frame)
@@ -933,7 +922,7 @@ void *func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, 
  * 1 EMITTER_ZONED, 2 EMITTER_NO_PROBE, 4 also call func_1516284C there, 8 and 0x10 set settings
  * flags 1 and 2. lifetime -1 means untimed.
  */
-void func_151A9390(u8 options, u8 preset, LevelObject *obj, Vec3f *pos,
+void func_151A9390(u8 options, u8 preset, TriggerZone *obj, Vec3f *pos,
                    f32 bottom, f32 radius, s16 lifetime, u8 arg7, s32 arg8) {
     EmitterDef def;
     Emitter *emitter;

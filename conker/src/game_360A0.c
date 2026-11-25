@@ -4,8 +4,8 @@
 #include "variables.h"
 #include "effects.h"
 
-/* structs.h's struct110 types offsets 0/2/4 as u8 and 0xC/0x10 as u8 as well; the
-   golden code reads them with lh / lwc1.  File-local typedef per the usual policy. */
+/* The TriggerZone of zone handler D_80082ECC[...] as this file reads it: x/y/z, radius, pitch/yaw and
+   flags, plus the low byte of TriggerZone.data1 (0x1B), which the code loads as a byte. */
 typedef struct Game360A0Owner {
     s16 x;
     s16 y;

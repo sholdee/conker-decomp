@@ -677,7 +677,7 @@ void func_150379DC(f32 *out, s32 refBone, s32 bone, s32 objIndex, f32 range, s32
                 target.y = held->ypos;
                 target.z = held->zpos;
             } else {
-                func_15043FF0(&target, (struct113 *)model);
+                func_15043FF0(&target, model);
             }
             if (func_15037698(objIndex, refBone, bone, target.x, target.y, target.z, out, range, 0, axisMode)) {
                 return;
@@ -1865,7 +1865,7 @@ void func_1503A830(Actor *obj) {
                     model = holderData->partMtx[D_800BE9C0];
                     if (model != NULL) {
                         model += 2; // the third part matrix
-                        func_15043FF0((Vec3f *)D_800C3FE8, (struct113 *)model);
+                        func_15043FF0((Vec3f *)D_800C3FE8, model);
                         noHolderTarget = 0;
                     }
                 }

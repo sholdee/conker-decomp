@@ -10,7 +10,7 @@ void func_15000000(void) {
     for (i = 0; i < 3; i++)
     {
         msgQueue = &D_80041E58[i];
-        osCreateMesgQueue(msgQueue, &D_80041EA0[i], 8);
+        osCreateMesgQueue(msgQueue, D_80041EA0[i], 8);
         func_10008570(i, msgQueue);
     }
 

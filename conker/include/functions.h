@@ -157,16 +157,16 @@ void func_1001263C(s32 arg0, s32 arg1, s32 arg2);
 s32  func_100126E8(u8 *dst, s32 dstSize);
 s32  func_10012718(u16 arg0, Actor *arg1, s32 arg2, s16 arg3, u16 arg4);
 s32  func_100127D0(void);
-void func_10012A28(struct121 *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_10012B84(struct11 *arg0, s32 arg1);
-void func_10012BD0(struct11 *arg0, s32 arg1);
-void func_10012C5C(struct9 *arg0, s32 arg1, s32 arg2);
-void func_10012CFC(struct12 *arg0, s32 arg1, s32 arg2);
+void func_10012A28(ALBank *bank, s32 offset, s32 table, s32 arg3);
+void func_10012B84(ALInstrument *inst, s32 arg1);
+void func_10012BD0(ALInstrument *inst, s32 arg1);
+void func_10012C5C(ALSound *sound, s32 offset, s32 table);
+void func_10012CFC(WaveTable *wave, s32 offset, s32 table);
 f32  func_10012D80(u8 arg0);
 s32  func_10012E04(s32 *arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5);
-s32  func_10012F94(struct124 *arg0, f32 *arg1);
+s32  func_10012F94(struct OscState *osc, f32 *value);
 void func_100131D8(s32 *arg0);
-void func_100131FC(struct13 *arg0, s32 arg1);
+void func_100131FC(ALSeqpConfig *config, s32 arg1);
 void func_10016E90(SndState *arg0);
 void func_10016F00(SndState *state);
 SndState *func_10017100(s32 arg0, s16 arg1);
@@ -185,11 +185,8 @@ void n_alClose(s32 arg0);
 s32  _n_timeToSamplesNoRound(s32 micros);
 s32  _n_timeToSamples(s32 micros);
 f32  alCents2Ratio(s32 arg0);
-void func_1001A3E0(struct24 *arg0, s32 arg1, s32 arg2, s32 arg3);
 void func_1001CBF0(f32 arg0, f32 arg1, f32 arg2, f32 arg3[3], f32 arg4[3]);
-void func_1001CD54(struct125 *arg0);
 f32  func_1001CEA4(s32 arg0);
-void func_1001D6E8(struct42 *arg0, s32 (*arg1)(s32 arg), struct15 *arg2);
 s32  func_1001D9B0(s16 arg0);
 s32  func_1001DA28(s16 arg0);
 void func_1001DAA0(s32 arg0, s16 arg1, s32 arg2);
@@ -337,7 +334,7 @@ void func_1500EB30(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_1500EBC4(void);
 void func_1500ED80(void);
 void func_1500EE18(Actor *arg0, s32 arg1, s32 arg2);
-void func_1500EE94(struct16 *arg0);
+void func_1500EE94(TriggerZone *zone);
 void func_1500EF20(void);
 
 void func_15010240(void);
@@ -348,7 +345,7 @@ void func_15010538(Actor *arg0);
 void func_15010680(void);
 void func_150106A0(void);
 void func_150106B0(void);
-s32  func_150106D0(struct39 *arg0);
+s32  func_150106D0(TriggerZone *zone);
 void func_15010780(void);
 void func_15010FB0(void);
 void func_150110F0(void);
@@ -381,7 +378,7 @@ void func_1501C870(void);
 
 void func_15040350(void *arg0, u32 arg1);
 s32  func_1504082C(u32 *arg0);
-s32 func_150408CC(struct148 *arg0);
+s32 func_150408CC(Gfx *gfx);
 void func_15042D50(void);
 void func_15042D78(u8 arg0);
 void func_150432BC(f32 arg0);
@@ -392,7 +389,7 @@ void func_15043A00(MsgRing *ring, u8 *buffer, s32 capacity);
 void func_15043D90(Mtx *m, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 void func_15043E68(Mtx *m, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 void func_15043EC8(MtxF mtx, f32 x, f32 y, f32 z, f32 arg4, f32 arg5, f32 arg6);
-void func_15043FF0(Vec3f *arg0, struct113 *arg1);
+void func_15043FF0(Vec3f *out, Mtx *mtx);
 void func_150442C0(MtxF arg0, f32 x, f32 y, f32 z);
 void func_15047F00(MtxF mtx, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 void func_15048134(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
@@ -1059,7 +1056,7 @@ Acmd *func_1001E530(s16 *outp, Acmd *p, s32 bus);
 //func_101A04F4
 //func_101A0538
 void func_1001C224(void *arg0, s32 arg1, s32 arg2, s32 arg3);
-void func_1001CF38(struct139 *arg0, f32 arg1);
+void func_1001CF38(void *lowpass, f32 rate);
 
 u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 void func_1501748C(s16 arg0);
@@ -1144,6 +1141,7 @@ s32  func_15187EC0(s32 arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 ar
 typedef struct TexScroll TexScroll; /* game_1C2C60.c */
 TexScroll *func_15195AA8(Gfx *dl, s32 texture, s32 doubled, s32 occurrence, s32 isNew, s32 which, s32 speedS,
                          s32 speedT);
+void func_15196318(TexScroll *scroll, s32 speedS, s32 speedT);
 void func_151B8DB0(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
 void func_151D5404(Vec3f*, f32, f32, f32, s32, s32, s32, s32);
 void func_151D5714(Actor *obj, Vec3f *from, Vec3f *to, u8 bone, f32 scale, u8 arg5, s32 arg6);

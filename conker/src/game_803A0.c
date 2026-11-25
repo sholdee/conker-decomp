@@ -136,7 +136,7 @@ void func_1505327C(Actor *arg0, f32 yVelocity, f32 gravity, s32 arg3, s32 mtxInd
         if ((arg0->ob_matrix_ptr != NULL) && (mtxIndex != -1)) {
         // matching: an unused label keeps IDO from sinking the index shift below the -1 test
         joint:
-            func_15043FF0(&pos, &((struct113 *)arg0->ob_matrix_ptr)[mtxIndex]);
+            func_15043FF0(&pos, &((Mtx *)arg0->ob_matrix_ptr)[mtxIndex]);
             movement_obj[arg0->owner].mv->swing_xvel = pos.x;
             movement_obj[arg0->owner].mv->swing_zvel = pos.z;
         }

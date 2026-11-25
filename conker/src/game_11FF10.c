@@ -52,7 +52,6 @@ extern u8 D_800CC40C;
 WorldObject *func_151149AC(s32);
 void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(Actor *, s32);
-void func_15196318(s32, s32, s32);
 
 /* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its D_800DBF94 bit 0 set, runs
  * movement_obj[0] through func_15136C3C .. func_1507CD64(6) once; then offsets the four D_800BE4F0 entries
@@ -88,10 +87,10 @@ void func_150F2A60(s32 arg0) {
             } else {
                 scroll = 0;
             }
-            func_15196318(D_800BE4F0->unk0, scroll, 0);
-            func_15196318(D_800BE4F0->unk4, 0, -scroll);
-            func_15196318(D_800BE4F0->unk8, scroll, 0);
-            func_15196318(D_800BE4F0->unkC, -scroll, 0);
+            func_15196318(D_800BE4F0[0], scroll, 0);
+            func_15196318(D_800BE4F0[1], 0, -scroll);
+            func_15196318(D_800BE4F0[2], scroll, 0);
+            func_15196318(D_800BE4F0[3], -scroll, 0);
         }
     }
 }
