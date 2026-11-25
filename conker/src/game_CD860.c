@@ -39,8 +39,6 @@ s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
     return 0;
 }
 
-Actor *func_1505EEF4(s32);
-
 /* Answers query `query` about record `slot`; `msg` carries the query's parameters.
  * Queries 6 and 13 take an id whose bits 12-15 select its kind: 0x2000 is an object in
  * movement_obj (looked up by func_1505EEF4), 0x9000 a zones record. */

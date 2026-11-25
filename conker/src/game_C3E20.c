@@ -318,8 +318,6 @@ s32 func_15096D78(s32 actorIndex, s32 command, s32 *args) {
 }
 
 
-Actor *func_1505EEF4(s32);
-
 /*
  * Answers script query `query` about actor `actorIndex` (arguments in args[2..]); fixed-point results
  * are 16.16.

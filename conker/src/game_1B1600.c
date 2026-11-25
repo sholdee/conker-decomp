@@ -18,8 +18,6 @@ extern f32 D_800DE03C;  /* light distance scale */
 extern u8 D_800DE040;   /* nonzero: keep the light at least 30 degrees above the object */
 extern u8 D_800DE041;   /* nonzero: only faces flagged in the D_800D3668 table receive shadows */
 
-extern s32 func_1502DB20(s32);
-
 /* Half-extents of an object's bounding box, from its bone matrices or, failing that, its model size. */
 s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
     s32 id;
@@ -347,8 +345,6 @@ s32 func_15184DF0(s32 objIndex, s32 view, f32 *halfX, f32 *halfY, f32 *halfZ) {
 extern Gfx D_8008D448[];
 extern Vp D_8008D3E8;
 extern Mtx D_89470;
-extern s32 func_1506196C(Actor *, s32);
-extern Gfx *func_1502CCFC(Gfx *, s32, s32, MtxF *, s32, s32 *, s32, s32);
 
 /*
  * Renders object objIndex in black into the 64x64 shadow texture at D_800DF088 through slot's light

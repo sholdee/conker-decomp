@@ -151,7 +151,6 @@ struct Actor150FD514 {
 extern s32 D_800A1EEC[];
 extern void func_1504715C(CollisionHit *, Actor *);
 extern s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-extern void func_1505D024(Actor *, s32, u16, s32);
 extern s32 func_1516284C(LightEffectHeader *, s32 *, s32, s32, s32, u8, u8, s32, u8, u8, s32);
 
 /*
@@ -288,7 +287,6 @@ void func_150FCFD4(Actor *obj, u8 arg1, s32 arg2) {
     }
 }
 
-extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);
 extern void func_15107B78(Actor *, s32, s32, s32, s32);
 extern void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 

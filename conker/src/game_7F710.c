@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1505A770(Actor *arg0);
-
 /*
  * While mv->unk6B < 4, moves the actor toward the s16 target position in its mv block
  * (all the way, or 40% per call in modes 1 and 3); otherwise clears the mode once unk28 runs out.

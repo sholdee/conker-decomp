@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1507C3E0(Actor *obj, s16 *height, s16 *width, s16 *depth);
-
 /* Refreshes the cached height/width/depth (ActorCtl height, width, depth) of every object that has one. */
 void func_1507C370(void) {
     s32 i;

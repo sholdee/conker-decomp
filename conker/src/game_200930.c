@@ -262,8 +262,6 @@ void func_151D3E04(Actor *obj, f32 *out, void *localPos, u8 bone, f32 yOffset) {
     }
 }
 
-extern void func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32);
-
 /* Calls func_1505D1C4 at the midpoint of a and b, with obj's movement angle relative to its mv. */
 void func_151D3E6C(Actor *obj, f32 *a, f32 *b, s32 arg3) {
     f32 x = (b[0] + a[0]) * 0.5f;
@@ -313,8 +311,6 @@ void func_151D3FF4(Vec3f *pos, u8 arg1, s32 arg2) {
 
     func_151602C0(&header, &header2, (func_150ADA20() % 24U) + 34, 255, 161, 162, 255, 0, 0, arg1, arg2);
 }
-
-void func_1507C3E0(Actor *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
 
 /* Calls func_1505D1C4 twice (with arg5 and arg6) at pos; the second point is 90 units back along dir,
    or pos raised by half of target's height when there is no dir. */
@@ -631,8 +627,6 @@ typedef struct {
 } S151D4DAC;
 
 void func_151C2050(Actor *, f32 *, f32 *, s32, f32);
-void func_1507DE4C(Actor *);
-s32 func_1505D024(Actor *, s32, u16, s32);
 
 /* Applies a hit from attacker to victim travelling along dir. */
 void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4DAC *hit, s32 flags, f32 *dir, u8 arg7, s32 arg8) {
@@ -873,7 +867,6 @@ void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u
 
 void func_151D5A18(Actor *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, u8);
 void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
-void func_150636A4(Actor *);
 
 /* Computes obj's emission point and direction for slot `slot`, stores a far target point along it in
    unk31C->unkB8..unkC0, and calls func_15081690 from the point towards that target. */

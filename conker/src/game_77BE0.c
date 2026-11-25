@@ -3,13 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-// 3-byte entries of D_80099140
-typedef struct {
-    s8 unk0;
-    s8 unk1;
-    s8 unk2;
-} Struct80099140;
-
 /* Per-mode tables indexed by D_800CC27C (D_800990C0 and D_800990E0 are read by game_79F10.c). */
 const f32 D_800990C0[8] = { 0.0f, 0.6000000238f, 0.1800000072f, 0.3000000119f, 0.0f, 2.0f, 2.0f, 4.0f };
 const f32 D_800990E0[8] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
@@ -34,10 +27,6 @@ const u16 D_8009917C[16] = {
 const u16 D_8009919C[6] = { 0x2B1, 0x2B5, 0x2B6, 0x2B7, 0x2BD, 0x2BE };
 
 void func_1508295C(s32, s32, s32);
-void func_1507D4F8(s32);
-s32 func_1504C8BC(Actor *);
-void func_1504AF10(Actor *, s32, s32);
-void func_15061B4C(void);
 
 void func_1504A730(void) {
     Actor *obj;
@@ -263,8 +252,6 @@ void func_1504AF10(Actor *obj, s32 force, s32 release) {
 }
 
 void func_1510F820(void *, void *, f32 *, f32 *, f32 *, f32 *, f32 *);
-void func_15060A30(s32, void *);
-void func_1507CD64(void *, s32);
 
 f32 func_1504B0FC(Actor *obj, f32 arg1) {
     s32 belowLevel;
@@ -642,9 +629,6 @@ s32 func_1504C0B8(void) {
     }
     return 27;
 }
-
-void func_15064A14(void *);
-s32 func_15064B94(Actor *, f32, f32, s32, f32);
 
 void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
     f32 blend;

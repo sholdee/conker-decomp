@@ -468,8 +468,6 @@ s32 func_151C87AC(SightSoundHandle *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg
     return 0;
 }
 
-extern void func_1507C3E0(void *, s16 *, s16 *, s16 *);
-
 /* Returns whether the beam segment passes through the actor's bounding sphere. */
 s32 func_151C87E0(Actor *actor, SightBeamObject *obj) {
     s32 kind;
@@ -532,7 +530,6 @@ extern LightEffect *func_151602C0(LightEffectHeader *, s32 *, s32, s32, s32, s32
 // matching: s32 parameters where the definition has u8 and s16 (no truncation at the call)
 extern void func_150E7FEC(f32, s32, void *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern void func_15164F0C(s32, u8, s32, u8, s32);
-extern void func_1505D024(s32, s32, s32, s32);
 
 /* Breaks the beam: debris and sparks at both ends, sounds, and (if `actor` tripped it) a reaction. */
 void func_151C899C(Actor *actor, SightBeamObject *obj) {
@@ -599,7 +596,7 @@ void func_151C899C(Actor *actor, SightBeamObject *obj) {
         func_151D8868(&params8868, 0, 0xFF, 0);
     }
     if (actor != NULL) {
-        func_1505D024((s32)actor, D_800AAC30[state->unk94], 0, -1);
+        func_1505D024(actor, D_800AAC30[state->unk94], 0, -1);
     }
     func_10010F88(0x2F5, 0x7FFF, func_150ADA20() % 500U, 0, 0, obj->head.def.pos.x, obj->head.def.pos.y, obj->head.def.pos.z, 2000, 2200);
     func_1000FA64(0x2F6, obj->head.def.rot.x, obj->head.def.rot.y, obj->head.def.rot.z, 0x7FFF, 2200, 2000, (SoundRecordCallback)func_1000EC24, (void *)5, 0, 0, func_150ADA20() % 500U);

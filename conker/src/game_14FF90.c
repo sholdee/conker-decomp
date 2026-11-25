@@ -80,8 +80,6 @@ void func_1511FC60(Camera *camera);
 s32 func_15125490(Camera *camera);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s16 *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
 void func_150AD8B0(Vec3f *, Vec3f *, Vec3f *);
-void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
-void func_1507E1D0(Actor *, f32 *, f32 *, f32 *);
 void func_1512D560(void *, s32, s32);
 s32 func_15127520(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId);
 s32 func_151277B0(CamSound *sound, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *soundId);

@@ -1469,8 +1469,6 @@ void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPi
     }
 }
 
-void func_1507C3E0(Actor *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
-
 /*
  * Recomputes an object's aim points (OBJ_AIM) from its type's aim bone: the bone origin pushed out by
  * unk30 along z, a top point unk0 up along y, two side points unk3A out along +-x, and a z direction in

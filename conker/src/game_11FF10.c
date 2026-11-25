@@ -14,7 +14,6 @@ extern struct {
     u8 unk120;
 } *D_800CC5EC;
 extern u8 D_800CC40C;
-void func_1507CD64(Actor *, s32);
 
 /* While movement_obj[0] has mv: if entry 0xFA or 0xF9 of db_Object_array has its gWorldObjectContacts bit 0 set, runs
  * movement_obj[0] through func_15136C3C .. func_1507CD64(6) once; then offsets the four D_800BE4F0 entries
@@ -74,8 +73,6 @@ void func_150F2C8C(Actor *target) {
         memcpy(&emitter->state, &state, sizeof(state));
     }
 }
-
-void func_1502EA98(Actor *, s32, s32, s32, s32, s32, s32);
 
 /* Emitter update: while the target lives, emits a burst of 3 particles from its bone 15 each time its unk222
  * changes to a nonzero value. */

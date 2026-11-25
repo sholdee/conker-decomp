@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
 void func_151C3B0C(s32, f32, f32, f32, f32, s32, s32, s32);
 extern s32 math_distance3D(s32, s32, s32);
 

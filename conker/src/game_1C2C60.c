@@ -1489,7 +1489,6 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
     }
 }
 
-extern void func_1505D024(Actor *, s32, u16, s32);
 extern s32 func_1518D1C0(Actor *, s32, s32, s32, s32, s32, const char *);
 
 /* Jet update callback: a point inside object 0's (the player's) cylinder hits it and retires the older points. */
@@ -3513,8 +3512,6 @@ void func_1519CD64(FlamethrowerController *ctrl) {
     ctrl->base.header.state = -1;
     ctrl->base.header.flags |= 1;
 }
-
-s32 func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
 
 /* Calls func_1505D1C4(kind) at points spaced flame->length * fraction along the flame, oldest first. */
 void func_1519CDB0(CharacterFlamethrowerActor *actor, f32 fraction, s32 kind) {

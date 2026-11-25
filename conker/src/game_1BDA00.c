@@ -38,8 +38,6 @@ typedef struct PeriodicObject {
     /* 0x90 */ PeriodicTrigger trigger;
 } PeriodicObject;
 
-extern s32 func_1505D024(void *, s32, u16, s32);
-
 /*
  * Advances the trigger timer by D_800BE9E4 and calls func_1505D024 (with the target's index in
  * movement_obj) once per elapsed interval; then sets the linked state's unk46 to 1000 if unk84 is clear.

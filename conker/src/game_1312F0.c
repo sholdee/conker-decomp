@@ -9,7 +9,6 @@ void func_151D5404(Vec3f *, f32, f32, f32, s32, s32, u8, s32);
 void func_151D5334(Vec3f *, f32, f32, f32, s32, u8, s32);
 void func_151D5514(Vec3f *, u8, s32);
 void func_151D40D4(Vec3f *, s32, Actor *, Actor *, s32, s32, s32, s32);
-void func_15055A2C(s32, f32, f32, f32, s32);
 
 /* Spawns an impact burst at pos: a ground splash when there is floor just below, effects, an optional variant-specific effect pair and particles. */
 void func_15103E40(Actor *owner, Actor *obj, Vec3f *pos, u8 variant, s32 arg4, u8 arg5, s32 arg6) {

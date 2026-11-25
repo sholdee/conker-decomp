@@ -493,7 +493,6 @@ s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 ar
     return 0;
 }
 
-void func_15055A2C(s32, f32, f32, f32, s32);
 void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface);
 void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32,
                    IgnoreList *, s32);

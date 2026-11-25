@@ -172,8 +172,6 @@ s32 func_15035714(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     return 0;
 }
 
-void func_1502D54C(s32, s32 *);
-s32 func_1502DB20(u8);
 s32 math_distance3D(s32, s32, s32);
 
 /*
@@ -361,8 +359,6 @@ Gfx *func_15035D6C(Gfx *gfx, ModelAttachment *att, s32 red, s32 green, s32 blue)
     return gfx;
 }
 
-extern Gfx *func_1502CCFC(Gfx *, s32, s32, u32, s32, s32 *, s32, s32);
-
 /* Draws the queued object reflections (not the attachment ones) for `player`. */
 Gfx *func_15035FE8(Gfx *gfx, s32 player) {
     ReflectionEntry *entry;
@@ -384,12 +380,10 @@ Gfx *func_15035FE8(Gfx *gfx, s32 player) {
         color[1] = entry->color[1];
         color[2] = entry->color[2];
         color[3] = 255;
-        gfx = func_1502CCFC(gfx, entry->objIndex, player, entry->mtx, entry->alpha, color, 0, 1);
+        gfx = func_1502CCFC(gfx, entry->objIndex, player, (void *)entry->mtx, entry->alpha, color, 0, 1);
     }
     return gfx;
 }
-
-void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
 
 /*
  * Queues a reflection in the horizontal plane y = unk118 for every moving object of kind 0 or 1

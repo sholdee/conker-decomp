@@ -2,17 +2,11 @@
 
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern void func_15022190(s16, s16, s16, f32);
 extern void func_1501D348(s32, s32, s32, s32, s32);
 extern void func_1501C730(s32, s32, s32, s32, s32);
-void func_1507D1D8(Actor *obj);
 extern void func_1509C3A0(void);
-
-void func_1507CD0C(Actor *obj);
-void func_1507D4F8(s32);
-void func_1507E1D0(Actor *, f32 *, f32 *, f32 *);
 
 /* Puts obj into state 2 with the given timer. */
 void func_1507C8E0(Actor *obj, s32 timer) {
@@ -122,7 +116,6 @@ void func_1507CD0C(Actor *obj) {
 }
 
 void func_15169040(void *, s32);
-void func_1504BAF0(Actor *);
 
 /* Kills obj with the given cause: plays its sound, resets movement and moves it to a dead state. */
 void func_1507CD64(Actor *obj, s32 cause) {
@@ -420,7 +413,6 @@ extern void func_151CFA4C(Actor *, s32, s32);
 extern void func_151BA518(Actor *, s32, s32);
 extern void func_151A6C90(Actor *, s32, s32);
 extern void func_151D22B0(Actor *, s32, s32);
-void func_1507DB44(Actor *obj, s32 arg1);
 
 /* Death handler: dispatches on obj->id; returns 1 or 2 when the object was handled specially, else 0. */
 /* Runs the per-id handler for obj (mostly id handler(obj, 0xFF, 1)); returns 1 or 2 for ids handled specially, else 0. */

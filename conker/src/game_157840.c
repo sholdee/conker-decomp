@@ -33,7 +33,6 @@ extern ZScanParams D_800DC200[4][4];
 
 void func_15123A54(Camera *arg0);
 
-void func_1507C3E0(Actor *obj, s16 *height, s16 *width, s16 *depth);
 s32 func_150A3FC4(f32, f32, s32, void *, void *);
 void func_1510E8BC(void *a0, void *a1, void *a2, void *a3, void *arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, s32 arg10, s32 arg11, f32 arg12, f32 arg13, s32 arg14);
 void func_151236D0(void *);

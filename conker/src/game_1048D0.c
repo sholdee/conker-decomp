@@ -1,6 +1,9 @@
 #include <ultra64.h>
+#define func_15052F9C func_15052F9C_header // matching: this file keeps its own declaration of func_15052F9C
 #include "functions.h"
 #include "variables.h"
+#undef func_15052F9C
+extern s32 func_15052F9C(Actor *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9); // matching: the definition returns nothing; this caller tests $v0
 
 
 /* Object that receives message 0x36; the three bytes at 0x28 are set to pure red or green, so they look like an RGB tint. */
@@ -186,11 +189,6 @@ void func_150D7790(Actor *obj, s32 action) {
 }
 
 extern s8 D_800CC4B4;
-extern s32 func_15052F9C(Actor *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
-extern void func_1505327C(Actor *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
-extern void func_1505A3A8(f32 arg0, Actor *arg1, f32 arg2, f32 arg3, u8 arg4);
-extern void func_1505C7D8(Actor *arg0, u8 arg1);
-extern s32 func_150535F4(Actor *arg0);
 
 /*
  * Per-frame update for an object that can be carried by a player (unk13C set, unk124 = player index).

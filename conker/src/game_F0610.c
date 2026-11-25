@@ -57,10 +57,6 @@ typedef struct {
     s32 unk14;
 } Struct150C3230;
 
-void func_15059C84(Actor *arg0);
-void func_1505A770(Actor *arg0);
-void func_1506AC8C(Actor *arg0, s32 arg1, void *arg2);
-
 void func_150C3230(Actor *obj) {
     s32 index;
     s32 type;
@@ -137,16 +133,11 @@ void func_150C3230(Actor *obj) {
                     target->energy = 1;
                 }
             }
-            func_1506AC8C(obj, (D_800BE616 != 0) ? 0xB : 0xE, &eventData);
+            func_1506AC8C(obj, (D_800BE616 != 0) ? 0xB : 0xE, (s32)&eventData);
             func_15060F28(obj, 1);
         }
     }
 }
-void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
-f32 func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
-void func_15056B08(Actor *arg0);
-void func_150562FC(Actor *arg0);
-u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
 
 void func_150C3574(Actor *obj) {
     f32 accel;

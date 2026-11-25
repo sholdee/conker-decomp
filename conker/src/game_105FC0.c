@@ -290,8 +290,6 @@ s32 func_150D8FAC(PissTrail *trail) {
 f32 sqrtf(f32);
 
 extern void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
-extern void func_1505A250(f32, f32, f32, f32 *, f32 *);
-extern void func_1505D024(Actor *, s32, u16, s32);
 void func_150DA67C(PissTrail *trail, RayHit *hit, f32 *dir);
 
 /*

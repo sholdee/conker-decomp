@@ -3,6 +3,7 @@
 #define func_10010630 func_10010630_hdr
 // matching: this file was built against a func_10010154 prototype with an unsigned volume
 #define func_10010154 func_10010154_functions_h
+#define func_1505DADC func_1505DADC_header // matching: this file keeps its own declaration of func_1505DADC
 #include "functions.h"
 #undef func_10010154
 s32 func_10010154(u16 sound, void *obj, u32 volume, s16 nearDistance, u16 farDistance);
@@ -10,6 +11,8 @@ s32 func_10010154(u16 sound, void *obj, u32 volume, s16 nearDistance, u16 farDis
 // matching: callers here were compiled with an unsigned volume (arg2); the definition takes s32.
 void func_10010630(u16 arg0, Actor *arg1, u32 arg2, s16 arg3, u16 arg4);
 #include "variables.h"
+#undef func_1505DADC
+extern u8 func_1505DADC(Actor *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4); // matching: s32 pitch and halfCone: this caller does not narrow them
 
 extern s32 D_800D187C;
 extern void func_151942E8();
@@ -187,14 +190,9 @@ typedef struct {
 extern void func_150E1570(Actor *, f32, f32, f32, f32, f32, f32, s32, s32);
 
 s32 func_1510F8CC(s32);
-extern Actor *func_1505EEB0(s32 state, s32 *arg1);
-extern u8 func_1505DADC(Actor *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4);
-extern void func_1506AC8C(Actor *, s32, s32);
-extern Actor *func_1505ED34(void);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 extern s32 func_1515D480(s32);
 extern void *func_1515D440(void);
-extern Actor *func_1505EEF4(s32 arg0);
 extern void func_151A3390(void *arg0, u8 arg1);
 void func_1516F1C0(s32, s32, u8, s32);
 void func_1516F2F8(u8, s32, s32, s32, u8, s32);
@@ -208,9 +206,7 @@ extern void func_150FF084(Actor *arg0, s32 arg1, s32 arg2);
 extern void func_150FED30(Actor *arg0, s32 arg1, s32 arg2);
 void func_151C329C(s32 arg0, s32 arg1, s32 arg2);
 void func_151DC260(f32 *, void *, s32, s32, s32);
-extern void func_1505F188(Actor *arg0);
 extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
-s32 func_1505D024(void *, s32, u16, s32);
 extern void func_150F16DC(Actor *, u8, u8, s32, s32);
 void func_15194408(Actor *arg0, Actor *arg1);
 

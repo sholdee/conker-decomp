@@ -11,7 +11,6 @@
 extern void func_15188010(s32, f32 *);
 extern s32 func_15022B08(s32, s32);
 extern void func_1518804C(s32, f32);
-extern void func_15060A30(s32, void *);
 
 struct Wave1511CB44;
 struct Swing1511DBC4;
@@ -1230,7 +1229,6 @@ struct Owner1511DF6C {
 };
 
 extern void *func_1509B570(s32);
-extern void func_1507C3E0(Actor *, s16 *, s16 *, s16 *);
 
 /* Plays the impact sound for this object type, with extra sounds for characters 0x3B and 0x80. */
 void func_1511DD98(WorldObject *obj, Actor *character) {

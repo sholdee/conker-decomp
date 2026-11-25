@@ -215,7 +215,6 @@ onFloor: // matching: an unused label splits the block, so the call setup stays 
 }
 
 extern void func_150A7D00(Mtx *, f32 x, f32 y, f32 z); /* translation matrix */
-extern s32 func_1506196C(u8 *arg0, s32 arg1);
 extern s32 D_80091770[];
 
 /* Draws the shadow quad, loading its texture and alpha only when they differ from the last shadow drawn. */
@@ -239,7 +238,7 @@ Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {
         alpha = shadow->alpha;
         switch (shadow->ownerType) {
             case 0:
-                ownerAlpha = func_1506196C(shadow->owner, view);
+                ownerAlpha = func_1506196C((Actor *)shadow->owner, view);
                 break;
             case 1: {
                 WorldObject *prop = (WorldObject *)shadow->owner;

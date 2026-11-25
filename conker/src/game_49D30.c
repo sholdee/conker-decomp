@@ -40,7 +40,6 @@ s32 func_150229E4(Actor *obj);
 extern s32 D_800C3668[];
 extern s32 func_15023BB0(SeqEvent *, s32, s32, SeqEvent **, s32, s32, s32, s32, s32, s32, s32);
 void func_15022640(s32 id, s32 scene);
-extern Actor *func_1505EEF4(s32);
 extern void func_15082A44(void *, s32, s32, s32, s32);
 
 extern SeqTrackPath *D_800C3A50[];
@@ -2521,8 +2520,6 @@ s32 func_150235DC(s32 scene) {
     }
 }
 
-extern void func_1504A730(void);
-extern void func_15061B4C(void);
 void func_15022998(s32 *obj);
 /* Per-frame update of the cutscene's objects (unless D_800C3654[0] hands it to func_1504A730): run
    each live object's handler and apply the track of objects bound to one. */

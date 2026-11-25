@@ -294,8 +294,6 @@ AimedBeam *func_150EEF80(Actor *actor, u8 slot, u8 arg2, s32 arg3) {
 }
 
 void func_15081690(void *, f32, f32, f32, f32, f32, f32, void *, f32, s32, s32, s32, s32, s32, s32);
-s32 func_1505D024(void *, s32, s32, s32);
-void func_1502EA98(void *, s32, s32, s32, s32, s32, s32);
 
 /* Per-frame update of a beam: aims it from the muzzle to the target, pulses it and applies its hit. */
 s32 func_150EF38C(AimedBeam *beam) {

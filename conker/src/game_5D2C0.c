@@ -1,6 +1,9 @@
 #include <ultra64.h>
+#define func_1502D630 func_1502D630_header // matching: this file keeps its own declaration of func_1502D630
 #include "functions.h"
 #include "variables.h"
+#undef func_1502D630
+extern void func_1502D630(Actor *, s32 *, s32, s32); // matching: called with an extra argument
 
 extern s32 D_800902BC[];
 extern void func_150A7A48(MtxF a, MtxF b, MtxF out);
@@ -519,8 +522,6 @@ void func_15030D54(ModelAttachment *att, f32 x, f32 y, f32 z, f32 rotX, f32 rotY
     }
 }
 
-s32 func_1506196C(Actor *obj, s32 view);
-
 /* Draws the attachments of every object visible in viewport `view`. `pass` 0 draws the opaque
  * ones, 1 the translucent ones, 2 those of objects whose unk5 is 7. */
 Gfx *func_15030E08(Gfx *gdl, s32 view, s32 pass) {
@@ -620,9 +621,6 @@ s32 func_15031070(ModelAttachment *att, Actor *owner, Mtx **mtx, Mtx **boneMtx) 
     return 1;
 }
 
-extern void func_1502D54C(s32, s32 *);
-extern void func_1502D630(Actor *, s32 *, s32, s32);
-extern void func_1502CC34(Actor *, s32, s32, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *);
 extern void func_150832AC(Actor *);
 extern Gfx *func_1515D914(Gfx *, s32, s32, s32, s32, s32, s32, s32, void *, void *, s32, void *, s32, void *);
 extern Gfx *func_1515E544(Gfx *, s32, s32, s32, void *);
@@ -1028,7 +1026,6 @@ s32 func_15031E7C(ModelAttachment *att, Actor *owner) {
 
 extern s32 D_800902D0;
 extern s32 D_800902D4;
-extern void func_1505E060(AnimInstance *anim);
 
 /* Hook for held/worn props: picks the prop's animation (and for some models its bone and parent)
  * from the owner's id and state, then keeps its frame in step with the owner's animation. */

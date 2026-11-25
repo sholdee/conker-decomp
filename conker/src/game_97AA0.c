@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Bursts three debris pieces from the object's position. */
 void func_1506A5F0(Actor *obj, s32 arg1) {
@@ -130,11 +129,6 @@ void func_1506AA08(Actor *obj, s32 arg1) {
     func_151B6320(obj, 0xFF, 1);
 }
 
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} Pair1506AA48;
-
 /* Spawns an effect that carries the object and the two words at arg as its data. */
 void func_1506AA48(Actor *obj, Pair1506AA48 *arg) {
     TimedEffect *effect;
@@ -164,12 +158,6 @@ void func_1506AAE0(Actor *obj, s32 arg1) {
         }
     }
 }
-
-typedef struct {
-    /* 0x00 */ Actor *unk0;
-    /* 0x04 */ Vec3f unk4;
-    /* 0x10 */ s32 unk10;
-} Arg1506AB7C;
 
 void func_1506AB7C(Actor *obj, Arg1506AB7C *arg) {
     func_15103E40(obj, arg->unk0, &arg->unk4, 1, arg->unk10, 0xFF, 1);

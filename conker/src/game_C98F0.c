@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern Actor *func_1505EEF4(s32);
 extern void func_15022190(s16, s16, s16, f32);
 extern void func_150221E8(s16, s16, s16, f32);
 

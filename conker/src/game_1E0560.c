@@ -649,8 +649,6 @@ s32 func_151B498C(HoltenRopeEffect *effect, s32 *mode0, s32 *mode1,
     return TRUE;
 }
 
-extern void func_1502EC34(HoltenRopeColorSource *, u32 *, u32 *, u32 *, u32 *);
-
 /* Draw style 1: two-cycle, tinted with the color source's color while bit 0 of its unkA4 is set; style 0 otherwise. */
 u8 func_151B4A14(HoltenRopeTinted *rope, s32 *mode0, s32 *mode1,
                  s32 *primR, s32 *primG, s32 *primB, s32 *primA,

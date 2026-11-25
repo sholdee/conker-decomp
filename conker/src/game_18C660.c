@@ -55,8 +55,6 @@ void func_1515F270(Actor *obj, TriggerZone *zone) {
     }
 }
 
-s32 func_1505D024(Actor *obj, s32 arg1, u16 arg2, s32 arg3);
-
 void func_1515F2B8(Actor *obj, TriggerZone *zone) {
     func_1505D024(obj, 0x6001D, obj->langle, -1);
 }
@@ -194,7 +192,6 @@ void func_1515FC34(Actor *obj, TriggerZone *zone) {
 }
 
 s32 func_150AD960(s32, s32, s32, s32);
-void func_1507CD64(Actor *, s32);
 
 /*
  * TriggerZone handler: unless the zone has a range (data2, in hundredths of its radius) that `obj`

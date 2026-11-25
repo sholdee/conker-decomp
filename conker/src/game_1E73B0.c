@@ -529,7 +529,6 @@ typedef struct { s32 v[9]; } S32x9;
 typedef struct { f32 v[9]; } F32x9;
 extern S32x9 D_800AA718;
 extern F32x9 D_800AA73C;
-void func_15055A2C(s32, f32, f32, f32, s32);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, CollisionTri *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 void func_151C04F8(Vec3f *, u8, s32);
 void func_151C05A4(Vec3f *, u8, s32);

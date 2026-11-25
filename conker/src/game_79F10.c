@@ -31,21 +31,8 @@ u8 func_150ADA20(void);
 #include "variables.h"
 
 void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
-void func_15056B08(Actor *arg0);
-void func_150585F0(Actor *arg0, f32 arg1);
 
 void func_1510F820(void *, void *, f32 *, f32 *, f32 *, f32 *, f32 *);
-void func_1505A250(f32, f32, f32, f32 *, f32 *);
-void func_15060A30(s32, void *);
-void func_1507CD64(void *, s32);
-f32 func_1504B0FC(Actor *arg0, f32 arg1);
-void func_1504BA38(Actor *arg0);
-void func_1504BB88(Actor *arg0);
-void func_1504BC38(Actor *arg0);
-void func_1504BE2C(Actor *arg0, u16 *arg1, f32 *arg2, s8 *arg3);
-
-void func_1504C0E8(Actor *arg0, s32 arg1, f32 arg2);
-void func_1504C9E4(Actor *arg0, s8 arg1, u8 arg2);
 
 void func_1504CA60(Actor *actor) {
     f32 range;
@@ -82,24 +69,12 @@ typedef struct Sub9C {
 
 
 
-extern u16 D_8009917C[];
 extern f32 D_800CBD90;
 extern f32 D_800CBD94;
 extern f32 D_800CBD98;
 extern f32 D_800CBDFC;
 extern u16 D_800CC27E;
-void func_1502EA0C(Actor *, s32, s32, s32, s32, s32);
-void func_1502EA50(Actor *);
 void func_15044380(f32, f32, f32, Actor *, s32, s32);
-void func_15055E50(Actor *, u8);
-u8 func_150599C8(Actor *, u8, u16);
-f32 func_1505A3A8(f32, Actor *, f32, f32, u8);
-void func_1505A9AC(Actor *, f32);
-void func_1505D024(Actor *, s32, u16, s32);
-void func_1505D6F0(Actor *, u8);
-void func_1505F298(Actor *, OSContPad *);
-void func_1506045C(Actor *, u16, s32, f32, s32);
-void func_15063168(Actor *);
 void func_15087E54(u8, Actor *);
 s32 func_150A3FC4(f32, f32, void *, s16 (*)[3], f32 *);
 void func_1510E8BC(void **, s16 (*)[3], f32 *, f32 *, u32 *, s16 *, f32, f32, f32, f32, s32, Actor *, f32, f32, s32);
@@ -113,11 +88,6 @@ extern s32 D_800cc2bc;
 // matching: a declaration-only block scope (no storage). IDO opens a lexical block for it, which changes
 // register allocation/scheduling of the surrounding statements; no storage-free idiomatic form matches.
 #define BLK typedef s32 blk_t
-void func_1505A770(Actor *arg0);
-void func_15052260(Actor *arg0);
-void func_1505250C(Actor *arg0, s32 arg1);
-s32 func_1505C7D8(Actor *, u8);
-void func_15059C84(Actor *);
 
 /*
  * Per-frame update of a player-controlled actor: reads (or overrides) the controller, turns stick input
@@ -1611,8 +1581,6 @@ void func_150511E8(Actor *actor) {
     func_1505A250(-slopeX, -slopeZ, leanRate, &actor->ob_slopex, &actor->ob_slopey);
 }
 
-extern f32 D_800990C0[];
-extern f32 D_800990E0[];
 void func_15087EF0(s32, void *);
 
 /* Ground/water tilt for a player-like actor: slides on steep slopes, then eases roll (unkC4) and pitch (unkB8). */

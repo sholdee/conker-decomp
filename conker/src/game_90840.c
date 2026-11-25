@@ -7,8 +7,6 @@
 #undef func_10010A3C
 #include "variables.h"
 
-void func_1506AC8C(Actor *, s32, void *);
-
 /* Packet handed to func_1506AC8C by func_15063B64. */
 typedef struct ThrowPacket {
     Actor *thrower;
@@ -62,7 +60,6 @@ void func_15063570(Actor *arg0) {
 }
 
 void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, Actor **, f32, s32, s32, s32, s32, s32, s32);
-void func_150636A4(Actor *arg0);
 
 void func_15063628(Actor *arg0, f32 arg1) {
     ActorCtl *ctl = arg0->mv;
@@ -88,7 +85,6 @@ void func_150636A4(Actor *arg0) {
     }
 }
 
-void func_15063FA0(Actor *, s32);
 void func_151D57F8(Actor *, s32);
 s32 func_15081E78(Actor *, Actor **, s32);
 void func_150FFCC8(void *, void *, void *, void *, void *);
@@ -250,7 +246,7 @@ void func_15063B64(Actor *arg0) {
 
         packet.throwerId = (arg0 - movement_obj) + 1;
         packet.thrower = arg0;
-        func_1506AC8C(arg0, 0xB, &packet);
+        func_1506AC8C(arg0, 0xB, (s32)&packet);
         func_150836CC(arg0, packet.anim);
 
         if (arg0->mv->numGrenades != 0) {
@@ -361,8 +357,6 @@ void func_15063FA0(Actor *arg0, s32 kind) {
     func_1506C460(yaw, velX, velY, 0.0f, 100, kind, 0.0f, 0.5f, (s32)pos, 1, 1);
 }
 
-s32 func_1505DADC(Actor *, u16 *, s32, s32, s32);
-
 /* Picks animA or animB at random; if one of them is already playing, picks animC instead
  * (or returns 999 while unk107 < 40). Returns 999 when animC is already playing. */
 u16 func_150641D8(Actor *arg0, u16 animA, u16 animB, u16 animC) {
@@ -397,8 +391,6 @@ typedef struct MtxParts {
     s16 whole[4][4];
     u16 frac[4][4];
 } MtxParts;
-void func_15060A30(s32 arg0, Actor *arg1);
-void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 
 /* Handles the scripted move requested in unk7B, then the default B-button move; plays the
  * chosen animation unless `noPlay` is set. */
@@ -1955,7 +1947,7 @@ s32 func_15065A5C(Actor *arg0, s32 heldButtons, s32 pressedButtons, f32 arg3, s3
                         anims[0] = 0xE7;
                         anims[1] = 0x22B;
                         arg0->mv->shotsfired++;
-                        func_1506AC8C(arg0, 9, anims);
+                        func_1506AC8C(arg0, 9, (s32)anims);
                     }
                 } else {
                     anim = func_15063E84(arg0, 0xE4, 1, 0, pressedButtons);

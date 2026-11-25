@@ -106,8 +106,6 @@ BeamObj *func_150F6DE4(Actor *owner) {
 
 void func_15081690(Actor *actor, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, RayHit *hit, f32 maxDist, s32 arg9,
                    s32 argA, s32 argB, s32 argC, s32 argD, s32 argE);
-s32 func_1506196C(u8 *obj, s32 arg1);
-void func_1502EA98(u8 *obj, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 
 /* Per-frame update: re-casts the beam from the owner and moves the end sprites to where it hits. */
 void func_150F706C(BeamObj *obj) {

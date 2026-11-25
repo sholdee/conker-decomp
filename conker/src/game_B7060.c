@@ -931,7 +931,6 @@ s32 func_1508C194(s32 player) {
     return 0;
 }
 
-Actor *func_1505EEF4(s32);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, s16 *,
                   f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
 
@@ -1581,9 +1580,7 @@ s32 func_1508DAEC(s32 player, s32 mode) {
 }
 
 
-void func_1502EA0C(Actor *, s32, s32, s32, s32, s32);
 s32 func_1508E780(s32 arg0);
-void func_1502EA50(Actor *);
 
 
 /*
@@ -1975,8 +1972,6 @@ s32 func_1508E780(s32 type) {
         }
     }
 }
-
-void func_15062800(Actor *, Actor *);
 
 /* Player `player` takes over the multiplayer state of player `source`. */
 s32 func_1508E89C(s32 player, s32 source) {

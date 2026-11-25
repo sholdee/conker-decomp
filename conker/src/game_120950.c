@@ -17,12 +17,6 @@ f32 func_150F34A0(Actor *obj, f32 pitch) {
     return speed;
 }
 
-void func_150585F0(Actor *arg0, f32 arg1);
-void func_15052590(Actor *arg0);
-u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
-f32 func_1505A3A8(f32 arg0, void *arg1, f32 arg2, f32 arg3, u8 arg4);
-
-
 /* Per-frame control of a flying mode: the stick steers and pitches, B thrusts, A reverses, R holds altitude,
  * Z fires (only when level is 0x3C and fewer than 5 id-0x25 objects exist). Also picks up the
  * D_800CC26D object into unk13C and drops it again when unk25C bit 1 is set. */

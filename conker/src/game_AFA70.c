@@ -2,10 +2,13 @@
 
 // matching: func_150302F0 returns an s32 (game_5D2C0.c); func_150836CC matches only when it sees a void return
 #define func_150302F0 func_150302F0_functions_h
+#define func_1505EEF4 func_1505EEF4_header // matching: this file keeps its own declaration of func_1505EEF4
 #include "functions.h"
 #undef func_150302F0
 void func_150302F0(Actor *obj, s32 setId);
 #include "variables.h"
+#undef func_1505EEF4
+extern Actor *func_1505EEF4(void); // matching: called without its argument
 
 // One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
 typedef struct PartDef {
@@ -29,9 +32,6 @@ typedef struct PartSet {
 
 extern PartSet D_80086CC4[];
 
-extern Actor *func_1505ED34(void);
-extern Actor *func_1505EEF4(void);
-extern void func_1505F188(Actor *obj);
 extern s32 func_150A6360(void *arg0, MtxF arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7);
 extern void *func_1515D440(void);
 extern s32 func_1515D480(s32);

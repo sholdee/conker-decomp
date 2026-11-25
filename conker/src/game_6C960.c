@@ -2,9 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_1502D824(AnimInstance *anim, void *obj, u8 *buf);
-void func_1505E0C4(void *actor, u16 *animEntry, AnimInstance *state, s32 arg3, s32 restart, s32 anim, s32 bank,
-                   f32 speed, f32 blendFrames, f32 arg9, f32 arg10, s32 flag8000);
 void func_150A81D0(Mtx **mtx, f32 (*transform)[4], AnimInstance *anim, s32 arg3, s32 numParts, s16 *arg5, u8 *remap,
                    s32 scale);
 void func_150A9984(Mtx *mtx, u8 count);

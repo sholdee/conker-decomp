@@ -44,7 +44,6 @@ OwnerSparkEffect *func_150B53D0(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
     return effect;
 }
 
-extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);
 extern void func_15107700(Actor *, s16, s16, s16, s32, f32, f32, s16, s16, u8 *, u8, s32);
 extern void func_15107B78(Actor *, s32, s32, s32, s32);
 

@@ -57,10 +57,6 @@ void func_150E0870(Actor *obj, u8 arg1, s32 arg2) {
 
 extern u16 D_800CC346;
 
-void func_15056B08(Actor *arg0);
-void func_150585F0(Actor *arg0, f32 arg1);
-u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
-s32 func_150535F4(Actor *arg0);
 void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
 
 /* Per-frame update for obj: steps its unk83 counter while unk87 is set, moves it, then stores its x/z displacement since last frame. */

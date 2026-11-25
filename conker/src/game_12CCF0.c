@@ -5,7 +5,6 @@
 
 void func_151D5148(Actor *obj);
 void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
-void func_1505D1C4(f32 x, f32 y, f32 z, s32 flags, s32 objIndex, s32 angle, s32 arg6, Vec3f *arg7);
 
 void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
 void func_150FFD84(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3);
@@ -94,7 +93,7 @@ void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type) {
     flags = type | 0x60000;
     index = obj - movement_obj;
     angle = obj->langle;
-    func_1505D1C4(position->x, position->y, position->z, flags, index, angle, 0, origin);
+    func_1505D1C4(position->x, position->y, position->z, flags, index, angle, 0, (s32)origin);
 }
 
 /* Writes the world position of the muzzle point D_800A2130 on bone D_80088BB0 of `obj` to `out`. */

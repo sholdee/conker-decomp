@@ -377,8 +377,6 @@ void func_150C99B4(RadialEffect *effect, Vec3f *pos, u8 heading, f32 cosine, f32
     func_15130374(&packet, 1, 0, effect->header.owner, effect->header.kind);
 }
 
-extern s32 func_1505D024(Actor *, s32, u16, s32);
-
 /* Ring update callback: hits actors that lie up to 250 units inside the ring edge. */
 void func_150C9BDC(RadialEffect *effect, f32 oldRadius) {
     s32 i;

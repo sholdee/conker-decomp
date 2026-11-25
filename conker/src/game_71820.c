@@ -93,7 +93,6 @@ void func_15044658(void) {
 
 extern f32 D_800CBDD8;
 extern f32 D_800CBDDC;
-void func_1507C3E0(Actor *obj, s16 *height, s16 *arg2, s16 *arg3);
 
 /* Sets D_800CBDD8/D_800CBDDC (a height and a mid-height) for obj's collision probe. */
 void func_15044660(Actor *obj, f32 x, f32 y, f32 z) {
@@ -287,15 +286,11 @@ s32 func_15044CE4(TriggerVolume *volume) {
     return func_15044B78(volume);
 }
 
-extern s32 func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32);
-
 /* Check 2: calls func_1505D1C4 at the node's position with its depth; never fires. */
 s32 func_15044D40(TriggerVolume *volume) {
     func_1505D1C4(volume->node.x, volume->node.y, volume->node.z, volume->depth, 0xFF, 0, 0, 0);
     return FALSE;
 }
-
-s32 func_1505D024(Actor *obj, s32 type, u16 angle, s32 arg3);
 
 /* Trigger actions 1-4: hit the player with a func_1505D024 type unless stunned or immune. */
 

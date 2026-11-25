@@ -486,8 +486,6 @@ extern f32 D_80096560;
 extern f32 D_800968B0;
 extern s32 D_800968E0;
 
-extern const u16 D_8009919C[6];
-
 // code_75400.c
 
 extern f32 D_8009A220[];

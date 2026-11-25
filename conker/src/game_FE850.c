@@ -7,7 +7,6 @@
 extern f32 D_800A08B0;
 extern f32 D_800A08B4;
 extern f32 D_800A08B8;
-extern void func_15059C84(s32);
 
 struct Obj150D13A0 {
     u8 pad0[0x3C];
@@ -29,7 +28,7 @@ void func_150D13A0(s32 arg0) {
     temp->unk3C = temp->unk3C * D_800A08B4;
     temp->unkC4 = temp->unkC4 + temp->unk148;
     temp->unk148 = temp->unk148 * D_800A08B8;
-    func_15059C84(arg0);
+    func_15059C84((Actor *)arg0);
 }
 
 void func_150D1410(s32 arg0) {

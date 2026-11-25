@@ -246,7 +246,6 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
 
 /* Looks like the script format version: later versions carry more operands. */
 
-extern Actor *func_1505EEF4(s32 path);
 /* K&R definitions below (they narrow their short params from the stack); these are their promoted prototypes. */
 s32 func_1509F354(s32 first, s32 last, s32 unplayed, u32 volume, s32 path, s32 nearDistance, s32 farDistance);
 void func_1509F47C(s32 first, s32 last, s32 volume, s32 objId, s32 nearDistance, s32 farDistance);

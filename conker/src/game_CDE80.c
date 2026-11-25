@@ -190,7 +190,6 @@ extern s32 D_800D3278;
 
 void func_150829D8(Actor *);
 void func_1512D560(Camera *, s32, TriggerZone *);
-void func_15055C88(Actor *arg0);
 void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackArg);
 s32 __osPiGetAccess(void);
 void __osPiRelAccess(void);

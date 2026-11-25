@@ -262,8 +262,6 @@ void func_15117DA4(WorldObject *prop, f32 x, f32 y, f32 z, f32 *out) {
 }
 
 
-extern void func_15060A30(s32, Actor *);
-
 /*
  * A hinged prop that grabs an object close to its anchor point, swings rotX up to a level-dependent
  * angle carrying the object along, then swings back down.
@@ -964,8 +962,6 @@ void func_151196D4(WorldObject *prop) {
         }
     }
 }
-
-extern Actor *func_1505EFD0(s32);
 
 /*
  * Sways the vertex groups set up by func_151196D4 (plants or similar) and writes the transformed

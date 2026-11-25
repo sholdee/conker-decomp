@@ -10,7 +10,6 @@
  * D_800DF7C8[1] lists type-1 trails (world object owners, one matrix).
  */
 
-extern s32 func_1502DB20(s32);
 void func_15188A58(BoneTrail *trail, BoneTrail **list);
 
 /* Starts (or extends) a type-0 trail behind a game object. */
@@ -402,7 +401,6 @@ void func_151895CC(BoneTrail *trail) {
 }
 
 extern s32 func_150849CC(Actor *, s32 *);
-extern Gfx *func_1502C974(Gfx *gfx, s32 index, s32 player, s32 mode, s32 wrap);
 
 /* Type-0 draw: draws the owner object once per history frame, oldest faintest. */
 Gfx *func_151895F4(Gfx *gfx, BoneTrail *trail, s16 player) {

@@ -24,8 +24,6 @@ typedef struct {
 extern HitSphere *D_80086C60[];
 extern u8 D_8009CBCC[];
 
-void func_1505D1C4(f32, f32, f32, s32, s32, s32, s32, s32);
-
 /* Point vs. hit-sphere test: takes the point `dist` ahead of `self` (rotated by its pitch unkB8
  * and yaw unk40), rejects it against obj's whole-body sphere, then tests it against each of obj's
  * hit spheres (table `type`) grown by `radius`.  On a hit, calls func_1505D1C4 at obj's position

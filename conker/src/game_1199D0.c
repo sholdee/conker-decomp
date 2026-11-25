@@ -122,8 +122,6 @@ void func_150ECB4C(EmitterEffect *effect, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, &effect->data.fog.owner, &effect->data.fog.ownerId, effect);
 }
 
-extern void func_1502EA98(Actor *, u8, u8, u8, u8, s32, u8);
-
 /* Fog flash effect: re-flashes the owner's fog each frame, and ends once the owner is gone. */
 void func_150ECB8C(EmitterEffect *effect) {
     FogFlashData *fog = &effect->data.fog;

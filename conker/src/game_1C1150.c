@@ -6,7 +6,6 @@
 extern void func_1504715C(CollisionHit *ground, Actor *obj);
 
 extern void func_151C0098(f32 *pos, Actor *obj, s32 arg2, u8 arg3, s32 arg4);
-extern void func_1507CD64(Actor *obj, s32 arg1);
 extern s32 func_1518D1C0(Actor *obj, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 *arg6);
 extern u8 D_800A8244[];
 
@@ -284,8 +283,6 @@ void func_15194810(Actor *self, Actor *other, u8 *arg2) {
 void func_151949E0(Actor *self, Actor *other, u8 *arg2) {
 }
 
-extern void func_1507DE4C(Actor *obj);
-
 // Calls func_15104170 when D_8008FD90 == 1 and self's mv->unk1A0 cooldown has run out, then restarts it.
 void func_151949F4(s32 arg0, Actor *self, Actor *other) {
     if (D_8008FD90 == 1 && self->playernumber == 0 && (D_800E9D00 & 8) && self->mv->unk1A0 == 0) {
@@ -498,7 +495,6 @@ u8 arg2;
     }
 }
 
-extern Actor *func_1505ED34(void);
 extern s32 func_150838EC(Actor *obj, s32 anim, s32 arg2, f32 speed);
 extern void func_150D10E4(Actor *obj, u8 arg1);
 

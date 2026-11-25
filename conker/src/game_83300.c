@@ -21,29 +21,13 @@ const u16 D_80099428[2] = { 0xE9, 0 };
 const s32 D_8009942C[3] = { 0x12, 0x0B, 0x13 };
 
 
-void func_15058F24(Actor *arg0, f32, f32);
-void func_1505D6F0(Actor *arg0, s32 arg1);
-u8   func_150599C8(Actor *arg0, u8 arg1, u16 arg2);
-void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
-void func_150611E8(Actor *arg0, s32 arg1);
-void func_1505A770(Actor *actor);
-void func_15059C84(Actor *actor);
-void func_1505A3A8(f32 targetSpeed, Actor *actor, f32 accel, f32 decel, u8 turnDiff);
-
-void func_150642AC(Actor *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4);
-s32 func_15065A5C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
-
 struct HitReaction;
-void func_1505B9C4(Actor *attacker, Actor *victim, struct HitReaction *base, struct HitReaction *hit, u8 index, s32 victimSlot, u8 damageMask);
 extern void (*D_80086694[])(void *, Actor *, u8 *);
 struct HitReaction;
-s32 func_1505C1E4(Actor *arg0, Actor *arg1, struct HitReaction *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 extern MtxF *D_800CC4A4;
-void func_1505F188(Actor *arg0);
-s32 func_1505C7D8(Actor *arg0, s32 arg1);
 
 /* An actor's animation playback state (Actor.unk2D0); the previous animation is kept for blending. */
-typedef struct {
+typedef struct AnimPlaybackState {
     /* 0x000 */ s32 unk0;
     /* 0x004 */ u16 anim; /* bit 0x8000: set by func_1505E0C4's last argument */
     /* 0x006 */ u16 prevAnim;
@@ -228,7 +212,6 @@ typedef struct Game83300AnimEntry {
     Game83300AnimSub sub[3];
     u8 pad16[2];
 } Game83300AnimEntry;
-void func_150649A0(s32, s32);
 
 /* Moves the actor toward its host movement_obj[unk13D - 100] and picks the carried animation. */
 void func_150562FC(Actor *actor) {
@@ -444,8 +427,6 @@ ObjScriptCmd *func_1507BB28(s32, s32);
 void func_1507BC14(Actor *);
 s32 func_150229E4(Actor *);
 void func_15047390(MtxF mf, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
-void func_1504C9E4(Actor *arg0, s8 arg1, u8 arg2);
-u8 func_15059B54(Actor *arg0, u16 arg1);
 
 /*
  * Per-frame AI for a path/chase actor: picks the point to head for from its mode (unk223),
@@ -1071,7 +1052,6 @@ void func_1510E8BC(void *a0, void *a1, void *a2, void *a3, void *arg4, void *arg
 f32 func_1510F648(f32, f32, f32);
 s32 func_15044380(f32 arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, s32 arg5);
 ObjScriptCmd *func_1507BB28(s32, s32);
-u8 func_1505DADC(Actor *arg0, u16 *arg1, u8 arg2, u8 arg3, u8 arg4);
 
 /* Updates the actor's floor height (unk180) and pushes it out of walls, reacting to a wall hit. */
 void func_15058898(Actor *actor, f32 prevY) {
@@ -1852,9 +1832,6 @@ void func_1505A770(Actor *actor) {
     }
 }
 // a big one, but could be ok
-void func_15055C88(Actor *);
-void func_1507CD64(Actor *arg0, s32 arg1);
-void func_15060A9C(s32 arg0, Actor *arg1);
 
 /* Lands the player on floorY: water entry, fall damage/death, landing animations and bounce. */
 void func_1505A9AC(Actor *actor, f32 floorY) {
@@ -2498,7 +2475,6 @@ typedef struct {
 
 extern u8 D_8009A6A0[];
 extern Rule1505C1E4 *D_80086AA0[];
-void func_15060B04(s32 arg0, Actor *arg1, s32 arg2);
 
 /*
  * Resolves a hit on `victim` through the victim's reaction rules (unk239): may redirect to another
@@ -2667,11 +2643,9 @@ s32 func_1505C1E4(Actor *attacker, Actor *victim, HitReaction *table, s32 index,
     hitMask |= 1 << (i + 0x1F);
     return hitMask;
 }
-s32 func_1505C7D8(Actor *arg0, s32 arg1);
 
 extern s32 D_800B2CD0;
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
-void func_1507C3E0(Actor *, s16 *, s32, s32);
 
 /* Tests the attacker's active attack (unkD0) against every other actor and applies the hits; returns the hit mask. */
 s32 func_1505C7D8(Actor *attacker, s32 selfSlot) {
@@ -3034,7 +3008,6 @@ void func_1505D408(Actor *actor, Actor *other, f32 nx, f32 ny, f32 nz, f32 distS
 end: // matching: a jump to the shared epilogue, not an early return
     ;
 }
-void func_1505D408(Actor *arg0, Actor *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7);
 
 /* Pushes the actor out of an extra collision cylinder attached to `other` (offset in other's frame). */
 void func_1505D5D0(Actor *actor, Actor *other, f32 x, f32 y, f32 z, f32 ratio, f32 radius, s32 otherSlot,
@@ -3147,7 +3120,6 @@ void func_1505D6F0(Actor *actor, s32 selfIdx) {
         }
     }
 }
-f32 func_1505DF10(Actor *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, void *, void *, void *, f32 *, s32, s32, f32);
 
 /*
@@ -3204,7 +3176,6 @@ u8 func_1505DADC(Actor *actor, u16 *outAngle, u8 pitch, u8 skipIdx, u8 halfCone)
 
     return bestIdx;
 }
-f32 func_1505DF10(Actor *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4, s32 arg5);
 
 /* The first live actor that the actor would reach within `time` at its speed, inside a cone of its move angle; -1 if none. */
 s8 func_1505DDA8(Actor *actor, s32 unused, u16 cone, f32 time) {
@@ -3540,10 +3511,6 @@ u32 func_1505E7CC(s32 kind, Actor *actor) {
     return 0;
 }
 
-void func_15060A30(s32 arg0, Actor *arg1);
-void func_15060B04(s32 arg0, Actor *arg1, s32 arg2);
-void func_1507CD64(Actor *arg0, s32 arg1);
-
 /*
  * Advances the actor's reaction sequence (entry unk106, step unk105): plays the next step's animation
  * and stun time, starts the death animation when it ends with no health left, or ends the reaction.
@@ -3855,7 +3822,6 @@ void func_1505F188(Actor *actor) {
     actor->floorTri.v[2].z = 0;
 }
 void func_151C6EA0(Actor *arg0, s32 arg1, s32 arg2);
-void func_1506045C(Actor *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4);
 /* Player controls for jumping, swimming and the hover (anim 0xE9), from the controller pad. */
 void func_1505F298(Actor *actor, OSContPad *pad) {
     s32 anim;
@@ -4527,9 +4493,7 @@ void func_15060D54(Actor *actor) {
 }
 extern void func_151695F0(Actor *, s32);
 extern void func_15084558(Actor *);
-extern void func_1504AF10(Actor *, s32, s32);
 extern void func_15188AD0(Actor *);
-void func_150626EC(Actor *arg0, s32 arg1);
 
 /* Removes the actor: releases its resources and attachments, then clears its slot. */
 void func_15060F28(Actor *actor, s32 mode) {
@@ -4821,7 +4785,6 @@ s32 func_1506196C(Actor *actor, s32 player) {
     return alpha;
 }
 
-s32 func_150623F4(Actor *arg0);
 /*
  * Per-frame fade and visibility update of all actors: unk2FA bit 0 is set when func_150623F4 says the
  * actor is visible, or when one of its linked actors (keys in bytes 0x20B..0x20E) is.
@@ -4876,9 +4839,6 @@ typedef struct Game83300Step4 {
 } Game83300Step4;
 extern Game83300Step4 D_800860F0;
 
-void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
-void func_15062E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
-void func_15062FC0(Actor *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 count, s32 ds, s32 dt);
 void func_150F1CB0(Actor *arg0);
 
 /* Per-frame texture/morph animations of actor types that have them (once per type for most). */

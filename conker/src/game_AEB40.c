@@ -5,12 +5,6 @@
 
 extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
 
-extern s32 func_1505D024(Actor *, s32, u16, s32);
-extern void func_15060A30(s32, Actor *);
-extern void func_15060A9C(s32, Actor *);
-extern void func_1506AC8C(Actor *, s32, s32);
-extern void func_1507DE4C(Actor *);
-extern void func_1507DF10(Actor *obj, s32 arg1);
 extern s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, Vec3f *outFar, Vec3f *outCentre, f32 *outDist, s32 *outIndex, s32 *outBone, s32 *outPart, s16 *outOffset);
 extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32 *, void *, f32);
 extern void func_15104608(f32, f32, f32, s32);

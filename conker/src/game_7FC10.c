@@ -4,9 +4,6 @@
 #include "variables.h"
 
 void func_1502178C(Actor *arg0, s32 arg1, s32 arg2);
-s32 func_150535F4(Actor *arg0);
-void func_15056B08(Actor *arg0);
-void func_150585F0(Actor *arg0, f32 arg1);
 
 /**
  * Eases the object's unkC4 toward its turn rate: the change from prevAngle to the current moving angle,

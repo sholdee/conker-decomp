@@ -56,36 +56,11 @@ extern s32 D_8008857C;
 extern u8 *D_8008CA4C[];
 
 /* This file */
-void func_1502BD84(Actor *obj, s32 index);
-void func_1502C608(s32 index);
-Gfx *func_1502C408(Gfx *gdl, s32 index);
-void func_1502C6E8(s32 index, s16 player, s32 mode);
-Gfx *func_1502C974(Gfx *gdl, s32 index, s32 player, s32 mode, s32 wrap);
-Gfx *func_1502CCFC(Gfx *gdl, s32 index, s32 player, void *model, s32 alpha, s32 *colour, s32 mode, s32 wrap);
-void func_1502D54C(s32 index, s32 *colour);
-void func_1502D630(Actor *obj, s32 *colour, s32 player);
-void func_1502DB84(MtxF mtx, s32 index);
-void func_1502DF38(s32 index, s32 rootOnly);
-void func_1502E4C4(s32 index);
-void func_1502E9FC(Actor *obj, s32 dist);
-void func_1502EAFC(Actor *obj);
-void func_1502EC34(Actor *obj, s32 *r, s32 *g, s32 *b, s32 *a);
-void func_1502EEF4(s32 index);
-Gfx *func_1502F01C(Gfx *gdl, s32 index);
-void func_1502F264(s32 index);
-void func_1502F3C8(void);
-void func_1502F490(Actor *platform, f32 *x, f32 *y, f32 *z, s32 tri);
-void func_1502F948(Actor *obj);
-Gfx *func_1502F9FC(Gfx *gdl, s32 index);
-void func_1502FBE8(Actor *obj);
-void func_1502FD70(Actor *obj);
 
 /* Other files */
 s32 func_150229E4(Actor *);
-void func_1505DFDC(Actor *);
 // matching: the command goes in as s32 (functions.h has u8)
 void func_1506160C(Actor *obj, s32 arg1, u8 arg2, u8 arg3, s32 player);
-s32 func_1506196C(Actor *, s32);
 void func_150837D4(s32, s32, s32);
 s32 func_150838EC(Actor *, s32, s32, f32);
 s32 func_150849A0(Actor *);
