@@ -2,424 +2,335 @@
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * Two object-attached particle emitters (effects 0x23 and the caller-chosen type of func_15192D48):
+ * their spawners, per-frame updates and message handlers. Each effect is a struct260 whose data at
+ * 0x28 is an ObjectEmitterData.
+ */
 
-void func_15192920(void *arg0) {
-    struct260 *temp_v0;
-    struct {
-        void *unk0;
-        u8 unk4;
-        f32 unk8;
-    } sp28;
+/* Data of an effect that follows an object. */
+typedef struct {
+    /* 0x00 */ struct127 *object;
+    /* 0x04 */ u8 objectId; /* object->unique_id when attached */
+    /* 0x08 */ f32 spawnAccum;
+} ObjectEmitterData; /* size 0xC */
 
-    if (*(s32 *)&arg0 != 0) {
-        sp28.unk0 = arg0;
-        sp28.unk4 = *(u8 *)((s32)arg0 + 0x3B);
-        sp28.unk8 = 0.0f;
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 kind;
+    /* 0x02 */ u8 pad2[0xC - 0x2];
+    /* 0x0C */ u8 owner;
+    /* 0x0D */ u8 padD[0x28 - 0xD];
+    /* 0x28 */ ObjectEmitterData data;
+} Effect1BFDD0;
 
-        temp_v0 = func_151491F4(0x23, -1, 0x14, 1, 0x10, 0xC, 0xFF, 1);
-        if (temp_v0 != NULL) {
-            memcpy((void *)((s32)temp_v0 + 0x28), &sp28, 0xC);
-        }
+/* ParticleDesc.flags (see game_15D730.c) */
+#define PARTICLE_LIFETIME  0x1
+#define PARTICLE_MOVE      0x4
+#define PARTICLE_FLIP_S    0x40
+#define PARTICLE_FLIP_T    0x80
+#define PARTICLE_FADE      0x200
+#define PARTICLE_SCALE     0x400
+#define PARTICLE_SCALE_MUL 0x800
+
+/* Spawn parameters of a particle (the layout of ParticleDesc in game_15D730.c, up to 0x64). */
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode;
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ vertex pos;
+    /* 0x3C */ vertex offset;
+    /* 0x48 */ vertex vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ s32 flags;
+    /* 0x5C */ void *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc; /* D_80089760 index, -1 for none */
+    /* 0x63 */ s8 deathFunc;  /* D_80089800 index, -1 for none */
+} ParticleDesc;
+
+/* Live particle returned by func_15130374; its caller-sized data starts at 0xA8. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ f32 drag; /* read by update func 10 (func_151316DC) */
+} Particle1BFDD0;
+
+/* Attaches effect 0x23 to the object. */
+void func_15192920(struct127 *object) {
+    Effect1BFDD0 *effect;
+    ObjectEmitterData data;
+
+    if (object == NULL) {
+        return;
+    }
+    data.object = object;
+    data.objectId = object->unique_id;
+    data.spawnAccum = 0.0f;
+
+    effect = (Effect1BFDD0 *)func_151491F4(0x23, -1, 0x14, 1, 0x10, 0xC, 0xFF, 1);
+    if (effect != NULL) {
+        memcpy(&effect->data, &data, sizeof(data));
     }
 }
 
-typedef struct {
-    u8 pad0[0x14];
-    f32 unk14;
-    u8 pad18[4];
-    f32 unk1C;
-    u8 pad20[0x7A - 0x20];
-    u16 unk7A;
-    u8 pad7C[0x180 - 0x7C];
-    f32 unk180;
-} Obj151929A4;
+extern s32 func_1515C0F8(struct127 *, vertex **);
+extern void func_15143874(s16 angle, f32 radius, f32 *x, f32 *z);
+extern Particle1BFDD0 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
 
-typedef struct {
-    Obj151929A4 *unk0;
-    u8 unk4;
-    f32 unk8;
-} State151929A4;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    State151929A4 unk28;
-} Actor151929A4;
-
-typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30[3];
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48[3];
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    s8 unk63;
-} Fx151929A4;
-
-extern s32 func_1515C0F8(Obj151929A4 *, f32 **);
-extern void func_15143874(s16, f32, f32 *, f32 *);
-extern struct260 *func_15130374(void *, u8, s32, u8, s32);
-
-void func_151929A4(Actor151929A4 *arg0) {
-    State151929A4 *state;
-    u8 flag;
+/* Effect 0x23 update: emits 0.3-0.9 particles a frame at 20 units to either side of the object. */
+void func_151929A4(Effect1BFDD0 *effect) {
+    ObjectEmitterData *data;
+    u8 side;
     s32 pad[2];
-    Fx151929A4 fx;
+    ParticleDesc desc;
     s32 pad2;
-    f32 val;
-    f32 *dir;
-    f32 scale;
-    struct260 *ret;
+    f32 drag;
+    vertex *dir;
+    f32 speed;
+    Particle1BFDD0 *particle;
 
-    state = &arg0->unk28;
-    state->unk8 += (312.0f + (func_150ADA68() * 599.0f)) * 0.001000000047f * D_800BE9A4;
-    if (state->unk8 > 1.0f && func_1515C0F8(state->unk0, &dir) != 0) {
-        fx.unk1D = 0x29;
-        fx.unk08 = 0xE03;
-        fx.unk00 = 0x200005;
-        fx.unk18 = 0xB0;
-        fx.unk19 = 0xA0;
-        fx.unk1A = 0x2A;
-        fx.unk14 = 0x40;
-        fx.unk15 = 0xB;
-        fx.unk16 = 0x6A;
-        fx.unk04 = 0;
-        fx.unk0C = 0;
-        fx.unk10 = 0;
-        fx.unk17 = 0xFF;
-        fx.unk1C = 0xFF;
-        fx.unk60 = 3;
-        fx.unk61 = 3;
-        fx.unk58 = 0xE05;
-        fx.unk62 = 0xA;
-        fx.unk63 = -1;
-        fx.unk1E = 0x14;
-        fx.unk20 = 0xC;
-        fx.unk22 = 0x23;
-        scale = -1.516000032f;
-        fx.unk54 = 0.0f;
-        fx.unk24 = 1.039999962f;
-        val = 0.9500000477f;
+    data = &effect->data;
+    data->spawnAccum += (312.0f + (func_150ADA68() * 599.0f)) * 0.001f * D_800BE9A4;
+    if (data->spawnAccum > 1.0f && func_1515C0F8(data->object, &dir) != 0) {
+        desc.texture = 0x29;
+        desc.renderMode = 0xE03;
+        desc.unk0 = 0x200005;
+        desc.r2 = 0xB0;
+        desc.g2 = 0xA0;
+        desc.b2 = 0x2A;
+        desc.r = 0x40;
+        desc.g = 0xB;
+        desc.b = 0x6A;
+        desc.unk4 = 0;
+        desc.frame = 0;
+        desc.frameRate = 0;
+        desc.a = 0xFF;
+        desc.brightness = 0xFF;
+        desc.primColorMode = 3;
+        desc.envColorMode = 3;
+        desc.flags = PARTICLE_LIFETIME | PARTICLE_MOVE | PARTICLE_FADE | PARTICLE_SCALE | PARTICLE_SCALE_MUL;
+        desc.updateFunc = 10;
+        desc.deathFunc = -1;
+        desc.fadeStart = 20;
+        desc.fadeRate = 12;
+        desc.scaleStart = 35;
+        speed = -1.516f;
+        desc.gravity = 0.0f;
+        desc.scaleRate = 1.04f;
+        drag = 0.95000005f;
         do {
-            flag = func_150ADA20() & 1;
-            fx.unk0A = (func_150ADA20() % 31U) + 0x14;
-            fx.unk1B = (func_150ADA20() % 156U) + 0x64;
-            fx.unk28 = fx.unk2C = (func_150ADA68() * 150.0f) + 100.0f;
-            func_15143874((s16)(state->unk0->unk7A >> 8), flag ? 20.0f : -20.0f, &fx.unk30[0], &fx.unk30[2]);
-            fx.unk30[0] += state->unk0->unk14;
-            fx.unk30[2] += state->unk0->unk1C;
-            fx.unk30[1] = state->unk0->unk180 + 20.0f;
-            fx.unk58 &= ~0xC0;
+            side = func_150ADA20() & 1;
+            desc.timer = (func_150ADA20() % 31U) + 20;
+            desc.alpha = (func_150ADA20() % 156U) + 100;
+            desc.width = desc.height = (func_150ADA68() * 150.0f) + 100.0f;
+            func_15143874((s16)(data->object->unk7A >> 8), side ? 20.0f : -20.0f, &desc.pos.x, &desc.pos.z);
+            desc.pos.x += data->object->x_position;
+            desc.pos.z += data->object->z_position;
+            desc.pos.y = data->object->unk180 + 20.0f;
+            desc.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
             if (func_150ADA20() & 1) {
-                fx.unk58 |= 0x40;
+                desc.flags |= PARTICLE_FLIP_S;
             }
             if (func_150ADA20() & 1) {
-                fx.unk58 |= 0x80;
+                desc.flags |= PARTICLE_FLIP_T;
             }
-            fx.unk48[0] = dir[0] * scale;
-            fx.unk48[1] = dir[1] * scale;
-            fx.unk48[2] = dir[2] * scale;
-            ret = func_15130374(&fx, 1, 4, arg0->unkC, arg0->unk1);
-            if (ret != NULL) {
-                memcpy((u8 *)ret + 0xA8, &val, 4);
+            desc.vel.x = dir->x * speed;
+            desc.vel.y = dir->y * speed;
+            desc.vel.z = dir->z * speed;
+            particle = func_15130374(&desc, 1, sizeof(f32), effect->owner, effect->kind);
+            if (particle != NULL) {
+                memcpy(&particle->drag, &drag, sizeof(drag));
             }
-            state->unk8 -= 1.0f;
-        } while (state->unk8 > 1.0f);
+            data->spawnAccum -= 1.0f;
+        } while (data->spawnAccum > 1.0f);
     }
 }
 
-struct260 *func_15192D48(void *arg0, s16 arg1, u8 arg2, s32 arg3) {
-    struct260 *temp_v0;
-    struct {
-        void *unk0;
-        u8 unk4;
-        f32 unk8;
-    } sp28;
+/* Attaches an effect of the given type to the object; returns the effect or NULL. */
+Effect1BFDD0 *func_15192D48(struct127 *object, s16 type, u8 arg2, s32 arg3) {
+    Effect1BFDD0 *effect;
+    ObjectEmitterData data;
 
-    if (arg0 == NULL) {
+    if (object == NULL) {
         return NULL;
     }
 
-    sp28.unk0 = arg0;
-    sp28.unk4 = *(u8 *)((s32)arg0 + 0x3B);
-    sp28.unk8 = 0.0f;
+    data.object = object;
+    data.objectId = object->unique_id;
+    data.spawnAccum = 0.0f;
 
-    temp_v0 = func_151491F4(arg1, -1, 0x18, 1, 0x16, 0xC, arg2, arg3);
-    if (temp_v0 != NULL) {
-        memcpy((void *)((s32)temp_v0 + 0x28), &sp28, 0xC);
+    effect = (Effect1BFDD0 *)func_151491F4(type, -1, 0x18, 1, 0x16, 0xC, arg2, arg3);
+    if (effect != NULL) {
+        memcpy(&effect->data, &data, sizeof(data));
     }
-    return temp_v0;
+    return effect;
 }
 
-typedef struct {
-    u8 pad0[0x1D4];
-    s32 unk1D4;
-} Obj15192DF0;
+extern void func_15143134(const vertex *, vertex *, Mtx *);
+extern void func_15143794(s16 yaw, s16 pitch, f32 speed, vertex *out);
 
-typedef struct {
-    u8 pad0[0x7A];
-    u16 unk7A;
-    u8 pad7C[0x1D4 - 0x7C];
-    s32 unk1D4;
-} ObjB15192DF0;
-
-typedef struct {
-    ObjB15192DF0 *unk0;
-    u8 unk4;
-    f32 unk8;
-} State15192DF0;
-
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1B];
-    State15192DF0 unk28;
-} Actor15192DF0;
-
-extern void func_15143134(const void *, void *, s32);
-extern void func_15143794(s16, s16, f32, void *);
-extern struct260 *func_15130374(void *, u8, s32, u8, s32);
-
-void func_15192DF0(Actor15192DF0 *arg0) {
-    State15192DF0 *state;
-    s16 angle;
-    s16 a;
-    s32 r;
+/* Update of func_15192D48's effect: emits 0.8-2 particles a frame from bone 1 of the object, flung
+ * out to either side. */
+void func_15192DF0(Effect1BFDD0 *effect) {
+    ObjectEmitterData *data;
+    s16 facing;
+    s16 yaw;
+    s32 rand;
     s32 pad1;
-    struct {
-        s32 unk00;
-        s32 unk04;
-        s16 unk08;
-        s16 unk0A;
-        s32 unk0C;
-        s32 unk10;
-        u8 unk14;
-        u8 unk15;
-        u8 unk16;
-        u8 unk17;
-        u8 unk18;
-        u8 unk19;
-        u8 unk1A;
-        u8 unk1B;
-        u8 unk1C;
-        u8 unk1D;
-        s16 unk1E;
-        s16 unk20;
-        s16 unk22;
-        f32 unk24;
-        f32 unk28;
-        f32 unk2C;
-        f32 unk30[3];
-        f32 unk3C;
-        f32 unk40;
-        f32 unk44;
-        f32 unk48[3];
-        f32 unk54;
-        s32 unk58;
-        u8 pad5C[4];
-        u8 unk60;
-        u8 unk61;
-        u8 unk62;
-        s8 unk63;
-    } fx;
+    ParticleDesc desc;
     s32 pad2;
-    f32 val;
-    f32 f;
-    f32 vec[3];
-    struct260 *ret;
+    f32 drag;
+    f32 unused;
+    vertex offset;
+    Particle1BFDD0 *particle;
 
-    state = &arg0->unk28;
-    state->unk8 += (792.0f + (func_150ADA68() * 1202.0f)) * 0.001000000047f * D_800BE9A4;
-    if (state->unk8 > 1.0f) {
-        if (state->unk0->unk1D4 == 0) {
-            while (state->unk8 > 1.0f) {
+    data = &effect->data;
+    data->spawnAccum += (792.0f + (func_150ADA68() * 1202.0f)) * 0.001f * D_800BE9A4;
+    if (data->spawnAccum > 1.0f) {
+        if (data->object->unk1D4 == NULL) {
+            // the object has no bone matrices: spins forever
+            while (data->spawnAccum > 1.0f) {
             }
         } else {
-            angle = (state->unk0->unk7A >> 8) + 0x40;
-            fx.unk1D = 0x29;
-            fx.unk08 = 0xE03;
-            fx.unk00 = 0x200005;
-            fx.unk18 = 0xB0;
-            fx.unk19 = 0xA0;
-            fx.unk1A = 0x2A;
-            fx.unk14 = 0x40;
-            fx.unk15 = 0xB;
-            fx.unk16 = 0x6A;
-            fx.unk04 = 0;
-            fx.unk0C = 0;
-            fx.unk10 = 0;
-            fx.unk17 = 0xFF;
-            fx.unk1C = 0xFF;
-            fx.unk60 = 3;
-            fx.unk61 = 3;
-            fx.unk58 = 0xE05;
-            fx.unk62 = 0xA;
-            fx.unk63 = -1;
-            fx.unk1E = 0x19;
-            fx.unk20 = 0xA;
-            fx.unk22 = 0x23;
-            fx.unk54 = 0.0f;
-            fx.unk24 = 1.019999981f;
-            val = 0.9708999991f;
+            facing = (data->object->unk7A >> 8) + 0x40;
+            desc.texture = 0x29;
+            desc.renderMode = 0xE03;
+            desc.unk0 = 0x200005;
+            desc.r2 = 0xB0;
+            desc.g2 = 0xA0;
+            desc.b2 = 0x2A;
+            desc.r = 0x40;
+            desc.g = 0xB;
+            desc.b = 0x6A;
+            desc.unk4 = 0;
+            desc.frame = 0;
+            desc.frameRate = 0;
+            desc.a = 0xFF;
+            desc.brightness = 0xFF;
+            desc.primColorMode = 3;
+            desc.envColorMode = 3;
+            desc.flags = PARTICLE_LIFETIME | PARTICLE_MOVE | PARTICLE_FADE | PARTICLE_SCALE | PARTICLE_SCALE_MUL;
+            desc.updateFunc = 10;
+            desc.deathFunc = -1;
+            desc.fadeStart = 25;
+            desc.fadeRate = 10;
+            desc.scaleStart = 35;
+            desc.gravity = 0.0f;
+            desc.scaleRate = 1.02f;
+            drag = 0.9709f;
             do {
-                a = (func_150ADA20() % 51U) - 0x82;
-                vec[0] = (func_150ADA68() * 20.0f) + 30.0f;
-                vec[1] = (func_150ADA68() * 60.0f) + -20.0f;
-                vec[2] = 0.0f;
+                yaw = (func_150ADA20() % 51U) - 130;
+                offset.x = (func_150ADA68() * 20.0f) + 30.0f;
+                offset.y = (func_150ADA68() * 60.0f) + -20.0f;
+                offset.z = 0.0f;
                 if (func_150ADA20() & 1) {
-                    vec[0] = -vec[0];
-                    a = a + angle;
+                    offset.x = -offset.x;
+                    yaw = yaw + facing;
                 } else {
-                    a = angle - a;
+                    yaw = facing - yaw;
                 }
-                fx.unk0A = (func_150ADA20() % 11U) + 0x1E;
-                fx.unk1B = (func_150ADA20() % 101U) + 0x64;
-                fx.unk28 = fx.unk2C = (func_150ADA68() * 150.0f) + 100.0f;
-                func_15143134(vec, fx.unk30, state->unk0->unk1D4 + 0x40);
-                r = func_150ADA20();
-                func_15143794(a, (r % 28U) - 0x19, func_150ADA68() * 3998.0f * 0.001000000047f, fx.unk48);
-                fx.unk58 &= ~0xC0;
+                desc.timer = (func_150ADA20() % 11U) + 30;
+                desc.alpha = (func_150ADA20() % 101U) + 100;
+                desc.width = desc.height = (func_150ADA68() * 150.0f) + 100.0f;
+                func_15143134(&offset, &desc.pos, (Mtx *)data->object->unk1D4 + 1);
+                rand = func_150ADA20();
+                func_15143794(yaw, (rand % 28U) - 25, func_150ADA68() * 3998.0f * 0.001f, &desc.vel);
+                desc.flags &= ~(PARTICLE_FLIP_S | PARTICLE_FLIP_T);
                 if (func_150ADA20() & 1) {
-                    fx.unk58 |= 0x40;
+                    desc.flags |= PARTICLE_FLIP_S;
                 }
                 if (func_150ADA20() & 1) {
-                    fx.unk58 |= 0x80;
+                    desc.flags |= PARTICLE_FLIP_T;
                 }
-                ret = func_15130374(&fx, 1, 4, arg0->unkC, arg0->unk1);
-                if (ret != NULL) {
-                    memcpy((u8 *)ret + 0xA8, &val, 4);
+                particle = func_15130374(&desc, 1, sizeof(f32), effect->owner, effect->kind);
+                if (particle != NULL) {
+                    memcpy(&particle->drag, &drag, sizeof(drag));
                 }
-                state->unk8 -= 1.0f;
-            } while (state->unk8 > 1.0f);
+                data->spawnAccum -= 1.0f;
+            } while (data->spawnAccum > 1.0f);
         }
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* Payload of message 0x2D: two objects trade places. */
 typedef struct {
-    s32 unk0;
-    u8  unk4;
-} SubA_15193234;
+    /* 0x00 */ struct127 *from;
+    /* 0x04 */ struct127 *to;
+    /* 0x08 */ u8 fromId;
+    /* 0x09 */ u8 toId;
+} ObjectSwapMessage;
 
+/* Payload of message 0: an object going away. */
 typedef struct {
-    s32 unk0;
-    union {
-        s32 w4;
-        u8  b4;
-    } u4;
-    u8  unk8;
-    u8  unk9;
-} ArgB_15193234;
+    /* 0x00 */ struct127 *object;
+    /* 0x04 */ u8 objectId;
+} ObjectRemovedMessage;
 
-void func_15193234(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_15193234 *temp_v0 = (SubA_15193234 *)((u8 *)arg0 + 0x28);
-    ArgB_15193234 *b = (ArgB_15193234 *)arg1;
-    s32 b0;
+/* Message handler: message 0x2D moves the effect to the other object of a swap; message 0 ends the
+ * effect when its object goes away. */
+void func_15193234(Effect1BFDD0 *effect, void *msg, u8 msgType) {
+    ObjectEmitterData *data = &effect->data;
+    ObjectSwapMessage *swap = msg;
+    struct127 *removed;
 
-    if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else {
-            if (temp_v0->unk0 == b->u4.w4) {
-                temp_v0->unk0 = b->unk0;
-                ((volatile SubA_15193234 *)temp_v0)->unk4 = b->unk8;
-            }
-trailing_label_15193234:
-            ;
+    if (msgType == 0x2D) {
+        if (data->object == swap->from) {
+            data->object = swap->to;
+            data->objectId = swap->toId;
+        } else if (data->object == swap->to) {
+            ObjectEmitterData *dst = data; // matching: the -g3 scope keeps the store out of the b delay slot
+
+            dst->object = swap->from;
+            dst->objectId = swap->fromId;
         }
-    } else if (arg2 == 0) {
-        b0 = b->unk0;
-        if ((b0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
+    } else if (msgType == 0) {
+        removed = ((ObjectRemovedMessage *)msg)->object;
+        if ((removed == data->object) || (((ObjectRemovedMessage *)msg)->objectId == data->objectId)) {
+            func_1516972C((struct102 *)effect);
         }
     }
 }
 
-void func_151932E0(struct260 *arg0, s32 arg1, u8 arg2) {
-    SubA_15193234 *temp_v0 = (SubA_15193234 *)((u8 *)arg0 + 0x28);
-    ArgB_15193234 *b = (ArgB_15193234 *)arg1;
-    s32 b0;
+/* Message handler of func_15192D48's effect: the same as func_15193234. */
+void func_151932E0(Effect1BFDD0 *effect, void *msg, u8 msgType) {
+    ObjectEmitterData *data = &effect->data;
+    ObjectSwapMessage *swap = msg;
+    struct127 *removed;
 
-    if (arg2 == 0x2D) {
-        if (temp_v0->unk0 == b->unk0) {
-            temp_v0->unk0 = b->u4.w4;
-            temp_v0->unk4 = b->unk9;
-        } else {
-            if (temp_v0->unk0 == b->u4.w4) {
-                temp_v0->unk0 = b->unk0;
-                ((volatile SubA_15193234 *)temp_v0)->unk4 = b->unk8;
-            }
-trailing_label_151932E0:
-            ;
+    if (msgType == 0x2D) {
+        if (data->object == swap->from) {
+            data->object = swap->to;
+            data->objectId = swap->toId;
+        } else if (data->object == swap->to) {
+            ObjectEmitterData *dst = data; // matching: the -g3 scope keeps the store out of the b delay slot
+
+            dst->object = swap->from;
+            dst->objectId = swap->fromId;
         }
-    } else if (arg2 == 0) {
-        b0 = b->unk0;
-        if ((b0 == temp_v0->unk0) || (b->u4.b4 == temp_v0->unk4)) {
-            func_1516972C((struct102 *)arg0);
+    } else if (msgType == 0) {
+        removed = ((ObjectRemovedMessage *)msg)->object;
+        if ((removed == data->object) || (((ObjectRemovedMessage *)msg)->objectId == data->objectId)) {
+            func_1516972C((struct102 *)effect);
         }
     }
 }
