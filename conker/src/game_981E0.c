@@ -198,26 +198,26 @@ struct func_1506C32C_stack {
     s32 sound3;
 };
 
-typedef struct Vec3w_15070D24 {
+typedef struct Vec3w {
     s32 unk0;
     s32 unk4;
     s32 unk8;
-} Vec3w_15070D24;
+} Vec3w;
 
 /* Locals of the effect spawners func_15070D24 / func_15070F60, in stack order. */
-typedef struct Stack_15070D24 {
+typedef struct EffectLocals {
     Header2 header2;
     Header header;
     u8 pad16[2];
     f32 worldPos[3];
     f32 randoms[2];
-    Vec3w_15070D24 vec78;
-    Vec3w_15070D24 localPos;
-} Stack_15070D24;
+    Vec3w vec78;
+    Vec3w localPos;
+} EffectLocals;
 
-extern Vec3w_15070D24 D_80099B88;
-extern Vec3w_15070D24 D_80099B94;
-extern Vec3w_15070D24 D_80099BBC;
+extern Vec3w D_80099B88;
+extern Vec3w D_80099B94;
+extern Vec3w D_80099BBC;
 extern s32 func_150ADA20(void);
 extern void func_15143134(void *, void *, s32);
 extern void func_151DC484(f32 *, struct199 *, s32, u8, s32);
@@ -255,14 +255,14 @@ void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 s32 func_151F2CDC(void);
 extern s32 *D_800BE5A8[];
 extern s8 D_800E0BCE[];
-extern Vec3w_15070D24 D_80099B70;
-extern Vec3w_15070D24 D_80099B7C;
+extern Vec3w D_80099B70;
+extern Vec3w D_80099B7C;
 extern s32 func_15145EA4(void *arg0, void *arg1, s32 arg2, s32 arg3);
 extern struct127 *func_1507515C(struct127 *);
 extern void func_151C1860(void *, s32, s32);
 void func_15103E40(struct127 *, struct127 *, struct17 *, u8, u8, u8, u8);
-extern Vec3w_15070D24 D_80099BA0;
-extern Vec3w_15070D24 D_80099BAC;
+extern Vec3w D_80099BA0;
+extern Vec3w D_80099BAC;
 extern void func_151D5334(struct17*, f32, f32, f32, s32, s32, s32);
 extern void func_150FE860(struct127 *arg0, s32 arg1, s32 arg2);
 extern void func_151D8868(void *arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -2411,12 +2411,13 @@ void func_15070224(s32 cmd) {
     func_151602C0(&header, &header2, (func_150ADA20() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
 }
 
+/* struct198 with its object fields typed. */
 typedef struct {
     s32 unk0;
     struct127 *unk4;
     struct127 *unk8;
     struct127 *unkC;
-} Info_15070300;
+} struct198Objs;
 
 /* Objects 0x77 / 0x28: fires (func_151C0698, else func_1506CE6C), then spawns effect func_15102B38 at bone 4. */
 void func_15070300(s32 cmd) {
@@ -2425,9 +2426,9 @@ void func_15070300(s32 cmd) {
     u8 mode;
     struct127 *other;
     u8 idx;
-    Info_15070300 info;
-    Vec3w_15070D24 localPos;
-    Vec3w_15070D24 vec74;
+    struct198Objs info;
+    Vec3w localPos;
+    Vec3w vec74;
     f32 randoms[2];
     f32 worldPos[3];
     s32 *srcs[1];
@@ -2669,7 +2670,7 @@ void func_15070D00(s32 cmd) {
 }
 
 void func_15070D24(s32 cmd) {
-    Stack_15070D24 fx;
+    EffectLocals fx;
 
     fx.localPos = D_80099B88;
     fx.vec78 = D_80099B94;
@@ -2706,7 +2707,7 @@ void func_15070D24(s32 cmd) {
 void func_15070F60(cmd)
     u8 cmd;
 {
-    Stack_15070D24 fx;
+    EffectLocals fx;
 
     fx.localPos = D_80099BA0;
     fx.vec78 = D_80099BAC;
