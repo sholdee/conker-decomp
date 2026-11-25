@@ -411,263 +411,316 @@ Gfx *func_151BCA90(TrailEffect *trail, Gfx *gfx, s16 viewport) {
     return gfx;
 }
 
-void func_151BD21C(void *arg0, void *arg1, u8 arg2) {
-    void *target;
-    s32 current;
-    s32 value;
+/* Message handler: finishes the trail when its owner goes away, follows the owner through a swap. */
+/* Message handler: finishes the trail when its owner goes away, follows the owner through a swap. */
+void func_151BD21C(TrailEffect *trail, ActorMsg *msg, u8 msgId) {
+    ActorRef *owner;
+    struct127 *actor;
+    struct127 *actorA;
 
-    target = *(void **)((u8 *)arg0 + 0x98);
-    current = *(s32 *)target;
-    if (arg2 == 0) {
-        if (current == *(s32 *)arg1 || *(u8 *)((u8 *)target + 4) == *(u8 *)((u8 *)arg1 + 4)) {
-            u16 *flags = (u16 *)((u8 *)arg0 + 0x1E);
+    owner = &trail->data->owner;
+    actor = owner->actor;
+    if (msgId == 0) {
+        if (actor == msg->ref.actor || msg->ref.uniqueId == owner->uniqueId) {
+            u16 *flags = &trail->flags; // matching: keeps the flags store out of the jr delay slot
 
-            *(s8 *)((u8 *)arg0 + 0x30) = 0;
+            trail->unk30 = 0;
             *flags |= 8;
         }
-    } else if (arg2 == 0x2D) {
-        value = *(s32 *)arg1;
-        if (value == *(s32 *)target) {
-            *(s32 *)target = *(s32 *)((u8 *)arg1 + 4);
-            *(u8 *)((u8 *)target + 4) = *(u8 *)((u8 *)arg1 + 9);
+    } else if (msgId == 0x2D) {
+        actorA = msg->swap.actorA;
+        if (actorA == owner->actor) {
+            owner->actor = msg->swap.actorB;
+            owner->uniqueId = msg->swap.idB;
             return;
         }
-        if (*(s32 *)((u8 *)arg1 + 4) == *(s32 *)target) {
-            *(s32 *)target = value;
-            *(u8 *)((u8 *)target + 4) = *(u8 *)((u8 *)arg1 + 8);
+        if (owner->actor == msg->swap.actorB) {
+            owner->actor = actorA;
+            owner->uniqueId = msg->swap.idA;
         }
     }
 }
 
-s32 func_151BD2BC(s32 *arg0) {
-    s32 *p = (s32 *)arg0[0xA];
-    if (*p == 0) {
+typedef struct {
+    u8 pad0[0x28];
+    ActorRef owner;
+} OwnedEffect28;
+
+/* Returns whether the effect's owner is still the same active actor. */
+s32 func_151BD2BC(OwnedEffect28 *effect) {
+    struct127 *owner = effect->owner.actor;
+
+    if (owner->interaction_state == 0) {
         return 0;
     }
-    if (*((u8 *)arg0 + 0x2C) != *((u8 *)p + 0x3B)) {
+    if (owner->unique_id != effect->owner.uniqueId) {
         return 0;
     }
     return 1;
 }
 
-extern f32 D_800AA850;
-extern f32 D_800AA860;
-extern f32 D_800AA864;
-
+/* Spawn parameters of a BloodStrip (same layout as game_161520.c's BloodStripDesc). */
 typedef struct {
-    /* 0x00 */ u8  unk0;
-    /* 0x01 */ u8  pad1[0x3];
-    /* 0x04 */ void *unk4;
-    /* 0x08 */ u8  unk8;
-    /* 0x09 */ u8  pad9[0x3];
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ u8  unk24;
-    /* 0x25 */ u8  pad25[0x1];
-    /* 0x26 */ s16 unk26;
-    /* 0x28 */ s16 unk28;
-    /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s16 unk2C;
-    /* 0x2E */ u8  unk2E;
-    /* 0x2F */ u8  unk2F;
-    /* 0x30 */ s8  unk30;
-    /* 0x31 */ u8  pad31[0x3];
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ u8  unk38;
-    /* 0x39 */ s8  unk39;
-} struct_E9FE0_2F8;
+    u8 ownerId;
+    u8 pad1[3];
+    struct127 *owner;
+    u8 bone;
+    u8 pad9[3];
+    struct17 offsetA;
+    struct17 offsetB;
+    u8 flags;
+    u8 pad25;
+    s16 duration;
+    s16 pause;
+    s16 lifetime;
+    u16 sound;
+    s8 sampleCallback;
+    s8 emitCallback;
+    s8 rateCallback;
+    u8 pad31[3];
+    f32 rate;
+    u8 mode;
+    s8 updateCallback;
+    u8 pad3A[2];
+} BloodStripDesc;
 
-void *func_15134DAC(struct_E9FE0_2F8 *, s32);
+/* Blood swept between two points on an actor's bone (game_161520.c's BloodStrip). */
+typedef struct {
+    u8 pad0;
+    u8 kind;
+    u8 pad2[0xA];
+    u8 unkC;
+    u8 padD[3];
+    s32 active;
+    s32 unk14;
+    u8 ownerId;
+    u8 pad19[3];
+    struct127 *owner;
+    u8 bone;
+    u8 pad21[3];
+    struct17 offsetA;
+    struct17 offsetB;
+    u8 flags;
+    u8 pad3D;
+    s16 duration;
+    s16 pause;
+    s16 lifetime;
+    u16 sound;
+    s8 sampleCallback;
+    s8 emitCallback;
+    s8 rateCallback;
+    u8 pad49[3];
+    f32 rate;
+    u8 mode;
+    s8 updateCallback;
+    u8 pad52[2];
+    s16 timer;
+    u8 pad56[2];
+    struct17 posA;
+    struct17 posB;
+    f32 accumulator;
+    f32 power;
+    f32 time;
+} BloodStrip;
 
-void func_151BD2F8(void *arg0, s32 arg1, s32 arg2) {
-    struct_E9FE0_2F8 sp24;
-    struct { s16 unk0; u8 pad[2]; } sp20;
-    void *temp_v0;
+/* BloodStrip spawned by func_151BD2F8, with two bytes of extra data. */
+typedef struct {
+    BloodStrip strip;
+    u8 pad7C[4];
+    s16 sampleAge; /* 0x80: frames since the last sample */
+} AgedBloodStrip;
 
-    if (arg0 == NULL) {
+AgedBloodStrip *func_15134DAC(BloodStripDesc *desc, s32 extraSize);
+
+/* Spawns two mirrored blood strips on bone 1 of actor. */
+void func_151BD2F8(struct127 *actor, s32 arg1, s32 arg2) {
+    BloodStripDesc desc;
+    struct {
+        s16 value;
+        u8 pad[2]; // matching: IDO gives the initial value a word-aligned slot
+    } sampleAge;
+    AgedBloodStrip *strip;
+
+    if (actor == NULL) {
         return;
     }
 
-    sp24.unk0 = *((u8 *)arg0 + 0x3B);
-    sp24.unk4 = arg0;
-    sp24.unk8 = 1;
-    sp24.unkC = 31.0f;
-    sp24.unk10 = -34.0f;
-    sp24.unk14 = -117.0f;
-    sp24.unk18 = 35.0f;
-    sp24.unk1C = -24.0f;
-    sp24.unk20 = -182.0f;
-    sp24.unk24 = 0;
-    sp24.unk26 = 0x32;
-    sp24.unk28 = 0x64;
-    sp24.unk2A = 0x12C;
-    sp24.unk2E = 4;
-    sp24.unk2F = 4;
-    sp24.unk30 = 3;
-    sp24.unk34 = D_800AA850;
-    sp24.unk38 = 5;
-    sp24.unk39 = -1;
+    desc.ownerId = actor->unique_id;
+    desc.owner = actor;
+    desc.bone = 1;
+    desc.offsetA.unk0 = 31.0f;
+    desc.offsetA.unk4 = -34.0f;
+    desc.offsetA.unk8 = -117.0f;
+    desc.offsetB.unk0 = 35.0f;
+    desc.offsetB.unk4 = -24.0f;
+    desc.offsetB.unk8 = -182.0f;
+    desc.flags = 0;
+    desc.duration = 50;
+    desc.pause = 100;
+    desc.lifetime = 300;
+    desc.sampleCallback = 4; /* func_151BD42C */
+    desc.emitCallback = 4;   /* func_151BD43C */
+    desc.rateCallback = 3;   /* func_151BD750 */
+    desc.rate = 0.3006100059f;
+    desc.mode = 5;
+    desc.updateCallback = -1;
 
-    sp20.unk0 = 0;
+    sampleAge.value = 0;
 
-    temp_v0 = func_15134DAC(&sp24, 2);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x80, &sp20, 2);
+    strip = func_15134DAC(&desc, sizeof(sampleAge.value));
+    if (strip != NULL) {
+        memcpy(&strip->sampleAge, &sampleAge.value, sizeof(sampleAge.value));
     }
 
-    sp24.unkC = -sp24.unkC;
-    sp24.unk18 = -sp24.unk18;
+    desc.offsetA.unk0 = -desc.offsetA.unk0;
+    desc.offsetB.unk0 = -desc.offsetB.unk0;
 
-    temp_v0 = func_15134DAC(&sp24, 2);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x80, &sp20, 2);
+    strip = func_15134DAC(&desc, sizeof(sampleAge.value));
+    if (strip != NULL) {
+        memcpy(&strip->sampleAge, &sampleAge.value, sizeof(sampleAge.value));
     }
 }
 
-s32 func_151BD42C(u8 *arg0) {
-    *(s16 *)(arg0 + 0x80) = 0;
+/* BloodStrip sample callback: restarts the sample age. */
+s32 func_151BD42C(AgedBloodStrip *strip) {
+    strip->sampleAge = 0;
     return 1;
 }
 
+/* ParticleDesc.flags (see game_15D730.c) */
+#define PARTICLE_LIFETIME   0x1
+#define PARTICLE_GRAVITY    0x2
+#define PARTICLE_MOVE       0x4
+#define PARTICLE_FLIP_S     0x40
+#define PARTICLE_FLIP_T     0x80
+#define PARTICLE_FADE       0x200
+#define PARTICLE_SCALE      0x400
+#define PARTICLE_SCALE_MUL  0x800
+#define PARTICLE_USE_OFFSET 0x1000
+#define PARTICLE_HANDLERS   0x4000
+#define PARTICLE_DRAW_FUNC  0x8000
+
+/* Spawn parameters of a particle: the first 0x66 bytes of game_15D730.c's ParticleDesc
+   (the full 0x70-byte struct moves this file's stack slots). */
 typedef struct {
-    s32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30[3];
-    f32 unk3C[3];
-    f32 unk48[3];
-    f32 unk54;
-    s32 unk58;
-    u8 pad5C[4];
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-} Fx151BD43C;
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode;
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ struct17 pos;
+    /* 0x3C */ struct17 offset;
+    /* 0x48 */ struct17 vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ s32 flags;
+    /* 0x5C */ void *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;
+    /* 0x63 */ s8 deathFunc;
+    /* 0x64 */ s8 drawFunc;
+    /* 0x65 */ u8 handlerSet;
+} ParticleDesc;
 
-typedef struct {
-    u8 pad0[0x14];
-    f32 unk14[3];
-    u8 pad20[0x3B - 0x20];
-    u8 unk3B;
-    u8 pad3C[0x74 - 0x3C];
-    u8 unk74;
-} Owner151BD43C;
+u8 *func_15130374(ParticleDesc *desc, u8 kind, s32 dataSize, u8 arg3, s32 arg4);
 
-typedef struct {
-    u8 pad0;
-    u8 unk1;
-    u8 pad2[0xA];
-    u8 unkC;
-    u8 padD[0x1C - 0xD];
-    Owner151BD43C *unk1C;
-    u8 pad20[0x74 - 0x20];
-    f32 unk74;
-} Actor151BD43C;
+/* BloodStrip emit callback: spawns one blood droplet at pointA moving towards pointB. */
+void func_151BD43C(struct17 *pointA, struct17 *pointB, struct17 *velA, struct17 *velB, f32 time,
+                   BloodStrip *strip) {
+    u8 *particle;
+    struct127 *owner;
+    ParticleDesc desc;
+    f32 drag;
+    s32 pad;  // matching: stack slot of the original frame
+    ActorRef ownerRef;
+    s32 pad2; // matching: stack slot of the original frame
 
-typedef struct {
-    Owner151BD43C *owner;
-    u8 ownerId;
-} Extra151BD43C;
-
-struct260 *func_15130374(void *, u8, s32, u8, s32);
-
-void func_151BD43C(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, f32 arg4, Actor151BD43C *arg5) {
-    struct260 *ret;
-    Owner151BD43C *owner;
-    Fx151BD43C fx;
-    f32 val;
-    s32 pad;
-    Extra151BD43C extra;
-    s32 pad2;
-
-    owner = arg5->unk1C;
+    owner = strip->owner;
     if ((owner->unk74 & 0xF) != 0xF) {
-        fx.unk1D = 0x29;
-        fx.unk08 = 0xE03;
-        fx.unk00 = 0x200005;
-        fx.unk04 = 0;
-        fx.unk0C = 0;
-        fx.unk10 = 0;
-        fx.unk54 = ((func_150ADA68() * 251.0f) + 44.0f) * 0.001000000047f;
-        fx.unk1E = 0x14;
-        fx.unk20 = 0xC;
-        fx.unk58 = (func_150ADA20() & 1 ? 0x40 : 0) | (1 | 2 | 4 | (func_150ADA20() & 1 ? 0x80 : 0)) | 0x200 | 0x400 | 0x800 | 0x1000 | 0x4000 | 0x8000;
-        fx.unk60 = 3;
-        fx.unk61 = 3;
-        fx.unk63 = -1;
-        fx.unk64 = -1;
-        fx.unk65 = 7;
-        fx.unk22 = 0x22;
-        fx.unk14 = 0xDD;
-        fx.unk15 = 0xD3;
-        fx.unk16 = 0xCD;
-        fx.unk17 = 0xFF;
-        fx.unk18 = 0x57;
-        fx.unk19 = 0x55;
-        fx.unk1A = 0x5A;
-        val = 0.9347190261f;
-        fx.unk24 = 1.034358025f;
-        fx.unk1B = (func_150ADA20() % 156U) + 0x64;
-        fx.unk1C = 0xFF;
-        fx.unk0A = (func_150ADA20() % 18U) + 0x19;
-        fx.unk28 = fx.unk2C = (func_150ADA68() * 53.0f) + 49.0f;
-        fx.unk48[0] = (arg1[0] - arg0[0]) * arg5->unk74;
-        fx.unk48[1] = (arg1[1] - arg0[1]) * arg5->unk74;
-        fx.unk48[2] = (arg1[2] - arg0[2]) * arg5->unk74;
-        fx.unk30[0] = arg0[0] - arg5->unk1C->unk14[0];
-        fx.unk30[1] = arg0[1] - arg5->unk1C->unk14[1];
-        fx.unk30[2] = arg0[2] - arg5->unk1C->unk14[2];
-        fx.unk30[0] += fx.unk48[0] * arg4;
-        fx.unk30[1] += fx.unk48[1] * arg4;
-        fx.unk30[2] += fx.unk48[2] * arg4;
-        extra.owner = arg5->unk1C;
-        extra.ownerId = arg5->unk1C->unk3B;
-        fx.unk62 = 0x13;
-        fx.unk3C[0] = arg5->unk1C->unk14[0];
-        fx.unk3C[1] = arg5->unk1C->unk14[1];
-        fx.unk3C[2] = arg5->unk1C->unk14[2];
-        ret = func_15130374(&fx, 1, 0x10, arg5->unkC, arg5->unk1);
-        if (ret != NULL) {
-            memcpy((u8 *)ret + 0xA8, &val, 4);
-            memcpy((u8 *)ret + 0xB0, &extra, 8);
+        desc.texture = 0x29;
+        desc.renderMode = 0xE03;
+        desc.unk0 = 0x200005;
+        desc.unk4 = 0;
+        desc.frame = 0;
+        desc.frameRate = 0;
+        desc.gravity = ((func_150ADA68() * 251.0f) + 44.0f) * 0.001000000047f;
+        desc.fadeStart = 20;
+        desc.fadeRate = 12;
+        desc.flags = (func_150ADA20() & 1 ? PARTICLE_FLIP_S : 0) |
+                     (PARTICLE_LIFETIME | PARTICLE_GRAVITY | PARTICLE_MOVE | (func_150ADA20() & 1 ? PARTICLE_FLIP_T : 0)) |
+                     PARTICLE_FADE | PARTICLE_SCALE | PARTICLE_SCALE_MUL | PARTICLE_USE_OFFSET | PARTICLE_HANDLERS |
+                     PARTICLE_DRAW_FUNC;
+        desc.primColorMode = 3;
+        desc.envColorMode = 3;
+        desc.deathFunc = -1;
+        desc.drawFunc = -1;
+        desc.handlerSet = 7;
+        desc.scaleStart = 34;
+        desc.r = 221;
+        desc.g = 211;
+        desc.b = 205;
+        desc.a = 255;
+        desc.r2 = 87;
+        desc.g2 = 85;
+        desc.b2 = 90;
+        drag = 0.9347190261f;
+        desc.scaleRate = 1.034358025f;
+        desc.alpha = (func_150ADA20() % 156U) + 100;
+        desc.brightness = 255;
+        desc.timer = (func_150ADA20() % 18U) + 25;
+        desc.width = desc.height = (func_150ADA68() * 53.0f) + 49.0f;
+        desc.vel.unk0 = (pointB->unk0 - pointA->unk0) * strip->power;
+        desc.vel.unk4 = (pointB->unk4 - pointA->unk4) * strip->power;
+        desc.vel.unk8 = (pointB->unk8 - pointA->unk8) * strip->power;
+        desc.pos.unk0 = pointA->unk0 - strip->owner->x_position;
+        desc.pos.unk4 = pointA->unk4 - strip->owner->y_position;
+        desc.pos.unk8 = pointA->unk8 - strip->owner->z_position;
+        desc.pos.unk0 += desc.vel.unk0 * time;
+        desc.pos.unk4 += desc.vel.unk4 * time;
+        desc.pos.unk8 += desc.vel.unk8 * time;
+        ownerRef.actor = strip->owner;
+        ownerRef.uniqueId = strip->owner->unique_id;
+        desc.updateFunc = 0x13;
+        desc.offset.unk0 = strip->owner->x_position;
+        desc.offset.unk4 = strip->owner->y_position;
+        desc.offset.unk8 = strip->owner->z_position;
+        particle = func_15130374(&desc, 1, 0x10, strip->unkC, strip->kind);
+        if (particle != NULL) {
+            memcpy(particle + 0xA8, &drag, sizeof(drag));
+            memcpy(particle + 0xB0, &ownerRef, sizeof(ownerRef));
         }
     }
 }
 
-f32 func_151BD750(s16 *arg0) {
-    s16 temp;
-    f32 ret;
+extern f32 D_800AA860; /* 0.001f */
+extern f32 D_800AA864; /* 0.04f */
 
-    temp = arg0[0x40];
-    ret = (1.0f + 1.0f) * (f32) temp * D_800AA860 + D_800AA864;
-    arg0[0x40] = temp + D_800BE9E4;
-    return ret;
+/* BloodStrip rate callback: the rate grows with the time since the last sample. */
+f32 func_151BD750(AgedBloodStrip *strip) {
+    s16 age;
+    f32 rate;
+
+    age = strip->sampleAge;
+    rate = (1.0f + 1.0f) * (f32)age * D_800AA860 + D_800AA864; // matching: literals change FP register allocation
+    strip->sampleAge = age + D_800BE9E4;
+    return rate;
 }
 
 extern void func_1513170C(void);
