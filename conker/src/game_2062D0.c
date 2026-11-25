@@ -13,12 +13,6 @@ s32 func_15131918(Vec3f *vel, f32 scale);
 
 extern u8 D_800AB330[]; /* per effect kind flag */
 
-/* Start of a live effect created from an ParticleDef. */
-typedef struct {
-    EffectHeader header;
-    u8 pad10[0x8];
-    ParticleDef desc;
-} EffectBase; /* 0x70 */
 
 /* Data of a func_151DA08C effect: wobbles its scale and keeps spawning func_151DB5D0 particles. */
 typedef struct {
@@ -36,9 +30,9 @@ typedef struct {
 } SteamData; /* 0x1C */
 
 typedef struct {
-    EffectBase base;
-    u8 pad70[0xB8];
-    SteamData steam;
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ u8 pad110[0x18];
+    /* 0x128 */ SteamData steam;
 } SteamEffect;
 
 
@@ -590,11 +584,11 @@ s32 func_151DA368(SteamEffect *effect) {
     steam = &effect->steam;
     steam->phaseX = steam->phaseX + steam->stepX * D_800BE9E4;
     steam->phaseY = steam->phaseY + steam->stepY * D_800BE9E4;
-    effect->base.desc.width = func_151423D8(steam->phaseX - 0x40) * steam->amplitudeX + steam->size;
-    effect->base.desc.height = func_151423D8(steam->phaseY - 0x40) * steam->amplitudeY + steam->size;
+    effect->head.def.width = func_151423D8(steam->phaseX - 0x40) * steam->amplitudeX + steam->size;
+    effect->head.def.height = func_151423D8(steam->phaseY - 0x40) * steam->amplitudeY + steam->size;
 lbl: // matching: ends the basic block so the scaleY store is not moved into the next call's delay slot
     steam->spawnCredit += (0.15f + func_150ADA68() * 0.1f) * D_800BE9A4;
-    avgScale = (effect->base.desc.width + effect->base.desc.height) * 0.5f;
+    avgScale = (effect->head.def.width + effect->head.def.height) * 0.5f;
     if (steam->spawnCredit > 1.0f) {
         radius = avgScale * 500.0f;
         do {
@@ -602,9 +596,9 @@ lbl: // matching: ends the basic block so the scaleY store is not moved into the
             dist = func_150ADA68() * radius;
             c = func_151423D8(angle - 0x40);
             // matching: indexing the position as an array orders the add's operands like the target
-            pos[0] = func_151423D8(angle) * dist + ((f32 *)&effect->base.desc.pos)[0];
-            pos[1] = ((f32 *)&effect->base.desc.pos)[1] + -3.5f;
-            pos[2] = ((f32 *)&effect->base.desc.pos)[2] + c * dist;
+            pos[0] = func_151423D8(angle) * dist + ((f32 *)&effect->head.def.pos)[0];
+            pos[1] = ((f32 *)&effect->head.def.pos)[1] + -3.5f;
+            pos[2] = ((f32 *)&effect->head.def.pos)[2] + c * dist;
             {
                 s16 life;
 
@@ -615,7 +609,7 @@ lbl: // matching: ends the basic block so the scaleY store is not moved into the
                 dist = func_150ADA68();
                 func_151DB5D0(steam->kind, pos, vel, avgScale * 471.0f, (dist * 154.0f + 10106.0f) * 0.0001f, 1.0f,
                               (func_150ADA68() * 25.0f + -50.0f) * 0.001f, life, 0x9B, life, 0xFF / life, 1,
-                              effect->base.header.owner, effect->base.header.kind);
+                              effect->head.header.owner, effect->head.header.kind);
             }
             steam->spawnCredit -= 1.0f;
         } while
@@ -629,7 +623,7 @@ s32 func_151DA6A8(SteamEffect *effect) {
     s32 i;
     SteamData *steam;
 
-    if (effect->base.desc.flags & 1) {
+    if (effect->head.def.flags & 1) {
         steam = &effect->steam;
         i = D_800BE9E4;
         while (i--) {
@@ -793,9 +787,8 @@ typedef struct {
 } SquashData; /* 0xC */
 
 typedef struct {
-    EffectBase base;
-    u8 pad70[0xA0];
-    SquashData squash;
+    /* 0x000 */ DefParticleHead head;
+    /* 0x110 */ SquashData squash;
 } SquashEffect;
 
 /* Spawns a squash-and-stretch effect of kind `kind` at `pos`. */
@@ -864,17 +857,14 @@ s32 func_151DADA0(SquashEffect *effect) {
     squash = &effect->squash;
     squash->phase = squash->phase + squash->step * D_800BE9E4;
     wave = func_151423D8((u8)(squash->phase - 0x40));
-    effect->base.desc.scale.x = squash->amplitudeX * wave + 1.0f;
-    effect->base.desc.scale.y = 1.3f - squash->amplitudeY * wave;
+    effect->head.def.scale.x = squash->amplitudeX * wave + 1.0f;
+    effect->head.def.scale.y = 1.3f - squash->amplitudeY * wave;
     return 1;
 }
 
 /* An effect drawn as a camera-facing quad, with a double-buffered vertex block per view. */
 typedef struct {
-    EffectBase base;
-    u8 pad70[0x50];
-    Vtx quad[4];
-    Vtx *buffers[1]; /* one per view */
+    /* 0x000 */ DefParticleHead head;
 } QuadEffect;
 
 void func_151D5D60(Vtx **buffers, s16 view, s32 size, Vtx **vtx, u8 *fresh);
@@ -890,19 +880,19 @@ Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
     f32 dx;
     u8 fresh;
 
-    func_151D5D60(effect->buffers, view, sizeof(effect->quad), &vtx, &fresh);
+    func_151D5D60(effect->head.vtxBuffers, view, sizeof(effect->head.vtxTemplate), &vtx, &fresh);
     ret = vtx;
     if (vtx) {
         if (fresh) {
-            memcpy(effect->buffers[view], effect->quad, sizeof(effect->quad));
-            memcpy(effect->buffers[view] + 4, effect->quad, sizeof(effect->quad));
+            memcpy(effect->head.vtxBuffers[view], effect->head.vtxTemplate, sizeof(effect->head.vtxTemplate));
+            memcpy(effect->head.vtxBuffers[view] + 4, effect->head.vtxTemplate, sizeof(effect->head.vtxTemplate));
         }
     } else {
         return NULL;
     }
 
-    halfWidth = effect->base.desc.width * effect->base.desc.scale.x;
-    height = effect->base.desc.height * effect->base.desc.scale.y;
+    halfWidth = effect->head.def.width * effect->head.def.scale.x;
+    height = effect->head.def.height * effect->head.def.scale.y;
     dz = D_800DD1D8[view] * halfWidth;
     dx = D_800DD1E8[view] * halfWidth;
 
@@ -910,12 +900,12 @@ Vtx *func_151DAE28(QuadEffect *effect, s16 view) {
     vtx[1].v.flag = 0;
     vtx[2].v.flag = 0;
     vtx[3].v.flag = 0;
-    vtx[0].v.ob[0] = vtx[3].v.ob[0] = effect->base.desc.pos.x + dx;
-    vtx[0].v.ob[1] = vtx[1].v.ob[1] = effect->base.desc.pos.y;
-    vtx[0].v.ob[2] = vtx[3].v.ob[2] = effect->base.desc.pos.z - dz;
-    vtx[1].v.ob[0] = vtx[2].v.ob[0] = effect->base.desc.pos.x - dx;
-    vtx[2].v.ob[1] = vtx[3].v.ob[1] = effect->base.desc.pos.y + height;
-    vtx[1].v.ob[2] = vtx[2].v.ob[2] = effect->base.desc.pos.z + dz;
+    vtx[0].v.ob[0] = vtx[3].v.ob[0] = effect->head.def.pos.x + dx;
+    vtx[0].v.ob[1] = vtx[1].v.ob[1] = effect->head.def.pos.y;
+    vtx[0].v.ob[2] = vtx[3].v.ob[2] = effect->head.def.pos.z - dz;
+    vtx[1].v.ob[0] = vtx[2].v.ob[0] = effect->head.def.pos.x - dx;
+    vtx[2].v.ob[1] = vtx[3].v.ob[1] = effect->head.def.pos.y + height;
+    vtx[1].v.ob[2] = vtx[2].v.ob[2] = effect->head.def.pos.z + dz;
 
     return ret;
 }
