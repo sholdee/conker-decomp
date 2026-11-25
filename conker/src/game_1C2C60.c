@@ -15,10 +15,12 @@ void *func_1513D2F0(void *arg0, void *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, 
 #define D_800DBFF0 D_800DBFF0_hdr
 #define D_800BE628 D_800BE628_hdr
 #define D_800DD198 D_800DD198_hdr
+#define D_800E0900 D_800E0900_hdr
 #include "variables.h"
 #undef D_800DBFF0
 #undef D_800BE628
 #undef D_800DD198
+#undef D_800E0900
 
 void *memcpy(void *, const void *, u32);
 
@@ -1412,7 +1414,7 @@ typedef struct EffectMessage {
     /* 0x9 */ u8 otherId; /* message 0x2D */
 } EffectMessage;
 
-void func_151993B4();
+void func_151993B4(CharacterFlamethrowerActor *actor);
 
 /* Message handler: dies when its owner is killed (0, 2, 8); follows an owner swap (0x2D). */
 void func_15198054(CharacterFlamethrowerActor *actor, EffectMessage *msg, u8 kind) {
@@ -2047,69 +2049,72 @@ void func_151990AC(CharacterFlamethrowerActor *actor, Vec3f *end) {
     } while (jet->spriteAccum > 1.0f);
 }
 
-struct ConkerStruct151993B4 {
-    char pad0[0x1E];
-    u16 unk1E;
-    char pad20[0x10];
-    u8 unk30;
-    char pad31[0x67];
-    u8 *unk98;
-};
+/* Stops a jet: no new points, and it dies once fewer than 2 remain while the newest fade out. */
+void func_151993B4(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerJet *jet;
 
-void func_151993B4(struct ConkerStruct151993B4 *arg0) {
-    u8 *p;
-    p = arg0->unk98;
-    arg0->unk30 = 0;
-    arg0->unk1E &= 0xFFFD;
-    p[6] |= 1;
-    p[6] |= 4;
+    jet = actor->state;
+    actor->unk30 = 0;
+    actor->flags1E &= ~2;
+    jet->flags |= 1;
+    jet->flags |= 4;
 }
 
+/* Per-character flamethrower slots, indexed like D_800A8A9C. */
+typedef struct FlamethrowerSlot {
+    /* 0x00 */ u8 pad0[0x14];
+    /* 0x14 */ u8 active;
+} FlamethrowerSlot;
+
+extern FlamethrowerSlot *D_800E0900[];
+/* unique_ids of the 6 characters that have a FlamethrowerSlot. */
 extern u8 D_800A8A9C[];
 
-void func_151993E4(u8 *arg0) {
-    u8 *q;
-    u8 *p;
+/* Jet init callback (D_8008F87C): clears the owner's FlamethrowerSlot `active` flag. */
+void func_151993E4(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerJet *jet;
+    struct127 *owner;
     s32 i;
     s32 found;
 
-    q = *(u8 **)(arg0 + 0x98);
-    p = *(u8 **)q;
+    jet = actor->state;
+    owner = jet->owner;
     i = 0;
-    found = 0;
+    found = FALSE;
     do {
-        if (p[0x3B] == D_800A8A9C[i]) {
-            found = 1;
+        if (owner->unique_id == D_800A8A9C[i]) {
+            found = TRUE;
         } else {
             i++;
         }
     } while (!found && i < 6);
 
     if (found) {
-        ((u8 *)D_800E0900[i])[0x14] = 0;
+        D_800E0900[i]->active = FALSE;
     }
 }
 
-void func_1519944C(u8 *arg0) {
-    u8 *q;
-    u8 *p;
+/* Jet destroy callback (D_8008F88C): sets the owner's FlamethrowerSlot `active` flag again. */
+void func_1519944C(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerJet *jet;
+    struct127 *owner;
     s32 i;
     s32 found;
 
-    q = *(u8 **)(arg0 + 0x98);
-    p = *(u8 **)q;
+    jet = actor->state;
+    owner = jet->owner;
     i = 0;
-    found = 0;
+    found = FALSE;
     do {
-        if (p[0x3B] == D_800A8A9C[i]) {
-            found = 1;
+        if (owner->unique_id == D_800A8A9C[i]) {
+            found = TRUE;
         } else {
             i++;
         }
     } while (!found && i < 6);
 
     if (found) {
-        ((u8 *)D_800E0900[i])[0x14] = 1;
+        D_800E0900[i]->active = TRUE;
     }
 }
 
