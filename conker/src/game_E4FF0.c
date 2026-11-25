@@ -94,6 +94,7 @@ extern f32 D_8009FD30[3];
 extern f32 D_8009FD3C[3];
 extern f32 D_8009FD48[3];
 
+// matching: the model is passed as s32; a pointer type moves the unk1D4 temp from v0 to a3
 void func_15142314(s32 model, s32 joint, f32 *out);
 void func_15143134(f32 *in, f32 *out, void *mtx);
 void func_1515C244(struct127 *, f32 *, f32 *, f32 *);
@@ -105,160 +106,164 @@ void func_1514C678(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, u8);
 s32 func_15132A4C(ModelParticleSpawn *, s32, s32, s32, u8, s32);
 void func_15151A38(BurstConfig *, u8, s32);
 
-void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2) {
-    f32 pts[2][3];
-    f32 base[3];
-    f32 sx;
-    f32 sy;
+/*
+ * Spawns the debris of a smashed object: shards and a dust cloud around its bounds, a ground
+ * decal under it, and two flung chunks (each with a burst) from joints 4 and 5 of its model.
+ */
+void func_150B7B40(struct127 *obj, u8 arg1, s32 arg2) {
+    f32 joints[2][3];
+    f32 root[3];
+    f32 scaleXZ;
+    f32 scaleY;
     f32 scale;
-    f32 ss;
-    f32 cc;
-    s32 pad5;
-    ModelParticleSpawn p;
-    s32 pad2[3];
+    f32 dirX;
+    f32 dirZ;
+    s32 pad5; // matching: stack slot
+    ModelParticleSpawn chunk;
+    s32 pad2[3]; // matching: stack slot
     s8 i;
-    f32 offX;
-    f32 offZ;
-    vertex pos;
-    f32 h;
-    f32 r;
-    f32 ratio;
+    f32 velX;
+    f32 velZ;
+    vertex center;
+    f32 height;
+    f32 radius;
+    f32 aspect;
 
-    if (arg0 != NULL) {
-        if (arg0->unk1D4 != NULL) {
-            func_15142314((s32)arg0->unk1D4, 4, pts[0]);
-            func_15142314((s32)arg0->unk1D4, 5, pts[1]);
-            func_15142314((s32)arg0->unk1D4, 0, base);
+    if (obj != NULL) {
+        if (obj->unk1D4 != NULL) {
+            func_15142314((s32)obj->unk1D4, 4, joints[0]);
+            func_15142314((s32)obj->unk1D4, 5, joints[1]);
+            func_15142314((s32)obj->unk1D4, 0, root);
         } else {
-            base[0] = arg0->x_position;
-            base[1] = arg0->y_position;
-            base[2] = arg0->z_position;
-            pts[0][0] = base[0] + 20.0f;
-            pts[0][1] = base[1] + 130.0f;
-            pts[0][2] = base[2];
-            pts[1][0] = base[0] - 20.0f;
-            pts[1][1] = base[1] + 130.0f;
-            pts[1][2] = base[2];
+            root[0] = obj->x_position;
+            root[1] = obj->y_position;
+            root[2] = obj->z_position;
+            joints[0][0] = root[0] + 20.0f;
+            joints[0][1] = root[1] + 130.0f;
+            joints[0][2] = root[2];
+            joints[1][0] = root[0] - 20.0f;
+            joints[1][1] = root[1] + 130.0f;
+            joints[1][2] = root[2];
         }
-        ss = func_151423D8(arg0->unk76 >> 8);
-        cc = func_151423D8((arg0->unk76 >> 8) + 0x40);
-        offX = arg0->xz_velocity * ss;
-        offZ = arg0->xz_velocity * cc;
+        dirX = func_151423D8(obj->unk76 >> 8);
+        dirZ = func_151423D8((obj->unk76 >> 8) + 0x40);
+        velX = obj->xz_velocity * dirX;
+        velZ = obj->xz_velocity * dirZ;
         {
-            f32 a[3];
-            f32 b[3];
+            f32 bottom[3];
+            f32 side[3];
 
-            if (arg0->unk1D4 != NULL) {
-                s32 m;
+            if (obj->unk1D4 != NULL) {
+                void *mtx;
                 f32 dx;
                 f32 dz;
 
-                m = (s32)arg0->unk1D4 + 0x80;
-                func_15143134(D_8009FD30, &pos.x, m);
-                func_15143134(D_8009FD3C, a, m);
-                func_15143134(D_8009FD48, b, m);
-                h = fabsf(pos.y - a[1]);
-                dx = b[0] - a[0];
-                dz = b[2] - a[2];
-                r = sqrtf(dx * dx + dz * dz);
+                mtx = (u8 *)obj->unk1D4 + 0x80;
+                func_15143134(D_8009FD30, &center.x, mtx);
+                func_15143134(D_8009FD3C, bottom, mtx);
+                func_15143134(D_8009FD48, side, mtx);
+                height = fabsf(center.y - bottom[1]);
+                dx = side[0] - bottom[0];
+                dz = side[2] - bottom[2];
+                radius = sqrtf(dx * dx + dz * dz);
             } else {
-                func_1515C244(arg0, &pos.x, &r, &h);
+                func_1515C244(obj, &center.x, &radius, &height);
             }
         }
-        if (r != 0.0f) {
-            ratio = h / r;
+        if (radius != 0.0f) {
+            aspect = height / radius;
         } else {
-            ratio = 1.0f;
+            aspect = 1.0f;
         }
-        func_150B82D0(&pos, &h, &r, &ratio, arg1, arg2);
-        func_150B85C0(&pos, &h, &r, arg1, arg2);
+        func_150B82D0(&center, &height, &radius, &aspect, arg1, arg2);
+        func_150B85C0(&center, &height, &radius, arg1, arg2);
         {
-            Ground floor;
-            vertex ray;
+            Ground ground;
+            vertex probe;
 
-            ray.x = pos.x;
-            ray.y = pos.y + 100.0f;
-            ray.z = pos.z;
-            func_1504715C(&floor, arg0);
-            if (func_15046C80(&ray, 0, pos.y - 2000.0f, &floor) != 0) {
-                ray.y = floor.height;
-                func_1514C678(ray.x, ray.y + 31.0f, ray.z, r, 0, 0xFF,
-                              (func_150ADA20() % 11U) + 0x1E, 0x19, 0, 0, 0, arg1);
+            probe.x = center.x;
+            probe.y = center.y + 100.0f;
+            probe.z = center.z;
+            func_1504715C(&ground, obj);
+            if (func_15046C80(&probe, 0, center.y - 2000.0f, &ground) != 0) {
+                probe.y = ground.height;
+                func_1514C678(probe.x, probe.y + 31.0f, probe.z, radius, 0, 0xFF,
+                              (func_150ADA20() % 11U) + 30, 25, 0, 0, 0, arg1);
             }
         }
-        p.model = 0;
-        p.lifetime = 0x12C;
-        p.elasticity = 0.6000000238f;
-        p.rot.x = arg0->unkB8;
-        p.rot.y = arg0->unk40;
-        p.rot.z = arg0->unkC4;
-        p.scale.x = 1.0f;
-        p.scale.y = 1.0f;
-        p.scale.z = 1.0f;
-        p.flags = 0x197D;
-        p.variant = 0;
-        p.unk5C = 0;
-        p.alpha = 0xFF;
-        p.updateFn = 1;
-        p.update2Fn = 0;
-        p.floorHitFn = 1;
-        p.floorType3Fn = 0;
-        p.wallHitFn = 1;
-        p.destroyFn = 0;
-        p.squashFn = 0;
-        p.matrixFn = 0;
-        p.unk6A = 0;
-        p.owner = 0;
-        p.ownerId = 0;
-        p.fadeStart = 1;
-        p.fadeRate = 0xFF;
-        p.rotVel.z = 0;
-        p.gravity = -1.600000024f;
-        sx = arg0->xz_scale;
-        if (sx > 1.0f) {
-            sx = 1.0f;
+        chunk.model = 0;
+        chunk.lifetime = 300;
+        chunk.elasticity = 0.6000000238f;
+        chunk.rot.x = obj->unkB8;
+        chunk.rot.y = obj->unk40;
+        chunk.rot.z = obj->unkC4;
+        chunk.scale.x = 1.0f;
+        chunk.scale.y = 1.0f;
+        chunk.scale.z = 1.0f;
+        chunk.flags = 0x197D;
+        chunk.variant = 0;
+        chunk.unk5C = NULL;
+        chunk.alpha = 0xFF;
+        chunk.updateFn = 1;
+        chunk.update2Fn = 0;
+        chunk.floorHitFn = 1;
+        chunk.floorType3Fn = 0;
+        chunk.wallHitFn = 1;
+        chunk.destroyFn = 0;
+        chunk.squashFn = 0;
+        chunk.matrixFn = 0;
+        chunk.unk6A = 0;
+        chunk.owner = NULL;
+        chunk.ownerId = 0;
+        chunk.fadeStart = 1;
+        chunk.fadeRate = 0xFF;
+        chunk.rotVel.z = 0; // matching: an int 0 here; 0.0f makes IDO keep a shared zero in $f22
+        chunk.gravity = -1.600000024f;
+        scaleXZ = obj->xz_scale;
+        if (scaleXZ > 1.0f) {
+            scaleXZ = 1.0f;
         }
-        if (sx < 0.5f) {
-            sx = 0.5f;
+        if (scaleXZ < 0.5f) {
+            scaleXZ = 0.5f;
         }
-        sy = arg0->y_scale;
-        if (sy > 1.0f) {
-            sy = 1.0f;
+        scaleY = obj->y_scale;
+        if (scaleY > 1.0f) {
+            scaleY = 1.0f;
         }
-        if (sy < 0.5f) {
-            sy = 0.5f;
+        if (scaleY < 0.5f) {
+            scaleY = 0.5f;
         }
-        p.radius = ((28.0f * sy) + (28.0f * sx)) * 0.5f;
-        p.sizeXZ = 3.0f * sx;
-        p.sizeY = 3.0f * sy;
+        chunk.radius = ((28.0f * scaleY) + (28.0f * scaleXZ)) * 0.5f;
+        chunk.sizeXZ = 3.0f * scaleXZ;
+        chunk.sizeY = 3.0f * scaleY;
         for (i = 0; i < 2; i++) {
             f32 speed;
-            s16 ang1;
-            s16 ang2;
-            f32 s1;
-            f32 c1;
-            f32 s2;
-            f32 c2;
-            f32 hv;
+            s16 yaw;
+            s16 pitch;
+            f32 sinYaw;
+            f32 cosYaw;
+            f32 sinPitch;
+            f32 cosPitch;
+            f32 horizontal;
             BurstConfig burst;
 
-            speed = (func_150ADA68() * 30.0f * arg0->y_scale) + 10.0f;
-            ang1 = func_150ADA20() & 0x7F;
-            ang2 = -0x20 - (func_150ADA20() & 0x1F);
-            s1 = func_151423D8(ang1);
-            c1 = func_151423D8(ang1 - 0x40);
-            s2 = func_151423D8(ang2);
-            c2 = func_151423D8(ang2 - 0x40);
-            hv = speed * s2;
-            p.pos = *(vertex *)pts[i];
-            p.vel.x = (hv * c1) + offX;
-            p.vel.y = -speed * c2;
-            p.vel.z = (hv * s1) + offZ;
-            p.rotVel.x = 30.0f - (func_150ADA68() * 60.0f);
-            p.rotVel.y = 30.0f - (func_150ADA68() * 60.0f);
-            func_15132A4C(&p, 3, 2, 0, arg1, 0);
-            scale = ((arg0->xz_scale + arg0->y_scale) * 0.5f) / 0.9599999785f;
-            burst.position = *(vertex *)pts[i];
+            speed = (func_150ADA68() * 30.0f * obj->y_scale) + 10.0f;
+            yaw = func_150ADA20() & 0x7F;
+            pitch = -0x20 - (func_150ADA20() & 0x1F);
+            sinYaw = func_151423D8(yaw);
+            cosYaw = func_151423D8(yaw - 0x40);
+            sinPitch = func_151423D8(pitch);
+            cosPitch = func_151423D8(pitch - 0x40);
+            horizontal = speed * sinPitch;
+            chunk.pos = *(vertex *)joints[i];
+            chunk.vel.x = (horizontal * cosYaw) + velX;
+            chunk.vel.y = -speed * cosPitch;
+            chunk.vel.z = (horizontal * sinYaw) + velZ;
+            chunk.rotVel.x = 30.0f - (func_150ADA68() * 60.0f);
+            chunk.rotVel.y = 30.0f - (func_150ADA68() * 60.0f);
+            func_15132A4C(&chunk, 3, 2, 0, arg1, 0);
+            scale = ((obj->xz_scale + obj->y_scale) * 0.5f) / 0.9599999785f;
+            burst.position = *(vertex *)joints[i];
             burst.countBase = 4;
             burst.countRange = 4;
             burst.yawRange = 0xFF;
@@ -273,8 +278,8 @@ void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2) {
             burst.yawBase = 0;
             burst.fadeBase = 3;
             burst.fadeRange = 3;
-            burst.lifeBase = 0x32;
-            burst.lifeRange = 0x14;
+            burst.lifeBase = 50;
+            burst.lifeRange = 20;
             burst.green = 1;
             burst.enabled = 0x21;
             burst.red = 0x48;
@@ -298,9 +303,9 @@ void func_150B7B40(struct127 *arg0, u8 arg1, s32 arg2) {
             burst.unk78 = 0x20;
             burst.unk7C = 0;
             burst.unk7D = 7;
-            burst.unk80 = 0xA;
-            burst.unk82 = 0x19;
-            burst.unk84 = arg0->unk184;
+            burst.unk80 = 10;
+            burst.unk82 = 25;
+            burst.unk84 = obj->unk184;
             func_15151A38(&burst, arg1, arg2);
         }
     }
