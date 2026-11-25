@@ -103,7 +103,7 @@ void func_1511A838(Game147C70State *mesh) {
         ripple = mesh->ripple;
         ripple->phaseOffsets = phaseOffsets = allocate_memory(mesh->vertexCount, 1, 0, 0);
         ripple->heights = allocate_memory(mesh->vertexCount * sizeof(f32), 1, 0, 0);
-        heights = ripple->heights;
+        heights = ripple->heights; // matching: IDO reloads heights from the struct only with this split form
         ripple->followRates = followRates = allocate_memory(mesh->vertexCount * sizeof(f32), 1, 0, 0);
         ripple->falloffs = falloffs = allocate_memory(mesh->vertexCount * sizeof(f32), 1, 0, 0);
         radius = (mesh->params >> 16) & 0xFFFF;
