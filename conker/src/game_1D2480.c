@@ -1,4 +1,5 @@
 #include <ultra64.h>
+/* functions.h declares func_15169260 with an s32 first argument; this file passes a typed pointer. */
 #define func_15169260 func_15169260_s32
 #include "functions.h"
 #undef func_15169260
@@ -128,11 +129,7 @@ Gfx *func_151A5170(Gfx *gfx, struct Obj151A4FD0 *effect, s32 arg2) {
         if (pass == 0) {
             left = VIEWPORT(effect->viewport)->left;
             rows = 8;
-            if (viewWidth > 256) {
-                columns = 256;
-            } else {
-                columns = viewWidth;
-            }
+            columns = (viewWidth > 256) ? 256 : viewWidth;
         } else {
             if (viewWidth <= 256) {
                 break;
