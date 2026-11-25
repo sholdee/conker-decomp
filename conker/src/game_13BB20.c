@@ -91,19 +91,6 @@ void func_1510E8BC(s32 *outTri, s16 (*outVerts)[3], f32 *outFloorY, f32 *outProp
                   -10000.0f, 20000.0f, noFallback);
 }
 
-/* Actor fields that structs.h still covers with padding. */
-typedef struct ObjFloorView {
-    /* 0x000 */ u8 pad0[0xF8];
-    /* 0x0F8 */ s32 unkF8;
-    /* 0x0FC */ u8 padFC[0x17C - 0xFC];
-    /* 0x17C */ f32 ceilingY;
-    /* 0x180 */ u8 pad180[0x19E - 0x180];
-    /* 0x19E */ s16 floorTriIndex;
-    /* 0x1A0 */ u16 propNum; // D_800DBEF4 index + 1 of the prop stood on, 0 = none
-    /* 0x1A2 */ u8 pad1A2[0x274 - 0x1A2];
-    /* 0x274 */ u8 objectNum; // D_800CC2D0 index + 1 of the object stood on, 0 = none
-} ObjFloorView;
-
 extern void func_1510F800();
 extern void func_150A64C8(s16, s16, s32 *, s32);
 extern void func_150A44F0(s32, s32 *, s32);
@@ -177,7 +164,6 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
     s32 triAddr;
     volatile f32 reach; // matching: IDO reloads it from the stack on every hit
 
-#define obj ((ObjFloorView *)object) // matching: a local pointer copy changes the frame
     noFloor = -10000.0f;
     total = 0;
     floorTri = 0;
@@ -186,7 +172,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
     if (outTri != NULL) {
         *outTri = 0;
     }
-    if (obj != NULL) {
+    if (object != NULL) {
         reach = D_800DBE64;
     } else {
         reach = 50.0f;
@@ -204,8 +190,8 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
     D_800DBE54 = noFloor;
     objectNum = 0;
     D_800DBE60 = 0;
-    if (obj != NULL) {
-        obj->floorTriIndex = 0;
+    if (object != NULL) {
+        object->floorTriIndex = 0;
     }
     numProbes = NUM_PROBES;
     first = TRUE;
@@ -215,7 +201,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
     }
     for (type = 0; type < numProbes; type++) {
         if (D_80089120[type] == 1) {
-            if (type == PROBE_OBJECT && obj != NULL && (obj->unkF8 & 0x200)) {
+            if (type == PROBE_OBJECT && object != NULL && (object->unkF8 & 0x200)) {
                 continue;
             }
             ix = (s32)x;
@@ -339,11 +325,11 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                     floorTri = triAddr;
                     vtxBase = hit->vtxBase;
                     if (type != PROBE_OBJECT) {
-                        if (obj != NULL && vtxBase == 0) {
-                            obj->floorTriIndex = WORLD_TRI_INDEX(triAddr);
+                        if (object != NULL && vtxBase == 0) {
+                            object->floorTriIndex = WORLD_TRI_INDEX(triAddr);
                         }
-                    } else if (obj != NULL) {
-                        obj->floorTriIndex = (triAddr - D_800C6070[D_800CC2D0[hit->unkC].id]) / 12;
+                    } else if (object != NULL) {
+                        object->floorTriIndex = (triAddr - D_800C6070[D_800CC2D0[hit->unkC].id]) / 12;
                     }
                     if (vtxBase == 0 && outTri != NULL) {
                         *outTri = (s32)hit->tri;
@@ -436,16 +422,16 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
             *outTri = 0;
         }
     }
-    if (obj != NULL) {
-        obj->propNum = D_800DBE60;
+    if (object != NULL) {
+        object->propNum = D_800DBE60;
         if (D_800DBE60 != 0 && (y - *outFloorY) < 10.0f) {
             D_800DBEF4[D_800DBE60 - 1].flags |= 0x84;
             D_800DBF94[D_800DBE60 - 1] |= 1 << (object - D_800CC2D0);
         }
         if (objectNum != 0 && (y - *outFloorY) < 10.0f) {
-            obj->objectNum = objectNum;
+            object->objectNum = objectNum;
         } else {
-            obj->objectNum = 0;
+            object->objectNum = 0;
         }
     }
     if (total == 0) {
@@ -454,11 +440,10 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
             *outFlags = 0;
         }
     }
-    if (obj != NULL) {
-        obj->ceilingY = ceilingY;
+    if (object != NULL) {
+        object->ceilingY = ceilingY;
     }
     D_800DBE58 = ceilingY;
-#undef obj
 }
 
 

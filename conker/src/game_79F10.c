@@ -1698,7 +1698,7 @@ void func_15051558(Actor *actor, f32 x, f32 z, u16 facing) {
             D_800CC27C = 1;
             bumped = 1;
         }
-        kind = (actor->unk274 != 0) ? D_800CC2D0[actor->unk274 - 1].id : -1;
+        kind = (actor->objectNum != 0) ? D_800CC2D0[actor->objectNum - 1].id : -1;
         if (D_800CC27C == 0) {
             normalX = 0.0f;
             normalZ = 0.0f;

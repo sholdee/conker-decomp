@@ -1449,7 +1449,7 @@ struct Actor {
     /* 0x264 */ s32 unk264;
     u8  pad268[0x8];
     /* 0x270 */ f32 unk270;
-    u8  unk274;
+    /* 0x274 */ u8  objectNum; // D_800CC2D0 index + 1 of the object stood on, 0 = none
     u8  pad275;
     s8  unk276;
     u8  pad277;

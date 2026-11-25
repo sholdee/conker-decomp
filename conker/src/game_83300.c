@@ -2117,8 +2117,8 @@ void func_1505A9AC(Actor *actor, f32 floorY) {
                 if (actor->unkA9 == 2) {
                     Actor *other;
                     found = 0;
-                    if (actor->unk274 != 0) {
-                        other = &D_800CC2D0[actor->unk274 - 1];
+                    if (actor->objectNum != 0) {
+                        other = &D_800CC2D0[actor->objectNum - 1];
                         if (other->unk24C != 0) {
                             found = 1;
                             other->unk218 = 0;

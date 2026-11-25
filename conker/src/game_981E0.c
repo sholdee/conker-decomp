@@ -366,7 +366,7 @@ void func_1506B268(void) {
 void func_1506B2BC(void) {
     Actor *obj = func_150721E8(D_800D154C);
 
-    if (obj != NULL && (obj - D_800CC2D0) + 1 == D_800CC2D0[0].unk274) {
+    if (obj != NULL && (obj - D_800CC2D0) + 1 == D_800CC2D0[0].objectNum) {
         D_800D154C->unk218 = NULL;
         D_800D154C->unk232 = 4;
     }
@@ -3030,7 +3030,7 @@ void func_15071FB0(void) {
 
 /*
  * Launches the player (D_800CC2D0[0]) with the current object's stored velocity unk2D8..unk2E0
- * and an animation. With D_800D1580 == 0, only if player->unk274 names the object owned by the
+ * and an animation. With D_800D1580 == 0, only if player->objectNum names the object owned by the
  * current player (unk65), and the player is turned around.
  */
 void func_15071FDC(void) {
@@ -3054,7 +3054,7 @@ void func_15071FDC(void) {
             }
             entry++;
         }
-        if (found + 1 != player->unk274) {
+        if (found + 1 != player->objectNum) {
             return;
         }
         player->unk76 = D_800D154C->unk76 + 0x8000;

@@ -471,7 +471,7 @@ void func_150548E4(Actor *obj) {
     owner = &D_800CC2D0[obj->unk65 - 1];
 
     for (i = 0; i < D_8008FD8C; i++) {
-        if ((D_800CC2D0[i].unk274 == (obj - D_800CC2D0) + 1) && (owner->unk232 == 1)) {
+        if ((D_800CC2D0[i].objectNum == (obj - D_800CC2D0) + 1) && (owner->unk232 == 1)) {
             owner->unk218 = NULL;
             if (func_150ADA20() & 1) {
                 owner->unk232 = 2;
