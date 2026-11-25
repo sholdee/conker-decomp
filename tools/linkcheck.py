@@ -46,18 +46,27 @@ LINKER_MADE = re.compile(r"_(ROM_START|ROM_END|VRAM|VRAM_END|DATA_START|DATA_END
 
 
 def referenced(conker):
-    """Every symbol some input object leaves undefined (that is, references)."""
-    objs = " ".join(str(p.relative_to(conker)) for p in (conker / "build").rglob("*.o"))
-    cmd = f"mips-linux-gnu-nm -u {objs}"
+    """Every symbol that a relocation in a LINKED object refers to. Objects come from the linker
+    script, so stale objects left in build/ are ignored. Relocations, not `nm -u`, because IDO -g3
+    writes every declared extern into each object's symbol table even when nothing uses it."""
+    ld = (conker / "conker.ld").read_text()
+    objs = sorted(set(re.findall(r"(build/\S+?\.o)\(", ld)))
+    objs = [o for o in objs if (conker / o).exists()]
+    cmd = "mips-linux-gnu-objdump -r " + " ".join(objs)
     try:
         out = subprocess.run(cmd, shell=True, cwd=conker, capture_output=True, text=True)
     except FileNotFoundError:
         out = None
-    if out is None or out.returncode not in (0, 1) or not out.stdout:
+    if out is None or out.returncode or not out.stdout:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         import mw
         out = mw.run(cmd, conker, timeout=1800)
-    return {l.split()[-1] for l in out.stdout.splitlines() if l.strip().startswith("U ")}
+    names = set()
+    for line in out.stdout.splitlines():
+        m = re.match(r"^[0-9a-f]{8}\s+R_MIPS_\w+\s+([^\s+]+)", line)
+        if m:
+            names.add(m.group(1))
+    return names
 
 
 def main():
