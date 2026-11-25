@@ -12,20 +12,10 @@ void func_150D82B0(s32 arg0) {
 /* First byte of a Gfx command: its opcode, read as a signed byte. */
 #define GFX_OPCODE(gfx) (*(s8 *)(gfx))
 
-/* State passed to the display-list callbacks below (only the fields they use). */
-typedef struct {
-    u8 pad0[0x18];
-    s16 unk18;
-    u8 pad1A[0xA];
-    Gfx **displayList;
-    u8 pad28[0x10];
-    s32 phase;
-    s32 progress; /* percent, 0..100 */
-} DLCallbackState;
 
-/* While the actor runs action 13 with anim->unk8 in 23..40, scrolls the texture of the first
- * G_SETTILESIZE command in the display list horizontally. */
-s32 func_150D82BC(DLCallbackState *state, Actor *actor) {
+/* Model attachment hook 1 (D_800841C0[1]). While the actor runs action 13 with anim->unk8 in 23..40,
+ * scrolls the texture of the first G_SETTILESIZE command in the display list horizontally. */
+s32 func_150D82BC(ModelAttachment *att, Actor *actor) {
     AnimInstance *anim = actor->unk2D0;
     Gfx *list;
     s32 i;
@@ -36,13 +26,13 @@ s32 func_150D82BC(DLCallbackState *state, Actor *actor) {
     if (anim == NULL) {
         return 0;
     }
-    state->unk18 = D_80090298[6];
+    att->seg6Id = D_80090298[6];
     if (actor->unk84.uh == 13) {
         if (23.0f <= anim->frame && anim->frame <= 40.0f) {
-            state->unk18 = D_80090298[7];
+            att->seg6Id = D_80090298[7];
             t = anim->frame - 23.0f;
             t *= 1.0f / 17.0f;
-            list = *state->displayList;
+            list = *att->dlists;
             for (i = 0; GFX_OPCODE(&list[i]) != (s8)G_SETTILESIZE; i++) {
             }
             w0 = list[i].words.w0;
@@ -57,44 +47,45 @@ s32 func_150D82BC(DLCallbackState *state, Actor *actor) {
     return 0;
 }
 
-/* Scrolls the first G_SETTILESIZE command's texture vertically by a progress value that rises
- * to 100% once action 0x18D reaches anim->unk8 46, then falls to 0 once action 0x18E reaches 34. */
-s32 func_150D83D8(DLCallbackState *state, Actor *actor) {
+/* Model attachment hook 19 (D_800841C0[19]). Scrolls the first G_SETTILESIZE command's texture
+ * vertically by a progress value (unk3C, percent; unk38 is the phase) that rises to 100% once action
+ * 0x18D reaches anim->unk8 46, then falls to 0 once action 0x18E reaches 34. */
+s32 func_150D83D8(ModelAttachment *att, Actor *actor) {
     Gfx *list;
     s32 i;
     f32 t;
 
-    switch (state->phase) {
+    switch (att->unk38) {
         case 0:
-            state->progress = 50;
-            state->unk18 = D_80090298[27];
+            att->unk3C = 50;
+            att->seg6Id = D_80090298[27];
             if (actor->unk84.uh == 0x18D && 46.0f <= actor->unk2D0->frame) {
-                state->phase = 1;
-                state->unk18 = D_80090298[28];
+                att->unk38 = 1;
+                att->seg6Id = D_80090298[28];
             }
             break;
         case 1:
-            state->progress += D_800BE9E4;
-            if (state->progress >= 100) {
-                state->progress = 100;
-                state->phase = 2;
+            att->unk3C += D_800BE9E4;
+            if (att->unk3C >= 100) {
+                att->unk3C = 100;
+                att->unk38 = 2;
             }
             break;
         case 2:
             if (actor->unk84.uh == 0x18E && 34.0f <= actor->unk2D0->frame) {
-                state->phase = 3;
+                att->unk38 = 3;
             }
             break;
         case 3:
-            state->progress -= D_800BE9E4 * 4;
-            if (state->progress <= 0) {
-                state->progress = 0;
-                state->phase = 4;
+            att->unk3C -= D_800BE9E4 * 4;
+            if (att->unk3C <= 0) {
+                att->unk3C = 0;
+                att->unk38 = 4;
             }
             break;
     }
-    t = state->progress * 0.01f;
-    list = *state->displayList;
+    t = att->unk3C * 0.01f;
+    list = *att->dlists;
     for (i = 0; GFX_OPCODE(&list[i]) != (s8)G_SETTILESIZE; i++) {
     }
     list[i].words.w0 = _SHIFTL(G_SETTILESIZE, 24, 8) | _SHIFTL(2, 12, 12) | _SHIFTL((s32)(120.0f * t + 2.0f), 0, 12);

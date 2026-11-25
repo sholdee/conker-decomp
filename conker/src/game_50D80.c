@@ -526,7 +526,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             }
         }
     } else if (event->type == 0xD) {
-        ActorCtl *s;
+        ModelAttachment *att;
 
         if (obj == NULL) {
             return 1;
@@ -536,12 +536,12 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
         } else if (event->unk4 == 1) {
             func_150836CC(obj, event->value + 1);
         } else {
-            s = func_1503195C(obj, event->value + 1, 0);
-            if (s != NULL) {
+            att = func_1503195C(obj, event->value + 1, 0);
+            if (att != NULL) {
                 if (event->unk4 == 2) {
-                    FS16(s, 0x18) = D_80090214[event->unk5];
+                    att->seg6Id = D_80090214[event->unk5];
                 } else if (event->unk4 == 3) {
-                    FS16(s, 0x1A) = D_80090214[event->unk5];
+                    att->seg7Id = D_80090214[event->unk5];
                 }
             }
         }

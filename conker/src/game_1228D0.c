@@ -154,19 +154,9 @@ void func_150F568C(s32 arg0) {
 
 extern s32 D_80090274[];
 
-/* Partial view of the first argument of the draw callbacks func_150F56B0 and func_150F5A54. */
-typedef struct {
-    /* 0x00 */ u8 pad0[0x18];
-    /* 0x18 */ s16 texture;
-    /* 0x1A */ u8 pad1A[0x24 - 0x1A];
-    /* 0x24 */ Gfx **displayList;
-    /* 0x28 */ u8 pad28[0x38 - 0x28];
-    /* 0x38 */ s32 fadeState; /* 0 = start, 1 = shown, 2 = faded out */
-} DrawHook;
-
-/* Picks the hook's texture (an entry of D_80090274) from the actor's animation frame while
- * the actor is in state 0xAE. */
-s32 func_150F56B0(DrawHook *hook, Actor *actor) {
+/* Model attachment hook 4 (D_800841C0[4]). Picks the attachment's segment-6 texture (an entry of
+ * D_80090274) from the actor's animation frame while the actor is in state 0xAE. */
+s32 func_150F56B0(ModelAttachment *att, Actor *actor) {
     AnimInstance *anim;
     s32 frame;
     f32 two; // matching: IDO materializes 2.0f once only when it is a variable
@@ -219,13 +209,14 @@ s32 func_150F56B0(DrawHook *hook, Actor *actor) {
             frame = (s32)(two * t) + 7;
         }
     }
-    hook->texture = D_80090274[frame];
+    att->seg6Id = D_80090274[frame];
     return 0;
 }
 
-/* While the actor is in state 5, slides the hook's texture over animation frames 69-84 by
- * patching the upper-left t of the first G_SETTILESIZE in its display list. */
-s32 func_150F5A54(DrawHook *hook, Actor *actor) {
+/* Model attachment hook 21 (D_800841C0[21]). While the actor is in state 5, slides the attachment's
+ * texture over animation frames 69-84 by patching the upper-left t of the first G_SETTILESIZE in its
+ * display list. unk38 is the fade state: 0 = start, 1 = shown, 2 = faded out. */
+s32 func_150F5A54(ModelAttachment *att, Actor *actor) {
     AnimInstance *anim;
     Gfx *gfx;
     s32 count;
@@ -239,14 +230,14 @@ s32 func_150F5A54(DrawHook *hook, Actor *actor) {
         return 0;
     }
 
-    gfx = *hook->displayList;
+    gfx = *att->dlists;
     count = 1;
     notStarted = FALSE;
-    switch (hook->fadeState) {
+    switch (att->unk38) {
     case 0:
         if (actor->unk84.uh == 5) {
             level = 1.0f;
-            hook->fadeState = 1;
+            att->unk38 = 1;
         } else {
             notStarted = TRUE;
         }
@@ -264,7 +255,7 @@ s32 func_150F5A54(DrawHook *hook, Actor *actor) {
             level = 1.0f;
         } else if (84.0f < anim->frame) {
             level = 0.0f;
-            hook->fadeState = 2;
+            att->unk38 = 2;
         } else {
             level = (anim->frame - 69.0f) / 15;
             level = 1.0f - level;
