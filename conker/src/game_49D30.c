@@ -638,14 +638,6 @@ void func_1501D348(s32 map, s32 cutscene, s32 scene, s32 callback, s32 callbackA
 }
 
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s8 unk4;
-    s8 unk5;
-    s16 unk6;
-} struct_game49D30_3;
-
-typedef struct {
     u8 unk0;
     u8 unk1;
     u8 unk2;
@@ -656,12 +648,15 @@ extern u16 D_800C3C8E;
 extern struct_game49D30_4 D_80084110[];
 extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
 
-void func_1501DAAC(s32 arg0) {
+/* Scan the scene's scripts for type-5 events with values 0x1E, 0xE, 0x68 and 0x44 (setting the
+   flags D_800C3C99, D_800C3C9C, D_800C35AA, D_800C35A9) and 0x77 (start time D_800C3C8E), and pass
+   the D_80084110 entry named by the earliest type-1 value-1 event to func_1517EE40. */
+void func_1501DAAC(s32 scene) {
     s32 i;
     s32 best;
-    struct_game49D30_3 *found;
+    SeqEvent *found;
     s32 score;
-    u8 *ptr;
+    SeqEvent *events;
 
     D_800C3C99 = 0;
     D_800C35A9 = 0;
@@ -670,82 +665,81 @@ void func_1501DAAC(s32 arg0) {
     D_800C3C8E = 0;
 
     best = -1;
-    i = 0;
-    if (D_800C363A[arg0] > 0) {
-        do {
-            ptr = D_800C3688[arg0][i];
-            if (ptr != 0) {
-                found = 0;
-                func_15023BB0(ptr + 0x18, 5, i, (s16 **)&found, 1, 0x1E, 0, 0, 0, 0, arg0);
-                if (found != 0) {
-                    D_800C3C99 = 1;
-                }
+    for (i = 0; i < D_800C363A[scene]; i++) {
+        events = D_800C3688[scene][i];
+        if (events != NULL) {
+            found = NULL;
+            func_15023BB0(&events[3], 5, i, &found, 1, 0x1E, 0, 0, 0, 0, scene);
+            if (found != NULL) {
+                D_800C3C99 = 1;
+            }
 
-                found = 0;
-                func_15023BB0(ptr + 0x18, 5, i, (s16 **)&found, 1, 0xE, 0, 0, 0, 0, arg0);
-                if (found != 0) {
-                    D_800C3C9C = 1;
-                }
+            found = NULL;
+            func_15023BB0(&events[3], 5, i, &found, 1, 0xE, 0, 0, 0, 0, scene);
+            if (found != NULL) {
+                D_800C3C9C = 1;
+            }
 
-                found = 0;
-                func_15023BB0(ptr + 0x18, 5, i, (s16 **)&found, 1, 0x68, 0, 0, 0, 0, arg0);
-                if (found != 0) {
-                    D_800C35AA = 1;
-                }
+            found = NULL;
+            func_15023BB0(&events[3], 5, i, &found, 1, 0x68, 0, 0, 0, 0, scene);
+            if (found != NULL) {
+                D_800C35AA = 1;
+            }
 
-                found = 0;
-                func_15023BB0(ptr + 0x18, 5, i, (s16 **)&found, 1, 0x44, 0, 0, 0, 0, arg0);
-                if (found != 0) {
-                    D_800C35A9 = 1;
-                }
+            found = NULL;
+            func_15023BB0(&events[3], 5, i, &found, 1, 0x44, 0, 0, 0, 0, scene);
+            if (found != NULL) {
+                D_800C35A9 = 1;
+            }
 
-                found = 0;
-                score = func_15023BB0(ptr + 0x18, 5, i, (s16 **)&found, 1, 0x77, 0, 0, 0, 0, arg0);
-                if (found != 0) {
-                    D_800C3C8E = score;
-                }
+            found = NULL;
+            score = func_15023BB0(&events[3], 5, i, &found, 1, 0x77, 0, 0, 0, 0, scene);
+            if (found != NULL) {
+                D_800C3C8E = score;
+            }
 
-                found = 0;
-                score = func_15023BB0(ptr + 0x18, 5, i, (s16 **)&found, 1, 1, 1, 0, 0, 0, arg0);
-                if (found != 0) {
-                    if ((best == -1) || (score < best)) {
-                        best = score;
-                        if (found->unk6 == 1) {
-                            func_1517EE40(D_80084110[found->unk5].unk0, D_80084110[found->unk5].unk1, D_80084110[found->unk5].unk2, 0, 1, 0);
-                        } else {
-                            func_1517EE40(D_80084110[found->unk5].unk0, D_80084110[found->unk5].unk1, D_80084110[found->unk5].unk2, 0, 0, 0);
-                        }
+            found = NULL;
+            score = func_15023BB0(&events[3], 5, i, &found, 1, 1, 1, 0, 0, 0, scene);
+            if (found != NULL) {
+                if ((best == -1) || (score < best)) {
+                    best = score;
+                    if (found->unk6 == 1) {
+                        func_1517EE40(D_80084110[found->unk5].unk0, D_80084110[found->unk5].unk1, D_80084110[found->unk5].unk2, 0, 1, 0);
+                    } else {
+                        func_1517EE40(D_80084110[found->unk5].unk0, D_80084110[found->unk5].unk1, D_80084110[found->unk5].unk2, 0, 0, 0);
                     }
                 }
             }
-            i++;
-        } while (i < D_800C363A[arg0]);
+        }
     }
 
-    D_800C35B0[arg0] = D_800C3C8E;
+    D_800C35B0[scene] = D_800C3C8E;
 }
 
-void func_1501DE18(s32 arg0) {
+/* Jump the scene to its end: advance the clock past the end time, update every track once, apply
+   the result to the objects bound to tracks and finish the cutscene. */
+void func_1501DE18(s32 scene) {
     s32 i;
-    s32 limit;
+    s32 count;
     struct127 *obj;
 
-    D_800C35B0[arg0] = D_800C3640[arg0] + D_800BEA08;
+    D_800C35B0[scene] = D_800C3640[scene] + D_800BEA08;
     func_150242F8(1, 0);
     func_1501EC38(0);
     func_150242F8(0, 0);
     func_15020EC4(0);
 
-    for (obj = D_800CC2D0, i = 0, limit = 25; i != limit; i++, obj = (struct127 *)((u8 *)obj + 0x32C)) {
+    // matching: the object count lives in its own register
+    for (obj = D_800CC2D0, i = 0, count = 25; i != count; i++, obj++) {
         if (obj->interaction_state) {
             D_800C3E78 = i;
             if (func_150229E4(obj)) {
-                func_1502178C(obj, arg0, -1);
+                func_1502178C(obj, scene, -1);
             }
         }
     }
 
-    func_1501E81C(1, arg0);
+    func_1501E81C(1, scene);
 }
 
 s32 func_100127D0(void);
@@ -765,45 +759,43 @@ extern void func_1000E17C(void);
 extern void func_1517EE40(s32, s32, s32, s32, s32, s32);
 extern void func_151F2BA8(void);
 void func_1501DE18(s32 arg0);
-void func_1501DF04(s32 arg0)
-{
-  struct127 *obj;
-  u8 temp_s0;
-  s32 new_var;
-  if (func_100127D0() != 0)
-  {
-    func_151F2BA8();
-  }
-  obj = func_15072208(D_800CC2D0, 0);
-  if (obj != 0)
-  {
-    func_15060F28(obj, 0);
-  }
-  temp_s0 = D_800C3C99;
-  func_1501DE18(arg0);
-  if (temp_s0 != 0)
-  {
-    if (D_800C35C4 == 0)
-    {
-      do
-      {
-        temp_s0 = D_800C3C99;
-        func_1501DE18(new_var = arg0);
-      }
-      while ((temp_s0 != 0) && (D_800C35C4 == 0));
+/* Skip the running cutscene: jump to its end (again while the next one chains on, D_800C3C99),
+   then restore the screen fade and clear the objects' cutscene state. */
+void func_1501DF04(s32 scene) {
+    struct127 *obj;
+    u8 chained;
+    s32 sceneCopy;
+
+    if (func_100127D0() != 0) {
+        func_151F2BA8();
     }
-  }
- if (((D_800C35A9 == 0) && (D_800C3C8A != 1)) && (D_800C3C8D == 0)) { func_1517EE40(0, 0, 0, 0x1E, 0, 0); } { u8 *temp_v0 = (u8 *) D_800CC2D0; u8 *end = (u8 *) (&D_800D121C); do { if ((*((s32 *) temp_v0)) != 0) {
-        temp_v0[0xA4] = 0;
-      }
-      temp_v0 += sizeof(struct127);
+    obj = func_15072208(D_800CC2D0, 0);
+    if (obj != NULL) {
+        func_15060F28(obj, 0);
     }
-    while (temp_v0 != end);
-  }
-  D_800C3663 = 0;
-  func_1000E17C();
-  D_800DBFF4[0] = 4;
-  D_800C3672 = 1;
+    chained = D_800C3C99;
+    func_1501DE18(scene);
+    if (chained != 0) {
+        if (D_800C35C4 == 0) {
+            do {
+                chained = D_800C3C99;
+                // matching: the argument goes through a local copy
+                func_1501DE18(sceneCopy = scene);
+            } while ((chained != 0) && (D_800C35C4 == 0));
+        }
+    }
+    // matching: the fade call and the loop setup share a source line (-g3 line numbers steer scheduling),
+    // and the loop walks D_800CC2D0 by bytes (0xA4 is padding in struct127)
+    if (D_800C35A9 == 0 && D_800C3C8A != 1 && D_800C3C8D == 0) { func_1517EE40(0, 0, 0, 0x1E, 0, 0); } { u8 *ptr = (u8 *)D_800CC2D0; u8 *end = (u8 *)&D_800D121C; do {
+        if (*(s32 *)ptr != 0) {
+            ptr[0xA4] = 0;
+        }
+        ptr += sizeof(struct127);
+    } while (ptr != end); }
+    D_800C3663 = 0;
+    func_1000E17C();
+    D_800DBFF4[0] = 4;
+    D_800C3672 = 1;
 }
 
 extern u8 D_800C3663;
