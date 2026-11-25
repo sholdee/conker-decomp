@@ -33,11 +33,12 @@ typedef struct RenderView {
     /* 0x07C */ f32 pixelTanX; // tan(fovX / 2) / halfWidth
     /* 0x080 */ f32 pixelTanY; // tan(fovY / 2) / halfHeight
     /* 0x084 */ f32 unk84;
-    /* 0x088 */ f32 frustumPlanes[4][3]; // left, right, top, bottom side-plane normals
+    /* 0x088 */ f32 frustumPlanes[4][3]; // side-plane normals: [0..1] from frustumFovX, [2..3] from frustumFovY
     /* 0x0B8 */ u8 padB8[0xC8];
 } RenderView; // size 0x180
 
-/* variables.h declares these as s32; they hold pointers to arrays of views and viewports. */
+/* variables.h types these as s32: D_800BE628 and D_800BE62C point at the per-view RenderViews and Vps, and
+ * D_800D9D10 holds the per-view 4x4 matrices. */
 #define RENDER_VIEWS ((RenderView *)D_800BE628)
 #define VIEWPORTS ((Vp *)D_800BE62C)
 #define VIEW_MATRICES ((f32 (*)[4][4])D_800D9D10)
@@ -353,6 +354,8 @@ void func_1501AF44(f32 *left, f32 *top, f32 *right, f32 *bottom) {
 
 void func_1510B128(s32, f32, f32, f32, f32);
 
+/* Passes func_1510B128 the angles (degrees) that view's half-size subtends at the distance where the layout's
+ * full width/height fills view's fov, less the fov of view `layout`. */
 void func_1501B0A0(s32 view, s32 layout) {
     f32 halfFovX;
     f32 halfFovY;
