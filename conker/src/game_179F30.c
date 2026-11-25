@@ -12,13 +12,37 @@ struct St1514DE94 {
 };
 struct St1514DE94 *func_15083568(struct127 *, s32, f32, s32);
 
-typedef struct struct_1514EBA4 {
-    char pad0[0x10];
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s16 unk1C;
-} struct_1514EBA4;
+/* One node of an object's attachment list: something spawned for the object (an effect, a
+ * sound, a sub-object) together with the attachment type that knows how to message or free it. */
+typedef struct Attachment {
+    /* 0x00 */ u8 pad0[0x10];               // allocator header
+    /* 0x10 */ s32 handle;                  // the attached thing, passed to the type's handlers
+    /* 0x14 */ struct Attachment *next;
+    /* 0x18 */ struct Attachment *prev;
+    /* 0x1C */ s16 type;                    // index into D_8008ABE8
+} Attachment;
+
+/* Game objects keep the head of their attachment list at +0x2F4 (padding in struct127). */
+typedef struct AttachmentOwner {
+    /* 0x000 */ u8 pad0[0x2F4];
+    /* 0x2F4 */ Attachment *attachments;
+} AttachmentOwner;
+#define ATTACHMENTS(obj) (((AttachmentOwner *)(obj))->attachments)
+
+/* Attachment types form a tree (first child / next sibling), so a message sent to a type
+ * also reaches attachments of its subtypes. */
+typedef struct AttachmentType {
+    /* 0x0 */ s16 messageHandler;           // index into D_8008AB64, or -1
+    /* 0x2 */ s16 destroyHandler;           // index into D_8008AB58, or -1
+    /* 0x4 */ s16 firstChild;               // -1 terminates
+    /* 0x6 */ s16 nextSibling;              // -1 terminates
+} AttachmentType;
+
+extern void (*D_8008AB58[])(s32);
+extern s32 (*D_8008AB64[])(s32, s32, s32);
+extern AttachmentType *D_8008ABE8[];
+
+Attachment *func_1514EC1C(s32 handle, struct127 *owner, s16 type);
 
 typedef struct Vec3w1514F308 {
     s32 unk0;
@@ -48,7 +72,7 @@ typedef struct HudSpriteHandle {
     HudSpriteState *field_0x14;
 } HudSpriteHandle;
 
-extern struct_1514EBA4 *func_15167A68(s32, s32, s32, s32, s32, s32);
+extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern f32 D_800A5E08;
 extern f32 D_800A5E0C;
 extern f32 D_800A5E10;
@@ -79,7 +103,6 @@ void func_151BD2F8(void *, s32, s32);
 void func_151B9F00(void *, s32, s32);
 void func_150C0AC0(Struct1514F5CCArg *, s32, s32);
 s32 func_150C5370(void *, s32);
-s32 func_1514EC1C(s32, s32, s16);
 extern void *func_15155FD4(s32);
 extern void *func_15155780(s32, s32);
 s32 func_1514CA80(struct127 *, s32 *, s32 *, s32 *);
@@ -154,80 +177,85 @@ typedef struct Struct1514E00C_A4 {
 } Struct1514E00C_A4;
 
 
-s32 func_1514CA80(struct127 *arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
-    u8 ret = 0;
+/**
+ * Finds which spawn-callback slots apply to `obj`: one chosen by its object id (*idSlot, flag 4),
+ * one chosen by D_800BE9F0 (*globalSlot, flag 2) and, inside that, one chosen by its unique_id
+ * (*uniqueSlot, flag 1). Returns the OR of the flags that were set.
+ */
+s32 func_1514CA80(struct127 *obj, s32 *uniqueSlot, s32 *globalSlot, s32 *idSlot) {
+    u8 found = 0;
 
-    switch (arg0->id) {
+    switch (obj->id) {
     case 94:
-        *arg3 = 0x19;
-        ret = 4;
+        *idSlot = 25;
+        found = 4;
         break;
     case 154:
-        *arg3 = 0x18;
-        ret = 4;
+        *idSlot = 24;
+        found = 4;
         break;
     case 16:
     case 46:
-        *arg3 = 0x17;
-        ret = 4;
+        *idSlot = 23;
+        found = 4;
         break;
     case 127:
-        *arg3 = 0x16;
-        ret = 4;
+        *idSlot = 22;
+        found = 4;
         break;
     case 153:
-        *arg3 = 0x15;
-        ret = 4;
+        *idSlot = 21;
+        found = 4;
         break;
     case 137:
     case 186:
-        *arg3 = 0x14;
-        ret = 4;
+        *idSlot = 20;
+        found = 4;
         break;
     case 173:
-        *arg3 = 0x11;
-        ret = 4;
+        *idSlot = 17;
+        found = 4;
         break;
     case 134:
-        *arg3 = 0x12;
-        ret = 4;
+        *idSlot = 18;
+        found = 4;
         break;
     case 82:
-        *arg3 = 0x13;
-        ret = 4;
+        *idSlot = 19;
+        found = 4;
         break;
     case 95:
-        *arg3 = 0x1B;
-        ret = 4;
+        *idSlot = 27;
+        found = 4;
         break;
     case 107:
-        *arg3 = 0x10;
-        ret = 4;
+        *idSlot = 16;
+        found = 4;
         break;
     case 148:
-        *arg3 = 0xE;
-        ret = 4;
+        *idSlot = 14;
+        found = 4;
         break;
     case 37:
-        *arg3 = 0x1A;
-        ret = 4;
+        *idSlot = 26;
+        found = 4;
         break;
     case 146:
-        *arg3 = 0xF;
-        ret = 4;
+        *idSlot = 15;
+        found = 4;
         break;
     case 159:
     case 160:
-        *arg3 = 0xD;
-        ret = 4;
+        *idSlot = 13;
+        found = 4;
         break;
     case 147:
-        *arg3 = 0xC;
-        ret = 4;
+        *idSlot = 12;
+        found = 4;
         break;
     case 141:
-        *arg3 = 0xB;
-        ret = 4;
+        *idSlot = 11;
+        found = 4;
         break;
     case 0:
     case 1:
@@ -235,276 +263,276 @@ s32 func_1514CA80(struct127 *arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
     case 3:
     case 4:
     case 150:
-        *arg3 = 0;
-        ret = 4;
+        *idSlot = 0;
+        found = 4;
         break;
     case 8:
-        *arg3 = 2;
-        ret = 4;
+        *idSlot = 2;
+        found = 4;
         break;
     case 10:
-        *arg3 = 3;
-        ret = 4;
+        *idSlot = 3;
+        found = 4;
         break;
     case 41:
     case 42:
-        *arg3 = 4;
-        ret = 4;
+        *idSlot = 4;
+        found = 4;
         break;
     case 83:
-        *arg3 = 5;
-        ret = 4;
+        *idSlot = 5;
+        found = 4;
         break;
     case 119:
-        *arg3 = 6;
-        ret = 4;
+        *idSlot = 6;
+        found = 4;
         break;
     case 71:
-        *arg3 = 7;
-        ret = 4;
+        *idSlot = 7;
+        found = 4;
         break;
     case 40:
-        *arg3 = 8;
-        ret = 4;
+        *idSlot = 8;
+        found = 4;
         break;
     case 123:
-        *arg3 = 9;
-        ret = 4;
+        *idSlot = 9;
+        found = 4;
         break;
     case 18:
-        *arg3 = 0xA;
-        ret = 4;
+        *idSlot = 10;
+        found = 4;
         break;
     }
 
     switch (D_800BE9F0) {
     case 43:
-        *arg2 = 0x15;
-        ret |= 2;
-        if (arg0->id == 0x9C || arg0->id == 0x9D) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 21;
+        found |= 2;
+        if (obj->id == 156 || obj->id == 157) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 29:
-        *arg2 = 0x14;
-        ret |= 2;
-        if (arg0->unique_id == 9) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 20;
+        found |= 2;
+        if (obj->unique_id == 9) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 0:
-        *arg2 = 0x10;
-        ret |= 2;
-        if (arg0->unique_id == 1) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 16;
+        found |= 2;
+        if (obj->unique_id == 1) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 44:
-        *arg2 = 0x11;
-        ret |= 2;
-        if (arg0->unique_id == 1) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 17;
+        found |= 2;
+        if (obj->unique_id == 1) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 35:
-        *arg2 = 0xF;
-        ret |= 2;
-        if (arg0->unique_id == 1) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 15;
+        found |= 2;
+        if (obj->unique_id == 1) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 47:
-        *arg2 = 0x12;
-        ret |= 2;
-        if (arg0->unique_id == 1) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 18;
+        found |= 2;
+        if (obj->unique_id == 1) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 53:
-        *arg2 = 0x13;
-        ret |= 2;
-        if (arg0->unique_id == 1) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 19;
+        found |= 2;
+        if (obj->unique_id == 1) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 40:
-        *arg2 = 0xE;
-        ret |= 2;
-        if (arg0->unique_id == 1) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 14;
+        found |= 2;
+        if (obj->unique_id == 1) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 27:
-        *arg2 = 0xA;
-        ret |= 2;
-        if (arg0->unique_id == 1) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 10;
+        found |= 2;
+        if (obj->unique_id == 1) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 30:
-        *arg2 = 0xB;
-        ret |= 2;
-        if (arg0->unique_id == 1) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 11;
+        found |= 2;
+        if (obj->unique_id == 1) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 38:
-        *arg2 = 0xC;
-        ret |= 2;
-        if (arg0->unique_id == 1) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 12;
+        found |= 2;
+        if (obj->unique_id == 1) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 28:
-        *arg2 = 0xD;
-        ret |= 2;
-        if (arg0->unique_id == 1) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 13;
+        found |= 2;
+        if (obj->unique_id == 1) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 14:
-        *arg2 = 7;
-        ret |= 2;
-        switch (arg0->unique_id) {
+        *globalSlot = 7;
+        found |= 2;
+        switch (obj->unique_id) {
         case 8:
-            *arg1 = 0;
-            ret |= 1;
+            *uniqueSlot = 0;
+            found |= 1;
             break;
         case 1:
-            *arg1 = 1;
-            ret |= 1;
+            *uniqueSlot = 1;
+            found |= 1;
             break;
         }
         break;
     case 4:
-        *arg2 = 6;
-        ret |= 2;
-        if (arg0->unique_id == 1) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 6;
+        found |= 2;
+        if (obj->unique_id == 1) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 7:
-        *arg2 = 5;
-        ret |= 2;
-        if (arg0->unique_id == 0x10) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 5;
+        found |= 2;
+        if (obj->unique_id == 16) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 12:
-        *arg2 = 3;
-        ret |= 2;
+        *globalSlot = 3;
+        found |= 2;
         break;
     case 2:
-        *arg2 = 0;
-        ret |= 2;
-        switch (arg0->unique_id) {
+        *globalSlot = 0;
+        found |= 2;
+        switch (obj->unique_id) {
         case 9:
-            *arg1 = 0;
-            ret |= 1;
+            *uniqueSlot = 0;
+            found |= 1;
             break;
         case 7:
-            *arg1 = 1;
-            ret |= 1;
+            *uniqueSlot = 1;
+            found |= 1;
             break;
         case 14:
         case 15:
         case 23:
         case 25:
-            *arg1 = 2;
-            ret |= 1;
+            *uniqueSlot = 2;
+            found |= 1;
             break;
         case 13:
-            *arg1 = 3;
-            ret |= 1;
+            *uniqueSlot = 3;
+            found |= 1;
             break;
         }
         break;
     case 10:
-        *arg2 = 1;
-        ret |= 2;
-        switch (arg0->unique_id) {
+        *globalSlot = 1;
+        found |= 2;
+        switch (obj->unique_id) {
         case 6:
-            *arg1 = 0;
-            ret |= 1;
+            *uniqueSlot = 0;
+            found |= 1;
             break;
         case 7:
-            *arg1 = 1;
-            ret |= 1;
+            *uniqueSlot = 1;
+            found |= 1;
             break;
         case 8:
-            *arg1 = 2;
-            ret |= 1;
+            *uniqueSlot = 2;
+            found |= 1;
             break;
         case 9:
-            *arg1 = 3;
-            ret |= 1;
+            *uniqueSlot = 3;
+            found |= 1;
             break;
         case 10:
-            *arg1 = 4;
-            ret |= 1;
+            *uniqueSlot = 4;
+            found |= 1;
             break;
         case 11:
-            *arg1 = 5;
-            ret |= 1;
+            *uniqueSlot = 5;
+            found |= 1;
             break;
         case 12:
-            *arg1 = 6;
-            ret |= 1;
+            *uniqueSlot = 6;
+            found |= 1;
             break;
         case 13:
-            *arg1 = 7;
-            ret |= 1;
+            *uniqueSlot = 7;
+            found |= 1;
             break;
         case 15:
-            *arg1 = 8;
-            ret |= 1;
+            *uniqueSlot = 8;
+            found |= 1;
             break;
         }
         break;
     case 6:
-        *arg2 = 2;
-        ret |= 2;
+        *globalSlot = 2;
+        found |= 2;
         break;
     case 16:
-        *arg2 = 4;
-        ret |= 2;
-        if (arg0->unique_id == 6) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 4;
+        found |= 2;
+        if (obj->unique_id == 6) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 20:
-        *arg2 = 8;
-        ret |= 2;
-        if (arg0->unique_id == 0x10) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 8;
+        found |= 2;
+        if (obj->unique_id == 16) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     case 23:
-        *arg2 = 9;
-        ret |= 2;
-        if (arg0->unique_id == 1) {
-            *arg1 = 0;
-            ret |= 1;
+        *globalSlot = 9;
+        found |= 2;
+        if (obj->unique_id == 1) {
+            *uniqueSlot = 0;
+            found |= 1;
         }
         break;
     }
-    return ret;
+    return found;
 }
 
 
@@ -566,82 +594,60 @@ s32 func_1514D15C(struct127 *arg0) {
     return 1;
 }
 
-typedef struct Node1514D310 {
-    char pad0[0x10];
-    s32 unk10;
-    struct Node1514D310 *unk14;
-    char pad18[0x4];
-    s16 unk1C;
-} Node1514D310;
-
-typedef struct Cont1514D310 {
-    char pad0[0x2F4];
-    Node1514D310 *unk2F4;
-} Cont1514D310;
-
-typedef struct Struct8008ABE8 {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-    s16 unk6;
-} Struct8008ABE8;
-
-extern void (*D_8008AB58[])(s32);
-extern s32 (*D_8008AB64[])(s32, s32, s32);
-extern Struct8008ABE8 *D_8008ABE8[];
 s32 func_1514D4B8(s16, s16);
 
-s32 func_1514D310(Cont1514D310 *arg0) {
-    Node1514D310 *node;
-    Node1514D310 *next;
+/** Frees every attachment of `owner`, letting each attachment type release its handle first. */
+s32 func_1514D310(struct127 *owner) {
+    Attachment *node;
+    Attachment *next;
 
-    node = arg0->unk2F4;
-    while (node != 0) {
-        next = node->unk14;
-        if (D_8008ABE8[node->unk1C]->unk2 != -1) {
-            D_8008AB58[D_8008ABE8[node->unk1C]->unk2](node->unk10);
+    node = ATTACHMENTS(owner);
+    while (node != NULL) {
+        next = node->next;
+        if (D_8008ABE8[node->type]->destroyHandler != -1) {
+            D_8008AB58[D_8008ABE8[node->type]->destroyHandler](node->handle);
         }
-        func_1516972C((struct102 *) node);
+        func_1516972C((struct102 *)node);
         node = next;
     }
     return 1;
 }
 
-s32 func_1514D3B0(Cont1514D310 *arg0, s16 arg1, s32 arg2, s32 arg3) {
-    Node1514D310 *node;
+/**
+ * Sends message `msg` (with `arg`) to every attachment of `owner` whose type is `type` or one
+ * of its subtypes. Returns the result of the last handler called, as 0 or 1.
+ */
+s32 func_1514D3B0(struct127 *owner, s16 type, s32 msg, s32 arg) {
+    Attachment *node;
     s32 result;
 
-    node = arg0->unk2F4;
     result = 0;
-    if (node != 0) {
-        do {
-            if ((arg1 == node->unk1C) || (func_1514D4B8(D_8008ABE8[arg1]->unk4, node->unk1C) != 0)) {
-                if (D_8008ABE8[node->unk1C]->unk0 != -1) {
-                    if (D_8008AB64[D_8008ABE8[node->unk1C]->unk0](node->unk10, arg2, arg3) != 0) {
-                        result = 1;
-                    } else {
-                        result = 0;
-                    }
+    for (node = ATTACHMENTS(owner); node != NULL; node = node->next) {
+        if (type == node->type || func_1514D4B8(D_8008ABE8[type]->firstChild, node->type)) {
+            if (D_8008ABE8[node->type]->messageHandler != -1) {
+                if (D_8008AB64[D_8008ABE8[node->type]->messageHandler](node->handle, msg, arg)) {
+                    result = 1;
+                } else {
+                    result = 0;
                 }
             }
-            node = node->unk14;
-        } while (node != 0);
+        }
     }
     return result;
 }
 
-s32 func_1514D4B8(s16 arg0, s16 arg1) {
-    if (arg0 == -1) {
+/** Returns whether attachment type `type` occurs in the type subtree rooted at `root` or its siblings. */
+s32 func_1514D4B8(s16 root, s16 type) {
+    if (root == -1) {
         return 0;
     }
-    if (arg0 == arg1) {
+    if (root == type) {
         return 1;
     }
-
-    if (func_1514D4B8(D_8008ABE8[arg0]->unk6, arg1) != 0) {
+    if (func_1514D4B8(D_8008ABE8[root]->nextSibling, type)) {
         return 1;
     }
-    if (func_1514D4B8(D_8008ABE8[arg0]->unk4, arg1) != 0) {
+    if (func_1514D4B8(D_8008ABE8[root]->firstChild, type)) {
         return 1;
     }
     return 0;
@@ -806,7 +812,6 @@ void func_1514D96C(s32 arg0) {
 }
 
 s32 func_15158BD0(s32, s32, s32);
-s32 func_1514EC1C(s32, s32, s16);
 
 void func_1514D978(s32 arg0) {
     struct {
@@ -838,7 +843,6 @@ void func_1514D978(s32 arg0) {
 }
 
 s32 func_151ACA60(s32, f32, s32);
-s32 func_1514EC1C(s32, s32, s16);
 
 void func_1514D9F4(s32 arg0) {
     s32 v0;
@@ -890,7 +894,6 @@ void func_1514DAA4(struct127 *arg0) {
 }
 
 s32 func_15158BD0(s32, s32, s32);
-s32 func_1514EC1C(s32, s32, s16);
 
 void func_1514DB18(s32 arg0) {
     s32 v0 = func_15158BD0(arg0, 1, 0);
@@ -1430,145 +1433,131 @@ s32 func_1514EB8C(s32 arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-struct_1514EBA4 *func_1514EBA4(s32 arg0, s16 arg1, s32 arg2) {
-    struct_1514EBA4 *ret;
+/** Allocates an unlinked attachment node for `handle` with `extraSize` bytes of payload. */
+Attachment *func_1514EBA4(s32 handle, s16 type, s32 extraSize) {
+    Attachment *node;
 
-    ret = func_15167A68(0x24, 1, arg2 + 0x20, 1, 0xFF, 1);
-    if (ret == 0) {
+    node = func_15167A68(0x24, 1, extraSize + 0x20, 1, 0xFF, 1);
+    if (node == NULL) {
         return NULL;
     }
-    ret->unk10 = arg0;
-    ret->unk14 = 0;
-    ret->unk18 = 0;
-    ret->unk1C = arg1;
-    return ret;
+    node->handle = handle;
+    node->next = NULL;
+    node->prev = NULL;
+    node->type = type;
+    return node;
 }
 
-s32 func_1514EC1C(s32 arg0, s32 arg1, s16 arg2) {
-    s32 result;
-    struct_1514EBA4 *ret;
+/**
+ * Attaches `handle` to `owner` as an attachment of `type` (pushed at the head of its list).
+ * If no node can be allocated, the handle is released instead. Returns the node or NULL.
+ */
+Attachment *func_1514EC1C(s32 handle, struct127 *owner, s16 type) {
+    Attachment *result;
+    Attachment *node;
 
-    result = 0;
-    if (arg0 != 0) {
-        ret = func_1514EBA4(arg0, arg2, 0);
-        result = (s32) ret;
-        if (ret != 0) {
-            ret->unk14 = (s32) ((Cont1514D310 *) arg1)->unk2F4;
-            ((Cont1514D310 *) arg1)->unk2F4 = (Node1514D310 *) ret;
-            ret->unk18 = 0;
-            if (ret->unk14 != 0) {
-                ((struct_1514EBA4 *) ret->unk14)->unk18 = (s32) ret;
+    result = NULL;
+    if (handle != 0) {
+        node = func_1514EBA4(handle, type, 0);
+        result = node;
+        if (node != NULL) {
+            node->next = ATTACHMENTS(owner);
+            ATTACHMENTS(owner) = node;
+            node->prev = NULL;
+            if (node->next != NULL) {
+                node->next->prev = node;
             }
-        } else if (D_8008ABE8[arg2]->unk2 != -1) {
-            D_8008AB58[D_8008ABE8[arg2]->unk2](arg0);
+        } else if (D_8008ABE8[type]->destroyHandler != -1) {
+            D_8008AB58[D_8008ABE8[type]->destroyHandler](handle);
         } else {
-            func_1516972C((struct102 *) arg0);
+            func_1516972C((struct102 *)handle);
         }
     }
     return result;
 }
 
-typedef struct Node1514ECE0 {
-    char pad0[0x14];
-    struct Node1514ECE0 *unk14;
-    char pad18[0x4];
-    s16 unk1C;
-} Node1514ECE0;
-
-s32 func_1514ECE0(Node1514ECE0 *arg0, s16 arg1, s32 *arg2) {
+/** Finds the first attachment of `type` in the list starting at `list`; stores it (or NULL) in *out. */
+s32 func_1514ECE0(Attachment *list, s16 type, Attachment **out) {
     s32 found;
-    Node1514ECE0 *node;
-    Node1514ECE0 *next;
+    Attachment *node;
+    Attachment *next;
 
-    found = 0;
-    node = arg0;
-    if (node != 0) {
+    found = FALSE;
+    node = list;
+    if (node != NULL) {
         do {
-            next = node->unk14;
-            if (arg1 == node->unk1C) {
-                found = 1;
+            next = node->next;
+            if (type == node->type) {
+                found = TRUE;
             } else {
                 node = next;
             }
-        } while (node != 0 && found == 0);
+        } while (node != NULL && !found);
     }
 
-    if (arg2 != 0) {
-        *arg2 = (s32) node;
+    if (out != NULL) {
+        *out = node;
     }
     return found;
 }
 
-typedef struct Node1514ED3C {
-    char pad0[0x10];
-    s32 key;
-    struct Node1514ED3C *next;
-} Node1514ED3C;
+/** Finds the first attachment holding `handle` in the list starting at `list`; stores it (or NULL) in *out. */
+s32 func_1514ED3C(Attachment *list, s32 handle, Attachment **out) {
+    s32 found = FALSE;
+    Attachment *node = list;
+    Attachment *next;
 
-s32 func_1514ED3C(Node1514ED3C *node, s32 key, s32 *out) {
-    s32 found = 0;
-    Node1514ED3C *cur = node;
-    Node1514ED3C *next;
-    if (cur != 0) {
+    if (node != NULL) {
         do {
-            next = cur->next;
-            if (key == cur->key) {
-                found = 1;
+            next = node->next;
+            if (handle == node->handle) {
+                found = TRUE;
             } else {
-                cur = next;
+                node = next;
             }
-        } while (cur != 0 && found == 0);
+        } while (node != NULL && !found);
     }
-    if (out != 0) {
-        *out = (s32) cur;
+    if (out != NULL) {
+        *out = node;
     }
     return found;
 }
 
-typedef struct Node1514ED8C {
-    char pad0[0x10];
-    s32 unk10;
-    struct Node1514ED8C *unk14;
-    struct Node1514ED8C *unk18;
-} Node1514ED8C;
+/** Unlinks `node` from `owner`'s attachment list and frees it. Returns the node's handle. */
+s32 func_1514ED8C(Attachment *node, struct127 *owner) {
+    s32 handle;
 
-typedef struct Cont1514ED8C {
-    char pad0[0x2F4];
-    Node1514ED8C *unk2F4;
-} Cont1514ED8C;
-
-s32 func_1514ED8C(Node1514ED8C *node, Cont1514ED8C *cont) {
-    s32 ret;
-    if (node == cont->unk2F4) {
-        cont->unk2F4 = node->unk14;
+    if (node == ATTACHMENTS(owner)) {
+        ATTACHMENTS(owner) = node->next;
     }
-    if (node->unk14 != 0) {
-        node->unk14->unk18 = node->unk18;
+    if (node->next != NULL) {
+        node->next->prev = node->prev;
     }
-    if (node->unk18 != 0) {
-        node->unk18->unk14 = node->unk14;
+    if (node->prev != NULL) {
+        node->prev->next = node->next;
     }
-    ret = node->unk10;
-    func_1516972C((struct102 *) node);
-    return ret;
+    handle = node->handle;
+    func_1516972C((struct102 *)node);
+    return handle;
 }
 
-void func_1514EDF0(s32 key, Cont1514ED8C *cont) {
-    Node1514ED8C *node;
+/** Removes (without releasing the handle) every attachment of `owner` that holds `handle`. */
+void func_1514EDF0(s32 handle, struct127 *owner) {
+    Attachment *node;
     s32 ret;
-    s32 out;
+    Attachment *match;
     u8 found;
 
-    node = cont->unk2F4;
-    out = 0;
+    node = ATTACHMENTS(owner);
+    match = NULL;
     do {
-        ret = func_1514ED3C((Node1514ED3C *) node, key, &out);
+        ret = func_1514ED3C(node, handle, &match);
         found = ret;
         if (ret) {
-            node = ((Node1514ED8C *) out)->unk14;
-            func_1514ED8C((Node1514ED8C *) out, cont);
+            node = match->next;
+            func_1514ED8C(match, owner);
         }
-    } while (found != 0);
+    } while (found);
 }
 
 struct Struct1514EE70 {
