@@ -4,195 +4,209 @@
 
 
 typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec3f_15129C30;
+    /* 0x0 */ u16 buttons;
+    /* 0x2 */ s8 stickX;
+    /* 0x3 */ s8 stickY;
+} ControllerInput;
 
-typedef struct {
-    u16 buttons;
-    s8 stickX;
-    s8 stickY;
-} Pad_15129C30;
-
+/*
+ * Camera state: the same 0x9A0-byte object as struct108 (include/structs.h). Only the fields this
+ * file uses are named.
+ */
 typedef struct {
     /* 0x000 */ u8 pad0[0x23D];
-    /* 0x23D */ u8 unk23D;
-    /* 0x23E */ u8 pad23E[0x2A4 - 0x23E];
-    /* 0x2A4 */ Vec3f_15129C30 unk2A4;
+    /* 0x23D */ u8 index; /* this camera's slot in the per-camera tables */
+    /* 0x23E */ u8 pad23E[0x66];
+    /* 0x2A4 */ struct17 unk2A4;
     /* 0x2B0 */ u8 pad2B0[0xC];
-    /* 0x2BC */ Vec3f_15129C30 unk2BC;
-    /* 0x2C8 */ u8 pad2C8[0x2F8 - 0x2C8];
-    /* 0x2F8 */ f32 unk2F8;
-    /* 0x2FC */ f32 unk2FC;
-    /* 0x300 */ f32 unk300;
-    /* 0x304 */ u8 pad304[0x344 - 0x304];
+    /* 0x2BC */ struct17 unk2BC;
+    /* 0x2C8 */ u8 pad2C8[0x30];
+    /* 0x2F8 */ f32 posX;
+    /* 0x2FC */ f32 posY;
+    /* 0x300 */ f32 posZ;
+    /* 0x304 */ u8 pad304[0x40];
     /* 0x344 */ f32 unk344;
-    /* 0x348 */ u8 pad348[0x360 - 0x348];
+    /* 0x348 */ u8 pad348[0x18];
     /* 0x360 */ f32 unk360;
-    /* 0x364 */ u8 pad364[0x36A - 0x364];
-    /* 0x36A */ u16 unk36A;
-    /* 0x36C */ Pad_15129C30 *unk36C;
-    /* 0x370 */ u8 pad370[0x37C - 0x370];
-    /* 0x37C */ f32 unk37C;
+    /* 0x364 */ u8 pad364[6];
+    /* 0x36A */ u16 buttonsPressed;
+    /* 0x36C */ ControllerInput *input;
+    /* 0x370 */ u8 pad370[0xC];
+    /* 0x37C */ f32 yaw; /* degrees */
     /* 0x380 */ f32 unk380;
     /* 0x384 */ u8 pad384[4];
-    /* 0x388 */ f32 unk388;
+    /* 0x388 */ f32 pitch; /* degrees */
     /* 0x38C */ u8 pad38C[4];
     /* 0x390 */ f32 unk390;
     /* 0x394 */ f32 unk394;
-    /* 0x398 */ f32 unk398;
-    /* 0x39C */ f32 unk39C;
+    /* 0x398 */ f32 pitchRad;
+    /* 0x39C */ f32 yawRad;
     /* 0x3A0 */ f32 unk3A0;
-    /* 0x3A4 */ u8 pad3A4[0x5EC - 0x3A4];
-    /* 0x5EC */ f32 unk5EC;
-    /* 0x5F0 */ s32 unk5F0;
-    /* 0x5F4 */ u8 pad5F4[0x640 - 0x5F4];
+    /* 0x3A4 */ u8 pad3A4[0x248];
+    /* 0x5EC */ f32 roll; /* degrees */
+    /* 0x5F0 */ s32 flags;
+    /* 0x5F4 */ u8 pad5F4[0x4C];
     /* 0x640 */ s32 unk640;
     /* 0x644 */ s32 unk644;
     /* 0x648 */ s32 unk648;
-} Cam_15129C30;
+} Camera;
 
-extern f32 D_80089560[];
-extern f32 D_80089570[];
-extern f32 D_80089580[];
-void func_1510E7A4(void *a0, void *a1, void *a2, void *a3, void *arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 arg10, s32 arg11, f32 arg12, f32 arg13);
+/* Per-camera accumulated speeds for the free camera, indexed by Camera.index. */
+extern f32 D_80089560[]; /* vertical (C-up / C-down) */
+extern f32 D_80089570[]; /* strafe or roll (C-left / C-right) */
+extern f32 D_80089580[]; /* pitch (A / B) */
 
-void func_15129C30(Cam_15129C30 *arg0) {
-    f32 dx;
-    f32 dy;
-    f32 dz;
-    f32 fwd;
+void func_1510E7A4(s32 *, s32 *, f32 *, f32 *, s32 *, s32, f32, f32, f32, f32, u16, s32, f32, f32);
+void func_151E6C1C(s32 index);
+
+/*
+ * Free-fly camera. D-pad down toggles it (flag 0x80000000 in flags means paused). While active, the
+ * stick turns (x) and moves forward/back (y), C-up/C-down move vertically, A/B pitch, and
+ * C-left/C-right strafe, or roll while Z is held. The camera looks 600 units ahead.
+ */
+void func_15129C30(Camera *cam) {
+    f32 dirX;
+    f32 lookY;
+    f32 dirZ;
+    f32 forward;
     f32 strafe;
-    f32 sx;
-    f32 sy;
-    Vec3f_15129C30 sp68;
-    u8 idx;
+    f32 stickX;
+    f32 stickY;
+    struct17 floor;
+    u8 index;
     u16 buttons;
     f32 f;
 
     strafe = 0.0f;
-    idx = arg0->unk23D;
-    buttons = arg0->unk36C->buttons;
-    if (arg0->unk36A & 0x400) {
-        if (arg0->unk5F0 & 0x80000000) {
-            arg0->unk5F0 &= ~0x80000000;
+    index = cam->index;
+    buttons = cam->input->buttons;
+    if (cam->buttonsPressed & D_JPAD) {
+        if (cam->flags & 0x80000000) {
+            cam->flags &= ~0x80000000;
         } else {
-            arg0->unk5F0 |= 0x80000000;
+            cam->flags |= 0x80000000;
         }
     }
-    if (!(arg0->unk5F0 & 0x80000000)) {
-        if ((arg0->unk36C->stickX < -4) || (arg0->unk36C->stickX >= 5)) {
-            sx = arg0->unk36C->stickX;
+    if (!(cam->flags & 0x80000000)) {
+        // Stick dead zone of +-4.
+        if (cam->input->stickX < -4 || cam->input->stickX >= 5) {
+            stickX = cam->input->stickX;
         } else {
-            sx = 0.0f;
+            stickX = 0.0f;
         }
-        if ((arg0->unk36C->stickY < -4) || (arg0->unk36C->stickY >= 5)) {
-            sy = arg0->unk36C->stickY;
+        if (cam->input->stickY < -4 || cam->input->stickY >= 5) {
+            stickY = cam->input->stickY;
         } else {
-            sy = 0.0f;
+            stickY = 0.0f;
         }
-        f = sx / 80.0f;
+
+        f = stickX / 80.0f;
         if (f > 0.0f) {
-            arg0->unk37C -= f * f * D_800BEA08;
+            cam->yaw -= f * f * D_800BEA08;
         } else {
-            arg0->unk37C += f * f * D_800BEA08;
+            cam->yaw += f * f * D_800BEA08;
         }
-        arg0->unk39C = arg0->unk37C * 0.01745329238f;
-        f = (sy / 80.0f) * 7.0f;
+        cam->yawRad = cam->yaw * 0.01745329238f;
+
+        f = (stickY / 80.0f) * 7.0f;
         if (f > 0.0f) {
-            fwd = f * f * D_800BEA08;
+            forward = f * f * D_800BEA08;
         } else {
-            fwd = -f * f * D_800BEA08;
+            forward = -f * f * D_800BEA08;
         }
-        if (buttons & 4) {
-            D_80089560[idx] += 0.200000003f;
-            arg0->unk2FC -= D_80089560[idx] * D_800BEA08;
-        } else if (buttons & 8) {
-            D_80089560[idx] += 0.200000003f;
-            arg0->unk2FC += D_80089560[idx] * D_800BEA08;
+
+        if (buttons & D_CBUTTONS) {
+            D_80089560[index] += 0.200000003f;
+            cam->posY -= D_80089560[index] * D_800BEA08;
+        } else if (buttons & U_CBUTTONS) {
+            D_80089560[index] += 0.200000003f;
+            cam->posY += D_80089560[index] * D_800BEA08;
         } else {
-            D_80089560[idx] = 0.0f;
+            D_80089560[index] = 0.0f;
         }
-        if (buttons & 0x8000) {
-            D_80089580[idx] += 0.01250000019f;
-            arg0->unk388 -= D_80089580[idx] * D_800BEA08;
-        } else if (buttons & 0x4000) {
-            D_80089580[idx] += 0.01250000019f;
-            arg0->unk388 += D_80089580[idx] * D_800BEA08;
+
+        if (buttons & A_BUTTON) {
+            D_80089580[index] += 0.01250000019f;
+            cam->pitch -= D_80089580[index] * D_800BEA08;
+        } else if (buttons & B_BUTTON) {
+            D_80089580[index] += 0.01250000019f;
+            cam->pitch += D_80089580[index] * D_800BEA08;
         } else {
-            D_80089580[idx] = 0.0f;
+            D_80089580[index] = 0.0f;
         }
-        if (arg0->unk388 < -89.5f) {
-            arg0->unk388 = -89.5f;
+        if (cam->pitch < -89.5f) {
+            cam->pitch = -89.5f;
         } else {
-            f = (arg0->unk388 > 89.5f) ? 89.5f : arg0->unk388;
-            arg0->unk388 = f;
+            f = (cam->pitch > 89.5f) ? 89.5f : cam->pitch;
+            cam->pitch = f;
         }
-        arg0->unk398 = arg0->unk388 * 0.01745329238f;
-        if (buttons & 0x2000) {
-            if ((buttons & 2) && (buttons & 0x2000)) {
-                D_80089570[idx] += 0.200000003f;
-                arg0->unk5EC -= D_80089570[idx] * 0.1000000015f;
-            } else if ((buttons & 1) && (buttons & 0x2000)) {
-                D_80089570[idx] += 0.200000003f;
-                arg0->unk5EC += D_80089570[idx] * 0.1000000015f;
+        cam->pitchRad = cam->pitch * 0.01745329238f;
+
+        if (buttons & Z_TRIG) {
+            if ((buttons & L_CBUTTONS) && (buttons & Z_TRIG)) {
+                D_80089570[index] += 0.200000003f;
+                cam->roll -= D_80089570[index] * 0.1000000015f;
+            } else if ((buttons & R_CBUTTONS) && (buttons & Z_TRIG)) {
+                D_80089570[index] += 0.200000003f;
+                cam->roll += D_80089570[index] * 0.1000000015f;
             } else {
-                D_80089570[idx] = 0.0f;
+                D_80089570[index] = 0.0f;
             }
         } else {
-            if (buttons & 2) {
-                D_80089570[idx] += 0.400000006f;
-                strafe -= D_80089570[idx];
-            } else if (buttons & 1) {
-                D_80089570[idx] += 0.400000006f;
-                strafe += D_80089570[idx];
+            if (buttons & L_CBUTTONS) {
+                D_80089570[index] += 0.400000006f;
+                strafe -= D_80089570[index];
+            } else if (buttons & R_CBUTTONS) {
+                D_80089570[index] += 0.400000006f;
+                strafe += D_80089570[index];
             } else {
-                D_80089570[idx] = 0.0f;
+                D_80089570[index] = 0.0f;
             }
         }
-        D_80089570[idx] = (D_80089570[idx] > 100.0f) ? 100.0f : D_80089570[idx];
-        D_80089580[idx] = (D_80089580[idx] > 8.0f) ? 8.0f : D_80089580[idx];
-        D_80089560[idx] = (D_80089560[idx] > 40.0f) ? 40.0f : D_80089560[idx];
-        if (arg0->unk5EC < -45.0f) {
-            arg0->unk5EC = -45.0f;
+
+        D_80089570[index] = (D_80089570[index] > 100.0f) ? 100.0f : D_80089570[index];
+        D_80089580[index] = (D_80089580[index] > 8.0f) ? 8.0f : D_80089580[index];
+        D_80089560[index] = (D_80089560[index] > 40.0f) ? 40.0f : D_80089560[index];
+        if (cam->roll < -45.0f) {
+            cam->roll = -45.0f;
         } else {
-            f = (arg0->unk5EC > 45.0f) ? 45.0f : arg0->unk5EC;
-            arg0->unk5EC = f;
+            f = (cam->roll > 45.0f) ? 45.0f : cam->roll;
+            cam->roll = f;
         }
-        dx = -sinf(arg0->unk39C);
-        dz = -cosf(arg0->unk39C);
-        arg0->unk2F8 += dx * fwd;
-        arg0->unk300 += dz * fwd;
-        arg0->unk2F8 += -dz * strafe;
-        arg0->unk300 += dx * strafe;
-        arg0->unk344 = 0.0f;
-        dx *= 600.0f;
-        dz *= 600.0f;
-        f = sqrtf(dx * dx + dz * dz);
-        dy = sinf(arg0->unk398) * f;
-        dx = cosf(arg0->unk398) * dx;
-        dz = cosf(arg0->unk398) * dz;
-        sx = arg0->unk2F8 + dx;
-        arg0->unk2A4.x = sx;
-        sy = arg0->unk2FC + dy;
-        arg0->unk2BC.x = sx;
-        f = arg0->unk300 + dz;
-        arg0->unk390 = 0.0f;
-        arg0->unk2A4.z = arg0->unk2BC.z = f;
-        arg0->unk2A4.y = arg0->unk2BC.y = sy;
-        arg0->unk2A4 = arg0->unk2BC;
+
+        dirX = -sinf(cam->yawRad);
+        dirZ = -cosf(cam->yawRad);
+        cam->posX += dirX * forward;
+        cam->posZ += dirZ * forward;
+        cam->posX += -dirZ * strafe;
+        cam->posZ += dirX * strafe;
+        cam->unk344 = 0.0f;
+
+        dirX *= 600.0f;
+        dirZ *= 600.0f;
+        f = sqrtf(dirX * dirX + dirZ * dirZ);
+        lookY = sinf(cam->pitchRad) * f;
+        dirX = cosf(cam->pitchRad) * dirX;
+        dirZ = cosf(cam->pitchRad) * dirZ;
+        stickX = cam->posX + dirX;
+        cam->unk2A4.unk0 = stickX;
+        stickY = cam->posY + lookY;
+        cam->unk2BC.unk0 = stickX;
+        f = cam->posZ + dirZ;
+        cam->unk390 = 0.0f;
+        cam->unk2A4.unk8 = cam->unk2BC.unk8 = f;
+        cam->unk2A4.unk4 = cam->unk2BC.unk4 = stickY;
+        cam->unk2A4 = cam->unk2BC;
     } else {
-        arg0->unk394 = arg0->unk37C;
+        cam->unk394 = cam->yaw;
     }
-    arg0->unk380 = arg0->unk37C;
-    arg0->unk3A0 = arg0->unk39C = arg0->unk37C * 0.01745329238f;
-    func_1510E7A4(&arg0->unk644, &arg0->unk648, &sp68, &arg0->unk360, &arg0->unk640, 0, arg0->unk2F8, arg0->unk2FC,
-                  arg0->unk300, arg0->unk2FC, 0, 0, -10000.0f, arg0->unk2FC);
+    cam->unk380 = cam->yaw;
+    cam->unk3A0 = cam->yawRad = cam->yaw * 0.01745329238f;
+    func_1510E7A4(&cam->unk644, &cam->unk648, &floor.unk0, &cam->unk360, &cam->unk640, 0, cam->posX, cam->posY,
+                  cam->posZ, cam->posY, 0, 0, -10000.0f, cam->posY);
 }
 
-extern s32 func_151E6C1C(s32);
-
-s32 func_1512A360(u8 *arg0) {
-    return func_151E6C1C(arg0[0x23D]);
+/* Runs func_151E6C1C for this camera's slot. */
+void func_1512A360(Camera *cam) {
+    func_151E6C1C(cam->index);
 }
