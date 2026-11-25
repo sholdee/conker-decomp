@@ -20,6 +20,8 @@
 #define TEXTBOX_CB_PAGE_SHOWN   0x4000  /* set while the callback runs: a page is fully shown */
 #define TEXTBOX_SCREEN_POS      0x8000  /* positioned by screen percentages instead of a world point */
 #define TEXTBOX_CLAMP           0x10000 /* keep a screen-positioned box inside the view bounds */
+#define TEXTBOX_CENTERED        0x20000 /* centre each text line */
+#define TEXTBOX_WHITE_TEXT      0x40000
 
 /* Message table entry (D_800DD254 / D_800DD258). */
 typedef struct {
@@ -409,6 +411,7 @@ Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
     yoff = box->height / D_8009055C.height * D_8009057C.height * 0.5f * box->scale;
     box->bodyX = cosf(box->angle + 3.1415927f) * (box->width * 0.5f) * 1.15f * box->scale + box->x - xoff;
     box->bodyY = sinf(box->angle + 3.1415927f) * (box->height * 0.5f) * 1.04f * box->scale + box->y - yoff;
+    /* shadow pass */
     gDPPipeSync(gfx++);
     gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
                       TEXEL0, 0);
@@ -475,6 +478,7 @@ Gfx *func_1516B6BC(Gfx *gfx, TextBox *box, s32 arg2) {
     if (overflow) {
         return start;
     }
+    /* the box itself, tinted with the config's colour */
     if (dark) {
         D_800D2DA8 = D_800D2DA9 = D_800D2DAA = 0;
     } else {
@@ -586,9 +590,11 @@ u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source) {
 Gfx *func_150417AC(Gfx *, f32, f32, u8 *, u8, u8, u8, u8, f32, f32, s32);
 extern u8 D_800859A0[];
 
-Gfx *func_1516C934(gfx, arg1, r, g, b, a)
+/* Draws the current page of a text box line by line ('\n' separates lines), tinted r/g/b/a.
+ * Returns gfx unchanged if the display list would overflow. */
+Gfx *func_1516C934(gfx, box, r, g, b, a)
     Gfx *gfx;
-    TextBox *arg1;
+    TextBox *box;
     u8 r;
     u8 g;
     u8 b;
@@ -596,7 +602,7 @@ Gfx *func_1516C934(gfx, arg1, r, g, b, a)
 {
     Gfx *original;
     u8 line[84];
-    TextBox *text;
+    TextBox *self; // matching: a second copy of box; IDO allocates the two differently
     f32 offset;
     s32 i;
     s32 n;
@@ -604,27 +610,27 @@ Gfx *func_1516C934(gfx, arg1, r, g, b, a)
 
     i = 0;
     n = 0;
-    text = arg1;
+    self = box;
     original = gfx;
-lbl:
+lbl: // matching: unused label; with the block below it sets IDO's register priorities for box/i
     {
         f32 x;
         f32 y;
 
-        x = arg1->centerX - arg1->halfTextWidth;
-        y = arg1->centerY - arg1->halfTextHeight;
+        x = box->centerX - box->halfTextWidth;
+        y = box->centerY - box->halfTextHeight;
         gSPDisplayList(gfx++, D_800859A0);
-        first = 1;
-        while (text->text[i] == '\n') {
+        first = TRUE;
+        while (self->text[i] == '\n') {
             i++;
         }
         do {
-            if ((gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4 ? TRUE : FALSE) != 0) {
+            if ((gfx - D_800BE9C8[D_800BE9C0] > D_800BEBA4 ? TRUE : FALSE) != 0) { // matching: inline flag form
                 return original;
             }
-            if (1) {
+            if (1) { // matching: empty block shifts IDO's temp-register assignment
             }
-            line[n] = text->text[i];
+            line[n] = self->text[i];
             if (line[n] == '\n') {
                 line[n] = 0;
             }
@@ -635,30 +641,30 @@ lbl:
 
                 func_150428D4(line, &width, &height, &advance);
                 if (!first) {
-                    y += (f32)height;
+                    y += height;
                 } else {
-                    first = 0;
+                    first = FALSE;
                 }
-                if (text->config->flags & 0x20000) {
-                    offset = arg1->halfTextWidth - (f32)(width >> 1) - 1.0f;
+                if (self->config->flags & TEXTBOX_CENTERED) {
+                    offset = box->halfTextWidth - (width >> 1) - 1.0f;
                 } else {
                     offset = 0.0f;
                 }
-                if (text->config->flags & 0x40000) {
+                if (self->config->flags & TEXTBOX_WHITE_TEXT) {
                     gfx = func_150417AC(gfx, x + offset + 1.0f, y, line, 0xFF, 0xFF, 0xFF, a, 4096.0f, 4096.0f, n);
                     n = 0;
-                } else if (!(text->config->flags & 4)) {
+                } else if (!(self->config->flags & TEXTBOX_DARK)) {
                     gfx = func_150417AC(gfx, x + offset + 1.0f, y, line, 0, 0, 0, a, 4096.0f, 4096.0f, n);
                     n = 0;
                 } else {
                     gfx = func_150417AC(gfx, x + offset, y, line, r, g, b, a, 4096.0f, 4096.0f, n);
                     n = 0;
                 }
-                y += (f32)advance;
+                y += advance;
             } else {
                 n++;
             }
-        } while (arg1->text[i++] != 0);
+        } while (box->text[i++] != 0);
     }
     return gfx;
 }
