@@ -1430,7 +1430,7 @@ void func_15084558(Actor *self) {
     s32 pad;
     s32 data;
     u8 *block;
-    s32 table;
+    TexCoord *table;
 
     id = self->id;
     if (id != 0xFF && D_800D19A0[id] != NULL) {
@@ -1494,9 +1494,9 @@ void func_15084558(Actor *self) {
                         D_800C6070[id] = 0;
                     }
                     table = D_800C6360[id];
-                    if (table != 0) {
-                        func_10004074((void *)table);
-                        D_800C6360[id] = 0;
+                    if (table != NULL) {
+                        func_10004074(table);
+                        D_800C6360[id] = NULL;
                     }
                 }
             }

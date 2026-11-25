@@ -149,12 +149,6 @@ s32 func_1510BF60(Gfx *dl, s32 tex, Vtx **outVtx, s32 skip) {
     return count;
 }
 
-/* Saved texture coordinates of one vertex. */
-typedef struct {
-    /* 0x00 */ s16 s;
-    /* 0x02 */ s16 t;
-} TexCoord;
-
 /* Scrolls the texture coordinates of one mesh's vertices along a circle. */
 typedef struct {
     /* 0x00 */ TexCoord *primary;   /* original UVs of the vertices in mesh 0 */

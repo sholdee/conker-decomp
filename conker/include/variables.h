@@ -921,7 +921,7 @@ extern u8  D_800C4000;
 extern u16 D_800C5A90[187]; // per model: animation count
 extern s32 D_800C5C08[187];
 extern s32 D_800C6070[187];
-extern s32 D_800C6360[187];
+extern TexCoord *D_800C6360[187]; // per model id: saved texture coordinates (func_1503D804)
 
 extern struct160 D_800C6650[];
 extern s32 D_800C6654;
@@ -1015,7 +1015,7 @@ extern f32 D_800D1550; // frame time step
 extern s32 D_800D1580; // array?
 extern s16 D_800D1582;
 extern u8  D_800D1583;
-extern s32 D_800D1588[187];  // 748 bytes
+extern s32 D_800D1588[187]; // per model id: animation table (see func_1503D660)
 extern s32 D_800D1548;
 extern Actor *D_800D154C;
 

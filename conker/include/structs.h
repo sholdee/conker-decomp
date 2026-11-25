@@ -2411,6 +2411,12 @@ typedef struct SaveSlotInfo {
     /* 0x0F */ s8 padF;
 } SaveSlotInfo; /* size = 0x10 */
 
+/* The texture coordinates of one vertex (Vtx.v.tc); D_800C6360[id] saves a model's originals. */
+typedef struct TexCoord {
+    /* 0x0 */ s16 s;
+    /* 0x2 */ s16 t;
+} TexCoord;
+
 typedef struct {
     f32 unk0;   // used
     f32 unk4;   // used
