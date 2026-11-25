@@ -127,11 +127,9 @@ typedef struct {
     /* 0x128 */ SprayGrowth growth;
 } SprayParticle;
 
-extern f32 D_800AA108;
-extern f32 D_800AA10C;
-
 void func_150CCD90(f32, f32 *, f32 *, f32 *);
-void func_1514C678(f32, f32, s32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
+void func_1514C678(f32 x, f32 y, f32 z, f32 radius, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8,
+                   f32 arg9, u8 *rgb, u8 argB);
 SprayParticle *func_1513D668(SprayDesc *desc, SprayColor *colors, u8 updateFn1, u8 updateFn2, u8 expireFn,
                              u8 flip, s16 angle, f32 width, f32 height, s32 arg9, f32 *argA, u8 argB,
                              s32 motionSize, u8 argD, s32 argE);
@@ -146,9 +144,9 @@ void func_151AF6D4(struct127 *actor, s32 side, s32 arg2) {
     SprayParticle *particle;
     SprayGrowth growth;
     SprayDesc desc;
-    s32 rnd;
+    s32 lifeRoll; // matching: IDO schedules the first roll differently when it is inlined
     SprayColor colors[4];
-    s16 puffCount;
+    s16 roll;
     u8 r;
     u8 g;
     u8 b;
@@ -192,15 +190,15 @@ void func_151AF6D4(struct127 *actor, s32 side, s32 arg2) {
     colors[3].unk8 = 0;
     desc.unk0 = 0x50;
     desc.unk2 = 0x2502;
-    rnd = func_150ADA20();
-    desc.life = (rnd % 61U) + 88;
+    lifeRoll = func_150ADA20();
+    desc.life = (lifeRoll % 61U) + 88;
     desc.unk8 = 0;
     desc.unkC = 0;
     desc.unk10 = 0xFF;
     desc.unk11 = 0xFF;
     desc.unk12 = 0xFF;
     desc.unk13 = 0xFF;
-    desc.size0 = desc.size1 = ((func_150ADA68() * 21.0f) + 91.0f) * D_800AA108;
+    desc.size0 = desc.size1 = ((func_150ADA68() * 21.0f) + 91.0f) * 0.001f;
     desc.pos.unk0 = pos[0];
     desc.pos.unk4 = ground.height;
     desc.pos.unk8 = pos[2];
@@ -214,7 +212,7 @@ void func_151AF6D4(struct127 *actor, s32 side, s32 arg2) {
     desc.alpha = (func_150ADA20() % 41U) + 80;
     desc.unk45 = 0xFF;
     growth.growEndTimer = (desc.life - (func_150ADA20() % 6U)) - 8;
-    growth.growRate = (((func_150ADA68() * 40.0f) + 51.0f) * desc.size0) * D_800AA10C;
+    growth.growRate = (((func_150ADA68() * 40.0f) + 51.0f) * desc.size0) * 0.001f;
     desc.unk46 = 0;
     desc.unk47 = 6;
     particle = func_1513D668(&desc, colors, 0, 0x16, 0, 0, (actor->unk7A >> 8) - ((side == 1) ? -10 : 10),
@@ -222,18 +220,27 @@ void func_151AF6D4(struct127 *actor, s32 side, s32 arg2) {
     if (particle != NULL) {
         memcpy(&particle->growth, &growth, sizeof(growth));
     }
-    puffCount = (func_150ADA20() % 11U) + 5;
-    func_1514C678(pos[0], pos[1], *(s32 *)&pos[2], (func_150ADA68() * 17.0f) + 29.0f,
-                  0, 0xFF, puffCount, 16, 0, 0.0f, 0, 0xFF);
+    roll = (func_150ADA20() % 11U) + 5;
+    func_1514C678(pos[0], pos[1], pos[2], (func_150ADA68() * 17.0f) + 29.0f,
+                  0, 0xFF, roll, 16, 0, 0.0f, NULL, 0xFF);
 }
 
-s32 func_151AFBD4(void *arg0) {
-    s32 v0 = *(s16 *)((u8 *)arg0 + 0x1C);
-    s32 v1;
-    if (v0 < 0x20) {
-        v1 = v0 * 8;
-        if (v1 < *(u8 *)((u8 *)arg0 + 0x28)) {
-            *(u8 *)((u8 *)arg0 + 0x28) = v1;
+/* Particle updated by func_151AFBD4. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0x1C];
+    /* 0x1C */ s16 timer;
+    /* 0x1E */ u8 pad1E[0xA];
+    /* 0x28 */ u8 alpha;
+} FadeParticle;
+
+/* Fades the particle out over the last 32 frames of its timer. */
+s32 func_151AFBD4(FadeParticle *particle) {
+    s32 fade;
+
+    if (particle->timer < 32) {
+        fade = particle->timer * 8;
+        if (fade < particle->alpha) {
+            particle->alpha = fade;
         }
     }
     return 1;
