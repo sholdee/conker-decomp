@@ -220,70 +220,11 @@ s32 func_150D8E4C(Trail *trail) {
     return 1;
 }
 
-typedef struct {
-    u8 pad0[0x78];
-    u8 unk78;
-    u8 pad79[0x11];
-    u16 unk8A;
-} Stats150D8FAC;
-
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x37];
-    u8 unk3B;
-    u8 pad3C[0x18E];
-    u8 unk1CA;
-    u8 pad1CB[0x151];
-    Stats150D8FAC *unk31C;
-} Actor150D8FAC;
-
-typedef struct {
-    Actor150D8FAC *unk0;
-    u8 unk4;
-    u8 pad5[3];
-    struct17 unk8;
-    struct17 unk14;
-    struct17 unk20;
-    f32 unk2C;
-    s16 unk30;
-    u8 pad32[2];
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    u8 unk4C;
-    u8 unk4D;
-} Payload150D8FAC;
-
-typedef struct {
-    struct17 unk0;
-    struct17 unkC;
-    f32 unk18;
-    u8 unk1C;
-    u8 pad1D[3];
-    f32 unk20;
-} Entry150D8FAC;
-
-typedef struct {
-    u8 pad0[0x10];
-    struct17 unk10;
-    u8 pad1C[9];
-    u8 unk25;
-    u8 pad26[6];
-    s8 unk2C;
-    s8 unk2D;
-    s8 unk2E;
-    u8 pad2F[0x65];
-    Entry150D8FAC *unk94;
-    Payload150D8FAC *unk98;
-} Obj150D8FAC;
-
-s32 func_150D8FAC(Obj150D8FAC *arg0) {
-    Payload150D8FAC *payload;
-    Entry150D8FAC *base;
-    Actor150D8FAC *actor;
+/* Follows the owner and emits new trail points, interpolated over the elapsed time. */
+s32 func_150D8FAC(Trail *trail) {
+    TrailData *data;
+    TrailPoint *points;
+    struct127 *actor;
     struct17 pos;
     struct17 vel;
     f32 time;
@@ -293,51 +234,52 @@ s32 func_150D8FAC(Obj150D8FAC *arg0) {
     struct17 dpos;
     struct17 dvel;
 
-    payload = arg0->unk98;
-    base = arg0->unk94;
-    actor = payload->unk0;
-    if ((actor->unk31C->unk78 != 3) || (actor->unk1CA <= 0)) {
-        func_150D8E1C((Trail *)arg0);
+    data = trail->data;
+    points = trail->points;
+    actor = data->owner;
+    if ((actor->unk31C->unk78 != 3) || (actor->health <= 0)) {
+        func_150D8E1C(trail);
     }
-    if ((actor->unk0 == 0) || (actor->unk3B != payload->unk4)) {
+    if ((actor->interaction_state == 0) || (actor->unique_id != data->ownerId)) {
         return 0;
     }
-    func_150D8B10((f32 *)actor, (f32 *)&pos);
+    func_150D8B10(actor, &pos);
     func_150D8B3C(actor, &vel);
-    arg0->unk10 = pos;
-    if (payload->unk4C & 1) {
+    trail->pos = pos;
+    if (data->flags & 1) {
         flags = actor->unk31C->unk8A;
         if (flags & 0x2000) {
-            payload->unk3C += 0.001379000023f * D_800BE9A4;
-            if (payload->unk3C > 0.04293100163f) {
-                payload->unk3C = 0.04293100163f;
+            data->speedScale += 0.001379000023f * D_800BE9A4;
+            if (data->speedScale > 0.04293100163f) {
+                data->speedScale = 0.04293100163f;
             }
         } else {
-            payload->unk3C -= 0.001379000023f * D_800BE9A4;
-            if (payload->unk3C < 0.01724099927f) {
-                payload->unk3C = 0.01724099927f;
+            data->speedScale -= 0.001379000023f * D_800BE9A4;
+            if (data->speedScale < 0.01724099927f) {
+                data->speedScale = 0.01724099927f;
             }
         }
     }
-    payload->unk34 += 0.380000025f * D_800BE9A4;
-    if (payload->unk34 > 1.0f) {
+    data->pending += 0.380000025f * D_800BE9A4;
+    if (data->pending > 1.0f) {
         struct17 cur;
         struct17 curVel;
         f32 dpx;
         f32 dpy;
         f32 dpz;
         struct17 dvs;
-        inv = 1.0f / payload->unk34;
-        time = payload->unk2C + D_800BE9A4;
-        cur = payload->unk14;
-        curVel = payload->unk20;
+
+        inv = 1.0f / data->pending;
+        time = data->time + D_800BE9A4;
+        cur = data->lastPos;
+        curVel = data->lastVel;
         step = time * inv;
-        dpos.unk0 = pos.unk0 - payload->unk14.unk0;
-        dpos.unk4 = pos.unk4 - payload->unk14.unk4;
-        dpos.unk8 = pos.unk8 - payload->unk14.unk8;
-        dvel.unk0 = vel.unk0 - payload->unk20.unk0;
-        dvel.unk4 = vel.unk4 - payload->unk20.unk4;
-        dvel.unk8 = vel.unk8 - payload->unk20.unk8;
+        dpos.unk0 = pos.unk0 - data->lastPos.unk0;
+        dpos.unk4 = pos.unk4 - data->lastPos.unk4;
+        dpos.unk8 = pos.unk8 - data->lastPos.unk8;
+        dvel.unk0 = vel.unk0 - data->lastVel.unk0;
+        dvel.unk4 = vel.unk4 - data->lastVel.unk4;
+        dvel.unk8 = vel.unk8 - data->lastVel.unk8;
         dpx = dpos.unk0 * inv;
         dpy = dpos.unk4 * inv;
         dpz = dpos.unk8 * inv;
@@ -345,29 +287,30 @@ s32 func_150D8FAC(Obj150D8FAC *arg0) {
         dvs.unk4 = dvel.unk4 * inv;
         dvs.unk8 = dvel.unk8 * inv;
         do {
-            Entry150D8FAC *entry;
+            TrailPoint *point;
 
-            entry = &base[arg0->unk2E];
-            entry->unk0 = cur;
-            entry->unkC.unk0 = payload->unk3C * curVel.unk0;
-            entry->unkC.unk4 = payload->unk3C * curVel.unk4;
-            entry->unkC.unk8 = payload->unk3C * curVel.unk8;
-            entry->unk18 = 0.0f;
-            entry->unk1C = 0xFF;
-            entry->unk20 = 0.0f;
-            func_150D8D84(&entry->unk0, &entry->unkC, time);
-            arg0->unk2E++;
+            point = &points[trail->head];
+            point->pos = cur;
+            point->vel.unk0 = data->speedScale * curVel.unk0;
+            point->vel.unk4 = data->speedScale * curVel.unk4;
+            point->vel.unk8 = data->speedScale * curVel.unk8;
+            point->len = 0.0f;
+            point->alpha = 255;
+            point->texture = 0.0f;
+            func_150D8D84(&point->pos, &point->vel, time);
+            trail->head++;
             time -= step;
-            if (arg0->unk2E == arg0->unk25) {
-                arg0->unk2E = 0;
+            if (trail->head == trail->capacity) {
+                trail->head = 0;
             }
-            arg0->unk2C++;
-            if (arg0->unk2E == arg0->unk2D) {
-                arg0->unk2D++;
-                if (arg0->unk2D == arg0->unk25) {
-                    arg0->unk2D = 0;
+            trail->count++;
+            if (trail->head == trail->tail) {
+                /* buffer full: drop the oldest point */
+                trail->tail++;
+                if (trail->tail == trail->capacity) {
+                    trail->tail = 0;
                 }
-                arg0->unk2C--;
+                trail->count--;
             }
             cur.unk0 += dpx;
             cur.unk4 += dpy;
@@ -375,266 +318,245 @@ s32 func_150D8FAC(Obj150D8FAC *arg0) {
             curVel.unk0 += dvs.unk0;
             curVel.unk4 += dvs.unk4;
             curVel.unk8 += dvs.unk8;
-            payload->unk34 -= 1.0f;
-        } while (payload->unk34 > 1.0f);
-        payload->unk14 = cur;
-        payload->unk20 = curVel;
-        payload->unk2C = time;
+            data->pending -= 1.0f;
+        } while (data->pending > 1.0f);
+        data->lastPos = cur;
+        data->lastVel = curVel;
+        data->time = time;
     }
     return 1;
 }
 
+/* Surface record of a ray hit (passed on to the particle spawners). */
 typedef struct {
-    struct17 pos;
-    u8 padC[0xC];
-    f32 len;
-    u8 alpha;
-    u8 pad1D[3];
-    f32 unk20;
-} Seg150D942C; /* 0x24 */
+    u8 unk0[0x10];
+    u16 unk10;
+} RaySurface;
 
+/* Result of the func_15081690 ray cast. */
 typedef struct {
-    u8 *obj;
-    u8 pad4[0x2C];
-    u16 unk30;
-    u8 pad32[6];
-    f32 unk38;
-} Data150D942C;
-
-typedef struct {
-    u8 pad0[0x10];
-    struct17 pos;
-    u8 pad1C[2];
-    u16 flags;
-    u8 pad20[5];
-    u8 cap;
-    u8 pad26[6];
-    s8 count;
-    s8 tail;
-    s8 head;
-    u8 pad2F[0x94 - 0x2F];
-    Seg150D942C *buf;
-    Data150D942C *data;
-} Self150D942C;
-
-typedef struct {
-    u8 *obj;
+    struct127 *obj;
     f32 dist;
     struct17 pos;
-    u8 pad14[0x45];
-    u8 flag;
-    u8 pad5A[0x68 - 0x5A];
-} Hit150D942C;
+    u8 pad14[0x30];
+    RaySurface surface;
+    u8 pad56[3];
+    u8 hit;             /* 0 none, 1 surface, 2+ object */
+    u8 pad5A[0xE];
+} RayHit;
 
 f32 sqrtf(f32);
-
-
-
 
 extern f32 func_150484A0(f32, f32);
 extern f32 func_15143E64(f32 *);
 extern f32 func_15144528(f32, f32, f32);
-extern void func_15081690(u8 *, s32, s32, s32, f32, f32, f32, Hit150D942C *, f32, s32, s32, s32, s32, s32, s32);
+extern void func_15081690(struct127 *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32, s32, s32);
 extern void func_1505A250(f32, f32, f32, f32 *, f32 *);
-extern void func_1505D024(u8 *, s32, u16, s32);
+extern void func_1505D024(struct127 *, s32, u16, s32);
 extern void func_150DA67C();
 
-#define OB(o, off, T) (*(T *)((u8 *)(o) + (off)))
-
-s32 func_150D942C(Self150D942C *arg0) {
-    s32 sz;
+/*
+ * Walks the trail from newest to oldest point: clamps its total length, ray casts every
+ * segment (hits trim the trail and affect the object hit), then scrolls the texture and
+ * fades the oldest part.
+ */
+s32 func_150D942C(Trail *trail) {
+    s32 count;
     s32 i;
-    f32 acc;
-    f32 sp17C;
-    f32 f24;
-    f32 f2;
-    f32 sp164[3];
-    f32 f0;
-    f32 f12;
-    f32 sp150[3];
-    Hit150D942C spE8;
-    Seg150D942C *buf;
-    Seg150D942C *prev;
-    Data150D942C *data;
-    u8 *obj;
-    u8 *hobj;
-    f32 t16;
-    f32 t18;
-    s32 conv;
-    s32 i2, i3;
-    f32 rcp;
-    f32 spB8;
-    f32 inv;
+    f32 totalLen;
+    f32 pad; // matching: unused stack slot
+    f32 maxLen;
+    f32 excess;
+    f32 delta[3];
+    f32 len;
+    f32 invLen;
+    f32 dir[3];
+    RayHit hit;
+    TrailPoint *points;
+    TrailPoint *prev;
+    TrailData *data;
+    struct127 *owner;
+    struct127 *target;
+    f32 dx;
+    f32 dz;
+    s32 ownerIndex;
+    s32 j, k;
+    f32 invFadeLen;
+    f32 texPos;
+    f32 fadeLen;
 
-    sz = arg0->count;
-    data = arg0->data;
-    buf = arg0->buf;
-    obj = data->obj;
-    if (sz >= 2) {
-        acc = 0.0f;
-        i = arg0->head;
-        if (arg0->flags & 2) {
-            prev = (Seg150D942C *)&arg0->pos;
+    count = trail->count;
+    data = trail->data;
+    points = trail->points;
+    owner = data->owner;
+    if (count >= 2) {
+        totalLen = 0.0f;
+        i = trail->head;
+        if (trail->flags & 2) {
+            prev = (TrailPoint *)&trail->pos;
         } else {
             i -= 1;
             if (i < 0) {
-                i = arg0->cap - 1;
+                i = trail->capacity - 1;
             }
-            prev = &buf[i];
+            prev = &points[i];
         }
-        f24 = 1195.0f;
+        maxLen = 1195.0f;
         do {
-            Seg150D942C *cur;
-            f12 = -9999.0f;
+            TrailPoint *cur;
+
+            invLen = -9999.0f;
             i -= 1;
             if (i < 0) {
-                i = arg0->cap - 1;
+                i = trail->capacity - 1;
             }
-            cur = &buf[i];
-            sp164[0] = cur->pos.unk0 - prev->pos.unk0;
-            sp164[1] = cur->pos.unk4 - prev->pos.unk4;
-            sp164[2] = cur->pos.unk8 - prev->pos.unk8;
-            f0 = func_15143E64(sp164);
-            acc += f0;
-            cur->len = f0;
-            if (f24 < acc) {
+            cur = &points[i];
+            delta[0] = cur->pos.unk0 - prev->pos.unk0;
+            delta[1] = cur->pos.unk4 - prev->pos.unk4;
+            delta[2] = cur->pos.unk8 - prev->pos.unk8;
+            len = func_15143E64(delta);
+            totalLen += len;
+            cur->len = len;
+            if (maxLen < totalLen) {
+                /* too long: cut this segment and drop everything older */
                 if (cur->len != 0) {
-                    f12 = 1.0f / cur->len;
-                    sp150[0] = sp164[0] * f12;
-                    sp150[1] = sp164[1] * f12;
-                    f2 = (acc - f24) * f12;
-                    sp150[2] = sp164[2] * f12;
-                    cur->pos.unk0 = cur->pos.unk0 - sp164[0] * f2;
-                    cur->pos.unk4 = cur->pos.unk4 - sp164[1] * f2;
-                    cur->pos.unk8 = cur->pos.unk8 - sp164[2] * f2;
-                    cur->len = cur->len * (1.0f - f2);
+                    invLen = 1.0f / cur->len;
+                    dir[0] = delta[0] * invLen;
+                    dir[1] = delta[1] * invLen;
+                    excess = (totalLen - maxLen) * invLen;
+                    dir[2] = delta[2] * invLen;
+                    cur->pos.unk0 = cur->pos.unk0 - delta[0] * excess;
+                    cur->pos.unk4 = cur->pos.unk4 - delta[1] * excess;
+                    cur->pos.unk8 = cur->pos.unk8 - delta[2] * excess;
+                    cur->len = cur->len * (1.0f - excess);
                 }
-                acc = f24;
-                if (i != arg0->tail) {
-                    do {
-                        arg0->tail += 1;
-                        if (arg0->tail == arg0->cap) {
-                            arg0->tail = 0;
-                        }
-                        arg0->count -= 1;
-                    } while (i != arg0->tail);
+                totalLen = maxLen;
+                while (i != trail->tail) {
+                    trail->tail += 1;
+                    if (trail->tail == trail->capacity) {
+                        trail->tail = 0;
+                    }
+                    trail->count -= 1;
                 }
             }
 
             if (cur->len != 0.0f) {
-                if (f12 == -9999.0f) {
-                    f12 = 1.0f / cur->len;
-                    sp150[0] = sp164[0] * f12;
-                    sp150[1] = sp164[1] * f12;
-                    sp150[2] = sp164[2] * f12;
+                if (invLen == -9999.0f) {
+                    invLen = 1.0f / cur->len;
+                    dir[0] = delta[0] * invLen;
+                    dir[1] = delta[1] * invLen;
+                    dir[2] = delta[2] * invLen;
                 }
-                func_15081690(obj, *(s32 *)&prev->pos.unk0, *(s32 *)&prev->pos.unk4, *(s32 *)&prev->pos.unk8, sp150[0], sp150[1], sp150[2], &spE8, cur->len, 0, 0, 1, -1, 0, 0);
-                if (spE8.flag != 0) {
-                    func_150DA67C(arg0, &spE8, sp150);
-                    if (spE8.flag >= 2) {
-                        hobj = spE8.obj;
-                        OB(hobj, 0x2EC, s32) = 1;
-                        if (OB(hobj, 4, u8) == 0x3A) {
-                            OB(hobj, 0x232, u8) = 0xA;
-                            OB(hobj, 0x218, s32) = 0;
-                        } else if (OB(hobj, 4, u8) == 0x10 && OB(hobj, 0x251, u8) == 1) {
-                            func_1505A250(OB(hobj, 0x14, f32) - spE8.pos.unk0, OB(hobj, 0x1C, f32) - spE8.pos.unk8, ((1.0f - (acc - 50.0f) * 0.001052631531f) * 0.4550000131f) + 0.2010000050f, &OB(hobj, 0x164, f32), &OB(hobj, 0x168, f32));
-                            if (OB(hobj, 0x232, u8) == 0xF) {
-                                s32 padx;
-                                OB(hobj, 0x218, s32) = 0;
+                func_15081690(owner, prev->pos.unk0, prev->pos.unk4, prev->pos.unk8, dir[0], dir[1], dir[2], &hit, cur->len, 0, 0, 1, -1, 0, 0);
+                if (hit.hit != 0) {
+                    func_150DA67C(trail, &hit, dir);
+                    if (hit.hit >= 2) {
+                        target = hit.obj;
+                        target->unk2EC = 1;
+                        if (target->id == 0x3A) {
+                            target->unk232 = 10;
+                            target->unk218 = NULL;
+                        } else if (target->id == 0x10 && target->unk251 == 1) {
+                            func_1505A250(target->x_position - hit.pos.unk0, target->z_position - hit.pos.unk8,
+                                          ((1.0f - (totalLen - 50.0f) * 0.001052631531f) * 0.4550000131f) + 0.2010000050f,
+                                          &target->unk164, &target->unk168);
+                            if (target->unk232 == 15) {
+                                s32 pad; // matching: -g3 block scope
+                                target->unk218 = NULL;
                             }
-                        } else if (OB(hobj, 4, u8) == 0x10) {
-                            t16 = cur->pos.unk0 - OB(obj, 0x14, f32);
-                            t18 = cur->pos.unk8 - OB(obj, 0x1C, f32);
-                            if (OB(hobj, 0x232, u8) == 0x10) {
-                                OB(hobj, 0x3C, f32) = OB(hobj, 0x3C, f32) * 0.7200000286f;
-                                f2 = 1.0f / (sqrtf(t16 * t16 + t18 * t18) * -0.07000000030f);
-                                func_1505A250(t16 * f2, t18 * f2, 0.7f, &OB(hobj, 0x164, f32), &OB(hobj, 0x168, f32));
+                        } else if (target->id == 0x10) {
+                            dx = cur->pos.unk0 - owner->x_position;
+                            dz = cur->pos.unk8 - owner->z_position;
+                            if (target->unk232 == 16) {
+                                target->xz_velocity = target->xz_velocity * 0.7200000286f;
+                                excess = 1.0f / (sqrtf(dx * dx + dz * dz) * -0.07000000030f);
+                                func_1505A250(dx * excess, dz * excess, 0.7f, &target->unk164, &target->unk168);
                             }
-                            if (OB(hobj, 0x125, u8) == 0) {
-                                s32 pady;
-                                OB(hobj, 0x232, u8) = 0xF;
-                                OB(hobj, 0x218, s32) = 0;
+                            if (target->immune == 0) {
+                                s32 pad; // matching: -g3 block scope
+                                target->unk232 = 15;
+                                target->unk218 = NULL;
                             }
-                        } else if (OB(hobj, 4, u8) == 0x91) {
-                            OB(hobj, 0x232, u8) = 3;
-                            OB(hobj, 0x218, s32) = 0;
-                        } else if (OB(hobj, 4, u8) == 0x90) {
-                            OB(hobj, 0x232, u8) = 0x2C;
-                            OB(hobj, 0x218, s32) = 0;
+                        } else if (target->id == 0x91) {
+                            target->unk232 = 3;
+                            target->unk218 = NULL;
+                        } else if (target->id == 0x90) {
+                            target->unk232 = 44;
+                            target->unk218 = NULL;
                         } else {
-                            conv = (struct127 *)obj - D_800CC2D0;
-                            func_1505D024(hobj, 0xE0036, ((u16)(func_150484A0(sp150[0], sp150[2]) * 10430.37793f) - 0x4000) | 1, conv);
+                            ownerIndex = owner - D_800CC2D0;
+                            func_1505D024(target, 0xE0036, ((u16)(func_150484A0(dir[0], dir[2]) * 10430.37793f) - 0x4000) | 1, ownerIndex);
                         }
                     }
-                    cur->pos = spE8.pos;
-                    acc = acc - cur->len;
-                    cur->len = spE8.dist;
-                    acc += cur->len;
-                    if (i != arg0->tail) {
-                        do {
-                            arg0->tail += 1;
-                            if (arg0->tail == arg0->cap) {
-                                arg0->tail = 0;
-                            }
-                            arg0->count -= 1;
-                        } while (i != arg0->tail);
+                    /* the hit ends the trail here */
+                    cur->pos = hit.pos;
+                    totalLen = totalLen - cur->len;
+                    cur->len = hit.dist;
+                    totalLen += cur->len;
+                    while (i != trail->tail) {
+                        trail->tail += 1;
+                        if (trail->tail == trail->capacity) {
+                            trail->tail = 0;
+                        }
+                        trail->count -= 1;
                     }
-                    if (data->unk30 != 0) {
-                        func_1000F91C(data->unk30, 0x7FFF, 0, 0, 0, (s32)cur->pos.unk0, (s32)cur->pos.unk4, (s32)cur->pos.unk8, 0x1F4, 0x1388);
+                    if (data->sound != 0) {
+                        func_1000F91C(data->sound, 0x7FFF, 0, 0, 0, (s32)cur->pos.unk0, (s32)cur->pos.unk4, (s32)cur->pos.unk8, 500, 5000);
                     }
                 }
             }
             prev = cur;
-        } while (i != arg0->tail);
-        sz = arg0->count;
+        } while (i != trail->tail);
+        count = trail->count;
     }
-    if (sz >= 2) {
-        data->unk38 = data->unk38 + -395.0f * D_800BE9A4;
-        data->unk38 = func_15144528(data->unk38, 16383.0f, -16384.0f);
-        spB8 = 0.0f;
-        i2 = arg0->head;
+    if (count >= 2) {
+        data->texScroll = data->texScroll + -395.0f * D_800BE9A4;
+        data->texScroll = func_15144528(data->texScroll, 16383.0f, -16384.0f);
+        texPos = 0.0f;
+        j = trail->head;
         for (;;) {
-            Seg150D942C *cur2;
-            i2 -= 1;
-            if (i2 < 0) {
-                i2 = arg0->cap - 1;
+            TrailPoint *cur2;
+
+            j -= 1;
+            if (j < 0) {
+                j = trail->capacity - 1;
             }
-            cur2 = &buf[i2];
-            spB8 += cur2->len;
-            cur2->unk20 = func_15144528(data->unk38 + spB8 * 29.02999878f, 16383.0f, -16384.0f);
-            if (i2 != arg0->tail) {
+            cur2 = &points[j];
+            texPos += cur2->len;
+            cur2->texture = func_15144528(data->texScroll + texPos * 29.02999878f, 16383.0f, -16384.0f);
+            if (j != trail->tail) {
                 continue;
             }
             break;
         }
-        sz = arg0->count;
+        count = trail->count;
     }
-    if (sz >= 2) {
-        f0 = 0.0f;
-        t16 = acc * 0.8020000458f;
-        i3 = arg0->head;
-        inv = acc - t16;
-        rcp = 1.0f / inv;
+    if (count >= 2) {
+        /* fade out the oldest 19.8% of the trail */
+        len = 0.0f;
+        dx = totalLen * 0.8020000458f;
+        k = trail->head;
+        fadeLen = totalLen - dx;
+        invFadeLen = 1.0f / fadeLen;
         do {
-            Seg150D942C *cur3;
-            i3 -= 1;
-            if (i3 < 0) {
-                i3 = arg0->cap - 1;
+            TrailPoint *cur3;
+
+            k -= 1;
+            if (k < 0) {
+                k = trail->capacity - 1;
             }
-            cur3 = &buf[i3];
-            f0 += cur3->len;
-            if (t16 < f0) {
-                s32 padz;
-                cur3->alpha = (u32)((inv - (f0 - t16)) * rcp * 155.0f);
+            cur3 = &points[k];
+            len += cur3->len;
+            if (dx < len) {
+                s32 pad; // matching: -g3 block scope
+                cur3->alpha = (u32)((fadeLen - (len - dx)) * invFadeLen * 155.0f);
             } else {
-                cur3->alpha = 0x9B;
+                cur3->alpha = 155;
             }
-        } while (i3 != arg0->tail);
+        } while (k != trail->tail);
     }
     return 1;
 }
-
 
 typedef struct Game105FC0Vec3f {
     f32 x;
