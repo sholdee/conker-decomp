@@ -155,12 +155,12 @@ void func_1507E5C8(Actor *actor, s32 morphDuration) {
         if (record->unk8 != 0) {
             actor->unk68[0] = record->unk8;
         } else {
-            actor->unk68[0] = ((u8 *)D_800D1C90[actor->id])[0x3B];
+            actor->unk68[0] = D_800D1C90[actor->id]->eyeDefault[0];
         }
         if (record->unk9 != 0) {
             actor->unk68[1] = record->unk9;
         } else {
-            actor->unk68[1] = ((u8 *)D_800D1C90[actor->id])[0x3C];
+            actor->unk68[1] = D_800D1C90[actor->id]->eyeDefault[1];
         }
     }
 }

@@ -1,37 +1,7 @@
 #include <ultra64.h>
 
-// variables.h declares several of the symbols below with types that do not fit how this file uses
-// them (model tables are declared as plain s32, ...). Their header declarations are renamed out of
-// the way and redeclared further down.
 #include "functions.h"
-
-#define D_800D1C90 D_800D1C90_hdr
 #include "variables.h"
-#undef D_800D1C90
-
-// One entry of a model's definition table D_800D1C90 (header struct124).
-typedef struct ModelDef {
-    /* 0x00 */ u8 pad0[0x2];
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ u8 subModelCount;
-    /* 0x05 */ u8 subModelList;     // index into D_80086CAC
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ u8 pad8[0x6];
-    /* 0x0E */ u16 unkE;
-    /* 0x10 */ u8 pad10[0x2];
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 pad13[0x16];
-    /* 0x29 */ u8 unk29;
-    /* 0x2A */ u16 unk2A;
-    /* 0x2C */ u8 pad2C[0x7];
-    /* 0x33 */ s8 unk33;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ u8 extraModelCount;
-    /* 0x39 */ u8 unk39;
-    /* 0x3A */ u8 pad3A;
-    /* 0x3B */ u8 unk3B;
-    /* 0x3C */ u8 unk3C;
-} ModelDef;
 
 // One 0x10-byte part of a part set (D_80086CC4): a child object or an attachment.
 typedef struct PartDef {
@@ -77,7 +47,6 @@ typedef struct {
     /* 0x8 */ s32 unk8;
 } ModelReloc;
 
-extern ModelDef *D_800D1C90[187];
 extern f32 D_8009CC3C;  // matching: 20000.0f, but as a literal IDO loads it into a different register
 extern u8 *D_800D210C;
 extern u8 D_800D2100;
@@ -1088,8 +1057,8 @@ void func_150839B8(Actor *obj, s32 modelId, SpawnRecord *spawn) {
         obj->unk2CB = def->unk33;
         obj->unk2CC = def->unk34;
         obj->unk5 = def->unk12;
-        obj->unk68[0] = def->unk3B;
-        obj->unk68[1] = def->unk3C;
+        obj->unk68[0] = def->eyeDefault[0];
+        obj->unk68[1] = def->eyeDefault[1];
         obj->unk160 = def->unk2;
         if (def->subModelCount != 0) {
             obj->modelIds = D_80086CAC[def->subModelList];
@@ -1151,7 +1120,7 @@ Actor *func_15083AC8(Actor *parent, s32 arg1, s32 modelId, s32 arg3, s32 state, 
     func_1503D774(modelId, 0);
     if (arg5 & 1) {
         obj->unkF8 |= 0x4000;
-        obj->unk270 = D_800D1C90[modelId]->unkE * obj->xz_scale;
+        obj->unk270 = D_800D1C90[modelId]->bodyRadius * obj->xz_scale;
     }
     animFlag = 0;
     if (arg5 & 2) {

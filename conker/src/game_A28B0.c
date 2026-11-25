@@ -556,7 +556,7 @@ void func_150768DC(void) {
     f32 nearest;
     s32 i;
     u8 script;
-    struct124 *type;
+    ModelDef *type;
     u8 angle;
     u8 foundIndex;
 
@@ -574,7 +574,7 @@ void func_150768DC(void) {
                 dist = func_1505A72C(D_800D154C, obj);
                 if (dist < nearest) {
                     type = D_800D1C90[D_800D154C->id];
-                    viewAngle = type->unk17;
+                    viewAngle = type->viewAngle;
                     angle = func_1505A630(obj->x_position - D_800D154C->x_position,
                                           D_800D154C->z_position - obj->z_position, 0) >> 8;
                     if (((((D_800D154C->unk76 >> 8) + D_800D154C->unk2CA) - angle + (viewAngle / 2)) & 0xFF) < viewAngle) {

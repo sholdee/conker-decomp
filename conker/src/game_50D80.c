@@ -1161,7 +1161,7 @@ s32 func_1502460C(SeqEvent *event, s32 track, s32 index, s32 eventTime, s32 scen
             D_800C3C8C = 1;
         } else if (event->value == 0x72) {
             if (obj != NULL) {
-                obj->unkC8 = FS16(D_800D1C90[obj->id], 6);
+                obj->unkC8 = D_800D1C90[obj->id]->unk6;
             }
         } else if (event->value == 0x78) {
             D_800C3C8D = 1;

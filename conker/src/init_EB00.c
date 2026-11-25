@@ -1045,7 +1045,7 @@ s32 func_10010FFC(u16 handle, s32 sound, u16 volume, s16 cents, u8 mix, Actor *o
     } else {
         volume = (volume + volume + volume) >> 2;
         if (obj->id != 0xFF) {
-            scale = (u16)D_800D1C90[obj->id]->unkE * obj->xz_scale;
+            scale = D_800D1C90[obj->id]->bodyRadius * obj->xz_scale;
         } else {
             scale = 0.0f;
         }

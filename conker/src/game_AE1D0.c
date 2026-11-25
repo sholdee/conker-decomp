@@ -21,15 +21,6 @@ typedef struct {
     /* 0x8 */ s16 z;
 } HitSphere; /* size 0xA */
 
-/* struct124 (include/structs.h) has the wrong types at 0xE/0x10: the game reads a u16 at
- * 0xE (golden `lhu $t2,0xE($t1)` + the bgez/0x4F800000 unsigned-to-float fixup) and an s16
- * at 0x10 (golden `lh $t6,0x10($t5)`), not an s16 and an s32.  Corrected file-locally. */
-typedef struct {
-    /* 0x00 */ u8  pad0[0xE];
-    /* 0x0E */ u16 body_radius;
-    /* 0x10 */ s16 body_height;
-} ModelBounds;
-
 extern HitSphere *D_80086C60[];
 extern u8 D_8009CBCC[];
 
@@ -52,7 +43,7 @@ s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 a
     f32 dy;
     f32 pos[3];
     f32 dz;
-    ModelBounds *bounds;
+    ModelDef *bounds;
     s32 count;
     MtxF *bones;
     Vec3f local;
@@ -81,10 +72,10 @@ s32 func_15080D20(Actor *self, Actor *obj, s32 type, f32 dist, f32 radius, s32 a
     pos[1] += self->y_position;
     pos[2] += self->z_position;
     id = obj->id;
-    bounds = (ModelBounds *)D_800D1C90[id];
+    bounds = D_800D1C90[id];
     // matching: the body radius reuses `angle`; a separate local shifts IDO's register allocation
-    angle = bounds->body_radius * obj->xz_scale;
-    height = bounds->body_height * obj->y_scale;
+    angle = bounds->bodyRadius * obj->xz_scale;
+    height = bounds->bodyHeight * obj->y_scale;
     dx = pos[0] - obj->x_position;
     dy = pos[1] - (obj->y_position + height);
     dz = pos[2] - obj->z_position;
@@ -178,9 +169,9 @@ s32 func_1508114C(Actor *obj, Vec3f *rayOrigin, Vec3f *rayDir, Vec3f *outNear, V
     count = D_8009CBCC[type];
     *outDist = -1.0f;
     centre.x = obj->x_position;
-    centre.y = ((ModelBounds *)D_800D1C90[obj->id])->body_height * obj->y_scale + obj->y_position;
+    centre.y = D_800D1C90[obj->id]->bodyHeight * obj->y_scale + obj->y_position;
     centre.z = obj->z_position;
-    radius = ((ModelBounds *)D_800D1C90[obj->id])->body_radius * obj->y_scale;
+    radius = D_800D1C90[obj->id]->bodyRadius * obj->y_scale;
     if (func_151452C4(rayOrigin, rayDir, &centre, radius, &near, &far, &tNear, &tFar) == 0) {
         return 0;
     }

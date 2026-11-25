@@ -20,7 +20,7 @@ s32 func_15053430(Actor *obj) {
         return 1;
     }
 
-    flags = D_800D1C90[obj->id]->data.i.unk0;
+    flags = D_800D1C90[obj->id]->flags;
     if ((obj->unk10E != 0) && (obj->unk10E < 0xF0)) {
         func_1505D2B8(obj, 9);
     } else {
@@ -63,7 +63,7 @@ s32 func_150535F4(Actor *obj) {
             func_15060F28(obj, 1);
             return 1;
         }
-        flags = D_800D1C90[obj->id]->data.i.unk0;
+        flags = D_800D1C90[obj->id]->flags;
         if ((flags & 0x10) ||
             ((flags & 8) && (obj->unk28 == 0.0f)) ||
             (obj->unk10F == 0)) {

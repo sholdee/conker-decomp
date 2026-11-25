@@ -51,22 +51,6 @@ typedef struct SpriteParams {
     /* 0xE */ u8 padE[2];
 } SpriteParams;
 
-/* The D_800D1C90 entry fields func_1502E4C4 reads (struct124 is only 0x2C long and has unkE s16,
-   unk10 s32 here). */
-typedef struct ModelBounds {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ u16 radius;
-    /* 0x10 */ s16 centreY;
-    /* 0x12 */ u8 pad12[0x2C];
-    /* 0x3E */ u16 unk3E; // cull distance: 0 = obj->unkE4, 1 = none, else scaled by xz_scale
-} ModelBounds;
-
-/* The D_800D1C90 entry's texture choice per unk6C slot and state. */
-typedef struct ModelTexSlots {
-    /* 0x0 */ u8 pad0[8];
-    /* 0x8 */ u8 texture[2][3];
-} ModelTexSlots;
-
 /* Entries of the D_800C5338[id] texture tables. */
 typedef struct ObjTexture {
     /* 0x0 */ s32 addr;
@@ -1023,12 +1007,12 @@ load:
             {
                 s32 k;
 
-                if (D_800D1C90[id]->data.i.unk1 != 0) {
+                if (D_800D1C90[id]->unk29 != 0) {
                     u8 *p;
 
                     D_800C3FFA = 0;
                     bzero(remapBuf, D_800C4ED0[id]);
-                    p = D_8008422C[D_800D1C90[id]->data.i.unk1];
+                    p = D_8008422C[D_800D1C90[id]->unk29];
                     while (*p != 0xFF) {
                         k = p[0];
                         remapBuf[k] = p[1];
@@ -1267,9 +1251,9 @@ void func_1502E4C4(s32 index) {
         obj->unk74 = D_800CC2D0[obj->unk65 - 1].unk74;
         return;
     }
-    width = (u32)((ModelBounds *)D_800D1C90[id])->radius * obj->xz_scale;
-    height = (u32)((ModelBounds *)D_800D1C90[id])->radius * obj->y_scale;
-    yOffset = (((ModelBounds *)D_800D1C90[id])->centreY + obj->unkCC) * obj->y_scale;
+    width = (u32)D_800D1C90[id]->bodyRadius * obj->xz_scale;
+    height = (u32)D_800D1C90[id]->bodyRadius * obj->y_scale;
+    yOffset = (D_800D1C90[id]->bodyHeight + obj->unkCC) * obj->y_scale;
     obj->unk270 = width;
     range = obj->unk10;
     if (D_800C35EA[0] == 1 && D_800C3660 == 0) {
@@ -1279,12 +1263,12 @@ void func_1502E4C4(s32 index) {
     if (obj->unk101 & 0x80) {
         cullDist = 0.0f;
     } else {
-        if (((ModelBounds *)D_800D1C90[id])->unk3E == 0) {
+        if (D_800D1C90[id]->cullDistance == 0) {
             cullDist = obj->unkE4;
-        } else if (((ModelBounds *)D_800D1C90[id])->unk3E == 1) {
+        } else if (D_800D1C90[id]->cullDistance == 1) {
             cullDist = 0.0f;
         } else {
-            cullDist = (u32)((ModelBounds *)D_800D1C90[id])->unk3E * obj->xz_scale;
+            cullDist = (u32)D_800D1C90[id]->cullDistance * obj->xz_scale;
         }
     }
     for (i = 0; i <= D_80082FA0; i++) {
@@ -1577,7 +1561,7 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
         if (obj->eyeCode[i] >= 10) {
             texIndex[i] = obj->eyeCode[i] - 10;
         } else {
-            texIndex[i] = ((ModelTexSlots *)D_800D1C90[id])->texture[i][obj->eyeCode[i]];
+            texIndex[i] = D_800D1C90[id]->texture[i][obj->eyeCode[i]];
             if (obj->expression && !override) {
                 override = func_1507E908(obj, obj->expression);
             }
@@ -1587,7 +1571,7 @@ Gfx *func_1502F01C(Gfx *gdl, s32 index) {
                 overrideTex[0] = override[0];
                 overrideTex[1] = override[1];
                 if (override != NULL) { // matching: dropping this redundant re-test changes the code
-                    if (overrideTex[i] != ((ModelTexSlots *)D_800D1C90[id])->texture[i][2]) {
+                    if (overrideTex[i] != D_800D1C90[id]->texture[i][2]) {
                         if (obj->eyeCode[i] == 0) {
                             texIndex[i] = overrideTex[i];
                         }

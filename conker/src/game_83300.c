@@ -446,18 +446,6 @@ void func_15056A00(Actor *actor, u8 turn, u8 row) {
         actor->unk138 = 0;
     }
 }
-/* Per actor-type info, D_800D1C90[id] (only the fields used here). */
-typedef struct ActorInfo15056B08 {
-    /* 0x00 */ u8 pad0[0x14];
-    /* 0x14 */ s16 headHeight;
-    /* 0x16 */ u8 pad16;
-    /* 0x17 */ u8 viewAngle; /* width of the spotting cone, in 1/256 turns */
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 pad1A[0xD];
-    /* 0x27 */ u8 headBone;
-} ActorInfo15056B08;
-
 struct216 *func_1507BB28(s32, s32);
 void func_1507BC14(Actor *);
 s32 func_150229E4(Actor *);
@@ -491,7 +479,7 @@ void func_15056B08(Actor *actor) {
     Actor *target;
     f32 arriveDist;
     u8 scanForTargets;
-    ActorInfo15056B08 *info;
+    ModelDef *info;
     f32 dx;
     f32 dz;
     f32 distSqXZ;
@@ -527,7 +515,7 @@ void func_15056B08(Actor *actor) {
         return;
     }
     state = mode;
-    info = (ActorInfo15056B08 *)D_800D1C90[actor->id];
+    info = D_800D1C90[actor->id];
     if (actor->unk23D == 0xFF) {
         rangeSq = 1000000000.0f;
     } else {
@@ -4554,13 +4542,13 @@ void func_15060BE0(Actor *actor) {
     f32 scale;
     f32 offX;
     s32 done;
-    ActorInfo15056B08 *info;
+    ModelDef *info;
     f32 (*bone)[4];
 
     done = FALSE;
     if (actor->id != 0xFF) {
         if ((actor->unk1D4 != 0) && (D_800C3E90 == 0)) {
-            info = (ActorInfo15056B08 *)D_800D1C90[actor->id];
+            info = D_800D1C90[actor->id];
             bone = (f32 (*)[4])((u8 *)actor->unk1D4 + (info->headBone << 6)); /* 4x4 float matrices */
             height = (f32)info->headHeight * actor->y_scale;
             if (height) {
@@ -5200,7 +5188,7 @@ s32 func_150623F4(Actor *actor) {
         }
     }
     id = actor->id;
-    height = *(s16 *)((u8 *)D_800D1C90[id] + 0x10) * actor->y_scale;
+    height = D_800D1C90[id]->bodyHeight * actor->y_scale;
     for (i = 0; i <= D_80082FA0; i++) {
         hidden = 1;
         if (func_150A6360(i * 0x180 + (u8 *)D_800BE628, D_800D9C10[i], actor->x_position,
@@ -5337,7 +5325,7 @@ void func_15062B84(Actor *actor) {
 
 /* Sets the actor's scale and rescales its hit and body cylinders from the type info. */
 void func_15062BDC(Actor *actor, f32 xzScale, f32 yScale) {
-    struct124 *info;
+    ModelDef *info;
 
     actor->xz_scale = xzScale;
     actor->y_scale = yScale;

@@ -149,13 +149,6 @@ ReflectionEntry *func_150356C8(void) {
 }
 
 
-/* Per model-type bounds, D_800D1C90[id] (only the fields used here). */
-typedef struct ModelBounds {
-    /* 0x00 */ u8 pad0[0xE];
-    /* 0x0E */ u16 body_radius;
-    /* 0x10 */ s16 body_height;
-} ModelBounds;
-
 s32 func_150A6360(s32, void *, f32, f32, f32, f32, f32, f32);
 
 /*
@@ -169,19 +162,19 @@ s32 func_15035714(s32 mode, Actor *obj, f32 (*mtx)[4], f32 planeY) {
     f32 radius;
     f32 y;
     s32 recp;
-    ModelBounds *bounds;
+    ModelDef *bounds;
     s32 id;
     f32 delta;
 
     recp = (s32)D_800BE628;
     id = obj->id;
-    bounds = (ModelBounds *)D_800D1C90[id];
-    radius = bounds->body_radius;
+    bounds = D_800D1C90[id];
+    radius = bounds->bodyRadius;
     radiusXZ = radius;
     radiusY = radius;
     radiusXZ *= obj->xz_scale;
     radiusY *= obj->y_scale;
-    height = bounds->body_height * obj->y_scale;
+    height = bounds->bodyHeight * obj->y_scale;
     if (mode == 1 || mode == 0) {
         delta = (obj->y_position + height) - planeY;
         y = planeY - delta;

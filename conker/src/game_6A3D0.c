@@ -52,7 +52,6 @@ extern u16 D_800C4778[];      // display-list parts
 extern u16 D_800C5628[];      // textures count
 extern u16 D_800C4ED0[];      // bone count
 extern s16 D_800C5918[];      // triangle weight, see func_1503D984
-extern struct124 *D_800D1C90[]; // see func_1503D774
 // D_800C5C08 / D_800C6070 (vertex runs / triangle list, built by func_150028BC) keep variables.h's s32.
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
@@ -331,7 +330,7 @@ s32 func_1503D660(s32 id, s32 arg1) {
 /* Loads model id's D_800D1C90 entry, unless it is already loaded. Returns 0, or 2 if it is missing. */
 s32 func_1503D774(s32 id, s32 arg1) {
     u32 size;
-    struct124 *table;
+    ModelDef **table;
 
     if (D_800D1C90[id] != NULL) {
         return 0;
@@ -343,8 +342,8 @@ s32 func_1503D774(s32 id, s32 arg1) {
         return 2;
     } else {
         // the original stores the table, then replaces it with its first entry
-        D_800D1C90[id] = table;
-        D_800D1C90[id] = table->unk0;
+        D_800D1C90[id] = (ModelDef *)table;
+        D_800D1C90[id] = *table;
     }
     return 0;
 }

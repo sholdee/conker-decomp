@@ -690,8 +690,8 @@ void func_1506BF5C(void) {
     sound = D_800D1580 & 0x7FF;
     id = D_800D154C->id;
     ownerFilter = (u32)D_800D1580 >> 24;
-    if (D_800D1C90[id]->unk4 != 0) {
-        owner = *D_80086CAC[(u8)D_800D1C90[id]->unk5];
+    if (D_800D1C90[id]->subModelCount != 0) {
+        owner = *D_80086CAC[D_800D1C90[id]->subModelList];
     } else {
         owner = id;
     }

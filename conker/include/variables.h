@@ -1049,7 +1049,7 @@ extern u8  D_800D1995;
 extern u16 *D_800D1998; // sound effects voiced while the text types out
 
 extern u8 *D_800D19A0[187]; // per model id: model data (just past its header)
-extern struct124 *D_800D1C90[187]; // 748 bytes, 187 pointers? 17 structs?
+extern ModelDef *D_800D1C90[187];
 extern u8  D_800D1F80[187];
 extern u8  D_800D2040[187]; // per model id counter
 extern SpawnRecord *D_800D20FC;

@@ -911,6 +911,50 @@ struct struct124 {
     } data;
 }; // size 0x2C
 
+/* Per model-type definition, D_800D1C90[id] (loaded by func_1503D774; freed by func_15084558 with its
+ * allocation starting 0x10 bytes earlier). An ExpressionTableHeader (game_AB760) sits 8 bytes before it.
+ * Only the fields the code reads are typed; the full size is unknown (at least 0x40). */
+typedef struct ModelDef {
+    /* 0x00 */ s16 aimHeight;       // aim top point, above the aim bone (func_1503A08C)
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ u8  subModelCount;
+    /* 0x05 */ u8  subModelList;    // index into D_80086CAC
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ u8  texture[2][3];   // texture per eye slot (Actor.unk6C) and state
+    /* 0x0E */ u16 bodyRadius;
+    /* 0x10 */ s16 bodyHeight;
+    /* 0x12 */ u8  unk12;
+    /* 0x13 */ u8  pad13;
+    /* 0x14 */ s16 headHeight;
+    /* 0x16 */ u8  pad16;
+    /* 0x17 */ u8  viewAngle;       // width of the spotting cone, in 1/256 turns
+    /* 0x18 */ u8  unk18;
+    /* 0x19 */ u8  unk19;
+    /* 0x1A */ s16 unk1A;           // body cylinder (Actor.unkE4/E6/E8)
+    /* 0x1C */ s16 unk1C;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;           // hit cylinder (Actor.unkD2/D4/D6)
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ s16 unk24;
+    /* 0x26 */ u8  aimBone;
+    /* 0x27 */ u8  headBone;
+    /* 0x28 */ u8  flags;
+    /* 0x29 */ u8  unk29;
+    /* 0x2A */ u16 unk2A;
+    /* 0x2C */ s8  headYaw[2];      // head turn range: yaw one way / the other (func_1503A830)
+    /* 0x2E */ s8  headPitch[2];    // pitch up / down
+    /* 0x30 */ s8  aimReach;        // aim point along the aim bone's z axis
+    /* 0x31 */ u8  pad31[2];
+    /* 0x33 */ s8  unk33;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ u8  extraModelCount;
+    /* 0x39 */ u8  unk39;
+    /* 0x3A */ u8  aimHalfWidth;    // aim side points along the aim bone's x axis
+    /* 0x3B */ u8  eyeDefault[2];   // default Actor.unk68[0..1]
+    /* 0x3D */ u8  pad3D;
+    /* 0x3E */ u16 cullDistance;    // 0 = Actor.unkE4, 1 = never culled, else scaled by xz_scale
+} ModelDef;
+
 typedef struct {
     s16 unk0;
     s16 unk2;       // used

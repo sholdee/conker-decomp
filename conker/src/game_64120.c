@@ -1501,22 +1501,6 @@ void func_15039ED0(s32 limitIdx, f32 *yaw, f32 *pitch, f32 *prevYaw, f32 *prevPi
     }
 }
 
-/* Per-type object definitions in D_800D1C90 (include/structs.h types that array as struct124, which does not
- * match these offsets); only the fields used here. */
-typedef struct {
-    /* 0x00 */ s16 unk0; /* aim height above the bone */
-    /* 0x02 */ u8 pad2[0x24];
-    /* 0x26 */ u8 unk26; /* bone the aim points are taken from */
-    /* 0x27 */ u8 pad27[5];
-    /* 0x2C */ s8 unk2C; /* head turn range, yaw left/right and pitch up/down (see func_1503A830) */
-    /* 0x2D */ s8 unk2D;
-    /* 0x2E */ s8 unk2E;
-    /* 0x2F */ s8 unk2F;
-    /* 0x30 */ s8 unk30; /* aim reach along the bone's z axis */
-    /* 0x31 */ u8 pad31[9];
-    /* 0x3A */ u8 unk3A; /* aim half-width along the bone's x axis */
-} ObjTypeDef;
-
 s32 func_1503D774(s32 arg0, s32 arg1);
 void func_1507C3E0(Actor *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
 
@@ -1526,7 +1510,7 @@ void func_1507C3E0(Actor *arg0, s16 *arg1, s16 *arg2, s16 *arg3);
  * dir. Objects without that bone data get points from their position and func_1507C3E0's height.
  */
 void func_1503A08C(Actor *obj) {
-    ObjTypeDef *def;
+    ModelDef *def;
     f32 (*bone)[4];
     f32 vx;
     f32 vy;
@@ -1549,11 +1533,11 @@ void func_1503A08C(Actor *obj) {
     if (obj->id != 0xFF) {
         if ((obj->unk1D4 != NULL) && (D_800D1C90[obj->id] != NULL)) {
             if (func_1503D774(obj->id, 0) == 0) {
-                def = (ObjTypeDef *)D_800D1C90[obj->id];
+                def = D_800D1C90[obj->id];
                 bone = (f32 (*)[4])obj->unk1D4;
-                bone = ((MtxF *)bone)[def->unk26]; // matching: two steps; one OBJ_BONES() index mismatches
+                bone = ((MtxF *)bone)[def->aimBone]; // matching: two steps; one OBJ_BONES() index mismatches
                 scale = obj->y_scale;
-                width = def->unk3A * scale;
+                width = def->aimHalfWidth * scale;
                 if (width != 0) {
                     vx = bone[0][0];
                     vy = bone[0][1];
@@ -1574,7 +1558,7 @@ void func_1503A08C(Actor *obj) {
                     sideY = 0.0f;
                     sideX = 0.0f;
                 }
-                len = def->unk0 * scale;
+                len = def->aimHeight * scale;
                 if (len != 0) {
                     vx = bone[1][0];
                     vy = bone[1][1];
@@ -1592,7 +1576,7 @@ void func_1503A08C(Actor *obj) {
                 vx = bone[2][0];
                 vy = bone[2][1];
                 vz = bone[2][2];
-                len = def->unk30 * scale;
+                len = def->aimReach * scale;
                 if (len != 0) {
                     mag = sqrtf(vx * vx + vy * vy + vz * vz);
                     if (mag != 0) {
@@ -1628,9 +1612,9 @@ void func_1503A08C(Actor *obj) {
                 obj->aim.side[1][2] = obj->aim.z - sideZ + upZ;
             }
         } else {
-            def = (ObjTypeDef *)D_800D1C90[obj->id];
+            def = D_800D1C90[obj->id];
             if (def != NULL) {
-                topHeight = def->unk0;
+                topHeight = def->aimHeight;
             } else {
                 topHeight = 0;
             }
@@ -1723,7 +1707,6 @@ void func_1503A7F0(void) {
 f32 func_150489B0(u8);
 s32 func_15022024(f32 *, f32 *, s32, s32);
 
-#define OBJ_DEF(id) ((ObjTypeDef *)D_800D1C90[id])
 
 #define CLAMP(x, lo, hi) ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))
 #define ABS(x) ((x) < 0 ? -(x) : (x))
@@ -1767,7 +1750,7 @@ void func_1503A830(Actor *obj) {
     s32 speed;
     s32 aim;
     s32 noHolderTarget;
-    ObjTypeDef *unusedDef; // matching: -g3 stack slot
+    ModelDef *unusedDef; // matching: -g3 stack slot
 
     if (obj->unk1D4 == NULL) {
         return;
@@ -2028,11 +2011,11 @@ void func_1503A830(Actor *obj) {
     if (D_800D1C90[id] == NULL) {
         return;
     }
-    yaw0 = (yaw[0] >= 0.0f) ? OBJ_DEF(id)->unk2D * yaw[0] / 45.0f : OBJ_DEF(id)->unk2C * yaw[0] / -45.0f;
-    yaw1 = (yaw[1] >= 0.0f) ? OBJ_DEF(id)->unk2C * yaw[1] / 45.0f : OBJ_DEF(id)->unk2D * yaw[1] / -45.0f;
+    yaw0 = (yaw[0] >= 0.0f) ? D_800D1C90[id]->headYaw[1] * yaw[0] / 45.0f : D_800D1C90[id]->headYaw[0] * yaw[0] / -45.0f;
+    yaw1 = (yaw[1] >= 0.0f) ? D_800D1C90[id]->headYaw[0] * yaw[1] / 45.0f : D_800D1C90[id]->headYaw[1] * yaw[1] / -45.0f;
     yaw1 = -yaw1;
-    pitch0 = (pitch[0] >= 0.0f) ? OBJ_DEF(id)->unk2E * pitch[0] / 30.0f : OBJ_DEF(id)->unk2F * pitch[0] / -15.0f;
-    pitch1 = (pitch[1] >= 0.0f) ? OBJ_DEF(id)->unk2E * pitch[1] / 30.0f : OBJ_DEF(id)->unk2F * pitch[1] / -15.0f;
+    pitch0 = (pitch[0] >= 0.0f) ? D_800D1C90[id]->headPitch[0] * pitch[0] / 30.0f : D_800D1C90[id]->headPitch[1] * pitch[0] / -15.0f;
+    pitch1 = (pitch[1] >= 0.0f) ? D_800D1C90[id]->headPitch[0] * pitch[1] / 30.0f : D_800D1C90[id]->headPitch[1] * pitch[1] / -15.0f;
     APPROACH(obj->unk27A[0], (s32)yaw1);
     APPROACH(obj->unk27A[1], (s32)yaw0);
     APPROACH(obj->unk27E[0], (s32)pitch1);
