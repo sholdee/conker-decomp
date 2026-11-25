@@ -191,7 +191,7 @@ typedef struct Func151994B8Desc {
 void func_151994B8(s32 arg0, Func151994B8Desc *arg1, s32 arg2, s32 arg3);
 
 /* matching: four scalars, not s32[4] (an array gets an 8-aligned, larger frame) */
-struct func_1506C32C_stack {
+struct SoundChoices {
     s32 sound0;
     s32 sound1;
     s32 sound2;
@@ -840,7 +840,7 @@ void func_1506BF5C(void) {
  */
 void func_1506C32C(void) {
     s32 cmd;
-    struct func_1506C32C_stack sounds;
+    struct SoundChoices sounds;
     s32 index;
     s32 sound;
 
