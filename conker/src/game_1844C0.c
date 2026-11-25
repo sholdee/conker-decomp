@@ -103,7 +103,7 @@ extern s32 func_1515D480(s32);
 extern s32 func_1515D440(void);
 extern s32 (*D_8008AD90[])(Effect *);
 extern s32 (*D_8008ADA0[])(Effect *);
-extern void func_1503F4B0(ModelInstance *, Effect *, u8);
+extern void func_1503F4B0(ModelInstance *);
 /*
  * Spawns a model effect from `params`, with `extraSize` bytes of extension at 0x120. The object type
  * is 0x5B or 0x4C when params->flags has 0x80 or 0x10 set, else 0x36.
@@ -192,9 +192,9 @@ void func_1515728C(Effect *fx) {
  * when its lifetime runs out or a callback returns 0.
  */
 void func_151572D0(Effect *fx) {
-    register s32 value;
-    register u8 dead;
-    register s16 lifetime;
+    s32 value; // matching: one local for both callback indices and the faded alpha
+    u8 dead;
+    s16 lifetime;
 
     dead = FALSE;
     if (fx->params.flags & 1) {
@@ -217,12 +217,10 @@ void func_151572D0(Effect *fx) {
             }
         }
     }
-    if (dead) {
-    } else {
-        func_1503F4B0(fx->model, fx, dead);
+    if (!dead) {
+        func_1503F4B0(fx->model);
     }
-    if (dead) {
-    } else if (fx->params.flags & 0x20) {
+    if (!dead && (fx->params.flags & 0x20)) {
         lifetime = fx->params.lifetime;
         if (lifetime < fx->params.fadeStart) {
             value = lifetime * fx->params.fadeRate;
@@ -330,15 +328,13 @@ s32 func_15157860(Effect *fx) {
 Effect *func_15157898(EffectParams *params, EffectExtra *extra, s32 arg2, f32 arg3, s32 attachArg, s32 arg5,
                       s32 extraSize, u8 owner, s32 list) {
     Effect *fx;
-    Effect *ret;
 
     fx = func_15157010(params, arg2, arg3, attachArg, arg5, extraSize + sizeof(EffectExtra), owner, list);
     if (fx == NULL) {
         return NULL;
     }
-    ret = fx;
     memcpy(&fx->extra, extra, sizeof(EffectExtra));
-    return ret;
+    return fx;
 }
 
 /* Update callback (D_8008ADA0[1]): root matrix = rotation extra.rot, uniform scale, translation pos. */
