@@ -69,8 +69,9 @@ extern s32 func_151DCEF0(OSMesgQueue *mq, u8 block, u8 *buffer, s32 size); /* ti
 extern s32 func_151DD4E0(OSMesgQueue *mq, u8 block, u8 *buffer);           /* write one block */
 extern void func_151DD9E4(void);
 extern void func_151E7EF8(void);
-extern void *func_1502B5C8();
+extern void *func_1502B5C8(u32 *size, s32 depth, ...); /* loads ROM table data */
 
+/* Resets the saved game state (func_15017790, every D_800C3A60 entry and the values saved with them). */
 void func_150064E0(void) {
     s32 i;
 
@@ -81,7 +82,6 @@ void func_150064E0(void) {
     D_800BE3E8 = 0;
     D_800D2E45 = 1;
 }
-
 
 /*
  * Loads EEPROM save file `eepromSlot` (0-3) into the game state. A file whose checksum fails resets the
@@ -230,7 +230,7 @@ void func_15006BEC(s32 saveSlot) {
     u16 sum;
 
     sequence = (D_800BE3F8[saveSlot].sequence + 1) & 0x7FFFFFFF;
-    j = -1; /* free EEPROM save files */
+    j = -1; /* bit mask of free EEPROM save files; matching: reuses j, a separate local allocates differently */
     for (i = 0; i < 3; i++) {
         if (D_800BE3F8[i].sequence >= 0) {
             j &= ~(1 << D_800BE3F8[i].eepromSlot);
@@ -260,15 +260,15 @@ void func_15006BEC(s32 saveSlot) {
     *p++ = sequence & 0xFF;
     for (i = 0; i < 27; i++) { *p++ = ((u8 *)D_800D2E4C)[i]; }
     for (i = 0; i < 9; i++) { *p++ = D_800D2E60[i]; }
-    *p++ = *(s8 *)&D_800BE3DF;
+    *p++ = *(s8 *)&D_800BE3DF; // matching: original loads it signed (lb)
     *p++ = D_800BE3E0;
     D_800BE3E4 = func_150859AC(0, 6);
     *p++ = (D_800BE3E4 >> 8) & 0xFF;
-    *p++ = (D_800BE3E4) & 0xFF;
+    *p++ = D_800BE3E4 & 0xFF;
     *p++ = ((u32)D_800BE3E8 >> 24) & 0xFF;
     *p++ = ((u32)D_800BE3E8 >> 16) & 0xFF;
     *p++ = ((u32)D_800BE3E8 >> 8) & 0xFF;
-    *p++ = (D_800BE3E8) & 0xFF;
+    *p++ = D_800BE3E8 & 0xFF;
     for (i = 0; i < 69; i++) { p[i] = 0; }
     byte = 0;
     bit = 0x80;
