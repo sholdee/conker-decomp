@@ -12,15 +12,6 @@ extern void func_1510F800(s32);
 s32 func_151BE850(Vec3f *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6);
 s32 func_15149550(void *, s32, s32, u8, u8, s32);
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
-typedef struct {
-    s8 unk0;
-    u8 pad1[3];
-    Vec3f unk4;
-    Vec3f unk10;
-    f32 unk1C;
-    s8 unk20;
-    u8 pad21[3];
-} Struct150156F4Payload;
 
 typedef struct {
     f32 unk0;
@@ -1129,7 +1120,7 @@ s32 func_15015644(TriggerZone *obj) {
 s32 func_150156F4(TriggerZone *obj) {
     Vec3f points[2];
     MtxF mtx;
-    Struct150156F4Payload payload;
+    RopeSpawn payload;
 
     if (D_800BE9F0 == 0xB) {
         if (obj->unk18 < 6U) {
@@ -1155,14 +1146,14 @@ s32 func_150156F4(TriggerZone *obj) {
     points[0].x = obj->x;
     points[0].y = obj->y;
     points[0].z = obj->z;
-    payload.unk0 = obj->unk18;
+    payload.id = obj->unk18;
 
-    /* unk4 gets the higher end, unk10 the lower */
-    payload.unk4 = points[points[0].y < points[1].y];
-    payload.unk10 = points[points[1].y < points[0].y];
+    /* the higher end is the top */
+    payload.ends.top = points[points[0].y < points[1].y];
+    payload.ends.bottom = points[points[1].y < points[0].y];
 
     payload.unk20 = 0;
-    payload.unk1C = fabsf(points[1].y - points[0].y);
+    payload.length = fabsf(points[1].y - points[0].y);
     func_151ACBD4(&payload, 0);
 
     return 1;

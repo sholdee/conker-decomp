@@ -53,14 +53,13 @@ dummy_label_15010880:
 // }
 
 void func_150109D0(void) {
-    struct179 tmp;
+    RopeSpawn tmp;
 
     tmp.unk20 = 0;  
-    //D_80096430 listed as (struct180*), but used as (struct180) here;
-    tmp.unk4 = *((struct180*) &D_80096430); 
+    tmp.ends = D_80096430;
 
-    tmp.unk0 = 1;
-    tmp.unk1C = fabsf(tmp.unk4.unk4 - tmp.unk4.unk10); 
+    tmp.id = 1;
+    tmp.length = fabsf(tmp.ends.top.y - tmp.ends.bottom.y); 
     func_151ACBD4(&tmp, 0);
     func_150E8854();
 }

@@ -610,8 +610,8 @@ extern f32 D_8009623C;
 extern f32 D_80096240;
 extern f32 D_80096244;
 
-extern f32 *D_800963A0;
-extern struct180 *D_80096430; // 6 x s32?
+extern RopeEnds D_800963A0[6];
+extern RopeEnds D_80096430;
 
 extern f32 D_80096530;
 extern f32 D_80096534;

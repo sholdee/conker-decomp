@@ -2982,22 +2982,21 @@ typedef struct {
     u8 pad5[3];
 } VtxMorphFrame;
 
-typedef struct {
-    s32 unk0;
-    f32 unk4;
-    s32 unk8;
-    s32 unkC;
-    f32 unk10;
-    s32 unk14;
-} struct180; // size 0x18
+/* The two end points of a rope (level data such as D_80096320), higher end first. */
+typedef struct RopeEnds {
+    /* 0x00 */ Vec3f top;
+    /* 0x0C */ Vec3f bottom;
+} RopeEnds; /* size 0x18 */
 
-typedef struct {
-    s8  unk0;
-    u8  pad[0x3];
-    struct180 unk4;
-    f32 unk1C;
-    s8  unk20;
-} struct179;
+/* Spawn data of a rope; func_151ACBD4 (game_1D9F10.c) copies it into the new Rope from its id field on. */
+typedef struct RopeSpawn {
+    /* 0x00 */ s8 id;
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ RopeEnds ends;
+    /* 0x1C */ f32 length;     /* |top.y - bottom.y| */
+    /* 0x20 */ s8 unk20;
+    /* 0x21 */ u8 pad21[3];
+} RopeSpawn; /* size 0x24 */
 
 typedef struct {
     u8 pad[0x170];
