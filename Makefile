@@ -76,8 +76,11 @@ $(BUILD_DIR)/%.bin.o: %.bin
 $(TARGET).bin: $(TARGET).elf
 	$(OBJCOPY) $(OBJCOPYFLAGS) -O binary $< $@
 
+# n64crc.py writes the header checksums the boot code verifies. For a matching ROM they are unchanged;
+# a ROM built from changed code needs them to boot on hardware.
 $(TARGET).z64: $(TARGET).bin
 	@cp $< $@
+	@$(PYTHON) tools/n64crc.py $@ >/dev/null
 
 # combine
 $(GAME_DIR)/$(BASENAME).$(VERSION).bin: $(BIN_DIR)/game.$(VERSION).bin
