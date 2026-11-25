@@ -3197,19 +3197,6 @@ typedef struct {
 } struct202;
 
 typedef struct {
-    s16 unk0;
-    s16 unk2;
-    s16 unk4;
-} struct203;
-
-typedef struct {
-    u8 pad0[0x28];
-    struct203 *unk28;
-    u8  pad2C[0x8];
-    u8  unk34;
-} struct204;
-
-typedef struct {
     u16 unk0;
     u16 unk2;
     u16 unk4;
