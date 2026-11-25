@@ -5,21 +5,6 @@
 
 void func_151541B8(Vec3f *, f32, f32, f32, f32, u8, s32);
 
-typedef struct {
-    /* 0x00 */ u8 pad00[0x4F];
-    /* 0x4F */ u8 unk4F; /* (unk4F & 0x60) == 0x40: bullets pass through */
-} RayHitPart;
-
-/* A surface hit record: the floor under a point, or the first pass-through surface of a bullet trace. */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ CollisionTri surface;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s8  unk1C;
-    /* 0x1D */ s8  unk1D;
-    /* 0x20 */ RayHitPart *part;
-} SurfaceHit;
-
 /* Fills in the impact particle parameters; fewer particles on busy frames. */
 void func_151BFC40(JetSpray *config, f32 *scale) {
     config->countBase = 3;
@@ -53,8 +38,8 @@ void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_1514FB98(DirectedJetSpray *, u8, s32);
 void func_1514FBFC(SurfaceJetSpray *, u8, s32);
 void func_1514FCE8(JetSpraySpec *, u8, s32);
-void func_1504715C(SurfaceHit *, Actor *);
-s32 func_15046C80(Vec3f *, s32, f32, SurfaceHit *);
+void func_1504715C(CollisionHit *, Actor *);
+s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
 void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList);
 s32 func_15144E80(CollisionTri *, Vec3f *, Vec3f *, Vec3f *);
@@ -124,7 +109,7 @@ void func_151BFE84(CollisionTri *surface, Vec3f *pos, Vec3f *dir, u8 withParticl
 void func_151C0098(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwner, s32 fxList) {
     JetSpraySpec fx;
     Vec3f probe;
-    SurfaceHit floor;
+    CollisionHit floor;
     Vec3f markPos;
 
     func_151C0418(pos, fxOwner, fxList);
@@ -172,7 +157,7 @@ void func_151C0098(Vec3f *pos, Actor *hitObj, u8 withParticles, u8 fxOwner, s32 
             markPos.x = probe.x;
             markPos.y = floor.height;
             markPos.z = probe.z;
-            func_151C0360(&floor.surface, &markPos, fxOwner, fxList);
+            func_151C0360(&floor.tri, &markPos, fxOwner, fxList);
             func_151C0644(pos, fxOwner, fxList);
         }
     }
@@ -273,7 +258,7 @@ typedef struct {
     /* 0x59 */ u8  hitType; /* 0: nothing, 1: end of trace, >= 2: hit */
     /* 0x5A */ u8  unk5A;
     /* 0x5B */ u8  pad5B;
-    /* 0x5C */ RayHitPart *part;
+    /* 0x5C */ WorldObject *part;
     /* 0x60 */ s32 unk60;
 } RayHit;
 
@@ -310,7 +295,7 @@ typedef struct {
     /* 0x093 */ u8 pad93;
     /* 0x094 */ f32 passTimer;
     /* 0x098 */ Vec3f passPos;
-    /* 0x0A4 */ SurfaceHit pass;
+    /* 0x0A4 */ CollisionHit pass;
     /* 0x0C8 */ u8 flags; /* bit 0: the trace went through a pass-through surface */
     /* 0x0C9 */ u8 padC9[3];
     /* 0x0CC */ s32 mode;
@@ -355,7 +340,7 @@ void func_151C1798(Actor *obj, Vec3f *pos);
 void func_151C1860(Vec3f *pos, u8 fxOwner, s32 fxList);
 s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *aimDir,
                   Actor *shooter, IgnoreList *ignore, Vec3f *passPos, f32 *passDist,
-                  SurfaceHit *pass, s32 mode);
+                  CollisionHit *pass, s32 mode);
 s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
 
 /* Fires a bullet from shooter (aimed by aimer's view, if given) and spawns its object and effects. */
@@ -363,7 +348,7 @@ void func_151C0698(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactTy
     RayHit ray;
     f32 passDist;
     Vec3f passPos;
-    SurfaceHit pass;
+    CollisionHit pass;
     u8 useAim;
     Vec3f pos;
     Vec3f dir;
@@ -584,7 +569,7 @@ void func_15055A2C(s32, f32, f32, f32, s32);
 void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface);
 void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32,
                    IgnoreList *, s32);
-s32 func_151ABE40(Vec3f *, SurfaceHit *, s32, s32, s32);
+s32 func_151ABE40(Vec3f *, CollisionHit *, s32, s32, s32);
 
 /* Per-frame bullet update: moves it, traces for hits and spawns the impact. Returns FALSE when it is done. */
 s32 func_151C1180(Bullet *bullet) {
@@ -783,7 +768,7 @@ s32 func_151C1940(Actor *obj, Actor *self, IgnoreList *ignore) {
 }
 
 void func_151C1D5C(Actor *, Vec3f *, Vec3f *, RayHit *, f32, s32, s32, s32, s8,
-                   IgnoreList *, Vec3f *, f32 *, SurfaceHit *, s32);
+                   IgnoreList *, Vec3f *, f32 *, CollisionHit *, s32);
 s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
 
 /*
@@ -793,7 +778,7 @@ s32 func_15145128(Vec3f *, Vec3f *, f32 *, f32 *);
  */
 s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *aimDir,
                   Actor *shooter, IgnoreList *ignore, Vec3f *passPos, f32 *passDist,
-                  SurfaceHit *pass, s32 mode) {
+                  CollisionHit *pass, s32 mode) {
     u8 trace;
     u8 hit;
     Vec3f *src;
@@ -869,8 +854,8 @@ s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *a
  */
 void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 arg4,
                    s32 arg5, s32 arg6, s32 arg7, s8 arg8, IgnoreList *ignore, Vec3f *passPos,
-                   f32 *passDist, SurfaceHit *pass, s32 mode) {
-    RayHitPart *part;
+                   f32 *passDist, CollisionHit *pass, s32 mode) {
+    WorldObject *part;
     Vec3f pos;
     f32 dist;
     s32 more;
@@ -884,9 +869,9 @@ void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 ar
                       arg6, arg7, arg8, ignore, mode);
         dist += ray->dist;
         if (ray->part != NULL) {
-            RayHitPart *p = ray->part;
+            WorldObject *p = ray->part;
 
-            if ((p->unk4F & 0x60) == 0x40) {
+            if ((p->flags & 0x60) == 0x40) {
                 pos.x = ray->hitPos.x + ray->dir.x * 0.1f;
                 part = p;
                 pos.y = ray->hitPos.y + ray->dir.y * 0.1f;
@@ -895,11 +880,11 @@ void func_151C1D5C(Actor *shooter, Vec3f *start, Vec3f *dir, RayHit *ray, f32 ar
                 *passDist = dist;
                 dist += 0.1f;
                 pass->height = ray->hitPos.y;
-                pass->surface = ray->surface;
-                pass->unk18 = ray->unk60;
-                pass->unk1C = 7;
-                pass->unk1D = 3;
-                pass->part = part;
+                pass->tri = ray->surface;
+                pass->material = ray->unk60;
+                pass->flags = 7;
+                pass->source = 3;
+                pass->surface = part;
                 more = TRUE;
             } else {
                 more = FALSE;

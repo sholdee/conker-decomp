@@ -715,21 +715,10 @@ typedef struct {
     /* 0x1C */ Actor *owner;
 } BloodStrip;
 
-/* Ground probe result filled by func_1504715C (game_105760.c's Ground_150D85AC). */
-typedef struct {
-    /* 0x00 */ f32 height;
-    /* 0x04 */ u8 pad4[0x18 - 0x4];
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s8 unk1C;
-    /* 0x1D */ s8 unk1D;
-    /* 0x1E */ u8 pad1E[2];
-    /* 0x20 */ s32 unk20;
-} Ground;
-
 void func_15137F30(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32 time, BloodStrip *strip,
                    f32 *start, f32 *end, f32 *velocity, f32 *arg3, s16 *arg4, s8 *arg5, f32 *arg6);
 void func_151D9014(f32 *, f32 *, s32, f32, s32, s32, f32, s32, f32, f32, s32, s32, s32, s32, s32, s32);
-void func_1504715C(Ground *, Actor *);
+void func_1504715C(CollisionHit *, Actor *);
 
 /* BloodStrip emit callback: one func_151D9014 blood particle, larger than func_15137E60's. 60% of
  * them get a ground probe under the strip's owner; the rest get none (height -10000). */
@@ -741,7 +730,7 @@ void func_150F695C(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32
     s16 arg4;
     s8 arg5;
     f32 arg6;
-    Ground ground;
+    CollisionHit ground;
     u8 probeGround;
     s32 flag;
     f32 random;
@@ -754,10 +743,10 @@ void func_150F695C(f32 *pointA, f32 *pointB, f32 *velocityA, f32 *velocityB, f32
     if (probeGround) {
         func_1504715C(&ground, strip->owner);
     } else {
-        ground.unk18 = 0;
-        ground.unk1C = 0;
-        ground.unk1D = 0;
-        ground.unk20 = 0;
+        ground.material = 0;
+        ground.flags = 0;
+        ground.source = 0;
+        ground.surface = 0;
         ground.height = -10000.0f;
     }
     if (probeGround) {
