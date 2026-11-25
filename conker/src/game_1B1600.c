@@ -5,9 +5,19 @@
 void func_150A7CB0(f32 mtx[4][4], f32 x, f32 y, f32 z);
 #include "variables.h"
 
-struct vtx151857DC;
-extern struct vtx151857DC *(*D_8008D498[])(struct vtx151857DC *, struct vtx151857DC *, struct vtx151857DC *);
-extern s32 (*D_8008D4C0[])(struct vtx151857DC *);
+/* A shadow-polygon vertex while it is clipped in light space. */
+typedef struct ClipVtx {
+    f32 x;       /* light-space position, clipped against the shadow frustum */
+    f32 y;
+    f32 z;
+    s16 modelX;  /* model-space position, interpolated along */
+    s16 modelY;
+    s16 modelZ;
+} ClipVtx;       /* size 0x14 */
+
+/* Per clip plane: edge intersection, and the inside test. */
+extern ClipVtx *(*D_8008D498[])(ClipVtx *, ClipVtx *, ClipVtx *);
+extern s32 (*D_8008D4C0[])(ClipVtx *);
 
 extern f32 D_800D3688;
 extern s32 D_800DE01C;
@@ -411,279 +421,275 @@ Gfx *func_15184FA4(Gfx *gfx, s32 objIndex, s32 slot, s32 view) {
     return gfx;
 }
 
-struct vtx151857DC {
-    f32 x;       /* 0x0 */
-    f32 y;       /* 0x4 */
-    f32 z;       /* 0x8 */
-    s16 unkC;    /* 0xC */
-    s16 unkE;    /* 0xE */
-    s16 unk10;   /* 0x10 */
-};
+/*
+ * Clip-plane edge intersections (D_8008D498): each writes the point where edge a->b crosses its plane to
+ * out, interpolating the model-space position too, and returns out + 1. The paired tests (D_8008D4C0)
+ * say whether a vertex is on the kept side.
+ */
 
-struct vtx151857DC *func_15185454(struct vtx151857DC *a0, struct vtx151857DC *a1, struct vtx151857DC *a2) {
+/* Plane y == z. */
+ClipVtx *func_15185454(ClipVtx *a, ClipVtx *b, ClipVtx *out) {
     f32 t;
     f32 y;
 
-    t = (a0->z - a0->y) / ((a1->y - a0->y) - (a1->z - a0->z));
-    a2->x = a0->x + (a1->x - a0->x) * t;
-    y = a0->y + (a1->y - a0->y) * t;
-    a2->z = y;
-    a2->y = y;
-    a2->unkC = (s16)((f32)a0->unkC + (f32)(a1->unkC - a0->unkC) * t);
-    a2->unkE = (s16)((f32)a0->unkE + (f32)(a1->unkE - a0->unkE) * t);
-    a2->unk10 = (s16)((f32)a0->unk10 + (f32)(a1->unk10 - a0->unk10) * t);
-    return a2 + 1;
+    t = (a->z - a->y) / ((b->y - a->y) - (b->z - a->z));
+    out->x = a->x + (b->x - a->x) * t;
+    y = a->y + (b->y - a->y) * t;
+    out->z = y;
+    out->y = y;
+    out->modelX = a->modelX + (b->modelX - a->modelX) * t;
+    out->modelY = a->modelY + (b->modelY - a->modelY) * t;
+    out->modelZ = a->modelZ + (b->modelZ - a->modelZ) * t;
+    return out + 1;
 }
 
-s32 func_15185554(f32 *arg0) {
-    return arg0[2] < arg0[1];
+s32 func_15185554(ClipVtx *v) {
+    return v->z < v->y;
 }
 
-struct vtx151857DC *func_1518557C(struct vtx151857DC *a0, struct vtx151857DC *a1, struct vtx151857DC *a2) {
+/* Plane x == -z. */
+ClipVtx *func_1518557C(ClipVtx *a, ClipVtx *b, ClipVtx *out) {
     f32 t;
 
-    t = (a0->z + a0->x) / ((a0->x - a1->x) + (a0->z - a1->z));
-    a2->x = a0->x + (a1->x - a0->x) * t;
-    a2->y = a0->y + (a1->y - a0->y) * t;
-    a2->z = -a2->x;
-    a2->unkC = (s16)((f32)a0->unkC + (f32)(a1->unkC - a0->unkC) * t);
-    a2->unkE = (s16)((f32)a0->unkE + (f32)(a1->unkE - a0->unkE) * t);
-    a2->unk10 = (s16)((f32)a0->unk10 + (f32)(a1->unk10 - a0->unk10) * t);
-    return a2 + 1;
+    t = (a->z + a->x) / ((a->x - b->x) + (a->z - b->z));
+    out->x = a->x + (b->x - a->x) * t;
+    out->y = a->y + (b->y - a->y) * t;
+    out->z = -out->x;
+    out->modelX = a->modelX + (b->modelX - a->modelX) * t;
+    out->modelY = a->modelY + (b->modelY - a->modelY) * t;
+    out->modelZ = a->modelZ + (b->modelZ - a->modelZ) * t;
+    return out + 1;
 }
 
-s32 func_1518567C(f32 *arg0) {
-    return arg0[0] < -arg0[2];
+s32 func_1518567C(ClipVtx *v) {
+    return v->x < -v->z;
 }
 
-struct vtx151856A8 {
-    f32 x;
-    f32 y;
-    f32 z;
-    s16 unkC;
-    s16 unkE;
-    s16 unk10;
-};
-
-struct vtx151856A8 *func_151856A8(struct vtx151856A8 *a0, struct vtx151856A8 *a1, struct vtx151856A8 *a2) {
+/* Plane y == -z. */
+ClipVtx *func_151856A8(ClipVtx *a, ClipVtx *b, ClipVtx *out) {
     f32 t;
 
-    t = (a0->z + a0->y) / ((a0->y - a1->y) + (a0->z - a1->z));
-    a2->x = a0->x + (a1->x - a0->x) * t;
-    a2->y = a0->y + (a1->y - a0->y) * t;
-    a2->z = -a2->y;
-    a2->unkC = (s16)((f32)a0->unkC + (f32)(a1->unkC - a0->unkC) * t);
-    a2->unkE = (s16)((f32)a0->unkE + (f32)(a1->unkE - a0->unkE) * t);
-    a2->unk10 = (s16)((f32)a0->unk10 + (f32)(a1->unk10 - a0->unk10) * t);
-    return a2 + 1;
+    t = (a->z + a->y) / ((a->y - b->y) + (a->z - b->z));
+    out->x = a->x + (b->x - a->x) * t;
+    out->y = a->y + (b->y - a->y) * t;
+    out->z = -out->y;
+    out->modelX = a->modelX + (b->modelX - a->modelX) * t;
+    out->modelY = a->modelY + (b->modelY - a->modelY) * t;
+    out->modelZ = a->modelZ + (b->modelZ - a->modelZ) * t;
+    return out + 1;
 }
 
-s32 func_151857B0(f32 *arg0) {
-    return arg0[1] < -arg0[2];
+s32 func_151857B0(ClipVtx *v) {
+    return v->y < -v->z;
 }
 
-struct vtx151857DC *func_151857DC(struct vtx151857DC *a0, struct vtx151857DC *a1, struct vtx151857DC *a2) {
+/* Plane x == z. */
+ClipVtx *func_151857DC(ClipVtx *a, ClipVtx *b, ClipVtx *out) {
     f32 t;
 
-    t = (a0->z - a0->x) / ((a1->x - a0->x) - (a1->z - a0->z));
-    a2->x = a0->x + (a1->x - a0->x) * t;
-    a2->y = a0->y + (a1->y - a0->y) * t;
-    a2->z = a2->x;
-    a2->unkC = (s16)((f32)a0->unkC + (f32)(a1->unkC - a0->unkC) * t);
-    a2->unkE = (s16)((f32)a0->unkE + (f32)(a1->unkE - a0->unkE) * t);
-    a2->unk10 = (s16)((f32)a0->unk10 + (f32)(a1->unk10 - a0->unk10) * t);
-    return a2 + 1;
+    t = (a->z - a->x) / ((b->x - a->x) - (b->z - a->z));
+    out->x = a->x + (b->x - a->x) * t;
+    out->y = a->y + (b->y - a->y) * t;
+    out->z = out->x;
+    out->modelX = a->modelX + (b->modelX - a->modelX) * t;
+    out->modelY = a->modelY + (b->modelY - a->modelY) * t;
+    out->modelZ = a->modelZ + (b->modelZ - a->modelZ) * t;
+    return out + 1;
 }
 
-s32 func_151858D4(f32 *arg0) {
-    return arg0[2] < arg0[0];
+s32 func_151858D4(ClipVtx *v) {
+    return v->z < v->x;
 }
 
-struct vtx151857DC *func_151858FC(struct vtx151857DC *a0, struct vtx151857DC *a1, struct vtx151857DC *a2) {
+/* Near plane z == D_800D3688. */
+ClipVtx *func_151858FC(ClipVtx *a, ClipVtx *b, ClipVtx *out) {
     f32 t;
 
-    t = (D_800D3688 - a0->z) / (a1->z - a0->z);
-    a2->x = a0->x + (a1->x - a0->x) * t;
-    a2->y = a0->y + (a1->y - a0->y) * t;
-    a2->z = D_800D3688;
-    a2->unkC = (s16)((f32)a0->unkC + (f32)(a1->unkC - a0->unkC) * t);
-    a2->unkE = (s16)((f32)a0->unkE + (f32)(a1->unkE - a0->unkE) * t);
-    a2->unk10 = (s16)((f32)a0->unk10 + (f32)(a1->unk10 - a0->unk10) * t);
-    return a2 + 1;
+    t = (D_800D3688 - a->z) / (b->z - a->z);
+    out->x = a->x + (b->x - a->x) * t;
+    out->y = a->y + (b->y - a->y) * t;
+    out->z = D_800D3688;
+    out->modelX = a->modelX + (b->modelX - a->modelX) * t;
+    out->modelY = a->modelY + (b->modelY - a->modelY) * t;
+    out->modelZ = a->modelZ + (b->modelZ - a->modelZ) * t;
+    return out + 1;
 }
 
-extern f32 D_800D3688;
-
-s32 func_151859FC(f32 *arg0) {
-    return D_800D3688 < arg0[2];
+s32 func_151859FC(ClipVtx *v) {
+    return D_800D3688 < v->z;
 }
 
-extern f32 D_800D368C;
-
-struct vtx151857DC *func_15185A28(struct vtx151857DC *a0, struct vtx151857DC *a1, struct vtx151857DC *a2) {
+/* Far plane z == D_800D368C. */
+ClipVtx *func_15185A28(ClipVtx *a, ClipVtx *b, ClipVtx *out) {
     f32 t;
 
-    t = (D_800D368C - a0->z) / (a1->z - a0->z);
-    a2->x = a0->x + (a1->x - a0->x) * t;
-    a2->y = a0->y + (a1->y - a0->y) * t;
-    a2->z = D_800D368C;
-    a2->unkC = (s16)((f32)a0->unkC + (f32)(a1->unkC - a0->unkC) * t);
-    a2->unkE = (s16)((f32)a0->unkE + (f32)(a1->unkE - a0->unkE) * t);
-    a2->unk10 = (s16)((f32)a0->unk10 + (f32)(a1->unk10 - a0->unk10) * t);
-    return a2 + 1;
+    t = (D_800D368C - a->z) / (b->z - a->z);
+    out->x = a->x + (b->x - a->x) * t;
+    out->y = a->y + (b->y - a->y) * t;
+    out->z = D_800D368C;
+    out->modelX = a->modelX + (b->modelX - a->modelX) * t;
+    out->modelY = a->modelY + (b->modelY - a->modelY) * t;
+    out->modelZ = a->modelZ + (b->modelZ - a->modelZ) * t;
+    return out + 1;
 }
 
-extern f32 D_800D368C;
-
-s32 func_15185B28(f32 *arg0) {
-    return arg0[2] < D_800D368C;
+s32 func_15185B28(ClipVtx *v) {
+    return v->z < D_800D368C;
 }
 
-struct vtx151857DC *func_15185B54(struct vtx151857DC *a0, struct vtx151857DC *a1, struct vtx151857DC *a2) {
+/* Plane x == 0 (splits the shadow into quadrants). */
+ClipVtx *func_15185B54(ClipVtx *a, ClipVtx *b, ClipVtx *out) {
     f32 t;
 
-    t = a0->x / (a0->x - a1->x);
-    a2->x = 0.0f;
-    a2->y = a0->y + (a1->y - a0->y) * t;
-    a2->z = a0->z + (a1->z - a0->z) * t;
-    a2->unkC = (s16)((f32)a0->unkC + (f32)(a1->unkC - a0->unkC) * t);
-    a2->unkE = (s16)((f32)a0->unkE + (f32)(a1->unkE - a0->unkE) * t);
-    a2->unk10 = (s16)((f32)a0->unk10 + (f32)(a1->unk10 - a0->unk10) * t);
-    return a2 + 1;
+    t = a->x / (a->x - b->x);
+    out->x = 0.0f;
+    out->y = a->y + (b->y - a->y) * t;
+    out->z = a->z + (b->z - a->z) * t;
+    out->modelX = a->modelX + (b->modelX - a->modelX) * t;
+    out->modelY = a->modelY + (b->modelY - a->modelY) * t;
+    out->modelZ = a->modelZ + (b->modelZ - a->modelZ) * t;
+    return out + 1;
 }
 
-s32 func_15185C44(f32 *arg0) {
-    return arg0[0] <= 0.0f;
+s32 func_15185C44(ClipVtx *v) {
+    return v->x <= 0.0f;
 }
 
-struct vtx151857DC *func_15185C6C(struct vtx151857DC *a0, struct vtx151857DC *a1, struct vtx151857DC *a2) {
+/* Plane y == 0. */
+ClipVtx *func_15185C6C(ClipVtx *a, ClipVtx *b, ClipVtx *out) {
     f32 t;
 
-    t = a0->y / (a0->y - a1->y);
-    a2->y = 0.0f;
-    a2->x = a0->x + (a1->x - a0->x) * t;
-    a2->z = a0->z + (a1->z - a0->z) * t;
-    a2->unkC = (s16)((f32)a0->unkC + (f32)(a1->unkC - a0->unkC) * t);
-    a2->unkE = (s16)((f32)a0->unkE + (f32)(a1->unkE - a0->unkE) * t);
-    a2->unk10 = (s16)((f32)a0->unk10 + (f32)(a1->unk10 - a0->unk10) * t);
-    return a2 + 1;
+    t = a->y / (a->y - b->y);
+    out->y = 0.0f;
+    out->x = a->x + (b->x - a->x) * t;
+    out->z = a->z + (b->z - a->z) * t;
+    out->modelX = a->modelX + (b->modelX - a->modelX) * t;
+    out->modelY = a->modelY + (b->modelY - a->modelY) * t;
+    out->modelZ = a->modelZ + (b->modelZ - a->modelZ) * t;
+    return out + 1;
 }
 
-s32 func_15185D5C(f32 *arg0) {
-    return arg0[1] <= 0.0f;
+s32 func_15185D5C(ClipVtx *v) {
+    return v->y <= 0.0f;
 }
 
-s32 func_15185D84(f32 *arg0) {
-    return arg0[0] > 0.0f;
+s32 func_15185D84(ClipVtx *v) {
+    return v->x > 0.0f;
 }
 
-s32 func_15185DAC(f32 *arg0) {
-    return arg0[1] > 0.0f;
+s32 func_15185DAC(ClipVtx *v) {
+    return v->y > 0.0f;
 }
 
-struct vtx151857DC *func_15185DD4(struct vtx151857DC *arg0, s32 arg1, s32 arg2, struct vtx151857DC *arg3) {
-    struct vtx151857DC *cur;
-    struct vtx151857DC *prev;
-    struct vtx151857DC *(*emit)(struct vtx151857DC *, struct vtx151857DC *, struct vtx151857DC *);
-    s32 (*test)(struct vtx151857DC *);
+/*
+ * One Sutherland-Hodgman pass: clips the polygon in[0..count-1] against clip plane `plane`, writing the
+ * resulting vertices to out. Returns the end of the output.
+ */
+ClipVtx *func_15185DD4(ClipVtx *in, s32 count, s32 plane, ClipVtx *out) {
+    ClipVtx *cur;
+    ClipVtx *prev;
+    ClipVtx *(*intersect)(ClipVtx *, ClipVtx *, ClipVtx *);
+    s32 (*inside)(ClipVtx *);
     s32 i;
 
-    prev = &arg0[arg1 - 1];
-    emit = D_8008D498[arg2];
-    test = D_8008D4C0[arg2];
-    cur = arg0;
-    i = 0;
-    if (arg1 > 0) {
-        do {
-            if (test(cur) != 0) {
-                if (test(prev) != 0) {
-                    *arg3++ = *cur;
-                } else {
-                    arg3 = emit(prev, cur, arg3);
-                    *arg3++ = *cur;
-                }
+    prev = &in[count - 1];
+    intersect = D_8008D498[plane];
+    inside = D_8008D4C0[plane];
+    cur = in;
+    for (i = 0; i < count; i++) {
+        if (inside(cur)) {
+            if (inside(prev)) {
+                *out++ = *cur;
             } else {
-                if (test(prev) != 0) {
-                    arg3 = emit(prev, cur, arg3);
-                }
+                out = intersect(prev, cur, out);
+                *out++ = *cur;
             }
-            i++;
-            prev = cur;
-            cur++;
-        } while (i != arg1);
+        } else if (inside(prev)) {
+            out = intersect(prev, cur, out);
+        }
+        prev = cur;
+        cur++;
     }
-    return arg3;
+    return out;
 }
 
+/* A shadow-receiving vertex: light-space position and a pointer to its model-space position. */
 struct vin15185F24 {
     f32 x;
     f32 y;
     f32 z;
-    s16 *col;
+    s16 *model;
     s32 unk10;
 };
 
-s32 func_15185F24(struct vin15185F24 *arg0, s32 arg1, s32 arg2, Vtx_t *arg3, s32 *arg4, s32 arg5) {
-    struct vtx151857DC buf[2][26];
+/*
+ * Clips polygon in[0..count-1] to the shadow frustum and emits it as textured vertices in out, with the
+ * shadow texture coordinates and fade alpha. When split is set, the result is also cut at x == 0 and
+ * y == 0 into four quadrants, whose vertex ranges end at quadEnd[1..4] (quadEnd[0] = 0). Returns the
+ * number of vertices written.
+ */
+s32 func_15185F24(struct vin15185F24 *in, s32 count, s32 maxVerts, Vtx_t *out, s32 *quadEnd, s32 split) {
+    ClipVtx buf[2][26];
     s32 i;
     s32 j;
-    struct vtx151857DC *src;
-    struct vtx151857DC *dst;
+    ClipVtx *src;
+    ClipVtx *dst;
     f32 scale;
-    s16 *col;
-    s32 mid[3];
+    s16 *model;
+    s32 halfEnd[3];
     s32 *p;
 
-    src = (struct vtx151857DC *)arg0;
+    src = (ClipVtx *)in;
     dst = buf[0];
-    for (i = 0; i < arg1; i++) {
-        col = arg0[i].col;
+    for (i = 0; i < count; i++) {
+        model = in[i].model;
         *dst = *src;
-        dst->unkC = col[0];
-        dst->unkE = col[1];
-        dst->unk10 = col[2];
+        dst->modelX = model[0];
+        dst->modelY = model[1];
+        dst->modelZ = model[2];
         dst++;
         src++;
     }
+    // matching: vertex counts come from unsigned byte differences, not pointer subtraction
     for (i = 0; i < 6; i++) {
-        arg1 = ((u32)func_15185DD4(buf[i & 1], arg1, i, buf[(i & 1) ^ 1]) - (u32)buf[(i & 1) ^ 1]) / 20;
+        count = ((u32)func_15185DD4(buf[i & 1], count, i, buf[(i & 1) ^ 1]) - (u32)buf[(i & 1) ^ 1]) / sizeof(ClipVtx);
     }
-    mid[0] = 0;
-    arg4[0] = 0;
-    if (arg5 != 0) {
+    halfEnd[0] = 0;
+    quadEnd[0] = 0;
+    if (split != 0) {
         for (j = 0; j < 2; j++) {
-            mid[j + 1] = ((u32)func_15185DD4(buf[i & 1], arg1, j + 6, &buf[(i & 1) ^ 1][mid[j]]) - (u32)buf[(i & 1) ^ 1]) / 20;
+            halfEnd[j + 1] = ((u32)func_15185DD4(buf[i & 1], count, j + 6, &buf[(i & 1) ^ 1][halfEnd[j]]) - (u32)buf[(i & 1) ^ 1]) / sizeof(ClipVtx);
         }
         i++;
-        for (j = 0, p = arg4; j < 4;) {
-            arg1 = mid[1] - mid[0];
-            *p = ((u32)func_15185DD4(&buf[i & 1][mid[0]], arg1, (j++ >> 1) + 8, &buf[(i & 1) ^ 1][*p++]) - (u32)buf[(i & 1) ^ 1]) / 20;
-            arg1 = mid[2] - mid[1];
-            *p = ((u32)func_15185DD4(&buf[i & 1][mid[1]], arg1, (j++ >> 1) + 8, &buf[(i & 1) ^ 1][*p++]) - (u32)buf[(i & 1) ^ 1]) / 20;
+        for (j = 0, p = quadEnd; j < 4;) {
+            count = halfEnd[1] - halfEnd[0];
+            *p = ((u32)func_15185DD4(&buf[i & 1][halfEnd[0]], count, (j++ >> 1) + 8, &buf[(i & 1) ^ 1][*p++]) - (u32)buf[(i & 1) ^ 1]) / sizeof(ClipVtx);
+            count = halfEnd[2] - halfEnd[1];
+            *p = ((u32)func_15185DD4(&buf[i & 1][halfEnd[1]], count, (j++ >> 1) + 8, &buf[(i & 1) ^ 1][*p++]) - (u32)buf[(i & 1) ^ 1]) / sizeof(ClipVtx);
         }
-        arg1 = *p;
+        count = *p;
         i++;
     } else {
-        arg4[1] = arg4[2] = arg4[3] = arg4[4] = arg1;
+        quadEnd[1] = quadEnd[2] = quadEnd[3] = quadEnd[4] = count;
     }
     dst = buf[i & 1];
-    for (i = 0; i < arg1; i++) {
-        arg3[i].ob[0] = dst->unkC;
-        arg3[i].ob[1] = dst->unkE;
-        arg3[i].ob[2] = dst->unk10;
+    for (i = 0; i < count; i++) {
+        out[i].ob[0] = dst->modelX;
+        out[i].ob[1] = dst->modelY;
+        out[i].ob[2] = dst->modelZ;
         scale = 1020.0f / dst->z;
         dst->x *= scale;
         dst->y *= scale;
-        arg3[i].tc[0] = 1024.0f - dst->x;
-        arg3[i].tc[1] = dst->y + 1024.0f;
-        arg3[i].cn[0] = 0;
-        arg3[i].cn[1] = 0;
-        arg3[i].cn[2] = 0;
-        arg3[i].cn[3] = (u32)(D_800DE02C - ((dst->z - D_800D368C) / (D_800D3688 - D_800D368C)) * D_800DE02C);
-        arg3[i].flag = 0;
+        out[i].tc[0] = 1024.0f - dst->x;
+        out[i].tc[1] = dst->y + 1024.0f;
+        out[i].cn[0] = 0;
+        out[i].cn[1] = 0;
+        out[i].cn[2] = 0;
+        out[i].cn[3] = (u32)(D_800DE02C - ((dst->z - D_800D368C) / (D_800D3688 - D_800D368C)) * D_800DE02C);
+        out[i].flag = 0;
         dst++;
     }
-    return arg1;
+    return count;
 }
 
 extern s32 func_1510F720(s32, s32, s32, u8 **);
