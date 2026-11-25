@@ -116,308 +116,287 @@ void func_151C56A4(f32 *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &intPos, (func_150ADA20() & 1) + 6, 0xFF, 0xE8, 0xAB, 0xFF, 0, 0, arg1, arg2);
 }
 
-extern s32 func_15137C64(f32 *, f32 *, f32 *, f32 *, f32 *, s32, s32, s32);
-extern void func_151DC034(f32 *, f32, s32, s16, s32, u8, s32);
-extern void func_151DA6F8(f32 *, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
-extern void func_15143794(s16, s16, f32, f32 *);
-extern void func_15143874(s16, f32, f32 *, f32 *);
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-void func_151D9014(f32 *a0, f32 *a1, s32 a2, f32 a3, s32 sp10, s32 sp14, f32 sp18, s32 sp1C, f32 sp20, f32 sp24, s32 sp28, s32 sp2C, s32 sp30, s32 sp34, u8 sp38, s32 sp3C);
-
+/* Particle spawn template passed to func_15130280 (same layout as ParticleSpawn in game_1028F0.c). */
 typedef struct {
-    u32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 unk30;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48[3];
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67;
-    s16 unk68;
-    u8 pad6A[2];
-    f32 unk6C;
-} Spawn151C577C;
+    /* 0x00 */ u32 unk00;
+    /* 0x04 */ s32 unk04;
+    /* 0x08 */ s16 unk08;
+    /* 0x0A */ s16 unk0A;
+    /* 0x0C */ s32 unk0C;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u8 unk14;
+    /* 0x15 */ u8 unk15;
+    /* 0x16 */ u8 unk16;
+    /* 0x17 */ u8 unk17;
+    /* 0x18 */ u8 unk18;
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ s16 unk1E;
+    /* 0x20 */ s16 unk20;
+    /* 0x22 */ s16 unk22;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ f32 unk2C;
+    /* 0x30 */ vertex pos;
+    /* 0x3C */ vertex unk3C;
+    /* 0x48 */ vertex vel;
+    /* 0x54 */ f32 unk54;
+    /* 0x58 */ u32 flags;
+    /* 0x5C */ s32 unk5C;
+    /* 0x60 */ u8 unk60;
+    /* 0x61 */ u8 unk61;
+    /* 0x62 */ u8 unk62;
+    /* 0x63 */ s8 unk63;
+    /* 0x64 */ s8 unk64;
+    /* 0x65 */ u8 unk65;
+    /* 0x66 */ u8 unk66;
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 unk68;
+    /* 0x6A */ u8 pad6A[2];
+    /* 0x6C */ f32 unk6C;
+} ParticleSpawn; /* size 0x70 */
 
-void func_151C577C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7) {
-    f32 v0[3];
-    struct17 v1;
-    f32 v2[3];
-    f32 v3[3];
-    f32 v4[3];
-    s16 cnt;
+/* Per-particle data at 0xB0 of the particles func_151C5F44 spawns. */
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x04 */ f32 unk4;
+} ParticleExtra;
+
+/* Live particle, as created by func_15130280; the caller-defined data starts at 0xA8. */
+typedef struct {
+    /* 0x00 */ u8 pad0[0xA8];
+    /* 0xA8 */ f32 unkA8;
+    /* 0xAC */ u8 padAC[4];
+    /* 0xB0 */ ParticleExtra extra;
+} Particle;
+
+extern s32 func_15137C64(vertex *, vertex *, f32 *, f32 *, f32 *, vertex *, vertex *, vertex *);
+extern void func_151DC034(vertex *, f32, u8, s16, s32, u8, s32);
+extern void func_151DA6F8(vertex *, vertex *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, u8, s32);
+extern void func_15143794(s16, s16, f32, vertex *);
+extern void func_15143874(s16, f32, f32 *, f32 *);
+extern Particle *func_15130280(ParticleSpawn *, u8, s32, s32, u8, s32);
+void func_151D9014(vertex *a0, vertex *a1, s32 a2, f32 a3, s32 sp10, s32 sp14, f32 sp18, s32 sp1C, f32 sp20, f32 sp24, s32 sp28, s32 sp2C, s32 sp30, s32 sp34, u8 sp38, s32 sp3C);
+
+/* Spawns a burst of effects from the frame func_15137C64 derives from arg0..arg2: always a
+ * func_151DC034 effect, then (each when its flag is set) a ring of func_151DA6F8 particles,
+ * func_151D9014 particles along `dir`, and func_15130280 particles thrown at random angles. */
+void func_151C577C(vertex *arg0, vertex *arg1, vertex *arg2, u8 doForward, u8 doRing, u8 doScatter, u8 arg6,
+                   s32 arg7) {
+    vertex unkPos;
+    vertex origin;
+    f32 dir[3];
+    f32 basisA[3];
+    f32 basisB[3];
+    s16 ringCount;
     f32 sinv;
     f32 cosv;
-    f32 vel[3];
-    s32 n;
-    s32 i;
-    f32 vel2[3];
-    s32 j;
-    Spawn151C577C sp;
-    f32 scale;
-    f32 fa;
-    f32 fc;
-    s32 ra;
-    s32 rb;
-    void *ret;
+    vertex vel;
+    s32 randB;
+    s32 bit80;
+    vertex vel2;
+    s32 count;
+    ParticleSpawn spawn;
+    f32 unkA8;
+    f32 f;
+    f32 f2;
+    s32 randA;
+    s32 randC;
+    Particle *particle;
 
-    if (func_15137C64(v0, &v1.unk0, v2, v3, v4, arg0, arg1, arg2) != 0) {
-        fc = func_150ADA68();
-        ra = func_150ADA20();
-        func_151DC034(v0, fc * 24.0f + 168.0f, (ra % 101U + 0x9B) & 0xFF, (func_150ADA20() & 7) + 0xF, 1, arg6, arg7);
-        if (arg4 != 0) {
-            cnt = func_150ADA20() % 3U + 5;
-            if (cnt != 0) {
+    if (func_15137C64(&unkPos, &origin, dir, basisA, basisB, arg0, arg1, arg2) != 0) {
+        f2 = func_150ADA68();
+        randA = func_150ADA20();
+        func_151DC034(&unkPos, f2 * 24.0f + 168.0f, randA % 101U + 155, (func_150ADA20() & 7) + 15, 1, arg6, arg7);
+        if (doRing) {
+            ringCount = func_150ADA20() % 3U + 5;
+            if (ringCount != 0) {
                 do {
-                    fa = (func_150ADA68() * 33.0f + 60.0f) * 0.1000000015f;
-                    func_15143874(func_150ADA20() & 0xFF, fa, &cosv, &sinv);
-                    vel[0] = v4[0] * sinv + v3[0] * cosv;
-                    vel[1] = v4[1] * sinv + v3[1] * cosv;
-                    vel[2] = v4[2] * sinv + v3[2] * cosv;
-                    fa = func_150ADA68();
-                    rb = func_150ADA20();
-                    ra = func_150ADA20();
-                    fc = func_150ADA68();
-                    func_151DA6F8(v0, vel, fa * 0.1620000005f + 0.1930000037f, rb % 9U + 0x12, ra % 156U + 0x64, fc * 4.0f + 4.0f, 3, func_150ADA20() & 0, 1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, arg6, arg7);
-                    cnt--;
-                } while (cnt != 0);
+                    f = (func_150ADA68() * 33.0f + 60.0f) * 0.1f;
+                    func_15143874(func_150ADA20() & 0xFF, f, &cosv, &sinv);
+                    vel.x = basisB[0] * sinv + basisA[0] * cosv;
+                    vel.y = basisB[1] * sinv + basisA[1] * cosv;
+                    vel.z = basisB[2] * sinv + basisA[2] * cosv;
+                    f = func_150ADA68();
+                    randC = func_150ADA20();
+                    randA = func_150ADA20();
+                    f2 = func_150ADA68();
+                    func_151DA6F8(&unkPos, &vel, f * 0.162f + 0.193f, randC % 9U + 18, randA % 156U + 100, f2 * 4.0f + 4.0f, 3, func_150ADA20() & 0, 1.0f, 1.0f, 1, 1, 0, 0x10, 0xF, 0, arg6, arg7);
+                    ringCount--;
+                } while (ringCount != 0);
             }
         }
-        if (arg3 != 0) {
-            j = func_150ADA20() % 6U + 5;
-            if (j != 0) {
+        if (doForward) {
+            count = func_150ADA20() % 6U + 5;
+            if (count != 0) {
                 do {
-                    fa = (func_150ADA68() * 150.0f + 200.0f) * 0.1000000015f;
-                    vel2[0] = v2[0] * fa;
-                    vel2[1] = v2[1] * fa;
-                    vel2[2] = v2[2] * fa;
-                    fa = func_150ADA68();
-                    ra = func_150ADA20();
-                    n = func_150ADA20();
-                    func_151D9014(&v1.unk0, vel2, 1, fa * 0.682000041f + -0.4120000303f, ra % 11U + 5, n % 156U + 0x64, func_150ADA68() * 60.0f + 80.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6, arg7);
-                    j--;
-                } while (j != 0);
+                    f = (func_150ADA68() * 150.0f + 200.0f) * 0.1f;
+                    vel2.x = dir[0] * f;
+                    vel2.y = dir[1] * f;
+                    vel2.z = dir[2] * f;
+                    f = func_150ADA68();
+                    randA = func_150ADA20();
+                    randB = func_150ADA20();
+                    func_151D9014(&origin, &vel2, 1, f * 0.682000041f + -0.4120000303f, randA % 11U + 5, randB % 156U + 100, func_150ADA68() * 60.0f + 80.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6, arg7);
+                    count--;
+                } while (count != 0);
             }
         }
-        if (arg5 != 0) {
-            j = func_150ADA20() % 7U + 3;
-            scale = 0.9508649707f;
-            sp.unk1D = 0x6C;
-            sp.unk08 = 0x5103;
-            sp.unk00 = 0x200005;
-            sp.unk1E = 0x14;
-            sp.unk20 = 0xC;
-            sp.unk58 = 0x80D207;
-            sp.unk60 = 8;
-            sp.unk61 = 6;
-            sp.unk62 = 0x10;
-            sp.unk04 = 0;
-            sp.unk0C = 0;
-            sp.unk10 = 0;
-            sp.unk63 = -1;
-            sp.unk64 = -1;
-            sp.unk65 = 0;
-            sp.unk22 = 1;
-            sp.unk24 = 1.0f;
-            sp.unk14 = 0xE2;
-            sp.unk15 = 0xB2;
-            sp.unk16 = 0x60;
-            sp.unk17 = 0xFF;
-            sp.unk18 = 0x39;
-            sp.unk19 = 0xF;
-            sp.unk1A = 0;
-            sp.unk1C = 0xFF;
-            sp.unk30 = v1;
-            sp.unk3C = 0.0f;
-            sp.unk40 = 0.0f;
-            sp.unk44 = 0.0f;
-            for (; j > 0; j--) {
-                ra = func_150ADA20();
-                rb = func_150ADA20();
-                func_15143794(ra & 0xFF, -(rb & 0x3F), func_150ADA68() * 7.0f + 2.0f, sp.unk48);
-                fa = func_150ADA68() * 117.0f;
-                sp.unk58 &= ~0xC0;
-                sp.unk54 = (fa + -197.0f) * 0.001000000047f;
-                i = (func_150ADA20() & 1) ? 0x80 : 0;
-                n = (func_150ADA20() & 1) ? 0x40 : 0;
-                sp.unk58 |= n | i;
-                sp.unk1B = func_150ADA20() % 66U + 0xBE;
-                sp.unk0A = func_150ADA20() % 45U + 0x2C;
-                fc = func_150ADA68() * 122.0f + 77.0f;
-                sp.unk28 = fc;
-                sp.unk2C = fc;
-                ret = func_15130280(&sp, 1, 0, 4, arg6, arg7);
-                if (ret != NULL) {
-                    memcpy((u8 *)ret + 0xA8, &scale, 4);
+        if (doScatter) {
+            count = func_150ADA20() % 7U + 3;
+            unkA8 = 0.9508649707f;
+            spawn.unk1D = 0x6C;
+            spawn.unk08 = 0x5103;
+            spawn.unk00 = 0x200005;
+            spawn.unk1E = 20;
+            spawn.unk20 = 12;
+            spawn.flags = 0x80D207;
+            spawn.unk60 = 8;
+            spawn.unk61 = 6;
+            spawn.unk62 = 0x10;
+            spawn.unk04 = 0;
+            spawn.unk0C = 0;
+            spawn.unk10 = 0;
+            spawn.unk63 = -1;
+            spawn.unk64 = -1;
+            spawn.unk65 = 0;
+            spawn.unk22 = 1;
+            spawn.unk24 = 1.0f;
+            spawn.unk14 = 0xE2;
+            spawn.unk15 = 0xB2;
+            spawn.unk16 = 0x60;
+            spawn.unk17 = 0xFF;
+            spawn.unk18 = 0x39;
+            spawn.unk19 = 0xF;
+            spawn.unk1A = 0;
+            spawn.unk1C = 0xFF;
+            spawn.pos = origin;
+            spawn.unk3C.x = 0.0f;
+            spawn.unk3C.y = 0.0f;
+            spawn.unk3C.z = 0.0f;
+            for (; count > 0; count--) {
+                randA = func_150ADA20();
+                randC = func_150ADA20();
+                func_15143794(randA & 0xFF, -(randC & 0x3F), func_150ADA68() * 7.0f + 2.0f, &spawn.vel);
+                f = func_150ADA68() * 117.0f;
+                spawn.flags &= ~0xC0;
+                spawn.unk54 = (f + -197.0f) * 0.001f;
+                bit80 = (func_150ADA20() & 1) ? 0x80 : 0;
+                randB = (func_150ADA20() & 1) ? 0x40 : 0;
+                spawn.flags |= randB | bit80;
+                spawn.unk1B = func_150ADA20() % 66U + 190;
+                spawn.unk0A = func_150ADA20() % 45U + 44;
+                f2 = func_150ADA68() * 122.0f + 77.0f;
+                spawn.unk28 = f2;
+                spawn.unk2C = f2;
+                particle = func_15130280(&spawn, 1, 0, sizeof(f32), arg6, arg7);
+                if (particle != NULL) {
+                    memcpy(&particle->unkA8, &unkA8, sizeof(unkA8));
                 }
             }
         }
     }
 }
 
-void func_15137F30(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, void *arg5, f32 *out6C, f32 *out60, f32 *out54, f32 *out50, s16 *out4E, u8 *out4D, f32 *out48);
-void func_151D9014(f32 *a0, f32 *a1, s32 a2, f32 a3, s32 sp10, s32 sp14, f32 sp18, s32 sp1C, f32 sp20, f32 sp24, s32 sp28, s32 sp2C, s32 sp30, s32 sp34, u8 sp38, s32 sp3C);
+/* Effect record passed to func_151C5E74; unkC and unk1 are the owner arguments of spawned particles. */
+typedef struct {
+    /* 0x00 */ u8 pad0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 unkC;
+} Effect151C5E74;
 
-void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, u8 *arg5) {
-    f32 sp6C[3];
-    f32 sp60[3];
-    f32 sp54[3];
-    f32 sp50;
-    s16 sp4E;
-    u8 sp4D;
-    f32 sp48;
+void func_15137F30(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, Effect151C5E74 *effect, vertex *pos, vertex *unk60,
+                   vertex *vel, f32 *out50, s16 *out4E, u8 *out4D, f32 *out48);
 
-    func_15137F30(a0, a1, a2, a3, arg4, arg5, sp6C, sp60, sp54, &sp50, &sp4E, &sp4D, &sp48);
-    func_151D9014(sp6C, sp54, 1, sp50, sp4E, sp4D, sp48, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg5[0xC], arg5[1]);
+/* Spawns one func_151D9014 particle whose position, velocity and parameters func_15137F30 computes. */
+void func_151C5E74(f32 *a0, f32 *a1, f32 *a2, f32 *a3, f32 arg4, Effect151C5E74 *effect) {
+    vertex pos;
+    vertex unk60;
+    vertex vel;
+    /* func_151D9014 arguments 3..6 */
+    f32 param3;
+    s16 param4;
+    u8 param5;
+    f32 param6;
+
+    func_15137F30(a0, a1, a2, a3, arg4, effect, &pos, &unk60, &vel, &param3, &param4, &param5, &param6);
+    func_151D9014(&pos, &vel, 1, param3, param4, param5, param6, 0, 1.0f, 1.0f, 1, 0, 1, 0, effect->unkC,
+                  effect->unk1);
 }
 
-typedef struct {
-    u32 unk00;
-    s32 unk04;
-    s16 unk08;
-    s16 unk0A;
-    s32 unk0C;
-    s32 unk10;
-    u8 unk14;
-    u8 unk15;
-    u8 unk16;
-    u8 unk17;
-    u8 unk18;
-    u8 unk19;
-    u8 unk1A;
-    u8 unk1B;
-    u8 unk1C;
-    u8 unk1D;
-    s16 unk1E;
-    s16 unk20;
-    s16 unk22;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    struct17 unk30;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    struct17 unk48;
-    f32 unk54;
-    u32 unk58;
-    s32 unk5C;
-    u8 unk60;
-    u8 unk61;
-    u8 unk62;
-    s8 unk63;
-    s8 unk64;
-    u8 unk65;
-    u8 unk66;
-    u8 pad67;
-    s16 unk68;
-    u8 pad6A[2];
-    f32 unk6C;
-} Params151C5F44; /* 0x70 */
+/* Spawns a func_15130280 particle at `pos` moving at `vel`. A `unk0A` of -1 means 300 and leaves flag
+ * bit 0 clear. Returns the particle, or NULL. */
+Particle *func_151C5F44(vertex *pos, vertex *vel, f32 unk54, f32 unkA8Value, u8 unk1B, s16 unk0A, f32 size,
+                        u8 altUnk62, s32 arg8, u8 arg9, s32 argA) {
+    ParticleSpawn spawn;
+    f32 unkA8;
+    Particle *particle;
+    ParticleExtra extra;
+    s32 bit80;
+    s32 hasUnk0A;
+    s32 bit40;
 
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    f32 unk4;
-} Extra151C5F44;
-
-extern void *func_15130280(void *, u8, s32, s32, u8, s32);
-
-void *func_151C5F44(struct17 *arg0, struct17 *arg1, f32 arg2, f32 arg3, u8 arg4, s16 arg5, f32 arg6, u8 arg7,
-                    s32 arg8, u8 arg9, s32 argA) {
-    Params151C5F44 params;
-    f32 scale;
-    void *ret;
-    Extra151C5F44 extra;
-    s32 r2;
-    s32 flag;
-    s32 r1;
-
-    scale = arg3;
-    params.unk1D = 0x6C;
-    params.unk08 = 0x5103;
-    params.unk00 = 0x200005;
-    params.unk04 = 0;
-    params.unk0C = 0;
-    params.unk10 = 0;
-    params.unk1E = 0x14;
-    params.unk20 = 0xC;
-    r1 = ((func_150ADA20() & 1) ? 0x40 : 0);
-    flag = (arg5 == -1) ? 0 : 1;
-    r2 = (func_150ADA20() & 1) ? 0x80 : 0;
-    params.unk58 = r2 | flag | 2 | 4 | r1 | 0x4000 | 0x8000 | 0x200 | 0x800000;
-    params.unk60 = 8;
-    params.unk61 = 6;
-    if (arg7) {
-        params.unk62 = 0x1D;
+    unkA8 = unkA8Value;
+    spawn.unk1D = 0x6C;
+    spawn.unk08 = 0x5103;
+    spawn.unk00 = 0x200005;
+    spawn.unk04 = 0;
+    spawn.unk0C = 0;
+    spawn.unk10 = 0;
+    spawn.unk1E = 20;
+    spawn.unk20 = 12;
+    bit40 = (func_150ADA20() & 1) ? 0x40 : 0;
+    hasUnk0A = (unk0A == -1) ? 0 : 1;
+    bit80 = (func_150ADA20() & 1) ? 0x80 : 0;
+    spawn.flags = bit80 | hasUnk0A | 2 | 4 | bit40 | 0x4000 | 0x8000 | 0x200 | 0x800000;
+    spawn.unk60 = 8;
+    spawn.unk61 = 6;
+    if (altUnk62) {
+        spawn.unk62 = 0x1D;
     } else {
-        params.unk62 = 0xA;
+        spawn.unk62 = 0xA;
     }
-    params.unk63 = -1;
-    params.unk64 = -1;
-    params.unk22 = 1;
-    params.unk65 = 0;
+    spawn.unk63 = -1;
+    spawn.unk64 = -1;
+    spawn.unk22 = 1;
+    spawn.unk65 = 0;
     extra.unk0 = 1;
     extra.unk1 = 0;
-    params.unk14 = 0xE2;
-    params.unk15 = 0xB2;
-    params.unk16 = 0x60;
-    params.unk17 = 0xFF;
-    params.unk18 = 0x39;
-    params.unk19 = 0xF;
-    params.unk1A = 0;
-    params.unk1C = 0xFF;
-    params.unk24 = 1.0f;
-    extra.unk4 = 0.7030000091f;
-    params.unk30 = *arg0;
-    params.unk3C = 0.0f;
-    params.unk40 = 0.0f;
-    params.unk44 = 0.0f;
-    params.unk48 = *arg1;
-    params.unk54 = arg2;
-    params.unk1B = arg4;
-    if (arg5 == -1) {
-        params.unk0A = 0x12C;
+    spawn.unk14 = 0xE2;
+    spawn.unk15 = 0xB2;
+    spawn.unk16 = 0x60;
+    spawn.unk17 = 0xFF;
+    spawn.unk18 = 0x39;
+    spawn.unk19 = 0xF;
+    spawn.unk1A = 0;
+    spawn.unk1C = 0xFF;
+    spawn.unk24 = 1.0f;
+    extra.unk4 = 0.703f;
+    spawn.pos = *pos;
+    spawn.unk3C.x = 0.0f;
+    spawn.unk3C.y = 0.0f;
+    spawn.unk3C.z = 0.0f;
+    spawn.vel = *vel;
+    spawn.unk54 = unk54;
+    spawn.unk1B = unk1B;
+    if (unk0A == -1) {
+        spawn.unk0A = 300;
     } else {
-        params.unk0A = arg5;
+        spawn.unk0A = unk0A;
     }
-    params.unk2C = arg6;
-    params.unk28 = arg6;
-    ret = func_15130280(&params, 1, arg8, 0x10, arg9, argA);
-    if (ret != NULL) {
-        memcpy((u8 *)ret + 0xA8, &scale, 4);
-        memcpy((u8 *)ret + 0xB0, &extra, 8);
+    spawn.unk2C = size;
+    spawn.unk28 = size;
+    particle = func_15130280(&spawn, 1, arg8, sizeof(f32) + 4 + sizeof(ParticleExtra), arg9, argA);
+    if (particle != NULL) {
+        memcpy(&particle->unkA8, &unkA8, sizeof(unkA8));
+        memcpy(&particle->extra, &extra, sizeof(extra));
     }
-    return ret;
+    return particle;
 }
 
 struct conker151C61A0 {
