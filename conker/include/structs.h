@@ -2232,28 +2232,33 @@ typedef struct ParticleAxes {
     /* 0x0C */ Vec3f v;
 } ParticleAxes; // size 0x18
 
-typedef struct {
-    u8 pad0[0x7];
-    u8 unk7;
-    u8 pad8[0x3];
-    u8 unkB;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-} struct214;
+/* Swarm script commands (game_CB1C0.c). The spawn command (func_1509DD50) for func_15177F90. */
+typedef struct SwarmSpawnCmd {
+    /* 0x00 */ u8  pad0[0x7];
+    /* 0x07 */ u8  memberCount;
+    /* 0x08 */ u8  pad8[0x3];
+    /* 0x0B */ u8  tag;
+    /* 0x0C */ s32 x;
+    /* 0x10 */ s32 y;
+    /* 0x14 */ s32 z;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 playSfx;
+} SwarmSpawnCmd;
 
-typedef struct {
-    u8 pad0[0x8];
-    s32 unk8;
-    union {
-        struct SHORTS s;
-        struct WORD   i;
-    } unkC;
-    s32 unk10;
-    s32 unk14;
-} struct215;
+/* The target command (func_1509DDFC, func_1509DEC4): op 0 follows an object, op 1 heads for a point. */
+typedef struct SwarmTargetCmd {
+    /* 0x00 */ u8  pad0[0x8];
+    /* 0x08 */ s32 target;          /* op 0: object id (bit 13 masked off); op 1: x */
+    /* 0x0C */ union {
+        struct {
+            s16 unk0;
+            s16 yOffset;
+        } follow;                   /* op 0 */
+        s32 y;                      /* op 1 */
+    } argC;
+    /* 0x10 */ s32 z;               /* op 1 */
+    /* 0x14 */ s32 yOffset;         /* op 1 */
+} SwarmTargetCmd;
 
 /* One 5-byte command of an object script (Actor.unk218, run by func_1507BC14 in game_A28B0.c): op indexes the
  * command table D_80086730, args are copied to D_800D1890..D_800D1893; an op >= 247 is a 1-byte label. */
