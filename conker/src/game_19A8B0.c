@@ -431,61 +431,6 @@ void func_1516D99C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s
     s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
     s32, s32, s32, s32, u8, s32, s32, s32, s32, s32, u8, s32);
 
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    char pad2[0xA];
-    u8 unkC;
-    u8 padD;
-    s16 unkE;
-    s16 unk10;
-    s16 unk12;
-    s16 unk14;
-    s16 unk16;
-    s16 unk18;
-    s16 unk1A;
-    s16 unk1C;
-    u16 unk1E;
-    u16 unk20;
-    u16 unk22;
-    u8 unk24;
-    u8 unk25;
-    u8 unk26;
-    u8 unk27;
-    u8 unk28;
-    u8 unk29;
-    u8 unk2A;
-    u8 unk2B;
-    u8 unk2C;
-    u8 unk2D;
-    u8 unk2E;
-    u8 unk2F;
-    u8 unk30;
-    u8 unk31;
-    u8 unk32;
-    u8 unk33;
-    u8 unk34;
-    u8 unk35;
-    u8 unk36;
-    u8 unk37;
-    u8 unk38;
-    u8 unk39;
-    u8 unk3A;
-    u8 unk3B;
-    u8 unk3C;
-    u8 unk3D;
-    u8 unk3E;
-    u8 unk3F;
-    u8 unk40;
-    u8 unk41;
-    u8 unk42;
-    u8 unk43;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    u8 unk48;
-} Emitter1516DB90;
 
 extern s16 D_800A6E30[][7];
 extern void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
@@ -496,220 +441,220 @@ void func_15170034(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 #define HI_U8(arg) (bp[2])
 #define LO_U8(arg) (bp[3])
 
-void func_1516DB90(Emitter1516DB90 *arg0) {
-    Emitter1516DB90 *p;
+void func_1516DB90(Emitter *arg0) {
+    Emitter *emitter;
     s32 i;
-    s16 a14;
-    s16 a16;
-    s32 life;
+    s16 scaleX;
+    s16 scaleY;
+    s32 velocityY;
     s16 x;
     s16 y;
     s32 tmp;
-    s32 r;
-    s32 g;
-    s32 b;
-    s32 a;
+    s32 velXHigh;
+    s32 velXLow;
+    s32 velZHigh;
+    s32 velZLow;
     s16 z;
     u8 *bp;
     s16 c24, c25, c26, c27, c28, c2A, c2B, c2C, c32, c33, c34, c35;
-    f32 x1;
-    f32 y1;
-    f32 z1;
-    f32 x2;
-    f32 y2;
-    f32 z2;
-    f32 vx;
-    f32 vy;
-    f32 vz;
+    f32 fromX;
+    f32 fromY;
+    f32 fromZ;
+    f32 toX;
+    f32 toY;
+    f32 toZ;
+    f32 velX;
+    f32 velY;
+    f32 velZ;
     f32 speed;
-    f32 spread;
+    f32 offset;
     f32 s;
     f32 c;
-    u8 ang;
+    u8 angle;
     u8 pad2;
-    u8 rnd;
-    s32 thresh;
-    s32 rr;
-    s32 flag;
-    s32 count;
+    u8 roll;
+    s32 threshold;
+    s32 scaleRandom;
+    s32 isAlt;
+    s32 countdown;
 
-    p = arg0;
+    emitter = arg0;
     bp = (u8 *)&tmp;
-    if (p->unk0 == 0x11) {
-        flag = 0;
+    if (emitter->unk0 == 0x11) {
+        isAlt = 0;
     } else {
-        flag = 1;
+        isAlt = 1;
     }
-    count = p->unk42;
-    count -= D_800BE9E4;
-    while (count < 0) {
-        if (p->unk41 != 0) {
-            count += p->unk41;
+    countdown = emitter->countdown;
+    countdown -= D_800BE9E4;
+    while (countdown < 0) {
+        if (emitter->interval != 0) {
+            countdown += emitter->interval;
         } else {
-            count = 0;
+            countdown = 0;
         }
-        for (i = 0; i < p->unk44; i++) {
-            if (p->unk43 != 0) {
-                rnd = func_150ADA20() & 0xFF;
-                if (p->unk22 & 4) {
-                    thresh = p->unk43;
-                    thresh = (p->unk20 * thresh) / p->unk3C;
+        for (i = 0; i < emitter->burst; i++) {
+            if (emitter->chance != 0) {
+                roll = func_150ADA20() & 0xFF;
+                if (emitter->flags & 4) {
+                    threshold = emitter->chance;
+                    threshold = (emitter->timer * threshold) / emitter->initialTimer;
                 } else {
-                    thresh = p->unk43;
+                    threshold = emitter->chance;
                 }
             }
-            if (p->unk43 == 0 || rnd < thresh) {
-                if (p->unk3F == 0xFF) {
-                    if (p->unk22 & 0x10) {
+            if (emitter->chance == 0 || roll < threshold) {
+                if (emitter->object == 0xFF) {
+                    if (emitter->flags & 0x10) {
                         
-                        s16 *sv = (s16 *)((u16)p->unk10 | (p->unkE << 16));
+                        s16 *sv = (s16 *)((u16)emitter->y | (emitter->x << 16));
                         x = sv[0];
-                        y = sv[1] + p->unk12;
+                        y = sv[1] + emitter->z;
                         z = sv[2];
-                    } else if (p->unk22 & 0x20) {
+                    } else if (emitter->flags & 0x20) {
                         
-                        f32 *fv = (f32 *)((u16)p->unk10 | (p->unkE << 16));
+                        f32 *fv = (f32 *)((u16)emitter->y | (emitter->x << 16));
                         x = fv[0];
-                        y = fv[1] + p->unk12;
+                        y = fv[1] + emitter->z;
                         z = fv[2];
                     } else {
-                        x = p->unkE;
-                        y = p->unk10;
-                        z = p->unk12;
+                        x = emitter->x;
+                        y = emitter->y;
+                        z = emitter->z;
                     }
                 } else {
-                    if (D_800CC2D0[p->unk3F].unk1D4 == NULL) {
+                    if (D_800CC2D0[emitter->object].unk1D4 == NULL) {
                         continue;
                     }
-                    x1 = D_800A6E30[p->unkE][0];
-                    y1 = D_800A6E30[p->unkE][1];
-                    z1 = D_800A6E30[p->unkE][2];
-                    x2 = D_800A6E30[p->unkE][3];
-                    y2 = D_800A6E30[p->unkE][4];
-                    z2 = D_800A6E30[p->unkE][5];
-                    if (D_800A6E30[p->unkE][6] != 0) {
-                        z2 += (u32)(func_150ADA20() & D_800A6E30[p->unkE][6]);
+                    fromX = D_800A6E30[emitter->x][0];
+                    fromY = D_800A6E30[emitter->x][1];
+                    fromZ = D_800A6E30[emitter->x][2];
+                    toX = D_800A6E30[emitter->x][3];
+                    toY = D_800A6E30[emitter->x][4];
+                    toZ = D_800A6E30[emitter->x][5];
+                    if (D_800A6E30[emitter->x][6] != 0) {
+                        toZ += (u32)(func_150ADA20() & D_800A6E30[emitter->x][6]);
                     }
-                    func_150A7960((f32 *)((u8 *)D_800CC2D0[p->unk3F].unk1D4 + (p->unk47 << 6)), x1, y1, z1, &x1, &y1, &z1);
-                    func_150A7960((f32 *)((u8 *)D_800CC2D0[p->unk3F].unk1D4 + (p->unk47 << 6)), x2, y2, z2, &x2, &y2, &z2);
-                    vx = (x2 - x1) * 8.0f;
-                    vy = (y2 - y1) * 8.0f;
-                    vz = (z2 - z1) * 8.0f;
-                    life = vy;
-                    ang = 0x40 - D_800CC2D0[p->unk3F].unk76;
-                    vx -= D_800CC2D0[p->unk3F].xz_velocity * func_15048A40(ang) * 64.0f;
-                    vz -= *(f32 *)((u8 *)D_800CC30C + p->unk3F * 0x32C) * func_150489B0(ang) * 64.0f;
-                    tmp = vx;
-                    r = HI_U8(tmp);
-                    g = LO_U8(tmp);
-                    tmp = vz;
-                    b = HI_U8(tmp);
-                    a = LO_U8(tmp);
-                    x = x1;
-                    y = y1;
-                    z = z1;
+                    func_150A7960((f32 *)((u8 *)D_800CC2D0[emitter->object].unk1D4 + (emitter->bone << 6)), fromX, fromY, fromZ, &fromX, &fromY, &fromZ);
+                    func_150A7960((f32 *)((u8 *)D_800CC2D0[emitter->object].unk1D4 + (emitter->bone << 6)), toX, toY, toZ, &toX, &toY, &toZ);
+                    velX = (toX - fromX) * 8.0f;
+                    velY = (toY - fromY) * 8.0f;
+                    velZ = (toZ - fromZ) * 8.0f;
+                    velocityY = velY;
+                    angle = 0x40 - D_800CC2D0[emitter->object].unk76;
+                    velX -= D_800CC2D0[emitter->object].xz_velocity * func_15048A40(angle) * 64.0f;
+                    velZ -= *(f32 *)((u8 *)D_800CC30C + emitter->object * 0x32C) * func_150489B0(angle) * 64.0f;
+                    tmp = velX;
+                    velXHigh = HI_U8(tmp);
+                    velXLow = LO_U8(tmp);
+                    tmp = velZ;
+                    velZHigh = HI_U8(tmp);
+                    velZLow = LO_U8(tmp);
+                    x = fromX;
+                    y = fromY;
+                    z = fromZ;
                 }
-                if (p->unk22 & 8) {
-                    func_15170034(p->unk22, &vx, &vy, &vz);
-                    speed = p->unk45 * 16;
-                    spread = (u32)p->unk46;
-                    y += spread * vy;
-                    vy = speed * vy;
-                    life = vy;
+                if (emitter->flags & 8) {
+                    func_15170034(emitter->flags, &velX, &velY, &velZ);
+                    speed = emitter->speed * 16;
+                    offset = (u32)emitter->startOffset;
+                    y += offset * velY;
+                    velY = speed * velY;
+                    velocityY = velY;
                     func_150ADA20();
-                    x += vx * spread;
-                    z += vz * spread;
-                    vx *= speed;
-                    vz *= speed;
-                    tmp = vx;
-                    r = HI_U8(tmp);
-                    g = LO_U8(tmp);
-                    tmp = vz;
-                    b = HI_U8(tmp);
-                    a = LO_U8(tmp);
+                    x += velX * offset;
+                    z += velZ * offset;
+                    velX *= speed;
+                    velZ *= speed;
+                    tmp = velX;
+                    velXHigh = HI_U8(tmp);
+                    velXLow = LO_U8(tmp);
+                    tmp = velZ;
+                    velZHigh = HI_U8(tmp);
+                    velZLow = LO_U8(tmp);
                 }
-                if (p->unk3D != 0) {
-                    ang = func_150ADA20();
-                    s = func_15048A40(ang);
-                    c = func_150489B0(ang);
-                    speed = (u32)((func_150ADA20() & 0xFFFF) * p->unk3D) * (1.0f / 65536.0f);
+                if (emitter->radiusXZ != 0) {
+                    angle = func_150ADA20();
+                    s = func_15048A40(angle);
+                    c = func_150489B0(angle);
+                    speed = (u32)((func_150ADA20() & 0xFFFF) * emitter->radiusXZ) * (1.0f / 65536.0f);
                     x += speed * s;
                     z += speed * c;
                 }
-                if (p->unk3E != 0) {
+                if (emitter->radiusY != 0) {
                     s = func_15048A40(func_150ADA20() & 0xFF);
-                    speed = (u32)((func_150ADA20() & 0xFFFF) * p->unk3E) * (1.0f / 65536.0f);
+                    speed = (u32)((func_150ADA20() & 0xFFFF) * emitter->radiusY) * (1.0f / 65536.0f);
                     y += (s32)(speed * s);
                 }
-                a14 = p->unk14;
-                a16 = p->unk16;
-                if (p->unk18 != 0) {
-                    rr = (u32)func_150ADA20() % (u32)p->unk18;
+                scaleX = emitter->scaleX;
+                scaleY = emitter->scaleY;
+                if (emitter->scaleXRandom != 0) {
+                    scaleRandom = (u32)func_150ADA20() % (u32)emitter->scaleXRandom;
                 } else {
-                    rr = 0;
+                    scaleRandom = 0;
                 }
-                if (p->unk22 & 1) {
-                    a14 += rr;
-                    a16 += rr;
+                if (emitter->flags & 1) {
+                    scaleX += scaleRandom;
+                    scaleY += scaleRandom;
                 } else {
-                    a14 += rr;
-                    if (p->unk1A != 0) {
-                        a16 += (u32)func_150ADA20() % (u32)p->unk1A;
+                    scaleX += scaleRandom;
+                    if (emitter->scaleYRandom != 0) {
+                        scaleY += (u32)func_150ADA20() % (u32)emitter->scaleYRandom;
                     }
                 }
-                if (!(p->unk22 & 8) && !(p->unk22 & 0x80)) {
-                    life = p->unk1C;
-                    if (p->unk1E != 0) {
-                        life += (u32)func_150ADA20() % p->unk1E;
+                if (!(emitter->flags & 8) && !(emitter->flags & 0x80)) {
+                    velocityY = emitter->velocityY;
+                    if (emitter->velocityYRandom != 0) {
+                        velocityY += (u32)func_150ADA20() % emitter->velocityYRandom;
                     }
-                    r = p->unk2E;
-                    if (p->unk38 != 0) {
-                        r += (u32)func_150ADA20() % p->unk38;
-                        if (r >= 0x100) {
-                            r = 0xFF;
+                    velXHigh = emitter->velocityXHigh;
+                    if (emitter->velocityXHighRandom != 0) {
+                        velXHigh += (u32)func_150ADA20() % emitter->velocityXHighRandom;
+                        if (velXHigh >= 0x100) {
+                            velXHigh = 0xFF;
                         }
                     }
-                    g = p->unk2F;
-                    if (p->unk39 != 0) {
-                        g += (u32)func_150ADA20() % p->unk39;
-                        if (g >= 0x100) {
-                            g = 0xFF;
+                    velXLow = emitter->velocityXLow;
+                    if (emitter->velocityXLowRandom != 0) {
+                        velXLow += (u32)func_150ADA20() % emitter->velocityXLowRandom;
+                        if (velXLow >= 0x100) {
+                            velXLow = 0xFF;
                         }
                     }
-                    b = p->unk30;
-                    if (p->unk3A != 0) {
-                        b += (u32)func_150ADA20() % p->unk3A;
-                        if (b >= 0x100) {
-                            b = 0xFF;
+                    velZHigh = emitter->velocityZHigh;
+                    if (emitter->velocityZHighRandom != 0) {
+                        velZHigh += (u32)func_150ADA20() % emitter->velocityZHighRandom;
+                        if (velZHigh >= 0x100) {
+                            velZHigh = 0xFF;
                         }
                     }
-                    a = p->unk31;
-                    if (p->unk3B != 0) {
-                        a += (u32)func_150ADA20() % p->unk3B;
-                        if (a >= 0x100) {
-                            a = 0xFF;
+                    velZLow = emitter->velocityZLow;
+                    if (emitter->velocityZLowRandom != 0) {
+                        velZLow += (u32)func_150ADA20() % emitter->velocityZLowRandom;
+                        if (velZLow >= 0x100) {
+                            velZLow = 0xFF;
                         }
                     }
                 }
                 {
-                    c32 = p->unk32; c33 = p->unk33; c34 = p->unk34; c35 = p->unk35;
-                    c2A = p->unk2A; c2B = p->unk2B; c2C = p->unk2C;
-                    c26 = p->unk26; c27 = p->unk27; c28 = p->unk28;
-                func_1516D4E8(x, y, z, p->unk24, p->unk25, c26, c27, c28, p->unk29, c2A, c2B,
-                              c2C, p->unk2D, r, g, b, a, c32, c33, c34, c35, p->unk36,
-                              p->unk37, a14, a16, p->unk40, life, flag, p->unk48, p->unkC, p->unk1);
+                    c32 = emitter->unk32; c33 = emitter->unk33; c34 = emitter->unk34; c35 = emitter->unk35;
+                    c2A = emitter->envR; c2B = emitter->envG; c2C = emitter->envB;
+                    c26 = emitter->r; c27 = emitter->g; c28 = emitter->b;
+                func_1516D4E8(x, y, z, emitter->texture, emitter->frame, c26, c27, c28, emitter->alpha, c2A, c2B,
+                              c2C, emitter->kind, velXHigh, velXLow, velZHigh, velZLow, c32, c33, c34, c35, emitter->unk36,
+                              emitter->unk37, scaleX, scaleY, emitter->particleLifetime, velocityY, isAlt, emitter->particleLink, emitter->unkC, emitter->unk1);
                 }
             }
         }
     }
-    p->unk42 = count;
-    i = p->unk20;
+    emitter->countdown = countdown;
+    i = emitter->timer;
     if (i != 0xFFFF) {
         i -= D_800BE9E4;
         if (i > 0) {
-            p->unk20 = i;
+            emitter->timer = i;
         } else {
-            func_1516972C((struct102 *)p);
+            func_1516972C((struct102 *)emitter);
         }
     }
 }
