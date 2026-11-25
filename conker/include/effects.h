@@ -740,6 +740,15 @@ typedef struct BillboardTemplate {
     /* 0x36 */ u8 pad36[2];
 } BillboardTemplate; /* size 0x38 */
 
+/* Type 5 / 0x42 object: a moving, animated billboard particle (created by func_15167D84 in game_1944C0.c).
+ * A spawner's extra data follows it (particle + 1). */
+typedef struct BillboardParticle {
+    /* 0x00 */ EffectHeader link;
+    /* 0x10 */ BillboardTemplate tmpl;
+    /* 0x48 */ s8 onDeath;      /* index into D_8008CA20, -1 = none */
+    /* 0x49 */ u8 pad49[7];
+} BillboardParticle; /* size 0x50 */
+
 /* Random spawn angles: yaw = yawBase + rand % (yawRange + 1), likewise pitch (256-step binary angles).
  * Most spawn configs of game_17CAF0.c store random ranges as base/range pairs like this. */
 typedef struct AngleRange {

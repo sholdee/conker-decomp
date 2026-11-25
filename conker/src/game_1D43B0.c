@@ -284,45 +284,6 @@ void func_151A7610(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, BloodTrail *trai
                   15, 20, 0, -1, 86, 39, 0, trail->unkC, trail->unk1);
 }
 
-/* Billboard particle created by func_15167D84 (layout as Particle in game_1944C0.c). */
-typedef struct {
-    /* 0x00 */ u8 link[0x10];
-    /* 0x10 */ void *anim;
-    /* 0x14 */ s32 unk14;       /* BILLBOARD_CUSTOM_MODE: bits 0-7 render mode, bits 16-31 combine mode */
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s16 frame;
-    /* 0x1E */ s16 frameStep;
-    /* 0x20 */ s16 x;
-    /* 0x22 */ s16 y;
-    /* 0x24 */ s16 z;
-    /* 0x26 */ s16 velX;
-    /* 0x28 */ s16 velZ;
-    /* 0x2A */ u8 pad2A[2];
-    /* 0x2C */ u8 subX;
-    /* 0x2D */ u8 subZ;
-    /* 0x2E */ u8 subY;
-    /* 0x2F */ s8 callback;     /* index into D_8008C9C8, -1 = none */
-    /* 0x30 */ s16 velY;
-    /* 0x32 */ s16 accelY;
-    /* 0x34 */ s16 width;
-    /* 0x36 */ s16 height;
-    /* 0x38 */ s16 life;        /* counts down */
-    /* 0x3A */ s8 fadeStep;
-    /* 0x3B */ u8 pad3B;
-    /* 0x3C */ u8 primR;
-    /* 0x3D */ u8 primG;
-    /* 0x3E */ u8 primB;
-    /* 0x3F */ u8 primA;
-    /* 0x40 */ u8 envR;
-    /* 0x41 */ u8 envG;
-    /* 0x42 */ u8 envB;
-    /* 0x43 */ u8 pad43;
-    /* 0x44 */ u16 flags;
-    /* 0x46 */ u8 pad46[2];
-    /* 0x48 */ s8 onDeath;
-    /* 0x49 */ u8 pad49[7];
-} SpriteParticle; // the spawner's extra data follows at 0x50
-
 /* Extra data of the particles run by callbacks 0x14 and 0x15. The *Start fields are values of life. */
 typedef struct {
     /* 0x0 */ s16 tintStart;    /* from here the env colour follows life (callback 0x15) */
@@ -334,40 +295,40 @@ typedef struct {
 } SwellParticleData;
 
 /* Callback 0x14: fade out and swell; switches to callback 0x15 to tint. */
-void func_151A77C0(SpriteParticle *particle) {
+void func_151A77C0(BillboardParticle *particle) {
     SwellParticleData *data = (SwellParticleData *)(particle + 1);
 
-    if (particle->life < data->fadeOutStart) {
-        particle->primA = particle->life * data->fadeOutStep;
+    if (particle->tmpl.life < data->fadeOutStart) {
+        particle->tmpl.primA = particle->tmpl.life * data->fadeOutStep;
     }
-    if (particle->life < data->swellStart) {
+    if (particle->tmpl.life < data->swellStart) {
         s16 growth = data->swellRate * D_800BE9E4;
 
-        particle->width += growth;
-        particle->height += growth;
+        particle->tmpl.width += growth;
+        particle->tmpl.height += growth;
     }
-    if (particle->life < data->tintStart) {
-        particle->callback = 0x15;
-        particle->flags |= BILLBOARD_ENV_COLOR | BILLBOARD_2CYCLE;
-        particle->envR = particle->envG = particle->envB = particle->life * data->tintStep;
-        particle->unk14 = 0xC000F;
+    if (particle->tmpl.life < data->tintStart) {
+        particle->tmpl.callback = 0x15;
+        particle->tmpl.flags |= BILLBOARD_ENV_COLOR | BILLBOARD_2CYCLE;
+        particle->tmpl.envR = particle->tmpl.envG = particle->tmpl.envB = particle->tmpl.life * data->tintStep;
+        particle->tmpl.unk4 = 0xC000F;
     }
 }
 
 /* Callback 0x15: func_151A77C0 after the switch, with the env colour following life. */
-void func_151A787C(SpriteParticle *particle) {
+void func_151A787C(BillboardParticle *particle) {
     SwellParticleData *data = (SwellParticleData *)(particle + 1);
 
-    if (particle->life < data->fadeOutStart) {
-        particle->primA = particle->life * data->fadeOutStep;
+    if (particle->tmpl.life < data->fadeOutStart) {
+        particle->tmpl.primA = particle->tmpl.life * data->fadeOutStep;
     }
-    if (particle->life < data->swellStart) {
+    if (particle->tmpl.life < data->swellStart) {
         s16 growth = data->swellRate * D_800BE9E4;
 
-        particle->width += growth;
-        particle->height += growth;
+        particle->tmpl.width += growth;
+        particle->tmpl.height += growth;
     }
-    particle->envR = particle->envG = particle->envB = particle->life * data->tintStep;
+    particle->tmpl.envR = particle->tmpl.envG = particle->tmpl.envB = particle->tmpl.life * data->tintStep;
 }
 
 /* Particle destroyFn of the debris pieces: removes the blood trail. */

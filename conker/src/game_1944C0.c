@@ -85,15 +85,6 @@ typedef struct {
     /* 0xD */ u8 flip;         /* bit 0: flip s, bit 1: flip t */
 } SpriteParams;
 
-/* Type 5 / 0x42 object: a moving, animated billboard particle (created by func_15167D84). */
-typedef struct {
-    /* 0x00 */ EffectHeader link;
-    /* 0x10 */ BillboardTemplate tmpl;
-    /* 0x48 */ s8 onDeath;      /* index into D_8008CA20, -1 = none */
-} Particle;
-
-
-
 extern SpriteAnim *D_8008CA4C[];
 
 void func_15169070(s32 first, s32 last, s32 event, u8 eventType);
@@ -468,7 +459,7 @@ Gfx *func_15167C58(Gfx *gdl, SpriteFx *fx, u8 arg2) {
     return (Gfx *)func_15095760(gfx, &params);
 }
 /* Spawns a particle (type 0x42 when `altType` is set, else 5) from the 0x38-byte template at `src`. */
-Particle *func_15167D84(src, altType, extra, onDeath, owner, list)
+BillboardParticle *func_15167D84(src, altType, extra, onDeath, owner, list)
     BillboardTemplate *src;
     s32 altType;
     s32 extra;
@@ -476,7 +467,7 @@ Particle *func_15167D84(src, altType, extra, onDeath, owner, list)
     u8 owner;
     s32 list;
 {
-    Particle *particle;
+    BillboardParticle *particle;
 
     particle = func_15167A68((altType == 0) ? 5 : 0x42, list, extra + 0x50, 0, owner, 1);
     if (particle == NULL) {
@@ -486,8 +477,8 @@ Particle *func_15167D84(src, altType, extra, onDeath, owner, list)
     particle->onDeath = onDeath;
     return particle;
 }
-/* Particle update: life, fade, motion and animation; runs onDeath and destroys it when finished. */
-void func_15167E0C(Particle *p) {
+/* BillboardParticle update: life, fade, motion and animation; runs onDeath and destroys it when finished. */
+void func_15167E0C(BillboardParticle *p) {
     void (*func)(struct102 *);
     u8 finished;
     s32 limit;
@@ -598,8 +589,8 @@ Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 extern s32 D_800D2C9C;
 
-/* Particle draw: sets render/combine modes and colours, then the current frame as a billboard. */
-s32 func_15168118(Gfx *gfx, Particle *p, s16 viewIndex) {
+/* BillboardParticle draw: sets render/combine modes and colours, then the current frame as a billboard. */
+s32 func_15168118(Gfx *gfx, BillboardParticle *p, s16 viewIndex) {
     s32 view;
     SpriteParams params;
     s32 pad1[2]; // matching: stack layout of the target frame
@@ -907,7 +898,7 @@ void func_15168B10(s32 obj, s32 type) {
 }
 
 /*
- * Particle callback: tmpl.unk4 holds a fade rate (high half) and a delay (low half). Keeps the particle alive
+ * BillboardParticle callback: tmpl.unk4 holds a fade rate (high half) and a delay (low half). Keeps the particle alive
  * (life = 30) while the delay counts down, then fades primA by the rate each call and lets it die.
  * Readable equivalent:
  *     word = p->tmpl.unk4;
@@ -920,7 +911,7 @@ void func_15168B10(s32 obj, s32 type) {
 
 void func_15168B44(void *arg0)
 {
-  Particle *a;
+  BillboardParticle *a;
   s32 v1;
   s32 new_var2;
   u16 t6;
