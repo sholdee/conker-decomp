@@ -102,10 +102,6 @@ extern s32 D_800D37E0;
 extern f32 D_800DBE54;
 extern f32 D_800DBE58;
 extern u16 D_800DBE60;
-extern f32 D_800DBE68;
-extern f32 D_800DBE6C;
-extern f32 D_800DBE70;
-extern s32 *D_800DBF94;
 
 // D_800DBE5C points at the world mesh's per-triangle materials, or is NULL.
 // World-mesh triangles are 12 bytes (three vertex offsets) from D_800DBE3C on.

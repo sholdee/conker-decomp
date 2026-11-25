@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800DCD27;               // priority of the current ambient colour
 
 void *allocate_memory(s32 size, s32, s32, s32);
 f32 func_1515F008(s16 *, s32);
@@ -433,7 +432,6 @@ Gfx *func_1515E544(Gfx *gfx, PointLightGfx *lightBuf, u8 maxLights, u8 countByte
     return gfx;
 }
 
-extern u8 D_800D9E21;                // light count byte func_1515D914 stored for player 0
 extern PointLight *D_800D9E28[];     // the lights it picked
 
 /*

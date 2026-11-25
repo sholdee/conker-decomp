@@ -156,7 +156,6 @@ void func_150ED638(Actor *obj, s32 left, s32 right) {
     func_15062FC0(obj, 1, size, 0x800, 0x800, size, -left * 7, 0);
 }
 
-extern s8 D_800E0BCE[];
 extern s32 func_1508DAEC(s32 player, s32 mode);
 extern struct216 *func_1507BB28(s32 arg0, s32 scriptId);
 extern void func_15052F9C(Actor *arg0, f32 height, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 immune, s32 arg7, s32 force, s32 arg9);

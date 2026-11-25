@@ -83,14 +83,12 @@ typedef struct {
     /* 0x4 */ u32 addr;
 } DlCommand;
 
-extern s32 D_800DBF98; // grouped objects, kept at the end of D_800DBEF4
 extern LevelModelEntry *D_800B0E50;
 extern ObjectBehavior D_80088C90[];
 extern GroupedObjectDefaults D_800A26C0[];
 extern void *D_800DBED0[4];
 extern void *D_800DBEE0;
 extern void *D_800DBEE4;
-extern s32 *D_800DBF94;
 void *allocate_memory(s32, u32, s32, s32);
 ModelAsset *func_1502B6BC(s32 *, s32, s32, s32, s32, s32);
 void func_1510CE60(Gfx *, s32, s32, s32, s32);

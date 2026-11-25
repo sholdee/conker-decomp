@@ -239,9 +239,6 @@ Gfx *func_15142FBC(Gfx *gdl, s32 modeH, s32 modeL, u8 *needSync);
 extern s32 D_800903F4;
 extern s32 D_800A4AC8[][2];
 extern s16 D_800DCE40;
-extern s32 D_800DD220;
-extern s32 D_800DD224;
-extern s32 D_800DD230;
 
 /* Loads the next frame of texture D_800903F4 (advancing 0x80 per call, wrapping at 0x500) and sets a render mode. */
 Gfx *func_151668B8(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {

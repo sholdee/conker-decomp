@@ -53,7 +53,6 @@ void func_1517725C(u8);
 void func_15179DB0(u8);
 void func_15183C28(s32);
 
-extern f32 D_800CC2E4;
 extern u8 D_800A72D0[];
 extern s32 D_800DDF20;
 extern s32 D_800DDF98;

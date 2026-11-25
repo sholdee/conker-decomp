@@ -4,7 +4,6 @@
 #include "variables.h"
 
 
-extern u8 D_800DDBD0[15];
 
 void func_15009334(s32 index);
 
@@ -618,11 +617,7 @@ void func_1500AC14(void) {
 
 extern u8 D_80095CC4[];
 extern s16 D_800BE438[15][2];
-extern u8 D_800DDBC0[];
-extern u8 D_800DDBE0[];
-extern u8 D_800DDBF0[];
 extern u8 D_800DDC20[][2];
-extern u8 D_800DDC80[];
 
 /** Sets up particle slot `slot` for resource `id` (0xFF: unused). */
 void func_1500AD84(s32 slot, s32 id, s32 flags) {
@@ -955,8 +950,6 @@ typedef struct Game36680EmitterChoice {
 
 extern Game36680EmitterChoice D_8008CF00[][8];
 extern Game36680Emitter D_8008CEB8[];
-extern u8 D_800DDC10[];
-extern s16 D_800DDC90[60];
 extern void func_1510F800(s32);
 extern void func_1517B89C(s32, s32);
 

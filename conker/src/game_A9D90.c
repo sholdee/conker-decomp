@@ -128,8 +128,6 @@ typedef struct CD64Msg {
     u8 id;
 } CD64Msg;
 
-extern u8 D_800D18A9;
-extern s16 D_800E0AD0[];
 void func_15169040(void *, s32);
 void func_1504BAF0(Actor *);
 void func_150E7994(s16, f32, u8, s32);

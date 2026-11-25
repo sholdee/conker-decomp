@@ -29,7 +29,6 @@ typedef struct ListObj {
 
 extern ListObj *D_800DCE50[2][104];
 
-extern s32 *D_800DBF94;
 
 typedef struct {
     s32 count;

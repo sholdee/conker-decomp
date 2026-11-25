@@ -96,7 +96,6 @@ s32 func_15085BE8(void) {
     return overlap;
 }
 
-extern s32 D_800D2354;
 extern f32 sqrtf(f32);
 f32 func_15086D94(f32, f32, f32, f32, f32);
 

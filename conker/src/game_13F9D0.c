@@ -135,8 +135,6 @@ typedef struct DrawEntry {
 } DrawEntry;
 
 extern DrawEntry **D_80089240[]; // per view
-extern u16 D_800DBEE8[];         // per view: entries in D_80089240
-extern u8 D_800C3658[];
 
 extern s32 func_15022B08(s32, s32);
 extern s32 func_1503F800(void *, s16, s16, s32, s32);
@@ -327,7 +325,6 @@ Gfx *func_151733D8(Gfx *gfx, s32);
 Gfx *func_151137D4(Gfx *gfx, WorldObject *obj, Mtx *mtx, s32 view, s32 distance, s32 pass);
 Gfx *func_1515E544(Gfx *gfx, s32, s32, s32, void *);
 extern Mtx D_80089470;
-extern u8 D_800D9E21;
 
 /* Draws one view's object list; translucent selects the pass (objects with flags bit 0x10 or alpha < 255). */
 Gfx *func_151135C4(Gfx *gfx, s32 translucent, s16 view) {
@@ -477,7 +474,6 @@ void func_15113C88(void) {
     }
 }
 
-extern s32 D_800DBF98; // grouped objects, kept at the end of D_800DBEF4
 
 /* A group of objects that move together; the first member leads. */
 
@@ -533,7 +529,6 @@ void func_15113E54(s32 arg0) {
     }
 }
 
-extern s32 *D_800DBF94; // per object: bit N set when actor D_800CC2D0[N] touches it
 
 /* Whether actor `actor` (any actor if -1) touches obj; only objects with flags bit 0x80 track contacts. */
 s32 func_15114050(WorldObject *obj, s32 actor) {
@@ -649,7 +644,6 @@ void func_15114348(s32 objIndex, f32 *x, f32 *y, f32 *z) {
 }
 
 extern f32 D_800A2F60;
-extern u16 D_800CBDA0[];
 
 /* Carries an actor standing on object objIndex: moves it with the object and turns it by the object's yaw spin. */
 void func_1511473C(Actor *actor, s32 objIndex) {

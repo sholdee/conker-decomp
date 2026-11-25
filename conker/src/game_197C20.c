@@ -22,7 +22,6 @@ typedef struct {
 
 extern MessageEntry *D_800DD254;
 extern MessageEntry *D_800DD258;
-extern u8 D_800CC4B3[][0x32C]; /* byte 0x1E3 of each D_800CC2D0 object */
 
 extern void *func_15167A68(s32, s32, s32, s32, s32, s32);
 extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);

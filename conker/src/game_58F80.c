@@ -53,26 +53,15 @@ typedef struct ObjTexture {
 
 extern u8 D_800C3E70;
 extern s32 D_800C3E74;
-extern u16 D_800C3E7A; // bone matrices used this frame
-extern u8 D_800C3E90;
 extern u8 D_800C3656;
 extern u8 D_800C3660;
-extern u8 D_800C3FFA;
-extern u16 D_800C4778[]; // display-list parts per model id
 extern Gfx **D_800C4488[];
-extern u16 D_800C4ED0[]; // bone count per model id
 extern ObjTexture *D_800C5338[];
-extern u16 D_800C5EF8[];
 extern D_800C666FEntry D_800C666F[];
 extern u8 D_800C3E98[];
 extern u8 D_C3E98[];
-extern u8 D_800D9900;
 extern u8 D_800D9E28[];
 extern MtxF D_800D2CA8[]; // view matrix per player
-extern u8 D_800DD2E4[];
-extern u16 D_800DD2E8;
-extern u16 D_800DD2EC;
-extern u8 D_800DF7C4;
 extern u8 D_800832C0[];
 extern u8 *D_8008422C[];
 extern s32 D_80088554;

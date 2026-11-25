@@ -136,13 +136,6 @@ void func_15171FC0(Particle19F150 *particle) {
 }
 
 /* Cached draw state shared by all sprite particles: texture, frame, cycle|combine mode, primitive colour. */
-extern s32 D_800DD1B4;
-extern s32 D_800DD1B8;
-extern s16 D_800DD1BC;
-extern s16 D_800DD1C0;
-extern s16 D_800DD1C2;
-extern s16 D_800DD1C4;
-extern s16 D_800DD1C6;
 /* Filled in by func_15094F70; unused here. */
 struct TexState151720C4 {
     s32 unk0[5];

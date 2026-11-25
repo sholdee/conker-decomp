@@ -18,10 +18,6 @@ extern void (*D_8008CA20[])(struct102 *);
 extern void (*D_8008C9C8[])(struct102 *);
 extern void (*D_8008CB64[3])(void);
 
-extern s16 D_800DD1C0;
-extern s16 D_800DD1C2;
-extern s16 D_800DD1C4;
-extern s16 D_800DD1C6;
 
 /* Template / payload of a type 0x10 object. */
 typedef struct {
@@ -206,27 +202,7 @@ void func_15167310(void) {
 }
 
 extern Mtx D_80089470;
-extern s32 D_800DD1B4;
-extern s32 D_800DD1B8;
-extern s16 D_800DD1BC;
-extern s16 D_800DD1BE;
-extern s16 D_800DD1C8;
-extern s16 D_800DD1CA;
-extern s16 D_800DD1CC;
-extern s16 D_800DD1CE;
 extern s16 D_800DD1F8;
-extern s32 D_800DD1FC;
-extern s32 D_800DD200;
-extern s16 D_800DD204;
-extern s16 D_800DD206;
-extern s32 D_800DD208;
-extern s32 D_800DD20C;
-extern s32 D_800DD210;
-extern s32 D_800DD214;
-extern s32 D_800DD218;
-extern s32 D_800DD21C;
-extern s32 D_800DD220;
-extern s32 D_800DD224;
 void func_15168F84(s32 group, s32 *first, s32 *last);
 
 /*

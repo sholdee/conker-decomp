@@ -6,7 +6,6 @@
 #define ARRAY_COUNT(arr) (s32)(sizeof(arr) / sizeof(arr[0]))
 
 s32 func_151464B8(s16 *arg0);
-extern u8 D_800C3E90;
 extern s32 D_800A3880[];
 extern s32 D_800DC640[];
 s32 *func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5);

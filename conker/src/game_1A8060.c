@@ -10,8 +10,6 @@ typedef struct {
 } VtxMorphGroup;
 
 extern VtxMorphGroup D_800A7230[2];
-extern u16 D_800C4310[];  // part count, indexed by VtxMorphGroup.kind
-extern s32 *D_800C4020[]; // per-id first vertex of each part
 extern void func_10004074(void *);
 s32 func_150849A0(void *);
 extern void *allocate_memory(s32, s32, s32, s32);

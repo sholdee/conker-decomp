@@ -54,9 +54,7 @@ extern struct {
     u8 pad0[0x120];
     u8 unk120;
 } *D_800CC5EC;
-extern s32 *D_800DBF94;
 extern u8 D_800CC40C;
-extern u8 D_800CC49A;
 WorldObject *func_151149AC(s32);
 void func_15136C3C(Actor *, s32, s32, s32, s32, s32, s32, s32);
 void func_1507CD64(Actor *, s32);
@@ -293,7 +291,6 @@ f32 func_150F34A0(Actor *obj, f32 pitch) {
     return speed;
 }
 
-extern u8 D_800CC26D;
 void func_150585F0(Actor *arg0, f32 arg1);
 void func_15052590(Actor *arg0);
 u8 func_150599C8(Actor *arg0, u8 arg1, u16 arg2);

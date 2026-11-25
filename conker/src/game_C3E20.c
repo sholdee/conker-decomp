@@ -121,7 +121,6 @@ void func_15096D08(void) {
     }
 }
 
-extern s32 D_800D3840;
 extern s32 D_800DC310[][0x1A];
 extern s8 D_800C365C;
 s32 func_15084000(s32);

@@ -9,8 +9,6 @@
 extern void *allocate_memory(s32, s32, s32, s32);
 extern u8 D_800D30D0[];
 extern u8 D_800D30F0[];
-extern TriggerZone **D_800D3270;
-extern s32 D_800D3274;
 
 /* Clears the per-id record flag bits (D_800D2E4C) and state tables. */
 void func_15017790(void) {
@@ -107,8 +105,6 @@ typedef struct {
 extern void func_150A0D14(TriggerZone *obj);
 void func_15017FA4(TriggerZone *obj, ObjectBounds *bounds);
 extern ObjectBounds *D_800D309C;
-extern u64 D_800D30A0[3];
-extern u64 D_800D30B8[3];
 
 /* Whether the ranges [a0, a1) and [b0, b1) overlap. */
 #define OVERLAP(a0, a1, b0, b1) (((a0 <= b0) && (b0 < a1)) || ((b0 < a0) && (a0 < b1)) || ((a0 < b1) && (b1 < a1)))

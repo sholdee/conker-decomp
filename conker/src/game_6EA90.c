@@ -103,7 +103,6 @@ typedef struct {
     /* 0x3 */ u8 y; /* drop below the line top */
 } FontGlyph;
 
-extern u16 D_800CBD4E; // animation clock (high bits pick icon frames)
 extern u8 D_800CBD50; // control/icon code of the current character, 0xFF if none
 extern u8 D_800CBD57; // current primitive colour r, g, b, a (D_800CBD57-5A)
 extern u8 D_800CBD58;

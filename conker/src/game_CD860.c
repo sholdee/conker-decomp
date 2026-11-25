@@ -45,7 +45,6 @@ s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
     return 0;
 }
 
-extern s32 D_800D3840;
 Actor *func_1505EEF4(s32);
 s32 func_150A2D84(s32, s32);
 s32 func_150A2EE4(s32, s32);

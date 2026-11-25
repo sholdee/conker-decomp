@@ -57,16 +57,10 @@ typedef struct {
    each unk field holds depends on the track's SeqTrackInfo type. */
 
 extern u16 *D_800C35C8[];
-extern u16 *D_800C35D8[];
 extern SeqTrackInfo *D_800C35F0[];
-extern u8 D_800C363A[];
 extern void func_1507E7E4(void *, s32, s32, s32, s32);
 extern s8 D_8008FD84[];
 extern s32 D_800C35B0[];
-extern s32 D_800C3640[];
-extern u8 D_800C3C99;
-extern u8 D_800C3C9C;
-extern u8 D_800D2E40;
 s32 func_1501D2C4(s32 map, s32 cutscene);
 extern u8 D_800C35AA;
 extern void func_1507F640(void);
@@ -85,7 +79,6 @@ void func_15022640(s32 id, s32 scene);
 extern WorldObject *func_151149AC(u8);
 extern Actor *func_1505EEF4(s32);
 extern void func_15082A44(void *, s32, s32, s32, s32);
-extern u8 D_800D2100;
 
 
 
@@ -236,7 +229,6 @@ void func_1501CC3C(void) {
     }
 }
 
-extern u8 *D_800C3960[][30];
 
 /* Mark every track's active-event table (D_800C3960) as empty. */
 void func_1501CDC0(s32 scene) {
@@ -321,31 +313,12 @@ s32 func_1501CFF8(s32 scene) {
     return sum;
 }
 
-extern u16 D_800C3C8E;
-extern u8 D_800C35F8;
-extern f32 D_800C3648;
-extern f32 D_800C364C;
-extern f32 D_800C3650;
 extern u8 D_800C3656[];
-extern u8 D_800C3658[];
-extern u8 D_800C365A[];
 extern u8 D_800C365C[];
 extern u8 D_800C365E[];
 extern u8 D_800C3660[];
-extern u8 D_800C3662;
-extern u8 D_800C3C8C;
-extern u8 D_800C3C8D;
-extern u8 D_800C3A58;
 extern f32 D_800C35A4;
-extern s8 D_800C3C8A;
-extern u8 D_800C3C8B;
-extern f32 D_800C3674;
 extern f32 D_800C3678;
-extern s32 D_800C367C;
-extern u8 D_800C3680;
-extern u8 D_800C3672;
-extern u8 D_800C3C9D;
-extern s16 D_800C3C9E;
 void func_150233BC(void);
 
 /* Reset the per-scene cutscene state before a new script is loaded. */
@@ -452,8 +425,6 @@ void func_15022528(s32 scene);
 void func_1501DAAC(s32 scene);
 extern void (*D_800840FC[])(s32, s32, s32, s32);
 extern u8 D_800C35A8;
-extern u8 D_800C3C98;
-extern u16 D_800C3C9A;
 extern s32 *D_800C35E0[];
 
 /* Start cutscene `cutscene` of map `map` in scene slot `scene`. If another map is loaded, switch
@@ -771,7 +742,6 @@ s32 func_1501E05C(s32 scene) {
     return 0;
 }
 
-extern u8 D_800C3C89;
 s32 func_151F2CDC(void);
 void func_151F2D6C(s32, s32);
 
@@ -924,7 +894,6 @@ void func_1501E73C(s32 scene) {
 }
 
 extern void func_15169040(u8 *, u8);
-extern u8 D_800C35C3;
 void func_1501EA18(s32 scene);
 void func_150233E4(void);
 s32 func_150235DC(s32 scene);
@@ -1823,7 +1792,6 @@ void func_15020EC4(s32 scene) {
 extern void func_1510E7A4(void *, void *, f32 *, void *, void *, void *, f32, f32, f32, f32, u16, Actor *, f32, f32);
 
 // matching: ((u8 *)&D_800D35E0)[-4] is D_800D35DC; a distinct base keeps IDO from reusing the hoisted address
-extern f32 D_800D35E0;
 
 /* Move object `target` to the state of the scene's object track bound to it (all tracks, or only
    `onlyTrack` unless it is -1): position, velocity, floor probe, scale, facing and alpha. */

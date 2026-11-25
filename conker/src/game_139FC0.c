@@ -3,14 +3,8 @@
 #include "variables.h"
 
 extern u8 D_1A37E0[];
-extern u8 D_800D9F68[];
 
 extern u16 D_800D9E70[4][3];
-extern u8 D_800D9E88[4][3];
-extern u8 D_800D9E98[4][3];
-extern u8 D_800D9EA8[4][3];
-extern u8 D_800D9EB4[3];
-extern u8 D_800D9EB8[4][3];
 
 extern f32 func_150489B0(u8);
 

@@ -258,7 +258,6 @@ s32 func_1509ED74(s32 id, s32 op, s32 *cmd) {
 }
 
 /* Looks like the script format version: later versions carry more operands. */
-extern s32 D_800D3840;
 
 extern Actor *func_1505EEF4(s32 path);
 extern s32 func_1000F568(s32 base, s32 count);

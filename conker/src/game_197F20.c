@@ -45,7 +45,6 @@ extern MessageEntry *D_800DD258;
 extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 u8 *func_1516C878(TextBoxConfig *config, s32 index, s16 source);
 
-extern u8 D_800CC4B3[][0x32C]; /* byte 0x1E3 of each D_800CC2D0 object, set by func_1516A7B0 */
 s32 func_151F2CDC(void);
 void func_1516CC58(); // matching: unprototyped (a prototype changes AA70's register allocation)
 
@@ -300,10 +299,6 @@ extern struct {
     u32 cycle1;
     u32 cycle2;
 } D_800A4AC8[];
-extern u8 D_800D2DA8;
-extern u8 D_800D2DA9;
-extern u8 D_800D2DAA;
-extern u8 D_800E0BDC;
 Gfx *func_15094F70(Gfx *, TextBoxTexture *, s32, TextBoxSprite *, s32, s32, s32, s32, s32);
 Gfx *func_15095A48(Gfx *, TextBoxSprite *, f32, f32);
 Gfx *func_1516C934(Gfx *, TextBox *, s32, s32, s32, s32);

@@ -1540,7 +1540,6 @@ void func_150F1D10(Actor *actor, u8 arg1, s32 arg2) {
     }
 }
 
-extern u8 D_800D98F0;
 
 /* Random sound 0x6C-0x6E for actor `index` once it is far enough from the origin, at most every
  * 128-255 ticks (D_800D98F0 counts down); func_100114D0 derives the pan from its height. */

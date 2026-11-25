@@ -33,7 +33,6 @@ extern f32 D_800A34B0[4][2];
 extern f32 D_800A3550;
 extern f32 D_800A3554;
 extern u16 D_800894E0[2][3];
-extern f32 D_800DC004;
 
 void func_15120158(Camera *camera);
 void func_15122C5C(Camera *camera);

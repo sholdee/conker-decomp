@@ -29,7 +29,6 @@ extern CamOffset *D_800DC280[4]; // camera shake tables: one CamOffset delta per
 extern s32 D_800DC290[4];        // their lengths in frames
 extern CamOffset D_800DCDE0[];
 extern Entry800DC2C0 D_800DC2C0[];
-extern LookAt D_800D9B90[];
 
 #define VIEW_MTX(player) (&D_800DC2A0[D_800BE9C0][player])
 

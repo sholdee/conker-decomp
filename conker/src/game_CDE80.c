@@ -201,16 +201,10 @@ typedef struct {
 #define BOX_CONTAINS(b, px, py, pz) ((b)->xmin < (px) && (px) < (b)->xmax && (b)->ymin < (py) && \
                                      (py) < (b)->ymax && (b)->zmin < (pz) && (pz) < (b)->zmax)
 
-extern TriggerZone **D_800D3270;
-extern s32 D_800D3274;
 extern s32 D_800D3278;
 extern ZoneBounds *D_800D309C;
-extern u64 D_800D30A0[3];     /* zones that are always tested */
-extern u64 D_800D30B8[3];     /* default candidate zones */
 extern u16 D_800D30D0[16];    /* per actor: 1 + index of the last box it was found in, 0 for none */
 extern u64 D_800D30F0[16][3]; /* per actor: zones it was inside last time */
-extern u8 D_800DF0E0;
-extern u8 D_800DF0E1;
 
 void func_150806A8(s32);
 void func_150829D8(Actor *);
@@ -692,7 +686,6 @@ void func_150A24C0(TriggerZone *zone, s32 unk127) {
 }
 
 extern u8 D_800D3090;
-extern u8 D_800D9EB8[][3];
 void func_150E7290(s32 arg0, s32 owner, s32 kind);
 void func_150E68B0(Actor *actor, s32 arg1, TriggerZone *zone, u8 sourceIndex);
 void func_151CE51C(Actor *actor, TriggerZone *zone);

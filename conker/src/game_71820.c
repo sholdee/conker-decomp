@@ -29,8 +29,6 @@ void func_15044370(void) {
     D_800CBD9C = 0;
 }
 
-extern f32 D_800CBDF4;
-extern f32 D_800CBDF8;
 void func_1510F800(s32);
 void func_15044660(Actor *, f32, f32, f32);
 s32 func_150AB1F0(f32, f32, f32, Actor *, s32);
@@ -356,9 +354,6 @@ s32 func_150A6500(s16, s16, s32 *, u16);
 s32 func_150A3FC4(f32, f32, s32, CollisionTri *, f32 *);
 extern u8 D_800D37E0[];
 extern u8 D_800D3830[];
-extern f32 D_800DBE68;
-extern f32 D_800DBE6C;
-extern f32 D_800DBE70;
 extern f32 D_800DBE74;
 
 /* Ceiling probe against collision set 0: lowest triangle between pos.y and top. */

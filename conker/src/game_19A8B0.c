@@ -271,13 +271,6 @@ typedef struct ParticleTexture {
 } ParticleTexture;
 
 extern ParticleTexture *D_8008CA4C[];
-extern u8 D_800D2DA8;
-extern u8 D_800D2DA9;
-extern u8 D_800D2DAA;
-extern s16 D_800DD1BC;
-extern s16 D_800DD1C8;
-extern s16 D_800DD1CA;
-extern s16 D_800DD1CC;
 Gfx *func_15142E24(Gfx *gfx, s32 texture, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7,
                    s32 sprite, u8 *synced, s32 argA);
 Gfx *func_15142FBC(Gfx *gfx, s32 othermodeH, s32 othermodeL, u8 *synced);

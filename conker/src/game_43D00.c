@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800D2100;
 
 /* Collects the distinct spawn-table model types (< 0xBB) and the data func_1502B7F0 loads for each. */
 void func_15016850(void) {
@@ -40,8 +39,6 @@ void func_15016850(void) {
 extern u8 D_1A33F0[];
 extern u8 D_1A34E0[];
 extern u8 D_1A37E0[];
-extern u8 D_800D2101;
-extern u8 *D_800D210C;
 extern s32 func_1502B9B4(s32, s32, ...);
 extern u32 func_1502B8E0(void *, s32, s32, s32, ...);
 extern void *allocate_memory(s32, s32, s32, s32);

@@ -13,10 +13,6 @@ typedef struct {
 } Struct_1509C440;
 
 extern void func_1501D348(s32, s32, s32, s32, s32);
-extern s32 D_800D3840;
-extern u8 D_800C35C3;
-extern u8 D_800C3C99;
-extern u8 D_800C3C9C;
 void func_1509C8FC(s32 ref, s32 alt);
 
 /* Fixed-point 16.16 to float scale. */
@@ -108,8 +104,6 @@ s32 func_1509C440(s32 id, s32 event, Struct_1509C440 *params) {
     // Events 2, 5 and 6 (and unknown ones) fall off the end with no return value.
 }
 
-extern u8 D_800C3C98;
-extern u8 D_800C3672;
 
 /* Condition check per event; its table entry (80088498) sits near func_1509C440's (800884D4). */
 s32 func_1509C7C8(s32 id, s32 event, s32 unused) {

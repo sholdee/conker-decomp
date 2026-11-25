@@ -158,9 +158,6 @@ typedef struct {
 
 extern u8 D_800903AC;          /* flare sprite texture */
 extern u8 D_800A7250[][7];     /* sprite sizes, one row per flare type */
-extern u8 D_800D2DA8;
-extern u8 D_800D2DA9;
-extern u8 D_800D2DAA;
 extern Gfx *func_150950D4(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern Gfx *func_15095A48(Gfx *, FlareSprite *, f32, f32);
 extern Gfx *func_1517EA4C(Gfx *gfx);

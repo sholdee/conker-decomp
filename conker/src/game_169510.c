@@ -1477,7 +1477,6 @@ s16 func_15143044(u8, s32);
  * cycle 1 colour and cycle 1 alpha, in that order.
  */
 extern u8 D_800A4BA8[][16];
-extern s16 D_800DD1BE;
 
 /* Sets the colour combiner to mode combiner unless it is already current. */
 Gfx *func_1513F4E4(Gfx *gfx, u8 combiner, u8 *needSync) {

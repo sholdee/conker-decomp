@@ -23,8 +23,6 @@ void func_1504BB88(Actor *arg0);
 void func_1504BC38(Actor *arg0);
 void func_1504BE2C(Actor *arg0, u16 *arg1, f32 *arg2, s8 *arg3);
 
-extern u8 D_800CC2B1;
-extern f32 D_800CC2B4;
 void func_1504C0E8(Actor *arg0, s32 arg1, f32 arg2);
 void func_1504C9E4(Actor *arg0, s8 arg1, u8 arg2);
 
@@ -68,16 +66,11 @@ extern f32 D_800CBD90;
 extern f32 D_800CBD94;
 extern f32 D_800CBD98;
 extern s8 D_800CBDD4;
-extern f32 D_800CBDF4;
-extern f32 D_800CBDF8;
 extern f32 D_800CBDFC;
-extern u8 D_800CC26C;
 extern f32 D_800CC270;
 extern f32 D_800CC274;
 extern f32 D_800CC278;
 extern u16 D_800CC27E;
-extern s32 D_800CC28C;
-extern s32 D_800CC290;
 s32 func_1000F568(s32, s32);
 void func_1502EA0C(Actor *, s32, s32, s32, s32, s32);
 void func_1502EA50(Actor *);

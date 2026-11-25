@@ -31,7 +31,6 @@ s32 func_150DF8C0(s32 index) {
     return 0;
 }
 
-extern u8 D_800D9950[];
 extern void func_150A2864(s32, s32);
 extern void func_150A3444(s32, s16, s16, s16);
 extern void func_151749A0(s32, s32);

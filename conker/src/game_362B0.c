@@ -26,7 +26,6 @@ typedef struct {
 
 extern void *allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 extern struct_8008D050 D_8008D050[];
-extern u8 D_800DDE54[];
 extern D800DDE60Entry *D_800DDE60[];
 
 

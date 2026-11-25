@@ -45,7 +45,6 @@ typedef struct {
     u32 base;
 } ZDecode;
 
-extern s32 D_800DC9F0; /* live glow count */
 extern ZDecode D_80089630[];
 extern s32 (*D_80089F90[])(GlowObj *, s16);
 extern void (*D_80089F9C[])(GlowObj *);

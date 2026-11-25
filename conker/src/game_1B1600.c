@@ -29,7 +29,6 @@ extern u8 D_800DE040;   /* nonzero: keep the light at least 30 degrees above the
 extern u8 D_800DE041;   /* nonzero: only faces flagged in the D_800D3668 table receive shadows */
 
 extern s32 func_1502DB20(s32);
-extern u8 D_800C3E90;
 
 /* Half-extents of an object's bounding box, from its bone matrices or, failing that, its model size. */
 s32 func_15184150(s32 objIndex, f32 *halfX, f32 *halfY, f32 *halfZ) {
@@ -95,7 +94,6 @@ extern Vec3f D_800DDFB0[]; /* light position per shadow slot */
 extern f32 D_800DF6F8; /* light-to-object distance */
 extern f32 D_800DE028;
 extern f32 D_800DE02C;
-extern u8 D_800DF0E1;
 extern MtxF D_800DF0F8[];
 extern u16 D_800DF0D0[];
 extern Mtx D_800DF2F8[][2];
@@ -769,7 +767,6 @@ s32 func_151873E4(s32 x, s32 z, s32 range, ShadowVtx *out, f32 *mtx, ShadowVtx *
 extern s32 D_8008D3E0; /* shadow vertex budget for this frame */
 extern Gfx D_8008D410[];
 extern Vp D_800DF090[];
-extern u8 D_800DF0E0;
 extern s32 func_150849CC(Actor *, s32 *);
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_10004074(void *);

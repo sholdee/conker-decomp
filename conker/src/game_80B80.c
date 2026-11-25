@@ -28,13 +28,6 @@ typedef struct {
 } Struct800872A0;
 
 extern Struct800872A0 *D_800872A0;
-extern f32 D_800D239C;
-extern f32 D_800D23A0;
-extern f32 D_800D23A4;
-extern f32 D_800CC254;
-extern f32 D_800CC258;
-extern f32 D_800CC25C;
-extern s32 D_800CC260;
 s32 func_1508855C(Actor *arg0);
 void func_15087350(s32, s32, f32);
 Actor *func_150883B0(s32, s32, f32 *, s32 *);

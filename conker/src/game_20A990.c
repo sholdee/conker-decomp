@@ -168,7 +168,6 @@ s32 func_151DD710(OSMesgQueue *mq, OSContStatus *data) {
 }
 
 extern u8 *D_800E0A70;
-extern s32 D_800E0A74;
 extern s8 D_800E0BD2;
 
 void func_151DD8C0(void) {

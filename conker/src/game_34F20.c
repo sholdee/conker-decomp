@@ -86,9 +86,6 @@ void func_150A11C4(void *);
 void func_151E81EC(void);
 
 
-extern s32 D_800DC9F0;
-extern u8 D_800E0B99;
-extern u8 D_800E0BD1;
 
 
 void func_15007B3C(void) {

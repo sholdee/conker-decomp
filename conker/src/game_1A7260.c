@@ -172,8 +172,6 @@ Gfx *func_1517A394(Gfx *gfx) {
     return gfx;
 }
 
-extern f32 D_800D35E0;
-extern f32 D_800D35E8; /* 0x800D35E4 has no symbol of its own */
 #define D_800D35E4 ((&D_800D35E8)[-1])
 extern s16 D_800DD450; /* primitive alpha last set in the display list; -1 = unknown */
 extern u8 D_8008CDF0[];

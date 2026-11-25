@@ -8,7 +8,6 @@ typedef struct {
     /* 0x2 */ s16 ids[1]; /* actually [count] */
 } IdList;
 
-extern u8 D_800D9F68[]; /* per-id reference count */
 
 extern void func_10004074(void *);
 void func_1510D608(s32 id, s32 arg1);

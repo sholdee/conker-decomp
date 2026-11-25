@@ -7,14 +7,9 @@
 
 extern Gfx *D_800B0E08;
 extern Mtx D_80089470;
-extern f32 D_800D35E0;
-extern f32 D_800D35E8;
 // matching: 0x800D35E4 has no symbol; addressing it as D_800D35E0[1] lets IDO share one %hi, the original doesn't
 
 #define D_800D35E4 ((&D_800D35E8)[-1])
-extern u8 D_800C3662;
-extern LookAt D_800D9B90[];
-extern u8 D_800D9E21;
 extern s32 D_800D9E28;
 
 void func_150A7A48(MtxF a, MtxF b, MtxF out);

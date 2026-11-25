@@ -31,11 +31,8 @@ typedef struct {
 
 /* Cutscene state, indexed by scene (and track). */
 extern SeqEvent *D_800C3688[][30]; /* each track's events */
-extern u16 *D_800C35D8[];          /* each track's event count */
-extern u8 D_800C363A[];            /* track count */
 extern SeqTrackInfo *D_800C35F0[];
 extern s32 D_800C35B0[];           /* current time */
-extern s32 D_800C3640[];           /* end time */
 
 extern WorldObject *func_151149AC(s32);
 extern s32 func_1502460C(SeqEvent *, s32, s32, s32, s32, Actor *, WorldObject *, f32 *, s32);
@@ -71,7 +68,6 @@ typedef struct {
     /* 0x18 */ SeqSound *userData;
 } SeqVoice;
 
-extern u8 D_800C3C89;
 extern void func_10004074(void *);
 
 /*
@@ -288,7 +284,6 @@ void func_15024130(s32 count, s32 scene) {
     }
 }
 
-extern u16 D_800C3C9A;
 
 /*
  * Inserts an event into the time-sorted dispatch queue. When the queue is full
@@ -320,7 +315,6 @@ void func_150241B4(SeqQueueEntry *queue, s32 *count, SeqEvent *event, s32 track,
     (*count)++;
 }
 
-extern u8 D_800C3C8C;
 
 /*
  * Queues and dispatches every event of `scene` whose time falls in
@@ -406,31 +400,12 @@ typedef struct {
 extern s8 D_800E0BF4;
 extern u8 **D_800C35E0[];
 extern s32 D_80090214[];
-extern u8 D_800C35F8;
 extern u8 D_800C3656[];
-extern u8 D_800C3658[];
-extern u8 D_800C365A[];
 extern u8 D_800C365C[];
 extern u8 D_800C365E[];
-extern u8 D_800C35C3;
-extern f32 D_800C364C;
-extern f32 D_800C3650;
 extern u8 D_800C3660[];
-extern u8 D_800C3C8B;
-extern u8 D_800C3C8D;
 extern s16 D_800DDE10;
-extern f32 *D_800DDE44;
-extern f32 *D_800DDE48;
-extern f32 *D_800DDE4C;
-extern f32 D_800C3674;
 extern f32 D_800C3678;
-extern s32 D_800C367C;
-extern u8 D_800C3662;
-extern u8 D_800C3680;
-extern u8 D_800DBEAC;
-extern s32 D_800D2450;
-extern u8 D_800C3C9D;
-extern s16 D_800C3C9E;
 
 extern void func_1501C730(s32, s32, s32, s32, s32);
 extern void func_15023440(SeqSubtitle *, s32);
@@ -1245,7 +1220,6 @@ typedef struct {
     s8 unk6;
 } Ev151D8868;
 
-extern u8 *D_800C3960[][30];
 extern s16 *D_800C3868[][30];
 extern s32 D_8008CA50;
 extern f32 *D_800AAA90;
@@ -2543,8 +2517,6 @@ typedef struct {
 } SeqColor;
 
 extern SeqColor D_80084110[];
-extern s8 D_800C3C8A;
-extern u16 D_800C3C8E;
 
 /*
  * Third cutscene event handler: sounds (types 6 and 10), func_1000xxxx audio

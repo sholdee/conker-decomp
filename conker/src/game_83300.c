@@ -452,8 +452,6 @@ s32 func_150229E4(Actor *);
 void func_15047390(MtxF mf, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
 void func_1504C9E4(Actor *arg0, s8 arg1, u8 arg2);
 u8 func_15059B54(Actor *arg0, u16 arg1);
-extern f32 D_800CC2E4;
-extern f32 D_800CC2EC;
 
 /*
  * Per-frame AI for a path/chase actor: picks the point to head for from its mode (unk223),
@@ -3025,8 +3023,6 @@ f32 func_1505D34C(f32 angleDeg, f32 a, f32 b, f32 scale, f32 *outZ) {
     return (a * sinA) + b * cosA;
 }
 
-extern u8 D_800CC26C;
-extern u8 D_800CC26D;
 
 /* Pushes the actor out of `other` along (nx, ny, nz) unless the other one is lighter. */
 void func_1505D408(Actor *actor, Actor *other, f32 nx, f32 ny, f32 nz, f32 distSq, f32 minDist, s32 otherSlot) {
@@ -3297,7 +3293,6 @@ f32 func_1505DF10(Actor *actor, u8 otherIdx, u16 *outAngle, f32 *outDistSqXZ, f3
     *outDistSqXZ = dx + dz;
     return (dx + dy) + dz;
 }
-extern u16 D_800C4ED0[];
 
 /* Stops the actor's animation and clears its playback state. */
 void func_1505DFDC(Actor *actor) {
@@ -4521,7 +4516,6 @@ s32 func_15060BA4(Actor *actor, s32 amount) {
     }
     return TRUE;
 }
-extern u8 D_800C3E90;
 
 /* Stores the actor's head position (s16 at 0x1BC): headHeight along its head bone's up axis, or its origin. */
 void func_15060BE0(Actor *actor) {
@@ -4594,7 +4588,6 @@ extern void func_1503E260(s32);
 extern s32 func_150303E4(Actor *);
 extern void func_15188AD0(Actor *);
 extern void func_10004074(void *);
-extern u8 *D_800D210C;
 void func_150626EC(Actor *arg0, s32 arg1);
 
 /* Removes the actor: releases its resources and attachments, then clears its slot. */
@@ -4948,7 +4941,6 @@ void func_15062FC0(Actor *actor, s32 group, u8 arg2, s32 wrapS, s32 wrapT, s32 c
 void func_1501B660(Actor *arg0, f32 *arg1, s32 arg2);
 f32 func_150489B0(u8 arg0);
 void func_150F1CB0(Actor *arg0);
-extern s32 *D_800C4020[];
 extern s32 D_8009942C[];
 
 /* Per-frame texture/morph animations of actor types that have them (once per type for most). */
@@ -5425,7 +5417,6 @@ void func_15062E24(s32 type, s32 firstVtx, s32 arg2, s32 arg3, s32 arg4, s32 set
         }
     }
 }
-extern s32 *D_800C4020[];
 
 /*
  * Scrolls the texture coordinates of `count` vertices (vertex group `group`, or from the start) in the

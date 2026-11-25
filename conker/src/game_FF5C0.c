@@ -3,7 +3,6 @@
 #include "variables.h"
 
 /* Number of live strobe effects (read by game_58F80.c). */
-extern u8 D_800D9900;
 
 /* Per-effect data of a strobe: the screen alternates between lit (litTime) and dark (darkTime). */
 typedef struct {

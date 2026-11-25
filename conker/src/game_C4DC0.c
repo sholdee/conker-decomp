@@ -11,8 +11,6 @@ typedef struct {
 extern s32 func_15082A44(void *, s32, s32, s32, s32);
 extern Actor *func_1505EEF4(s32);
 extern s32 func_15053430(Actor *);
-extern u8 D_800D2100;
-extern s32 D_800D3840;
 
 /* Returns the object id for script id `scriptId` (| 0x2000 when nonzero), spawning it from its slot if needed. */
 s32 func_15097910(s32 scriptId, s32 unused) {
@@ -77,7 +75,6 @@ typedef struct {
 #define OBJ_INDEX(o) ((o) - D_800CC2D0)
 
 
-extern s16 D_800C3FF4[3];
 extern void func_1503DE70(Actor *, s32, s32);
 extern void func_1504BAF0(Actor *);
 extern void func_15052F9C(Actor *, f32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -121,7 +118,6 @@ extern s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f
 extern f32 func_15144BC8(f32);
 extern s8 func_151E564C(void);
 extern s8 func_151E565C(void);
-extern u8 D_800D18A9;
 /* D_800D2350: per-node info, indexed by the node ids func_15086D48 returns. */
 typedef struct {
     u8 pad0[7];
@@ -129,7 +125,6 @@ typedef struct {
     u8 pad8[8];
 } NodeInfo;
 extern NodeInfo *D_800D2350;
-extern s8 D_800E0AC0[];
 extern u8 D_800E0BB8[];
 
 /* Script "set" commands: applies command `opcode` with arguments `cmd->a` to object `objId`.

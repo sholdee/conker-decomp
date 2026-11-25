@@ -76,11 +76,8 @@ void func_151236D0(Camera *);
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32, f32, f32);
 s32 func_150A3FC4(f32, f32, s32, s32 *, f32 *);
 void func_1512C150(Camera *);
-extern u8 D_800C3672;
-extern s32 D_800C367C;
 extern s32 D_800C3678;
 extern Vec3f D_80089544;
-extern f32 D_800C3648;
 
 /*
  * Per-frame camera message pump: handles a pending unk734 request, then drains the camera's

@@ -2,6 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
+extern s8 D_800E0BE0[];
 struct Struct151E5034 {
     f32 unk0;
     f32 unk4;
@@ -40,12 +41,9 @@ struct Struct151E5034 {
 #define MENU_CLEFT  0x40 /* C-left */
 #define MENU_CRIGHT 0x80 /* C-right */
 
-extern s8 D_800E0C00[]; /* team of each D_8008FE44 entry */
 extern char **D_800E0BD8; /* text strings */
 extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
-extern s32 D_800E0A90;
-extern u8 D_800E0B96;
 /* One entry of the menu's game-mode table (D_800AB68C[]) */
 typedef struct {
     /* 0x0 */ s16 nameText;
@@ -62,7 +60,6 @@ typedef struct {
 extern MenuEntry D_800AB68C[];
 extern char D_800AB850[];
 extern void (*D_800E0A88)(void);
-extern u8 D_800E0A95; /* current page's fade level, 0-0xFF */
 extern s8 D_800E0A96; /* page to switch to once faded out; -1: none */
 void func_15042D94(s32, s32, s32, char *, ...);
 void func_151E2404(void);
@@ -72,9 +69,7 @@ s32 func_151F2CDC(void);
 s32 func_1509CF28(s32, s32 *);
 void func_1509D054(void);
 s32 func_1509D08C(s32, s32, s32 *, s32 *);
-extern s8 D_800E0BB1;
 
-extern s8 D_800E0BE0[];
 void func_151DD9E4(void);
 
 
@@ -86,7 +81,6 @@ extern struct Struct151E5034 *D_8008FDD4;
 
 
 extern s8 D_8008FDDC;
-extern u8 D_800E0A94; /* menu brightness, scales the page alpha */
 
 extern s32 D_8008FE24;
 extern s8 D_8008FD84;
@@ -335,8 +329,6 @@ void func_151DE8F0(void) {
     }
 }
 
-extern s8 D_800E0BE9;
-extern u8 D_800E0A97;
 extern char D_800AB800[];
 struct216 *func_1507BB28(s32, s32);
 void func_1000DE1C(s32, s32);
@@ -855,8 +847,6 @@ extern char D_800AB848[];
 extern char D_800AB84C[];
 extern s8 D_8008FE9C[];
 extern s8 D_8008FEC4[]; /* [preset][4] team per player; a 2D declaration mismatches */
-extern s8 D_800E0B90[];
-extern u8 D_800E0B8C;
 extern s8 D_8008FDA0; /* extra (non-controller) slots in the player list */
 extern s8 D_8008FDC4;
 void func_151E22BC(void);
@@ -1043,7 +1033,6 @@ void func_151E09DC(void) {
     D_8008FDD4->input &= ~MENU_BACK;
 }
 
-extern Actor *D_800E0BA0[];
 extern u32 D_8008FEA4[];
 extern char D_800AB854[];
 void func_151E7F60(s32, s32);
@@ -1344,8 +1333,6 @@ extern char D_800AB88C[];
 extern char D_800AB890[];
 extern char D_800AB894[];
 extern char D_800AB898[];
-extern s8 D_800E0BB0;
-extern s8 D_800E0BC8[];
 s32 func_151E24F0(s32 *);
 
 /*

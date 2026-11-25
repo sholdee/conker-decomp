@@ -297,7 +297,6 @@ f32 func_15086D94(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
 }
 
 extern Racer *D_800872A0;
-extern s8 D_800D23A8;
 extern s32 D_800D2394;
 extern void *allocate_memory(s32, s32, s32, s32);
 u8 func_150888A8(u8, u8, s8);
@@ -384,9 +383,6 @@ void func_150870D0(s32 startId, s32 numRacers, s32 numSpare) {
 f32 sinf(f32);
 f32 cosf(f32);
 extern f32 D_800CC310;
-extern f32 D_800D239C;
-extern f32 D_800D23A0;
-extern f32 D_800D23A4;
 extern s8 D_800D2390;
 void func_15088F30(Racer *racer, f32 *outX, f32 *outY, f32 *outZ);
 f32 func_150497E0(f32 *, s32, f32);
@@ -1058,9 +1054,6 @@ u8 func_150888A8(u8 prev, u8 cur, s8 route) {
     return best;
 }
 
-extern s8 D_800E0BE7;
-extern s16 D_800E0C10[];
-extern s32 D_800E0C18[];
 
 /*
  * Advances `racer` by `step` along the path, shifting its spline nodes when it crosses one.
@@ -1508,8 +1501,7 @@ void func_15089BB0(void) {
 void *func_1509B570(s32);
 void func_1508BC20(void);
 extern f32 D_800872B0[], D_800872F8[];
-extern s8 D_800872F0[], D_800E0BD0;
-extern s32 D_800D2E48;
+extern s8 D_800872F0[];
 
 /* Loads the multiplayer game resource D_800D2E48 and resets its per-player state. */
 s32 func_15089BC0(void) {

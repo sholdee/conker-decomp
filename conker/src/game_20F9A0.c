@@ -59,20 +59,12 @@ struct Struct151E4314 {
 
 extern ModeEntry D_800AB68C[];
 extern struct Struct151E4314 D_800AB7A4[];
-extern s8 D_800E0C00[];
 extern s8 D_800E0BEB;
-extern s16 D_800E0A80;
 extern u8 **D_800E0BD8;
 extern void func_1501D348(s32, s32, s32, s32, s32);
 void func_151E2834(void);
 s32 func_1517EFDC(void);
-extern s32 D_800E0A90;
 extern s8 D_8008FE28;
-extern u8 D_800E0B96;
-extern u8 D_800D2E40;
-extern s16 D_800E0B9A;
-extern u8 D_800E0B95;
-extern u8 D_800E0BDC;
 extern void (*D_800E0A88)(void);
 extern void (*D_8008FDEC[])(void);
 void func_1501C730(s32, s32, s32, s32, s32);
@@ -94,44 +86,30 @@ void func_1509D054(void);
 void func_1509D08C(s32, s32, s32 *, s32 *);
 extern s16 D_8008FDAC;
 extern u8 D_8008FDB4;
-extern s8 D_800D23A8;
-extern u8 D_800E0B99;
-extern s8 D_800E0BB1;
-extern u8 D_800E0BD1;
 
 static Actor *D_800E0BA0[4]; /* characters spawned by func_151E7F60 */
 static s8 D_800E0BE0[23]; /* option values (see func_151E3344) */
 void func_151DDBA0(void);
 
-extern u8 D_800E0B97;
-extern u8 D_800E0B98;
-extern u8 D_800E0A8C;
 void func_151DE7D4(void);
 
 extern u8 D_8008FD74;
 
 extern struct Struct151E5034 *D_8008FDD4;
 
-extern s8 D_800E0BE9;
-extern u8 D_800E0A97;
 void func_151E7E9C(void);
 
 void func_15042E3C(char *, ...);
 void func_151E327C(void);
 
-extern u8 D_800E0B8C;
-extern s8 D_800E0B90[];
 void func_151E7F60(s32 arg0, s32 arg1);
 
 void func_151E4314(void);
 
-extern s8 D_800E0BB0;
-extern s8 D_800E0BC8[];
 s32 func_151E24F0(s32 *arg0);
 
 void func_151E43DC(void);
 
-extern s8 D_800E0BCE[];
 extern s8 D_800E0BEE;
 
 /*
@@ -225,17 +203,10 @@ extern s16 D_800AB790[];
 extern s8 D_8008FD88;
 extern s8 D_8008FF37[];
 extern s8 D_800E0AB0[];
-extern s8 D_800E0AC0[];
-extern s16 D_800E0AD0[16];
 extern u8 D_800E0AA8;
 extern s8 D_800E0AA9;
 extern s8 D_800E0AAA;
-extern s16 D_800E0AA0[];
 extern s8 D_800E0BB8[];
-extern s8 D_800E0BD0;
-extern s16 D_800E0C10[];
-extern s32 D_800E0C18[];
-extern s8 D_800D2130;
 
 /* Sets up a match from the current mode's table entry: roster, teams, rules flags and per-player kinds. */
 void func_151E2834(void) {
@@ -909,7 +880,6 @@ void func_151E4314(void) {
     }
 }
 extern s8 D_800BE91A;
-extern u8 D_800C3C8C;
 extern char D_800AB8CC[];
 extern char D_800AB8D0[];
 extern char D_800AB8D4[];
@@ -1806,7 +1776,6 @@ void func_151E5FF4(Actor *source, Actor *victim, s32 cause) {
 }
 
 extern s8 D_800E0BEA;
-extern s8 D_800E0BD3;
 extern s32 D_800E0BD4;
 extern s32 D_8008FDD8;
 extern void func_10004074(void *);

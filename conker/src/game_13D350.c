@@ -11,7 +11,6 @@ Gfx *func_1501A680(Gfx *gfx);
 Gfx *func_1501A6CC(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry);
 Gfx *func_15110544(Gfx *gfx, s32 ulx, s32 uly, s32 lrx, s32 lry, u8 r, u8 g, u8 b);
 
-extern u8 D_800DBEA8[];
 
 typedef struct Game13D350ViewAngles {
     u8 pad0[0xC];
@@ -343,8 +342,6 @@ typedef struct SkyTile {
 s32 func_150A6210(MtxF mtx, f32 x, f32 y, f32 z, f32 width, f32 height, f32 arg6);
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 extern u8 D_1673[];
-extern u8 D_800DBEAB;
-extern u8 D_800DBEAC;
 
 /* Draws one sky face, with texture set texSet (tiles from firstTex on): a width x height grid of tileW x tileH
  * textured quads in the plane `axis` ('x', 'y' or 'z') through (x, y, z). Quads outside the view
@@ -657,7 +654,6 @@ extern struct Game13D350S16x2 D_800891F4;
 extern struct Game13D350U8x2 D_800891F8;
 extern struct Game13D350U8x2 D_800891FC;
 extern SkyFace D_800A2DA0[];
-extern Vtx *D_800DBE88[][2];
 extern Mtx D_80089470;
 
 

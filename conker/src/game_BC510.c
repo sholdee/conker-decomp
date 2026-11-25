@@ -6,7 +6,6 @@ void func_1509093C(void);
 void func_1508F9F4(void);
 void func_1508F0D4(void);
 void func_1508F7BC(void);
-extern u8 D_800CC49A;
 
 
 extern s32 func_1510D0EC(s32, s32, s32, s32);
@@ -548,7 +547,6 @@ Gfx *func_15090630(Gfx *gfx) {
 }
 extern s32 D_800D2558[];
 extern s32 func_1502FE10(s32 id, s32 **end, u8 *arg2, WaterVtx **start, s32 *arg4, s32 *arg5, s32 *arg6);
-extern u16 D_800CC382;
 extern u16 D_8009025A;
 extern u16 D_80090262;
 extern u16 D_80090266;
@@ -903,10 +901,8 @@ extern u8 D_800873BC[];
 extern u8 D_800873C4[];
 extern u8 D_800873C8[];
 extern HudScore *D_8008FDD4;
-extern s8 D_800E0AC0[];
 extern HudNames *D_800E0BD8;
 extern HudTime *D_800872A0;
-extern s8 D_800E0BE7;
 extern u8 D_CF1[];
 extern u8 D_CF2[];
 extern u8 D_D13[];
@@ -1402,7 +1398,6 @@ void func_15093878(void) {
     D_800D244C = allocate_memory(2 * sizeof(Mtx), 1, 1, 0);
 }
 
-extern s32 D_800D2450;
 extern u8 D_11AD[];
 void func_150A7D00(Mtx *, f32, f32, f32);
 
@@ -1438,7 +1433,6 @@ Gfx *func_150938BC(Gfx *gfx) {
     return gfx;
 }
 extern u8 D_800AB62C[][3];
-extern u16 D_800E0BCC;
 u8 func_15085DA8(f32 arg0);
 
 /* Draws the radar: a disc around each local player (larger when `large`) with a dot for every

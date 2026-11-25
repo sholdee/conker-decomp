@@ -8,7 +8,6 @@ void func_15012470(void);
 void func_15008E10(s32);
 void func_15189900(struct145 *, u8);
 
-extern u8 D_800D9950[];
 extern u8 *D_80088870;
 
 
@@ -58,7 +57,6 @@ void func_1500E70C(s32 id) {
     }
 }
 
-extern u8 D_800DCA20;
 extern f32 D_800DCA24;
 extern u8 D_800DCA28;
 extern f32 D_800DCA2C;

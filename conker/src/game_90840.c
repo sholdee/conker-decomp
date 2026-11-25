@@ -9,7 +9,6 @@ s32 func_100109D0();
 s32 func_10010A3C();
 #include "variables.h"
 
-extern f32 D_800CC2B4;
 void func_15143134(void *, f32 *, s32);
 void func_1506AC8C(Actor *, s32, void *);
 
@@ -396,7 +395,6 @@ u16 func_150641D8(Actor *arg0, u16 animA, u16 animB, u16 animC) {
     return selected;
 }
 
-extern s32 D_800CC28C;
 
 /* A libultra fixed-point Mtx viewed as its integer and fraction halves. */
 typedef struct MtxParts {
@@ -1027,8 +1025,6 @@ extern u16 D_800996A0[][4];
 extern u16 D_800996C0[];
 extern u16 D_800996C8[];
 extern u16 D_800996D0[];
-extern u8 D_800C3A58;
-extern s32 D_800CC290;
 extern WorldObject *D_800CC5EC;
 extern void func_1000EC24();
 extern void func_1000EFB4();

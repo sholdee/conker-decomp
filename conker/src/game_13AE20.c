@@ -221,8 +221,6 @@ extern void func_150A7D00(Mtx *, f32 x, f32 y, f32 z); /* translation matrix */
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 extern s32 func_1506196C(u8 *arg0, s32 arg1);
 extern s32 D_80091770[];
-extern s32 D_800DD1B4;
-extern s16 D_800DD1C6;
 
 /* Draws the shadow quad, loading its texture and alpha only when they differ from the last shadow drawn. */
 Gfx *func_1510E120(Gfx *gfx, Shadow *shadow, s16 view) {

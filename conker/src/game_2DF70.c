@@ -37,10 +37,6 @@ void func_15000AC0(void) {
     D_800D9E64 = 0;
 }
 
-extern u8 D_800DBEA8[];
-extern Vtx *D_800DBE88[][2];
-extern u8 D_800DBEAB;
-extern u8 D_800DBEAC;
 extern s32 func_1510D0EC(s32, s32, s32, s32);
 void func_15111858(void);
 
@@ -901,7 +897,6 @@ s32 func_15002878(void) {
 }
 
 extern u16 D_800C5918[];
-extern u16 D_800C5EF8[];
 extern s8 **D_800C4488[];
 
 // matching: these stay macros; naming them as locals changes the frame and register allocation

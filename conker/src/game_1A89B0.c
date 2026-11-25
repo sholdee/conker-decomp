@@ -201,14 +201,7 @@ extern Game1A89B0Anim D_8008CEBC[];
 extern Game1A89B0AnimRef D_8008CF00[][8];
 /* Per sprite type (15 types) unless noted: */
 extern u32 D_800DDC40[15]; /* distance to the nearest sprite this frame */
-extern s16 D_800DDC90[];   /* animation phases, 4 per type (frame << 8) */
 extern Game1A89B0TexSize D_800DDB80[];
-extern u8 D_800DDBC0[];    /* index into D_80095CE0 */
-extern u8 D_800DDBD0[];    /* frame count the phases cycle through */
-extern u8 D_800DDBE0[];    /* frame shown while a sprite is disturbed (unkB >= 0x21) */
-extern u8 D_800DDBF0[];    /* draw pass (see func_1517D7B0) */
-extern u8 D_800DDC10[];    /* per-phase direction bits for ping-pong animation */
-extern u8 D_800DDC80[];    /* row of D_8008CF00 */
 extern void *allocate_memory(s32, s32, s32, s32);
 extern s32 func_150AD9A0(s32, s32, s32);
 extern void func_15170500(s32, s32, s32, s32, s32, s32, s32);

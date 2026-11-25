@@ -20,12 +20,8 @@ typedef struct {
 } Struct_80087410;
 
 extern Struct_80087410 D_80087410;
-extern s32 D_800D2E48;
-extern s32 D_800D2F58;
-extern u8 D_800D2E69;
 extern s32 D_800D3000;
 extern s32 D_800D3004;
-extern s32 D_800D3840;
 
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
 #define ID_FLAG_BYTE(id) (*(((id) >> 3) + D_800D2E4C))
@@ -215,8 +211,6 @@ typedef struct {
     /* 0x0C */ s32 unkC[1];  // query 34: the weights
 } QueryArgs;
 
-extern s8 D_800E0BB1;
-extern u8 D_800D2E40;
 s32 func_151E5F64(s32 arg0);
 
 /* Answers query `query` about record `id` with arguments `args`; unknown queries return 0. */

@@ -32,19 +32,14 @@ typedef struct {
     /* 0x0B */ u8 siz;
 } HudSprite; /* size 0xC */
 
-extern s32 D_800E0A74;
-extern u8 D_800E0B96;
-extern u8 D_800E0B97;
 extern Gfx D_80090028;
 extern HudSprite D_800917F8;
 extern HudSprite D_80091804;
 extern HudSprite D_80091810;
 extern Gfx *(*D_8008FFF4[])(Gfx *);
-extern s8 D_800E0BD3;
 extern u8 **D_800E0BD8;
 extern u8 D_7FB;
 extern u8 D_887;
-extern u8 D_800E0A94;
 extern u8 D_800E0C85;
 extern HudSprite D_8009013C;
 /* func_1510D0EC returns this instead of a texture address when it fails. */
@@ -150,11 +145,9 @@ Gfx *func_151E86E4(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s3
 
 
 extern u8 D_800ABA90[][4];
-extern s8 D_800E0BB0;
 extern u8 D_D10;
 extern u8 D_D14;
 extern u8 D_D16;
-extern u16 D_800E0BCC;
 extern u8 D_8009006C[];
 extern u8 D_80090070[];
 extern s32 func_15086D48(s32, s32);
@@ -375,8 +368,6 @@ Gfx *func_151E89A0(Gfx *gfx, s32 unused, s32 alpha) {
     return gfx;
 }
 
-extern s16 D_800E0AA0[];
-extern s8 D_800E0C00[];
 
 
 /* Draws each team's row of score pips; teams with no active player get a separate icon. */
@@ -512,8 +503,6 @@ typedef struct {
 } ScoreState;
 
 extern ScoreState *D_8008FDD4;
-extern s8 D_800E0AC0[];
-extern s16 D_800E0AD0[];
 extern u8 D_800ABAA8;
 extern u8 D_800ABAAC;
 extern u8 D_800ABAB0;
@@ -892,7 +881,6 @@ extern u8 D_82F;
 extern u8 D_830;
 extern u8 D_891;
 extern HudModel *D_8009005C;
-extern s16 D_800C3C9E;
 typedef struct {
     /* 0x00 */ u8 pad0[0x64];
     /* 0x64 */ s32 unk64;
@@ -1077,8 +1065,6 @@ Gfx *func_151EB930(Gfx *gfx) {
     return gfx;
 }
 
-extern s16 D_800E0A80;
-extern s32 D_800E0A90;
 
 /* Draws the current message, a run of text lines ended by a "*" line, fading in and out. */
 Gfx *func_151EB96C(Gfx *gfx) {
@@ -1324,7 +1310,6 @@ Gfx *func_151EC1F0(Gfx *gfx) {
 }
 
 
-extern u8 D_800E0A95;
 extern void *D_800900BC[];
 Gfx *func_151EC648(Gfx *);
 Gfx *func_151EE184(Gfx *);
@@ -1388,8 +1373,6 @@ extern f32 sinf(f32);
 extern f32 cosf(f32);
 extern u8 *D_800900D8[];
 extern u8 *D_800900FC[];
-extern s8 D_800E0B90[];
-extern Actor *D_800E0BA0[];
 extern u8 D_800E0C88[];
 extern u8 D_87B;
 extern u8 D_88C;

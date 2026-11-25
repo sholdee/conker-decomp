@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800D2E40;
 void func_1501C730(s32, s32, s32, s32, s32);
 void func_151E557C(void);
 void func_1000E934(void);

@@ -3,8 +3,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u16 D_800CBDA0[];
-extern s32 *D_800DBF94;
 void func_1508295C(s32, s32, s32);
 void func_1507D4F8(s32);
 s32 func_1504C8BC(Actor *);
@@ -565,7 +563,6 @@ void func_1504BC38(Actor *obj) {
 }
 
 void func_1507EB2C(void *arg0);
-extern f32 D_800CC2B4;
 
 void func_1504BE2C(Actor *obj, u16 *arg1, f32 *arg2, s8 *arg3) {
     s32 pad[2]; // matching: the frame has two unused words
@@ -643,7 +640,6 @@ extern f32 D_800991F4;
 extern f32 D_800991F8;
 extern f32 D_800991FC;
 extern f32 D_80099200;
-extern u8 D_800CC2B1;
 
 void func_1504C0E8(Actor *obj, s32 arg1, f32 arg2) {
     f32 blend;

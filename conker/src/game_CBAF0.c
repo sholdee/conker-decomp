@@ -11,7 +11,6 @@ typedef struct ScriptCmd {
 } ScriptCmd;
 
 /* Word count of the current script command (2 + its parameter count). */
-extern s32 D_800D3840;
 
 void func_151F2D6C(s32, s32);
 void func_151F2BA8(void);

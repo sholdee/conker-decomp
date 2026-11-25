@@ -48,18 +48,9 @@ extern u8 D_8008FDCD;
 extern u8 D_8008FE28;
 extern s8 D_8008FE30;
 extern s8 D_8008FEEC;
-extern u8 D_800D2E40;
-extern s32 D_800D2E48;
 extern s8 D_800E0A85;
-extern u8 D_800E0A8C;
-extern s32 D_800E0A90;
 extern u8 D_800E0A98;
 extern s8 D_800E0A99;
-extern u8 D_800E0B96;
-extern u8 D_800E0B97;
-extern u8 D_800E0B98;
-extern s16 D_800E0B9A;
-extern s8 D_800E0BE3;
 
 extern char D_800AB7D4[];
 extern char D_800AB7DC[];

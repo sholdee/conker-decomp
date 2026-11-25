@@ -12,7 +12,6 @@ struct CB3D0_arg1 {
 extern f32 D_800D2FC0[];
 extern f32 D_800D2FD8[];
 extern u8 D_800D2FEC[];
-extern s32 D_800D3840;
 
 // On a type-1 record (only while D_800D3840 == 3), sets both float slots of entry `index` to the
 // 16.16 fixed-point `value` and flags the entry.
@@ -58,7 +57,6 @@ extern void func_15087FC4(s32, s32);
 extern s32 func_150880F8(s32, s32);
 extern void func_1508B1D4(s32);
 extern void func_150495B0(f32 *, f32, f32 *, f32, f32, f32);
-extern s32 D_800D2450;
 
 // Runs command `cmd` with up to four integer params; most commands forward to a helper.
 s32 func_1509DFC4(s32 arg0, s32 cmd, struct CB3D0_arg2 *args) {
@@ -178,7 +176,6 @@ extern s32 func_150882B0(s32 arg0);
 extern s32 func_150882E4(s32 arg0, s32 arg1);
 extern s32 func_150887F8(void);
 extern s32 func_1508B194(s32 arg0);
-extern s8 D_800E0BD0;
 extern s8 D_800E0BE0[];
 
 // Answers query `cmd` with up to four integer params and returns the result as an s32.

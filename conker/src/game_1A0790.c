@@ -2,8 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u8 D_800DBEA8[];
-extern u8 D_800DD2E4[];
 void func_151733E4(s32 from, s32 to, s32 arg2, s32 blend, s32 dest);
 extern s8 D_800DD2E0;
 
@@ -52,13 +50,9 @@ Gfx *func_151733D8(Gfx *gfx, s32 arg1) {
     }
 }
 
-extern u16 D_800DD2E8;
 extern u16 D_800DD2EA;
-extern u16 D_800DD2EC;
 extern u16 D_800DD2EE;
 extern s16 D_800DD2F0;
-extern s16 D_800DD2F2;
-extern s16 D_800DD2F4;
 s8 func_15173994(s32 arg0);
 #define sFogPresets (&D_8008CC70)
 

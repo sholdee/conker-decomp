@@ -23,7 +23,6 @@ typedef struct {
     u8  soundTimer;
 } WavePreset; /* size 0x18 */
 
-extern u8 D_800DDE54[];
 extern WavePreset D_8008D050[];
 extern WaveSample *D_800DDE60[];
 

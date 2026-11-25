@@ -14,7 +14,6 @@ u8 func_150ADA20(void);
 s32 func_150380C0(f32 *, s32, s32, s32, f32, s32, f32 *, s32, s32, s32, s32);
 extern f32 D_800C3FD0[];
 
-extern s16 D_800C3FF4[];
 extern u16 *D_80084380[];
 extern u8 D_80097E7C[];
 extern u8 D_80098050[];
@@ -64,7 +63,6 @@ void func_15036C70(Actor *obj) {
     }
 }
 
-extern u8 D_800C3FFA;         /* aim pass / slot counter */
 static f32 D_800C3FE8[3];     /* current aim target */
 void func_150379DC(f32 *, s32, s32, s32, f32, s32, s32);
 void func_15038620(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);

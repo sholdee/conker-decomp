@@ -116,8 +116,6 @@ void func_1000E2F4(s32);
 s32 func_151F2CDC(void);
 void func_151F2BE8(void);
 void func_151F2C4C(void);
-extern s32 D_800DC9F0;
-extern LookAt D_800D9B90[];
 
 /*
  * Waits for the next message on D_800BEA10 and handles it; type 1 runs and draws one game frame.
@@ -370,7 +368,6 @@ void func_15036148(void);
 void func_1515D6C8(void);
 void func_1516706C(void);
 void func_151671E8(void);
-extern u8 D_800DCD27;
 
 // D_80043B40 is the 508-entry TLB slot table (see the handwritten miss handler at 0x10006138,
 // which uses the same {page, age} layout); this pass ages every slot by one frame.

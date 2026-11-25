@@ -3,7 +3,6 @@
 #include "variables.h"
 
 /* Per-texture use counts; D_800BC448 holds each texture's lifetime (see game_139FC0.c). */
-extern u8 D_800D9F68[];
 
 void func_1510D608(s32 index, s32 lifetime);
 extern s32 func_10004074(s16 *);

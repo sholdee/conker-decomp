@@ -3,7 +3,6 @@
 #include "variables.h"
 #include "effects.h"
 
-extern s32 *D_800DBF94;
 extern WorldObject *func_151149AC(u8);
 extern s32 func_1505D024(Actor *, s32, u16, s32);
 extern void func_150A7960(MtxF mtx, f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);

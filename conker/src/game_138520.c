@@ -3,11 +3,6 @@
 #include "variables.h"
 
 extern MtxF D_800D9B28;
-extern s16 D_800DD2F2;
-extern s16 D_800DD2F4;
-extern f32 D_800C3648; // added to both FOVs of every view
-extern f32 D_800C364C; // near-plane override when non-zero
-extern f32 D_800C3650; // far-plane override when non-zero
 
 f32 cosf(f32);
 f32 sinf(f32);

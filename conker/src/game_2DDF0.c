@@ -5,11 +5,6 @@
 
 // loops...
 extern s16 D_800D9E70[][3];
-extern u8 D_800D9E88[][3];
-extern u8 D_800D9E98[][3];
-extern u8 D_800D9EA8[][3];
-extern u8 D_800D9EB4[3];
-extern u8 D_800D9EB8[][3];
 extern u8 D_800A2D04[][3];
 extern u8 D_800A2CE8[][3];
 extern u8 D_800A2CEC[][3];

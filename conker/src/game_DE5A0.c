@@ -19,8 +19,6 @@ s32 func_15167D84(void *, s32, s32, s32, s32, s32);
 
 extern s32 D_8008CAE0;
 extern u8 D_800B86A4[][0x32C];
-extern f32 D_800CC2E4;
-extern f32 D_800CC2EC;
 
 
 /* Remembers the object's x/z, and drags a swimming player who comes within range down and sideways around it. */

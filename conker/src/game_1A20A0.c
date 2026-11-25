@@ -352,8 +352,6 @@ typedef struct SwarmFlight {
 
 extern SwarmFlight D_8008D0B0[];
 extern s32 D_800C35B0;
-extern f32 D_800D35E0;
-extern f32 D_800D35E8; /* 0x800D35E4 == (&D_800D35E8)[-1]; it has no symbol of its own */
 #define D_800D35E4 ((&D_800D35E8)[-1])
 s32 func_150490A8(Vec3f *arg0);
 s32 func_150AD960(s32, s32, s32, s32);

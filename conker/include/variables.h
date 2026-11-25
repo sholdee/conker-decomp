@@ -992,41 +992,81 @@ extern u16 D_800C18B8[];
 extern s32 D_800C35B8[]; /* time at the previous update */
 extern u8 D_800C35C0[];
 extern u8 D_800C35C2;
+extern u8 D_800C35C3;
 extern u8  D_800C35C4;
 extern u8  D_800C35C5;
+extern u16 * D_800C35D8[]; /* each track's event count */
 extern u8 D_800C35E8[2]; // per scene: changes with each run of the scene
 extern u8  D_800C35EA[2]; // per cutscene scene slot (0/1): cutscene state, 1 = playing
+extern u8 D_800C35F8;
 extern struct168 D_800C3600; // scripted camera shot
 extern u8  D_800C3638;
+extern u8 D_800C363A[]; /* track count */
+extern s32 D_800C3640[]; /* end time */
+extern f32 D_800C3648; // added to both FOVs of every view
+extern f32 D_800C364C; // near-plane override when non-zero
+extern f32 D_800C3650; // far-plane override when non-zero
 extern u8 D_800C3654[];
+extern u8 D_800C3658[];
+extern u8 D_800C365A[];
+extern u8 D_800C3662;
 extern u8  D_800C3663;
 extern u8  D_800C3670;
 extern u8  D_800C3671;
+extern u8 D_800C3672;
+extern f32 D_800C3674;
+extern s32 D_800C367C;
+extern u8 D_800C3680;
 extern u8  D_800C3681;
 extern u8  D_800C3682;
 extern u8  D_800C3683;
 extern SeqTrackState *D_800C3958[]; // per scene: the track states
+extern u8 * D_800C3960[][30];
+extern u8 D_800C3A58;
 extern u8  D_800C3C88;
+extern u8 D_800C3C89;
+extern s8 D_800C3C8A;
+extern u8 D_800C3C8B;
+extern u8 D_800C3C8C;
+extern u8 D_800C3C8D;
+extern u16 D_800C3C8E;
 extern u8  D_800C3C90;
 extern s32 D_800C3C94;
+extern u8 D_800C3C98;
+extern u8 D_800C3C99;
+extern u16 D_800C3C9A;
+extern u8 D_800C3C9C;
+extern u8 D_800C3C9D;
+extern s16 D_800C3C9E;
 extern SeqSubtitle D_800C3CA0[3];
 extern struct SeqQueueEntry *D_800C3D50; // dispatch queue, D_800C3C9A entries (type in 50D80)
 extern u8  D_800C3E78;
+extern u16 D_800C3E7A; // bone matrices used this frame
 extern u16 D_800C3E7C;
 extern s32 D_800C3E80[2]; // bone-matrix pool per frame buffer
 extern s32 D_800C3E84;
 extern u32 D_800C3E88; // bone-matrix pool cursor
 extern u32 D_800C3E8C; // bone-matrix pool start
+extern u8 D_800C3E90;
 extern ModelAttachment *D_800C3EE0; // head of the model attachment list
 extern Vtx *D_800C3FC0[]; // per actor: a 5-vertex quad buffer; [0] is the template D_80084300
 extern s32 D_800C3FC4;
 extern s64 D_800C3A60[];
+extern s16 D_800C3FF4[3];
+extern u8 D_800C3FFA; /* aim pass / slot counter */
 extern u8  D_800C4000;
 
+extern s32 * D_800C4020[]; // per-id first vertex of each part
+extern u16 D_800C4310[]; // part count, indexed by VtxMorphGroup.kind
+extern u16 D_800C4778[]; // display-list parts per model id
 extern Gfx **D_800C48F0[]; // per model: display list table (ModelHeader dlists2)
 extern void *D_800C4BE0[]; // per model: bone table (16-byte entries)
+extern u16 D_800C4ED0[]; // bone count per model id
+extern u16 D_800C5628[]; // textures count
+extern u16 D_800C57A0[]; // vertex count
 extern u16 D_800C5A90[187]; // per model: animation count
 extern VtxRun *D_800C5C08[187]; // per model id: vertex runs (D_800C5EF8[id] of them)
+extern u16 D_800C5EF8[];
 extern VtxTri *D_800C6070[187]; // per model id: triangles
 extern TexCoord *D_800C6360[187]; // per model id: saved texture coordinates (func_1503D804)
 
@@ -1039,7 +1079,11 @@ extern s32 D_800C6860[];
 extern u8  D_800C68A0;
 extern u8  D_800C68A1;
 
+extern u16 D_800CBD4E; // animation clock (high bits pick icon frames)
+extern u16 D_800CBDA0[];
 extern u8 D_800CBDD3;
+extern f32 D_800CBDF4;
+extern f32 D_800CBDF8;
 extern TriggerNode *D_800CBE00; // timed trigger nodes (func_15044964)
 extern u8  D_800CBD60;
 extern u8  D_800CBD61;
@@ -1068,17 +1112,27 @@ extern f32 D_800CC23C;
 
 extern s32 D_800CC250;
 
+extern f32 D_800CC254;
+extern f32 D_800CC258;
+extern f32 D_800CC25C;
+extern s32 D_800CC260;
 extern s16 D_800CC264;
 extern s32 D_800CC268;
+extern u8 D_800CC26C;
+extern u8 D_800CC26D;
 extern u8  D_800CC26E;
 extern u8  D_800CC27C;
 extern s32 D_800CC280;
 extern OSContPad *D_800CC284; // the current player's controller input
 extern s32 D_800CC288;
+extern s32 D_800CC28C;
+extern s32 D_800CC290;
 extern TexAnimState D_800CC298;
 extern u8  D_800CC2A2;
 
+extern u8 D_800CC2B1;
 extern s16 D_800CC2B2;
+extern f32 D_800CC2B4;
 extern f32 D_800CC2C0;
 extern f32 D_800CC2C4;
 extern f32 D_800CC2C8;
@@ -1089,15 +1143,20 @@ extern u16 D_800CC2BA; // frame step of the actor being updated
 extern s32 D_800CC2BC;
 extern Actor D_800CC2D0[26]; // objects
 extern u8  D_800CC2D4[];
+extern f32 D_800CC2E4;
 extern f32 D_800CC2E8[];
+extern f32 D_800CC2EC;
 extern f32 D_800CC30C[];
 extern u8  D_800CC335;
 extern u16 D_800CC34A[];
 extern u8  D_800CC37D;
+extern u16 D_800CC382;
 extern u8  D_800CC3D4[];
 extern s8  D_800CC3D7;
 extern u8  D_800CC3F5[] ; // ??
 
+extern u8 D_800CC49A;
+extern u8 D_800CC4B3[][0x32C]; /* byte 0x1E3 of each D_800CC2D0 object */
 extern Actor  D_800CC5A0[];
 extern u8  D_800CC521[]; // ??
 
@@ -1139,6 +1198,7 @@ extern u16 D_800D18A0;
 extern u16 D_800D18A2;
 extern u8  D_800D18A4[4]; // per player: half-size of the square, minus 4 (game_A9D90)
 extern u8  D_800D18A8;
+extern u8 D_800D18A9;
 extern u8  D_800D18C0;
 extern u8  D_800D18D0;
 
@@ -1162,10 +1222,23 @@ extern u8  D_800D1F80[187];
 extern u8  D_800D2040[187]; // per model id counter
 extern SpawnRecord *D_800D20FC;
 
+extern u8 D_800D2100;
+extern u8 D_800D2101;
 extern PathPoint **D_800D2104;
 extern u8 *D_800D2108;
+extern u8 * D_800D210C;
+extern s8 D_800D2130;
+extern s32 D_800D2354;
+extern f32 D_800D239C;
+extern f32 D_800D23A0;
+extern f32 D_800D23A4;
+extern s8 D_800D23A8;
+extern s32 D_800D2450;
 extern s32 D_800D2C9C; // G_TT_RGBA16 when the last loaded texture has a palette, else G_TT_NONE
 extern u8 *D_800D2CA0; // current texture frame (0x80000000 = missing asset)
+extern u8 D_800D2DA8; // sprite prim colour r, g, b (used while D_800D2DAB is 0)
+extern u8 D_800D2DA9;
+extern u8 D_800D2DAA;
 extern u8  D_800D2DAB;
 extern u16 *D_800D2110;
 extern s32 D_800D2120;
@@ -1205,9 +1278,12 @@ extern f32 D_800D2890[3];
 extern u8  D_800D2C68;
 extern s32 D_800D2C28[16]; // segment base addresses
 
+extern u8 D_800D2E40;
+extern s32 D_800D2E48;
 extern s32 D_800D2E50;
 extern u8  D_800D2E60[];
 extern u8  D_800D2E68;
+extern u8 D_800D2E69;
 extern u8 D_800D2E70[0xF0]; // one state byte per id
 extern u8  D_800D2E41;
 extern u8  D_800D2E42;
@@ -1222,14 +1298,22 @@ extern IdRecordList D_800D2F48;
 extern f32 D_800D2DB0;
 extern s32 D_800D2DB4;
 
+extern s32 D_800D2F58;
 extern u32 D_800D3094; // number of trigger zones in D_800D3098
 extern TriggerZone *D_800D3098; // level placement / marker table (0x34-byte records)
+extern u64 D_800D30A0[3]; /* zones that are always tested */
+extern u64 D_800D30B8[3]; /* default candidate zones */
+extern TriggerZone ** D_800D3270;
+extern s32 D_800D3274;
 extern GroundCandidate D_800D3300[]; // ground-probe hits
 extern u8  D_800D35DC; // 1-based slot of the actor being updated (0 = none)
+extern f32 D_800D35E0;
+extern f32 D_800D35E8; /* 0x800D35E4 == (&D_800D35E8)[-1]; it has no symbol of its own */
 extern u8 *D_800D3668; // per-face shadow flag table
 extern u8 *D_800D366C; // end of D_800D3668
 extern f32 D_800D3670;
 extern s16 D_800D3674;
+extern s32 D_800D3840;
 extern s32 D_800D3858;
 
 extern struct102 *D_800D9894;
@@ -1238,6 +1322,8 @@ extern s32 D_800D98E0;
 extern u8  D_800D987C;
 extern u8  D_800D9890;
 
+extern u8 D_800D98F0;
+extern u8 D_800D9900;
 extern u8  D_800D9930[];
 extern u8  D_800D9920;
 extern u8  D_800D9921;
@@ -1248,6 +1334,7 @@ extern u8  D_800D9939;
 extern u8  D_800D992A[];
 extern u8  D_800D993A[];
 
+extern u8 D_800D9950[];
 extern struct HomingEffect *D_800D99D0[8]; // live homing effects by handle - 1 (defined in game_1104D0)
 extern TriggerZone *D_800D9A20[2]; // registered by func_15014040 (by unk18)
 extern s16 *D_800D9A40; // bit per player (game_11FF10)
@@ -1267,6 +1354,7 @@ extern u8  D_800D9B84[];
 extern u8  D_800D9B88[];
 extern u8  D_800D9B8B;
 extern u8  D_800D9B8C;
+extern LookAt D_800D9B90[];
 extern u8  D_800D9BD0[][2][8];
 extern s32 D_800D9E10[];
 extern u8  D_800D9E20;
@@ -1284,11 +1372,18 @@ extern u8  D_800D9E20;
 
 extern MtxF D_800D9C10[]; // per view: view matrix
 extern MtxF D_800D9D10[]; // per view: view matrix * projection
+extern u8 D_800D9E21; // light count byte func_1515D914 stored for player 0
 extern u8  D_800D9E64;
+extern u8 D_800D9E88[4][3];
+extern u8 D_800D9E98[4][3];
+extern u8 D_800D9EA8[4][3];
+extern u8 D_800D9EB4[3];
+extern u8 D_800D9EB8[4][3];
 extern s32 D_800D9F58;
 extern s32 D_800D9F5C;
 extern u8  D_800D9F60;
 
+extern u8 D_800D9F68[]; /* per-id reference count */
 extern s32 D_800DBDD8[];
 extern s32 D_800DBDE8[];
 extern s32 D_800DBDF8[];
@@ -1313,8 +1408,16 @@ extern u32 *D_800DBE5C; // per world-mesh triangle: material / surface flags
 extern u8  D_800DBE62;
 extern u8  D_800DBE63;
 extern f32 D_800DBE64;
+extern f32 D_800DBE68;
+extern f32 D_800DBE6C;
+extern f32 D_800DBE70;
 extern void *D_800DBE80; // the current sky data (star field, tile formats or gradient texture)
+extern Vtx * D_800DBE88[][2]; // per view, per framebuffer
+extern u8 D_800DBEA8[];
+extern u8 D_800DBEAB;
+extern u8 D_800DBEAC;
 extern Mtx *D_800DBEB0; // sky projection matrices, 2 per view
+extern u16 D_800DBEE8[]; // per view: entries in D_80089240
 extern s32 D_800DBEF0;
 extern WorldObject *D_800DBEF4; // D_800DBEF0 entries
 extern s32 *D_800DBEF8; // per object: handle released with func_10004074
@@ -1324,22 +1427,28 @@ extern MtxF D_800DBF08[]; // per-frame
 extern u8  D_800DBF88;
 extern s32 D_800DBF8C;
 extern s32 D_800DBF90;
+extern s32 * D_800DBF94; // per object: bit N set when actor D_800CC2D0[N] touches it
+extern s32 D_800DBF98; // grouped objects, kept at the end of D_800DBEF4
 extern Camera *D_800DBFF0;
 extern u8  D_800DBFF4[4]; // per-player camera hold timers; *(s32 *)D_800DBFF4 tests all four at once
 extern u8  D_800DBFF5;
 extern u8  D_800DBFF6;
 extern u8  D_800DBFF7;
 
+extern f32 D_800DC004; // camera transition height (see func_15128030)
 extern Camera *D_800DC010; // saved cameras (one per view)
 extern CamPose *D_800DC020; // the level's camera pose table (D_80089550 entries)
 extern CamPose *D_800DC024; // the pose game_15BD90 is moving to
 extern Mtx  *D_800DC2A0[2]; // per framebuffer: one view matrix per view
 extern CamMsgQueue *D_800DC2B0; // one per camera
+extern s32 D_800DC9F0; /* live glow count */
+extern u8 D_800DCA20;
 extern f32 *D_800DCC10[][4];
 extern ParticleNode *D_800DC460; // loaded particle models: list head
 extern ParticleNode *D_800DC464; // list tail
 extern s16 D_800DC468[];
 extern s32 D_800DC63C;
+extern u8 D_800DCD27; // priority of the current ambient colour
 extern s8 D_800DCD30[4][3]; // per-player directional light direction
 extern u8  D_800DCD31;
 extern u8  D_800DCD32;
@@ -1377,14 +1486,44 @@ extern u8   D_800DCDD0;
 extern s8   D_800DD190;
 extern void *D_800DD198[6]; // per object-list walk depth (D_800DD190): the next node to visit
 extern s32 D_800DD1B0; // texture last loaded by func_1517A9A8
+extern s32 D_800DD1B4;
+extern s32 D_800DD1B8;
+extern s16 D_800DD1BC;
+extern s16 D_800DD1BE;
+extern s16 D_800DD1C0;
+extern s16 D_800DD1C2;
+extern s16 D_800DD1C4;
+extern s16 D_800DD1C6;
+extern s16 D_800DD1C8;
+extern s16 D_800DD1CA;
+extern s16 D_800DD1CC;
+extern s16 D_800DD1CE;
 extern f32  D_800DD1D8[];
 extern f32  D_800DD1E8[];
 
+extern s32 D_800DD1FC;
+extern s32 D_800DD200;
+extern s16 D_800DD204;
+extern s16 D_800DD206;
+extern s32 D_800DD208;
+extern s32 D_800DD20C;
+extern s32 D_800DD210;
+extern s32 D_800DD214;
+extern s32 D_800DD218;
+extern s32 D_800DD21C;
+extern s32 D_800DD220;
+extern s32 D_800DD224;
 extern void *D_800DD228;
+extern s32 D_800DD230;
 extern u8   D_800DD2C0[16]; // per player: spawn point
 extern u8   D_800DD2D0;
 extern u8   D_800DD2A0[4];
 
+extern u8 D_800DD2E4[];
+extern u16 D_800DD2E8;
+extern u16 D_800DD2EC;
+extern s16 D_800DD2F2;
+extern s16 D_800DD2F4;
 extern u8   D_800DD404;
 extern u8   D_800DD405;
 extern u8   D_800DD406;
@@ -1395,9 +1534,16 @@ extern VtxMorphFrame **D_800DD460[2]; // [group][part][frame]
 extern s32  D_800DD478[15 * 26]; // per texture type: 26 frame addresses (game_1A89B0)
 
 extern ParticleTexFile D_800DDA90[15];
+extern u8 D_800DDBC0[]; /* index into D_80095CE0 */
+extern u8 D_800DDBD0[15]; /* frame count the phases cycle through */
+extern u8 D_800DDBE0[]; /* frame shown while a sprite is disturbed (unkB >= 0x21) */
+extern u8 D_800DDBF0[]; /* draw pass (see func_1517D7B0) */
 extern s32  D_800DDC00;
 extern s32  D_800DDC08;
 extern s32  D_800DDC04;
+extern u8 D_800DDC10[]; /* per-phase direction bits for ping-pong animation */
+extern u8 D_800DDC80[]; /* row of D_8008CF00 */
+extern s16 D_800DDC90[60]; /* animation phases, 4 per type (frame << 8) */
 extern Vtx *D_800DDD10[2]; // this frame's sprite vertex buffer (game_1A89B0), one per frame buffer
 extern s32  D_800DDD0C;
 extern u8   D_800DDD1C;
@@ -1441,10 +1587,17 @@ extern u8   D_800DDE3D;
 extern u8   D_800DDE3E;
 extern u8   D_800DDE3F;
 extern u8   D_800DDE40; // nonzero: iris driven by the cutscene tracks
+extern f32 * D_800DDE44; // closure, percent
+extern f32 * D_800DDE48; // hole x, percent of the view width
+extern f32 * D_800DDE4C; // hole y, percent of the view height
 extern u8   D_800DDE50;
+extern u8 D_800DDE54[];
 extern EffectModelSlot D_800DDE80[11];
 
+extern u8 D_800DF0E0;
+extern u8 D_800DF0E1;
 extern MtxS16 *D_800DF7C0; // bone matrices drawn by func_1502C974 mode 4
+extern u8 D_800DF7C4; // alpha scale for func_1502C974 mode 4
 extern BoneTrail *D_800DF7C8[2]; // [0]: Actor owners, [1]: world object owners
 extern u8   D_800DDF5C[];
 extern u8   D_800DDF60[];
@@ -1455,8 +1608,42 @@ extern Gfx *D_800DDF78[]; // per effect model slot: the model's second display l
 extern s16 *D_800DF9B8[]; // per model: written by func_1510CE60
 extern struct TrailTask *D_800E0920; // type in 1CA420
 extern u8 D_800E0A00;
+extern s32 D_800E0A74;
+extern s16 D_800E0A80;
+extern u8 D_800E0A8C;
+extern s32 D_800E0A90;
+extern u8 D_800E0A94; /* menu brightness, scales the page alpha */
+extern u8 D_800E0A95; /* current page's fade level, 0-0xFF */
+extern u8 D_800E0A97;
+extern s16 D_800E0AA0[];
+extern s8 D_800E0AC0[];
+extern s16 D_800E0AD0[16];
 extern u8 **D_800E0B88; // bank 2 text strings (80)
+extern u8 D_800E0B8C;
+extern s8 D_800E0B90[];
 extern u8   D_800E0B94;
+extern u8 D_800E0B95;
+extern u8 D_800E0B96;
+extern u8 D_800E0B97;
+extern u8 D_800E0B98;
+extern u8 D_800E0B99;
+extern s16 D_800E0B9A;
+extern Actor * D_800E0BA0[];
+extern s8 D_800E0BB0;
+extern s8 D_800E0BB1;
+extern s8 D_800E0BC8[];
+extern u16 D_800E0BCC;
+extern s8 D_800E0BCE[];
+extern s8 D_800E0BD0;
+extern u8 D_800E0BD1;
+extern s8 D_800E0BD3;
+extern u8 D_800E0BDC;
+extern s8 D_800E0BE3;
+extern s8 D_800E0BE7;
+extern s8 D_800E0BE9;
+extern s8 D_800E0C00[]; /* team of each D_8008FE44 entry */
+extern s16 D_800E0C10[];
+extern s32 D_800E0C18[];
 extern s8   D_800E0C20;
 extern s32  D_800E0E04;
 extern TriggerZone *D_800E0900[6]; // per flamethrower character
@@ -1473,6 +1660,7 @@ extern StreamVoice D_800E0D80; // the streaming music player's voice
 // end of zero'd out section
 
 extern s32 *D_800E0E20; // Huffman table pointers, relocated by D_800E0E28
+extern s32 D_800E0E28;
 extern f32 *D_800E0E30; // pow43 table storage (0x8000 bytes)
 extern s32  D_800E9D00;
 extern u8   D_800E9D10[]; // heap arena: from here to 0x80400000

@@ -40,15 +40,9 @@ typedef struct GfxBytes {
 } GfxBytes;
 
 /* Per-model tables, indexed by model id (0..186). */
-extern s32 *D_800C4020[];
 extern Gfx **D_800C4488[];
 extern ObjTexture *D_800C5338[];
 extern void *D_800C5048[];
-extern u16 D_800C4310[];      // vtxIndices count
-extern u16 D_800C57A0[];      // vertex count
-extern u16 D_800C4778[];      // display-list parts
-extern u16 D_800C5628[];      // textures count
-extern u16 D_800C4ED0[];      // bone count
 extern s16 D_800C5918[];      // triangle weight, see func_1503D984
 
 extern void *allocate_memory(s32 size, s32, s32, s32);

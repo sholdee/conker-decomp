@@ -48,16 +48,10 @@ typedef struct {
 } ModelReloc;
 
 extern f32 D_8009CC3C;  // matching: 20000.0f, but as a literal IDO loads it into a different register
-extern u8 *D_800D210C;
-extern u8 D_800D2100;
-extern u8 D_800D2101;
-extern s8 D_800D2130;
 extern PartSet D_80086CC4[];
 extern s32 (*D_80086C90[])(Actor *, Actor *, s32);
 extern u8 D_800A7230[][8];
 extern ModelReloc *D_800C5338[];
-extern u16 D_800C5628[];
-extern u16 D_800C57A0[];
 
 extern void *allocate_memory(s32 size, s32, s32, s32);
 extern s32 func_10004074(void *);

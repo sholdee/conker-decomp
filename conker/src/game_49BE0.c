@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-extern u16 D_800CC382;
 
 extern void func_1501C53C(void);
 extern void func_15016680(void);

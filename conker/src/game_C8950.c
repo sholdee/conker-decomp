@@ -199,7 +199,6 @@ IdRecord *func_1509B950(IdRecord *node) {
 }
 
 void func_1509C228(void);
-extern u8 D_800D2E69;
 
 /*
  * Frees records. With `unloadAll` every record runs its mode-3 handler and is freed. Otherwise records
@@ -244,8 +243,6 @@ void func_1509BA04(s32 unloadAll) {
 
 void func_15096D08(void);
 s32 func_1509BE40(s32, s32, s32, ...);
-extern s32 D_800D2E48;
-extern s32 D_800D2F58;
 
 /* Runs every record's handler for `mode` (1, 2 or 4) and updates the per-id state bytes. */
 void func_1509BBA0(s32 mode) {
@@ -315,7 +312,6 @@ void func_1509BBA0(s32 mode) {
 
 // matching: a tentative definition here (not extern) lets as1 share one `lui` for the [0]/[1] stores
 s32 D_800D2F60[16];
-extern s32 D_800D3840;
 extern s32 (*D_80088498[])(s32, s32, s32 *);
 extern s32 (*D_800884D4[])(s32, s32, s32 *);
 

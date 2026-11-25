@@ -112,7 +112,6 @@ extern f32 D_800B0C3C;
 extern f32 D_800B0C40;
 extern f32 D_800B0C44;
 extern f32 D_800B0C48;
-extern s32 D_800E0E28;
 /* IMDCT window per block type (0 normal, 1 start, 2 short, 3 stop) */
 extern f32 D_800E0E38[4][36];
 extern f32 *D_800E1078;          /* pow43: i^(4/3) */

@@ -53,7 +53,6 @@ typedef struct {
     u8 unk39;
 } Desc1513B5E0;
 
-extern s8 D_800E0BCE[];
 void *func_1513B5E0(void *, s32, s32, u8, s32);
 
 /* Spawns the effect tied to `owner` and records the owner in the effect's extra data. */
@@ -113,7 +112,6 @@ typedef struct {
     Mtx mtx[2];       /* [frame] */
 } Obj151BA084;
 
-extern u8 D_800C3E90;
 void func_150A7960(MtxF m, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
 
 /*

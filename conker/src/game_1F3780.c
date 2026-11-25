@@ -10,7 +10,6 @@ extern Vec3f D_800AAB08[];
 extern Vec3f D_800AAB20[];
 extern Vec3f D_800AAB38[];
 extern Vec3f D_800AAB50[];
-extern u8 D_800DCA20;
 
 /* Argument of func_151D8868 (same layout as Game113D60Event in game_113D60.c). */
 typedef struct {

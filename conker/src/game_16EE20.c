@@ -9,25 +9,6 @@ Actor *func_15083E90();
 #include "effects.h"
 
 /* Cached RDP state (prim/env colour, geometry and other modes, last texture) for func_15142B7C..func_15142FBC. */
-extern s16 D_800DD1C0;
-extern s16 D_800DD1C2;
-extern s16 D_800DD1C4;
-extern s16 D_800DD1C6;
-extern s16 D_800DD1C8;
-extern s16 D_800DD1CA;
-extern s16 D_800DD1CC;
-extern s16 D_800DD1CE;
-extern s32 D_800DD1FC;
-extern s32 D_800DD200;
-extern s16 D_800DD204;
-extern s16 D_800DD206;
-extern s32 D_800DD208;
-extern s32 D_800DD20C;
-extern s32 D_800DD210;
-extern s32 D_800DD214;
-extern s32 D_800DD218;
-extern s32 D_800DD21C;
-extern u8 D_800C3E90;
 extern u8 D_8008A160[]; /* palettes of four RGB triples */
 /* Debug breadcrumbs of func_15143134. */
 extern s32 D_800DCA00;
@@ -2221,7 +2202,6 @@ s32 func_15146078(Vec3f *n, Vec3f *u, Vec3f *v) {
     func_15145128(v, v, &len, &invLen);
     return 1;
 }
-extern u8 D_800D9E21;
 void *func_1515D914(void *, s16, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32, s32, s32);
 void *func_1515E544(void *, s32, u8, u8, void *);
 /*

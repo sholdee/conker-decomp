@@ -321,9 +321,6 @@ Gfx *func_15095D0C(Gfx *gfx, SpriteParams *sprite) {
     return func_15095D34(gfx, sprite, 0, 0, 0);
 }
 
-extern u8 D_800D2DA8; // sprite prim colour r, g, b (used while D_800D2DAB is 0)
-extern u8 D_800D2DA9;
-extern u8 D_800D2DAA;
 
 /* Draws `sprite` at the placement func_15095B08 computed, then advances its animation. */
 Gfx *func_15095D34(Gfx *gfx, SpriteParams *sprite, s32 sOffset, s32 tOffset, s32 extraWidth) {

@@ -11,7 +11,6 @@ extern s16  D_800E0E16;
 extern u8   D_800E0E18;
 extern u8   D_800E0E2C;
 extern s32  D_800E0E24;
-extern s32  D_800E0E28;
 extern s16  D_800E0DB0;
 extern s16  D_800E0DB2;
 extern s32  D_800E0DD8;

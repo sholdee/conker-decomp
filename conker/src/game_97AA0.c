@@ -45,12 +45,8 @@ extern f32 D_800D1560[3];
 extern f32 D_800D1570[3];
 
 /* Bitmask of the objects (D_800CC2D0 indices) hit in the last collision check. */
-extern s32 D_800CC260;
 
 /* Object position saved before the collision move. */
-extern f32 D_800CC254;
-extern f32 D_800CC258;
-extern f32 D_800CC25C;
 
 extern void (*D_80086110[])(Actor *, s32);
 

@@ -30,7 +30,6 @@ typedef struct {
 } ScoreState;
 
 extern ScoreState *D_8008FDD4;
-extern s8 D_800E0BE3;
 
 /* Copies spawn point `spawnIndex` (or, when it is -1, the player's stored one) into the out
  * parameters. In multiplayer (D_800BE616) with D_800D18A8 set, it instead picks the team's spawn

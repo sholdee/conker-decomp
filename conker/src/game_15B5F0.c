@@ -3,7 +3,6 @@
 #include "variables.h"
 
 
-extern f32 D_800DC004; // camera transition height (see func_15128030)
 
 void func_150495B0(f32 *value, f32 target, f32 *velocity, f32 accel, f32 maxSpeed, f32 dt);
 
