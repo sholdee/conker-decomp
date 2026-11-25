@@ -12,18 +12,17 @@ extern s32 _MakeMotorData(OSMesgQueue *mq, OSPfs *pfs, s32 channel);
 
 extern u8 D_80084060[];
 extern OSTimer D_800BE6E0;
-extern f32 D_80096960;
 extern u8 D_800BEAC2;
 extern u8 D_800BEAC3;
 extern u8 D_800E0A00;
 
-s64 __ll_mul(u64 arg0, s32 arg1, s32 arg2);
-u64 __ull_div(u64 arg0, u64 arg1);
 void func_1501C0F0(u8 arg0, f32 arg1, f32 arg2);
 
+/* Arms the controller-read timer (25 * osClockRate / 1000000 ticks, i.e. 25 us) once per
+   frame, after func_1501BBB8 has consumed the previous read. */
 void func_1501BB20(void) {
     if (D_80084064 != 0) {
-        osSetTimer(&D_800BE6E0, __ull_div(__ll_mul(25ULL, *(s32 *)&D_8002BD10, D_8002BD14), 1000000ULL), 0, &D_8003B218, (OSMesg)6);
+        osSetTimer(&D_800BE6E0, 25ULL * D_8002BD10 / 1000000ULL, 0, &D_8003B218, (OSMesg)6);
         D_80084064 = 0;
     }
 }
@@ -41,15 +40,17 @@ void func_151DD8C0(void);
 
 #define PADS ((OSContPad *)D_800BE748)
 
+/* Reads the controllers into the per-player pads (D_80084060 maps player slots to channels),
+   records newly pressed buttons, applies the stick dead zone and returns the pad pointer table. */
 struct14 *func_1501BBB8(void) {
-    s32 unused;
-    s32 j;
-    s32 demo;
-    s32 count;
+    s32 pad; // matching: unused stack slot in the original frame
+    s32 player;
+    s32 replaying;
+    s32 numPlayers;
     OSContPad pads[4];
     s32 i;
     s32 x;
-    s32 y;
+    s32 y; // also carries the button word
 
     for (i = 0; i < 4; i++) {
         D_800BE718[i] = PADS[i].button;
@@ -69,22 +70,22 @@ struct14 *func_1501BBB8(void) {
         }
     }
     if (D_800BE9F0 != 0x1D) {
-        count = D_8008FD90;
+        numPlayers = D_8008FD90;
     } else {
-        count = 4;
+        numPlayers = 4;
     }
-    for (j = 0; j < 4; j++) {
-        i = D_80084060[j];
-        if (i < 4 && j < count) {
-            PADS[j].button = pads[i].button;
-            PADS[j].stick_x = pads[i].stick_x;
-            PADS[j].stick_y = pads[i].stick_y;
-            PADS[j].button |= D_800BE720[i];
+    for (player = 0; player < 4; player++) {
+        i = D_80084060[player];
+        if (i < 4 && player < numPlayers) {
+            PADS[player].button = pads[i].button;
+            PADS[player].stick_x = pads[i].stick_x;
+            PADS[player].stick_y = pads[i].stick_y;
+            PADS[player].button |= D_800BE720[i];
             D_800BE720[i] = 0;
         } else {
-            PADS[j].button = 0;
-            PADS[j].stick_x = 0;
-            PADS[j].stick_y = 0;
+            PADS[player].button = 0;
+            PADS[player].stick_x = 0;
+            PADS[player].stick_y = 0;
         }
     }
     for (i = 0; i < 4; i++) {
@@ -106,16 +107,16 @@ struct14 *func_1501BBB8(void) {
         }
     }
     if (D_800E0B94 == 2 || D_800E0B95 == 2) {
-        demo = 1;
+        replaying = 1;
         func_151DD8C0();
     } else {
-        demo = 0;
+        replaying = 0;
     }
     for (i = 0; i < 4; i++) {
         y = PADS[i].button;
         D_800BE710[i] = y & ~D_800BE700[i];
         D_800BE700[i] = y;
-        if (!demo) {
+        if (!replaying) {
             x = PADS[i].stick_x;
             if (((x < 0) ? -x : x) >= 8) {
                 PADS[i].stick_x = x - ((x < 0) ? -1 : 1) * 7;
@@ -134,29 +135,27 @@ struct14 *func_1501BBB8(void) {
 }
 
 
-void func_1501C010(u8 arg0, u8 arg1) {
-    f32 temp_f0;
-    f32 temp_f12;
-    f32 temp_f2;
-    u32 temp_v0;
+/* Starts rumble on a player's pak with an on/off pattern derived from strength (0-8). */
+void func_1501C010(u8 player, u8 strength) {
+    f32 scaled;
+    f32 onTime;
+    f32 offTime;
 
-    temp_v0 = arg1;
-    if (arg1 >= 9) {
-        arg1 = 8;
-        temp_v0 = 8;
+    if (strength > 8) {
+        strength = 8;
     }
-    if (temp_v0 == 8) {
-        temp_f2 = 20.0f;
-        temp_f12 = 0.0f;
-    } else if (temp_v0 == 0) {
-        temp_f2 = 0.0f;
-        temp_f12 = 99.0f;
+    if (strength == 8) {
+        onTime = 20.0f;
+        offTime = 0.0f;
+    } else if (strength == 0) {
+        onTime = 0.0f;
+        offTime = 99.0f;
     } else {
-        temp_f0 = ((f32)(u32)arg1 - 1.0f) * D_80096960 * 5.0f;
-        temp_f2 = temp_f0 + 2.0f;
-        temp_f12 = 7.0f - temp_f0;
+        scaled = ((f32)strength - 1.0f) * (1.0f / 6.0f) * 5.0f;
+        onTime = scaled + 2.0f;
+        offTime = 7.0f - scaled;
     }
-    func_1501C0F0(arg0, temp_f2, temp_f12);
+    func_1501C0F0(player, onTime, offTime);
 }
 
 void func_1501C0F0(u8 arg0, f32 arg1, f32 arg2) {
