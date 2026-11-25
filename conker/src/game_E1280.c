@@ -2,6 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
+/* Particle trails: a ring buffer of points emitted from a moving source and drawn as a ribbon. */
 
 #define TRAIL_STOPPED   1 /* state->flags: no more points are emitted */
 #define TRAIL_FADE_TAIL 2 /* state->flags: ramp alpha up from the oldest point */
@@ -66,7 +67,7 @@ typedef struct {
     /* 0x02 */ u8 pad2[0xA];
     /* 0x0C */ u8 unkC;
     /* 0x0D */ u8 padD[3];
-    /* 0x10 */ Vec3f pos;
+    /* 0x10 */ Vec3f pos;     /* 0x10-0x2B are copied from the TrailSpawn header */
     /* 0x1C */ s16 unk1C;
     /* 0x1E */ u16 flags;
     /* 0x20 */ s32 kind;
@@ -220,7 +221,7 @@ s32 func_150B40E8(Trail *trail) {
     return 1;
 }
 
-void func_150B5088();
+void func_150B5088(Trail *trail);
 
 /* Emits new trail points for this frame, interpolating speed across the frame's step. */
 s32 func_150B4294(Trail *trail) {
@@ -296,11 +297,15 @@ Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 
-Gfx *func_150B4710(Trail *trail, Gfx *gfx, s16 viewport) {
+/*
+ * Draws the trail as a camera-facing ribbon, newest point first: each pair of points becomes a quad
+ * whose sides are offset by the point's width along (segment x to-camera).
+ */
+Gfx *func_150B4710(Trail *trail, Gfx *gfx, s16 camIdx) {
     Vtx *vtx;
     TrailState *state;
-    Vec3f b;
-    Vec3f a;
+    Vec3f next;
+    Vec3f cur;
     s32 j;
     s32 i;
     TrailPoint *points;
@@ -314,9 +319,9 @@ Gfx *func_150B4710(Trail *trail, Gfx *gfx, s16 viewport) {
     f32 nx;
     f32 ny;
     f32 nz;
-    f32 len;
-    u8 level;
-    u8 prev;
+    f32 lenSq;
+    u8 texS;
+    u8 prevTexS;
     s16 alpha;
     s16 prevAlpha;
     u8 update;
@@ -324,12 +329,12 @@ Gfx *func_150B4710(Trail *trail, Gfx *gfx, s16 viewport) {
     s16 count;
     s32 k;
     f32 scale;
-    f32 scaleB;
+    f32 nextScale;
 
     if (trail->count >= 2) {
-        func_151D5D60(trail->unk84, viewport, (trail->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
+        func_151D5D60(trail->unk84, camIdx, (trail->capacity * 2 + 10) * sizeof(Vtx), (void **)&vtx, NULL);
         if (vtx != NULL) {
-            cam = &D_800DBFF0[viewport].unk2F8;
+            cam = &D_800DBFF0[camIdx].unk2F8;
             state = trail->state;
             points = trail->points;
             update = 1;
@@ -375,8 +380,8 @@ lbl1:
                 if (j < 0) {
                     j = trail->capacity - 1;
                 }
-                a = trail->pos;
-                prev = points[j].texS;
+                cur = trail->pos;
+                prevTexS = points[j].texS;
                 prevAlpha = (points[j].alpha * state->alpha) >> 8;
             } else {
                 i = trail->head - 1;
@@ -387,36 +392,36 @@ lbl1:
                 if (j < 0) {
                     j = trail->capacity - 1;
                 }
-                a = points[i].pos;
-                prev = points[i].texS;
+                cur = points[i].pos;
+                prevTexS = points[i].texS;
                 prevAlpha = (points[i].alpha * state->alpha) >> 8;
             }
-            b = points[j].pos;
-            level = points[j].texS;
+            next = points[j].pos;
+            texS = points[j].texS;
             alpha = (points[j].alpha * state->alpha) >> 8;
-            dx = a.x - b.x;
-            dy = a.y - b.y;
-            dz = a.z - b.z;
-            cx = a.x - cam[0];
-            cy = a.y - cam[1];
-            cz = a.z - cam[2];
+            dx = cur.x - next.x;
+            dy = cur.y - next.y;
+            dz = cur.z - next.z;
+            cx = cur.x - cam[0];
+            cy = cur.y - cam[1];
+            cz = cur.z - cam[2];
             nx = dy * cz - cy * dz;
             ny = dz * cx - cz * dx;
             nz = dx * cy - cx * dy;
-            len = nx * nx + ny * ny + nz * nz;
-            if (len == 0.0f) {
+            lenSq = nx * nx + ny * ny + nz * nz;
+            if (lenSq == 0.0f) {
                 nx = 0.0f;
                 ny = 0.0f;
                 nz = 0.0f;
             } else {
-                scale = points[j].width / sqrtf(len);
+                scale = points[j].width / sqrtf(lenSq);
                 nx = nx * scale;
                 ny = ny * scale;
                 nz = nz * scale;
             }
-            vtx->v.ob[0] = (s16)(a.x + nx);
-            vtx->v.ob[1] = (s16)(a.y + ny);
-            vtx->v.ob[2] = (s16)(a.z + nz);
+            vtx->v.ob[0] = (s16)(cur.x + nx);
+            vtx->v.ob[1] = (s16)(cur.y + ny);
+            vtx->v.ob[2] = (s16)(cur.z + nz);
             vtx->v.tc[0] = points[j].texS << 6;
             vtx->v.tc[1] = 0x43C0;
             vtx->v.cn[0] = 0xFF;
@@ -425,9 +430,9 @@ lbl1:
             vtx->v.cn[3] = prevAlpha;
             vtx->v.flag = 0;
             vtx++;
-            vtx->v.ob[0] = (s16)(a.x - nx);
-            vtx->v.ob[1] = (s16)(a.y - ny);
-            vtx->v.ob[2] = (s16)(a.z - nz);
+            vtx->v.ob[0] = (s16)(cur.x - nx);
+            vtx->v.ob[1] = (s16)(cur.y - ny);
+            vtx->v.ob[2] = (s16)(cur.z - nz);
             vtx->v.tc[0] = points[j].texS << 6;
             vtx->v.tc[1] = 0x4000;
             vtx->v.cn[0] = 0xFF;
@@ -437,29 +442,29 @@ lbl1:
             vtx->v.flag = 0;
             vtx++;
             do {
-                dx = a.x - b.x;
-                dy = a.y - b.y;
-                dz = a.z - b.z;
-                cx = b.x - cam[0];
-                cy = b.y - cam[1];
-                cz = b.z - cam[2];
+                dx = cur.x - next.x;
+                dy = cur.y - next.y;
+                dz = cur.z - next.z;
+                cx = next.x - cam[0];
+                cy = next.y - cam[1];
+                cz = next.z - cam[2];
                 nx = dy * cz - cy * dz;
                 ny = dz * cx - cz * dx;
                 nz = dx * cy - cx * dy;
-                len = nx * nx + ny * ny + nz * nz;
-                if (len == 0.0f) {
+                lenSq = nx * nx + ny * ny + nz * nz;
+                if (lenSq == 0.0f) {
                     nx = 0.0f;
                     ny = 0.0f;
                     nz = 0.0f;
                 } else {
-                    scaleB = points[j].width / sqrtf(len);
-                    nx = nx * scaleB;
-                    ny = ny * scaleB;
-                    nz = nz * scaleB;
+                    nextScale = points[j].width / sqrtf(lenSq);
+                    nx = nx * nextScale;
+                    ny = ny * nextScale;
+                    nz = nz * nextScale;
                 }
-                vtx->v.ob[0] = (s16)(b.x + nx);
-                vtx->v.ob[1] = (s16)(b.y + ny);
-                vtx->v.ob[2] = (s16)(b.z + nz);
+                vtx->v.ob[0] = (s16)(next.x + nx);
+                vtx->v.ob[1] = (s16)(next.y + ny);
+                vtx->v.ob[2] = (s16)(next.z + nz);
                 vtx->v.tc[0] = points[j].texS << 6;
                 vtx->v.tc[1] = 0x43C0;
                 vtx->v.cn[0] = 0xFF;
@@ -468,9 +473,9 @@ lbl1:
                 vtx->v.cn[3] = alpha;
                 vtx->v.flag = 0;
                 vtx++;
-                vtx->v.ob[0] = (s16)(b.x - nx);
-                vtx->v.ob[1] = (s16)(b.y - ny);
-                vtx->v.ob[2] = (s16)(b.z - nz);
+                vtx->v.ob[0] = (s16)(next.x - nx);
+                vtx->v.ob[1] = (s16)(next.y - ny);
+                vtx->v.ob[2] = (s16)(next.z - nz);
                 vtx->v.tc[0] = points[j].texS << 6;
                 vtx->v.tc[1] = 0x4000;
                 vtx->v.cn[0] = 0xFF;
@@ -482,7 +487,7 @@ lbl1:
                 gSPVertex(gfx++, vtx - 4, 4, 0);
                 gSP1Triangle(gfx++, 0, 1, 2, 0);
                 gSP1Triangle(gfx++, 1, 3, 2, 0);
-                if (prev < level) {
+                if (prevTexS < texS) {
                     memcpy(vtx, vtx - 2, 2 * sizeof(Vtx));
                     vtx[-2].v.tc[0] -= 0x4000;
                     vtx++;
@@ -494,11 +499,11 @@ lbl1:
                 if (j < 0) {
                     j = trail->capacity - 1;
                 }
-                prev = level;
-                a = points[i].pos;
-                b = points[j].pos;
+                prevTexS = texS;
+                cur = points[i].pos;
+                next = points[j].pos;
                 alpha = (points[j].alpha * state->alpha) >> 8;
-                level = points[j].texS;
+                texS = points[j].texS;
             } while (i != trail->tail);
         }
     }
@@ -617,6 +622,7 @@ void func_150B5088(Trail *trail) {
     } while (state->burstAccum > 1.0f);
 }
 
+/* Message handler: message 5 stops the trail. */
 void func_150B538C(Trail *trail, s32 arg1, u8 msg) {
     if (msg == 5) {
         func_150B5060(trail);
