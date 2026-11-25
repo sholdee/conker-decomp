@@ -110,7 +110,7 @@ extern s32 *D_800DBF94;
 
 // D_800DBE5C points at the world mesh's per-triangle materials, or is NULL.
 // World-mesh triangles are 12 bytes (three vertex offsets) from D_800DBE3C on.
-#define WORLD_TRI_INDEX(tri) (((s32)(tri) - D_800DBE3C) / 12)
+#define WORLD_TRI_INDEX(tri) (((s32)(tri) - (s32)D_800DBE3C) / 12)
 
 #define PROBE_WORLD 0
 #define PROBE_PROP 2
@@ -338,9 +338,9 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
                     *outFloorY = noFloor;
                     floorVtxBase = 0;
                     if (outTri != NULL) {
-                        *outTri = D_800DBE3C;
+                        *outTri = (s32)D_800DBE3C;
                     }
-                    floorTri = D_800DBE3C;
+                    floorTri = (s32)D_800DBE3C;
                 }
                 triIndex = WORLD_TRI_INDEX(floorTri);
                 if (type == PROBE_WORLD && outFlags != NULL) {
@@ -410,7 +410,7 @@ void func_1510E950(s32 *outTri, s16 (*outVerts)[3], s16 (*outPropVerts)[3], f32 
         }
     }
     if (floorTri != 0 && outVerts != NULL) {
-        extern s32 D_800DBE3C; // matching: a declaration here keeps IDO from using beqzl on this test
+        extern MeshTri *D_800DBE3C; // matching: a declaration here keeps IDO from using beqzl on this test
         for (i = 0; i < 3; i++) {
             vtx = (s16 *)(((s32 *)floorTri)[i] + floorVtxBase);
             outVerts[i][0] = vtx[0];

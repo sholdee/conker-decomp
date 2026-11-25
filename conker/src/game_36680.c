@@ -1003,11 +1003,9 @@ void func_1500BEC0(void) {
             if (packed & 0xF0000) {
                 slot = ((packed >> 16) & 0xF) - 1;
                 kind = (packed >> 20) & 7;
-                // matching: D_800DBE3C (s32) holds the address of the 12-byte triangles (3 vertex
-                // pointers each); indexing it as a typed array swaps the operands of an addu
                 D_800DDD20 = D_8008CEB8[D_8008CF00[D_800DDC80[slot]][kind].emitter].emit(
                     D_8008CF00[D_800DDC80[slot]][kind].count, kind, slot,
-                    ((packed >> 5) & 3) ^ 3, D_800DDD20, (s16 **)(D_800DBE3C + i * 12));
+                    ((packed >> 5) & 3) ^ 3, D_800DDD20, (s16 **)&D_800DBE3C[i]);
                 D_800BE478[slot]++;
             }
         }

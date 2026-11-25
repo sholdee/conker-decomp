@@ -3660,6 +3660,13 @@ typedef struct AllocatorFreeBlock {
     /* 0x10 */ struct AllocatorFreeBlock *prevFree;
 } AllocatorFreeBlock;
 
+/* One 12-byte entry of the world-mesh triangle table D_800DBE3C (built by func_15000F04 in game_2DF70):
+ * the triangle's three vertices. Collision code reads the same words as offsets from a vertex base,
+ * which is 0 for the static world mesh. */
+typedef struct MeshTri {
+    /* 0x0 */ Vtx *verts[3];
+} MeshTri;
+
 /* A ground-probe candidate hit (func_150A3A70 / func_150A43E0 fill the D_800D3300 array with these). */
 typedef struct GroundCandidate {
     /* 0x0 */ s32 height;  // 24.8 fixed point

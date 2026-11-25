@@ -16,11 +16,6 @@ typedef struct QuadNode {
     /* 0xC */ s16 child;    // first of four children (0: leaf; its triangle stream follows the node)
 } QuadNode;
 
-// One entry of the triangle table D_800DBE3C: the triangle's three vertices.
-typedef struct MeshTri {
-    Vtx *verts[3];
-} MeshTri;
-
 // A triangle's vertex positions, passed by value to the box test func_15049260.
 typedef struct Tri3f {
     Vec3f pts[3];
@@ -413,7 +408,7 @@ void func_15001460(Gfx *dl) {
                 }
             }
             for (j = 0; j < 3; j++) {
-                ((MeshTri *)D_800DBE3C)[count].verts[j] = verts[tris[t][j]];
+                D_800DBE3C[count].verts[j] = verts[tris[t][j]];
             }
             D_800DBE40[count].minx = min[0];
             D_800DBE40[count].maxx = max[0];
@@ -661,7 +656,7 @@ void func_15002008(s32 minX, s32 maxX, s32 minZ, s32 maxZ, u16 *triList) {
 
     for (i = 1; i <= count; i++) {
         index = triList[i];
-        tri = &((MeshTri *)D_800DBE3C)[index];
+        tri = &((MeshTri *)D_800DBE3C)[index]; // matching: the no-op cast keeps IDO's addu operand order
 
         for (j = 0; j < 3; j++) {
             if ((u32)tri->verts[j] > 0x80000000) {
@@ -726,7 +721,7 @@ int func_15002248(s32 minX, s32 maxX, s32 minZ, s32 maxZ, s32 *minY, s32 *maxY, 
 
     for (i = 1; i < total; i++) {
         index = triList[i];
-        tri = &((MeshTri *)D_800DBE3C)[index];
+        tri = &((MeshTri *)D_800DBE3C)[index]; // matching: the no-op cast keeps IDO's addu operand order
 
         for (j = 0; j < 3; j++) {
             if ((u32)tri->verts[j] > 0x80000000) {

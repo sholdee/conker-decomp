@@ -113,7 +113,7 @@ void func_15174BF0(s32 count, s32 group, s32 x, s32 y, s32 z, s32 player,
             actor->flags |= 0x80;
             actor->groundHeight = func_1510F8D8(actorX, y, actorZ, &surface);
             if (surface != 0) {
-                surfaceIndex = (surface - D_800DBE3C) / 12;
+                surfaceIndex = (surface - (s32)D_800DBE3C) / 12;
                 surfaceFlags = D_800DBE5C[surfaceIndex];
             } else {
                 surfaceFlags = 0;
@@ -323,7 +323,7 @@ void func_15175390(s32 count, s32 group, s32 x, s32 y, s32 z, s32 maxRadius,
             actor->flags |= 0x80;
             // matching: reusing ringWidth/onGround here keeps the original stack frame size
             if (surface != 0) {
-                ringWidth = (surface - D_800DBE3C) / 12;
+                ringWidth = (surface - (s32)D_800DBE3C) / 12;
                 onGround = D_800DBE5C[ringWidth];
             } else {
                 onGround = 0;
@@ -515,7 +515,7 @@ void func_15175958(SwarmActor *actor) {
     if (actor->flags & 0x80) {
         actor->groundHeight = func_1510F8D8(actor->x, actor->y, actor->z, &surface);
         if (surface != 0) {
-            surfaceIndex = (surface - D_800DBE3C) / 12;
+            surfaceIndex = (surface - (s32)D_800DBE3C) / 12;
             surfaceFlags = D_800DBE5C[surfaceIndex];
         } else {
             surfaceFlags = 0;

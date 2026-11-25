@@ -74,7 +74,7 @@ void func_150E42F8(s32 count) {
         z = func_150ADA20() % 500 + centerZ;
         y = func_1510F8D8(x, y, z, &surface);
         if (noHit != y && surface != 0) {
-            idx = (surface - D_800DBE3C) / 12;
+            idx = (surface - (s32)D_800DBE3C) / 12;
             if (idx >= 0 && idx < D_800DBE4C) {
                 material = func_1510F8CC(D_800DBE5C[idx]);
                 if (material != 0) {
@@ -275,7 +275,7 @@ void func_150E4928(WorldObject *obj) {
         }
         if (found) {
             if (obj->materials != NULL) {
-                i = ((s32)tri - D_800DBE3C) / 12;
+                i = ((s32)tri - (s32)D_800DBE3C) / 12;
                 material = obj->materials[i - obj->firstTri];
             } else {
                 material = obj->material;

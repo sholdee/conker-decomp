@@ -261,7 +261,7 @@ void func_150E1D14(Game10EF60Effect *effect) {
                             effect->target_y = rayY;
                             effect->target_z = rayZ;
                             stopDist = 1.0f;
-                            i = (hitTri - D_800DBE3C) / 12;
+                            i = (hitTri - (u32)D_800DBE3C) / 12;
                             if (i >= 0 && i < D_800DBE4C && D_800DBE5C != NULL) {
                                 impact = func_1510F8CC(D_800DBE5C[i]);
                             }

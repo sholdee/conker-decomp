@@ -685,7 +685,7 @@ extern s32 func_1510F720(s32, s32, s32, u8 **);
 extern ShadowVtx *func_150A5B90(u32 *, ShadowVtx *, f32 *, ShadowVtx *);
 extern u32 *D_800D3694;
 extern void func_1510F800(s32);
-extern s32 D_800D3690;
+extern MeshTri *D_800D3690;
 extern s32 D_800DF0E8;
 extern s32 D_800DF0EC;
 extern s32 D_800DF0F0;

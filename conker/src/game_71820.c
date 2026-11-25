@@ -1,9 +1,6 @@
 #include <ultra64.h>
-// The headers declare D_800DBE3C with a placeholder type; this file redeclares it with its real one.
 #include "functions.h"
-#define D_800DBE3C D_800DBE3C_hdr
 #include "variables.h"
-#undef D_800DBE3C
 
 /* A TriggerNode with a box volume (func_150448D0). */
 typedef struct TriggerVolume {
@@ -359,7 +356,6 @@ s32 func_150A43E0(s32, s32, s32, void *);
 void func_150A44F0(s32, void *, s32);
 s32 func_150A6500(s16, s16, s32 *, u16);
 s32 func_150A3FC4(f32, f32, s32, CollisionTri *, f32 *);
-extern u8 *D_800DBE3C;
 extern u8 D_800D37E0[];
 extern u8 D_800D3830[];
 extern f32 D_800DBE68;
@@ -405,7 +401,7 @@ s32 func_15044ED0(Vec3f *pos, f32 top, CollisionHit *hit) {
             hit->tri.v[j].z = vtx->v.ob[2];
         }
         {
-            s32 triangle = ((u8 *)candidate->tri - D_800DBE3C) / 12;
+            s32 triangle = (MeshTri *)candidate->tri - D_800DBE3C;
             hit->material = D_800DBE5C[triangle];
         }
         hit->flags |= 5;
@@ -463,7 +459,7 @@ s32 func_150450CC(Vec3f *pos, f32 bottom, CollisionHit *hit) {
             hit->tri.v[j].z = vtx->v.ob[2];
         }
         if (D_800DBE5C != NULL) {
-            s32 triangle = ((u8 *)candidate->tri - D_800DBE3C) / 12;
+            s32 triangle = (MeshTri *)candidate->tri - D_800DBE3C;
             hit->material = D_800DBE5C[triangle];
         } else {
             hit->material = 0;
@@ -671,7 +667,7 @@ s32 func_15045880(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->firstTri;
+            s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
             hit->material = hit->surface->material;
@@ -735,7 +731,7 @@ s32 func_15045AE4(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->firstTri;
+            s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
             hit->material = hit->surface->material;
@@ -799,7 +795,7 @@ s32 func_15045D48(Vec3f *pos, f32 top, s32 *set, CollisionHit *hit) {
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->firstTri;
+            s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
             hit->material = hit->surface->material;
@@ -858,7 +854,7 @@ s32 func_15045F8C(Vec3f *pos, f32 bottom, s32 *set, CollisionHit *hit) {
         hit->surface = &D_800DBEF4[surface];
         materials = hit->surface->materials;
         if (materials != NULL) {
-            s32 triangle = ((u8 *)vertices - D_800DBE3C) / 12 - hit->surface->firstTri;
+            s32 triangle = ((MeshTri *)vertices - D_800DBE3C) - hit->surface->firstTri;
             hit->material = materials[triangle];
         } else {
             hit->material = hit->surface->material;

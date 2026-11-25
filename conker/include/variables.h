@@ -1195,7 +1195,7 @@ extern u16 D_800DBE32;
 extern u16 D_800DBE34;
 extern u16 D_800DBE36;
 extern s32 D_800DBE38;
-extern s32 D_800DBE3C;
+extern MeshTri *D_800DBE3C;
 extern s32 D_800DBE4C;
 extern s32 D_800DBE50;
 extern u32 *D_800DBE5C; // per world-mesh triangle: material / surface flags
