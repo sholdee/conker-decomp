@@ -704,50 +704,8 @@ void func_15167E0C(Particle *p) {
         func_1516972C((struct102 *)p);
     }
 }
-typedef struct {
-    s32 unk0;
-    u8 pad4[0x6];
-    u8 unkA;
-} Tex15168118;
-
-typedef struct {
-    u8 pad0[0x10];
-    Tex15168118 *unk10;
-    s32 unk14;
-    s32 unk18;
-    s16 unk1C;
-    s16 pad1E;
-    s16 unk20;
-    s16 unk22;
-    s16 unk24;
-    u8 pad26[0xE];
-    s16 unk34;
-    s16 unk36;
-    u8 pad38[0x4];
-    u8 unk3C;
-    u8 unk3D;
-    u8 unk3E;
-    u8 unk3F;
-    u8 unk40;
-    u8 unk41;
-    u8 unk42;
-    u8 pad43;
-    u16 unk44;
-} Obj15168118;
-
-typedef struct {
-    s16 x;
-    s16 y;
-    s16 z;
-    s16 unk6;
-    s16 unk8;
-    u8 unkA;
-    u8 padB[2];
-    u8 unkD;
-} Pos15168118;
-
-extern Tex15168118 D_800907FC;
-extern Tex15168118 D_8009053C;
+extern SpriteAnim D_800907FC;
+extern SpriteAnim D_8009053C;
 Gfx *func_15142B7C(Gfx *gfx, s32 arg1, s32 arg2);
 Gfx *func_15142C10(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5);
 Gfx *func_15142CF0(Gfx *gfx, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 *arg7);
@@ -756,48 +714,52 @@ Gfx *func_1513F4E4(Gfx *gdl, u8 arg1, u8 *arg2);
 extern s32 D_800D2C9C;
 s32 func_15095760(Gfx *arg0, void *arg1);
 
-s32 func_15168118(Gfx *arg0, Obj15168118 *arg1, s16 arg2) {
-    s32 idx;
-    Pos15168118 pos;
-    s32 pad1[2];
+/* Particle draw: sets render/combine modes and colours, then the current frame as a billboard. */
+s32 func_15168118(Gfx *gfx, Particle *p, s16 viewIndex) {
+    s32 view;
+    SpriteParams params;
+    s32 pad1[2]; // matching: stack layout of the target frame
     u8 update;
-    s32 pad2[3];
+    s32 pad2[3]; // matching: stack layout of the target frame
     f32 angle;
-    s32 v;
-    s32 base;
-    s32 r, g, b;
-    Tex15168118 *t;
-    Tex15168118 *e;
+    s32 size;
+    s32 unused; // matching: an unused local the target allocates
+    s32 c0, c1, c2; /* colour components, reused for prim and env */
+    SpriteAnim *anim;
+    SpriteAnim *white;
 
-    pos.unkD = 0;
-    if (arg1->unk44 & 4) {
-        pos.unkD = 1;
+    params.flip = 0;
+    if (p->flags & PARTICLE_FLIP_S) {
+        params.flip = 1;
     }
-    if (arg1->unk44 & 8) {
-        pos.unkD |= 2;
+    if (p->flags & PARTICLE_FLIP_T) {
+        params.flip |= 2;
     }
-    if ((u32)arg1->unk10->unk0 < 0x10000000) {
+    // matching: two empty tests of the same condition steer IDO's scheduling of the texture load
+    if ((u32)p->anim->frames < 0x10000000) {
     }
-    if ((u32)arg1->unk10->unk0 < 0x10000000) {
+    if ((u32)p->anim->frames < 0x10000000) {
     }
     update = 1;
     {
-    s32 tex;
-    t = arg1->unk10;
-    if ((u32)t->unk0 < 0x10000000) {
-        tex = t->unk0;
-    } else {
-        tex = ((s32 *)t->unk0)[arg1->unk1C >> 8];
+        s32 texture;
+
+        anim = p->anim;
+        if ((u32)anim->frames < 0x10000000) {
+            texture = (s32)anim->frames;
+        } else {
+            texture = anim->frames[p->frame >> 8];
+        }
+        gfx = func_15142E24(gfx, (s32)anim, p->frame << 8, 2, 0x100, 0x100, texture, 5, (s32)&params, &update, 3);
     }
-    arg0 = func_15142E24(arg0, (s32)t, arg1->unk1C << 8, 2, 0x100, 0x100, tex, 5, (s32)&pos, &update, 3);
-    }
-    idx = arg2;
-    pos.x = arg1->unk20;
-    pos.y = arg1->unk22;
-    pos.z = arg1->unk24;
-    v = arg1->unk34;
-    if (v < 0) {
-        angle = fabsf(D_800DBFF0[idx].unk380 + (arg1->unk18 & 0xFF) * 1.40625f);
+    view = viewIndex;
+    params.x = p->x;
+    params.y = p->y;
+    params.z = p->z;
+    size = p->width;
+    if (size < 0) {
+        /* 0.0111 = 1/90: fold the view angle into 0..90 degrees */
+        angle = fabsf(D_800DBFF0[view].unk380 + (p->unk18 & 0xFF) * 1.40625f);
         while (angle >= 360.0f) {
             angle -= 360.0f;
         }
@@ -807,61 +769,73 @@ s32 func_15168118(Gfx *arg0, Obj15168118 *arg1, s16 arg2) {
         if (angle >= 90.0f) {
             angle = 180.0f - angle;
         }
-        v = v * angle * -0.01111111138f;
-        if (v < 0x400) {
-            v = 0x400;
+        size = size * angle * -0.01111111138f;
+        if (size < 0x400) {
+            size = 0x400;
         }
     }
-    pos.unk6 = v;
-    v = arg1->unk36;
-    if (v < 0) {
-        idx = (arg1->unk34 < 0) ? 0 : arg1->unk34;
-        v = fabsf(D_800DBFF0[arg2].unk388) * (idx + v) * 0.01111111138f - v;
+    params.unk6 = size;
+    size = p->height;
+    if (size < 0) {
+        view = (p->width < 0) ? 0 : p->width;
+        size = fabsf(D_800DBFF0[viewIndex].unk388) * (view + size) * 0.01111111138f - size;
     }
-    pos.unk8 = v;
-    if (arg1->unk44 & 0x100) {
-        u8 mode;
-        u8 combine;
-        s32 pad3[2];
+    params.unk8 = size;
+    if (p->flags & PARTICLE_CUSTOM_MODE) {
+        u8 renderMode;
+        u8 combineMode;
+        s32 pad3[2]; // matching: stack layout of the target frame
 
-        mode = arg1->unk14 & 0xFF;
-        combine = (arg1->unk14 & 0xFFFF0000) >> 16;
-        arg0 = func_15142B7C(arg0, 5, 0);
-        arg0 = func_1513F4E4(arg0, combine, &update);
-        arg0 = func_15142FBC(arg0, G_PM_NPRIMITIVE | ((arg1->unk44 & 0x200) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
-                            D_800A4AC8[mode].unk0 | D_800A4AC8[mode].unk4 | 4, &update);
-    } else if (arg1->unk10->unkA != 5) {
-        arg0 = func_1513F4E4(arg0, 0xD, &update);
-        arg0 = func_15142FBC(arg0, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        renderMode = p->unk14 & 0xFF;
+        combineMode = (p->unk14 & 0xFFFF0000) >> 16;
+        gfx = func_15142B7C(gfx, 5, 0);
+        gfx = func_1513F4E4(gfx, combineMode, &update);
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | ((p->flags & PARTICLE_2CYCLE) ? G_CYC_2CYCLE : G_CYC_1CYCLE) | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+                            D_800A4AC8[renderMode].unk0 | D_800A4AC8[renderMode].unk4 | 4, &update);
+    } else if (p->anim->unkA != 5) {
+        gfx = func_1513F4E4(gfx, 0xD, &update);
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
-    } else if (arg1->unk10->unkA == 3) {
-        arg0 = func_1513F4E4(arg0, 0xE, &update);
-        arg0 = func_15142FBC(arg0, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+    } else if (p->anim->unkA == 3) {
+        gfx = func_1513F4E4(gfx, 0xE, &update);
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[3].unk0 | D_800A4AC8[3].unk4 | 4, &update);
-    } else if (arg1->unk44 & 0x10) {
-        arg0 = func_1513F4E4(arg0, 0xD, &update);
-        arg0 = func_15142FBC(arg0, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+    } else if (p->flags & 0x10) {
+        gfx = func_1513F4E4(gfx, 0xD, &update);
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[0x12].unk0 | D_800A4AC8[0x12].unk4 | 4, &update);
     } else {
-        arg0 = func_1513F4E4(arg0, 0xF, &update);
-        arg0 = func_15142FBC(arg0, G_PM_NPRIMITIVE | G_CYC_2CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+        gfx = func_1513F4E4(gfx, 0xF, &update);
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_2CYCLE | G_TP_NONE | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
                             D_800A4AC8[0x11].unk0 | D_800A4AC8[0x11].unk4 | 4, &update);
     }
-    r = arg1->unk3D;
-    g = arg1->unk3E;
-    b = arg1->unk3F;
-    arg0 = func_15142CF0(arg0, 1, 0, arg1->unk3C, r, g, b, &update);
-    if (arg1->unk44 & 1) {
-        r = arg1->unk40;
-        g = arg1->unk41;
-        b = arg1->unk42;
+    c0 = p->primG;
+    c1 = p->primB;
+    c2 = p->primA;
+    gfx = func_15142CF0(gfx, 1, 0, p->primR, c0, c1, c2, &update);
+    if (p->flags & PARTICLE_ENV_COLOR) {
+        c0 = p->envR;
+        c1 = p->envG;
+        c2 = p->envB;
     } else {
-        t = arg1->unk10;
-        e = &D_8009053C;
-        if (arg1->unk10 == &D_800907FC) { r = 0x80; g = 0x80; b = 0xFF; } else if (e == t) { r = 0xFF; g = 0xFF; b = 0xFF; } else { r = 0; g = 0; b = 0; }
+        anim = p->anim;
+        white = &D_8009053C;
+        if (p->anim == &D_800907FC) {
+            c0 = 0x80;
+            c1 = 0x80;
+            c2 = 0xFF;
+        } else if (white == anim) {
+            c0 = 0xFF;
+            c1 = 0xFF;
+            c2 = 0xFF;
+        } else {
+            c0 = 0;
+            c1 = 0;
+            c2 = 0;
+        }
     }
-    arg0 = func_15142C10(arg0, r, g, b, 0, &update);
-    return func_15095760(arg0, (void *)&pos);
+    gfx = func_15142C10(gfx, c0, c1, c2, 0, &update);
+    return func_15095760(gfx, &params);
 }
 typedef struct {
     Vtx vtx[8];
