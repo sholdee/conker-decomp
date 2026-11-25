@@ -405,8 +405,6 @@ typedef struct {
     /* 0x48 */ s32 unk48;
 } Params15153F18;
 
-extern f32 D_800A5470;
-extern f32 D_800A5474;
 
 void func_15153F18(Params15153F18 *params, struct17 *pos, s32, s32, s32);
 
@@ -422,8 +420,8 @@ void func_15142180(u8 kind, struct17 *pos, s32 arg2, f32 scaleA, f32 scaleB) {
     params.unk6 = 10;
     params.unk14 = 2.5f * scaleA;
     params.unk18 = (1.0f + 1.0f) * scaleA; // matching: folds to 2.0f but avoids IDO turning 2.0f * x into x + x
-    params.unk1C = D_800A5470;
-    params.unk20 = D_800A5474;
+    params.unk1C = 0.1080000028f;
+    params.unk20 = 0.2050000131f;
     params.unk24 = 3.0f * scaleB;
     params.unk28 = 3.5f * scaleB;
     params.unk0 = 0;
