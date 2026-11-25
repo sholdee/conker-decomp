@@ -132,7 +132,10 @@ Gfx *func_151E86E4(Gfx *gfx, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s3
 
 
 
-extern u8 D_800ABA90[][4];
+/* RGBA colour of each team: red, blue, green, yellow. */
+static const u8 D_800ABA90[4][4] = {
+    { 255, 0, 0, 255 }, { 0, 0, 255, 255 }, { 0, 255, 0, 255 }, { 255, 255, 0, 255 },
+};
 extern u8 D_D10;
 extern u8 D_D14;
 extern u8 D_D16;
@@ -449,7 +452,7 @@ Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh
             if (inactiveTeams & (1 << i)) {
                 gDPPipeSync(gfx++);
                 {
-                    u8 *color = D_800ABA90[i];
+                    const u8 *color = D_800ABA90[i];
                     gDPSetEnvColor(gfx++, color[0], color[1], color[2], 0xFF);
                 }
                 gfx = func_151E86E4(gfx, (x - 8) << 2, y - 0x18, (x + 8) << 2, y + 0x28, 0, 0x600, 0x280, 0x400, 0x400);
@@ -462,19 +465,10 @@ Gfx *func_151E966C(Gfx *gfx, s32 y, s32 extraPipTeam, s8 loadTexture, u8 refresh
 }
 
 
-extern u8 D_800ABAA8;
-extern u8 D_800ABAAC;
-extern u8 D_800ABAB0;
-extern u8 D_800ABAB8;
-extern u8 D_800ABABC;
-extern u8 D_800ABAC0;
-extern u8 D_800ABAC4;
 extern u8 D_843;
 extern u8 D_888;
 
 
-extern u8 D_800ABAA0;
-extern u8 D_800ABAA4;
 
 /* Draws the two team icons with each team's total score beside them. */
 Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
@@ -562,8 +556,8 @@ Gfx *func_151E9D18(Gfx *gfx, s32 rowY, s32 refresh) {
     gfx = func_151E86E4(gfx, 0x108, y, 0x148, y + 0x40, 0, leftIconS, iconT, 0x400, 0x400);
     gfx = func_151E86E4(gfx, 0x318, y, 0x358, y + 0x40, 0, 0, iconT + rightIconT, 0x400, 0x400);
     func_1504332C(0xC0, 0xC0, 0xC0, 0xFF);
-    func_15042D94(0x4F, (y >> 2) + 1, 0x80, &D_800ABAA0, team1Total);
-    func_15042D94(0xD3, (y >> 2) + 1, 0x80, &D_800ABAA4, team0Total);
+    func_15042D94(0x4F, (y >> 2) + 1, 0x80, " %d", team1Total);
+    func_15042D94(0xD3, (y >> 2) + 1, 0x80, " %d", team0Total);
     return gfx;
 }
 
@@ -741,25 +735,25 @@ Gfx *func_151EA15C(Gfx *gfx, s32 topY, s32 alpha, s32 live) {
             if (nameIndex < 0) {
                 nameIndex = 0;
             }
-            func_15042D94(x + 0x3C, y, 0x81, &D_800ABAA8, D_800E0BD8[nameIndex + nameBase]);
+            func_15042D94(x + 0x3C, y, 0x81, "%s", D_800E0BD8[nameIndex + nameBase]);
             if (D_8008FDC0 & 1) {
-                func_15042D94(xbase + 0x54, y, 0x81, &D_800ABAAC, D_800E0AA0[team]);
+                func_15042D94(xbase + 0x54, y, 0x81, "%d", D_800E0AA0[team]);
                 x = xbase + 0x1E;
             }
             x += 0x58;
-            func_15042D94(x, y, 0x81, &D_800ABAB0, percent);
+            func_15042D94(x, y, 0x81, "%d%%", percent);
             x += 0x1A;
-            func_15042D94(x, y, 0x81, &D_800ABAB8, D_8008FDD4->score[i]);
+            func_15042D94(x, y, 0x81, "%d", D_8008FDD4->score[i]);
             x += 0x1E;
             if (D_8008FDD4->selection != 1) {
                 if ((D_80087270[i] == 9) || ((i == 0) && (D_8008FD7C == 9))) {
-                    func_15042D94(x, y, 0x81, &D_800ABABC);
+                    func_15042D94(x, y, 0x81, "X");
                 } else {
-                    func_15042D94(x, y, 0x81, &D_800ABAC0, D_8008FDD4->stats[i].unk4);
+                    func_15042D94(x, y, 0x81, "%d", D_8008FDD4->stats[i].unk4);
                 }
                 x += 0x1E;
             }
-            func_15042D94(x, y, 0x81, &D_800ABAC4, D_800E0AD0[i]);
+            func_15042D94(x, y, 0x81, "%d", D_800E0AD0[i]);
             y += 0xF;
         }
     }
@@ -1927,7 +1921,6 @@ void func_151EDF4C(void) {
     }
 }
 
-extern u8 D_800ABAD4;
 extern void func_150428D4(u8 *, s32 *, s32 *, s32 *);
 extern void func_150A7D00(void *, f32, f32, f32);
 extern ObjScriptCmd *func_1507BB28(s32, s32);
@@ -2173,7 +2166,7 @@ Gfx *func_151EE184(Gfx *gfx) {
     if ((D_800BE9AC & 0x1F) >= 10) {
         width = i + width + 2;
         func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
-        func_15042D94(width, 0xB4, 0x80, &D_800ABAD4);
+        func_15042D94(width, 0xB4, 0x80, "-");
     }
     return gfx;
 }
