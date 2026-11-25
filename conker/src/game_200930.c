@@ -626,8 +626,6 @@ typedef struct {
     /* 0x59 */ u8 unk59;
 } S151D4DAC;
 
-void func_151C2050(Actor *, f32 *, f32 *, s32, f32);
-
 /* Applies a hit from attacker to victim travelling along dir. */
 void func_151D4DAC(Actor *victim, Actor *attacker, f32 *arg2, f32 *arg3, S151D4DAC *hit, s32 flags, f32 *dir, u8 arg7, s32 arg8) {
     s32 alreadyDead;

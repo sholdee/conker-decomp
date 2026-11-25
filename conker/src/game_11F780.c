@@ -7,8 +7,6 @@ s32 func_1509BE40(s32, s32, s32, s32);
 
 static const f32 D_800A1920[3] = { 0.0f, -45.0f, 0.0f };
 
-extern void func_151C329C(f32 *pos, s32, s32);
-
 /* Transforms the fixed point D_800A1920 by the bone selected by `slot` (3-8); returns 0 for other slots. */
 s32 func_150F22D0(f32 *out, Actor *owner, u8 slot) {
     s32 bone;

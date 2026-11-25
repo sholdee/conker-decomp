@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 /* Per-side (0, 1) tables: byte offset of the side's joint matrix in Actor.ob_matrix_ptr, and model-space points
  * that func_15145EA4 transforms by it. */
@@ -11,16 +10,11 @@ extern Vec3f D_800AAB20[];
 extern Vec3f D_800AAB38[];
 extern Vec3f D_800AAB50[];
 
-s32 func_151C229C(Vec3f *pos, Vec3f *dir, Vec3f *arg2, Vec3f *arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7,
-                  f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15,
-                  s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24,
-                  s32 arg25, s32 arg26);
 void func_151D5174(Actor *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f **,
                    Vec3f **, Vec3f *);
 void func_151D5148(Actor *arg0);
 void func_151D3F14(Vec3f *arg0, u8 arg1, s32 arg2);
 void func_151D4408(Vec3f *, Vec3f *, s32, Actor *, f32, u8, s32);
-void func_151C6D70(Actor *, u8, Vec3f *, s16, u8, s32);
 
 /* Fires this side's shot from its joint points (or, without a skeleton, from beside the object): posts
  * a func_151D8868 event for its camera, side effects, then func_151C229C along `aim` (from the joints when arg2). */
@@ -146,8 +140,6 @@ s32 func_151C62D0(Actor *arg0, u8 side, u8 arg2, ModelAttachment *attachment, s1
                          (func_150ADA20() % 156U) + 100, arg0, arg2 ? 0 : 1, arg2 ? 0 : 1, arg2 ? 0 : 1, 8, arg2 ? 0 : 1, 1, 0, 0x1A, 0.0f, 0xFF,
                          -1, 0, arg5, arg6);
 }
-
-void func_151C69CC(Actor *arg0, Vec3f *out, u8 side);
 
 /* Handler-table entry: the side-0 point of func_151C69CC. */
 void func_151C6974(Actor *arg0, s32 arg1, Vec3f *out) {
@@ -337,15 +329,6 @@ void func_151C6EA0(Actor *owner, u8 arg1, s32 arg2) {
         memcpy(&effect->unk170, &state, sizeof(state));
     }
 }
-
-typedef struct {
-    u8 pad0[0x60];
-    s32 unk60;
-    u8 pad64[0x70 - 0x64];
-    u8 unk70;
-    u8 pad71[0x7C - 0x71];
-    Actor *unk7C;
-} Func151C7038Arg;
 
 /* Mirrors the owner object's state (type 0xE9 only): flag 0x20000 and its animation speed scaled to 0-255. */
 s32 func_151C7038(Func151C7038Arg *arg0) {

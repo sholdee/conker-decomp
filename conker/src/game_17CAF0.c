@@ -1339,8 +1339,6 @@ s32 func_1515452C(Object15132A4C *object) {
     }
 }
 
-extern void func_151C5F44(Vec3f *, f32 *, f32, f32, s32, s32, f32, s32, void *, u8, s32);
-
 /* Spawns a random number of particles (func_151C5F44), each moving at a random yaw and a pitch from
  * config's range. */
 void func_15154684(ParticleBurst *config, u8 arg1, s32 arg2) {

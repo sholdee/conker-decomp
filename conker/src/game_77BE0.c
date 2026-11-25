@@ -176,8 +176,6 @@ void func_1504A730(void) {
     D_800D35DC = 0;
 }
 
-void func_150ED578(Actor *arg0);
-
 void func_1504ADD0(void) {
     s32 i;
     Actor *obj;

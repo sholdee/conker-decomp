@@ -1,15 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 void func_151D5148(Actor *obj);
 void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
 
-void func_150FFCC8(Actor *obj, Vec3f *position, Vec3f *direction, Vec3f *axis0, Vec3f *axis1);
-void func_150FFD84(Vec3f *position, Vec3f *direction, u8 arg2, s32 arg3);
-void func_150FFB6C(Vec3f *position, Vec3f *origin, Actor *obj, s32 type);
-void func_150FFC3C(Actor *obj);
 void func_15081690(Actor *obj, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, void *arg7, f32 arg8, s32 arg9,
                    s32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
 s32 func_15081E78(Actor *obj, void *arg1, s32 arg2);

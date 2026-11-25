@@ -275,8 +275,6 @@ typedef struct ImpactObj {
     /* 0x110 */ ImpactHit hit;
 } ImpactObj;
 
-void func_151C329C(Vec3f *pos, u8, s32);
-
 /* One-entry variant lists for func_15151D6C, copied from rodata. */
 typedef struct { s32 v[1]; } S32x1;
 typedef struct { f32 v[1]; } F32x1;

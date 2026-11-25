@@ -17,7 +17,6 @@ extern Vec3f D_800A1FE0;
 
 void func_151D3E6C(Actor *obj, Vec3f *arg1, Vec3f *arg2, s32 arg3);
 void func_151D3F14(Vec3f *position, u8 arg1, s32 arg2);
-s32 func_151C229C(Vec3f *arg0, Vec3f *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 arg10, s32 arg11, Actor *arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, s32 arg20, f32 arg21, s32 arg22, s32 arg23, s32 arg24, s32 arg25, s32 arg26);
 
 /* Runs the func_150FE49C effects for `obj`, then spawns a func_151C229C effect from the result. */
 s32 func_150FE320(Actor *obj, u8 arg1, s32 arg2) {

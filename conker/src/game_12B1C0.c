@@ -3,8 +3,6 @@
 #include "variables.h"
 
 
-extern void func_150ED638(Actor *, s32, s32);
-
 void func_150FDD10(s32 arg0) {
     Actor *obj;
 

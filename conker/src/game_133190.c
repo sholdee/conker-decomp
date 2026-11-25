@@ -764,8 +764,6 @@ void func_15107AE0(Vec3f *start, Vec3f *end, Vec3f *ctrl1, Vec3f *ctrl2) {
     ctrl2->z = start->z + dz * 0.6667f;
 }
 
-extern void func_151C329C(void *, s32, s32);
-
 /* Calls func_151C329C at the point on the actor's bounds in direction yaw/pitch. */
 void func_15107B78(Actor *actor, s32 yaw, s32 pitch, s32 arg3, s32 arg4) {
     Vec3f pos;

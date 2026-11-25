@@ -19,9 +19,6 @@ const Vec3f D_800A1C48 = { -124.0f, -8.0f, 28.0f };
 const Vec3f D_800A1C54 = { -170.0f, -8.0f, 28.0f };
 
 void func_151D3F14(Vec3f *pos, u8, s32);
-ModelAttachment *func_150FF288(Actor *);
-s32 func_150FF6E0(Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Actor *, ModelAttachment *);
-void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
 void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
 
 extern LightEffect *func_151602C0(LightEffectHeader *, Vec3i *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
@@ -170,7 +167,6 @@ void func_150F887C(StageObj *obj, StageMsg *msg, u8 type) {
 }
 
 extern void func_15164F0C(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4);
-extern void func_151C329C(Vec3f *pos, s32, s32);
 void func_151DB5D0(s32, Vec3f *pos, Vec3f *vel, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
 
 /*

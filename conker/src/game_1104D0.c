@@ -2,7 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_151C3B0C(s32, f32, f32, f32, f32, s32, s32, s32);
 extern s32 math_distance3D(s32, s32, s32);
 
 /* 18 bytes copied verbatim from an effect into each particle it spawns. */
@@ -228,7 +227,6 @@ typedef struct {
 } HomingSpawnDesc;
 
 extern s32 func_15046C80(Vec3f *, s32, f32, f32 *);
-extern s32 func_151C229C(Vec3f *, void *, s32, s32, s32, HomingSpawnDesc *, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 
 /*
  * Per-frame update of an effect: counts down its lifetime, steps pos toward the target and spawns particles

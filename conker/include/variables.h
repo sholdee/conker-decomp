@@ -515,8 +515,6 @@ extern Vec3f D_800A1B80;
 extern Vec3f D_800A1B8C;
 extern f32 D_800A1FB0;
 extern f32 D_800A1FBC;
-extern const Vec3f D_800A2148;
-extern const Vec3f D_800A2154;
 extern u8  D_800A2CD0[][3];
 
 extern s32 D_800A4AA0; //?
@@ -533,8 +531,6 @@ extern const f32 D_800A6820[24];
 
 
 extern VtxMorphGroup D_800A7230[2]; // vertex morph groups
-extern const Vec3f D_800AAA90; // bone-attachment offset (defined in game_1F2730.c)
-extern const Vec3f D_800AAA9C;
 extern u16 D_800AB140[];
 extern IdList1 D_800AB168; // effect-object kinds (game_1FFF60)
 // game_2062D0.c

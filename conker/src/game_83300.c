@@ -3820,7 +3820,6 @@ void func_1505F188(Actor *actor) {
     actor->floorTri.v[2].y = 0;
     actor->floorTri.v[2].z = 0;
 }
-void func_151C6EA0(Actor *arg0, s32 arg1, s32 arg2);
 /* Player controls for jumping, swimming and the hover (anim 0xE9), from the controller pad. */
 void func_1505F298(Actor *actor, OSContPad *pad) {
     s32 anim;

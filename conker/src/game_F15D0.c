@@ -102,7 +102,6 @@ void func_150C4120(Actor *owner, s16 duration, u8 arg2, s32 arg3) {
 
 extern void func_1504715C(CollisionHit *, Actor *);
 extern s32 func_1515C0F8(Actor *, Vec3f **);
-extern void func_151C36D8(Vec3f *, s32, s32);
 extern void func_151D9014(Vec3f *, Vec3f *, s32, f32, s32, s32, f32, s32, f32, f32, s32, void *, s32, s32, s32, s32);
 const Vec3f D_800A0350[3] = {
     { 0.0f, 16.0f, 0.0f },

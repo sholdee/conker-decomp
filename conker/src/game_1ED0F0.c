@@ -6,7 +6,6 @@
 #include "variables.h"
 #undef func_15144AA8
 f32 func_15144AA8(u8, Camera *);
-#include "effects.h"
 
 /* Fills in the impact particle parameters; fewer particles on busy frames. */
 void func_151BFC40(JetSpray *config, f32 *scale) {
@@ -34,14 +33,8 @@ void func_151BFC40(JetSpray *config, f32 *scale) {
     config->eventFunc = (D_80082FA0 >= 2 || D_8008FD8C >= 8) ? -1 : 0;
 }
 
-void func_151C0418(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151C04F8(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151C05A4(Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151C05F0(Vec3f *pos, u8 fxOwner, s32 fxList);
 void func_1504715C(CollisionHit *, Actor *);
 s32 func_15046C80(Vec3f *, s32, f32, CollisionHit *);
-void func_151C0360(CollisionTri *surface, Vec3f *pos, u8 fxOwner, s32 fxList);
-void func_151C0644(Vec3f *pos, u8 fxOwner, s32 fxList);
 
 /* Bullet hit with no surface: sparks and smoke at pos, plus impact particles thrown back along -dir. */
 void func_151BFDA0(Vec3f *pos, Vec3f *dir, u8 withParticles, u8 fxOwner, s32 fxList) {
@@ -250,26 +243,7 @@ typedef struct Bullet88 {
     /* 0x110 */ s32 unk110;
 } Bullet88;
 
-/* A positional sound; see func_151C110C. */
-typedef struct {
-    /* 0x00 */ s16 unk0;
-    /* 0x02 */ s16 x;
-    /* 0x04 */ s16 y;
-    /* 0x06 */ s16 z;
-    /* 0x08 */ u8 pad8[0x10];
-    /* 0x18 */ Bullet *bullet;
-} SoundEmitter;
-
 s32 func_151D5B6C(Vec3f *, Vec3f *, Actor *, s32, IgnoreList *);
-FollowFx *func_151B8908(Bullet *);
-Bullet88 *func_151B8400(Bullet *);
-void *func_151B8668(Bullet *, u8, s32);
-void func_151C1798(Actor *obj, Vec3f *pos);
-void func_151C1860(Vec3f *pos, u8 fxOwner, s32 fxList);
-s32 func_151C196C(RayHit *ray, Vec3f *start, Vec3f *dir, Vec3f *aimPos, Vec3f *aimDir,
-                  Actor *shooter, IgnoreList *ignore, Vec3f *passPos, f32 *passDist,
-                  CollisionHit *pass, s32 mode);
-s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 arg4, s32 arg5, s16 *arg6);
 
 /* Fires a bullet from shooter (aimed by aimer's view, if given) and spawns its object and effects. */
 void func_151C0698(Actor *shooter, Actor *aimer, IgnoreList *ignore, u8 impactType, u8 fxOwner, s32 fxList) {
@@ -429,10 +403,10 @@ lbl1: // matching: an unused label splits IDO's basic block here (register choic
             header2.y = pos.y;
             header2.z = pos.z;
             bulletState->trail = func_151602C0(&header, &header2, 40, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, fxOwner, fxList);
-            bulletState->follow = func_151B8908(obj);
+            bulletState->follow = (struct FollowFx *)func_151B8908(obj);
             bulletState->sound = func_1000FA64(func_150ADA20() % 3 + 750, pos.x, pos.y, pos.z, 30000, 1000, 500,
                                                (SoundRecordCallback)func_151C110C, obj, 0, 4, 0);
-            bulletState->unk88 = func_151B8400(obj);
+            bulletState->unk88 = (struct Bullet88 *)func_151B8400(obj);
             if (D_80082FA0 < 2 && D_8008FD8C < 4) {
                 bulletState->unk8C = func_151B8668(obj, fxOwner, fxList);
             } else {
@@ -493,7 +467,6 @@ s32 func_151C110C(SoundEmitter *emitter, s32 arg1, void **arg2, s32 arg3, s32 ar
     return 0;
 }
 
-void func_151C1654(Vec3f *pos, Vec3f *dir, Actor *owner, u8 impactType, CollisionTri *surface);
 void func_15081690(Actor *, f32, f32, f32, f32, f32, f32, RayHit *, f32, s32, s32, s32, s32,
                    IgnoreList *, s32);
 s32 func_151ABE40(Vec3f *, CollisionHit *, s32, s32, s32);
@@ -693,9 +666,6 @@ void func_151C1860(Vec3f *pos, u8 fxOwner, s32 fxList) {
 s32 func_151C1940(Actor *obj, Actor *self, IgnoreList *ignore) {
     return func_151C02E4(obj, self, ignore->count, ignore->objs);
 }
-
-void func_151C1D5C(Actor *, Vec3f *, Vec3f *, RayHit *, f32, s32, s32, s32, s8,
-                   IgnoreList *, Vec3f *, f32 *, CollisionHit *, s32);
 
 /*
  * Traces a bullet from start along dir. With an aim view (aimPos/aimDir), first traces the view ray and

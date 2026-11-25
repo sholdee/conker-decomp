@@ -2,7 +2,6 @@
 // matching: callers here use the full s32 return of these, unlike their functions.h prototypes
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern s32 func_1510F8CC(s32);
 extern f32 D_800AAA30; /* 0.1f; ROM 0x24F4F0, just before this file's .rodata slice */
@@ -43,42 +42,11 @@ void func_151C2050(Actor *obj, Vec3f *pos, Vec3f *dir, s32 soundId, f32 distance
     }
 }
 
-/* Projectile state, stored at offset 0x110 of the object func_151C229C spawns. */
-typedef struct Game1EF500TrailExt {
-    /* 0x00 */ u8 flags;
-    /* 0x01 */ u8 pad1[3];
-    /* 0x04 */ Vec3f velocity;
-    /* 0x10 */ Vec3f accel; /* eases toward drift each frame; also the length of the drawn tail */
-    /* 0x1C */ Vec3f drift;
-    /* 0x28 */ RayHit path;
-    /* 0x8C */ f32 remaining; /* distance left before the projectile expires */
-    /* 0x90 */ Actor *owner;
-    /* 0x94 */ u8 ownerId; /* owner->unique_id at spawn */
-    /* 0x95 */ u8 pad95[3];
-    /* 0x98 */ f32 scale;
-    /* 0x9C */ s8 expireHandler; /* index into D_8008FBD0, -1 for none */
-    /* 0x9D */ u8 pad9D;
-    /* 0x9E */ u16 sound;
-    /* 0xA0 */ u8 soundEnabled;
-    /* 0xA1 */ u8 listener; /* index into camera_global_Cameras of the player the sound follows */
-    /* 0xA2 */ u8 padA2[2];
-    /* 0xA4 */ s32 fieldA4;
-    /* 0xA8 */ s8 fieldA8;
-    /* 0xA9 */ u8 padA9[3];
-    /* 0xAC */ s32 handle;
-} Game1EF500TrailExt; /* 0xB0 */
-
 /* TrailExt flags */
 #define TRAIL_HIT_CALLBACK 1    /* call D_800E0940 on expiry */
 #define TRAIL_EXPIRE_HANDLER 2  /* call D_8008FBD0[expireHandler] on expiry */
 #define TRAIL_COLLIDE 4
 #define TRAIL_FLAG_8 8
-
-/* The projectile object (allocated by func_1513D2F0). */
-typedef struct {
-    /* 0x000 */ DefParticleHead head;    /* head.def.unk44: alpha */
-    /* 0x110 */ Game1EF500TrailExt trail;
-} Game1EF500Trail;
 
 /* Expiry handlers, chosen by Game1EF500TrailExt.expireHandler (entry 0 is func_151C2F48). */
 typedef void (*TrailExpireHandler)(Game1EF500Trail *);
@@ -93,15 +61,8 @@ typedef struct {
 } FlybySound;
 
 extern FlybySound D_8008FBE8[];
-void func_151C436C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, s32 steps);
-u8 func_151C43E0(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
-void func_151C4510(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
-s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt);
 void *memcpy(void *, const void *, u32);
 s32 func_151D5B6C(Vec3f *, Vec3f *, Actor *, s8, s32);
-s32 func_151C4B0C(RayHit *arg0, RayHit *arg1, Vec3f *arg2, Vec3f *arg3, f32 *arg4, f32 arg5,
-                  u8 arg6, Vec3f *arg7, Vec3f *arg8, u8 *arg9, u8 arg10, f32 arg11, void *arg12, s8 arg13,
-                  u8 arg14, u8 arg15, s32 arg16, u8 arg17);
 
 /*
  * Spawns a projectile at origin heading along direction (or from altOrigin along altDirection),
@@ -977,11 +938,6 @@ s32 func_151C455C(Game1EF500Trail *trail, Game1EF500TrailExt *ext, f32 dt) {
     }
     return alive;
 }
-
-typedef struct {
-    /* 0x00 */ TimedEffect base;
-    /* 0x28 */ StreamEmitter emitter;
-} Game1EF500TimedOwner;
 
 /* StreamEmitter update: when its timer runs out, starts one ProjectileStream and picks a new random delay. */
 void func_151C4644(Game1EF500TimedOwner *owner) {

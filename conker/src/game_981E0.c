@@ -4,7 +4,14 @@
 // matching: this file was built against a func_10010154 prototype with an unsigned volume
 #define func_10010154 func_10010154_functions_h
 #define func_1505DADC func_1505DADC_header // matching: this file keeps its own declaration of func_1505DADC
+// matching: func_1506FB60 passes the side to these as an int, (cmd - 0x13) & 0xFF; hide the header's prototypes
+#define func_151C6A28 func_151C6A28_hdr
+#define func_151C62D0 func_151C62D0_hdr
 #include "functions.h"
+#undef func_151C6A28
+void func_151C6A28(Actor *, s32, s32, s32);
+#undef func_151C62D0
+s32 func_151C62D0(Actor *, s32, s32, ModelAttachment *, s32, s32, s32);
 #undef func_10010154
 s32 func_10010154(u16 sound, void *obj, u32 volume, s16 nearDistance, u16 farDistance);
 #undef func_10010630
@@ -16,7 +23,6 @@ extern u8 func_1505DADC(Actor *arg0, s16 *arg1, s32 arg2, u8 arg3, s32 arg4); //
 
 extern s32 D_800D187C;
 extern void func_151942E8();
-void func_151C0698(Actor *arg0, Actor *arg1, IgnoreList *arg2, u8 arg3, s32 arg4, s32 arg5);
 
 /* Parameter block for func_151994B8 (CharacterFlamethrowerSetup in game_1C2C60.c). */
 typedef struct Func151994B8Desc {
@@ -198,12 +204,7 @@ void func_1516F1C0(s32, s32, u8, s32);
 void func_1516F2F8(u8, s32, s32, s32, u8, s32);
 void func_151700D8(f32 *, f32, f32, s32, f32, s32, s32, s32, s32, s32);
 s32 func_151F2CDC(void);
-extern void func_151C1860(void *, s32, s32);
 extern void func_151D5334(Vec3f*, f32, f32, f32, s32, s32, s32);
-extern void func_150FE860(Actor *arg0, s32 arg1, s32 arg2);
-extern void func_150FF084(Actor *arg0, s32 arg1, s32 arg2);
-extern void func_150FED30(Actor *arg0, s32 arg1, s32 arg2);
-void func_151C329C(s32 arg0, s32 arg1, s32 arg2);
 void func_151DC260(f32 *, void *, s32, s32, s32);
 extern s32 func_15082A44(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 extern void func_150F16DC(Actor *, u8, u8, s32, s32);

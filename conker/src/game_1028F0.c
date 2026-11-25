@@ -148,9 +148,6 @@ void func_150D5A4C(TimedEffect *effect) {
 
 
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, f32 *, s32 *, s32 *, s32 *, f32 *, s32, s32 *, f32);
-void func_151C05A4(Vec3f *, u8, s32);
-void func_151C05F0(Vec3f *, u8, s32);
-void func_151C0360(f32 *, s32 *, u8, s32);
 
 /*
  * Breakup effect for obj: plays sounds, then spawns pieces (three fixed models, then

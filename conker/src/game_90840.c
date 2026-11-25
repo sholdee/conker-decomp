@@ -87,8 +87,6 @@ void func_150636A4(Actor *arg0) {
 
 void func_151D57F8(Actor *, s32);
 s32 func_15081E78(Actor *, Actor **, s32);
-void func_150FFCC8(void *, void *, void *, void *, void *);
-void func_150FFD84(f32 *, f32 *, s32, s32);
 void func_1512D2E4(void *, s32);
 
 /* Runs the work each object queued in its control block's `pending` flags this frame. */

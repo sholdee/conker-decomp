@@ -294,7 +294,6 @@ extern void func_1504715C(CollisionHit *ground, Actor *actor);
 extern void func_15153F18(AngleRange *, SplashSpray *, CollisionHit *, u8, s32);
 // matching: a pointer for argument 3 (the definition has s32)
 extern void func_15150178(AngleRange *, DropSpray *, CollisionHit *, u8, s32);
-extern void func_151C329C(Vec3f *, u8, s32);
 
 /*
  * Spawns an impact at offset D_800A1CFC[point] in actor's sixth matrix: two func_15153F18 /
@@ -704,7 +703,6 @@ struct FadeInSprite {
     /* 0x70 */ s16 duration;  /* the timer's starting value */
 };
 
-void func_150FEC28(Actor *actor, u8 bone, Vec3f *arg2, Vec3f *arg3, Vec3f *position, u8 arg5, s32 arg6);
 void func_151D4408(Vec3f *pos, Vec3f *dir, void *mtx, Actor *owner, f32 scale, u8 arg5, s32 arg6);
 
 /* D_8008ACC8 sprite callback: fades the sprite's alpha in over its first fadeStart ticks. */

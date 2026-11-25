@@ -2,15 +2,8 @@
 // matching: func_151B8908's spill slot needs func_150ADA20 declared returning s32, not u8
 #include "functions.h"
 #include "variables.h"
-#include "effects.h"
 
 extern u8 D_800AA490;
-
-/* A particle spawned by func_151B8400, which keeps its bullet at 0x110. */
-typedef struct {
-    /* 0x000 */ DefParticleHead head;
-    /* 0x110 */ Bullet *bullet;
-} BulletParticle;
 
 /* Spawns the particle that follows bullet (updated by func_151B85AC). */
 BulletParticle *func_151B8400(Bullet *bullet) {
@@ -78,7 +71,7 @@ void func_151B863C(BulletParticle *particle, s16 viewport) {
 }
 
 /* Starts a BloodTrail effect (emitter 3) that tracks the bullet's position. */
-void func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
+BloodTrail *func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
     BloodTrailDesc20 desc;
 
     desc.radius = 10.0f;
@@ -90,7 +83,7 @@ void func_151B8668(Bullet *bullet, u8 fxOwner, s32 fxList) {
     desc.flags = 0;
     desc.emitter = 3;
     desc.unk18 = 0;
-    func_15134908(&desc, 0, fxOwner, fxList);
+    return func_15134908(&desc, 0, fxOwner, fxList);
 }
 
 void func_151A26EC(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
@@ -133,7 +126,7 @@ void func_151B86F4(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, EffectHeader *ef
 extern TextureChoices D_800AA4B8;
 
 /* Spawns a particle at the bullet's position, with a random texture choice and random flag bits 0x40 / 0x80. */
-void func_151B8908(Bullet *bullet) {
+SpriteParticle *func_151B8908(Bullet *bullet) {
     s32 pad; // matching: unused frame slot above spawn
     ParticleDesc spawn;
     TextureChoices choices;
@@ -174,5 +167,5 @@ void func_151B8908(Bullet *bullet) {
     spawn.handlerSet = 0;
     spawn.viewMask = 0;
     spawn.views = 0xFF;
-    func_15130280(&spawn, 1, 0, 0, bullet->head.header.owner, bullet->head.header.kind);
+    return func_15130280(&spawn, 1, 0, 0, bullet->head.header.owner, bullet->head.header.kind);
 }

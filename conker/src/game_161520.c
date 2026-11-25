@@ -1278,7 +1278,6 @@ void func_15136AE4(f32 x, f32 y, f32 z, f32 dirX, f32 dirY, f32 dirZ, u8 *arg6) 
 
 void func_1515C244(Actor *, Vec3f *, f32 *, f32 *);
 void func_151A9834(Vec3f *, f32, f32, CollisionHit *, s32, u8, s8 *, u8, s32);
-void func_151C61A0(s32, s32, u8, s32);
 
 
 /*
@@ -1462,9 +1461,6 @@ void func_15136F50(Vec3f *from, Vec3f *to, Vec3f *direction, u8 arg3, u8 arg4, s
     }
 }
 
-
-void func_151C329C(Vec3f *, u8, s32);
-void func_151C577C(Vec3f *, Vec3f *, Vec3f *, u8, u8, u8, u8, s32);
 
 /* Picks the impact effect for a hit on actor (NULL: plain blood) from its model and state. */
 void func_15137610(Actor *actor, Vec3f *from, Vec3f *to,
@@ -2274,7 +2270,6 @@ const Vec3f D_800A41E8[4] = {
     { -14.681799f, 17.8482f, -1.3326f },
     { 9.2282f, 23.578999f, 8.4736f },
 };
-extern void func_151C5F44(s32, f32 *, f32, f32, s32, s32, f32, s32, s32, u8, s32);
 
 /* Gore for profile 2/15 actors, chunk sizes scaled by `scale`. */
 void func_15139768(Actor *actor, f32 *origin, f32 scale, void *hit, u8 arg4, s32 arg5) {

@@ -58,9 +58,6 @@ struct ProjectileParticle {
     } state;
 };
 
-extern s32 func_151C4B0C(s32, ProjectileState *, Vec3f *, Vec3f *, f32 *, f32, u8, s32, Vec3f *, u8 *, s32,
-                         f32, Actor *, s32, u8, u8, s32, u8);
-
 /* Spawns a projectile at `pos`, aimed along `aim` (or at `target` when arg2 is set). */
 void func_150F7470(Vec3f *pos, Vec3f *aim, s32 arg2, Vec3f *target, u8 targetIsDir, s32 arg5, f32 speed,
                    f32 arg7, f32 arg8, Actor *owner, u8 arg10, u8 arg11, u8 arg12, u8 arg13, s32 arg14,
@@ -308,9 +305,6 @@ void func_150F7F58(TrailPuff *obj, s16 arg1) {
 }
 
 void func_151D3F14(Vec3f *pos, u8, s32);
-ModelAttachment *func_150FF288(Actor *);
-s32 func_150FF6E0(Vec3f *, Vec3f *, Vec3f *, Vec3f *, Vec3f *, Actor *, ModelAttachment *);
-void func_150FF474(Vec3f *position, Vec3f *points, u8 arg2, s32 arg3);
 void func_151D4408(Vec3f *, Vec3f *, void *, Actor *, f32, s32, s32);
 
 /* Impact effect at `pos`. */
