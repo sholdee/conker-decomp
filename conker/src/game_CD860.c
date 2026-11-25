@@ -38,7 +38,7 @@ void func_150A2940(s32, s32, s32);
 void func_150A3398(s32, u16, s32, s32, s32, s32);
 
 /* Applies command `command` with the parameters in `msg` to record `slot`.
- * Returns 1 for the commands that complete immediately (0-2), else 0. */
+ * Returns 1 for commands 0-2 and 0 otherwise. */
 s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
     s32 mode;
 
@@ -59,6 +59,7 @@ s32 func_150A03B0(s32 slot, u32 command, Msg_CD860 *msg) {
         func_150A3398(slot, msg->params[0], msg->params[1], msg->params[2], msg->params[3], msg->params[4]);
         break;
     case 5:
+        // matching: `== 0` would compile to sltiu; the inverted test keeps the branchy form
         mode = (msg->params[0] == 999) ? 2 : (msg->params[0] != 0) ? 0 : 1;
         func_151C970C(mode, &D_800D3098[slot]);
         break;
@@ -74,16 +75,18 @@ s32 func_150A2FA4(s32, s32);
 s32 func_150A2CA4(s32);
 void func_150A3330(s32, s32 *, s32 *, s32 *, s32 *);
 
-/* Answers query `query` about record `slot`; `msg` carries the query's parameters. */
+/* Answers query `query` about record `slot`; `msg` carries the query's parameters.
+ * Queries 6 and 13 take an id whose bits 12-15 select its kind: 0x2000 is an object in
+ * D_800CC2D0 (looked up by func_1505EEF4), 0x9000 a D_800D3098 record. */
 s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
     switch (query) {
     case 6:
         {
-            s32 v;
+            s32 pad; // matching: unused stack slot keeps `result` at the original sp offset
             s32 id;
             s32 result;
             struct127 *obj;
-            s32 ret;
+            s32 ret = 0;
 
             id = msg->params[0] & 0xFFFF0FFF;
             switch (msg->params[0] & 0xF000) {
@@ -93,13 +96,12 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
                     return 0;
                 }
                 result = func_150A29C8(obj - D_800CC2D0, slot);
-            lbl1:
+            lbl1: // matching: block boundary stops IDO moving the store into the branch delay slot
                 break;
             case 0x9000:
                 result = func_150A2D84(id, slot);
                 break;
             }
-            ret = 0;
             return (result == 0) ? 1 : ret;
         }
     case 8:
@@ -152,13 +154,11 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
             s32 i;
 
             for (i = 0; i < 25; i++) {
-                if (D_800CC2D0[i].interaction_state == msg->params[0]) {
-                    if (func_150A29C8(i, slot) == 0) {
-                        if (query == 11) {
-                            return D_800CC2D0[i].unk13F | 0x2000;
-                        }
-                        return D_800CC2D0[i].unique_id;
+                if (D_800CC2D0[i].interaction_state == msg->params[0] && func_150A29C8(i, slot) == 0) {
+                    if (query == 11) {
+                        return D_800CC2D0[i].unk13F | 0x2000;
                     }
+                    return D_800CC2D0[i].unique_id;
                 }
             }
             return 0;
@@ -167,7 +167,7 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
         return D_800D3098[slot].unk14;
     case 13:
         {
-            s32 v;
+            s32 pad; // matching: unused stack slot; removing it shifts the frame layout
             s32 id;
             s32 result;
             struct127 *obj;
@@ -201,10 +201,8 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
                         return 1;
                     }
                     if (msg->params[1] != 0) {
-                        if (D_800CC2D0[i].unk31C->unk78 != 3) {
-                            if (func_150A2D84(i, msg->params[0] & 0xFFFF0FFF) == 0) {
-                                return 1;
-                            }
+                        if (D_800CC2D0[i].unk31C->unk78 != 3 && func_150A2D84(i, msg->params[0] & 0xFFFF0FFF) == 0) {
+                            return 1;
                         }
                     } else {
                         return 1;
@@ -216,16 +214,16 @@ s32 func_150A04D8(s32 slot, s32 query, Msg_CD860 *msg) {
         return 1;
     case 17:
         {
-            s32 v;
+            s32 which;
 
-            v = msg->params[0];
-            if (v == 0) {
+            which = msg->params[0];
+            if (which == 0) {
                 return D_800D3098[slot].unk17;
-            } else if (v == 1) {
+            } else if (which == 1) {
                 return D_800D3098[slot].unk18;
-            } else if (v == 2) {
+            } else if (which == 2) {
                 return D_800D3098[slot].unk1C;
-            } else if (v == 3) {
+            } else if (which == 3) {
                 return D_800D3098[slot].unk20;
             }
             break;
