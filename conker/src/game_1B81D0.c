@@ -100,7 +100,7 @@ typedef struct {
 extern Particle *func_15132A4C(ParticleSpawn *, s32, s32, s32, u8, s32);
 extern void func_1518CA80(ParticleEffect *, u8);
 extern void func_151429E0(u8, u8 *, u8 *, u8 *);
-extern s32 func_15046C80(f32 *, s32, f32, ParticleFloor *);
+extern s32 func_15046C80(vertex *, s32, f32, ParticleFloor *);
 
 /*
  * Update callback of a falling droplet: once it drops below its floor height, spawns 4-7 splash
@@ -108,7 +108,7 @@ extern s32 func_15046C80(f32 *, s32, f32, ParticleFloor *);
  * Returns 1 while the droplet is still above the floor.
  */
 s32 func_1518AD20(Particle *particle) {
-    f32 *floorY;
+    f32 *floorY; // matching: IDO keeps &particle->floorY live in a register only via this pointer
 
     floorY = &particle->floorY;
     if (particle->pos.y < particle->floorY) {
@@ -124,9 +124,8 @@ s32 func_1518AD20(Particle *particle) {
         f32 sinPitch;
         f32 cosPitch;
         Particle *droplet;
-        u8 colour;
-        s32 alpha;
-        s32 colourIndex;
+        s32 scaled;
+        s32 colour;
 
         spawn.model = particle->model;
         spawn.lifetime = 50;
@@ -134,9 +133,9 @@ s32 func_1518AD20(Particle *particle) {
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
         spawn.flags = 0x9E8;
-        spawn.elasticity = 0.400000006f;
+        spawn.elasticity = 0.4f;
         spawn.rotVel.z = 0.0f;
-        spawn.gravity = -1.299999952f;
+        spawn.gravity = -1.3f;
         spawn.pos.x = particle->pos.x;
         spawn.pos.y = *floorY;
         spawn.pos.z = particle->pos.z;
@@ -158,17 +157,15 @@ s32 func_1518AD20(Particle *particle) {
         // matching: a separate assignment (not the for initialiser) gives the loop-entry order
         count = (func_150ADA20() & 3) + 4;
         for (; count > 0; count--) {
-            size = (func_150ADA68() * (particle->radius * 0.5f)) + 0.05000000075f;
+            size = (func_150ADA68() * (particle->radius * 0.5f)) + 0.05f;
             yaw = func_150ADA20() & 0xFF;
             pitch = -0x20 - (func_150ADA20() & 0x1F);
             speed = (func_150ADA68() * 10.0f) + 5.0f;
-            sinYaw = func_151423D8((u8)(yaw - 0x40));
+            sinYaw = func_151423D8(yaw - 0x40);
             cosYaw = func_151423D8(yaw);
-            sinPitch = func_151423D8((u8)(pitch - 0x40));
+            sinPitch = func_151423D8(pitch - 0x40);
             cosPitch = func_151423D8(pitch);
-            spawn.radius = size;
-            spawn.sizeXZ = size;
-            spawn.sizeY = size;
+            spawn.sizeY = spawn.sizeXZ = spawn.radius = size;
             spawn.vel.x = speed * cosPitch * sinYaw;
             spawn.vel.y = -speed * sinPitch;
             spawn.vel.z = speed * cosPitch * cosYaw;
@@ -189,13 +186,13 @@ s32 func_1518AD20(Particle *particle) {
         }
         switch (particle->model) {
             case 4:
-                colourIndex = 1;
+                colour = 1;
                 break;
             case 5:
-                colourIndex = 0;
+                colour = 0;
                 break;
             default:
-                colourIndex = 0;
+                colour = 0;
                 break;
         }
         ring.pos.x = particle->pos.x;
@@ -208,15 +205,14 @@ s32 func_1518AD20(Particle *particle) {
         ring.unk22 = (func_150ADA20() % 201U) + 300;
         ring.unk24 = 0;
         ring.unk26 = 600;
-        colour = colourIndex;
         func_151429E0(colour, &ring.color1[0], &ring.color1[1], &ring.color1[2]);
         func_151429E0(colour, &ring.color2[0], &ring.color2[1], &ring.color2[2]);
         ring.intensity = 0xFF;
-        alpha = particle->radius * 511.0f;
-        if (alpha > 255.0f) {
+        scaled = particle->radius * 511.0f;
+        if (scaled > 255.0f) {
             ring.unk2F = 0xFF;
         } else {
-            ring.unk2F = alpha;
+            ring.unk2F = scaled;
         }
         ring.unk30 = 10;
         ring.unk31 = 0;
@@ -249,16 +245,14 @@ s32 func_1518B1D8(Particle *particle) {
         return 0;
     }
 
-    lifetimeAlpha = particle->lifetime;
-    lifetimeAlpha <<= 2;
-    if (lifetimeAlpha >= 0x100) {
-        lifetimeAlpha = 0xFF;
+    lifetimeAlpha = particle->lifetime * 4;
+    if (lifetimeAlpha >= 256) {
+        lifetimeAlpha = 255;
     }
 
     heightAlpha = (s32)height >> 1;
-    alpha = lifetimeAlpha;
-    if (heightAlpha >= 0x100) {
-        heightAlpha = 0xFF;
+    if (heightAlpha >= 256) {
+        heightAlpha = 255;
     }
 
     alpha = (heightAlpha < lifetimeAlpha) ? heightAlpha : lifetimeAlpha;
@@ -271,10 +265,10 @@ s32 func_1518B1D8(Particle *particle) {
     return 1;
 }
 
-void func_1518B2A8(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6);
+void func_1518B2A8(vertex *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6);
 
 /* func_1518B2A8 with model 4. */
-void func_1518B264(f32 *pos, f32 radius, f32 size, s32 count, u8 arg4) {
+void func_1518B264(vertex *pos, f32 radius, f32 size, s32 count, u8 arg4) {
     func_1518B2A8(pos, radius, size, count, 4, 0xFF, arg4);
 }
 
@@ -283,7 +277,7 @@ void func_1518B264(f32 *pos, f32 radius, f32 size, s32 count, u8 arg4) {
  * onto the floor below it (when there is one) together with 1-4 smaller droplets above that point.
  * Every droplet remembers the floor height (see func_1518AD20). arg5 is unused.
  */
-void func_1518B2A8(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
+void func_1518B2A8(vertex *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg5, u8 arg6) {
     ParticleSpawn spawn;
     ParticleFloor floor;
     u8 angle;
@@ -321,29 +315,26 @@ void func_1518B2A8(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg
         spawn.scale.x = 1.0f;
         spawn.scale.y = 1.0f;
         spawn.scale.z = 1.0f;
-        floor.height = 99999.8984375f;
+        floor.height = 99999.9f;
         spawn.rotVel.z = 0.0f;
         spawn.vel.x = 0.0f;
         spawn.vel.y = 0.0f;
         spawn.vel.z = 0.0f;
-        spawn.elasticity = 0.4000000060f;
-        spawn.gravity = -1.299999952f;
+        spawn.elasticity = 0.4f;
+        spawn.gravity = -1.3f;
         for (; count > 0; count--) {
-            angle = func_150ADA20();
-            angle &= 0xFF;
+            angle = func_150ADA20() & 0xFF;
             dist = func_150ADA68() * radius;
-            spawn.sizeXZ = size;
-            spawn.sizeY = size;
-            spawn.radius = size;
+            spawn.radius = spawn.sizeY = spawn.sizeXZ = size;
             spawn.rot.x = func_150ADA68() * 360.0f;
             spawn.rot.y = func_150ADA68() * 360.0f;
             spawn.rot.z = func_150ADA68() * 360.0f;
-            spawn.pos.x = pos[0] + func_151423D8(angle) * dist;
-            spawn.pos.y = (pos[1] + radius) - (func_150ADA68() * 2.0f * radius);
-            spawn.pos.z = pos[2] - func_151423D8(angle - 0x40) * dist;
+            spawn.pos.x = pos->x + func_151423D8(angle) * dist;
+            spawn.pos.y = (pos->y + radius) - (func_150ADA68() * 2.0f * radius);
+            spawn.pos.z = pos->z - func_151423D8(angle - 0x40) * dist;
             spawn.rotVel.x = 25.0f - func_150ADA68() * 50.0f;
             spawn.rotVel.y = 25.0f - func_150ADA68() * 50.0f;
-            if (func_15046C80(&spawn.pos.x, 0, -10000.0f, &floor) != 0) {
+            if (func_15046C80(&spawn.pos, 0, -10000.0f, &floor) != 0) {
                 spawn.update2Fn = 2;
                 droplet = func_15132A4C(&spawn, 3, 0xFF, sizeof(f32), arg6, 0);
                 if (droplet != NULL) {
@@ -354,13 +345,10 @@ void func_1518B2A8(f32 *pos, f32 radius, f32 size, s32 count, u16 model, s32 arg
                 y = size * 16.0f + spawn.pos.y;
                 z = spawn.pos.z;
                 for (; n > 0; n--) {
-                    angle = func_150ADA20();
-                    angle &= 0xFF;
+                    angle = func_150ADA20() & 0xFF;
                     dist = func_150ADA68() * size * 16.0f;
-                    scale = func_150ADA68() * 0.3000000119f + 0.1000000015f;
-                    spawn.sizeY = scale;
-                    spawn.sizeXZ = scale;
-                    spawn.radius = scale;
+                    scale = func_150ADA68() * 0.3f + 0.1f;
+                    spawn.radius = spawn.sizeXZ = spawn.sizeY = scale;
                     spawn.rot.x = func_150ADA68() * 360.0f;
                     spawn.rot.y = func_150ADA68() * 360.0f;
                     spawn.rot.z = func_150ADA68() * 360.0f;
