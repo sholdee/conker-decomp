@@ -463,7 +463,7 @@ s32 func_15013C38(TriggerZone *obj) {
     obj->flags |= 4;
     index = obj->unk18;
 
-    if ((((u8 *)D_800D2E4C)[0x11] & 4) && (D_800BE9F0 == 0x13)) { // low byte of D_800D2E4C->unk10
+    if ((D_800D2E4C[0x11] & 4) && (D_800BE9F0 == 0x13)) { // low byte of D_800D2E4C[0x10]
         return 1;
     }
 
@@ -695,7 +695,7 @@ s32 func_150142EC(TriggerZone *obj) {
         return 1;
     }
 
-    if ((((u8 *)D_800D2E4C)[0x11] & 4) && (D_800BE9F0 == 0x13)) { // low byte of D_800D2E4C->unk10
+    if ((D_800D2E4C[0x11] & 4) && (D_800BE9F0 == 0x13)) { // low byte of D_800D2E4C[0x10]
         return 1;
     }
 

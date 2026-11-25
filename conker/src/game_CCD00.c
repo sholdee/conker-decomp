@@ -40,9 +40,8 @@ extern s32 D_800D3000;
 extern s32 D_800D3004;
 extern s32 D_800D3840;
 
-/* variables.h declares D_800D2E4C as struct102 *: it is the per-id flag bit array. */
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
-#define ID_FLAG_BYTE(id) (*(((id) >> 3) + (u8 *)D_800D2E4C))
+#define ID_FLAG_BYTE(id) (*(((id) >> 3) + D_800D2E4C))
 #define ID_FLAG_BIT(id) (1 << ((id) & 7))
 
 CCD00Node *func_1509B704(s16 id);

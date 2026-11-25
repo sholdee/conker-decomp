@@ -232,7 +232,7 @@ void func_150F2994(Camera *actor, s32 flag) {
     }
     func_1509BFB0(0, 0x405D, flag);
     func_1509BFB0(0, 0x405F, flag);
-    if (D_800D2E4C->pad15[0] & 8) {
+    if (D_800D2E4C[0x15] & 8) {
         func_1509BFB0(0, 0x4063, flag);
         func_1509BFB0(0, 0x4064, flag);
         func_1509BFB0(0, 0x4065, flag);

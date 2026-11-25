@@ -59,5 +59,5 @@ void func_1500E470(s32 level) {
     func_15178EB0();
     func_15012FE0();
 
-    func_151645C4(!(D_800D2E4C->unk4 & 0x80));
+    func_151645C4(!(D_800D2E4C[0x4] & 0x80));
 }

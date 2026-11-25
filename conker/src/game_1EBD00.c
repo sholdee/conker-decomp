@@ -17,7 +17,7 @@ extern void *func_15157010(EffectParams *params, s32 arg1, f32 arg2, s32 attachA
                            u8 owner, s32 list);
 
 /*
- * Spawns an effect (variant 0-2) at `pos`, facing `angle` degrees. In one mode (D_800D2E4C->unk19 bit 2,
+ * Spawns an effect (variant 0-2) at `pos`, facing `angle` degrees. In one mode (D_800D2E4C[0x19] bit 2,
  * or variant 2) it is a model effect 39 units ahead of and 40 below `pos`; otherwise func_151BEEE0 makes it.
  */
 void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant) {
@@ -31,7 +31,7 @@ void *func_151BE850(Vec3f *pos, f32 angle, u8 count, u8 arg3, u8 variant) {
     if (variant >= 3) {
         return NULL;
     }
-    if ((D_800D2E4C->unk19 & 4) || (variant == 2)) {
+    if ((D_800D2E4C[0x19] & 4) || (variant == 2)) {
         u8 variantIds[3] = { 3, 1, 2 };
         Vec3f offset;
         s32 flag;

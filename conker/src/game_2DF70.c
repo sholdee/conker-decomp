@@ -295,7 +295,7 @@ void func_15000AD0(s32 arg0) {
     } else if (D_800B0DF0->unk8 == 1) {
         func_15111858();
     }
-    if (D_800D2E4C->unk14 & 1) {
+    if (D_800D2E4C[0x14] & 1) {
         D_800DBEAC = 1;
     } else {
         D_800DBEAC = 0;

@@ -52,7 +52,7 @@ void func_150000B0(void) {
     D_80041F04 = 0;
     D_80041F08 = 0;
     D_80041F0C = 0;
-    if (q.song == 1 && (D_800D2E4C->unk4 & 0x80)) {
+    if (q.song == 1 && (D_800D2E4C[0x4] & 0x80)) {
         q.song = 0x46;
         q.unk4 = 0x10;
     }

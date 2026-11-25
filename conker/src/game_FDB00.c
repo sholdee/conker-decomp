@@ -7,7 +7,7 @@ s32 func_1509BE40();
 void func_151254F4(Camera *arg0, s32 arg1);
 
 void func_150D0650(Camera *arg0) {
-    if ((D_800D2E4C->unk0 & 0x80) == 0) {
+    if ((D_800D2E4C[0x0] & 0x80) == 0) {
         if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
             if (func_15123934(arg0, arg0->mode, 0, arg0->unk134, 8) != 0) {
                 arg0->flags |= 0x1000000;

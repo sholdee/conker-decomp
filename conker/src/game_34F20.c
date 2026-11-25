@@ -136,7 +136,7 @@ void func_15007B3C(void) {
         break;
     case 0x13:
         value = 0xEB;
-        if (!(*((u8 *)D_800D2E4C + 0x11) & 4)) {
+        if (!(D_800D2E4C[0x11] & 4)) {
             value = D_800B0DF0->unk11 + 0xEB;
         }
         break;
@@ -171,7 +171,7 @@ void func_15007B3C(void) {
     } else {
         func_10003ACC(0, 0, 0);
     }
-    if ((D_800BE616 == 0) && !(*((u8 *)D_800D2E4C + 0x18) & 1)) {
+    if ((D_800BE616 == 0) && !(D_800D2E4C[0x18] & 1)) {
         D_800D2457 = D_800D2456 = 3;
         func_15085710(0, 5, 3);
     }

@@ -31,7 +31,7 @@ typedef struct {
 #define NODE_LIST (*(C8950List *)&D_800D2F48)
 /* Bit `id` of the 0x1B-byte bit array at D_800D2E4C. */
 // matching: offset + base operand order (indexing puts the base first and swaps registers)
-#define ID_FLAG(id) (*(((id) >> 3) + (u8 *)D_800D2E4C) & (1 << ((id) & 7)))
+#define ID_FLAG(id) (*(((id) >> 3) + D_800D2E4C) & (1 << ((id) & 7)))
 /* One state byte per id. */
 #define ID_STATE ((u8 *)&D_800D2E70)
 
@@ -409,8 +409,8 @@ void func_1509BFB0(s32 count, s32 cmdWord, s32 arg, ...) {
 void func_1509C120(void) {
     s32 i;
     s32 last;
-    struct102 *bufs[4];
-    struct102 *old;
+    u8 *bufs[4];
+    u8 *old;
 
     last = func_150ADA20() & 3;
     old = D_800D2E4C;

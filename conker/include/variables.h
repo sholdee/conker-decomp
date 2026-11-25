@@ -1099,7 +1099,7 @@ extern u8  D_800D2E42;
 extern u8  D_800D2E43;
 extern u8  D_800D2E44;
 extern u8  D_800D2E45;
-extern struct102 *D_800D2E4C;
+extern u8 *D_800D2E4C; // 0x1B-byte bit array of per-id flags (saved with the game)
 
 extern u8  D_800D2F3C;
 extern u16 *D_800D2F40;

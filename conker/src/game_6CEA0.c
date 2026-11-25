@@ -70,7 +70,7 @@ s32 func_1509CB68(void);
 s32 strlen(const char *);
 
 /* Bit `idx` of the task bitset at D_800D2E4C (see game_C9EC0.c). */
-#define TASK_BIT_SET(idx) (((u8 *)D_800D2E4C)[(idx) >> 3] & (1 << ((idx) & 7)))
+#define TASK_BIT_SET(idx) (D_800D2E4C[(idx) >> 3] & (1 << ((idx) & 7)))
 
 #define MENU_MAX_ROWS 19
 #define SCROLL_LIMIT 11.0f
@@ -194,7 +194,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         } else {
             func_150428D4(func_1509CA10(taskIndex), &width, &height, &depth);
             // matching: index + base operand order (TASK_BIT_SET's base + index allocates differently)
-            if (*((taskIndex >> 3) + (u8 *)D_800D2E4C) & (1 << (taskIndex & 7))) {
+            if (*((taskIndex >> 3) + D_800D2E4C) & (1 << (taskIndex & 7))) {
                 if (entry == D_80084498) {
                     if (D_80084494 != 0) {
                         text = D_80098948;

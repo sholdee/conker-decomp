@@ -2,7 +2,6 @@
 #define func_1506160C func_1506160C_hdr
 #include "functions.h"
 #undef func_1506160C
-/* variables.h types these as scalars; they are redeclared below as arrays. */
 #include "variables.h"
 
 

@@ -34,7 +34,7 @@ extern s32 func_15116110(WorldObject *obj);
 /* Runs func_1511650C with sound 0x353 (or 0x43 at a lower pitch once object 0's flag bit 2 is set), unless
  * bit 3 of byte 0xA of the 27-byte flag record at D_800D2E4C is set. */
 void func_150C7870(WorldObject *obj) {
-    if (!(((u8 *)D_800D2E4C)[0xA] & 8)) { // struct102 has no field at byte 0xA (inside unk8)
+    if (!(D_800D2E4C[0xA] & 8)) {
         if (!(D_800DBEF4[0].behaviorState & 4)) {
             func_1511650C(obj, 1, 0x353, 1000.0f);
         } else {

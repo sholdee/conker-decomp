@@ -936,7 +936,7 @@ Gfx *func_151EB06C(Gfx *gfx) {
     extern s32 func_1510D0EC(); // matching: unprototyped, so the texture-id calls below pass pointers as-is
     static s8 D_800900B8 = 0;
 
-    show = (D_800D2E4C->unk19 & 4) || (D_8008FDA8 < 0);
+    show = (D_800D2E4C[0x19] & 4) || (D_8008FDA8 < 0);
     if (D_800BE616 && !D_800BEAC0 && !D_800BEAC1) {
         if (!func_151E564C() || D_8008FDD4->unk42 == 1) {
             gfx = func_151E89A0(gfx, 0, 0xFF);

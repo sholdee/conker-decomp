@@ -92,7 +92,7 @@ void func_15006590(s32 eepromSlot) {
     u8 backup[27];
 
     for (i = 0; i < 27; i++) {
-        backup[i] = ((u8 *)D_800D2E4C)[i];
+        backup[i] = D_800D2E4C[i];
     }
     if (D_800BE3F0 == NULL) {
         D_800BE3F0 = (u8 *)func_1502B5C8(NULL, 1, 7) + 8;
@@ -109,7 +109,7 @@ void func_15006590(s32 eepromSlot) {
         func_150064E0();
         if (D_800BE3DC >= 0 && D_80082BC0 != 0) {
             for (i = 0; i < 27; i++) {
-                ((u8 *)D_800D2E4C)[i] = backup[i];
+                D_800D2E4C[i] = backup[i];
             }
         }
         if (block == 0x34) {
@@ -123,7 +123,7 @@ void func_15006590(s32 eepromSlot) {
         sequence |= p[-2] << 8;
         sequence |= p[-1];
         for (i = 0; i < 27; i++) {
-            ((u8 *)D_800D2E4C)[i] = *p++;
+            D_800D2E4C[i] = *p++;
         }
         for (i = 0; i < 9; i++) {
             D_800D2E60[i] = *p++;
@@ -161,7 +161,7 @@ void func_15006590(s32 eepromSlot) {
             if (D_800BE3F8[saveSlot].sequence < sequence) {
                 flagCount = 0;
                 for (i = 0; i < 27; i++) {
-                    bits = ((u8 *)D_800D2E4C)[i];
+                    bits = D_800D2E4C[i];
                     for (j = 8; j != 0; j--) {
                         if (bits & 1) {
                             flagCount++;
@@ -182,12 +182,12 @@ void func_15006590(s32 eepromSlot) {
                     }
                 } else {
                     for (i = 0; i < 27; i++) {
-                        ((u8 *)D_800D2E4C)[i] = backup[i];
+                        D_800D2E4C[i] = backup[i];
                     }
                 }
             } else {
                 for (i = 0; i < 27; i++) {
-                    ((u8 *)D_800D2E4C)[i] = backup[i];
+                    D_800D2E4C[i] = backup[i];
                 }
             }
         }
@@ -243,7 +243,7 @@ void func_15006BEC(s32 saveSlot) {
     *p++ = (sequence >> 16) & 0xFF;
     *p++ = (sequence >> 8) & 0xFF;
     *p++ = sequence & 0xFF;
-    for (i = 0; i < 27; i++) { *p++ = ((u8 *)D_800D2E4C)[i]; }
+    for (i = 0; i < 27; i++) { *p++ = D_800D2E4C[i]; }
     for (i = 0; i < 9; i++) { *p++ = D_800D2E60[i]; }
     *p++ = D_800BE3DF; // matching: original loads it signed (lb)
     *p++ = D_800BE3E0;
@@ -468,7 +468,7 @@ void func_15007778(void) {
     D_800BE3DC = -1;
     D_800BE3DE = 0;
     D_80082BC0 = 1;
-    for (i = 0; i < 27; i++) { ((u8 *)D_800D2E4C)[i] = 0; }
+    for (i = 0; i < 27; i++) { D_800D2E4C[i] = 0; }
     for (i = 0; i < 9; i++) { D_800D2E60[i] = 0; }
     for (i = 0; i < 4; i++) { D_800BE3D8[i] = -1; }
 }

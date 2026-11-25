@@ -398,7 +398,7 @@ void func_1507D4F8(s32 slot) {
         }
 
         D_800D18A8 = 1;
-        if (!(D_800D2E4C->unk19 & 4) && D_8008FDA8 >= 0) {
+        if (!(D_800D2E4C[0x19] & 4) && D_8008FDA8 >= 0) {
             func_1501C730(1, 0x22, 0, 0, 0);
             return;
         }

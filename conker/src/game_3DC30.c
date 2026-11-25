@@ -27,7 +27,7 @@ dummy_label_15010880:
     if (temp_v0 != NULL) {
         memcpy((u8 *) temp_v0 + 0x28, &tmp, 0xC);
     }
-    if (D_800D2E4C->unk12 & 0x40) {
+    if (D_800D2E4C[0x12] & 0x40) {
         func_15149130(5, 9, -1, -1, 1, 0, NULL, 0xFF, 1);
     }
 }
@@ -47,7 +47,7 @@ dummy_label_15010880:
 //     if (temp_v0 != NULL) {
 //         memcpy(&temp_v0->unk28, &tmp, 12); // memcpy
 //     }
-//     if ((D_800D2E4C->unk12 & 0x40) != 0) {
+//     if ((D_800D2E4C[0x12] & 0x40) != 0) {
 //         func_15149130(5, 9, -1, -1, 1, 0, 0, 255, 1);
 //     }
 // }

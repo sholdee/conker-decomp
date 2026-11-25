@@ -5,9 +5,9 @@
 #include "effects.h"
 
 /* Updates flag bits in unk84 (0x4, 0x4000, 0x10000, 0x1000000) from func_1509BE40 queries; the first two
-   checks are skipped when D_800D2E4C->unk4 bit 0x80 / unk1 bit 4 are set. */
+   checks are skipped when D_800D2E4C[0x4] bit 0x80 / unk1 bit 4 are set. */
 void func_150AE5B0(Camera *arg0) {
-    if (!(D_800D2E4C->unk4 & 0x80)) {
+    if (!(D_800D2E4C[0x4] & 0x80)) {
         if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
             if (func_15123934(arg0, arg0->mode, 0, arg0->unk134, 8) != 0) {
                 arg0->flags |= 0x1000000;
@@ -18,7 +18,7 @@ void func_150AE5B0(Camera *arg0) {
         }
     }
     arg0->flags &= ~0x4000;
-    if (!(D_800D2E4C->unk1 & 4)) {
+    if (!(D_800D2E4C[0x1] & 4)) {
         if (func_1509BE40(1, 0x2000, 0x95, func_1509BE40(0, 0x2014, 0xB7) | 0x2000) != 0) {
             arg0->flags |= 0x1000000;
             if ((arg0->mode & 1) && func_15123934(arg0, arg0->mode, 0, arg0->unk134, 0) != 0) {

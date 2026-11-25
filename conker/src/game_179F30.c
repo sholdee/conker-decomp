@@ -904,7 +904,7 @@ void func_1514DE44(Actor *obj) {
 }
 
 void func_1514DE50(Actor *obj) {
-    if (((u8 *)D_800D2E4C)[0x11] & 8) { // low byte of D_800D2E4C->unk10
+    if (D_800D2E4C[0x11] & 8) { // low byte of D_800D2E4C[0x10]
         func_1514DCAC(obj);
     }
 }
