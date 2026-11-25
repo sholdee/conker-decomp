@@ -6,10 +6,7 @@
 #undef func_1509BFB0
 s32 func_1509BFB0(s32 num, s32, s32, ...);
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
+#include "effects.h"
 
 /* A level object (func_151149AC returns one; see Prop in game_10B7D0.c). */
 typedef struct {
@@ -138,54 +135,51 @@ struct260 *func_150E1060(u8 index, u8 owner, s32 kind) {
     return effect;
 }
 
-/* Spawn parameters passed to func_15130374 (see Struct15130374Arg in game_113D60.c). */
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 unk0A;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ f32 position[3];
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ u32 flags;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-    /* 0x64 */ s8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 pad66[2];
-} ParticleSpawnArgs;
+/* matching: the first 0x68 bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
+typedef struct ParticleDesc68 {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode; /* low byte: D_800A4AC8 index, high byte: func_1513F4E4 arg */
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;      /* 16.16 animation frame */
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;     /* D_80090B60 index */
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ vertex pos;
+    /* 0x3C */ vertex offset;
+    /* 0x48 */ vertex vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ u32 flags;      /* PARTICLE_* */
+    /* 0x5C */ struct ParticleViewMask *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
+    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
+    /* 0x64 */ s8 drawFunc;    /* D_80089804 index, -1 for none */
+    /* 0x65 */ u8 handlerSet;  /* D_80089814/D_80089844/D_80089878 index */
+    /* 0x66 */ u8 views;       /* bit per view the particle is drawn in */
+    /* 0x67 */ u8 pad67;
+} ParticleDesc68;
 
 /* Two points per emitter index, in the prop's space (start and end of the emission direction). */
-extern Vec3f D_800A0FE4[];
-extern Vec3f D_800A0FFC[];
-extern struct260 *func_15130374(ParticleSpawnArgs *, u8, s32, u8, s32);
-extern void func_15145CD0(Prop *, Vec3f **, f32 **, s32);
+extern vertex D_800A0FE4[];
+extern vertex D_800A0FFC[];
+extern struct260 *func_15130374(ParticleDesc68 *, u8, s32, u8, s32);
+extern void func_15145CD0(Prop *, vertex **, f32 **, s32);
 
 /* Emitter effect update: accumulates a random rate and, while the emitter's lookup has one of the
  * low D_80082FA0 + 1 bits set, emits one particle per whole unit along D_800A0FE4 -> D_800A0FFC. */
@@ -194,10 +188,10 @@ void func_150E114C(EmitterEffect *effect) {
     s32 i;
     s16 mask;
     s32 pad[2]; // matching: two unused stack words above args
-    ParticleSpawnArgs args;
+    ParticleDesc68 args;
     f32 extra;
     f32 dir[3];
-    Vec3f *points[2];
+    vertex *points[2];
     f32 *results[2];
     s32 flip80;
     s32 flip40;
@@ -218,58 +212,58 @@ void func_150E114C(EmitterEffect *effect) {
         }
         {
             f32 *d; // matching: the block-scoped pointer steers regalloc for the subtraction below
-            args.unk1D = 0x29;
-            args.unk08 = 0x4403;
-            args.unk00 = 0x200005;
-            args.unk1E = 0x21;
-            args.unk20 = 7;
+            args.texture = 0x29;
+            args.renderMode = 0x4403;
+            args.unk0 = 0x200005;
+            args.fadeStart = 0x21;
+            args.fadeRate = 7;
             args.flags = 0x1CE05;
-            args.unk60 = 6;
-            args.unk61 = 8;
-            args.unk62 = 0x10;
-            args.unk63 = -1;
-            args.unk04 = 0;
-            args.unk0C = 0;
-            args.unk10 = 0;
-            args.unk54 = 0.0f;
-            args.unk64 = -1;
-            args.unk65 = 0;
-            args.unk22 = 0x27;
-            args.unk14 = 0xDD;
-            args.unk15 = 0xD3;
-            args.unk16 = 0xCD;
-            args.unk17 = 0xFF;
-            args.unk18 = 0x57;
-            args.unk19 = 0x55;
-            args.unk1A = 0x5A;
-            args.unk1C = 0xFF;
+            args.primColorMode = 6;
+            args.envColorMode = 8;
+            args.updateFunc = 0x10;
+            args.deathFunc = -1;
+            args.unk4 = 0;
+            args.frame = 0;
+            args.frameRate = 0;
+            args.gravity = 0.0f;
+            args.drawFunc = -1;
+            args.handlerSet = 0;
+            args.scaleStart = 0x27;
+            args.r = 0xDD;
+            args.g = 0xD3;
+            args.b = 0xCD;
+            args.a = 0xFF;
+            args.r2 = 0x57;
+            args.g2 = 0x55;
+            args.b2 = 0x5A;
+            args.brightness = 0xFF;
             extra = 0.962338984f;
-            args.unk24 = 1.011461973f;
+            args.scaleRate = 1.011461973f;
             points[0] = &D_800A0FE4[emitter->index];
             points[1] = &D_800A0FFC[emitter->index];
-            results[0] = args.position;
+            results[0] = &args.pos.x;
             results[1] = dir;
             func_15145CD0(emitter->prop, points, results, 2);
             d = dir;
-            d[0] -= args.position[0];
-            d[1] -= args.position[1];
-            d[2] -= args.position[2];
+            d[0] -= args.pos.x;
+            d[1] -= args.pos.y;
+            d[2] -= args.pos.z;
         }
         do {
             args.flags &= ~0xC0;
             flip80 = (func_150ADA20() & 1) ? 0x80 : 0;
             flip40 = (func_150ADA20() & 1) ? 0x40 : 0;
             args.flags |= flip40 | flip80;
-            args.unk3C = 0.0f;
-            args.unk40 = 0.0f;
-            args.unk44 = 0.0f;
-            args.unk1B = 0xFF;
-            args.unk0A = (func_150ADA20() % 17U) + 50;
-            args.unk28 = args.unk2C = (func_150ADA68() * 165.0f) + 357.0f;
+            args.offset.x = 0.0f;
+            args.offset.y = 0.0f;
+            args.offset.z = 0.0f;
+            args.alpha = 0xFF;
+            args.timer = (func_150ADA20() % 17U) + 50;
+            args.width = args.height = (func_150ADA68() * 165.0f) + 357.0f;
             speed = ((func_150ADA68() * 195.0f) + 356.0f) * 0.001f;
-            args.unk48 = dir[0] * speed;
-            args.unk4C = dir[1] * speed;
-            args.unk50 = dir[2] * speed;
+            args.vel.x = dir[0] * speed;
+            args.vel.y = dir[1] * speed;
+            args.vel.z = dir[2] * speed;
             particle = func_15130374(&args, 1, sizeof(extra), effect->owner, effect->kind);
             if (particle != NULL) {
                 memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));

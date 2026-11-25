@@ -1,14 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
+#include "effects.h"
 
 /* Data copied into a func_151491F4 particle at offset 0x28 by func_1515AF90. */
 typedef struct {
-    /* 0x00 */ Vec3f position;
+    /* 0x00 */ vertex position;
     /* 0x0C */ f32 unkC;
     /* 0x10 */ f32 unk10;
     /* 0x14 */ f32 upperFloorY; // highest floor between the camera's eye and y = 19500
@@ -26,7 +23,7 @@ typedef struct {
     /* 0x20 */ void *surface;
 } GroundHit;
 
-s32 func_1504697C(Vec3f *pos, u16 mask, f32 bottom, GroundHit *hit);
+s32 func_1504697C(vertex *pos, u16 mask, f32 bottom, GroundHit *hit);
 
 /*
  * With a 1-in-16 chance, spawns a particle (func_151491F4) 107-2010 units from the player's camera,
@@ -37,7 +34,7 @@ void func_1515AF90(s16 player) {
     if (!(func_150ADA20() & 0xF)) {
         void *particle;
         GroundParticle effect;
-        Vec3f *eye;
+        vertex *eye;
         s32 yaw;
         u8 valid;
         s16 angle;
@@ -45,13 +42,13 @@ void func_1515AF90(s16 player) {
         f32 cosine;
         f32 sine;
         GroundHit hit;
-        Vec3f probe;
+        vertex probe;
         GroundHit lowerHit;
-        Vec3f lowerProbe;
+        vertex lowerProbe;
         f32 bottom;
 
         valid = TRUE;
-        eye = (Vec3f *)&D_800DBFF0[player].eye.x;
+        eye = (vertex *)&D_800DBFF0[player].eye.x;
         yaw = D_800DBFF0[player].unk380 * 0.7111111283f;
         {
             u32 roll = func_150ADA20();
@@ -103,33 +100,47 @@ void func_1515AF90(s16 player) {
     }
 }
 
-/* Sprite-particle descriptor passed to func_151303BC (ParticleDesc in game_117490.c). */
-typedef struct {
-    /* 0x00 */ s32 flags;
+/* matching: the first 0x6C bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
+typedef struct ParticleDesc6C {
+    /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ s16 texture;
-    /* 0x0A */ s16 lifetime;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14[7];
+    /* 0x08 */ u16 renderMode; /* low byte: D_800A4AC8 index, high byte: func_1513F4E4 arg */
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;      /* 16.16 animation frame */
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
     /* 0x1B */ u8 alpha;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;     /* D_80090B60 index */
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
     /* 0x28 */ f32 width;
     /* 0x2C */ f32 height;
-    /* 0x30 */ Vec3f position;
-    /* 0x3C */ Vec3f unk3C;
-    /* 0x48 */ Vec3f velocity;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 unk58;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ s8 unk60[4];
-    /* 0x64 */ u8 pad64[8]; // matching: game_117490.c has 0xC here; this frame needs a 0x6C-byte desc
-} ParticleDesc;
+    /* 0x30 */ vertex pos;
+    /* 0x3C */ vertex offset;
+    /* 0x48 */ vertex vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ u32 flags;      /* PARTICLE_* */
+    /* 0x5C */ struct ParticleViewMask *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
+    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
+    /* 0x64 */ s8 drawFunc;    /* D_80089804 index, -1 for none */
+    /* 0x65 */ u8 handlerSet;  /* D_80089814/D_80089844/D_80089878 index */
+    /* 0x66 */ u8 views;       /* bit per view the particle is drawn in */
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 minSize;
+    /* 0x6A */ s16 unk6A;
+} ParticleDesc6C;
 
 /* Extra data copied into a func_151303BC particle at +0xA8 (ParticleExtra in game_117490.c). */
 typedef struct {
@@ -145,7 +156,7 @@ typedef struct {
 
 /* Emitter state stored in an effect object at +0x28. */
 typedef struct {
-    /* 0x00 */ Vec3f position;
+    /* 0x00 */ vertex position;
     /* 0x0C */ f32 rate;        // particles per unit of D_800BE9A4
     /* 0x10 */ f32 accumulator; // pending particles; one is spawned per whole unit
     /* 0x14 */ f32 unk14;
@@ -156,13 +167,13 @@ typedef struct {
     /* 0x28 */ ParticleEmitter emitter;
 } EmitterObject;
 
-void *func_151303BC(ParticleDesc *, s32, s32);
+void *func_151303BC(ParticleDesc6C *, s32, s32);
 
 /* Effect update: accumulates rate * D_800BE9A4 and spawns one func_151303BC particle per whole unit. */
 void func_1515B21C(EmitterObject *obj) {
     ParticleEmitter *emitter;
     void *particle;
-    ParticleDesc desc;
+    ParticleDesc6C desc;
     ParticleExtra extra;
 
     emitter = &obj->emitter;
@@ -170,53 +181,53 @@ void func_1515B21C(EmitterObject *obj) {
     if (emitter->accumulator > 1.0f) {
         f32 size;
 
-        desc.unk1D = 47;
-        desc.texture = 0xC01;
-        desc.flags = 0x200005;
+        desc.texture = 47;
+        desc.renderMode = 0xC01;
+        desc.unk0 = 0x200005;
         desc.unk4 = 0;
-        desc.unk14[6] = 0;
-        desc.unk14[5] = 0;
-        desc.unk14[4] = 0;
-        desc.unk14[3] = 0;
-        desc.unk14[2] = 0;
-        desc.unk14[1] = 0;
-        desc.unk14[0] = 0;
-        desc.unk10 = 0;
-        desc.unkC = 0;
-        desc.unk1C = 255;
-        desc.unk22 = 0;
-        desc.unk24 = 0.0f;
-        desc.unk58 = 0x3207;
-        desc.unk60[0] = 5;
-        desc.unk60[1] = 5;
-        desc.unk60[2] = 4;
-        desc.unk60[3] = -1;
-        desc.position = emitter->position;
-        desc.unk3C.x = 0.0f;
-        desc.unk3C.y = 0.0f;
-        desc.unk3C.z = 0.0f;
-        desc.unk1E = 50;
-        desc.unk20 = 5;
+        desc.b2 = 0;
+        desc.g2 = 0;
+        desc.r2 = 0;
+        desc.a = 0;
+        desc.b = 0;
+        desc.g = 0;
+        desc.r = 0;
+        desc.frameRate = 0;
+        desc.frame = 0;
+        desc.brightness = 255;
+        desc.scaleStart = 0;
+        desc.scaleRate = 0.0f;
+        desc.flags = 0x3207;
+        desc.primColorMode = 5;
+        desc.envColorMode = 5;
+        desc.updateFunc = 4;
+        desc.deathFunc = -1;
+        desc.pos = emitter->position;
+        desc.offset.x = 0.0f;
+        desc.offset.y = 0.0f;
+        desc.offset.z = 0.0f;
+        desc.fadeStart = 50;
+        desc.fadeRate = 5;
         extra.unk4[0] = 0;
         extra.unk4[1] = 0;
         extra.unk18[0] = 0;
         extra.unk18[1] = 0;
-        desc.velocity.x = 0.0f;
-        desc.velocity.z = 0.0f;
+        desc.vel.x = 0.0f;
+        desc.vel.z = 0.0f;
         extra.unk10 = 1.200000048f;
         extra.unk14 = 0.8333333135f;
         extra.unk24 = emitter->unk14;
 
         if (func_150ADA20() & 1) {
-            desc.unk58 |= 0x40;
+            desc.flags |= 0x40;
         }
         if (func_150ADA20() & 1) {
-            desc.unk58 |= 0x80;
+            desc.flags |= 0x80;
         }
 
         do {
-            desc.velocity.y = func_150ADA68() * 12.0f * 0.1000000015f;
-            desc.lifetime = (func_150ADA20() % 152U) + 150;
+            desc.vel.y = func_150ADA68() * 12.0f * 0.1000000015f;
+            desc.timer = (func_150ADA20() % 152U) + 150;
             desc.alpha = (func_150ADA20() % 151U) + 55;
             size = (func_150ADA68() * 200.0f) + 100.0f;
             desc.width = size;
@@ -230,7 +241,7 @@ void func_1515B21C(EmitterObject *obj) {
             extra.unk18[3] = (func_150ADA20() & 3) + 2;
             extra.unk1C[0] = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.size;
             extra.unk1C[1] = ((func_150ADA68() * 0.0700000003f) + 0.05999999866f) * extra.size;
-            desc.unk54 = ((func_150ADA68() * 1005.0f) + 600.0f) * 0.001000000047f;
+            desc.gravity = ((func_150ADA68() * 1005.0f) + 600.0f) * 0.001000000047f;
 
             particle = func_151303BC(&desc, 2, 0x28);
             if (particle != NULL) {

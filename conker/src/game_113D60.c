@@ -1077,44 +1077,41 @@ void func_150E8B1C(Game113D60RegionSpawnerEffect *effect) {
     }
 }
 
-typedef struct {
-    /* 0x00 */ s32 unk00;
-    /* 0x04 */ s32 unk04;
-    /* 0x08 */ s16 unk08;
-    /* 0x0A */ s16 unk0A;
-    /* 0x0C */ s32 unk0C;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14;
-    /* 0x15 */ u8 unk15;
-    /* 0x16 */ u8 unk16;
-    /* 0x17 */ u8 unk17;
-    /* 0x18 */ u8 unk18;
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
-    /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
-    /* 0x1E */ s16 unk1E;
-    /* 0x20 */ s16 unk20;
-    /* 0x22 */ s16 unk22;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ f32 unk2C;
-    /* 0x30 */ vertex position;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ f32 unk50;
-    /* 0x54 */ f32 unk54;
-    /* 0x58 */ s32 flags;
-    /* 0x5C */ u8 pad5C[4];
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ s8 unk63;
-} Struct15130374Arg; // matching: 0x64-byte view of ParticleDesc; the full 0x70 changes the stack frame
+/* matching: the first 0x64 bytes of ParticleDesc; a full ParticleDesc on the stack changes the frame. */
+typedef struct ParticleDesc64 {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 renderMode; /* low byte: D_800A4AC8 index, high byte: func_1513F4E4 arg */
+    /* 0x0A */ s16 timer;
+    /* 0x0C */ s32 frame;      /* 16.16 animation frame */
+    /* 0x10 */ s32 frameRate;
+    /* 0x14 */ u8 r;
+    /* 0x15 */ u8 g;
+    /* 0x16 */ u8 b;
+    /* 0x17 */ u8 a;
+    /* 0x18 */ u8 r2;
+    /* 0x19 */ u8 g2;
+    /* 0x1A */ u8 b2;
+    /* 0x1B */ u8 alpha;
+    /* 0x1C */ u8 brightness;
+    /* 0x1D */ u8 texture;     /* D_80090B60 index */
+    /* 0x1E */ s16 fadeStart;
+    /* 0x20 */ s16 fadeRate;
+    /* 0x22 */ s16 scaleStart;
+    /* 0x24 */ f32 scaleRate;
+    /* 0x28 */ f32 width;
+    /* 0x2C */ f32 height;
+    /* 0x30 */ vertex pos;
+    /* 0x3C */ vertex offset;
+    /* 0x48 */ vertex vel;
+    /* 0x54 */ f32 gravity;
+    /* 0x58 */ u32 flags;      /* PARTICLE_* */
+    /* 0x5C */ struct ParticleViewMask *viewMask;
+    /* 0x60 */ u8 primColorMode;
+    /* 0x61 */ u8 envColorMode;
+    /* 0x62 */ s8 updateFunc;  /* D_80089760 index, -1 for none */
+    /* 0x63 */ s8 deathFunc;   /* D_80089800 index, -1 for none */
+} ParticleDesc64;
 
 /* A spawner at a fixed point: `position`, then the spawn rate as in Game113D60Spawner. */
 typedef struct {
@@ -1129,7 +1126,7 @@ typedef struct {
     /* 0x28 */ Game113D60PointSpawner spawner;
 } Game113D60PointSpawnerEffect;
 
-struct260 *func_15130374(Struct15130374Arg *, u8, s32, u8, s32);
+struct260 *func_15130374(ParticleDesc64 *, u8, s32, u8, s32);
 
 /* Spawns func_15130374 particles within 20 units of the spawner's position. */
 void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
@@ -1137,7 +1134,7 @@ void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
     struct260 *particle;
     s32 flip80;
     s32 flip40;
-    Struct15130374Arg arg;
+    ParticleDesc64 arg;
     s32 pad; // matching: unused stack slot
     f32 extra;
     f32 zero; // matching: writing 0.0f literals instead does not match
@@ -1149,34 +1146,34 @@ void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
         {
             f32 size;
 
-            arg.unk1D = 0x16;
-            arg.unk08 = 0xE01;
-            arg.unk00 = 0x200005;
-            arg.unk04 = 0;
-            arg.unk0C = 0;
-            arg.unk10 = 0;
+            arg.texture = 0x16;
+            arg.renderMode = 0xE01;
+            arg.unk0 = 0x200005;
+            arg.unk4 = 0;
+            arg.frame = 0;
+            arg.frameRate = 0;
             arg.flags = 0x801E05;
-            arg.unk60 = 3;
-            arg.unk61 = 3;
-            arg.unk62 = 0x1A;
-            arg.unk63 = -1;
-            arg.unk3C = zero;
-            arg.unk40 = zero;
-            arg.unk44 = zero;
-            arg.unk54 = zero;
-            arg.unk17 = 0xFF;
-            arg.unk1C = 0xFF;
-            arg.unk1E = 30;
-            arg.unk20 = 8;
-            arg.unk48 = zero;
-            arg.unk50 = zero;
+            arg.primColorMode = 3;
+            arg.envColorMode = 3;
+            arg.updateFunc = 0x1A;
+            arg.deathFunc = -1;
+            arg.offset.x = zero;
+            arg.offset.y = zero;
+            arg.offset.z = zero;
+            arg.gravity = zero;
+            arg.a = 0xFF;
+            arg.brightness = 0xFF;
+            arg.fadeStart = 30;
+            arg.fadeRate = 8;
+            arg.vel.x = zero;
+            arg.vel.z = zero;
             do {
                 extra = 0.9700999856f;
-                arg.unk22 = arg.unk0A = (func_150ADA20() & 0xF) + 40;
-                arg.unk1B = (func_150ADA20() % 119) + 100;
+                arg.scaleStart = arg.timer = (func_150ADA20() & 0xF) + 40;
+                arg.alpha = (func_150ADA20() % 119) + 100;
                 size = (func_150ADA68() * 59.0f) + 80.0f;
-                arg.unk2C = arg.unk28 = size;
-                arg.unk24 = ((func_150ADA68() * 3727.0f) + 99979.0f) * 9.999999747e-06f;
+                arg.height = arg.width = size;
+                arg.scaleRate = ((func_150ADA68() * 3727.0f) + 99979.0f) * 9.999999747e-06f;
                 arg.flags &= ~0xC0;
                 if (func_150ADA20() & 1) {
                     flip80 = 0x80;
@@ -1189,18 +1186,18 @@ void func_150E8D5C(Game113D60PointSpawnerEffect *effect) {
                     flip40 = 0;
                 }
                 arg.flags |= (u32)(flip40 | flip80);
-                arg.unk18 = 0x44;
-                arg.unk19 = 0x3C;
-                arg.unk1A = 0x27;
-                arg.unk14 = 0xF;
-                arg.unk15 = 0x11;
-                arg.unk16 = 5;
+                arg.r2 = 0x44;
+                arg.g2 = 0x3C;
+                arg.b2 = 0x27;
+                arg.r = 0xF;
+                arg.g = 0x11;
+                arg.b = 5;
                 func_151436B4(func_150ADA68() * 6.283185482f, func_150ADA68() * 6.283185482f, func_150ADA68() * 20.0f,
-                              &arg.position);
-                arg.position.x += spawner->position.x;
-                arg.position.y += spawner->position.y;
-                arg.position.z += spawner->position.z;
-                arg.unk4C = ((func_150ADA68() * 471.0f) + -1242.0f) * 0.009999999776f;
+                              &arg.pos);
+                arg.pos.x += spawner->position.x;
+                arg.pos.y += spawner->position.y;
+                arg.pos.z += spawner->position.z;
+                arg.vel.y = ((func_150ADA68() * 471.0f) + -1242.0f) * 0.009999999776f;
                 particle = func_15130374(&arg, 0, sizeof(extra), effect->header.owner, effect->header.kind);
                 if (particle != NULL) {
                     memcpy((u8 *)particle + 0xA8, &extra, sizeof(extra));
@@ -1308,57 +1305,54 @@ typedef struct {
     /* 0x170 */ Game113D60DebrisExtra extra;
 } Game113D60Debris;
 
-typedef struct {
-    /* 0x00 */ f32 unk00;
-    /* 0x04 */ f32 unk04;
-    /* 0x08 */ f32 unk08;
-    /* 0x0C */ f32 unk0C;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ vertex position;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 unk69;
+/* matching: the first 0x78 bytes of ParticleSpawn; a full ParticleSpawn on the stack changes the frame. */
+typedef struct ParticleSpawn78 {
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 elasticity;
+    /* 0x08 */ f32 sizeXZ;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ vertex rot;
+    /* 0x1C */ vertex scale;
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ vertex rotVel;
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ u32 flags;
+    /* 0x54 */ s16 lifetime;
+    /* 0x56 */ u16 model;
+    /* 0x58 */ u8 variant;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s16 *unk5C;
+    /* 0x60 */ u8 alpha;
+    /* 0x61 */ u8 updateFn;
+    /* 0x62 */ u8 update2Fn;
+    /* 0x63 */ u8 floorHitFn;
+    /* 0x64 */ u8 floorType3Fn;
+    /* 0x65 */ u8 wallHitFn;
+    /* 0x66 */ u8 destroyFn;
+    /* 0x67 */ u8 squashFn;
+    /* 0x68 */ u8 matrixFn;
+    /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
-    /* 0x6C */ s32 unk6C;
-    /* 0x70 */ u8 unk70;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-} Struct15132A4CArg; // matching: 0x78-byte view of ParticleSpawn; the full 0x7C changes the stack frame
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ struct struct127 *owner;
+    /* 0x70 */ u8 ownerId;
+    /* 0x71 */ u8 pad71;
+    /* 0x72 */ s16 fadeStart;
+    /* 0x74 */ s16 fadeRate;
+    /* 0x76 */ u8 pad76[2];
+} ParticleSpawn78;
 
 extern u8 D_800A12F0[];
 extern f32 D_800A12F4[];
-extern Game113D60Debris *func_15132A4C(Struct15132A4CArg *, s32, s32, s32, u8, s32);
+extern Game113D60Debris *func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 
 /* Spawns func_15132A4C debris particles (updated by func_150E971C) within 50 units of the
  * spawner's position. */
 void func_150E93DC(Game113D60PointSpawnerEffect *effect) {
     Game113D60PointSpawner *spawner;
     Game113D60Debris *debris;
-    Struct15132A4CArg arg;
+    ParticleSpawn78 arg;
     s32 i;
     Game113D60DebrisExtra extra; // copied into the particle uninitialized
 
@@ -1368,48 +1362,48 @@ void func_150E93DC(Game113D60PointSpawnerEffect *effect) {
         {
             f32 pad; // matching: unused stack slot
 
-            arg.unk00 = 0.0f;
-            arg.unk04 = 1.0f;
-            arg.unk1C = 1.0f;
-            arg.unk20 = 1.0f;
-            arg.unk24 = 1.0f;
-            arg.unk50 = 0x49E8;
-            arg.unk34 = 0.0f;
-            arg.unk38 = 0.0f;
-            arg.unk3C = 0.0f;
-            arg.unk44 = 0.0f;
-            arg.unk58 = 0;
+            arg.radius = 0.0f;
+            arg.elasticity = 1.0f;
+            arg.scale.x = 1.0f;
+            arg.scale.y = 1.0f;
+            arg.scale.z = 1.0f;
+            arg.flags = 0x49E8;
+            arg.vel.x = 0.0f;
+            arg.vel.y = 0.0f;
+            arg.vel.z = 0.0f;
+            arg.rotVel.y = 0.0f;
+            arg.variant = 0;
             arg.unk5C = 0;
-            arg.unk60 = 0xFF;
-            arg.unk62 = 0;
-            arg.unk63 = 0;
-            arg.unk64 = 0;
-            arg.unk65 = 0;
-            arg.unk66 = 0;
-            arg.unk67 = 0;
-            arg.unk68 = 2;
+            arg.alpha = 0xFF;
+            arg.update2Fn = 0;
+            arg.floorHitFn = 0;
+            arg.floorType3Fn = 0;
+            arg.wallHitFn = 0;
+            arg.destroyFn = 0;
+            arg.squashFn = 0;
+            arg.matrixFn = 2;
             arg.unk6A = 2;
-            arg.unk6C = 0;
-            arg.unk70 = 0;
-            arg.unk72 = 1;
-            arg.unk74 = 0xFF;
+            arg.owner = 0;
+            arg.ownerId = 0;
+            arg.fadeStart = 1;
+            arg.fadeRate = 0xFF;
             do {
                 i = func_150ADA20() % 1;
-                arg.unk56 = D_800A12F0[i];
-                arg.unk08 = arg.unk0C = D_800A12F4[i] * ((func_150ADA68() * 351.0f) + 400.0f) * 0.001000000047f;
-                arg.unk10 = func_150ADA68() * 360.0f;
-                arg.unk14 = func_150ADA68() * 360.0f;
-                arg.unk18 = func_150ADA68() * 360.0f;
-                arg.unk4C = ((func_150ADA68() * 423.0f) + -1401.0f) * 0.001000000047f;
-                arg.unk54 = (func_150ADA20() % 1) + 100;
-                arg.unk40 = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
-                arg.unk48 = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
+                arg.model = D_800A12F0[i];
+                arg.sizeXZ = arg.sizeY = D_800A12F4[i] * ((func_150ADA68() * 351.0f) + 400.0f) * 0.001000000047f;
+                arg.rot.x = func_150ADA68() * 360.0f;
+                arg.rot.y = func_150ADA68() * 360.0f;
+                arg.rot.z = func_150ADA68() * 360.0f;
+                arg.gravity = ((func_150ADA68() * 423.0f) + -1401.0f) * 0.001000000047f;
+                arg.lifetime = (func_150ADA20() % 1) + 100;
+                arg.rotVel.x = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
+                arg.rotVel.z = ((func_150ADA68() * 27374.0f) + -13687.0f) * 0.001000000047f;
                 func_151436B4(func_150ADA68() * 6.283185482f, func_150ADA68() * 6.283185482f, func_150ADA68() * 50.0f,
-                              &arg.position);
-                arg.position.x += spawner->position.x;
-                arg.position.y += spawner->position.y;
-                arg.position.z += spawner->position.z;
-                arg.unk61 = 8;
+                              &arg.pos);
+                arg.pos.x += spawner->position.x;
+                arg.pos.y += spawner->position.y;
+                arg.pos.z += spawner->position.z;
+                arg.updateFn = 8;
                 debris = func_15132A4C(&arg, 3, 0xFF, sizeof(extra), effect->header.owner, effect->header.kind);
                 if (debris != NULL) {
                     memcpy(&debris->extra, &extra, sizeof(extra));

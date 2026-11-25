@@ -1443,31 +1443,30 @@ typedef struct JetChildPreset {
     /* 0xA */ s16 lifeRange;
 } JetChildPreset;
 
-/* Spawn description for func_1513D524. */
-typedef struct SceneParticleSpawn {
-    /* 0x00 */ u8 texture;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 life;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 unk10;
-    /* 0x11 */ u8 unk11;
-    /* 0x12 */ u8 unk12;
-    /* 0x13 */ u8 unk13;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ vertex start;
-    /* 0x28 */ vertex end;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 unk44;
+/* matching: the first 0x48 bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
+typedef struct ParticleDef48 {
+    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
+    /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
+    /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 frame;       /* 16.16 animation frame */
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ vertex pos;
+    /* 0x28 */ vertex rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x34 */ vertex scale;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
     /* 0x45 */ u8 unk45;
-} SceneParticleSpawn;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+} ParticleDef48;
 
 extern JetChildPreset D_800A8710[];
-extern SceneParticle *func_1513D524(SceneParticleSpawn *, u8, u8, u8, u8, u8, s32, u8, s32);
+extern SceneParticle *func_1513D524(ParticleDef48 *, u8, u8, u8, u8, u8, s32, u8, s32);
 
 /*
  * Called when jet point `index` fades below childLife: spawns line particles (moved and faded by
@@ -1483,7 +1482,7 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
     SceneParticle *ret;
     u8 a;
     u8 b;
-    SceneParticleSpawn spawn;
+    ParticleDef48 spawn;
     JetChildData data;
     f32 sinA;
     f32 cosA;
@@ -1508,11 +1507,11 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
     if (jet->childAccum > 1.0f && i != actor->head) {
         s32 pad[2]; // matching: unused stack slots
 
-        spawn.unk8 = 0;
+        spawn.frame = 0;
         data.unk20 = 25137.0f;
         data.unk24 = 6733.0f;
         data.unk2C = 0;
-        spawn.unkC = (data.unk20 + data.unk24) * 0.5f;
+        spawn.frameSpeed = (data.unk20 + data.unk24) * 0.5f;
         data.gravity = jet->gravity;
         data.fadeStart = 8;
         data.alphaPerLife = 32;
@@ -1522,30 +1521,30 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
         data.unk0 = preset->sizeScale * 30.09054375f;
         data.unk4 = preset->sizeScale * 18.35523224f;
         data.unk1C = 0;
-        spawn.unk14 = (data.unk0 + data.unk4) * 0.5f;
-        data.unk8 = spawn.unk14;
+        spawn.width = (data.unk0 + data.unk4) * 0.5f;
+        data.unk8 = spawn.width;
         data.unkC = preset->unk4 * 3.961740017f;
         data.unk10 = preset->unk4 * 2.919177055f;
         data.unk14 = preset->unk4 * 8.116548538f;
         data.unk1E = 0;
-        spawn.unk34 = 1.0f;
-        spawn.unk3C = 1.0f;
-        spawn.unk40 = 0x40000001;
+        spawn.scale.x = 1.0f;
+        spawn.scale.z = 1.0f;
+        spawn.flags = 0x40000001;
         spawn.unk44 = 255;
         spawn.unk45 = 255;
-        spawn.unk18 = (data.unkC + data.unk10) * 0.5f;
-        data.unk18 = spawn.unk18;
-        spawn.unk38 = 0.0f;
+        spawn.height = (data.unkC + data.unk10) * 0.5f;
+        data.unk18 = spawn.height;
+        spawn.scale.y = 0.0f;
         if (func_150ADA20() & 1) {
             spawn.texture = 0x13;
         } else {
             spawn.texture = 0x14;
         }
-        spawn.unk10 = 0;
-        spawn.unk11 = 0;
-        spawn.unk12 = 0;
-        spawn.unk13 = 0x68;
-        spawn.unk2 = 0x301;
+        spawn.rgba[0] = 0;
+        spawn.rgba[1] = 0;
+        spawn.rgba[2] = 0;
+        spawn.rgba[3] = 0x68;
+        spawn.renderModes = 0x301;
         next = (Particle *)((u8 *)points + i * sizeof(Particle));
         data.velA = next->vel;
         data.velB = cur->vel;
@@ -1557,17 +1556,17 @@ void func_15198110(CharacterFlamethrowerActor *actor, s32 index) {
             sinB = func_151423D8((u8)(b - 0x40));
             cosB = func_151423D8(b);
             rad = next->size * 0.8000000119f;
-            spawn.life = (func_150ADA20() % (u32)(preset->lifeRange + 1)) + preset->lifeMin;
+            spawn.lifetime = (func_150ADA20() % (u32)(preset->lifeRange + 1)) + preset->lifeMin;
             rc = rad * cosB;
             dx = rc * sinA;
             dy = -rad * sinB;
             dz = rc * cosA;
-            spawn.start.x = next->pos.x + dx;
-            spawn.start.y = next->pos.y + dy;
-            spawn.start.z = next->pos.z + dz;
-            spawn.end.x = cur->pos.x + dx;
-            spawn.end.y = cur->pos.y + dy;
-            spawn.end.z = cur->pos.z + dz;
+            spawn.pos.x = next->pos.x + dx;
+            spawn.pos.y = next->pos.y + dy;
+            spawn.pos.z = next->pos.z + dz;
+            spawn.rot.x = cur->pos.x + dx;
+            spawn.rot.y = cur->pos.y + dy;
+            spawn.rot.z = cur->pos.z + dz;
             if (func_150ADA20() & 1) {
                 flag = 1;
             } else {
@@ -2765,32 +2764,28 @@ s32 func_15199C34(CharacterFlamethrowerActor *actor) {
     return 1;
 }
 
-/* Spawn description for func_1513D2F0. */
-typedef struct LineParticleSpawn {
-    u8 texture;
-    u8 unk1;
-    s16 unk2;
-    s16 life;
-    s32 unk8;
-    s32 unkC;
-    u8 unk10;
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    f32 unk14;
-    f32 unk18;
-    vertex start;
-    vertex end;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    s32 unk40;
-    u8 unk44;
-    u8 unk45;
-    u8 unk46;
-    u8 unk47;
-    s32 unk48;
-} LineParticleSpawn;
+/* matching: the first 0x4C bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
+typedef struct ParticleDef4C {
+    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
+    /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
+    /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 frame;       /* 16.16 animation frame */
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ vertex pos;
+    /* 0x28 */ vertex rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x34 */ vertex scale;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
+    /* 0x45 */ u8 unk45;
+    /* 0x46 */ u8 unk46;
+    /* 0x47 */ u8 unk47;
+    /* 0x48 */ s16 *unk48;
+} ParticleDef4C;
 
 extern void (*D_8008F8A8[])(void *);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
@@ -2955,7 +2950,7 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
             s32 head;
             s32 next;
             s32 i;
-            LineParticleSpawn spawn;
+            ParticleDef4C spawn;
             FlameLineData lineData;
             s32 found;
             FlamePoint *last;
@@ -3011,23 +3006,23 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
                 }
                 last = p;
             } while (i != actor->tail && found == 0);
-            spawn.unk8 = 0;
-            spawn.unkC = 0;
+            spawn.frame = 0;
+            spawn.frameSpeed = 0;
             lineData.dragA = flame->line.dragA;
             lineData.dragB = flame->line.dragB;
             lineData.shrinkRate = flame->line.shrinkRate;
             lineData.fadeStart = flame->line.fadeStart;
             lineData.alphaPerLife = flame->line.alphaPerLife;
-            spawn.unk1 = 0;
-            spawn.unk2 = 0x2203;
-            spawn.unk10 = 0xFF;
-            spawn.unk11 = 0xFF;
-            spawn.unk12 = 0xFF;
-            spawn.unk13 = 0xFF;
-            spawn.unk34 = 1.0f;
-            spawn.unk38 = 0.0f;
-            spawn.unk3C = 1.0f;
-            spawn.unk40 = 0x40CC05E1;
+            spawn.type = 0;
+            spawn.renderModes = 0x2203;
+            spawn.rgba[0] = 0xFF;
+            spawn.rgba[1] = 0xFF;
+            spawn.rgba[2] = 0xFF;
+            spawn.rgba[3] = 0xFF;
+            spawn.scale.x = 1.0f;
+            spawn.scale.y = 0.0f;
+            spawn.scale.z = 1.0f;
+            spawn.flags = 0x40CC05E1;
             spawn.unk45 = 0xFF;
             spawn.unk46 = 0;
             spawn.unk47 = 7;
@@ -3044,8 +3039,8 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
                 r1 = func_150ADA68() * flame->line.unk14 + flame->line.unkC;
                 r2 = func_150ADA68() * flame->line.unk18 + flame->line.unk10;
                 r3 = func_150ADA68() * flame->line.speedRange + flame->line.speedMin;
-                spawn.unk14 = 24.22288895f * r1;
-                spawn.unk18 = 3.440458536f * r2;
+                spawn.width = 24.22288895f * r1;
+                spawn.height = 3.440458536f * r2;
                 lineData.velA.x = b->vel.x * r3;
                 lineData.velA.y = b->vel.y * r3;
                 lineData.velA.z = b->vel.z * r3;
@@ -3058,14 +3053,14 @@ s32 func_1519A9A4(CharacterFlamethrowerActor *actor) {
                 } else {
                     spawn.texture = 0x14;
                 }
-                spawn.life = func_150ADA20() % (flame->line.lifeRange + 1) + flame->line.lifeMin;
+                spawn.lifetime = func_150ADA20() % (flame->line.lifeRange + 1) + flame->line.lifeMin;
                 func_15143794((s16)(func_150ADA20() & 0xFF), (s16)((func_150ADA20() & 0x7F) - 0x3F), alpha, &vel.x);
-                spawn.start.x = pos.x + vel.x;
-                spawn.start.y = pos.y + vel.y;
-                spawn.start.z = pos.z + vel.z;
-                spawn.end.x = spawn.start.x + dir.x;
-                spawn.end.y = spawn.start.y + dir.y;
-                spawn.end.z = spawn.start.z + dir.z;
+                spawn.pos.x = pos.x + vel.x;
+                spawn.pos.y = pos.y + vel.y;
+                spawn.pos.z = pos.z + vel.z;
+                spawn.rot.x = spawn.pos.x + dir.x;
+                spawn.rot.y = spawn.pos.y + dir.y;
+                spawn.rot.z = spawn.pos.z + dir.z;
                 spawn.unk44 = func_150ADA20() % (flame->line.unk3D + 1) + flame->line.unk3C;
                 particle = func_1513D2F0(&spawn, &D_800A4AA0, 0x1F, 0x22, 0, 0x1A, ((func_150ADA20() & 1) ? 1 : 0) | 2, 0, 0, 0x2C,
                                     actor->unkC, actor->unk1);

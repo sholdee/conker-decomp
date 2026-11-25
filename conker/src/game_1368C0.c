@@ -122,41 +122,43 @@ typedef struct {
     /* 0x73 */ s8 unk73;
 } EmitterSpawn; /* size 0x74 */
 
-/* Debris spawn template passed to func_15132A4C (same layout as Particle150E9890 in game_116D40.c). */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 scaleXZ;
-    /* 0x0C */ f32 scaleY;
-    /* 0x10 */ f32 rot[3];
-    /* 0x1C */ f32 unk1C[3];
+/* matching: the first 0x78 bytes of ParticleSpawn; a full ParticleSpawn on the stack changes the frame. */
+typedef struct ParticleSpawn78 {
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 elasticity;
+    /* 0x08 */ f32 sizeXZ;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ vertex rot;
+    /* 0x1C */ vertex scale;
     /* 0x28 */ vertex pos;
     /* 0x34 */ vertex vel;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
-    /* 0x54 */ s16 unk54;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ u8 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 unk69;
+    /* 0x40 */ vertex rotVel;
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ u32 flags;
+    /* 0x54 */ s16 lifetime;
+    /* 0x56 */ u16 model;
+    /* 0x58 */ u8 variant;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s16 *unk5C;
+    /* 0x60 */ u8 alpha;
+    /* 0x61 */ u8 updateFn;
+    /* 0x62 */ u8 update2Fn;
+    /* 0x63 */ u8 floorHitFn;
+    /* 0x64 */ u8 floorType3Fn;
+    /* 0x65 */ u8 wallHitFn;
+    /* 0x66 */ u8 destroyFn;
+    /* 0x67 */ u8 squashFn;
+    /* 0x68 */ u8 matrixFn;
+    /* 0x69 */ s8 drawFn;
     /* 0x6A */ u8 unk6A;
-    /* 0x6C */ struct127 *object;
-    /* 0x70 */ u8 objectId;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-} DebrisSpawn; /* size 0x78 */
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ struct struct127 *owner;
+    /* 0x70 */ u8 ownerId;
+    /* 0x71 */ u8 pad71;
+    /* 0x72 */ s16 fadeStart;
+    /* 0x74 */ s16 fadeRate;
+    /* 0x76 */ u8 pad76[2];
+} ParticleSpawn78;
 
 /* Payload of message 0x2D: two objects trade places. */
 typedef struct {
@@ -188,7 +190,7 @@ extern void (*D_80088C64[])(void *, vertex *, vertex *, vertex *, vertex *, vert
 extern void func_15143134(const vertex *, vertex *, void *);
 extern s32 func_15145128(vertex *, vertex *, f32 *, f32 *);
 extern Particle1368C0 *func_15130374(ParticleDesc *, u8, s32, u8, s32);
-extern void func_15132A4C(DebrisSpawn *, s32, s32, s32, u8, s32);
+extern void func_15132A4C(ParticleSpawn78 *, s32, s32, s32, u8, s32);
 extern void func_15152B38(EmitterSpawn *, u8, s32);
 extern void func_1511490C(f32 mtx[4][4], void *arg1);
 extern void func_150A7960(f32 mtx[4][4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ);
@@ -402,56 +404,56 @@ void func_15109C20(Effect1368C0 *effect, vertex *point, vertex *start, vertex *e
     struct127 *object;
     f32 speed;
     s32 pad98;
-    DebrisSpawn debris;
+    ParticleSpawn78 debris;
 
     object = effect->data.tracked.object;
     speed = (func_150ADA68() * 4611.0f + 1581.0f) * 0.001000000047f;
-    debris.unk0 = 1.0f;
-    debris.unk4 = 1.0f;
-    debris.scaleXZ = debris.scaleY = (func_150ADA68() * 3522.0f + 4599.0f) * 9.999999975e-07f;
-    debris.rot[0] = func_150ADA68() * 360.0f;
-    debris.rot[1] = func_150ADA68() * 360.0f;
-    debris.rot[2] = func_150ADA68() * 360.0f;
-    debris.unk1C[0] = 1.0f;
-    debris.unk1C[1] = 1.0f;
-    debris.unk1C[2] = 1.0f;
+    debris.radius = 1.0f;
+    debris.elasticity = 1.0f;
+    debris.sizeXZ = debris.sizeY = (func_150ADA68() * 3522.0f + 4599.0f) * 9.999999975e-07f;
+    debris.rot.x = func_150ADA68() * 360.0f;
+    debris.rot.y = func_150ADA68() * 360.0f;
+    debris.rot.z = func_150ADA68() * 360.0f;
+    debris.scale.x = 1.0f;
+    debris.scale.y = 1.0f;
+    debris.scale.z = 1.0f;
     debris.pos = *point;
     debris.vel.x = dir->x * speed;
     debris.vel.y = dir->y * speed;
     debris.vel.z = dir->z * speed;
-    debris.unk40 = (func_150ADA68() * 24546.0f + -12273.0f) * 0.001000000047f;
-    debris.unk44 = 0.0f;
-    debris.unk48 = (func_150ADA68() * 24546.0f + -12273.0f) * 0.001000000047f;
-    debris.unk4C = (func_150ADA68() * 124.0f + -231.0f) * 0.001000000047f;
-    debris.unk50 = 0x29E8;
-    debris.unk54 = func_150ADA20() % 15U + 20;
+    debris.rotVel.x = (func_150ADA68() * 24546.0f + -12273.0f) * 0.001000000047f;
+    debris.rotVel.y = 0.0f;
+    debris.rotVel.z = (func_150ADA68() * 24546.0f + -12273.0f) * 0.001000000047f;
+    debris.gravity = (func_150ADA68() * 124.0f + -231.0f) * 0.001000000047f;
+    debris.flags = 0x29E8;
+    debris.lifetime = func_150ADA20() % 15U + 20;
 
     if (func_150ADA20() & 1) {
-        debris.unk56 = 0x23;
+        debris.model = 0x23;
     } else {
-        debris.unk56 = 0x24;
+        debris.model = 0x24;
     }
 
-    debris.unk58 = 0;
+    debris.variant = 0;
     debris.unk5C = 0;
-    debris.unk60 = 0xFF;
-    debris.unk61 = 8;
-    debris.unk62 = 0;
-    debris.unk63 = 0;
-    debris.unk64 = 0;
-    debris.unk65 = 0;
-    debris.unk66 = 0;
-    debris.unk67 = 0;
-    debris.unk68 = 2;
+    debris.alpha = 0xFF;
+    debris.updateFn = 8;
+    debris.update2Fn = 0;
+    debris.floorHitFn = 0;
+    debris.floorType3Fn = 0;
+    debris.wallHitFn = 0;
+    debris.destroyFn = 0;
+    debris.squashFn = 0;
+    debris.matrixFn = 2;
     if (effect->unk13 == 0x1A) { /* emitted by effect 0x1A (func_151094FC) */
         debris.unk6A = 1;
     } else {
         debris.unk6A = 2;
     }
-    debris.object = object;
-    debris.objectId = object->unique_id;
-    debris.unk72 = 10;
-    debris.unk74 = 25;
+    debris.owner = object;
+    debris.ownerId = object->unique_id;
+    debris.fadeStart = 10;
+    debris.fadeRate = 25;
 
     func_15132A4C(&debris, 3, 0xFF, 0, effect->owner, effect->kind);
 }

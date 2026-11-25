@@ -1,13 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 s32 func_151BB0E0(); /* sound update callback, defined below */
 void func_151602C0(Header *, Header2 *, s32, s32, s32, s32, s32, s32, s32, u8, s32);
-
-typedef struct {
-    f32 x, y, z;
-} Vec3f;
 
 /* Collision surface record, from the func_150AC9C0 ray cast or a floor query. */
 typedef struct {
@@ -260,7 +257,7 @@ typedef struct {
     /* 0x06 */ s16 unk6;
     /* 0x08 */ s32 unk8;
     /* 0x0C */ s32 unkC;
-    /* 0x10 */ Vec3f pos;
+    /* 0x10 */ vertex pos;
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24;
@@ -277,54 +274,54 @@ typedef struct {
     /* 0x58 */ s8 unk58;
 } Desc1514FCE8;
 
-/* Particle descriptor read by func_1513264C. */
-typedef struct {
-    /* 0x00 */ f32 unk0;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ Vec3f pos;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ Vec3f start;
-    /* 0x34 */ Vec3f vel;
-    /* 0x40 */ f32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ f32 unk48;
-    /* 0x4C */ f32 unk4C;
-    /* 0x50 */ s32 unk50;
+/* matching: ParticleSpawn plus 0x4 bytes; the stack frame needs the larger size. */
+typedef struct ParticleSpawn80 {
+    /* 0x00 */ f32 radius;
+    /* 0x04 */ f32 elasticity;
+    /* 0x08 */ f32 sizeXZ;
+    /* 0x0C */ f32 sizeY;
+    /* 0x10 */ vertex rot;
+    /* 0x1C */ vertex scale;
+    /* 0x28 */ vertex pos;
+    /* 0x34 */ vertex vel;
+    /* 0x40 */ vertex rotVel;
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ u32 flags;
     /* 0x54 */ s16 lifetime;
-    /* 0x56 */ s16 unk56;
-    /* 0x58 */ s8 unk58;
-    /* 0x5C */ s32 unk5C;
-    /* 0x60 */ u8 unk60;
-    /* 0x61 */ u8 unk61;
-    /* 0x62 */ u8 unk62;
-    /* 0x63 */ u8 unk63;
-    /* 0x64 */ u8 unk64;
-    /* 0x65 */ u8 unk65;
-    /* 0x66 */ u8 unk66;
-    /* 0x67 */ u8 unk67;
-    /* 0x68 */ u8 unk68;
-    /* 0x69 */ u8 unk69;
-    /* 0x6A */ s8 unk6A;
-    /* 0x6C */ struct127 *owner;
+    /* 0x56 */ u16 model;
+    /* 0x58 */ u8 variant;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s16 *unk5C;
+    /* 0x60 */ u8 alpha;
+    /* 0x61 */ u8 updateFn;
+    /* 0x62 */ u8 update2Fn;
+    /* 0x63 */ u8 floorHitFn;
+    /* 0x64 */ u8 floorType3Fn;
+    /* 0x65 */ u8 wallHitFn;
+    /* 0x66 */ u8 destroyFn;
+    /* 0x67 */ u8 squashFn;
+    /* 0x68 */ u8 matrixFn;
+    /* 0x69 */ s8 drawFn;
+    /* 0x6A */ u8 unk6A;
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ struct struct127 *owner;
     /* 0x70 */ u8 ownerId;
-    /* 0x72 */ s16 unk72;
-    /* 0x74 */ s16 unk74;
-    /* 0x78 */ s32 pad78;
-    /* 0x7C */ s32 pad7C;
-} Part1513264C;
+    /* 0x71 */ u8 pad71;
+    /* 0x72 */ s16 fadeStart;
+    /* 0x74 */ s16 fadeRate;
+    /* 0x76 */ u8 pad76[2];
+    /* 0x78 */ s32 sound;
+    /* 0x7C */ u8 pad7C[0x4];
+} ParticleSpawn80;
 
-extern Vec3f D_800AA590, D_800AA59C, D_800AA5A8, D_800AA5B4[], D_800AA5CC[], D_800AA5FC[];
+extern vertex D_800AA590, D_800AA59C, D_800AA5A8, D_800AA5B4[], D_800AA5CC[], D_800AA5FC[];
 extern f32 D_800AA62C[];
-extern Vec3f D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[], D_800AA6D8[];
+extern vertex D_800AA63C, D_800AA648[], D_800AA660[], D_800AA678[], D_800AA6A8[], D_800AA6D8[];
 extern f32 D_800AA708[];
 void func_1514FCE8(Desc1514FCE8 *, u8, s32);
 extern void func_1503F404(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
-extern void func_1513264C(Part1513264C *, s32, s32, FloorInfo *, s32, u8, s32);
-extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
+extern void func_1513264C(ParticleSpawn80 *, s32, s32, FloorInfo *, s32, u8, s32);
+extern void func_15143134(vertex *in, vertex *out, Mtx *mtx);
 
 /*
  * Spawns a burst effect at `obj` plus up to twelve particles launched along fixed paths in the space of
@@ -333,8 +330,8 @@ extern void func_15143134(Vec3f *in, Vec3f *out, Mtx *mtx);
 void func_151BA518(struct127 *obj, u8 arg1, s32 arg2) {
     Desc1514FCE8 burst;
     FloorInfo floor;
-    Vec3f objPos;
-    Part1513264C part;
+    vertex objPos;
+    ParticleSpawn80 part;
     f32 outA2, outA1, outA0, outB2, outB1, outB0;
     Mtx *mtx;
     s32 i, j, k;
@@ -393,145 +390,145 @@ void func_151BA518(struct127 *obj, u8 arg1, s32 arg2) {
         }
         {
             typedef s32 T152; // matching: as above
-            part.unk0 = 1.0f;
-            part.unk1C = 1.0f;
-            part.unk20 = 1.0f;
-            part.unk24 = 1.0f;
-            part.unk4 = 0.7f;
-            part.unk44 = 0.0f;
-            part.unk50 = 0x39E9;
-            part.unk58 = 0;
+            part.radius = 1.0f;
+            part.scale.x = 1.0f;
+            part.scale.y = 1.0f;
+            part.scale.z = 1.0f;
+            part.elasticity = 0.7f;
+            part.rotVel.y = 0.0f;
+            part.flags = 0x39E9;
+            part.variant = 0;
             part.unk5C = 0;
-            part.unk60 = 0xFF;
-            part.unk61 = 0xD;
-            part.unk62 = 0;
-            part.unk63 = 0xC;
-            part.unk64 = 0;
-            part.unk65 = 0;
-            part.unk66 = 0;
-            part.unk67 = 0;
-            part.unk68 = 2;
+            part.alpha = 0xFF;
+            part.updateFn = 0xD;
+            part.update2Fn = 0;
+            part.floorHitFn = 0xC;
+            part.floorType3Fn = 0;
+            part.wallHitFn = 0;
+            part.destroyFn = 0;
+            part.squashFn = 0;
+            part.matrixFn = 2;
             part.unk6A = 0;
             part.owner = obj;
             part.ownerId = obj->unique_id;
-            part.unk72 = 0xC;
-            part.unk74 = 0x15;
+            part.fadeStart = 0xC;
+            part.fadeRate = 0x15;
         }
         scale = 0.001f;
         accel = -488.0f * scale;
 
         speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
         part.lifetime = (func_150ADA20() % 36U) + 30;
-        part.unk56 = 0x27;
-        part.unk8 = 0.75f;
-        part.unkC = 0.75f;
+        part.model = 0x27;
+        part.sizeXZ = 0.75f;
+        part.sizeY = 0.75f;
         func_150ADA68();
-        part.unk4C = accel;
-        func_15143134(&D_800AA590, &part.start, mtx);
+        part.gravity = accel;
+        func_15143134(&D_800AA590, &part.pos, mtx);
         func_15143134(&D_800AA59C, &part.vel, mtx);
-        part.vel.x = part.vel.x - part.start.x;
-        part.vel.y = part.vel.y - part.start.y;
-        part.vel.z = part.vel.z - part.start.z;
+        part.vel.x = part.vel.x - part.pos.x;
+        part.vel.y = part.vel.y - part.pos.y;
+        part.vel.z = part.vel.z - part.pos.z;
         part.vel.x = part.vel.x * speed;
         part.vel.y = part.vel.y * speed;
         part.vel.z = part.vel.z * speed;
-        part.pos = objPos;
-        part.pos.x += 109.0f;
-        part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-        part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+        part.rot = objPos;
+        part.rot.x += 109.0f;
+        part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+        part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
         func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
 
         speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
         part.lifetime = (func_150ADA20() % 36U) + 30;
-        part.unk56 = 0x28;
-        part.unk8 = 0.5f;
-        part.unkC = 0.5f;
+        part.model = 0x28;
+        part.sizeXZ = 0.5f;
+        part.sizeY = 0.5f;
         func_150ADA68();
-        part.unk4C = accel;
-        func_15143134(&D_800AA5A8, &part.start, mtx);
+        part.gravity = accel;
+        func_15143134(&D_800AA5A8, &part.pos, mtx);
         func_15143134(&D_800AA5B4[func_150ADA20() & 1], &part.vel, mtx);
-        part.vel.x = part.vel.x - part.start.x;
-        part.vel.y = part.vel.y - part.start.y;
-        part.vel.z = part.vel.z - part.start.z;
+        part.vel.x = part.vel.x - part.pos.x;
+        part.vel.y = part.vel.y - part.pos.y;
+        part.vel.z = part.vel.z - part.pos.z;
         part.vel.x = part.vel.x * speed;
         part.vel.y = part.vel.y * speed;
         part.vel.z = part.vel.z * speed;
-        part.pos = objPos;
-        part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-        part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+        part.rot = objPos;
+        part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+        part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
         func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
 
-        part.unk56 = 0x29;
+        part.model = 0x29;
         for (i = 0; i != 4; i++) {
             if (func_150ADA20() & 1) {
                 speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
                 part.lifetime = (func_150ADA20() % 36U) + 30;
-                part.unk8 = part.unkC = D_800AA62C[i];
+                part.sizeXZ = part.sizeY = D_800AA62C[i];
                 func_150ADA68();
-                part.unk4C = accel;
-                func_15143134(&D_800AA5CC[i], &part.start, mtx);
+                part.gravity = accel;
+                func_15143134(&D_800AA5CC[i], &part.pos, mtx);
                 func_15143134(&D_800AA5FC[i], &part.vel, mtx);
-                part.vel.x = part.vel.x - part.start.x;
-                part.vel.y = part.vel.y - part.start.y;
-                part.vel.z = part.vel.z - part.start.z;
+                part.vel.x = part.vel.x - part.pos.x;
+                part.vel.y = part.vel.y - part.pos.y;
+                part.vel.z = part.vel.z - part.pos.z;
                 part.vel.x = part.vel.x * speed;
                 part.vel.y = part.vel.y * speed;
                 part.vel.z = part.vel.z * speed;
-                part.pos = objPos;
-                part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-                part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                part.rot = objPos;
+                part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
                 func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
             }
         }
 
-        part.unk56 = 0x2B;
-        func_15143134(&D_800AA63C, &part.start, mtx);
-        part.unk8 = part.unkC = 0.551f;
+        part.model = 0x2B;
+        func_15143134(&D_800AA63C, &part.pos, mtx);
+        part.sizeXZ = part.sizeY = 0.551f;
         for (j = 0; j != 2; j++) {
             if (func_150ADA20() & 1) {
                 speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
                 part.lifetime = (func_150ADA20() % 36U) + 30;
                 func_150ADA68();
-                part.unk4C = accel;
+                part.gravity = accel;
                 func_15143134(&D_800AA648[j], &part.vel, mtx);
-                part.vel.x = part.vel.x - part.start.x;
-                part.vel.y = part.vel.y - part.start.y;
-                part.vel.z = part.vel.z - part.start.z;
+                part.vel.x = part.vel.x - part.pos.x;
+                part.vel.y = part.vel.y - part.pos.y;
+                part.vel.z = part.vel.z - part.pos.z;
                 part.vel.x = part.vel.x * speed;
                 part.vel.y = part.vel.y * speed;
                 part.vel.z = part.vel.z * speed;
-                part.pos = objPos;
-                part.pos.x += D_800AA660[j].x;
-                part.pos.y += D_800AA660[j].y;
-                part.pos.z += D_800AA660[j].z;
-                part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-                part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                part.rot = objPos;
+                part.rot.x += D_800AA660[j].x;
+                part.rot.y += D_800AA660[j].y;
+                part.rot.z += D_800AA660[j].z;
+                part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
                 func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
             }
         }
 
-        part.unk56 = 0x2C;
+        part.model = 0x2C;
         for (k = 0; k != 4; k++) {
             if (func_150ADA20() & 1) {
                 speed = ((func_150ADA68() * 200.0f) + 83.0f) * scale;
                 part.lifetime = (func_150ADA20() % 36U) + 30;
-                part.unk8 = part.unkC = D_800AA708[k];
+                part.sizeXZ = part.sizeY = D_800AA708[k];
                 func_150ADA68();
-                part.unk4C = accel;
-                func_15143134(&D_800AA678[k], &part.start, mtx);
+                part.gravity = accel;
+                func_15143134(&D_800AA678[k], &part.pos, mtx);
                 func_15143134(&D_800AA6A8[k], &part.vel, mtx);
-                part.vel.x = part.vel.x - part.start.x;
-                part.vel.y = part.vel.y - part.start.y;
-                part.vel.z = part.vel.z - part.start.z;
+                part.vel.x = part.vel.x - part.pos.x;
+                part.vel.y = part.vel.y - part.pos.y;
+                part.vel.z = part.vel.z - part.pos.z;
                 part.vel.x = part.vel.x * speed;
                 part.vel.y = part.vel.y * speed;
                 part.vel.z = part.vel.z * speed;
-                part.pos = objPos;
-                part.pos.x += D_800AA6D8[k].x;
-                part.pos.y += D_800AA6D8[k].y;
-                part.pos.z += D_800AA6D8[k].z;
-                part.unk40 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
-                part.unk48 = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                part.rot = objPos;
+                part.rot.x += D_800AA6D8[k].x;
+                part.rot.y += D_800AA6D8[k].y;
+                part.rot.z += D_800AA6D8[k].z;
+                part.rotVel.x = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
+                part.rotVel.z = ((func_150ADA68() * 28864.0f) + -14432.0f) * scale;
                 func_1513264C(&part, 3, 0xFF, &floor, 0, arg1, arg2);
             }
         }
@@ -670,13 +667,13 @@ end:
 
 /* Effect descriptor read by func_1514FBFC. */
 typedef struct {
-    Vec3f dir;      /* 0x00 */
+    vertex dir;      /* 0x00 */
     Surface surf;     /* 0x0C */
     u8 pad1E[2];
     f32 unk20;
     s32 unk24;
     s32 unk28;
-    Vec3f pos;      /* 0x2C */
+    vertex pos;      /* 0x2C */
     f32 unk38;
     f32 unk3C;
     f32 unk40;
@@ -702,8 +699,8 @@ typedef struct {
 typedef struct {
     s32 unk0;
     s32 unk4;
-    Vec3f pos;      /* 0x08 */
-    Vec3f vel;      /* 0x14 */
+    vertex pos;      /* 0x08 */
+    vertex vel;      /* 0x14 */
     Surface surf;     /* 0x20 */
     u8 pad32[2];
     f32 unk34;
@@ -726,28 +723,28 @@ extern F32x9 D_800AA73C;
 void func_15055A2C(s32, f32, f32, f32, s32);
 s32 func_150AC9C0(f32, f32, f32, f32, f32, f32, s32, Surface *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
 s32 func_15145C90(s32 hitInfo);
-s32 func_15144E80(Surface *, Vec3f *, Vec3f *, Vec3f *);
+s32 func_15144E80(Surface *, vertex *, vertex *, vertex *);
 void func_1514FBFC(Desc1514FBFC *, u8, s32);
 void func_15151D6C(Desc15151D6C *, s32 *, f32 *, s32, u8, s32);
-void func_151C04F8(Vec3f *, u8, s32);
-void func_151C05A4(Vec3f *, u8, s32);
-void func_151C05F0(Vec3f *, u8, s32);
-void func_151C0644(Vec3f *, u8, s32);
-void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2);
-void func_151BBFBC(Surface *surf, Vec3f *pos, s32 arg2, s32 arg3);
+void func_151C04F8(vertex *, u8, s32);
+void func_151C05A4(vertex *, u8, s32);
+void func_151C05F0(vertex *, u8, s32);
+void func_151C0644(vertex *, u8, s32);
+void func_151BBEE4(vertex *pos, u8 arg1, s32 arg2);
+void func_151BBFBC(Surface *surf, vertex *pos, s32 arg2, s32 arg3);
 
 /*
  * Impact effect for a shot from `from` towards `to`: effects at the origin, then a ray cast along the
  * shot and, where it hits a surface, impact effects there.
  */
-void func_151BB61C(struct127 *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
+void func_151BB61C(struct127 *obj, vertex *from, vertex *to, u8 arg3, s32 arg4) {
     Surface surf;
-    Vec3f hit;
-    Vec3f delta;
+    vertex hit;
+    vertex delta;
     s32 hitInfo;
-    Vec3f edgeA;
-    Vec3f edgeB;
-    Vec3f normal;
+    vertex edgeA;
+    vertex edgeB;
+    vertex normal;
     Desc1514FBFC fx;
 
     if (obj != NULL) {
@@ -828,7 +825,7 @@ void func_151BB61C(struct127 *obj, Vec3f *from, Vec3f *to, u8 arg3, s32 arg4) {
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 unk4;
-    /* 0x08 */ Vec3f pos;
+    /* 0x08 */ vertex pos;
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 unk16;
     /* 0x18 */ s16 unk18;
@@ -844,24 +841,24 @@ typedef struct {
     /* 0x38 */ f32 unk38;
 } Desc15152190;
 
-void func_15152190(Desc15152190 *, Vec3f *, Vec3f *, s32, f32, s32, s32, s32);
-s32 func_15046C80(Vec3f *, u16, f32, FloorInfo *);
-extern Vec3f D_8008FBA0;
-extern Vec3f D_8008FBAC;
+void func_15152190(Desc15152190 *, vertex *, vertex *, s32, f32, s32, s32, s32);
+s32 func_15046C80(vertex *, u16, f32, FloorInfo *);
+extern vertex D_8008FBA0;
+extern vertex D_8008FBAC;
 
 /*
  * Impact effect halfway between `a` and `b`: a burst there, a ground impact on the floor below it,
  * and a shower of debris.
  */
 void func_151BBA9C(struct127 *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
-    Vec3f center;
+    vertex center;
     Desc1514FCE8 burst;
     FloorInfo floor;
-    Vec3f probe;
-    Vec3f hit;
-    Vec3f edgeA;
-    Vec3f edgeB;
-    Vec3f normal;
+    vertex probe;
+    vertex hit;
+    vertex edgeA;
+    vertex edgeB;
+    vertex normal;
 
     if (obj != NULL) {
         center.x = (b[0] + a[0]) * 0.5f;
@@ -918,8 +915,8 @@ void func_151BBA9C(struct127 *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
         }
         {
             Desc15152190 debris;
-            Vec3f first = D_8008FBA0;
-            Vec3f second = D_8008FBAC;
+            vertex first = D_8008FBA0;
+            vertex second = D_8008FBAC;
 
             debris.unk0 = 4;
             debris.unk4 = 8;
@@ -943,7 +940,7 @@ void func_151BBA9C(struct127 *obj, f32 *a, f32 *b, u8 arg3, s32 arg4) {
 }
 
 /* Spawns a short-lived effect at `pos` with a random size and lifetime. */
-void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
+void func_151BBEE4(vertex *pos, u8 arg1, s32 arg2) {
     Header header;
     Header2 header2;
 
@@ -959,10 +956,10 @@ void func_151BBEE4(Vec3f *pos, u8 arg1, s32 arg2) {
     func_151602C0(&header, &header2, (func_150ADA20() % 21U) + 30, 0xFF, 0x61, 0x36, 0xFF, 0, 0, arg1, arg2);
 }
 
-void func_150E7FEC(f32, s32, Surface *, Vec3f *, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_150E7FEC(f32, s32, Surface *, vertex *, s32, s32, s32, s32, s32, s32, s32, s32);
 
 /* Spawns a randomised func_150E7FEC effect on surface `surf` at `pos`. */
-void func_151BBFBC(Surface *surf, Vec3f *pos, s32 arg2, s32 arg3) {
+void func_151BBFBC(Surface *surf, vertex *pos, s32 arg2, s32 arg3) {
     s32 pad; // matching: unused stack slot
     u32 rnd1;
     f32 rnd0;
@@ -1015,7 +1012,7 @@ typedef struct {
 } Fx15163414;
 
 typedef struct {
-    /* 0x00 */ Vec3f pos;
+    /* 0x00 */ vertex pos;
     /* 0x0C */ s16 unkC;
     /* 0x0E */ s16 unkE;
     /* 0x10 */ s32 unk10;
@@ -1029,7 +1026,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ struct127 *owner;
     /* 0x04 */ u8 ownerId;
-    /* 0x08 */ Vec3f pos;
+    /* 0x08 */ vertex pos;
     /* 0x14 */ f32 unk14;
     /* 0x18 */ f32 unk18;
     /* 0x1C */ f32 unk1C;

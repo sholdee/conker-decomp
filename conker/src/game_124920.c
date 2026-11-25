@@ -168,32 +168,31 @@ void func_150F7470(vertex *pos, struct17 *aim, s32 arg2, struct17 *target, u8 ta
     }
 }
 
-/* Spawn descriptor for func_1513D2F0. */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ u8 color[4];
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ struct17 pos;
-    /* 0x28 */ struct17 unk28;
-    /* 0x34 */ f32 unk34;
-    /* 0x38 */ f32 unk38;
-    /* 0x3C */ f32 unk3C;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ u8 unk44;
+/* matching: the first 0x54 bytes of ParticleDef; a full ParticleDef on the stack changes the frame. */
+typedef struct ParticleDef54 {
+    /* 0x00 */ u8 texture;      /* D_80090B60 index, 0xFF = untextured */
+    /* 0x01 */ u8 type;         /* selects the D_80089F64 handler */
+    /* 0x02 */ u16 renderModes; /* low byte: D_800A4AC8 index, high byte: combiner index */
+    /* 0x04 */ s16 lifetime;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 frame;       /* 16.16 animation frame */
+    /* 0x0C */ s32 frameSpeed;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 width;
+    /* 0x18 */ f32 height;
+    /* 0x1C */ vertex pos;
+    /* 0x28 */ vertex rot;      /* a point instead for func_1513F114 (bend target) and beams (end point) */
+    /* 0x34 */ vertex scale;
+    /* 0x40 */ s32 flags;
+    /* 0x44 */ u8 unk44;        /* faded out with the lifetime (flag 0x8000000) */
     /* 0x45 */ u8 unk45;
     /* 0x46 */ u8 unk46;
     /* 0x47 */ u8 unk47;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ u8 unk4C;
+    /* 0x48 */ s16 *unk48;
+    /* 0x4C */ u8 viewportMask;
     /* 0x4D */ u8 pad4D[3];
     /* 0x50 */ s32 unk50;
-} PuffSpawn;
+} ParticleDef54;
 
 /* Per-object state of a puff spawned by func_1513D2F0 (updated by func_150F7E20). */
 typedef struct {
@@ -288,7 +287,7 @@ s8 func_150F78B4(EffectObj *obj) {
         }
     }
     {
-        PuffSpawn spawn;
+        ParticleDef54 spawn;
 
         state->trailDist += dist;
         state->trailAge += dt;
@@ -300,36 +299,36 @@ s8 func_150F78B4(EffectObj *obj) {
             puffState.unkC = state->unk80;
             puffState.sizeBase = 8.318000793f;
             puffState.sizeAmplitude = 8.318000793f;
-            spawn.unk0 = 0x7A;
-            spawn.unk1 = 0;
-            spawn.unk2 = 0x4404;
-            spawn.unk4 = 10;
-            spawn.unk8 = 0;
-            spawn.unkC = 0;
-            spawn.color[0] = 0xFF;
-            spawn.color[1] = 0xFF;
-            spawn.color[2] = 0xFF;
-            spawn.color[3] = 0xFF;
-            spawn.unk14 = 0.0f;
-            spawn.unk18 = 0.0f;
+            spawn.texture = 0x7A;
+            spawn.type = 0;
+            spawn.renderModes = 0x4404;
+            spawn.lifetime = 10;
+            spawn.frame = 0;
+            spawn.frameSpeed = 0;
+            spawn.rgba[0] = 0xFF;
+            spawn.rgba[1] = 0xFF;
+            spawn.rgba[2] = 0xFF;
+            spawn.rgba[3] = 0xFF;
+            spawn.width = 0.0f;
+            spawn.height = 0.0f;
             puffState.phaseSpeed = 0.4670000076f;
-            spawn.unk28 = *(struct17 *)&D_800A5480;
-            spawn.unk34 = 1.0f;
-            spawn.unk38 = 1.0f;
-            spawn.unk3C = 1.0f;
-            spawn.unk40 = 0xCC0008;
+            spawn.rot = *(vertex *)&D_800A5480;
+            spawn.scale.x = 1.0f;
+            spawn.scale.y = 1.0f;
+            spawn.scale.z = 1.0f;
+            spawn.flags = 0xCC0008;
             spawn.unk45 = 0xFF;
             spawn.unk46 = 0;
             spawn.unk47 = 6;
             spawn.unk48 = 0;
-            spawn.unk4C = 0xFF;
+            spawn.viewportMask = 0xFF;
             spawn.unk50 = 0;
             do {
                 extern s32 D_800A4AA0; // matching: a declaration here opens the loop scope IDO's scheduler needs
 
                 puffState.phase = 4.712388992f;
                 puffState.timeLeft = 27.0f - state->trailAge;
-                spawn.pos = state->trailPos;
+                spawn.pos = *(vertex *)&state->trailPos; // TODO(vectors): struct17/vertex mix
                 spawn.unk44 = puffState.timeLeft * 6.481481552f;
                 puff = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC, obj->unk1);
                 if (puff != NULL) {
@@ -471,7 +470,7 @@ s32 func_150F81BC(EffectObj *obj) {
         if (func_15145128(&delta, &dir, &dist, &unused) != 0) {
             struct17 step;
             PuffObj *puff;
-            PuffSpawn spawn;
+            ParticleDef54 spawn;
             PuffState puffState;
 
             step.unk0 = dir.unk0 * 20.0f;
@@ -486,35 +485,35 @@ s32 func_150F81BC(EffectObj *obj) {
                 puffState.phaseSpeed = 0.4630000293f;
                 puffState.sizeBase = 8.241000175f;
                 puffState.sizeAmplitude = 3.888999939f;
-                spawn.unk0 = 0x7A;
-                spawn.unk1 = 0;
-                spawn.unk2 = 0x4404;
-                spawn.unk4 = 10;
-                spawn.unk8 = 0;
-                spawn.unkC = 0;
-                spawn.color[0] = 0xFF;
-                spawn.color[1] = 0xFF;
-                spawn.color[2] = 0xFF;
-                spawn.color[3] = 0xFF;
-                spawn.unk18 = 0.0f;
-                spawn.unk14 = 0.0f;
-                spawn.unk28 = *(struct17 *)&D_800A5480;
-                spawn.unk34 = 1.0f;
-                spawn.unk38 = 1.0f;
-                spawn.unk3C = 1.0f;
-                spawn.unk40 = 0xCC0008;
+                spawn.texture = 0x7A;
+                spawn.type = 0;
+                spawn.renderModes = 0x4404;
+                spawn.lifetime = 10;
+                spawn.frame = 0;
+                spawn.frameSpeed = 0;
+                spawn.rgba[0] = 0xFF;
+                spawn.rgba[1] = 0xFF;
+                spawn.rgba[2] = 0xFF;
+                spawn.rgba[3] = 0xFF;
+                spawn.height = 0.0f;
+                spawn.width = 0.0f;
+                spawn.rot = *(vertex *)&D_800A5480;
+                spawn.scale.x = 1.0f;
+                spawn.scale.y = 1.0f;
+                spawn.scale.z = 1.0f;
+                spawn.flags = 0xCC0008;
                 spawn.unk45 = 0xFF;
                 spawn.unk46 = 0;
                 spawn.unk47 = 6;
                 spawn.unk48 = 0;
-                spawn.unk4C = 0xFF;
+                spawn.viewportMask = 0xFF;
                 spawn.unk50 = 0;
                 do {
                     extern s32 D_800A4AA0; // matching: a declaration here opens the loop scope IDO's scheduler needs
 
                     puffState.phase = 4.712388992f;
                     puffState.timeLeft = 27.0f - follow->trailAge;
-                    spawn.pos = follow->trailPos;
+                    spawn.pos = *(vertex *)&follow->trailPos; // TODO(vectors): struct17/vertex mix
                     spawn.unk44 = puffState.timeLeft * 6.481481552f;
                     puff = func_1513D2F0(&spawn, (s32)&D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj->unkC,
                                          obj->unk1);
