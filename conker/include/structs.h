@@ -100,6 +100,9 @@ typedef struct {
     s32 unk0;
 } struct36;
 
+/* One synthesizer aux bus as game code sees it (struct07.unk48 = n_syn->auxBus, stride 0x44; init_1E4A0.c
+ * creates its effect at unk20). The audio files use their own views (init_1E530.c FxBus, init_210C0.c AuxBus,
+ * N_ALAuxBus in n_synthInternals.h), which do not agree on every field. */
 typedef struct {
     s32 unk0;
     s32 unk4;
@@ -118,7 +121,7 @@ typedef struct {
     s32 unk38;
     s32 unk3C;
     s32 unk40;
-} struct37;
+} struct37; /* size 0x44 */
 
 typedef struct {
     s32 unk0;     // used
@@ -139,7 +142,7 @@ typedef struct {
     s32 unk3C;
     struct36 *unk40;
     s32 unk44;    // used
-    struct37 *unk48; // used
+    struct37 *unk48; // used: the aux buses
     s32 unk4C;    // used
     s32 unk50;    // used
     s32 unk54;

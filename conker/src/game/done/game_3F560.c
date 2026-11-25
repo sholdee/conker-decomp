@@ -5,7 +5,7 @@
 
 
 void func_150120B0(s32 arg0) {
-    struct37 *temp_v0;
+    TimedEffect *effect;
     struct184 tmp;
 
     tmp.unk0 = 50.0f;
@@ -17,9 +17,9 @@ void func_150120B0(s32 arg0) {
     tmp.unk18 = 0.0f;
     tmp.unk1C = D_80096540;
 
-    temp_v0 = func_15149130(300, -1, 30, -1, 0, 65, 32, 255, 1);
-    if (temp_v0 != NULL) {
-        memcpy(&temp_v0->unk28, &tmp, 32);
+    effect = func_15149130(300, -1, 30, -1, 0, 65, 32, 255, 1);
+    if (effect != NULL) {
+        memcpy(effect + 1, &tmp, 32);
     }
 }
 

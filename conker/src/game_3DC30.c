@@ -34,7 +34,7 @@ dummy_label_15010880:
 // NON-MATCHING: ops in wrong order
 // void func_15010880(void) {
 //     struct177 tmp;
-//     struct37 *temp_v0;
+//     TimedEffect *temp_v0;
 
 //     func_15177410(0x10, 0xE9, -437, 0x463, -0xCBF, 90.0f, 15000, 36.0f, 0x4D, 15, 127, 127, 127, 127, 127, 127);
 //     D_800E0934 = func_150DE32C;

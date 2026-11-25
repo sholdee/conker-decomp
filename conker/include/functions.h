@@ -775,7 +775,6 @@ void func_151403DC(s32 arg0, u8 arg1);
 void func_151411A4(struct DefParticleHead *particle);
 void func_151411C4(struct DefParticleHead *particle);
 s32  func_15141818(s32 arg0, s32 arg1);
-void func_15141970(struct37 *arg0);
 void func_15141990(void *arg0);
 void func_151419B0(void *arg0);
 void func_15141DA4(void *arg0, s32 arg1, s32 arg2);

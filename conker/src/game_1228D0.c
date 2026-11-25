@@ -304,7 +304,6 @@ void func_150F5C08(Actor *owner, s16 arg1, u8 arg2, s32 arg3) {
     data.ownerId = owner->unique_id;
     data.accum = 0.0f;
 
-    // the header's struct37 * parameter is really the size of the effect's data
     effect = func_15149130(arg1, -1, 0x51, -1, 1, 0x3E, sizeof(data), arg2, arg3);
     if (effect != NULL) {
         memcpy(&((SparkEffect *)effect)->data, &data, sizeof(data));

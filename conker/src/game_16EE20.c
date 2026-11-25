@@ -21,18 +21,6 @@ void func_150A7960(f32 *, f32, f32, f32, f32 *, f32 *, f32 *);
 Gfx *func_15094FE8(Gfx *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_1514306C(s32 *, s32, s32, u8);
 
-void func_15141970(struct37 *arg0) {
-    func_1514EDF0(arg0, (Actor *)arg0->unk2C); // unk2C: the owner (struct37 types it s32)
-}
-
-void func_15141990(void *arg0) {
-    func_15141970(arg0);
-}
-
-void func_151419B0(void *arg0) {
-    func_15141970(arg0);
-}
-
 typedef struct {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ union {
@@ -46,7 +34,7 @@ typedef struct {
 /* The block at 0x28 of the receiving object. */
 typedef struct {
     /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
+    /* 0x04 */ s32 unk4;   /* the owner actor */
     /* 0x08 */ u8 unk8;
 } Link151419D0;
 
@@ -55,6 +43,20 @@ typedef struct {
     /* 0x00 */ TimedEffect base;
     /* 0x28 */ Link151419D0 link;
 } LinkedObject151419D0;
+
+/* Calls func_1514EDF0 with the object and its owner (link.unk4). */
+void func_15141970(LinkedObject151419D0 *obj) {
+    func_1514EDF0(obj, (Actor *)obj->link.unk4);
+}
+
+void func_15141990(void *arg0) {
+    func_15141970(arg0);
+}
+
+void func_151419B0(void *arg0) {
+    func_15141970(arg0);
+}
+
 
 
 /* Message handler: message 0 destroys the object if it refers to it; 0x2D re-links it. */
