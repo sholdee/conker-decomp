@@ -230,7 +230,7 @@ Gfx *func_1514803C(Trail *trail, Gfx *gfx, s16 arg2) {
         if (vtx == NULL) {
             return gfx;
         }
-        if (vtx != NULL) {
+        if (vtx != NULL) { // matching: redundant re-test of vtx
             if (D_800BE9C0 != 0) {
                 vtx += (trail->capacity - 1) * 2;
             }
@@ -370,28 +370,23 @@ s32 func_151488C4(Trail *trail) {
     s32 phase;
     struct {
         u16 step;
-        u8 pad2[2];
-    } interval;
+    } interval; // matching: a struct puts step at offset 0 of its stack slot (a bare u16 sits at 2)
     s32 index;
     s32 count;
     s32 phaseIndex;
-    TrailPoint *point;
 
     points = trail->points;
     params = trail->params;
     index = trail->start;
-    if (index != trail->end) {
-        do {
-            point = (TrailPoint *)((u32)points + index * 0x14);
-            index++;
-            point->velocityY -= params->motion.gravity * D_800BE9A4;
-            point->pos.x += params->motion.velocity.x * D_800BE9A4;
-            point->pos.y += point->velocityY * D_800BE9A4;
-            point->pos.z += params->motion.velocity.z * D_800BE9A4;
-            if (index == trail->capacity) {
-                index = 0;
-            }
-        } while (index != trail->end);
+    while (index != trail->end) {
+        points[index].velocityY -= params->motion.gravity * D_800BE9A4;
+        points[index].pos.x += params->motion.velocity.x * D_800BE9A4;
+        points[index].pos.y += points[index].velocityY * D_800BE9A4;
+        points[index].pos.z += params->motion.velocity.z * D_800BE9A4;
+        index++;
+        if (index == trail->capacity) {
+            index = 0;
+        }
     }
     count = trail->count;
     if (count < trail->capacity - 1) {
@@ -407,20 +402,18 @@ s32 func_151488C4(Trail *trail) {
             trail->end = 0;
         }
         phaseIndex = trail->start;
-        if (phaseIndex != trail->end) {
-            do {
-                points[phaseIndex].phase = phase;
-                if (params->motion.flags & 0x20) {
-                    phase = (phase - interval.step) & 0xFFFF;
-                } else {
-                    phase += interval.step;
-                    phase &= 0xFFFF;
-                }
-                phaseIndex++;
-                if (phaseIndex == trail->capacity) {
-                    phaseIndex = 0;
-                }
-            } while (phaseIndex != trail->end);
+        while (phaseIndex != trail->end) {
+            points[phaseIndex].phase = phase;
+            if (params->motion.flags & 0x20) {
+                phase = (phase - interval.step) & 0xFFFF;
+            } else {
+                phase += interval.step;
+                phase &= 0xFFFF;
+            }
+            phaseIndex++;
+            if (phaseIndex == trail->capacity) {
+                phaseIndex = 0;
+            }
         }
     } else if (params->motion.flags & 0x17) {
         params->state = 3;
@@ -435,21 +428,19 @@ s32 func_15148AF4(Trail *trail) {
     s32 idx;
     TrailPoint *points;
     TrailParams *params;
-    TrailPoint *point;
 
     points = trail->points;
     params = trail->params;
     idx = trail->end;
     do {
-        idx -= 1;
+        idx--;
         if (idx < 0) {
             idx = trail->capacity - 1;
         }
-        point = (TrailPoint *)((u8 *)points + (idx * 0x14));
-        point->velocityY = point->velocityY - (params->motion.gravity * D_800BE9A4);
-        point->pos.x = point->pos.x + (params->motion.velocity.x * D_800BE9A4);
-        point->pos.y = point->pos.y + (point->velocityY * D_800BE9A4);
-        point->pos.z = point->pos.z + (params->motion.velocity.z * D_800BE9A4);
+        points[idx].velocityY -= params->motion.gravity * D_800BE9A4;
+        points[idx].pos.x += params->motion.velocity.x * D_800BE9A4;
+        points[idx].pos.y += points[idx].velocityY * D_800BE9A4;
+        points[idx].pos.z += params->motion.velocity.z * D_800BE9A4;
     } while (idx != trail->start);
     return 1;
 }
@@ -630,7 +621,7 @@ void func_15148F1C(u8 texture, f32 x, f32 y, f32 z, s32 arg4, s32 yaw, s32 pitch
 /* Fades the trail in: alpha = 8 per unit of unk1C, capped at 255. */
 s32 func_151490C8(Trail *trail) {
     TrailParams *params = trail->params;
-    s32 alpha = trail->unk1C << 3;
+    s32 alpha = trail->unk1C * 8;
 
     if (alpha >= 0x100) {
         alpha = 0xFF;
