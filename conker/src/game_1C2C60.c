@@ -30,7 +30,6 @@ extern void *allocate_memory(s32, s32, s32, s32);
 s32 func_151422C0(s32, const char *, s32, s32, const char *, s32);
 struct225 *func_151602C0(Header *, Header2 *, s32, s32, s32, s32, u8, u8, s32, u8, s32);
 
-extern f32 D_800A8AF8;
 
 /* Generic doubly linked list node; every list allocated by func_151957B0 starts with one. */
 typedef struct ListNode {
@@ -2163,7 +2162,7 @@ typedef struct FlameSeed {
     /* 0x35 */ s8 unk35;       /* D_8008F8A8 index */
     /* 0x36 */ s8 destroyFn;   /* D_8008F8B4 index */
     /* 0x37 */ s8 soundFn;     /* D_8008F8B8 index */
-    /* 0x38 */ s8 unk38;       /* D_8008F8BC index */
+    /* 0x38 */ s8 soundUpdateFn; /* D_8008F8BC index */
     /* 0x39 */ s8 soundStopFn; /* D_8008F8C0 index */
     /* 0x3A */ u8 alpha;
     /* 0x3B */ u8 pad3B;
@@ -2281,7 +2280,8 @@ typedef struct CharacterFlamethrowerSetup {
 } CharacterFlamethrowerSetup;
 
 void func_15145EA4(Vec3f **in, Vec3f **out, s32 matrix, s32 count);
-struct225 *func_1519C09C(s32 arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7);
+struct225 *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
+                         s32 arg7);
 extern void (*D_8008F8A4[])(void *);
 extern s16 (*D_8008F8B8[])(void);
 
@@ -2351,7 +2351,7 @@ CharacterFlamethrowerActor *func_151994B8(s32 extraSize, CharacterFlamethrowerSe
                 D_8008F8A4[initial.seed.initFn](result);
             }
             if (setup->flags & 1) {
-                state->light = func_1519C09C((s32)result, &spawn.pos.x, setup->red, setup->green, setup->blue,
+                state->light = func_1519C09C(result, &spawn.pos, setup->red, setup->green, setup->blue,
                                          setup->alpha, arg2, arg3);
             } else {
                 state->light = NULL;
@@ -2477,8 +2477,8 @@ s32 func_15199A10(CharacterFlamethrowerActor *actor) {
             out->unk12 = oldest->pos.z;
         }
     }
-    if (flame->seed.unk38 != -1) {
-        D_8008F8BC[flame->seed.unk38](actor);
+    if (flame->seed.soundUpdateFn != -1) {
+        D_8008F8BC[flame->seed.soundUpdateFn](actor);
     }
     flame->flags &= ~1;
     if (actor->count > 0) {
@@ -3395,171 +3395,159 @@ void func_1519BE1C(Vec3f *pos, Vec3f *vel, f32 gravity, f32 dt) {
     pos->z += v.z * dt;
 }
 
-void func_1519BEB8(u8 *arg0) {
-    u8 *q;
-    u8 *p;
+/* Flame init callback (D_8008F8A4): clears the owner's FlamethrowerSlot `active` flag. */
+void func_1519BEB8(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerFlame *flame;
+    struct127 *owner;
     s32 i;
     s32 found;
 
-    q = *(u8 **)(arg0 + 0x98);
-    p = *(u8 **)q;
+    flame = actor->state;
+    owner = flame->seed.owner;
     i = 0;
-    found = 0;
+    found = FALSE;
     do {
-        if (p[0x3B] == D_800A8A9C[i]) {
-            found = 1;
+        if (owner->unique_id == D_800A8A9C[i]) {
+            found = TRUE;
         } else {
             i++;
         }
     } while (!found && i < 6);
 
     if (found) {
-        ((u8 *)D_800E0900[i])[0x14] = 0;
+        D_800E0900[i]->active = FALSE;
     }
 }
 
-void func_1519BF20(u8 *arg0) {
-    u8 *q;
-    u8 *p;
+/* Flame destroy callback (D_8008F8B4): sets the owner's FlamethrowerSlot `active` flag again. */
+void func_1519BF20(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerFlame *flame;
+    struct127 *owner;
     s32 i;
     s32 found;
 
-    q = *(u8 **)(arg0 + 0x98);
-    p = *(u8 **)q;
+    flame = actor->state;
+    owner = flame->seed.owner;
     i = 0;
-    found = 0;
+    found = FALSE;
     do {
-        if (p[0x3B] == D_800A8A9C[i]) {
-            found = 1;
+        if (owner->unique_id == D_800A8A9C[i]) {
+            found = TRUE;
         } else {
             i++;
         }
     } while (!found && i < 6);
 
     if (found) {
-        ((u8 *)D_800E0900[i])[0x14] = 1;
+        D_800E0900[i]->active = TRUE;
     }
 }
 
+/* Flame sound-start callback (D_8008F8B8): starts the looping flame sound; its handle is left in v0. */
 void func_1519BF8C(void) {
     func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    char padC[0x28 - 0xC];
-} Struct1519BFBCVec;
+/* Flame callback (D_8008F8BC): moves the flame's sound to its oldest point. */
+void func_1519BFBC(CharacterFlamethrowerActor *actor) {
+    FlamePoint *points;
+    CharacterFlamethrowerFlame *flame;
+    u16 sound;
 
-typedef struct {
-    char pad_0x0[0x130];
-    u16 field_0x130;
-} Struct1519BFBCSound;
-
-typedef struct {
-    char pad0[0x2C];
-    s8 unk2C;
-    s8 unk2D;
-    char pad2E[0x94 - 0x2E];
-    Struct1519BFBCVec *unk94;
-    Struct1519BFBCSound *field_0x98;
-} Struct1519BFBC;
-
-void func_1519BFBC(Struct1519BFBC *arg0) {
-    Struct1519BFBCVec *temp_v1;
-    Struct1519BFBCSound *temp_v2;
-    u16 temp_a0;
-    s32 temp_t6;
-    s32 temp_t7;
-
-    temp_v2 = arg0->field_0x98;
-    temp_v1 = arg0->unk94;
-
-    if (arg0->unk2C != 0) {
-        temp_a0 = temp_v2->field_0x130;
-        if (temp_a0 != 0) {
-            temp_t6 = 0x1388;
-            temp_t7 = 0x1F4;
-            func_1000F91C(temp_a0, 0x7FFF, 0, 0, 0,
-                          ((Struct1519BFBCVec *)((u8 *)temp_v1 + (arg0->unk2D * 0x28)))->unk0,
-                          ((Struct1519BFBCVec *)((u8 *)temp_v1 + (arg0->unk2D * 0x28)))->unk4,
-                          ((Struct1519BFBCVec *)((u8 *)temp_v1 + (arg0->unk2D * 0x28)))->unk8,
-                          temp_t7, temp_t6);
+    flame = actor->state;
+    points = actor->points;
+    if (actor->count != 0) {
+        sound = flame->sound;
+        if (sound != 0) {
+            func_1000F91C(sound, 0x7FFF, 0, 0, 0, points[actor->tail].pos.x, points[actor->tail].pos.y,
+                          points[actor->tail].pos.z, 500, 5000);
         }
     }
 }
 
-void func_1519C06C(Struct1519BFBC *arg0) {
-    Struct1519BFBCSound *temp = arg0->field_0x98;
-    u16 val = temp->field_0x130;
-    if (val != 0) {
-        func_100111C8(val);
+/* Flame sound-stop callback (D_8008F8C0). */
+void func_1519C06C(CharacterFlamethrowerActor *actor) {
+    CharacterFlamethrowerFlame *flame = actor->state;
+    u16 sound = flame->sound;
+    if (sound != 0) {
+        func_100111C8(sound);
     }
 }
 
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-} Struct1519C09CData;
+/* Light parameters func_1519C09C stores at offset 0x18 of a flame's light. */
+typedef struct FlameLightParams {
+    /* 0x00 */ f32 unk0;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+} FlameLightParams;
 
-struct225 *func_1519C09C(s32 arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7) {
-    struct225 *temp_v0;
+/* How a flame's light (a struct225 from func_151602C0) lays out the data func_1519C09C gives it. */
+typedef struct FlameLight {
+    /* 0x00 */ u8 pad0[0x18];
+    /* 0x18 */ FlameLightParams params;
+    /* 0x38 */ CharacterFlamethrowerActor *flame;
+} FlameLight;
+
+/* Creates the light that follows flame `flame` at `pos`, colored (red, green, blue, alpha). */
+struct225 *func_1519C09C(CharacterFlamethrowerActor *flame, Vec3f *pos, u8 red, u8 green, u8 blue, u8 alpha, u8 arg6,
+                         s32 arg7) {
+    struct225 *light;
     Header header;
     Header2 header2;
-    s32 sp5C;
-    Struct1519C09CData data;
+    CharacterFlamethrowerActor *owner;
+    FlameLightParams params;
 
-    data.unk0 = 35.0f;
-    data.unk4 = 5.0f;
-    sp5C = arg0;
+    params.unk0 = 35.0f;
+    params.unk4 = 5.0f;
+    owner = flame;
     header.unk0 = 2;
     header.unk1 = 2;
-    header.unk2 = 0x12C;
+    header.unk2 = 300;
     header.unk4 = 0x22;
-    data.unk8 = 110.0f;
-    data.unkC = 1.0f;
-    data.unk10 = 0.0f;
-    data.unk14 = 7.0f;
-    data.unk18 = D_800A8AF8;
-    data.unk1C = 127.0f;
-    header2.unk0 = arg1[0];
-    header2.unk4 = arg1[1];
-    header2.unk8 = arg1[2];
+    params.unk8 = 110.0f;
+    params.unkC = 1.0f;
+    params.unk10 = 0.0f;
+    params.unk14 = 7.0f;
+    params.unk18 = 0.2488999963f;
+    params.unk1C = 127.0f;
+    header2.unk0 = pos->x;
+    header2.unk4 = pos->y;
+    header2.unk8 = pos->z;
 
-    temp_v0 = func_151602C0(&header, &header2, arg2, arg3, arg4, arg5, 0xFF, 0, 0x24, arg6, arg7);
-    if (temp_v0 != NULL) {
-        memcpy((u8 *)temp_v0 + 0x18, &data, sizeof(data));
-        memcpy((u8 *)temp_v0 + 0x38, &sp5C, sizeof(sp5C));
+    light = func_151602C0(&header, &header2, red, green, blue, alpha, 0xFF, 0, 0x24, arg6, arg7);
+    if (light != NULL) {
+        memcpy(&((FlameLight *)light)->params, &params, sizeof(params));
+        memcpy(&((FlameLight *)light)->flame, &owner, sizeof(owner));
     }
-    return temp_v0;
+    return light;
 }
 
-void func_1519C258(s32);
-void func_151617C4(s32);
+void func_1519C258(FlameLight *light);
+void func_151617C4(FlameLight *light);
+void func_151617E4(FlameLight *light);
 
-void func_1519C200(s32 arg0) {
-    func_1519C258(arg0);
-    func_151617C4(arg0);
+/* Light destroy: detaches it from its flame, then func_151617C4. */
+void func_1519C200(FlameLight *light) {
+    func_1519C258(light);
+    func_151617C4(light);
 }
 
-void func_151617E4(s32);
-
-void func_1519C22C(s32 arg0) {
-    func_1519C258(arg0);
-    func_151617E4(arg0);
+/* Light destroy: detaches it from its flame, then func_151617E4. */
+void func_1519C22C(FlameLight *light) {
+    func_1519C258(light);
+    func_151617E4(light);
 }
 
-void func_1519C258(s32 arg0) {
-    s32 *t = *(s32 **)(*(u32 *)(arg0 + 0x38) + 0x98);
+/* Clears the flame's pointer to this light. */
+void func_1519C258(FlameLight *light) {
+    CharacterFlamethrowerFlame *flame = light->flame->state;
 
-    t[0x52] = 0;
+    flame->light = NULL;
 }
 
 typedef struct {
