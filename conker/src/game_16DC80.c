@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "effects.h"
 
 // matching: IDO orders the index addu as the original only when indexing through this (no-op) cast
 #define VIEWS ((RenderView *)D_800BE628)
@@ -103,14 +104,6 @@ typedef struct GlowObj {
     /* 0x110 */ GlowParams params;
 } GlowObj;
 
-/* Spawn descriptor handed to func_1513D524 (only the fields used here). */
-typedef struct {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 unk1;
-    /* 0x02 */ u8 pad2[0x3E];
-    /* 0x40 */ s32 flags;
-} GlowSpawn;
-
 /* matching: the depth terms of a RenderView's viewports[0], read as scalars (the Vp_t array access allocates
  * FP registers differently in func_151408A4). */
 typedef struct {
@@ -148,11 +141,11 @@ f32 sqrtf(f32);
  * Spawns a glow through func_1513D524 and copies paramSize bytes of params into it.
  * Returns the new glow, or NULL.
  */
-GlowObj *func_151407D0(GlowParams *params, s32 paramSize, GlowSpawn *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6,
+GlowObj *func_151407D0(GlowParams *params, s32 paramSize, ParticleDef *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6,
                        s8 handler, u8 arg8, s32 arg9) {
     GlowObj *obj;
 
-    spawn->unk1 = 3;
+    spawn->type = 3;
     spawn->flags |= 0x40400000;
     obj = func_1513D524(spawn, arg3, arg4, arg5, 1, arg6, paramSize, arg8, arg9);
     if (obj != NULL) {
