@@ -27,7 +27,7 @@ extern f32 D_800DC000;
 extern f32 D_800C3614;
 extern f32 D_800C3618;
 extern f32 D_800C361C;
-extern f32 D_800C3624;
+extern Vec3f D_800C3620; // game_49D30.c's; its .y is the gCamShot.at.angles.pitch word
 /* Camera distance presets, indexed by Camera.DistIndex: { tripod magnitude, height }. */
 const f32 D_800A34B0[4][2] = {
     { 267.0f, 100.0f },
@@ -1200,7 +1200,7 @@ void func_15125A6C(Camera *camera) {
         D_800C3618 = camera->CharPtr->ypos + 96.0f;
         D_800C361C = (camera->CharPtr->zpos + (radius * cosf(angle))) + (cosf(sideAngle) * sideRadius);
         gCamShot.at.angles.sway = 0.0f;
-        D_800C3624 = -180.0f;
+        D_800C3620.y = -180.0f;
         gCamShot.unk8 = 0.0f;
         gCamShot.at.angles.yaw = yaw - 180.0f;
         D_800C365C[0] = 0;
