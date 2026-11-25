@@ -123,7 +123,7 @@ void func_1511575C(struct LiftXYZ *obj) {
     s16 dx;
     s16 targetX;
     s16 dy;
-    s32 dz;
+    s32 dz; // matching: s32 with an s16 cast; an s16 local allocates differently
     s16 targetY;
     s16 targetZ;
     s32 startX;
@@ -249,8 +249,8 @@ void func_15115E0C(struct Seesaw *obj, struct127 *player) {
     dx = player->x_position - (f32)obj->x;
     dz = player->z_position - (f32)obj->z;
     if ((obj->flags & 4) == 4) {
-        obj->weightX = obj->weightX + (cosYaw * dx + sinYaw * dz);
-        obj->weightZ = obj->weightZ - (cosYaw * dz + sinYaw * dx);
+        obj->weightX += (cosYaw * dx + sinYaw * dz);
+        obj->weightZ -= (cosYaw * dz + sinYaw * dx);
     }
 }
 
@@ -263,10 +263,11 @@ void func_15115EDC(struct Seesaw *obj, struct127 *player) {
     oldZ = obj->weightZ;
     func_15115E0C(obj, player);
     if (player->unk84.uh == 0x4B) {
+        // matching: the old values are reused to hold this frame's extra gain
         oldX = (obj->weightX - oldX) * 4.0f;
         oldZ = (obj->weightZ - oldZ) * 4.0f;
-        obj->weightX = obj->weightX + oldX;
-        obj->weightZ = obj->weightZ + oldZ;
+        obj->weightX += oldX;
+        obj->weightZ += oldZ;
     }
 }
 
