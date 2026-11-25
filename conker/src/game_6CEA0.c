@@ -3,9 +3,6 @@
 #include "variables.h"
 
 
-/* variables.h declares D_800BE728 as s32[]; it holds a pointer to the per-controller OSContPad pointers. */
-#define CONT_PADS (*(OSContPad ***)&D_800BE728)
-
 #define STICK_DEADZONE 20
 
 /*
@@ -18,7 +15,7 @@ void func_1503F9F0(s16 controller, s16 *dirX, s16 *dirY) {
     OSContPad *pad;
     s16 stickX;
 
-    pad = CONT_PADS[controller];
+    pad = D_800BE728[controller];
     if (--D_80084484 != 0) {
         *dirX = 0;
         *dirY = 0;
@@ -155,7 +152,7 @@ s32 func_1503FB40(Gfx **gfxp, u16 backButtons, u16 selectButtons) {
         }
         D_800C6850 = rowY;
         if (fabsf(D_800C6850) >= SCROLL_LIMIT) {
-            step = (CONT_PADS[0]->button & Z_TRIG) ? 3 : 1;
+            step = (D_800BE728[0]->button & Z_TRIG) ? 3 : 1;
             if (D_80084488 == 1) {
                 D_80084498 -= step;
                 if (D_80084498 > taskCount) {

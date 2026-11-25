@@ -1098,7 +1098,7 @@ void func_151BDD8C(BurstEffect *effect) {
             if (data->sparks[k] != NULL) {
                 BurstSparkData *sparkData = &data->sparks[k]->data;
 
-                if (*((u16 **)D_800BE728[0])[(u8)player] & 0x8000) {
+                if (D_800BE728[(u8)player]->button & A_BUTTON) {
                     sparkData->field48 = 6.0f;
                     sparkData->field4C = 21.0f;
                 } else {
@@ -1109,7 +1109,7 @@ void func_151BDD8C(BurstEffect *effect) {
             if (data->glows[k] != NULL) {
                 BurstGlowData *glowData = &data->glows[k]->data;
 
-                if (*((u16 **)D_800BE728[0])[(u8)player] & 0x8000) {
+                if (D_800BE728[(u8)player]->button & A_BUTTON) {
                     glowData->field04 = 1.5f;
                 } else {
                     glowData->field04 = 1.0f;

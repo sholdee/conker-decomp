@@ -9,9 +9,6 @@
 /* variables.h declares D_800C3600 as struct168 *; it is the struct itself (a scripted camera shot). */
 #define SCRIPT_CAM (*(struct168 *)&D_800C3600)
 
-/* variables.h declares D_800BE728 as s32[]; it holds a pointer to the per-controller OSContPad pointers. */
-#define CONT_PADS (*(OSContPad ***)&D_800BE728)
-
 #define DEG2RAD 0.01745329238474369f
 
 /* Sound emitter handed to the aim sound callbacks by func_1000FA64. */
@@ -161,7 +158,7 @@ void func_15122C5C(Camera *camera) {
         *eye = camera->savedEye;
     }
     index = camera->playerIndex;
-    camera->contPad = CONT_PADS[index];
+    camera->contPad = D_800BE728[index];
     camera->buttonsPressed = D_800BE710[index];
     camera->prevEye = *eye;
     camera->unk358 = camera->unk35C;

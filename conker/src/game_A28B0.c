@@ -2008,7 +2008,7 @@ void func_1507A620(void) {
 }
 
 s32 func_1507A6FC(s32 arg0) {
-    return ((u16 (*)[3])D_800BE748)[arg0][0];
+    return D_800BE748[arg0].button;
 }
 
 /* Jumps to arg3 when entry arg0 of D_800BE748 has all the bits of (arg1:arg2) set. */

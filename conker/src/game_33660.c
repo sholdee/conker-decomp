@@ -17,10 +17,10 @@ extern u8  D_800BE740;
 void func_150061B0(void) {
     osCreateMesgQueue(&D_800BE900, &D_800BE2D0, 8);
     osSetEventMesg(OS_EVENT_SI, &D_800BE900, D_800BE9E0);
-    D_800BE730.unk0 = &D_800BE748;
-    D_800BE730.unk4 = &D_800BE74E;
-    D_800BE730.unk8 = &D_800BE754;
-    D_800BE730.unkC = &D_800BE75A;
+    D_800BE730[0] = &D_800BE748[0];
+    D_800BE730[1] = &D_800BE748[1];
+    D_800BE730[2] = &D_800BE748[2];
+    D_800BE730[3] = &D_800BE748[3];
     func_15007644();
 }
 

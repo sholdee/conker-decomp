@@ -163,7 +163,7 @@ void func_1504A730(void) {
                 obj->unk31C->unk57 = 0;
                 // D_800CC284 is the current controller's OSContPad *, D_800BE728 points at one per controller
                 if (i < 4) {
-                    D_800CC284 = (*(s32 **)&D_800BE728)[i];
+                    D_800CC284 = (s32)D_800BE728[i];
                 } else {
                     bzero(&noPad, sizeof(noPad));
                     *(OSContPad **)&D_800CC284 = &noPad;
@@ -275,7 +275,7 @@ void func_1504ADD0(void) {
             D_800D154C = obj;
             if (i < D_8008FD8C) {
                 if (i < 4) {
-                    D_800CC284 = (*(s32 **)&D_800BE728)[i];
+                    D_800CC284 = (s32)D_800BE728[i];
                 } else {
                     bzero(&noPad, sizeof(noPad));
                     *(OSContPad **)&D_800CC284 = &noPad;

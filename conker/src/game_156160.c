@@ -2,16 +2,13 @@
 #include "functions.h"
 // variables.h declares these as arrays/ints; the code uses them as pointers.
 #define D_800D3098 D_800D3098_header
-#define D_800BE728 D_800BE728_header
 #define D_800DC010 D_800DC010_header
 #define D_800C35EA D_800C35EA_header
 #include "variables.h"
 #undef D_800D3098
-#undef D_800BE728
 #undef D_800DC010
 #undef D_800C35EA
 extern struct178 *D_800D3098;
-extern OSContPad **D_800BE728;
 extern Camera *D_800DC010;
 extern u8 D_800C35EA[];
 

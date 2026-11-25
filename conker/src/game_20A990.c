@@ -173,19 +173,18 @@ extern s8 D_800E0BD2;
 
 void func_151DD8C0(void) {
     typedef struct { s8 x; s8 y; u16 time; u16 buttons; } Entry;
-    typedef struct { u16 buttons; s8 x; s8 y; } Input;
-    Input *input = (Input *)D_800BE748;
+    OSContPad *input = D_800BE748;
     Entry *e;
     s32 idx;
     s32 next;
     s32 time;
     u16 held;
-    held = input->buttons & 0x1000;
+    held = input->button & START_BUTTON;
     idx = D_800E0A74;
     e = (Entry *)D_800E0A70 + idx;
-    input->x = e->x;
-    input->y = e->y;
-    input->buttons = e->buttons | held;
+    input->stick_x = e->x;
+    input->stick_y = e->y;
+    input->button = e->buttons | held;
     D_800E0BD2 = 0;
     if (idx < 0x1F3) {
         next = e[1].time;

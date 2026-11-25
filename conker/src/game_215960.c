@@ -2134,7 +2134,7 @@ Gfx *func_151EE184(Gfx *gfx) {
         selectedKey--;
     }
     mtx = allocate_memory(0x80, 4, 2, 0);
-    if (D_800BE748[0] & 0x8000) {
+    if (D_800BE748[0].button & A_BUTTON) {
         D_800E0C82 += 8;
     } else {
         D_800E0C82 -= 8;

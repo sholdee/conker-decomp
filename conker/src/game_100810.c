@@ -8,9 +8,6 @@
  * ribbon, two particle emitters that follow the owner and three looping sounds driven by its state.
  */
 
-/* variables.h declares D_800BE728 as s32[]; it holds a pointer to the per-controller OSContPad pointers. */
-#define CONT_PADS (*(OSContPad ***)&D_800BE728)
-
 /* Spawn header passed to func_15147A80; the actor keeps a copy of it at 0x10. */
 typedef struct {
     struct17 pos;
@@ -401,9 +398,9 @@ s32 func_150D3A68(TrailActor *actor) {
                 if (player >= 4) {
                     state->mode = 1;
                 } else {
-                    if (CONT_PADS[player]->stick_y > 20) {
+                    if (D_800BE728[player]->stick_y > 20) {
                         state->mode = 0;
-                    } else if (CONT_PADS[player]->stick_y < -20) {
+                    } else if (D_800BE728[player]->stick_y < -20) {
                         state->mode = 2;
                     } else {
                         state->mode = 1;

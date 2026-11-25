@@ -11,11 +11,6 @@ extern void func_1517F488(s32 r, s32 g, s32 b, s32 alpha, s32 duration, s32 view
 extern f32 func_15144BC8(f32 angle); /* wraps an angle into [0, 360] degrees */
 
 
-/* variables.h declares these as plain arrays: D_800BE748 is the OSContPad array and
-   D_800BE728 holds a pointer to the per-controller OSContPad pointers. */
-#define PADS ((OSContPad *)D_800BE748)
-#define CONT_PADS (*(OSContPad ***)&D_800BE728)
-
 /* Actor (structs.h) declares 0x6C, 0x128, 0x1A8 and 0x2E4 with other widths, so the code below
    reaches the bytes and halves it uses through those fields. */
 
@@ -128,7 +123,7 @@ void func_150ED578(Actor *obj) {
     state = obj->unk31C;
     if ((state != NULL) && (state->unk84 == 0)) {
         player = D_800BE616 ? obj->unk127 : obj->unk124;
-        if (CONT_PADS[player]->button & R_TRIG) {
+        if (D_800BE728[player]->button & R_TRIG) {
             owner = &D_800CC2D0[player];
             if (owner->unk31C->aimState != 0) {
                 camera = owner->camera;
@@ -300,15 +295,15 @@ void func_150ED748(Actor *obj) {
         lockFlags = 0;
         health = D_800CC2D0[player].health;
         if (health != 0) {
-            steer = PADS[player].stick_x;
+            steer = D_800BE748[player].stick_x;
             obj->unk247 = 50;
             obj->unk248 = 50;
             throttleScale = 0.6399999857f;
             stateFlags = D_800CC2D0[player].unk31C->unk128;
-            if ((stateFlags & 1) && (CONT_PADS[player]->button & A_BUTTON) && (D_800CC2D0[player].unk31C->unk12C != 0)) {
+            if ((stateFlags & 1) && (D_800BE728[player]->button & A_BUTTON) && (D_800CC2D0[player].unk31C->unk12C != 0)) {
                 obj->unk247 = 28;
                 obj->unk248 = 28;
-                PADS[player].stick_y = 80;
+                D_800BE748[player].stick_y = 80;
                 throttleScale += throttleScale;
                 if (D_800BE9E4 < D_800CC2D0[player].unk31C->unk12C) {
                     D_800CC2D0[player].unk31C->unk12C -= D_800BE9E4;
@@ -322,7 +317,7 @@ void func_150ED748(Actor *obj) {
             if (turnRate < 10) {
                 turnRate = 10;
             }
-            if ((CONT_PADS[player]->button & R_TRIG) && ((D_800CC2D0[player].unk31C->unk128 & 2) || (D_800BE616 == 0))) {
+            if ((D_800BE728[player]->button & R_TRIG) && ((D_800CC2D0[player].unk31C->unk128 & 2) || (D_800BE616 == 0))) {
                 throttleScale = 0.0f;
                 lockFlags = 0x1F;
                 steer = 0;
@@ -355,12 +350,12 @@ void func_150ED748(Actor *obj) {
             throttleScale = 0.0f;
             obj->disable_run--;
         }
-        obj->unk44 = PADS[player].stick_y * throttleScale;
+        obj->unk44 = D_800BE748[player].stick_y * throttleScale;
         D_800CC2D0[player].unk31C->unk75 = lockFlags;
         D_800CC2D0[player].unk31C->unk78 = lockFlags;
     } else if (D_800C3E78 < D_8008FD8C) {
         func_1504C854(obj);
-        if ((player < 4) && (CONT_PADS[player]->button & Z_TRIG)) {
+        if ((player < 4) && (D_800BE728[player]->button & Z_TRIG)) {
             D_800CC288 = Z_TRIG;
         }
         if (D_800CC288 & Z_TRIG) {
@@ -460,7 +455,7 @@ void func_150ED748(Actor *obj) {
             if ((D_800BE616 != 0) && (viewer[0] < 2) && (D_800E0BCE[viewer[0]] != 0)) {
                 camSlot = D_800E0BCE[viewer[0]] + 1;
             } else {
-                pad = &PADS[viewer[0]];
+                pad = &D_800BE748[viewer[0]];
                 if (pad->button & R_CBUTTONS) {
                     obj->unk31C->unk1BC += yawStep;
                 }
@@ -629,7 +624,7 @@ void func_150EEC84(Actor *obj) {
         }
         func_151254F4(camera, index);
         obj->unk31C->unk78 = 0x29;
-        PADS[index].button &= ~R_TRIG;
+        D_800BE748[index].button &= ~R_TRIG;
         player = &D_800CC2D0[index];
         player->unk2FC |= 1 << camera->playerIndex;
         if (player->pad10A != 0) {

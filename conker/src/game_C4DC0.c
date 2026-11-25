@@ -537,7 +537,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
         break;
     case 0x2E:
         D_800BE710[cmd->a[0]] = cmd->a[1];
-        *((u16 **)D_800BE728[0])[cmd->a[0]] = cmd->a[1];
+        D_800BE728[cmd->a[0]]->button = cmd->a[1];
         break;
     case 0x56:
         obj->unk65 = cmd->a[0];
@@ -792,7 +792,7 @@ s32 func_15097A8C(s32 objId, s32 opcode, ScriptCmd *cmd) {
 
         idx = OBJ_INDEX(obj);
         if (idx < 4) {
-            *((u16 **)D_800BE728[0])[idx] |= 0x4000;
+            D_800BE728[idx]->button |= B_BUTTON;
             D_800BE710[idx] |= 0x4000;
         }
     }

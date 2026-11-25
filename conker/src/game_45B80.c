@@ -8,6 +8,8 @@
 #undef D_800BE9D0
 extern s32 D_800BE9D0;
 
+OSContPad **func_1501BBB8(void);
+
 
 Gfx *func_151674F8(Gfx *gfx, s32 group, s16 player, s32 list);
 Gfx *func_15174AA4(Gfx *gfx, s32 arg1, s32 player);
@@ -42,7 +44,7 @@ void func_150186D0(void) {
 
     D_8002AC60 = 1;
     D_8002AC64 = 3500;
-    *D_800BE728 = func_1501BBB8();
+    D_800BE728 = func_1501BBB8();
 
     while (func_151DCFD8(1) != 0) {
     }
@@ -309,7 +311,7 @@ void func_15018F80(s16 player) {
 /* Start of frame: reset the display-list head to this frame's buffer and update timing. */
 void func_1501905C(void) {
     D_800BE9D0 = (s32)D_800BE9D8[D_800BE9C0];
-    *D_800BE728 = func_1501BBB8();
+    D_800BE728 = func_1501BBB8();
     func_15019F20();
     if ((D_800BEAC1 != 0) && (D_800BEAC0 == 0)) {
         func_15169040(0, 0x47);

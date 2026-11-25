@@ -608,7 +608,7 @@ void func_15054A94(Actor *obj) {
         if (state->unk84 == 0) {
             index = other - D_800CC2D0;
             // D_800BE728[0] points to the per-player controller pads
-            if (index < 4 && !(((OSContPad **)D_800BE728[0])[index]->button & R_TRIG)) {
+            if (index < 4 && !(D_800BE728[index]->button & R_TRIG)) {
                 ready = 0;
             }
         }

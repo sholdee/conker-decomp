@@ -37,11 +37,10 @@ extern OSMesg D_800BE990;
 void func_1501C57C(void);
 void func_151DD8C0(void);
 
-#define PADS ((OSContPad *)D_800BE748)
 
 /* Reads the controllers into the per-player pads (D_80084060 maps player slots to channels),
    records newly pressed buttons, applies the stick dead zone and returns the pad pointer table. */
-struct14 *func_1501BBB8(void) {
+OSContPad **func_1501BBB8(void) {
     s32 pad; // matching: unused stack slot in the original frame
     s32 player;
     s32 replaying;
@@ -52,7 +51,7 @@ struct14 *func_1501BBB8(void) {
     s32 y; // also carries the button word
 
     for (i = 0; i < 4; i++) {
-        D_800BE718[i] = PADS[i].button;
+        D_800BE718[i] = D_800BE748[i].button;
     }
     osRecvMesg(&D_800BE900, &D_800BE990, 1);
     osContGetReadData(pads);
@@ -76,29 +75,29 @@ struct14 *func_1501BBB8(void) {
     for (player = 0; player < 4; player++) {
         i = D_80084060[player];
         if (i < 4 && player < numPlayers) {
-            PADS[player].button = pads[i].button;
-            PADS[player].stick_x = pads[i].stick_x;
-            PADS[player].stick_y = pads[i].stick_y;
-            PADS[player].button |= D_800BE720[i];
+            D_800BE748[player].button = pads[i].button;
+            D_800BE748[player].stick_x = pads[i].stick_x;
+            D_800BE748[player].stick_y = pads[i].stick_y;
+            D_800BE748[player].button |= D_800BE720[i];
             D_800BE720[i] = 0;
         } else {
-            PADS[player].button = 0;
-            PADS[player].stick_x = 0;
-            PADS[player].stick_y = 0;
+            D_800BE748[player].button = 0;
+            D_800BE748[player].stick_x = 0;
+            D_800BE748[player].stick_y = 0;
         }
     }
     for (i = 0; i < 4; i++) {
-        y = PADS[i].button;
+        y = D_800BE748[i].button;
         D_800BE930[i] = y & ~D_800BE708[i];
         D_800BE918[i].button = y;
         D_800BE708[i] = y;
-        x = PADS[i].stick_x;
+        x = D_800BE748[i].stick_x;
         if (((x < 0) ? -x : x) >= 8) {
             D_800BE918[i].stick_x = x - ((x < 0) ? -1 : 1) * 7;
         } else {
             D_800BE918[i].stick_x = 0;
         }
-        y = PADS[i].stick_y;
+        y = D_800BE748[i].stick_y;
         if (((y < 0) ? -y : y) >= 8) {
             D_800BE918[i].stick_y = y - ((y < 0) ? -1 : 1) * 7;
         } else {
@@ -112,25 +111,25 @@ struct14 *func_1501BBB8(void) {
         replaying = 0;
     }
     for (i = 0; i < 4; i++) {
-        y = PADS[i].button;
+        y = D_800BE748[i].button;
         D_800BE710[i] = y & ~D_800BE700[i];
         D_800BE700[i] = y;
         if (!replaying) {
-            x = PADS[i].stick_x;
+            x = D_800BE748[i].stick_x;
             if (((x < 0) ? -x : x) >= 8) {
-                PADS[i].stick_x = x - ((x < 0) ? -1 : 1) * 7;
+                D_800BE748[i].stick_x = x - ((x < 0) ? -1 : 1) * 7;
             } else {
-                PADS[i].stick_x = 0;
+                D_800BE748[i].stick_x = 0;
             }
-            y = PADS[i].stick_y;
+            y = D_800BE748[i].stick_y;
             if (((y < 0) ? -y : y) >= 8) {
-                PADS[i].stick_y = y - ((y < 0) ? -1 : 1) * 7;
+                D_800BE748[i].stick_y = y - ((y < 0) ? -1 : 1) * 7;
             } else {
-                PADS[i].stick_y = 0;
+                D_800BE748[i].stick_y = 0;
             }
         }
     }
-    return &D_800BE730;
+    return D_800BE730;
 }
 
 

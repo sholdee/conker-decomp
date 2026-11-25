@@ -855,7 +855,7 @@ extern u8   D_800BE93C[];
 
 extern u16  D_800BE710[];
 extern u16  D_800BE720[];
-extern s32  D_800BE728[];
+extern OSContPad **D_800BE728; // per-player controller pads (the table func_1501BBB8 returns)
 extern u8   D_800BE940[];
 extern u8   D_800BE944[];
 extern u8   D_800BE948[];
@@ -876,11 +876,8 @@ extern u8   D_800BE9ED;
 extern u16  *D_800BE9F4; // was u16
 extern s32  D_800BE9F8;
 
-extern struct14 D_800BE730;
-extern u16 D_800BE748[];
-extern s32 D_800BE74E;
-extern s32 D_800BE754;
-extern s32 D_800BE75A;
+extern OSContPad *D_800BE730[4]; // per-player pointers into D_800BE748
+extern OSContPad D_800BE748[4];   // per-player controller pads
 
 extern s32 D_800BEA00[]; // struct04
 extern s32 D_800BEA04[]; // struct04
