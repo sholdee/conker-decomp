@@ -164,33 +164,33 @@ void func_151D69B4(Pickup *pickup, struct127 *player) {
     first.unk40 = 0.400000006f;
     func_15153F18(&first.unk00, first.pos, ground, 0xFF, 1);
     {
-    Params15150178 second;
+        Params15150178 second;
 
-    second.pos[0] = pickup->position[0];
-    second.pos[1] = pickup->position[1];
-    second.pos[2] = pickup->position[2];
-    second.unk14 = 0xF;
-    second.unk16 = 6;
-    second.unk00 = 0;
-    second.unk02 = 0xFF;
-    second.unk04 = -0x40;
-    second.unk06 = 0xC;
-    second.unk20 = 0x3C;
-    second.unk22 = 0x2D;
-    second.unk2C = 0xC8;
-    second.unk2D = 0x37;
-    second.unk38 = 1;
-    second.unk39 = 9;
-    second.unk3C = 1.0f;
-    second.unk40 = 0;
-    second.unk44 = 1.0f;
-    second.unk18 = 10.0f;
-    second.unk1C = 6.0f;
-    second.unk24 = -1.506000042f;
-    second.unk28 = 0.8140000105f;
-    second.unk30 = 44.0f;
-    second.unk34 = 88.0f;
-    func_15150178(&second.unk00, second.pos, ground, 0xFF, 1);
+        second.pos[0] = pickup->position[0];
+        second.pos[1] = pickup->position[1];
+        second.pos[2] = pickup->position[2];
+        second.unk14 = 0xF;
+        second.unk16 = 6;
+        second.unk00 = 0;
+        second.unk02 = 0xFF;
+        second.unk04 = -0x40;
+        second.unk06 = 0xC;
+        second.unk20 = 0x3C;
+        second.unk22 = 0x2D;
+        second.unk2C = 0xC8;
+        second.unk2D = 0x37;
+        second.unk38 = 1;
+        second.unk39 = 9;
+        second.unk3C = 1.0f;
+        second.unk40 = 0;
+        second.unk44 = 1.0f;
+        second.unk18 = 10.0f;
+        second.unk1C = 6.0f;
+        second.unk24 = -1.506000042f;
+        second.unk28 = 0.8140000105f;
+        second.unk30 = 44.0f;
+        second.unk34 = 88.0f;
+        func_15150178(&second.unk00, second.pos, ground, 0xFF, 1);
     }
 }
 
@@ -284,39 +284,40 @@ void func_151D6BFC(struct127 *owner, u8 arg1, s32 arg2) {
     params.owner = owner;
     params.ownerId = owner->unique_id;
     params.unk41 = 1;
-    params.pos = *(struct17 *)&D_800A5480;
+    params.pos = *(struct17 *)&D_800A5480; // variables.h declares D_800A5480 as f32; it is a struct17
     params.fadeStart = 8;
     params.fadeRate = 0x1F;
     func_15157010(&params, 0, 1.0f, 0, 0, 0, arg1, arg2);
     {
-    AmountTextStyle style;
-    char str[4] = "500";
-    s32 scale;
-    TextObj *textObj;
-    style.owner = owner;
-    style.ownerId = owner->unique_id;
-    style.fadeStart = 8;
-    style.fadeRate = 0x1F;
-    style.amount = func_150859AC(0, 6);
-    entry = func_1509B570(0x83);
-    if (entry != NULL) {
-        scale = entry->unk64 + 1;
-        if (scale == 0xFF) {
-            style.amount += 100;
-        } else if (scale == 0) {
-            style.amount = 0;
-        } else if (scale < 3) {
-            s32 scaled = style.amount * scale; // matching: the product needs its own local
+        AmountTextStyle style;
+        char str[4] = "500";
+        s32 scale;
+        TextObj *textObj;
 
-            style.amount = scaled / 3;
+        style.owner = owner;
+        style.ownerId = owner->unique_id;
+        style.fadeStart = 8;
+        style.fadeRate = 0x1F;
+        style.amount = func_150859AC(0, 6);
+        entry = func_1509B570(0x83);
+        if (entry != NULL) {
+            scale = entry->unk64 + 1;
+            if (scale == 0xFF) {
+                style.amount += 100;
+            } else if (scale == 0) {
+                style.amount = 0;
+            } else if (scale < 3) {
+                s32 scaled = style.amount * scale; // matching: the product needs its own local
+
+                style.amount = scaled / 3;
+            }
+        } else {
+            style.amount = 0;
         }
-    } else {
-        style.amount = 0;
-    }
-    textObj = func_150CFF10(0x63, str, 150, sizeof(AmountTextStyle), 3, 1, arg1, arg2);
-    if (textObj != NULL) {
-        memcpy(textObj->text.style, &style, sizeof(AmountTextStyle));
-    }
+        textObj = func_150CFF10(0x63, str, 150, sizeof(AmountTextStyle), 3, 1, arg1, arg2);
+        if (textObj != NULL) {
+            memcpy(textObj->text.style, &style, sizeof(AmountTextStyle));
+        }
     }
 }
 
