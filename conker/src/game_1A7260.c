@@ -2,70 +2,94 @@
 #include "functions.h"
 #include "variables.h"
 
+/*
+ * Small spinning, fading debris particles. They are allocated with func_15167A68 (0xB8 bytes) and driven by
+ * the object-type handler table in .rodata (D_8008B648 etc.): an update callback (func_1517A1EC or
+ * func_1517A84C), the draw callback func_1517A3A0 and the begin-draw hook func_1517A958.
+ */
+typedef struct Particle {
+    /* 0x00 */ u8 type;      // object type given to func_15167A68
+    /* 0x01 */ u8 pad1[0xF];
+    /* 0x10 */ Mtx mtx[2];   // model matrix, double-buffered by D_800BE9C0
+    /* 0x90 */ s16 x;
+    /* 0x92 */ s16 y;
+    /* 0x94 */ s16 z;
+    /* 0x96 */ s16 rotX;
+    /* 0x98 */ s16 rotY;
+    /* 0x9A */ s16 rotZ;
+    /* 0x9C */ s8 spinX;
+    /* 0x9D */ s8 spinY;
+    /* 0x9E */ s8 spinZ;
+    /* 0x9F */ u8 texture;   // passed to func_1517A9A8
+    /* 0xA0 */ s16 velX;
+    /* 0xA2 */ s16 velY;
+    /* 0xA4 */ s16 velZ;
+    /* 0xA6 */ u16 timer;
+    /* 0xA8 */ f32 scale;
+    /* 0xAC */ u16 unkAC;    // 5 selects falling motion; also the timer value below which drag applies
+    /* 0xAE */ u16 dragRange; // the horizontal speed drops by up to this much per frame
+    /* 0xB0 */ s16 groundY;
+    /* 0xB2 */ u8 viewFlags; // bit n: drawn in view n; bit n+4: left view n afterwards
+    /* 0xB3 */ u8 alpha;
+} Particle; // size 0xB8
 
-struct func_1517A84C_obj {
-    u8 pad0[0x90];
-    s16 unk90;
-    s16 unk92;
-    s16 unk94;
-    s16 unk96;
-    s16 unk98;
-    s16 unk9A;
-    s8 unk9C;
-    s8 unk9D;
-    s8 unk9E;
-    u8 unk9F;
-    s16 unkA0;
-    s16 unkA2;
-    s16 unkA4;
-    u16 unkA6;
-    f32 unkA8;
-    u16 unkAC;
-    u16 unkAE;
-    s16 unkB0;
-    u8 unkB2;
-    u8 unkB3;
-};
+/* Per-slot wave state; other files view D_8008D0B0 through their own layouts. */
+typedef struct WaveState {
+    /* 0x00 */ u8 pad0[0x18];
+    /* 0x18 */ f32 rate[2];
+    /* 0x20 */ f32 angle[2];
+    /* 0x28 */ f32 amplitude;
+    /* 0x2C */ u8 pad2C[0xC];
+} WaveState;
 
+/* D_800DDE80 viewed with the two vertex buffers that include/variables.h leaves as padding. */
+typedef struct VtxSlot {
+    /* 0x00 */ void *field0;
+    /* 0x04 */ Vtx *vtxB;
+    /* 0x08 */ Vtx *vtxA;
+    /* 0x0C */ s32 fieldC;
+    /* 0x10 */ void *field10;
+} VtxSlot;
+
+extern WaveState D_8008D0B0[];
+extern u8 D_800A7210[7]; /* vertex indices; a static const here would land in discarded .rodata */
 extern f32 D_800A7220;
-extern struct func_1517A84C_obj *func_15167A68(s32, s32, s32, s32, s32, s32);
-extern u8 func_150ADA20(void);
 
-struct Unk8008D0B0 {
-    u8 pad0[0x18];
-    f32 rate[2];
-    f32 angle[2];
-    f32 amp;
-    u8 pad2C[0xC];
-};
-extern struct Unk8008D0B0 D_8008D0B0[];
-extern u8 D_800A7210[];
+extern Particle *func_15167A68(s32, s32, s32, s32, s32, s32);
+s32 func_1510AEE0(f32 mtx[4][4], f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
+void func_1510E82C(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
+Gfx *func_1510B7B4(Gfx *gfx, s32 player);
+Gfx *func_15094F70(Gfx *, void *, s32, void *, s32, s32, s32, s32, s32);
+Gfx *func_15142FBC(Gfx *gfx, s32 modeH, s32 modeL, u8 *needSync);
+Gfx *func_1517A9A8(Gfx *gfx, s32 texture);
+void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z);
 
-void func_15179DB0(u8 arg0) {
+/* Animates the wave vertices of slot `slot`: both buffers bob with a sine of their own phase. */
+void func_15179DB0(u8 slot) {
     s32 i;
     s32 j;
-    s16 v;
+    s16 height;
     {
     Vtx *vtx[2];
     f32 *angle[2];
     f32 *rate[2];
 
-    vtx[1] = *(Vtx **)((u8 *)&D_800DDE80[arg0] + 4);
-    vtx[0] = *(Vtx **)((u8 *)&D_800DDE80[arg0] + 8);
-    angle[0] = &D_8008D0B0[arg0].angle[0];
-    angle[1] = &D_8008D0B0[arg0].angle[1];
-    rate[0] = &D_8008D0B0[arg0].rate[0];
-    rate[1] = &D_8008D0B0[arg0].rate[1];
+    vtx[1] = ((VtxSlot *)D_800DDE80)[slot].vtxB;
+    vtx[0] = ((VtxSlot *)D_800DDE80)[slot].vtxA;
+    angle[0] = &D_8008D0B0[slot].angle[0];
+    angle[1] = &D_8008D0B0[slot].angle[1];
+    rate[0] = &D_8008D0B0[slot].rate[0];
+    rate[1] = &D_8008D0B0[slot].rate[1];
     for (i = 0; i < 2; i++) {
-        v = D_8008D0B0[arg0].amp * sinf(*angle[i] * 0.01745329238f);
-        vtx[i][2].v.ob[0] = v;
-        vtx[i][3].v.ob[0] = v;
-        v = -(v >> 1);
+        height = D_8008D0B0[slot].amplitude * sinf(*angle[i] * 0.01745329238f);
+        vtx[i][2].v.ob[0] = height;
+        vtx[i][3].v.ob[0] = height;
+        height = -(height >> 1);
         for (j = 0; j < 7; j++) {
-            vtx[i][D_800A7210[j]].v.ob[0] = v;
+            vtx[i][D_800A7210[j]].v.ob[0] = height;
         }
-        vtx[i][6].v.ob[0] = v + 18;
-        vtx[i][8].v.ob[0] = v - 18;
+        vtx[i][6].v.ob[0] = height + 18;
+        vtx[i][8].v.ob[0] = height - 18;
         *angle[i] += *rate[i];
         if (*angle[i] >= 360.0f) {
             *angle[i] -= 360.0f;
@@ -74,275 +98,263 @@ void func_15179DB0(u8 arg0) {
     }
 }
 
-void func_15179FE0(u8 arg0, s16 arg1, s16 arg2, s16 arg3, s8 arg4, u16 arg5, u16 arg6, u8 arg7, u8 arg8, u8 arg9, s32 arg10) {
-    struct func_1517A84C_obj *obj;
+/* Spawns one particle of object type `type` at (x, y, z) with random horizontal speed and spin. */
+void func_15179FE0(u8 texture, s16 x, s16 y, s16 z, s8 velY, u16 timer, u16 unkAC, u8 speedRange,
+                   u8 spinRange, u8 dragRange, s32 type) {
+    Particle *particle;
     s32 rnd;
 
-    obj = func_15167A68(arg10, 0, 0xB8, 1, 0xFF, 1);
-    if (obj != NULL) {
-        obj->unk90 = arg1;
-        obj->unk92 = arg2;
-        obj->unk94 = arg3;
-        obj->unkA2 = arg4;
-        obj->unkA0 = ((u32)func_150ADA20() % arg7) - (arg7 >> 1);
-        obj->unkA4 = ((u32)func_150ADA20() % arg7) - (arg7 >> 1);
-        if (arg6 == 5) {
-            obj->unk90 += obj->unkA0 * 4;
-            obj->unk92 -= obj->unkA2 * 4;
-            obj->unk94 += obj->unkA4 * 4;
+    particle = func_15167A68(type, 0, sizeof(Particle), 1, 0xFF, 1);
+    if (particle != NULL) {
+        particle->x = x;
+        particle->y = y;
+        particle->z = z;
+        particle->velY = velY;
+        particle->velX = ((u32)func_150ADA20() % speedRange) - (speedRange >> 1);
+        particle->velZ = ((u32)func_150ADA20() % speedRange) - (speedRange >> 1);
+        if (unkAC == 5) {
+            particle->x += particle->velX * 4;
+            particle->y -= particle->velY * 4;
+            particle->z += particle->velZ * 4;
         }
-        obj->unk96 = 0;
-        obj->unk98 = 0;
-        obj->unk9A = 0;
-        obj->unk9C = ((u32)func_150ADA20() % arg8) - (arg8 >> 1);
-        obj->unk9D = ((u32)func_150ADA20() % arg8) - (arg8 >> 1);
-        obj->unk9E = ((u32)func_150ADA20() % arg8) - (arg8 >> 1);
+        particle->rotX = 0;
+        particle->rotY = 0;
+        particle->rotZ = 0;
+        particle->spinX = ((u32)func_150ADA20() % spinRange) - (spinRange >> 1);
+        particle->spinY = ((u32)func_150ADA20() % spinRange) - (spinRange >> 1);
+        particle->spinZ = ((u32)func_150ADA20() % spinRange) - (spinRange >> 1);
         rnd = func_150ADA20() & 0x7F;
-        obj->unkA8 = (rnd + 0x8C) * D_800A7220;
-        obj->unkA6 = arg5;
-        obj->unk9F = arg0;
-        obj->unkAC = arg6;
-        obj->unkAE = arg9;
-        obj->unkB2 = 0;
-        obj->unkB3 = 0xFF;
+        particle->scale = (rnd + 140) * 0.01f;
+        particle->timer = timer;
+        particle->texture = texture;
+        particle->unkAC = unkAC;
+        particle->dragRange = dragRange;
+        particle->viewFlags = 0;
+        particle->alpha = 0xFF;
     }
 }
 
-void func_1517A1EC(struct func_1517A84C_obj *obj) {
+/* Update callback for particles from func_15179FE0: move, spin, slow down, then fade out once the timer runs
+ * out. Frees the particle when it is invisible or has left every view it was drawn in. */
+void func_1517A1EC(Particle *particle) {
     s32 sign;
-    u32 r;
-    s32 a6;
+    u32 drag;
+    s32 timer;
 
-    obj->unk90 += obj->unkA0;
-    obj->unk92 -= obj->unkA2;
-    obj->unk94 += obj->unkA4;
-    obj->unk96 += obj->unk9C;
-    obj->unk98 += obj->unk9D;
-    obj->unk9A += obj->unk9E;
-    if (obj->unkAC == 5) {
-        obj->unkA2++;
+    particle->x += particle->velX;
+    particle->y -= particle->velY;
+    particle->z += particle->velZ;
+    particle->rotX += particle->spinX;
+    particle->rotY += particle->spinY;
+    particle->rotZ += particle->spinZ;
+    if (particle->unkAC == 5) {
+        particle->velY++;
     }
-    if (obj->unkA6 < obj->unkAC) {
+    if (particle->timer < particle->unkAC) {
         s32 pad;
-        r = (u32)func_150ADA20() % obj->unkAE;
-        sign = (obj->unkA0 < 0) ? -1 : 1;
-        obj->unkA0 += -sign * r;
-        r = (u32)func_150ADA20() % obj->unkAE;
-        sign = (obj->unkA4 < 0) ? -1 : 1;
-        obj->unkA4 += -sign * r;
+        drag = (u32)func_150ADA20() % particle->dragRange;
+        sign = (particle->velX < 0) ? -1 : 1;
+        particle->velX += -sign * drag;
+        drag = (u32)func_150ADA20() % particle->dragRange;
+        sign = (particle->velZ < 0) ? -1 : 1;
+        particle->velZ += -sign * drag;
     }
-    a6 = obj->unkA6;
-    a6 -= D_800BE9E4;
-    if (a6 < 0) {
-        s32 b3;
-        a6 = 0;
-        b3 = obj->unkB3;
-        b3 -= D_800BE9E4 * 4;
-        if (b3 < 0) {
-            b3 = 0;
+    timer = particle->timer;
+    timer -= D_800BE9E4;
+    if (timer < 0) {
+        s32 alpha;
+        timer = 0;
+        alpha = particle->alpha;
+        alpha -= D_800BE9E4 * 4;
+        if (alpha < 0) {
+            alpha = 0;
         }
-        obj->unkB3 = b3;
+        particle->alpha = alpha;
     }
-    obj->unkA6 = a6;
-    if (obj->unkB3 == 0 || (obj->unkB2 && (obj->unkB2 >> 4) == (obj->unkB2 & 0xF))) {
-        func_1516972C((struct102 *)obj);
+    particle->timer = timer;
+    if (particle->alpha == 0 ||
+        (particle->viewFlags && (particle->viewFlags >> 4) == (particle->viewFlags & 0xF))) {
+        func_1516972C((struct102 *)particle);
     }
 }
 
-s32 func_1517A394(arg0)
-s32 arg0;
-{
-    return arg0;
+/* Identity hook used by func_1517A958 for object types 0xC and 0x59. */
+Gfx *func_1517A394(Gfx *gfx) {
+    return gfx;
 }
 
-s32 func_1510AEE0(f32 *, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
-Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3);
 extern f32 D_800D35E0;
-extern f32 D_800D35E8;
-extern u8 D_800D9C10[];
+extern f32 D_800D35E8; /* 0x800D35E4 has no symbol of its own */
+#define D_800D35E4 ((&D_800D35E8)[-1])
+extern f32 D_800D9C10[][4][4]; /* one view matrix per camera */
 extern s32 D_800D2C9C;
-extern s16 D_800DD450;
+extern s16 D_800DD450; /* primitive alpha last set in the display list; -1 = unknown */
 extern u8 D_8008CDF0[];
-s32 func_1517A9A8(s32 arg0, s32 arg1);
 
-Gfx *func_1517A3A0(Gfx *gfx, struct func_1517A84C_obj *obj, s16 arg2) {
-    if ((obj->pad0[0] != 0xC) && (obj->pad0[0] != 0x59)) {
-        if (func_1510AEE0((f32 *)(D_800D9C10 + (arg2 << 6)), obj->unk90, obj->unk92, obj->unk94, D_800D9B20,
-                          D_800D9B1C, D_800D35E0, (&D_800D35E8)[-1], 0, 0) != 0) {
-            if (obj->pad0[0] == 8) {
-                if (obj->unkB2 & (1 << arg2)) {
-                    obj->unkB2 |= 0x10 << arg2;
+/* Draw callback: culls the particle against view `view` (types 0xC and 0x59 are never culled), then emits its
+ * texture, matrix, primitive alpha and render mode, and the shared particle display list D_8008CDF0. */
+Gfx *func_1517A3A0(Gfx *gfx, Particle *particle, s16 view) {
+    if ((particle->type != 0xC) && (particle->type != 0x59)) {
+        if (func_1510AEE0(D_800D9C10[view], particle->x, particle->y, particle->z, D_800D9B20, D_800D9B1C,
+                          D_800D35E0, D_800D35E4, NULL, NULL) != 0) {
+            if (particle->type == 8) {
+                if (particle->viewFlags & (1 << view)) {
+                    particle->viewFlags |= 0x10 << view;
                 }
             }
             return gfx;
         }
     }
-    if (obj->pad0[0] != 9) {
-        obj->unkB2 |= 1 << arg2;
+    if (particle->type != 9) {
+        particle->viewFlags |= 1 << view;
     }
-    gfx = (Gfx *)func_1517A9A8((s32)gfx, obj->unk9F);
-    func_15043D90((Mtx *)((u8 *)obj + (D_800BE9C0 << 6) + 0x10), obj->unk96, obj->unk98,
-                  obj->unk9A, obj->unkA8, obj->unkA8, obj->unkA8,
-                  obj->unk90, obj->unk92, obj->unk94);
-    gSPMatrix(gfx++, (u8 *)obj + (D_800BE9C0 << 6) + 0x10, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    if (D_800DD450 != obj->unkB3) {
+    gfx = func_1517A9A8(gfx, particle->texture);
+    func_15043D90(&particle->mtx[D_800BE9C0], particle->rotX, particle->rotY, particle->rotZ,
+                  particle->scale, particle->scale, particle->scale, particle->x, particle->y, particle->z);
+    gSPMatrix(gfx++, &particle->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    if (D_800DD450 != particle->alpha) {
         gDPPipeSync(gfx++);
-        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, obj->unkB3);
-        ((s16 *)D_800DD460)[-8] = obj->unkB3; /* == D_800DD450; spelled via a neighbour so IDO does not CSE its address with the read */
+        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, particle->alpha);
+        // matching: D_800DD450 spelled via its neighbour so IDO does not CSE its address with the read above
+        ((s16 *)D_800DD460)[-8] = particle->alpha;
     }
     {
         s32 pad;
-        s32 mode;
-        u8 update;
-        update = 0;
-        mode = ((obj->pad0[0] == 8) || (obj->pad0[0] == 9)) ? 0x5049D8 : 0x504240;
-        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C | G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE, mode, &update);
+        s32 modeL;
+        u8 needSync;
+        needSync = 0;
+        modeL = ((particle->type == 8) || (particle->type == 9)) ? 0x5049D8 : 0x504240;
+        gfx = func_15142FBC(gfx, G_PM_NPRIMITIVE | G_CYC_1CYCLE | G_TP_PERSP | G_TD_CLAMP | G_TL_TILE | D_800D2C9C |
+                                     G_TF_BILERP | G_TC_FILT | G_CK_NONE | G_CD_NOISE | G_AD_NOISE,
+                            modeL, &needSync);
     }
     gSPDisplayList(gfx++, D_8008CDF0);
     return gfx;
 }
 
-extern void func_1510E82C(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
-
-void func_1517A644(f32 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4) {
-    struct func_1517A84C_obj *obj;
-    s32 n;
-    f32 y;
+/* Spawns one ground debris chunk (object type 9) of size `size` at (x, z), resting on the ground below y. */
+void func_1517A644(f32 size, u8 texture, s16 x, s16 y, s16 z) {
+    Particle *particle;
+    s32 range;
+    f32 groundY;
     s32 half;
     s32 pad;
 
-    n = arg0;
-    if (n != 0) {
-        obj = func_15167A68(9, 0, 0xB8, 1, 0xFF, 1);
-        if (obj != NULL) {
-            func_1510E82C(0, 0, &y, 0, 0, 0, arg2, arg3, arg4, arg3, 0, 0);
-            obj->unk92 = obj->unkB0 = y + 3.0f;
-            obj->unk90 = arg2;
-            obj->unk94 = arg4;
-            obj->unk96 = 0x5A;
-            obj->unk98 = (u32)func_150ADA20() % 360;
-            obj->unk9A = 0;
-            obj->unkA0 = 0;
-            obj->unkA4 = 0;
-            obj->unk9F = arg1;
-            obj->unkA8 = (s32)(((u32)func_150ADA20() % 80) + 100) * 0.009999999776f;
-            obj->unkA2 = arg0 * 0.400000006f;
-            half = arg0 * 0.5f;
-            obj->unk9C = ((u32)func_150ADA20() % (u32)n) - half;
-            obj->unk9D = ((u32)func_150ADA20() % (u32)n) - half;
-            obj->unk9E = ((u32)func_150ADA20() % (u32)n) - half;
-            obj->unkA6 = 0;
-            obj->unkB3 = 0xFF;
+    range = size;
+    if (range != 0) {
+        particle = func_15167A68(9, 0, sizeof(Particle), 1, 0xFF, 1);
+        if (particle != NULL) {
+            func_1510E82C(0, 0, &groundY, 0, 0, 0, x, y, z, y, 0, 0);
+            particle->y = particle->groundY = groundY + 3.0f;
+            particle->x = x;
+            particle->z = z;
+            particle->rotX = 90;
+            particle->rotY = (u32)func_150ADA20() % 360;
+            particle->rotZ = 0;
+            particle->velX = 0;
+            particle->velZ = 0;
+            particle->texture = texture;
+            particle->scale = (s32)(((u32)func_150ADA20() % 80) + 100) * 0.01f;
+            particle->velY = size * 0.4f;
+            half = size * 0.5f;
+            particle->spinX = ((u32)func_150ADA20() % (u32)range) - half;
+            particle->spinY = ((u32)func_150ADA20() % (u32)range) - half;
+            particle->spinZ = ((u32)func_150ADA20() % (u32)range) - half;
+            particle->timer = 0;
+            particle->alpha = 0xFF;
         }
     }
 }
 
-void func_1517A84C(struct func_1517A84C_obj *arg0) {
-    s32 temp_v0;
-    s32 temp_v1;
+/* Update callback for func_1517A644 chunks: fly up, fall back to the ground, then lie flat and fade out over
+ * 60 frames before being freed. */
+void func_1517A84C(Particle *particle) {
+    s32 value;
+    s32 groundY;
 
-    temp_v0 = arg0->unkA6;
-    if (temp_v0 == 0) {
-        arg0->unk90 += arg0->unkA0;
-        temp_v0 = arg0->unkA2;
-        arg0->unk92 += temp_v0;
-        arg0->unk94 += arg0->unkA4;
-        if (temp_v0 > 0) {
-            arg0->unkA2 = temp_v0 - 1;
-            if (arg0->unkA2 <= 0) {
-                arg0->unkA2 = -3;
+    value = particle->timer;
+    if (value == 0) {
+        particle->x += particle->velX;
+        value = particle->velY;
+        particle->y += value;
+        particle->z += particle->velZ;
+        if (value > 0) {
+            particle->velY = value - 1;
+            if (particle->velY <= 0) {
+                particle->velY = -3;
             }
         }
-        temp_v1 = arg0->unkB0;
-        temp_v0 = arg0->unk92 - temp_v1;
-        if (temp_v0 <= 0) {
-            arg0->unk96 = 0x5A;
-            arg0->unk9A = 0;
-            arg0->unkA6 = 0x3C;
-            arg0->unk92 = temp_v1;
+        groundY = particle->groundY;
+        value = particle->y - groundY;
+        if (value <= 0) {
+            particle->rotX = 90;
+            particle->rotZ = 0;
+            particle->timer = 60;
+            particle->y = groundY;
         } else {
-            arg0->unk96 += arg0->unk9C;
-            arg0->unk98 += arg0->unk9D;
-            arg0->unk9A += arg0->unk9E;
+            particle->rotX += particle->spinX;
+            particle->rotY += particle->spinY;
+            particle->rotZ += particle->spinZ;
         }
     } else {
-        temp_v0 -= D_800BE9E4;
-        if (temp_v0 > 0) {
-            arg0->unkA6 = temp_v0;
-            arg0->unkB3 = (temp_v0 << 8) / 0x3C;
+        value -= D_800BE9E4;
+        if (value > 0) {
+            particle->timer = value;
+            particle->alpha = (value << 8) / 60;
         } else {
-            func_1516972C((struct102 *)arg0);
+            func_1516972C((struct102 *)particle);
         }
     }
 }
 
-extern s16 D_800DD450;
-extern s32 func_1517A394();
-
-s32 func_1517A958(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    arg2 = arg2;
-    arg3 = arg3;
+/* Begin-draw hook: forgets the cached primitive alpha so the first particle drawn sets it again. */
+Gfx *func_1517A958(Gfx *gfx, s32 type, s32 arg2, s32 arg3) {
     D_800DD450 = -1;
-    if ((arg1 == 0xC) || (arg1 == 0x59)) {
-        arg0 = func_1517A394();
+    if ((type == 0xC) || (type == 0x59)) {
+        gfx = func_1517A394(gfx);
     }
-    return arg0;
+    return gfx;
 }
 
-extern s32 D_800DD1B0;
-extern s32 D_80090614;
-struct sp34_t { s32 unk0[5]; };
-extern s32 func_15094F70(s32, s32, s32, struct sp34_t*, s32, s32, s32, s32, s32);
+extern s32 D_800DD1B0; /* texture last loaded by func_1517A9A8 */
+extern u8 D_80090614[];
 
-s32 func_1517A9A8(s32 arg0, s32 arg1) {
-    struct sp34_t sp34;
+/* Loads particle texture `texture` unless it is already the current one. */
+Gfx *func_1517A9A8(Gfx *gfx, s32 texture) {
+    struct {
+        s32 unk0[5];
+    } texState; // filled in by func_15094F70; unused here
 
-    if (arg1 != D_800DD1B0) {
-        arg0 = func_15094F70(arg0, (s32)&D_80090614, (s32)((u32)arg1 << 8), &sp34, 0, 0, 0, 2, 3);
-        D_800DD1B0 = arg1;
+    if (texture != D_800DD1B0) {
+        gfx = func_15094F70(gfx, D_80090614, (u32)texture << 8, &texState, 0, 0, 0, 2, 3);
+        D_800DD1B0 = texture;
     }
-    return arg0;
+    return gfx;
 }
 
-u8 func_150ADA20(void);
-extern void func_1517A644(f32, u8, s16, s16, s16);
-void func_1517AA20(f32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
-{
-  s32 randX;
-  s32 randZ;
-  s32 arg2s;
-  s32 i;
-  s32 limit;
-  s32 randBit;
-  u32 offset;
-  f32 pos;
-  if (arg0 < 12.0f)
-  {
-  }
-  else
-  {
-    limit = (s32) (arg0 * 8.0f);
-    arg0 *= 0.5f;
- arg2s = (s16) arg2; i = 0; if (arg4 > 0) { do {
-        randX = func_150ADA20() & 0x3F;
-        randZ = func_150ADA20() & 0x3F;
-        randX -= 0x20;
-        randZ -= 0x20;
-        offset = (((u32) func_150ADA20()) % ((u32) limit)) >> 4;
-        pos = ((f32) offset) + arg0;
-        randBit = func_150ADA20();
-        randBit &= 1;
-        func_1517A644(pos, randBit, (s16) (arg1 + randX), (s16) arg2s, arg3 + randZ);
-        i += 1;
-      }
-      while (i != arg4);
+/* Spawns `count` ground debris chunks scattered around (x, y, z) when `size` is at least 12. */
+void func_1517AA20(f32 size, s32 x, s32 y, s32 z, s32 count) {
+    s32 offsetX;
+    s32 offsetZ;
+    s32 i;
+    s32 range;
+    f32 chunkSize;
+
+    if (!(size < 12.0f)) {
+        range = size * 8.0f;
+        size *= 0.5f;
+        for (i = 0; i < count; i++) {
+            offsetX = func_150ADA20() & 0x3F;
+            offsetZ = func_150ADA20() & 0x3F;
+            offsetX -= 32;
+            offsetZ -= 32;
+            chunkSize = (f32)(((u32)func_150ADA20() % (u32)range) >> 4) + size;
+            func_1517A644(chunkSize, func_150ADA20() & 1, x + offsetX, y, z + offsetZ);
+        }
     }
-  }
 }
 
-
-extern void func_1510B7B4(s32, s32);
-
-void func_1517AB7C(s32 arg0, s32 arg1, s16 arg2) {
-    func_1510B7B4(arg0, arg2);
+/* Draw callback for another object type in the same table; forwards to func_1510B7B4. */
+Gfx *func_1517AB7C(Gfx *gfx, s32 arg1, s16 player) {
+    return func_1510B7B4(gfx, player);
 }
